@@ -63,6 +63,15 @@ $env:CORP_NO_PROXY = "127.0.0.1,localhost,::1"
 
 따라서 **유효한 Key를 헤더로 넣고 최종 HTTP 응답과 Content-Type까지 직접·프록시 양쪽에서 재검증한 뒤** NO_PROXY를 결정합니다. 실제 호스트·프록시 주소·Key는 저장하지 않습니다.
 
+### 인증 포함 경로 재검증 결과
+
+| 경로 | 최종 응답 | 판정 |
+|---|---|---|
+| Direct | HTTP 403, `text/html` | 정상 모델 API JSON에 도달하지 못함 |
+| Explicit proxy | HTTP 000, Content-Type 없음 | 최종 HTTP 응답 전 연결 실패 |
+
+유효 Key를 포함해도 정상 JSON이 없었으므로 아직 NO_PROXY 경로를 확정하지 않습니다. Proxy 쪽 curl 종료 코드와 오류 메시지로 CONNECT·timeout·TLS 인증서 실패를 구분하고, 기존에 성공한 클라이언트의 인증 헤더 이름과 네트워크 경로를 비교합니다.
+
 ## 2. 선택적 API 직접 점검
 
 ```powershell
