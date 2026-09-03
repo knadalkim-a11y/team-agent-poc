@@ -6,14 +6,26 @@
 
 ### Planned
 
+- `EES 통합 Assistant` Workspace Model 생성
+- 합성 System Prompt 1개·Skill 2개·Knowledge 1개 수동 등록
+- Native Skill 선택·Knowledge 근거·미확인 정책·운영 DB 직접접속 금지 검증
 - Open WebUI 0.11.3 정상 모드 재시작과 계정 유지 확인
 - Open WebUI 직접 연결의 스트리밍·문맥·반복·재시작 검증
-- Hermes 0.19.0 localhost API 호환성 확인
-- Hermes Memory 비활성화와 위험 Tool 차단 검증
-- 2개 사용자 계정의 데이터 격리 검증
-- 팀 POC 전 Hermes 공식 설치본 전환 검토
+- 2개 사용자 계정의 데이터·리소스 격리 검증
+- Native 방식의 한계가 관찰된 경우에만 Hermes 비교
 - 검증 완료 후 서버 신규 배포
 
+### Added
+
+- Open WebUI Native 우선 MVP 구조
+- 비밀정보가 없는 Agent Pack 템플릿
+- 정책 근거·Skill 선택·DB 접근금지 평가 시나리오
+
+### Changed
+
+- Hermes 연동을 필수 다음 단계에서 선택적 비교 단계로 변경
+- POC 범위를 Assistant 1개, Skill 2개, 합성 Knowledge 1개로 제한
+- Router·A2A·MCP·자동 동기화는 Native의 한계가 확인될 때까지 보류
 ## 2026-09-03
 
 ### Added
@@ -69,6 +81,6 @@
 
 - Open WebUI 핵심 기동은 검증됐으나 정상 모드 재시작과 계정 유지 확인은 아직 진행 전입니다.
 - Open WebUI → 사내 vLLM 기본 Chat 응답과 모델 allowlist는 검증됐으나 스트리밍·문맥·반복·재시작은 아직 미검증입니다.
-- Hermes gateway/API는 현재 실행 중이 아닙니다.
+- Hermes gateway/API는 현재 실행 중이 아니며, 현재 우선 경로가 아닙니다. Native 평가 후 비교 여부를 결정합니다.
 - 개인화와 사용자 인식형 외부 Memory는 MVP 범위에서 제외합니다.
 - Docker sandbox가 없으므로 초기 Hermes Tool은 비활성화합니다.
