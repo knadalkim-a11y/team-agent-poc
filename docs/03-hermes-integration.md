@@ -20,9 +20,9 @@ Hermes 연결 전에 직접 경로의 모든 장기 시험을 끝낼 필요는 �
 |---|---|
 | 모델 allowlist | GLM·Gemma 등 승인된 Chat 모델만 picker에 보이고 Embedding·Reranker는 숨겨짐 |
 | 대화 문맥 | 같은 대화에서는 일회성 문자열을 기억함 |
-| 새 대화 분리 | 새 대화에서는 그 문자열을 알 수 없다고 답함 |
+| 새 대화 분리 | Open WebUI Chat History·Memory 도구를 끈 새 대화에서는 그 문자열을 알 수 없다고 답함 |
 
-20회 반복, 장시간 대화, 성능 비교는 Hermes 연결 후 직접 경로와 Hermes 경로에 같은 질문으로 실행합니다. 이 단계에서는 비교 기준을 흐리지 않도록 Open WebUI 자체 Tool·Memory·RAG는 활성화하지 않습니다.
+20회 반복, 장시간 대화, 성능 비교는 Hermes 연결 후 직접 경로와 Hermes 경로에 같은 질문으로 실행합니다. 이 단계에서는 비교 기준을 흐리지 않도록 Direct 기준선용 Model preset의 Open WebUI Builtin Tools·Memory·RAG를 비활성화합니다. 같은 사용자의 Chat History 검색은 자동 문맥 주입이나 장기 Memory 실패로 판정하지 않습니다.
 
 ## 현재 환경
 
@@ -164,7 +164,7 @@ Admin Panel의 Connections에서 두 번째 OpenAI-compatible 연결을 추가�
 - [ ] 8642가 127.0.0.1에만 열린다.
 - [ ] 직접 vLLM과 Hermes 모델을 각각 선택할 수 있다.
 - [ ] Hermes가 사내 vLLM을 통해 답한다.
-- [ ] 새 대화에서 이전 테스트 문자열을 자동 회수하지 않는다.
+- [ ] Open WebUI Chat History·Memory 도구를 끈 새 대화에서 이전 테스트 문자열을 자동 회수하지 않는다.
 - [ ] Memory와 위험 Tool이 비활성화돼 있다.
 - [ ] 20회 반복 요청에 오류가 없다.
 - [ ] Hermes 중단 시 직접 vLLM 연결은 계속 동작한다.
