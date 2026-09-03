@@ -109,6 +109,12 @@ $secureKey = $null
 
 인증이 없는 사내 엔드포인트라면 담당자가 안내한 방식을 따릅니다. 현재 기준선은 Chat Completions이며, 별도로 검증하기 전에는 Responses API를 활성화하지 않습니다.
 
+### Explicit proxy timeout과 `/models` 제한 후보
+
+인증 포함 재검증 후 explicit proxy 경로는 curl exit 28 timeout이었고, 같은 PC의 기존 Agent는 정상 동작했습니다. 따라서 고정 프록시 경로는 사내 vLLM에 사용하지 않고 direct 경로에서 실제 Chat Completions를 검증합니다.
+
+사내 Gateway가 `/v1/models`를 차단하면서 `/v1/chat/completions`만 허용할 수 있습니다. 이 경우 Open WebUI의 Verify Connection은 실패해도 연결의 Model IDs (Filter)에 정확한 ID를 `+`로 추가하면 자동 모델 조회를 생략하고 picker에 표시할 수 있습니다. Verify 결과가 아니라 실제 Chat Completions 성공으로 연결을 판정합니다.
+
 ## 3. Open WebUI 연결 추가
 
 Open WebUI 버전에 따라 메뉴 이름이 조금 다를 수 있습니다.
@@ -122,8 +128,9 @@ Open WebUI 버전에 따라 메뉴 이름이 조금 다를 수 있습니다.
 7. URL에 <INTERNAL_VLLM_BASE_URL>을 입력합니다. 끝은 일반적으로 `/v1`이며 `/models`나 `/chat/completions`는 붙이지 않습니다.
 8. 사내 Gateway가 Key를 요구하면 Auth는 Bearer로 두고 API Key를 UI에 직접 입력합니다. 인증이 없으면 담당자 안내에 따라 Auth를 None으로 둡니다.
 9. Model IDs (Filter)에 허용할 <INTERNAL_MODEL_ID>만 추가합니다. `/models` 자동 조회가 정상이고 전체 노출이 허용될 때만 비워 둡니다.
-10. Verify Connection과 Save 후 새 대화에서 해당 모델을 선택합니다.
-11. 사용자별 외부 연결을 받지 않는 중앙관리형 POC이므로 Direct Connections는 OFF로 유지합니다.
+10. Model ID가 입력란에만 남아 있지 않고 `+`로 목록 항목에 추가됐는지 확인한 뒤 Save합니다.
+11. Verify Connection은 `/models` 정책 때문에 실패할 수 있으므로, 수동 Model ID가 picker에 표시되고 실제 Chat Completions가 성공하는지로 판정합니다.
+12. 사용자별 외부 연결을 받지 않는 중앙관리형 POC이므로 Direct Connections는 OFF로 유지합니다.
 
 주의:
 
