@@ -76,12 +76,36 @@ flowchart LR
 
 ## 1. Skill 등록
 
-관리자 계정에서 `Workspace > Skills`로 이동해 다음 두 파일을 각각 Import합니다. 메뉴 이름은 설치 버전에 따라 조금 다를 수 있습니다.
+현재 설치된 Open WebUI 0.11.3 UI에서는 파일 선택형 Import 대신 `Workspace > Skills > Create` 화면의 네 필드에 수동 입력합니다.
 
-- `agent-pack/skills/policy-grounded-answer/SKILL.md`
-- `agent-pack/skills/structured-troubleshooting/SKILL.md`
+| 필드 | 입력 원칙 |
+|---|---|
+| Skill 이름 | 사람이 알아보기 쉬운 표시 이름 |
+| Skill ID | 영문 소문자 slug, 생성 후 변경하지 않음 |
+| Skill 설명 | 모델이 선택 기준으로 사용할 짧고 구체적인 설명 |
+| 지침 | `SKILL.md`에서 YAML frontmatter를 제외한 본문 |
 
-등록 후 이름과 설명만 보고 두 Skill의 용도가 구분되는지 확인합니다. 모델에 연결된 Skill은 질문 의도에 따라 필요할 때 본문을 불러오도록 테스트합니다.
+첫 번째 Skill:
+
+| 필드 | 값 |
+|---|---|
+| Skill 이름 | `정책 근거 답변` |
+| Skill ID | `policy-grounded-answer` |
+| Skill 설명 | `정책·규정·허용 여부 또는 근거를 묻는 질문에 연결된 정책과 지식을 확인하고 문서 ID와 버전을 포함해 답하는 절차` |
+| 지침 | `agent-pack/skills/policy-grounded-answer/SKILL.md`의 `# Policy-grounded answer`부터 끝까지 |
+
+두 번째 Skill은 첫 번째 저장과 단독 호출을 확인한 뒤 등록합니다.
+
+Workspace에 Skill을 생성하는 것만으로는 전체 대화에 적용되지 않습니다. 이후 `Workspace > Models`에서 `EES 통합 Assistant`에 Skill을 연결해야 합니다. 사용자는 Workspace 화면에 들어갈 필요 없이 일반 Chat에서 해당 Assistant를 선택합니다.
+
+```mermaid
+flowchart LR
+    Admin["관리자<br/>Workspace Skills"] --> Bind["EES 통합 Assistant에 연결"]
+    Bind --> Chat["사용자<br/>일반 Chat에서 선택"]
+    Chat --> Load["필요 시 view_skill"]
+```
+
+모델에 연결된 Skill은 이름과 설명만 기본 제공되고, Native Function Calling을 통해 필요한 때 본문을 불러오는지 호출 이력으로 확인합니다. 일반 사용자에게 공유할 때는 Assistant뿐 아니라 연결된 Skill에도 읽기 권한을 부여해야 합니다.
 
 ## 2. Knowledge 등록
 
