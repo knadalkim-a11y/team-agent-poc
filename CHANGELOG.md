@@ -36,7 +36,8 @@
 - 이후 약 30분 동안 8080 listener가 없고 /health가 HTTP 000인 정체 상태를 확인했습니다.
 - uv·uvx·python 프로세스는 남아 있었고, 원래 창에서 Ctrl+C 후 traceback 없이 중단됐습니다.
 - import timing과 DEBUG 로그로 재실행했고, aiosqlite 설정 조회가 계속 진행되는 것을 확인했습니다.
-- 정지로 보였던 구간은 실제로 DB 초기화가 무로그 상태로 진행됐을 가능성이 있으며, 최종 startup 완료 여부는 아직 확인 전입니다.
+- aiosqlite 조회 로그는 webui.db 접근을 확인할 뿐 전체 DB 초기화 진행을 증명하지 않으므로 원인 판정을 보류했습니다.
+- 신규 빈 DB에서 수십 분이 걸리는 것은 정상으로 간주하지 않으며 프로세스 중복·파일 변화·import 병목을 추가 확인합니다.
 - 아직 Application startup complete와 브라우저 접속은 확인 전입니다.
 
 ### Current limitations
