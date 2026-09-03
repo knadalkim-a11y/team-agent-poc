@@ -11,7 +11,7 @@ Git에서는 기존처럼 하나의 Agent Package로 관리합니다. 다만 Ope
 flowchart TB
     Pack["Git의 Agent Package<br/>관리 단위는 하나"]
     Skill["Open WebUI Skill<br/>SKILL.md 지침"]
-    Tool["EES Tool Server<br/>scripts·references"]
+    Tool["실행 Tool<br/>내장 또는 외부"]
     Assistant["EES 통합 Assistant"]
     User["사용자"]
 
@@ -71,10 +71,43 @@ Open WebUI 공식 정의에서 Workspace Skill은 Markdown 지침입니다. 모�
 | 짧고 정적인 참고 문서 | Knowledge |
 | 크거나 구조화된 Reference | Tool Server의 검색·조회 API |
 | `scripts/` 실행 코드 | Workspace Tool 또는 외부 MCP/OpenAPI Tool Server |
-| 패키지 의존성·런타임 | 외부 Tool Server 환경 |
-| API Key·사내 URL | Tool Server의 서버 측 설정·Secret |
+| 패키지 의존성·런타임 | Open WebUI 환경 또는 외부 Tool Server 환경 |
+| API Key·사내 URL | Workspace Tool 설정 또는 외부 Tool Server의 Secret |
 | 반드시 지켜야 하는 공통 정책 | Filter·RBAC·Tool/Broker 내부 강제 |
 | 버전·설치·업데이트 | Git 원본과 별도 배포 절차 |
+
+### 별도 Tool Server는 선택 사항
+
+Open WebUI의 `Workspace > 도구`는 Python 코드를 Open WebUI 백엔드 프로세스 안에서 직접 실행합니다. 따라서 별도 서버 없이도 실제 API 호출·계산·조회 기능을 만들 수 있습니다.
+
+```mermaid
+flowchart TB
+    Assistant["EES 통합 Assistant"]
+    Internal["선택 A: Workspace Tool<br/>Open WebUI 내부 Python"]
+    External["선택 B: MCP·OpenAPI Tool<br/>별도 프로세스"]
+    API["사내 API·승인 시스템"]
+
+    Assistant --> Internal --> API
+    Assistant --> External --> API
+```
+
+| 구분 | Workspace Tool | 외부 MCP/OpenAPI Tool |
+|---|---|---|
+| 별도 서버 | 불필요 | 필요 |
+| 코드 위치 | Open WebUI DB·프로세스 | Git 배포 디렉터리·별도 프로세스 |
+| 적합한 범위 | 작은 POC, 단순 API wrapper | 여러 파일·의존성·복잡한 패키지 |
+| Open WebUI 결합도 | 높음 | 낮음 |
+| 다른 Agent 재사용 | 별도 Adapter 필요 | 같은 endpoint 재사용 가능 |
+| 장애·권한 격리 | 약함 | 강함 |
+| 업데이트 | UI Import·수정 | Git 배포·서비스 재시작 |
+
+현재 POC에서는 **읽기 전용 Workspace Tool 하나**로 실제 실행 루프를 먼저 검증할 수 있습니다. 기존 Agent Skill 전체를 UI에 복사하지 않고, 대표 스크립트 하나를 얇게 감싸 Tool 함수로 노출합니다. 다음 조건 중 하나가 확인되면 외부 Tool Server로 이동합니다.
+
+- 여러 Python 파일과 별도 라이브러리가 필요함
+- `references/`·`assets/`를 패키지 상대경로로 읽어야 함
+- Hermes·Claude Code 등 다른 Agent도 같은 실행 기능을 써야 함
+- Secret·감사·장애·배포 수명주기를 Open WebUI와 분리해야 함
+- 패키지 수나 담당 팀이 늘어남
 
 ### 권장 배치 구조
 
