@@ -73,6 +73,7 @@ Router, A2A, MCP, 자동 동기화와 실제 EMS·APC Agent 연동은 이번 단
 | Open WebUI | 0.11.3 |
 | Open WebUI Python | 3.11 |
 | Open WebUI 주소 | http://127.0.0.1:8080 |
+| 표시 이름 | `EES Assistant (Open WebUI)` |
 | 기반 모델 | 승인된 사내 Chat 모델 1개 |
 | 외부 공개 | 금지 |
 | 개인 Memory·위험 Tool | 초기 POC에서 비활성화 |
