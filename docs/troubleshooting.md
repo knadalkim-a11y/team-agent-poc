@@ -53,6 +53,35 @@ curl.exe -I --proxy $proxyUrl https://huggingface.co
 
 ## Open WebUI 시작 실패
 
+### WEBUI_SECRET_KEY 로그 뒤 잠시 출력이 없음
+
+Open WebUI 0.11.3은 키 파일을 읽은 직후 `open_webui.main`을 import하고 서버 초기화를 계속합니다. 따라서 다음 문구가 마지막으로 보이더라도 키 파일에서 멈췄다고 단정하지 않습니다.
+
+```text
+Loading WEBUI_SECRET_KEY from <WORK_DIR>\.webui_secret_key
+```
+
+키 파일이 생성돼 있고 이후 출력이 다시 진행된다면 정상적인 최초 기동 과정입니다. 키 파일을 삭제하거나 다시 만들지 말고 다음 완료 문구를 기다립니다.
+
+```text
+Application startup complete.
+Uvicorn running on http://127.0.0.1:8080
+```
+
+별도 PowerShell에서 종료 없이 상태를 확인할 수 있습니다.
+
+```powershell
+Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue
+Get-Process | Where-Object { $_.ProcessName -match "python|uv" } |
+    Select-Object Id, ProcessName, CPU, StartTime, WorkingSet64
+```
+
+8080 listener가 생기면 브라우저에서 http://127.0.0.1:8080 을 확인합니다. 출력이 계속 진행 중이면 프로세스를 중단하지 않습니다.
+
+공식 v0.11.3 CLI 소스:
+https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/__init__.py
+
+
 ### No embedding model is loaded
 
 fresh install에서는 기본 임베딩 모델 다운로드가 필요할 수 있습니다. 캐시가 없는데 OFFLINE_MODE 또는 HF_HUB_OFFLINE을 설정하면 시작이 실패할 수 있습니다.
