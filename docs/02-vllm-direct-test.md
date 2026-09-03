@@ -13,6 +13,18 @@ Hermes를 거치기 전에 Open WebUI와 사내 vLLM 사이의 기준선을 만�
 
 이 단계에서는 Hermes, MCP, RAG, 파일 첨부, Shell·Python Tool을 사용하지 않습니다. Hermes gateway가 중지된 상태에서도 응답해야 직접 경로가 검증된 것입니다.
 
+## 현재 관찰된 기본 OpenAI 연결 오류
+
+초기 UI에서 다음 오류가 보일 수 있습니다.
+
+```text
+403
+Attempt to decode JSON with unexpected mimetype: text/html
+https://api.openai.com/v1/models
+```
+
+이는 Open WebUI가 기본 OpenAI 연결의 모델 목록을 조회했지만 사내 보안망이 JSON 대신 차단 안내 HTML을 반환했다는 뜻입니다. UI와 `/health`가 정상이라면 Open WebUI 기동 오류가 아닙니다. 외부 OpenAI 연결은 토글로 비활성화하고 사내 vLLM 연결만 활성화합니다.
+
 ## 1. 준비
 
 승인된 경로에서 다음 값을 확보합니다.
@@ -71,12 +83,14 @@ $secureKey = $null
 Open WebUI 버전에 따라 메뉴 이름이 조금 다를 수 있습니다.
 
 1. 관리자 계정으로 로그인합니다.
-2. Admin Panel → Settings → Connections로 이동합니다.
-3. OpenAI-compatible 연결을 추가합니다.
-4. URL에 <INTERNAL_VLLM_BASE_URL>을 입력합니다.
-5. API Key는 UI에 직접 입력합니다.
-6. 자동 조회가 안 되면 <INTERNAL_MODEL_ID>를 수동 등록합니다.
-7. 저장 후 새 대화에서 해당 모델을 선택합니다.
+2. 프로필 메뉴 → Admin Panel → Settings → Connections로 이동합니다.
+3. Manage OpenAI API Connections에서 `https://api.openai.com/v1` 기본 연결을 삭제하지 않고 토글로 비활성화합니다.
+4. `+` Add Connection을 눌러 Provider는 OpenAI, Standard / Compatible을 선택합니다.
+5. API Type은 **Chat Completions**를 선택하고 Responses는 활성화하지 않습니다.
+6. URL에 <INTERNAL_VLLM_BASE_URL>을 입력합니다.
+7. API Key는 UI에 직접 입력합니다. 인증이 없는 endpoint만 담당자 안내에 따라 `none` 또는 빈 값을 사용합니다.
+8. Model IDs (Filter)에 허용할 <INTERNAL_MODEL_ID>만 추가합니다. `/models` 자동 조회가 정상이고 전체 노출이 허용될 때만 비워 둡니다.
+9. Verify Connection과 Save 후 새 대화에서 해당 모델을 선택합니다.
 
 주의:
 
