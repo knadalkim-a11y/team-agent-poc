@@ -82,6 +82,41 @@ Get-Process | Where-Object { $_.ProcessName -match "python|uv" } |
 https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/__init__.py
 
 
+### CORS 경고 뒤 30분 이상 정체되고 8080 listener가 없음
+
+관찰된 증상:
+
+```text
+WARNING: CORS_ALLOW_ORIGIN IS SET TO '*' ...
+8080 listener 없음
+/health = HTTP 000
+uv·uvx·python 프로세스는 존재
+```
+
+CORS 문구는 단순 경고입니다. v0.11.3에서는 이 시점 전후로 `open_webui.main`과 여러 router·vector DB 모듈을 동기적으로 import합니다. 30분 동안 listener가 없다면 정상적인 최초 기동 대기로 보지 않습니다.
+
+다른 Python 프로세스를 일괄 종료하지 말고 원래 Open WebUI PowerShell에서만 `Ctrl+C`를 누릅니다. 같은 창에서 진단 변수를 설정하고 다시 실행합니다.
+
+```powershell
+$env:GLOBAL_LOG_LEVEL = "DEBUG"
+$env:ENABLE_VERSION_UPDATE_CHECK = "False"
+$env:CORS_ALLOW_ORIGIN = "http://127.0.0.1:8080"
+$env:PYTHONPROFILEIMPORTTIME = "1"
+
+uvx --python 3.11 open-webui@0.11.3 serve --host 127.0.0.1 --port 8080
+```
+
+- CORS_ALLOW_ORIGIN 설정은 경고를 제거할 뿐 정체 원인을 해결하는 값은 아닙니다.
+- 마지막으로 출력되는 import 구간과 오류를 비식별화해 확인합니다.
+- 진단 후에는 `Remove-Item Env:PYTHONPROFILEIMPORTTIME -ErrorAction SilentlyContinue`로 import timing을 해제합니다.
+- ChromaDB·native ML library import에서 멈춘다면 Windows 백신·디스크 검사 영향 여부를 별도로 확인합니다.
+- 배너와 `Waiting for application startup` 이후에 멈춘 경우에만 임베딩 다운로드 경로를 우선 확인합니다.
+
+공식 v0.11.3 소스:
+
+- https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/main.py
+- https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/retrieval/vector/factory.py
+
 ### No embedding model is loaded
 
 fresh install에서는 기본 임베딩 모델 다운로드가 필요할 수 있습니다. 캐시가 없는데 OFFLINE_MODE 또는 HF_HUB_OFFLINE을 설정하면 시작이 실패할 수 있습니다.
