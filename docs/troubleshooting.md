@@ -107,6 +107,21 @@ uvx --python 3.11 open-webui@0.11.3 serve --host 127.0.0.1 --port 8080
 ```
 
 - CORS_ALLOW_ORIGIN 설정은 경고를 제거할 뿐 정체 원인을 해결하는 값은 아닙니다.
+- `Ctrl+C` 후 traceback 없이 프롬프트로 돌아오는 경우도 있습니다. uvx가 자식 Python을 종료하면서 traceback을 전달하지 않은 경우입니다.
+- 진단 출력을 로컬 임시 로그에 함께 저장하려면 다음처럼 실행합니다.
+
+```powershell
+$debugLog = Join-Path $env:TEMP "openwebui-import.log"
+uvx --python 3.11 open-webui@0.11.3 serve --host 127.0.0.1 --port 8080 2>&1 |
+    Tee-Object -FilePath $debugLog
+```
+
+다시 정체되면 `Ctrl+C` 후 다음 명령으로 마지막 import 구간을 확인합니다.
+
+```powershell
+Get-Content $debugLog -Tail 40
+```
+
 - 마지막으로 출력되는 import 구간과 오류를 비식별화해 확인합니다.
 - 진단 후에는 `Remove-Item Env:PYTHONPROFILEIMPORTTIME -ErrorAction SilentlyContinue`로 import timing을 해제합니다.
 - ChromaDB·native ML library import에서 멈춘다면 Windows 백신·디스크 검사 영향 여부를 별도로 확인합니다.
