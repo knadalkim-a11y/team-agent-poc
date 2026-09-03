@@ -6,7 +6,7 @@
 
 ### Planned
 
-- Open WebUI 0.11.3 기동 확인
+- Open WebUI 0.11.3 정상 모드 재시작과 계정 유지 확인
 - Open WebUI에서 사내 vLLM 직접 연결 검증
 - Hermes 0.19.0 localhost API 호환성 확인
 - Hermes Memory 비활성화와 위험 Tool 차단 검증
@@ -42,10 +42,12 @@
 - 신규 빈 DB에서 수십 분이 걸리는 것은 정상으로 간주하지 않으며 프로세스 중복·파일 변화·import 병목을 추가 확인합니다.
 - DEBUG 모드에서는 백엔드가 준비된 뒤에도 aiosqlite와 서버 로그가 계속 출력되는 것이 정상입니다.
 - DEBUG를 제거한 정상 재시작과 계정 유지 확인은 아직 진행 전입니다.
+- UI 준비 후 Hugging Face HTTPS 호출에서 `CERTIFICATE_VERIFY_FAILED` 재시도를 관찰했습니다.
+- 핵심 UI·계정 기능에는 영향이 없지만 로컬 임베딩·파일 RAG 관련 기능은 사내 CA 신뢰 설정 전까지 보류합니다.
 
 ### Current limitations
 
-- Open WebUI 기동은 아직 검증되지 않았습니다.
+- Open WebUI 핵심 기동은 검증됐으나 정상 모드 재시작과 계정 유지 확인은 아직 진행 전입니다.
 - Open WebUI → 사내 vLLM 연결은 아직 검증되지 않았습니다.
 - Hermes gateway/API는 현재 실행 중이 아닙니다.
 - 개인화와 사용자 인식형 외부 Memory는 MVP 범위에서 제외합니다.
