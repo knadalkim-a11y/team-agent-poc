@@ -7,7 +7,7 @@
 ### Planned
 
 - Open WebUI 0.11.3 정상 모드 재시작과 계정 유지 확인
-- Open WebUI에서 사내 vLLM 직접 연결 검증
+- Open WebUI 직접 연결의 모델 allowlist·스트리밍·맥락·반복·재시작 검증
 - Hermes 0.19.0 localhost API 호환성 확인
 - Hermes Memory 비활성화와 위험 Tool 차단 검증
 - 2개 사용자 계정의 데이터 격리 검증
@@ -31,6 +31,8 @@
 - 로컬 포트 8080과 8642에 기존 listener 없음
 - Open WebUI 0.11.3 진단 실행에서 /health HTTP 200 확인
 - 브라우저 UI 접속과 최초 관리자 계정 생성 확인
+- Open WebUI에서 승인된 사내 Chat 모델 2종을 각각 선택해 기본 응답 확인
+- 사내 Chat 모델 전환 후 각 모델의 정상 응답 확인
 
 ### Observed
 
@@ -57,11 +59,13 @@
 - 두 경로 모두 모델 API의 정상 JSON 응답을 받지 못해 proxy curl 종료 코드·TLS 오류와 기존 성공 클라이언트의 경로를 추가 확인합니다.
 - explicit proxy 진단은 curl exit 28 timeout이었지만 같은 PC의 기존 Agent는 정상 동작했습니다.
 - 고정 프록시 대신 direct Chat Completions를 검증하며, Gateway의 `/models` 제한 가능성 때문에 Open WebUI에는 exact Model ID를 수동 등록합니다.
+- 사내 `/models` 전체 카탈로그 때문에 Embedding·Reranker도 모델 선택기에 노출됐습니다. 연결의 `Model IDs (Filter)`를 승인된 Chat 모델 allowlist로 제한합니다.
+- 현재 날짜를 맞히는 응답은 Open WebUI의 시간 컨텍스트 주입으로도 가능하므로 Tool·Function 호출 성공 증거로 간주하지 않습니다.
 
 ### Current limitations
 
 - Open WebUI 핵심 기동은 검증됐으나 정상 모드 재시작과 계정 유지 확인은 아직 진행 전입니다.
-- Open WebUI → 사내 vLLM 연결은 아직 검증되지 않았습니다.
+- Open WebUI → 사내 vLLM 기본 Chat 응답은 검증됐으나 모델 allowlist·스트리밍·맥락·반복·재시작은 아직 미검증입니다.
 - Hermes gateway/API는 현재 실행 중이 아닙니다.
 - 개인화와 사용자 인식형 외부 Memory는 MVP 범위에서 제외합니다.
 - Docker sandbox가 없으므로 초기 Hermes Tool은 비활성화합니다.
