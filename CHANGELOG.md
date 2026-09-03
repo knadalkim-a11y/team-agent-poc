@@ -30,6 +30,7 @@
 - GitHub, PyPI, Hugging Face 프록시 연결 HTTP 200
 - 로컬 포트 8080과 8642에 기존 listener 없음
 - Open WebUI 0.11.3 진단 실행에서 /health HTTP 200 확인
+- 브라우저 UI 접속과 최초 관리자 계정 생성 확인
 
 ### Observed
 
@@ -40,7 +41,7 @@
 - aiosqlite 조회 로그는 webui.db 접근을 확인할 뿐 전체 DB 초기화 진행을 증명하지 않으므로 원인 판정을 보류했습니다.
 - 신규 빈 DB에서 수십 분이 걸리는 것은 정상으로 간주하지 않으며 프로세스 중복·파일 변화·import 병목을 추가 확인합니다.
 - DEBUG 모드에서는 백엔드가 준비된 뒤에도 aiosqlite와 서버 로그가 계속 출력되는 것이 정상입니다.
-- 브라우저 화면과 최초 계정 생성은 아직 확인 전입니다.
+- DEBUG를 제거한 정상 재시작과 계정 유지 확인은 아직 진행 전입니다.
 
 ### Current limitations
 
