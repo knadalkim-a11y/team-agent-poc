@@ -59,7 +59,7 @@ Router, A2A, MCP, 자동 동기화와 실제 EMS·APC Agent 연동은 이번 단
 | Open WebUI UI·관리자 계정 | 검증됨 | `/health` 200, 브라우저 접속·최초 계정 생성 완료 |
 | Open WebUI → 사내 vLLM | 부분 검증 | 승인된 Chat 모델 2종 응답·allowlist 확인 |
 | Native Builtin Tool | 관찰됨 | `search_chats`·`view_chat` 사용 확인 |
-| Agent Pack 템플릿 | 추가됨 | 합성 Prompt·Policy·Skill 2개·Knowledge |
+| Agent Pack 템플릿 | 진행 중 | 합성 템플릿 추가, `policy-grounded-answer` Skill 등록 확인 |
 | EES 통합 Assistant | 다음 단계 | 아직 Open WebUI에 생성·평가하지 않음 |
 | 사용자 격리 | 대기 | 서버 파일럿 전 2계정 검증 |
 | Hermes 연결 비교 | 보류·선택 | Native 부족이 확인된 경우에만 수행 |
