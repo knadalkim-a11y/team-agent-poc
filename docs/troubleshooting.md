@@ -125,7 +125,8 @@ Get-Content $debugLog -Tail 40
 - `DEBUG | aiosqlite.core ... fetchall ... completed`는 기본 메타데이터 DB인 `DATA_DIR/webui.db`에서 비동기 조회가 끝났다는 뜻입니다. 이것만으로 전체 DB 초기화가 진행 중이라고 단정하지 않습니다.
 - Open WebUI는 계정·대화·설정을 저장하는 `webui.db`와 RAG용 Chroma 데이터인 `DATA_DIR/vector_db`를 별도로 사용합니다.
 - 서로 다른 SQL 작업과 시각이 계속 출력되면 프로세스 활동은 있지만, 비어 있는 신규 DB에서 수십 분이 걸리는 것은 정상 성능으로 보지 않습니다.
-- `/health`가 200이면 완료입니다. 계속 000이면 마지막 로그와 DB 파일 변화, Open WebUI 프로세스 중복 여부를 확인합니다.
+- `/health`가 200이면 백엔드는 준비된 것입니다. DEBUG 로그가 계속 출력돼도 전경 서버의 정상 동작입니다.
+- 계속 000이면 마지막 로그와 DB 파일 변화, Open WebUI 프로세스 중복 여부를 확인합니다.
 - 마지막으로 출력되는 import 구간과 오류를 비식별화해 확인합니다.
 - 진단 후에는 `Remove-Item Env:PYTHONPROFILEIMPORTTIME -ErrorAction SilentlyContinue`로 import timing을 해제합니다.
 - ChromaDB·native ML library import에서 멈춘다면 Windows 백신·디스크 검사 영향 여부를 별도로 확인합니다.
