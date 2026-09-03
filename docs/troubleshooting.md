@@ -122,9 +122,10 @@ uvx --python 3.11 open-webui@0.11.3 serve --host 127.0.0.1 --port 8080 2>&1 |
 Get-Content $debugLog -Tail 40
 ```
 
-- `DEBUG | aiosqlite.core ... fetchall ... completed`가 서로 다른 시각과 작업으로 계속 출력되면 SQLite 초기화·설정 조회가 진행 중인 것입니다. 이 자체는 오류가 아닙니다.
-- 이 상태에서는 중단하지 않고 `Application startup complete`를 기다립니다. 별도 창의 `/health`가 200이면 완료입니다.
-- 동일한 한두 줄만 반복되고 새로운 작업이 전혀 없이 장시간 지속될 때만 로그 마지막 부분을 다시 확인합니다.
+- `DEBUG | aiosqlite.core ... fetchall ... completed`는 기본 메타데이터 DB인 `DATA_DIR/webui.db`에서 비동기 조회가 끝났다는 뜻입니다. 이것만으로 전체 DB 초기화가 진행 중이라고 단정하지 않습니다.
+- Open WebUI는 계정·대화·설정을 저장하는 `webui.db`와 RAG용 Chroma 데이터인 `DATA_DIR/vector_db`를 별도로 사용합니다.
+- 서로 다른 SQL 작업과 시각이 계속 출력되면 프로세스 활동은 있지만, 비어 있는 신규 DB에서 수십 분이 걸리는 것은 정상 성능으로 보지 않습니다.
+- `/health`가 200이면 완료입니다. 계속 000이면 마지막 로그와 DB 파일 변화, Open WebUI 프로세스 중복 여부를 확인합니다.
 - 마지막으로 출력되는 import 구간과 오류를 비식별화해 확인합니다.
 - 진단 후에는 `Remove-Item Env:PYTHONPROFILEIMPORTTIME -ErrorAction SilentlyContinue`로 import timing을 해제합니다.
 - ChromaDB·native ML library import에서 멈춘다면 Windows 백신·디스크 검사 영향 여부를 별도로 확인합니다.
