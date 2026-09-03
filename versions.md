@@ -20,7 +20,7 @@
 
 | 항목 | 값 | 상태 |
 |---|---|---|
-| Open WebUI | 0.11.3 | 백엔드 /health HTTP 200, UI 확인 전 |
+| Open WebUI | 0.11.3 | /health 200, UI 접속·관리자 계정 생성 확인 |
 | Python | 3.11 | 목표 런타임 |
 | 주소 | http://127.0.0.1:8080 | /health HTTP 200 |
 | DATA_DIR | %LOCALAPPDATA%\EES-Agent-POC\open-webui\data | 사용 여부 미검증 |
