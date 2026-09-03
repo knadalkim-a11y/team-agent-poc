@@ -43,7 +43,7 @@ curl.exe -sS -o NUL -w "DIRECT http=%{http_code}\n" --connect-timeout 10 --nopro
 curl.exe -sS -o NUL -w "PROXY  http=%{http_code}\n" --connect-timeout 10 --proxy $proxyUrl $targetUrl
 ```
 
-API Key 없이 실행하므로 `401` 또는 `403`도 TCP·TLS·HTTP 경로 자체가 연결됐다는 증거가 될 수 있습니다. `000` 또는 connect error는 해당 경로가 실패한 것입니다.
+API Key 없이 실행하므로 `401` 또는 `403`도 TCP·TLS·HTTP 경로 자체가 연결됐다는 증거가 될 수 있지만, Key+IP 허용 경로 판정에는 사용할 수 없습니다. `000` 또는 connect error는 해당 경로가 실패한 것입니다. 프록시 출력에 HTTP 상태가 두 줄이면 첫 `200 Connection established`가 아니라 마지막 API 응답을 판정합니다.
 
 - 직접 경로만 연결: <INTERNAL_VLLM_HOST>를 `CORP_NO_PROXY`에 추가합니다.
 - 프록시 경로만 연결: <INTERNAL_VLLM_HOST>를 `CORP_NO_PROXY`에 추가하지 않습니다.
@@ -57,16 +57,11 @@ $env:CORP_NO_PROXY = "127.0.0.1,localhost,::1"
 
 환경변수를 바꿨다면 Open WebUI를 재시작합니다.
 
-## 네트워크 경로 판정 결과
+## 네트워크 경로 판정 상태
 
-2026-09-03 로컬 POC에서 비식별 경로 테스트 결과:
+2026-09-03 최초 비인증 비교에서 직접 경로는 403 HTML, 프록시 경로에서는 200이 관찰됐습니다. 그러나 Gateway가 Key와 발신 IP를 함께 검증하므로 비인증 결과만으로 정상 경로를 확정할 수 없습니다. 또한 HTTP 프록시의 `200 Connection established`는 TLS 터널 생성 성공일 뿐 최종 `/v1/models` 응답 200이 아닐 수 있습니다.
 
-| 경로 | 결과 | 판정 |
-|---|---|---|
-| 사내 vLLM 직접 연결 | HTTP 403 + `text/html` | 보안망 차단 |
-| 사내 프록시 경유 | HTTP 200 | 정상 경로 |
-
-따라서 이 환경에서는 사내 vLLM 호스트를 `NO_PROXY`에 넣지 않고, `NO_PROXY`를 loopback 주소로만 제한합니다. 실제 호스트와 프록시 주소는 저장하지 않습니다.
+따라서 **유효한 Key를 헤더로 넣고 최종 HTTP 응답과 Content-Type까지 직접·프록시 양쪽에서 재검증한 뒤** NO_PROXY를 결정합니다. 실제 호스트·프록시 주소·Key는 저장하지 않습니다.
 
 ## 2. 선택적 API 직접 점검
 
