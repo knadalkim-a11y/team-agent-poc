@@ -137,6 +137,51 @@ Get-Content $debugLog -Tail 40
 - https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/main.py
 - https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/retrieval/vector/factory.py
 
+### UI가 열린 뒤 Hugging Face SSL 재시도
+
+관찰된 경고:
+
+```text
+huggingface_hub.utils._http:_http_backoff_base
+[SSL: CERTIFICATE_VERIFY_FAILED]
+```
+
+`/health`가 200이고 UI 로그인까지 가능하다면 Open WebUI의 핵심 기동과 운영 DB는 정상입니다. 이 경고는 Hugging Face의 임베딩·리랭커·Whisper 같은 외부 자산 조회 또는 다운로드에서 Python 런타임이 사내 TLS 검사 프록시의 인증서 체인을 신뢰하지 못해 발생할 수 있습니다.
+
+```text
+Open WebUI·계정·사내 LLM 채팅  → 계속 검증 가능
+로컬 임베딩·파일 RAG·Whisper   → 인증서 해결 전 보류
+```
+
+정확한 대상을 확인할 때는 별도 PowerShell에서 공개 URL이 포함된 앞뒤 로그만 확인합니다.
+
+```powershell
+Select-String -Path "$env:TEMP\openwebui-import.log" `
+    -Pattern "huggingface|Retrying|CERTIFICATE_VERIFY_FAILED" -Context 1,1 |
+    Select-Object -Last 20
+```
+
+장기 해결은 IT가 승인한 **공인 루트와 사내 Root·Intermediate CA가 함께 포함된 PEM CA bundle**을 받아 Open WebUI 시작 전에 지정하는 것입니다. CA bundle이나 사내 경로는 Git에 커밋하지 않습니다.
+
+```powershell
+$caBundle = "C:\approved-path\corp-ca-bundle.pem"
+$env:SSL_CERT_FILE = $caBundle
+$env:REQUESTS_CA_BUNDLE = $caBundle
+```
+
+- `SSL_CERT_FILE`은 현재 Hugging Face Hub가 사용하는 HTTPX 계열 TLS 검증에 적용됩니다.
+- `UV_SYSTEM_CERTS=true`는 uv의 패키지 다운로드 인증서 설정이며, 실행된 Open WebUI의 HTTPX TLS 신뢰를 자동으로 해결한다고 간주하지 않습니다.
+- `verify=false`, 빈 `CURL_CA_BUNDLE`, SSL 검증 비활성화는 사용하지 않습니다.
+- fresh install에서 임베딩 캐시가 없으면 `OFFLINE_MODE=true`와 `HF_HUB_OFFLINE=1`이 `No embedding model is loaded`를 유발할 수 있으므로, 경고를 숨기기 위한 즉시 조치로 사용하지 않습니다.
+- 먼저 사내 vLLM 채팅 기준선을 검증하고, 이후 승인된 CA bundle·사전 반입된 임베딩 모델·사내 임베딩 API 중 운영 방식을 선택합니다.
+
+공식 참고:
+
+- https://docs.openwebui.com/reference/env-configuration/
+- https://docs.openwebui.com/tutorials/maintenance/offline-mode/
+- https://www.python-httpx.org/environment_variables/
+- https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables
+
 ### No embedding model is loaded
 
 fresh install에서는 기본 임베딩 모델 다운로드가 필요할 수 있습니다. 캐시가 없는데 OFFLINE_MODE 또는 HF_HUB_OFFLINE을 설정하면 시작이 실패할 수 있습니다.
