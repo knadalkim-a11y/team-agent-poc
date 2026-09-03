@@ -66,7 +66,33 @@ $env:ENABLE_OLLAMA_API = "False"
 
 data에는 계정·대화·첨부파일 등 민감한 상태가 저장될 수 있습니다. data와 .webui_secret_key는 Git에 올리지 않습니다. 같은 작업 디렉터리를 계속 사용해야 생성된 secret key가 유지됩니다.
 
-## 3. 고정 버전 실행
+## 3. 표시 이름 설정
+
+Community 버전의 공식 `WEBUI_NAME` 환경 변수를 사용합니다.
+
+```powershell
+$env:WEBUI_NAME = "EES Assistant"
+```
+
+Open WebUI 0.11.3은 Community 라이선스에서 다음처럼 원본 프로젝트명을 덧붙입니다.
+
+```text
+EES Assistant (Open WebUI)
+```
+
+`Open WebUI` 표기까지 완전히 제거하는 로고·화이트라벨 변경은 Enterprise 라이선스 영역이므로 소스 파일을 직접 수정하지 않습니다. 사내망에서 외부 메타데이터를 조회하는 legacy `CUSTOM_NAME`도 사용하지 않습니다.
+
+저장소의 `start-openwebui.ps1`는 위 값을 기본 적용합니다. 다른 이름으로 시험하려면 다음처럼 실행할 수 있습니다.
+
+```powershell
+.\scripts\start-openwebui.ps1 -WebUiName "<DISPLAY_NAME>"
+```
+
+이 값은 프로세스 시작 시 읽습니다. 이미 실행 중이라면 원래 창에서 `Ctrl+C`로 종료하고 다시 시작한 뒤 브라우저를 새로고침합니다. 데이터 디렉터리나 DB를 삭제할 필요는 없습니다.
+
+공식 참고: https://docs.openwebui.com/reference/env-configuration/#webui_name
+
+## 4. 고정 버전 실행
 
 수동 실행:
 
@@ -84,7 +110,7 @@ $env:CORP_NO_PROXY = "127.0.0.1,localhost,<INTERNAL_VLLM_HOST>"
 
 첫 실행에는 Python 패키지와 임베딩 모델 다운로드로 시간이 걸릴 수 있습니다. 모델 캐시가 없는 최초 실행에서는 OFFLINE_MODE나 HF_HUB_OFFLINE을 먼저 설정하지 않습니다.
 
-## 4. 기동 확인
+## 5. 기동 확인
 
 다음과 유사한 문구를 확인합니다.
 
@@ -100,7 +126,7 @@ Uvicorn running on http://127.0.0.1:8080
 
 첫 계정은 관리자 권한을 갖게 될 수 있으므로 POC 관리자 계정으로 생성하고, 비밀번호는 문서에 기록하지 않습니다.
 
-## 5. 통과 조건
+## 6. 통과 조건
 
 - [x] 프로세스가 오류 없이 유지된다.
 - [x] http://127.0.0.1:8080 이 열린다.
@@ -116,7 +142,7 @@ Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue
     Select-Object LocalAddress, LocalPort, OwningProcess
 ```
 
-## 6. 포트와 프록시
+## 7. 포트와 프록시
 
 로컬 Open WebUI의 127.0.0.1:8080과 원격 사내 프록시의 8080은 충돌하지 않습니다.
 
