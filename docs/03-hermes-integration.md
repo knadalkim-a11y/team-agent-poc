@@ -34,6 +34,33 @@ Open WebUI는 Builtin Tool 명세를 OpenAI 형식 `tools`로 upstream에 보낼
 - 두 경로를 함께 유지해 사용자 경험과 품질을 비교
 - 단일 Agent에서 양쪽 기능이 모두 필요하다는 증거가 생긴 뒤에만 사용자 인식형 MCP/API 브리지를 검토
 
+### 모델 선택기 운영 단계
+
+POC에서는 실제 모델과 Hermes 경로를 모두 노출해 같은 질문을 비교합니다.
+
+```text
+POC 모델 선택기
+├─ 사내 GLM (Direct)
+├─ 사내 Gemma (Direct)
+└─ EES Hermes Agent
+```
+
+파일럿에서는 비개발자가 구현 세부사항을 선택하지 않도록 Workspace Model preset으로 역할 중심 이름을 제공합니다.
+
+```text
+일반 사용자 모델 선택기
+├─ EES 기본 Assistant
+└─ EES Hermes Agent
+
+개발자·관리자 선택기
+├─ EES 기본 Assistant
+├─ EES Hermes Agent
+├─ 사내 GLM (Direct)
+└─ 사내 Gemma (Direct)
+```
+
+`EES 기본 Assistant`는 별도 물리 모델이 아니라 승인된 Direct 모델 하나를 감싸는 Open WebUI preset입니다. `EES Hermes Agent`는 Hermes API가 광고하는 논리 모델이며, 실제 기반 모델은 Hermes Profile에서 설정합니다. POC 결과가 나오기 전에는 기본 모델 자동 라우팅이나 여러 preset을 추가하지 않습니다.
+
 특히 Open WebUI의 Tool Approval은 Hermes 내부 Tool 실행을 승인·차단하지 못하므로 Hermes 자체 toolset과 승인 정책을 별도로 제한해야 합니다.
 
 ## 진입 Gate — 10분 이내 최소 점검
