@@ -44,6 +44,7 @@
 - Open WebUI 0.11.3 Skill 생성 화면에서 YAML frontmatter를 인식하고 `policy-grounded-answer` 생성 확인
 - Open WebUI Workspace의 Skills 목록에서 `policy-grounded-answer`와 `structured-troubleshooting` 2개 생성 확인
 - `EES POC Policy` Knowledge Base에 합성 `poc-policy.md` 문서 첨부 확인
+- `EES 통합 Assistant` Workspace Model 생성 및 메인 Chat 모델 선택기 노출 확인
 - 기존 Hermes 0.19.0과 사내 모델의 CLI 질문·응답 확인
 - GitHub, PyPI, Hugging Face 프록시 연결 HTTP 200
 - 로컬 포트 8080과 8642에 기존 listener 없음
