@@ -45,6 +45,9 @@
 - Open WebUI Workspace의 Skills 목록에서 `policy-grounded-answer`와 `structured-troubleshooting` 2개 생성 확인
 - `EES POC Policy` Knowledge Base에 합성 `poc-policy.md` 문서 첨부 확인
 - `EES 통합 Assistant` Workspace Model 생성 및 메인 Chat 모델 선택기 노출 확인
+- 정책 질문에서 `view_skill` 호출과 `policy-grounded-answer` 형식 준수 확인
+- 합성 Knowledge의 `POC-POL-001 v0.1` 및 관련 절을 정확히 근거로 제시
+- 임베딩 우회 상태에서 semantic query 실패 후 `grep_knowledge_files`·파일 보기로 복구 확인
 - 기존 Hermes 0.19.0과 사내 모델의 CLI 질문·응답 확인
 - GitHub, PyPI, Hugging Face 프록시 연결 HTTP 200
 - 로컬 포트 8080과 8642에 기존 listener 없음
@@ -56,6 +59,7 @@
 
 ### Observed
 
+- 첫 정책 답변에서 `POC`를 한 곳에서 `PCO`로 표기한 경미한 출력 오타를 관찰했습니다.
 - `EES POC Policy` Knowledge Base에서 파일 추가 시 임베딩 모델 미설정 오류를 확인했습니다. 작은 합성 문서 POC는 관리자 문서 설정의 `임베딩 검색 우회`로 진행하고, 사내 Embedding 모델 연결은 후속 단계로 분리합니다.
 - Open WebUI 최초 기동은 CORS 경고까지 진행됐습니다.
 - 이후 약 30분 동안 8080 listener가 없고 /health가 HTTP 000인 정체 상태를 확인했습니다.
