@@ -65,10 +65,12 @@ Open WebUI 직접 연결이 확인될 때까지 정상 동작 중인 Hermes를 �
 
 ```powershell
 $env:CORP_PROXY_URL = "http://<CORPORATE_PROXY_HOST>:<PORT>"
-$env:CORP_NO_PROXY = "127.0.0.1,localhost,<INTERNAL_VLLM_HOST>"
+$env:CORP_NO_PROXY = "127.0.0.1,localhost,::1"
 
 .\scripts\start-openwebui.ps1
 ```
+
+사내 vLLM 호스트를 `CORP_NO_PROXY`에 추가할지는 직접 경로와 프록시 경로를 비교한 뒤 결정합니다. 내부 주소라는 이유만으로 우회 목록에 넣지 않습니다.
 
 다른 PowerShell에서:
 
