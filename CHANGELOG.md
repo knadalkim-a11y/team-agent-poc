@@ -19,12 +19,14 @@
 
 - Open WebUI Native 우선 MVP 구조
 - 비밀정보가 없는 Agent Pack 템플릿
+- `WEBUI_NAME=EES Assistant`를 적용하는 재현 가능한 실행 스크립트 설정
 - 정책 근거·Skill 선택·DB 접근금지 평가 시나리오
 
 ### Changed
 
 - Hermes 연동을 필수 다음 단계에서 선택적 비교 단계로 변경
 - POC 범위를 Assistant 1개, Skill 2개, 합성 Knowledge 1개로 제한
+- Community 라이선스를 지키며 표시 이름을 `EES Assistant (Open WebUI)`로 변경
 - Router·A2A·MCP·자동 동기화는 Native의 한계가 확인될 때까지 보류
 
 ## 2026-09-03
