@@ -1,6 +1,6 @@
 # 03. Open WebUI Native 통합 Assistant
 
-> 상태: **현재 MVP / 미검증**  
+> 상태: **현재 MVP / 부분 검증**  
 > 범위: 합성 정보만 사용하며, 실제 사내 정책·URL·모델 ID·업무 데이터는 등록하지 않는다.
 
 ## 목표 구조
@@ -30,6 +30,61 @@ flowchart TB
 | 위험 기능 | OFF | Terminal·Shell·Code Interpreter·쓰기·DB Tool 미연결 |
 
 POC에서는 Router, A2A, MCP, 자동 동기화, 외부 Agent를 만들지 않습니다. Native 방식으로 부족한 실제 사례가 확인된 뒤에만 추가합니다.
+
+## 확인된 제한: Open WebUI Skill은 실행 패키지가 아니다
+
+Open WebUI 공식 정의에서 Workspace Skill은 Markdown 지침입니다. 모델에는 이름·설명만 먼저 제공되고, 필요할 때 `view_skill`로 본문을 불러옵니다. Python 실행, API 호출, 별도 `references/`·`scripts/` 디렉터리 배포 기능은 Workspace Skill 자체에 없습니다.
+
+따라서 기존 사내 Agent Skill 패키지를 Open WebUI Skill 하나로 옮기는 방식은 사용하지 않습니다.
+
+| 기존 사내 Agent Skill 구성 | Open WebUI에서의 대응 |
+|---|---|
+| `SKILL.md`의 판단 기준·절차 | Workspace Skill |
+| 짧고 정적인 참고 문서 | Knowledge |
+| 크거나 구조화된 Reference | Tool Server의 검색·조회 API |
+| `scripts/` 실행 코드 | Workspace Tool 또는 외부 MCP/OpenAPI Tool Server |
+| 패키지 의존성·런타임 | 외부 Tool Server 환경 |
+| API Key·사내 URL | Tool Server의 서버 측 설정·Secret |
+| 반드시 지켜야 하는 공통 정책 | Filter·RBAC·Tool/Broker 내부 강제 |
+| 버전·설치·업데이트 | Git 원본과 별도 배포 절차 |
+
+### 권장 배치 구조
+
+```mermaid
+flowchart TB
+    Git["Git: EES Agent Pack<br/>SKILL.md·references·scripts·tests"]
+    Deploy["배포 Adapter"]
+    Runtime["EES Tool Server<br/>검증된 코드·Secret·감사"]
+    Context["Open WebUI<br/>Skill·Knowledge"]
+    Protocol["MCP 또는 OpenAPI Tools"]
+    Assistant["EES 통합 Assistant"]
+    Guard["Filter·RBAC<br/>공통 강제 정책"]
+
+    Git --> Deploy --> Context --> Assistant
+    Git --> Runtime --> Protocol --> Assistant
+    Guard --> Assistant
+```
+
+Open WebUI는 사용자 UI와 Native Tool 호출 루프를 담당하고, 실행 가능한 패키지의 원본과 런타임은 Git 및 Tool Server가 담당합니다. 즉, Open WebUI Skill은 Agent Pack 전체가 아니라 Agent Pack 중 **지침 부분을 투영한 배포본**입니다.
+
+작은 POC 코드는 Open WebUI의 Python Workspace Tool로 넣을 수 있지만, 팀 공용 패키지는 외부 MCP/OpenAPI Tool Server가 더 적합합니다. Open WebUI 업그레이드와 실행 코드를 분리할 수 있고, 의존성·Secret·감사·권한을 서버에서 관리할 수 있기 때문입니다.
+
+예를 들어 GitHub 패키지는 다음처럼 나눕니다.
+
+- `SKILL.md`: 언제 저장소를 조회하고 어떤 검증·승인 절차를 따르는지
+- `references/`: 사내 GitHub 사용 가이드와 API 규격
+- `scripts/`: 검색·파일 조회·브랜치 생성·PR 생성 구현
+- Tool Server: 스크립트를 `search_repository`, `get_file`, `create_branch`, `open_pull_request` 같은 제한된 함수로 노출
+- 강제 정책: 저장소·브랜치 allowlist, 쓰기 전 사용자 승인, 최소 권한 토큰, 감사 로그
+
+범용 Shell이나 임의 `git push`를 그대로 노출하지 않습니다. 또한 Tool은 Open WebUI 서버에서 실행되므로, 중앙 서버로 이전한 뒤 사용자의 PC 작업 폴더를 직접 조작하지 않습니다. 사용자 로컬 저장소를 다루려면 별도 로컬 실행 Agent/Runner가 필요하고, WebUI에서는 중앙 GitHub API 작업이나 서버 측 워크스페이스만 수행합니다.
+
+공식 근거:
+
+- [Open WebUI Skills](https://docs.openwebui.com/features/workspace/skills/): Skill은 실행 코드가 아닌 Markdown 지침
+- [Open WebUI Extensibility](https://docs.openwebui.com/features/extensibility/): 실행 능력은 Tool·Function·MCP·OpenAPI로 제공
+- [Open WebUI Tools](https://docs.openwebui.com/features/extensibility/plugin/tools/): Workspace Tool은 Open WebUI 프로세스 안에서 Python으로 실행
+- [Open WebUI MCP](https://docs.openwebui.com/features/extensibility/mcp/): Streamable HTTP MCP Tool Server 연결 지원
 
 ## 정책 적용의 두 층
 
