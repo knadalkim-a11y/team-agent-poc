@@ -111,8 +111,10 @@ flowchart LR
 
 1. `Workspace > Knowledge`에서 `EES POC Policy`를 생성합니다.
 2. `agent-pack/knowledge/poc-policy.md`를 등록합니다.
-3. 현재 Hugging Face SSL 또는 임베딩 구성이 불안정하면 POC에서는 작은 문서를 Full Context 방식으로 연결합니다.
-4. 실제 사내 문서는 승인·비식별·접근권한 기준이 정해질 때까지 넣지 않습니다.
+3. 현재처럼 파일 추가 시 `임베딩 모델이 없음` 오류가 나면 `관리자 패널 > 설정 > 문서`에서 `임베딩 검색 우회`를 켜고 저장한 뒤 다시 추가합니다.
+4. 이 옵션은 임베딩·분할 검색 없이 전체 내용을 컨텍스트로 전달하는 전역 POC 설정입니다. 작은 합성 문서에만 사용하고, 대규모 문서를 넣기 전에는 끈 뒤 사내 OpenAI-compatible Embedding 모델을 별도로 연결합니다.
+5. Knowledge를 Assistant에 붙일 때도 `Full Context`를 선택해 이번 시험이 벡터 검색 품질과 섞이지 않게 합니다.
+6. 실제 사내 문서는 승인·비식별·접근권한 기준이 정해질 때까지 넣지 않습니다.
 
 ## 3. Workspace Model 생성
 
