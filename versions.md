@@ -20,9 +20,9 @@
 
 | 항목 | 값 | 상태 |
 |---|---|---|
-| Open WebUI | 0.11.3 | 실행 명령 입력, 기동 미확인 |
+| Open WebUI | 0.11.3 | 백엔드 /health HTTP 200, UI 확인 전 |
 | Python | 3.11 | 목표 런타임 |
-| 주소 | http://127.0.0.1:8080 | 미검증 |
+| 주소 | http://127.0.0.1:8080 | /health HTTP 200 |
 | DATA_DIR | %LOCALAPPDATA%\EES-Agent-POC\open-webui\data | 사용 여부 미검증 |
 | Hermes API | http://127.0.0.1:8642/v1 | 미기동 |
 | 외부 다운로드 프록시 | <CORPORATE_PROXY_URL> | 실제 값 비공개 |
