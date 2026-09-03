@@ -1,0 +1,143 @@
+# Troubleshooting
+
+Windows 로컬 POC의 장애를 계층별로 분리합니다. 앞 단계가 실패하면 뒤 단계를 수정하지 않습니다.
+
+```text
+① 사내 vLLM API 직접 호출
+        ↓
+② Open WebUI → 사내 vLLM
+        ↓
+③ Hermes API → 사내 vLLM
+        ↓
+④ Open WebUI → Hermes → 사내 vLLM
+```
+
+## 안전한 진단 정보
+
+```powershell
+Get-Date
+uv --version
+hermes --version
+hermes profile list
+hermes gateway status
+
+Get-NetTCPConnection -LocalPort 8080,8642 -State Listen -ErrorAction SilentlyContinue |
+    Select-Object LocalAddress, LocalPort, OwningProcess
+```
+
+공유 전 API Key, 실제 사내 URL·IP·모델 경로, 사용자명·개인 경로, 업무 질문과 응답을 제거합니다.
+
+## 프록시 다운로드 실패
+
+```powershell
+$proxyUrl = "http://<CORPORATE_PROXY_HOST>:<PORT>"
+$env:HTTP_PROXY = $proxyUrl
+$env:HTTPS_PROXY = $proxyUrl
+$env:NO_PROXY = "127.0.0.1,localhost,<INTERNAL_VLLM_HOST>"
+$env:UV_SYSTEM_CERTS = "true"
+
+curl.exe -I --proxy $proxyUrl https://github.com
+curl.exe -I --proxy $proxyUrl https://pypi.org/simple/open-webui/
+curl.exe -I --proxy $proxyUrl https://huggingface.co
+```
+
+| 결과 | 의미 | 조치 |
+|---|---|---|
+| 200·301·302 | 경로 정상 | 같은 PowerShell에서 재시도 |
+| 407 | 프록시 인증 필요 | 사내 인증·미러 방식 확인 |
+| 403 | 정책 차단 가능성 | allowlist 또는 패키지 미러 요청 |
+| 인증서 오류 | 사내 CA 문제 가능성 | 승인된 CA 신뢰 설정 |
+| timeout | 망 경로 문제 | 프록시 주소·네트워크 확인 |
+
+--insecure, verify=false 등 TLS 검증 해제는 사용하지 않습니다.
+
+## Open WebUI 시작 실패
+
+### No embedding model is loaded
+
+fresh install에서는 기본 임베딩 모델 다운로드가 필요할 수 있습니다. 캐시가 없는데 OFFLINE_MODE 또는 HF_HUB_OFFLINE을 설정하면 시작이 실패할 수 있습니다.
+
+1. 접근 가능한 세션에서 최초 다운로드를 완료합니다.
+2. 정책상 차단이면 승인된 캐시를 사전 반입합니다.
+3. 또는 사내 OpenAI-compatible embeddings endpoint를 사용합니다.
+
+### 페이지가 열리지 않음
+
+```powershell
+Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue
+```
+
+출력이 없으면 아직 다운로드 중이거나 시작 전에 실패한 것입니다. 0.0.0.0:8080으로 열렸다면 중단하고 --host 127.0.0.1로 다시 시작합니다.
+
+### Address already in use
+
+```powershell
+$conn = Get-NetTCPConnection -LocalPort 8080 -State Listen
+Get-Process -Id $conn.OwningProcess
+```
+
+프로세스를 확인한 뒤 종료 여부를 결정하며, 확인 없이 강제 종료하지 않습니다.
+
+### 재시작 후 계정·대화가 사라짐
+
+- 매번 같은 DATA_DIR과 작업 디렉터리를 사용했는지 확인합니다.
+- .webui_secret_key가 유지되는지 확인합니다.
+- 실행 중인 DB를 복사하지 않습니다. 백업 전에 Open WebUI를 종료합니다.
+
+## 사내 vLLM 직접 연결 실패
+
+| 상태 | 우선 확인 |
+|---|---|
+| 401·403 | API Key, Bearer 인증, 권한 |
+| 404 | base URL의 /v1 중복 또는 누락 |
+| 422 | 실제 모델 ID와 요청 형식 |
+| 429 | rate limit·동시 요청 제한 |
+| 500 | vLLM·Gateway 로그, API 방식 |
+| 502·504 | 중간 Gateway·vLLM 상태와 timeout |
+
+진단 순서:
+
+```text
+/v1/models → /v1/chat/completions(stream=false)
+→ Open WebUI 단일 요청 → Open WebUI streaming
+```
+
+Responses API는 사내 endpoint에서 성공을 확인하기 전에는 사용하지 않습니다. 내부 호스트가 프록시로 전달되면 NO_PROXY를 수정하고 Open WebUI를 재시작합니다.
+
+## Hermes 시작 실패
+
+### Gateway stopped
+
+```powershell
+hermes --profile team-poc gateway
+```
+
+전경 로그를 확인합니다.
+
+### aiohttp not installed
+
+0.19.0 pip/uv 설치에서 발생할 수 있습니다. 임의로 site-packages를 수정하지 않고 공식 설치본 전환 계획으로 이동합니다.
+
+### /health는 되지만 /v1/models가 401
+
+Authorization: Bearer <HERMES_API_KEY> 헤더와 Open WebUI에 저장한 Key가 같은지 확인합니다.
+
+### 8642가 외부에 열림
+
+```powershell
+Get-NetTCPConnection -LocalPort 8642 -State Listen |
+    Select-Object LocalAddress, LocalPort
+```
+
+127.0.0.1이 아니면 즉시 Gateway를 중단합니다.
+
+## 사용자·Memory 격리 실패
+
+다음은 파일럿 중단 조건입니다.
+
+- 새 대화에서 이전 대화의 일회성 문자열이 자동 회수됨
+- 사용자 A의 정보가 사용자 B에게 노출됨
+- Memory를 껐는데 장기 기억이 생성됨
+- 비활성화한 Shell·파일 Tool이 실행됨
+
+이 경우 다른 사용자를 추가하지 않고 Profile과 Open WebUI 사용자 분리를 다시 검토합니다.
