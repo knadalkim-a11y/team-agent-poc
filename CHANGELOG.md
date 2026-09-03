@@ -34,7 +34,8 @@
 
 - Open WebUI 최초 기동은 CORS 경고까지 진행됐습니다.
 - 이후 약 30분 동안 8080 listener가 없고 /health가 HTTP 000인 정체 상태를 확인했습니다.
-- uv·uvx·python 프로세스는 남아 있어 import timing을 켠 재실행 진단 단계로 전환했습니다.
+- uv·uvx·python 프로세스는 남아 있었고, 원래 창에서 Ctrl+C 후 traceback 없이 중단됐습니다.
+- 다음 실행은 import timing과 로컬 임시 로그를 켜 정체 모듈을 식별합니다.
 - 아직 Application startup complete와 브라우저 접속은 확인 전입니다.
 
 ### Current limitations
