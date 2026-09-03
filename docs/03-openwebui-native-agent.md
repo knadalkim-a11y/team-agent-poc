@@ -43,6 +43,24 @@ flowchart LR
 - 운영 DB 직접 접근 금지는 DB Tool·자격증명·네트워크 경로를 제공하지 않는 것으로 강제합니다.
 - 나중에 조회가 필요하면 승인된 읽기 전용 API 또는 Query Broker만 별도 Tool로 연결합니다.
 
+## 단계 구분
+
+```mermaid
+flowchart LR
+    A["지금<br/>Skill·Knowledge 품질"] --> B["Assistant 구성<br/>Native 호출 검증"]
+    B --> C["파일럿 전<br/>Filter·권한·인프라 통제"]
+```
+
+| 단계 | 확인 대상 | 해석 |
+|---|---|---|
+| 지금 | Skill 선택, 절차 준수, 근거 표시 | 행동 품질 검증 |
+| Assistant 구성 후 | Native `view_skill`, Knowledge, 위험 Tool 미연결 | POC 안전성 검증 |
+| 파일럿 전 | 필수 Filter, RBAC, 자격증명·네트워크 차단, 승인된 조회 Broker | 강제 통제 검증 |
+
+Open WebUI에서 Claude Code Hook과 가장 가까운 확장 지점은 요청·응답을 가로채는 Filter Function입니다. Tool은 정책을 강제하는 장치가 아니라 모델에 실행 능력을 추가하는 장치이므로, 직접 DB Tool 대신 정책이 내장된 읽기 전용 Broker만 나중에 연결합니다.
+
+Skill만으로 거절에 성공한 결과는 행동 품질 PASS이며, 강제 통제 PASS로 판정하지 않습니다.
+
 ## Git 원본과 Open WebUI 배포본
 
 ```mermaid
