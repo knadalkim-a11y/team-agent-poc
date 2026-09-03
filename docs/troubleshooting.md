@@ -33,7 +33,7 @@ Get-NetTCPConnection -LocalPort 8080,8642 -State Listen -ErrorAction SilentlyCon
 $proxyUrl = "http://<CORPORATE_PROXY_HOST>:<PORT>"
 $env:HTTP_PROXY = $proxyUrl
 $env:HTTPS_PROXY = $proxyUrl
-$env:NO_PROXY = "127.0.0.1,localhost,<INTERNAL_VLLM_HOST>"
+$env:NO_PROXY = "127.0.0.1,localhost,::1"
 $env:UV_SYSTEM_CERTS = "true"
 
 curl.exe -I --proxy $proxyUrl https://github.com
@@ -215,6 +215,18 @@ Get-Process -Id $conn.OwningProcess
 
 ## 사내 vLLM 직접 연결 실패
 
+### `Cannot connect to host <INTERNAL_VLLM_HOST>:443 ssl:default`
+
+키·URL·모델 ID 검증 전에 발생하는 전송 계층 오류입니다. Open WebUI 0.11.3의 OpenAI-compatible 요청은 `aiohttp.ClientSession(trust_env=True)`를 사용하므로 실행 프로세스의 `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`를 따릅니다.
+
+1. API Key 없이 direct와 proxy의 `/v1/models` HTTP 도달 여부를 비교합니다.
+2. direct만 성공하면 호스트를 NO_PROXY에 추가합니다.
+3. proxy만 성공하면 호스트를 NO_PROXY에서 제거합니다.
+4. HTTP 경로는 도달하지만 인증서 오류가 이어지면 승인된 PEM CA bundle을 `AIOHTTP_CLIENT_SSL_CERT_FILE`에 지정합니다.
+5. SSL 검증을 끄지 않습니다.
+
+
+
 | 상태 | 우선 확인 |
 |---|---|
 | 401·403 | API Key, Bearer 인증, 권한 |
@@ -231,7 +243,7 @@ Get-Process -Id $conn.OwningProcess
 → Open WebUI 단일 요청 → Open WebUI streaming
 ```
 
-Responses API는 사내 endpoint에서 성공을 확인하기 전에는 사용하지 않습니다. 내부 호스트가 프록시로 전달되면 NO_PROXY를 수정하고 Open WebUI를 재시작합니다.
+Responses API는 사내 endpoint에서 성공을 확인하기 전에는 사용하지 않습니다. 사내 호스트의 직접·프록시 경로를 각각 확인한 뒤, 직접 경로가 검증된 경우에만 NO_PROXY에 추가하고 Open WebUI를 재시작합니다.
 
 ## Hermes 시작 실패
 
