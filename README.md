@@ -40,7 +40,7 @@ flowchart TB
 | GitHub·PyPI·Hugging Face 접근 | 검증됨 | 프록시 경유 HTTP 200 |
 | 로컬 포트 8080·8642 | 검증됨 | 기존 listener 없음 |
 | Open WebUI UI·관리자 계정 | 검증됨 | /health 200, 브라우저 접속·최초 계정 생성 완료 |
-| Open WebUI → 사내 vLLM | 대기 | Open WebUI 기동 후 진행 |
+| Open WebUI → 사내 vLLM | 진행 중 | 승인된 Chat 모델 2종 응답 확인, allowlist·스트리밍·반복 검증 남음 |
 | Open WebUI → Hermes | 대기 | 직접 vLLM 기준선 통과 후 진행 |
 | 사용자 격리 | 대기 | 서버 파일럿 전 2계정 검증 |
 
