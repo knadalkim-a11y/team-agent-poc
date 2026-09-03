@@ -3,18 +3,46 @@
 > 상태: **현재 MVP / 부분 검증**  
 > 범위: 합성 정보만 사용하며, 실제 사내 정책·URL·모델 ID·업무 데이터는 등록하지 않는다.
 
-## 목표 구조
+## 30초 구조 요약
+
+Git에서는 기존처럼 하나의 Agent Package로 관리합니다. 다만 Open WebUI Skill 하나가 패키지 전체를 실행할 수 없으므로, 배포할 때 **지침**과 **실행 기능**이 서로 다른 위치에 놓입니다.
 
 ```mermaid
 flowchart TB
-    User["팀 사용자"] --> WebUI["Open WebUI<br/>계정·대화·권한"]
-    WebUI --> Assistant["EES 통합 Assistant<br/>Workspace Model"]
-    Pack["Git Agent Pack<br/>Prompt·Policy·Skill·Knowledge"] --> Assistant
-    Assistant --> Native["Open WebUI Native Loop"]
-    Native --> LLM["승인된 사내 Chat 모델"]
+    Pack["Git의 Agent Package<br/>관리 단위는 하나"]
+    Skill["Open WebUI Skill<br/>SKILL.md 지침"]
+    Tool["EES Tool Server<br/>scripts·references"]
+    Assistant["EES 통합 Assistant"]
+    User["사용자"]
+
+    Pack --> Skill --> Assistant
+    Pack --> Tool --> Assistant
+    User --> Assistant
 ```
 
-`EES 통합 Assistant`는 새로운 물리 모델이 아니라, 승인된 기반 모델에 공통 지침·Skill·Knowledge·허용 기능을 묶는 Open WebUI Workspace Model입니다.
+사용자는 여전히 `EES 통합 Assistant` 하나만 선택합니다. Assistant에는 Skill과 Tool이 함께 연결되어 있으며, Skill은 **무엇을 언제 어떻게 할지** 알려주고 Tool은 **실제로 실행**합니다.
+
+### 실제 질문 처리 예시
+
+```mermaid
+sequenceDiagram
+    participant U as 사용자
+    participant A as EES Assistant
+    participant S as GitHub Skill
+    participant T as GitHub Tool
+    participant G as 사내 GitHub
+
+    U->>A: 이 저장소의 PR을 확인해줘
+    A->>S: view_skill
+    S-->>A: PR 조회 절차와 제한
+    A->>T: get_pull_request(repo, number)
+    T->>G: 승인된 API 호출
+    G-->>T: PR 데이터
+    T-->>A: 구조화된 결과
+    A-->>U: 결과 설명
+```
+
+`EES 통합 Assistant`는 새로운 물리 모델이 아니라, 승인된 기반 모델에 공통 지침·Skill·Knowledge·허용 Tool을 묶는 Open WebUI Workspace Model입니다.
 
 ## MVP 구성
 
