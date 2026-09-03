@@ -3,7 +3,8 @@
 [CmdletBinding()]
 param(
     [string]$ProxyUrl = $env:CORP_PROXY_URL,
-    [string]$NoProxy = $env:CORP_NO_PROXY
+    [string]$NoProxy = $env:CORP_NO_PROXY,
+    [string]$WebUiName = "EES Assistant"
 )
 
 Set-StrictMode -Version Latest
@@ -13,6 +14,18 @@ $listenAddress = "127.0.0.1"
 $port = 8080
 $openWebuiVersion = "0.11.3"
 $pythonVersion = "3.11"
+
+if ([string]::IsNullOrWhiteSpace($WebUiName) -or $WebUiName -match "[\r\n]") {
+    throw "WebUiName은 줄바꿈이 없는 이름이어야 합니다."
+}
+
+$WebUiName = $WebUiName.Trim()
+$displayWebUiName = if ($WebUiName -eq "Open WebUI") {
+    "Open WebUI"
+}
+else {
+    "$WebUiName (Open WebUI)"
+}
 
 $localAppData = [Environment]::GetFolderPath("LocalApplicationData")
 if ([string]::IsNullOrWhiteSpace($localAppData)) {
@@ -63,6 +76,7 @@ $env:UV_SYSTEM_CERTS = "true"
 
 # 현재 POC에서는 Ollama 연결을 사용하지 않습니다.
 $env:ENABLE_OLLAMA_API = "False"
+$env:WEBUI_NAME = $WebUiName
 $env:DATA_DIR = $dataDir
 
 $uvxCommand = Get-Command "uvx" -CommandType Application -ErrorAction SilentlyContinue |
@@ -83,6 +97,7 @@ New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
 
 Write-Host ""
 Write-Host "Open WebUI v$openWebuiVersion"
+Write-Host "Name     : $displayWebUiName"
 Write-Host "URL      : http://$($listenAddress):$port"
 Write-Host "Data     : $dataDir"
 Write-Host "Python   : $pythonVersion"
