@@ -60,7 +60,7 @@ Router, A2A, MCP, 자동 동기화와 실제 EMS·APC Agent 연동은 이번 단
 | Open WebUI → 사내 vLLM | 부분 검증 | 승인된 Chat 모델 2종 응답·allowlist 확인 |
 | Native Builtin Tool | 관찰됨 | `search_chats`·`view_chat` 사용 확인 |
 | Agent Pack 템플릿 | 등록됨 | Skill 2개와 `EES POC Policy` 합성 문서 첨부 확인 |
-| EES 통합 Assistant | 평가 중 | P02 정책 근거·P04-A 정책 Skill 선택 PASS |
+| EES 통합 Assistant | 평가 중 | P02 Knowledge 근거·P04 Skill 자동 선택 PASS |
 | 사용자 격리 | 대기 | 서버 파일럿 전 2계정 검증 |
 | Hermes 연결 비교 | 보류·선택 | Native 부족이 확인된 경우에만 수행 |
 
