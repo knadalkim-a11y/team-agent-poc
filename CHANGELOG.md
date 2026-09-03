@@ -26,6 +26,7 @@
 - Hermes 연동을 필수 다음 단계에서 선택적 비교 단계로 변경
 - POC 범위를 Assistant 1개, Skill 2개, 합성 Knowledge 1개로 제한
 - Router·A2A·MCP·자동 동기화는 Native의 한계가 확인될 때까지 보류
+
 ## 2026-09-03
 
 ### Added
