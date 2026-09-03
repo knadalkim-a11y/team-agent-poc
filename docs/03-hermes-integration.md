@@ -12,6 +12,30 @@
 
 두 연결을 함께 유지해 문제가 Open WebUI, Hermes, 모델 중 어디에서 발생하는지 비교합니다.
 
+## Open WebUI 기능과 Hermes의 경계
+
+Open WebUI의 UI·계정·대화 저장 기능은 Hermes 모델을 선택해도 그대로 사용합니다. 그러나 Open WebUI가 일반 모델에 제공하는 Builtin Tool은 Hermes v0.19.0에 자동 승계되지 않습니다.
+
+| 기능 | Hermes 모델 선택 시 |
+|---|---|
+| 로그인·사용자 계정 | 유지 |
+| 대화 목록·현재 대화 저장 | 유지 |
+| 현재 대화의 전체 메시지 전달 | 유지 |
+| `search_chats`·`view_chat` | 자동 승계되지 않음 |
+| Open WebUI Memory·Notes·Knowledge Tool | 자동 승계되지 않음 |
+| Hermes Skill·Memory·Tool | Hermes API 서버에서 실행 |
+
+Open WebUI는 Builtin Tool 명세를 OpenAI 형식 `tools`로 upstream에 보낼 수 있지만, Hermes v0.19.0 API 서버는 이를 Hermes Tool로 등록하지 않습니다. Hermes 도구는 Profile의 `api_server` toolset에서 별도로 결정됩니다.
+
+따라서 MVP 구성은 다음과 같습니다.
+
+- 직접 GLM·Gemma: 필요한 Open WebUI Builtin Tools 사용
+- Hermes Agent POC: Open WebUI `Builtin Tools OFF`, Hermes가 에이전트 실행 전담
+- 두 경로를 함께 유지해 사용자 경험과 품질을 비교
+- 단일 Agent에서 양쪽 기능이 모두 필요하다는 증거가 생긴 뒤에만 사용자 인식형 MCP/API 브리지를 검토
+
+특히 Open WebUI의 Tool Approval은 Hermes 내부 Tool 실행을 승인·차단하지 못하므로 Hermes 자체 toolset과 승인 정책을 별도로 제한해야 합니다.
+
 ## 진입 Gate — 10분 이내 최소 점검
 
 Hermes 연결 전에 직접 경로의 모든 장기 시험을 끝낼 필요는 없습니다. 다음 세 가지만 확인합니다.
