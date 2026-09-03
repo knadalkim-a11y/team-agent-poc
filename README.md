@@ -107,6 +107,7 @@ $env:CORP_NO_PROXY = "127.0.0.1,localhost,::1"
 - [Open WebUI 설치·기동](docs/01-openwebui-install.md)
 - [사내 vLLM 직접 연결](docs/02-vllm-direct-test.md)
 - [Open WebUI Native 통합 Assistant](docs/03-openwebui-native-agent.md)
+- [Confluence Read Tool POC](docs/04-confluence-read-tool.md)
 - [Agent Pack 템플릿](agent-pack/README.md)
 - [선택적 Hermes 비교](docs/03-hermes-integration.md)
 - [장애 분리](docs/troubleshooting.md)
