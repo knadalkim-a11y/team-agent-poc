@@ -39,7 +39,7 @@ flowchart TB
 | uv | 검증됨 | v0.12.7 |
 | GitHub·PyPI·Hugging Face 접근 | 검증됨 | 프록시 경유 HTTP 200 |
 | 로컬 포트 8080·8642 | 검증됨 | 기존 listener 없음 |
-| Open WebUI 실행 명령 | 진행 중 | 최초 기동 결과 확인 필요 |
+| Open WebUI 백엔드 | 검증됨 | 진단 실행에서 /health HTTP 200 |
 | Open WebUI → 사내 vLLM | 대기 | Open WebUI 기동 후 진행 |
 | Open WebUI → Hermes | 대기 | 직접 vLLM 기준선 통과 후 진행 |
 | 사용자 격리 | 대기 | 서버 파일럿 전 2계정 검증 |
