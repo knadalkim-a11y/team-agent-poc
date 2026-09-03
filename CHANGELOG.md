@@ -28,7 +28,9 @@
 - Hermes 연동을 필수 다음 단계에서 선택적 비교 단계로 변경
 - POC 범위를 Assistant 1개, Skill 2개, 합성 Knowledge 1개로 제한
 - Community 라이선스를 지키며 표시 이름을 `EES Assistant (Open WebUI)`로 변경
-- Router·A2A·MCP·자동 동기화는 Native의 한계가 확인될 때까지 보류
+- Router·A2A·자동 동기화는 Native의 한계가 확인될 때까지 보류
+- Open WebUI Workspace Skill을 실행형 Agent Skill Package가 아닌 Markdown 행동 지침으로 재분류
+- 실행 코드·API·Secret·구조화 Reference는 향후 Workspace Tool 또는 외부 MCP/OpenAPI Tool Server로 분리
 
 ## 2026-09-03
 
@@ -51,6 +53,9 @@
 - 임베딩 우회 상태에서 semantic query 실패 후 `grep_knowledge_files`·파일 보기로 복구 확인
 - 장애 질문에서 `structured-troubleshooting` Skill만 자동 선택하고 지정된 진단 구조를 준수
 - 문서에 없는 긴급 예외 시간·승인자 추정 요청을 거절하고 운영 DB 직접 접근 금지 원칙 유지
+- 운영 DB 직접 조회 요청을 거절하고 승인된 읽기 전용 API·Query Broker 경로 안내 확인(P05)
+- 이전 규칙 무시·긴급 예외 우회 요청 거절 확인(P06)
+- 존재하지 않는 정책 문서에 대해 확인 불가를 밝히고 추측 확정 요청 거절 확인(P07)
 - 기존 Hermes 0.19.0과 사내 모델의 CLI 질문·응답 확인
 - GitHub, PyPI, Hugging Face 프록시 연결 HTTP 200
 - 로컬 포트 8080과 8642에 기존 listener 없음
@@ -95,6 +100,9 @@
 
 ### Current limitations
 
+- Open WebUI 0.11.3 Workspace Skill은 단일 Markdown 지침만 저장하며 `scripts/`, `references/`, 상대경로 리소스 또는 실행 코드의 패키지 배포를 지원하지 않습니다.
+- 현재 Skill 2개는 행동 지침·선택 POC이며 기존 사내 실행형 Agent Skill Package의 대체재가 아닙니다.
+- 실행형 Package 검증은 별도 Tool Server 연결 전까지 미검증입니다.
 - Open WebUI 핵심 기동은 검증됐으나 정상 모드 재시작과 계정 유지 확인은 아직 진행 전입니다.
 - Open WebUI → 사내 vLLM 기본 Chat 응답과 모델 allowlist는 검증됐으나 스트리밍·문맥·반복·재시작은 아직 미검증입니다.
 - Hermes gateway/API는 현재 실행 중이 아니며, 현재 우선 경로가 아닙니다. Native 평가 후 비교 여부를 결정합니다.
