@@ -33,10 +33,26 @@ https://api.openai.com/v1/models
 - <INTERNAL_MODEL_ID>
 - API Key 또는 사내 인증 방식
 
-실제 값은 이 저장소에 기록하지 않습니다. 사내 호스트는 프록시를 우회하도록 Open WebUI 시작 전에 설정합니다.
+실제 값은 이 저장소에 기록하지 않습니다. 사내 호스트가 직접 연결 대상인지 프록시 경유 대상인지는 환경마다 다르므로 먼저 경로를 비교합니다. 내부 주소라는 이유만으로 `NO_PROXY`에 넣지 않습니다.
 
 ```powershell
-$env:CORP_NO_PROXY = "127.0.0.1,localhost,<INTERNAL_VLLM_HOST>"
+$targetUrl = "https://<INTERNAL_VLLM_HOST>/v1/models"
+$proxyUrl = "http://<CORPORATE_PROXY_HOST>:<PORT>"
+
+curl.exe -sS -o NUL -w "DIRECT http=%{http_code}\n" --connect-timeout 10 --noproxy "*" $targetUrl
+curl.exe -sS -o NUL -w "PROXY  http=%{http_code}\n" --connect-timeout 10 --proxy $proxyUrl $targetUrl
+```
+
+API Key 없이 실행하므로 `401` 또는 `403`도 TCP·TLS·HTTP 경로 자체가 연결됐다는 증거가 될 수 있습니다. `000` 또는 connect error는 해당 경로가 실패한 것입니다.
+
+- 직접 경로만 연결: <INTERNAL_VLLM_HOST>를 `CORP_NO_PROXY`에 추가합니다.
+- 프록시 경로만 연결: <INTERNAL_VLLM_HOST>를 `CORP_NO_PROXY`에 추가하지 않습니다.
+- 둘 다 실패: DNS·방화벽·사내 CA 문제를 먼저 해결합니다.
+
+기본값은 loopback만 우회합니다.
+
+```powershell
+$env:CORP_NO_PROXY = "127.0.0.1,localhost,::1"
 ```
 
 환경변수를 바꿨다면 Open WebUI를 재시작합니다.
