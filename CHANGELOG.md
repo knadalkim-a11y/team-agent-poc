@@ -48,6 +48,7 @@
 - 정책 질문에서 `view_skill` 호출과 `policy-grounded-answer` 형식 준수 확인
 - 합성 Knowledge의 `POC-POL-001 v0.1` 및 관련 절을 정확히 근거로 제시
 - 임베딩 우회 상태에서 semantic query 실패 후 `grep_knowledge_files`·파일 보기로 복구 확인
+- 장애 질문에서 `structured-troubleshooting` Skill만 자동 선택하고 지정된 진단 구조를 준수
 - 기존 Hermes 0.19.0과 사내 모델의 CLI 질문·응답 확인
 - GitHub, PyPI, Hugging Face 프록시 연결 HTTP 200
 - 로컬 포트 8080과 8642에 기존 listener 없음
@@ -59,6 +60,7 @@
 
 ### Observed
 
+- 장애 분석 답변의 일부 맞춤법 오타는 Skill 선택과 분리해 모델 출력 품질 개선 항목으로 남겼습니다.
 - 첫 정책 답변에서 `POC`를 한 곳에서 `PCO`로 표기한 경미한 출력 오타를 관찰했습니다.
 - `EES POC Policy` Knowledge Base에서 파일 추가 시 임베딩 모델 미설정 오류를 확인했습니다. 작은 합성 문서 POC는 관리자 문서 설정의 `임베딩 검색 우회`로 진행하고, 사내 Embedding 모델 연결은 후속 단계로 분리합니다.
 - Open WebUI 최초 기동은 CORS 경고까지 진행됐습니다.
