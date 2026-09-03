@@ -84,13 +84,15 @@ Open WebUI 버전에 따라 메뉴 이름이 조금 다를 수 있습니다.
 
 1. 관리자 계정으로 로그인합니다.
 2. 프로필 메뉴 → Admin Panel → Settings → Connections로 이동합니다.
-3. Manage OpenAI API Connections에서 `https://api.openai.com/v1` 기본 연결을 삭제하지 않고 토글로 비활성화합니다.
-4. `+` Add Connection을 눌러 Provider는 OpenAI, Standard / Compatible을 선택합니다.
-5. API Type은 **Chat Completions**를 선택하고 Responses는 활성화하지 않습니다.
-6. URL에 <INTERNAL_VLLM_BASE_URL>을 입력합니다.
-7. API Key는 UI에 직접 입력합니다. 인증이 없는 endpoint만 담당자 안내에 따라 `none` 또는 빈 값을 사용합니다.
-8. Model IDs (Filter)에 허용할 <INTERNAL_MODEL_ID>만 추가합니다. `/models` 자동 조회가 정상이고 전체 노출이 허용될 때만 비워 둡니다.
-9. Verify Connection과 Save 후 새 대화에서 해당 모델을 선택합니다.
+3. 상단 `OpenAI API` 전체 스위치는 **ON**으로 유지합니다. 사내 vLLM도 이 OpenAI-compatible 어댑터를 사용합니다.
+4. Manage OpenAI API Connections에서 `https://api.openai.com/v1` 행의 개별 토글만 **OFF**로 바꿉니다.
+5. 같은 섹션의 `+` Add Connection으로 사내 vLLM 연결을 추가합니다.
+6. Provider는 `Default`, API Type은 **Chat Completions**를 선택하고 Responses는 활성화하지 않습니다.
+7. URL에 <INTERNAL_VLLM_BASE_URL>을 입력합니다. 끝은 일반적으로 `/v1`이며 `/models`나 `/chat/completions`는 붙이지 않습니다.
+8. 사내 Gateway가 Key를 요구하면 Auth는 Bearer로 두고 API Key를 UI에 직접 입력합니다. 인증이 없으면 담당자 안내에 따라 Auth를 None으로 둡니다.
+9. Model IDs (Filter)에 허용할 <INTERNAL_MODEL_ID>만 추가합니다. `/models` 자동 조회가 정상이고 전체 노출이 허용될 때만 비워 둡니다.
+10. Verify Connection과 Save 후 새 대화에서 해당 모델을 선택합니다.
+11. 사용자별 외부 연결을 받지 않는 중앙관리형 POC이므로 Direct Connections는 OFF로 유지합니다.
 
 주의:
 
