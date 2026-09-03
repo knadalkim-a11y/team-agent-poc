@@ -63,6 +63,7 @@
 - 사내 `/models` 전체 카탈로그 때문에 Embedding·Reranker도 모델 선택기에 노출됐습니다. 연결의 `Model IDs (Filter)`를 승인된 Chat 모델 allowlist로 제한합니다.
 - 현재 날짜를 맞히는 응답은 Open WebUI의 시간 컨텍스트 주입으로도 가능하므로 Tool·Function 호출 성공 증거로 간주하지 않습니다.
 - 새 대화에서 같은 사용자의 이전 질문을 찾는 동작을 관찰했습니다. Native Builtin Tools의 `search_chats`·`view_chat` 호출 가능성이 높으며, 이는 자동 문맥 주입·장기 Memory·사용자 간 노출과 구분합니다.
+- Open WebUI Builtin Tools는 Hermes v0.19.0 API에 자동 승계되지 않습니다. MVP에서는 직접 모델과 Hermes 모델을 병행하고 Hermes 전용 preset의 Builtin Tools를 끕니다.
 
 ### Current limitations
 
