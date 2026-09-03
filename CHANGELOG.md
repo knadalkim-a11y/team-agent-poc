@@ -30,6 +30,11 @@
 - GitHub, PyPI, Hugging Face 프록시 연결 HTTP 200
 - 로컬 포트 8080과 8642에 기존 listener 없음
 
+### Observed
+
+- Open WebUI 최초 기동에서 WEBUI_SECRET_KEY 로드 문구 뒤 잠시 출력이 없었으나, 대기 후 다음 초기화 단계가 계속 진행됨을 확인했습니다.
+- 아직 Application startup complete와 브라우저 접속은 확인 전입니다.
+
 ### Current limitations
 
 - Open WebUI 기동은 아직 검증되지 않았습니다.
