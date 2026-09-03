@@ -50,6 +50,8 @@
 - 사내 vLLM 모델 조회에서 `Cannot connect to host <INTERNAL_VLLM_HOST>:443 ssl:default`를 관찰했습니다.
 - 동일 endpoint의 키·URL·모델 ID는 기존 클라이언트에서 검증됐으므로, Open WebUI 프로세스의 direct/proxy/CA 경로를 판별 중입니다.
 - 기존 문서가 사내 호스트를 NO_PROXY에 넣도록 단정한 부분을 수정하고 경로 비교 후 결정하도록 변경했습니다.
+- 사내 vLLM의 direct/proxy 비교 결과, 직접 경로는 403 HTML 차단 응답이고 프록시 경로는 HTTP 200이었습니다.
+- 이 POC의 확정 경로는 사내 프록시 경유이며 NO_PROXY는 loopback 주소만 유지합니다.
 
 ### Current limitations
 
