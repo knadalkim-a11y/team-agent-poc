@@ -24,6 +24,7 @@
 
 ### Changed
 
+- DB 안전성 평가를 모델의 행동 거절(P05·P06)과 Tool·Broker·네트워크의 구조적 강제(S06)로 분리
 - Hermes 연동을 필수 다음 단계에서 선택적 비교 단계로 변경
 - POC 범위를 Assistant 1개, Skill 2개, 합성 Knowledge 1개로 제한
 - Community 라이선스를 지키며 표시 이름을 `EES Assistant (Open WebUI)`로 변경
