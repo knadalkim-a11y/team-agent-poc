@@ -76,23 +76,23 @@ flowchart LR
 
 ## 1. Skill 등록
 
-현재 설치된 Open WebUI 0.11.3 UI에서는 파일 선택형 Import 대신 `Workspace > Skills > Create` 화면의 네 필드에 수동 입력합니다.
+현재 설치된 Open WebUI 0.11.3 UI에서는 파일 선택형 Import 대신 `Workspace > Skills > Create`에서 `SKILL.md` 전체 내용을 지침 칸에 붙여 넣습니다. YAML frontmatter를 인식해 이름·ID·설명이 자동 입력되므로 값을 검토한 뒤 생성합니다.
 
 | 필드 | 입력 원칙 |
 |---|---|
 | Skill 이름 | 사람이 알아보기 쉬운 표시 이름 |
 | Skill ID | 영문 소문자 slug, 생성 후 변경하지 않음 |
 | Skill 설명 | 모델이 선택 기준으로 사용할 짧고 구체적인 설명 |
-| 지침 | `SKILL.md`에서 YAML frontmatter를 제외한 본문 |
+| 지침 | YAML frontmatter를 포함한 `SKILL.md` 전체 내용 붙여넣기 |
 
 첫 번째 Skill:
 
 | 필드 | 값 |
 |---|---|
-| Skill 이름 | `정책 근거 답변` |
-| Skill ID | `policy-grounded-answer` |
-| Skill 설명 | `정책·규정·허용 여부 또는 근거를 묻는 질문에 연결된 정책과 지식을 확인하고 문서 ID와 버전을 포함해 답하는 절차` |
-| 지침 | `agent-pack/skills/policy-grounded-answer/SKILL.md`의 `# Policy-grounded answer`부터 끝까지 |
+| Skill 이름 | frontmatter의 `policy-grounded-answer` 자동 입력 확인 |
+| Skill ID | `policy-grounded-answer` 자동 입력 확인 |
+| Skill 설명 | frontmatter 설명 자동 입력 확인 |
+| 지침 | `agent-pack/skills/policy-grounded-answer/SKILL.md` 전체 내용 |
 
 두 번째 Skill은 첫 번째 저장과 단독 호출을 확인한 뒤 등록합니다.
 
