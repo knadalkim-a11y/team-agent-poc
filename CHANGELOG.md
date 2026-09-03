@@ -32,7 +32,9 @@
 
 ### Observed
 
-- Open WebUI 최초 기동에서 WEBUI_SECRET_KEY 로드 문구 뒤 잠시 출력이 없었으나, 대기 후 다음 초기화 단계가 계속 진행됨을 확인했습니다.
+- Open WebUI 최초 기동은 CORS 경고까지 진행됐습니다.
+- 이후 약 30분 동안 8080 listener가 없고 /health가 HTTP 000인 정체 상태를 확인했습니다.
+- uv·uvx·python 프로세스는 남아 있어 import timing을 켠 재실행 진단 단계로 전환했습니다.
 - 아직 Application startup complete와 브라우저 접속은 확인 전입니다.
 
 ### Current limitations
