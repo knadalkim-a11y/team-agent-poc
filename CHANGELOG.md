@@ -41,6 +41,7 @@
 
 ### Verified
 
+- Open WebUI 0.11.3 Skill 생성 화면에서 YAML frontmatter를 인식하고 `policy-grounded-answer` 생성 확인
 - 기존 Hermes 0.19.0과 사내 모델의 CLI 질문·응답 확인
 - GitHub, PyPI, Hugging Face 프록시 연결 HTTP 200
 - 로컬 포트 8080과 8642에 기존 listener 없음
