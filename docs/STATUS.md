@@ -31,13 +31,13 @@
 - 개인 Memory·위험 Tool은 초기 구성에서 제외합니다. 운영 DB 직접 연결·범용 SQL·Shell·쓰기 기능을 추가하지 않습니다.
 - 기존 Hermes 설치·사내 모델 Q/A 확인 이력은 유지하되, WebUI↔Hermes 연동·재설치는 보류합니다. 실제 Native 한계가 확인될 때만 비교합니다.
 - Router·A2A·EMS/APC 자동 라우팅·자동 배포·개인화·서버 이전은 후속 범위입니다. 사용자 PC 공개나 외부 서비스 추가를 이번 준비 작업에 포함하지 않습니다.
-- 사용자 일회성 설정: README의 [GPT 프로젝트 최초 설정](../README.md#gpt-프로젝트-최초-설정)을 프로젝트 지침에 저장했는지 미확인. 저장소 게시만으로 이 앱 설정을 완료 처리하지 않습니다.
+- 사용자 일회성 설정: README의 [GPT 프로젝트 최초 설정](../README.md#gpt-프로젝트-최초-설정)에 따라 지침을 넣고 새 프로젝트를 만들었다는 사용자 보고를 확인했습니다. 동일한 설정을 다시 요청하지 않습니다. 앱 설정 화면을 직접 검사한 것은 아닙니다.
 
 ## 이번 사전 준비 검증 — 2026-09-05
 
 - 환경: Linux / Python 3.12.13 / Node.js. 실제 사내 데이터·인증·네트워크 호출 없는 합성 HTML 참고 예제만 추가.
 - HTML 구조·ID·label과 외부 리소스 없음 확인, 추출 JavaScript의 `node --check` 통과. DOM 대체 객체로 초기 6개, 제목·공간 필터, 빈 결과, 초기화, 본문·비활성 원문 버튼, iframe 높이 메시지를 확인.
-- `python scripts/check_docs.py`: Markdown 20개, 내부 링크 95개, 오류 0·검토 후보 0. `git diff --check` 통과.
+- `python scripts/check_docs.py`: Markdown 20개, 내부 링크 95개, 오류 0·검토 후보 0. `git diff --check` 통과. 이후 프로젝트 지침 설정 완료에 대한 사용자 보고를 반영하고 두 점검을 다시 통과함.
 - 기존 Python Tool·Skill·Prompt·설정·테스트는 변경하지 않았고 Python 전체 테스트는 이번에 재실행하지 않음. 아래 86개 통과는 이전 실행 기록.
 - 실제 브라우저 레이아웃·Windows·Open WebUI 렌더링·Confluence·Jira·GitHub 연결 및 배포는 미실행. 새 서버·공통 프레임워크·추가 업무 Skill은 만들지 않음.
 
