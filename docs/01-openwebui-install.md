@@ -1,20 +1,16 @@
 # 01. Open WebUI 설치 및 기동
 
-> 상태: **진행 중**  
+> 문서 역할: Windows 최초 설치·기동 절차
+>
 > 목표: Docker를 사용하지 않는 Windows PC에서 Open WebUI 0.11.3의 로그인 화면까지 확인한다.
+
+최신 적용 상태는 [STATUS](STATUS.md), 환경값은 [versions](../versions.md), 기동 판정은 [평가표 A](../evals/scenarios.md)에서 관리합니다.
 
 이 단계에서는 사내 vLLM과 Hermes를 아직 연결하지 않습니다.
 
-## 현재 확인 결과
+## 초기 설치 기록 (2026-09-03)
 
-| 항목 | 결과 |
-|---|---|
-| uv 설치 | 0.12.7 확인 |
-| GitHub 접근 | 프록시 경유 HTTP 200 |
-| PyPI 접근 | 프록시 경유 HTTP 200 |
-| Hugging Face 접근 | 프록시 경유 HTTP 200 |
-| Open WebUI 실행 명령 | 입력 완료 |
-| 기동·로그인 화면 | 확인 필요 |
+사용자 보고로 uv 설치, GitHub·PyPI·Hugging Face 프록시 접근 HTTP 200, Open WebUI 실행 명령 입력을 확인했습니다. 이 기록은 최초 설치 과정의 관찰이며 최신 기동 상태를 대신하지 않습니다.
 
 ## 1. PowerShell 세션 설정
 
@@ -41,7 +37,7 @@ curl.exe -I --proxy $proxyUrl https://pypi.org/simple/open-webui/
 curl.exe -I --proxy $proxyUrl https://huggingface.co
 ```
 
-현재 환경에서는 세 주소 모두 HTTP 200을 확인했습니다.
+2026-09-03 초기 연결 시험에서는 세 주소 모두 HTTP 200을 확인했습니다. 이후 다른 PC·망에서 설치할 때는 다시 확인합니다.
 
 ## 2. 데이터 위치 고정
 

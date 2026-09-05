@@ -1,9 +1,10 @@
 # 03. Open WebUI ↔ Hermes 연동
 
-> 상태: **선택적 비교 / 보류**  
+> 문서 역할: 선택적 Hermes 비교 절차
+>
 > 선행 조건: Open WebUI Native `EES 통합 Assistant` 평가에서 외부 Agent 엔진이 필요한 구체적 실패 사례가 확인되어야 한다.
 
-현재 Native MVP의 필수 절차가 아닙니다. 아래 내용은 추후 비교를 위해 보존합니다.
+Native MVP의 필수 절차가 아닙니다. 아래 내용은 추후 비교를 위해 보존합니다. 최신 착수·보류 상태는 [STATUS](STATUS.md), 환경은 [versions](../versions.md), 실제 시험 판정은 [평가표 G](../evals/scenarios.md)를 확인합니다.
 
 ## 목표
 
@@ -77,18 +78,11 @@ Hermes 연결 전에 직접 경로의 모든 장기 시험을 끝낼 필요는 �
 
 20회 반복, 장시간 대화, 성능 비교는 Hermes 연결 후 직접 경로와 Hermes 경로에 같은 질문으로 실행합니다. 이 단계에서는 비교 기준을 흐리지 않도록 Direct 기준선용 Model preset의 Open WebUI Builtin Tools·Memory·RAG를 비활성화합니다. 같은 사용자의 Chat History 검색은 자동 문맥 주입이나 장기 Memory 실패로 판정하지 않습니다.
 
-## 현재 환경
+## 환경 및 호환성 확인
 
-| 항목 | 상태 |
-|---|---|
-| Hermes | 0.19.0 (v2026.7.20) |
-| 설치 | uv tool / pip |
-| Python | 3.12.10 |
-| 현재 Profile | default |
-| Gateway | stopped |
-| Hermes API | 미검증 |
+설치 버전·방식·Python·Profile은 [versions](../versions.md)에서 관리합니다. 이 문서의 명령 예시는 2026-09-03에 기록한 Hermes 0.19.0 환경을 기준으로 하며, 다른 버전에는 확인 없이 적용하지 않습니다.
 
-0.19.0은 필요한 OpenAI-compatible API를 제공하지만 현재 pip/uv 설치에는 API 서버용 aiohttp가 없을 수 있습니다. 이 버전은 동일 PC의 localhost smoke test까지만 사용하고, 팀 POC 전에 공식 Windows 설치본으로 전환한 뒤 재검증합니다.
+0.19.0은 필요한 OpenAI-compatible API를 제공하지만 pip/uv 설치에는 API 서버용 aiohttp가 없을 수 있습니다. 이 예시는 동일 PC의 localhost smoke test까지만 대상으로 합니다. Hermes 비교를 실제로 선택하고 의존성·Windows 호환성 점검에서 변경 필요가 확인되면, 승인된 설치 방식·버전을 정한 뒤 재검증합니다. Native MVP 진행을 위해 Hermes를 미리 업그레이드하지 않습니다.
 
 ## 1. 별도 Profile 생성
 
@@ -148,7 +142,7 @@ POC에서는 Windows Service나 예약 작업으로 등록하지 않습니다. �
 aiohttp not installed
 ```
 
-이 경우 공식 Windows 설치본으로 전환한 뒤 전체 단계를 다시 검증합니다.
+이 경우 임의로 설치를 교체하지 않습니다. 위 호환성 확인 절차에 따라 변경 필요와 승인된 설치 방식을 정한 뒤 전체 단계를 다시 검증합니다.
 
 ## 5. API 점검
 

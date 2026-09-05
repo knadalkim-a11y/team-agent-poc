@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Windows 로컬 POC의 장애를 계층별로 분리합니다. 앞 단계가 실패하면 뒤 단계를 수정하지 않습니다.
+Windows 로컬 POC의 장애를 계층별로 분리합니다. 실제 구성한 경로에서 앞 단계가 실패하면 뒤 단계를 수정하지 않습니다. 최신 적용 경로는 [STATUS](STATUS.md), 실행 환경은 [versions](../versions.md)를 확인합니다. 아래 ③·④는 Hermes 비교를 선택해 연동한 경우에만 진단하며 Native MVP의 필수 단계가 아닙니다.
 
 ```text
 ① 사내 vLLM API 직접 호출
@@ -257,7 +257,7 @@ hermes --profile team-poc gateway
 
 ### aiohttp not installed
 
-0.19.0 pip/uv 설치에서 발생할 수 있습니다. 임의로 site-packages를 수정하지 않고 공식 설치본 전환 계획으로 이동합니다.
+0.19.0 pip/uv 설치에서 발생할 수 있습니다. 임의로 site-packages를 수정하지 않습니다. Hermes 비교를 실제로 선택한 경우에만 [호환성 확인 절차](03-hermes-integration.md)에 따라 설치 방식·버전 변경 필요를 검토하고 승인 후 재검증합니다.
 
 ### /health는 되지만 /v1/models가 401
 

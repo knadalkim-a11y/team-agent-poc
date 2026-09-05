@@ -1,7 +1,10 @@
 # 03. Open WebUI Native 통합 Assistant
 
-> 상태: **현재 MVP / 부분 검증**  
+> 문서 역할: Native Assistant 기준선 구성·확장 원칙
+>
 > 범위: 합성 정보만 사용하며, 실제 사내 정책·URL·모델 ID·업무 데이터는 등록하지 않는다.
+
+최신 적용 상태는 [STATUS](STATUS.md), 시험 판정은 [평가표](../evals/scenarios.md)를 확인합니다. 아래 2-Skill 구성은 합성 문서 기반의 초기 기준선입니다. Confluence 패키지의 추가 적용 절차는 [04. Confluence 읽기 Tool](04-confluence-read-tool.md)에서 다루며, Git에 준비된 것과 실제 UI에 적용된 것은 구분합니다.
 
 ## 30초 구조 요약
 
@@ -20,9 +23,9 @@ flowchart TB
     User --> Assistant
 ```
 
-사용자는 여전히 `EES 통합 Assistant` 하나만 선택합니다. Assistant에는 Skill과 Tool이 함께 연결되어 있으며, Skill은 **무엇을 언제 어떻게 할지** 알려주고 Tool은 **실제로 실행**합니다.
+사용자는 여전히 `EES 통합 Assistant` 하나만 선택합니다. Skill과 Tool을 함께 연결하는 구조에서 Skill은 **무엇을 언제 어떻게 할지** 알려주고 Tool은 **실제로 실행**합니다. 이 구조 설명이 모든 외부 Tool의 연결 완료를 의미하지는 않습니다.
 
-### 실제 질문 처리 예시
+### 확장 시 질문 처리 예시 — GitHub 연동은 미구현
 
 ```mermaid
 sequenceDiagram
@@ -44,7 +47,7 @@ sequenceDiagram
 
 `EES 통합 Assistant`는 새로운 물리 모델이 아니라, 승인된 기반 모델에 공통 지침·Skill·Knowledge·허용 Tool을 묶는 Open WebUI Workspace Model입니다.
 
-## MVP 구성
+## 초기 Native 기준선 구성
 
 | 구성 | POC 값 | 역할 |
 |---|---|---|
@@ -101,7 +104,7 @@ flowchart TB
 | 장애·권한 격리 | 약함 | 강함 |
 | 업데이트 | UI Import·수정 | Git 배포·서비스 재시작 |
 
-현재 POC에서는 **읽기 전용 Workspace Tool 하나**로 실제 실행 루프를 먼저 검증할 수 있습니다. 기존 Agent Skill 전체를 UI에 복사하지 않고, 대표 스크립트 하나를 얇게 감싸 Tool 함수로 노출합니다. 다음 조건 중 하나가 확인되면 외부 Tool Server로 이동합니다.
+현재 POC에서는 **읽기 전용 Workspace Tool 하나**로 실제 실행 루프를 먼저 검증할 수 있습니다. 기존 Agent Skill 전체를 UI에 복사하지 않고, 대표 스크립트 하나를 얇게 감싸 Tool 함수로 노출합니다. 다음 조건 중 하나가 확인되면 외부 Tool Server 분리를 검토합니다. 자동 전환이나 현재 MVP의 선행 조건은 아닙니다.
 
 - 여러 Python 파일과 별도 라이브러리가 필요함
 - `references/`·`assets/`를 패키지 상대경로로 읽어야 함
@@ -109,7 +112,9 @@ flowchart TB
 - Secret·감사·장애·배포 수명주기를 Open WebUI와 분리해야 함
 - 패키지 수나 담당 팀이 늘어남
 
-### 권장 배치 구조
+### 선택적 확장 배치 예시 — 현재 MVP에 미구현
+
+아래는 외부 실행 환경이 필요한 경우의 선택지입니다. 현재 Workspace Tool MVP에 별도 Tool Server·배포 Adapter·공통 Filter를 추가해야 한다는 뜻은 아닙니다.
 
 ```mermaid
 flowchart TB
@@ -126,9 +131,9 @@ flowchart TB
     Guard --> Assistant
 ```
 
-Open WebUI는 사용자 UI와 Native Tool 호출 루프를 담당하고, 실행 가능한 패키지의 원본과 런타임은 Git 및 Tool Server가 담당합니다. 즉, Open WebUI Skill은 Agent Pack 전체가 아니라 Agent Pack 중 **지침 부분을 투영한 배포본**입니다.
+이 확장안에서는 Open WebUI가 사용자 UI와 Native Tool 호출 루프를, Git이 패키지 원본을, 외부 Tool Server가 실행을 담당합니다. Workspace Tool MVP에서는 실행을 Open WebUI 백엔드가 담당합니다. 두 경우 모두 Open WebUI Skill은 Agent Pack 전체가 아니라 Agent Pack 중 **지침 부분을 투영한 배포본**입니다.
 
-작은 POC 코드는 Open WebUI의 Python Workspace Tool로 넣을 수 있지만, 팀 공용 패키지는 외부 MCP/OpenAPI Tool Server가 더 적합합니다. Open WebUI 업그레이드와 실행 코드를 분리할 수 있고, 의존성·Secret·감사·권한을 서버에서 관리할 수 있기 때문입니다.
+작은 POC 코드는 Open WebUI의 Python Workspace Tool로 넣습니다. 팀 공용 패키지라도 규모만으로 외부 서버를 추가하지 않으며, 의존성·Secret·감사·권한의 별도 수명주기가 필요해질 때 외부 MCP/OpenAPI Tool Server의 운영 비용과 이점을 비교합니다.
 
 예를 들어 GitHub 패키지는 다음처럼 나눕니다.
 

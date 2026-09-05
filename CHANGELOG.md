@@ -1,38 +1,40 @@
 # Changelog
 
-설치·연동 완료 여부는 실제 검증 후에만 기록합니다.
+완료된 변경·중요 결정과 날짜별 관찰을 기록합니다. 다음 작업과 최신 배포 상태는 [STATUS](docs/STATUS.md), 시험별 현재 판정은 [평가표](evals/scenarios.md)가 원본입니다. 과거 실패 기록을 현재 장애나 재실행 지시로 해석하지 않습니다.
 
-## Unreleased
-
-### Planned
-
-- `EES 통합 Assistant` Workspace Model 생성
-- 합성 System Prompt 1개·Skill 2개·Knowledge 1개 수동 등록
-- Native Skill 선택·Knowledge 근거·미확인 정책·운영 DB 직접접속 금지 검증
-- Open WebUI 0.11.3 정상 모드 재시작과 계정 유지 확인
-- Open WebUI 직접 연결의 스트리밍·문맥·반복·재시작 검증
-- 2개 사용자 계정의 데이터·리소스 격리 검증
-- Native 방식의 한계가 관찰된 경우에만 Hermes 비교
-- 검증 완료 후 서버 신규 배포
+## 2026-09-05
 
 ### Added
 
-- Open WebUI Native 우선 MVP 구조
-- 비밀정보가 없는 Agent Pack 템플릿
-- `WEBUI_NAME=EES Assistant`를 적용하는 재현 가능한 실행 스크립트 설정
-- 정책 근거·Skill 선택·DB 접근금지 평가 시나리오
+- 개인 UserValves PAT를 사용하는 Confluence 읽기 Tool과 Skill 묶음 준비.
+- 고정 GET API·허용 Space·TLS 검증·응답 제한·안전한 오류 처리 및 오프라인 테스트 43개 추가.
+- Confluence 설치·암호화 저장·사용자 권한 검증 가이드 추가. 실제 연결이나 WebUI 배포 완료를 의미하지 않음.
+- GPT 개발 규칙 `AGENTS.md`와 최신 작업 상태 `docs/STATUS.md` 추가.
 
 ### Changed
 
-- DB 안전성 평가를 모델의 행동 거절(P05·P06)과 Tool·Broker·네트워크의 구조적 강제(S06)로 분리
-- Hermes 연동을 필수 다음 단계에서 선택적 비교 단계로 변경
-- POC 범위를 Assistant 1개, Skill 2개, 합성 Knowledge 1개로 제한
-- Community 라이선스를 지키며 표시 이름을 `EES Assistant (Open WebUI)`로 변경
-- Router·A2A·자동 동기화는 Native의 한계가 확인될 때까지 보류
-- Open WebUI Workspace Skill을 실행형 Agent Skill Package가 아닌 Markdown 행동 지침으로 재분류
-- 실행 코드·API·Secret·구조화 Reference는 향후 Workspace Tool 또는 외부 MCP/OpenAPI Tool Server로 분리
+- README는 목적·구조 지도·문서 탐색, versions는 환경 기준, CHANGELOG는 완료 이력으로 역할을 구분.
+- Confluence C01~C09를 `evals/scenarios.md#confluence-live`로 옮기고 설치 가이드는 평가표 링크만 유지.
+- 설치 가이드의 중복 판정표 제거. 직접 모델 D06 반복 안정성 / D07 재시작 번호를 기존 평가표 기준으로 통일.
+- 기존 UI의 Skill 2개와 Git에 추가 준비된 Confluence Skill을 구분. Git 준비·WebUI 반영·실환경 검증을 독립적으로 추적.
+- 과거 관찰은 날짜로 구분하고, GitHub·외부 Tool Server·Hermes 예시는 선택적 후속 경로로 명시.
+- 관리 리팩토링에서는 기존 Skill·Tool·실행 스크립트·설정·테스트 경로와 동작을 변경하지 않음.
+
+### 주요 결정
+
+- 혼자 GPT로 개발하는 규모에 맞춰 진입 문서 2개만 추가. 별도 adapter·registry·배포 시스템과 세션별 handoff 파일은 만들지 않음.
+- 실제 WebUI에 복사·등록한 원본 커밋을 추적하며, 모르는 적용 SHA를 Git 최신 커밋으로 대신 기록하지 않음.
 
 ## 2026-09-03
+
+### 설계·관리 변경
+
+- Open WebUI Native 우선 MVP와 비밀정보 없는 Agent Pack 템플릿 채택.
+- Hermes 연동을 필수 다음 단계가 아닌 선택적 비교로 변경.
+- 기본 구성 기준선을 Assistant 1개, Skill 2개, 합성 Knowledge 1개로 정의.
+- DB 안전성을 모델의 행동 거절(P05·P06)과 실제 Tool·Broker·네트워크 통제(S06)로 분리.
+- Community 표시 이름을 `EES Assistant (Open WebUI)`로 구성.
+- Open WebUI Skill의 지침과 실행 코드를 구분하고 Workspace Tool 또는 외부 연결로 실행 기능을 제공하는 방향을 정리.
 
 ### Added
 
@@ -98,11 +100,13 @@
 - 새 대화에서 같은 사용자의 이전 질문을 찾는 동작을 관찰했습니다. Native Builtin Tools의 `search_chats`·`view_chat` 호출 가능성이 높으며, 이는 자동 문맥 주입·장기 Memory·사용자 간 노출과 구분합니다.
 - Open WebUI Builtin Tools는 Hermes v0.19.0 API에 자동 승계되지 않습니다. MVP에서는 직접 모델과 Hermes 모델을 병행하고 Hermes 전용 preset의 Builtin Tools를 끕니다.
 
-### Current limitations
+### 당시 제한과 보류 기록
+
+다음은 2026-09-03 당시의 기록입니다. 현재 상태나 다음 작업 지시가 아니며, 후속 변경과 [STATUS](docs/STATUS.md)를 함께 확인합니다.
 
 - Open WebUI 0.11.3 Workspace Skill은 단일 Markdown 지침만 저장하며 `scripts/`, `references/`, 상대경로 리소스 또는 실행 코드의 패키지 배포를 지원하지 않습니다.
 - 현재 Skill 2개는 행동 지침·선택 POC이며 기존 사내 실행형 Agent Skill Package의 대체재가 아닙니다.
-- 실행형 Package 검증은 별도 Tool Server 연결 전까지 미검증입니다.
+- 당시 실행형 Package의 실환경 검증은 미수행이었습니다. 별도 Tool Server가 필수 조건인 것은 아니며, 후속 Workspace Tool 경로는 [Confluence 가이드](docs/04-confluence-read-tool.md)에서 다룹니다.
 - Open WebUI 핵심 기동은 검증됐으나 정상 모드 재시작과 계정 유지 확인은 아직 진행 전입니다.
 - Open WebUI → 사내 vLLM 기본 Chat 응답과 모델 allowlist는 검증됐으나 스트리밍·문맥·반복·재시작은 아직 미검증입니다.
 - Hermes gateway/API는 현재 실행 중이 아니며, 현재 우선 경로가 아닙니다. Native 평가 후 비교 여부를 결정합니다.
