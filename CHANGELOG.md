@@ -6,6 +6,7 @@
 
 ### Added
 
+- Confluence 검색 결과 탐색용 합성 HTML 참고 예제 추가. 별도 서버·설치 없이 받은 결과의 필터·상세 펼치기를 확인하는 용도이며 기존 Tool과 미연동.
 - 개인 UserValves PAT를 사용하는 Confluence 읽기 Tool과 Skill 묶음 준비.
 - 고정 GET API·허용 Space·TLS 검증·응답 제한·안전한 오류 처리 및 오프라인 테스트 43개 추가.
 - Confluence 설치·암호화 저장·사용자 권한 검증 가이드 추가. 실제 연결이나 WebUI 배포 완료를 의미하지 않음.
@@ -25,6 +26,7 @@
 
 ### 주요 결정
 
+- 기본 되묻기·일반 답변·Rich UI의 선택 기준과 Jira/GitHub 읽기 연동 준비 항목을 기존 Native 가이드에 정리. Rich UI는 업무 기능 내부에서 관리하고 실제 중복 전에는 공통 프레임워크를 만들지 않음.
 - 혼자 GPT로 개발하는 규모에 맞춰 진입 문서 2개만 추가. 별도 adapter·registry·배포 시스템과 세션별 handoff 파일은 만들지 않음.
 - 실제 WebUI에 복사·등록한 원본 커밋을 추적하며, 모르는 적용 SHA를 Git 최신 커밋으로 대신 기록하지 않음.
 

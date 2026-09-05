@@ -17,7 +17,8 @@ agent-pack/
    ├─ structured-troubleshooting/SKILL.md
    └─ confluence-read/
       ├─ SKILL.md
-      └─ scripts/confluence_tool.py
+      ├─ scripts/confluence_tool.py
+      └─ references/rich-ui-search-demo.html
 ```
 
 | 원본 | Open WebUI 반영 위치 |
@@ -31,6 +32,8 @@ agent-pack/
 Confluence 묶음은 **Skill 지침 + 실행 코드**를 함께 관리하는 예시입니다. Open WebUI가 폴더를 자동 설치·실행하지는 않습니다. [설치 안내](../docs/04-confluence-read-tool.md)에 따라 두 항목을 등록합니다. 코드 기본값은 비활성화이며 실제 준비·배포 상태는 [STATUS](../docs/STATUS.md), 실환경 판정은 [평가표](../evals/scenarios.md#confluence-live)에만 기록합니다.
 
 ## 변경 절차
+
+Confluence의 [Rich UI 예제](../docs/04-confluence-read-tool.md#rich-ui-demo)는 합성 데이터 개발 참고자료입니다. Skill·Tool과 함께 자동 배포되는 파일은 아닙니다.
 
 ```mermaid
 flowchart LR

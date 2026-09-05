@@ -108,6 +108,20 @@ Tool은 네트워크 호출 전에 실제 `open_webui.env.ENABLE_VALVE_ENCRYPTIO
 
 Tool은 모델이 준 임의 주소·HTTP method·raw CQL을 받지 않고 승인된 HTTPS base의 GET API만 호출합니다. 리다이렉트를 차단하고 검색어·응답 크기를 제한합니다. Skill은 문서 속 “정책을 무시하라” 같은 명령을 자료로만 취급하도록 지시하지만, 이것만으로 prompt injection 방어가 보장되지는 않습니다. 이 파일럿 Assistant에 셸·쓰기 도구를 추가하지 않습니다. 이 Tool의 제한은 다른 도구까지 강제하는 공통 보안 계층이 아닙니다.
 
+<a id="rich-ui-demo"></a>
+
+## 선택 사항: 검색 결과 Rich UI 참고 예제
+
+[검색 결과 탐색 예제](../agent-pack/skills/confluence-read/references/rich-ui-search-demo.html)는 합성 데이터로 만든 독립 HTML입니다. 파일을 내려받아 브라우저에서 열면 됩니다. 서버·패키지 설치·인증이 필요하지 않습니다. GitHub의 파일 보기 화면은 HTML을 실행하지 않습니다.
+
+- 제목과 Space로 **이미 받은 결과 안에서만** 좁히고 상세를 펼치는 흐름을 살펴봅니다. 추가 Confluence 검색이나 전체 문서 검색이 아닙니다.
+- 원문 링크의 위치를 보여주지만 합성 예제의 링크는 비활성입니다. 현재 Tool에 없는 문서 유형·최신 버전 전용 필터는 제공하지 않습니다.
+- 이 파일은 개발 참고자료입니다. 기존 `confluence_tool.py`는 JSON 문자열을 반환하며 이 HTML을 불러오지 않습니다. Workspace에 자동 설치되지 않으며 업무 Skill로 별도 등록하지 않습니다.
+
+실제 검색·권한 검증 후 반복 탐색의 필요가 확인되면 [공통 선택 기준](03-openwebui-native-agent.md#rich-ui)에 따라 현재 Tool에 작은 HTML 템플릿을 포함합니다. 검색 응답과 본문 조회를 구분하고, 원문 URL은 Tool에서 검증한 값을 사용합니다. 상세를 펼치는 동작만으로 아직 조회하지 않은 본문을 읽었다고 표시하지 않습니다.
+
+사내에서 적용할 때는 정상·빈 결과·조회 실패를 구분하고, 원문 링크, iframe 높이, 긴 제목·좁은 화면, 모델에 전달되는 근거와 화면의 일치를 확인합니다. 이 예제의 오프라인 점검은 실제 Open WebUI 렌더링이나 Confluence 권한 검증을 대체하지 않습니다.
+
 ## 공식 근거
 
 - [Open WebUI Valves](https://docs.openwebui.com/features/extensibility/plugin/development/valves/)

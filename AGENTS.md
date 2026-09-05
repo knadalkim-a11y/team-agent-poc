@@ -28,6 +28,7 @@ STATUS는 평가표를 복제하지 않고 요약과 증거 링크만 둡니다.
 ## 3. 구현 위치와 과설계 방지
 
 - 관련 지침·실행 코드는 `agent-pack/skills/<기능>/`에 함께 둡니다. 현재 기능 경로를 이유 없이 이동하지 않습니다.
+- Rich UI도 해당 업무 기능 안에 둡니다. 참고 예제는 `references/`, 배포용 HTML은 작은 동안 단일 Tool에 포함하고 커질 때만 `ui/`로 분리합니다. 분리 시 실제 등록 파일에 포함하는 방법도 정합니다. 선택 기준은 [Native 가이드](docs/03-openwebui-native-agent.md#rich-ui)를 따릅니다.
 - 최상위 `scripts/`는 개발·운영자용이고, Skill 내부 `scripts/`는 해당 업무 Tool의 코드입니다.
 - `tests/`에는 자동 시험 코드를, `evals/`에는 합격 기준과 증거를 둡니다.
 - 공통 코드가 실제로 중복되거나 별도 실행 환경이 필요해지기 전에는 `src/adapters/providers/registry` 같은 계층·별도 서버·빌드 시스템을 추가하지 않습니다.
