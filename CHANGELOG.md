@@ -10,6 +10,7 @@
 - 고정 GET API·허용 Space·TLS 검증·응답 제한·안전한 오류 처리 및 오프라인 테스트 43개 추가.
 - Confluence 설치·암호화 저장·사용자 권한 검증 가이드 추가. 실제 연결이나 WebUI 배포 완료를 의미하지 않음.
 - GPT 개발 규칙 `AGENTS.md`와 최신 작업 상태 `docs/STATUS.md` 추가.
+- 읽기 전용·오프라인 문서 점검기 `scripts/check_docs.py`와 합성 저장소 회귀 테스트 43개 추가. 깨진 내부 링크와 연결되지 않은 관리 문서를 구분하고, 문서 자동 삭제는 하지 않음.
 
 ### Changed
 
@@ -19,11 +20,18 @@
 - 기존 UI의 Skill 2개와 Git에 추가 준비된 Confluence Skill을 구분. Git 준비·WebUI 반영·실환경 검증을 독립적으로 추적.
 - 과거 관찰은 날짜로 구분하고, GitHub·외부 Tool Server·Hermes 예시는 선택적 후속 경로로 명시.
 - 관리 리팩토링에서는 기존 Skill·Tool·실행 스크립트·설정·테스트 경로와 동작을 변경하지 않음.
+- GPT 작업 종료에 관련 문서 의미 검토·구조 점검·경고 처리 보고를 포함. 새 문서보다 기존 원본 갱신을 우선하고 세션별 보고서 누적을 방지.
+- README에 일회성 ChatGPT 프로젝트 지침 설정 안내와 검사 범위·한계를 추가. 사용자 설정 완료나 GitHub 필수 검사 설치를 의미하지 않음.
 
 ### 주요 결정
 
 - 혼자 GPT로 개발하는 규모에 맞춰 진입 문서 2개만 추가. 별도 adapter·registry·배포 시스템과 세션별 handoff 파일은 만들지 않음.
 - 실제 WebUI에 복사·등록한 원본 커밋을 추적하며, 모르는 적용 SHA를 Git 최신 커밋으로 대신 기록하지 않음.
+
+### 문서 점검 추가 검증
+
+- Linux / Python 3.12.13 / Pydantic 2.13.4에서 `python -m unittest discover -s tests -v`: 신규 문서 점검 43개와 기존 Confluence 43개, 총 86개 통과.
+- `python scripts/check_docs.py`: 문서 20개·내부 링크 86개, 오류 0·검토 후보 0. `git diff --check` 통과. 실제 Windows·WebUI·Confluence 검증이나 사용자 프로젝트 설정은 수행하지 않음.
 
 ## 2026-09-03
 

@@ -8,7 +8,7 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용이며, 사내 PC 밖에서 코드·문서 준비만 할 수 있는 상황.
-- 이번 작업: GPT 개발 진입점 추가와 상태·검증 기록의 원본 정리. 기존 Skill·Tool·실행 스크립트·테스트 경로와 동작은 유지.
+- 이번 작업: 읽기 전용 문서 점검기·회귀 테스트와 GPT 문서 관리 종료 규칙을 추가. 기존 Skill·Tool·서비스 실행 스크립트·설정은 유지.
 - 다음 작업 하나: 사내 복귀 후 **Confluence 제품·버전과 개인 PAT 인증 방식을 확인**한다. [설치 안내](04-confluence-read-tool.md)의 제품 확인부터 시작하며, 현재 Tool은 Data Center PAT/Bearer용 초안이다.
 
 ## Git 준비와 WebUI 적용을 구분
@@ -29,12 +29,14 @@
 - 개인 Memory·위험 Tool은 초기 구성에서 제외합니다. 운영 DB 직접 연결·범용 SQL·Shell·쓰기 기능을 추가하지 않습니다.
 - 기존 Hermes 설치·사내 모델 Q/A 확인 이력은 유지하되, WebUI↔Hermes 연동·재설치는 보류합니다. 실제 Native 한계가 확인될 때만 비교합니다.
 - Router·A2A·EMS/APC 자동 라우팅·자동 배포·개인화·서버 이전은 후속 범위입니다. 사용자 PC 공개나 외부 서비스 추가를 이번 준비 작업에 포함하지 않습니다.
+- 사용자 일회성 설정: README의 [GPT 프로젝트 최초 설정](../README.md#gpt-프로젝트-최초-설정)을 프로젝트 지침에 저장했는지 미확인. 저장소 게시만으로 이 앱 설정을 완료 처리하지 않습니다.
 
-## 이번 관리 리팩토링 검증
+## 이번 문서 관리 검증
 
-- 문서·상태 원본 정리 완료. 신규 파일은 AGENTS와 STATUS 두 개이며, 실행 코드·설정·시험 코드와 기존 기능 경로는 유지.
-- 기존 자동 테스트 43개 재통과, 내부 문서 링크·평가 판정·증거 보존 검사 통과. [이번 재검증 기록](../evals/confluence-offline.md#management-refactor)을 확인한다.
-- 독립 문서 검토에서 차단할 문제를 발견하지 않음.
+- 환경: 2026-09-05, Linux / Python 3.12.13 / Pydantic 2.13.4. 네트워크 호출을 막은 합성 문서·mock API 시험이며 사내 실환경 검증이 아님.
+- `python -m unittest discover -s tests -v`: 문서 점검 43개 + 기존 Confluence 43개, 총 86개 통과. 파일 bytes·mtime 보존, 코드 예시 제외, 경로 이탈·심볼릭 링크·합성 resolve 경계, CLI 출력·종료 코드를 확인.
+- `python scripts/check_docs.py`: Markdown 20개, 내부 링크 86개, 오류 0·검토 후보 0. `git diff --check` 통과. 문서 내용 전체의 최신성이나 실사용 여부를 보장하는 결과는 아님.
+- 신규 파일은 점검기와 테스트 두 개. 문서 삭제·새 보고서 파일·스케줄러·필수 CI는 추가하지 않음. 이전 [관리 리팩토링 증거](../evals/confluence-offline.md#management-refactor)는 당시 기록으로 보존.
 - 실제 Windows 실행·Confluence·WebUI 배포: 수행하지 않음.
 
 원격 게시 여부는 해당 Git 커밋으로 확인합니다. 문서 게시를 WebUI 배포 완료로 해석하지 않습니다.
