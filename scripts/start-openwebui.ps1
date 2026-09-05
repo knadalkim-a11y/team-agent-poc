@@ -4,7 +4,8 @@
 param(
     [string]$ProxyUrl = $env:CORP_PROXY_URL,
     [string]$NoProxy = $env:CORP_NO_PROXY,
-    [string]$WebUiName = "EES Assistant"
+    [string]$WebUiName = "EES Assistant",
+    [switch]$ConfluenceReady
 )
 
 Set-StrictMode -Version Latest
@@ -34,6 +35,21 @@ if ([string]::IsNullOrWhiteSpace($localAppData)) {
 
 $openWebuiRoot = Join-Path $localAppData "EES-Agent-POC\open-webui"
 $dataDir = Join-Path $openWebuiRoot "data"
+
+# Opt-in only: preserve the existing encryption key and local-only binding.
+# Enabling encryption does not migrate legacy plaintext UserValves.
+if ($ConfluenceReady) {
+    $secretKeyPath = Join-Path $openWebuiRoot ".webui_secret_key"
+    $hasEnvironmentKey = -not [string]::IsNullOrWhiteSpace($env:WEBUI_SECRET_KEY)
+    $hasKeyFile = Test-Path -LiteralPath $secretKeyPath -PathType Leaf
+    if (-not $hasEnvironmentKey -and (-not $hasKeyFile -or (Get-Item -LiteralPath $secretKeyPath).Length -eq 0)) {
+        throw "기존 WEBUI_SECRET_KEY 또는 .webui_secret_key가 필요합니다. 새 키를 만들지 말고 기존 설치 위치를 확인하세요."
+    }
+    $env:ENABLE_VALVE_ENCRYPTION = "true"
+    $env:LOGURU_DIAGNOSE = "false"
+    $env:GLOBAL_LOG_LEVEL = "INFO"
+    Write-Host "Valve encryption enabled; verify dummy UserValves storage before saving a real PAT."
+}
 
 if (-not [string]::IsNullOrWhiteSpace($ProxyUrl)) {
     $proxyUri = $null

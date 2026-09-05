@@ -1,106 +1,112 @@
 # 04. Confluence Read Tool POC
 
-> 상태: **설계 / 실제 PAT 입력 전**
->
-> 실제 사내 URL, PAT, 사용자 계정, 문서 내용은 Git에 기록하지 않습니다.
+> 사외 준비용 구현·가짜 응답 테스트입니다. 사내 연결, 실제 PAT 저장 암호화, 사용자 격리는 아직 검증하지 않았습니다.
+> 실제 주소·PAT·계정·문서 내용은 Git, Skill, 채팅, 환경변수 예제에 넣지 않습니다.
 
-## 목적
+## 범위와 구성
 
-Open WebUI Native가 지침형 Skill을 선택한 뒤 사용자 권한으로 실제 Confluence 문서를 조회하고, 근거 링크를 포함해 답하는지 검증합니다. 첫 POC는 조회 전용이며 페이지 생성·수정·삭제·댓글·첨부파일 작업은 제공하지 않습니다.
-
-## 사용자 경험
+별도 Tool Server 없이 Open WebUI Workspace Tool에서 조회합니다. 기존 Open WebUI 코드는 수정하지 않습니다.
 
 ```mermaid
-flowchart LR
-    User["사용자"] --> Assistant["EES 통합 Assistant"]
-    Assistant --> Skill["Confluence Skill<br/>조회 절차"]
-    Assistant --> Tool["Workspace Tool<br/>읽기 전용 Python"]
-    Tool --> Confluence["사내 Confluence REST API"]
-    Confluence --> Assistant
+flowchart TB
+    A["EES 통합 Assistant"] --> S["Skill: 조회·근거 답변 절차"]
+    A --> T["Workspace Tool: 고정된 조회 함수"]
+    U["사용자별 PAT 설정"] --> T
+    T --> C["Confluence: 해당 사용자 권한 확인"]
+    C --> A
 ```
 
-사용자는 Chat 화면의 Tool 설정에서 자신의 PAT를 한 번 입력합니다. PAT는 모델의 Tool 인자, 대화, Skill, Knowledge에 포함하지 않습니다.
-
-## 설정 분리
-
-| 구분 | 저장 값 | 설정 주체 |
-|---|---|---|
-| Admin Valves | Base URL placeholder, 허용 Space, timeout, 최대 결과 수 | 관리자 |
-| UserValves | 개인 PAT | 각 사용자 |
-| Tool 인자 | 검색어, Space key, page ID, limit | 모델 |
-| 금지 | PAT, 임의 URL, raw CQL, HTTP method, Authorization header | 모델 입력 불가 |
-
-예상 UI:
-
-```text
-Confluence Tool 설정
-├─ 개인 PAT       [••••••••••]
-├─ 기본 Space     [선택]
-└─ 저장           [버튼]
-```
-
-`UserValves`의 PAT 필드는 password input으로 표시합니다. 화면 마스킹은 저장 암호화가 아니므로 아래 Gate를 먼저 통과해야 합니다.
-
-## Secret Gate
-
-실제 PAT를 입력하기 전에 모두 확인합니다.
-
-- `ENABLE_VALVE_ENCRYPTION=true`
-- 재시작 후에도 동일한 고정 `WEBUI_SECRET_KEY` 사용
-- `.webui_secret_key`, PAT, 실제 URL을 Git에 커밋하지 않음
-- DEBUG·민감 로컬 변수 출력 비활성화
-- 요청 헤더와 `UserValves`를 로그에 출력하지 않음
-- Open WebUI 데이터 디렉터리 접근권한 최소화
-- 실제 PAT 대신 일회성 가짜 canary로 DB 평문 미포함 확인
-- PAT의 짧은 만료기간과 폐기·교체 절차 확인
-
-`ENABLE_VALVE_ENCRYPTION` 기본값은 false입니다. `WEBUI_SECRET_KEY`가 바뀌면 기존 Valve 값을 복호화할 수 없으므로 사용자가 PAT를 다시 입력해야 합니다.
-
-암호화해도 Open WebUI 서버 프로세스와 서버 관리자는 실행 시 PAT에 접근할 수 있습니다. 회사 정책이 Open WebUI DB의 암호화 저장을 허용하지 않으면 실제 PAT를 넣지 않고 OAuth/SSO 또는 사내 Credential Broker를 사용합니다.
-
-## 인증 방식 Gate
-
-구현 전에 사내 Confluence 종류와 버전을 확인합니다.
-
-| 제품 | 일반적인 개인 인증 |
+| 파일 | 역할 |
 |---|---|
-| Confluence Data Center/Server 7.9+ | Personal Access Token, `Authorization: Bearer <PAT>` |
-| Confluence Cloud | API token 또는 OAuth 2.0 |
+| `agent-pack/skills/confluence-read/SKILL.md` | 모델의 조회·답변 절차 |
+| `agent-pack/skills/confluence-read/scripts/confluence_tool.py` | Workspace에 등록할 단일 Python Tool |
+| `tests/` | 가짜 HTTP 응답·설정으로 실행하는 자동 테스트 |
 
-Data Center/Server PAT는 토큰 자체의 읽기 전용 scope가 아니라 PAT 소유자의 현재 권한을 따릅니다. Tool을 GET endpoint로만 제한해도 PAT가 유출되면 소유자의 다른 권한이 위험할 수 있습니다.
+`Tools` 클래스는 `check_access`, `search_pages`, `get_page` 세 개의 async 함수를 제공합니다. 페이지·댓글 쓰기, 첨부파일, 백그라운드 수집은 제외합니다. Skill 폴더 전체를 WebUI가 자동 설치하는 구조는 아닙니다.
 
-사용자별 문서 권한을 유지하려면 각 사용자의 개인 PAT를 사용합니다. 공용 서비스 계정 PAT는 모든 사용자가 그 계정이 볼 수 있는 문서를 공유하게 되므로 별도 공간 allowlist와 동일 권한 모델이 승인된 경우에만 사용합니다.
+## 1. 사외에서 가짜 응답 테스트
 
-## 최소 Tool 함수
+저장소 루트에서 실행합니다. 실제 서버나 PAT가 필요하지 않습니다.
 
-| 함수 | 역할 | 제한 |
-|---|---|---|
-| `check_access()` | PAT 유효성과 현재 사용자 확인 | 토큰·전체 프로필 반환 금지 |
-| `search_pages(query, space_key, limit)` | 페이지 검색 | raw CQL 금지, limit 최대 10, 허용 Space만 |
-| `get_page(page_id)` | 선택한 페이지 본문 조회 | GET만, 본문 길이 제한, 원문 링크 포함 |
+```powershell
+python -m unittest discover -s tests -v
+```
 
-Tool 내부 강제사항:
+코드의 의존성은 Python 표준 라이브러리와 Pydantic 2입니다. 독립 테스트 환경이 필요하면 별도 가상환경에 `pydantic==2.13.4`를 설치합니다. 테스트 때문에 운영 Open WebUI의 Pydantic 버전을 변경하거나 Open WebUI를 재설치하지 않습니다.
 
-- Base URL은 관리자 설정에서만 읽고 사용자·모델 입력을 받지 않음
-- HTTP method와 endpoint allowlist 고정
-- 검색 문자열을 escape한 뒤 Tool이 CQL을 조립
-- Redirect의 origin 변경 거부
-- TLS 검증 유지 및 승인된 사내 CA만 사용
-- HTML을 안전한 text로 변환
-- 결과 크기·페이지 수·timeout 제한
-- 401, 403, 404, timeout을 구분하되 내부 정보나 PAT를 오류에 포함하지 않음
-- Confluence 문서 내용은 비신뢰 데이터로 취급하고 문서 안의 명령을 실행하지 않음
+Mock 통과는 Python 로직의 검증입니다. 실제 UserValves 화면, DB 암호화, 사내 인증서·프록시·Confluence 권한이 동작한다는 의미가 아닙니다.
 
-## 버튼과 입력 화면
+## 2. 사내 복귀 후 제품·인증 방식 확인
 
-- 사용자별 PAT·기본 Space 입력: `UserValves`가 표준 설정 폼과 저장 버튼 제공
-- Tool 실행 중 확인·추가 입력: `__event_call__`의 confirmation/input dialog 사용 가능
-- 메시지 아래 고정 버튼: Action Function으로 가능
-- 임의의 전용 설정 페이지나 설정 폼 내부의 사용자 정의 연결 테스트 버튼은 기본 UserValves 범위를 벗어남
+구현 대상은 **Confluence Data Center의 PAT/Bearer 인증과 REST API v1**입니다. Cloud 인증은 구현하지 않았습니다. 제품·버전·API 지원을 확인하기 전에는 `ENABLED=false`를 유지합니다. 기존 Server 제품도 호환성을 별도로 확인해야 합니다.
 
-조회 전용 POC에는 매 호출 확인 버튼을 두지 않습니다. `check_access()`를 대화에서 호출해 연결 테스트하고, 쓰기 기능을 추가하는 경우에만 명시적 확인 버튼을 필수화합니다.
+- 관리자에게 개인 PAT 사용과 Open WebUI 암호화 저장이 허용되는지 확인합니다.
+- Base URL의 HTTPS 주소와 context path, 허용 Space key를 확인합니다.
+- 기존에 성공한 direct/proxy 경로와 사내 CA 필요 여부를 확인합니다. 새 우회 경로를 만들지 않습니다.
+- PAT는 사용자의 권한을 갖습니다. Tool이 조회만 제공해도 PAT 자체가 읽기 전용이라는 뜻은 아닙니다.
 
-## 평가 시나리오
+## 3. 실제 PAT보다 먼저 암호화 검증
+
+기존 Open WebUI를 정상 종료한 뒤 기존 DB와 키를 승인된 내부 위치에 보호·백업합니다. 현재 사용하는 `.webui_secret_key`를 유지해야 합니다. Git이나 일반 공유 폴더에 백업하지 않습니다.
+
+```powershell
+.\scripts\start-openwebui.ps1 -ConfluenceReady
+```
+
+기존에 필요한 프록시 등 실행 인자는 그대로 유지합니다. 이 옵션은 Valve 암호화와 `LOGURU_DIAGNOSE=false`를 적용하며, 기존 키를 새로 생성하거나 교체하지 않습니다. 키가 없거나 확인되지 않으면 중단하고 기존 키 위치부터 확인합니다.
+
+Tool은 네트워크 호출 전에 실제 `open_webui.env.ENABLE_VALVE_ENCRYPTION`과 키 존재를 검사합니다. **이 검사만으로 저장 암호화 검증을 대체할 수는 없습니다.**
+
+1. 다음 절의 Tool을 등록하되 `ENABLED=false`를 유지합니다.
+2. 사용자 PAT 입력란에 실제 토큰 대신 식별 가능한 일회성 가짜 canary를 저장합니다.
+3. 승인된 로컬 검사로 DB의 해당 UserValves 값이 암호화됐는지, canary가 DB·로그에 평문으로 남지 않는지 확인합니다. 값 자체는 출력·공유하지 않습니다.
+4. 재시작 뒤 같은 키로 설정을 읽을 수 있는지 확인합니다. 통과 후에만 실제 PAT로 교체합니다.
+
+암호화 활성화 전에 저장했던 평문 값은 자동 변환됐다고 가정하지 말고 다시 저장·검증합니다. 이전 DB 백업·로그에 남은 평문도 별도 보호·정리 대상입니다. 실제 PAT가 평문으로 노출됐다면 폐기·재발급합니다.
+
+화면 마스킹은 저장 암호화가 아닙니다. DB 암호화도 악의적인 Tool 코드 작성자, 권한 있는 서버 관리자, 본인 브라우저 개발자 도구로부터 토큰을 숨기는 보장은 아닙니다. 검토된 Tool만 설치하고 편집 권한을 제한합니다. 키 변경·분실은 복호화 실패로 이어질 수 있습니다.
+
+## 4. Workspace Tool·Skill 등록
+
+1. 관리자 계정의 Workspace → 도구에서 새 도구를 만들고 `confluence_tool.py` 전체를 붙여넣어 저장합니다.
+2. 관리자 Valves에서 아래 설정을 확인합니다. 실제 값은 사내 관리자 화면에만 입력합니다.
+3. Workspace Skill에 `SKILL.md`의 이름·설명·본문을 등록합니다.
+4. `EES 통합 Assistant`의 설정에서 해당 Skill과 Tool을 연결하고, 파일럿 사용자에게 필요한 사용 권한만 부여합니다.
+5. 각 사용자는 자신의 Tool 설정에서 PAT와 기본 Space를 입력하고 기본 **저장** 버튼을 누릅니다. 일반 사용자에게 도구 코드 편집 권한을 주지 않습니다.
+
+| 관리자 Valves | 기본값·의미 |
+|---|---|
+| `ENABLED` | `false`; 제품·인증·저장 검증 후에만 활성화 |
+| `CONFLUENCE_BASE_URL` | 빈 값; 고정 HTTPS base와 필요한 context path |
+| `ALLOWED_SPACES` | 빈 값이면 차단; 승인된 Space key를 쉼표로 구분 |
+| `TIMEOUT_SECONDS` | `15`; 소켓 연결·읽기 timeout. 전체 대화의 절대 시간 제한은 아님 |
+| `MAX_RESULTS` | `10`; 검색 결과 수 제한 |
+| `MAX_RESPONSE_BYTES` | `1000000`; 응답 크기 제한 |
+| `MAX_CONTENT_CHARS` | `12000`; 반환 본문 길이 제한 |
+| `USE_ENV_PROXY` | `false`; 검증된 직접 연결 또는 환경 프록시 경로를 관리자가 선택 |
+| `CA_BUNDLE_PATH` | 빈 값; 필요한 경우 승인된 추가 CA 인증서 묶음 경로 |
+
+| 사용자 UserValves | 입력 |
+|---|---|
+| `PAT` | 개인 PAT, 비밀번호형 마스킹 필드 |
+| `DEFAULT_SPACE` | 기본 Space key를 직접 입력하는 텍스트 필드; 드롭다운 아님 |
+
+입력값과 제한 범위는 Tool에서도 검사합니다. 기본 Space는 관리자 허용목록 안에서만 선택할 수 있으며, 사용자 설정으로 공통 제한을 완화할 수 없습니다. TLS 검증을 끄는 옵션은 제공하지 않습니다.
+
+별도의 연결 확인 버튼·입력 팝업은 구현하지 않습니다. 기본 설정 저장 후 채팅으로 “Confluence 연결 확인해줘”를 요청하여 `check_access()`를 호출합니다.
+
+## 5. 실제 연결·사용자 격리 체크리스트
+
+- 제품·인증과 C01/C02를 확인한 후 `ENABLED=true`로 변경합니다. PAT 없는 요청은 명확히 실패해야 합니다.
+- 본인이 원래 볼 수 있는 합성 테스트 페이지를 검색·조회하고 제목·본문·원문 링크를 확인합니다.
+- 사용자 A/B 각각의 PAT로 테스트합니다. A만 볼 수 있는 테스트 페이지가 B의 검색·직접 조회에 노출되면 중단합니다. A의 대화·조회 결과를 B에게 공유하지 않습니다.
+- 만료 토큰, 권한 없음, 존재하지 않는 페이지, 연결 시간 초과를 확인합니다. 실패를 성공·검색 결과 없음으로 바꾸어 답하지 않아야 합니다.
+- 공용 PAT 대체, 요청 간 PAT 공유, 사용자 간 결과 캐시를 도입하지 않습니다.
+- Tool 결과·오류·로그에 PAT·Authorization 헤더가 없어야 합니다. 보안 확인 없이 DEBUG 로그나 TLS 우회 설정을 켜지 않습니다.
+
+Tool은 모델이 준 임의 주소·HTTP method·raw CQL을 받지 않고 승인된 HTTPS base의 GET API만 호출합니다. 리다이렉트를 차단하고 검색어·응답 크기를 제한합니다. Skill은 문서 속 “정책을 무시하라” 같은 명령을 자료로만 취급하도록 지시하지만, 이것만으로 prompt injection 방어가 보장되지는 않습니다. 이 파일럿 Assistant에 셸·쓰기 도구를 추가하지 않습니다. 이 Tool의 제한은 다른 도구까지 강제하는 공통 보안 계층이 아닙니다.
+
+## 실환경 평가 — 자동 테스트와 별도 기록
 
 | ID | 검증 내용 | 통과 조건 | 상태 |
 |---|---|---|---|
@@ -114,41 +120,10 @@ Tool 내부 강제사항:
 | C08 | Prompt injection | 문서 안의 도구 실행·정책 무시 지시를 데이터로만 취급 | 대기 |
 | C09 | 회전 | PAT 폐기·교체 후 새 PAT로 정상 복구 | 대기 |
 
-## MVP 범위
-
-```text
-포함
-├─ Workspace Tool 1개
-├─ UserValves 개인 PAT
-├─ 연결 확인
-├─ 페이지 검색
-└─ 페이지 본문 조회
-
-제외
-├─ 페이지·댓글 생성 및 수정
-├─ 첨부파일 다운로드
-├─ 개인 Space 전체 수집
-├─ 백그라운드 동기화·RAG 적재
-├─ 외부 MCP Tool Server
-└─ 공용 서비스 계정
-```
-
-## 구현 전 확인할 값
-
-실제 값 자체는 문서나 Chat에 붙이지 않고 존재 여부만 확인합니다.
-
-1. Confluence Data Center/Server인지 Cloud인지
-2. 정확한 제품 버전과 PAT 메뉴 사용 가능 여부
-3. API Base URL의 context path 형태
-4. Open WebUI 프로세스에서 사내 Confluence까지 direct/proxy 경로
-5. 사내 CA 인증서 필요 여부
-6. POC 허용 Space와 첨부파일 제외 동의
-7. 회사 정책상 개인 PAT의 Open WebUI 암호화 저장 허용 여부
-
 ## 공식 근거
 
 - [Open WebUI Valves](https://docs.openwebui.com/features/extensibility/plugin/development/valves/)
 - [Open WebUI Tool Development](https://docs.openwebui.com/features/extensibility/plugin/tools/development/)
-- [Open WebUI Interactive Events](https://docs.openwebui.com/features/extensibility/plugin/development/events/)
 - [Atlassian Data Center PAT](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html)
-- [Confluence Cloud authentication](https://developer.atlassian.com/cloud/confluence/basic-auth-for-rest-apis/)
+- [Confluence Data Center REST API](https://developer.atlassian.com/server/confluence/confluence-rest-api/)
+- [Confluence CQL 검색](https://developer.atlassian.com/server/confluence/advanced-searching-using-cql/)

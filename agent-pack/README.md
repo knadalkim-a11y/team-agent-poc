@@ -12,7 +12,10 @@ agent-pack/
 │  └─ poc-policy.md
 └─ skills/
    ├─ policy-grounded-answer/SKILL.md
-   └─ structured-troubleshooting/SKILL.md
+   ├─ structured-troubleshooting/SKILL.md
+   └─ confluence-read/
+      ├─ SKILL.md
+      └─ scripts/confluence_tool.py
 ```
 
 | 원본 | Open WebUI 반영 위치 |
@@ -21,6 +24,9 @@ agent-pack/
 | `policies/*.md` | 공통 규칙의 검토·관리 원본 |
 | `knowledge/*.md` | Workspace Knowledge |
 | `skills/*/SKILL.md` | Workspace Skills |
+| `skills/confluence-read/scripts/confluence_tool.py` | Workspace Tools; 별도 등록 후 Assistant에 연결 |
+
+Confluence 묶음은 **Skill 지침 + 실행 코드**를 함께 관리하는 예시입니다. Open WebUI가 폴더를 자동 설치·실행하지는 않습니다. [설치 안내](../docs/04-confluence-read-tool.md)에 따라 두 항목을 등록합니다. Tool은 기본 비활성화이며, 실제 PAT·문서·사용자 권한은 사내 검증 전입니다.
 
 ## 변경 절차
 

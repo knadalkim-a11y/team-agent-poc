@@ -48,7 +48,7 @@ Router, A2A, MCP, 자동 동기화와 실제 EMS·APC Agent 연동은 이번 단
 
 ## 현재 상태
 
-기준일: 2026-09-03
+기준일: 2026-09-05
 
 | 항목 | 상태 | 비고 |
 |---|---|---|
@@ -62,6 +62,7 @@ Router, A2A, MCP, 자동 동기화와 실제 EMS·APC Agent 연동은 이번 단
 | Agent Pack 템플릿 | 등록됨 | Skill 2개와 `EES POC Policy` 합성 문서 첨부 확인 |
 | EES 통합 Assistant | 평가 중 | P02·P03 Knowledge 정확성, P04 Skill 자동 선택 PASS |
 | 사용자 격리 | 대기 | 서버 파일럿 전 2계정 검증 |
+| Confluence Skill·읽기 Tool | 사외 준비 | 가짜 응답 테스트만 수행; 실제 인증·암호화 저장·권한은 사내 확인 필요 |
 | Hermes 연결 비교 | 보류·선택 | Native 부족이 확인된 경우에만 수행 |
 
 ## POC 고정 조건
@@ -108,6 +109,7 @@ $env:CORP_NO_PROXY = "127.0.0.1,localhost,::1"
 - [사내 vLLM 직접 연결](docs/02-vllm-direct-test.md)
 - [Open WebUI Native 통합 Assistant](docs/03-openwebui-native-agent.md)
 - [Confluence Read Tool POC](docs/04-confluence-read-tool.md)
+- [Confluence 사외 검증 기록](evals/confluence-offline.md)
 - [Agent Pack 템플릿](agent-pack/README.md)
 - [선택적 Hermes 비교](docs/03-hermes-integration.md)
 - [장애 분리](docs/troubleshooting.md)
