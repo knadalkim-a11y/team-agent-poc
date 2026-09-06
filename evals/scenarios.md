@@ -165,7 +165,7 @@ Native 평가에서 복잡한 다단계 작업의 실패가 확인된 경우에�
 |---|---|---|---|
 | C01 | 사용자별 설정 UI | PAT가 password 형식으로 표시되고 사용자별로 분리됨 | PASS |
 | C02 | 저장 암호화 | 가짜 canary가 DB·로그에 평문으로 남지 않음 | PASS — 현재 DB·기본 콘솔 범위; [증거](#confluence-canary-restart) |
-| C03 | 연결 확인 | 현재 사용자로 인증되며 PAT는 응답·로그에 없음 | 대기 |
+| C03 | 연결 확인 | 현재 사용자로 인증되며 PAT는 응답·로그에 없음 | FAIL — URL 사전검사 |
 | C04 | 검색·조회 | 허용 Space 문서를 검색하고 제목·근거·원문 링크 반환 | 대기 |
 | C05 | 사용자 격리 | 사용자 A 전용 문서를 B의 PAT로 조회할 수 없음 | 대기 |
 | C06 | 쓰기 차단 | 생성·수정·삭제 요청에 대응하는 Tool과 endpoint가 없음 | 대기 |
@@ -192,6 +192,7 @@ Native 평가에서 복잡한 다단계 작업의 실패가 확인된 경우에�
 | 2026-09-06 | C02 | Windows / OWUI 0.11.3 / 가짜 PAT DB 검사 | 진행 중 — DB 부분 확인 | 사용자 보고: `CheckCompleted=true`, `EncryptedCanaryMatches=1`, `PlaintextCanaryMatches=0`, `PlaintextInDatabaseFiles=false`, `DatabaseFilesChecked=2`, `DatabaseCheckPassed=true`, `LogsChecked=false`, `RestartPersistenceChecked=false` | [1ed22bd의 검사기](https://github.com/knadalkim-a11y/team-agent-poc/blob/1ed22bda548f5234c0f15f8e90e6a6e53a8afe4e/scripts/check_confluence_canary.py)를 안내한 뒤 받은 결과. GPT 직접 실행·전달 코드 대조는 미실행. 기존 파일 키로 일치하는 암호문 1건과 검사한 DB 관련 파일 2개의 평문 부재를 확인한 범위이며, 부가 파일 종류는 출력에 없음. 로그·가짜 값 저장 후 재기동·UI 마스킹·사용자 분리는 미확인; 실제 PAT 입력·API 호출 없음 |
 | 2026-09-06 | C02 | Windows / OWUI 0.11.3 / 같은 창 수동 재기동 | PASS — 현재 DB·기본 콘솔 범위 | 사용자 보고: 원래 콘솔에서 canary 검색 결과 없음. 재기동 후 개인 설정 값이 남아 있고 저장 버튼을 누르지 않음. DB 재검사 결과 `true, 1, 0, false, 2, true, false, false` | 순서는 직전 기록의 8개 필드와 같음. 콘솔·재기동 확인은 사용자 관찰로 별도 기록하며 검사기 마지막 두 필드가 `true`가 된 것으로 바꾸지 않음. 범위와 미확인은 [상세 증거](#confluence-canary-restart)를 따름 |
 | 2026-09-06 | C01 | Windows / OWUI 0.11.3 / 관리자 A·일반 테스트 사용자 B | PASS | 사용자 보고: 안내한 6단계 모두 정상. B의 최초 PAT 빈칸, 가짜 값 저장·재조회·마스킹 정상, A의 기존 실제 PAT 유지, B의 가짜 PAT 비우기·저장까지 완료 | [ef049ea의 시험 안내](https://github.com/knadalkim-a11y/team-agent-poc/blob/ef049ea71f930e3d959dd312f1e8e855478caeb7/docs/04-confluence-read-tool.md#활성화-전-개인-설정-분리-확인c01). 별도 브라우저 세션·Tool 읽기 권한·`ENABLED=false` 유지 조건의 사용자 보고이며 계정 신규 생성/재사용 여부는 따로 확인하지 않음. 실제 토큰·계정 식별자·화면 수집 및 GPT 직접 검사는 없음. 실제 API 호출에서의 자격증명·문서 권한 분리(C03/C05)는 별도 대기 |
+| 2026-09-06 | C03 | Windows / OWUI 0.11.3 / EES 통합 Assistant·Confluence Tool | FAIL — URL 사전검사 | 사용자 보고: `check_access` 실행 표시, `ok=false`, 메시지 “HTTPS 호스트와 선택적 컨텍스트 경로만 허용합니다.”. Assistant도 설정 오류를 알림. 후속 설명은 사내 Confluence가 HTTP를 쓰는 것 같다는 내용 | 오류 코드는 `configuration_requried`로 전사됐고 Git 원본 표기는 `configuration_required`임; 전사 오타인지 등록 코드 차이인지는 미확인. 원본 `_base_url`에서 HTTP 스킴은 이 메시지로 API 요청 전에 차단됨. 실제 URL·프로토콜 값은 미수집·미대조라 HTTP 원인은 조건부 진단. PAT 오류·HTTP 응답·프록시·CA 실패로 판정하지 않음. 응답 요약에 PAT는 없으나 콘솔 확인은 별도 보고 없음 |
 | YYYY-MM-DD | <ID> | OWUI <VERSION> | 대기 | <REFERENCE> | <NOTE> |
 
 - 오류 전문 대신 비식별 요약이나 Issue 링크를 남깁니다.

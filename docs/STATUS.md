@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: Confluence Tool·개인 PAT·관리자 연결 설정·Skill 등록·Assistant 연결에 이어, 2026-09-06 사용자가 일반 테스트 계정 B를 이용한 6단계 개인 설정 분리 시험과 가짜 값 정리까지 모두 정상이라고 보고함. [평가표와 결과 기록](../evals/scenarios.md#결과-기록)에 C01 PASS로 반영했으며 C02의 기존 범위 내 PASS도 유지. 실제 토큰·주소·계정 식별자는 수집하지 않음. 활성화·실제 인증·문서 권한 격리는 아직 미확인. 정해진 기동 스크립트 채택은 안정화 이후로 유지.
-- 다음 작업 하나: **Tool을 활성화하고 관리자 계정 A의 실제 Confluence 인증(C03)을 확인**한다. [연결 안내](04-confluence-read-tool.md#5-실제-연결과-안전한-사용)에 따라 Workspace 도구 목록의 관리자 밸브에서 `ENABLED=true`로 저장한 뒤 A의 새 채팅에서 `EES 통합 Assistant`를 선택해 연결 확인을 요청한다. `check_access`의 실제 실행과 `ok`·`authenticated` 결과를 확인하며 모델의 성공 문장만으로 판정하지 않는다. PAT가 응답·콘솔에 노출되지 않았는지도 사내에서 확인하고 결과만 공유한다. 활성화·호출 결과는 아직 보고되지 않음. 프록시·CA 경로는 실제 오류 근거로 확인하며 임의로 검증을 끄지 않음.
+- 이번 작업: 2026-09-06 C01 PASS 후 첫 `check_access`가 “HTTPS 호스트와 선택적 컨텍스트 경로만 허용합니다.” 오류를 반환했다고 보고받음. 이어 사용자는 사내 Confluence가 HTTPS가 아닌 HTTP를 쓰는 것 같다고 설명함. 저장소 `_base_url`은 HTTP를 이 메시지로 차단하므로 원인 후보와 일치하나 실제 입력값의 프로토콜은 아직 확정 보고가 없음. [C03 기록](../evals/scenarios.md#결과-기록)은 URL 사전검사 실패로 관리하며 PAT·네트워크·문서 권한 실패로 단정하지 않음. C01/C02 판정은 유지하고 실제 주소·토큰은 수집하지 않음.
+- 다음 작업 하나: **실제 Confluence 주소와 관리자 `CONFLUENCE_BASE_URL`의 HTTP/HTTPS 사용 여부를 확인**한다. 공식 HTTPS 접속 주소가 있으면 그 기본 주소를 사용하고 HTTP 주소에 임의로 `s`를 붙이지 않는다. HTTP만 제공된다면 현재 HTTPS 전용 Tool과 실행 환경의 불일치이므로 HTTP에서 PAT 전송이 암호화되지 않는 점과 명시적 지원 방식부터 정한다. 이번 요청은 원인 확인이며 HTTP 허용 코드나 보안 경계는 변경하지 않음. 전체 사내 URL·PAT는 받지 않고 프로토콜 여부만 확인한다.
 - 사내 작업 전달: 사내 PC에서는 ChatGPT에 접근할 수 없어 외부 모바일에서 코드·명령을 옮겨 실행함. 복사 가능한 안내를 제공하며 저장소 파일은 사내 PC의 Git pull로 받을 수도 있음. 다운로드 링크만으로 안내를 마치지 않음.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
@@ -21,7 +21,7 @@
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 개정 내용 미반영 | [P08~P10 및 기존 P02~P07 재검증](../evals/scenarios.md#instruction-revision); 사내 모델 검증 대기 | 미확인 |
-| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.1; 초기 v0.1.0 [0cb6096](https://github.com/knadalkim-a11y/team-agent-poc/commit/0cb60962c44c2d0b59c4cb028faf2030161699f5) | 2026-09-06 Tool·개인 PAT·관리자 설정·Skill·Assistant 연결 및 개인 설정 분리 확인 사용자 보고; 활성화·실제 호출·문서 권한 격리는 미확인 | [사외 자동 시험 증거](../evals/confluence-offline.md), [실환경 C01~C09](../evals/scenarios.md#confluence-live) | 안내 원본: Tool [4dff01d](https://github.com/knadalkim-a11y/team-agent-poc/blob/4dff01d5bfc495d8bb2a29f0d52c548f794562c0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), Skill [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md); 등록 내용 직접 대조 미실행 |
+| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.1; 초기 v0.1.0 [0cb6096](https://github.com/knadalkim-a11y/team-agent-poc/commit/0cb60962c44c2d0b59c4cb028faf2030161699f5) | 2026-09-06 Tool·개인 PAT·관리자 설정·Skill·Assistant 연결·개인 설정 분리 확인 후 `check_access` 호출 사용자 보고; 주소 형식 오류로 인증 미확인 | [사외 자동 시험 증거](../evals/confluence-offline.md), [실환경 C01~C09](../evals/scenarios.md#confluence-live) | 안내 원본: Tool [4dff01d](https://github.com/knadalkim-a11y/team-agent-poc/blob/4dff01d5bfc495d8bb2a29f0d52c548f794562c0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), Skill [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md); 등록 내용 직접 대조 미실행 |
 | Rich UI 참고 예제 | [합성 검색 결과 HTML](04-confluence-read-tool.md#rich-ui-demo); 실제 API·기존 Tool과 미연동 | 배포 대상 미확정 | [사전 준비 검증](../evals/confluence-offline.md#status-history); 실제 브라우저·WebUI 검증과 구분 | 해당 없음 |
 | 실행 스크립트 | 시작·smoke test·암호화 준비 옵션; smoke 자동 리디렉션 차단 | 사용자 보고로 명령 복사 후 수동 실행; 정해진 기동 스크립트 채택은 안정화 이후 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
 
@@ -39,7 +39,7 @@
 
 ## 최근 점검
 
-- C01의 6단계 정상 보고를 기존 기준·안내와 대조해 판정과 증거를 반영하고 B 가짜 값 정리도 기록함. 다음 인증 확인의 기대 결과는 Tool의 `check_access` 구현과 대조했으며 C03·C05는 대기 상태를 유지. 변경은 STATUS와 평가표뿐이며 코드·설정은 변경하지 않음. 문서 점검 오류·검토 후보 0 및 `git diff --check` 통과. GPT의 사내 직접 검사·API 시험은 미실행.
+- 첫 호출 오류 문구를 `_base_url`·`_context`와 대조하고 독립 검토로 HTTP를 포함한 동일 문구의 조건과 다른 오류 분기를 구분함. 사용자의 HTTP 사용 추정과 코드의 HTTPS 전용 조건이 일치함을 확인하되 실제 입력값·접속 경로는 미대조. C01/C02 판정과 실행 코드·허용 범위는 유지. 변경은 STATUS와 평가표뿐이며 문서 점검 오류·검토 후보 0 및 `git diff --check` 통과. GPT의 사내 직접 호출·네트워크 시험은 미실행.
 - 읽기 전용 가짜 PAT DB 검사기와 합성 SQLite 시험을 추가했던 자동 시험 97개, 문서 검사·diff 통과 이력은 [검증 증거](../evals/confluence-offline.md#canary-db-check)에 보존. 평문·잘못된 키·중복·WAL·journal·값 비노출 조건을 확인했던 사외 시험이며 이번 결과 기록에서 재실행하지 않음.
 - 기존 스크립트 전용 암호화 안내에 수동 기동 대안을 추가. 경로·키 재정의·8080 사용 시 중단, 새 백업 폴더, 핵심 파일 비교 후 기동 순서를 정적으로 검토. 문서 검사와 미실행 범위는 [수동 기동 안내 검토](../evals/confluence-offline.md#manual-startup)에 기록함.
 - 지침·STATUS·README의 검수와 기록 규칙을 대조해 STATUS 갱신 조건의 불일치를 보완. 문서 검사 오류·검토 후보 0, 상세 검증 결과와 미확인 범위는 [검수 절차 보완 기록](../evals/confluence-offline.md#review-process)에 둡니다.
