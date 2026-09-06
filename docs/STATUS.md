@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: 사용자 보고로 [Confluence 버전](../versions.md#confluence-확인-환경), 개인 PAT 보유 및 기존 Confluence Skill이 사내 Claude Code용임을 확인. 가짜 PAT 시험은 [C02 기록](../evals/scenarios.md#confluence-canary-restart)의 현재 DB·기본 콘솔 범위에서 PASS. 2026-09-06 실제 개인 PAT 저장에 이어 사용자가 관리자 밸브 화면을 찾아 연결 주소·허용 공간 설정 완료를 보고함. 안내는 `ENABLED=false` 유지였으며 실제 주소·키·토큰 값은 수집하지 않음. 사용자별 설정 분리·실제 인증·API 응답은 아직 미확인. 정해진 기동 스크립트 채택은 안정화 이후로 유지.
-- 다음 작업 하나: **Git의 Confluence Skill을 Workspace에 등록하고 `EES 통합 Assistant`에 Skill과 Tool을 연결**한다. [등록 안내](04-confluence-read-tool.md#4-workspace-toolskill-등록)에 따라 [3495c2c의 SKILL.md](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md)의 이름·설명·본문을 사용한다. 관리자 `ENABLED=false`를 유지하며 사용자별 설정 분리(C01)를 확인한 뒤 활성화·API 시험으로 진행한다. Skill 등록·Assistant 연결 완료는 아직 보고되지 않음. 프록시·CA 경로 검증도 미실행.
+- 이번 작업: 사용자 보고로 [Confluence 버전](../versions.md#confluence-확인-환경), 개인 PAT 보유 및 기존 Confluence Skill이 사내 Claude Code용임을 확인. 가짜 PAT 시험은 [C02 기록](../evals/scenarios.md#confluence-canary-restart)의 현재 DB·기본 콘솔 범위에서 PASS. 2026-09-06 개인 PAT·관리자 연결 설정에 이어 `confluence-read` Skill 등록 및 `EES 통합 Assistant`의 Skill·Tool 연결 완료를 보고함. 안내는 `ENABLED=false` 유지였으며 실제 주소·키·토큰 값은 수집하지 않음. 사용자별 설정 분리·실제 인증·API 응답은 아직 미확인. 정해진 기동 스크립트 채택은 안정화 이후로 유지.
+- 다음 작업 하나: **사용자별 개인 설정 분리(C01)를 확인**한다. [시험 안내](04-confluence-read-tool.md#활성화-전-개인-설정-분리-확인c01)에 따라 기존 일반 테스트 계정을 재사용하거나 본인이 관리하는 시험 계정을 생성하고 Tool의 필요한 읽기 권한으로 시험한다. 관리자 `ENABLED=false`를 유지하며 다른 사용자의 PAT가 나타나지 않고 개인 설정 저장이 서로 영향을 주지 않는지 확인한다. 실제 토큰 값·화면·로그는 외부로 받지 않는다. 두 번째 계정 존재·C01 실행 결과는 아직 미확인이며 통과 후 활성화·실제 인증 시험으로 이어간다. 프록시·CA 경로 검증도 미실행.
 - 사내 작업 전달: 사내 PC에서는 ChatGPT에 접근할 수 없어 외부 모바일에서 코드·명령을 옮겨 실행함. 복사 가능한 안내를 제공하며 저장소 파일은 사내 PC의 Git pull로 받을 수도 있음. 다운로드 링크만으로 안내를 마치지 않음.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
@@ -21,11 +21,11 @@
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 개정 내용 미반영 | [P08~P10 및 기존 P02~P07 재검증](../evals/scenarios.md#instruction-revision); 사내 모델 검증 대기 | 미확인 |
-| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.1; 초기 v0.1.0 [0cb6096](https://github.com/knadalkim-a11y/team-agent-poc/commit/0cb60962c44c2d0b59c4cb028faf2030161699f5) | 2026-09-06 Tool 생성·가짜 PAT 시험·실제 개인 PAT 저장·관리자 연결 설정 사용자 보고; 사용자 분리·Skill 등록·Assistant 연결·API는 미확인 | [사외 자동 시험 증거](../evals/confluence-offline.md), [실환경 C01~C09](../evals/scenarios.md#confluence-live) | Tool 안내 원본 [4dff01d](https://github.com/knadalkim-a11y/team-agent-poc/blob/4dff01d5bfc495d8bb2a29f0d52c548f794562c0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), 등록 내용 대조 미실행; Skill은 위 다음 작업의 원본으로 안내하며 반영 미확인 |
+| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.1; 초기 v0.1.0 [0cb6096](https://github.com/knadalkim-a11y/team-agent-poc/commit/0cb60962c44c2d0b59c4cb028faf2030161699f5) | 2026-09-06 Tool·개인 PAT·관리자 설정·Skill 등록·Assistant 연결 사용자 보고; 사용자 분리·실제 호출·API는 미확인 | [사외 자동 시험 증거](../evals/confluence-offline.md), [실환경 C01~C09](../evals/scenarios.md#confluence-live) | 안내 원본: Tool [4dff01d](https://github.com/knadalkim-a11y/team-agent-poc/blob/4dff01d5bfc495d8bb2a29f0d52c548f794562c0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), Skill [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md); 등록 내용 직접 대조 미실행 |
 | Rich UI 참고 예제 | [합성 검색 결과 HTML](04-confluence-read-tool.md#rich-ui-demo); 실제 API·기존 Tool과 미연동 | 배포 대상 미확정 | [사전 준비 검증](../evals/confluence-offline.md#status-history); 실제 브라우저·WebUI 검증과 구분 | 해당 없음 |
 | 실행 스크립트 | 시작·smoke test·암호화 준비 옵션; smoke 자동 리디렉션 차단 | 사용자 보고로 명령 복사 후 수동 실행; 정해진 기동 스크립트 채택은 안정화 이후 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
 
-**Git에는 Skill 3개가 있고, 기존 UI에서 생성·사용을 확인한 것은 2개입니다.** Confluence 코드가 Git에 존재한다고 설치·활성화됐다고 판단하지 않습니다. 적용 커밋은 저장소의 최신 커밋이 아니라 실제로 복사·등록한 원본을 적습니다.
+**Skill은 Git과 UI 등록 보고 기준 모두 3개이며, 실제 사용 확인은 기존 2개입니다.** Confluence Skill·Tool의 등록과 Assistant 연결 보고를 실제 호출 성공으로 간주하지 않습니다. 적용 원본은 Git 최신 커밋과 구분하며, 안내 원본·사용자 보고·등록 내용 대조 여부를 함께 기록합니다.
 
 ## 남아 있는 검증과 제한
 
@@ -39,7 +39,7 @@
 
 ## 최근 점검
 
-- 관리자 설정 완료 보고를 반영하고 안내에서 혼동한 Python 설정 정의와 실제 관리자 밸브 입력 화면을 구분해 보완함. Skill의 이름·ID·설명·지침과 모델의 도구·스킬 선택 위치를 v0.11.3 화면 소스 및 Git Skill 원본과 대조함. 등록·연결·활성화·조회 판정을 분리하고 인증·사용자 분리 판정은 유지. 변경은 STATUS와 Confluence 안내뿐이며 문서 점검 오류·검토 후보 0 및 `git diff --check` 통과. 사내 Skill 등록·API 시험은 미실행.
+- Skill 등록·Assistant 연결 완료 보고와 실제 호출 미확인을 구분해 현재 상태·Skill 개수·안내 원본을 갱신함. C01의 기존 기준에 맞춰 테스트 계정·읽기 권한·가짜 값 저장·기존 값 유지 확인 순서를 안내에 보완하고 v0.11.3 사용자 추가·접근 제어·입력 화면 소스와 대조함. 변경은 STATUS와 Confluence 안내뿐이며 평가표 판정·코드·설정은 유지. 문서 점검 오류·검토 후보 0 및 `git diff --check` 통과. 사내 C01·API 시험은 미실행.
 - 읽기 전용 가짜 PAT DB 검사기와 합성 SQLite 시험을 추가했던 자동 시험 97개, 문서 검사·diff 통과 이력은 [검증 증거](../evals/confluence-offline.md#canary-db-check)에 보존. 평문·잘못된 키·중복·WAL·journal·값 비노출 조건을 확인했던 사외 시험이며 이번 결과 기록에서 재실행하지 않음.
 - 기존 스크립트 전용 암호화 안내에 수동 기동 대안을 추가. 경로·키 재정의·8080 사용 시 중단, 새 백업 폴더, 핵심 파일 비교 후 기동 순서를 정적으로 검토. 문서 검사와 미실행 범위는 [수동 기동 안내 검토](../evals/confluence-offline.md#manual-startup)에 기록함.
 - 지침·STATUS·README의 검수와 기록 규칙을 대조해 STATUS 갱신 조건의 불일치를 보완. 문서 검사 오류·검토 후보 0, 상세 검증 결과와 미확인 범위는 [검수 절차 보완 기록](../evals/confluence-offline.md#review-process)에 둡니다.

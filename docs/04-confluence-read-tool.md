@@ -172,6 +172,17 @@ Skill 항목별 입력은 [v0.11.3 Skill 편집 화면](https://github.com/open-
 
 별도의 연결 확인 버튼·입력 팝업은 구현하지 않습니다. 기본 설정 저장 후 채팅으로 “Confluence 연결 확인해줘”를 요청하여 `check_access()`를 호출합니다.
 
+### 활성화 전 개인 설정 분리 확인(C01)
+
+이 시험은 WebUI의 개인 설정 분리를 확인합니다. 관리자 `ENABLED=false`를 유지하며 두 번째 계정에는 실제 Confluence PAT가 필요하지 않습니다.
+
+1. 이 Tool에 PAT를 저장한 적 없는 일반 테스트 계정 B를 사용합니다. 없다면 관리자 패널 → 사용자 → 개요 → 사용자 추가에서 본인이 관리하는 시험 계정을 만들고 역할은 `user`로 둡니다.
+2. 관리자 계정 A에서 Tool 편집 화면 상단 **접근 → 접근 권한 추가**로 B에게 **읽기** 권한을 부여합니다. 다른 사용자의 기존 접근 설정은 보존합니다. Tool의 커뮤니티 `Share`가 아닌 이 접근 제어 화면을 사용합니다. 개인 설정만 시험할 때는 Tool 접근으로 시작하며 Assistant도 사용할 경우 모델·Skill의 접근 권한을 별도로 확인합니다.
+3. 별도 시크릿 창에서 B로 로그인하고 새 채팅의 개인 밸브를 열어 PAT가 비어 있고 비밀번호형 입력란인지 확인합니다. `EES-USER-B-TEST`라는 가짜 값을 저장한 뒤 창을 다시 열어 유지되는지 확인합니다.
+4. A의 원래 브라우저에서 개인 밸브를 닫았다가 다시 열어 기존에 저장한 본인 PAT와 동일한지 확인합니다. 눈 버튼으로 사내 화면에서만 비교하고 실제 값·스크린샷을 외부로 전달하지 않습니다. B의 가짜 PAT는 시험 후 비우고 저장합니다.
+
+계정 추가는 [v0.11.3 사용자 추가 화면](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/admin/Users/UserList/AddUserModal.svelte), 권한은 [접근 제어](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/common/AccessControl.svelte), 표시 전환은 [SensitiveInput](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/common/SensitiveInput.svelte)을 기준으로 합니다. 결과는 [C01](../evals/scenarios.md#confluence-live)에 기록하며 실제 Confluence 호출의 자격증명·문서 권한 분리(C03/C05)와 구분합니다.
+
 ## 5. 실제 연결과 안전한 사용
 
 설정 후 [실환경 평가 C01~C09](../evals/scenarios.md#confluence-live)를 실행하고, 결과와 비식별 증거는 해당 평가 문서에만 기록합니다. 이 설치 안내에는 별도의 통과 상태를 복제하지 않습니다.
