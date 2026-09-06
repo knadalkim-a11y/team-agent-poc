@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: 사용자 보고로 [Confluence 버전](../versions.md#confluence-확인-환경), 개인 PAT 보유 및 기존 Confluence Skill이 사내 Claude Code용임을 확인. 2026-09-06 예상 폴더·DB·키 파일 존재를 확인했고, 원래 수동 실행 창에서 종료 후 재검사한 결과는 작업 폴더 일치=True, DATA_DIR 일치=True, 키 파일 비어 있지 않음=True, WEBUI_SECRET_KEY 지정=False, DATABASE_URL 지정=False. 새 창에서 했던 앞선 경로·환경변수 검사는 기존 실행 설정의 근거로 사용하지 않음. 정해진 기동 스크립트 채택은 안정화 이후로 유지.
-- 다음 작업 하나: **확인한 원래 PowerShell 창에서 기존 데이터·키를 백업하고 암호화 옵션을 추가해 수동 재기동**한다. [수동 기동 안내](04-confluence-read-tool.md#수동-기동을-유지하는-경우)에 따라 기존 설정을 유지하고, 재접속 시 기존 계정·대화가 보이는지 확인한다. 백업·암호화 옵션 적용·재기동·WebUI Tool 등록·PAT 저장·실제 조회는 아직 미검증이며 실제 PAT는 가짜 값 저장 검증 이후에만 입력한다.
+- 이번 작업: 사용자 보고로 [Confluence 버전](../versions.md#confluence-확인-환경), 개인 PAT 보유 및 기존 Confluence Skill이 사내 Claude Code용임을 확인. 원래 실행 창의 작업 폴더·DATA_DIR 일치, 비어 있지 않은 기존 키 및 키·DB 환경변수 재정의 없음을 확인한 뒤 수동 백업·암호화 옵션 추가·재기동 명령을 실행함. 2026-09-06 사용자가 `BackupVerified=True`와 기존 계정·대화 유지를 보고했으며 [W04 결과](../evals/scenarios.md#결과-기록)에 기록함. 가짜 PAT의 실제 저장 암호화는 아직 미검증. 정해진 기동 스크립트 채택은 안정화 이후로 유지.
+- 다음 작업 하나: **Confluence 읽기 Tool v0.1.1을 Workspace 도구에 비활성 상태로 등록**한다. 안내 원본은 [4dff01d의 confluence_tool.py](https://github.com/knadalkim-a11y/team-agent-poc/blob/4dff01d5bfc495d8bb2a29f0d52c548f794562c0/agent-pack/skills/confluence-read/scripts/confluence_tool.py)이며 저장 성공·실제 적용 SHA는 아직 미확인. 관리자 Valves의 `ENABLED=false`를 유지하고 등록 후 사용자 UserValves에서 가짜 PAT 저장·암호화 검증으로 이어간다. 실제 PAT 입력·활성화·검색은 검증 이후에 진행한다.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
 - Git 반영: [PR #1](https://github.com/knadalkim-a11y/team-agent-poc/pull/1)을 2026-09-06 `main`에 병합 완료. [병합 커밋](https://github.com/knadalkim-a11y/team-agent-poc/commit/881b194a68dd03682c11f07bd1cb6f41d09fa260)의 내용이 검수한 PR과 같음을 확인했으며, 사내 적용 상태는 아래 표를 따름.
@@ -40,7 +40,7 @@
 
 - 기존 스크립트 전용 암호화 안내에 수동 기동 대안을 추가. 경로·키 재정의·8080 사용 시 중단, 새 백업 폴더, 핵심 파일 비교 후 기동 순서를 정적으로 검토. 문서 검사와 미실행 범위는 [수동 기동 안내 검토](../evals/confluence-offline.md#manual-startup)에 기록함.
 - 지침·STATUS·README의 검수와 기록 규칙을 대조해 STATUS 갱신 조건의 불일치를 보완. 문서 검사 오류·검토 후보 0, 상세 검증 결과와 미확인 범위는 [검수 절차 보완 기록](../evals/confluence-offline.md#review-process)에 둡니다.
-- 이전 코드 시험 87개 통과는 [직전 정리의 증거](../evals/confluence-offline.md#pre-mvp-cleanup)이며 이번 재실행 결과가 아닙니다. 실환경·사용성·Windows 실행 및 WebUI 배포는 이번에도 미실행입니다.
+- 이번 사용자 보고는 수동 명령의 백업·재기동과 W04에 한정해 반영. 문서 점검 오류·검토 후보 0 및 `git diff --check` 통과. 이전 코드 시험 87개 통과는 [직전 정리의 증거](../evals/confluence-offline.md#pre-mvp-cleanup)이며 이번 재실행 결과가 아님. GPT의 Windows 직접 실행·고정 ps1 검증, Tool 배포·저장 암호화·사내 API·사용자 격리·사용성 검증은 미실행.
 
 원격 게시 여부는 해당 Git 커밋으로 확인합니다. 문서 게시를 WebUI 배포 완료로 해석하지 않습니다.
 
