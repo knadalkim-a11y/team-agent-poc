@@ -8,7 +8,7 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용이며, 사내 PC 밖에서 코드·문서 준비만 할 수 있는 상황.
-- 이번 작업: 관련 PR 확인 규칙, 자료와 실행 지시의 구분, 승인된 Tool 조회 근거, 개인 설정의 PAT 보호 저장 범위를 명확히 함. Assistant Prompt·공통 정책·정책 답변 Skill을 수정했고 Python Tool·실행 스크립트·설정은 유지.
+- 이번 작업: 현재 사내 모델의 성능과 지속적인 모델 교체 가능성을 [환경·개발 기준](../versions.md#사내-모델-운용-기준)에 반영. 앞서 개정한 Assistant Prompt·공통 정책·정책 답변 Skill은 유지하며 모델 설정·Python Tool·실행 스크립트는 변경하지 않음.
 - 다음 작업 하나: 사내 복귀 후 **Confluence 제품·버전과 개인 PAT 인증 방식을 확인**한다. [설치 안내](04-confluence-read-tool.md)의 제품 확인부터 시작하며, 현재 Tool은 Data Center PAT/Bearer용 초안이다.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 이번 준비·지침 개정의 Git 변경은 [PR #1](https://github.com/knadalkim-a11y/team-agent-poc/pull/1)에서 관리한다. 병합 여부는 PR 상태로 확인하며 WebUI 적용과 구분한다.
@@ -35,7 +35,13 @@
 - Router·A2A·EMS/APC 자동 라우팅·자동 배포·개인화·서버 이전은 후속 범위입니다. 사용자 PC 공개나 외부 서비스 추가를 이번 준비 작업에 포함하지 않습니다.
 - 사용자 일회성 설정: README의 [GPT 프로젝트 최초 설정](../README.md#gpt-프로젝트-최초-설정)에 따라 지침을 넣고 새 프로젝트를 만들었다는 사용자 보고를 확인했습니다. 동일한 설정을 다시 요청하지 않습니다. 앱 설정 화면을 직접 검사한 것은 아닙니다.
 
-## 이번 지침 개정 검증 — 2026-09-06
+## 모델 운용 기준 반영 — 2026-09-06
+
+- 사용자 보고와 설계 전제를 기존 문서 4개에 반영. 신규 파일·모델 분기 코드·실행 설정은 추가하지 않음.
+- 현재 GLM 5.2 기준 Tool 호출 성공률·되묻기 동작·응답 시간의 비교 측정은 미실행. 모델 교체 시 기존 평가 질문을 재사용하며 별도 평가 프레임워크는 만들지 않음.
+- Linux / Python 3.12.13에서 `python scripts/check_docs.py`: Markdown 20개·내부 링크 101개·오류 0·검토 후보 0. `git diff --check` 통과. 코드·Skill·설정·시험 파일 변경 없음; 실제 모델·WebUI 실행과 배포는 미실행.
+
+## 이전 지침 개정 검증 — 2026-09-06
 
 - 환경: Linux / Python 3.12.13. 기존 Markdown 8개를 수정했으며 새 파일·서버·Tool 코드·실행 설정·자동 테스트 코드는 추가하거나 변경하지 않음.
 - `python scripts/check_docs.py`: Markdown 20개, 내부 링크 98개, 오류 0·검토 후보 0. `git diff --check` 통과.
