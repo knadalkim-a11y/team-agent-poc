@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: 사용자 보고로 [Confluence 버전](../versions.md#confluence-확인-환경), 개인 PAT 보유 및 기존 Confluence Skill이 사내 Claude Code용임을 확인. 수동 백업·암호화 옵션 추가·재기동 후 기존 계정·대화 유지는 [W04 결과](../evals/scenarios.md#결과-기록)에 기록함. 2026-09-06 사용자가 안내한 Python Tool 생성 완료를 보고함. 등록 내용·Valves 실제 화면·가짜 PAT 저장·암호화는 아직 대조하지 않았으며 정해진 기동 스크립트 채택은 안정화 이후로 유지.
-- 다음 작업 하나: **Confluence Tool의 개인 설정(UserValves)에 일회성 가짜 PAT를 저장**한다. 관리자 Valves의 `ENABLED=false`를 확인·유지하고 사용자 PAT 입력란의 마스킹과 저장 성공을 확인한 뒤 실제 DB·로그 암호화 검증으로 이어간다. 실제 PAT 입력·활성화·검색은 검증 이후에 진행하며, 도구 생성만으로 C01/C02를 통과 처리하지 않는다.
+- 이번 작업: 사용자 보고로 [Confluence 버전](../versions.md#confluence-확인-환경), 개인 PAT 보유 및 기존 Confluence Skill이 사내 Claude Code용임을 확인. 수동 재기동·계정·대화 유지는 [W04 결과](../evals/scenarios.md#결과-기록)에 기록함. 2026-09-06 Tool 생성에 이어 개인 설정에 안내한 가짜 PAT 저장 완료를 보고함. UI 마스킹·DB 저장 암호화·로그·사용자 분리는 별도 확인 전이며 정해진 기동 스크립트 채택은 안정화 이후로 유지.
+- 다음 작업 하나: **가짜 PAT의 실제 DB 저장을 읽기 전용으로 검사**한다. [검사 안내](04-confluence-read-tool.md#가짜-pat의-db-저장-검사)에 따라 원래 WebUI는 유지하고 새 PowerShell에서 검사한다. `ENABLED=false`와 실제 PAT 미입력을 유지하며 DB 결과 이후 로그·가짜 값 저장 후 재기동을 확인한다. 저장 버튼 성공이나 검사 코드의 합성 시험만으로 C01/C02를 통과 처리하지 않는다.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
 - Git 반영: [PR #1](https://github.com/knadalkim-a11y/team-agent-poc/pull/1)을 2026-09-06 `main`에 병합 완료. [병합 커밋](https://github.com/knadalkim-a11y/team-agent-poc/commit/881b194a68dd03682c11f07bd1cb6f41d09fa260)의 내용이 검수한 PR과 같음을 확인했으며, 사내 적용 상태는 아래 표를 따름.
@@ -20,7 +20,7 @@
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 개정 내용 미반영 | [P08~P10 및 기존 P02~P07 재검증](../evals/scenarios.md#instruction-revision); 사내 모델 검증 대기 | 미확인 |
-| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.1; 초기 v0.1.0 [0cb6096](https://github.com/knadalkim-a11y/team-agent-poc/commit/0cb60962c44c2d0b59c4cb028faf2030161699f5) | 2026-09-06 Tool 생성 사용자 보고; Skill 등록·Assistant 연결·설정·API는 미확인 | [사외 자동 시험 증거](../evals/confluence-offline.md), [실환경 C01~C09](../evals/scenarios.md#confluence-live) | 안내 원본 [4dff01d의 Python Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/4dff01d5bfc495d8bb2a29f0d52c548f794562c0/agent-pack/skills/confluence-read/scripts/confluence_tool.py); 등록 내용 대조 미실행 |
+| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.1; 초기 v0.1.0 [0cb6096](https://github.com/knadalkim-a11y/team-agent-poc/commit/0cb60962c44c2d0b59c4cb028faf2030161699f5) | 2026-09-06 Tool 생성·개인 설정 가짜 PAT 저장 사용자 보고; Skill 등록·Assistant 연결·DB 암호화·API는 미확인 | [사외 자동 시험 증거](../evals/confluence-offline.md), [실환경 C01~C09](../evals/scenarios.md#confluence-live) | 안내 원본 [4dff01d의 Python Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/4dff01d5bfc495d8bb2a29f0d52c548f794562c0/agent-pack/skills/confluence-read/scripts/confluence_tool.py); 등록 내용 대조 미실행 |
 | Rich UI 참고 예제 | [합성 검색 결과 HTML](04-confluence-read-tool.md#rich-ui-demo); 실제 API·기존 Tool과 미연동 | 배포 대상 미확정 | [사전 준비 검증](../evals/confluence-offline.md#status-history); 실제 브라우저·WebUI 검증과 구분 | 해당 없음 |
 | 실행 스크립트 | 시작·smoke test·암호화 준비 옵션; smoke 자동 리디렉션 차단 | 사용자 보고로 명령 복사 후 수동 실행; 정해진 기동 스크립트 채택은 안정화 이후 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
 
@@ -38,6 +38,7 @@
 
 ## 최근 점검
 
+- 읽기 전용 가짜 PAT DB 검사기와 합성 SQLite 시험을 추가. 새 검사 10개를 포함한 자동 시험 97개, 문서 검사·diff 점검 통과. 평문·잘못된 키·중복·WAL·journal·값 비노출 조건과 실제 판정의 한계는 [검증 증거](../evals/confluence-offline.md#canary-db-check)에 기록함. 사내 검사 실행 결과는 아직 없음.
 - 기존 스크립트 전용 암호화 안내에 수동 기동 대안을 추가. 경로·키 재정의·8080 사용 시 중단, 새 백업 폴더, 핵심 파일 비교 후 기동 순서를 정적으로 검토. 문서 검사와 미실행 범위는 [수동 기동 안내 검토](../evals/confluence-offline.md#manual-startup)에 기록함.
 - 지침·STATUS·README의 검수와 기록 규칙을 대조해 STATUS 갱신 조건의 불일치를 보완. 문서 검사 오류·검토 후보 0, 상세 검증 결과와 미확인 범위는 [검수 절차 보완 기록](../evals/confluence-offline.md#review-process)에 둡니다.
 - 사용자 보고의 수동 백업·재기동·W04와 Tool 생성 상태를 구분해 반영. 문서 점검 오류·검토 후보 0 및 `git diff --check` 통과. 이전 코드 시험 87개 통과는 [직전 정리의 증거](../evals/confluence-offline.md#pre-mvp-cleanup)이며 이번 재실행 결과가 아님. GPT의 Windows 직접 실행·고정 ps1 검증, Tool 등록 내용 대조·저장 암호화·사내 API·사용자 격리·사용성 검증은 미실행.

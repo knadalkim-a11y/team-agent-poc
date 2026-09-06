@@ -140,3 +140,14 @@ Tool은 기본 `ENABLED=false`입니다. Skill은 지침이지 보안 경계가 
 - 정적 검토: 경로 불일치·키/DB 환경변수 재정의·빈 키·8080 사용·복사/해시 비교 실패 때 재기동하지 않는 순서를 확인. 새 백업 폴더는 기존 폴더를 덮어쓰지 않고 핵심 DB·키 해시는 출력 없이 비교함. 백업 성공·기동·Valve 저장 암호화 판정을 구분하며 실제 PAT 입력 순서와 기존 C01~C09 판정은 유지.
 - 검증: Linux에서 `python scripts/check_docs.py` 오류·검토 후보 0, `git diff --check` 통과. 기존 Markdown 3개만 변경했으며 Python Tool·설정·기동 스크립트·자동 시험·실환경 평가표는 변경하지 않음.
 - 미실행: PowerShell이 없어 명령의 Windows 실행·오류 분기·백업 복원·재기동은 시험하지 못함. 사용자 보고의 원래 창 검사 결과는 STATUS에만 기록하며, 아직 백업·암호화 저장·WebUI 등록 성공으로 간주하지 않음. 이전 Python 시험 87개는 이번 재실행 결과가 아님.
+
+<a id="canary-db-check"></a>
+
+## 가짜 PAT DB 검사 코드 검증 — 2026-09-06
+
+- 근거: Open WebUI v0.11.3의 `models/tools.py`, `models/users.py`, `utils/valves.py`, `serve()` 키 로드를 대조. 개인 UserValves는 `user.settings.tools.valves[tool_id]`에 dict 전체의 Fernet 암호문 문자열로 저장됨. 관리자 `tool.valves`나 문자열 모양만 검사하는 방식은 개인 PAT 저장 증거가 되지 않음.
+- 구현: 기존 키를 공백 제거 없이 읽고 읽기 전용 SQLite에서 해당 가짜 PAT와 일치하는 암호문을 확인. 평문 dict·잘못된 키·누락·중복·DB/WAL/journal 잔존은 통과하지 않음. 앱 import·API 호출·DB 마이그레이션·자격증명/사용자 ID/오류 전문 출력 없음. 실환경은 metadata 0.11.3만 허용하며 결과에서 로그·재기동 미검증을 명시.
+- 합성 환경: Linux / Python 3.12.13 / Pydantic 2.13.4 / cryptography 46.0.0. 새 검사 시험 10개 통과: 암호문·DB 원본 유지, 평문, 잘못된 키·누락, 중복·혼합, committed WAL, journal 잔존, 청크 경계·UTF-16, DB 미생성, 44자 키, 오류 비노출. 표준 32자 형태 외에 줄바꿈이 있는 합성 키도 그대로 검증.
+- uv 실행 검토: Linux / uv 0.11.33의 임시 오프라인 합성 패키지 실험에서 `패키지@버전` 실행과 `--from 패키지==버전 python` 및 stdin 실행이 같은 Python 환경을 재사용함. Open WebUI 설치·기동은 수행하지 않음. `--offline`이 로컬 캐시 재구성까지 금지하는 옵션은 아님.
+- 검증 결과: `python -m unittest discover -s tests -v` 97개 통과, `python scripts/check_docs.py` 오류·검토 후보 0, `git diff --check` 통과. 기존 업무 Tool·기동 스크립트·C01~C09 판정은 변경하지 않음.
+- 미확인: Windows/사용자 uv 버전에서 검사 실행, 실제 DB·로그 및 가짜 값 저장 후 재기동은 미실행. 사용자 저장 보고는 서버 DB 저장 성공을 독립 검증한 것이 아니며 C01/C02는 계속 대기. 모든 로그·백업·스냅샷을 검사하거나 실제 PAT 입력을 승인하는 결과가 아님.

@@ -34,7 +34,7 @@ flowchart TB
 python -m unittest discover -s tests -v
 ```
 
-코드의 의존성은 Python 표준 라이브러리와 Pydantic 2입니다. 독립 테스트 환경이 필요하면 별도 가상환경에 `pydantic==2.13.4`를 설치합니다. 테스트 때문에 운영 Open WebUI의 Pydantic 버전을 변경하거나 Open WebUI를 재설치하지 않습니다.
+업무 Tool의 의존성은 Python 표준 라이브러리와 Pydantic 2입니다. 암호화 검사 시험에는 `cryptography`도 필요하며 독립 테스트 환경의 버전은 [환경 기준](../versions.md#독립-자동-시험-환경)을 따릅니다. 테스트 때문에 운영 Open WebUI의 의존 버전을 변경하거나 Open WebUI를 재설치하지 않습니다.
 
 Mock 통과는 Python 로직의 검증입니다. 실제 UserValves 화면, DB 암호화, 사내 인증서·프록시·Confluence 권한이 동작한다는 의미가 아닙니다.
 
@@ -121,6 +121,23 @@ Tool은 네트워크 호출 전에 실제 `open_webui.env.ENABLE_VALVE_ENCRYPTIO
 암호화 활성화 전에 저장했던 평문 값은 자동 변환됐다고 가정하지 말고 다시 저장·검증합니다. 이전 DB 백업·로그에 남은 평문도 별도 보호·정리 대상입니다. 실제 PAT가 평문으로 노출됐다면 폐기·재발급합니다.
 
 화면 마스킹은 저장 암호화가 아닙니다. DB 암호화도 악의적인 Tool 코드 작성자, 권한 있는 서버 관리자, 본인 브라우저 개발자 도구로부터 토큰을 숨기는 보장은 아닙니다. 검토된 Tool만 설치하고 편집 권한을 제한합니다. 키 변경·분실은 복호화 실패로 이어질 수 있습니다.
+
+### 가짜 PAT의 DB 저장 검사
+
+[check_confluence_canary.py](../scripts/check_confluence_canary.py)는 이번 시험 문자열 `EES-CANARY-20260906-7F3A9C`를 검사하는 운영자용 코드입니다. 이 값은 방금 지정한 Confluence 개인 PAT 한 곳에만 저장하며, 검사는 전체 사용자 설정 중 해당 값의 일치를 찾습니다. Workspace Tool에 등록하지 않습니다. 앞서 확인한 `%LOCALAPPDATA%\EES-Agent-POC\open-webui`의 파일 기반 키·SQLite 구성에만 사용하며, 다른 위치·환경변수 키·외부 DB에 강제로 적용하지 않습니다.
+
+가짜 값을 개인 설정에 저장한 뒤 서버는 유지하고 **새 PowerShell 창**에서 실행합니다. 아래는 저장소 루트 기준이며 파일만 내려받았다면 해당 폴더에서 마지막 경로를 `.\check_confluence_canary.py`로 바꿉니다.
+
+```powershell
+uvx --offline --no-python-downloads --python 3.11 --from "open-webui==0.11.3" python .\scripts\check_confluence_canary.py
+```
+
+`uvx --from`은 패키지 환경의 Python을 사용하고 `--offline`은 네트워크를 차단합니다. 동일 환경이 캐시에 있으면 재사용하며 캐시 상태에 따라 로컬 환경을 재구성하거나 실패할 수 있습니다. 캐시 부족 시 네트워크 제한을 풀거나 다른 버전으로 재설치하지 말고 실행 환경을 확인합니다. 검사는 앱 초기화 없이 배포 메타데이터 버전과 `cryptography`만 사용합니다. [uv 도구 환경](https://docs.astral.sh/uv/concepts/tools/#tool-environments)
+
+- SQLite를 `mode=ro`로 열어 `user.settings.tools.valves`의 문자열 암호문만 기존 키로 복호화하고 `PAT`와 시험 문자열의 일치를 셉니다. 개인 설정 저장 위치는 [0.11.3 models/tools.py](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/models/tools.py), 키 파생 방식은 [utils/valves.py](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/valves.py)를 기준으로 합니다.
+- 평문 dict는 암호화 성공으로 세지 않습니다. DB·존재하는 WAL/rollback journal에서도 UTF-8·UTF-16 평문 시험 문자열을 찾습니다. 값·키·해시·사용자 ID·오류 전문은 출력하지 않으며 DB 내용을 변경하거나 앱을 기동하지 않습니다.
+- 기대 결과는 `CheckCompleted=true`, `EncryptedCanaryMatches=1`, `PlaintextCanaryMatches=0`, `PlaintextInDatabaseFiles=false`, `DatabaseCheckPassed=true`입니다. 암호문이 없거나 잘못된 키·중복 시험 값·평문 잔존이 있으면 통과하지 않습니다. 검사 실패·예상 밖 스키마는 안전한 오류 코드로 반환하며 종료 코드는 정상 DB 확인 `0`, 조건 미충족 `1`, 검사 불가 `2`입니다.
+- `LogsChecked=false`와 `RestartPersistenceChecked=false`는 이 검사의 범위 밖이라는 뜻입니다. 파일·콘솔 로그, 기타 백업 및 가짜 값 저장 후 재기동·재조회는 별도로 확인합니다. 실행 중 DB는 검사 사이 변경될 수 있어 현재 조회·파일 읽기 시점의 결과이며 이 출력만으로 C02 전체나 사용자 격리를 PASS 처리하지 않습니다. 합성 시험 근거는 [검사 코드 검증](../evals/confluence-offline.md#canary-db-check)에 둡니다.
 
 ## 4. Workspace Tool·Skill 등록
 

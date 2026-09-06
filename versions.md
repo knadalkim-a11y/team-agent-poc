@@ -55,7 +55,7 @@
 
 ## 독립 자동 시험 환경
 
-Confluence Tool 시험은 Python 표준 라이브러리와 Pydantic 2를 사용합니다. 재현용 독립 환경의 Pydantic 버전 예시는 2.13.4이며, Open WebUI 자체의 의존 버전을 이 값으로 강제하지 않습니다. 실제 실행한 OS·Python·라이브러리 버전은 [날짜별 시험 증거](evals/confluence-offline.md)에 기록합니다.
+Confluence Tool 시험은 Python 표준 라이브러리와 Pydantic 2를 사용합니다. 저장 암호화 검사와 그 합성 시험에는 `cryptography`도 필요합니다. 재현용 독립 환경의 버전 예시는 Pydantic 2.13.4·cryptography 46.0.0이며, Open WebUI 자체의 의존 버전을 이 값으로 강제하지 않습니다. 실제 실행한 OS·Python·라이브러리 버전은 [날짜별 시험 증거](evals/confluence-offline.md)에 기록합니다.
 
 ## 변경 규칙
 

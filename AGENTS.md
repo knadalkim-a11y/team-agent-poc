@@ -62,7 +62,7 @@ python scripts/check_docs.py
 python -m unittest discover -s tests -v
 ```
 
-문서 점검은 Python 표준 라이브러리만 사용합니다. 전체 테스트 환경에는 Pydantic 2가 필요합니다. 테스트 때문에 설치된 Open WebUI 의존성을 임의 변경하지 않습니다. 대상 버전은 [versions.md](versions.md), 독립 시험 환경은 [Confluence 가이드](docs/04-confluence-read-tool.md)를 확인합니다.
+문서 점검은 Python 표준 라이브러리만 사용합니다. 전체 테스트 환경에는 Pydantic 2와 암호화 검사 시험용 `cryptography`가 필요합니다. 테스트 때문에 설치된 Open WebUI 의존성을 임의 변경하지 않습니다. 대상 버전은 [versions.md](versions.md), 독립 시험 환경은 [Confluence 가이드](docs/04-confluence-read-tool.md)를 확인합니다.
 
 - 문서만 변경해도 `python scripts/check_docs.py`와 `git diff --check`를 실행합니다. 코드 변경은 관련 자동 테스트도 실행합니다.
 - 문서 점검 오류는 해결한 뒤 완료 처리합니다. 경고는 검토 후보일 뿐이며, 유지·연결 보완·후속 확인 중 무엇으로 처리했는지 짧게 보고합니다. 오류를 숨기기 위해 링크나 증거를 제거하지 않습니다.
