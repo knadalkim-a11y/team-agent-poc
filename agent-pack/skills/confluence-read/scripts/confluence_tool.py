@@ -1,7 +1,7 @@
 """
 title: EES Confluence Read
 description: Personal-PAT, allowlisted, read-only Confluence Data Center access.
-version: 0.1.1
+version: 0.1.2
 required_open_webui_version: 0.11.3
 """
 
@@ -82,16 +82,18 @@ def _redact(value, pat):
     return value
 
 
-def _base_url(value):
+def _base_url(value, allow_http=False):
     if not isinstance(value, str) or not value or re.search(r"[\s\\]", value):
-        _fail("configuration_required", "관리자가 올바른 HTTPS 기본 주소를 설정해야 합니다.")
+        _fail("configuration_required", "관리자가 올바른 Confluence 기본 주소를 설정해야 합니다.")
     try:
         parsed = urllib.parse.urlsplit(value)
         port = parsed.port
     except ValueError:
         _fail("configuration_required", "기본 주소 형식이 올바르지 않습니다.")
+    if parsed.scheme == "http" and allow_http is not True:
+        _fail("configuration_required", "HTTPS 기본 주소가 필요합니다. HTTP 전용 사내 연결은 관리자의 ALLOW_HTTP 설정이 필요합니다.")
     if (
-        parsed.scheme != "https"
+        parsed.scheme not in ("https", "http")
         or not parsed.hostname
         or parsed.username is not None
         or parsed.password is not None
@@ -100,11 +102,11 @@ def _base_url(value):
         or (port is not None and not 1 <= port <= 65535)
         or not re.fullmatch(r"[A-Za-z0-9.-]+", parsed.hostname)
     ):
-        _fail("configuration_required", "HTTPS 호스트와 선택적 컨텍스트 경로만 허용합니다.")
+        _fail("configuration_required", "허용된 호스트와 선택적 컨텍스트 경로만 사용할 수 있습니다.")
     path = parsed.path.rstrip("/")
     if path and not re.fullmatch(r"(?:/[A-Za-z0-9_-]+)+", path):
         _fail("configuration_required", "기본 주소의 컨텍스트 경로를 확인해야 합니다.")
-    return urllib.parse.urlunsplit(("https", parsed.netloc, path, "", ""))
+    return urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, path, "", ""))
 
 
 def _space_keys(value):
@@ -119,14 +121,15 @@ class Tools:
         model_config = ConfigDict(validate_assignment=True, hide_input_in_errors=True)
 
         ENABLED: bool = Field(default=False, description="제품·버전·승인 및 설치 체크리스트 확인 후 활성화")
-        CONFLUENCE_BASE_URL: str = Field(default="", description="고정 HTTPS 주소. 예: https://confluence.example.invalid/wiki")
+        CONFLUENCE_BASE_URL: str = Field(default="", description="고정 기본 주소와 선택적 context path. 기본 HTTPS; HTTP는 ALLOW_HTTP 필요")
+        ALLOW_HTTP: bool = Field(default=False, description="HTTP 전용 사내 기본 주소를 명시적으로 허용. PAT와 조회 내용이 전송 중 암호화되지 않음")
         ALLOWED_SPACES: str = Field(default="", description="조회 허용 공간 키, 쉼표로 구분. 비어 있으면 차단")
         TIMEOUT_SECONDS: int = Field(default=15, ge=1, le=60)
         MAX_RESULTS: int = Field(default=10, ge=1, le=10)
         MAX_RESPONSE_BYTES: int = Field(default=1000000, ge=1024, le=2000000)
         MAX_CONTENT_CHARS: int = Field(default=12000, ge=256, le=30000)
         USE_ENV_PROXY: bool = Field(default=False, description="확인된 프록시 경로가 필요할 때만 환경 프록시 사용")
-        CA_BUNDLE_PATH: str = Field(default="", description="선택적 사내 CA PEM 파일 경로. TLS 검증은 항상 켜짐")
+        CA_BUNDLE_PATH: str = Field(default="", description="HTTPS용 추가 사내 CA PEM 파일 경로. HTTPS 인증서 검증은 항상 켜짐; HTTP에는 미사용")
 
     class UserValves(BaseModel):
         model_config = ConfigDict(hide_input_in_errors=True)
@@ -149,7 +152,7 @@ class Tools:
             _fail("disabled", "Confluence Tool이 비활성화 상태입니다. 관리자 설정을 확인하세요.")
         if not _encryption_enabled():
             _fail("encryption_required", "개인 설정 암호화 활성화와 저장 검증이 먼저 필요합니다. PAT를 채팅에 보내지 마세요.")
-        base = _base_url(config.CONFLUENCE_BASE_URL)
+        base = _base_url(config.CONFLUENCE_BASE_URL, config.ALLOW_HTTP)
         spaces = _space_keys(config.ALLOWED_SPACES)
         if not isinstance(user, dict) or not isinstance(user.get("id"), str) or not user["id"]:
             _fail("user_required", "로그인한 사용자의 개인 설정이 필요합니다.")
@@ -165,14 +168,16 @@ class Tools:
     def _request(self, config, base, pat, path, params=None):
         if path != "/rest/api/user/current" and path != "/rest/api/content/search" and not re.fullmatch(r"/rest/api/content/[0-9]{1,30}", path):
             _fail("endpoint_blocked", "허용되지 않은 API 경로입니다.")
-        context = ssl.create_default_context()
-        if config.CA_BUNDLE_PATH:
-            context.load_verify_locations(cafile=config.CA_BUNDLE_PATH)
-        opener = urllib.request.build_opener(
+        handlers = [
             urllib.request.ProxyHandler() if config.USE_ENV_PROXY else urllib.request.ProxyHandler({}),
-            urllib.request.HTTPSHandler(context=context),
             _NoRedirect(),
-        )
+        ]
+        if urllib.parse.urlsplit(base).scheme == "https":
+            context = ssl.create_default_context()
+            if config.CA_BUNDLE_PATH:
+                context.load_verify_locations(cafile=config.CA_BUNDLE_PATH)
+            handlers.append(urllib.request.HTTPSHandler(context=context))
+        opener = urllib.request.build_opener(*handlers)
         url = base + path
         if params:
             url += "?" + urllib.parse.urlencode(params)
@@ -293,7 +298,7 @@ class Tools:
         except _ToolError as error:
             output = {"ok": False, "error": {"code": error.code, "message": error.message}}
         except (ssl.SSLError, urllib.error.URLError, TimeoutError, OSError):
-            output = {"ok": False, "error": {"code": "connection_failed", "message": "연결에 실패했습니다. 관리자에게 TLS·인증서·네트워크 경로 확인을 요청하세요. 인증 검증을 끄지 마세요."}}
+            output = {"ok": False, "error": {"code": "connection_failed", "message": "연결에 실패했습니다. 관리자에게 기본 주소·네트워크 경로 확인을 요청하세요. HTTPS 사용 시 인증서도 확인하고 인증서 검증은 끄지 마세요."}}
         except Exception:
             # Never serialize upstream exceptions, request headers, or user objects.
             output = {"ok": False, "error": {"code": "tool_error", "message": "도구 처리에 실패했습니다. 관리자에게 설정·호환성 확인을 요청하세요."}}

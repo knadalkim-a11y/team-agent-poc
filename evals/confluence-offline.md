@@ -151,3 +151,14 @@ Tool은 기본 `ENABLED=false`입니다. Skill은 지침이지 보안 경계가 
 - uv 실행 검토: Linux / uv 0.11.33의 임시 오프라인 합성 패키지 실험에서 `패키지@버전` 실행과 `--from 패키지==버전 python` 및 stdin 실행이 같은 Python 환경을 재사용함. Open WebUI 설치·기동은 수행하지 않음. `--offline`이 로컬 캐시 재구성까지 금지하는 옵션은 아님.
 - 검증 결과: `python -m unittest discover -s tests -v` 97개 통과, `python scripts/check_docs.py` 오류·검토 후보 0, `git diff --check` 통과. 기존 업무 Tool·기동 스크립트·C01~C09 판정은 변경하지 않음.
 - 미확인: Windows/사용자 uv 버전에서 검사 실행, 실제 DB·로그 및 가짜 값 저장 후 재기동은 미실행. 사용자 저장 보고는 서버 DB 저장 성공을 독립 검증한 것이 아니며 C01/C02는 계속 대기. 모든 로그·백업·스냅샷을 검사하거나 실제 PAT 입력을 승인하는 결과가 아님.
+
+<a id="http-opt-in"></a>
+
+## HTTP 전용 사내 연결의 명시적 허용 — 2026-09-06
+
+- 원인·범위: 사용자는 첫 `check_access`에서 HTTPS 주소 검사 오류를 보고했고 사내 주소가 HTTP인 것 같다고 설명함. 실제 주소는 수집하지 않음. 기존 v0.1.1은 HTTP를 요청 전에 차단하고 반환 base도 HTTPS로 고정했으므로 검사 조건만 바꾸면 충분하지 않았음.
+- 처리: Tool v0.1.2에 관리자 `ALLOW_HTTP=false` 기본값 추가. 명시적으로 허용한 HTTP만 고정 기본 주소로 사용하며 스킴·포트·context path를 API 요청과 원문 링크에 보존. HTTP에서는 사용하지 않는 CA 파일 로드를 생략하고, HTTPS는 추가 CA 적용·인증서·호스트명 검증을 유지. HTTP/HTTPS 자동 전환·리디렉션·일반 사용자나 모델의 주소/프로토콜 선택은 제공하지 않음. HTTP에서 PAT·조회 내용의 전송 암호화가 없다는 설명과 기존 Tool의 수동 갱신 절차를 추가함.
+- 회귀 검증: 기본 HTTP 차단, 개인 설정을 통한 HTTP 허용 우회 차단, 옵션 재비활성화, 고정 HTTP GET·검색·문서 링크, 사용하지 않는 CA 파일, HTTPS 검증·CA 적용 유지, 양쪽 스킴의 잘못된 URL·리디렉션 차단·환경 프록시 기본 미사용, HTTPS 실패 시 HTTP 재시도 없음. 기존 개인 PAT 분리·응답 비밀정보 제거·공간·읽기 제한 시험도 함께 확인함.
+- 실행 결과: Linux / Python 3.12.13 / Pydantic 2.13.4 / cryptography 46.0.0에서 `python -m unittest discover -s tests -q` 총 101개 통과(Confluence 48개·가짜 PAT 검사 10개·문서 점검 43개). `python scripts/check_docs.py` 문서 20개·내부 링크 140개·오류 0·검토 후보 0, `git diff --check` 통과. 합성 데이터·mock 요청만 사용하고 실제 DNS·네트워크 연결은 시험에서 차단함.
+- 독립 검토: Python Tool과 시험 diff를 별도 검토해 위 경계에서 차단할 문제를 찾지 못함. 검토자는 파일 수정·시험 재실행을 하지 않았으며 구현 담당자의 실행 결과와 구분함.
+- 미실행: Windows PowerShell의 코드 복사 명령·WebUI 코드 교체 후 설정 보존·사내 HTTP/HTTPS 인증·문서 권한·로그·모델 호출·실제 배포. 기존 C01/C02 판정은 해당 시점 증거로 보존하며 C03 실패를 mock 성공으로 덮어쓰지 않음. 새 의존성·서버·Skill 본문·공통 정책·기동 방식은 추가하거나 바꾸지 않음.

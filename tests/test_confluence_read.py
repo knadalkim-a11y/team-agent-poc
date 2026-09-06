@@ -202,6 +202,64 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         self.use_response({"type": "anonymous"})
         self.assert_error(await self.tool.check_access(__user__=self.user()))
 
+    async def test_http_requires_admin_opt_in_and_can_be_disabled_again(self):
+        self.assertFalse(self.tool.valves.ALLOW_HTTP)
+        self.tool.valves.CONFLUENCE_BASE_URL = "http://confluence.example.invalid/wiki"
+        # Extra personal settings must not grant the administrator's permission.
+        self.assert_error(await self.tool.check_access(__user__=self.user(ALLOW_HTTP=True)))
+        self.assert_no_calls()
+        self.tool.valves.ALLOW_HTTP = True
+        self.assertTrue(self.result(await self.tool.check_access(__user__=self.user()))["ok"])
+        self.calls.clear()
+        self.tool.valves.ALLOW_HTTP = False
+        self.assert_error(await self.tool.check_access(__user__=self.user()))
+        self.assert_no_calls()
+
+    async def test_http_opt_in_preserves_endpoint_and_skips_unused_ca(self):
+        self.tool.valves.ALLOW_HTTP = True
+        self.tool.valves.CONFLUENCE_BASE_URL = "http://confluence.example.invalid:8090/wiki/"
+        self.tool.valves.CA_BUNDLE_PATH = "synthetic-missing-ca.pem"
+        with patch.object(ssl.SSLContext, "load_verify_locations", side_effect=AssertionError("HTTP MUST NOT LOAD CA")):
+            self.assertTrue(self.result(await self.tool.check_access(__user__=self.user()))["ok"])
+        self.assertEqual(len(self.calls), 1)
+        request = self.calls[0][0]
+        self.assertEqual(request.full_url, "http://confluence.example.invalid:8090/wiki/rest/api/user/current")
+        self.assertEqual(request.get_method(), "GET")
+        self.assertEqual(request.get_header("Authorization"), "Bearer " + TOKEN_A)
+        self.assertIsNone(request.data)
+
+    async def test_http_search_and_page_links_preserve_fixed_origin(self):
+        base = "http://confluence.example.invalid:8090/wiki"
+        self.tool.valves.ALLOW_HTTP = True
+        self.tool.valves.CONFLUENCE_BASE_URL = base + "/"
+        data = page()
+        data["_links"] = {"base": "http://evil.example.invalid", "webui": "https://evil.example.invalid/collect"}
+        self.use_response({"results": [data], "size": 1})
+        search = self.result(await self.tool.search_pages("guide", __user__=self.user()))
+        self.assertTrue(search["ok"])
+        self.assertEqual(search["results"][0]["url"], base + "/pages/viewpage.action?pageId=123")
+        self.use_response(data)
+        document = self.result(await self.tool.get_page("123", __user__=self.user()))
+        self.assertTrue(document["ok"])
+        self.assertEqual(document["page"]["url"], base + "/pages/viewpage.action?pageId=123")
+        self.assertEqual(len(self.calls), 3)
+        for request, _, _ in self.calls:
+            parsed = urllib.parse.urlsplit(request.full_url)
+            self.assertEqual((parsed.scheme, parsed.netloc), ("http", "confluence.example.invalid:8090"))
+            self.assertIn(parsed.path, ("/wiki/rest/api/content/search", "/wiki/rest/api/content/123"))
+            self.assertEqual(request.get_method(), "GET")
+
+    async def test_http_permission_does_not_weaken_https_or_skip_its_ca(self):
+        self.tool.valves.ALLOW_HTTP = True
+        self.tool.valves.CA_BUNDLE_PATH = "synthetic-ca.pem"
+        with patch.object(ssl.SSLContext, "load_verify_locations") as load_ca:
+            self.assertTrue(self.result(await self.tool.check_access(__user__=self.user()))["ok"])
+        load_ca.assert_called_once_with(cafile="synthetic-ca.pem")
+        handler = next(h for h in self.openers[0].handlers if isinstance(h, urllib.request.HTTPSHandler))
+        self.assertEqual(handler._context.verify_mode, ssl.CERT_REQUIRED)
+        self.assertTrue(handler._context.check_hostname)
+        self.assertEqual(self.calls[0][0].full_url, BASE_URL + "/rest/api/user/current")
+
     async def test_tls_verification_and_no_redirect_handler_are_installed(self):
         self.assertTrue(self.result(await self.tool.check_access(__user__=self.user()))["ok"])
         handlers = self.openers[0].handlers
@@ -223,15 +281,21 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(redirected, "Redirect handler must refuse to forward credentials")
 
     async def test_proxy_environment_is_not_used_by_default(self):
-        with patch.dict("os.environ", {"HTTPS_PROXY": "http://proxy.example.invalid:8080", "https_proxy": "http://proxy.example.invalid:8080", "NO_PROXY": "", "no_proxy": ""}):
-            self.assertTrue(self.result(await self.tool.check_access(__user__=self.user()))["ok"])
-        proxy_handlers = [handler for handler in self.openers[0].handlers if isinstance(handler, urllib.request.ProxyHandler)]
-        self.assertTrue(all(not handler.proxies for handler in proxy_handlers))
+        self.tool.valves.ALLOW_HTTP = True
+        environment = {key: "http://proxy.example.invalid:8080" for key in ("HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy")}
+        environment.update({"NO_PROXY": "", "no_proxy": ""})
+        with patch.dict("os.environ", environment):
+            for scheme in ("https", "http"):
+                self.tool.valves.CONFLUENCE_BASE_URL = scheme + "://confluence.example.invalid/wiki"
+                self.assertTrue(self.result(await self.tool.check_access(__user__=self.user()))["ok"])
+        for opener in self.openers:
+            proxy_handlers = [handler for handler in opener.handlers if isinstance(handler, urllib.request.ProxyHandler)]
+            self.assertTrue(all(not handler.proxies for handler in proxy_handlers))
 
     async def test_invalid_base_urls_are_rejected_before_network(self):
         urls = [
-            "http://confluence.example.invalid/wiki",
             "file:///etc/passwd",
+            "ftp://confluence.example.invalid/wiki",
             "https://user:password@confluence.example.invalid/wiki",
             "https://confluence.example.invalid/wiki?target=other",
             "https://confluence.example.invalid/wiki#fragment",
@@ -239,10 +303,12 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
             "https://confluence.example.invalid/wiki\\admin",
             "https://confluence.example.invalid/wiki\nInjected",
         ]
-        for url in urls:
-            with self.subTest(url=url):
-                self.tool.valves.CONFLUENCE_BASE_URL = url
-                self.assert_error(await self.tool.check_access(__user__=self.user()))
+        for allow_http in (False, True):
+            self.tool.valves.ALLOW_HTTP = allow_http
+            for url in urls + [url.replace("https://", "http://") for url in urls]:
+                with self.subTest(url=url, allow_http=allow_http):
+                    self.tool.valves.CONFLUENCE_BASE_URL = url
+                    self.assert_error(await self.tool.check_access(__user__=self.user()))
         self.assert_no_calls()
 
     async def test_search_uses_fixed_endpoint_and_bounded_limit(self):
@@ -391,23 +457,35 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(len(self.calls), 1)
 
     async def test_redirect_is_not_followed_and_does_not_expose_location(self):
+        self.tool.valves.ALLOW_HTTP = True
         def redirect(request):
             raise urllib.error.HTTPError(request.full_url, 302, "Found", header_map(Location="https://evil.example.invalid/?secret=" + TOKEN_A), io.BytesIO(b"redirect"))
 
         self.responder = redirect
-        raw = await self.tool.check_access(__user__=self.user())
-        self.assert_error(raw)
-        self.assertNotIn("evil.example.invalid", raw)
-        self.assertEqual(len(self.calls), 1)
+        for scheme in ("https", "http"):
+            self.calls.clear()
+            self.tool.valves.CONFLUENCE_BASE_URL = scheme + "://confluence.example.invalid/wiki"
+            raw = await self.tool.check_access(__user__=self.user())
+            self.assert_error(raw)
+            self.assertNotIn("evil.example.invalid", raw)
+            self.assertEqual(len(self.calls), 1)
+            handler = next(h for h in self.openers[-1].handlers if isinstance(h, urllib.request.HTTPRedirectHandler))
+            for target in ("http://evil.example.invalid/collect", "https://evil.example.invalid/collect"):
+                with self.assertRaises((urllib.error.HTTPError, tool_module._ToolError)):
+                    handler.redirect_request(self.calls[0][0], FakeResponse(b"redirect"), 302, "Found", {}, target)
 
     async def test_network_timeout_and_tls_failures_do_not_reflect_exception(self):
+        self.tool.valves.ALLOW_HTTP = True
         for error in (TimeoutError(TOKEN_A), urllib.error.URLError("certificate failure " + TOKEN_A), ConnectionError(TOKEN_A)):
             with self.subTest(error_type=type(error).__name__):
+                self.calls.clear()
                 def fail(_request):
                     raise error
 
                 self.responder = fail
                 self.assert_error(await self.tool.check_access(__user__=self.user()))
+                self.assertEqual(len(self.calls), 1, "HTTPS failure must not retry using HTTP")
+                self.assertTrue(self.calls[0][0].full_url.startswith("https://"))
 
     async def test_malformed_json_is_safe_failure(self):
         self.use_response(b'{"broken":')

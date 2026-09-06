@@ -43,7 +43,7 @@ Mock 통과는 Python 로직의 검증입니다. 실제 UserValves 화면, DB �
 구현 대상은 **Confluence Data Center의 PAT/Bearer 인증과 REST API v1**입니다. Cloud 인증은 구현하지 않았습니다. 제품·버전·API 지원을 확인하기 전에는 `ENABLED=false`를 유지합니다. 기존 Server 제품도 호환성을 별도로 확인해야 합니다.
 
 - 관리자에게 개인 PAT 사용과 Open WebUI 암호화 저장이 허용되는지 확인합니다.
-- Base URL의 HTTPS 주소와 context path, 허용 Space key를 확인합니다.
+- Base URL의 HTTP/HTTPS 사용 여부와 context path, 허용 Space key를 확인합니다. 기본은 HTTPS입니다. HTTP 전용 사내 주소는 아래 관리자 `ALLOW_HTTP` 설정으로 명시적으로 허용하며, HTTP에서는 PAT와 조회 내용이 전송 중 암호화되지 않습니다. 공식 HTTPS 주소가 있으면 그 주소를 사용하고 HTTP 주소에 임의로 `s`를 붙이지 않습니다.
 - 기존에 성공한 direct/proxy 경로와 사내 CA 필요 여부를 확인합니다. 새 우회 경로를 만들지 않습니다.
 - PAT는 사용자의 권한을 갖습니다. Tool이 조회만 제공해도 PAT 자체가 읽기 전용이라는 뜻은 아닙니다.
 
@@ -154,23 +154,46 @@ Skill 항목별 입력은 [v0.11.3 Skill 편집 화면](https://github.com/open-
 | 관리자 Valves | 기본값·의미 |
 |---|---|
 | `ENABLED` | `false`; 제품·인증·저장 검증 후에만 활성화 |
-| `CONFLUENCE_BASE_URL` | 빈 값; 고정 HTTPS base와 필요한 context path |
+| `CONFLUENCE_BASE_URL` | 빈 값; 고정 기본 주소와 필요한 context path. 기본 HTTPS, HTTP는 아래 옵션 필요 |
+| `ALLOW_HTTP` | `false`; HTTP 전용 사내 기본 주소를 허용할 때만 `true`. PAT·조회 내용의 전송 암호화가 없음 |
 | `ALLOWED_SPACES` | 빈 값이면 차단; 승인된 Space key를 쉼표로 구분 |
 | `TIMEOUT_SECONDS` | `15`; 소켓 연결·읽기 timeout. 전체 대화의 절대 시간 제한은 아님 |
 | `MAX_RESULTS` | `10`; 검색 결과 수 제한 |
 | `MAX_RESPONSE_BYTES` | `1000000`; 응답 크기 제한 |
 | `MAX_CONTENT_CHARS` | `12000`; 반환 본문 길이 제한 |
 | `USE_ENV_PROXY` | `false`; 검증된 직접 연결 또는 환경 프록시 경로를 관리자가 선택 |
-| `CA_BUNDLE_PATH` | 빈 값; 필요한 경우 승인된 추가 CA 인증서 묶음 경로 |
+| `CA_BUNDLE_PATH` | 빈 값; HTTPS에 필요한 경우 승인된 추가 CA 인증서 묶음 경로. HTTP에는 사용하지 않음 |
 
 | 사용자 UserValves | 입력 |
 |---|---|
 | `PAT` | 개인 PAT, 비밀번호형 마스킹 필드 |
 | `DEFAULT_SPACE` | 기본 Space key를 직접 입력하는 텍스트 필드; 드롭다운 아님 |
 
-입력값과 제한 범위는 Tool에서도 검사합니다. 기본 Space는 관리자 허용목록 안에서만 선택할 수 있으며, 사용자 설정으로 공통 제한을 완화할 수 없습니다. TLS 검증을 끄는 옵션은 제공하지 않습니다.
+입력값과 제한 범위는 Tool에서도 검사합니다. 기본 Space는 관리자 허용목록 안에서만 선택할 수 있으며, 사용자 설정이나 모델 인자로 HTTP 허용 여부 등 공통 제한을 완화할 수 없습니다. `ALLOW_HTTP=true`여도 HTTPS 요청의 인증서·호스트명 검증은 유지하며, HTTPS 실패 시 HTTP로 재시도하거나 리디렉션하지 않습니다. DB 저장 암호화(C02)는 HTTP 전송을 암호화하지 않습니다.
 
 별도의 연결 확인 버튼·입력 팝업은 구현하지 않습니다. 기본 설정 저장 후 채팅으로 “Confluence 연결 확인해줘”를 요청하여 `check_access()`를 호출합니다.
+
+<a id="http-tool-update"></a>
+
+### 기존 도구를 v0.1.2로 갱신하고 HTTP 연결 허용
+
+이 절차는 기존 Tool의 HTTP 주소 사전검사 실패를 해결하기 위한 수동 갱신입니다. Git pull은 WebUI에 코드를 자동 반영하지 않습니다. 기존 Tool의 이름·ID·접근 권한을 유지하며 새 Tool을 만들지 않습니다.
+
+1. 관리자 밸브에서 기존 Tool의 `ENABLED=false`를 저장합니다.
+2. 사내 PC의 `main` 브랜치인 저장소 폴더에서 아래 명령을 실행합니다. pull이 실패하면 중단하고 로컬 변경을 보존합니다. 마지막 명령은 파일 전체를 클립보드에 복사하며 Python을 실행하지 않습니다.
+
+   ```powershell
+   git pull --ff-only
+   if ($LASTEXITCODE -ne 0) { throw "Git 갱신 실패. 여기서 중단하세요." }
+   Get-Content -Raw -Encoding UTF8 .\agent-pack\skills\confluence-read\scripts\confluence_tool.py | Set-Clipboard
+   ```
+
+3. Workspace → 도구 → 기존 `EES Confluence Read` 편집에서 Python 코드 전체를 교체합니다. 맨 위 `version: 0.1.2`를 확인하고 저장합니다. Git을 사용할 수 없으면 같은 버전의 [Python 원본](../agent-pack/skills/confluence-read/scripts/confluence_tool.py) 전체를 옮깁니다. 일부 `https` 문자열만 일괄 치환하지 않습니다.
+4. 도구 목록의 관리자 밸브를 다시 엽니다. `ALLOW_HTTP`가 보이는지 확인하고 기존 Base URL·허용 Space·`ENABLED=false`가 유지됐는지 확인합니다. Base URL은 실제 사내 기본 주소와 포트·필요한 context path만 입력하며 `/rest/api/...`, 문서 경로·쿼리를 넣지 않습니다. HTTP 전용 사내 연결에 한해 `ALLOW_HTTP=true`로 저장합니다. 옵션이 안 보이면 화면을 새로고침하고 저장한 코드 버전을 확인합니다.
+5. 기존 개인 설정의 PAT 저장 상태와 Assistant의 Tool 연결·접근 권한을 확인합니다. UserValves 구조·저장 암호화 방식은 이번 버전에서 바뀌지 않지만 기존 설정 보존을 확인하지 않은 채 활성화하지 않습니다. 실제 PAT·내부 주소를 채팅이나 공유 로그로 보내지 않습니다.
+6. C01/C02와 제품·인증 조건을 확인한 환경에서 `ENABLED=true`로 저장하고 새 채팅의 `EES 통합 Assistant`에 “Confluence 연결 확인해줘”를 요청합니다. `check_access`의 `ok=true`·`authenticated=true`와 PAT 비노출을 확인한 뒤 C03을 판정합니다. 실패하면 오류 코드·메시지만 기록합니다. HTTP를 허용했어도 인증·프록시·문서 권한 성공이 보장되는 것은 아닙니다.
+
+적용한 Git 커밋·Tool 버전·확인 날짜와 결과는 [STATUS](STATUS.md)와 [실환경 기록](../evals/scenarios.md#결과-기록)에서 추적합니다. HTTP 사용을 중지할 때는 `ALLOW_HTTP=false`로 되돌리며 HTTPS 기본 주소가 준비될 때까지 필요한 경우 `ENABLED=false`를 유지합니다.
 
 ### 활성화 전 개인 설정 분리 확인(C01)
 
@@ -194,7 +217,7 @@ Skill 항목별 입력은 [v0.11.3 Skill 편집 화면](https://github.com/open-
 - 공용 PAT 대체, 요청 간 PAT 공유, 사용자 간 결과 캐시를 도입하지 않습니다.
 - Tool 결과·오류·로그에 PAT·Authorization 헤더가 없어야 합니다. 보안 확인 없이 DEBUG 로그나 TLS 우회 설정을 켜지 않습니다.
 
-Tool은 모델이 준 임의 주소·HTTP method·raw CQL을 받지 않고 승인된 HTTPS base의 GET API만 호출합니다. 리다이렉트를 차단하고 검색어·응답 크기를 제한합니다. Skill은 문서 속 “정책을 무시하라” 같은 명령을 자료로만 취급하도록 지시하지만, 이것만으로 prompt injection 방어가 보장되지는 않습니다. 이 파일럿 Assistant에 셸·쓰기 도구를 추가하지 않습니다. 이 Tool의 제한은 다른 도구까지 강제하는 공통 보안 계층이 아닙니다.
+Tool은 모델이 준 임의 주소·HTTP method·raw CQL을 받지 않고 관리자가 고정한 base의 GET API만 호출합니다. 기본 HTTPS이며 명시적으로 허용한 HTTP도 같은 호스트·경로·사용자·Space 제한을 적용합니다. 리다이렉트를 차단하고 검색어·응답 크기를 제한합니다. Skill은 문서 속 “정책을 무시하라” 같은 명령을 자료로만 취급하도록 지시하지만, 이것만으로 prompt injection 방어가 보장되지는 않습니다. 이 파일럿 Assistant에 셸·쓰기 도구를 추가하지 않습니다. 이 Tool의 제한은 다른 도구까지 강제하는 공통 보안 계층이 아닙니다.
 
 <a id="rich-ui-demo"></a>
 
