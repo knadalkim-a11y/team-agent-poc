@@ -8,10 +8,12 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용이며, 사내 PC 밖에서 코드·문서 준비만 할 수 있는 상황.
-- 이번 작업: AI 사용 경험이 적은 비개발자를 기본 사용자로 삼는 설계·검토 기준을 [개발 지침](../AGENTS.md#3-구현-위치와-과설계-방지)에 반영. 쉬운 업무 표현·입력 예시·필요한 조건만 확인·결과와 오류 뒤의 다음 행동을 우선하며, 실제 화면·Assistant Prompt·Tool·모델 설정은 변경하지 않음.
+- 이번 작업: 사용자 결정에 따라 Confluence 읽기 MVP를 우선하고 역할별 기능·Rich UI는 후속 구상으로만 기록. AI 초보자를 위한 [개발 지침](../AGENTS.md#3-구현-위치와-과설계-방지)을 유지하며, 현재 문서의 범위만 정리하고 기능 구현·설정·배포는 수행하지 않음.
 - 다음 작업 하나: 사내 복귀 후 **Confluence 제품·버전과 개인 PAT 인증 방식을 확인**한다. [설치 안내](04-confluence-read-tool.md)의 제품 확인부터 시작하며, 현재 Tool은 Data Center PAT/Bearer용 초안이다.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
+- 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
 - 이번 준비·지침 개정의 Git 변경은 [PR #1](https://github.com/knadalkim-a11y/team-agent-poc/pull/1)에서 관리한다. 병합 여부는 PR 상태로 확인하며 WebUI 적용과 구분한다.
+- 이번 범위 정리 점검(2026-09-06): Linux / Python 3.12.13에서 STATUS만 변경. `python scripts/check_docs.py`는 Markdown 20개·내부 링크 101개·오류 0·검토 후보 0, `git diff --check` 통과. 실제 사내 검증은 미실행.
 
 ## Git 준비와 WebUI 적용을 구분
 
