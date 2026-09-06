@@ -21,13 +21,14 @@ $proxyUrl = "http://<CORPORATE_PROXY_HOST>:<PORT>"
 
 $env:HTTP_PROXY = $proxyUrl
 $env:HTTPS_PROXY = $proxyUrl
-$env:NO_PROXY = "127.0.0.1,localhost,<INTERNAL_VLLM_HOST>"
+$env:NO_PROXY = "127.0.0.1,localhost,::1"
 $env:UV_SYSTEM_CERTS = "true"
 ```
 
 - 프록시 계정이나 비밀번호를 URL에 넣지 않습니다.
 - 인증서 오류가 발생해도 TLS 검증을 끄지 않습니다.
 - PowerShell을 새로 열면 세션 설정을 다시 적용합니다.
+- 사내 모델 호스트는 [인증 포함 경로 확인](02-vllm-direct-test.md) 후 직접 연결이 검증된 경우에만 `NO_PROXY`에 추가합니다.
 
 연결 확인:
 
@@ -100,7 +101,7 @@ uvx --python 3.11 open-webui@0.11.3 serve --host 127.0.0.1 --port 8080
 
 ```powershell
 $env:CORP_PROXY_URL = "http://<CORPORATE_PROXY_HOST>:<PORT>"
-$env:CORP_NO_PROXY = "127.0.0.1,localhost,<INTERNAL_VLLM_HOST>"
+$env:CORP_NO_PROXY = "127.0.0.1,localhost,::1"
 .\scripts\start-openwebui.ps1
 ```
 
@@ -120,9 +121,13 @@ Uvicorn running on http://127.0.0.1:8080
 .\scripts\smoke-test.ps1
 ```
 
+이 점검은 지정한 loopback 주소의 응답만 확인하고 리디렉션은 따라가지 않습니다. HTTP 3xx는 실패로 처리하므로 기본 주소·경로와 로컬 서비스 응답을 확인합니다. 성공해도 사내 모델·Confluence 연결이나 사용자 권한 검증을 대신하지 않습니다.
+
 첫 계정은 관리자 권한을 갖게 될 수 있으므로 POC 관리자 계정으로 생성하고, 비밀번호는 문서에 기록하지 않습니다.
 
 ## 6. 통과 조건
+
+아래 체크 표시는 2026-09-03 초기 설치의 사용자 보고입니다. 최신 판정과 남은 시험은 [평가표 A](../evals/scenarios.md)에서 확인합니다.
 
 - [x] 프로세스가 오류 없이 유지된다.
 - [x] http://127.0.0.1:8080 이 열린다.

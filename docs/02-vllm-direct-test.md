@@ -48,8 +48,8 @@ curl.exe -sS -o NUL -w "PROXY  http=%{http_code}\n" --connect-timeout 10 --proxy
 
 API Key 없이 실행하므로 `401` 또는 `403`도 TCP·TLS·HTTP 경로 자체가 연결됐다는 증거가 될 수 있지만, Key+IP 허용 경로 판정에는 사용할 수 없습니다. `000` 또는 connect error는 해당 경로가 실패한 것입니다. 프록시 출력에 HTTP 상태가 두 줄이면 첫 `200 Connection established`가 아니라 마지막 API 응답을 판정합니다.
 
-- 직접 경로만 연결: <INTERNAL_VLLM_HOST>를 `CORP_NO_PROXY`에 추가합니다.
-- 프록시 경로만 연결: <INTERNAL_VLLM_HOST>를 `CORP_NO_PROXY`에 추가하지 않습니다.
+- 인증을 포함한 실제 API 요청이 직접 경로에서 검증됨: <INTERNAL_VLLM_HOST>를 `CORP_NO_PROXY`에 추가합니다.
+- 인증을 포함한 실제 API 요청이 프록시 경로에서 검증됨: <INTERNAL_VLLM_HOST>를 `CORP_NO_PROXY`에 추가하지 않습니다.
 - 둘 다 실패: DNS·방화벽·사내 CA 문제를 먼저 해결합니다.
 
 기본값은 loopback만 우회합니다.
@@ -60,7 +60,7 @@ $env:CORP_NO_PROXY = "127.0.0.1,localhost,::1"
 
 환경변수를 바꿨다면 Open WebUI를 재시작합니다.
 
-## 네트워크 경로 판정 상태
+## 과거 네트워크 경로 관찰 — 2026-09-03
 
 2026-09-03 최초 비인증 비교에서 직접 경로는 403 HTML, 프록시 경로에서는 200이 관찰됐습니다. 그러나 Gateway가 Key와 발신 IP를 함께 검증하므로 비인증 결과만으로 정상 경로를 확정할 수 없습니다. 또한 HTTP 프록시의 `200 Connection established`는 TLS 터널 생성 성공일 뿐 최종 `/v1/models` 응답 200이 아닐 수 있습니다.
 
@@ -114,7 +114,7 @@ $secureKey = $null
 
 ### Explicit proxy timeout과 `/models` 제한 후보
 
-인증 포함 재검증 후 explicit proxy 경로는 curl exit 28 timeout이었고, 같은 PC의 기존 Agent는 정상 동작했습니다. 따라서 고정 프록시 경로는 사내 vLLM에 사용하지 않고 direct 경로에서 실제 Chat Completions를 검증합니다.
+2026-09-03 인증 포함 재검증 후 explicit proxy 경로는 curl exit 28 timeout이었고, 같은 PC의 기존 Agent는 정상 동작했습니다. 당시에는 고정 프록시 대신 direct 경로에서 실제 Chat Completions를 검증하기로 했습니다. 이 과거 관찰을 새 환경의 프록시 금지나 직접 경로 성공 근거로 재사용하지 않습니다.
 
 사내 Gateway가 `/v1/models`를 차단하면서 `/v1/chat/completions`만 허용할 수 있습니다. 이 경우 Open WebUI의 Verify Connection은 실패해도 연결의 Model IDs (Filter)에 정확한 ID를 `+`로 추가하면 자동 모델 조회를 생략하고 picker에 표시할 수 있습니다. Verify 결과가 아니라 실제 Chat Completions 성공으로 연결을 판정합니다.
 

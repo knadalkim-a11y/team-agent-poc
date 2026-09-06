@@ -324,6 +324,22 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(urllib.parse.urlsplit(request.full_url).path, "/wiki/rest/api/content/123")
             self.assertEqual(request.get_method(), "GET")
 
+    async def test_get_page_preserves_table_cells_and_inline_text(self):
+        data = page()
+        data["body"]["storage"]["value"] = (
+            "<p>온도 <strong>12</strong>℃</p>"
+            "<table><tr><th>최솟값</th><th>최댓값</th></tr>"
+            "<tr><td>12</td><td>34</td></tr></table>"
+        )
+        self.use_response(data)
+        result = self.result(await self.tool.get_page("123", __user__=self.user()))
+        self.assertTrue(result["ok"])
+        lines = result["content"].splitlines()
+        self.assertEqual(len(lines), 3)
+        self.assertEqual(lines[0], "온도 12℃")
+        self.assertEqual(lines[1].split(), ["최솟값", "최댓값"])
+        self.assertEqual(lines[2].split(), ["12", "34"])
+
     async def test_direct_page_id_in_forbidden_space_never_loads_body(self):
         self.use_response(page(space="SECRET", body=False))
         self.assert_error(await self.tool.get_page("123", __user__=self.user()))

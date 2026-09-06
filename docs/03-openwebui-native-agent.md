@@ -8,11 +8,11 @@
 
 ## 30초 구조 요약
 
-Git에서는 기존처럼 하나의 Agent Package로 관리합니다. 다만 Open WebUI Skill 하나가 패키지 전체를 실행할 수 없으므로, 배포할 때 **지침**과 **실행 기능**이 서로 다른 위치에 놓입니다.
+Git에서는 공식 배포 자산을 하나의 Agent Package로 관리합니다. 팀원이 WebUI에서 만들고 공유하는 개인·팀 자산과의 경계는 [README의 원본과 배포본](../README.md#원본과-배포본)을 따릅니다. Open WebUI Skill 하나가 패키지 전체를 실행할 수 없으므로, 공식 패키지를 배포할 때 **지침**과 **실행 기능**이 서로 다른 위치에 놓입니다.
 
 ```mermaid
 flowchart TB
-    Pack["Git의 Agent Package<br/>관리 단위는 하나"]
+    Pack["Git의 공식 Agent Package<br/>관리 단위는 하나"]
     Skill["Open WebUI Skill<br/>SKILL.md 지침"]
     Tool["실행 Tool<br/>내장 또는 외부"]
     Assistant["EES 통합 Assistant"]
@@ -58,16 +58,16 @@ sequenceDiagram
 | 검색어·대상 등이 모호하거나 후보 중 하나를 골라야 함 | 기본 `ask_user`로 필요한 조건만 확인; 사용할 수 없으면 일반 대화로 질문 |
 | 정해진 여러 값을 한 번 입력 | 기존 프롬프트 변수 입력 화면으로 충족되는지 먼저 확인 |
 | 짧은 답변·소수의 결과 링크 | 일반 채팅 답변 |
-| 받은 결과를 반복해서 필터링·펼치기·비교 | 업무 Tool의 Rich UI |
+| 받은 결과를 반복해서 필터링·펼치기·비교 | 업무 Tool 또는 사용자 클릭 Action에서 반환하는 Rich UI |
 
 `ask_user`는 [Open WebUI 0.11.3 내장 Tool](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/tools.py)입니다. Native 호출·내장 Tool·User Input 설정과 모델의 실제 호출 여부를 해당 환경에서 확인합니다. 알려진 조건을 다시 입력시키거나 동일한 질문용 Tool을 새로 만들지 않습니다.
 
 Rich UI를 구현할 때의 경계:
 
-- 모델이 업무 Tool을 선택하면 Tool이 조회·입력 검증 후 화면을 반환합니다. HTML은 고정 템플릿으로 만들고 외부 자료는 텍스트로 삽입합니다.
+- 모델이 업무 Tool을 선택하거나 사용자가 Action 버튼을 클릭하면, 연결된 코드가 조회·입력·권한 검증 후 화면을 반환하도록 구현할 수 있습니다. [0.11.3 Action 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/actions.py)도 Rich UI 반환을 지원하지만, 현재 패키지에 Action이나 업무용 Rich UI가 연결된 것은 아닙니다. HTML은 고정 템플릿으로 만들고 외부 자료는 텍스트로 삽입합니다.
 - `HTMLResponse`와 `Content-Disposition: inline`으로 화면을 반환하고, 모델의 설명에 필요한 데이터는 `(HTMLResponse, context)`로 함께 제공합니다. HTML만 반환했다고 모델이 화면 내용을 읽을 수 있다고 가정하지 않습니다. [공식 Rich UI 안내](https://docs.openwebui.com/features/extensibility/plugin/development/rich-ui/)
 - 받은 결과 안의 필터·상세 펼치기는 브라우저에서 처리합니다. 추가 검색·본문 조회는 업무 Tool과 사용자별 권한 검사를 거칩니다. iframe에 PAT를 넣거나 원 시스템 API를 직접 호출시키지 않습니다.
-- 버튼이 자동으로 Python Tool을 재호출하지는 않습니다. 대화로 선택을 전달할지, 별도 동작을 구현할지는 사용사례가 정해진 뒤 결정합니다. iframe의 same-origin 권한을 켜는 방식으로 해결하지 않습니다.
+- Rich UI 안의 HTML 버튼은 자동으로 Python Tool을 재호출하지 않습니다. 별도 등록한 Action과 구분하며, 대화로 선택을 전달할지 추가 동작을 구현할지는 사용사례가 정해진 뒤 결정합니다. iframe의 same-origin 권한을 켜는 방식으로 해결하지 않습니다.
 - 저장된 채팅의 화면은 당시 결과일 수 있습니다. 갱신 여부를 표시하고, 필터·입력 상태가 재접속 후 자동 복원되거나 항상 최신이라고 설명하지 않습니다.
 
 코드 위치는 [AGENTS의 구현 규칙](../AGENTS.md#3-구현-위치와-과설계-방지)을 따릅니다. 기능별 API 코드는 원 시스템에 요청하는 클라이언트 코드입니다. 원 시스템 서버 구현을 이 저장소에 가져오지 않으며, 둘 이상의 실제 기능에서 같은 코드의 반복 수정이 생기면 공통화를 검토합니다.
@@ -103,7 +103,9 @@ POC에서는 Router, A2A, MCP, 자동 동기화, 외부 Agent를 만들지 않�
 
 ## 확인된 제한: Open WebUI Skill은 실행 패키지가 아니다
 
-Open WebUI 공식 정의에서 Workspace Skill은 Markdown 지침입니다. 모델에는 이름·설명만 먼저 제공되고, 필요할 때 `view_skill`로 본문을 불러옵니다. Python 실행, API 호출, 별도 `references/`·`scripts/` 디렉터리 배포 기능은 Workspace Skill 자체에 없습니다.
+Open WebUI 공식 정의에서 Workspace Skill은 Markdown 지침입니다. 0.11.3에서 기본 내장 Tool을 사용하는 대화는 연결된 Skill의 이름·설명을 먼저 제공하고 필요할 때 `view_skill`로 본문을 불러옵니다. 사용자가 `$`로 Skill을 직접 지정하거나 내장 Tool을 사용하지 않는 경로에서는 본문을 직접 제공합니다. 따라서 `view_skill` 호출이 없다는 이유만으로 Skill이 적용되지 않았다고 판단하지 않습니다. [0.11.3 Skill 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/middleware.py)
+
+Python 실행, API 호출, 별도 `references/`·`scripts/` 디렉터리 배포 기능은 Workspace Skill 자체에 없습니다.
 
 따라서 기존 사내 Agent Skill 패키지를 Open WebUI Skill 하나로 옮기는 방식은 사용하지 않습니다.
 
@@ -111,12 +113,12 @@ Open WebUI 공식 정의에서 Workspace Skill은 Markdown 지침입니다. 모�
 |---|---|
 | `SKILL.md`의 판단 기준·절차 | Workspace Skill |
 | 짧고 정적인 참고 문서 | Knowledge |
-| 크거나 구조화된 Reference | Tool Server의 검색·조회 API |
+| 크거나 구조화된 Reference | Workspace Tool 또는 필요 시 외부 Tool Server의 검색·조회 API |
 | `scripts/` 실행 코드 | Workspace Tool 또는 외부 MCP/OpenAPI Tool Server |
 | 패키지 의존성·런타임 | Open WebUI 환경 또는 외부 Tool Server 환경 |
 | API Key·사내 URL | Workspace Tool 설정 또는 외부 Tool Server의 Secret |
 | 반드시 지켜야 하는 공통 정책 | Filter·RBAC·Tool/Broker 내부 강제 |
-| 버전·설치·업데이트 | Git 원본과 별도 배포 절차 |
+| 공식 배포 자산의 버전·설치·업데이트 | Git 원본과 별도 배포 절차 |
 
 ### 별도 Tool Server는 선택 사항
 
@@ -140,7 +142,7 @@ flowchart TB
 | 적합한 범위 | 작은 POC, 단순 API wrapper | 여러 파일·의존성·복잡한 패키지 |
 | Open WebUI 결합도 | 높음 | 낮음 |
 | 다른 Agent 재사용 | 별도 Adapter 필요 | 같은 endpoint 재사용 가능 |
-| 장애·권한 격리 | 약함 | 강함 |
+| 장애·권한 격리 | WebUI 프로세스를 공유; Tool 내부 검증 필요 | 별도 분리·통제 가능; 실제 배포 설계에 따름 |
 | 업데이트 | UI Import·수정 | Git 배포·서비스 재시작 |
 
 현재 POC에서는 **읽기 전용 Workspace Tool 하나**로 실제 실행 루프를 먼저 검증할 수 있습니다. 기존 Agent Skill 전체를 UI에 복사하지 않고, 대표 스크립트 하나를 얇게 감싸 Tool 함수로 노출합니다. 다음 조건 중 하나가 확인되면 외부 Tool Server 분리를 검토합니다. 자동 전환이나 현재 MVP의 선행 조건은 아닙니다.
@@ -170,17 +172,19 @@ flowchart TB
     Guard --> Assistant
 ```
 
-이 확장안에서는 Open WebUI가 사용자 UI와 Native Tool 호출 루프를, Git이 패키지 원본을, 외부 Tool Server가 실행을 담당합니다. Workspace Tool MVP에서는 실행을 Open WebUI 백엔드가 담당합니다. 두 경우 모두 Open WebUI Skill은 Agent Pack 전체가 아니라 Agent Pack 중 **지침 부분을 투영한 배포본**입니다.
+이 확장안에서는 Open WebUI가 사용자 UI와 Native Tool 호출 루프를, Git이 공식 패키지 원본을, 외부 Tool Server가 실행을 담당합니다. Workspace Tool MVP에서는 실행을 Open WebUI 백엔드가 담당합니다. 두 경우 모두 패키지에서 등록한 Open WebUI Skill은 Agent Pack 전체가 아니라 Agent Pack 중 **지침 부분을 투영한 배포본**입니다.
 
 작은 POC 코드는 Open WebUI의 Python Workspace Tool로 넣습니다. 팀 공용 패키지라도 규모만으로 외부 서버를 추가하지 않으며, 의존성·Secret·감사·권한의 별도 수명주기가 필요해질 때 외부 MCP/OpenAPI Tool Server의 운영 비용과 이점을 비교합니다.
 
-예를 들어 GitHub 패키지는 다음처럼 나눕니다.
+예를 들어 후속 GitHub 읽기 패키지는 다음처럼 나눌 수 있습니다. 아직 구현된 함수가 아닙니다.
 
-- `SKILL.md`: 언제 저장소를 조회하고 어떤 검증·승인 절차를 따르는지
+- `SKILL.md`: 언제 저장소를 조회하고 근거와 조회 제한을 어떻게 확인하는지
 - `references/`: 사내 GitHub 사용 가이드와 API 규격
-- `scripts/`: 검색·파일 조회·브랜치 생성·PR 생성 구현
-- Tool Server: 스크립트를 `search_repository`, `get_file`, `create_branch`, `open_pull_request` 같은 제한된 함수로 노출
-- 강제 정책: 저장소·브랜치 allowlist, 쓰기 전 사용자 승인, 최소 권한 토큰, 감사 로그
+- `scripts/`: 검색·파일·PR 조회 구현
+- Workspace Tool 또는 필요한 경우 Tool Server: `search_repository`, `get_file`, `get_pull_request` 같은 제한된 함수 노출
+- 강제 정책: 허용 저장소·조회 범위, 사용자별 권한, 응답 크기·시간 제한
+
+브랜치·PR 생성 같은 쓰기 기능과 그 승인 절차는 읽기 MVP 이후 별도 범위에서 검토합니다.
 
 범용 Shell이나 임의 `git push`를 그대로 노출하지 않습니다. 또한 Tool은 Open WebUI 서버에서 실행되므로, 중앙 서버로 이전한 뒤 사용자의 PC 작업 폴더를 직접 조작하지 않습니다. 사용자 로컬 저장소를 다루려면 별도 로컬 실행 Agent/Runner가 필요하고, WebUI에서는 중앙 GitHub API 작업이나 서버 측 워크스페이스만 수행합니다.
 
@@ -205,19 +209,15 @@ flowchart LR
 
 ## 단계 구분
 
-```mermaid
-flowchart LR
-    A["지금<br/>Skill·Knowledge 품질"] --> B["Assistant 구성<br/>Native 호출 검증"]
-    B --> C["파일럿 전<br/>Filter·권한·인프라 통제"]
-```
+현재 진행 단계는 [STATUS](STATUS.md), 항목별 판정은 [평가표](../evals/scenarios.md)를 따릅니다. 아래는 검증 범위를 구분하는 기준이며 별도 서버나 Filter의 도입 순서가 아닙니다.
 
 | 단계 | 확인 대상 | 해석 |
 |---|---|---|
-| 지금 | Skill 선택, 절차 준수, 근거 표시 | 행동 품질 검증 |
-| Assistant 구성 후 | Native `view_skill`, Knowledge, 위험 Tool 미연결 | POC 안전성 검증 |
-| 파일럿 전 | 필수 Filter, RBAC, 자격증명·네트워크 차단, 승인된 조회 Broker | 강제 통제 검증 |
+| 기본 Assistant | Skill 선택, 절차 준수, Knowledge 조회·근거 표시 | 사내 모델의 행동 품질 검증 |
+| 읽기 Tool 연결 | 입력 제한, 사용자별 인증·권한, 실패 처리, 위험 Tool 미연결 | 실제 실행 경로 검증 |
+| 다른 사용자에게 공개 전 | 자산 접근 권한, 비밀 저장, 사용자 간 데이터 격리 | 해당 연결 기능의 실환경 평가 |
 
-Open WebUI에서 Claude Code Hook과 가장 가까운 확장 지점은 요청·응답을 가로채는 Filter Function입니다. Tool은 정책을 강제하는 장치가 아니라 모델에 실행 능력을 추가하는 장치이므로, 직접 DB Tool 대신 정책이 내장된 읽기 전용 Broker만 나중에 연결합니다.
+Tool은 실행 능력을 제공하며 입력 제한·권한 검사도 Tool 코드에서 강제할 수 있습니다. 한 Tool의 제한이 다른 Tool까지 통제하는 것은 아닙니다. 요청·응답을 가로채는 Filter Function이나 외부 Broker는 별도 통제의 필요가 확인될 때 검토하며, 현재 Confluence Workspace Tool MVP의 자동 선행 조건으로 두지 않습니다.
 
 Skill만으로 거절에 성공한 결과는 행동 품질 PASS이며, 강제 통제 PASS로 판정하지 않습니다.
 
@@ -239,13 +239,15 @@ flowchart LR
 - Open WebUI 서버에서 운영 DB로 가는 직접 네트워크 경로와 자격증명을 제공하지 않습니다.
 - 차단 시험은 답변 문구가 아니라 Broker와 DB 감사 로그에서 실제 쿼리 미실행을 확인합니다.
 
-따라서 현재 P05·P06은 모델 행동 평가일 뿐입니다. DB Tool을 도입하는 시점에 평가표 S06을 별도로 통과해야 파일럿에 사용할 수 있습니다.
+따라서 현재 P05·P06은 모델 행동 평가일 뿐입니다. 향후 승인된 DB 조회 중계 경로를 도입하면 [평가표 S06](../evals/scenarios.md)의 실제 통제 증거를 확인해야 합니다. 이는 운영 DB 직접 접속 Tool을 허용하거나 Confluence 문서 조회에 별도 Broker를 요구한다는 뜻이 아닙니다.
 
-## Git 원본과 Open WebUI 배포본
+## 공식 Git 원본과 Open WebUI 배포본
+
+아래 절차는 담당자가 공식으로 채택한 배포 자산에 적용합니다. 팀원의 개인·팀 자산 작성과 허용된 범위의 공유에 매번 담당자 승인을 요구하지 않습니다. 관리 경계는 [README의 원본과 배포본](../README.md#원본과-배포본)을 따릅니다.
 
 ```mermaid
 flowchart LR
-    Review["담당자 검토"] --> Git["Git 관리 원본"]
+    Review["공식 자산 담당자 검토"] --> Git["Git 관리 원본"]
     Git --> Import["관리자 수동 등록"]
     Import --> DB["Open WebUI DB 배포본"]
     DB --> Test["평가 후 공개"]
@@ -285,16 +287,18 @@ flowchart LR
     Chat --> Load["필요 시 view_skill"]
 ```
 
-모델에 연결된 Skill은 이름과 설명만 기본 제공되고, Native Function Calling을 통해 필요한 때 본문을 불러오는지 호출 이력으로 확인합니다. 일반 사용자에게 공유할 때는 Assistant뿐 아니라 연결된 Skill에도 읽기 권한을 부여해야 합니다.
+현재 기준선의 Native·내장 Tool 사용 경로에서는 Skill을 직접 지정하지 않은 질문으로 필요한 본문을 불러오는지 호출 이력을 확인합니다. `$`로 직접 지정한 시험과 자동 선택 시험은 구분하며, 지침 준수도 실제 사내 모델에서 확인합니다. 일반 사용자에게 공유할 때는 Assistant뿐 아니라 연결된 Skill에도 읽기 권한을 부여해야 합니다.
 
 ## 2. Knowledge 등록
 
 1. `Workspace > Knowledge`에서 `EES POC Policy`를 생성합니다.
 2. `agent-pack/knowledge/poc-policy.md`를 등록합니다.
 3. 현재처럼 파일 추가 시 `임베딩 모델이 없음` 오류가 나면 `관리자 패널 > 설정 > 문서`에서 `임베딩 검색 우회`를 켜고 저장한 뒤 다시 추가합니다.
-4. 이 옵션은 임베딩·분할 검색 없이 전체 내용을 컨텍스트로 전달하는 전역 POC 설정입니다. 작은 합성 문서에만 사용하고, 대규모 문서를 넣기 전에는 끈 뒤 사내 OpenAI-compatible Embedding 모델을 별도로 연결합니다.
+4. 이 옵션은 임베딩·분할 검색을 우회하는 전역 POC 설정입니다. 작은 합성 문서에만 사용하고, 대규모 문서를 넣기 전에는 끈 뒤 사내 OpenAI-compatible Embedding 모델을 별도로 연결합니다.
 5. Knowledge를 Assistant에 붙일 때도 `Full Context`를 선택해 이번 시험이 벡터 검색 품질과 섞이지 않게 합니다.
 6. 실제 사내 문서는 승인·비식별·접근권한 기준이 정해질 때까지 넣지 않습니다.
+
+`Full Context`를 설정해도 Native에서 모델에 연결한 Knowledge 본문이 자동 주입된다고 가정하지 않습니다. [0.11.3 처리 코드](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/middleware.py)는 모델 Knowledge 자동 주입과 Native 내장 조회 경로를 구분합니다. 실제 Knowledge 조회 Tool 호출과 답변 근거를 확인합니다.
 
 ## 3. Workspace Model 생성
 
@@ -333,7 +337,7 @@ OFF
 
 ## 4. 공개 전 검증
 
-`evals/scenarios.md`의 P01~P07을 실행합니다. 특히 다음은 답변뿐 아니라 Skill·Tool 호출 이력을 함께 확인합니다.
+[평가표](../evals/scenarios.md)의 Native Assistant 평가와 [지침 개정 후 재평가](../evals/scenarios.md#instruction-revision)를 적용 범위에 맞춰 실행합니다. 특히 다음은 답변뿐 아니라 Skill·Tool 호출 이력을 함께 확인합니다.
 
 - 정책 문서 ID·버전 근거가 맞는가
 - 문서에 없는 규칙을 만들어내지 않는가
@@ -346,13 +350,14 @@ P05 또는 P06이 실패하면 다른 사용자에게 공개하지 않습니다.
 ## 5. 업데이트 원칙
 
 ```text
-Git 변경 → 검토 → Open WebUI 수동 반영 → P01~P07 재평가 → 사용자 공개
+공식 Git 자산 변경 → 검토 → Open WebUI 수동 반영 → 해당 평가 재실행 → 사용자 공개
 ```
 
-- Git의 파일을 관리 원본으로 취급합니다.
-- Open WebUI에서 직접 수정한 내용은 Git에도 동일하게 반영해 복사본 간 차이를 막습니다.
+- 공식 배포 자산은 Git 파일을 관리 원본으로 취급하고 Git에서 수정한 뒤 WebUI에 반영합니다. 개인·팀 작성물 전체를 Git 관리 대상으로 삼지 않습니다.
+- 공식 항목을 WebUI에서 직접 수정했다면 Git 원본과 차이를 확인하고 검토·반영하여 복사본 간 불일치를 해소합니다.
 - Policy·Skill·Knowledge에는 문서 ID와 버전을 둡니다.
 - 자동 업데이트는 롤백·승인·감사 로그가 마련되기 전에는 사용하지 않습니다.
+- 모델·서빙 옵션을 교체하면 [사내 모델 운용 기준](../versions.md#사내-모델-운용-기준)에 따라 기존 평가 질문으로 호출 품질·횟수·응답 시간을 다시 확인합니다.
 
 ## 다음 단계 Gate
 
