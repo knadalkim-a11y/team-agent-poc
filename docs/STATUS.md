@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: 기존 사내 PC에는 Open WebUI 설치·UI 설정만 했고 저장소를 받은 적은 없는 것 같다는 사용자 설명으로 최초 clone부터 안내함. 최초 연결 실패 후 Git 명령별 사내 프록시를 지정한 `ls-remote`와 `clone`이 모두 성공했다는 보고를 받음. 저장소 받기 성공이며 Confluence Tool v0.1.2의 WebUI 코드 교체·`ALLOW_HTTP` 설정·인증 성공 보고는 아님. 내려받은 실제 SHA는 아직 대조하지 않았고 [C03 기존 실패 기록](../evals/scenarios.md#결과-기록)을 유지함.
-- 다음 작업 하나: **사내 기존 Tool을 v0.1.2로 갱신하고 연결 확인을 다시 실행**한다. [기존 Tool 갱신 순서](04-confluence-read-tool.md#http-tool-update)에 따라 잠시 비활성화한 뒤 같은 Tool의 코드를 교체하고 기존 설정·연결을 확인한다. 실제 HTTP 전용 사내 기본 주소라면 관리자 `ALLOW_HTTP=true`를 저장한 뒤 활성화하고 `check_access` 결과를 기록한다. 실제 주소·PAT는 수집하지 않으며 공식 HTTPS 주소가 있으면 기본 HTTPS 경로를 사용한다.
+- 이번 작업: Git 프록시 연결·최초 clone 성공에 이어, 사용자가 Tool v0.1.2 코드 교체·HTTP 기본 주소와 관리자 `ALLOW_HTTP=true` 설정·기존 설정 확인·활성화 안내를 모두 수행하고 `check_access`의 `ok=true`, `authenticated=true`를 확인했다고 보고함. 개인 PAT 인증 성공으로 기록하며 기존 URL 사전검사 실패는 과거 기록으로 보존함. [C03](../evals/scenarios.md#confluence-live)의 이번 응답·콘솔 PAT 비노출 확인은 아직 별도 보고가 없고 검색·본문·문서별 권한 검증은 다음 단계임.
+- 다음 작업 하나: **허용 Space의 알고 있는 문서를 검색하고 본문·원문 링크를 확인(C04)**한다. [실제 연결과 안전한 사용](04-confluence-read-tool.md#5-실제-연결과-안전한-사용)에 따라 가능하면 짧은 합성 테스트 문서를 사용해 `search_pages` → `get_page`의 성공과 내용 일치를 확인한다. 이번 인증 호출의 응답·콘솔에 PAT·Authorization 헤더가 노출되지 않았는지도 사내에서 확인해 C03의 남은 조건을 마무리한다. 내부 문서·주소·PAT는 받지 않고 성공 여부와 비식별 오류만 기록한다.
 - 사내 작업 전달: 사내 PC에서는 ChatGPT에 접근할 수 없어 외부 모바일에서 코드·명령을 옮겨 실행함. Git 저장소의 안내 경로는 `%USERPROFILE%\team-agent-poc`이며 Open WebUI 데이터·설치 경로와 별개임. 최초 clone 성공 보고가 있으므로 다시 clone을 요구하지 않음. Git은 해당 PowerShell의 `$gitProxy` 변수와 `git -c "http.proxy=$gitProxy" ...`로 연결했으며 영구 프록시 저장이나 WebUI/Confluence 프록시 변경은 안내하지 않음. 새 창의 후속 Git 갱신 시 사내 프록시 값을 다시 설정해야 하며 실제 주소는 수집하지 않음.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
@@ -21,11 +21,11 @@
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 개정 내용 미반영 | [P08~P10 및 기존 P02~P07 재검증](../evals/scenarios.md#instruction-revision); 사내 모델 검증 대기 | 미확인 |
-| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.2; HTTP 명시적 허용 준비 | 2026-09-06 기존 v0.1.1 안내 원본으로 등록한 Tool의 `check_access`가 URL 사전검사 실패했다는 보고. v0.1.2 교체·실제 인증은 미확인 | [HTTP 지원 사외 검증](../evals/confluence-offline.md#http-opt-in), [실환경 C01~C09](../evals/scenarios.md#confluence-live) | 기존 안내 원본: Tool [4dff01d](https://github.com/knadalkim-a11y/team-agent-poc/blob/4dff01d5bfc495d8bb2a29f0d52c548f794562c0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), Skill [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md); 등록 내용 직접 대조 미실행. v0.1.2 적용 SHA 미확인 |
+| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.2; HTTP 명시적 허용 | 2026-09-06 v0.1.2 적용·HTTP 허용·활성화 후 `check_access`의 `ok=true`, `authenticated=true` 사용자 보고. 검색·본문·권한은 미확인 | [HTTP 지원 사외 검증](../evals/confluence-offline.md#http-opt-in), [실환경 C01~C09 및 결과](../evals/scenarios.md#confluence-live) | 새 Tool 안내 원본 [910ad765](https://github.com/knadalkim-a11y/team-agent-poc/blob/910ad765a777df1caf30a565a197097f8afbf8b0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), 기존 Skill 안내 원본 [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md). 등록 코드·사내 checkout SHA 직접 대조 미실행 |
 | Rich UI 참고 예제 | [합성 검색 결과 HTML](04-confluence-read-tool.md#rich-ui-demo); 실제 API·기존 Tool과 미연동 | 배포 대상 미확정 | [사전 준비 검증](../evals/confluence-offline.md#status-history); 실제 브라우저·WebUI 검증과 구분 | 해당 없음 |
 | 실행 스크립트 | 시작·smoke test·암호화 준비 옵션; smoke 자동 리디렉션 차단 | 사용자 보고로 명령 복사 후 수동 실행; 정해진 기동 스크립트 채택은 안정화 이후 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
 
-**Skill은 Git과 UI 등록 보고 기준 모두 3개이며, 실제 사용 확인은 기존 2개입니다.** Confluence Skill·Tool의 등록과 Assistant 연결 보고를 실제 호출 성공으로 간주하지 않습니다. 적용 원본은 Git 최신 커밋과 구분하며, 안내 원본·사용자 보고·등록 내용 대조 여부를 함께 기록합니다.
+**Skill은 Git과 UI 등록 보고 기준 모두 3개이며, Skill 자체 사용 확인은 기존 2개입니다.** Confluence Tool의 `check_access` 성공 보고는 있으나 `confluence-read`를 `view_skill`로 불러왔는지는 별도 확인되지 않았습니다. 적용 원본은 Git 최신 커밋과 구분하며, 안내 원본·사용자 보고·등록 내용 대조 여부를 함께 기록합니다.
 
 ## 남아 있는 검증과 제한
 
@@ -39,6 +39,7 @@
 
 ## 최근 점검
 
+- 사용자 보고의 두 성공 필드를 Tool의 `check_access` 결과와 대조해 인증 성공으로 반영하고, 평가표의 PAT 비노출·검색·문서 권한 조건과 구분함. STATUS·평가표만 갱신하며 문서 점검·`git diff --check`를 확인함. 실제 사내 실행·화면·로그 직접 검사는 없고 코드 시험을 재실행하지 않음.
 - Git 프록시 연결·최초 clone 성공이라는 사용자 보고를 다음 WebUI 수동 적용 단계와 구분해 반영함. 안내 원본은 Tool v0.1.2의 [910ad765](https://github.com/knadalkim-a11y/team-agent-poc/commit/910ad765a777df1caf30a565a197097f8afbf8b0)이며 실제 사내 SHA·등록 코드 대조는 대기. STATUS만 갱신하고 문서 점검·`git diff --check`를 확인함. 실행 코드·기존 실환경 판정은 유지하며 자동 코드 시험은 이번 상태 기록에서 재실행하지 않음.
 - HTTP 허용 옵션·요청·문서 링크·HTTPS 검증·리디렉션·프록시 경계와 관련 안내를 검토함. 독립 코드·시험 diff 검토에서 차단할 문제 없음. 실제 주소·PAT·사내 네트워크는 사용하지 않았으며 새 검증 결과와 미실행 범위는 [HTTP 지원 기록](../evals/confluence-offline.md#http-opt-in)에 둠. C01/C02의 기존 판정을 v0.1.2 배포 시험 결과로 갱신하지 않음.
 - 읽기 전용 가짜 PAT DB 검사기와 합성 SQLite 시험을 추가했던 자동 시험 97개, 문서 검사·diff 통과 이력은 [검증 증거](../evals/confluence-offline.md#canary-db-check)에 보존. 평문·잘못된 키·중복·WAL·journal·값 비노출 조건을 확인했던 당시 사외 시험임.
