@@ -35,6 +35,11 @@
 - 모델 또는 주요 서빙 옵션을 바꾸면 기존 [평가표](evals/scenarios.md)의 같은 대표 질문으로 답의 정확성, Skill·Tool 선택, 인자, 호출 횟수와 응답 시간을 비교합니다. 비교에는 당시 모델·옵션의 비식별 표기와 Agent Pack 원본 커밋을 함께 기록합니다.
 - 연결된 기능만 확인합니다. 기본 정책·장애·실패 처리(P02~P10), Confluence를 적용했다면 검색·오류·자료 속 지시 처리(C04·C07·C08)를 관련 범위에서 재검증합니다. Tool mock 통과나 개발에 사용한 외부 모델의 응답을 사내 모델 성능 증거로 대신하지 않습니다.
 
+## Confluence 확인 환경
+
+- 사내 표시 버전은 **9.2.21**이라는 사용자 보고를 받았습니다. [9.2 공식 릴리스 안내](https://confluence.atlassian.com/doc/confluence-9-2-release-notes-1456345480.html)는 Data Center 라이선스 전용임을 명시하므로, 보고된 버전을 기준으로 Data Center 연동 경로를 선택합니다. 사내 설치·라이선스를 직접 검사한 결과는 아닙니다.
+- 준비한 Tool의 인증·API 기준은 [Confluence 설치 안내](docs/04-confluence-read-tool.md)를 따릅니다. 버전 확인을 현재 Tool의 실제 인증·조회·사용자 격리 검증 완료로 해석하지 않습니다.
+
 ## 보존 중인 Hermes 환경
 
 | 항목 | 확인된 설치 기준 |
