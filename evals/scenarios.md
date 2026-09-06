@@ -163,7 +163,7 @@ Native 평가에서 복잡한 다단계 작업의 실패가 확인된 경우에�
 
 | ID | 검증 내용 | 통과 조건 | 상태 |
 |---|---|---|---|
-| C01 | 사용자별 설정 UI | PAT가 password 형식으로 표시되고 사용자별로 분리됨 | 대기 |
+| C01 | 사용자별 설정 UI | PAT가 password 형식으로 표시되고 사용자별로 분리됨 | PASS |
 | C02 | 저장 암호화 | 가짜 canary가 DB·로그에 평문으로 남지 않음 | PASS — 현재 DB·기본 콘솔 범위; [증거](#confluence-canary-restart) |
 | C03 | 연결 확인 | 현재 사용자로 인증되며 PAT는 응답·로그에 없음 | 대기 |
 | C04 | 검색·조회 | 허용 Space 문서를 검색하고 제목·근거·원문 링크 반환 | 대기 |
@@ -191,6 +191,7 @@ Native 평가에서 복잡한 다단계 작업의 실패가 확인된 경우에�
 | 2026-09-06 | W04 | Windows / OWUI 0.11.3 / 수동 uvx 기동 | PASS | 사용자 보고: `BackupVerified=True` 출력 후 재기동, 기존 계정·대화 모두 유지 | [4dff01d의 수동 안내](https://github.com/knadalkim-a11y/team-agent-poc/blob/4dff01d5bfc495d8bb2a29f0d52c548f794562c0/docs/04-confluence-read-tool.md#수동-기동을-유지하는-경우) 실행 보고; 백업 핵심 DB·키 비교 포함. 고정 ps1 미사용, 복원 시험·Valve 저장 암호화·재시작 후 모델 응답·사용자 격리는 미판정 |
 | 2026-09-06 | C02 | Windows / OWUI 0.11.3 / 가짜 PAT DB 검사 | 진행 중 — DB 부분 확인 | 사용자 보고: `CheckCompleted=true`, `EncryptedCanaryMatches=1`, `PlaintextCanaryMatches=0`, `PlaintextInDatabaseFiles=false`, `DatabaseFilesChecked=2`, `DatabaseCheckPassed=true`, `LogsChecked=false`, `RestartPersistenceChecked=false` | [1ed22bd의 검사기](https://github.com/knadalkim-a11y/team-agent-poc/blob/1ed22bda548f5234c0f15f8e90e6a6e53a8afe4e/scripts/check_confluence_canary.py)를 안내한 뒤 받은 결과. GPT 직접 실행·전달 코드 대조는 미실행. 기존 파일 키로 일치하는 암호문 1건과 검사한 DB 관련 파일 2개의 평문 부재를 확인한 범위이며, 부가 파일 종류는 출력에 없음. 로그·가짜 값 저장 후 재기동·UI 마스킹·사용자 분리는 미확인; 실제 PAT 입력·API 호출 없음 |
 | 2026-09-06 | C02 | Windows / OWUI 0.11.3 / 같은 창 수동 재기동 | PASS — 현재 DB·기본 콘솔 범위 | 사용자 보고: 원래 콘솔에서 canary 검색 결과 없음. 재기동 후 개인 설정 값이 남아 있고 저장 버튼을 누르지 않음. DB 재검사 결과 `true, 1, 0, false, 2, true, false, false` | 순서는 직전 기록의 8개 필드와 같음. 콘솔·재기동 확인은 사용자 관찰로 별도 기록하며 검사기 마지막 두 필드가 `true`가 된 것으로 바꾸지 않음. 범위와 미확인은 [상세 증거](#confluence-canary-restart)를 따름 |
+| 2026-09-06 | C01 | Windows / OWUI 0.11.3 / 관리자 A·일반 테스트 사용자 B | PASS | 사용자 보고: 안내한 6단계 모두 정상. B의 최초 PAT 빈칸, 가짜 값 저장·재조회·마스킹 정상, A의 기존 실제 PAT 유지, B의 가짜 PAT 비우기·저장까지 완료 | [ef049ea의 시험 안내](https://github.com/knadalkim-a11y/team-agent-poc/blob/ef049ea71f930e3d959dd312f1e8e855478caeb7/docs/04-confluence-read-tool.md#활성화-전-개인-설정-분리-확인c01). 별도 브라우저 세션·Tool 읽기 권한·`ENABLED=false` 유지 조건의 사용자 보고이며 계정 신규 생성/재사용 여부는 따로 확인하지 않음. 실제 토큰·계정 식별자·화면 수집 및 GPT 직접 검사는 없음. 실제 API 호출에서의 자격증명·문서 권한 분리(C03/C05)는 별도 대기 |
 | YYYY-MM-DD | <ID> | OWUI <VERSION> | 대기 | <REFERENCE> | <NOTE> |
 
 - 오류 전문 대신 비식별 요약이나 Issue 링크를 남깁니다.
@@ -205,4 +206,4 @@ Native 평가에서 복잡한 다단계 작업의 실패가 확인된 경우에�
 - 순서: 원래 서버 콘솔에서 `Ctrl+Shift+F`로 가짜 값을 검색해 결과 없음 → 안내한 같은 창 재기동 → 브라우저 새로고침 후 개인 설정 값 유지 확인, 저장 버튼 미사용 → 별도 창에서 DB 검사 반복. UI 관찰은 설정 칸의 값 유지이며 평문 표시로 정확한 문자열을 다시 대조했다는 보고는 아님.
 - 재검사: `CheckCompleted=true`, `EncryptedCanaryMatches=1`, `PlaintextCanaryMatches=0`, `PlaintextInDatabaseFiles=false`, `DatabaseFilesChecked=2`, `DatabaseCheckPassed=true`, `LogsChecked=false`, `RestartPersistenceChecked=false`. 기존 파일 키로 같은 가짜 값의 암호문 1건이 재시작 후에도 복호화됐고 검사한 DB 관련 파일 2개에 평문이 없음. UI 유지 관찰과 함께 저장 후 재기동 확인 근거로 사용함.
 - 로그 범위: 안내한 기본 수동 기동의 현재 콘솔 버퍼 검색. [v0.11.3 logger.py](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/logger.py)의 일반 출력은 stdout이며, 감사 수준이 `NONE`이 아니고 파일 옵션이 켜진 경우에만 감사 파일 출력이 추가됨. [env.py](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/env.py)의 감사 수준 기본값은 `NONE`. 기본 소스 대조는 사내 PC의 별도 환경변수·로그 수집 설정까지 직접 검사한 것이 아님.
-- 판정: 이번 저장 시험의 DB·기본 콘솔 범위에서 C02 PASS. 별도 감사 로그·리디렉션·외부 수집·버퍼 밖 과거 출력·모든 백업까지 평문 부재를 보증하지 않음. 별도 로그 설정을 사용했다는 정보가 확인되면 해당 로그 확인을 추가함. 사용자별 설정 분리(C01)·실제 인증(C03)·문서 권한 격리(C05)는 아직 대기이며 실제 PAT 저장·API 호출은 보고되지 않음. 관리자 `ENABLED=false`를 유지하고 다음은 개인 PAT 교체만 안내함.
+- 판정: 이번 저장 시험의 DB·기본 콘솔 범위에서 C02 PASS. 별도 감사 로그·리디렉션·외부 수집·버퍼 밖 과거 출력·모든 백업까지 평문 부재를 보증하지 않음. 별도 로그 설정을 사용했다는 정보가 확인되면 해당 로그 확인을 추가함. 이 C02 시험 당시 사용자별 설정 분리(C01)·실제 인증(C03)·문서 권한 격리(C05)는 대기였고 실제 PAT 저장·API 호출도 보고되지 않았음. 당시 관리자 `ENABLED=false`를 유지하고 다음은 개인 PAT 교체만 안내했으며, 이후 판정은 위 평가표·결과 기록을 따름.
