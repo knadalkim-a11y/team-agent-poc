@@ -142,12 +142,14 @@ uvx --offline --no-python-downloads --python 3.11 --from "open-webui==0.11.3" py
 ## 4. Workspace Tool·Skill 등록
 
 1. 관리자 계정의 Workspace → 도구에서 새 도구를 만들고 `confluence_tool.py` 전체를 붙여넣어 저장합니다.
-2. 관리자 Valves에서 아래 설정을 확인합니다. 실제 값은 사내 관리자 화면에만 입력합니다.
-3. Workspace Skill에 `SKILL.md`의 이름·설명·본문을 등록합니다.
-4. `EES 통합 Assistant`의 설정에서 해당 Skill과 Tool을 연결하고, 파일럿 사용자에게 필요한 사용 권한만 부여합니다.
+2. 저장 후 **Workspace → 도구 목록 → 해당 도구 오른쪽 톱니바퀴(밸브 / Valves)**에서 아래 관리자 설정을 입력합니다. Python 코드의 `ALLOWED_SPACES: str = Field(...)`는 입력 항목 정의이며 실제 공간 키를 넣는 화면은 이 밸브 창입니다. `ALLOWED_SPACES` 입력란에는 `TEAM`처럼 키만 입력하고 Python 구문·따옴표를 붙이지 않습니다. 실제 값은 사내 관리자 화면에만 입력합니다.
+3. Workspace → 스킬에서 새 Skill을 만듭니다. 이름·ID는 `confluence-read`, 설명은 `SKILL.md`의 `description` 내용, 지침은 `# Confluence 근거 조회`부터 아래 본문을 입력하고 **저장 및 생성**합니다. 이처럼 항목별로 입력할 때 지침에 앞부분 YAML 메타데이터를 복제할 필요는 없습니다.
+4. Workspace → 모델 → `EES 통합 Assistant` 편집에서 아래로 내려가 **도구**에 `EES Confluence Read`, **스킬**에 `confluence-read`를 추가한 뒤 **저장 및 업데이트**합니다. 기존 Skill에 추가하는 방식이며 파일럿 사용자에게 필요한 사용 권한만 부여합니다. 모델에 연결하는 설정과 관리자 Valves의 `ENABLED`는 별개이므로 활성화 전 확인 단계에는 `false`를 유지합니다.
 5. 각 사용자는 새 채팅 입력창 아래 **통합 → 도구 → 해당 도구 옆 밸브(조절기 모양) 버튼**에서 개인 설정을 열고 PAT와 기본 Space를 입력한 뒤 **저장**을 누릅니다. 개인 창에는 `PAT`·`DEFAULT_SPACE`가 표시되며 Workspace 편집 화면의 관리자 Valves와 구분합니다. 가짜 값 저장 시험 단계에는 실제 PAT 대신 일회성 가짜 문자열을 사용하고 `ENABLED=false`를 유지합니다. 일반 사용자에게 도구 코드 편집 권한을 주지 않습니다.
 
-위 개인 입력 경로는 [Open WebUI v0.11.3의 통합 메뉴](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/MessageInput/IntegrationsMenu.svelte)와 [사용자 밸브 연결](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/MessageInput.svelte)을 기준으로 확인했습니다. 도구 선택 토글을 켜지 않고도 밸브 버튼을 열 수 있습니다. 생성 직후 목록에 없으면 화면을 새로고침해 확인합니다.
+관리자 밸브 위치는 [v0.11.3 도구 목록](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Tools.svelte), 개인 입력 경로는 [통합 메뉴](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/MessageInput/IntegrationsMenu.svelte)와 [사용자 밸브 연결](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/MessageInput.svelte)을 기준으로 확인했습니다. 도구 선택 토글을 켜지 않고도 개인 밸브 버튼을 열 수 있습니다. 생성 직후 목록에 없으면 화면을 새로고침해 확인합니다.
+
+Skill 항목별 입력은 [v0.11.3 Skill 편집 화면](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Skills/SkillEditor.svelte), 도구·스킬 연결은 [모델 편집 화면](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/ModelEditor.svelte)을 기준으로 합니다. 등록·모델 연결 성공만으로 실제 조회 실행을 통과 처리하지 않습니다.
 
 | 관리자 Valves | 기본값·의미 |
 |---|---|
