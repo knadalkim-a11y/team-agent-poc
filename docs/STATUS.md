@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: 사용자 보고로 [Confluence 버전](../versions.md#confluence-확인-환경), 개인 PAT 보유 및 기존 Confluence Skill이 사내 Claude Code용임을 확인. Open WebUI는 GPT가 제공한 명령을 복사해 수동 실행했고, 정해진 기동 스크립트 채택은 안정화 이후로 둠. 현재 WebUI Tool의 등록·인증·저장 암호화·조회는 아직 검증하지 않음.
-- 다음 작업 하나: **이전에 안내한 위치에 기존 DB·키 파일이 있는지 읽기 전용으로 확인**한다. [초기 설치 안내](01-openwebui-install.md)의 예상 경로에 파일이 있어도 실행 중인 인스턴스의 사용 경로·암호화 검증 완료를 뜻하지 않음. 수동 실행 방식을 유지하면서 [Confluence 설치 안내](04-confluence-read-tool.md)의 가짜 값 저장 암호화 검증을 준비하며, 실제 PAT는 채팅으로 받지 않음.
+- 이번 작업: 사용자 보고로 [Confluence 버전](../versions.md#confluence-확인-환경), 개인 PAT 보유 및 기존 Confluence Skill이 사내 Claude Code용임을 확인. Open WebUI는 명령 복사 후 수동 실행하며 정해진 기동 스크립트 채택은 안정화 이후로 둠. 2026-09-06 사용자가 [초기 설치 안내](01-openwebui-install.md)의 예상 폴더·DB·키 파일 존재 검사 3개 모두 True라고 보고함. 파일 존재만 확인했으며 현재 사용 경로·키 내용·WebUI Tool 등록·인증·저장 암호화·조회는 미검증.
+- 다음 작업 하나: **원래 수동 실행 PowerShell에서 정상 종료 후 작업 폴더·DATA_DIR 일치와 키·DB 환경변수 지정 여부를 값 노출 없이 확인**한다. 원래 창의 설정을 보존하며, 예상 경로로 강제 변경하거나 키를 새로 만들지 않음. 이 확인 후 기존 DB·실제 사용 키를 보호·백업하고 [Confluence 설치 안내](04-confluence-read-tool.md)의 가짜 값 저장 암호화 검증을 준비한다. 종료·백업·암호화 설정·재기동은 아직 미실행이며 실제 PAT는 채팅으로 받지 않음.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
 - Git 반영: [PR #1](https://github.com/knadalkim-a11y/team-agent-poc/pull/1)을 2026-09-06 `main`에 병합 완료. [병합 커밋](https://github.com/knadalkim-a11y/team-agent-poc/commit/881b194a68dd03682c11f07bd1cb6f41d09fa260)의 내용이 검수한 PR과 같음을 확인했으며, 사내 적용 상태는 아래 표를 따름.
