@@ -8,7 +8,7 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: Tool 인증 성공 후 검색·재연결 실패에 이어, 사용자가 브라우저로 사내 Confluence에 직접 접속해 502 오류를 확인했다고 보고함. 서비스 또는 앞단 게이트웨이 문제와 관련됐을 가능성이 있어 [C03/C04](../evals/scenarios.md#confluence-live)는 복구 후 재시험 대기로 전환함. 브라우저 관찰을 Tool이 받은 HTTP 상태로 바꾸거나 서버의 정확한 고장 지점·앞선 실패와의 동일 원인으로 확정하지 않음. 최초 인증 성공과 이후 실패 기록은 보존함.
+- 이번 작업: Tool 인증 성공 후 검색·재연결 실패에 이어, 사용자가 브라우저로 사내 Confluence에 직접 접속해 502 오류를 확인했다고 보고함. 후속으로 재연결 오류 코드 `connection_failed`와 기본 주소·네트워크 경로·HTTPS 사용 시 인증서를 확인하라는 메시지를 부분 전달했고 복구 후 재시도하겠다고 함. HTTPS 문구는 공통 안내이며 실제 HTTPS 사용 증거가 아님. 서비스 또는 앞단 게이트웨이 문제가 관련됐을 가능성으로 [C03/C04](../evals/scenarios.md#confluence-live)의 복구 후 재시험 대기를 유지함. 브라우저 502와 Tool 오류의 동일 원인이나 정확한 고장 지점은 미확정이고 최초 성공·이후 실패 기록은 보존함.
 - 다음 작업 하나: **브라우저에서 Confluence 정상 접속이 복구된 뒤 현재 설정으로 연결·검색·본문 조회를 순서대로 재확인**한다. 복구 전에는 반복 호출이나 HTTPS·프록시·PAT·timeout 변경을 진행하지 않는다. 복구 후 `check_access`의 두 성공 필드를 확인하고 허용 Space의 작은 검색·본문·원문 링크를 확인한다. Tool만 계속 실패하면 그때 실제 오류 코드·비식별 메시지·경과 시간으로 진단을 재개한다. C03 응답·콘솔 PAT 비노출 확인도 미완료이며 자동 재시도·감시는 구성하지 않음.
 - 사내 작업 전달: 사내 PC에서는 ChatGPT에 접근할 수 없어 외부 모바일에서 코드·명령을 옮겨 실행함. Git 저장소의 안내 경로는 `%USERPROFILE%\team-agent-poc`이며 Open WebUI 데이터·설치 경로와 별개임. 최초 clone 성공 보고가 있으므로 다시 clone을 요구하지 않음. Git은 해당 PowerShell의 `$gitProxy` 변수와 `git -c "http.proxy=$gitProxy" ...`로 연결했으며 영구 프록시 저장이나 WebUI/Confluence 프록시 변경은 안내하지 않음. 새 창의 후속 Git 갱신 시 사내 프록시 값을 다시 설정해야 하며 실제 주소는 수집하지 않음.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
