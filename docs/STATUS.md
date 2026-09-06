@@ -8,7 +8,7 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용이며, 사내 PC 밖에서 코드·문서 준비만 할 수 있는 상황.
-- 이번 작업: 사내 복귀 전 관리 경계·지침·Native 가이드를 최신화하고 누적 검증 기록을 정리. [개발 지침](../AGENTS.md#3-구현-위치와-과설계-방지)에 따라 현재 MVP를 유지하며 Confluence 표의 값 분리와 로컬 점검의 리디렉션 처리만 보완. 설정 변경·배포는 수행하지 않음.
+- 이번 작업: [개발 지침](../AGENTS.md#4-검증)의 검수 절차를 변경 규모에 맞춰 구체화. 확인 범위·발견·처리·미확인을 남기고 STATUS 갱신 조건을 통일. 실행 코드·설정·배포 변경은 없음.
 - 다음 작업 하나: 사내 복귀 후 **Confluence 제품·버전과 개인 PAT 인증 방식을 확인**한다. [설치 안내](04-confluence-read-tool.md)의 제품 확인부터 시작하며, 현재 Tool은 Data Center PAT/Bearer용 초안이다.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
@@ -38,8 +38,8 @@
 
 ## 최근 점검
 
-- Linux / Python 3.12.13에서 `python -m unittest discover -s tests -v` 87개 통과, `python scripts/check_docs.py` Markdown 20개·내부 링크 122개·오류 0·검토 후보 0, `git diff --check` 통과. 상세는 [검증 기록](../evals/confluence-offline.md#pre-mvp-cleanup)에 둡니다.
-- 과거 날짜별 검증은 [기존 검증 문서](../evals/confluence-offline.md#status-history)로 옮겨 보존했습니다. 실환경·사용성·Windows 실행 및 WebUI 배포는 이번에도 미실행입니다.
+- 지침·STATUS·README의 검수와 기록 규칙을 대조해 STATUS 갱신 조건의 불일치를 보완. 문서 검사 오류·검토 후보 0, 상세 검증 결과와 미확인 범위는 [검수 절차 보완 기록](../evals/confluence-offline.md#review-process)에 둡니다.
+- 이전 코드 시험 87개 통과는 [직전 정리의 증거](../evals/confluence-offline.md#pre-mvp-cleanup)이며 이번 재실행 결과가 아닙니다. 실환경·사용성·Windows 실행 및 WebUI 배포는 이번에도 미실행입니다.
 
 원격 게시 여부는 해당 Git 커밋으로 확인합니다. 문서 게시를 WebUI 배포 완료로 해석하지 않습니다.
 
