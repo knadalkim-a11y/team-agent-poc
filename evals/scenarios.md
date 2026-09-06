@@ -165,7 +165,7 @@ Native 평가에서 복잡한 다단계 작업의 실패가 확인된 경우에�
 |---|---|---|---|
 | C01 | 사용자별 설정 UI | PAT가 password 형식으로 표시되고 사용자별로 분리됨 | PASS |
 | C02 | 저장 암호화 | 가짜 canary가 DB·로그에 평문으로 남지 않음 | PASS — 현재 DB·기본 콘솔 범위; [증거](#confluence-canary-restart) |
-| C03 | 연결 확인 | 현재 사용자로 인증되며 PAT는 응답·로그에 없음 | 진행 중 — 인증 PASS; 응답·로그 비노출 확인 대기 |
+| C03 | 연결 확인 | 현재 사용자로 인증되며 PAT는 응답·로그에 없음 | FAIL — 재확인 실패; 오류 코드 미확인 |
 | C04 | 검색·조회 | 허용 Space 문서를 검색하고 제목·근거·원문 링크 반환 | FAIL — 검색 connection_failed |
 | C05 | 사용자 격리 | 사용자 A 전용 문서를 B의 PAT로 조회할 수 없음 | 대기 |
 | C06 | 쓰기 차단 | 생성·수정·삭제 요청에 대응하는 Tool과 endpoint가 없음 | 대기 |
@@ -197,6 +197,7 @@ Native 평가에서 복잡한 다단계 작업의 실패가 확인된 경우에�
 | 2026-09-06 | C03 | Windows / OWUI 0.11.3 / EES 통합 Assistant·Confluence Tool | FAIL — URL 사전검사 | 사용자 보고: `check_access` 실행 표시, `ok=false`, 메시지 “HTTPS 호스트와 선택적 컨텍스트 경로만 허용합니다.”. Assistant도 설정 오류를 알림. 후속 설명은 사내 Confluence가 HTTP를 쓰는 것 같다는 내용 | 오류 코드는 `configuration_requried`로 전사됐고 Git 원본 표기는 `configuration_required`임; 전사 오타인지 등록 코드 차이인지는 미확인. 원본 `_base_url`에서 HTTP 스킴은 이 메시지로 API 요청 전에 차단됨. 실제 URL·프로토콜 값은 미수집·미대조라 HTTP 원인은 조건부 진단. PAT 오류·HTTP 응답·프록시·CA 실패로 판정하지 않음. 응답 요약에 PAT는 없으나 콘솔 확인은 별도 보고 없음 |
 | 2026-09-06 | C03 | Windows / OWUI 0.11.3 / Confluence 9.2.21 / Tool v0.1.2 적용 안내 | 진행 중 — 인증 PASS; 응답·로그 비노출 확인 대기 | 사용자 보고: 기존 Tool 비활성화·코드 교체·HTTP 기본 주소와 `ALLOW_HTTP=true` 설정·기존 설정 확인·활성화 안내를 모두 수행했고 `check_access`가 성공했으며 `ok`, `authenticated` 모두 `true` | 새 안내 원본은 [910ad765의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/910ad765a777df1caf30a565a197097f8afbf8b0/agent-pack/skills/confluence-read/scripts/confluence_tool.py). 원본에서는 개인 PAT로 `/rest/api/user/current`를 호출해 알려진 사용자 응답일 때만 인증 성공을 반환함. 실제 사내 checkout SHA·등록 코드·주소·PAT는 수집·직접 대조하지 않음. 응답 전문·콘솔의 PAT 비노출은 별도 보고가 없어 C03 전체 PASS로 판정하지 않음. 검색·본문·문서별 권한과 `view_skill` 호출은 별도 미확인. 이전 URL 사전검사 실패는 당시 기록으로 보존 |
 | 2026-09-06 | C04 | Windows / OWUI 0.11.3 / Tool v0.1.2 적용 안내 후 | FAIL — 검색 connection_failed | 사용자 보고: 문서 검색 첫 질문에서 `search_pages`가 `connection_failed`로 실패. HTTPS 때문인 것 같다고 설명 | 앞선 `check_access`의 `ok=true`, `authenticated=true` 보고는 유지. 원본은 두 함수 모두 공통 기본 주소·전송 경로를 사용하고 HTTP를 HTTPS로 자동 변경하지 않음. 오류 메시지 전문·실패 시간·동시점 인증 재확인은 아직 없고 실제 등록 코드도 미대조이므로 HTTPS·timeout·프록시·검색 서버 원인 중 어느 것도 확정하지 않음. 본문·원문 링크·PAT 비노출 확인 보고도 없음 |
+| 2026-09-06 | C03 | Windows / OWUI 0.11.3 / Tool v0.1.2 적용 안내 후 / 같은 대화 | FAIL — 재확인 실패; 오류 코드 미확인 | 사용자 보고: 앞서 성공했던 연결 도구를 같은 대화에서 다시 실행했으나 이번에는 실패 | 검색 실패 후 연결 재확인 안내에 대한 보고. 실제 Tool 결과 전문·오류 코드·소요 시간·설정 변경 여부는 아직 미수집이므로 검색과 동일한 `connection_failed` 또는 HTTPS·프록시·timeout 원인으로 단정하지 않음. 최초 `ok=true`, `authenticated=true` 관찰은 당시 증거로 보존하며 현재 연결 정상으로 재사용하지 않음. 검색 재시도와 본문·링크·PAT 비노출 확인은 미보고 |
 | YYYY-MM-DD | <ID> | OWUI <VERSION> | 대기 | <REFERENCE> | <NOTE> |
 
 - 오류 전문 대신 비식별 요약이나 Issue 링크를 남깁니다.

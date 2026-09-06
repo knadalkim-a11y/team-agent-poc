@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: Tool v0.1.2 적용 후 `check_access`의 두 성공 필드를 확인했다는 보고에 이어, 첫 문서 검색의 `search_pages`가 `connection_failed`로 실패했다고 보고받음. 사용자는 HTTPS 원인을 추측했으나 원본의 이 오류는 시간 초과·네트워크·TLS 등을 묶은 공통 오류이며 스킴을 증명하지 않음. C03 인증 성공 이력은 유지하고 [C04](../evals/scenarios.md#confluence-live)는 검색 연결 실패로 기록함. 실제 오류 메시지 전문·실패까지 소요 시간·재인증 결과·등록 코드 직접 대조는 아직 없음.
-- 다음 작업 하나: **같은 Assistant·Tool의 인증 재확인과 작은 검색 재시도로 실패 범위를 좁힌다.** 현재 설정을 유지한 채 `check_access`를 다시 실행하고, 짧은 검색어·허용 Space 한 곳·결과 1개로 검색해 `search_pages` 실행 시작부터 오류까지 대략 걸린 시간과 오류 코드·비식별 메시지를 확인한다. 인증도 실패하는지 검색만 실패하는지 구분하며 시간만으로 timeout을 확정하거나 HTTPS·프록시·인증서 설정을 바꾸지 않는다. C03 응답·콘솔 비노출 확인과 C04 본문·링크 검증은 계속 미확인이다.
+- 이번 작업: 최초 `check_access` 인증 성공·첫 검색의 `connection_failed` 보고에 이어, 같은 대화에서 연결 확인을 다시 했으나 실패했다는 사용자 보고를 받음. 검색 API만의 문제로 좁힐 수 없어 공통 연결·설정 경로부터 확인함. 재연결 실패의 실제 Tool 출력·오류 코드·메시지·경과 시간은 아직 없으므로 검색과 같은 `connection_failed`라고 가정하지 않음. [C03](../evals/scenarios.md#confluence-live)은 재확인 실패로 갱신하고 최초 인증 성공은 과거 증거로 보존함.
+- 다음 작업 하나: **이미 실패한 `check_access` 실행 내역에서 오류 코드·비식별 메시지와 대략 걸린 시간을 확인**한다. Assistant의 설명 문장과 실제 Tool 결과를 구분하고, 검색의 기존 `connection_failed`와 같은 오류인지 먼저 확인한다. 같은 대화여도 원본 Tool은 호출마다 현재 설정으로 새 요청을 만들므로 과거 성공만으로 연결 유지를 보장하지 않는다. 근거 없이 HTTPS·프록시·인증서·timeout 설정을 바꾸거나 검색 재시도를 반복하지 않는다. C03 응답·콘솔 비노출과 C04 본문·링크 확인은 계속 미확인이다.
 - 사내 작업 전달: 사내 PC에서는 ChatGPT에 접근할 수 없어 외부 모바일에서 코드·명령을 옮겨 실행함. Git 저장소의 안내 경로는 `%USERPROFILE%\team-agent-poc`이며 Open WebUI 데이터·설치 경로와 별개임. 최초 clone 성공 보고가 있으므로 다시 clone을 요구하지 않음. Git은 해당 PowerShell의 `$gitProxy` 변수와 `git -c "http.proxy=$gitProxy" ...`로 연결했으며 영구 프록시 저장이나 WebUI/Confluence 프록시 변경은 안내하지 않음. 새 창의 후속 Git 갱신 시 사내 프록시 값을 다시 설정해야 하며 실제 주소는 수집하지 않음.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
@@ -21,7 +21,7 @@
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 개정 내용 미반영 | [P08~P10 및 기존 P02~P07 재검증](../evals/scenarios.md#instruction-revision); 사내 모델 검증 대기 | 미확인 |
-| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.2; HTTP 명시적 허용 | 2026-09-06 v0.1.2 적용·HTTP 허용 후 `check_access` 인증 성공, 이어 첫 `search_pages`는 `connection_failed` 사용자 보고. 본문·권한은 미확인 | [HTTP 지원 사외 검증](../evals/confluence-offline.md#http-opt-in), [실환경 C01~C09 및 결과](../evals/scenarios.md#confluence-live) | 새 Tool 안내 원본 [910ad765](https://github.com/knadalkim-a11y/team-agent-poc/blob/910ad765a777df1caf30a565a197097f8afbf8b0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), 기존 Skill 안내 원본 [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md). 등록 코드·사내 checkout SHA 직접 대조 미실행 |
+| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.2; HTTP 명시적 허용 | 2026-09-06 최초 인증 성공 후 검색 `connection_failed`, 같은 대화의 연결 재확인도 실패했다는 사용자 보고. 재확인 오류 코드는 미수집. 본문·권한은 미확인 | [HTTP 지원 사외 검증](../evals/confluence-offline.md#http-opt-in), [실환경 C01~C09 및 결과](../evals/scenarios.md#confluence-live) | 새 Tool 안내 원본 [910ad765](https://github.com/knadalkim-a11y/team-agent-poc/blob/910ad765a777df1caf30a565a197097f8afbf8b0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), 기존 Skill 안내 원본 [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md). 등록 코드·사내 checkout SHA 직접 대조 미실행 |
 | Rich UI 참고 예제 | [합성 검색 결과 HTML](04-confluence-read-tool.md#rich-ui-demo); 실제 API·기존 Tool과 미연동 | 배포 대상 미확정 | [사전 준비 검증](../evals/confluence-offline.md#status-history); 실제 브라우저·WebUI 검증과 구분 | 해당 없음 |
 | 실행 스크립트 | 시작·smoke test·암호화 준비 옵션; smoke 자동 리디렉션 차단 | 사용자 보고로 명령 복사 후 수동 실행; 정해진 기동 스크립트 채택은 안정화 이후 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
 
@@ -39,6 +39,7 @@
 
 ## 최근 점검
 
+- 재연결 실패 보고를 최초 인증 성공·검색 오류와 구분해 반영함. 새 오류 코드를 추정하지 않고 이미 실패한 호출 결과 확인을 다음 단계로 정함. STATUS·평가표만 변경하고 문서 점검·`git diff --check`를 확인함. 실행 코드·설정 변경·코드 시험·사내 직접 호출은 수행하지 않음.
 - `check_access`·`search_pages`가 공통 `_context`와 `_request`를 사용하고 v0.1.2가 기본 주소의 스킴을 보존함을 확인함. 검색에 별도 HTTPS 고정은 없으며 `connection_failed`에 시간 초과·TLS·URL/OS 오류가 포함되고 HTTP 상태 오류·리디렉션은 별도 분기임. 독립 코드 검토에서도 검색만 HTTPS로 변경된다는 근거가 없음을 확인함. 진단에는 실제 적용 설정·동시점 재인증·오류 시간 정보가 더 필요함. STATUS·평가표만 변경해 문서 점검·`git diff --check`를 확인하며 코드 시험·사내 호출은 실행하지 않음.
 - 사용자 보고의 두 성공 필드를 Tool의 `check_access` 결과와 대조해 인증 성공으로 반영하고, 평가표의 PAT 비노출·검색·문서 권한 조건과 구분함. STATUS·평가표만 갱신하며 문서 점검·`git diff --check`를 확인함. 실제 사내 실행·화면·로그 직접 검사는 없고 코드 시험을 재실행하지 않음.
 - Git 프록시 연결·최초 clone 성공이라는 사용자 보고를 다음 WebUI 수동 적용 단계와 구분해 반영함. 안내 원본은 Tool v0.1.2의 [910ad765](https://github.com/knadalkim-a11y/team-agent-poc/commit/910ad765a777df1caf30a565a197097f8afbf8b0)이며 실제 사내 SHA·등록 코드 대조는 대기. STATUS만 갱신하고 문서 점검·`git diff --check`를 확인함. 실행 코드·기존 실환경 판정은 유지하며 자동 코드 시험은 이번 상태 기록에서 재실행하지 않음.
