@@ -7,9 +7,9 @@
 ## 목표와 이번 작업
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
-- 현재 경로: Open WebUI Native. Windows·Docker 미사용이며, 사내 PC 밖에서 코드·문서 준비만 할 수 있는 상황.
-- 이번 작업: 사용자 승인으로 PR #1의 준비 코드·문서·검수 지침을 `main`에 병합. 사내 실행·WebUI 배포는 수행하지 않음.
-- 다음 작업 하나: 사내 복귀 후 **Confluence 제품·버전과 개인 PAT 인증 방식을 확인**한다. [설치 안내](04-confluence-read-tool.md)의 제품 확인부터 시작하며, 현재 Tool은 Data Center PAT/Bearer용 초안이다.
+- 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
+- 이번 작업: Confluence 실환경 검증의 첫 단계로 제품·버전·개인 PAT 메뉴 유무를 확인하도록 안내. 확인 결과는 대기 중이며 Tool 등록·실제 인증·WebUI 배포는 아직 수행하지 않음.
+- 다음 작업 하나: **Confluence 제품·버전과 개인 PAT 인증 방식을 확인**한다. [설치 안내](04-confluence-read-tool.md)의 제품 확인부터 시작하며, 현재 Tool은 Data Center PAT/Bearer용 초안이다.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
 - Git 반영: [PR #1](https://github.com/knadalkim-a11y/team-agent-poc/pull/1)을 2026-09-06 `main`에 병합 완료. [병합 커밋](https://github.com/knadalkim-a11y/team-agent-poc/commit/881b194a68dd03682c11f07bd1cb6f41d09fa260)의 내용이 검수한 PR과 같음을 확인했으며, 사내 적용 상태는 아래 표를 따름.
