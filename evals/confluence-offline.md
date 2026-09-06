@@ -1,6 +1,6 @@
-# Confluence 사외 검증 기록
+# Confluence·관리 작업 사외 검증 기록
 
-> 2026-09-05 실행 결과를 보존하는 과거 검증 보고서입니다. 최신 준비 상태는 [STATUS](../docs/STATUS.md), 항목별 실환경 결과는 [C01~C09](scenarios.md#confluence-live)에서 확인합니다. 이후 코드 변경이나 배포에 이 결과가 자동으로 적용되는 것은 아닙니다.
+> Confluence Tool과 관련 관리 작업의 날짜별 사외 검증 증거를 보존합니다. 최신 준비 상태는 [STATUS](../docs/STATUS.md), 항목별 실환경 결과는 [C01~C09](scenarios.md#confluence-live)에서 확인합니다. 이후 코드 변경이나 배포에 이 결과가 자동으로 적용되는 것은 아닙니다.
 
 - 날짜: 2026-09-05
 - 범위: Confluence 읽기 Tool v0.1.0, Skill, 설치 안내
@@ -60,3 +60,74 @@ Tool은 기본 `ENABLED=false`입니다. Skill은 지침이지 보안 경계가 
 - Windows 스크립트 실행, 실제 Confluence·WebUI 접속, 자격증명 저장·서비스 배포: 수행하지 않음.
 
 문서 리팩토링을 근거로 실환경 시험을 PASS로 바꾸지 않았습니다.
+
+<a id="status-history"></a>
+
+## STATUS에서 옮긴 과거 검증 증거
+
+2026-09-06 정리 시 [이전 STATUS](https://github.com/knadalkim-a11y/team-agent-poc/blob/3614af44fffd2bb887683e0fdcf2f415edef45fe/docs/STATUS.md)의 날짜·환경·결과를 보존해 옮겼습니다. 아래 기록은 이번 정리 후 재검증이나 사내 배포 완료를 뜻하지 않습니다.
+
+## 비개발자 사용성 기준 반영 — 2026-09-06
+
+- 기존 개발 지침·상태·변경 이력 3개만 갱신. 별도 사용성 문서·UI 프레임워크·새 기능은 추가하지 않음. Confluence 읽기 MVP와 후속 순서는 유지.
+- Linux / Python 3.12.13에서 `python scripts/check_docs.py`: Markdown 20개·내부 링크 101개·오류 0·검토 후보 0. `git diff --check` 통과. 실제 화면·사내 모델·초보 사용자 사용성 검증과 WebUI 배포는 미실행.
+
+## 이전 모델 운용 기준 반영 — 2026-09-06
+
+- 사용자 보고와 설계 전제를 기존 문서 4개에 반영. 신규 파일·모델 분기 코드·실행 설정은 추가하지 않음.
+- 현재 GLM 5.2 기준 Tool 호출 성공률·되묻기 동작·응답 시간의 비교 측정은 미실행. 모델 교체 시 기존 평가 질문을 재사용하며 별도 평가 프레임워크는 만들지 않음.
+- Linux / Python 3.12.13에서 `python scripts/check_docs.py`: Markdown 20개·내부 링크 101개·오류 0·검토 후보 0. `git diff --check` 통과. 코드·Skill·설정·시험 파일 변경 없음; 실제 모델·WebUI 실행과 배포는 미실행.
+
+## 이전 지침 개정 검증 — 2026-09-06
+
+- 환경: Linux / Python 3.12.13. 기존 Markdown 8개를 수정했으며 새 파일·서버·Tool 코드·실행 설정·자동 테스트 코드는 추가하거나 변경하지 않음.
+- `python scripts/check_docs.py`: Markdown 20개, 내부 링크 98개, 오류 0·검토 후보 0. `git diff --check` 통과.
+- skill-creator의 `quick_validate.py agent-pack/skills/policy-grounded-answer`: 형식 검사 통과. 지침 간 일치·과설계·권한 범위에 대한 독립 정적 검토에서 수정 필수 문제 없음.
+- Python 전체 테스트·사내 모델·Windows·Open WebUI 실행은 미실행. 형식·정적 검토는 정책 준수와 실제 Tool 차단의 행동 검증을 대신하지 않음.
+- 아래 이전 실행 기록은 보존. 개정본의 사내 응답 검증은 [P02~P10](../evals/scenarios.md#instruction-revision)에서 관리하며, Tool 설정의 암호화·사용자 권한 검증은 기존 C01~C09를 따른다.
+- 앱 프로젝트 지침은 기존 파일 참조 문구를 유지하며 앱 설정을 직접 변경하지 않음. 개정 Agent Pack도 WebUI에는 아직 반영하지 않음.
+
+## 이전 Rich UI 사전 준비 검증 — 2026-09-05
+
+- 환경: Linux / Python 3.12.13 / Node.js. 실제 사내 데이터·인증·네트워크 호출 없는 합성 HTML 참고 예제만 추가.
+- HTML 구조·ID·label과 외부 리소스 없음 확인, 추출 JavaScript의 `node --check` 통과. DOM 대체 객체로 초기 6개, 제목·공간 필터, 빈 결과, 초기화, 본문·비활성 원문 버튼, iframe 높이 메시지를 확인.
+- `python scripts/check_docs.py`: Markdown 20개, 내부 링크 95개, 오류 0·검토 후보 0. `git diff --check` 통과. 이후 프로젝트 지침 설정 완료에 대한 사용자 보고를 반영하고 두 점검을 다시 통과함.
+- 기존 Python Tool·Skill·Prompt·설정·테스트는 변경하지 않았고 Python 전체 테스트는 이번에 재실행하지 않음. 아래 86개 통과는 이전 실행 기록.
+- 실제 브라우저 레이아웃·Windows·Open WebUI 렌더링·Confluence·Jira·GitHub 연결 및 배포는 미실행. 새 서버·공통 프레임워크·추가 업무 Skill은 만들지 않음.
+
+## 이전 문서 점검기 추가 검증 — 2026-09-05
+
+- 환경: 2026-09-05, Linux / Python 3.12.13 / Pydantic 2.13.4. 네트워크 호출을 막은 합성 문서·mock API 시험이며 사내 실환경 검증이 아님.
+- `python -m unittest discover -s tests -v`: 문서 점검 43개 + 기존 Confluence 43개, 총 86개 통과. 파일 bytes·mtime 보존, 코드 예시 제외, 경로 이탈·심볼릭 링크·합성 resolve 경계, CLI 출력·종료 코드를 확인.
+- `python scripts/check_docs.py`: Markdown 20개, 내부 링크 86개, 오류 0·검토 후보 0. `git diff --check` 통과. 문서 내용 전체의 최신성이나 실사용 여부를 보장하는 결과는 아님.
+- 신규 파일은 점검기와 테스트 두 개. 문서 삭제·새 보고서 파일·스케줄러·필수 CI는 추가하지 않음. 이전 [관리 리팩토링 증거](../evals/confluence-offline.md#management-refactor)는 당시 기록으로 보존.
+- 실제 Windows 실행·Confluence·WebUI 배포: 수행하지 않음.
+
+### MVP 우선 범위 정리 — 2026-09-06
+
+- 이번 범위 정리 점검(2026-09-06): Linux / Python 3.12.13에서 STATUS만 변경. `python scripts/check_docs.py`는 Markdown 20개·내부 링크 101개·오류 0·검토 후보 0, `git diff --check` 통과. 실제 사내 검증은 미실행.
+
+<a id="pre-mvp-cleanup"></a>
+
+## 사내 복귀 전 정리·결함 보완 검증 — 2026-09-06
+
+- 실행 환경: Linux / Python 3.12.13 / Pydantic 2.13.4. 실제 사내 데이터·PAT·네트워크를 사용하지 않은 합성 mock 시험.
+- 변경 전 기준선: `python -m unittest discover -s tests -v` 86개 통과, `python scripts/check_docs.py` Markdown 20개·내부 링크 101개·오류 0·검토 후보 0.
+- Confluence Tool v0.1.1은 평문 변환에서 표 셀 경계를 보존. `get_page` 회귀시험으로 헤더·12/34 수치 분리와 인라인 텍스트의 보존을 확인하며, 병합 셀·복잡한 표 렌더링은 구현하지 않음.
+- `smoke-test.ps1`의 자동 리디렉션 차단은 정적 검토만 수행. PowerShell 미설치로 Windows 실행은 미검증이며, 사내에서 loopback 정상 응답과 리디렉션 실패 처리를 확인해야 함.
+- 관리·설치 가이드 정리와 과거 STATUS 증거 이동. 신규 파일·계층·의존성·실행 환경을 추가하지 않음. Prompt·Skill 본문·공통 정책·모델 설정과 기존 실환경 시험 판정은 유지.
+- 변경 후 `python -m unittest discover -s tests -v`: 문서 점검 43개 + Confluence 44개, 총 87개 통과. `python scripts/check_docs.py`: Markdown 20개·내부 링크 122개·오류 0·검토 후보 0. `git diff --check` 통과.
+- 이전 STATUS의 날짜별 검증 블록 원문과 평가표의 ID·판정·날짜별 결과 보존을 대조 확인. STATUS는 80줄에서 48줄로 정리. 변경하지 않은 Prompt·Skill 본문·공통 정책·모델 버전 기준·설정·기동 스크립트는 기존 내용과 동일함을 확인.
+- 변경한 기존 파일 15개의 최종 독립 검토에서 차단할 문제 없음. 관리 경계·평가 범위·코드 회귀·과설계·실환경 상태 구분을 확인했으며, 별도 실행 시험을 추가한 결과는 아님.
+- 실제 GLM 성능·Windows·WebUI·Confluence·사용자 권한 및 사용성 검증·배포는 미실행. 이전 PASS를 이번 배포나 실행 결과로 갱신하지 않음.
+
+<a id="review-process"></a>
+
+## 검수 절차와 기록 기준 보완 — 2026-09-06
+
+- 확인 범위: `AGENTS.md`의 시작·검증·종료 규칙과 `docs/STATUS.md` 갱신 규칙, README의 문서 관리 안내를 대조. 작은 표현 수정·기능/정책 변경·반복 결함에 따른 검수 범위, 기록 위치, 실환경 미확인의 구분을 검토.
+- 발견 사항: AGENTS의 매 세션 STATUS 갱신으로 읽히는 문구와 종료 시 평가 증거·STATUS 갱신 요구가 STATUS의 조건부 갱신 규칙과 불일치. 기존 규칙에 의미 검토는 있었지만 실제 대조 대상·중요 조건·발견과 처리 결과를 드러내는 완료 기준은 부족했음.
+- 처리: 기존 지침에 규모별 검수, 관련 문제 수정 후 필요한 재검증, 네 가지 결과 요소를 반영. 작은 수정은 짧은 보고, 재사용할 근거는 기존 evals, STATUS는 상태 변경 시 갱신으로 통일. README는 기존 지침 위임과 충돌하지 않아 유지. 새 파일·CI·검수 자동 실행은 추가하지 않음.
+- 검증 결과: Linux / Python 3.12.13에서 `python scripts/check_docs.py` 문서 20개·내부 링크 122개·오류 0·검토 후보 0, `git diff --check` 통과. 변경은 기존 Markdown 4개뿐이며 실행 코드·설정·시험 코드·평가표는 유지. 과거 검증 원문과 다음 사내 작업의 보존도 대조 확인.
+- 독립 검토: 변경한 4개 문서와 README를 대조해 규모별 검수·결과 기록·STATUS 조건이 일치함을 확인. 설명 요청의 구현 확대, 매번 전체 시험·독립 검토·별도 보고서 강제가 생기지 않았으며 확인 범위에서 수정 필수 문제 없음. 정적 의미 검토이며 자동 시험 재실행을 뜻하지 않음.
+- 미확인: 개정 지침이 향후 세션에서 누락을 얼마나 줄이는지는 아직 관찰하지 않음. 실행 코드 변경이 없어 Python 전체 시험은 이번에 재실행하지 않았으며, Windows·사내 GLM·WebUI·Confluence·권한·사용성·배포 검증도 미실행. 이전 87개 통과는 직전 정리의 증거로 유지.

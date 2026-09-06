@@ -2,7 +2,7 @@
 
 Open WebUI의 `EES 통합 Assistant`에 등록할 Git 관리 원본입니다. 현재 파일은 모두 안전한 합성 POC 템플릿이며 공식 사내 정책이 아닙니다.
 
-이 폴더는 팀 사용자가 쓰는 Assistant의 동작 원본입니다. 프로젝트를 코딩하는 GPT의 규칙은 [AGENTS.md](../AGENTS.md), Git 준비·WebUI 반영·다음 작업은 [STATUS](../docs/STATUS.md)를 확인합니다. 아래 파일 목록은 Git 원본이며 실제 배포 상태표가 아닙니다.
+이 폴더는 담당자가 관리하는 공통 배포 자산의 원본입니다. 팀원 작성물과의 구분은 [관리 경계](../README.md#원본과-배포본)를 따릅니다. 프로젝트를 코딩하는 GPT의 규칙은 [AGENTS.md](../AGENTS.md), Git 준비·WebUI 반영·다음 작업은 [STATUS](../docs/STATUS.md)를 확인합니다. 아래 파일 목록은 Git 원본이며 실제 배포 상태표가 아닙니다.
 
 ```text
 agent-pack/
@@ -17,7 +17,8 @@ agent-pack/
    ├─ structured-troubleshooting/SKILL.md
    └─ confluence-read/
       ├─ SKILL.md
-      └─ scripts/confluence_tool.py
+      ├─ scripts/confluence_tool.py
+      └─ references/rich-ui-search-demo.html
 ```
 
 | 원본 | Open WebUI 반영 위치 |
@@ -32,6 +33,8 @@ Confluence 묶음은 **Skill 지침 + 실행 코드**를 함께 관리하는 예
 
 ## 변경 절차
 
+Confluence의 [Rich UI 예제](../docs/04-confluence-read-tool.md#rich-ui-demo)는 합성 데이터 개발 참고자료입니다. Skill·Tool과 함께 자동 배포되는 파일은 아닙니다.
+
 ```mermaid
 flowchart LR
     Edit["Git 수정"] --> Review["담당자 검토"]
@@ -42,7 +45,7 @@ flowchart LR
 
 초기에는 관리자가 수동 반영합니다. 자동 동기화, MCP, Router, A2A는 POC 범위가 아닙니다.
 
-변경은 Git 원본에서 검토한 뒤 반영합니다. UI에서 먼저 수정했다면 동일한 내용을 Git에 되돌려 기록하고 확인해야 합니다. STATUS에는 실제 반영한 원본 커밋과 검증 증거를 남기며, 모르는 적용 버전은 미확인으로 둡니다. Skill 내부 `scripts/`는 기능 실행 코드이고, 저장소 최상위 `scripts/`는 개발·운영자용 실행 스크립트입니다.
+이 변경 절차와 공통 정책의 변경 관리 규칙은 이 폴더에서 관리하는 공통 배포 자산에 적용합니다. 변경은 Git 원본에서 검토한 뒤 반영하며, 해당 배포본을 UI에서 먼저 수정했다면 검토 후 Git 원본과 일치시킵니다. STATUS에는 실제 반영한 원본 커밋과 검증 증거를 남기며, 모르는 적용 버전은 미확인으로 둡니다. Skill 내부 `scripts/`는 기능 실행 코드이고, 저장소 최상위 `scripts/`는 개발·운영자용 실행 스크립트입니다.
 
 ## 금지 사항
 

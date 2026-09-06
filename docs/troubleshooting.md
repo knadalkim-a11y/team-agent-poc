@@ -146,7 +146,7 @@ huggingface_hub.utils._http:_http_backoff_base
 [SSL: CERTIFICATE_VERIFY_FAILED]
 ```
 
-`/health`가 200이고 UI 로그인까지 가능하다면 Open WebUI의 핵심 기동과 운영 DB는 정상입니다. 이 경고는 Hugging Face의 임베딩·리랭커·Whisper 같은 외부 자산 조회 또는 다운로드에서 Python 런타임이 사내 TLS 검사 프록시의 인증서 체인을 신뢰하지 못해 발생할 수 있습니다.
+`/health`가 200이고 UI 로그인까지 가능하다면 기본 서버 응답과 로그인을 확인한 상태입니다. 사내 모델·검색·재시작·전체 데이터 저장 상태까지 정상이라고 판정하지는 않습니다. 이 경고는 Hugging Face의 임베딩·리랭커·Whisper 같은 외부 자산 조회 또는 다운로드에서 Python 런타임이 사내 TLS 검사 프록시의 인증서 체인을 신뢰하지 못해 발생할 수 있습니다.
 
 ```text
 Open WebUI·계정·사내 LLM 채팅  → 계속 검증 가능
@@ -219,13 +219,7 @@ Get-Process -Id $conn.OwningProcess
 
 키·URL·모델 ID 검증 전에 발생하는 전송 계층 오류입니다. Open WebUI 0.11.3의 OpenAI-compatible 요청은 `aiohttp.ClientSession(trust_env=True)`를 사용하므로 실행 프로세스의 `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`를 따릅니다.
 
-1. API Key 없이 direct와 proxy의 `/v1/models` HTTP 도달 여부를 비교합니다.
-2. direct만 성공하면 호스트를 NO_PROXY에 추가합니다.
-3. proxy만 성공하면 호스트를 NO_PROXY에서 제거합니다.
-4. HTTP 경로는 도달하지만 인증서 오류가 이어지면 승인된 PEM CA bundle을 `AIOHTTP_CLIENT_SSL_CERT_FILE`에 지정합니다.
-5. SSL 검증을 끄지 않습니다.
-
-
+[직접 연결 가이드](02-vllm-direct-test.md)에 따라 인증을 포함한 실제 API 요청의 직접·프록시 경로를 비교합니다. 비인증 401·403이나 프록시 CONNECT의 200만으로 정상 경로를 정하지 않습니다. 검증된 경로에 맞춰 `NO_PROXY`를 설정하며, `/models`가 제한되면 승인된 모델 ID로 Chat Completions를 확인합니다. 인증서 오류가 이어지면 승인된 PEM CA bundle을 `AIOHTTP_CLIENT_SSL_CERT_FILE`에 지정하고 TLS 검증은 유지합니다.
 
 | 상태 | 우선 확인 |
 |---|---|

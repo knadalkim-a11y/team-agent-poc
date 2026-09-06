@@ -38,7 +38,8 @@ Add-Type -AssemblyName System.Net.Http
 
 $handler = [System.Net.Http.HttpClientHandler]::new()
 $handler.UseProxy = $false
-$handler.AllowAutoRedirect = $true
+# Keep checks on the requested local endpoint; redirects must fail the check.
+$handler.AllowAutoRedirect = $false
 
 $client = [System.Net.Http.HttpClient]::new($handler)
 $client.Timeout = [TimeSpan]::FromSeconds($TimeoutSeconds)

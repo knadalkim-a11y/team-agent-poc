@@ -1,7 +1,7 @@
 """
 title: EES Confluence Read
 description: Personal-PAT, allowlisted, read-only Confluence Data Center access.
-version: 0.1.0
+version: 0.1.1
 required_open_webui_version: 0.11.3
 """
 
@@ -46,6 +46,9 @@ class _PlainText(HTMLParser):
     def handle_endtag(self, tag):
         if tag in ("script", "style") and self.hidden:
             self.hidden -= 1
+        if tag in ("td", "th"):
+            # Keep adjacent cell values distinct without splitting inline text.
+            self.parts.append("\t")
         if tag in ("p", "div", "li", "tr"):
             self.parts.append("\n")
 
