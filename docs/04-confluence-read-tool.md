@@ -128,7 +128,9 @@ Tool은 네트워크 호출 전에 실제 `open_webui.env.ENABLE_VALVE_ENCRYPTIO
 2. 관리자 Valves에서 아래 설정을 확인합니다. 실제 값은 사내 관리자 화면에만 입력합니다.
 3. Workspace Skill에 `SKILL.md`의 이름·설명·본문을 등록합니다.
 4. `EES 통합 Assistant`의 설정에서 해당 Skill과 Tool을 연결하고, 파일럿 사용자에게 필요한 사용 권한만 부여합니다.
-5. 각 사용자는 자신의 Tool 설정에서 PAT와 기본 Space를 입력하고 기본 **저장** 버튼을 누릅니다. 일반 사용자에게 도구 코드 편집 권한을 주지 않습니다.
+5. 각 사용자는 새 채팅 입력창 아래 **통합 → 도구 → 해당 도구 옆 밸브(조절기 모양) 버튼**에서 개인 설정을 열고 PAT와 기본 Space를 입력한 뒤 **저장**을 누릅니다. 개인 창에는 `PAT`·`DEFAULT_SPACE`가 표시되며 Workspace 편집 화면의 관리자 Valves와 구분합니다. 가짜 값 저장 시험 단계에는 실제 PAT 대신 일회성 가짜 문자열을 사용하고 `ENABLED=false`를 유지합니다. 일반 사용자에게 도구 코드 편집 권한을 주지 않습니다.
+
+위 개인 입력 경로는 [Open WebUI v0.11.3의 통합 메뉴](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/MessageInput/IntegrationsMenu.svelte)와 [사용자 밸브 연결](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/MessageInput.svelte)을 기준으로 확인했습니다. 도구 선택 토글을 켜지 않고도 밸브 버튼을 열 수 있습니다. 생성 직후 목록에 없으면 화면을 새로고침해 확인합니다.
 
 | 관리자 Valves | 기본값·의미 |
 |---|---|
