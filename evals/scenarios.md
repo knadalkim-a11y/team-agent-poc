@@ -165,8 +165,8 @@ Native 평가에서 복잡한 다단계 작업의 실패가 확인된 경우에�
 |---|---|---|---|
 | C01 | 사용자별 설정 UI | PAT가 password 형식으로 표시되고 사용자별로 분리됨 | PASS |
 | C02 | 저장 암호화 | 가짜 canary가 DB·로그에 평문으로 남지 않음 | PASS — 현재 DB·기본 콘솔 범위; [증거](#confluence-canary-restart) |
-| C03 | 연결 확인 | 현재 사용자로 인증되며 PAT는 응답·로그에 없음 | FAIL — 재확인 실패; 오류 코드 미확인 |
-| C04 | 검색·조회 | 허용 Space 문서를 검색하고 제목·근거·원문 링크 반환 | FAIL — 검색 connection_failed |
+| C03 | 연결 확인 | 현재 사용자로 인증되며 PAT는 응답·로그에 없음 | 보류 — 브라우저 502 관찰; 복구 후 재시험 |
+| C04 | 검색·조회 | 허용 Space 문서를 검색하고 제목·근거·원문 링크 반환 | 보류 — 브라우저 502 관찰; 복구 후 재시험 |
 | C05 | 사용자 격리 | 사용자 A 전용 문서를 B의 PAT로 조회할 수 없음 | 대기 |
 | C06 | 쓰기 차단 | 생성·수정·삭제 요청에 대응하는 Tool과 endpoint가 없음 | 대기 |
 | C07 | 오류 처리 | 401·403·404·timeout에서 추측하지 않고 안전하게 실패 | 대기 |
@@ -198,6 +198,7 @@ Native 평가에서 복잡한 다단계 작업의 실패가 확인된 경우에�
 | 2026-09-06 | C03 | Windows / OWUI 0.11.3 / Confluence 9.2.21 / Tool v0.1.2 적용 안내 | 진행 중 — 인증 PASS; 응답·로그 비노출 확인 대기 | 사용자 보고: 기존 Tool 비활성화·코드 교체·HTTP 기본 주소와 `ALLOW_HTTP=true` 설정·기존 설정 확인·활성화 안내를 모두 수행했고 `check_access`가 성공했으며 `ok`, `authenticated` 모두 `true` | 새 안내 원본은 [910ad765의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/910ad765a777df1caf30a565a197097f8afbf8b0/agent-pack/skills/confluence-read/scripts/confluence_tool.py). 원본에서는 개인 PAT로 `/rest/api/user/current`를 호출해 알려진 사용자 응답일 때만 인증 성공을 반환함. 실제 사내 checkout SHA·등록 코드·주소·PAT는 수집·직접 대조하지 않음. 응답 전문·콘솔의 PAT 비노출은 별도 보고가 없어 C03 전체 PASS로 판정하지 않음. 검색·본문·문서별 권한과 `view_skill` 호출은 별도 미확인. 이전 URL 사전검사 실패는 당시 기록으로 보존 |
 | 2026-09-06 | C04 | Windows / OWUI 0.11.3 / Tool v0.1.2 적용 안내 후 | FAIL — 검색 connection_failed | 사용자 보고: 문서 검색 첫 질문에서 `search_pages`가 `connection_failed`로 실패. HTTPS 때문인 것 같다고 설명 | 앞선 `check_access`의 `ok=true`, `authenticated=true` 보고는 유지. 원본은 두 함수 모두 공통 기본 주소·전송 경로를 사용하고 HTTP를 HTTPS로 자동 변경하지 않음. 오류 메시지 전문·실패 시간·동시점 인증 재확인은 아직 없고 실제 등록 코드도 미대조이므로 HTTPS·timeout·프록시·검색 서버 원인 중 어느 것도 확정하지 않음. 본문·원문 링크·PAT 비노출 확인 보고도 없음 |
 | 2026-09-06 | C03 | Windows / OWUI 0.11.3 / Tool v0.1.2 적용 안내 후 / 같은 대화 | FAIL — 재확인 실패; 오류 코드 미확인 | 사용자 보고: 앞서 성공했던 연결 도구를 같은 대화에서 다시 실행했으나 이번에는 실패 | 검색 실패 후 연결 재확인 안내에 대한 보고. 실제 Tool 결과 전문·오류 코드·소요 시간·설정 변경 여부는 아직 미수집이므로 검색과 동일한 `connection_failed` 또는 HTTPS·프록시·timeout 원인으로 단정하지 않음. 최초 `ok=true`, `authenticated=true` 관찰은 당시 증거로 보존하며 현재 연결 정상으로 재사용하지 않음. 검색 재시도와 본문·링크·PAT 비노출 확인은 미보고 |
+| 2026-09-06 | C03/C04 | 사내 PC / Confluence 브라우저 접속 | 보류 — 복구 후 재시험 | 사용자 보고: 사내 Confluence에 직접 접속했더니 502 오류가 표시됐고 서버가 불안정한 것 같다고 설명 | Open WebUI 밖에서도 접속 장애를 관찰한 근거. 서비스·앞단 게이트웨이 장애가 관련됐을 가능성으로 관리하며 정확한 원인·노드·Tool 요청과 동일한 경로인지는 미확인. Tool의 `connection_failed`가 HTTP 502를 받았다는 뜻은 아니며 원본의 HTTP 502 처리 코드는 `upstream_error`임. 앞선 성공·실패 기록을 보존하고 현재 설정으로 복구 후 연결·검색·본문·링크 및 비노출 조건을 재확인함. GPT의 사내 직접 점검·설정 변경·자동 재시도는 없음 |
 | YYYY-MM-DD | <ID> | OWUI <VERSION> | 대기 | <REFERENCE> | <NOTE> |
 
 - 오류 전문 대신 비식별 요약이나 Issue 링크를 남깁니다.
