@@ -49,13 +49,67 @@ Mock 통과는 Python 로직의 검증입니다. 실제 UserValves 화면, DB �
 
 ## 3. 실제 PAT보다 먼저 암호화 검증
 
-기존 Open WebUI를 정상 종료한 뒤 기존 DB와 키를 승인된 내부 위치에 보호·백업합니다. 현재 사용하는 `.webui_secret_key`를 유지해야 합니다. Git이나 일반 공유 폴더에 백업하지 않습니다.
+기존 Open WebUI를 정상 종료한 뒤 기존 DB와 키를 승인된 내부 위치에 보호·백업합니다. 현재 사용하는 `.webui_secret_key`를 유지해야 합니다. Git이나 일반 공유 폴더에 백업하지 않습니다. 수동 기동과 저장소 스크립트 중 기존 실행 방식에 맞는 하나를 사용합니다.
+
+### 수동 기동을 유지하는 경우
+
+아래는 [초기 설치 안내](01-openwebui-install.md)의 작업 폴더·`DATA_DIR`를 원래 실행 PowerShell에서 확인했고, 비어 있지 않은 기존 키 파일을 사용하며 `WEBUI_SECRET_KEY`·`DATABASE_URL` 환경변수 재정의가 없는 경우의 명령입니다. 새 창의 환경변수로 기존 실행 설정을 판단하지 않습니다. 다른 위치나 키·DB 구성이면 이 예제를 강제로 적용하지 않습니다.
+
+원래 실행 창에서 `Ctrl+C`로 정상 종료해 프롬프트로 돌아온 뒤, 그 창을 닫거나 설정을 바꾸지 않고 실행합니다. 해당 PC의 `%LOCALAPPDATA%\EES-Agent-POC` 아래에 날짜별 백업 폴더를 만들며, 이 위치를 백업에 사용해도 되는 내부 환경에서만 실행합니다. `data` 전체와 기존 키를 복사하고 핵심 DB·키의 SHA256을 값 출력 없이 비교합니다. 첨부파일 전체 해시 검증이나 복원 시험을 대신하지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = "Stop"
+    $eesRoot = Join-Path $env:LOCALAPPDATA "EES-Agent-POC\open-webui"
+    $eesData = Join-Path $eesRoot "data"
+    $eesKey = Join-Path $eesRoot ".webui_secret_key"
+
+    if ((Get-Location).Path -ne $eesRoot -or $env:DATA_DIR -ne $eesData) {
+        throw "경로가 다릅니다. 확인했던 원래 PowerShell 창에서 실행하세요."
+    }
+    if ($env:WEBUI_SECRET_KEY -or $env:DATABASE_URL) {
+        throw "키 또는 DB 설정이 달라졌습니다. 재기동 전에 확인하세요."
+    }
+    if ((Get-Item -LiteralPath $eesKey).Length -eq 0) {
+        throw "기존 키 파일이 비어 있습니다."
+    }
+    $eesListeners = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties().GetActiveTcpListeners()
+    if ($eesListeners.Port -contains 8080) {
+        throw "8080 포트가 사용 중입니다. 기존 WebUI 종료를 확인하세요."
+    }
+
+    $eesBackup = Join-Path (Split-Path $eesRoot -Parent) ("open-webui-backup-" + (Get-Date -Format "yyyyMMdd-HHmmss-fff"))
+    New-Item -ItemType Directory -Path $eesBackup | Out-Null
+    Copy-Item -LiteralPath $eesData -Destination $eesBackup -Recurse -Force
+    Copy-Item -LiteralPath $eesKey -Destination $eesBackup
+
+    foreach ($eesFile in @("data\webui.db", ".webui_secret_key")) {
+        $eesOriginalHash = (Get-FileHash -LiteralPath (Join-Path $eesRoot $eesFile) -Algorithm SHA256).Hash
+        $eesBackupHash = (Get-FileHash -LiteralPath (Join-Path $eesBackup $eesFile) -Algorithm SHA256).Hash
+        if ($eesOriginalHash -ne $eesBackupHash) {
+            throw "백업 비교에 실패했습니다. 재기동하지 않습니다."
+        }
+    }
+    Write-Host "BackupVerified=True"
+
+    $env:ENABLE_VALVE_ENCRYPTION = "true"
+    $env:LOGURU_DIAGNOSE = "false"
+    $env:GLOBAL_LOG_LEVEL = "INFO"
+    uvx --python 3.11 open-webui@0.11.3 serve --host 127.0.0.1 --port 8080
+}
+```
+
+오류가 나면 블록 안의 후속 단계는 실행하지 않습니다. `BackupVerified=True`는 복사와 핵심 파일 비교의 성공만 뜻합니다. 기동 후 기존 계정·대화가 보이는지 확인하고 아래 가짜 값 저장 시험으로 이어갑니다. 이 명령은 새 기동 스크립트를 설치하거나 기존 프록시·데이터 경로·키를 교체하지 않습니다. 암호화 플래그를 추가했어도 실제 저장 검증 전에는 PAT를 입력하지 않습니다.
+
+### 저장소 기동 스크립트를 사용하는 경우
 
 ```powershell
 .\scripts\start-openwebui.ps1 -ConfluenceReady
 ```
 
 기존에 필요한 프록시 등 실행 인자는 그대로 유지합니다. 이 옵션은 Valve 암호화와 `LOGURU_DIAGNOSE=false`를 적용하며, 기존 키를 새로 생성하거나 교체하지 않습니다. 키가 없거나 확인되지 않으면 중단하고 기존 키 위치부터 확인합니다.
+
+### 두 기동 방식의 공통 저장 검증
 
 Tool은 네트워크 호출 전에 실제 `open_webui.env.ENABLE_VALVE_ENCRYPTION`과 키 존재를 검사합니다. **이 검사만으로 저장 암호화 검증을 대체할 수는 없습니다.**
 
