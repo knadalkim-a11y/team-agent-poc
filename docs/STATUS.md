@@ -1,6 +1,6 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-05
+갱신일: 2026-09-06
 
 이 파일은 새 GPT 세션의 짧은 인계 지점입니다. 기능별 판정 원본은 [평가표](../evals/scenarios.md), 환경 기준은 [versions](../versions.md), 과거 변경은 [CHANGELOG](../CHANGELOG.md)에 둡니다. 아래 요약이 증거와 충돌하면 단정하지 말고 증거를 확인합니다.
 
@@ -8,15 +8,17 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용이며, 사내 PC 밖에서 코드·문서 준비만 할 수 있는 상황.
-- 이번 작업: Confluence 검색 결과용 합성 Rich UI 참고 예제와 되묻기·화면 선택 기준, Jira/GitHub 후속 연동 준비 항목을 추가. 기존 Skill·Python Tool·서비스 실행 스크립트·설정은 유지.
+- 이번 작업: 관련 PR 확인 규칙, 자료와 실행 지시의 구분, 승인된 Tool 조회 근거, 개인 설정의 PAT 보호 저장 범위를 명확히 함. Assistant Prompt·공통 정책·정책 답변 Skill을 수정했고 Python Tool·실행 스크립트·설정은 유지.
 - 다음 작업 하나: 사내 복귀 후 **Confluence 제품·버전과 개인 PAT 인증 방식을 확인**한다. [설치 안내](04-confluence-read-tool.md)의 제품 확인부터 시작하며, 현재 Tool은 Data Center PAT/Bearer용 초안이다.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
+- 이번 준비·지침 개정의 Git 변경은 [PR #1](https://github.com/knadalkim-a11y/team-agent-poc/pull/1)에서 관리한다. 병합 여부는 PR 상태로 확인하며 WebUI 적용과 구분한다.
 
 ## Git 준비와 WebUI 적용을 구분
 
 | 대상 | Git에서 준비한 것 | WebUI 반영 마지막 확인 | 검증 근거 | 적용 원본 커밋 |
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
+| 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 개정 내용 미반영 | [P08~P10 및 기존 P02~P07 재검증](../evals/scenarios.md#instruction-revision); 사내 모델 검증 대기 | 미확인 |
 | Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool, 원본 [0cb6096](https://github.com/knadalkim-a11y/team-agent-poc/commit/0cb60962c44c2d0b59c4cb028faf2030161699f5) | 반영 확인 없음 | [사외 자동 시험 증거](../evals/confluence-offline.md), [실환경 C01~C09](../evals/scenarios.md#confluence-live) | 미확인 |
 | Rich UI 참고 예제 | [합성 검색 결과 HTML](04-confluence-read-tool.md#rich-ui-demo); 실제 API·기존 Tool과 미연동 | 배포 대상 미확정 | 아래 사전 준비 검증; 실제 브라우저·WebUI 검증과 구분 | 해당 없음 |
 | 실행 스크립트 | 시작·smoke test·암호화 준비 옵션 | 이 저장소 스크립트로 기동한 사실과 적용 SHA는 미확인 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
@@ -33,7 +35,16 @@
 - Router·A2A·EMS/APC 자동 라우팅·자동 배포·개인화·서버 이전은 후속 범위입니다. 사용자 PC 공개나 외부 서비스 추가를 이번 준비 작업에 포함하지 않습니다.
 - 사용자 일회성 설정: README의 [GPT 프로젝트 최초 설정](../README.md#gpt-프로젝트-최초-설정)에 따라 지침을 넣고 새 프로젝트를 만들었다는 사용자 보고를 확인했습니다. 동일한 설정을 다시 요청하지 않습니다. 앱 설정 화면을 직접 검사한 것은 아닙니다.
 
-## 이번 사전 준비 검증 — 2026-09-05
+## 이번 지침 개정 검증 — 2026-09-06
+
+- 환경: Linux / Python 3.12.13. 기존 Markdown 8개를 수정했으며 새 파일·서버·Tool 코드·실행 설정·자동 테스트 코드는 추가하거나 변경하지 않음.
+- `python scripts/check_docs.py`: Markdown 20개, 내부 링크 98개, 오류 0·검토 후보 0. `git diff --check` 통과.
+- skill-creator의 `quick_validate.py agent-pack/skills/policy-grounded-answer`: 형식 검사 통과. 지침 간 일치·과설계·권한 범위에 대한 독립 정적 검토에서 수정 필수 문제 없음.
+- Python 전체 테스트·사내 모델·Windows·Open WebUI 실행은 미실행. 형식·정적 검토는 정책 준수와 실제 Tool 차단의 행동 검증을 대신하지 않음.
+- 아래 이전 실행 기록은 보존. 개정본의 사내 응답 검증은 [P02~P10](../evals/scenarios.md#instruction-revision)에서 관리하며, Tool 설정의 암호화·사용자 권한 검증은 기존 C01~C09를 따른다.
+- 앱 프로젝트 지침은 기존 파일 참조 문구를 유지하며 앱 설정을 직접 변경하지 않음. 개정 Agent Pack도 WebUI에는 아직 반영하지 않음.
+
+## 이전 Rich UI 사전 준비 검증 — 2026-09-05
 
 - 환경: Linux / Python 3.12.13 / Node.js. 실제 사내 데이터·인증·네트워크 호출 없는 합성 HTML 참고 예제만 추가.
 - HTML 구조·ID·label과 외부 리소스 없음 확인, 추출 JavaScript의 `node --check` 통과. DOM 대체 객체로 초기 6개, 제목·공간 필터, 빈 결과, 초기화, 본문·비활성 원문 버튼, iframe 높이 메시지를 확인.
