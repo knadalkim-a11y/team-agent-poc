@@ -4,6 +4,7 @@
 
 ## 2026-09-07
 
+- Open WebUI v0.11.3의 모델 연결·자산별 읽기 권한을 구분하고 같은 팀 그룹에 Assistant·기반 모델·연결 Skill/Tool/Knowledge를 공유하는 운영 안내 추가. 신규 구성원 추가와 새 자산 공유의 관리 단위를 설명하며 실제 권한 변경·사용 성공으로 간주하지 않음. [근거](evals/scenarios.md#assistant-resource-access-followup).
 - 사용자 설명에 따라 방화벽 운영을 사내 관리 시스템 경로로 통일. 직접 로컬 규칙 생성 안내를 연결 정보와 WebUI 수신 설정으로 대체하고 실패/원복도 사내 관리 기준을 따르도록 정리. 실제 규칙·네트워크 변경은 수행하지 않음. [관리 경로](evals/scenarios.md#managed-firewall-access).
 - 현재 PC의 Public 프로필·IP/포트 직접 접속 선택을 반영해 Public 유지·로컬/첫 팀원 IP와 TCP 8080으로 제한한 접속 안내를 구체화. 기존 수동 환경을 보존하고 HTTP 전송 한계를 명시하며 초기 로그인 화면 확인에 HTTPS 준비를 선행 요구하지 않음. [준비 범위](evals/scenarios.md#local-pc-public-access).
 - 사용자 선택에 따라 팀 파일럿 호스트를 현재 사용 중인 Windows PC로 변경. 새 서버 배포를 선행조건으로 두지 않고 기존 DB·키·버전·수동 기동을 유지하는 계정·접속 경로·전송 보호·방화벽·운영/원복 안내를 기존 설치 문서에 추가. 실행 스크립트·사내 설정은 변경하지 않았으며 완료한 개인 검증은 재사용. [결정·준비 범위](evals/scenarios.md#local-pc-pilot-plan).

@@ -174,7 +174,7 @@ Open WebUI  = 내 PC의 127.0.0.1:8080에서 수신
 
 기존 로컬 화면에서 관리자 설정 → Authentication → **New Sign Ups를 OFF**로 저장합니다. 팀원 계정은 관리자 Users → Add User에서 역할 **user**로 준비합니다. 기존 일반 테스트 계정 B가 있으면 첫 확인에 재사용하고, 관리자의 계정·PAT를 공유하지 않습니다. 비밀번호는 사내 전달 수단을 사용합니다. 각 팀원은 자신의 개인 PAT를 입력합니다. 공개 가입 OFF와 관리자 계정 추가는 별도 경로입니다. [v0.11.3 설정 UI](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/admin/Settings/Authentication.svelte), [계정 추가 UI](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/admin/Users/UserList/AddUserModal.svelte)
 
-Assistant·기반 모델·연결된 Tool/Skill/Knowledge의 읽기 권한은 파일럿 계정/그룹에 맞춥니다. 기존 [Model not found 복구](troubleshooting.md#user-model-not-found)를 반복하지 않고 새로 연결한 Jira/GitHub를 포함한 실제 공개 구성을 확인합니다. 일반 사용자에게 Python Tool 등록·수정 권한을 함께 열지 않습니다.
+Assistant·기반 모델·연결된 Tool/Skill/Knowledge의 읽기 권한은 [같은 파일럿 그룹](03-openwebui-native-agent.md#assistant-resource-access)에 맞춥니다. 모델 연결만으로 자산 권한이 따라가지 않으므로 자산별 최초 설정과 새 구성원 추가를 구분합니다. 기존 [Model not found 복구](troubleshooting.md#user-model-not-found)를 반복하지 않고 새로 연결한 Jira/GitHub를 포함한 실제 공개 구성을 확인합니다. 일반 사용자에게 Python Tool 등록·수정 권한을 함께 열지 않습니다.
 
 현재 PC는 사용자 보고로 **Public 프로필**이며 우선 IP·포트 직접 접속을 선택했습니다. 방화벽은 사용자가 지정한 **사내 관리 시스템**을 통해 처리합니다. [최신 접속 경로 결정](../evals/scenarios.md#managed-firewall-access)을 따르며 아래 프로필 확인을 반복하거나 Private으로 바꾸지 않습니다. Public은 Windows 네트워크 프로필 이름이며 인터넷 공개 여부나 공인 IP를 뜻하지 않습니다.
 
@@ -225,9 +225,9 @@ Get-NetConnectionProfile | Select-Object InterfaceAlias, NetworkCategory
 }
 ```
 
-특정 사내 IP로만 수신하면 기존 loopback URL은 열리지 않으므로 본인과 팀원 모두 `http://<PC_LAN_IPV4>:8080`을 사용합니다. 이번에는 팀원 PC의 익명 로그인 화면 도달성만 확인합니다. HTTPS 앞단 경로를 선택했다면 위 직접 HTTP 수신 변경을 그대로 적용하지 않고 그 경로의 바인딩·포트를 사용합니다. `0.0.0.0`은 접속 URL이 아니며 모든 인터페이스 수신을 기본안으로 사용하지 않습니다.
+특정 사내 IP로만 수신하면 기존 loopback URL은 열리지 않으므로 본인과 팀원 모두 `http://<PC_LAN_IPV4>:8080`을 사용합니다. 현재 개인 PC 파일럿의 팀원 로그인 화면 도달성은 [사용자 보고로 확인](../evals/scenarios.md#assistant-resource-access-followup)했으므로 이 접속 확인을 반복하지 않습니다. 아래 진단은 다른 환경이나 재발한 오류에 사용합니다. HTTPS 앞단 경로를 선택했다면 위 직접 HTTP 수신 변경을 그대로 적용하지 않고 그 경로의 바인딩·포트를 사용합니다. `0.0.0.0`은 접속 URL이 아니며 모든 인터페이스 수신을 기본안으로 사용하지 않습니다.
 
-연결이 막히면 먼저 WebUI 실행창과 이 문서의 listener 확인 명령으로 호스트가 지정한 사내 IP의 8080에서 수신하는지 확인합니다. 수신 중인데 팀원 PC에서 접속되지 않으면 위 출발지·목적지·포트의 허용 상태와 팀원 PC 경로를 사내 관리 시스템·담당 절차로 확인합니다. 로컬 방화벽 변경으로 우회하거나 Git 프록시를 팀원 브라우저·내부 API 설정으로 복제하지 않습니다. 이번 보고는 팀원 PC의 로그인 화면 표시 여부 또는 비식별 오류만 받습니다. 일반 사용자 로그인·EES Assistant 접근·개인 PAT/조회 권한과 HTTP 전송 보호 한계는 후속 공개 구성에 맞춰 확인합니다.
+연결이 막히면 먼저 WebUI 실행창과 이 문서의 listener 확인 명령으로 호스트가 지정한 사내 IP의 8080에서 수신하는지 확인합니다. 수신 중인데 팀원 PC에서 접속되지 않으면 위 출발지·목적지·포트의 허용 상태와 팀원 PC 경로를 사내 관리 시스템·담당 절차로 확인합니다. 로컬 방화벽 변경으로 우회하거나 Git 프록시를 팀원 브라우저·내부 API 설정으로 복제하지 않습니다. 오류를 공유할 때는 실제 주소·계정·토큰을 제외합니다. 일반 사용자 로그인·EES Assistant 접근·개인 PAT/조회 권한과 HTTP 전송 보호 한계는 후속 공개 구성에 맞춰 확인합니다.
 
 ### 파일럿 운영과 원복
 
@@ -236,4 +236,4 @@ Get-NetConnectionProfile | Select-Object InterfaceAlias, NetworkCategory
 - 같은 DB·키의 완료한 저장/복구 시험은 반복하지 않습니다. 기존 백업 절차를 유지하고, 새 접속 경로와 일반 계정의 대화·파일·개인 PAT·조회 권한을 [공개 전 기준](03-openwebui-native-agent.md#4-공개-전-검증)에 맞춰 확인합니다. 파일럿 참여자 간 비공개 자산이 공유되지 않는지와 처음 쓰는 사람이 결과·오류·원문을 이해하는지 함께 봅니다.
 - 직접 LAN 수신을 중단할 때는 원래 창에서 종료 후 기존 명령의 `--host 127.0.0.1 --port 8080`으로 되돌립니다. 파일럿 전용 허용 범위·앞단 경로가 있다면 사내 관리 절차로 종료하며 기존 공용 규칙이나 수동 규칙을 임의로 변경하지 않습니다. DB·키·계정·PAT를 삭제하지 않습니다.
 
-이 절은 적용 준비 절차입니다. 실제 방화벽·수신 주소·HTTPS·팀원 접속·격리를 사외에서 실행하거나 통과 처리하지 않았습니다.
+이 절의 Windows 명령·실제 방화벽·수신 주소·HTTPS·계정 격리는 사외에서 직접 검사하지 않았습니다. 팀원 로그인 화면 접속은 사용자 보고 범위에서 확인했으며 일반 사용자의 연결 자산 권한·조회 성공은 별도 확인합니다.
