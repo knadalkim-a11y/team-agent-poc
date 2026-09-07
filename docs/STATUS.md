@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: 2026-09-07 Chat History 해제·내장 Memory OFF 확인·저장 후 새 대화 재시험 안내에 사용자가 이전 문자열을 알 수 없다고 답했다고 확인함. 기존 같은 대화 회수 성공과 함께 S01을 확인한 두 대화·합성 문자열 범위의 PASS로 기록함. 이어 공식 소스에서 Builtin Tools의 Memory OFF만으로는 자동 문맥 주입·응답 후 검토가 꺼지지 않음을 확인해 모델 Capabilities의 Memory OFF 안내를 명확히 보완함. S02·S03는 미완료임.
-- 다음 작업 하나: **모델 Capabilities의 Memory OFF를 확인한다.** [Memory 제어 범위](troubleshooting.md#native-memory-controls)에 따라 A의 EES 통합 Assistant 편집에서 Capabilities → Memory 상태를 확인한다. 켜져 있으면 해제·저장 및 업데이트하고 이미 OFF이면 유지한다. 기존 내장 Memory·Chat History OFF와 Knowledge·Confluence 도구·Skill 연결은 보존하며, 완료한 S01 질문을 반복하지 않는다. 저장된 Memory 부재는 별도 확인 대상으로 남긴다.
+- 이번 작업: 2026-09-07 사용자가 EES 통합 Assistant의 Capabilities → Memory가 OFF라고 확인함. 앞선 내장 도구 설정 안내 및 새 대화의 합성 문자열 회수 불가와 함께 S02를 해당 Assistant 구성·시험 범위의 PASS로 기록함. 사용자 개인 Memory 설정·다른 모델·기존 저장 내용까지 확인한 것은 아니며 S03는 대기임. S01과 다른 기존 판정은 유지함.
+- 다음 작업 하나: **개인 Memory 목록을 볼 수 있는지 확인한다.** [Memory 저장소 확인 안내](troubleshooting.md#native-memory-controls)에 따라 같은 A 계정의 설정 → 개인화 → Memory를 읽기 전용으로 확인한다. Saved Memories 목록이 원래 보이면 시험 문자열을 검색하고 조회 오류 없이 존재하는지 확인한다. Memory OFF로 목록이 숨겨졌거나 메뉴가 없으면 그대로 두고 해당 상태만 보고한다. 목록을 보기 위해 기능을 켜거나 기존 데이터를 삭제하지 않는다.
 - 사내 작업 전달: 사내 PC에서는 ChatGPT에 접근할 수 없어 외부 모바일에서 코드·명령을 옮겨 실행함. Git 저장소의 안내 경로는 `%USERPROFILE%\team-agent-poc`이며 Open WebUI 데이터·설치 경로와 별개임. 최초 clone 성공 보고가 있으므로 다시 clone을 요구하지 않음. Git은 해당 PowerShell의 `$gitProxy` 변수와 `git -c "http.proxy=$gitProxy" ...`로 연결했으며 영구 프록시 저장이나 WebUI/Confluence 프록시 변경은 안내하지 않음. 새 창의 후속 Git 갱신 시 사내 프록시 값을 다시 설정해야 하며 실제 주소는 수집하지 않음.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
@@ -30,7 +30,7 @@
 
 ## 남아 있는 검증과 제한
 
-- S01은 Chat History 설정 안내 후 새 대화의 회수 불가를 사용자 보고로 확인함. 모델 Capabilities의 Memory OFF 및 S02/S03의 설정·저장소 확인은 대기임. 내장 Memory 체크·개인 Memory 설정·모델 기능을 구분하며, 목록이 숨겨졌다는 이유로 저장 부재를 확정하거나 확인하려고 Memory를 켜지 않음. 다른 사용자 격리도 별도 미확인임.
+- S01·S02는 해당 Assistant의 합성 대화와 모델 Memory OFF 범위에서 확인함. S03의 저장된 시험 문자열 부재는 미확인이며 개인 Memory 설정·목록 상태도 아직 전달받지 않음. 목록 숨김·메뉴 부재·조회 오류를 저장 부재로 판정하지 않고 다른 사용자 격리와도 구분함.
 - W02는 현재 8080 수신 주소, W03는 이전 수동 기동 구성의 DB·사용자 설정 범위에서 확인됨. 별도 프록시·다른 서비스의 공개 여부·프로세스 소유와 첨부파일·모델 캐시 등 모든 저장물의 위치까지 검증한 것은 아님. 기동 구성·데이터 경로가 바뀌면 관련 항목을 다시 확인함.
 - [C07](../evals/scenarios.md#confluence-live)의 404 매핑 오류·인증 실패와 PAT 교체 안내는 확인됐으나 HTTP 401·403·timeout 개별 분기는 미확인임. `authentication_failed`만으로 HTTP 401을 확정하지 않으며 C09 PASS로 이 항목을 완료 처리하지 않음. 정상 서비스에 장애를 유발하거나 완료한 토큰 시험을 반복하지 않고 미확인 범위를 유지함. Confluence Skill을 실제 `view_skill`로 불러왔는지도 별도 미확인임.
 - 내장 `query_knowledge_files`의 임베딩 모델 부재 관련 실패는 과거 관찰로 보존함. 조회 경로 지침 적용 후 C04·P02 두 질문은 정상·오류 재발 없음으로 확인됐으나 의미 검색 자체를 복구하거나 강제 비활성화한 것은 아님. 실제 임베딩 설정·오류 원문·이번 개별 호출 내역·장기 안정성은 미확인임.
@@ -44,6 +44,7 @@
 
 ## 최근 점검
 
+- 2026-09-07 모델 Memory OFF 보고를 이전 S01 결과 및 확인한 Capabilities 제어 범위와 대조해 S02에 반영함. S03의 실제 저장소 부재와 분리하고 기존 개인 설정 안내의 목록 숨김·조회 오류 조건을 다음 단계에 적용함. STATUS·평가표만 변경하고 문서 점검·`git diff --check`를 확인함. 사내 설정 변경·저장소 검사·코드 시험은 미실행.
 - 2026-09-07 새 대화 재시험 보고를 이전 같은 대화·Chat History 조회 이력과 구분해 S01에 반영함. 독립 검토로 Native Memory 노출·자동 문맥 주입·응답 후 검토의 다른 조건과 개인 설정 OFF의 목록 숨김/조회 오류를 확인함. Capabilities UI·저장 경로와 대조해 기존 안내의 Memory OFF 범위를 명확히 함. Native 가이드·장애 안내·STATUS·평가표의 Markdown 4개만 변경하고 문서 점검·`git diff --check`를 확인함. 사내 모델 기능 설정·Memory 저장소 검사·코드 시험은 미실행.
 - 2026-09-07 BuiltinTools/ModelEditor의 Chat History 체크·저장과 백엔드 `builtinTools.chats`의 기본값/두 함수 노출 조건을 대조함. 독립 백엔드 검토로 현재 사용자 ID 필터와 별도 Memory 조건을 확인함. Native 가이드·장애 안내·STATUS·평가표의 Markdown 4개만 변경하고 문서 점검·`git diff --check`를 확인함. 사내 설정 저장·재시험·Memory 저장소 검사 및 코드 시험은 미실행.
 - 2026-09-07 같은 대화 응답 보고를 기존 합성 질문·S01 기준과 대조해 부분 확인으로 기록함. 다음 새 대화 질문에는 문자열을 다시 제공하지 않고, Chat History 조회·장기 Memory·다른 사용자 격리를 구분하도록 함. STATUS·평가표만 변경하고 문서 점검·`git diff --check`를 확인함. GPT의 사내 화면·설정·실행 내역 검사와 코드 시험은 미실행.
