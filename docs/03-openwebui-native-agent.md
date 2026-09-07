@@ -392,7 +392,9 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 <a id="first-use-entry"></a>
 
-### 기존 Assistant의 첫 화면 준비
+### 기존 Assistant의 첫 화면 초안 — 적용 보류
+
+사용자 결정에 따라 **기능과 실제 사용 범위가 안정된 뒤 검토**합니다. 현재 네 가지 예시는 Assistant의 고정 역할·최종 기능 목록이 아니며 아래 Import·소개 변경·팀원 배포는 지금 수행할 절차가 아닙니다. 범용 대화와 기능 확장을 유지하고, 이 초안은 [보류 결정](../evals/scenarios.md#onboarding-deferred)에 따라 참고용으로 보존합니다.
 
 이미 동작하는 Assistant에서 **소개 문구와 예시 질문만** 추가합니다. 초기 기준선의 Skill 2개로 되돌리거나 모델·Tool을 다시 만들지 않습니다. 기존 System Prompt·기능·개인 설정은 유지합니다. 이 절은 적용 안내이며 실제 UI 저장 여부는 [STATUS](STATUS.md)에 기록합니다.
 
@@ -412,7 +414,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 근거: [v0.11.3 ModelEditor](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/ModelEditor.svelte), [Prompts 편집·가져오기](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/PromptSuggestions.svelte), [새 대화 화면](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Placeholder.svelte), [예시 선택 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte).
 
-팀원에게는 [처음 사용하기](07-team-quickstart.md)를 전달합니다. 첫 실제 사용 확인은 일반 사용자 한 명이 본인 Jira PAT로 **시스템별 현황 → 관심 시스템의 받은 목록 → 원문**을 보는 업무 하나로 묶습니다. 도움 없이 시작했는지, 막힌 단계가 있었는지, 결과·조회 범위를 이해했는지를 기록하며 같은 실행이 실제 만족한 평가 조건만 연결합니다. 이 흐름은 모든 연동이나 사용자 격리 전체의 통과를 대신하지 않습니다. 완료한 관리자 인증·저장·재시작·건수 대조 시험이나 별도 연결 확인을 반복하지 않습니다.
+초안 적용을 다시 진행할 때는 [처음 사용하기](07-team-quickstart.md)를 당시 기능 범위에 맞춰 검토한 뒤 전달합니다. 실제 사용 확인은 그때 자주 쓰는 업무로 선정합니다. 일반 사용자 한 명이 본인 Jira PAT로 **시스템별 현황 → 관심 시스템의 받은 목록 → 원문**을 보는 흐름은 가능한 예시 중 하나입니다. 도움 없이 시작했는지, 막힌 단계가 있었는지, 결과·조회 범위를 이해했는지를 기록하며 같은 실행이 실제 만족한 평가 조건만 연결합니다. 이 흐름은 모든 연동이나 사용자 격리 전체의 통과를 대신하지 않습니다. 완료한 관리자 인증·저장·재시작·건수 대조 시험이나 별도 연결 확인을 반복하지 않습니다.
 
 ## 4. 공개 전 검증
 

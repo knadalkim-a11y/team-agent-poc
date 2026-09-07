@@ -4,6 +4,7 @@
 
 ## 2026-09-07
 
+- 사용자 우선순위에 따라 첫 화면 예시·온보딩 적용을 기능 안정화 이후로 보류. 현재 연결 업무를 Assistant의 고정 역할로 취급하지 않고 준비물은 참고 초안으로 보존. [결정](evals/scenarios.md#onboarding-deferred).
 - 기존 모델 UI에 가져올 시작 질문 4개·소개 문구와 팀원용 첫 사용 안내 추가. 첫 사용자 Jira 업무로 다음 범위를 좁히고 Native 가이드의 오래된 Rich UI 미연결 설명을 수정. 업무 코드·System Prompt·기존 시험은 변경하지 않음. [준비·검수](evals/scenarios.md#team-first-use-preparation).
 - 당분간 팀원만 사용한다는 선택에 따라 기존 Skill·Tool·모델의 Public 설정 보고를 반영하고 그룹별 권한 절차를 후속으로 변경. [설정 보고와 확인 범위](evals/scenarios.md#team-public-resource-sharing).
 - Open WebUI v0.11.3의 모델 연결·자산별 읽기 권한을 구분하고 같은 팀 그룹에 Assistant·기반 모델·연결 Skill/Tool/Knowledge를 공유하는 운영 안내 추가. 신규 구성원 추가와 새 자산 공유의 관리 단위를 설명하며 실제 권한 변경·사용 성공으로 간주하지 않음. [근거](evals/scenarios.md#assistant-resource-access-followup).

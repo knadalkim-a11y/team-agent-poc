@@ -28,7 +28,7 @@ agent-pack/
 
 | 원본 | Open WebUI 반영 위치 |
 |---|---|
-| `ees-prompt-suggestions.json` | 기존 Workspace Model 편집의 Prompts → Import; [첫 화면 적용](../docs/03-openwebui-native-agent.md#first-use-entry) |
+| `ees-prompt-suggestions.json` | 기능 안정화 후 검토할 예시 질문 초안; [현재 Import 보류](../docs/03-openwebui-native-agent.md#first-use-entry) |
 | `system-prompts/*.md` | Workspace Model의 System Prompt |
 | `policies/*.md` | 공통 규칙의 검토·관리 원본 |
 | `knowledge/*.md` | Workspace Knowledge |
@@ -43,7 +43,7 @@ Jira는 작은 고정 조회 흐름으로 시작하며 별도 Skill을 추가하
 
 GitHub도 별도 Skill 없이 조건부 Prompt·작은 함수 설명과 기존 채팅 표로 시작합니다. [GitHub 안내](../docs/06-github-read-tool.md)에 따라 도구를 등록하고 새 개인 입력칸의 저장을 확인합니다. PR 목록·본문만 읽으며 GitHub.com의 개발용 연결과 사내 GHES 연결은 별개입니다.
 
-대화 시작 예시는 기존 모델의 화면용 메타데이터입니다. 새 Skill·Tool이나 모델 전체 가져오기 파일이 아니며 System Prompt를 교체하지 않습니다. 질문 버튼은 클릭 즉시 전송될 수 있으므로 실제로 보낼 수 있는 문장으로 작성하고 부족한 대상은 대화에서 확인합니다. [팀원용 시작 안내](../docs/07-team-quickstart.md)는 사용자가 읽는 문서이고 개발·평가 이력을 포함하지 않습니다.
+대화 시작 예시와 팀원용 안내는 **적용을 보류한 초안**이며 Assistant의 역할 범위를 고정하지 않습니다. 대화 시작 예시는 기존 모델의 화면용 메타데이터입니다. 새 Skill·Tool이나 모델 전체 가져오기 파일이 아니며 System Prompt를 교체하지 않습니다. 질문 버튼은 클릭 즉시 전송될 수 있으므로 실제로 보낼 수 있는 문장으로 작성하고 부족한 대상은 대화에서 확인합니다. [팀원용 시작 안내](../docs/07-team-quickstart.md)는 사용자가 읽는 문서이고 개발·평가 이력을 포함하지 않습니다.
 
 ## 변경 절차
 
