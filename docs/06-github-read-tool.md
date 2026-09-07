@@ -93,7 +93,7 @@ uvx --offline --no-python-downloads --python 3.11 --from "open-webui==0.11.3" py
 
 ## 6. 기존 등록본의 후속 조회 보완 적용
 
-v0.1.1은 Git 준비본이며 사내 반영·모델의 자연어 선택 성공은 아직 미확인입니다. 현재 `EES GitHub Read`를 편집해 검수한 커밋의 [Python 코드](../agent-pack/skills/github-read/scripts/github_tool.py)로 교체합니다. 기존 도구 항목·관리자 설정·개인 PAT를 유지하며 도구를 새로 만들거나 토큰을 다시 입력할 필요는 없습니다. 개인 필드·저장·인증·전송 코드가 바뀌지 않아 완료한 DB/재시작/인증 검사는 반복하지 않습니다.
+v0.1.1 코드·GitHub 지침 저장은 [사용자 보고](../evals/scenarios.md#followup-tools-saved)로 확인했으며 모델의 자연어 선택·후속 페이지 동작은 미확인입니다. 아래는 적용 절차 참고이며 저장 완료 후 다시 수행할 필요가 없습니다. 업데이트할 때는 `EES GitHub Read`를 편집해 검수한 커밋의 [Python 코드](../agent-pack/skills/github-read/scripts/github_tool.py)로 교체합니다. 기존 도구 항목·관리자 설정·개인 PAT를 유지하며 도구를 새로 만들거나 토큰을 다시 입력할 필요는 없습니다. 개인 필드·저장·인증·전송 코드가 바뀌지 않아 완료한 DB/재시작/인증 검사는 반복하지 않습니다.
 
 기본 Assistant의 System Prompt에서는 [원본](../agent-pack/system-prompts/ees-integrated-assistant.md#github-조회-기능이-연결된-경우)의 **GitHub 조회 기능이 연결된 경우** 절만 갱신합니다. 해당 절이 없으면 추가하고 이미 있으면 중복 없이 교체합니다. 사용자 추가 지침은 보존합니다. 소개·추천 질문·첫 화면·온보딩 설정을 적용하는 절차가 아닙니다.
 

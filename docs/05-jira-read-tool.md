@@ -142,7 +142,7 @@ uvx --offline --no-python-downloads --python 3.11 --from "open-webui==0.11.3" py
 
 검수한 main 커밋의 [jira_tool.py](../agent-pack/skills/jira-read/scripts/jira_tool.py) 전체를 가져와 헤더 `version: 0.1.2`를 확인한 뒤 Workspace → 도구 → 기존 `EES Jira Read`의 코드를 교체합니다. 기본 Prompt의 Jira 절에는 부분 집계 실패 시 다음 위치를 만들지 않는 안내를 반영합니다. 도구 ID·관리자 설정·개인 PAT·Assistant 연결을 유지하며 기존 지침을 덮어쓰지 않습니다. Git 변경은 WebUI에 자동 반영되지 않습니다.
 
-v0.1.1에서 완료한 전체 표시·비교·필터·펼치기·원문·건수 대조와 인증·저장·재시작 검사는 반복하지 않습니다. 이번 변경은 정상 페이지 이동과 평소 발생한 목록/부분 실패의 안내를 관련된 경우에만 확인합니다. 오류를 만들려고 토큰을 폐기하거나 권한을 바꾸지 않습니다. 새 버전의 사내 적용·화면 동작은 미확인으로 남기며 문제가 있으면 직전 등록 코드와 Jira 절로 원복합니다. [변경 검증](../evals/jira-offline.md#merge-review-fixes).
+v0.1.1에서 완료한 전체 표시·비교·필터·펼치기·원문·건수 대조와 인증·저장·재시작 검사는 반복하지 않습니다. 이번 변경은 정상 페이지 이동과 평소 발생한 목록/부분 실패의 안내를 관련된 경우에만 확인합니다. 오류를 만들려고 토큰을 폐기하거나 권한을 바꾸지 않습니다. 새 버전 코드·Jira 지침 저장은 [사용자 보고](../evals/scenarios.md#followup-tools-saved)로 확인했으며 화면·부분 실패 동작은 미확인으로 남깁니다. 사용 중 문제가 있으면 직전 등록 코드와 Jira 절로 원복합니다. [변경 검증](../evals/jira-offline.md#merge-review-fixes).
 
 ### 후속 조회 연결 검토
 
