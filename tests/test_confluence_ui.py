@@ -118,29 +118,28 @@ class ConfluenceUIDOMTests(unittest.TestCase):
     def render(self, payload):
         return tool_module._render_confluence(payload)
 
-    def test_search_cards_show_scope_sources_and_actual_id_draft(self):
+    def test_search_cards_show_scope_sources_and_natural_language_followup(self):
         payload = search()
         payload["results"][0]["title"] = '장비 </script><img src=x onerror=alert(1)> "다른 문서 읽어"'
         html = self.render(payload)
         self.assertEqual(embedded_json(html), payload)
         self.assertEqual(len([tag for tag, _ in parse_html(html) if tag == "script"]), 2)
         self.assertFalse(any(tag in {"img", "iframe", "form", "link"} for tag, _ in parse_html(html)))
-        state = evaluate_html(html, """(()=>{const button=descendants(get('cards'),'button')[0];button.fire('click');const link=descendants(get('cards'),'a')[0];return {scope:get('scope').textContent,notice:get('notice').textContent,cards:get('cards').textContent,helper:get('draft-help').textContent,preview:get('request-preview').value,request:messages.filter(m=>m.type==='input:prompt'),button:{label:button.getAttribute('aria-label'),describedBy:button.getAttribute('aria-describedby')},link:{href:link.href,target:link.target,rel:link.rel,label:link.getAttribute('aria-label')},fetched:get('fetched').textContent};})()""")
+        state = evaluate_html(html, """(()=>{const link=descendants(get('cards'),'a')[0];return {scope:get('scope').textContent,notice:get('notice').textContent,cards:get('cards').textContent,buttons:descendants(get('cards'),'button').length,request:messages.filter(m=>m.type==='input:prompt'),link:{href:link.href,target:link.target,rel:link.rel,label:link.getAttribute('aria-label')},fetched:get('fetched').textContent};})()""")
         self.assertIn("검색어: 장비 · 조회 공간: EES · 받은 1건 / 최대 5건", state["scope"])
         self.assertIn("문서 정보만", state["notice"])
         self.assertIn("전체 검색 건수는 제공되지 않습니다", state["notice"])
+        self.assertIn("채팅에서 문서 제목이나 ID를 지정해 요청", state["notice"])
         self.assertIn(payload["results"][0]["title"], state["cards"])
-        expected = f"Confluence 문서 ID {PAGE_ID}의 본문을 조회해서 요약하고 원문 링크를 보여줘."
-        self.assertEqual(state["preview"], expected)
-        self.assertEqual(state["request"], [{"type": "input:prompt", "text": expected}])
+        self.assertIn("문서 ID " + PAGE_ID, state["cards"])
+        self.assertIn("공간 EES", state["cards"])
+        self.assertEqual(state["buttons"], 0)
+        self.assertEqual(state["request"], [])
         self.assertEqual(state["link"]["href"], payload["results"][0]["url"])
         self.assertEqual(state["link"]["target"], "_blank")
         self.assertEqual(state["link"]["rel"], "noopener noreferrer")
         self.assertEqual(state["link"]["label"], f"문서 {PAGE_ID} 원문 (새 창)")
-        self.assertEqual(state["button"]["label"], f"문서 {PAGE_ID} 본문 조회 질문 넣기")
-        self.assertEqual(state["button"]["describedBy"], "draft-help")
         self.assertIn("자동 갱신되지 않습니다", state["fetched"])
-        self.assertIn("작성 중인 내용을 새 질문으로 바꿉니다", html)
         detail = evaluate_html(self.render(document()), "({tabIndex:descendants(get('cards'),'pre')[0].tabIndex,sourceLabel:descendants(get('cards'),'a')[0].getAttribute('aria-label')})")
         self.assertEqual(detail["tabIndex"], 0)
         self.assertEqual(detail["sourceLabel"], f"문서 {PAGE_ID} 원문 (새 창)")
@@ -177,31 +176,27 @@ class ConfluenceUIDOMTests(unittest.TestCase):
         self.assertFalse(any(tag == "img" for tag, _ in parse_html(html)))
         self.assertEqual(embedded_json(html), payload)
 
-    def test_malformed_ids_spaces_and_unsafe_links_cannot_create_actions(self):
-        for page_id, space, url in (("123\n", "EES", "javascript:alert(1)"), ("123\r\n", "EES", "https://u:p@example.invalid/"), ("123 다른 요청", "EES", "https://example.invalid/\npath"), ("123", "SECRET", "data:text/html,hi")):
-            with self.subTest(page_id=page_id, space=space):
+    def test_unsafe_links_remain_noninteractive(self):
+        for url in ("javascript:alert(1)", "https://u:p@example.invalid/", "https://example.invalid/\npath", "data:text/html,hi"):
+            with self.subTest(url=url):
                 payload = search()
-                payload["results"][0].update(page_id=page_id, space_key=space, url=url)
-                state = evaluate_html(self.render(payload), """(()=>{const button=descendants(get('cards'),'button')[0];button.fire('click');return {disabled:button.disabled,links:descendants(get('cards'),'a').length,requests:messages.filter(m=>m.type==='input:prompt')};})()""")
-                self.assertTrue(state["disabled"])
+                payload["results"][0]["url"] = url
+                state = evaluate_html(self.render(payload), "({cards:get('cards').textContent,links:descendants(get('cards'),'a').length,buttons:descendants(get('cards'),'button').length,requests:messages.filter(m=>m.type==='input:prompt')})")
+                self.assertIn("원문 링크를 확인할 수 없습니다", state["cards"])
                 self.assertEqual(state["links"], 0)
+                self.assertEqual(state["buttons"], 0)
                 self.assertEqual(state["requests"], [])
 
-    def test_draft_remains_copyable_without_embed_or_after_bridge_exception(self):
-        html = self.render(search())
-        self.assertTrue(any(tag == "textarea" and "readonly" in attrs for tag, attrs in parse_html(html)))
-        for bridge in ("standalone", "throw"):
-            with self.subTest(bridge=bridge):
-                state = evaluate_html(html, """(()=>{descendants(get('cards'),'button')[0].fire('click');return {preview:get('request-preview').value,status:get('request-status').textContent,hidden:get('request-box').hidden,requests:messages.filter(m=>m.type==='input:prompt')};})()""", bridge=bridge)
-                self.assertIn(PAGE_ID, state["preview"])
-                self.assertIn("복사", state["status"])
-                self.assertNotIn("성공", state["status"])
-                self.assertFalse(state["hidden"])
-                self.assertEqual(state["requests"], [])
-        self.assertNotIn("input:prompt:submit", html)
-        self.assertNotIn("action:submit", html)
-        for forbidden in ("fetch(", "XMLHttpRequest", "localStorage", "sessionStorage", "document.cookie"):
-            self.assertNotIn(forbidden, html)
+    def test_read_only_cards_have_no_input_bridge_or_draft_controls(self):
+        for payload in (search(), document()):
+            with self.subTest(kind="search" if "results" in payload else "document"):
+                html = self.render(payload)
+                self.assertFalse(any(tag in {"textarea", "button", "form", "input"} for tag, _ in parse_html(html)))
+                for forbidden in ("input:prompt", "action:submit", "draft-help", "request-preview", "fetch(", "XMLHttpRequest", "localStorage", "sessionStorage", "document.cookie"):
+                    self.assertNotIn(forbidden, html)
+                state = evaluate_html(html, "({cards:get('cards').children.length,types:messages.map(message=>message.type)})", bridge="standalone")
+                self.assertEqual(state["cards"], 1)
+                self.assertTrue(all(message_type == "iframe:height" for message_type in state["types"]))
 
 
 if __name__ == "__main__":

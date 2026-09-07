@@ -1,7 +1,7 @@
 """
 title: EES GitHub Read
 description: Read an approved repository's pull requests with the user's personal GitHub token.
-version: 0.1.2
+version: 0.1.3
 required_open_webui_version: 0.11.3
 """
 
@@ -463,10 +463,6 @@ function sourceLink(value){
   if(typeof value!=='string'||/[\s\\]/.test(value))return null;
   try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&u.hostname&&!u.username&&!u.password?u.href:null;}catch{return null;}
 }
-function detailRequest(pr){
-  if(data.ok!==true||!list||!validRepo(repo)||!pulls.includes(pr)||!pr||!validNumber(pr.number))return null;
-  return 'GitHub '+repo+' 저장소의 PR #'+pr.number+' 본문을 조회해서 요약하고 원문 링크를 보여줘.';
-}
 function nextRequest(){
   if(data.ok!==true||!list||!validRepo(repo)||!Object.hasOwn(states,data.state)||page.has_next!==true||page.basis!=='link'||!Number.isInteger(page.page)||page.page<1||page.page>=100000||page.next_page!==page.page+1||!Number.isInteger(page.per_page)||page.per_page<1||page.per_page>50||page.returned!==pulls.length||pulls.length>page.per_page)return null;
   return 'GitHub '+repo+' 저장소의 PR 목록을 상태 '+data.state+', '+page.next_page+'페이지로 이어서 보여줘.';
@@ -496,7 +492,6 @@ function card(pr,detail){
   }
   const actions=node('div',undefined,'actions'),url=sourceLink(pr.url);
   if(url){const link=node('a','원문 보기 · 새 창','button');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.setAttribute('aria-label',(validNumber(pr.number)?'PR #'+pr.number+' ':'PR ')+'원문 보기 · 새 창');actions.append(link);}else actions.append(node('span','원문 주소를 확인하지 못했습니다.','muted'));
-  if(!detail){const button=node('button','본문 요약 질문 넣기');button.type='button';button.setAttribute('data-pr-number',String(pr.number));button.setAttribute('aria-describedby','followup-help');button.disabled=!detailRequest(pr);button.addEventListener('click',()=>prepareRequest(detailRequest(pr)));actions.append(button);}
   section.append(actions);return section;
 }
 el('query-next').addEventListener('click',()=>prepareRequest(nextRequest()));

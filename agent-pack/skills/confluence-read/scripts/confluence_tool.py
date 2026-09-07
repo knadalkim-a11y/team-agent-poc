@@ -1,7 +1,7 @@
 """
 title: EES Confluence Read
 description: Personal-PAT, allowlisted, read-only Confluence Data Center access.
-version: 0.1.3
+version: 0.1.4
 required_open_webui_version: 0.11.3
 """
 
@@ -313,7 +313,7 @@ class Tools:
         return await asyncio.to_thread(self._run, "check_access", __user__)
 
     async def search_pages(self, query: str, space_key: str = "", limit: int = 5, __user__: dict = None):
-        """Search approved Confluence spaces and show document cards. Results contain metadata only; call get_page with an actual page ID when the requested task needs body contents. Card buttons optionally prepare follow-up drafts."""
+        """Search approved Confluence spaces and show document cards. Results contain metadata only; call get_page with an actual page ID when the requested task needs body contents."""
         raw = await asyncio.to_thread(self._run, "search_pages", __user__, query=query, space_key=space_key, limit=limit)
         return _rich_result(raw)
 
@@ -336,7 +336,7 @@ def _rich_result(raw):
 
 
 def _render_confluence(payload):
-    """Display received evidence and optional drafts without further API calls."""
+    """Display received evidence without further API calls or chat input changes."""
     data = json.dumps(payload, ensure_ascii=False, allow_nan=False)
     for character, escaped in (("&", "\\u0026"), ("<", "\\u003c"), (">", "\\u003e"),
                                ("\u2028", "\\u2028"), ("\u2029", "\\u2029")):
@@ -346,13 +346,11 @@ def _render_confluence(payload):
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <title>Confluence 문서</title><style>
 :root{color-scheme:light dark;--bg:#f3f5f7;--surface:#fff;--ink:#202b38;--muted:#5d6978;--line:#dce2e8;--accent:#20649b;--warn:#795018}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 system-ui,sans-serif}main{max-width:980px;margin:auto;padding:16px}h1{font-size:20px;margin:0 0 6px}h2{font-size:16px;margin:0;overflow-wrap:anywhere}p{margin:8px 0}.muted,.meta{color:var(--muted)}.meta{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px}.card,.notice{border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px;background:var(--surface);overflow-wrap:anywhere}.notice{border-left:4px solid var(--warn)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}button,a{font:inherit;color:var(--accent)}button,.source{min-height:44px;display:inline-flex;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);text-decoration:none}button{cursor:pointer}button:disabled{opacity:.55;cursor:default}button:focus-visible,a:focus-visible,summary:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}summary{cursor:pointer;min-height:44px;padding:8px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;max-height:420px;font:inherit;margin:4px 0 0}textarea{width:100%;min-height:100px;resize:vertical;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px}[hidden]{display:none!important}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 system-ui,sans-serif}main{max-width:980px;margin:auto;padding:16px}h1{font-size:20px;margin:0 0 6px}h2{font-size:16px;margin:0;overflow-wrap:anywhere}p{margin:8px 0}.muted,.meta{color:var(--muted)}.meta{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px}.card,.notice{border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px;background:var(--surface);overflow-wrap:anywhere}.notice{border-left:4px solid var(--warn)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}a{font:inherit;color:var(--accent)}.source{min-height:44px;display:inline-flex;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);text-decoration:none}a:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}summary{cursor:pointer;min-height:44px;padding:8px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;max-height:420px;font:inherit;margin:4px 0 0}[hidden]{display:none!important}
 @media(prefers-color-scheme:dark){:root{--bg:#151b23;--surface:#202933;--ink:#e7edf4;--muted:#b4c0ce;--line:#435264;--accent:#92c7f5;--warn:#e2b775}}@media(max-width:520px){main{padding:10px}.card,.notice{padding:12px}.actions>*{width:100%;justify-content:center}}
 </style></head><body><main>
 <h1 id="heading">Confluence 문서</h1><p id="scope" class="muted"></p><p id="fetched" class="muted"></p>
 <div id="notice" class="notice" role="status" hidden></div><div id="cards"></div>
-<p id="draft-help" class="muted" hidden>본문 조회 버튼은 채팅 입력창의 작성 중인 내용을 새 질문으로 바꿉니다. 질문을 확인하고 직접 전송해야 조회합니다.</p>
-<section id="request-box" class="card" hidden><p id="request-status" role="status" aria-live="polite"></p><label for="request-preview">복사할 질문</label><textarea id="request-preview" readonly></textarea></section>
 </main><script type="application/json" id="result-data">''' + data + r'''</script><script>
 'use strict';
 const data=JSON.parse(document.getElementById('result-data').textContent);
@@ -361,18 +359,15 @@ const text=value=>typeof value==='string'?value:'';
 function node(tag,value,className=''){const item=document.createElement(tag);item.textContent=value;item.className=className;return item;}
 function notice(value){el('notice').textContent=value;el('notice').hidden=false;}
 function href(value){if(typeof value!=='string'||/[\s\\\u0000-\u001f\u007f]/.test(value))return '';try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)&&url.hostname&&!url.username&&!url.password?url.href:'';}catch{return '';}}
-function pageId(value){return typeof value==='string'&&value.trim()===value&&/^[0-9]{1,30}$/.test(value);}
 function source(page,actions){const url=href(page.url);if(url){const link=node('a','원문 (새 창)','source');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.referrerPolicy='no-referrer';link.setAttribute('aria-label',`문서 ${text(page.page_id)||'ID 미확인'} 원문 (새 창)`);actions.append(link);}else{actions.append(node('span','원문 링크를 확인할 수 없습니다.','muted'));}}
 function card(page){const item=node('article','','card');item.append(node('h2',text(page.title)||'제목 없음'));const meta=node('div','','meta');meta.append(node('span','공간 '+(text(page.space_key)||'미확인')),node('span','문서 ID '+(text(page.page_id)||'미확인')),node('span','버전 '+(Number.isInteger(page.version)?page.version:'미확인')));item.append(meta);return item;}
-function question(page){const spaces=data.selected_spaces;if(data.ok!==true||!Array.isArray(data.results)||!data.results.includes(page)||!Array.isArray(spaces)||!spaces.includes(page.space_key)||!pageId(page.page_id))return '';return `Confluence 문서 ID ${page.page_id}의 본문을 조회해서 요약하고 원문 링크를 보여줘.`;}
-function insertQuestion(value){if(!value)return;el('request-box').hidden=false;el('request-preview').value=value;el('request-status').textContent='질문 초안입니다. 채팅 입력창을 확인한 뒤 직접 전송하세요. 입력되지 않았다면 아래 질문을 복사하세요.';if(window.parent===window){el('request-status').textContent='아래 질문을 복사해 채팅에 보내세요.';}else{try{window.parent.postMessage({type:'input:prompt',text:value},'*');}catch{el('request-status').textContent='입력창 연결을 확인하지 못했습니다. 아래 질문을 복사해 채팅에 보내세요.';}}resize();}
 if(data.ok!==true){notice(text(data.error&&data.error.message)||'조회 결과를 확인하지 못했습니다.');}
 else if(Array.isArray(data.results)){
   el('heading').textContent='Confluence 검색 결과';
   el('scope').textContent=`검색어: ${text(data.query)} · 조회 공간: ${Array.isArray(data.selected_spaces)?data.selected_spaces.join(', '):'미확인'} · 받은 ${data.results.length}건 / 최대 ${Number.isInteger(data.limit)?data.limit:'미확인'}건`;
   if(!data.results.length){notice('현재 사용자 권한과 조회 공간에서 받은 결과가 없습니다. 검색어를 바꾸거나 허용된 다른 공간을 지정해 다시 요청하세요.');}
-  else{notice('검색 결과에는 문서 정보만 있습니다. 본문 요약이 필요하면 문서를 선택해 조회하세요. 현재 사용자 권한과 조회 공간에 한정된 결과이며 전체 검색 건수는 제공되지 않습니다.');el('draft-help').hidden=false;}
-  data.results.forEach(page=>{const item=card(page),actions=node('div','','actions'),button=node('button','본문 조회 질문 넣기');button.type='button';button.setAttribute('aria-label',`문서 ${text(page.page_id)||'ID 미확인'} 본문 조회 질문 넣기`);button.setAttribute('aria-describedby','draft-help');const value=question(page);button.disabled=!value;button.addEventListener('click',()=>insertQuestion(value));actions.append(button);source(page,actions);item.append(actions);el('cards').append(item);});
+  else{notice('검색 결과에는 문서 정보만 있습니다. 본문 요약이 필요하면 채팅에서 문서 제목이나 ID를 지정해 요청하세요. 현재 사용자 권한과 조회 공간에 한정된 결과이며 전체 검색 건수는 제공되지 않습니다.');}
+  data.results.forEach(page=>{const item=card(page),actions=node('div','','actions');source(page,actions);item.append(actions);el('cards').append(item);});
 }else if(data.page){
   el('heading').textContent='Confluence 문서 본문';el('scope').textContent='현재 사용자 권한으로 확인한 문서의 본문 텍스트입니다.';
   const item=card(data.page),actions=node('div','','actions');source(data.page,actions);item.append(actions);

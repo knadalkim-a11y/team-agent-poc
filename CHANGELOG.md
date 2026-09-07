@@ -4,6 +4,8 @@
 
 ## 2026-09-07
 
+- Confluence v0.1.4·GitHub v0.1.3·Jira v0.1.5: 사용자 요청에 따라 문서/PR/이슈마다 반복되던 본문 질문 버튼과 전용 코드를 제거. 원문·본문 근거·목록 조작을 유지하고 기존 Prompt의 자연어 후속 조회를 사용함. Confluence 전용 입력 브리지·복사용 영역도 제거했으며 추가 호출/의존성·서버 변경 없음. 기존 Jira 날짜 시험의 시간대 의존은 해당 시험 조건만 명시해 보완. [검수·적용 범위](evals/scenarios.md#body-query-buttons-removed).
+
 - 사용자 의견에 따라 Rich UI 시각 디자인 튜닝은 기능 흐름 완성 뒤 묶어 진행하도록 후속으로 정리. GitHub/Jira의 정상 동작 보고와 디자인 만족도를 구분하고 업무를 막는 조작·가독성 문제는 발견 시 보완함. 첫 화면·온보딩 보류 유지, 현재 CSS·새 디자인 시스템 변경 없음. [결정 기록](evals/scenarios.md#jira-rich-ui-acceptance).
 
 - LAN 접속의 origin 거부 대응을 현재 창 전용 설정에서 Windows User 영구 저장과 현재 창 동시 적용으로 보완. 기존 허용 목록을 유지하고 초기 진단 명령의 loopback 덮어쓰기를 제거했으며 별도 설정 파일·로더는 추가하지 않음. 실제 저장·복구는 사용자 확인 대기. [안내](docs/troubleshooting.md#cors-origin-update), [검토 기록](evals/scenarios.md#chat-live-update-observation).

@@ -494,6 +494,25 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 사용자는 기능들을 만든 뒤 Rich UI를 따로 튜닝할 필요가 있고 현재 디자인이 어설프다고 평가함. 기능 흐름 완성을 우선하고 시각 디자인을 후속 묶음으로 다듬는 결정으로 기록함. 정상 동작 확인과 디자인 만족도를 구분하며 실제 화면을 GPT가 보고 평가한 것은 아님. 업무를 막는 조작·가독성 오류는 발견 시 보완하고 첫 화면·온보딩 보류는 유지함. 현재 CSS·컴포넌트 개편·새 디자인 시스템 도입은 수행하지 않음.
 - 다음은 Confluence 검색 카드→본문 조회 질문 입력·수동 전송→본문 요약/원문 흐름임. 완료한 GitHub/Jira 본문 흐름·일반 채팅·인증/DB 저장·전체 건수 대조·20회 검사는 반복하지 않음. 상태·Jira 안내·평가 기록과 결정 이력만 갱신하고 문서·diff를 검사함. 앱 코드·실환경 변경과 독립 검토·추가 자동 시험은 수행하지 않음.
 
+<a id="body-query-buttons-removed"></a>
+
+## 2026-09-07 항목별 본문 질문 버튼 제거
+
+- 사용자가 `본문 조회 질문 넣기` 버튼들이 보기 좋지 않아 없는 편이 낫다고 요청함. 기존 GitHub v0.1.2·Jira v0.1.4 버튼 흐름 정상 보고와 디자인 불만은 위 기록에 보존하고, Confluence 이전 버튼 흐름은 정상 확인을 받지 않은 상태로 남김. main `090068890304637a2116327ccf039adb3843d556`·AGENTS·STATUS와 열린 PR 0개를 확인해 관련 변경을 준비함.
+- Confluence v0.1.4·GitHub v0.1.3·Jira v0.1.5에서 문서/PR/이슈별 본문 질문 버튼과 전용 helper·설명을 제거함. Confluence는 다른 초안 기능이 없어 입력 브리지·복사용 영역·전용 CSS도 제거함. Jira 시스템/다음 목록·GitHub 다음 목록 질문은 유지함. 숨겨 둔 버튼·대체 입력폼·자동 조회·추가 API/모델 호출·새 의존성·디자인 시스템은 도입하지 않음.
+- 실제 제목·문서 ID/PR 번호/이슈 키·원문 링크·검색/목록 범위·본문 근거·오류/빈 결과를 보존함. 기존 전체 Prompt에 현재 대화 결과의 실제 ID로 자연어 본문 요청을 연결하고 모호하면 제목/ID만 확인하는 지침이 있어 Prompt·Skill은 변경하지 않음. 서버 조회·인증·저장·권한 로직과 CORS·기동·DB/키는 변경하지 않음.
+
+| 실행·환경 | 결과 |
+|---|---|
+| Linux / Python 3.12.13 / Pydantic 2.13.4 / Node v24.19.0, `python -m unittest discover -s tests -p test_confluence_ui.py -v` | 9/9 PASS, skip 없음. 검색/본문 근거·원문 안전성·버튼/입력 브리지 부재·범위/오류 구분 확인 |
+| 같은 환경, `python -m unittest discover -s tests -p test_github_ui.py -v` | 8/8 PASS. 항목별 버튼 부재·실제 PR 정보·원문/본문·다음 목록 질문과 실패 시 복사 안내 보존 |
+| 같은 환경, `python -m unittest discover -s tests -p test_jira_dashboard_ui.py -v` 최초 | 23개 중 22 PASS, 1 FAIL. 기존 날짜 시험이 UTC 기대 날짜를 고정해 기본 시간대에서 전날로 표시되는 차이 때문. 제품 날짜 표시 코드는 변경하지 않음 |
+| 날짜 시험 한 건 `TZ=UTC PYTHONPATH=tests python -m unittest test_jira_dashboard_ui.JiraDashboardDOMTests.test_compact_summary_includes_metadata_before_opening_details -v` | PASS로 시간대 의존 확인. 이후 해당 시험의 `evaluate`만 `mock.patch.dict(os.environ, {"TZ": "UTC"})`로 감싸 자식 Node의 조건을 명시함 |
+| 기본 셸에서 `PYTHONPATH=tests python -m unittest test_jira_dashboard_ui.JiraDashboardDOMTests.test_compact_summary_includes_metadata_before_opening_details -v` | 수정한 1개 PASS. 앞선 나머지 22개 결과는 재사용하며 전체 시험을 다시 반복하지 않음 |
+
+- 검토 범위는 세 Tool의 표시 변경·관련 기존 UI 시험·기능 안내임. 삭제된 버튼 전용 시험은 제거/변경하고 남은 원문·식별자·본문 근거·목록 조작·입력 브리지 실패 조건은 유지함. 과거 브라우저 URL 보안 정책 차단은 우회하거나 재시도하지 않음. 실제 사내 Windows/WebUI·시각 배치·모델의 자연어 후속 조회는 이번 준비본으로 미실행이며 합성 결과를 배포 성공으로 확대하지 않음.
+- 기존 도구 3개 코드만 교체하고 이름/ID·개인 PAT/관리자 설정·전체 Prompt를 유지하는 2,500자 이내 전달 명령을 준비함. 아직 미확인인 Confluence 검색→같은 대화에서 문서 지정·본문 요약→원문 흐름을 다음으로 남기며 완료한 GitHub/Jira 버튼 시험·인증/저장·health·20회 검사는 반복하지 않음. 관련 문서 검사와 diff 검사를 수행하고 사내 교체/복구는 사용자 보고 전까지 대기로 둠.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

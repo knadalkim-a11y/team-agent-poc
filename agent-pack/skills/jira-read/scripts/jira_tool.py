@@ -1,7 +1,7 @@
 """
 title: EES Jira Read
 description: Project overview and issue reads through a user's confirmed Bearer authentication.
-version: 0.1.4
+version: 0.1.5
 required_open_webui_version: 0.11.3
 """
 
@@ -453,10 +453,6 @@ function projectRequest(key){
   if(data.ok!==true||!scopeReady||!projectKey(key)||!scopeKeys.includes(key)||!projects.some(p=>p.key===key))return null;
   return 'Jira '+key+' 프로젝트의 최근 이슈를 처음부터 보여줘. 전체 기간·모든 상태·모든 담당자 기준으로 조회해줘.';
 }
-function issueRequest(issue){
-  if(data.ok!==true||listing.ok!==true||!scopeReady||!issues.includes(issue)||typeof issue.key!=='string'||issue.key.trim()!==issue.key||!/^[A-Z][A-Z0-9_]{0,31}-[1-9][0-9]{0,14}$/.test(issue.key)||!scopeKeys.includes(issue.project_key)||issue.key.slice(0,issue.key.lastIndexOf('-'))!==issue.project_key)return null;
-  return 'Jira '+issue.key+' 이슈의 본문을 조회해서 요약하고 원문 링크를 보여줘.';
-}
 function nextRequest(){
   const next=listing.next_start_at,start=listing.start_at,listed=scope.listing_project_keys;
   if(data.ok!==true||!scopeReady||listing.ok!==true||projects.some(p=>p.ok!==true)||!scopeKeys.every(key=>projects.some(p=>p.key===key&&p.ok===true))||!Array.isArray(listed)||listed.length!==scopeKeys.length||!scopeKeys.every(key=>listed.includes(key))||!validCount(start)||!validCount(next)||next>100000||next<=start||listing.returned!==issues.length||next!==start+issues.length||!validCount(listing.total)||next>=listing.total)return null;
@@ -552,8 +548,7 @@ function issueDetail(issue){
   const source=node('div',undefined,'jira-source'),url=safeUrl(issue.url);
   if(url){const link=node('a','원문 열기 · 새 창','jira-reset');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.setAttribute('aria-label',str(issue.key)+' Jira 원문 열기 · 새 창');source.append(link);}
   else source.append(node('span','원문 링크를 확인하지 못했습니다.','jira-meta'));
-  const request=node('button','본문 요약 질문 넣기','jira-reset');request.type='button';request.setAttribute('data-jira-action','issue');request.setAttribute('aria-label',str(issue.key)+' 본문 요약 질문 넣기');request.setAttribute('aria-describedby','followup-help');request.disabled=!issueRequest(issue);request.addEventListener('click',()=>prepareChatRequest(issueRequest(issue)));source.append(request);
-  source.append(node('span','본문 요약은 질문을 보낸 뒤 새 답변에서 확인합니다.','jira-meta'));fields.append(source);detail.append(fields);detailNodes.set(issue,detail);return detail;
+  fields.append(source);detail.append(fields);detailNodes.set(issue,detail);return detail;
 }
 function render(){
   for(const [button,key] of buttons)button.setAttribute('aria-pressed',String(key===selected));
