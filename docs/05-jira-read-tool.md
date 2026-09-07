@@ -6,7 +6,31 @@ Jira 프로젝트를 시스템 구분으로 사용해 전체·미완료 건수�
 
 사용자 보고 제품은 **Jira 8.5.12, build 805012, sha1:156decd**이며 개인 토큰을 이미 사용하고 있습니다. Server/Data Center 구분과 현재 성공하는 API의 인증 헤더 형식은 미확인입니다. 공식 내장 PAT는 Jira 8.14부터 제공되므로 토큰을 갖고 있다는 사실만으로 8.5.12의 Bearer 호환성을 확정하지 않습니다. [Atlassian PAT 안내](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html)
 
-현재 코드는 **Bearer 인증 후보**이며 기본 비활성 상태입니다. 기존 성공 호출의 `Authorization` 형식이 `Bearer`인지 먼저 확인하고, 다르면 코드를 적용하기 전에 해당 방식에 맞춥니다. 실제 토큰값·내부 주소·프로젝트명은 채팅이나 Git에 기록하지 않습니다. 인증 확인 때문에 업무용 토큰을 폐기·재발급하거나 Jira를 업그레이드하지 않습니다.
+현재 코드는 **Bearer 인증 후보**이며 기본 비활성 상태입니다. 2026-09-07 사용자는 Confluence와 같은 방식일 것으로 설명했습니다. 이를 Bearer 작업 가정으로 사용하되 성공으로 기록하지 않고 아래 한 번의 계정 확인으로 호환성을 판단합니다. 반복해서 인증 메뉴 이름을 요구하지 않습니다. 실제 토큰값·내부 주소·프로젝트명은 채팅이나 Git에 기록하지 않습니다. 인증 확인 때문에 업무용 토큰을 폐기·재발급하거나 Jira를 업그레이드하지 않습니다.
+
+### 기존 토큰으로 한 번 연결 확인
+
+[check-jira-auth.ps1](../scripts/check-jira-auth.ps1)은 Windows PowerShell 5.1 이상에서 실행하는 읽기 확인입니다. Jira 기본 주소와 개인 토큰을 실행 시 입력하며 토큰 입력은 숨깁니다. `GET /rest/api/2/myself` 한 곳만 호출하고, 리디렉션·쿠키·Windows 기본 인증·자동 재시도를 사용하지 않습니다. WebUI·DB·설정을 변경하거나 토큰을 파일에 저장하지 않습니다. .NET 기본 TLS 검증을 유지하고 응답은 64 KiB·시간은 15초로 제한합니다.
+
+현재 원본은 main 미병합 [PR #2](https://github.com/knadalkim-a11y/team-agent-poc/pull/2)에 있습니다. 기존 저장소에서 PR을 fetch해 확인 스크립트만 임시 파일로 꺼내면 작업 브랜치나 기존 파일을 바꿀 필요가 없습니다. 아래 `git show`의 커밋은 전달 시 검수한 원본 SHA로 고정합니다.
+
+```powershell
+Set-Location "$env:USERPROFILE\team-agent-poc"
+# 새 창이면 기존 사내 Git 프록시 값만 이 창에 입력
+$gitProxy = Read-Host 'Git proxy URL'
+git -c "http.proxy=$gitProxy" fetch origin refs/pull/2/head
+if ($LASTEXITCODE -ne 0) { throw 'Git fetch failed' }
+$jiraSource = '<REVIEWED_PR_COMMIT_SHA>'
+$jiraCheck = Join-Path $env:TEMP 'ees-check-jira-auth.ps1'
+$jiraScript = git show "${jiraSource}:scripts/check-jira-auth.ps1"
+if ($LASTEXITCODE -ne 0) { throw 'Script read failed' }
+$jiraScript | Set-Content -Encoding UTF8 $jiraCheck
+& $jiraCheck
+```
+
+기존 창에 `$gitProxy`가 있으면 재입력 줄은 생략합니다. Jira 기본 주소는 필요한 컨텍스트 경로까지만 입력하고 `/rest/api/2`는 붙이지 않습니다. Jira가 승인된 `http://` 전용 주소라면 마지막 실행을 `& $jiraCheck -AllowHttp`로 바꿉니다. 네트워크상 Windows 시스템 프록시가 필요한 경우에만 `-UseSystemProxy`를 추가합니다. Git 프록시를 Jira에 자동 재사용하지 않으며 실행 정책이 차단하면 정책을 우회하지 않고 사내 승인 실행 방식으로 진행합니다.
+
+성공 출력은 `HTTPStatus=200`과 `BearerAuthenticated=True`입니다. 실패하면 `HTTPStatus`(받은 경우)·`BearerAuthenticated=False`·`CheckStage`만 보고 원인에 맞춰 다음 단계를 정합니다. 예외·응답 본문·사용자 식별자·주소·토큰은 출력하지 않습니다. 성공은 **해당 PC의 Bearer 계정 확인**만 뜻하며 프로젝트 권한·WebUI 네트워크/저장·Rich UI 성공은 이후 흐름에서 확인합니다.
 
 ## 2. 사용할 수 있는 업무
 
