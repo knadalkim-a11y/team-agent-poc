@@ -1,7 +1,7 @@
 """
 title: EES GitHub Read
 description: Read an approved repository's pull requests with the user's personal GitHub token.
-version: 0.1.1
+version: 0.1.2
 required_open_webui_version: 0.11.3
 """
 
@@ -407,12 +407,118 @@ class Tools:
         output = await asyncio.to_thread(self._run, "check_access", __user__)
         return json.dumps(output, ensure_ascii=False)
 
-    async def github_list_pull_requests(self, repository: str = "", state: str = "open", page: int = 1, __user__: dict = None) -> str:
+    async def github_list_pull_requests(self, repository: str = "", state: str = "open", page: int = 1, __user__: dict = None):
         """List one approved owner/repo's PR page, updated newest first. State is open, closed or all. Empty repository works only with one allowed repository. Use a confirmed next_page; returned count is not a total."""
         output = await asyncio.to_thread(self._run, "list_pull_requests", __user__, repository=repository, state=state, page=page)
-        return json.dumps(output, ensure_ascii=False)
+        return _display_result(output)
 
-    async def github_get_pull_request(self, number: int, repository: str = "", __user__: dict = None) -> str:
+    async def github_get_pull_request(self, number: int, repository: str = "", __user__: dict = None):
         """Read a PR description and source using a number supplied by the user or confirmed in a prior result. Empty repository works only with one allowed repository; reuse a known owner/repo. Call directly without a separate list or access check. Does not read changes, reviews, CI or comments."""
         output = await asyncio.to_thread(self._run, "get_pull_request", __user__, repository=repository, number=number)
+        return _display_result(output)
+
+
+def _display_result(output):
+    """Keep the already redacted evidence separate from the optional display."""
+    try:
+        from fastapi.responses import HTMLResponse
+        return HTMLResponse(content=_render_result(output), headers={"Content-Disposition": "inline"}), output
+    except Exception:
+        output["display_notice"] = "화면을 표시하지 못했습니다. 아래 조회 데이터로 안내하고 관리자에게 화면 호환성 확인을 요청하세요."
         return json.dumps(output, ensure_ascii=False)
+
+
+def _render_result(payload):
+    """Display received PR evidence without network access or automatic submission."""
+    data = json.dumps(payload, ensure_ascii=False, allow_nan=False)
+    for character, escaped in (("&", "\\u0026"), ("<", "\\u003c"), (">", "\\u003e"),
+                               ("\u2028", "\\u2028"), ("\u2029", "\\u2029")):
+        data = data.replace(character, escaped)
+    return r'''<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>GitHub PR 조회</title><style>
+:root{color-scheme:light dark;--bg:#f3f5f7;--surface:#fff;--ink:#202b38;--muted:#5d6978;--line:#dce2e8;--accent:#20649b;--tint:#edf4fa;--warning:#795018;--warning-bg:#fcf6e9}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 system-ui,-apple-system,'Segoe UI',sans-serif}main{max-width:960px;margin:auto;padding:24px}h1,h2,p{margin:0}h1{font-size:24px;line-height:1.4}h2{font-size:17px;line-height:1.5;overflow-wrap:anywhere}header{margin-bottom:18px}.muted{color:var(--muted);font-size:13px;overflow-wrap:anywhere}.context{margin-top:5px}.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:12px}.meta{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;color:var(--muted);font-size:13px;overflow-wrap:anywhere}.badge{background:var(--tint);color:var(--accent);padding:2px 8px;border-radius:5px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}button,a.button{font:inherit;color:var(--accent);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:9px 13px;min-height:44px;cursor:pointer}a.button{display:inline-flex;align-items:center;text-decoration:none}button:hover,a.button:hover{background:var(--tint)}button:disabled{opacity:.55;cursor:not-allowed}button:focus-visible,a:focus-visible,summary:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:3px}details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}summary{cursor:pointer;font-weight:600;padding:4px 0}.body{white-space:pre-wrap;overflow-wrap:anywhere;max-height:440px;overflow:auto;margin:10px 0;font:inherit}#error{background:var(--warning-bg);color:var(--warning)}#request-box{margin-top:16px}textarea{display:block;width:100%;min-height:100px;resize:vertical;border:1px solid var(--line);border-radius:7px;padding:10px;margin-top:7px;background:var(--surface);color:var(--ink);font:inherit}label{display:block;margin-top:8px}footer{margin-top:16px}#followup-help{margin-top:12px}[hidden]{display:none!important}
+@media(prefers-color-scheme:dark){:root{--bg:#161c24;--surface:#1d2631;--ink:#e6ebf1;--muted:#a9b5c4;--line:#354252;--accent:#8dc3ed;--tint:#263d51;--warning:#ecd1a3;--warning-bg:#352e24}}
+@media(max-width:520px){main{padding:18px 12px}.card{padding:15px}h1{font-size:22px}.actions{gap:8px}}
+</style></head><body><main>
+<header><h1 id="heading">GitHub PR 조회</h1><p id="scope" class="context"></p><p id="time" class="muted context"></p></header>
+<section id="error" class="card" role="status" hidden></section>
+<p id="result-note" class="muted"></p><div id="results"></div>
+<footer id="followups" hidden><p id="next-note" class="muted"></p><div class="actions"><button id="query-next" type="button" aria-describedby="followup-help" disabled>다음 목록 질문 넣기</button></div><p id="followup-help" class="muted">질문 넣기 버튼은 채팅 입력창의 작성 중인 내용을 바꿉니다. 내용을 확인하고 보내기를 눌러야 조회합니다.</p></footer>
+<section id="request-box" class="card" hidden><p id="request-status" class="muted" role="status"></p><label for="request-preview">후속 질문 · 필요하면 복사해 채팅에 보내세요</label><textarea id="request-preview" readonly></textarea></section>
+<footer><p id="coverage" class="muted"></p></footer>
+</main><script type="application/json" id="result-data">''' + data + r'''</script><script>
+'use strict';
+const data=JSON.parse(document.getElementById('result-data').textContent),el=id=>document.getElementById(id);
+const str=value=>typeof value==='string'?value:'확인 불가';
+const node=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
+const validNumber=value=>Number.isInteger(value)&&value>=1&&value<=2147483647;
+const validRepo=value=>typeof value==='string'&&value.trim()===value&&/^[A-Za-z0-9][A-Za-z0-9-]{0,38}\/[A-Za-z0-9_.-]{1,100}$/.test(value)&&!['.','..'].includes(value.split('/')[1]);
+const repo=data.repository,pulls=Array.isArray(data.pull_requests)?data.pull_requests:[],page=data.pagination||{};
+const list=Array.isArray(data.pull_requests),states={open:'열림',closed:'닫힘',all:'모든 상태'};
+const stamp=value=>{const date=new Date(value);return typeof value==='string'&&!Number.isNaN(date.getTime())?date.toLocaleString('ko-KR'):'확인 불가';};
+function sourceLink(value){
+  if(typeof value!=='string'||/[\s\\]/.test(value))return null;
+  try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&u.hostname&&!u.username&&!u.password?u.href:null;}catch{return null;}
+}
+function detailRequest(pr){
+  if(data.ok!==true||!list||!validRepo(repo)||!pulls.includes(pr)||!pr||!validNumber(pr.number))return null;
+  return 'GitHub '+repo+' 저장소의 PR #'+pr.number+' 본문을 조회해서 요약하고 원문 링크를 보여줘.';
+}
+function nextRequest(){
+  if(data.ok!==true||!list||!validRepo(repo)||!Object.hasOwn(states,data.state)||page.has_next!==true||page.basis!=='link'||!Number.isInteger(page.page)||page.page<1||page.page>=100000||page.next_page!==page.page+1||!Number.isInteger(page.per_page)||page.per_page<1||page.per_page>50||page.returned!==pulls.length||pulls.length>page.per_page)return null;
+  return 'GitHub '+repo+' 저장소의 PR 목록을 상태 '+data.state+', '+page.next_page+'페이지로 이어서 보여줘.';
+}
+function prepareRequest(text){
+  if(!text)return;
+  el('request-preview').value=text;el('request-box').hidden=false;
+  el('request-status').textContent='채팅 입력창에서 내용을 확인하고 보내세요. 반영되지 않으면 아래 질문을 복사해 보내세요.';
+  if(window.parent===window)el('request-status').textContent='아래 질문을 복사해 채팅 입력창에 넣고 보내세요.';
+  else{try{window.parent.postMessage({type:'input:prompt',text},'*');}catch{el('request-status').textContent='입력창 연결을 확인하지 못했습니다. 아래 질문을 복사해 채팅에 보내세요.';}}
+  resize();
+}
+function card(pr,detail){
+  const section=node('article',undefined,'card');
+  section.append(node('h2',(validNumber(pr.number)?'#'+pr.number+' · ':'')+str(pr.title)));
+  const meta=node('div',undefined,'meta');
+  const state=pr.merged===true?'병합됨':pr.state==='closed'?'닫힘':pr.state==='open'?'열림':'상태 미확인';
+  meta.append(node('span',state,'badge'),node('span',pr.draft===true?'초안':pr.draft===false?'초안 아님':'초안 여부 미확인'),node('span','작성자 '+str(pr.author)),node('span','수정 '+stamp(pr.updated_at)));
+  if(pr.merged===null||pr.merged===undefined)meta.append(node('span','병합 여부 미확인'));
+  section.append(meta);
+  if(detail){
+    section.append(node('p','대상 '+str(pr.base_ref)+' · 작업 '+str(pr.head_ref),'muted context'));
+    const body=node('details');body.append(node('summary','조회한 본문 · 펼치기/접기'));
+    const content=node('div',typeof data.body==='string'?(data.body||'등록된 본문이 없습니다.'):'본문을 확인하지 못했습니다.','body');content.tabIndex=0;body.append(content);
+    body.append(node('p',data.body_truncated===true?'본문 일부만 가져왔습니다. 전체 내용은 원문에서 확인하세요.':data.body_truncated===false?'응답으로 받은 본문 전체입니다.':'본문 잘림 여부를 확인하지 못했습니다.','muted'));
+    section.append(body);
+  }
+  const actions=node('div',undefined,'actions'),url=sourceLink(pr.url);
+  if(url){const link=node('a','원문 보기 · 새 창','button');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.setAttribute('aria-label',(validNumber(pr.number)?'PR #'+pr.number+' ':'PR ')+'원문 보기 · 새 창');actions.append(link);}else actions.append(node('span','원문 주소를 확인하지 못했습니다.','muted'));
+  if(!detail){const button=node('button','본문 요약 질문 넣기');button.type='button';button.setAttribute('data-pr-number',String(pr.number));button.setAttribute('aria-describedby','followup-help');button.disabled=!detailRequest(pr);button.addEventListener('click',()=>prepareRequest(detailRequest(pr)));actions.append(button);}
+  section.append(actions);return section;
+}
+el('query-next').addEventListener('click',()=>prepareRequest(nextRequest()));
+if(data.ok!==true){
+  el('heading').textContent='GitHub 조회를 완료하지 못했습니다.';el('error').hidden=false;
+  el('error').textContent=data.error&&typeof data.error.message==='string'&&data.error.message.trim()?data.error.message:'조회 상태를 확인하지 못했습니다. 관리자에게 확인을 요청하세요.';
+}else{
+  el('heading').textContent=list?'GitHub PR 목록':'GitHub PR 본문';
+  el('scope').textContent=str(repo)+(list?' · '+(states[data.state]||'상태 미확인')+' · '+(Number.isInteger(page.page)?page.page+'페이지':'페이지 미확인'):'');
+  el('time').textContent='조회 시각 '+stamp(data.fetched_at)+' · 자동 갱신 안 됨';
+  el('coverage').textContent='변경 파일·코드·CI·리뷰·댓글·병합 가능 여부는 조회하지 않았습니다.';
+  if(list){
+    el('result-note').textContent='최근 수정순 · 이번 페이지 '+pulls.length+'건 · 저장소 전체 건수가 아닙니다. 본문은 아직 조회하지 않았습니다.';
+    for(const pr of pulls)if(pr&&typeof pr==='object')el('results').append(card(pr,false));
+    if(!pulls.length)el('results').append(node('p','이 페이지에서 볼 수 있는 PR이 없습니다. 다른 상태나 첫 페이지를 요청할 수 있습니다.','card muted'));
+    el('followups').hidden=false;
+    const next=nextRequest();el('query-next').disabled=!next;
+    el('next-note').textContent=next?'같은 저장소·상태의 '+page.next_page+'페이지를 조회하는 질문입니다.':page.has_next===false&&page.next_page===null&&['link','short_page'].includes(page.basis)?'조회 응답 기준 다음 페이지가 없습니다.':'다음 페이지를 확인하지 못했습니다. 마지막 페이지라고 단정할 수 없습니다.';
+  }else if(data.pull_request&&typeof data.pull_request==='object')el('results').append(card(data.pull_request,true));
+}
+let pending=false,lastHeight=0;
+function resize(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;const height=Math.ceil(document.querySelector('main').getBoundingClientRect().height);if(height!==lastHeight){lastHeight=height;try{window.parent.postMessage({type:'iframe:height',height},'*');}catch{}}});}
+if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe(document.querySelector('main'));
+window.addEventListener('resize',resize);document.addEventListener('toggle',resize,true);resize();
+</script></body></html>'''

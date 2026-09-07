@@ -130,12 +130,22 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         return {"id": user_id, "valves": self.tool.UserValves(PAT=token, **values)}
 
     def result(self, raw):
-        self.assertIsInstance(raw, str, "Tool must return a JSON string")
-        data = json.loads(raw)
+        if isinstance(raw, tuple):
+            self.assertEqual(len(raw), 2)
+            data = raw[1]
+        else:
+            self.assertIsInstance(raw, str, "Tool must return JSON or a Rich UI result pair")
+            data = json.loads(raw)
         self.assertIsInstance(data.get("ok"), bool)
         for token in (TOKEN_A, TOKEN_B):
-            self.assertNotIn(token, raw, "PAT must never appear in Tool output")
+            self.assertNotIn(token, self.output_text(raw), "PAT must never appear in Tool output")
         return data
+
+    @staticmethod
+    def output_text(raw):
+        if isinstance(raw, tuple):
+            return raw[0].body.decode("utf-8") + json.dumps(raw[1], ensure_ascii=False)
+        return raw
 
     def assert_error(self, raw):
         data = self.result(raw)
@@ -315,7 +325,7 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         self.use_response({"results": [page(body=False)], "size": 1})
         raw = await self.tool.search_pages("equipment guide", space_key="EES", limit=5, __user__=self.user())
         self.assertTrue(self.result(raw)["ok"])
-        self.assertIn("Synthetic equipment guide", raw)
+        self.assertIn("Synthetic equipment guide", self.output_text(raw))
         request = self.calls[0][0]
         parsed = urllib.parse.urlsplit(request.full_url)
         self.assertEqual(parsed.path, "/wiki/rest/api/content/search")
@@ -381,7 +391,7 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         self.responder = respond
         raw = await self.tool.get_page("123", __user__=self.user())
         self.assertTrue(self.result(raw)["ok"])
-        self.assertIn("Synthetic safe content", raw)
+        self.assertIn("Synthetic safe content", self.output_text(raw))
         self.assertEqual(len(self.calls), 2)
         expands = [urllib.parse.parse_qs(urllib.parse.urlsplit(call[0].full_url).query)["expand"][0] for call in self.calls]
         self.assertEqual(expands[0], "space")
@@ -418,20 +428,20 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         self.responder = lambda _request: FakeResponse(next(counter))
         raw = await self.tool.get_page("123", __user__=self.user())
         self.assert_error(raw)
-        self.assertNotIn("DO NOT DISCLOSE", raw)
+        self.assertNotIn("DO NOT DISCLOSE", self.output_text(raw))
 
     async def test_missing_page_space_is_closed(self):
         self.use_response({"id": "123", "type": "page", "title": "DO NOT DISCLOSE"})
         raw = await self.tool.get_page("123", __user__=self.user())
         self.assert_error(raw)
-        self.assertNotIn("DO NOT DISCLOSE", raw)
+        self.assertNotIn("DO NOT DISCLOSE", self.output_text(raw))
         self.assertEqual(len(self.calls), 1)
 
     async def test_search_does_not_disclose_out_of_allowlist_results(self):
         self.use_response({"results": [page(space="SECRET", title="FORBIDDEN RESULT")], "size": 1})
         raw = await self.tool.search_pages("guide", __user__=self.user())
         self.result(raw)
-        self.assertNotIn("FORBIDDEN RESULT", raw)
+        self.assertNotIn("FORBIDDEN RESULT", self.output_text(raw))
 
     async def test_remote_links_cannot_override_fixed_confluence_origin(self):
         data = page(body=False)
@@ -439,7 +449,7 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         self.use_response({"results": [data], "size": 1})
         raw = await self.tool.search_pages("guide", __user__=self.user())
         self.result(raw)
-        self.assertNotIn("evil.example.invalid", raw)
+        self.assertNotIn("evil.example.invalid", self.output_text(raw))
 
     async def test_upstream_http_errors_are_safe_and_not_retried(self):
         for status in (401, 403, 404, 429, 500, 502, 503):
@@ -544,11 +554,11 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         for user, raw in zip(users, results):
             self.assertTrue(self.result(raw)["ok"])
             if user["id"] == "user-a":
-                self.assertIn("USER_A_PRIVATE_DOCUMENT", raw)
-                self.assertNotIn("USER_B_PRIVATE_DOCUMENT", raw)
+                self.assertIn("USER_A_PRIVATE_DOCUMENT", self.output_text(raw))
+                self.assertNotIn("USER_B_PRIVATE_DOCUMENT", self.output_text(raw))
             else:
-                self.assertIn("USER_B_PRIVATE_DOCUMENT", raw)
-                self.assertNotIn("USER_A_PRIVATE_DOCUMENT", raw)
+                self.assertIn("USER_B_PRIVATE_DOCUMENT", self.output_text(raw))
+                self.assertNotIn("USER_A_PRIVATE_DOCUMENT", self.output_text(raw))
         self.assertEqual(len(self.calls), 8)
 
     async def test_repeat_reads_make_fresh_requests(self):
@@ -566,7 +576,7 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         raw = await self.tool.search_pages("guide", __user__=self.user())
         data = self.result(raw)
         self.assertTrue(data["ok"])
-        self.assertNotIn(TOKEN_A[:10], raw, "Redaction must run before the 500-character title cutoff")
+        self.assertNotIn(TOKEN_A[:10], self.output_text(raw), "Redaction must run before the 500-character title cutoff")
         self.assertLessEqual(len(data["results"][0]["title"]), 500)
 
     async def test_body_boundary_does_not_reveal_partial_pat(self):
@@ -577,7 +587,7 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         raw = await self.tool.get_page("123", __user__=self.user())
         result = self.result(raw)
         self.assertTrue(result["ok"])
-        self.assertNotIn(TOKEN_A[:10], raw, "Redaction must run before body truncation")
+        self.assertNotIn(TOKEN_A[:10], self.output_text(raw), "Redaction must run before body truncation")
         self.assertLessEqual(len(result["content"]), 256)
 
     async def test_html_entity_encoded_pat_is_redacted_before_body_cutoff(self):
@@ -589,7 +599,7 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         raw = await self.tool.get_page("123", __user__=self.user())
         result = self.result(raw)
         self.assertTrue(result["ok"])
-        self.assertNotIn(TOKEN_A[:10], raw, "HTML-decoded content must be redacted before truncation")
+        self.assertNotIn(TOKEN_A[:10], self.output_text(raw), "HTML-decoded content must be redacted before truncation")
         self.assertLessEqual(len(result["content"]), 256)
 
     def test_only_three_read_functions_are_exposed(self):

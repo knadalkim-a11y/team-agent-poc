@@ -99,10 +99,10 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 
 Rich UI를 구현할 때의 경계:
 
-- 모델이 업무 Tool을 선택하면 연결된 코드가 조회·입력·권한 검증 후 화면을 반환할 수 있습니다. 현재 Jira는 [Tool에서 대시보드를 반환](05-jira-read-tool.md#5-구현-경계와-운영)합니다. [0.11.3 Action 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/actions.py)도 Rich UI 반환을 지원하지만 별도 Action은 이 패키지에 구현하지 않았습니다. HTML은 고정 템플릿으로 만들고 외부 자료는 텍스트로 삽입합니다.
+- 모델이 업무 Tool을 선택하면 연결된 코드가 조회·입력·권한 검증 후 화면을 반환할 수 있습니다. [Jira 대시보드](05-jira-read-tool.md#5-구현-경계와-운영)에 이어 [GitHub PR 카드](06-github-read-tool.md#followup-update)·[Confluence 검색/본문 카드](04-confluence-read-tool.md#rich-ui-results)를 기존 Tool 안에 준비했습니다. 실제 적용 상태는 STATUS를 따릅니다. [0.11.3 Action 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/actions.py)도 Rich UI 반환을 지원하지만 별도 Action은 이 패키지에 구현하지 않았습니다. HTML은 고정 템플릿으로 만들고 외부 자료는 텍스트로 삽입합니다.
 - `HTMLResponse`와 `Content-Disposition: inline`으로 화면을 반환하고, 모델의 설명에 필요한 데이터는 `(HTMLResponse, context)`로 함께 제공합니다. HTML만 반환했다고 모델이 화면 내용을 읽을 수 있다고 가정하지 않습니다. [공식 Rich UI 안내](https://docs.openwebui.com/features/extensibility/plugin/development/rich-ui/)
 - 받은 결과 안의 필터·상세 펼치기는 브라우저에서 처리합니다. 추가 검색·본문 조회는 업무 Tool과 사용자별 권한 검사를 거칩니다. iframe에 PAT를 넣거나 원 시스템 API를 직접 호출시키지 않습니다.
-- Rich UI 안의 HTML 버튼은 자동으로 Python Tool을 재호출하지 않습니다. 별도 등록한 Action과 구분하며, 대화로 선택을 전달할지 추가 동작을 구현할지는 사용사례가 정해진 뒤 결정합니다. iframe의 same-origin 권한을 켜는 방식으로 해결하지 않습니다.
+- Rich UI 안의 HTML 버튼은 자동으로 Python Tool을 재호출하지 않습니다. 현재 후속 질문은 `input:prompt`로 입력 초안을 전달하고 사용자가 검토·전송합니다. 기존 입력을 바꿀 수 있다는 안내와 복사 가능한 초안을 제공하며 자동 전송·원 시스템 직접 API 호출·same-origin 권한 추가는 하지 않습니다.
 - 저장된 채팅의 화면은 당시 결과일 수 있습니다. 갱신 여부를 표시하고, 필터·입력 상태가 재접속 후 자동 복원되거나 항상 최신이라고 설명하지 않습니다.
 
 코드 위치는 [AGENTS의 구현 규칙](../AGENTS.md#3-구현-위치와-과설계-방지)을 따릅니다. 기능별 API 코드는 원 시스템에 요청하는 클라이언트 코드입니다. 원 시스템 서버 구현을 이 저장소에 가져오지 않으며, 둘 이상의 실제 기능에서 같은 코드의 반복 수정이 생기면 공통화를 검토합니다.
@@ -113,7 +113,7 @@ Rich UI를 구현할 때의 경계:
 
 | 대상 | 구현 전에 확인할 정보 | 첫 읽기 기능 후보 | Rich UI 후보 |
 |---|---|---|---|
-| Confluence | 제품·버전, 개인 인증, 허용 Space | 문서 검색·본문 조회 | [받은 검색 결과 탐색 예제](04-confluence-read-tool.md#rich-ui-demo) |
+| Confluence | 제품·버전, 개인 인증, 허용 Space | 문서 검색·본문 조회 | [검색·본문·근거 카드](04-confluence-read-tool.md#rich-ui-results) |
 | Jira | Cloud/Data Center·버전, 개인 인증, 허용 프로젝트·조회 필드 | 이슈 검색·상세 조회 | 이슈 목록에서 상태·담당자별 좁히기, 상세 펼치기 |
 | GitHub | GitHub.com/Enterprise Server·버전, 개인 인증, 허용 저장소 | 이슈·PR 목록과 상세 조회 | PR 목록의 리뷰·검사 상태 비교 |
 

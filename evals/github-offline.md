@@ -96,3 +96,31 @@ test_github_tool.GitHubReadTests.test_case_insensitive_repository_and_single_def
 - WebUI 수동 코드·GitHub Prompt 절 적용, 사내 모델의 직접 번호/“두 번째 PR”/“다음 목록” 선택, 실제 페이지 정확성·오류 안내 사용성은 미확인. 사내 적용은 [기존 항목 갱신 안내](../docs/06-github-read-tool.md#followup-update)의 변경 범위만 확인함. 전체 System Prompt 교체·온보딩 적용을 요구하지 않음.
 - 인증·개인 필드·저장·전송·Jira/Confluence·화면·시작 스크립트는 변경하지 않음. 완료한 저장/재시작/인증·기본 조회·20회 안정성 검사는 반복하지 않음. 기존 성공·실패·미확인 판정은 [실환경 평가](scenarios.md#github-live)에 보존함.
 - 별도 Jira 검토에서 목록 오류의 안전한 `listing.error.message`를 화면이 버리고 재조회만 안내하는 점, 부분 프로젝트 실패의 회복에 따라 다음 목록 범위가 바뀔 수 있는 점을 확인함. 이번 GitHub 흐름에는 섞지 않고 [다음 작업](../docs/STATUS.md)에 남김. Jira 코드·시험은 수정·실행하지 않음.
+
+<a id="rich-ui-results"></a>
+
+## PR 목록·본문 카드와 최적화 — 2026-09-07
+
+- 기준 main: `028287e2ca77c3b14424b51a49871f025943554d`. 최신 AGENTS·STATUS 및 열린 PR 0개를 확인하고 기존 연동의 카드 보완만 준비함. 첫 화면·온보딩은 보류함.
+- 환경: 사외 Linux / Python 3.12.13 / Pydantic 2.13.4 / Node 24.19.0. HTTP는 합성 응답이며 실제 PAT·업무 자료를 사용하지 않음. `tests/rich_ui_support.py`의 최소 DOM 모형을 공유하며 CSS 배치·실제 브라우저를 시험한 것으로 설명하지 않음.
+
+### 변경과 확인 범위
+
+- v0.1.2에서 목록·상세·오류를 작은 단일 템플릿으로 반환함. 실제 PR 번호·저장소·조회 범위/시각, 이번 페이지 건수, closed와 병합 미확인, 본문 잘림을 구분함. 본문은 기본 접힘·영역 내 스크롤이며 읽은 근거 문자열을 모델에 그대로 보존함.
+- 후속 버튼은 확인한 저장소·실제 PR 번호 또는 확인된 다음 페이지로 질문 초안만 생성함. 제목·본문을 실행 지시로 붙이지 않고 작성 중 입력 교체 안내·복사 가능한 질문을 제공함. 자동 제출·조회·미확인 다음 페이지 생성은 없음.
+- 기존 `_run`을 한 번 호출하고 redacted 결과를 화면/모델 근거로 나눔. UI HTML을 모델 context에 넣지 않고 Prompt의 카드/전체표 중복을 줄임. 같은 조회 자료를 재사용하며 실제 모델 token·응답속도 향상을 측정한 것은 아님. `_run`·API·인증·Valves/UserValves 동기 메서드 AST는 이전과 동일함.
+- 기존 `test_github_tool.py`의 결과 추출과 직접 상세 2개는 tuple 계약에만 맞췄고 본문·PAT 비노출 검사를 보존함. 새 API·라이브러리·서버·공통 프런트 계층은 추가하지 않음.
+
+### 실행 증거
+
+| 명령·검토 | 실제 결과 |
+|---|---|
+| `python -m unittest discover -s tests -p test_github_ui.py -v` 최초 실행 | 8개 중 7 PASS, 1 FAIL / 6.222초. 실패는 DOM 모형이 HTML 초기 `disabled` 속성을 읽지 않아 발생; 실제 템플릿에는 disabled가 있었음 |
+| 공용 DOM 모형에 초기 속성 반영 후 실패한 검사 1개 + 변경된 기존 직접 상세 2개 | 3 PASS / 3.667초. FakeHTMLResponse로 tuple 경로를 강제; 이미 통과한 7개는 반복하지 않음 |
+| 상세 기본 접힘·실제 PR 번호가 있는 원문 접근성 이름 추가 후 해당 DOM 검사만 | 1 PASS / 0.724초. 본문·잘림·외부 텍스트·키보드 초점과 함께 확인 |
+| 새 검사의 고유 범위 | 8개 모두 PASS: wrapper/HTML·JSON 분리·본문/PAT 보존·표시 실패 fallback·안전한 원문·실제 ID 초안·페이지/실패/빈 결과·좁은 화면용 CSS 선언. 기존 직접 상세 2개도 PASS |
+| 합성 요청·정적 대조 | wrapper당 `_run` 1회, 기존 계정 1회 + PR 1회 요청 유지. API/인증/설정 AST 동일. 외부 HTML/스크립트 삽입 없이 textContent 사용; HTML 데이터 escape 확인 |
+| 독립 읽기 전용 검토 | 범위·페이지·병합/본문 미확인·복사 초안·안전한 링크·fallback·추가 호출/과설계 검토. 공통 Prompt의 본문 미조회 문구를 목록 카드로 한정하고 Node 미설치 시 DOM만 skip하도록 보완 |
+| Node 미설치 경로 | `shutil.which`를 None으로 모킹해 DOM 진입 시 SkipTest를 확인함. Python wrapper 검사는 Node 없이도 남음 |
+
+최종 전체 변경에서 `python scripts/check_docs.py`는 25개 파일·421개 링크·오류 0·검토 후보 0이며 `git diff --check`도 통과함. 실제 브라우저 배치는 미실행: 앞선 로컬 HTML 탐색의 URL 보안 정책 차단을 우회하거나 반복하지 않음. 사내 WebUI 등록·iframe/입력 반영·모델 자연어 선택·GHES·Windows 복구·실제 사용성은 미실행. 기존 저장/인증/안정성 시험을 반복하지 않고 [사내 변경 범위](../docs/06-github-read-tool.md#followup-update)에 남김.

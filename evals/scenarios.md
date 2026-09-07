@@ -247,7 +247,7 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 | GH01 | 개인 설정·인증 | 새 GitHub 필드 마스킹·해당 Tool 암호화 저장, 기존 PAT 계정 인증, 개인 설정 분리 | 부분 확인 — 새 개인 필드 DB 범위 PASS, 인증을 포함한 목록 조회 성공 보고. 계정 분리·마스킹 별도 관찰은 미확인. [저장 증거](#github-storage-check), [목록 성공](#github-first-list) |
 | GH02 | PR 목록·본문·원문 | 같은 계정/저장소/상태의 목록·PR 번호·본문·원문 일치, 한 페이지·잘림·미확인 의미를 유지 | 기본 흐름 확인 완료 — 목록·PR 한 건 본문 요약·원문 일치 사용자 보고. 전체 목록/페이지·잘림 의미 대조는 후속. v0.1.1 코드·GitHub 지침 [저장 보고](#followup-tools-saved)가 있으며 새 버전의 후속 조회·페이지 동작은 미확인. [확인 기록](#github-read-acceptance), [변경 범위](#github-followup-preparation) |
 | GH03 | 읽기·저장소·사용자 경계 | 허용 범위 밖 차단, 다른 사용자의 토큰·저장소 권한 분리, 리디렉션/쓰기 실행 없음 | 대기 — 사내 대표 차단·공개 전 계정 확인 |
-| GH04 | 실패·처음 사용 | 빈 결과/인증 실패/권한 부재와 다음 행동 이해, 자료 속 실행 지시 거절, 이모지 없는 목록/요약에서 근거·범위 확인 | 부분 확인 — 설정 오류 안내 후 형식 수정·목록 조회 성공. 나머지 조건은 대기. 개정 오류 안내의 실제 응답도 미확인. [성공 기록](#github-first-list), [변경 범위](#github-followup-preparation) |
+| GH04 | 실패·처음 사용 | 빈 결과/인증 실패/권한 부재와 다음 행동 이해, 자료 속 실행 지시 거절, 이모지 없는 카드/요약에서 근거·범위 확인. 카드 초안은 실제 PR 번호·확인된 다음 페이지를 사용하고 수동 전송하며 본문 펼치기/원문과 모델 근거가 일치 | 부분 확인 — 설정 오류 안내 후 형식 수정·목록 조회 성공. 나머지 조건은 대기. 개정 오류 안내의 실제 응답도 미확인. v0.1.2 카드 사내 적용·실사용은 대기([사외 검사](github-offline.md#rich-ui-results)). [성공 기록](#github-first-list), [변경 범위](#github-followup-preparation) |
 
 2026-09-07 사용자가 “github야 pat도 이미 발급 받아뒀고 버전은 github enterprise server 3.17.15”라고 보고했습니다. 제품·버전·개인 토큰 보유의 근거이며, 실제 값·저장소 식별자·API 결과는 수집하지 않았습니다. 개발용 GitHub.com 연결과 사내 GHES 연결은 별개입니다.
 
@@ -537,3 +537,11 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 재검사: `CheckCompleted=true`, `EncryptedCanaryMatches=1`, `PlaintextCanaryMatches=0`, `PlaintextInDatabaseFiles=false`, `DatabaseFilesChecked=2`, `DatabaseCheckPassed=true`, `LogsChecked=false`, `RestartPersistenceChecked=false`. 기존 파일 키로 같은 가짜 값의 암호문 1건이 재시작 후에도 복호화됐고 검사한 DB 관련 파일 2개에 평문이 없음. UI 유지 관찰과 함께 저장 후 재기동 확인 근거로 사용함.
 - 로그 범위: 안내한 기본 수동 기동의 현재 콘솔 버퍼 검색. [v0.11.3 logger.py](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/logger.py)의 일반 출력은 stdout이며, 감사 수준이 `NONE`이 아니고 파일 옵션이 켜진 경우에만 감사 파일 출력이 추가됨. [env.py](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/env.py)의 감사 수준 기본값은 `NONE`. 기본 소스 대조는 사내 PC의 별도 환경변수·로그 수집 설정까지 직접 검사한 것이 아님.
 - 판정: 이번 저장 시험의 DB·기본 콘솔 범위에서 C02 PASS. 별도 감사 로그·리디렉션·외부 수집·버퍼 밖 과거 출력·모든 백업까지 평문 부재를 보증하지 않음. 별도 로그 설정을 사용했다는 정보가 확인되면 해당 로그 확인을 추가함. 이 C02 시험 당시 사용자별 설정 분리(C01)·실제 인증(C03)·문서 권한 격리(C05)는 대기였고 실제 PAT 저장·API 호출도 보고되지 않았음. 당시 관리자 `ENABLED=false`를 유지하고 다음은 개인 PAT 교체만 안내했으며, 이후 판정은 위 평가표·결과 기록을 따름.
+
+<a id="rich-ui-cards-preparation"></a>
+
+## 기존 연동 카드 보완 준비 — 2026-09-07
+
+- 최신 main `028287e2ca77c3b14424b51a49871f025943554d`·AGENTS·STATUS와 열린 PR 0개를 확인하고 GitHub/Confluence의 기존 조회 뒤 카드·후속 질문 흐름을 준비함. 새 화면 검사 17개·변경된 기존 직접 상세 2개 PASS. [GitHub 실행 증거](github-offline.md#rich-ui-results), [Confluence 실행 증거](confluence-offline.md#rich-ui-results).
+- 변경 범위의 사내 기준: 실제 ID·원문·조회 범위/시각이 보이고 목록을 전체 건수나 본문으로 해석하지 않음. 질문 넣기는 입력 교체 안내·복사 초안·수동 전송을 제공하며 API를 자동 호출하지 않음. 본문은 접어 두고 키보드/좁은 화면에서 읽을 수 있으며 모델 근거와 일치함. 오류/빈 결과를 구분하고 같은 표를 답변에 반복하지 않음. Confluence는 검색→본문을 C04, GitHub는 GH02/GH04의 변경 범위에 묶어 확인함.
+- 판정: Git 준비·합성 확인이며 실제 브라우저·사내 WebUI·모델 호출·사용성은 미실행. C04/GH02·Jira UX02의 과거 PASS와 저장 보고를 보존하고 새 카드 적용 성공으로 확대하지 않음. 첫 화면·온보딩은 보류하며 기존 저장·인증·20회 안정성 검사를 반복하지 않음.

@@ -125,6 +125,15 @@ class GitHubReadTests(unittest.TestCase):
         elif operation == "detail":
             kwargs = {"repository": REPOSITORY, "number": 11, **kwargs}
         result = asyncio.run(getattr(self.tool, methods[operation])(__user__=self.user() if user is DEFAULT_USER else user, **kwargs))
+        return self.result_data(result)
+
+    def result_data(self, result):
+        if isinstance(result, tuple):
+            display, evidence = result
+            self.assertEqual(display.headers["Content-Disposition"], "inline")
+            self.assertNotIn(PAT_A, display.body.decode())
+            self.assertNotIn(PAT_B, display.body.decode())
+            result = json.dumps(evidence, ensure_ascii=False)
         self.assertIsInstance(result, str)
         data = json.loads(result)
         self.assertIsInstance(data.get("ok"), bool)
@@ -193,7 +202,7 @@ class GitHubReadTests(unittest.TestCase):
     def test_direct_detail_omits_single_repository_without_list_preflight(self):
         self.tool.valves.ALLOWED_REPOSITORIES = REPOSITORY
         self.responder = lambda request: Response(pull_request())
-        result = json.loads(asyncio.run(self.tool.github_get_pull_request(number=11, __user__=self.user())))
+        result = self.result_data(asyncio.run(self.tool.github_get_pull_request(number=11, __user__=self.user())))
         self.assertTrue(result["ok"])
         self.assertEqual(result["repository"], REPOSITORY)
         self.assertEqual(result["pull_request"]["number"], 11)
@@ -201,7 +210,7 @@ class GitHubReadTests(unittest.TestCase):
                          [BASE + "/api/v3/user", BASE + "/api/v3/repos/" + REPOSITORY + "/pulls/11"])
 
     def test_direct_detail_omitted_repository_requires_choice_before_network(self):
-        result = json.loads(asyncio.run(self.tool.github_get_pull_request(number=11, __user__=self.user())))
+        result = self.result_data(asyncio.run(self.tool.github_get_pull_request(number=11, __user__=self.user())))
         self.assertFalse(result["ok"])
         self.assertEqual(result["error"]["code"], "repository_required")
         self.assertEqual(self.calls, [])
