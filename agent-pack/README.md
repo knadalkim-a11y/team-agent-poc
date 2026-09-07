@@ -15,10 +15,12 @@ agent-pack/
 └─ skills/
    ├─ policy-grounded-answer/SKILL.md
    ├─ structured-troubleshooting/SKILL.md
-   └─ confluence-read/
-      ├─ SKILL.md
-      ├─ scripts/confluence_tool.py
-      └─ references/rich-ui-search-demo.html
+   ├─ confluence-read/
+   │  ├─ SKILL.md
+   │  ├─ scripts/confluence_tool.py
+   │  └─ references/rich-ui-search-demo.html
+   └─ jira-read/
+      └─ scripts/jira_tool.py
 ```
 
 | 원본 | Open WebUI 반영 위치 |
@@ -28,8 +30,11 @@ agent-pack/
 | `knowledge/*.md` | Workspace Knowledge |
 | `skills/*/SKILL.md` | Workspace Skills |
 | `skills/confluence-read/scripts/confluence_tool.py` | Workspace Tools; 별도 등록 후 Assistant에 연결 |
+| `skills/jira-read/scripts/jira_tool.py` | Workspace Tools; 프로젝트별 현황 화면을 코드에 포함 |
 
 Confluence 묶음은 **Skill 지침 + 실행 코드**를 함께 관리하는 예시입니다. Open WebUI가 폴더를 자동 설치·실행하지는 않습니다. [설치 안내](../docs/04-confluence-read-tool.md)에 따라 두 항목을 등록합니다. 코드 기본값은 비활성화이며 실제 준비·배포 상태는 [STATUS](../docs/STATUS.md), 실환경 판정은 [평가표](../evals/scenarios.md#confluence-live)에만 기록합니다.
+
+Jira는 작은 고정 조회 흐름으로 시작하며 별도 Skill을 추가하지 않습니다. 기존 System Prompt의 조건부 조회 안내와 함수 설명을 사용하고 [Jira 안내](../docs/05-jira-read-tool.md)에 따라 Python Tool만 추가합니다. 화면은 같은 파일 안에 있어 별도 HTML 복사·빌드가 필요하지 않습니다. 사용자 환경의 인증 방식은 아직 미확인이므로 실제 활성화 전 안내의 인증 조건을 확인합니다.
 
 ## 변경 절차
 

@@ -40,6 +40,12 @@
 - 사내 표시 버전은 **9.2.21**이라는 사용자 보고를 받았습니다. [9.2 공식 릴리스 안내](https://confluence.atlassian.com/doc/confluence-9-2-release-notes-1456345480.html)는 Data Center 라이선스 전용임을 명시하므로, 보고된 버전을 기준으로 Data Center 연동 경로를 선택합니다. 사내 설치·라이선스를 직접 검사한 결과는 아닙니다.
 - 준비한 Tool의 인증·API 기준은 [Confluence 설치 안내](docs/04-confluence-read-tool.md)를 따릅니다. 버전 확인을 현재 Tool의 실제 인증·조회·사용자 격리 검증 완료로 해석하지 않습니다.
 
+## Jira 확인 환경
+
+- 2026-09-07 사용자 보고: Jira **8.5.12**, build **805012**, sha1 **156decd**. 개인 토큰을 이미 다른 호출에 사용 중이며 시스템은 프로젝트로 구분하는 것으로 설명함. 실제 프로젝트 키는 사내 허용목록으로 관리하며 저장소에는 넣지 않음.
+- Server/Data Center 라이선스 구분·기존 호출의 인증 헤더 형식은 미확인. [공식 내장 PAT](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html)는 Jira 8.14 이상이므로 현재 사용 중인 토큰을 내장 PAT로 단정하지 않음. [8.5.12 REST API](https://docs.atlassian.com/software/jira/docs/api/REST/8.5.12/)를 기준으로 기본 비활성 Bearer 읽기 후보를 준비하며 활성화 전 기존 성공 인증 형식을 확인함.
+- 새 도구·화면의 적용과 Jira 실환경 성공은 미확인. [등록 안내](docs/05-jira-read-tool.md), [판정](evals/scenarios.md#jira-live)을 따르며 이 문서는 API 연결 성공을 뜻하지 않음.
+
 ## 보존 중인 Hermes 환경
 
 | 항목 | 확인된 설치 기준 |

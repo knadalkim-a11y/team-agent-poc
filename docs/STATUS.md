@@ -7,9 +7,9 @@
 ## 목표와 이번 작업
 
 - 목표: 비개발자가 범용 채팅·사내 자료 조회·팀원 Prompt/Skill 공유를 쉽게 사용하는 플랫폼. 현재는 Open WebUI Native와 Git Agent Pack을 사용하고 원본 WebUI는 수정하지 않음.
-- 현재 위치: 개인 Windows 환경의 기본 채팅·Confluence 읽기 흐름을 확인했고, 다음 업무 연동과 첫 실제 Rich UI를 준비하는 단계. 공용 서버 배포·비개발자 사용성·전체 격리 검증 완료를 뜻하지 않음.
-- 이번 작업: 전체 계획을 업무 흐름 단위로 재정리하고, 기능별 검증·공개 전 검증·조건부 진단을 구분함. 사용성·공유 완료 조건과 사내 확인을 묶는 작업 규칙을 추가함. 코드·실행 자산·사내 설정은 변경하지 않음.
-- 다음 작업 하나: **Jira의 제품/버전, 개인 인증 방식, 첫 조회 업무를 한 번에 확인한다.** 예: Cloud/Data Center 여부, PAT 등 개인 인증의 보유 여부, 내가 맡은 열린 이슈 또는 특정 프로젝트의 이슈 조회 중 필요한 흐름. 실제 주소·토큰·프로젝트명은 외부로 받지 않으며 허용 범위는 사내 설정에 둠. 정보가 지연되면 이미 연결된 Confluence로 첫 Rich UI를 구현하는 대안을 사용함.
+- 현재 위치: 개인 Windows 환경의 기본 채팅·Confluence 읽기 흐름을 확인했고, Jira 프로젝트별 현황과 첫 API 결과용 Rich UI 코드를 준비하는 단계. 실제 Jira 연결·WebUI 화면·공용 배포·비개발자 사용성 완료를 뜻하지 않음.
+- 이번 작업: 사용자 보고 Jira 8.5.12·기존 개인 토큰·프로젝트 기반 시스템 구분을 반영해 프로젝트별 전체/미완료 집계와 최근 목록·상세 읽기, 결과 탐색 화면을 구현함. 실제 키는 사내 허용목록에서만 관리하고 저장소에는 합성 예시만 둠. 기본 비활성 Bearer 후보이며 코드·합성 검사와 사내 적용을 구분함.
+- 다음 작업 하나: **현재 성공하는 Jira 호출의 인증 형식이 Bearer인지 확인한다.** 모르면 토큰 발급 메뉴/앱 이름만 확인하고 실제 토큰·주소·키 목록은 추가 수집하지 않음. 형식이 맞으면 [Jira 등록 안내](05-jira-read-tool.md)에 따라 새 개인 필드 저장 확인 후 정상 프로젝트 한 흐름을 확인함. 기존 업무용 토큰을 폐기·재발급하지 않음.
 
 <a id="delivery-plan"></a>
 
@@ -18,7 +18,7 @@
 | 순서 | 작업 묶음 | 완료 판단·진행 조건 |
 |---|---|---|
 | 1. 기반 활용 | 기존 범용 채팅·Confluence 검색/본문/근거 링크 사용 | 확인한 W·D·Confluence 증거를 재사용하되 환경·변경 영향이 다른 범위는 구분. 세부 정책 문답 전체 완료를 다음 기능의 선행조건으로 두지 않음 |
-| 2. Jira + 첫 Rich UI | 작은 이슈 검색·상세 조회와 받은 결과의 상태/담당자 필터·펼치기·원문 열기. 기본 Assistant의 실제 가능한 질문 예시와 조건 보완·오류 안내도 함께 준비 | 조회 근거·허용 범위·대표 실패 처리·실제 WebUI 화면 동작 확인. Jira 정보가 막히면 Confluence 결과 탐색으로 화면 작업부터 진행 |
+| 2. Jira + 첫 Rich UI | 프로젝트별 시스템 전체/미완료 비교 → 받은 최근 목록의 프로젝트/상태/담당자 필터·펼치기 → 이슈 상세·원문. 질문 예시·부분 실패·다음 페이지 안내를 함께 제공 | [읽기 Tool·화면 준비](05-jira-read-tool.md); 실제 인증 호환성·집계 일치·허용 범위·대표 실패·WebUI 동작은 미확인. 기존 전수 검증을 반복하지 않음 |
 | 3. GitHub 읽기 | 제품/인증/허용 저장소 확인 후 필요한 PR 또는 이슈 조회 하나 | 원문과 결과·권한 일치 확인. 독립 후속 작업이므로 연결 준비가 지연돼도 준비된 기능의 파일럿을 막지 않음 |
 | 4. 소규모 공용 파일럿 | 승인된 팀 서버에 새 배포, 선택한 기능의 공개 전 검증, 소수 비개발자 실제 사용. 허용된 Prompt·Skill 공유 흐름 확인 | 공개 전 조건과 [사용성 기준](../evals/scenarios.md#usability)을 충족하고 실제 업무에서 막힌 지점을 개선. 개인 PC 포트 공개·사용자 데이터 자동 이전으로 대체하지 않음 |
 | 5. 수요 기반 확장 | EMS/APC/FDC의 승인 API가 있는 업무 하나, 필요한 역할별 기능·Rich UI | 업무 가치와 접근 경계를 먼저 정하고 작은 읽기 기능부터 추가. 쓰기·자동화·다중 Agent는 별도 필요가 확인될 때 검토 |
@@ -36,12 +36,14 @@
 | 조회 경로 보완 | Prompt의 [현재 POC 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션 | 부분 적용 당시 C04·P02 정상·임베딩 오류 재발 없음 보고; 이번 전체 Prompt에도 포함해 저장 안내 | [실환경 결과](../evals/scenarios.md#결과-기록), [당시 소스 검토](../evals/confluence-offline.md#knowledge-routing) | 부분 추가 안내 원본 [28f526a](https://github.com/knadalkim-a11y/team-agent-poc/blob/28f526a39162e54f126f577554f8c15fdd5940f1/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로); 현재 전체 지침 안내 원본은 위 행. 부분 적용 당시 성공을 이번 개정 후 재평가로 간주하지 않음 |
 | Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.2; HTTP 명시적 허용 | 2026-09-07 연결·조회·문서 권한·확인한 출력의 PAT 비노출·시험한 구성의 쓰기 차단·PAT 폐기와 교체 후 복구 확인 보고. 오류 처리 등 공용 사용 전체 검증은 미완료 | [HTTP 지원 사외 검증](../evals/confluence-offline.md#http-opt-in), [실환경 C01~C09 및 결과](../evals/scenarios.md#confluence-live) | 새 Tool 안내 원본 [910ad765](https://github.com/knadalkim-a11y/team-agent-poc/blob/910ad765a777df1caf30a565a197097f8afbf8b0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), 기존 Skill 안내 원본 [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md). C06에서 등록 코드가 전달한 원본과 같다는 사용자 확인; GPT의 등록 코드·사내 checkout SHA 직접 대조는 미실행 |
 | Rich UI 참고 예제 | [합성 검색 결과 HTML](04-confluence-read-tool.md#rich-ui-demo); 실제 API·기존 Tool과 미연동 | 배포 대상 미확정 | [사전 준비 검증](../evals/confluence-offline.md#status-history); 실제 브라우저·WebUI 검증과 구분 | 해당 없음 |
+| Jira 읽기·Rich UI | 기본 비활성 Python Tool v0.1.0, 코드 안의 고정 화면, 기존 Prompt의 조건부 Jira 조회 안내. 추가 Skill 없음 | 미적용. 사용자 보고 버전·기존 토큰 보유와 Bearer 호환성·WebUI 성공을 구분 | [Jira 사외 검증](../evals/jira-offline.md#initial-implementation), [J01~J05](../evals/scenarios.md#jira-live) | 사내 적용 원본 없음; 새 변경의 Git 준비와 사내 적용을 구분 |
 | 실행 스크립트 | 시작·smoke test·암호화 준비 옵션; smoke 자동 리디렉션 차단 | 사용자 보고로 명령 복사 후 수동 실행; 정해진 기동 스크립트 채택은 안정화 이후 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
 
 **Skill은 Git과 UI 등록 보고 기준 모두 3개이며, Skill 자체 사용 확인은 기존 2개입니다.** Confluence Tool의 `check_access` 성공 보고는 있으나 `confluence-read`를 `view_skill`로 불러왔는지는 별도 확인되지 않았습니다. 적용 원본은 Git 최신 커밋과 구분하며, 안내 원본·사용자 보고·등록 내용 대조 여부를 함께 기록합니다.
 
 ## 남아 있는 검증과 제한
 
+- Jira의 Bearer 인증 호환성·프로젝트별 전체/미완료 실측·새 Jira 개인 필드 저장·계정 분리·실제 Rich UI는 미확인. 프로젝트별 집계와 최근 페이지를 구분하며 일부 실패를 0건으로 바꾸지 않음. 공용 공개 조건과 기존 증거는 유지함.
 - 개정 지침은 UI 저장 보고가 있고 P02 PASS, P03 창작 거절 부분 확인 상태. 나머지는 평가표의 시점에 따라 기능 확인·공개 전 묶음·진단으로 수행하며 미확인을 PASS로 바꾸지 않음. POC-POL-001 v0.1은 합성 Knowledge이고 공통 정책 관리 원본 v0.2와 다름.
 - Confluence C07의 개별 HTTP 401·403·timeout 분기, confluence-read Skill의 실제 로딩은 미확인. 과거 임베딩 검색 오류는 조회 경로 보완 후 재발 없음 보고가 있으나 의미 검색 자체를 복구한 것은 아님. 운영 장애나 토큰 폐기를 불필요하게 반복하지 않음.
 - 기존 W/D/S/Confluence PASS는 해당 환경·구성·합성 자료와 사용자 보고 범위임. I01~I05 사용자 격리·새 서버의 비밀 저장/권한·실제 비개발자 사용/공유는 별도 미완료. 공개할 환경과 기능의 필수 조건부터 확인함.
@@ -57,7 +59,7 @@
 
 ## 최근 점검
 
-전체 계획·AGENTS·Native 가이드·모델 운용 기준·평가표를 대조하고 제품 흐름과 검증 시점을 독립 검토함. 순차 전수 검증으로 읽히던 안내, 초기 2-Skill 기준, 사용성 완료 조건 누락과 STATUS의 누적 기록을 정리함. 문서·diff 검사 및 미실행 범위는 [계획 최적화 검토](../evals/confluence-offline.md#mvp-plan-review), 이전 점검은 [이관 기록](../evals/confluence-offline.md#status-reviews-20260907)에 보존함.
+Jira 읽기 경로·프로젝트 집계/최근 목록의 구분·고정 화면과 사내 안내를 대조함. 변경한 Jira 코드·합성 화면의 검사 결과와 미실행 범위는 [첫 Jira 구현 검증](../evals/jira-offline.md#initial-implementation)에 기록함. 직전 계획 정리와 점검 요약은 [계획 최적화 검토](../evals/confluence-offline.md#mvp-plan-review)에 보존돼 있음. 기존 Confluence 실행 코드·저장 검사·서빙 설정과 과거 실환경 판정은 변경하지 않음.
 
 ## 갱신 규칙
 
