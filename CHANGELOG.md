@@ -4,6 +4,7 @@
 
 ## 2026-09-07
 
+- 기존 모델 UI에 가져올 시작 질문 4개·소개 문구와 팀원용 첫 사용 안내 추가. 첫 사용자 Jira 업무로 다음 범위를 좁히고 Native 가이드의 오래된 Rich UI 미연결 설명을 수정. 업무 코드·System Prompt·기존 시험은 변경하지 않음. [준비·검수](evals/scenarios.md#team-first-use-preparation).
 - 당분간 팀원만 사용한다는 선택에 따라 기존 Skill·Tool·모델의 Public 설정 보고를 반영하고 그룹별 권한 절차를 후속으로 변경. [설정 보고와 확인 범위](evals/scenarios.md#team-public-resource-sharing).
 - Open WebUI v0.11.3의 모델 연결·자산별 읽기 권한을 구분하고 같은 팀 그룹에 Assistant·기반 모델·연결 Skill/Tool/Knowledge를 공유하는 운영 안내 추가. 신규 구성원 추가와 새 자산 공유의 관리 단위를 설명하며 실제 권한 변경·사용 성공으로 간주하지 않음. [근거](evals/scenarios.md#assistant-resource-access-followup).
 - 사용자 설명에 따라 방화벽 운영을 사내 관리 시스템 경로로 통일. 직접 로컬 규칙 생성 안내를 연결 정보와 WebUI 수신 설정으로 대체하고 실패/원복도 사내 관리 기준을 따르도록 정리. 실제 규칙·네트워크 변경은 수행하지 않음. [관리 경로](evals/scenarios.md#managed-firewall-access).

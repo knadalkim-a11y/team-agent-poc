@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 범용 채팅·사내 자료 조회·팀원 Prompt/Skill 공유를 쉽게 사용하는 플랫폼. 현재는 Open WebUI Native와 Git Agent Pack을 사용하고 원본 WebUI는 수정하지 않음.
 - 현재 위치: 사용자가 별도 권한 구조를 인지했고, 당분간 팀원만 사용하므로 **기존 Skill·Tool·모델을 모두 Public으로 변경**했다고 보고함. 그룹별 권한 설정은 후속으로 미룸. 일반 사용자 조회 성공·Knowledge 공개 여부·Read/Write 세부 값은 미확인.
-- 이번 작업: [현재 Public 운영과 후속 그룹 안내](03-openwebui-native-agent.md#assistant-resource-access)를 구분하고 사용자 설정 보고를 기록함. 그룹 설정을 다음 작업의 선행조건에서 제외하며 사내 설정을 직접 변경하지 않음.
-- 다음 작업 하나: **현재 공유 구성으로 일반 사용자의 실제 업무 흐름 하나를 확인한다.** EES Assistant 선택부터 본인 PAT를 사용한 조회·결과/원문 확인까지 새 사용자 범위에서 확인함. 그룹 재설정이나 완료한 LAN 접속·프로필·관리자 인증/저장/조회 검사는 요구하지 않음.
+- 이번 작업: 완료한 기반·연동·접속 증거와 후속 그룹 운영을 유지하면서, 기존 모델용 [소개·예시 질문 4개](03-openwebui-native-agent.md#first-use-entry)와 [팀원용 시작 안내](07-team-quickstart.md)를 준비함. Jira Rich UI가 아직 없다고 적힌 오래된 설명을 바로잡고 새 도구·화면 프레임워크·System Prompt 개정은 추가하지 않음.
+- 다음 작업 하나: **기존 Assistant 첫 화면에 예시를 반영하고 일반 사용자 한 명의 Jira 업무를 확인한다.** 본인 Jira PAT로 시스템별 현황 → 관심 시스템의 받은 목록 → 원문까지 진행하며 도움 필요 지점·결과 이해를 함께 기록함. UI 반영·실제 팀원 사용은 아직 미확인. 그룹 재설정이나 완료한 LAN/프로필·관리자 인증/저장/조회 검사는 요구하지 않음.
 
 <a id="delivery-plan"></a>
 
@@ -20,7 +20,7 @@
 | 1. 기반 활용 | 기존 범용 채팅·Confluence 검색/본문/근거 링크 사용 | 확인한 W·D·Confluence 증거를 재사용하되 환경·변경 영향이 다른 범위는 구분. 세부 정책 문답 전체 완료를 다음 기능의 선행조건으로 두지 않음 |
 | 2. Jira + 첫 Rich UI | 프로젝트별 전체/미완료 비교 → 받은 최근 목록의 필터·펼치기 → 원문 | [v0.1.1 기본 흐름 확인 보고](../evals/scenarios.md#jira-dashboard-acceptance). 전체 시스템 표시·대표 시스템 건수 대조·화면 조작 확인. 개별 상세 API·권한/공개 전 조건은 평가표에 남기며 다음 기능 개발의 전수 선행조건으로 두지 않음 |
 | 3. GitHub 읽기 | GHES 3.17.15 개인 PAT로 허용 저장소 한 곳의 PR 목록 → 본문 → 원문 | [기본 흐름 확인 완료](../evals/scenarios.md#github-read-acceptance) — 개인 환경의 목록·PR 한 건 본문 요약·원문 일치 보고. 계정/공개 전 조건은 별도이며 완료한 흐름을 반복하지 않음 |
-| 4. 소규모 공용 파일럿 | 현재 Windows PC에서 팀원별 일반 계정·제한된 접속 경로 준비, 선택한 기능의 공개 전 확인·소수 비개발자 실제 사용 | 기존 DB·키·버전·수동 기동 유지. 변경된 접속 경로·전송 보호·계정/자산 격리와 [사용성 기준](../evals/scenarios.md#usability)을 확인함. 다른 서버 이전은 후속 운영 필요로 남김 |
+| 4. 소규모 공용 파일럿 — 현재 | 접속·Public 설정 보고를 바탕으로 첫 화면과 일반 사용자 업무 하나 완성 | 기존 DB·키·버전·수동 기동 유지. 첫 Jira 사용에 필요한 자산 접근·개인 설정·결과 이해를 묶고 [남은 권한·격리 조건](../evals/scenarios.md#validation-timing)은 실제 확인 범위만 판정. 그룹 세분화·서버 이전은 후속 필요로 남김 |
 | 5. 수요 기반 확장 | EMS/APC/FDC의 승인 API가 있는 업무 하나, 필요한 역할별 기능·Rich UI | 업무 가치와 접근 경계를 먼저 정하고 작은 읽기 기능부터 추가. 쓰기·자동화·다중 Agent는 별도 필요가 확인될 때 검토 |
 
 첫 공용 파일럿의 기본 업무 범위는 **범용 채팅 + Confluence + 준비된 Jira/첫 Rich UI**입니다. GitHub는 개인 환경의 기본 흐름을 확인한 추가 업무이며, 현재는 기존 Tool·Skill·모델 전체를 Public으로 바꿨다는 사용자 보고가 있습니다. 이 설정 변경을 GitHub를 포함한 모든 연동의 일반 사용자 조회·격리 검증 완료로 간주하지 않습니다. GitHub·EMS/APC/FDC 전체 연동이나 Hermes 도입을 MVP 완료 조건으로 두지 않습니다. 파일럿에서 비개발자가 실제 업무 흐름을 완료하고 결과·오류·공유를 이해하는 것까지가 첫 배포의 목표입니다.
@@ -32,6 +32,7 @@
 | 대상 | Git에서 준비한 것 | WebUI 반영 마지막 확인 | 검증 근거 | 적용 원본 커밋 |
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
+| 첫 사용 안내 | 소개 문구·Prompts Import용 JSON 4개 예시·팀원 안내 | UI 저장·추천 질문 클릭·일반 사용자 업무는 미확인 | [준비·검수 기록](../evals/scenarios.md#team-first-use-preparation) | PR #4의 [질문 원본](../agent-pack/ees-prompt-suggestions.json); 배포 원본 SHA 미확인 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 2026-09-07 두 지침 UI 저장 보고; 개정 후 P02 PASS, P03 창작 거절 부분 확인, P04~P10 미완료; 실행 시점은 평가표 | [P02~P10 재검증](../evals/scenarios.md#instruction-revision), [기존 지침 갱신](03-openwebui-native-agent.md#update-existing-instructions) | 전달·저장 안내 원본 [dfeb95f](https://github.com/knadalkim-a11y/team-agent-poc/commit/dfeb95fbf96cf6a2bb75a3ba75fac3bc92ed60fc); 등록 내용·사용자 추가 규칙·사내 checkout SHA 직접 대조는 미실행 |
 | 조회 경로 보완 | Prompt의 [현재 POC 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션 | 부분 적용 당시 C04·P02 정상·임베딩 오류 재발 없음 보고; 이번 전체 Prompt에도 포함해 저장 안내 | [실환경 결과](../evals/scenarios.md#결과-기록), [당시 소스 검토](../evals/confluence-offline.md#knowledge-routing) | 부분 추가 안내 원본 [28f526a](https://github.com/knadalkim-a11y/team-agent-poc/blob/28f526a39162e54f126f577554f8c15fdd5940f1/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로); 현재 전체 지침 안내 원본은 위 행. 부분 적용 당시 성공을 이번 개정 후 재평가로 간주하지 않음 |
 | Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.2; HTTP 명시적 허용 | 2026-09-07 연결·조회·문서 권한·확인한 출력의 PAT 비노출·시험한 구성의 쓰기 차단·PAT 폐기와 교체 후 복구 확인 보고. 오류 처리 등 공용 사용 전체 검증은 미완료 | [HTTP 지원 사외 검증](../evals/confluence-offline.md#http-opt-in), [실환경 C01~C09 및 결과](../evals/scenarios.md#confluence-live) | 새 Tool 안내 원본 [910ad765](https://github.com/knadalkim-a11y/team-agent-poc/blob/910ad765a777df1caf30a565a197097f8afbf8b0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), 기존 Skill 안내 원본 [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md). C06에서 등록 코드가 전달한 원본과 같다는 사용자 확인; GPT의 등록 코드·사내 checkout SHA 직접 대조는 미실행 |
@@ -62,7 +63,7 @@
 
 ## 최근 점검
 
-[팀 사용 자산 Public 설정 보고](../evals/scenarios.md#team-public-resource-sharing): 현재 운영 설명·설치 안내·평가표를 사용자 선택과 맞추고 그룹 설정은 후속으로 미룸. 문서·링크·diff만 점검함. 실행 코드·기존 시험은 변경/반복하지 않으며 일반 계정 조회/격리는 미확인으로 유지함.
+[첫 사용 준비·계획 정리](../evals/scenarios.md#team-first-use-preparation): v0.11.3의 기존 모델 설명·Prompts Import/클릭 경로에 맞춰 JSON과 안내를 준비하고 오래된 Rich UI 설명을 수정함. JSON 구조·문서·링크·diff만 확인하며 업무 코드·기존 시험은 변경/반복하지 않음. UI 적용·일반 계정 사용/격리는 아직 미확인.
 
 ## 갱신 규칙
 

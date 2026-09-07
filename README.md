@@ -6,6 +6,7 @@
 
 - **개발을 이어갈 GPT**: [AGENTS.md](AGENTS.md) → [현재 상태](docs/STATUS.md) → 해당 기능 파일과 테스트.
 - **설치·운영할 사람**: [환경 기준](versions.md) → [설치·기동](docs/01-openwebui-install.md) → 해당 연동 가이드.
+- **처음 사용하는 팀원**: [EES Assistant 시작 안내](docs/07-team-quickstart.md).
 - **준비·배포·검증 여부 확인**: [STATUS](docs/STATUS.md)의 요약과 연결된 [평가표](evals/scenarios.md)를 확인합니다. README에는 진행 상태를 복제하지 않습니다.
 
 매번 시작 문구를 입력하는 대신 아래의 일회성 프로젝트 지침을 사용합니다. 현재 상태는 대화 기억이 아니라 저장소에서 확인합니다.
@@ -91,6 +92,7 @@ flowchart TB
 | 기존 Windows PC로 팀 파일럿 시작 | [접속·계정·공유 범위 준비](docs/01-openwebui-install.md#local-pc-pilot) |
 | 사내 Chat 모델 연결 | [02-vllm-direct-test](docs/02-vllm-direct-test.md) |
 | 기본 Assistant 구성 | [03-openwebui-native-agent](docs/03-openwebui-native-agent.md) |
+| 기존 Assistant 첫 화면에 업무 예시 추가 | [소개 문구·예시 질문 적용](docs/03-openwebui-native-agent.md#first-use-entry) |
 | Confluence Skill·Tool 등록 | [04-confluence-read-tool](docs/04-confluence-read-tool.md) |
 | Jira 읽기·프로젝트별 현황 | [05-jira-read-tool](docs/05-jira-read-tool.md) |
 | GitHub Enterprise PR 읽기 | [06-github-read-tool](docs/06-github-read-tool.md) |

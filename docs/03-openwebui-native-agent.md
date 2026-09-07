@@ -99,7 +99,7 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 
 Rich UI를 구현할 때의 경계:
 
-- 모델이 업무 Tool을 선택하거나 사용자가 Action 버튼을 클릭하면, 연결된 코드가 조회·입력·권한 검증 후 화면을 반환하도록 구현할 수 있습니다. [0.11.3 Action 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/actions.py)도 Rich UI 반환을 지원하지만, 현재 패키지에 Action이나 업무용 Rich UI가 연결된 것은 아닙니다. HTML은 고정 템플릿으로 만들고 외부 자료는 텍스트로 삽입합니다.
+- 모델이 업무 Tool을 선택하면 연결된 코드가 조회·입력·권한 검증 후 화면을 반환할 수 있습니다. 현재 Jira는 [Tool에서 대시보드를 반환](05-jira-read-tool.md#5-구현-경계와-운영)합니다. [0.11.3 Action 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/actions.py)도 Rich UI 반환을 지원하지만 별도 Action은 이 패키지에 구현하지 않았습니다. HTML은 고정 템플릿으로 만들고 외부 자료는 텍스트로 삽입합니다.
 - `HTMLResponse`와 `Content-Disposition: inline`으로 화면을 반환하고, 모델의 설명에 필요한 데이터는 `(HTMLResponse, context)`로 함께 제공합니다. HTML만 반환했다고 모델이 화면 내용을 읽을 수 있다고 가정하지 않습니다. [공식 Rich UI 안내](https://docs.openwebui.com/features/extensibility/plugin/development/rich-ui/)
 - 받은 결과 안의 필터·상세 펼치기는 브라우저에서 처리합니다. 추가 검색·본문 조회는 업무 Tool과 사용자별 권한 검사를 거칩니다. iframe에 PAT를 넣거나 원 시스템 API를 직접 호출시키지 않습니다.
 - Rich UI 안의 HTML 버튼은 자동으로 Python Tool을 재호출하지 않습니다. 별도 등록한 Action과 구분하며, 대화로 선택을 전달할지 추가 동작을 구현할지는 사용사례가 정해진 뒤 결정합니다. iframe의 same-origin 권한을 켜는 방식으로 해결하지 않습니다.
@@ -109,7 +109,7 @@ Rich UI를 구현할 때의 경계:
 
 ### 후속 연동을 시작할 때
 
-각 연동의 제품·인증을 확인한 뒤 작은 읽기 기능부터 구현합니다. 현재 구현·배포 상태와 진행 순서는 [STATUS](STATUS.md)에서 관리합니다.
+아래 표는 새 연동을 선정할 때의 범용 검토 기준입니다. 이미 연결한 Confluence·Jira·GitHub의 제품·인증을 다시 확인하는 순서가 아닙니다. 현재 구현·배포 상태와 진행 순서는 [STATUS](STATUS.md)에서 관리합니다.
 
 | 대상 | 구현 전에 확인할 정보 | 첫 읽기 기능 후보 | Rich UI 후보 |
 |---|---|---|---|
@@ -389,6 +389,30 @@ Tools의 선택 목록과 내장 기능 설정은 별도입니다. Tools에 Conf
 Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools → Memory**를 모두 해제합니다. 내장 Memory 도구만 끄면 자동 문맥 주입·응답 후 검토 경로까지 꺼지는 것은 아닙니다. [Memory 제어 범위](troubleshooting.md#native-memory-controls)를 따릅니다.
 
 과거 대화 검색도 끄려면 **Builtin Tools → Chat History**를 해제하고 저장합니다. Memory OFF만으로는 `search_chats`·`view_chat`이 꺼지지 않습니다. 정확한 설정·재확인 순서는 [새 대화에서 과거 내용을 찾는 경우](troubleshooting.md#native-chat-history)를 따릅니다. 이는 초기 MVP의 대화 분리 기준이며, 이후 같은 계정의 이전 대화 검색을 제공하려면 기능·사용자 안내·평가 기준을 함께 조정합니다.
+
+<a id="first-use-entry"></a>
+
+### 기존 Assistant의 첫 화면 준비
+
+이미 동작하는 Assistant에서 **소개 문구와 예시 질문만** 추가합니다. 초기 기준선의 Skill 2개로 되돌리거나 모델·Tool을 다시 만들지 않습니다. 기존 System Prompt·기능·개인 설정은 유지합니다. 이 절은 적용 안내이며 실제 UI 저장 여부는 [STATUS](STATUS.md)에 기록합니다.
+
+1. **Workspace → Models → EES 통합 Assistant 편집**을 엽니다.
+2. **Description → Custom**에 아래 소개를 넣습니다. 기존에 팀 전용 설명이 있다면 필요한 문구를 보존합니다.
+
+```text
+업무 내용을 정리하고, Confluence 문서·Jira 이슈 현황·GitHub PR을 내 권한 범위에서 확인합니다.
+```
+
+3. **Prompts → Custom → Import**에서 [ees-prompt-suggestions.json](../agent-pack/ees-prompt-suggestions.json)을 선택합니다. 처음 Custom으로 전환하며 생긴 빈 항목은 삭제한 뒤 가져옵니다. 가져오기는 기존 목록에 **추가**하므로 같은 예시가 이미 있으면 반복하지 않습니다. 파일 전달이 어려우면 같은 JSON의 `title` 두 값을 **Title / Subtitle**, `content`를 **Content**에 입력해 항목을 추가할 수 있습니다.
+4. 저장 및 업데이트 후 새로고침하고 **폴더 밖의 새 일반 대화**에서 Assistant를 선택합니다. 소개와 예시 질문을 확인합니다. 예시 순서는 달라질 수 있고 입력 상태에 따라 일부만 보일 수 있습니다.
+
+이 JSON은 Prompts 목록만 가져오는 형식입니다. 모델 전체 Import나 System Prompt 입력란에 넣지 않습니다. 일반 팀원이 이 설정을 반복할 필요는 없습니다. 소개 문구는 두 줄로 줄여 보일 수 있으며, 예시 질문은 개인 설정에 따라 클릭 즉시 전송되거나 입력창에 채워집니다. 토큰이나 미치환된 placeholder를 예시에 넣지 않습니다.
+
+모델 설명과 질문 메타데이터는 대화 지침을 바꾸지 않습니다. Jira/GitHub 조회 지침은 기존 [System Prompt의 해당 절](../agent-pack/system-prompts/ees-integrated-assistant.md)에 준비돼 있지만 UI 반영은 아직 별도 확인되지 않았습니다. 실제 질문에서 조회 선택·범위 안내가 어긋날 때 해당 절의 누락 여부만 확인하며, 정상 동작 중인 지침을 첫 화면 변경 때문에 일괄 교체하지 않습니다.
+
+근거: [v0.11.3 ModelEditor](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/ModelEditor.svelte), [Prompts 편집·가져오기](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/PromptSuggestions.svelte), [새 대화 화면](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Placeholder.svelte), [예시 선택 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte).
+
+팀원에게는 [처음 사용하기](07-team-quickstart.md)를 전달합니다. 첫 실제 사용 확인은 일반 사용자 한 명이 본인 Jira PAT로 **시스템별 현황 → 관심 시스템의 받은 목록 → 원문**을 보는 업무 하나로 묶습니다. 도움 없이 시작했는지, 막힌 단계가 있었는지, 결과·조회 범위를 이해했는지를 기록하며 같은 실행이 실제 만족한 평가 조건만 연결합니다. 이 흐름은 모든 연동이나 사용자 격리 전체의 통과를 대신하지 않습니다. 완료한 관리자 인증·저장·재시작·건수 대조 시험이나 별도 연결 확인을 반복하지 않습니다.
 
 ## 4. 공개 전 검증
 
