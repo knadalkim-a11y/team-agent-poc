@@ -297,11 +297,28 @@ Get-NetTCPConnection -LocalPort 8642 -State Listen |
 
 ## 사용자·Memory 격리 실패
 
+<a id="native-chat-history"></a>
+
+### 새 대화에서 search_chats·view_chat으로 과거 내용을 찾음
+
+같은 계정의 새 대화에서 이 두 함수로 이전 문자열을 찾았다면 **Chat History 조회**를 먼저 확인합니다. Memory 저장이나 다른 사용자 정보 노출을 뜻하지 않습니다. v0.11.3의 `search_chats`는 현재 사용자 ID로 검색하고 `view_chat`은 대화 ID와 현재 사용자 ID로 조회합니다. [조회 함수](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/tools/builtin.py#L1530-L1624)
+
+초기 MVP는 현재 대화 범위로 시작하므로 아래처럼 설정합니다.
+
+1. 관리자 A의 **Workspace → 모델 → EES 통합 Assistant 편집**을 엽니다.
+2. 화면 아래 **Builtin Tools / 내장 도구**에서 **Chat History / 대화 기록**을 해제합니다. **Memory**도 초기 기준의 OFF인지 확인합니다. Builtin Tools 기능 자체는 켜 두고 Knowledge Base·Confluence 도구·Skill 연결을 유지합니다.
+3. **저장 및 업데이트**를 누르고 화면을 새로고침합니다. 이 선택은 UI에서 `meta.builtinTools.chats=false`로 저장되며, 기본값은 true입니다. false이면 Native 함수 목록에 `search_chats`·`view_chat`을 추가하지 않습니다. Memory는 별도 조건으로 제어됩니다. [내장 도구 UI](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/BuiltinTools.svelte), [모델 저장](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/ModelEditor.svelte#L331-L336), [함수 노출 조건](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/tools.py#L538-L663)
+4. 같은 계정으로 **새 대화**를 만들고 같은 Assistant에서 `다른 대화에서 내가 말한 테스트 문자열이 뭐였지?`라고 묻습니다. 문자열·이전 대화 본문을 새 질문에 붙이지 않습니다. 과거 대화 조회 호출 없이 확인할 수 없다고 답하는지 확인합니다. 같은 대화 회수 시험이나 토큰 검사는 반복하지 않습니다.
+
+설정 후에도 회수하면 실제 선택한 Assistant·저장 여부·조회 함수·다른 컨텍스트 유입을 확인합니다. 기존 대화 목록이나 Memory를 삭제해 시험을 통과시키지 않습니다. Chat History OFF는 모델의 해당 내장 조회 경로를 제한하는 것이며, 사용자가 자신의 저장된 대화를 직접 여는 기능을 없애거나 기존 대화를 삭제하지 않습니다. 새 대화에서 모른다고 답한 것만으로 S02·S03의 실제 Memory 설정·저장소까지 확인된 것으로 기록하지 않습니다.
+
+### 실제 격리·비활성화 위반
+
 다음은 파일럿 중단 조건입니다.
 
-- 새 대화에서 이전 대화의 일회성 문자열이 자동 회수됨
-- 사용자 A의 정보가 사용자 B에게 노출됨
+- Chat History·Memory OFF를 확인한 초기 구성에서 다른 경로로 이전 대화 정보가 회수되며 원인이 확인되지 않음
+- 사용자 A의 비공개 정보가 권한 없는 사용자 B에게 노출됨
 - Memory를 껐는데 장기 기억이 생성됨
 - 비활성화한 Shell·파일 Tool이 실행됨
 
-이 경우 다른 사용자를 추가하지 않고 Profile과 Open WebUI 사용자 분리를 다시 검토합니다.
+이 경우 다른 사용자를 추가하지 않고 실제 조회 경로·권한·설정을 확인합니다. 허용된 같은 계정의 과거 대화 조회와 다른 사용자 격리 실패를 혼동하지 않습니다.
