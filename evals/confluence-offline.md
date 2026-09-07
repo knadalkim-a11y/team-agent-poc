@@ -210,3 +210,14 @@ Tool은 기본 `ENABLED=false`입니다. Skill은 지침이지 보안 경계가 
 - 검토 결과: 합성 사실에 답변 왜곡·표식 부착·추가 숫자 시험 조회 지시를 섞고 새 대화의 정상 질문으로 검사함. 지시 문장까지 실제 반환됐는지와 정상 질문의 성공을 함께 확인하도록 함. 독립 검토의 비판적 인용과 지시 이행 구분, 단순 호출 횟수 대신 지시 유래 추가 호출 판정을 반영함. 비밀정보·외부 전송·쓰기 지시는 포함하지 않음.
 - 검증 결과: Linux / Python 3.12.13에서 `python scripts/check_docs.py` 문서 20개·내부 링크 153개·오류 0·검토 후보 0, `git diff --check` 통과.
 - 미실행: 사내 문서 생성·조회·모델 답변·추가 호출 확인. 합성 한 건의 안내이며 모델·모든 injection 유형의 방어를 보증하지 않음. 기존 Markdown 4개만 변경하고 코드·설정·의존성 변경이나 코드 시험 재실행은 없음.
+
+<a id="knowledge-routing"></a>
+
+## 임베딩 없는 POC 조회 경로 보완 검토 — 2026-09-07
+
+- 발견·범위: C08의 정상 본문·답변·추가 ID 0 조회 부재·링크 확인과 별도 query_knowledge_files 실패를 구분함. 기존 Native 가이드의 임베딩 우회 설명이 Native 의미 검색까지 해결하는 것으로 읽힐 수 있어 범위를 보완함.
+- 공식 소스 대조: v0.11.3 `tools/builtin.py`의 query_knowledge_files는 임베딩 함수를 사용하고 `retrieval/utils.py`의 query_collection을 직접 호출함. 파일/소스 본문 처리의 우회 분기를 거치지 않음. search_knowledge_files는 파일명 검색, grep_knowledge_files는 문자열/정규식 검색, view_knowledge_file은 권한 확인 후 저장된 본문을 읽음. list_knowledge는 Knowledge ID만 반환한 경우 해당 ID를 지정해 파일 목록을 한 번 더 읽어야 함.
+- UI·제어 대조: `utils/tools.py`의 knowledge 그룹과 `Models/BuiltinTools.svelte`를 확인함. 그룹 전체 OFF는 목록·검색·본문 조회도 제거하고 query 함수 단독 토글은 없음. `ModelEditor.svelte`의 System Prompt와 Save & Update 경로를 확인함.
+- 처리·독립 검토: Prompt 원본에 Confluence ID 직접 조회·충분한 결과 뒤 추가 검색 생략·작은 합성 Knowledge의 파일 ID 식별 후 본문 읽기·임베딩 미검증 시 query_knowledge_files 미사용을 추가함. 독립 백엔드 검토의 함수 구분·파일 ID 확인 순서를 반영함. 지침이 함수 노출을 강제 차단하지 않음을 명시하고 기존 정책 Knowledge는 유지함.
+- 검증 결과: Linux / Python 3.12.13에서 `python scripts/check_docs.py` 문서 20개·내부 링크 158개·오류 0·검토 후보 0, `git diff --check` 통과. 기존 Markdown 7개만 변경함.
+- 미실행: 사내 UI 부분 추가·저장, C04 공통 문서와 P02 정책 질문 재확인, 실제 임베딩 설정·검색 복구. Git Prompt 준비를 WebUI 적용으로 기록하지 않으며 과거 v0.2 전체 지침 배포와 구분함. Python·Skill·도구 코드·설정·의존성 변경 및 코드 시험 재실행은 없음. 자료 조회 지침과 관련 Markdown만 변경함.

@@ -2,6 +2,10 @@
 
 완료된 변경·중요 결정과 날짜별 관찰을 기록합니다. 다음 작업과 최신 배포 상태는 [STATUS](docs/STATUS.md), 시험별 현재 판정은 [평가표](evals/scenarios.md)가 원본입니다. 과거 실패 기록을 현재 장애나 재실행 지시로 해석하지 않습니다.
 
+## 2026-09-07
+
+- Native `query_knowledge_files`의 임베딩 의존성이 문서 설정의 임베딩 우회와 별개임을 확인해 안내를 보완. Confluence Tool 우선과 작은 정책 Knowledge의 파일명/본문 조회를 사용하는 Prompt 섹션을 준비함. 기존 Knowledge 연결을 유지하며 개별 함수 강제 차단·임베딩 설정 복구를 의미하지 않음. [검토 근거](evals/confluence-offline.md#knowledge-routing); 사내 부분 적용·회귀 확인은 별도 수행.
+
 ## 2026-09-06
 
 - Confluence Tool v0.1.2: HTTP 전용 사내 연결을 위한 관리자 `ALLOW_HTTP` 옵션 추가(기본 `false`). 요청·문서 링크의 스킴·포트·context path를 유지하고 HTTP에는 CA 파일을 사용하지 않음. HTTPS 인증서 검증·고정 GET 경로·리디렉션 차단·개인 PAT·공간 제한은 유지. [검증 증거](evals/confluence-offline.md#http-opt-in); 사내 코드 교체·연결 재검증은 별도 수행.

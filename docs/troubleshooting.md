@@ -203,6 +203,22 @@ fresh install에서는 기본 임베딩 모델 다운로드가 필요할 수 있
 2. 정책상 차단이면 승인된 캐시를 사전 반입합니다.
 3. 또는 사내 OpenAI-compatible embeddings endpoint를 사용합니다.
 
+<a id="native-knowledge-embedding"></a>
+
+### Native query_knowledge_files에서 임베딩 오류
+
+Confluence `get_page`와 `query_knowledge_files`는 별도 경로입니다. 저장소의 Confluence Tool은 고정된 읽기 API를 호출하고, Open WebUI의 내장 `query_knowledge_files`는 Workspace Knowledge를 의미 검색하며 임베딩 함수를 사용합니다. v0.11.3에서 문서 설정의 임베딩 우회는 이 내장 검색 함수에 적용되지 않습니다. [의미 검색 구현](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/tools/builtin.py#L3138-L3306), [소스 본문 처리의 우회 분기](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/retrieval/utils.py#L1334-L1573)
+
+`embedding model`이 없다는 오류만으로 정확한 엔진·모델 경로·캐시·설정을 확정하지 않습니다. 같은 시험에서 Confluence 본문·답변·링크가 정상이면 그 성공은 보존하고 내장 검색의 실패를 별도로 기록합니다. 문서의 공격 지시를 따랐다는 근거 없이 다른 검색 호출 자체를 prompt injection 실패로 분류하지 않습니다.
+
+작은 POC의 최소 보완:
+
+1. A의 **Workspace → 모델 → EES 통합 Assistant 편집 → System Prompt**에서 기존 내용 끝에 [현재 POC의 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션만 추가하고 **저장 및 업데이트**합니다. 같은 섹션이 있으면 중복 추가하지 않습니다. 이번 부분 적용을 과거 Prompt·정책 개정 전체의 배포 완료로 기록하지 않습니다.
+2. 기존 Knowledge와 Skill 연결은 유지합니다. v0.11.3의 내장 도구 UI는 `Knowledge Base` 그룹을 제어하며, 전체 OFF 시 목록·파일명 검색·본문 읽기도 함께 제거됩니다. `query_knowledge_files`만 끄는 개별 UI 토글은 제공하지 않습니다. [도구 주입 조건](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/tools.py#L538-L643), [내장 도구 UI](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/BuiltinTools.svelte)
+3. 새 대화에서 기존 합성 공통 Confluence 문서의 ID로 조회·요약·링크를 요청합니다. 다른 새 대화에서는 `POC-POL-001에서 운영 DB 직접 조회가 허용되는지 문서 ID·버전·관련 절을 근거로 알려줘.`라고 질문합니다. 전자는 Confluence Tool, 후자는 필요한 목록/파일명 검색과 `view_knowledge_file`로 정상 답변하는지, 임베딩 검색 오류가 재발하는지 확인합니다. 이는 새 Prompt 부분 적용의 C04·P02 회귀 확인이며 완료된 권한·쓰기·injection 시험 전체를 반복하는 절차가 아닙니다.
+
+지침은 함수 노출을 강제로 차단하지 않으므로 임베딩 검색 자체가 복구됐다고 기록하지 않습니다. 재발하면 실패 함수·선택 경로와 적용 여부를 확인합니다. 의미 검색이 실제로 필요해지면 승인된 사내 임베딩 API 또는 반입 모델을 별도로 구성하고 검색을 검증합니다. 이번 보완으로 모델 다운로드·TLS 우회·DB 재생성·기존 PAT 변경을 수행하지 않습니다.
+
 ### 페이지가 열리지 않음
 
 ```powershell
