@@ -221,3 +221,13 @@ Tool은 기본 `ENABLED=false`입니다. Skill은 지침이지 보안 경계가 
 - 처리·독립 검토: Prompt 원본에 Confluence ID 직접 조회·충분한 결과 뒤 추가 검색 생략·작은 합성 Knowledge의 파일 ID 식별 후 본문 읽기·임베딩 미검증 시 query_knowledge_files 미사용을 추가함. 독립 백엔드 검토의 함수 구분·파일 ID 확인 순서를 반영함. 지침이 함수 노출을 강제 차단하지 않음을 명시하고 기존 정책 Knowledge는 유지함.
 - 검증 결과: Linux / Python 3.12.13에서 `python scripts/check_docs.py` 문서 20개·내부 링크 158개·오류 0·검토 후보 0, `git diff --check` 통과. 기존 Markdown 7개만 변경함.
 - 미실행: 사내 UI 부분 추가·저장, C04 공통 문서와 P02 정책 질문 재확인, 실제 임베딩 설정·검색 복구. Git Prompt 준비를 WebUI 적용으로 기록하지 않으며 과거 v0.2 전체 지침 배포와 구분함. Python·Skill·도구 코드·설정·의존성 변경 및 코드 시험 재실행은 없음. 자료 조회 지침과 관련 Markdown만 변경함.
+
+<a id="c09-procedure"></a>
+
+## 조회 경로 재확인 기록과 C09 안내 검토 — 2026-09-07
+
+- 범위·처리: 자료 조회 경로 섹션 부분 적용 후 C04·P02 정상 및 임베딩 오류 재발 없음이라는 사용자 보고를 STATUS·실환경 평가에 반영함. 이전 임베딩 실패와 당시 미실행 기록은 보존하고 의미 검색 복구·함수 미호출·전체 v0.2 배포로 확대하지 않음.
+- 절차 대조: C09의 새 PAT 복구 조건, Tool의 개인 설정·실제 `/rest/api/user/current` 호출·HTTP 오류 매핑·인증 사용자 판정을 [시험 안내](../docs/04-confluence-read-tool.md#c09-token-rotation)와 대조함. [Atlassian 공식 안내](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html)의 개인 PAT 생성·이름 지정·만료·개별 폐기·생성 화면 이후 재표시 제한을 확인함.
+- 독립 검토·반영: 기존 Claude Code용 토큰 보존, 시험용 토큰 정상 인증 후 해당 토큰만 폐기, WebUI의 폐기된 값을 유지한 실제 재호출, 새 토큰 복구 순서를 확인함. 원래 토큰 복원만으로 새 PAT 회전 PASS를 주지 않고 `authentication_failed`가 반드시 HTTP 401을 뜻하지 않음을 반영함. 일반 연결 실패·빈 설정·모델의 호출 없는 거절은 폐기 효과로 판정하지 않음.
+- 검증 결과: Linux / Python 3.12.13에서 `python scripts/check_docs.py` 오류 0·검토 후보 0, `git diff --check` 통과. 기존 Markdown 4개만 변경함.
+- 미실행: GPT의 사내 Prompt 등록 내용·질문 출력 직접 대조, PAT 생성·폐기·교체·실제 인증 호출·출력 비노출 검사. C09와 C07의 미확인 분기는 유지함. 코드·설정·Skill·의존성 변경 및 코드 시험 재실행은 없음.

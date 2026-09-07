@@ -323,6 +323,25 @@ Tool은 모델이 준 임의 주소·HTTP method·raw CQL을 받지 않고 관�
 
 결과는 지시 문장 포함 여부, 답변의 사실·링크 일치, 표식 처리, 추가 ID `0` 조회 여부로 [평가표](../evals/scenarios.md#confluence-live)에 기록합니다. `confluence-read` 자체 호출 여부는 실행 내역에서 따로 확인된 경우에만 기록하며 Tool 성공만으로 추정하지 않습니다. 시험 문서는 실제 운영 지식으로 채택하지 않습니다.
 
+<a id="c09-token-rotation"></a>
+
+### 시험용 PAT 폐기·교체 확인(C09)
+
+기존 Claude Code 등에서 사용하는 PAT를 보존하기 위해 같은 Confluence 사용자로 시험용 토큰을 따로 만듭니다. WebUI에서는 A 본인의 `EES Confluence Read` 개인 설정만 바꿉니다. B의 설정·공통 관리자 설정·코드·주소·프록시는 변경하지 않습니다. 토큰 생성·폐기는 Confluence 웹 화면에서 직접 수행하며 Assistant에 쓰기 기능을 추가하지 않습니다.
+
+1. **시험용 토큰으로 정상 연결:** Confluence 오른쪽 위 프로필 → 설정 → 개인 액세스 토큰에서 `EES-WEBUI-C09-TEST`처럼 구분되는 이름으로 새 PAT를 만듭니다. 만료일은 사내 기준과 시험 시간을 고려해 설정합니다. 생성 화면의 값을 A의 WebUI 개인 PAT 입력란에 넣고 저장한 뒤 새 대화에서 아래 질문을 보냅니다. 실제 `check_access`의 `ok=true`, `authenticated=true`를 확인한 다음 단계로 넘어갑니다.
+
+   ```text
+   Confluence 연결을 check_access로 다시 확인해줘. 실제 실행 결과로 연결 상태를 알려줘.
+   ```
+
+2. **시험용 토큰만 폐기하고 실패 확인:** Confluence PAT 목록에서 방금 만든 `EES-WEBUI-C09-TEST` 한 건을 확인해 폐기합니다. WebUI 개인 설정에는 그 폐기된 값을 그대로 둔 채 새 대화에서 같은 질문을 실행합니다. 실제 호출의 `ok=false`·`error.code`와 모델의 실패 안내를 확인합니다. 값을 비워 생긴 설정 오류나 모델의 호출 없는 거절은 폐기 검증이 아닙니다. 폐기 후에도 성공하거나 서비스 연결 오류만 발생하면 폐기 효과를 확인한 것으로 판정하지 않고 원인 확인 대상으로 남깁니다.
+3. **새 토큰으로 복구:** 같은 Confluence 사용자로 `EES-WEBUI` 등 구분되는 이름의 새 PAT를 만들고 A의 WebUI 개인 설정에 교체·저장합니다. 새 대화에서 같은 질문의 실제 `ok=true`, `authenticated=true`를 확인합니다. 새 PAT는 WebUI 전용으로 유지할 수 있으며 기존 업무용 PAT를 폐기하거나 Claude Code 설정을 바꾸지 않습니다. 원래 유효 PAT만 복원한 경우에는 서비스 복구로 기록하고 C09의 새 PAT 교체 확인과 구분합니다.
+
+생성·폐기 메뉴와 생성 후 토큰 재표시 제한은 [Atlassian 공식 PAT 안내](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html)를 따릅니다. 토큰은 사내 개인 설정에만 입력하고 채팅·공유 로그·Git에 넣지 않습니다. 생성 한도 등으로 새 토큰을 만들 수 없으면 기존 업무용 토큰을 임의로 폐기해 자리를 만들지 않습니다.
+
+판정은 **시험용 PAT의 정상 인증 → 해당 PAT 폐기 후 실제 인증 실패 → 새 PAT의 정상 인증**으로 합니다. 원본 Tool의 `authentication_failed`는 HTTP 401뿐 아니라 `/rest/api/user/current`의 응답이 인증 사용자(`type=known`)가 아닌 경우에도 반환되므로 코드 이름만으로 C07의 HTTP 401 실측을 확정하지 않습니다. `permission_denied`는 원본의 HTTP 403 분기이지만 받은 결과에 한해서만 기록합니다. 기존 404 사례를 반복하거나 timeout을 만들지 않으며 미확인 분기는 남깁니다. 단계별 성공·실패 코드·실패 안내와 확인한 출력의 PAT 비노출 여부만 [실환경 결과](../evals/scenarios.md#confluence-live)에 기록합니다.
+
 <a id="rich-ui-demo"></a>
 
 ## 선택 사항: 검색 결과 Rich UI 참고 예제
