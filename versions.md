@@ -43,9 +43,9 @@
 ## Jira 확인 환경
 
 - 2026-09-07 사용자 보고: Jira **8.5.12**, build **805012**, sha1 **156decd**. 개인 토큰을 이미 다른 호출에 사용 중이며 시스템은 프로젝트로 구분하는 것으로 설명함. 실제 프로젝트 키는 사내 허용목록으로 관리하며 저장소에는 넣지 않음.
-- Server/Data Center 라이선스 구분·기존 호출의 인증 헤더 형식은 미확인. [공식 내장 PAT](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html)는 Jira 8.14 이상이므로 현재 사용 중인 토큰을 내장 PAT로 단정하지 않음. [8.5.12 REST API](https://docs.atlassian.com/software/jira/docs/api/REST/8.5.12/)를 기준으로 기본 비활성 Bearer 읽기 후보를 준비하며 활성화 전 기존 성공 인증 형식을 확인함.
-- 새 도구·화면의 적용과 Jira 실환경 성공은 미확인. [등록 안내](docs/05-jira-read-tool.md), [판정](evals/scenarios.md#jira-live)을 따르며 이 문서는 API 연결 성공을 뜻하지 않음.
-- 후속 사용자 설명은 Confluence와 같은 인증 방식일 것이라는 추정임. Bearer 가정으로 기존 토큰의 계정 확인을 한 번 진행하며 성공 보고 전에는 호환성 미확인을 유지함.
+- Server/Data Center 라이선스 구분·토큰 발급 구현은 미확인. [공식 내장 PAT](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html)는 Jira 8.14 이상이므로 현재 사용 중인 토큰을 내장 PAT로 단정하지 않음. [8.5.12 REST API](https://docs.atlassian.com/software/jira/docs/api/REST/8.5.12/)를 기준으로 기본 비활성 Bearer 읽기 Tool을 준비함.
+- 2026-09-07 후속 사용자 보고: `check-jira-auth.ps1 -AllowHttp` 안내 후 `HTTPStatus=200`, `BearerAuthenticated=True`. 해당 PC에서 HTTP Bearer 계정 확인 성공으로 판정함. [확인 범위와 앞선 차단](evals/scenarios.md#jira-bearer-check)을 보존함.
+- 새 도구의 WebUI 등록·개인 설정·프로젝트 조회·화면은 미확인. [등록 안내](docs/05-jira-read-tool.md), [판정](evals/scenarios.md#jira-live)을 따르며 이미 끝난 인증 확인은 반복하지 않음.
 
 ## 보존 중인 Hermes 환경
 
