@@ -48,6 +48,12 @@
 - 2026-09-07 후속 사용자 보고: `check-jira-auth.ps1 -AllowHttp` 안내 후 `HTTPStatus=200`, `BearerAuthenticated=True`. 해당 PC에서 HTTP Bearer 계정 확인 성공으로 판정함. [확인 범위와 앞선 차단](evals/scenarios.md#jira-bearer-check)을 보존함.
 - 후속 보고로 WebUI 등록·관리자 설정·Assistant 연결·가짜 개인 PAT 마스킹과 DB 저장 검사 통과, 실제 토큰 입력 후 대시보드 정상 표시를 확인함. 이후 v0.1.1의 전체 표시·대표 건수 대조·화면 조작 확인은 위 적용 기록을 따르며 계정 격리는 미확인입니다. [저장·첫 화면 증거](evals/scenarios.md#jira-first-dashboard), [판정](evals/scenarios.md#jira-live)을 따르며 이미 끝난 인증·등록·저장 확인은 반복하지 않음.
 
+## GitHub 확인 환경
+
+- 2026-09-07 사용자 보고: **GitHub Enterprise Server 3.17.15**, 개인 PAT를 이미 발급받아 보유함. PAT 종류·권한·사내 기본 주소/프로토콜·허용 저장소·API 실행 성공은 아직 미확인임.
+- 후보 Tool **v0.1.0**, Open WebUI **0.11.3**, [GHES 3.17 PR REST API](https://docs.github.com/en/enterprise-server@3.17/rest/pulls/pulls), API 버전 헤더 **2022-11-28**을 기준으로 준비함. GitHub.com용 구현으로 대체하거나 현재 서버 버전을 자동 변경하지 않음.
+- 새 개인 필드 저장은 기존 검사기의 `--github`로 확인하며 동일 플랫폼의 기존 DB/키·재시작 증거는 재사용함. 실제 Tool/Prompt 등록·저장 검사·목록/본문 조회는 미실행. [가이드](docs/06-github-read-tool.md), [사외 검증](evals/github-offline.md), [실환경 판정](evals/scenarios.md#github-live)
+
 ## 보존 중인 Hermes 환경
 
 | 항목 | 확인된 설치 기준 |

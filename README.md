@@ -92,6 +92,7 @@ flowchart TB
 | 기본 Assistant 구성 | [03-openwebui-native-agent](docs/03-openwebui-native-agent.md) |
 | Confluence Skill·Tool 등록 | [04-confluence-read-tool](docs/04-confluence-read-tool.md) |
 | Jira 읽기·프로젝트별 현황 | [05-jira-read-tool](docs/05-jira-read-tool.md) |
+| GitHub Enterprise PR 읽기 | [06-github-read-tool](docs/06-github-read-tool.md) |
 | 오류 원인 분리 | [troubleshooting](docs/troubleshooting.md) |
 | 합격 기준·실환경 기록 | [evals/scenarios](evals/scenarios.md) |
 | Confluence 사외 시험 증거 | [evals/confluence-offline](evals/confluence-offline.md) |

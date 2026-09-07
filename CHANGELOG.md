@@ -4,6 +4,8 @@
 
 ## 2026-09-07
 
+- GHES 3.17.15용 개인 PAT 기반 PR 읽기 후보를 추가. 허용 저장소의 목록·본문·원문만 고정 GET으로 조회하고 페이지/미확인 상태를 구분. 기존 저장 검사기에 GitHub 전용 모드를 추가하고 조건부 Prompt·등록 안내·관련 합성 검사를 준비함. 기존 업무 Tool·Jira 디자인·서버 설정은 유지. [가이드](docs/06-github-read-tool.md), [근거](evals/github-offline.md).
+
 - Jira 화면 v0.1.1: 이모지 없이 글자·여백·명암을 정리하고 미완료/전체 기준의 정렬·막대 축척, 펼치기 전 주요 정보, 필터 후 펼침 상태 유지와 조회 범위 안내를 개선. API·인증·설정은 유지하고 화면 관련 합성 검사만 수행. 사내 반영은 별도. [근거](evals/jira-offline.md#dashboard-design).
 - 기존 읽기 전용 개인 설정 검사기에 `--jira` 선택을 추가. Jira에서만 쓰는 합성 값과 정확한 도구를 함께 확인해 기존 Confluence 값이나 다른 도구의 암호문을 새 필드 성공으로 오인하지 않도록 함. 기본 Confluence 모드·키/DB·업무 Tool은 유지하고 관련 합성 시험만 수행. [근거](evals/jira-offline.md#jira-storage-check).
 - Confluence와 같은 인증 방식이라는 사용자 설명을 작업 가정으로 반영하고, 토큰을 새로 저장하기 전 고정 Jira 계정 API만 확인하는 PowerShell 스크립트와 PR 원본 전달 안내를 추가. 기존 Jira Tool·31개 합성 시험·Confluence 증거는 유지하며 실제 인증 성공으로 간주하지 않음. [근거](evals/jira-offline.md#bearer-check-preparation).

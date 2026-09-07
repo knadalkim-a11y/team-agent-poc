@@ -25,24 +25,28 @@ flowchart TB
 
 사용자는 여전히 `EES 통합 Assistant` 하나만 선택합니다. Skill과 Tool을 함께 연결하는 구조에서 Skill은 **무엇을 언제 어떻게 할지** 알려주고 Tool은 **실제로 실행**합니다. 이 구조 설명이 모든 외부 Tool의 연결 완료를 의미하지는 않습니다.
 
-### 확장 시 질문 처리 예시 — GitHub 연동은 미구현
+### GitHub PR 읽기 흐름
+
+[GitHub 읽기 Tool](06-github-read-tool.md)을 등록한 뒤의 흐름입니다. 작은 PR 읽기는 별도 Skill 없이 조건부 Prompt와 함수 설명을 사용합니다. 준비·실제 반영 여부는 STATUS를 따릅니다.
 
 ```mermaid
 sequenceDiagram
     participant U as 사용자
     participant A as EES Assistant
-    participant S as GitHub Skill
     participant T as GitHub Tool
     participant G as 사내 GitHub
-
-    U->>A: 이 저장소의 PR을 확인해줘
-    A->>S: view_skill
-    S-->>A: PR 조회 절차와 제한
-    A->>T: get_pull_request(repo, number)
-    T->>G: 승인된 API 호출
-    G-->>T: PR 데이터
-    T-->>A: 구조화된 결과
-    A-->>U: 결과 설명
+    U->>A: 저장소의 열린 PR 조회
+    A->>T: github_list_pull_requests
+    T->>G: 개인 인증과 고정 GET
+    G-->>T: PR 한 페이지
+    T-->>A: 범위·원문·페이지 정보
+    A-->>U: 목록 표와 다음 행동
+    U->>A: PR 본문 요약
+    A->>T: github_get_pull_request
+    T->>G: 지정 PR 읽기
+    G-->>T: PR 본문
+    T-->>A: 본문·잘림·원문
+    A-->>U: 근거 있는 요약
 ```
 
 `EES 통합 Assistant`는 새로운 물리 모델이 아니라, 승인된 기반 모델에 공통 지침·Skill·Knowledge·허용 Tool을 묶는 Open WebUI Workspace Model입니다.
@@ -187,7 +191,7 @@ flowchart TB
 
 작은 POC 코드는 Open WebUI의 Python Workspace Tool로 넣습니다. 팀 공용 패키지라도 규모만으로 외부 서버를 추가하지 않으며, 의존성·Secret·감사·권한의 별도 수명주기가 필요해질 때 외부 MCP/OpenAPI Tool Server의 운영 비용과 이점을 비교합니다.
 
-예를 들어 후속 GitHub 읽기 패키지는 다음처럼 나눌 수 있습니다. 아직 구현된 함수가 아닙니다.
+현재 [GitHub PR 읽기](06-github-read-tool.md)는 단일 Workspace Tool로 준비했습니다. 아래는 향후 파일 검색·가이드가 필요한 경우의 확장 예시이며 현재 구현 목록이 아닙니다.
 
 - `SKILL.md`: 언제 저장소를 조회하고 근거와 조회 제한을 어떻게 확인하는지
 - `references/`: 사내 GitHub 사용 가이드와 API 규격

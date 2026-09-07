@@ -3,8 +3,9 @@
 Run with the existing WebUI Python environment (cryptography is required).
 Does not import open_webui, migrate a DB, call an API, or print stored values.
 This is a DB check only; logs and restart persistence remain separate gates.
-No arguments retains the Confluence check; --jira checks the fixed Jira marker
-in the unique Tool named EES Jira Read, using its stored tool ID internally.
+No arguments retains the Confluence check; --jira and --github check their fixed
+markers in the unique EES Jira Read or EES GitHub Read Tool respectively, using
+the stored tool ID internally.
 """
 
 import base64
@@ -19,6 +20,7 @@ from pathlib import Path
 
 CANARY = "EES-CANARY-20260906-7F3A9C"  # Synthetic test value, never a real PAT.
 JIRA_CANARY = "EES-JIRA-CANARY-20260907-B92F6A"
+GITHUB_CANARY = "EES-GITHUB-CANARY-20260907-C43D8E"
 
 
 def contains_canary(path, canary):
@@ -34,10 +36,13 @@ def contains_canary(path, canary):
     return False
 
 
-def check(root, *, jira=False):
+def check(root, *, jira=False, github=False):
+    if jira and github:
+        raise ValueError("Choose one fixed tool mode")
     from cryptography.fernet import Fernet, InvalidToken
 
-    canary = JIRA_CANARY if jira else CANARY
+    canary = GITHUB_CANARY if github else JIRA_CANARY if jira else CANARY
+    target_name = "EES GitHub Read" if github else "EES Jira Read" if jira else None
     root = Path(root).resolve(strict=True)
     database = root / "data" / "webui.db"
     # Match open-webui serve: read the existing key without stripping whitespace.
@@ -57,13 +62,13 @@ def check(root, *, jira=False):
     connection = sqlite3.connect(database.as_uri() + "?mode=ro", uri=True, timeout=5)
     try:
         connection.execute("PRAGMA query_only=ON")
-        if jira:
+        if target_name is not None:
             # v0.11.3 models/tools.py: tool.id keys settings.tools.valves.
             # One snapshot binds the exact label to its stored settings.
             connection.execute("BEGIN")
             target_ids = [row[0] for row in connection.execute(
                 'SELECT id FROM "tool" WHERE name = ? COLLATE BINARY',
-                ("EES Jira Read",),
+                (target_name,),
             )]
             if any(not isinstance(tool_id, str) or not tool_id for tool_id in target_ids):
                 raise ValueError("Unexpected tool schema")
@@ -89,7 +94,7 @@ def check(root, *, jira=False):
                         continue
                     if isinstance(decoded, dict) and decoded.get("PAT") == canary:
                         encrypted_matches += 1
-                        if jira and len(target_ids) == 1 and tool_id == target_ids[0]:
+                        if target_name is not None and len(target_ids) == 1 and tool_id == target_ids[0]:
                             target_encrypted_matches += 1
     finally:
         connection.close()
@@ -113,7 +118,7 @@ def check(root, *, jira=False):
         "LogsChecked": False,
         "RestartPersistenceChecked": False,
     }
-    if jira:
+    if target_name is not None:
         result["TargetToolMatches"] = len(target_ids)
         result["TargetEncryptedCanaryMatches"] = target_encrypted_matches
         result["DatabaseCheckPassed"] &= len(target_ids) == 1 and target_encrypted_matches == 1
@@ -123,7 +128,7 @@ def check(root, *, jira=False):
 def main(argv=None):
     try:
         args = sys.argv[1:] if argv is None else argv
-        if args not in ([], ["--jira"]):
+        if args not in ([], ["--jira"], ["--github"]):
             print(json.dumps({"CheckCompleted": False, "Error": "UNSUPPORTED_ARGUMENTS"}))
             return 2
         if version("open-webui") != "0.11.3":
@@ -132,7 +137,8 @@ def main(argv=None):
         local_data = os.environ.get("LOCALAPPDATA")
         if not local_data:
             raise ValueError("LOCALAPPDATA is unavailable")
-        result = check(Path(local_data) / "EES-Agent-POC" / "open-webui", jira=bool(args))
+        root = Path(local_data) / "EES-Agent-POC" / "open-webui"
+        result = check(root, github=True) if args == ["--github"] else check(root, jira=bool(args))
     except Exception:
         # Do not disclose exception text, stored values, user IDs, keys or paths.
         print(json.dumps({"CheckCompleted": False, "Error": "LOCAL_CHECK_FAILED"}))
