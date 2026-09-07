@@ -143,6 +143,14 @@ Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue
     Select-Object LocalAddress, LocalPort, OwningProcess
 ```
 
+`Get-NetTCPConnection`이 인식되지 않으면 WebUI 실행창을 유지하고 별도 PowerShell에서 아래 한 줄로 확인합니다. 모듈 설치·설정 변경·재시작은 필요하지 않습니다.
+
+```powershell
+netstat.exe -ano | findstr.exe LISTENING | findstr.exe /C:":8080 "
+```
+
+출력의 **왼쪽 로컬 주소**가 `127.0.0.1:8080`인 수신 행만 있어야 W02 기준에 맞습니다. 오른쪽 원격 주소의 `0.0.0.0:0`은 수신 주소 판정에 사용하지 않습니다. 다른 로컬 주소가 있거나 출력 없음·명령 오류면 해당 상태만 확인하며, 실제 사내 주소·전체 연결 목록은 공유하지 않습니다. `::1`은 IPv6 루프백이므로 다른 주소라는 이유만으로 외부 공개를 단정하지 않습니다. `-p tcp`로 IPv6 행을 제외하지 않고, 포트 뒤 공백까지 일치시켜 다른 포트를 섞지 않습니다. 이는 현재 8080 수신 주소의 확인이며 프로세스 소유·별도 프록시 구성까지 검증하는 것은 아닙니다. 옵션과 열 구분은 [Microsoft netstat](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/netstat), 문자열 필터는 [Microsoft findstr](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/findstr)를 따릅니다.
+
 ## 7. 포트와 프록시
 
 로컬 Open WebUI의 127.0.0.1:8080과 원격 사내 프록시의 8080은 충돌하지 않습니다.

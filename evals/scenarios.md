@@ -17,7 +17,7 @@
 | ID | 검증 내용 | 통과 조건 | 상태 |
 |---|---|---|---|
 | W01 | 로컬 기동 | http://127.0.0.1:8080에서 로그인 화면이 열린다 | PASS |
-| W02 | loopback 제한 | listener가 127.0.0.1:8080에만 열린다 | 대기 |
+| W02 | loopback 제한 | listener가 127.0.0.1:8080에만 열린다 | 대기 — Get-NetTCPConnection 인식 오류; netstat 대체 확인 준비 |
 | W03 | 데이터 위치 | DB와 상태가 지정 DATA_DIR에 생성된다 | 대기 |
 | W04 | 재시작 | 재시작 후 계정과 허용된 대화가 유지된다 | PASS |
 
@@ -220,6 +220,7 @@ Native 평가에서 복잡한 다단계 작업의 실패가 확인된 경우에�
 | 2026-09-07 | C09 사전 연결 재확인 | Windows / OWUI 0.11.3 / Confluence 도구 선택 확인 후 | 인증 성공 — 폐기·교체는 대기 | 사용자 보고: 설정 과정에서 실수로 도구를 미사용으로 설정한 것 같다고 설명했고, 재시도 결과 ok와 authenticated가 모두 true라고 확인함 | 실제 check_access 인증 성공 보고로 인정하고 앞선 도구 미호출 이슈는 복구 확인으로 정리함. 변경 전후 UI·실행 내역·저장된 토큰 식별은 GPT가 직접 대조하지 않음. 폐기·새 토큰 복구·이번 출력의 PAT 비노출은 아직 별도 미확인. 기존 미호출 기록과 C03~C08 결과를 보존하며 시험용 토큰 한 건만 다음 폐기 대상으로 안내함 |
 | 2026-09-07 | C09 폐기 / C07 인증 실패 안내 | Windows / OWUI 0.11.3 / 시험용 PAT 폐기 후 재호출 | 폐기 후 인증 실패·교체 안내 확인 — 새 PAT 복구 대기 | 시험용 PAT만 폐기하고 WebUI 값·도구 선택을 유지한 새 대화에서 check_access를 실행하도록 안내한 뒤 사용자 보고: ok=false, error.code=authentication_failed. 이어 Skill 지침에 따라 PAT 교체 안내도 받았다고 확인함 | 앞선 정상 인증과 함께 해당 폐기 시험의 실패 전환 및 다음 조치 안내를 확인한 근거. 응답 전문·HTTP 상태·토큰 식별·view_skill 호출·이번 출력의 PAT 비노출을 GPT가 직접 확인한 것은 아님. authentication_failed는 HTTP 401 외에 현재 사용자 응답이 type=known이 아닐 때도 반환되므로 HTTP 401 실측으로 단정하지 않음. Skill 안내를 따랐다는 보고만으로 실제 Skill 로딩을 확정하지 않으며 C09 새 PAT 복구와 C07의 나머지 분기는 유지함 |
 | 2026-09-07 | C09 새 PAT 복구 | Windows / OWUI 0.11.3 / A의 새 PAT 저장 후 | PASS — 시험한 사용자·토큰 교체 흐름 | 같은 Confluence 사용자로 새 PAT 생성·A의 개인 설정 교체 저장·도구가 켜진 새 대화의 check_access 확인을 안내한 뒤 사용자가 ok와 authenticated가 둘 다 성공했다고 보고함. 앞선 정상 인증, 시험용 PAT 폐기 뒤 ok=false/authentication_failed, PAT 교체 안내와 함께 판정함 | 사용자 보고에 근거하며 GPT의 실제 토큰·등록 화면·실행 내역 직접 대조는 없음. 모든 사용자·노드·장기 운영·새 토큰의 전체 로그 비노출이나 C07의 모든 HTTP/timeout 분기 확인으로 확대하지 않음. Confluence Skill 로딩과 전체 MVP·공용 배포 Gate는 별도이며 기존 폐기 시험을 반복하지 않음 |
+| 2026-09-07 | W02 명령 실행 | Windows / OWUI 0.11.3 / PowerShell 포트 확인 안내 | 대기 — 명령 인식 오류 | 사용자가 cmdlet·함수·스크립트·실행 프로그램으로 인식되지 않는다는 오류를 보고했고, 이름 확인 질문에 Get-NetTCPConnection이라고 전달함 | 포트 조회 결과는 미수집이므로 주소·공개 범위를 판정하지 않음. 원인이나 Windows/PowerShell 세부 환경을 추정하지 않고 netstat의 LISTENING·정확한 8080 필터 대안을 설치 안내에 준비함. 공식 문서·독립 정적 검토와 Linux의 문서 검사·diff 확인을 수행하며 Windows 실제 실행·기존 서비스 설정 변경은 미실행. 기존 PASS 항목은 유지함 |
 | YYYY-MM-DD | <ID> | OWUI <VERSION> | 대기 | <REFERENCE> | <NOTE> |
 
 - 오류 전문 대신 비식별 요약이나 Issue 링크를 남깁니다.
