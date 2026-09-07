@@ -96,12 +96,12 @@ loopback에서 사내 IP로 접속 주소를 바꾼 뒤부터라는 단서가 �
 
 <a id="cors-origin-update"></a>
 
-### 현재 브라우저 주소를 허용 목록에 추가
+### 현재 브라우저 주소를 허용 목록에 영구 저장
 
 `is not an accepted origin`이 확인됐거나 승인된 브라우저 접속 주소를 변경할 때 사용합니다. 서버가 수신하는 `--host`와 브라우저 origin 허용 설정은 별개입니다. v0.11.3의 [CORS 설정](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/config.py)은 주소를 세미콜론으로 나누며, 빈 항목이나 `*;주소` 혼합은 기동 오류를 낼 수 있습니다.
 
 1. **현재 WebUI 서버를 실행한 원래 PowerShell**에서 `Ctrl+C`를 누르고 입력 가능한 상태가 될 때까지 기다립니다. 같은 창·기존 폴더를 유지합니다.
-2. 아래 블록 전체를 실행하고 주소를 물으면 현재 브라우저 주소를 `http://` 또는 `https://`부터 입력합니다. 대화 경로는 자동으로 제외합니다. 기존에 명시한 주소를 유지하며 이전 loopback 주소와 현재 주소를 추가합니다. 기존 값이 비었거나 `*`뿐이면 이 두 주소를 명시적으로 허용합니다.
+2. 아래 블록 전체를 한 번 실행하고 주소를 물으면 현재 브라우저 주소를 `http://` 또는 `https://`부터 입력합니다. 대화 경로는 자동으로 제외합니다. 현재 창과 Windows 사용자 설정에 명시한 주소를 합치고 이전 loopback 주소와 현재 주소를 추가합니다. 기존 값이 비었거나 `*`뿐이면 이 두 주소를 명시적으로 허용합니다. 허용 목록을 **이 PC의 현재 Windows 사용자 환경변수에 영구 저장**하고 현재 창에도 적용합니다.
 
 ```powershell
 & {
@@ -111,19 +111,33 @@ loopback에서 사내 IP로 접속 주소를 바꾼 뒤부터라는 단서가 �
         throw '브라우저 주소를 http:// 또는 https://부터 입력하세요.'
     }
     $eesOrigin = $eesUrl.GetLeftPart([System.UriPartial]::Authority)
-    $eesOrigins = @($env:CORS_ALLOW_ORIGIN -split ';' |
+    $eesStored = [Environment]::GetEnvironmentVariable('CORS_ALLOW_ORIGIN', 'User')
+    $eesOrigins = @((@($env:CORS_ALLOW_ORIGIN, $eesStored) -join ';') -split ';' |
         ForEach-Object { $_.Trim() } |
         Where-Object { $_ -and $_ -ne '*' })
-    $env:CORS_ALLOW_ORIGIN = (@($eesOrigins + 'http://127.0.0.1:8080' + $eesOrigin) |
+    $eesCors = (@($eesOrigins + 'http://127.0.0.1:8080' + $eesOrigin) |
         Select-Object -Unique) -join ';'
-    Write-Host ('허용 주소 설정 완료: ' + $env:CORS_ALLOW_ORIGIN)
+    [Environment]::SetEnvironmentVariable('CORS_ALLOW_ORIGIN', $eesCors, 'User')
+    if ([Environment]::GetEnvironmentVariable('CORS_ALLOW_ORIGIN', 'User') -cne $eesCors) {
+        throw '사용자 설정 저장을 확인하지 못했습니다.'
+    }
+    $env:CORS_ALLOW_ORIGIN = $eesCors
+    Write-Host '영구 저장 및 현재 창 적용 완료'
 }
 ```
 
-3. `허용 주소 설정 완료`가 나오면 **같은 창에서 직전에 사용한 기존 기동 명령**을 다시 실행합니다. 입력 오류가 나면 이 블록부터 올바른 주소로 다시 실행합니다. 데이터·키·모델·패키지와 수신 주소는 이 블록이 변경하지 않습니다.
+3. `영구 저장 및 현재 창 적용 완료`가 나오면 **같은 창에서 직전에 사용한 기존 기동 명령**을 다시 실행합니다. 입력 오류가 나면 올바른 주소로 블록을 다시 실행합니다. 저장 권한 오류면 오류 내용을 확인하고 강제로 관리자/시스템 범위로 바꾸지 않습니다. 데이터·키·모델·패키지와 수신 주소는 이 블록이 변경하지 않습니다.
 4. 정상 기동 후 브라우저를 한 번 새로고침해 연결을 맺고, 새 대화에 `안녕`을 한 번 보냅니다. 그 뒤 새로고침 없이 답변이 표시되고 완료되는지 확인합니다. 실패하면 현재 서버에 같은 origin 거부가 다시 나오는지 확인하고, 다른 오류라면 위 진단으로 범위를 좁힙니다.
 
-이 설정은 **현재 PowerShell과 그 창에서 시작하는 서버에 적용**됩니다. 새 PowerShell에서 기동할 때도 기존 시작 명령 앞에 같은 설정을 적용해야 합니다. 사내 IP·주소는 Git이나 채팅에 보내지 않습니다. 이 절차의 복사 블록은 2,500자 이내이며 실제 Windows 실행·복구 판정은 사용자 확인이 필요합니다.
+User 범위는 **같은 Windows 계정에서 재부팅 후에도 유지**됩니다. 평소 기동 시 주소를 다시 입력할 필요가 없습니다. 기존 기동 절차에 `$env:CORS_ALLOW_ORIGIN`을 예전 loopback 값으로 다시 지정하는 줄이 있으면 제거해야 저장된 목록을 덮어쓰지 않습니다. IP·포트·HTTP/HTTPS가 바뀔 때만 새 주소를 추가합니다. 다른 Windows 계정·서비스·서버로 옮길 때는 해당 실행 환경에 다시 설정합니다.
+
+이미 열려 있던 다른 Terminal·VS Code·PowerShell은 이전 환경을 보유할 수 있습니다. 이번 원래 창은 위 명령이 즉시 갱신합니다. 다른 기존 창을 꼭 사용해야 할 때만 기동 전에 아래 한 줄로 저장값을 읽습니다. 모든 새 탭이 즉시 최신 환경을 물려받는다고 가정하지 않습니다. [Microsoft 환경변수 안내](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-5.1), [User 저장과 새 프로세스 상속](https://learn.microsoft.com/en-us/dotnet/api/system.environment.setenvironmentvariable?view=netframework-4.8.1).
+
+```powershell
+$env:CORS_ALLOW_ORIGIN = [Environment]::GetEnvironmentVariable('CORS_ALLOW_ORIGIN', 'User')
+```
+
+사용자 환경변수는 해당 계정에서 실행하는 다른 인스턴스에도 상속될 수 있습니다. 현재 단일 PC·계정의 수동 기동에 적용하며 별도 파일/로더·서비스는 추가하지 않습니다. 사내 IP·주소는 Git이나 채팅에 보내지 않습니다. 복사 블록은 각각 2,500자 이내이며 실제 Windows 저장·재기동·복구 판정은 사용자 확인이 필요합니다.
 
 ## 프록시 다운로드 실패
 
@@ -198,13 +212,12 @@ CORS 문구는 단순 경고입니다. v0.11.3에서는 이 시점 전후로 `op
 ```powershell
 $env:GLOBAL_LOG_LEVEL = "DEBUG"
 $env:ENABLE_VERSION_UPDATE_CHECK = "False"
-$env:CORS_ALLOW_ORIGIN = "http://127.0.0.1:8080"
 $env:PYTHONPROFILEIMPORTTIME = "1"
 
 uvx --python 3.11 open-webui@0.11.3 serve --host 127.0.0.1 --port 8080
 ```
 
-- CORS_ALLOW_ORIGIN 설정은 경고를 제거할 뿐 정체 원인을 해결하는 값은 아닙니다.
+- 이 import 정체 진단 때문에 `CORS_ALLOW_ORIGIN`을 loopback만 허용하도록 덮어쓰지 않습니다. 기존 허용 목록을 유지하고 실제 origin 거부 오류가 있을 때 [주소 설정](#cors-origin-update)을 보완합니다.
 - `Ctrl+C` 후 traceback 없이 프롬프트로 돌아오는 경우도 있습니다. uvx가 자식 Python을 종료하면서 traceback을 전달하지 않은 경우입니다.
 - 진단 출력을 로컬 임시 로그에 함께 저장하려면 다음처럼 실행합니다.
 

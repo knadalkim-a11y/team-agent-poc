@@ -213,7 +213,7 @@ Get-NetConnectionProfile | Select-Object InterfaceAlias, NetworkCategory
 
 이후 **원래 WebUI 실행 창**에서 `Ctrl+C`로 종료하고 기존 환경변수를 유지한 채 수신 주소를 바꿉니다. 아래는 확인했던 기존 경로·uvx 캐시를 사용하는 예시이며 캐시가 없으면 설치·업그레이드 대신 중단합니다. 저장소 시작 스크립트는 종료 시 `Pop-Location`하므로 같은 창이어도 폴더가 바뀔 수 있습니다. 기존 `DATA_DIR`와 비어 있지 않은 키 파일을 확인한 뒤 해당 폴더로 이동합니다. 경로가 다르면 이 예제로 강제 실행하지 않고 실제 기존 위치에 맞춥니다. `DATA_DIR`, `WEBUI_SECRET_KEY`, `ENABLE_VALVE_ENCRYPTION`, 모델/프록시 설정을 재설정하지 않습니다.
 
-기동 전에 **같은 창에서 새 브라우저 접속 주소를 `CORS_ALLOW_ORIGIN`에 추가**합니다. [허용 주소 보완](troubleshooting.md#cors-origin-update)의 2번 블록에 예정한 `http://<PC_LAN_IPV4>:8080`을 실제 값으로 입력한 뒤 아래 기동 명령을 사용합니다. 수신 IP만 바꾸고 이전 loopback origin만 허용하면 화면은 열려도 실시간 답변 연결이 거부될 수 있습니다. HTTPS 앞단을 쓰면 실제 브라우저의 HTTPS origin을 입력합니다.
+접속 주소를 처음 설정하거나 변경할 때 **같은 창에서 새 브라우저 주소를 `CORS_ALLOW_ORIGIN`에 영구 저장**합니다. [허용 주소 보완](troubleshooting.md#cors-origin-update)의 2번 블록에 예정한 `http://<PC_LAN_IPV4>:8080`을 실제 값으로 입력한 뒤 아래 기동 명령을 사용합니다. 현재 Windows 사용자 설정에 저장하므로 주소·실행 계정이 같으면 매번 입력하지 않습니다. 기존 명령에서 CORS를 loopback으로 덮어쓰는 줄은 제거합니다. 수신 IP만 바꾸고 이전 loopback origin만 허용하면 화면은 열려도 실시간 답변 연결이 거부될 수 있습니다. HTTPS 앞단을 쓰면 실제 브라우저의 HTTPS origin을 입력합니다.
 
 ```powershell
 & {
