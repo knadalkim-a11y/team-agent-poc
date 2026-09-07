@@ -4,6 +4,7 @@
 
 ## 2026-09-07
 
+- 전체 계획을 기능·사용성 중심으로 재정리. Jira 읽기와 첫 실제 Rich UI·초기 사용 안내를 한 업무 흐름으로 묶고, GitHub는 준비된 범위의 소규모 파일럿을 막지 않는 독립 후속으로 배치. 검증 목록과 실행 시점을 분리하고 초기 2-Skill 고정 기준을 현재 승인 구성 확인으로 갱신. 미확인·과거 실패는 보존하고 공개 전 격리·비밀 보호·읽기 제한은 유지함. 사내 확인 묶음·변경 영향에 따른 검사·사용성/공유 완료 조건을 추가하고 STATUS 누적 점검을 기존 evals로 이관. 실행 자산·버전·사내 설정 변경 없음. [검토 근거](evals/confluence-offline.md#mvp-plan-review).
 - Native `query_knowledge_files`의 임베딩 의존성이 문서 설정의 임베딩 우회와 별개임을 확인해 안내를 보완. Confluence Tool 우선과 작은 정책 Knowledge의 파일명/본문 조회를 사용하는 Prompt 섹션을 준비함. 기존 Knowledge 연결을 유지하며 개별 함수 강제 차단·임베딩 설정 복구를 의미하지 않음. [검토 근거](evals/confluence-offline.md#knowledge-routing); 사내 부분 적용·회귀 확인은 별도 수행.
 
 ## 2026-09-06
