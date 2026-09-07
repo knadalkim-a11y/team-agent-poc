@@ -4,6 +4,10 @@
 
 ## 2026-09-07
 
+- 열린 PR #2~#5 통합 검토에서 Jira 목록 오류의 안전한 안내 누락·부분 실패 뒤 페이지 범위 변화를 v0.1.2로 보완. 관련 변경은 기존 PR에서 마무리하는 개발 규칙을 추가하고 배포 원본·GitHub 버전 안내를 정리함. 새 PR 생성·사내 배포 없이 변경 시험만 수행. [검토 근거](evals/scenarios.md#pr-stack-review).
+
+- GitHub Tool v0.1.1: 직접 PR 본문의 저장소 생략 입력을 가이드와 일치시키고, 응답에서 확인한 숫자 저장소 ID 링크·마지막 페이지를 처리. 후속 PR 선택·목록 조건 재사용·실패 다음 행동을 GitHub Prompt 절에 반영함. 개인 설정·전송·기존 연동은 유지하며 사내 적용은 미확인. [검증](evals/github-offline.md#followup-flow).
+
 - 사용자 우선순위에 따라 첫 화면 예시·온보딩 적용을 기능 안정화 이후로 보류. 현재 연결 업무를 Assistant의 고정 역할로 취급하지 않고 준비물은 참고 초안으로 보존. [결정](evals/scenarios.md#onboarding-deferred).
 - 기존 모델 UI에 가져올 시작 질문 4개·소개 문구와 팀원용 첫 사용 안내 추가. 첫 사용자 Jira 업무로 다음 범위를 좁히고 Native 가이드의 오래된 Rich UI 미연결 설명을 수정. 업무 코드·System Prompt·기존 시험은 변경하지 않음. [준비·검수](evals/scenarios.md#team-first-use-preparation).
 - 당분간 팀원만 사용한다는 선택에 따라 기존 Skill·Tool·모델의 Public 설정 보고를 반영하고 그룹별 권한 절차를 후속으로 변경. [설정 보고와 확인 범위](evals/scenarios.md#team-public-resource-sharing).

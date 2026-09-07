@@ -77,6 +77,14 @@ def next_link(page=2, **changes):
     return "<" + BASE + "/api/v3/repos/" + REPOSITORY + "/pulls?" + urllib.parse.urlencode(params) + '>; rel="next"'
 
 
+def page_link(page, relation, repository_id=None, **changes):
+    link = next_link(page=page, **changes).replace('rel="next"', 'rel="' + relation + '"')
+    if repository_id is not None:
+        link = link.replace("/api/v3/repos/" + REPOSITORY + "/pulls",
+                            "/api/v3/repositories/" + str(repository_id) + "/pulls")
+    return link
+
+
 class GitHubReadTests(unittest.TestCase):
     def setUp(self):
         self.tool = module.Tools()
@@ -181,6 +189,22 @@ class GitHubReadTests(unittest.TestCase):
             self.assertTrue(result["ok"])
             self.assertEqual(result["repository"], REPOSITORY)
             self.assertEqual(urllib.parse.urlsplit(self.calls[-1].full_url).path, "/api/v3/repos/" + REPOSITORY + "/pulls")
+
+    def test_direct_detail_omits_single_repository_without_list_preflight(self):
+        self.tool.valves.ALLOWED_REPOSITORIES = REPOSITORY
+        self.responder = lambda request: Response(pull_request())
+        result = json.loads(asyncio.run(self.tool.github_get_pull_request(number=11, __user__=self.user())))
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["repository"], REPOSITORY)
+        self.assertEqual(result["pull_request"]["number"], 11)
+        self.assertEqual([request.full_url for request in self.calls],
+                         [BASE + "/api/v3/user", BASE + "/api/v3/repos/" + REPOSITORY + "/pulls/11"])
+
+    def test_direct_detail_omitted_repository_requires_choice_before_network(self):
+        result = json.loads(asyncio.run(self.tool.github_get_pull_request(number=11, __user__=self.user())))
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error"]["code"], "repository_required")
+        self.assertEqual(self.calls, [])
 
     def test_invalid_state_page_and_number_stop_before_network(self):
         for state in ("merged", "OPEN", "open&state=all", "", 1):
@@ -291,6 +315,101 @@ class GitHubReadTests(unittest.TestCase):
         self.assertNotIn("total", result)
         self.assertNotIn("total", result["pagination"])
         self.assertEqual(len(self.calls), 2)
+
+    def test_canonical_next_and_final_links_keep_requests_on_owner_path(self):
+        items = [pull_request(11), pull_request(12)]
+        for item in items:
+            item["base"]["repo"]["id"] = 101
+        self.responder = lambda request: Response(items, link=", ".join([
+            page_link(2, "next", 101), page_link(2, "last", 101)]))
+        first = self.call()
+        self.assertTrue(first["ok"])
+        self.assertEqual(first["pagination"]["next_page"], 2)
+        self.assertIs(first["pagination"]["has_next"], True)
+        self.assertEqual(len(self.calls), 2)
+        self.responder = lambda request: Response(items, link=", ".join([
+            page_link(1, "first", 101), page_link(1, "prev", 101)]))
+        final = self.call(page=first["pagination"]["next_page"])
+        self.assertTrue(final["ok"])
+        self.assertIs(final["pagination"]["has_next"], False)
+        self.assertIsNone(final["pagination"]["next_page"])
+        self.assertEqual(final["pagination"]["basis"], "link")
+        self.assertEqual(len(self.calls), 4)
+        for request, page in zip(self.calls[1::2], ("1", "2")):
+            parsed = urllib.parse.urlsplit(request.full_url)
+            self.assertEqual(parsed.path, "/api/v3/repos/" + REPOSITORY + "/pulls")
+            self.assertEqual(urllib.parse.parse_qs(parsed.query),
+                             {"state": ["open"], "sort": ["updated"], "direction": ["desc"],
+                              "per_page": ["2"], "page": [page]})
+
+    def test_canonical_links_need_consistent_positive_repository_id(self):
+        candidates = [[], [pull_request(11), pull_request(12)]]
+        for ids in ((101, 102), (101, None), (101, True), (101, 0), (101, -1),
+                    (101, "101"), (101, {}), (101, []), (102, 102)):
+            items = [pull_request(11), pull_request(12)]
+            for item, value in zip(items, ids):
+                item["base"]["repo"]["id"] = value
+            candidates.append(items)
+        for index, items in enumerate(candidates):
+            for page, link in ((1, page_link(2, "next", 101)),
+                               (2, page_link(1, "prev", 101))):
+                with self.subTest(candidate=index, page=page):
+                    self.responder = lambda request, current=items, metadata=link: Response(current, link=metadata)
+                    result = self.call(page=page)
+                    self.assertTrue(result["ok"])
+                    self.assertEqual(len(result["pull_requests"]), len(items))
+                    self.assertIsNone(result["pagination"]["has_next"])
+                    self.assertIsNone(result["pagination"]["next_page"])
+
+    def test_last_page_owner_links_work_for_full_short_and_empty_results(self):
+        for items in ([pull_request(11), pull_request(12)], [pull_request()], []):
+            with self.subTest(returned=len(items)):
+                self.responder = lambda request, current=items: Response(current, link=", ".join([
+                    page_link(1, "first"), page_link(2, "prev")]))
+                result = self.call(page=3)
+                self.assertTrue(result["ok"])
+                self.assertIs(result["pagination"]["has_next"], False)
+                self.assertIsNone(result["pagination"]["next_page"])
+
+    def test_all_page_links_must_match_scope_filters_and_relations(self):
+        items = [pull_request(11), pull_request(12)]
+        for item in items:
+            item["base"]["repo"]["id"] = 101
+        bad_links = [
+            page_link(1, "prev", 102),
+            page_link(1, "prev", 101).replace(BASE, "https://elsewhere.example.invalid"),
+            page_link(1, "prev", 101).replace("/pulls?", "/issues?"),
+            page_link(1, "prev", 101, state="closed"),
+            page_link(1, "prev", 101, per_page="50"),
+            page_link(1, "prev", 101, extra="unexpected"),
+            page_link(1, "prev", 101).replace("page=1", "page=1&page=2"),
+            page_link(1, "prev", 101).replace('>; rel=', '#fragment>; rel='),
+            page_link(2, "prev", 101), page_link(2, "first", 101),
+            page_link(1, "last", 101), page_link(4, "next", 101),
+            page_link(1, "prev", 101) + ", " + page_link(1, "prev", 101), "malformed"]
+        for index, bad_link in enumerate(bad_links):
+            for prefix in (page_link(3, "next", 101), page_link(1, "first", 101)):
+                with self.subTest(metadata=index, prefix=prefix):
+                    self.responder = lambda request, current=prefix + ", " + bad_link: Response(items, link=current)
+                    result = self.call(page=2)
+                    self.assertTrue(result["ok"])
+                    self.assertIsNone(result["pagination"]["has_next"])
+                    self.assertIsNone(result["pagination"]["next_page"])
+
+    def test_contradictory_last_and_out_of_range_next_remain_unknown(self):
+        for page, link in (
+                (2, page_link(3, "next") + ", " + page_link(2, "last")),
+                (2, page_link(1, "prev") + ", " + page_link(3, "last")),
+                (1, page_link(1, "first")),
+                (100000, page_link(100001, "next"))):
+            with self.subTest(page=page, link=link):
+                self.responder = lambda request, current=link: Response([pull_request()], link=current)
+                result = self.call(page=page)
+                self.assertTrue(result["ok"])
+                self.assertIsNone(result["pagination"]["has_next"])
+                self.assertIsNone(result["pagination"]["next_page"])
+        self.responder = lambda request: Response([pull_request()], link=page_link(99999, "prev"))
+        self.assertIs(self.call(page=100000)["pagination"]["has_next"], False)
 
     def test_full_page_without_confirmed_next_is_unknown(self):
         self.responder = lambda request: Response([pull_request(11), pull_request(12)])

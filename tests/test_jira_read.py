@@ -210,6 +210,59 @@ class JiraReadTests(unittest.TestCase):
             self.assertEqual(result["summary"]["available_total"], 53)
             self.assertEqual(result["scope"]["listing_project_keys"], ["SYSA"])
 
+    def test_partial_scope_suppresses_cursor_until_first_page_recovery(self):
+        def respond(request):
+            params = query(request)
+            if params.get("maxResults") == ["0"] and '"SYSB"' in params["jql"][0]:
+                return Response({}, status=403)
+            return self.normal_response(request)
+        self.responder = respond
+        partial = self.run_tool()
+        self.assertTrue(partial["ok"])
+        self.assertTrue(partial["listing"]["ok"])
+        self.assertEqual(len(partial["issues"]), 30)
+        self.assertEqual(partial["listing"]["total"], 53)
+        self.assertIsNone(partial["listing"]["next_start_at"])
+        self.assertEqual(partial["summary"]["available_total"], 53)
+        self.assertIsNone(partial["summary"]["total"])
+        self.assertIn("처음부터 조회", partial["notice"])
+        partial_pages = [query(r) for r in self.calls if query(r).get("maxResults") == ["30"]]
+        self.assertEqual(len(partial_pages), 1)
+        self.assertEqual(partial_pages[0]["startAt"], ["0"])
+        self.assertNotIn("SYSB", partial_pages[0]["jql"][0])
+
+        self.responder = self.normal_response
+        self.calls.clear()
+        recovered = self.run_tool(start_at=0)
+        self.assertEqual(recovered["status"], "complete")
+        self.assertEqual(recovered["scope"]["listing_project_keys"], ["SYSA", "SYSB"])
+        self.assertEqual(recovered["listing"]["next_start_at"], 30)
+        recovered_pages = [query(r) for r in self.calls if query(r).get("maxResults") == ["30"]]
+        self.assertEqual(len(recovered_pages), 1)
+        self.assertEqual(recovered_pages[0]["startAt"], ["0"])
+        self.assertIn("SYSB", recovered_pages[0]["jql"][0])
+
+    def test_later_page_failure_never_applies_offset_to_reduced_scope(self):
+        first = self.run_tool()
+        self.assertEqual(first["listing"]["next_start_at"], 30)
+        def respond(request):
+            params = query(request)
+            if params.get("maxResults") == ["0"] and '"SYSB"' in params["jql"][0]:
+                return Response({}, status=403)
+            return self.normal_response(request)
+        self.responder = respond
+        self.calls.clear()
+        result = self.run_tool(start_at=first["listing"]["next_start_at"])
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["status"], "partial")
+        self.assertEqual(result["summary"]["available_total"], 53)
+        self.assertEqual(result["issues"], [])
+        self.assertFalse(result["listing"]["ok"])
+        self.assertIsNone(result["listing"]["next_start_at"])
+        self.assertEqual(result["listing"]["error"]["code"], "page_scope_changed")
+        self.assertIn("처음부터 조회", result["listing"]["error"]["message"])
+        self.assertFalse(any(query(r).get("maxResults") == ["30"] for r in self.calls))
+
     def test_zero_counts_are_successful_and_distinct_from_unavailable(self):
         def respond(request):
             params = query(request)
