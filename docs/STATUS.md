@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: 2026-09-07 원래 PowerShell의 같은 기동 구성으로 재시작한 뒤 기반 GLM의 새 대화에서 응답을 확인하도록 안내했고, 사용자가 정상이라고 보고함. D07를 이번 재시작 후 응답 범위에서 PASS로 기록함. 직접 경로 평가표 D01~D07는 각 기록의 모델·시점·시험 범위에서 모두 PASS이며, EES 통합 Assistant 구성·지침 개정·사용자 격리 등 전체 MVP 검증 완료를 뜻하지 않음.
-- 다음 작업 하나: **EES 통합 Assistant의 현재 실행 기능·연결 구성(S04/S05)을 읽기 전용으로 확인한다.** Workspace → Models → EES 통합 Assistant 편집에서 Capabilities의 Web Search·Code Interpreter·Terminal 상태와 Tools의 선택된 이름을 보고받는다. 추가 MCP·DB Tool 연결이나 운영 DB 접속정보를 넣은 적이 있는지는 유무만 확인하며 실제 주소·비밀값은 받지 않는다. 기존 Skill 3개·Knowledge·Confluence 읽기 Tool과 이미 확인한 Memory 설정은 유지한다. 설정 확인 범위와 전체 서버 통제를 구분하고, 이후 미반영 v0.2 지침 적용·관련 행동 평가로 이어간다.
+- 이번 작업: 2026-09-07 사용자가 EES 통합 Assistant의 Tools에 ees confluence read가 선택됐고, Capabilities는 Web Search ON·Code Interpreter OFF·Terminal ON이라고 보고함. 초기 MVP의 Web Search·Terminal OFF 구성과 달라 S04는 구성 보완이 필요한 대기로 유지함. ON만으로 실제 웹 조회·명령 실행이나 외부 서버 연결이 확인된 것은 아님. 추가 MCP·DB 연결 및 운영 DB 접속정보 유무는 아직 답변받지 않아 S05는 대기임.
+- 다음 작업 하나: **EES 통합 Assistant의 Web Search·Terminal을 OFF로 저장하고 확인한다.** Workspace → Models → EES 통합 Assistant 편집의 Capabilities에서 두 항목을 해제하고 저장 및 업데이트 후 새로고침·다시 편집해 OFF 상태를 확인한다. Code Interpreter OFF와 기존 Confluence 읽기 Tool·Skill 3개·Knowledge·Memory 설정은 유지한다. 미응답인 추가 MCP·DB 도구 연결 및 운영 DB 접속정보 등록 여부는 유무만 보고받고 실제 주소·비밀값은 받지 않는다. 이 설정 확인을 전체 서버 통제나 S04/S05 전체 실행 검증으로 확대하지 않는다.
 - 사내 작업 전달: 사내 PC에서는 ChatGPT에 접근할 수 없어 외부 모바일에서 코드·명령을 옮겨 실행함. Git 저장소의 안내 경로는 `%USERPROFILE%\team-agent-poc`이며 Open WebUI 데이터·설치 경로와 별개임. 최초 clone 성공 보고가 있으므로 다시 clone을 요구하지 않음. Git은 해당 PowerShell의 `$gitProxy` 변수와 `git -c "http.proxy=$gitProxy" ...`로 연결했으며 영구 프록시 저장이나 WebUI/Confluence 프록시 변경은 안내하지 않음. 새 창의 후속 Git 갱신 시 사내 프록시 값을 다시 설정해야 하며 실제 주소는 수집하지 않음.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
@@ -30,6 +30,7 @@
 
 ## 남아 있는 검증과 제한
 
+- EES의 Web Search·Terminal ON이 보고되어 초기 MVP 구성 보완이 필요함. 실제 웹·명령 실행은 관찰되지 않았고 OFF 저장·재확인은 대기임. Tools의 Confluence 선택만으로 추가 MCP·DB 연결 또는 운영 DB 접속정보 부재를 확인한 것으로 처리하지 않음.
 - S01~S03는 해당 Assistant의 합성 대화·모델 Memory OFF·A의 빈 Saved Memories 목록 보고 범위에서 확인함. 개인 설정 Memory는 ON이므로 다른 모델까지 Memory OFF라고 설명하지 않음. 전체 DB·모든 기록의 저장 부재·다른 사용자 격리는 미확인이고 조회 오류가 있었음을 뒤늦게 알게 되면 목록 판정을 다시 확인함.
 - W02는 현재 8080 수신 주소, W03는 이전 수동 기동 구성의 DB·사용자 설정 범위에서 확인됨. 별도 프록시·다른 서비스의 공개 여부·프로세스 소유와 첨부파일·모델 캐시 등 모든 저장물의 위치까지 검증한 것은 아님. 기동 구성·데이터 경로가 바뀌면 관련 항목을 다시 확인함.
 - [C07](../evals/scenarios.md#confluence-live)의 404 매핑 오류·인증 실패와 PAT 교체 안내는 확인됐으나 HTTP 401·403·timeout 개별 분기는 미확인임. `authentication_failed`만으로 HTTP 401을 확정하지 않으며 C09 PASS로 이 항목을 완료 처리하지 않음. 정상 서비스에 장애를 유발하거나 완료한 토큰 시험을 반복하지 않고 미확인 범위를 유지함. Confluence Skill을 실제 `view_skill`로 불러왔는지도 별도 미확인임.
@@ -44,6 +45,7 @@
 
 ## 최근 점검
 
+- 2026-09-07 EES 기능 ON/OFF 보고를 기존 Native OFF 기준·S04/S05와 대조함. 독립 검토로 공식 v0.11.3 내장 Tool 노출의 추가 조건 및 Tools 선택과의 구분을 확인해 저장·재확인 안내를 보완함. STATUS·Native 가이드·평가표만 변경하고 문서 점검·`git diff --check`를 확인함. 사내 기능 변경·외부 조회·명령 실행·호출 원문 검사와 코드 시험은 미실행.
 - 2026-09-07 D07 정상 보고를 직전 재시작·확인 질문 안내와 대조해 반영함. 독립 검토로 남은 S04/S05 구성 확인을 다음 최소 단계로 정하고 기존 Native 가이드·모델 기능 UI 항목과 대조함. STATUS·평가표만 변경해 문서 점검·`git diff --check`를 확인함. 사내 재시작·화면·환경설정 직접 검사, S04/S05 실환경 확인·코드 시험은 미실행.
 - 2026-09-07 D06의 20회 완료 보고를 기존 순차 요청 기준과 대조함. 기존 수동 기동·W04 및 D07 기준을 확인하고 독립 검토로 같은 창의 경로·환경설정 유지와 정상 종료 후 재실행 절차를 점검함. STATUS·직접 연결 가이드·평가표만 변경하고 문서 점검·`git diff --check`를 확인함. 사내 UI·호출 원문 직접 검사, 이번 재시작·D07 및 코드 시험은 미실행.
 - 2026-09-07 D05 보고를 직전 설정·새 대화 질문 안내와 대조해 해당 시험 범위로 반영함. D06의 기존 20회 기준을 수행할 최소 순차 절차를 준비하고 독립 검토로 요청 단위·실패 보존·집계 범위를 확인함. STATUS·직접 연결 가이드·평가표만 변경해 문서 점검·`git diff --check`를 확인함. 사내 UI·요청 직접 검사, D06 실행과 코드 시험은 미실행.
