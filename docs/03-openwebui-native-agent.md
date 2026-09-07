@@ -371,6 +371,23 @@ P05 또는 P06이 실패하면 다른 사용자에게 공개하지 않습니다.
 - 자동 업데이트는 롤백·승인·감사 로그가 마련되기 전에는 사용하지 않습니다.
 - 모델·서빙 옵션을 교체하면 [사내 모델 운용 기준](../versions.md#사내-모델-운용-기준)에 따라 기존 평가 질문으로 호출 품질·횟수·응답 시간을 다시 확인합니다.
 
+<a id="update-existing-instructions"></a>
+
+### 이미 등록된 지침 갱신
+
+현재 미반영된 지침 개정은 아래 기존 두 항목을 갱신해 적용합니다. 새로운 Skill이나 Assistant를 만들지 않습니다.
+
+| 원본 | 기존 UI 항목 |
+|---|---|
+| `agent-pack/system-prompts/ees-integrated-assistant.md` 전체 | Workspace → Models → EES 통합 Assistant 편집 → System Prompt |
+| `agent-pack/skills/policy-grounded-answer/SKILL.md` 전체, frontmatter 포함 | Workspace → Skills → 기존 policy-grounded-answer 편집 → 지침 |
+
+1. 기존 두 지침을 승인된 사내 로컬 위치에 복사해 보존하고, 직접 추가한 규칙이 있으면 해당 부분을 보존하면서 Git 원본과 맞춥니다. 내부 내용을 외부 채팅·Git에 옮기지 않습니다.
+2. 기존 항목의 본문을 갱신합니다. 전체 System Prompt에는 2026-09-07 보완한 자료 조회 경로가 이미 포함돼 있으므로 같은 섹션을 다시 덧붙이지 않습니다. 공통 정책 관리 파일이 자동 등록되는 구조는 아닙니다.
+3. 각각 저장하고 모델은 저장 및 업데이트합니다. 이름·ID·모델/Skill 연결·Confluence Tool·Knowledge·기능 OFF 설정·개인 PAT를 유지합니다.
+4. 두 항목의 저장 여부와 사용한 원본 Git 커밋을 기록합니다. 모바일로 원문을 옮긴 경우 안내 원본 커밋과 사내 checkout SHA를 혼동하지 않습니다. UI 저장 보고는 등록 내용의 직접 대조나 평가 통과와 구분합니다.
+5. 새 대화에서 [지침 개정 후 평가](../evals/scenarios.md#instruction-revision)를 진행합니다. 기존 PASS 이력은 보존하고 개정된 지침의 관련 결과를 별도로 기록합니다.
+
 ## 다음 단계 Gate
 
 Native POC에서 복잡한 병렬 분석, 장시간 상태 유지, 독립 검증, 외부 전용 ReAct가 실제로 필요하다는 실패 사례가 모일 때만 Hermes 또는 외부 Agent 연결을 비교합니다.

@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: 2026-09-07 사용자가 Confluence 외에 추가 연결 도구도 따로 없다고 보고함. 앞선 EES의 Web Search·Terminal·Code Interpreter OFF 및 Confluence 읽기 Tool 선택 보고와 함께 S04를 확인한 Assistant 구성 범위의 PASS로 기록함. 실제 런타임 거부·HTTP 조작 방어·전체 서버 차단을 검증한 것은 아님. 운영 DB 접속정보 등록 여부는 명시적으로 답변받지 않았으므로 S05는 대기임.
-- 다음 작업 하나: **운영 시스템 DB 접속정보를 이 Open WebUI의 설정이나 도구에 등록한 적이 있는지 확인한다.** 등록 유무만 보고받고 실제 계정·비밀번호·주소는 받지 않는다. 추가 연결 도구 없음과 EES 기능 OFF는 다시 묻지 않는다. 해당 확인을 마친 뒤 미반영 v0.2 지침 적용과 관련 행동 평가로 이어간다.
+- 이번 작업: 2026-09-07 사용자가 운영 DB 접속정보를 이 Open WebUI의 설정·도구에 아직 등록하지 않았다고 보고함. 앞선 Confluence 외 추가 도구 없음 보고와 함께 S05를 현재 구성의 사용자 보고 범위에서 PASS로 기록함. 미반영 지침 개정의 기존 System Prompt·정책 답변 Skill을 갱신할 원문과 절차를 준비했으며, 실제 UI 저장·개정 후 행동 평가는 아직 대기임.
+- 다음 작업 하나: **EES System Prompt와 policy-grounded-answer Skill의 기존 지침을 Git 원본으로 갱신한다.** [등록된 지침 갱신 절차](03-openwebui-native-agent.md#update-existing-instructions)에 따라 기존 내용과 사용자 추가 규칙을 사내에 보존하고 기존 두 항목을 갱신한다. 각 복사 블록은 2,500자 이내이며 조회 경로 섹션이 포함된 전체 Prompt를 사용한다. 이름·ID·Skill 연결·Confluence Tool·Knowledge·기능 OFF·토큰은 유지한다. 두 항목의 저장 보고를 받은 뒤 개정 관련 행동 평가를 진행한다.
 - 사내 작업 전달: 사내 PC에서는 ChatGPT에 접근할 수 없어 외부 모바일에서 코드·명령을 옮겨 실행함. Git 저장소의 안내 경로는 `%USERPROFILE%\team-agent-poc`이며 Open WebUI 데이터·설치 경로와 별개임. 최초 clone 성공 보고가 있으므로 다시 clone을 요구하지 않음. Git은 해당 PowerShell의 `$gitProxy` 변수와 `git -c "http.proxy=$gitProxy" ...`로 연결했으며 영구 프록시 저장이나 WebUI/Confluence 프록시 변경은 안내하지 않음. 새 창의 후속 Git 갱신 시 사내 프록시 값을 다시 설정해야 하며 실제 주소는 수집하지 않음.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
@@ -20,7 +20,7 @@
 | 대상 | Git에서 준비한 것 | WebUI 반영 마지막 확인 | 검증 근거 | 적용 원본 커밋 |
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
-| 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 개정 내용 미반영 | [P08~P10 및 기존 P02~P07 재검증](../evals/scenarios.md#instruction-revision); 사내 모델 검증 대기 | 미확인 |
+| 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 두 지침의 갱신 안내 준비; UI 저장 보고 대기 | [P08~P10 및 기존 P02~P07 재검증](../evals/scenarios.md#instruction-revision), [기존 지침 갱신](03-openwebui-native-agent.md#update-existing-instructions) | 안내 원본 [dfeb95f](https://github.com/knadalkim-a11y/team-agent-poc/commit/dfeb95fbf96cf6a2bb75a3ba75fac3bc92ed60fc); 실제 등록 내용·사내 checkout SHA 직접 대조는 미실행 |
 | 조회 경로 보완 | 2026-09-07 Prompt의 [현재 POC 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션 | 사용자 보고로 부분 적용 후 C04·P02 정상 및 두 질문의 임베딩 오류 재발 없음 확인 | [실환경 결과](../evals/scenarios.md#결과-기록), [당시 소스 검토](../evals/confluence-offline.md#knowledge-routing) | 부분 추가 안내 원본 [28f526a](https://github.com/knadalkim-a11y/team-agent-poc/blob/28f526a39162e54f126f577554f8c15fdd5940f1/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로); 등록 내용·SHA 직접 대조는 미실행. 위 지침 개정 전체 반영과 구분 |
 | Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.2; HTTP 명시적 허용 | 2026-09-07 연결·조회·문서 권한·확인한 출력의 PAT 비노출·시험한 구성의 쓰기 차단·PAT 폐기와 교체 후 복구 확인 보고. 오류 처리 등 공용 사용 전체 검증은 미완료 | [HTTP 지원 사외 검증](../evals/confluence-offline.md#http-opt-in), [실환경 C01~C09 및 결과](../evals/scenarios.md#confluence-live) | 새 Tool 안내 원본 [910ad765](https://github.com/knadalkim-a11y/team-agent-poc/blob/910ad765a777df1caf30a565a197097f8afbf8b0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), 기존 Skill 안내 원본 [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md). C06에서 등록 코드가 전달한 원본과 같다는 사용자 확인; GPT의 등록 코드·사내 checkout SHA 직접 대조는 미실행 |
 | Rich UI 참고 예제 | [합성 검색 결과 HTML](04-confluence-read-tool.md#rich-ui-demo); 실제 API·기존 Tool과 미연동 | 배포 대상 미확정 | [사전 준비 검증](../evals/confluence-offline.md#status-history); 실제 브라우저·WebUI 검증과 구분 | 해당 없음 |
@@ -30,7 +30,7 @@
 
 ## 남아 있는 검증과 제한
 
-- S04는 EES의 Web Search·Terminal·Code Interpreter OFF 및 Confluence 외 추가 연결 도구 없음이라는 사용자 보고에 따른 구성 범위 PASS임. 실제 함수 목록·호출 원문·런타임 거부나 전체 서버 차단은 직접 검증하지 않음. S05의 운영 DB 접속정보 등록 여부는 미확인이며, 도구가 없다는 보고로 접속정보도 없다고 추정하지 않음.
+- S04/S05는 EES 기능 OFF·Confluence 외 추가 연결 도구 없음·운영 DB 접속정보 미등록이라는 사용자 보고의 현재 구성 범위에서 PASS임. 실제 함수 목록·호출 원문·런타임 거부나 전체 서버·파일의 접속정보 부재는 직접 검증하지 않음. 미연결인 DB 조회 중계 경로의 S06은 별도 후속 항목으로 유지함.
 - S01~S03는 해당 Assistant의 합성 대화·모델 Memory OFF·A의 빈 Saved Memories 목록 보고 범위에서 확인함. 개인 설정 Memory는 ON이므로 다른 모델까지 Memory OFF라고 설명하지 않음. 전체 DB·모든 기록의 저장 부재·다른 사용자 격리는 미확인이고 조회 오류가 있었음을 뒤늦게 알게 되면 목록 판정을 다시 확인함.
 - W02는 현재 8080 수신 주소, W03는 이전 수동 기동 구성의 DB·사용자 설정 범위에서 확인됨. 별도 프록시·다른 서비스의 공개 여부·프로세스 소유와 첨부파일·모델 캐시 등 모든 저장물의 위치까지 검증한 것은 아님. 기동 구성·데이터 경로가 바뀌면 관련 항목을 다시 확인함.
 - [C07](../evals/scenarios.md#confluence-live)의 404 매핑 오류·인증 실패와 PAT 교체 안내는 확인됐으나 HTTP 401·403·timeout 개별 분기는 미확인임. `authentication_failed`만으로 HTTP 401을 확정하지 않으며 C09 PASS로 이 항목을 완료 처리하지 않음. 정상 서비스에 장애를 유발하거나 완료한 토큰 시험을 반복하지 않고 미확인 범위를 유지함. Confluence Skill을 실제 `view_skill`로 불러왔는지도 별도 미확인임.
@@ -45,6 +45,7 @@
 
 ## 최근 점검
 
+- 2026-09-07 DB 접속정보 미등록 보고를 기존 도구 미연결 보고·S05 기준과 대조함. 독립 검토로 미반영 Prompt·정책 답변 Skill·업데이트 원칙을 확인하고 원문 두 블록 전달, 사용자 추가 규칙 보존, 기존 조회 경로 포함 및 적용 원본 추적을 점검함. STATUS·Native 가이드·평가표만 변경해 문서 점검·`git diff --check`를 확인함. 실행 자산은 변경하지 않았고 사내 UI 갱신·행동 평가·코드 시험은 미실행.
 - 2026-09-07 추가 도구 없음 보고를 기존 기능 OFF·Confluence 선택 및 S04/S05 기준과 대조함. 독립 검토로 S04를 구성 범위에서 판정하고 같은 설정·무해한 질문을 불필요하게 반복하지 않기로 함. DB 접속정보 유무는 별도 미확인으로 유지함. STATUS·평가표만 변경하고 문서 점검·`git diff --check`를 확인함. 사내 UI·런타임 직접 검사와 코드 시험은 미실행.
 - 2026-09-07 두 항목 OFF 보고를 직전 저장·새로고침 안내 및 앞선 Code Interpreter 상태와 대조함. 과거 ON 관찰을 보존하고 미응답인 추가 연결·접속정보 유무를 추정하지 않음. STATUS·평가표만 변경해 문서 점검·`git diff --check`를 확인함. 사내 UI·함수 목록·호출 원문 직접 검사와 코드 시험은 미실행.
 - 2026-09-07 EES 기능 ON/OFF 보고를 기존 Native OFF 기준·S04/S05와 대조함. 독립 검토로 공식 v0.11.3 내장 Tool 노출의 추가 조건 및 Tools 선택과의 구분을 확인해 저장·재확인 안내를 보완함. STATUS·Native 가이드·평가표만 변경하고 문서 점검·`git diff --check`를 확인함. 사내 기능 변경·외부 조회·명령 실행·호출 원문 검사와 코드 시험은 미실행.
