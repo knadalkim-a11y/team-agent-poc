@@ -14,15 +14,15 @@ Jira 프로젝트를 시스템 구분으로 사용해 전체·미완료 건수�
 
 [check-jira-auth.ps1](../scripts/check-jira-auth.ps1)은 Windows PowerShell 5.1 이상에서 실행하는 읽기 확인입니다. Jira 기본 주소와 개인 토큰을 실행 시 입력하며 토큰 입력은 숨깁니다. `GET /rest/api/2/myself` 한 곳만 호출하고, 리디렉션·쿠키·Windows 기본 인증·자동 재시도를 사용하지 않습니다. WebUI·DB·설정을 변경하거나 토큰을 파일에 저장하지 않습니다. .NET 기본 TLS 검증을 유지하고 응답은 64 KiB·시간은 15초로 제한합니다.
 
-현재 원본은 main 미병합 [PR #2](https://github.com/knadalkim-a11y/team-agent-poc/pull/2)에 있습니다. 기존 저장소에서 PR을 fetch해 확인 스크립트만 임시 파일로 꺼내면 작업 브랜치나 기존 파일을 바꿀 필요가 없습니다. 아래 `git show`의 커밋은 전달 시 검수한 원본 SHA로 고정합니다.
+최초 구현은 [PR #2](https://github.com/knadalkim-a11y/team-agent-poc/pull/2)에서 관리했습니다. 배포할 때는 검수한 main 커밋을 사용합니다. 기존 저장소에서 fetch 후 확인 스크립트만 임시 파일로 꺼내면 작업 브랜치나 기존 파일을 바꿀 필요가 없습니다. 아래 `git show`의 커밋은 전달 시 검수한 원본 SHA로 고정합니다.
 
 ```powershell
 Set-Location "$env:USERPROFILE\team-agent-poc"
 # 새 창이면 기존 사내 Git 프록시 값만 이 창에 입력
 $gitProxy = Read-Host 'Git proxy URL'
-git -c "http.proxy=$gitProxy" fetch origin refs/pull/2/head
+git -c "http.proxy=$gitProxy" fetch origin main
 if ($LASTEXITCODE -ne 0) { throw 'Git fetch failed' }
-$jiraSource = '<REVIEWED_PR_COMMIT_SHA>'
+$jiraSource = '<REVIEWED_COMMIT_SHA>'
 $jiraCheck = Join-Path $env:TEMP 'ees-check-jira-auth.ps1'
 $jiraScript = git show "${jiraSource}:scripts/check-jira-auth.ps1"
 if ($LASTEXITCODE -ne 0) { throw 'Script read failed' }
@@ -86,9 +86,9 @@ Set-Location "$env:USERPROFILE\team-agent-poc"
 if (-not (Get-Variable gitProxy -ValueOnly -ErrorAction SilentlyContinue)) {
     $gitProxy = Read-Host 'Git proxy URL'
 }
-git -c "http.proxy=$gitProxy" fetch origin refs/pull/2/head
+git -c "http.proxy=$gitProxy" fetch origin main
 if ($LASTEXITCODE -ne 0) { throw 'Git fetch failed' }
-$jiraCheckSource = '<REVIEWED_PR_COMMIT_SHA>'
+$jiraCheckSource = '<REVIEWED_COMMIT_SHA>'
 $jiraStoreCheck = Join-Path $env:TEMP 'ees-jira-storage-check.py'
 $jiraStoreCode = git show "${jiraCheckSource}:scripts/check_confluence_canary.py"
 if ($LASTEXITCODE -ne 0) { throw 'Checker read failed' }
@@ -134,11 +134,15 @@ uvx --offline --no-python-downloads --python 3.11 --from "open-webui==0.11.3" py
 
 기본값은 관리자에게 필요한 미완료 현황을 바로 보여주고 일반 조회 설명은 필요할 때 펼칩니다. 부분 실패·조회 중 건수 변동은 눈에 보이는 안내로 유지합니다. 키보드 포커스·기본 버튼/펼치기·숫자 병기·좁은 화면/다크 모드 대응을 보존했습니다. [합성 검사](../evals/jira-offline.md#dashboard-design)는 실제 브라우저의 배치·대비·조작성 확인과 구분합니다.
 
-### 기존 화면 개편본 반영
+<a id="failure-followup-update"></a>
 
-PR #2의 검수한 원본에서 [jira_tool.py](../agent-pack/skills/jira-read/scripts/jira_tool.py) 전체를 가져와 헤더 `version: 0.1.1`을 확인한 뒤 Workspace → 도구 → 기존 `EES Jira Read`의 코드만 교체합니다. 도구 ID·관리자 설정·개인 설정·Assistant 연결을 유지하며 새 도구 생성이나 PAT 재입력은 필요하지 않습니다. Git 변경은 WebUI에 자동 반영되지 않습니다.
+### v0.1.2 목록 실패·페이지 범위 보완
 
-저장 후 새 대시보드를 한 번 요청해 비교 기준 변경 → 프로젝트/상태 선택 → 상세 펼치기·원문 열기를 확인합니다. 전체 시스템 표시와 대표 프로젝트 한 곳의 건수 대조도 이 흐름에 묶습니다. 이미 통과한 인증·DB 저장·재시작 검사는 관련 변경이 없으므로 반복하지 않습니다. 문제가 있으면 같은 도구에 앞서 표시를 확인한 ce982de5 원본 코드를 되돌리며 개인 설정은 삭제하지 않습니다.
+목록 조회가 실패하면 해당 오류의 안전한 안내를 화면에 그대로 텍스트로 표시하고 성공한 프로젝트 집계는 유지합니다. 권한·인증·호출 제한을 모두 “다시 조회”로 안내하지 않습니다. 일부 프로젝트 집계에 실패한 첫 페이지는 확인된 프로젝트의 받은 목록을 보여주되 다음 페이지 위치를 제공하지 않습니다. 정상 페이지 뒤 일부 집계가 실패하면 목록 API를 호출하기 전에 중단해 달라진 프로젝트 범위에 이전 위치를 적용하지 않습니다. 안내에 따라 원하는 프로젝트를 지정하거나 첫 페이지부터 새로 조회합니다.
+
+검수한 main 커밋의 [jira_tool.py](../agent-pack/skills/jira-read/scripts/jira_tool.py) 전체를 가져와 헤더 `version: 0.1.2`를 확인한 뒤 Workspace → 도구 → 기존 `EES Jira Read`의 코드를 교체합니다. 기본 Prompt의 Jira 절에는 부분 집계 실패 시 다음 위치를 만들지 않는 안내를 반영합니다. 도구 ID·관리자 설정·개인 PAT·Assistant 연결을 유지하며 기존 지침을 덮어쓰지 않습니다. Git 변경은 WebUI에 자동 반영되지 않습니다.
+
+v0.1.1에서 완료한 전체 표시·비교·필터·펼치기·원문·건수 대조와 인증·저장·재시작 검사는 반복하지 않습니다. 이번 변경은 정상 페이지 이동과 평소 발생한 목록/부분 실패의 안내를 관련된 경우에만 확인합니다. 오류를 만들려고 토큰을 폐기하거나 권한을 바꾸지 않습니다. 새 버전의 사내 적용·화면 동작은 미확인으로 남기며 문제가 있으면 직전 등록 코드와 Jira 절로 원복합니다. [변경 검증](../evals/jira-offline.md#merge-review-fixes).
 
 ### 후속 조회 연결 검토
 

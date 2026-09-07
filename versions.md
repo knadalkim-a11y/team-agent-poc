@@ -6,17 +6,19 @@
 
 | 항목 | 기준 | 용도 |
 |---|---|---|
-| OS | Windows | 개인 PC POC; Docker 사용하지 않음 |
+| OS | Windows | 기존 개인 PC에서 소규모 팀 파일럿; Docker 사용하지 않음 |
 | Open WebUI | 0.11.3 | 실행 스크립트의 고정 버전 |
 | Python | 3.11 | Open WebUI 목표 런타임 |
 | uv | 0.12.7 | 사용자 보고 설치 버전 |
-| 접속 주소 | http://127.0.0.1:8080 | 외부에 공개하지 않는 loopback |
+| 로컬 접속 기준 | http://127.0.0.1:8080 | 현재 개인 환경의 loopback; 팀원 접속 주소·경로는 별도 설정 |
 | 작업 디렉터리 | %LOCALAPPDATA%\EES-Agent-POC\open-webui | 기존 키를 유지하도록 동일 위치 사용 |
 | DATA_DIR | 위 작업 디렉터리의 data 폴더 | 계정·대화 등 실행 데이터; Git 제외 |
 | 표시 이름 | EES Assistant (Open WebUI) | Community 구성의 표시값 |
 | 모델·프록시 | 승인된 사내 값; 저장소에는 placeholder | 실제 주소·키·모델 경로는 Git에 저장하지 않음 |
 
 데이터 위치나 설치 스크립트가 실제 환경에 적용됐다는 증거를 이 표에서 대신하지 않습니다.
+
+2026-09-07 사용자는 현재 사용 중인 Windows PC를 팀 파일럿 호스트로 선택했습니다. 기존 작업 디렉터리·DB·키·버전·수동 기동 방식을 유지하며 재설치나 데이터 이전을 전제로 하지 않습니다. 사내 연결 프로필 **Public**, 우선 IP·포트 직접 접속을 사용하며 **방화벽은 사내 관리 시스템을 따른다**는 사용자 설명을 반영했습니다. 초기 주소는 `http://<PC_LAN_IPV4>:8080`이며 후속으로 [팀원 로그인 화면 접속 확인](evals/scenarios.md#assistant-resource-access-followup)을 보고받았습니다. 실제 수신 설정·관리 시스템의 정책·일반 계정 조회/격리는 직접 대조하지 않았습니다. HTTP 전송 암호화는 미적용이고 HTTPS 주소·인증서 보유 여부는 별도 미확인입니다. [관리 경로 기록](evals/scenarios.md#managed-firewall-access), [기존 PC 파일럿 안내](docs/01-openwebui-install.md#local-pc-pilot)를 따르며 전용 서버 이전은 후속 운영 필요에 따라 검토합니다.
 
 ## 사내 모델 운용 기준
 
@@ -51,7 +53,7 @@
 ## GitHub 확인 환경
 
 - 2026-09-07 사용자 보고: **GitHub Enterprise Server 3.17.15**, 개인 PAT를 이미 발급받아 보유함. 후속으로 허용 저장소를 정확한 `owner/repo`로 보완한 뒤 [열린 PR 목록 정상 조회](evals/scenarios.md#github-first-list)를 보고함. 조회 전 계정 확인 경로를 근거로 해당 개인 환경의 인증·목록 조회 성공으로 판정함. PAT 종류·전체 권한·사내 기본 주소/프로토콜은 미확인이며 실제 주소·허용 저장소 값은 사내 설정에서만 관리함.
-- Tool **v0.1.0**, Open WebUI **0.11.3**, [GHES 3.17 PR REST API](https://docs.github.com/en/enterprise-server@3.17/rest/pulls/pulls), API 버전 헤더 **2022-11-28**을 기준으로 준비함. GitHub.com용 구현으로 대체하거나 현재 서버 버전을 자동 변경하지 않음.
+- 최초 준비·마지막 사내 적용 안내본은 GitHub Tool **v0.1.0**이며 현재 Git 준비본은 [STATUS](docs/STATUS.md)의 버전을 따릅니다. Open WebUI **0.11.3**, [GHES 3.17 PR REST API](https://docs.github.com/en/enterprise-server@3.17/rest/pulls/pulls), API 버전 헤더 **2022-11-28**을 유지합니다. GitHub.com용 구현으로 대체하거나 현재 서버 버전을 자동 변경하지 않음.
 - 2026-09-07 [4b058996](https://github.com/knadalkim-a11y/team-agent-poc/commit/4b058996d1e3f360ee670da553e2f9bc7a9046a1)의 Tool 등록·검사 안내 후 `--github` 출력 사용자 보고로 새 개인 PAT 필드의 **DB 범위 PASS**를 확인함. 사내 등록 코드·checkout SHA 직접 대조는 미실행. [저장 증거](evals/scenarios.md#github-storage-check)를 보존하고 동일 플랫폼의 기존 DB/키·재시작 증거를 재사용하며 관련 변경 없는 저장 검사는 반복하지 않음.
 - 후속 사용자 보고로 선택한 한 PR의 본문 요약·원문 링크 대조까지 [기본 읽기 흐름 확인](evals/scenarios.md#github-read-acceptance)을 완료함. 전체 목록 정확성·페이지 처리·마스킹 화면의 별도 관찰·GitHub Prompt 절 UI 저장·사용자 격리는 미확인. 완료한 개인 환경의 목록·본문·인증·저장 검사는 관련 변경 없이 반복하지 않으며, 다음 환경·범위 선정은 [소규모 공용 파일럿 계획](docs/STATUS.md#delivery-plan)을 따름. [가이드](docs/06-github-read-tool.md), [사외 검증](evals/github-offline.md), [실환경 판정](evals/scenarios.md#github-live)
 
