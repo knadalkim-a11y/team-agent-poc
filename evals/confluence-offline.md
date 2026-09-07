@@ -316,3 +316,23 @@ Tool은 기본 `ENABLED=false`입니다. Skill은 지침이지 보안 경계가 
 | 독립 읽기 전용 검토 | 실제 범위/본문 보존·원문·초안·오류 fallback·추가 호출/과설계 확인. 본문 필요 시 사용자 추가 클릭을 강제하던 설명을 수정하고 공통 Prompt 문구를 목록 카드로 한정함. Node 없는 환경은 DOM만 skip하도록 보완 |
 
 최종 전체 변경에서 `python scripts/check_docs.py`는 25개 파일·421개 링크·오류 0·검토 후보 0이며 `git diff --check`도 통과함. 실제 브라우저 배치는 미실행이며 앞선 URL 보안 정책 차단을 우회하거나 반복하지 않음. 사내 API·WebUI 등록/화면·입력 반영·모델 근거 일치·사용성·Windows 복구는 미실행. C01~C09의 기존 증거와 완료한 저장·인증·토큰 폐기는 반복하지 않으며 [사내 카드 확인](../docs/04-confluence-read-tool.md#rich-ui-results)을 기존 흐름과 묶음.
+
+
+<a id="search-error-guidance"></a>
+
+## 2026-09-07 검색 조건 오류의 다음 요청 안내 — v0.1.5
+
+- 기준 main: `f8ea51656d056b4bc17c50f17c34e6b455f23e26`. 최신 AGENTS·STATUS와 열린 PR 0개를 확인함. 사용자 요청에 따라 Rich UI 디자인은 후속으로 두고 기존 조회 실패의 다음 행동만 보완함.
+- 발견: 검색 API의 HTTP 400도 `upstream_error`와 관리자 문의로만 안내하던 분기를 재현함. [Atlassian Server REST 8.9.1 공식 참조](https://docs.atlassian.com/ConfluenceServer/rest/8.9.1)는 `/rest/api/content/search`의 잘못되거나 누락된 CQL에 HTTP 400을 명시함. 이는 API 계약 참고이며 사내 9.2.21의 실제 응답을 관찰한 근거는 아님.
+- 변경: 고정 API 경로를 기존 상태 오류 처리에 전달해 검색 400은 `invalid_query`와 검색어 변경·지속 실패 시 설정 확인, 비검색 400은 `invalid_request`와 요청 값·API 설정 확인을 안내함. 원인 단정·응답 원문 노출·같은 요청의 자동 재시도는 추가하지 않음. 빈 검색 결과는 정상 응답으로 유지함.
+- 환경: 사외 Linux / Python 3.12.13 / Pydantic 2.13.4. 합성 HTTP 응답만 사용하며 테스트 harness가 실제 DNS·socket 접속을 차단함.
+
+| 확인 범위 | 결과 |
+|---|---|
+| 코드 수정 전 새 시험 2개 | 4개 subtest FAIL. 검색의 HTTPError/상태 응답과 비검색 연결 확인/문서 조회 모두 `upstream_error`여서 기대한 구분이 없음을 재현 |
+| 수정 후 새 시험 2개 + 영향받는 기존 시험 9개 | 11/11 PASS, 0.127초. 검색 400의 두 응답 경로·안내·오류 body 닫기, 비검색 400 구분, raw reason/body·PAT 비노출, 실패당 1회 요청 및 변경한 검색어의 정상 0건 응답 확인 |
+| 함께 확인한 기존 9개 | 고정 검색 경로·limit, 잘못된 검색 입력/Space, CQL status 제외·문자열 처리, 본문 전 metadata 확인, 401/403/404/429/500/502/503, redirect 차단, network/timeout/TLS 안내 |
+| 독립 읽기 전용 검토 | 변경 코드·시험의 경로 분리, raw 오류/PAT 비노출, HTTPError 닫기, 기존 상태 처리·호출 횟수 검토. 추가 수정이 필요한 문제 없음 |
+| 문서·diff | `python scripts/check_docs.py`: 25개 파일·452개 링크·오류 0·검토 후보 0. `git diff --check` 통과 |
+
+실행은 `PYTHONPATH=tests python -m unittest`에 `test_confluence_read.ConfluenceReadTests`의 위 11개 메서드를 지정함. 새 메서드는 `test_rejected_search_guides_query_change_without_retry_or_private_details`, `test_non_search_bad_request_is_not_a_query_or_pat_error`임. 전체 suite·UI/브라우저·완료한 사내 확인은 반복하지 않음. Skill·System Prompt·HTML/CSS·정상 조회·인증/설정·서버 실행 방식은 변경하지 않음. 사내 마지막 저장 보고는 v0.1.4이며 이번 v0.1.5는 다음 코드 적용 묶음에 포함할 준비본임. 실제 서버 400·모델의 안내 응답 성공이나 C07 전체 통과로 확대하지 않음.

@@ -451,6 +451,58 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         self.result(raw)
         self.assertNotIn("evil.example.invalid", self.output_text(raw))
 
+    async def test_rejected_search_guides_query_change_without_retry_or_private_details(self):
+        for raised in (True, False):
+            with self.subTest(http_error=raised):
+                self.calls.clear()
+                error_body = io.BytesIO(("private search response " + TOKEN_A).encode())
+
+                def fail(request):
+                    if raised:
+                        raise urllib.error.HTTPError(request.full_url, 400, "private reason " + TOKEN_A,
+                                                     header_map(Content_Type="text/html"), error_body)
+                    return FakeResponse(b"private search response", status=400, content_type="text/html")
+
+                self.responder = fail
+                raw = await self.tool.search_pages("equipment guide", __user__=self.user())
+                data = self.assert_error(raw)
+                self.assertEqual(data["error"]["code"], "invalid_query")
+                self.assertIn("검색어", data["error"]["message"])
+                self.assertIn("바꿔", data["error"]["message"])
+                self.assertNotIn("results", data)
+                self.assertNotIn("private", self.output_text(raw))
+                self.assertEqual(len(self.calls), 1)
+                if raised:
+                    self.assertTrue(error_body.closed)
+
+        self.calls.clear()
+        self.use_response({"results": [], "size": 0})
+        result = self.result(await self.tool.search_pages("equipment", __user__=self.user()))
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["results"], [])
+        self.assertEqual(len(self.calls), 1)
+
+    async def test_non_search_bad_request_is_not_a_query_or_pat_error(self):
+        for operation in ("check_access", "get_page"):
+            with self.subTest(operation=operation):
+                self.calls.clear()
+
+                def fail(request):
+                    raise urllib.error.HTTPError(request.full_url, 400, "private reason " + TOKEN_A,
+                                                 header_map(Content_Type="text/html"), io.BytesIO(b"private response"))
+
+                self.responder = fail
+                if operation == "check_access":
+                    raw = await self.tool.check_access(__user__=self.user())
+                else:
+                    raw = await self.tool.get_page("123", __user__=self.user())
+                data = self.assert_error(raw)
+                self.assertEqual(data["error"]["code"], "invalid_request")
+                self.assertNotIn("검색어", data["error"]["message"])
+                self.assertNotIn("PAT", data["error"]["message"])
+                self.assertNotIn("private", self.output_text(raw))
+                self.assertEqual(len(self.calls), 1)
+
     async def test_upstream_http_errors_are_safe_and_not_retried(self):
         for status in (401, 403, 404, 429, 500, 502, 503):
             with self.subTest(status=status):

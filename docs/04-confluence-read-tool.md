@@ -5,7 +5,7 @@
 
 ## 범위와 구성
 
-별도 Tool Server 없이 Open WebUI Workspace Tool에서 조회합니다. 기존 Open WebUI 코드는 수정하지 않습니다. 현재 v0.1.4 준비본은 검색·본문·오류 카드를 반환하며 본문 질문 버튼을 제거했습니다. 기존 등록본의 [카드 적용 안내](#rich-ui-results)는 아래에 있습니다.
+별도 Tool Server 없이 Open WebUI Workspace Tool에서 조회합니다. 기존 Open WebUI 코드는 수정하지 않습니다. 현재 v0.1.5 준비본은 검색 조건의 HTTP 400을 일반 서버 오류와 구분해 다음 요청을 안내합니다. v0.1.4의 검색·본문·오류 카드와 본문 질문 버튼 제거는 유지합니다. 기존 등록본의 [카드 적용 안내](#rich-ui-results)는 아래에 있습니다.
 
 ```mermaid
 flowchart TB
@@ -278,6 +278,8 @@ Tool은 모델이 준 임의 주소·HTTP method·raw CQL을 받지 않고 관�
 <a id="c07-error-response"></a>
 
 ### 오류 응답 확인 시작(C07)
+
+v0.1.5부터 검색 API의 HTTP 400은 `invalid_query`로 반환하고, 검색어를 짧은 단어나 문서 제목으로 바꿔 요청하도록 안내합니다. 계속 실패하면 검색 API 설정 확인을 안내합니다. 연결 확인·문서 조회의 HTTP 400은 `invalid_request`로 구분하며 검색어나 PAT 교체를 원인으로 단정하지 않습니다. 정상 응답의 검색 결과 0건과 실패는 별개이고, 오류 응답 원문을 노출하거나 같은 요청을 자동 반복하지 않습니다. [사외 검증 기록](../evals/confluence-offline.md#search-error-guidance)의 합성 시험만 완료했으며, 이 분기를 만들려고 사내 설정·PAT를 바꾸거나 실패를 유도하지 않습니다.
 
 기존 C05의 권한 거절과 서비스 장애 당시 `connection_failed`는 해당 관찰 범위에서 재사용합니다. 구체적인 상태를 받지 않은 권한 거절을 403과 404 양쪽의 실측으로 세거나, 일반 연결 오류를 timeout으로 단정하지 않습니다. 아래는 설정을 유지하는 추가 조회 시험이며 C07의 모든 오류 경로를 한 번에 검증하는 절차가 아닙니다.
 

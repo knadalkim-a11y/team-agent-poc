@@ -4,6 +4,8 @@
 
 ## 2026-09-07
 
+- Confluence v0.1.5: 검색 API의 HTTP 400을 `invalid_query`로 구분해 검색어 변경과 지속 실패 시 설정 확인을 안내. 비검색 400은 `invalid_request`로 처리하며 추가 호출·재시도·의존성 없이 기존 오류 처리에 경로만 전달함. 관련 오프라인 시험 11개 통과, 사내 적용 대기. 사용자의 본문 버튼 제거 확인을 기록하고 원문 링크·전체 Rich UI 디자인은 후속으로 유지함. [검증](evals/confluence-offline.md#search-error-guidance), [사용자 보고](evals/scenarios.md#body-query-buttons-observed).
+
 - Confluence v0.1.4·GitHub v0.1.3·Jira v0.1.5: 사용자 요청에 따라 문서/PR/이슈마다 반복되던 본문 질문 버튼과 전용 코드를 제거. 원문·본문 근거·목록 조작을 유지하고 기존 Prompt의 자연어 후속 조회를 사용함. Confluence 전용 입력 브리지·복사용 영역도 제거했으며 추가 호출/의존성·서버 변경 없음. 기존 Jira 날짜 시험의 시간대 의존은 해당 시험 조건만 명시해 보완. [검수·적용 범위](evals/scenarios.md#body-query-buttons-removed).
 
 - 사용자 의견에 따라 Rich UI 시각 디자인 튜닝은 기능 흐름 완성 뒤 묶어 진행하도록 후속으로 정리. GitHub/Jira의 정상 동작 보고와 디자인 만족도를 구분하고 업무를 막는 조작·가독성 문제는 발견 시 보완함. 첫 화면·온보딩 보류 유지, 현재 CSS·새 디자인 시스템 변경 없음. [결정 기록](evals/scenarios.md#jira-rich-ui-acceptance).

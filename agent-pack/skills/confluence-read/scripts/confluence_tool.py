@@ -1,7 +1,7 @@
 """
 title: EES Confluence Read
 description: Personal-PAT, allowlisted, read-only Confluence Data Center access.
-version: 0.1.4
+version: 0.1.5
 required_open_webui_version: 0.11.3
 """
 
@@ -191,7 +191,7 @@ class Tools:
             with opener.open(request, timeout=config.TIMEOUT_SECONDS) as response:
                 status = response.getcode()
                 if status != 200:
-                    self._status_error(status)
+                    self._status_error(status, path)
                 content_type = response.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
                 if content_type != "application/json":
                     _fail("unexpected_response", "JSON이 아닌 응답입니다. API 경로 또는 인증 경로를 확인하세요.")
@@ -201,7 +201,7 @@ class Tools:
         except urllib.error.HTTPError as error:
             status = error.code
             error.close()
-            self._status_error(status)
+            self._status_error(status, path)
         try:
             result = json.loads(data)
         except (ValueError, UnicodeDecodeError):
@@ -212,7 +212,11 @@ class Tools:
         # exposed by a cut through a reflected credential at the output boundary.
         return _redact(result, pat)
 
-    def _status_error(self, status):
+    def _status_error(self, status, path):
+        if status == 400:
+            if path == "/rest/api/content/search":
+                _fail("invalid_query", "검색 조건을 처리하지 못했습니다. 검색어를 짧은 단어나 문서 제목으로 바꿔 다시 요청하세요. 계속되면 관리자에게 검색 API 설정 확인을 요청하세요.")
+            _fail("invalid_request", "Confluence가 조회 요청을 처리하지 못했습니다. 요청 값을 확인하고, 계속되면 관리자에게 API 설정 확인을 요청하세요.")
         errors = {
             401: ("authentication_failed", "PAT 인증에 실패했습니다. 개인 설정에서 확인하세요."),
             403: ("permission_denied", "접근이 거부되었습니다. 개인 권한 또는 접속 정책을 확인하세요."),
