@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 범용 채팅·사내 자료 조회·팀원 Prompt/Skill 공유를 쉽게 사용하는 플랫폼. 현재는 Open WebUI Native와 Git Agent Pack을 사용하고 원본 WebUI는 수정하지 않음.
 - 현재 위치: 기존 연동의 후속 조회 흐름을 보완하는 단계. **첫 화면·온보딩 적용은 보류**하고 범용 Assistant 방향을 유지함. 기존 Skill·Tool·모델 Public 설정 보고와 그룹 운영 후속 결정은 그대로임.
-- 이번 작업: **유지보수를 고려해 GitHub v0.1.2 PR 목록·본문 카드와 Confluence v0.1.3 검색·본문·근거 카드를 준비함.** 기존 조회 결과를 재사용하고 본문 접기·수동 질문 초안·오류/빈 결과 구분을 적용함. UI 템플릿은 모델 근거에서 분리하고 중복 표 출력 지침을 정리했으며 추가 API·모델 호출·프런트 의존성·서버는 없음. Jira v0.1.4 준비본도 유지함. Windows 오류 이후 사내 접속·복구와 새 코드 적용은 계속 미확인이며 세 저장 보고는 당시 버전의 증거로 보존함.
-- 다음 작업 하나: **사내 PC 접속 가능 시 기존 주소의 `/health` 응답을 한 번 확인한다.** 정상이면 준비된 Jira v0.1.4·GitHub v0.1.2·Confluence v0.1.3 코드와 바뀐 Prompt 항목을 한 번에 반영하고 [Jira 조작](05-jira-read-tool.md#jira-mvp-usability)·[PR 후속 조회](06-github-read-tool.md#followup-update)·[문서 검색/본문](04-confluence-read-tool.md#rich-ui-results)을 각 한 흐름으로 확인함. 응답이 없으면 [수락 오류 진단과 조건부 대응](troubleshooting.md#windows-accept-winerror64)으로 좁힘. 지금 사용자에게 실행을 요구하지 않으며 완료한 저장·인증·20회 검사는 반복하지 않음. 첫 화면·온보딩은 계속 보류함.
+- 이번 작업: **유지보수를 고려해 GitHub v0.1.2 PR 목록·본문 카드와 Confluence v0.1.3 검색·본문·근거 카드를 준비함.** 기존 조회 결과를 재사용하고 본문 접기·수동 질문 초안·오류/빈 결과 구분을 적용함. UI 템플릿은 모델 근거에서 분리하고 중복 표 출력 지침을 정리했으며 추가 API·모델 호출·프런트 의존성·서버는 없음. Jira v0.1.4 준비본도 유지함. 사용자는 기존 폴더·기존 명령으로 재시작한 뒤 `/health`에 true가 표시된다고 보고함. 현재 서버 응답 회복만 확인했으며 오류 원인·재발 여부·모델/새 카드 동작은 미확인. 세 저장 보고는 당시 버전의 증거로 보존함.
+- 다음 작업 하나: **검수한 준비본 `7c8a65b0e2eed6d22109b8770e97b9e6908ad68a`를 사내 Git에서 가져와 기존 Jira v0.1.4·GitHub v0.1.2·Confluence v0.1.3 코드를 반영한다.** 기존 도구 항목·설정·개인 PAT를 유지하고 이후 바뀐 Prompt 항목을 한 번 편집한 뒤 [Jira 조작](05-jira-read-tool.md#jira-mvp-usability)·[PR 후속 조회](06-github-read-tool.md#followup-update)·[문서 검색/본문](04-confluence-read-tool.md#rich-ui-results)을 각 한 흐름으로 확인함. 기존 기동의 `/health` 회복 보고를 재사용하고 완료한 저장·인증·20회 검사는 반복하지 않음. 첫 화면·온보딩은 계속 보류하며 Selector 실행 파일은 아직 적용하지 않음.
 
 <a id="resume-branch"></a>
 
@@ -50,13 +50,13 @@
 | Jira 읽기·Rich UI | Python Tool v0.1.4·Jira 후속 조회 지침. 입력 초안 버튼에 원문·빈 필터 복구·오류 설명 연결 보완; HTTP·개인 설정은 기존과 같음 | 2026-09-07 v0.1.2 코드·Jira Prompt 절 저장 보고. v0.1.4 코드·준비된 Jira 지침은 미적용; 앞선 목록 오류·부분 범위의 실환경 동작도 미확인 | [v0.1.4 사외 검증](../evals/jira-offline.md#mvp-usability), [v0.1.3 사외 검증](../evals/jira-offline.md#followup-actions), [저장 보고](../evals/scenarios.md#followup-tools-saved), [v0.1.2 사외 검증](../evals/jira-offline.md#merge-review-fixes), [기존 v0.1.1 기본 흐름](../evals/scenarios.md#jira-dashboard-acceptance), [J01~J05](../evals/scenarios.md#jira-live) | 안내 원본 [16adc3a의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/16adc3a8b4b7c1a1660d6cc485d34a28b2a2fb0f/agent-pack/skills/jira-read/scripts/jira_tool.py) 및 [Jira Prompt 절](https://github.com/knadalkim-a11y/team-agent-poc/blob/16adc3a8b4b7c1a1660d6cc485d34a28b2a2fb0f/agent-pack/system-prompts/ees-integrated-assistant.md#jira-조회-기능이-연결된-경우). 사용자 보고 기준이며 사내 등록 코드·checkout 직접 대조는 미실행. 이전 적용·저장 증거는 [첫 화면 기록](../evals/scenarios.md#jira-first-dashboard)에 보존 |
 | GitHub PR 읽기 | Python Tool v0.1.2·GitHub/공통 카드 지침. PR 목록/본문/오류 카드·정확한 번호/다음 페이지 질문 초안 추가; 개인 설정·조회 경로는 기존과 같음 | 2026-09-07 v0.1.1 코드·GitHub Prompt 절 저장 보고. v0.1.2 코드·개정 지침은 미적용이며 자연어 선택·후속 페이지 동작도 미확인 | [저장 보고](../evals/scenarios.md#followup-tools-saved), [기존 기본 흐름](../evals/scenarios.md#github-read-acceptance), [DB 저장 증거](../evals/scenarios.md#github-storage-check), [사외 검증](../evals/github-offline.md), [GH01~GH04](../evals/scenarios.md#github-live) | 안내 원본 [16adc3a의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/16adc3a8b4b7c1a1660d6cc485d34a28b2a2fb0f/agent-pack/skills/github-read/scripts/github_tool.py) 및 [GitHub Prompt 절](https://github.com/knadalkim-a11y/team-agent-poc/blob/16adc3a8b4b7c1a1660d6cc485d34a28b2a2fb0f/agent-pack/system-prompts/ees-integrated-assistant.md#github-조회-기능이-연결된-경우). 사용자 보고 기준이며 사내 등록 코드·checkout 직접 대조는 미실행. 이전 적용 원본·검사기는 [저장 증거](../evals/scenarios.md#github-storage-check)에 보존 |
 | 실행 스크립트 | 시작·smoke test·암호화 준비 옵션; smoke 자동 리디렉션 차단 | 사용자 보고로 명령 복사 후 수동 실행; 정해진 기동 스크립트 채택은 안정화 이후 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
-| Windows 수락 오류 선택 기동 | [Selector 실행 파일](../scripts/serve_openwebui_windows.py)·읽기 전용 사전검사·복구 안내. 기존 SQLite·단일 worker 범위 | 사내 실행·복구 미확인. 사용자 퇴근으로 PC 접근 불가 | [소스·합성 검사](../evals/scenarios.md#windows-accept-preparation); 실제 Windows 동작과 구분 | Git 준비본만 반영. 사내 적용 원본 없음; 기존 기동 스크립트·명령을 자동 교체하지 않음 |
+| Windows 수락 오류 선택 기동 | [Selector 실행 파일](../scripts/serve_openwebui_windows.py)·읽기 전용 사전검사·복구 안내. 기존 SQLite·단일 worker 범위 | 선택 실행 파일 미적용. 사내 PC 접근 재개 후 기존 명령으로 재시작해 `/health` true 보고; 모델 동작·재발 방지는 미확인 | [소스·합성 검사](../evals/scenarios.md#windows-accept-preparation); 실제 Windows 동작과 구분 | Git 준비본만 반영. 사내 적용 원본 없음; 기존 기동 스크립트·명령을 자동 교체하지 않음 |
 
 **Skill은 Git과 UI 등록 보고 기준 모두 3개이며, Skill 자체 사용 확인은 기존 2개입니다.** Confluence Tool의 `check_access` 성공 보고는 있으나 `confluence-read`를 `view_skill`로 불러왔는지는 별도 확인되지 않았습니다. 적용 원본은 Git 최신 커밋과 구분하며, 안내 원본·사용자 보고·등록 내용 대조 여부를 함께 기록합니다.
 
 ## 남아 있는 검증과 제한
 
-- Windows 수락 오류 이후 현재 접속·listener 상태는 미확인. 전달된 런타임 경로는 Python 3.11이며 패치 버전·실제 Uvicorn 버전은 미대조. 선택 실행 파일은 사내에 반영되지 않았으며 대응 효과·모델 스트리밍도 미확인. 기존 성공 기록을 삭제하거나 이번 오류로 Jira/GitHub 코드 실패를 확정하지 않음.
+- Windows 수락 오류 이후 접속 불가를 보고했으나 원래 PowerShell에서 Ctrl+C 후 기존 폴더·명령으로 재시작해 `/health` true를 확인했다고 보고함([증거](../evals/scenarios.md#windows-existing-restart)). listener 종료 경로·근본 원인·재발 여부와 이번 재시작 후 모델/연동 동작은 미확인. 전달된 런타임 경로는 Python 3.11이며 패치 버전·실제 Uvicorn 버전은 미대조. 선택 실행 파일은 미적용이며 기존 성공 기록과 오류 기록을 보존함.
 
 - GitHub v0.1.2 카드·질문 초안과 앞선 직접 본문·후속 대화·페이지 변경은 [해당 범위만 사내 확인](06-github-read-tool.md#followup-update)이 남음. 새 개인 필드 DB 저장과 기존 목록·PR 한 건 본문·원문 기본 흐름은 사용자 보고 범위에서 확인함. Prompt 절 UI 저장은 사용자 보고로 확인했으며 전체 목록 정확성/페이지 처리·사용자 격리·마스킹 화면의 별도 관찰은 미확인. PAT 종류/전체 권한은 확인하지 않았고 실제 사내 주소·저장소 식별자·업무 내용은 기록하지 않음. CI/리뷰·diff·일반 이슈·쓰기는 후속 수요로 남김. 새 카드의 브라우저 배치·초안 입력·실제 모델 답변은 미실행.
 
@@ -77,7 +77,7 @@
 
 ## 최근 점검
 
-[GitHub PR 카드](../evals/github-offline.md#rich-ui-results)·[Confluence 검색/본문 카드](../evals/confluence-offline.md#rich-ui-results)의 반환 계약·범위·수동 초안·오류·본문 보존을 집중 검증함. 새 화면 검사 17개와 변경된 기존 직접 상세 검사 2개가 통과함. 독립 검토에서 본문 조회 여부에 관한 Prompt 문구와 Node 없는 환경의 DOM 검사 처리를 수정했고, 본문 기본 접힘·키보드 접근성을 보완함. 조회/권한 경로는 정적 대조하고 추가 요청 없음은 합성 호출로 확인해 기존 저장·인증·안정성 전수 시험을 반복하지 않음. 실제 브라우저 배치·사내 WebUI·Windows 복구는 미실행. 앞선 Jira 검증은 [기존 기록](../evals/jira-offline.md#mvp-usability)에 보존함.
+[기존 기동 재시작 보고](../evals/scenarios.md#windows-existing-restart): 접속 불가 이후 Ctrl+C·기존 폴더/명령 재실행·`/health` true의 사용자 보고를 기록하고 다음 작업을 준비본 반영으로 옮김. 실제 HTTP 상태/로그·모델 응답·재발 여부를 직접 확인한 것은 아니며 Selector 적용 성공으로 해석하지 않음. 이번에는 상태 문서만 갱신하고 기능·인증·저장 검사를 반복하지 않음. 카드의 사외 검사와 미확인 범위는 [GitHub](../evals/github-offline.md#rich-ui-results)·[Confluence](../evals/confluence-offline.md#rich-ui-results)·[Jira](../evals/jira-offline.md#mvp-usability)에 보존함.
 
 ## 갱신 규칙
 
