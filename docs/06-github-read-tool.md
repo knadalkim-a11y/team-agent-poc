@@ -56,14 +56,14 @@ UserValves는 비밀번호형 개인 `PAT` 한 필드입니다. 관리자 공통
 
 GitHub에서만 쓰는 합성 값은 **`EES-GITHUB-CANARY-20260907-C43D8E`**입니다. 기존 [check_confluence_canary.py](../scripts/check_confluence_canary.py)의 `--github` 모드로 검사합니다. 파일명·기본 Confluence 모드·`--jira`를 유지하며 새 도구 이름과 정확히 하나인 내부 ID의 저장값을 연결합니다.
 
-아래 명령은 검수한 작업 브랜치를 가져온 뒤 해당 커밋의 검사기만 임시 파일에 기록합니다. 현재 작업 브랜치나 다른 파일을 덮어쓰지 않습니다. 전달할 때 `<REVIEWED_COMMIT_SHA>`는 검수한 고정 커밋으로 바꿉니다. Tool 코드는 같은 커밋의 `agent-pack/skills/github-read/scripts/github_tool.py`를 사용합니다.
+아래 명령은 main을 가져온 뒤 검수한 커밋의 검사기만 임시 파일에 기록합니다. 현재 작업 브랜치나 다른 파일을 덮어쓰지 않습니다. 전달할 때 `<REVIEWED_COMMIT_SHA>`는 검수한 고정 커밋으로 바꿉니다. Tool 코드는 같은 커밋의 `agent-pack/skills/github-read/scripts/github_tool.py`를 사용합니다.
 
 ```powershell
 Set-Location "$env:USERPROFILE\team-agent-poc"
 if (-not (Get-Variable gitProxy -ValueOnly -ErrorAction SilentlyContinue)) {
     $gitProxy = Read-Host 'Git proxy URL'
 }
-git -c "http.proxy=$gitProxy" fetch origin codex/github-pr-read-20260907
+git -c "http.proxy=$gitProxy" fetch origin main
 if ($LASTEXITCODE -ne 0) { throw 'Git fetch failed' }
 $githubSource = '<REVIEWED_COMMIT_SHA>'
 $githubStoreCheck = Join-Path $env:TEMP 'ees-github-storage-check.py'

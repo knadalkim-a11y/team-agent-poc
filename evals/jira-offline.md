@@ -115,3 +115,27 @@
 - [사용자 확인 원본](scenarios.md#jira-dashboard-acceptance)을 직전 적용 안내 SHA와 전체 표시·대표 건수 대조·화면 조작 세 항목에 연결함. 기본 흐름 정상 보고를 받아 디자인/반복 확인을 종료하고 다음 Git 읽기 준비로 이동함. 모든 권한·본문·오류·공용 사용성 완료로 확대하지 않음.
 - 변경은 Jira 가이드·STATUS·versions·평가/증거 문서에 한정함. 코드·설정·시험은 변경하지 않음. 문서 점검·diff 검사와 현재/과거 적용 원본 표현을 대조하며 기능·인증·저장·사내 검사는 반복하지 않음.
 - 사내 Git 제품·버전·개인 인증·허용 저장소는 아직 미확인임. 개발 원본 저장소의 GitHub.com 연결을 사내 서비스로 가정하지 않으며 제품 확인 후 작은 PR/이슈 읽기 흐름을 정함. 신규 연동 코드·사내 통신은 미실행.
+
+<a id="merge-review-fixes"></a>
+
+## PR 통합 검토의 목록 오류·부분 범위 보완 — 2026-09-07
+
+사용자가 열린 PR 전체 검토·병합을 요청함. PR #2 `29e27c87b3f18538ae610fc335342dabf44b3894`의 AGENTS·STATUS와 최신 누적 원본 PR #5 `abee68fb9cd0a161064026a784ef65b4118423c2`를 대조함. Jira 원본은 두 커밋에서 같은 blob이며 새 PR을 만들지 않고 기존 PR #5에서 수정함.
+
+### 발견과 처리
+
+- `_dashboard`는 목록 실패에 안전한 `listing.error.message`를 반환하지만 화면은 이를 버리고 “다시 조회”만 표시했음. v0.1.2는 메시지를 textContent로 표시하고 실패한 목록·정상 빈 목록·성공한 집계를 구분함. 인증·권한·호출 제한·페이지 범위 오류에 맞는 다음 행동을 보존함.
+- 일부 프로젝트 집계 실패 시 성공한 프로젝트만으로 목록을 만든 뒤 next_start_at을 제공했음. 다음 호출에서 실패 프로젝트가 회복되면 같은 위치가 다른 목록 범위에 적용돼 누락/중복될 수 있었음. 부분 실패 첫 페이지는 받은 행과 성공 집계를 유지하되 다음 위치를 제공하지 않음. 정상 페이지의 후속 요청에서 일부 집계가 실패하면 목록 GET 전에 page_scope_changed로 중단하고 첫 페이지 재조회를 안내함.
+- 화면은 부분 실패의 오래된 다음 위치도 표시하지 않음. 회복 후 첫 페이지 재조회에서 정상 다음 위치를 반환함. 기존 요청 스키마·개인 설정·인증·전송·읽기 제한은 유지하며 캐시·새 함수·상태 저장은 추가하지 않음. Jira Prompt와 가이드의 후속 조회 설명도 맞춤.
+
+### 검증
+
+Linux / Python 3.12.13 / Pydantic 2.13.4 / Node 24.19.0. 기존 합성 HTTP·DOM 모형에서 변경 범위 **7/7 PASS, 0.838초**. 신규 4개와 영향받는 기존 3개이며 실행 명령은 다음과 같음.
+
+```text
+python -m unittest discover -s tests -p 'test_jira*.py' -k partial_scope -k later_page_failure -k page_limit_and_next_page -k listing_error_guidance -k listing_failure_is_distinct -k exact_project_counts_are_independent -v
+```
+
+확인 범위: 오류별 텍스트 안내·HTML처럼 보이는 오류 문자열의 비실행·정상 집계 보존, 부분 첫 페이지의 다음 위치 제거, 후속 페이지의 줄어든 범위 요청 차단, 회복 후 처음부터 조회, 정상 페이지 이동. 변경 코드·시험·Prompt·가이드 diff를 대조하고 공백 검사를 통과함.
+
+기존 전체 UI/기능 suite·인증·DB 저장·재시작·20회 안정성·Confluence·GitHub 검사를 반복하지 않음. 실제 사내 v0.1.2 등록·모델 선택·브라우저 표시·부분 실패는 미확인. 이전 v0.1.1 사용자 확인을 새 버전 성공으로 바꾸지 않음. [적용 범위](../docs/05-jira-read-tool.md#failure-followup-update), [통합 검토](scenarios.md#pr-stack-review).
