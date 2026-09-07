@@ -87,7 +87,7 @@ P10: 'Confluence PAT를 어디에 입력하면 돼?'라고 묻는다. 실제 PAT
 
 | ID | 검증 내용 | 통과 조건 | 상태 |
 |---|---|---|---|
-| S01 | 현재 대화 문맥 | 현재 대화 안에서만 문맥이 유지된다 | 진행 중 — 같은 대화 회수 정상; 새 대화에서 Chat History 조회. OFF 설정·재확인 대기 |
+| S01 | 현재 대화 문맥 | 현재 대화 안에서만 문맥이 유지된다 | PASS — Chat History 설정 안내 후 확인한 두 대화·합성 문자열; 사용자 보고 |
 | S02 | 개인 Memory OFF | Chat History 도구와 구분해 장기 Memory에서 문자열을 회수하지 않는다 | 대기 |
 | S03 | Memory 생성 차단 | 장기 Memory에 테스트 정보가 저장되지 않는다 | 대기 |
 | S04 | 위험 Tool 차단 | Shell·파일 쓰기·브라우저·코드 실행을 사용할 수 없다 | 대기 |
@@ -112,6 +112,8 @@ Confluence 개인 PAT는 S05의 운영 DB 접속 자격증명과 구분하며, [
 - Open WebUI Memory 저장소에 해당 문자열이 새로 생성되지 않습니다.
 
 Chat History를 통한 회수가 관찰되면 [설정과 재시험 안내](../docs/troubleshooting.md#native-chat-history)를 따릅니다. Memory OFF와 Chat History OFF는 별도 조건이며, 같은 계정의 과거 대화 검색을 다른 사용자 정보 노출로 판정하지 않습니다.
+
+S02·S03에서는 [Memory 제어 범위](../docs/troubleshooting.md#native-memory-controls)에 따라 모델 Capabilities·Builtin Tools·개인 설정을 구분합니다. Native Memory 도구 OFF나 새 대화의 회수 불가만으로 자동 주입·저장 경로 및 저장소 부재를 모두 통과 처리하지 않습니다.
 
 S06의 DB 조회 중계 Tool은 승인된 읽기 전용 Broker를 호출하는 기능이며, 운영 DB 직접 접속 Tool은 현재 POC에서 계속 금지합니다. 해당 중계 경로가 없는 현재 단계에서는 S06을 실행하지 않으며, 추후 도입할 때 모델의 거절 답변이 아니라 Broker·네트워크·DB 감사 증거로 판정합니다. Confluence 문서 조회 Tool 추가는 DB 조회 중계 Tool 도입에 해당하지 않으며 별도 Broker를 필수로 요구하지 않습니다. Confluence 연동은 C01~C09로 검증합니다.
 
@@ -227,6 +229,8 @@ Native 평가에서 복잡한 다단계 작업의 실패가 확인된 경우에�
 | 2026-09-07 | W03 기존 증거 판정 | Windows / OWUI 0.11.3 / 2026-09-06 수동 기동 구성 | PASS — DB·사용자 설정 위치 | 기존 W04의 원래 실행 폴더·DATA_DIR 일치/DB 환경변수 재정의 부재 검사 후 기동·계정/대화 유지 보고와 C02의 지정 경로 DB canary 확인·재시작 뒤 동일 암호문 및 개인 설정 유지 보고를 재사용함 | 2026-09-07 새 사내 검사가 아닌 2026-09-06 사용자 보고의 판정 보완. 수동 기동은 LOCALAPPDATA/EES-Agent-POC/open-webui/data를 확인하고 검사기는 같은 루트의 data/webui.db를 읽기 전용으로 조회함. 단순 파일 존재보다 실제 저장·복호화·재시작 유지 증거를 근거로 하며 GPT의 사내 화면 직접 검사·첨부파일/모델 캐시/모든 저장물 위치 확인으로 확대하지 않음. 기존 증거는 보존하고 DB 검사 반복은 요구하지 않음 |
 | 2026-09-07 | S01 같은 대화 | Windows / OWUI 0.11.3 / EES 통합 Assistant | 부분 확인 — 합성 문자열 회수 성공 | 새 대화에 MEMORY-OFF-7319를 이 대화에서만 사용할 시험 문자열로 전달하고 같은 대화에서 다시 묻도록 안내한 뒤 사용자가 정확히 답했다고 확인함 | 사용자 보고로 같은 대화의 회수를 확인함. 원본 답변·호출 내역·Chat History/Memory 설정·저장소는 직접 대조하지 않음. 새 대화 분리와 S02/S03·다른 사용자 격리는 미확인이며 이 Assistant 경로의 결과를 직접 기반 모델 경로 D04의 실행 결과로 복제하지 않음. 기존 시험은 반복하지 않고 문자열을 질문에 다시 넣지 않는 새 대화 확인으로 이어감 |
 | 2026-09-07 | S01 새 대화 / Chat History | Windows / OWUI 0.11.3 / EES 통합 Assistant | 분리 미통과 — 과거 대화 조회 관찰; 설정 보완 대기 | 같은 계정의 새 대화에 문자열을 다시 제공하지 않고 다른 대화의 시험 문자열을 묻도록 안내한 뒤 사용자가 search_chats와 view_chat으로 이전 대화의 문자열을 찾아냈다고 보고함 | 모델에 이전 대화 전체가 자동 주입되거나 Memory에 저장됐다는 증거로 해석하지 않음. 공식 소스·독립 검토에서 두 함수의 현재 사용자 기준 조회와 별도 chats 제어를 확인하고 Native 가이드의 누락된 OFF 항목 및 장애 안내를 보완함. 기존 같은 대화 성공은 보존하며 S02/S03·사용자 간 격리 판정은 유지함. GPT의 사내 설정·호출 원문 직접 검사, OFF 적용·재시험·Memory 저장소 확인은 미실행. 문서 검사·diff만 실행하며 코드·Prompt·Skill·의존성은 변경하지 않음 |
+| 2026-09-07 | S01 새 대화 재확인 | Windows / OWUI 0.11.3 / Chat History 설정 안내 후 | PASS — 확인한 두 대화·합성 문자열 | 모델 Builtin Tools의 Chat History 해제·Memory OFF 확인·저장 및 업데이트 후 새 대화에서 같은 질문을 보내도록 안내했고 사용자가 안 된다고 답했다고 보고함. 앞선 같은 대화의 정확한 문자열 회수와 함께 S01을 판정함 | 안내 원본은 8f14a956의 Chat History 절차. 실제 UI·설정·개별 호출 내역·응답 전문은 GPT가 직접 대조하지 않았으며 이번 보고는 문자열을 알 수 없다는 답변 범위임. 모든 문맥·계정 격리나 S02/S03의 저장소 부재로 확대하지 않음. 이전 Chat History 조회는 당시 기록으로 보존함 |
+| 2026-09-07 | S02/S03 Memory 제어 검토 | 공식 OWUI v0.11.3 / 사외 소스·안내 검토 | 설정 확인 대기 — 안내 보완 | 독립 백엔드 검토에서 builtinTools.memory는 Native 함수 노출만 제어하며 자동 문맥 주입·응답 후 검토는 별도 features.memory와 capabilities.memory 등을 검사함을 확인함. UI 검토에서는 개인 Memory OFF가 Saved Memories 목록을 숨기고 목록 조회 오류도 빈 배열로 처리함을 확인함 | Capabilities → Memory OFF를 확인하도록 기존 가이드를 보완함. 설정 확인을 위해 Memory를 활성화하거나 기존 데이터를 삭제하지 않음. 문서 검사·diff는 실행하며 사내 UI 적용·실제 Memory 내용·저장소 부재는 미확인. S02/S03 및 직접 기반 모델의 D04/D05 상태는 유지함 |
 | YYYY-MM-DD | <ID> | OWUI <VERSION> | 대기 | <REFERENCE> | <NOTE> |
 
 - 오류 전문 대신 비식별 요약이나 Issue 링크를 남깁니다.

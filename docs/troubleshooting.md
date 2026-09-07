@@ -306,11 +306,29 @@ Get-NetTCPConnection -LocalPort 8642 -State Listen |
 초기 MVP는 현재 대화 범위로 시작하므로 아래처럼 설정합니다.
 
 1. 관리자 A의 **Workspace → 모델 → EES 통합 Assistant 편집**을 엽니다.
-2. 화면 아래 **Builtin Tools / 내장 도구**에서 **Chat History / 대화 기록**을 해제합니다. **Memory**도 초기 기준의 OFF인지 확인합니다. Builtin Tools 기능 자체는 켜 두고 Knowledge Base·Confluence 도구·Skill 연결을 유지합니다.
+2. 화면 아래 **Builtin Tools / 내장 도구**에서 **Chat History / 대화 기록**을 해제합니다. **Memory**는 아래 [제어 범위](#native-memory-controls)에 따라 **Capabilities와 Builtin Tools 양쪽에서 OFF**인지 확인합니다. Builtin Tools 기능 자체는 켜 두고 Knowledge Base·Confluence 도구·Skill 연결을 유지합니다.
 3. **저장 및 업데이트**를 누르고 화면을 새로고침합니다. 이 선택은 UI에서 `meta.builtinTools.chats=false`로 저장되며, 기본값은 true입니다. false이면 Native 함수 목록에 `search_chats`·`view_chat`을 추가하지 않습니다. Memory는 별도 조건으로 제어됩니다. [내장 도구 UI](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/BuiltinTools.svelte), [모델 저장](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/ModelEditor.svelte#L331-L336), [함수 노출 조건](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/tools.py#L538-L663)
 4. 같은 계정으로 **새 대화**를 만들고 같은 Assistant에서 `다른 대화에서 내가 말한 테스트 문자열이 뭐였지?`라고 묻습니다. 문자열·이전 대화 본문을 새 질문에 붙이지 않습니다. 과거 대화 조회 호출 없이 확인할 수 없다고 답하는지 확인합니다. 같은 대화 회수 시험이나 토큰 검사는 반복하지 않습니다.
 
 설정 후에도 회수하면 실제 선택한 Assistant·저장 여부·조회 함수·다른 컨텍스트 유입을 확인합니다. 기존 대화 목록이나 Memory를 삭제해 시험을 통과시키지 않습니다. Chat History OFF는 모델의 해당 내장 조회 경로를 제한하는 것이며, 사용자가 자신의 저장된 대화를 직접 여는 기능을 없애거나 기존 대화를 삭제하지 않습니다. 새 대화에서 모른다고 답한 것만으로 S02·S03의 실제 Memory 설정·저장소까지 확인된 것으로 기록하지 않습니다.
+
+<a id="native-memory-controls"></a>
+
+### Memory 도구와 모델 기능의 차이
+
+v0.11.3의 아래 제어는 서로 다릅니다. 새 대화에서 이전 문자열을 모른다고 답해도 모든 Memory 경로가 꺼졌거나 저장소에 문자열이 없음을 증명하지는 않습니다.
+
+| 설정 | 확인한 제어 범위 | 초기 MVP |
+|---|---|---|
+| 모델 Capabilities → Memory | 내장 Memory 함수·저장 Memory의 문맥 주입·응답 후 자동 Memory 검토가 공통으로 검사하는 모델 조건 | OFF |
+| 모델 Builtin Tools → Memory | Native Memory 함수 목록의 노출; 자동 문맥 주입·응답 후 검토는 이 값만으로 차단되지 않음 | OFF |
+| 개인 설정 → 개인화 → Memory | 사용자별 설정 및 Saved Memories 화면 노출; OFF이면 목록·검색도 숨겨짐 | 저장소 확인과 설정 확인을 구분 |
+
+관리자 A가 **Workspace → 모델 → EES 통합 Assistant 편집 → Capabilities / 기능 → Memory**를 확인합니다. 켜져 있으면 해제하고 **저장 및 업데이트**합니다. 이미 OFF이면 유지하고 완료한 S01 질문을 반복하지 않습니다. 모델 편집기의 **Builtin Tools → Memory·Chat History**도 OFF를 유지하며, 기존 Knowledge·Confluence 도구·Skill 연결은 보존합니다. 이 작업은 모델 설정 확인이며 Prompt나 도구 코드를 교체하지 않습니다.
+
+공식 구현은 [Capabilities UI](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/Capabilities.svelte#L56-L58), [모델 설정 저장](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/ModelEditor.svelte#L264-L267), [Native Memory 조건](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/tools.py#L657-L675), [자동 문맥 주입 조건](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/memory.py#L285-L291), [응답 후 검토 조건](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/memory.py#L409-L444)을 대조했습니다. 모델 기능 OFF는 기존에 저장된 Memory를 삭제하는 작업이 아닙니다.
+
+S03의 저장소 확인은 별도입니다. **설정 → 개인화 → Memory**에서 목록이 원래 보이는 경우에만 시험 문자열을 검색할 수 있습니다. 개인 Memory가 OFF라 목록이 숨겨져 있거나 개인화 탭이 없으면 확인 목적으로 켜지 않습니다. 목록 조회 오류가 있어도 빈 목록으로 표시될 수 있으므로 오류 상태의 검색 결과 없음은 저장 부재로 판정하지 않습니다. [개인 설정과 목록 표시](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Settings/Personalization.svelte#L99-L147), [목록 조회 오류 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Settings/Personalization.svelte#L51-L58)
 
 ### 실제 격리·비활성화 위반
 
