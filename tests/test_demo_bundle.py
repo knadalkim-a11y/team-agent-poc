@@ -100,15 +100,18 @@ class DemoBundleTests(unittest.TestCase):
     def test_dirty_sources_require_opt_in_and_record_actual_working_content(self):
         self.write("agent-pack/system-prompts/assistant.md", "Changed synthetic instructions\n")
         self.git("add", "agent-pack/system-prompts/assistant.md")
-        self.write("agent-pack/system-prompts/assistant.md", "Working synthetic instructions\n")
-        with self.assertRaisesRegex(BUNDLE.BundleError, "Tracked sources have changes"):
-            self.build()
-        self.assertFalse((self.base / "output").exists())
-        contents = self.contents(self.build(allow_dirty=True))
-        manifest = json.loads(contents["manifest.json"])
-        self.assertTrue(manifest["source_dirty"])
-        self.assertEqual(manifest["source_commit"], self.git("rev-parse", "HEAD"))
-        self.assertEqual(contents["agent-pack/system-prompts/assistant.md"], b"Working synthetic instructions\n")
+        for ending in (b"\n", b"\r\n"):
+            with self.subTest(line_ending=ending):
+                content = b"Working synthetic instructions" + ending
+                (self.root / "agent-pack/system-prompts/assistant.md").write_bytes(content)
+                with self.assertRaisesRegex(BUNDLE.BundleError, "Tracked sources have changes"):
+                    self.build()
+                self.assertFalse((self.base / "output").exists())
+                contents = self.contents(self.build(directory=f"working-{len(ending)}", allow_dirty=True))
+                manifest = json.loads(contents["manifest.json"])
+                self.assertTrue(manifest["source_dirty"])
+                self.assertEqual(manifest["source_commit"], self.git("rev-parse", "HEAD"))
+                self.assertEqual(contents["agent-pack/system-prompts/assistant.md"], content)
 
     def test_existing_artifact_is_not_overwritten(self):
         artifact = self.build()

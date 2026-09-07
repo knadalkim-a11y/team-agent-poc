@@ -87,7 +87,7 @@ jobs:
               enabled=true
             else
               git diff --name-only "$BEFORE_SHA" HEAD > "$RUNNER_TEMP/ees-changed.txt"
-              if grep -Eq '^(branding/|scripts/build_ees_webui\.py$|scripts/render_ees_brand_assets\.py$|\.github/workflows/ees-delivery\.yml$)' "$RUNNER_TEMP/ees-changed.txt"; then
+              if grep -Eq '^(branding/|scripts/build_(ees_webui|demo_bundle)\.py$|scripts/render_ees_brand_assets\.py$|tests/test_(ees_branding_build|demo_bundle)\.py$|\.github/workflows/ees-delivery\.yml$)' "$RUNNER_TEMP/ees-changed.txt"; then
                 enabled=true
               fi
             fi
