@@ -4,6 +4,8 @@
 
 ## 2026-09-07
 
+- 공통 정책 적용 범위를 EES Assistant로 한정하고 사용자 제시 여섯 목표를 프로젝트 계획에 반영. 관리자 워크플로와 레거시 간접 UI를 별도 목표로 명시하고 구현 수단 선택 기준·보류 범위를 정리함. 실행 코드·사내 설정 변경 없음. [결정 기록](evals/scenarios.md#six-project-goals).
+
 - 사용자 요청으로 공통 정책의 사용자 적용을 최우선 작업으로 변경. 기존 정책 답변 Skill·공통 Prompt·실행 권한의 역할과 적용 범위를 구분하며, 실제 규정·WebUI 설정은 변경하지 않음. [결정 기록](evals/scenarios.md#common-policy-priority).
 
 - Confluence v0.1.5: 검색 API의 HTTP 400을 `invalid_query`로 구분해 검색어 변경과 지속 실패 시 설정 확인을 안내. 비검색 400은 `invalid_request`로 처리하며 추가 호출·재시도·의존성 없이 기존 오류 처리에 경로만 전달함. 관련 오프라인 시험 11개 통과, 사내 적용 대기. 사용자의 본문 버튼 제거 확인을 기록하고 원문 링크·전체 Rich UI 디자인은 후속으로 유지함. [검증](evals/confluence-offline.md#search-error-guidance), [사용자 보고](evals/scenarios.md#body-query-buttons-observed).
