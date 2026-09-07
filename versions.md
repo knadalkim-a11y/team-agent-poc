@@ -42,11 +42,11 @@
 
 ## Jira 확인 환경
 
-- Git 후보 Tool **v0.1.1**은 대시보드 표시만 개편한 버전입니다. 사내에서 정상 표시를 보고받은 원본은 **v0.1.0 / ce982de5**이며 개편본 반영은 미확인입니다. 인증·API·설정 스키마는 동일합니다. [변경 검증](evals/jira-offline.md#dashboard-design)
+- Jira Tool **v0.1.1 / a6b6f2e** 적용과 기본 대시보드 흐름 정상 확인을 2026-09-07 사용자에게 보고받았습니다. 사내 등록 코드·checkout SHA의 직접 대조는 미실행입니다. 인증·API·설정 스키마는 v0.1.0과 동일합니다. [적용 범위](evals/scenarios.md#jira-dashboard-acceptance), [사외 변경 검증](evals/jira-offline.md#dashboard-design)
 - 2026-09-07 사용자 보고: Jira **8.5.12**, build **805012**, sha1 **156decd**. 개인 토큰을 이미 다른 호출에 사용 중이며 시스템은 프로젝트로 구분하는 것으로 설명함. 실제 프로젝트 키는 사내 허용목록으로 관리하며 저장소에는 넣지 않음.
 - Server/Data Center 라이선스 구분·토큰 발급 구현은 미확인. [공식 내장 PAT](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html)는 Jira 8.14 이상이므로 현재 사용 중인 토큰을 내장 PAT로 단정하지 않음. [8.5.12 REST API](https://docs.atlassian.com/software/jira/docs/api/REST/8.5.12/)를 기준으로 기본 비활성 Bearer 읽기 Tool을 준비함.
 - 2026-09-07 후속 사용자 보고: `check-jira-auth.ps1 -AllowHttp` 안내 후 `HTTPStatus=200`, `BearerAuthenticated=True`. 해당 PC에서 HTTP Bearer 계정 확인 성공으로 판정함. [확인 범위와 앞선 차단](evals/scenarios.md#jira-bearer-check)을 보존함.
-- 후속 보고로 WebUI 등록·관리자 설정·Assistant 연결·가짜 개인 PAT 마스킹과 DB 저장 검사 통과, 실제 토큰 입력 후 대시보드 정상 표시를 확인함. 전체 프로젝트 표시·건수 대조·화면 조작·계정 격리는 미확인. [저장·첫 화면 증거](evals/scenarios.md#jira-first-dashboard), [판정](evals/scenarios.md#jira-live)을 따르며 이미 끝난 인증·등록·저장 확인은 반복하지 않음.
+- 후속 보고로 WebUI 등록·관리자 설정·Assistant 연결·가짜 개인 PAT 마스킹과 DB 저장 검사 통과, 실제 토큰 입력 후 대시보드 정상 표시를 확인함. 이후 v0.1.1의 전체 표시·대표 건수 대조·화면 조작 확인은 위 적용 기록을 따르며 계정 격리는 미확인입니다. [저장·첫 화면 증거](evals/scenarios.md#jira-first-dashboard), [판정](evals/scenarios.md#jira-live)을 따르며 이미 끝난 인증·등록·저장 확인은 반복하지 않음.
 
 ## 보존 중인 Hermes 환경
 
