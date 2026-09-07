@@ -38,7 +38,7 @@
 
 | ID | 검증 내용 | 통과 조건 | 상태 |
 |---|---|---|---|
-| W01 | 로컬 기동 | http://127.0.0.1:8080에서 로그인 화면이 열린다 | PASS |
+| W01 | 로컬 기동 | http://127.0.0.1:8080에서 로그인 화면이 열린다 | 과거 PASS 유지 — 2026-09-07 수락 오류 보고 후 현재 응답은 미확인. [오류·준비 기록](#windows-accept-preparation) |
 | W02 | loopback 제한 | listener가 127.0.0.1:8080에만 열린다 | PASS — netstat로 확인한 시점의 8080 수신 주소; 사용자 보고 |
 | W03 | 데이터 위치 | DB와 상태가 지정 DATA_DIR에 생성된다 | PASS — 2026-09-06 수동 기동의 DB·사용자 설정 범위; W04/C02 증거 재사용 |
 | W04 | 재시작 | 재시작 후 계정과 허용된 대화가 유지된다 | PASS |
@@ -398,6 +398,20 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 사용자 보고에 따른 UI 저장 확인임. 사내 checkout SHA·등록 코드 직접 대조, 새 버전의 자연어 선택·본문 뒤 목록 이어가기·실제 화면/오류 동작은 미실행. 기존 기본 흐름 PASS를 새 버전의 후속 조회 PASS로 확대하지 않음.
 - 다음 확인은 새 대화 하나에서 알고 있는 PR 번호로 직접 상세 요청 → 같은 저장소 목록 → 두 번째 항목의 실제 PR → 다음 목록 순서로 진행함. 두 번째 항목이 없으면 해당 선택은 미확인으로 남기며 페이지 결과는 정상 이어짐·마지막·미확인을 구분함. 결과 요지만 받고 호출 이력은 이상 진단에 필요한 경우에만 확인함. 사내 식별자·본문은 수집하지 않음.
 - Jira 목록/부분 실패 안내는 평소 해당 상황이 생길 때 확인함. 오류를 만들려고 토큰 폐기·권한 변경을 반복하지 않으며 완료한 인증·DB 저장·재시작·기본 조회 검사는 재실행하지 않음. 이번 변경은 상태 문서만 갱신하고 Tool·Prompt·설정·시험 코드는 변경하지 않음. 문서 5개 변경을 대조하고 `python scripts/check_docs.py`에서 문서 25개·내부 링크 372개·오류 0·검토 후보 0을 확인했으며 `git diff --check`도 통과함.
+
+<a id="windows-accept-preparation"></a>
+
+## 2026-09-07 Windows 접속 수락 오류·사외 대응 준비
+
+- 사용자 보고: `OSError: [WinError 64]`와 `Task exception was never retrieved`, 추가 로그의 `IocpProactor.accept.<locals>.accept_coro()`·Python 3.11 `windows_events.py:605`. 실제 사용자 경로·계정·연결 대상은 보관하지 않음. 발생 동작·화면 영향·전체 traceback·`Accept failed on a socket`·`/health` 결과는 미보고. 사용자는 퇴근 후 사내 PC에 접근할 수 없으며 도움 없이 가능한 조치를 요청함.
+- 보고 수신 시 최신 main `44a07ab5ba9541ccfd88173d63cab48079521087`, 열린 PR 0개, AGENTS·STATUS를 확인함. Jira/GitHub 두 Tool·Prompt 절 저장 보고는 그대로 유지하고 새 버전 후속 대화의 사내 확인은 보류함. 기존 W01/D06 PASS는 당시 관찰로 보존하며 현재 접속 정상이나 새 실행 파일 성공을 뜻하지 않음.
+- [CPython 3.11 수락 구현](https://github.com/python/cpython/blob/3.11/Lib/asyncio/windows_events.py)에서 해당 coroutine이 수락 결과를 기다리는 경로임을 확인함. [Proactor 서버](https://github.com/python/cpython/blob/3.11/Lib/asyncio/proactor_events.py)는 수락의 `OSError`에서 listener를 닫으며 [공식 이슈 #93821](https://github.com/python/cpython/issues/93821)에도 같은 패턴의 접속 중단이 보고됨. 이것은 소스상 가능한 경로이며 사용자 서버의 실제 종료·특정 브라우저/망/새 Tool이 원인이라는 판정은 아님.
+- [WebUI v0.11.3 원래 serve](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/__init__.py)는 Windows에서 `loop='none'`을 전달함. [고정 Uvicorn 0.51.0의 loop 선택](https://github.com/Kludex/uvicorn/blob/0.51.0/uvicorn/config.py)·[서버 실행](https://github.com/Kludex/uvicorn/blob/0.51.0/uvicorn/server.py)과 대조해, 앞서 선택한 Windows Selector 정책을 사용하는 경로로 판단함. [WebUI DB 모듈](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/internal/db.py)은 PostgreSQL일 때만 별도로 Selector 정책을 설정함.
+- 새 [선택 실행 파일](../scripts/serve_openwebui_windows.py)은 원래 기동 함수에 명시한 기존 IP·포트를 전달함. 기본 PowerShell 기동·WebUI/CPython 코어·Agent Pack·의존성 버전은 수정하지 않음. 지원 버전·단일 worker·기존 SQLite DB·키의 존재를 먼저 확인하고 잘못된 위치에서 새 DB/키를 만들지 않도록 앱 import 전에 중단함. 환경변수·작업 위치를 바꾸거나 전역 예외를 무시하지 않음.
+- 검토 중 `open_webui.env`를 원래 serve보다 먼저 불러오면 `.env`와 기존 key-file의 적용 순서가 달라질 수 있음을 발견해 그 접근을 제거함. 원래 초기화 순서를 유지하고 패키지 `.env`·별도 DB 설정·여러 worker는 이번 작은 대응의 범위 밖으로 차단함. 해당 설정을 삭제하거나 우회하도록 안내하지 않음. `--check`는 WebUI import·서버 시작·DB 내용 접근 없이 사전조건만 확인하며 건강 상태나 키 일치 판정을 대신하지 않음.
+- 독립 소스·구현 검토에서 중대한 문제 없음. Windows Selector의 asyncio subprocess/pipe 미지원·512개 소켓 제한은 [공식 문서](https://docs.python.org/3.11/library/asyncio-platforms.html)에 따라 적용 가이드에 명시함. 사내 재현 없이 기본 실행을 강제 변경하거나 코어 monkeypatch·오류 숨김·자동 재시작 체계를 추가하지 않음.
+- 사외 검사 환경: Linux / Python 3.12.13, 표준 라이브러리만 사용. `python -m unittest discover -s tests -p test_openwebui_windows_launcher.py -v` **10개 PASS**, 0.034초. 임시 합성 상태·모의 Windows/패키지 정보로 사전검사의 무변경·비밀 비출력, missing DB/key·빈 환경 키·버전/worker/custom DB/패키지 `.env` 차단, 정책 설정 후 기존 serve 위임, cwd/env/host/port 유지와 앱 예외 전파를 확인함. 실제 Windows 이벤트 루프·설치된 WebUI·네트워크 장애 재현을 실행한 것은 아님.
+- Linux에서 실제 `--check` 직접 실행은 지원 플랫폼 아님으로 종료 코드 1과 안전한 안내를 반환함. 사내 PC 원격접속·현재 프로세스 조치·PowerShell/Windows 실행·`/health`·스트리밍·장애 복구는 **미실행**. 관련 없는 Tool·인증·저장·20회 검사는 재실행하지 않음. 다음 사내 확인과 원복은 [기존 장애 가이드](../docs/troubleshooting.md#windows-accept-winerror64)에 정리함. 문서 점검은 문서 25개·내부 링크 384개·오류 0·검토 후보 0이며 diff 검사도 통과함.
 
 ## 결과 기록
 

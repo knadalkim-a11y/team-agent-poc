@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 범용 채팅·사내 자료 조회·팀원 Prompt/Skill 공유를 쉽게 사용하는 플랫폼. 현재는 Open WebUI Native와 Git Agent Pack을 사용하고 원본 WebUI는 수정하지 않음.
 - 현재 위치: 기존 연동의 후속 조회 흐름을 보완하는 단계. **첫 화면·온보딩 적용은 보류**하고 범용 Assistant 방향을 유지함. 기존 Skill·Tool·모델 Public 설정 보고와 그룹 운영 후속 결정은 그대로임.
-- 이번 작업: **Jira Tool v0.1.2·GitHub Tool v0.1.1·두 기능의 Prompt 절을 WebUI에 저장했다는 사용자 보고를 반영함.** 적용 안내 원본은 main의 `16adc3a8b4b7c1a1660d6cc485d34a28b2a2fb0f`. 등록 코드 직접 대조와 새 버전의 동작 확인은 미실행. [저장 보고·확인 범위](../evals/scenarios.md#followup-tools-saved). PR #2~#5 통합·열린 PR 0개 상태를 유지함.
-- 다음 작업 하나: **새 대화 하나에서 GitHub 직접 PR 조회 → 목록의 두 번째 PR 선택 → 상세 뒤 다음 목록을 확인한다.** 저장한 코드를 다시 옮기지 않으며 Jira 목록/부분 실패 안내는 평소 해당 상황이 생길 때 확인함. 완료한 인증/저장/기본 조회·20회 안정성 검사는 반복하지 않음. 첫 화면·온보딩 적용은 계속 보류함.
+- 이번 작업: **Windows `WinError 64`·`IocpProactor.accept...accept_coro()` 보고를 조사하고 기존 환경용 선택 실행 파일을 준비함.** 사내 PC 접근 불가로 현재 `/health`·실제 listener 종료·오류 발생 동작은 미확인. CPython 수락 실패 경로와 WebUI 기동 호환성을 대조했으며 기본 실행 방식은 유지함. [준비·검증·미확인](../evals/scenarios.md#windows-accept-preparation). Jira/GitHub 세 저장 보고는 보존하고 새 버전의 후속 조회 확인은 보류함.
+- 다음 작업 하나: **사내 PC 접속 가능 시 기존 주소의 `/health` 응답을 한 번 확인한다.** 정상이면 보류했던 GitHub 직접 PR 조회·두 번째 선택·다음 목록을 이어가고, 응답이 없으면 [수락 오류 진단과 조건부 대응](troubleshooting.md#windows-accept-winerror64)으로 좁힘. 현재 접근이 불가능한 사용자에게 즉시 실행을 요구하지 않음. 완료한 저장·인증·20회 검사는 반복하지 않고 첫 화면·온보딩 적용은 계속 보류함.
 
 <a id="resume-branch"></a>
 
@@ -50,10 +50,13 @@
 | Jira 읽기·Rich UI | Python Tool v0.1.2·Jira 후속 조회 지침. 목록 오류별 행동 안내·부분 집계 실패 시 페이지 범위 보호; 개인 설정은 기존과 같음 | 2026-09-07 v0.1.2 코드·Jira Prompt 절 저장 보고. 새 버전의 목록 오류·부분 범위 동작은 미확인 | [저장 보고](../evals/scenarios.md#followup-tools-saved), [v0.1.2 사외 검증](../evals/jira-offline.md#merge-review-fixes), [기존 v0.1.1 기본 흐름](../evals/scenarios.md#jira-dashboard-acceptance), [J01~J05](../evals/scenarios.md#jira-live) | 안내 원본 [16adc3a의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/16adc3a8b4b7c1a1660d6cc485d34a28b2a2fb0f/agent-pack/skills/jira-read/scripts/jira_tool.py) 및 [Jira Prompt 절](https://github.com/knadalkim-a11y/team-agent-poc/blob/16adc3a8b4b7c1a1660d6cc485d34a28b2a2fb0f/agent-pack/system-prompts/ees-integrated-assistant.md#jira-조회-기능이-연결된-경우). 사용자 보고 기준이며 사내 등록 코드·checkout 직접 대조는 미실행. 이전 적용·저장 증거는 [첫 화면 기록](../evals/scenarios.md#jira-first-dashboard)에 보존 |
 | GitHub PR 읽기 | Python Tool v0.1.1·GitHub 후속 대화 Prompt 절. 직접 본문·확인된 숫자 저장소 링크·마지막 페이지 처리 보완; 개인 설정은 기존과 같음 | 2026-09-07 v0.1.1 코드·GitHub Prompt 절 저장 보고. 새 버전의 자연어 선택·후속 페이지 동작은 미확인 | [저장 보고](../evals/scenarios.md#followup-tools-saved), [기존 기본 흐름](../evals/scenarios.md#github-read-acceptance), [DB 저장 증거](../evals/scenarios.md#github-storage-check), [사외 검증](../evals/github-offline.md), [GH01~GH04](../evals/scenarios.md#github-live) | 안내 원본 [16adc3a의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/16adc3a8b4b7c1a1660d6cc485d34a28b2a2fb0f/agent-pack/skills/github-read/scripts/github_tool.py) 및 [GitHub Prompt 절](https://github.com/knadalkim-a11y/team-agent-poc/blob/16adc3a8b4b7c1a1660d6cc485d34a28b2a2fb0f/agent-pack/system-prompts/ees-integrated-assistant.md#github-조회-기능이-연결된-경우). 사용자 보고 기준이며 사내 등록 코드·checkout 직접 대조는 미실행. 이전 적용 원본·검사기는 [저장 증거](../evals/scenarios.md#github-storage-check)에 보존 |
 | 실행 스크립트 | 시작·smoke test·암호화 준비 옵션; smoke 자동 리디렉션 차단 | 사용자 보고로 명령 복사 후 수동 실행; 정해진 기동 스크립트 채택은 안정화 이후 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
+| Windows 수락 오류 선택 기동 | [Selector 실행 파일](../scripts/serve_openwebui_windows.py)·읽기 전용 사전검사·복구 안내. 기존 SQLite·단일 worker 범위 | 사내 실행·복구 미확인. 사용자 퇴근으로 PC 접근 불가 | [소스·합성 검사](../evals/scenarios.md#windows-accept-preparation); 실제 Windows 동작과 구분 | Git 준비본만 반영. 사내 적용 원본 없음; 기존 기동 스크립트·명령을 자동 교체하지 않음 |
 
 **Skill은 Git과 UI 등록 보고 기준 모두 3개이며, Skill 자체 사용 확인은 기존 2개입니다.** Confluence Tool의 `check_access` 성공 보고는 있으나 `confluence-read`를 `view_skill`로 불러왔는지는 별도 확인되지 않았습니다. 적용 원본은 Git 최신 커밋과 구분하며, 안내 원본·사용자 보고·등록 내용 대조 여부를 함께 기록합니다.
 
 ## 남아 있는 검증과 제한
+
+- Windows 수락 오류 이후 현재 접속·listener 상태는 미확인. 전달된 런타임 경로는 Python 3.11이며 패치 버전·실제 Uvicorn 버전은 미대조. 선택 실행 파일은 사내에 반영되지 않았으며 대응 효과·모델 스트리밍도 미확인. 기존 성공 기록을 삭제하거나 이번 오류로 Jira/GitHub 코드 실패를 확정하지 않음.
 
 - GitHub v0.1.1의 직접 본문·후속 대화·페이지 변경은 [해당 범위만 사내 확인](06-github-read-tool.md#followup-update)이 남음. 새 개인 필드 DB 저장과 기존 목록·PR 한 건 본문·원문 기본 흐름은 사용자 보고 범위에서 확인함. Prompt 절 UI 저장은 사용자 보고로 확인했으며 전체 목록 정확성/페이지 처리·사용자 격리·마스킹 화면의 별도 관찰은 미확인. PAT 종류/전체 권한은 확인하지 않았고 실제 사내 주소·저장소 식별자·업무 내용은 기록하지 않음. CI/리뷰·diff·일반 이슈·쓰기·추가 Rich UI는 후속 수요로 남김.
 
@@ -74,7 +77,7 @@
 
 ## 최근 점검
 
-[Jira/GitHub 보완본 저장 보고](../evals/scenarios.md#followup-tools-saved): 안내한 정확한 원본과 세 저장 대상의 사용자 보고를 기록함. 새 버전의 자연어 후속 조회·화면·오류 안내는 아직 판정하지 않음. 문서 상태·링크·diff만 확인하며 실행 코드·설정·시험은 변경하거나 재실행하지 않음. 이전 PR 검토·병합·사외 시험 근거는 그대로 재사용함.
+[Windows 수락 오류 대응 준비](../evals/scenarios.md#windows-accept-preparation): 공식 CPython·WebUI·Uvicorn 소스 대조, 선택 실행 파일·관련 합성 검사와 독립 코드 검토를 완료함. 추가 파일은 실행 파일과 그 시험 파일뿐이며 기존 장애 가이드·상태·평가표·환경·변경 기록을 갱신함. 사내 원격 실행·재시작·Windows 실증은 미실행. 원래 연동·인증·저장 시험은 재실행하지 않음.
 
 ## 갱신 규칙
 

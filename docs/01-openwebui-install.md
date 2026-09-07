@@ -107,6 +107,8 @@ $env:CORP_NO_PROXY = "127.0.0.1,localhost,::1"
 
 첫 실행에는 Python 패키지와 임베딩 모델 다운로드로 시간이 걸릴 수 있습니다. 모델 캐시가 없는 최초 실행에서는 OFFLINE_MODE나 HF_HUB_OFFLINE을 먼저 설정하지 않습니다.
 
+기존 Windows 서버에서 `WinError 64`와 `IocpProactor.accept...accept_coro()`가 함께 나타나면 [접속 수락 오류 진단·선택 기동](troubleshooting.md#windows-accept-winerror64)을 따릅니다. 해당 준비본은 기존 구성의 조건부 대응이며 위 기본 기동 명령·스크립트를 자동 대체하지 않습니다.
+
 ## 5. 기동 확인
 
 다음과 유사한 문구를 확인합니다.

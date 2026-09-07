@@ -4,6 +4,8 @@
 
 ## 2026-09-07
 
+- Windows `WinError 64`·`accept_coro` 보고에 대해 CPython 수락 실패 경로를 대조하고 기존 환경용 Selector 선택 실행 파일·사전검사·복구 안내를 추가함. 기본 기동·WebUI 코어·연동 코드는 유지. 사내 PC 접근 불가로 실제 장애 원인·적용·복구는 미확인. [준비·검증](evals/scenarios.md#windows-accept-preparation).
+
 - PR #2~#5 전체 검토·병합 완료. main 통합 커밋 `3184b78`, 열린 PR 0개를 확인하고 STATUS의 재개 기준을 최신 main으로 정리함. 사내 적용·첫 화면/온보딩 보류 상태와 과거 검증 근거는 유지. [병합 기록](evals/scenarios.md#pr-stack-review).
 
 - 열린 PR #2~#5 통합 검토에서 Jira 목록 오류의 안전한 안내 누락·부분 실패 뒤 페이지 범위 변화를 v0.1.2로 보완. 관련 변경은 기존 PR에서 마무리하는 개발 규칙을 추가하고 배포 원본·GitHub 버전 안내를 정리함. 새 PR 생성·사내 배포 없이 변경 시험만 수행. [검토 근거](evals/scenarios.md#pr-stack-review).

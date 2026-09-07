@@ -40,6 +40,41 @@ Get-NetTCPConnection -LocalPort 8080,8642 -State Listen -ErrorAction SilentlyCon
 
 기반 모델 편집·권한 저장 경로는 [관리자 모델 설정](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/admin/Settings/Models.svelte)과 [공통 모델 편집기](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/ModelEditor.svelte)를 기준으로 확인했습니다. 저장 후에도 실패하면 실제 선택 ID와 preset의 Base Model 유효성을 사내에서 대조하고, 실패 요청의 경로·HTTP 상태·비식별 오류 `detail`만 확인합니다. 일반 채팅 경로는 권한 오류도 HTTP 400으로 감쌀 수 있어 403 여부만으로 판정하지 않습니다. 실제 사내 원인·해결 여부는 별도 결과가 있어야 확정합니다.
 
+<a id="windows-accept-winerror64"></a>
+
+## Windows WinError 64와 accept_coro
+
+`Task exception was never retrieved`에 `IocpProactor.accept.<locals>.accept_coro()`가 함께 있으면 들어오는 연결을 수락하는 Windows asyncio 경로에서 난 예외입니다. CPython 3.11의 Proactor 서버는 이 과정의 `OSError`에서 listener를 닫는 경로가 있습니다. 사용자에게서 받은 두 로그만으로 실제 listener 종료·끊긴 상대·발생 동작이나 Jira/GitHub 변경과의 인과관계는 확정하지 않습니다. [CPython 보고](https://github.com/python/cpython/issues/93821), [수락 예외 처리](https://github.com/python/cpython/blob/3.11/Lib/asyncio/proactor_events.py).
+
+사내 PC에 접근할 수 없다면 Git의 준비 작업과 실제 복구를 구분합니다. 다음 접속 때 기존 기본 주소의 `/health`를 한 번 확인합니다. 정상 응답이면 곧바로 실행 방식을 바꾸지 않고 보류했던 후속 조회를 이어갑니다. 응답이 없으면 실행 PC에서도 같은 수신 주소·포트로 확인해 로컬 서버와 팀원 접속 경로를 구분하고, 같은 시점의 `Accept failed on a socket` 유무만 확인합니다. 연결 대상 IP·전체 로그·토큰은 외부에 전달하지 않습니다.
+
+### 재발 시 선택할 기동 준비본
+
+기존 서버의 수락 오류와 접속 중단이 함께 확인되면 [Windows 선택 실행 파일](../scripts/serve_openwebui_windows.py)로 Proactor 수락 경로를 피하는 방안을 검토할 수 있습니다. 실행 파일은 `WindowsSelectorEventLoopPolicy`를 설정한 뒤 원래 `open_webui.serve()`를 호출합니다. v0.11.3의 Windows `serve()`는 `loop='none'`을 사용하므로 이 정책을 유지합니다. WebUI·Python 설치 파일을 수정하거나 오류 로그를 숨기는 방식이 아닙니다. [WebUI 기동 소스](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/__init__.py), [Uvicorn 0.51.0 loop 선택](https://github.com/Kludex/uvicorn/blob/0.51.0/uvicorn/config.py).
+
+지원 범위는 **Windows·Python 3.11·WebUI 0.11.3·Uvicorn 0.51.0·기존 SQLite·단일 worker**입니다. Windows Selector는 asyncio subprocess/pipe를 지원하지 않고 소켓 512개 제한이 있어, 현재 읽기 API 중심의 작은 구성에 한정한 선택지입니다. 로컬 프로세스 실행 기능·여러 worker·확장 운영은 별도 검토합니다. [Python 제한](https://docs.python.org/3.11/library/asyncio-platforms.html). 사내 기동·복구·모델 스트리밍은 아직 미확인입니다.
+
+검수한 커밋에서 실행 파일을 사내 Git 작업 폴더로 가져온 후, **원래 WebUI 기동 PowerShell의 작업 위치와 환경**에서 아래 사전검사만 먼저 실행합니다. 새 창이라면 기존 기동 때의 `DATA_DIR`·키 설정·암호화·프록시·사내 API 설정을 그대로 복원합니다. 저장소 폴더로 작업 위치를 바꾸면 기존 키 파일을 찾지 못할 수 있습니다.
+
+```powershell
+$eesWin64Launcher = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\serve_openwebui_windows.py'
+uvx --offline --no-python-downloads --python 3.11 --from 'open-webui==0.11.3' python $eesWin64Launcher --check
+if ($LASTEXITCODE -ne 0) { throw '기존 실행 환경 확인 실패. 현재 설정을 유지하고 안내를 확인하세요.' }
+```
+
+`--check`는 서버·모델·API·DB 접속과 WebUI import 없이 패키지 버전 및 기존 파일의 존재/크기만 확인합니다. 키·DB 내용은 읽거나 출력하지 않고 파일도 만들지 않습니다. `PreflightPassed=true`는 이 사전조건만 뜻하며 `/health` 성공이나 저장 암호화 검증이 아닙니다. `DATABASE_URL` 등 별도 DB 설정·패키지가 읽는 `.env`·여러 worker가 있으면 중단합니다. 통과시키려고 해당 설정을 지우지 않습니다. 캐시가 없으면 중단하며 새 패키지·Python을 내려받지 않습니다.
+
+선택 기동을 적용할 때만 원래 서버 창에서 `Ctrl+C`로 해당 WebUI를 종료하고, 같은 작업 폴더·환경에서 **기존에 사용하던 수신 IP와 포트**를 전달합니다. 접속 범위를 자동으로 바꾸지 않으며 다른 Python/Hermes 프로세스를 일괄 종료하지 않습니다.
+
+```powershell
+$eesListenAddress = Read-Host '기존 WebUI --host 값'
+$eesListenPort = [int](Read-Host '기존 WebUI --port 값')
+uvx --offline --no-python-downloads --python 3.11 --from 'open-webui==0.11.3' python $eesWin64Launcher --host $eesListenAddress --port $eesListenPort
+if ($LASTEXITCODE -ne 0) { throw '선택 기동 실패. 해당 오류를 확인하고 기존 기동 명령으로 복구하세요.' }
+```
+
+기동 후 필요한 확인은 `/health`와 일반 채팅 한 건의 스트리밍·정상 완료입니다. 정상일 때 보류한 GitHub 후속 조회를 이어갑니다. 완료한 PAT·DB 저장·20회 검사를 자동 반복하지 않습니다. 원복은 해당 서버를 종료한 뒤 동일 환경에서 기존 `uvx --python 3.11 open-webui@0.11.3 serve --host ... --port ...` 명령으로 기동하는 것입니다. 별도 재설치·DB/키 재생성·방화벽 변경은 이 대응에 포함되지 않습니다. [준비와 검증 범위](../evals/scenarios.md#windows-accept-preparation).
+
 ## 프록시 다운로드 실패
 
 ```powershell
