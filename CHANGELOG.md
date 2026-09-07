@@ -4,6 +4,19 @@
 
 ## 2026-09-07
 
+- 열린 PR #2~#5 통합 검토에서 Jira 목록 오류의 안전한 안내 누락·부분 실패 뒤 페이지 범위 변화를 v0.1.2로 보완. 관련 변경은 기존 PR에서 마무리하는 개발 규칙을 추가하고 배포 원본·GitHub 버전 안내를 정리함. 새 PR 생성·사내 배포 없이 변경 시험만 수행. [검토 근거](evals/scenarios.md#pr-stack-review).
+
+- GitHub Tool v0.1.1: 직접 PR 본문의 저장소 생략 입력을 가이드와 일치시키고, 응답에서 확인한 숫자 저장소 ID 링크·마지막 페이지를 처리. 후속 PR 선택·목록 조건 재사용·실패 다음 행동을 GitHub Prompt 절에 반영함. 개인 설정·전송·기존 연동은 유지하며 사내 적용은 미확인. [검증](evals/github-offline.md#followup-flow).
+
+- 사용자 우선순위에 따라 첫 화면 예시·온보딩 적용을 기능 안정화 이후로 보류. 현재 연결 업무를 Assistant의 고정 역할로 취급하지 않고 준비물은 참고 초안으로 보존. [결정](evals/scenarios.md#onboarding-deferred).
+- 기존 모델 UI에 가져올 시작 질문 4개·소개 문구와 팀원용 첫 사용 안내 추가. 첫 사용자 Jira 업무로 다음 범위를 좁히고 Native 가이드의 오래된 Rich UI 미연결 설명을 수정. 업무 코드·System Prompt·기존 시험은 변경하지 않음. [준비·검수](evals/scenarios.md#team-first-use-preparation).
+- 당분간 팀원만 사용한다는 선택에 따라 기존 Skill·Tool·모델의 Public 설정 보고를 반영하고 그룹별 권한 절차를 후속으로 변경. [설정 보고와 확인 범위](evals/scenarios.md#team-public-resource-sharing).
+- Open WebUI v0.11.3의 모델 연결·자산별 읽기 권한을 구분하고 같은 팀 그룹에 Assistant·기반 모델·연결 Skill/Tool/Knowledge를 공유하는 운영 안내 추가. 신규 구성원 추가와 새 자산 공유의 관리 단위를 설명하며 실제 권한 변경·사용 성공으로 간주하지 않음. [근거](evals/scenarios.md#assistant-resource-access-followup).
+- 사용자 설명에 따라 방화벽 운영을 사내 관리 시스템 경로로 통일. 직접 로컬 규칙 생성 안내를 연결 정보와 WebUI 수신 설정으로 대체하고 실패/원복도 사내 관리 기준을 따르도록 정리. 실제 규칙·네트워크 변경은 수행하지 않음. [관리 경로](evals/scenarios.md#managed-firewall-access).
+- 현재 PC의 Public 프로필·IP/포트 직접 접속 선택을 반영해 Public 유지·로컬/첫 팀원 IP와 TCP 8080으로 제한한 접속 안내를 구체화. 기존 수동 환경을 보존하고 HTTP 전송 한계를 명시하며 초기 로그인 화면 확인에 HTTPS 준비를 선행 요구하지 않음. [준비 범위](evals/scenarios.md#local-pc-public-access).
+- 사용자 선택에 따라 팀 파일럿 호스트를 현재 사용 중인 Windows PC로 변경. 새 서버 배포를 선행조건으로 두지 않고 기존 DB·키·버전·수동 기동을 유지하는 계정·접속 경로·전송 보호·방화벽·운영/원복 안내를 기존 설치 문서에 추가. 실행 스크립트·사내 설정은 변경하지 않았으며 완료한 개인 검증은 재사용. [결정·준비 범위](evals/scenarios.md#local-pc-pilot-plan).
+- GHES 3.17.15용 개인 PAT 기반 PR 읽기 후보를 추가. 허용 저장소의 목록·본문·원문만 고정 GET으로 조회하고 페이지/미확인 상태를 구분. 기존 저장 검사기에 GitHub 전용 모드를 추가하고 조건부 Prompt·등록 안내·관련 합성 검사를 준비함. 기존 업무 Tool·Jira 디자인·서버 설정은 유지. [가이드](docs/06-github-read-tool.md), [근거](evals/github-offline.md).
+
 - Jira 화면 v0.1.1: 이모지 없이 글자·여백·명암을 정리하고 미완료/전체 기준의 정렬·막대 축척, 펼치기 전 주요 정보, 필터 후 펼침 상태 유지와 조회 범위 안내를 개선. API·인증·설정은 유지하고 화면 관련 합성 검사만 수행. 사내 반영은 별도. [근거](evals/jira-offline.md#dashboard-design).
 - 기존 읽기 전용 개인 설정 검사기에 `--jira` 선택을 추가. Jira에서만 쓰는 합성 값과 정확한 도구를 함께 확인해 기존 Confluence 값이나 다른 도구의 암호문을 새 필드 성공으로 오인하지 않도록 함. 기본 Confluence 모드·키/DB·업무 Tool은 유지하고 관련 합성 시험만 수행. [근거](evals/jira-offline.md#jira-storage-check).
 - Confluence와 같은 인증 방식이라는 사용자 설명을 작업 가정으로 반영하고, 토큰을 새로 저장하기 전 고정 Jira 계정 API만 확인하는 PowerShell 스크립트와 PR 원본 전달 안내를 추가. 기존 Jira Tool·31개 합성 시험·Confluence 증거는 유지하며 실제 인증 성공으로 간주하지 않음. [근거](evals/jira-offline.md#bearer-check-preparation).

@@ -379,6 +379,52 @@ class JiraDashboardDOMTests(unittest.TestCase):
         self.assertIn("이슈 목록 조회 실패", result["meta"])
         self.assertIn("채팅에서 다시 조회", result["empty"])
 
+    def test_listing_error_guidance_is_visible_as_safe_text_without_retry_hint(self):
+        errors = [
+            {"code": "authentication_failed", "message": "개인 설정의 토큰을 확인하세요."},
+            {"code": "permission_denied", "message": "개인 권한이나 접속 정책을 확인하세요."},
+            {"code": "rate_limited", "message": "호출 한도에 도달했습니다. 잠시 후 다시 조회하세요."},
+            {"code": "page_scope_changed", "message": "프로젝트 오류를 확인한 뒤 같은 범위를 처음부터 조회하세요."},
+            {"code": "unexpected_response", "message": '</script><img src=x onerror="alert(1)"> 확인 필요'},
+        ]
+        for error in errors:
+            with self.subTest(code=error["code"]):
+                payload = fixture()
+                payload["status"] = "partial"
+                payload["issues"] = []
+                payload["listing"] = {"ok": False, "total": None, "returned": 0,
+                                      "next_start_at": None, "error": error}
+                result = self.evaluate(payload, """({total:get('total').textContent,
+                    notice:get('notice').textContent,empty:get('issues').textContent,
+                    next:get('next').textContent,images:descendants(get('issues'),'img').length})""")
+                self.assertEqual(result["total"], "220건")
+                self.assertIn(error["message"], result["notice"])
+                self.assertIn(error["message"], result["empty"])
+                self.assertNotIn("채팅에서 다시 조회", result["empty"])
+                self.assertIn("위 안내에 따라", result["next"])
+                self.assertNotIn("시작 위치", result["next"])
+                self.assertEqual(result["images"], 0)
+
+    def test_partial_scope_keeps_rows_and_replaces_stale_next_hint_with_restart(self):
+        payload = fixture()
+        payload["status"] = "partial"
+        payload["projects"][1] = {"key": "BETA", "ok": False, "total": None, "open": None,
+                                  "error": {"code": "permission_denied", "message": "개인 권한을 확인하세요."}}
+        payload["summary"].update(total=None, open=None, complete=False,
+                                  available_total=200, available_open=120)
+        payload["listing"]["total"] = 200
+        # Even a stale cursor supplied to the renderer must not be advertised.
+        result = self.evaluate(payload, """({total:get('total').textContent,
+            note:get('total-note').textContent,issues:get('issues').textContent,
+            next:get('next').textContent})""")
+        self.assertEqual(result["total"], "전체 집계 미완료")
+        self.assertIn("200건", result["note"])
+        self.assertIn("ALPHA-7", result["issues"])
+        self.assertIn("ALPHA-6", result["issues"])
+        self.assertIn("다음 페이지를 제공하지 않습니다", result["next"])
+        self.assertIn("처음부터 조회", result["next"])
+        self.assertNotIn("시작 위치", result["next"])
+
 
 if __name__ == "__main__":
     unittest.main()

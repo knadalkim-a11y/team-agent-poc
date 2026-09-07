@@ -6,6 +6,7 @@ Open WebUI의 `EES 통합 Assistant`에 등록할 Git 관리 원본입니다. �
 
 ```text
 agent-pack/
+├─ ees-prompt-suggestions.json
 ├─ system-prompts/
 │  └─ ees-integrated-assistant.md
 ├─ policies/
@@ -19,22 +20,30 @@ agent-pack/
    │  ├─ SKILL.md
    │  ├─ scripts/confluence_tool.py
    │  └─ references/rich-ui-search-demo.html
-   └─ jira-read/
-      └─ scripts/jira_tool.py
+   ├─ jira-read/
+   │  └─ scripts/jira_tool.py
+   └─ github-read/
+      └─ scripts/github_tool.py
 ```
 
 | 원본 | Open WebUI 반영 위치 |
 |---|---|
+| `ees-prompt-suggestions.json` | 기능 안정화 후 검토할 예시 질문 초안; [현재 Import 보류](../docs/03-openwebui-native-agent.md#first-use-entry) |
 | `system-prompts/*.md` | Workspace Model의 System Prompt |
 | `policies/*.md` | 공통 규칙의 검토·관리 원본 |
 | `knowledge/*.md` | Workspace Knowledge |
 | `skills/*/SKILL.md` | Workspace Skills |
 | `skills/confluence-read/scripts/confluence_tool.py` | Workspace Tools; 별도 등록 후 Assistant에 연결 |
 | `skills/jira-read/scripts/jira_tool.py` | Workspace Tools; 프로젝트별 현황 화면을 코드에 포함 |
+| `skills/github-read/scripts/github_tool.py` | Workspace Tools; GHES의 개인 PAT 기반 PR 목록·본문 읽기 |
 
 Confluence 묶음은 **Skill 지침 + 실행 코드**를 함께 관리하는 예시입니다. Open WebUI가 폴더를 자동 설치·실행하지는 않습니다. [설치 안내](../docs/04-confluence-read-tool.md)에 따라 두 항목을 등록합니다. 코드 기본값은 비활성화이며 실제 준비·배포 상태는 [STATUS](../docs/STATUS.md), 실환경 판정은 [평가표](../evals/scenarios.md#confluence-live)에만 기록합니다.
 
-Jira는 작은 고정 조회 흐름으로 시작하며 별도 Skill을 추가하지 않습니다. 기존 System Prompt의 조건부 조회 안내와 함수 설명을 사용하고 [Jira 안내](../docs/05-jira-read-tool.md)에 따라 Python Tool만 추가합니다. 화면은 같은 파일 안에 있어 별도 HTML 복사·빌드가 필요하지 않습니다. 사용자 환경의 인증 방식은 아직 미확인이므로 실제 활성화 전 안내의 인증 조건을 확인합니다.
+Jira는 작은 고정 조회 흐름으로 시작하며 별도 Skill을 추가하지 않습니다. 기존 System Prompt의 조건부 조회 안내와 함수 설명을 사용하고 [Jira 안내](../docs/05-jira-read-tool.md)에 따라 Python Tool만 추가합니다. 화면은 같은 파일 안에 있어 별도 HTML 복사·빌드가 필요하지 않습니다. 확인한 인증·적용 원본은 STATUS에서 관리하며 다른 환경으로 옮길 때 필요한 조건만 확인합니다.
+
+GitHub도 별도 Skill 없이 조건부 Prompt·작은 함수 설명과 기존 채팅 표로 시작합니다. [GitHub 안내](../docs/06-github-read-tool.md)에 따라 도구를 등록하고 새 개인 입력칸의 저장을 확인합니다. PR 목록·본문만 읽으며 GitHub.com의 개발용 연결과 사내 GHES 연결은 별개입니다.
+
+대화 시작 예시와 팀원용 안내는 **적용을 보류한 초안**이며 Assistant의 역할 범위를 고정하지 않습니다. 대화 시작 예시는 기존 모델의 화면용 메타데이터입니다. 새 Skill·Tool이나 모델 전체 가져오기 파일이 아니며 System Prompt를 교체하지 않습니다. 질문 버튼은 클릭 즉시 전송될 수 있으므로 실제로 보낼 수 있는 문장으로 작성하고 부족한 대상은 대화에서 확인합니다. [팀원용 시작 안내](../docs/07-team-quickstart.md)는 사용자가 읽는 문서이고 개발·평가 이력을 포함하지 않습니다.
 
 ## 변경 절차
 

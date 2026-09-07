@@ -6,6 +6,7 @@
 
 - **개발을 이어갈 GPT**: [AGENTS.md](AGENTS.md) → [현재 상태](docs/STATUS.md) → 해당 기능 파일과 테스트.
 - **설치·운영할 사람**: [환경 기준](versions.md) → [설치·기동](docs/01-openwebui-install.md) → 해당 연동 가이드.
+- **팀원 안내 초안**: [EES Assistant 시작 안내](docs/07-team-quickstart.md) — 기능 안정화 후 적용·배포 검토.
 - **준비·배포·검증 여부 확인**: [STATUS](docs/STATUS.md)의 요약과 연결된 [평가표](evals/scenarios.md)를 확인합니다. README에는 진행 상태를 복제하지 않습니다.
 
 매번 시작 문구를 입력하는 대신 아래의 일회성 프로젝트 지침을 사용합니다. 현재 상태는 대화 기억이 아니라 저장소에서 확인합니다.
@@ -88,10 +89,13 @@ flowchart TB
 | 할 일 | 안내 |
 |---|---|
 | Open WebUI 설치·시작 | [01-openwebui-install](docs/01-openwebui-install.md) |
+| 기존 Windows PC로 팀 파일럿 시작 | [접속·계정·공유 범위 준비](docs/01-openwebui-install.md#local-pc-pilot) |
 | 사내 Chat 모델 연결 | [02-vllm-direct-test](docs/02-vllm-direct-test.md) |
 | 기본 Assistant 구성 | [03-openwebui-native-agent](docs/03-openwebui-native-agent.md) |
+| 첫 화면 안내 초안 확인 — 적용 보류 | [소개 문구·예시 질문 초안](docs/03-openwebui-native-agent.md#first-use-entry) |
 | Confluence Skill·Tool 등록 | [04-confluence-read-tool](docs/04-confluence-read-tool.md) |
 | Jira 읽기·프로젝트별 현황 | [05-jira-read-tool](docs/05-jira-read-tool.md) |
+| GitHub Enterprise PR 읽기 | [06-github-read-tool](docs/06-github-read-tool.md) |
 | 오류 원인 분리 | [troubleshooting](docs/troubleshooting.md) |
 | 합격 기준·실환경 기록 | [evals/scenarios](evals/scenarios.md) |
 | Confluence 사외 시험 증거 | [evals/confluence-offline](evals/confluence-offline.md) |
@@ -123,10 +127,10 @@ python scripts/check_docs.py --root . --json
 
 ## 범위와 안전 경계
 
-개인 Windows PC에서 Docker 없이 검증한 뒤 승인된 팀 서버에 새로 배포하는 방식입니다. 정확한 버전은 [환경 기준](versions.md), 현재 진행 순서와 보류 항목은 [STATUS](docs/STATUS.md)에서 확인합니다. 별도 Tool Server·Router·A2A·자동 동기화는 실제 필요가 확인되고 범위가 승인된 뒤에만 추가합니다.
+기존 Windows PC의 Docker 없는 Open WebUI를 유지하고, 팀원이 브라우저로 접속하는 소규모 파일럿부터 진행합니다. 별도 서버 이전은 가용성·사용량 등 운영 필요가 확인될 때 검토합니다. 정확한 버전은 [환경 기준](versions.md), 접속·공유 절차는 [기존 PC 파일럿 안내](docs/01-openwebui-install.md#local-pc-pilot), 현재 상태는 [STATUS](docs/STATUS.md)에서 확인합니다. 별도 Tool Server·Router·A2A·자동 동기화는 실제 필요가 확인되고 범위가 승인된 뒤에만 추가합니다.
 
 - 운영 DB 직접 연결, DB 자격증명, 범용 SQL·Shell·쓰기 도구는 이 POC에 제공하지 않습니다.
 - 승인된 읽기 전용 API 또는 Query Broker를 연결할 때에도 도구·권한·네트워크 수준의 검증이 필요합니다.
 - 실제 사내 주소·PAT·API Key·개인정보·사용자 DB·대화·키 파일은 Git에 올리지 않습니다. 설정 예제는 placeholder만 사용합니다.
-- 개인 PC의 포트를 팀에 공개하는 방식으로 이전하지 않습니다. 서버 배포 시 사용자 데이터의 이전은 별도 승인 대상으로 둡니다.
+- 기존 PC의 DB·키·계정·버전을 유지하며, 파일럿에 필요한 접속 범위와 일반 사용자 권한을 설정합니다. 개인 환경의 저장 검사 결과가 팀원의 접속 경로·전송 보호·사용자 격리를 대신하지는 않습니다. 추후 다른 서버로 사용자 데이터를 옮기는 작업은 별도 범위로 정합니다.
 - 모델 선택기의 숨김은 UI 정리입니다. 리소스 권한과 사용자 격리는 별도로 검증합니다.

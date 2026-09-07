@@ -48,6 +48,10 @@ class CanaryCheckTests(unittest.TestCase):
         with sqlite3.connect(self.db) as db:
             db.execute('INSERT INTO "tool" VALUES (?, ?)', (tool_id, name))
 
+    def github_tool(self, tool_id="synthetic-github", name="EES GitHub Read"):
+        with sqlite3.connect(self.db) as db:
+            db.execute('INSERT INTO "tool" VALUES (?, ?)', (tool_id, name))
+
     def test_encrypted_value_matches_existing_key_and_db_is_unchanged(self):
         self.store(self.encrypted())
         before = self.db.read_bytes()
@@ -247,6 +251,176 @@ class CanaryCheckTests(unittest.TestCase):
         check.assert_not_called()
         self.assertEqual(json.loads(output.getvalue()),
                          {"CheckCompleted": False, "Error": "UNSUPPORTED_ARGUMENTS"})
+
+    def test_github_requires_fresh_marker_under_exact_target_and_preserves_db(self):
+        self.github_tool()
+        self.jira_tool()
+        self.store(self.encrypted())
+        self.store(self.encrypted(checker.JIRA_CANARY), "synthetic-jira")
+        self.store(self.encrypted(checker.GITHUB_CANARY), "synthetic-github")
+        before = self.db.read_bytes()
+        result = checker.check(self.root, github=True)
+        self.assertEqual(result, {
+            "CheckCompleted": True,
+            "EncryptedCanaryMatches": 1,
+            "PlaintextCanaryMatches": 0,
+            "PlaintextInDatabaseFiles": False,
+            "DatabaseFilesChecked": 1,
+            "DatabaseCheckPassed": True,
+            "LogsChecked": False,
+            "RestartPersistenceChecked": False,
+            "TargetToolMatches": 1,
+            "TargetEncryptedCanaryMatches": 1,
+        })
+        self.assertTrue(checker.check(self.root)["DatabaseCheckPassed"])
+        self.assertTrue(checker.check(self.root, jira=True)["DatabaseCheckPassed"])
+        self.assertEqual(before, self.db.read_bytes())
+
+    def test_github_marker_in_another_tool_cannot_pass(self):
+        self.github_tool()
+        self.store(self.encrypted(checker.GITHUB_CANARY), "synthetic-jira")
+        result = checker.check(self.root, github=True)
+        self.assertEqual(result["EncryptedCanaryMatches"], 1)
+        self.assertEqual(result["TargetEncryptedCanaryMatches"], 0)
+        self.assertFalse(result["DatabaseCheckPassed"])
+
+    def test_github_existing_markers_in_target_cannot_pass(self):
+        self.github_tool()
+        for marker in (checker.CANARY, checker.JIRA_CANARY):
+            with self.subTest(marker=marker):
+                self.store(self.encrypted(marker), "synthetic-github")
+                result = checker.check(self.root, github=True)
+                self.assertEqual(result["EncryptedCanaryMatches"], 0)
+                self.assertEqual(result["TargetEncryptedCanaryMatches"], 0)
+                self.assertFalse(result["DatabaseCheckPassed"])
+
+    def test_github_missing_or_case_mismatched_label_cannot_pass(self):
+        self.store(self.encrypted(checker.GITHUB_CANARY), "synthetic-github")
+        result = checker.check(self.root, github=True)
+        self.assertEqual(result["TargetToolMatches"], 0)
+        self.assertFalse(result["DatabaseCheckPassed"])
+        self.github_tool(name="EES Github Read")
+        result = checker.check(self.root, github=True)
+        self.assertEqual(result["TargetToolMatches"], 0)
+        self.assertFalse(result["DatabaseCheckPassed"])
+
+    def test_github_duplicate_labels_cannot_pass(self):
+        self.github_tool()
+        self.github_tool(tool_id="synthetic-github-copy")
+        self.store(self.encrypted(checker.GITHUB_CANARY), "synthetic-github")
+        result = checker.check(self.root, github=True)
+        self.assertEqual(result["TargetToolMatches"], 2)
+        self.assertEqual(result["TargetEncryptedCanaryMatches"], 0)
+        self.assertFalse(result["DatabaseCheckPassed"])
+
+    def test_github_duplicate_marker_for_same_or_different_tool_cannot_pass(self):
+        self.github_tool()
+        for other_tool in ("synthetic-github", "synthetic-other"):
+            with self.subTest(other_tool=other_tool):
+                with sqlite3.connect(self.db) as db:
+                    db.execute('DELETE FROM "user"')
+                self.store(self.encrypted(checker.GITHUB_CANARY), "synthetic-github")
+                self.store(self.encrypted(checker.GITHUB_CANARY), other_tool)
+                result = checker.check(self.root, github=True)
+                self.assertEqual(result["EncryptedCanaryMatches"], 2)
+                self.assertFalse(result["DatabaseCheckPassed"])
+
+    def test_github_plaintext_in_db_and_journal_cannot_pass(self):
+        self.github_tool()
+        self.store({"PAT": checker.GITHUB_CANARY}, "synthetic-github")
+        result = checker.check(self.root, github=True)
+        self.assertEqual(result["PlaintextCanaryMatches"], 1)
+        self.assertTrue(result["PlaintextInDatabaseFiles"])
+        self.assertFalse(result["DatabaseCheckPassed"])
+        with sqlite3.connect(self.db) as db:
+            db.execute('DELETE FROM "user"')
+            db.commit()
+            db.execute("VACUUM")
+        self.store(self.encrypted(checker.GITHUB_CANARY), "synthetic-github")
+        self.assertTrue(checker.check(self.root, github=True)["DatabaseCheckPassed"])
+        Path(str(self.db) + "-journal").write_bytes(b"\0" * 512 + checker.GITHUB_CANARY.encode())
+        result = checker.check(self.root, github=True)
+        self.assertEqual(result["EncryptedCanaryMatches"], 1)
+        self.assertEqual(result["PlaintextCanaryMatches"], 0)
+        self.assertTrue(result["PlaintextInDatabaseFiles"])
+        self.assertFalse(result["DatabaseCheckPassed"])
+
+    def test_github_committed_wal_target_and_plaintext_are_read(self):
+        keeper = sqlite3.connect(self.db)
+        self.addCleanup(keeper.close)
+        keeper.execute("PRAGMA journal_mode=WAL")
+        keeper.execute("PRAGMA wal_autocheckpoint=0")
+        keeper.execute('INSERT INTO "tool" VALUES (?, ?)', ("synthetic-github", "EES GitHub Read"))
+        keeper.execute('INSERT INTO "user" VALUES (?)', (json.dumps({
+            "tools": {"valves": {"synthetic-github": self.encrypted(checker.GITHUB_CANARY)}}
+        }),))
+        keeper.commit()
+        result = checker.check(self.root, github=True)
+        self.assertTrue(result["DatabaseCheckPassed"])
+        self.assertGreaterEqual(result["DatabaseFilesChecked"], 2)
+        keeper.execute('INSERT INTO "user" VALUES (?)',
+                       (json.dumps({"note": checker.GITHUB_CANARY}),))
+        keeper.commit()
+        self.assertFalse(checker.contains_canary(self.db, checker.GITHUB_CANARY))
+        self.assertTrue(checker.contains_canary(Path(str(self.db) + "-wal"), checker.GITHUB_CANARY))
+        result = checker.check(self.root, github=True)
+        self.assertEqual(result["PlaintextCanaryMatches"], 0)
+        self.assertTrue(result["PlaintextInDatabaseFiles"])
+        self.assertFalse(result["DatabaseCheckPassed"])
+
+    def test_github_cli_checks_version_before_reading(self):
+        output = io.StringIO()
+        with patch.object(checker, "version", return_value="0.11.2"), \
+             patch.object(checker, "check") as check, contextlib.redirect_stdout(output):
+            self.assertEqual(checker.main(["--github"]), 2)
+        check.assert_not_called()
+        self.assertEqual(json.loads(output.getvalue()),
+                         {"CheckCompleted": False, "Error": "UNSUPPORTED_WEBUI_VERSION"})
+
+    def test_github_cli_uses_fixed_mode_and_prints_only_counts_and_booleans(self):
+        self.github_tool()
+        self.store(self.encrypted(checker.GITHUB_CANARY), "synthetic-github")
+        expected = checker.check(self.root, github=True)
+        output = io.StringIO()
+        with patch.dict("os.environ", {"LOCALAPPDATA": str(self.root)}), \
+             patch.object(checker, "version", return_value="0.11.3"), \
+             patch.object(checker, "check", return_value=expected) as check, \
+             contextlib.redirect_stdout(output):
+            self.assertEqual(checker.main(["--github"]), 0)
+        check.assert_called_once_with(self.root / "EES-Agent-POC" / "open-webui", github=True)
+        self.assertEqual(json.loads(output.getvalue()), expected)
+        self.assertTrue(all(type(value) in (int, bool) for value in expected.values()))
+
+    def test_github_cli_suppresses_error_details(self):
+        output = io.StringIO()
+        with patch.dict("os.environ", {"LOCALAPPDATA": str(self.root)}), \
+             patch.object(checker, "version", return_value="0.11.3"), \
+             patch.object(checker, "check", side_effect=ValueError("secret-id-url")), \
+             contextlib.redirect_stdout(output):
+            self.assertEqual(checker.main(["--github"]), 2)
+        self.assertEqual(json.loads(output.getvalue()),
+                         {"CheckCompleted": False, "Error": "LOCAL_CHECK_FAILED"})
+
+    def test_conflicting_check_modes_rejected_before_file_access(self):
+        with patch.object(checker, "Path") as path, self.assertRaises(ValueError):
+            checker.check(self.root, jira=True, github=True)
+        path.assert_not_called()
+
+    def test_cli_conflicts_and_arbitrary_input_rejected_before_version_or_file_access(self):
+        for args in (["--jira", "--github"], ["--github", "--jira"],
+                     ["--github", "--github"], ["--github", "synthetic-secret"],
+                     ["--github=synthetic-secret"], ["--tool", "EES GitHub Read"]):
+            with self.subTest(args=args):
+                output = io.StringIO()
+                with patch.object(checker, "version") as version, \
+                     patch.object(checker, "Path") as path, \
+                     patch.object(checker, "check") as check, contextlib.redirect_stdout(output):
+                    self.assertEqual(checker.main(args), 2)
+                version.assert_not_called()
+                path.assert_not_called()
+                check.assert_not_called()
+                self.assertEqual(json.loads(output.getvalue()),
+                                 {"CheckCompleted": False, "Error": "UNSUPPORTED_ARGUMENTS"})
 
 
 if __name__ == "__main__":
