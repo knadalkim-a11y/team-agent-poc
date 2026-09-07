@@ -27,6 +27,19 @@ Get-NetTCPConnection -LocalPort 8080,8642 -State Listen -ErrorAction SilentlyCon
 
 공유 전 API Key, 실제 사내 URL·IP·모델 경로, 사용자명·개인 경로, 업무 질문과 응답을 제거합니다.
 
+<a id="user-model-not-found"></a>
+
+## 일반 사용자만 Model not found
+
+관리자 A는 Workspace Assistant를 사용할 수 있지만 일반 사용자 B는 `Model not found`를 받는다면, Assistant 자체와 연결된 **기반 모델의 읽기 권한**을 각각 확인합니다. v0.11.3은 목록에 Assistant를 표시할 때와 실제 채팅을 실행할 때의 검사가 다릅니다. 채팅에서는 기반 모델의 권한도 검사하므로 목록에 보이는 것만으로 실행 가능하다고 판단하지 않습니다. 기반 모델 ID가 없거나 오래된 경우에도 같은 문구가 가능하므로 오류만으로 원인을 확정하지 않습니다. [모델 접근 검사](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/models.py), [기반 모델 체인 검사](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/access_control/__init__.py)
+
+1. A의 **Workspace → 모델 → EES 통합 Assistant 편집**에서 `Base Model (From)`에 지정된 정확한 기반 모델을 확인합니다. Assistant의 **접근**에 B의 읽기 권한이 등록돼 있고 화면 하단 **저장 및 업데이트**까지 눌렀는지도 확인합니다. 실제 모델 ID·주소는 사내 화면에서만 확인합니다.
+2. A의 **관리자 패널 → 설정 → 모델**에서 그 기반 모델을 찾아 **편집(연필) → 접근 → 접근 권한 추가**로 B 또는 승인된 시험 그룹에 **읽기**를 부여하고 **저장 및 업데이트**합니다. 다른 preset을 기반으로 사용하는 구성이라면 그 아래 기반 모델까지 접근 권한을 확인합니다. 기존 사용자의 권한과 모델 연결 설정을 보존합니다.
+3. 기반 모델의 `Hide`는 UI 표시 정리이며 읽기 권한과 별개입니다. 숨김만 해제하는 것으로 권한 문제를 해결하지 않습니다. B에게 필요한 모델의 읽기 권한만 설정하며 관리자 승격·전체 공개·접근 검사 우회는 필요하지 않습니다.
+4. B 화면을 새로고침하고 새 대화에서 `EES 통합 Assistant`를 다시 선택해 “안녕. 한 문장으로 답해줘.”처럼 도구가 필요 없는 질문을 보냅니다. 정상 답변을 확인한 후에만 Confluence 공통 문서 조회와 C05를 이어갑니다. 이 단계에서 PAT·HTTP·프록시·인증서 설정을 변경하지 않습니다.
+
+기반 모델 편집·권한 저장 경로는 [관리자 모델 설정](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/admin/Settings/Models.svelte)과 [공통 모델 편집기](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/ModelEditor.svelte)를 기준으로 확인했습니다. 저장 후에도 실패하면 실제 선택 ID와 preset의 Base Model 유효성을 사내에서 대조하고, 실패 요청의 경로·HTTP 상태·비식별 오류 `detail`만 확인합니다. 일반 채팅 경로는 권한 오류도 HTTP 400으로 감쌀 수 있어 403 여부만으로 판정하지 않습니다. 실제 사내 원인·해결 여부는 별도 결과가 있어야 확정합니다.
+
 ## 프록시 다운로드 실패
 
 ```powershell

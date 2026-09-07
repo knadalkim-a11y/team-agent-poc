@@ -172,3 +172,14 @@ Tool은 기본 `ENABLED=false`입니다. Skill은 지침이지 보안 경계가 
 - 독립 검토: 브라우저 창 분리 외에 서로 다른 WebUI 사용자 계정을 명시해야 한다는 보완을 반영함. 기존 계정 사용, Confluence 자체 제한 확인과 정상 조회, 실제 Tool 결과 확인의 범위를 검토했으며 별도 검토자는 도구 실행·파일 수정·실환경 시험을 수행하지 않음.
 - 검증 결과: Linux / Python 3.12.13에서 `python scripts/check_docs.py` 문서 20개·내부 링크 142개·오류 0·검토 후보 0, `git diff --check` 통과. 기존 Markdown 3개만 변경했으며 실제 사내 검색어나 문서·PAT를 사용하지 않음.
 - 미실행: 실제 계정·문서 준비, Confluence 접근 제한 변경, B PAT 저장, 두 사용자 검색·조회·콘솔 확인, 시험 후 정리. 가이드 준비나 계정 사용 가능 보고를 C05 PASS로 기록하지 않음. 실행 코드·설정·Skill·의존성·기존 실환경 판정은 변경하지 않았고 코드 시험을 재실행하지 않음.
+
+<a id="model-access-review"></a>
+
+## 일반 사용자 모델 접근 오류 검토 — 2026-09-07
+
+- 발견: C05 안내에는 Assistant·Tool·Skill 권한만 적혀 있고 기반 모델 권한 확인이 빠져 있었음. 기존 Native 가이드에는 기반 모델 접근 필요성이 명시돼 있어 안내 간 연결을 보완함. A 사용 가능·B `Model not found`라는 사용자 보고를 받고 해당 일반 사용자 경로를 검토함.
+- 소스 대조: 공식 Open WebUI v0.11.3의 `utils/models.py`는 Assistant 목록 필터와 채팅의 `check_model_access`를 구분하고, `utils/access_control/__init__.py`의 `has_base_model_access`가 기반 모델 체인의 각 읽기 권한을 확인함. 일반 사용자에게 기반 모델 DB 항목/읽기 권한이 없으면 접근을 거절할 수 있음. `main.py`의 일반 채팅은 모델 ID 누락과 권한 거절에서 `Model not found`를 반환하며 HTTP 400도 가능함. `routers/openai.py`의 provider 모델 조회 실패는 별도 404 경로임.
+- UI 대조·처리: `workspace/Models/ModelEditor.svelte`의 `Base Model (From)`·AccessControl·`access_grants` 제출·Save & Update, `admin/Settings/Models.svelte`의 편집·upsert 저장을 확인함. [장애 안내](../docs/troubleshooting.md#user-model-not-found)에 해당 기반 모델의 B 읽기 권한 확인·저장과 새 대화의 단순 인사말 확인을 추가하고 C05에서 연결함. Hide는 권한과 구분하며 관리자 승격·전체 공개·검사 우회·실행 코드 변경을 해결책으로 넣지 않음.
+- 독립 검토: 백엔드 담당 검토가 기반 모델 읽기 검사, 목록에는 보이지만 채팅이 실패할 수 있는 조건, 400/403/404 경로 차이를 확인함. 실제 사내 오류 원인은 아직 확정하지 않으며 필요한 최소 권한 확인을 첫 단계로 정함.
+- 검증 결과: Linux / Python 3.12.13에서 `python scripts/check_docs.py` 문서 20개·내부 링크 146개·오류 0·검토 후보 0, `git diff --check` 통과. 기존 Markdown 5개만 변경함.
+- 미실행: 사내 B 계정의 실제 권한·기반 모델 ID·실패 요청 확인, 권한 저장·채팅 복구·Confluence 재시험. 문서만 변경하고 코드 시험·서비스·모델·PAT 설정 변경은 수행하지 않음. C04 PASS는 유지하고 C05는 모델 접근 오류 해결 전 보류함.
