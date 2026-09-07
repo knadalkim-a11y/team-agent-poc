@@ -51,8 +51,9 @@
 ## GitHub 확인 환경
 
 - 2026-09-07 사용자 보고: **GitHub Enterprise Server 3.17.15**, 개인 PAT를 이미 발급받아 보유함. PAT 종류·권한·사내 기본 주소/프로토콜·허용 저장소·API 실행 성공은 아직 미확인임.
-- 후보 Tool **v0.1.0**, Open WebUI **0.11.3**, [GHES 3.17 PR REST API](https://docs.github.com/en/enterprise-server@3.17/rest/pulls/pulls), API 버전 헤더 **2022-11-28**을 기준으로 준비함. GitHub.com용 구현으로 대체하거나 현재 서버 버전을 자동 변경하지 않음.
-- 새 개인 필드 저장은 기존 검사기의 `--github`로 확인하며 동일 플랫폼의 기존 DB/키·재시작 증거는 재사용함. 실제 Tool/Prompt 등록·저장 검사·목록/본문 조회는 미실행. [가이드](docs/06-github-read-tool.md), [사외 검증](evals/github-offline.md), [실환경 판정](evals/scenarios.md#github-live)
+- Tool **v0.1.0**, Open WebUI **0.11.3**, [GHES 3.17 PR REST API](https://docs.github.com/en/enterprise-server@3.17/rest/pulls/pulls), API 버전 헤더 **2022-11-28**을 기준으로 준비함. GitHub.com용 구현으로 대체하거나 현재 서버 버전을 자동 변경하지 않음.
+- 2026-09-07 [4b058996](https://github.com/knadalkim-a11y/team-agent-poc/commit/4b058996d1e3f360ee670da553e2f9bc7a9046a1)의 Tool 등록·검사 안내 후 `--github` 출력 사용자 보고로 새 개인 PAT 필드의 **DB 범위 PASS**를 확인함. 사내 등록 코드·checkout SHA 직접 대조는 미실행. [저장 증거](evals/scenarios.md#github-storage-check)를 보존하고 동일 플랫폼의 기존 DB/키·재시작 증거를 재사용하며 관련 변경 없는 저장 검사는 반복하지 않음.
+- 마스킹 화면의 별도 관찰·GitHub Prompt 절 UI 저장·실제 API 인증·PR 목록/본문 조회·사용자 격리는 미확인. 다음은 기존 실제 PAT 적용·활성화 후 PR 조회 흐름 확인임. [가이드](docs/06-github-read-tool.md), [사외 검증](evals/github-offline.md), [실환경 판정](evals/scenarios.md#github-live)
 
 ## 보존 중인 Hermes 환경
 

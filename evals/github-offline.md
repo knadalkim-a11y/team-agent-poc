@@ -40,3 +40,11 @@
 - 실제 GHES 인증·토큰 scope/조직 정책·접근 가능한 저장소·PR 정확성·권한 격리·새 GitHub 필드의 DB 저장·WebUI 모델 호출·비개발자 사용성·사내 성능은 **미실행**임. PowerShell/uvx 전달 명령은 사외에서 실행하지 않음. 외부 GitHub.com 개발 연결을 내부 API 성공으로 간주하지 않음.
 - 정상 요청 예상은 연결 확인 1회, 목록 또는 상세 한 작업당 계정 확인 1회 + PR API 1회임. 실제 지연·호출 수는 미측정이며 자동 재시도·전체 페이지 수집·CI/리뷰 추가 조회는 하지 않음.
 - 다음은 [등록·새 필드 저장·대표 PR 확인](../docs/06-github-read-tool.md)임. 신규 필드 확인과 기존 플랫폼 전수 검증을 구분하며, 저장 확인 통과 후 기존 실제 PAT를 입력하도록 안내함.
+
+<a id="storage-success-followup"></a>
+
+## 새 개인 필드 저장 확인 후속 — 2026-09-07
+
+- [4b058996](https://github.com/knadalkim-a11y/team-agent-poc/commit/4b058996d1e3f360ee670da553e2f9bc7a9046a1)의 등록·검사 안내 뒤 받은 사용자 출력 10개를 `--github` 필드 순서와 대조함. 새 개인 PAT 필드의 DB 범위 PASS를 [실환경 증거](scenarios.md#github-storage-check)에 기록하고 STATUS·가이드·환경 기준의 다음 작업을 실제 PAT 적용·PR 조회로 갱신함. 최초 구현 당시의 미실행 기록은 당시 상태로 보존함.
+- 이번 변경은 문서뿐이며 Tool·Prompt·저장 검사기는 그대로임. 문서·내부 링크 및 diff만 점검하고 기존 GitHub 27개·저장 검사기 34개 시험과 사내 저장/재시작·Jira/Confluence 검증은 반복하지 않음.
+- 실제 GHES API 인증·PR 정확성·사용자 격리·Prompt UI 저장은 아직 미확인. DB 출력의 로그/재시작 미검사를 실패로 해석하거나 GH01 전체 PASS로 확대하지 않음. 다음 한 저장소의 목록/상세 조회 자체가 인증을 포함하므로 별도 연결 사전검사를 추가하지 않음.

@@ -4,7 +4,7 @@
 
 ## 1. 확인한 제품과 범위
 
-2026-09-07 사용자가 **GitHub Enterprise Server 3.17.15**와 기존 개인 PAT 보유를 확인했습니다. 토큰 종류·실제 API 권한·사내 주소/프로토콜·허용 저장소·WebUI 연결 성공은 아직 미확인입니다. 실제 값은 아래 사내 설정에만 입력합니다.
+2026-09-07 사용자가 **GitHub Enterprise Server 3.17.15**와 기존 개인 PAT 보유를 확인했습니다. 후속 `--github` 출력 보고로 등록한 도구의 새 개인 PAT 필드에 대한 [DB 저장 확인](../evals/scenarios.md#github-storage-check)을 통과했습니다. 토큰 종류·실제 API 권한·사내 주소/프로토콜·허용 저장소·WebUI의 실제 PR 조회 성공은 아직 미확인입니다. 실제 값은 아래 사내 설정에만 입력합니다.
 
 [GHES 3.17 PR API](https://docs.github.com/en/enterprise-server@3.17/rest/pulls/pulls)에 맞춰 고정 서버의 `/api/v3` 아래에서 `GET /user`, `GET /repos/{owner}/{repo}/pulls`, `GET /repos/{owner}/{repo}/pulls/{number}`만 사용합니다. Bearer 개인 인증, GitHub JSON, API 버전 `2022-11-28` 헤더를 고정합니다. 기본 주소에는 **서버 주소와 필요한 포트만** 입력하며 `/api/v3`, 저장소 경로·`.git` URL은 넣지 않습니다.
 
@@ -47,6 +47,8 @@ PR 쓰기·병합·리뷰 제출·댓글·CI 실행·코드 파일·diff·일반
 UserValves는 비밀번호형 개인 `PAT` 한 필드입니다. 관리자 공통 설정·채팅·HTML로 토큰을 입력받지 않습니다. `github_check_access`는 필요할 때 자신의 계정 인증만 확인하며 저장소 권한·새 필드 저장을 대신하지 않습니다. [사용자 API의 인증 응답 범위](https://docs.github.com/en/enterprise-server@3.17/rest/users/users#get-the-authenticated-user)
 
 ## 4. 새 GitHub 입력칸 저장 확인
+
+현재 개인 환경에서는 2026-09-07 [4b058996의 등록·검사 안내](https://github.com/knadalkim-a11y/team-agent-poc/commit/4b058996d1e3f360ee670da553e2f9bc7a9046a1) 후 사용자가 보고한 출력으로 **DB 범위 PASS**를 확인했습니다. [출력과 확인 범위](../evals/scenarios.md#github-storage-check)를 보존하며 관련 저장 경로 변경이 없으면 아래 검사를 반복하지 않습니다. 다음은 가짜 값을 기존 실제 PAT로 교체하고 `ENABLED=true`로 활성화한 뒤 PR 목록·본문·원문을 확인하는 단계입니다. 이 출력은 마스킹 화면의 별도 관찰·Prompt 저장·실제 API 인증·사용자 격리를 확인한 것으로 확대하지 않습니다.
 
 GitHub에서만 쓰는 합성 값은 **`EES-GITHUB-CANARY-20260907-C43D8E`**입니다. 기존 [check_confluence_canary.py](../scripts/check_confluence_canary.py)의 `--github` 모드로 검사합니다. 파일명·기본 Confluence 모드·`--jira`를 유지하며 새 도구 이름과 정확히 하나인 내부 ID의 저장값을 연결합니다.
 

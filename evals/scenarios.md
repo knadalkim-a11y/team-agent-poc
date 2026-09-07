@@ -243,12 +243,22 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 
 | ID | 확인할 흐름 | 통과 조건 | 상태 |
 |---|---|---|---|
-| GH01 | 개인 설정·인증 | 새 GitHub 필드 마스킹·해당 Tool 암호화 저장, 기존 PAT 계정 인증, 개인 설정 분리 | 준비 — GHES 3.17.15·기존 PAT 보유 보고. 등록·저장·API 인증 미실행 |
+| GH01 | 개인 설정·인증 | 새 GitHub 필드 마스킹·해당 Tool 암호화 저장, 기존 PAT 계정 인증, 개인 설정 분리 | 부분 확인 — 새 개인 필드 DB 범위 PASS. 실제 API 인증·계정 분리·마스킹 별도 관찰은 미확인. [저장 증거](#github-storage-check) |
 | GH02 | PR 목록·본문·원문 | 같은 계정/저장소/상태의 목록·PR 번호·본문·원문 일치, 한 페이지·잘림·미확인 의미를 유지 | 대기 — 후보 코드/합성 검사와 구분 |
 | GH03 | 읽기·저장소·사용자 경계 | 허용 범위 밖 차단, 다른 사용자의 토큰·저장소 권한 분리, 리디렉션/쓰기 실행 없음 | 대기 — 사내 대표 차단·공개 전 계정 확인 |
 | GH04 | 실패·처음 사용 | 빈 결과/인증 실패/권한 부재와 다음 행동 이해, 자료 속 실행 지시 거절, 이모지 없는 목록/요약에서 근거·범위 확인 | 대기 — 실제 사용자 대화 미실행 |
 
 2026-09-07 사용자가 “github야 pat도 이미 발급 받아뒀고 버전은 github enterprise server 3.17.15”라고 보고했습니다. 제품·버전·개인 토큰 보유의 근거이며, 실제 값·저장소 식별자·API 결과는 수집하지 않았습니다. 개발용 GitHub.com 연결과 사내 GHES 연결은 별개입니다.
+
+<a id="github-storage-check"></a>
+
+### GitHub 새 개인 필드 저장 확인 — 2026-09-07
+
+- 실행·관찰: 사내 Windows 사용자의 보고. 안내 원본은 [4b058996의 GitHub Tool v0.1.0](https://github.com/knadalkim-a11y/team-agent-poc/blob/4b058996d1e3f360ee670da553e2f9bc7a9046a1/agent-pack/skills/github-read/scripts/github_tool.py)과 [같은 커밋의 검사기](https://github.com/knadalkim-a11y/team-agent-poc/blob/4b058996d1e3f360ee670da553e2f9bc7a9046a1/scripts/check_confluence_canary.py) `--github`. 정확한 이름 `EES GitHub Read`로 등록하고 비활성 상태에서 개인 PAT에 합성 값 `EES-GITHUB-CANARY-20260907-C43D8E`를 저장하도록 안내한 뒤 받은 결과임. GPT의 사내 코드·DB·화면 직접 검사 및 전달 코드/checkout SHA 대조는 미실행.
+- 출력 순서: 사용자가 `true, 1, 0, false, 2, true, false, false, 1, 1`을 보고함. 고정 검사기 순서에 따라 `CheckCompleted=true`, `EncryptedCanaryMatches=1`, `PlaintextCanaryMatches=0`, `PlaintextInDatabaseFiles=false`, `DatabaseFilesChecked=2`, `DatabaseCheckPassed=true`, `LogsChecked=false`, `RestartPersistenceChecked=false`, `TargetToolMatches=1`, `TargetEncryptedCanaryMatches=1`로 대응함.
+- 판정: 새 GitHub 개인 PAT 필드의 **DB 범위 PASS**. 정확한 이름의 Tool 1개에 연결된 개인 설정과 전체 검사 범위에서 일치하는 암호문이 각각 1건이고 평문 일치가 없으며, 검사한 DB 관련 파일 2개에 합성 값의 평문이 없음. 출력은 부가 파일 종류를 식별하지 않음. `LogsChecked=false`·`RestartPersistenceChecked=false`는 이 검사기의 범위 밖이며 실패를 뜻하지 않음. 동일 플랫폼의 기존 로그/재시작 증거를 재사용하고 관련 변경 없는 시험을 반복하지 않음.
+- 확인 범위: Tool 이름/저장 연결과 해당 합성 값의 DB 저장을 확인함. 로그인 사용자 신원·모든 계정의 격리·전체 로그/백업의 평문 부재·관리자 설정값·Assistant 연결·마스킹 화면·Prompt UI 저장·실제 API 인증·PR 결과를 확인한 것으로 확대하지 않음. 마스킹은 별도 관찰 보고가 없으며 완료 표를 채우기 위한 재질문은 하지 않음.
+- 다음: 개인 설정의 가짜 값을 이미 보유한 실제 PAT로 교체하고 활성화한 뒤, 기존 Prompt에 GitHub 절을 추가하여 허용 저장소 한 곳의 PR 목록 → 한 PR 본문·원문을 확인함. 실제 토큰·사내 주소·저장소·본문은 외부로 받지 않고 정상 여부나 비식별 오류 코드만 기록함. 별도 연결 사전검사·저장·재시작·기존 Jira/Confluence 검사를 반복하지 않음.
 
 ## 결과 기록
 
