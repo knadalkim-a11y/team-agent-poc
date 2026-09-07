@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: 2026-09-07 사용자가 설정 중 도구를 미사용으로 바꾼 것 같다고 설명하고, 선택 상태 확인·재시도 안내 뒤 `check_access`의 `ok=true`, `authenticated=true`를 보고함. C09 사전 연결의 인증 성공으로 기록하고 도구 미호출 이슈는 복구 확인으로 정리함. 사내 화면·등록 내용·토큰 식별의 GPT 직접 대조는 없으며 토큰 폐기·새 PAT 복구는 아직 미실행임. 앞선 C04·P02·C08 결과는 유지함.
-- 다음 작업 하나: **C09 시험용 PAT만 폐기한 뒤 실제 인증 실패를 확인한다.** [토큰 폐기·교체 안내](04-confluence-read-tool.md#c09-token-rotation)의 2단계에 따라 이번에 만든 `EES-WEBUI-C09-TEST` 한 건만 Confluence에서 폐기한다. WebUI 개인 설정에는 그 값을 그대로 두고 Confluence 도구가 켜진 새 대화에서 `check_access`를 실행한다. 실제 `ok`·`error.code`와 실패 안내를 확인하며 기존 Claude Code용 PAT는 보존한다. 실패 확인 후 새 PAT로 복구하며 C07 분기는 실제 관찰한 범위만 갱신한다.
+- 이번 작업: 2026-09-07 시험용 PAT 폐기·WebUI 값 유지·실제 재호출 안내 후 사용자가 `ok=false`, `authentication_failed`를 보고하고 Skill 지침에 따라 PAT를 교체하라는 안내도 받았다고 확인함. 앞선 정상 인증과 함께 C09의 폐기 후 인증 실패 및 C07의 인증 실패·교체 안내 사례로 기록함. HTTP 상태 원문·Skill 로딩 호출·사내 화면을 직접 확인한 것은 아니며 새 PAT 복구는 대기임.
+- 다음 작업 하나: **새 PAT로 교체하고 정상 인증 복구를 확인한다.** [토큰 폐기·교체 안내](04-confluence-read-tool.md#c09-token-rotation)의 3단계에 따라 같은 Confluence 사용자로 새 PAT를 만들고 A의 WebUI 개인 설정에 저장한다. Confluence 도구를 켠 새 대화에서 `check_access`의 `ok=true`, `authenticated=true`를 확인한다. 기존 Claude Code용 PAT는 보존하며 폐기 시험을 반복하지 않는다.
 - 사내 작업 전달: 사내 PC에서는 ChatGPT에 접근할 수 없어 외부 모바일에서 코드·명령을 옮겨 실행함. Git 저장소의 안내 경로는 `%USERPROFILE%\team-agent-poc`이며 Open WebUI 데이터·설치 경로와 별개임. 최초 clone 성공 보고가 있으므로 다시 clone을 요구하지 않음. Git은 해당 PowerShell의 `$gitProxy` 변수와 `git -c "http.proxy=$gitProxy" ...`로 연결했으며 영구 프록시 저장이나 WebUI/Confluence 프록시 변경은 안내하지 않음. 새 창의 후속 Git 갱신 시 사내 프록시 값을 다시 설정해야 하며 실제 주소는 수집하지 않음.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
@@ -30,7 +30,7 @@
 
 ## 남아 있는 검증과 제한
 
-- C09 사전 연결은 도구 선택 확인 뒤 인증 성공으로 보고됨. [C09](../evals/scenarios.md#confluence-live)는 진행 중이며 시험용 토큰 폐기 후 인증 실패·새 PAT 교체 후 복구는 미확인임. 과거 도구 부재 설명은 당시 기록으로 보존함.
+- [C09](../evals/scenarios.md#confluence-live)는 정상 인증·시험용 PAT 폐기 후 인증 실패까지 사용자 보고로 확인했으며 새 PAT 복구만 대기임. 실패 후 PAT 교체 안내도 확인함. `authentication_failed`만으로 HTTP 401을 확정하지 않고 C07의 미확인 HTTP·timeout 분기는 유지함. Skill을 실제 `view_skill`로 불러왔는지는 별도 미확인임.
 - 내장 `query_knowledge_files`의 임베딩 모델 부재 관련 실패는 과거 관찰로 보존함. 조회 경로 지침 적용 후 C04·P02 두 질문은 정상·오류 재발 없음으로 확인됐으나 의미 검색 자체를 복구하거나 강제 비활성화한 것은 아님. 실제 임베딩 설정·오류 원문·이번 개별 호출 내역·장기 안정성은 미확인임.
 - 사내 연결·저장 암호화·두 사용자 권한 확인은 [C01~C09](../evals/scenarios.md#confluence-live)의 판정으로 관리합니다. 가짜 값의 현재 DB·콘솔·재기동 확인은 사용자 보고로 기록했으며, 별도 감사 로그·외부 로그 수집 설정이 있는 환경까지 검증한 것은 아닙니다. 그런 설정이 확인되면 해당 로그도 실제 PAT 입력 전에 확인합니다.
 - Open WebUI 재시작·스트리밍·문맥·반복 안정성·데이터 위치·사용자 격리의 미확인 항목은 [전체 평가표](../evals/scenarios.md)를 따릅니다. 기존 UI 성공이나 mock 테스트로 미확인 항목을 PASS 처리하지 않습니다.
@@ -42,6 +42,7 @@
 
 ## 최근 점검
 
+- 2026-09-07 폐기 후 오류 두 필드·PAT 교체 안내 보고를 기존 C09 순서 및 `authentication_failed`의 복수 반환 경로와 대조해 반영함. C09 전체 PASS·HTTP 401 실측·Skill 로딩 확인으로 확대하지 않음. STATUS·평가표만 변경하고 문서 점검·`git diff --check`를 확인함. 코드 시험과 GPT의 사내 인증·토큰 교체는 미실행.
 - 2026-09-07 도구 미사용 설명과 재시도의 두 성공 필드를 이전 미호출 기록·C09 단계별 기준과 대조해 반영함. 폐기 대상은 시험용 PAT 한 건이고 WebUI에는 폐기된 값을 유지한 채 호출해야 한다는 기존 안내를 재확인함. STATUS·평가표만 변경하고 문서 점검·`git diff --check`를 확인함. 코드·설정 변경, 코드 시험, GPT의 사내 인증·토큰 폐기는 미실행.
 - 2026-09-07 모델의 도구 부재 설명을 실제 API 오류와 구분해 기록하고 원본 `check_access` 정의·개인 설정과 도구 선택의 구분을 기존 등록 안내와 대조함. 현재 대화의 선택 확인을 먼저 안내하며 코드·PAT 재입력·네트워크 수정으로 확대하지 않음. STATUS·평가표만 변경하고 문서 점검·`git diff --check`를 확인함. 사내 도구 목록·호출·새 PAT 인증 및 코드 시험은 미실행.
 - 2026-09-07 부분 Prompt 적용 후 두 정상 질문의 사용자 보고를 기존 C04·P02·C08 및 전체 지침 개정과 구분해 반영함. C09 기준·Tool 인증/오류 처리·공식 PAT 안내를 대조하고 독립 검토를 거쳐 시험용 PAT만 폐기하는 절차를 준비함. 문서 검사와 미실행 범위는 [C09 안내 검토](../evals/confluence-offline.md#c09-procedure)에 기록함. 실환경 C09는 미실행이며 기존 업무용 PAT는 유지함.
