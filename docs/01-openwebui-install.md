@@ -77,15 +77,23 @@ Open WebUI 0.11.3은 Community 라이선스에서 다음처럼 원본 프로젝�
 EES Assistant (Open WebUI)
 ```
 
-`Open WebUI` 표기까지 완전히 제거하는 로고·화이트라벨 변경은 Enterprise 라이선스 영역이므로 소스 파일을 직접 수정하지 않습니다. 사내망에서 외부 메타데이터를 조회하는 legacy `CUSTOM_NAME`도 사용하지 않습니다.
+**표시 설정의 기술적 한계와 브랜딩 라이선스는 별개입니다.** [v0.11.3 LICENSE 4항](https://github.com/open-webui/open-webui/blob/v0.11.3/LICENSE)은 임의의 연속 30일 동안 앱에 직접 접근하는 최종 사용자가 50명을 넘지 않는 배포, 권리자의 사전 서면 허가, 명시적인 Enterprise 허가를 브랜딩 변경 예외로 둡니다. 따라서 로고·이름 교체가 무조건 Enterprise 전용이라는 종전 안내를 정정합니다. 전체 적용 인원·권한 조건은 미확인이므로 완전 교체 경로는 이 조건에 맞춰 선택합니다. 저작권·라이선스 고지의 보존 조건도 유지합니다. [공식 설명](https://docs.openwebui.com/license/).
 
-저장소의 `start-openwebui.ps1`는 위 값을 기본 적용합니다. 다른 이름으로 시험하려면 다음처럼 실행할 수 있습니다.
+| 바꾸려는 위치 | 준비 방식 |
+|---|---|
+| EES 선택 시 모델 이름·소개·빠른 제안 | 기존 Model의 메타데이터 편집. [첫 화면 적용 안내](03-openwebui-native-agent.md#first-use-entry) |
+| 서비스 표시 이름 | 공식 `WEBUI_NAME`은 위 접미사를 포함함. [v0.11.3 env.py](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/env.py)와 [Sidebar](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/layout/Sidebar.svelte)에서 동작 확인 |
+| Open WebUI 로고·favicon·서비스명을 EES로 완전히 교체 | 브랜딩 조건에 맞는 고정 버전 패치/빌드 또는 허가된 브랜딩 기능 검토. 현재 수정·빌드·사내 적용은 미수행 |
+
+첫 화면의 모델 이름·프로필 이미지와 서비스 전체 로고는 서로 다른 위치입니다. 사내망에서 외부 메타데이터를 조회하는 legacy `CUSTOM_NAME`은 사용하지 않습니다. uvx 캐시나 설치된 파일을 직접 덮어쓰는 대신 [버전 고정·배포·원복 절차](03-openwebui-native-agent.md#release-delivery)를 따릅니다.
+
+저장소의 `start-openwebui.ps1`는 초기 loopback 설치용이며 위 값을 기본 적용합니다. 현재 정상인 LAN 수동 실행을 이 스크립트로 교체하지 않습니다. 초기 설치에서 다른 이름으로 시험하려면 다음처럼 실행할 수 있습니다.
 
 ```powershell
 .\scripts\start-openwebui.ps1 -WebUiName "<DISPLAY_NAME>"
 ```
 
-이 값은 프로세스 시작 시 읽습니다. 이미 실행 중이라면 원래 창에서 `Ctrl+C`로 종료하고 다시 시작한 뒤 브라우저를 새로고침합니다. 데이터 디렉터리나 DB를 삭제할 필요는 없습니다.
+이 값은 프로세스 시작 시 읽습니다. 현재 창의 `$env:`만 바꾸면 새 창에 영구 저장되지 않습니다. 실제 적용 시에는 기존 값과 User 범위 값을 기록하고 필요한 변수만 보존·반영한 뒤, 정한 적용 시점에 같은 작업 폴더·기존 명령으로 재기동합니다. 이번 시연 준비에서는 서버를 재시작하지 않으며 CORS·IP·포트·프록시·DATA_DIR·DB·키를 변경하지 않습니다.
 
 공식 참고: https://docs.openwebui.com/reference/env-configuration/#webui_name
 
@@ -235,7 +243,7 @@ Get-NetConnectionProfile | Select-Object InterfaceAlias, NetworkCategory
 
 ### 파일럿 운영과 원복
 
-- [소개 문구·예시 질문](03-openwebui-native-agent.md#first-use-entry)과 [팀원용 안내](07-team-quickstart.md)는 기능 안정화 후 검토할 초안입니다. 현재 파일럿에 적용·전달하는 선행조건이 아니며, 완료한 설치·연동 검사를 사용자 온보딩마다 반복하지 않습니다.
+- [소개 문구·예시 질문](03-openwebui-native-agent.md#first-use-entry)과 [팀원용 안내](07-team-quickstart.md)는 사용자 요청으로 팀 시연 준비 대상으로 전환했습니다. 현재 UI 저장·팀원 전달은 미확인이며 완료한 설치·연동 검사를 다시 반복하지 않습니다.
 - 처음에는 소수 팀원이 대표 조회를 사용합니다. 도구 실행은 이 Windows PC에서 이루어지고 LLM 요청은 기존 사내 서빙 경로로 전달됩니다. 사용 인원이 늘어났을 때의 동시 처리·응답 시간은 아직 측정하지 않았습니다.
 - PC·WebUI 프로세스가 켜져 있고 사내망이 연결된 동안 사용할 수 있습니다. 화면 잠금과 절전은 구분하며 전원 정책 전체를 바꾸지 않고 이용 시간·재시작 시간을 팀 내에서 정합니다.
 - 같은 DB·키의 완료한 저장/복구 시험은 반복하지 않습니다. 기존 백업 절차를 유지하고, 새 접속 경로와 일반 계정의 대화·파일·개인 PAT·조회 권한을 [공개 전 기준](03-openwebui-native-agent.md#4-공개-전-검증)에 맞춰 확인합니다. 파일럿 참여자 간 비공개 자산이 공유되지 않는지와 처음 쓰는 사람이 결과·오류·원문을 이해하는지 함께 봅니다.

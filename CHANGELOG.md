@@ -4,6 +4,8 @@
 
 ## 2026-09-07
 
+- 팀 시연을 우선해 EES 이름·소개·시작 질문 4개와 짧은 안내의 적용 준비를 재개. 브랜딩의 50명/30일 라이선스 예외를 확인해 Enterprise 전용 단정을 정정하고, 설정/Agent Pack과 upstream 빌드의 배포·원복 계획을 분리함. 실제 브랜딩 교체·CI/사내 배포는 미수행. [준비 기록](evals/scenarios.md#team-demo-customization).
+
 - 공통 정책 적용 범위를 EES Assistant로 한정하고 사용자 제시 여섯 목표를 프로젝트 계획에 반영. 관리자 워크플로와 레거시 간접 UI를 별도 목표로 명시하고 구현 수단 선택 기준·보류 범위를 정리함. 실행 코드·사내 설정 변경 없음. [결정 기록](evals/scenarios.md#six-project-goals).
 
 - 사용자 요청으로 공통 정책의 사용자 적용을 최우선 작업으로 변경. 기존 정책 답변 Skill·공통 Prompt·실행 권한의 역할과 적용 범위를 구분하며, 실제 규정·WebUI 설정은 변경하지 않음. [결정 기록](evals/scenarios.md#common-policy-priority).

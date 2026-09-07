@@ -547,6 +547,17 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 독립 읽기 검토에서 기존 계획의 적용 범위 미확정·워크플로 누락·레거시 연결/UI 혼합과 Native 가이드의 첫 화면 보류 충돌·외부 Agent 비교 조건을 확인해 정리함. Native 가이드의 과거 Prompt UI 미반영 설명도 현재 STATUS를 참조하도록 바꿈. [정책·워크플로 배치](../docs/03-openwebui-native-agent.md#managed-policy-workflow)의 공식 제품 자료는 후보 역할의 참고이며 사내 0.11.3 실행 증거가 아님.
 - 공통 정책은 계속 합성 POC/미승인, Confluence v0.1.5는 Git 준비/사내 미적용 상태임. 이번에는 목표·계획·가이드만 갱신했고 새 정책 내용·Prompt·Skill·Hook·실행 코드·WebUI 설정은 변경하지 않음. 문서·diff를 검사하며 코드 시험·완료한 사내 확인은 반복하지 않음.
 
+<a id="team-demo-customization"></a>
+
+## 2026-09-07 팀 시연용 커스터마이징·배포 방식 준비
+
+- 사용자가 여섯 목표 구현에 앞서 팀원에게 보여주기 위한 로고·서비스명 `EES Assistant`·팀 맞춤 빠른 제안과 수정/배포 파이프라인을 준비하자고 요청함. 첫 화면·소개/제안·짧은 안내의 과거 보류를 이 범위에서 해제함. 조회 카드 전체 재디자인·정책/워크플로/레거시 구현을 이번 시연 준비에 함께 추가하지 않음.
+- [v0.11.3 LICENSE](https://github.com/open-webui/open-webui/blob/v0.11.3/LICENSE) 4항과 [공식 설명](https://docs.openwebui.com/license/)을 확인함. 임의의 연속 30일 내 앱에 직접 접근하는 최종 사용자가 50명 이하인 배포 또는 별도 서면/Enterprise 허가의 예외가 있어 종전 Enterprise 전용 단정을 정정함. 현재 배포 인원·별도 허가는 미확인이며 로고 제거 패치·전체 브랜딩 교체는 미수행. 저작권·라이선스 고지 보존 조건은 유지함.
+- [env.py](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/env.py)의 `WEBUI_NAME` 접미사와 [Sidebar](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/layout/Sidebar.svelte)의 이름/정적 이미지 경로, [Placeholder](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Placeholder.svelte)의 모델 이름·프로필·소개를 대조함. 라이선스 예외와 기본 배포본의 설정 지원을 구분함. 사내 등록 코드·화면은 직접 검사하지 않음.
+- 소개는 범용 질문·글쓰기·업무 정리와 권한 내 문서/이슈 활용으로 준비함. 시작 질문은 메모 정리·Confluence 문서·Jira 현황·GitHub PR의 4개이며 기존 JSON Import 형식을 유지함. GitHub의 `owner/repo`를 무조건 먼저 묻는 예시는 기존 Prompt의 단일 저장소 자동 선택·여러 후보 확인 흐름에 맞춰 제거함. 기존 모델 ID·전체 Prompt·Skill·Tool·PAT를 유지하는 적용 안내임.
+- JSON 파싱·4항목·제목/부제/본문 형식·질문 중복 없음·2,500자 이내를 확인함. 독립 읽기 검토에서 문구의 실제 기능 일치와 현재 LAN 수동 실행/loopback 스크립트의 차이를 확인함. [배포·원복 계획](../docs/03-openwebui-native-agent.md#release-delivery)은 설정/Agent Pack과 프로그램 빌드를 분리하고 고정 커밋·변경 항목·직전 적용 원본을 사용함. CI·자동 패키징·사내 자동 적용은 아직 구현하지 않음.
+- 이번 변경은 시작 질문 JSON·소개/적용 가이드·라이선스 정정·배포 설계·우선순위 기록임. 문서·diff를 검사하며 코드 시험·기존 사내 인증/저장·조회·스트리밍을 반복하지 않음. 실제 UI 저장·팀원 시연·로고/이름 교체·원복·Windows 프로그램 빌드·서비스 재시작은 미실행.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
