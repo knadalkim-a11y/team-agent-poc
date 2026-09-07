@@ -4,6 +4,8 @@
 
 ## 2026-09-07
 
+- 초기 사용 인원 50명 이하 확인에 따라 EES 이름·아이콘을 적용하는 0.11.3+ees.1 별도 wheel 빌더와 해시/원본 커밋을 기록하는 Agent Pack ZIP 도구를 추가. 관련 검사·변경별 패키징 Actions를 준비하고 기존 Windows 환경을 보존하는 전환/원복 절차를 정리함. 사내 배포는 별도. [검증·범위](evals/scenarios.md#ees-branding-delivery).
+
 - 팀 시연을 우선해 EES 이름·소개·시작 질문 4개와 짧은 안내의 적용 준비를 재개. 브랜딩의 50명/30일 라이선스 예외를 확인해 Enterprise 전용 단정을 정정하고, 설정/Agent Pack과 upstream 빌드의 배포·원복 계획을 분리함. 실제 브랜딩 교체·CI/사내 배포는 미수행. [준비 기록](evals/scenarios.md#team-demo-customization).
 
 - 공통 정책 적용 범위를 EES Assistant로 한정하고 사용자 제시 여섯 목표를 프로젝트 계획에 반영. 관리자 워크플로와 레거시 간접 UI를 별도 목표로 명시하고 구현 수단 선택 기준·보류 범위를 정리함. 실행 코드·사내 설정 변경 없음. [결정 기록](evals/scenarios.md#six-project-goals).

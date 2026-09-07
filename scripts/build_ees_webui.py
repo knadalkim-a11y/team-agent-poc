@@ -1,0 +1,206 @@
+"""Repack the pinned official wheel with reviewed EES branding, without installing it.
+
+Requires only Python's standard library. No network, credentials, runtime data,
+dependency resolution, or upstream code execution is involved. Branding use must
+meet the upstream license; this builder preserves every bundled license notice.
+"""
+
+import argparse
+import base64
+import csv
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+import tempfile
+from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
+
+
+UPSTREAM_VERSION = "0.11.3"
+VERSION = "0.11.3+ees.1"
+SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
+SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
+WHEEL_FILENAME = f"open_webui-{VERSION}-py3-none-any.whl"
+SOURCE_INFO = f"open_webui-{UPSTREAM_VERSION}.dist-info/"
+TARGET_INFO = f"open_webui-{VERSION}.dist-info/"
+SOURCE_APP = "open_webui/frontend/_app/"
+TARGET_APP = "open_webui/frontend/_ees1/"
+ASSET_DIR = Path(__file__).resolve().parents[1] / "branding" / "ees" / "assets"
+ASSET_NAMES = (
+    "favicon.svg", "favicon.png", "favicon-96x96.png", "favicon.ico",
+    "apple-touch-icon.png", "logo.png", "splash.png", "splash-dark.png",
+)
+
+# Every replacement is pinned to one reviewed upstream file and occurrence count.
+# Upstream comments, attribution strings, documentation, and source maps remain.
+PATCHES = {
+    "open_webui/env.py": [(
+        b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'Open WebUI')\n"
+        b"if WEBUI_NAME != 'Open WebUI':\n    WEBUI_NAME += ' (Open WebUI)'",
+        b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'EES Assistant')", 1,
+    )],
+    "open_webui/frontend/index.html": [
+        (b"<title>Open WebUI</title>", b"<title>EES Assistant</title>", 1),
+        (b"/_app/", b"/_ees1/", 49),
+    ],
+    SOURCE_APP + "immutable/chunks/CHq18Uto.js": [
+        (b'const ca="Open WebUI"', b'const ca="EES Assistant"', 1),
+    ],
+    SOURCE_APP + "immutable/nodes/0.CvnwnD8l.js": [
+        (b" / Open WebUI`", b" / EES Assistant`", 3),
+    ],
+    SOURCE_APP + "immutable/nodes/26.Ck8JdNW5.js": [
+        (b" / Open WebUI`", b" / EES Assistant`", 2),
+    ],
+    SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
+        (b"/_app/version.json", b"/_ees1/version.json", 1),
+        (b'an="0.11.3"', b'an="0.11.3+ees.1"', 1),
+    ],
+    SOURCE_APP + "version.json": [
+        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.1"}', 1),
+    ],
+    SOURCE_INFO + "METADATA": [
+        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.1\n", 1),
+    ],
+}
+
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def target_name(name):
+    if name.startswith(SOURCE_INFO):
+        return TARGET_INFO + name[len(SOURCE_INFO):]
+    if name.startswith(SOURCE_APP):
+        return TARGET_APP + name[len(SOURCE_APP):]
+    return name
+
+
+def prepare_replacements(source, asset_dir):
+    """Validate every precondition before creating any output file."""
+    names = source.namelist()
+    if len(names) != len(set(names)):
+        raise ValueError("The source wheel contains duplicate entries.")
+    targets = [target_name(name) for name in names]
+    if len(targets) != len(set(targets)):
+        raise ValueError("The target wheel would contain duplicate entries.")
+    if any(name.endswith(("/RECORD.jws", "/RECORD.p7s")) for name in names):
+        raise ValueError("Signed wheels cannot be repacked by this builder.")
+    required = set(PATCHES) | {SOURCE_INFO + "RECORD", SOURCE_INFO + "WHEEL"}
+    asset_targets = {
+        prefix + name: name
+        for prefix in ("open_webui/static/", "open_webui/frontend/static/")
+        for name in ASSET_NAMES
+    }
+    asset_targets["open_webui/frontend/favicon.png"] = "favicon.png"
+    required.update(asset_targets)
+    missing = required - set(names)
+    if missing:
+        raise ValueError("Missing wheel entries: " + ", ".join(sorted(missing)))
+
+    replacements = {}
+    for name, patches in PATCHES.items():
+        content = source.read(name)
+        for old, new, expected in patches:
+            actual = content.count(old)
+            if actual != expected:
+                raise ValueError(f"Patch precondition failed: {name}: expected {expected}, got {actual}.")
+            content = content.replace(old, new)
+        replacements[name] = content
+    assets = {}
+    for name in ASSET_NAMES:
+        path = Path(asset_dir) / name
+        if not path.is_file() or path.stat().st_size == 0:
+            raise ValueError(f"Missing or empty branding asset: {name}")
+        assets[name] = path.read_bytes()
+    replacements.update({name: assets[asset] for name, asset in asset_targets.items()})
+    return replacements
+
+
+def zip_entry(name, attributes=0o100644 << 16):
+    entry = ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+    entry.create_system = 3
+    entry.external_attr = attributes
+    entry.compress_type = ZIP_DEFLATED
+    return entry
+
+
+def build(wheel, output_dir, asset_dir=ASSET_DIR):
+    wheel, output_dir = Path(wheel), Path(output_dir)
+    if wheel.name != SOURCE_FILENAME or sha256_file(wheel) != SOURCE_SHA256:
+        raise ValueError("Expected the unchanged, pinned official Open WebUI 0.11.3 wheel.")
+    wheel_target = output_dir / WHEEL_FILENAME
+    manifest_target = output_dir / "manifest.json"
+    if any(path.exists() or path.is_symlink() for path in (wheel_target, manifest_target)):
+        raise ValueError("Output already exists; choose an empty release destination.")
+
+    with ZipFile(wheel) as source:
+        replacements = prepare_replacements(source, asset_dir)
+        entries = sorted(source.infolist(), key=lambda entry: target_name(entry.filename))
+        output_dir.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix=".ees-build-", dir=output_dir) as temporary:
+            built = Path(temporary) / WHEEL_FILENAME
+            record = []
+            with ZipFile(built, "w", compression=ZIP_DEFLATED, compresslevel=6) as destination:
+                for entry in entries:
+                    if entry.filename == SOURCE_INFO + "RECORD":
+                        continue
+                    name = target_name(entry.filename)
+                    content = replacements.get(entry.filename)
+                    if content is None:
+                        content = source.read(entry)
+                    digest = base64.urlsafe_b64encode(hashlib.sha256(content).digest()).rstrip(b"=").decode("ascii")
+                    destination.writestr(zip_entry(name, entry.external_attr), content, compresslevel=6)
+                    record.append((name, "sha256=" + digest, str(len(content))))
+                record_name = TARGET_INFO + "RECORD"
+                record.append((record_name, "", ""))
+                csv_text = io.StringIO(newline="")
+                csv.writer(csv_text, lineterminator="\n").writerows(record)
+                destination.writestr(zip_entry(record_name), csv_text.getvalue().encode(), compresslevel=6)
+
+            manifest = {
+                "schema_version": 1,
+                "upstream_version": UPSTREAM_VERSION,
+                "version": VERSION,
+                "source": {"filename": SOURCE_FILENAME, "sha256": SOURCE_SHA256},
+                "wheel": {"filename": WHEEL_FILENAME, "sha256": sha256_file(built), "size": built.stat().st_size},
+                "changed_files": sorted([target_name(name) for name in replacements] + [record_name]),
+                "relocated_frontend": {
+                    "from": SOURCE_APP, "to": TARGET_APP,
+                    "file_count": sum(entry.filename.startswith(SOURCE_APP) for entry in entries),
+                },
+            }
+            manifest_file = Path(temporary) / "manifest.json"
+            manifest_file.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+            # Hard links publish complete files without overwriting a racing build.
+            os.link(built, wheel_target)
+            try:
+                os.link(manifest_file, manifest_target)
+            except OSError:
+                wheel_target.unlink()
+                raise
+    return manifest
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--wheel", required=True, type=Path)
+    parser.add_argument("--output-dir", required=True, type=Path)
+    args = parser.parse_args()
+    try:
+        manifest = build(args.wheel, args.output_dir)
+    except (OSError, ValueError) as error:
+        parser.exit(1, f"Build stopped: {error}\n")
+    print(f"Prepared {manifest['wheel']['filename']}")
+    print(f"SHA256={manifest['wheel']['sha256']}")
+    print("No runtime installation or server changes were performed.")
+
+
+if __name__ == "__main__":
+    main()

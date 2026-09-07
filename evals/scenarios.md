@@ -558,6 +558,22 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - JSON 파싱·4항목·제목/부제/본문 형식·질문 중복 없음·2,500자 이내를 확인함. 독립 읽기 검토에서 문구의 실제 기능 일치와 현재 LAN 수동 실행/loopback 스크립트의 차이를 확인함. [배포·원복 계획](../docs/03-openwebui-native-agent.md#release-delivery)은 설정/Agent Pack과 프로그램 빌드를 분리하고 고정 커밋·변경 항목·직전 적용 원본을 사용함. CI·자동 패키징·사내 자동 적용은 아직 구현하지 않음.
 - 이번 변경은 시작 질문 JSON·소개/적용 가이드·라이선스 정정·배포 설계·우선순위 기록임. 문서·diff를 검사하며 코드 시험·기존 사내 인증/저장·조회·스트리밍을 반복하지 않음. 실제 UI 저장·팀원 시연·로고/이름 교체·원복·Windows 프로그램 빌드·서비스 재시작은 미실행.
 
+<a id="ees-branding-delivery"></a>
+
+## 2026-09-07 EES 브랜딩·전달 도구 구현
+
+- 사용자가 초기 배포 인원 50명 이하를 확인함. 앞선 v0.11.3 라이선스 예외를 적용하는 범위로 EES 브랜딩을 준비하며 사내 인원 계수·라이선스 허가서 발급을 직접 수행한 것은 아님.
+- 최신 main `1a87897`·관련 열린 PR 0개를 확인함. 공식 `open_webui-0.11.3-py3-none-any.whl`을 의존성 없이 내려받아 SHA-256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`를 고정함. 단순 이름 환경변수만으로 접미사가 없어지지 않는 원본 동작과 config.py의 static 파일 재복사 경로를 확인함.
+- [브랜딩 빌더](../scripts/build_ees_webui.py)는 기본 이름·접미사·페이지 제목/알림·아이콘을 제한된 파일/개수로 변경함. frontend 1,653개 파일을 `_ees1` 경로로 옮겨 이전 immutable JavaScript 캐시와 분리하고 버전 조회도 일치시킴. 원본 라이선스·주석·비대상 파일·의존성 요구는 보존함. 모델 이름/소개/프로필은 별도 메타데이터이며 도움말·출처·CLI의 upstream 이름은 남음.
+- Linux / Python 3.12.13에서 `EES_TEST_UPSTREAM_WHEEL=<공식 wheel> python -m unittest discover -s tests -p test_ees_branding_build.py -v`: 합성 6개와 실제 wheel 1개, **7/7 PASS**. 5,894개 항목의 RECORD/크기/해시, 비대상 바이트·라이선스·의존성 보존, 원본/패치 불일치·필수 파일 부재·출력 충돌 차단, 합성 빌드의 재현성을 확인함. 서버 코드를 import하거나 설치·시작하지 않음.
+- 같은 환경에서 실제 CLI 산출물 `0.11.3+ees.1` 생성 완료: 146,008,333바이트, SHA-256 `97d414e711e1950484df25650999e877b71f0ea6b362b056ac7e21796c88f19a`. 내용 변경은 텍스트 8·이미지 17·RECORD 1개이며 namespace 이동과 구분함. 플랫폼별 압축 라이브러리 차이가 있으면 산출물 해시는 해당 manifest를 기준으로 함.
+- [전달 도구](../scripts/build_demo_bundle.py)의 Git 합성 시험 **7/7 PASS**: 정확한 커밋·파일 해시/크기, dirty 기본 차단/개발 표시, 정한 추적 파일만 포함, 민감 이름·비추적/심볼릭 링크 제외, 출력 충돌·원본 상태 변경 차단, 브랜딩 manifest/실제 wheel 해시 대조, 동일 ZIP 재현성을 확인함.
+- 실제 EES wheel을 포함한 개발용 ZIP도 생성해 22개 전달 파일의 크기/해시·프로필 PNG 포함·현재 커밋과 `source_dirty=true` 표시를 대조함. 이 개발용 ZIP은 clean 릴리스로 게시하지 않음.
+- EES SVG와 PNG/ICO 파생 자산을 생성하고 아이콘을 시각 확인함. 변경 Python/JavaScript의 문법·frontend 참조 147개를 검사함. 실제 브라우저 렌더·모바일·Windows 설치·사내 UI 교체·프로그램 전환/원복은 미실행.
+- [Actions](../.github/workflows/ees-delivery.yml)는 Windows/Linux 패키징 검사와 main의 전달물 생성, 브랜딩 변경 시에만 별도 wheel 생성을 준비함. YAML 파싱 검사를 수행함. GitHub runner 실행·artifact 게시 결과는 로컬 검사와 구분하며 최초 실행 상태는 후속으로 확인함.
+- 독립 읽기 검토에서 기존 uvx 캐시를 덮어쓰지 않고 같은 Python/전체 의존성의 별도 환경을 준비하는 방식을 선택함. 기존 DATA_DIR·키·cwd·CORS·host/port를 고정하고 준비 후 한 서버만 전환하며 원복은 보존한 실행 파일을 사용함. 정확한 현재 실행 파일/인자가 아직 없어 자동 설치·전환은 제공하지 않음. 현재 미적용인 Selector 실행 파일의 버전 제한도 보존함. 독립 검토에서 지적한 프로필 PNG의 별도 전달 누락은 PNG/SVG allowlist 추가로 보완했고, 설치 루트 `.env`·암호화/정적 파일/DB override의 전환 전 확인을 가이드에 명시함.
+- 기존 일반 채팅·연동·PAT 저장/권한 시험과 전체 Prompt 재입력은 반복하지 않음. 빠른 제안·소개는 준비본을 재사용하며 실제 저장/팀원 시연은 별도 사용자 확인 대상임.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

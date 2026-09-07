@@ -54,7 +54,8 @@
 | [docs/STATUS.md](docs/STATUS.md) | 현재 목표·다음 작업·미해결·Git 준비와 WebUI 적용 상태 |
 | [agent-pack/](agent-pack/README.md) | 서비스 Assistant에 배포할 Prompt·정책·Skill·합성 Knowledge 원본 |
 | [agent-pack/skills/confluence-read/](agent-pack/skills/confluence-read/) | 기능 단위 묶음: 지침과 실행 코드를 함께 관리 |
-| [scripts/](scripts/) | 개발·운영자가 실행하는 시작·점검 스크립트 |
+| [scripts/](scripts/) | 개발·운영자의 시작·점검·배포물 생성 스크립트 |
+| [branding/ees/](branding/ees/) | EES 이름·아이콘 배포 자산; [빌드·배포 안내](docs/03-openwebui-native-agent.md#release-delivery) |
 | [config/](config/) | 비밀값 없는 설정 예제 |
 | [tests/](tests/) | 자동 실행하는 검증 코드 |
 | [evals/](evals/) | 합격 기준·실환경 판정·날짜별 검증 증거 |

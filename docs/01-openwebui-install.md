@@ -71,21 +71,21 @@ Community 버전의 공식 `WEBUI_NAME` 환경 변수를 사용합니다.
 $env:WEBUI_NAME = "EES Assistant"
 ```
 
-Open WebUI 0.11.3은 Community 라이선스에서 다음처럼 원본 프로젝트명을 덧붙입니다.
+공식 Open WebUI 0.11.3 배포본은 이름 설정에 다음처럼 원본 프로젝트명을 덧붙입니다.
 
 ```text
 EES Assistant (Open WebUI)
 ```
 
-**표시 설정의 기술적 한계와 브랜딩 라이선스는 별개입니다.** [v0.11.3 LICENSE 4항](https://github.com/open-webui/open-webui/blob/v0.11.3/LICENSE)은 임의의 연속 30일 동안 앱에 직접 접근하는 최종 사용자가 50명을 넘지 않는 배포, 권리자의 사전 서면 허가, 명시적인 Enterprise 허가를 브랜딩 변경 예외로 둡니다. 따라서 로고·이름 교체가 무조건 Enterprise 전용이라는 종전 안내를 정정합니다. 전체 적용 인원·권한 조건은 미확인이므로 완전 교체 경로는 이 조건에 맞춰 선택합니다. 저작권·라이선스 고지의 보존 조건도 유지합니다. [공식 설명](https://docs.openwebui.com/license/).
+**표시 설정의 기술적 한계와 브랜딩 라이선스는 별개입니다.** [v0.11.3 LICENSE 4항](https://github.com/open-webui/open-webui/blob/v0.11.3/LICENSE)은 임의의 연속 30일 동안 앱에 직접 접근하는 최종 사용자가 50명을 넘지 않는 배포, 권리자의 사전 서면 허가, 명시적인 Enterprise 허가를 브랜딩 변경 예외로 둡니다. 따라서 로고·이름 교체가 무조건 Enterprise 전용이라는 종전 안내를 정정합니다. 2026-09-07 사용자가 초기 배포 인원 50명 이하를 확인했습니다. 이 범위의 EES 브랜딩 패키지를 준비하며, 이후 범위를 늘릴 때는 위 조건을 다시 확인합니다. 저작권·라이선스 고지의 보존 조건도 유지합니다. [공식 설명](https://docs.openwebui.com/license/).
 
 | 바꾸려는 위치 | 준비 방식 |
 |---|---|
 | EES 선택 시 모델 이름·소개·빠른 제안 | 기존 Model의 메타데이터 편집. [첫 화면 적용 안내](03-openwebui-native-agent.md#first-use-entry) |
-| 서비스 표시 이름 | 공식 `WEBUI_NAME`은 위 접미사를 포함함. [v0.11.3 env.py](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/env.py)와 [Sidebar](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/layout/Sidebar.svelte)에서 동작 확인 |
-| Open WebUI 로고·favicon·서비스명을 EES로 완전히 교체 | 브랜딩 조건에 맞는 고정 버전 패치/빌드 또는 허가된 브랜딩 기능 검토. 현재 수정·빌드·사내 적용은 미수행 |
+| 서비스 표시 이름 | EES 패키지의 기본값은 `EES Assistant`, 자동 접미사는 제거함. 기존 `WEBUI_NAME`을 명시했다면 해당 값이 우선함 |
+| 로그인·사이드바·시작 로고·favicon·제목 | [EES 아이콘](../branding/ees/assets/favicon.svg)과 이름을 넣은 `0.11.3+ees.1` 패키지. upstream 0.11.3 유지, 사내 전환은 별도 |
 
-첫 화면의 모델 이름·프로필 이미지와 서비스 전체 로고는 서로 다른 위치입니다. 사내망에서 외부 메타데이터를 조회하는 legacy `CUSTOM_NAME`은 사용하지 않습니다. uvx 캐시나 설치된 파일을 직접 덮어쓰는 대신 [버전 고정·배포·원복 절차](03-openwebui-native-agent.md#release-delivery)를 따릅니다.
+첫 화면의 모델 이름·프로필 이미지와 서비스 전체 로고는 서로 다른 위치입니다. 기존 모델의 프로필도 바꾸려면 편집 화면에 [favicon.png](../branding/ees/assets/favicon.png)를 올립니다. 도움말·라이선스·출처 링크나 CLI의 upstream 이름까지 전부 지우는 패키지는 아닙니다. 사내망에서 외부 메타데이터를 조회하는 legacy `CUSTOM_NAME`은 사용하지 않습니다. uvx 캐시나 설치된 파일을 직접 덮어쓰는 대신 [버전 고정·배포·원복 절차](03-openwebui-native-agent.md#release-delivery)를 따릅니다.
 
 저장소의 `start-openwebui.ps1`는 초기 loopback 설치용이며 위 값을 기본 적용합니다. 현재 정상인 LAN 수동 실행을 이 스크립트로 교체하지 않습니다. 초기 설치에서 다른 이름으로 시험하려면 다음처럼 실행할 수 있습니다.
 

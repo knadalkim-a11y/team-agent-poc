@@ -31,6 +31,10 @@ __pycache__/
 *.py[cod]
 .uv-cache/
 
+# Reproducible program and delivery artifacts
+/dist/
+*.whl
+
 # Temporary, backup, Windows and editors
 *.tmp
 *.bak

@@ -449,26 +449,51 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 ## 5. 업데이트 원칙
 
-팀 시연부터 **Git 수정 → 관련 검사·검토 → 고정 커밋/릴리스 → 변경 파일·적용표 전달 → 사내 관리자 반영 → 바뀐 부분 확인·기록**으로 관리합니다. 현재 CI·자동 패키징·사내 자동 배포는 미구현입니다. 첫 자동화는 검사와 전달물 생성까지를 대상으로 하고 사내 서버 반영은 수동으로 유지하는 안입니다.
+**Git 수정 → 관련 검사·검토 → 커밋별 전달물 생성 → 사내 관리자 반영 → 바뀐 부분 확인·기록**으로 관리합니다. [EES delivery](../.github/workflows/ees-delivery.yml)는 패키징 검사와 파일 전달을 자동화합니다. 사내 서버·DB·WebUI 등록 항목을 자동 수정하는 연결은 없습니다.
 
-| 변경 종류 | 최소 배포 단위 | 원복 기준 |
+| 변경 종류 | 배포 단위 | 원복 기준 |
 |---|---|---|
-| 모델 이름·소개·빠른 제안 | 기존 모델 ID의 해당 메타데이터. 제안 JSON은 목록에 추가되므로 중복 Import 방지 | 반영 전 이름·소개·제안 목록만 복구 |
-| 공통 Prompt·Skill·Tool | 검토한 커밋의 변경 항목만 기존 ID에 반영 | 실제 배포됐던 직전 커밋의 해당 항목으로 복구 |
-| 서비스 표시 이름 설정 | 기존 값 기록 후 해당 변수만 적용. 현재 LAN 수동 기동·CORS 유지 | 이전 값과 동일 작업 폴더·기동 명령으로 복구 |
-| 향후 Open WebUI 소스 커스터마이징 | upstream 0.11.3과 정확한 SHA·최소 패치·별도 빌드 산출물을 고정. [브랜딩 조건](01-openwebui-install.md#3-표시-이름-설정)에 맞춰 선택 | 같은 upstream 버전의 직전 프로그램 산출물로 복구. DB·키는 보존 |
+| 모델 이름·소개·빠른 제안 | 기존 모델 ID의 메타데이터. [소개·제안 적용](#first-use-entry), 프로필은 [EES 아이콘](../branding/ees/assets/favicon.png) | 반영 전 이름·소개·제안·프로필만 복구 |
+| 공통 Prompt·Skill·Tool | 커밋별 Agent Pack ZIP에서 바뀐 항목만 기존 ID에 반영 | 실제 적용했던 직전 커밋의 해당 항목 |
+| 서비스 이름·아이콘 | `open_webui-0.11.3+ees.1-py3-none-any.whl`과 브랜딩 manifest | 보존한 기존 프로그램 환경으로 기동; 같은 DATA_DIR·키·접속 설정 |
 
-전달물에는 원본 커밋, 대상 WebUI 버전, 변경 파일과 해시, 기존 항목별 반영 위치, 재시작 필요 여부, 직전 적용 원본을 포함하도록 준비합니다. 패키지는 검토한 배포 파일만 명시적으로 포함하며 전체 작업 폴더·DB·키·PAT·실제 주소·사용자 작성물을 묶지 않습니다. GitHub Actions 등 검사/패키징 자동화는 이 계약을 바탕으로 다음 구현에서 추가하며 이번 변경으로 이미 작동한다고 기록하지 않습니다.
+### 검사와 전달물 생성
 
-소스 커스터마이징이 필요하면 고정 upstream에 우리 패치를 적용해 별도 산출물을 만들고, Agent Pack 변경마다 WebUI 전체를 다시 빌드하지 않습니다. uvx 캐시·설치된 `site-packages`의 수작업 수정이나 Linux 가상환경을 Windows에 복사하는 방식을 배포 절차로 쓰지 않습니다. 프로그램 교체는 기존 중단·백업 절차를 재사용하고 같은 작업 폴더·DATA_DIR·키·CORS·네트워크 설정을 보존합니다. upstream 업그레이드가 포함될 때는 DB 호환성을 별도로 검토하며 단순 파일 원복을 보장하지 않습니다. 모델 메타데이터만 바뀐 경우 서버 재시작이나 DB 전체 복원은 필요하지 않습니다.
+PR과 관련 main 변경에 Python 3.11 / Windows·Linux의 패키징 시험, 문서·diff 점검을 실행합니다. main에서는 `EES-demo-<commit>.zip`을 Actions artifact로 생성합니다. Prompt·Skill 수정만 있으면 작은 Agent Pack 묶음만 만들며 브랜딩 자산·빌더·workflow가 바뀐 커밋에만 프로그램 wheel도 포함합니다. 기존 커밋의 프로그램을 다시 만들려면 Actions → **EES delivery → Run workflow → include_branding**을 선택합니다. 현재 자동 검사 범위는 패키징이며 개별 업무 Tool 기능 시험·사내 사용 확인을 대신하지 않습니다.
 
-현재 `scripts/start-openwebui.ps1`와 `scripts/smoke-test.ps1`는 초기 loopback 기준이므로 정상인 LAN 수동 운영을 이 스크립트로 대체하지 않습니다. 사내 반영 명령을 전달할 때는 각 복사 블록을 2,500자 이내로 준비합니다.
+Artifacts 보존 기간은 14일입니다. 적용할 ZIP과 직전 배포 ZIP은 승인된 내부 위치에 보관합니다. ZIP의 `manifest.json`에 원본 커밋·파일별 SHA-256/크기를 기록하며 브랜딩 포함 시 그 manifest도 넣습니다. 배포 도구는 Git 추적 파일 중 정한 경로만 포함하고 `.env`·DB·키·비추적 파일을 제외합니다. 운영 데이터나 사용자 작성물을 Git/전달 폴더에 넣지 않습니다.
 
-- 공식 배포 자산은 Git 파일을 관리 원본으로 취급하고 Git에서 수정한 뒤 WebUI에 반영합니다. 개인·팀 작성물 전체를 Git 관리 대상으로 삼지 않습니다.
-- 공식 항목을 WebUI에서 직접 수정했다면 Git 원본과 차이를 확인하고 검토·반영하여 복사본 간 불일치를 해소합니다.
-- Policy·Skill·Knowledge에는 문서 ID와 버전을 둡니다.
-- 자동 업데이트는 롤백·승인·감사 로그가 마련되기 전에는 사용하지 않습니다.
-- 모델·서빙 옵션을 교체하면 [사내 모델 운용 기준](../versions.md#사내-모델-운용-기준)에 따라 기존 평가 질문으로 호출 품질·횟수·응답 시간을 다시 확인합니다.
+로컬 개발 환경에서도 다음 명령으로 만들 수 있습니다. 실제 배포에는 검토한 clean checkout을 사용하며 로컬 개발용 `--allow-dirty` 산출물은 미커밋 상태로 표시됩니다.
+
+```powershell
+python scripts/build_demo_bundle.py --output-dir dist/delivery
+```
+
+프로그램 묶음이 필요한 경우에만 같은 checkout에서 실행합니다. `pip download`는 현재 환경에 WebUI나 의존성을 설치하지 않습니다.
+
+```powershell
+python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
+python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
+python scripts/build_demo_bundle.py --output-dir dist/delivery --branding-dir dist/branding
+```
+
+[브랜딩 빌더](../scripts/build_ees_webui.py)는 공식 wheel의 고정 SHA-256과 패치 위치를 확인한 뒤 별도 파일을 만듭니다. 이름 기본값·자동 접미사·브라우저 제목/알림·아이콘을 변경하고, frontend 경로를 릴리스별로 바꿔 이전 JavaScript 캐시와 분리합니다. upstream 라이선스·주석·의존성 요구는 보존하고 wheel RECORD를 다시 계산합니다. 버전·원본 파일이나 패치 위치가 다르면 중단합니다. 임의 버전에 패치를 강제 적용하지 않습니다.
+
+아이콘은 저장소의 SVG가 원본입니다. 수정할 때만 개발 환경의 CairoSVG 2.8.2·Pillow 12.3.0과 시스템 Cairo로 [렌더 스크립트](../scripts/render_ees_brand_assets.py)를 실행하고 파생 파일을 함께 커밋합니다. 일반 wheel 빌드와 사내 서버에는 이 렌더 의존성이 필요하지 않습니다. 다음 브랜딩 변경은 패키지 버전·frontend 경로를 함께 올려 별도 릴리스로 관리합니다.
+
+### 기존 Windows 서버에 적용
+
+브랜딩 프로그램 교체 전에 **현재 실행 중인 Python 환경·작업 폴더·기동 인자·명시된 DATA_DIR·기존 키 설정 방식**을 한 번 확인합니다. 이는 이미 완료한 인증/저장 시험의 반복이 아니라 바꿀 실행 파일과 원복 대상을 식별하는 과정입니다. 사내 경로·패키지 전체 목록·키는 내부에 보관하고 외부에는 필요한 버전·확인 결과만 전달합니다. 기존 설치 루트의 `.env`, `ENABLE_VALVE_ENCRYPTION`·`STATIC_DIR`·`FRONTEND_BUILD_DIR`·외부 DB 설정 여부도 값 노출 없이 확인합니다. 프로세스가 `.env`에서 읽은 값은 부모 PowerShell에 없을 수 있으므로, 이런 설정이 있으면 원본과 새 환경의 대응을 확인한 뒤 전환합니다.
+
+1. 현재 서버를 유지한 채 같은 Python 패치 버전의 릴리스별 별도 venv를 준비합니다. 기존 환경의 전체 설치 패키지 목록을 고정 입력으로 사용하고 Open WebUI 항목만 EES wheel로 교체합니다. 의존성 추가·버전 차이나 설치 실패가 있으면 전환하지 않습니다. 현재 환경을 직접 덮어쓰거나 새 uvx에서 의존성을 다시 선택하게 하지 않습니다.
+2. 준비가 끝나면 기존 서버를 종료하고 기존 내부 백업 절차로 data·키 복구본을 확보합니다. 같은 DB를 쓰는 서버를 두 개 동시에 실행하지 않습니다.
+3. 기존 작업 폴더에서 **원래 DATA_DIR의 절대 경로·키·CORS·IP/포트·프록시 설정**을 유지하며 새 환경의 `Scripts\open-webui.exe`에 기존 기동 인자를 넘깁니다. 이름은 `WEBUI_NAME=EES Assistant`로 적용하고 legacy `CUSTOM_NAME` 설정은 사용하지 않습니다. 설치 위치를 바꾸면서 DATA_DIR 기본값을 사용하면 새 DB가 생길 수 있으므로 명시된 기존 경로를 사용합니다.
+4. 기존 브라우저 탭은 강력 새로고침을 한 번 하고 로그인/사이드바 이름·아이콘·첫 화면을 확인합니다. 실행 환경이 바뀐 경우 일반 대화 한 건으로 응답 스트리밍만 함께 확인합니다. 기존 연동·PAT·권한 시험을 전체 반복하지 않습니다.
+5. 이상이 있으면 새 서버를 종료하고 기록한 기존 실행 파일·동일 인자로 돌아갑니다. DB·키를 재생성하거나 캐시를 정리하지 않습니다. 원래 uvx 명령도 보존합니다. upstream 업그레이드는 이번 변경에 포함하지 않으며, 추후 업그레이드의 DB 호환성은 별도로 검토합니다.
+
+정확한 사내 실행 파일이 아직 확인되지 않았으므로 자동 설치/전환 스크립트는 제공하지 않습니다. 기존 `start-openwebui.ps1`·`smoke-test.ps1`는 초기 loopback 기준이며 선택 Selector 실행 파일도 현재 미적용입니다. 이번 브랜딩 전환에 함께 도입하지 않습니다. 실제 반영 명령은 환경 확인 후 각각 2,500자 이내로 전달합니다. 모델 메타데이터만 바꾸는 작업에는 서버 재시작이 필요하지 않습니다.
+
+공식 항목을 WebUI에서 직접 수정했다면 Git과의 차이를 검토해 원본을 맞춥니다. Policy·Skill·Knowledge에는 문서 ID와 버전을 두며, 모델·서빙 옵션이 바뀌면 [사내 모델 운용 기준](../versions.md#사내-모델-운용-기준)의 관련 흐름만 확인합니다.
 
 <a id="update-existing-instructions"></a>
 
