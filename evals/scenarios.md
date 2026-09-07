@@ -446,6 +446,17 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 다음은 새 대화에서 GitHub의 기존 허용 저장소 목록 카드→PR 본문 질문 넣기→입력 확인/수동 전송→본문·원문을 한 흐름으로 확인함. 빈 결과·오류이면 해당 상태만 받고 원인 확인에 필요한 경우에만 호출 이력을 확인함. 이후 Jira/Confluence의 변경 흐름을 이어가며 완료한 저장·인증·20회 검사는 반복하지 않음.
 - STATUS와 이 기록만 변경하며 실행 코드·Prompt 원본·설정·자동 시험은 변경/재실행하지 않음. 문서 점검·diff 검사를 수행함. 첫 화면·온보딩·Selector 실행 파일은 계속 보류함.
 
+
+<a id="chat-live-update-observation"></a>
+
+## 2026-09-07 새로고침 뒤에만 답변이 보이는 현상
+
+- 기존 기동으로 재시작해 `/health` true를 보고하고 도구 3개·전체 Prompt 저장을 마친 뒤, 사용자는 새 대화에서 `안녕`을 보내도 답변 없이 멈춰 보이지만 UI를 새로고침하면 답변이 나타난다고 보고함. 선택 모델·실제 도구 호출·HTTP/WebSocket 상태·브라우저/서버 로그는 미확인. 앞선 정상 기록을 삭제하거나 재시작 뒤 대화 정상으로 확대하지 않음.
+- 저장된 답변을 다시 읽었을 가능성이 있어 모델의 답변 처리와 실시간 이벤트 전달/화면 반영을 분리해 진단함. Open WebUI v0.11.3 공식 소스와 [공식 연결 오류 가이드](https://docs.openwebui.com/troubleshooting/connection-error/)를 대조함. 저장 대화의 DB 반영→chat:completion 및 Socket.IO events→브라우저 갱신은 별도 경로이며, 이 소스 설명 자체가 사내 원인 확인은 아님. 정확한 소스 링크와 다음 절차는 [기존 장애 가이드](../docs/troubleshooting.md#chat-visible-after-refresh)에 정리함.
+- 독립된 읽기 전용 소스 조사로 기본 true 설정의 WebSocket 전용 전송, 자동 polling/SSE 전환 부재, Socket.IO에 적용되는 CORS 설정을 확인함. 초기 진단 문서의 loopback origin과 이후 사내 IP 접속은 불일치 가능성이 있으나 실제 실행 값·거부 로그는 미수집. 사용자는 추가로 127.0.0.1에서 자신의 IP 주소로 바꾼 뒤부터 이 현상이 있었던 것 같다고 보고함. 이는 시점에 대한 체감 보고이며 실제 설정·재현 대조는 아님. CORS origin 불일치를 우선 후보로 두되 프런트 처리 오류도 열어 두고 WinError 64·모델·새 Tool/Prompt를 원인으로 확정하지 않음.
+- IP 접속 전환 단서를 반영해 먼저 현재 서버 PowerShell 로그의 `is not an accepted origin` 유무/안전한 한 줄을 확인함. 해당 로그가 없다고 CORS 정상으로 확정하지 않으며, 필요한 경우 브라우저 F12→Console의 WebSocket/CORS/connect_error/TypeError 문구 1~2줄로 이어감. connect_error는 일반 로그일 수 있어 빨간 오류에 한정하지 않음. 값·전체 로그·HAR는 받지 않고 이후 필요할 때 Network로 좁힘. 이는 새 장애 진단이며 완료한 20회·인증·저장 시험 반복이 아님.
+- GitHub 카드 확인과 Jira/Confluence 후속 흐름은 이 표시 문제의 원인이 좁혀질 때까지 대기. 서버 설정·기동·Tool/Prompt 코드·패키지·키/DB·브라우저 상태는 변경하지 않음. STATUS·기존 장애 가이드·이 기록만 갱신하고 문서·diff 검사를 수행함. 실제 오류 원인·조치 효과·일반 채팅/새 카드 정상 동작은 미확인.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

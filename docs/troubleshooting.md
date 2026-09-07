@@ -75,6 +75,25 @@ if ($LASTEXITCODE -ne 0) { throw '선택 기동 실패. 해당 오류를 확인�
 
 기동 후 필요한 확인은 `/health`와 일반 채팅 한 건의 스트리밍·정상 완료입니다. 정상일 때 보류한 GitHub 후속 조회를 이어갑니다. 완료한 PAT·DB 저장·20회 검사를 자동 반복하지 않습니다. 원복은 해당 서버를 종료한 뒤 동일 환경에서 기존 `uvx --python 3.11 open-webui@0.11.3 serve --host ... --port ...` 명령으로 기동하는 것입니다. 별도 재설치·DB/키 재생성·방화벽 변경은 이 대응에 포함되지 않습니다. [준비와 검증 범위](../evals/scenarios.md#windows-accept-preparation).
 
+
+<a id="chat-visible-after-refresh"></a>
+
+## 채팅 답변이 새로고침한 뒤에만 보임
+
+`/health`는 정상이지만 새 대화의 짧은 질문이 멈춰 보이고 새로고침하면 답변이 나타나는 경우, 답변 생성/저장과 실시간 전달/화면 반영을 분리해서 진단합니다. 이 현상만으로 모델 정지·새 Tool 오류·Windows 수락 오류 재발을 확정하지 않습니다.
+
+Open WebUI v0.11.3의 [응답 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/middleware.py)는 저장 대화의 최종 출력을 DB에 반영하고 `chat:completion` 이벤트를 보냅니다. [Socket.IO 서버](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/socket/main.py)와 [브라우저 갱신](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte)은 별도 경로입니다. [공식 연결 오류 안내](https://docs.openwebui.com/troubleshooting/connection-error/)도 브라우저 WebSocket·CORS 오류 확인을 권고합니다.
+
+loopback에서 사내 IP로 접속 주소를 바꾼 뒤부터라는 단서가 있으면 현재 WebUI 서버 PowerShell 로그의 `is not an accepted origin` 유무부터 확인합니다. 해당 문구가 없다는 것만으로 CORS 정상이라고 판정하지 않습니다.
+
+브라우저 쪽 정보를 확인할 때는 같은 접속 주소에서 **F12 → Console(콘솔)**을 열고 새 대화에 `안녕`을 한 번만 보냅니다. 답변이 멈춰 보이면 그 상태에서 `WebSocket`, `socket.io`, `connect_error`, `CORS`, `TypeError` 관련 문구 1~2줄을 확인합니다. [클라이언트 연결 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/src/routes/%2Blayout.svelte)는 `connect_error`를 일반 로그로 기록하므로 빨간 오류에만 한정하지 않습니다. 실제 주소·토큰·세션 값은 가리고 전체 콘솔/HAR·요청 헤더는 전달하지 않습니다. 개발자 도구가 사내 정책으로 제한되면 우회하지 않고 그 제한을 알립니다.
+
+- 허용되지 않은 origin·CORS 오류가 있으면 실제 브라우저 접속 origin과 **현재 서버 프로세스가 사용하는** `CORS_ALLOW_ORIGIN`을 대조합니다. 과거 초기 진단의 `http://127.0.0.1:8080`만 남은 경우와 현재 사내 IP 접속의 불일치는 후보이며 아직 실측 원인이 아닙니다. 새 PowerShell의 빈 환경변수를 실행 중 서버 설정으로 해석하지 않습니다.
+- WebSocket 연결 실패 문구이면 실패 상태/사유와 승인된 접속 경로를 확인합니다. `ENABLE_WEBSOCKET_SUPPORT=true`일 때 v0.11.3은 WebSocket 전송만 사용하므로 자동 polling/SSE 복구를 가정하지 않습니다. 오류 증거 없이 해당 설정을 끄거나 단일 PC에 Redis·새 프록시를 추가하지 않습니다.
+- `TypeError` 등 화면 처리 오류가 있으면 해당 오류의 파일명과 첫 호출 위치로 범위를 좁힙니다. 콘솔 정보가 없으면 다음 단계에서 Network의 실시간 연결 상태를 확인합니다.
+
+먼저 원인을 좁히고 해당 설정/경로만 보완합니다. 최초 진단에서 코드·Prompt 재입력, 재설치·업그레이드·재시작·토큰/DB 검증을 일괄 반복하지 않습니다. 수정 뒤 같은 짧은 대화의 실시간 표시·정상 완료를 확인하고 보류한 카드 확인으로 돌아갑니다. 현재 관찰과 판정은 [결과 기록](../evals/scenarios.md#chat-live-update-observation)에 남깁니다.
+
 ## 프록시 다운로드 실패
 
 ```powershell
