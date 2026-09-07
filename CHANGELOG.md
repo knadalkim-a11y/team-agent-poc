@@ -4,6 +4,8 @@
 
 ## 2026-09-07
 
+- 사용자 의견에 따라 Rich UI 시각 디자인 튜닝은 기능 흐름 완성 뒤 묶어 진행하도록 후속으로 정리. GitHub/Jira의 정상 동작 보고와 디자인 만족도를 구분하고 업무를 막는 조작·가독성 문제는 발견 시 보완함. 첫 화면·온보딩 보류 유지, 현재 CSS·새 디자인 시스템 변경 없음. [결정 기록](evals/scenarios.md#jira-rich-ui-acceptance).
+
 - LAN 접속의 origin 거부 대응을 현재 창 전용 설정에서 Windows User 영구 저장과 현재 창 동시 적용으로 보완. 기존 허용 목록을 유지하고 초기 진단 명령의 loopback 덮어쓰기를 제거했으며 별도 설정 파일·로더는 추가하지 않음. 실제 저장·복구는 사용자 확인 대기. [안내](docs/troubleshooting.md#cors-origin-update), [검토 기록](evals/scenarios.md#chat-live-update-observation).
 
 - GitHub v0.1.2 PR 목록/본문과 Confluence v0.1.3 검색/본문/근거 카드를 기존 단일 Tool에 추가. 실제 ID·확인된 다음 페이지로 수동 질문 초안을 만들고 빈 결과/오류·범위·잘림을 구분함. 기존 조회 결과와 본문 근거를 재사용하고 UI HTML과 중복 표를 모델 답변에서 줄이며 새 의존성·API/모델 호출·서버는 추가하지 않음. 공용 오프라인 DOM 검사 도구를 사용하고 사내 적용은 대기. [GitHub 검증](evals/github-offline.md#rich-ui-results), [Confluence 검증](evals/confluence-offline.md#rich-ui-results).
