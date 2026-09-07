@@ -6,17 +6,19 @@
 
 | 항목 | 기준 | 용도 |
 |---|---|---|
-| OS | Windows | 개인 PC POC; Docker 사용하지 않음 |
+| OS | Windows | 기존 개인 PC에서 소규모 팀 파일럿; Docker 사용하지 않음 |
 | Open WebUI | 0.11.3 | 실행 스크립트의 고정 버전 |
 | Python | 3.11 | Open WebUI 목표 런타임 |
 | uv | 0.12.7 | 사용자 보고 설치 버전 |
-| 접속 주소 | http://127.0.0.1:8080 | 외부에 공개하지 않는 loopback |
+| 로컬 접속 기준 | http://127.0.0.1:8080 | 현재 개인 환경의 loopback; 팀원 접속 주소·경로는 별도 설정 |
 | 작업 디렉터리 | %LOCALAPPDATA%\EES-Agent-POC\open-webui | 기존 키를 유지하도록 동일 위치 사용 |
 | DATA_DIR | 위 작업 디렉터리의 data 폴더 | 계정·대화 등 실행 데이터; Git 제외 |
 | 표시 이름 | EES Assistant (Open WebUI) | Community 구성의 표시값 |
 | 모델·프록시 | 승인된 사내 값; 저장소에는 placeholder | 실제 주소·키·모델 경로는 Git에 저장하지 않음 |
 
 데이터 위치나 설치 스크립트가 실제 환경에 적용됐다는 증거를 이 표에서 대신하지 않습니다.
+
+2026-09-07 사용자는 현재 사용 중인 Windows PC를 팀 파일럿 호스트로 선택했습니다. 기존 작업 디렉터리·DB·키·버전·수동 기동 방식을 유지하며 재설치나 데이터 이전을 전제로 하지 않습니다. 팀원 접속에 필요한 바인딩·방화벽·HTTPS 경로와 일반 사용자 권한은 실제 설정을 확인할 대상이며, 완료 상태는 [파일럿 계획 기록](evals/scenarios.md#local-pc-pilot-plan), 절차는 [기존 PC 파일럿 안내](docs/01-openwebui-install.md#local-pc-pilot)를 따릅니다. 전용 서버 이전은 후속 운영 필요에 따라 검토합니다.
 
 ## 사내 모델 운용 기준
 

@@ -1,6 +1,6 @@
 # 01. Open WebUI 설치 및 기동
 
-> 문서 역할: Windows 최초 설치·기동 절차
+> 문서 역할: Windows 최초 설치·기동 및 기존 PC 팀 파일럿 절차
 >
 > 목표: Docker를 사용하지 않는 Windows PC에서 Open WebUI 0.11.3의 로그인 화면까지 확인한다.
 
@@ -163,3 +163,60 @@ Open WebUI  = 내 PC의 127.0.0.1:8080에서 수신
 ## 다음 단계
 
 위 통과 조건을 확인한 후 [02. 사내 vLLM 직접 연결](02-vllm-direct-test.md)로 진행합니다. 실패하면 Hermes를 건드리지 않고 [Troubleshooting](troubleshooting.md)에서 Open WebUI 문제부터 분리합니다.
+
+<a id="local-pc-pilot"></a>
+
+## 8. 현재 Windows PC에서 소규모 팀 파일럿
+
+2026-09-07 사용자가 현재 설치해 사용하는 Windows PC를 팀원도 접속할 호스트로 선택했습니다. 위 최초 설치를 다시 실행하지 않습니다. 같은 작업 폴더·`DATA_DIR`·DB·키·버전·수동 기동과 확인한 Tool을 유지합니다. 전용 서버 이전·서비스 등록·자동 시작은 이후 운영 필요에 따라 정합니다. 이번 선택은 기존의 새 서버 우선 계획을 대체하며 [현재 단계와 증거](../evals/scenarios.md#local-pc-pilot-plan)를 따릅니다.
+
+### 먼저 계정과 접속 경로 준비
+
+기존 로컬 화면에서 관리자 설정 → Authentication → **New Sign Ups를 OFF**로 저장합니다. 팀원 계정은 관리자 Users → Add User에서 역할 **user**로 준비합니다. 기존 일반 테스트 계정 B가 있으면 첫 확인에 재사용하고, 관리자의 계정·PAT를 공유하지 않습니다. 비밀번호는 사내 전달 수단을 사용합니다. 각 팀원은 자신의 개인 PAT를 입력합니다. 공개 가입 OFF와 관리자 계정 추가는 별도 경로입니다. [v0.11.3 설정 UI](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/admin/Settings/Authentication.svelte), [계정 추가 UI](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/admin/Users/UserList/AddUserModal.svelte)
+
+Assistant·기반 모델·연결된 Tool/Skill/Knowledge의 읽기 권한은 파일럿 계정/그룹에 맞춥니다. 기존 [Model not found 복구](troubleshooting.md#user-model-not-found)를 반복하지 않고 새로 연결한 Jira/GitHub를 포함한 실제 공개 구성을 확인합니다. 일반 사용자에게 Python Tool 등록·수정 권한을 함께 열지 않습니다.
+
+WebUI를 실행한 창은 유지하고 **별도 PowerShell**에서 다음 읽기 전용 명령으로 사내 연결의 네트워크 프로필을 확인합니다. 어댑터가 여러 개라면 실제 사내망 연결을 골라 확인하며 VPN·가상 어댑터를 자동 선택하지 않습니다. 공유할 정보는 해당 연결의 `NetworkCategory`뿐입니다.
+
+```powershell
+Get-NetConnectionProfile | Select-Object InterfaceAlias, NetworkCategory
+```
+
+사내 접속용 PC 주소와 허용할 팀원 PC 주소는 그 PC에서만 관리합니다. DHCP 주소가 바뀌면 바인딩·규칙·접속 주소도 함께 조정해야 하며, 임의 고정 IP를 먼저 설정하지 않습니다. 도구가 없거나 회사 정책으로 제한되면 오류 종류를 확인하고 프로필·방화벽을 우회하지 않습니다.
+
+### 브라우저 접속과 전송 보호
+
+`127.0.0.1`은 접속하는 사람 자신의 PC이므로 팀원용 주소로 배포하지 않습니다. 기존 사내 HTTPS 경로를 이 PC로 연결할 수 있는지 먼저 확인하고, 같은 PC의 HTTPS 앞단을 사용할 경우 WebUI는 기존 loopback을 유지할 수 있습니다. 실제 경로·인증서는 아직 미확인입니다.
+
+현재 `open-webui serve`에는 `--host`·`--port`가 있지만 `--ssl-certfile`·`--ssl-keyfile` 옵션은 없습니다. 옵션만 붙여 HTTPS가 된다고 안내하지 않습니다. HTTPS가 필요하면 앞단에서 TLS를 처리하며 기존에 승인된 경로가 있는지부터 확인합니다. [v0.11.3 CLI 소스](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/__init__.py), [공식 HTTPS 안내](https://docs.openwebui.com/getting-started/advanced-topics/hardening/#https-and-tls)
+
+직접 HTTP로 열면 로그인 비밀번호·세션·개인 PAT의 브라우저 전송이 암호화되지 않습니다. 기존 DB 암호화 PASS는 전송 보호를 대신하지 않습니다. 아래 HTTP 직접 수신 예시는 도달성과 익명 로그인 화면 확인용이며, 팀원이 실제 자격증명을 입력할 경로는 전송 보호를 정한 뒤 사용합니다. 이 확인을 위해 인증을 끄거나 `WEBUI_AUTH=false`를 설정하지 않습니다.
+
+### LAN 직접 수신이 필요한 경우의 적용 예시
+
+접속 경로가 정해진 뒤 해당 경로에 필요한 포트만 허용합니다. 예를 들어 직접 8080 도달성을 확인할 때는 관리 권한이 있는 PowerShell에서 **PC의 사내 주소와 첫 팀원 PC 주소**로 한정합니다. 아래 placeholder는 사내 값으로 바꾸며 `LocalSubnet`·`Any`·전체 대역으로 넓히지 않습니다. Windows의 `DomainAuthenticated` 프로필은 규칙에서 `Domain`, `Private`은 `Private`을 사용합니다. `Public`이면 임의로 프로필을 바꾸지 않고 실제 사내 연결 정책부터 확인합니다.
+
+```powershell
+New-NetFirewallRule -Name "EES-POC-Pilot-8080" -DisplayName "EES POC pilot 8080" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8080 -LocalAddress "<PC_LAN_IPV4>" -RemoteAddress "<TEAMMATE_IPV4>" -Profile "<Domain_OR_Private>"
+```
+
+기존 Python/8080의 넓은 허용 규칙이 있으면 좁은 규칙을 추가해도 그 허용 범위가 사라지지 않습니다. 기존 유효 규칙을 확인한 뒤 해당 범위만 조정하며, 방화벽 전체 해제·모든 Python 프로세스 허용으로 해결하지 않습니다. 로컬 규칙 적용을 막는 회사 정책은 이 명령으로 우회하지 않습니다. [규칙 인자](https://learn.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule?view=windowsserver2025-ps), [규칙·정책 병합](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/rules)
+
+이후 **원래 WebUI 실행 창**에서 `Ctrl+C`로 종료하고, 같은 폴더와 기존 환경변수를 유지한 채 수신 주소만 바꿉니다. 아래는 기존 uvx 캐시를 사용하는 예시이며 캐시가 없으면 설치·업그레이드 대신 중단합니다. 작업 폴더가 바뀌면 다른 키를 읽거나 만들 수 있으므로 새 폴더에서 실행하지 않습니다. `DATA_DIR`, `WEBUI_SECRET_KEY`, `ENABLE_VALVE_ENCRYPTION`, 모델/프록시 설정을 재설정하지 않습니다.
+
+```powershell
+uvx --offline --no-python-downloads --python 3.11 open-webui@0.11.3 serve --host "<PC_LAN_IPV4>" --port 8080
+```
+
+특정 사내 IP로만 수신하면 기존 loopback URL은 열리지 않습니다. 팀원 PC에서 `http://<PC_LAN_IPV4>:8080`의 익명 로그인 화면 도달성만 확인합니다. HTTPS 앞단 경로를 선택했다면 위 직접 HTTP 수신 변경을 그대로 적용하지 않고 그 경로의 바인딩·포트를 사용합니다. `0.0.0.0`은 접속 URL이 아니며 모든 인터페이스 수신을 기본안으로 사용하지 않습니다.
+
+연결이 막히면 **호스트 수신 → 실제 방화벽 규칙/네트워크 정책 → 팀원 PC 경로** 순서로 범위를 좁힙니다. Git 프록시를 팀원 브라우저나 내부 API 설정으로 복제하지 않습니다. 전송 보호 경로가 준비된 뒤 일반 사용자 한 명으로 로그인·EES Assistant 접근·선택한 조회를 확인합니다.
+
+### 파일럿 운영과 원복
+
+- 처음에는 소수 팀원이 대표 조회를 사용합니다. 도구 실행은 이 Windows PC에서 이루어지고 LLM 요청은 기존 사내 서빙 경로로 전달됩니다. 사용 인원이 늘어났을 때의 동시 처리·응답 시간은 아직 측정하지 않았습니다.
+- PC·WebUI 프로세스가 켜져 있고 사내망이 연결된 동안 사용할 수 있습니다. 화면 잠금과 절전은 구분하며 전원 정책 전체를 바꾸지 않고 이용 시간·재시작 시간을 팀 내에서 정합니다.
+- 같은 DB·키의 완료한 저장/복구 시험은 반복하지 않습니다. 기존 백업 절차를 유지하고, 새 접속 경로와 일반 계정의 대화·파일·개인 PAT·조회 권한을 [공개 전 기준](03-openwebui-native-agent.md#4-공개-전-검증)에 맞춰 확인합니다. 파일럿 참여자 간 비공개 자산이 공유되지 않는지와 처음 쓰는 사람이 결과·오류·원문을 이해하는지 함께 봅니다.
+- 직접 LAN 수신을 중단할 때는 원래 창에서 종료 후 기존 명령의 `--host 127.0.0.1 --port 8080`으로 되돌립니다. 이번에 만든 `EES-POC-Pilot-8080` 규칙만 비활성화하고 팀원용 앞단 경로가 있다면 그 연결도 중단합니다. DB·키·계정·PAT를 삭제하지 않습니다.
+
+이 절은 적용 준비 절차입니다. 실제 방화벽·수신 주소·HTTPS·팀원 접속·격리를 사외에서 실행하거나 통과 처리하지 않았습니다.
