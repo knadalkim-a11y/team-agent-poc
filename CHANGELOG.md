@@ -4,6 +4,7 @@
 
 ## 2026-09-07
 
+- Jira 화면 v0.1.1: 이모지 없이 글자·여백·명암을 정리하고 미완료/전체 기준의 정렬·막대 축척, 펼치기 전 주요 정보, 필터 후 펼침 상태 유지와 조회 범위 안내를 개선. API·인증·설정은 유지하고 화면 관련 합성 검사만 수행. 사내 반영은 별도. [근거](evals/jira-offline.md#dashboard-design).
 - 기존 읽기 전용 개인 설정 검사기에 `--jira` 선택을 추가. Jira에서만 쓰는 합성 값과 정확한 도구를 함께 확인해 기존 Confluence 값이나 다른 도구의 암호문을 새 필드 성공으로 오인하지 않도록 함. 기본 Confluence 모드·키/DB·업무 Tool은 유지하고 관련 합성 시험만 수행. [근거](evals/jira-offline.md#jira-storage-check).
 - Confluence와 같은 인증 방식이라는 사용자 설명을 작업 가정으로 반영하고, 토큰을 새로 저장하기 전 고정 Jira 계정 API만 확인하는 PowerShell 스크립트와 PR 원본 전달 안내를 추가. 기존 Jira Tool·31개 합성 시험·Confluence 증거는 유지하며 실제 인증 성공으로 간주하지 않음. [근거](evals/jira-offline.md#bearer-check-preparation).
 - Jira 8.5.12 REST 기준의 기본 비활성 Bearer 읽기 후보와 프로젝트별 현황 화면을 준비. 개인 토큰·정확한 프로젝트 허용목록, 전체/미완료 API 집계와 최근 목록 분리, 부분 실패·원문·페이지 안내를 구현함. 기존 Prompt에 연결된 경우만 사용하는 Jira 경로를 추가하며 별도 Skill·서버·UI 빌드 없이 사용. 실제 인증·WebUI 적용은 미확인. [가이드](docs/05-jira-read-tool.md), [검증](evals/jira-offline.md#initial-implementation).

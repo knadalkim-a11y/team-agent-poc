@@ -61,7 +61,7 @@ class ParsedHTML(HTMLParser):
         self.tags.append((tag, dict(attrs)))
 
 
-# A deliberately small DOM stub checks text/data flow and click filtering only.
+# A deliberately small DOM stub checks text/data flow, sorting and local filters.
 # CSS, layout, iframe sandboxing and real events require browser/WebUI acceptance.
 NODE_HARNESS = r"""
 const fs=require('node:fs'),vm=require('node:vm');
@@ -75,13 +75,14 @@ class Element {
   setAttribute(key,value){this.attrs[key]=value;}
   addEventListener(name,handler){this.events[name]=handler;}
   getBoundingClientRect(){return {height:900};}
-  fire(name){this.events[name]();}
+  fire(name){this.events[name]({target:this,currentTarget:this});}
 }
 const elements={};
 const get=id=>elements[id]||(elements[id]=new Element('div'));
+const descendants=(element,tag)=>element.children.flatMap(child=>typeof child==='string'?[]:[...(child.tagName===tag?[child]:[]),...descendants(child,tag)]);
 get('jira-data').textContent=input.data;
 const messages=[];
-const context=vm.createContext({URL,Date,console,document:{getElementById:get,createElement:tag=>new Element(tag),querySelector:()=>get('main'),addEventListener:()=>{}},window:{parent:{postMessage:message=>messages.push(message)},addEventListener:()=>{}},requestAnimationFrame:handler=>handler(),get,messages});
+const context=vm.createContext({URL,Date,console,document:{getElementById:get,createElement:tag=>new Element(tag),querySelector:()=>get('main'),addEventListener:()=>{}},window:{parent:{postMessage:message=>messages.push(message)},addEventListener:()=>{}},requestAnimationFrame:handler=>handler(),get,messages,descendants});
 vm.runInContext(input.script,context);
 const result=vm.runInContext(input.action,context);
 process.stdout.write(JSON.stringify(result));
@@ -143,6 +144,71 @@ class JiraDashboardDOMTests(unittest.TestCase):
         self.assertIn("시작 위치 2", result["next"])
         self.assertEqual(result["height"], {"type": "iframe:height", "height": 900})
 
+    def test_comparison_defaults_to_open_and_rescales_when_metric_changes(self):
+        payload = fixture()
+        payload["projects"] = [
+            {"key": "ALPHA", "ok": True, "total": 20000, "open": 2},
+            {"key": "BETA", "ok": True, "total": 100, "open": 40},
+        ]
+        payload["summary"] = {"total": 20100, "open": 42, "available_total": 20100,
+                              "available_open": 42, "complete": True}
+        payload["listing"]["total"] = 20100
+        result = self.evaluate(payload, """
+            const snapshot=()=>get('projects').children.filter(n=>n.tagName==='button').map(button=>({
+                key:button.children[0].textContent,
+                widths:button.children[1].children.map(bar=>bar.style.width),
+                counts:button.children[2].textContent
+            }));
+            const defaultMetric=get('comparison-metric').value,open=snapshot();
+            const aggregates=[get('total').textContent,get('open').textContent];
+            get('comparison-metric').value='total';get('comparison-metric').fire('change');
+            ({defaultMetric,open,total:snapshot(),aggregates,
+              afterAggregates:[get('total').textContent,get('open').textContent]})""")
+        self.assertEqual(result["defaultMetric"], "open")
+        self.assertEqual([row["key"] for row in result["open"]], ["BETA", "ALPHA"])
+        self.assertEqual(result["open"][0]["widths"], ["100%"])
+        self.assertEqual(result["open"][1]["widths"], ["5%"])
+        self.assertIn("전체 20,000건", result["open"][1]["counts"])
+        self.assertIn("미완료 2건", result["open"][1]["counts"])
+        self.assertEqual([row["key"] for row in result["total"]], ["ALPHA", "BETA"])
+        self.assertEqual(result["total"][0]["widths"], ["100%"])
+        self.assertEqual(result["total"][1]["widths"], ["0.5%"])
+        self.assertEqual(result["aggregates"], result["afterAggregates"])
+
+    def test_zero_counts_and_failures_have_stable_distinct_comparison_rows(self):
+        payload = fixture()
+        payload["status"] = "partial"
+        payload["projects"] = [
+            {"key": "UNREAD", "ok": False, "total": None, "open": None},
+            {"key": "BETA", "ok": True, "total": 0, "open": 0},
+            {"key": "ALPHA", "ok": True, "total": 0, "open": 0},
+        ]
+        payload["summary"] = {"total": None, "open": None, "available_total": 0,
+                              "available_open": 0, "complete": False}
+        payload["issues"] = []
+        payload["listing"] = {"ok": True, "total": 0, "returned": 0,
+                              "start_at": 0, "next_start_at": None}
+        result = self.evaluate(payload, """
+            const rows=()=>get('projects').children.filter(n=>n.tagName==='button').map(button=>({
+                key:button.children[0].textContent,text:button.textContent,
+                widths:button.children[1].children.map(bar=>bar.style.width)
+            }));
+            const open=rows();get('comparison-metric').value='total';get('comparison-metric').fire('change');
+            ({open,total:rows(),aggregate:get('total').textContent,note:get('total-note').textContent,
+              empty:get('issues').textContent})""")
+        for rows in (result["open"], result["total"]):
+            self.assertEqual([row["key"] for row in rows], ["ALPHA", "BETA", "UNREAD"])
+            self.assertEqual(rows[0]["widths"], ["0%"])
+            self.assertEqual(rows[1]["widths"], ["0%"])
+            self.assertIn("전체 0건", rows[0]["text"])
+            self.assertIn("미완료 0건", rows[0]["text"])
+            self.assertIn("집계 실패", rows[2]["text"])
+            self.assertIn("0건이 아닙니다", rows[2]["text"])
+        self.assertEqual(result["aggregate"], "전체 집계 미완료")
+        self.assertIn("집계 성공 프로젝트만: 0건", result["note"])
+        self.assertIn("이번 조회 범위에서 볼 수 있는 이슈가 없습니다", result["empty"])
+        self.assertNotIn("목록을 받지 못했습니다", result["empty"])
+
     def test_failed_project_is_not_zero_or_complete_total(self):
         payload = fixture()
         payload["status"] = "partial"
@@ -156,27 +222,86 @@ class JiraDashboardDOMTests(unittest.TestCase):
         self.assertIn("집계 실패", result["project"])
         self.assertIn("0건이 아닙니다", result["project"])
 
+    def test_count_drift_warns_without_showing_a_complete_aggregate(self):
+        payload = fixture()
+        payload["status"] = "partial"
+        payload["summary"].update(total=None, open=None, complete=False)
+        payload["listing"]["total"] = 221
+        result = self.evaluate(payload, """({notice:get('notice').textContent,
+            hidden:get('notice').hidden,total:get('total').textContent,open:get('open').textContent,
+            totalNote:get('total-note').textContent,openNote:get('open-note').textContent,
+            project:get('projects').children[0].textContent})""")
+        self.assertFalse(result["hidden"])
+        self.assertIn("조회 중 건수가 달라졌습니다", result["notice"])
+        self.assertIn("전체 합계는 다시 조회해 확인하세요", result["notice"])
+        self.assertNotIn("프로젝트의 집계를 확인하지 못했습니다", result["notice"])
+        self.assertEqual(result["total"], "전체 집계 미완료")
+        self.assertEqual(result["open"], "전체 집계 미완료")
+        self.assertIn("집계 성공 프로젝트만: 220건", result["totalNote"])
+        self.assertIn("집계 성공 프로젝트만: 125건", result["openNote"])
+        self.assertIn("전체 200건", result["project"])
+        self.assertIn("미완료 120건", result["project"])
+
     def test_project_filter_does_not_claim_unloaded_project_is_empty(self):
         result = self.evaluate(fixture(), """get('projects').children[1].fire('click');
-            ({issues:get('issues').textContent,total:get('total').textContent,title:get('list-title').textContent})""")
+            get('comparison-metric').value='total';get('comparison-metric').fire('change');
+            ({issues:get('issues').textContent,total:get('total').textContent,title:get('list-title').textContent,
+              selected:get('projects').children.filter(n=>n.attrs['aria-pressed']==='true').map(n=>n.children[0].textContent)})""")
         self.assertIn("BETA 이슈가 이번 목록에 없습니다", result["issues"])
         self.assertIn("프로젝트에 이슈가 없다는 뜻은 아닙니다", result["issues"])
         self.assertEqual(result["total"], "220건")
         self.assertIn("BETA", result["title"])
+        self.assertEqual(result["selected"], ["BETA"])
 
     def test_status_assignee_filters_and_reset_use_only_received_data(self):
         result = self.evaluate(fixture(), """
+            const aggregates=()=>[get('total').textContent,get('open').textContent,get('projects').textContent];
+            const initial=aggregates();
             get('status').value=String(statuses.indexOf('완료'));get('status').fire('change');
             const afterStatus=get('issues').textContent;
             get('assignee').value=JSON.stringify(['none']);get('assignee').fire('change');
             const afterAssignee=get('issues').textContent;
+            const afterAggregates=aggregates(),filterScope=get('selection').textContent;
             get('reset').fire('click');
-            ({afterStatus,afterAssignee,reset:get('issues').textContent})""")
+            ({afterStatus,afterAssignee,reset:get('issues').textContent,initial,afterAggregates,filterScope})""")
         self.assertIn("ALPHA-6", result["afterStatus"])
         self.assertNotIn("ALPHA-7", result["afterStatus"])
         self.assertIn("ALPHA-6", result["afterAssignee"])
         self.assertIn("ALPHA-7", result["reset"])
         self.assertIn("ALPHA-6", result["reset"])
+        self.assertEqual(result["initial"], result["afterAggregates"])
+        self.assertIn("이번에 받은", result["filterScope"])
+
+    def test_compact_summary_includes_metadata_before_opening_details(self):
+        payload = fixture()
+        payload["issues"][0]["updated"] = "2026-09-07T01:23:45Z"
+        result = self.evaluate(payload, """
+            const detail=get('issues').children[0];
+            const expanded=Boolean(detail.open),summary=detail.children[0];
+            detail.open=true;
+            const timestamp=detail.children[1].children.find(field=>field.children[0].textContent==='수정 시각');
+            ({summary:summary.textContent,expanded,
+              fullTime:timestamp.children[1].textContent,
+              hoverTitle:descendants(summary,'div').some(field=>Object.hasOwn(field.attrs,'title'))})""")
+        for text in ("ALPHA-7", "Synthetic task", "진행 중", "담당자", "테스트 A", "수정일", "2026"):
+            self.assertIn(text, result["summary"])
+        self.assertFalse(result["expanded"])
+        self.assertRegex(result["summary"], r"2026\.\s*09\.\s*07\.")
+        self.assertRegex(result["fullTime"], r"2026\.\s*9\.\s*7\..*\d{1,2}:23:45")
+        self.assertFalse(result["hoverTitle"])
+
+    def test_expanded_issue_survives_filter_reset_and_metric_change(self):
+        result = self.evaluate(fixture(), """
+            const detail=get('issues').children[0];detail.open=true;
+            get('status').value=String(statuses.indexOf('완료'));get('status').fire('change');
+            const hidden=!get('issues').textContent.includes('ALPHA-7');
+            get('reset').fire('click');
+            get('comparison-metric').value='total';get('comparison-metric').fire('change');
+            const restored=get('issues').children.find(n=>n.textContent.includes('ALPHA-7'));
+            ({hidden,same:restored===detail,open:Boolean(restored.open)})""")
+        self.assertTrue(result["hidden"])
+        self.assertTrue(result["same"])
+        self.assertTrue(result["open"])
 
     def test_same_display_name_keeps_distinct_assignee_filters(self):
         payload = fixture()
@@ -226,6 +351,23 @@ class JiraDashboardDOMTests(unittest.TestCase):
         ]""")
         self.assertEqual(result[:4], [None, None, None, None])
         self.assertEqual(result[4], "https://jira.example.invalid/browse/ALPHA-7")
+
+    def test_rendered_source_links_are_safe_and_frame_messages_only_resize(self):
+        payload = fixture()
+        payload["issues"][1]["url"] = "javascript:alert(1)"
+        result = self.evaluate(payload, """
+            get('projects').children[0].fire('click');
+            get('comparison-metric').value='total';get('comparison-metric').fire('change');
+            get('reset').fire('click');
+            ({links:descendants(get('issues'),'a').map(a=>({href:a.href,target:a.target,rel:a.rel})),messages})""")
+        self.assertEqual(result["links"], [{
+            "href": "https://jira.example.invalid/browse/ALPHA-7",
+            "target": "_blank", "rel": "noopener noreferrer",
+        }])
+        self.assertGreater(len(result["messages"]), 0)
+        for message in result["messages"]:
+            self.assertEqual(set(message), {"type", "height"})
+            self.assertEqual(message["type"], "iframe:height")
 
     def test_listing_failure_is_distinct_from_successful_project_counts(self):
         payload = fixture()

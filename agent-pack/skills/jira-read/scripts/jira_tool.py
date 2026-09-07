@@ -1,7 +1,7 @@
 """
 title: EES Jira Read
 description: Project overview and issue reads through a user's confirmed Bearer authentication.
-version: 0.1.0
+version: 0.1.1
 required_open_webui_version: 0.11.3
 """
 
@@ -400,63 +400,83 @@ def _render_dashboard(payload):
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <title>프로젝트별 Jira 현황</title><style>
-:root{color-scheme:light dark;--bg:#f5f7fb;--card:#fff;--ink:#18243c;--muted:#607087;--line:#dfe5ee;--blue:#2563eb;--pale:#e8efff;--track:#dbe3f1;--warn:#895318;--warn-bg:#fff4df}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 system-ui,-apple-system,'Segoe UI',sans-serif}
-main{max-width:1060px;margin:auto;padding:24px}header{margin-bottom:20px}h1{font-size:25px;letter-spacing:-.8px;margin:4px 0 6px}h2{font-size:17px;margin:0}p{margin:6px 0}
-.eyebrow{color:var(--blue);font-size:11px;font-weight:750;letter-spacing:1.4px}.muted,.meta{color:var(--muted);font-size:12px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:20px;margin-bottom:16px}.stats .card{margin:0}.number{font-size:30px;font-weight:750;line-height:1.35;font-variant-numeric:tabular-nums}
-.notice{border-radius:10px;padding:11px 14px;background:var(--pale);font-size:12px;margin:12px 0}.notice.warn{background:var(--warn-bg);color:var(--warn)}.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-button,select{font:inherit;color:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
-.reset{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--card);font-size:12px}.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}.dot{width:8px;height:8px;display:inline-block;background:var(--track);border-radius:3px;margin-right:5px}.dot.open{background:var(--blue)}
-.project{display:grid;grid-template-columns:110px minmax(40px,1fr) 140px;gap:14px;align-items:center;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-bottom-color:var(--line);padding:14px 10px;border-radius:8px}
-.project:hover,.project[aria-pressed=true]{background:var(--pale)}.project[aria-pressed=true]{border-color:var(--blue)}.project-name{font-size:13px;font-weight:700;overflow-wrap:anywhere}.bars{display:grid;gap:5px}.bar{height:7px;background:var(--track);border-radius:10px;min-width:0}.bar.open{background:var(--blue)}
-.counts{font-size:12px;text-align:right;font-variant-numeric:tabular-nums}.counts span{display:block}.filters{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.filters label{display:grid;gap:4px;font-size:12px;color:var(--muted);min-width:150px;flex:1}
-select{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:8px;min-width:0;max-width:100%}.issue{border-top:1px solid var(--line)}summary{cursor:pointer;padding:14px 0;list-style:none;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}summary::-webkit-details-marker{display:none}
-summary:after{content:'+';color:var(--muted);font-size:20px}details[open]>summary:after{content:'−'}.issue-key{color:var(--blue);font-size:11px;font-weight:700}.issue-title{font-size:14px;overflow-wrap:anywhere;margin:2px 0}.badge{font-size:11px;border-radius:5px;padding:2px 6px;background:var(--pale);display:inline-block;max-width:100%;overflow-wrap:anywhere}
-.issue-info{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;padding:0 0 16px}.issue-info>div{overflow-wrap:anywhere}.issue-info b{display:block;color:var(--muted);font-size:11px;font-weight:500}a{color:var(--blue);text-underline-offset:3px}.empty{padding:22px 4px;color:var(--muted);font-size:13px}.footer{border-top:1px solid var(--line);padding-top:12px;margin-top:8px;font-size:12px;color:var(--muted)}
-@media(prefers-color-scheme:dark){:root{--bg:#101724;--card:#172233;--ink:#e5ebf5;--muted:#a0afc4;--line:#304055;--blue:#8caeff;--pale:#233654;--track:#415575;--warn:#f5cf93;--warn-bg:#3c3020}}
-@media(max-width:550px){main{padding:14px}.card{padding:15px}h1{font-size:22px}.project{grid-template-columns:88px minmax(24px,1fr) 90px;gap:8px;padding:12px 5px}.counts{font-size:11px}.project-name{font-size:11px}.number{font-size:25px}.issue-info{grid-template-columns:1fr}.filters label{min-width:120px}}
+:root{color-scheme:light dark;--jira-bg:#f3f5f7;--jira-surface:#fff;--jira-ink:#202b38;--jira-muted:#5d6978;--jira-line:#dce2e8;--jira-accent:#20649b;--jira-tint:#edf4fa;--jira-track:#e7edf2;--jira-warning:#795018;--jira-warning-bg:#fcf6e9}
+*{box-sizing:border-box}body{margin:0;background:var(--jira-bg);color:var(--jira-ink);font:14px/1.6 system-ui,-apple-system,'Segoe UI',sans-serif}main{max-width:1120px;margin:auto;padding:28px 24px}h1,h2,p{margin:0}h1{font-size:28px;line-height:1.35;font-weight:700;letter-spacing:-.8px}h2{font-size:18px;line-height:1.5;font-weight:650;letter-spacing:-.3px}
+.jira-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}.jira-eyebrow{font-size:13px;font-weight:600;color:var(--jira-muted);margin-bottom:5px}.jira-subtitle{margin-top:7px;color:var(--jira-muted)}.jira-meta,.jira-muted{font-size:13px;color:var(--jira-muted)}.jira-meta{overflow-wrap:anywhere}.jira-header .jira-meta{padding-bottom:2px}
+.jira-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}.jira-stat{background:var(--jira-surface);border:1px solid var(--jira-line);border-radius:12px;padding:20px 24px}.jira-stat-primary{border-top:3px solid var(--jira-accent);padding-top:18px}.jira-stat-label{font-size:14px;font-weight:600}.jira-stat-primary .jira-stat-label,.jira-stat-primary .jira-number{color:var(--jira-accent)}.jira-number{font-size:42px;font-weight:650;line-height:1.45;letter-spacing:-1px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.jira-number.jira-incomplete{font-size:23px;letter-spacing:-.5px;padding:10px 0}.jira-stat .jira-muted{margin-top:3px}
+.jira-panel{background:var(--jira-surface);border:1px solid var(--jira-line);border-radius:12px;padding:24px;margin-bottom:20px}.jira-section-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}.jira-section-head p{margin-top:4px}.jira-notice{background:var(--jira-warning-bg);color:var(--jira-warning);border:1px solid var(--jira-line);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:14px}.jira-notice[hidden]{display:none}
+button,select{font:inherit;color:inherit}button,summary{cursor:pointer}button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--jira-accent);outline-offset:3px}select{border:1px solid var(--jira-line);background:var(--jira-surface);border-radius:7px;padding:9px 12px;min-height:44px;min-width:0;max-width:100%}.jira-metric{display:flex;align-items:center;gap:10px;color:var(--jira-muted);font-size:13px}.jira-metric select{color:var(--jira-ink);font-size:14px}.jira-reset{border:1px solid var(--jira-line);border-radius:7px;padding:9px 13px;min-height:44px;background:var(--jira-surface);font-size:14px}.jira-reset:hover{background:var(--jira-tint)}
+.jira-project{display:grid;grid-template-columns:116px minmax(32px,1fr) 196px;gap:20px;align-items:center;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-bottom-color:var(--jira-line);padding:16px 12px;border-radius:6px}.jira-project:hover,.jira-project[aria-pressed=true]{background:var(--jira-tint)}.jira-project[aria-pressed=true]{border-color:var(--jira-accent)}.jira-project-name{font-size:14px;font-weight:650;overflow-wrap:anywhere;min-width:0}.jira-bars{display:block;height:10px;background:var(--jira-track);border-radius:3px;overflow:hidden}.jira-bar{display:block;height:10px;background:var(--jira-accent);border-radius:3px}.jira-counts{display:flex;align-items:center;justify-content:flex-end;gap:16px;font-size:13px;font-variant-numeric:tabular-nums}.jira-counts span{white-space:nowrap}.jira-counts .jira-current-count{font-size:14px;font-weight:650;color:var(--jira-ink)}.jira-project-failed .jira-bars{background:transparent;height:auto}.jira-project-failed .jira-counts{display:grid;gap:0;justify-content:end}.jira-project-error{font-size:13px;color:var(--jira-warning);padding:7px 12px 12px;overflow-wrap:anywhere}.jira-comparison-note{font-size:13px;color:var(--jira-muted);margin-top:14px}
+.jira-query-details{margin-top:14px;border-top:1px solid var(--jira-line);padding-top:12px}.jira-query-details>summary{font-size:13px;color:var(--jira-muted);display:flex;gap:12px;justify-content:space-between;padding:3px 0;list-style:none}.jira-query-details p{font-size:13px;color:var(--jira-muted);margin-top:9px;overflow-wrap:anywhere}.jira-query-details>summary::-webkit-details-marker,.jira-issue>summary::-webkit-details-marker{display:none}.jira-open-label{display:none}details[open]>summary .jira-open-label{display:inline}details[open]>summary .jira-closed-label{display:none}
+.jira-list-context{border-left:3px solid var(--jira-line);padding-left:12px;font-size:13px;color:var(--jira-muted);margin-top:4px}.jira-filters{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0 14px}.jira-filters label{display:grid;gap:5px;font-size:13px;color:var(--jira-muted);min-width:140px;max-width:280px;flex:1}.jira-filters select{color:var(--jira-ink)}.jira-selection{color:var(--jira-muted);font-size:13px;margin-bottom:12px;overflow-wrap:anywhere}
+.jira-issue{border-top:1px solid var(--jira-line)}.jira-issue>summary{padding:17px 0;list-style:none;display:grid;grid-template-columns:minmax(0,1fr) 90px 118px 112px 32px;gap:16px;align-items:center}.jira-issue-heading{min-width:0}.jira-issue-key{color:var(--jira-muted);font-size:13px;font-variant-numeric:tabular-nums;margin-bottom:3px;overflow-wrap:anywhere}.jira-issue-title{font-size:15px;line-height:1.55;font-weight:550;overflow-wrap:anywhere}.jira-status{min-width:0}.jira-badge{font-size:13px;line-height:1.5;border-radius:5px;padding:3px 8px;background:var(--jira-tint);color:var(--jira-accent);display:inline-block;max-width:100%;overflow-wrap:anywhere}.jira-badge-done{background:var(--jira-track);color:var(--jira-muted)}.jira-assignee,.jira-updated{min-width:0;font-size:14px;overflow-wrap:anywhere}.jira-field-label{display:block;color:var(--jira-muted);font-size:13px;font-weight:400;margin-bottom:3px}.jira-updated span{font-size:13px;font-variant-numeric:tabular-nums}.jira-detail-switch{font-size:13px;color:var(--jira-accent);text-align:right;white-space:nowrap}
+.jira-issue-info{display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;background:var(--jira-bg);border-radius:8px;padding:16px 18px;margin-bottom:16px;font-size:14px}.jira-issue-info>div{overflow-wrap:anywhere}.jira-source{grid-column:1/-1;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}a{color:var(--jira-accent);text-underline-offset:3px}.jira-empty{padding:28px 4px;color:var(--jira-muted);font-size:14px;overflow-wrap:anywhere}.jira-footer{border-top:1px solid var(--jira-line);padding-top:16px;margin-top:8px;font-size:13px;color:var(--jira-muted);overflow-wrap:anywhere}
+@media(prefers-color-scheme:dark){:root{--jira-bg:#161c24;--jira-surface:#1d2631;--jira-ink:#e6ebf1;--jira-muted:#a9b5c4;--jira-line:#354252;--jira-accent:#8dc3ed;--jira-tint:#263d51;--jira-track:#344454;--jira-warning:#ecd1a3;--jira-warning-bg:#352e24}}
+@media(max-width:760px){.jira-issue>summary{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 18px}.jira-issue-heading{grid-column:1/-1}.jira-status{grid-column:1;grid-row:2}.jira-detail-switch{grid-column:2;grid-row:2}.jira-assignee{grid-column:1;grid-row:3}.jira-updated{grid-column:2;grid-row:3}.jira-project{grid-template-columns:96px minmax(28px,1fr) 178px;gap:12px}.jira-counts{gap:10px}.jira-metric{flex-wrap:wrap}.jira-header{gap:8px}}
+@media(max-width:520px){main{padding:20px 12px}h1{font-size:24px}.jira-header{margin-bottom:20px}.jira-stats{gap:10px}.jira-stat{padding:15px 14px}.jira-stat-primary{padding-top:13px}.jira-number{font-size:31px;letter-spacing:-.8px}.jira-number.jira-incomplete{font-size:18px;padding:8px 0}.jira-stat .jira-muted{font-size:13px}.jira-panel{padding:18px 14px}.jira-section-head{gap:12px}.jira-metric{width:100%;justify-content:space-between}.jira-project{grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:14px 8px}.jira-bars{grid-column:1/-1;grid-row:2}.jira-counts{grid-column:2;grid-row:1;display:grid;justify-items:end;gap:1px}.jira-project-name{font-size:14px}.jira-counts span{white-space:normal}.jira-filters{gap:10px}.jira-filters label{min-width:115px}.jira-issue-info{gap:14px;padding:14px}.jira-footer{line-height:1.7}}
 </style></head><body><main>
-<header><div class="eyebrow">JIRA · TEAM OVERVIEW</div><h1>프로젝트별 이슈 현황</h1><p class="muted">내 Jira 계정으로 볼 수 있는 이슈 기준</p><p id="time" class="meta"></p></header>
-<div id="notice" class="notice" role="status"></div>
-<div class="stats"><section class="card"><div>전체 이슈</div><div id="total" class="number"></div><p id="total-note" class="muted"></p></section><section class="card"><div>미완료 이슈</div><div id="open" class="number"></div><p id="open-note" class="muted"></p></section></div>
-<section class="card" aria-labelledby="overview-title"><div class="section-head"><h2 id="overview-title">시스템 비교</h2><div class="legend"><span><i class="dot"></i>전체</span><span><i class="dot open"></i>미완료</span></div></div>
-<p class="muted">프로젝트를 누르면 아래에서 이번에 받은 이슈만 좁혀 봅니다.</p><div id="projects"></div><p class="meta">미완료: Jira 상태 분류가 완료가 아닌 이슈 · 집계값은 각 API 조회 시점의 값입니다.</p></section>
-<section class="card" aria-labelledby="list-title"><div class="section-head"><h2 id="list-title">최근 이슈</h2><button class="reset" id="reset" type="button">필터 초기화</button></div><p id="listing-meta" class="meta"></p>
-<div class="filters"><label>상태<select id="status"><option value="">모든 상태</option></select></label><label>담당자<select id="assignee"><option value="">모든 담당자</option></select></label></div>
-<p id="selection" class="meta" aria-live="polite"></p><div id="issues"></div><div id="next" class="footer"></div></section>
+<header class="jira-header"><div><p class="jira-eyebrow">업무 현황</p><h1>Jira 이슈 현황</h1><p id="scope-summary" class="jira-subtitle"></p></div><p id="time" class="jira-meta"></p></header>
+<div id="notice" class="jira-notice" role="status" hidden></div>
+<div class="jira-stats"><section class="jira-stat jira-stat-primary" aria-label="미완료 이슈 집계"><p class="jira-stat-label">미완료 이슈</p><div id="open" class="jira-number"></div><p id="open-note" class="jira-muted"></p></section><section class="jira-stat" aria-label="전체 이슈 집계"><p class="jira-stat-label">전체 이슈</p><div id="total" class="jira-number"></div><p id="total-note" class="jira-muted"></p></section></div>
+<section class="jira-panel" aria-labelledby="overview-title"><div class="jira-section-head"><div><h2 id="overview-title">시스템별 비교</h2><p id="comparison-note" class="jira-muted"></p></div><label class="jira-metric">비교 기준<select id="comparison-metric"><option value="open" selected>미완료 이슈</option><option value="total">전체 이슈</option></select></label></div>
+<div id="projects"></div><p class="jira-comparison-note">프로젝트를 선택하면 아래의 이번 이슈 목록을 좁혀 봅니다.</p>
+<details class="jira-query-details"><summary><span>조회 기준</span><span><span class="jira-closed-label">보기</span><span class="jira-open-label">접기</span></span></summary><p id="query-period"></p><p>미완료는 Jira 상태 분류가 완료가 아닌 이슈입니다. 프로젝트별 건수는 각각 조회한 시점의 값입니다.</p><p id="query-notice"></p></details></section>
+<section class="jira-panel" aria-labelledby="list-title"><div class="jira-section-head"><div><h2 id="list-title">최근 이슈</h2><p id="listing-meta" class="jira-meta"></p></div><button class="jira-reset" id="reset" type="button">필터 초기화</button></div><p class="jira-list-context">아래 필터는 이번에 받은 목록에만 적용됩니다. 위의 전체 집계는 바뀌지 않습니다.</p>
+<div class="jira-filters"><label>상태<select id="status"><option value="">모든 상태</option></select></label><label>담당자<select id="assignee"><option value="">모든 담당자</option></select></label></div>
+<p id="selection" class="jira-selection" aria-live="polite"></p><div id="issues"></div><div id="next" class="jira-footer"></div></section>
 </main><script type="application/json" id="jira-data">''' + data + r'''</script><script>
 'use strict';
 const data=JSON.parse(document.getElementById('jira-data').textContent);
 const el=id=>document.getElementById(id), str=v=>v===null||v===undefined?'':String(v);
-const count=v=>Number.isSafeInteger(v)&&v>=0?v.toLocaleString('ko-KR')+'건':'확인 불가';
+const validCount=v=>Number.isSafeInteger(v)&&v>=0;
+const count=v=>validCount(v)?v.toLocaleString('ko-KR')+'건':'확인 불가';
 const node=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
 const projects=Array.isArray(data.projects)?data.projects:[], issues=Array.isArray(data.issues)?data.issues:[];
-const info=data.summary||{}, listing=data.listing||{};
+const info=data.summary||{}, listing=data.listing||{}, scope=data.scope||{};
+const scopeKeys=Array.isArray(scope.project_keys)?scope.project_keys:projects.map(p=>p.key);
 let selected='';
 const stamp=value=>{const d=new Date(value);return value&&!Number.isNaN(d.getTime())?d.toLocaleString('ko-KR'):str(value)||'확인 불가';};
-el('time').textContent='조회 '+stamp(data.started_at)+' → '+stamp(data.fetched_at);
-el('notice').textContent=str(data.notice)||'현재 계정의 권한과 설정된 프로젝트 범위로 조회했습니다.';
-if(data.status!=='complete'||info.complete!==true)el('notice').classList.add('warn');
+const shortDate=value=>{const d=new Date(value);return value&&!Number.isNaN(d.getTime())?d.toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'}):str(value)||'확인 불가';};
+el('scope-summary').textContent=(scopeKeys.length===1?str(scopeKeys[0])+' 프로젝트':scopeKeys.length+'개 프로젝트')+' 전체 기간 · 내 Jira 계정 기준';
+el('time').textContent='조회 완료 '+stamp(data.fetched_at);
+el('query-period').textContent='조회 시작 '+stamp(data.started_at)+' / 완료 '+stamp(data.fetched_at);
+el('query-notice').textContent=str(data.notice)||'현재 계정의 권한과 설정된 프로젝트 범위로 조회했습니다.';
+const notices=[],failed=projects.filter(p=>p.ok!==true).length;
+if(failed)notices.push(failed+'개 프로젝트의 집계를 확인하지 못했습니다. 확인된 건수만 표시합니다.');
+if(info.complete!==true&&!failed)notices.push(validCount(listing.total)&&validCount(info.available_total)&&listing.total!==info.available_total?'조회 중 건수가 달라졌습니다. 전체 합계는 다시 조회해 확인하세요.':'전체 합계가 확정되지 않았습니다. 다시 조회해 확인하세요.');
+if(listing.ok!==true)notices.push('최근 이슈 목록을 불러오지 못했습니다. 확인된 시스템별 집계는 아래에 표시됩니다.');
+if(data.status!=='complete'&&!notices.length)notices.push('일부 결과를 확인하지 못했습니다. 조회 기준을 확인해 주세요.');
+if(notices.length){el('notice').hidden=false;el('notice').textContent=notices.join(' ');}
 for(const metric of ['total','open']){
   el(metric).textContent=info.complete===true?count(info[metric]):'전체 집계 미완료';
   el(metric+'-note').textContent=info.complete===true?'조회 대상 프로젝트 합계':'집계 성공 프로젝트만: '+count(info['available_'+metric]);
+  if(info.complete!==true)el(metric).classList.add('jira-incomplete');
 }
-const maxTotal=Math.max(1,...projects.filter(p=>p.ok&&Number.isSafeInteger(p.total)).map(p=>p.total));
-const buttons=[];
-for(const project of projects){
-  const button=node('button',undefined,'project');button.type='button';button.setAttribute('aria-pressed','false');
-  button.append(node('span',str(project.key),'project-name'));
-  const bars=node('span',undefined,'bars'),counts=node('span',undefined,'counts');bars.setAttribute('aria-hidden','true');
-  if(project.ok===true){
-    for(const metric of ['total','open']){const bar=node('span',undefined,'bar'+(metric==='open'?' open':''));bar.style.width=(Number.isSafeInteger(project[metric])?Math.max(0,Math.min(100,project[metric]/maxTotal*100)):0)+'%';bars.append(bar);}
-    counts.append(node('span','전체 '+count(project.total)),node('span','미완료 '+count(project.open)));
-  }else{bars.append(node('span','—','muted'));counts.append(node('span','집계 실패'),node('span','0건이 아닙니다','muted'));}
-  button.append(bars,counts);button.addEventListener('click',()=>{selected=selected===project.key?'':project.key;render();});
-  buttons.push([button,project.key]);el('projects').append(button);
-  if(project.ok!==true)el('projects').append(node('p',str(project.key)+': '+str(project.error&&project.error.message||'프로젝트 설정과 접근권한을 확인한 뒤 다시 조회하세요.'),'meta'));
+let buttons=[];
+el('comparison-metric').value='open';
+function renderProjects(){
+  const metric=el('comparison-metric').value==='total'?'total':'open',other=metric==='open'?'total':'open';
+  const label=key=>key==='open'?'미완료':'전체';
+  const valid=project=>project.ok===true&&validCount(project[metric]);
+  const ordered=[...projects].sort((a,b)=>Number(valid(b))-Number(valid(a))||(valid(a)?b[metric]-a[metric]:0)||str(a.key).localeCompare(str(b.key),'en'));
+  const maximum=Math.max(1,...ordered.filter(valid).map(p=>p[metric]));
+  el('comparison-note').textContent=label(metric)+' 이슈가 많은 순 · 조회 대상 전체 기간';
+  el('projects').replaceChildren();buttons=[];
+  for(const project of ordered){
+    const button=node('button',undefined,'jira-project'+(project.ok===true?'':' jira-project-failed'));button.type='button';button.setAttribute('aria-pressed',String(project.key===selected));button.setAttribute('aria-controls','issues');
+    button.append(node('span',str(project.key),'jira-project-name'));
+    const bars=node('span',undefined,'jira-bars'),counts=node('span',undefined,'jira-counts');bars.setAttribute('aria-hidden','true');
+    if(project.ok===true){
+      const bar=node('span',undefined,'jira-bar');bar.style.width=(valid(project)?Math.max(0,Math.min(100,project[metric]/maximum*100)):0)+'%';bars.append(bar);
+      counts.append(node('span',label(metric)+' '+count(project[metric]),'jira-current-count'),node('span',label(other)+' '+count(project[other]),'jira-muted'));
+    }else{counts.append(node('span','집계 실패','jira-current-count'),node('span','0건이 아닙니다','jira-muted'));}
+    button.append(bars,counts);button.addEventListener('click',()=>{selected=selected===project.key?'':project.key;render();});
+    buttons.push([button,project.key]);el('projects').append(button);
+    if(project.ok!==true)el('projects').append(node('p',str(project.key)+': '+str(project.error&&project.error.message||'프로젝트 설정과 접근권한을 확인한 뒤 다시 조회하세요.'),'jira-project-error'));
+  }
+  if(!projects.length)el('projects').append(node('p','조회할 프로젝트가 없습니다. 채팅에서 조회 범위를 확인해 주세요.','jira-empty'));
 }
-if(!projects.length)el('projects').append(node('p','조회할 프로젝트가 없습니다. 채팅에서 조회 범위를 확인해 주세요.','empty'));
+el('comparison-metric').addEventListener('change',()=>{renderProjects();resize();});
 const statuses=[...new Set(issues.map(i=>str(i.status)))].sort((a,b)=>a.localeCompare(b,'ko'));
 function assigneeInfo(issue){
   if(issue.assignee_known===true&&typeof issue.assignee_id==='string'&&issue.assignee_id)return {key:JSON.stringify(['user',issue.assignee_id]),label:str(issue.assignee)||issue.assignee_id,id:issue.assignee_id};
@@ -472,6 +492,24 @@ for(const info of assignees){const option=node('option',info.label);option.value
 for(const id of ['status','assignee'])el(id).addEventListener('change',render);
 el('reset').addEventListener('click',()=>{selected='';el('status').value='';el('assignee').value='';render();});
 function safeUrl(value){try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password?u.href:null;}catch{return null;}}
+const detailNodes=new Map();
+function issueDetail(issue){
+  if(detailNodes.has(issue))return detailNodes.get(issue);
+  const detail=node('details',undefined,'jira-issue'),head=node('summary'),heading=node('div',undefined,'jira-issue-heading');
+  heading.append(node('div',str(issue.key),'jira-issue-key'),node('div',str(issue.summary)||'제목 없음','jira-issue-title'));
+  const status=node('div',undefined,'jira-status');status.append(node('span',str(issue.status)||'상태 확인 불가','jira-badge'+(issue.status_category==='done'?' jira-badge-done':'')));
+  const assignee=node('div',undefined,'jira-assignee');assignee.append(node('b','담당자','jira-field-label'),node('span',assigneeMap.get(assigneeInfo(issue).key).label));
+  const updated=node('div',undefined,'jira-updated');updated.append(node('b','수정일','jira-field-label'),node('span',shortDate(issue.updated)));
+  const toggle=node('span',undefined,'jira-detail-switch');toggle.append(node('span','상세','jira-closed-label'),node('span','접기','jira-open-label'));
+  head.append(heading,status,assignee,updated,toggle);detail.append(head);
+  const fields=node('div',undefined,'jira-issue-info');
+  for(const [label,value] of [['우선순위',issue.priority_known===true?issue.priority||'없음':'미확인'],['기한',issue.due_date_known===true?issue.due_date||'없음':'미확인'],['수정 시각',stamp(issue.updated)]]){
+    const field=node('div');field.append(node('b',label,'jira-field-label'),node('span',str(value)));fields.append(field);
+  }
+  const source=node('div',undefined,'jira-source'),url=safeUrl(issue.url);
+  if(url){const link=node('a','Jira에서 열기');link.href=url;link.target='_blank';link.rel='noopener noreferrer';source.append(link);}
+  source.append(node('span','본문은 Jira 원문에서 확인할 수 있습니다.','jira-meta'));fields.append(source);detail.append(fields);detailNodes.set(issue,detail);return detail;
+}
 function render(){
   for(const [button,key] of buttons)button.setAttribute('aria-pressed',String(key===selected));
   const status=el('status').value,assignee=el('assignee').value;
@@ -479,23 +517,14 @@ function render(){
   const filtered=received.filter(i=>(status===''||str(i.status)===statuses[Number(status)])&&(assignee===''||assigneeInfo(i).key===assignee));
   el('list-title').textContent=(selected?selected+' · ':'')+'최근 이슈';
   el('listing-meta').textContent=listing.ok===true?'조회 범위 '+count(listing.total)+' 중 이번에 받은 '+count(issues.length)+' · 최근 수정순':'이슈 목록 조회 실패 · 상단 프로젝트 집계와 별개입니다.';
-  el('selection').textContent='화면에 '+count(filtered.length)+' 표시 · 필터는 이번에 받은 이슈에만 적용됩니다.';
+  el('selection').textContent=(selected?selected+' 선택 · ':'')+'화면에 '+count(filtered.length)+' 표시 · 필터는 이번에 받은 이슈에만 적용됩니다.';
   el('issues').replaceChildren();
-  for(const issue of filtered){
-    const detail=node('details',undefined,'issue'),head=node('summary'),heading=node('div');
-    heading.append(node('div',str(issue.key)+' · '+str(issue.project_key),'issue-key'),node('div',str(issue.summary)||'제목 없음','issue-title'),node('span',str(issue.status)||'상태 확인 불가','badge'));
-    head.append(heading);detail.append(head);const fields=node('div',undefined,'issue-info');
-    for(const [label,value] of [['담당자',assigneeMap.get(assigneeInfo(issue).key).label],['우선순위',issue.priority_known===true?issue.priority||'없음':'미확인'],['수정일',issue.updated?stamp(issue.updated):'확인 불가'],['기한',issue.due_date_known===true?issue.due_date||'없음':'미확인']]){
-      const field=node('div');field.append(node('b',label),node('span',str(value)));fields.append(field);
-    }
-    const url=safeUrl(issue.url);if(url){const link=node('a','Jira에서 상세 내용 열기 ↗');link.href=url;link.target='_blank';link.rel='noopener noreferrer';fields.append(link);}
-    fields.append(node('span','이번에 받은 항목만 표시합니다. 본문은 Jira 원문에서 확인하세요.','meta'));detail.append(fields);el('issues').append(detail);
-  }
+  for(const issue of filtered)el('issues').append(issueDetail(issue));
   if(!filtered.length){let message='선택한 조건에 맞는 이슈가 이번 목록에 없습니다. 필터를 바꿔보세요.';
     if(listing.ok!==true)message='목록을 받지 못했습니다. 채팅에서 다시 조회해 주세요.';
     else if(selected&&!received.length)message=selected+' 이슈가 이번 목록에 없습니다. 채팅에 “'+selected+' 이슈 보여줘”라고 요청하세요. 프로젝트에 이슈가 없다는 뜻은 아닙니다.';
     else if(!issues.length&&listing.total===0)message='이번 조회 범위에서 볼 수 있는 이슈가 없습니다.';
-    el('issues').append(node('p',message,'empty'));
+    el('issues').append(node('p',message,'jira-empty'));
   }
   const next=listing.next_start_at;
   el('next').textContent=Number.isSafeInteger(next)&&next>=0?'다음 목록은 채팅에 “같은 조회 범위의 다음 이슈 보여줘 (시작 위치 '+next+')”라고 요청하세요. 프로젝트를 바꿔 조회할 때는 처음부터 요청하세요.':'새로 조회하거나 다른 프로젝트를 보려면 채팅에 요청하세요.';
@@ -504,5 +533,5 @@ function render(){
 let pending=false,lastHeight=0;
 function resize(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;const height=Math.ceil(document.querySelector('main').getBoundingClientRect().height);if(height!==lastHeight){lastHeight=height;window.parent.postMessage({type:'iframe:height',height},'*');}});}
 if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe(document.querySelector('main'));
-window.addEventListener('resize',resize);document.addEventListener('toggle',resize,true);render();
+window.addEventListener('resize',resize);document.addEventListener('toggle',resize,true);renderProjects();render();
 </script></body></html>'''
