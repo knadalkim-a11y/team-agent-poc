@@ -139,3 +139,41 @@ python -m unittest discover -s tests -p 'test_jira*.py' -k partial_scope -k late
 확인 범위: 오류별 텍스트 안내·HTML처럼 보이는 오류 문자열의 비실행·정상 집계 보존, 부분 첫 페이지의 다음 위치 제거, 후속 페이지의 줄어든 범위 요청 차단, 회복 후 처음부터 조회, 정상 페이지 이동. 변경 코드·시험·Prompt·가이드 diff를 대조하고 공백 검사를 통과함.
 
 기존 전체 UI/기능 suite·인증·DB 저장·재시작·20회 안정성·Confluence·GitHub 검사를 반복하지 않음. 실제 사내 v0.1.2 등록·모델 선택·브라우저 표시·부분 실패는 미확인. 이전 v0.1.1 사용자 확인을 새 버전 성공으로 바꾸지 않음. [적용 범위](../docs/05-jira-read-tool.md#failure-followup-update), [통합 검토](scenarios.md#pr-stack-review).
+
+
+<a id="followup-actions"></a>
+
+## 후속 질문 넣기 — 2026-09-07
+
+### 범위와 근거
+
+사내 PC 접근을 기다리는 동안 준비할 개발 요청에 따라, 최신 main `b36cebcc9aed0deb6caa6ef7c6442d6da6f263c5`·열린 PR 0개와 AGENTS·STATUS를 확인하고 Jira 결과의 후속 질문 한 흐름을 선택함. 원본 WebUI·첫 화면/온보딩·추가 서버는 변경하지 않음. Windows 오류의 사내 영향·복구는 계속 미확인으로 유지함.
+
+- v0.1.3 renderer에 본문 요약, 선택 시스템의 첫 목록, 원래 범위의 다음 목록 질문 넣기 버튼을 추가함. 기존 집계·필터·원문·펼치기 디자인을 유지하고 결과의 실제 키·확인한 cursor만 고정 질문에 사용함. 제목·본문·담당자·오류·URL을 요청문에 합성하지 않음.
+- [WebUI v0.11.3 Chat](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte)에서 `input:prompt`는 입력창 `setText`만 수행하고 `input:prompt:submit`은 origin에 따라 즉시 제출할 수 있음을 대조함. [FullHeightIframe](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/common/FullHeightIframe.svelte)의 등록된 frame 메시지 경로를 사용하며 `window.args`·same-origin 허용·추가 API를 사용하지 않음. 공식 [Rich UI 설명](https://docs.openwebui.com/features/extensibility/plugin/development/rich-ui/#prompt-submission)보다 해당 태그의 코드 계약을 우선함.
+- 기존 초안이 교체된다는 안내와 직접 보내기 절차를 버튼 주변에 표시함. 수신/성공 응답이 없는 경로이므로 입력 완료·조회 중·조회 성공으로 표시하지 않으며, 독립 HTML이나 메시지 예외에서도 복사 가능한 readonly 질문을 남김. 클릭·필터만으로 자동 전송하지 않음.
+- 다음 목록은 원래 scope와 listing scope가 일치하고 프로젝트 집계 실패가 없으며, 다음 위치가 정수·허용 범위·반환 행 수·전체 건수와 일치할 때만 준비함. 화면의 시스템/상태/담당자 필터를 다음 API 범위로 바꾸지 않음. 새 프로젝트는 처음부터 조회하고 부분 실패·위치 미확인은 다음 버튼을 비활성화함. 마지막은 null과 받은 건수로 확인한 경우에만 안내함.
+- Jira Prompt에 직접 지정 키로 상세 조회, 표시 순번을 실제 이슈 키로 해석, 상세 뒤에도 직전 성공 목록의 범위·위치를 유지하는 절차를 반영함. 입력 초안은 조회 결과가 아니며 실제 실행 시 기존 Tool의 권한 검사를 그대로 거침.
+
+### 검사·검토 결과
+
+Linux / Python 3.12.13 / Pydantic 2.13.4 / Node 24.19.0의 합성 HTML·DOM stub 검사임. 실제 iframe sandbox·WebUI 입력창·모델의 도구 선택·Jira 서버는 실행하지 않음.
+
+| 검사 | 결과 |
+|---|---|
+| 새 후속 질문 7개 + 기존 HTML 안전 2개 + 영향받는 기존 6개 | 고유 **15개 PASS**, 3.750초. 실제 이슈 키·선택 프로젝트 첫 조회·단일/전체 원래 범위 next·실패/cursor/범위 불일치·standalone/bridge 예외·악성 키 확인 |
+| 키 검증 보완 후 관련 2개 | **2개 PASS**, 1.072초. JS 정규식의 `$`가 마지막 개행 앞에도 일치하는 경계를 발견해 `trim()` 결과와 원본이 같은지 검사하고 LF/CRLF를 거부함 |
+| HTTP·인증·설정·저장 경로 | 이전 main과 `_render_dashboard`·모듈 버전 설명을 제외한 AST가 동일. 기존 Jira API/인증/암호화 검사 증거 재사용, 해당 시험 재실행 없음 |
+| 독립 코드·지침 검토 | 초안 메시지 종류·대상 키·페이지 범위·오류/빈 결과·수신 미확인 안내·과설계를 검토한 범위에서 중대한 문제 없음 |
+| 문서·diff 검사 | 문서 25개·내부 링크 396개·오류 0·검토 후보 0, `git diff --check` PASS. 기존 문서만 갱신 |
+
+선택 시험 준비 중 전체 범위 질문의 기대 문구·DOM 시험 변수 충돌을 정리하고 listing scope 불일치 차단을 보완한 뒤 위 결과를 얻음. 실제 사용자 실패 보고를 새 합성 PASS로 바꾸지 않음.
+
+재현 시 `tests`를 import 경로로 두고 `test_jira_dashboard_ui`의 `JiraDashboardSafetyTests` 2개와 다음 DOM 메서드만 선택한다. 매 변경마다 전체 시험을 반복하는 목록이 아니다.
+
+- 신규: `test_issue_question_uses_actual_row_key_without_untrusted_descriptions`, `test_project_question_starts_selected_project_even_without_local_rows`, `test_next_question_keeps_original_scope_and_cursor_after_local_filters`, `test_next_question_is_disabled_for_inconsistent_or_failed_page`, `test_question_remains_copyable_without_embed_or_after_bridge_exception`, `test_malformed_or_out_of_scope_issue_key_has_no_usable_question`, `test_malformed_project_key_cannot_become_a_chat_question`.
+- 영향받는 기존: `test_exact_project_counts_are_independent_of_received_list`, `test_project_filter_does_not_claim_unloaded_project_is_empty`, `test_status_assignee_filters_and_reset_use_only_received_data`, `test_rendered_source_links_are_safe_and_frame_messages_only_resize`, `test_listing_error_guidance_is_visible_as_safe_text_without_retry_hint`, `test_partial_scope_keeps_rows_and_replaces_stale_next_hint_with_restart`.
+
+### 적용 경계
+
+현재 사내 저장 보고는 v0.1.2·이전 Jira 지침까지이며 v0.1.3·이번 지침은 Git 준비본이다. 사내 접속 복구 후 기존 Tool 코드·Jira 절을 한 번에 반영하고 [변경된 흐름](../docs/05-jira-read-tool.md#jira-followup-actions)만 확인한다. 키·DB·연동 설정·완료한 기본 화면/조회·20회 검사는 반복하지 않는다. 실제 입력 반영과 보내기 후 모델의 후속 조회는 **미실행**으로 남긴다.

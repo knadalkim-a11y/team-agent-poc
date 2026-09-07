@@ -1,7 +1,7 @@
 """
 title: EES Jira Read
 description: Project overview and issue reads through a user's confirmed Bearer authentication.
-version: 0.1.2
+version: 0.1.3
 required_open_webui_version: 0.11.3
 """
 
@@ -396,7 +396,7 @@ class Tools:
 
 
 def _render_dashboard(payload):
-    """Render a self-contained, read-only view of an already received API result."""
+    """Render received data and explicit follow-up drafts; never call an API from the frame."""
     import json
 
     data = json.dumps(payload, ensure_ascii=False, allow_nan=False)
@@ -418,6 +418,7 @@ button,select{font:inherit;color:inherit}button,summary{cursor:pointer}button:fo
 .jira-list-context{border-left:3px solid var(--jira-line);padding-left:12px;font-size:13px;color:var(--jira-muted);margin-top:4px}.jira-filters{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0 14px}.jira-filters label{display:grid;gap:5px;font-size:13px;color:var(--jira-muted);min-width:140px;max-width:280px;flex:1}.jira-filters select{color:var(--jira-ink)}.jira-selection{color:var(--jira-muted);font-size:13px;margin-bottom:12px;overflow-wrap:anywhere}
 .jira-issue{border-top:1px solid var(--jira-line)}.jira-issue>summary{padding:17px 0;list-style:none;display:grid;grid-template-columns:minmax(0,1fr) 90px 118px 112px 32px;gap:16px;align-items:center}.jira-issue-heading{min-width:0}.jira-issue-key{color:var(--jira-muted);font-size:13px;font-variant-numeric:tabular-nums;margin-bottom:3px;overflow-wrap:anywhere}.jira-issue-title{font-size:15px;line-height:1.55;font-weight:550;overflow-wrap:anywhere}.jira-status{min-width:0}.jira-badge{font-size:13px;line-height:1.5;border-radius:5px;padding:3px 8px;background:var(--jira-tint);color:var(--jira-accent);display:inline-block;max-width:100%;overflow-wrap:anywhere}.jira-badge-done{background:var(--jira-track);color:var(--jira-muted)}.jira-assignee,.jira-updated{min-width:0;font-size:14px;overflow-wrap:anywhere}.jira-field-label{display:block;color:var(--jira-muted);font-size:13px;font-weight:400;margin-bottom:3px}.jira-updated span{font-size:13px;font-variant-numeric:tabular-nums}.jira-detail-switch{font-size:13px;color:var(--jira-accent);text-align:right;white-space:nowrap}
 .jira-issue-info{display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;background:var(--jira-bg);border-radius:8px;padding:16px 18px;margin-bottom:16px;font-size:14px}.jira-issue-info>div{overflow-wrap:anywhere}.jira-source{grid-column:1/-1;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}a{color:var(--jira-accent);text-underline-offset:3px}.jira-empty{padding:28px 4px;color:var(--jira-muted);font-size:14px;overflow-wrap:anywhere}.jira-footer{border-top:1px solid var(--jira-line);padding-top:16px;margin-top:8px;font-size:13px;color:var(--jira-muted);overflow-wrap:anywhere}
+.jira-actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.jira-reset:disabled{opacity:.55;cursor:not-allowed}.jira-request{border:1px solid var(--jira-line);border-radius:8px;padding:14px;margin-top:16px;background:var(--jira-bg)}.jira-request[hidden]{display:none}.jira-request label{display:block;font-size:13px;margin:8px 0}.jira-request textarea{display:block;width:100%;min-height:90px;resize:vertical;font:inherit;color:inherit;background:var(--jira-surface);border:1px solid var(--jira-line);border-radius:6px;padding:10px}.jira-request textarea:focus-visible{outline:3px solid var(--jira-accent);outline-offset:3px}
 @media(prefers-color-scheme:dark){:root{--jira-bg:#161c24;--jira-surface:#1d2631;--jira-ink:#e6ebf1;--jira-muted:#a9b5c4;--jira-line:#354252;--jira-accent:#8dc3ed;--jira-tint:#263d51;--jira-track:#344454;--jira-warning:#ecd1a3;--jira-warning-bg:#352e24}}
 @media(max-width:760px){.jira-issue>summary{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 18px}.jira-issue-heading{grid-column:1/-1}.jira-status{grid-column:1;grid-row:2}.jira-detail-switch{grid-column:2;grid-row:2}.jira-assignee{grid-column:1;grid-row:3}.jira-updated{grid-column:2;grid-row:3}.jira-project{grid-template-columns:96px minmax(28px,1fr) 178px;gap:12px}.jira-counts{gap:10px}.jira-metric{flex-wrap:wrap}.jira-header{gap:8px}}
 @media(max-width:520px){main{padding:20px 12px}h1{font-size:24px}.jira-header{margin-bottom:20px}.jira-stats{gap:10px}.jira-stat{padding:15px 14px}.jira-stat-primary{padding-top:13px}.jira-number{font-size:31px;letter-spacing:-.8px}.jira-number.jira-incomplete{font-size:18px;padding:8px 0}.jira-stat .jira-muted{font-size:13px}.jira-panel{padding:18px 14px}.jira-section-head{gap:12px}.jira-metric{width:100%;justify-content:space-between}.jira-project{grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:14px 8px}.jira-bars{grid-column:1/-1;grid-row:2}.jira-counts{grid-column:2;grid-row:1;display:grid;justify-items:end;gap:1px}.jira-project-name{font-size:14px}.jira-counts span{white-space:normal}.jira-filters{gap:10px}.jira-filters label{min-width:115px}.jira-issue-info{gap:14px;padding:14px}.jira-footer{line-height:1.7}}
@@ -430,7 +431,10 @@ button,select{font:inherit;color:inherit}button,summary{cursor:pointer}button:fo
 <details class="jira-query-details"><summary><span>조회 기준</span><span><span class="jira-closed-label">보기</span><span class="jira-open-label">접기</span></span></summary><p id="query-period"></p><p>미완료는 Jira 상태 분류가 완료가 아닌 이슈입니다. 프로젝트별 건수는 각각 조회한 시점의 값입니다.</p><p id="query-notice"></p></details></section>
 <section class="jira-panel" aria-labelledby="list-title"><div class="jira-section-head"><div><h2 id="list-title">최근 이슈</h2><p id="listing-meta" class="jira-meta"></p></div><button class="jira-reset" id="reset" type="button">필터 초기화</button></div><p class="jira-list-context">아래 필터는 이번에 받은 목록에만 적용됩니다. 위의 전체 집계는 바뀌지 않습니다.</p>
 <div class="jira-filters"><label>상태<select id="status"><option value="">모든 상태</option></select></label><label>담당자<select id="assignee"><option value="">모든 담당자</option></select></label></div>
-<p id="selection" class="jira-selection" aria-live="polite"></p><div id="issues"></div><div id="next" class="jira-footer"></div></section>
+<p id="followup-help" class="jira-meta">질문 넣기 버튼은 채팅 입력창의 작성 중인 내용을 바꿉니다. 내용을 확인하고 보내기를 눌러야 조회합니다.</p>
+<div class="jira-actions"><button id="query-project" class="jira-reset" type="button" aria-describedby="followup-help" disabled>선택 시스템 조회 질문 넣기</button></div>
+<p id="selection" class="jira-selection" aria-live="polite"></p><div id="issues"></div><div class="jira-footer"><p id="next"></p><div class="jira-actions"><button id="query-next" class="jira-reset" type="button" aria-describedby="followup-help" disabled>다음 목록 질문 넣기</button></div></div>
+<div id="request-box" class="jira-request" hidden><p id="request-status" class="jira-meta" role="status"></p><label for="request-preview">후속 질문 · 필요하면 복사해 채팅에 보내세요</label><textarea id="request-preview" readonly></textarea></div></section>
 </main><script type="application/json" id="jira-data">''' + data + r'''</script><script>
 'use strict';
 const data=JSON.parse(document.getElementById('jira-data').textContent);
@@ -442,6 +446,32 @@ const projects=Array.isArray(data.projects)?data.projects:[], issues=Array.isArr
 const info=data.summary||{}, listing=data.listing||{}, scope=data.scope||{};
 const scopeKeys=Array.isArray(scope.project_keys)?scope.project_keys:projects.map(p=>p.key);
 let selected='';
+const projectKey=value=>typeof value==='string'&&value.trim()===value&&/^[A-Z][A-Z0-9_]{0,31}$/.test(value);
+const scopeReady=Array.isArray(scope.project_keys)&&scopeKeys.length>0&&scopeKeys.length<=20&&scopeKeys.every(projectKey)&&new Set(scopeKeys).size===scopeKeys.length;
+function projectRequest(key){
+  if(data.ok!==true||!scopeReady||!projectKey(key)||!scopeKeys.includes(key)||!projects.some(p=>p.key===key))return null;
+  return 'Jira '+key+' 프로젝트의 최근 이슈를 처음부터 보여줘. 전체 기간·모든 상태·모든 담당자 기준으로 조회해줘.';
+}
+function issueRequest(issue){
+  if(data.ok!==true||listing.ok!==true||!scopeReady||!issues.includes(issue)||typeof issue.key!=='string'||issue.key.trim()!==issue.key||!/^[A-Z][A-Z0-9_]{0,31}-[1-9][0-9]{0,14}$/.test(issue.key)||!scopeKeys.includes(issue.project_key)||issue.key.slice(0,issue.key.lastIndexOf('-'))!==issue.project_key)return null;
+  return 'Jira '+issue.key+' 이슈의 본문을 조회해서 요약하고 원문 링크를 보여줘.';
+}
+function nextRequest(){
+  const next=listing.next_start_at,start=listing.start_at,listed=scope.listing_project_keys;
+  if(data.ok!==true||!scopeReady||listing.ok!==true||projects.some(p=>p.ok!==true)||!scopeKeys.every(key=>projects.some(p=>p.key===key&&p.ok===true))||!Array.isArray(listed)||listed.length!==scopeKeys.length||!scopeKeys.every(key=>listed.includes(key))||!validCount(start)||!validCount(next)||next>100000||next<=start||listing.returned!==issues.length||next!==start+issues.length||!validCount(listing.total)||next>=listing.total)return null;
+  const target=scopeKeys.length===1?scopeKeys[0]+' 프로젝트':'전체 허용 프로젝트';
+  return 'Jira '+target+'의 최근 이슈를 시작 위치 '+next+'부터 보여줘. 전체 기간·모든 상태·모든 담당자 기준으로 조회해줘.';
+}
+function prepareChatRequest(text){
+  if(!text)return;
+  el('request-preview').value=text;el('request-box').hidden=false;
+  el('request-status').textContent='채팅 입력창에서 내용을 확인하고 보내세요. 반영되지 않으면 아래 질문을 복사해 보내세요.';
+  if(window.parent===window){el('request-status').textContent='아래 질문을 복사해 채팅 입력창에 넣고 보내세요.';}
+  else{try{window.parent.postMessage({type:'input:prompt',text},'*');}catch{el('request-status').textContent='입력창 연결을 확인하지 못했습니다. 아래 질문을 복사해 채팅에 보내세요.';}}
+  resize();
+}
+el('query-project').addEventListener('click',()=>prepareChatRequest(projectRequest(selected)));
+el('query-next').addEventListener('click',()=>prepareChatRequest(nextRequest()));
 const stamp=value=>{const d=new Date(value);return value&&!Number.isNaN(d.getTime())?d.toLocaleString('ko-KR'):str(value)||'확인 불가';};
 const shortDate=value=>{const d=new Date(value);return value&&!Number.isNaN(d.getTime())?d.toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'}):str(value)||'확인 불가';};
 el('scope-summary').textContent=(scopeKeys.length===1?str(scopeKeys[0])+' 프로젝트':scopeKeys.length+'개 프로젝트')+' 전체 기간 · 내 Jira 계정 기준';
@@ -516,7 +546,8 @@ function issueDetail(issue){
   }
   const source=node('div',undefined,'jira-source'),url=safeUrl(issue.url);
   if(url){const link=node('a','Jira에서 열기');link.href=url;link.target='_blank';link.rel='noopener noreferrer';source.append(link);}
-  source.append(node('span','본문은 Jira 원문에서 확인할 수 있습니다.','jira-meta'));fields.append(source);detail.append(fields);detailNodes.set(issue,detail);return detail;
+  const request=node('button','본문 요약 질문 넣기','jira-reset');request.type='button';request.setAttribute('data-jira-action','issue');request.setAttribute('aria-describedby','followup-help');request.disabled=!issueRequest(issue);request.addEventListener('click',()=>prepareChatRequest(issueRequest(issue)));source.append(request);
+  source.append(node('span','본문 요약은 질문을 보낸 뒤 새 답변에서 확인합니다.','jira-meta'));fields.append(source);detail.append(fields);detailNodes.set(issue,detail);return detail;
 }
 function render(){
   for(const [button,key] of buttons)button.setAttribute('aria-pressed',String(key===selected));
@@ -534,8 +565,12 @@ function render(){
     else if(!issues.length&&listing.total===0)message='이번 조회 범위에서 볼 수 있는 이슈가 없습니다.';
     el('issues').append(node('p',message,'jira-empty'));
   }
-  const next=listing.next_start_at;
-  el('next').textContent=listing.ok!==true?'목록 조회가 완료되지 않았습니다. 위 안내에 따라 확인해 주세요.':failed?'일부 프로젝트를 확인하지 못해 다음 페이지를 제공하지 않습니다. 프로젝트 오류를 확인한 뒤 같은 범위를 처음부터 조회하거나 확인된 프로젝트 하나를 새로 조회하세요.':Number.isSafeInteger(next)&&next>=0?'다음 목록은 채팅에 “같은 조회 범위의 다음 이슈 보여줘 (시작 위치 '+next+')”라고 요청하세요. 프로젝트를 바꿔 조회할 때는 처음부터 요청하세요.':'새로 조회하거나 다른 프로젝트를 보려면 채팅에 요청하세요.';
+  const next=listing.next_start_at,nextText=nextRequest();
+  el('next').textContent=listing.ok!==true?'목록 조회가 완료되지 않았습니다. 위 안내에 따라 확인해 주세요.':failed?'일부 프로젝트를 확인하지 못해 다음 페이지를 제공하지 않습니다. 프로젝트 오류를 확인한 뒤 같은 범위를 처음부터 조회하거나 확인된 프로젝트 하나를 새로 조회하세요.':next===null&&validCount(listing.start_at)&&validCount(listing.total)&&listing.returned===issues.length&&listing.start_at+issues.length>=listing.total?'현재 조회 시점의 마지막 목록입니다. 다른 시스템을 조회하려면 선택한 뒤 조회 질문을 넣으세요.':'다음 페이지 위치를 확인하지 못했습니다. 채팅에서 원하는 조회 범위를 처음부터 요청하세요.';
+  el('query-project').disabled=!projectRequest(selected);
+  el('query-project').textContent=selected?selected+' 조회 질문 넣기':'선택 시스템 조회 질문 넣기';
+  el('query-next').disabled=!nextText;
+  if(nextText)el('next').textContent=(scopeKeys.length===1?scopeKeys[0]+' 프로젝트':'전체 허용 프로젝트')+'의 다음 목록 · 시작 위치 '+next+' · 화면의 시스템·상태·담당자 선택은 다음 조회에 적용되지 않습니다.';
   resize();
 }
 let pending=false,lastHeight=0;

@@ -4,6 +4,8 @@
 
 ## 2026-09-07
 
+- Jira Tool v0.1.3: 결과 화면에서 본문·선택 시스템·다음 목록의 정확한 후속 질문을 입력창에 넣는 버튼 추가. 자동 제출 없이 복사 가능한 질문을 남기고 부분 실패·잘못된 cursor에서는 다음 요청을 차단함. Jira Prompt에 직접 이슈 조회·상세 뒤 목록 범위 유지 지침 반영. HTTP·인증·저장 코드는 유지하며 사내 적용은 대기. [검증](evals/jira-offline.md#followup-actions).
+
 - Windows `WinError 64`·`accept_coro` 보고에 대해 CPython 수락 실패 경로를 대조하고 기존 환경용 Selector 선택 실행 파일·사전검사·복구 안내를 추가함. 기본 기동·WebUI 코어·연동 코드는 유지. 사내 PC 접근 불가로 실제 장애 원인·적용·복구는 미확인. [준비·검증](evals/scenarios.md#windows-accept-preparation).
 
 - PR #2~#5 전체 검토·병합 완료. main 통합 커밋 `3184b78`, 열린 PR 0개를 확인하고 STATUS의 재개 기준을 최신 main으로 정리함. 사내 적용·첫 화면/온보딩 보류 상태와 과거 검증 근거는 유지. [병합 기록](evals/scenarios.md#pr-stack-review).
