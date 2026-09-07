@@ -1,6 +1,6 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-06
+갱신일: 2026-09-07
 
 이 파일은 새 GPT 세션의 짧은 인계 지점입니다. 기능별 판정 원본은 [평가표](../evals/scenarios.md), 환경 기준은 [versions](../versions.md), 과거 변경은 [CHANGELOG](../CHANGELOG.md)에 둡니다. 아래 요약이 증거와 충돌하면 단정하지 말고 증거를 확인합니다.
 
@@ -8,8 +8,8 @@
 
 - 목표: 비개발자가 Open WebUI의 `EES 통합 Assistant`에서 사내 LLM·팀 지침·읽기 기능을 쓰는 POC.
 - 현재 경로: Open WebUI Native. Windows·Docker 미사용. 사용자가 사내 복귀를 보고했으며, GPT가 사내 PC·서비스에 직접 접속한 것은 아님.
-- 이번 작업: Tool 인증 성공 후 검색·재연결 실패에 이어, 사용자가 브라우저로 사내 Confluence에 직접 접속해 502 오류를 확인했다고 보고함. 후속으로 재연결 오류 코드 `connection_failed`와 기본 주소·네트워크 경로·HTTPS 사용 시 인증서를 확인하라는 메시지를 부분 전달했고 복구 후 재시도하겠다고 함. HTTPS 문구는 공통 안내이며 실제 HTTPS 사용 증거가 아님. 서비스 또는 앞단 게이트웨이 문제가 관련됐을 가능성으로 [C03/C04](../evals/scenarios.md#confluence-live)의 복구 후 재시험 대기를 유지함. 브라우저 502와 Tool 오류의 동일 원인이나 정확한 고장 지점은 미확정이고 최초 성공·이후 실패 기록은 보존함.
-- 다음 작업 하나: **브라우저에서 Confluence 정상 접속이 복구된 뒤 현재 설정으로 연결·검색·본문 조회를 순서대로 재확인**한다. 복구 전에는 반복 호출이나 HTTPS·프록시·PAT·timeout 변경을 진행하지 않는다. 복구 후 `check_access`의 두 성공 필드를 확인하고 허용 Space의 작은 검색·본문·원문 링크를 확인한다. Tool만 계속 실패하면 그때 실제 오류 코드·비식별 메시지·경과 시간으로 진단을 재개한다. C03 응답·콘솔 PAT 비노출 확인도 미완료이며 자동 재시도·감시는 구성하지 않음.
+- 이번 작업: 2026-09-07 사용자가 접속·연결 확인과 일반 키워드 1개의 검색이 성공했다고 보고함. [C03/C04](../evals/scenarios.md#confluence-live)의 복구 대기를 해제하고 연결·검색 성공 보고를 반영함. 이번 `check_access`의 개별 반환 필드·검색 결과 전문은 받지 않았고 본문·원문 링크·PAT 비노출·사용자별 문서 권한 확인은 아직 없음. 이전 502·Tool 실패는 당시 기록으로 보존하며 장애 원인이나 장기 안정성까지 검증됐다고 보지 않음. 실제 검색어·문서 내용은 Git에 기록하지 않음.
+- 다음 작업 하나: **검색 결과 한 건의 본문을 읽고 요약·원문 링크를 대조(C04)**한다. 같은 Assistant에서 검색으로 얻은 문서 한 건을 `get_page`로 읽어 핵심 내용을 요약하게 하고, 실제 Tool 성공·본문 일치·링크가 해당 문서로 열리는지를 확인한다. `truncated=true`이면 일부 본문 기준임을 안내해야 한다. 응답·콘솔의 PAT 비노출은 별도 미확인이므로 사내에서 함께 확인하되 내부 문서·주소·토큰을 외부로 보내지 않는다.
 - 사내 작업 전달: 사내 PC에서는 ChatGPT에 접근할 수 없어 외부 모바일에서 코드·명령을 옮겨 실행함. Git 저장소의 안내 경로는 `%USERPROFILE%\team-agent-poc`이며 Open WebUI 데이터·설치 경로와 별개임. 최초 clone 성공 보고가 있으므로 다시 clone을 요구하지 않음. Git은 해당 PowerShell의 `$gitProxy` 변수와 `git -c "http.proxy=$gitProxy" ...`로 연결했으며 영구 프록시 저장이나 WebUI/Confluence 프록시 변경은 안내하지 않음. 새 창의 후속 Git 갱신 시 사내 프록시 값을 다시 설정해야 하며 실제 주소는 수집하지 않음.
 - 후속 순서: Confluence 읽기 MVP 검증 → Jira 읽기 연동 → GitHub 읽기 연동. 각 연동 전에 [제품·인증·조회 범위](03-openwebui-native-agent.md#rich-ui)를 확인하고, Rich UI는 실제 사용사례가 정해질 때 적용한다.
 - 후속 구상(미착수): 부서 공용 범용 채팅을 기반으로 EMS/FDC/APC의 간접 업무 UI까지 확장하고, 업무 시스템 운영자·사용자별 기능과 Rich UI를 구분한다. WebUI 플랫폼 관리자와 업무 역할은 별도로 다루며, 구체적인 권한 설계·화면 구현은 MVP 이후로 미룬다.
@@ -21,7 +21,7 @@
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 개정 내용 미반영 | [P08~P10 및 기존 P02~P07 재검증](../evals/scenarios.md#instruction-revision); 사내 모델 검증 대기 | 미확인 |
-| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.2; HTTP 명시적 허용 | 2026-09-06 최초 인증 성공 후 검색·재연결 실패, 이어 브라우저에서도 Confluence 502 사용자 보고. 현재 설정 유지·서비스 복구 후 재시험 대기. 본문·권한은 미확인 | [HTTP 지원 사외 검증](../evals/confluence-offline.md#http-opt-in), [실환경 C01~C09 및 결과](../evals/scenarios.md#confluence-live) | 새 Tool 안내 원본 [910ad765](https://github.com/knadalkim-a11y/team-agent-poc/blob/910ad765a777df1caf30a565a197097f8afbf8b0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), 기존 Skill 안내 원본 [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md). 등록 코드·사내 checkout SHA 직접 대조 미실행 |
+| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.2; HTTP 명시적 허용 | 2026-09-07 연결 확인·키워드 검색 성공 사용자 보고. 본문·원문 링크·PAT 비노출·문서 권한은 미확인 | [HTTP 지원 사외 검증](../evals/confluence-offline.md#http-opt-in), [실환경 C01~C09 및 결과](../evals/scenarios.md#confluence-live) | 새 Tool 안내 원본 [910ad765](https://github.com/knadalkim-a11y/team-agent-poc/blob/910ad765a777df1caf30a565a197097f8afbf8b0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), 기존 Skill 안내 원본 [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md). 등록 코드·사내 checkout SHA 직접 대조 미실행 |
 | Rich UI 참고 예제 | [합성 검색 결과 HTML](04-confluence-read-tool.md#rich-ui-demo); 실제 API·기존 Tool과 미연동 | 배포 대상 미확정 | [사전 준비 검증](../evals/confluence-offline.md#status-history); 실제 브라우저·WebUI 검증과 구분 | 해당 없음 |
 | 실행 스크립트 | 시작·smoke test·암호화 준비 옵션; smoke 자동 리디렉션 차단 | 사용자 보고로 명령 복사 후 수동 실행; 정해진 기동 스크립트 채택은 안정화 이후 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
 
@@ -39,6 +39,7 @@
 
 ## 최근 점검
 
+- 2026-09-07 연결·검색 성공 보고를 평가 조건과 대조해 C03/C04를 부분 확인으로 갱신함. 본문·링크·비노출·문서 권한을 미확인으로 유지하고 과거 실패 증거를 보존함. STATUS·평가표만 변경해 문서 점검·`git diff --check`를 확인함. 코드·설정 변경이나 자동 코드 시험·사내 직접 검사는 수행하지 않음.
 - 브라우저 502 관찰을 기존 Tool 오류와 구분해 기록하고 서비스 복구 후 재시험으로 다음 작업을 변경함. 원본 Tool에서 받은 HTTP 502는 `upstream_error` 분기이며 이전 `connection_failed`를 502 수신 증거로 해석하지 않음. STATUS·평가표만 변경하고 문서 점검·`git diff --check`를 확인함. 코드·설정 변경, 사내 서버 점검·복구·코드 시험은 실행하지 않음.
 - 재연결 실패 보고를 최초 인증 성공·검색 오류와 구분해 반영함. 새 오류 코드를 추정하지 않고 이미 실패한 호출 결과 확인을 다음 단계로 정함. STATUS·평가표만 변경하고 문서 점검·`git diff --check`를 확인함. 실행 코드·설정 변경·코드 시험·사내 직접 호출은 수행하지 않음.
 - `check_access`·`search_pages`가 공통 `_context`와 `_request`를 사용하고 v0.1.2가 기본 주소의 스킴을 보존함을 확인함. 검색에 별도 HTTPS 고정은 없으며 `connection_failed`에 시간 초과·TLS·URL/OS 오류가 포함되고 HTTP 상태 오류·리디렉션은 별도 분기임. 독립 코드 검토에서도 검색만 HTTPS로 변경된다는 근거가 없음을 확인함. 진단에는 실제 적용 설정·동시점 재인증·오류 시간 정보가 더 필요함. STATUS·평가표만 변경해 문서 점검·`git diff --check`를 확인하며 코드 시험·사내 호출은 실행하지 않음.
