@@ -4,7 +4,7 @@
 
 ## 1. 확인한 제품과 범위
 
-2026-09-07 사용자가 **GitHub Enterprise Server 3.17.15**와 기존 개인 PAT 보유를 확인했습니다. 후속 `--github` 출력 보고로 새 개인 PAT 필드의 [DB 저장 확인](../evals/scenarios.md#github-storage-check)을 통과했고, 허용 저장소를 정확한 `owner/repo`로 보완한 뒤 [열린 PR 목록 정상 조회](../evals/scenarios.md#github-first-list)를 보고했습니다. 목록 호출 전 계정 확인 경로를 근거로 해당 개인 환경의 인증·목록 조회 성공으로 판정합니다. 본문·원문 링크 대조와 사용자 격리는 미확인입니다. 토큰 종류·전체 권한·사내 주소/프로토콜은 미확인이며 실제 주소·허용 저장소 값은 사내 설정에서만 관리합니다.
+2026-09-07 사용자가 **GitHub Enterprise Server 3.17.15**와 기존 개인 PAT 보유를 확인했습니다. 후속 `--github` 출력 보고로 새 개인 PAT 필드의 [DB 저장 확인](../evals/scenarios.md#github-storage-check)을 통과했고, 허용 저장소를 정확한 `owner/repo`로 보완한 뒤 [열린 PR 목록 정상 조회](../evals/scenarios.md#github-first-list)를 보고했습니다. 이어 선택한 한 PR의 본문 요약·원문 링크도 맞게 표시된다는 보고로 [개인 환경의 기본 읽기 흐름](../evals/scenarios.md#github-read-acceptance)을 확인했습니다. 목록·상세 호출 전 계정 확인 경로를 근거로 해당 개인 환경의 인증·조회 성공으로 판정합니다. 전체 목록 정확성·페이지 처리·사용자 격리는 미확인입니다. 토큰 종류·전체 권한·사내 주소/프로토콜은 미확인이며 실제 주소·허용 저장소 값은 사내 설정에서만 관리합니다.
 
 [GHES 3.17 PR API](https://docs.github.com/en/enterprise-server@3.17/rest/pulls/pulls)에 맞춰 고정 서버의 `/api/v3` 아래에서 `GET /user`, `GET /repos/{owner}/{repo}/pulls`, `GET /repos/{owner}/{repo}/pulls/{number}`만 사용합니다. Bearer 개인 인증, GitHub JSON, API 버전 `2022-11-28` 헤더를 고정합니다. 기본 주소에는 **서버 주소와 필요한 포트만** 입력하며 `/api/v3`, 저장소 경로·`.git` URL은 넣지 않습니다.
 
@@ -50,7 +50,7 @@ UserValves는 비밀번호형 개인 `PAT` 한 필드입니다. 관리자 공통
 
 ## 4. 새 GitHub 입력칸 저장 확인
 
-현재 개인 환경에서는 2026-09-07 [4b058996의 등록·검사 안내](https://github.com/knadalkim-a11y/team-agent-poc/commit/4b058996d1e3f360ee670da553e2f9bc7a9046a1) 후 사용자가 보고한 출력으로 **DB 범위 PASS**를 확인했습니다. [출력과 확인 범위](../evals/scenarios.md#github-storage-check)를 보존하며 관련 저장 경로 변경이 없으면 아래 검사를 반복하지 않습니다. 이후 [열린 PR 목록 조회도 성공](../evals/scenarios.md#github-first-list)했으므로 다음은 목록에서 고른 한 PR의 본문·원문 확인입니다. DB 출력 자체를 마스킹 화면의 별도 관찰·Prompt 저장·실제 API 인증·사용자 격리 증거로 확대하지 않습니다.
+현재 개인 환경에서는 2026-09-07 [4b058996의 등록·검사 안내](https://github.com/knadalkim-a11y/team-agent-poc/commit/4b058996d1e3f360ee670da553e2f9bc7a9046a1) 후 사용자가 보고한 출력으로 **DB 범위 PASS**를 확인했습니다. [출력과 확인 범위](../evals/scenarios.md#github-storage-check)를 보존하며 관련 저장 경로 변경이 없으면 아래 검사를 반복하지 않습니다. 이후 [목록 → 한 PR의 본문 요약 → 원문 링크 확인](../evals/scenarios.md#github-read-acceptance)도 사용자 보고로 완료했습니다. DB 출력 자체를 마스킹 화면의 별도 관찰·Prompt 저장·실제 API 인증·사용자 격리 증거로 확대하지 않습니다.
 
 GitHub에서만 쓰는 합성 값은 **`EES-GITHUB-CANARY-20260907-C43D8E`**입니다. 기존 [check_confluence_canary.py](../scripts/check_confluence_canary.py)의 `--github` 모드로 검사합니다. 파일명·기본 Confluence 모드·`--jira`를 유지하며 새 도구 이름과 정확히 하나인 내부 ID의 저장값을 연결합니다.
 
@@ -77,7 +77,7 @@ uvx --offline --no-python-downloads --python 3.11 --from "open-webui==0.11.3" py
 
 ## 5. 작은 사내 확인 묶음과 복구
 
-현재 개인 환경은 [열린 PR 목록까지 확인](../evals/scenarios.md#github-first-list)했습니다. 완료한 목록·인증·저장 확인을 반복하지 않고, 조회한 목록 중 하나의 본문 요약·원문 링크를 확인합니다.
+현재 개인 환경은 [목록 → 한 PR의 본문 요약 → 원문 링크 확인](../evals/scenarios.md#github-read-acceptance)을 사용자 보고로 완료했습니다. 완료한 개인 환경 검사를 반복하지 않고 [소규모 공용 파일럿 준비](STATUS.md#delivery-plan)로 진행하며, 먼저 공개할 환경과 기능 범위를 정합니다.
 
 새 환경에서는 저장 확인 통과 후 한 저장소의 열린 PR 목록 → 하나의 본문 요약 → 원문을 한 흐름으로 확인합니다. 같은 개인 계정의 GitHub 화면과 제목·상태·본문·링크를 대조합니다. 빈 목록이면 정상 빈 결과를 확인하고 PR이 있는 다른 허용 저장소로 대표 상세를 확인합니다. 필요할 때만 다음 페이지나 닫힌 PR을 확인합니다.
 
