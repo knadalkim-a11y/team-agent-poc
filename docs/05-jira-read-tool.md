@@ -6,7 +6,7 @@ Jira 프로젝트를 시스템 구분으로 사용해 전체·미완료 건수�
 
 사용자 보고 제품은 **Jira 8.5.12, build 805012, sha1:156decd**입니다. 2026-09-07 기존 개인 토큰으로 HTTP 계정 확인을 실행한 뒤 `HTTPStatus=200`, `BearerAuthenticated=True`를 보고받아 **해당 PC의 Bearer 인증 호환성을 확인**했습니다. Server/Data Center 구분과 토큰 발급 구현은 미확인입니다. 공식 내장 PAT의 지원 시작 버전과 현재 환경의 실제 성공을 구분합니다. [Atlassian PAT 안내](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html)
 
-현재 코드는 Bearer 방식을 사용하며 등록 전 기본 비활성 상태입니다. 완료한 계정 확인은 반복하지 않고 아래 관리자 등록으로 진행합니다. [성공 범위와 앞선 차단 기록](../evals/scenarios.md#jira-bearer-check)을 보존하며 WebUI 저장·프로젝트 조회·화면 성공은 별도로 확인합니다. 실제 토큰값·내부 주소·프로젝트명은 채팅이나 Git에 기록하지 않습니다. 인증 확인 때문에 업무용 토큰을 폐기·재발급하거나 Jira를 업그레이드하지 않습니다.
+현재 코드는 Bearer 방식을 사용하며 새 개인 필드 확인까지 비활성 상태를 유지합니다. 완료한 계정 확인과 [Tool 등록·마스킹](../evals/scenarios.md#jira-registration)은 반복하지 않고 아래 새 Jira 입력칸의 DB 저장 확인으로 진행합니다. [인증 성공 범위와 앞선 차단 기록](../evals/scenarios.md#jira-bearer-check)을 보존하며 프로젝트 조회·화면 성공은 별도로 확인합니다. 실제 토큰값·내부 주소·프로젝트명은 채팅이나 Git에 기록하지 않습니다. 인증 확인 때문에 업무용 토큰을 폐기·재발급하거나 Jira를 업그레이드하지 않습니다.
 
 ### 기존 토큰으로 한 번 연결 확인
 
@@ -52,12 +52,12 @@ $jiraScript | Set-Content -Encoding UTF8 $jiraCheck
 
 1. Workspace → 도구에서 `EES Jira Read`를 만들고 Python 원본 전체를 등록합니다. 새 개인 설정 확인까지 `ENABLED=false`로 유지합니다. Git 갱신만으로 WebUI에 반영되지 않습니다. 현재 전달 원본은 [ce982de5의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/ce982de5e83a26421297e502e7f780365d7a18d3/agent-pack/skills/jira-read/scripts/jira_tool.py)입니다.
 2. 아래 관리자 설정에 계정 확인에 성공한 사내 기본 주소와 **정확한 프로젝트 키 목록**을 입력합니다. 현재 확인한 HTTP 환경은 `ALLOW_HTTP=true`로 설정하고 다른 값은 기본값을 유지합니다. 키 접두사나 와일드카드로 프로젝트를 자동 허용하지 않습니다.
-3. 기존 WebUI의 버전·키·DB·암호화 경로가 같다면 이미 확인한 저장·재시작 증거를 재사용합니다. 새 Jira 개인 PAT 필드는 가짜 값으로 마스킹과 해당 사용자·Tool 설정 한 건의 암호화 저장을 확인합니다. 기존 Confluence 전용 canary 명령을 그대로 재실행해 Jira 검증으로 간주하지 않습니다. 저장 경로나 키가 바뀌었다면 영향받는 검증만 추가합니다. [기존 저장 검증 원칙](04-confluence-read-tool.md#3-실제-pat보다-먼저-암호화-검증)
+3. 기존 WebUI의 버전·키·DB·암호화 경로가 같다면 이미 확인한 저장·재시작 증거를 재사용합니다. 새 Jira 개인 PAT 필드는 가짜 값으로 마스킹과 해당 Tool의 개인 설정 한 건의 암호화 저장을 확인합니다. 아래 [Jira 전용 확인](#새-jira-개인-입력칸-저장-확인)을 사용하고 기본 Confluence 모드의 결과를 Jira 검증으로 간주하지 않습니다. 저장 경로나 키가 바뀌었다면 영향받는 검증만 추가합니다. [기존 저장 검증 원칙](04-confluence-read-tool.md#3-실제-pat보다-먼저-암호화-검증)
 4. 확인 후 각 사용자가 Jira 도구의 **개인 설정**에 본인 토큰을 입력합니다. 관리자 공통 설정·채팅·HTML에 넣지 않습니다. 기존 Confluence PAT 설정은 그대로 유지합니다.
 5. 승인된 사용자에게 도구 읽기 권한을 주고 `EES 통합 Assistant`의 Tools에 연결합니다. 기존 사용자 지침을 보존하면서 [기본 Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)의 Jira 조회 안내를 반영합니다. 공용 공개 전에는 새 도구의 접근 권한과 다른 사용자의 빈 개인 설정도 확인합니다.
 6. 위 조건이 충족되면 `ENABLED=true`로 저장하고 평소 접근하는 프로젝트 하나의 현황을 요청합니다. 대시보드 조회에 사용자 인증 확인이 포함되므로 별도 연결 확인 질문을 직전에 반복하지 않습니다. 실패하면 오류 코드·메시지만 확인하며 토큰이나 응답 원문을 공유하지 않습니다.
 
-새 개인 설정은 새 채팅 → 통합 → 도구 → `EES Jira Read` 옆 밸브에서 엽니다. `PAT`에 Jira에서만 쓸 가짜 값 `EES-JIRA-CANARY-20260907-B92F6A`를 저장하고 다시 열어 마스킹을 확인합니다. 실제 토큰 입력 전 새 필드의 저장 확인만 진행하며 기존 Confluence canary·재시작·키 백업을 반복하지 않습니다. Confluence 검사기는 가짜 값이 고정돼 있고 Tool·사용자를 선택하지 않으므로 그대로 실행해 Jira 저장 성공으로 기록하지 않습니다.
+새 개인 설정은 새 채팅 → 통합 → 도구 → `EES Jira Read` 옆 밸브에서 엽니다. `PAT`에 Jira에서만 쓸 가짜 값 `EES-JIRA-CANARY-20260907-B92F6A`를 저장하고 다시 열어 마스킹을 확인합니다. 현재 사용자 환경에서는 이 등록·마스킹까지 완료 보고가 있으므로 반복하지 않습니다. 실제 토큰 입력 전 새 필드의 저장 확인만 진행하며 기존 Confluence canary·재시작·키 백업을 반복하지 않습니다.
 
 | 관리자 Valves | 기본값·의미 |
 |---|---|
@@ -72,6 +72,33 @@ $jiraScript | Set-Content -Encoding UTF8 $jiraCheck
 | `MAX_RESPONSE_BYTES` / `MAX_DESCRIPTION_CHARS` | 응답 기본 1 MB·본문 6,000자. 크기 초과와 본문 잘림은 구분해 표시 |
 
 사용자 UserValves의 `PAT`는 비밀번호형 개인 입력란입니다. 비밀번호형 표시만으로 저장 암호화가 입증되지는 않습니다. Tool의 암호화 활성화·키 검사도 실제 저장 증거를 대신하지 않습니다. 기존 DB나 키를 재생성하지 않습니다.
+
+### 새 Jira 개인 입력칸 저장 확인
+
+기존 [check_confluence_canary.py](../scripts/check_confluence_canary.py)에 `--jira`를 붙여 새 Jira 가짜 값만 검사합니다. 기존 파일명·기본 Confluence 동작을 유지하며 별도 검사기·암호화 구현을 만들지 않습니다. 도구 이름 `EES Jira Read`와 일치하는 항목이 정확히 하나일 때 그 내부 ID의 개인 설정에 저장된 가짜 값을 확인합니다. 다른 도구에만 저장되거나 중복된 값·도구, 평문 저장은 통과하지 않습니다. 사용자 ID나 실제 저장값을 출력하지 않으며 특정 사용자 계정의 식별·전체 계정 격리 시험을 대신하지 않습니다.
+
+서버·비활성 Jira Tool·저장한 가짜 값을 유지한 채 Git 저장소 폴더의 PowerShell에서 실행합니다. 기존 창의 `$gitProxy`를 재사용하고, 새 창이면 같은 사내 Git 프록시만 입력합니다. 아래 원본 SHA는 전달 시 검수한 커밋으로 고정합니다.
+
+```powershell
+Set-Location "$env:USERPROFILE\team-agent-poc"
+if (-not (Get-Variable gitProxy -ValueOnly -ErrorAction SilentlyContinue)) {
+    $gitProxy = Read-Host 'Git proxy URL'
+}
+git -c "http.proxy=$gitProxy" fetch origin refs/pull/2/head
+if ($LASTEXITCODE -ne 0) { throw 'Git fetch failed' }
+$jiraCheckSource = '<REVIEWED_PR_COMMIT_SHA>'
+$jiraStoreCheck = Join-Path $env:TEMP 'ees-jira-storage-check.py'
+$jiraStoreCode = git show "${jiraCheckSource}:scripts/check_confluence_canary.py"
+if ($LASTEXITCODE -ne 0) { throw 'Checker read failed' }
+$jiraStoreCode | Set-Content -Encoding UTF8 $jiraStoreCheck
+uvx --offline --no-python-downloads --python 3.11 --from "open-webui==0.11.3" python $jiraStoreCheck --jira
+```
+
+이 명령은 기존 캐시의 고정 WebUI Python 환경을 사용합니다. 네트워크·앱 초기화·DB/키 쓰기 없이 기존 파일 키와 SQLite를 읽습니다. 캐시가 없어 실패하면 외부 다운로드나 다른 버전 설치로 진행하지 않고 오류 코드로 실행 환경을 확인합니다. 파일 키·DB 위치 등 기존 환경 전제는 [Confluence 저장 확인](04-confluence-read-tool.md#3-실제-pat보다-먼저-암호화-검증)과 같습니다.
+
+정상 기준은 `CheckCompleted=true`, `TargetToolMatches=1`, `TargetEncryptedCanaryMatches=1`, `EncryptedCanaryMatches=1`, `PlaintextCanaryMatches=0`, `PlaintextInDatabaseFiles=false`, `DatabaseCheckPassed=true`입니다. DB·존재하는 WAL/journal의 읽기 시점 범위이며 `DatabaseFilesChecked`는 존재하는 파일 수에 따라 다릅니다. `LogsChecked=false`, `RestartPersistenceChecked=false`는 이번 명령의 범위 밖이라는 표시입니다. 동일 구성의 기존 플랫폼 검증을 재사용하며 이 값을 바꾸기 위해 과거 시험을 반복하지 않습니다.
+
+출력 결과를 확인한 뒤 개인 PAT의 가짜 값을 기존 실제 토큰으로 교체하고 `ENABLED=true`로 활성화합니다. 실패 결과에서는 실제 토큰을 넣지 않고 비식별 결과만 확인합니다. 이후 평소 접근하는 프로젝트 한 곳의 현황 조회에 인증·집계·목록·화면 확인을 묶습니다.
 
 ## 4. 작은 사내 확인 묶음
 

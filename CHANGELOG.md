@@ -4,6 +4,7 @@
 
 ## 2026-09-07
 
+- 기존 읽기 전용 개인 설정 검사기에 `--jira` 선택을 추가. Jira에서만 쓰는 합성 값과 정확한 도구를 함께 확인해 기존 Confluence 값이나 다른 도구의 암호문을 새 필드 성공으로 오인하지 않도록 함. 기본 Confluence 모드·키/DB·업무 Tool은 유지하고 관련 합성 시험만 수행. [근거](evals/jira-offline.md#jira-storage-check).
 - Confluence와 같은 인증 방식이라는 사용자 설명을 작업 가정으로 반영하고, 토큰을 새로 저장하기 전 고정 Jira 계정 API만 확인하는 PowerShell 스크립트와 PR 원본 전달 안내를 추가. 기존 Jira Tool·31개 합성 시험·Confluence 증거는 유지하며 실제 인증 성공으로 간주하지 않음. [근거](evals/jira-offline.md#bearer-check-preparation).
 - Jira 8.5.12 REST 기준의 기본 비활성 Bearer 읽기 후보와 프로젝트별 현황 화면을 준비. 개인 토큰·정확한 프로젝트 허용목록, 전체/미완료 API 집계와 최근 목록 분리, 부분 실패·원문·페이지 안내를 구현함. 기존 Prompt에 연결된 경우만 사용하는 Jira 경로를 추가하며 별도 Skill·서버·UI 빌드 없이 사용. 실제 인증·WebUI 적용은 미확인. [가이드](docs/05-jira-read-tool.md), [검증](evals/jira-offline.md#initial-implementation).
 - 전체 계획을 기능·사용성 중심으로 재정리. Jira 읽기와 첫 실제 Rich UI·초기 사용 안내를 한 업무 흐름으로 묶고, GitHub는 준비된 범위의 소규모 파일럿을 막지 않는 독립 후속으로 배치. 검증 목록과 실행 시점을 분리하고 초기 2-Skill 고정 기준을 현재 승인 구성 확인으로 갱신. 미확인·과거 실패는 보존하고 공개 전 격리·비밀 보호·읽기 제한은 유지함. 사내 확인 묶음·변경 영향에 따른 검사·사용성/공유 완료 조건을 추가하고 STATUS 누적 점검을 기존 evals로 이관. 실행 자산·버전·사내 설정 변경 없음. [검토 근거](evals/confluence-offline.md#mvp-plan-review).

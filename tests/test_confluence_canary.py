@@ -34,14 +34,19 @@ class CanaryCheckTests(unittest.TestCase):
         self.fernet = Fernet(base64.urlsafe_b64encode(hashlib.sha256(self.secret.encode()).digest()))
         with sqlite3.connect(self.db) as db:
             db.execute('CREATE TABLE "user" (settings TEXT)')
+            db.execute('CREATE TABLE "tool" (id TEXT PRIMARY KEY, name TEXT)')
 
-    def store(self, stored):
+    def store(self, stored, tool_id="synthetic-tool"):
         with sqlite3.connect(self.db) as db:
             db.execute('INSERT INTO "user" VALUES (?)',
-                       (json.dumps({"tools": {"valves": {"synthetic-tool": stored}}}),))
+                       (json.dumps({"tools": {"valves": {tool_id: stored}}}),))
 
-    def encrypted(self):
-        return self.fernet.encrypt(json.dumps({"PAT": checker.CANARY}).encode()).decode()
+    def encrypted(self, canary=checker.CANARY):
+        return self.fernet.encrypt(json.dumps({"PAT": canary}).encode()).decode()
+
+    def jira_tool(self, tool_id="synthetic-jira", name="EES Jira Read"):
+        with sqlite3.connect(self.db) as db:
+            db.execute('INSERT INTO "tool" VALUES (?, ?)', (tool_id, name))
 
     def test_encrypted_value_matches_existing_key_and_db_is_unchanged(self):
         self.store(self.encrypted())
@@ -52,6 +57,8 @@ class CanaryCheckTests(unittest.TestCase):
         self.assertFalse(result["LogsChecked"])
         self.assertFalse(result["RestartPersistenceChecked"])
         self.assertEqual(before, self.db.read_bytes())
+        self.assertNotIn("TargetToolMatches", result)
+        self.assertNotIn("TargetEncryptedCanaryMatches", result)
 
     def test_plaintext_dict_cannot_pass(self):
         self.store({"PAT": checker.CANARY})
@@ -114,9 +121,132 @@ class CanaryCheckTests(unittest.TestCase):
              patch.object(checker, "version", return_value="0.11.3"), \
              patch.object(checker, "check", side_effect=ValueError("synthetic-secret-do-not-print")), \
              contextlib.redirect_stdout(output):
-            self.assertEqual(checker.main(), 2)
+            self.assertEqual(checker.main([]), 2)
         self.assertEqual(json.loads(output.getvalue()),
                          {"CheckCompleted": False, "Error": "LOCAL_CHECK_FAILED"})
+
+    def test_jira_requires_fresh_marker_under_exact_target_and_preserves_db(self):
+        self.jira_tool()
+        self.store(self.encrypted())  # Existing Confluence marker is independent.
+        self.store(self.encrypted(checker.JIRA_CANARY), "synthetic-jira")
+        before = self.db.read_bytes()
+        result = checker.check(self.root, jira=True)
+        self.assertTrue(result["DatabaseCheckPassed"])
+        self.assertEqual(result["EncryptedCanaryMatches"], 1)
+        self.assertEqual(result["TargetToolMatches"], 1)
+        self.assertEqual(result["TargetEncryptedCanaryMatches"], 1)
+        self.assertFalse(result["LogsChecked"])
+        self.assertFalse(result["RestartPersistenceChecked"])
+        self.assertEqual(before, self.db.read_bytes())
+        self.assertTrue(checker.check(self.root)["DatabaseCheckPassed"])
+
+    def test_jira_marker_in_another_tool_cannot_pass(self):
+        self.jira_tool()
+        self.store(self.encrypted(checker.JIRA_CANARY))
+        result = checker.check(self.root, jira=True)
+        self.assertEqual(result["EncryptedCanaryMatches"], 1)
+        self.assertEqual(result["TargetEncryptedCanaryMatches"], 0)
+        self.assertFalse(result["DatabaseCheckPassed"])
+
+    def test_jira_old_marker_in_target_cannot_pass(self):
+        self.jira_tool()
+        self.store(self.encrypted(), "synthetic-jira")
+        self.assertFalse(checker.check(self.root, jira=True)["DatabaseCheckPassed"])
+
+    def test_jira_missing_or_case_mismatched_label_cannot_pass(self):
+        self.store(self.encrypted(checker.JIRA_CANARY), "synthetic-jira")
+        result = checker.check(self.root, jira=True)
+        self.assertEqual(result["TargetToolMatches"], 0)
+        self.assertFalse(result["DatabaseCheckPassed"])
+        self.jira_tool(name="ees jira read")
+        result = checker.check(self.root, jira=True)
+        self.assertEqual(result["TargetToolMatches"], 0)
+        self.assertFalse(result["DatabaseCheckPassed"])
+
+    def test_jira_duplicate_labels_cannot_pass(self):
+        self.jira_tool()
+        self.jira_tool(tool_id="synthetic-jira-copy")
+        self.store(self.encrypted(checker.JIRA_CANARY), "synthetic-jira")
+        result = checker.check(self.root, jira=True)
+        self.assertEqual(result["TargetToolMatches"], 2)
+        self.assertFalse(result["DatabaseCheckPassed"])
+
+    def test_jira_duplicate_marker_for_same_or_different_tool_cannot_pass(self):
+        self.jira_tool()
+        for other_tool in ("synthetic-jira", "synthetic-other"):
+            with self.subTest(other_tool=other_tool):
+                with sqlite3.connect(self.db) as db:
+                    db.execute('DELETE FROM "user"')
+                self.store(self.encrypted(checker.JIRA_CANARY), "synthetic-jira")
+                self.store(self.encrypted(checker.JIRA_CANARY), other_tool)
+                result = checker.check(self.root, jira=True)
+                self.assertEqual(result["EncryptedCanaryMatches"], 2)
+                self.assertFalse(result["DatabaseCheckPassed"])
+
+    def test_jira_plaintext_and_file_residue_cannot_pass(self):
+        self.jira_tool()
+        self.store({"PAT": checker.JIRA_CANARY}, "synthetic-jira")
+        result = checker.check(self.root, jira=True)
+        self.assertEqual(result["PlaintextCanaryMatches"], 1)
+        self.assertTrue(result["PlaintextInDatabaseFiles"])
+        self.assertFalse(result["DatabaseCheckPassed"])
+        with sqlite3.connect(self.db) as db:
+            db.execute('DELETE FROM "user"')
+            db.commit()
+            db.execute("VACUUM")
+        self.store(self.encrypted(checker.JIRA_CANARY), "synthetic-jira")
+        self.assertTrue(checker.check(self.root, jira=True)["DatabaseCheckPassed"])
+        Path(str(self.db) + "-journal").write_bytes(b"\0" * 512 + checker.JIRA_CANARY.encode())
+        self.assertFalse(checker.check(self.root, jira=True)["DatabaseCheckPassed"])
+
+    def test_jira_committed_wal_target_and_plaintext_are_read(self):
+        keeper = sqlite3.connect(self.db)
+        self.addCleanup(keeper.close)
+        keeper.execute("PRAGMA journal_mode=WAL")
+        keeper.execute("PRAGMA wal_autocheckpoint=0")
+        keeper.execute('INSERT INTO "tool" VALUES (?, ?)', ("synthetic-jira", "EES Jira Read"))
+        keeper.execute('INSERT INTO "user" VALUES (?)', (json.dumps({
+            "tools": {"valves": {"synthetic-jira": self.encrypted(checker.JIRA_CANARY)}}
+        }),))
+        keeper.commit()
+        self.assertTrue(checker.check(self.root, jira=True)["DatabaseCheckPassed"])
+        keeper.execute('INSERT INTO "user" VALUES (?)',
+                       (json.dumps({"note": checker.JIRA_CANARY}),))
+        keeper.commit()
+        self.assertFalse(checker.contains_canary(self.db, checker.JIRA_CANARY))
+        self.assertTrue(checker.contains_canary(Path(str(self.db) + "-wal"), checker.JIRA_CANARY))
+        result = checker.check(self.root, jira=True)
+        self.assertEqual(result["PlaintextCanaryMatches"], 0)
+        self.assertTrue(result["PlaintextInDatabaseFiles"])
+        self.assertFalse(result["DatabaseCheckPassed"])
+
+    def test_jira_cli_checks_version_before_reading_and_outputs_only_result(self):
+        output = io.StringIO()
+        with patch.object(checker, "version", return_value="0.11.2"), \
+             patch.object(checker, "check") as check, contextlib.redirect_stdout(output):
+            self.assertEqual(checker.main(["--jira"]), 2)
+        check.assert_not_called()
+        self.assertEqual(json.loads(output.getvalue()),
+                         {"CheckCompleted": False, "Error": "UNSUPPORTED_WEBUI_VERSION"})
+
+    def test_jira_cli_uses_fixed_mode_and_suppresses_error_details(self):
+        output = io.StringIO()
+        with patch.dict("os.environ", {"LOCALAPPDATA": str(self.root)}), \
+             patch.object(checker, "version", return_value="0.11.3"), \
+             patch.object(checker, "check", side_effect=ValueError("secret-id-url")) as check, \
+             contextlib.redirect_stdout(output):
+            self.assertEqual(checker.main(["--jira"]), 2)
+        check.assert_called_once_with(self.root / "EES-Agent-POC" / "open-webui", jira=True)
+        self.assertEqual(json.loads(output.getvalue()),
+                         {"CheckCompleted": False, "Error": "LOCAL_CHECK_FAILED"})
+
+    def test_cli_rejects_arbitrary_input_without_echoing_it(self):
+        output = io.StringIO()
+        with patch.object(checker, "check") as check, contextlib.redirect_stdout(output):
+            self.assertEqual(checker.main(["--jira", "synthetic-secret"]), 2)
+        check.assert_not_called()
+        self.assertEqual(json.loads(output.getvalue()),
+                         {"CheckCompleted": False, "Error": "UNSUPPORTED_ARGUMENTS"})
 
 
 if __name__ == "__main__":

@@ -45,7 +45,7 @@
 - 2026-09-07 사용자 보고: Jira **8.5.12**, build **805012**, sha1 **156decd**. 개인 토큰을 이미 다른 호출에 사용 중이며 시스템은 프로젝트로 구분하는 것으로 설명함. 실제 프로젝트 키는 사내 허용목록으로 관리하며 저장소에는 넣지 않음.
 - Server/Data Center 라이선스 구분·토큰 발급 구현은 미확인. [공식 내장 PAT](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html)는 Jira 8.14 이상이므로 현재 사용 중인 토큰을 내장 PAT로 단정하지 않음. [8.5.12 REST API](https://docs.atlassian.com/software/jira/docs/api/REST/8.5.12/)를 기준으로 기본 비활성 Bearer 읽기 Tool을 준비함.
 - 2026-09-07 후속 사용자 보고: `check-jira-auth.ps1 -AllowHttp` 안내 후 `HTTPStatus=200`, `BearerAuthenticated=True`. 해당 PC에서 HTTP Bearer 계정 확인 성공으로 판정함. [확인 범위와 앞선 차단](evals/scenarios.md#jira-bearer-check)을 보존함.
-- 새 도구의 WebUI 등록·개인 설정·프로젝트 조회·화면은 미확인. [등록 안내](docs/05-jira-read-tool.md), [판정](evals/scenarios.md#jira-live)을 따르며 이미 끝난 인증 확인은 반복하지 않음.
+- 후속 보고로 새 도구의 WebUI 등록·관리자 설정·Assistant 연결·가짜 개인 PAT 저장/마스킹을 확인함. DB 암호화·계정 분리·프로젝트 조회·실제 화면은 미확인. [등록 증거](evals/scenarios.md#jira-registration), [판정](evals/scenarios.md#jira-live)을 따르며 이미 끝난 인증·등록 확인은 반복하지 않음.
 
 ## 보존 중인 Hermes 환경
 

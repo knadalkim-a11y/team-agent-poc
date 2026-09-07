@@ -3,6 +3,8 @@
 Run with the existing WebUI Python environment (cryptography is required).
 Does not import open_webui, migrate a DB, call an API, or print stored values.
 This is a DB check only; logs and restart persistence remain separate gates.
+No arguments retains the Confluence check; --jira checks the fixed Jira marker
+in the unique Tool named EES Jira Read, using its stored tool ID internally.
 """
 
 import base64
@@ -10,11 +12,13 @@ import hashlib
 import json
 import os
 import sqlite3
+import sys
 from importlib.metadata import version
 from pathlib import Path
 
 
 CANARY = "EES-CANARY-20260906-7F3A9C"  # Synthetic test value, never a real PAT.
+JIRA_CANARY = "EES-JIRA-CANARY-20260907-B92F6A"
 
 
 def contains_canary(path, canary):
@@ -30,9 +34,10 @@ def contains_canary(path, canary):
     return False
 
 
-def check(root):
+def check(root, *, jira=False):
     from cryptography.fernet import Fernet, InvalidToken
 
+    canary = JIRA_CANARY if jira else CANARY
     root = Path(root).resolve(strict=True)
     database = root / "data" / "webui.db"
     # Match open-webui serve: read the existing key without stripping whitespace.
@@ -46,10 +51,22 @@ def check(root):
 
     encrypted_matches = 0
     plaintext_matches = 0
+    target_ids = []
+    target_encrypted_matches = 0
     # mode=ro never creates a missing DB. Do not use immutable=1: it ignores WAL.
     connection = sqlite3.connect(database.as_uri() + "?mode=ro", uri=True, timeout=5)
     try:
         connection.execute("PRAGMA query_only=ON")
+        if jira:
+            # v0.11.3 models/tools.py: tool.id keys settings.tools.valves.
+            # One snapshot binds the exact label to its stored settings.
+            connection.execute("BEGIN")
+            target_ids = [row[0] for row in connection.execute(
+                'SELECT id FROM "tool" WHERE name = ? COLLATE BINARY',
+                ("EES Jira Read",),
+            )]
+            if any(not isinstance(tool_id, str) or not tool_id for tool_id in target_ids):
+                raise ValueError("Unexpected tool schema")
         for (raw_settings,) in connection.execute('SELECT settings FROM "user"'):
             settings = json.loads(raw_settings) if raw_settings else {}
             if settings is None:
@@ -62,16 +79,18 @@ def check(root):
             valves = tools.get("valves") or {}
             if not isinstance(valves, dict):
                 raise ValueError("Unexpected valves schema")
-            for stored in valves.values():
+            for tool_id, stored in valves.items():
                 if isinstance(stored, dict):
-                    plaintext_matches += stored.get("PAT") == CANARY
+                    plaintext_matches += stored.get("PAT") == canary
                 elif isinstance(stored, str):
                     try:
                         decoded = json.loads(fernet.decrypt(stored.encode()))
                     except (InvalidToken, ValueError, UnicodeError):
                         continue
-                    if isinstance(decoded, dict) and decoded.get("PAT") == CANARY:
+                    if isinstance(decoded, dict) and decoded.get("PAT") == canary:
                         encrypted_matches += 1
+                        if jira and len(target_ids) == 1 and tool_id == target_ids[0]:
+                            target_encrypted_matches += 1
     finally:
         connection.close()
 
@@ -81,8 +100,8 @@ def check(root):
         path = Path(str(database) + suffix)
         if path.is_file():
             files_checked += 1
-            physical_plaintext |= contains_canary(path, CANARY)
-    return {
+            physical_plaintext |= contains_canary(path, canary)
+    result = {
         "CheckCompleted": True,
         "EncryptedCanaryMatches": encrypted_matches,
         "PlaintextCanaryMatches": plaintext_matches,
@@ -94,17 +113,26 @@ def check(root):
         "LogsChecked": False,
         "RestartPersistenceChecked": False,
     }
+    if jira:
+        result["TargetToolMatches"] = len(target_ids)
+        result["TargetEncryptedCanaryMatches"] = target_encrypted_matches
+        result["DatabaseCheckPassed"] &= len(target_ids) == 1 and target_encrypted_matches == 1
+    return result
 
 
-def main():
+def main(argv=None):
     try:
+        args = sys.argv[1:] if argv is None else argv
+        if args not in ([], ["--jira"]):
+            print(json.dumps({"CheckCompleted": False, "Error": "UNSUPPORTED_ARGUMENTS"}))
+            return 2
         if version("open-webui") != "0.11.3":
             print(json.dumps({"CheckCompleted": False, "Error": "UNSUPPORTED_WEBUI_VERSION"}))
             return 2
         local_data = os.environ.get("LOCALAPPDATA")
         if not local_data:
             raise ValueError("LOCALAPPDATA is unavailable")
-        result = check(Path(local_data) / "EES-Agent-POC" / "open-webui")
+        result = check(Path(local_data) / "EES-Agent-POC" / "open-webui", jira=bool(args))
     except Exception:
         # Do not disclose exception text, stored values, user IDs, keys or paths.
         print(json.dumps({"CheckCompleted": False, "Error": "LOCAL_CHECK_FAILED"}))

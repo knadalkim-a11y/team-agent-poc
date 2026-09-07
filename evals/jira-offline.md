@@ -71,3 +71,15 @@
 - 대조: Jira의 실제 관리자/개인 설정 필드·대시보드 내 인증 호출, 기존 Confluence 저장 검사기의 고정 canary와 전체 사용자/Tool 순회, 완료한 플랫폼 증거의 재사용 범위를 확인함. 독립 검토에서도 기존 검사기를 그대로 실행하면 새 Jira 필드의 증거가 되지 않음을 확인해 안내에 반영함. 새 Jira 필드 저장 확인은 후속 등록 흐름에 남김.
 - 검증: 문서 점검·diff 검사와 변경 파일 범위를 확인함. 인증 스크립트·Jira Tool·화면·자동 시험은 바뀌지 않아 기존 Jira 31개와 Confluence·저장·재시작 시험을 반복하지 않음.
 - 미실행: GPT의 사내 API/PC 직접 검사·WebUI 등록·개인 설정·프로젝트 조회·화면 검증. 사용자 보고 성공을 해당 PC 계정 확인 이외의 완료로 확대하지 않음.
+
+<a id="jira-storage-check"></a>
+
+## 새 Jira 입력칸의 저장 확인 준비 — 2026-09-07
+
+- 사용자 보고: Tool 등록·관리자 설정·Assistant 연결·합성 개인 PAT 저장/마스킹 완료. [실환경 관찰 원본](scenarios.md#jira-registration)을 갱신하며 DB 암호화 성공으로 확대하지 않음.
+- 사외 환경: Linux, Python 3.12.13, cryptography 46.0.0. Windows용 전달 명령과 실제 사내 DB는 실행하지 않음.
+- 변경: 기존 [check_confluence_canary.py](../scripts/check_confluence_canary.py)에 고정 `--jira` 모드와 관련 시험을 추가함. 기본 Confluence 동작·출력은 유지함. Jira 모드는 새 합성 값만 검사하고 정확히 하나인 `EES Jira Read`의 ID와 개인 설정 저장 키를 연결함. 전체 암호문 일치 1건·해당 Tool의 일치 1건·평문 부재가 함께 충족돼야 통과함.
+- 소스·검토: [Open WebUI v0.11.3 tools.py](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/models/tools.py)의 `tool.id`·`tool.name`과 `user.settings.tools.valves` 구조를 확인함. Tool 선택과 설정 순회는 같은 읽기 트랜잭션을 사용함. 기존 파일 키·읽기 전용 SQLite와 WAL/journal 검사를 재사용하고 앱 초기화·API·DB/키 쓰기·값/ID/예외 출력 경로를 추가하지 않음. 구현 후 독립 diff 대조에서도 확정 결함 없음.
+- 관련 합성 시험: `python -m unittest discover -s tests -p 'test_confluence_canary.py' -v`에서 21/21 PASS, 0.054초, 종료 코드 0. 새 값 정상/다른 Tool/이전 값/이름 누락·대소문자·중복/중복 저장/평문·WAL·journal/버전/출력 비노출과 기존 기본 동작을 확인함. 첫 실행의 시험 fixture에서 VACUUM 전 트랜잭션 종료 누락을 수정한 뒤 통과했으며 운영 코드 결함으로 기록하지 않음. Jira 업무 코드·화면 31개, Confluence 조회, 사내 인증·등록·재시작 검사는 변경 영향이 없어 반복하지 않음.
+- 문서·범위: Jira 가이드·STATUS·versions·J01/등록 보고·CHANGELOG와 검사 코드/시험을 대조하고 문서 점검·diff 검사를 수행함. 추가 검사기 파일·의존 패키지·업무 Tool 갱신 없이 기존 검사기를 확장함.
+- 미실행: 실제 사내 DB·키·Windows/uvx 실행, 새 필드 암호화·로그·사용자 격리·Jira 조회·화면. 통과 기준과 전달 명령은 [Jira 저장 확인](../docs/05-jira-read-tool.md#새-jira-개인-입력칸-저장-확인)을 따름. DB 검사 성공도 로그인 사용자 식별·모든 계정의 접근 격리나 물리 파일의 고정 시점 전체 스냅샷을 뜻하지 않음.
