@@ -88,11 +88,42 @@ loopback에서 사내 IP로 접속 주소를 바꾼 뒤부터라는 단서가 �
 
 브라우저 쪽 정보를 확인할 때는 같은 접속 주소에서 **F12 → Console(콘솔)**을 열고 새 대화에 `안녕`을 한 번만 보냅니다. 답변이 멈춰 보이면 그 상태에서 `WebSocket`, `socket.io`, `connect_error`, `CORS`, `TypeError` 관련 문구 1~2줄을 확인합니다. [클라이언트 연결 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/src/routes/%2Blayout.svelte)는 `connect_error`를 일반 로그로 기록하므로 빨간 오류에만 한정하지 않습니다. 실제 주소·토큰·세션 값은 가리고 전체 콘솔/HAR·요청 헤더는 전달하지 않습니다. 개발자 도구가 사내 정책으로 제한되면 우회하지 않고 그 제한을 알립니다.
 
-- 허용되지 않은 origin·CORS 오류가 있으면 실제 브라우저 접속 origin과 **현재 서버 프로세스가 사용하는** `CORS_ALLOW_ORIGIN`을 대조합니다. 과거 초기 진단의 `http://127.0.0.1:8080`만 남은 경우와 현재 사내 IP 접속의 불일치는 후보이며 아직 실측 원인이 아닙니다. 새 PowerShell의 빈 환경변수를 실행 중 서버 설정으로 해석하지 않습니다.
+- 허용되지 않은 origin·CORS 오류가 있으면 실제 브라우저 접속 origin과 **현재 서버 프로세스가 사용하는** `CORS_ALLOW_ORIGIN`을 대조하고 [허용 주소 보완](#cors-origin-update)을 적용합니다. 과거 초기 진단의 `http://127.0.0.1:8080`만 남은 경우와 현재 사내 IP 접속이 다른 경우를 구분합니다. 새 PowerShell의 빈 환경변수를 실행 중 서버 설정으로 해석하지 않습니다.
 - WebSocket 연결 실패 문구이면 실패 상태/사유와 승인된 접속 경로를 확인합니다. `ENABLE_WEBSOCKET_SUPPORT=true`일 때 v0.11.3은 WebSocket 전송만 사용하므로 자동 polling/SSE 복구를 가정하지 않습니다. 오류 증거 없이 해당 설정을 끄거나 단일 PC에 Redis·새 프록시를 추가하지 않습니다.
 - `TypeError` 등 화면 처리 오류가 있으면 해당 오류의 파일명과 첫 호출 위치로 범위를 좁힙니다. 콘솔 정보가 없으면 다음 단계에서 Network의 실시간 연결 상태를 확인합니다.
 
 먼저 원인을 좁히고 해당 설정/경로만 보완합니다. 최초 진단에서 코드·Prompt 재입력, 재설치·업그레이드·재시작·토큰/DB 검증을 일괄 반복하지 않습니다. 수정 뒤 같은 짧은 대화의 실시간 표시·정상 완료를 확인하고 보류한 카드 확인으로 돌아갑니다. 현재 관찰과 판정은 [결과 기록](../evals/scenarios.md#chat-live-update-observation)에 남깁니다.
+
+<a id="cors-origin-update"></a>
+
+### 현재 브라우저 주소를 허용 목록에 추가
+
+`is not an accepted origin`이 확인됐거나 승인된 브라우저 접속 주소를 변경할 때 사용합니다. 서버가 수신하는 `--host`와 브라우저 origin 허용 설정은 별개입니다. v0.11.3의 [CORS 설정](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/config.py)은 주소를 세미콜론으로 나누며, 빈 항목이나 `*;주소` 혼합은 기동 오류를 낼 수 있습니다.
+
+1. **현재 WebUI 서버를 실행한 원래 PowerShell**에서 `Ctrl+C`를 누르고 입력 가능한 상태가 될 때까지 기다립니다. 같은 창·기존 폴더를 유지합니다.
+2. 아래 블록 전체를 실행하고 주소를 물으면 현재 브라우저 주소를 `http://` 또는 `https://`부터 입력합니다. 대화 경로는 자동으로 제외합니다. 기존에 명시한 주소를 유지하며 이전 loopback 주소와 현재 주소를 추가합니다. 기존 값이 비었거나 `*`뿐이면 이 두 주소를 명시적으로 허용합니다.
+
+```powershell
+& {
+    $ErrorActionPreference = "Stop"
+    $eesUrl = [uri](Read-Host '현재 WebUI 브라우저 주소 전체')
+    if (-not $eesUrl.IsAbsoluteUri -or $eesUrl.Scheme -notin @('http', 'https') -or -not $eesUrl.Host -or $eesUrl.UserInfo) {
+        throw '브라우저 주소를 http:// 또는 https://부터 입력하세요.'
+    }
+    $eesOrigin = $eesUrl.GetLeftPart([System.UriPartial]::Authority)
+    $eesOrigins = @($env:CORS_ALLOW_ORIGIN -split ';' |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { $_ -and $_ -ne '*' })
+    $env:CORS_ALLOW_ORIGIN = (@($eesOrigins + 'http://127.0.0.1:8080' + $eesOrigin) |
+        Select-Object -Unique) -join ';'
+    Write-Host ('허용 주소 설정 완료: ' + $env:CORS_ALLOW_ORIGIN)
+}
+```
+
+3. `허용 주소 설정 완료`가 나오면 **같은 창에서 직전에 사용한 기존 기동 명령**을 다시 실행합니다. 입력 오류가 나면 이 블록부터 올바른 주소로 다시 실행합니다. 데이터·키·모델·패키지와 수신 주소는 이 블록이 변경하지 않습니다.
+4. 정상 기동 후 브라우저를 한 번 새로고침해 연결을 맺고, 새 대화에 `안녕`을 한 번 보냅니다. 그 뒤 새로고침 없이 답변이 표시되고 완료되는지 확인합니다. 실패하면 현재 서버에 같은 origin 거부가 다시 나오는지 확인하고, 다른 오류라면 위 진단으로 범위를 좁힙니다.
+
+이 설정은 **현재 PowerShell과 그 창에서 시작하는 서버에 적용**됩니다. 새 PowerShell에서 기동할 때도 기존 시작 명령 앞에 같은 설정을 적용해야 합니다. 사내 IP·주소는 Git이나 채팅에 보내지 않습니다. 이 절차의 복사 블록은 2,500자 이내이며 실제 Windows 실행·복구 판정은 사용자 확인이 필요합니다.
 
 ## 프록시 다운로드 실패
 

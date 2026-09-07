@@ -9,7 +9,7 @@
 - 목표: 비개발자가 범용 채팅·사내 자료 조회·팀원 Prompt/Skill 공유를 쉽게 사용하는 플랫폼. 현재는 Open WebUI Native와 Git Agent Pack을 사용하고 원본 WebUI는 수정하지 않음.
 - 현재 위치: 기존 연동의 후속 조회 흐름을 보완하는 단계. **첫 화면·온보딩 적용은 보류**하고 범용 Assistant 방향을 유지함. 기존 Skill·Tool·모델 Public 설정 보고와 그룹 운영 후속 결정은 그대로임.
 - 이번 작업: **유지보수를 고려해 GitHub v0.1.2 PR 목록·본문 카드와 Confluence v0.1.3 검색·본문·근거 카드를 준비함.** 기존 조회 결과를 재사용하고 본문 접기·수동 질문 초안·오류/빈 결과 구분을 적용함. UI 템플릿은 모델 근거에서 분리하고 중복 표 출력 지침을 정리했으며 추가 API·모델 호출·프런트 의존성·서버는 없음. Jira v0.1.4 준비본도 유지함. 사용자는 기존 폴더·기존 명령으로 재시작한 뒤 `/health`에 true가 표시된다고 보고함. 현재 서버 응답 회복만 확인했으며 오류 원인·재발 여부·모델/새 카드 동작은 미확인. 이후 준비본의 Jira v0.1.4·GitHub v0.1.2·Confluence v0.1.3 도구 3개 저장 완료를 보고함. 이어 같은 원본의 전체 System Prompt를 2,500자 이내 3블록으로 전달했고 저장 및 업데이트 완료를 보고함. 이후 새 대화의 짧은 질문도 멈춰 보이며 새로고침 뒤에는 답변이 나타난다는 보고가 있어 실시간 표시 문제를 먼저 진단함. 새 카드 동작은 아직 미확인이며 앞선 저장 보고는 당시 버전의 증거로 보존함.
-- 다음 작업 하나: **현재 서버 PowerShell 로그에서 `is not an accepted origin` 유무를 확인한다.** 사용자가 loopback에서 자신의 IP로 접속 주소를 바꾼 뒤부터였던 것 같다고 보고해 CORS origin 불일치를 우선 조사함. 없다면 브라우저 Console의 WebSocket·connect_error·TypeError 문구로 [실시간 표시 문제](troubleshooting.md#chat-visible-after-refresh)를 좁힘. `/health` 정상은 실시간 채팅 정상과 구분하며 코드/지침 재입력·재시작·인증/저장/20회 검사를 먼저 반복하지 않음. GitHub 카드→Jira→Confluence 확인은 문제를 좁힌 뒤 재개하며 첫 화면·온보딩·Selector 적용은 보류함.
+- 다음 작업 하나: **현재 브라우저 origin을 허용 목록에 추가하고 기존 명령으로 재기동한 뒤 짧은 대화 한 건의 실시간 표시를 확인한다.** 사용자가 서버의 `is not an accepted origin` 오류가 있다고 확인함. [허용 주소 보완](troubleshooting.md#cors-origin-update)은 원래 PowerShell에서 기존 명시 주소를 유지하고 현재 origin을 추가하며 빈 항목·wildcard 혼합을 제거함. 실제 설정 반영·재기동·복구 결과는 아직 미확인. `/health`·인증/저장/20회 완료 검사는 반복하지 않음. 복구 후 GitHub 카드→Jira→Confluence 확인을 재개하며 첫 화면·온보딩·Selector 적용은 보류함.
 
 <a id="resume-branch"></a>
 
@@ -57,7 +57,7 @@
 
 ## 남아 있는 검증과 제한
 
-- 새 대화의 `안녕`이 멈춰 보이고 새로고침 후 답변이 나타난다는 [사용자 보고](../evals/scenarios.md#chat-live-update-observation)가 있음. 실제 모델·실시간 연결/브라우저 오류·현재 origin 설정은 미확인. loopback에서 자신의 IP로 접속 주소를 바꾼 뒤부터였던 것 같다는 추가 보고가 있어 CORS를 우선 확인함. 일반 채팅의 표시 문제를 먼저 확인하며 코드 저장·과거 스트리밍/20회 PASS를 현재 정상으로 간주하지 않음.
+- 새 대화의 `안녕`이 멈춰 보이고 새로고침 후 답변이 나타난다는 [사용자 보고](../evals/scenarios.md#chat-live-update-observation)가 있음. IP 접속 전환 단서에 이어 서버의 `is not an accepted origin` 오류 존재를 확인받아 origin 거부는 사용자 보고 범위에서 확인함. 정확한 현재 origin·허용 목록 값과 실제 모델/브라우저 상태는 직접 대조하지 않았으며, 허용 주소 보완 후 복구는 아직 미확인. 코드 저장·과거 스트리밍/20회 PASS를 현재 정상으로 간주하지 않음.
 
 - Windows 수락 오류 이후 접속 불가를 보고했으나 원래 PowerShell에서 Ctrl+C 후 기존 폴더·명령으로 재시작해 `/health` true를 확인했다고 보고함([증거](../evals/scenarios.md#windows-existing-restart)). listener 종료 경로·근본 원인·재발 여부와 이번 재시작 후 모델/연동 동작은 미확인. 전달된 런타임 경로는 Python 3.11이며 패치 버전·실제 Uvicorn 버전은 미대조. 선택 실행 파일은 미적용이며 기존 성공 기록과 오류 기록을 보존함.
 
@@ -80,7 +80,7 @@
 
 ## 최근 점검
 
-[실시간 표시 문제 관찰](../evals/scenarios.md#chat-live-update-observation)을 기록함. v0.11.3 공식 소스/가이드로 답변 저장과 Socket.IO 이벤트/화면 갱신 경로를 대조하고 연결·CORS·프런트 처리 오류를 조사 후보로 남김. IP 접속 전환 단서를 반영해 먼저 서버의 origin 거부 로그를 확인하며 실환경 원인은 아직 미확인임. 상태·장애 안내 문서만 갱신하고 코드·설정·서버를 변경하거나 완료 검사를 반복하지 않음. 앞선 코드/지침 저장과 서버 health 회복, 사외 카드 검사 증거는 보존함.
+[origin 거부 확인과 보완 준비](../evals/scenarios.md#chat-live-update-observation)를 기록함. v0.11.3 공식 CORS 파싱·Socket.IO 적용을 대조해 세미콜론 목록, 빈 항목·wildcard 처리, 실제 브라우저 origin 추출과 같은 PowerShell에서의 재기동 절차를 검토함. 기존 장애 가이드에 2,500자 이내 명령을 추가하고 LAN 전환 안내에서 연결함. 문서·diff 검사를 수행하며 Windows 명령 실행·실제 설정 반영·일반 채팅 복구는 사용자 확인 대기. 앱 코드·패키지·실행 스크립트·사내 서버는 GPT가 변경하지 않았으며 완료 검사를 반복하지 않음.
 
 ## 갱신 규칙
 
