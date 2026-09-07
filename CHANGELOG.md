@@ -4,6 +4,8 @@
 
 ## 2026-09-07
 
+- Jira Tool v0.1.4: MVP에 필요한 원문 링크의 조작 영역·이슈별 접근성 이름, 빈 필터의 즉시 초기화, 실패 설명 연결과 당시 조회 시각 표시를 보완. 기존 HTML만 수정하고 조회·인증·후속 질문 계약은 유지함. 사내 적용 대기. [검증](evals/jira-offline.md#mvp-usability).
+
 - Jira Tool v0.1.3: 결과 화면에서 본문·선택 시스템·다음 목록의 정확한 후속 질문을 입력창에 넣는 버튼 추가. 자동 제출 없이 복사 가능한 질문을 남기고 부분 실패·잘못된 cursor에서는 다음 요청을 차단함. Jira Prompt에 직접 이슈 조회·상세 뒤 목록 범위 유지 지침 반영. HTTP·인증·저장 코드는 유지하며 사내 적용은 대기. [검증](evals/jira-offline.md#followup-actions).
 
 - Windows `WinError 64`·`accept_coro` 보고에 대해 CPython 수락 실패 경로를 대조하고 기존 환경용 Selector 선택 실행 파일·사전검사·복구 안내를 추가함. 기본 기동·WebUI 코어·연동 코드는 유지. 사내 PC 접근 불가로 실제 장애 원인·적용·복구는 미확인. [준비·검증](evals/scenarios.md#windows-accept-preparation).

@@ -177,3 +177,42 @@ Linux / Python 3.12.13 / Pydantic 2.13.4 / Node 24.19.0의 합성 HTML·DOM stub
 ### 적용 경계
 
 현재 사내 저장 보고는 v0.1.2·이전 Jira 지침까지이며 v0.1.3·이번 지침은 Git 준비본이다. 사내 접속 복구 후 기존 Tool 코드·Jira 절을 한 번에 반영하고 [변경된 흐름](../docs/05-jira-read-tool.md#jira-followup-actions)만 확인한다. 키·DB·연동 설정·완료한 기본 화면/조회·20회 검사는 반복하지 않는다. 실제 입력 반영과 보내기 후 모델의 후속 조회는 **미실행**으로 남긴다.
+
+
+<a id="mvp-usability"></a>
+
+## MVP 조회 카드 보완 — 2026-09-07
+
+### 범위와 검토
+
+최신 main `f71c737be8b1037fda48a490bde581e14c390d6a`의 AGENTS·STATUS와 열린 PR 0개를 확인함. 사용자가 레퍼런스 활용을 승인하면서 유지보수·MVP를 우선하도록 요청함. 현재 실제 Rich UI가 있는 Jira 한 흐름만 선택하고, 이미 있는 반응형 카드·테마·집계·후속 질문은 유지함. 새 프레임워크·라이브러리·빌드·추가 서버·모델 호출은 도입하지 않음. 참고한 디자인 출처와 적용 방법은 [사용 가이드](../docs/05-jira-read-tool.md#jira-mvp-usability)에 함께 둠.
+
+- Jira v0.1.4: 원문 링크와 질문 버튼의 스타일·이슈별 접근성 이름, 잘못된 링크 안내, 빈 필터 결과 안의 초기화·초점 복귀, 실패 프로젝트와 오류 설명의 연결을 보완함. 목록 실패의 빈 상태 색과 조회 시각·자동 갱신 안 됨 안내도 적용함.
+- 원문은 상세 영역 안의 기존 위치에 두고, 필터 초기화는 하나의 `resetFilters` 함수를 재사용함. 새로운 조회나 입력 초안 발송을 추가하지 않음. 소스상 최소 높이는 44px이며 실제 터치 영역 실측과 구분함.
+- 독립 검토는 실제 renderer·관련 시험 diff의 회귀·접근성 속성·URL 처리·과설계에 한정함. 범위 내 주요 결함을 발견하지 못함. `jira_tool.py`는 모듈 버전·renderer를 제외한 AST가 작업 시작 HEAD와 동일함. HTTP·인증·권한·저장·도구 스키마·Prompt는 불변이며 완료한 해당 검사는 재실행하지 않음.
+
+### 변경 범위 검증
+
+환경: Linux, Python 3.12.13, Pydantic 2.13.4, Node v24.19.0. 기존 DOM harness에 초점 추적만 추가하고 기존 시험 6개를 확장함. 새 시험 메서드는 만들지 않음.
+
+| 검사 | 결과와 범위 |
+|---|---|
+| 아래 관련 기존 시험 7개 | **7개 PASS, 3.505초, 첫 실행**. 로컬 필터 복구 후 두 행·펼친 상세 보존, 집계 불변, 상태 초점 복귀·draft 미발송. 실제 0건/실패의 빈 영역은 초기화 없음. 미수신 프로젝트 안내·원문 안전 속성/접근성 이름·실패행 오류 연결·조회 시각 문구 확인 |
+| 문서·diff | `python scripts/check_docs.py`: 25개 파일·405개 링크, 오류 0·검토 후보 0. `git diff --check` PASS |
+| 브라우저 합성 화면 | **미실행**. Cloud Browser 연결 후 합성 로컬 HTML 탐색을 시도했으나 URL 보안 정책이 차단함. 우회·별도 브라우저 실행은 하지 않음. CSS 배치·높이 실측·실제 키보드/보조기술 동작은 확인하지 못함 |
+| 사내 WebUI·Jira·모델·Windows | **미실행**. 사내 PC 접근 불가. 신규 v0.1.4 적용 성공·실사용성·장애 복구로 판정하지 않음 |
+
+검사 범위 재현 명령(재실행 요구가 아님):
+
+```bash
+PYTHONPATH=tests python -m unittest -v \
+  test_jira_dashboard_ui.JiraDashboardDOMTests.test_rendered_source_links_are_safe_and_frame_messages_only_resize \
+  test_jira_dashboard_ui.JiraDashboardDOMTests.test_link_protocol_and_url_credentials_are_rejected \
+  test_jira_dashboard_ui.JiraDashboardDOMTests.test_status_assignee_filters_and_reset_use_only_received_data \
+  test_jira_dashboard_ui.JiraDashboardDOMTests.test_project_filter_does_not_claim_unloaded_project_is_empty \
+  test_jira_dashboard_ui.JiraDashboardDOMTests.test_listing_error_guidance_is_visible_as_safe_text_without_retry_hint \
+  test_jira_dashboard_ui.JiraDashboardDOMTests.test_failed_project_is_not_zero_or_complete_total \
+  test_jira_dashboard_ui.JiraDashboardDOMTests.test_zero_counts_and_failures_have_stable_distinct_comparison_rows
+```
+
+사내 마지막 저장 보고는 v0.1.2·이전 Jira 지침임. 이번 v0.1.4는 앞선 v0.1.3 후속 질문 준비와 함께 한 번에 적용하며, 실제 확인은 [변경 조작](../docs/05-jira-read-tool.md#jira-mvp-usability)에 묶음. 이전 기록·실환경 판정은 유지하고 별도 검수 문서나 PR은 추가하지 않음.

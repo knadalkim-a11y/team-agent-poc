@@ -75,6 +75,7 @@ class Element {
   replaceChildren(...nodes){this.children=nodes;this._text='';}
   setAttribute(key,value){this.attrs[key]=value;}
   addEventListener(name,handler){this.events[name]=handler;}
+  focus(){document.activeElement=this;}
   getBoundingClientRect(){return {height:900};}
   fire(name){if(name==='click'&&this.disabled)return;this.events[name]({target:this,currentTarget:this});}
 }
@@ -88,7 +89,8 @@ window.parent=input.bridge==='standalone'?window:{postMessage:message=>{
   if(input.bridge==='throw'&&message.type==='input:prompt')throw new Error('Synthetic bridge failure');
   messages.push(message);
 }};
-const context=vm.createContext({URL,Date,console,document:{getElementById:get,createElement:tag=>new Element(tag),querySelector:()=>get('main'),addEventListener:()=>{}},window,requestAnimationFrame:handler=>handler(),get,messages,descendants});
+const document={getElementById:get,createElement:tag=>new Element(tag),querySelector:()=>get('main'),addEventListener:()=>{},activeElement:null};
+const context=vm.createContext({URL,Date,console,document,window,requestAnimationFrame:handler=>handler(),get,messages,descendants});
 vm.runInContext(input.script,context);
 const result=vm.runInContext(input.action,context);
 process.stdout.write(JSON.stringify(result));
@@ -206,8 +208,10 @@ class JiraDashboardDOMTests(unittest.TestCase):
                 widths:button.children[1].children.map(bar=>bar.style.width)
             }));
             const open=rows();get('comparison-metric').value='total';get('comparison-metric').fire('change');
+            const empty=get('issues').textContent,emptyButtons=descendants(get('issues'),'button').length;
+            get('projects').children[0].fire('click');
             ({open,total:rows(),aggregate:get('total').textContent,note:get('total-note').textContent,
-              empty:get('issues').textContent})""")
+              empty,emptyButtons,selectedEmptyButtons:descendants(get('issues'),'button').length})""")
         for rows in (result["open"], result["total"]):
             self.assertEqual([row["key"] for row in rows], ["ALPHA", "BETA", "UNREAD"])
             self.assertEqual(rows[0]["widths"], ["0%"])
@@ -220,6 +224,8 @@ class JiraDashboardDOMTests(unittest.TestCase):
         self.assertIn("집계 성공 프로젝트만: 0건", result["note"])
         self.assertIn("이번 조회 범위에서 볼 수 있는 이슈가 없습니다", result["empty"])
         self.assertNotIn("목록을 받지 못했습니다", result["empty"])
+        self.assertEqual(result["emptyButtons"], 0)
+        self.assertEqual(result["selectedEmptyButtons"], 0)
 
     def test_failed_project_is_not_zero_or_complete_total(self):
         payload = fixture()
@@ -227,12 +233,22 @@ class JiraDashboardDOMTests(unittest.TestCase):
         payload["projects"][1] = {"key": "BETA", "ok": False, "total": None, "open": None}
         payload["summary"] = {"total": None, "open": None, "available_total": 200,
                               "available_open": 120, "complete": False}
-        result = self.evaluate(payload, """({total:get('total').textContent,
-            note:get('total-note').textContent,project:get('projects').children[1].textContent})""")
+        result = self.evaluate(payload, """
+            const errorLinks=()=>get('projects').children.filter(n=>n.tagName==='button').map(button=>({
+                key:button.children[0].textContent,
+                error:get('projects').children.find(n=>n.id&&n.id===button.attrs['aria-describedby'])?.textContent||null
+            }));
+            const before=errorLinks();get('comparison-metric').value='total';get('comparison-metric').fire('change');
+            ({total:get('total').textContent,note:get('total-note').textContent,
+              project:get('projects').children[1].textContent,before,after:errorLinks()})""")
         self.assertEqual(result["total"], "전체 집계 미완료")
         self.assertIn("집계 성공 프로젝트만: 200건", result["note"])
         self.assertIn("집계 실패", result["project"])
         self.assertIn("0건이 아닙니다", result["project"])
+        for links in (result["before"], result["after"]):
+            self.assertEqual(links[0], {"key": "ALPHA", "error": None})
+            self.assertEqual(links[1]["key"], "BETA")
+            self.assertIn("BETA: 프로젝트 설정과 접근권한을 확인", links[1]["error"])
 
     def test_count_drift_warns_without_showing_a_complete_aggregate(self):
         payload = fixture()
@@ -258,9 +274,17 @@ class JiraDashboardDOMTests(unittest.TestCase):
         result = self.evaluate(fixture(), """get('projects').children[1].fire('click');
             get('comparison-metric').value='total';get('comparison-metric').fire('change');
             ({issues:get('issues').textContent,total:get('total').textContent,title:get('list-title').textContent,
+              questionLabel:get('query-project').textContent,questionDisabled:get('query-project').disabled,
+              resetLabels:descendants(get('issues'),'button').map(n=>n.textContent),
+              drafts:messages.filter(message=>message.type==='input:prompt'),
               selected:get('projects').children.filter(n=>n.attrs['aria-pressed']==='true').map(n=>n.children[0].textContent)})""")
         self.assertIn("BETA 이슈가 이번 목록에 없습니다", result["issues"])
         self.assertIn("프로젝트에 이슈가 없다는 뜻은 아닙니다", result["issues"])
+        self.assertIn("위의 “BETA 조회 질문 넣기”로 새 목록을 요청", result["issues"])
+        self.assertEqual(result["questionLabel"], "BETA 조회 질문 넣기")
+        self.assertFalse(result["questionDisabled"])
+        self.assertEqual(result["resetLabels"], ["필터 초기화"])
+        self.assertEqual(result["drafts"], [])
         self.assertEqual(result["total"], "220건")
         self.assertIn("BETA", result["title"])
         self.assertEqual(result["selected"], ["BETA"])
@@ -268,14 +292,26 @@ class JiraDashboardDOMTests(unittest.TestCase):
     def test_status_assignee_filters_and_reset_use_only_received_data(self):
         result = self.evaluate(fixture(), """
             const aggregates=()=>[get('total').textContent,get('open').textContent,get('projects').textContent];
-            const initial=aggregates();
+            const initial=aggregates(),firstDetail=get('issues').children[0];firstDetail.open=true;
             get('status').value=String(statuses.indexOf('완료'));get('status').fire('change');
             const afterStatus=get('issues').textContent;
             get('assignee').value=JSON.stringify(['none']);get('assignee').fire('change');
             const afterAssignee=get('issues').textContent;
             const afterAggregates=aggregates(),filterScope=get('selection').textContent;
             get('reset').fire('click');
-            ({afterStatus,afterAssignee,reset:get('issues').textContent,initial,afterAggregates,filterScope})""")
+            const reset=get('issues').textContent;
+            get('projects').children[0].fire('click');
+            get('status').value=String(statuses.indexOf('완료'));get('status').fire('change');
+            get('assignee').value=JSON.stringify(['user','test-user-a']);get('assignee').fire('change');
+            const empty=get('issues').textContent,emptyButtons=descendants(get('issues'),'button');
+            const resetLabels=emptyButtons.map(n=>n.textContent);emptyButtons[0].fire('click');
+            ({afterStatus,afterAssignee,reset,initial,afterAggregates,filterScope,empty,resetLabels,
+              afterEmptyReset:get('issues').textContent,afterResetAggregates:aggregates(),
+              selectedAfterReset:get('projects').children.filter(n=>n.attrs['aria-pressed']==='true').length,
+              statusAfterReset:get('status').value,assigneeAfterReset:get('assignee').value,
+              detailPreserved:get('issues').children[0]===firstDetail&&firstDetail.open===true,
+              focusRestored:document.activeElement===get('status'),
+              drafts:messages.filter(message=>message.type==='input:prompt')})""")
         self.assertIn("ALPHA-6", result["afterStatus"])
         self.assertNotIn("ALPHA-7", result["afterStatus"])
         self.assertIn("ALPHA-6", result["afterAssignee"])
@@ -283,6 +319,17 @@ class JiraDashboardDOMTests(unittest.TestCase):
         self.assertIn("ALPHA-6", result["reset"])
         self.assertEqual(result["initial"], result["afterAggregates"])
         self.assertIn("이번에 받은", result["filterScope"])
+        self.assertIn("선택한 조건에 맞는 이슈가 이번 목록에 없습니다", result["empty"])
+        self.assertEqual(result["resetLabels"], ["필터 초기화"])
+        self.assertIn("ALPHA-7", result["afterEmptyReset"])
+        self.assertIn("ALPHA-6", result["afterEmptyReset"])
+        self.assertEqual(result["initial"], result["afterResetAggregates"])
+        self.assertEqual(result["selectedAfterReset"], 0)
+        self.assertEqual(result["statusAfterReset"], "")
+        self.assertEqual(result["assigneeAfterReset"], "")
+        self.assertTrue(result["detailPreserved"])
+        self.assertTrue(result["focusRestored"])
+        self.assertEqual(result["drafts"], [])
 
     def test_compact_summary_includes_metadata_before_opening_details(self):
         payload = fixture()
@@ -371,11 +418,19 @@ class JiraDashboardDOMTests(unittest.TestCase):
             get('projects').children[0].fire('click');
             get('comparison-metric').value='total';get('comparison-metric').fire('change');
             get('reset').fire('click');
-            ({links:descendants(get('issues'),'a').map(a=>({href:a.href,target:a.target,rel:a.rel})),messages})""")
+            ({links:descendants(get('issues'),'a').map(a=>({href:a.href,target:a.target,rel:a.rel,
+                text:a.textContent,label:a.attrs['aria-label']})),
+              actions:descendants(get('issues'),'button').map(button=>button.attrs['aria-label']),
+              missingSource:get('issues').children[1].textContent,time:get('time').textContent,messages})""")
         self.assertEqual(result["links"], [{
             "href": "https://jira.example.invalid/browse/ALPHA-7",
             "target": "_blank", "rel": "noopener noreferrer",
+            "text": "원문 열기 · 새 창", "label": "ALPHA-7 Jira 원문 열기 · 새 창",
         }])
+        self.assertEqual(result["actions"], ["ALPHA-7 본문 요약 질문 넣기", "ALPHA-6 본문 요약 질문 넣기"])
+        self.assertIn("원문 링크를 확인하지 못했습니다", result["missingSource"])
+        self.assertIn("조회 시각", result["time"])
+        self.assertIn("자동 갱신 안 됨", result["time"])
         self.assertGreater(len(result["messages"]), 0)
         for message in result["messages"]:
             self.assertEqual(set(message), {"type", "height"})
@@ -406,9 +461,13 @@ class JiraDashboardDOMTests(unittest.TestCase):
                 payload["issues"] = []
                 payload["listing"] = {"ok": False, "total": None, "returned": 0,
                                       "next_start_at": None, "error": error}
-                result = self.evaluate(payload, """({total:get('total').textContent,
+                result = self.evaluate(payload, """
+                    get('projects').children[0].fire('click');
+                    ({total:get('total').textContent,
                     notice:get('notice').textContent,empty:get('issues').textContent,
-                    next:get('next').textContent,images:descendants(get('issues'),'img').length})""")
+                    next:get('next').textContent,images:descendants(get('issues'),'img').length,
+                    emptyClass:get('issues').children[0].className,
+                    emptyButtons:descendants(get('issues'),'button').length})""")
                 self.assertEqual(result["total"], "220건")
                 self.assertIn(error["message"], result["notice"])
                 self.assertIn(error["message"], result["empty"])
@@ -416,6 +475,8 @@ class JiraDashboardDOMTests(unittest.TestCase):
                 self.assertIn("위 안내에 따라", result["next"])
                 self.assertNotIn("시작 위치", result["next"])
                 self.assertEqual(result["images"], 0)
+                self.assertIn("jira-empty-error", result["emptyClass"].split())
+                self.assertEqual(result["emptyButtons"], 0)
 
     def test_partial_scope_keeps_rows_and_replaces_stale_next_hint_with_restart(self):
         payload = fixture()
