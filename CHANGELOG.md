@@ -4,6 +4,8 @@
 
 ## 2026-09-07
 
+- 사용자 요청으로 공통 정책의 사용자 적용을 최우선 작업으로 변경. 기존 정책 답변 Skill·공통 Prompt·실행 권한의 역할과 적용 범위를 구분하며, 실제 규정·WebUI 설정은 변경하지 않음. [결정 기록](evals/scenarios.md#common-policy-priority).
+
 - Confluence v0.1.5: 검색 API의 HTTP 400을 `invalid_query`로 구분해 검색어 변경과 지속 실패 시 설정 확인을 안내. 비검색 400은 `invalid_request`로 처리하며 추가 호출·재시도·의존성 없이 기존 오류 처리에 경로만 전달함. 관련 오프라인 시험 11개 통과, 사내 적용 대기. 사용자의 본문 버튼 제거 확인을 기록하고 원문 링크·전체 Rich UI 디자인은 후속으로 유지함. [검증](evals/confluence-offline.md#search-error-guidance), [사용자 보고](evals/scenarios.md#body-query-buttons-observed).
 
 - Confluence v0.1.4·GitHub v0.1.3·Jira v0.1.5: 사용자 요청에 따라 문서/PR/이슈마다 반복되던 본문 질문 버튼과 전용 코드를 제거. 원문·본문 근거·목록 조작을 유지하고 기존 Prompt의 자연어 후속 조회를 사용함. Confluence 전용 입력 브리지·복사용 영역도 제거했으며 추가 호출/의존성·서버 변경 없음. 기존 Jira 날짜 시험의 시간대 의존은 해당 시험 조건만 명시해 보완. [검수·적용 범위](evals/scenarios.md#body-query-buttons-removed).
