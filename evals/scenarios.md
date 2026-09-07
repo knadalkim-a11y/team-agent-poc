@@ -378,7 +378,16 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - Jira 목록 오류 안내와 부분 실패 뒤 페이지 범위 문제를 v0.1.2로 수정함. [집중 시험 7/7 PASS](jira-offline.md#merge-review-fixes). GitHub/저장 검사기에서 추가 수정 필수 문제는 없었고 [직전 13개 시험](github-offline.md#followup-flow)과 기존 검사 근거를 재사용함. 전체 인증·저장·재시작·20회 안정성 시험은 반복하지 않음.
 - GitHub 버전 설명과 배포 원본 안내를 준비본/사내 적용본으로 구분함. AGENTS에 관련 후속 변경은 기존 PR에서 마무리하고 병합 뒤 main에서 재개하는 원칙을 추가함. 새로운 PR·인계 파일·자동 검증 체계는 만들지 않음.
 - 사전 문서 점검은 `python scripts/check_docs.py`: 문서 25개·내부 링크 364개·오류 0·검토 후보 0, `git diff --check` PASS.
-- 병합은 #5 → #4 → #3 → #2 순서로 통합 후 main에 반영하는 방식이며 각 병합 시 최신 head를 다시 확인하고 expected_head_sha를 사용함. 실제 병합 결과는 확인 후 이 기록과 STATUS를 갱신함. 사내 WebUI 반영은 별도이며 이번 병합으로 적용 성공을 주장하지 않음.
+- 각 병합 시 최신 head와 기준 브랜치를 다시 확인하고 expected_head_sha를 고정했으며 일반 merge 방식으로 병합함. 새 PR 없이 #5 → #4 → #3 → #2 순서로 통합했고 모든 단계의 코드 tree가 검수한 `f6fdd138d1c866c508264e44df577d573ed5ec66`과 일치함.
+
+| 병합 PR | 병합 결과 커밋 | 대상 |
+|---|---|---|
+| [#5](https://github.com/knadalkim-a11y/team-agent-poc/pull/5) | `4585af040890228d0b4bbf09dd65bf1a5e5191cc` | PR #4 브랜치 |
+| [#4](https://github.com/knadalkim-a11y/team-agent-poc/pull/4) | `1b7651b91a31e805d1ce0add67b9d8db829f7184` | PR #3 브랜치 |
+| [#3](https://github.com/knadalkim-a11y/team-agent-poc/pull/3) | `2de96b4c4b9963f03c3651b2aab51654ccdac5f0` | PR #2 브랜치 |
+| [#2](https://github.com/knadalkim-a11y/team-agent-poc/pull/2) | `3184b78ccb3d4d8a4977055693cb6d58728caa01` | main |
+
+- 원격 main이 위 최종 병합 커밋이고 열린 PR이 0개임을 재조회함. STATUS의 재개 기준·다음 작업·준비본/배포본 설명은 main 기준으로 정리하고 이 병합 상태 문서만 main에 후속 반영함. 후속 상태 정리는 문서 3개만 변경했으며 최종 문서 점검은 문서 25개·내부 링크 366개·오류 0·검토 후보 0, diff 검사 PASS. 코드·시험은 후속 문서 정리에서 변경/재실행하지 않음. 사내 WebUI 반영은 별도이며 이번 병합으로 적용 성공을 주장하지 않음.
 
 ## 결과 기록
 

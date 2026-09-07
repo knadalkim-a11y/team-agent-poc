@@ -8,23 +8,16 @@
 
 - 목표: 비개발자가 범용 채팅·사내 자료 조회·팀원 Prompt/Skill 공유를 쉽게 사용하는 플랫폼. 현재는 Open WebUI Native와 Git Agent Pack을 사용하고 원본 WebUI는 수정하지 않음.
 - 현재 위치: 기존 연동의 후속 조회 흐름을 보완하는 단계. **첫 화면·온보딩 적용은 보류**하고 범용 Assistant 방향을 유지함. 기존 Skill·Tool·모델 Public 설정 보고와 그룹 운영 후속 결정은 그대로임.
-- 이번 작업: PR #4 `4645f21`을 기준으로 GitHub PR 직접 본문 요청·선택한 PR 후속 조회·페이지 이동·실패 안내를 보완함. Tool v0.1.1과 GitHub Prompt 절은 Git 준비본이며 사내 반영은 미확인. [변경 근거·검증](../evals/github-offline.md#followup-flow), [기존 등록본 적용 범위](06-github-read-tool.md#followup-update).
-- 다음 작업 하나: **Jira 목록 조회 실패 화면이 오류별 다음 행동을 전달하도록 보완한다.** 현재 화면이 안전한 오류 메시지를 버리고 재조회만 권하는 코드상 문제를 확인함. 성공한 집계·범위를 보존하는 작은 변경으로 진행하며, 부분 실패 뒤 페이지 범위가 달라지는 조건도 해당 흐름에서 확인함. GitHub 사내 적용 결과는 받는 범위만 기록하고 완료한 인증/저장/조회·20회 안정성 검사를 반복하지 않음.
+- 이번 작업: **PR #2~#5를 모두 검토·병합해 main으로 통합함. 열린 PR 0개 확인.** Jira v0.1.2의 목록 오류 안내·부분 실패 페이지 범위를 보완하고 GitHub v0.1.1·후속 대화 지침을 함께 반영함. [통합 검토·병합 근거](../evals/scenarios.md#pr-stack-review). Git 병합은 사내 적용 완료를 뜻하지 않음.
+- 다음 작업 하나: **병합한 Jira/GitHub 보완본을 기존 WebUI에 반영하고 변경된 후속 조회·오류 안내만 확인한다.** [Jira 적용 범위](05-jira-read-tool.md#failure-followup-update), [GitHub 적용 범위](06-github-read-tool.md#followup-update)를 따르며 기존 도구 ID·개인 설정·사용자 지침을 유지함. 완료한 인증/저장/기본 조회·20회 안정성 검사는 반복하지 않음. 첫 화면·온보딩 적용은 계속 보류함.
 
 <a id="resume-branch"></a>
 
-## 새 대화에서 이어갈 브랜치
+## 최신 main에서 재개
 
-2026-09-07 재개 시 `main`은 `9dcdbf60a98124506140b0dca315d50223cfa0ed`이며 아래 PR들은 열려 있는 draft·미병합 상태였습니다. 이번 보완은 [PR #4](https://github.com/knadalkim-a11y/team-agent-poc/pull/4)의 `4645f21488cceecd97d649a687dd2fd3d29de399`에서 분기한 **`codex/github-followup-flow-20260907`**에서 이어갑니다. 비교 기준은 PR #4 브랜치이며 기존 PR 변경은 보존합니다. main만 읽고 Jira 구현부터 다시 시작하지 않습니다.
+**다음 개발은 원격 최신 main을 기준으로 시작합니다.** PR #5 → #4 → #3 → #2 순서로 통합했고, main 통합 병합 커밋은 [3184b78](https://github.com/knadalkim-a11y/team-agent-poc/commit/3184b78ccb3d4d8a4977055693cb6d58728caa01)입니다. 현재 상태와 재개 기준도 main에서 관리합니다. 이전 PR 브랜치를 최신 작업 대상으로 고정하지 않습니다.
 
-| PR | 내용 | 기준 브랜치 |
-|---|---|---|
-| [#2](https://github.com/knadalkim-a11y/team-agent-poc/pull/2) | Jira 읽기·대시보드와 확인 기록 | main |
-| [#3](https://github.com/knadalkim-a11y/team-agent-poc/pull/3) | GitHub PR 읽기와 확인 기록 | PR #2의 브랜치 |
-| [#4](https://github.com/knadalkim-a11y/team-agent-poc/pull/4) | 현재 PC 팀 사용·공유 설정·온보딩 보류·현재 계획 | PR #3의 브랜치 |
-| GitHub 후속 조회 보완 | 직접 본문 요청·페이지 메타데이터·후속 대화 지침 | PR #4의 브랜치 |
-
-재개할 때 원격 main·관련 PR과 `codex/github-followup-flow-20260907`의 상태를 다시 확인하고 실제 최신 작업 커밋의 `AGENTS.md`와 이 문서를 읽은 뒤 해당 기능 파일만 봅니다. 이후 병합됐다면 실제 반영 상태에 맞춰 기준을 갱신합니다. Git의 준비 원본과 아래 표의 사내 수동 적용 원본을 혼동하지 않습니다. 새 대화용 별도 인계 문서나 프로젝트 지침 재입력은 필요하지 않습니다.
+재개 시 최신 main 커밋의 AGENTS·이 문서를 읽고 그때 관련 열린 PR이 있는지만 확인합니다. 관련 후속 수정은 기존 PR에서 마무리하며 새 PR을 미병합 PR 위에 계속 쌓지 않습니다. 이전 PR별 원본·병합 결과는 [통합 기록](../evals/scenarios.md#pr-stack-review)에 보존합니다. 아래 사내 수동 적용 원본은 Git 최신 main과 구분합니다.
 
 <a id="delivery-plan"></a>
 
@@ -49,13 +42,13 @@
 | 대상 | Git에서 준비한 것 | WebUI 반영 마지막 확인 | 검증 근거 | 적용 원본 커밋 |
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
-| 첫 사용 안내 — 보류 | 소개·질문 JSON 4개·팀원 안내 참고 초안 | 사용자 결정으로 UI 적용·팀원 배포 보류. 적용 성공 보고 없음 | [준비 기록](../evals/scenarios.md#team-first-use-preparation), [보류 결정](../evals/scenarios.md#onboarding-deferred) | PR #4의 [초안](../agent-pack/ees-prompt-suggestions.json); 배포 원본 SHA 미확인 |
+| 첫 사용 안내 — 보류 | 소개·질문 JSON 4개·팀원 안내 참고 초안 | 사용자 결정으로 UI 적용·팀원 배포 보류. 적용 성공 보고 없음 | [준비 기록](../evals/scenarios.md#team-first-use-preparation), [보류 결정](../evals/scenarios.md#onboarding-deferred) | 보관한 [초안](../agent-pack/ees-prompt-suggestions.json); 배포 원본 SHA 미확인 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 2026-09-07 두 지침 UI 저장 보고; 개정 후 P02 PASS, P03 창작 거절 부분 확인, P04~P10 미완료; 실행 시점은 평가표 | [P02~P10 재검증](../evals/scenarios.md#instruction-revision), [기존 지침 갱신](03-openwebui-native-agent.md#update-existing-instructions) | 전달·저장 안내 원본 [dfeb95f](https://github.com/knadalkim-a11y/team-agent-poc/commit/dfeb95fbf96cf6a2bb75a3ba75fac3bc92ed60fc); 등록 내용·사용자 추가 규칙·사내 checkout SHA 직접 대조는 미실행 |
 | 조회 경로 보완 | Prompt의 [현재 POC 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션 | 부분 적용 당시 C04·P02 정상·임베딩 오류 재발 없음 보고; 이번 전체 Prompt에도 포함해 저장 안내 | [실환경 결과](../evals/scenarios.md#결과-기록), [당시 소스 검토](../evals/confluence-offline.md#knowledge-routing) | 부분 추가 안내 원본 [28f526a](https://github.com/knadalkim-a11y/team-agent-poc/blob/28f526a39162e54f126f577554f8c15fdd5940f1/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로); 현재 전체 지침 안내 원본은 위 행. 부분 적용 당시 성공을 이번 개정 후 재평가로 간주하지 않음 |
 | Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.2; HTTP 명시적 허용 | 2026-09-07 연결·조회·문서 권한·확인한 출력의 PAT 비노출·시험한 구성의 쓰기 차단·PAT 폐기와 교체 후 복구 확인 보고. 오류 처리 등 공용 사용 전체 검증은 미완료 | [HTTP 지원 사외 검증](../evals/confluence-offline.md#http-opt-in), [실환경 C01~C09 및 결과](../evals/scenarios.md#confluence-live) | 새 Tool 안내 원본 [910ad765](https://github.com/knadalkim-a11y/team-agent-poc/blob/910ad765a777df1caf30a565a197097f8afbf8b0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), 기존 Skill 안내 원본 [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md). C06에서 등록 코드가 전달한 원본과 같다는 사용자 확인; GPT의 등록 코드·사내 checkout SHA 직접 대조는 미실행 |
 | Rich UI 참고 예제 | [합성 검색 결과 HTML](04-confluence-read-tool.md#rich-ui-demo); 실제 API·기존 Tool과 미연동 | 배포 대상 미확정 | [사전 준비 검증](../evals/confluence-offline.md#status-history); 실제 브라우저·WebUI 검증과 구분 | 해당 없음 |
-| Jira 읽기·Rich UI | 기본 비활성 Python Tool v0.1.1, 코드 안의 개편 화면, 기존 Prompt의 조건부 Jira 안내. 추가 Skill 없음 | 2026-09-07 v0.1.1 적용·전체 시스템 표시·대표 시스템 건수 대조·화면 조작 정상 보고. Jira Prompt 절의 별도 UI 반영은 미안내 | [사외 변경 검증](../evals/jira-offline.md#dashboard-design), [실환경 보고](../evals/scenarios.md#jira-dashboard-acceptance), [J01~J05](../evals/scenarios.md#jira-live) | 적용 안내 원본 [a6b6f2e의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/a6b6f2e911525519e8cc56be92d889caa1ab8845/agent-pack/skills/jira-read/scripts/jira_tool.py). 사용자 보고 기준이며 사내 등록 코드·checkout 직접 대조는 미실행. 이전 ce982de5 등록과 d24b47d 저장 검사 증거는 [첫 화면 기록](../evals/scenarios.md#jira-first-dashboard)에 보존 |
-| GitHub PR 읽기 | Python Tool v0.1.1·GitHub 후속 대화 Prompt 절 준비. 직접 본문·확인된 숫자 저장소 링크·마지막 페이지 처리 보완; 개인 설정은 기존과 같음 | 2026-09-07 새 개인 필드 DB 범위 PASS 후 목록·PR 한 건 본문 요약·원문 링크 정상 보고. v0.1.1·개정 GitHub Prompt 절 UI 적용은 미확인 | [기본 흐름 확인](../evals/scenarios.md#github-read-acceptance), [저장 증거](../evals/scenarios.md#github-storage-check), [사외 검증](../evals/github-offline.md), [GH01~GH04](../evals/scenarios.md#github-live) | 안내 원본 [4b058996의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/4b058996d1e3f360ee670da553e2f9bc7a9046a1/agent-pack/skills/github-read/scripts/github_tool.py) 및 [검사기](https://github.com/knadalkim-a11y/team-agent-poc/blob/4b058996d1e3f360ee670da553e2f9bc7a9046a1/scripts/check_confluence_canary.py). 사용자 보고 기준이며 등록 코드·checkout 직접 대조는 미실행. Jira PR #2 기반 별도 GitHub PR #3, main 미병합 |
+| Jira 읽기·Rich UI | Python Tool v0.1.2·Jira 후속 조회 지침. 목록 오류별 행동 안내·부분 집계 실패 시 페이지 범위 보호; 개인 설정은 기존과 같음 | 2026-09-07 v0.1.1 적용·전체 시스템 표시·대표 시스템 건수 대조·화면 조작 정상 보고. v0.1.2·개정 Jira Prompt 절 사내 적용은 미확인 | [v0.1.2 변경 검증](../evals/jira-offline.md#merge-review-fixes), [실환경 보고](../evals/scenarios.md#jira-dashboard-acceptance), [J01~J05](../evals/scenarios.md#jira-live) | 적용 안내 원본 [a6b6f2e의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/a6b6f2e911525519e8cc56be92d889caa1ab8845/agent-pack/skills/jira-read/scripts/jira_tool.py). 사용자 보고 기준이며 사내 등록 코드·checkout 직접 대조는 미실행. 이전 ce982de5 등록과 d24b47d 저장 검사 증거는 [첫 화면 기록](../evals/scenarios.md#jira-first-dashboard)에 보존 |
+| GitHub PR 읽기 | Python Tool v0.1.1·GitHub 후속 대화 Prompt 절 준비. 직접 본문·확인된 숫자 저장소 링크·마지막 페이지 처리 보완; 개인 설정은 기존과 같음 | 2026-09-07 새 개인 필드 DB 범위 PASS 후 목록·PR 한 건 본문 요약·원문 링크 정상 보고. v0.1.1·개정 GitHub Prompt 절 UI 적용은 미확인 | [기본 흐름 확인](../evals/scenarios.md#github-read-acceptance), [저장 증거](../evals/scenarios.md#github-storage-check), [사외 검증](../evals/github-offline.md), [GH01~GH04](../evals/scenarios.md#github-live) | 안내 원본 [4b058996의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/4b058996d1e3f360ee670da553e2f9bc7a9046a1/agent-pack/skills/github-read/scripts/github_tool.py) 및 [검사기](https://github.com/knadalkim-a11y/team-agent-poc/blob/4b058996d1e3f360ee670da553e2f9bc7a9046a1/scripts/check_confluence_canary.py). 사용자 보고 기준이며 등록 코드·checkout 직접 대조는 미실행. Git 준비본은 main 통합 완료, 위 커밋은 기존 사내 적용 안내본 |
 | 실행 스크립트 | 시작·smoke test·암호화 준비 옵션; smoke 자동 리디렉션 차단 | 사용자 보고로 명령 복사 후 수동 실행; 정해진 기동 스크립트 채택은 안정화 이후 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
 
 **Skill은 Git과 UI 등록 보고 기준 모두 3개이며, Skill 자체 사용 확인은 기존 2개입니다.** Confluence Tool의 `check_access` 성공 보고는 있으나 `confluence-read`를 `view_skill`로 불러왔는지는 별도 확인되지 않았습니다. 적용 원본은 Git 최신 커밋과 구분하며, 안내 원본·사용자 보고·등록 내용 대조 여부를 함께 기록합니다.
@@ -64,7 +57,7 @@
 
 - GitHub v0.1.1의 직접 본문·후속 대화·페이지 변경은 [해당 범위만 사내 확인](06-github-read-tool.md#followup-update)이 남음. 새 개인 필드 DB 저장과 기존 목록·PR 한 건 본문·원문 기본 흐름은 사용자 보고 범위에서 확인함. 전체 목록 정확성/페이지 처리·사용자 격리·마스킹 화면의 별도 관찰·Prompt 절 UI 저장은 미확인. PAT 종류/전체 권한은 확인하지 않았고 실제 사내 주소·저장소 식별자·업무 내용은 기록하지 않음. CI/리뷰·diff·일반 이슈·쓰기·추가 Rich UI는 후속 수요로 남김.
 
-- Jira는 개인 환경의 기본 조회·화면 흐름을 사용자 보고로 확인함. 개별 상세 API/본문 정확성·대표 권한 차단·계정 격리·실제 출력 비밀 비노출·부분 실패와 모델 근거 대조는 평가표의 관련 시점에 남김. 전체 시스템의 모든 건수를 대조한 것으로 확대하지 않음. 완료한 인증·DB 저장·재시작·화면 흐름을 반복하지 않음.
+- Jira v0.1.2의 목록 오류 안내·부분 범위 보호는 사내 적용·실제 화면 확인이 남음. 개인 환경의 기존 v0.1.1 기본 조회·화면 흐름은 사용자 보고로 확인함. 개별 상세 API/본문 정확성·대표 권한 차단·계정 격리·실제 출력 비밀 비노출·부분 실패와 모델 근거 대조는 평가표의 관련 시점에 남김. 전체 시스템의 모든 건수를 대조한 것으로 확대하지 않음. 완료한 인증·DB 저장·재시작·화면 흐름을 반복하지 않음.
 - 개정 지침은 UI 저장 보고가 있고 P02 PASS, P03 창작 거절 부분 확인 상태. 나머지는 평가표의 시점에 따라 기능 확인·공개 전 묶음·진단으로 수행하며 미확인을 PASS로 바꾸지 않음. POC-POL-001 v0.1은 합성 Knowledge이고 공통 정책 관리 원본 v0.2와 다름.
 - Confluence C07의 개별 HTTP 401·403·timeout 분기, confluence-read Skill의 실제 로딩은 미확인. 과거 임베딩 검색 오류는 조회 경로 보완 후 재발 없음 보고가 있으나 의미 검색 자체를 복구한 것은 아님. 운영 장애나 토큰 폐기를 불필요하게 반복하지 않음.
 - 기존 W/D/S/Confluence PASS는 해당 환경·구성·합성 자료와 사용자 보고 범위임. 현재 PC의 팀원 로그인 화면 접속은 확인했으며 전송 보호·I01~I05 사용자 격리·실제 비개발자 사용/공유는 미완료. 같은 저장 경로의 완료 증거는 재사용하며, 다른 서버로 옮길 때 그 환경의 저장/권한을 확인함.
@@ -81,7 +74,7 @@
 
 ## 최근 점검
 
-[GitHub 후속 조회 보완](../evals/github-offline.md#followup-flow): 최신 main·PR #2/#3/#4와 준비 원본·사내 적용 기록을 대조하고, 상세 함수 스키마 불일치와 페이지 메타데이터 처리 문제를 수정함. 변경한 호출·페이지 조건만 합성 검사하고 GitHub Prompt·가이드·문서 참조를 확인함. 인증·저장·기존 연동·20회 안정성 시험은 반복하지 않음. 사내 모델 동작·배포는 미확인. 이전 정리 근거는 [기존 기록](../evals/scenarios.md#session-continuation)에 보존함.
+[PR #2~#5 통합 검토·병합](../evals/scenarios.md#pr-stack-review): 전체 PR 변경·리뷰/댓글·검사 상태와 코드/가이드를 대조함. 확인된 Jira 두 문제를 기존 PR 안에서 수정하고 변경 범위 7개 시험 통과. GitHub 직전 13개 시험과 기존 인증·저장 근거는 재사용함. 각 단계의 최신 head를 고정해 병합했고 검수한 코드 tree의 main 반영·열린 PR 0개를 확인함. 문서·최종 diff 검사를 수행하며 사내 배포·실제 모델/브라우저 확인은 미실행으로 유지함.
 
 ## 갱신 규칙
 
