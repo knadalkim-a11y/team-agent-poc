@@ -7,9 +7,9 @@
 ## 목표와 이번 작업
 
 - 목표: 비개발자가 범용 채팅·사내 자료 조회·팀원 Prompt/Skill 공유를 쉽게 사용하는 플랫폼. 현재는 Open WebUI Native와 Git Agent Pack을 사용하고 원본 WebUI는 수정하지 않음.
-- 현재 위치: 기본 채팅·Confluence 읽기와 Jira Bearer 계정 확인 성공에 이어 Jira Tool 등록·관리자 설정·Assistant 연결·가짜 개인 PAT 저장/마스킹 완료를 보고받음. 새 필드의 DB 암호화·프로젝트 조회·실제 화면·공용 배포·비개발자 사용성은 미확인.
-- 이번 작업: 등록 안내 전체 완료 보고를 확인한 범위로 기록하고 기존 읽기 전용 저장 검사기에 Jira 전용 선택을 추가함. Jira의 새 가짜 값과 정확한 Tool을 함께 검사하며 업무 Tool·화면·인증 코드는 변경하지 않음.
-- 다음 작업 하나: **새 Jira 개인 입력칸의 DB 저장을 한 번 확인한다.** [Jira 전용 저장 확인](05-jira-read-tool.md#새-jira-개인-입력칸-저장-확인)의 통과 출력 후 가짜 값을 기존 실제 PAT로 교체·활성화하고 정상 프로젝트 대시보드를 조회함. 이미 확인한 등록·마스킹·계정 인증과 동일 플랫폼의 저장·재시작 검증은 반복하지 않음.
+- 현재 위치: 새 Jira 개인 필드의 DB 저장 검사 통과와 실제 토큰 입력 후 WebUI 대시보드 정상 표시를 보고받음. 전체 시스템 비교·건수 일치·필터/원문 조작·계정 격리·공용 배포·비개발자 사용성은 미확인.
+- 이번 작업: 저장 검사 10개 출력과 실제 토큰 입력 후 대시보드 성공을 기록함. 이어 사용자 친화적 디자인·가독성·사용성과 유연성 요구에 맞춰 화면 코드와 v0.11.3 후속 조회 지원 경로를 검토함. 앞선 인증 실패 진단은 종료했으며 코드·설정·기존 검증은 변경하거나 반복하지 않음.
+- 다음 작업 하나: **관리자용 전체 시스템 비교 화면의 가독성과 탐색을 개선한다.** [검토한 우선순위](05-jira-read-tool.md#6-사용자-친화적인-화면과-유연성--개선-검토)에 따라 미완료 기준 비교·정렬·목록 정보 배치부터 다루고 실제 조회 버튼/조건 확장을 구분함. 이번 턴은 검토이며 개선 코드는 미적용. 전체 시스템 표시·건수 대조·화면 조작은 [업무 흐름 확인](05-jira-read-tool.md#4-작은-사내-확인-묶음)에 묶고 완료한 인증·저장·재시작 검사는 반복하지 않음.
 
 <a id="delivery-plan"></a>
 
@@ -18,7 +18,7 @@
 | 순서 | 작업 묶음 | 완료 판단·진행 조건 |
 |---|---|---|
 | 1. 기반 활용 | 기존 범용 채팅·Confluence 검색/본문/근거 링크 사용 | 확인한 W·D·Confluence 증거를 재사용하되 환경·변경 영향이 다른 범위는 구분. 세부 정책 문답 전체 완료를 다음 기능의 선행조건으로 두지 않음 |
-| 2. Jira + 첫 Rich UI | 프로젝트별 시스템 전체/미완료 비교 → 받은 최근 목록의 프로젝트/상태/담당자 필터·펼치기 → 이슈 상세·원문. 질문 예시·부분 실패·다음 페이지 안내를 함께 제공 | [읽기 Tool·화면 준비](05-jira-read-tool.md); 해당 PC Bearer 인증·WebUI 등록/마스킹 확인. 새 필드 DB 저장·집계 일치·허용 범위·대표 실패·실제 화면은 미확인. 기존 전수 검증을 반복하지 않음 |
+| 2. Jira + 첫 Rich UI | 프로젝트별 시스템 전체/미완료 비교 → 받은 최근 목록의 프로젝트/상태/담당자 필터·펼치기 → 이슈 상세·원문. 질문 예시·부분 실패·다음 페이지 안내를 함께 제공 | [첫 실제 대시보드 표시 확인](../evals/scenarios.md#jira-first-dashboard). 인증·등록·마스킹·새 필드 DB 저장 확인; 전체 비교·집계 일치·권한·화면 조작은 남아 있음. 기존 전수 검증을 반복하지 않음 |
 | 3. GitHub 읽기 | 제품/인증/허용 저장소 확인 후 필요한 PR 또는 이슈 조회 하나 | 원문과 결과·권한 일치 확인. 독립 후속 작업이므로 연결 준비가 지연돼도 준비된 기능의 파일럿을 막지 않음 |
 | 4. 소규모 공용 파일럿 | 승인된 팀 서버에 새 배포, 선택한 기능의 공개 전 검증, 소수 비개발자 실제 사용. 허용된 Prompt·Skill 공유 흐름 확인 | 공개 전 조건과 [사용성 기준](../evals/scenarios.md#usability)을 충족하고 실제 업무에서 막힌 지점을 개선. 개인 PC 포트 공개·사용자 데이터 자동 이전으로 대체하지 않음 |
 | 5. 수요 기반 확장 | EMS/APC/FDC의 승인 API가 있는 업무 하나, 필요한 역할별 기능·Rich UI | 업무 가치와 접근 경계를 먼저 정하고 작은 읽기 기능부터 추가. 쓰기·자동화·다중 Agent는 별도 필요가 확인될 때 검토 |
@@ -36,14 +36,14 @@
 | 조회 경로 보완 | Prompt의 [현재 POC 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션 | 부분 적용 당시 C04·P02 정상·임베딩 오류 재발 없음 보고; 이번 전체 Prompt에도 포함해 저장 안내 | [실환경 결과](../evals/scenarios.md#결과-기록), [당시 소스 검토](../evals/confluence-offline.md#knowledge-routing) | 부분 추가 안내 원본 [28f526a](https://github.com/knadalkim-a11y/team-agent-poc/blob/28f526a39162e54f126f577554f8c15fdd5940f1/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로); 현재 전체 지침 안내 원본은 위 행. 부분 적용 당시 성공을 이번 개정 후 재평가로 간주하지 않음 |
 | Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.2; HTTP 명시적 허용 | 2026-09-07 연결·조회·문서 권한·확인한 출력의 PAT 비노출·시험한 구성의 쓰기 차단·PAT 폐기와 교체 후 복구 확인 보고. 오류 처리 등 공용 사용 전체 검증은 미완료 | [HTTP 지원 사외 검증](../evals/confluence-offline.md#http-opt-in), [실환경 C01~C09 및 결과](../evals/scenarios.md#confluence-live) | 새 Tool 안내 원본 [910ad765](https://github.com/knadalkim-a11y/team-agent-poc/blob/910ad765a777df1caf30a565a197097f8afbf8b0/agent-pack/skills/confluence-read/scripts/confluence_tool.py), 기존 Skill 안내 원본 [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md). C06에서 등록 코드가 전달한 원본과 같다는 사용자 확인; GPT의 등록 코드·사내 checkout SHA 직접 대조는 미실행 |
 | Rich UI 참고 예제 | [합성 검색 결과 HTML](04-confluence-read-tool.md#rich-ui-demo); 실제 API·기존 Tool과 미연동 | 배포 대상 미확정 | [사전 준비 검증](../evals/confluence-offline.md#status-history); 실제 브라우저·WebUI 검증과 구분 | 해당 없음 |
-| Jira 읽기·Rich UI | 기본 비활성 Python Tool v0.1.0, 코드 안의 고정 화면, 기존 Prompt의 조건부 Jira 조회 안내. 추가 Skill 없음 | 2026-09-07 Tool 등록·관리자 설정·Assistant 연결·가짜 개인 PAT 마스킹 완료 보고. 비활성 유지 안내; DB 저장·조회·화면은 대기. Jira Prompt 절의 별도 UI 반영은 미안내 | [사외 검증](../evals/jira-offline.md#initial-implementation), [계정 확인](../evals/scenarios.md#jira-bearer-check), [등록 보고](../evals/scenarios.md#jira-registration), [J01~J05](../evals/scenarios.md#jira-live) | 안내 원본 [ce982de5의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/ce982de5e83a26421297e502e7f780365d7a18d3/agent-pack/skills/jira-read/scripts/jira_tool.py) 등록 완료의 사용자 보고. GPT의 사내 코드/checkout 직접 대조는 미실행 |
+| Jira 읽기·Rich UI | 기본 비활성 Python Tool v0.1.0, 코드 안의 고정 화면, 기존 Prompt의 조건부 Jira 조회 안내. 추가 Skill 없음 | 2026-09-07 등록·마스킹·DB 저장 확인 후 실제 PAT로 대시보드 정상 표시 보고. 전체 집계·화면 조작·계정 격리는 미확인. Jira Prompt 절의 별도 UI 반영은 미안내 | [사외 검증](../evals/jira-offline.md#initial-implementation), [저장·첫 대시보드](../evals/scenarios.md#jira-first-dashboard), [J01~J05](../evals/scenarios.md#jira-live) | 안내 원본 [ce982de5의 Tool](https://github.com/knadalkim-a11y/team-agent-poc/blob/ce982de5e83a26421297e502e7f780365d7a18d3/agent-pack/skills/jira-read/scripts/jira_tool.py) 등록·사용 보고. DB 검사 안내 원본은 [d24b47d](https://github.com/knadalkim-a11y/team-agent-poc/commit/d24b47d317a7e1604eb23dac7645cb1d5c947e9c). 사내 코드/checkout 직접 대조는 미실행 |
 | 실행 스크립트 | 시작·smoke test·암호화 준비 옵션; smoke 자동 리디렉션 차단 | 사용자 보고로 명령 복사 후 수동 실행; 정해진 기동 스크립트 채택은 안정화 이후 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
 
 **Skill은 Git과 UI 등록 보고 기준 모두 3개이며, Skill 자체 사용 확인은 기존 2개입니다.** Confluence Tool의 `check_access` 성공 보고는 있으나 `confluence-read`를 `view_skill`로 불러왔는지는 별도 확인되지 않았습니다. 적용 원본은 Git 최신 커밋과 구분하며, 안내 원본·사용자 보고·등록 내용 대조 여부를 함께 기록합니다.
 
 ## 남아 있는 검증과 제한
 
-- Jira는 해당 PC의 HTTP Bearer 인증·WebUI Tool 등록·개인 입력칸 마스킹을 확인함. 새 필드 DB 암호화·계정 분리·프로젝트별 전체/미완료 실측·WebUI 조회 실행·실제 Rich UI는 미확인. 프로젝트별 집계와 최근 페이지를 구분하며 일부 실패를 0건으로 바꾸지 않음. 공용 공개 조건과 기존 증거는 유지함.
+- Jira는 새 필드 DB 저장과 실제 토큰으로 WebUI 대시보드 표시까지 확인함. 전체 시스템 표시·전체/미완료 건수 대조·필터/상세/원문 조작·계정 격리·실제 조회의 비밀 비노출 확인은 미완료. 검사기의 로그/재시작 false는 범위 밖 표시이며 기존 플랫폼 증거를 재사용함. 프로젝트별 집계와 최근 페이지를 구분하고 공용 공개 조건을 유지함.
 - 개정 지침은 UI 저장 보고가 있고 P02 PASS, P03 창작 거절 부분 확인 상태. 나머지는 평가표의 시점에 따라 기능 확인·공개 전 묶음·진단으로 수행하며 미확인을 PASS로 바꾸지 않음. POC-POL-001 v0.1은 합성 Knowledge이고 공통 정책 관리 원본 v0.2와 다름.
 - Confluence C07의 개별 HTTP 401·403·timeout 분기, confluence-read Skill의 실제 로딩은 미확인. 과거 임베딩 검색 오류는 조회 경로 보완 후 재발 없음 보고가 있으나 의미 검색 자체를 복구한 것은 아님. 운영 장애나 토큰 폐기를 불필요하게 반복하지 않음.
 - 기존 W/D/S/Confluence PASS는 해당 환경·구성·합성 자료와 사용자 보고 범위임. I01~I05 사용자 격리·새 서버의 비밀 저장/권한·실제 비개발자 사용/공유는 별도 미완료. 공개할 환경과 기능의 필수 조건부터 확인함.
@@ -59,7 +59,7 @@
 
 ## 최근 점검
 
-[등록·가짜 값 마스킹 완료 보고](../evals/scenarios.md#jira-registration)를 기록하고 새 Jira 입력칸 확인을 위한 기존 검사기의 선택 옵션을 추가함. 공식 v0.11.3 Tool 식별 구조·출력 제한·읽기 전용 경로와 관련 합성 시험·문서 점검은 [Jira 저장 확인 준비](../evals/jira-offline.md#jira-storage-check)에 기록함. [이전 문서 점검](../evals/jira-offline.md#bearer-success-followup)과 [Jira 코드·화면 31개 검사](../evals/jira-offline.md#initial-implementation)를 보존하며 변경한 검사기 이외의 기존 기능·사내 검증은 반복하지 않음.
+[저장 검사 통과·첫 대시보드 표시 보고](../evals/scenarios.md#jira-first-dashboard)를 원본 출력 순서와 대조함. 독립 검토로 DB 검사 범위·실제 화면 성공과 건수/상호작용 미확인을 구분했고, 별도 연결 확인 재성공이나 전체 J01~J05 통과로 확대하지 않음. [이번 문서·화면 개선 검토](../evals/jira-offline.md#first-dashboard-followup), [이전 저장 검사기 검증](../evals/jira-offline.md#jira-storage-check), [Jira 코드·화면 31개 검사](../evals/jira-offline.md#initial-implementation)를 보존함. 화면 개선은 현재 템플릿의 비교 축·작은 글자·목록 배치와 공식 버전의 후속 채팅 지원까지 검토했으며 실제 변경·버튼 실행은 미수행. 기존 기능 및 사내 검사는 반복하지 않음.
 
 ## 갱신 규칙
 
