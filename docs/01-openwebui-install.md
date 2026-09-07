@@ -174,7 +174,7 @@ Open WebUI  = 내 PC의 127.0.0.1:8080에서 수신
 
 기존 로컬 화면에서 관리자 설정 → Authentication → **New Sign Ups를 OFF**로 저장합니다. 팀원 계정은 관리자 Users → Add User에서 역할 **user**로 준비합니다. 기존 일반 테스트 계정 B가 있으면 첫 확인에 재사용하고, 관리자의 계정·PAT를 공유하지 않습니다. 비밀번호는 사내 전달 수단을 사용합니다. 각 팀원은 자신의 개인 PAT를 입력합니다. 공개 가입 OFF와 관리자 계정 추가는 별도 경로입니다. [v0.11.3 설정 UI](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/admin/Settings/Authentication.svelte), [계정 추가 UI](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/admin/Users/UserList/AddUserModal.svelte)
 
-Assistant·기반 모델·연결된 Tool/Skill/Knowledge의 읽기 권한은 [같은 파일럿 그룹](03-openwebui-native-agent.md#assistant-resource-access)에 맞춥니다. 모델 연결만으로 자산 권한이 따라가지 않으므로 자산별 최초 설정과 새 구성원 추가를 구분합니다. 기존 [Model not found 복구](troubleshooting.md#user-model-not-found)를 반복하지 않고 새로 연결한 Jira/GitHub를 포함한 실제 공개 구성을 확인합니다. 일반 사용자에게 Python Tool 등록·수정 권한을 함께 열지 않습니다.
+현재는 사용자가 팀원만 사용할 환경의 **기존 Skill·Tool·모델을 모두 Public으로 변경**했다고 보고했습니다. [그룹별 읽기 권한 설정](03-openwebui-native-agent.md#assistant-resource-access)은 사용 대상 확대나 자산별 제한이 필요할 때 적용하며 지금 다시 요구하지 않습니다. Knowledge 공개 여부·Read/Write 세부 값은 보고되지 않았습니다. 기존 [Model not found 복구](troubleshooting.md#user-model-not-found)를 반복하지 않고 일반 사용자 업무 흐름에서 실제 필요한 자산 접근을 확인합니다. 사용을 위한 공개 설정과 Python Tool 등록·수정 권한은 구분합니다.
 
 현재 PC는 사용자 보고로 **Public 프로필**이며 우선 IP·포트 직접 접속을 선택했습니다. 방화벽은 사용자가 지정한 **사내 관리 시스템**을 통해 처리합니다. [최신 접속 경로 결정](../evals/scenarios.md#managed-firewall-access)을 따르며 아래 프로필 확인을 반복하거나 Private으로 바꾸지 않습니다. Public은 Windows 네트워크 프로필 이름이며 인터넷 공개 여부나 공인 IP를 뜻하지 않습니다.
 
