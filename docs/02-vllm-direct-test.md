@@ -162,7 +162,7 @@ Open WebUI는 현재 날짜·시간·요일 정보를 시스템 컨텍스트에 
 
 Native Function Calling에서 Builtin Tools가 활성화돼 있으면 `Chat History` 범주의 `search_chats`와 `view_chat`을 모델이 호출할 수 있습니다. 따라서 새 대화에서 “아까 내가 무엇을 물었나?”처럼 과거 대화를 명시적으로 요구하면 같은 사용자의 저장된 채팅을 검색해 답하는 것이 정상입니다.
 
-이것은 이전 메시지가 새 대화에 자동으로 주입된 것이 아니며 Open WebUI Memory나 Hermes Memory와도 구분합니다. 순수한 새 대화 문맥 분리는 Model preset의 `Capabilities → Builtin Tools`에서 `Chat History`와 `Memory`를 끈 상태로 검사합니다. 사용자 격리는 별도 계정 B가 계정 A의 문자열을 검색할 수 없는지로 검사합니다.
+이것은 이전 메시지가 새 대화에 자동으로 주입된 것이 아니며 Open WebUI Memory나 Hermes Memory와도 구분합니다. 순수한 새 대화 문맥 분리는 **관리자 패널 → 설정 → 모델 → 이번에 시험하는 기반 GLM 편집**에서 `Capabilities → Memory`와 `Builtin Tools → Memory·Chat History`가 각각 OFF인 상태로 검사합니다. EES 통합 Assistant에서 확인한 설정이 기반 모델에도 적용됐다고 가정하지 않습니다. [Memory 제어 범위](troubleshooting.md#native-memory-controls)에 따라 모델 설정을 확인하고, 필요한 항목만 해제해 저장한 뒤 화면을 새로고침합니다. 메뉴가 보이지 않으면 확인 목적으로 기능을 켜거나 새 모델을 만들지 말고 해당 상태를 보고합니다. 사용자 격리는 별도 계정 B가 계정 A의 문자열을 검색할 수 없는지로 검사합니다. 기반 모델은 관리자 모델 목록에서 공통 편집기로 열립니다. [v0.11.3 관리자 모델 UI](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/admin/Settings/Models.svelte)
 
 Open WebUI v0.11.3의 내장 구현은 `search_chats`와 `view_chat` 조회에 현재 사용자의 ID를 사용하지만, 서버 파일럿 전에는 두 계정으로 실제 검증합니다.
 
@@ -183,10 +183,10 @@ D01~D07의 시험 정의와 판정은 [평가표 B](../evals/scenarios.md)를 �
 ```text
 1차: 이 대화에서만 테스트 문자열은 OWUI-DIRECT-7319야.
 2차: 방금 테스트 문자열이 뭐였지?
-새 대화(먼저 Chat History·Memory 도구 OFF): 내가 이전 대화에서 말한 문자열이 뭐였지?
+새 대화(먼저 모델 Memory 기능과 Chat History·Memory 도구 OFF): 내가 이전 대화에서 말한 문자열이 뭐였지?
 ```
 
-Chat History 도구가 켜진 상태에서 같은 질문으로 과거 대화를 찾는 것은 별도의 정상 기능이며 D05 실패로 판정하지 않습니다.
+완료한 같은 대화 시험(D04)은 반복하지 않습니다. 설정을 확인한 뒤 같은 기반 모델로 새 대화를 만들고 위 마지막 질문만 입력하며 시험 문자열·이전 답변을 붙이지 않습니다. 문자열을 알 수 없다는 답변인지와 과거 대화·Memory 조회 호출이 없는지 확인합니다. 기존 대화나 Saved Memories를 삭제하지 않습니다. Chat History 도구가 켜진 상태에서 같은 질문으로 과거 대화를 찾는 것은 별도의 정상 기능이며 D05 실패로 판정하지 않습니다.
 
 ## 통과 판정
 
