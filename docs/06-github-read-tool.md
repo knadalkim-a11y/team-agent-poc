@@ -44,6 +44,8 @@ PR 쓰기·병합·리뷰 제출·댓글·CI 실행·코드 파일·diff·일반
 | `MAX_RESULTS` / `MAX_BODY_CHARS` | 기본 30개 / 6,000자. 최대 50개 / 12,000자 |
 | `TIMEOUT_SECONDS` / `MAX_RESPONSE_BYTES` | 기본 15초 / 1 MB. 개별 연결·읽기 제한이며 전체 실행 절대 시간과 구분 |
 
+`owner`는 저장소를 소유한 **조직명 또는 계정명**입니다. 합성 예시 URL이 `https://github.example.invalid/team/service-a`이면 `ALLOWED_REPOSITORIES`에는 `team/service-a`를 입력합니다. 여러 곳은 `team/service-a,team/service-b`처럼 **각 항목마다 owner를 포함**합니다. 저장소 이름만 나열하거나 전체 URL·`/tree/...` 경로·따옴표를 붙이지 않고 일반 쉼표 `,`로 구분합니다. clone 주소의 `.git` 접미사도 제외합니다. “허용 저장소는 정확한 owner/repo를 쉼표로 구분해 최대 20개까지 설정하세요”라는 `configuration_required`는 API 요청 전 설정 검사 오류이며 PAT 인증 결과가 아닙니다. 항목 하나라도 형식이 맞지 않거나 고유 저장소가 20개를 넘으면 전체 요청을 중단합니다. 항목 앞뒤 공백과 쉼표 뒤 공백은 허용합니다.
+
 UserValves는 비밀번호형 개인 `PAT` 한 필드입니다. 관리자 공통 설정·채팅·HTML로 토큰을 입력받지 않습니다. `github_check_access`는 필요할 때 자신의 계정 인증만 확인하며 저장소 권한·새 필드 저장을 대신하지 않습니다. [사용자 API의 인증 응답 범위](https://docs.github.com/en/enterprise-server@3.17/rest/users/users#get-the-authenticated-user)
 
 ## 4. 새 GitHub 입력칸 저장 확인

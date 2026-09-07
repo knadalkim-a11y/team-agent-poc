@@ -7,9 +7,9 @@
 ## 목표와 이번 작업
 
 - 목표: 비개발자가 범용 채팅·사내 자료 조회·팀원 Prompt/Skill 공유를 쉽게 사용하는 플랫폼. 현재는 Open WebUI Native와 Git Agent Pack을 사용하고 원본 WebUI는 수정하지 않음.
-- 현재 위치: Jira v0.1.1 기본 조회 흐름 확인 후 GitHub 읽기를 준비했고, 사용자 보고로 새 GitHub 개인 PAT 필드의 DB 저장 확인을 통과함. 실제 GHES 인증·PR 조회는 아직 미확인.
-- 이번 작업: `--github` 출력 10개를 [저장 증거](../evals/scenarios.md#github-storage-check)에 기록함. 정확한 GitHub Tool 1개와 암호문 1건, 검사한 DB 관련 파일 2개의 평문 부재를 확인한 범위이며 업무 코드·검사기·Prompt는 변경하지 않음.
-- 다음 작업 하나: **기존 실제 PAT로 허용 저장소 한 곳의 PR 목록·본문·원문을 확인한다.** 개인 설정의 가짜 값을 기존 PAT로 교체하고 관리자 `ENABLED=true`로 활성화함. 기존 Assistant Prompt 끝에 [GitHub 절](../agent-pack/system-prompts/ees-integrated-assistant.md#github-조회-기능이-연결된-경우)을 추가한 뒤 새 대화에서 조회함. 완료한 저장·재시작·Jira/Confluence 검사를 반복하지 않으며 목록 전에 별도 연결 확인을 추가하지 않음.
+- 현재 위치: GitHub 새 개인 PAT 필드의 DB 저장 확인은 통과함. 후속 PR 목록 요청에서 허용 저장소 형식의 `configuration_required`를 보고받았으며 실제 GHES 인증·PR 조회 성공은 아직 미확인.
+- 이번 작업: [목록 요청 실패](../evals/scenarios.md#github-repository-config)를 기록하고 안내 원본의 설정 검사와 대조함. 해당 오류는 API 요청 전 발생하며 실제 입력을 받지 않아 어느 항목이 잘못됐는지는 미확정. 각 항목에 조직명/계정명을 포함하는 `owner/repo` 예시를 가이드에 보완함.
+- 다음 작업 하나: **관리자 `ALLOWED_REPOSITORIES`를 정확한 owner/repo 형식으로 보완하고 PR 목록을 다시 조회한다.** URL의 조직명/계정명과 저장소명을 함께 사용하며 쉼표로 구분한 각 항목을 확인함. 성공 후 한 PR 본문·원문으로 이어가고 완료한 저장·재시작·Jira/Confluence 검사는 반복하지 않음. 별도 인증 사전검사나 토큰 재발급을 추가하지 않음.
 
 <a id="delivery-plan"></a>
 
@@ -62,7 +62,7 @@
 
 ## 최근 점검
 
-[GitHub 저장 확인 후속](../evals/github-offline.md#storage-success-followup): 사용자 출력과 고정 검사기 필드 순서를 대조하고 DB 범위 PASS를 기록함. 이번 변경은 문서뿐이며 문서·링크·diff만 점검함. 기존 GitHub 27개·저장 검사기 34개 합성 시험과 Jira/Confluence 완료 검증을 반복하지 않음. 실제 GHES API·PR 사용성은 확인 대기.
+[GitHub 저장소 설정 진단](../evals/scenarios.md#github-repository-config): 보고된 문구를 원본의 설정 검사·호출 순서와 대조함. 원인은 형식/건수 검사 범위로 좁혔으나 구체 입력 원인은 미확정. 문서·링크·diff만 점검하고 실행 코드·Prompt·검사기는 변경하지 않았으며 기존 시험을 반복하지 않음. 앞선 [DB 저장 PASS](../evals/scenarios.md#github-storage-check)는 유지함.
 
 ## 갱신 규칙
 
