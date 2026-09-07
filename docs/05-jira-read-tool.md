@@ -166,7 +166,7 @@ v0.1.1에서 완료한 전체 표시·비교·필터·펼치기·원문·건수 
 
 <a id="jira-mvp-usability"></a>
 
-### v0.1.4 조회 카드 사용성 — Git 준비본
+### v0.1.4 조회 카드 사용성
 
 MVP에서는 기존 Jira Rich UI 한 곳의 표현과 조작을 보완합니다. 기존 반응형 배치·집계·조회 범위·후속 질문 계약은 유지합니다.
 
@@ -175,6 +175,6 @@ MVP에서는 기존 Jira Rich UI 한 곳의 표현과 조작을 보완합니다.
 - 선택 프로젝트의 이슈를 아직 받지 않았다면 기존 프로젝트 조회 질문 버튼을 안내합니다. 실제 0건·목록 실패의 빈 결과 영역에는 초기화 버튼을 추가하지 않습니다.
 - 목록 실패는 목록 위치에서도 오류 색과 글로 표시하고, 실패 프로젝트의 선택 버튼을 해당 오류 설명과 접근성 속성으로 연결합니다. 상단은 **조회 시각 · 자동 갱신 안 됨**으로 표시해 저장된 카드와 현재 상태를 혼동하지 않게 합니다.
 
-Tool UI의 [조회 표](https://www.tool-ui.com/docs/data-table)·[설계 원칙](https://www.tool-ui.com/docs/design-guidelines), assistant-ui의 [오류 표현](https://www.assistant-ui.com/elements/tool-error)에서 필요한 패턴만 참고해 기존 HTML로 구현했습니다. 외부 코드 복사·라이브러리·CDN·추가 모델 호출·공통 UI 계층은 없습니다. GitHub·Confluence의 텍스트 조회와 첫 화면·온보딩 보류도 유지합니다.
+Tool UI의 [조회 표](https://www.tool-ui.com/docs/data-table)·[설계 원칙](https://www.tool-ui.com/docs/design-guidelines), assistant-ui의 [오류 표현](https://www.assistant-ui.com/elements/tool-error)에서 필요한 패턴만 참고해 기존 HTML로 구현했습니다. 외부 코드 복사·라이브러리·CDN·추가 모델 호출·공통 UI 계층은 없습니다. 첫 화면·온보딩 보류는 유지하며 연동별 적용 상태는 [STATUS](STATUS.md)를 따릅니다.
 
 사내 적용은 위 [후속 질문 적용 안내](#jira-followup-actions)에 묶습니다. 기존 대시보드에서 조건을 조합해 빈 목록을 만든 뒤 초기화가 되는지, 원문 버튼이 해당 이슈를 새 창으로 여는지만 추가 확인하면 됩니다. 실패를 만들기 위해 계정·권한을 바꾸지 않습니다. 사외 검증과 실제 화면 확인의 제한은 [검증 기록](../evals/jira-offline.md#mvp-usability)을 따릅니다.
