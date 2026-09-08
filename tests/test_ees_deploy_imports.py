@@ -1,8 +1,9 @@
-"""Fixed import probes use standard-library fixtures, never the real app."""
+"""Import probes use stdlib fixtures plus an opt-in real NLTK check, never the app."""
 
 import importlib.util
 import io
 import json
+import ntpath
 import os
 from pathlib import Path
 import subprocess
@@ -62,14 +63,59 @@ class ImportProbeTests(unittest.TestCase):
 
     def test_environment_excludes_registered_values_proxies_and_python_hooks(self):
         source = {"SystemRoot": "C:/Windows", "PATH": "loader-path", "TEMP": "temp-directory",
+                  "HOME": "profile-home", "USERPROFILE": "profile-directory", "APPDATA": "profile-roaming",
+                  "LOCALAPPDATA": "profile-local", "HOMEDRIVE": "C:", "HOMEPATH": "/Users/ees-profile",
                   "DATA_DIR": "SYNTHETIC_SECRET", "WEBUI_SECRET_KEY": "SYNTHETIC_SECRET",
                   "HTTP_PROXY": "SYNTHETIC_SECRET", "HTTPS_PROXY": "SYNTHETIC_SECRET",
-                  "PYTHONPATH": "SYNTHETIC_SECRET", "HOME": "SYNTHETIC_SECRET",
+                  "PYTHONPATH": "SYNTHETIC_SECRET", "PYTHONHOME": "SYNTHETIC_SECRET",
                   "SSL_CERT_FILE": "SYNTHETIC_SECRET", "NLTK_DATA": "SYNTHETIC_SECRET"}
         with patch.dict(os.environ, source, clear=True):
             # Windows normalizes os.environ keys to uppercase.
             self.assertEqual({key.upper(): value for key, value in PROBE._environment().items()},
-                             {key.upper(): source[key] for key in ("SystemRoot", "PATH", "TEMP")})
+                             {key.upper(): source[key] for key in (
+                                 "SystemRoot", "PATH", "TEMP", "HOME", "USERPROFILE", "APPDATA",
+                                 "LOCALAPPDATA", "HOMEDRIVE", "HOMEPATH")})
+
+    def test_windows_home_expansion_survives_profile_filtering(self):
+        # ntpath exercises the Windows expansion rules on either test platform.
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(ntpath.expanduser("~/"), "~/")
+        for profile in ({"USERPROFILE": "C:/Users/ees-profile"},
+                        {"HOMEDRIVE": "C:", "HOMEPATH": "/Users/ees-profile"}):
+            with self.subTest(profile_fields=tuple(profile)):
+                with patch.dict(os.environ, profile, clear=True):
+                    filtered = PROBE._environment()
+                with patch.dict(os.environ, filtered, clear=True):
+                    self.assertEqual(ntpath.normpath(ntpath.expanduser("~/")),
+                                     ntpath.normpath("C:/Users/ees-profile"))
+
+    @unittest.skipUnless(os.environ.get("EES_RUN_REAL_NLTK_TEST") == "1", "opt-in real NLTK dependency check")
+    def test_real_nltk_import_completes_with_profile_environment(self):
+        with patch.object(PROBE, "WATCHDOG_SECONDS", 10), patch.object(PROBE, "PARENT_SECONDS", 15):
+            result = PROBE._measure(sys.executable)
+        self.assertEqual(result["status"], "completed", result)
+        self.assertTrue(result["import_completed"])
+        self.assertFalse(result["cleanup_unverified"])
+
+    @unittest.skipUnless(os.name == "nt" and os.environ.get("EES_RUN_REAL_NLTK_TEST") == "1",
+                         "Windows real NLTK profile regression")
+    def test_real_nltk_downloader_without_profile_reproduces_value_error(self):
+        # First import normally, then remove both profile and existing corpus
+        # directory fallbacks. This exercises NLTK's own implementation without
+        # requiring a particular runner's corpus installation or copying source.
+        statement = '''import nltk
+import os
+nltk.data.path.clear()
+for key in ("HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "HOMEDRIVE", "HOMEPATH"):
+    os.environ.pop(key, None)
+nltk.downloader.Downloader()'''
+        with patch.object(PROBE, "_program", return_value=self.program(statement, timeout=10)), \
+                patch.object(PROBE, "PARENT_SECONDS", 15):
+            result = PROBE._measure(sys.executable)
+        self.assertEqual(result["status"], "import_failed", result)
+        self.assertIn("ValueError", result["error_types"])
+        self.assertTrue(any(frame.startswith("nltk/downloader.py:") for frame in result["last_error_frames"]))
+        self.assertFalse(result["cleanup_unverified"])
 
     def test_only_self_times_are_summed_and_unknown_names_are_hidden(self):
         stderr = "\n".join([

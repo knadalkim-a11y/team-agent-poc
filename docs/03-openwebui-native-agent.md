@@ -644,17 +644,19 @@ v2는 새 실패의 기록된 이유·실제 health 검사 경과 시간·설정
 
 다음 재배포를 안내하기 전에 **가설·필요한 증거·성공 조건·중단/복구 조건**을 정합니다. GPT가 외부 코드·합성 검사를 처리하고, 사내에서만 가능한 독립 검사는 짧은 명령 한 번으로 묶습니다. 추가 왕복은 이전 결과에 따라 달라지는 검사에만 사용합니다. 별도 진단 서비스·상시 수집·실제 DB를 공유하는 병렬 앱은 추가하지 않습니다.
 
-Diagnose v2 결과 수신 뒤 현재 검사는 아래 고정 import 비교입니다. **사내 장애 원인은 여전히 미확인이고, EES 전환 성공은 별도 확인 대상입니다.** 아래 날짜/실패 시각에 맞춘 이전 수동 진단·캐시 절차는 과거 경위이며 처음부터 반복하지 않습니다.
+Diagnose v2 뒤 실행한 고정 import 비교 결과까지 수신했습니다. 현재 다음 행동은 [기존 결과 후속 확인](#ees-import-followup)이며 재검사를 요청하지 않습니다. **사내 장애 원인은 여전히 미확인이고, EES 전환 성공은 별도 확인 대상입니다.** 아래 날짜/실패 시각에 맞춘 이전 수동 진단·캐시 절차는 과거 경위이며 처음부터 반복하지 않습니다.
 
 <a id="ees-import-probe"></a>
 
 **기존/후보 NLTK import 비교:** 2026-09-08에 받은 v2 결과는 추정 후보 로그 전체 10,228바이트에서 KeyboardInterrupt만 확인했고 종료 위치는 NLTK → scikit-learn → pandas → importlib의 파일 조회 경로였습니다. 이 위치만으로 pandas 결함이나 파일 접근 지연을 확정하지 않습니다. 이미 빠르게 통과한 NumPy 단독 검사·전체 캐시 작업은 반복하지 않습니다. [수신 근거](../evals/scenarios.md#ees-import-probe).
 
+**현재는 재실행 보류:** 이후 받은 기존 `import_failed/11.157초`·후보 `parent_timeout_cleanup_unverified/70.0초`는 아래 [기존 결과 후속 확인](#ees-import-followup)으로 이어갑니다. 후보 검사 자식의 상태를 확인하기 전에 아래 ProbeImports 실행 블록이나 Deploy를 다시 실행하지 않습니다.
+
 - 가설: 같은 의존성 로딩을 분리해도 후보에서 지연이 재현되는지 확인합니다. 두 환경의 실행 시간·import별 self 시간·시간 제한 시 호출 위치를 함께 수집합니다.
-- 범위: 준비된 동일 후보를 사용해 고정 `import nltk`만 기존/후보 Python에서 순차 실행합니다. 앱 entry point를 호출하거나 운영 DATA_DIR·키·등록 환경을 자식에 전달하지 않습니다. 기존 관리 잠금으로 동시 배포를 막고 임시 작업 폴더와 필요한 OS 환경만 사용합니다.
+- 범위: 준비된 동일 후보를 사용해 고정 `import nltk`만 기존/후보 Python에서 순차 실행합니다. 앱 entry point를 호출하거나 운영 DATA_DIR·키·등록 환경을 자식에 전달하지 않습니다. 기존 관리 잠금으로 동시 배포를 막고 임시 작업 폴더와 필요한 OS 환경을 사용합니다. HOME·USERPROFILE·APPDATA·LOCALAPPDATA·HOMEDRIVE·HOMEPATH는 사용자 폴더 해석에 필요해 유지하며 이 실제 경로를 외부 요약에 출력하지 않습니다.
 - 한도: 자식이 site 처리 전에 60초 자가 종료를 예약합니다. 부모는 각 70초까지 감시하고 한도 초과 시 최대 2초의 회수 대기가 붙습니다. 부모 시간 제한/정리 미확인이면 다음 비교를 중단합니다. 검사 전체는 약 2분 범위이며 배포·복구 대기가 붙지 않습니다. 결과가 느리다는 이유로 자동 재시도하지 않습니다.
 
-기존 운영 PowerShell 창에서 다음 블록 한 번을 실행합니다. 새 ZIP·Prepare·Deploy는 필요하지 않습니다.
+아래는 최초 import 비교 때 사용한 실행 절차입니다. **현재는 실행하지 않으며**, 이미 받은 결과의 [후속 확인](#ees-import-followup)을 따릅니다. 새 ZIP·Prepare·Deploy는 필요하지 않습니다.
 
 ```powershell
 & {
@@ -671,7 +673,7 @@ Diagnose v2 결과 수신 뒤 현재 검사는 아래 고정 import 비교입니
 
 상세 비식별 결과는 기존 관리 상태 폴더의 `last-import-probe.json`에 실행 UTC 시각·후보 커밋과 함께 최근 한 건을 저장합니다. `saved=yes`일 때 저장을 확인한 것이며, `saved=no`면 현재 콘솔 결과를 전달하고 이전 파일을 이번 결과로 간주하지 않습니다. 후속 정보가 꼭 필요하면 이 저장 결과에서 필요한 항목만 조회하도록 안내하고 측정을 반복하지 않습니다. 새 조회 서비스나 별도 보고 명령은 추가하지 않습니다.
 
-**이전 버전으로 이미 실행했다면 재실행하지 않습니다.** 현재 화면에서 original/candidate 각각의 `status`와 `elapsed_seconds`, 네 값만 타이핑하면 첫 비교 판단에 충분합니다. 새 저장/전달 형식을 적용하려고 이미 한 검사를 반복하지 않습니다.
+**이전 버전으로 실행한 status·elapsed_seconds 네 값은 이미 받았습니다.** 새 저장/전달 형식을 적용하려고 검사를 반복하거나 같은 값을 다시 옮기지 않습니다. 현재 필요한 항목은 아래 [후속 확인](#ees-import-followup)에 한정합니다.
 
 `timed_import_events`는 계측된 import 시도 수이며 성공한 모듈 수가 아닙니다. `self`는 하위 import를 제외한 시간이므로 합산할 수 있지만 미완료 시도의 시간은 빠질 수 있습니다. `cumulative`를 합산하지 않습니다. 시간 제한 stack은 종료 순간의 관찰이며 전체 시간 동안 같은 곳에 있었다는 증거가 아닙니다. [Python importtime](https://docs.python.org/3.11/using/cmdline.html#cmdoption-X), [자가 종료](https://docs.python.org/3.11/library/faulthandler.html#faulthandler.dump_traceback_later).
 
@@ -684,6 +686,29 @@ Diagnose v2 결과 수신 뒤 현재 검사는 아래 고정 import 비교입니
 | 부모 제한/정리 미확인 | 진단 자체가 미완료. 추가 실행을 멈추고 검사 자식의 상태부터 확인 |
 
 성공 조건은 두 환경의 비교 근거 확보입니다. 앱 전환 성공이나 원인 해소를 의미하지 않습니다. `-I -S -B` 뒤 `site.main()`을 수행하므로 사용자 site·PYTHON 환경·작업 폴더 등이 실제 서버와 다릅니다. pyc 쓰기는 막지만 설치된 모듈/site 코드의 일반적인 부작용까지 차단하는 격리 환경은 아닙니다. 코드는 서버 기동·다운로드·재설치·캐시 복구를 호출하지 않습니다. 임시 로그·관리 잠금·최근 비식별 검사 결과 파일을 사용하며 기존 배포 기록·프로그램·DB·키는 수정하지 않습니다.
+
+<a id="ees-import-followup"></a>
+
+**기존 import 결과의 후속 확인:** 11.157초/70.0초 결과는 앞서 안내한 기본 순서(original, candidate)로 해석합니다. 기존 `import_failed`는 분리한 검사 자식의 오류이며 운영 서버 장애를 뜻하지 않습니다. 후보의 부모 시간 제한은 실제 검사 자식의 잔존을 확정하지 못한 상태로, 60초 watchdog 종료와 구분합니다. 원본 서버를 종료하거나 같은 검사를 반복하지 않습니다.
+
+기존 필터가 모든 사용자 폴더 변수를 제외한 것은 진단 결함입니다. NLTK는 import 도중 Downloader를 초기화하며 기존 corpus 경로를 선택하지 못하면 APPDATA 또는 사용자 홈 경로를 찾습니다. Windows에서 이 변수를 모두 빼면 ValueError를 유발할 수 있어 일반 프로필 변수는 보존하도록 수정했습니다. 이번 사용자의 실제 오류가 그것인지는 아직 미확인이고, 후보 70초와 과거 EES 600초 실패의 원인으로 확대하지 않습니다. [NLTK 소스](https://www.nltk.org/_modules/nltk/downloader.html#Downloader.default_download_dir), [Windows 홈 경로 처리](https://docs.python.org/3.11/library/os.path.html#os.path.expanduser).
+
+현재 화면에서 **기존 `error_types`**와 **후보의 `watchdog_armed` → `import_entered` → `import_completed` → `watchdog_dump_seen`** 네 값을 한 묶음으로 확인합니다. true/false는 T/F로 줄여 `O=오류명 C=T/T/F/F`처럼 타이핑하면 됩니다. 모르는 값은 `?`로 남기고 새 저장 형식을 얻으려고 재실행하지 않습니다.
+
+후보 검사 프로세스 관측 여부는 기존 PowerShell 창에서 아래 읽기 전용 블록으로 확인합니다. Python/서버를 새로 실행하거나 프로세스를 종료하지 않고 숫자만 출력합니다.
+
+```powershell
+& {
+  try {
+    $eesProbeProcesses = @(Get-CimInstance Win32_Process -Filter "Name='python.exe'" -ErrorAction Stop)
+    $eesProbeMatches = @($eesProbeProcesses | Where-Object { $_.CommandLine -like '*EES_IMPORT_WATCHDOG_ARMED*' }).Count
+    $eesProbeUnknown = @($eesProbeProcesses | Where-Object { [string]::IsNullOrWhiteSpace($_.CommandLine) }).Count
+    "P=$eesProbeMatches U=$eesProbeUnknown"
+  } catch { 'P=? U=?' }
+}
+```
+
+P는 해당 검사 표식이 있는 python.exe 수이며 launcher/실제 자식이 각각 잡힐 수 있습니다. U는 명령행을 읽을 수 없는 python.exe 수입니다. P가 양수면 검사가 관측된 것이고, P=0/U>0 또는 조회 실패는 판단 불가입니다. P=0/U=0은 그 순간 조회한 목록에서 발견하지 못했다는 뜻이며 과거의 종료 시점·원인을 증명하지 않습니다. 표식과 python.exe 이름을 함께 사용해 운영 서버나 PowerShell 자신의 명령문을 집계하지 않습니다. [조회 정보의 범위](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-process). `O/C`와 `P/U` 두 줄만 전달하며 후속 정리/검사는 이 결과에 따라 정합니다.
 
 <a id="ees-deployment-diagnostics"></a>
 

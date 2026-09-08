@@ -886,6 +886,18 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 로컬 검증: Linux/Python 3.12.13에서 운영/연동 43개 통과, import 전용 21개 중 Windows 전용 1 skip을 제외하고 통과함. 대표 SEND 예시는 45자로 전체 출력보다 타이핑 범위를 줄였으며 허용 오류명을 두 환경에 모두 넣은 경계에서도 180자 이하를 검사함. 상태/시간 미확인·부분 읽기·정리 미확인·저장 실패·오래된 파일 유지·하드링크 보호 및 배포 기록 보존을 확인함. 문서 25개/링크 562개·오류/검토 후보 0과 diff 검사 통과. 실제 사내 타이핑 사용성과 NLTK 검사 결과는 미확인임.
 - 원격 검증/반영: 원본 `dba8b78801192acf5eff1a9a2431b4c5cb4adac2`의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34285520053) 두 작업이 성공함. 기존 실제 자식/venv/DPAPI·오프라인 준비·PowerShell 파싱과 새 전달/저장 경계 시험을 포함한 결과임. 독립 설계 및 구현 검토 후 [PR #12](https://github.com/knadalkim-a11y/team-agent-poc/pull/12)를 `fce4aebd7005a35c412e40922d71336852439ca3`로 main에 병합함. 사내 실행/타이핑 결과는 미수신이며 검사/서비스를 새로 실행하지 않음.
 
+<a id="ees-import-followup"></a>
+
+### 기존 import 실패·후보 정리 미확인과 검사 환경 수정 — 2026-09-08
+
+- 사용자 보고: 이미 검사했으며 첫 결과 status=import_failed/elapsed_seconds=11.157, 두 번째 parent_timeout_cleanup_unverified/70.0임. 기본 실행 순서에 따라 original/candidate로 관리하고 전사 오탈자는 재입력 요구 없이 의미대로 읽음. 타이핑/SEND·상세 저장 보완 전에 수행한 결과이므로 새 저장 파일이 있다고 가정하지 않음. 기존 예외 종류·후보 진행 표식·정확한 사내 코드 SHA·현재 검사 자식 잔존은 미확인임.
+- 판단: 기존 실패는 임시 검사 자식의 실패로 운영 서버 장애의 증거가 아님. 후보는 부모가 70초 한도 뒤 소유 launcher 종료를 시도했지만 Windows 실제 자식의 종료를 확인하지 못한 상태임. 실제 잔존을 단정하거나 60초 watchdog이 정상 작동한 timeout으로 바꾸지 않음. 둘을 성공/느림 비교로 요약할 수 없으며 원본 서버 종료·추가 배포·동일 검사 반복을 요구하지 않음.
+- 발견한 검사 결함: 기존 `_environment`가 APPDATA·USERPROFILE·HOME·HOMEDRIVE/HOMEPATH를 모두 제외함. [NLTK 3.9.2 소스](https://www.nltk.org/_modules/nltk/downloader.html#Downloader.default_download_dir)의 import 시 Downloader 초기화와 기본 경로 선택을 대조하면, 기존 쓰기 가능 corpus 경로가 없고 Windows 홈을 해석하지 못할 때 ValueError가 발생할 수 있음. [Python 3.11 Windows 홈 해석](https://docs.python.org/3.11/library/os.path.html#os.path.expanduser)도 USERPROFILE 또는 HOMEDRIVE/HOMEPATH를 사용함. 실제 사내 NLTK 버전·이번 예외/프레임은 받지 않았으므로 사용자 원본 오류를 이 ValueError로 확정하지 않으며 후보 70초/과거 배포 600초의 원인으로 확대하지 않음.
+- 수정 범위: 일반 OS 프로필 HOME·USERPROFILE·APPDATA·LOCALAPPDATA·HOMEDRIVE·HOMEPATH를 두 검사 환경에 유지함. DATA_DIR·앱 비밀키·프록시·PYTHON 훅 제외와 경로 비출력, 기동/중단 한도·기존 서버/배포 기록·DB/키는 유지함. 기존 stdlib/가짜 nltk fixture만으로 실제 NLTK 초기화 결함을 놓쳤으므로 CI에 시험용 nltk==3.9.2를 추가하고 실제 import와 Windows 프로필 제거 후 Downloader ValueError 재현을 검사함. 이 시험 버전을 사내 패키지 변경이나 전체 앱 기동 검증으로 취급하지 않음.
+- 후속 확인: 기존 화면의 original error_types 및 후보 watchdog_armed/import_entered/import_completed/watchdog_dump_seen, 현재 읽기 전용 CIM의 P/U 두 숫자를 한 묶음으로 받음. 독립 검토에서 import 완료 뒤 종료 지연을 구분하기 위해 completed 표식을 포함하고, CIM은 python.exe+검사 전용 표식으로 PowerShell 자신의 명령문/원본 서버를 제외함. 명령행 미열람/조회 오류는 미확인으로 남기고 P=0/U=0도 그 시점의 조회 범위로만 해석함. 새 수집 서비스·자동 종료·검사 실행은 추가하지 않음. [실행과 타이핑 형식](../docs/03-openwebui-native-agent.md#ees-import-followup).
+- 개발 기준: 최신 main `0a0d7721f85d56b024469b7155f93bc0df4364c5`, 관련 열린 PR 없음, 로컬 전체 tree 일치 상태에서 시작함. Workflow 변경으로 main의 기존 배포물 생성 작업이 실행되더라도 사내 후보 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`을 교체하거나 새 Prepare를 안내하지 않음.
+- 로컬 검증: Linux/Python 3.12.13에서 import 전용 24개 중 21개 통과, 실제 NLTK opt-in/Windows 전용 3개는 미실행으로 skip함. Windows 홈 경로 해석·환경 필터와 기존 계측/종료/전달 경계 시험을 확인함. 실제 NLTK 및 Windows 프로세스 시험은 원격 CI에서 확인할 예정이며 로컬 PowerShell 조회는 미실행임. 독립 검토가 찾은 가이드의 과거 실행 지시와 현재 보류 안내 충돌을 수정함.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **사내→외부 결과 전달은 타이핑만 가능하다는 제약을 반영함.** 전체 출력/사진 요청을 철회하고 ProbeImports 끝에 상태·시간 중심의 SEND 한 줄, 사내에는 상세 비식별 결과 저장을 main에 반영함. [전달 제약·검증](../evals/scenarios.md#ees-typed-handoff). 기존 original 복구/프로세스 식별 확인과 후보 기동 원인 미확정은 유지함.
-- 다음 작업 하나: **이미 검사했다면 original/candidate의 status·elapsed_seconds 네 값만 받는다.** 아직 미실행이면 Update·ProbeImports 후 SEND 한 줄만 타이핑한다. [실행과 해석](03-openwebui-native-agent.md#ees-import-probe). 새 출력 형식 때문에 재검사하지 않으며 상세 정보는 저장 결과에서 필요한 항목만 확인함.
+- 이번 작업: **기존 ProbeImports 결과를 수신함: 기본 순서 기준 original import_failed/11.157초, candidate parent_timeout_cleanup_unverified/70.0초.** 검사 도구의 사용자 폴더 환경 제거 결함을 발견해 수정하고 실제 NLTK 검증을 추가함. 이번 원본 예외와의 인과는 아직 미확인이며 후보 자식의 잔존도 확정하지 않음. [수신·수정 근거](../evals/scenarios.md#ees-import-followup).
+- 다음 작업 하나: **재검사 없이 기존 화면의 original error_types·후보 watchdog/진행 표식과 읽기 전용 P/U 집계를 한 묶음으로 받는다.** [짧은 후속 확인](03-openwebui-native-agent.md#ees-import-followup). 검사 자식의 상태 확인 전 ProbeImports/Deploy/서버 재기동을 반복하지 않으며 타입·T/F·숫자만 타이핑한다.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -21,7 +21,7 @@ Diagnose 운영 코드 원본은 `70e7b9f268029bbc161f03b5f364130d2cd24239`, [PR
 
 Diagnose v2 운영 코드 원본은 `2cb6b55f8ff2dc38ecd8a2ca39d30a7e6951d876`이며 [PR #10](https://github.com/knadalkim-a11y/team-agent-poc/pull/10)의 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34281735662)는 성공했습니다. main 병합은 `50c2a1f7bcaa80b6ee64252bd74bbece30fb098d`입니다. 사내 v2 실행 결과를 수신했으며 전체 checkout SHA 직접 대조·추가 Deploy는 미실행입니다. 기존 준비 프로그램 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`과 DB·키·CA 선택·대기 한도를 유지하며, 프로그램 ZIP을 다시 준비하지 않습니다.
 
-ProbeImports의 타이핑 전달 보완 원본은 `dba8b78801192acf5eff1a9a2431b4c5cb4adac2`이며 [PR #12](https://github.com/knadalkim-a11y/team-agent-poc/pull/12)의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34285520053)는 성공했습니다. main 병합은 `fce4aebd7005a35c412e40922d71336852439ca3`입니다. 기본 비교의 PR #11 근거는 [기존 기록](../evals/scenarios.md#ees-import-probe)에 보존하며, 사내 검사 결과는 아직 받지 않았습니다. 기존 프로그램 ZIP의 Deploy Commit은 계속 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`입니다.
+ProbeImports의 타이핑 전달 보완 원본은 `dba8b78801192acf5eff1a9a2431b4c5cb4adac2`이며 [PR #12](https://github.com/knadalkim-a11y/team-agent-poc/pull/12)의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34285520053)는 성공했습니다. main 병합은 `fce4aebd7005a35c412e40922d71336852439ca3`입니다. 기본 비교의 PR #11 근거는 [기존 기록](../evals/scenarios.md#ees-import-probe)에 보존하며, 타이핑 출력 보완 전에 실행한 사내 검사 결과를 수신했습니다. 전체 사내 checkout SHA와 실제 예외 종류는 아직 대조하지 않았습니다. 기존 프로그램 ZIP의 Deploy Commit은 계속 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`입니다.
 
 <a id="resume-branch"></a>
 
