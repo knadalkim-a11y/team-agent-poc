@@ -8,7 +8,7 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **잔여 캐시 집계 26713/26700/11/2/0/0과 뒤이은 Deploy 실패·기존 프로그램 복구 성공을 보고받음.** 마지막 실패는 2026-09-08T07:35:31Z, health_check/process이며 이번 후보의 실제 대기 시간·로그는 미확인임. [증거](../evals/scenarios.md#ees-diagnose-once). 수동 중간 확인 부담을 줄이는 Diagnose 명령을 준비하며 EES 전환은 미완료임.
+- 이번 작업: **잔여 캐시 집계 26713/26700/11/2/0/0과 뒤이은 Deploy 실패·기존 프로그램 복구 성공을 보고받음.** 마지막 실패는 2026-09-08T07:35:31Z, health_check/process이며 이번 후보의 실제 대기 시간·로그는 미확인임. [증거](../evals/scenarios.md#ees-diagnose-once). 수동 중간 확인 부담을 줄이는 Diagnose 명령을 main에 반영했으며 EES 전환은 미완료임.
 - 다음 작업 하나: **Update 후 Diagnose 한 번의 결과로 최신 후보 로그를 검토한다.** [실행·해석](03-openwebui-native-agent.md#ees-diagnose-once). 캐시 배치·Deploy를 반복하지 않고, 로그에 근거해 필요한 후속 조치를 묶음으로 결정함. 두 SyntaxError의 기동 영향·프록시/허용 목록 관련성은 미확인으로 유지함.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
@@ -16,6 +16,8 @@
 진단 보완 코드 원본은 `1ac1c33cf50cb3135f63c7ed8ac5ccaf22cdab30`이며 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34184761238) 성공을 확인했습니다. PR #7의 main 병합과 사내 `c5f1690...` Update/Status 실행은 사용자 보고로 확인했으며 전체 SHA·등록 내용 직접 대조는 미실행입니다. 프로그램 후보 ZIP 원본 및 EES 전환 성공 여부와 구분합니다.
 
 CA 옵션 운영 코드 원본은 `6a2638be157c125dd12ad70c95de075cbe77d1ce`, main 병합은 `d9cb7cd87d0c93dec6485407b280aa04b505e4a3`입니다. [PR의 Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34190121123)는 성공했습니다. Update/옵션을 포함한 명령 안내 뒤 위 배포 실패를 보고받았으며, 실제 명령·checkout SHA·후보 환경 원문은 직접 대조하지 않았습니다. 이 SHA를 프로그램 Deploy의 Commit으로 사용하지 않습니다.
+
+Diagnose 운영 코드 원본은 `70e7b9f268029bbc161f03b5f364130d2cd24239`, [PR #9](https://github.com/knadalkim-a11y/team-agent-poc/pull/9) 병합은 `36974ce45ff46a1e7fc830c2325873f14546f8e5`입니다. [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34201413944)는 성공했으며 사내 Update/Diagnose 실행은 대기입니다. 프로그램 후보의 Deploy Commit과 구분합니다.
 
 <a id="resume-branch"></a>
 

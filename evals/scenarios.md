@@ -843,6 +843,8 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - [Diagnose](../docs/03-openwebui-native-agent.md#ees-diagnose-once)는 기존 관리 명령에 추가한 읽기 전용 로그 요약임. 후보 로그 선택은 Windows 생성 시각에 근거한 추정이며 현재 복구 로그와 이후 재기동을 구분함. 기동/인증서/네트워크 고정 마커·오류 종류·공개 하위 경로/stdlib/frozen traceback과 생략·부분 읽기 여부를 한 번에 전달함. 원문 오류·URL·환경 값·사용자 경로는 출력하지 않고 앱 import/기동·추가 통신·캐시/상태 쓰기는 없음.
 - 검증: Linux/Python 3.12.13에서 로그 요약 시험 15개·운영 CLI/전환 회귀 시험 27개 PASS. 최신 실패와 복구 로그 구분·동일 초/동일 생성 시각·후속 기동/잠금/상태 경합·링크/하드링크·읽기 중 변경·4 MiB 부분 읽기·공개 하위 경로/stdlib/frozen/SyntaxError 위치·합성 비밀 원문 비출력을 확인함. `python -I -S -B scripts/manage_ees.py --help` 성공으로 site 초기화 없이 명령 import/파싱을 확인함. 독립 검토에서 in절 없는 SyntaxError 위치 누락을 발견·보완하고 관련 시험 통과 후 추가 차단 사항 없음. 문서 점검 25개/링크 550개·오류/검토 후보 0과 diff 검사 PASS. 생성 시각 시험은 합성 주입이며 Windows 실제 생성 시각·PowerShell 실행 및 사내 Diagnose·최신 후보 로그 해석·EES 전환 성공은 이 로컬 검증에서 미실행임.
 
+- 원격 검증: 코드 원본 `70e7b9f268029bbc161f03b5f364130d2cd24239`의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34201413944) 두 작업이 성공함. 기존 배포 경계/실제 자식 수명 시험과 새 로그 시험·운영 CLI·Windows PowerShell 구문 검사·문서 검사를 포함함. [PR #9](https://github.com/knadalkim-a11y/team-agent-poc/pull/9)는 `36974ce45ff46a1e7fc830c2325873f14546f8e5`로 main에 병합됨. 실제 사내 PowerShell 실행·Windows 생성 시각에 의한 이번 후보 연결·EES 기동 성공은 여전히 미확인임.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
