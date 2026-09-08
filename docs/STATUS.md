@@ -9,7 +9,7 @@
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
 - 이번 작업: **후보 Deploy의 health_check 실패와 기존 프로그램 자동 복구 성공을 사용자 보고로 확인함.** Diagnostics의 recovery_status=succeeded와 기존 프로그램 재기동·데이터 복원/교체 없음 안내를 받음. EES 전환은 미완료이며 기동 중 종료인지 응답 대기 만료인지는 아직 미확정. [이번 실패·복구 보고](../evals/scenarios.md#ees-retransition-health-failure). 사내 운영 코드의 마지막 보고는 `head=c5f1690...`이며 전체 checkout/설정 직접 대조는 미실행. [직전 상태](../evals/scenarios.md#ees-retransition-ready), [준비 후보](../evals/scenarios.md#ees-prepare-completed).
-- 다음 작업 하나: **이번 실패 후보의 기동 로그를 사내에서 읽어 오류 종류·기동 완료 여부를 확인한다.** 복구 후 현재 process.log_file은 기존 프로그램 로그이므로 생성 시각과 실패 시각으로 직전 후보 로그를 좁힌다. 외부에는 주소·키·개인 경로를 뺀 필요한 오류 요지만 받으며, 결과 전에는 Deploy·Start/Stop·Prepare·Init·DB 복원이나 대기 시간 증가를 반복하지 않음. [진단 안내](03-openwebui-native-agent.md#ees-deployment-diagnostics).
+- 다음 작업 하나: **받은 importlib/KeyboardInterrupt 바로 앞의 패키지 파일·코드 2~4줄을 같은 로그 출력에서 확인한다.** 현재 traceback은 모듈을 읽던 중 중단된 흔적이며 관리 스크립트의 후보 종료로도 생길 수 있어 원인 패키지·기동 지연 이유는 미확정임. site-packages 앞의 개인 경로·사내 주소·키는 제외함. 같은 로그 명령·Deploy·Start/Stop·Prepare·Init·DB 복원이나 대기 시간 증가는 반복하지 않음. [진단 안내](03-openwebui-native-agent.md#ees-deployment-diagnostics).
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -90,7 +90,7 @@
 
 ## 최근 점검
 
-최신 main `88ae12b`·열린 PR 없음·로컬 무변경에서 같은 커밋의 지침/상태와 health 실패·복구 경로를 대조함. 이번 후보 로그를 복구 후 기존 프로그램 로그와 혼동하지 않는 읽기 절차를 한정해 검토함. [결과·범위](../evals/scenarios.md#ees-retransition-health-failure). 문서만 갱신하며 코드 시험/CI·사내 health/데이터/연동 검증은 반복하지 않음.
+최신 main `8c03023`·열린 PR 없음·로컬 tree 일치를 확인하고 후속 traceback을 후보 실행의 SIGBREAK 처리·자동 복구의 종료 경로와 대조함. 중단 흔적을 누락 패키지나 최초 실패 원인으로 단정하지 않고 같은 출력의 패키지 프레임만 추가 확인함. [결과·범위](../evals/scenarios.md#ees-retransition-health-failure). 문서 점검·diff 검사 통과. 코드 변경/시험·별도 독립 검토·사내 재기동은 없음.
 
 ## 갱신 규칙
 
