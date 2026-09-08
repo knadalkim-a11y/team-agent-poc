@@ -630,6 +630,14 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 실제 로컬 명령은 `python -m unittest discover -s tests -p test_ees_deploy_recover.py -v`, 결과 `Ran 13 tests in 0.086s / OK`. Python 패치 버전은 당시 따로 조회하지 않았음. `python -I scripts/ees_deploy_recover.py --help`로 전달한 CLI 진입점도 확인함.
 - [CI 34178389854](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34178389854): 코드 원본 `15cd88b5a99142c07c4d8cca4dcdd957354d48cb`, Windows/Linux 전달 검사와 패키징 모두 success. 두 OS 로그에서 이번 복구 시험 **각 13/13 PASS, skip 0**을 확인함. 프로그램 wheel은 바꾸지 않아 이번 패키징은 Agent Pack 전용이며 사내에서는 기존 `4a8779b`의 프로그램 ZIP을 유지함. CI 성공 증거만 추가하는 마무리 커밋은 문서/diff를 확인하고 코드 CI를 다시 실행하지 않음. 실제 사내 캐시 파일의 검증·복구 재준비 성공은 이후 사용자 실행 범위임.
 
+#### 사내 준비 성공 보고와 첫 전환 안내 — 2026-09-08
+
+- 사용자는 기존 서버 시작 명령을 다시 실행해 소켓 주소 중복 사용 오류를 보고했으며, 이어 기존 서버가 실행 중이고 WebUI에 정상 접속된다고 확인함. 관리 실행은 별도 프로세스이므로 PowerShell이 입력 대기여도 서버가 동작할 수 있음을 설명함. 오류를 기존 서버 장애나 재등록 필요로 확대하지 않음.
+- Git 갱신의 `create mode` 출력 뒤 ZIP 선택 창을 뒤늦게 발견해 선택했다고 보고함. 그동안은 파일 선택 대기였고 이후 준비 로그는 파일에 기록되는 구조임을 안내함. 사용자 대기 시간을 실제 패키지 설치 시간이나 기동 시간으로 기록하지 않음.
+- 후속 결과는 true / 약기한 원본 커밋 / false / EES 버전으로 보고됐고 복구 출력 순서에 따라 **prepared=true, server_changed=false, webui_version=0.11.3+ees.1**의 준비 성공으로 확인함. 고정 안내 커밋은 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`; 전체 SHA와 파일/로그 원문은 직접 대조하지 않음. 캐시 검증·복사·실패 후보 보존·준비 완료는 복구 명령 성공의 사용자 보고 범위이며 기존 antlr4 실패 기록을 보존함.
+- 다음은 동일 커밋의 Deploy이며 현재 관리 서버 정상 종료·DATA_DIR/키/설정 백업·EES 기동을 스크립트가 처리함. 수동 Ctrl+C/추가 serve·Init·Prepare·기존 health를 반복하지 않음. 기본 health 대기 300초를 유지하며 백업 시간은 이 제한과 별도임. 실제 전환 동안 접속 중단이 발생할 수 있음을 안내함.
+- Deploy의 예상 성공 출력은 active=true / source_commit / data_restored=false. 성공 후 강력 새로고침과 EES 이름/아이콘, 기존 계정의 대화·있는 Memory·등록한 모델/도구/스킬, 일반 대화 스트리밍 한 건만 함께 확인하도록 안내함. 실제 Deploy·UI/데이터 연속성은 아직 미실행이며 공통 자산 자동 동기화가 적용된 것으로 간주하지 않음. 이번에는 상태 문서 두 개와 문서/diff만 확인하며 코드 시험·CI·완료한 연동 시험을 반복하지 않음.
+
 
 ## 결과 기록
 

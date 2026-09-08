@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **antlr4-python3-runtime 4.9.3의 기존 캐시 wheel 한 개를 찾았다는 사용자 보고를 받음.** 해당 파일의 검증·별도 wheelhouse 복사·비활성 실패 후보 보존 이동·동일 버전 재준비를 [복구 명령](03-openwebui-native-agent.md#ees-offline-recovery)으로 묶음. 후보 Python 3.11.16의 앞선 의존성 해결 실패와 기존 등록·관리 기동 후 health true·HTTP 200 기록을 보존함. 캐시 검색 성공을 Prepare 성공으로 확대하지 않으며 EES 프로그램 전환은 아직 미실행. [실환경 기록](../evals/scenarios.md#ees-first-registration).
-- 다음 작업 하나: **사내에서 Git을 갱신하고 캐시 복구 명령으로 Prepare를 다시 진행한다.** [프로그램 ZIP](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172321176/artifacts/10036107795) 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`을 그대로 사용하며 새 ZIP 다운로드·재등록·기존 health/연동 시험을 반복하지 않는다. 복구는 첫 배포의 기존 original 환경에서만 지원하며 캐시를 임의 수정하거나 버전 고정·오프라인/바이너리 제한을 풀지 않음. `prepared=true`가 확인된 뒤 실제 Deploy와 변경 화면/데이터 연속성 확인을 진행한다.
+- 이번 작업: **사내 캐시 복구 뒤 EES 프로그램 준비 성공을 사용자 보고로 확인함.** 출력 순서상 `prepared=true`, 약기한 원본 커밋, `server_changed=false`, `webui_version=0.11.3+ees.1`을 보고받음. 안내 명령은 기존 프로그램 ZIP 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`을 고정하며 사내 출력의 전체 SHA·파일 원문은 직접 대조하지 않음. 앞선 antlr4 설치 실패와 캐시 복구 기록을 보존함. 기존 서버 접속 정상 보고가 있고 실제 EES 전환은 아직 미실행. [실환경 기록](../evals/scenarios.md#ees-first-registration).
+- 다음 작업 하나: **준비된 같은 원본 커밋으로 Deploy를 실행하고 변경 화면·기존 데이터 연속성을 확인한다.** 관리 명령이 현재 서버 정상 종료·기존 데이터/키/설정 백업·EES 기동을 처리함. 새 ZIP 다운로드·재등록·재준비·수동 서버 추가 기동·완료한 기존 health/연동 시험은 반복하지 않는다. Deploy 성공 후 기존 계정의 대화·저장 Memory·등록 항목과 EES 이름/아이콘·일반 대화 스트리밍 한 건을 확인함. 공통 자산 API 동기화는 후속 개발이며 현재 번들 자산은 자동 반영되지 않음.
 
 <a id="resume-branch"></a>
 
@@ -46,7 +46,7 @@
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | 팀 시연용 이름·소개·시작 질문 | 기존 모델 이름·소개·프로필 적용 안내, 제안 JSON 4개·짧은 팀원 안내 | 사용자 요청으로 준비 재개. 실제 UI 저장·로고 교체·팀원 전달은 미확인 | [시연 준비](../evals/scenarios.md#team-demo-customization), [이전 준비](../evals/scenarios.md#team-first-use-preparation), [당시 보류](../evals/scenarios.md#onboarding-deferred) | 현재 [제안 JSON](../agent-pack/ees-prompt-suggestions.json); 사내 적용 원본 없음 |
-| EES 프로그램·전달 도구 | 이름·아이콘 wheel/ZIP/Actions와 Windows 배포 명령; 기동 대기·첫 antlr4 캐시 복구 명령 | Plan 통과·antlr4 wheel 선택 실패 뒤 캐시 wheel 한 개 발견 보고. 복구 재준비·Deploy는 미실행. 기존 등록·관리 기동 후 health true/200 기록 유지 | [운영 명령](03-openwebui-native-agent.md#기존-windows-서버에-적용), [초기 등록·Prepare 실패 기록](../evals/scenarios.md#ees-first-registration), [CI 근거](../evals/scenarios.md#ees-program-deployment) | 등록 안내 원본 `c584928`; 사내 checkout SHA 직접 대조 미실행. [프로그램 ZIP](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172321176/artifacts/10036107795) 안내 원본 `4a8779b`, EES 프로그램 전환 미실행 |
+| EES 프로그램·전달 도구 | 이름·아이콘 wheel/ZIP/Actions와 Windows 배포 명령; 기동 대기·첫 antlr4 캐시 복구 명령 | 캐시 복구 후 prepared=true·server_changed=false·0.11.3+ees.1 보고. 준비 완료, Deploy 미실행. 기존 서버 접속 정상 보고 유지 | [운영 명령](03-openwebui-native-agent.md#기존-windows-서버에-적용), [초기 등록·준비 성공 기록](../evals/scenarios.md#ees-first-registration), [CI 근거](../evals/scenarios.md#ees-program-deployment) | 등록 안내 원본 `c584928`; 사내 checkout SHA 직접 대조 미실행. [프로그램 ZIP](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172321176/artifacts/10036107795) 안내 원본 `4a8779b`, 준비 성공 보고·전환 미실행 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 2026-09-07 두 지침 UI 저장 보고; 개정 후 P02 PASS, P03 창작 거절 부분 확인, P04~P10 미완료; 실행 시점은 평가표 | [P02~P10 재검증](../evals/scenarios.md#instruction-revision), [기존 지침 갱신](03-openwebui-native-agent.md#update-existing-instructions) | 전달·저장 안내 원본 [dfeb95f](https://github.com/knadalkim-a11y/team-agent-poc/commit/dfeb95fbf96cf6a2bb75a3ba75fac3bc92ed60fc); 등록 내용·사용자 추가 규칙·사내 checkout SHA 직접 대조는 미실행 |
 | 조회 경로 보완 | Prompt의 [현재 POC 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션 | 부분 적용 당시 C04·P02 정상·임베딩 오류 재발 없음 보고; 이번 전체 Prompt에도 포함해 저장 안내 | [실환경 결과](../evals/scenarios.md#결과-기록), [당시 소스 검토](../evals/confluence-offline.md#knowledge-routing) | 부분 추가 안내 원본 [28f526a](https://github.com/knadalkim-a11y/team-agent-poc/blob/28f526a39162e54f126f577554f8c15fdd5940f1/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로); 현재 전체 지침 안내 원본은 위 행. 부분 적용 당시 성공을 이번 개정 후 재평가로 간주하지 않음 |
 | 카드·후속 조회 지침 | 카드/답변 중복 억제, Confluence 본문 조회, Jira/GitHub의 실제 ID·후속 범위 지침 | 2026-09-07 전체 System Prompt 3블록 전달 후 저장 및 업데이트 완료 보고. 일반 채팅 스트리밍과 GitHub/Jira 이전 본문 후속 흐름 정상 보고; 이번 버튼 제거에는 같은 전체 Prompt 유지, Confluence 새 흐름은 미확인 | [전체 지침 저장 보고](../evals/scenarios.md#rich-ui-prompt-saved) | [7c8a65b의 전체 Prompt](https://github.com/knadalkim-a11y/team-agent-poc/blob/7c8a65b0e2eed6d22109b8770e97b9e6908ad68a/agent-pack/system-prompts/ees-integrated-assistant.md); 실제 등록 내용·사용자 추가 지침 직접 대조는 미실행 |
@@ -84,7 +84,7 @@
 
 ## 최근 점검
 
-캐시 wheel 한 개 발견 보고를 반영한 복구 명령을 검토하고 신규 합성 시험 13개·Windows/Linux CI의 동일 13개·전달 검사·CLI 진입점을 확인함(코드 원본 `15cd88b`). wheel 이름/버전·무결성, 실행 중/준비 완료 후보 보호, 실패 후보와 로그 보존, 잠금 안의 오프라인 재준비를 검증함. [코드·실환경 기록](../evals/scenarios.md#ees-first-registration). 사내 등록/health·브랜딩 빌드·연동 시험은 반복하지 않으며 복구 후 사내 준비 성공·EES 설치·UI/데이터 연속성은 미확인.
+사내 준비 성공 보고를 복구 명령의 출력 순서에 대조하고 다음 Deploy의 관리 프로세스 종료·백업·기동 경로를 읽기 검토함. 기본 기동 대기 300초와 기존 준비 커밋을 유지하며 수동 서버 추가 기동을 안내하지 않음. [실환경·후속 확인](../evals/scenarios.md#ees-first-registration). 상태 문서와 diff만 갱신·확인하고 완료한 준비·코드 시험·등록/health·연동 검증은 반복하지 않음. Deploy·EES 화면/데이터 연속성은 사내 미실행.
 
 ## 갱신 규칙
 
