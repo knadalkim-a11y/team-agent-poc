@@ -845,6 +845,18 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 
 - 원격 검증: 코드 원본 `70e7b9f268029bbc161f03b5f364130d2cd24239`의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34201413944) 두 작업이 성공함. 기존 배포 경계/실제 자식 수명 시험과 새 로그 시험·운영 CLI·Windows PowerShell 구문 검사·문서 검사를 포함함. [PR #9](https://github.com/knadalkim-a11y/team-agent-poc/pull/9)는 `36974ce45ff46a1e7fc830c2325873f14546f8e5`로 main에 병합됨. 실제 사내 PowerShell 실행·Windows 생성 시각에 의한 이번 후보 연결·EES 기동 성공은 여전히 미확인임.
 
+<a id="ees-diagnostic-workflow"></a>
+
+### 사내 전달과 실패 증거 보존 재설계 — 2026-09-08
+
+- 사용자 요청: 테스트 결과를 옮기는 왕복이 심한 병목이므로 분석·복구 과정을 재검토한 뒤 전체 흐름을 다시 설계하고 진행함. 같은 실패의 호출 경로/시간/기동 마커 분절 요청, 필터 누락으로 재조회, 긴 캐시 결과의 추가 집계가 실제 기록에 있음. CA 비교와 긴 경로 캐시 쓰기는 국소 증거가 있지만 기동 지연의 인과를 입증하지 못했고 최종 Deploy도 실패함. 기존 프로그램 복구의 프로세스 식별·종료 확인·데이터/키 보존은 유지할 필요가 있음.
+- 범위: 원격 main `d25af56d36c49ea14dec0f09c14693bf170aed94`·관련 열린 PR 없음에서 시작. 이전 로컬 HEAD `84c008734f8919c35bb66346876d04073dc80cf6`와 원격 main의 전체 tree `8e275ca10ce6281b957d87f9cc69c84324d2fb96` 일치를 확인한 별도 worktree에서 수정함. 직접 Git fetch는 인증 실패했으며 GitHub 연결 도구로 최신 상태 조회/반영을 수행함. 기존 작업 파일·사내 서버에 접근하거나 덮어쓰지 않음.
+- 설계: [운영 흐름](../docs/03-openwebui-native-agent.md#ees-diagnostic-workflow)은 기존 로그 수집 → 결과에 필요한 검사 묶음 → 원인 후보에 대한 변경 → 필요한 전환 한 번 → 결과 확인임. 소스/자동 검사는 GPT가 수행하고 사용자는 Git 명령과 한 번의 비식별 결과/사진 전달을 담당함. 후속 실행은 가설·추가로 필요한 증거·성공/중단 기준을 먼저 정함. 새 운영 서버·별도 이력 DB·자동 전송·강제 종료·자동 재배포는 추가하지 않음.
+- 구현: `ProcessError`가 시간초과/입증된 자식 종료/identity 불일치·조회 불가/launch 실패·불확실을 고정 reason으로 구분함. elapsed_seconds는 해당 기동 또는 health 단계의 monotonic 경과 시간이며 전체 배포 시간이 아님. 실제 소유한 자식에서 얻지 못한 종료 코드는 null임. 새 `last_failure.evidence_version=1`에 후보 kind/commit과 switch.log_id를 복구 전에 보존하고 복구 progress/로그를 별도로 기록함. 기존 Stop/백업/Start/CA/현재 데이터 복구 순서와 기본 300초·명령별 최대 900초는 유지함.
+- Diagnose v2: 새 기록은 관리 logs 아래 정확한 basename만 읽고 손상/누락 기록을 시간 추정으로 대체하지 않음. idle에서 후속 Start/Stop/성공 전환 후에도 과거 실패를 읽으며 현재 프로세스 로그·복구 로그를 후보로 쓰지 않음. recovery_required/pending/launch_uncertain이면 로그 읽기는 unavailable로 남고 구조화 실패 기록만 전달함. 구형 실패는 기존 생성 시각 추정을 유지하며 누락했던 정확한 증거를 역으로 만들지 않음. 프로세스 확인 예외는 running=null/inspection_unavailable로 남겨 다른 수집 결과를 보존함. 첫 비중단 오류와 마지막 traceback은 읽은 범위의 증거로 구분하고 동일 trace를 중복 출력하지 않으며 합계 최대 20프레임·4 MiB 읽기 한도를 유지함.
+- 검증: Linux/Python 3.12.13에서 운영 CLI/전환 시험 33개 통과. 배포 모듈 시험 94개 집계, 3 skip을 제외하고 통과(로컬 `/proc` PID namespace 불일치로 실제 자식 수명주기 클래스 skip, Python 3.11/uv opt-in 시험 skip, Windows DPAPI skip). 그 안에 프로세스 계약 21개와 보고 시험 27개가 포함됨. 조기 종료/시간초과/identity 오류 구분, 후보와 복구의 reason·log 분리, identity 반환 전 종료의 새 로그 보존, legacy/후속 기동/정확한 로그 누락, 첫 오류 뒤 KeyboardInterrupt, 읽기 중 변경·링크·비밀 비출력을 확인함. 실패→복구→Stop→실제 보고 모듈/렌더러의 합성 통합 시험에서도 정확한 후보 선택과 두 오류 위치·비밀 비출력을 확인함. `python -I -S -B scripts/manage_ees.py --help` 통과. 문서 점검 25개/링크 554개·오류/검토 후보 0 및 diff 검사 통과.
+- 독립 설계 검토에서 verify_identity=false를 종료로 단정하지 않기, early launch의 로그 출처 유지, 신규 기록의 추정 fallback 금지, 프로세스 확인 실패로 전체 보고를 잃지 않기, 두 traceback의 공유 출력 한도를 반영함. 구현 검토에서 후보/복구 로그 ID 동일 시 거부를 추가하고 회귀 검사 통과 후 새 차단 사항 없음. recovery_required 상태의 로그 조회 제한은 명시함. Windows/Linux CI는 이번 PR에서 확인함. 이번 완료 기준은 진단 준비/전달 흐름이며 실제 사내 실행·기동 지연 원인·데이터/화면/연동 성공은 미확인임.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

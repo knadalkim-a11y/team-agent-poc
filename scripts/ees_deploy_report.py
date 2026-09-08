@@ -1,9 +1,10 @@
-"""Read one inferred failed-startup log without running or changing the server.
+"""Read one failed-startup log without running or changing the server.
 
-Only fixed labels and public Python frame locations leave this module. Creation
-times identify a likely log, not a durable association with a deployment attempt.
+Recorded log IDs bind new failures to their logs. Legacy creation times identify
+only a likely log. Only fixed labels and public Python frame locations leave here.
 """
 
+from collections import deque
 from datetime import datetime, timezone
 import os
 from pathlib import Path
@@ -89,14 +90,29 @@ def _frame_label(path, number, function):
 def _summarize(payload, *, scope, log_bytes):
     text = payload.decode("utf-8", errors="replace")
     folded = text.lower()
-    frames, errors, tracebacks = [], [], 0
+    errors, tracebacks, sequence = [], 0, 0
+    first_error = None
+
+    def traceback_record(header=False):
+        return {"id": sequence, "frames": deque(maxlen=MAX_FRAMES), "count": 0,
+                "unknown": 0, "header": header, "completed": False, "error_type": None}
+
+    current = traceback_record()
     for line in text.splitlines():
         if line == "Traceback (most recent call last):":
-            frames = []
+            sequence += 1
+            current = traceback_record(header=True)
             tracebacks += 1
         match = _FRAME.fullmatch(line)
         if match:
-            frames.append(_frame_label(*match.groups()))
+            # SyntaxError may start a new location without a Traceback header.
+            if current["completed"]:
+                sequence += 1
+                current = traceback_record()
+            label = _frame_label(*match.groups())
+            current["frames"].append(label)
+            current["count"] += 1
+            current["unknown"] += label == "other"
         match = re.match(r"^((?:[A-Za-z_][A-Za-z_0-9]*\.)*[A-Za-z_][A-Za-z_0-9]*)(?::|$)", line)
         if match:
             name = match[1].rsplit(".", 1)[-1]
@@ -104,14 +120,110 @@ def _summarize(payload, *, scope, log_bytes):
                 label = name if name in _ERRORS else "other"
                 if label not in errors:
                     errors.append(label)
+                current["completed"] = True
+                current["error_type"] = label
+                if first_error is None and name not in {"KeyboardInterrupt", "SystemExit"}:
+                    first_error = {**current, "frames": list(current["frames"])}
+    same_traceback = first_error is not None and first_error["id"] == current["id"]
+    first_budget = min(MAX_FRAMES // 2, first_error["count"]) if first_error and not same_traceback else 0
+    last_budget = MAX_FRAMES - first_budget
+    first_frames = first_error["frames"][-first_budget:] if first_budget else []
+    first_visible = last_budget if same_traceback else first_budget
     return {
         "scan_scope": scope, "log_bytes": log_bytes, "bytes_read": len(payload),
-        "tracebacks_seen": tracebacks, "last_traceback_header_seen": tracebacks > 0,
+        "tracebacks_seen": tracebacks, "last_traceback_header_seen": current["header"],
         "error_types": errors,
         "signals": {key: any(marker in folded for marker in markers) for key, markers in _SIGNALS.items()},
-        "frames": frames[-MAX_FRAMES:], "frames_omitted": max(0, len(frames) - MAX_FRAMES),
-        "unknown_frames": frames.count("other"),
+        "frames": list(current["frames"])[-last_budget:],
+        "frames_omitted": max(0, current["count"] - last_budget),
+        "unknown_frames": current["unknown"],
+        "first_error_type": first_error["error_type"] if first_error else None,
+        "first_error_frames": first_frames,
+        "first_error_frames_omitted": max(0, first_error["count"] - first_visible) if first_error else 0,
+        "first_error_unknown_frames": first_error["unknown"] if first_error else 0,
+        "first_error_traceback_header_seen": first_error["header"] if first_error else False,
+        "first_error_matches_last_traceback": same_traceback,
     }
+
+
+def _recorded_candidate(config, registry, failure):
+    if (type(failure["evidence_version"]) is not int or failure["evidence_version"] != 1
+            or not isinstance(failure.get("candidate"), dict)
+            or not isinstance(failure.get("switch"), dict)):
+        return _unavailable("invalid_recorded_evidence")
+    candidate = failure["candidate"]
+    kind, commit = candidate.get("kind"), candidate.get("source_commit")
+    if (kind not in {"original", "release"} or "source_commit" not in candidate
+            or (kind == "original" and commit is not None)
+            or (kind == "release" and (not isinstance(commit, str) or not re.fullmatch(r"[0-9a-f]{40}", commit)))):
+        return _unavailable("invalid_recorded_evidence")
+    log_id = failure["switch"].get("log_id")
+    if log_id is None:
+        return _unavailable("recorded_log_missing")
+    recovery_id = failure.get("recovery_log_id")
+    if (not isinstance(log_id, str) or not _LOG_NAME.fullmatch(log_id)
+            or (recovery_id is not None and (not isinstance(recovery_id, str) or not _LOG_NAME.fullmatch(recovery_id)))):
+        return _unavailable("invalid_recorded_log_id")
+    if log_id == recovery_id:
+        return _unavailable("candidate_matches_recovery_log", ambiguous=True)
+    if registry.get("phase") != "idle" or registry.get("pending") or registry.get("launch_uncertain"):
+        return _unavailable("recorded_failure_not_idle")
+    logs = states._safe(Path(config["state_root"]) / "logs")
+    selected = states._regular(logs / log_id)
+    process = registry.get("process")
+    if process:
+        if not isinstance(process, dict) or not isinstance(process.get("log_file"), str):
+            return _unavailable("invalid_active_log_record")
+        active = states._safe(process["log_file"], exists=False)
+        if active == selected:
+            return _unavailable("recorded_log_is_active", ambiguous=True)
+    return selected, {"selection": "recorded_log_id", "candidate_seconds": None, "recovery_seconds": None}
+
+
+def _inferred_candidate(config, registry, failure):
+    if (registry.get("phase") != "idle" or registry.get("last_event") != "previous_program_recovered"
+            or registry.get("current", {}).get("kind") != "original" or registry.get("pending")
+            or registry.get("launch_uncertain") or failure.get("recovery_status") != "succeeded"
+            or failure.get("switch", {}).get("stage") != "health_check"):
+        return _unavailable("no_recovered_health_failure")
+    failed = datetime.strptime(failure["failed_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
+    updated = datetime.fromisoformat(registry["updated_at"])
+    if updated.tzinfo is None:
+        return _unavailable("invalid_timestamps")
+    updated = updated.timestamp()
+    logs = states._safe(Path(config["state_root"]) / "logs")
+    active = states._regular(registry["process"]["log_file"])
+    if active.parent != logs or not _LOG_NAME.fullmatch(active.name):
+        return _unavailable("recovery_log_outside_managed_logs")
+    active_created = _created_at(active)
+    if not failed <= active_created <= updated:
+        return _unavailable("inconsistent_recovery_time", ambiguous=True)
+    candidates = []
+    count = 0
+    for entry in logs.iterdir():
+        if not _LOG_NAME.fullmatch(entry.name):
+            continue
+        count += 1
+        if count > MAX_LOG_FILES:
+            return _unavailable("too_many_logs")
+        entry = states._regular(entry)
+        created = _created_at(entry)
+        if entry == active:
+            continue
+        if created >= active_created:
+            return _unavailable("later_or_tied_recovery_log", ambiguous=True)
+        if created >= failed + 1:
+            return _unavailable("log_between_failure_and_recovery", ambiguous=True)
+        candidates.append((created, entry))
+    if not candidates:
+        return _unavailable("candidate_log_missing")
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    created, candidate = candidates[0]
+    if len(candidates) > 1 and candidates[1][0] == created:
+        return _unavailable("candidate_creation_time_tied", ambiguous=True)
+    return candidate, {"selection": "inferred_from_creation_time",
+                       "candidate_seconds": round(max(0, failed - created), 1),
+                       "recovery_seconds": round(updated - active_created, 1)}
 
 
 def collect(config, registry):
@@ -125,60 +237,23 @@ No URLs, exception messages, absolute paths or source lines are returned.
         if lock.exists() or lock.is_symlink():
             return {"status": "busy", "reason": "deployment_in_progress"}
         failure = registry.get("last_failure") or {}
-        if (registry.get("phase") != "idle" or registry.get("last_event") != "previous_program_recovered"
-                or registry.get("current", {}).get("kind") != "original" or registry.get("pending")
-                or registry.get("launch_uncertain") or failure.get("recovery_status") != "succeeded"
-                or failure.get("switch", {}).get("stage") != "health_check"):
-            return _unavailable("no_recovered_health_failure")
-        failed = datetime.strptime(failure["failed_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
-        updated = datetime.fromisoformat(registry["updated_at"])
-        if updated.tzinfo is None:
-            return _unavailable("invalid_timestamps")
-        updated = updated.timestamp()
-        logs = states._safe(Path(config["state_root"]) / "logs")
-        active = states._regular(registry["process"]["log_file"])
-        if active.parent != logs or not _LOG_NAME.fullmatch(active.name):
-            return _unavailable("recovery_log_outside_managed_logs")
-        active_created = _created_at(active)
-        if not failed <= active_created <= updated:
-            return _unavailable("inconsistent_recovery_time", ambiguous=True)
-        candidates = []
-        count = 0
-        for entry in logs.iterdir():
-            if not _LOG_NAME.fullmatch(entry.name):
-                continue
-            count += 1
-            if count > MAX_LOG_FILES:
-                return _unavailable("too_many_logs")
-            entry = states._regular(entry)
-            created = _created_at(entry)
-            if entry == active:
-                continue
-            if created >= active_created:
-                return _unavailable("later_or_tied_recovery_log", ambiguous=True)
-            if created >= failed + 1:
-                return _unavailable("log_between_failure_and_recovery", ambiguous=True)
-            candidates.append((created, entry))
-        if not candidates:
-            return _unavailable("candidate_log_missing")
-        candidates.sort(key=lambda item: item[0], reverse=True)
-        created, candidate = candidates[0]
-        if len(candidates) > 1 and candidates[1][0] == created:
-            return _unavailable("candidate_creation_time_tied", ambiguous=True)
-        before = candidate.stat()
+        selected = (_recorded_candidate(config, registry, failure) if "evidence_version" in failure
+                    else _inferred_candidate(config, registry, failure))
+        if isinstance(selected, dict):
+            return selected
+        candidate, metadata = selected
+        before = states._regular(candidate).stat()
         scope = "tail" if before.st_size > MAX_LOG_BYTES else "full"
         with candidate.open("rb") as handle:
             handle.seek(max(0, before.st_size - MAX_LOG_BYTES))
             payload = handle.read(MAX_LOG_BYTES)
-        after = candidate.stat()
+        after = states._regular(candidate).stat()
         if (before.st_size, before.st_mtime_ns, before.st_ino) != (after.st_size, after.st_mtime_ns, after.st_ino):
             return _unavailable("candidate_log_changed", ambiguous=True)
         if scope == "tail":
             payload = payload.partition(b"\n")[2]
         result = _summarize(payload, scope=scope, log_bytes=before.st_size)
-        return {"status": "ok", "selection": "inferred_from_creation_time",
-                "candidate_seconds": round(max(0, failed - created), 1),
-                "recovery_seconds": round(updated - active_created, 1), **result}
+        return {"status": "ok", **metadata, **result}
     except NotImplementedError:
         return _unavailable("creation_time_unsupported")
     except states.StateError:

@@ -520,7 +520,7 @@ API 동기화는 관리 목록에 지정한 EES 자산·필드만 대상으로 �
 | `Init` | 기존 Python·작업 폴더·DATA_DIR·IP/포트·uv를 한 번 등록. 기존 서버/데이터를 수정하거나 시작하지 않음 |
 | `Update` | 현재 main의 추적 파일이 깨끗할 때만 `fetch`와 `merge --ff-only`. 저장된 Git 프록시 설정을 사용하거나 해당 명령에만 `-GitProxy`로 전달 |
 | `Status` | 현재 프로그램·관리 프로세스·원복 가능 여부·CA 모드와 마지막 전환 실패 요약 표시. 키/환경 값 출력 없음 |
-| `Diagnose` | 자동 복구 뒤 실패 후보 로그·근사 시간·기동/네트워크 마커·공개 traceback 위치를 한 번에 요약. 재기동·앱 import·통신 없음 |
+| `Diagnose` | 실패 후보·실패 이유/시간·해당 로그의 기동/네트워크 마커·공개 traceback 위치를 한 번에 요약. 기존 형식은 시간으로 로그 추정. 재기동·앱 import·통신 없음 |
 | `Plan` | 지정 커밋의 프로그램 포함 ZIP·모든 파일 해시/크기·wheel RECORD 확인 |
 | `Prepare` | 기존 서버를 둔 채 별도 venv에 정확한 기존 의존성을 오프라인 설치·검사. 운영 환경은 수정하지 않음 |
 | `Deploy` | 등록된 서버 정상 종료 → 전체 기존 data/키/설정 백업·검사 → 준비된 프로그램 시작 → health 확인·기록. 선택적 `-UseWindowsCA`는 종료 전에 CA를 준비하고 해당 릴리스의 기동에 적용 |
@@ -611,7 +611,7 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 
 <a id="ees-diagnose-once"></a>
 
-**실패 뒤 한 번에 진단하기:** 자동 복구가 성공했으면 추가 배포 전에 아래 명령으로 이번 실패를 확인합니다. 새 PowerShell 창에서도 기존 변수·클립보드 없이 실행할 수 있습니다. `Update`는 운영 코드만 갱신하며 준비한 프로그램 ZIP/후보는 그대로 사용합니다.
+**현재 진입점 — 실패 뒤 한 번에 진단하기:** 기존 상태·로그부터 한 번 수집하고, 결과에 따라 필요한 검사나 수정을 정합니다. 아래 v2 안내는 해당 변경이 main에 병합된 뒤 `Update`한 운영 코드 기준입니다. 새 PowerShell 창에서도 기존 변수·클립보드 없이 실행할 수 있습니다. `Update`는 Git 통신으로 운영 코드를 갱신하며 준비한 프로그램 ZIP/후보를 바꾸지 않습니다. 실패하면 블록이 중단됩니다.
 
 ```powershell
 & {
@@ -622,13 +622,28 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 }
 ```
 
-결과를 한 번에 복사하거나 출력 화면 사진으로 전달하면 됩니다. 원문 로그를 옮기거나 필드별로 다시 입력하지 않습니다. 이 명령에는 600초 기동 대기가 없습니다. 등록 상태·현재 프로세스 식별 정보와 기존 로그만 읽으며 앱 import·외부 요청·캐시 쓰기·배포/복구를 실행하지 않습니다. Python은 이 action에서만 `-I -S -B`로 실행됩니다.
+결과 전체를 한 번에 복사하거나 출력 화면 사진으로 전달하면 됩니다. 원문 로그를 옮기거나 필드별로 다시 입력하지 않습니다. `Diagnose`에는 600초 기동 대기가 없습니다. 등록 상태·현재 프로세스 식별 정보와 기존 로그만 읽으며 DB 조회·앱 import·네트워크 요청·캐시 쓰기·배포/복구를 실행하지 않습니다. Python은 이 action에서만 `-I -S -B`로 실행됩니다. 현재 프로세스 검사를 할 수 없으면 `process_check=inspection_unavailable`, `managed_process_running=null`로 남기고 가능한 로그 요약은 계속 제공합니다. 이는 서버 종료 판정이 아닙니다.
 
-`candidate_seconds`는 로그 생성부터 실패 기록까지의 **근사 시간**입니다. 600초는 Deploy의 최대 대기 한도이며 정상 기동 또는 프로세스 종료가 확인되면 일찍 끝납니다. 실패 후 기존 프로그램 복구에는 별도 대기가 붙습니다. `health_check/process`만으로 600초 만료라고 판단하지 않으며 같은 대기를 원인 확인 없이 반복하지 않습니다.
+v2는 새 실패의 기록된 이유·실제 health 검사 경과 시간·설정한 제한·관찰한 종료 코드를 보여줍니다. 값이 없으면 `null`로 남기며 과거 실패를 복원하지 않습니다. 기존 형식의 `candidate_seconds`·`recovery_seconds`는 로그 생성부터 실패/복구 기록까지의 **근사 시간**입니다. 600초는 `-HealthTimeout 600`을 전달한 경우의 프로그램별 최대 health 대기 한도이며 정상 기동 또는 프로세스 종료를 확인하면 일찍 끝납니다. 기본 300초·허용 1~900초는 유지하고, 실패 후 복구에는 별도 대기가 붙습니다. 기존 `health_check/process`만으로 시간 만료라고 판단하지 않습니다.
 
-현재 복구 로그를 후보로 오인하지 않도록 마지막 실패·복구 상태와 Windows 생성 시각을 대조합니다. 선택은 `inferred_from_creation_time`으로 표시하며, 후속 Start/Stop·경합·로그 부재·이상한 시각에는 unavailable/ambiguous/busy를 출력합니다. 로그를 옮기거나 삭제했다면 시각 추정의 근거가 사라질 수 있습니다. `scan_scope=tail`이면 끝 4 MiB만 읽은 부분 결과입니다. 마커의 false는 읽은 범위에서 해당 문자열을 찾지 못했다는 뜻이며 프록시/화이트리스트 문제가 없다는 보장이 아닙니다.
+새 실패는 후보와 로그 ID를 함께 보존하고 `selection=recorded_log_id`로 해당 로그를 선택합니다. 후속 Start/Stop 뒤에도 관리 상태가 idle이고 선택 로그가 현재 활성 로그가 아니면 읽을 수 있습니다. 기록된 ID가 없거나 잘못됐거나 파일을 찾을 수 없으면 시각 추정으로 대체하지 않고 이유를 출력합니다. 새 필드가 없는 기존 실패만 마지막 실패·복구 상태와 Windows 생성 시각을 대조해 `inferred_from_creation_time`으로 표시합니다. 이 추정은 후속 Start/Stop·경합·로그 이동/삭제·이상한 시각 때문에 unavailable/ambiguous/busy가 될 수 있습니다.
 
-마지막 traceback의 공개 패키지 하위 경로·표준 라이브러리·frozen 위치를 최대 20개 보존하고 미분류 위치와 생략 수를 표시합니다. 예외 메시지·코드 행·사용자 절대경로·주소·환경 값은 출력하지 않습니다. KeyboardInterrupt는 종료 신호에 따른 정리 시점일 수 있어 그 위치 하나로 전체 지연 원인을 확정하지 않습니다. 이 보고를 먼저 검토하고, 필요한 후속 조치만 한 묶음으로 정합니다. 아래 날짜/실패 시각에 맞춘 수동 진단·캐시 절차는 과거 경위와 개별 확인용이며 처음부터 반복하지 않습니다.
+읽은 범위의 첫 비중단 오류와 마지막 traceback을 함께 요약합니다. `first_error_type`은 KeyboardInterrupt/SystemExit를 제외한 첫 오류이며, 최초 장애 원인이라는 뜻은 아닙니다. 두 위치가 같으면 프레임을 중복 출력하지 않고, 공개 패키지 하위 경로·표준 라이브러리·frozen 위치는 합계 최대 20개로 제한합니다. 미분류 위치·생략 수·traceback 시작부 확인 여부를 표시하고 예외 메시지·코드 행·사용자 절대경로·주소·환경 값은 출력하지 않습니다. `scan_scope=tail`이면 끝 4 MiB만 읽은 부분 결과이며, 마커의 false는 읽은 범위에서 해당 문자열을 찾지 못했다는 뜻입니다. KeyboardInterrupt는 종료 신호의 정리 시점일 수 있고 네트워크 마커도 전체 지연의 원인을 증명하지 않습니다.
+
+| 받은 결과 | 다음 행동 |
+|---|---|
+| 읽을 수 있는 구체적 오류·호출 위치 | 해당 경로에 필요한 좁은 수정/검사를 GPT가 준비하고 독립 검사는 한 묶음으로 안내 |
+| `health_timeout` 또는 KeyboardInterrupt만 확인 | 지연 가설과 이를 구분할 증거를 먼저 정함. 같은 설정으로 Deploy·600초 대기 반복 금지 |
+| `process_exited` 또는 `launch_failed` | 종료 코드와 첫 오류를 함께 보고 기동 실패 경로를 좁힘. 시간이 부족했다고 단정하지 않음 |
+| `identity_unavailable`·`identity_changed`·`launch_unverified` | 프로세스 식별 문제부터 확인. 이중 기동을 막는 기존 중단/복구 조건 유지 |
+| unavailable·ambiguous·busy 또는 프로세스 검사 불가 | 출력된 이유에 맞춰 필요한 로컬 확인만 준비. 원문 로그 전체나 동일 명령 반복을 기본 요청으로 삼지 않음 |
+| `startup_complete`·`listening` 마커 | 로그의 문자열 관찰로 기록. 실제 `/health`와 필요한 사용 흐름 확인이 있어야 전환 성공 판단 |
+
+<a id="ees-diagnostic-workflow"></a>
+
+다음 재배포를 안내하기 전에 **가설·필요한 증거·성공 조건·중단/복구 조건**을 정합니다. GPT가 외부 코드·합성 검사를 처리하고, 사내에서만 가능한 독립 검사는 짧은 명령 한 번으로 묶습니다. 추가 왕복은 이전 결과에 따라 달라지는 검사에만 사용합니다. 별도 진단 서비스·상시 수집·실제 DB를 공유하는 병렬 앱은 추가하지 않습니다.
+
+이번 단계의 완료 조건은 진단 코드·검사·안내의 준비와 기존 실패 결과를 받을 경로 확보입니다. **사내 장애 원인은 여전히 미확인이고, EES 전환 성공은 별도 확인 대상입니다.** 아래 날짜/실패 시각에 맞춘 수동 진단·캐시 절차는 과거 경위와 개별 확인용이며 처음부터 반복하지 않습니다.
 
 <a id="ees-deployment-diagnostics"></a>
 
@@ -637,16 +652,20 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 | 필드 | 의미 |
 |---|---|
 | `action`, `failed_at` | 실패한 Deploy/Rollback과 UTC 발생 시각. 마지막 실패는 이후 성공·Stop·Start에도 이력으로 유지하며 현재 `phase`와 구분 |
+| `evidence_version`, `candidate` | 새 실패 증거 버전 `1`과 전환하려던 `kind`/`source_commit`. Diagnose 출력 버전 `2`와 구분하며 original의 커밋은 `null` |
 | `switch` | 처음 실패한 단계·오류 분류·숫자 코드 |
+| `switch.reason` | `health_timeout` 제한 만료, `process_exited` 종료 관찰, `identity_unavailable` 식별 검사 불가, `identity_changed` 식별 불일치, `launch_failed` 실행 실패, `launch_unverified` 실행 후 식별 미확정. 해당 정보가 없으면 `null` |
+| `elapsed_seconds`, `timeout_seconds`, `exit_code` | 해당 실패의 검사 경과 시간·설정 제한·관찰한 종료 코드. 알 수 없거나 해당 없으면 `null`; 전체 배포 시간과 구분 |
+| `switch.log_id`, `recovery_log_id` | 실패 후보 로그와 복구 시도 로그의 관리용 파일명. 절대 경로를 내보내지 않고 서로 별도 보존. 로그 생성 전 실패 등에서는 `null` |
 | `recovery`, `recovery_status` | 자동 복구 자체의 실패와 결과. `succeeded`는 기존 프로그램 health 확인, `failed`는 복구 실패, `blocked`는 식별 불명으로 미시도, `not_attempted`는 사전 확인·전환 기록 실패로 자동 복구 미시도 |
 | `stage` | `select_program` 환경 선택, `port_check` 포트 확인, `process_start` 실행, `health_check` 응답 대기, `process_stop` 종료, `backup` 백업. `process_record`·`stop_record`·`backup_record`·`switch_record`는 해당 상태 기록 실패 |
 | `operation`, `errno`, `winerror` | `port_probe`는 소켓 준비/정리, `port_bind`는 주소 바인딩. 운영체제가 제공한 정수만 남으며 없으면 `null` |
 
-포트 확인은 같은 검사에서 나온 오류 번호를 보존하며 진단 때문에 다시 bind하거나 재시도하지 않습니다. “포트 사용 불가”를 곧바로 다른 프로세스의 점유로 단정하지 않습니다. health 실패의 자식 프로세스 로그는 자동 해석하지 않으므로 번호가 `null`인 경우에는 [사내 기동 로그 위치](#ees-local-state)에서 필요한 부분만 확인합니다. 진단에는 예외 원문·내부 주소·사용자 경로·키·로그 내용이 포함되지 않습니다. 마지막 실패 기록 저장까지 실패하면 콘솔에 저장 실패 안내와 확보한 진단을 남깁니다.
+포트 확인은 같은 검사에서 나온 오류 번호를 보존하며 진단 때문에 다시 bind하거나 재시도하지 않습니다. “포트 사용 불가”를 곧바로 다른 프로세스의 점유로 단정하지 않습니다. 전환 실패의 Diagnostics는 자식 로그를 읽지 않으며, 복구 뒤 [Diagnose](#ees-diagnose-once)로 허용된 요약을 함께 확인합니다. Diagnostics에는 예외 원문·내부 주소·사용자 경로·키·로그 내용이 포함되지 않습니다. 마지막 실패 기록 저장까지 실패하면 콘솔에 저장 실패 안내와 확보한 진단을 남깁니다.
 
 현재 서버의 적용 상태와 다음 실행 여부는 [STATUS](STATUS.md)를 따릅니다. 진단 기능 확인만을 위해 정상 서버에 실패를 만들거나 Deploy·재기동·기존 연동 검증을 반복하지 않습니다.
 
-**health 실패 뒤 자동 복구가 성공한 경우:** 현재 `deployment.json`의 `process.log_file`은 복구된 기존 프로그램의 로그입니다. 실패 후보 로그 경로는 별도로 보존하지 않으므로 현재 로그를 제외하고, 실패 시각과 복구 로그보다 앞선 **생성 시각**으로 직전 기동 로그를 좁힙니다. 수정 시각 최신순은 현재 서버의 로그를 고를 수 있습니다. 로그 이동/삭제나 이후 재기동이 있었다면 시각만으로 이번 후보를 확정하지 않습니다. `health_check`와 숫자 코드 null만으로 기동 중 종료·응답 대기 만료·프로세스 확인 오류를 구분할 수 없으며, 종료 정리 중 찍힌 `KeyboardInterrupt`도 최초 실패 원인으로 단정하지 않습니다. 로그는 사내에서 읽고 필요한 오류 종류·기동 완료 여부만 비식별로 전달합니다.
+**과거 수동 진단 기록 — 기존 형식의 health 실패 뒤 자동 복구가 성공한 경우:** 아래는 2026-09-08까지의 실패 증거와 개별 명령을 보존한 절차입니다. 현재 진입점은 위 Diagnose이며, 아래 명령을 순서대로 다시 실행하지 않습니다. 당시 `deployment.json`의 `process.log_file`은 복구된 기존 프로그램의 로그입니다. 기존 형식은 실패 후보 로그 경로를 별도로 보존하지 않으므로 현재 로그를 제외하고, 실패 시각과 복구 로그보다 앞선 **생성 시각**으로 직전 기동 로그를 좁힙니다. 수정 시각 최신순은 현재 서버의 로그를 고를 수 있습니다. 로그 이동/삭제나 이후 재기동이 있었다면 시각만으로 이번 후보를 확정하지 않습니다. `health_check`와 숫자 코드 null만으로 기동 중 종료·응답 대기 만료·프로세스 확인 오류를 구분할 수 없으며, 종료 정리 중 찍힌 `KeyboardInterrupt`도 최초 실패 원인으로 단정하지 않습니다. 로그는 사내에서 읽고 필요한 오류 종류·기동 완료 여부만 비식별로 전달합니다.
 
 <a id="ees-failed-candidate-summary"></a>
 
