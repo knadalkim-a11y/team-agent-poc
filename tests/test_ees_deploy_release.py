@@ -2,12 +2,14 @@
 
 import base64
 import csv
+from datetime import datetime, timedelta, timezone
 import hashlib
 import io
 import json
 import os
 from pathlib import Path
 import shutil
+import ssl
 import stat
 import subprocess
 import sys
@@ -15,6 +17,11 @@ import tempfile
 import unittest
 from unittest import mock
 import zipfile
+
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.x509.oid import NameOID
 
 from scripts import ees_deploy_release as release
 
@@ -49,6 +56,183 @@ def wheel_bytes(corrupt_record=False, distribution="open_webui", version=release
         for name, content in members.items():
             archive.writestr(name, content)
     return output.getvalue()
+
+
+class WindowsCaTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        key = ec.generate_private_key(ec.SECP256R1())
+        name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "Synthetic EES test CA")])
+        now = datetime.now(timezone.utc)
+        certificate = (x509.CertificateBuilder().subject_name(name).issuer_name(name)
+                       .public_key(key.public_key()).serial_number(x509.random_serial_number())
+                       .not_valid_before(now - timedelta(days=1)).not_valid_after(now + timedelta(days=1))
+                       .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
+                       .sign(key, hashes.SHA256()))
+        cls.pem = certificate.public_bytes(serialization.Encoding.PEM)
+        leaf_key = ec.generate_private_key(ec.SECP256R1())
+        leaf = (x509.CertificateBuilder().subject_name(x509.Name([
+                    x509.NameAttribute(NameOID.COMMON_NAME, "ees-test.local")])).issuer_name(name)
+                .public_key(leaf_key.public_key()).serial_number(x509.random_serial_number())
+                .not_valid_before(now - timedelta(days=1)).not_valid_after(now + timedelta(days=1))
+                .add_extension(x509.SubjectAlternativeName([x509.DNSName("ees-test.local")]), critical=False)
+                .add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
+                .sign(key, hashes.SHA256()))
+        cls.leaf_pem = leaf.public_bytes(serialization.Encoding.PEM)
+        cls.leaf_key = leaf_key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+                                            serialization.NoEncryption())
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.target = self.root / "candidate"
+        self.target.mkdir()
+
+    def prepare(self, payload=None):
+        with mock.patch.object(release, "_collect_windows_ca", return_value=self.pem if payload is None else payload):
+            return release.prepare_windows_ca(self.target, "candidate-python", {})
+
+    def test_snapshot_is_immutable_reused_and_outside_venv(self):
+        metadata = self.target / "release.json"
+        metadata.write_bytes(b"preserved candidate metadata")
+        fingerprint = self.prepare()
+        path = release.windows_ca_path(self.target, fingerprint)
+        self.assertEqual(path, self.target / "trusted-ca" / (digest(self.pem) + ".pem"))
+        self.assertEqual(path.read_bytes(), self.pem)
+        os.utime(path, ns=(1_000_000_000, 1_000_000_000))
+        before = path.stat().st_mtime_ns
+        self.assertEqual(self.prepare(), fingerprint)
+        self.assertEqual(path.stat().st_mtime_ns, before)
+        self.assertEqual(metadata.read_bytes(), b"preserved candidate metadata")
+        self.assertFalse((self.target / "venv").exists())
+
+    def test_bad_export_is_rejected_without_creating_bundle(self):
+        for payload in (b"", b"not a certificate", self.leaf_pem, self.pem + b"-----BEGIN PRIVATE KEY-----\nprivate\n",
+                        b"-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----\n"):
+            with self.subTest(payload_kind=len(payload)):
+                with self.assertRaises(release.ReleaseError):
+                    self.prepare(payload)
+                self.assertFalse((self.target / "trusted-ca").exists())
+
+    def test_invalid_digest_missing_tampered_and_unparseable_snapshots_fail(self):
+        for fingerprint in (None, [], "A" * 64, "../escape", "a" * 63, "a" * 64 + "\n"):
+            with self.subTest(fingerprint=fingerprint):
+                with self.assertRaises(release.ReleaseError):
+                    release.windows_ca_path(self.target, fingerprint)
+        with self.assertRaises(release.ReleaseError):
+            release.windows_ca_path(self.target, "a" * 64)
+        fingerprint = self.prepare()
+        path = release.windows_ca_path(self.target, fingerprint)
+        path.write_bytes(self.pem + b"\n")
+        with self.assertRaisesRegex(release.ReleaseError, "changed"):
+            release.windows_ca_path(self.target, fingerprint)
+        with self.assertRaisesRegex(release.ReleaseError, "changed"):
+            self.prepare()
+        self.assertEqual(path.read_bytes(), self.pem + b"\n")
+        invalid = b"not a public CA"
+        (path.parent / (digest(invalid) + ".pem")).write_bytes(invalid)
+        with self.assertRaisesRegex(release.ReleaseError, "valid public CA"):
+            release.windows_ca_path(self.target, digest(invalid))
+
+    def test_reparse_directory_or_file_is_rejected_without_overwrite(self):
+        fingerprint = self.prepare()
+        path = release.windows_ca_path(self.target, fingerprint)
+        linked = release._linked
+        for unsafe in (self.target, path.parent, path):
+            with self.subTest(unsafe=unsafe.name), mock.patch.object(
+                    release, "_linked", side_effect=lambda candidate: candidate == unsafe or linked(candidate)):
+                with self.assertRaises(release.ReleaseError):
+                    release.windows_ca_path(self.target, fingerprint)
+                with self.assertRaises(release.ReleaseError):
+                    self.prepare()
+        self.assertEqual(path.read_bytes(), self.pem)
+        with mock.patch.object(Path, "is_symlink", return_value=False), \
+             mock.patch.object(Path, "exists", return_value=True), \
+             mock.patch.object(Path, "lstat", return_value=mock.Mock(st_file_attributes=0x400)):
+            self.assertTrue(release._linked(path))
+
+    def test_hardlinked_snapshot_is_rejected(self):
+        fingerprint = self.prepare()
+        path = release.windows_ca_path(self.target, fingerprint)
+        os.link(path, self.root / "other.pem")
+        with self.assertRaisesRegex(release.ReleaseError, "regular file"):
+            release.windows_ca_path(self.target, fingerprint)
+
+    def test_collector_is_isolated_uses_saved_environment_and_removes_key_logging(self):
+        environment = {"HTTPS_PROXY": "synthetic proxy", "SSL_CERT_FILE": "synthetic CA path",
+                       "SSLKEYLOGFILE": "private key log", "sslkeylogfile": "another key log"}
+        with mock.patch.object(release.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, self.pem)) as run:
+            self.assertEqual(release._collect_windows_ca("candidate-python", environment, cwd=self.root), self.pem)
+        command = run.call_args.args[0]
+        options = run.call_args.kwargs
+        self.assertEqual(command[:5], ["candidate-python", "-I", "-S", "-B", "-c"])
+        self.assertNotIn("open_webui", command[5])
+        self.assertEqual(options["env"], {"HTTPS_PROXY": "synthetic proxy", "SSL_CERT_FILE": "synthetic CA path"})
+        self.assertEqual(options["timeout"], 30)
+        self.assertEqual(options["stdin"], subprocess.DEVNULL)
+        self.assertEqual(options["cwd"], self.root)
+        self.assertTrue(options["check"] and options["capture_output"])
+        self.assertEqual(environment["SSLKEYLOGFILE"], "private key log")
+
+    def test_export_process_failures_are_sanitized_and_leave_no_bundle(self):
+        for failure in (subprocess.TimeoutExpired("synthetic-private", 30, output=b"secret", stderr=b"secret"),
+                        subprocess.CalledProcessError(1, "synthetic-private", stderr=b"secret"),
+                        OSError("synthetic-private")):
+            with self.subTest(error=type(failure).__name__), mock.patch.object(release.subprocess, "run", side_effect=failure):
+                with self.assertRaises(release.ReleaseError) as caught:
+                    release.prepare_windows_ca(self.target, "candidate-python", {})
+                self.assertNotIn("synthetic-private", str(caught.exception))
+                self.assertNotIn("secret", str(caught.exception))
+                self.assertTrue(caught.exception.__suppress_context__)
+                self.assertFalse((self.target / "trusted-ca").exists())
+
+    def test_real_export_requires_windows(self):
+        environment = {k: v for k, v in os.environ.items() if k.upper() not in {"SSL_CERT_FILE", "SSL_CERT_DIR"}}
+        if sys.platform == "win32":
+            payload = release._collect_windows_ca(sys.executable, environment)
+            release._validate_ca_payload(payload)
+        else:
+            with self.assertRaisesRegex(release.ReleaseError, "Windows CA export failed"):
+                release._collect_windows_ca(sys.executable, environment)
+
+    def test_snapshot_verifies_tls_chain_and_still_rejects_hostname_or_untrusted_ca(self):
+        bundle = release.windows_ca_path(self.target, self.prepare())
+        cert_path, key_path = self.root / "server.pem", self.root / "server-key.pem"
+        cert_path.write_bytes(self.leaf_pem + self.pem)
+        key_path.write_bytes(self.leaf_key)
+        server_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        server_context.load_cert_chain(cert_path, key_path)
+
+        def handshake(hostname, trusted):
+            client_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            if trusted:
+                client_context.load_verify_locations(cafile=str(bundle))
+            incoming, outgoing, server_in, server_out = (ssl.MemoryBIO() for _ in range(4))
+            client = client_context.wrap_bio(incoming, outgoing, server_hostname=hostname)
+            server = server_context.wrap_bio(server_in, server_out, server_side=True)
+            for _ in range(10):
+                client_done = server_done = False
+                try:
+                    client.do_handshake()
+                    client_done = True
+                except ssl.SSLWantReadError:
+                    pass
+                server_in.write(outgoing.read())
+                try:
+                    server.do_handshake()
+                    server_done = True
+                except ssl.SSLWantReadError:
+                    pass
+                incoming.write(server_out.read())
+                if client_done and server_done:
+                    return
+            self.fail("Synthetic TLS handshake did not finish")
+
+        handshake("ees-test.local", True)
+        for hostname, trusted in (("other-test.local", True), ("ees-test.local", False)):
+            with self.subTest(hostname=hostname, trusted=trusted), self.assertRaises(ssl.SSLCertVerificationError):
+                handshake(hostname, trusted)
 
 
 class ReleaseTests(unittest.TestCase):

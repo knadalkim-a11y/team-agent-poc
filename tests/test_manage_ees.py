@@ -386,6 +386,98 @@ class DeploymentTransactionTests(unittest.TestCase):
                 self.assertEqual(MANAGER.main(["start", "--config", "unused.json", "--health-timeout", value]), 0)
             self.assertEqual(operate.call_args.args[0].health_timeout, int(value))
 
+    def test_windows_ca_selection_survives_start_and_rollback_without_changing_original_env(self):
+        digest = "b" * 64
+        bundle = self.root / "synthetic-ca.pem"
+        launched = []
+        original_start = self.mocks[5].side_effect
+
+        def start(executable, cwd, env, *rest):
+            launched.append((executable, dict(env)))
+            return original_start(executable, cwd, env, *rest)
+
+        def prepare(*args, **kwargs):
+            self.assertEqual(self.events, [])  # Trust material is ready before the first stop.
+            self.assertEqual(args[1], "candidate-python")
+            self.assertNotIn("REQUESTS_CA_BUNDLE", args[2])
+            self.assertEqual(kwargs["cwd"], "original-cwd")
+            return digest
+
+        self.mocks[5].side_effect = start
+        with patch.object(MANAGER.releases, "prepare_windows_ca", side_effect=prepare) as collect, \
+                patch.object(MANAGER.releases, "windows_ca_path", return_value=bundle), \
+                patch.object(MANAGER.states, "load_config", return_value=self.config):
+            MANAGER.switch(self.config, self.candidate, "deployed", use_windows_ca=True)
+            self.assertEqual(self.read()["current"]["ca_bundle_sha256"], digest)
+            self.assertNotIn("ca_bundle_sha256", self.candidate)
+            args = argparse.Namespace(action="status", config="unused.json", health_timeout=300)
+            self.assertEqual(MANAGER.operate(args)["ca_mode"], "windows_snapshot")
+            args.action = "stop"
+            MANAGER.operate(args)
+            args.action = "start"
+            MANAGER.operate(args)
+            MANAGER.switch(self.config, None, "rolled_back_program")
+            self.assertEqual(self.read()["current"], self.original)
+            MANAGER.switch(self.config, None, "rolled_back_program")
+            self.assertEqual(self.read()["current"]["ca_bundle_sha256"], digest)
+            collect.assert_called_once()
+        self.assertEqual([exe for exe, _ in launched],
+                         ["candidate-python", "candidate-python", "original-python", "candidate-python"])
+        for exe, env in launched:
+            for name in ("REQUESTS_CA_BUNDLE", "SSL_CERT_FILE"):
+                if exe == "candidate-python":
+                    self.assertEqual(env[name], str(bundle))
+                else:
+                    self.assertNotIn(name, env)
+
+    def test_windows_ca_preparation_failure_keeps_current_server_running(self):
+        with patch.object(MANAGER.releases, "prepare_windows_ca",
+                          side_effect=MANAGER.releases.ReleaseError("Windows CA export failed.")), \
+                self.assertRaises(MANAGER.DeploymentError) as caught:
+            MANAGER.switch(self.config, self.candidate, "deployed", use_windows_ca=True)
+        self.assertEqual(self.events, [])
+        self.assertEqual(self.read()["current"], self.original)
+        self.assertEqual(self.read()["process"], self.original_process)
+        self.assertEqual(caught.exception.diagnostics["switch"]["stage"], "select_program")
+        self.assertEqual(caught.exception.diagnostics["switch"]["error_type"], "release")
+
+    def test_windows_ca_failed_candidate_recovery_uses_saved_original_ca(self):
+        saved = self.mocks[0].return_value
+        saved.update(REQUESTS_CA_BUNDLE="saved-requests-ca", SSL_CERT_FILE="saved-ssl-ca")
+        original_start = self.mocks[5].side_effect
+        launched = []
+
+        def start(executable, cwd, env, *rest):
+            launched.append((executable, dict(env)))
+            return original_start(executable, cwd, env, *rest)
+
+        def health(identity, **kwargs):
+            if identity == self.candidate_process:
+                raise MANAGER.processes.ProcessError("synthetic startup failure")
+
+        self.mocks[5].side_effect = start
+        self.mocks[6].side_effect = health
+        with patch.object(MANAGER.releases, "prepare_windows_ca", return_value="b" * 64), \
+                patch.object(MANAGER.releases, "windows_ca_path", return_value=Path("candidate-ca")), \
+                self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.switch(self.config, self.candidate, "deployed", use_windows_ca=True)
+        self.assertEqual(launched[0][1]["REQUESTS_CA_BUNDLE"], "candidate-ca")
+        self.assertEqual(launched[1][1], saved)
+        self.assertEqual(self.read()["current"], self.original)
+        self.assertEqual(self.read()["last_failure"]["recovery_status"], "succeeded")
+
+    def test_windows_ca_cli_rejects_other_actions_and_forwards_deploy_option(self):
+        for action in ("init", "status", "plan", "prepare", "rollback", "start", "stop"):
+            with self.subTest(action=action), patch.object(MANAGER, "operate") as operate, \
+                    redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
+                MANAGER.main([action, "--config", "unused.json", "--use-windows-ca"])
+            self.assertEqual(error.exception.code, 2)
+            operate.assert_not_called()
+        with patch.object(MANAGER.states, "load_config", return_value=self.config), \
+                patch.object(MANAGER, "switch", return_value={}) as switch, redirect_stdout(io.StringIO()):
+            MANAGER.main(["deploy", "--config", "unused.json", "--commit", COMMIT, "--use-windows-ca"])
+        self.assertTrue(switch.call_args.kwargs["use_windows_ca"])
+
 
 if __name__ == "__main__":
     unittest.main()

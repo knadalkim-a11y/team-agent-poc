@@ -65,8 +65,8 @@ jobs:
           python-version: '3.11'
       - run: python -m unittest discover -s tests -p test_ees_branding_build.py -v
       - run: python -m unittest discover -s tests -p test_demo_bundle.py -v
-      - name: Install the operator's fixed uv for isolated installation tests
-        run: python -m pip install uv==0.12.7
+      - name: Install fixed uv and synthetic TLS test dependencies
+        run: python -m pip install uv==0.12.7 cryptography==46.0.0
       - name: Verify deployment boundaries and real child lifecycle
         env:
           EES_RUN_REAL_UV_TEST: '1'
