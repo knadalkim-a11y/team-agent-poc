@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **전환 실패 후 최신 로그의 모듈 import 중 `KeyboardInterrupt`, 이전 로그의 HTTP 200·세션 종료 기록을 사용자 보고로 확인함.** 종료 신호의 출처·최초 전환/자동 복구 실패 원인은 미확정이며 패키지 누락으로 단정하지 않음. 앞선 조회에서 `recovery_required`·original 선택·관리 프로세스/잠금/listener 없음·health 연결 실패였고 백업 참조가 있음. DB 복원은 미시도이며 준비 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`과 이전 실패를 보존함. [실환경 기록](../evals/scenarios.md#ees-first-registration).
-- 다음 작업 하나: **현재 복구 상태와 original 선택을 확인하는 가드를 두고 관리 Stop → Start로 기존 서버 복구를 한 번 시도한다.** Stop 성공 뒤에만 등록된 기존 Python·작업 위치·환경·데이터로 Start하며 이번 대기 상한은 600초로 전달함. 시간 초과 원인 확정이나 영구 설정 변경은 아니며 실패 시 재종료/재시작을 자동 반복하지 않음. 성공하면 started=true와 기존 UI 접속만 받고, 실패하면 직접 출력되는 시작 오류로 진단함. EES 재배포·패키지 설치·DB 복원은 이번 복구에 포함하지 않음.
+- 이번 작업: **기존 서버 복구 명령에서 stopped=true·data_changed=false 뒤 Start의 포트 확보 실패를 사용자 보고로 확인함.** 정확한 오류는 start_server의 두 번째 bind 검사에서 나오며 새 로그/프로세스 생성 전임. 직전 검사는 통과하므로 다른 서버 점유나 IP 변경을 확정하지 않음. 코드상 Stop 이후 idle·pending 해제 상태가 예상되지만 현재 기록은 재대조 전이며 서비스 복구는 미완료. DB 복원은 미시도이고 준비 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`과 이전 실패를 보존함. [실환경 기록](../evals/scenarios.md#ees-first-registration).
+- 다음 작업 하나: **현재 배포 상태·등록 IP 존재·포트의 TCP 상태/PID와 같은 Python의 짧은 bind 확인에서 Windows 오류 번호를 받는다.** 원래 검사가 모든 OSError를 한 메시지로 묶으므로 실제 번호로 다음 복구를 결정함. 확인용 소켓은 즉시 닫고 WebUI/DB를 열지 않음. 새 Start·Deploy·패키지 설치·포트 변경·강제 종료는 붙이지 않으며 긴 로그 전사나 완료한 연동 시험을 요구하지 않음.
 
 <a id="resume-branch"></a>
 
@@ -46,7 +46,7 @@
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | 팀 시연용 이름·소개·시작 질문 | 기존 모델 이름·소개·프로필 적용 안내, 제안 JSON 4개·짧은 팀원 안내 | 사용자 요청으로 준비 재개. 실제 UI 저장·로고 교체·팀원 전달은 미확인 | [시연 준비](../evals/scenarios.md#team-demo-customization), [이전 준비](../evals/scenarios.md#team-first-use-preparation), [당시 보류](../evals/scenarios.md#onboarding-deferred) | 현재 [제안 JSON](../agent-pack/ees-prompt-suggestions.json); 사내 적용 원본 없음 |
-| EES 프로그램·전달 도구 | 이름·아이콘 wheel/ZIP/Actions와 Windows 배포 명령; 기동 대기·첫 antlr4 캐시 복구 명령 | 첫 Deploy 전환·자동 복구 실패 후 listener 없음·health 연결 실패. 최신 로그 KeyboardInterrupt·이전 로그 세션 종료 보고, 원인 미확정. 관리 Stop/Start로 기존 서버 복구 안내, 결과 대기 | [운영 명령](03-openwebui-native-agent.md#기존-windows-서버에-적용), [초기 등록·전환 실패 기록](../evals/scenarios.md#ees-first-registration), [CI 근거](../evals/scenarios.md#ees-program-deployment) | 등록 안내 원본 `c584928`; 사내 checkout SHA 직접 대조 미실행. [프로그램 ZIP](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172321176/artifacts/10036107795) 안내 원본 `4a8779b`, 준비 성공 보고·전환 완료 미확인 |
+| EES 프로그램·전달 도구 | 이름·아이콘 wheel/ZIP/Actions와 Windows 배포 명령; 기동 대기·첫 antlr4 캐시 복구 명령 | 첫 Deploy 전환·자동 복구 실패. 후속 Stop 성공 뒤 Start가 프로세스 생성 전 포트 검사에서 실패. 실제 Windows 오류 번호·포트 상태 대기, 기존 서버 복구 미완료 | [운영 명령](03-openwebui-native-agent.md#기존-windows-서버에-적용), [초기 등록·전환 실패 기록](../evals/scenarios.md#ees-first-registration), [CI 근거](../evals/scenarios.md#ees-program-deployment) | 등록 안내 원본 `c584928`; 사내 checkout SHA 직접 대조 미실행. [프로그램 ZIP](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172321176/artifacts/10036107795) 안내 원본 `4a8779b`, 준비 성공 보고·전환 완료 미확인 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 2026-09-07 두 지침 UI 저장 보고; 개정 후 P02 PASS, P03 창작 거절 부분 확인, P04~P10 미완료; 실행 시점은 평가표 | [P02~P10 재검증](../evals/scenarios.md#instruction-revision), [기존 지침 갱신](03-openwebui-native-agent.md#update-existing-instructions) | 전달·저장 안내 원본 [dfeb95f](https://github.com/knadalkim-a11y/team-agent-poc/commit/dfeb95fbf96cf6a2bb75a3ba75fac3bc92ed60fc); 등록 내용·사용자 추가 규칙·사내 checkout SHA 직접 대조는 미실행 |
 | 조회 경로 보완 | Prompt의 [현재 POC 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션 | 부분 적용 당시 C04·P02 정상·임베딩 오류 재발 없음 보고; 이번 전체 Prompt에도 포함해 저장 안내 | [실환경 결과](../evals/scenarios.md#결과-기록), [당시 소스 검토](../evals/confluence-offline.md#knowledge-routing) | 부분 추가 안내 원본 [28f526a](https://github.com/knadalkim-a11y/team-agent-poc/blob/28f526a39162e54f126f577554f8c15fdd5940f1/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로); 현재 전체 지침 안내 원본은 위 행. 부분 적용 당시 성공을 이번 개정 후 재평가로 간주하지 않음 |
 | 카드·후속 조회 지침 | 카드/답변 중복 억제, Confluence 본문 조회, Jira/GitHub의 실제 ID·후속 범위 지침 | 2026-09-07 전체 System Prompt 3블록 전달 후 저장 및 업데이트 완료 보고. 일반 채팅 스트리밍과 GitHub/Jira 이전 본문 후속 흐름 정상 보고; 이번 버튼 제거에는 같은 전체 Prompt 유지, Confluence 새 흐름은 미확인 | [전체 지침 저장 보고](../evals/scenarios.md#rich-ui-prompt-saved) | [7c8a65b의 전체 Prompt](https://github.com/knadalkim-a11y/team-agent-poc/blob/7c8a65b0e2eed6d22109b8770e97b9e6908ad68a/agent-pack/system-prompts/ees-integrated-assistant.md); 실제 등록 내용·사용자 추가 지침 직접 대조는 미실행 |
@@ -84,7 +84,7 @@
 
 ## 최근 점검
 
-KeyboardInterrupt·세션 종료 보고를 관리 종료 신호와 Stop/Start의 복구 경로에 대조하고 해당 절차를 독립 읽기 검토함. 현재 상태 가드·Stop 실패 시 중단·original 실행 환경 보존·Start 실패 시 추가 종료 없음과 명령 단위 600초 상한을 확인함. [진단·복구 안내 근거](../evals/scenarios.md#ees-first-registration). 문서 두 개와 문서/diff만 확인하고 코드 시험·CI·완료한 연동 검증은 반복하지 않음. 최초 실패 원인과 사내 복구 완료는 미확인.
+Stop 성공·Start 포트 오류를 정확한 코드 분기에 대조하고 독립 읽기 검토함. 두 번째 bind 실패가 프로세스 생성/health 대기 전임과 OSError 번호가 기존 메시지에서 숨겨지는 점을 확인해 짧은 포트 진단을 안내함. [복구 시도·포트 진단 근거](../evals/scenarios.md#ees-first-registration). 문서 두 개와 문서/diff만 확인하며 코드 시험·CI·완료한 연동 검증은 반복하지 않음. 실제 포트 오류 원인과 사내 복구 완료는 미확인.
 
 ## 갱신 규칙
 
