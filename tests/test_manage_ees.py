@@ -65,7 +65,7 @@ class DeploymentTransactionTests(unittest.TestCase):
             patch.object(MANAGER.states, "runtime_environment", return_value={
                 "DATA_DIR": "original-data", "WEBUI_SECRET_KEY": "synthetic-key", "CORS_ALLOW_ORIGIN": "synthetic-origin"}),
             patch.object(MANAGER.releases, "validate_prepared", return_value={"target_python": "candidate-python"}),
-            patch.object(MANAGER.processes, "port_is_free", side_effect=lambda *_: self.port_free),
+            patch.object(MANAGER.processes, "port_is_free", side_effect=lambda *_, **kwargs: self.port_free),
             patch.object(MANAGER.processes, "verify_identity", return_value=True),
             patch.object(MANAGER.processes, "stop_server", side_effect=stopped),
             patch.object(MANAGER.processes, "start_server", side_effect=start),
@@ -113,6 +113,10 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.assertEqual(self.read()["current"], self.original)
         self.assertEqual(self.read()["process"], self.original_process)
         self.assertEqual(self.read()["phase"], "idle")
+        failure = self.read()["last_failure"]
+        self.assertEqual(failure["switch"]["stage"], "health_check")
+        self.assertEqual(failure["recovery_status"], "succeeded")
+        self.assertIsNone(failure["recovery"])
         self.assertIn("stop:candidate-python", self.events)
         self.assertEqual(marker.read_bytes(), b"New user memory is not rolled back")
 
@@ -125,6 +129,10 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.assertEqual(self.read()["phase"], "recovery_required")
         self.assertEqual(self.read()["process"], self.candidate_process)
         self.assertEqual(self.events.count("start:original-python"), 0)
+        failure = self.read()["last_failure"]
+        self.assertEqual(failure["switch"]["stage"], "health_check")
+        self.assertEqual(failure["recovery"]["stage"], "process_stop")
+        self.assertEqual(failure["recovery_status"], "failed")
 
     def test_backup_failure_does_not_launch_candidate_and_recovers_original(self):
         self.mocks[7].side_effect = MANAGER.states.StateError("synthetic backup failed")
@@ -132,6 +140,7 @@ class DeploymentTransactionTests(unittest.TestCase):
             MANAGER.switch(self.config, self.candidate, "deployed")
         self.assertNotIn("start:candidate-python", self.events)
         self.assertEqual(self.read()["current"], self.original)
+        self.assertEqual(self.read()["last_failure"]["switch"]["stage"], "backup")
 
     def test_unidentified_launched_child_blocks_automatic_recovery_even_before_listen(self):
         self.mocks[5].side_effect = MANAGER.processes.LaunchUncertain("identity unavailable")
@@ -140,24 +149,166 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.mocks[5].assert_called_once()
         self.assertEqual(self.read()["phase"], "recovery_required")
         self.assertTrue(self.read()["launch_uncertain"])
+        self.assertEqual(self.read()["last_failure"]["switch"]["error_type"], "launch_uncertain")
+        self.assertEqual(self.read()["last_failure"]["recovery_status"], "blocked")
         with self.assertRaisesRegex(MANAGER.DeploymentError, "could not be identified"):
             MANAGER.stop_registered(self.config, self.read())
 
     def test_unmanaged_listener_is_not_stopped_and_no_backup_is_started(self):
         self.registry["process"] = None
         MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
-        with self.assertRaisesRegex(MANAGER.DeploymentError, "port is in use"):
+        with self.assertRaisesRegex(MANAGER.DeploymentError, "preflight failed"):
             MANAGER.switch(self.config, self.candidate, "deployed")
         self.mocks[4].assert_not_called()
         self.mocks[7].assert_not_called()
         self.assertEqual(self.read()["phase"], "idle")
+        self.assertEqual(self.read()["last_failure"]["recovery_status"], "not_attempted")
+        self.assertEqual(self.read()["last_failure"]["switch"]["stage"], "port_check")
 
     def test_process_identity_mismatch_never_advances_the_switch(self):
         self.mocks[4].side_effect = MANAGER.processes.ProcessError("identity changed")
-        with self.assertRaisesRegex(MANAGER.processes.ProcessError, "identity changed"):
+        with self.assertRaisesRegex(MANAGER.DeploymentError, "preflight failed"):
             MANAGER.switch(self.config, self.candidate, "deployed")
         self.mocks[7].assert_not_called()
         self.mocks[5].assert_not_called()
+        self.assertEqual(self.read()["last_failure"]["switch"]["stage"], "process_stop")
+
+    def test_backup_and_recovery_bind_failures_keep_codes_without_private_text(self):
+        private = "synthetic-key http://private.invalid C:\\private\\server.log"
+        socket_error = OSError(10049, private)
+        socket_error.winerror = 10049
+        self.mocks[7].side_effect = MANAGER.states.StateError(private)
+        bind_error = MANAGER.processes.ProcessError("The listen port is unavailable.",
+                                                   cause=socket_error, operation="port_bind")
+        self.mocks[2].side_effect = [True, bind_error]
+        with self.assertRaises(MANAGER.DeploymentError) as caught:
+            MANAGER.switch(self.config, self.candidate, "deployed")
+        failure = self.read()["last_failure"]
+        self.assertEqual(failure["switch"]["stage"], "backup")
+        self.assertEqual(failure["recovery"], {"stage": "port_check", "error_type": "process",
+                                             "operation": "port_bind", "errno": 10049, "winerror": 10049})
+        self.assertEqual(failure, caught.exception.diagnostics)
+        self.mocks[5].assert_not_called()
+        self.assertNotIn(private, json.dumps(failure) + str(caught.exception))
+        self.assertEqual(self.read()["phase"], "recovery_required")
+
+    def test_failed_recovery_launch_keeps_uncertainty_and_never_retries(self):
+        self.mocks[7].side_effect = MANAGER.states.StateError("backup failed")
+        self.mocks[5].side_effect = MANAGER.processes.LaunchUncertain("private launch detail")
+        with self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.switch(self.config, self.candidate, "deployed")
+        self.mocks[5].assert_called_once()
+        current = self.read()
+        self.assertTrue(current["launch_uncertain"])
+        self.assertEqual(current["phase"], "recovery_required")
+        self.assertEqual(current["last_failure"]["switch"]["stage"], "backup")
+        self.assertEqual(current["last_failure"]["recovery"]["error_type"], "launch_uncertain")
+        with self.assertRaisesRegex(MANAGER.DeploymentError, "could not be identified"):
+            MANAGER.stop_registered(self.config, current)
+
+    def test_cli_reports_distinct_failures_and_does_not_echo_exception_details(self):
+        private = "SYNTHETIC-PAT C:\\private\\server.log http://private.invalid"
+        first, second = OSError(13, private), OSError(98, private)
+        first.winerror, second.winerror = "SYNTHETIC-PAT", 10048
+        self.mocks[6].side_effect = [first, second]
+        output = io.StringIO()
+        with patch.object(MANAGER.states, "load_config", return_value=self.config), \
+                redirect_stderr(output), self.assertRaises(SystemExit) as caught:
+            MANAGER.main(["deploy", "--config", "unused.json", "--commit", COMMIT])
+        self.assertEqual(caught.exception.code, 1)
+        failure = self.read()["last_failure"]
+        self.assertEqual(failure["switch"]["errno"], 13)
+        self.assertIsNone(failure["switch"]["winerror"])
+        self.assertEqual(failure["recovery"]["errno"], 98)
+        self.assertEqual(failure["recovery"]["winerror"], 10048)
+        self.assertEqual(json.loads(output.getvalue().split("Diagnostics: ")[1]), failure)
+        self.assertNotIn(private, output.getvalue() + json.dumps(failure))
+
+    def test_terminal_record_failure_keeps_diagnostics_after_recovery(self):
+        original_record = MANAGER.record
+        self.mocks[6].side_effect = [MANAGER.processes.ProcessError("private failure"), None]
+
+        def record(config, registry, event):
+            if event == "previous_program_recovered":
+                raise OSError("private disk path")
+            original_record(config, registry, event)
+
+        with patch.object(MANAGER, "record", side_effect=record), \
+                self.assertRaisesRegex(MANAGER.DeploymentError, "record could not be saved") as caught:
+            MANAGER.switch(self.config, self.candidate, "deployed")
+        self.assertEqual(caught.exception.diagnostics["recovery_status"], "succeeded")
+        self.assertEqual(caught.exception.diagnostics["switch"]["stage"], "health_check")
+        self.assertIn("start:original-python", self.events)
+        self.assertNotIn("private", str(caught.exception))
+
+    def test_status_accepts_old_state_and_filters_persisted_failure_fields(self):
+        args = argparse.Namespace(action="status", config="unused.json")
+        with patch.object(MANAGER.states, "load_config", return_value=self.config):
+            self.assertIsNone(MANAGER.operate(args)["last_failure"])
+            self.registry["last_failure"] = {
+                "action": "SYNTHETIC-PAT", "failed_at": "SYNTHETIC-PAT", "raw": "SYNTHETIC-PAT",
+                "switch": {"stage": ["SYNTHETIC-PAT"], "error_type": "SYNTHETIC-PAT", "errno": True,
+                           "winerror": "SYNTHETIC-PAT", "operation": "SYNTHETIC-PAT"},
+                "recovery": {"stage": "port_check", "errno": 98}, "recovery_status": ["SYNTHETIC-PAT"],
+            }
+            MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
+            result = MANAGER.operate(args)
+        self.assertNotIn("SYNTHETIC-PAT", json.dumps(result))
+        self.assertIsNone(result["last_failure"]["switch"]["errno"])
+        self.assertEqual(result["last_failure"]["recovery"]["errno"], 98)
+
+    def test_switch_record_failures_report_stage_without_extra_launches(self):
+        original_record = MANAGER.record
+        for failed_event in ("switch_started", "deployed"):
+            with self.subTest(failed_event=failed_event):
+                MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
+                self.events.clear()
+                self.port_free = False
+
+                def record(config, registry, event):
+                    if event == failed_event:
+                        raise OSError(13, "private disk path")
+                    original_record(config, registry, event)
+
+                with patch.object(MANAGER, "record", side_effect=record), \
+                        self.assertRaises(MANAGER.DeploymentError) as caught:
+                    MANAGER.switch(self.config, self.candidate, "deployed")
+                failure = caught.exception.diagnostics
+                self.assertEqual(failure["switch"]["stage"], "switch_record")
+                self.assertEqual(failure["switch"]["errno"], 13)
+                self.assertEqual(failure["recovery_status"], "not_attempted")
+                self.assertNotIn("private", str(caught.exception))
+                self.assertEqual(self.events.count("start:candidate-python"), int(failed_event == "deployed"))
+                self.assertNotIn("start:original-python", self.events)
+
+    def test_uncertain_launch_record_failure_keeps_primary_failure_and_blocks_recovery(self):
+        original_record = MANAGER.record
+        self.mocks[5].side_effect = MANAGER.processes.LaunchUncertain("private inspection detail")
+
+        def record(config, registry, event):
+            if event == "process_identity_unavailable_after_launch":
+                raise OSError(13, "private disk path")
+            original_record(config, registry, event)
+
+        with patch.object(MANAGER, "record", side_effect=record), \
+                self.assertRaisesRegex(MANAGER.DeploymentError, "record could not be saved") as caught:
+            MANAGER.switch(self.config, self.candidate, "deployed")
+        self.assertEqual(caught.exception.diagnostics["switch"]["error_type"], "launch_uncertain")
+        self.assertEqual(caught.exception.diagnostics["recovery_status"], "blocked")
+        self.mocks[5].assert_called_once()
+        self.assertNotIn("private", str(caught.exception))
+        self.assertEqual(self.read()["phase"], "switching")
+
+    def test_later_success_keeps_timestamped_last_failure_as_history(self):
+        self.mocks[6].side_effect = [MANAGER.processes.ProcessError("startup failed"), None]
+        with self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.switch(self.config, self.candidate, "deployed")
+        failure = self.read()["last_failure"]
+        self.mocks[6].side_effect = None
+        result = MANAGER.switch(self.config, self.candidate, "deployed")
+        self.assertTrue(result["active"])
+        self.assertEqual(self.read()["last_failure"], failure)
+        self.assertEqual(self.read()["last_event"], "deployed")
 
     def test_rollback_keeps_live_data_and_selects_previous_program(self):
         self.registry.update(current=self.candidate, previous=self.original, process=self.candidate_process)

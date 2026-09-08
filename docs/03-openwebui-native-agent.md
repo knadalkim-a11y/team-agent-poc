@@ -519,7 +519,7 @@ API 동기화는 관리 목록에 지정한 EES 자산·필드만 대상으로 �
 |---|---|
 | `Init` | 기존 Python·작업 폴더·DATA_DIR·IP/포트·uv를 한 번 등록. 기존 서버/데이터를 수정하거나 시작하지 않음 |
 | `Update` | 현재 main의 추적 파일이 깨끗할 때만 `fetch`와 `merge --ff-only`. 사내 Git 프록시는 `-GitProxy`로 전달 |
-| `Status` | 현재 프로그램·관리 프로세스·원복 가능 여부 표시. 키/환경 값 출력 없음 |
+| `Status` | 현재 프로그램·관리 프로세스·원복 가능 여부와 마지막 전환 실패 요약 표시. 키/환경 값 출력 없음 |
 | `Plan` | 지정 커밋의 프로그램 포함 ZIP·모든 파일 해시/크기·wheel RECORD 확인 |
 | `Prepare` | 기존 서버를 둔 채 별도 venv에 정확한 기존 의존성을 오프라인 설치·검사. 운영 환경은 수정하지 않음 |
 | `Deploy` | 등록된 서버 정상 종료 → 전체 기존 data/키/설정 백업·검사 → 준비된 프로그램 시작 → health 확인·기록 |
@@ -607,6 +607,22 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 첫 사내 등록에서는 종전 60초 대기가 만료됐지만 관리 프로세스가 살아 있었고, 이후 `/health`가 `status=true`/HTTP 200으로 응답했습니다. `Start` 시간 초과는 프로세스 종료를 뜻하지 않으므로 현재 `Status`와 `/health`를 보고 계속 진행합니다. 단순 `Status`의 `managed_process_running=true`는 프로세스 생존 확인이며 응답 준비까지 보증하지 않습니다. 정상 응답을 확인한 뒤 대기 시간 변경만을 이유로 다시 재기동하지 않습니다.
 
 새 프로그램의 health가 실패하면 새 프로세스의 정상 종료를 확인하고 기존 프로그램을 같은 현재 데이터로 다시 시작합니다. 프로세스 식별/종료를 확인하지 못하면 자동 복구를 멈춰 이중 서버를 방지합니다. `/health` 성공은 앱의 기동 확인이며 로그인·화면·스트리밍 전체 성공을 뜻하지 않습니다.
+
+<a id="ees-deployment-diagnostics"></a>
+
+**전환 실패 진단:** 보완된 운영 스크립트는 전환 중 오류가 나면 짧은 `Diagnostics` JSON을 출력하고, 기존 `deployment.json`의 `last_failure`에도 저장합니다. `Status`에서는 허용된 진단 필드만 다시 골라 표시합니다. 이전 등록 파일에 이 필드가 없으면 `null`이며 재등록할 필요가 없습니다. 이 진단은 코드 반영 뒤 발생한 실패부터 남고, 과거 오류를 역으로 복원하지 않습니다.
+
+| 필드 | 의미 |
+|---|---|
+| `action`, `failed_at` | 실패한 Deploy/Rollback과 UTC 발생 시각. 마지막 실패는 이후 성공·Stop·Start에도 이력으로 유지하며 현재 `phase`와 구분 |
+| `switch` | 처음 실패한 단계·오류 분류·숫자 코드 |
+| `recovery`, `recovery_status` | 자동 복구 자체의 실패와 결과. `succeeded`는 기존 프로그램 health 확인, `failed`는 복구 실패, `blocked`는 식별 불명으로 미시도, `not_attempted`는 사전 확인·전환 기록 실패로 자동 복구 미시도 |
+| `stage` | `select_program` 환경 선택, `port_check` 포트 확인, `process_start` 실행, `health_check` 응답 대기, `process_stop` 종료, `backup` 백업. `process_record`·`stop_record`·`backup_record`·`switch_record`는 해당 상태 기록 실패 |
+| `operation`, `errno`, `winerror` | `port_probe`는 소켓 준비/정리, `port_bind`는 주소 바인딩. 운영체제가 제공한 정수만 남으며 없으면 `null` |
+
+포트 확인은 같은 검사에서 나온 오류 번호를 보존하며 진단 때문에 다시 bind하거나 재시도하지 않습니다. “포트 사용 불가”를 곧바로 다른 프로세스의 점유로 단정하지 않습니다. health 실패의 자식 프로세스 로그는 자동 해석하지 않으므로 번호가 `null`인 경우에는 [사내 기동 로그 위치](#ees-local-state)에서 필요한 부분만 확인합니다. 진단에는 예외 원문·내부 주소·사용자 경로·키·로그 내용이 포함되지 않습니다. 마지막 실패 기록 저장까지 실패하면 콘솔에 저장 실패 안내와 확보한 진단을 남깁니다.
+
+현재 서버의 적용 상태와 다음 실행 여부는 [STATUS](STATUS.md)를 따릅니다. 진단 기능 확인만을 위해 정상 서버에 실패를 만들거나 Deploy·재기동·기존 연동 검증을 반복하지 않습니다.
 
 첫 전환 후 기존 계정의 대화/Memory·등록 항목이 이어지는지 확인하고, 브라우저 강력 새로고침 한 번 뒤 EES 이름·아이콘과 일반 대화 스트리밍 한 건을 확인합니다. 완료한 연동·PAT·권한 시험과 전체 Prompt 입력은 반복하지 않습니다. 적용 커밋과 결과만 STATUS에 연결합니다.
 

@@ -1,6 +1,7 @@
 """Real local fake-child lifecycle tests; never import or install Open WebUI."""
 
 import importlib.util
+import errno
 import json
 import os
 from pathlib import Path
@@ -12,7 +13,7 @@ import threading
 import time
 import unittest
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 
 MODULE = Path(__file__).resolve().parents[1] / 'scripts' / 'ees_deploy_process.py'
@@ -228,6 +229,89 @@ class ProcessContracts(unittest.TestCase):
     def setUp(self):
         self.saved = {'pid': 123, 'executable': 'python', 'created_at': '456', 'group_id': 123,
                       'host': '127.0.0.1', 'port': 8080, 'log_file': 'local-only.log'}
+
+    def test_bind_failure_preserves_only_numeric_codes_without_reprobe_or_launch(self):
+        private = 'synthetic-private-key C:/private/server.log 192.0.2.123'
+        for code, windows_code in [(errno.EADDRINUSE, 10048), (errno.EADDRNOTAVAIL, 10049),
+                                   (errno.EACCES, 10013)]:
+            with self.subTest(code=code):
+                original = OSError(code, private, 'synthetic-private-file')
+                original.winerror = windows_code
+                resource = MagicMock()
+                listener = resource.__enter__.return_value
+                listener.bind.side_effect = original
+                with patch.object(manager.socket, 'socket', return_value=resource) as probe, \
+                        patch.object(manager.subprocess, 'Popen') as spawn:
+                    with self.assertRaises(manager.ProcessError) as failure:
+                        manager.start_server(sys.executable, '.', {'KEY': private}, '192.0.2.123', 8080, '.')
+                error = failure.exception
+                self.assertEqual((error.errno, error.winerror, error.operation), (code, windows_code, 'port_bind'))
+                self.assertEqual(str(error), 'The listen port is unavailable; no existing process was stopped.')
+                self.assertNotIn('synthetic-private', repr(error))
+                self.assertTrue(error.__suppress_context__)
+                probe.assert_called_once()
+                listener.bind.assert_called_once_with(('192.0.2.123', 8080))
+                spawn.assert_not_called()
+
+    def test_port_probe_boolean_api_remains_available(self):
+        resource = MagicMock()
+        listener = resource.__enter__.return_value
+        listener.bind.side_effect = OSError(errno.EADDRNOTAVAIL, 'synthetic-private')
+        with patch.object(manager.socket, 'socket', return_value=resource) as probe:
+            self.assertIs(manager.port_is_free('127.0.0.1', 8080), False)
+            listener.bind.side_effect = None
+            self.assertIs(manager.port_is_free('127.0.0.1', 8080), True)
+            self.assertIs(manager.port_is_free('127.0.0.1', 8080, raise_on_error=True), True)
+        self.assertEqual((probe.call_count, listener.bind.call_count), (3, 3))
+
+    def test_socket_setup_failure_is_distinct_from_bind_failure(self):
+        for failed_step in ('creation', 'setsockopt'):
+            with self.subTest(failed_step=failed_step):
+                resource = MagicMock()
+                listener = resource.__enter__.return_value
+                original = OSError(errno.EMFILE, 'synthetic-private')
+                if failed_step == 'setsockopt':
+                    listener.setsockopt.side_effect = original
+                with patch.object(manager.os, 'name', 'posix'), \
+                        patch.object(manager.socket, 'socket', return_value=resource,
+                                     side_effect=original if failed_step == 'creation' else None) as probe:
+                    with self.assertRaises(manager.ProcessError) as failure:
+                        manager.port_is_free('127.0.0.1', 8080, raise_on_error=True)
+                self.assertEqual((failure.exception.errno, failure.exception.winerror,
+                                  failure.exception.operation), (errno.EMFILE, None, 'port_probe'))
+                probe.assert_called_once()
+                listener.bind.assert_not_called()
+
+    def test_process_error_rejects_nonnumeric_codes_and_unknown_operation(self):
+        for value in (None, True, 'synthetic-private', 13.0, ['synthetic-private']):
+            with self.subTest(value=value):
+                original = OSError('synthetic-private-error')
+                original.errno = original.winerror = value
+                error = manager.ProcessError('Safe message.', cause=original, operation='synthetic-private')
+                self.assertEqual((error.errno, error.winerror, error.operation), (None, None, None))
+                self.assertEqual(str(error), 'Safe message.')
+
+    def test_launch_failure_does_not_echo_error_or_log_path(self):
+        original = OSError(errno.EACCES, 'synthetic-private-error', 'synthetic-private-file')
+        with tempfile.TemporaryDirectory(prefix='synthetic-private-') as directory, \
+                patch.object(manager, 'port_is_free', return_value=True), \
+                patch.object(manager.subprocess, 'Popen', side_effect=original) as spawn:
+            with self.assertRaises(manager.ProcessError) as failure:
+                manager.start_server(sys.executable, directory, {}, '127.0.0.1', 8080, directory)
+            self.assertEqual(failure.exception.errno, errno.EACCES)
+            self.assertNotIn('synthetic-private', str(failure.exception))
+            self.assertNotIn(directory, str(failure.exception))
+            spawn.assert_called_once()
+
+    def test_health_failure_does_not_echo_saved_log_path(self):
+        identity = {**self.saved, 'log_file': 'C:/synthetic-private/server.log'}
+        with patch.object(manager, 'verify_identity', return_value=False):
+            with self.assertRaisesRegex(manager.ProcessError, 'exited before becoming healthy') as failure:
+                manager.wait_healthy(identity, timeout=1)
+            self.assertNotIn('synthetic-private', str(failure.exception))
+        with self.assertRaisesRegex(manager.ProcessError, 'health timed out') as failure:
+            manager.wait_healthy(identity, timeout=0)
+        self.assertNotIn('synthetic-private', str(failure.exception))
 
     def test_unknown_port_owner_is_never_spawned_or_stopped(self):
         with socket.socket() as listener:
