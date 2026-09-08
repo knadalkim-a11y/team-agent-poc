@@ -710,6 +710,78 @@ candidate_seconds는 로그 생성부터 실패 기록까지의 근사 시간입
 
 패키지/파일명·행 번호·함수명만 출력하고 사내 절대 경로·URL·오류 메시지는 내보내지 않습니다. 허용 목록 밖의 프레임은 위치를 보존해 other로 남깁니다. 마지막 Traceback이 끝 200줄에 없으면 남아 있는 tail의 부분 정보이며, 로그 이동/삭제나 시계 변경이 있으면 시각으로 고른 후보도 확정하지 않습니다. 이 stack은 종료 시점 표본입니다. 네트워크 함수가 보이면 그 호출 경로의 필요한 목적지/캐시를 확인하고, 파일 읽기/컴파일 위치라면 파일 준비 경로를 검토합니다. 어느 쪽도 이 표본만으로 600초 전체의 원인을 확정하지 않습니다.
 
+<a id="ees-candidate-bytecode"></a>
+
+**FileFinder 중단 표본 뒤 후보 캐시 준비:** 반복된 기동 한도 만료 후, 후보의 Python 소스를 실행하지 않고 bytecode 캐시를 준비하는 완화 작업입니다. FileFinder.find_spec의 파일 존재 확인은 컴파일 지연이나 600초 전체의 원인을 증명하지 않습니다. 현재 copy 설치는 uv의 bytecode 사전 컴파일을 지정하지 않으므로 준비할 여지는 있지만 효과는 실제 결과로 판단합니다. 화이트리스트 조건은 유지하며 외부 요청은 하지 않습니다.
+
+같은 PowerShell 창에서 두 블록을 순서대로 실행합니다. 첫 블록은 코드 변수만 준비하고 두 번째 블록이 실행합니다. 2026-09-08T05:33:02Z 실패 후 original로 복구한 기존 prepared 후보에만 사용하며 기존 서버는 유지합니다. 부모·자식 모두 -I -S -B로 시작하고, 원본/후보 앱을 추가 import하거나 원본 Python의 site 초기화로 의존성을 다시 검사하지 않습니다.
+
+```powershell
+$eesCode = @'
+import json,pathlib,subprocess,sys
+sys.path.insert(0,sys.argv[2])
+try:
+    import manage_ees as m
+    cfg=m.states.load_config(pathlib.Path(sys.argv[1]))
+    with m.locked(cfg):
+        reg=m.read_registry(cfg)
+        if (reg['phase']!='idle' or reg['current']['kind']!='original'
+            or reg['last_failure']['failed_at']!='2026-09-08T05:33:02Z'
+            or reg['last_failure']['recovery_status']!='succeeded'): raise ValueError()
+        env=m.states.runtime_environment(cfg)
+        root=m.target_for(cfg,'4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50')
+        meta=json.loads(m.states._regular(root/'release.json').read_bytes())
+        if (meta['state']!='prepared' or meta['source_commit']!=root.name
+            or meta['metadata_sha256']!=m.releases._metadata_digest(meta)
+            or meta['source_python']!=cfg['source_python']
+            or pathlib.Path(meta['target_python'])!=root/'venv/Scripts/python.exe'): raise ValueError()
+        m.states._regular(meta['target_python'],allow_hardlinks=True)
+        site=m.states._safe(root/'venv/Lib/site-packages')
+        if not site.is_dir(): raise ValueError()
+        code="""
+import compileall,json,os,pathlib,py_compile,sys,time
+started=time.monotonic()
+root=pathlib.Path(sys.argv[1])
+files=[]
+def walk_error(e): raise e
+for folder,dirs,names in os.walk(root,onerror=walk_error):
+    for name in dirs+names:
+        p=pathlib.Path(folder)/name
+        if p.is_symlink() or getattr(p.lstat(),'st_file_attributes',0)&0x400: raise ValueError()
+    files.extend(pathlib.Path(folder)/n for n in names if n.endswith('.py') and (pathlib.Path(folder)/n).is_file())
+if not files: raise ValueError()
+failed=sum(not compileall.compile_file(str(p),quiet=2,optimize=0,
+    invalidation_mode=py_compile.PycInvalidationMode.TIMESTAMP) for p in files)
+print(json.dumps({'status':'ready' if failed==0 else 'partial',
+    'checked_files':len(files),'failed_files':failed,
+    'elapsed_seconds':round(time.monotonic()-started,1)}))
+"""
+        r=subprocess.run([meta['target_python'],'-I','-S','-B','-c',code,str(site)],
+            env=env,cwd=cfg['cwd'],stdin=subprocess.DEVNULL,capture_output=True,timeout=900)
+        if r.returncode: raise RuntimeError()
+        print(json.dumps(json.loads(r.stdout)))
+except subprocess.TimeoutExpired:
+    print(json.dumps({'status':'timeout','limit_seconds':900}))
+except Exception as e:
+    print(json.dumps({'status':'stopped','error_type':type(e).__name__}))
+'@
+```
+
+```powershell
+& {
+  $ErrorActionPreference = 'Stop'
+  if (-not $eesCode) { throw '먼저 첫 번째 블록을 실행합니다.' }
+  $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+  $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
+  $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
+  $eesCode | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
+}
+```
+
+배포 잠금과 등록 fingerprint·후보 release.json fingerprint/대상 경로를 확인하고, 후보 Lib/site-packages의 모든 하위 경로(기존 __pycache__ 포함)를 먼저 확인해 링크·Windows reparse point·디렉터리 순회 오류를 거부합니다. 전체 패키지 inventory 비교는 이후 Deploy의 기존 검증에 맡기며 캐시 준비가 이를 대신하지 않습니다. 임시 deployment.lock과 후보 캐시만 쓰고 Python 소스·패키지 버전·DB·키·config/DPAPI·기존 서버 설정은 편집하지 않습니다.
+
+캐시 자식의 제한은 **900초(15분)**이고 부모의 등록 기록 확인은 별도입니다. elapsed_seconds는 자식의 파일 순회·캐시 처리 시간입니다. [compileall](https://docs.python.org/3.11/library/compileall.html)로 기존 유효 캐시를 강제로 다시 만들지 않으며, checked_files는 기존 캐시 확인을 포함한 파일 수입니다. ready는 캐시 작업의 성공으로 기동 성공을 보증하지 않습니다. partial은 test/example 문법 파일 등에서도 발생할 수 있어 환경 손상·재설치 근거로 단정하지 않습니다. timeout/stopped에서도 이미 생성한 정상 캐시가 남을 수 있습니다. 결과를 받은 뒤 다음 배포 여부를 정하고 Deploy를 자동 연결하지 않습니다.
+
 <a id="ees-failure-timing"></a>
 
 **실패까지의 시간과 기동 완료 흔적 확인:** 자동 복구 성공 뒤 추가 Start/Stop/Deploy 없이 읽는 명령입니다. 현재 복구 로그를 제외하고 생성 시각으로 실패 후보를 좁히므로 로그 이동/삭제나 시각 변경이 있었다면 이번 후보로 확정하지 않습니다. 원문 대신 시간·기동 완료 문자열 존재 여부만 출력합니다.

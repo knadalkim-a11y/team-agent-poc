@@ -803,6 +803,12 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 후속은 [같은 로그의 하위 프레임 요약](../docs/03-openwebui-native-agent.md#ees-failed-network-frames)으로 한정함. 독립 검토로 알려진 필터 누락을 먼저 해소하고 모든 프레임의 순서를 보존해 미분류는 other로 표시하도록 함. 끝 200줄의 마지막 traceback에서 최대 12개를 출력하며 패키지/표준 라이브러리의 파일명·행 번호·함수명만 허용함. 실제 경로·코드 행·오류 원문·URL은 출력하지 않음. 이 정지 시점 표본만으로 600초 전체의 인과를 확정하지 않으며 추가 네트워크 시험·앱 import·재배포·캐시 준비는 없음.
 - main fa262e9·열린 PR 없음·로컬 baseline tree 일치를 확인함. 문서 점검 25개/내부 링크 541개·오류 0·검토 후보 0과 diff 검사를 통과함. 명령은 2250자이며 같은 기본 정규식의 합성 예에서 LangChain/stdlib/importlib 분류와 비허용 경로의 other 처리를 확인함. PowerShell 실행·파싱 및 사내 로그 조회는 아직 미실행이며 실제 Windows 통과로 확대하지 않음.
 
+- 위 하위 프레임 명령 뒤 사용자 보고: last_frames는 other 6개 뒤 `importlib:1176:_find_and_load`, `importlib:1138:_find_and_load_unlocked`, `importlib:1078:_find_spec`, `importlib:1507:find_spec`, `importlib:1479:_get_spec`, `importlib:1634:find_spec` 순서임. other의 패키지/함수는 식별하지 않으며 생략된 호출이 무해하다고 판정하지 않음.
+- 등록 Python과 같은 [CPython v3.11.16의 _bootstrap_external.py](https://github.com/python/cpython/blob/v3.11.16/Lib/importlib/_bootstrap_external.py)를 읽어 FileFinder.find_spec의 1634행이 `_path_isfile(full_path)`이고 package 초기화 파일 후보의 존재 확인임을 대조함. 종료 순간의 파일 탐색 표본이며 600초 전체가 파일 검사·컴파일·보안 검사에서 소요됐다는 증거나 앞선 네트워크 대기 부재를 뜻하지 않음. 사내 소스 원문·실제 차단 목적지는 미확인임.
+- 앞서 보류했던 [후보 bytecode 준비](../docs/03-openwebui-native-agent.md#ees-candidate-bytecode)를 한 번의 완화 시도로 안내함. 반복 기동 한도 만료와 사전 컴파일 없는 copy 설치가 검토 근거이며 캐시 누락/효과를 확정하지 않음. 배포 잠금 안에서 fixed 실패 시각·idle/original/복구 성공과 prepared 메타데이터 fingerprint/원본 Python/대상 경로를 확인함. 부모·자식의 -I -S -B와 정적 메타데이터 확인으로 원본 site 초기화/패키지 probe를 피함. 전체 inventory 검증은 이후 Deploy에서 유지함.
+- 독립 검토에서 후보 실행 파일의 링크 검사 누락을 발견해 기존 _regular(allow_hardlinks=True)로 실행 파일과 상위 경로를 검사하도록 보완함. 후보 site-packages의 모든 하위 항목을 캐시 포함 먼저 순회해 링크/reparse point/순회 실패를 거부한 뒤 compileall을 실행함. 임시 배포 잠금과 후보 캐시만 쓰며 앱 import·네트워크 요청·원본 venv/소스/DB/키/config/DPAPI 수정·재설치·화이트리스트 확대는 하지 않음. 자식 제한 900초와 별도 부모 확인 시간을 구분하며 ready/partial/timeout/stopped를 요약함. checked_files는 이미 유효한 캐시 확인을 포함하고 partial/timeout은 손상이나 재설치 근거가 아님. 자동 Deploy는 연결하지 않으며 사내 실행 결과는 대기임.
+- main 844f24b·열린 PR 없음·로컬 baseline tree 일치를 확인함. Linux/Python 3.12.13에서 문서의 부모/자식 Python 본문 구문과 합성 fixture를 검사해 소스 부작용 미실행·소스 바이트 유지·캐시 생성·기존 유효 캐시 내용/mtime 유지·문법 오류 partial 요약·__pycache__ 링크의 쓰기 전 거부를 확인함. 최종 두 블록은 2470자/393자로 각각 2500자 이내이며 부모 구문을 다시 확인함. 문서 점검 25개/내부 링크 542개·오류 0·검토 후보 0과 diff 검사를 통과함. Windows/Python 3.11 실제 실행·PowerShell 파싱·사내 캐시 준비와 기동 성공은 미실행임. 실행 코드/시험 파일은 변경하지 않고 기존 문서에만 절차와 증거를 기록함.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
