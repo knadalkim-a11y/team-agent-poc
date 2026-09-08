@@ -644,19 +644,19 @@ v2는 새 실패의 기록된 이유·실제 health 검사 경과 시간·설정
 
 다음 재배포를 안내하기 전에 **가설·필요한 증거·성공 조건·중단/복구 조건**을 정합니다. GPT가 외부 코드·합성 검사를 처리하고, 사내에서만 가능한 독립 검사는 짧은 명령 한 번으로 묶습니다. 추가 왕복은 이전 결과에 따라 달라지는 검사에만 사용합니다. 별도 진단 서비스·상시 수집·실제 DB를 공유하는 병렬 앱은 추가하지 않습니다.
 
-Diagnose v2 뒤 실행한 고정 import 비교의 추가 결과까지 수신했고, 같은 실행의 정보 수집은 끝냈습니다. 현재 다음 행동은 외부 검증·main 반영을 마친 [시간 기준 수정본](#ees-import-deadline)으로 한 번 비교하는 것입니다. **사내 장애 원인은 여전히 미확인이고, EES 전환 성공은 별도 확인 대상입니다.** 아래 날짜/실패 시각에 맞춘 이전 수동 진단·캐시 절차는 과거 경위이며 처음부터 반복하지 않습니다.
+Diagnose v2 뒤 첫 import 비교의 정보 수집과 [시간 기준 수정](#ees-import-deadline) 후 비교 실행까지 끝냈습니다. 현재 다음 행동은 **[이번 저장 보고서와 현재 검사 프로세스의 읽기 전용 조회](#ees-import-saved-followup)**입니다. 사내 장애 원인은 여전히 미확인이고, EES 전환 성공은 별도 확인 대상입니다. 아래 이전 실행·수동 진단·캐시 절차는 과거 경위이며 처음부터 반복하지 않습니다.
 
 <a id="ees-import-probe"></a>
 
 **기존/후보 NLTK import 비교:** 2026-09-08에 받은 v2 결과는 추정 후보 로그 전체 10,228바이트에서 KeyboardInterrupt만 확인했고 종료 위치는 NLTK → scikit-learn → pandas → importlib의 파일 조회 경로였습니다. 이 위치만으로 pandas 결함이나 파일 접근 지연을 확정하지 않습니다. 이미 빠르게 통과한 NumPy 단독 검사·전체 캐시 작업은 반복하지 않습니다. [수신 근거](../evals/scenarios.md#ees-import-probe).
 
-**기존 결과 수집은 완료했습니다.** 기존 `import_failed/11.157초/ValueError`·후보 `parent_timeout_cleanup_unverified/70.0초`와 표식 T/T/F/F·P=0/U=0, 후보 오류 빈 목록·전체 stderr·self 합 54.817145초·마지막 계측 `pandas.errors.cow`를 받았습니다. [판정과 한계](#ees-import-followup)를 보존하고, 아래 실행은 프로필/시간 기준 결함을 고친 뒤 새 비교 근거를 얻는 한 번으로 한정합니다. Deploy는 실행하지 않습니다.
+**아래 비교는 수정 후 실행까지 이미 완료한 이력입니다. 현재 재실행하지 않습니다.** 첫 실행의 기존 `import_failed/11.157초/ValueError`·후보 `parent_timeout_cleanup_unverified/70.0초`와 표식 T/T/F/F·P=0/U=0, 후보 오류 빈 목록·전체 stderr·self 합 54.817145초·마지막 계측 `pandas.errors.cow`는 [당시 판정과 한계](#ees-import-followup)에 보존합니다. 수정 후에는 `O=OK/5.3 C=CLEANUP/70.0 saved=yes`와 양쪽 `0.5/59.5`를 받았습니다. 다음은 [저장 결과 조회](#ees-import-saved-followup)입니다. 아래 가설·범위·명령은 완료한 비교의 재현 정보입니다.
 
 - 가설: 프로필 필터 수정으로 기존 환경의 비교 기준을 다시 확보하고, 자식 시작이 늦어 부모가 watchdog보다 먼저 중단할 수 있던 시간 기준 결함을 제거하면 후보의 완료/시간 제한을 더 정확하게 관측할 수 있습니다. 이는 기존 pandas 이름을 원인으로 확정하거나 대기 한도를 늘리는 검사가 아닙니다.
 - 범위: 준비된 동일 후보를 사용해 고정 `import nltk`만 기존/후보 Python에서 순차 실행합니다. 앱 entry point를 호출하거나 운영 DATA_DIR·키·등록 환경을 자식에 전달하지 않습니다. 기존 관리 잠금으로 동시 배포를 막고 임시 작업 폴더와 필요한 OS 환경을 사용합니다. HOME·USERPROFILE·APPDATA·LOCALAPPDATA·HOMEDRIVE·HOMEPATH는 사용자 폴더 해석에 필요해 유지하며 이 실제 경로를 외부 요약에 출력하지 않습니다.
 - 한도: 각 환경의 부모 측 시작+60초를 자식 종료 목표로 사용해 Python 초기화 시간도 포함합니다. 자식은 남은 시간만 watchdog에 예약하며, 이미 예산이 소진됐으면 site/NLTK를 시작하지 않고 끝냅니다. 부모의 각 70초 감시와 한도 초과 시 최대 2초 회수 대기는 유지합니다. 부모 시간 제한/정리 미확인이면 다음 비교를 중단합니다. 감시·회수 대기 예산은 두 환경 합계 약 144초이며, OS의 프로세스/파일 생성 호출 자체까지 강제하는 전체 시간 상한은 아닙니다. 배포·복구 대기는 붙지 않고 결과가 느리다는 이유로 자동 재시도하지 않습니다.
 
-시간 기준 수정본의 Windows/Linux CI·main 반영이 [STATUS](STATUS.md)에서 확인된 뒤, 기존 운영 PowerShell 창에서 아래 블록 한 번만 실행합니다. 새 ZIP·Prepare·Deploy는 필요하지 않습니다. 같은 실행의 예전 출력 형식만 바꾸려고 재검사하는 절차가 아닙니다.
+아래는 시간 기준 수정본의 Windows/Linux CI·main 반영 뒤 안내했던 실행 블록입니다. 이번 결과를 이미 수신했으므로 다시 실행하지 않습니다.
 
 ```powershell
 & {
@@ -667,7 +667,7 @@ Diagnose v2 뒤 실행한 고정 import 비교의 추가 결과까지 수신했�
 }
 ```
 
-마지막 **`SEND I1`과 `SEND T1` 두 줄만 타이핑**해 전달합니다. 위의 상세 JSON·모듈 목록·traceback은 옮기지 않습니다. I1 예시는 `SEND I1 O=OK/2.1 C=TIME-IMPORT/60.0 saved=yes`, T1 예시는 `SEND T1 O=0.1/59.9 C=12.0/48.0`이며 모두 실제 결과가 아닙니다. O는 기존, C는 후보입니다. I1의 `/` 뒤는 전체 경과 초, T1의 두 숫자는 예약 지점 도달까지 걸린 초/실제 남은 watchdog 예산 초입니다. 미확인 값은 `-`입니다. 출력은 상태·숫자·허용된 공개 모듈/프레임만 포함합니다. 준비 메타데이터 검사는 선택 대상 확인이며 설치 파일 전체의 무결성/버전 재검증은 아닙니다.
+출력 형식은 마지막 **`SEND I1`과 `SEND T1` 두 줄**이며 이번 값은 이미 수신했습니다. 위의 상세 JSON·모듈 목록·traceback은 옮기지 않습니다. I1 예시는 `SEND I1 O=OK/2.1 C=TIME-IMPORT/60.0 saved=yes`, T1 예시는 `SEND T1 O=0.1/59.9 C=12.0/48.0`이며 모두 실제 결과가 아닙니다. O는 기존, C는 후보입니다. I1의 `/` 뒤는 전체 경과 초, T1의 두 숫자는 watchdog 예약 직전 예산 확인까지 걸린 초/그때 남은 예산 초입니다. 미확인 값은 `-`입니다. 출력은 상태·숫자·허용된 공개 모듈/프레임만 포함합니다. 준비 메타데이터 검사는 선택 대상 확인이며 설치 파일 전체의 무결성/버전 재검증은 아닙니다.
 
 전달 값은 `OK` 완료, `TIME-BOOT` site/NLTK 시작 전 예산 소진, `TIME-SITE`/`TIME-IMPORT`/`TIME-EXIT` 시간 제한 시 관찰 단계, `TIME-?` 단계 미확인, `ERROR` import 실패, `LAUNCH` 실행 실패, `CLEANUP` 검사 자식의 정리 미확인, `STOP` 사용자 중단, `SKIP` 후속 비교 생략, `UNKNOWN` 미완료/분류 불가입니다. `partial=yes`는 일부 출력만 읽은 경우이며 누락 시간은 `-`로 남깁니다. 실패뿐 아니라 CLEANUP 중 관측된 허용 예외도 `errO`/`errC`로 붙습니다. 이 값은 원인 판정이나 추가 배포 지시가 아닙니다.
 
@@ -722,7 +722,57 @@ P는 해당 검사 표식이 있는 python.exe 수이며 launcher/실제 자식�
 
 수정본은 공통 monotonic 기준으로 부모 시작+60초/70초를 정하고, 자식은 남은 시간만 예약합니다. 이미 60초가 지났다면 새 import 없이 TIME-BOOT로 끝내며 `watchdog_arm_seconds`·`watchdog_budget_seconds`를 비식별로 저장하고 T1에 요약합니다. 초기화 자체가 부모 한도까지 끝나지 않는 경우는 계속 CLEANUP으로 남깁니다. [프로세스 공통 시계](https://docs.python.org/3.11/library/time.html#time.monotonic), [watchdog 예약의 상대 시간](https://docs.python.org/3.11/library/faulthandler.html#faulthandler.dump_traceback_later).
 
-다음 한 번의 성공 조건은 수정된 프로필로 original 비교 결과를 확보하고, 후보의 완료 또는 예산 소진/시간 제한과 예약 시점을 함께 관측하는 것입니다. CLEANUP·조회 불가·예외가 나오면 그 결과에서 멈추며 같은 검사를 자동 반복하거나 Deploy로 이어가지 않습니다. 실제 사내 지연 원인·EES 전환 성공은 별도 판정입니다. [검증과 반영 상태](STATUS.md).
+수정 후 한 번 비교한 결과 original은 5.3초에 완료했고 후보는 예산 확인까지 0.5초였지만 CLEANUP/70.0으로 끝났습니다. 이 시점에서 검사를 멈추고 [저장 보고서 조회](#ees-import-saved-followup)로 이어갑니다. CLEANUP을 후보 정상 완료·덤프 부재로 해석하거나 같은 검사를 자동 반복/Deploy로 이어가지 않습니다. 실제 사내 지연 원인·EES 전환 성공은 별도 판정입니다. [검증과 반영 상태](STATUS.md).
+
+<a id="ees-import-saved-followup"></a>
+
+**수정 후 비교 결과의 저장 보고서 조회:** `SEND I1 O=OK/5.3 C=CLEANUP/70.0 saved=yes`, `SEND T1 O=0.5/59.5 C=0.5/59.5`를 수신했습니다. original의 분리 import는 정상 완료했고 후보도 예산 확인 지점까지 약 0.5초였으므로 늦은 초기화 때문에 watchdog 예산을 잃는다는 앞선 가설은 이번 결과를 설명하지 못합니다. CLEANUP은 덤프 유무보다 우선 표시되므로 이 두 줄만으로 이번 watchdog 덤프가 없었다고 판단하지 않습니다. 이전 실행의 T/T/F/F·54.8초·마지막 pandas 이름·P=0/U=0은 이번 값으로 재사용하지 않습니다.
+
+같은 ProbeImports·Deploy는 반복하지 않습니다. 아래 블록은 기본 config와 마지막 비식별 보고서, 현재 검사 표식 프로세스 수만 읽습니다. Python·서버를 실행하거나 종료하지 않습니다. 후보 commit·대상·저장 여부·O/C 상태·반올림한 여섯 시간값을 받은 두 줄과 대조하며 불일치/읽기 실패는 R=?로 남깁니다. UTC 저장 시각도 출력하지만 조건이 같은 다른 실행까지 구분하는 고유 실행 ID는 아닙니다. 저장된 source_commit은 검사기 코드가 아닌 후보 프로그램 commit입니다.
+
+```powershell
+& {
+  $ErrorActionPreference='Stop'
+  $d='R=?'; $f='F=?'; $p='?'; $u='?'
+  function safe($x,$n=60) {
+    $x=[string]$x
+    if(!$x){'-'}elseif($x.Length -le $n -and $x -cmatch '^[A-Za-z0-9_./:<>,?-]+\z'){$x}else{'?'}
+  }
+  function sec($x) {
+    if($null -eq $x -or $x -is [bool]){return '-'}
+    $x=[double]$x
+    if($x -ge 0 -and $x -le 86400){$x.ToString('F1',[Globalization.CultureInfo]::InvariantCulture)}else{'-'}
+  }
+  try {
+    $cfg=Get-Content -LiteralPath (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json') -Encoding UTF8 -Raw | ConvertFrom-Json
+    $r=Get-Content -LiteralPath (Join-Path $cfg.state_root 'last-import-probe.json') -Encoding UTF8 -Raw | ConvertFrom-Json
+    $o=@($r.results | Where-Object program -eq original)
+    $c=@($r.results | Where-Object program -eq candidate)
+    if($o.Count -ne 1 -or $c.Count -ne 1){throw 'report'}
+    $o=$o[0]; $c=$c[0]
+    $v=@($o.elapsed_seconds,$c.elapsed_seconds,$o.watchdog_arm_seconds,$o.watchdog_budget_seconds,$c.watchdog_arm_seconds,$c.watchdog_budget_seconds)
+    $v=($v | ForEach-Object {sec $_}) -join '/'
+    if($r.source_commit -ne '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50' -or $r.recorded_at -notmatch '^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ\z' -or $r.target -ne 'nltk' -or $r.report_saved -ne $true -or $o.status -ne 'completed' -or $c.status -ne 'parent_timeout_cleanup_unverified' -or $v -ne '5.3/70.0/0.5/59.5/0.5/59.5'){throw 'report'}
+    $m=(@($c.watchdog_armed,$c.import_entered,$c.import_completed,$c.watchdog_dump_seen) | ForEach-Object {if($_ -isnot [bool]){'?'}elseif($_){'T'}else{'F'}}) -join ''
+    $sc=(@($c.stdout_scope,$c.stderr_scope) | ForEach-Object {if($_ -eq 'full'){'F'}elseif($_ -eq 'tail'){'T'}else{'?'}}) -join '/'
+    $e=safe (@($c.error_types) -join ',') 40
+    $fr=@($c.watchdog_first_thread_frames | Where-Object {$_ -ne 'other'}) | Select-Object -First 1
+    $f="W=$(safe $c.watchdog_threads_seen 5) F=$(safe $fr 80) T=$(safe (sec $c.observed_self_seconds) 10) L=$(safe $c.last_timed_import)"
+    $d="R=$($r.recorded_at) M=$m X=$(safe $c.exit_code 11) S=$sc E=$e"
+  } catch {}
+  try {
+    $q=@(Get-CimInstance Win32_Process -Filter "Name='python.exe'")
+    $p=@($q | Where-Object {$_.CommandLine -like '*EES_IMPORT_WATCHDOG_ARMED*'}).Count
+    $u=@($q | Where-Object {[string]::IsNullOrWhiteSpace($_.CommandLine)}).Count
+  } catch {}
+  "SEND D1 $d P=$p U=$u"
+  "SEND F1 $f"
+}
+```
+
+`SEND D1`·`SEND F1` 두 줄만 전달합니다. M은 이번 후보의 watchdog_armed/import_entered/import_completed/watchdog_dump_seen 순서(T/F/?), X는 기록된 종료 코드, S는 stdout/stderr의 full=F·tail=T, E는 인식 오류 종류입니다. X는 부모의 종료 시도 후 값일 수 있어 자연 종료 원인으로 해석하지 않습니다. P/U는 이번 조회의 검사 표식 Python/명령행 미열람 개수이며 보고서 읽기와 독립해서 조회합니다. W는 덤프 thread 수, F는 첫 덤프 thread에서 other를 제외한 첫 비식별 프레임(없으면 -), T는 self 합 초, L은 마지막 계측 이름입니다. 첫 thread가 main thread라는 보장은 없고 프레임 하나를 원인으로 단정하지 않습니다. 값이 길거나 허용 문자 밖이면 ?이며 시간 null은 0으로 바꾸지 않습니다.
+
+R=?여도 재검사하지 않고 그 두 줄을 그대로 전달합니다. 이번 조회 결과로 덤프 관측·진행 단계·현재 잔존을 먼저 구분하며, 정리 대상을 확인하지 않은 상태에서 Python 전체 종료·기존 서버 재시작·캐시/패키지 재작업을 안내하지 않습니다. 이 PowerShell 블록은 로컬 실행 환경에 PowerShell이 없어 실제 실행 검증은 하지 않았고, 저장 필드·문법·읽기 전용 동작을 검토했습니다.
 
 <a id="ees-deployment-diagnostics"></a>
 

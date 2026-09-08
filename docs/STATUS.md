@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **후보 오류 빈 목록·전체 stderr·import self 합 54.817145초·마지막 계측 pandas.errors.cow를 수신해 기존 출력 수집을 끝냄.** 세부 지연 원인은 미확정임. 별도로 부모/자식 timeout 시작 기준 차이가 T/T/F/F·정리 미확인을 만들 수 있음을 외부에서 재현하고 공통 deadline과 SEND T1 시간 요약을 수정함. Windows/Linux 검증 후 main에 반영함. [수신·재현·검증](../evals/scenarios.md#ees-import-deadline).
-- 다음 작업 하나: **검증·main 반영된 시간 기준 수정본으로 Update/ProbeImports 한 번 실행 후 SEND I1·T1 두 줄을 받는다.** [수정 이유와 실행](03-openwebui-native-agent.md#ees-import-deadline), [명령](03-openwebui-native-agent.md#ees-import-probe). 감시 예산은 환경당 70초(+회수 최대 2초)로 유지함. 기존 출력의 추가 필드·CIM 재조회·패키지/캐시 재작업·Deploy는 요청하지 않으며, 같은 결과면 자동 반복하지 않음.
+- 이번 작업: **수정 후 비교의 `O=OK/5.3 C=CLEANUP/70.0 saved=yes`, `O=0.5/59.5 C=0.5/59.5`를 수신함.** 기존 환경은 정상 비교 기준을 확보했고 후보는 예산 확인까지 약 0.5초였으므로 늦은 초기화 가설로 이번 결과를 설명할 수 없음. 후보 지연·덤프 관측·현재 잔존은 미확정이며, 이전 실행의 필드나 P=0/U=0을 재사용하지 않음. [수신·판정](../evals/scenarios.md#ees-import-saved-followup).
+- 다음 작업 하나: **저장된 이번 보고서와 현재 검사 프로세스를 읽는 한 블록으로 SEND D1·F1 두 줄을 받는다.** [읽기 전용 조회](03-openwebui-native-agent.md#ees-import-saved-followup)는 기존 저장 필드를 함께 요약하며 새 import를 실행하지 않음. Update/ProbeImports·Deploy·서버 재시작·패키지/캐시 재작업은 안내하지 않음. 보고서 조건 불일치/조회 불가도 출력 그대로 받고 재검사를 자동 반복하지 않음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -21,7 +21,7 @@ Diagnose 운영 코드 원본은 `70e7b9f268029bbc161f03b5f364130d2cd24239`, [PR
 
 Diagnose v2 운영 코드 원본은 `2cb6b55f8ff2dc38ecd8a2ca39d30a7e6951d876`이며 [PR #10](https://github.com/knadalkim-a11y/team-agent-poc/pull/10)의 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34281735662)는 성공했습니다. main 병합은 `50c2a1f7bcaa80b6ee64252bd74bbece30fb098d`입니다. 사내 v2 실행 결과를 수신했으며 전체 checkout SHA 직접 대조·추가 Deploy는 미실행입니다. 기존 준비 프로그램 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`과 DB·키·CA 선택·대기 한도를 유지하며, 프로그램 ZIP을 다시 준비하지 않습니다.
 
-ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa96502b`이며 [PR #14](https://github.com/knadalkim-a11y/team-agent-poc/pull/14)의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34288461465)는 성공했습니다. main 병합은 `4656464b76e94222378872b76d56d3e87adedc76`입니다. 앞선 PR #11~13 근거는 [기본 검사](../evals/scenarios.md#ees-import-probe)·[전달 보완](../evals/scenarios.md#ees-typed-handoff)·[프로필 수정](../evals/scenarios.md#ees-import-followup)에 보존합니다. 사내에서는 타이핑 보완 전 실행의 original ValueError와 후보 전체 stderr의 인식 오류 없음까지 수신했고, 전체 사내 checkout SHA·원본 발생 프레임·후보 세부 지연 원인은 미확인입니다. 이번 수정의 사내 적용·새 비교는 미실행입니다. 기존 프로그램 ZIP의 Deploy Commit은 계속 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`입니다.
+ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa96502b`이며 [PR #14](https://github.com/knadalkim-a11y/team-agent-poc/pull/14)의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34288461465)는 성공했습니다. main 병합은 `4656464b76e94222378872b76d56d3e87adedc76`입니다. 앞선 PR #11~13 근거는 [기본 검사](../evals/scenarios.md#ees-import-probe)·[전달 보완](../evals/scenarios.md#ees-typed-handoff)·[프로필 수정](../evals/scenarios.md#ees-import-followup)에 보존합니다. 수정 후 안내에 따른 새 I1/T1 사용자 보고를 수신했으며, 전체 사내 checkout SHA·후보 세부 지연 원인·실제 EES 전환 성공은 미확인입니다. 기존 프로그램 ZIP의 Deploy Commit은 계속 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`입니다.
 
 <a id="resume-branch"></a>
 
@@ -99,7 +99,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-08 후속: 후보 마지막 네 값을 반영하고 이전 실행 정보 수집을 마침. 54.8초는 기록된 import들의 self 합이며 마지막 pandas 이름은 정체 위치가 아님을 확인함. 부모/자식 deadline 시작 기준 경쟁을 외부 합성 자식으로 재현하고 수정함. Windows/Linux CI에서 지연 시작·예산 소진·실제 NLTK와 Windows venv가 통과한 뒤 main에 반영함. 독립 코드/가이드 검토에는 차단 결함이 없었으며, 감시 예산을 OS 호출까지 강제하는 전체 시간 상한처럼 읽지 않도록 문구를 보완함. [재현·검증·미실행](../evals/scenarios.md#ees-import-deadline). 사내 세부 지연 원인·EES 전환 성공은 미확정이며 초기 [재설계 검토](../evals/scenarios.md#ees-diagnostic-workflow)는 보존함.
+2026-09-08 후속: 수정 후 I1/T1을 반영하고 기존 실행 안내를 완료 이력으로 전환함. CLEANUP이 덤프 유무보다 우선 표시되는 코드와 저장 필드를 대조하고, 독립 검토로 읽기 전용 후속 조회를 확인함. Windows PowerShell 5.1에서 한글 경로를 읽도록 UTF-8을 명시했으며 블록은 2,500자 이내임. 로컬 PowerShell 실제 실행·사내 보고서/CIM 직접 조회는 미실행. 문서·내부 링크·diff를 검사하며 실행 코드와 기존 CI 시험은 변경/반복하지 않음. [근거·한계](../evals/scenarios.md#ees-import-saved-followup), [이전 시간 기준 검증](../evals/scenarios.md#ees-import-deadline), [초기 재설계 검토](../evals/scenarios.md#ees-diagnostic-workflow).
 
 ## 갱신 규칙
 

@@ -917,6 +917,17 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 로컬 검증: Linux/Python 3.12.13에서 import 전용 29개 중 26개 통과/실제 NLTK opt-in 및 Windows 전용 3 skip, 운영/연동 43개 통과. 실제 자식에 2초 예약 전 지연·watchdog 전체 3초/부모 4초를 주어 부모 전에 덤프 종료함을 확인했고, 시작 예산 소진 시 site/NLTK 미실행을 검증함. 구형/부분/잘못된 시간 기록의 미확인 처리·CLEANUP 오류 유지·두 SEND 줄 각각 180자 한도도 통과함. 최초 반영본 문서 25개/575링크·오류/검토 후보 0과 diff 검사 통과. 실제 Windows/NLTK 회귀는 아래 원격 CI에서 확인함.
 - 원격 검증/반영: 원본 `25e4af3972d3b46a232c24216741aececa96502b`의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34288461465)가 성공함. 두 OS에서 지연 시작·예산 소진·실제 NLTK import가 통과했고 Windows venv 및 프로필 제거 ValueError 회귀도 통과함. 배포 모듈 131개(Windows 전체 통과/Linux 3 skip), 운영/연동 43개와 기존 문서·PowerShell 파싱 검사가 통과함. 독립 최종 검토에서 차단 결함은 없었고 감시/회수 예산을 전체 OS 호출의 강제 시간 상한과 구분하는 문구를 보완함. [PR #14](https://github.com/knadalkim-a11y/team-agent-poc/pull/14)를 `4656464b76e94222378872b76d56d3e87adedc76`로 main에 병합함. 사내 실행·실제 지연 원인·EES 전환 성공은 계속 미확인임.
 
+<a id="ees-import-saved-followup"></a>
+
+### 수정 후 import 비교 수신·저장 결과 조회 준비 — 2026-09-08
+
+- 사용자 보고: `SEND I1 O=OK/5.3 C=CLEANUP/70.0 saved=yes`, `SEND T1 O=0.5/59.5 C=0.5/59.5`. 수정 후 안내한 한 번의 비교 결과로 기록하며, 사내 checkout 전체 SHA·원문 파일·실제 프로세스는 직접 대조하지 않음.
+- 판정: original 분리 import는 5.3초에 정상 완료함. 양쪽 0.5초는 부모 기준 시작부터 watchdog 예약 직전 예산 확인 지점까지의 관측값이며 남은 예산은 59.5초임. 따라서 늦은 초기화 때문에 watchdog 예산을 확보하지 못했다는 가설은 이번 후보 결과를 설명하지 못함. 후보는 70초에 정리 미확인으로 끝났으며 실제 지연 원인·현재 잔존·덤프 유무는 두 줄만으로 확정할 수 없음. 코드에서 CLEANUP은 덤프/완료 표식보다 우선 출력됨.
+- 실행 구분: 첫 실행의 ValueError·T/T/F/F·오류 빈 목록·전체 stderr·self 54.817145초·마지막 pandas 이름·P=0/U=0은 당시 근거로 보존하고 이번 실행 값으로 옮기지 않음. original 정상 결과를 이전 ValueError의 발생 위치 확정이나 후보/EES 전환 성공으로 확대하지 않음.
+- 다음 한 번: `saved=yes`에 따라 [기존 보고서 조회](../docs/03-openwebui-native-agent.md#ees-import-saved-followup)로 이번 후보의 표식·관찰 범위·인식 오류·덤프 수/첫 비식별 프레임·import 시간/이름과 현재 CIM의 검사 Python/명령행 미열람 수를 두 줄에 묶음. 파일은 config의 state_root에서 UTF-8로 읽고 후보 커밋·대상·상태·저장 여부·보고한 여섯 시간과 UTC 형식을 대조함. 이는 조건 일치이지 고유 실행 ID 검증은 아님. 반올림 경계 차이 등으로 R=?가 나와도 결과 그대로 받으며 재검사를 자동 실행하지 않음. 이전 P=0/U=0은 새 조회를 대신하지 않음.
+- 검토 범위: 기준 원격 main `8f631669e3bd7f1b7a3f25890874a180ce476ae6`, 열린 PR 0개와 동일한 로컬 전체 트리 `92016092d86b7de7529949565d050fdbb808298b`에서 관련 상태·가이드·저장/분류 코드를 대조함. 독립 읽기 검토로 Windows PowerShell 5.1 한글 경로의 UTF-8 명시를 보완함. 블록은 2,389자로 2,500자 이내이고 새 Python 실행·종료·서버/설정 쓰기·네트워크 요청을 포함하지 않음. null/비정상 시간은 0으로 바꾸지 않고 출력 길이/문자를 제한함. X는 부모 종료 시도 후 값일 수 있으며 첫 덤프 thread가 main thread라는 보장은 없음.
+- 검증·미실행: STATUS·가이드·이 기록 3개만 변경하고 문서·내부 링크·diff를 검사함. 실행 코드·CI를 변경하거나 기존 시험을 반복하지 않음. PowerShell이 없는 로컬 환경에서 이 조회 블록의 실제 실행 검증은 미실행이며, 사내 보고서/CIM 직접 조회와 EES 전환도 미실행임. 앞선 PR #14의 Windows/Linux 검증은 위 날짜별 기록으로 유지함.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
