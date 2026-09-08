@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **선택한 transformers 파일의 캐시 임시 경로 270자에서 FileNotFoundError/errno=2가 발생했다고 보고받음.** 소스 231자·최종 캐시 256자·winerror=null이며 Windows 경로 제한을 강하게 시사하지만 전체 600초 원인으로 확정하지 않음. [실제 출력·범위](../evals/scenarios.md#ees-windows-ca-support). 화이트리스트 조건과 EES 전환 미완료·기존 프로그램 복구 성공 상태는 유지함.
-- 다음 작업 하나: **검증한 같은 후보 캐시 한 개의 저장에 Windows 확장 길이 표기를 적용하고 일반 경로로 읽히는지 확인한다.** [캐시 임시 경로 조치](03-openwebui-native-agent.md#ees-candidate-cache-extended)는 기존 상태/경로 검증을 유지하고 cfile만 지정함. 등록 경로·릴리스 위치·PC 정책을 변경하지 않으며, written/cache_readable 결과를 받은 뒤 남은 캐시와 재배포를 판단함.
+- 이번 작업: **같은 transformers 파일이 written/verify_cache/source_units=231/cache_units=256/cache_readable=true라고 사용자에게 보고받음.** 일반 표기의 임시 경로 270자 실패 뒤 확장 cfile로 저장하고 일반 경로/헤더 확인에 성공한 범위임. [실제 결과·한계](../evals/scenarios.md#ees-windows-ca-support). 나머지 캐시와 두 문법 오류·600초 기동 영향은 미확인이고 기존 프로그램 복구 성공·EES 전환 미완료 상태는 유지함.
+- 다음 작업 하나: **남은 누락 캐시를 한 번에 처리하고 정확한 예상 집계일 때만 같은 후보로 한 번 재배포한다.** [잔여 캐시·조건부 전환](03-openwebui-native-agent.md#ees-candidate-cache-finish)은 기존 헤더 일치 26700/추가 저장 11/문법 오류 2/그 외 오류 0/긴 최종 경로 0/전체 26713을 모두 요구함. 일치하면 기존 Deploy -UseWindowsCA -HealthTimeout 600으로 이어지고 다르면 요약만 출력하고 멈춤. 미분류 문법 오류를 무해하다고 단정하지 않으며 실제 기동/복구 결과로 판단함.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -93,7 +93,7 @@ CA 옵션 운영 코드 원본은 `6a2638be157c125dd12ad70c95de075cbe77d1ce`, ma
 
 ## 최근 점검
 
-최신 main `c24b73d`·AGENTS 변경 없음·열린 PR 없음·로컬 baseline tree 일치에서 임시 경로 270자 실패를 반영하고 Microsoft/CPython 공식 설명을 대조함. 독립 검토로 한 파일의 cfile만 확장하고 일반 경로 읽기 확인을 유지하는 범위를 확인함. Linux/Python 3.12에서 최종 부모가 만드는 실제 자식 문자열/구문·Windows 경로 조건/접두어·명시적 cfile의 헤더/소스 파일명 유지를 확인함. [검증·미실행](../evals/scenarios.md#ees-windows-ca-support). Windows 확장 경로 실제 I/O·PowerShell 파싱·사내 조치·재배포는 미실행이며 기존 문서만 갱신함.
+최신 main `6a62bee`·AGENTS 변경 없음·열린 PR 없음·로컬 baseline tree 일치에서 선택 캐시의 Windows 성공 보고를 반영함. 독립 검토로 남은 캐시 처리와 정확한 수치의 1회 배포 조건을 대조함. Linux/Python 3.12의 명시적 플랫폼/API 어댑터로 캐시 집계·소스/기존 캐시 유지·오래된 헤더/긴 최종 경로/링크 거부·재실행 추가 저장 0을 확인하고 원래 Windows 경로 조건/부모 문자열 구문을 별도 확인함. [검증·미실행](../evals/scenarios.md#ees-windows-ca-support). 배치의 Windows I/O·PowerShell 직접 실행·사내 재배포는 미실행이며 기존 문서만 갱신함.
 
 ## 갱신 규칙
 

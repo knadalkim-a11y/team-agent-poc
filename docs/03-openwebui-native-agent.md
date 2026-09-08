@@ -1032,6 +1032,92 @@ r['stage']='verify_cache'
 저장 후 일반 경로 q.open으로 16바이트 timestamp 헤더를 확인하고 written/cache_readable=true를 받습니다. 이는 선택 캐시의 일반 경로 읽기와 헤더 확인이며 전체 bytecode 무결성·앱 기동 성공은 아닙니다. 실패 시 앞선 클래스/오류 번호/길이 요약을 유지하되, 확장 표기의 실패 경로는 기존 분류에서 other가 될 수 있고 failed_units에는 표기 접두어 길이도 포함될 수 있습니다. 이미 기록된 캐시를 오류 때문에 삭제하지 않습니다. 나머지 캐시 누락과 두 문법 오류·600초 기동 실패의 영향은 후속 결과와 구분합니다.
 
 
+<a id="ees-candidate-cache-finish"></a>
+
+**긴 경로 한 파일 성공 뒤 나머지 캐시와 재배포:** 동일 파일의 written/verify_cache/source_units=231/cache_units=256/cache_readable=true 보고 후 사용하는 절차입니다. 한 파일의 일반 표기 실패→확장 cfile 성공과 일반 경로 읽기를 확인한 범위이며 600초 기동 원인은 아직 확정하지 않습니다.
+
+기존 JSON은 other 파일의 경로를 숨겼으므로 나머지 전체를 처리하려면 후보를 한 번 순회해야 합니다. 아래 첫 블록은 코드를 준비하고 두 번째 블록이 작업을 실행합니다. 기존 서버를 유지한 채 모든 하위 경로의 링크/reparse를 먼저 검사한 뒤, 기존 캐시는 일반 경로의 16바이트 timestamp 헤더만 확인해 유지하고 없는 캐시만 같은 확장 cfile 방식으로 저장합니다. 앱 import·소스 수정·외부 요청·PC 정책/등록 경로 변경은 하지 않습니다. 기존 부모의 후보/복구 상태·준비 메타데이터/경로 검사·잠금과 900초 자식 제한을 유지합니다.
+
+```powershell
+$eesFinish = @'
+import importlib.util as u,json,os,pathlib,py_compile,struct,sys,warnings
+warnings.simplefilter('ignore')
+root=pathlib.Path(sys.argv[1])
+if sys.platform!='win32': raise ValueError()
+def units(x): return len(str(x).encode('utf-16-le'))//2
+files=[]
+def walk_error(e): raise e
+for folder,dirs,names in os.walk(root,onerror=walk_error):
+    for name in dirs+names:
+        p=pathlib.Path(folder)/name
+        if p.is_symlink() or getattr(p.lstat(),'st_file_attributes',0)&0x400: raise ValueError()
+    files.extend(pathlib.Path(folder)/n for n in names if n.endswith('.py') and (pathlib.Path(folder)/n).is_file())
+if not files: raise ValueError()
+r=dict(checked_files=len(files),existing_valid=0,written=0,syntax_errors=0,other_errors=0,long_final=0)
+for p in files:
+    try:
+        q=pathlib.Path(u.cache_from_source(str(p),optimization=''))
+        s=p.stat()
+        expected=u.MAGIC_NUMBER+struct.pack('<III',0,int(s.st_mtime)&0xffffffff,s.st_size&0xffffffff)
+        try:
+            with q.open('rb') as f: header=f.read(16)
+        except FileNotFoundError: header=None
+        if header is not None:
+            r['existing_valid' if header==expected else 'other_errors']+=1
+            continue
+        try: compile(p.read_bytes(),'<candidate>','exec',dont_inherit=True,optimize=0)
+        except SyntaxError:
+            r['syntax_errors']+=1
+            continue
+        if units(q)>=260:
+            r['long_final']+=1
+            continue
+        if (not q.is_absolute() or len(q.drive)!=2 or q.drive[1]!=':'
+            or any(x.endswith((' ','.')) for x in q.parts[1:])): raise ValueError()
+        py_compile.compile(str(p),cfile=chr(92)*2+'?'+chr(92)+str(q),
+            doraise=True,quiet=0,optimize=0,invalidation_mode=py_compile.PycInvalidationMode.TIMESTAMP)
+        with q.open('rb') as f: header=f.read(16)
+        if header!=expected: raise ValueError()
+        r['written']+=1
+    except Exception: r['other_errors']+=1
+print(json.dumps(r))
+'@
+```
+
+```powershell
+& {
+  $ErrorActionPreference = 'Stop'
+  if (-not $eesCode -or -not $eesFinish) { throw '같은 창의 앞선 코드와 첫 블록이 필요합니다.' }
+  $eesParts = [regex]::Split($eesCode, '"""')
+  if ($eesParts.Count -ne 3 -or $eesParts[1] -notmatch 'compileall\.compile_file' -or
+      $eesParts[0] -notmatch '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50') {
+    throw '앞선 후보 코드가 다릅니다.'
+  }
+  $eesRun = $eesParts[0] + '"""' + $eesFinish + '"""' + $eesParts[2]
+  $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+  $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
+  $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
+  $eesRaw = $eesRun | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
+  if ($LASTEXITCODE -ne 0) { throw '캐시 작업이 중단됐습니다.' }
+  try { $global:eesCacheBatch = $eesRaw | ConvertFrom-Json }
+  catch { throw '캐시 결과를 해석하지 못했습니다.' }
+  $eesResult = $global:eesCacheBatch
+  $eesResult | ConvertTo-Json -Compress
+  if ($eesResult.checked_files -ne 26713 -or $eesResult.existing_valid -ne 26700 -or
+      $eesResult.written -ne 11 -or $eesResult.syntax_errors -ne 2 -or
+      $eesResult.other_errors -ne 0 -or $eesResult.long_final -ne 0) {
+    Write-Output '예상과 달라 배포하지 않았습니다. 위 요약을 보내주세요.'
+    return
+  }
+  & (Join-Path $eesScripts 'manage-ees.ps1') -Action Deploy -Commit '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50' -UseWindowsCA -HealthTimeout 600
+}
+```
+
+checked_files=26713, existing_valid=26700, written=11, syntax_errors=2, other_errors=0, long_final=0을 모두 만족한 경우에만 같은 준비 후보의 Deploy -UseWindowsCA -HealthTimeout 600을 한 번 실행합니다. 두 번째 블록은 이 조건에서 기존 서버 종료·백업·후보 기동으로 이어지므로 이를 실행 전에 안내합니다. 숫자가 다르거나 부모/캐시 검사가 중단되면 결과만 남기고 서버 전환은 하지 않습니다. JSON 요약은 eesCacheBatch 변수에도 보존해 다시 복사/검사하지 않고 후속에서 사용할 수 있게 합니다.
+
+existing_valid는 일반 경로에서 현재 소스와 timestamp 헤더가 일치한 개수이며 bytecode 전체 무결성 판정은 아닙니다. 최종 일반 캐시 경로 260 이상은 long_final로, 기존 헤더 불일치/읽기/저장 오류는 other_errors로 집계해 배포를 막습니다. SyntaxError 두 개는 수정/삭제하지 않고 무해하다고 분류하지 않습니다. 그중 other/test=False의 실제 기동 영향도 미확인으로 유지한 채 기존 복구 관리가 있는 Deploy 결과로 확인합니다. 같은 준비 후보·CA 옵션·600초 한도를 유지하고 새 ZIP/Prepare/Init을 요구하지 않습니다. 후보 기동 실패 시 기존 복구 동작을 따르며, 캐시 완료를 데이터/화면/모델 응답 성공으로 확대하지 않습니다.
+
+
 <a id="ees-failure-timing"></a>
 
 **실패까지의 시간과 기동 완료 흔적 확인:** 자동 복구 성공 뒤 추가 Start/Stop/Deploy 없이 읽는 명령입니다. 현재 복구 로그를 제외하고 생성 시각으로 실패 후보를 좁히므로 로그 이동/삭제나 시각 변경이 있었다면 이번 후보로 확정하지 않습니다. 원문 대신 시간·기동 완료 문자열 존재 여부만 출력합니다.
