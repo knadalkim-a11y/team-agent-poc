@@ -750,6 +750,16 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 성공 시 마지막 JSON과 기존 주소의 EES 이름/아이콘·기존 대화·일반 채팅을 한 번에 확인하고, 실패 시 재실행 전에 고정 안내 Operation stopped와 Diagnostics만 받도록 안내함. 전체 내부 로그·config·키/주소·경로를 요구하지 않음. 이 시점의 Deploy는 명령 전달 단계이며 사내 실행/결과·EES 전환 성공은 미확인임.
 - 최신 main·열린 PR 없음·로컬 무변경·같은 tree에서 지침/상태와 관련 코드/가이드를 대조함. STATUS·이 평가 기록만 갱신함. 로컬 Linux/Python 3.12.13의 `python scripts/check_docs.py`: **DOCS OK, 25 files / 530 links / errors=0 / review_candidates=0**, `git diff --check` 통과. 코드/시험·실행 설정 변경과 코드 시험/CI·독립 검토·사내 health/연동 재시험은 반복하지 않음.
 
+<a id="ees-retransition-health-failure"></a>
+
+#### 재전환 health 실패·기존 프로그램 자동 복구 보고 — 2026-09-08
+
+- 앞서 전달한 준비 후보 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`의 `Deploy -HealthTimeout 600`에 대해 사용자가 실패를 보고함. 고정 안내는 이전 프로그램이 다시 실행 중이고 기존 데이터를 복원하거나 교체하지 않았다는 내용임. Diagnostics는 `deploy, 2026-09-08, health_check, proess, null, null, null, null, succeeded`로 전사됨. 필드 순서에 따라 operation/errno/winerror/recovery=null, recovery_status=succeeded로 해석하며 `proess`는 원본 스키마의 process 분류에 대응하는 것으로 보되 JSON 원문·전체 UTC 시각 직접 대조는 미실행임.
+- 후보 전환은 실패했으며 기존 프로그램 health 확인을 포함한 자동 복구 성공은 명령 출력의 사용자 보고로 인정함. 데이터 복원/교체 미실행을 데이터 전체 무변경·화면/대화/연동 재검증으로 확대하지 않음. 이번 실패는 health 단계이며 숫자 오류 코드가 없어 후보 기동 중 종료·대기 만료·프로세스 확인 오류를 아직 구분하지 못함. 최초 사내 전환의 실패 원인과 같다고 단정하지 않음.
+- 복구 성공 뒤 registry.process는 기존 프로그램 identity/log_file로 교체됨을 코드에서 확인함. 다음은 현재 로그를 제외하고 실패 시각·복구 로그보다 앞선 생성 시각으로 좁힌 후보 로그를 사내에서 읽는 것임. 수정 시각 최신순이나 종료 정리의 KeyboardInterrupt만으로 원인을 판정하지 않음. 후보 로그 연결은 시각에 근거한 추정이며 이동/삭제·후속 기동이 있으면 재확인함. [진단 안내](../docs/03-openwebui-native-agent.md#ees-deployment-diagnostics).
+- 사용자는 Git 프록시 설정도 완료했다고 보고함. 앞선 안내는 사용자 전역 `http.https://github.com.proxy`였으나 실제 값/설정 원문은 미수집임. 이후 Update 안내에서 저장된 Git 설정을 사용할 수 있도록 선택 인자로 정리함. 배포 health 요청은 ProxyHandler({})로 프록시를 사용하지 않으며 Git 설정 완료를 이번 health 실패의 원인이나 해결 증거로 간주하지 않음.
+- 최신 main `88ae12b5277ea51201eb7421dabf35a172ca3165`·열린 PR 없음·로컬 tree 일치와 같은 원본의 AGENTS/STATUS를 확인함. 코드/등록 환경은 변경하지 않으며 Deploy·재기동·Prepare·Init·DB 복원·대기 시간 증가를 반복하지 않음. 읽기 절차의 후보/복구 로그 구분만 별도 검토했으며 사내 로그 명령 실행과 원인 확정은 대기임. 로컬 `python scripts/check_docs.py`: **DOCS OK, 25 files / 533 links / errors=0 / review_candidates=0**, `git diff --check` 통과. 코드 시험/CI·사내 실행 검증은 미실행이며 현재 환경에 PowerShell은 없음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

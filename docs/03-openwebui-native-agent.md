@@ -518,7 +518,7 @@ API 동기화는 관리 목록에 지정한 EES 자산·필드만 대상으로 �
 | Action | 동작 |
 |---|---|
 | `Init` | 기존 Python·작업 폴더·DATA_DIR·IP/포트·uv를 한 번 등록. 기존 서버/데이터를 수정하거나 시작하지 않음 |
-| `Update` | 현재 main의 추적 파일이 깨끗할 때만 `fetch`와 `merge --ff-only`. 사내 Git 프록시는 `-GitProxy`로 전달 |
+| `Update` | 현재 main의 추적 파일이 깨끗할 때만 `fetch`와 `merge --ff-only`. 저장된 Git 프록시 설정을 사용하거나 해당 명령에만 `-GitProxy`로 전달 |
 | `Status` | 현재 프로그램·관리 프로세스·원복 가능 여부와 마지막 전환 실패 요약 표시. 키/환경 값 출력 없음 |
 | `Plan` | 지정 커밋의 프로그램 포함 ZIP·모든 파일 해시/크기·wheel RECORD 확인 |
 | `Prepare` | 기존 서버를 둔 채 별도 venv에 정확한 기존 의존성을 오프라인 설치·검사. 운영 환경은 수정하지 않음 |
@@ -624,21 +624,20 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 
 현재 서버의 적용 상태와 다음 실행 여부는 [STATUS](STATUS.md)를 따릅니다. 진단 기능 확인만을 위해 정상 서버에 실패를 만들거나 Deploy·재기동·기존 연동 검증을 반복하지 않습니다.
 
+**health 실패 뒤 자동 복구가 성공한 경우:** 현재 `deployment.json`의 `process.log_file`은 복구된 기존 프로그램의 로그입니다. 실패 후보 로그 경로는 별도로 보존하지 않으므로 현재 로그를 제외하고, 실패 시각과 복구 로그보다 앞선 **생성 시각**으로 직전 기동 로그를 좁힙니다. 수정 시각 최신순은 현재 서버의 로그를 고를 수 있습니다. 로그 이동/삭제나 이후 재기동이 있었다면 시각만으로 이번 후보를 확정하지 않습니다. `health_check`와 숫자 코드 null만으로 기동 중 종료·응답 대기 만료·프로세스 확인 오류를 구분할 수 없으며, 종료 정리 중 찍힌 `KeyboardInterrupt`도 최초 실패 원인으로 단정하지 않습니다. 로그는 사내에서 읽고 필요한 오류 종류·기동 완료 여부만 비식별로 전달합니다.
+
 <a id="ees-resume-prepared-release"></a>
 
 **준비 완료한 후보로 재전환을 이어갈 때:** 프로그램 준비 성공 후 기존 서버로 복구한 경우에는 [STATUS의 프로그램 원본](STATUS.md)을 유지합니다. 운영 스크립트 갱신과 프로그램 교체는 별개이므로 Git 최신 커밋을 `Deploy -Commit`에 넣거나 프로그램을 다시 다운로드·Prepare하지 않습니다.
 
-첫 단계는 기존 운영 PowerShell에서 아래 블록으로 checkout만 갱신하고 현재 관리 상태를 읽는 것입니다. 새 창이면 이전에 사용한 사내 Git 프록시 값을 `$gitProxy`에 로컬로 설정합니다. 값이나 config 원문을 외부에 전달하지 않습니다. 실행 정책 오류는 기존 [Windows 적용 안내](#기존-windows-서버에-적용)를 따르며 이 블록이 정책을 변경하지는 않습니다.
+첫 단계는 기존 운영 PowerShell에서 아래 블록으로 checkout만 갱신하고 현재 관리 상태를 읽는 것입니다. 저장한 GitHub.com용 Git 프록시 설정이 있으면 `$gitProxy`를 다시 입력할 필요가 없습니다. 임시 프록시가 필요한 경우에만 이전 값을 `$gitProxy`에 로컬로 설정하고 Update 호출에 `-GitProxy $gitProxy`를 추가합니다. 값이나 config 원문을 외부에 전달하지 않습니다. 실행 정책 오류는 기존 [Windows 적용 안내](#기존-windows-서버에-적용)를 따르며 이 블록이 정책을 변경하지는 않습니다.
 
 ```powershell
 & {
     $ErrorActionPreference = 'Stop'
     $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
-    if ([string]::IsNullOrWhiteSpace($gitProxy)) {
-        throw '기존 사내 Git 프록시를 $gitProxy에 설정해 주세요.'
-    }
     $eesManager = Join-Path $eesRepo 'scripts\manage-ees.ps1'
-    & $eesManager -Action Update -GitProxy $gitProxy
+    & $eesManager -Action Update
     if (-not $?) { throw 'Git 갱신이 완료되지 않았습니다.' }
     $eesHead = & git -C $eesRepo rev-parse HEAD
     if ($LASTEXITCODE -ne 0) { throw '갱신 커밋을 확인하지 못했습니다.' }
