@@ -39,8 +39,11 @@ print("EES_IMPORT_COMPLETED", flush=True)
 
 
 def _environment():
+    # Standard profile locations are needed by package initialization (including
+    # NLTK's default data directory); removing them can create a probe-only error.
     keep = {"PATH", "PATHEXT", "SYSTEMROOT", "WINDIR", "SYSTEMDRIVE", "COMSPEC",
-            "TEMP", "TMP", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE"}
+            "TEMP", "TMP", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE",
+            "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "HOMEDRIVE", "HOMEPATH"}
     return {key: value for key, value in os.environ.items() if key.upper() in keep}
 
 
