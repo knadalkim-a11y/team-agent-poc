@@ -7,8 +7,9 @@ import io
 import json
 from pathlib import Path
 import tempfile
+from types import ModuleType
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -610,7 +611,7 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.assertEqual(self.read()["last_failure"]["recovery_status"], "succeeded")
 
     def test_windows_ca_cli_rejects_other_actions_and_forwards_deploy_option(self):
-        for action in ("init", "status", "diagnose", "plan", "prepare", "rollback", "start", "stop"):
+        for action in ("init", "status", "diagnose", "probe-imports", "plan", "prepare", "rollback", "start", "stop"):
             with self.subTest(action=action), patch.object(MANAGER, "operate") as operate, \
                     redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
                 MANAGER.main([action, "--config", "unused.json", "--use-windows-ca"])
@@ -620,6 +621,169 @@ class DeploymentTransactionTests(unittest.TestCase):
                 patch.object(MANAGER, "switch", return_value={}) as switch, redirect_stdout(io.StringIO()):
             MANAGER.main(["deploy", "--config", "unused.json", "--commit", COMMIT, "--use-windows-ca"])
         self.assertTrue(switch.call_args.kwargs["use_windows_ca"])
+
+
+class ImportProbeIntegrationTests(unittest.TestCase):
+    """Use static prepared files; an import probe must not reach app operations."""
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name).resolve()
+        self.source = self.root / "original-python"
+        self.source.write_bytes(b"synthetic interpreter, never executed")
+        self.config = {
+            "schema_version": 1, "config_path": str(self.root / "config.json"),
+            "state_root": str(self.root), "source_python": str(self.source),
+            "releases_dir": str(self.root / "releases"),
+        }
+        MANAGER.write_json(Path(self.config["config_path"]), self.config)
+        self.registry = {
+            "schema_version": 1, "phase": "idle",
+            "current": {"kind": "original", "python": str(self.source), "source_commit": None},
+            "process": {"pid": 123, "executable": str(self.source)},
+            "last_failure": {"failed_at": "2026-09-08T07:35:31Z", "recovery_status": "succeeded"},
+        }
+        MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
+        self.target = Path(self.config["releases_dir"]) / COMMIT
+        self.candidate = self.target / "venv" / (
+            "Scripts/python.exe" if MANAGER.os.name == "nt" else "bin/python")
+        self.candidate.parent.mkdir(parents=True)
+        self.candidate.write_bytes(b"synthetic candidate, never executed")
+        self.metadata = {
+            "schema_version": 1, "state": "prepared", "source_commit": COMMIT,
+            "webui_version": MANAGER.releases.branding.VERSION,
+            "source_python": str(self.source), "venv_dir": str(self.target / "venv"),
+            "target_python": str(self.candidate), "python_executable": str(self.candidate),
+        }
+        self.write_metadata(self.metadata)
+        self.probe = ModuleType("ees_deploy_imports")
+        self.probe.compare = Mock(return_value={"status": "complete"})
+        self.probe.render = Mock(return_value="EES import comparison")
+        module_patch = patch.dict("sys.modules", {"ees_deploy_imports": self.probe})
+        module_patch.start()
+        self.addCleanup(module_patch.stop)
+        self.forbidden = []
+        for module, name in (
+                (MANAGER.states, "runtime_environment"), (MANAGER.states, "backup_state"),
+                (MANAGER.releases, "validate_prepared"), (MANAGER.processes, "start_server"),
+                (MANAGER.processes, "stop_server"), (MANAGER.processes, "wait_healthy"),
+                (MANAGER, "record"), (MANAGER, "switch")):
+            override = patch.object(module, name, side_effect=AssertionError("app operation in import probe"))
+            self.forbidden.append(override.start())
+            self.addCleanup(override.stop)
+
+    def write_metadata(self, metadata, *, corrupt_digest=False):
+        value = dict(metadata)
+        value["metadata_sha256"] = (
+            "0" * 64 if corrupt_digest else MANAGER.releases._metadata_digest(value))
+        MANAGER.write_json(self.target / "release.json", value)
+
+    def assert_unmodified(self, registry_before):
+        self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), registry_before)
+        self.assertFalse((self.root / "deployment.lock").exists())
+        for operation in self.forbidden:
+            operation.assert_not_called()
+
+    def test_probe_passes_only_registered_interpreters_and_preserves_failure_record(self):
+        before = MANAGER.registry_path(self.config).read_bytes()
+        prepared_before = (self.target / "release.json").read_bytes()
+
+        def compare(original, candidate):
+            self.assertTrue((self.root / "deployment.lock").exists())
+            self.assertEqual((original, candidate), (str(self.source), str(self.candidate)))
+            return {"status": "complete"}
+
+        self.probe.compare.side_effect = compare
+        result = MANAGER.probe_imports(self.config, COMMIT)
+        self.probe.compare.assert_called_once_with(str(self.source), str(self.candidate))
+        self.assertEqual(result, {"status": "complete", "source_commit": COMMIT})
+        self.assertEqual((self.target / "release.json").read_bytes(), prepared_before)
+        self.assert_unmodified(before)
+
+    def test_metadata_mismatch_blocks_both_imports_even_with_recomputed_digest(self):
+        cases = {
+            "schema": {"schema_version": 2}, "boolean_schema": {"schema_version": True},
+            "unprepared": {"state": "preparing"}, "commit": {"source_commit": "b" * 40},
+            "version": {"webui_version": "unexpected"},
+            "source": {"source_python": str(self.candidate)},
+            "venv": {"venv_dir": str(self.root)},
+            "target": {"target_python": str(self.source)},
+            "executable": {"python_executable": str(self.source)},
+        }
+        before = MANAGER.registry_path(self.config).read_bytes()
+        for name, changed in cases.items():
+            with self.subTest(field=name):
+                self.write_metadata(dict(self.metadata, **changed))
+                with self.assertRaises(MANAGER.DeploymentError):
+                    MANAGER.probe_imports(self.config, COMMIT)
+                self.probe.compare.assert_not_called()
+                self.assert_unmodified(before)
+
+    def test_changed_digest_or_missing_candidate_blocks_imports(self):
+        before = MANAGER.registry_path(self.config).read_bytes()
+        self.write_metadata(self.metadata, corrupt_digest=True)
+        with self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.probe_imports(self.config, COMMIT)
+        self.write_metadata(self.metadata)
+        self.candidate.unlink()
+        with self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.probe_imports(self.config, COMMIT)
+        self.probe.compare.assert_not_called()
+        self.assert_unmodified(before)
+
+    def test_incomplete_switch_or_active_candidate_blocks_imports(self):
+        cases = (
+            {"phase": "switching"}, {"phase": "recovery_required"},
+            {"pending": {"kind": "release", "source_commit": COMMIT}},
+            {"launch_uncertain": True},
+            {"current": {"kind": "release", "source_commit": COMMIT, "python": str(self.candidate)}},
+        )
+        for changed in cases:
+            with self.subTest(state=changed):
+                MANAGER.write_json(MANAGER.registry_path(self.config), dict(self.registry, **changed))
+                before = MANAGER.registry_path(self.config).read_bytes()
+                with self.assertRaises(MANAGER.DeploymentError):
+                    MANAGER.probe_imports(self.config, COMMIT)
+                self.probe.compare.assert_not_called()
+                self.assert_unmodified(before)
+
+    def test_existing_operator_lock_is_preserved_and_blocks_imports(self):
+        lock = self.root / "deployment.lock"
+        lock.write_bytes(b"another operation")
+        before = MANAGER.registry_path(self.config).read_bytes()
+        with self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.probe_imports(self.config, COMMIT)
+        self.probe.compare.assert_not_called()
+        self.assertEqual(lock.read_bytes(), b"another operation")
+        self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+
+    def test_probe_failure_releases_lock_without_recording_a_deployment_failure(self):
+        before = MANAGER.registry_path(self.config).read_bytes()
+        self.probe.compare.side_effect = OSError("synthetic probe failure")
+        with self.assertRaises(OSError):
+            MANAGER.probe_imports(self.config, COMMIT)
+        self.assert_unmodified(before)
+
+    def test_cli_requires_commit_before_any_operation(self):
+        with patch.object(MANAGER, "operate") as operate, redirect_stderr(io.StringIO()), \
+                self.assertRaises(SystemExit) as error:
+            MANAGER.main(["probe-imports", "--config", self.config["config_path"]])
+        self.assertEqual(error.exception.code, 2)
+        operate.assert_not_called()
+        self.probe.compare.assert_not_called()
+
+    def test_cli_routes_probe_result_to_short_renderer(self):
+        before = MANAGER.registry_path(self.config).read_bytes()
+        output = io.StringIO()
+        with patch.object(MANAGER.states, "load_config", return_value=self.config), redirect_stdout(output):
+            result = MANAGER.main([
+                "probe-imports", "--config", self.config["config_path"], "--commit", COMMIT])
+        self.assertEqual(result, 0)
+        self.probe.compare.assert_called_once_with(str(self.source), str(self.candidate))
+        self.probe.render.assert_called_once_with({"status": "complete", "source_commit": COMMIT})
+        self.assertEqual(output.getvalue().strip(), "EES import comparison")
+        self.assert_unmodified(before)
 
 
 if __name__ == "__main__":
