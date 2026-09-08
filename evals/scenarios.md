@@ -949,6 +949,19 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 코드 대조: `build_ees_webui.py`의 공식 wheel SHA·정확한 패치 위치/횟수·브랜딩 자산·manifest/RECORD 생성과 기존 시험은 재사용 가능함. 빌더는 설치를 하지 않으며 기존 환경 직접 적용·복원 기능은 아직 없음. `prepare_release()`의 새 venv/전체 의존성 설치와 자동 switch/recovery는 이전 방식으로 보존함. 실제 uvx 설치의 캐시/공유 링크·재시작 경로와 original/rollback 기록의 의미는 직접 적용 구현 전에 검토할 사항임. 기존 코드를 삭제하거나 이 기능을 완성된 것으로 기록하지 않음.
 - 검토·반영 범위: 기준 main `1bc26e1cc4da4821392f891ce0290d41c103b3b2`, 열린 PR 0개, 동일한 로컬 tree `0c3ff23fa62cff7624a26554a926cb55129c5c01`에서 관련 코드·가이드를 대조하고 독립 읽기 검토를 수행함. README·AGENTS·STATUS·Native 가이드·CHANGELOG·이 기록 6개 문서에 결정과 진단 종료를 반영함. 새 문서/서비스/설치기를 추가하지 않음. 문서·내부 링크·diff를 점검하며 실행 코드·CI·사내 설치/서버/데이터·실제 적용 시험은 변경/실행하지 않음.
 
+<a id="ees-wrapper-design"></a>
+
+### 앱 파일만 적용하는 래퍼 설계·계획·독립 검토 — 2026-09-08
+
+- 요청·범위: 사용자가 확정한 공식 Open WebUI + 우리 래퍼 방식으로 새 설계·계획·검토를 요청함. 이번 변경은 설계 문서이며 구현/설치/배포로 확대하지 않음. 기준 main `0794220138755972241bf0e58f77b95e0d212c34`, 열린 PR 0개, 로컬 tree `e1ccb278acad708572a5ca91180837ef64829e03` 일치에서 관련 코드를 읽음. 사내 후보 import 진단 중단과 원인 미해결 판정은 유지함.
+- 선택: 수정된 Open WebUI wheel의 앱·dist-info를 래퍼 관리 프로그램 폴더 한 곳에 두고 기존 Python/의존성으로 실행하는 방식. 활성 앱 1개·직전 프로그램 보관본 1개, Apply/Restore와 기존 Update/Start/Stop/Status로 한정함. 새 venv·의존성 설치·전역 PYTHONPATH·import hook·별도 서비스·자동 전환/복구를 추가하지 않음. Restore는 직전 적용 전 상태이며 최초에는 원본 앱 선택, 복원 후 재호출은 변경 없음으로 정의함. [설계 원본](../docs/03-openwebui-native-agent.md#ees-wrapper-design).
+- 대안 검토: [uv tool 환경 공식 설명](https://docs.astral.sh/uv/concepts/tools/#tool-environments)에서 uvx 캐시의 폐기 가능성과 수동 변경 비권장을 확인해 현재 환경에 직접 패치/pip 재설치를 기본안으로 삼지 않음. uv tool install도 별도 tool 환경을 만드는 방식이므로 즉시 대체하지 않음. 앱 폴더 분리는 캐시/공유 파일을 수정하지 않지만 기존 interpreter의 캐시 수명 문제까지 해결하지는 않음. Python 경로가 사라지면 자동 설치하지 않고 멈추며 영구 환경 이전을 이번 선행 과제로 늘리지 않음.
+- 기존 코드 대조: `build_ees_webui.py`는 `_app` 전체 이동·dist-info/RECORD 변경까지 포함하므로 changed_files만 복사하면 불완전함. 검증된 wheel의 전체 앱·metadata와 기존 자산/패치 조건을 재사용하도록 함. `ees_deploy_release._wheel`은 기존 해시/RECORD 검증에 사용 가능하지만 새 앱 추출의 purelib/경로 제한은 구현 시 보완해야 함. 현재 manager의 Stop은 phase/pending을 초기화하고 Start는 already_running으로 일찍 반환할 수 있어, 사내 수정 미완료 정보 보존과 사전 검사가 이 경로에서도 유지되도록 설계함. 구형 도구가 새 상태 형식을 거부하고 예전 Deploy/Rollback과 혼용되지 않게 해야 함.
+- upstream 정적 대조: 공식 [v0.11.3 serve](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/__init__.py), [env](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/env.py), [main](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/main.py), [db](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/internal/db.py)를 읽음. serve의 cwd 기반 키·FROM_INIT_PY·동일 process의 main import, env의 metadata 버전 및 패키지 기준 frontend/static 경로, main의 frontend mount를 확인함. DATA_DIR 미지정 시 기본 경로 생성/이동이 가능하므로 기존 DATA_DIR·키·cwd 보존을 시작 전 조건으로 명시함. 새 프로그램 상위 `.env`·단일 worker/reload 제한도 유지함. 모든 라우터/기능의 자식 Python 실행을 전수 검증한 것은 아님.
+- 경로 선택 검토: [Python import 검색 경로](https://docs.python.org/3.11/reference/import.html#the-path-based-finder)와 [metadata 검색 기준](https://docs.python.org/3.11/library/importlib.metadata.html#distribution-discovery)에 따라 문자열 절대경로를 사용하고 코드/metadata가 같은 앱을 가리키도록 함. 적용본 누락·불일치 시 원본 fallback 없이 중단하도록 설계함. 이는 공식 메커니즘·소스 대조이며 실제 Open WebUI 기동 실험이나 Windows 검증의 대체가 아님.
+- 독립 검토·반영: 통합/과설계 검토와 uv 설치 경계 검토를 병렬로 수행함. 직접 캐시 수정 제외, 전체 앱/metadata 동시 적용, Restore 의미와 기존 original 표시 문제를 보완함. 최종 검토에서는 미완료 작업 소유자의 PID+생성시각·잠금 내용 일치 및 종료 확인 때만 Restore가 잠금을 회수하도록 구체화함. PID-only 구형 잠금·식별 불가·불일치는 보존하고 추가 복구 명령/백그라운드 처리는 만들지 않음. Stop 후 미완료 정보 보존·already_running 전 검사도 명시함.
+- 검증·다음: Native 가이드·STATUS·CHANGELOG·이 기록 4개만 변경하며 문서·내부 링크·diff를 점검함. 범용 import 동작을 재확인하는 합성 시험이나 새 테스트 코드를 이 설계 턴에 만들지 않음. 앱 적용/Restore·경로/metadata/정적 파일·의존성 선택·중간 실패/잠금·데이터/키 보존의 Windows/Linux Python 3.11 시험은 다음 구현 단위에 포함함. 사내에서는 그 뒤 한 번의 짧은 적용/기동/변경 화면·대표 연동 확인을 받으며 기존 전수 검사는 반복하지 않음. 기능 구현·실제 경로 선택·사내 설치/기동·배포 성공은 미실행임.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

@@ -4,6 +4,8 @@
 
 ## 2026-09-08
 
+- 단순 래퍼의 적용/직전 복원 설계와 구현·검증 계획을 작성하고 독립 검토함. uvx 캐시 환경 직접 수정 대신 수정된 Open WebUI 앱/metadata만 래퍼 관리 경로에 두고 기존 interpreter·의존성을 재사용하는 방식을 채택함. 기존 빌더/운영 진입점과 적용·복원 두 작업으로 한정하며 미완료 작업의 기동 차단·잠금 회수 조건을 정의함. 설계 완료이며 실행 기능 구현·사내 적용 완료를 뜻하지 않음. [설계](docs/03-openwebui-native-agent.md#ees-wrapper-design), [검토](evals/scenarios.md#ees-wrapper-design).
+
 - 사용자 합의에 따라 공식 Open WebUI 패키지와 우리 프로젝트 래퍼 두 구성으로 유지보수 범위를 정함. 기존 Python·호환 의존성을 재사용하고 래퍼에서 사내 수정사항의 적용·되돌리기를 관리하는 방향으로 전환함. 별도 후보 환경의 지연 진단과 자동 전환/복구 확대를 중단하고 이전 코드·실패 증거는 보존함. 새 적용 명령 구현·실제 서버 변경 완료를 뜻하지 않음. [관리 기준](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance), [합의·마지막 진단 결과](evals/scenarios.md#ees-wrapper-maintenance).
 
 - import 검사에서 부모와 자식의 timeout 시작 기준이 달라 덤프 전에 부모가 중단할 수 있던 결함을 수정함. 부모 시작 기준의 절대 deadline·시작 예산 소진 분류와 SEND T1 시간 요약을 추가하고 기존 60/70초 한도를 유지함. 이전 수동 출력 수집은 완료했으며 마지막 pandas 이름을 원인으로 단정하지 않음. [근거와 다음 비교](docs/03-openwebui-native-agent.md#ees-import-deadline).
