@@ -627,6 +627,8 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - [복구 명령](../scripts/ees_deploy_recover.py)은 antlr4-python3-runtime 4.9.3으로 중단된 첫 준비만 다룸. 기존 original·이전 배포 없음·전환 중 아님을 확인하고 wheel 검증·별도 복사·비활성 실패 후보 보존 이동·동일 커밋의 오프라인 Prepare를 같은 관리 잠금 안에서 처리함. 운영 서버·DB·캐시·배포 선택 기록을 전환하지 않음. 여러 패키지 자동 수리나 새 배포 파이프라인을 추가하지 않음.
 - 사내 실행은 Git 갱신 뒤 기존 `EES-demo-4a8779bbf3ee.zip` 선택과 복구 명령 한 번으로 안내함. 복사 블록은 2,500자 이내로 제공하고 공통 자산 API 동기화·기존 완료 시험은 반복하지 않음. 복구 후 `prepared=true`·Deploy·화면/데이터 연속성은 다음 사용자 보고 범위임.
 - 사외 신규 합성 검사 **13/13 PASS**. wheel 패키지/버전/태그·RECORD 변경·중복 캐시·복사 충돌/다른 파일 혼입, 기존/전환 중 상태·관리 잠금·링크·manifest/원본 버전 불일치, 실패 로그 보존·재시도 실패·이미 준비된 동일 파일의 무변경 반환을 확인함. 원본 Python·DB·config·배포 기록은 fixture 바이트로 비교했고 실제 앱 import·서버 기동·다운로드는 수행하지 않음. 코드는 이 복구 파일과 신규 시험만 추가하고 기존 배포 core·프로그램 wheel은 변경하지 않음. 문서 검사 `files=25 links=505 errors=0 review_candidates=0`와 diff 검사 통과. 기존 완료 코드 시험을 로컬에서 반복하지 않고 기존 CI의 Windows/Linux 전달 검사로 게시본을 확인함.
+- 실제 로컬 명령은 `python -m unittest discover -s tests -p test_ees_deploy_recover.py -v`, 결과 `Ran 13 tests in 0.086s / OK`. Python 패치 버전은 당시 따로 조회하지 않았음. `python -I scripts/ees_deploy_recover.py --help`로 전달한 CLI 진입점도 확인함.
+- [CI 34178389854](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34178389854): 코드 원본 `15cd88b5a99142c07c4d8cca4dcdd957354d48cb`, Windows/Linux 전달 검사와 패키징 모두 success. 두 OS 로그에서 이번 복구 시험 **각 13/13 PASS, skip 0**을 확인함. 프로그램 wheel은 바꾸지 않아 이번 패키징은 Agent Pack 전용이며 사내에서는 기존 `4a8779b`의 프로그램 ZIP을 유지함. CI 성공 증거만 추가하는 마무리 커밋은 문서/diff를 확인하고 코드 CI를 다시 실행하지 않음. 실제 사내 캐시 파일의 검증·복구 재준비 성공은 이후 사용자 실행 범위임.
 
 
 ## 결과 기록
