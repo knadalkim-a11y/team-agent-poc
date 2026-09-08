@@ -697,7 +697,11 @@ class ImportProbeIntegrationTests(unittest.TestCase):
         self.probe.compare.side_effect = compare
         result = MANAGER.probe_imports(self.config, COMMIT)
         self.probe.compare.assert_called_once_with(str(self.source), str(self.candidate))
-        self.assertEqual(result, {"status": "complete", "source_commit": COMMIT})
+        self.assertEqual(result["status"], "complete")
+        self.assertEqual(result["source_commit"], COMMIT)
+        self.assertTrue(result["report_saved"])
+        self.assertRegex(result["recorded_at"], r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+        self.assertEqual(json.loads((self.root / "last-import-probe.json").read_bytes()), result)
         self.assertEqual((self.target / "release.json").read_bytes(), prepared_before)
         self.assert_unmodified(before)
 
@@ -765,6 +769,28 @@ class ImportProbeIntegrationTests(unittest.TestCase):
             MANAGER.probe_imports(self.config, COMMIT)
         self.assert_unmodified(before)
 
+    def test_report_save_failure_returns_current_result_and_preserves_old_file(self):
+        report = self.root / "last-import-probe.json"
+        report.write_bytes(b"old report")
+        before = MANAGER.registry_path(self.config).read_bytes()
+        with patch.object(MANAGER, "write_json", side_effect=OSError("private path")):
+            result = MANAGER.probe_imports(self.config, COMMIT)
+        self.assertFalse(result["report_saved"])
+        self.assertEqual(result["status"], "complete")
+        self.assertEqual(report.read_bytes(), b"old report")
+        self.assertNotIn("private path", json.dumps(result))
+        self.assert_unmodified(before)
+
+    def test_report_save_does_not_replace_a_hardlinked_file(self):
+        external = self.root / "unrelated.json"
+        external.write_bytes(b"preserve")
+        MANAGER.os.link(external, self.root / "last-import-probe.json")
+        before = MANAGER.registry_path(self.config).read_bytes()
+        result = MANAGER.probe_imports(self.config, COMMIT)
+        self.assertFalse(result["report_saved"])
+        self.assertEqual(external.read_bytes(), b"preserve")
+        self.assert_unmodified(before)
+
     def test_cli_requires_commit_before_any_operation(self):
         with patch.object(MANAGER, "operate") as operate, redirect_stderr(io.StringIO()), \
                 self.assertRaises(SystemExit) as error:
@@ -781,7 +807,8 @@ class ImportProbeIntegrationTests(unittest.TestCase):
                 "probe-imports", "--config", self.config["config_path"], "--commit", COMMIT])
         self.assertEqual(result, 0)
         self.probe.compare.assert_called_once_with(str(self.source), str(self.candidate))
-        self.probe.render.assert_called_once_with({"status": "complete", "source_commit": COMMIT})
+        self.probe.render.assert_called_once_with(
+            json.loads((self.root / "last-import-probe.json").read_bytes()))
         self.assertEqual(output.getvalue().strip(), "EES import comparison")
         self.assert_unmodified(before)
 

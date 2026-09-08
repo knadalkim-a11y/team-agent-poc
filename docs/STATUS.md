@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **사내 Diagnose v2 결과를 수신하고 고정 import 비교를 main에 반영함.** 현재 original 프로세스 identity 일치·과거 복구 성공이며 후보 전환은 미완료임. 추정 후보 로그 전체 10,228바이트에 KeyboardInterrupt만 있고 NLTK → scikit-learn → pandas → importlib 파일 조회 위치를 확인함. 정확한 실패 reason/health 시간은 구형 기록에 없어 null임. [수신·검증 근거](../evals/scenarios.md#ees-import-probe).
-- 다음 작업 하나: **Update·ProbeImports 한 번으로 기존/후보의 고정 NLTK import를 비교한다.** [실행과 판단 기준](03-openwebui-native-agent.md#ees-import-probe). 각각 60초 자가 종료·70초 부모 감시, 정리 미확인 시 다음 검사 중단. 이 비교는 실제 앱 기동과 구분하며 NumPy·전체 캐시 작업·600초 Deploy를 반복하지 않음.
+- 이번 작업: **사내→외부 결과 전달은 타이핑만 가능하다는 제약을 반영함.** 전체 출력/사진 요청을 철회하고 ProbeImports 끝에 상태·시간 중심의 SEND 한 줄, 사내에는 상세 비식별 결과 저장을 준비함. [전달 제약·검증](../evals/scenarios.md#ees-typed-handoff). 기존 original 복구/프로세스 식별 확인과 후보 기동 원인 미확정은 유지함.
+- 다음 작업 하나: **이미 검사했다면 original/candidate의 status·elapsed_seconds 네 값만 받는다.** 아직 미실행이면 Update·ProbeImports 후 SEND 한 줄만 타이핑한다. [실행과 해석](03-openwebui-native-agent.md#ees-import-probe). 새 출력 형식 때문에 재검사하지 않으며 상세 정보는 저장 결과에서 필요한 항목만 확인함.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 

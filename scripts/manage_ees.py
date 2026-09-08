@@ -229,6 +229,16 @@ def probe_imports(config, commit):
         # Static selection only: this is not a new inventory or deployment check.
         result = imports.compare(config["source_python"], str(candidate))
         result["source_commit"] = commit
+        result["recorded_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        result["report_saved"] = True
+        report_path = Path(config["state_root"]) / "last-import-probe.json"
+        try:
+            if report_path.exists() or report_path.is_symlink():
+                states._regular(report_path)
+            write_json(report_path, result)
+        except (OSError, ValueError, TypeError, states.StateError):
+            # Preserve this run's console evidence even if an older report remains.
+            result["report_saved"] = False
         return result
 
 
