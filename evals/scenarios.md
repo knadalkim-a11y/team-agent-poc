@@ -793,6 +793,10 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 작업 시작 main은 `427608b`, 열린 PR 없음·로컬 baseline tree 일치를 확인함. 운영 코드·관련 시험·가이드·CI 의존성을 독립 검토해 추가 조치가 필요한 결함은 발견하지 못함. 구현 시 문서 점검은 25개/내부 링크 540개·오류 0·검토 후보 0이며 diff 검사를 통과함. 당시 Windows 실제 CA 내보내기·PowerShell 파싱은 CI 확인 대상으로 두었으며 아래 후속 결과와 구분함. 사내 옵션 적용·재배포·모델 응답은 미실행임. 기존 prepared 후보 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`를 그대로 사용하고 새 프로그램 ZIP/Prepare를 요구하지 않음.
 - [PR #8](https://github.com/knadalkim-a11y/team-agent-poc/pull/8)의 운영 코드 `6a2638be157c125dd12ad70c95de075cbe77d1ce`에서 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34190121123)가 모두 성공함. Windows 실제 기본 CA 내보내기·PowerShell 파싱, 합성 TLS/전환 시험과 기존 DPAPI/real-uv/프로세스 lifecycle 검사를 통과했으며 사내 환경 시험을 대신하지 않음. main `427608b`와 같은 PR head·mergeable=clean을 확인하고 `d9cb7cd87d0c93dec6485407b280aa04b505e4a3`으로 병합함. 후속 상태 갱신은 문서만 수정하고 프로그램/시험 코드를 바꾸거나 같은 CI를 수동 반복하지 않음.
 
+- CA 옵션 적용 명령 안내 뒤 사용자 보고: `Switch failed; previous is running again`, action=deploy, failed_at=`2026-09-08T05:33:02Z`, switch.stage=health_check/error_type=process/operation=null/errno=null/winerror=null, recovery=null, recovery_status=succeeded. 새 후보의 health 단계 실패와 기존 프로그램 health 복구 성공 범위로 인정함. 직접 로그·실제 실행 인자·checkout SHA·후보 환경은 미대조이며 이전 후보의 599.5초/NumPy stack을 이번 실패의 증거로 재사용하지 않음. 기존 데이터의 복원/교체가 실행된 것으로 기록하지 않음.
+- [이번 후보 로그 요약](../docs/03-openwebui-native-agent.md#ees-failed-candidate-summary)은 실패 시각을 위 UTC 값으로 고정하고 현재 복구 로그를 제외해 생성 시각으로 후보를 좁힘. 근사 경과 시간과 전체 로그의 기동 완료/수신/CERTIFICATE_VERIFY_FAILED 마커, 끝 160줄의 마지막 traceback에 있는 허용 패키지 파일명/행 번호·오류 클래스만 받음. 경로·코드 행·예외 원문·키는 출력하지 않음. 독립 검토로 복구 후 ca_mode는 original의 값이며 후보 적용 판정에 쓰지 않는다는 점과 로그 시각 선택/종료 시 stack의 한계를 확인함. 사내 읽기 명령은 대기이고 재배포·NumPy 재설치·캐시 준비·추가 앱 import·실행 코드 수정·CI 반복은 없음.
+- main `f2a0fe2`·열린 PR 없음·로컬 baseline tree 일치를 확인함. 새 요약 블록은 2500자 이내이며 Python의 같은 기본 정규식으로 합성 공개 패키지 프레임 추출/비허용 경로 제외를 확인함. PowerShell 자체 실행·파싱은 로컬 도구 부재로 미실행이며 이 확인을 Windows 통과로 바꾸지 않음. 문서 점검 25개/내부 링크 540개·오류 0·검토 후보 0, diff 검사 통과. 기존 프록시 진단은 릴리스 CA를 덧붙이기 전 등록 환경의 비교라는 설명을 보완함.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

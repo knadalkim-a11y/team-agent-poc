@@ -8,14 +8,14 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **Windows 포함 CA 비교에서 ca_count=35, GitHub/Hugging Face 모두 response/200을 보고받고 후보 전용 `Deploy -UseWindowsCA`를 main에 반영함.** [PR #8](https://github.com/knadalkim-a11y/team-agent-poc/pull/8)의 Windows/Linux CI가 모두 성공함. 같은 후보 Requests·저장 환경에서 CA를 지정하자 앞선 인증서 오류가 해소된 범위이며 후보 599.5초 기동 지연의 인과는 미확정. [진단 보고](../evals/scenarios.md#ees-retransition-health-failure), [CA 보완 검증](../evals/scenarios.md#ees-windows-ca-support). EES 전환 미완료·기존 프로그램 자동 복구 성공 상태이며 사내 운영 코드의 마지막 보고는 `head=c5f1690...`임.
-- 다음 작업 하나: **Update 후 기존 준비본을 `Deploy -UseWindowsCA -HealthTimeout 600`으로 한 번 배포한다.** [적용 명령](03-openwebui-native-agent.md#ees-windows-ca-deploy)을 사용하며 프로그램 원본은 `4a8779b...`를 유지함. 이번 옵션은 EES 자식 환경에만 CA를 지정하고 Start/Rollback에 같은 스냅샷을 사용함. 사내 영구 적용·재배포는 아직 미실행임.
+- 이번 작업: **CA 옵션 배포 안내 뒤 2026-09-08T05:33:02Z의 Deploy도 health_check/process 실패, 기존 프로그램 자동 복구 succeeded를 보고받음.** recovery=null, operation/errno/winerror=null이며 EES 전환은 미완료임. 앞선 CA 비교 ca_count=35·GitHub/Hugging Face 200과 [PR #8](https://github.com/knadalkim-a11y/team-agent-poc/pull/8)의 Windows/Linux CI 성공은 유지하되 기동 실패 해결로 확대하지 않음. [이번 실패](../evals/scenarios.md#ees-windows-ca-support). 사내 실제 checkout 전체 SHA와 새 후보의 시간·로그는 아직 미대조임.
+- 다음 작업 하나: **이번 실패 시각으로 고정한 후보 로그 요약을 한 번 읽어 경과 시간·기동/인증서 오류 흔적·마지막 패키지 호출 위치를 확인한다.** [읽기 전용 명령](03-openwebui-native-agent.md#ees-failed-candidate-summary)은 복구된 original의 로그를 제외함. 이전 NumPy 호출 위치나 599.5초를 이번 결과로 재사용하지 않으며 재배포·재설치·캐시 준비·앱 import 검사는 추가하지 않음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
 진단 보완 코드 원본은 `1ac1c33cf50cb3135f63c7ed8ac5ccaf22cdab30`이며 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34184761238) 성공을 확인했습니다. PR #7의 main 병합과 사내 `c5f1690...` Update/Status 실행은 사용자 보고로 확인했으며 전체 SHA·등록 내용 직접 대조는 미실행입니다. 프로그램 후보 ZIP 원본 및 EES 전환 성공 여부와 구분합니다.
 
-CA 옵션 운영 코드 원본은 `6a2638be157c125dd12ad70c95de075cbe77d1ce`, main 병합은 `d9cb7cd87d0c93dec6485407b280aa04b505e4a3`입니다. [PR의 Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34190121123)는 성공했으며 사내 Update/옵션 적용은 대기입니다. 이 SHA를 프로그램 Deploy의 Commit으로 사용하지 않습니다.
+CA 옵션 운영 코드 원본은 `6a2638be157c125dd12ad70c95de075cbe77d1ce`, main 병합은 `d9cb7cd87d0c93dec6485407b280aa04b505e4a3`입니다. [PR의 Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34190121123)는 성공했습니다. Update/옵션을 포함한 명령 안내 뒤 위 배포 실패를 보고받았으며, 실제 명령·checkout SHA·후보 환경 원문은 직접 대조하지 않았습니다. 이 SHA를 프로그램 Deploy의 Commit으로 사용하지 않습니다.
 
 <a id="resume-branch"></a>
 
@@ -92,7 +92,7 @@ CA 옵션 운영 코드 원본은 `6a2638be157c125dd12ad70c95de075cbe77d1ce`, ma
 
 ## 최근 점검
 
-최신 main `427608b`에서 시작해 CA 옵션을 구현하고 독립 검토 후 PR #8을 병합함. 로컬 대상 시험 45개 중 44개 PASS·기존 real-uv 선택 시험 1개 skip이며, PR Windows/Linux CI에서는 실제 CA 내보내기·PowerShell 파싱·기존 real-uv/lifecycle 검사를 포함해 성공함. [결과·실행 범위](../evals/scenarios.md#ees-windows-ca-support). 사내 옵션 적용은 대기이며 실제 서버/저장 설정/패키지 변경은 없음.
+최신 main `f2a0fe2`·열린 PR 없음·로컬 baseline tree 일치에서 새 실패 보고를 진단 스키마/자동 복구 코드와 대조함. 후보 로그 선택과 현재 original의 ca_mode 해석을 독립 검토하고 기존 가이드에 이번 시각의 요약 명령을 준비함. [결과·범위](../evals/scenarios.md#ees-windows-ca-support). 로그 요약의 사내 실행은 대기이며 이번 응답에서는 실행 코드·서버·설정·패키지를 추가 변경하지 않음.
 
 ## 갱신 규칙
 

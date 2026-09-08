@@ -626,6 +626,49 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 
 **health 실패 뒤 자동 복구가 성공한 경우:** 현재 `deployment.json`의 `process.log_file`은 복구된 기존 프로그램의 로그입니다. 실패 후보 로그 경로는 별도로 보존하지 않으므로 현재 로그를 제외하고, 실패 시각과 복구 로그보다 앞선 **생성 시각**으로 직전 기동 로그를 좁힙니다. 수정 시각 최신순은 현재 서버의 로그를 고를 수 있습니다. 로그 이동/삭제나 이후 재기동이 있었다면 시각만으로 이번 후보를 확정하지 않습니다. `health_check`와 숫자 코드 null만으로 기동 중 종료·응답 대기 만료·프로세스 확인 오류를 구분할 수 없으며, 종료 정리 중 찍힌 `KeyboardInterrupt`도 최초 실패 원인으로 단정하지 않습니다. 로그는 사내에서 읽고 필요한 오류 종류·기동 완료 여부만 비식별로 전달합니다.
 
+<a id="ees-failed-candidate-summary"></a>
+
+**자동 복구된 최신 후보 로그 요약:** 다음 블록은 CA 옵션 배포 실패 `2026-09-08T05:33:02Z`에 맞춘 읽기 전용 명령입니다. 다른 실패에는 먼저 보고된 시각으로 비교 값을 바꿉니다. 등록 기록과 시각을 대조하고 현재 복구 로그를 제외해 생성 시각으로 후보를 좁힙니다. 이동/삭제된 로그나 시계 변경이 있으면 확정하지 않습니다. 전체 로그를 복사하지 않고 고정된 오류 분류·공개 패키지 이름/파일명/행 번호만 전달합니다.
+
+```powershell
+& {
+  $ErrorActionPreference = 'Stop'
+  $cfg = Get-Content -LiteralPath (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+  $reg = Get-Content -LiteralPath (Join-Path $cfg.state_root 'deployment.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+  if ($reg.phase -ne 'idle' -or $reg.last_event -ne 'previous_program_recovered' -or
+      $reg.last_failure.failed_at -ne '2026-09-08T05:33:02Z' -or
+      $reg.last_failure.recovery_status -ne 'succeeded') { throw '보고된 복구 기록과 다릅니다.' }
+  $active = Get-Item -LiteralPath $reg.process.log_file
+  $at = [DateTimeOffset]::Parse($reg.last_failure.failed_at).UtcDateTime
+  if ($active.CreationTimeUtc -lt $at) { throw '로그 시각을 확인해야 합니다.' }
+  $cand = Get-ChildItem (Join-Path $cfg.state_root 'logs') -Filter 'server-*.log' -File |
+      Where-Object { $_.FullName -ne $active.FullName -and
+          $_.CreationTimeUtc -lt $active.CreationTimeUtc -and $_.CreationTimeUtc -lt $at.AddSeconds(1) } |
+      Sort-Object CreationTimeUtc -Descending | Select-Object -First 1
+  if (-not $cand) { throw '후보 로그가 없습니다.' }
+  $marks = @(Select-String -LiteralPath $cand.FullName -SimpleMatch -Pattern 'Application startup complete','Uvicorn running on','CERTIFICATE_VERIFY_FAILED')
+  $frames = @(); $types = @()
+  foreach ($line in (Get-Content -LiteralPath $cand.FullName -Tail 160)) {
+      if ($line -match '^Traceback \(most recent call last\):') { $frames = @(); $types = @() }
+      if ($line -match '^\s*File "' -and
+          $line -match '[\\/]site-packages[\\/](numpy|chromadb|sqlalchemy|open_webui|scipy|torch|requests|urllib3|huggingface_hub|transformers)[\\/](?:[^"]*[\\/])?([A-Za-z0-9_.-]+\.py)", line (\d+)') {
+          $frames += "$($Matches[1])/$($Matches[2]):$($Matches[3])"
+      }
+      if ($line -cmatch '^(KeyboardInterrupt|[A-Za-z_]\w*(?:Error|Exception))(?::|$)') { $types += $Matches[1] }
+  }
+  [ordered]@{
+      candidate_seconds = [math]::Round(($at - $cand.CreationTimeUtc).TotalSeconds,1)
+      startup_complete = $marks.Pattern -contains 'Application startup complete'
+      listening = $marks.Pattern -contains 'Uvicorn running on'
+      cert_verify_failed = $marks.Pattern -contains 'CERTIFICATE_VERIFY_FAILED'
+      error_types = @($types | Select-Object -Last 3)
+      last_package_frames = @($frames | Select-Object -Last 4)
+  } | ConvertTo-Json
+}
+```
+
+candidate_seconds는 로그 생성부터 실패 기록까지의 근사 시간입니다. 약 600초면 이번에도 대기 한도 만료와 부합하지만 최초 지연 원인은 따로 확인합니다. 마커는 전체 후보 로그에서 찾고, error_types/last_package_frames는 끝 160줄 중 마지막 Traceback 이후(시작이 잘린 경우 남아 있는 부분)만 요약합니다. last_package_frames에는 허용 목록에 있는 패키지 프레임만 남기며, 실제 경로·코드 행·예외 메시지는 출력하지 않습니다. KeyboardInterrupt의 마지막 호출 위치는 후보 정리 시점의 표본이며 해당 패키지 손상 증거가 아닙니다. 복구 후 Status.ca_mode는 original의 값이므로 실패 후보의 CA 적용 여부로 해석하지 않습니다.
+
 <a id="ees-failure-timing"></a>
 
 **실패까지의 시간과 기동 완료 흔적 확인:** 자동 복구 성공 뒤 추가 Start/Stop/Deploy 없이 읽는 명령입니다. 현재 복구 로그를 제외하고 생성 시각으로 실패 후보를 좁히므로 로그 이동/삭제나 시각 변경이 있었다면 이번 후보로 확정하지 않습니다. 원문 대신 시간·기동 완료 문자열 존재 여부만 출력합니다.
@@ -675,9 +718,9 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 
 <a id="ees-startup-proxy-check"></a>
 
-**기동 지연의 프록시 확인:** Git의 `http.https://github.com.proxy`와 WebUI의 HTTP 클라이언트 설정은 별개입니다. 관리 스크립트의 health 요청은 프록시를 명시적으로 사용하지 않습니다. 기존/후보 프로그램은 같은 등록 환경을 복원하며 후보만 WEBUI_NAME을 추가합니다. 새 창의 프록시 환경변수를 바꿔도 등록 때 저장한 값을 대신하지 않습니다.
+**기동 지연의 프록시 확인:** Git의 `http.https://github.com.proxy`와 WebUI의 HTTP 클라이언트 설정은 별개입니다. 관리 스크립트의 health 요청은 프록시를 명시적으로 사용하지 않습니다. 기존/후보 프로그램은 같은 등록 환경을 복원하며 후보에 WEBUI_NAME을 추가합니다. `-UseWindowsCA`를 선택한 릴리스는 그 뒤 자식 환경에 CA 경로도 지정합니다. 새 창의 프록시 환경변수를 바꿔도 등록 때 저장한 값을 대신하지 않습니다.
 
-아래는 기존 `runtime_environment`로 등록 환경을 읽고, 후보 Python의 Requests로 GitHub/Hugging Face에 각 HEAD 요청 한 번을 보내는 진단입니다. 환경변수 외 Windows 프록시 설정과 NO_PROXY도 Requests의 실제 선택에 반영합니다([Requests 프록시](https://requests.readthedocs.io/en/latest/user/advanced/#proxies)). TLS 검증은 유지하고 redirect를 따라가지 않으며 `.netrc` 인증과 앱 토큰은 보내지 않습니다. Git 프록시를 다른 호스트에 강제로 적용하거나 서버 설정을 변경하지 않습니다. 외부 요청을 사용자가 요청한 이번 프록시 진단 범위로만 수행합니다.
+아래는 기존 `runtime_environment`로 등록 환경을 읽고, 후보 Python의 Requests로 GitHub/Hugging Face에 각 HEAD 요청 한 번을 보내는 진단입니다. 릴리스별 CA 옵션을 추가하기 전 등록 환경의 비교이며 `-UseWindowsCA` 적용 여부를 검사하는 명령은 아닙니다. 환경변수 외 Windows 프록시 설정과 NO_PROXY도 Requests의 실제 선택에 반영합니다([Requests 프록시](https://requests.readthedocs.io/en/latest/user/advanced/#proxies)). TLS 검증은 유지하고 redirect를 따라가지 않으며 `.netrc` 인증과 앱 토큰은 보내지 않습니다. Git 프록시를 다른 호스트에 강제로 적용하거나 서버 설정을 변경하지 않습니다. 외부 요청을 사용자가 요청한 이번 프록시 진단 범위로만 수행합니다.
 
 ```powershell
 & {
