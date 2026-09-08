@@ -606,6 +606,15 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - Linux/Python 3.12.13에서 `python -m unittest discover -s tests -p test_manage_ees.py -v`: **12/12 PASS**. 실제 sleep 없이 가상 75초 후 health 성공, 명시 제한의 Start/Deploy/Rollback/기존 프로세스 확인·복구 전달, 잘못된 인자의 작업 전 거절과 1/900 경계를 확인함. 대기 설정 보완을 확인하기 위한 사내 재기동/health 반복은 수행하지 않음.
 - [CI 34176365525](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34176365525): 수정 원본 `b22c24eea6f03b6bb1d4251b9606154410cf1624`, Windows/Linux 검사·PowerShell 문법·전달물 생성 모두 PASS. 프로그램 wheel을 바꾸지 않은 수정이므로 이번 CI는 Agent Pack만 묶었으며, 사내 프로그램 준비에는 기존 `4a8779b`의 프로그램 포함 ZIP을 계속 사용함. 성공 증거만 추가하는 마무리는 문서/diff를 확인하고 완료한 코드 검사를 반복하지 않음. 사내 운영 스크립트 갱신·EES 프로그램 Prepare/Deploy는 이후 사용자 실행 대상임.
 
+#### ZIP 선택과 오프라인 Prepare 실패 보고 — 2026-09-08
+
+- 사용자는 GitHub Actions에서 ZIP을 내려받은 뒤 폴더 경로를 입력하고 `select a regular, supported inner EES demo ZIP` 오류를 보고함. 바깥 artifact ZIP을 한 번 풀고 내부 `EES-demo-4a8779bbf3ee.zip`을 선택하도록 안내함. 실제 사내 사용자 경로는 기록하지 않음.
+- 파일 선택 안내 후 사용자 보고: `has_program=true`, `current_commit=null`, `program_restart_required=true`, `preserve_existing_data=true`, `agent_pack_applied=false`. 프로그램 배포만 구현되어 번들의 Agent Pack 항목은 동기화하지 않는다는 note도 보고됨. 이는 Plan의 변경 계획이며 재시작 실행·Prepare 성공을 뜻하지 않음.
+- 같은 보고에서 `offline preparation failed; the source runtime is unchanged. review the local prepare.log and supply missing wheels.` 오류를 확인함. `prepared=true`는 보고되지 않았으며 준비 완료·Deploy·EES wheel 전환은 미실행으로 유지함. 안내한 내부 ZIP 원본은 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`이고 사내 checkout SHA·설치 원문을 직접 대조하지 않음.
+- 읽기 검토에서 `prepare_release`가 별도 후보 환경의 생성·오프라인 설치·의존성 검사 중 subprocess/파일 오류와 시간 초과를 같은 안내로 반환함을 확인함. 원래 Python 환경·운영 데이터·서버를 전환하는 경로는 실행하지 않음. 누락 wheel이 원인인지는 아직 미확정이며 실패 후 원래 서버의 현재 health를 새로 검사한 것은 아님. 기존 정상 응답 기록은 당시 확인 범위로 보존함.
+- 실패 후보 폴더는 남지만 성공 시 쓰는 `release.json`이 없어 그대로 Prepare를 재시도하면 준비 메타데이터 검사에서 중단될 수 있음. 다음은 등록된 설정에서 해당 후보의 `prepare.log`를 찾아 필요한 오류 부분을 읽는 것임. 원인 확인 전에 재시도·폴더 삭제·운영 환경 설치를 안내하지 않으며 이후 재준비가 필요하면 [기존 운영 가이드](../docs/03-openwebui-native-agent.md#기존-windows-서버에-적용)의 비활성 후보 확인·격리 절차를 따름.
+- 이번 상태 갱신은 STATUS와 이 기록 두 문서만 변경함. 문서·diff 검사를 수행하고 코드 시험·브랜딩 빌드·기존 등록/health·연동/PAT 검증은 반복하지 않음. 내부 로그의 실제 실패 단계·패키지명/버전·복구 결과는 다음 사용자 보고를 기다림.
+
 
 ## 결과 기록
 
