@@ -8,10 +8,10 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **저장 보고서 `2026-09-08T23:04:17Z`의 `M=TTFT X=1 S=F/F E=- P=0 U=0`, `W=1 T=51.1 L=pandas._libs.writers`를 수신함.** watchdog 덤프 관측·import 미완료와 이번 조회 시점 검사 Python 잔존 없음이 확인됨. 첫 프레임은 공통 import 함수여서 후보 지연 원인은 미확정임. 기존 환경 정상 5.3초·후보 CLEANUP/70.0·양쪽 예산 0.5/59.5는 유지하고, X=1을 자연 오류나 과거 정리 성공으로 해석하지 않음. [수신·판정](../evals/scenarios.md#ees-import-dump-detail).
-- 다음 작업 하나: **같은 저장 보고서의 호출 위치와 상위 import 시간을 SEND S1·T2 두 줄로 받는다.** [읽기 전용 상세 조회](03-openwebui-native-agent.md#ees-import-dump-detail)는 방금 받은 UTC 시각·후보 커밋을 대조하고 보존된 프레임·top_self만 읽음. 새 import·CIM·Update/Deploy·서버 재시작·패키지/캐시 재작업은 안내하지 않음. 데이터 부족은 관측 한계로 남기며 같은 검사를 자동 반복하지 않음.
+- 이번 작업: **공식 Open WebUI 패키지와 우리 프로젝트 래퍼 두 구성으로 관리하자는 사용자 결정에 맞춰 범위를 단순화함.** 래퍼가 사내 설정·기능과 Open WebUI 수정사항의 빌드·적용·되돌리기를 관리하고 기존 Python·호환 의존성을 재사용함. 별도 후보 환경 진단·자동 전환/복구 확대는 중단함. 마지막 S1/T2까지 기록했으며 pandas 두 항목의 self 합 48.3초는 관측값이고 근본 원인·기존 배포 성공은 미확정으로 보존함. [합의와 근거](../evals/scenarios.md#ees-wrapper-maintenance).
+- 다음 작업 하나: **기존 실행 환경에 필요한 Open WebUI 수정만 적용하고 변경 전 프로그램으로 되돌리는 작은 절차를 준비한다.** [관리 기준과 재사용 범위](03-openwebui-native-agent.md#ees-wrapper-maintenance). 기존 브랜딩 빌더·자산·검사를 재사용하되 실제 설치/기동 경로·uvx 캐시/링크와 기존 배포 기록의 의미를 대조한 뒤 적용 방법을 정함. 직접 적용 명령은 아직 미구현이며 별도 환경 생성·의존성 재설치·API 동기화·진단 추가 왕복을 선행하지 않음. 데이터·키·사용자 설정과 원래 서버를 유지함.
 
-진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
+아래는 **중단한 후보 환경 방식의 구현·진단 이력**이며 현재 재실행 목록이 아닙니다. [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py)와 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)은 보존합니다. 기존 도구의 Rollback을 새 직접 적용 방식의 원복 기능으로 간주하지 않습니다. 마지막 실패와 원인 미확정 상태를 유지하며 관리 방식 변경을 배포 성공으로 기록하지 않습니다.
 
 진단 보완 코드 원본은 `1ac1c33cf50cb3135f63c7ed8ac5ccaf22cdab30`이며 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34184761238) 성공을 확인했습니다. PR #7의 main 병합과 사내 `c5f1690...` Update/Status 실행은 사용자 보고로 확인했으며 전체 SHA·등록 내용 직접 대조는 미실행입니다. 프로그램 후보 ZIP 원본 및 EES 전환 성공 여부와 구분합니다.
 
@@ -99,7 +99,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-08 후속: D1/F1 보고를 저장/분류 코드 및 Python faulthandler 공식 설명과 대조함. 현재 잔존 없음과 실행 당시 정리 미확인, 덤프 관측과 종료 성공을 구분함. 공통 첫 프레임 요약의 정보 부족을 보완해 같은 저장 보고서의 호출 위치·상위 시간 조회를 준비함. 독립 검토에서 빈 프레임 배열의 StrictMode 인덱스 처리와 두 출력 줄의 길이 한도를 보완함. 문서·링크·diff를 검사하며 실행 코드·기존 CI는 변경/반복하지 않음. D1/F1 조회는 사용자 실행 보고이며 GPT의 사내 직접 조회·새 S1/T2 블록의 PowerShell 실제 실행 검증은 미실행. [상세 근거](../evals/scenarios.md#ees-import-dump-detail), [이전 조회](../evals/scenarios.md#ees-import-saved-followup).
+2026-09-08 후속: S1/T2 수신과 사용자의 단순 관리 결정을 기록함. 기존 빌더·후보 환경 준비·전환 코드를 읽고 독립 검토로 재사용 가능 범위와 직접 적용의 미구현 상태를 대조함. README·AGENTS·가이드·현재 계획을 두 구성 기준으로 맞추고 이전 명령을 현재 실행 지시에서 제외함. 문서·내부 링크·diff를 검사하며 실행 코드·CI·사내 서버/패키지/데이터는 변경하거나 시험하지 않음. [검토·남은 구현 범위](../evals/scenarios.md#ees-wrapper-maintenance).
 
 ## 갱신 규칙
 

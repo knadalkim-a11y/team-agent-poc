@@ -4,6 +4,8 @@
 
 ## 2026-09-08
 
+- 사용자 합의에 따라 공식 Open WebUI 패키지와 우리 프로젝트 래퍼 두 구성으로 유지보수 범위를 정함. 기존 Python·호환 의존성을 재사용하고 래퍼에서 사내 수정사항의 적용·되돌리기를 관리하는 방향으로 전환함. 별도 후보 환경의 지연 진단과 자동 전환/복구 확대를 중단하고 이전 코드·실패 증거는 보존함. 새 적용 명령 구현·실제 서버 변경 완료를 뜻하지 않음. [관리 기준](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance), [합의·마지막 진단 결과](evals/scenarios.md#ees-wrapper-maintenance).
+
 - import 검사에서 부모와 자식의 timeout 시작 기준이 달라 덤프 전에 부모가 중단할 수 있던 결함을 수정함. 부모 시작 기준의 절대 deadline·시작 예산 소진 분류와 SEND T1 시간 요약을 추가하고 기존 60/70초 한도를 유지함. 이전 수동 출력 수집은 완료했으며 마지막 pandas 이름을 원인으로 단정하지 않음. [근거와 다음 비교](docs/03-openwebui-native-agent.md#ees-import-deadline).
 
 - import 검사에서 Windows 사용자 폴더 변수를 모두 제외해 NLTK 자체 오류를 만들 수 있던 환경 필터를 수정함. 일반 프로필 정보는 보존하고 실제 NLTK import/오류 재현을 CI에 추가함. 기존 사내 결과와 후보 자식 종료 미확인은 별도로 기록하고 재검사 대신 기존 출력·읽기 조회로 후속 확인함. [근거와 한계](evals/scenarios.md#ees-import-followup).
