@@ -647,6 +647,15 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 다음은 필요한 배포 기록 필드·포트 소유 PID·현재 health·최근 서버 로그 두 개의 읽기 조회임. 비밀값·내부 주소·사용자 경로를 공유 기록에 넣지 않고 실패에 필요한 부분만 확인함. 증거를 받은 뒤 식별 가능한 관리 프로세스의 정상 종료와 기록된 기존 프로그램 기동 등 복구 방법을 선택함. 원인 확인 전 Deploy·Init·Prepare·수동 serve 재실행, 배포 기록·잠금 변경, 강제 종료·DB 복원을 안내하지 않음.
 - 이번 변경은 STATUS와 이 증거 문서만 갱신하며 `python scripts/check_docs.py`와 `git diff --check`로 확인함. 코드 시험·CI·이미 완료한 연동 검증은 반복하지 않음. 사내 진단 결과와 복구 완료는 후속 사용자 보고 대상임.
 
+
+#### 전환 실패 후 읽기 진단 결과 — 2026-09-08
+
+- 사용자 보고: `phase=recovery_required`, `event=automatic_program_recovery_failed`, `updated_at=2026-09-08T02:40:12.630440+00:00`, `current_kind=original`, `pending_commit=4a8779...`(약기), `launch_uncertain=false`. `recorded_pid`와 `recorded_log`는 비어 있고 `lock_present=false`임. original은 기록된 선택일 뿐 실행 중인 프로그램이나 복구 성공을 뜻하지 않음.
+- 같은 읽기 진단에서 `listener_pids`가 비어 있고 curl 연결 실패(7)·`health_http=000`을 보고함. 조회 당시 해당 포트 listener를 찾지 못하고 health에 연결되지 않은 범위로 기록하며 모든 Python 프로세스가 종료됐다고 확대하지 않음. 실제 사내 주소·사용자 경로는 기록하지 않음.
+- `backup_recorded=true`는 배포 기록에 백업 참조가 있다는 보고임. 실제 백업 파일·검증 메타데이터를 재조회하거나 데이터 연속성을 확인한 것은 아니며 DB 복원 미시도 기록을 유지함.
+- 서버 로그에서 traceback과 `import open_webui.main` 줄을 보고했으나 마지막 예외는 수기 전사 부담으로 전달되지 않음. 이 중간 줄만으로 누락 패키지·네트워크·DB 등 원인을 특정하지 않음. 다음은 최신 서버 로그 두 개의 마지막 예외만 짧게 추출해 받는 것임. 이미 받은 상태·포트·health를 반복하거나 긴 로그 전체를 요구하지 않음. 원인 확인 전 재기동·재배포·패키지 설치·배포 기록/잠금 변경을 하지 않음.
+- STATUS와 이 증거 문서만 갱신하고 `python scripts/check_docs.py`·`git diff --check`로 확인함. 코드 시험·CI·완료한 연동 검증은 반복하지 않음. 실제 원인과 사내 복구 완료는 미확인임.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

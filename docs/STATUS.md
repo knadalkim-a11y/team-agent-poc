@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **준비 성공 뒤 첫 Deploy에서 전환 실패와 자동 복구 미완료 오류를 사용자 보고로 확인함.** 오류 문구와 코드상 DB 복원은 시도하지 않았으며 현재 접속 가능 여부·실행 중인 프로그램·백업 완료 여부는 미확인임. 앞선 `prepared=true`·`server_changed=false`·`webui_version=0.11.3+ees.1` 보고와 antlr4 실패·복구 기록을 보존함. 고정 안내 원본은 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`이며 사내 전체 SHA·기록/로그 원문은 직접 대조하지 않음. [실환경 기록](../evals/scenarios.md#ees-first-registration).
-- 다음 작업 하나: **배포 기록의 필요한 필드·포트 소유 PID·현재 health·최근 서버 로그 두 개를 읽기 조회하고 기존 프로그램 복구 방법을 정한다.** 실제 프로세스와 실패 단계를 확인한 뒤 식별 가능한 관리 프로세스의 정상 종료·기록된 기존 프로그램 기동 여부를 판단함. 원인 확인 전 Deploy·Init·Prepare·수동 serve를 재실행하거나 배포 기록·잠금을 바꾸지 않음. 이번 실패 이후의 상태 진단이며 완료한 연동 시험은 반복하지 않는다. EES 화면·데이터 연속성 확인과 공통 자산 API 동기화는 이후 단계로 유지함.
+- 이번 작업: **첫 Deploy 전환·자동 복구 실패 후 읽기 진단에서 `recovery_required`, 기록된 프로세스 없음, listener 없음·health 연결 실패를 사용자 보고로 확인함.** `current_kind=original`은 배포 기록이며 기동 성공을 뜻하지 않음. 백업 참조는 있으나 실제 파일 재검사는 하지 않았고 DB 복원은 미시도임. 로그의 `import open_webui.main` traceback만 전달돼 최종 예외와 원인은 미확정임. 앞선 준비 성공과 고정 안내 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`을 보존함. [실환경 기록](../evals/scenarios.md#ees-first-registration).
+- 다음 작업 하나: **최근 서버 로그 두 개의 마지막 예외만 짧게 추출해 받고 실패 원인에 맞는 기존 프로그램 복구 방법을 정한다.** 이미 받은 배포 상태·포트·health를 반복 조회하지 않으며 긴 traceback의 수기 전사를 요구하지 않음. 원인 확인 전 재기동·재배포·패키지 설치·배포 기록/잠금 변경은 하지 않음. 복구 후 EES 화면·데이터 연속성 확인과 공통 자산 API 동기화는 이후 단계로 유지함.
 
 <a id="resume-branch"></a>
 
@@ -46,7 +46,7 @@
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | 팀 시연용 이름·소개·시작 질문 | 기존 모델 이름·소개·프로필 적용 안내, 제안 JSON 4개·짧은 팀원 안내 | 사용자 요청으로 준비 재개. 실제 UI 저장·로고 교체·팀원 전달은 미확인 | [시연 준비](../evals/scenarios.md#team-demo-customization), [이전 준비](../evals/scenarios.md#team-first-use-preparation), [당시 보류](../evals/scenarios.md#onboarding-deferred) | 현재 [제안 JSON](../agent-pack/ees-prompt-suggestions.json); 사내 적용 원본 없음 |
-| EES 프로그램·전달 도구 | 이름·아이콘 wheel/ZIP/Actions와 Windows 배포 명령; 기동 대기·첫 antlr4 캐시 복구 명령 | 준비 성공 뒤 첫 Deploy에서 전환 실패·자동 복구 미완료 오류 보고. 현재 접속·실행 프로그램·백업 완료는 미확인, 오류상 DB 복원 미시도 | [운영 명령](03-openwebui-native-agent.md#기존-windows-서버에-적용), [초기 등록·전환 실패 기록](../evals/scenarios.md#ees-first-registration), [CI 근거](../evals/scenarios.md#ees-program-deployment) | 등록 안내 원본 `c584928`; 사내 checkout SHA 직접 대조 미실행. [프로그램 ZIP](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172321176/artifacts/10036107795) 안내 원본 `4a8779b`, 준비 성공 보고·전환 완료 미확인 |
+| EES 프로그램·전달 도구 | 이름·아이콘 wheel/ZIP/Actions와 Windows 배포 명령; 기동 대기·첫 antlr4 캐시 복구 명령 | 첫 Deploy 전환·자동 복구 실패. 후속 진단 시 기록된 프로세스·listener 없음, health 연결 실패. 백업 참조 있음·파일 재검사 미실행, DB 복원 미시도; 최종 예외 대기 | [운영 명령](03-openwebui-native-agent.md#기존-windows-서버에-적용), [초기 등록·전환 실패 기록](../evals/scenarios.md#ees-first-registration), [CI 근거](../evals/scenarios.md#ees-program-deployment) | 등록 안내 원본 `c584928`; 사내 checkout SHA 직접 대조 미실행. [프로그램 ZIP](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172321176/artifacts/10036107795) 안내 원본 `4a8779b`, 준비 성공 보고·전환 완료 미확인 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 2026-09-07 두 지침 UI 저장 보고; 개정 후 P02 PASS, P03 창작 거절 부분 확인, P04~P10 미완료; 실행 시점은 평가표 | [P02~P10 재검증](../evals/scenarios.md#instruction-revision), [기존 지침 갱신](03-openwebui-native-agent.md#update-existing-instructions) | 전달·저장 안내 원본 [dfeb95f](https://github.com/knadalkim-a11y/team-agent-poc/commit/dfeb95fbf96cf6a2bb75a3ba75fac3bc92ed60fc); 등록 내용·사용자 추가 규칙·사내 checkout SHA 직접 대조는 미실행 |
 | 조회 경로 보완 | Prompt의 [현재 POC 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션 | 부분 적용 당시 C04·P02 정상·임베딩 오류 재발 없음 보고; 이번 전체 Prompt에도 포함해 저장 안내 | [실환경 결과](../evals/scenarios.md#결과-기록), [당시 소스 검토](../evals/confluence-offline.md#knowledge-routing) | 부분 추가 안내 원본 [28f526a](https://github.com/knadalkim-a11y/team-agent-poc/blob/28f526a39162e54f126f577554f8c15fdd5940f1/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로); 현재 전체 지침 안내 원본은 위 행. 부분 적용 당시 성공을 이번 개정 후 재평가로 간주하지 않음 |
 | 카드·후속 조회 지침 | 카드/답변 중복 억제, Confluence 본문 조회, Jira/GitHub의 실제 ID·후속 범위 지침 | 2026-09-07 전체 System Prompt 3블록 전달 후 저장 및 업데이트 완료 보고. 일반 채팅 스트리밍과 GitHub/Jira 이전 본문 후속 흐름 정상 보고; 이번 버튼 제거에는 같은 전체 Prompt 유지, Confluence 새 흐름은 미확인 | [전체 지침 저장 보고](../evals/scenarios.md#rich-ui-prompt-saved) | [7c8a65b의 전체 Prompt](https://github.com/knadalkim-a11y/team-agent-poc/blob/7c8a65b0e2eed6d22109b8770e97b9e6908ad68a/agent-pack/system-prompts/ees-integrated-assistant.md); 실제 등록 내용·사용자 추가 지침 직접 대조는 미실행 |
@@ -84,7 +84,7 @@
 
 ## 최근 점검
 
-첫 Deploy 오류를 전환·자동 복구 분기에 대조함. 초기 관리 서버 종료 뒤 백업 또는 후보 기동 실패와 복구 실패가 이 문구로 합쳐지며, 실제 원인은 배포 기록·서버 로그가 필요함. DB 복원 미시도와 현재 가용성·백업·실행 프로그램 미확인을 구분함. [실환경·후속 진단](../evals/scenarios.md#ees-first-registration). 상태 문서 두 개와 문서/diff만 확인하고 코드 시험·CI·완료한 연동 검증은 반복하지 않음. 사내 읽기 진단·복구·EES 화면/데이터 연속성은 미확인.
+사용자 진단 보고로 `recovery_required`·`launch_uncertain=false`·관리 PID/로그 기록 없음·잠금 없음과 조회 당시 listener 없음·health 연결 실패를 반영함. 백업 참조 존재와 실제 파일 재검사·데이터 연속성 미확인을 구분하고, traceback 중간의 import 문장만으로 원인을 확정하지 않음. [진단 증거](../evals/scenarios.md#ees-first-registration). 상태 문서 두 개와 문서/diff만 확인하며 코드 시험·CI·완료한 상태/health·연동 검증은 반복하지 않음. 다음은 최근 서버 로그의 마지막 예외이며 사내 복구는 미완료.
 
 ## 갱신 규칙
 
