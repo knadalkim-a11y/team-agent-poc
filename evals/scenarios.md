@@ -904,6 +904,18 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 다음 확인 재설계: 오류명 하나만 남았다는 안내는 후보 지연 판단에 필요한 묶음을 빠뜨린 성급한 안내였음. 후보의 기존 error_types/stderr_scope와 observed_self_seconds/last_timed_import만 두 줄로 한 번에 요청함. 전자는 관측 예외와 읽기 범위, 후자는 계측된 시간/마지막 이름의 보조 근거임. 예외 발생 시각이나 진행 중 import의 위치를 직접 기록하지 않아 오류 후 종료 지연 또는 마지막 모듈 정체를 확정할 수 없음. 전체 top_self·원본 프레임·추가 표식은 요구하지 않으며, 없으면 ?로 받아 기존 증거의 한계로 기록하고 멈춤. 새 도구·같은 후보 검사·CIM 재조회·Deploy는 추가하지 않음.
 - 이번 점검 범위: main `3e9b1a3fc2a659cb2113d4d4829f3c7fc55e970b`·관련 열린 PR 없음에서 결과 요약/출력 코드를 대조함. 독립 검토로 후보 예외·범위와 시간/마지막 계측의 제한 및 네 값 묶음을 확인함. 이 묶음 뒤 같은 실행의 다른 필드를 반복 요청하지 않고 남는 원인은 미확정으로 기록하기로 함. 기존 실제 NLTK CI를 반복하지 않고 문서 3개만 갱신함. 문서 25개/571링크·오류/검토 후보 0과 diff 검사 통과. 사내 수정 적용·새 검사·추가 프로세스 조회/종료는 미실행임.
 
+<a id="ees-import-deadline"></a>
+
+### 후보 마지막 계측 수신과 watchdog 시간 기준 수정 — 2026-09-08
+
+- 수신: 후보 error_types=[]/stderr_scope=full/observed_self_seconds=54.817145/last_timed_import=pandas.errors.cow. 사용자의 last_time_import 키 전사는 기존 필드로 읽고 다시 입력시키지 않음. 이전 후보 70초·T/T/F/F·후속 P=0/U=0, original 11.157초/ValueError와 합쳐 해석하고 같은 실행의 추가 필드는 요청하지 않음.
+- 판정: 수집한 전체 stderr에서 인식된 예외가 없고 import 계측에 상당한 시간이 기록됨. self 합은 완료돼 기록된 import들 기준이며 초기 Python 로딩도 포함할 수 있음. CPU 시간·pandas 한 모듈의 시간·특정 I/O 대기·현재 정체 위치가 아님. [Python importtime 의미](https://docs.python.org/3.11/using/cmdline.html#cmdoption-X). 예외/종료의 모든 형태를 배제하거나 파일 손상·백신·네트워크를 확정하지 않음. 기존 검사 결과 해석은 여기서 마치며 사내 지연의 세부 원인은 미확정으로 남김.
+- 발견/외부 재현: 기존 부모 한도는 Popen 전부터 70초, 자식 watchdog은 Python 초기화 뒤 예약 호출부터 60초여서 예약이 10초보다 늦으면 부모가 먼저 중단할 수 있음. 독립 검토도 같은 경쟁을 발견함. 레포 파일 변경 없는 Linux 합성 자식에서 부모 1.8초/자식 1.0초/예약 전 1.2초 지연을 주었을 때 기존 방식은 1.802초·parent_timeout_cleanup_unverified·T/T/F/F, 부모 deadline에 남은 시간을 맞춘 시험 방식은 1.619초·watchdog_timeout·T/T/F/T였음. 정상 watchdog도 같은 표식을 만들 수 있다는 재현이며 실제 사내 예약 지연을 측정한 것은 아님.
+- 수정: 부모 시작+60초를 자식 deadline, 시작+70초를 부모 deadline으로 사용함. 자식은 남은 예산만 watchdog에 예약하며 이미 소진됐으면 site/NLTK 전에 고정 상태로 끝냄. Python 3.11의 [프로세스 공통 monotonic 기준](https://docs.python.org/3.11/library/time.html#time.monotonic)을 사용하고 시스템 시각 변경과 분리함. watchdog_arm_seconds/watchdog_budget_seconds를 비식별 결과에 추가하고 기존 SEND I1에 SEND T1 한 줄을 더해 사용자는 두 줄만 전달함. CLEANUP 중 관측 예외도 I1에 포함함. 서비스·JobObject·다른 프로세스 종료·부모 한도 연장·패키지 재설치를 추가하지 않음.
+- 다음 비교 조건: Windows/Linux에서 실제 정상/예외/예약 전 지연/예산 소진/venv/NLTK 검증을 마친 수정본을 main에 반영한 뒤 Update/ProbeImports를 한 번 안내함. 프로필 결함과 시간 기준 결함을 고쳐 original 비교 기준과 후보 완료/시간 제한 관측을 새로 얻는 목적임. 이전 형식만 바꾸거나 같은 긴 실패를 반복하려는 실행이 아님. original/candidate SEND I1·T1 두 줄만 받으며 CLEANUP·오류면 멈추고 Deploy로 자동 진행하지 않음. 실제 DB·키·원본 서버·준비 프로그램 commit `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`은 유지함. [실행 가이드](../docs/03-openwebui-native-agent.md#ees-import-probe).
+- 기준/미실행: 최신 main `d8d94424ef67b4697ed53545cd7a70a0c88baf9f`, 관련 열린 PR 없음, 로컬 전체 tree 일치에서 수정함. 사내 수정 적용·새 비교·프로세스 조회/종료·서버 전환은 미실행임.
+- 로컬 검증: Linux/Python 3.12.13에서 import 전용 29개 중 26개 통과/실제 NLTK opt-in 및 Windows 전용 3 skip, 운영/연동 43개 통과. 실제 자식에 2초 예약 전 지연·watchdog 전체 3초/부모 4초를 주어 부모 전에 덤프 종료함을 확인했고, 시작 예산 소진 시 site/NLTK 미실행을 검증함. 구형/부분/잘못된 시간 기록의 미확인 처리·CLEANUP 오류 유지·두 SEND 줄 각각 180자 한도도 통과함. 문서 25개/575링크·오류/검토 후보 0과 diff 검사 통과. 실제 Windows/NLTK 회귀는 원격 CI에서 확인할 예정임.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

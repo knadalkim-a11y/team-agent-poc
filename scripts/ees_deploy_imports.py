@@ -23,12 +23,24 @@ _TIMING = re.compile(r"import time:\s*([0-9]{1,16})\s*\|\s*[0-9]{1,16}\s*\|\s*([
 _FRAME = re.compile(r'\s*File "([^"\r\n]{1,2048})", line ([0-9]{1,8})(?:,? in ([A-Za-z0-9_.<>]{1,80}))?\s*\Z')
 _MARKERS = {"watchdog_armed": "EES_IMPORT_WATCHDOG_ARMED",
             "import_entered": "EES_IMPORT_ENTERED", "import_completed": "EES_IMPORT_COMPLETED"}
+_BOOT_EXPIRED = "EES_IMPORT_BOOT_BUDGET_EXHAUSTED"
+_BUDGET = re.compile(r"EES_IMPORT_BUDGET ([0-9]{1,5}\.[0-9]{6}) ([0-9]{1,5}\.[0-9]{6})\Z")
 
 
-def _program():
+def _program(started, watchdog_deadline):
+    # Python 3.11 monotonic time is system-wide on Windows and Linux. Include
+    # interpreter bootstrap in the same budget as the parent's wait, retaining
+    # the default ten seconds between the watchdog and parent deadlines.
     # Keep the watchdog armed through exception handling and interpreter exit.
-    return f'''import faulthandler
-faulthandler.dump_traceback_later({WATCHDOG_SECONDS!r}, exit=True)
+    return f'''import faulthandler, time
+_probe_now = time.monotonic()
+_probe_budget = {watchdog_deadline!r} - _probe_now
+if _probe_budget <= 0:
+    print("EES_IMPORT_BUDGET", format(max(0, _probe_now - {started!r}), ".6f"), "0.000000", flush=True)
+    print({_BOOT_EXPIRED!r}, flush=True)
+    raise SystemExit(124)
+faulthandler.dump_traceback_later(_probe_budget, exit=True)
+print("EES_IMPORT_BUDGET", format(max(0, _probe_now - {started!r}), ".6f"), format(_probe_budget, ".6f"), flush=True)
 print("EES_IMPORT_WATCHDOG_ARMED", flush=True)
 import site
 site.main()
@@ -65,7 +77,15 @@ def _read(stream):
 
 
 def _summarize(stdout, stderr, stdout_bytes, stderr_bytes):
-    markers = {key: value in stdout.splitlines() for key, value in _MARKERS.items()}
+    stdout_lines = stdout.splitlines()
+    markers = {key: value in stdout_lines for key, value in _MARKERS.items()}
+    arm_seconds, budget_seconds = None, None
+    if stdout_bytes <= MAX_BYTES:
+        clocks = [_BUDGET.fullmatch(line) for line in stdout_lines if line.startswith("EES_IMPORT_BUDGET ")]
+        if len(clocks) == 1 and clocks[0]:
+            arm, budget = map(float, clocks[0].groups())
+            if 0 <= arm <= 86400 and 0 <= budget <= 86400:
+                arm_seconds, budget_seconds = arm, budget
     events, total_us, top, last, errors = 0, 0, [], None, []
     watchdog, threads, frame_count, frames = False, 0, 0, []
     traceback, error_count, error_frames = False, 0, []
@@ -98,6 +118,8 @@ def _summarize(stdout, stderr, stdout_bytes, stderr_bytes):
                     errors.append(label)
                 traceback = False
     return {**markers, "watchdog_dump_seen": watchdog,
+            "startup_budget_exhausted": _BOOT_EXPIRED in stdout_lines,
+            "watchdog_arm_seconds": arm_seconds, "watchdog_budget_seconds": budget_seconds,
             "stdout_bytes": stdout_bytes, "stderr_bytes": stderr_bytes,
             "stdout_scope": "tail" if stdout_bytes > MAX_BYTES else "full",
             "stderr_scope": "tail" if stderr_bytes > MAX_BYTES else "full",
@@ -112,6 +134,7 @@ def _summarize(stdout, stderr, stdout_bytes, stderr_bytes):
 
 def _measure(executable):
     started, interrupted, unverified = time.monotonic(), False, False
+    watchdog_deadline, parent_deadline = started + WATCHDOG_SECONDS, started + PARENT_SECONDS
     # On Windows a venv launcher can own a second process. Killing the launcher
     # after the parent deadline cannot establish that the import child stopped.
     options = ({"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP} if os.name == "nt"
@@ -119,20 +142,21 @@ def _measure(executable):
     with tempfile.TemporaryDirectory(prefix="ees-import-", ignore_cleanup_errors=True) as directory, \
             tempfile.TemporaryFile(mode="w+b") as stdout, tempfile.TemporaryFile(mode="w+b") as stderr:
         try:
-            child = subprocess.Popen([str(executable), "-I", "-S", "-B", "-X", "importtime", "-c", _program()],
+            child = subprocess.Popen([str(executable), "-I", "-S", "-B", "-X", "importtime", "-c",
+                                      _program(started, watchdog_deadline)],
                                      cwd=directory, env=_environment(), stdin=subprocess.DEVNULL,
                                      stdout=stdout, stderr=stderr, **options)
         except OSError as error:
             return {"status": "launch_failed", "error_type": type(error).__name__ if type(error).__name__ in _ERRORS else "other",
                     "elapsed_seconds": round(time.monotonic() - started, 3), "cleanup_unverified": False}
         try:
-            child.wait(timeout=max(0, PARENT_SECONDS - (time.monotonic() - started)))
+            child.wait(timeout=max(0, parent_deadline - time.monotonic()))
         except KeyboardInterrupt:
             # Ctrl+C reaches the parent only. Let the child's existing watchdog
             # finish; do not remove its deadline or launch the second comparison.
             interrupted = True
             try:
-                child.wait(timeout=max(0, PARENT_SECONDS - (time.monotonic() - started)))
+                child.wait(timeout=max(0, parent_deadline - time.monotonic()))
             except subprocess.TimeoutExpired:
                 unverified = True
         except subprocess.TimeoutExpired:
@@ -149,6 +173,8 @@ def _measure(executable):
         summary = _summarize(out, err, out_size, err_size)
         status = ("parent_timeout_cleanup_unverified" if unverified else "interrupted" if interrupted
                   else "watchdog_timeout" if summary["watchdog_dump_seen"]
+                  else "startup_budget_exhausted" if summary["startup_budget_exhausted"]
+                  and child.returncode == 124 and not summary["import_entered"]
                   else "completed" if child.returncode == 0 and all(summary[key] for key in _MARKERS)
                   else "import_failed" if summary["import_entered"] else "probe_incomplete")
         return {"status": status, "elapsed_seconds": elapsed, "exit_code": child.returncode,
@@ -170,6 +196,8 @@ def _handoff_status(result):
     status = result.get("status")
     if result.get("cleanup_unverified") is True or status in {"parent_timeout", "parent_timeout_cleanup_unverified"}:
         return "CLEANUP"
+    if status == "startup_budget_exhausted":
+        return "TIME-?" if result.get("stdout_scope") == "tail" else "TIME-BOOT"
     if status == "watchdog_timeout":
         # A truncated marker stream cannot establish which phase was reached.
         if result.get("stdout_scope") == "tail":
@@ -184,6 +212,10 @@ def _handoff_status(result):
             "skipped_after_incomplete_probe": "SKIP"}.get(status, "UNKNOWN")
 
 
+def _handoff_seconds(seconds):
+    return f"{seconds:.1f}" if type(seconds) in (int, float) and 0 <= seconds <= 86400 else "-"
+
+
 def _handoff_line(report):
     """One short, fixed-label line for an operator who can only retype results."""
     parts, errors, partial = ["SEND I1"], [], False
@@ -191,10 +223,9 @@ def _handoff_line(report):
     for program, label in (("original", "O"), ("candidate", "C")):
         result = next((row for row in rows if isinstance(row, dict) and row.get("program") == program), {})
         status, seconds = _handoff_status(result), result.get("elapsed_seconds")
-        elapsed = (f"{seconds:.1f}" if type(seconds) in (int, float) and 0 <= seconds <= 86400 else "-")
-        parts.append(f"{label}={status}/{elapsed}")
+        parts.append(f"{label}={status}/{_handoff_seconds(seconds)}")
         partial = partial or result.get("stdout_scope") == "tail" or result.get("stderr_scope") == "tail"
-        if status in {"ERROR", "LAUNCH"}:
+        if status in {"ERROR", "LAUNCH", "CLEANUP"}:
             names = result.get("error_types", [])
             name = names[0] if isinstance(names, list) and names else result.get("error_type")
             if isinstance(name, str) and name in _ERRORS:
@@ -205,6 +236,17 @@ def _handoff_line(report):
     if partial:
         parts.append("partial=yes")
     return " ".join(parts + errors)
+
+
+def _handoff_timing_line(report):
+    parts = ["SEND T1"]
+    rows = report.get("results", [])
+    for program, label in (("original", "O"), ("candidate", "C")):
+        result = next((row for row in rows if isinstance(row, dict) and row.get("program") == program), {})
+        values = (None, None) if result.get("stdout_scope") == "tail" else (
+            result.get("watchdog_arm_seconds"), result.get("watchdog_budget_seconds"))
+        parts.append(f"{label}=" + "/".join(_handoff_seconds(value) for value in values))
+    return " ".join(parts)
 
 
 def render(report):
@@ -226,4 +268,5 @@ def render(report):
             lines.append("last_error_traceback (most recent call last):")
             lines.extend(result["last_error_frames"])
     lines.append(_handoff_line(report))
+    lines.append(_handoff_timing_line(report))
     return "\n".join(lines)
