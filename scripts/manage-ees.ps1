@@ -5,7 +5,7 @@ Settings and data stay outside Git. This does not synchronize Agent Pack items.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('Init', 'Update', 'Status', 'Diagnose', 'Plan', 'Prepare', 'Deploy', 'Rollback', 'Start', 'Stop')]
+    [ValidateSet('Init', 'Update', 'Status', 'Diagnose', 'ProbeImports', 'Plan', 'Prepare', 'Deploy', 'Rollback', 'Start', 'Stop')]
     [string]$Action,
     [string]$Config = (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'),
     [string]$SourcePython,
@@ -59,8 +59,10 @@ if (-not $operatorPython -or -not (Test-Path -LiteralPath $operatorPython -PathT
     throw 'The registered Python environment is unavailable. Preserve its uv cache and inspect the existing installation.'
 }
 $pythonOptions = @('-I')
-if ($Action -eq 'Diagnose') { $pythonOptions += @('-S', '-B') }
-$operationArgs = $pythonOptions + @((Join-Path $PSScriptRoot 'manage_ees.py'), $Action.ToLowerInvariant(), '--config', $Config)
+if ($Action -in @('Diagnose', 'ProbeImports')) { $pythonOptions += @('-S', '-B') }
+$pythonAction = $Action.ToLowerInvariant()
+if ($Action -eq 'ProbeImports') { $pythonAction = 'probe-imports' }
+$operationArgs = $pythonOptions + @((Join-Path $PSScriptRoot 'manage_ees.py'), $pythonAction, '--config', $Config)
 if ($Action -eq 'Init') {
     $operationArgs += @('--source-python', $SourcePython, '--cwd', $WorkingDirectory,
         '--data-dir', $DataDirectory, '--listen-host', $ListenHost, '--port', "$Port", '--uv', $UvPath)

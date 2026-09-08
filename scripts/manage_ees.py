@@ -199,6 +199,39 @@ def target_for(config, commit):
     return Path(config["releases_dir"]) / commit_id(commit)
 
 
+def probe_imports(config, commit):
+    """Compare the known import chain without starting either application."""
+    import ees_deploy_imports as imports
+
+    with locked(config):
+        registry = read_registry(config)
+        require_idle(registry)
+        if registry.get("pending") or registry.get("launch_uncertain"):
+            raise DeploymentError("Resolve the unfinished deployment before comparing imports.")
+        if registry["current"]["kind"] != "original":
+            raise DeploymentError("Import comparison requires the original program to remain selected.")
+        target = target_for(config, commit)
+        candidate = target / "venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+        if any(releases._linked(parent) for parent in (candidate.parent, *candidate.parent.parents)):
+            raise DeploymentError("Prepared import comparison paths cannot contain links.")
+        metadata = json.loads(states._regular(target / "release.json").read_bytes())
+        if (not isinstance(metadata, dict) or type(metadata.get("schema_version")) is not int
+                or metadata.get("schema_version") != 1
+                or metadata.get("state") != "prepared" or metadata.get("source_commit") != commit
+                or metadata.get("webui_version") != releases.branding.VERSION
+                or metadata.get("source_python") != config["source_python"]
+                or metadata.get("venv_dir") != str(target / "venv")
+                or metadata.get("target_python") != str(candidate)
+                or metadata.get("python_executable") != str(candidate)
+                or metadata.get("metadata_sha256") != releases._metadata_digest(metadata)
+                or not candidate.is_file()):
+            raise DeploymentError("Prepared import comparison metadata does not match this candidate.")
+        # Static selection only: this is not a new inventory or deployment check.
+        result = imports.compare(config["source_python"], str(candidate))
+        result["source_commit"] = commit
+        return result
+
+
 def initialize(args):
     config = states.init_config(args.config, args.source_python, args.cwd, args.data_dir,
                                 args.listen_host, args.port, args.uv)
@@ -411,6 +444,8 @@ def operate(args):
     if args.action == "init":
         return initialize(args)
     config = states.load_config(args.config)
+    if args.action == "probe-imports":
+        return probe_imports(config, commit_id(args.commit))
     if args.action == "plan":
         return plan(config, args)
     if args.action == "prepare":
@@ -509,7 +544,7 @@ def render_diagnosis(result):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["init", "status", "diagnose", "plan", "prepare", "deploy", "rollback", "start", "stop"])
+    parser.add_argument("action", choices=["init", "status", "diagnose", "probe-imports", "plan", "prepare", "deploy", "rollback", "start", "stop"])
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--bundle", type=Path)
     parser.add_argument("--commit")
@@ -528,7 +563,8 @@ def main(argv=None):
     if args.use_windows_ca and args.action != "deploy":
         parser.error("--use-windows-ca is supported only with deploy.")
     needed = {"init": ["source_python", "cwd", "data_dir", "listen_host", "port", "uv"],
-              "plan": ["bundle", "commit"], "prepare": ["bundle", "commit"], "deploy": ["commit"]}
+              "plan": ["bundle", "commit"], "prepare": ["bundle", "commit"], "deploy": ["commit"],
+              "probe-imports": ["commit"]}
     if any(getattr(args, name) is None for name in needed.get(args.action, [])):
         parser.error("Missing arguments for the requested operation.")
     try:
@@ -542,7 +578,11 @@ def main(argv=None):
         parser.exit(1, f"Operation stopped: {error}{detail}\n")
     except (OSError, ValueError, KeyError, TypeError):
         parser.exit(1, "Operation stopped: local state or a required file could not be inspected. No secrets were printed.\n")
-    print(render_diagnosis(result) if args.action == "diagnose" else json.dumps(result, ensure_ascii=False))
+    if args.action == "probe-imports":
+        import ees_deploy_imports as imports
+        print(imports.render(result))
+    else:
+        print(render_diagnosis(result) if args.action == "diagnose" else json.dumps(result, ensure_ascii=False))
     return 0
 
 

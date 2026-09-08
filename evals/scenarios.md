@@ -859,6 +859,20 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 원격 검증: 코드 원본 `2cb6b55f8ff2dc38ecd8a2ca39d30a7e6951d876`의 [PR #10](https://github.com/knadalkim-a11y/team-agent-poc/pull/10)에서 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34281735662) 두 작업이 성공함. 실제 합성 자식 수명주기·uv 오프라인 준비·Windows DPAPI 및 PowerShell 파싱을 포함한 설정된 검사 결과이며 사내 실제 앱 기동을 대신하지 않음. PR 실행의 배포물 준비 작업은 조건에 따라 skipped이며 새 프로그램 ZIP은 만들지 않음.
 - Git 반영: 독립 설계/구현 검토와 Windows/Linux CI 완료 후 PR #10을 `50c2a1f7bcaa80b6ee64252bd74bbece30fb098d`로 main에 병합함. GitHub의 별도 자동 리뷰는 병합 당시 진행 중이었으며 완료로 기록하지 않음. 상태·원격 증거 후속 갱신은 문서만 변경하고 문서/diff 검사 후 `[skip ci]`로 반영함. 사내 Update/Diagnose 결과는 대기이며 이전 실패의 원인을 확정하거나 배포 성공으로 바꾸지 않음.
 
+<a id="ees-import-probe"></a>
+
+### Diagnose v2 사내 결과와 고정 import 비교 — 2026-09-08
+
+- 사용자 전달 결과: `phase=idle`, `original_program=true`, `managed_process_running=true`, `process_check=identity_matched`. 마지막 실패는 `2026-09-08T07:35:31Z`, deploy/health_check/process, reason=null, recovery=succeeded이며 새 health의 elapsed/timeout/exit_code는 모두 null임. 현재 프로세스 식별과 저장된 복구 성공을 확인한 사용자 보고이며 이번 시점의 직접 `/health`·UI 검증은 아님.
+- 후보 선택은 `inferred_from_creation_time`, candidate_seconds=599.6, recovery_seconds=132.0, scan_scope=full, log_bytes=bytes_read=10228. 시작/수신/인증서/프록시/연결/읽기/DNS/다운로드/모델 캐시 신호는 모두 false, errors는 KeyboardInterrupt만 있음. traceback 1개·마지막 헤더 확인·24프레임 생략·unknown 1개, 첫 비중단 오류는 없음. 전사된 필드명의 명백한 오탈자는 의미에 맞춰 기록했으며 원문 재전송을 요구하지 않음.
+- 마지막 공개 호출 흐름은 nltk.classify.scikitlearn → sklearn의 초기화/base/utils/validation/array_api/fixes → pandas 초기화/core/api/arrays/datetime 계열 → frozen importlib의 find/load/find_spec/_path_stat임. 후보 로그 연결과 599.6초는 생성 시각에 따른 추정이고 정확한 timeout reason을 소급 확정하지 않음. 전체 선택 로그에서 이전 오류/기동 마커를 찾지 못했지만 네트워크·보안 검사·파일 I/O 원인을 배제할 수 없음. 최종 `_path_stat`이나 pandas 한 위치가 600초 전체의 원인이라는 근거는 없음.
+- 다음 가설: 동일 NLTK 의존성 로딩에서 후보/기존 차이가 재현되는지 고정 `ProbeImports` 한 번으로 비교함. 앞선 NumPy 단독 비교의 빠른 성공과 캐시 배치 후 실패는 보존하고 재실행하지 않음. 사용자에게 긴 코드를 수동 전달하지 않고 기존 Git 명령으로 수집·비식별 요약을 전달함. 상세 [실행·판정 기준](../docs/03-openwebui-native-agent.md#ees-import-probe).
+- 구현 범위: 기존 등록 검증/관리 잠금과 prepared 메타데이터의 커밋·원본·대상 경로·해시를 확인한 뒤 두 실행 파일에서 고정 import만 순차 실행. 부모의 기존 config/DPAPI 검증은 유지하지만 등록된 환경·DATA_DIR·키를 자식에 전달하지 않음. 서비스 전환·설치 파일 수정·DB/키 변경·원문 로그 전송 없음. 임시 출력과 잠금 사용, import의 일반 부작용까지 막는 OS 격리로 설명하지 않음.
+- 독립 설계 검토: 주기 stack/범용 profiler 대신 importtime의 self 시간과 deadline stack으로 축소함. Windows venv redirector만 종료하고 실제 Python이 남을 위험을 줄이기 위해 `-S`로 site 이전에 자식의 60초 `faulthandler` 자가 종료를 예약하고 이후 `site.main()` 수행. 부모 70초 제한/정리 미확인 시 다음 환경을 시작하지 않음. importtime에는 실패한 시도도 나타날 수 있어 `timed_import_events`로 명명하고 cumulative를 합산하지 않음. [Python 실행 옵션](https://docs.python.org/3.11/using/cmdline.html#cmdoption-X), [watchdog 종료](https://docs.python.org/3.11/library/faulthandler.html#faulthandler.dump_traceback_later).
+- 개발 기준: 최신 main `b1b2a5bbaafeef872dfd7f81e469a7aa37d05555`, 관련 열린 PR 없음, 로컬 기존 전체 tree 일치 상태에서 준비함. 사내 ProbeImports·실제 지연 원인·추가 전환은 미실행이며 아래 검증은 개발 환경의 합성 검사와 구분함.
+- 구현 검토: prepared schema의 bool 허용과 idle 상태에 남은 pending/launch_uncertain를 거부하도록 보완함. 일반 예외의 마지막 공개 프레임도 최대 6개 수집해 원인 위치 추가 왕복을 줄이며, watchdog 첫 thread의 최대 10개 프레임과 구분함. watchdog은 첫 thread가 main이라고 주장하지 않고 전체 thread 수를 함께 표시함. SyntaxError의 in 없는 파일 위치도 보존하고 원문 메시지/코드 행은 내보내지 않음. 사용자 중단 또는 부모 제한이면 다음 환경을 시작하지 않음.
+- 로컬 검증: Linux/Python 3.12.13에서 운영 CLI/전환 시험 41개 통과. 배포 모듈 회귀 108개 집계 중 4 skip을 제외하고 통과했으며, 마지막 SyntaxError 프레임 보완 후 import 전용 15개 중 Windows 3.11 venv 시험 1 skip을 제외하고 통과함. 실제 stdlib 자식의 완료/시간 제한 종료/예외, 부모 한도·Ctrl+C 뒤 후보 생략, self만 합산, 비밀 경로/메시지 제거·부분 읽기, 준비 대상 불일치·미완료 전환 차단·기존 상태 보존을 검증함. 로컬의 나머지 skip은 기존 PID namespace 수명주기·3.11/uv opt-in·Windows DPAPI 조건임. CLI의 -I -S -B 도움말, 문서 25개/링크 559개·오류/검토 후보 0과 diff 검사를 통과함. Windows 실자식/PowerShell 및 실제 사내 NLTK import는 이 로컬 실행으로 검증하지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

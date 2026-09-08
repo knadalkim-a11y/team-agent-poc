@@ -4,6 +4,8 @@
 
 ## 2026-09-08
 
+- Diagnose v2의 사내 결과를 기록하고, 종료 traceback만으로 원인을 단정하지 않도록 고정 NLTK import 비교 명령 `ProbeImports`를 추가함. 기존/후보별 계측·자가 종료 한도·비식별 결과를 한 번에 제공하며 서버 전환 없이 지연 재현 여부를 확인함. [사용법과 제한](docs/03-openwebui-native-agent.md#ees-import-probe), [증거](evals/scenarios.md#ees-import-probe).
+
 - 사내 확인을 짧은 Git 명령·한 번의 결과 전달·근거에 따른 다음 행동으로 재설계함. 새 실패 기록에 이유·기동 health 경과/한도·종료 코드·후보와 복구 로그 식별자를 보존하고 Diagnose v2에서 정확한 로그 연결과 첫 비중단/마지막 오류 위치를 제공함. 프로세스 확인 실패에도 확보한 진단을 반환하며 기존 데이터·복구 순서·대기 한도는 유지함. [운영 흐름](docs/03-openwebui-native-agent.md#ees-diagnostic-workflow), [검증과 한계](evals/scenarios.md#ees-diagnostic-workflow).
 
 - `Diagnose`로 자동 복구 뒤 실패 후보의 시간·기동/네트워크 마커·공개 traceback 위치를 한 번에 요약. 반복 재배포와 수동 중간 전사를 줄이고, 기존 로그를 읽어 다음 조치를 정함. 앱 import·기동·통신·데이터/캐시 쓰기 없이 동작함. [사용법](docs/03-openwebui-native-agent.md#ees-diagnose-once), [검증](evals/scenarios.md#ees-diagnose-once).
