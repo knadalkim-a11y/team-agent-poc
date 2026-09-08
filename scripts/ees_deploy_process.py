@@ -22,6 +22,16 @@ import uuid
 class ProcessError(RuntimeError):
     """Starting, identifying, or gracefully stopping the managed server failed."""
 
+    def __init__(self, message, *, cause=None, operation=None):
+        super().__init__(message)
+        self.errno = getattr(cause, 'errno', None)
+        self.winerror = getattr(cause, 'winerror', None)
+        if type(self.errno) is not int:
+            self.errno = None
+        if type(self.winerror) is not int:
+            self.winerror = None
+        self.operation = operation if type(operation) is str and operation in {'port_probe', 'port_bind'} else None
+
 
 class LaunchUncertain(ProcessError):
     """A child was spawned but its identity is unverified; do not start a fallback."""
@@ -45,16 +55,22 @@ def _address(host, port):
         raise ProcessError("Use an explicit listen IP and a port from 1 to 65535.") from None
 
 
-def port_is_free(host, port):
+def port_is_free(host, port, *, raise_on_error=False):
     """Probe binding with asyncio's platform defaults, without stopping a listener."""
     address = _address(host, port)
-    with socket.socket(socket.AF_INET6 if address.version == 6 else socket.AF_INET) as listener:
-        if os.name != 'nt':
-            listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        try:
+    operation = 'port_probe'
+    try:
+        with socket.socket(socket.AF_INET6 if address.version == 6 else socket.AF_INET) as listener:
+            if os.name != 'nt':
+                listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            operation = 'port_bind'
             listener.bind((host, port))
-        except OSError:
-            return False
+            operation = 'port_probe'
+    except OSError as error:
+        if raise_on_error:
+            raise ProcessError("The listen port is unavailable; no existing process was stopped.",
+                               cause=error, operation=operation) from None
+        return False
     return True
 
 
@@ -138,7 +154,7 @@ def verify_identity(identity):
 
 
 def start_server(python_exe, cwd, env, host, port, log_dir):
-    if not port_is_free(host, port):
+    if not port_is_free(host, port, raise_on_error=True):
         raise ProcessError("The listen port is unavailable; no existing process was stopped.")
     # Preserve a venv's executable path; resolving its symlink can select the base environment.
     python_exe, cwd = Path(python_exe).absolute(), Path(cwd).resolve()
@@ -154,8 +170,8 @@ def start_server(python_exe, cwd, env, host, port, log_dir):
             child = subprocess.Popen([str(python_exe), '-c', SERVER_CODE, host, str(port)],
                                      cwd=cwd, env=env, stdin=subprocess.DEVNULL,
                                      stdout=log, stderr=subprocess.STDOUT, **options)
-    except OSError:
-        raise ProcessError(f"Server launch failed; inspect the local log: {log_file}") from None
+    except OSError as error:
+        raise ProcessError("Server launch failed; inspect the local server log.", cause=error) from None
     _CHILDREN[child.pid] = child
     try:
         identity = _identity(child.pid)
@@ -169,7 +185,7 @@ def start_server(python_exe, cwd, env, host, port, log_dir):
         if not exited:
             raise LaunchUncertain("A server was launched but its identity could not be verified. "
                                   "It may still be running; automatic recovery must not start another server.") from None
-        raise ProcessError(f"Server exited during startup; inspect the local log: {log_file}")
+        raise ProcessError("Server exited during startup; inspect the local server log.")
     return {**identity, 'group_id': child.pid, 'host': host, 'port': port, 'log_file': str(log_file)}
 
 
@@ -200,12 +216,12 @@ def wait_healthy(identity, timeout=60, interval=0.2):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         if not verify_identity(identity):
-            raise ProcessError(f"Server exited before becoming healthy; inspect: {identity.get('log_file', '')}")
+            raise ProcessError("Server exited before becoming healthy; inspect the local server log.")
         if _healthy(identity['host'], identity['port'], min(2, max(0.01, deadline - time.monotonic()))):
             if verify_identity(identity):
                 return
         time.sleep(min(interval, max(0, deadline - time.monotonic())))
-    raise ProcessError(f"Server health timed out; inspect the local log: {identity.get('log_file', '')}")
+    raise ProcessError("Server health timed out; inspect the local server log.")
 
 
 def stop_server(identity, timeout=30):

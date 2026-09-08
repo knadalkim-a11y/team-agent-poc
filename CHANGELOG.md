@@ -4,6 +4,8 @@
 
 ## 2026-09-08
 
+- 프로그램 전환과 자동 복구의 실패 단계·오류 분류·소켓 errno/winerror를 구분해 콘솔과 기존 배포 기록에 남김. Status는 허용 필드만 표시하고 마지막 실패를 시간과 함께 보존함. 포트 오류를 점유로 단정하지 않으며 시작/health 오류에서 사용자 로그 경로를 제거함. 기존 포트 검사·잠금·프로세스 식별·환경/데이터 보호·복구 순서는 유지하고 추가 재시도는 없음. [진단 안내](docs/03-openwebui-native-agent.md#ees-deployment-diagnostics), [검증](evals/scenarios.md#ees-deployment-diagnostics).
+
 - 첫 오프라인 Prepare에서 antlr4-python3-runtime 4.9.3 wheel을 선택하지 못한 사례를 위한 캐시 복구 명령 추가. 기존 빌드 wheel을 검증·복사하고 비활성 실패 후보와 로그를 보존한 뒤 같은 버전으로 다시 준비함. 원래 서버·데이터·배포 기록을 전환하지 않으며 기존 캐시와 오프라인 제한을 유지함. [사용법](docs/03-openwebui-native-agent.md#ees-offline-recovery), [근거](evals/scenarios.md#ees-first-registration).
 
 - 사내 초기 관리 기동에서 60초 health 시간 초과 후 정상 응답이 확인되어 대기 기본값을 300초로 늘리고 명령별 1~900초 선택 인자를 추가함. 배포/원복 및 실패 후 기존 프로그램 복구에도 같은 제한을 적용하며 재등록·DB/키 변경 없이 사용할 수 있음. 초기 실행 정책 차단·시간 초과·후속 health 성공을 함께 기록하고 PowerShell 현재 창 설정 안내를 보완함. [근거](evals/scenarios.md#ees-first-registration).
