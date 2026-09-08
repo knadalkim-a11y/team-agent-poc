@@ -740,6 +740,16 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 첫 결과의 `phase=idle`, `original_program=true`, `managed_process_running=true`와 실제 HEAD를 보고 다음 명령을 정함. 재전환 대상은 이미 준비된 프로그램 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`이며 Git 최신 운영 코드 커밋과 혼동하지 않음. 준비 파일 재다운로드·Prepare·Init·별도 수동 Stop·DB 복원·완료한 연동/PAT 시험을 반복하지 않음. 이후 Deploy의 600초는 명령별 선택이며 기본 300초나 등록 환경을 변경하지 않음.
 - 코드/시험 파일 변경 없음. 독립 읽기 검토에서 Update 종료 위치·오류 중단·프록시 유지·HEAD 대조 필요·Status의 비변경 범위를 확인함. 로컬 Linux/Python 3.12.13의 `python scripts/check_docs.py`: **DOCS OK, 25 files / 532 links / errors=0 / review_candidates=0**, `git diff --check` 통과. 이번 PowerShell 전달 블록은 코드 대조로 검토했으며 실제 Windows 실행은 미실행. 같은 운영 코드의 자동 시험/CI는 반복하지 않음. 사내 실행·checkout SHA·Status·EES 전환 성공은 아직 미확인임. 이전 복구 성공을 새로운 조회 결과로 대체하지 않음.
 
+<a id="ees-retransition-ready"></a>
+
+#### 운영 코드 갱신·original 관리 상태 보고와 재전환 안내 — 2026-09-08
+
+- 사용자는 앞선 Update/HEAD/Status 블록 실행 결과로 `head=c5f1690...`과 `idle, null, true, true, false, null`을 보고함. 실제 출력 순서에 따라 phase=idle, current_commit=null, original_program=true, managed_process_running=true, rollback_available=false, last_failure=null로 기록함. 원격 최신 main `c5f16909dad6942a4af4481a008f2913e3a8e4f8`과 보고된 SHA 접두어가 일치하지만 생략된 전체 SHA나 사내 파일 원문을 직접 확인하지는 않음.
+- 운영 코드 갱신과 현재 original 관리 프로세스 생존은 사용자 보고 범위로 확인함. Status는 health/화면/데이터 연속성을 검사하지 않으며 last_failure=null도 과거 실패 원인이 해결됐다는 뜻은 아님. 완료한 갱신/상태 명령을 다시 요구하지 않음.
+- 이후 명령은 기존 운영 PowerShell의 `manage-ees.ps1 -Action Deploy -Commit 4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50 -HealthTimeout 600` 한 번으로 정함. 프로그램 준비 원본을 유지하고 별도 수동 Stop·재다운로드·Prepare·Init·DB 복원은 추가하지 않음. Deploy가 실제 준비 메타데이터/의존성·기존 환경·관리 프로세스/포트·잠금을 검사한 뒤 종료/백업/기동을 수행하며, 600초는 후보와 필요 시 복구 프로그램 각각의 health 대기 한도임. 전체 실행 시간 한도로 표현하지 않음.
+- 성공 시 마지막 JSON과 기존 주소의 EES 이름/아이콘·기존 대화·일반 채팅을 한 번에 확인하고, 실패 시 재실행 전에 고정 안내 Operation stopped와 Diagnostics만 받도록 안내함. 전체 내부 로그·config·키/주소·경로를 요구하지 않음. 이 시점의 Deploy는 명령 전달 단계이며 사내 실행/결과·EES 전환 성공은 미확인임.
+- 최신 main·열린 PR 없음·로컬 무변경·같은 tree에서 지침/상태와 관련 코드/가이드를 대조함. STATUS·이 평가 기록만 갱신함. 로컬 Linux/Python 3.12.13의 `python scripts/check_docs.py`: **DOCS OK, 25 files / 530 links / errors=0 / review_candidates=0**, `git diff --check` 통과. 코드/시험·실행 설정 변경과 코드 시험/CI·독립 검토·사내 health/연동 재시험은 반복하지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

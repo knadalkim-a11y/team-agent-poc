@@ -8,12 +8,12 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **사용자의 다음 작업 진행 요청에 따라, 기존 준비 후보를 사용하는 사내 재전환 범위를 운영 코드 갱신 → 현재 상태 확인 → 결과에 따른 전환으로 구체화함.** 첫 전달은 서버를 바꾸지 않는 Update와 Status만이며 사용자 실행 결과는 아직 없음. [재개 절차](03-openwebui-native-agent.md#ees-resume-prepared-release), [범위·안내 검토](../evals/scenarios.md#ees-retransition-first-step). 진단 보완의 [PR #7 병합](../evals/scenarios.md#ees-diagnostics-merged)은 완료했으며 사내 적용은 미확인. 기존 서버 복구 성공·EES 전환 미완료·최초 실패 원인 미확정은 유지함. [최종 복구](../evals/scenarios.md#ees-original-recovered), [후보 준비 성공](../evals/scenarios.md#ees-prepare-completed).
-- 다음 작업 하나: **사내 Update 후 HEAD와 Status 결과를 받아 실제 운영 코드 갱신·현재 original 관리 상태를 확인한다.** idle·original·관리 프로세스 생존을 확인한 뒤 준비된 프로그램 원본으로 Deploy 한 번을 안내함. 첫 블록에는 재기동·Deploy·데이터 검사·완료한 연동 재검증을 포함하지 않음. 재다운로드·Prepare·Init도 반복하지 않으며 기동 대기 600초는 이후 전환 명령에만 적용하고 기본값/등록 환경은 유지함.
+- 이번 작업: **사내 Update 뒤 `head=c5f1690...`, idle·original·관리 프로세스 생존을 사용자 보고로 확인함.** 전달한 Status 순서의 current_commit·last_failure는 null, rollback_available은 false임. 축약 SHA 접두어가 안내 원본과 일치하며 사내 전체 checkout/설정 직접 대조는 미실행. [갱신·상태 확인 보고](../evals/scenarios.md#ees-retransition-ready). 진단 운영 코드 갱신은 사용자 보고 범위로 인정하고 EES 프로그램 전환·최초 실패 원인 확정은 아직 미완료임. [재개 절차](03-openwebui-native-agent.md#ees-resume-prepared-release), [준비 후보](../evals/scenarios.md#ees-prepare-completed).
+- 다음 작업 하나: **준비된 프로그램 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`으로 Deploy 한 번의 결과와 최소 화면 확인을 받는다.** 같은 운영 창에서 `-HealthTimeout 600`을 전달하며 기본값/등록 환경은 유지함. 기존 관리 경로가 종료·백업·기동을 담당하고 재다운로드·Prepare·Init·별도 수동 Stop은 붙이지 않음. 실패 시 재실행 전에 Operation stopped/Diagnostics로 실제 실패와 복구 상태를 확인함. 이 명령의 사내 실행 결과는 아직 없음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
-진단 보완 코드 원본은 `1ac1c33cf50cb3135f63c7ed8ac5ccaf22cdab30`이며 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34184761238) 성공을 확인했습니다. PR #7의 main 병합은 완료했고 사내 checkout 갱신·실제 적용은 미확인입니다. 프로그램 후보 ZIP 원본과 구분합니다.
+진단 보완 코드 원본은 `1ac1c33cf50cb3135f63c7ed8ac5ccaf22cdab30`이며 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34184761238) 성공을 확인했습니다. PR #7의 main 병합과 사내 `c5f1690...` Update/Status 실행은 사용자 보고로 확인했으며 전체 SHA·등록 내용 직접 대조는 미실행입니다. 프로그램 후보 ZIP 원본 및 EES 전환 성공 여부와 구분합니다.
 
 <a id="resume-branch"></a>
 
@@ -90,7 +90,7 @@
 
 ## 최근 점검
 
-최신 main `0fc1897`·열린 PR 없음·로컬 무변경에서 시작하고 AGENTS·STATUS가 직전 기록과 동일함을 확인함. Update의 main/사용자 변경 보호·설정 읽기 전 종료, Status의 조회 범위와 비식별 출력, Deploy의 기존 후보 검증/종료/백업/복구 순서·명령별 대기 시간을 대조함. [재개 안내 검토](../evals/scenarios.md#ees-retransition-first-step). 이번에는 운영 코드/시험을 바꾸지 않고 기존 가이드·STATUS·평가 기록을 갱신함. 사내 checkout 갱신·상태 조회·서버 전환은 사용자 결과 대기이며 성공으로 기록하지 않음.
+최신 main `c5f1690`·열린 PR 없음·로컬 무변경을 확인하고 같은 커밋의 지침/상태가 직전 안내 원본과 동일함을 대조함. 사용자 보고의 여섯 상태값을 실제 Status 필드 순서에 매핑하고, 이후 Deploy가 기존 후보를 검증한 뒤 관리 프로세스 종료/백업/기동을 수행함을 확인함. [결과·다음 명령 근거](../evals/scenarios.md#ees-retransition-ready). STATUS·기존 평가 기록만 갱신하며 코드 시험/CI·독립 검토·사내 health/데이터/연동 검증은 반복하지 않음.
 
 ## 갱신 규칙
 
