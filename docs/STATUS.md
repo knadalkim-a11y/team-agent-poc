@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **같은 transformers 파일이 written/verify_cache/source_units=231/cache_units=256/cache_readable=true라고 사용자에게 보고받음.** 일반 표기의 임시 경로 270자 실패 뒤 확장 cfile로 저장하고 일반 경로/헤더 확인에 성공한 범위임. [실제 결과·한계](../evals/scenarios.md#ees-windows-ca-support). 나머지 캐시와 두 문법 오류·600초 기동 영향은 미확인이고 기존 프로그램 복구 성공·EES 전환 미완료 상태는 유지함.
-- 다음 작업 하나: **남은 누락 캐시를 한 번에 처리하고 정확한 예상 집계일 때만 같은 후보로 한 번 재배포한다.** [잔여 캐시·조건부 전환](03-openwebui-native-agent.md#ees-candidate-cache-finish)은 기존 헤더 일치 26700/추가 저장 11/문법 오류 2/그 외 오류 0/긴 최종 경로 0/전체 26713을 모두 요구함. 일치하면 기존 Deploy -UseWindowsCA -HealthTimeout 600으로 이어지고 다르면 요약만 출력하고 멈춤. 미분류 문법 오류를 무해하다고 단정하지 않으며 실제 기동/복구 결과로 판단함.
+- 이번 작업: **잔여 캐시 집계 26713/26700/11/2/0/0과 뒤이은 Deploy 실패·기존 프로그램 복구 성공을 보고받음.** 마지막 실패는 2026-09-08T07:35:31Z, health_check/process이며 이번 후보의 실제 대기 시간·로그는 미확인임. [증거](../evals/scenarios.md#ees-diagnose-once). 수동 중간 확인 부담을 줄이는 Diagnose 명령을 준비하며 EES 전환은 미완료임.
+- 다음 작업 하나: **Update 후 Diagnose 한 번의 결과로 최신 후보 로그를 검토한다.** [실행·해석](03-openwebui-native-agent.md#ees-diagnose-once). 캐시 배치·Deploy를 반복하지 않고, 로그에 근거해 필요한 후속 조치를 묶음으로 결정함. 두 SyntaxError의 기동 영향·프록시/허용 목록 관련성은 미확인으로 유지함.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -93,7 +93,7 @@ CA 옵션 운영 코드 원본은 `6a2638be157c125dd12ad70c95de075cbe77d1ce`, ma
 
 ## 최근 점검
 
-최신 main `6a62bee`·AGENTS 변경 없음·열린 PR 없음·로컬 baseline tree 일치에서 선택 캐시의 Windows 성공 보고를 반영함. 독립 검토로 남은 캐시 처리와 정확한 수치의 1회 배포 조건을 대조함. Linux/Python 3.12의 명시적 플랫폼/API 어댑터로 캐시 집계·소스/기존 캐시 유지·오래된 헤더/긴 최종 경로/링크 거부·재실행 추가 저장 0을 확인하고 원래 Windows 경로 조건/부모 문자열 구문을 별도 확인함. [검증·미실행](../evals/scenarios.md#ees-windows-ca-support). 배치의 Windows I/O·PowerShell 직접 실행·사내 재배포는 미실행이며 기존 문서만 갱신함.
+최신 main `a847e23`·AGENTS 변경 없음·관련 열린 PR 없음에서 최신 사용자 보고와 진단 흐름을 반영함. 기존 운영 진입점의 Diagnose와 로그 선택/비식별 요약·읽기 전용 경계를 검사함. [검증 범위·미실행](../evals/scenarios.md#ees-diagnose-once). 사내 실행·새 후보 로그 확인·EES 기동 성공은 아직 미확인임.
 
 ## 갱신 규칙
 

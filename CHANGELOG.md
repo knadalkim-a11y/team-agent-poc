@@ -4,6 +4,8 @@
 
 ## 2026-09-08
 
+- `Diagnose`로 자동 복구 뒤 실패 후보의 시간·기동/네트워크 마커·공개 traceback 위치를 한 번에 요약. 반복 재배포와 수동 중간 전사를 줄이고, 기존 로그를 읽어 다음 조치를 정함. 앱 import·기동·통신·데이터/캐시 쓰기 없이 동작함. [사용법](docs/03-openwebui-native-agent.md#ees-diagnose-once), [검증](evals/scenarios.md#ees-diagnose-once).
+
 - 후보 배포의 `-UseWindowsCA` 옵션 추가. 기존 서버 종료 전에 후보 Python으로 Windows 포함 CA 스냅샷을 준비하고, 릴리스의 자식 환경과 이후 Start/Rollback에 같은 신뢰 파일을 적용함. 등록된 config/DPAPI·기존 프로그램 복구 환경·데이터·키는 유지함. [사용법](docs/03-openwebui-native-agent.md#ees-windows-ca-deploy), [검증·사내 적용 구분](evals/scenarios.md#ees-windows-ca-support).
 
 - 프로그램 전환과 자동 복구의 실패 단계·오류 분류·소켓 errno/winerror를 구분해 콘솔과 기존 배포 기록에 남김. Status는 허용 필드만 표시하고 마지막 실패를 시간과 함께 보존함. 포트 오류를 점유로 단정하지 않으며 시작/health 오류에서 사용자 로그 경로를 제거함. 기존 포트 검사·잠금·프로세스 식별·환경/데이터 보호·복구 순서는 유지하고 추가 재시도는 없음. [진단 안내](docs/03-openwebui-native-agent.md#ees-deployment-diagnostics), [검증](evals/scenarios.md#ees-deployment-diagnostics).

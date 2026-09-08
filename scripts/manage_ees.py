@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import ees_deploy_process as processes
 import ees_deploy_release as releases
+import ees_deploy_report as reports
 import ees_deploy_state as states
 
 DEFAULT_HEALTH_TIMEOUT = 300
@@ -379,6 +380,18 @@ def operate(args):
                       use_windows_ca=getattr(args, "use_windows_ca", False))
     if args.action == "rollback":
         return switch(config, None, "rolled_back_program", health_timeout=args.health_timeout)
+    if args.action == "diagnose":
+        states._regular(registry_path(config))
+        registry = read_registry(config)
+        candidate = reports.collect(config, registry)
+        states._regular(registry_path(config))
+        if read_registry(config) != registry or (Path(config["state_root"]) / "deployment.lock").exists():
+            candidate = {"status": "unavailable", "reason": "state_changed_or_busy"}
+        return {"report_version": 1, "phase": registry["phase"],
+                "original_program": registry["current"]["kind"] == "original",
+                "managed_process_running": bool(registry.get("process") and processes.verify_identity(registry["process"])),
+                "last_failure": safe_last_failure(registry.get("last_failure")),
+                "candidate": candidate}
     if args.action == "status":
         registry = read_registry(config)
         return {"phase": registry["phase"], "current_commit": registry["current"].get("source_commit"),
@@ -405,9 +418,30 @@ def operate(args):
         return {"started": True}
 
 
+def render_diagnosis(result):
+    """Keep the allowlisted report short enough to share as one result or photos."""
+    failure = result["last_failure"] or {}
+    detail = failure.get("switch") or {}
+    candidate = result["candidate"]
+    lines = ["EES diagnosis v1", json.dumps({key: result[key] for key in (
+        "phase", "original_program", "managed_process_running")}),
+        "failure: " + json.dumps({"at": failure.get("failed_at"), "action": failure.get("action"),
+            "stage": detail.get("stage"), "error_type": detail.get("error_type"),
+            "recovery": failure.get("recovery_status")})]
+    if candidate["status"] != "ok":
+        return "\n".join(lines + ["candidate: " + json.dumps(candidate)])
+    lines += ["candidate: " + json.dumps({key: candidate[key] for key in (
+        "selection", "candidate_seconds", "recovery_seconds", "scan_scope", "log_bytes", "bytes_read")}),
+        "signals: " + json.dumps(candidate["signals"]),
+        "errors: " + json.dumps(candidate["error_types"]),
+        "traceback: " + json.dumps({key: candidate[key] for key in (
+            "tracebacks_seen", "last_traceback_header_seen", "frames_omitted", "unknown_frames")})]
+    return "\n".join(lines + candidate["frames"])
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["init", "status", "plan", "prepare", "deploy", "rollback", "start", "stop"])
+    parser.add_argument("action", choices=["init", "status", "diagnose", "plan", "prepare", "deploy", "rollback", "start", "stop"])
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--bundle", type=Path)
     parser.add_argument("--commit")
@@ -440,7 +474,7 @@ def main(argv=None):
         parser.exit(1, f"Operation stopped: {error}{detail}\n")
     except (OSError, ValueError, KeyError, TypeError):
         parser.exit(1, "Operation stopped: local state or a required file could not be inspected. No secrets were printed.\n")
-    print(json.dumps(result, ensure_ascii=False))
+    print(render_diagnosis(result) if args.action == "diagnose" else json.dumps(result, ensure_ascii=False))
     return 0
 
 
