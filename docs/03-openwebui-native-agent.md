@@ -981,6 +981,57 @@ print(json.dumps(r))
 오류 수집에서는 quiet=0/doraise=True를 사용합니다. quiet=2는 doraise도 무효화하므로 사용하지 않습니다. 경고와 오류 원문은 숨기고 패키지·오류 클래스·errno/winerror·단계와 경로 길이(UTF-16 단위)만 출력합니다. failed_path는 source/cache/cache_temp/cache_directory/other 분류이며 실제 경로를 포함하지 않습니다. written은 선택한 파일의 캐시 저장 성공이며 기동 성공을 뜻하지 않습니다. 한 파일의 결과를 나머지 누락 파일 전체·600초 실패의 원인으로 확대하지 않으며, other로 가려진 파일과 두 SyntaxError의 실제 기동 영향은 별도로 남깁니다.
 
 
+<a id="ees-candidate-cache-extended"></a>
+
+**캐시 임시 파일만 260자를 넘는 경우:** 선택 파일에서 source_units=231, cache_units=256, FileNotFoundError/errno=2/winerror=null, cache_temp/failed_units=270을 보고받은 뒤의 한 파일 조치입니다. 경로 제한을 강하게 시사하지만 오류 번호와 길이만으로 원인 전체를 확정하지 않습니다. [Microsoft의 확장 길이 경로](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation)는 로컬 파일 API에서 지원하는 표기입니다. 레지스트리/정책·등록 경로·릴리스 위치를 바꾸지 않고 검증한 같은 후보 캐시의 cfile에만 이를 적용합니다.
+
+직전 점검에 사용한 같은 PowerShell 창에서 실행합니다. eesCacheReport와 eesWriteProbe를 재사용하므로 JSON을 다시 복사하거나 전체 파일을 순회하지 않습니다. 같은 공개 패키지의 문법 정상·missing 목록에서 경로가 가장 긴 한 파일을 선택하며 앱 import·외부 요청·서버 전환은 없습니다.
+
+```powershell
+& {
+  $ErrorActionPreference = 'Stop'
+  if (-not $eesCode -or -not $eesWriteProbe -or -not $global:eesCacheReport) { throw '앞선 같은 PowerShell 창이 필요합니다.' }
+  $eesParts = [regex]::Split($eesCode, '"""')
+  if ($eesParts.Count -ne 3 -or $eesParts[0] -notmatch '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50') { throw '후보 코드가 다릅니다.' }
+  $eesPick = $global:eesCacheReport.files | Where-Object {
+    $_.compile_error -eq 'none' -and $_.cache -eq 'missing' -and
+    $_.file -match '^(torch|transformers|sentence_transformers)/'
+  } | Sort-Object { $_.file.Length } -Descending | Select-Object -First 1
+  if (-not $eesPick) { throw '대상이 없습니다.' }
+  $eesOld = '        py_compile.compile(str(p),doraise=True,quiet=0,optimize=0,'
+  if (-not $eesWriteProbe.Contains($eesOld)) { throw '직전 점검 코드가 다릅니다.' }
+  $eesNew = @'
+        import struct
+        if (sys.platform!='win32' or not q.is_absolute() or len(q.drive)!=2
+            or q.drive[1]!=':' or units(q)>=260
+            or any(x.endswith((' ','.')) for x in q.parts[1:])): raise ValueError()
+        long_cache=chr(92)*2+'?'+chr(92)+str(q)
+        py_compile.compile(str(p),cfile=long_cache,doraise=True,quiet=0,optimize=0,
+'@
+  $eesVerify = @'
+r['stage']='verify_cache'
+        with q.open('rb') as f: header=f.read(16)
+        s=p.stat()
+        expected=u.MAGIC_NUMBER+struct.pack('<III',0,int(s.st_mtime)&0xffffffff,s.st_size&0xffffffff)
+        if header!=expected: raise ValueError()
+        r.update(status='written',cache_readable=True)
+'@
+  $eesWorker = $eesWriteProbe.Replace($eesOld,$eesNew).Replace("r.update(status='written')",$eesVerify)
+  $eesPayload = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($eesPick.file))
+  $eesWorker = $eesWorker.Replace('EES_TARGET_BASE64',$eesPayload)
+  $eesRun = $eesParts[0] + '"""' + $eesWorker + '"""' + $eesParts[2]
+  $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+  $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
+  $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
+  $eesRun | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
+}
+```
+
+일반 경로의 기존 후보/복구 상태·메타데이터·로컬 드라이브·링크/reparse 검증을 먼저 유지합니다. _safe를 약화하거나 확장 표기를 config/메타데이터에 등록하지 않습니다. Windows 절대 드라이브 경로와 260 미만의 최종 캐시 경로만 허용하고, 확장 표기의 정규화 차이를 막기 위해 비앵커 구성요소 끝의 점/공백을 거부합니다. 소스 file은 일반 경로로 유지하고 cfile만 확장하므로 [CPython py_compile](https://docs.python.org/3.11/library/py_compile.html)의 소스/코드 파일명은 유지합니다. 기존 캐시가 있으면 앞선 already_present 동작을 유지하며 성공으로 새로 판정하지 않습니다.
+
+저장 후 일반 경로 q.open으로 16바이트 timestamp 헤더를 확인하고 written/cache_readable=true를 받습니다. 이는 선택 캐시의 일반 경로 읽기와 헤더 확인이며 전체 bytecode 무결성·앱 기동 성공은 아닙니다. 실패 시 앞선 클래스/오류 번호/길이 요약을 유지하되, 확장 표기의 실패 경로는 기존 분류에서 other가 될 수 있고 failed_units에는 표기 접두어 길이도 포함될 수 있습니다. 이미 기록된 캐시를 오류 때문에 삭제하지 않습니다. 나머지 캐시 누락과 두 문법 오류·600초 기동 실패의 영향은 후속 결과와 구분합니다.
+
+
 <a id="ees-failure-timing"></a>
 
 **실패까지의 시간과 기동 완료 흔적 확인:** 자동 복구 성공 뒤 추가 Start/Stop/Deploy 없이 읽는 명령입니다. 현재 복구 로그를 제외하고 생성 시각으로 실패 후보를 좁히므로 로그 이동/삭제나 시각 변경이 있었다면 이번 후보로 확정하지 않습니다. 원문 대신 시간·기동 완료 문자열 존재 여부만 출력합니다.
