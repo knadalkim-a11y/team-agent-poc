@@ -721,6 +721,16 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - CI 결과만 추가한 마무리는 STATUS·이 증거 문서의 문서/diff 검사를 수행하고 코드 시험/CI를 반복하지 않음. main 병합과 사내 적용은 아직 수행하지 않았음.
 - 사내 환경·등록 스냅샷·DATA_DIR·키·서버 프로세스에는 접근하지 않았음. 준비 완료 프로그램 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`·기존 original 복구 성공·EES 전환 미완료를 유지함. 프로그램 wheel/Agent Pack 원본은 변경하지 않았으며 재다운로드·Prepare·Deploy·재기동·완료한 연동 검증은 요구하지 않음. 새 진단의 사내 적용과 실제 최초 실패 원인은 미확인.
 
+<a id="ees-diagnostics-merged"></a>
+
+#### 배포 진단 PR #7 main 병합 — 2026-09-08
+
+- 사용자가 직전 “다음 단계는 PR 병합” 안내에 “진행해”라고 요청함. 최신 main `54746c3f05a840d7c847cc83870ab547a0e0ab02`와 PR head `53180c41666612a33f69b742c7ec79d3492c9091`의 AGENTS·STATUS가 직전 검수한 내용과 동일함을 확인함. 로컬 변경 없음, PR open·ready·mergeable, 제출된 외부 review 없음, 코드 원본 `1ac1c33`의 [Windows/Linux CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34184761238)을 확인함. 최종 head의 후속 변경은 위에 기록한 문서 증거 갱신뿐임.
+- [PR #7](https://github.com/knadalkim-a11y/team-agent-poc/pull/7)의 예상 head를 지정한 일반 merge를 실행해 `merged=true`와 병합 SHA [8cb3dd4](https://github.com/knadalkim-a11y/team-agent-poc/commit/8cb3dd4645cacf0fbaefaafe1bf0b0e63ae15c6e)를 확인함. 이후 원격 main이 해당 커밋이고 PR도 merged 상태임을 다시 읽음. 부모는 위 main/PR head이며 병합 tree `fdeef951d7dd6bc6bf6039c6065b89c3eb3e2530`가 검수한 최종 로컬/원격 PR tree와 일치함. 충돌 해결·코드 추가 수정·강제 갱신은 없었음.
+- 기존 사용자 파일과 날짜별 실패/복구·CI 증거는 보존함. STATUS의 main 미병합 상태와 다음 작업을 갱신하고 기존 이 평가 기록에 병합 결과를 추가함. 코드·시험·운영 가이드의 추가 변경은 없으며 새 인수인계 파일을 만들지 않음. 로컬 Linux/Python 3.12.13의 `python scripts/check_docs.py`: **DOCS OK, 25 files / 528 links / errors=0 / review_candidates=0**, `git diff --check` 통과. 같은 코드의 수동 재시험은 반복하지 않음.
+- main push로 자동 실행된 [병합 후 CI 34185073823](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34185073823)는 병합 커밋 `8cb3dd4`에서 success. Windows/Linux 전달 검사와 패키징 job 성공을 확인함. 이번 코드/브랜딩 변경 범위상 기존 프로그램 ZIP은 계속 유지하며 이 CI 성공을 사내 적용으로 확대하지 않음. 최종 상태·증거만 갱신하는 커밋에는 `[skip ci]`를 사용함.
+- 다음 사내 적용 경계를 기존 운영 스크립트와 대조함. `Update`는 main/추적 파일 무변경 확인 후 fetch·merge --ff-only만 수행하고 설정 읽기/Python 호출 전에 종료하지만, 이번 요청 범위에서는 실행을 요구하지 않음. 사내 checkout·프로그램·서버·데이터·키의 실제 갱신은 미실행/미확인. 기존 준비 후보 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`·정상 original 서버·EES 전환 미완료 상태를 유지함.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
