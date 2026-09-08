@@ -8,7 +8,7 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **수동 전달 병목과 진단·복구 흐름을 재설계하고 Diagnose v2를 준비함.** 실패 이유·health 경과 시간·종료 코드·후보/복구 로그 연결을 보존하고, 읽은 범위의 첫 비중단 오류와 마지막 traceback을 함께 제공함. [설계·검증](../evals/scenarios.md#ees-diagnostic-workflow). 마지막 사내 실패는 여전히 2026-09-08T07:35:31Z, health_check/process·기존 프로그램 복구 성공이며 EES 전환은 미완료임.
+- 이번 작업: **수동 전달 병목과 진단·복구 흐름을 재설계하고 Diagnose v2를 main에 반영함.** 실패 이유·health 경과 시간·종료 코드·후보/복구 로그 연결을 보존하고, 읽은 범위의 첫 비중단 오류와 마지막 traceback을 함께 제공함. [설계·검증](../evals/scenarios.md#ees-diagnostic-workflow). 마지막 사내 실패는 여전히 2026-09-08T07:35:31Z, health_check/process·기존 프로그램 복구 성공이며 EES 전환은 미완료임.
 - 다음 작업 하나: **운영 코드 반영 후 Update·Diagnose 한 번의 결과로 기존 실패를 검토한다.** [흐름과 판단 기준](03-openwebui-native-agent.md#ees-diagnostic-workflow). 구버전 실패 기록에 없던 정확한 시간·로그 연결은 새 코드로 복원할 수 없으므로 추정/미확인을 유지함. 추가 전환은 확인할 가설·수집 항목·성공/중단 기준을 먼저 정하며 두 SyntaxError나 CA/캐시를 기동 실패 원인으로 단정하지 않음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
@@ -19,7 +19,7 @@ CA 옵션 운영 코드 원본은 `6a2638be157c125dd12ad70c95de075cbe77d1ce`, ma
 
 Diagnose 운영 코드 원본은 `70e7b9f268029bbc161f03b5f364130d2cd24239`, [PR #9](https://github.com/knadalkim-a11y/team-agent-poc/pull/9) 병합은 `36974ce45ff46a1e7fc830c2325873f14546f8e5`입니다. [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34201413944)는 성공했으며 사내 Update/Diagnose 실행은 대기입니다. 프로그램 후보의 Deploy Commit과 구분합니다.
 
-Diagnose v2는 위 v1 이후의 운영 코드 보완이며 Git 반영·Windows/Linux CI는 이번 PR에서 확인합니다. 사내 Update/Diagnose·추가 Deploy는 미실행입니다. 기존 준비 프로그램 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`과 DB·키·CA 선택·대기 한도를 유지하며, 프로그램 ZIP을 다시 준비하지 않습니다.
+Diagnose v2 운영 코드 원본은 `2cb6b55f8ff2dc38ecd8a2ca39d30a7e6951d876`이며 [PR #10](https://github.com/knadalkim-a11y/team-agent-poc/pull/10)의 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34281735662)는 성공했습니다. main 병합은 `50c2a1f7bcaa80b6ee64252bd74bbece30fb098d`이며 사내 Update/Diagnose·추가 Deploy는 미실행입니다. 기존 준비 프로그램 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`과 DB·키·CA 선택·대기 한도를 유지하며, 프로그램 ZIP을 다시 준비하지 않습니다.
 
 <a id="resume-branch"></a>
 
