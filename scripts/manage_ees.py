@@ -21,9 +21,21 @@ import ees_deploy_process as processes
 import ees_deploy_release as releases
 import ees_deploy_state as states
 
+DEFAULT_HEALTH_TIMEOUT = 300
+
 
 class DeploymentError(RuntimeError):
     pass
+
+
+def health_timeout_arg(value):
+    try:
+        seconds = int(value)
+    except (ValueError, TypeError):
+        raise argparse.ArgumentTypeError("Health timeout must be an integer from 1 to 900 seconds.") from None
+    if not 1 <= seconds <= 900:
+        raise argparse.ArgumentTypeError("Health timeout must be an integer from 1 to 900 seconds.")
+    return seconds
 
 
 def write_json(path, value):
@@ -123,7 +135,7 @@ def require_free_port(config):
         raise DeploymentError("The configured port is in use. Stop the original manual server once with Ctrl+C; unrelated processes are never stopped.")
 
 
-def start_selected(config, selected, env, registry):
+def start_selected(config, selected, env, registry, health_timeout=DEFAULT_HEALTH_TIMEOUT):
     executable, child_env = selected_environment(config, selected, env)
     require_free_port(config)
     try:
@@ -137,7 +149,7 @@ def start_selected(config, selected, env, registry):
     registry["process"] = identity
     # Persist identity before health probing, including startup failures.
     record(config, registry, "process_started")
-    processes.wait_healthy(identity)
+    processes.wait_healthy(identity, timeout=health_timeout)
     return identity
 
 
@@ -185,7 +197,7 @@ def prepare(config, args):
             "webui_version": metadata["webui_version"]}
 
 
-def switch(config, selected, event):
+def switch(config, selected, event, health_timeout=DEFAULT_HEALTH_TIMEOUT):
     env = states.runtime_environment(config)
     with locked(config):
         registry = read_registry(config)
@@ -198,7 +210,7 @@ def switch(config, selected, event):
         selected_environment(config, old, env)
         selected_environment(config, selected, env)
         if selected == old and registry.get("process") and processes.verify_identity(registry["process"]):
-            processes.wait_healthy(registry["process"])
+            processes.wait_healthy(registry["process"], timeout=health_timeout)
             return {"already_current": True, "source_commit": selected.get("source_commit")}
         stop_registered(config, registry)
         registry["phase"] = "switching"
@@ -208,14 +220,14 @@ def switch(config, selected, event):
             backup = states.backup_state(config)
             registry["last_backup"] = backup
             record(config, registry, "backup_verified")
-            start_selected(config, selected, env, registry)
+            start_selected(config, selected, env, registry, health_timeout=health_timeout)
         except Exception:
             if registry.get("launch_uncertain"):
                 raise DeploymentError("A process launch needs local inspection. Automatic recovery was blocked to avoid two servers using the same data.") from None
             # Never start the old server while the candidate still owns the DB/port.
             try:
                 stop_registered(config, registry)
-                start_selected(config, old, env, registry)
+                start_selected(config, old, env, registry, health_timeout=health_timeout)
             except Exception:
                 registry["phase"] = "recovery_required"
                 record(config, registry, "automatic_program_recovery_failed")
@@ -244,9 +256,10 @@ def operate(args):
         commit = commit_id(args.commit)
         env = states.runtime_environment(config)
         metadata = releases.validate_prepared(target_for(config, commit), commit, config["source_python"], env=env)
-        return switch(config, {"kind": "release", "source_commit": commit, "python": metadata["target_python"]}, "deployed")
+        return switch(config, {"kind": "release", "source_commit": commit, "python": metadata["target_python"]},
+                      "deployed", health_timeout=args.health_timeout)
     if args.action == "rollback":
-        return switch(config, None, "rolled_back_program")
+        return switch(config, None, "rolled_back_program", health_timeout=args.health_timeout)
     if args.action == "status":
         registry = read_registry(config)
         return {"phase": registry["phase"], "current_commit": registry["current"].get("source_commit"),
@@ -264,9 +277,9 @@ def operate(args):
             return {"stopped": True, "data_changed": False}
         require_idle(registry)
         if registry.get("process") and processes.verify_identity(registry["process"]):
-            processes.wait_healthy(registry["process"])
+            processes.wait_healthy(registry["process"], timeout=args.health_timeout)
             return {"already_running": True}
-        start_selected(config, registry["current"], env, registry)
+        start_selected(config, registry["current"], env, registry, health_timeout=args.health_timeout)
         record(config, registry, "started_by_operator")
         return {"started": True}
 
@@ -284,6 +297,8 @@ def main(argv=None):
     parser.add_argument("--port", type=int)
     parser.add_argument("--uv", type=Path)
     parser.add_argument("--wheelhouse", type=Path)
+    parser.add_argument("--health-timeout", type=health_timeout_arg, default=DEFAULT_HEALTH_TIMEOUT,
+                        help="Seconds to wait for each server's health (default: 300; range: 1-900).")
     args = parser.parse_args(argv)
     needed = {"init": ["source_python", "cwd", "data_dir", "listen_host", "port", "uv"],
               "plan": ["bundle", "commit"], "prepare": ["bundle", "commit"], "deploy": ["commit"]}

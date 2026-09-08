@@ -1,7 +1,9 @@
 """Transaction tests use synthetic state; never start or inspect a real server."""
 
 import argparse
+from contextlib import redirect_stderr, redirect_stdout
 import importlib.util
+import io
 import json
 from pathlib import Path
 import tempfile
@@ -14,6 +16,7 @@ SPEC = importlib.util.spec_from_file_location("manage_ees", ROOT / "scripts" / "
 MANAGER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MANAGER)
 COMMIT = "a" * 40
+WAIT_HEALTHY = MANAGER.processes.wait_healthy
 
 
 class DeploymentTransactionTests(unittest.TestCase):
@@ -28,8 +31,8 @@ class DeploymentTransactionTests(unittest.TestCase):
         }
         self.original = {"kind": "original", "source_commit": None, "python": "original-python"}
         self.candidate = {"kind": "release", "source_commit": COMMIT, "python": "candidate-python"}
-        self.original_process = {"pid": 100, "executable": "original-python"}
-        self.candidate_process = {"pid": 200, "executable": "candidate-python"}
+        self.original_process = {"pid": 100, "executable": "original-python", "host": "127.0.0.1", "port": 8080}
+        self.candidate_process = {"pid": 200, "executable": "candidate-python", "host": "127.0.0.1", "port": 8080}
         self.registry = {"schema_version": 1, "phase": "idle", "current": self.original,
                          "previous": None, "process": self.original_process}
         MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
@@ -66,7 +69,7 @@ class DeploymentTransactionTests(unittest.TestCase):
             patch.object(MANAGER.processes, "verify_identity", return_value=True),
             patch.object(MANAGER.processes, "stop_server", side_effect=stopped),
             patch.object(MANAGER.processes, "start_server", side_effect=start),
-            patch.object(MANAGER.processes, "wait_healthy", side_effect=lambda _: self.events.append("health")),
+            patch.object(MANAGER.processes, "wait_healthy", side_effect=lambda _, **kwargs: self.events.append("health")),
             patch.object(MANAGER.states, "backup_state", side_effect=backup),
         ]
         self.mocks = []
@@ -78,7 +81,7 @@ class DeploymentTransactionTests(unittest.TestCase):
         return MANAGER.read_registry(self.config)
 
     def test_switch_orders_shutdown_backup_start_then_commits_pointer(self):
-        def health(_):
+        def health(_, *, timeout):
             self.assertEqual(self.read()["current"], self.original)
             self.assertEqual(self.read()["phase"], "switching")
             self.assertEqual(self.read()["process"], self.candidate_process)
@@ -94,7 +97,10 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.assertFalse((self.root / "deployment.lock").exists())
 
     def test_candidate_failure_recovers_original_without_restoring_database(self):
-        def health(identity):
+        probes = []
+
+        def health(identity, *, timeout):
+            probes.append((identity, timeout))
             if identity == self.candidate_process:
                 raise MANAGER.processes.ProcessError("synthetic startup failure")
 
@@ -102,7 +108,8 @@ class DeploymentTransactionTests(unittest.TestCase):
         marker = self.root / "synthetic-memory.txt"
         marker.write_bytes(b"New user memory is not rolled back")
         with self.assertRaisesRegex(MANAGER.DeploymentError, "previous program is running"):
-            MANAGER.switch(self.config, self.candidate, "deployed")
+            MANAGER.switch(self.config, self.candidate, "deployed", health_timeout=125)
+        self.assertEqual(probes, [(self.candidate_process, 125), (self.original_process, 125)])
         self.assertEqual(self.read()["current"], self.original)
         self.assertEqual(self.read()["process"], self.original_process)
         self.assertEqual(self.read()["phase"], "idle")
@@ -171,6 +178,62 @@ class DeploymentTransactionTests(unittest.TestCase):
         with self.assertRaisesRegex(MANAGER.DeploymentError, "needs recovery"):
             MANAGER.switch(self.config, self.candidate, "deployed")
         self.mocks[4].assert_not_called()
+
+    def test_default_start_waits_for_health_after_sixty_seconds_without_real_sleep(self):
+        self.registry["process"] = None
+        MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
+        self.port_free = True
+        clock = [0.0]
+
+        def advance(seconds):
+            clock[0] += seconds
+
+        self.mocks[6].side_effect = WAIT_HEALTHY
+        with patch.object(MANAGER.states, "load_config", return_value=self.config), \
+                patch.object(MANAGER.processes.time, "monotonic", side_effect=lambda: clock[0]), \
+                patch.object(MANAGER.processes.time, "sleep", side_effect=advance), \
+                patch.object(MANAGER.processes, "_healthy", side_effect=lambda *_: clock[0] >= 75), \
+                redirect_stdout(io.StringIO()):
+            self.assertEqual(MANAGER.main(["start", "--config", str(self.root / "config.json")]), 0)
+
+        self.assertGreaterEqual(clock[0], 75)
+        self.assertLess(clock[0], 76)
+        self.mocks[6].assert_called_once_with(self.original_process, timeout=300)
+        self.assertEqual(self.read()["last_event"], "started_by_operator")
+        self.assertEqual(self.events, ["start:original-python"])
+
+    def test_explicit_health_timeout_reaches_start_deploy_and_rollback(self):
+        cases = [
+            ("start", self.original, None, self.original_process),
+            ("deploy", self.original, None, self.original_process),
+            ("deploy", self.candidate, self.original, self.candidate_process),
+            ("rollback", self.candidate, self.original, self.candidate_process),
+        ]
+        for action, current, previous, process in cases:
+            with self.subTest(action=action, current=current["kind"]):
+                self.registry.update(current=current, previous=previous, process=process)
+                MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
+                self.port_free = False
+                self.mocks[6].reset_mock()
+                args = argparse.Namespace(action=action, config=self.root / "config.json",
+                                          commit=COMMIT, health_timeout=900)
+                with patch.object(MANAGER.states, "load_config", return_value=self.config):
+                    MANAGER.operate(args)
+                expected = self.candidate_process if action == "deploy" else self.original_process
+                self.mocks[6].assert_called_once_with(expected, timeout=900)
+
+    def test_health_timeout_cli_rejects_invalid_values_before_any_operation(self):
+        for value in ["0", "901", "-1", "1.5", "invalid"]:
+            with self.subTest(value=value), patch.object(MANAGER, "operate") as operate, \
+                    redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
+                MANAGER.main(["start", "--config", "unused.json", "--health-timeout", value])
+            self.assertEqual(error.exception.code, 2)
+            operate.assert_not_called()
+        for value in ["1", "900"]:
+            with self.subTest(value=value), patch.object(MANAGER, "operate", return_value={}) as operate, \
+                    redirect_stdout(io.StringIO()):
+                self.assertEqual(MANAGER.main(["start", "--config", "unused.json", "--health-timeout", value]), 0)
+            self.assertEqual(operate.call_args.args[0].health_timeout, int(value))
 
 
 if __name__ == "__main__":

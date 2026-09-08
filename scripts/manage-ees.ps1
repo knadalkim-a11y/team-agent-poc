@@ -17,6 +17,8 @@ param(
     [string]$Bundle,
     [string]$Commit,
     [string]$Wheelhouse,
+    [ValidateRange(1, 900)]
+    [int]$HealthTimeout,
     [string]$GitProxy
 )
 
@@ -60,5 +62,8 @@ if ($Action -eq 'Init') {
 if ($Bundle) { $operationArgs += @('--bundle', $Bundle) }
 if ($Commit) { $operationArgs += @('--commit', $Commit) }
 if ($Wheelhouse) { $operationArgs += @('--wheelhouse', $Wheelhouse) }
+if ($PSBoundParameters.ContainsKey('HealthTimeout')) {
+    $operationArgs += @('--health-timeout', "$HealthTimeout")
+}
 & $operatorPython @operationArgs
 if ($LASTEXITCODE -ne 0) { throw "EES operation stopped (exit $LASTEXITCODE)." }

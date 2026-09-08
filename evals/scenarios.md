@@ -593,6 +593,18 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - [main 전달 실행 34172321176](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172321176)의 Windows/Linux 검사와 패키징 모두 PASS. 프로그램 포함 내부 ZIP은 `EES-demo-4a8779bbf3ee.zip`, 원본 커밋은 위 병합 커밋. [artifact 10036107795](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172321176/artifacts/10036107795)의 바깥 ZIP 크기는 146,293,914바이트, GitHub SHA-256은 `2ce0fd9afb14f7a86c31a8f45933a229c599374dd069627db1bda81b4091359d`. 보존 만료 2026-09-22 이전에 승인된 내부 위치로 다운로드할 대상임. 코드/시험 변경 없이 이 결과를 남기는 마무리 커밋은 문서/diff만 확인하고 CI를 다시 실행하지 않음.
 
 
+<a id="ees-first-registration"></a>
+
+### 사내 최초 등록과 지연 기동 — 2026-09-08
+
+- 등록 안내 원본 `c584928a30b07c8c1cb2049e1efadf5aec1a46de`. 사용자는 기존 uvx/Python 3.11/Open WebUI 0.11.3·기존 LAN IP·8080 실행 명령을 제공함. 실제 주소와 사용자 경로는 기록하지 않음. 포트 소유 프로세스의 부모 체인에서 실제 venv Python을 찾는 읽기 조회 후 Python 3.11/배포 버전 0.11.3 READY, Git main 갱신 READY를 보고함. 사내 checkout SHA·경로 원문 직접 대조는 미실행.
+- 최초 `.ps1` 실행은 UnauthorizedAccess로 차단됨. `Get-ExecutionPolicy -List`의 다섯 범위가 모두 Undefined, 유효 정책 Restricted라는 사용자 보고를 받고, 원래 운영 창에만 Process/RemoteSigned를 적용하도록 안내함. 전역/사용자 영구 정책을 바꾸거나 Bypass·Unrestricted를 사용하지 않음. 이 실패를 등록 성공으로 덮어쓰지 않음.
+- 후속 Init 출력은 true/false/false로 보고됨. 이후 Status를 따로 요청해 출력 순서상 `phase=idle`, `current_commit=null`, `original_program=true`, `managed_process_running=true`, `rollback_available=false`를 확인함. 사용자는 앞선 Start가 `server health timed out`·exit 1로 끝났다는 사실도 함께 보고함.
+- 관리 프로세스를 재시작하지 않고 기존 서버의 고정 `/health` 한 번을 직접 조회하도록 안내했고, 사용자가 **status=true·HTTP 200**을 보고함. 기존 프로그램이 나중에 응답 가능한 상태가 된 범위까지 확인했으며 정확한 기동 소요 시간·지연 원인과 UI 로그인/스트리밍·Memory/저장 데이터 연속성은 미확인. 기존 완료 시험은 다시 요구하지 않음.
+- 사외 읽기 검토에서 원본 CLI/Typer와 관리 코드가 같은 `open_webui.serve(host,port)`·키 경로·Windows Uvicorn 설정을 사용함을 확인함. 이 비교만으로 지연 원인을 확정하지 않음.
+- 배포 시 같은 60초 제한으로 불필요하게 전환 실패/복구가 발생하지 않도록 관리 명령의 기본 health 대기를 300초로 늘리고 `-HealthTimeout`/`--health-timeout` 1~900초를 추가함. 현재/새 프로그램 확인과 실패 후 기존 프로그램 복구에 같은 값을 전달하며 기존 config·DPAPI 스냅샷은 변경하지 않음. 300초는 운영 기본값이며 이 사내 서버의 소요 시간을 실측한 값은 아님.
+- Linux/Python 3.12.13에서 `python -m unittest discover -s tests -p test_manage_ees.py -v`: **12/12 PASS**. 실제 sleep 없이 가상 75초 후 health 성공, 명시 제한의 Start/Deploy/Rollback/기존 프로세스 확인·복구 전달, 잘못된 인자의 작업 전 거절과 1/900 경계를 확인함. 대기 설정 보완을 확인하기 위한 사내 재기동/health 반복은 수행하지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
