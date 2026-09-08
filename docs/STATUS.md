@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **캐시 읽기 후속 점검에서 suspect_files=14, omitted=0을 사용자에게 보고받음.** files 목록은 모바일 전달이 어려워 미수집이며 오류 종류·기동 영향은 아직 미확인임. 앞선 캐시 준비 partial/26713/14/174.0초는 유지함. [결과·범위](../evals/scenarios.md#ees-windows-ca-support). 화이트리스트 조건과 EES 전환 미완료·기존 프로그램 복구 성공 상태는 유지함.
-- 다음 작업 하나: **이미 출력된 JSON을 사내 PC 안에서 묶어 짧은 결과만 받는다.** [partial 후속 점검의 긴 결과 요약](03-openwebui-native-agent.md#ees-candidate-cache-partial)은 파일 재검사 없이 공개 패키지/오류 종류/test_path/캐시 상태별 개수만 출력함. 긴 파일 목록을 옮기지 않고 결과로 기동 영향과 재배포 여부를 판단함.
+- 이번 작업: **캐시 missing 14개 중 메모리 문법 검사 성공 12개와 SyntaxError 2개를 사용자에게 보고받음.** SyntaxError는 torch 테스트 경로 1개와 other/비테스트 경로 1개임. 정상 문법 12개도 캐시가 없어 저장/경로 문제를 추가 구분해야 하며, 쓰기 오류나 기동 영향은 미확인임. [집계 원문·한계](../evals/scenarios.md#ees-windows-ca-support). 화이트리스트 조건과 EES 전환 미완료·기존 프로그램 복구 성공 상태는 유지함.
+- 다음 작업 하나: **기존 JSON의 공개 패키지·문법 정상·missing 파일 중 경로가 가장 긴 한 개만 캐시 저장을 시도해 오류 번호와 경로 길이를 받는다.** [선택 파일 저장 진단](03-openwebui-native-agent.md#ees-candidate-cache-write)은 전체 파일 순회·앱 import·외부 요청 없이 기존 후보/복구 상태 검증과 잠금을 유지함. 한 파일의 성공은 캐시만 유지하고, 실제 오류 확인 전 Windows 경로 정책이나 환경 설정은 바꾸지 않음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -93,7 +93,7 @@ CA 옵션 운영 코드 원본은 `6a2638be157c125dd12ad70c95de075cbe77d1ce`, ma
 
 ## 최근 점검
 
-최신 main `27ba9f5`·AGENTS 변경 없음·열린 PR 없음·로컬 baseline tree 일치에서 14/0 보고와 모바일 전달 제약을 반영함. 출력 JSON만 로컬 집계하는 명령을 준비하고 독립 검토에서 명령 복사와 JSON 복사의 클립보드 충돌을 확인해 실행 후 복사를 기다리는 순서로 보완함. [확인 범위·미실행](../evals/scenarios.md#ees-windows-ca-support). 사내 파일 재검사·캐시 재생성·서버 전환 없이 기존 문서만 갱신함.
+최신 main `2eb6e95`·AGENTS 변경 없음·열린 PR 없음·로컬 baseline tree 일치에서 6개 집계를 반영하고 CPython 저장 오류/Windows 경로 설명을 대조함. 독립 검토에서 중첩 문자열의 역슬래시와 잘못 복사한 JSON의 보존 문제를 보완함. Linux/Python 3.12에서 최종 부모가 만드는 실제 자식 코드를 실행해 앱 미실행·소스/기존 캐시 유지·오류 번호/경로 길이 요약·경로 탈출/링크 거부를 확인함. [검증·미실행](../evals/scenarios.md#ees-windows-ca-support). 실제 Windows 캐시 저장 진단·PowerShell 파싱·재배포는 미실행이며 기존 문서만 갱신함.
 
 ## 갱신 규칙
 

@@ -888,6 +888,99 @@ compile_error=none이면 문법 확인은 성공했지만 캐시가 없거나 �
 suspect_files=14·omitted=0·files 14개인 결과를 확인하고 공개 패키지/문법 오류 종류/test_path/캐시 상태별 개수만 출력합니다. 긴 파일명·경로·클립보드 원문·파싱 오류 원문은 출력하지 않으며 허용 목록 밖 값은 other로 묶습니다. JSON 이외의 내용을 복사했거나 결과 형식이 다르면 고정 안내로 멈춥니다. 패키지/테스트 경로 분류는 기동 미사용을 보증하지 않으며 묶인 결과를 받은 뒤 판단합니다.
 
 
+<a id="ees-candidate-cache-write"></a>
+
+**문법 정상인데 캐시가 missing인 경우:** 메모리 compile 성공은 캐시 저장 성공을 뜻하지 않습니다. [py_compile](https://docs.python.org/3.11/library/py_compile.html)은 소스보다 긴 __pycache__ 파일과 원자적 저장용 임시 파일을 사용하므로 경로 길이·권한·잠금 등 저장 오류를 구분해야 합니다. [Windows 긴 경로 조건](https://docs.python.org/3.11/using/windows.html#removing-the-max-path-limitation)은 가능성의 근거이며 실제 오류 확인 없이 레지스트리/정책을 바꾸지 않습니다.
+
+아래 두 블록은 기존 14개 JSON을 재사용하고 torch/transformers/sentence_transformers의 문법 정상·missing 항목 중 상대 경로가 가장 긴 한 개만 선택합니다. 앞선 다른 값들과 같은 PowerShell 창이 필요합니다. 두 번째 블록에서 입력을 기다리면 14개 files가 있던 원래 JSON을 PC 안에서 복사하고 Enter를 누릅니다. 검증에 사용한 JSON은 이번부터 eesCacheReport 변수에 보존합니다. 전체 파일 순회·앱 import·외부 요청·서버 전환은 없으며 성공하면 해당 후보 캐시 한 개를 유지합니다.
+
+```powershell
+$eesWriteProbe = @'
+import base64,importlib.util as u,json,pathlib,py_compile,sys,warnings
+warnings.simplefilter('ignore')
+def units(x): return len(str(x).encode('utf-16-le'))//2
+r={'status':'failed','stage':'path_check'}
+p=q=None
+try:
+    name=base64.b64decode('EES_TARGET_BASE64',validate=True).decode()
+    rel=pathlib.PurePosixPath(name)
+    if (rel.is_absolute() or '..' in rel.parts or chr(92) in name or ':' in name
+        or rel.parts[0] not in {'torch','transformers','sentence_transformers'}): raise ValueError()
+    root=pathlib.Path(sys.argv[1])
+    p=root.joinpath(*rel.parts)
+    if p.suffix!='.py': raise ValueError()
+    q=pathlib.Path(u.cache_from_source(str(p),optimization=''))
+    r.update(package=rel.parts[0],source_units=units(p),cache_units=units(q))
+    for target in (p,q):
+        for x in (target,*target.parents):
+            try: st=x.lstat()
+            except FileNotFoundError: continue
+            if x.is_symlink() or getattr(st,'st_file_attributes',0)&0x400: raise ValueError()
+    if not p.is_file(): raise ValueError()
+    if q.exists():
+        if not q.is_file(): raise ValueError()
+        r.update(status='already_present')
+    else:
+        r['stage']='compile_write'
+        py_compile.compile(str(p),doraise=True,quiet=0,optimize=0,
+            invalidation_mode=py_compile.PycInvalidationMode.TIMESTAMP)
+        r.update(status='written')
+except Exception as e:
+    f=getattr(e,'filename',None)
+    where='other'
+    if f and p and q:
+        f=str(f)
+        if f==str(p): where='source'
+        elif f==str(q): where='cache'
+        elif f.startswith(str(q)+'.'): where='cache_temp'
+        elif f==str(q.parent): where='cache_directory'
+    r.update(error_type=getattr(e,'exc_type_name',type(e).__name__),
+        errno=getattr(e,'errno',None),winerror=getattr(e,'winerror',None),
+        failed_path=where,failed_units=units(f) if f else None)
+print(json.dumps(r))
+'@
+```
+
+```powershell
+& {
+  $ErrorActionPreference = 'Stop'
+  if (-not $eesCode -or -not $eesWriteProbe) { throw '같은 창의 앞선 코드 변수와 첫 블록이 필요합니다.' }
+  $eesReport = $global:eesCacheReport
+  if (-not $eesReport) {
+    $null = Read-Host '14개 files가 있던 JSON 전체를 복사한 뒤 Enter'
+    try { $eesReport = Get-Clipboard -Raw | ConvertFrom-Json }
+    catch { throw 'JSON 결과만 다시 복사해주세요.' }
+  }
+  if ($eesReport.suspect_files -ne 14 -or $eesReport.omitted -ne 0 -or @($eesReport.files).Count -ne 14) {
+    $global:eesCacheReport = $null
+    throw '앞선 14개 점검 결과가 아닙니다.'
+  }
+  $eesPick = $eesReport.files |
+    Where-Object { $_.compile_error -eq 'none' -and $_.cache -eq 'missing' -and
+      $_.file -match '^(torch|transformers|sentence_transformers)/' } |
+    Sort-Object { $_.file.Length } -Descending | Select-Object -First 1
+  if (-not $eesPick) { throw '대상 공개 패키지 파일이 없습니다.' }
+  $global:eesCacheReport = $eesReport
+  $eesParts = [regex]::Split($eesCode, '"""')
+  if ($eesParts.Count -ne 3 -or $eesParts[1] -notmatch 'compileall\.compile_file' -or
+      $eesParts[0] -notmatch '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50') {
+    throw '앞선 캐시 준비 코드와 다릅니다.'
+  }
+  $eesPayload = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($eesPick.file))
+  $eesWorker = $eesWriteProbe.Replace('EES_TARGET_BASE64', $eesPayload)
+  $eesRun = $eesParts[0] + '"""' + $eesWorker + '"""' + $eesParts[2]
+  $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+  $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
+  $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
+  $eesRun | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
+}
+```
+
+기존 부모 코드의 idle/original/실패 시각/복구 성공·준비 메타데이터·후보 Python 경로 검증과 배포 잠금/900초 자식 제한을 재사용합니다. 입력 상대 경로는 base64 데이터로 전달하며 절대/상위/드라이브 경로를 거부하고 소스/캐시와 상위 경로의 링크/reparse point를 검사합니다. Python 소스·원본 venv·DB·키·config/DPAPI는 편집하지 않습니다. 후보 캐시가 이미 있으면 already_present로 알리고 다시 쓰지 않습니다.
+
+오류 수집에서는 quiet=0/doraise=True를 사용합니다. quiet=2는 doraise도 무효화하므로 사용하지 않습니다. 경고와 오류 원문은 숨기고 패키지·오류 클래스·errno/winerror·단계와 경로 길이(UTF-16 단위)만 출력합니다. failed_path는 source/cache/cache_temp/cache_directory/other 분류이며 실제 경로를 포함하지 않습니다. written은 선택한 파일의 캐시 저장 성공이며 기동 성공을 뜻하지 않습니다. 한 파일의 결과를 나머지 누락 파일 전체·600초 실패의 원인으로 확대하지 않으며, other로 가려진 파일과 두 SyntaxError의 실제 기동 영향은 별도로 남깁니다.
+
+
 <a id="ees-failure-timing"></a>
 
 **실패까지의 시간과 기동 완료 흔적 확인:** 자동 복구 성공 뒤 추가 Start/Stop/Deploy 없이 읽는 명령입니다. 현재 복구 로그를 제외하고 생성 시각으로 실패 후보를 좁히므로 로그 이동/삭제나 시각 변경이 있었다면 이번 후보로 확정하지 않습니다. 원문 대신 시간·기동 완료 문자열 존재 여부만 출력합니다.
