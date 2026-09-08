@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **후보 표식 T/T/F/F와 P=0/U=0을 추가 수신함.** 후보는 watchdog 등록·site 초기화 뒤 NLTK import 시작 표식까지 도달했고 완료/덤프는 미관측임. 조회 시점의 검사 표식 Python도 미관측이며 과거 70초의 정리 미확인 판정을 성공으로 바꾸지 않음. 기존 import_failed/11.157초의 오류 종류는 아직 미수신이고, main의 프로필 필터 수정과 실제 사내 오류의 인과도 미확정임. [수신·수정 근거](../evals/scenarios.md#ees-import-followup).
-- 다음 작업 하나: **기존 화면의 original error_types 값 하나만 받는다.** 안 보이면 `?`로 기록함. [짧은 후속 확인](03-openwebui-native-agent.md#ees-import-followup). 후보 표식·P/U는 이미 받았으므로 다시 요청하지 않고 ProbeImports/Deploy/서버 재기동·CIM 조회도 반복하지 않음.
+- 이번 작업: **기존(original) 오류 종류 ValueError를 수신함.** 검사기의 프로필 필터 결함과 부합하나 발생 프레임이 없어 같은 원인으로 확정하지 않음. 후보 70초·표식 T/T/F/F·조회 P=0/U=0은 별도 근거로 유지함. 원본 오류명 하나면 충분하다는 직전 안내는 후보 판단에 필요한 묶음을 빠뜨린 것으로 정정함. [수신·수정 근거](../evals/scenarios.md#ees-import-followup).
+- 다음 작업 하나: **후보의 기존 출력에서 error_types·stderr_scope·observed_self_seconds·last_timed_import 네 값을 두 줄로 한 번에 받는다.** [항목과 전달 형식](03-openwebui-native-agent.md#ees-import-followup). 안 보이면 `?`로 받고 출력이 없으면 기존 검사 증거의 한계로 정리함. original 오류·후보 표식·P/U를 다시 요구하거나 ProbeImports/Deploy/서버 재기동·CIM 조회로 자동 전환하지 않음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -21,7 +21,7 @@ Diagnose 운영 코드 원본은 `70e7b9f268029bbc161f03b5f364130d2cd24239`, [PR
 
 Diagnose v2 운영 코드 원본은 `2cb6b55f8ff2dc38ecd8a2ca39d30a7e6951d876`이며 [PR #10](https://github.com/knadalkim-a11y/team-agent-poc/pull/10)의 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34281735662)는 성공했습니다. main 병합은 `50c2a1f7bcaa80b6ee64252bd74bbece30fb098d`입니다. 사내 v2 실행 결과를 수신했으며 전체 checkout SHA 직접 대조·추가 Deploy는 미실행입니다. 기존 준비 프로그램 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`과 DB·키·CA 선택·대기 한도를 유지하며, 프로그램 ZIP을 다시 준비하지 않습니다.
 
-ProbeImports 프로필 보존 수정 원본은 `7dfa93e1f30fdb6f253a6dfcd6316b2f89b0f4ef`이며 [PR #13](https://github.com/knadalkim-a11y/team-agent-poc/pull/13)의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34286767622)는 성공했습니다. main 병합은 `0a5285da11cd15b6a111d470a440853e7e1a5ce7`입니다. 기본 비교 PR #11과 타이핑 보완 PR #12의 증거는 각각 [기본 검사](../evals/scenarios.md#ees-import-probe)·[전달 보완](../evals/scenarios.md#ees-typed-handoff)에 보존합니다. 사내에서는 타이핑 보완 전 실행 결과를 받았으며 이번 수정 적용·재검사는 하지 않았습니다. 전체 사내 checkout SHA와 실제 예외 종류는 아직 대조하지 않았습니다. 기존 프로그램 ZIP의 Deploy Commit은 계속 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`입니다.
+ProbeImports 프로필 보존 수정 원본은 `7dfa93e1f30fdb6f253a6dfcd6316b2f89b0f4ef`이며 [PR #13](https://github.com/knadalkim-a11y/team-agent-poc/pull/13)의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34286767622)는 성공했습니다. main 병합은 `0a5285da11cd15b6a111d470a440853e7e1a5ce7`입니다. 기본 비교 PR #11과 타이핑 보완 PR #12의 증거는 각각 [기본 검사](../evals/scenarios.md#ees-import-probe)·[전달 보완](../evals/scenarios.md#ees-typed-handoff)에 보존합니다. 사내에서는 타이핑 보완 전 실행 결과를 받았으며 이번 수정 적용·재검사는 하지 않았습니다. original의 ValueError는 사용자 보고로 수신했으나 전체 사내 checkout SHA·발생 프레임·후보 예외는 아직 미확인입니다. 기존 프로그램 ZIP의 Deploy Commit은 계속 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`입니다.
 
 <a id="resume-branch"></a>
 
@@ -99,7 +99,7 @@ ProbeImports 프로필 보존 수정 원본은 `7dfa93e1f30fdb6f253a6dfcd6316b2f
 
 ## 최근 점검
 
-2026-09-08 후속: 후보 T/T/F/F·P=0/U=0을 코드의 표식 순서와 대조함. import 시작 표식 뒤 완료 미관측 범위로 좁혔고, import 예외 후 종료 지연 가능성도 남겨 NLTK 내부 정체로 확정하지 않음. 즉시 종료할 검사 프로세스는 관측되지 않았으며 남은 요청은 기존 오류 종류 하나임. 문서만 갱신하고 사내 재검사·조회·종료나 코드 변경은 하지 않음. [검증 범위·기존 CI·미확인](../evals/scenarios.md#ees-import-followup), [초기 재설계 검토](../evals/scenarios.md#ees-diagnostic-workflow).
+2026-09-08 후속: original ValueError를 알려진 프로필 결함과 대조하되 인과를 확정하지 않음. 후보 예외·읽기 범위가 아직 없어 정상 watchdog 종료나 NLTK 내부 정체로 판정할 수 없음을 재확인함. 반복 실행 대신 기존 후보 출력의 예외/범위와 보조 계측 두 값을 한 묶음으로 요청하도록 정정함. 문서만 갱신하고 사내 재검사·조회·종료나 코드 변경은 하지 않음. [검증 범위·기존 CI·미확인](../evals/scenarios.md#ees-import-followup), [초기 재설계 검토](../evals/scenarios.md#ees-diagnostic-workflow).
 
 ## 갱신 규칙
 
