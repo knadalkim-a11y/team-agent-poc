@@ -644,7 +644,7 @@ v2는 새 실패의 기록된 이유·실제 health 검사 경과 시간·설정
 
 다음 재배포를 안내하기 전에 **가설·필요한 증거·성공 조건·중단/복구 조건**을 정합니다. GPT가 외부 코드·합성 검사를 처리하고, 사내에서만 가능한 독립 검사는 짧은 명령 한 번으로 묶습니다. 추가 왕복은 이전 결과에 따라 달라지는 검사에만 사용합니다. 별도 진단 서비스·상시 수집·실제 DB를 공유하는 병렬 앱은 추가하지 않습니다.
 
-Diagnose v2 뒤 첫 import 비교의 정보 수집과 [시간 기준 수정](#ees-import-deadline) 후 비교 실행까지 끝냈습니다. 현재 다음 행동은 **[이번 저장 보고서와 현재 검사 프로세스의 읽기 전용 조회](#ees-import-saved-followup)**입니다. 사내 장애 원인은 여전히 미확인이고, EES 전환 성공은 별도 확인 대상입니다. 아래 이전 실행·수동 진단·캐시 절차는 과거 경위이며 처음부터 반복하지 않습니다.
+Diagnose v2 뒤 첫 import 비교의 정보 수집과 [시간 기준 수정](#ees-import-deadline) 후 비교·저장 보고서 조회까지 끝냈습니다. 현재 다음 행동은 **[동일 보고서의 호출 위치와 상위 import 시간 조회](#ees-import-dump-detail)**입니다. watchdog 덤프가 관측됐고 이번 조회에서 검사 Python 잔존은 없었지만 사내 지연 원인은 미확인입니다. EES 전환 성공은 별도 확인 대상이며 아래 이전 실행·수동 진단·캐시 절차는 처음부터 반복하지 않습니다.
 
 <a id="ees-import-probe"></a>
 
@@ -728,7 +728,7 @@ P는 해당 검사 표식이 있는 python.exe 수이며 launcher/실제 자식�
 
 **수정 후 비교 결과의 저장 보고서 조회:** `SEND I1 O=OK/5.3 C=CLEANUP/70.0 saved=yes`, `SEND T1 O=0.5/59.5 C=0.5/59.5`를 수신했습니다. original의 분리 import는 정상 완료했고 후보도 예산 확인 지점까지 약 0.5초였으므로 늦은 초기화 때문에 watchdog 예산을 잃는다는 앞선 가설은 이번 결과를 설명하지 못합니다. CLEANUP은 덤프 유무보다 우선 표시되므로 이 두 줄만으로 이번 watchdog 덤프가 없었다고 판단하지 않습니다. 이전 실행의 T/T/F/F·54.8초·마지막 pandas 이름·P=0/U=0은 이번 값으로 재사용하지 않습니다.
 
-같은 ProbeImports·Deploy는 반복하지 않습니다. 아래 블록은 기본 config와 마지막 비식별 보고서, 현재 검사 표식 프로세스 수만 읽습니다. Python·서버를 실행하거나 종료하지 않습니다. 후보 commit·대상·저장 여부·O/C 상태·반올림한 여섯 시간값을 받은 두 줄과 대조하며 불일치/읽기 실패는 R=?로 남깁니다. UTC 저장 시각도 출력하지만 조건이 같은 다른 실행까지 구분하는 고유 실행 ID는 아닙니다. 저장된 source_commit은 검사기 코드가 아닌 후보 프로그램 commit입니다.
+**아래 D1/F1 조회는 완료한 이력입니다. 현재 다음 조회는 [덤프 상세](#ees-import-dump-detail)입니다.** 아래 블록은 기본 config와 마지막 비식별 보고서, 조회 시점 검사 표식 프로세스 수만 읽었습니다. Python·서버를 실행하거나 종료하지 않습니다. 후보 commit·대상·저장 여부·O/C 상태·반올림한 여섯 시간값을 받은 두 줄과 대조하며 불일치/읽기 실패는 R=?로 남깁니다. UTC 저장 시각도 출력하지만 조건이 같은 다른 실행까지 구분하는 고유 실행 ID는 아닙니다. 저장된 source_commit은 검사기 코드가 아닌 후보 프로그램 commit입니다.
 
 ```powershell
 & {
@@ -772,7 +772,55 @@ P는 해당 검사 표식이 있는 python.exe 수이며 launcher/실제 자식�
 
 `SEND D1`·`SEND F1` 두 줄만 전달합니다. M은 이번 후보의 watchdog_armed/import_entered/import_completed/watchdog_dump_seen 순서(T/F/?), X는 기록된 종료 코드, S는 stdout/stderr의 full=F·tail=T, E는 인식 오류 종류입니다. X는 부모의 종료 시도 후 값일 수 있어 자연 종료 원인으로 해석하지 않습니다. P/U는 이번 조회의 검사 표식 Python/명령행 미열람 개수이며 보고서 읽기와 독립해서 조회합니다. W는 덤프 thread 수, F는 첫 덤프 thread에서 other를 제외한 첫 비식별 프레임(없으면 -), T는 self 합 초, L은 마지막 계측 이름입니다. 첫 thread가 main thread라는 보장은 없고 프레임 하나를 원인으로 단정하지 않습니다. 값이 길거나 허용 문자 밖이면 ?이며 시간 null은 0으로 바꾸지 않습니다.
 
-R=?여도 재검사하지 않고 그 두 줄을 그대로 전달합니다. 이번 조회 결과로 덤프 관측·진행 단계·현재 잔존을 먼저 구분하며, 정리 대상을 확인하지 않은 상태에서 Python 전체 종료·기존 서버 재시작·캐시/패키지 재작업을 안내하지 않습니다. 이 PowerShell 블록은 로컬 실행 환경에 PowerShell이 없어 실제 실행 검증은 하지 않았고, 저장 필드·문법·읽기 전용 동작을 검토했습니다.
+위 조회를 준비할 때는 R=?도 재검사 없이 그대로 전달하도록 안내했습니다. 이후 D1/F1 사용자 출력 보고를 수신했으며 결과는 아래와 같습니다. GPT의 사외 준비 당시에는 PowerShell이 없어 실제 실행 검증을 하지 못했고 저장 필드·문법·읽기 전용 동작을 검토했습니다. 정리 대상을 확인하지 않은 상태에서 Python 전체 종료·기존 서버 재시작·캐시/패키지 재작업을 안내하지 않습니다.
+
+
+<a id="ees-import-dump-detail"></a>
+
+**덤프 관측 후 저장 상세 조회:** 저장 시각 `2026-09-08T23:04:17Z`의 D1/F1을 수신했습니다. `M=TTFT`는 watchdog 예약·import 진입·덤프 관측이 있고 완료 표식이 없다는 뜻입니다. 이번 CIM의 `P=0 U=0`은 조회 순간 검사 표식 Python과 명령행 미열람 Python이 없다는 범위이며 70초 시점의 정리 완료를 소급 증명하지 않습니다. `S=F/F E=- W=1`은 수집 앞부분 생략 없이 인식 오류가 없고 Python 덤프 thread 하나를 인식했다는 뜻입니다. 덤프 전체 작성 완료·native thread 수·정확한 발생 시각을 뜻하지 않습니다.
+
+`X=1`은 watchdog의 의도된 종료나 부모 강제 종료 후 값일 수 있어 자연 오류의 증거로 쓰지 않습니다. [Python faulthandler](https://docs.python.org/3.11/library/faulthandler.html#faulthandler.dump_traceback_later)는 `exit=True`에서 덤프 뒤 종료 코드 1을 사용하지만 이번에는 부모의 70초 대기 만료도 기록됐으므로 종료 경로·시각은 미확정입니다. `T=51.1`은 기록된 import self 합이고 `L=pandas._libs.writers`는 마지막 계측 이름입니다. 공통 함수 `frozen/importlib._bootstrap:241:_call_with_frames_removed` 하나만으로 pandas 손상·정체 지점을 판정하지 않습니다.
+
+앞선 첫 프레임 요약은 호출 위치를 좁히기에 부족했습니다. 다음 블록은 **같은 저장 보고서만 읽어** 보존된 호출 위치와 상위 self 시간을 함께 출력합니다. 기존 검사·CIM을 재실행하거나 Update/Deploy·프로세스 종료를 하지 않습니다. 읽기 실패나 시각/후보 불일치면 R=? 두 줄로 끝냅니다.
+
+```powershell
+& {
+  $ErrorActionPreference='Stop'
+  $s='R=?'; $t='R=?'
+  function safe($x,$n) {
+    $x=[string]$x
+    if(!$x){'-'}elseif($x.Length -le $n -and $x -cmatch '^[A-Za-z0-9_./:<>-]+\z'){$x}else{'?'}
+  }
+  function timing($x) {
+    if($null -eq $x -or $x -is [bool]){return '?'}
+    $v=[double]$x
+    if($v -ge 0 -and $v -le 86400){$v.ToString('F1',[Globalization.CultureInfo]::InvariantCulture)}else{'?'}
+  }
+  try {
+    $cfg=Get-Content -LiteralPath (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json') -Encoding UTF8 -Raw | ConvertFrom-Json
+    $r=Get-Content -LiteralPath (Join-Path $cfg.state_root 'last-import-probe.json') -Encoding UTF8 -Raw | ConvertFrom-Json
+    if($r.recorded_at -ne '2026-09-08T23:04:17Z' -or $r.source_commit -ne '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50' -or $r.target -ne 'nltk'){throw 'report'}
+    $c=@($r.results | Where-Object program -eq candidate)
+    if($c.Count -ne 1 -or $c[0].watchdog_dump_seen -ne $true){throw 'report'}
+    $c=$c[0]; $f=@($c.watchdog_first_thread_frames)
+    $a=@($f | Where-Object {$_ -ne 'other' -and $_ -notmatch '^(frozen/|stdlib/importlib/)'}) + @($null,$null)
+    $k=$f | Where-Object {$_ -match '^(frozen/importlib\.|stdlib/importlib/)' -and $_ -match ':(create_module|exec_module|_find_spec)$'} | Select-Object -First 1
+    if($k){$k=($k -split ':')[-1]}
+    $b=@($c.top_self | Select-Object -First 3)
+    $v=@(0..2 | ForEach-Object {
+      if($_ -lt $b.Count){"$(safe $b[$_].module 43)/$(timing $b[$_].seconds)"}else{'-'}
+    })
+    $s="K=$(safe $k 13) A=$(safe $a[0] 55) B=$(safe $a[1] 55) N=$($f.Count) O=$(safe $c.watchdog_first_thread_frames_omitted 4)"
+    $t="N=$(safe $c.timed_import_events 7) A=$($v[0]) B=$($v[1]) C=$($v[2])"
+  } catch {}
+  "SEND S1 $s"
+  "SEND T2 $t"
+}
+```
+
+`SEND S1`·`SEND T2` 두 줄만 전달합니다. S1의 K는 보존된 importlib 프레임에서 첫 create_module/exec_module/_find_spec 함수명, A/B는 frozen/importlib를 제외한 첫 두 비식별 호출 위치, N/O는 첫 thread의 보존/생략 프레임 수입니다. T2의 N은 계측 import 수, A/B/C는 self 시간이 큰 세 모듈과 초입니다. 빈 값은 -, 길이/문자/시간값이 부적합하면 ?로 남깁니다. 보존된 것은 첫 thread의 최초 10프레임뿐이므로 A/B가 전체 덤프의 꼬리라는 뜻은 아니며 그 밖의 프레임은 복원하지 못합니다. top_self는 이미 기록된 import 시간이고 실행 중인 모듈의 현재 경과 시간이 아닙니다.
+
+이 조회는 저장 구조·읽기 전용 동작과 출력 한도를 독립 검토했으며 PowerShell 실제 실행은 미실행입니다. 두 줄을 바탕으로 지연이 기록된 위치와 덤프 당시 호출 위치를 대조하고 필요한 좁은 수정/조사를 결정합니다. 값이 없으면 관측 한계로 남기며 패키지/캐시 재작업이나 같은 검사를 자동 반복하지 않습니다.
 
 <a id="ees-deployment-diagnostics"></a>
 

@@ -928,6 +928,17 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 검토 범위: 기준 원격 main `8f631669e3bd7f1b7a3f25890874a180ce476ae6`, 열린 PR 0개와 동일한 로컬 전체 트리 `92016092d86b7de7529949565d050fdbb808298b`에서 관련 상태·가이드·저장/분류 코드를 대조함. 독립 읽기 검토로 Windows PowerShell 5.1 한글 경로의 UTF-8 명시를 보완함. 블록은 2,389자로 2,500자 이내이고 새 Python 실행·종료·서버/설정 쓰기·네트워크 요청을 포함하지 않음. null/비정상 시간은 0으로 바꾸지 않고 출력 길이/문자를 제한함. X는 부모 종료 시도 후 값일 수 있으며 첫 덤프 thread가 main thread라는 보장은 없음.
 - 검증·미실행: STATUS·가이드·이 기록 3개만 변경하고 문서·내부 링크·diff를 검사함. 실행 코드·CI를 변경하거나 기존 시험을 반복하지 않음. PowerShell이 없는 로컬 환경에서 이 조회 블록의 실제 실행 검증은 미실행이며, 사내 보고서/CIM 직접 조회와 EES 전환도 미실행임. 앞선 PR #14의 Windows/Linux 검증은 위 날짜별 기록으로 유지함.
 
+<a id="ees-import-dump-detail"></a>
+
+### 저장된 watchdog 덤프 관측·호출 위치 조회 준비 — 2026-09-08
+
+- 사용자 보고: `SEND D1 R=2026-09-08T23:04:17Z M=TTFT X=1 S=F/F E=- P=0 U=0`, `SEND F1 W=1 F=frozen/importlib._bootstrap:241:_call_with_frames_removed T=51.1 L=pandas._libs.writers`. 위 조회 안내 원본은 `10e6546a4448cec3189560766ac64068595c6958`이며 같은 main·열린 PR 0개·로컬 tree `9963e157f153e82caaee7511878dc222bfbfa7b4`에서 대조함. 사내 checkout SHA·파일/CIM 직접 조회는 미실행.
+- 판정: 이번 저장 보고서에서 watchdog 예약·import 진입·덤프가 관측되고 완료 표식은 없음. 캡처된 stdout/stderr 앞부분 생략 없이 인식 오류가 없고 덤프 thread 1개가 인식됨. 이번 CIM 조회 순간에는 검사 표식 python.exe와 명령행 미열람 python.exe가 없었음. 최초 실행의 P=0/U=0을 재사용한 판정이 아니며 70초 시점 정리 완료·모든 native thread 상태·덤프 쓰기 완료까지 확대하지 않음.
+- 종료 해석: `_measure`는 부모 wait가 70초에 만료되면 정리 미확인을 기록하고 `child.kill()/wait(2)`를 시도한 뒤 exit_code를 수집함. [Python faulthandler 공식 설명](https://docs.python.org/3.11/library/faulthandler.html#faulthandler.dump_traceback_later)의 `exit=True` 역시 덤프 후 코드 1로 종료하므로 X=1은 자연 오류나 특정 종료 경로의 증거가 아님. 덤프의 정확한 발생 시각·watchdog 종료와 Windows venv launcher의 관찰 순서는 미확정. watchdog 미작동으로 수정하거나 CLEANUP을 성공으로 덮어쓰지 않음.
+- 지연 해석: self 합 51.1초·마지막 계측 pandas._libs.writers·공통 importlib 첫 프레임만으로 손상 패키지나 정체 위치를 확정할 수 없음. 앞선 첫 프레임 선택의 정보 부족을 인정하고 [같은 보고서의 상세 조회](../docs/03-openwebui-native-agent.md#ees-import-dump-detail)로 호출 위치와 top_self를 함께 요약함. 저장 시각·후보를 대조해 importlib 동작 함수, 비식별 호출 위치 2개, 보존/생략 프레임 수와 상위 self 3개를 SEND S1/T2 두 줄로 받음. 새 import·CIM·배포·캐시 작업을 추가하지 않음.
+- 관측 한계: parser는 첫 덤프 thread의 최초 10개 프레임만 저장하며 나머지는 생략 수만 남김. 임시 원문은 정리되므로 보존 밖의 꼬리를 되살리거나 보존 배열의 마지막을 전체 덤프 꼬리로 부르지 않음. top_self는 기록된 import 시간이며 현재 실행 중인 모듈의 시간 측정이 아님. 근거가 부족하면 그 한계를 유지하고 같은 검사를 자동 반복하지 않음.
+- 검토·검증: 독립 읽기 검토에서 새 PowerShell 블록의 UTF-8 읽기·출력 제한·부작용 부재를 대조하고, StrictMode에서 빈 호출 배열 인덱스가 실패하지 않도록 null 패딩을 추가함. 블록 1,759자, 정상 저장 구조에서 S1 최대 151자/T2 최대 179자로 전달 제한 이내임. STATUS·가이드·이 기록 3개만 변경하고 문서·내부 링크·diff를 점검함. 실행 코드·기존 CI는 변경/반복하지 않음. 새 S1/T2 블록의 PowerShell 실제 실행·사내 상세 조회·원인 확인·EES 전환 성공은 미실행/미확인임.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

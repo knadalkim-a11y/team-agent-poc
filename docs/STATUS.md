@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **수정 후 비교의 `O=OK/5.3 C=CLEANUP/70.0 saved=yes`, `O=0.5/59.5 C=0.5/59.5`를 수신함.** 기존 환경은 정상 비교 기준을 확보했고 후보는 예산 확인까지 약 0.5초였으므로 늦은 초기화 가설로 이번 결과를 설명할 수 없음. 후보 지연·덤프 관측·현재 잔존은 미확정이며, 이전 실행의 필드나 P=0/U=0을 재사용하지 않음. [수신·판정](../evals/scenarios.md#ees-import-saved-followup).
-- 다음 작업 하나: **저장된 이번 보고서와 현재 검사 프로세스를 읽는 한 블록으로 SEND D1·F1 두 줄을 받는다.** [읽기 전용 조회](03-openwebui-native-agent.md#ees-import-saved-followup)는 기존 저장 필드를 함께 요약하며 새 import를 실행하지 않음. Update/ProbeImports·Deploy·서버 재시작·패키지/캐시 재작업은 안내하지 않음. 보고서 조건 불일치/조회 불가도 출력 그대로 받고 재검사를 자동 반복하지 않음.
+- 이번 작업: **저장 보고서 `2026-09-08T23:04:17Z`의 `M=TTFT X=1 S=F/F E=- P=0 U=0`, `W=1 T=51.1 L=pandas._libs.writers`를 수신함.** watchdog 덤프 관측·import 미완료와 이번 조회 시점 검사 Python 잔존 없음이 확인됨. 첫 프레임은 공통 import 함수여서 후보 지연 원인은 미확정임. 기존 환경 정상 5.3초·후보 CLEANUP/70.0·양쪽 예산 0.5/59.5는 유지하고, X=1을 자연 오류나 과거 정리 성공으로 해석하지 않음. [수신·판정](../evals/scenarios.md#ees-import-dump-detail).
+- 다음 작업 하나: **같은 저장 보고서의 호출 위치와 상위 import 시간을 SEND S1·T2 두 줄로 받는다.** [읽기 전용 상세 조회](03-openwebui-native-agent.md#ees-import-dump-detail)는 방금 받은 UTC 시각·후보 커밋을 대조하고 보존된 프레임·top_self만 읽음. 새 import·CIM·Update/Deploy·서버 재시작·패키지/캐시 재작업은 안내하지 않음. 데이터 부족은 관측 한계로 남기며 같은 검사를 자동 반복하지 않음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -99,7 +99,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-08 후속: 수정 후 I1/T1을 반영하고 기존 실행 안내를 완료 이력으로 전환함. CLEANUP이 덤프 유무보다 우선 표시되는 코드와 저장 필드를 대조하고, 독립 검토로 읽기 전용 후속 조회를 확인함. Windows PowerShell 5.1에서 한글 경로를 읽도록 UTF-8을 명시했으며 블록은 2,500자 이내임. 로컬 PowerShell 실제 실행·사내 보고서/CIM 직접 조회는 미실행. 문서·내부 링크·diff를 검사하며 실행 코드와 기존 CI 시험은 변경/반복하지 않음. [근거·한계](../evals/scenarios.md#ees-import-saved-followup), [이전 시간 기준 검증](../evals/scenarios.md#ees-import-deadline), [초기 재설계 검토](../evals/scenarios.md#ees-diagnostic-workflow).
+2026-09-08 후속: D1/F1 보고를 저장/분류 코드 및 Python faulthandler 공식 설명과 대조함. 현재 잔존 없음과 실행 당시 정리 미확인, 덤프 관측과 종료 성공을 구분함. 공통 첫 프레임 요약의 정보 부족을 보완해 같은 저장 보고서의 호출 위치·상위 시간 조회를 준비함. 독립 검토에서 빈 프레임 배열의 StrictMode 인덱스 처리와 두 출력 줄의 길이 한도를 보완함. 문서·링크·diff를 검사하며 실행 코드·기존 CI는 변경/반복하지 않음. D1/F1 조회는 사용자 실행 보고이며 GPT의 사내 직접 조회·새 S1/T2 블록의 PowerShell 실제 실행 검증은 미실행. [상세 근거](../evals/scenarios.md#ees-import-dump-detail), [이전 조회](../evals/scenarios.md#ees-import-saved-followup).
 
 ## 갱신 규칙
 
