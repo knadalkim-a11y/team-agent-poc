@@ -855,6 +855,39 @@ print(json.dumps({'checked_files':len(files),'current_headers':current,
 compile_error=none이면 문법 확인은 성공했지만 캐시가 없거나 헤더/읽기 문제가 남은 경우입니다. test_path=true도 테스트 디렉터리 이름의 단서일 뿐 기동에서 미사용이라는 증명이 아닙니다. omitted가 있으면 모든 후보를 문법 검사한 것이 아닙니다. 결과를 받아 실제 기동에 필요한 파일인지 판단한 뒤 재배포 여부를 정합니다.
 
 
+**긴 files 결과를 모바일로 옮기기 어려운 경우:** 기존 JSON 출력만 사내 PC 안에서 묶으며 파일 점검을 다시 실행하지 않습니다. 아래 블록을 먼저 실행하면 입력을 기다립니다. 그때 위 점검 결과의 여는 {부터 마지막 }까지 PC 클립보드에 복사하고 Enter를 누릅니다. 명령 복사로 JSON 클립보드가 덮이는 순서를 피하기 위한 대기입니다.
+
+```powershell
+& {
+  $ErrorActionPreference = 'Stop'
+  $null = Read-Host '위 JSON 결과의 {부터 마지막 }까지 복사한 뒤 Enter'
+  try {
+    $eesReport = Get-Clipboard -Raw | ConvertFrom-Json
+  } catch {
+    throw 'JSON 결과 부분만 다시 복사해주세요.'
+  }
+  $eesFiles = @($eesReport.files)
+  if ($eesReport.suspect_files -ne 14 -or $eesReport.omitted -ne 0 -or $eesFiles.Count -ne 14) {
+    throw '방금 나온 14개 점검 결과가 아닙니다.'
+  }
+  $eesAllowed = '^(open_webui|numpy|scipy|pandas|sympy|sklearn|numba|torch|transformers|sentence_transformers|langchain|langchain_core|langchain_community|langchain_classic|future|past|libfuturize|libpasteurize|parso|jedi|IPython|networkx|sqlalchemy|chromadb)$'
+  $eesGroups = foreach ($f in $eesFiles) {
+    if ($f.test_path -isnot [bool]) { throw '점검 결과 형식이 다릅니다.' }
+    $pkg = ($f.file -split '/')[0]
+    if ($pkg -notmatch $eesAllowed) { $pkg = 'other' }
+    $err = $f.compile_error
+    if ($err -notmatch '^(none|SyntaxError|IndentationError|TabError|UnicodeDecodeError|ValueError|OSError|PermissionError|FileNotFoundError|MemoryError|RecursionError|OverflowError)$') { $err = 'other' }
+    $cache = $f.cache
+    if ($cache -notmatch '^(missing|header_diff|OSError|PermissionError|FileNotFoundError)$') { $cache = 'other' }
+    "$pkg / $err / test=$($f.test_path) / $cache"
+  }
+  $eesGroups | Group-Object | ForEach-Object { "$($_.Count) : $($_.Name)" }
+}
+```
+
+suspect_files=14·omitted=0·files 14개인 결과를 확인하고 공개 패키지/문법 오류 종류/test_path/캐시 상태별 개수만 출력합니다. 긴 파일명·경로·클립보드 원문·파싱 오류 원문은 출력하지 않으며 허용 목록 밖 값은 other로 묶습니다. JSON 이외의 내용을 복사했거나 결과 형식이 다르면 고정 안내로 멈춥니다. 패키지/테스트 경로 분류는 기동 미사용을 보증하지 않으며 묶인 결과를 받은 뒤 판단합니다.
+
+
 <a id="ees-failure-timing"></a>
 
 **실패까지의 시간과 기동 완료 흔적 확인:** 자동 복구 성공 뒤 추가 Start/Stop/Deploy 없이 읽는 명령입니다. 현재 복구 로그를 제외하고 생성 시각으로 실패 후보를 좁히므로 로그 이동/삭제나 시각 변경이 있었다면 이번 후보로 확정하지 않습니다. 원문 대신 시간·기동 완료 문자열 존재 여부만 출력합니다.
