@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **후보 599.5초·기동 완료/수신 표시 없음, 기존 프로그램 복구 111초를 사용자 보고로 확인함.** 600초 health 대기 만료와 부합하며 NumPy 단독 import는 기존/후보 모두 정상임. 기동 지연의 근본 원인은 미확정이고 사용자가 프록시 가능성도 확인하도록 요청함. [이번 실패·진단 보고](../evals/scenarios.md#ees-retransition-health-failure). 사내 운영 코드의 마지막 보고는 `head=c5f1690...`이며 전체 checkout/설정 직접 대조는 미실행. EES 전환은 미완료·기존 프로그램 자동 복구 성공 상태임.
-- 다음 작업 하나: **등록 때 저장한 실행 환경으로 후보 Python의 프록시 선택과 GitHub/Hugging Face HTTPS 응답을 확인한다.** Git 프록시·관리자의 직접 health 요청·앱의 HTTP 환경을 구분함. [프록시 진단](03-openwebui-native-agent.md#ees-startup-proxy-check)은 설정 요약과 두 응답만 출력하며 앱 토큰·프록시 값·응답 본문은 전송/출력하지 않음. 기동 전 캐시 준비는 검토했지만 프록시 확인을 우선해 미실행으로 보류함. 서버·DB·저장 설정·패키지는 유지하며 재배포/재설치를 반복하지 않음.
+- 이번 작업: **저장된 앱 환경에서 프록시 선택 후 GitHub/Hugging Face HTTPS 요청이 모두 SSLError로 실패했다고 보고받음.** saved_proxy_env=true, offline_mode=false이며 각 0.51초/0.27초임. 후보 599.5초·기동 완료/수신 표시 없음·기존 복구 111초와 NumPy 양쪽 정상 기록은 유지함. TLS 세부 원인 및 600초 기동 지연과의 인과는 미확정. [이번 실패·진단 보고](../evals/scenarios.md#ees-retransition-health-failure). EES 전환 미완료·기존 프로그램 자동 복구 성공 상태이며 사내 운영 코드의 마지막 보고는 `head=c5f1690...`임.
+- 다음 작업 하나: **같은 저장 환경의 GitHub 요청 한 번으로 SSL 이유·프록시 scheme·CA 설정 출처를 확인한다.** [TLS 세부 진단](03-openwebui-native-agent.md#ees-startup-tls-detail)은 고정된 분류만 출력하고 원문/값은 출력하지 않음. Deploy 안내 뒤 저장한 Git 영구 프록시와 초기 등록 때 저장한 앱 프록시는 별개임. 캐시 준비·재배포·재설치·인증서 검증 해제는 실행하지 않으며 서버·DB·저장 설정·패키지를 유지함.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -90,7 +90,7 @@
 
 ## 최근 점검
 
-최신 main `293ef23`·열린 PR 없음·로컬 tree 일치에서 시간/완료 표시 결과와 proxy/환경 복원 코드를 대조함. 고정 Open WebUI v0.11.3의 env/config/main 및 Requests 공식 설명을 확인하고 health의 프록시 미사용과 앱의 외부 통신 가능성을 구분함. [결과·범위](../evals/scenarios.md#ees-retransition-health-failure). 문서 점검·diff 검사 통과. 실제 사내 프록시 선택/접속 결과와 지연 원인은 대기이며 실행 코드·서버·환경 변경은 없음.
+최신 main `ff9091c`·열린 PR 없음·로컬 tree 일치에서 전달된 세 결과를 진단 출력 순서·환경 복원 코드와 대조함. Git 설정 안내 순서와 초기 앱 환경을 구분하고 SSLError를 인증서 신뢰 실패로 곧바로 단정하지 않음. [결과·범위](../evals/scenarios.md#ees-retransition-health-failure). 문서 점검·diff 검사와 TLS 진단의 Python 문법 검사를 통과함. 사내 TLS 세부 진단·원인 확정은 대기이며 실행 코드/서버/설정 변경은 없음.
 
 ## 갱신 규칙
 

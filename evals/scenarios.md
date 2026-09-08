@@ -772,6 +772,10 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 고정 upstream [v0.11.3 env](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/env.py), [config](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/config.py), [main](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/main.py)을 직접 읽음. OFFLINE_MODE와 모델 자동 갱신 설정 등 외부 통신 관련 경로는 존재하지만 사내 실행 여부는 미확인임. CUSTOM_NAME 외부 요청은 현 등록의 차단 설정과 구분함. 사용자 traceback은 HTTP 클라이언트 대기가 아닌 import 파일 읽기 위치이지만 그 전에 네트워크 지연이 없었다는 증거는 아님. Git 프록시 범위만으로 이번 지연의 네트워크 원인을 제외하지 않음.
 - 다음 [실행 환경·프록시 진단](../docs/03-openwebui-native-agent.md#ees-startup-proxy-check)은 저장 환경을 로컬에서 복원해 후보 Requests의 URL별 프록시 선택/HEAD 응답을 확인함. 실제 API 토큰을 붙이지 않고 netrc 인증/redirect를 사용하지 않으며 TLS 검증을 유지함. 설정 존재만으로 연결 성공을 판정하지 않고 Windows 프록시 선택도 클라이언트에 맡김. 해당 공개 URL의 결과는 모델 파일/CDN·사내 API·과거 기동 시 통신 전체의 증거가 아님. 최신 main293ef23과 열린 PR 없음/tree 일치 확인, Python 본문 문법 검사·문서 점검·diff 검사를 수행함. Windows/사내 접속 명령은 미실행이며 코드/서버/캐시/설정을 바꾸거나 CI를 반복하지 않음.
 
+- 프록시 진단 후 사용자 보고: saved_proxy_env=true, offline_mode=false; github는 proxy_selected=true/status=failed/error_type=SSLError/elapsed_seconds=0.51, huggingface는 같은 선택/실패/분류와 elapsed_seconds=0.27임. `faild`는 출력 스키마의 failed 전사로 대응함. 실제 후보 Requests가 프록시를 선택하고 SSL/TLS 오류로 빠르게 실패한 범위를 인정하며 TCP/프록시 인증/인증서 신뢰의 어느 단계까지 성공했는지는 확정하지 않음. 이 현재 HEAD 실패가 과거 600초 기동 지연의 원인이라는 연결 증거는 없음.
+- 사용자는 프록시를 앞선 설치/배포 명령 뒤에 설정하지 않았는지 확인함. 대화상 Deploy 안내 이후 GitHub.com용 사용자 전역 Git 설정을 안내했고 이후 설정 완료·배포 실패를 함께 보고받은 순서임. 정확한 설정 시각은 기록하지 않았음. 이번 saved_proxy_env는 그 Git 설정을 읽은 값이 아니라 초기 등록 환경을 복원한 결과임을 코드와 대조함. Git 영구 프록시를 나중에 설정했다는 점과 앱 환경에 기존 프록시 값이 있다는 점은 모순되지 않음.
+- 후속은 [TLS 세부 진단](../docs/03-openwebui-native-agent.md#ees-startup-tls-detail) 한 요청으로 정함. Requests/urllib3 공식 설명과 독립 검토로 SSLError의 인증서 검증·프록시 protocol 등 가능성을 구분하고 로컬 예외 문자열에서 허용된 SSL 이유만 추출하도록 함. proxy scheme과 CA 환경변수의 출처만 출력하며 값/경로·전체 오류·키는 출력하지 않음. Git 전송 backend·CA 원문·TLS 세부 원인은 아직 미확인임. 현재 main ff9091c·열린 PR 없음/tree 일치 확인 및 문서/diff/Python 문법 검사 통과. Windows/사내 요청 실행은 대기이며 TLS 검증 해제·CA 교체·캐시 준비·서버 재기동은 없음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

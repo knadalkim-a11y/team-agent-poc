@@ -732,6 +732,60 @@ except Exception as error:
 
 처음 설정 요약과 접속 결과 두 개만 전달합니다. `proxy_selected`는 해당 URL에 대한 Requests의 선택이며, 환경변수 부재만으로 Windows의 직접 통신을 단정하지 않습니다. 응답은 해당 공개 URL/HEAD의 범위로 실제 모델 파일·CDN·인증 API·기동 시 모든 통신을 보증하지 않습니다. ProxyError·SSLError·timeout을 구분하고 403도 프록시 원인으로 즉시 단정하지 않습니다. probe_failed/TimeoutExpired는 자식 Python의 시작/Requests import를 포함한 30초 제한이며 HTTP 요청만의 시간 초과와 구분합니다. Open WebUI를 import하지 않으며 DB·저장 설정·키·서버는 변경하지 않습니다.
 
+<a id="ees-startup-tls-detail"></a>
+
+**프록시 선택 뒤 SSLError가 보고된 경우:** Git 영구 프록시 설정 시점과 Init 때 저장한 앱 환경을 구분합니다. `saved_proxy_env=true`는 앱의 복원 환경에 값이 있다는 의미이며 새 Git 설정을 읽었다는 뜻이 아닙니다. SSLError만으로 인증서 신뢰 실패·프록시 접속 방식·기동 지연의 원인을 확정하지 않습니다. 다음 명령은 같은 환경으로 GitHub HEAD 한 번을 보내 프록시 URL의 scheme, Requests CA 설정의 출처, 허용한 SSL 오류 분류만 출력합니다. 실제 주소·경로·키·예외 원문은 출력하지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
+    $eesCode = @'
+import json, pathlib, subprocess, sys
+sys.path.insert(0, sys.argv[2])
+try:
+    from ees_deploy_state import runtime_environment
+    cfg = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
+    env = runtime_environment(cfg)
+    root = pathlib.Path(cfg['releases_dir']) / '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
+    meta = json.loads((root/'release.json').read_text(encoding='utf-8'))
+    if (meta['state']!='prepared' or meta['source_commit']!=root.name
+        or pathlib.Path(meta['target_python'])!=root/'venv/Scripts/python.exe'): raise ValueError()
+    code = '''
+import json, os, requests
+from urllib.parse import urlsplit
+out = {}
+try:
+    url = 'https://github.com/'
+    proxy = requests.utils.select_proxy(url, requests.utils.get_environ_proxies(url))
+    scheme = urlsplit(proxy or '').scheme.lower()
+    out['proxy_scheme'] = scheme if scheme in ('http','https','socks5','socks5h') else 'other_or_none'
+    out['ca_source'] = next((k for k in ('REQUESTS_CA_BUNDLE','CURL_CA_BUNDLE') if os.environ.get(k)), 'default')
+    with requests.Session() as session:
+        session.auth = lambda request: request
+        with session.head(url, timeout=(8,8), allow_redirects=False) as response:
+            out.update(status='response', http_status=response.status_code)
+except Exception as error:
+    known = ('CERTIFICATE_VERIFY_FAILED','WRONG_VERSION_NUMBER','TLSV1_ALERT_PROTOCOL_VERSION',
+             'UNSUPPORTED_PROTOCOL','TLSV1_ALERT_UNKNOWN_CA','SSLV3_ALERT_HANDSHAKE_FAILURE','UNEXPECTED_EOF_WHILE_READING')
+    out.update(status='failed', error_type=type(error).__name__,
+        ssl_reason=next((k for k in known if k in str(error)), 'unclassified'))
+print(json.dumps(out))
+'''
+    run = subprocess.run([meta['target_python'],'-I','-B','-c',code], env=env, cwd=cfg['cwd'],
+        stdin=subprocess.DEVNULL, capture_output=True, timeout=30)
+    print(json.dumps(json.loads(run.stdout)))
+except Exception as error:
+    print(json.dumps({'status':'probe_failed','error_type':type(error).__name__}))
+'@
+    $eesCode | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
+}
+```
+
+[Requests의 CA 선택](https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification)은 REQUESTS_CA_BUNDLE을 먼저, CURL_CA_BUNDLE을 다음으로 사용합니다. `default`는 해당 환경변수 지정이 없는 경우이며 Windows 저장소와 같다고 가정하지 않습니다. `proxy_scheme=http`인 프록시를 통해 HTTPS 목적지로 CONNECT하는 것도 지원되므로 이름만 보고 https로 바꾸지 않습니다([urllib3 프록시 설명](https://urllib3.readthedocs.io/en/stable/advanced-usage.html#http-and-https-proxies)). 인증서 검증을 유지하며 저장 설정·프록시·CA·서버를 변경하지 않습니다. 해당 진단의 오류 분류가 전체 기동 실패의 인과 증거는 아닙니다.
+
 <a id="ees-numpy-import-check"></a>
 
 **후보 로그가 NumPy import 중 KeyboardInterrupt로 끝난 경우:** 아래는 기존/준비 후보 Python에서 NumPy만 각각 한 번 읽는 독립 진단입니다. 기존 서버를 종료하거나 Open WebUI를 불러오지 않고 패키지를 설치하지 않습니다. 고정 커밋은 현재 준비 후보이며 새 후보에서는 해당 원본으로 바꿉니다. 로그 위치와 준비 메타데이터 원문은 출력하지 않습니다.
