@@ -621,6 +621,13 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - [공식 PyPI 4.9.3 파일 목록](https://pypi.org/project/antlr4-python3-runtime/4.9.3/#files)은 소스 압축파일 한 개만 제공함. SHA-256은 `f224469b4168294902bb1efa80a8bf7855f24c99aef99cbefc1bcd3cce77881b`. uv [0.12.7 빌드 코드](https://github.com/astral-sh/uv/blob/0.12.7/crates/uv-distribution/src/source/mod.rs)와 [캐시 wheel 조회](https://github.com/astral-sh/uv/blob/0.12.7/crates/uv-distribution/src/source/built_wheel_metadata.rs)에서 빌드한 `.whl` 보존·조회 경로를 확인함. 이 사실만으로 사내 캐시 존재나 선택 실패 원인을 단정하지 않음.
 - 다음은 기존 등록의 uv 실행 파일·보존된 환경으로 캐시 위치를 구해 해당 버전의 wheel 파일을 읽기 전용으로 찾는 것임. 발견하면 파일 검증·별도 wheelhouse 복사·비활성 후보 보존 이동 후 Prepare를 재시도하고, 발견되지 않으면 공식 소스로 별도 wheel을 준비함. 버전 업그레이드·운영 환경 설치·캐시 내부 수정·오프라인/바이너리 제한 해제는 하지 않음. 캐시 확인·재준비·Deploy는 아직 사내 미실행.
 
+#### 캐시 wheel 발견과 첫 준비 복구 명령 — 2026-09-08
+
+- 등록된 실행 환경의 uv 캐시 중 `sdists-*`에서 파일·ZIP 여부를 확인하는 조회를 안내했고 사용자는 `cached_wheel_count=1`을 보고함. 해당 패키지 파일 한 개의 발견까지 확인했으며 METADATA/RECORD·정확한 파일명/해시 원문 대조와 Prepare 성공은 아직 사내 미확인임. 실제 캐시·사용자 경로는 기록하지 않음.
+- [복구 명령](../scripts/ees_deploy_recover.py)은 antlr4-python3-runtime 4.9.3으로 중단된 첫 준비만 다룸. 기존 original·이전 배포 없음·전환 중 아님을 확인하고 wheel 검증·별도 복사·비활성 실패 후보 보존 이동·동일 커밋의 오프라인 Prepare를 같은 관리 잠금 안에서 처리함. 운영 서버·DB·캐시·배포 선택 기록을 전환하지 않음. 여러 패키지 자동 수리나 새 배포 파이프라인을 추가하지 않음.
+- 사내 실행은 Git 갱신 뒤 기존 `EES-demo-4a8779bbf3ee.zip` 선택과 복구 명령 한 번으로 안내함. 복사 블록은 2,500자 이내로 제공하고 공통 자산 API 동기화·기존 완료 시험은 반복하지 않음. 복구 후 `prepared=true`·Deploy·화면/데이터 연속성은 다음 사용자 보고 범위임.
+- 사외 신규 합성 검사 **13/13 PASS**. wheel 패키지/버전/태그·RECORD 변경·중복 캐시·복사 충돌/다른 파일 혼입, 기존/전환 중 상태·관리 잠금·링크·manifest/원본 버전 불일치, 실패 로그 보존·재시도 실패·이미 준비된 동일 파일의 무변경 반환을 확인함. 원본 Python·DB·config·배포 기록은 fixture 바이트로 비교했고 실제 앱 import·서버 기동·다운로드는 수행하지 않음. 코드는 이 복구 파일과 신규 시험만 추가하고 기존 배포 core·프로그램 wheel은 변경하지 않음. 문서 검사 `files=25 links=505 errors=0 review_candidates=0`와 diff 검사 통과. 기존 완료 코드 시험을 로컬에서 반복하지 않고 기존 CI의 Windows/Linux 전달 검사로 게시본을 확인함.
+
 
 ## 결과 기록
 

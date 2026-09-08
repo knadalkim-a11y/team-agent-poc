@@ -565,6 +565,19 @@ $commit = 'Actions 원본 커밋 40자리'
 
 준비는 uv 0.12.7의 오프라인 캐시만 사용합니다. 정확한 기존 버전의 패키지가 부족하면 서버를 바꾸지 않고 실패하며 `releases/<commit>/prepare.log`에 내부 진단을 남깁니다. 필요한 Windows wheel을 승인된 방식으로 준비한 경우 `Prepare`에 `-Wheelhouse '절대 경로'`를 추가할 수 있습니다. 실패한 후보 폴더는 자동 삭제하지 않습니다. 현재/직전 실행 대상이 아닌 실패 후보임을 확인한 뒤 그 폴더를 내부 격리 위치로 옮기고 같은 커밋으로 다시 준비합니다. 운영 환경에 새 의존성을 설치하거나 버전 고정을 풀지 않습니다.
 
+<a id="ees-offline-recovery"></a>
+
+**첫 준비의 antlr4 캐시 복구:** `antlr4-python3-runtime==4.9.3 has no usable wheels`로 첫 Prepare가 실패했고 기존 uv 빌드 캐시에 해당 wheel 한 개가 있을 때는 [복구 명령](../scripts/ees_deploy_recover.py)을 사용합니다. 기존 original 프로그램이 현재 대상이고 이전 배포·전환 중 상태가 없는 경우에만 지원합니다. 등록된 실행 환경의 캐시를 읽어 패키지 이름·버전·wheel 무결성을 검사하고 별도 wheelhouse에 복사합니다. 실패 후보는 고유 이름으로 보존 이동하고 같은 잠금 안에서 원래 버전 고정·오프라인 Prepare를 다시 수행합니다. 서버 종료·배포·DB 변경·캐시 정리는 하지 않습니다.
+
+Git을 갱신한 뒤 위에서 선택한 `$bundle`과 `$commit`을 그대로 사용합니다. 성공 출력은 `prepared=true`이며 이후 Deploy는 별도입니다. 다른 패키지나 캐시 부재 오류는 해당 로그에 따라 필요한 파일을 준비하며, 이 명령을 범용 의존성 자동 수리로 사용하지 않습니다.
+
+```powershell
+$eesConfigPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+$eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
+& $eesConfig.source_python -I .\scripts\ees_deploy_recover.py `
+    --config $eesConfigPath --bundle $bundle --commit $commit
+```
+
 준비 성공 후 사용이 적은 시간에 적용합니다. 기존 수동 서버가 아직 실행 중이면 이를 자동 종료하지 않으며, 한 번 Ctrl+C로 종료한 뒤 `Deploy`를 실행합니다. 이후 스크립트가 시작한 서버는 PID·실행 파일·생성 시각을 대조하고 정상 종료합니다. 현재 방식은 Windows 서비스가 아니므로 서버를 시작한 콘솔은 유지합니다.
 
 ```powershell

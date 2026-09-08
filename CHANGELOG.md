@@ -4,6 +4,8 @@
 
 ## 2026-09-08
 
+- 첫 오프라인 Prepare에서 antlr4-python3-runtime 4.9.3 wheel을 선택하지 못한 사례를 위한 캐시 복구 명령 추가. 기존 빌드 wheel을 검증·복사하고 비활성 실패 후보와 로그를 보존한 뒤 같은 버전으로 다시 준비함. 원래 서버·데이터·배포 기록을 전환하지 않으며 기존 캐시와 오프라인 제한을 유지함. [사용법](docs/03-openwebui-native-agent.md#ees-offline-recovery), [근거](evals/scenarios.md#ees-first-registration).
+
 - 사내 초기 관리 기동에서 60초 health 시간 초과 후 정상 응답이 확인되어 대기 기본값을 300초로 늘리고 명령별 1~900초 선택 인자를 추가함. 배포/원복 및 실패 후 기존 프로그램 복구에도 같은 제한을 적용하며 재등록·DB/키 변경 없이 사용할 수 있음. 초기 실행 정책 차단·시간 초과·후속 health 성공을 함께 기록하고 PowerShell 현재 창 설정 안내를 보완함. [근거](evals/scenarios.md#ees-first-registration).
 
 - Git 갱신·초기 환경 등록·고정 커밋 계획/오프라인 준비·배포/원복·시작/종료를 하나의 PowerShell 진입점으로 구현. 기존 DB·키·파일·실행 설정을 유지하고, 종료 후 검증 백업과 실패 시 프로그램 복구를 제공함. 신원 미확인 프로세스는 자동 복구를 차단하며 정상 데이터가 쌓인 DB 전체를 되돌리지 않음. 사내 적용과 공통 자산 API 동기화는 별도. [명령](docs/03-openwebui-native-agent.md#기존-windows-서버에-적용), [검증](evals/scenarios.md#ees-program-deployment).
