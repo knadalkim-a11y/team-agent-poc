@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **저장 환경의 GitHub 요청에서 CERTIFICATE_VERIFY_FAILED를 보고받아 인증서 검증 실패를 확인함.** proxy_scheme=http, ca_source=default, status=failed, error_type=SSLError임. 앞선 GitHub/Hugging Face SSL 실패와 후보 599.5초·기동 완료/수신 표시 없음·기존 복구 111초·NumPy 양쪽 정상 기록은 유지함. 특정 CA 부재 및 600초 기동 지연과의 인과는 미확정. [이번 실패·진단 보고](../evals/scenarios.md#ees-retransition-health-failure). EES 전환 미완료·기존 프로그램 자동 복구 성공 상태이며 사내 운영 코드의 마지막 보고는 `head=c5f1690...`임.
-- 다음 작업 하나: **같은 후보 Requests/저장 환경에서 Windows 저장소를 포함한 Python 기본 CA를 임시 지정해 두 URL을 비교한다.** [CA 비교 진단](03-openwebui-native-agent.md#ees-windows-ca-check)은 인증서 검증을 유지하며 임시 PEM을 종료 뒤 정리함. 결과에 따라 영구 CA 설정 방법을 정하고, Git 영구 프록시와 앱의 등록 환경은 별개로 다룸. 서버·DB·저장 설정·패키지 변경과 재배포는 없음.
+- 이번 작업: **Windows 포함 CA 비교에서 ca_count=35, GitHub/Hugging Face 모두 response/200을 보고받음.** 같은 후보 Requests·저장 환경에서 CA를 지정하자 앞선 인증서 오류가 해소된 범위를 확인함. 후보 599.5초 기동 지연의 인과는 미확정. 재시작에도 선택을 유지하는 후보 전용 `Deploy -UseWindowsCA`를 구현·검사함. [진단 보고](../evals/scenarios.md#ees-retransition-health-failure), [CA 보완 검증](../evals/scenarios.md#ees-windows-ca-support). EES 전환 미완료·기존 프로그램 자동 복구 성공 상태이며 사내 운영 코드의 마지막 보고는 `head=c5f1690...`임.
+- 다음 작업 하나: **CA 옵션 운영 코드의 Windows/Linux CI·main 반영을 확인한 뒤 기존 준비본을 해당 옵션으로 배포한다.** [적용 명령](03-openwebui-native-agent.md#ees-windows-ca-deploy)을 사용하며 프로그램 원본은 `4a8779b...`를 유지함. 이번 옵션은 EES 자식 환경에만 CA를 지정하고 Start/Rollback에 같은 스냅샷을 사용함. 사내 영구 적용·재배포는 아직 미실행임.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -90,7 +90,7 @@
 
 ## 최근 점검
 
-최신 main `ca09ade`·열린 PR 없음·로컬 baseline tree 일치에서 다섯 결과를 TLS 진단 출력 순서와 대조함. 인증서 검증 실패를 기록하고 Python/Requests 공식 설명과 독립 검토로 같은 클라이언트의 CA 비교를 준비함. [결과·범위](../evals/scenarios.md#ees-retransition-health-failure). 문서 점검·diff 검사와 비교 진단의 Python 문법 검사를 통과함. 사내 CA 비교·기동 지연 원인 확정은 대기이며 실행 코드/서버/저장 설정 변경은 없음.
+최신 main `427608b`·작업 시작 시 열린 PR 없음·로컬 baseline tree 일치를 확인함. CA 비교 성공을 반영하고 배포 명령/선택 기록/재시작·자동 복구/파일 경계를 검토함. 로컬 대상 시험 45개 중 44개 PASS·기존 real-uv 선택 시험 1개 skip, 합성 TLS의 신뢰 성공·호스트 불일치/미신뢰 거부를 확인함. [결과·실행 범위](../evals/scenarios.md#ees-windows-ca-support). Windows CI·사내 옵션 적용은 별도이며 실제 서버/저장 설정/패키지 변경은 없음.
 
 ## 갱신 규칙
 

@@ -519,10 +519,10 @@ API 동기화는 관리 목록에 지정한 EES 자산·필드만 대상으로 �
 |---|---|
 | `Init` | 기존 Python·작업 폴더·DATA_DIR·IP/포트·uv를 한 번 등록. 기존 서버/데이터를 수정하거나 시작하지 않음 |
 | `Update` | 현재 main의 추적 파일이 깨끗할 때만 `fetch`와 `merge --ff-only`. 저장된 Git 프록시 설정을 사용하거나 해당 명령에만 `-GitProxy`로 전달 |
-| `Status` | 현재 프로그램·관리 프로세스·원복 가능 여부와 마지막 전환 실패 요약 표시. 키/환경 값 출력 없음 |
+| `Status` | 현재 프로그램·관리 프로세스·원복 가능 여부·CA 모드와 마지막 전환 실패 요약 표시. 키/환경 값 출력 없음 |
 | `Plan` | 지정 커밋의 프로그램 포함 ZIP·모든 파일 해시/크기·wheel RECORD 확인 |
 | `Prepare` | 기존 서버를 둔 채 별도 venv에 정확한 기존 의존성을 오프라인 설치·검사. 운영 환경은 수정하지 않음 |
-| `Deploy` | 등록된 서버 정상 종료 → 전체 기존 data/키/설정 백업·검사 → 준비된 프로그램 시작 → health 확인·기록 |
+| `Deploy` | 등록된 서버 정상 종료 → 전체 기존 data/키/설정 백업·검사 → 준비된 프로그램 시작 → health 확인·기록. 선택적 `-UseWindowsCA`는 종료 전에 CA를 준비하고 해당 릴리스의 기동에 적용 |
 | `Rollback` | 직전 프로그램으로 전환. 최신 대화/메모리가 있는 현재 DATA_DIR 사용, DB 전체 복구 안 함 |
 | `Start` / `Stop` | 현재 등록된 프로그램의 시작 / 기록된 프로세스의 정상 종료 |
 
@@ -841,7 +841,33 @@ except Exception as e:
 }
 ```
 
-임시 PEM은 부모 프로세스의 TemporaryDirectory 아래에 만들어 자식 종료/timeout 뒤 정리합니다. 인증서 내용·개인키·실제 경로는 출력하지 않으며 `.netrc`/앱 인증 토큰·redirect는 쓰지 않습니다. SSLKEYLOGFILE은 진단 자식 환경에서만 제외해 키 로그를 남기지 않습니다. HTTP 응답 성공은 해당 두 URL에서 CA 입력을 바꾼 결과로 인정하며 기동 지연의 인과나 앱 전체 복구로 확대하지 않습니다. 영구 적용은 CA 출처와 실제 확인 결과에 맞춰 별도로 정하며, 현재 창의 REQUESTS_CA_BUNDLE만 설정해 등록 스냅샷이 바뀌었다고 보지 않습니다.
+임시 PEM은 부모 프로세스의 TemporaryDirectory 아래에 만들어 자식 종료/timeout 뒤 정리합니다. 인증서 내용·개인키·실제 경로는 출력하지 않으며 `.netrc`/앱 인증 토큰·redirect는 쓰지 않습니다. SSLKEYLOGFILE은 진단 자식 환경에서만 제외해 키 로그를 남기지 않습니다. HTTP 응답 성공은 해당 두 URL에서 CA 입력을 바꾼 결과로 인정하며 기동 지연의 인과나 앱 전체 복구로 확대하지 않습니다. 비교 성공 뒤에는 아래 릴리스별 옵션으로 적용하며, 현재 창의 REQUESTS_CA_BUNDLE만 설정해 등록 스냅샷이 바뀌었다고 보지 않습니다.
+
+<a id="ees-windows-ca-deploy"></a>
+
+**CA 비교 성공 후 배포:** `Deploy -UseWindowsCA`는 후보 Python의 표준 SSL 모듈로 Windows ROOT/CA와 기본 인증서 경로에서 CA를 읽습니다. 등록 환경과 작업 폴더를 사용하고 Open WebUI는 import하지 않습니다. 기존 서버를 멈추기 전에 비어 있지 않은 PEM과 해시를 검증하고, 해당 릴리스의 `trusted-ca/<sha256>.pem`에 저장합니다. 기존 파일을 덮어쓰지 않으며 경로 재지정·내용 변경은 거부합니다. CA 준비 실패는 기존 서버를 둔 채 종료됩니다.
+
+EES 자식 프로세스에만 이 파일의 REQUESTS_CA_BUNDLE·SSL_CERT_FILE을 지정합니다. 이 변수를 사용하는 사내·사외 HTTPS 모두에 적용되며, 명시적으로 별도 SSL 설정을 쓰는 클라이언트까지 강제로 바꾸지는 않습니다([Requests CA 설정](https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification)). 인증서·호스트 이름 검증은 유지합니다. 기존 프로그램의 자동 복구는 처음 등록한 환경을 사용합니다. config/DPAPI·원본 패키지·certifi·DB·키·시스템 인증서 저장소는 편집하지 않습니다.
+
+선택한 CA 해시는 프로그램 선택 기록에 남으므로 이후 `Start` 및 해당 릴리스로의 `Rollback`에도 같은 파일을 사용합니다. `Status.ca_mode`는 `windows_snapshot` 또는 `registered`입니다. 이 파일은 프로그램에 딸린 신뢰 자료이며 DATA_DIR 백업에 포함되지 않으므로 릴리스와 함께 보존합니다. Windows 인증서가 바뀌어도 기존 스냅샷을 자동 교체하지 않습니다. 새로운 CA를 반영하거나 다른 프로그램을 배포할 때는 다시 `Deploy -UseWindowsCA`를 명시합니다. 옵션 없이 Deploy하면 등록 환경을 선택합니다.
+
+아래는 **CA 옵션을 포함한 운영 코드가 main에 반영되고 해당 CI가 성공한 뒤** 실행합니다. 프로그램 후보는 기존 준비본을 사용합니다. Update 실패 시 Deploy를 진행하지 않으며 별도 Stop/Init/Prepare는 필요하지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesManager = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1'
+    & $eesManager -Action Update
+    if (-not $?) { throw 'Git 갱신이 완료되지 않았습니다.' }
+    & $eesManager -Action Deploy `
+        -Commit '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50' `
+        -UseWindowsCA -HealthTimeout 600
+    if (-not $?) { throw '전환 결과의 Diagnostics를 확인합니다.' }
+    & $eesManager -Action Status
+}
+```
+
+성공 시 active=true·해당 current_commit·ca_mode=windows_snapshot과 기존 주소 접속을 확인합니다. 내부 모델 응답도 한 번 확인해 새 CA가 적용된 HTTPS 사용 범위를 구분합니다. 실패하면 마지막 Diagnostics로 이어가며 같은 전환을 반복하지 않습니다. 과거 CA 비교의 200 응답만으로 기동 지연 해결이나 다른 연동 성공을 미리 판정하지 않습니다.
 
 <a id="ees-numpy-import-check"></a>
 

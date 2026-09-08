@@ -19,10 +19,14 @@ param(
     [string]$Wheelhouse,
     [ValidateRange(1, 900)]
     [int]$HealthTimeout,
+    [switch]$UseWindowsCA,
     [string]$GitProxy
 )
 
 $ErrorActionPreference = 'Stop'
+if ($UseWindowsCA -and $Action -ne 'Deploy') {
+    throw 'UseWindowsCA is supported only with Deploy.'
+}
 $repoPath = Split-Path $PSScriptRoot -Parent
 
 if ($Action -eq 'Update') {
@@ -65,5 +69,6 @@ if ($Wheelhouse) { $operationArgs += @('--wheelhouse', $Wheelhouse) }
 if ($PSBoundParameters.ContainsKey('HealthTimeout')) {
     $operationArgs += @('--health-timeout', "$HealthTimeout")
 }
+if ($UseWindowsCA) { $operationArgs += '--use-windows-ca' }
 & $operatorPython @operationArgs
 if ($LASTEXITCODE -ne 0) { throw "EES operation stopped (exit $LASTEXITCODE)." }

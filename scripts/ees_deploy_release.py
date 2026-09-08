@@ -15,6 +15,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import re
+import ssl
 import stat
 import subprocess
 import sys
@@ -46,6 +47,17 @@ for d in m.distributions():
 print(json.dumps({'python_version': sys.version, 'python_minor': list(sys.version_info[:2]),
                   'platform': sys.platform, 'packages': items}))
 """
+WINDOWS_CA_EXPORT = """import ssl, sys
+if sys.platform != 'win32':
+    raise RuntimeError('Windows certificate stores are required')
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+certificates = context.get_ca_certs(binary_form=True)
+if not certificates:
+    raise RuntimeError('No trusted CA certificates were loaded')
+sys.stdout.buffer.write(''.join(ssl.DER_cert_to_PEM_cert(c) for c in certificates).encode('ascii'))
+"""
+MAX_CA_BYTES = 4 * 1024 * 1024
 
 
 class ReleaseError(ValueError):
@@ -197,6 +209,81 @@ def _open_bundle(bundle):
 
 def _linked(path):
     return path.is_symlink() or (path.exists() and bool(getattr(path.lstat(), "st_file_attributes", 0) & 0x400))
+
+
+def _ca_directory(target_dir):
+    target = Path(target_dir).absolute()
+    directory = target / "trusted-ca"
+    if (not target.is_dir() or any(_linked(path) for path in (directory, target, *target.parents))
+            or (directory.exists() and not directory.is_dir())):
+        raise ReleaseError("Trusted CA paths must be ordinary directories inside the prepared release.")
+    return directory
+
+
+def _validate_ca_payload(payload):
+    try:
+        if (not isinstance(payload, bytes) or not 0 < len(payload) <= MAX_CA_BYTES
+                or not re.fullmatch(rb"(?:-----BEGIN CERTIFICATE-----\r?\n[A-Za-z0-9+/=\r\n]+-----END CERTIFICATE-----\s*)+", payload)):
+            raise ValueError()
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        context.load_verify_locations(cadata=payload.decode("ascii"))
+        if not context.get_ca_certs():
+            raise ValueError()
+    except (ValueError, UnicodeError, ssl.SSLError):
+        raise ReleaseError("Trusted CA export must contain a nonempty, valid public CA bundle.") from None
+
+
+def _collect_windows_ca(executable, env, *, cwd=None):
+    try:
+        child_env = {key: value for key, value in env.items() if key.upper() != "SSLKEYLOGFILE"}
+        result = subprocess.run([str(executable), "-I", "-S", "-B", "-c", WINDOWS_CA_EXPORT],
+                                env=child_env, stdin=subprocess.DEVNULL, capture_output=True,
+                                check=True, timeout=30, cwd=cwd)
+        return result.stdout
+    except (OSError, subprocess.SubprocessError):
+        raise ReleaseError("Windows CA export failed; the existing server was not stopped.") from None
+
+
+@_guarded
+def windows_ca_path(target_dir, digest):
+    """Resolve only an intact public CA snapshot belonging to this release."""
+    if not isinstance(digest, str) or not HEX64.fullmatch(digest):
+        raise ReleaseError("The selected trusted CA fingerprint is invalid.")
+    path = _ca_directory(target_dir) / (digest + ".pem")
+    if (_linked(path) or not path.is_file() or path.stat().st_nlink != 1
+            or not 0 < path.stat().st_size <= MAX_CA_BYTES):
+        raise ReleaseError("The selected trusted CA snapshot is missing or is not a regular file.")
+    payload = path.read_bytes()
+    if hashlib.sha256(payload).hexdigest() != digest:
+        raise ReleaseError("The selected trusted CA snapshot changed; preserve and inspect the release.")
+    _validate_ca_payload(payload)
+    return path
+
+
+@_guarded
+def prepare_windows_ca(target_dir, executable, env, *, cwd=None):
+    """Freeze candidate Windows/default trust without touching its packages or registration."""
+    directory = _ca_directory(target_dir)
+    payload = _collect_windows_ca(executable, env, cwd=cwd)
+    _validate_ca_payload(payload)
+    digest = hashlib.sha256(payload).hexdigest()
+    path = directory / (digest + ".pem")
+    directory.mkdir(exist_ok=True)
+    # Content-addressed files are never replaced, including during a later Deploy.
+    if not path.exists() and not _linked(path):
+        created = False
+        try:
+            with path.open("xb") as handle:
+                created = True
+                handle.write(payload)
+                handle.flush()
+                os.fsync(handle.fileno())
+        except OSError:
+            if created:
+                path.unlink(missing_ok=True)
+            raise
+    windows_ca_path(target_dir, digest)
+    return digest
 
 
 @_guarded

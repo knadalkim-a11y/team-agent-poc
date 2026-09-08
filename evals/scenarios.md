@@ -780,6 +780,18 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 후속 [CA 비교 진단](../docs/03-openwebui-native-agent.md#ees-windows-ca-check)은 같은 후보 Requests·프록시·저장 환경에서 CA 입력만 바꿈. Python SSLContext(PROTOCOL_TLS_CLIENT)의 load_default_certs가 Windows ROOT/CA와 OpenSSL 기본 경로에서 읽은 CA를 임시 PEM으로 지정해 두 공개 URL의 HEAD 결과를 받음. Windows 고유 검증 엔진 전체와 동일한 시험이 아니며 성공 시에도 해당 URL의 비교 범위로 한정함. TLS/호스트 검증을 유지하고 인증서·경로·예외 원문은 출력하지 않음. SSLKEYLOGFILE은 진단 자식 환경에서 제외하며 부모 TemporaryDirectory가 자식 종료/timeout 뒤 PEM을 정리함. 서버/DB/등록 스냅샷과 시스템 CA는 변경하지 않음.
 - 최신 main ca09ade·열린 PR 없음·로컬 baseline tree 일치를 확인하고 공식 Python/Requests 설명 및 독립 검토를 반영함. 안내 블록은 2500자 이내이며 부모/자식 Python 본문 문법·문서 링크·diff 검사를 통과함. Windows 저장소 로딩·사내 CA 비교는 아직 미실행이고, 영구 CA 적용·캐시 준비·재배포·전체 CI 반복은 없음.
 
+- CA 비교 후 사용자 보고: `35, github,huggingface 둘다 response, 200`을 ca_count=35, 각 status=response/http_status=200으로 대응함. 같은 후보 Requests/저장 환경에서 Windows 포함 CA를 명시하자 두 공개 URL의 HEAD 요청이 성공한 범위로 인정함. 특정 인증서 식별·실제 CA 원문은 수집하지 않았고, 사내 모델/API·전체 기동이나 이전 600초 지연의 인과는 아직 미확인임. 기존 프로그램은 자동 복구 상태를 유지하며 이 임시 비교가 영구 설정을 변경한 것은 아님.
+
+<a id="ees-windows-ca-support"></a>
+
+### 2026-09-08 — 후보 릴리스의 Windows CA 선택 유지
+
+- 위 비교 성공에 따라 `Deploy -UseWindowsCA`를 기존 운영 진입점에 추가함. 범용 환경 편집기·DPAPI 재등록·패키지 재설치 없이 후보별 CA 선택만 지원함. [사용법](../docs/03-openwebui-native-agent.md#ees-windows-ca-deploy). [Python 기본 CA 로딩](https://docs.python.org/3.11/library/ssl.html#ssl.SSLContext.load_default_certs), [Requests CA 지정](https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification)과 대조함.
+- 후보 Python `-I -S -B`의 표준 SSL 모듈이 등록 환경/cwd에서 CA를 내보냄. 30초 제한과 원문 비출력·SSLKEYLOGFILE 제외를 적용하며 앱 import/외부 요청은 하지 않음. 기존 서버 종료 전에 비어 있지 않은 PEM을 검증해 릴리스의 trusted-ca 아래 해시별 파일로 저장함. 기존 파일 덮어쓰기·경로 재지정/링크·변조를 거부하며 원본 venv·release.json·config/DPAPI·DB·키는 수정하지 않음.
+- 선택 기록에 ca_bundle_sha256만 추가하고 해당 EES 자식의 REQUESTS_CA_BUNDLE/SSL_CERT_FILE을 지정함. 성공 후 Start·릴리스 간 Rollback은 같은 파일을 재검증하며 자동 복구의 original은 등록 CA/환경을 그대로 사용함. 옵션 없는 기존 기록은 호환되고 Status에는 값/경로 대신 ca_mode만 추가함. CA 파일은 DATA_DIR 백업 외부의 재생성 가능한 프로그램 자료로 릴리스와 함께 보존하며 시스템 저장소 변경 시 자동 갱신하지 않음.
+- 로컬 Linux/Python 3.12.13·cryptography 46.0.0에서 `test_ees_deploy_release.py` 21개 중 20개 PASS·기존 opt-in real-uv 1개 skip, `test_manage_ees.py` 24개 PASS. 비밀값 없는 합성 시험으로 신뢰 CA의 TLS handshake 성공·호스트 이름 불일치/미신뢰 거부, 잘못된/빈 export·timeout·변조/링크 거부, 기존 서버 종료 전 실패, Start/Rollback 유지, 후보 실패 후 등록 CA로 original 복구, CLI 범위를 확인함. Windows CI에는 같은 합성 시험을 위한 기존 문서상 독립 환경 버전 cryptography 46.0.0을 설치하며 운영 의존성을 변경하지 않음.
+- 작업 시작 main은 `427608b`, 열린 PR 없음·로컬 baseline tree 일치를 확인함. 운영 코드·관련 시험·가이드·CI 의존성을 독립 검토해 추가 조치가 필요한 결함은 발견하지 못함. 문서 점검은 25개/내부 링크 540개·오류 0·검토 후보 0이며 diff 검사를 통과함. Windows 실제 CA 내보내기·PowerShell 파싱은 CI 확인 대상으로 두며 사내 옵션 적용·재배포·모델 응답은 미실행임. 기존 prepared 후보 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`를 그대로 사용하고 새 프로그램 ZIP/Prepare를 요구하지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

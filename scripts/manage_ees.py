@@ -175,6 +175,8 @@ def initialize(args):
 
 def selected_environment(config, selected, env):
     if selected["kind"] == "original":
+        if "ca_bundle_sha256" in selected:
+            raise DeploymentError("Windows CA selection is supported only for an EES release.")
         if selected["python"] != config["source_python"]:
             raise DeploymentError("Original interpreter does not match the registered environment.")
         return selected["python"], dict(env)
@@ -186,6 +188,10 @@ def selected_environment(config, selected, env):
         raise DeploymentError("Selected release interpreter does not match its prepared record.")
     child_env = dict(env)
     child_env["WEBUI_NAME"] = "EES Assistant"
+    if "ca_bundle_sha256" in selected:
+        ca_path = releases.windows_ca_path(target_for(config, commit), selected["ca_bundle_sha256"])
+        child_env["REQUESTS_CA_BUNDLE"] = str(ca_path)
+        child_env["SSL_CERT_FILE"] = str(ca_path)
     return metadata["target_python"], child_env
 
 
@@ -275,7 +281,7 @@ def prepare(config, args):
             "webui_version": metadata["webui_version"]}
 
 
-def switch(config, selected, event, health_timeout=DEFAULT_HEALTH_TIMEOUT):
+def switch(config, selected, event, health_timeout=DEFAULT_HEALTH_TIMEOUT, *, use_windows_ca=False):
     env = states.runtime_environment(config)
     with locked(config):
         registry = read_registry(config)
@@ -288,6 +294,13 @@ def switch(config, selected, event, health_timeout=DEFAULT_HEALTH_TIMEOUT):
         progress = {"stage": "select_program"}
         try:
             selected_environment(config, old, env)
+            if use_windows_ca:
+                if selected["kind"] != "release":
+                    raise DeploymentError("Windows CA selection is supported only for an EES release.")
+                executable, _ = selected_environment(config, selected, env)
+                digest = releases.prepare_windows_ca(target_for(config, selected["source_commit"]), executable, env,
+                                                     cwd=config["cwd"])
+                selected = dict(selected, ca_bundle_sha256=digest)
             selected_environment(config, selected, env)
             if selected == old and registry.get("process") and processes.verify_identity(registry["process"]):
                 progress["stage"] = "health_check"
@@ -362,7 +375,8 @@ def operate(args):
         env = states.runtime_environment(config)
         metadata = releases.validate_prepared(target_for(config, commit), commit, config["source_python"], env=env)
         return switch(config, {"kind": "release", "source_commit": commit, "python": metadata["target_python"]},
-                      "deployed", health_timeout=args.health_timeout)
+                      "deployed", health_timeout=args.health_timeout,
+                      use_windows_ca=getattr(args, "use_windows_ca", False))
     if args.action == "rollback":
         return switch(config, None, "rolled_back_program", health_timeout=args.health_timeout)
     if args.action == "status":
@@ -371,6 +385,7 @@ def operate(args):
                 "original_program": registry["current"]["kind"] == "original",
                 "managed_process_running": bool(registry.get("process") and processes.verify_identity(registry["process"])),
                 "rollback_available": registry.get("previous") is not None,
+                "ca_mode": "windows_snapshot" if "ca_bundle_sha256" in registry["current"] else "registered",
                 "last_failure": safe_last_failure(registry.get("last_failure"))}
     with locked(config):
         env = states.runtime_environment(config)
@@ -405,7 +420,11 @@ def main(argv=None):
     parser.add_argument("--wheelhouse", type=Path)
     parser.add_argument("--health-timeout", type=health_timeout_arg, default=DEFAULT_HEALTH_TIMEOUT,
                         help="Seconds to wait for each server's health (default: 300; range: 1-900).")
+    parser.add_argument("--use-windows-ca", action="store_true",
+                        help="Deploy with a Windows CA snapshot retained for this release's Start/Rollback.")
     args = parser.parse_args(argv)
+    if args.use_windows_ca and args.action != "deploy":
+        parser.error("--use-windows-ca is supported only with deploy.")
     needed = {"init": ["source_python", "cwd", "data_dir", "listen_host", "port", "uv"],
               "plan": ["bundle", "commit"], "prepare": ["bundle", "commit"], "deploy": ["commit"]}
     if any(getattr(args, name) is None for name in needed.get(args.action, [])):
