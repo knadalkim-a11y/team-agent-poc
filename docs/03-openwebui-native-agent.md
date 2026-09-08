@@ -520,6 +520,7 @@ API 동기화는 관리 목록에 지정한 EES 자산·필드만 대상으로 �
 | `Init` | 기존 Python·작업 폴더·DATA_DIR·IP/포트·uv를 한 번 등록. 기존 서버/데이터를 수정하거나 시작하지 않음 |
 | `Update` | 현재 main의 추적 파일이 깨끗할 때만 `fetch`와 `merge --ff-only`. 저장된 Git 프록시 설정을 사용하거나 해당 명령에만 `-GitProxy`로 전달 |
 | `Status` | 현재 프로그램·관리 프로세스·원복 가능 여부·CA 모드와 마지막 전환 실패 요약 표시. 키/환경 값 출력 없음 |
+| `Diagnose` | 자동 복구 뒤 실패 후보 로그·근사 시간·기동/네트워크 마커·공개 traceback 위치를 한 번에 요약. 재기동·앱 import·통신 없음 |
 | `Plan` | 지정 커밋의 프로그램 포함 ZIP·모든 파일 해시/크기·wheel RECORD 확인 |
 | `Prepare` | 기존 서버를 둔 채 별도 venv에 정확한 기존 의존성을 오프라인 설치·검사. 운영 환경은 수정하지 않음 |
 | `Deploy` | 등록된 서버 정상 종료 → 전체 기존 data/키/설정 백업·검사 → 준비된 프로그램 시작 → health 확인·기록. 선택적 `-UseWindowsCA`는 종료 전에 CA를 준비하고 해당 릴리스의 기동에 적용 |
@@ -607,6 +608,27 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 첫 사내 등록에서는 종전 60초 대기가 만료됐지만 관리 프로세스가 살아 있었고, 이후 `/health`가 `status=true`/HTTP 200으로 응답했습니다. `Start` 시간 초과는 프로세스 종료를 뜻하지 않으므로 현재 `Status`와 `/health`를 보고 계속 진행합니다. 단순 `Status`의 `managed_process_running=true`는 프로세스 생존 확인이며 응답 준비까지 보증하지 않습니다. 정상 응답을 확인한 뒤 대기 시간 변경만을 이유로 다시 재기동하지 않습니다.
 
 새 프로그램의 health가 실패하면 새 프로세스의 정상 종료를 확인하고 기존 프로그램을 같은 현재 데이터로 다시 시작합니다. 프로세스 식별/종료를 확인하지 못하면 자동 복구를 멈춰 이중 서버를 방지합니다. `/health` 성공은 앱의 기동 확인이며 로그인·화면·스트리밍 전체 성공을 뜻하지 않습니다.
+
+<a id="ees-diagnose-once"></a>
+
+**실패 뒤 한 번에 진단하기:** 자동 복구가 성공했으면 추가 배포 전에 아래 명령으로 이번 실패를 확인합니다. 새 PowerShell 창에서도 기존 변수·클립보드 없이 실행할 수 있습니다. `Update`는 운영 코드만 갱신하며 준비한 프로그램 ZIP/후보는 그대로 사용합니다.
+
+```powershell
+& {
+  $ErrorActionPreference = 'Stop'
+  Set-Location (Join-Path $env:USERPROFILE 'team-agent-poc')
+  .\scripts\manage-ees.ps1 -Action Update
+  .\scripts\manage-ees.ps1 -Action Diagnose
+}
+```
+
+결과를 한 번에 복사하거나 출력 화면 사진으로 전달하면 됩니다. 원문 로그를 옮기거나 필드별로 다시 입력하지 않습니다. 이 명령에는 600초 기동 대기가 없습니다. 등록 상태·현재 프로세스 식별 정보와 기존 로그만 읽으며 앱 import·외부 요청·캐시 쓰기·배포/복구를 실행하지 않습니다. Python은 이 action에서만 `-I -S -B`로 실행됩니다.
+
+`candidate_seconds`는 로그 생성부터 실패 기록까지의 **근사 시간**입니다. 600초는 Deploy의 최대 대기 한도이며 정상 기동 또는 프로세스 종료가 확인되면 일찍 끝납니다. 실패 후 기존 프로그램 복구에는 별도 대기가 붙습니다. `health_check/process`만으로 600초 만료라고 판단하지 않으며 같은 대기를 원인 확인 없이 반복하지 않습니다.
+
+현재 복구 로그를 후보로 오인하지 않도록 마지막 실패·복구 상태와 Windows 생성 시각을 대조합니다. 선택은 `inferred_from_creation_time`으로 표시하며, 후속 Start/Stop·경합·로그 부재·이상한 시각에는 unavailable/ambiguous/busy를 출력합니다. 로그를 옮기거나 삭제했다면 시각 추정의 근거가 사라질 수 있습니다. `scan_scope=tail`이면 끝 4 MiB만 읽은 부분 결과입니다. 마커의 false는 읽은 범위에서 해당 문자열을 찾지 못했다는 뜻이며 프록시/화이트리스트 문제가 없다는 보장이 아닙니다.
+
+마지막 traceback의 공개 패키지 하위 경로·표준 라이브러리·frozen 위치를 최대 20개 보존하고 미분류 위치와 생략 수를 표시합니다. 예외 메시지·코드 행·사용자 절대경로·주소·환경 값은 출력하지 않습니다. KeyboardInterrupt는 종료 신호에 따른 정리 시점일 수 있어 그 위치 하나로 전체 지연 원인을 확정하지 않습니다. 이 보고를 먼저 검토하고, 필요한 후속 조치만 한 묶음으로 정합니다. 아래 날짜/실패 시각에 맞춘 수동 진단·캐시 절차는 과거 경위와 개별 확인용이며 처음부터 반복하지 않습니다.
 
 <a id="ees-deployment-diagnostics"></a>
 
@@ -1034,7 +1056,9 @@ r['stage']='verify_cache'
 
 <a id="ees-candidate-cache-finish"></a>
 
-**긴 경로 한 파일 성공 뒤 나머지 캐시와 재배포:** 동일 파일의 written/verify_cache/source_units=231/cache_units=256/cache_readable=true 보고 후 사용하는 절차입니다. 한 파일의 일반 표기 실패→확장 cfile 성공과 일반 경로 읽기를 확인한 범위이며 600초 기동 원인은 아직 확정하지 않습니다.
+**완료된 캐시 배치 기록:** 2026-09-08 사용자 보고로 예상 집계와 뒤이은 전환 실패/복구 성공을 확인했습니다. 아래 절차를 반복하지 않고 [한 번에 진단](#ees-diagnose-once)으로 이어갑니다.
+
+**당시 긴 경로 한 파일 성공 뒤 나머지 캐시와 재배포:** 동일 파일의 written/verify_cache/source_units=231/cache_units=256/cache_readable=true 보고 후 사용하는 절차입니다. 한 파일의 일반 표기 실패→확장 cfile 성공과 일반 경로 읽기를 확인한 범위이며 600초 기동 원인은 아직 확정하지 않습니다.
 
 기존 JSON은 other 파일의 경로를 숨겼으므로 나머지 전체를 처리하려면 후보를 한 번 순회해야 합니다. 아래 첫 블록은 코드를 준비하고 두 번째 블록이 작업을 실행합니다. 기존 서버를 유지한 채 모든 하위 경로의 링크/reparse를 먼저 검사한 뒤, 기존 캐시는 일반 경로의 16바이트 timestamp 헤더만 확인해 유지하고 없는 캐시만 같은 확장 cfile 방식으로 저장합니다. 앱 import·소스 수정·외부 요청·PC 정책/등록 경로 변경은 하지 않습니다. 기존 부모의 후보/복구 상태·준비 메타데이터/경로 검사·잠금과 900초 자식 제한을 유지합니다.
 

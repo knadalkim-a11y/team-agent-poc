@@ -832,6 +832,17 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 사용자에게 예상 집계 이후 자동으로 기존 후보의 Deploy를 한 번 실행함을 사전 안내함. checked_files=26713, existing_valid=26700, written=11, syntax_errors=2, other_errors=0, long_final=0을 모두 만족할 때만 부모 작업/잠금 종료 후 Deploy -Commit 4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50 -UseWindowsCA -HealthTimeout 600을 실행함. 수치 차이·부모 중단/timeout·출력 해석 실패는 배포하지 않으며 eesCacheBatch에 요약을 보존함. 준비 완료 뒤 재실행하면 written이 0이 되어 배포 조건을 통과하지 않음. 두 SyntaxError는 삭제/수정하거나 무해하다고 판정하지 않고 기존 복구 관리가 있는 실제 기동으로 영향을 확인함. 새로운 후보/Prepare/Init·무조건 반복 재시작은 요구하지 않음.
 - main 6a62bee·AGENTS 동일·열린 PR 없음·로컬 baseline tree 일치를 확인함. 독립 검토에서 실제 두 블록의 집계·기존 캐시 유지·경로 조건·부모 종료 후 Deploy/6개 수치 조건과 반복 배포 방지를 대조해 차단할 문제를 찾지 못함. Linux/Python 3.12.13에서 부모 AST가 생성하는 실제 자식 문자열 일치/구문과 PureWindowsPath의 원래 드라이브/UNC/상대/끝 점·공백 조건을 확인함. 파일 처리 시험은 Windows 전용 조건 세 개와 cfile 접두어만 명시적으로 어댑트해 Linux에서 수행했으며 소스/기존 캐시 bytes·mtime 유지, 새 캐시/헤더, 두 SyntaxError 집계/앱 미실행, 두 번째 실행 추가 저장 0, stale 헤더/긴 최종 경로 오류 집계, 쓰기 전 링크 거부를 확인함. 6개 배포 수치 중 어느 하나가 다르거나 누락되면 통과하지 않는 비교 기준도 대조함. 최종 두 블록은 1981자/1405자로 각각 2500자 이내임. 문서 점검 25개/내부 링크 546개·오류 0·검토 후보 0과 diff 검사를 통과함. 이 확인은 실제 Windows 배치 I/O/PowerShell 파싱/사내 Deploy 실행이 아니며 해당 결과는 대기임. 프로그램 코드/시험 파일은 변경하지 않고 기존 문서만 갱신함.
 
+
+<a id="ees-diagnose-once"></a>
+
+### 캐시 배치 후 실패와 진단 왕복 축소 — 2026-09-08
+
+- 사내 Windows 사용자 보고: checked_files=26713, existing_valid=26700, written=11, syntax_errors=2, other_errors=0, long_final=0. 직전 안내한 조건과 일치하며 기존 캐시와 추가 11개를 합쳐 26711개 헤더 확인/저장, 두 문법 오류는 미해결임. 이어 Deploy가 failed_at=2026-09-08T07:35:31Z, switch.stage=health_check, error_type=process, operation/errno/winerror=null, recovery=null, recovery_status=succeeded로 실패함. 기존 프로그램 재기동과 데이터 미복원/미교체 메시지를 보고받았으며 GPT의 사내 직접 확인은 아님.
+- 이번 후보의 실제 대기 시간·기동 로그는 아직 받지 않았음. 앞선 600초·KeyboardInterrupt 관찰을 이번 실패에 그대로 적용하지 않으며 캐시 쓰기 문제 해결을 앱 기동 성공으로 확대하지 않음. 두 SyntaxError나 프록시/화이트리스트를 원인으로 확정하지 않음.
+- 사용자가 중간 결과를 여러 번 옮기는 시간이 과도하다고 지적하고 매번 600초 대기가 필요한지 질문함. 600초는 각 프로그램 health의 최대 한도이며 기동/종료 확인 시 일찍 끝나고 자동 복구에는 별도 대기가 붙는 구조임. 작은 수동 진단→재배포 반복을 멈추고 저장소의 한 명령→한 결과/화면 사진→근거에 따른 후속 조치로 변경함. 준비 프로그램 원본 4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50과 기존 DB/키/설정은 유지함.
+- [Diagnose](../docs/03-openwebui-native-agent.md#ees-diagnose-once)는 기존 관리 명령에 추가한 읽기 전용 로그 요약임. 후보 로그 선택은 Windows 생성 시각에 근거한 추정이며 현재 복구 로그와 이후 재기동을 구분함. 기동/인증서/네트워크 고정 마커·오류 종류·공개 하위 경로/stdlib/frozen traceback과 생략·부분 읽기 여부를 한 번에 전달함. 원문 오류·URL·환경 값·사용자 경로는 출력하지 않고 앱 import/기동·추가 통신·캐시/상태 쓰기는 없음.
+- 검증: Linux/Python 3.12.13에서 로그 요약 시험 15개·운영 CLI/전환 회귀 시험 27개 PASS. 최신 실패와 복구 로그 구분·동일 초/동일 생성 시각·후속 기동/잠금/상태 경합·링크/하드링크·읽기 중 변경·4 MiB 부분 읽기·공개 하위 경로/stdlib/frozen/SyntaxError 위치·합성 비밀 원문 비출력을 확인함. `python -I -S -B scripts/manage_ees.py --help` 성공으로 site 초기화 없이 명령 import/파싱을 확인함. 독립 검토에서 in절 없는 SyntaxError 위치 누락을 발견·보완하고 관련 시험 통과 후 추가 차단 사항 없음. 문서 점검 25개/링크 550개·오류/검토 후보 0과 diff 검사 PASS. 생성 시각 시험은 합성 주입이며 Windows 실제 생성 시각·PowerShell 실행 및 사내 Diagnose·최신 후보 로그 해석·EES 전환 성공은 이 로컬 검증에서 미실행임.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

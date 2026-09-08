@@ -80,6 +80,47 @@ class DeploymentTransactionTests(unittest.TestCase):
     def read(self):
         return MANAGER.read_registry(self.config)
 
+    def test_diagnose_reads_report_without_server_or_state_operations(self):
+        before = MANAGER.registry_path(self.config).read_bytes()
+        args = argparse.Namespace(action="diagnose", config="unused.json")
+        with patch.object(MANAGER.states, "load_config", return_value=self.config), \
+                patch.object(MANAGER.reports, "collect", return_value={"status": "unavailable", "reason": "no_failure"}) as collect, \
+                patch.object(MANAGER, "locked", side_effect=AssertionError("must not lock")), \
+                patch.object(MANAGER.states, "runtime_environment", side_effect=AssertionError("must not probe environment again")), \
+                patch.object(MANAGER.releases, "validate_prepared", side_effect=AssertionError("must not probe packages")):
+            result = MANAGER.operate(args)
+        collect.assert_called_once_with(self.config, self.registry)
+        self.assertTrue(result["original_program"])
+        self.assertTrue(result["managed_process_running"])
+        self.assertEqual(self.events, [])
+        self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+        self.assertFalse((self.root / "deployment.lock").exists())
+
+    def test_diagnose_cli_does_not_echo_persisted_failure_values(self):
+        self.registry["last_failure"] = {
+            "action": "private-action", "failed_at": "private-date",
+            "switch": {"stage": "private-stage", "error_type": "private-error", "message": "private-token"},
+            "recovery_status": "private-recovery"}
+        MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
+        output = io.StringIO()
+        with patch.object(MANAGER.states, "load_config", return_value=self.config), \
+                patch.object(MANAGER.reports, "collect", return_value={"status": "unavailable", "reason": "no_failure"}), \
+                redirect_stdout(output):
+            self.assertEqual(MANAGER.main(["diagnose", "--config", "unused.json"]), 0)
+        self.assertIn("EES diagnosis v1", output.getvalue())
+        self.assertNotIn("private-", output.getvalue())
+
+    def test_diagnose_discards_log_report_if_registry_changes_during_read(self):
+        def changed(*_):
+            self.registry["last_event"] = "started_by_operator"
+            MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
+            return {"status": "ok"}
+        with patch.object(MANAGER.states, "load_config", return_value=self.config), \
+                patch.object(MANAGER.reports, "collect", side_effect=changed):
+            result = MANAGER.operate(argparse.Namespace(action="diagnose", config="unused.json"))
+        self.assertEqual(result["candidate"], {"status": "unavailable", "reason": "state_changed_or_busy"})
+        self.assertEqual(self.events, [])
+
     def test_switch_orders_shutdown_backup_start_then_commits_pointer(self):
         def health(_, *, timeout):
             self.assertEqual(self.read()["current"], self.original)
@@ -467,7 +508,7 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.assertEqual(self.read()["last_failure"]["recovery_status"], "succeeded")
 
     def test_windows_ca_cli_rejects_other_actions_and_forwards_deploy_option(self):
-        for action in ("init", "status", "plan", "prepare", "rollback", "start", "stop"):
+        for action in ("init", "status", "diagnose", "plan", "prepare", "rollback", "start", "stop"):
             with self.subTest(action=action), patch.object(MANAGER, "operate") as operate, \
                     redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
                 MANAGER.main([action, "--config", "unused.json", "--use-windows-ca"])
