@@ -67,7 +67,9 @@ class ImportProbeTests(unittest.TestCase):
                   "PYTHONPATH": "SYNTHETIC_SECRET", "HOME": "SYNTHETIC_SECRET",
                   "SSL_CERT_FILE": "SYNTHETIC_SECRET", "NLTK_DATA": "SYNTHETIC_SECRET"}
         with patch.dict(os.environ, source, clear=True):
-            self.assertEqual(PROBE._environment(), {key: source[key] for key in ("SystemRoot", "PATH", "TEMP")})
+            # Windows normalizes os.environ keys to uppercase.
+            self.assertEqual({key.upper(): value for key, value in PROBE._environment().items()},
+                             {key.upper(): source[key] for key in ("SystemRoot", "PATH", "TEMP")})
 
     def test_only_self_times_are_summed_and_unknown_names_are_hidden(self):
         stderr = "\n".join([
