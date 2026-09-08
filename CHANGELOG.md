@@ -4,6 +4,8 @@
 
 ## 2026-09-08
 
+- import 검사에서 부모와 자식의 timeout 시작 기준이 달라 덤프 전에 부모가 중단할 수 있던 결함을 수정함. 부모 시작 기준의 절대 deadline·시작 예산 소진 분류와 SEND T1 시간 요약을 추가하고 기존 60/70초 한도를 유지함. 이전 수동 출력 수집은 완료했으며 마지막 pandas 이름을 원인으로 단정하지 않음. [근거와 다음 비교](docs/03-openwebui-native-agent.md#ees-import-deadline).
+
 - import 검사에서 Windows 사용자 폴더 변수를 모두 제외해 NLTK 자체 오류를 만들 수 있던 환경 필터를 수정함. 일반 프로필 정보는 보존하고 실제 NLTK import/오류 재현을 CI에 추가함. 기존 사내 결과와 후보 자식 종료 미확인은 별도로 기록하고 재검사 대신 기존 출력·읽기 조회로 후속 확인함. [근거와 한계](evals/scenarios.md#ees-import-followup).
 
 - 사내 결과는 직접 타이핑만 가능하다는 제약에 맞춰 ProbeImports에 전달용 SEND 한 줄과 최근 비식별 상세 결과 저장을 추가함. 이미 한 검사는 반복하지 않고 기존 화면의 상태·시간 네 값으로 진행하며 전체 출력·파일·사진 요청을 철회함. [전달 방식](docs/03-openwebui-native-agent.md#ees-import-probe), [검증](evals/scenarios.md#ees-typed-handoff).
