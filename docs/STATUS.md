@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **저장된 앱 환경에서 프록시 선택 후 GitHub/Hugging Face HTTPS 요청이 모두 SSLError로 실패했다고 보고받음.** saved_proxy_env=true, offline_mode=false이며 각 0.51초/0.27초임. 후보 599.5초·기동 완료/수신 표시 없음·기존 복구 111초와 NumPy 양쪽 정상 기록은 유지함. TLS 세부 원인 및 600초 기동 지연과의 인과는 미확정. [이번 실패·진단 보고](../evals/scenarios.md#ees-retransition-health-failure). EES 전환 미완료·기존 프로그램 자동 복구 성공 상태이며 사내 운영 코드의 마지막 보고는 `head=c5f1690...`임.
-- 다음 작업 하나: **같은 저장 환경의 GitHub 요청 한 번으로 SSL 이유·프록시 scheme·CA 설정 출처를 확인한다.** [TLS 세부 진단](03-openwebui-native-agent.md#ees-startup-tls-detail)은 고정된 분류만 출력하고 원문/값은 출력하지 않음. Deploy 안내 뒤 저장한 Git 영구 프록시와 초기 등록 때 저장한 앱 프록시는 별개임. 캐시 준비·재배포·재설치·인증서 검증 해제는 실행하지 않으며 서버·DB·저장 설정·패키지를 유지함.
+- 이번 작업: **저장 환경의 GitHub 요청에서 CERTIFICATE_VERIFY_FAILED를 보고받아 인증서 검증 실패를 확인함.** proxy_scheme=http, ca_source=default, status=failed, error_type=SSLError임. 앞선 GitHub/Hugging Face SSL 실패와 후보 599.5초·기동 완료/수신 표시 없음·기존 복구 111초·NumPy 양쪽 정상 기록은 유지함. 특정 CA 부재 및 600초 기동 지연과의 인과는 미확정. [이번 실패·진단 보고](../evals/scenarios.md#ees-retransition-health-failure). EES 전환 미완료·기존 프로그램 자동 복구 성공 상태이며 사내 운영 코드의 마지막 보고는 `head=c5f1690...`임.
+- 다음 작업 하나: **같은 후보 Requests/저장 환경에서 Windows 저장소를 포함한 Python 기본 CA를 임시 지정해 두 URL을 비교한다.** [CA 비교 진단](03-openwebui-native-agent.md#ees-windows-ca-check)은 인증서 검증을 유지하며 임시 PEM을 종료 뒤 정리함. 결과에 따라 영구 CA 설정 방법을 정하고, Git 영구 프록시와 앱의 등록 환경은 별개로 다룸. 서버·DB·저장 설정·패키지 변경과 재배포는 없음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -90,7 +90,7 @@
 
 ## 최근 점검
 
-최신 main `ff9091c`·열린 PR 없음·로컬 tree 일치에서 전달된 세 결과를 진단 출력 순서·환경 복원 코드와 대조함. Git 설정 안내 순서와 초기 앱 환경을 구분하고 SSLError를 인증서 신뢰 실패로 곧바로 단정하지 않음. [결과·범위](../evals/scenarios.md#ees-retransition-health-failure). 문서 점검·diff 검사와 TLS 진단의 Python 문법 검사를 통과함. 사내 TLS 세부 진단·원인 확정은 대기이며 실행 코드/서버/설정 변경은 없음.
+최신 main `ca09ade`·열린 PR 없음·로컬 baseline tree 일치에서 다섯 결과를 TLS 진단 출력 순서와 대조함. 인증서 검증 실패를 기록하고 Python/Requests 공식 설명과 독립 검토로 같은 클라이언트의 CA 비교를 준비함. [결과·범위](../evals/scenarios.md#ees-retransition-health-failure). 문서 점검·diff 검사와 비교 진단의 Python 문법 검사를 통과함. 사내 CA 비교·기동 지연 원인 확정은 대기이며 실행 코드/서버/저장 설정 변경은 없음.
 
 ## 갱신 규칙
 

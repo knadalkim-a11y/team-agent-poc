@@ -776,6 +776,10 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 사용자는 프록시를 앞선 설치/배포 명령 뒤에 설정하지 않았는지 확인함. 대화상 Deploy 안내 이후 GitHub.com용 사용자 전역 Git 설정을 안내했고 이후 설정 완료·배포 실패를 함께 보고받은 순서임. 정확한 설정 시각은 기록하지 않았음. 이번 saved_proxy_env는 그 Git 설정을 읽은 값이 아니라 초기 등록 환경을 복원한 결과임을 코드와 대조함. Git 영구 프록시를 나중에 설정했다는 점과 앱 환경에 기존 프록시 값이 있다는 점은 모순되지 않음.
 - 후속은 [TLS 세부 진단](../docs/03-openwebui-native-agent.md#ees-startup-tls-detail) 한 요청으로 정함. Requests/urllib3 공식 설명과 독립 검토로 SSLError의 인증서 검증·프록시 protocol 등 가능성을 구분하고 로컬 예외 문자열에서 허용된 SSL 이유만 추출하도록 함. proxy scheme과 CA 환경변수의 출처만 출력하며 값/경로·전체 오류·키는 출력하지 않음. Git 전송 backend·CA 원문·TLS 세부 원인은 아직 미확인임. 현재 main ff9091c·열린 PR 없음/tree 일치 확인 및 문서/diff/Python 문법 검사 통과. Windows/사내 요청 실행은 대기이며 TLS 검증 해제·CA 교체·캐시 준비·서버 재기동은 없음.
 
+- TLS 세부 진단 후 사용자 보고: `http, default, failed, SSLError, CERTIFICATE_VERIFY_FAILED`를 출력 순서대로 proxy_scheme/ca_source/status/error_type/ssl_reason으로 대응함. 저장 환경의 GitHub 요청에서 인증서 검증 실패가 확인됐으며 default는 REQUESTS_CA_BUNDLE/CURL_CA_BUNDLE 지정이 없다는 범위임. http 프록시를 통한 HTTPS CONNECT 자체는 정상 지원 방식이고, 이 분류만으로 특정 사내 루트 부재·인증서 만료/호스트 불일치 등을 구별하거나 600초 기동 실패의 원인으로 확정하지 않음.
+- 후속 [CA 비교 진단](../docs/03-openwebui-native-agent.md#ees-windows-ca-check)은 같은 후보 Requests·프록시·저장 환경에서 CA 입력만 바꿈. Python SSLContext(PROTOCOL_TLS_CLIENT)의 load_default_certs가 Windows ROOT/CA와 OpenSSL 기본 경로에서 읽은 CA를 임시 PEM으로 지정해 두 공개 URL의 HEAD 결과를 받음. Windows 고유 검증 엔진 전체와 동일한 시험이 아니며 성공 시에도 해당 URL의 비교 범위로 한정함. TLS/호스트 검증을 유지하고 인증서·경로·예외 원문은 출력하지 않음. SSLKEYLOGFILE은 진단 자식 환경에서 제외하며 부모 TemporaryDirectory가 자식 종료/timeout 뒤 PEM을 정리함. 서버/DB/등록 스냅샷과 시스템 CA는 변경하지 않음.
+- 최신 main ca09ade·열린 PR 없음·로컬 baseline tree 일치를 확인하고 공식 Python/Requests 설명 및 독립 검토를 반영함. 안내 블록은 2500자 이내이며 부모/자식 Python 본문 문법·문서 링크·diff 검사를 통과함. Windows 저장소 로딩·사내 CA 비교는 아직 미실행이고, 영구 CA 적용·캐시 준비·재배포·전체 CI 반복은 없음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

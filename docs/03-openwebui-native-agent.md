@@ -786,6 +786,63 @@ except Exception as error:
 
 [Requests의 CA 선택](https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification)은 REQUESTS_CA_BUNDLE을 먼저, CURL_CA_BUNDLE을 다음으로 사용합니다. `default`는 해당 환경변수 지정이 없는 경우이며 Windows 저장소와 같다고 가정하지 않습니다. `proxy_scheme=http`인 프록시를 통해 HTTPS 목적지로 CONNECT하는 것도 지원되므로 이름만 보고 https로 바꾸지 않습니다([urllib3 프록시 설명](https://urllib3.readthedocs.io/en/stable/advanced-usage.html#http-and-https-proxies)). 인증서 검증을 유지하며 저장 설정·프록시·CA·서버를 변경하지 않습니다. 해당 진단의 오류 분류가 전체 기동 실패의 인과 증거는 아닙니다.
 
+<a id="ees-windows-ca-check"></a>
+
+**default CA에서 CERTIFICATE_VERIFY_FAILED인 경우:** `proxy_scheme=http`는 HTTPS 목적지의 CONNECT에 사용할 수 있는 값이며 그 자체를 오류로 보지 않습니다. 같은 후보 Requests/저장 환경을 유지하고, Windows ROOT/CA 저장소를 포함해 Python SSL이 불러온 기본 CA를 이번 요청의 임시 PEM으로 지정해 비교합니다([Python CA 로딩](https://docs.python.org/3.11/library/ssl.html#ssl.SSLContext.load_default_certs)). 인증서 이름·유효기간·신뢰 검증은 계속 수행하며 새 루트 인증서를 시스템에 설치하지 않습니다. 이는 Windows 고유 검증 엔진/폐기 확인 전체와 동일한 시험은 아닙니다. SSL_CERT_FILE/DIR 등 OpenSSL 기본 경로도 포함할 수 있어 특정 사내 CA 부재의 확정 증거와 구분합니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
+    $eesCode = @'
+import json, pathlib, subprocess, sys, tempfile
+sys.path.insert(0, sys.argv[2])
+try:
+    from ees_deploy_state import runtime_environment
+    cfg = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
+    env = runtime_environment(cfg)
+    env.pop('SSLKEYLOGFILE', None)
+    root = pathlib.Path(cfg['releases_dir'])/'4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
+    m = json.loads((root/'release.json').read_text(encoding='utf-8'))
+    if (m['state']!='prepared' or m['source_commit']!=root.name
+        or pathlib.Path(m['target_python'])!=root/'venv/Scripts/python.exe'): raise ValueError()
+    code = '''
+import json, pathlib, requests, ssl, sys
+ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+ctx.load_default_certs(ssl.Purpose.SERVER_AUTH)
+certs = ctx.get_ca_certs(binary_form=True)
+if not certs: raise ValueError()
+bundle = pathlib.Path(sys.argv[1])/'ca.pem'
+bundle.write_text(''.join(ssl.DER_cert_to_PEM_cert(c) for c in certs), encoding='ascii')
+results = []
+for name, url in (('github','https://github.com/'),('huggingface','https://huggingface.co/')):
+    out = {'target':name}
+    try:
+        with requests.Session() as s:
+            s.auth = lambda r:r
+            with s.head(url, verify=str(bundle), timeout=(8,8), allow_redirects=False) as r:
+                out.update(status='response', http_status=r.status_code)
+    except Exception as e:
+        out.update(status='failed', error_type=type(e).__name__,
+            cert_verify_failed='CERTIFICATE_VERIFY_FAILED' in str(e))
+    results.append(out)
+print(json.dumps({'ca_count':len(certs),'results':results}))
+'''
+    with tempfile.TemporaryDirectory(prefix='ees-ca-check-') as folder:
+        r = subprocess.run([m['target_python'],'-I','-B','-c',code,folder], env=env,
+            cwd=cfg['cwd'], stdin=subprocess.DEVNULL, capture_output=True, timeout=60)
+        print(json.dumps(json.loads(r.stdout)))
+except Exception as e:
+    print(json.dumps({'status':'probe_failed','error_type':type(e).__name__}))
+'@
+    $eesCode | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
+}
+```
+
+임시 PEM은 부모 프로세스의 TemporaryDirectory 아래에 만들어 자식 종료/timeout 뒤 정리합니다. 인증서 내용·개인키·실제 경로는 출력하지 않으며 `.netrc`/앱 인증 토큰·redirect는 쓰지 않습니다. SSLKEYLOGFILE은 진단 자식 환경에서만 제외해 키 로그를 남기지 않습니다. HTTP 응답 성공은 해당 두 URL에서 CA 입력을 바꾼 결과로 인정하며 기동 지연의 인과나 앱 전체 복구로 확대하지 않습니다. 영구 적용은 CA 출처와 실제 확인 결과에 맞춰 별도로 정하며, 현재 창의 REQUESTS_CA_BUNDLE만 설정해 등록 스냅샷이 바뀌었다고 보지 않습니다.
+
 <a id="ees-numpy-import-check"></a>
 
 **후보 로그가 NumPy import 중 KeyboardInterrupt로 끝난 경우:** 아래는 기존/준비 후보 Python에서 NumPy만 각각 한 번 읽는 독립 진단입니다. 기존 서버를 종료하거나 Open WebUI를 불러오지 않고 패키지를 설치하지 않습니다. 고정 커밋은 현재 준비 후보이며 새 후보에서는 해당 원본으로 바꿉니다. 로그 위치와 준비 메타데이터 원문은 출력하지 않습니다.
