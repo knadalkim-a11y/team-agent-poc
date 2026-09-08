@@ -136,6 +136,37 @@ class DeployProcessTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr.decode(errors='replace'))
         self.assertEqual((self.root / 'graceful.txt').read_text(), 'stopped')
 
+    def test_venv_redirector_or_symlink_preserves_environment_and_graceful_stop(self):
+        environment = self.root / 'tiny-venv'
+        command = [sys.executable, '-m', 'venv', '--without-pip']
+        if os.name != 'nt':
+            command.append('--symlinks')
+        completed = subprocess.run(command + [str(environment)], stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, timeout=30)
+        self.assertEqual(completed.returncode, 0, completed.stderr.decode(errors='replace'))
+        executable = environment / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
+        if os.name != 'nt':
+            self.assertTrue(executable.is_symlink())
+        runtime_probe = (
+            "import json,os,sys; from pathlib import Path; "
+            "Path('python-runtime.json').write_text(json.dumps({"
+            "'prefix':sys.prefix,'executable':sys.executable,'pid':os.getpid()}))\n"
+        )
+        with patch.object(manager, 'SERVER_CODE', runtime_probe + FAKE_SERVER):
+            self.identity = manager.start_server(executable, self.root, dict(os.environ),
+                                                 '127.0.0.1', self.port, self.root / 'logs')
+        manager.wait_healthy(self.identity, timeout=5)
+        runtime = json.loads((self.root / 'python-runtime.json').read_text())
+        self.assertEqual(Path(runtime['prefix']).resolve(), environment.resolve())
+        self.assertEqual(Path(runtime['executable']).absolute(), executable.absolute())
+        if os.name == 'nt':
+            # CPython's venv redirector owns the group and waits for this Python child.
+            self.assertNotEqual(runtime['pid'], self.identity['pid'])
+        manager.stop_server(self.identity, timeout=3)
+        self.assertEqual((self.root / 'graceful.txt').read_text(), 'stopped')
+        self.assertFalse(manager.verify_identity(self.identity))
+        self.assertTrue(manager.port_is_free('127.0.0.1', self.port))
+
     def test_wrong_creation_time_or_executable_never_signals(self):
         identity = self.start()
         manager.wait_healthy(identity, timeout=5)

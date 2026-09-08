@@ -587,6 +587,7 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 독립 검토에서 시작 직후 프로세스 신원을 얻지 못한 상태에서 자동 복구가 두 서버를 띄울 수 있는 경계를 발견함. `LaunchUncertain`과 `recovery_required` 기록으로 자동 시작/중단 해제를 차단하고 관련 시험 추가. 정상 uv 실행 파일의 hardlink를 상태 파일과 구분하고, 큰 업로드/벡터 파일의 해시는 스트리밍으로 계산함.
 - 최초 등록이 기존 서버 창의 환경을 저장한다는 제한을 안내함. 새 창에 없는 기존 설정을 추정하거나 등록 성공을 전체 환경 동등성 검증으로 간주하지 않음. 설치 루트 `.env`/외부 저장소·지원하지 않는 경로는 보존하고 중단함.
 - [Actions](../.github/workflows/ees-delivery.yml)에 Windows/Linux 배포 시험, uv 0.12.7의 작은 합성 wheel 설치, Windows DPAPI와 PowerShell 5.1 문법 검사를 추가함. CI 결과는 아래에 후속 기록. 사내 PC의 기존 Open WebUI 기동·원복·UI·데이터 연속성은 미실행.
+- [첫 CI 34172105576](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172105576): Windows 배포 관련 49개 PASS, Linux 48개 PASS·Windows DPAPI 1개 SKIP. 두 플랫폼의 작은 wheel 오프라인 준비·실제 합성 서버 종료와 Windows DPAPI/PowerShell 문법 확인. 원본 `970207524cdf924abe1247ee5b42ec6b081b998f`. 실제 대상이 venv Python인 차이를 확인하기 위해 Windows redirector/Linux symlink 환경의 시작·정상 종료 1개를 추가하며 같은 PR에서 후속 CI로 확인함.
 
 ## 결과 기록
 
