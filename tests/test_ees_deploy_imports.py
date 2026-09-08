@@ -136,6 +136,82 @@ class ImportProbeTests(unittest.TestCase):
                 self.assertIn("source: unknown", text)
                 self.assertNotIn("SYNTHETIC_SECRET", text)
 
+    def test_handoff_is_last_line_with_fixed_program_order(self):
+        report = {"report_saved": True, "results": [
+            {"program": "candidate", "status": "watchdog_timeout", "import_entered": True, "elapsed_seconds": 60.123},
+            {"program": "original", "status": "completed", "elapsed_seconds": 1.678},
+        ]}
+        rendered = PROBE.render(report)
+        self.assertTrue(rendered.startswith("EES import comparison v1\n"))
+        self.assertIn('"program":"candidate"', rendered)
+        self.assertEqual(rendered.splitlines()[-1], "SEND I1 O=OK/1.7 C=TIME-IMPORT/60.1 saved=yes")
+
+    def test_handoff_timeout_phase_uses_markers_and_partial_stdout(self):
+        for fields, expected in (
+            ({"watchdog_armed": True}, "TIME-SITE"),
+            ({"watchdog_armed": True, "import_entered": True}, "TIME-IMPORT"),
+            ({"watchdog_armed": True, "import_entered": True, "import_completed": True}, "TIME-EXIT"),
+            ({}, "TIME-?"),
+            ({"import_entered": True, "stdout_scope": "tail"}, "TIME-?"),
+            ({"import_entered": True, "stderr_scope": "tail"}, "TIME-IMPORT"),
+        ):
+            with self.subTest(fields=fields):
+                result = {"program": "original", "status": "watchdog_timeout", **fields}
+                line = PROBE._handoff_line({"results": [result]})
+                self.assertIn(f"O={expected}/-", line)
+                self.assertEqual("partial=yes" in line, "tail" in fields.values())
+
+    def test_handoff_cleanup_takes_precedence_and_known_states_remain_distinct(self):
+        for status, fields, expected in (
+            ("completed", {}, "OK"),
+            ("completed", {"cleanup_unverified": True}, "CLEANUP"),
+            ("parent_timeout_cleanup_unverified", {}, "CLEANUP"),
+            ("parent_timeout", {}, "CLEANUP"),
+            ("watchdog_timeout", {"cleanup_unverified": True, "import_entered": True}, "CLEANUP"),
+            ("interrupted", {}, "STOP"),
+            ("import_failed", {}, "ERROR"),
+            ("launch_failed", {}, "LAUNCH"),
+            ("probe_incomplete", {}, "UNKNOWN"),
+            ("skipped_after_incomplete_probe", {}, "SKIP"),
+        ):
+            with self.subTest(status=status, fields=fields):
+                self.assertEqual(PROBE._handoff_status({"status": status, **fields}), expected)
+
+    def test_handoff_missing_rows_and_invalid_times_do_not_invent_results(self):
+        self.assertEqual(PROBE._handoff_line({}), "SEND I1 O=UNKNOWN/- C=UNKNOWN/- saved=no")
+        for seconds in (None, True, False, -1, 86401, float("nan"), float("inf"), -float("inf"), "1.7"):
+            with self.subTest(seconds=seconds):
+                line = PROBE._handoff_line({"report_saved": "yes", "results": [
+                    {"program": "original", "status": "completed", "elapsed_seconds": seconds}]})
+                self.assertEqual(line, "SEND I1 O=OK/- C=UNKNOWN/- saved=no")
+        for seconds, expected in ((0, "0.0"), (86400, "86400.0")):
+            line = PROBE._handoff_line({"results": [
+                {"program": "original", "status": "completed", "elapsed_seconds": seconds}]})
+            self.assertIn(f"O=OK/{expected}", line)
+
+    def test_handoff_error_types_are_allowlisted_first_only_and_length_is_bounded(self):
+        for error_type in PROBE._ERRORS:
+            report = {"report_saved": True, "results": [
+                {"program": "original", "status": "import_failed", "elapsed_seconds": 86400,
+                 "error_types": [error_type, "ValueError"], "stderr_scope": "tail"},
+                {"program": "candidate", "status": "launch_failed", "elapsed_seconds": 86400,
+                 "error_type": error_type},
+            ]}
+            with self.subTest(error_type=error_type):
+                line = PROBE._handoff_line(report)
+                self.assertTrue(line.endswith(f"errO={error_type} errC={error_type}"))
+                self.assertLessEqual(len(line), 180)
+                self.assertEqual(len(line.splitlines()), 1)
+
+    def test_handoff_never_echoes_unknown_labels_paths_or_errors(self):
+        for name in ("other", "SYNTHETIC_SECRET\nhttps://internal/path?token=private", {"private": "value"}):
+            line = PROBE._handoff_line({"source_commit": "SYNTHETIC_SECRET", "results": [
+                {"program": "original", "status": "import_failed", "error_types": [name]},
+                {"program": "candidate", "status": "SYNTHETIC_SECRET", "elapsed_seconds": "SYNTHETIC_SECRET"},
+                {"program": "SYNTHETIC_SECRET", "status": "completed"},
+            ]})
+            self.assertEqual(line, "SEND I1 O=ERROR/- C=UNKNOWN/- saved=no errO=OTHER")
+
     def test_syntax_error_location_without_function_hides_source_and_message(self):
         stderr = ('Traceback (most recent call last):\n'
                   '  File "C:/SYNTHETIC_SECRET/Lib/site-packages/nltk/data.py", line 12\n'

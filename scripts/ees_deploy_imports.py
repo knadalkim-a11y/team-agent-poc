@@ -163,6 +163,47 @@ def compare(original_python, candidate_python):
             "parent_seconds": PARENT_SECONDS, "results": results}
 
 
+def _handoff_status(result):
+    status = result.get("status")
+    if result.get("cleanup_unverified") is True or status in {"parent_timeout", "parent_timeout_cleanup_unverified"}:
+        return "CLEANUP"
+    if status == "watchdog_timeout":
+        # A truncated marker stream cannot establish which phase was reached.
+        if result.get("stdout_scope") == "tail":
+            return "TIME-?"
+        for marker, label in (("import_completed", "TIME-EXIT"), ("import_entered", "TIME-IMPORT"),
+                              ("watchdog_armed", "TIME-SITE")):
+            if result.get(marker) is True:
+                return label
+        return "TIME-?"
+    return {"completed": "OK", "interrupted": "STOP", "import_failed": "ERROR",
+            "launch_failed": "LAUNCH", "probe_incomplete": "UNKNOWN",
+            "skipped_after_incomplete_probe": "SKIP"}.get(status, "UNKNOWN")
+
+
+def _handoff_line(report):
+    """One short, fixed-label line for an operator who can only retype results."""
+    parts, errors, partial = ["SEND I1"], [], False
+    rows = report.get("results", [])
+    for program, label in (("original", "O"), ("candidate", "C")):
+        result = next((row for row in rows if isinstance(row, dict) and row.get("program") == program), {})
+        status, seconds = _handoff_status(result), result.get("elapsed_seconds")
+        elapsed = (f"{seconds:.1f}" if type(seconds) in (int, float) and 0 <= seconds <= 86400 else "-")
+        parts.append(f"{label}={status}/{elapsed}")
+        partial = partial or result.get("stdout_scope") == "tail" or result.get("stderr_scope") == "tail"
+        if status in {"ERROR", "LAUNCH"}:
+            names = result.get("error_types", [])
+            name = names[0] if isinstance(names, list) and names else result.get("error_type")
+            if isinstance(name, str) and name in _ERRORS:
+                errors.append(f"err{label}={name}")
+            elif name is not None:
+                errors.append(f"err{label}=OTHER")
+    parts.append("saved=" + ("yes" if report.get("report_saved") is True else "no"))
+    if partial:
+        parts.append("partial=yes")
+    return " ".join(parts + errors)
+
+
 def render(report):
     commit = report.get("source_commit")
     source = commit[:12] if isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}", commit) else "unknown"
@@ -181,4 +222,5 @@ def render(report):
         if result.get("last_error_frames"):
             lines.append("last_error_traceback (most recent call last):")
             lines.extend(result["last_error_frames"])
+    lines.append(_handoff_line(report))
     return "\n".join(lines)

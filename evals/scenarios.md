@@ -875,6 +875,16 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 첫 원격 CI: 코드 `01f85e560273fa7d375d9d7c3e996b1fd66f8633`의 [실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34284517391)에서 Linux 작업은 성공했고 Windows 배포 시험 117개 중 환경변수 키 대소문자 기대값 1개가 실패함. Windows os.environ의 SYSTEMROOT 정규화를 테스트가 SystemRoot와 문자열 비교한 문제로 확인했으며 실제 자식/Windows 3.11 venv의 site 초기화와 watchdog 종료 시험은 통과함. 테스트의 키 비교를 대소문자 무관하게 고치고 허용 환경·비밀값 차단 검증은 유지함. 로컬 전용 15개 중 Windows 전용 1 skip을 제외하고 다시 통과했으며 실행 코드는 바꾸지 않음.
 - 최종 원격 검증/반영: 테스트 수정 원본 `eac9a91f53da6d5a7bfae319f1eaabfd5717fd46`의 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34284648832) 두 작업이 성공함. Windows 실제 venv/site 초기화·watchdog 종료와 PowerShell 파싱, 기존 DPAPI/오프라인 준비/실자식 수명 검사도 해당 실행에 포함됨. 독립 설계/연동 검토·구현 검토·CI 후 [PR #11](https://github.com/knadalkim-a11y/team-agent-poc/pull/11)을 `2d7423e30639079f303ab12da689da4a553e1e33`로 main에 병합함. 병합 당시 GitHub 별도 자동 리뷰 제출/inline 지적은 없었으며 완료했다고 기록하지 않음. 후속 증거 갱신은 문서만 변경하고 문서/diff 검사 후 반영함. 사내 ProbeImports 결과·원인 확인·후속 Deploy는 여전히 대기임.
 
+<a id="ees-typed-handoff"></a>
+
+### 사내 결과의 타이핑 전달 제약 반영 — 2026-09-08
+
+- 사용자 확인: 현재 환경에서는 전체 출력·화면 사진을 외부로 옮길 수 없고 직접 타이핑만 가능함. 이전 안내의 복사/사진 전제는 실제 전달 병목을 해결하지 못했음. 이미 받은 Diagnose v2를 다시 요청하지 않으며 ProbeImports를 이미 실행했다면 기존 화면의 original/candidate `status`·`elapsed_seconds` 네 값만으로 첫 판단을 이어감.
+- 변경 범위: 고정 import 검사/한도/격리 환경은 유지하고 상세 출력 끝에 `SEND I1` 상태·시간 중심 한 줄을 추가함. 시간 제한의 site/import/exit/미확인과 정리 미확인·사용자 중단·후속 생략을 구분하고 부분 읽기/저장 실패를 숨기지 않음. 오류일 때 필요한 허용 예외 종류만 추가함. 암호화·압축 문자열·복잡한 코드표·새 전달 수단이나 서비스는 만들지 않음.
+- 후속 확인: 상세 비식별 결과를 기존 관리 상태 폴더의 `last-import-probe.json`에 UTC 시각·후보 commit과 함께 최근 한 건만 원자적으로 저장함. 저장 실패해도 현재 결과를 출력하고 `saved=no`를 붙임. 이전 파일을 최신 결과로 오인하지 않으며 새 형식을 위한 재검사는 금지함. 저장 결과에서 필요한 항목을 조회하는 시점에만 짧은 안내를 준비하며 별도 조회 명령/서비스는 추가하지 않음. 배포 기록·기존 실패·준비 프로그램·DB·키는 변경하지 않음.
+- 기준: 최신 main `f4d36750c19dbc72978a982c9bdc1db75ac4901e`, 관련 열린 PR 없음, 로컬 전체 tree 일치 상태에서 수정함. 독립 검토에서 이미 수행한 검사 재실행 금지, timeout-exit 구분, 부분 읽기 시 unknown, 누락 시간의 0 대체 금지, 저장 실패 뒤 오래된 보고서 오인 방지를 반영함. [실행 안내](../docs/03-openwebui-native-agent.md#ees-import-probe)와 AGENTS의 전달 규칙을 같은 제약으로 정정함.
+- 로컬 검증: Linux/Python 3.12.13에서 운영/연동 43개 통과, import 전용 21개 중 Windows 전용 1 skip을 제외하고 통과함. 대표 SEND 예시는 45자로 전체 출력보다 타이핑 범위를 줄였으며 허용 오류명을 두 환경에 모두 넣은 경계에서도 180자 이하를 검사함. 상태/시간 미확인·부분 읽기·정리 미확인·저장 실패·오래된 파일 유지·하드링크 보호 및 배포 기록 보존을 확인함. 문서 25개/링크 562개·오류/검토 후보 0과 diff 검사 통과. 실제 사내 타이핑 사용성과 NLTK 검사 결과는 미확인임.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
