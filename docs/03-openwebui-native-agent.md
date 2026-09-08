@@ -669,6 +669,47 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 
 candidate_seconds는 로그 생성부터 실패 기록까지의 근사 시간입니다. 약 600초면 이번에도 대기 한도 만료와 부합하지만 최초 지연 원인은 따로 확인합니다. 마커는 전체 후보 로그에서 찾고, error_types/last_package_frames는 끝 160줄 중 마지막 Traceback 이후(시작이 잘린 경우 남아 있는 부분)만 요약합니다. last_package_frames에는 허용 목록에 있는 패키지 프레임만 남기며, 실제 경로·코드 행·예외 메시지는 출력하지 않습니다. KeyboardInterrupt의 마지막 호출 위치는 후보 정리 시점의 표본이며 해당 패키지 손상 증거가 아닙니다. 복구 후 Status.ca_mode는 original의 값이므로 실패 후보의 CA 적용 여부로 해석하지 않습니다.
 
+<a id="ees-failed-network-frames"></a>
+
+**화이트리스트 환경에서 하위 호출 위치 확인:** 앞선 요약은 허용 목록에 없는 LangChain 등의 프레임과 표준 라이브러리 프레임을 생략했습니다. 그 출력의 마지막 파일이 실제 traceback 끝이라는 뜻은 아닙니다. 다음은 같은 2026-09-08T05:33:02Z 후보 로그에서 LangChain·다운로드 관련 패키지와 표준 라이브러리까지 마지막 호출 위치를 읽습니다. 네트워크 요청이나 프로그램 실행·설정 변경은 하지 않습니다.
+
+```powershell
+& {
+  $ErrorActionPreference = 'Stop'
+  $cfg = Get-Content -LiteralPath (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+  $reg = Get-Content -LiteralPath (Join-Path $cfg.state_root 'deployment.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+  if ($reg.phase -ne 'idle' -or $reg.last_event -ne 'previous_program_recovered' -or
+      $reg.last_failure.failed_at -ne '2026-09-08T05:33:02Z') { throw '이번 실패 기록과 다릅니다.' }
+  $active = Get-Item -LiteralPath $reg.process.log_file
+  $at = [DateTimeOffset]::Parse($reg.last_failure.failed_at).UtcDateTime
+  if ($active.CreationTimeUtc -lt $at) { throw '로그 시각이 맞지 않습니다.' }
+  $cand = Get-ChildItem (Join-Path $cfg.state_root 'logs') -Filter 'server-*.log' -File |
+      Where-Object { $_.FullName -ne $active.FullName -and
+          $_.CreationTimeUtc -lt $active.CreationTimeUtc -and $_.CreationTimeUtc -lt $at.AddSeconds(1) } |
+      Sort-Object CreationTimeUtc -Descending | Select-Object -First 1
+  if (-not $cand) { throw '후보 로그가 없습니다.' }
+  $allow = '^(open_webui|langchain(?:_community|_core|_classic|_text_splitters)?|unstructured|nltk|playwright|bs4|lxml|requests|urllib3|httpx|httpcore|huggingface_hub|transformers|sentence_transformers|numpy|scipy|sklearn|torch)$'
+  $frames = @()
+  foreach ($line in (Get-Content -LiteralPath $cand.FullName -Tail 200)) {
+      if ($line -match '^Traceback \(most recent call last\):') { $frames = @() }
+      if (-not ($line -match '^\s*File "([^"]+)", line (\d+), in ([A-Za-z0-9_.<>]+)')) { continue }
+      $path = $Matches[1] -replace '\\','/'
+      $num = $Matches[2]; $func = $Matches[3]; $label = 'other'
+      if ($path -match '/site-packages/([^/]+)/(?:.*/)?([A-Za-z0-9_.-]+\.py)$') {
+          $pkg = $Matches[1]; $file = $Matches[2]
+          if ($pkg -match $allow) { $label = "$pkg/$file" }
+      } elseif ($path -match '/Lib/(?!site-packages/)(?:.*/)?([A-Za-z0-9_.-]+\.py)$') {
+          $label = "stdlib/$($Matches[1])"
+      } elseif ($path -match '^<frozen importlib\.[A-Za-z_.]+>$') { $label = 'importlib' }
+      if ($label -eq 'other') { $frames += 'other' }
+      else { $frames += "$($label):$($num):$func" }
+  }
+  @{ last_frames = @($frames | Select-Object -Last 12) } | ConvertTo-Json
+}
+```
+
+패키지/파일명·행 번호·함수명만 출력하고 사내 절대 경로·URL·오류 메시지는 내보내지 않습니다. 허용 목록 밖의 프레임은 위치를 보존해 other로 남깁니다. 마지막 Traceback이 끝 200줄에 없으면 남아 있는 tail의 부분 정보이며, 로그 이동/삭제나 시계 변경이 있으면 시각으로 고른 후보도 확정하지 않습니다. 이 stack은 종료 시점 표본입니다. 네트워크 함수가 보이면 그 호출 경로의 필요한 목적지/캐시를 확인하고, 파일 읽기/컴파일 위치라면 파일 준비 경로를 검토합니다. 어느 쪽도 이 표본만으로 600초 전체의 원인을 확정하지 않습니다.
+
 <a id="ees-failure-timing"></a>
 
 **실패까지의 시간과 기동 완료 흔적 확인:** 자동 복구 성공 뒤 추가 Start/Stop/Deploy 없이 읽는 명령입니다. 현재 복구 로그를 제외하고 생성 시각으로 실패 후보를 좁히므로 로그 이동/삭제나 시각 변경이 있었다면 이번 후보로 확정하지 않습니다. 원문 대신 시간·기동 완료 문자열 존재 여부만 출력합니다.

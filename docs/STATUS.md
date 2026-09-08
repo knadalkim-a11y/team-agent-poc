@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **CA 옵션 배포 안내 뒤 2026-09-08T05:33:02Z의 Deploy도 health_check/process 실패, 기존 프로그램 자동 복구 succeeded를 보고받음.** recovery=null, operation/errno/winerror=null이며 EES 전환은 미완료임. 앞선 CA 비교 ca_count=35·GitHub/Hugging Face 200과 [PR #8](https://github.com/knadalkim-a11y/team-agent-poc/pull/8)의 Windows/Linux CI 성공은 유지하되 기동 실패 해결로 확대하지 않음. [이번 실패](../evals/scenarios.md#ees-windows-ca-support). 사내 실제 checkout 전체 SHA와 새 후보의 시간·로그는 아직 미대조임.
-- 다음 작업 하나: **이번 실패 시각으로 고정한 후보 로그 요약을 한 번 읽어 경과 시간·기동/인증서 오류 흔적·마지막 패키지 호출 위치를 확인한다.** [읽기 전용 명령](03-openwebui-native-agent.md#ees-failed-candidate-summary)은 복구된 original의 로그를 제외함. 이전 NumPy 호출 위치나 599.5초를 이번 결과로 재사용하지 않으며 재배포·재설치·캐시 준비·앱 import 검사는 추가하지 않음.
+- 이번 작업: **CA 옵션 배포도 candidate_seconds=600, startup_complete/listening/cert_verify_failed=false, KeyboardInterrupt를 보고받음.** 요약의 Open WebUI 호출 위치는 공식 v0.11.3의 LangChain 문서 로더 import 경로와 부합함. 앞선 필터가 LangChain·표준 라이브러리를 생략했으므로 실제 최하위 대기는 미확인임. 사용자가 화이트리스트 사이트만 접근 가능한 사내 환경을 명시해 이를 진단 전제로 반영함. [이번 실패·소스 대조](../evals/scenarios.md#ees-windows-ca-support). EES 전환 미완료·기존 프로그램 자동 복구 성공 상태는 유지함.
+- 다음 작업 하나: **같은 실패 로그에서 생략된 LangChain·네트워크·표준 라이브러리의 마지막 호출 위치를 읽는다.** [하위 프레임 요약](03-openwebui-native-agent.md#ees-failed-network-frames)은 외부 요청·서버 재기동 없이 읽으며 알 수 없는 프레임도 other로 위치를 남김. 검토하던 후보 bytecode 준비는 미실행 상태로 보류하고 네트워크 대기 여부부터 좁힘. GitHub/Hugging Face 첫 페이지 200을 모든 다운로드 목적지 허용으로 해석하지 않음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -87,12 +87,13 @@ CA 옵션 운영 코드 원본은 `6a2638be157c125dd12ad70c95de075cbe77d1ce`, ma
 
 - 범용 Assistant에 필요한 기능을 늘리는 방향을 유지합니다. 화면·답변은 사용자 친화적인 가독성과 유연성을 우선하고 **이모지를 사용하지 않습니다**. 소개·예시·짧은 시작 안내는 팀 시연용으로 준비합니다. 그룹 세분화·서비스화·서버 이전과 조회 카드 전체 재디자인은 이번 준비에 포함하지 않습니다.
 - 사내 PC에서는 ChatGPT에 접근할 수 없어 외부 모바일로 코드·명령을 옮기거나 Git을 사용함. `%USERPROFILE%\team-agent-poc` 최초 clone은 성공 보고가 있으므로 반복하지 않음. GitHub.com HTTPS용 사용자 전역 Git 프록시 설정 안내 후 2026-09-08 사용자가 설정 완료를 보고함. 설정 원문은 미수집이며 이후 Update는 저장된 Git 설정을 사용해 `-GitProxy`를 생략할 수 있음. WebUI/Confluence의 네트워크 설정 변경이나 모든 사내 호스트의 프록시 필요 여부가 확인된 것으로 해석하지 않음.
+- 2026-09-08 사용자 설명에 따라 **화이트리스트에 등록된 웹사이트만 접근 가능한 환경**을 전제로 함. 실제 허용 목록·차단 로그는 미수집이며 모델 파일·추가 다운로드 호스트·업데이트 확인까지 접근 가능하다고 가정하지 않음. 필요한 외부 호출과 기존 로컬 캐시 사용을 구분하고 승인되지 않은 우회·임의 허용 범위 확대는 하지 않음.
 - 현재 Windows PC의 데이터·키·계정은 유지하며 프로그램 운영에는 등록된 `manage-ees.ps1` 경로를 사용함. 실제 Python·작업 위치·DATA_DIR·주소와 기동 로그/백업의 위치는 [기존 등록 설정](03-openwebui-native-agent.md#ees-local-state)을 따름. `start-openwebui.ps1`의 loopback·기본 폴더는 설치 예제이며, 이 예제로 현재 등록값을 덮어쓰거나 되돌리지 않음. 접속 허용 정책은 사내 관리 시스템을 따르고 서비스화·다른 서버/데이터 이전은 후속 범위임.
 - 웹 프로젝트 지침은 2026-09-06 README의 짧은 저장소 참조 문구로 교체했다고 보고받음. 재입력을 요구하지 않으며 저장소 지침 변경이 웹 설정 자체를 수정한 것으로 기록하지 않음.
 
 ## 최근 점검
 
-최신 main `f2a0fe2`·열린 PR 없음·로컬 baseline tree 일치에서 새 실패 보고를 진단 스키마/자동 복구 코드와 대조함. 후보 로그 선택과 현재 original의 ca_mode 해석을 독립 검토하고 기존 가이드에 이번 시각의 요약 명령을 준비함. [결과·범위](../evals/scenarios.md#ees-windows-ca-support). 로그 요약의 사내 실행은 대기이며 이번 응답에서는 실행 코드·서버·설정·패키지를 추가 변경하지 않음.
+최신 main `fa262e9`·열린 PR 없음·로컬 baseline tree 일치에서 600초 결과와 필터의 한계를 확인함. 공식 v0.11.3 소스/브랜딩 패치 범위와 호출 위치를 대조하고 화이트리스트 조건을 반영해 하위 프레임 조회를 준비함. [결과·범위](../evals/scenarios.md#ees-windows-ca-support). 캐시 준비·재배포·앱 import·추가 외부 접속은 미실행이고 실행 코드/환경/패키지 변경 없이 기존 문서만 갱신함.
 
 ## 갱신 규칙
 
