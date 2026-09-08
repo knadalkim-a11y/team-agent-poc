@@ -615,6 +615,12 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 실패 후보 폴더는 남지만 성공 시 쓰는 `release.json`이 없어 그대로 Prepare를 재시도하면 준비 메타데이터 검사에서 중단될 수 있음. 다음은 등록된 설정에서 해당 후보의 `prepare.log`를 찾아 필요한 오류 부분을 읽는 것임. 원인 확인 전에 재시도·폴더 삭제·운영 환경 설치를 안내하지 않으며 이후 재준비가 필요하면 [기존 운영 가이드](../docs/03-openwebui-native-agent.md#기존-windows-서버에-적용)의 비활성 후보 확인·격리 절차를 따름.
 - 이번 상태 갱신은 STATUS와 이 기록 두 문서만 변경함. 문서·diff 검사를 수행하고 코드 시험·브랜딩 빌드·기존 등록/health·연동/PAT 검증은 반복하지 않음. 내부 로그의 실제 실패 단계·패키지명/버전·복구 결과는 다음 사용자 보고를 기다림.
 
+#### antlr4 wheel 선택 실패 진단 — 2026-09-08
+
+- 후속 로그에서 후보 `venv`의 Python **3.11.16**과 `antlr4-python3-runtime==4.9.3 has no usable wheels`·의존성 해결 실패를 사용자 보고로 확인함. 앞선 원인 미확정 기록을 보존하며 이번에는 오프라인 설치의 해당 wheel 선택 실패까지 좁힘. 다른 의존성이 모두 준비됐다는 뜻은 아님.
+- [공식 PyPI 4.9.3 파일 목록](https://pypi.org/project/antlr4-python3-runtime/4.9.3/#files)은 소스 압축파일 한 개만 제공함. SHA-256은 `f224469b4168294902bb1efa80a8bf7855f24c99aef99cbefc1bcd3cce77881b`. uv [0.12.7 빌드 코드](https://github.com/astral-sh/uv/blob/0.12.7/crates/uv-distribution/src/source/mod.rs)와 [캐시 wheel 조회](https://github.com/astral-sh/uv/blob/0.12.7/crates/uv-distribution/src/source/built_wheel_metadata.rs)에서 빌드한 `.whl` 보존·조회 경로를 확인함. 이 사실만으로 사내 캐시 존재나 선택 실패 원인을 단정하지 않음.
+- 다음은 기존 등록의 uv 실행 파일·보존된 환경으로 캐시 위치를 구해 해당 버전의 wheel 파일을 읽기 전용으로 찾는 것임. 발견하면 파일 검증·별도 wheelhouse 복사·비활성 후보 보존 이동 후 Prepare를 재시도하고, 발견되지 않으면 공식 소스로 별도 wheel을 준비함. 버전 업그레이드·운영 환경 설치·캐시 내부 수정·오프라인/바이너리 제한 해제는 하지 않음. 캐시 확인·재준비·Deploy는 아직 사내 미실행.
+
 
 ## 결과 기록
 
