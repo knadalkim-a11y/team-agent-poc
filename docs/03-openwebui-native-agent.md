@@ -673,6 +673,65 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 
 `candidate_seconds`는 후보 로그 생성부터 실패 기록까지, `recovery_seconds`는 복구 로그 생성부터 복구 완료 기록까지의 근사 시간입니다. 프로세스 생성/기록 시간도 포함하며 정확한 health 대기 측정값은 아닙니다. 후보 시간이 약 600초면 전달한 대기 한도 만료와 부합하지만 최초 지연 원인까지 확정하지 않습니다. 두 boolean은 해당 로그의 문자열 존재 여부이며 false를 절대적 미기동 증거로 보지 않습니다. 결과를 보고 다음 진단을 정하며 별도 패키지 검사·재설치·재배포를 자동으로 이어 붙이지 않습니다.
 
+<a id="ees-startup-proxy-check"></a>
+
+**기동 지연의 프록시 확인:** Git의 `http.https://github.com.proxy`와 WebUI의 HTTP 클라이언트 설정은 별개입니다. 관리 스크립트의 health 요청은 프록시를 명시적으로 사용하지 않습니다. 기존/후보 프로그램은 같은 등록 환경을 복원하며 후보만 WEBUI_NAME을 추가합니다. 새 창의 프록시 환경변수를 바꿔도 등록 때 저장한 값을 대신하지 않습니다.
+
+아래는 기존 `runtime_environment`로 등록 환경을 읽고, 후보 Python의 Requests로 GitHub/Hugging Face에 각 HEAD 요청 한 번을 보내는 진단입니다. 환경변수 외 Windows 프록시 설정과 NO_PROXY도 Requests의 실제 선택에 반영합니다([Requests 프록시](https://requests.readthedocs.io/en/latest/user/advanced/#proxies)). TLS 검증은 유지하고 redirect를 따라가지 않으며 `.netrc` 인증과 앱 토큰은 보내지 않습니다. Git 프록시를 다른 호스트에 강제로 적용하거나 서버 설정을 변경하지 않습니다. 외부 요청을 사용자가 요청한 이번 프록시 진단 범위로만 수행합니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
+    $eesCode = @'
+import json, pathlib, subprocess, sys
+sys.path.insert(0, sys.argv[2])
+try:
+    from ees_deploy_state import runtime_environment
+    cfg = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
+    env = runtime_environment(cfg)
+    root = pathlib.Path(cfg['releases_dir']) / '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
+    meta = json.loads((root / 'release.json').read_text(encoding='utf-8'))
+    if (meta['state']!='prepared' or meta['source_commit']!=root.name
+        or pathlib.Path(meta['target_python'])!=root/'venv/Scripts/python.exe'): raise ValueError()
+    print(json.dumps({'saved_proxy_env': any(env.get(k) for k in
+        ('HTTP_PROXY','HTTPS_PROXY','ALL_PROXY')),
+        'offline_mode': env.get('OFFLINE_MODE','false').lower() == 'true'}), flush=True)
+    code = '''
+import json, requests, sys, time
+url = sys.argv[1]
+out = {'target': sys.argv[2]}
+start = time.monotonic()
+try:
+    out['proxy_selected'] = bool(requests.utils.select_proxy(url, requests.utils.get_environ_proxies(url)))
+    with requests.Session() as session:
+        session.auth = lambda request: request
+        with session.head(url, timeout=(8,8), allow_redirects=False) as response:
+            out.update(status='response', http_status=response.status_code)
+except Exception as error:
+    out.update(status='failed', error_type=type(error).__name__)
+out['elapsed_seconds'] = round(time.monotonic() - start, 2)
+print(json.dumps(out))
+'''
+    for name, url in (('github','https://github.com/'), ('huggingface','https://huggingface.co/')):
+        try:
+            run = subprocess.run([meta['target_python'],'-I','-B','-c',code,url,name],
+                env=env, cwd=cfg['cwd'], stdin=subprocess.DEVNULL,
+                capture_output=True, timeout=30)
+            print(json.dumps(json.loads(run.stdout)), flush=True)
+        except Exception as error:
+            print(json.dumps({'target':name,'status':'probe_failed','error_type':type(error).__name__}), flush=True)
+except Exception as error:
+    print(json.dumps({'status':'settings_check_failed','error_type':type(error).__name__}))
+'@
+    $eesCode | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
+}
+```
+
+처음 설정 요약과 접속 결과 두 개만 전달합니다. `proxy_selected`는 해당 URL에 대한 Requests의 선택이며, 환경변수 부재만으로 Windows의 직접 통신을 단정하지 않습니다. 응답은 해당 공개 URL/HEAD의 범위로 실제 모델 파일·CDN·인증 API·기동 시 모든 통신을 보증하지 않습니다. ProxyError·SSLError·timeout을 구분하고 403도 프록시 원인으로 즉시 단정하지 않습니다. probe_failed/TimeoutExpired는 자식 Python의 시작/Requests import를 포함한 30초 제한이며 HTTP 요청만의 시간 초과와 구분합니다. Open WebUI를 import하지 않으며 DB·저장 설정·키·서버는 변경하지 않습니다.
+
 <a id="ees-numpy-import-check"></a>
 
 **후보 로그가 NumPy import 중 KeyboardInterrupt로 끝난 경우:** 아래는 기존/준비 후보 Python에서 NumPy만 각각 한 번 읽는 독립 진단입니다. 기존 서버를 종료하거나 Open WebUI를 불러오지 않고 패키지를 설치하지 않습니다. 고정 커밋은 현재 준비 후보이며 새 후보에서는 해당 원본으로 바꿉니다. 로그 위치와 준비 메타데이터 원문은 출력하지 않습니다.

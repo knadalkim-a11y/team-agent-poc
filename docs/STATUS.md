@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **후보 Deploy의 health_check 실패와 기존 프로그램 자동 복구 성공을 사용자 보고로 확인함.** Diagnostics의 recovery_status=succeeded와 기존 프로그램 재기동·데이터 복원/교체 없음 안내를 받음. EES 전환은 미완료이며 기동 중 종료인지 응답 대기 만료인지는 아직 미확정. [이번 실패·복구 보고](../evals/scenarios.md#ees-retransition-health-failure). 사내 운영 코드의 마지막 보고는 `head=c5f1690...`이며 전체 checkout/설정 직접 대조는 미실행. [직전 상태](../evals/scenarios.md#ees-retransition-ready), [준비 후보](../evals/scenarios.md#ees-prepare-completed).
-- 다음 작업 하나: **기존 로그의 생성→실패/복구 기록 시간과 후보의 기동 완료 문자열 존재 여부를 한 번 읽는다.** NumPy 단독 비교는 양쪽 2.4.6·ok·종료 코드 0·오류 없음, original 1.55초/candidate 1.67초로 사용자 보고됨. 이 검사에서는 후보의 단독 NumPy 지연/오류가 재현되지 않았으며 전체 기동 실패 원인은 미확정임. [시간·완료 흔적 확인](03-openwebui-native-agent.md#ees-failure-timing)으로 600초 대기 만료와 부합하는지 좁힌다. 기존 서버·DB·패키지는 유지하며 같은 import 검사·재설치·재배포·대기 시간 증가는 반복하지 않음.
+- 이번 작업: **후보 599.5초·기동 완료/수신 표시 없음, 기존 프로그램 복구 111초를 사용자 보고로 확인함.** 600초 health 대기 만료와 부합하며 NumPy 단독 import는 기존/후보 모두 정상임. 기동 지연의 근본 원인은 미확정이고 사용자가 프록시 가능성도 확인하도록 요청함. [이번 실패·진단 보고](../evals/scenarios.md#ees-retransition-health-failure). 사내 운영 코드의 마지막 보고는 `head=c5f1690...`이며 전체 checkout/설정 직접 대조는 미실행. EES 전환은 미완료·기존 프로그램 자동 복구 성공 상태임.
+- 다음 작업 하나: **등록 때 저장한 실행 환경으로 후보 Python의 프록시 선택과 GitHub/Hugging Face HTTPS 응답을 확인한다.** Git 프록시·관리자의 직접 health 요청·앱의 HTTP 환경을 구분함. [프록시 진단](03-openwebui-native-agent.md#ees-startup-proxy-check)은 설정 요약과 두 응답만 출력하며 앱 토큰·프록시 값·응답 본문은 전송/출력하지 않음. 기동 전 캐시 준비는 검토했지만 프록시 확인을 우선해 미실행으로 보류함. 서버·DB·저장 설정·패키지는 유지하며 재배포/재설치를 반복하지 않음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -90,7 +90,7 @@
 
 ## 최근 점검
 
-최신 main `ab58769`·열린 PR 없음·로컬 tree 일치와 같은 원본의 AGENTS/STATUS를 확인함. NumPy 두 결과를 검사 코드와 대조하고 추가 재설치 대신 실패 시각이 후보 종료 전에 기록되는 점을 이용한 읽기 절차를 정함. [결과·범위](../evals/scenarios.md#ees-retransition-health-failure). 문서 점검·diff 검사 통과. 시간·로그 표시의 사내 확인은 대기이며 운영 코드·서버·패키지는 변경하지 않음.
+최신 main `293ef23`·열린 PR 없음·로컬 tree 일치에서 시간/완료 표시 결과와 proxy/환경 복원 코드를 대조함. 고정 Open WebUI v0.11.3의 env/config/main 및 Requests 공식 설명을 확인하고 health의 프록시 미사용과 앱의 외부 통신 가능성을 구분함. [결과·범위](../evals/scenarios.md#ees-retransition-health-failure). 문서 점검·diff 검사 통과. 실제 사내 프록시 선택/접속 결과와 지연 원인은 대기이며 실행 코드·서버·환경 변경은 없음.
 
 ## 갱신 규칙
 
