@@ -604,6 +604,8 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 사외 읽기 검토에서 원본 CLI/Typer와 관리 코드가 같은 `open_webui.serve(host,port)`·키 경로·Windows Uvicorn 설정을 사용함을 확인함. 이 비교만으로 지연 원인을 확정하지 않음.
 - 배포 시 같은 60초 제한으로 불필요하게 전환 실패/복구가 발생하지 않도록 관리 명령의 기본 health 대기를 300초로 늘리고 `-HealthTimeout`/`--health-timeout` 1~900초를 추가함. 현재/새 프로그램 확인과 실패 후 기존 프로그램 복구에 같은 값을 전달하며 기존 config·DPAPI 스냅샷은 변경하지 않음. 300초는 운영 기본값이며 이 사내 서버의 소요 시간을 실측한 값은 아님.
 - Linux/Python 3.12.13에서 `python -m unittest discover -s tests -p test_manage_ees.py -v`: **12/12 PASS**. 실제 sleep 없이 가상 75초 후 health 성공, 명시 제한의 Start/Deploy/Rollback/기존 프로세스 확인·복구 전달, 잘못된 인자의 작업 전 거절과 1/900 경계를 확인함. 대기 설정 보완을 확인하기 위한 사내 재기동/health 반복은 수행하지 않음.
+- [CI 34176365525](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34176365525): 수정 원본 `b22c24eea6f03b6bb1d4251b9606154410cf1624`, Windows/Linux 검사·PowerShell 문법·전달물 생성 모두 PASS. 프로그램 wheel을 바꾸지 않은 수정이므로 이번 CI는 Agent Pack만 묶었으며, 사내 프로그램 준비에는 기존 `4a8779b`의 프로그램 포함 ZIP을 계속 사용함. 성공 증거만 추가하는 마무리는 문서/diff를 확인하고 완료한 코드 검사를 반복하지 않음. 사내 운영 스크립트 갱신·EES 프로그램 Prepare/Deploy는 이후 사용자 실행 대상임.
+
 
 ## 결과 기록
 
