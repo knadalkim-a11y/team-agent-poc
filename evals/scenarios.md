@@ -588,6 +588,10 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 최초 등록이 기존 서버 창의 환경을 저장한다는 제한을 안내함. 새 창에 없는 기존 설정을 추정하거나 등록 성공을 전체 환경 동등성 검증으로 간주하지 않음. 설치 루트 `.env`/외부 저장소·지원하지 않는 경로는 보존하고 중단함.
 - [Actions](../.github/workflows/ees-delivery.yml)에 Windows/Linux 배포 시험, uv 0.12.7의 작은 합성 wheel 설치, Windows DPAPI와 PowerShell 5.1 문법 검사를 추가함. CI 결과는 아래에 후속 기록. 사내 PC의 기존 Open WebUI 기동·원복·UI·데이터 연속성은 미실행.
 - [첫 CI 34172105576](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172105576): Windows 배포 관련 49개 PASS, Linux 48개 PASS·Windows DPAPI 1개 SKIP. 두 플랫폼의 작은 wheel 오프라인 준비·실제 합성 서버 종료와 Windows DPAPI/PowerShell 문법 확인. 원본 `970207524cdf924abe1247ee5b42ec6b081b998f`. 실제 대상이 venv Python인 차이를 확인하기 위해 Windows redirector/Linux symlink 환경의 시작·정상 종료 1개를 추가하며 같은 PR에서 후속 CI로 확인함.
+- [후속 CI 34172244363](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172244363): 원본 `05448a930ae7666932c448f876bb5546d8db2662`, **Windows 배포 관련 50개 PASS / Linux 49개 PASS·Windows DPAPI 1개 SKIP**. 별도 venv의 실제 Python 환경과 Windows redirector/Linux symlink를 확인하고 health→정상 종료 표식→PID 종료/포트 반환까지 통과함. PowerShell 5.1 문법·문서/diff 검사 통과. [PR #6](https://github.com/knadalkim-a11y/team-agent-poc/pull/6)을 검토 후 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`로 병합하고 열린 PR 0개 확인. main과 시험한 코드의 tree 일치를 확인함.
+
+- [main 전달 실행 34172321176](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172321176)의 Windows/Linux 검사와 패키징 모두 PASS. 프로그램 포함 내부 ZIP은 `EES-demo-4a8779bbf3ee.zip`, 원본 커밋은 위 병합 커밋. [artifact 10036107795](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172321176/artifacts/10036107795)의 바깥 ZIP 크기는 146,293,914바이트, GitHub SHA-256은 `2ce0fd9afb14f7a86c31a8f45933a229c599374dd069627db1bda81b4091359d`. 보존 만료 2026-09-22 이전에 승인된 내부 위치로 다운로드할 대상임. 코드/시험 변경 없이 이 결과를 남기는 마무리 커밋은 문서/diff만 확인하고 CI를 다시 실행하지 않음.
+
 
 ## 결과 기록
 
