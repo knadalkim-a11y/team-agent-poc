@@ -884,6 +884,7 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 후속 확인: 상세 비식별 결과를 기존 관리 상태 폴더의 `last-import-probe.json`에 UTC 시각·후보 commit과 함께 최근 한 건만 원자적으로 저장함. 저장 실패해도 현재 결과를 출력하고 `saved=no`를 붙임. 이전 파일을 최신 결과로 오인하지 않으며 새 형식을 위한 재검사는 금지함. 저장 결과에서 필요한 항목을 조회하는 시점에만 짧은 안내를 준비하며 별도 조회 명령/서비스는 추가하지 않음. 배포 기록·기존 실패·준비 프로그램·DB·키는 변경하지 않음.
 - 기준: 최신 main `f4d36750c19dbc72978a982c9bdc1db75ac4901e`, 관련 열린 PR 없음, 로컬 전체 tree 일치 상태에서 수정함. 독립 검토에서 이미 수행한 검사 재실행 금지, timeout-exit 구분, 부분 읽기 시 unknown, 누락 시간의 0 대체 금지, 저장 실패 뒤 오래된 보고서 오인 방지를 반영함. [실행 안내](../docs/03-openwebui-native-agent.md#ees-import-probe)와 AGENTS의 전달 규칙을 같은 제약으로 정정함.
 - 로컬 검증: Linux/Python 3.12.13에서 운영/연동 43개 통과, import 전용 21개 중 Windows 전용 1 skip을 제외하고 통과함. 대표 SEND 예시는 45자로 전체 출력보다 타이핑 범위를 줄였으며 허용 오류명을 두 환경에 모두 넣은 경계에서도 180자 이하를 검사함. 상태/시간 미확인·부분 읽기·정리 미확인·저장 실패·오래된 파일 유지·하드링크 보호 및 배포 기록 보존을 확인함. 문서 25개/링크 562개·오류/검토 후보 0과 diff 검사 통과. 실제 사내 타이핑 사용성과 NLTK 검사 결과는 미확인임.
+- 원격 검증/반영: 원본 `dba8b78801192acf5eff1a9a2431b4c5cb4adac2`의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34285520053) 두 작업이 성공함. 기존 실제 자식/venv/DPAPI·오프라인 준비·PowerShell 파싱과 새 전달/저장 경계 시험을 포함한 결과임. 독립 설계 및 구현 검토 후 [PR #12](https://github.com/knadalkim-a11y/team-agent-poc/pull/12)를 `fce4aebd7005a35c412e40922d71336852439ca3`로 main에 병합함. 사내 실행/타이핑 결과는 미수신이며 검사/서비스를 새로 실행하지 않음.
 
 ## 결과 기록
 
