@@ -184,7 +184,11 @@ class DeployProcessTests(unittest.TestCase):
             identity = self.start(EES_TEST_EXIT='1')
             manager.wait_healthy(identity, timeout=3)
         self.assertNotIn('synthetic-private', str(failure.exception))
-        self.assertEqual(len(list((self.root / 'logs').glob('*.log'))), 1)
+        self.assertEqual(failure.exception.reason, 'process_exited')
+        self.assertEqual(failure.exception.exit_code, 7)
+        logs = list((self.root / 'logs').glob('*.log'))
+        self.assertEqual(len(logs), 1)
+        self.assertEqual(failure.exception.log_id, logs[0].name)
 
     def test_occupied_port_does_not_start_or_stop_any_process(self):
         with socket.socket() as listener:
@@ -291,6 +295,27 @@ class ProcessContracts(unittest.TestCase):
                 self.assertEqual((error.errno, error.winerror, error.operation), (None, None, None))
                 self.assertEqual(str(error), 'Safe message.')
 
+    def test_failure_metadata_accepts_only_fixed_reasons_safe_ids_and_finite_numbers(self):
+        log_id = 'server-' + 'a' * 32 + '.log'
+        error = manager.ProcessError('Safe message.', reason='process_exited', elapsed_seconds=1.25,
+                                     timeout_seconds=60, exit_code=-2, log_id=log_id)
+        self.assertEqual((error.reason, error.elapsed_seconds, error.timeout_seconds,
+                          error.exit_code, error.log_id), ('process_exited', 1.25, 60, -2, log_id))
+        for value in (None, True, 'synthetic-private', ['synthetic-private'],
+                      float('inf'), float('-inf'), float('nan')):
+            with self.subTest(value=value):
+                error = manager.ProcessError('Safe message.', reason=value, elapsed_seconds=value,
+                                             timeout_seconds=value, exit_code=value, log_id=value)
+                self.assertEqual((error.reason, error.elapsed_seconds, error.timeout_seconds,
+                                  error.exit_code, error.log_id), (None, None, None, None, None))
+                self.assertNotIn('synthetic-private', json.dumps(vars(error)))
+        for value in (-1, -0.5):
+            error = manager.ProcessError('Safe message.', elapsed_seconds=value, timeout_seconds=value)
+            self.assertEqual((error.elapsed_seconds, error.timeout_seconds), (None, None))
+        for value in ('C:/synthetic-private/' + log_id, '../' + log_id, log_id + '\n',
+                      'server-secret.log', 'server-' + 'A' * 32 + '.log'):
+            self.assertIsNone(manager.ProcessError('Safe message.', log_id=value).log_id)
+
     def test_launch_failure_does_not_echo_error_or_log_path(self):
         original = OSError(errno.EACCES, 'synthetic-private-error', 'synthetic-private-file')
         with tempfile.TemporaryDirectory(prefix='synthetic-private-') as directory, \
@@ -299,6 +324,9 @@ class ProcessContracts(unittest.TestCase):
             with self.assertRaises(manager.ProcessError) as failure:
                 manager.start_server(sys.executable, directory, {}, '127.0.0.1', 8080, directory)
             self.assertEqual(failure.exception.errno, errno.EACCES)
+            self.assertEqual(failure.exception.reason, 'launch_failed')
+            self.assertGreaterEqual(failure.exception.elapsed_seconds, 0)
+            self.assertEqual(failure.exception.log_id, next(Path(directory).glob('*.log')).name)
             self.assertNotIn('synthetic-private', str(failure.exception))
             self.assertNotIn(directory, str(failure.exception))
             spawn.assert_called_once()
@@ -306,12 +334,90 @@ class ProcessContracts(unittest.TestCase):
     def test_health_failure_does_not_echo_saved_log_path(self):
         identity = {**self.saved, 'log_file': 'C:/synthetic-private/server.log'}
         with patch.object(manager, 'verify_identity', return_value=False):
-            with self.assertRaisesRegex(manager.ProcessError, 'exited before becoming healthy') as failure:
+            with self.assertRaisesRegex(manager.ProcessError, 'identity changed') as failure:
                 manager.wait_healthy(identity, timeout=1)
             self.assertNotIn('synthetic-private', str(failure.exception))
+            self.assertIsNone(failure.exception.log_id)
         with self.assertRaisesRegex(manager.ProcessError, 'health timed out') as failure:
             manager.wait_healthy(identity, timeout=0)
         self.assertNotIn('synthetic-private', str(failure.exception))
+
+    def test_health_exit_retains_exit_evidence_after_identity_removes_owned_child(self):
+        child = Mock(pid=self.saved['pid'], returncode=None)
+        def exited():
+            child.returncode = 7
+            return 7
+        child.poll.side_effect = exited
+        log_id = 'server-' + 'b' * 32 + '.log'
+        identity = {**self.saved, 'log_file': '/synthetic-private/' + log_id}
+        with patch.dict(manager._CHILDREN, {child.pid: child}, clear=True), \
+                patch.object(manager.time, 'monotonic', side_effect=[10, 10.1, 10.2]), \
+                patch.object(manager, '_healthy') as health, patch.object(manager.time, 'sleep') as sleep:
+            with self.assertRaises(manager.ProcessError) as failure:
+                manager.wait_healthy(identity, timeout=60)
+            self.assertNotIn(child.pid, manager._CHILDREN)
+        error = failure.exception
+        self.assertEqual((error.reason, error.exit_code, error.timeout_seconds, error.log_id),
+                         ('process_exited', 7, 60, log_id))
+        self.assertAlmostEqual(error.elapsed_seconds, .2)
+        child.poll.assert_called_once()
+        health.assert_not_called()
+        sleep.assert_not_called()
+        self.assertNotIn('synthetic-private', json.dumps(vars(error)))
+
+    def test_unhealthy_process_reports_timeout_with_measured_duration(self):
+        with patch.object(manager, 'verify_identity', return_value=True) as verify, \
+                patch.object(manager, '_healthy', return_value=False) as health, \
+                patch.object(manager.time, 'monotonic', side_effect=[20, 20, 20.1, 20.2, 21, 21.25]), \
+                patch.object(manager.time, 'sleep') as sleep:
+            with self.assertRaises(manager.ProcessError) as failure:
+                manager.wait_healthy(self.saved, timeout=1)
+        self.assertEqual((failure.exception.reason, failure.exception.elapsed_seconds,
+                          failure.exception.timeout_seconds, failure.exception.exit_code),
+                         ('health_timeout', 1.25, 1, None))
+        verify.assert_called_once_with(self.saved)
+        health.assert_called_once()
+        sleep.assert_called_once()
+
+    def test_missing_or_changed_identity_is_not_evidence_of_process_exit(self):
+        for actual in (None, {**self.saved, 'created_at': 'different'}):
+            with self.subTest(actual=actual), patch.dict(manager._CHILDREN, {}, clear=True), \
+                    patch.object(manager, '_identity', return_value=actual), \
+                    patch.object(manager, '_healthy') as health:
+                with self.assertRaises(manager.ProcessError) as failure:
+                    manager.wait_healthy(self.saved, timeout=60)
+                self.assertEqual(failure.exception.reason, 'identity_changed')
+                self.assertIsNone(failure.exception.exit_code)
+                self.assertGreaterEqual(failure.exception.elapsed_seconds, 0)
+                health.assert_not_called()
+
+    def test_identity_inspection_failure_is_distinct_and_does_not_echo_error(self):
+        original = OSError(errno.EACCES, 'synthetic-private-inspection')
+        with patch.object(manager, '_identity', side_effect=original), \
+                patch.object(manager, '_healthy') as health:
+            with self.assertRaises(manager.ProcessError) as failure:
+                manager.wait_healthy(self.saved, timeout=60)
+        self.assertEqual((failure.exception.reason, failure.exception.errno,
+                          failure.exception.exit_code), ('identity_unavailable', errno.EACCES, None))
+        self.assertNotIn('synthetic-private', str(failure.exception))
+        self.assertNotIn('synthetic-private', json.dumps(vars(failure.exception)))
+        self.assertTrue(failure.exception.__suppress_context__)
+        health.assert_not_called()
+
+    def test_final_health_identity_failure_is_not_reported_as_timeout_or_success(self):
+        for result, reason in ((False, 'identity_changed'),
+                               (manager.ProcessError('synthetic-private'), 'identity_unavailable')):
+            with self.subTest(reason=reason), patch.dict(manager._CHILDREN, {}, clear=True), \
+                    patch.object(manager, 'verify_identity', side_effect=[True, result]) as verify, \
+                    patch.object(manager, '_healthy', return_value=True) as health, \
+                    patch.object(manager.time, 'sleep') as sleep:
+                with self.assertRaises(manager.ProcessError) as failure:
+                    manager.wait_healthy(self.saved, timeout=60)
+                self.assertEqual(failure.exception.reason, reason)
+                self.assertNotIn('synthetic-private', str(failure.exception))
+                self.assertEqual(verify.call_count, 2)
+                health.assert_called_once()
+                sleep.assert_not_called()
 
     def test_unknown_port_owner_is_never_spawned_or_stopped(self):
         with socket.socket() as listener:
@@ -377,6 +483,9 @@ class ProcessContracts(unittest.TestCase):
                     with self.assertRaises(manager.LaunchUncertain) as failure:
                         manager.start_server(sys.executable, directory, {}, '127.0.0.1', 8080, directory)
                     self.assertNotIn('synthetic-private', str(failure.exception))
+                    self.assertEqual(failure.exception.reason, 'launch_unverified')
+                    self.assertEqual(failure.exception.log_id, next(Path(directory).glob('*.log')).name)
+                    self.assertGreaterEqual(failure.exception.elapsed_seconds, 0)
                     child.terminate.assert_not_called()
                     child.kill.assert_not_called()
                 manager._CHILDREN.pop(123, None)
@@ -390,6 +499,9 @@ class ProcessContracts(unittest.TestCase):
             with self.assertRaises(manager.ProcessError) as failure:
                 manager.start_server(sys.executable, directory, {}, '127.0.0.1', 8080, directory)
             self.assertNotIsInstance(failure.exception, manager.LaunchUncertain)
+            self.assertEqual(failure.exception.reason, 'process_exited')
+            self.assertEqual(failure.exception.exit_code, 7)
+            self.assertEqual(failure.exception.log_id, next(Path(directory).glob('*.log')).name)
             manager._CHILDREN.pop(123, None)
 
     def test_invalid_listen_address_never_uses_dns(self):

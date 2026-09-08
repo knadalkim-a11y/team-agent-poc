@@ -31,8 +31,10 @@ class DeploymentTransactionTests(unittest.TestCase):
         }
         self.original = {"kind": "original", "source_commit": None, "python": "original-python"}
         self.candidate = {"kind": "release", "source_commit": COMMIT, "python": "candidate-python"}
-        self.original_process = {"pid": 100, "executable": "original-python", "host": "127.0.0.1", "port": 8080}
-        self.candidate_process = {"pid": 200, "executable": "candidate-python", "host": "127.0.0.1", "port": 8080}
+        self.original_process = {"pid": 100, "executable": "original-python", "host": "127.0.0.1", "port": 8080,
+                                 "log_file": str(self.root / "logs" / ("server-" + "1" * 32 + ".log"))}
+        self.candidate_process = {"pid": 200, "executable": "candidate-python", "host": "127.0.0.1", "port": 8080,
+                                  "log_file": str(self.root / "logs" / ("server-" + "2" * 32 + ".log"))}
         self.registry = {"schema_version": 1, "phase": "idle", "current": self.original,
                          "previous": None, "process": self.original_process}
         MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
@@ -107,8 +109,22 @@ class DeploymentTransactionTests(unittest.TestCase):
                 patch.object(MANAGER.reports, "collect", return_value={"status": "unavailable", "reason": "no_failure"}), \
                 redirect_stdout(output):
             self.assertEqual(MANAGER.main(["diagnose", "--config", "unused.json"]), 0)
-        self.assertIn("EES diagnosis v1", output.getvalue())
+        self.assertIn("EES diagnosis v2", output.getvalue())
         self.assertNotIn("private-", output.getvalue())
+
+    def test_diagnose_keeps_log_evidence_when_process_inspection_fails(self):
+        before = MANAGER.registry_path(self.config).read_bytes()
+        report = {"status": "unavailable", "reason": "candidate_log_missing"}
+        with patch.object(MANAGER.states, "load_config", return_value=self.config), \
+                patch.object(MANAGER.reports, "collect", return_value=report), \
+                patch.object(MANAGER.processes, "verify_identity", side_effect=MANAGER.processes.ProcessError("private-inspection")):
+            result = MANAGER.operate(argparse.Namespace(action="diagnose", config="unused"))
+        self.assertIsNone(result["managed_process_running"])
+        self.assertEqual(result["process_check"], "inspection_unavailable")
+        self.assertEqual(result["candidate"], report)
+        self.assertNotIn("private-inspection", MANAGER.render_diagnosis(result))
+        self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+        self.assertEqual(self.events, [])
 
     def test_diagnose_discards_log_report_if_registry_changes_during_read(self):
         def changed(*_):
@@ -175,6 +191,90 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.assertEqual(failure["recovery"]["stage"], "process_stop")
         self.assertEqual(failure["recovery_status"], "failed")
 
+    def test_timeout_evidence_keeps_candidate_log_after_successful_recovery(self):
+        self.mocks[6].side_effect = [MANAGER.processes.ProcessError(
+            "private detail", reason="health_timeout", elapsed_seconds=125.1, timeout_seconds=125), None]
+        with self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.switch(self.config, self.candidate, "deployed", health_timeout=125)
+        failure = self.read()["last_failure"]
+        self.assertEqual(failure["evidence_version"], 1)
+        self.assertEqual(failure["candidate"], {"kind": "release", "source_commit": COMMIT})
+        self.assertEqual(failure["switch"]["reason"], "health_timeout")
+        self.assertEqual(failure["switch"]["timeout_seconds"], 125)
+        self.assertEqual(failure["switch"]["elapsed_seconds"], 125.1)
+        self.assertEqual(failure["switch"]["log_id"], Path(self.candidate_process["log_file"]).name)
+        self.assertEqual(failure["recovery_log_id"], Path(self.original_process["log_file"]).name)
+        self.assertIsNone(failure["switch"]["exit_code"])
+        self.assertEqual(self.read()["process"], self.original_process)
+        self.assertNotIn("private", json.dumps(failure))
+        self.assertNotIn(str(self.root), json.dumps(failure))
+
+    def test_candidate_and_recovery_failures_keep_separate_reasons_and_logs(self):
+        self.mocks[6].side_effect = [
+            MANAGER.processes.ProcessError("candidate", reason="process_exited", exit_code=7, elapsed_seconds=1.2, timeout_seconds=125),
+            MANAGER.processes.ProcessError("recovery", reason="health_timeout", elapsed_seconds=125, timeout_seconds=125)]
+        with self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.switch(self.config, self.candidate, "deployed", health_timeout=125)
+        failure = self.read()["last_failure"]
+        self.assertEqual(failure["switch"]["reason"], "process_exited")
+        self.assertEqual(failure["switch"]["exit_code"], 7)
+        self.assertEqual(failure["switch"]["log_id"], Path(self.candidate_process["log_file"]).name)
+        self.assertEqual(failure["recovery"]["reason"], "health_timeout")
+        self.assertEqual(failure["recovery"]["log_id"], Path(self.original_process["log_file"]).name)
+        self.assertEqual(failure["recovery_status"], "failed")
+
+    def test_early_exit_uses_launch_error_log_and_never_recovery_log(self):
+        log_id = "server-" + "3" * 32 + ".log"
+        self.mocks[5].side_effect = [MANAGER.processes.ProcessError(
+            "private early exit", reason="process_exited", exit_code=7, log_id=log_id), self.original_process]
+        with self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.switch(self.config, self.candidate, "deployed")
+        failure = self.read()["last_failure"]
+        self.assertEqual(failure["switch"]["stage"], "process_start")
+        self.assertEqual(failure["switch"]["log_id"], log_id)
+        self.assertEqual(failure["switch"]["exit_code"], 7)
+        self.assertEqual(failure["recovery_log_id"], Path(self.original_process["log_file"]).name)
+
+    def test_recovered_attempt_then_stop_diagnoses_exact_log_and_both_errors(self):
+        logs = self.root / "logs"
+        logs.mkdir()
+        Path(self.original_process["log_file"]).write_text("Application startup complete\n", encoding="utf-8")
+        Path(self.candidate_process["log_file"]).write_text(
+            'Traceback (most recent call last):\n'
+            '  File "C:/venv/Lib/site-packages/open_webui/main.py", line 9, in startup\n'
+            'ValueError: synthetic-private-error\n'
+            'Traceback (most recent call last):\n'
+            '  File "<frozen importlib._bootstrap>", line 10, in _find_and_load\n'
+            'KeyboardInterrupt\n', encoding="utf-8")
+        self.mocks[6].side_effect = [MANAGER.processes.ProcessError(
+            "private", reason="health_timeout", elapsed_seconds=125, timeout_seconds=125), None]
+        with self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.switch(self.config, self.candidate, "deployed", health_timeout=125)
+        with patch.object(MANAGER.states, "load_config", return_value=self.config):
+            MANAGER.operate(argparse.Namespace(action="stop", config="unused"))
+            before = MANAGER.registry_path(self.config).read_bytes()
+            result = MANAGER.operate(argparse.Namespace(action="diagnose", config="unused"))
+        self.assertEqual(result["candidate"]["selection"], "recorded_log_id")
+        self.assertFalse(result["candidate"]["signals"]["startup_complete"])
+        text = MANAGER.render_diagnosis(result)
+        self.assertIn("first_error_in_read_scope:", text)
+        self.assertIn("open_webui/main.py:9:startup", text)
+        self.assertIn("frozen/importlib._bootstrap:10:_find_and_load", text)
+        self.assertIn('"reason": "health_timeout"', text)
+        self.assertNotIn("synthetic-private-error", text)
+        self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+
+    def test_new_diagnostic_fields_filter_private_or_nonfinite_persisted_values(self):
+        raw = {"evidence_version": True, "candidate": {"kind": "release", "source_commit": "private"},
+               "switch": {"reason": ["private"], "log_id": "../private.log", "elapsed_seconds": float("inf"),
+                          "timeout_seconds": True, "exit_code": "private"}, "recovery_log_id": "private"}
+        safe = MANAGER.safe_last_failure(raw)
+        self.assertNotIn("private", json.dumps(safe))
+        self.assertIsNone(safe["evidence_version"])
+        self.assertIsNone(safe["switch"]["elapsed_seconds"])
+        self.assertIsNone(safe["switch"]["timeout_seconds"])
+        self.assertIsNone(safe["candidate"]["source_commit"])
+
     def test_backup_failure_does_not_launch_candidate_and_recovers_original(self):
         self.mocks[7].side_effect = MANAGER.states.StateError("synthetic backup failed")
         with self.assertRaisesRegex(MANAGER.DeploymentError, "previous program is running"):
@@ -227,7 +327,9 @@ class DeploymentTransactionTests(unittest.TestCase):
         failure = self.read()["last_failure"]
         self.assertEqual(failure["switch"]["stage"], "backup")
         self.assertEqual(failure["recovery"], {"stage": "port_check", "error_type": "process",
-                                             "operation": "port_bind", "errno": 10049, "winerror": 10049})
+                         "operation": "port_bind", "errno": 10049, "winerror": 10049,
+                         "reason": None, "elapsed_seconds": None, "timeout_seconds": None,
+                         "exit_code": None, "log_id": None})
         self.assertEqual(failure, caught.exception.diagnostics)
         self.mocks[5].assert_not_called()
         self.assertNotIn(private, json.dumps(failure) + str(caught.exception))

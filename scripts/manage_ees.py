@@ -8,6 +8,7 @@ import argparse
 from contextlib import contextmanager
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -37,6 +38,24 @@ FAILURE_STAGES = frozenset({
 })
 ERROR_TYPES = frozenset({"launch_uncertain", "process", "state", "release", "deployment", "os_error", "unexpected"})
 RECOVERY_STATES = frozenset({"not_attempted", "blocked", "failed", "succeeded"})
+FAILURE_REASONS = ("health_timeout", "process_exited", "identity_unavailable", "identity_changed",
+                   "launch_failed", "launch_unverified")
+
+
+def safe_log_id(value):
+    return value if isinstance(value, str) and re.fullmatch(r"server-[0-9a-f]{32}\.log", value) else None
+
+
+def safe_seconds(value):
+    return round(value, 3) if type(value) in (int, float) and 0 <= value <= 86400 and math.isfinite(value) else None
+
+
+def safe_candidate(value):
+    value = value if isinstance(value, dict) else {}
+    kind, commit = value.get("kind"), value.get("source_commit")
+    return {"kind": kind if kind in ("original", "release") else "unknown",
+            "source_commit": commit if kind == "release" and isinstance(commit, str)
+            and re.fullmatch(r"[0-9a-f]{40}", commit) else None}
 
 
 def safe_failure_detail(value):
@@ -48,6 +67,12 @@ def safe_failure_detail(value):
         "operation": value.get("operation") if value.get("operation") in ("port_probe", "port_bind") else None,
         "errno": value.get("errno") if type(value.get("errno")) is int else None,
         "winerror": value.get("winerror") if type(value.get("winerror")) is int else None,
+        "reason": value.get("reason") if value.get("reason") in FAILURE_REASONS else None,
+        "elapsed_seconds": safe_seconds(value.get("elapsed_seconds")),
+        "timeout_seconds": safe_seconds(value.get("timeout_seconds")),
+        "exit_code": value.get("exit_code") if type(value.get("exit_code")) is int
+        and -(2 ** 31) <= value["exit_code"] <= 2 ** 32 - 1 else None,
+        "log_id": safe_log_id(value.get("log_id")),
     }
 
 
@@ -59,24 +84,35 @@ def failure_detail(progress, error):
     ) if isinstance(error, cls)), "unexpected")
     return safe_failure_detail({"stage": progress.get("stage"), "error_type": error_type,
                                 "operation": getattr(error, "operation", None),
-                                "errno": getattr(error, "errno", None), "winerror": getattr(error, "winerror", None)})
+                                "errno": getattr(error, "errno", None), "winerror": getattr(error, "winerror", None),
+                                "reason": getattr(error, "reason", None),
+                                "elapsed_seconds": getattr(error, "elapsed_seconds", None),
+                                "timeout_seconds": getattr(error, "timeout_seconds", None),
+                                "exit_code": getattr(error, "exit_code", None),
+                                "log_id": safe_log_id(getattr(error, "log_id", None)) or progress.get("log_id")})
 
 
 def safe_last_failure(value):
     if not isinstance(value, dict):
         return None
     timestamp = value.get("failed_at")
-    return {
+    result = {
         "action": value.get("action") if value.get("action") in ("deploy", "rollback") else "unknown",
         "failed_at": timestamp if isinstance(timestamp, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", timestamp) else None,
         "switch": safe_failure_detail(value.get("switch")),
         "recovery": safe_failure_detail(value["recovery"]) if isinstance(value.get("recovery"), dict) else None,
         "recovery_status": value.get("recovery_status") if value.get("recovery_status") in tuple(RECOVERY_STATES) else "not_attempted",
     }
+    if "evidence_version" in value:
+        result.update(evidence_version=1 if type(value["evidence_version"]) is int and value["evidence_version"] == 1 else None,
+                      candidate=safe_candidate(value.get("candidate")),
+                      recovery_log_id=safe_log_id(value.get("recovery_log_id")))
+    return result
 
 
-def remember_failure(registry, event, progress, error):
+def remember_failure(registry, event, progress, error, *, selected=None):
     registry["last_failure"] = {
+        "evidence_version": 1, "candidate": safe_candidate(selected), "recovery_log_id": None,
         "action": "rollback" if event == "rolled_back_program" else "deploy",
         "failed_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "switch": failure_detail(progress, error), "recovery": None, "recovery_status": "not_attempted",
@@ -208,6 +244,7 @@ def require_free_port(config):
 
 def start_selected(config, selected, env, registry, health_timeout=DEFAULT_HEALTH_TIMEOUT, *, progress=None):
     progress = progress if progress is not None else {}
+    progress.pop("log_id", None)
     progress["stage"] = "select_program"
     executable, child_env = selected_environment(config, selected, env)
     progress["stage"] = "port_check"
@@ -216,15 +253,19 @@ def start_selected(config, selected, env, registry, health_timeout=DEFAULT_HEALT
     try:
         identity = processes.start_server(executable, config["cwd"], child_env,
                                           config["host"], config["port"], Path(config["state_root"]) / "logs")
-    except processes.LaunchUncertain:
+    except processes.LaunchUncertain as error:
+        progress["log_id"] = safe_log_id(getattr(error, "log_id", None))
         registry["phase"] = "recovery_required"
         registry["launch_uncertain"] = True
         try:
             record(config, registry, "process_identity_unavailable_after_launch")
         except (OSError, ValueError, TypeError):
             raise processes.LaunchUncertain("A server launch is unverified and its state could not be saved; "
-                                            "inspect the local process before continuing.") from None
+                                            "inspect the local process before continuing.",
+                                            reason="launch_unverified", log_id=progress["log_id"]) from None
         raise
+    log_file = identity.get("log_file")
+    progress["log_id"] = safe_log_id(Path(log_file).name) if isinstance(log_file, str) else None
     registry["process"] = identity
     # Persist identity before health probing, including startup failures.
     progress["stage"] = "process_record"
@@ -309,7 +350,7 @@ def switch(config, selected, event, health_timeout=DEFAULT_HEALTH_TIMEOUT, *, us
                 return {"already_current": True, "source_commit": selected.get("source_commit")}
             stop_registered(config, registry, progress=progress)
         except Exception as error:
-            remember_failure(registry, event, progress, error)
+            remember_failure(registry, event, progress, error, selected=selected)
             raise reported_failure(config, registry, "switch_preflight_failed",
                                    "Switch preflight failed; no replacement program was started. Inspect local state.") from None
         registry["phase"] = "switching"
@@ -317,7 +358,7 @@ def switch(config, selected, event, health_timeout=DEFAULT_HEALTH_TIMEOUT, *, us
         try:
             record(config, registry, "switch_started")
         except (OSError, ValueError, TypeError) as error:
-            remember_failure(registry, event, {"stage": "switch_record"}, error)
+            remember_failure(registry, event, {"stage": "switch_record"}, error, selected=selected)
             raise DeploymentError("Switch state could not be saved; no replacement program was started. "
                                   "Retain this diagnostic and inspect local state.",
                                   diagnostics=safe_last_failure(registry["last_failure"])) from None
@@ -329,17 +370,19 @@ def switch(config, selected, event, health_timeout=DEFAULT_HEALTH_TIMEOUT, *, us
             record(config, registry, "backup_verified")
             start_selected(config, selected, env, registry, health_timeout=health_timeout, progress=progress)
         except Exception as error:
-            remember_failure(registry, event, progress, error)
+            remember_failure(registry, event, progress, error, selected=selected)
             if registry.get("launch_uncertain"):
                 registry["last_failure"]["recovery_status"] = "blocked"
                 raise reported_failure(config, registry, "process_identity_unavailable_after_launch",
                                        "A process launch needs local inspection. Automatic recovery was blocked to avoid two servers using the same data.") from None
             # Never start the old server while the candidate still owns the DB/port.
+            recovery_progress = {}
             try:
-                stop_registered(config, registry, progress=progress)
-                start_selected(config, old, env, registry, health_timeout=health_timeout, progress=progress)
+                stop_registered(config, registry, progress=recovery_progress)
+                start_selected(config, old, env, registry, health_timeout=health_timeout, progress=recovery_progress)
             except Exception as recovery_error:
-                registry["last_failure"]["recovery"] = failure_detail(progress, recovery_error)
+                registry["last_failure"]["recovery"] = failure_detail(recovery_progress, recovery_error)
+                registry["last_failure"]["recovery_log_id"] = registry["last_failure"]["recovery"]["log_id"]
                 registry["last_failure"]["recovery_status"] = "failed"
                 registry["phase"] = "recovery_required"
                 raise reported_failure(config, registry, "automatic_program_recovery_failed",
@@ -347,6 +390,7 @@ def switch(config, selected, event, health_timeout=DEFAULT_HEALTH_TIMEOUT, *, us
             registry["phase"] = "idle"
             registry.pop("pending", None)
             registry["last_failure"]["recovery_status"] = "succeeded"
+            registry["last_failure"]["recovery_log_id"] = safe_log_id(recovery_progress.get("log_id"))
             raise reported_failure(config, registry, "previous_program_recovered",
                                    "Switch failed; the previous program is running again. Existing data was not restored or replaced.") from None
         registry["previous"] = old
@@ -356,7 +400,7 @@ def switch(config, selected, event, health_timeout=DEFAULT_HEALTH_TIMEOUT, *, us
         try:
             record(config, registry, event)
         except (OSError, ValueError, TypeError) as error:
-            remember_failure(registry, event, {"stage": "switch_record"}, error)
+            remember_failure(registry, event, {**progress, "stage": "switch_record"}, error, selected=selected)
             raise DeploymentError("Program health succeeded but activation could not be recorded; "
                                   "no automatic recovery was attempted. Retain this diagnostic and inspect local state.",
                                   diagnostics=safe_last_failure(registry["last_failure"])) from None
@@ -384,12 +428,25 @@ def operate(args):
         states._regular(registry_path(config))
         registry = read_registry(config)
         candidate = reports.collect(config, registry)
-        states._regular(registry_path(config))
-        if read_registry(config) != registry or (Path(config["state_root"]) / "deployment.lock").exists():
+        try:
+            if registry.get("process"):
+                running = processes.verify_identity(registry["process"])
+                process_check = "identity_matched" if running else "identity_not_matched"
+            else:
+                running, process_check = False, "not_recorded"
+        except (processes.ProcessError, OSError, ValueError, TypeError, KeyError):
+            running, process_check = None, "inspection_unavailable"
+        try:
+            states._regular(registry_path(config))
+            unchanged = read_registry(config) == registry and not (Path(config["state_root"]) / "deployment.lock").exists()
+        except (DeploymentError, states.StateError, OSError, ValueError, TypeError):
+            unchanged = False
+        if not unchanged:
             candidate = {"status": "unavailable", "reason": "state_changed_or_busy"}
-        return {"report_version": 1, "phase": registry["phase"],
+            running, process_check = None, "state_changed_or_busy"
+        return {"report_version": 2, "phase": registry["phase"],
                 "original_program": registry["current"]["kind"] == "original",
-                "managed_process_running": bool(registry.get("process") and processes.verify_identity(registry["process"])),
+                "managed_process_running": running, "process_check": process_check,
                 "last_failure": safe_last_failure(registry.get("last_failure")),
                 "candidate": candidate}
     if args.action == "status":
@@ -423,20 +480,31 @@ def render_diagnosis(result):
     failure = result["last_failure"] or {}
     detail = failure.get("switch") or {}
     candidate = result["candidate"]
-    lines = ["EES diagnosis v1", json.dumps({key: result[key] for key in (
-        "phase", "original_program", "managed_process_running")}),
+    lines = ["EES diagnosis v2", json.dumps({key: result[key] for key in (
+        "phase", "original_program", "managed_process_running", "process_check")}),
         "failure: " + json.dumps({"at": failure.get("failed_at"), "action": failure.get("action"),
             "stage": detail.get("stage"), "error_type": detail.get("error_type"),
-            "recovery": failure.get("recovery_status")})]
+            "reason": detail.get("reason"), "recovery": failure.get("recovery_status")}),
+        "health: " + json.dumps({key: detail.get(key) for key in (
+            "elapsed_seconds", "timeout_seconds", "exit_code")})]
+    if failure.get("candidate"):
+        lines.append("program: " + json.dumps(failure["candidate"]))
+    if failure.get("recovery"):
+        lines.append("recovery_failure: " + json.dumps({key: failure["recovery"].get(key) for key in (
+            "stage", "error_type", "reason", "elapsed_seconds", "timeout_seconds", "exit_code")}))
     if candidate["status"] != "ok":
         return "\n".join(lines + ["candidate: " + json.dumps(candidate)])
     lines += ["candidate: " + json.dumps({key: candidate[key] for key in (
         "selection", "candidate_seconds", "recovery_seconds", "scan_scope", "log_bytes", "bytes_read")}),
         "signals: " + json.dumps(candidate["signals"]),
         "errors: " + json.dumps(candidate["error_types"]),
-        "traceback: " + json.dumps({key: candidate[key] for key in (
-            "tracebacks_seen", "last_traceback_header_seen", "frames_omitted", "unknown_frames")})]
-    return "\n".join(lines + candidate["frames"])
+        "traceback: " + json.dumps({key: candidate.get(key) for key in (
+            "tracebacks_seen", "last_traceback_header_seen", "frames_omitted", "unknown_frames",
+            "first_error_type", "first_error_matches_last_traceback", "first_error_frames_omitted",
+            "first_error_unknown_frames", "first_error_traceback_header_seen")})]
+    if candidate.get("first_error_frames"):
+        lines += ["first_error_in_read_scope:", *candidate["first_error_frames"]]
+    return "\n".join(lines + ["last_traceback:", *candidate["frames"]])
 
 
 def main(argv=None):

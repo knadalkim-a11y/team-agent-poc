@@ -7,8 +7,10 @@ Logs stay on this PC. Linux support exists for offline lifecycle tests.
 
 import ipaddress
 import json
+import math
 import os
 from pathlib import Path
+import re
 import signal
 import socket
 import subprocess
@@ -22,7 +24,8 @@ import uuid
 class ProcessError(RuntimeError):
     """Starting, identifying, or gracefully stopping the managed server failed."""
 
-    def __init__(self, message, *, cause=None, operation=None):
+    def __init__(self, message, *, cause=None, operation=None, reason=None,
+                 elapsed_seconds=None, timeout_seconds=None, exit_code=None, log_id=None):
         super().__init__(message)
         self.errno = getattr(cause, 'errno', None)
         self.winerror = getattr(cause, 'winerror', None)
@@ -31,6 +34,22 @@ class ProcessError(RuntimeError):
         if type(self.winerror) is not int:
             self.winerror = None
         self.operation = operation if type(operation) is str and operation in {'port_probe', 'port_bind'} else None
+        reasons = {'health_timeout', 'process_exited', 'identity_unavailable',
+                   'identity_changed', 'launch_failed', 'launch_unverified'}
+        self.reason = reason if type(reason) is str and reason in reasons else None
+        self.elapsed_seconds = _duration(elapsed_seconds)
+        self.timeout_seconds = _duration(timeout_seconds)
+        self.exit_code = exit_code if type(exit_code) is int else None
+        self.log_id = (log_id if type(log_id) is str
+                       and re.fullmatch(r'server-[0-9a-f]{32}\.log', log_id) else None)
+
+
+def _duration(value):
+    if type(value) is int and value >= 0:
+        return value
+    if type(value) is float and math.isfinite(value) and value >= 0:
+        return value
+    return None
 
 
 class LaunchUncertain(ProcessError):
@@ -154,6 +173,7 @@ def verify_identity(identity):
 
 
 def start_server(python_exe, cwd, env, host, port, log_dir):
+    started = time.monotonic()
     if not port_is_free(host, port, raise_on_error=True):
         raise ProcessError("The listen port is unavailable; no existing process was stopped.")
     # Preserve a venv's executable path; resolving its symlink can select the base environment.
@@ -171,7 +191,9 @@ def start_server(python_exe, cwd, env, host, port, log_dir):
                                      cwd=cwd, env=env, stdin=subprocess.DEVNULL,
                                      stdout=log, stderr=subprocess.STDOUT, **options)
     except OSError as error:
-        raise ProcessError("Server launch failed; inspect the local server log.", cause=error) from None
+        raise ProcessError("Server launch failed; inspect the local server log.", cause=error,
+                           reason='launch_failed', elapsed_seconds=time.monotonic() - started,
+                           log_id=log_file.name) from None
     _CHILDREN[child.pid] = child
     try:
         identity = _identity(child.pid)
@@ -179,13 +201,19 @@ def start_server(python_exe, cwd, env, host, port, log_dir):
         identity = None
     if identity is None:
         try:
-            exited = child.poll() is not None
+            exit_code = child.poll()
+            exited = type(exit_code) is int
         except Exception:
+            exit_code = None
             exited = False
         if not exited:
             raise LaunchUncertain("A server was launched but its identity could not be verified. "
-                                  "It may still be running; automatic recovery must not start another server.") from None
-        raise ProcessError("Server exited during startup; inspect the local server log.")
+                                  "It may still be running; automatic recovery must not start another server.",
+                                  reason='launch_unverified', elapsed_seconds=time.monotonic() - started,
+                                  log_id=log_file.name) from None
+        raise ProcessError("Server exited during startup; inspect the local server log.",
+                           reason='process_exited', elapsed_seconds=time.monotonic() - started,
+                           exit_code=exit_code, log_id=log_file.name)
     return {**identity, 'group_id': child.pid, 'host': host, 'port': port, 'log_file': str(log_file)}
 
 
@@ -213,15 +241,42 @@ def _healthy(host, port, timeout):
 
 
 def wait_healthy(identity, timeout=60, interval=0.2):
-    deadline = time.monotonic() + timeout
+    started = time.monotonic()
+    deadline = started + timeout
+    log_file = identity.get('log_file') if isinstance(identity, dict) else None
+    log_id = Path(log_file).name if type(log_file) is str else None
+
+    def failure(message, reason, *, cause=None, exit_code=None):
+        return ProcessError(message, cause=cause, reason=reason,
+                            elapsed_seconds=time.monotonic() - started, timeout_seconds=timeout,
+                            exit_code=exit_code, log_id=log_id)
+
+    def check_identity():
+        # _identity's existing poll may remove a finished child from _CHILDREN.
+        # Keep its Popen reference to use that poll's exit evidence, without polling again.
+        pid = identity.get('pid') if isinstance(identity, dict) else None
+        child = _CHILDREN.get(pid) if type(pid) is int else None
+        try:
+            verified = verify_identity(identity)
+        except Exception as error:
+            raise failure("Server identity could not be inspected while waiting for health.",
+                          'identity_unavailable', cause=error) from None
+        if verified:
+            return
+        exit_code = getattr(child, 'returncode', None)
+        if type(exit_code) is int:
+            raise failure("Server exited before becoming healthy; inspect the local server log.",
+                          'process_exited', exit_code=exit_code)
+        raise failure("Server identity changed or is unavailable; inspect the local server log.",
+                      'identity_changed')
+
     while time.monotonic() < deadline:
-        if not verify_identity(identity):
-            raise ProcessError("Server exited before becoming healthy; inspect the local server log.")
+        check_identity()
         if _healthy(identity['host'], identity['port'], min(2, max(0.01, deadline - time.monotonic()))):
-            if verify_identity(identity):
-                return
+            check_identity()
+            return
         time.sleep(min(interval, max(0, deadline - time.monotonic())))
-    raise ProcessError("Server health timed out; inspect the local server log.")
+    raise failure("Server health timed out; inspect the local server log.", 'health_timeout')
 
 
 def stop_server(identity, timeout=30):

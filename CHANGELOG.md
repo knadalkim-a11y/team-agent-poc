@@ -4,6 +4,8 @@
 
 ## 2026-09-08
 
+- 사내 확인을 짧은 Git 명령·한 번의 결과 전달·근거에 따른 다음 행동으로 재설계함. 새 실패 기록에 이유·기동 health 경과/한도·종료 코드·후보와 복구 로그 식별자를 보존하고 Diagnose v2에서 정확한 로그 연결과 첫 비중단/마지막 오류 위치를 제공함. 프로세스 확인 실패에도 확보한 진단을 반환하며 기존 데이터·복구 순서·대기 한도는 유지함. [운영 흐름](docs/03-openwebui-native-agent.md#ees-diagnostic-workflow), [검증과 한계](evals/scenarios.md#ees-diagnostic-workflow).
+
 - `Diagnose`로 자동 복구 뒤 실패 후보의 시간·기동/네트워크 마커·공개 traceback 위치를 한 번에 요약. 반복 재배포와 수동 중간 전사를 줄이고, 기존 로그를 읽어 다음 조치를 정함. 앱 import·기동·통신·데이터/캐시 쓰기 없이 동작함. [사용법](docs/03-openwebui-native-agent.md#ees-diagnose-once), [검증](evals/scenarios.md#ees-diagnose-once).
 
 - 후보 배포의 `-UseWindowsCA` 옵션 추가. 기존 서버 종료 전에 후보 Python으로 Windows 포함 CA 스냅샷을 준비하고, 릴리스의 자식 환경과 이후 Start/Rollback에 같은 신뢰 파일을 적용함. 등록된 config/DPAPI·기존 프로그램 복구 환경·데이터·키는 유지함. [사용법](docs/03-openwebui-native-agent.md#ees-windows-ca-deploy), [검증·사내 적용 구분](evals/scenarios.md#ees-windows-ca-support).
