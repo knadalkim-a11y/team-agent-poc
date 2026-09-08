@@ -576,6 +576,18 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 후속 사용자 요구: Git·자동화 스크립트를 중심으로 배포하고 기존 스킬·툴·모델·사용자 데이터·Memory를 보존하는 래핑. 실제 0.11.3 wheel의 models/{skills,tools,models,memories,users,chats,files,knowledge,config}.py·internal/db.py·utils/valves.py·storage/provider.py·Chroma 구현을 읽어 관계형 DB·업로드·벡터 저장소·DATA_DIR 밖 키와 실행 설정을 구분함. Tool/User ID와 기존 키의 중요성, 외부 DB/저장소/Agent Memory의 별도 범위를 확인함.
 - tools/skills/models의 조회·갱신 router와 Form을 대조함. 일부 생략 필드가 기본값으로 덮일 수 있어 기존 값 조회·관리 필드 병합·직접 편집 충돌 확인·항목별 복구가 필요함. [공식 업데이트 안내](https://docs.openwebui.com/getting-started/updating/)의 버전 고정·백업·DB 마이그레이션 후 단순 프로그램 원복 한계도 대조함. 이를 [기존 배포 가이드](../docs/03-openwebui-native-agent.md#데이터-보존과-사내-자동화-계획)에 구현 전 계획으로 반영함. 읽기 검토·문서 변경만 수행하고 제품 코드·사내 데이터·실행 환경은 수정하지 않았으며 완료한 시험도 반복하지 않음.
 
+<a id="ees-program-deployment"></a>
+
+### 프로그램 배포 자동화 첫 단위 — 2026-09-08
+
+- 원본 main `e0afd903fc4e76783b4804002744d2b5dd441d7d`에서 시작. [운영 명령](../scripts/manage-ees.ps1), [전환 제어](../scripts/manage_ees.py), [환경/백업](../scripts/ees_deploy_state.py), [오프라인 준비](../scripts/ees_deploy_release.py), [프로세스](../scripts/ees_deploy_process.py)를 추가함. 내부 전용 설정과 현재 사용자 DPAPI 스냅샷을 사용하며 프로그램 환경만 전환함. Agent Pack API 동기화는 후속 범위임.
+- 합격 기준: 기존 DB/키를 생성·초기화하지 않음, DATA_DIR 전체/키/설정 백업의 바이트 보존, 준비 실패 시 기존 환경/서버 유지, 정확한 Python/전체 패키지 목록, 모르는 프로세스에 종료 신호 금지, 새 프로그램 종료 확인 후에만 기존 프로그램 복구, 프로그램 원복 때 최신 데이터 보존.
+- 사외 Linux/Python 3.12.13에서 `python -m unittest discover -s tests -p 'test_ees_deploy_*.py' -v`와 `python -m unittest discover -s tests -p test_manage_ees.py -v` 수행. 상태/설치 계약·실제 로컬 HTTP·전환 순서/실패 경계 통과. 실제 Windows DPAPI·Python 3.11 uv 설치·정상 PID namespace child 시험은 이 환경에서 미실행이며 Windows/Linux CI 대상으로 분리함.
+- 실제 EES wheel을 새 수신 검증기로 읽어 5,894개 RECORD 항목과 의존성 선언 116개 검증 통과. 기존 브랜딩 빌드를 다시 고치거나 전체 업무 시험을 반복하지 않음.
+- 독립 검토에서 시작 직후 프로세스 신원을 얻지 못한 상태에서 자동 복구가 두 서버를 띄울 수 있는 경계를 발견함. `LaunchUncertain`과 `recovery_required` 기록으로 자동 시작/중단 해제를 차단하고 관련 시험 추가. 정상 uv 실행 파일의 hardlink를 상태 파일과 구분하고, 큰 업로드/벡터 파일의 해시는 스트리밍으로 계산함.
+- 최초 등록이 기존 서버 창의 환경을 저장한다는 제한을 안내함. 새 창에 없는 기존 설정을 추정하거나 등록 성공을 전체 환경 동등성 검증으로 간주하지 않음. 설치 루트 `.env`/외부 저장소·지원하지 않는 경로는 보존하고 중단함.
+- [Actions](../.github/workflows/ees-delivery.yml)에 Windows/Linux 배포 시험, uv 0.12.7의 작은 합성 wheel 설치, Windows DPAPI와 PowerShell 5.1 문법 검사를 추가함. CI 결과는 아래에 후속 기록. 사내 PC의 기존 Open WebUI 기동·원복·UI·데이터 연속성은 미실행.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
