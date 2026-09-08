@@ -1,6 +1,6 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-07
+갱신일: 2026-09-08
 
 계획·다음 작업·적용 원본을 관리합니다. 시험 판정은 [평가표](../evals/scenarios.md), 환경은 [versions](../versions.md), 과거 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: 사용자가 초기 배포 인원 **50명 이하**를 확인함. 원본 0.11.3의 해시를 고정한 EES 이름·아이콘 패키지 `0.11.3+ees.1`, Agent Pack 전달 도구, 변경 종류별 GitHub Actions 패키징을 준비함. 기존 모델의 이름·소개·빠른 제안 4개 적용 안내를 유지함([구현·근거](../evals/scenarios.md#ees-branding-delivery)). 사내 프로그램 전환·UI 저장·팀원 시연은 미실행.
-- 다음 작업 하나: **기존 데이터를 보존하는 사내 배포 자동화의 첫 단위를 구현한다.** 사용자가 Git·자동화 스크립트 중심 배포와 기존 스킬·툴·모델·사용자 대화/메모리 보존을 요구함. 현재 환경을 한 번 연결하고 변경 계획·고정 커밋 전달·프로그램 전환/원복을 하나의 운영자 진입점으로 준비함. 공통 자산 API 동기화는 지정한 기존 ID/필드만 갱신하며 직접 수정 충돌·권한·연결·valves를 보존함([설계](03-openwebui-native-agent.md#데이터-보존과-사내-자동화-계획)). 아직 사내 전환·동기화 코드는 미구현이며 현재 서버·데이터·키·CORS는 변경하지 않음. 소개/제안 적용 안내와 Confluence v0.1.5 미적용 상태는 유지함.
+- 이번 작업: **프로그램 배포 자동화 첫 단위**를 구현함. `manage-ees.ps1`에 초기 환경 등록·Git 갱신·계획·오프라인 준비·배포·프로그램 원복·시작/종료를 모음. 기존 DB/업로드/Memory 검색 저장소·키·CORS를 유지하며 공통 자산 API 동기화는 아직 포함하지 않음. [명령과 지원 범위](03-openwebui-native-agent.md#기존-windows-서버에-적용), [배포 검증](../evals/scenarios.md#ees-program-deployment). 사내 등록/전환·UI 저장·팀원 시연은 미실행.
+- 다음 작업 하나: **기존 Windows 실행 명령에서 실제 WebUI Python·작업 폴더·DATA_DIR·host/port를 확인하고 최초 등록·프로그램 전환을 안내한다.** 기존 서버 창에서 설정을 보존해 한 번 연결하고, 성공한 CI의 프로그램 ZIP을 적용한다. 이후 공통 자산 동기화를 별도 단위로 구현하며 기존 ID/권한/연결/valves와 직접 수정 충돌을 보존한다. 기존 소개/제안 안내와 Confluence v0.1.5 미적용 상태는 유지한다.
 
 <a id="resume-branch"></a>
 
@@ -46,7 +46,7 @@
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | 팀 시연용 이름·소개·시작 질문 | 기존 모델 이름·소개·프로필 적용 안내, 제안 JSON 4개·짧은 팀원 안내 | 사용자 요청으로 준비 재개. 실제 UI 저장·로고 교체·팀원 전달은 미확인 | [시연 준비](../evals/scenarios.md#team-demo-customization), [이전 준비](../evals/scenarios.md#team-first-use-preparation), [당시 보류](../evals/scenarios.md#onboarding-deferred) | 현재 [제안 JSON](../agent-pack/ees-prompt-suggestions.json); 사내 적용 원본 없음 |
-| EES 프로그램·전달 도구 | EES 아이콘·0.11.3+ees.1 wheel 빌더·Agent Pack ZIP·Actions workflow | Windows/Linux CI·실제 배포 ZIP 생성 통과. 사내 전환/원복 미실행 | [빌드·배포 가이드](03-openwebui-native-agent.md#release-delivery), [CI·artifact 증거](../evals/scenarios.md#ees-branding-delivery) | 배포물 원본 `adbb40f`; 사내 적용 원본 없음 |
+| EES 프로그램·전달 도구 | 이름·아이콘 wheel/ZIP/Actions와 Windows 프로그램 배포 명령 | 기존 패키징 CI 통과; 새 배포 코드의 사외 확인 진행. 사내 등록/전환 미실행 | [운영 명령](03-openwebui-native-agent.md#기존-windows-서버에-적용), [새 검증](../evals/scenarios.md#ees-program-deployment), [이전 artifact](../evals/scenarios.md#ees-branding-delivery) | 기존 배포물 원본 `adbb40f`; 사내 적용 원본 없음 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 2026-09-07 두 지침 UI 저장 보고; 개정 후 P02 PASS, P03 창작 거절 부분 확인, P04~P10 미완료; 실행 시점은 평가표 | [P02~P10 재검증](../evals/scenarios.md#instruction-revision), [기존 지침 갱신](03-openwebui-native-agent.md#update-existing-instructions) | 전달·저장 안내 원본 [dfeb95f](https://github.com/knadalkim-a11y/team-agent-poc/commit/dfeb95fbf96cf6a2bb75a3ba75fac3bc92ed60fc); 등록 내용·사용자 추가 규칙·사내 checkout SHA 직접 대조는 미실행 |
 | 조회 경로 보완 | Prompt의 [현재 POC 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션 | 부분 적용 당시 C04·P02 정상·임베딩 오류 재발 없음 보고; 이번 전체 Prompt에도 포함해 저장 안내 | [실환경 결과](../evals/scenarios.md#결과-기록), [당시 소스 검토](../evals/confluence-offline.md#knowledge-routing) | 부분 추가 안내 원본 [28f526a](https://github.com/knadalkim-a11y/team-agent-poc/blob/28f526a39162e54f126f577554f8c15fdd5940f1/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로); 현재 전체 지침 안내 원본은 위 행. 부분 적용 당시 성공을 이번 개정 후 재평가로 간주하지 않음 |
 | 카드·후속 조회 지침 | 카드/답변 중복 억제, Confluence 본문 조회, Jira/GitHub의 실제 ID·후속 범위 지침 | 2026-09-07 전체 System Prompt 3블록 전달 후 저장 및 업데이트 완료 보고. 일반 채팅 스트리밍과 GitHub/Jira 이전 본문 후속 흐름 정상 보고; 이번 버튼 제거에는 같은 전체 Prompt 유지, Confluence 새 흐름은 미확인 | [전체 지침 저장 보고](../evals/scenarios.md#rich-ui-prompt-saved) | [7c8a65b의 전체 Prompt](https://github.com/knadalkim-a11y/team-agent-poc/blob/7c8a65b0e2eed6d22109b8770e97b9e6908ad68a/agent-pack/system-prompts/ees-integrated-assistant.md); 실제 등록 내용·사용자 추가 지침 직접 대조는 미실행 |
@@ -84,7 +84,7 @@
 
 ## 최근 점검
 
-브랜딩·전달 구현은 main에 반영했고 배포물 원본은 `adbb40f`임. 원본 wheel 5,894개 항목·관련 사외 시험 14개·frontend 참조 147개를 검사함. 최초 Actions에서 발견한 Windows 시험의 LF/CRLF 기대값을 수정한 뒤 **Windows/Linux CI·프로그램 포함 ZIP 생성 모두 통과**함. [실행·artifact·해시와 검토 범위](../evals/scenarios.md#ees-branding-delivery)에 기록함. 이번 마무리는 문서·diff만 검사하고 완료한 코드 시험을 반복하지 않음. 사내 프로그램 전환·UI 저장·실환경 사용은 별도 미확인임.
+배포 자동화의 상태 보존·오프라인 준비·프로세스 종료·실패 복구를 관련 합성 시험과 독립 읽기 검토로 확인함. 실제 Windows DPAPI·합성 child·uv 설치는 CI에서 확인하고, 사내 Open WebUI 전환/데이터 연속성/화면은 별도 미실행으로 유지함. [시험·CI 증거](../evals/scenarios.md#ees-program-deployment). 기존 채팅/연동/권한 시험과 브랜딩 wheel 검증은 변경과 무관하게 반복하지 않음.
 
 ## 갱신 규칙
 

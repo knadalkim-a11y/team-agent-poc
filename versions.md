@@ -18,6 +18,8 @@
 
 데이터 위치나 설치 스크립트가 실제 환경에 적용됐다는 증거를 이 표에서 대신하지 않습니다.
 
+프로그램 운영 스크립트는 Windows의 기존 Python 3.11·Open WebUI 0.11.3·로컬 SQLite/Chroma 구성 등록과 uv 0.12.7 오프라인 준비를 대상으로 합니다. 새 환경은 기존 Python 패치 버전과 전체 의존성 버전을 그대로 유지합니다. 별도 Windows/Linux CI의 합성 서버 검증과 사내 실제 전환을 구분합니다. [운영 명령](docs/03-openwebui-native-agent.md#기존-windows-서버에-적용).
+
 브랜딩 배포물은 **0.11.3+ees.1**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 위 표와 STATUS의 실제 적용 기록으로 구분합니다. 아래 Selector 실행 파일은 공식 0.11.3만 허용하고 현재 미적용이므로 EES 전환에 함께 사용하지 않습니다.
 
 Windows 접속 수락 오류용 [선택 실행 파일](scripts/serve_openwebui_windows.py)은 위 WebUI·Python 버전과 공식 고정 의존성 **Uvicorn 0.51.0**, 기존 SQLite·단일 worker에 한정합니다. 별도 설치·업그레이드를 수행하지 않으며 실제 사내 의존성 버전은 아직 미대조입니다. 사전검사에서 다르면 기존 환경을 보존한 채 검토합니다. [Selector 제한·적용 조건](docs/troubleshooting.md#windows-accept-winerror64).
