@@ -650,7 +650,7 @@ Diagnose v2 뒤 실행한 고정 import 비교 결과까지 수신했습니다. 
 
 **기존/후보 NLTK import 비교:** 2026-09-08에 받은 v2 결과는 추정 후보 로그 전체 10,228바이트에서 KeyboardInterrupt만 확인했고 종료 위치는 NLTK → scikit-learn → pandas → importlib의 파일 조회 경로였습니다. 이 위치만으로 pandas 결함이나 파일 접근 지연을 확정하지 않습니다. 이미 빠르게 통과한 NumPy 단독 검사·전체 캐시 작업은 반복하지 않습니다. [수신 근거](../evals/scenarios.md#ees-import-probe).
 
-**현재는 재실행 보류:** 이후 받은 기존 `import_failed/11.157초`·후보 `parent_timeout_cleanup_unverified/70.0초`는 아래 [기존 결과 후속 확인](#ees-import-followup)으로 이어갑니다. 후보 검사 자식의 상태를 확인하기 전에 아래 ProbeImports 실행 블록이나 Deploy를 다시 실행하지 않습니다.
+**현재는 재실행 보류:** 기존 `import_failed/11.157초`·후보 `parent_timeout_cleanup_unverified/70.0초`에 이어 후보 표식 T/T/F/F·P=0/U=0까지 받았습니다. 아래 [기존 결과 후속 확인](#ees-import-followup)의 original 오류 종류 하나만 남았으며, 아래 ProbeImports 실행 블록이나 Deploy를 다시 실행하지 않습니다.
 
 - 가설: 같은 의존성 로딩을 분리해도 후보에서 지연이 재현되는지 확인합니다. 두 환경의 실행 시간·import별 self 시간·시간 제한 시 호출 위치를 함께 수집합니다.
 - 범위: 준비된 동일 후보를 사용해 고정 `import nltk`만 기존/후보 Python에서 순차 실행합니다. 앱 entry point를 호출하거나 운영 DATA_DIR·키·등록 환경을 자식에 전달하지 않습니다. 기존 관리 잠금으로 동시 배포를 막고 임시 작업 폴더와 필요한 OS 환경을 사용합니다. HOME·USERPROFILE·APPDATA·LOCALAPPDATA·HOMEDRIVE·HOMEPATH는 사용자 폴더 해석에 필요해 유지하며 이 실제 경로를 외부 요약에 출력하지 않습니다.
@@ -693,9 +693,11 @@ Diagnose v2 뒤 실행한 고정 import 비교 결과까지 수신했습니다. 
 
 기존 필터가 모든 사용자 폴더 변수를 제외한 것은 진단 결함입니다. NLTK는 import 도중 Downloader를 초기화하며 기존 corpus 경로를 선택하지 못하면 APPDATA 또는 사용자 홈 경로를 찾습니다. Windows에서 이 변수를 모두 빼면 ValueError를 유발할 수 있어 일반 프로필 변수는 보존하도록 수정했습니다. 이번 사용자의 실제 오류가 그것인지는 아직 미확인이고, 후보 70초와 과거 EES 600초 실패의 원인으로 확대하지 않습니다. [NLTK 소스](https://www.nltk.org/_modules/nltk/downloader.html#Downloader.default_download_dir), [Windows 홈 경로 처리](https://docs.python.org/3.11/library/os.path.html#os.path.expanduser).
 
-현재 화면에서 **기존 `error_types`**와 **후보의 `watchdog_armed` → `import_entered` → `import_completed` → `watchdog_dump_seen`** 네 값을 한 묶음으로 확인합니다. true/false는 T/F로 줄여 `O=오류명 C=T/T/F/F`처럼 타이핑하면 됩니다. 모르는 값은 `?`로 남기고 새 저장 형식을 얻으려고 재실행하지 않습니다.
+**후속 결과 수신 완료:** 후보의 `watchdog_armed=true`, `import_entered=true`, `import_completed=false`, `watchdog_dump_seen=false`와 CIM `P=0/U=0`을 받았습니다. 코드 순서상 watchdog 등록·site 초기화 뒤 `import nltk` 직전 표식까지 도달했지만 완료 표식과 watchdog 덤프는 관측되지 않았습니다. NLTK 내부 지연과 import 오류 뒤 종료 지연을 아직 구분하지 못하며 watchdog이 정상 종료시켰다고 판정하지 않습니다. 조회 순간 검사 표식 Python은 미관측이므로 지금 종료할 대상을 특정할 근거도 없습니다.
 
-후보 검사 프로세스 관측 여부는 기존 PowerShell 창에서 아래 읽기 전용 블록으로 확인합니다. Python/서버를 새로 실행하거나 프로세스를 종료하지 않고 숫자만 출력합니다.
+**현재 남은 요청은 기존(original)의 `error_types` 값 하나입니다.** 기존 화면에서 `O=오류명` 한 줄만 전달하고, 안 보이면 `O=?`로 남깁니다. 이미 받은 후보 표식·P/U를 다시 옮기거나 새 저장 형식을 얻으려고 재검사하지 않습니다.
+
+아래는 이미 P=0/U=0을 받은 읽기 전용 조회 절차입니다. **현재 다시 실행하지 않습니다.** Python/서버를 새로 실행하거나 프로세스를 종료하지 않고 숫자만 출력했던 명령으로 보존합니다.
 
 ```powershell
 & {
@@ -708,7 +710,7 @@ Diagnose v2 뒤 실행한 고정 import 비교 결과까지 수신했습니다. 
 }
 ```
 
-P는 해당 검사 표식이 있는 python.exe 수이며 launcher/실제 자식이 각각 잡힐 수 있습니다. U는 명령행을 읽을 수 없는 python.exe 수입니다. P가 양수면 검사가 관측된 것이고, P=0/U>0 또는 조회 실패는 판단 불가입니다. P=0/U=0은 그 순간 조회한 목록에서 발견하지 못했다는 뜻이며 과거의 종료 시점·원인을 증명하지 않습니다. 표식과 python.exe 이름을 함께 사용해 운영 서버나 PowerShell 자신의 명령문을 집계하지 않습니다. [조회 정보의 범위](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-process). `O/C`와 `P/U` 두 줄만 전달하며 후속 정리/검사는 이 결과에 따라 정합니다.
+P는 해당 검사 표식이 있는 python.exe 수이며 launcher/실제 자식이 각각 잡힐 수 있습니다. U는 명령행을 읽을 수 없는 python.exe 수입니다. P가 양수면 검사가 관측된 것이고, P=0/U>0 또는 조회 실패는 판단 불가입니다. 받은 P=0/U=0은 그 순간 조회한 목록에서 발견하지 못했다는 뜻이며 과거의 종료 시점·원인을 증명하지 않습니다. 표식과 python.exe 이름을 함께 사용해 운영 서버나 PowerShell 자신의 명령문을 집계하지 않습니다. [조회 정보의 범위](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-process). 이 값만으로 재검사·재배포를 시작하지 않으며 기존 오류 종류를 먼저 확인합니다.
 
 <a id="ees-deployment-diagnostics"></a>
 

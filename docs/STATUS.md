@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **기존 ProbeImports 결과를 수신함: 기본 순서 기준 original import_failed/11.157초, candidate parent_timeout_cleanup_unverified/70.0초.** 검사 도구의 사용자 폴더 환경 제거 결함을 수정해 main에 반영하고 실제 NLTK의 Windows 오류 재현·Windows/Linux import 통과를 확인함. 이번 사내 원본 예외와의 인과는 아직 미확인이며 후보 자식의 잔존도 확정하지 않음. [수신·수정 근거](../evals/scenarios.md#ees-import-followup).
-- 다음 작업 하나: **재검사 없이 기존 화면의 original error_types·후보 watchdog/진행 표식과 읽기 전용 P/U 집계를 한 묶음으로 받는다.** [짧은 후속 확인](03-openwebui-native-agent.md#ees-import-followup). 검사 자식의 상태 확인 전 ProbeImports/Deploy/서버 재기동을 반복하지 않으며 타입·T/F·숫자만 타이핑한다.
+- 이번 작업: **후보 표식 T/T/F/F와 P=0/U=0을 추가 수신함.** 후보는 watchdog 등록·site 초기화 뒤 NLTK import 시작 표식까지 도달했고 완료/덤프는 미관측임. 조회 시점의 검사 표식 Python도 미관측이며 과거 70초의 정리 미확인 판정을 성공으로 바꾸지 않음. 기존 import_failed/11.157초의 오류 종류는 아직 미수신이고, main의 프로필 필터 수정과 실제 사내 오류의 인과도 미확정임. [수신·수정 근거](../evals/scenarios.md#ees-import-followup).
+- 다음 작업 하나: **기존 화면의 original error_types 값 하나만 받는다.** 안 보이면 `?`로 기록함. [짧은 후속 확인](03-openwebui-native-agent.md#ees-import-followup). 후보 표식·P/U는 이미 받았으므로 다시 요청하지 않고 ProbeImports/Deploy/서버 재기동·CIM 조회도 반복하지 않음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -99,7 +99,7 @@ ProbeImports 프로필 보존 수정 원본은 `7dfa93e1f30fdb6f253a6dfcd6316b2f
 
 ## 최근 점검
 
-2026-09-08: 수신한 기존 import 실패·후보 정리 미확인을 대조하고 실제 NLTK 초기화에서 프로필 필터 결함을 확인함. 독립 검토로 과거 실행 안내와 재실행 보류의 충돌을 수정했으며, CI에서 Windows NLTK 오류 재현·두 OS의 실제 import와 기존 배포/프로세스 경계 시험이 통과함. [검증 범위·미실행](../evals/scenarios.md#ees-import-followup). 현재 사내 검사 자식·실제 예외·후보 지연 원인은 미확인이며 기존 화면과 읽기 전용 조회 두 줄로 후속 확인함. 초기 [재설계 검토 기록](../evals/scenarios.md#ees-diagnostic-workflow)은 보존함.
+2026-09-08 후속: 후보 T/T/F/F·P=0/U=0을 코드의 표식 순서와 대조함. import 시작 표식 뒤 완료 미관측 범위로 좁혔고, import 예외 후 종료 지연 가능성도 남겨 NLTK 내부 정체로 확정하지 않음. 즉시 종료할 검사 프로세스는 관측되지 않았으며 남은 요청은 기존 오류 종류 하나임. 문서만 갱신하고 사내 재검사·조회·종료나 코드 변경은 하지 않음. [검증 범위·기존 CI·미확인](../evals/scenarios.md#ees-import-followup), [초기 재설계 검토](../evals/scenarios.md#ees-diagnostic-workflow).
 
 ## 갱신 규칙
 
