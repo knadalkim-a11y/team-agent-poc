@@ -624,6 +624,33 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 
 현재 서버의 적용 상태와 다음 실행 여부는 [STATUS](STATUS.md)를 따릅니다. 진단 기능 확인만을 위해 정상 서버에 실패를 만들거나 Deploy·재기동·기존 연동 검증을 반복하지 않습니다.
 
+<a id="ees-resume-prepared-release"></a>
+
+**준비 완료한 후보로 재전환을 이어갈 때:** 프로그램 준비 성공 후 기존 서버로 복구한 경우에는 [STATUS의 프로그램 원본](STATUS.md)을 유지합니다. 운영 스크립트 갱신과 프로그램 교체는 별개이므로 Git 최신 커밋을 `Deploy -Commit`에 넣거나 프로그램을 다시 다운로드·Prepare하지 않습니다.
+
+첫 단계는 기존 운영 PowerShell에서 아래 블록으로 checkout만 갱신하고 현재 관리 상태를 읽는 것입니다. 새 창이면 이전에 사용한 사내 Git 프록시 값을 `$gitProxy`에 로컬로 설정합니다. 값이나 config 원문을 외부에 전달하지 않습니다. 실행 정책 오류는 기존 [Windows 적용 안내](#기존-windows-서버에-적용)를 따르며 이 블록이 정책을 변경하지는 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    if ([string]::IsNullOrWhiteSpace($gitProxy)) {
+        throw '기존 사내 Git 프록시를 $gitProxy에 설정해 주세요.'
+    }
+    $eesManager = Join-Path $eesRepo 'scripts\manage-ees.ps1'
+    & $eesManager -Action Update -GitProxy $gitProxy
+    if (-not $?) { throw 'Git 갱신이 완료되지 않았습니다.' }
+    $eesHead = & git -C $eesRepo rev-parse HEAD
+    if ($LASTEXITCODE -ne 0) { throw '갱신 커밋을 확인하지 못했습니다.' }
+    "head=$eesHead"
+    & $eesManager -Action Status
+}
+```
+
+외부에는 `head=` 줄과 마지막 상태 JSON만 전달합니다. 기존 서버가 관리 중인 original로 복구된 현재 재개 조건은 `phase=idle`, `original_program=true`, `managed_process_running=true`이며 실제 결과를 확인한 뒤 다음 명령을 정합니다. 이 조회는 health·데이터·연동 재시험이 아닙니다. 결과가 다르거나 명령이 실패하면 자동으로 Stop·Start·Deploy를 이어 붙이지 않습니다.
+
+이후 전환은 확인한 프로그램 원본으로 기존 `Deploy` 경로를 한 번 사용하며, 이전 장기 기동 관찰을 고려한 `-HealthTimeout 600`은 그 명령에만 적용합니다. 기본 300초·등록 환경은 바꾸지 않습니다. Deploy가 준비 상태·환경·프로세스를 확인하고 종료·백업·기동을 관리하므로 별도 수동 Stop을 먼저 요구하지 않습니다. 실행 결과에 따라 active/화면 확인 또는 `Diagnostics`의 실패 단계 확인으로 이어갑니다.
+
 첫 전환 후 기존 계정의 대화/Memory·등록 항목이 이어지는지 확인하고, 브라우저 강력 새로고침 한 번 뒤 EES 이름·아이콘과 일반 대화 스트리밍 한 건을 확인합니다. 완료한 연동·PAT·권한 시험과 전체 Prompt 입력은 반복하지 않습니다. 적용 커밋과 결과만 STATUS에 연결합니다.
 
 **일반 원복과 중단 복구:**

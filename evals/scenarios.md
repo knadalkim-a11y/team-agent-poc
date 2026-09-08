@@ -731,6 +731,15 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - main push로 자동 실행된 [병합 후 CI 34185073823](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34185073823)는 병합 커밋 `8cb3dd4`에서 success. Windows/Linux 전달 검사와 패키징 job 성공을 확인함. 이번 코드/브랜딩 변경 범위상 기존 프로그램 ZIP은 계속 유지하며 이 CI 성공을 사내 적용으로 확대하지 않음. 최종 상태·증거만 갱신하는 커밋에는 `[skip ci]`를 사용함.
 - 다음 사내 적용 경계를 기존 운영 스크립트와 대조함. `Update`는 main/추적 파일 무변경 확인 후 fetch·merge --ff-only만 수행하고 설정 읽기/Python 호출 전에 종료하지만, 이번 요청 범위에서는 실행을 요구하지 않음. 사내 checkout·프로그램·서버·데이터·키의 실제 갱신은 미실행/미확인. 기존 준비 후보 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`·정상 original 서버·EES 전환 미완료 상태를 유지함.
 
+<a id="ees-retransition-first-step"></a>
+
+#### 준비 후보 재전환 범위와 첫 사내 단계 — 2026-09-08
+
+- 사용자가 PR #7 병합 완료 뒤 다음 작업 진행을 요청함. 최신 main `0fc18977cf991af2b586c1121a5e20fbf6e52904`·열린 PR 0개·로컬 무변경을 확인하고 같은 커밋의 AGENTS·STATUS와 관련 운영 코드/가이드를 대조함. 이전 병합만 수행하던 범위에서 사내 재개 안내로 진행하며 사내 PC 직접 접근은 없음.
+- 범위는 운영 스크립트 Update → 현재 Status/HEAD 확인 → 결과에 따른 기존 후보 Deploy로 정함. 첫 블록은 기존 main checkout·추적 파일 무변경 가드를 통과해야 fetch/ff-only 갱신하고 이후 HEAD와 상태 JSON만 출력함. 기존 `$gitProxy`는 사내에서 유지하며 서버·환경·데이터·키를 갱신하지 않음. PowerShell 블록 안에서 오류를 중단해 갱신 실패 후 후속 단계가 이어지지 않게 함. [전달할 절차](../docs/03-openwebui-native-agent.md#ees-resume-prepared-release).
+- 첫 결과의 `phase=idle`, `original_program=true`, `managed_process_running=true`와 실제 HEAD를 보고 다음 명령을 정함. 재전환 대상은 이미 준비된 프로그램 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`이며 Git 최신 운영 코드 커밋과 혼동하지 않음. 준비 파일 재다운로드·Prepare·Init·별도 수동 Stop·DB 복원·완료한 연동/PAT 시험을 반복하지 않음. 이후 Deploy의 600초는 명령별 선택이며 기본 300초나 등록 환경을 변경하지 않음.
+- 코드/시험 파일 변경 없음. 독립 읽기 검토에서 Update 종료 위치·오류 중단·프록시 유지·HEAD 대조 필요·Status의 비변경 범위를 확인함. 로컬 Linux/Python 3.12.13의 `python scripts/check_docs.py`: **DOCS OK, 25 files / 532 links / errors=0 / review_candidates=0**, `git diff --check` 통과. 이번 PowerShell 전달 블록은 코드 대조로 검토했으며 실제 Windows 실행은 미실행. 같은 운영 코드의 자동 시험/CI는 반복하지 않음. 사내 실행·checkout SHA·Status·EES 전환 성공은 아직 미확인임. 이전 복구 성공을 새로운 조회 결과로 대체하지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
