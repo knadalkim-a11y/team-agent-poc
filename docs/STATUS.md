@@ -8,7 +8,7 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **사내 Diagnose v2 결과를 수신하고 다음 import 비교를 준비함.** 현재 original 프로세스 identity 일치·과거 복구 성공이며 후보 전환은 미완료임. 추정 후보 로그 전체 10,228바이트에 KeyboardInterrupt만 있고 NLTK → scikit-learn → pandas → importlib 파일 조회 위치를 확인함. 정확한 실패 reason/health 시간은 구형 기록에 없어 null임. [수신·검증 근거](../evals/scenarios.md#ees-import-probe).
+- 이번 작업: **사내 Diagnose v2 결과를 수신하고 고정 import 비교를 main에 반영함.** 현재 original 프로세스 identity 일치·과거 복구 성공이며 후보 전환은 미완료임. 추정 후보 로그 전체 10,228바이트에 KeyboardInterrupt만 있고 NLTK → scikit-learn → pandas → importlib 파일 조회 위치를 확인함. 정확한 실패 reason/health 시간은 구형 기록에 없어 null임. [수신·검증 근거](../evals/scenarios.md#ees-import-probe).
 - 다음 작업 하나: **Update·ProbeImports 한 번으로 기존/후보의 고정 NLTK import를 비교한다.** [실행과 판단 기준](03-openwebui-native-agent.md#ees-import-probe). 각각 60초 자가 종료·70초 부모 감시, 정리 미확인 시 다음 검사 중단. 이 비교는 실제 앱 기동과 구분하며 NumPy·전체 캐시 작업·600초 Deploy를 반복하지 않음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
@@ -20,6 +20,8 @@ CA 옵션 운영 코드 원본은 `6a2638be157c125dd12ad70c95de075cbe77d1ce`, ma
 Diagnose 운영 코드 원본은 `70e7b9f268029bbc161f03b5f364130d2cd24239`, [PR #9](https://github.com/knadalkim-a11y/team-agent-poc/pull/9) 병합은 `36974ce45ff46a1e7fc830c2325873f14546f8e5`입니다. [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34201413944)는 성공했습니다. 이후 수신한 v2 사내 결과는 아래 기록으로 이어집니다. 프로그램 후보의 Deploy Commit과 구분합니다.
 
 Diagnose v2 운영 코드 원본은 `2cb6b55f8ff2dc38ecd8a2ca39d30a7e6951d876`이며 [PR #10](https://github.com/knadalkim-a11y/team-agent-poc/pull/10)의 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34281735662)는 성공했습니다. main 병합은 `50c2a1f7bcaa80b6ee64252bd74bbece30fb098d`입니다. 사내 v2 실행 결과를 수신했으며 전체 checkout SHA 직접 대조·추가 Deploy는 미실행입니다. 기존 준비 프로그램 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`과 DB·키·CA 선택·대기 한도를 유지하며, 프로그램 ZIP을 다시 준비하지 않습니다.
+
+ProbeImports 운영 코드와 최종 검증 원본은 `eac9a91f53da6d5a7bfae319f1eaabfd5717fd46`이며 [PR #11](https://github.com/knadalkim-a11y/team-agent-poc/pull/11)의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34284648832)는 성공했습니다. main 병합은 `2d7423e30639079f303ab12da689da4a553e1e33`입니다. Windows 실제 venv/site 초기화·자가 종료와 PowerShell 파싱을 포함하며 사내 NLTK 비교는 대기입니다. 기존 프로그램 ZIP의 Deploy Commit은 계속 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`입니다.
 
 <a id="resume-branch"></a>
 
