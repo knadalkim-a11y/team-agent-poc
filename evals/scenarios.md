@@ -597,6 +597,8 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 
 ### 사내 최초 등록과 지연 기동 — 2026-09-08
 
+아래는 발생 순서대로 보존한 기록이며 각 절의 “다음·미실행·미확인”은 당시 상태입니다. 새 세션에서는 [현재 STATUS](../docs/STATUS.md)를 먼저 읽고 [후보 준비 성공](#ees-prepare-completed)·[최종 기존 서버 복구](#ees-original-recovered)로 바로 이동합니다. 이전 장애 대응 명령을 순서대로 재실행하지 않습니다.
+
 - 등록 안내 원본 `c584928a30b07c8c1cb2049e1efadf5aec1a46de`. 사용자는 기존 uvx/Python 3.11/Open WebUI 0.11.3·기존 LAN IP·8080 실행 명령을 제공함. 실제 주소와 사용자 경로는 기록하지 않음. 포트 소유 프로세스의 부모 체인에서 실제 venv Python을 찾는 읽기 조회 후 Python 3.11/배포 버전 0.11.3 READY, Git main 갱신 READY를 보고함. 사내 checkout SHA·경로 원문 직접 대조는 미실행.
 - 최초 `.ps1` 실행은 UnauthorizedAccess로 차단됨. `Get-ExecutionPolicy -List`의 다섯 범위가 모두 Undefined, 유효 정책 Restricted라는 사용자 보고를 받고, 원래 운영 창에만 Process/RemoteSigned를 적용하도록 안내함. 전역/사용자 영구 정책을 바꾸거나 Bypass·Unrestricted를 사용하지 않음. 이 실패를 등록 성공으로 덮어쓰지 않음.
 - 후속 Init 출력은 true/false/false로 보고됨. 이후 Status를 따로 요청해 출력 순서상 `phase=idle`, `current_commit=null`, `original_program=true`, `managed_process_running=true`, `rollback_available=false`를 확인함. 사용자는 앞선 Start가 `server health timed out`·exit 1로 끝났다는 사실도 함께 보고함.
@@ -615,6 +617,8 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 실패 후보 폴더는 남지만 성공 시 쓰는 `release.json`이 없어 그대로 Prepare를 재시도하면 준비 메타데이터 검사에서 중단될 수 있음. 다음은 등록된 설정에서 해당 후보의 `prepare.log`를 찾아 필요한 오류 부분을 읽는 것임. 원인 확인 전에 재시도·폴더 삭제·운영 환경 설치를 안내하지 않으며 이후 재준비가 필요하면 [기존 운영 가이드](../docs/03-openwebui-native-agent.md#기존-windows-서버에-적용)의 비활성 후보 확인·격리 절차를 따름.
 - 이번 상태 갱신은 STATUS와 이 기록 두 문서만 변경함. 문서·diff 검사를 수행하고 코드 시험·브랜딩 빌드·기존 등록/health·연동/PAT 검증은 반복하지 않음. 내부 로그의 실제 실패 단계·패키지명/버전·복구 결과는 다음 사용자 보고를 기다림.
 
+<a id="ees-antlr-runtime-observation"></a>
+
 #### antlr4 wheel 선택 실패 진단 — 2026-09-08
 
 - 후속 로그에서 후보 `venv`의 Python **3.11.16**과 `antlr4-python3-runtime==4.9.3 has no usable wheels`·의존성 해결 실패를 사용자 보고로 확인함. 앞선 원인 미확정 기록을 보존하며 이번에는 오프라인 설치의 해당 wheel 선택 실패까지 좁힘. 다른 의존성이 모두 준비됐다는 뜻은 아님.
@@ -629,6 +633,8 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 사외 신규 합성 검사 **13/13 PASS**. wheel 패키지/버전/태그·RECORD 변경·중복 캐시·복사 충돌/다른 파일 혼입, 기존/전환 중 상태·관리 잠금·링크·manifest/원본 버전 불일치, 실패 로그 보존·재시도 실패·이미 준비된 동일 파일의 무변경 반환을 확인함. 원본 Python·DB·config·배포 기록은 fixture 바이트로 비교했고 실제 앱 import·서버 기동·다운로드는 수행하지 않음. 코드는 이 복구 파일과 신규 시험만 추가하고 기존 배포 core·프로그램 wheel은 변경하지 않음. 문서 검사 `files=25 links=505 errors=0 review_candidates=0`와 diff 검사 통과. 기존 완료 코드 시험을 로컬에서 반복하지 않고 기존 CI의 Windows/Linux 전달 검사로 게시본을 확인함.
 - 실제 로컬 명령은 `python -m unittest discover -s tests -p test_ees_deploy_recover.py -v`, 결과 `Ran 13 tests in 0.086s / OK`. Python 패치 버전은 당시 따로 조회하지 않았음. `python -I scripts/ees_deploy_recover.py --help`로 전달한 CLI 진입점도 확인함.
 - [CI 34178389854](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34178389854): 코드 원본 `15cd88b5a99142c07c4d8cca4dcdd957354d48cb`, Windows/Linux 전달 검사와 패키징 모두 success. 두 OS 로그에서 이번 복구 시험 **각 13/13 PASS, skip 0**을 확인함. 프로그램 wheel은 바꾸지 않아 이번 패키징은 Agent Pack 전용이며 사내에서는 기존 `4a8779b`의 프로그램 ZIP을 유지함. CI 성공 증거만 추가하는 마무리 커밋은 문서/diff를 확인하고 코드 CI를 다시 실행하지 않음. 실제 사내 캐시 파일의 검증·복구 재준비 성공은 이후 사용자 실행 범위임.
+
+<a id="ees-prepare-completed"></a>
 
 #### 사내 준비 성공 보고와 첫 전환 안내 — 2026-09-08
 
@@ -680,6 +686,8 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 실행 후 started=true와 기존 UI 접속만 확인하고 실패 시 추가 Start/Deploy 재시도 없이 실제 시작 오류를 받음. Init·설치·포트 변경·강제 종료·DB 복원은 붙이지 않음. 이 기록 시점의 Start는 아직 사용자 미실행이며 EES 전환과 데이터 연속성도 미확인임.
 - STATUS와 이 증거 문서만 갱신하고 문서 점검·diff를 확인함. 코드 시험·CI·완료한 연동 검증은 반복하지 않음.
 
+<a id="ees-original-recovered"></a>
+
 #### 기존 프로그램 기동과 접속 복구 성공 보고 — 2026-09-08
 
 - 가드가 있는 기존 프로그램 Start 안내 뒤 사용자가 `started=true`와 기존 주소 접속 정상을 보고함. 안내 명령은 idle·original·process 없음·launch_uncertain=false 조건에서 등록된 기존 프로그램을 `-HealthTimeout 600`으로 기동함. 별도 사내 프로세스/파일 원문 대조는 미실행이며 명령 성공 조건의 health와 UI 가용성을 확인한 사용자 보고 범위임.
@@ -687,6 +695,16 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 실제 소요 시간과 앞선 실패 당시 Windows 오류 번호는 없으므로 600초 상한이 원인을 해결했다거나 중복 검사·외부 점유가 원인이었다고 단정하지 않음. 같은 health·Stop/Start·완료한 연동 시험은 다시 요구하지 않으며 현재 서버를 유지함.
 - 다음 개발 단위는 EES 재전환 전에 전환/자동 복구 단계와 소켓 오류 번호를 짧게 남기는 배포 진단 보완으로 정리함. 기존 안전 확인을 제거하거나 자동 재시도·DB 복원을 추가하지 않으며 해당 코드 구현·사내 적용은 이번 보고에 포함하지 않음.
 - STATUS와 이 증거 문서만 갱신하고 문서 점검·diff를 확인함. 코드 시험·CI·완료한 사내 검증은 반복하지 않음.
+
+<a id="ees-resume-audit"></a>
+
+#### 새 세션 재개를 위한 기록 점검 — 2026-09-08
+
+- 원격 main `2c328f53c25f5b5e5e798be0a65f93a6fa5e0caf`와 열린 PR 0개, 로컬 무변경·같은 tree에서 점검함. AGENTS·STATUS·README·환경 기준·기존 Windows 배포 가이드·준비/실패/복구 증거와 다음 진단 대상 코드를 대조하고 운영 정보의 독립 읽기 검토를 수행함. 실행 중인 사내 서버에는 접근하거나 명령을 실행하지 않음.
+- 복구 성공·원인 미확정·준비 완료 원본·데이터 보존·미구현 Agent Pack 동기화·2500자 전달/이모지 금지·Rich UI 후속 원칙은 이미 기록돼 있음을 확인함. 다만 Python 3.11.16 후보 로그 보고가 환경 원본에서 바로 보이지 않고, 설치 예제 경로와 운영 원본·운영 코드와 프로그램 ZIP이 혼동될 수 있어 정리함. 패치 버전 보고를 원래 설치 전체 직접 검증으로 확대하지 않음.
+- README의 원본 미수정 표현을 별도 브랜딩 wheel 방식과 맞추고 환경 표의 예제 경로를 명확히 표시함. 실제 설정·배포 기록·기동 로그·준비 메타데이터·백업 위치는 기존 운영 가이드에 모음. STATUS는 운영 코드 `15cd88b`와 프로그램 원본 `4a8779b`를 구분하고 준비·최종 복구·다음 수정 코드/시험으로 직접 연결함. 중복 포트 검사를 최초 장애 원인으로 단정하거나 진단 기능 구현 완료로 기록하지 않음.
+- 과거 날짜별 실패·관찰·코드/CI 증거는 보존하고 이력의 당시 상태와 현재 상태를 구분하는 탐색 안내만 추가함. 새 handoff/summary 문서를 만들거나 기존 증거를 삭제·archive로 이동하지 않음. 프로그램 코드·설정·테스트 파일은 변경하지 않음.
+- README·STATUS·versions·기존 운영 가이드·이 평가 기록의 문서 점검과 diff를 확인함. 완료한 코드/CI·사내 health·재기동·연동 검증은 반복하지 않음. 현재 상태는 원래 프로그램 복구 완료, EES 전환 미완료이며 다음은 안전한 배포 진단 보완임.
 
 ## 결과 기록
 

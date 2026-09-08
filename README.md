@@ -1,6 +1,6 @@
 # Team Agent POC
 
-비개발자가 EES Assistant의 Chat UI에서 사내 문서와 업무 시스템을 활용하고, 관리자가 정한 공통 정책과 업무 처리 절차를 적용받는 플랫폼 POC입니다. 범용 대화·업무용 Prompt/Skill 공유를 유지하며, 현재 MVP는 Open WebUI 원본을 수정하지 않고 공통 배포할 Agent Pack과 실행·검증 절차를 이 저장소에서 관리합니다.
+비개발자가 EES Assistant의 Chat UI에서 사내 문서와 업무 시스템을 활용하고, 관리자가 정한 공통 정책과 업무 처리 절차를 적용받는 플랫폼 POC입니다. 범용 대화·업무용 Prompt/Skill 공유를 유지하며 Open WebUI Native를 활용합니다. 공통 배포할 Agent Pack·운영 절차와, 공식 wheel의 이름·아이콘을 바꾼 별도 EES 프로그램 패키지를 이 저장소에서 관리합니다. 프로그램과 기존 사용자 데이터는 분리해 보존하며 실제 적용 상태는 [STATUS](docs/STATUS.md)에서 확인합니다.
 
 ## 프로젝트 목표
 

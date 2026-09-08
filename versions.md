@@ -1,6 +1,6 @@
 # 버전 및 환경 기준
 
-문서 갱신일: 2026-09-07. 설치 기준 확인일은 2026-09-03이며 모델 운용 기준은 아래 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
+문서 갱신일: 2026-09-08. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
 
 ## Open WebUI 대상 환경
 
@@ -8,15 +8,17 @@
 |---|---|---|
 | OS | Windows | 기존 개인 PC에서 소규모 팀 파일럿; Docker 사용하지 않음 |
 | Open WebUI | 0.11.3 | 실행 스크립트의 고정 버전 |
-| Python | 3.11 | Open WebUI 목표 런타임 |
+| Python | 3.11 | 지원 기준. 2026-09-08 후보 준비 로그의 3.11.16 사용자 보고는 아래에 구분 |
 | uv | 0.12.7 | 사용자 보고 설치 버전 |
-| 로컬 접속 기준 | http://127.0.0.1:8080 | 현재 개인 환경의 loopback; 팀원 접속 주소·경로는 별도 설정 |
-| 작업 디렉터리 | %LOCALAPPDATA%\EES-Agent-POC\open-webui | 기존 키를 유지하도록 동일 위치 사용 |
-| DATA_DIR | 위 작업 디렉터리의 data 폴더 | 계정·대화 등 실행 데이터; Git 제외 |
+| 로컬 접속 예제 | http://127.0.0.1:8080 | 신규 설치 예제. 현재 서버는 등록한 기존 LAN IP·포트 사용 |
+| 작업 디렉터리 예제 | %LOCALAPPDATA%\EES-Agent-POC\open-webui | 신규 설치 예제. 기존 서버는 등록된 cwd 유지 |
+| DATA_DIR 예제 | 위 예제 작업 디렉터리의 data 폴더 | 신규 설치 예제. 기존 서버는 등록된 data_dir 유지; Git 제외 |
 | 표시 이름 | 공식본: EES Assistant (Open WebUI) / EES 패키지: EES Assistant | 사내 브랜딩 전환은 미확인 |
 | 모델·프록시 | 승인된 사내 값; 저장소에는 placeholder | 실제 주소·키·모델 경로는 Git에 저장하지 않음 |
 
-데이터 위치나 설치 스크립트가 실제 환경에 적용됐다는 증거를 이 표에서 대신하지 않습니다.
+이 표의 예제 경로를 이미 등록한 서버에 다시 적용하지 않습니다. 실제 Python·작업 위치·DATA_DIR·수신 주소는 사내 등록 설정이 원본이며 값을 추측하거나 재등록하지 않습니다. [기존 등록과 기록 위치](docs/03-openwebui-native-agent.md#ees-local-state)를 따릅니다.
+
+2026-09-08 [antlr4 준비 실패 로그](evals/scenarios.md#ees-antlr-runtime-observation)에서 후보 venv의 Python **3.11.16**을 사용자 보고로 확인했습니다. 원래 설치 전체·실제 Uvicorn 버전을 직접 대조한 기록은 아니며 3.11 지원 기준과 구분합니다. 후보는 등록된 원래 Python 패치 버전을 유지하도록 준비하는 구조입니다.
 
 프로그램 운영 스크립트는 Windows의 기존 Python 3.11·Open WebUI 0.11.3·로컬 SQLite/Chroma 구성 등록과 uv 0.12.7 오프라인 준비를 대상으로 합니다. 새 환경은 기존 Python 패치 버전과 전체 의존성 버전을 그대로 유지합니다. 별도 Windows/Linux CI의 합성 서버 검증과 사내 실제 전환을 구분합니다. [운영 명령](docs/03-openwebui-native-agent.md#기존-windows-서버에-적용).
 

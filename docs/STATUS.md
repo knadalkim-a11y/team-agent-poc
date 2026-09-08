@@ -8,14 +8,16 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **가드가 있는 기존 프로그램 Start 뒤 started=true와 기존 주소 접속 정상 보고로 서버 복구를 확인함.** 기동 명령의 health 성공 조건과 UI 가용성을 확인한 사용자 보고 범위이며 전체 데이터/등록 항목을 재검사한 것은 아님. DB 복원은 하지 않았고 EES 프로그램 전환은 미완료임. 앞선 전환·자동 복구·포트 검사 실패 원인은 미확정으로 보존하며 준비 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`을 유지함. [실환경 기록](../evals/scenarios.md#ees-first-registration).
+- 이번 작업: **가드가 있는 기존 프로그램 Start 뒤 started=true와 기존 주소 접속 정상 보고로 서버 복구를 확인함.** 기동 명령의 health 성공 조건과 UI 가용성을 확인한 사용자 보고 범위이며 전체 데이터/등록 항목을 재검사한 것은 아님. DB 복원은 하지 않았고 EES 프로그램 전환은 미완료임. 앞선 전환·자동 복구·포트 검사 실패 원인은 미확정으로 보존함. [최종 복구 결과](../evals/scenarios.md#ees-original-recovered), [준비 완료한 원본](../evals/scenarios.md#ees-prepare-completed).
 - 다음 작업 하나: **EES 재전환 전에 전환/자동 복구의 실패 단계와 소켓 오류 번호를 짧게 남기는 배포 진단 보완을 준비한다.** 현재 오류 메시지에서 사라지는 원인을 확보하는 작은 변경으로 범위를 잡고, 포트·프로세스 식별·잠금·기존 환경 보호를 유지함. 현재 복구된 서버에 추가 명령·재기동·Deploy·데이터 재검사·완료한 연동 검증을 요구하지 않음. 기동 대기 600초 성공을 원인 확정이나 영구 설정 변경으로 해석하지 않음.
+
+다음 수정은 [manage_ees.py](../scripts/manage_ees.py)의 전환/자동 복구 예외 처리와 [ees_deploy_process.py](../scripts/ees_deploy_process.py)의 bind 오류 정보에서 시작합니다. 원래 실패와 복구 실패를 구분하고 내부 주소·키·로그 원문을 노출하지 않는 짧은 진단이 목표입니다. 관련 기존 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)이며 실제 코드 변경에 맞춰 필요한 조건만 확인합니다. 이 보완은 아직 구현하지 않았습니다.
 
 <a id="resume-branch"></a>
 
 ## 최신 main에서 재개
 
-**다음 개발은 원격 최신 main을 기준으로 시작합니다.** PR #5 → #4 → #3 → #2 순서로 통합했고, main 통합 병합 커밋은 [3184b78](https://github.com/knadalkim-a11y/team-agent-poc/commit/3184b78ccb3d4d8a4977055693cb6d58728caa01)입니다. 현재 상태와 재개 기준도 main에서 관리합니다. 이전 PR 브랜치를 최신 작업 대상으로 고정하지 않습니다.
+**다음 개발은 원격 최신 main을 기준으로 시작합니다.** PR #5 → #4 → #3 → #2의 [통합 커밋 3184b78](https://github.com/knadalkim-a11y/team-agent-poc/commit/3184b78ccb3d4d8a4977055693cb6d58728caa01)과 이후 [PR #6의 프로그램 원본 4a8779b](../evals/scenarios.md#ees-program-deployment)는 과거 병합/배포물 이력입니다. 이를 최신 개발 head로 고정하지 않으며 재개 시 원격 main을 확인합니다.
 
 재개 시 최신 main 커밋의 AGENTS·이 문서를 읽고 그때 관련 열린 PR이 있는지만 확인합니다. 관련 후속 수정은 기존 PR에서 마무리하며 새 PR을 미병합 PR 위에 계속 쌓지 않습니다. 이전 PR별 원본·병합 결과는 [통합 기록](../evals/scenarios.md#pr-stack-review)에 보존합니다. 아래 사내 수동 적용 원본은 Git 최신 main과 구분합니다.
 
@@ -46,7 +48,7 @@
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | 팀 시연용 이름·소개·시작 질문 | 기존 모델 이름·소개·프로필 적용 안내, 제안 JSON 4개·짧은 팀원 안내 | 사용자 요청으로 준비 재개. 실제 UI 저장·로고 교체·팀원 전달은 미확인 | [시연 준비](../evals/scenarios.md#team-demo-customization), [이전 준비](../evals/scenarios.md#team-first-use-preparation), [당시 보류](../evals/scenarios.md#onboarding-deferred) | 현재 [제안 JSON](../agent-pack/ees-prompt-suggestions.json); 사내 적용 원본 없음 |
-| EES 프로그램·전달 도구 | 이름·아이콘 wheel/ZIP/Actions와 Windows 배포 명령; 기동 대기·첫 antlr4 캐시 복구 명령 | 첫 Deploy 전환·자동 복구 실패 이력 보존. 후속 기존 Start의 started=true·기존 UI 접속 정상 보고로 원래 프로그램 복구 확인. EES 전환 미완료, 최초 실패 원인 미확정 | [운영 명령](03-openwebui-native-agent.md#기존-windows-서버에-적용), [초기 등록·복구 기록](../evals/scenarios.md#ees-first-registration), [CI 근거](../evals/scenarios.md#ees-program-deployment) | 등록 안내 원본 `c584928`; 사내 checkout SHA 직접 대조 미실행. [프로그램 ZIP](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34172321176/artifacts/10036107795) 준비 원본 `4a8779b`; 현재 원래 프로그램 복구, EES 전환 미완료 |
+| EES 프로그램·전달 도구 | 이름·아이콘 wheel/ZIP/Actions와 Windows 배포 명령; 기동 대기·첫 antlr4 캐시 복구 명령 | 후보 prepared=true·server_changed=false·0.11.3+ees.1 보고 후 첫 Deploy/자동 복구 실패. 최종 기존 Start·UI 접속 정상 보고로 original 복구. EES 전환 미완료·최초 실패 원인 미확정 | [운영 명령](03-openwebui-native-agent.md#기존-windows-서버에-적용), [준비 성공](../evals/scenarios.md#ees-prepare-completed), [최종 복구](../evals/scenarios.md#ees-original-recovered), [프로그램 CI](../evals/scenarios.md#ees-program-deployment) | 프로그램 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`, 내부 ZIP `EES-demo-4a8779bbf3ee.zip`. 운영 코드의 [캐시 복구 추가 원본 15cd88b](https://github.com/knadalkim-a11y/team-agent-poc/commit/15cd88b5a99142c07c4d8cca4dcdd957354d48cb)와 구분. 사내 checkout 전체 SHA 직접 대조 미실행 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 2026-09-07 두 지침 UI 저장 보고; 개정 후 P02 PASS, P03 창작 거절 부분 확인, P04~P10 미완료; 실행 시점은 평가표 | [P02~P10 재검증](../evals/scenarios.md#instruction-revision), [기존 지침 갱신](03-openwebui-native-agent.md#update-existing-instructions) | 전달·저장 안내 원본 [dfeb95f](https://github.com/knadalkim-a11y/team-agent-poc/commit/dfeb95fbf96cf6a2bb75a3ba75fac3bc92ed60fc); 등록 내용·사용자 추가 규칙·사내 checkout SHA 직접 대조는 미실행 |
 | 조회 경로 보완 | Prompt의 [현재 POC 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션 | 부분 적용 당시 C04·P02 정상·임베딩 오류 재발 없음 보고; 이번 전체 Prompt에도 포함해 저장 안내 | [실환경 결과](../evals/scenarios.md#결과-기록), [당시 소스 검토](../evals/confluence-offline.md#knowledge-routing) | 부분 추가 안내 원본 [28f526a](https://github.com/knadalkim-a11y/team-agent-poc/blob/28f526a39162e54f126f577554f8c15fdd5940f1/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로); 현재 전체 지침 안내 원본은 위 행. 부분 적용 당시 성공을 이번 개정 후 재평가로 간주하지 않음 |
 | 카드·후속 조회 지침 | 카드/답변 중복 억제, Confluence 본문 조회, Jira/GitHub의 실제 ID·후속 범위 지침 | 2026-09-07 전체 System Prompt 3블록 전달 후 저장 및 업데이트 완료 보고. 일반 채팅 스트리밍과 GitHub/Jira 이전 본문 후속 흐름 정상 보고; 이번 버튼 제거에는 같은 전체 Prompt 유지, Confluence 새 흐름은 미확인 | [전체 지침 저장 보고](../evals/scenarios.md#rich-ui-prompt-saved) | [7c8a65b의 전체 Prompt](https://github.com/knadalkim-a11y/team-agent-poc/blob/7c8a65b0e2eed6d22109b8770e97b9e6908ad68a/agent-pack/system-prompts/ees-integrated-assistant.md); 실제 등록 내용·사용자 추가 지침 직접 대조는 미실행 |
@@ -59,11 +61,13 @@
 
 **Skill은 Git과 UI 등록 보고 기준 모두 3개이며, Skill 자체 사용 확인은 기존 2개입니다.** Confluence Tool의 `check_access` 성공 보고는 있으나 `confluence-read`를 `view_skill`로 불러왔는지는 별도 확인되지 않았습니다. 적용 원본은 Git 최신 커밋과 구분하며, 안내 원본·사용자 보고·등록 내용 대조 여부를 함께 기록합니다.
 
+프로그램 후보는 이미 준비한 위 ZIP을 유지하며 현재 장애 정리를 이유로 다시 다운로드·Prepare하지 않습니다. 운영 스크립트는 최신 main에서 개발하되, `15cd88b`의 CI 산출물은 Agent Pack 전용이므로 프로그램 ZIP을 대체하지 않습니다. **번들에 포함된 Prompt·Skill·Tool의 API 자동 동기화는 미구현**이며 기존 UI 등록 항목을 계속 사용합니다.
+
 ## 남아 있는 검증과 제한
 
 - 새로고침 뒤에만 답변이 보이던 현상과 origin 거부 보고 후, CORS 영구 저장·현재 창 적용 안내에 이어 **스트리밍이 되고 정상인 것 같다는 사용자 보고**를 받음([기록](../evals/scenarios.md#chat-live-update-observation)). 현재 일반 채팅의 실시간 표시 복구로 인정함. 정확한 허용 목록·User 저장 출력·오류 로그 소멸·PC 재부팅 뒤 유지·장기 안정성은 직접 대조하지 않았으며 Windows 수락 오류의 원인/재발 방지나 새 카드 성공으로 확대하지 않음.
 
-- Windows 수락 오류 이후 접속 불가를 보고했으나 원래 PowerShell에서 Ctrl+C 후 기존 폴더·명령으로 재시작해 `/health` true를 확인했다고 보고함([증거](../evals/scenarios.md#windows-existing-restart)). 이후 CORS 안내 뒤 일반 채팅 스트리밍 복구를 보고했지만 listener 종료 경로·수락 오류 근본 원인·재발 여부는 미확인. GitHub/Jira 후속 카드 흐름 정상 보고는 각각 별도 근거로 기록함. 전달된 런타임 경로는 Python 3.11이며 패치 버전·실제 Uvicorn 버전은 미대조. 선택 실행 파일은 미적용이며 기존 성공 기록과 오류 기록을 보존함.
+- Windows 수락 오류 이후 접속 불가를 보고했으나 원래 PowerShell에서 Ctrl+C 후 기존 폴더·명령으로 재시작해 `/health` true를 확인했다고 보고함([증거](../evals/scenarios.md#windows-existing-restart)). 이후 CORS 안내 뒤 일반 채팅 스트리밍 복구를 보고했지만 listener 종료 경로·수락 오류 근본 원인·재발 여부는 미확인. GitHub/Jira 후속 카드 흐름 정상 보고는 각각 별도 근거로 기록함. 당시 전달된 런타임 경로는 Python 3.11이었으며 이후 후보 준비 로그의 3.11.16 보고는 [환경 기준](../versions.md#open-webui-대상-환경)에 구분함. 원래 설치 전체·실제 Uvicorn 버전의 직접 대조는 미실행. 선택 실행 파일은 미적용이며 기존 성공 기록과 오류 기록을 보존함.
 
 - GitHub v0.1.2의 목록 카드·PR 한 건의 본문 질문 입력·수동 전송 뒤 본문 요약/원문 일치는 [사용자 보고로 확인](../evals/scenarios.md#github-rich-ui-acceptance)함. 실제 코드/화면·호출 이력의 직접 대조는 없으며 다음 페이지·본문 뒤 목록 이어가기·오류/빈 결과·전체 목록 정확성·사용자 격리·마스킹·좁은 화면/키보드 조작은 이번 보고에 포함되지 않음. 확인한 흐름·인증·DB 저장은 반복하지 않고 남은 조건은 해당 사용/공개 시점에 확인함. CI/리뷰·diff·일반 이슈·쓰기는 후속 수요로 유지함. 이번 v0.1.3 버튼 제거본의 코드 저장은 사용자 보고로 확인했으며 새 출력은 미확인.
 
@@ -79,12 +83,12 @@
 
 - 범용 Assistant에 필요한 기능을 늘리는 방향을 유지합니다. 화면·답변은 사용자 친화적인 가독성과 유연성을 우선하고 **이모지를 사용하지 않습니다**. 소개·예시·짧은 시작 안내는 팀 시연용으로 준비합니다. 그룹 세분화·서비스화·서버 이전과 조회 카드 전체 재디자인은 이번 준비에 포함하지 않습니다.
 - 사내 PC에서는 ChatGPT에 접근할 수 없어 외부 모바일로 코드·명령을 옮기거나 Git을 사용함. `%USERPROFILE%\team-agent-poc` 최초 clone은 성공 보고가 있으므로 반복하지 않음. 새 PowerShell에서는 사내 `$gitProxy` 값을 다시 설정하고 `git -c "http.proxy=$gitProxy" ...`를 사용함. 영구 프록시나 WebUI/Confluence 네트워크 설정은 임의 변경하지 않음.
-- 현재 Windows PC의 데이터·키·계정·명령 복사 실행을 유지함. 기존 `start-openwebui.ps1`는 loopback 기준이며 이번 파일럿 때문에 자동 변경하지 않음. 앱 수신 주소는 기존 실행 환경에서 조정하고 접속 허용 정책은 사내 관리 시스템을 따름. 서비스화·다른 서버 이전·데이터 이전은 후속 필요가 생길 때 범위를 정함.
+- 현재 Windows PC의 데이터·키·계정은 유지하며 프로그램 운영에는 등록된 `manage-ees.ps1` 경로를 사용함. 실제 Python·작업 위치·DATA_DIR·주소와 기동 로그/백업의 위치는 [기존 등록 설정](03-openwebui-native-agent.md#ees-local-state)을 따름. `start-openwebui.ps1`의 loopback·기본 폴더는 설치 예제이며, 이 예제로 현재 등록값을 덮어쓰거나 되돌리지 않음. 접속 허용 정책은 사내 관리 시스템을 따르고 서비스화·다른 서버/데이터 이전은 후속 범위임.
 - 웹 프로젝트 지침은 2026-09-06 README의 짧은 저장소 참조 문구로 교체했다고 보고받음. 재입력을 요구하지 않으며 저장소 지침 변경이 웹 설정 자체를 수정한 것으로 기록하지 않음.
 
 ## 최근 점검
 
-started=true·기존 UI 접속 정상 보고를 반영해 원래 프로그램 복구를 기록함. 가용성 복구와 EES 전환 미완료·최초 실패 원인 미확정을 구분함. [복구 성공 근거](../evals/scenarios.md#ees-first-registration). 문서 두 개와 문서/diff만 확인하며 코드 시험·CI·health/재기동·완료한 연동 검증을 반복하지 않음. 다음 보완은 실패 단계·소켓 오류 번호의 짧은 진단이며 구현·사내 적용은 아직 미실행.
+새 세션 재개에 필요한 기록을 최신 main·운영 코드/가이드·사용자 보고와 대조함. 준비된 프로그램/운영 코드 원본 구분, 후보 Python 패치 버전, 실제 등록값과 설치 예제 구분, 준비·복구 결과와 다음 수정 진입점 링크를 보완함. [재개 기록 점검](../evals/scenarios.md#ees-resume-audit). 기존 날짜별 실패·복구 증거를 보존하며 별도 인수인계 파일을 추가하지 않음. 문서/diff만 확인하고 코드 시험·CI·사내 health/재기동은 반복하지 않음. 원래 프로그램 복구와 EES 전환 미완료 상태는 유지함.
 
 ## 갱신 규칙
 
