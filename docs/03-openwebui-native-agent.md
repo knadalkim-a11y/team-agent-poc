@@ -626,6 +626,53 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 
 **health 실패 뒤 자동 복구가 성공한 경우:** 현재 `deployment.json`의 `process.log_file`은 복구된 기존 프로그램의 로그입니다. 실패 후보 로그 경로는 별도로 보존하지 않으므로 현재 로그를 제외하고, 실패 시각과 복구 로그보다 앞선 **생성 시각**으로 직전 기동 로그를 좁힙니다. 수정 시각 최신순은 현재 서버의 로그를 고를 수 있습니다. 로그 이동/삭제나 이후 재기동이 있었다면 시각만으로 이번 후보를 확정하지 않습니다. `health_check`와 숫자 코드 null만으로 기동 중 종료·응답 대기 만료·프로세스 확인 오류를 구분할 수 없으며, 종료 정리 중 찍힌 `KeyboardInterrupt`도 최초 실패 원인으로 단정하지 않습니다. 로그는 사내에서 읽고 필요한 오류 종류·기동 완료 여부만 비식별로 전달합니다.
 
+<a id="ees-failure-timing"></a>
+
+**실패까지의 시간과 기동 완료 흔적 확인:** 자동 복구 성공 뒤 추가 Start/Stop/Deploy 없이 읽는 명령입니다. 현재 복구 로그를 제외하고 생성 시각으로 실패 후보를 좁히므로 로그 이동/삭제나 시각 변경이 있었다면 이번 후보로 확정하지 않습니다. 원문 대신 시간·기동 완료 문자열 존재 여부만 출력합니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $eesState = Join-Path $eesCfg.state_root 'deployment.json'
+    $eesReg = Get-Content -LiteralPath $eesState -Raw -Encoding UTF8 | ConvertFrom-Json
+    $eesFailure = $eesReg.last_failure
+    if ($eesReg.phase -ne 'idle' -or
+        $eesReg.last_event -ne 'previous_program_recovered' -or
+        $eesFailure.action -ne 'deploy' -or
+        $eesFailure.switch.stage -ne 'health_check' -or
+        $eesFailure.recovery_status -ne 'succeeded') {
+        throw '보고된 복구 상태와 다릅니다.'
+    }
+    $eesActive = Get-Item -LiteralPath $eesReg.process.log_file
+    $eesFailedAt = [DateTimeOffset]::Parse($eesFailure.failed_at).UtcDateTime
+    $eesUpdatedAt = [DateTimeOffset]::Parse($eesReg.updated_at).UtcDateTime
+    if ($eesActive.CreationTimeUtc -lt $eesFailedAt -or
+        $eesUpdatedAt -lt $eesActive.CreationTimeUtc) {
+        throw '기록 시각이 맞지 않습니다.'
+    }
+    $eesLogs = Join-Path $eesCfg.state_root 'logs'
+    $eesCandidate = Get-ChildItem -LiteralPath $eesLogs -Filter 'server-*.log' -File |
+        Where-Object {
+            $_.FullName -ne $eesActive.FullName -and
+            $_.CreationTimeUtc -lt $eesActive.CreationTimeUtc -and
+            $_.CreationTimeUtc -lt $eesFailedAt.AddSeconds(1)
+        } | Sort-Object CreationTimeUtc -Descending | Select-Object -First 1
+    if (-not $eesCandidate) { throw '후보 로그를 찾지 못했습니다.' }
+    $eesMarks = @(Select-String -LiteralPath $eesCandidate.FullName -SimpleMatch -Pattern `
+        'Application startup complete', 'Uvicorn running on')
+    [ordered]@{
+        candidate_seconds = [math]::Round(($eesFailedAt - $eesCandidate.CreationTimeUtc).TotalSeconds, 1)
+        recovery_seconds = [math]::Round(($eesUpdatedAt - $eesActive.CreationTimeUtc).TotalSeconds, 1)
+        startup_complete = [bool]($eesMarks | Where-Object { $_.Line -like '*Application startup complete*' })
+        listening = [bool]($eesMarks | Where-Object { $_.Line -like '*Uvicorn running on*' })
+    } | ConvertTo-Json
+}
+```
+
+`candidate_seconds`는 후보 로그 생성부터 실패 기록까지, `recovery_seconds`는 복구 로그 생성부터 복구 완료 기록까지의 근사 시간입니다. 프로세스 생성/기록 시간도 포함하며 정확한 health 대기 측정값은 아닙니다. 후보 시간이 약 600초면 전달한 대기 한도 만료와 부합하지만 최초 지연 원인까지 확정하지 않습니다. 두 boolean은 해당 로그의 문자열 존재 여부이며 false를 절대적 미기동 증거로 보지 않습니다. 결과를 보고 다음 진단을 정하며 별도 패키지 검사·재설치·재배포를 자동으로 이어 붙이지 않습니다.
+
 <a id="ees-numpy-import-check"></a>
 
 **후보 로그가 NumPy import 중 KeyboardInterrupt로 끝난 경우:** 아래는 기존/준비 후보 Python에서 NumPy만 각각 한 번 읽는 독립 진단입니다. 기존 서버를 종료하거나 Open WebUI를 불러오지 않고 패키지를 설치하지 않습니다. 고정 커밋은 현재 준비 후보이며 새 후보에서는 해당 원본으로 바꿉니다. 로그 위치와 준비 메타데이터 원문은 출력하지 않습니다.
