@@ -626,6 +626,50 @@ $eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | Conve
 
 **health 실패 뒤 자동 복구가 성공한 경우:** 현재 `deployment.json`의 `process.log_file`은 복구된 기존 프로그램의 로그입니다. 실패 후보 로그 경로는 별도로 보존하지 않으므로 현재 로그를 제외하고, 실패 시각과 복구 로그보다 앞선 **생성 시각**으로 직전 기동 로그를 좁힙니다. 수정 시각 최신순은 현재 서버의 로그를 고를 수 있습니다. 로그 이동/삭제나 이후 재기동이 있었다면 시각만으로 이번 후보를 확정하지 않습니다. `health_check`와 숫자 코드 null만으로 기동 중 종료·응답 대기 만료·프로세스 확인 오류를 구분할 수 없으며, 종료 정리 중 찍힌 `KeyboardInterrupt`도 최초 실패 원인으로 단정하지 않습니다. 로그는 사내에서 읽고 필요한 오류 종류·기동 완료 여부만 비식별로 전달합니다.
 
+<a id="ees-numpy-import-check"></a>
+
+**후보 로그가 NumPy import 중 KeyboardInterrupt로 끝난 경우:** 아래는 기존/준비 후보 Python에서 NumPy만 각각 한 번 읽는 독립 진단입니다. 기존 서버를 종료하거나 Open WebUI를 불러오지 않고 패키지를 설치하지 않습니다. 고정 커밋은 현재 준비 후보이며 새 후보에서는 해당 원본으로 바꿉니다. 로그 위치와 준비 메타데이터 원문은 출력하지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $eesCommit = '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
+    $eesReleasePath = Join-Path (Join-Path $eesCfg.releases_dir $eesCommit) 'release.json'
+    $eesRelease = Get-Content -LiteralPath $eesReleasePath -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($eesRelease.state -ne 'prepared' -or $eesRelease.source_commit -ne $eesCommit) {
+        throw '준비 후보 기록이 일치하지 않습니다.'
+    }
+    $eesProbe = @'
+import json, re, subprocess, sys, time
+code = "import numpy; print('NUMPY_VERSION='+numpy.__version__)"
+for label, executable in zip(('original', 'candidate'), sys.argv[1:]):
+    print(label + ': checking', flush=True)
+    start = time.monotonic()
+    out = {'target': label}
+    try:
+        run = subprocess.run([executable, '-I', '-B', '-c', code],
+            stdin=subprocess.DEVNULL, capture_output=True, timeout=60)
+        version = re.search(rb'(?m)^NUMPY_VERSION=([0-9][A-Za-z0-9.+_-]*)\r?$', run.stdout)
+        errors = re.findall(rb'(?m)^([A-Za-z_][A-Za-z0-9_]*(?:Error|Exception)):', run.stderr)
+        out.update(status='ok' if run.returncode == 0 and version else 'failed',
+            returncode=run.returncode,
+            version=version[1].decode('ascii') if version else None,
+            error_type=errors[-1].decode('ascii') if errors else None)
+    except subprocess.TimeoutExpired:
+        out.update(status='timeout', limit_seconds=60)
+    except OSError as error:
+        out.update(status='launch_failed', error_type=type(error).__name__)
+    out['elapsed_seconds'] = round(time.monotonic() - start, 2)
+    print(json.dumps(out), flush=True)
+'@
+    $eesProbe | & $eesCfg.source_python -I -B - $eesCfg.source_python $eesRelease.target_python
+}
+```
+
+각 자식 검사는 60초 timeout 뒤 그 검사 프로세스만 종료합니다. 프로세스 생성 지연은 제한을 넘을 수 있어 전체 실행 시간을 보장하지 않습니다([Python subprocess](https://docs.python.org/3.11/library/subprocess.html#subprocess.run)). `-I`는 현재 디렉터리/사용자 site와 PYTHON* 변수를 제외하며 실제 서버 기동과 구분합니다. `-B`는 새 bytecode 쓰기를 막고 기존 bytecode 읽기는 허용합니다([Python 옵션](https://docs.python.org/3.11/using/cmdline.html)). 두 JSON만 전달하며 raw stderr/config는 전달하지 않습니다. 실패 시 종료 코드와 오류 분류로 후속 진단하고, 성공해도 이번 단독 import가 가능하다는 범위만 인정합니다. 콜드 기동·누적 import·저장 환경·보안 검사 지연의 해소나 배포 성공을 뜻하지 않습니다.
+
 <a id="ees-resume-prepared-release"></a>
 
 **준비 완료한 후보로 재전환을 이어갈 때:** 프로그램 준비 성공 후 기존 서버로 복구한 경우에는 [STATUS의 프로그램 원본](STATUS.md)을 유지합니다. 운영 스크립트 갱신과 프로그램 교체는 별개이므로 Git 최신 커밋을 `Deploy -Commit`에 넣거나 프로그램을 다시 다운로드·Prepare하지 않습니다.
