@@ -9,9 +9,11 @@
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
 - 이번 작업: **EES 전환/자동 복구의 실패 단계와 소켓 오류 번호를 남기는 배포 진단을 구현함.** 콘솔·기존 배포 기록·Status에서 원래 실패와 복구 실패를 구분하고 예외 원문·내부 경로는 노출하지 않음. 관련 합성 시험과 검수 범위는 [진단 보완 근거](../evals/scenarios.md#ees-deployment-diagnostics)에 기록함. 사내 미적용이며 기존 서버의 복구 성공·EES 전환 미완료·최초 실패 원인 미확정은 유지함. [최종 복구 결과](../evals/scenarios.md#ees-original-recovered), [준비 완료한 원본](../evals/scenarios.md#ees-prepare-completed).
-- 다음 작업 하나: **진단 보완 변경안을 main에 통합한 뒤, 기존 준비 후보를 사용하는 EES 재전환의 사내 적용 범위를 확정한다.** 현재 복구된 서버에는 추가 명령·재기동·Deploy·데이터 재검사·완료한 연동 검증을 요구하지 않음. 기동 대기 600초 성공을 원인 확정이나 영구 설정 변경으로 해석하지 않음.
+- 다음 작업 하나: **검토·CI가 완료된 [PR #7](https://github.com/knadalkim-a11y/team-agent-poc/pull/7)을 main에 통합한 뒤, 기존 준비 후보를 사용하는 EES 재전환의 사내 적용 범위를 확정한다.** 현재 복구된 서버에는 추가 명령·재기동·Deploy·데이터 재검사·완료한 연동 검증을 요구하지 않음. 기동 대기 600초 성공을 원인 확정이나 영구 설정 변경으로 해석하지 않음.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
+
+진단 보완 코드 원본은 `1ac1c33cf50cb3135f63c7ed8ac5ccaf22cdab30`이며 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34184761238) 성공을 확인했습니다. 이번 변경안은 main 미병합·사내 미적용이며 프로그램 후보 ZIP 원본과 구분합니다.
 
 <a id="resume-branch"></a>
 
@@ -88,7 +90,7 @@
 
 ## 최근 점검
 
-최신 main `54746c3`와 열린 PR 없음에서 진단 보완을 시작함. 원래 오류·자동 복구 오류의 분리, 소켓 단일 검사에서 숫자 보존, 로그 경로 비노출, 기존 상태 호환·이후 성공 시 과거 실패 보존을 관련 코드/시험·운영 안내와 대조함. [구현·검증 결과](../evals/scenarios.md#ees-deployment-diagnostics). 과거 [재개 점검](../evals/scenarios.md#ees-resume-audit)과 실패·복구 증거는 유지하며 새 인수인계 파일은 추가하지 않음. 사내 서버 명령·health/재기동·데이터/연동 재검증은 미실행.
+최신 main `54746c3`와 열린 PR 없음에서 진단 보완을 시작하고 PR #7로 준비함. 원래 오류·자동 복구 오류 분리, 숫자 보존·비노출·구형 상태 호환을 관련 코드/시험·운영 안내와 대조했으며 독립 검토 지적 두 조건을 수정함. 로컬 합성 시험과 Windows/Linux CI에서 관련 시험·실제 자식 수명주기·문서 검사를 통과함. [실행 범위·skip을 포함한 검증 결과](../evals/scenarios.md#ees-deployment-diagnostics). 과거 [재개 점검](../evals/scenarios.md#ees-resume-audit)과 실패·복구 증거는 보존함. 사내 서버 명령·health/재기동·데이터/연동 재검증은 미실행.
 
 ## 갱신 규칙
 
