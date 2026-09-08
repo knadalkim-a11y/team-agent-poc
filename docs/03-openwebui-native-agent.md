@@ -782,6 +782,79 @@ except Exception as e:
 
 캐시 자식의 제한은 **900초(15분)**이고 부모의 등록 기록 확인은 별도입니다. elapsed_seconds는 자식의 파일 순회·캐시 처리 시간입니다. [compileall](https://docs.python.org/3.11/library/compileall.html)로 기존 유효 캐시를 강제로 다시 만들지 않으며, checked_files는 기존 캐시 확인을 포함한 파일 수입니다. ready는 캐시 작업의 성공으로 기동 성공을 보증하지 않습니다. partial은 test/example 문법 파일 등에서도 발생할 수 있어 환경 손상·재설치 근거로 단정하지 않습니다. timeout/stopped에서도 이미 생성한 정상 캐시가 남을 수 있습니다. 결과를 받은 뒤 다음 배포 여부를 정하고 Deploy를 자동 연결하지 않습니다.
 
+<a id="ees-candidate-cache-partial"></a>
+
+**캐시 준비가 partial인 경우:** 성공 수는 새 생성과 기존 유효 캐시 확인을 포함합니다. 실패 개수만으로 기동 실패·환경 손상·test/example 파일로 판정하지 않습니다. 아래는 캐시를 다시 만들지 않고 현재 누락/헤더 불일치 후보를 읽는 후속 명령이며, 앞선 실패 파일 목록을 정확히 복원하는 검사는 아닙니다.
+
+방금 캐시 준비에 사용한 같은 PowerShell 창에서 두 블록을 실행합니다. $eesCode에 남은 기존 부모 코드의 후보/복구 상태·메타데이터·경로 검증과 배포 잠금을 재사용하고 자식의 캐시 생성 부분만 읽기 점검으로 교체합니다. 코드 변수 형태가 다르면 멈춥니다. 부모/자식 -I -S -B와 900초 자식 제한을 유지하며 앱 import·외부 접속·소스/캐시 저장·서버 재기동은 하지 않습니다. 임시 배포 잠금만 생성/해제합니다.
+
+```powershell
+$eesProbe = @'
+import importlib.util as u,json,os,pathlib,struct,sys,time,warnings
+warnings.simplefilter('ignore')
+start=time.monotonic()
+root=pathlib.Path(sys.argv[1])
+files=[]
+def walk_error(e): raise e
+for folder,dirs,names in os.walk(root,onerror=walk_error):
+    for name in dirs+names:
+        p=pathlib.Path(folder)/name
+        if p.is_symlink() or getattr(p.lstat(),'st_file_attributes',0)&0x400: raise ValueError()
+    files.extend(pathlib.Path(folder)/n for n in names if n.endswith('.py') and (pathlib.Path(folder)/n).is_file())
+if not files: raise ValueError()
+public=set('open_webui numpy scipy pandas sympy sklearn numba torch transformers sentence_transformers langchain langchain_core langchain_community langchain_classic future past libfuturize libpasteurize parso jedi IPython networkx sqlalchemy chromadb'.split())
+rows=[]
+current=0
+suspects=0
+for p in files:
+    try:
+        s=p.stat()
+        expected=u.MAGIC_NUMBER+struct.pack('<III',0,int(s.st_mtime)&0xffffffff,s.st_size&0xffffffff)
+        q=pathlib.Path(u.cache_from_source(str(p),optimization=''))
+        with q.open('rb') as f: header=f.read(16)
+        if header==expected:
+            current+=1
+            continue
+        state='header_diff'
+    except FileNotFoundError: state='missing'
+    except OSError as e: state=type(e).__name__
+    suspects+=1
+    if len(rows)>=50: continue
+    error='none'
+    try: compile(p.read_bytes(),'<candidate>','exec',dont_inherit=True,optimize=0)
+    except Exception as e: error=type(e).__name__
+    rel=p.relative_to(root)
+    rows.append({'file':rel.as_posix() if rel.parts[0] in public else 'other',
+        'test_path':any(x in {'test','tests','testing','testdata','examples'} for x in rel.parts[:-1]),
+        'cache':state,'compile_error':error})
+print(json.dumps({'checked_files':len(files),'current_headers':current,
+    'suspect_files':suspects,'omitted':max(0,suspects-len(rows)),
+    'files':rows,'elapsed_seconds':round(time.monotonic()-start,1)}))
+'@
+```
+
+```powershell
+& {
+  $ErrorActionPreference = 'Stop'
+  if (-not $eesCode -or -not $eesProbe) { throw '앞선 코드 변수와 첫 블록이 필요합니다.' }
+  $eesParts = [regex]::Split($eesCode, '"""')
+  if ($eesParts.Count -ne 3 -or $eesParts[1] -notmatch 'compileall\.compile_file' -or
+      $eesParts[0] -notmatch '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50') {
+    throw '앞서 사용한 캐시 준비 코드와 다릅니다.'
+  }
+  $eesRead = $eesParts[0] + '"""' + $eesProbe + '"""' + $eesParts[2]
+  $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+  $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
+  $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
+  $eesRead | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
+}
+```
+
+전체 하위 링크/reparse point를 먼저 거부하고 캐시 첫 16바이트의 magic/flags/수정시각/크기를 확인합니다. current_headers는 현재 소스와 timestamp 헤더가 일치한 수이며 bytecode 전체 무결성 검사가 아닙니다. 누락·불일치·읽기 오류 후보 중 최대 50개만 [compile](https://docs.python.org/3.11/library/functions.html#compile)로 메모리에서 문법을 확인하며 실행/저장하지 않습니다. 경고·예외 원문·코드 행·절대 경로를 출력하지 않고 공개 패키지 허용 목록의 상대 경로만 표시하며 나머지는 other입니다.
+
+compile_error=none이면 문법 확인은 성공했지만 캐시가 없거나 헤더/읽기 문제가 남은 경우입니다. test_path=true도 테스트 디렉터리 이름의 단서일 뿐 기동에서 미사용이라는 증명이 아닙니다. omitted가 있으면 모든 후보를 문법 검사한 것이 아닙니다. 결과를 받아 실제 기동에 필요한 파일인지 판단한 뒤 재배포 여부를 정합니다.
+
+
 <a id="ees-failure-timing"></a>
 
 **실패까지의 시간과 기동 완료 흔적 확인:** 자동 복구 성공 뒤 추가 Start/Stop/Deploy 없이 읽는 명령입니다. 현재 복구 로그를 제외하고 생성 시각으로 실패 후보를 좁히므로 로그 이동/삭제나 시각 변경이 있었다면 이번 후보로 확정하지 않습니다. 원문 대신 시간·기동 완료 문자열 존재 여부만 출력합니다.

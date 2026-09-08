@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
-- 이번 작업: **같은 600초 실패의 마지막 표본은 other 6개 뒤 importlib 호출 6개이며, 끝은 find_spec:1634임.** CPython 3.11.16 공식 소스에서 해당 행은 모듈 파일 존재 확인임을 대조함. 전체 지연 원인·외부 통신 부재·파일 손상은 확정하지 않음. [이번 실패·소스 대조](../evals/scenarios.md#ees-windows-ca-support). 화이트리스트 환경을 전제로 하며 EES 전환 미완료·기존 프로그램 자동 복구 성공 상태는 유지함.
-- 다음 작업 하나: **기존 서버를 유지하면서 prepared 후보의 bytecode 캐시를 한 번 준비하고 요약 결과를 받는다.** [후보 캐시 준비](03-openwebui-native-agent.md#ees-candidate-bytecode)는 앱 실행·외부 요청 없이 후보 소스를 컴파일하는 완화 시도이며 원인 확정이나 기동 성공을 뜻하지 않음. 자식 작업 제한은 900초이고 결과를 받은 뒤 재배포 여부를 정함. GitHub/Hugging Face 첫 페이지 200을 모든 다운로드 목적지 허용으로 해석하지 않음.
+- 이번 작업: **후보 캐시 준비 결과 partial, checked_files=26713, failed_files=14, elapsed_seconds=174.0을 사용자에게 보고받음.** 처리 성공 26699개는 기존 유효 캐시 확인을 포함하며 새 생성 개수로 해석하지 않음. 실패 파일 종류·기동 영향은 미확인임. [이번 결과·범위](../evals/scenarios.md#ees-windows-ca-support). 화이트리스트 조건과 EES 전환 미완료·기존 프로그램 복구 성공 상태는 유지함.
+- 다음 작업 하나: **현재 캐시가 없거나 소스와 헤더가 다른 파일만 읽기 점검하고 결과를 받는다.** [partial 후속 점검](03-openwebui-native-agent.md#ees-candidate-cache-partial)은 후보 앱 실행·캐시 재생성·외부 접속 없이 최대 50개 후보의 문법과 비식별 파일 단서를 확인함. 이는 과거 14개 실패 목록의 정확한 복원이 아니며, 결과로 기동 영향과 재배포 여부를 판단함.
 
 진단 코드는 [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py), 관련 시험은 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)입니다. [진단 필드와 해석](03-openwebui-native-agent.md#ees-deployment-diagnostics)을 따르며, 마지막 실패 기록은 이후 성공과 구분해 보존합니다. 새 진단은 과거 실패 원인을 복원하거나 사내 적용을 대신하지 않습니다.
 
@@ -93,7 +93,7 @@ CA 옵션 운영 코드 원본은 `6a2638be157c125dd12ad70c95de075cbe77d1ce`, ma
 
 ## 최근 점검
 
-최신 main `844f24b`·열린 PR 없음·로컬 baseline tree 일치에서 하위 프레임 결과와 CPython 3.11.16의 해당 소스를 대조함. 후보 캐시 준비 명령의 독립 검토와 Linux/Python 3.12 합성 검증으로 앱 미실행·소스/유효 캐시 유지·문법 오류 요약·캐시 링크 거부를 확인함. [결과·범위](../evals/scenarios.md#ees-windows-ca-support). 사내 캐시 준비·재배포와 Windows PowerShell 실행은 미실행임. 기존 문서만 갱신하며 프로그램 코드·환경·패키지는 변경하지 않음.
+최신 main `82bda20`·AGENTS 변경 없음·열린 PR 없음·로컬 baseline tree 일치에서 partial 보고를 반영함. 읽기 후속 점검을 독립 검토하고 Linux/Python 3.12 합성 파일에서 앱 미실행·소스/캐시 내용과 mtime 유지·헤더 일치/누락·문법 오류 요약·비허용 패키지 경로 마스킹·링크 거부·50개 제한을 확인함. [결과·한계](../evals/scenarios.md#ees-windows-ca-support). 사내 캐시 준비는 사용자 보고로 확인했고 후속 점검·재배포·Windows PowerShell 직접 실행은 미실행임. 기존 문서만 갱신함.
 
 ## 갱신 규칙
 
