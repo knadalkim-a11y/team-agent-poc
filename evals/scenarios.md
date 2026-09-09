@@ -1035,6 +1035,11 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 포트 해석·다음 판단: [Microsoft의 Winsock 오류 정의](https://learn.microsoft.com/en-us/windows/win32/winsock/windows-sockets-error-codes-2)에서 10048은 주소 사용 중이며 기존 socket·정상 종료되지 않은 socket·종료 중 socket도 포함함. 기존 서버가 현재 정상 실행 중이라고 단정하지 않음. 등록 포트의 TCP 상태 수/Listen·Bound 점유 PID·프로세스 이름을 먼저 읽고, 기존 표준 라이브러리 운영 코드의 verify_identity와 제한된 /health 조회를 재사용해 신원/응답을 두 번째 줄로 요약하도록 준비함. PID만 같으면 신원 일치라고 간주하지 않으며 health 전에 TCP를 수집해 조회 자체의 연결을 구분함. 서버·파일·설정을 변경하거나 새 bind/Start/Stop/Restore/Apply·후보 진단을 실행하지 않음. 성공 조건은 현재 점유/종료 중 상태와 기존 서버 응답의 구분이며 조회 불가 시 unavailable/unknown을 남기고 재기동/강제 종료하지 않음.
 - 이번 검증·한계: STATUS·이 기록만 변경하고 문서/diff를 검사함. 후속 PowerShell은 2,500자 이내·결과 두 줄로 준비하고 내장 Python 구문과 기존 코드의 무설치/앱 미실행 경계를 대조함. 로컬 Windows PowerShell 및 사내 TCP/신원/health 조회는 미실행임. 앞선 실제 wheel·Windows/Linux CI 성공을 이번 사내 가동이나 포트 원인 해결로 확대하지 않음.
 
+
+- 후속 사내 조회 결과: 사용자가 `tcp=none`, `owners=none`, `saved_pid=None`, `identity=false`, `health=false`를 전달함. 이 결과는 조회 시점에 등록 주소/포트 및 wildcard에 일치하는 TCP 항목이 없고 등록 PID·정상 health 응답도 없었다는 근거임. bind 자체를 새로 시도한 것은 아니므로 현재 bind 가능이나 과거 10048의 근본 원인까지 확정하지 않음. 조회 시점과 이후 실행 사이 상태 변화도 가능하며, 원래 서버·EES 수정본 가동 성공은 아직 없음.
+- 새 증거에 따른 단일 시작: 최신 main `65c3457f89b16d902de74d3a93506d4a5d913257`, tree `40b80f61a54c171755db94e4e57242199cc0541e`, 관련 열린 PR 0개를 확인함. 등록된 기존 Start는 선택/idle·등록 신원·포트를 실행 직전에 다시 검사하고 원래 Python/환경으로 한 자식만 시작함. 이전 10048은 자식 생성 전 실패였으므로 새 점유 항목 부재 증거에 따라 `Start -HealthTimeout 120 -Summary` 한 번을 안내함. health가 확인되면 상한 전에도 종료하며 실패 시 서버를 자동 종료/복구하거나 Start를 반복하지 않음. 동일한 장시간 health 실패를 다시 시도하는 절차나 포트 강제 재사용 설정 변경이 아님.
+- 후속 전달·검증: 2,500자 이내 PowerShell 블록은 기존 Start 한 번과 실패 시 저장된 결과 읽기만 포함함. action=start·failed=true·기록 시각이 이번 시작 이후인 경우에만 이유/errno/winerror/exit_code를 두 번째 줄로 표시해 과거 오류 재전달을 막고 추가 수집 왕복을 줄임. 새 기록이 없으면 detail=unavailable로 끝남. 성공 시 EES 요약과 기존 주소 접속 여부를 합해 1~2줄로 받음. 코드 경로/필드와 블록을 좁게 대조하고 STATUS·이 기록의 문서/diff를 검사함. Windows PowerShell 실실행·사내 Start/접속은 미실행이며 이미 통과한 운영 코드·자동 시험·CI를 변경/반복하지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
