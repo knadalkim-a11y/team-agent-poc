@@ -496,6 +496,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 | 기존 Update | 래퍼 Git 갱신만 수행. 서버·프로그램을 자동 교체하지 않음 |
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA> -CheckOnly` | 저장 설정·버전/의존성 요구·전달물·설치 경로와 적용 가능 여부를 읽어 표시. 앱 import·서버 중지·쓰기 없음 |
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA>` | 서버가 종료됐음을 확인한 뒤 검증된 프로그램만 적용. 같은 커밋/해시이면 변경 없음. 자동 시작·health 대기 없음 |
+| `Apply -Bundle <ZIP> -Commit <40자리 SHA> -Resume` | promote에서 중단된 실제 적용의 폴더를 사용자가 옮긴 뒤, 같은 ZIP·기록·전체 파일을 대조해 완료 기록만 남김. 파일 이동/추출·자동 시작 없음. `-CheckOnly`를 함께 쓰면 읽기 검증만 수행 |
 | `Restore` | **직전 적용 전 프로그램 상태**로 한 번 되돌림. 최초 적용의 직전 상태는 원래 Open WebUI. 복원 뒤 같은 Restore는 변경 없음 |
 | 기존 Start / Stop / Status | 같은 interpreter/cwd/데이터로 시작·정상 종료·상태 표시. 실제 앱 원본/사내 수정 여부와 적용 커밋을 구분 |
 
@@ -508,7 +509,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 - 쓰기 전에 버전·원본 기준·wheel 해시/RECORD·동일한 의존성 요구를 확인합니다. 추출은 고정 purelib wheel의 앱/metadata만 허용하고 경로 이탈·중복·링크·`.data`/스크립트 배치/`.pth` 등 범용 설치 동작은 거부합니다.
 - 서버 종료·기존 관리 프로세스 식별·포트 확인과 기존 작업 잠금을 재사용합니다. 식별되지 않은 프로세스를 종료하지 않으며 파일 잠금이면 적용을 멈춥니다.
 - 임시 앱 폴더 검증을 마친 뒤 직전 프로그램을 한 개 보관하고 교체합니다. **여러 파일 교체를 원자적이라고 주장하지 않습니다.** 기존 상태 파일에 적용 미완료를 먼저 기록하고, 성공한 경우에만 완료로 바꿉니다.
-- 적용 중 중단되면 Start를 차단하고 명시적인 Restore만 허용합니다. Start의 수정본 선택·완료/일치 검사는 기존 already_running 빠른 반환보다 먼저 수행합니다. Stop은 사내 수정의 미완료 기록·보관본·소유자 정보를 지우지 않습니다.
+- 적용 중 중단되면 Start를 차단합니다. 명시적인 Restore로 되돌리거나, Apply의 promote 단계에서 사용자가 실제 폴더 이동을 마친 경우에만 [Apply -Resume](#ees-wrapper-manual-promote)으로 전체 파일/기록을 검증해 완료할 수 있습니다. 다른 단계·남은 staging·다른 ZIP/기록·손상 파일은 재개하지 않습니다. Start의 수정본 선택·완료/일치 검사는 기존 already_running 빠른 반환보다 먼저 수행하며 Stop은 미완료 기록·보관본·소유자를 지우지 않습니다.
 - Restore는 잠금 내용이 저장된 미완료 작업의 소유자 PID·생성시각과 일치하고 그 프로세스의 종료가 확인된 경우에만 해당 잠금을 회수합니다. PID만 있는 구형 잠금·식별 불가·기록 불일치는 제거하지 않고 중단합니다. 별도 잠금 정리 명령이나 백그라운드 복구는 추가하지 않습니다.
 - Restore는 보관본·기록을 대조해 복원하며 손상·예상 밖 변경이면 덮어쓰기를 멈춥니다. DB 전체 복구·자동 재시도·여러 릴리스 이력 관리로 확대하지 않습니다.
 - 프로그램 선택은 기존 배포 기록에서 관리하되 `original` Python 사용을 “원본 앱 실행”으로 오표시하지 않습니다. 새 기록 형식은 구형 도구가 거부하도록 하고, 새 방식 채택 후 옛 Prepare/Deploy/Rollback/ProbeImports와 혼용하지 않습니다. 이전 실패·배포 기록은 보존합니다.
@@ -576,6 +577,59 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 실패하면 마지막 `EES` 줄에서 `action/result/stage`와 표시된 `error/errno/winerror/at`만 한 줄로 전달합니다. 일반 파일/상태 예외의 `at`는 저장소 내부 코드 파일명/행이며 개인 경로나 원문 오류는 출력하지 않습니다. `stage`는 작업 종류일 수 있으므로 코드 위치와 함께 판단하고, 이미 실패한 Apply를 새 출력 형식을 얻기 위해 반복하지 않습니다. 이전 버전의 `local_state_or_file_unavailable`만 남은 오류는 원래 예외를 복원할 수 없습니다. [이번 보완과 사내 실패 근거](../evals/scenarios.md#ees-wrapper-error-evidence). PowerShell에서 먼저 막혀 EES 줄이 없다면 실패한 작업명과 짧은 오류 종류만 전달하고 나머지 명령을 실행하지 않습니다. `result=ok`인 Apply는 프로그램 파일 적용 성공이며, Start의 health와 화면 확인까지 완료해야 실제 사내 적용 성공으로 기록합니다. 마지막 서버 가동 보고는 현재 상태로 간주하지 않습니다.
 
 Start의 `stage=health_check` 시간 초과는 지정한 시간 안에 정상 응답을 확인하지 못했다는 뜻입니다. 프로세스를 자동 종료하지 않으므로 나중에 접속될 수 있으며, 시간 초과만으로 Start/uvx를 반복하거나 Restore를 실행하지 않습니다. 이후 기존 주소 접속을 확인했고 다른 문제가 없다면 추가 로그 수집을 요구하지 않습니다. 저장된 실패는 당시 대기 결과로 보존하고 이후 접속 관찰을 별도로 기록하며, 원래 서버의 접속을 EES 수정본 Apply 성공으로 간주하지 않습니다.
+
+<a id="ees-wrapper-manual-promote"></a>
+
+#### 탐색기에서 실제 프로그램 폴더를 옮긴 뒤 적용 완료
+
+2026-09-09 사내 별도 프로그램 복사본에서 Python의 rename 실패 뒤 같은 폴더의 탐색기 이름 변경 성공을 보고받았습니다. 실행 프로세스와 경과 시간이 함께 달라졌으므로 Python 결함이나 특정 보안 제품을 원인으로 단정하지 않습니다. 원인을 알아내기 위한 반복 검사 대신, 사용자가 폴더를 옮기고 래퍼가 검증·완료하는 명시적 경로를 지원합니다. 시험용 `done-*`은 운영 적용 기록에 속하지 않으므로 채택하지 않습니다.
+
+아래 첫 블록은 원본으로 Restore된 현재 적용 상태에서 사용합니다. 기존 ZIP을 Downloads에 보존한 경우의 경로이며 다른 위치라면 `$b`만 실제 ZIP 파일 전체 경로로 바꿉니다. Update→CheckOnly→Stop→Apply 순서로 한 번 실행합니다. Apply가 바로 성공하면 Start까지 진행하므로 수동 변경/Resume을 생략합니다. Apply가 promote에서 중단되고 staging만 남아 있으며 잠금이 해제된 경우에만 관리 폴더를 열고 `next=manual_rename`으로 끝냅니다. 이때 서버는 아직 시작하지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $m = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1'
+    $b = Join-Path $env:USERPROFILE 'Downloads\EES-demo-4a8779bbf3ee.zip'
+    $k = '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
+    & $m -Action Update
+    & $m -Action Apply -Bundle $b -Commit $k -CheckOnly -Summary
+    & $m -Action Stop -Summary
+    try {
+        & $m -Action Apply -Bundle $b -Commit $k -Summary
+    } catch {
+        $f = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+        $c = Get-Content -LiteralPath $f -Raw -Encoding UTF8 | ConvertFrom-Json
+        $r = Get-Content -LiteralPath (Join-Path $c.state_root 'deployment.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+        $p = $r.customization.pending
+        if ($p.action -ne 'apply' -or $p.stage -ne 'promote' -or
+            (Test-Path -LiteralPath (Join-Path $c.state_root 'deployment.lock')) -or
+            (Test-Path -LiteralPath (Join-Path $c.state_root 'program')) -or
+            -not (Test-Path -LiteralPath (Join-Path $c.state_root 'program.staging') -PathType Container)) { throw }
+        Invoke-Item -LiteralPath $c.state_root
+        'next=manual_rename program.staging -> program'
+        return
+    }
+    & $m -Action Start -HealthTimeout 120 -Summary
+}
+```
+
+**`next=manual_rename`이 표시된 경우에만**, 열린 폴더의 **`program.staging`을 F2로 `program`으로 변경**합니다. 시험용 probe/done이나 원본 uvx 폴더가 대상이 아닙니다. 이름 변경이 실패하거나 이미 program이 있으면 덮어쓰지 않고 멈춥니다. 성공한 뒤에만 아래 두 번째 블록을 실행합니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $m = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1'
+    $b = Join-Path $env:USERPROFILE 'Downloads\EES-demo-4a8779bbf3ee.zip'
+    $k = '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
+    & $m -Action Apply -Bundle $b -Commit $k -Resume -Summary
+    & $m -Action Start -HealthTimeout 120 -Summary
+}
+```
+
+Resume은 정상 작업 잠금과 서버 종료·포트 검사를 유지합니다. 저장된 pending=apply/promote와 같은 ZIP/commit, 이전 선택 기록, program 전체 해시/metadata, 직전 보관본을 확인하고 staging이 없을 때만 완료 기록을 남깁니다. 새 작업 소유자를 먼저 기록하며 완료 저장 실패 시 미완료 상태를 보존합니다. 별도 경로 입력·시험 복사본 채택·파일 이동/추출·남은 잠금 회수·자동 Restore/Start/재시도는 추가하지 않습니다. Resume 실패 시 Start도 실행되지 않으며 기존 명시적 Restore는 유지합니다. `-Resume -CheckOnly`는 같은 완료 조건의 읽기 검증이고 서버를 종료하거나 완료 기록을 쓰지 않습니다.
+
+사내 결과는 **Apply/Resume와 Start 결과 한 줄, 이름/아이콘·기존 대화·대표 조회 확인 한 줄**만 전달합니다. 실패하면 마지막 EES 줄의 action/result/stage와 표시된 오류 코드만 전달하며, 수동 이름 변경 실패는 그 사실 한 줄이면 됩니다. Start의 health 시간 초과 뒤에는 Start/uvx를 반복하지 않고 위의 지연 기동 안내를 따릅니다. Resume 성공은 프로그램 적용 기록 완료이며 실제 사내 성공은 Start/화면 확인과 구분합니다. [구현·검증 및 사내 결과](../evals/scenarios.md#ees-wrapper-manual-resume).
 
 **직전 프로그램으로 되돌릴 때만** 아래 별도 블록을 사용합니다. 최초 Apply의 직전 상태는 원래 Open WebUI이며, 복원 완료 뒤 같은 Restore를 반복해도 변경하지 않습니다. 보관본·잠금·미완료 기록이 일치하지 않으면 멈추고, 임의 잠금 삭제·프로세스 강제 종료·DB 복구를 하지 않습니다. Start 실패 뒤 Restore가 자동 실행되는 구조는 아닙니다.
 

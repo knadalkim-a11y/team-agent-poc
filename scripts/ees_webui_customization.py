@@ -389,6 +389,43 @@ def apply(config, registry, bundle, commit, env, record, owner):
     return _result(selected, True, "apply")
 
 
+def check_resume(config, registry, env, selected):
+    """Read-only validation of an operator-completed pending promotion."""
+    current = validate_registry(registry)
+    pending = current["pending"]
+    if not pending or pending["action"] != "apply" or pending["stage"] != "promote":
+        raise CustomizationError("Resume requires an incomplete Apply at the promote stage.")
+    if (registry.get("phase") != "idle" or registry.get("pending") or registry.get("launch_uncertain")
+            or registry.get("current", {}).get("kind") != "original"
+            or registry["current"].get("python") != config["source_python"]):
+        raise CustomizationError("Resume requires the idle registered original interpreter selection.")
+    if (pending["before"] != current["active"] or pending["old_previous"] != current["previous"]
+            or pending["target"] != selected):
+        raise CustomizationError("The pending Apply, prior selection and supplied bundle must match exactly.")
+    program, previous, staged = _paths(config, env)
+    if staged.exists():
+        raise CustomizationError("The staged program has not been manually promoted; no program files were moved.")
+    validate_program(program, selected)
+    if pending["before"]:
+        validate_program(previous, pending["before"])
+    elif previous.exists():
+        raise CustomizationError("An unexpected previous program directory prevents Resume.")
+    return current
+
+
+def resume_apply(config, registry, bundle, commit, env, record, owner):
+    """Explicitly finish a validated manual rename; never move or install files."""
+    _owner(owner)
+    selected, _ = _load_bundle(config, bundle, commit, env)
+    current = check_resume(config, registry, env, selected)
+    pending = dict(current["pending"], owner=dict(owner))
+    registry["customization"] = dict(current, pending=pending)
+    record(config, registry, "program_apply_resumed")
+    _complete(config, registry, record, active=selected, previous={"active": pending["before"]},
+              event="program_applied")
+    return _result(selected, True, "apply")
+
+
 def restore(config, registry, record, owner):
     """Restore the state immediately before Apply once, including interrupted Apply."""
     _owner(owner)

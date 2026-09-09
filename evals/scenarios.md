@@ -1094,6 +1094,19 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 비교·전달의 끝나는 조건: 첫 줄은 test 결과/inspect·extract·validate·rename 단계/오류 타입·번호, 둘째 줄은 새 시험 폴더의 기본 이름만 출력함. 설정·실제 경로·예외 원문은 출력하지 않음. **test=failed stage=rename일 때만** 사용자가 같은 시험 복사본을 출력된 source → target 이름으로 탐색기에서 한 번 변경하며, 다른 단계의 실패는 종료함. Python 성공이면 수동 변경을 반복하지 않음. 사용자 결과는 Python 결과와 필요한 경우 수동 성공/실패 1~2줄로 받음. 비교용 복사본은 결과 확인을 위해 남기며 실제 program/program.staging이나 선택 기록은 수동 편집하지 않음. 성공해도 별도 복사본의 해당 시도 성공일 뿐 실제 적용은 미완료이고, Python 실패 뒤 탐색기 성공도 실행 프로세스/경과 시간이 동시에 달라지므로 Python 결함·보안 제품 원인을 확정하지 않음.
 - 비교 안내 검수: 최신 main `cb114f2acc4a8a24f036492be986c95c728cdd3d`, tree `10b21d90d2b90121f9468506341da73916650e62`, 관련 열린 PR 0개와 기존 파일 준비/검증 함수를 대조함. 안내 블록은 1,625자·Python 문법 통과. 기존 시험 fixture를 재사용한 Linux/Python 3.12 합성 예제 3개에서 성공, rename 접근 거부 시 완전한 원본 복사본 보존/목적지 부재/단 한 번 호출, 검증 실패 시 rename 미호출을 확인함. 세 경우 모두 기존 원본/합성 DB·키·설정/registry 바이트를 보존했고 새 probe/done 아래에만 파일이 생김. 저장 환경/설치 metadata 조회는 fixture에서 대체했으며 Windows·실제 사내 ZIP 비교까지 검증한 것으로 기록하지 않음. 독립 검토에서 실제 안내의 범위·단계·출력·경로·실패 보존을 대조해 차단 결함을 발견하지 못함. 운영 코드/시험/CI 설정을 바꾸거나 기존 실제 wheel CI를 반복하지 않고 문서/diff를 검사함.
 
+- 실제 프로그램 복사본 비교 결과 수신: 사용자는 `test=failed stage=rename` 뒤 같은 probe 폴더를 탐색기에서 done 이름으로 변경하는 데 성공했다고 보고함. 기존 안내대로라면 ZIP/추출/전체 검증을 통과한 복사본이며, 이번 오류 타입/errno/winerror는 새로 전달받지 않았으므로 이전 Win5를 복제하지 않음. 같은 내용의 폴더에서 Python 시도 실패와 이후 탐색기 성공을 확인한 범위이고 실행 프로세스/경과 시간이 달라 원인 확정은 아님. 시험 복사본은 운영 선택에 채택하지 않고 실제 수정본 적용은 미완료로 유지함. 일반 권한·핸들·빈 폴더/실제 복사본 비교 검사는 여기서 종료함.
+
+<a id="ees-wrapper-manual-resume"></a>
+
+### 수동 폴더 변경 뒤 명시적 Apply 재개 — 2026-09-09
+
+- 개발 기준과 문제: 최신 원격 main `a34706d497161502bab7ae97a86c85ccb68b28cf`, tree `7f2b14373389e40000744ae180c14ef73d56c4e0`, 관련 열린 PR 0개와 현재 AGENTS/STATUS·확정 설계·적용 코드를 대조함. 기존 코드는 수동으로 실제 staging→program 이동을 마쳐도 미완료 상태를 완료할 방법이 없었음. 사내 실제 복사본의 수동 성공 보고를 근거로 추가 원인 검사 대신 좁은 명시적 완료 기능을 구현함.
+- 구현 범위: 기존 진입점의 Apply에 -Resume을 추가하고 동일 Bundle/Commit 인자를 유지함. check_resume/resume_apply는 pending=apply/promote, 기존 active/previous와 pending의 before/old_previous 일치, 번들 target 동일, staging 부재, program 전체 해시/metadata 및 직전 보관본을 확인함. 기존 환경·경로 검사·_complete를 재사용하고 새 owner 기록 뒤에만 완료함. manager는 기존 정확한 original interpreter 선택, idle, 서버 종료/포트, 정상 작업 잠금을 유지함. -Resume -CheckOnly는 읽기 검증만 하고 기존 state/lock 변경 감지를 유지함. 일반 Apply·Restore·Start 보호와 구형 후보 작업 차단을 유지함.
+- 과설계 검토: 독립 검토에서 시험용 done 폴더의 임의 채택, 전체 저장 구조 변경, 자동 복사/PowerShell 대체, 별도 수동 준비 모드를 제외하고 Resume 한 옵션으로 제한함. 재개는 파일 추출/이동/삭제·자동 서버 시작·자동 Restore·잠금 강제 회수를 수행하지 않음. 정상 Apply를 실제로 한 번 시도해 해당 거래의 staging/기록을 만들고, promote 실패 때만 사용자가 실제 폴더를 옮겨 재개함. 정상 Apply가 성공하면 수동 단계는 생략함. 이전 실패를 성공으로 덮어쓰거나 시험 복사본 성공을 실제 적용으로 취급하지 않음.
+- 사내 안내: 기존 ZIP/프로그램 commit을 재사용하는 두 짧은 PowerShell 블록으로 Update→CheckOnly→Stop→Apply(정상 시 Start)와 수동 rename 후 Resume→Start를 준비함. 첫 블록은 실제 Apply catch에서만 pending=apply/promote·staging 존재/program 부재/잠금 부재를 확인하고 폴더를 열어 수동 단계로 끝냄. 앞 단계 실패 시 이후 변경을 하지 않음. 사용자 결과는 1~2줄만 받으며 원본 Python/의존성·uvx·데이터/키/설정 보존과 120초 기동 대기를 유지함.
+- 로컬 검증: Python 3.12 customization 31개 중 30개 통과/실제 wheel fixture 1개 미지정으로 skip, manager 72개 중 70개 통과/pwsh 부재로 어댑터·문서 구문 2개 skip. 정상 수동 승격/최초 및 직전 Restore·동일 파일/다른 commit, 미완료/다른 단계·ZIP/기록 불일치·변조/누락/추가/링크·보관본 불일치 거부, 완료 기록 실패 시 새 owner/pending 보존을 검증함. manager는 실행 중/미확인 신원·점유 포트·남은 잠금·정확하지 않은 original 선택 거부, CheckOnly 무쓰기/동시 변경 차단·CLI 제한을 검사함. 변경할 프로그램과 선택 기록의 보존을 뜻하며 일반 -Summary의 last-operation 결과 저장까지 무쓰기라고 주장하지 않음.
+- 독립 최종 검토·전달: 실제 코드/시험/두 명령 블록을 대조해 차단 결함을 발견하지 못함. 프로그램/원본 데이터 경계·동시 작업/복원·과설계를 검토했고 새 모듈/환경/파일 이동 대체를 추가하지 않음. 안내 블록은 1,283자/356자이며 Windows CI에서 문서의 해당 블록과 어댑터 구문/인자 전달을 검사함. 문서 검사는 DOCS OK, 25 files / 617 links / errors=0 / review_candidates=0이며 diff 검사도 통과함. Windows/Linux Python 3.11 CI 결과는 완료 후 기록함. 실제 사내 Resume·수정본 Start/화면 확인은 미실행임.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
