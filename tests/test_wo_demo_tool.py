@@ -109,10 +109,15 @@ class WODemoToolTests(unittest.IsolatedAsyncioTestCase):
     async def test_allowed_fields_accept_limit_and_reject_one_character_over(self):
         for field, limit in LIMITS.items():
             with self.subTest(field=field):
-                accepted = self.result(await self.update({field: "가" * limit}))
-                self.assertTrue(accepted["ok"])
-                request, _ = self.request()
-                self.assertEqual(request["changes"], {field: "가" * limit})
+                if field == "equipment_id":
+                    # The length is allowed, but an invented ID must not select equipment.
+                    rejected = self.failure(await self.update({field: "가" * limit}))
+                    self.assertEqual(rejected["error"]["code"], "unknown_equipment")
+                else:
+                    accepted = self.result(await self.update({field: "가" * limit}))
+                    self.assertTrue(accepted["ok"])
+                    request, _ = self.request()
+                    self.assertEqual(request["changes"], {field: "가" * limit})
                 before = len(self.events)
                 self.failure(await self.update({field: "가" * (limit + 1)}))
                 self.assertEqual(len(self.events), before)
@@ -123,6 +128,63 @@ class WODemoToolTests(unittest.IsolatedAsyncioTestCase):
                 self.failure(await self.update({"title": "수정"}, revision=revision))
         self.assertEqual(self.events, [])
         self.assertTrue(self.result(await self.update({"title": "수정"}, revision=0))["ok"])
+
+    async def test_equipment_lookup_is_independent_and_never_selects_first_match(self):
+        all_items = self.result(await self.tool.ems_demo_find_equipment())
+        self.assertTrue(all_items["ok"])
+        self.assertEqual(all_items["matches_count"], 32)
+        self.assertEqual(len(all_items["matches"]), 8)
+        self.assertTrue(all_items["matches_truncated"])
+        self.assertNotIn("equipment", all_items)
+        missing = self.result(await self.tool.ems_demo_find_equipment(query="없는 샘플 설비"))
+        self.assertTrue(missing["ok"])
+        self.assertEqual(missing["matches"], [])
+        self.assertEqual(missing["matches_count"], 0)
+        self.assertEqual(self.events, [])
+
+    async def test_equipment_lookup_scope_exact_id_and_shared_panel_catalog(self):
+        found = self.result(await self.tool.ems_demo_find_equipment(
+            site="천안", shop="조립", line="조립 1라인", process="권취", query="kr-ca"))
+        self.assertEqual(found["matches_count"], 1)
+        self.assertFalse(found["matches_truncated"])
+        self.assertEqual(found["matches"][0]["id"], "KR-CA-211")
+        self.assertEqual(found["available_options"]["process"], ["권취", "조립"])
+        scoped_out = self.result(await self.tool.ems_demo_find_equipment(
+            equipment_id="KR-CA-211", site="울산"))
+        self.assertEqual(scoped_out["matches_count"], 0)
+        partial_id = self.result(await self.tool.ems_demo_find_equipment(equipment_id="KR-CA"))
+        self.assertEqual(partial_id["matches_count"], 0)
+        self.assertEqual(self.events, [])
+        await self.view()
+        code = self.events[-1]["data"]["code"]
+        start = code.index("const equipmentCatalog = ") + len("const equipmentCatalog = ")
+        catalog, _ = json.JSONDecoder().raw_decode(code[start:])
+        self.assertEqual(len(catalog), 32)
+        self.assertEqual(next(item for item in catalog if item["id"] == "KR-CA-211"), found["matches"][0])
+        found["matches"][0]["name"] = "caller changed copy"
+        again = await self.tool.ems_demo_find_equipment(equipment_id="KR-CA-211")
+        self.assertEqual(again["matches"][0]["name"], "권취 설비 1호")
+
+    async def test_equipment_lookup_rejects_bad_filters_without_browser(self):
+        for field in ("corporation", "site", "shop", "line", "process", "query", "equipment_id"):
+            for value in (None, 42, True, [], {}, "가" * 101):
+                with self.subTest(field=field, value=value):
+                    result = self.failure(await self.tool.ems_demo_find_equipment(**{field: value}))
+                    self.assertEqual(result["error"]["code"], "invalid_filters")
+        self.assertEqual(self.events, [])
+
+    async def test_wo_resolves_equipment_path_and_rejects_wrong_scope_before_editing(self):
+        for changes, error in (({"equipment_id": "INVENTED", "title": "must not apply"}, "unknown_equipment"),
+                               ({"equipment_id": "   ", "title": "must not select first equipment"}, "unknown_equipment"),
+                               ({"equipment_id": "KR-CA-211", "site": "울산"}, "equipment_scope_mismatch")):
+            self.assertEqual(self.failure(await self.update(changes))["error"]["code"], error)
+        self.assertEqual(self.events, [])
+        fields = {"title": "권취 설비 소음 점검", "type": "점검", "priority": "일반", "description": "사용자 보고: 소음 발생"}
+        self.assertTrue(self.result(await self.update({"equipment_id": "KR-CA-211", "process": "권취", **fields}))["ok"])
+        request, _ = self.request()
+        self.assertEqual(request["changes"], {"equipment_id": "KR-CA-211", "corporation": "한국", "site": "천안",
+                                             "shop": "조립", "line": "조립 1라인", "process": "권취", **fields})
+        self.assertEqual(request["expected_revision"], 3)
 
     async def test_missing_metadata_or_callback_fails_without_execution(self):
         for metadata in [None, [], "sample-chat", {}, {"chat_id": None},

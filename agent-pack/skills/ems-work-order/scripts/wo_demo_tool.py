@@ -1,7 +1,7 @@
 """
 title: EES WO Demo
 description: Sample equipment selection and WO drafting beside the existing chat. No EMS connection or real issuance.
-version: 0.1.0
+version: 0.1.1
 required_open_webui_version: 0.11.3
 """
 
@@ -15,6 +15,49 @@ _LIMITS = {
     "process": 100, "query": 100, "equipment_id": 100,
     "title": 100, "type": 100, "priority": 100, "description": 2500,
 }
+_HIERARCHY = ("corporation", "site", "shop", "line", "process")
+_EQUIPMENT_FILTERS = (*_HIERARCHY, "query", "equipment_id")
+
+
+def _demo_catalog():
+    """Single sample source shared by independent lookup and the WO panel."""
+    locations = (("한국", "천안", "KR-CA"), ("한국", "울산", "KR-US"),
+                 ("헝가리", "헝가리 사업장", "HU"), ("미국", "미국 사업장", "US"))
+    shops = (("전극", ("믹싱", "코팅")), ("조립", ("권취", "조립")))
+    return tuple(
+        {"id": f"{prefix}-{si}{number}{pi}", "name": f"{process} 설비 {number}호",
+         "corporation": corporation, "site": site, "shop": shop,
+         "line": f"{shop} {number}라인", "process": process}
+        for corporation, site, prefix in locations
+        for si, (shop, processes) in enumerate(shops, 1)
+        for number in (1, 2)
+        for pi, process in enumerate(processes, 1)
+    )
+
+
+_DEMO_EQUIPMENT = _demo_catalog()
+
+
+def _find_demo_equipment(filters):
+    """Shared lookup; no browser, model invocation, selection or EMS writes."""
+    if any(key not in _EQUIPMENT_FILTERS or not isinstance(value, str) or len(value) > 100
+           for key, value in filters.items()):
+        return _error("invalid_filters", "설비 검색 조건은 100자 이내의 문자열로 입력해 주세요.")
+    selected = {key: filters.get(key, "").strip() for key in _EQUIPMENT_FILTERS}
+    query = selected["query"].lower()
+    matches = [dict(item) for item in _DEMO_EQUIPMENT
+               if all(not selected[key] or item[key] == selected[key] for key in _HIERARCHY)
+               and (not selected["equipment_id"] or item["id"] == selected["equipment_id"])
+               and (not query or query in (item["id"] + " " + item["name"]).lower())]
+    options = {
+        key: list(dict.fromkeys(item[key] for item in _DEMO_EQUIPMENT
+                               if all(not selected[parent] or item[parent] == selected[parent]
+                                      for parent in _HIERARCHY[:index])))
+        for index, key in enumerate(_HIERARCHY)
+    }
+    return {"ok": True, "demo": True, "filters": selected, "available_options": options,
+            "matches_count": len(matches), "matches": matches[:8], "matches_truncated": len(matches) > 8,
+            "message": "샘플 설비 조회 결과입니다. 실제 EMS 조회가 아니며 설비를 선택하거나 WO를 작성하지 않았습니다."}
 
 # A single copy/paste Tool is the deployment unit. No CDN, credentials,
 # arbitrary model-generated JavaScript, package imports, or backend state.
@@ -238,14 +281,7 @@ try {
     const hierarchy = ['corporation', 'site', 'shop', 'line', 'process'];
     const contentFields = ['title', 'type', 'priority', 'description'];
     const fieldNames = {corporation:'법인',site:'사업장',shop:'SHOP',line:'LINE',process:'PROCESS',query:'설비 검색',equipment_id:'설비',title:'작업 제목',type:'작업 구분',priority:'우선순위',description:'요청 내용'};
-    const catalog = [];
-    const locations = [['한국','천안','KR-CA'],['한국','울산','KR-US'],['헝가리','헝가리 사업장','HU'],['미국','미국 사업장','US']];
-    const shops = [['전극',['믹싱','코팅']],['조립',['권취','조립']]];
-    locations.forEach(([corporation,site,prefix]) => shops.forEach(([shop,processes], si) => {
-      [1,2].forEach(n => processes.forEach((process, pi) => {
-        catalog.push({id:prefix+'-'+(si+1)+n+(pi+1),name:process+' 설비 '+n+'호',corporation,site,shop,line:shop+' '+n+'라인',process});
-      }));
-    }));
+    const catalog = equipmentCatalog;
     const state = {revision:Date.now(),phase:'edit',filters:Object.fromEntries([...hierarchy,'query'].map(k=>[k,''])),equipment_id:'',fields:{title:'',type:'점검',priority:'일반',description:''}};
     const origins = {};
     let reviewed = null, lastAI = null, visibleLimit = 8, choosing = true, note = '법인·사업장이나 설비명으로 대상 설비를 찾아보세요.';
@@ -253,7 +289,14 @@ try {
     const originalMinWidth = column.style.minWidth;
     const host = document.createElement('aside');
     host.id = 'ees-wo-demo-panel'; host.setAttribute('aria-label','설비 WO 시연');
-    host.style.cssText = 'flex:0 0 min(44%,480px);width:min(44%,480px);min-width:350px;height:100%;min-height:0;overflow:auto;border-left:1px solid #8886;z-index:30;';
+    host.style.cssText = 'flex:0 0 420px;width:420px;min-width:0;box-sizing:border-box;height:100%;min-height:0;overflow:auto;border-left:1px solid #8886;z-index:30;';
+    const divider = document.createElement('div');
+    divider.id='ees-wo-demo-resizer';divider.tabIndex=0;
+    divider.setAttribute('role','separator');divider.setAttribute('aria-orientation','vertical');
+    divider.setAttribute('aria-label','대화와 WO 화면 너비 조절');divider.setAttribute('aria-controls',host.id);
+    divider.title='드래그하거나 좌우 방향키로 화면 너비를 조절하세요.';
+    divider.style.cssText='flex:0 0 10px;width:10px;align-self:stretch;display:flex;align-items:center;justify-content:center;cursor:col-resize;touch-action:none;user-select:none;z-index:31;';
+    const grip=document.createElement('span');grip.style.cssText='width:3px;height:36px;border-radius:2px;background:#8888;pointer-events:none;';divider.append(grip);
     const shadow = host.attachShadow({mode:'open'});
     // Only this reviewed, constant template is assigned as HTML. All data use textContent/value.
     shadow.innerHTML = panelHTML;
@@ -384,21 +427,71 @@ try {
       reviewed=null;lastAI=null;state.phase='issued';state.revision+=1;note='샘플 WO 발행 완료. 실제 EMS에는 저장하지 않았습니다.';
       q('issue').disabled=true;q('result-number').textContent='WO-DEMO-0001';renderValues(q('result-values'),issued);render();
     });
+    let panelWidth=null, maximumWidth=800, drag=null;
+    const finishDrag = event => {
+      if(!drag || (event && event.pointerId!==drag.id))return;
+      const previous=drag;drag=null;
+      if(divider.hasPointerCapture(previous.id))divider.releasePointerCapture(previous.id);
+      document.body.style.userSelect=previous.selection;document.body.style.cursor=previous.cursor;
+    };
+    const setWidth = value => {
+      panelWidth=Math.round(Math.max(350,Math.min(maximumWidth,value)));
+      host.style.width=panelWidth+'px';host.style.flexBasis=panelWidth+'px';
+      divider.setAttribute('aria-valuenow',String(panelWidth));divider.setAttribute('aria-valuetext',panelWidth+'픽셀');
+    };
     const resize = () => {
-      if(window.innerWidth<900){host.style.position='fixed';host.style.inset='0 0 0 auto';host.style.width='min(100%,480px)';host.style.minWidth='0';host.style.zIndex='60';}
-      else {host.style.position='relative';host.style.inset='auto';host.style.width='min(44%,480px)';host.style.minWidth='350px';host.style.zIndex='30';}
+      if(!host.isConnected)return;
+      // v0.11.3 chat row has no padding/gap; its native siblings have no margins.
+      const others=Array.from(row.children).filter(child=>child!==column && child!==host && child!==divider);
+      const occupied=others.reduce((total,child)=>{
+        const style=getComputedStyle(child);
+        return total+(['absolute','fixed'].includes(style.position)?0:child.getBoundingClientRect().width);
+      },0);
+      const available=row.clientWidth-occupied;
+      const mobile=window.innerWidth<900 || available<720;
+      divider.hidden=mobile;divider.style.display=mobile?'none':'flex';
+      if(mobile){finishDrag();host.style.position='fixed';host.style.inset='0 0 0 auto';host.style.width='min(100%,480px)';host.style.zIndex='60';}
+      else {
+        host.style.position='relative';host.style.inset='auto';host.style.zIndex='30';
+        maximumWidth=Math.floor(Math.min(800,available-360-10));
+        divider.setAttribute('aria-valuemin','350');divider.setAttribute('aria-valuemax',String(Math.floor(maximumWidth)));
+        setWidth(panelWidth===null?Math.min(480,available*.44):panelWidth);
+      }
+    };
+    divider.addEventListener('pointerdown',event=>{
+      if(divider.hidden || event.button!==0 || event.isPrimary===false)return;
+      finishDrag();
+      drag={id:event.pointerId,x:event.clientX,width:panelWidth,selection:document.body.style.userSelect,cursor:document.body.style.cursor};
+      document.body.style.userSelect='none';document.body.style.cursor='col-resize';
+      try{divider.setPointerCapture(event.pointerId);}catch(_){finishDrag();return;}
+      divider.focus({preventScroll:true});event.preventDefault();
+    });
+    divider.addEventListener('pointermove',event=>{if(drag && event.pointerId===drag.id)setWidth(drag.width+drag.x-event.clientX);});
+    ['pointerup','pointercancel','lostpointercapture'].forEach(type=>divider.addEventListener(type,finishDrag));
+    divider.addEventListener('keydown',event=>{
+      if(divider.hidden || !['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      event.preventDefault();setWidth(event.key==='Home'?350:event.key==='End'?maximumWidth:panelWidth+(event.key==='ArrowLeft'?20:-20));
+    });
+    divider.addEventListener('focus',()=>divider.style.outline='2px solid #6b91d5');
+    divider.addEventListener('blur',()=>divider.style.outline='');
+    const resizeObserver=new ResizeObserver(resize);
+    const observeLayout=()=>{
+      resizeObserver.disconnect();if(!host.isConnected)return;
+      resizeObserver.observe(row);
+      Array.from(row.children).filter(child=>child!==host && child!==divider).forEach(child=>resizeObserver.observe(child));
     };
     const theme = () => {host.style.colorScheme=document.documentElement.classList.contains('dark')?'dark':'light';};
-    const observer=new MutationObserver(()=>{if(!alive())controller.destroy();});
+    const observer=new MutationObserver(records=>{if(!alive())controller.destroy();else if(records.some(record=>record.target===row)){observeLayout();resize();}});
     const themeObserver=new MutationObserver(theme);
-    const open=()=>{if(!host.isConnected)row.append(host);column.style.minWidth='0';host.hidden=false;resize();theme();};
-    const destroy=()=>{observer.disconnect();themeObserver.disconnect();window.removeEventListener('resize',resize);host.remove();column.style.minWidth=originalMinWidth;if(window.__eesWODemoV1===controller)delete window.__eesWODemoV1;};
+    const close=()=>{finishDrag();resizeObserver.disconnect();divider.remove();host.remove();column.style.minWidth=originalMinWidth;};
+    const open=()=>{if(!host.isConnected){row.append(divider,host);observeLayout();}column.style.minWidth='0';host.hidden=false;resize();theme();};
+    const destroy=()=>{observer.disconnect();themeObserver.disconnect();window.removeEventListener('resize',resize);close();if(window.__eesWODemoV1===controller)delete window.__eesWODemoV1;};
     controller={chatId:request.chat_id,alive,destroy,open,view,update:(revision,changes)=>{
       if(revision!==state.revision)return {...fail('revision_conflict','사용자가 화면을 수정했습니다. 현재 값을 확인하고 요청한 부분만 다시 수정해 주세요.'),current:view()};
       const result=apply(changes,'ai');if(!result.ok)displayError(result.error.message);return result;
     }};
     window.__eesWODemoV1=controller;
-    q('close').addEventListener('click',()=>{host.remove();column.style.minWidth=originalMinWidth;});
+    q('close').addEventListener('click',close);
     observer.observe(document.body,{childList:true,subtree:true});themeObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class']});window.addEventListener('resize',resize);
     render();open();
   }
@@ -422,6 +515,7 @@ async def _call(action, event_call, metadata, **values):
         return _error("browser_required", "WebUI 대화 화면의 연결을 확인해 주세요.")
     request = {"action": action, "chat_id": chat_id, **values}
     code = "const request = " + json.dumps(request, ensure_ascii=True) + ";\n"
+    code += "const equipmentCatalog = " + json.dumps(_DEMO_EQUIPMENT, ensure_ascii=True) + ";\n"
     code += "const panelHTML = " + json.dumps(PANEL_HTML, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
     try:
         result = await asyncio.wait_for(event_call({"type": "execute", "data": {"code": code}}), timeout=EVENT_TIMEOUT_SECONDS)
@@ -435,12 +529,29 @@ async def _call(action, event_call, metadata, **values):
 
 
 class Tools:
+    async def ems_demo_find_equipment(self, corporation: str = "", site: str = "", shop: str = "",
+                                      line: str = "", process: str = "", query: str = "",
+                                      equipment_id: str = "") -> dict:
+        """Find SAMPLE equipment independently of WO. No browser/chat is required; no panel opens or selection changes. Use for equipment-only questions or to resolve a WO target before drafting. Zero/multiple matches are normal results, not a selected equipment. Never invent an ID or select the first of multiple matches. No real EMS connection.
+
+        :param corporation: Exact corporation, e.g. 한국. Empty means all.
+        :param site: Exact site, e.g. 천안. Known conditions can be supplied without all parents.
+        :param shop: Exact SHOP, e.g. 조립.
+        :param line: Exact LINE, e.g. 조립 1라인.
+        :param process: Exact PROCESS, e.g. 권취. Hierarchy is SHOP > LINE > PROCESS.
+        :param query: Equipment name or code substring. At most 100 characters.
+        :param equipment_id: Exact returned equipment ID. Combined with other conditions using AND.
+        """
+        return _find_demo_equipment({"corporation": corporation, "site": site, "shop": shop,
+                                     "line": line, "process": process, "query": query,
+                                     "equipment_id": equipment_id})
+
     async def wo_demo_view(self, __event_call__=None, __metadata__=None) -> dict:
         """Open the SAMPLE WO side panel and read its latest form, revision, filter options and matching equipment. Use before editing, including after manual UI input. This never reads EMS or issues a WO. Keep using the existing chat; no separate mode. Follow returned options and sample equipment IDs, never invent them."""
         return await _call("view", __event_call__, __metadata__)
 
     async def wo_demo_update(self, expected_revision: int, changes: dict, __event_call__=None, __metadata__=None) -> dict:
-        """Edit only requested fields in the SAMPLE panel, preserving other current values. Call wo_demo_view first; use its revision. On revision_conflict read current state and preserve new user input. No issuance action exists.
+        """Edit only requested fields in the SAMPLE panel, preserving other current values. Call wo_demo_view first; use its revision. On revision_conflict read current state and preserve new user input. No issuance action exists. For an initial draft, send the resolved equipment_id and title/type/priority/description together in one update; preserve existing user values.
 
         :param expected_revision: The latest revision returned by wo_demo_view.
         :param changes: Only changed fields as strings: corporation, site, shop, line, process, query, equipment_id, title, type (점검/수리), priority (일반/긴급), description. Use returned filter values and equipment IDs. title <=100 chars; description <=2500. SHOP > LINE > PROCESS. Empty filter clears it and descendants. To append text, start with the latest description. Never send HTML, code, phase or issuance requests.
@@ -451,4 +562,15 @@ class Tools:
             return _error("invalid_changes", "시연 화면에서 지원하는 입력 항목만 수정할 수 있습니다.")
         if any(not isinstance(value, str) or len(value) > _LIMITS[key] for key, value in changes.items()):
             return _error("invalid_changes", "입력값과 길이를 확인해 주세요. 제목은 100자, 요청 내용은 2,500자까지입니다.")
+        if changes.get("equipment_id"):
+            # Reuse the lookup business function, not a nested model/tool-routing loop.
+            found = _find_demo_equipment({"equipment_id": changes["equipment_id"]})
+            if found["matches_count"] != 1:
+                return _error("unknown_equipment", "샘플 목록에 있는 설비 코드를 선택해 주세요.")
+            equipment = found["matches"][0]
+            if any(changes.get(key) and changes[key] != equipment[key] for key in _HIERARCHY):
+                return _error("equipment_scope_mismatch", "선택한 설비와 법인·사업장·필터 조건이 다릅니다.")
+            # An explicit ID resolves its whole path, even when only a child filter was given.
+            changes = {**changes, "equipment_id": equipment["id"],
+                       **{key: equipment[key] for key in _HIERARCHY}}
         return await _call("update", __event_call__, __metadata__, expected_revision=expected_revision, changes=changes)

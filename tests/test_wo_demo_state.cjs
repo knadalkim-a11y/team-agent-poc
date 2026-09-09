@@ -44,9 +44,13 @@ class Element {
   replaceChildren(...nodes) { [...this.children].forEach(node => node.remove()); this.append(...nodes); }
   remove() { if (this.parentElement) this.parentElement.children = this.parentElement.children.filter(c => c !== this); this.parentElement = null; }
   setAttribute(key, value) { this.attributes[key] = String(value); }
+  getBoundingClientRect() { return { width: this.rectWidth ?? (parseFloat(this.style.width) || this.clientWidth || 0) }; }
+  setPointerCapture(id) { this.captureId = id; }
+  hasPointerCapture(id) { return this.captureId === id; }
+  releasePointerCapture(id) { if (this.captureId === id) this.captureId = null; }
   addEventListener(type, callback) { (this.events[type] ||= []).push(callback); }
   removeEventListener(type, callback) { this.events[type] = (this.events[type] || []).filter(c => c !== callback); }
-  fire(type) { (this.events[type] || []).forEach(callback => callback({ target: this, preventDefault() {} })); }
+  fire(type, values = {}) { (this.events[type] || []).forEach(callback => callback({ target: this, button: 0, pointerId: 1, preventDefault() {}, ...values })); }
   focus() { this.focused = true; }
   attachShadow() { this.shadowRoot = new Shadow(); return this.shadowRoot; }
 }
@@ -71,6 +75,7 @@ class Shadow extends Element {
 function environment({ layout = true } = {}) {
   const body = new Element('body'); body.connected = true;
   const row = new Element(), column = new Element(), anchor = new Element();
+  row.clientWidth = 1200;
   body.append(row); row.append(column); column.append(anchor);
   const documentElement = new Element('html'), observers = [], window = new Element('window');
   window.innerWidth = 1440;
@@ -80,8 +85,14 @@ function environment({ layout = true } = {}) {
     observe() { this.active = true; }
     disconnect() { this.active = false; }
   }
+  const sizeObservers = [];
+  class ResizeObserver {
+    constructor(callback) { this.callback = callback; sizeObservers.push(this); }
+    observe() { this.active = true; }
+    disconnect() { this.active = false; }
+  }
   const location = { pathname: '/c/sample-chat' };
-  const context = vm.createContext({ window, document, location, MutationObserver, getComputedStyle: () => ({ display: 'flex' }) });
+  const context = vm.createContext({ window, document, location, MutationObserver, ResizeObserver, getComputedStyle: node => ({ display: 'flex', position: node.style.position }) });
   const host = () => row.children.find(node => node.id === 'ees-wo-demo-panel');
   const q = id => host()?.shadowRoot.getElementById(id);
   async function call(action = 'view', changes = {}, revision, chat_id = 'sample-chat') {
@@ -89,7 +100,11 @@ function environment({ layout = true } = {}) {
     const result = await vm.runInContext('(async () => {\n' + payload.code + '\n})()', context);
     return JSON.parse(JSON.stringify(result));
   }
-  return { window, location, row, host, q, call, mutate: () => observers.filter(o => o.active).forEach(o => o.callback()), context };
+  return { window, location, row, body, host, q, call, context, sizeObservers,
+    divider: () => row.children.find(node => node.id === 'ees-wo-demo-resizer'),
+    mutate: (records = []) => observers.filter(o => o.active).forEach(o => o.callback(records)),
+    resize: () => sizeObservers.filter(o => o.active).forEach(o => o.callback()),
+  };
 }
 const ok = result => { assert.equal(result.ok, true, JSON.stringify(result)); assert.equal(result.demo, true); return result; };
 const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert.equal(result.error.code, code); return result; };
@@ -97,7 +112,7 @@ const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert
 (async () => {
   const env = environment(); let state = ok(await env.call());
   assert.equal(state.matches_count, 32); assert.equal(state.matches.length, 8);
-  const firstHost = env.host(); assert.ok(firstHost); assert.equal(env.row.children.length, 2);
+  const firstHost = env.host(); assert.ok(firstHost); assert.equal(env.row.children.length, 3);
   bad(await env.call('update', { site: '천안', title: 'must not apply' }, state.revision), 'parent_required');
   assert.deepEqual(ok(await env.call()).fields, state.fields);
   assert.equal(ok(await env.call()).revision, state.revision);
@@ -166,5 +181,46 @@ const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert
   bad(await unsupported.call(), 'unsupported_layout');
   assert.equal(unsupported.row.children.length, 1); assert.equal(unsupported.window.__eesWODemoV1, undefined);
   console.log('PASS close/reopen, changed-chat reset and unsupported routes/layout');
-  console.log('4 grouped JS state checks passed (synthetic DOM; browser rendering unverified).');
+
+  const sized = environment(); let draft = ok(await sized.call());
+  const initialRevision = draft.revision;
+  const fields = { title: '설비 점검', type: '점검', priority: '일반', description: '선택한 설비 점검 요청' };
+  draft = ok(await sized.call('update', { equipment_id: draft.matches[0].id, ...fields }, initialRevision));
+  assert.equal(draft.revision, initialRevision + 1); assert.deepEqual(draft.fields, fields);
+  const handle = sized.divider(), width = () => parseFloat(sized.host().style.width);
+  assert.equal(handle.attributes.role, 'separator'); assert.equal(handle.attributes['aria-controls'], sized.host().id);
+  assert.equal(handle.tabIndex, 0); assert.equal(width(), 480);
+  sized.body.style.userSelect = 'text'; sized.body.style.cursor = 'auto';
+  handle.fire('pointerdown', { clientX: 900 }); assert.equal(handle.captureId, 1);
+  handle.fire('pointermove', { clientX: -1000, pointerId: 2 }); assert.equal(width(), 480);
+  handle.fire('pointermove', { clientX: -1000 }); assert.equal(width(), 800);
+  handle.fire('pointermove', { clientX: 2000 }); assert.equal(width(), 350);
+  handle.fire('pointercancel'); assert.equal(handle.captureId, null);
+  assert.equal(sized.body.style.userSelect, 'text'); assert.equal(sized.body.style.cursor, 'auto');
+  handle.fire('keydown', { key: 'ArrowLeft' }); assert.equal(width(), 370);
+  handle.fire('keydown', { key: 'End' }); assert.equal(width(), 800);
+  sized.row.clientWidth = 1000; sized.resize(); assert.equal(width(), 630);
+  const otherPanel = new Element(); otherPanel.rectWidth = 200; sized.row.append(otherPanel);
+  sized.mutate([{ target: sized.row }]); assert.equal(width(), 430);
+  otherPanel.rectWidth = 500; sized.resize(); assert.equal(handle.hidden, true);
+  assert.equal(sized.host().style.position, 'fixed');
+  otherPanel.remove(); sized.row.clientWidth = 1200; sized.resize(); assert.equal(width(), 430);
+  handle.fire('keydown', { key: 'Home' }); assert.equal(width(), 350);
+  handle.fire('pointerdown', { clientX: 900 });
+  handle.fire('pointermove', { clientX: 650 }); handle.fire('pointerup'); assert.equal(width(), 600);
+  handle.fire('pointerdown', { clientX: 650 });
+  sized.window.innerWidth = 600; sized.window.fire('resize');
+  assert.equal(handle.hidden, true); assert.equal(handle.captureId, null);
+  assert.equal(sized.body.style.userSelect, 'text');
+  sized.window.innerWidth = 1440; sized.window.fire('resize'); assert.equal(width(), 600);
+  assert.deepEqual(ok(await sized.call()), draft);
+  handle.fire('pointerdown', { clientX: 650 }); sized.q('close').fire('click');
+  assert.equal(handle.captureId, null); assert.equal(sized.divider(), undefined);
+  assert.equal(sized.sizeObservers.some(observer => observer.active), false);
+  assert.deepEqual(ok(await sized.call()), draft); assert.equal(width(), 600);
+  handle.fire('pointerdown', { clientX: 650 }); sized.location.pathname = '/c/third-chat'; sized.mutate();
+  assert.equal(handle.captureId, null); assert.equal(sized.divider(), undefined);
+  assert.equal(sized.body.style.userSelect, 'text'); assert.equal(sized.window.events.resize.length, 0);
+  console.log('PASS complete initial draft, resize bounds/pointer/keyboard, container changes and cleanup without form changes');
+  console.log('5 grouped JS state checks passed (synthetic DOM; browser rendering unverified).');
 })().catch(error => { console.error(error); process.exitCode = 1; });

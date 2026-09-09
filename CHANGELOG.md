@@ -4,7 +4,7 @@
 
 ## 2026-09-09
 
-- 기존 Open WebUI 대화창과 우측 패널에서 WO를 체험하는 시연 Tool을 준비함. 법인·사업장·SHOP·LINE·PROCESS의 샘플 설비 선택, 최신 폼 읽기·변경 번호를 대조한 AI 수정과 사용자 최종 버튼의 샘플 결과를 연결함. 단일 Python Tool과 조건부 Prompt 추가로 제공하며 실제 EMS 연결·저장은 없음. 사용자가 시연용 목업 → 피드백 → 운영용 목업 → 실제 EMS 구현 순서를 확정했으며 권한 세분화는 후속으로 둠. [시연 안내와 적용 경계](docs/03-openwebui-native-agent.md#wo-mockup), [검증 기록](evals/scenarios.md#wo-mockup).
+- 기존 대화·우측 패널 WO 시연의 사내 동작 보고를 받고 v0.1.1에서 AI의 첫 초안 작성, 드래그·키보드 패널 너비 조절, 브라우저와 독립적인 설비 검색을 보완함. WO와 설비 검색은 같은 샘플 목록·검색 코드를 재사용하며 기존 EES WO Demo 등록 파일 한 개로 유지함. 최신 폼·변경 번호 대조와 사용자 최종 버튼의 샘플 결과를 유지하고 실제 EMS 연결·저장은 없음. 기존 Tool 코드와 WO Prompt 절만 교체하는 갱신 안내를 추가하며 초기 성공 보고와 추가 변경의 사내 확인을 구분함. 시연용 목업 → 피드백 → 운영용 목업 → 실제 EMS 구현 순서와 후속 권한 세분화 방향은 유지함. [시연 안내와 적용 경계](docs/03-openwebui-native-agent.md#wo-mockup), [검증 기록](evals/scenarios.md#wo-mockup).
 
 - 사용자 요청으로 WO 작성의 클릭 가능한 참고 목업을 준비함. 직접 입력·예시 채팅의 같은 폼 수정·변경 표시·내용 확인·사용자 최종 버튼·샘플 결과 흐름을 단일 HTML에 담으며 실제 AI·EMS 호출과 WebUI 배포는 없음. 입력 항목은 예시이고 디자인 승인·쓰기 권한 확대와 구분함. [목업 안내](docs/03-openwebui-native-agent.md#wo-mockup), [검증 범위](evals/scenarios.md#wo-mockup).
 
