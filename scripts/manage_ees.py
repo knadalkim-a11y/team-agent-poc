@@ -331,6 +331,8 @@ def selected_program(config, registry):
         raise DeploymentError("The wrapper must use the registered original interpreter.")
     value = registry["customization"]
     if value["pending"]:
+        if value["pending"]["action"] == "apply" and value["pending"]["stage"] == "promote":
+            raise DeploymentError("Program promotion is incomplete; use Restore or, after manual promotion, Apply --resume before Start.")
         raise DeploymentError("Program file replacement is incomplete; use Restore before Start.")
     active = value["active"]
     if active:
@@ -357,19 +359,23 @@ def require_stopped(config, registry):
 def customize(config, args):
     env = states.runtime_environment(config)
     check_only = getattr(args, "check_only", False)
+    resume = getattr(args, "resume", False)
     if check_only:
         # Deliberately no lock creation, report write, app import or server stop.
         registry = read_registry(config)
         require_idle(registry)
         if registry.get("pending") or registry.get("launch_uncertain"):
             raise DeploymentError("The existing operation is incomplete; program changes are blocked.")
-        selected_program(config, registry)
-        customization.check_applicability(config, registry, env)
+        if not resume:
+            selected_program(config, registry)
+            customization.check_applicability(config, registry, env)
         if (Path(config["state_root"]) / "deployment.lock").exists():
             raise DeploymentError("Another operation or interrupted-operation lock exists; CheckOnly was stopped.")
         if registry["current"] != {"kind": "original", "source_commit": None, "python": config["source_python"]}:
             raise DeploymentError("Apply requires the registered original interpreter and program baseline.")
         selection = customization.inspect_bundle(config, args.bundle, commit_id(args.commit), env)
+        if resume:
+            customization.check_resume(config, registry, env, selection)
         if read_registry(config) != registry or (Path(config["state_root"]) / "deployment.lock").exists():
             raise DeploymentError("The deployment changed during CheckOnly; no applicability result was accepted.")
         return {"checked": True, "changed": False, "source_commit": selection["source_commit"],
@@ -380,6 +386,10 @@ def customize(config, args):
         require_stopped(config, registry)
         if args.action == "apply":
             require_idle(registry)
+            if resume:
+                if registry["current"] != {"kind": "original", "source_commit": None, "python": config["source_python"]}:
+                    raise DeploymentError("Apply requires the registered original interpreter and program baseline.")
+                return customization.resume_apply(config, registry, args.bundle, commit_id(args.commit), env, record, owner)
             selected_program(config, registry)
             return customization.apply(config, registry, args.bundle, commit_id(args.commit), env, record, owner)
         return customization.restore(config, registry, record, owner)
@@ -783,6 +793,7 @@ def main(argv=None):
     parser.add_argument("--uv", type=Path)
     parser.add_argument("--wheelhouse", type=Path)
     parser.add_argument("--check-only", action="store_true", help="Read-only Apply preflight; never imports or stops the app.")
+    parser.add_argument("--resume", action="store_true", help="Explicitly finish Apply after its staged program was manually renamed.")
     parser.add_argument("--summary", action="store_true", help="Print a single safe line for manual result handoff.")
     parser.add_argument("--health-timeout", type=health_timeout_arg, default=DEFAULT_HEALTH_TIMEOUT,
                         help="Seconds to wait for each server's health (default: 300; range: 1-900).")
@@ -791,6 +802,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.check_only and args.action != "apply":
         parser.error("--check-only is supported only with apply.")
+    if args.resume and args.action != "apply":
+        parser.error("--resume is supported only with apply.")
     if args.summary and args.action not in ("apply", "restore", "start", "stop", "status"):
         parser.error("--summary is supported with Apply/Restore/Start/Stop/Status only.")
     if args.use_windows_ca and args.action != "deploy":

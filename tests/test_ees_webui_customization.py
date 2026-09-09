@@ -114,6 +114,33 @@ class CustomizationTests(unittest.TestCase):
     def restore(self):
         return custom.restore(self.config, self.registry, self.record, OWNER)
 
+    def interrupt_promotion(self, commit=COMMIT, *, manually_promote=True):
+        staged = self.root / "state" / "program.staging"
+        original_rename = Path.rename
+        def rename(path, target):
+            if path == staged:
+                raise PermissionError(13, "synthetic promotion lock")
+            return original_rename(path, target)
+        with mock.patch.object(Path, "rename", rename), self.assertRaises(PermissionError):
+            self.apply(commit)
+        self.assertEqual(self.saved["customization"]["pending"]["stage"], "promote")
+        if manually_promote:
+            staged.rename(self.program)
+        return copy.deepcopy(self.registry["customization"]["pending"]["target"])
+
+    def resume(self, commit=COMMIT, *, owner=None):
+        return custom.resume_apply(self.config, self.registry, self.bundle, commit, self.env,
+                                   self.record, owner or dict(OWNER, pid=654, created_at="456.78"))
+
+    def assert_resume_rejected_unchanged(self, commit=COMMIT):
+        files, registry, saved, events = self.tree(), copy.deepcopy(self.registry), copy.deepcopy(self.saved), list(self.events)
+        with self.assertRaises((custom.CustomizationError, release.ReleaseError, custom.states.StateError)):
+            self.resume(commit)
+        self.assertEqual(self.tree(), files)
+        self.assertEqual(self.registry, registry)
+        self.assertEqual(self.saved, saved)
+        self.assertEqual(self.events, events)
+
     def tree(self):
         return {str(path.relative_to(self.root)): path.read_bytes() for path in self.root.rglob("*") if path.is_file()}
 
@@ -404,6 +431,149 @@ class CustomizationTests(unittest.TestCase):
         self.assertEqual(self.tree(), before)
         self.assertFalse(self.restore()["changed"])
 
+    def test_resume_manual_first_promotion_commits_without_moving_files_and_restores_original(self):
+        preserved = self.tree()
+        selection = self.interrupt_promotion()
+        files, events, registry = self.tree(), list(self.events), copy.deepcopy(self.registry)
+        self.assertEqual(custom.check_resume(self.config, self.registry, self.env, selection),
+                         self.registry["customization"])
+        self.assertEqual((self.tree(), self.events, self.registry), (files, events, registry))
+        with mock.patch.object(Path, "rename", side_effect=AssertionError("Resume must not rename")), \
+                mock.patch.object(custom, "_extract", side_effect=AssertionError("Resume must not extract")), \
+                mock.patch.object(custom, "_remove", side_effect=AssertionError("Resume must not remove")):
+            result = self.resume()
+        self.assertTrue(result["changed"])
+        self.assertFalse(result["original_program"])
+        self.assertFalse(result["data_changed"])
+        self.assertEqual(result["source_commit"], COMMIT)
+        self.assertEqual(self.registry["customization"],
+                         {"active": selection, "previous": {"active": None}, "pending": None})
+        self.assertEqual(self.tree(), files)
+        self.assertEqual(self.registry["last_failure"], {"historical": True})
+        self.assert_resume_rejected_unchanged()
+        self.assertFalse(self.apply()["changed"])
+        self.assertTrue(self.restore()["original_program"])
+        self.assertEqual(self.tree(), preserved)
+
+    def test_resume_updated_and_identical_bytes_preserves_exact_predecessor(self):
+        self.apply()
+        previous = copy.deepcopy(self.registry["customization"]["active"])
+        for commit, content in (("b" * 40, make_wheel(replacement={"open_webui/main.py": b"# next app\n"})),
+                                ("c" * 40, make_wheel())):
+            with self.subTest(commit=commit):
+                self.write_bundle(content, commit=commit)
+                selected = self.interrupt_promotion(commit)
+                files = self.tree()
+                self.assertEqual(self.resume(commit)["source_commit"], commit)
+                self.assertEqual(self.registry["customization"]["active"], selected)
+                self.assertEqual(self.registry["customization"]["previous"], {"active": previous})
+                self.assertEqual(self.tree(), files)
+                self.assertEqual(self.restore()["source_commit"], COMMIT)
+                custom.validate_program(self.program, previous)
+
+    def test_resume_rejects_missing_pending_and_premature_or_duplicate_staging(self):
+        self.assert_resume_rejected_unchanged()
+        self.interrupt_promotion(manually_promote=False)
+        self.assert_resume_rejected_unchanged()
+        staged = self.root / "state" / "program.staging"
+        staged.rename(self.program)
+        staged.mkdir()
+        self.assert_resume_rejected_unchanged()
+        staged.rmdir()
+        previous = self.root / "state" / "program.previous"
+        previous.mkdir()
+        self.assert_resume_rejected_unchanged()
+        previous.rmdir()
+        self.assertTrue(self.resume()["changed"])
+
+    def test_resume_rejects_wrong_bundle_target_and_inconsistent_transaction_readonly(self):
+        selected = self.interrupt_promotion()
+        self.assert_resume_rejected_unchanged("b" * 40)
+        original_bundle = self.bundle.read_bytes()
+        self.write_bundle(make_wheel(replacement={"open_webui/main.py": b"# changed under same commit\n"}))
+        self.assert_resume_rejected_unchanged()
+        self.bundle.write_bytes(original_bundle)
+        original = copy.deepcopy(self.registry)
+        changes = [
+            ("pending", "action", "restore"),
+            *(("pending", "stage", stage) for stage in ("staging", "retire_previous", "move_active", "restore")),
+            ("pending", "before", selected),
+            ("pending", "old_previous", {"active": None}),
+            ("pending", "target", dict(selected, source_commit="b" * 40)),
+            ("customization", "active", selected),
+            ("customization", "previous", {"active": None}),
+            ("registry", "phase", "switching"),
+            ("registry", "pending", {"kind": "release"}),
+            ("registry", "launch_uncertain", True),
+            ("registry", "current", {"kind": "release", "python": str(self.python)}),
+            ("registry", "current", {"kind": "original", "python": "another-python"}),
+        ]
+        for location, key, value in changes:
+            with self.subTest(location=location, key=key, value=value):
+                self.registry = copy.deepcopy(original)
+                target = (self.registry if location == "registry" else self.registry["customization"]
+                          if location == "customization" else self.registry["customization"]["pending"])
+                target[key] = value
+                self.assert_resume_rejected_unchanged()
+        self.registry = original
+        self.assertTrue(self.resume()["changed"])
+
+    def test_resume_rejects_incomplete_changed_extra_or_linked_program_files(self):
+        self.interrupt_promotion()
+        target = self.program / "open_webui/main.py"
+        original = target.read_bytes()
+        for value in (b"modified", None):
+            with self.subTest(value=value):
+                target.write_bytes(value) if value is not None else target.unlink()
+                self.assert_resume_rejected_unchanged()
+                target.write_bytes(original)
+        extra = self.program / "unexpected.txt"
+        extra.write_bytes(b"unowned")
+        self.assert_resume_rejected_unchanged()
+        extra.unlink()
+        linked = self.root / "linked.py"
+        os.link(target, linked)
+        self.assert_resume_rejected_unchanged()
+        linked.unlink()
+        self.assertTrue(self.resume()["changed"])
+
+    def test_resume_rejects_missing_or_changed_previous_before_recording(self):
+        self.apply()
+        self.write_bundle(make_wheel(replacement={"open_webui/main.py": b"# next app\n"}), commit="b" * 40)
+        self.interrupt_promotion("b" * 40)
+        previous = self.root / "state" / "program.previous"
+        hidden = self.root / "state" / "retained-for-test"
+        previous.rename(hidden)
+        self.assert_resume_rejected_unchanged("b" * 40)
+        hidden.rename(previous)
+        target = previous / "open_webui/main.py"
+        original = target.read_bytes()
+        target.write_bytes(b"changed predecessor")
+        self.assert_resume_rejected_unchanged("b" * 40)
+        target.write_bytes(original)
+        self.assertTrue(self.resume("b" * 40)["changed"])
+
+    def test_resume_final_record_failure_retains_new_owner_and_remains_restorable(self):
+        preserved = self.tree()
+        self.interrupt_promotion()
+        files = self.tree()
+        owner = dict(OWNER, pid=654, created_at="456.78")
+        record = self.record
+        def fail_complete(config, registry, event):
+            if event == "program_applied":
+                raise OSError("synthetic final record failure")
+            record(config, registry, event)
+        with mock.patch.object(self, "record", side_effect=fail_complete), self.assertRaises(OSError):
+            self.resume(owner=owner)
+        self.assertEqual(self.tree(), files)
+        for registry in (self.registry, self.saved):
+            self.assertEqual(registry["customization"]["pending"]["owner"], owner)
+            self.assertEqual(registry["customization"]["pending"]["stage"], "promote")
+            self.assertIsNone(registry["customization"]["active"])
+        self.registry = copy.deepcopy(self.saved)
+        self.assertTrue(self.restore()["original_program"])
+        self.assertEqual(self.tree(), preserved)
+
     def test_interrupted_previous_retirement_preserves_intact_current_app(self):
         self.apply()
         self.write_bundle(commit="b" * 40)
@@ -557,6 +727,30 @@ class RealBrandingWheelTests(unittest.TestCase):
             self.assertTrue(custom.restore(config, registry, record, OWNER)["original_program"])
             self.assertEqual(list((fixture / "state").iterdir()), [])
             self.assertFalse(custom.restore(config, registry, record, OWNER)["changed"])
+            # Exercise the same real payload after a simulated promotion denial.
+            # The separate rename below represents the operator's completed move;
+            # CI does not claim to reproduce the company PC's Explorer behavior.
+            staged = fixture / "state/program.staging"
+            with mock.patch.object(custom, "_load_bundle", return_value=(selection, content)):
+                with mock.patch.object(Path, "rename", side_effect=PermissionError(13, "synthetic denial")), \
+                        self.assertRaises(PermissionError):
+                    custom.apply(config, registry, None, COMMIT, {"DATA_DIR": config["data_dir"]}, record, OWNER)
+                self.assertEqual(registry["customization"]["pending"]["stage"], "promote")
+                self.assertFalse(program.exists())
+                custom.validate_program(staged, selection)
+                staged.rename(program)
+                with mock.patch.object(Path, "rename", side_effect=AssertionError("Resume must not rename")), \
+                        mock.patch.object(custom, "_extract", side_effect=AssertionError("Resume must not extract")), \
+                        mock.patch.object(custom, "_remove", side_effect=AssertionError("Resume must not remove")):
+                    resumed = custom.resume_apply(config, registry, None, COMMIT,
+                                                  {"DATA_DIR": config["data_dir"]}, record, OWNER)
+            self.assertTrue(resumed["changed"])
+            self.assertEqual(registry["customization"],
+                             {"active": selection, "previous": {"active": None}, "pending": None})
+            self.assertEqual(events[-2:], ["program_apply_resumed", "program_applied"])
+            custom.validate_program(program, selection)
+            self.assertTrue(custom.restore(config, registry, record, OWNER)["original_program"])
+            self.assertEqual(list((fixture / "state").iterdir()), [])
             for name, value in preserved.items():
                 self.assertEqual((fixture / name).read_bytes(), value, name)
 

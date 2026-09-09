@@ -6,6 +6,10 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
 import tempfile
 from types import ModuleType
 import unittest
@@ -855,13 +859,184 @@ class CustomizationIntegrationTests(unittest.TestCase):
 
     def args(self, action, **kw):
         return argparse.Namespace(action=action, config="unused", bundle="unused.zip", commit=COMMIT,
-                                  check_only=kw.get("check_only", False), health_timeout=120)
+                                  check_only=kw.get("check_only", False), resume=kw.get("resume", False),
+                                  health_timeout=120)
 
     def pending(self):
         self.registry["customization"]["pending"] = {
             "action": "apply", "owner": dict(OPERATOR), "before": None, "target": self.selection,
             "old_previous": None, "stage": "promote"}
         self.write()
+
+    def manual_promotion(self):
+        self.registry["customization"] = {"active": None, "previous": None, "pending": None}
+        self.pending()
+        program = self.root / "program"
+        program.mkdir()
+        (program / "synthetic-payload").write_bytes(b"already manually renamed")
+        return program, self.root / "program.previous", self.root / "program.staging"
+
+    def test_resume_cli_is_explicit_apply_only_and_still_requires_bundle_and_commit(self):
+        actions = ("init", "status", "diagnose", "probe-imports", "plan", "prepare", "deploy",
+                   "rollback", "start", "stop", "restore")
+        for action in actions:
+            with self.subTest(action=action), patch.object(MANAGER, "operate") as operate, \
+                    redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
+                MANAGER.main([action, "--config", "unused", "--resume"])
+            self.assertEqual(error.exception.code, 2)
+            operate.assert_not_called()
+        for supplied in ([], ["--bundle", "unused.zip"], ["--commit", COMMIT]):
+            with self.subTest(supplied=supplied), patch.object(MANAGER, "operate") as operate, \
+                    redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
+                MANAGER.main(["apply", "--config", "unused", "--resume"] + supplied)
+            self.assertEqual(error.exception.code, 2)
+            operate.assert_not_called()
+        for flags in ([], ["--resume"], ["--resume", "--check-only"]):
+            with self.subTest(flags=flags), patch.object(MANAGER, "operate", return_value={}) as operate, \
+                    redirect_stdout(io.StringIO()):
+                self.assertEqual(MANAGER.main(["apply", "--config", "unused", "--bundle", "unused.zip",
+                                               "--commit", COMMIT] + flags), 0)
+            args = operate.call_args.args[0]
+            self.assertEqual(args.resume, "--resume" in flags)
+            self.assertEqual(args.check_only, "--check-only" in flags)
+
+    def test_resume_finishes_record_without_repeating_apply_rename_or_server_actions(self):
+        paths = self.manual_promotion()
+        before = (paths[0] / "synthetic-payload").read_bytes()
+        with patch.object(MANAGER.customization, "_paths", return_value=paths), \
+                patch.object(MANAGER.customization, "_load_bundle", return_value=(self.selection, b"unused")) as load, \
+                patch.object(MANAGER.customization, "apply") as apply, \
+                patch.object(MANAGER.customization, "restore") as restore, \
+                patch.object(Path, "rename") as rename:
+            result = MANAGER.operate(self.args("apply", resume=True))
+        self.assertTrue(result["changed"])
+        self.assertEqual(result["source_commit"], COMMIT)
+        self.assertFalse(result["data_changed"])
+        self.assertFalse(result["original_program"])
+        load.assert_called_once_with(self.config, "unused.zip", COMMIT, self.env)
+        apply.assert_not_called()
+        restore.assert_not_called()
+        rename.assert_not_called()
+        self.mocks["check_applicability"].assert_not_called()
+        for name in ("start_server", "stop_server", "wait_healthy"):
+            self.mocks[name].assert_not_called()
+        after = MANAGER.read_registry(self.config)
+        self.assertEqual(after["customization"], {"active": self.selection, "previous": {"active": None}, "pending": None})
+        for key in ("current", "previous", "last_failure"):
+            self.assertEqual(after[key], self.registry[key])
+        self.assertEqual(after["last_event"], "program_applied")
+        self.assertEqual((paths[0] / "synthetic-payload").read_bytes(), before)
+        self.assertFalse((self.root / "deployment.lock").exists())
+        self.mocks["port_is_free"].assert_called_once_with("127.0.0.1", 8080, raise_on_error=True)
+
+    def test_resume_check_only_is_read_only_even_with_summary_and_registered_server(self):
+        paths = self.manual_promotion()
+        self.registry["process"] = {"pid": 123}
+        self.write()
+        before = {str(p.relative_to(self.root)): p.read_bytes() for p in self.root.rglob("*") if p.is_file()}
+        output = io.StringIO()
+        with patch.object(MANAGER.customization, "_paths", return_value=paths), \
+                patch.object(MANAGER, "locked") as lock, \
+                patch.object(MANAGER.customization, "resume_apply") as resume, \
+                patch.object(MANAGER.customization, "apply") as apply, \
+                patch.object(MANAGER.customization, "restore") as restore, \
+                patch.object(Path, "rename") as rename, redirect_stdout(output):
+            result = MANAGER.main(["apply", "--config", "unused", "--bundle", "unused.zip", "--commit", COMMIT,
+                                   "--resume", "--check-only", "--summary"])
+        self.assertEqual(result, 0)
+        self.assertIn("result=ok", output.getvalue())
+        self.assertEqual(len(output.getvalue().splitlines()), 1)
+        self.assertEqual(before, {str(p.relative_to(self.root)): p.read_bytes() for p in self.root.rglob("*") if p.is_file()})
+        for mocked in (lock, resume, apply, restore, rename):
+            mocked.assert_not_called()
+        for name in ("start_server", "stop_server", "wait_healthy", "port_is_free", "check_applicability"):
+            self.mocks[name].assert_not_called()
+        self.mocks["inspect_bundle"].assert_called_once_with(self.config, Path("unused.zip"), COMMIT, self.env)
+        self.mocks["validate_program"].assert_called_once_with(paths[0], self.selection)
+
+    def test_resume_check_only_rejects_concurrent_registry_or_lock_change(self):
+        paths = self.manual_promotion()
+        lock = self.root / "deployment.lock"
+        for kind in ("registry", "lock"):
+            with self.subTest(kind=kind):
+                def changed(*_):
+                    if kind == "registry":
+                        self.registry["last_event"] = "concurrent-operation"
+                        self.write()
+                    else:
+                        lock.write_text(json.dumps(OPERATOR))
+                    return self.selection
+                self.mocks["inspect_bundle"].side_effect = changed
+                with patch.object(MANAGER.customization, "_paths", return_value=paths), \
+                        self.assertRaisesRegex(MANAGER.DeploymentError, "changed during CheckOnly"):
+                    MANAGER.operate(self.args("apply", resume=True, check_only=True))
+        self.assertEqual(lock.read_text(), json.dumps(OPERATOR))
+
+    def test_resume_rejects_no_pending_and_default_apply_does_not_implicitly_resume(self):
+        before = MANAGER.registry_path(self.config).read_bytes()
+        with self.assertRaisesRegex(MANAGER.customization.CustomizationError, "incomplete Apply"):
+            MANAGER.operate(self.args("apply", resume=True, check_only=True))
+        with patch.object(MANAGER.customization, "_load_bundle", return_value=(self.selection, b"unused")), \
+                self.assertRaisesRegex(MANAGER.customization.CustomizationError, "incomplete Apply"):
+            MANAGER.operate(self.args("apply", resume=True))
+        self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+        self.pending()
+        with patch.object(MANAGER.customization, "resume_apply") as resume, \
+                self.assertRaisesRegex(MANAGER.DeploymentError, "incomplete"):
+            MANAGER.operate(self.args("apply"))
+        resume.assert_not_called()
+
+    def test_resume_blocks_running_unknown_launch_or_occupied_port_without_auto_actions(self):
+        self.pending()
+        for kind in ("running", "uninspectable", "uncertain", "port", "port-error"):
+            with self.subTest(kind=kind):
+                self.registry["process"] = {"pid": 123}
+                self.registry["launch_uncertain"] = kind == "uncertain"
+                self.write()
+                before = MANAGER.registry_path(self.config).read_bytes()
+                def identify(pid):
+                    if pid == MANAGER.os.getpid():
+                        return self.owner
+                    if kind == "uninspectable":
+                        raise MANAGER.processes.ProcessError("unavailable")
+                    return OPERATOR if kind == "running" else None
+                self.mocks["_identity"].side_effect = identify
+                self.mocks["port_is_free"].return_value = kind != "port"
+                self.mocks["port_is_free"].side_effect = MANAGER.processes.ProcessError("port unavailable") if kind == "port-error" else None
+                with patch.object(MANAGER.customization, "resume_apply") as resume, \
+                        self.assertRaises((MANAGER.DeploymentError, MANAGER.processes.ProcessError)):
+                    MANAGER.operate(self.args("apply", resume=True))
+                resume.assert_not_called()
+                self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+                self.assertFalse((self.root / "deployment.lock").exists())
+        for name in ("start_server", "stop_server", "wait_healthy"):
+            self.mocks[name].assert_not_called()
+
+    def test_resume_never_reclaims_even_exact_dead_owner_lock(self):
+        self.pending()
+        lock = self.root / "deployment.lock"
+        lock.write_text(json.dumps(OPERATOR))
+        before = {p.name: p.read_bytes() for p in self.root.iterdir()}
+        for check_only in (False, True):
+            with self.subTest(check_only=check_only), \
+                    patch.object(MANAGER.customization, "resume_apply") as resume, \
+                    self.assertRaisesRegex(MANAGER.DeploymentError, "lock"):
+                MANAGER.operate(self.args("apply", resume=True, check_only=check_only))
+            resume.assert_not_called()
+            self.assertEqual(before, {p.name: p.read_bytes() for p in self.root.iterdir()})
+
+    def test_resume_requires_exact_original_selection_before_recording(self):
+        self.pending()
+        self.registry["current"]["source_commit"] = COMMIT
+        self.write()
+        before = MANAGER.registry_path(self.config).read_bytes()
+        for check_only in (False, True):
+            with self.subTest(check_only=check_only), \
+                    patch.object(MANAGER.customization, "resume_apply") as resume, \
+                    self.assertRaisesRegex(MANAGER.DeploymentError, "baseline"):
+                MANAGER.operate(self.args("apply", resume=True, check_only=check_only))
+            resume.assert_not_called()
+            self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
 
     def test_legacy_schema_with_customization_cannot_bypass_guards(self):
         self.registry["schema_version"] = 1
@@ -1105,6 +1280,60 @@ class CustomizationIntegrationTests(unittest.TestCase):
         self.assertIn("error=FileNotFoundError errno=2", output.getvalue())
         self.assertNotIn("synthetic-private", output.getvalue())
         self.assertEqual(before, {path.name: path.read_bytes() for path in self.root.iterdir()})
+
+
+@unittest.skipUnless(shutil.which("pwsh"), "PowerShell adapter execution requires pwsh")
+class PowerShellResumeTests(unittest.TestCase):
+    def test_documented_manual_apply_and_resume_blocks_parse_in_powershell(self):
+        guide = (ROOT / "docs" / "03-openwebui-native-agent.md").read_text(encoding="utf-8")
+        section = guide.split('<a id="ees-wrapper-manual-promote"></a>', 1)[1]
+        blocks = re.findall(r"```powershell\n(.*?)\n```", section, re.DOTALL)[:2]
+        self.assertEqual(len(blocks), 2)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            parser = root / "parse.ps1"
+            parser.write_text("""param([string]$SourcePath)
+$tokens = $null
+$parseErrors = $null
+[System.Management.Automation.Language.Parser]::ParseFile(
+    $SourcePath, [ref]$tokens, [ref]$parseErrors) | Out-Null
+if ($parseErrors.Count -gt 0) {
+    $parseErrors | ForEach-Object { $_.Message }
+    exit 1
+}
+""", encoding="utf-8")
+            for name, block in zip(("manual-apply", "manual-resume"), blocks):
+                with self.subTest(block=name):
+                    self.assertLessEqual(len(block), 2500)
+                    source = root / (name + ".ps1")
+                    source.write_text(block, encoding="utf-8")
+                    result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(parser), str(source)],
+                                            capture_output=True, text=True, timeout=30)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_adapter_forwards_resume_and_check_only_and_rejects_other_actions(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            scripts = root / "scripts"
+            scripts.mkdir()
+            adapter = scripts / "manage-ees.ps1"
+            shutil.copyfile(ROOT / "scripts" / "manage-ees.ps1", adapter)
+            (scripts / "manage_ees.py").write_text("import json, sys\nprint(json.dumps(sys.argv[1:]))\n", encoding="utf-8")
+            config = root / "config.json"
+            config.write_text(json.dumps({"source_python": sys.executable}), encoding="utf-8")
+            command = [shutil.which("pwsh"), "-NoProfile", "-File", str(adapter)]
+            result = subprocess.run(command + ["-Action", "Apply", "-Config", str(config), "-Bundle", "synthetic.zip",
+                "-Commit", COMMIT, "-Resume", "-CheckOnly"], capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), ["apply", "--config", str(config), "--bundle", "synthetic.zip",
+                                                        "--commit", COMMIT, "--check-only", "--resume"])
+            for action in ("Start", "Restore", "Update"):
+                with self.subTest(action=action):
+                    result = subprocess.run(command + ["-Action", action, "-Config", str(config), "-Resume"],
+                                            capture_output=True, text=True, timeout=30)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn("Resume is supported only with Apply", result.stderr)
+                    self.assertEqual(result.stdout.strip(), "")
 
 
 if __name__ == "__main__":

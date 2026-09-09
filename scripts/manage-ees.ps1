@@ -21,6 +21,7 @@ param(
     [int]$HealthTimeout,
     [switch]$UseWindowsCA,
     [switch]$CheckOnly,
+    [switch]$Resume,
     [switch]$Summary,
     [string]$GitProxy
 )
@@ -30,6 +31,7 @@ if ($UseWindowsCA -and $Action -ne 'Deploy') {
     throw 'UseWindowsCA is supported only with Deploy.'
 }
 if ($CheckOnly -and $Action -ne 'Apply') { throw 'CheckOnly is supported only with Apply.' }
+if ($Resume -and $Action -ne 'Apply') { throw 'Resume is supported only with Apply.' }
 if ($Summary -and $Action -notin @('Apply', 'Restore', 'Start', 'Stop', 'Status')) {
     throw 'Summary is supported with Apply/Restore/Start/Stop/Status only.'
 }
@@ -81,6 +83,7 @@ if ($PSBoundParameters.ContainsKey('HealthTimeout')) {
 }
 if ($UseWindowsCA) { $operationArgs += '--use-windows-ca' }
 if ($CheckOnly) { $operationArgs += '--check-only' }
+if ($Resume) { $operationArgs += '--resume' }
 if ($Summary) { $operationArgs += '--summary' }
 & $operatorPython @operationArgs
 if ($LASTEXITCODE -ne 0) { throw "EES operation stopped (exit $LASTEXITCODE)." }
