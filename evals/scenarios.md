@@ -1030,6 +1030,11 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 기존 실행 명령 보충: 사용자는 이전 직접 실행이 `uvx --python 3.11 open-webui@0.11.3 serve --host <기존 등록 주소> --port 8080`이었다고 설명함. 실제 사내 주소는 이 기록에 저장하지 않음. 현재 래퍼의 original Start는 등록된 Python 경로로 `from open_webui import serve`를 실행하며 새 uvx 환경을 만들거나 패키지를 설치하지 않음. uvx의 해석/실행 경로와 등록된 Python 직접 실행은 구분하되, 이번 process_start만으로 Python 버전/의존성 문제나 그 실행 방식 차이를 원인으로 확정하지 않음. 생성 후 신원 확인 실패 가능성이 있어 기존 uvx 명령도 실패 이유 확인 전에 병행 실행하지 않음.
 - 후속 검증·한계: STATUS·이 기록만 갱신하고 문서/diff를 검사함. 이미 검증한 코드/시험/CI·Restore·Start를 반복하거나 변경하지 않음. 확인용 PowerShell은 기존 결과 파일만 읽고 서버·설정·데이터를 변경하지 않으며 2,500자 이내/출력 두 줄로 준비함. 사내 이유/코드 조회·원인 확인·서버 가동 성공은 대기 중임.
 
+
+- 후속 Start 원인 보고: 사용자가 `The listen port is unavailable; no existing process was stopped.` 및 `reason=null`, `errno=10048`, `winerror=10048`, `exit_code=null`을 전달함. 최신 main `ac90d841f5b0434669a7c27084e0abff73ce2637`, tree `c829ddea41a1f5321ceb5bb79cc63cce82743d25`, 관련 열린 PR 0개를 확인함. 기존 코드와 좁은 독립 읽기 대조에서 start_selected의 첫 port_check 뒤 start_server 진입 직후 두 번째 bind 검사가 실패했음을 확인함. **이번 Start는 Popen·원본 Python/앱 실행·health 대기 전에 중단됐으므로 새 자식 프로세스를 생성하지 않음.** 앞선 launch_unverified 가능성은 이유 수신 전 판단이며 이번 오류에는 해당하지 않음. uvx/직접 Python 실행 차이나 패키지 import가 이번 Start 실패를 일으킨 것으로 해석하지 않음.
+- 포트 해석·다음 판단: [Microsoft의 Winsock 오류 정의](https://learn.microsoft.com/en-us/windows/win32/winsock/windows-sockets-error-codes-2)에서 10048은 주소 사용 중이며 기존 socket·정상 종료되지 않은 socket·종료 중 socket도 포함함. 기존 서버가 현재 정상 실행 중이라고 단정하지 않음. 등록 포트의 TCP 상태 수/Listen·Bound 점유 PID·프로세스 이름을 먼저 읽고, 기존 표준 라이브러리 운영 코드의 verify_identity와 제한된 /health 조회를 재사용해 신원/응답을 두 번째 줄로 요약하도록 준비함. PID만 같으면 신원 일치라고 간주하지 않으며 health 전에 TCP를 수집해 조회 자체의 연결을 구분함. 서버·파일·설정을 변경하거나 새 bind/Start/Stop/Restore/Apply·후보 진단을 실행하지 않음. 성공 조건은 현재 점유/종료 중 상태와 기존 서버 응답의 구분이며 조회 불가 시 unavailable/unknown을 남기고 재기동/강제 종료하지 않음.
+- 이번 검증·한계: STATUS·이 기록만 변경하고 문서/diff를 검사함. 후속 PowerShell은 2,500자 이내·결과 두 줄로 준비하고 내장 Python 구문과 기존 코드의 무설치/앱 미실행 경계를 대조함. 로컬 Windows PowerShell 및 사내 TCP/신원/health 조회는 미실행임. 앞선 실제 wheel·Windows/Linux CI 성공을 이번 사내 가동이나 포트 원인 해결로 확대하지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
