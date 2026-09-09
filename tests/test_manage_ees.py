@@ -1023,6 +1023,89 @@ class CustomizationIntegrationTests(unittest.TestCase):
         self.assertTrue(saved["failed"])
         self.assertNotIn("synthetic-private", json.dumps(saved))
 
+    def test_apply_promotion_failure_preserves_codes_location_and_pending_without_retry(self):
+        self.registry["customization"] = {"active": None, "previous": None, "pending": None}
+        self.write()
+        self.mocks["check_applicability"].return_value = self.registry["customization"]
+        program, previous, staged = (self.root / name for name in ("program", "program.previous", "program.staging"))
+        private = "synthetic-private-PAT-and-path"
+        error = PermissionError(13, private, private)
+        error.winerror = 5
+        error.stage = private
+        output = io.StringIO()
+        with patch.object(MANAGER.customization, "_paths", return_value=(program, previous, staged)), \
+                patch.object(MANAGER.customization, "_load_bundle", return_value=(self.selection, b"unused")), \
+                patch.object(MANAGER.customization, "_extract", side_effect=lambda _, path: path.mkdir()), \
+                patch.object(Path, "rename", side_effect=error) as rename, \
+                patch.object(MANAGER.customization, "restore") as restore, redirect_stdout(output):
+            result = MANAGER.main(["apply", "--config", "unused", "--bundle", "unused.zip",
+                                   "--commit", COMMIT, "--summary"])
+        self.assertEqual(result, 1)
+        rename.assert_called_once_with(program)
+        restore.assert_not_called()
+        self.mocks["start_server"].assert_not_called()
+        self.assertTrue(staged.is_dir())
+        self.assertFalse(program.exists())
+        self.assertFalse((self.root / "deployment.lock").exists())
+        self.assertEqual(MANAGER.read_registry(self.config)["customization"]["pending"]["stage"], "promote")
+        saved = json.loads((self.root / "last-operation.json").read_bytes())
+        detail = saved["result"]["local_error"]
+        self.assertEqual((detail["type"], detail["errno"], detail["winerror"]), ("PermissionError", 13, 5))
+        self.assertEqual(detail["source"], "ees_webui_customization.py")
+        source = (ROOT / "scripts" / detail["source"]).read_text(encoding="utf-8").splitlines()
+        self.assertEqual(source[detail["line"] - 1].strip(), "staged.rename(program)")
+        self.assertIn("error=PermissionError errno=13 winerror=5 at=ees_webui_customization.py:", output.getvalue())
+        self.assertEqual(len(output.getvalue().splitlines()), 1)
+        self.assertNotIn(private, output.getvalue() + json.dumps(saved))
+
+    def test_local_error_filters_private_frames_classes_and_malformed_fields(self):
+        private = "synthetic-private-PAT-and-path"
+        for error in (ValueError(private), KeyError(private), type(private, (OSError,), {})(private)):
+            error.errno, error.winerror = private, 2 ** 64
+            namespace = {"error": error}
+            # A matching basename outside the checkout must not be reported.
+            code = compile("raise error", str(self.root / private / "manage_ees.py"), "exec")
+            try:
+                exec(code, namespace)
+            except (OSError, ValueError, KeyError) as caught:
+                detail = MANAGER.local_error_detail(caught)
+            self.assertIsNone(detail["source"])
+            self.assertIsNone(detail["line"])
+            self.assertIsNone(detail["errno"])
+            self.assertIsNone(detail["winerror"])
+            self.assertNotIn(private, json.dumps(detail))
+        result = {"local_error": {"type": [private], "source": private, "line": private,
+                                  "errno": True, "winerror": private}}
+        text = MANAGER.render_summary("apply", result, failed=True)
+        self.assertIn("error=unknown errno=- winerror=- at=-", text)
+        self.assertNotIn(private, text)
+
+    def test_summary_retains_original_error_when_report_write_also_fails(self):
+        error = PermissionError(13, "synthetic-private-PAT-and-path")
+        error.winerror = 32
+        output = io.StringIO()
+        with patch.object(MANAGER, "operate", side_effect=error), \
+                patch.object(MANAGER, "write_json", side_effect=OSError(28, "private report path")), \
+                redirect_stdout(output):
+            result = MANAGER.main(["restore", "--config", "unused", "--summary"])
+        self.assertEqual(result, 1)
+        self.assertEqual(len(output.getvalue().splitlines()), 1)
+        self.assertIn("error=PermissionError errno=13 winerror=32", output.getvalue())
+        self.assertIn("report=unavailable", output.getvalue())
+        self.assertNotIn("private", output.getvalue())
+
+    def test_failed_check_only_reports_error_codes_without_writing_state(self):
+        before = {path.name: path.read_bytes() for path in self.root.iterdir()}
+        self.mocks["inspect_bundle"].side_effect = FileNotFoundError(2, "synthetic-private-path")
+        output = io.StringIO()
+        with redirect_stdout(output):
+            result = MANAGER.main(["apply", "--config", "unused", "--bundle", "unused.zip",
+                                   "--commit", COMMIT, "--check-only", "--summary"])
+        self.assertEqual(result, 1)
+        self.assertIn("error=FileNotFoundError errno=2", output.getvalue())
+        self.assertNotIn("synthetic-private", output.getvalue())
+        self.assertEqual(before, {path.name: path.read_bytes() for path in self.root.iterdir()})
+
 
 if __name__ == "__main__":
     unittest.main()

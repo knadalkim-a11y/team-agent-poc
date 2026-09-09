@@ -4,6 +4,8 @@
 
 ## 2026-09-09
 
+- Apply 등 일반 파일/상태 오류에서 사라졌던 예외 종류·errno/winerror·고정 내부 코드 위치를 기존 한 줄 요약과 상세 결과에 보존함. 개인 경로·원문 오류는 제외하며 새 재시도/복구 동작은 추가하지 않음. 최초 프로그램 폴더 이동 실패 회귀와 Windows/Linux 실제 wheel의 Apply/Restore 검사를 보완함. [검증·사내 상태](evals/scenarios.md#ees-wrapper-error-evidence).
+
 - 기존 Python·호환 의존성을 재사용하며 검증된 Open WebUI 앱/metadata만 관리 폴더에 적용하는 Apply/CheckOnly·직전 Restore와 기존 Start/Stop/Status 연결을 추가함. 기존 빌더·운영 코드를 재사용하고 미완료 적용의 시작 차단·보관본/잠금 대조·구형 후보 작업 혼용 차단, 직접 타이핑용 한 줄 요약과 짧은 사내 안내를 준비함. uvx 설치·데이터·키·개인 설정을 유지하고 새 환경/재설치·자동 전환/복구를 추가하지 않음. 검증·게시 결과와 사내 적용 여부는 [구현 기록](evals/scenarios.md#ees-wrapper-implementation)에 구분함.
 
 ## 2026-09-08

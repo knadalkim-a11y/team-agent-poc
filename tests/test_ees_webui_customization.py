@@ -373,6 +373,37 @@ class CustomizationTests(unittest.TestCase):
         self.restore()
         self.assertEqual(self.registry["customization"]["active"], first)
 
+    def test_failed_first_program_promotion_requires_restore_and_preserves_original(self):
+        before = self.tree()
+        staged = self.root / "state" / "program.staging"
+        attempts = []
+        original_rename = Path.rename
+        def rename(path, target):
+            attempts.append((path, target))
+            if path == staged:
+                raise PermissionError(13, "synthetic promotion lock")
+            return original_rename(path, target)
+        with mock.patch.object(Path, "rename", rename), self.assertRaises(PermissionError):
+            self.apply()
+        self.assertEqual(attempts, [(staged, self.program)])
+        pending = self.saved["customization"]["pending"]
+        self.assertEqual(pending["stage"], "promote")
+        self.assertEqual(pending["owner"], OWNER)
+        self.assertIsNone(pending["before"])
+        self.assertIsNone(self.saved["customization"]["active"])
+        self.assertEqual(self.events[-1], "program_promote")
+        self.assertNotIn("program_applied", self.events)
+        self.assertFalse(self.program.exists())
+        custom.validate_program(staged, pending["target"])
+        self.assertEqual(before, {name: value for name, value in self.tree().items() if Path(name).parts[0] != "state"})
+        with self.assertRaisesRegex(custom.CustomizationError, "Restore"):
+            self.apply()
+        self.assertTrue(self.restore()["original_program"])
+        self.assertIsNone(self.registry["customization"]["pending"])
+        self.assertEqual(list((self.root / "state").iterdir()), [])
+        self.assertEqual(self.tree(), before)
+        self.assertFalse(self.restore()["changed"])
+
     def test_interrupted_previous_retirement_preserves_intact_current_app(self):
         self.apply()
         self.write_bundle(commit="b" * 40)
@@ -457,7 +488,7 @@ class CustomizationTests(unittest.TestCase):
 
 
 class RealBrandingWheelTests(unittest.TestCase):
-    @unittest.skipUnless(os.environ.get("EES_TEST_BRANDING_DIR"), "Real built wheel is supplied by the package CI job")
+    @unittest.skipUnless(os.environ.get("EES_TEST_BRANDING_DIR"), "Real built wheel is supplied by Windows/Linux delivery CI")
     def test_real_built_wheel_has_complete_purelib_app_metadata_and_frontend(self):
         root = Path(os.environ["EES_TEST_BRANDING_DIR"])
         content = (root / branding.WHEEL_FILENAME).read_bytes()
@@ -471,8 +502,32 @@ class RealBrandingWheelTests(unittest.TestCase):
         selection = {"source_commit": COMMIT, "wheel_sha256": digest(content),
                      "record_sha256": layout["record_sha256"], "webui_version": branding.VERSION}
         with tempfile.TemporaryDirectory() as temporary:
-            program = Path(temporary) / "program"
-            custom._extract(content, program)
+            fixture = Path(temporary)
+            for name in ("state", "original/open_webui", "data", "cwd"):
+                (fixture / name).mkdir(parents=True)
+            preserved = {"original/python.exe": b"original interpreter", "original/open_webui/__init__.py": b"original app",
+                         "original/example.py": b"original dependency", "data/webui.db": b"synthetic database",
+                         "cwd/.webui_secret_key": b"synthetic secret key"}
+            for name, value in preserved.items():
+                (fixture / name).write_bytes(value)
+            config = {"state_root": str(fixture / "state"), "source_prefix": str(fixture / "original"),
+                      "source_python": str(fixture / "original/python.exe"), "package_dir": str(fixture / "original/open_webui"),
+                      "data_dir": str(fixture / "data"), "cwd": str(fixture / "cwd")}
+            registry = {"schema_version": 1, "phase": "idle", "current": {"kind": "original", "python": config["source_python"]}}
+            events = []
+            def record(config, registry, event):
+                events.append(event)
+            # The wheel is already verified above. Supply that exact content at
+            # the environment-inspection boundary, then exercise real staging,
+            # directory promotion and Restore without importing the application.
+            with mock.patch.object(custom, "_load_bundle", return_value=(selection, content)):
+                result = custom.apply(config, registry, None, COMMIT, {"DATA_DIR": config["data_dir"]}, record, OWNER)
+            self.assertTrue(result["changed"])
+            self.assertEqual(events[-2:], ["program_promote", "program_applied"])
+            program = fixture / "state/program"
+            self.assertFalse((fixture / "state/program.staging").exists())
+            self.assertEqual(registry["customization"]["active"], selection)
+            self.assertIsNone(registry["customization"]["pending"])
             custom.validate_program(program, selection)
             spec = importlib.machinery.PathFinder.find_spec("open_webui", [str(program)])
             self.assertEqual(Path(spec.origin), program / "open_webui/__init__.py")
@@ -499,6 +554,11 @@ class RealBrandingWheelTests(unittest.TestCase):
                 if (frontend_static / name).exists():
                     shutil.copyfile(frontend_static / name, static / name)
             custom.validate_program(program, selection)
+            self.assertTrue(custom.restore(config, registry, record, OWNER)["original_program"])
+            self.assertEqual(list((fixture / "state").iterdir()), [])
+            self.assertFalse(custom.restore(config, registry, record, OWNER)["changed"])
+            for name, value in preserved.items():
+                self.assertEqual((fixture / name).read_bytes(), value, name)
 
 
 
