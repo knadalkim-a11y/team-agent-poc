@@ -1426,3 +1426,10 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 문서 확인: `python scripts/check_docs.py`의 files=25, links=685, errors=0, review_candidates=0 및 `git diff --check` 통과. 현재 Start 안내와 과거 Deploy 안내의 적용 범위·main/CI 조건·수동 환경변수의 한계를 대조함.
 
 직전 STATUS 점검 보존(읽기 진단 준비, 2026-09-09): main `f2e0f9f`, PR #19 head `986f9412`·동일 tree와 지침/상태를 대조함. 현재 Start의 실패 기록 저장 위치·프로세스/health 확인·로그 연결과 Windows 콘솔 공유 구조를 읽기 검토함. 최근 패널 변경에 서버 실행 코드 변경은 없음. 사내 읽기 진단 블록의 Python 문법을 확인했으며 당시 Windows 실행/실제 원인은 미확인. 상태·평가 문서만 갱신하고 문서/diff를 점검함.
+
+
+**PR #19 병합·복구 안내 (2026-09-09):** 사용자가 병합과 복구 안내를 승인함. head `f30e056e6e98363f04acafa117c7743e8adfa392`, main `f2e0f9fbf717f00e8cb6e4fe154777f4f08b7c5d`, mergeable=true와 [Windows/Linux CI 34412665441](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34412665441)의 completed/success를 확인함. draft를 해제하고 expected head를 지정해 병합했으며 원격 main [cb3a922d870663abd7f5fd576ba23456575e49a2](https://github.com/knadalkim-a11y/team-agent-poc/commit/cb3a922d870663abd7f5fd576ba23456575e49a2)를 확인함.
+
+기존 등록 계정 PowerShell에서 Process 범위 실행 정책 → Update → Stop → Start -UseWindowsCA -HealthTimeout 120 -Summary를 단일 실패 중단 블록으로 안내함. 마지막 EES 줄과 웹 접속 여부만 전달받으며 콘솔 창은 유지함. Start 요약의 commit은 적용 프로그램 원본으로, 래퍼 병합 SHA와 구분함. 사내 Update·CA 내보내기·재시작·복구는 아직 미확인이고 최초 종료 원인도 확정하지 않음. 이번 병합 후 기록은 STATUS와 이 문서만 갱신하며 코드·설정·이미 통과한 기능 검사를 반복하지 않음.
+
+직전 STATUS 점검 보존(Start CA 준비, 2026-09-09): 2026-09-09: main `f2e0f9f`, PR #19 head `bd953a2f`·동일 tree와 지침/상태를 대조함. 사내 실패 요약과 이전 Windows CA 비교 성공 기록을 연결하고 Start의 CA 선택·자식 환경 적용·재사용을 보완함. 관련 관리 시험 79개 중 77개 통과, 로컬 pwsh 부재 2개 건너뜀. 손상 CA의 Status/Stop도 추가 확인했으며 문서/diff를 점검함. 원격 CI와 실제 Windows CA 내보내기·서버 복구는 각각 별도 확인 대상. [진단·검증 기록](../evals/scenarios.md#ees-start-health-followup).
