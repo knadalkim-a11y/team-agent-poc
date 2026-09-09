@@ -124,7 +124,7 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 
 ### WO 시연 목업
 
-사용자가 정한 순서는 **시연용 목업 → 시연 피드백 → 운영용 목업 → 실제 EMS 구현**입니다. 기존 Open WebUI 대화창과 우측 WO 패널의 초기 시연은 사내에서 동작한다는 사용자 보고를 받았습니다. v0.1.3의 업무 패널 열기/닫기와 기능 정상 동작도 사용자 보고로 확인했습니다. 이후 설비 조회 결과의 `panel.error.code=panel_error` 보고를 받았습니다. 아래 v0.1.5는 패널 실행 예외의 짧은 진단값을 남기고 첫 화면 생성 실패 후 재시도를 보완한 준비본입니다. 실제 최초 예외 원인은 아직 미확정입니다. 실제 업무 항목·권한 세분화는 후속으로 둡니다. 첫 [단독 HTML 목업](../agent-pack/skills/ems-work-order/references/wo-mockup.html)은 화면 배치 참고로 보존하며, WebUI에는 기존 **EES WO Demo** Tool 한 개를 계속 사용합니다.
+사용자가 정한 순서는 **시연용 목업 → 시연 피드백 → 운영용 목업 → 실제 EMS 구현**입니다. 기존 Open WebUI 대화창과 우측 WO 패널의 초기 시연은 사내에서 동작한다는 사용자 보고를 받았습니다. v0.1.3의 업무 패널 열기/닫기와 기능 정상 동작도 사용자 보고로 확인했습니다. 이후 설비 조회 결과의 `panel.error.code=panel_error` 보고를 받았습니다. v0.1.5는 패널 실행 예외의 짧은 진단값과 첫 화면 생성 실패 후 재시도를 보완했으며, 갱신 안내 후 패널이 표시된다는 사용자 보고를 받았습니다. 실제 최초 예외 원인·장기 재발 여부는 아직 미확정입니다. 실제 업무 항목·권한 세분화는 후속으로 둡니다. 첫 [단독 HTML 목업](../agent-pack/skills/ems-work-order/references/wo-mockup.html)은 화면 배치 참고로 보존하며, WebUI에는 기존 **EES WO Demo** Tool 한 개를 계속 사용합니다.
 
 - 채팅으로 WO 작성을 요청하면 AI가 설비를 찾고 대화 내용을 바탕으로 **설비·작업 제목·작업 구분·우선순위·증상 및 요청 내용**을 채워 첫 초안을 보여줍니다. 후보가 여러 개일 때만 설비를 선택하게 합니다. 화면에서 설비를 직접 클릭한 경우에는 “선택한 설비로 초안을 작성해줘”라고 이어서 요청하며, 선택만으로 AI가 자동 호출되지는 않습니다.
 - 화면에서 직접 입력하거나 기존 채팅으로 AI에게 수정 요청을 할 수 있습니다. `wo_demo_view`가 현재 화면과 변경 번호를 읽고 `wo_demo_update`가 요청한 항목만 바꿉니다. 그사이 사용자 입력이 바뀌면 이전 변경 번호의 수정을 거부하고 최신 값을 다시 읽도록 합니다. AI가 만든 초안도 사람이 확인·수정한 뒤 최종 버튼으로 결정합니다.
@@ -137,7 +137,7 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 
 구현은 [wo_demo_tool.py](../agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)의 고정된 화면 코드와 Open WebUI 0.11.3의 [공식 execute 이벤트](https://docs.openwebui.com/features/extensibility/plugin/development/events/#execute-works-with-both-__event_call__-and-__event_emitter__)를 사용합니다. 우측 패널을 붙이는 위치는 [0.11.3 Chat 화면 구조](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte)에 의존하며 공식 업무 패널 등록 API가 아닙니다. 모델이 실행할 JavaScript를 작성하지 않고 정해진 입력값만 전달합니다. 프런트엔드 재빌드·재설치·추가 서버·CDN은 필요하지 않습니다. 사외 검사와 실제 사내 WebUI·모델 동작 확인은 [검증 기록](../evals/scenarios.md#wo-mockup)에서 구분합니다.
 
-**사내 시연 적용·갱신:** [PR #19](https://github.com/knadalkim-a11y/team-agent-poc/pull/19)의 `docs/legacy-ui-workflow` 준비본이며 아직 main 배포본이 아닙니다. 아래 명령은 해당 원격 브랜치에서 Tool·Prompt·첫 화면 제안 파일 세 개만 임시 폴더에 꺼냅니다. 기존 checkout의 브랜치·작업 파일·실행 프로그램은 그대로 둡니다. v0.1.3의 기능 정상 보고와 이후 패널 예외 보고, 이번 v0.1.5의 사내 확인을 구분합니다. 초기 등록 내용·정확한 적용 파일은 직접 대조하지 않았으며 마지막 전달 원본과 결과는 [평가 기록](../evals/scenarios.md#wo-mockup)을 따릅니다.
+**사내 시연 적용·갱신:** [PR #19](https://github.com/knadalkim-a11y/team-agent-poc/pull/19)의 `docs/legacy-ui-workflow` 준비본이며 아직 main 배포본이 아닙니다. 아래 명령은 해당 원격 브랜치에서 Tool·Prompt·첫 화면 제안 파일 세 개만 임시 폴더에 꺼냅니다. 기존 checkout의 브랜치·작업 파일·실행 프로그램은 그대로 둡니다. v0.1.3의 기능 정상 보고와 이후 패널 예외, v0.1.5 안내 후 표시 성공 보고를 구분해 기록합니다. 이미 갱신해 패널이 표시되는 사용자는 아래 적용·확인을 반복하지 않습니다. 초기 등록 내용·정확한 적용 파일은 직접 대조하지 않았으며 마지막 전달 원본과 결과는 [평가 기록](../evals/scenarios.md#wo-mockup)을 따릅니다.
 
 **v0.1.2 이후 버전을 적용한 경우:** 아래 1·2번으로 기존 Tool 코드만 교체한 뒤 한 번 새로고침합니다. WO 지침·제안 JSON은 이번에 변경하지 않았으므로 3·4번을 반복하지 않습니다. 문제가 발생했던 설비 조회를 한 번 요청합니다. 같은 오류가 나오면 아래의 짧은 진단값만 확인하며 이전 전체 기능 검사를 반복하지 않습니다.
 
