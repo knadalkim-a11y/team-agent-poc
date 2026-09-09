@@ -1002,6 +1002,12 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 후속 경로 보완·사전 확인: 사용자가 ZIP 입력에 파일명 없이 Downloads 폴더 경로만 지정했다고 설명함. `EES-demo-4a8779bbf3ee.zip` 파일명까지 포함한 경로와 기존 프로그램 Commit `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`으로 읽기 전용 Apply/CheckOnly를 안내했고, **`checked=true`, `changed=false`, `already_applied=false`, `requires_stopped_server=true`, `data_changed=false`** 보고를 수신함. 이번 입력의 사전 검사가 통과했으며 해당 ZIP은 현재 적용본과 일치하지 않고 이 검사에서 프로그램/데이터 변경도 없음을 뜻함. 최초 실패의 상세 예외·Stop 실행 여부를 소급해 확정하거나 현재 서버 가동을 추정하지 않음.
 - 후속 처리·다음: 원격 main `abdd449828e9382fc5aed7ca8d1e5a83a3c52da6`·관련 열린 PR 0개·로컬 tree `73c640f4253043034a56932d6745e19b0bb56e6c` 일치를 확인함. STATUS와 이 기록만 갱신하고 문서/diff를 검사함. 경로 문제를 분리하기 위한 추가 진단이나 이미 통과한 CheckOnly를 반복하지 않고, 같은 ZIP/Commit의 Stop→Apply→Start(health 최대 120초) 후 기존 화면/대화·채팅/대표 조회를 확인하도록 안내함. 첫 실패에서 중단하며 결과는 1~2줄만 받음. **사전 확인 PASS, 실제 Apply/Start·UI 성공은 아직 미확인**임. 원격 main의 문서 기록 갱신 때문에 사내 코드 Update를 다시 요구하지 않음.
 
+
+- 실제 Apply 재실패·이유 보고: CheckOnly 통과 뒤 Stop→Apply→Start 블록을 안내했고, 사용자가 Apply에서 `action=apply result=failed changed=- commit=- stage=apply program=- running=-`를 보고함. 실제 Apply 실패의 저장 결과에서 reason만 읽도록 안내한 뒤 **`local_state_or_file_unavailable`**을 수신함. 해당 실패 기록 읽기는 확인됐지만 원래 예외 종류·errno/winerror·발생 파일/코드 위치는 저장되지 않음. `changed=-`로 변경 없음이나 안전한 재시도를 단정하지 않음.
+- 사외 코드 검토: 최신 원격 main `4832a40dcc210896e1712a876a9979b5868b0d94`, 관련 열린 PR 0개, 로컬 tree `ac741dce28f43a0573b949da03d63863244e18a5` 일치를 확인함. `manage_ees.main`이 OSError/ValueError/KeyError/TypeError를 구체 정보 없이 일반 문구로 저장하는 부족함을 확인함. CheckOnly 통과 후 새로 실행하는 잠금 생성·종료 확인·상태 저장·추출/fsync·폴더 이동을 독립 읽기 검토했으나 확정적인 실행 결함은 찾지 못함. 캐시의 읽을 수 있는 wheel 헤더 구간에 Windows 금지 문자/예약 이름/대소문자 경로 충돌은 없었으며 불완전한 캐시 전체를 검사한 것으로 확대하지 않음. 디스크 부족·접근 차단·파일 잠금·입력 문제 중 하나를 원인으로 추측해 확정하지 않음.
+- 다음 확인 범위: 기존 config의 state_root에서 deployment.json의 허용된 pending.stage/last_event, program/program.staging/deployment.lock 존재, staging 파일 수와 해당 드라이브 여유 GB를 읽기 전용으로 한 번에 요약하도록 준비함. stage/event 한 줄과 폴더/파일 수/여유 한 줄만 받으며 경로·키·원문 로그를 출력하지 않음. 파일 수/디스크 조회 불가는 unavailable로 구분하고 확보한 단계 정보는 유지함. 프로그램/DB import·쓰기·Apply/CheckOnly/Restore/Start·이전 Diagnose/Deploy/ProbeImports를 실행하지 않음. 단계/폴더 상태가 맞지 않으면 멈추며 이 조회 자체를 정확한 원인 확정이나 복원 성공으로 해석하지 않음.
+- 이번 검증·한계: STATUS와 기존 평가 기록만 변경하며 문서/diff를 검사함. 실행 코드·기존 자동 시험/CI는 변경/반복하지 않음. PowerShell 5 구문과 출력·부작용을 읽기 대조했으나 로컬 pwsh 부재로 새 조회 블록의 실제 실행은 미검증임. 사내 조회 결과와 원인·실제 적용/기동 성공은 대기 중임. 원래 예외를 잃은 과거 오류는 뒤늦게 복원할 수 없으며, 그 정보를 얻기 위한 실제 Apply 반복은 안내하지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
