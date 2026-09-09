@@ -9,7 +9,7 @@
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
 - 이번 작업: **단순 래퍼 Apply/CheckOnly·직전 Restore·Start/Stop/Status 연결은 PR #15로 main에 반영했고, [PR #16](https://github.com/knadalkim-a11y/team-agent-poc/pull/16)의 오류 정보 보존·Windows/Linux Python 3.11 실제 wheel 검사까지 완료함. 2026-09-09 사내 오류 기록 보존과 원본 Restore·Start 성공을 사용자 보고로 확인함.** `evidence_saved=true`, Restore=result ok/changed true/complete/original, Start=result ok/complete/original/running true임. **EES 수정본 사내 적용은 미완료**이며 `ees_webui_customization.py:386`의 staging→program rename 접근 거부(errno=13/winerror=5) 원인은 미확정임. 후속 폴더 접근 두 항목은 성공했고 목적지/리소스 모니터 검색 결과는 없었으나 원인 해소나 보안 차단 확정으로 해석하지 않음. 기존 Python/의존성·uvx 설치·데이터·키·사용자 설정을 유지하고 과거 SSL 지연·실패는 당시 관찰로 보존함. [구현 범위](03-openwebui-native-agent.md#ees-wrapper-design), [적용 실패와 이번 복원 성공](../evals/scenarios.md#ees-wrapper-apply-resume).
-- 다음 작업 하나: **원본 서비스 사용을 유지하면서, 보존한 오류 시각의 폴더 rename 접근 거부 기록이 있는지 사내 PC 관리 측 확인을 기다린다.** 현재 코드나 특정 보안 제품을 원인으로 확정할 근거는 없으며 정책 완화·새 추적 도구·권한/점유 검사 반복·추가 Restore/Start·수동 promote·Apply 재시도를 요청하지 않음. 새로운 원인 근거가 확인되면 필요한 수정과 수정본 적용만 재개함. 현재 추가 명령·전체 출력·파일·사진 전달은 필요하지 않음. [미확정 원인과 사내 확인 범위](../evals/scenarios.md#ees-wrapper-apply-resume).
+- 다음 작업 하나: **사용자의 후속 진행 요청에 따라 사내 PC 관리 측의 접근 거부 기록 확인을 구체화한다.** 보존한 apply-failure JSON 중 이번 오류 조건에 맞는 최신 기록 내부 at를 읽어 시간대가 있는 오류 기록 시각과 작업/코드 두 줄만 표시하는 안내를 준비함. 현재 last-operation의 Start 결과나 복사 시각은 사용하지 않음. 출력은 GPT에 먼저 전달할 필요 없이 함께 준비한 문의 문구에 넣어 담당자에게 전달하고, 회신은 기록 있음/없음/조회 불가와 확인된 원인 요지 1~2줄만 받음. 실제 사내 관리 시스템 조회/전송은 GPT가 수행하지 않았으며 현재 코드·특정 보안 제품을 원인으로 단정하지 않음. 기록이 없거나 조회 불가하면 그 범위만 남기고 추가 Apply/서버 변경으로 이어가지 않음. 원본 서비스 사용을 유지하며 새 원인 근거가 확인되면 필요한 수정과 적용을 재개함. [기록 대조 안내와 검수](../evals/scenarios.md#ees-wrapper-apply-resume).
 
 아래는 **중단한 후보 환경 방식의 구현·진단 이력**이며 현재 재실행 목록이 아닙니다. [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py)와 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)은 보존합니다. 기존 도구의 Rollback을 새 직접 적용 방식의 원복 기능으로 간주하지 않습니다. 마지막 실패와 원인 미확정 상태를 유지하며 관리 방식 변경을 배포 성공으로 기록하지 않습니다.
 
@@ -106,7 +106,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-09: 오류 기록 보존·원본 Restore/Start 성공 보고 뒤 최신 main `991495b`·관련 열린 PR 0개·로컬 tree 일치를 확인함. 현재/다음 작업·마지막 서버 증거를 갱신하고 원인 미확정·수정본 적용 보류는 유지함. 문서/diff 검사만 수행하고 실행 코드/시험/CI 설정·서버를 변경하거나 완료한 검사·독립 검토·사내 확인을 반복하지 않음. 이번 원본 서비스 복원 성공을 수정본 적용 성공으로 기록하지 않음. [수신 결과와 확인 범위](../evals/scenarios.md#ees-wrapper-apply-resume).
+2026-09-09: 사용자의 진행 요청 뒤 최신 main `fa489e1`·관련 열린 PR 0개·로컬 tree 일치를 확인함. 기존 오류 저장 형식과 보존 파일명·경로 검증을 재사용해 문의에 필요한 기록 시각 조회/전달 문구를 준비함. 1,601자 블록의 Python 문법, 합성 예제 2개(최신 내부 시각/중복 복사/현재 Start 제외, 해당 기록 없음), 파일 무변경 및 좁은 독립 검토를 완료함. 문서/diff를 검사했으며 Windows PowerShell·사내 관리 시스템 조회는 미실행임. 실행 코드/시험/CI 설정·서버는 변경하지 않았고 원본 Restore/Start 성공과 수정본 적용 미완료를 유지함. [후속 준비 근거](../evals/scenarios.md#ees-wrapper-apply-resume).
 
 ## 갱신 규칙
 
