@@ -1399,3 +1399,17 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 이번 기록은 STATUS와 이 평가 문서만 갱신함. 실행 코드·설정·시험 코드는 그대로 두고 문서 25개·링크 677개 오류 0과 diff 검사 PASS를 확인함. 다음은 현재 목업의 시연 피드백을 화면 개선에 반영하는 것임.
 
 직전 STATUS 점검 보존(크기 조절 표시 수정 준비, 2026-09-09): 2026-09-09: main `f2e0f9f`, PR #19 head `cd836593`·동일 tree와 지침/상태를 대조함. 크기 조절 바의 모든 focus에 테두리를 강제하던 원인을 확인하고 포인터 조작 직후 해제·키보드 너비 조절 때 복원하는 두 곳을 수정함. 생성 JavaScript 11개 묶음 통과, 문서/diff 점검. 실제 사내 표시 변경은 적용 후 확인 대상이며 [목업 기록](../evals/scenarios.md#wo-mockup)에 범위를 보존함.
+
+
+<a id="ees-start-health-followup"></a>
+
+### 정상 사용 후 서버 종료 의심·Start health 실패 (2026-09-09)
+
+- 보고: 앞선 래퍼 Apply/Start·이름/로고·연동 정상과 v0.1.6 패널 크기 조절 적용/정상 보고 뒤 서버가 종료된 것 같다는 요청을 받음. 기존 등록 계정/환경에서 Start -HealthTimeout 120 -Summary를 안내했으며 사용자가 start failed, health_check를 보고함. 실제 종료와 최초 원인은 확인되지 않았고 기존 성공을 현재 가동 증거로 사용하지 않음.
+- 범위: 원격 main `f2e0f9f`, 관련 PR #19 head `986f9412dbaa7cba082005cda1caaeaf818245e4`, 로컬 동일 tree `2f3521af046ca42a495f4db73cfe0a64124a9853` 확인. 최근 v0.1.5/v0.1.6은 Tool 패널과 검사/문서만 변경했고 서버 실행 스크립트 변경은 없음. 실제 사내 설정·환경 변화, 직전 질의한 Sub-agents 설정의 변경/활성화 여부는 미확인임.
+- 읽기 검토: Start의 health_check는 health_timeout뿐 아니라 process_exited/identity_unavailable/identity_changed도 포함함. 실패 세부 reason·elapsed_seconds·exit_code·log_id는 state_root/last-operation.json의 result.process에 저장됨. timeout 후 child를 자동 종료하지 않아 현재 생존과 health를 한 번 확인할 필요가 있음. 구형 Diagnose/registry.last_failure는 과거 후보 Deploy/Rollback 실패를 볼 수 있으므로 이번 확인에 사용하지 않음.
+- 실행 방식: Windows에서 CREATE_NEW_PROCESS_GROUP만 사용하고 콘솔은 분리하지 않아 창 종료 영향을 받을 수 있음. 최초 실제 종료 원인으로 확정하지 않음. [콘솔 상속](https://learn.microsoft.com/en-us/windows/console/creation-of-a-console), [콘솔 닫기 신호](https://learn.microsoft.com/en-us/windows/console/ctrl-close-signal). 최초 종료와 이번 재시작 실패가 같은 원인이라는 근거도 아직 없음.
+- 다음 확인: 기존 Python을 -I -S -B로 실행하는 2,148자 이내 단일 PowerShell 블록을 준비함. 저장된 Start 실패인지 먼저 확인하고 실패 reason/time/exit, 현재 등록 프로세스 identity와 2초 health 조회 1회, 해당 실패 log_id의 끝 4MiB를 기존 로그 요약기로 읽어 첫 오류 종류·고정 signal·공개 프레임 하나를 FAIL/NOW/LOG 세 줄에 반환함. 원문 로그·주소·키는 출력하지 않음. startup_complete 등 로그 signal은 현재 health의 대체 근거가 아님. 사용자는 짧은 세 줄만 전달하며 실패 시 반복 Start·대기 확대·재설치·Stop/Restore는 수행하지 않음.
+- 검증: 진단 Python 문법 검사 PASS, 읽기 경로와 출력 항목을 검토함. 실제 Windows/사내 진단은 다음 사용자 실행 대상이며 코드·설정·서버를 수정하지 않음. 이번 변경은 STATUS와 이 기록 두 문서뿐이며 문서 25개·링크 676개 오류 0, diff 검사 PASS.
+
+직전 STATUS 점검 보존(크기 조절 적용 확인, 2026-09-09): 2026-09-09: main `f2e0f9f`, PR #19 head `ba396da8`·로컬 동일 tree와 지침/상태를 대조함. v0.1.6 적용과 크기 조절 정상 동작을 사용자 보고로 확인하고 현재 상태·평가 기록만 갱신함. 문서/diff를 점검하며 코드·설정·완료한 기능 검사는 반복 변경/실행하지 않음. [표시 수정·사내 확인 근거](../evals/scenarios.md#wo-mockup).
