@@ -455,7 +455,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 ### 공식 패키지와 래퍼의 단순 유지보수
 
-**설계·계획 검토본이며 새 적용 기능은 아직 미구현입니다.** 관리 원본은 공식 Open WebUI와 이 저장소의 사내 래퍼 두 개입니다. 기존 Python·호환 라이브러리를 재사용하며 이름·아이콘 수정에 새 가상환경·전체 의존성 재설치·자동 전환 체계를 붙이지 않습니다.
+**Apply/CheckOnly·직전 Restore와 기존 Start/Stop/Status 연결을 구현했습니다.** 구현·자동 검증과 사내 적용 성공은 별개이며 [이번 검증 기록](../evals/scenarios.md#ees-wrapper-implementation)에 구분합니다. 관리 원본은 공식 Open WebUI와 이 저장소의 사내 래퍼 두 개입니다. 기존 Python·호환 라이브러리를 재사용하며 이름·아이콘 수정에 새 가상환경·전체 의존성 재설치·자동 전환 체계를 붙이지 않습니다.
 
 | 관리 대상 | 책임 |
 |---|---|
@@ -489,19 +489,19 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 #### 관리자 작업
 
-아래 이름은 **구현 예정 인터페이스**이며 지금 실행할 명령이 아닙니다. 진입점은 기존 `manage-ees.ps1` 하나를 유지합니다.
+진입점은 기존 `manage-ees.ps1` 하나를 유지합니다. 사내 실행은 [적용 안내](#ees-wrapper-apply)를 사용하며, 구현 브랜치/PR과 main 반영 상태를 [STATUS](STATUS.md)에서 먼저 구분합니다.
 
 | 작업 | 동작·끝나는 조건 |
 |---|---|
 | 기존 Update | 래퍼 Git 갱신만 수행. 서버·프로그램을 자동 교체하지 않음 |
-| Apply + CheckOnly | 저장 설정·버전/의존성 요구·전달물·설치 경로와 적용 가능 여부를 읽어 표시. 앱 import·서버 중지·쓰기 없음 |
-| Apply | 서버가 종료됐음을 확인한 뒤 검증된 프로그램만 적용. 같은 커밋/해시이면 변경 없음. 자동 시작·health 대기 없음 |
-| Restore | **직전 적용 전 프로그램 상태**로 한 번 되돌림. 최초 적용의 직전 상태는 원래 Open WebUI. 복원 뒤 같은 Restore는 변경 없음 |
+| `Apply -Bundle <ZIP> -Commit <40자리 SHA> -CheckOnly` | 저장 설정·버전/의존성 요구·전달물·설치 경로와 적용 가능 여부를 읽어 표시. 앱 import·서버 중지·쓰기 없음 |
+| `Apply -Bundle <ZIP> -Commit <40자리 SHA>` | 서버가 종료됐음을 확인한 뒤 검증된 프로그램만 적용. 같은 커밋/해시이면 변경 없음. 자동 시작·health 대기 없음 |
+| `Restore` | **직전 적용 전 프로그램 상태**로 한 번 되돌림. 최초 적용의 직전 상태는 원래 Open WebUI. 복원 뒤 같은 Restore는 변경 없음 |
 | 기존 Start / Stop / Status | 같은 interpreter/cwd/데이터로 시작·정상 종료·상태 표시. 실제 앱 원본/사내 수정 여부와 적용 커밋을 구분 |
 
 일상 흐름은 **CheckOnly → Stop → Apply → Start → 변경 부분 확인**입니다. 사전 확인이 실패하면 서버를 중지하지 않습니다. 적용 실패 시 서버를 자동으로 다른 프로그램으로 시작하지 않고 결과에서 멈춥니다. 필요하면 사용자가 Stop 상태를 확인하고 Restore·Start를 실행합니다. 기존 Start의 한 번의 명시적 health 대기만 사용하며, 같은 실패를 자동 반복하거나 후보 import 검사를 붙이지 않습니다.
 
-전달물은 기존 CI·Git 전달 방식을 재사용합니다. 파일 적용과 실제 기동 결과는 구분해 최근 상세 결과를 사내에 저장하고, 외부 전달은 **상태·변경 여부·적용 커밋·실패 단계 등 1~2줄**로 제한합니다. 이미 실행한 결과를 요약 형식 때문에 다시 측정하지 않습니다. Tool/Skill/Prompt는 지금처럼 바뀐 항목만 기존 ID에 반영하며 자동 API 동기화는 추가하지 않습니다.
+전달물은 기존 CI·Git 전달 방식을 재사용합니다. `Apply/Restore/Start/Stop/Status -Summary`는 상태·변경 여부·적용 커밋·실패 단계·프로그램 선택을 한 줄로 출력합니다. `-Summary`를 사용한 Apply/Restore/Start/Stop의 마지막 상세 결과는 `state_root/last-operation.json`에 저장하며, CheckOnly와 Status는 결과 파일이나 잠금을 쓰지 않습니다. 상세 결과 저장이 실패하면 `report=unavailable`로 표시하므로 이전 파일을 새 결과로 해석하지 않습니다. 파일 적용과 실제 기동 결과를 구분하고 외부 전달은 **마지막 요약과 화면 확인 1~2줄**로 제한합니다. 이미 실행한 결과를 요약 형식 때문에 다시 측정하지 않습니다. Tool/Skill/Prompt는 지금처럼 바뀐 항목만 기존 ID에 반영하며 자동 API 동기화는 추가하지 않습니다.
 
 #### 필요한 최소 실패 처리
 
@@ -513,9 +513,9 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 - Restore는 보관본·기록을 대조해 복원하며 손상·예상 밖 변경이면 덮어쓰기를 멈춥니다. DB 전체 복구·자동 재시도·여러 릴리스 이력 관리로 확대하지 않습니다.
 - 프로그램 선택은 기존 배포 기록에서 관리하되 `original` Python 사용을 “원본 앱 실행”으로 오표시하지 않습니다. 새 기록 형식은 구형 도구가 거부하도록 하고, 새 방식 채택 후 옛 Prepare/Deploy/Rollback/ProbeImports와 혼용하지 않습니다. 이전 실패·배포 기록은 보존합니다.
 
-#### 구현 계획과 완료 기준
+#### 구현 범위와 완료 기준
 
-기능을 여러 미완성 PR로 쌓지 않고 아래 1·2를 하나의 적용/되돌리기 구현 단위로 완성합니다. 이번 요청에서는 이 설계·계획·검토까지만 수행합니다.
+아래 1·2를 하나의 적용/되돌리기 구현 단위로 준비했습니다. [2026-09-08 설계 검토](../evals/scenarios.md#ees-wrapper-design)와 [2026-09-09 구현 검증](../evals/scenarios.md#ees-wrapper-implementation)을 구분하며, 3의 사내 적용은 아직 수행하지 않았습니다.
 
 | 순서 | 작업 | 완료 기준 |
 |---|---|---|
@@ -533,13 +533,74 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 | `scripts/ees_deploy_process.py` | 현재 시작/종료 유지, 앱 경로 선택과 시작 전 일치 확인 |
 | `scripts/ees_deploy_release.py`, `tests/` | 기존 전달물 검증 재사용·필요한 함수 분리와 위 변경 범위 검사 |
 
-별도 프로젝트·폴더 계층·플러그인 시스템·대시보드를 만들지 않습니다. 예전 후보 코드나 증거는 이번 설계에서 삭제하지 않고 현재 절차에서 제외합니다. [설계 검토와 미확인 범위](../evals/scenarios.md#ees-wrapper-design), [현재 작업 상태](STATUS.md).
+별도 프로젝트·폴더 계층·플러그인 시스템·대시보드를 만들지 않습니다. 예전 후보 코드나 증거는 삭제하지 않고 현재 절차에서 제외합니다. [설계 검토와 미확인 범위](../evals/scenarios.md#ees-wrapper-design), [현재 작업 상태](STATUS.md).
 
 | 변경 종류 | 배포 단위 | 원복 기준 |
 |---|---|---|
 | 모델 이름·소개·빠른 제안 | 기존 모델 ID의 메타데이터. [소개·제안 적용](#first-use-entry), 프로필은 [EES 아이콘](../branding/ees/assets/favicon.png) | 반영 전 이름·소개·제안·프로필만 복구 |
 | 공통 Prompt·Skill·Tool | 커밋별 Agent Pack ZIP에서 바뀐 항목만 기존 ID에 반영 | 실제 적용했던 직전 커밋의 해당 항목 |
-| 서비스 이름·아이콘 | 기존 `open_webui-0.11.3+ees.1-py3-none-any.whl`과 브랜딩 manifest를 재사용 가능 | 변경 전 프로그램 복원·같은 DATA_DIR/키/접속 설정 유지. 기존 환경 직접 적용·원복 절차는 준비 대상 |
+| 서비스 이름·아이콘 | 기존 `open_webui-0.11.3+ees.1-py3-none-any.whl`과 브랜딩 manifest를 재사용 가능 | 변경 전 프로그램 복원·같은 DATA_DIR/키/접속 설정 유지. [Apply/Restore 안내](#ees-wrapper-apply) 사용 |
+
+<a id="ees-wrapper-apply"></a>
+
+#### 사내 적용·확인 안내
+
+**구현본이 main에 반영되고 해당 CI가 통과한 뒤 사용합니다.** 현재 게시·검증 상태는 [STATUS](STATUS.md), 실제 사내 결과는 [구현 기록](../evals/scenarios.md#ees-wrapper-implementation)에서 구분합니다. 이미 등록한 운영 PowerShell과 `%USERPROFILE%\team-agent-poc` checkout을 사용하며 최초 Init·후보 Prepare·pandas 진단을 반복하지 않습니다. 기존 저장 설정과 Python이 있어야 하며 누락·불일치는 사전 확인에서 중단합니다.
+
+프로그램 ZIP은 보존 중인 `EES-demo-4a8779bbf3ee.zip`과 전체 프로그램 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`을 재사용할 수 있습니다. Apply는 이 ZIP의 해시·wheel·대상 버전/의존성·앱 경로를 다시 확인합니다. 운영 코드 최신 HEAD를 프로그램 Commit에 넣지 않으며, Agent Pack 전용 ZIP이나 후보 venv를 새 전달물로 사용하지 않습니다.
+
+`$eesBundle`의 자리표시자만 보존한 ZIP의 실제 경로로 바꿉니다. 경로를 채팅에 알려줄 필요는 없습니다. 아래 블록은 **Git 갱신 → 읽기 전용 사전 확인 → 정상 종료 → 프로그램 적용 → 명시적인 시작** 순서입니다. 앞 단계가 실패하면 그 자리에서 멈춥니다. 특히 CheckOnly 실패 시 Stop을 실행하지 않습니다. 기존 프로세스를 식별하지 못하거나 포트가 사용 중이면 임의 종료하지 않습니다. 자동 전환·복구·재시도 없이 첫 기동의 health 확인을 최대 120초로 요청하며, 시간 초과를 배포 성공으로 해석하지 않습니다. 기존 기본값이나 등록 설정은 바꾸지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $eesManager = Join-Path $eesRepo 'scripts\manage-ees.ps1'
+    & $eesManager -Action Update
+    $eesBundle = '보존한 EES-demo-4a8779bbf3ee.zip의 전체 경로'
+    $eesProgramCommit = '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
+    & $eesManager -Action Apply -Bundle $eesBundle -Commit $eesProgramCommit -CheckOnly -Summary
+    & $eesManager -Action Stop -Summary
+    & $eesManager -Action Apply -Bundle $eesBundle -Commit $eesProgramCommit -Summary
+    & $eesManager -Action Start -HealthTimeout 120 -Summary
+}
+```
+
+성공한 경우 기존 주소에서 강력 새로고침 한 번 뒤 **EES 이름·아이콘, 기존 대화 유지, 일반 채팅 스트리밍과 대표 조회 한 건**을 함께 확인합니다. 대표 조회는 기존에 쓰던 Confluence·Jira·GitHub 중 하나면 충분합니다. 인증/저장·20회 안정성 등 완료한 전수 검사를 반복하지 않습니다. 외부에는 아래 두 줄만 직접 타이핑하며 경로·주소·로그·파일·사진은 전달하지 않습니다.
+
+```text
+마지막 EES 줄: action=... result=... changed=... commit=... stage=... program=... running=...
+화면: 이름·아이콘=정상/미확인, 기존 대화=유지/미확인, 채팅·대표 조회=정상/미확인
+```
+
+실패하면 마지막 `EES` 한 줄만 전달합니다. PowerShell에서 먼저 막혀 EES 줄이 없다면 실패한 작업명과 짧은 오류 종류만 전달하고 나머지 명령을 실행하지 않습니다. `result=ok`인 Apply는 프로그램 파일 적용 성공이며, Start의 health와 화면 확인까지 완료해야 실제 사내 적용 성공으로 기록합니다. 마지막 서버 가동 보고는 현재 상태로 간주하지 않습니다.
+
+**직전 프로그램으로 되돌릴 때만** 아래 별도 블록을 사용합니다. 최초 Apply의 직전 상태는 원래 Open WebUI이며, 복원 완료 뒤 같은 Restore를 반복해도 변경하지 않습니다. 보관본·잠금·미완료 기록이 일치하지 않으면 멈추고, 임의 잠금 삭제·프로세스 강제 종료·DB 복구를 하지 않습니다. Start 실패 뒤 Restore가 자동 실행되는 구조는 아닙니다.
+
+일반 원복은 Stop→Restore→Start 순서입니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesManager = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1'
+    & $eesManager -Action Stop -Summary
+    & $eesManager -Action Restore -Summary
+    & $eesManager -Action Start -HealthTimeout 120 -Summary
+}
+```
+
+**Apply/Restore 작업 자체가 중단되어 미완료 잠금이 남은 경우**에는 Stop을 먼저 실행하면 그 잠금 때문에 차단됩니다. 이때만 아래처럼 Restore를 직접 실행합니다. Restore가 저장된 작업 소유자의 종료·잠금 일치와 현재 서버 종료·포트 상태를 확인한 뒤 복원하며, 확인되지 않으면 변경하지 않고 멈춥니다. 성공했을 때만 Start를 이어갑니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesManager = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1'
+    & $eesManager -Action Restore -Summary
+    & $eesManager -Action Start -HealthTimeout 120 -Summary
+}
+```
+
+현재 선택·실행 상태만 필요할 때는 같은 진입점의 `-Action Status -Summary`를 사용합니다. `program=original/customized`는 프로그램 선택, `incomplete/invalid`는 미완료/불일치, `-`는 해당 요약에서 미확인이라는 뜻입니다. Status의 `result=ok`만으로 프로그램 정상이나 health 성공을 판정하지 않으며 실제 화면·연동 성공을 대신하지 않습니다. 새 방식 채택 후 상태 형식은 구형 후보 명령을 거부하며 이전 실패·배포 기록은 보존합니다.
 
 ### 검사와 전달물 생성
 
@@ -595,9 +656,9 @@ API 동기화는 관리 목록에 지정한 EES 자산·필드만 대상으로 �
 
 ### 기존 Windows 서버에 적용
 
-**이하 후보 준비·전환 절차는 이전 구현 이력입니다.** 현재 관리 기준은 [공식 패키지와 래퍼](#ees-wrapper-maintenance)이며 아래 Init/Prepare/Deploy/ProbeImports·캐시/진단 명령을 순서대로 다시 실행하지 않습니다. 기존 도구가 삭제·비활성화됐다는 뜻은 아닙니다.
+**이하 후보 준비·전환 절차는 2026-09-08 중단한 이전 구현 이력입니다. 현재 실행 안내는 [Apply/Restore](#ees-wrapper-apply)입니다.** 아래 Init/Prepare/Deploy/ProbeImports·캐시/진단 명령을 순서대로 다시 실행하지 않습니다. 이전 코드는 보존하지만 새 상태 형식 채택 후 후보 작업과의 혼용은 거부합니다.
 
-현재 지원 범위는 **기존 Windows / Python 3.11 / Open WebUI 0.11.3 / 로컬 SQLite·Chroma·업로드 / 단일 서버**에서 `0.11.3+ees.1`로의 프로그램 전환입니다. 새 서비스나 Selector 실행 파일은 추가하지 않습니다. 기존 환경의 Python 패치 버전·모든 설치 패키지를 고정하고 Open WebUI 항목만 교체합니다. 운영 중인 uvx 환경과 캐시는 보존합니다. 후속 브랜딩 버전은 해당 버전의 호환성·원복 지원을 함께 갱신한 뒤 사용합니다.
+당시 후보 방식의 지원 범위는 **기존 Windows / Python 3.11 / Open WebUI 0.11.3 / 로컬 SQLite·Chroma·업로드 / 단일 서버**에서 `0.11.3+ees.1`로의 프로그램 전환입니다. 새 서비스나 Selector 실행 파일은 추가하지 않습니다. 기존 환경의 Python 패치 버전·모든 설치 패키지를 고정하고 Open WebUI 항목만 교체합니다. 운영 중인 uvx 환경과 캐시는 보존합니다. 후속 브랜딩 버전은 해당 버전의 호환성·원복 지원을 함께 갱신한 뒤 사용합니다.
 
 [manage-ees.ps1](../scripts/manage-ees.ps1)은 아래 작업을 제공합니다. 상대 경로는 저장소 루트 기준입니다.
 
@@ -930,7 +991,7 @@ P는 해당 검사 표식이 있는 python.exe 수이며 launcher/실제 자식�
 
 현재 서버의 적용 상태와 다음 실행 여부는 [STATUS](STATUS.md)를 따릅니다. 진단 기능 확인만을 위해 정상 서버에 실패를 만들거나 Deploy·재기동·기존 연동 검증을 반복하지 않습니다.
 
-**과거 수동 진단 기록 — 기존 형식의 health 실패 뒤 자동 복구가 성공한 경우:** 아래는 2026-09-08까지의 실패 증거와 개별 명령을 보존한 절차입니다. 현재 진입점은 위 Diagnose이며, 아래 명령을 순서대로 다시 실행하지 않습니다. 당시 `deployment.json`의 `process.log_file`은 복구된 기존 프로그램의 로그입니다. 기존 형식은 실패 후보 로그 경로를 별도로 보존하지 않으므로 현재 로그를 제외하고, 실패 시각과 복구 로그보다 앞선 **생성 시각**으로 직전 기동 로그를 좁힙니다. 수정 시각 최신순은 현재 서버의 로그를 고를 수 있습니다. 로그 이동/삭제나 이후 재기동이 있었다면 시각만으로 이번 후보를 확정하지 않습니다. `health_check`와 숫자 코드 null만으로 기동 중 종료·응답 대기 만료·프로세스 확인 오류를 구분할 수 없으며, 종료 정리 중 찍힌 `KeyboardInterrupt`도 최초 실패 원인으로 단정하지 않습니다. 로그는 사내에서 읽고 필요한 오류 종류·기동 완료 여부만 비식별로 전달합니다.
+**과거 수동 진단 기록 — 기존 형식의 health 실패 뒤 자동 복구가 성공한 경우:** 아래는 2026-09-08까지의 실패 증거와 개별 명령을 보존한 절차입니다. 당시 진입점은 위 Diagnose였으며, 현재는 [Apply/Restore 안내](#ees-wrapper-apply)를 따르고 아래 명령을 순서대로 다시 실행하지 않습니다. 당시 `deployment.json`의 `process.log_file`은 복구된 기존 프로그램의 로그입니다. 기존 형식은 실패 후보 로그 경로를 별도로 보존하지 않으므로 현재 로그를 제외하고, 실패 시각과 복구 로그보다 앞선 **생성 시각**으로 직전 기동 로그를 좁힙니다. 수정 시각 최신순은 현재 서버의 로그를 고를 수 있습니다. 로그 이동/삭제나 이후 재기동이 있었다면 시각만으로 이번 후보를 확정하지 않습니다. `health_check`와 숫자 코드 null만으로 기동 중 종료·응답 대기 만료·프로세스 확인 오류를 구분할 수 없으며, 종료 정리 중 찍힌 `KeyboardInterrupt`도 최초 실패 원인으로 단정하지 않습니다. 로그는 사내에서 읽고 필요한 오류 종류·기동 완료 여부만 비식별로 전달합니다.
 
 <a id="ees-failed-candidate-summary"></a>
 
@@ -1715,7 +1776,7 @@ for label, executable in zip(('original', 'candidate'), sys.argv[1:]):
 
 <a id="ees-resume-prepared-release"></a>
 
-**준비 완료한 후보로 재전환을 이어갈 때:** 프로그램 준비 성공 후 기존 서버로 복구한 경우에는 [STATUS의 프로그램 원본](STATUS.md)을 유지합니다. 운영 스크립트 갱신과 프로그램 교체는 별개이므로 Git 최신 커밋을 `Deploy -Commit`에 넣거나 프로그램을 다시 다운로드·Prepare하지 않습니다.
+**2026-09-07~08 당시 준비 후보 재전환 안내 — 현재 재실행하지 않음:** 프로그램 준비 성공 후 기존 서버로 복구한 경우에는 [STATUS의 프로그램 원본](STATUS.md)을 유지합니다. 운영 스크립트 갱신과 프로그램 교체는 별개이므로 Git 최신 커밋을 `Deploy -Commit`에 넣거나 프로그램을 다시 다운로드·Prepare하지 않습니다.
 
 첫 단계는 기존 운영 PowerShell에서 아래 블록으로 checkout만 갱신하고 현재 관리 상태를 읽는 것입니다. 저장한 GitHub.com용 Git 프록시 설정이 있으면 `$gitProxy`를 다시 입력할 필요가 없습니다. 임시 프록시가 필요한 경우에만 이전 값을 `$gitProxy`에 로컬로 설정하고 Update 호출에 `-GitProxy $gitProxy`를 추가합니다. 값이나 config 원문을 외부에 전달하지 않습니다. 실행 정책 오류는 기존 [Windows 적용 안내](#기존-windows-서버에-적용)를 따르며 이 블록이 정책을 변경하지는 않습니다.
 

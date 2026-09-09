@@ -18,6 +18,7 @@ MANAGER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MANAGER)
 COMMIT = "a" * 40
 WAIT_HEALTHY = MANAGER.processes.wait_healthy
+OPERATOR = {"pid": 4242, "executable": "synthetic-operator-python", "created_at": "1234"}
 
 
 class DeploymentTransactionTests(unittest.TestCase):
@@ -811,6 +812,216 @@ class ImportProbeIntegrationTests(unittest.TestCase):
             json.loads((self.root / "last-import-probe.json").read_bytes()))
         self.assertEqual(output.getvalue().strip(), "EES import comparison")
         self.assert_unmodified(before)
+
+
+class CustomizationIntegrationTests(unittest.TestCase):
+    """Exercise operator boundaries without touching a real installation."""
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name).resolve()
+        self.config = {"state_root": str(self.root), "source_python": "original-python",
+                       "cwd": "original-cwd", "data_dir": "original-data", "host": "127.0.0.1", "port": 8080}
+        self.selection = {"source_commit": COMMIT, "wheel_sha256": "b" * 64,
+                          "record_sha256": "c" * 64, "webui_version": MANAGER.releases.branding.VERSION}
+        self.registry = {"schema_version": 2, "phase": "idle", "process": None,
+            "current": {"kind": "original", "source_commit": None, "python": "original-python"},
+            "previous": {"kind": "historical-release"}, "last_failure": {"action": "deploy"},
+            "customization": {"active": self.selection, "previous": {"active": None}, "pending": None}}
+        self.write()
+        self.env = {"DATA_DIR": "original-data", "WEBUI_SECRET_KEY": "synthetic-key"}
+        self.owner = dict(OPERATOR)
+        self.mocks = {}
+        for module, name, kw in (
+            (MANAGER.states, "load_config", {"return_value": self.config}),
+            (MANAGER.states, "runtime_environment", {"return_value": self.env}),
+            (MANAGER.processes, "_identity", {"side_effect": lambda pid: self.owner if pid == MANAGER.os.getpid() else None}),
+            (MANAGER.processes, "port_is_free", {"return_value": True}),
+            (MANAGER.processes, "verify_identity", {"return_value": False}),
+            (MANAGER.processes, "wait_healthy", {}),
+            (MANAGER.processes, "start_server", {"return_value": {"pid": 123}}),
+            (MANAGER.processes, "stop_server", {}),
+            (MANAGER.customization, "validate_program", {"return_value": self.root / "program"}),
+            (MANAGER.customization, "inspect_bundle", {"return_value": self.selection}),
+            (MANAGER.customization, "check_applicability", {}),
+        ):
+            override = patch.object(module, name, **kw)
+            self.mocks[name] = override.start()
+            self.addCleanup(override.stop)
+
+    def write(self):
+        MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
+
+    def args(self, action, **kw):
+        return argparse.Namespace(action=action, config="unused", bundle="unused.zip", commit=COMMIT,
+                                  check_only=kw.get("check_only", False), health_timeout=120)
+
+    def pending(self):
+        self.registry["customization"]["pending"] = {
+            "action": "apply", "owner": dict(OPERATOR), "before": None, "target": self.selection,
+            "old_previous": None, "stage": "promote"}
+        self.write()
+
+    def test_legacy_schema_with_customization_cannot_bypass_guards(self):
+        self.registry["schema_version"] = 1
+        self.write()
+        with self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.operate(self.args("start"))
+        self.mocks["start_server"].assert_not_called()
+
+    def test_status_summary_exposes_incomplete_program(self):
+        self.pending()
+        result = MANAGER.operate(self.args("status"))
+        self.assertIn("program=incomplete", MANAGER.render_summary("status", result))
+
+    def test_check_only_does_not_write_lock_report_stop_or_import_app(self):
+        self.registry["process"] = {"pid": 123}
+        self.write()
+        before = {p.name: p.read_bytes() for p in self.root.iterdir()}
+        result = MANAGER.operate(self.args("apply", check_only=True))
+        self.assertTrue(result["checked"])
+        self.assertTrue(result["already_applied"])
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.root.iterdir()})
+        for name in ("start_server", "stop_server", "wait_healthy"):
+            self.mocks[name].assert_not_called()
+
+    def test_check_only_rejects_state_change_during_inspection(self):
+        def changed(*_):
+            self.registry["last_event"] = "concurrent-operation"
+            self.write()
+            return self.selection
+        self.mocks["inspect_bundle"].side_effect = changed
+        with self.assertRaisesRegex(MANAGER.DeploymentError, "changed during CheckOnly"):
+            MANAGER.operate(self.args("apply", check_only=True))
+
+    def test_apply_refuses_running_unidentified_or_occupied_server(self):
+        self.registry["process"] = {"pid": 123}
+        self.write()
+        with patch.object(MANAGER.customization, "apply") as apply:
+            self.mocks["_identity"].side_effect = lambda pid: self.owner
+            with self.assertRaisesRegex(MANAGER.DeploymentError, "Stop"):
+                MANAGER.operate(self.args("apply"))
+            self.mocks["_identity"].side_effect = lambda pid: self.owner if pid == MANAGER.os.getpid() else None
+            self.mocks["port_is_free"].return_value = False
+            with self.assertRaisesRegex(MANAGER.DeploymentError, "port"):
+                MANAGER.operate(self.args("apply"))
+            apply.assert_not_called()
+        self.mocks["stop_server"].assert_not_called()
+
+    def test_missing_program_blocks_already_running_before_health_wait(self):
+        self.registry["process"] = {"pid": 123}
+        self.write()
+        self.mocks["verify_identity"].return_value = True
+        self.mocks["validate_program"].side_effect = MANAGER.customization.CustomizationError("missing metadata")
+        with self.assertRaisesRegex(ValueError, "missing metadata"):
+            MANAGER.operate(self.args("start"))
+        self.mocks["wait_healthy"].assert_not_called()
+        self.mocks["start_server"].assert_not_called()
+
+    def test_pending_blocks_start_and_survives_stop_with_history(self):
+        self.pending()
+        before = MANAGER.read_registry(self.config)
+        with self.assertRaisesRegex(MANAGER.DeploymentError, "incomplete"):
+            MANAGER.operate(self.args("start"))
+        MANAGER.operate(self.args("stop"))
+        after = MANAGER.read_registry(self.config)
+        for key in ("customization", "previous", "last_failure"):
+            self.assertEqual(after[key], before[key])
+        with self.assertRaisesRegex(MANAGER.DeploymentError, "incomplete"):
+            MANAGER.operate(self.args("start"))
+
+    def test_wrapper_start_passes_registered_environment_and_selected_path(self):
+        result = MANAGER.operate(self.args("start"))
+        self.assertTrue(result["started"])
+        call = self.mocks["start_server"].call_args
+        self.assertEqual(call.args[:3], ("original-python", "original-cwd", self.env))
+        self.assertEqual(call.kwargs, {"program_path": str(self.root / "program")})
+        self.mocks["wait_healthy"].assert_called_once_with({"pid": 123}, timeout=120)
+
+    def test_health_failure_does_not_switch_or_start_original_automatically(self):
+        self.mocks["wait_healthy"].side_effect = MANAGER.processes.ProcessError("synthetic health failure")
+        with self.assertRaises(MANAGER.processes.ProcessError):
+            MANAGER.operate(self.args("start"))
+        self.mocks["start_server"].assert_called_once()
+        self.mocks["stop_server"].assert_not_called()
+        self.assertEqual(MANAGER.read_registry(self.config)["customization"]["active"], self.selection)
+
+    def test_legacy_actions_refused_before_candidate_inventory_or_server_calls(self):
+        for action in ("plan", "prepare", "deploy", "rollback", "probe-imports", "diagnose"):
+            with self.subTest(action=action), self.assertRaisesRegex(MANAGER.DeploymentError, "Apply/Restore"):
+                MANAGER.operate(self.args(action))
+        self.mocks["inspect_bundle"].assert_not_called()
+        self.mocks["start_server"].assert_not_called()
+
+    def test_status_distinguishes_existing_python_from_customized_app(self):
+        result = MANAGER.operate(self.args("status"))
+        self.assertFalse(result["original_program"])
+        self.assertEqual(result["current_commit"], COMMIT)
+        self.assertTrue(result["program_valid"])
+        self.assertTrue(result["restore_available"])
+        self.assertFalse(result["rollback_available"])
+        self.pending()
+        result = MANAGER.operate(self.args("status"))
+        self.assertFalse(result["program_valid"])
+        self.assertTrue(result["program_incomplete"])
+        self.assertFalse(result["original_program"])
+
+    def test_restore_reclaims_only_exact_recorded_dead_owner(self):
+        self.pending()
+        lock = self.root / "deployment.lock"
+        lock.write_text(json.dumps(OPERATOR))
+        with patch.object(MANAGER.customization, "restore", return_value={"changed": True}) as restore:
+            self.assertTrue(MANAGER.operate(self.args("restore"))["changed"])
+        restore.assert_called_once()
+        self.assertFalse(lock.exists())
+        self.mocks["start_server"].assert_not_called()
+
+    def test_restore_preserves_old_mismatched_live_or_uninspectable_lock(self):
+        self.pending()
+        lock = self.root / "deployment.lock"
+        cases = [("4242", None), (json.dumps(dict(OPERATOR, created_at="other")), None),
+                 (json.dumps(OPERATOR), OPERATOR),
+                 (json.dumps(OPERATOR), MANAGER.processes.ProcessError("unavailable"))]
+        for content, state in cases:
+            with self.subTest(content=content, state=state):
+                lock.write_text(content)
+                def identify(pid):
+                    if pid == MANAGER.os.getpid():
+                        return self.owner
+                    if isinstance(state, Exception):
+                        raise state
+                    return state
+                self.mocks["_identity"].side_effect = identify
+                with self.assertRaises((MANAGER.DeploymentError, MANAGER.processes.ProcessError)):
+                    MANAGER.operate(self.args("restore"))
+                self.assertEqual(lock.read_text(), content)
+
+    def test_summary_is_one_line_and_check_only_leaves_no_report(self):
+        output = io.StringIO()
+        before = MANAGER.registry_path(self.config).read_bytes()
+        with redirect_stdout(output):
+            result = MANAGER.main(["apply", "--config", "unused", "--bundle", "unused.zip",
+                                   "--commit", COMMIT, "--check-only", "--summary"])
+        self.assertEqual(result, 0)
+        self.assertEqual(len(output.getvalue().splitlines()), 1)
+        self.assertIn("result=ok", output.getvalue())
+        self.assertNotIn("synthetic-key", output.getvalue())
+        self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+        self.assertFalse((self.root / "last-operation.json").exists())
+
+    def test_summary_failure_is_short_and_saved_locally_without_raw_paths(self):
+        self.mocks["validate_program"].side_effect = OSError(13, "synthetic-private-path")
+        output = io.StringIO()
+        with redirect_stdout(output):
+            result = MANAGER.main(["start", "--config", "unused", "--summary"])
+        self.assertEqual(result, 1)
+        self.assertIn("result=failed", output.getvalue())
+        self.assertEqual(len(output.getvalue().splitlines()), 1)
+        self.assertNotIn("synthetic-private", output.getvalue())
+        saved = json.loads((self.root / "last-operation.json").read_bytes())
+        self.assertTrue(saved["failed"])
+        self.assertNotIn("synthetic-private", json.dumps(saved))
 
 
 if __name__ == "__main__":

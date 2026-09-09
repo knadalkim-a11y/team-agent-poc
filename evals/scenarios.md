@@ -971,6 +971,20 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 독립 읽기 검토·처리: STATUS 표의 “고정 import 비교 준비”를 최종 S1/T2 수신 후 진단 중단·원인 미해결로 바로잡음. v2의 원래 프로그램 가동·식별 일치는 2026-09-08 당시 보고이며 현재 실시간 상태가 아님을 명시함. 마지막 P/U 값도 서버의 현재 가동 증거로 재해석하지 않음. 과거 ZIP 보존과 새 Apply 전달물 검증/적용 성공을 구분함.
 - 결과·한계: 별도 handoff/summary 파일 없이 STATUS의 [기존 재개 절](../docs/STATUS.md#resume-branch)을 보완하고 이 기록에 근거를 남김. 문서·내부 링크·diff를 검사함. 설계/독립 검토는 완료됐으나 실행 기능·새 테스트·사내 설치/기동은 수행하지 않았음. 다음 세션 시작만을 이유로 사용자에게 사내 진단을 반복시키지 않음.
 
+<a id="ees-wrapper-implementation"></a>
+
+### 단순 래퍼 Apply/Restore·기존 운영 연결 구현 — 2026-09-09
+
+- 개발 기준: 원격 최신 main `99ab68064a70a88da4b988d349dd1c45e30e7022`, tree `482e8853f71d60799a6dfc80294bf7b6ff6a775e`, 관련 열린 PR 0개를 확인함. AGENTS·STATUS의 현재/재개 절, [확정 설계](../docs/03-openwebui-native-agent.md#ees-wrapper-design), [설계 검토](#ees-wrapper-design)와 [재개 근거](#ees-wrapper-resume)를 읽고 같은 tree의 로컬 비교 스냅샷에서 구현함. 새 대화 시작을 이유로 사내 서버 상태·후보 import 진단을 요구하지 않음.
+- 구현 범위: 기존 빌더·번들/wheel 검사와 운영 진입점을 재사용하고 `ees_webui_customization.py` 한 모듈로 앱/metadata 적용·직전 Restore를 준비함. Apply/CheckOnly는 앱 import·서버 중지·쓰기 없이 전달물/환경을 검증하며, Apply는 서버 종료 확인 뒤 프로그램만 교체함. 기존 Python·의존성·uvx 설치·DATA_DIR·키·사용자 설정을 유지하고 Start는 수정본 코드/metadata/정적 파일을 함께 선택함. 새 venv·전체 재설치·자동 전환/복구·API 동기화는 추가하지 않음.
+- 실패·운영 경계: 중복 적용은 변경 없음, 최초 Restore는 원본 앱 선택, 복원 후 재호출은 변경 없음. 미완료 교체·보관본/기록 불일치·잠금 소유자 불명·구형 후보 작업 혼용은 차단하고 기존 실패 이력을 보존함. Stop 뒤 미완료 정보와 Start의 이미 실행 중 반환 전 검사를 유지함. 동작 확인은 아래 자동 검사 결과에서 확정하며 이 설명 자체를 PASS 근거로 삼지 않음.
+- 전달·사내 안내: Apply/Restore/Start/Stop/Status의 `-Summary`에 프로그램 선택·미완료/불일치와 적용 커밋을 포함해 한 줄로 제공하고, `-Summary`를 사용한 변경 작업의 마지막 상세 결과는 사내 `last-operation.json`에 보존함. CheckOnly/Status는 무쓰기. [사내 블록](../docs/03-openwebui-native-agent.md#ees-wrapper-apply)은 CheckOnly 성공 뒤 Stop→Apply→Start 순서로 한 번 진행하고 실패 시 중단함. 기존 프로그램 ZIP `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`을 새 검증을 거쳐 재사용하며 각 명령 블록은 2,500자 이내로 준비함. 사용자는 마지막 요약·화면 확인 1~2줄만 직접 입력하며 전체 출력·파일·사진을 전달하지 않음.
+- 로컬 자동 검사: Linux/Python 3.12.13에서 `python -m unittest discover -s tests -p test_manage_ees.py -v` **56개 PASS**, `test_ees_deploy_*.py` **131개 중 125개 PASS·6개 skip**, `test_ees_branding_build.py` **7개 중 6개 PASS·1개 skip**, `test_demo_bundle.py` **7개 PASS**를 확인함. skip에는 실제 Windows DPAPI·uv/NLTK opt-in·/proc 기동 조건과 실제 wheel fixture 부재가 포함되며 실행한 것으로 기록하지 않음. 새 `test_ees_webui_customization.py`의 최종 합성 검사 건수는 마무리 결과에 반영함. 실제 고정 공식 wheel의 전체 앱/metadata/정적 파일 검증과 Windows/Linux Python 3.11 검사는 PR CI에서 수행하도록 연결했고 **현재 CI 대기**임.
+- 독립 검토·처리: 적용/복원 기록·단계별 중단, 보관본·종료된 작업 소유자 잠금, Stop의 미완료 기록 유지·거부 조건, 원본 의존성/데이터/키 경계, 비밀정보 요약과 과설계·파일 분산·중복 관리를 검토함. v1 기록에 새 상태가 섞인 경우 거부와 CheckOnly의 bytecode 쓰기 차단을 보완함. Start/Stop의 적용 커밋·Status의 미완료/불일치를 한 줄에 표시하고, 중단된 Apply의 잠금에서 Stop이 먼저 차단되는 문제는 직접 Restore→성공 시 Start 안내로 수정함. 기존 빌더/운영 진입점·신규 적용 모듈 하나를 유지하고 별도 서비스·환경·배포 계층은 추가하지 않았으며 검토 범위의 미처리 차단 문제는 없음. 실제 사내 프로세스·Windows UI 성공의 근거는 아님.
+- 문서·전달 검사: 새 적용/일반 복원/중단 복원 블록은 각각 602/270/230자로 2,500자 이내임. `python scripts/check_docs.py`: **DOCS OK, 25 files / 612 links / errors=0 / review_candidates=0**, `git diff --check` 통과. 과거 날짜별 설계/진단·오류 기록을 보존하고 기존 관리 원본만 갱신함.
+- Git 반영: **대기 — 구현 브랜치 `feat/simple-webui-wrapper`, 원격 게시·PR·main 반영은 미완료.** 원격에서 확인한 커밋·CI·PR 상태를 마무리 시 기록함. main 병합과 사내 적용은 별개임.
+- 사내 결과·한계: **미실행 — 새 Apply·Restore·Start·실제 Windows UI/기존 대화/대표 연동 확인 없음.** 이전 v2의 원래 프로그램 가동·복구 보고는 2026-09-08 당시 관찰임. Linux 합성 시험·정적 실제 wheel 대조·Windows CI가 통과해도 사내 기동/사용 성공으로 확대하지 않음. 후보 pandas/import 지연 원인은 미해결 이력으로 보존하며 이번 방식 전환의 선행 검사를 삼지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

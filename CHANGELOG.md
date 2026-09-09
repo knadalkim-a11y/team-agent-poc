@@ -2,6 +2,10 @@
 
 완료된 변경·중요 결정과 날짜별 관찰을 기록합니다. 다음 작업과 최신 배포 상태는 [STATUS](docs/STATUS.md), 시험별 현재 판정은 [평가표](evals/scenarios.md)가 원본입니다. 과거 실패 기록을 현재 장애나 재실행 지시로 해석하지 않습니다.
 
+## 2026-09-09
+
+- 기존 Python·호환 의존성을 재사용하며 검증된 Open WebUI 앱/metadata만 관리 폴더에 적용하는 Apply/CheckOnly·직전 Restore와 기존 Start/Stop/Status 연결을 추가함. 기존 빌더·운영 코드를 재사용하고 미완료 적용의 시작 차단·보관본/잠금 대조·구형 후보 작업 혼용 차단, 직접 타이핑용 한 줄 요약과 짧은 사내 안내를 준비함. uvx 설치·데이터·키·개인 설정을 유지하고 새 환경/재설치·자동 전환/복구를 추가하지 않음. 검증·게시 결과와 사내 적용 여부는 [구현 기록](evals/scenarios.md#ees-wrapper-implementation)에 구분함.
+
 ## 2026-09-08
 
 - 단순 래퍼의 적용/직전 복원 설계와 구현·검증 계획을 작성하고 독립 검토함. uvx 캐시 환경 직접 수정 대신 수정된 Open WebUI 앱/metadata만 래퍼 관리 경로에 두고 기존 interpreter·의존성을 재사용하는 방식을 채택함. 기존 빌더/운영 진입점과 적용·복원 두 작업으로 한정하며 미완료 작업의 기동 차단·잠금 회수 조건을 정의함. 설계 완료이며 실행 기능 구현·사내 적용 완료를 뜻하지 않음. [설계](docs/03-openwebui-native-agent.md#ees-wrapper-design), [검토](evals/scenarios.md#ees-wrapper-design).
