@@ -22,6 +22,7 @@ import ees_deploy_process as processes
 import ees_deploy_release as releases
 import ees_deploy_report as reports
 import ees_deploy_state as states
+import ees_webui_customization as customization
 
 DEFAULT_HEALTH_TIMEOUT = 300
 
@@ -160,27 +161,61 @@ def registry_path(config):
 
 def read_registry(config):
     try:
-        value = json.loads(registry_path(config).read_text(encoding="utf-8"))
-        if value["schema_version"] != 1 or value["phase"] not in {"idle", "switching", "recovery_required"}:
+        value = json.loads(states._regular(registry_path(config)).read_text(encoding="utf-8"))
+        if (type(value["schema_version"]) is not int or value["schema_version"] not in (1, 2)
+                or value["phase"] not in {"idle", "switching", "recovery_required"}):
             raise ValueError()
+        customization.validate_registry(value)
         return value
     except (OSError, ValueError, KeyError, TypeError):
         raise DeploymentError("Deployment record is missing or invalid; inspect the local state before continuing.") from None
 
 
+def lock_owner(value):
+    return (isinstance(value, dict) and set(value) == {"pid", "executable", "created_at"}
+            and type(value["pid"]) is int and 1 <= value["pid"] <= 0xFFFFFFFF
+            and isinstance(value["executable"], str) and bool(value["executable"])
+            and isinstance(value["created_at"], str) and bool(value["created_at"]))
+
+
 @contextmanager
-def locked(config):
+def locked(config, *, restore=False, track_owner=False):
     path = Path(config["state_root"]) / "deployment.lock"
+    # Only file replacement has a resumable transaction owner. Preserve the
+    # existing lock behavior for operations without such a transaction.
+    owner = processes._identity(os.getpid()) if track_owner or restore else os.getpid()
+    if (track_owner or restore) and not lock_owner(owner):
+        raise DeploymentError("The operation owner could not be identified; no files were changed.")
+    if restore and path.exists():
+        # Only Restore may recover an exact, dead, recorded transaction owner.
+        # PID reuse, inaccessible processes and old PID-only locks remain blocked.
+        content = states._regular(path).read_bytes()
+        try:
+            saved = json.loads(content)
+        except (ValueError, UnicodeError):
+            saved = None
+        registry = read_registry(config)
+        pending = registry.get("customization", {}).get("pending") or {}
+        if (not lock_owner(saved) or pending.get("owner") != saved
+                or processes._identity(saved["pid"]) is not None):
+            raise DeploymentError("The interrupted-operation lock cannot be safely reclaimed; it was preserved.")
+        if states._regular(path).read_bytes() != content:
+            raise DeploymentError("The operation lock changed; it was preserved.")
+        path.unlink()
     try:
         handle = path.open("x", encoding="ascii")
     except FileExistsError:
         raise DeploymentError("Another operation or interrupted-operation lock exists; do not start a second deployment.") from None
     try:
         with handle:
-            handle.write(str(os.getpid()))
-        yield
+            json.dump(owner, handle, ensure_ascii=True, sort_keys=True)
+            handle.flush()
+            os.fsync(handle.fileno())
+        yield owner
     finally:
-        path.unlink()
+        # Never remove a lock that was replaced by another operation.
+        if path.exists() and json.loads(states._regular(path).read_bytes()) == owner:
+            path.unlink()
 
 
 def record(config, registry, event):
@@ -205,6 +240,7 @@ def probe_imports(config, commit):
 
     with locked(config):
         registry = read_registry(config)
+        require_legacy(registry)
         require_idle(registry)
         if registry.get("pending") or registry.get("launch_uncertain"):
             raise DeploymentError("Resolve the unfinished deployment before comparing imports.")
@@ -280,6 +316,75 @@ def require_idle(registry):
         raise DeploymentError("A previous switch needs recovery; use status and stop before attempting another operation.")
 
 
+def require_legacy(registry):
+    if registry["schema_version"] != 1:
+        raise DeploymentError("This instance uses Apply/Restore; the previous candidate workflow is disabled.")
+
+
+def selected_program(config, registry):
+    """Validate the app selection before even returning already_running."""
+    if registry["schema_version"] == 1:
+        return None
+    customization.validate_registry(registry)
+    selected = registry["current"]
+    if selected != {"kind": "original", "source_commit": None, "python": config["source_python"]}:
+        raise DeploymentError("The wrapper must use the registered original interpreter.")
+    value = registry["customization"]
+    if value["pending"]:
+        raise DeploymentError("Program file replacement is incomplete; use Restore before Start.")
+    active = value["active"]
+    if active:
+        return customization.validate_program(Path(config["state_root"]) / "program", active)
+    return None
+
+
+def program_result(registry):
+    value = registry.get("customization", {})
+    active, pending = value.get("active"), value.get("pending")
+    return {"source_commit": active["source_commit"] if active else registry["current"].get("source_commit"),
+            "original_program": registry["current"]["kind"] == "original" and not active and not pending,
+            "program_incomplete": bool(pending)}
+
+
+def require_stopped(config, registry):
+    if registry.get("launch_uncertain"):
+        raise DeploymentError("The last process launch is unverified; no program files were changed.")
+    if registry.get("process") and processes._identity(registry["process"].get("pid")) is not None:
+        raise DeploymentError("Stop the registered server before changing program files.")
+    require_free_port(config)
+
+
+def customize(config, args):
+    env = states.runtime_environment(config)
+    check_only = getattr(args, "check_only", False)
+    if check_only:
+        # Deliberately no lock creation, report write, app import or server stop.
+        registry = read_registry(config)
+        require_idle(registry)
+        if registry.get("pending") or registry.get("launch_uncertain"):
+            raise DeploymentError("The existing operation is incomplete; program changes are blocked.")
+        selected_program(config, registry)
+        customization.check_applicability(config, registry, env)
+        if (Path(config["state_root"]) / "deployment.lock").exists():
+            raise DeploymentError("Another operation or interrupted-operation lock exists; CheckOnly was stopped.")
+        if registry["current"] != {"kind": "original", "source_commit": None, "python": config["source_python"]}:
+            raise DeploymentError("Apply requires the registered original interpreter and program baseline.")
+        selection = customization.inspect_bundle(config, args.bundle, commit_id(args.commit), env)
+        if read_registry(config) != registry or (Path(config["state_root"]) / "deployment.lock").exists():
+            raise DeploymentError("The deployment changed during CheckOnly; no applicability result was accepted.")
+        return {"checked": True, "changed": False, "source_commit": selection["source_commit"],
+                "already_applied": registry.get("customization", {}).get("active") == selection,
+                "requires_stopped_server": True, "data_changed": False}
+    with locked(config, restore=args.action == "restore", track_owner=True) as owner:
+        registry = read_registry(config)
+        require_stopped(config, registry)
+        if args.action == "apply":
+            require_idle(registry)
+            selected_program(config, registry)
+            return customization.apply(config, registry, args.bundle, commit_id(args.commit), env, record, owner)
+        return customization.restore(config, registry, record, owner)
+
+
 def require_free_port(config):
     if not processes.port_is_free(config["host"], config["port"], raise_on_error=True):
         raise DeploymentError("The configured port is unavailable; no unrelated process was stopped.")
@@ -290,12 +395,14 @@ def start_selected(config, selected, env, registry, health_timeout=DEFAULT_HEALT
     progress.pop("log_id", None)
     progress["stage"] = "select_program"
     executable, child_env = selected_environment(config, selected, env)
+    program = selected_program(config, registry)
     progress["stage"] = "port_check"
     require_free_port(config)
     progress["stage"] = "process_start"
     try:
         identity = processes.start_server(executable, config["cwd"], child_env,
-                                          config["host"], config["port"], Path(config["state_root"]) / "logs")
+                                          config["host"], config["port"], Path(config["state_root"]) / "logs",
+                                          **({"program_path": str(program)} if program else {}))
     except processes.LaunchUncertain as error:
         progress["log_id"] = safe_log_id(getattr(error, "log_id", None))
         registry["phase"] = "recovery_required"
@@ -335,6 +442,7 @@ def stop_registered(config, registry, *, progress=None):
 def plan(config, args):
     states.runtime_environment(config)
     registry = read_registry(config)
+    require_legacy(registry)
     require_idle(registry)
     manifest = releases.validate_bundle(args.bundle, commit_id(args.commit))
     return {
@@ -351,7 +459,9 @@ def prepare(config, args):
     commit = commit_id(args.commit)
     target = target_for(config, commit)
     with locked(config):
-        require_idle(read_registry(config))
+        registry = read_registry(config)
+        require_legacy(registry)
+        require_idle(registry)
         if target.exists():
             metadata = releases.validate_prepared(target, commit, config["source_python"], env=env)
             releases.validate_bundle(args.bundle, commit)
@@ -370,6 +480,7 @@ def switch(config, selected, event, health_timeout=DEFAULT_HEALTH_TIMEOUT, *, us
     env = states.runtime_environment(config)
     with locked(config):
         registry = read_registry(config)
+        require_legacy(registry)
         require_idle(registry)
         if selected is None:
             if not registry.get("previous"):
@@ -454,6 +565,10 @@ def operate(args):
     if args.action == "init":
         return initialize(args)
     config = states.load_config(args.config)
+    if args.action in ("apply", "restore"):
+        return customize(config, args)
+    if args.action in ("plan", "prepare", "deploy", "rollback", "probe-imports", "diagnose"):
+        require_legacy(read_registry(config))
     if args.action == "probe-imports":
         return probe_imports(config, commit_id(args.commit))
     if args.action == "plan":
@@ -496,10 +611,21 @@ def operate(args):
                 "candidate": candidate}
     if args.action == "status":
         registry = read_registry(config)
-        return {"phase": registry["phase"], "current_commit": registry["current"].get("source_commit"),
-                "original_program": registry["current"]["kind"] == "original",
+        active = registry.get("customization", {}).get("active")
+        pending = registry.get("customization", {}).get("pending")
+        valid = None
+        if registry["schema_version"] == 2:
+            try:
+                selected_program(config, registry)
+                valid = True
+            except (ValueError, OSError, DeploymentError, states.StateError):
+                valid = False
+        return {"phase": registry["phase"], "current_commit": active["source_commit"] if active else registry["current"].get("source_commit"),
+                "original_program": registry["current"]["kind"] == "original" and not active and not pending,
                 "managed_process_running": bool(registry.get("process") and processes.verify_identity(registry["process"])),
-                "rollback_available": registry.get("previous") is not None,
+                "rollback_available": registry["schema_version"] == 1 and registry.get("previous") is not None,
+                "restore_available": registry.get("customization", {}).get("previous") is not None or bool(pending),
+                "program_valid": valid, "program_incomplete": bool(pending),
                 "ca_mode": "windows_snapshot" if "ca_bundle_sha256" in registry["current"] else "registered",
                 "last_failure": safe_last_failure(registry.get("last_failure"))}
     with locked(config):
@@ -507,17 +633,28 @@ def operate(args):
         registry = read_registry(config)
         if args.action == "stop":
             stop_registered(config, registry)
-            registry["phase"] = "idle"
-            registry.pop("pending", None)
+            if not registry.get("customization", {}).get("pending"):
+                registry["phase"] = "idle"
+                registry.pop("pending", None)
             record(config, registry, "stopped_by_operator")
-            return {"stopped": True, "data_changed": False}
+            return {"stopped": True, "data_changed": False, **program_result(registry)}
+        selected_program(config, registry)
         require_idle(registry)
         if registry.get("process") and processes.verify_identity(registry["process"]):
-            processes.wait_healthy(registry["process"], timeout=args.health_timeout)
-            return {"already_running": True}
-        start_selected(config, registry["current"], env, registry, health_timeout=args.health_timeout)
+            try:
+                processes.wait_healthy(registry["process"], timeout=args.health_timeout)
+            except processes.ProcessError as error:
+                error.stage = "health_check"
+                raise
+            return {"already_running": True, **program_result(registry)}
+        progress = {}
+        try:
+            start_selected(config, registry["current"], env, registry, health_timeout=args.health_timeout, progress=progress)
+        except (processes.ProcessError, DeploymentError, OSError) as error:
+            error.stage = progress.get("stage", "start")
+            raise
         record(config, registry, "started_by_operator")
-        return {"started": True}
+        return {"started": True, **program_result(registry)}
 
 
 def render_diagnosis(result):
@@ -552,9 +689,43 @@ def render_diagnosis(result):
     return "\n".join(lines + ["last_traceback:", *candidate["frames"]])
 
 
+def render_summary(action, result, *, failed=False):
+    def flag(value):
+        return "true" if value is True else "false" if value is False else "-"
+    commit = result.get("source_commit") or result.get("current_commit")
+    commit = commit[:12] if isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}", commit) else "-"
+    stage = result.get("stage", "complete")
+    # Fixed labels only: never echo paths, environment, artifact payloads or logs.
+    stages = {"complete", "preflight", "inspect_bundle", "apply", "restore", "start", "stop", "status",
+              "select_program", "port_check", "process_start", "process_record", "health_check"}
+    stage = stage if isinstance(stage, str) and stage in stages else action
+    program = ("incomplete" if result.get("program_incomplete") else "invalid" if result.get("program_valid") is False
+               else "original" if result.get("original_program") is True
+               else "customized" if result.get("original_program") is False else "-")
+    return (f"EES action={action} result={'failed' if failed else 'ok'} changed={flag(result.get('changed'))} "
+            f"commit={commit} stage={stage} program={program} "
+            f"running={flag(result.get('managed_process_running', result.get('started', result.get('already_running'))))}")
+
+
+def save_operation(args, result, *, failed=False):
+    """One local result; CheckOnly and Status remain read-only."""
+    if getattr(args, "check_only", False) or args.action == "status":
+        return True
+    try:
+        config = states.load_config(args.config)
+        target = Path(config["state_root"]) / "last-operation.json"
+        if target.exists() or target.is_symlink():
+            states._regular(target)
+        write_json(target, {"action": args.action, "failed": failed,
+                           "at": datetime.now(timezone.utc).isoformat(), "result": result})
+        return True
+    except (OSError, ValueError, TypeError, KeyError, states.StateError):
+        return False
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["init", "status", "diagnose", "probe-imports", "plan", "prepare", "deploy", "rollback", "start", "stop"])
+    parser.add_argument("action", choices=["init", "status", "diagnose", "probe-imports", "plan", "prepare", "deploy", "rollback", "start", "stop", "apply", "restore"])
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--bundle", type=Path)
     parser.add_argument("--commit")
@@ -565,21 +736,34 @@ def main(argv=None):
     parser.add_argument("--port", type=int)
     parser.add_argument("--uv", type=Path)
     parser.add_argument("--wheelhouse", type=Path)
+    parser.add_argument("--check-only", action="store_true", help="Read-only Apply preflight; never imports or stops the app.")
+    parser.add_argument("--summary", action="store_true", help="Print a single safe line for manual result handoff.")
     parser.add_argument("--health-timeout", type=health_timeout_arg, default=DEFAULT_HEALTH_TIMEOUT,
                         help="Seconds to wait for each server's health (default: 300; range: 1-900).")
     parser.add_argument("--use-windows-ca", action="store_true",
                         help="Deploy with a Windows CA snapshot retained for this release's Start/Rollback.")
     args = parser.parse_args(argv)
+    if args.check_only and args.action != "apply":
+        parser.error("--check-only is supported only with apply.")
+    if args.summary and args.action not in ("apply", "restore", "start", "stop", "status"):
+        parser.error("--summary is supported with Apply/Restore/Start/Stop/Status only.")
     if args.use_windows_ca and args.action != "deploy":
         parser.error("--use-windows-ca is supported only with deploy.")
     needed = {"init": ["source_python", "cwd", "data_dir", "listen_host", "port", "uv"],
               "plan": ["bundle", "commit"], "prepare": ["bundle", "commit"], "deploy": ["commit"],
-              "probe-imports": ["commit"]}
+              "probe-imports": ["commit"], "apply": ["bundle", "commit"]}
     if any(getattr(args, name) is None for name in needed.get(args.action, [])):
         parser.error("Missing arguments for the requested operation.")
     try:
         result = operate(args)
-    except (DeploymentError, states.StateError, releases.ReleaseError, processes.ProcessError) as error:
+    except (DeploymentError, states.StateError, releases.ReleaseError, processes.ProcessError,
+            customization.CustomizationError) as error:
+        if args.summary:
+            result = {"stage": getattr(error, "stage", args.action), "changed": None,
+                      "reason": str(error), "process": failure_detail({}, error)}
+            saved = save_operation(args, result, failed=True)
+            print(render_summary(args.action, result, failed=True) + (" report=unavailable" if not saved else ""))
+            return 1
         # Module errors deliberately contain no settings, keys, API responses, or child logs.
         diagnostics = safe_last_failure(error.diagnostics) if isinstance(error, DeploymentError) else None
         detail = "\nDiagnostics: " + json.dumps(diagnostics) if diagnostics else ""
@@ -587,7 +771,16 @@ def main(argv=None):
             detail = "\nDiagnostics: " + json.dumps(failure_detail({}, error))
         parser.exit(1, f"Operation stopped: {error}{detail}\n")
     except (OSError, ValueError, KeyError, TypeError):
+        if args.summary:
+            result = {"stage": args.action, "reason": "local_state_or_file_unavailable", "changed": None}
+            saved = save_operation(args, result, failed=True)
+            print(render_summary(args.action, result, failed=True) + (" report=unavailable" if not saved else ""))
+            return 1
         parser.exit(1, "Operation stopped: local state or a required file could not be inspected. No secrets were printed.\n")
+    if args.summary:
+        saved = save_operation(args, result)
+        print(render_summary(args.action, result) + (" report=unavailable" if not saved else ""))
+        return 0
     if args.action == "probe-imports":
         import ees_deploy_imports as imports
         print(imports.render(result))

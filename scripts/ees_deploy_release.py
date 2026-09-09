@@ -35,17 +35,23 @@ HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 PACKAGE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
 VERSION = re.compile(r"[A-Za-z0-9][A-Za-z0-9._+!-]*\Z")
 RESERVED = re.compile(r"(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?\Z", re.I)
-PROBE = """import importlib.metadata as m, json, sys
+PROBE = """import importlib.metadata as m, importlib.util, json, pathlib, sys
 items = []
+metadata_root = None
 for d in m.distributions():
     direct = json.loads(d.read_text('direct_url.json') or '{}')
     name = d.metadata.get('Name')
+    if (name or '').lower().replace('_', '-') == 'open-webui':
+        metadata_root = str(pathlib.Path(d.locate_file('')).absolute())
     items.append({'name': name, 'version': d.version,
                   'direct': bool(direct), 'archive': 'archive_info' in direct,
                   'editable': bool(direct.get('dir_info', {}).get('editable')),
                   'requires': (d.requires or []) if (name or '').lower().replace('_', '-') == 'open-webui' else []})
+spec = importlib.util.find_spec('open_webui')
+package_dir = str(pathlib.Path(spec.origin).absolute().parent) if spec and spec.origin else None
 print(json.dumps({'python_version': sys.version, 'python_minor': list(sys.version_info[:2]),
-                  'platform': sys.platform, 'packages': items}))
+                  'platform': sys.platform, 'packages': items,
+                  'app': {'package_dir': package_dir, 'metadata_root': metadata_root}}))
 """
 WINDOWS_CA_EXPORT = """import ssl, sys
 if sys.platform != 'win32':
@@ -332,7 +338,7 @@ def _environment(env=None):
 
 def probe_python(executable, env=None):
     try:
-        result = subprocess.run([str(executable), "-I", "-c", PROBE], check=True, stdout=subprocess.PIPE,
+        result = subprocess.run([str(executable), "-I", "-B", "-c", PROBE], check=True, stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE, env=_environment(env), timeout=60)
         data = _json(result.stdout)
         packages, requires = {}, []
@@ -349,7 +355,7 @@ def probe_python(executable, env=None):
                 requires = sorted(item["requires"])
         if data["python_minor"] != [3, 11] or packages.get("open-webui") not in {branding.UPSTREAM_VERSION, branding.VERSION}:
             raise ReleaseError("Expected the existing Python 3.11 and supported Open WebUI runtime.")
-        return {"python_version": data["python_version"], "platform": data["platform"], "packages": packages, "requires": requires}
+        return {"python_version": data["python_version"], "platform": data["platform"], "packages": packages, "requires": requires, "app": data.get("app")}
     except (OSError, subprocess.SubprocessError, KeyError, TypeError) as error:
         raise ReleaseError("Could not inspect the selected Python runtime without importing the application.") from error
 

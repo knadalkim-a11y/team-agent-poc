@@ -5,7 +5,7 @@ Settings and data stay outside Git. This does not synchronize Agent Pack items.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('Init', 'Update', 'Status', 'Diagnose', 'ProbeImports', 'Plan', 'Prepare', 'Deploy', 'Rollback', 'Start', 'Stop')]
+    [ValidateSet('Init', 'Update', 'Status', 'Diagnose', 'ProbeImports', 'Plan', 'Prepare', 'Deploy', 'Rollback', 'Start', 'Stop', 'Apply', 'Restore')]
     [string]$Action,
     [string]$Config = (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'),
     [string]$SourcePython,
@@ -20,12 +20,18 @@ param(
     [ValidateRange(1, 900)]
     [int]$HealthTimeout,
     [switch]$UseWindowsCA,
+    [switch]$CheckOnly,
+    [switch]$Summary,
     [string]$GitProxy
 )
 
 $ErrorActionPreference = 'Stop'
 if ($UseWindowsCA -and $Action -ne 'Deploy') {
     throw 'UseWindowsCA is supported only with Deploy.'
+}
+if ($CheckOnly -and $Action -ne 'Apply') { throw 'CheckOnly is supported only with Apply.' }
+if ($Summary -and $Action -notin @('Apply', 'Restore', 'Start', 'Stop', 'Status')) {
+    throw 'Summary is supported with Apply/Restore/Start/Stop/Status only.'
 }
 $repoPath = Split-Path $PSScriptRoot -Parent
 
@@ -58,7 +64,7 @@ if ($Action -eq 'Init') {
 if (-not $operatorPython -or -not (Test-Path -LiteralPath $operatorPython -PathType Leaf)) {
     throw 'The registered Python environment is unavailable. Preserve its uv cache and inspect the existing installation.'
 }
-$pythonOptions = @('-I')
+$pythonOptions = @('-I', '-B')
 if ($Action -in @('Diagnose', 'ProbeImports')) { $pythonOptions += @('-S', '-B') }
 $pythonAction = $Action.ToLowerInvariant()
 if ($Action -eq 'ProbeImports') { $pythonAction = 'probe-imports' }
@@ -74,5 +80,7 @@ if ($PSBoundParameters.ContainsKey('HealthTimeout')) {
     $operationArgs += @('--health-timeout', "$HealthTimeout")
 }
 if ($UseWindowsCA) { $operationArgs += '--use-windows-ca' }
+if ($CheckOnly) { $operationArgs += '--check-only' }
+if ($Summary) { $operationArgs += '--summary' }
 & $operatorPython @operationArgs
 if ($LASTEXITCODE -ne 0) { throw "EES operation stopped (exit $LASTEXITCODE)." }

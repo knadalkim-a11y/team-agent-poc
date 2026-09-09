@@ -61,6 +61,74 @@ SERVER_CODE = (
     "signal.signal(signal.SIGBREAK, signal.default_int_handler) if sys.platform == 'win32' else None; "
     "from open_webui import serve; serve(host=sys.argv[1], port=int(sys.argv[2]))"
 )
+# This entry point runs only for a selected wrapper program. Keep its import
+# checks before Open WebUI: importing upstream can create or move runtime data.
+CUSTOMIZED_SERVER_CODE = r'''
+import importlib.metadata as metadata
+import importlib.util
+import json
+import os
+from pathlib import Path
+import signal
+import sys
+
+def reject():
+    raise SystemExit("Selected program or existing runtime settings could not be verified; no fallback was started.")
+
+try:
+    root = Path(sys.argv[3])
+    version, info_name = sys.argv[4:6]
+    if not root.is_absolute() or not root.is_dir() or root.is_symlink():
+        reject()
+    root = root.resolve()
+    package = root / 'open_webui'
+    metadata_dir = root / info_name
+    code = package / '__init__.py'
+    required = (code, metadata_dir / 'METADATA', package / 'frontend' / 'index.html',
+                package / 'frontend' / '_ees1' / 'version.json')
+    if (package.is_symlink() or metadata_dir.is_symlink()
+            or any(not item.is_file() or item.is_symlink() for item in required)):
+        reject()
+    cwd = Path.cwd()
+    if any(item.exists() or item.is_symlink() for item in
+           (cwd / '.env', package / '.env', root / '.env', root.parent / '.env')):
+        reject()
+    data = Path(os.environ.get('DATA_DIR', ''))
+    if (not data.is_absolute() or not data.is_dir()
+            or not (data / 'webui.db').is_file() or (data / 'webui.db').stat().st_size == 0):
+        reject()
+    key = os.environ.get('WEBUI_SECRET_KEY')
+    if key is not None:
+        if not key.strip():
+            reject()
+    else:
+        key_file = cwd / '.webui_secret_key'
+        if not key_file.is_file() or key_file.is_symlink() or not key_file.read_bytes().strip():
+            reject()
+    if any(os.environ.get(name, '1') != '1' for name in ('UVICORN_WORKERS', 'WEB_CONCURRENCY')):
+        reject()
+    if any(os.environ.get(name, '').lower() not in ('', '0', 'false')
+           for name in ('UVICORN_RELOAD', 'WEBUI_RELOAD')):
+        reject()
+    sys.path.insert(0, str(root))
+    spec = importlib.util.find_spec('open_webui')
+    if spec is None or spec.origin is None or Path(spec.origin).resolve() != code:
+        reject()
+    distribution = metadata.distribution('open-webui')
+    if (distribution.metadata.get('Name') != 'open-webui' or distribution.version != version
+            or Path(distribution.locate_file('')).resolve() != root
+            or distribution.read_text('METADATA') != (metadata_dir / 'METADATA').read_text(encoding='utf-8')
+            or json.loads(required[-1].read_text(encoding='utf-8')).get('version') != version):
+        reject()
+except (OSError, ValueError, TypeError, AttributeError, ImportError, IndexError):
+    reject()
+
+signal.signal(signal.SIGBREAK, signal.default_int_handler) if sys.platform == 'win32' else None
+import open_webui
+if Path(open_webui.__file__).resolve() != code:
+    reject()
+open_webui.serve(host=sys.argv[1], port=int(sys.argv[2]))
+'''
 _CHILDREN = {}
 
 
@@ -172,7 +240,7 @@ def verify_identity(identity):
     return isinstance(identity, dict) and _same(_identity(identity.get('pid')), identity)
 
 
-def start_server(python_exe, cwd, env, host, port, log_dir):
+def start_server(python_exe, cwd, env, host, port, log_dir, *, program_path=None):
     started = time.monotonic()
     if not port_is_free(host, port, raise_on_error=True):
         raise ProcessError("The listen port is unavailable; no existing process was stopped.")
@@ -180,6 +248,18 @@ def start_server(python_exe, cwd, env, host, port, log_dir):
     python_exe, cwd = Path(python_exe).absolute(), Path(cwd).resolve()
     if not python_exe.is_file() or not cwd.is_dir():
         raise ProcessError("The existing Python executable and working directory are required.")
+    command = [str(python_exe), '-c', SERVER_CODE, host, str(port)]
+    if program_path is not None:
+        if (type(program_path) is not str or not Path(program_path).is_absolute()
+                or not Path(program_path).is_dir() or Path(program_path).is_symlink()):
+            raise ProcessError("The selected program requires an existing absolute directory; no fallback was started.")
+        # Original launch and the standalone stop helper need no builder import.
+        try:
+            from . import build_ees_webui as branding
+        except ImportError:
+            import build_ees_webui as branding
+        command = [str(python_exe), '-I', '-B', '-c', CUSTOMIZED_SERVER_CODE, host, str(port),
+                   str(Path(program_path).resolve()), branding.VERSION, branding.TARGET_INFO.rstrip('/')]
     log_dir = Path(log_dir)
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = (log_dir / ('server-' + uuid.uuid4().hex + '.log')).resolve()
@@ -187,7 +267,7 @@ def start_server(python_exe, cwd, env, host, port, log_dir):
                else {'start_new_session': True})
     try:
         with log_file.open('xb') as log:
-            child = subprocess.Popen([str(python_exe), '-c', SERVER_CODE, host, str(port)],
+            child = subprocess.Popen(command,
                                      cwd=cwd, env=env, stdin=subprocess.DEVNULL,
                                      stdout=log, stderr=subprocess.STDOUT, **options)
     except OSError as error:

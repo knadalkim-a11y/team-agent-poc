@@ -543,5 +543,192 @@ class ProcessContracts(unittest.TestCase):
                 worker.join(timeout=2)
 
 
+class CustomizedLauncherTests(unittest.TestCase):
+    """Execute the real selected-program child code with a synthetic app."""
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name).resolve()
+        self.cwd, self.data, self.program = (self.root / name for name in ('working', 'data', 'program'))
+        for directory in (self.cwd, self.data, self.program):
+            directory.mkdir()
+        self.package = self.program / 'open_webui'
+        self.package.mkdir()
+        self.info = self.program / 'open_webui-0.11.3+ees.1.dist-info'
+        self.info.mkdir()
+        self.metadata = self.info / 'METADATA'
+        self.metadata.write_text('Metadata-Version: 2.1\nName: open-webui\nVersion: 0.11.3+ees.1\n', encoding='utf-8')
+        frontend = self.package / 'frontend'
+        (frontend / '_ees1').mkdir(parents=True)
+        (frontend / 'index.html').write_text('synthetic-selected-frontend', encoding='utf-8')
+        (frontend / '_ees1' / 'version.json').write_text('{"version":"0.11.3+ees.1"}', encoding='utf-8')
+        (self.data / 'webui.db').write_bytes(b'synthetic-existing-data')
+        (self.cwd / '.webui_secret_key').write_bytes(b'synthetic-existing-key')
+        (self.package / '__init__.py').write_text('''
+import importlib.metadata as metadata
+import json
+import os
+from pathlib import Path
+import sys
+import cryptography
+Path('imported.txt').write_text('selected', encoding='utf-8')
+def serve(*, host, port):
+    Path('observed.json').write_text(json.dumps({
+        'code': __file__, 'metadata_root': str(metadata.distribution('open-webui').locate_file('')),
+        'version': metadata.version('open-webui'), 'dependency': cryptography.__file__,
+        'static': (Path(__file__).parent / 'frontend' / 'index.html').read_text(encoding='utf-8'),
+        'prefix': sys.prefix, 'executable': sys.executable, 'cwd': str(Path.cwd()),
+        'data': os.environ['DATA_DIR'], 'path_type': type(sys.path[0]).__name__,
+        'host': host, 'port': port}), encoding='utf-8')
+''', encoding='utf-8')
+        self.env = {**os.environ, 'DATA_DIR': str(self.data)}
+        for name in ('WEBUI_SECRET_KEY', 'UVICORN_WORKERS', 'WEB_CONCURRENCY', 'UVICORN_RELOAD', 'WEBUI_RELOAD'):
+            self.env.pop(name, None)
+
+    def command(self, program_path=None, *, original=False):
+        saved = {'pid': 123, 'executable': 'python', 'created_at': '456'}
+        child = Mock(pid=123)
+        with patch.object(manager, 'port_is_free', return_value=True), \
+                patch.object(manager, '_identity', return_value=saved), \
+                patch.object(manager.subprocess, 'Popen', return_value=child) as spawn, \
+                patch.object(sys, 'path', [str(MODULE.parent), *sys.path]):
+            options = {} if original else {'program_path': str(self.program) if program_path is None else program_path}
+            try:
+                manager.start_server(sys.executable, self.cwd, self.env, '127.0.0.1', 8080,
+                                     self.root / 'logs', **options)
+            finally:
+                manager._CHILDREN.pop(123, None)
+        return spawn.call_args.args[0]
+
+    def run_child(self):
+        return subprocess.run(self.command(), cwd=self.cwd, env=self.env, capture_output=True,
+                              text=True, timeout=15)
+
+    def assert_rejected_without_app_import(self):
+        result = self.run_child()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('no fallback was started', result.stderr)
+        self.assertNotIn(str(self.root), result.stderr)
+        self.assertNotIn('synthetic-existing-key', result.stderr)
+        self.assertFalse((self.cwd / 'imported.txt').exists())
+
+    def test_actual_child_selects_code_metadata_static_and_existing_dependency(self):
+        import cryptography
+        result = self.run_child()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        observation = json.loads((self.cwd / 'observed.json').read_text(encoding='utf-8'))
+        self.assertEqual(Path(observation['code']), self.package / '__init__.py')
+        self.assertEqual(Path(observation['metadata_root']), self.program)
+        self.assertEqual(observation['version'], '0.11.3+ees.1')
+        self.assertEqual(Path(observation['dependency']), Path(cryptography.__file__))
+        self.assertEqual(observation['static'], 'synthetic-selected-frontend')
+        self.assertEqual(observation['prefix'], sys.prefix)
+        self.assertEqual(Path(observation['executable']).absolute(), Path(sys.executable).absolute())
+        self.assertEqual(Path(observation['cwd']), self.cwd)
+        self.assertEqual(Path(observation['data']), self.data)
+        self.assertEqual((observation['path_type'], observation['host'], observation['port']),
+                         ('str', '127.0.0.1', 8080))
+        self.assertFalse(list(self.program.rglob('__pycache__')))
+        self.assertEqual((self.data / 'webui.db').read_bytes(), b'synthetic-existing-data')
+        self.assertEqual((self.cwd / '.webui_secret_key').read_bytes(), b'synthetic-existing-key')
+
+    def test_original_command_is_unchanged_and_customized_command_is_isolated(self):
+        self.assertEqual(self.command(original=True),
+                         [str(Path(sys.executable).absolute()), '-c', manager.SERVER_CODE, '127.0.0.1', '8080'])
+        selected = self.command()
+        self.assertEqual(selected[1:4], ['-I', '-B', '-c'])
+        self.assertEqual(selected[4], manager.CUSTOMIZED_SERVER_CODE)
+        self.assertEqual(selected[7:], [str(self.program), '0.11.3+ees.1', self.info.name])
+
+    def test_nonabsolute_or_nonstring_program_path_refuses_launch(self):
+        for value in ('relative', str(self.root / 'missing'), self.program):
+            with self.subTest(value=type(value).__name__), self.assertRaises(manager.ProcessError):
+                self.command(value)
+
+    def test_missing_code_metadata_or_static_never_falls_back(self):
+        for target in (self.package / '__init__.py', self.metadata, self.package / 'frontend' / 'index.html',
+                       self.package / 'frontend' / '_ees1' / 'version.json'):
+            with self.subTest(target=target.name):
+                original = target.read_bytes()
+                target.unlink()
+                try:
+                    self.assert_rejected_without_app_import()
+                finally:
+                    target.write_bytes(original)
+
+    def test_missing_selection_never_imports_an_available_original(self):
+        original_root = self.root / 'original-installation'
+        original_package = original_root / 'open_webui'
+        original_package.mkdir(parents=True)
+        (original_package / '__init__.py').write_text(
+            "from pathlib import Path\nPath('original-imported.txt').write_text('unexpected')\n", encoding='utf-8')
+        original_info = original_root / 'open_webui-0.11.3.dist-info'
+        original_info.mkdir()
+        (original_info / 'METADATA').write_text(
+            'Metadata-Version: 2.1\nName: open-webui\nVersion: 0.11.3\n', encoding='utf-8')
+        for target in (self.package / '__init__.py', self.metadata):
+            with self.subTest(target=target.name):
+                content = target.read_bytes()
+                target.unlink()
+                try:
+                    command = self.command()
+                    # Model an already installed official package without installing one.
+                    # The complete production entry point follows this search-path fixture.
+                    command[4] = ('import sys\nsys.path.append(' + repr(str(original_root)) + ')\n'
+                                  + command[4])
+                    result = subprocess.run(command, cwd=self.cwd, env=self.env, capture_output=True,
+                                            text=True, timeout=15)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn('no fallback was started', result.stderr)
+                    self.assertFalse((self.cwd / 'original-imported.txt').exists())
+                    self.assertFalse((self.cwd / 'imported.txt').exists())
+                finally:
+                    target.write_bytes(content)
+
+    def test_mismatched_metadata_or_static_version_refuses_import(self):
+        for target in (self.metadata, self.package / 'frontend' / '_ees1' / 'version.json'):
+            with self.subTest(target=target.name):
+                original = target.read_bytes()
+                target.write_bytes(original.replace(b'0.11.3+ees.1', b'0.11.3'))
+                try:
+                    self.assert_rejected_without_app_import()
+                finally:
+                    target.write_bytes(original)
+
+    def test_existing_data_and_existing_key_are_required_before_import(self):
+        for name, value in (('DATA_DIR', None), ('DATA_DIR', 'relative'),
+                            ('DATA_DIR', str(self.root / 'missing')), ('WEBUI_SECRET_KEY', ' '),
+                            ('UVICORN_WORKERS', '2'), ('WEB_CONCURRENCY', '2'),
+                            ('UVICORN_RELOAD', 'true'), ('WEBUI_RELOAD', '1')):
+            with self.subTest(name=name, value=value):
+                previous = self.env.pop(name, None)
+                if value is not None:
+                    self.env[name] = value
+                try:
+                    self.assert_rejected_without_app_import()
+                finally:
+                    self.env.pop(name, None)
+                    if previous is not None:
+                        self.env[name] = previous
+        (self.cwd / '.webui_secret_key').unlink()
+        self.assert_rejected_without_app_import()
+        self.env['WEBUI_SECRET_KEY'] = 'synthetic-environment-key'
+        result = self.run_child()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse((self.cwd / '.webui_secret_key').exists())
+
+    def test_unexpected_dotenv_stops_before_import_and_preserves_file(self):
+        for directory in (self.cwd, self.package, self.program, self.program.parent):
+            with self.subTest(directory=directory.name):
+                dotenv = directory / '.env'
+                dotenv.write_bytes(b'WEBUI_SECRET_KEY=synthetic-private')
+                try:
+                    self.assert_rejected_without_app_import()
+                    self.assertEqual(dotenv.read_bytes(), b'WEBUI_SECRET_KEY=synthetic-private')
+                finally:
+                    dotenv.unlink()
+
+
 if __name__ == '__main__':
     unittest.main()

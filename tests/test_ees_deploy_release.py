@@ -413,8 +413,8 @@ class ReleaseTests(unittest.TestCase):
         with mock.patch.object(release.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, json.dumps(payload).encode())) as run:
             with self.assertRaisesRegex(release.ReleaseError, "direct-URL"):
                 release.probe_python(self.source_python)
-            self.assertEqual(run.call_args.args[0][1:3], ["-I", "-c"])
-            self.assertNotIn("import open_webui", run.call_args.args[0][3])
+            self.assertEqual(run.call_args.args[0][1:4], ["-I", "-B", "-c"])
+            self.assertNotIn("import open_webui", run.call_args.args[0][4])
 
     def test_prepared_fingerprint_and_inventory_are_revalidated(self):
         with mock.patch.object(release, "probe_python", side_effect=[self.baseline(), self.baseline(True)]), \

@@ -12,7 +12,9 @@ on:
       - 'scripts/ees_deploy_*.py'
       - 'scripts/manage_ees.py'
       - 'scripts/manage-ees.ps1'
+      - 'scripts/ees_webui_customization.py'
       - 'tests/test_ees_deploy_*.py'
+      - 'tests/test_ees_webui_customization.py'
       - 'tests/test_manage_ees.py'
       - 'tests/test_ees_branding_build.py'
       - 'tests/test_demo_bundle.py'
@@ -31,7 +33,9 @@ on:
       - 'scripts/ees_deploy_*.py'
       - 'scripts/manage_ees.py'
       - 'scripts/manage-ees.ps1'
+      - 'scripts/ees_webui_customization.py'
       - 'tests/test_ees_deploy_*.py'
+      - 'tests/test_ees_webui_customization.py'
       - 'tests/test_manage_ees.py'
       - 'tests/test_ees_branding_build.py'
       - 'tests/test_demo_bundle.py'
@@ -52,6 +56,7 @@ jobs:
   check:
     name: Delivery checks (${{ matrix.os }})
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-24.04, windows-2022]
     runs-on: ${{ matrix.os }}
@@ -73,6 +78,17 @@ jobs:
           EES_RUN_REAL_NLTK_TEST: '1'
         run: python -m unittest discover -s tests -p test_ees_deploy_*.py -v
       - run: python -m unittest discover -s tests -p test_manage_ees.py -v
+      - name: Download the fixed upstream wheel for program validation
+        if: runner.os == 'Linux'
+        run: |
+          python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
+      - name: Build the real program fixture without installing it
+        if: runner.os == 'Linux'
+        run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
+      - name: Verify program-only Apply and Restore
+        env:
+          EES_TEST_BRANDING_DIR: ${{ runner.os == 'Linux' && 'dist/branding' || '' }}
+        run: python -m unittest discover -s tests -p test_ees_webui_customization.py -v
       - name: Parse the Windows PowerShell entry point
         if: runner.os == 'Windows'
         shell: powershell
@@ -127,6 +143,11 @@ jobs:
       - name: Build the EES wheel
         if: steps.branding.outputs.enabled == 'true'
         run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
+      - name: Verify the real wheel can be selected as a standalone program
+        if: steps.branding.outputs.enabled == 'true'
+        env:
+          EES_TEST_BRANDING_DIR: dist/branding
+        run: python -m unittest discover -s tests -p test_ees_webui_customization.py -v
       - name: Bundle with branding
         if: steps.branding.outputs.enabled == 'true'
         run: python scripts/build_demo_bundle.py --output-dir dist/delivery --branding-dir dist/branding
