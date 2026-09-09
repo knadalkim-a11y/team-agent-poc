@@ -22,6 +22,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from email.message import Message
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -130,21 +131,16 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         return {"id": user_id, "valves": self.tool.UserValves(PAT=token, **values)}
 
     def result(self, raw):
-        if isinstance(raw, tuple):
-            self.assertEqual(len(raw), 2)
-            data = raw[1]
-        else:
-            self.assertIsInstance(raw, str, "Tool must return JSON or a Rich UI result pair")
-            data = json.loads(raw)
+        self.assertIsInstance(raw, str, "Tool must return the redacted JSON result")
+        data = json.loads(raw)
         self.assertIsInstance(data.get("ok"), bool)
+        self.assertNotIn("display_notice", data)
         for token in (TOKEN_A, TOKEN_B):
             self.assertNotIn(token, self.output_text(raw), "PAT must never appear in Tool output")
         return data
 
     @staticmethod
     def output_text(raw):
-        if isinstance(raw, tuple):
-            return raw[0].body.decode("utf-8") + json.dumps(raw[1], ensure_ascii=False)
         return raw
 
     def assert_error(self, raw):
@@ -322,9 +318,18 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         self.assert_no_calls()
 
     async def test_search_uses_fixed_endpoint_and_bounded_limit(self):
+        self.tool.valves.MAX_RESULTS = 3
         self.use_response({"results": [page(body=False)], "size": 1})
-        raw = await self.tool.search_pages("equipment guide", space_key="EES", limit=5, __user__=self.user())
-        self.assertTrue(self.result(raw)["ok"])
+        raw = await self.tool.search_pages("  equipment guide  ", space_key="EES", limit=5, __user__=self.user())
+        output = self.result(raw)
+        self.assertTrue(output["ok"])
+        self.assertEqual(output["query"], "equipment guide")
+        self.assertEqual(output["selected_spaces"], ["EES"])
+        self.assertEqual(output["limit"], 3)
+        self.assertIsNotNone(datetime.fromisoformat(output["fetched_at"]).tzinfo)
+        self.assertNotIn("content", output)
+        self.assertTrue(output["untrusted_content"])
+        self.assertEqual(len(self.calls), 1)
         self.assertIn("Synthetic equipment guide", self.output_text(raw))
         request = self.calls[0][0]
         parsed = urllib.parse.urlsplit(request.full_url)
@@ -332,14 +337,28 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(parsed.netloc, "confluence.example.invalid")
         self.assertEqual(request.get_method(), "GET")
         params = urllib.parse.parse_qs(parsed.query)
-        self.assertEqual(int(params["limit"][0]), 5)
+        self.assertEqual(int(params["limit"][0]), 3)
         self.assertIn("EES", params["cql"][0])
         self.assertNotIn(TOKEN_A, request.full_url)
+
+    async def test_search_scope_matches_explicit_default_and_allowed_spaces(self):
+        self.use_response({"results": []})
+        for requested, default, selected in (("APC", "EES", ["APC"]), ("", "EES", ["EES"]), ("", "", ["EES", "APC"])):
+            with self.subTest(requested=requested, default=default):
+                raw = await self.tool.search_pages("guide", space_key=requested, __user__=self.user(DEFAULT_SPACE=default))
+                output = self.result(raw)
+                self.assertTrue(output["ok"])
+                self.assertEqual(output["selected_spaces"], selected)
+                cql = urllib.parse.parse_qs(urllib.parse.urlsplit(self.calls[-1][0].full_url).query)["cql"][0]
+                expected = ",".join('"' + key + '"' for key in selected)
+                self.assertIn("space IN (" + expected + ")", cql)
+        self.assertEqual(len(self.calls), 3)
 
     async def test_invalid_search_input_never_issues_request(self):
         for query in ("", "   ", "x" * 5000, "guide\x00secret"):
             with self.subTest(query_length=len(query)):
-                self.assert_error(await self.tool.search_pages(query, __user__=self.user()))
+                result = self.assert_error(await self.tool.search_pages(query, __user__=self.user()))
+                self.assertEqual(set(result), {"ok", "error"})
         self.assert_no_calls()
 
     async def test_search_cql_omits_unsupported_status_predicate(self):
@@ -364,7 +383,10 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("SECRET", outside_literals)
 
     async def test_unknown_space_never_issues_search(self):
-        self.assert_error(await self.tool.search_pages("guide", space_key="SECRET", __user__=self.user()))
+        raw = await self.tool.search_pages("PRIVATE REQUEST", space_key="SECRET", __user__=self.user())
+        self.assertEqual(set(self.assert_error(raw)), {"ok", "error"})
+        self.assertNotIn("PRIVATE", raw)
+        self.assertNotIn("SECRET", raw)
         self.assert_no_calls()
 
     async def test_invalid_space_cannot_modify_cql(self):
@@ -384,20 +406,28 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         self.assert_no_calls()
 
     async def test_get_page_checks_metadata_before_loading_body(self):
+        page_id = "123456789012345678901234567890"
+
         def respond(request):
             params = urllib.parse.parse_qs(urllib.parse.urlsplit(request.full_url).query)
-            return FakeResponse(page(body=params.get("expand") != ["space"]))
+            return FakeResponse(page(page_id=page_id, body=params.get("expand") != ["space"]))
 
         self.responder = respond
-        raw = await self.tool.get_page("123", __user__=self.user())
-        self.assertTrue(self.result(raw)["ok"])
+        raw = await self.tool.get_page(page_id, __user__=self.user())
+        output = self.result(raw)
+        self.assertTrue(output["ok"])
+        self.assertEqual(output["page"]["page_id"], page_id)
+        self.assertEqual(output["page"]["url"], BASE_URL + "/pages/viewpage.action?pageId=" + page_id)
+        self.assertIsNotNone(datetime.fromisoformat(output["fetched_at"]).tzinfo)
+        self.assertFalse(output["truncated"])
+        self.assertTrue(output["untrusted_content"])
         self.assertIn("Synthetic safe content", self.output_text(raw))
         self.assertEqual(len(self.calls), 2)
         expands = [urllib.parse.parse_qs(urllib.parse.urlsplit(call[0].full_url).query)["expand"][0] for call in self.calls]
         self.assertEqual(expands[0], "space")
         self.assertEqual(set(expands[1].split(",")), {"body.storage", "version", "space"})
         for request, _, _ in self.calls:
-            self.assertEqual(urllib.parse.urlsplit(request.full_url).path, "/wiki/rest/api/content/123")
+            self.assertEqual(urllib.parse.urlsplit(request.full_url).path, "/wiki/rest/api/content/" + page_id)
             self.assertEqual(request.get_method(), "GET")
 
     async def test_get_page_preserves_table_cells_and_inline_text(self):

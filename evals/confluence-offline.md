@@ -336,3 +336,14 @@ Tool은 기본 `ENABLED=false`입니다. Skill은 지침이지 보안 경계가 
 | 문서·diff | `python scripts/check_docs.py`: 25개 파일·452개 링크·오류 0·검토 후보 0. `git diff --check` 통과 |
 
 실행은 `PYTHONPATH=tests python -m unittest`에 `test_confluence_read.ConfluenceReadTests`의 위 11개 메서드를 지정함. 새 메서드는 `test_rejected_search_guides_query_change_without_retry_or_private_details`, `test_non_search_bad_request_is_not_a_query_or_pat_error`임. 전체 suite·UI/브라우저·완료한 사내 확인은 반복하지 않음. Skill·System Prompt·HTML/CSS·정상 조회·인증/설정·서버 실행 방식은 변경하지 않음. 사내 마지막 저장 보고는 v0.1.4이며 이번 v0.1.5는 다음 코드 적용 묶음에 포함할 준비본임. 실제 서버 400·모델의 안내 응답 성공이나 C07 전체 통과로 확대하지 않음.
+
+
+<a id="plain-results"></a>
+
+## 시험용 Rich UI 제거·일반 답변 전환 — 2026-09-09
+
+- 기준 main: `99a9ee6584a3b23a2dd26ebb94ede079886b2831`. 사용자가 EES 프로그램 이름·로고, 기존 대화 유지와 Confluence/Jira/GitHub 조회 정상 확인 뒤 초기 기능 확인용 Rich UI 전체 제거를 요청함. 기존 등록 항목·연동·개인 설정을 유지하고 일반 답변으로 전환할 준비본이며 사내 반영 완료로 기록하지 않음.
+- Confluence v0.1.6: `search_pages`·`get_page`가 `_run`의 검증·마스킹된 JSON을 직접 반환하도록 바꾸고 HTMLResponse·HTML/JavaScript/CSS 템플릿·표시 실패 분기를 제거함. 공개 함수·입력·Valves/UserValves 이름, 개인 PAT·암호화 확인·허용 Space·GET 경로·응답 제한은 유지함. 검증된 조회 범위·시각·문서 ID·원문 URL·본문·잘림·실패 코드는 일반 답변의 근거로 계속 반환함. `HTMLParser`는 저장 형식의 본문을 평문으로 추출하는 기존 역할이므로 보존함.
+- 독립 HTML 참고 예제와 화면 전용 테스트를 제거함. 예제는 [당시 Git 원본](https://github.com/knadalkim-a11y/team-agent-poc/blob/99a9ee6584a3b23a2dd26ebb94ede079886b2831/agent-pack/skills/confluence-read/references/rich-ui-search-demo.html)과 위 날짜별 기록으로 보존함. UI 전용 DOM 시험은 폐기하고 유효한 검색 범위·시각·30자리 ID·원문·권한 조회 순서·실패 메타데이터 비노출 검사를 기존 `test_confluence_read.py`에 통합함. 일반 결과 helper가 모든 호출에서 문자열 JSON·PAT 비노출을 확인하므로 tuple/HTML로 되돌아가는 회귀도 검출함.
+- 환경: 사외 Linux / Python 3.12.13 / Pydantic 2.13.4. 기존 런타임만 사용하며 의존성을 설치하지 않음. `python -m unittest discover -s tests -p 'test_confluence*.py' -v`: **85/85 PASS**, skip 없음, 0.362초. 최초 실행은 제거 대상 UI 테스트 파일이 남아 있어 15개 오류를 보고했으며 해당 파일 삭제를 완료한 뒤 위 결과로 재확인함. 네트워크 차단 합성 응답·합성 DB/키 검사이며 실제 사내 API·Open WebUI 저장·화면·사용자별 권한 검증은 수행하지 않음.
+- 배포 안내는 기존 Tool 코드와 Skill·공통 Prompt를 같은 작업 묶음으로 교체하는 방식임. 기존 Tool ID·사용자 설정·대화 보존, 새 대화의 검색→본문·원문 확인을 명시함. 프로그램 재적용·서버 재시작·PAT 재발급·전체 권한 시험을 추가하지 않음. 새 UI 프레임워크·옵션·공통 API 동기화를 만들지 않음. 최종 공통 검수와 사내 결과는 [현재 평가표](scenarios.md#validation-timing)에서 구분함.

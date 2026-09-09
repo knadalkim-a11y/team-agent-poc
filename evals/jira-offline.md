@@ -216,3 +216,13 @@ PYTHONPATH=tests python -m unittest -v \
 ```
 
 사내 마지막 저장 보고는 v0.1.2·이전 Jira 지침임. 이번 v0.1.4는 앞선 v0.1.3 후속 질문 준비와 함께 한 번에 적용하며, 실제 확인은 [변경 조작](../docs/05-jira-read-tool.md#jira-mvp-usability)에 묶음. 이전 기록·실환경 판정은 유지하고 별도 검수 문서나 PR은 추가하지 않음.
+
+
+<a id="rich-ui-removed"></a>
+
+## 시험용 Rich UI 제거 — 2026-09-09
+
+- 사용자 요청: 기존 기능 확인용 UI를 모두 제거하고 향후 업무별로 하나씩 새로 설계함. Jira API·기존 개인 PAT/관리자 설정·도구 ID/함수 인자는 유지하며 현재 조회 성공을 제거본의 사내 적용 성공으로 바꾸지 않음.
+- 변경: v0.1.6에서 jira_dashboard의 HTMLResponse/표시 실패 분기·전체 HTML/CSS/JavaScript 차트/필터/질문 버튼을 제거하고 기존 마스킹 JSON 문자열을 반환함. _dashboard의 화면 필터 안내를 받은 페이지의 범위 설명으로 바꾸며 집계/페이지/본문/권한/네트워크 계약은 유지함. 기존 사용 지침은 일반 답변·표·원문 링크로 정리하고 과거 화면/검증 이력 링크를 보존함.
+- 검사: Linux/Python 3.12.13/Pydantic 2.13.4에서 `python -B -m unittest discover -s tests -p test_jira_read.py -v` 25/25 PASS. 기존 API/권한/개인 토큰/HTTPS/페이지/오류 23개와 공개 jira_dashboard의 정상 집계/조회 범위/원문/다음 페이지 및 부분 실패/미확정 수치/안전한 오류 JSON 2개를 확인함. 실제 사내 등록/새 대화 출력은 아직 미실행임.
+- 정리: 삭제한 test_jira_dashboard_ui.py의 DOM/차트 시험은 제거한 구현 전용이며 현재 회귀 대상에서 제외함. 과거 결과는 이 기록과 Git 원본에 유지함. 새 테스트 파일·UI 대체 계층·표시 토글·서비스·회사 환경 의존성 설치를 추가하지 않음.

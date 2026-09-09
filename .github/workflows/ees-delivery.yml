@@ -16,6 +16,9 @@ on:
       - 'tests/test_ees_deploy_*.py'
       - 'tests/test_ees_webui_customization.py'
       - 'tests/test_manage_ees.py'
+      - 'tests/test_confluence*.py'
+      - 'tests/test_jira_read.py'
+      - 'tests/test_github_tool.py'
       - 'tests/test_ees_branding_build.py'
       - 'tests/test_demo_bundle.py'
       - 'docs/**'
@@ -37,6 +40,9 @@ on:
       - 'tests/test_ees_deploy_*.py'
       - 'tests/test_ees_webui_customization.py'
       - 'tests/test_manage_ees.py'
+      - 'tests/test_confluence*.py'
+      - 'tests/test_jira_read.py'
+      - 'tests/test_github_tool.py'
       - 'tests/test_ees_branding_build.py'
       - 'tests/test_demo_bundle.py'
       - 'docs/**'
@@ -70,8 +76,14 @@ jobs:
           python-version: '3.11'
       - run: python -m unittest discover -s tests -p test_ees_branding_build.py -v
       - run: python -m unittest discover -s tests -p test_demo_bundle.py -v
-      - name: Install fixed uv, TLS, and NLTK test dependencies
-        run: python -m pip install uv==0.12.7 cryptography==46.0.0 nltk==3.9.2
+      - name: Install fixed test dependencies
+        run: python -m pip install uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4
+      - name: Verify Confluence read and plain results
+        run: python -m unittest discover -s tests -p "test_confluence*.py" -v
+      - name: Verify Jira read and plain results
+        run: python -m unittest discover -s tests -p test_jira_read.py -v
+      - name: Verify GitHub read and plain results
+        run: python -m unittest discover -s tests -p test_github_tool.py -v
       - name: Verify deployment boundaries, child lifecycle, and NLTK imports
         env:
           EES_RUN_REAL_UV_TEST: '1'

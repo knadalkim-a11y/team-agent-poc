@@ -295,6 +295,44 @@ class JiraReadTests(unittest.TestCase):
             self.assertFalse(result["listing"]["ok"])
             self.assertEqual(result["issues"], [])
 
+    def test_public_dashboard_returns_json_with_counts_scope_and_next_page(self):
+        output = asyncio.run(self.tool.jira_dashboard(project_key="SYSA", __user__=self.user()))
+        self.assertIsInstance(output, str)
+        result = json.loads(output)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["scope"]["project_keys"], ["SYSA"])
+        self.assertEqual(result["summary"]["total"], 53)
+        self.assertEqual(result["listing"]["returned"], 30)
+        self.assertEqual(result["listing"]["next_start_at"], 30)
+        self.assertEqual(result["issues"][0]["url"], BASE + "/browse/SYSA-1")
+        self.assertNotIn("display_notice", result)
+        self.assertNotIn(PAT_A, output)
+        following = json.loads(asyncio.run(self.tool.jira_dashboard(
+            project_key="SYSA", start_at=result["listing"]["next_start_at"], __user__=self.user())))
+        self.assertEqual(following["issues"][0]["key"], "SYSA-31")
+        self.assertIsNone(following["listing"]["next_start_at"])
+
+    def test_public_dashboard_keeps_partial_counts_and_safe_errors_in_json(self):
+        def respond(request):
+            if '"SYSB"' in query(request).get("jql", [""])[0]:
+                return Response({}, status=403)
+            return self.normal_response(request)
+        self.responder = respond
+        output = asyncio.run(self.tool.jira_dashboard(__user__=self.user()))
+        self.assertIsInstance(output, str)
+        result = json.loads(output)
+        self.assertEqual(result["status"], "partial")
+        self.assertIsNone(result["summary"]["total"])
+        self.assertEqual(result["summary"]["available_total"], 53)
+        self.assertIsNone(result["listing"]["next_start_at"])
+        self.tool.valves.ENABLED = False
+        self.calls.clear()
+        failed = json.loads(asyncio.run(self.tool.jira_dashboard(__user__=self.user())))
+        self.assertFalse(failed["ok"])
+        self.assertIn("error", failed)
+        self.assertEqual(self.calls, [])
+        self.assertNotIn(PAT_A, json.dumps(failed))
+
     def test_public_issue_wrapper_reads_text_with_fixed_source(self):
         result = json.loads(asyncio.run(self.tool.jira_get_issue("SYSA-1", __user__=self.user())))
         self.assertTrue(result["ok"])
