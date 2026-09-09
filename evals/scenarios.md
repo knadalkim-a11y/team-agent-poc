@@ -988,6 +988,17 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 후속 병합·안내: 2026-09-09 사용자의 “진행하자”에 따라 최신 main `99ab680`·PR head `69888ec`·관련 열린 PR 1개와 CI success를 재확인함. CI 이후 3개 문서만 변경됐음을 비교하고 예상 head를 지정해 PR #15를 main에 병합함. [병합 커밋 b65e7fb](https://github.com/knadalkim-a11y/team-agent-poc/commit/b65e7fbbee612a8e34f7fd4136ca5cdc919fd082)과 검토한 tree `b23ac6e8a9af5bd09523d80bcb2be381b61230dd`의 일치를 확인함. 이번 후속은 STATUS·기존 검증 기록만 갱신하며 문서/diff를 검사하고 실행 코드·이미 통과한 기능 시험은 변경/반복하지 않음. 사내 적용 블록은 독립 읽기 대조로 단계별 실패 중단·프로그램 ZIP/Commit·기존 설정·120초 한 번의 시작 대기·1~2줄 결과 형식·2,500자 한도를 확인함. Git 병합 완료이며 사내 실행 결과는 아직 받지 않음.
 - 사내 결과·한계: **미실행 — 새 Apply·Restore·Start·실제 Windows UI/기존 대화/대표 연동 확인 없음.** 이전 v2의 원래 프로그램 가동·복구 보고는 2026-09-08 당시 관찰임. Linux 합성 시험·정적 실제 wheel 대조·Windows CI가 통과해도 사내 기동/사용 성공으로 확대하지 않음. 후보 pandas/import 지연 원인은 미해결 이력으로 보존하며 이번 방식 전환의 선행 검사를 삼지 않음.
 
+
+<a id="ees-wrapper-apply-failure"></a>
+
+### 단순 래퍼 사내 Apply 실패 보고 — 2026-09-09
+
+- 사용자 보고: `action=apply result=failed changed=- commit=- stage=apply program=- running=-`, 이어서 PowerShell `CategoryInfo: OperationStopped`, `EES operation stopped (exit 1)`을 전달함. 사내 적용 시도에서 실패했으며 현재 안내 블록의 첫 CheckOnly인지 Stop 뒤 실제 Apply인지, 사내 checkout SHA·프로그램 변경·현재 서버 상태는 미확인임. 위 구현/병합 시점의 미실행 기록은 당시 상태로 보존함.
+- 사외 확인: 최신 원격 main `7035c2b1d17f1c96f910004f0a178b0ffba6e09f`, tree `06f2e6c53f6f5b97fc09c1fefd813084a3720962`, 관련 열린 PR 0개와 로컬 tree 일치를 확인함. [병합 후 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34294969809)는 `b65e7fb`에서 success임. 이 CI 성공을 이번 사내 실패의 원인 배제나 적용 성공으로 간주하지 않음.
+- 코드 대조·판정: `manage_ees.main/render_summary`에서 CheckOnly와 실제 Apply 모두 같은 action/stage를 출력함. PowerShell 문구는 Python 비정상 종료를 전달하는 안내이며 원인은 아님. `changed=-`는 변경 없음의 증거가 아님. 실제 Apply의 Summary 실패는 `last-operation.json`에 시각·action·failed·result.reason을 저장하지만 CheckOnly는 실패해도 무쓰기여서 저장하지 않음. 기존 상세 파일이 있더라도 이번 CheckOnly 오류로 단정하지 않음.
+- 다음 확인·중단 조건: 실패 전 `action=stop result=ok`가 있었다면 재적용 없이 마지막 저장 결과의 시각/action/failed와 reason만 두 줄로 읽음. 없었다면 기존 입력의 `Apply -CheckOnly`에서 `-Summary`만 제외해 읽기 전용으로 한 번 확인하고 `Operation stopped:` 이유 한 줄만 받음. 전체 출력·파일·사진은 요구하지 않음. 결과가 없거나 맞지 않으면 미확인으로 남기며 실제 Apply/Start/Restore 재시도·잠금 삭제·후보 Diagnose/Deploy/ProbeImports·pandas 진단을 안내하지 않음.
+- 검토·검증: 독립된 짧은 읽기 검토로 CheckOnly 기록 부재·과거 결과 오인 위험·두 분기의 최소 확인을 대조함. STATUS와 이 기록만 변경하고 문서 점검·diff를 확인함. 실행 코드·기존 자동 시험을 변경/반복하지 않음. 사내 상세 원인 조회·PowerShell 후속 블록 실행은 미실행이며 **구현/CI 완료, 실제 사내 적용 성공 미확인**을 유지함.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
