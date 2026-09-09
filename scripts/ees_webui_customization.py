@@ -23,6 +23,8 @@ except ImportError:
 
 branding = releases.branding
 RECORD = branding.TARGET_INFO + "RECORD"
+# Present in the pinned upstream wheel: Docker reference text, never app files.
+PACKAGING_FILES = frozenset({"requirements-min.txt", "data/readme.txt"})
 REQUIRED = {RECORD, branding.TARGET_INFO + "METADATA", branding.TARGET_INFO + "WHEEL",
             "open_webui/__init__.py", "open_webui/env.py", "open_webui/main.py",
             "open_webui/frontend/index.html", branding.TARGET_APP + "version.json"}
@@ -95,12 +97,14 @@ def _allowed_name(name):
             and not name.lower().endswith((".pyc", ".pyo")))
 
 
-def _record_rows(content):
+def _record_rows(content, *, allow_packaging=False):
     rows = {}
     folded = set()
     try:
         for row in csv.reader(io.StringIO(content.decode("utf-8"))):
-            if len(row) != 3 or not _allowed_name(row[0]) or row[0].casefold() in folded:
+            if (len(row) != 3 or (not _allowed_name(row[0])
+                                 and not (allow_packaging and row[0] in PACKAGING_FILES))
+                    or row[0].casefold() in folded):
                 raise CustomizationError("Program RECORD contains an unsupported or duplicate path.")
             name, digest, size = row
             if name == RECORD:
@@ -146,14 +150,25 @@ def _wheel_layout(content):
     """Extra app-only constraints after the existing release hash/RECORD validator."""
     with zipfile.ZipFile(io.BytesIO(content)) as wheel:
         names = releases._entries(wheel, maximum_entries=10000, maximum_file=64 * 1024 * 1024)
-        if any(not _allowed_name(name) for name in names):
+        if any(not _allowed_name(name) and name not in PACKAGING_FILES for name in names):
             raise CustomizationError("The wheel contains unsupported install paths or executable path hooks.")
         record = wheel.read(RECORD)
-        rows = _record_rows(record)
+        rows = _record_rows(record, allow_packaging=True)
         if set(rows) != set(names):
             raise CustomizationError("The app RECORD and wheel file list differ.")
         _metadata(wheel.read)
-        return {"record_sha256": hashlib.sha256(record).hexdigest(), "rows": rows}
+        if PACKAGING_FILES.intersection(rows):
+            # The complete original wheel/RECORD was verified by releases._wheel.
+            # Retain only app+metadata and derive an exact RECORD for that subset;
+            # the saved wheel SHA still identifies the unchanged input artifact.
+            rows = {name: row for name, row in rows.items() if name not in PACKAGING_FILES}
+            output = io.StringIO()
+            writer = csv.writer(output, lineterminator="\n")
+            for name in sorted(set(rows) - {RECORD}):
+                writer.writerow([name, *rows[name]])
+            writer.writerow([RECORD, "", ""])
+            record = output.getvalue().encode("utf-8")
+        return {"record_sha256": hashlib.sha256(record).hexdigest(), "record": record, "rows": rows}
 
 
 def _paths(config, env=None):
@@ -277,17 +292,18 @@ def _remove(path, selection, *, partial=False, staging=False):
 
 
 def _extract(content, path):
+    layout = _wheel_layout(content)
     path.mkdir()
     with zipfile.ZipFile(io.BytesIO(content)) as archive:
         record = path / RECORD
         record.parent.mkdir(parents=True)
         temporary = path / ".record.part"
         with temporary.open("xb") as output:
-            output.write(archive.read(RECORD))
+            output.write(layout["record"])
             output.flush()
             os.fsync(output.fileno())
         temporary.replace(record)
-        for name in archive.namelist():
+        for name in layout["rows"]:
             if name == RECORD:
                 continue
             target = path.joinpath(*name.split("/"))

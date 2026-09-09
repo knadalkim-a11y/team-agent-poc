@@ -166,7 +166,7 @@ class CustomizationTests(unittest.TestCase):
 
     def test_wheel_install_paths_hooks_metadata_frontend_and_record_rejected(self):
         variants = [make_wheel(extra={name: b"unexpected"}) for name in (
-            "elsewhere.py", "open_webui-0.11.3+ees.1.data/scripts/start", "activate.pth",
+            "elsewhere.py", "data/another.txt", "requirements.txt", "open_webui-0.11.3+ees.1.data/scripts/start", "activate.pth",
             "open_webui/inject.pth", "open_webui/.env", "open_webui/__pycache__/cache.pyc", branding.SOURCE_APP + "old.js")]
         variants += [make_wheel(replacement={branding.TARGET_INFO + "WHEEL": value}) for value in (
             b"Wheel-Version: 1.0\nRoot-Is-Purelib: false\nTag: py3-none-any\n",
@@ -212,6 +212,51 @@ class CustomizationTests(unittest.TestCase):
         with self.assertRaises(custom.CustomizationError):
             custom.check_applicability(self.config, self.registry, self.env)
         self.assertEqual(self.tree(), before)
+
+    def test_original_packaging_docs_are_verified_but_not_installed(self):
+        content = make_wheel(extra={"requirements-min.txt": b"Minimal Docker dependency reference",
+                                    "data/readme.txt": b"Docker data directory description"})
+        self.write_bundle(content)
+        self.apply()
+        selected = self.registry["customization"]["active"]
+        self.assertEqual(selected["wheel_sha256"], digest(content))
+        with zipfile.ZipFile(io.BytesIO(content)) as source:
+            original_record = source.read(custom.RECORD)
+            projected_record = (self.program / custom.RECORD).read_bytes()
+            self.assertNotEqual(original_record, projected_record)
+            self.assertEqual(selected["record_sha256"], digest(projected_record))
+            for name in custom._record_rows(projected_record):
+                if name != custom.RECORD:
+                    self.assertEqual((self.program / name).read_bytes(), source.read(name))
+        for name in custom.PACKAGING_FILES:
+            self.assertFalse((self.program / name).exists())
+        custom.validate_program(self.program, selected)
+        self.assertFalse(self.apply()["changed"])
+        self.assertTrue(self.restore()["original_program"])
+        # Excluding packaging text from installation never exempts it from the
+        # original wheel RECORD integrity check performed before extraction.
+        with zipfile.ZipFile(io.BytesIO(content)) as source:
+            damaged = io.BytesIO()
+            with zipfile.ZipFile(damaged, "w") as destination:
+                for name in source.namelist():
+                    destination.writestr(name, b"tampered" if name == "data/readme.txt" else source.read(name))
+        self.write_bundle(damaged.getvalue())
+        with self.assertRaisesRegex(release.ReleaseError, "RECORD"):
+            self.apply()
+        self.assertFalse(self.program.exists())
+
+    def test_packaging_doc_only_change_keeps_app_identity_and_restores_prior_commit(self):
+        self.write_bundle(make_wheel(extra={"data/readme.txt": b"first packaging reference"}))
+        self.apply()
+        first = copy.deepcopy(self.registry["customization"]["active"])
+        self.write_bundle(make_wheel(extra={"data/readme.txt": b"second packaging reference"}), commit="b" * 40)
+        self.assertTrue(self.apply("b" * 40)["changed"])
+        second = self.registry["customization"]["active"]
+        self.assertNotEqual(first["wheel_sha256"], second["wheel_sha256"])
+        self.assertEqual(first["record_sha256"], second["record_sha256"])
+        self.assertEqual(self.restore()["source_commit"], COMMIT)
+        self.assertFalse(self.restore()["changed"])
+        custom.validate_program(self.program, first)
 
     def test_wrong_baseline_requirements_and_commit_do_not_write(self):
         for probe in ({"packages": {"open-webui": branding.VERSION}, "requires": ["example==1.0"]},
@@ -418,6 +463,10 @@ class RealBrandingWheelTests(unittest.TestCase):
         content = (root / branding.WHEEL_FILENAME).read_bytes()
         manifest = json.loads((root / "manifest.json").read_bytes())
         release._wheel(content, manifest)
+        with zipfile.ZipFile(io.BytesIO(content)) as wheel:
+            unsupported = sorted(name for name in wheel.namelist()
+                                 if not custom._allowed_name(name) and name not in custom.PACKAGING_FILES)
+            self.assertEqual(unsupported, [], "Unsupported real-wheel paths: " + repr(unsupported[:20]))
         layout = custom._wheel_layout(content)
         selection = {"source_commit": COMMIT, "wheel_sha256": digest(content),
                      "record_sha256": layout["record_sha256"], "webui_version": branding.VERSION}
