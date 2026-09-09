@@ -498,5 +498,53 @@ const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert
   noNavigationAPI.location.pathname = '/c/sample-chat'; noNavigationAPI.replaceLayout(); noNavigationAPI.flushMutations();
   assert.equal(noNavigationAPI.host(), fallbackHost);
   console.log('PASS SPA navigation events, new-chat entry, auth/pagehide cleanup and MutationObserver fallback');
-  console.log('10 grouped JS state checks passed (synthetic DOM; browser rendering unverified).');
+
+  // An initial render failure must not cache the unusable DOM and poison retries.
+  const recovery = environment(), originalAttachShadow = Element.prototype.attachShadow;
+  let initialFailure;
+  try {
+    Element.prototype.attachShadow = function () {
+      const shadow = originalAttachShadow.call(this), getElementById = shadow.getElementById.bind(shadow);
+      shadow.getElementById = id => id === 'panel-title' ? null : getElementById(id);
+      return shadow;
+    };
+    initialFailure = bad(await recovery.call('equipment'), 'panel_error');
+  } finally {
+    Element.prototype.attachShadow = originalAttachShadow;
+  }
+  assert.deepEqual(initialFailure.error.diagnostic, { script_version: '0.1.5', stage: 'initial_render', exception: 'TypeError' });
+  assert.equal(recovery.window.__eesWODemoManagerV1.chats.size, 0);
+  assert.equal(recovery.host(), undefined); assert.equal(recovery.launcher(), undefined);
+  let recovered = ok(await recovery.call('equipment'));
+  assert.equal(recovery.window.__eesWODemoManagerV1.chats.size, 1);
+  recovered = ok(await recovery.call('update', { equipment_id: 'KR-CA-211', ...fields }, recovered.revision));
+  recovery.q('description').value = '화면 오류가 나도 유지할 수동 작성 내용'; recovery.q('description').fire('input');
+  const preservedDraft = ok(await recovery.call()), recoveredHost = recovery.host();
+  const recoveredController = recovery.window.__eesWODemoV1;
+
+  // Later render failures preserve the existing draft and expose only fixed diagnostics.
+  const privateMarker = 'SYNTHETIC_PRIVATE_MESSAGE_STACK_URL', injectedError = new Error(privateMarker);
+  injectedError.name = privateMarker; injectedError.stack = privateMarker;
+  const recoveredShadow = recoveredHost.shadowRoot, originalGetElementById = recoveredShadow.getElementById;
+  let renderFailure;
+  try {
+    recoveredShadow.getElementById = function (id) {
+      if (id === 'panel-title') throw injectedError;
+      return originalGetElementById.call(this, id);
+    };
+    renderFailure = bad(await recovery.call('equipment', { site: '울산' }), 'panel_error');
+  } finally {
+    recoveredShadow.getElementById = originalGetElementById;
+  }
+  assert.deepEqual(renderFailure.error.diagnostic, { script_version: '0.1.5', stage: 'equipment_render', exception: 'Error' });
+  assert.deepEqual(Object.keys(renderFailure.error).sort(), ['code', 'diagnostic', 'message']);
+  assert.equal(JSON.stringify(renderFailure).includes(privateMarker), false);
+  assert.equal(recovery.host(), recoveredHost); assert.equal(recovery.window.__eesWODemoV1, recoveredController);
+  const afterRenderFailure = ok(await recovery.call());
+  for (const key of ['revision', 'phase', 'filters', 'equipment', 'fields']) {
+    assert.deepEqual(afterRenderFailure[key], preservedDraft[key]);
+  }
+  assert.equal(recovery.q('description').value, preservedDraft.fields.description);
+  console.log('PASS initial-render recovery without broken cache, safe diagnostic fields and existing draft preservation');
+  console.log('11 grouped JS state checks passed (synthetic DOM; browser rendering unverified).');
 })().catch(error => { console.error(error); process.exitCode = 1; });

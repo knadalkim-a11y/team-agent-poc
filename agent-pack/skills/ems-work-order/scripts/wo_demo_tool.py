@@ -1,7 +1,7 @@
 """
 title: EES WO Demo
 description: Sample equipment selection and WO drafting beside the existing chat. No EMS connection or real issuance.
-version: 0.1.4
+version: 0.1.5
 required_open_webui_version: 0.11.3
 """
 
@@ -267,6 +267,7 @@ PANEL_HTML = r"""<style>
 """
 
 PANEL_SCRIPT = r"""
+let panelStage='route_check';
 try {
   const fail = (code, message) => ({ok: false, demo: true, error: {code, message}});
   if (location.pathname !== '/c/' + encodeURIComponent(request.chat_id)) {
@@ -281,10 +282,12 @@ try {
     const toolbar=controlsWrapper?.parentElement || column?.querySelector('nav .flex-none.items-center.gap-2.self-center');
     return row?.isConnected && toolbar?.isConnected && getComputedStyle(row).display==='flex'?{anchor,column,row,toolbar,controlsWrapper}:null;
   };
+  panelStage='layout_lookup';
   const layout=getLayout();
   if (!layout) {
     return fail('unsupported_layout', '이 화면에서 시연 패널을 열 수 없습니다. 일반 대화 화면과 WebUI 버전을 확인해 주세요.');
   }
+  panelStage='manager_setup';
   let manager=window.__eesWODemoManagerV1;
   if(!manager){
     // v0.1.2 had one disposable controller. A refresh is recommended on upgrade.
@@ -320,12 +323,14 @@ try {
     window.addEventListener('popstate',sync);window.addEventListener('pagehide',destroy);
     navigation?.addEventListener('navigatesuccess',sync);
   }
+  panelStage='state_restore';
   manager.sync();
   let controller=manager.chats.get(request.chat_id);
   if (!controller && !['view','equipment'].includes(request.action)) {
     return fail('view_required', '먼저 시연 화면의 현재 상태를 확인해 주세요. 이전 화면의 수정 요청은 적용하지 않았습니다.');
   }
   if (!controller) {
+    panelStage='panel_create';
     let {anchor,column,row,toolbar}=layout;
     const hierarchy = ['corporation', 'site', 'shop', 'line', 'process'];
     const contentFields = ['title', 'type', 'priority', 'description'];
@@ -349,9 +354,11 @@ try {
     divider.title='드래그하거나 좌우 방향키로 화면 너비를 조절하세요.';
     divider.style.cssText='flex:0 0 10px;width:10px;align-self:stretch;display:flex;align-items:center;justify-content:center;cursor:col-resize;touch-action:none;user-select:none;z-index:31;';
     const grip=document.createElement('span');grip.style.cssText='width:3px;height:36px;border-radius:2px;background:#8888;pointer-events:none;';divider.append(grip);
+    panelStage='template_load';
     const shadow = host.attachShadow({mode:'open'});
     // Only this reviewed, constant template is assigned as HTML. All data use textContent/value.
     shadow.innerHTML = panelHTML;
+    panelStage='controls_create';
     const launcherSlot=document.createElement('div');launcherSlot.className='flex';
     const launcher=document.createElement('button');
     launcher.id='ees-work-panel-toggle';launcher.type='button';
@@ -497,6 +504,7 @@ try {
       visibleLimit=8;searchNote='검색 조건을 변경했어요. 작성 중인 WO는 그대로 유지돼요.';
       q('validation').hidden=true;render();
     };
+    panelStage='event_bind';
     hierarchy.forEach(key=>q(key).addEventListener('change',()=>{
       if(screen==='equipment'){changeSearch(key,q(key).value);return;}
       const result=apply({[key]:q(key).value},'user');if(!result.ok)displayError(result.error.message);
@@ -577,6 +585,7 @@ try {
     });
     divider.addEventListener('focus',()=>divider.style.outline='2px solid #6b91d5');
     divider.addEventListener('blur',()=>divider.style.outline='');
+    panelStage='resize_setup';
     const resizeObserver=new ResizeObserver(resize);
     const observeLayout=()=>{
       resizeObserver.disconnect();if(!host.isConnected)return;
@@ -617,16 +626,24 @@ try {
       const result=apply(changes,'ai');if(!result.ok){displayError(result.error.message);return result;}
       screen='wo';render();return view();
     }};
-    manager.chats.set(request.chat_id,controller);
     q('close').addEventListener('click',close);
     launcher.addEventListener('click',()=>wantsOpen?close():open());
-    render();manager.sync();
+    panelStage='initial_render';
+    render();
+    // Cache only a fully rendered controller so a failed first render can be retried.
+    manager.chats.set(request.chat_id,controller);
+    panelStage='panel_mount';
+    manager.sync();
   }
+  panelStage='panel_open';
   controller.open();
+  panelStage=request.action==='equipment'?'equipment_render':request.action==='view'?'wo_render':'wo_update';
   if(request.action==='equipment')return controller.browse(request.filters);
   return request.action==='view'?controller.woView():controller.update(request.expected_revision,request.changes);
-} catch (_) {
-  return {ok:false,demo:true,error:{code:'panel_error',message:'시연 화면을 처리하지 못했습니다. 화면의 현재 내용을 확인한 뒤 다시 열어 주세요.'}};
+} catch (error) {
+  // Return fixed diagnostic labels only; exception messages/stacks may contain user data.
+  const exception=['TypeError','ReferenceError','RangeError','SyntaxError','Error','NotFoundError','NotSupportedError','SecurityError','InvalidStateError','InvalidCharacterError'].includes(error?.name)?error.name:'Error';
+  return {ok:false,demo:true,error:{code:'panel_error',message:'시연 화면을 처리하지 못했습니다. 화면의 현재 내용을 확인한 뒤 다시 열어 주세요.',diagnostic:{script_version:'0.1.5',stage:panelStage,exception}}};
 }
 """
 
