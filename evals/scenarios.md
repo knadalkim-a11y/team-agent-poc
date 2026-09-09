@@ -1050,6 +1050,16 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - SSL 지연 이력·후속 종료: 사용자는 이전 기동 때도 SSL CERTIFICATE_VERIFY_FAILED 오류 재시도 때문에 시작이 오래 걸렸다고 설명함. 이는 기존 환경의 지연 이력에 대한 사용자 보고이며 이번 로그에서 동일 원인을 직접 확인한 것은 아님. 접속이 확인됐으므로 직전에 준비한 현재 Start 로그 읽기 요청은 필수 후속에서 제외하고 추가 Start/Stop/uvx·health 대기 확대·원문 로그·파일·사진을 요구하지 않음. 새 환경/의존성 재설치·TLS 검증 해제·과거 후보 Diagnose/Deploy/ProbeImports·인증서 변경 절차를 재개하지 않음. 앞선 Apply promote 단계의 OS 오류와 SSL/health 지연은 서로 다른 미해결/관찰로 관리함.
 - 상태/가이드 반영·한계: 최신 main `ad03711b2f775b2710a2095fecc67105b2b56bbc`, tree `809468d2e9c6a7edf66c5529c8d9efdcd7a1a409`, 관련 열린 PR 0개를 확인함. STATUS의 현재/다음 작업·마지막 서버 증거와 기존 적용 가이드의 Start 시간 초과 해석을 갱신하고 문서/diff를 검사함. 원본 서비스는 현 상태로 유지하며 운영 코드/기능 시험/CI·사내 기동/로그 검사는 반복하지 않음. **구현·Windows/Linux 실제 wheel CI 완료, 원본 Restore·이후 주소 접속 확인, EES 수정본 Apply 최종 전환/사내 적용 미완료**로 구분함. 과거 Apply 예외 정보는 유실됐으며 원인 수정이 확인된 것으로 기록하거나 같은 Apply를 새 출력 형식 수집만을 위해 반복하지 않음.
 
+
+<a id="ees-wrapper-apply-resume"></a>
+
+### 원본 복원 후 수정본 실제 적용 재개 — 2026-09-09
+
+- 요청·기준: 원본 Restore 및 늦은 서버 접속 확인 뒤 사용자가 다음 작업 진행을 요청함. 최신 main `b8daca91a070aec1465357b16fbe15615a754f6c`, tree `1e66a0b9168797bbf721c6cea53bc2af39cad212`, 관련 열린 PR 0개를 확인하고 AGENTS/STATUS·선택한 단순 래퍼 설계·Apply 실패 기록을 읽음. 이번 목적은 미완료 수정본의 실제 적용 1회이며, 새로운 오류 표시 형식만 얻으려고 과거 실패를 재현하는 작업은 아님. 과거 Apply의 원래 OS 예외는 유실됐고 원인이 해결됐다는 증거는 아직 없음.
+- 추가 검토·검증 재사용: 최종 이동 전 ZIP·출력/검증 파일 핸들이 모두 닫히고, controller는 chdir하지 않으며 등록 cwd와 관리 root 중첩을 차단함을 좁게 독립 대조함. program/staging은 같은 부모 아래이고 네트워크/재분석 경로를 거부함. program_promote 이후 남은 폴더 상태로 rename 자체 실패인지 기록 후 정리 실패인지 확정할 수는 없음. 추가 실행 결함을 찾지 못해 폴더 이동/보안 설정/재시도 방식을 임의로 변경하지 않음. [PR #16 Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34297374121)의 head `234f8d56b90d74e3d6f77d14772f9a4ca63226a1`·success를 다시 확인하고 그 검증 tree `8158c6bf50207332681d7efd8ff3bdd5eace4ab0` 대비 현재 scripts/tests/ees-delivery workflow 차이가 없음을 확인함. 실제 wheel 검사는 추출/검증/폴더 이동/Restore를 포함하되 record callback은 시험용이며 사내 ACL/일시 잠금까지 보장하지 않음. 이미 통과한 시험/CI를 반복하거나 합성 폴더 probe를 추가하지 않음.
+- 실제 적용 1회 안내: 보존한 Downloads/EES-demo-4a8779bbf3ee.zip 파일 존재를 확인하고 고정 프로그램 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`을 사용함. Update→CheckOnly→Stop→Apply→Start를 한 PowerShell 블록에서 실행함. CheckOnly는 원본 Restore 뒤 변경된 선택/미완료·보관 폴더 상태와 전달물을 확인하며 실패하면 서버를 중지하지 않음. Stop은 그 시점의 등록 신원과 포트를 확인하고, Apply/Start도 기존 보호를 재사용함. 모든 단계는 한 번만 실행하고 앞 단계 실패 시 뒤 단계로 넘어가지 않음. 자동 Restore/재시작·강제 종료·새 venv·설치·이전 후보 진단은 없음. 정상 응답 대기는 명시한 120초를 유지하고 시간 초과 뒤 프로세스를 추가 시작하지 않으며 나중 접속 관찰은 별도로 기록함.
+- 전달·완료 기준: 블록 2,074자이며 $last 파이프 저장·관리 명령 throw 전파·단계별 이전 출력 초기화를 읽기 대조함. Apply 성공 여부와 마지막 EES 결과를 첫 줄에, 실패하면 action/failed/이번 시작 이후 at가 일치하는 last-operation의 이유/코드만 두 번째 줄에 표시함. CheckOnly는 무쓰기이므로 저장 결과를 가져오지 않고 detail=not_saved로 끝나며, 과거 오류를 새 오류로 전달하지 않음. 성공 보고는 이름/아이콘·기존 대화 유지·채팅/대표 조회를 한 화면 확인 줄로 묶음. STATUS와 이 기록의 문서/diff만 검사했으며 PowerShell 실실행·사내 적용/화면 결과는 대기 중임. 구현·자동 검사 통과와 실제 수정본 적용 성공은 계속 구분함.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

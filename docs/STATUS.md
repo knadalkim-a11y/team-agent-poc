@@ -9,7 +9,7 @@
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
 - 이번 작업: **단순 래퍼 Apply/CheckOnly·직전 Restore·Start/Stop/Status 연결은 PR #15로 main에 반영함. Apply 최종 전환 단계의 예외 정보 유실은 [PR #16](https://github.com/knadalkim-a11y/team-agent-poc/pull/16)으로 보완·병합했으며 Windows/Linux Python 3.11 및 실제 wheel Apply/폴더 이동/Restore 검사를 통과함.** 사내 Restore는 원본 선택으로 완료됐고, 원본 Start가 120초 health 대기에서 실패를 반환한 뒤 **2026-09-09 사용자가 기존 주소에 접속해 서버가 켜진 것을 확인함.** 원래 서비스의 지연 기동/접속은 사용자 보고로 확인하며 해당 Start 결과 자체를 소급해 성공으로 바꾸지 않음. 사용자가 이전 기동에서도 SSL CERTIFICATE_VERIFY_FAILED 재시도로 지연됐다고 설명했으나 이번 원인 동일성·정확한 지연 시간은 미확인임. EES 수정본의 Apply 최종 전환 실패와 사내 적용 미완료는 별개로 남아 있음. 기존 Python/의존성·uvx 설치·데이터·키·사용자 설정을 보존하고 자동 재시도/복구·중단한 후보 진단은 추가하지 않음. [구현 범위](03-openwebui-native-agent.md#ees-wrapper-design), [사내 후속 증거](../evals/scenarios.md#ees-wrapper-error-evidence).
-- 다음 작업 하나: **남은 EES 수정본의 사내 Apply 최종 전환 실패 해결·적용 완료.** [promote 실패와 원본 지연 기동](../evals/scenarios.md#ees-wrapper-error-evidence)을 구분함. 현재 원본 서비스는 유지하고, 접속 확인으로 직전 원본 로그 확인 요청·추가 Start/health 대기는 종료함. Apply의 사내 OS 원인은 아직 미확인이고 과거에 버린 예외는 복원되지 않으므로 오류 형식 수집만을 위한 동일 Apply 반복이나 원인 없는 변경을 안내하지 않음. SSL 재시도 지연 이력은 별도 단서로 보존하며 새 환경/재설치·TLS 검증 해제·후보 Diagnose/Deploy/ProbeImports로 확장하지 않음. 구현/CI 완료·원본 복원 후 접속 확인·수정본 적용 미완료를 각각 유지함.
+- 다음 작업 하나: **사용자의 후속 진행 요청에 따라 검증된 수정본을 사내에 한 번 실제 적용한다.** [원본 복원 후 적용 재개](../evals/scenarios.md#ees-wrapper-apply-resume). 최종 promote 경로를 추가로 좁게 검토했으나 코드 결함/사내 OS 원인은 확정하지 못했으며 임의 수정은 하지 않음. 현재 운영 코드·시험·CI 설정은 PR #16의 Windows/Linux 실제 wheel CI 통과본과 같음. 기존 Downloads ZIP/프로그램 Commit으로 Update→복원 후 CheckOnly→Stop→Apply→Start(health 상한 120초)를 한 블록에서 명시적으로 한 번 수행하고 실패 시 끝냄. 이번 목적은 사용자가 요청한 수정본 실제 적용 완료이며 오류 형식 수집만을 위한 이전 실패 재현이 아님. 요약은 Apply 성공 여부와 마지막 EES 결과, 실패 시 이번 저장된 이유/코드까지 1~2줄로 제한함. 동일 실패 자동 반복·자동 Restore·SSL 진단/대기 상향·새 환경/재설치는 하지 않음. 사내 실제 실행/수정본 적용 성공은 대기 중임.
 
 아래는 **중단한 후보 환경 방식의 구현·진단 이력**이며 현재 재실행 목록이 아닙니다. [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py)와 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)은 보존합니다. 기존 도구의 Rollback을 새 직접 적용 방식의 원복 기능으로 간주하지 않습니다. 마지막 실패와 원인 미확정 상태를 유지하며 관리 방식 변경을 배포 성공으로 기록하지 않습니다.
 
@@ -106,7 +106,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-09: 사용자가 health 시간 초과 뒤 기존 주소 접속/서버 가동을 확인했고 이전 SSL 인증서 오류 재시도 지연 이력을 설명함. 최신 main `ad03711`·관련 열린 PR 0개·로컬 tree 일치를 확인함. 기존 기동/시간 초과 해석을 적용 가이드에 명확히 하고 [지연 기동·추가 확인 종료](../evals/scenarios.md#ees-wrapper-error-evidence)를 기록함. 문서/diff만 검사하고 실행 코드·기능 시험·CI·사내 기동/로그 검사를 반복하지 않음. 원본 서비스 접속은 사용자 관찰 범위로 확인하며 이번 SSL 원인·Apply OS 원인·수정본 사내 적용은 미확인임.
+2026-09-09: 사용자의 다음 작업 진행 요청에 따라 최신 main `b8daca9`·관련 열린 PR 0개·로컬 tree 일치를 확인함. Apply 추출/검증 핸들·동일 부모 폴더·상태 기록/최종 이동을 좁게 독립 검토했으며 추가 코드 결함은 발견하지 못함. PR #16 CI의 head `234f8d56`/success와 현 코드·시험·CI 설정의 동일성을 확인해 통과한 검사를 재사용함. [실제 적용 1회와 실패 중단/짧은 전달](../evals/scenarios.md#ees-wrapper-apply-resume)을 준비하고 문서/diff를 검사함. 실행 코드 변경·전수 시험·별도 합성 폴더 probe·사내 기동/적용은 수행하지 않았으며, 과거 Apply OS 원인 해결이나 새 적용 성공으로 기록하지 않음.
 
 ## 갱신 규칙
 
