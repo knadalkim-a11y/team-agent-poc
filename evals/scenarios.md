@@ -1045,6 +1045,11 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 현재 Start 로그 확인 준비: `last-operation.json`의 action=start·failed=true·stage=health_check와 고정 log_id 형식을 확인하고, 기존 `_regular`로 관리 logs 아래 해당 파일을 읽으며 현재 registry process.log_file과 일치할 때만 요약함. 과거 로그를 시간순으로 고르거나 기존 candidate `collect`/Diagnose를 호출하지 않음. 기존 `_summarize`의 고정 오류/신호·검증된 공개 프레임 한 개만 사용하고, 기록 시점 크기 최대 4MiB를 읽어 full/tail을 구분함. 진행 중 로그 증가 자체는 실패로 취급하지 않음. 기존 verify_identity와 제한된 `_healthy(..., 3)`를 한 번 읽고 registry 재읽기 일치 뒤 두 줄만 표시함. 현재 작업이 바뀌었거나 기록을 읽을 수 없으면 check=unavailable로 끝나며 서버/상태/데이터를 변경하지 않음.
 - 이번 검증·한계: 전달 블록 2,243자·내장 Python 구문 확인, 기존 함수/결과 경로·앱 import/설치/서버 신호/새 bind/상태 쓰기 없음 대조, 문서/diff 점검을 수행함. 로그 오류/신호가 없더라도 읽은 범위에서 검출되지 않았다는 뜻이며 정상 기동이나 원인 부재로 확대하지 않음. Windows PowerShell 실실행·사내 이번 로그/현재 신원/health 결과는 미확인임. 운영 코드/기능 시험/CI 변경·반복 없음. 원래 서버 복원 성공·원래 서버 가동 실패·EES 수정본 미적용을 구분해 유지함.
 
+
+- 후속 지연 기동·접속 보고: 2026-09-09 사용자가 기존 주소에 접속하니 서버가 켜졌다고 전달함. 앞선 원본 Restore 완료와 별도 Apply 없이 진행한 Start 이후의 관찰이므로 원래 서비스의 지연 기동/브라우저 접속 확인으로 기록함. Start의 120초 health 제한 시간 실패는 당시 결과로 보존하며, 이후 접속 확인으로 소급해 명령 result=ok 또는 당시 health 통과로 바꾸지 않음. 실제 PID/health JSON·정확한 기동 소요 시간·장기 안정성·EES 수정본 적용/기능 성공까지 확인한 것으로 확대하지 않음.
+- SSL 지연 이력·후속 종료: 사용자는 이전 기동 때도 SSL CERTIFICATE_VERIFY_FAILED 오류 재시도 때문에 시작이 오래 걸렸다고 설명함. 이는 기존 환경의 지연 이력에 대한 사용자 보고이며 이번 로그에서 동일 원인을 직접 확인한 것은 아님. 접속이 확인됐으므로 직전에 준비한 현재 Start 로그 읽기 요청은 필수 후속에서 제외하고 추가 Start/Stop/uvx·health 대기 확대·원문 로그·파일·사진을 요구하지 않음. 새 환경/의존성 재설치·TLS 검증 해제·과거 후보 Diagnose/Deploy/ProbeImports·인증서 변경 절차를 재개하지 않음. 앞선 Apply promote 단계의 OS 오류와 SSL/health 지연은 서로 다른 미해결/관찰로 관리함.
+- 상태/가이드 반영·한계: 최신 main `ad03711b2f775b2710a2095fecc67105b2b56bbc`, tree `809468d2e9c6a7edf66c5529c8d9efdcd7a1a409`, 관련 열린 PR 0개를 확인함. STATUS의 현재/다음 작업·마지막 서버 증거와 기존 적용 가이드의 Start 시간 초과 해석을 갱신하고 문서/diff를 검사함. 원본 서비스는 현 상태로 유지하며 운영 코드/기능 시험/CI·사내 기동/로그 검사는 반복하지 않음. **구현·Windows/Linux 실제 wheel CI 완료, 원본 Restore·이후 주소 접속 확인, EES 수정본 Apply 최종 전환/사내 적용 미완료**로 구분함. 과거 Apply 예외 정보는 유실됐으며 원인 수정이 확인된 것으로 기록하거나 같은 Apply를 새 출력 형식 수집만을 위해 반복하지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

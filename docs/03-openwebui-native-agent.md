@@ -575,6 +575,8 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 실패하면 마지막 `EES` 줄에서 `action/result/stage`와 표시된 `error/errno/winerror/at`만 한 줄로 전달합니다. 일반 파일/상태 예외의 `at`는 저장소 내부 코드 파일명/행이며 개인 경로나 원문 오류는 출력하지 않습니다. `stage`는 작업 종류일 수 있으므로 코드 위치와 함께 판단하고, 이미 실패한 Apply를 새 출력 형식을 얻기 위해 반복하지 않습니다. 이전 버전의 `local_state_or_file_unavailable`만 남은 오류는 원래 예외를 복원할 수 없습니다. [이번 보완과 사내 실패 근거](../evals/scenarios.md#ees-wrapper-error-evidence). PowerShell에서 먼저 막혀 EES 줄이 없다면 실패한 작업명과 짧은 오류 종류만 전달하고 나머지 명령을 실행하지 않습니다. `result=ok`인 Apply는 프로그램 파일 적용 성공이며, Start의 health와 화면 확인까지 완료해야 실제 사내 적용 성공으로 기록합니다. 마지막 서버 가동 보고는 현재 상태로 간주하지 않습니다.
 
+Start의 `stage=health_check` 시간 초과는 지정한 시간 안에 정상 응답을 확인하지 못했다는 뜻입니다. 프로세스를 자동 종료하지 않으므로 나중에 접속될 수 있으며, 시간 초과만으로 Start/uvx를 반복하거나 Restore를 실행하지 않습니다. 이후 기존 주소 접속을 확인했고 다른 문제가 없다면 추가 로그 수집을 요구하지 않습니다. 저장된 실패는 당시 대기 결과로 보존하고 이후 접속 관찰을 별도로 기록하며, 원래 서버의 접속을 EES 수정본 Apply 성공으로 간주하지 않습니다.
+
 **직전 프로그램으로 되돌릴 때만** 아래 별도 블록을 사용합니다. 최초 Apply의 직전 상태는 원래 Open WebUI이며, 복원 완료 뒤 같은 Restore를 반복해도 변경하지 않습니다. 보관본·잠금·미완료 기록이 일치하지 않으면 멈추고, 임의 잠금 삭제·프로세스 강제 종료·DB 복구를 하지 않습니다. Start 실패 뒤 Restore가 자동 실행되는 구조는 아닙니다.
 
 일반 원복은 Stop→Restore→Start 순서입니다.
