@@ -250,6 +250,8 @@ Get-Content $debugLog -Tail 40
 
 ### UI가 열린 뒤 Hugging Face SSL 재시도
 
+등록된 `manage-ees.ps1`로 운영 중이면 현재 창의 환경변수보다 저장된 실행 환경이 우선합니다. 아래 수동 실행 예제를 그대로 적용하지 말고 [현재 래퍼의 Start -UseWindowsCA 절차](03-openwebui-native-agent.md#ees-start-windows-ca)를 사용합니다. 이 절차는 `health=false`인 기동 지연에도 적용 가능한 경로이며, 정확한 다운로드 실패와 현재 응답 상태를 먼저 구분합니다.
+
 관찰된 경고:
 
 ```text

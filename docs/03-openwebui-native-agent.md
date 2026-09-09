@@ -84,7 +84,7 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 
 ## 되묻기와 Rich UI 선택 기준
 
-현재 조회 결과는 **Tool의 JSON → Assistant의 일반 문장·표·원문 링크**로 제공합니다. 초기 기능 확인용 Confluence·Jira·GitHub의 Rich UI와 합성 HTML 예제는 제거하며, 기존 사내 등록본에는 [Tool·Prompt 갱신](#plain-output-update)이 필요합니다. 과거 채팅과 화면 검증 증거는 보존합니다.
+현재 조회 결과는 **Tool의 JSON → Assistant의 일반 문장·표·원문 링크**로 제공합니다. 초기 기능 확인용 Confluence·Jira·GitHub의 Rich UI와 합성 HTML 예제는 제거하며, 등록본의 갱신 절차는 [Tool·Prompt 갱신](#plain-output-update), 현재 적용 보고는 [STATUS](STATUS.md)에서 관리합니다. 과거 채팅과 화면 검증 증거는 보존합니다.
 
 향후 화면은 [실행 계획](STATUS.md#delivery-plan)의 실제 업무 흐름을 고른 뒤 하나씩 설계합니다. 기존 카드의 전체 디자인 튜닝이나 새 UI 공통 기반을 이번 제거 작업에 붙이지 않습니다. 이름·로고와 대화 시작 예시는 조회 결과 Rich UI와 별도입니다.
 
@@ -104,6 +104,88 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 - 버튼의 입력 초안 생성·추가 조회·전송은 각각 실제 구현된 동작만 안내합니다. 저장된 채팅의 결과를 항상 최신이라고 설명하지 않습니다.
 
 코드 위치는 [AGENTS의 구현 규칙](../AGENTS.md#3-구현-위치와-과설계-방지)을 따릅니다. 기능별 API 코드는 원 시스템에 요청하는 클라이언트 코드입니다. 원 시스템 서버 구현을 이 저장소에 가져오지 않으며, 둘 이상의 실제 기능에서 같은 코드의 반복 수정이 생기면 공통화를 검토합니다.
+
+<a id="legacy-ui-design"></a>
+
+### 레거시 업무 화면의 설계 기준
+
+2026-09-09 사용자 합의: **자주 쓰는 업무 화면을 준비하고, 대화·대상·업무 조건에 맞춰 내용과 검토된 화면 부품을 바꾸는 방식**을 기본으로 합니다. 사람과 AI가 같은 작성 화면을 함께 편집하며, 다음 절차로 업무별 화면을 하나씩 완성합니다.
+
+1. **업무 선택 → 클릭 가능한 목업 → 사용자 확인 → 실제 기능 연결 → 업무 흐름 검증** 순서로 진행합니다. 목업은 합성 데이터로 직접 입력·수정, AI 작성·수정의 모의 반영, 발행 전/완료 상태를 보여주고 실제 업무를 실행하지 않습니다. 이번 합의는 개발 방식에 대한 결정이며 개별 목업의 승인이나 EMS 실행 권한을 뜻하지 않습니다.
+2. 준비된 업무 화면을 기본으로 설비·기간·작업 종류에 따른 값과 필요한 입력 영역·관련 이력·비교 부품을 바꿉니다. 필수 항목과 발행 동작은 업무 규칙으로 정합니다. 매번 자유 생성하는 화면은 일회성 설명·분석·시각화 후보로 두며 실제 업무 실행 경로와 구분합니다. 같은 화면의 허용된 값·구성 변경마다 디자인 승인을 반복하지 않습니다.
+3. 사용자는 직접 입력·선택·수정하거나 채팅으로 AI에게 작성·수정을 요청할 수 있습니다. AI는 화면의 최신 입력값을 기준으로 요청한 부분을 수정하고, 같은 작성 화면을 갱신합니다. AI가 바꾼 항목을 표시하며 처리 중 생긴 사용자 수정을 조용히 덮어쓰지 않습니다. 최신 상태 전달·변경 반영은 구현할 기능이고 기존 Rich UI의 자동 동작으로 가정하지 않습니다.
+4. WO 발행 같은 상태 변경은 **AI의 초안 준비와 사용자의 최종 실행을 분리**합니다. “WO 발행해줘”는 우선 작성·확인 화면을 준비하는 요청으로 처리합니다. 사용자가 최종 버튼으로 확인한 내용만 서버가 검증·실행하며 자연어 Tool 호출만으로 이 단계를 건너뛰지 못하게 합니다. 실행 전 내용·대상이 바뀌면 다시 확인하고, 중복 클릭·재시도에 따른 중복 발행 방지와 결과 불명 시 실제 생성 여부 확인을 포함합니다. 성공은 EMS가 반환한 실제 결과·WO 번호로 표시합니다.
+5. 공식 Open WebUI 패키지와 기존 래퍼의 관리 방식을 유지합니다. 초기 화면은 작은 HTML/CSS/JavaScript와 기존 Python 업무 연결 코드로 만들고, 실제 반복 수정이 생길 때 공통 부품으로 묶습니다. 복잡한 화면 상태·재사용 필요가 확인될 때만 추가 프레임워크나 빌드 구성을 검토합니다. 브라우저 입력을 인증된 서버 동작으로 전달하는 경로는 해당 Open WebUI 버전에서 구현·검증합니다.
+6. 실제 발행은 기존 EMS 업무 서비스·규칙을 재사용합니다. WO 발행은 대표 설계 예시이며 EMS API 유무·필수 항목·서버 로직의 재사용 가능성은 아직 미확인입니다. API가 없다면 필요한 호출 통로를 EMS 쪽에 추가하는 범위를 별도로 정합니다. 현재 읽기 전용 Tool·정책은 유지하고, 향후 허용된 업무 쓰기를 도입할 때 해당 기능의 권한·실행 범위와 검증 기준을 함께 정합니다.
+
+상세 필드·화면 구성은 실제 업무 요구를 확인한 뒤 목업에서 합의합니다. 구현·사용성 검증 완료와 설계 방향 합의를 구분하며 [설계 검토 기록](../evals/scenarios.md#legacy-ui-design)을 따릅니다.
+
+<a id="wo-mockup"></a>
+
+### WO 시연 목업
+
+사용자가 정한 순서는 **시연용 목업 → 시연 피드백 → 운영용 목업 → 실제 EMS 구현**입니다. 기존 Open WebUI 대화창과 우측 WO 패널의 초기 시연은 사내에서 동작한다는 사용자 보고를 받았습니다. v0.1.3의 업무 패널 열기/닫기와 기능 정상 동작도 사용자 보고로 확인했습니다. 이후 설비 조회 결과의 `panel.error.code=panel_error` 보고를 받았습니다. v0.1.5는 패널 실행 예외의 짧은 진단값과 첫 화면 생성 실패 후 재시도를 보완했으며, 갱신 안내 후 패널이 표시된다는 사용자 보고를 받았습니다. 실제 최초 예외 원인·장기 재발 여부는 아직 미확정입니다. 후속 v0.1.6은 크기 조절 바의 마우스 클릭·드래그 테두리를 숨기고 키보드 포커스 표시를 유지합니다. 실제 업무 항목·권한 세분화는 후속으로 둡니다. 첫 [단독 HTML 목업](../agent-pack/skills/ems-work-order/references/wo-mockup.html)은 화면 배치 참고로 보존하며, WebUI에는 기존 **EES WO Demo** Tool 한 개를 계속 사용합니다.
+
+- 채팅으로 WO 작성을 요청하면 AI가 설비를 찾고 대화 내용을 바탕으로 **설비·작업 제목·작업 구분·우선순위·증상 및 요청 내용**을 채워 첫 초안을 보여줍니다. 후보가 여러 개일 때만 설비를 선택하게 합니다. 화면에서 설비를 직접 클릭한 경우에는 “선택한 설비로 초안을 작성해줘”라고 이어서 요청하며, 선택만으로 AI가 자동 호출되지는 않습니다.
+- 화면에서 직접 입력하거나 기존 채팅으로 AI에게 수정 요청을 할 수 있습니다. `wo_demo_view`가 현재 화면과 변경 번호를 읽고 `wo_demo_update`가 요청한 항목만 바꿉니다. 그사이 사용자 입력이 바뀌면 이전 변경 번호의 수정을 거부하고 최신 값을 다시 읽도록 합니다. AI가 만든 초안도 사람이 확인·수정한 뒤 최종 버튼으로 결정합니다.
+- 설비 검색 조건은 **법인 → 사업장 → SHOP → LINE → PROCESS**입니다. 샘플 32개 설비를 사용하며 한국/헝가리/미국 법인, 천안/울산/헝가리 사업장/미국 사업장, 전극/조립 SHOP과 각 1·2라인, 전극의 믹싱·코팅 및 조립의 권취·조립 공정을 제공합니다. 실제 EMS 조회 결과나 확정 스키마가 아닙니다.
+- `ems_demo_find_equipment`를 대화에서 호출하면 우측에 **설비 조회 패널**을 열고 요청한 검색 조건과 샘플 결과를 보여줍니다. 화면에서 필터를 바꾸고 설비를 선택해 정보를 확인할 수 있으며, 설비 조회만으로 WO 작성 폼을 열거나 기존 초안 대상을 바꾸지 않습니다. 내부 공통 조회 함수는 화면 없이도 재사용하며 현재 EES WO Demo 등록 항목 하나에 포함합니다. 사용자는 설비 조회가 여러 업무의 공통 도구가 될 것이므로 독립 등록·관리가 유리하다고 보되, 이번 시연은 적용 편의를 위해 한 항목으로 유지하기로 했습니다. 운영용 설계에서는 설비 조회를 공통 Tool로 별도 등록하는 방향으로 분리합니다. 현재는 공통 샘플 목록·조회 함수를 WO에서도 재사용합니다.
+- 넓은 화면에서는 대화와 패널 사이 경계선을 끌어 너비를 바꿉니다. 경계선에 키보드 초점을 두고 좌우 방향키로 조절하거나 Home/End로 허용 범위의 양 끝을 선택할 수 있습니다. 같은 대화에서는 너비를 기억하며 좁은 화면의 패널 방식은 유지합니다.
+- 사용자가 작성 내용을 확인하고 최종 버튼을 누르면 샘플 WO 결과만 표시합니다. AI에게 실제 발행 기능을 제공하지 않으며 EMS 조회·발행·저장도 하지 않습니다.
+- 해당 대화에서 패널을 처음 연 뒤에는 채팅 오른쪽 위 **‘제어’ 옆의 업무 패널 아이콘**으로 AI 호출 없이 접고 펼칩니다. 마우스를 올리면 ‘업무 패널 열기/닫기’ 안내가 보입니다. 같은 브라우저 탭에서 다른 대화로 이동했다 돌아오면 그 대화의 검색 조건·선택 설비·WO 내용·확인/완료 상태·너비와 열림/닫힘 상태를 복원합니다. 처음 방문한 다른 대화에 이전 대화의 패널을 표시하지 않습니다.
+- 작성 내용은 현재 브라우저 탭의 메모리에만 있습니다. 새로고침·탭 종료·로그아웃에서는 초기화하며 영구 저장 기능은 아닙니다. 처음 패널을 열지 않은 대화에서는 제안 질문이나 설비 조회 요청으로 시작합니다. 일반 대화에서 사용하며 임시 대화·노트에는 붙이지 않습니다.
+
+구현은 [wo_demo_tool.py](../agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)의 고정된 화면 코드와 Open WebUI 0.11.3의 [공식 execute 이벤트](https://docs.openwebui.com/features/extensibility/plugin/development/events/#execute-works-with-both-__event_call__-and-__event_emitter__)를 사용합니다. 우측 패널을 붙이는 위치는 [0.11.3 Chat 화면 구조](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte)에 의존하며 공식 업무 패널 등록 API가 아닙니다. 모델이 실행할 JavaScript를 작성하지 않고 정해진 입력값만 전달합니다. 프런트엔드 재빌드·재설치·추가 서버·CDN은 필요하지 않습니다. 사외 검사와 실제 사내 WebUI·모델 동작 확인은 [검증 기록](../evals/scenarios.md#wo-mockup)에서 구분합니다.
+
+**사내 시연 적용·갱신:** [PR #19](https://github.com/knadalkim-a11y/team-agent-poc/pull/19)의 `docs/legacy-ui-workflow` 준비본이며 아직 main 배포본이 아닙니다. 아래 명령은 해당 원격 브랜치에서 Tool·Prompt·첫 화면 제안 파일 세 개만 임시 폴더에 꺼냅니다. 기존 checkout의 브랜치·작업 파일·실행 프로그램은 그대로 둡니다. v0.1.3의 기능 정상 보고와 이후 패널 예외, v0.1.5 안내 후 표시 성공 보고를 구분해 기록합니다. v0.1.6의 크기 조절 표시 변경은 기존 Tool 코드만 갱신합니다. 패널 오류 진단을 위해 같은 확인을 반복하지 않습니다. 초기 등록 내용·정확한 적용 파일은 직접 대조하지 않았으며 마지막 전달 원본과 결과는 [평가 기록](../evals/scenarios.md#wo-mockup)을 따릅니다.
+
+**v0.1.2 이후 버전을 적용한 경우:** 아래 1·2번으로 기존 Tool 코드만 교체한 뒤 한 번 새로고침합니다. WO 지침·제안 JSON은 이번에 변경하지 않았으므로 3·4번을 반복하지 않습니다. 패널을 열고 크기 조절 바를 클릭·드래그할 때 테두리가 없는지 사용 중 확인합니다. 이전 전체 기능 검사를 반복하지 않으며, 패널 오류가 재발한 경우에만 아래의 짧은 진단값을 확인합니다.
+
+1. 사내 PowerShell에서 다음 블록을 실행하면 준비본을 받고 Tool 코드 전체가 클립보드에 복사됩니다. 실패하면 다음 단계로 넘어가지 않습니다.
+
+   ```powershell
+   & {
+       $ErrorActionPreference = 'Stop'
+       $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+       $eesDemo = Join-Path $env:TEMP 'ees-wo-demo'
+       New-Item -ItemType Directory -Path $eesDemo -Force | Out-Null
+       git -C $eesRepo fetch origin docs/legacy-ui-workflow
+       if ($LASTEXITCODE -ne 0) { throw 'Git fetch failed' }
+       git -C $eesRepo archive FETCH_HEAD --format=zip --output="$eesDemo\source.zip" agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py agent-pack/system-prompts/ees-integrated-assistant.md agent-pack/ees-prompt-suggestions.json
+       if ($LASTEXITCODE -ne 0) { throw 'Source export failed' }
+       Expand-Archive -LiteralPath "$eesDemo\source.zip" -DestinationPath $eesDemo -Force
+       $eesToolCode = Get-Content -LiteralPath "$eesDemo\agent-pack\skills\ems-work-order\scripts\wo_demo_tool.py" -Raw -Encoding UTF8
+       if ($eesToolCode -notmatch '(?m)^version: 0\.1\.6\r?$') { throw 'Expected WO demo version 0.1.6' }
+       Set-Clipboard -Value $eesToolCode
+   }
+   ```
+
+2. **이미 시연한 사용자:** Workspace → Tools의 기존 **EES WO Demo**를 편집해 코드 전체를 교체하고 `version: 0.1.6`를 확인해 저장합니다. 삭제·재생성하지 않으며 기존 모델 연결·설정은 보존합니다. **처음 설치하는 경우에만** 새 EES WO Demo를 만들고 사용 중인 EES 모델의 Tools에 추가합니다. 다른 Tool 선택은 유지하며 새 Skill은 등록하지 않습니다.
+3. 다음 블록으로 [공통 Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)의 **WO 시연 도구가 연결된 경우** 절을 복사합니다. **기존 사용자는 같은 제목의 이전 절만 교체**하고, 처음 설치하는 경우에만 현재 프롬프트 끝에 한 번 추가합니다. 이전 절을 중복 추가하거나 프롬프트 전체·사용자 추가 지침을 교체하지 않습니다.
+
+   ```powershell
+   & {
+       $ErrorActionPreference = 'Stop'
+       $eesPrompt = Get-Content -LiteralPath "$env:TEMP\ees-wo-demo\agent-pack\system-prompts\ees-integrated-assistant.md" -Raw -Encoding UTF8
+       $eesSection = [regex]::Match($eesPrompt, '(?ms)^## WO 시연 도구가 연결된 경우\r?\n.*?(?=^## |\z)')
+       if (-not $eesSection.Success) { throw 'Demo instructions missing' }
+       Set-Clipboard -Value $eesSection.Value.Trim()
+   }
+   ```
+
+4. 같은 EES 모델 편집 화면에서 **프롬프트(Prompts) → 기본값(Default)을 눌러 사용자 정의(Custom)**로 전환합니다. 아래 명령으로 가져올 파일 경로를 복사한 뒤 **가져오기(Import)** 파일 선택창의 파일 이름 칸에 붙여넣습니다. 사용자 정의 목록은 EES 모델의 기본 영어 제안을 대신하며, 목록 안의 기존 예시·빈 항목은 정리하여 아래 네 문구만 남깁니다. 가져오기는 추가 방식이므로 중복으로 가져오지 않습니다. 모델 전체 가져오기나 System Prompt에 넣는 JSON이 아닙니다. [제안 편집 상세](#first-use-entry).
+
+   ```powershell
+   Set-Clipboard -Value (Join-Path $env:TEMP 'ees-wo-demo\agent-pack\ees-prompt-suggestions.json')
+   ```
+
+   제안은 **천안 설비 찾기 / 헝가리 설비 찾기 / AI로 WO 초안 작성 / 직접 설비 선택하기**입니다. 앞의 두 문구는 조건이 채워진 조회 패널, 세 번째는 소음 점검 WO 초안, 네 번째는 사용자가 필터를 조작할 조회 화면을 요청합니다. 네 질문 모두 샘플 시연임을 명시합니다.
+
+5. 모델을 저장·업데이트하고 브라우저를 한 번 새로고침한 뒤 폴더 밖의 새 일반 대화에서 **EES Assistant**를 선택합니다. 이전 메모리의 화면 코드와 작성 중인 샘플 초안이 초기화됩니다. 제안을 클릭하면 사용자 설정에 따라 바로 전송되거나 입력창에 채워지며, 입력창에 들어온 경우 전송하면 됩니다. 프로그램 Apply·서버 재시작은 필요하지 않습니다.
+
+**패널 오류 확인:** 설비 조회는 성공해도 화면 표시 결과인 `panel.ok`는 실패할 수 있습니다. 도구 실행 결과의 `panel.error.code`가 그 요청의 오류 분류이며 다른 예시 코드들을 별도로 찾을 필요는 없습니다. `panel_error`는 브라우저에서 화면 코드가 실행되다 예외가 났다는 뜻입니다. v0.1.5부터 `panel.error.diagnostic`에 `script_version`, `stage`, `exception`만 추가하며 예외 원문·스택·대화 내용은 반환하지 않습니다. 같은 오류가 나면 이 세 값만 짧게 전달합니다. `browser_response_unconfirmed`는 브라우저 응답을 확인하지 못한 별도 분류이고 8초 대기는 패널 표시 요청부터 시작하므로 전체 LLM 응답 대기와 구분합니다. 초기 화면을 완성한 뒤에만 대화별 캐시에 넣어 첫 생성 실패 후 재시도가 불완전한 화면을 재사용하지 않게 했습니다. 이미 정상 작성하던 WO 상태를 일괄 초기화하지 않습니다.
+
+**첫 시연:** 일반 EES 대화에서 “한국 천안 조립 SHOP 조립 1라인 권취 설비에서 소음이 나. 점검 WO 초안 작성해줘”라고 한 번 요청합니다. 유일한 샘플 설비 `KR-CA-211`과 초안의 다섯 항목이 채워지면 화면에서 내용을 직접 수정하고, 채팅으로 “긴급으로 변경해줘”, “점검 항목을 추가해줘”를 이어서 요청합니다. 패널 너비 조절과 변경 내용 확인 → 최종 확인·샘플 발행까지 체험하고 피드백으로 운영용 목업을 다듬습니다. 설비 조회부터 시연하려면 “천안 조립 1라인의 설비를 찾아줘”라고 요청합니다. 우측 검색 패널에서 권취 설비를 선택한 뒤 “이 설비에서 소음이 나. 점검 WO 초안 작성해줘”라고 말하면 같은 패널의 WO 작성 화면으로 이어집니다. 기존 WO를 작성하던 중 다른 설비를 찾아봐도 초안은 보존합니다.
 
 <a id="plain-output-update"></a>
 
@@ -466,7 +548,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 ### 기존 Assistant의 팀 시연용 첫 화면 — 적용 준비
 
-사용자가 여섯 목표의 본격 구현 전에 팀원 시연을 위한 이름·로고·빠른 제안과 배포 방식을 먼저 준비하자고 요청했습니다. [이전 보류 결정](../evals/scenarios.md#onboarding-deferred)은 당시 이력으로 보존하고 소개·예시와 짧은 시작 안내의 준비를 재개합니다. 아래 네 가지는 시작 예시이며 범용 Assistant의 역할·최종 기능 목록을 제한하지 않습니다. 준비·실제 UI 저장·팀원 시연 결과는 구분합니다.
+사용자가 여섯 목표의 본격 구현 전에 팀원 시연을 위한 이름·로고·빠른 제안과 배포 방식을 먼저 준비하자고 요청했습니다. [이전 보류 결정](../evals/scenarios.md#onboarding-deferred)은 당시 이력으로 보존합니다. 현재 [제안 JSON](../agent-pack/ees-prompt-suggestions.json)은 후속 요청에 따라 **설비 조회·WO 목업을 확인하기 위한 네 질문**으로 구성합니다. 범용 Assistant의 역할·최종 기능 목록을 제한하지 않으며 준비·실제 UI 저장·팀원 시연 결과는 구분합니다. 이번 제안만 갱신할 때는 아래 3·4번을 적용하며 이름·소개를 다시 바꾸지 않습니다.
 
 이미 동작하는 Assistant에서 **표시 이름·소개 문구·예시 질문**을 정리합니다. 초기 기준선의 Skill 2개로 되돌리거나 모델·Tool을 다시 만들지 않습니다. 기존 System Prompt·기능·개인 설정은 유지합니다. 이 절은 적용 안내이며 실제 UI 저장 여부는 [STATUS](STATUS.md)에 기록합니다.
 
@@ -477,7 +559,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 궁금한 것을 묻고, 글을 쓰거나 업무 내용을 정리해 보세요. 연결된 문서와 이슈도 내 권한 안에서 찾아볼 수 있습니다.
 ```
 
-3. **Prompts → Custom → Import**에서 [ees-prompt-suggestions.json](../agent-pack/ees-prompt-suggestions.json)을 선택합니다. 처음 Custom으로 전환하며 생긴 빈 항목은 삭제한 뒤 가져옵니다. 가져오기는 기존 목록에 **추가**하므로 같은 예시가 이미 있으면 반복하지 않습니다. 파일 전달이 어려우면 같은 JSON의 `title` 두 값을 **Title / Subtitle**, `content`를 **Content**에 입력해 항목을 추가할 수 있습니다.
+3. **프롬프트(Prompts) → 기본값(Default)을 눌러 사용자 정의(Custom) → 가져오기(Import)**에서 [ees-prompt-suggestions.json](../agent-pack/ees-prompt-suggestions.json)을 선택합니다. 사용자 정의 목록은 해당 EES 모델의 전역 기본 제안을 대체하므로 전역 영어 목록을 삭제할 필요가 없습니다. 사용자 정의 안에 남은 기존 예시·처음 전환할 때 생긴 빈 항목은 정리해 목업 제안 네 개만 남깁니다. 가져오기는 기존 목록에 **추가**하므로 같은 예시가 이미 있으면 반복하지 않습니다. 파일 전달이 어려우면 같은 JSON의 `title` 두 값을 **Title / Subtitle**, `content`를 **Content**에 입력해 항목을 추가할 수 있습니다.
 4. 저장 및 업데이트 후 새로고침하고 **폴더 밖의 새 일반 대화**에서 Assistant를 선택합니다. 소개와 예시 질문을 확인합니다. 예시 순서는 달라질 수 있고 입력 상태에 따라 일부만 보일 수 있습니다.
 
 이 JSON은 Prompts 목록만 가져오는 형식입니다. 모델 전체 Import나 System Prompt 입력란에 넣지 않습니다. 일반 팀원이 이 설정을 반복할 필요는 없습니다. 소개 문구는 두 줄로 줄여 보일 수 있으며, 예시 질문은 개인 설정에 따라 클릭 즉시 전송되거나 입력창에 채워집니다. 토큰이나 미치환된 placeholder를 예시에 넣지 않습니다.
@@ -552,6 +634,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA> -Resume` | promote에서 중단된 실제 적용의 폴더를 사용자가 옮긴 뒤, 같은 ZIP·기록·전체 파일을 대조해 완료 기록만 남김. 파일 이동/추출·자동 시작 없음. `-CheckOnly`를 함께 쓰면 읽기 검증만 수행 |
 | `Restore` | **직전 적용 전 프로그램 상태**로 한 번 되돌림. 최초 적용의 직전 상태는 원래 Open WebUI. 복원 뒤 같은 Restore는 변경 없음 |
 | 기존 Start / Stop / Status | 같은 interpreter/cwd/데이터로 시작·정상 종료·상태 표시. 실제 앱 원본/사내 수정 여부와 적용 커밋을 구분 |
+| `Start -UseWindowsCA` | 종료된 서버에 Windows 신뢰 CA 스냅샷을 선택하고 시작. 이후 일반 Start에서도 재사용. [SSL 복구 절차](#ees-start-windows-ca) |
 
 일상 흐름은 **CheckOnly → Stop → Apply → Start → 변경 부분 확인**입니다. 사전 확인이 실패하면 서버를 중지하지 않습니다. 적용 실패 시 서버를 자동으로 다른 프로그램으로 시작하지 않고 결과에서 멈춥니다. 필요하면 사용자가 Stop 상태를 확인하고 Restore·Start를 실행합니다. 기존 Start의 한 번의 명시적 health 대기만 사용하며, 같은 실패를 자동 반복하거나 후보 import 검사를 붙이지 않습니다.
 
@@ -594,6 +677,32 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 | 모델 이름·소개·빠른 제안 | 기존 모델 ID의 메타데이터. [소개·제안 적용](#first-use-entry), 프로필은 [EES 아이콘](../branding/ees/assets/favicon.png) | 반영 전 이름·소개·제안·프로필만 복구 |
 | 공통 Prompt·Skill·Tool | 커밋별 Agent Pack ZIP에서 바뀐 항목만 기존 ID에 반영 | 실제 적용했던 직전 커밋의 해당 항목 |
 | 서비스 이름·아이콘 | 기존 `open_webui-0.11.3+ees.1-py3-none-any.whl`과 브랜딩 manifest를 재사용 가능 | 변경 전 프로그램 복원·같은 DATA_DIR/키/접속 설정 유지. [Apply/Restore 안내](#ees-wrapper-apply) 사용 |
+
+<a id="ees-start-windows-ca"></a>
+
+#### Start에서 Windows 신뢰 인증서 사용
+
+**이 옵션이 main에 반영되고 해당 CI가 통과한 뒤 사용합니다.** 현재 Apply/Restore 래퍼에서 `health_timeout`과 `cert_verify_failed`·다운로드·모델 캐시 누락 신호가 함께 나타나면, 등록된 환경이 Windows의 사내 인증서를 사용하지 못하는지 확인합니다. 2026-09-09의 [진단 결과와 이전 CA 비교](../evals/scenarios.md#ees-start-health-followup)는 이 복구 경로를 뒷받침하지만 정확한 모델·다운로드 주소와 최초 서버 종료 원인은 아직 미확인입니다.
+
+현재 PowerShell의 인증서 환경변수만 바꿔도 Start는 등록한 환경을 복원하므로 그 값이 서버에 전달된다고 가정하지 않습니다. `Start -UseWindowsCA`는 기존 Python으로 Windows ROOT/CA와 기본 경로의 신뢰 인증서를 읽고 검증한 PEM을 `state_root/trusted-ca/<sha256>.pem`에 저장합니다. 해시는 기존 배포 기록의 `runtime_ca_sha256`에 보존하고, 서버 자식 환경의 `REQUESTS_CA_BUNDLE`·`SSL_CERT_FILE`만 바꿉니다. 등록 config/DPAPI·원본 Python·패키지·DB·키·시스템 신뢰 저장소는 수정하지 않으며 TLS 인증서·호스트 이름 검증을 유지합니다. 명시적으로 별도 SSL 설정을 쓰는 클라이언트까지 바꾸지는 않습니다([HTTPX SSL 설정](https://www.python-httpx.org/advanced/ssl/)).
+
+실행 중인 서버에는 새 CA를 적용할 수 없어 Stop이 먼저 필요합니다. 아래 블록은 기존 등록 계정의 PowerShell에서 **Update → Stop → CA 선택 후 Start**를 한 번 수행하며 앞 단계가 실패하면 멈춥니다. Tool·Prompt 갱신, Apply, 새 환경 설치는 필요하지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    Set-Location "$env:USERPROFILE\team-agent-poc"
+    .\scripts\manage-ees.ps1 -Action Update
+    .\scripts\manage-ees.ps1 -Action Stop -Summary
+    .\scripts\manage-ees.ps1 -Action Start -UseWindowsCA -HealthTimeout 120 -Summary
+}
+```
+
+성공 기준은 마지막 Start의 `result=ok`, `running=true`와 기존 주소의 접속입니다. 마지막 EES 요약 한 줄과 접속 여부만 전달합니다. PowerShell 창은 열어 둡니다. 현재 실행 방식은 콘솔 분리를 보장하지 않으며, 이것이 최초 종료 원인이었는지는 확인되지 않았습니다.
+
+CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로그램 Apply/Restore에서 유지됩니다. `Status.ca_mode=windows_snapshot`으로 선택을 확인하며, Windows 신뢰 저장소 변경을 반영하려면 서버를 Stop한 뒤 옵션을 다시 지정합니다. PEM이 없거나 변조되면 시작을 차단하고 Status는 `program_valid=false`로 표시하지만 Stop은 허용합니다. CA 내보내기/검증 실패나 사용 중인 포트에는 새 서버를 실행하지 않습니다. 신뢰 파일은 DATA_DIR와 별도이므로 운영 상태 폴더와 함께 보존합니다.
+
+다시 실패하면 마지막 EES 줄의 실패 단계만 전달하고 같은 긴 대기나 재설치를 반복하지 않습니다. 인증서 해결만으로 모든 다운로드 호스트 접근·모델 캐시 확보가 보장되지는 않습니다. 캐시가 없다는 신호가 있는 동안 오류를 숨기려고 offline 모드부터 켜지 않습니다. 구형 후보 `Deploy -UseWindowsCA`를 현재 복구 절차로 사용하지 않습니다.
 
 <a id="ees-wrapper-apply"></a>
 
@@ -1814,6 +1923,8 @@ except Exception as e:
 임시 PEM은 부모 프로세스의 TemporaryDirectory 아래에 만들어 자식 종료/timeout 뒤 정리합니다. 인증서 내용·개인키·실제 경로는 출력하지 않으며 `.netrc`/앱 인증 토큰·redirect는 쓰지 않습니다. SSLKEYLOGFILE은 진단 자식 환경에서만 제외해 키 로그를 남기지 않습니다. HTTP 응답 성공은 해당 두 URL에서 CA 입력을 바꾼 결과로 인정하며 기동 지연의 인과나 앱 전체 복구로 확대하지 않습니다. 비교 성공 뒤에는 아래 릴리스별 옵션으로 적용하며, 현재 창의 REQUESTS_CA_BUNDLE만 설정해 등록 스냅샷이 바뀌었다고 보지 않습니다.
 
 <a id="ees-windows-ca-deploy"></a>
+
+다음은 **중단한 후보 Deploy 방식의 과거 안내**입니다. 현재 Apply/Restore 서버의 인증서 복구는 [Start -UseWindowsCA](#ees-start-windows-ca)를 사용합니다.
 
 **CA 비교 성공 후 배포:** `Deploy -UseWindowsCA`는 후보 Python의 표준 SSL 모듈로 Windows ROOT/CA와 기본 인증서 경로에서 CA를 읽습니다. 등록 환경과 작업 폴더를 사용하고 Open WebUI는 import하지 않습니다. 기존 서버를 멈추기 전에 비어 있지 않은 PEM과 해시를 검증하고, 해당 릴리스의 `trusted-ca/<sha256>.pem`에 저장합니다. 기존 파일을 덮어쓰지 않으며 경로 재지정·내용 변경은 거부합니다. CA 준비 실패는 기존 서버를 둔 채 종료됩니다.
 

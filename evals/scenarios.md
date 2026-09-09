@@ -1129,9 +1129,19 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 로컬 검증: 기존 Python 3.12.13/Pydantic 2.13.4에서 Confluence 읽기/보안 canary 85개, Jira 25개, GitHub 34개 **총 144개 PASS, skip 없음**. 제거한 DOM 시험의 중요 JSON/범위/조회 시각/대형 ID/본문/부분 실패 계약은 기존 읽기 시험에서 확인함. [Confluence](confluence-offline.md#plain-results), [Jira](jira-offline.md#rich-ui-removed), [GitHub](github-offline.md#rich-ui-removed)에 명령·증거를 기록함.
 - 독립 검토: 실제 diff/AST로 표시 계층 외 API·인증·마스킹·URL·pagination 보존, 삭제 범위, 새 대화와 기존 기록의 구분, 과설계를 대조함. 조회 회귀 결함은 발견하지 못함. Windows에서 연속 Python 명령의 앞 실패가 가려질 수 있어 CI의 읽기 검사 3개를 별도 step으로 분리함. 불필요한 Confluence Skill 한 줄 갱신과 사내 재등록 요구도 제거하여 대상은 기존 Tool 3개·공통 Prompt로 맞춤. 새 기능/보안 설정이나 사내 패키지 설치는 추가하지 않음.
 - 전달 검수: 지적 두 건의 수정 후 독립 대조를 통과함. 중앙 안내의 PowerShell 4개 블록은 317/162/166/167자로 제한 이내이며 명령/저장 실패 시 다음 단계로 넘어가지 않도록 안내함. 문서 검사 DOCS OK(files=25, links=627, errors=0, review_candidates=0)와 diff 검사 통과. 실제 사내 새 출력은 미실행임.
-- 사내 안내·남은 확인: [기존 항목 갱신 안내](../docs/03-openwebui-native-agent.md#plain-output-update)에 따라 main Update 후 기존 Tool 코드 3개와 공통 Prompt만 교체·저장함. 기존 ID·관리자/개인 설정·PAT·모델/Skill/Knowledge 연결과 추가 지침을 보존함. 새 대화에서 세 조회를 한 번씩 요청하고 카드 없는 일반 답변/원문 정상 여부를 1~2줄로 받음. 이전 대화의 카드는 기록으로 남을 수 있으며 DB/대화를 지우지 않음. Apply/Stop/Start·wheel·인증/격리 전수 검사는 반복하지 않음. **구현·자동 검사·독립 검토·main 반영 완료, 사내 Tool/Prompt 갱신·새 출력 확인 미완료**임.
+- 당시 사내 안내·남은 확인(후속 완료 보고 수신 전): [기존 항목 갱신 안내](../docs/03-openwebui-native-agent.md#plain-output-update)에 따라 main Update 후 기존 Tool 코드 3개와 공통 Prompt만 교체·저장함. 기존 ID·관리자/개인 설정·PAT·모델/Skill/Knowledge 연결과 추가 지침을 보존함. 새 대화에서 세 조회를 한 번씩 요청하고 카드 없는 일반 답변/원문 정상 여부를 1~2줄로 받음. 이전 대화의 카드는 기록으로 남을 수 있으며 DB/대화를 지우지 않음. Apply/Stop/Start·wheel·인증/격리 전수 검사는 반복하지 않음. **구현·자동 검사·독립 검토·main 반영 완료, 사내 Tool/Prompt 갱신·새 출력 확인 미완료**임.
 
 - 최종 CI·게시: [PR #18](https://github.com/knadalkim-a11y/team-agent-poc/pull/18)의 최종 원본 `61568f119f6b2bec03e29adaa24b207d00585a2e`, tree `c9ed44a513328f6d31907fdf1275023b9ad41275`가 [Windows/Linux Python 3.11 CI 34308748946](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34308748946) success임. 각 플랫폼에서 Confluence 85/Jira 25/GitHub 34 총 144개, 실제 wheel customization 31개, manager 72개가 모두 통과함. 기존 deployment 139개는 Windows 전부 통과/Linux 플랫폼 전용 3개 skip, 초기 branding 단위 시험의 실제 wheel 미지정 1개 skip은 뒤의 실제 wheel 검사와 구분함. 번들·PowerShell·문서 검사도 통과함. 첫 두 CI의 Windows 시험 fixture 실패는 Confluence/Jira/GitHub 기존 기록에 남기고 SQLite 정리·OS 인증서 호출·테스트 루프 초기화만 보완했으며 생산 코드를 바꾸거나 검사를 skip하지 않음. 시험 보완의 독립 검토도 통과함. [main 병합 b105a14](https://github.com/knadalkim-a11y/team-agent-poc/commit/b105a1441d1bb403684b985e20dc1a43a6519564)와 최종 원본의 tree 일치를 확인함. 이후 STATUS/이 기록의 현재 상태만 갱신하며 사내 새 Tool/Prompt 반영 성공은 아직 확인하지 않음.
+
+<a id="plain-output-applied-report"></a>
+
+### 초기 Rich UI 제거·변경 프롬프트 WebUI 반영 완료 보고 (2026-09-09)
+
+- 사용자 보고: 다른 대화에서 기존에 만든 Rich UI를 모두 제거하는 작업을 했고, 변경된 프롬프트들을 WebUI에 모두 반영했다고 알림. **Rich UI 제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 인정**함.
+- 판정 범위: 개별 Tool 3개의 등록 버전/코드, 실제 적용 SHA, 새 조회에서 카드 부재·원문 링크·세 연동 출력의 개별 확인 결과는 이번 보고에 없음. 완료한 작업을 다시 저장하도록 안내하지 않고 해당 미확인은 다음 관련 사용/변경에 묶음. 실제 코드·설정·조회 결과를 GPT가 직접 확인한 것으로 기록하지 않음.
+- 기록 변경: 원격 main `f2e0f9f`와 PR #19 head `3b3a2f1`을 기준으로 STATUS의 현재 반영 상태·반복 저장 안내·프롬프트 미반영 표현, Native 가이드의 현재 상태 참조를 정리함. 과거 실패·당시 미완료/설계 검토 기록은 보존하고 이번 보고를 추가함. 기존 실행 계획의 EES 전용 공통 정책 단계와 합의한 목업 우선 설계를 유지함.
+- 검증: 문서 3개만 변경. 관련 표현과 사용자 보고 범위를 대조하고 Linux에서 `python scripts/check_docs.py` = `DOCS OK | files=25 links=640 errors=0 review_candidates=0`, `git diff --check` 통과. 실행 코드·정책·시험·CI·실환경을 변경하거나 기존 기능 검사를 반복하지 않음.
+
 
 ## 결과 기록
 
@@ -1265,3 +1275,154 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 최신 main `028287e2ca77c3b14424b51a49871f025943554d`·AGENTS·STATUS와 열린 PR 0개를 확인하고 GitHub/Confluence의 기존 조회 뒤 카드·후속 질문 흐름을 준비함. 새 화면 검사 17개·변경된 기존 직접 상세 2개 PASS. [GitHub 실행 증거](github-offline.md#rich-ui-results), [Confluence 실행 증거](confluence-offline.md#rich-ui-results).
 - 변경 범위의 사내 기준: 실제 ID·원문·조회 범위/시각이 보이고 목록을 전체 건수나 본문으로 해석하지 않음. 질문 넣기는 입력 교체 안내·복사 초안·수동 전송을 제공하며 API를 자동 호출하지 않음. 본문은 접어 두고 키보드/좁은 화면에서 읽을 수 있으며 모델 근거와 일치함. 오류/빈 결과를 구분하고 같은 표를 답변에 반복하지 않음. Confluence는 검색→본문을 C04, GitHub는 GH02/GH04의 변경 범위에 묶어 확인함.
 - 판정: Git 준비·합성 확인이며 실제 브라우저·사내 WebUI·모델 호출·사용성은 미실행. C04/GH02·Jira UX02의 과거 PASS와 저장 보고를 보존하고 새 카드 적용 성공으로 확대하지 않음. 첫 화면·온보딩은 보류하며 기존 저장·인증·20회 안정성 검사를 반복하지 않음.
+
+<a id="legacy-ui-design"></a>
+
+### 레거시 업무 화면 설계 합의와 문서 검토 (2026-09-09)
+
+- 기준: 원격 main `f2e0f9fbf717f00e8cb6e4fe154777f4f08b7c5d`, 관련 열린 PR 0개. 사용자가 준비된 업무 화면·상황별 부품 활용, 직접 입력과 AI 작성/수정, 사용자 버튼으로 최종 결정, 목업 확인 후 실제 기능 구현 순서에 동의함. [설계 관리 원본](../docs/03-openwebui-native-agent.md#legacy-ui-design).
+- 확인 범위: 해당 AGENTS/STATUS·README의 관리 경계, Native 가이드의 Rich UI/현재 일반 출력 절차, CHANGELOG와 본 기록. 구현·정책을 바꾸지 않고 기존 문서 안에서 결정과 후속 범위를 연결함.
+- 검토 사항: 최신 폼 기준의 AI 편집과 사용자 수정 보존, 확인한 내용만 실행하는 서버 경계, 중복/결과 불명 처리, 실제 EMS 업무 로직 재사용, 개별 목업 승인과 개발 방식 합의 구분, 기존 Python·작은 웹 화면부터 시작하는 과설계 방지 기준을 대조함. 별도 검토에서도 네 문서의 diff와 합의/실행 경계·기존 상태 보존·중복을 대조했으며 수정이 필요한 중요한 문제는 발견되지 않음.
+- 검증: Linux의 원격 내용 일치 snapshot에서 `python scripts/check_docs.py` = `DOCS OK | files=25 links=634 errors=0 review_candidates=0`, `git diff --check` 통과. 원본 74개 파일의 bytes·mode·blob SHA와 tree `77f0b13a9413871d4c144a2de75210e1c0c39d1d`를 원격 기준과 대조함. 문서 4개만 변경했으며 실행 코드·시험·의존성·CI 변경과 기존 기능 전체 재시험은 없음.
+- 미구현/미확인: 실제 목업·사용자 사용성 확인·폼 상태 연동·최종 실행 경로·EMS API/필드/업무 로직·WO 발행 모두 미구현 또는 미확인. 이번 합의가 개별 목업 승인이나 쓰기 권한/정책의 확대, 사내 반영 완료를 뜻하지 않음. 이 설계 검토 당시에는 현재 읽기 전용 범위와 세 Tool/Prompt의 사내 갱신 대기를 유지함. 이후 [사용자 완료 보고](#plain-output-applied-report)는 별도 기록으로 추가함.
+
+직전 STATUS 점검의 보존 기록(초기 Rich UI 제거, 2026-09-09):
+
+2026-09-09: 원격 main `99a9ee`·관련 열린 PR 0개에서 시작해 사용자가 확인한 EES 이름·로고·기존 대화·세 연동 정상으로 래퍼 사내 적용 단위를 마감함. 초기 Rich UI 제거·일반 답변 지침·가이드·시험을 [PR #18](https://github.com/knadalkim-a11y/team-agent-poc/pull/18)로 구현하고 독립 검토·보완을 완료함. 최종 원본 `61568f119f6b2bec03e29adaa24b207d00585a2e`의 Windows/Linux CI `34308748946` success와 main 병합 `b105a1441d1bb403684b985e20dc1a43a6519564`를 확인함. 각 플랫폼에서 세 조회 144개·실제 wheel Apply/Restore 31개·manager 72개 통과. 초기 Windows 시험 fixture 실패와 수정 후 통과를 기존 evals에 보존함. 사내 Tool 3개/Prompt 저장·카드 없는 새 출력은 미완료이며 이번 안내 원본은 위 최종 커밋임. 후속 현재 상태 갱신은 문서만 수정하고 실행 코드·CI를 다시 변경하지 않음. [최종 검증·반영 경계](../evals/scenarios.md#prototype-rich-ui-removal).
+
+<a id="wo-mockup"></a>
+
+### WO 작성 참고 목업 (2026-09-09)
+
+- 기준·범위: 원격 main `f2e0f9f`, 관련 PR #19 head `f91ff10a`와 지침·상태를 확인한 로컬 작업본에서 진행함. 사용자가 합의한 화면 설계를 바탕으로 목업부터 만들자고 명시 요청하여 기존 다음 공통 정책 단계보다 이번 목업을 우선함. 초기 Rich UI 제거·변경 프롬프트 WebUI 반영 완료의 [사용자 보고](#plain-output-applied-report)는 보존함.
+- 산출물: [단일 HTML 참고 목업](../agent-pack/skills/ems-work-order/references/wo-mockup.html)과 기존 Native 가이드·STATUS·CHANGELOG 갱신. 배포 Skill·Tool·서버·패키지 의존성을 추가하지 않으며 기존 Skill 개수와 세 읽기 Tool/Prompt를 바꾸지 않음.
+- 시연 범위: 직접 폼 입력과 규칙 기반 예시 채팅의 같은 폼 수정, AI 변경 표시, 사용자 입력 보존, 필수 입력 안내, 최종 내용 확인과 샘플 결과, 확인 뒤 수정 시 재확인. 채팅·발행은 시연이며 실제 AI 호출·EMS API/데이터 변경이 없음을 화면에서 밝힘.
+- 검증 결과: Node v24.19.0에서 HTML의 실제 스크립트를 추출해 구문 확인 후 최소 이벤트 대역으로 5개 흐름을 실행·통과함. 직접 입력 보존과 AI 추가/되돌리기, 이후 수동 수정 보존과 제목 길이 제한, 필수 입력과 최신 확인값·채팅 발행 차단, 수정 후 재확인과 확인값 기반 결과, 중복 실행 차단과 완료 결과 보존을 확인함. 독립 소스 검토에서 핵심 흐름 차단 결함은 발견하지 못함. `python scripts/check_docs.py`: files=25, links=647, errors=0, review_candidates=0. `git diff --check` 통과. 브라우저 시각·좁은 화면·실제 키보드 조작은 실행 검증하지 않았으며 해당 레이아웃·네이티브 컨트롤은 소스에만 준비함.
+- 미확인: 사용자 디자인 승인·비개발자 사용성 확인, 실제 EMS 필드/업무 규칙·API/권한, Open WebUI 내 표시·최신 폼과 모델의 상태 연결, 실제 발행·중복 방지·실패 복구는 미구현 또는 미검증. 목업에서 보이는 동작을 실제 업무 통합 성공이나 쓰기 정책 변경으로 판정하지 않음. 다음 한 작업은 사용자 피드백을 받아 목업을 수정·확인하는 것임.
+
+직전 STATUS 점검의 보존 기록(적용 보고 반영, 2026-09-09): 원격 main `f2e0f9f`와 관련 PR #19 head `3b3a2f1`의 지침·상태, 변경 없는 로컬 작업본을 확인함. 사용자의 다른 대화 작업 완료 보고를 받아 Rich UI 제거·변경 프롬프트 WebUI 반영을 완료로 기록하고, 반복 저장 안내와 현재 프롬프트 미반영 표현을 정리함. 개별 Tool 코드·적용 SHA·새 조회/원문 검증까지 확대하지 않았으며 당시 실행 계획의 다음 단계를 유지함. 문서 검사와 기록 범위는 [최신 적용 보고](#plain-output-applied-report), 합의한 UI 원칙은 [설계 검토](#legacy-ui-design)에 연결함.
+
+**기존 WebUI의 대화·우측 패널 시연으로 확장 (2026-09-09):**
+
+- 요청·결정: 사용자가 기존 대화창을 그대로 쓰는 우측 패널 시연과 SHOP → LINE → PROCESS 계층을 확인함. 과도한 상세 설계 없이 시연용 목업 → 시연 피드백 → 운영용 목업 → 실제 EMS 구현 순서로 진행하고 권한 세분화는 후속으로 둠. 앞의 단독 HTML은 첫 배치 참고로 보존하며 이번 배포본과 구분함.
+- 구현 범위: [EES WO Demo Tool](../agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py) 한 개의 `wo_demo_view`/`wo_demo_update`와 조건부 [Prompt 안내](../agent-pack/system-prompts/ees-integrated-assistant.md). 샘플 32개 설비의 검색·선택, 최신 브라우저 폼 읽기·변경 번호 확인 후 부분 수정, 사용자 최종 버튼의 샘플 결과를 제공함. 별도 Skill·서버·패키지 의존성·CDN·프런트엔드 재빌드·기존 세 읽기 Tool 변경은 없음.
+- 소스 근거: [공식 execute 이벤트](https://docs.openwebui.com/features/extensibility/plugin/development/events/#execute-works-with-both-__event_call__-and-__event_emitter__), [v0.11.3 Chat.svelte](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte), [도구 실행 인자 주입](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/middleware.py), [브라우저 응답 경로](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/socket/main.py)를 대조함. execute는 공식 이벤트이나 패널 부착은 해당 버전의 화면 구조에 의존함. 고정된 코드에 모델 입력을 JSON 값으로 전달하며 임의 실행 코드를 모델에 맡기지 않음.
+- 검사 대상: 최신 값/변경 번호 전달, 사용자 입력 뒤 오래된 수정 거부, 계층별 검색과 설비 ID 일치, 필수 입력·확인 후 수정·최종 버튼·샘플 결과 보존, 브라우저 이벤트 오류/응답 미확인, 패널 닫기/다시 열기와 대화 이동·초기화. 브라우저 메모리만 사용하며 실제 EMS API·WO 저장은 없음.
+- 이번 검증 결과: Linux Python 3.12에서 `python -m unittest tests.test_wo_demo_tool -v`의 [Python 계약 검사](../tests/test_wo_demo_tool.py) 11개 통과. Node v24.19.0에서 `node tests/test_wo_demo_state.cjs`의 [실제 생성 스크립트 상태 검사](../tests/test_wo_demo_state.cjs) 4개 묶음 통과. 최소 DOM·이벤트 대역을 사용하며 실제 브라우저를 구동한 시험은 아님. 검색 계층·선택, 사용자 수정과 오래된 AI 수정의 충돌, 되돌리기·입력값 보존, 확인 후 수정·최종 버튼·중복 클릭, 닫기/대화 이동, 코드 형태의 문자열을 데이터로 취급하는 동작을 확인함. 독립 소스 검토에서 발견한 부모 없는 하위 필터 처리와 설비 변경 후 기존 내용 유지 안내를 보완함. 동일 검사를 기존 Windows/Linux CI에 연결했으며 이번 원격 CI 결과는 아직 미확인임.
+- 화면 검사 제한: control-browser로 합성 로컬 호스트에 접근했으나 `net::ERR_BLOCKED_BY_CLIENT`로 차단됨. 실제 화면 조작·시각 배치·좁은 화면·사내 WebUI/LLM 시험은 미실행으로 유지하고 다른 브라우저나 경로로 우회하지 않음. 문서 검사 `files=25, links=658, errors=0, review_candidates=0`과 `git diff --check` 통과. PowerShell 적용 명령은 각각 2,500자 이내로 준비했으며 실제 사내 실행은 미확인임.
+- 적용 경계: PR #19 `docs/legacy-ui-workflow` 준비본이며 main 미병합. [사내 적용 안내](../docs/03-openwebui-native-agent.md#wo-mockup)를 준비했으나 실제 Tool 저장·모델 연결·Prompt 절 추가·사내 WebUI 표시·사내 LLM 수정 흐름·사용자 시연 피드백은 미확인. 사외 합성 호스트 검사를 실제 Open WebUI 통합 성공으로 바꾸지 않음. 운영용 목업 승인·EMS 업무 규칙/API·권한·실제 발행은 후속 범위임.
+
+직전 STATUS 점검의 보존 기록(첫 WO 목업, 2026-09-09): 원격 main `f2e0f9f`와 관련 PR #19 head `f91ff10a`의 지침·상태를 기준으로 사용자가 요청한 단독 HTML 참고 목업을 준비함. 입력 항목과 예시 채팅은 합성이며 당시 실제 AI·EMS·WebUI 통합과 디자인 승인은 미확인으로 구분함. 실행 검사는 위 첫 목업 기록에 보존함.
+
+**사내 시연 동작 보고와 첫 피드백 반영 (2026-09-09):**
+
+- 시작 기준: 원격 main `f2e0f9fbf717f00e8cb6e4fe154777f4f08b7c5d`, 관련 draft PR #19 head `450cc136a55b9a9107e4b971d00de37fd632e18e`, tree `96f142b5fc76027785d18fb493176187985582f9`와 같은 무변경 로컬 tree에서 진행함. 이전 코드의 [Windows/Linux CI 34316420142](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34316420142)는 completed/success로 확인함. 이번 개선 코드의 CI 결과로 바꾸지 않음.
+- 사용자 보고: 위 head의 파일 두 개를 꺼내 기존 WebUI에 등록하는 안내 이후 “기능 동작하는거 확인했어”를 수신함. 첫 WO 시연의 사내 기능 동작 확인으로 기록하고 설치 확인을 반복하지 않음. 사내 등록 바이트·정확한 SHA·모든 세부 시험과 실제 EMS 기능을 직접 확인했다는 뜻은 아님. 당시 사외 브라우저 접근 차단은 앞의 역사적 제한으로 보존함.
+- 받은 피드백: AI가 처음부터 초안을 채워 사람의 입력을 줄일 것, 옆 업무 패널 크기를 조절할 것, 설비 찾기를 별도 Tool 기능으로 분리해 다른 업무에서도 재사용할 것. 기존 단일 Python 등록 파일의 v0.1.1과 WO Prompt 절만 갱신하며 별도 서버·새 의존성·새 등록 항목은 추가하지 않음.
+- 작성 흐름: Prompt가 현재 선택/대화 조건으로 설비를 정한 뒤 `equipment_id`와 네 작성 필드를 한 번에 채우도록 함. 증상이 없으면 상태 점검 목적·세부 증상 미입력의 시연 초안을 쓰고, 미지정 유형/우선순위는 점검/일반 제안값으로 안내함. 관찰·원인·긴급성을 만들어 넣지 않으며 복수/누락 후보는 임의 선택하지 않음. 기존 수동 내용·최신 revision·사람의 최종 버튼은 유지함. 화면 선택 클릭 자체가 AI를 재호출한다고 안내하지 않음.
+- 조회 분리: `ems_demo_find_equipment`는 브라우저·채팅 메타데이터 없이 샘플 설비만 반환하는 독립 호출 기능임. 동일 파일의 공통 조회 함수·32개 카탈로그를 WO 대상 검증에도 사용하고 같은 카탈로그를 화면에 직렬화함. 모델이 조회 결과를 WO에 전달하거나 WO가 내부 공통 함수를 호출할 수 있으며, 다른 Tool을 실행하는 별도 AI 루프는 없음. 직접 조회의 0건·복수건·잘림을 정상 결과로 구분하고 정확 ID/명시 범위가 다른 WO 수정은 화면 호출 전에 거부함.
+- 너비 조절: 넓은 화면의 경계 드래그와 좌우 방향키·Home/End를 지원함. 패널 350~800px, 대화 최소 360px와 경계 10px를 가용 폭에 맞춰 유지하고 창/네이티브 옆 패널 변화에 반응함. 폭이 부족하면 기존 서랍 화면을 사용함. 같은 대화의 닫기/열기에는 폭을 유지하고 이동/새로고침에서는 초기화함. v0.11.3의 padding/gap 없는 flex 행과 margin 없는 네이티브 형제를 전제로 한 작은 어댑터이며 임의 레이아웃용 범용 프레임워크가 아님.
+- 검토·검증: Linux Python 3.12.13에서 `python -m unittest tests.test_wo_demo_tool -v` 15개, Node v24.19.0에서 `node tests/test_wo_demo_state.cjs` 5개 묶음 통과. 독립 조회의 정확/부분 조건·빈/복수 결과·원본 카탈로그 보존·공통 화면 데이터, WO의 잘못된 ID/범위 거부와 경로 보완, 완성 초안 일괄 반영·기존 입력 충돌·최종 확인을 확인함. 최소 DOM 대역으로 드래그/키보드 한계·컨테이너 축소·포인터 취소/종료·관찰자 정리·폼과 revision 보존을 확인함. 독립 소스 검토에서 공백 ID가 전체 검색으로 바뀌어 첫 설비를 선택할 수 있던 경계를 발견해 반드시 단일 결과인 경우만 선택하도록 수정하고 회귀 사례를 추가함.
+- 문서·변경 검사: `python scripts/check_docs.py`의 files=25, links=659, errors=0, review_candidates=0과 `git diff --check` 통과. Tool·Prompt·Native 가이드·현재 상태/증거/변경 기록과 두 관련 시험만 수정하고 기존 세 읽기 Tool·서버 설정·프로그램 wheel은 변경하지 않음. 원격 게시와 이번 head의 CI는 해당 PR에서 확인하며 위 이전 CI 성공과 구분함.
+- 적용·미확인: 기존 EES WO Demo 코드를 교체하고 기존 WO Prompt 절만 교체한 뒤 새로고침 또는 새 일반 대화에서 새 화면 코드를 사용하도록 안내함. 이번 개선본의 사내 저장·사내 모델이 한 요청으로 초안을 채우는 품질·실제 드래그 배치는 아직 미확인임. 자동 시험은 실제 브라우저·사내 LLM 시험이 아니며 사용자 최종 버튼도 샘플 결과만 표시함. 다음 사용자 확인은 이 변경 흐름 한 묶음으로 한정하고 실제 EMS/운영 화면·권한 설계는 후속으로 유지함.
+
+직전 STATUS 점검의 보존 기록(기존 WebUI 패널 구현, 2026-09-09): 기존 대화·우측 패널, SHOP → LINE → PROCESS, 시연 후 운영용 목업 순서를 반영하여 단일 Tool과 조건부 Prompt를 준비함. 당시 사내 저장·패널 표시·모델 수정은 미확인이었으며 첫 HTML과 기존 Rich UI 제거·프롬프트 적용 보고를 보존함. 구현 검사·브라우저 차단 근거는 위 확장 기록, 이후 실제 동작 보고는 이번 기록에 구분함.
+
+**설비 조회의 등록 단위 합의 (2026-09-09):** 사용자는 설비 조회가 여러 업무에서 자주 쓰는 공통 기능이라 독립 Tool 등록이 유리하다는 의도를 설명하고, 이번 시연은 적용이 간단한 단일 등록 항목을 유지하기로 함. 현재 별도 호출 함수와 향후 독립 등록·관리 방향을 Native 가이드에서 구분하고 STATUS·CHANGELOG에 반영함. 기준 main `f2e0f9f`, PR #19 head `aecbe642`와 같은 로컬 tree를 확인했으며 코드·Prompt·설정·시험·전달 명령은 변경하지 않음. 기존 개선본의 사내 적용 성공이나 운영용 분리 구현 승인·완료로 확대하지 않음. 문서/diff 검사만 수행하며 완료한 코드 시험·사내 확인을 반복하지 않음. 직전 STATUS의 첫 피드백 구현·검사·사내 미확인 범위는 위 첫 피드백 기록에 보존함.
+
+**설비 조회의 우측 검색 패널과 목업 제안 추가 (2026-09-09):**
+
+- 요청·기준: 사용자가 단일 등록 유지 합의에 이어 설비 조회에도 우측 패널이 표시되길 요청함. 원격 main `f2e0f9f`, 관련 draft PR #19 head `2beca4116020f3c4dd545870d7507a0d2f57672e`, 같은 로컬 tree `d733c6f37c951916477c0a1fb9caab29342b05c6`에서 진행함. 앞선 코드 원본 `aecbe642b62330f5db2bd16ea8bec8f7f4900dc2`의 [CI 34317613425](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34317613425)는 completed/success로 확인했으며 새 검색 패널 구현의 검사나 사내 적용 성공과 구분함.
+- 변경 범위: EES WO Demo v0.1.2의 설비 조회 함수가 대화에서 우측 검색 화면을 표시하도록 하고, 같은 패널에서 필터·결과·선택 정보를 확인한 뒤 WO 요청으로 이어지도록 함. 내부 공통 설비 조회는 화면과 분리해 유지하며 등록 항목·서버·의존성을 추가하지 않음. 설비 탐색 상태와 WO 초안·대상·확인/완료 상태를 구분하고 탐색만으로 기존 WO를 바꾸지 않음.
+- 대화 계약: 조회 결과와 `panel.ok`를 별도로 확인해 조회 성공을 화면 표시 성공으로 바꾸지 않음. `wo_demo_view`의 `equipment_search.selected_equipment`로 화면에서 고른 설비를 읽고, 사용자가 그 설비의 WO 작성을 요청한 경우에만 명시적으로 ID를 전달함. 기존 WO 수정 요청에는 원래 대상을 유지함. 수동 선택 자체는 AI 호출·WO 발행이 아니며 검색 결과의 빈/복수/잘림·샘플 경계를 유지함.
+- 필요한 확인: 조회 조건과 화면 결과 일치, 상위 조건이 생략된 조회·정확 ID·빈/복수 결과, 직접 검색·선택에서 WO 초안으로 연결, 기존 초안/확인/발행 완료 상태 보존, 화면 응답 실패와 데이터 성공의 구분, 기존 너비 조절·새 대화/닫기 동작을 관련 합성 검사로 확인함. 실제 사내 모델의 호출·화면 표시·사용성은 사용자 확인 전이며 이전 확인을 반복 요구하지 않음.
+- 첫 화면 제안: 사용자가 현재 영어 기본 문구 대신 목업 확인용 질문을 요청해 기존 [제안 JSON](../agent-pack/ees-prompt-suggestions.json)을 천안 설비·헝가리 설비·AI WO 초안·직접 설비 선택의 네 문구로 교체함. v0.11.3의 기존 모델 편집/제안/새 대화 원본을 대조해 사용자 정의 목록이 모델별 기본 제안을 대체하고 가져오기는 기존 사용자 정의 목록에 추가됨을 확인함. [적용 안내](../docs/03-openwebui-native-agent.md#first-use-entry)에 기본값 → 사용자 정의·빈/기존 항목 정리·가져오기·저장과 EES 모델 선택을 명시함. Tool·Prompt와 같은 원본에서 세 번째 파일로 내보내며 모델 전체 가져오기·서비스 재시작은 없음.
+- 검증 결과: Linux Python 3.12.13에서 `python -m unittest tests.test_wo_demo_tool -v` 19개, Node v24.19.0에서 `node tests/test_wo_demo_state.cjs` 7개 묶음 통과. 실제 Tool이 생성한 execute payload와 최소 DOM으로 조회 패널·수동 선택에서 완성 초안 전달, 기존 수동 내용/확인/발행 결과 보존·복귀, 표시 실패/잘못된 응답·시간 초과 시 데이터 성공과 구분을 확인함. 소스 검토에서 입력 중 공백을 잘라 단어 사이 공백을 입력하지 못하는 경계를 발견해 화면 입력은 보존하고 검색 비교에서 정리하도록 수정·회귀 검사함. 성공 `panel` 응답은 표시 상태만 반환하도록 줄여 서로 다른 WO/조회 건수와 중복 후보가 섞이지 않게 함. 제안 JSON 4개의 형식과 실제 샘플 조건을 대조해 천안 2건·헝가리 1건·WO 대상 1건임을 확인함. 모델이 자연어 질문을 정확히 도구 인자로 변환하는 실환경 시험과는 구분함.
+- 전달 경계: 앞서 안내한 `aecbe642` v0.1.1은 설비 조회만으로 패널을 표시하지 않는 이전 준비본임. 새 v0.1.2 Tool 코드·변경된 WO Prompt 절·제안 네 개를 기존 항목에 반영하도록 안내하며 새로고침으로 이전 브라우저 코드를 초기화함. 이번 사내 저장·검색 패널/제안 표시·클릭/모델 동작은 미확인이며 운영용 독립 Tool 등록은 후속 방향으로 유지함.
+- 문서·범위 검사: `python scripts/check_docs.py`의 files=25, links=667, errors=0, review_candidates=0과 `git diff --check` 통과. 변경은 시연 Tool·WO Prompt 절·기존 제안 JSON·관련 가이드/상태/기록과 두 시험에 한정하며 원래 세 읽기 Tool·서버 설정·프로그램 wheel은 유지함. 실제 브라우저·사내 LLM 검사는 미실행임.
+
+**사내 갱신 수행 보고와 대화 이동 후 패널 복원 (2026-09-09):**
+
+- 기준: 원격 main `f2e0f9fbf717f00e8cb6e4fe154777f4f08b7c5d`, 관련 draft PR #19 head `5a80ac6db0a088d0f0e3711ec9dc883c36c99466`, 같은 로컬 tree `6a640be7a4f4945d5494b9b280bf1a8662665c2f`와 지침·상태를 대조함. 해당 이전 개선본의 [Windows/Linux CI 34320080356](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34320080356)는 completed/success로 확인했으며 이번 복원 수정본 검사로 바꾸지 않음.
+- 사용자 보고: v0.1.2의 기존 Tool 코드·WO 지침·제안 네 개 갱신 안내 뒤 사용자가 수행했다고 알리고, 첫 제안 시연 도중 다른 대화로 이동했다 돌아오니 패널이 사라져 다시 켤 수 없다고 보고함. 갱신 절차 수행과 이 사용성 문제를 확인한 보고이며 등록 바이트·SHA·제안 네 개의 개별 표시/클릭·전체 WO 흐름을 직접 대조한 것은 아님. 반복 설치 확인을 요구하지 않고 이번 결함을 수정함.
+- 원인 범위: 기존 JavaScript는 대화 경로 또는 채팅 DOM이 달라지면 현재 controller와 메모리 상태를 폐기하고, 닫기 버튼도 패널 내부에만 두어 직접 재열기 경로가 없었음. 사용자 보고와 일치하는 소스 동작이며 별도 사내 로그·화면 원문을 요구하지 않음. 이전 코드가 이미 폐기한 입력을 이번 수정이 소급 복원한다고 안내하지 않음.
+- 변경·완료 조건: v0.1.3은 같은 브라우저 탭의 일반 대화별 검색·선택·WO 초안·확인/완료 상태·화면 종류·너비와 열림 여부를 유지하고, 해당 대화로 돌아오면 다시 연결함. 해당 대화에서 패널을 한 번 연 뒤에는 채팅 오른쪽 위의 열기/닫기 버튼으로 AI 호출 없이 재개함. 다른 대화에 앞 대화의 상태를 노출하지 않으며 늦게 온 다른 대화의 실행 요청이 현재 패널을 지우거나 바꾸지 않도록 함. 새로고침·탭 종료·로그아웃 시 초기화하는 메모리 범위이며 새 서버·영구 저장·등록 항목은 추가하지 않음.
+- 적용 범위: 기존 EES WO Demo 코드만 교체하는 안내를 준비하며 WO 지침·제안 JSON·모델 연결·이전 연동 설정은 유지함. 새로고침으로 이전 실행 코드를 초기화한 뒤 새 시연을 시작하여 대화 이동/복귀와 버튼 닫기/재열기를 한 묶음으로 확인하도록 함. 수정본 사내 적용·실제 DOM/라우팅·계정 변경 동작과 실제 브라우저 사용성은 사용자 확인 전임.
+- 검토·검증 결과: Linux Python 3.12.13에서 `python -m unittest tests.test_wo_demo_tool -v` 기존 19개, Node v24.19.0에서 `node tests/test_wo_demo_state.cjs` 10개 묶음 통과. 실제 Tool의 execute payload와 최소 DOM 대역으로 추가 Tool 호출 없는 A → B → A 복원, 새 채팅 DOM에 재연결, 검색/선택·수동 초안·검토·시연 발행 결과·너비·닫힘 선호 보존, 다른 대화의 지연 요청 거부를 확인함. DOM 변경·popstate·Navigation API 경로와 auth/pagehide 정리, 활성 패널의 resize 처리만 유지하며 자체 DOM 변경 후 관찰자 호출이 안정되는지도 확인함. 독립 소스 검토에서 공개 Python 함수·수정 revision·최종 발행 버튼의 계약이 유지되고 새 저장소·의존성·전역 라우트 교체가 없음을 대조함. 이 합성 검사는 실제 WebUI 렌더링·사내 LLM 통합·계정 격리 성공을 뜻하지 않음.
+- 문서·범위 검사: `python scripts/check_docs.py`의 files=25, links=670, errors=0, review_candidates=0과 `git diff --check` 통과. 시연 Tool·해당 JavaScript 시험·기존 가이드/상태/기록만 변경하며 Prompt·제안 JSON·서버·프로그램 wheel은 변경하지 않음. 이번 원격 CI는 PR의 새 head 상태로 확인하며 앞선 CI 성공과 구분함.
+
+직전 STATUS 점검 보존(검색 패널·제안 준비, 2026-09-09): main `f2e0f9f`, 관련 PR #19 head `2beca411`에서 설비 조회 우측 패널과 목업 제안을 준비하고 기존 WO 상태 보존·선택에서 초안 작성으로 연결함. 당시 새 Tool·Prompt·제안의 사내 저장/동작은 미확인이었으며 구현 검사는 위 검색 패널 기록, 이후 갱신 수행 보고는 이번 기록에 구분함.
+
+**업무 패널 정상 보고와 상단 아이콘 스타일 (2026-09-09):**
+
+- 사용자 보고: v0.1.3 원본 `dd2c3767112cf30762df77ca4d3de2f836fc303f`의 갱신 안내 뒤 업무 패널 닫기/열기를 직접 확인했고 기능이 정상 작동한다고 보고함. 이전 대화 이동 복원 확인 안내에 대한 기능 정상 보고로 인정하며 등록 코드 원문·모든 경계 조건을 직접 대조한 것으로 확대하지 않음. 이번 요청은 오른쪽 위 ‘제어’와 어울리는 버튼 디자인이며 기능 전수 재검사를 요구하지 않음.
+- 기준·범위: main `f2e0f9f`, PR #19 head `dd2c3767`, 같은 로컬 tree `29b06961add9c925427b6d3ba99b38f4908a6f0e`와 지침·상태를 대조함. v0.1.4는 [v0.11.3 Navbar](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Navbar.svelte)의 Controls 버튼 스타일과 상단 배치를 사용함. 버튼은 패널 아이콘과 이름 안내·열림 상태를 제공하고 원래 Controls 동작은 유지함. 기존 Tool 코드만 갱신하며 Prompt·제안 JSON·서버·의존성·업무 처리 계약은 변경하지 않음.
+
+- 검토·검증: 버튼은 기존 Controls와 같은 24px 영역·20px 선 아이콘을 사용하고 title/aria-label/aria-expanded로 이름과 상태를 알림. Controls가 숨겨진 경우에도 같은 상단 도구 모음을 사용함. 기존 Node 생성 JavaScript 검사 10개 묶음을 통과했으며 기존 검사에 상단 재생성·Controls 부재·아이콘 위치 및 닫기/재열기를 반영함. 대화별 복원·수동 초안·검토/시연 결과·관찰자 안정성도 유지됨을 확인함. `python scripts/check_docs.py`는 files=25, links=672, errors=0, review_candidates=0이며 `git diff --check` 통과. 공개 Python API는 변경하지 않아 기존 Python 검사는 반복하지 않음. 실제 WebUI의 픽셀 배치·디자인 만족도는 사내 적용 전이며 소스·합성 검사와 구분함.
+
+직전 STATUS 점검 보존(대화별 복원 준비, 2026-09-09): 2026-09-09: main `f2e0f9f`, 작업 기준 PR #19 head `5a80ac6d`와 이전 개선본 CI success를 확인하고, 사용자의 v0.1.2 갱신 수행·대화 이동 후 패널 소실 보고를 반영함. 이동 때 상태를 폐기하던 동작을 대화별 복원·직접 열기/닫기로 보완함. 기존 Python 19개·생성 JavaScript 10개 묶음·문서/diff 검사 통과. 코드·검사·보고 경계는 [목업 기록](../evals/scenarios.md#wo-mockup)에 보존함. 이번 수정본의 사내 적용·실제 이동/버튼 동작은 미확인임.
+
+**패널 실행 예외 보고와 짧은 진단·재시도 보완 (2026-09-09):**
+
+- 기준·보고: main `f2e0f9f`, PR #19 head `4cd61bf157cec57775a2edd4ce516c88ea2e705d`, 로컬 동일 tree `3425484c8e377b4fcdf9416cdec3ca43df741a12`와 지침·상태를 대조함. 사용자가 `ems_demo_find_equipment`의 `panel.ok=false`, `error.code=panel_error`와 고정 안내문을 전달함. 이것이 요청한 오류 분류 값이며 `browser_response_unconfirmed`·`unsupported_layout`은 다른 분기 예시라 추가로 찾을 필요 없음을 설명함. v0.1.4 실제 저장/등록 바이트는 직접 확인하지 않음.
+- 원인 범위: `panel_error`는 화면 스크립트의 outer catch에만 있어 브라우저에 코드가 도착해 실행 중 예외가 발생한 것으로 좁힘. 기존 코드는 예외 종류·위치를 버려 실제 최초 실패 원인은 이 결과만으로 확정할 수 없음. 별도 LLM 첫 응답 지연(단독 GLM 5.2에서도 간헐적이라는 후속 보고 포함)이나 8초 브라우저 응답 대기 초과를 이번 코드의 확정 원인으로 삼지 않음.
+- 보완: v0.1.5의 `panel.error.diagnostic`은 `script_version`, 고정 `stage`, 허용된 `exception` 이름만 반환하며 예외 원문·스택·사용자 데이터는 포함하지 않음. 초기 화면을 첫 렌더링 전에 캐시에 넣던 경계는 실패를 주입해 재현함. 첫 렌더링 성공 뒤 캐시하도록 바꿔 다음 조회가 불완전한 화면을 재사용하지 않게 함. 이것은 재현한 복구 경계의 보완이며 사용자의 최초 예외를 재현/해결했다는 뜻이 아님. 기존 정상 WO·패널 상태는 일괄 삭제하지 않음.
+- 적용 범위: 기존 Tool 코드만 교체하고 새로고침한 뒤 문제가 났던 조회 한 번에서 표시 또는 짧은 진단값을 확인함. 사용자에게 전체 로그·파일·사진을 요구하지 않으며 Prompt·제안 JSON·서버·의존성·공개 도구 함수는 변경하지 않음. 실제 사내 결과는 미확인임.
+- 검증: 실제 생성된 화면 스크립트를 사용하는 합성 DOM 검사 `node tests/test_wo_demo_state.cjs` **11개 묶음 PASS**. 첫 렌더링 실패 후 새 화면으로 재시도 성공, 단계·예외 이름만 반환, 원문/스택 누출 없음, 기존 수동 WO 내용·revision·단계 보존을 확인함. 문서 25개·링크 674개 오류 0과 `git diff --check` PASS. 공개 Python API는 바꾸지 않아 이전 19개 검사를 반복하지 않음. 실제 사내 브라우저의 최초 예외 재현/해결까지 확인한 것은 아님.
+
+직전 STATUS 점검 보존(아이콘 스타일 준비, 2026-09-09): 2026-09-09: main `f2e0f9f`, 작업 기준 PR #19 head `dd2c3767`와 같은 로컬 tree를 확인함. 사용자의 패널 열기/닫기·기능 정상 보고를 반영하고 Open WebUI v0.11.3 상단 ‘제어’ 버튼 원본에 맞춰 업무 패널 아이콘과 배치를 조정함. 기존 생성 JavaScript 10개 묶음·문서/diff 검사 통과. 범위·검사와 앞선 복원 구현 기록은 [목업 기록](../evals/scenarios.md#wo-mockup)에 보존함. 이번 디자인의 사내 적용은 미확인임.
+
+
+**v0.1.5 안내 후 패널 표시 성공 보고 (2026-09-09):**
+
+- 기존 EES WO Demo 코드 교체·새로고침·설비 조회 안내 원본은 `0767c815bc31d67cd2c4c41450a8c05206d8f41c`(v0.1.5)임. 안내 뒤 사용자가 설비 조회 패널이 이제 표시된다고 보고함. 이번 표시 확인 단위를 마치며 같은 갱신·전체 기능 검사·진단값 전달을 다시 요구하지 않음.
+- 확인 범위는 사용자 보고에 따른 현재 패널 표시임. 사내 등록 코드·전체 SHA 직접 대조, 최초 예외 원인 확정·장기 재발 방지 확인으로 확대하지 않음. 앞선 `panel_error` 실패와 합성 오류 주입의 첫 렌더링 캐시 보완 근거는 위 기록에 보존함. 재발할 때만 해당 요청의 진단 세 값을 확인함.
+- 이번 작업은 STATUS·Native 가이드·이 평가 기록만 갱신하며 실행 코드·설정·시험 코드는 바꾸지 않음. 문서 25개·링크 675개 오류 0과 diff 검사 PASS. 완료한 기능 시험은 반복하지 않음. 시연 피드백 → 운영용 목업 → 실제 EMS 구현 순서를 유지함.
+
+직전 STATUS 점검 보존(패널 진단 준비, 2026-09-09): 2026-09-09: main `f2e0f9f`, 작업 기준 PR #19 head `4cd61bf1`와 같은 로컬 tree를 확인함. 사용자가 전달한 `panel_error`를 브라우저 화면 코드의 실행 예외로 분류함. 실제 최초 오류는 미확정이며, 합성 오류 주입으로 첫 렌더링 실패가 캐시에 남아 재시도까지 막는 경계를 재현해 보완함. 생성 JavaScript 11개 묶음·문서/diff 검사 통과. 오류 결과의 고정 진단값·기존 상태 보존과 검증 범위는 [목업 기록](../evals/scenarios.md#wo-mockup)에 보존함. 수정본의 사내 확인은 아직임.
+
+
+**크기 조절 바의 포인터 포커스 표시 보완 (2026-09-09):**
+
+- 기준: main `f2e0f9f`, PR #19 head `cd836593959b1dd1509c1516cb75eb17aed38c97`, 로컬 동일 tree `830475c52aa9c2c33a6ef524f350cb50e05a3048`. v0.1.5 안내 후 패널 표시 성공 보고에 이어 사용자가 크기 조절 바를 클릭하면 생기는 파란 테두리 제거를 요청함.
+- 원인·수정: 기존 pointerdown의 focus 호출과 모든 focus에 파란 outline을 지정하는 핸들러가 연결됨을 확인함. v0.1.6은 포인터로 focus한 직후 outline을 none으로 바꾸고, 허용된 너비 조절 키를 누르면 표시를 복원함. 기존 Tab 포커스·드래그·방향키·Home/End·너비 제한·WO 상태를 유지하며 새 리스너나 별도 스타일시트는 추가하지 않음.
+- 검증: `node tests/test_wo_demo_state.cjs`의 기존 11개 묶음 PASS. 생성 스크립트의 포인터/키보드 너비 조절·대화별 상태·진단/재시도 경계를 확인했고 시험 코드는 진단 버전 기대값만 갱신함. 실제 브라우저의 테두리 렌더링 검증과는 구분함. 문서 25개·링크 676개 오류 0, diff 검사 PASS. 전체 Python 시험·서버 재시작·이전 사내 기능 검사를 반복하지 않음.
+- 적용: 기존 EES WO Demo 코드만 교체하고 한 번 새로고침한 뒤 크기 조절을 사용 중 확인함. v0.1.5 패널 표시 성공은 유지하되 v0.1.6의 실제 저장·표시 변경은 아직 미확인임.
+
+직전 STATUS 점검 보존(패널 표시 성공, 2026-09-09): 2026-09-09: main `f2e0f9f`, PR #19 head `0767c815`와 로컬 동일 원본을 확인함. v0.1.5 갱신 안내 후 사용자가 패널 표시 성공을 보고하여 현재 상태·가이드·평가 기록만 갱신함. 실행 코드·설정·검사 코드는 변경하지 않았고 문서/diff만 점검함. 최초 원인 미확정과 이전 실패·합성 검사 기록은 [목업 기록](../evals/scenarios.md#wo-mockup)에 보존함.
+
+
+**v0.1.6 크기 조절 표시 적용 확인 (2026-09-09):**
+
+- 전달 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc`의 기존 Tool 코드 교체 안내 뒤 사용자가 적용 및 정상 동작을 보고함. 요청한 크기 조절 바의 마우스 표시 수정 확인으로 이번 단위를 마침. 추가 교체·전체 기능 검사·진단값 전달을 요청하지 않음.
+- 실제 사내 사용자의 확인 보고이며 등록 코드/전체 SHA 직접 대조나 키보드 조작 별도 실측을 의미하지 않음. 앞선 패널 예외·표시 성공 이력과 최초 예외 원인 미확정 상태는 보존함.
+- 이번 기록은 STATUS와 이 평가 문서만 갱신함. 실행 코드·설정·시험 코드는 그대로 두고 문서 25개·링크 677개 오류 0과 diff 검사 PASS를 확인함. 다음은 현재 목업의 시연 피드백을 화면 개선에 반영하는 것임.
+
+직전 STATUS 점검 보존(크기 조절 표시 수정 준비, 2026-09-09): 2026-09-09: main `f2e0f9f`, PR #19 head `cd836593`·동일 tree와 지침/상태를 대조함. 크기 조절 바의 모든 focus에 테두리를 강제하던 원인을 확인하고 포인터 조작 직후 해제·키보드 너비 조절 때 복원하는 두 곳을 수정함. 생성 JavaScript 11개 묶음 통과, 문서/diff 점검. 실제 사내 표시 변경은 적용 후 확인 대상이며 [목업 기록](../evals/scenarios.md#wo-mockup)에 범위를 보존함.
+
+
+<a id="ees-start-health-followup"></a>
+
+### 정상 사용 후 서버 종료 의심·Start health 실패 (2026-09-09)
+
+- 보고: 앞선 래퍼 Apply/Start·이름/로고·연동 정상과 v0.1.6 패널 크기 조절 적용/정상 보고 뒤 서버가 종료된 것 같다는 요청을 받음. 기존 등록 계정/환경에서 Start -HealthTimeout 120 -Summary를 안내했으며 사용자가 start failed, health_check를 보고함. 실제 종료와 최초 원인은 확인되지 않았고 기존 성공을 현재 가동 증거로 사용하지 않음.
+- 범위: 원격 main `f2e0f9f`, 관련 PR #19 head `986f9412dbaa7cba082005cda1caaeaf818245e4`, 로컬 동일 tree `2f3521af046ca42a495f4db73cfe0a64124a9853` 확인. 최근 v0.1.5/v0.1.6은 Tool 패널과 검사/문서만 변경했고 서버 실행 스크립트 변경은 없음. 실제 사내 설정·환경 변화, 직전 질의한 Sub-agents 설정의 변경/활성화 여부는 미확인임.
+- 읽기 검토: Start의 health_check는 health_timeout뿐 아니라 process_exited/identity_unavailable/identity_changed도 포함함. 실패 세부 reason·elapsed_seconds·exit_code·log_id는 state_root/last-operation.json의 result.process에 저장됨. timeout 후 child를 자동 종료하지 않아 현재 생존과 health를 한 번 확인할 필요가 있음. 구형 Diagnose/registry.last_failure는 과거 후보 Deploy/Rollback 실패를 볼 수 있으므로 이번 확인에 사용하지 않음.
+- 실행 방식: Windows에서 CREATE_NEW_PROCESS_GROUP만 사용하고 콘솔은 분리하지 않아 창 종료 영향을 받을 수 있음. 최초 실제 종료 원인으로 확정하지 않음. [콘솔 상속](https://learn.microsoft.com/en-us/windows/console/creation-of-a-console), [콘솔 닫기 신호](https://learn.microsoft.com/en-us/windows/console/ctrl-close-signal). 최초 종료와 이번 재시작 실패가 같은 원인이라는 근거도 아직 없음.
+- 다음 확인: 기존 Python을 -I -S -B로 실행하는 2,148자 이내 단일 PowerShell 블록을 준비함. 저장된 Start 실패인지 먼저 확인하고 실패 reason/time/exit, 현재 등록 프로세스 identity와 2초 health 조회 1회, 해당 실패 log_id의 끝 4MiB를 기존 로그 요약기로 읽어 첫 오류 종류·고정 signal·공개 프레임 하나를 FAIL/NOW/LOG 세 줄에 반환함. 원문 로그·주소·키는 출력하지 않음. startup_complete 등 로그 signal은 현재 health의 대체 근거가 아님. 사용자는 짧은 세 줄만 전달하며 실패 시 반복 Start·대기 확대·재설치·Stop/Restore는 수행하지 않음.
+- 검증: 진단 Python 문법 검사 PASS, 읽기 경로와 출력 항목을 검토함. 실제 Windows/사내 진단은 다음 사용자 실행 대상이며 코드·설정·서버를 수정하지 않음. 이번 변경은 STATUS와 이 기록 두 문서뿐이며 문서 25개·링크 676개 오류 0, diff 검사 PASS.
+
+직전 STATUS 점검 보존(크기 조절 적용 확인, 2026-09-09): 2026-09-09: main `f2e0f9f`, PR #19 head `ba396da8`·로컬 동일 tree와 지침/상태를 대조함. v0.1.6 적용과 크기 조절 정상 동작을 사용자 보고로 확인하고 현재 상태·평가 기록만 갱신함. 문서/diff를 점검하며 코드·설정·완료한 기능 검사는 반복 변경/실행하지 않음. [표시 수정·사내 확인 근거](../evals/scenarios.md#wo-mockup).
+
+**Start 실패 요약 수신·Windows CA 경로 보완 (2026-09-09):**
+
+- 사용자 입력: `fail reason=health_timeout seconds=120.0 exit=-`, `now process=true health=false`, `log error=other signals=cert_verify_failed,download_activity,model_cache_missing frame=httpcore/_exceptions.py:14:map_exceptions`. 현재 프로세스 생존과 응답 실패를 구분했으며, 모델 자산 다운로드의 TLS 실패/재시도 때문에 초기화가 지연될 가능성을 좁힘. 정확한 모델·요청 호스트·최초 서버 종료 원인은 이 요약만으로 확정하지 않음.
+- 이전 근거: 이 문서의 Windows CA 비교에서 ca_count=35와 GitHub/Hugging Face HTTP 200을 보고받았음. 원본 시작에도 SSL 재시도·지연이 있었다는 후속 보고를 보존함. 당시 두 URL 접속 성공이 현재 모든 다운로드 호스트나 앱 기동 성공을 보장하지는 않음.
+- 코드 확인: 현재 schema2 원본 Python/커스터마이징 경로는 등록 환경을 복원하며 과거 후보 Deploy의 릴리스별 CA를 상속하지 않음. 새 PowerShell의 SSL_CERT_FILE 설정만으로 이 간극을 해결할 수 없어 기존 Start에 명시적인 CA 선택을 추가함. 최근 패널 변경은 이 운영 코드를 변경하지 않았지만 이번 복구 보완은 운영 코드 변경임.
+- 변경: 기존 CA 내보내기·PEM/해시 검증을 재사용해 종료된 schema2 서버에만 `Start -UseWindowsCA` 허용. 빈 포트와 프로그램/환경을 확인한 뒤 state_root에 CA를 보존하고 기존 deployment의 `runtime_ca_sha256`에 선택을 저장함. 자식의 REQUESTS_CA_BUNDLE/SSL_CERT_FILE에만 적용하며 health timeout 이후와 다음 일반 Start에서도 재사용함. config/DPAPI·current/customization·기존 Python·DB·키·TLS 검증은 유지함. 실행 중 옵션 변경은 거부하고 손상 CA는 Start를 차단하지만 Status/Stop은 가능함.
+- 시작 기준: 원격 main `f2e0f9fbf717f00e8cb6e4fe154777f4f08b7c5d`, PR #19 head `bd953a2f0306fe2a43dc5fd04af9a6384ef9a378`, 동일 로컬 tree `67d1441a79ef5039b2eea0c49b9c31b312aa76a0`와 지침/상태를 확인함. 관련 세 실행/시험 파일과 기존 운영 안내·상태·평가·변경 기록만 갱신하며 Tool·Prompt·제안·프로그램 wheel은 변경하지 않음.
+- 검사: `python -m unittest discover -s tests -p test_manage_ees.py -v`에서 79개 중 77개 통과, pwsh 부재로 PowerShell 관련 2개 건너뜀. 원본/커스터마이징 CA 선택·자식 환경만 변경·Stop/Start 재사용·health timeout 뒤 선택 보존, live 프로세스 거부, 누락/변조/잘못된 PEM 차단과 Stop 허용, export 실패/사용 중인 포트의 실행 방지를 확인함. 추가로 기존 손상 CA 시험 하나에서 다섯 경우의 Status program_valid=false와 비변경을 확인해 통과함. 실제 Windows 신뢰 저장소·사내 네트워크/앱 실행은 하지 않음. 문서·diff 검사와 원격 Windows/Linux CI는 게시 단계에서 확인함.
+- 다음 절차: [현재 Start CA 안내](../docs/03-openwebui-native-agent.md#ees-start-windows-ca)는 main 반영·해당 CI 통과 후 Update → Stop → Start -UseWindowsCA/120초를 한 번 수행하도록 준비함. 현재 main 미병합, 사내 실행·복구 미확인. `result=ok/running=true`와 기존 주소 접속을 성공 기준으로 삼고 실패하면 해당 실패 단계에 따라 다음 판단을 정함. 같은 대기 반복·오프라인 강제·후보 Deploy 재개·TLS 해제는 하지 않음.
+- 문서 확인: `python scripts/check_docs.py`의 files=25, links=685, errors=0, review_candidates=0 및 `git diff --check` 통과. 현재 Start 안내와 과거 Deploy 안내의 적용 범위·main/CI 조건·수동 환경변수의 한계를 대조함.
+
+직전 STATUS 점검 보존(읽기 진단 준비, 2026-09-09): main `f2e0f9f`, PR #19 head `986f9412`·동일 tree와 지침/상태를 대조함. 현재 Start의 실패 기록 저장 위치·프로세스/health 확인·로그 연결과 Windows 콘솔 공유 구조를 읽기 검토함. 최근 패널 변경에 서버 실행 코드 변경은 없음. 사내 읽기 진단 블록의 Python 문법을 확인했으며 당시 Windows 실행/실제 원인은 미확인. 상태·평가 문서만 갱신하고 문서/diff를 점검함.

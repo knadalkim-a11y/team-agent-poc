@@ -1,0 +1,293 @@
+<div id="ees-wo-mockup" lang="ko">
+  <style>
+    #ees-wo-mockup {
+      --ees-bg: light-dark(#ffffff, #1c1f24);
+      --ees-soft: light-dark(#f5f7fa, #252a31);
+      --ees-ink: light-dark(#202a38, #eef1f7);
+      --ees-muted: light-dark(#596577, #b1bac8);
+      --ees-line: light-dark(#e0e5ec, #3d4653);
+      --ees-blue: light-dark(#2455a4, #91baff);
+      --ees-on-blue: light-dark(#ffffff, #132847);
+      --ees-blue-soft: light-dark(#eef4ff, #243750);
+      --ees-green: light-dark(#236547, #98d7b7);
+      --ees-green-soft: light-dark(#eff8f2, #253d31);
+      --ees-error: light-dark(#a83232, #ffaaaa);
+      color: var(--ees-ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+      font-size: 15px; line-height: 1.6; width: 100%; color-scheme: inherit;
+    }
+    #ees-wo-mockup * { box-sizing: border-box; }
+    #ees-wo-mockup [hidden] { display: none !important; }
+    #ees-wo-mockup .ees-app { background: var(--ees-bg); border: 1px solid var(--ees-line); border-radius: 16px; overflow: hidden; }
+    #ees-wo-mockup .ees-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; border-bottom: 1px solid var(--ees-line); }
+    #ees-wo-mockup .ees-brand { display: flex; align-items: center; gap: 12px; font-weight: 500; }
+    #ees-wo-mockup .ees-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: var(--ees-blue); color: var(--ees-on-blue); }
+    #ees-wo-mockup .ees-preview { color: var(--ees-muted); font-size: 12px; }
+    #ees-wo-mockup .ees-layout { display: grid; grid-template-columns: minmax(270px, .8fr) minmax(0, 1.3fr); }
+    #ees-wo-mockup .ees-chat { display: flex; flex-direction: column; gap: 20px; padding: 26px 22px; border-right: 1px solid var(--ees-line); background: var(--ees-soft); min-width: 0; }
+    #ees-wo-mockup .ees-panel-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    #ees-wo-mockup h2, #ees-wo-mockup h3, #ees-wo-mockup p { margin: 0; }
+    #ees-wo-mockup h2 { font-size: 21px; line-height: 1.4; font-weight: 500; }
+    #ees-wo-mockup h3 { font-size: 15px; font-weight: 500; }
+    #ees-wo-mockup .ees-caption { color: var(--ees-muted); font-size: 12px; }
+    #ees-wo-mockup .ees-chatlog { display: flex; flex-direction: column; gap: 18px; overflow-wrap: anywhere; }
+    #ees-wo-mockup .ees-message { display: flex; flex-direction: column; gap: 7px; }
+    #ees-wo-mockup .ees-message-name { color: var(--ees-muted); font-size: 12px; font-weight: 500; }
+    #ees-wo-mockup .ees-message-user { align-self: flex-end; padding: 13px 15px; max-width: 94%; border: 1px solid var(--ees-line); border-radius: 14px 14px 3px 14px; background: var(--ees-bg); white-space: pre-wrap; }
+    #ees-wo-mockup .ees-message-assistant { white-space: pre-wrap; }
+    #ees-wo-mockup .ees-chat-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
+    #ees-wo-mockup .ees-examples { display: flex; flex-wrap: wrap; gap: 7px; }
+    #ees-wo-mockup button { font: inherit; cursor: pointer; }
+    #ees-wo-mockup .ees-example { text-align: left; padding: 7px 10px; min-height: 38px; border: 1px solid var(--ees-line); border-radius: 8px; color: var(--ees-muted); background: var(--ees-bg); font-size: 12px; }
+    #ees-wo-mockup .ees-example:hover { color: var(--ees-blue); border-color: var(--ees-blue); }
+    #ees-wo-mockup .ees-composer { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid var(--ees-line); border-radius: 12px; background: var(--ees-bg); }
+    #ees-wo-mockup .ees-composer textarea { border: 0; padding: 0; min-height: 70px; resize: vertical; }
+    #ees-wo-mockup .ees-composer-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    #ees-wo-mockup .ees-work { padding: 26px 28px 20px; min-width: 0; }
+    #ees-wo-mockup .ees-heading { margin-bottom: 24px; }
+    #ees-wo-mockup .ees-eyebrow { font-size: 12px; color: var(--ees-muted); margin-bottom: 6px; letter-spacing: .04em; }
+    #ees-wo-mockup .ees-status { color: var(--ees-blue); border: 1px solid var(--ees-line); border-radius: 20px; padding: 3px 10px; font-size: 12px; white-space: nowrap; }
+    #ees-wo-mockup .ees-subtitle { color: var(--ees-muted); margin-top: 8px; font-size: 13px; }
+    #ees-wo-mockup .ees-fields { display: grid; gap: 18px; }
+    #ees-wo-mockup .ees-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+    #ees-wo-mockup .ees-field-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    #ees-wo-mockup label { font-weight: 500; font-size: 13px; }
+    #ees-wo-mockup .ees-required { color: var(--ees-muted); font-size: 11px; font-weight: 400; margin-left: 4px; }
+    #ees-wo-mockup input, #ees-wo-mockup select, #ees-wo-mockup textarea { font: inherit; font-size: 16px; color: var(--ees-ink); background: var(--ees-bg); width: 100%; min-width: 0; border: 1px solid var(--ees-line); border-radius: 8px; padding: 10px 12px; }
+    #ees-wo-mockup textarea { resize: vertical; }
+    #ees-wo-mockup .ees-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    #ees-wo-mockup .ees-changed { border-color: var(--ees-blue); background: var(--ees-blue-soft); }
+    #ees-wo-mockup .ees-origin { font-size: 11px; font-weight: 400; color: var(--ees-blue); }
+    #ees-wo-mockup .ees-origin[data-origin="user"] { color: var(--ees-muted); }
+    #ees-wo-mockup .ees-changebar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; color: var(--ees-blue); margin-top: 18px; font-size: 12px; }
+    #ees-wo-mockup .ees-text-button { padding: 5px 0; border: 0; background: transparent; color: var(--ees-blue); text-decoration: underline; font-size: 12px; }
+    #ees-wo-mockup .ees-actions { border-top: 1px solid var(--ees-line); padding-top: 20px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    #ees-wo-mockup .ees-button { border: 1px solid var(--ees-line); border-radius: 9px; padding: 10px 16px; min-height: 44px; background: var(--ees-bg); color: var(--ees-ink); font-weight: 500; }
+    #ees-wo-mockup .ees-primary { background: var(--ees-blue); border-color: var(--ees-blue); color: var(--ees-on-blue); }
+    #ees-wo-mockup button:disabled { cursor: default; opacity: .55; }
+    #ees-wo-mockup .ees-error { color: var(--ees-error); font-size: 13px; margin-top: 16px; }
+    #ees-wo-mockup .ees-review { display: grid; gap: 18px; margin: 0; }
+    #ees-wo-mockup .ees-review div { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 16px; padding-bottom: 15px; border-bottom: 1px solid var(--ees-line); }
+    #ees-wo-mockup .ees-review dt { color: var(--ees-muted); font-size: 13px; }
+    #ees-wo-mockup .ees-review dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    #ees-wo-mockup .ees-review-note { color: var(--ees-muted); font-size: 13px; margin-top: 20px; }
+    #ees-wo-mockup .ees-result { padding: 22px; background: var(--ees-green-soft); border-radius: 12px; color: var(--ees-green); margin-bottom: 24px; }
+    #ees-wo-mockup .ees-result-number { font-size: 24px; font-weight: 500; margin: 10px 0; overflow-wrap: anywhere; }
+    #ees-wo-mockup .ees-bottom { padding: 12px 24px; border-top: 1px solid var(--ees-line); color: var(--ees-muted); font-size: 11px; background: var(--ees-bg); }
+    @media (max-width: 720px) {
+      #ees-wo-mockup .ees-layout { grid-template-columns: 1fr; }
+      #ees-wo-mockup .ees-chat { border-right: 0; border-bottom: 1px solid var(--ees-line); }
+      #ees-wo-mockup .ees-chat, #ees-wo-mockup .ees-work { padding: 22px 18px; }
+      #ees-wo-mockup .ees-chat-bottom { margin-top: 0; }
+      #ees-wo-mockup .ees-top { padding: 16px 18px; }
+    }
+    @media (max-width: 380px) { #ees-wo-mockup .ees-pair { grid-template-columns: 1fr; } }
+    @media (pointer: coarse) { #ees-wo-mockup .ees-example, #ees-wo-mockup .ees-text-button { min-height: 44px; } }
+  </style>
+  <div class="ees-app">
+    <header class="ees-top">
+      <div class="ees-brand"><span class="ees-mark" aria-hidden="true">E</span><span>EES Assistant</span></div>
+      <span class="ees-preview">디자인 목업 · 샘플 데이터</span>
+    </header>
+    <main class="ees-layout">
+      <section class="ees-chat" aria-label="WO 작성 대화">
+        <div class="ees-panel-title"><h3>대화로 작성하기</h3><span class="ees-caption">AI 응답은 예시 동작</span></div>
+        <div class="ees-chatlog" id="ees-chatlog" role="log" aria-live="polite" aria-relevant="additions">
+          <div class="ees-message ees-message-user">3호기 모터에서 이상 소음이 나. 점검 WO 작성해줘.</div>
+          <div class="ees-message"><span class="ees-message-name">EES Assistant</span><p class="ees-message-assistant">작성 화면에 설비와 증상을 채웠어요. 직접 수정하거나, 대화로 내용을 바꿀 수 있어요. 아직 발행되지는 않았어요.</p></div>
+        </div>
+        <div class="ees-chat-bottom">
+          <div class="ees-examples" aria-label="수정 요청 예시">
+            <button class="ees-example" type="button" data-request="점검 항목 추가해줘">점검 항목 추가</button>
+            <button class="ees-example" type="button" data-request="우선순위 긴급으로 바꿔줘">긴급으로 변경</button>
+            <button class="ees-example" type="button" data-request="제목을 간결하게 다듬어줘">제목 다듬기</button>
+          </div>
+          <form class="ees-composer" id="ees-chat-form">
+            <label for="ees-chat-input" class="ees-caption">AI에게 요청</label>
+            <textarea id="ees-chat-input" rows="2" placeholder="예: 점검 항목 추가해줘" maxlength="800"></textarea>
+            <div class="ees-composer-footer"><span class="ees-caption">현재 입력 내용을 기준으로 수정</span><button class="ees-button ees-primary" type="submit" id="ees-send">요청</button></div>
+          </form>
+        </div>
+      </section>
+      <section class="ees-work" aria-label="작업지시 작성 화면">
+        <div class="ees-heading">
+          <div class="ees-eyebrow">EMS / 작업지시</div>
+          <div class="ees-panel-title"><h2 id="ees-work-title">WO 작성</h2><span class="ees-status" id="ees-stage" aria-live="polite">발행 전</span></div>
+          <p class="ees-subtitle" id="ees-work-subtitle">직접 입력하거나 대화로 수정할 수 있어요.</p>
+        </div>
+        <form id="ees-wo-form" novalidate>
+          <div class="ees-fields">
+            <div class="ees-field"><div class="ees-field-head"><label for="ees-equipment">설비<span class="ees-required">필수</span></label><span class="ees-origin" data-origin-for="equipment">AI 작성</span></div>
+              <select id="ees-equipment" name="equipment" required class="ees-changed"><option value="EQ-003">권취기 3호기 · EQ-003</option><option value="EQ-002">권취기 2호기 · EQ-002</option><option value="EQ-004">권취기 4호기 · EQ-004</option></select>
+            </div>
+            <div class="ees-field"><div class="ees-field-head"><label for="ees-title">작업 제목<span class="ees-required">필수</span></label><span class="ees-origin" data-origin-for="title">AI 작성</span></div>
+              <input id="ees-title" name="title" type="text" value="3호기 모터 이상 소음 점검 요청" maxlength="100" required class="ees-changed">
+            </div>
+            <div class="ees-pair">
+              <div class="ees-field"><div class="ees-field-head"><label for="ees-type">작업 구분</label><span class="ees-origin" data-origin-for="type"></span></div><select id="ees-type" name="type"><option value="점검">점검</option><option value="수리">수리</option></select></div>
+              <div class="ees-field"><div class="ees-field-head"><label for="ees-priority">우선순위</label><span class="ees-origin" data-origin-for="priority"></span></div><select id="ees-priority" name="priority"><option value="일반">일반</option><option value="긴급">긴급</option></select></div>
+            </div>
+            <div class="ees-field"><div class="ees-field-head"><label for="ees-description">증상 및 요청 내용<span class="ees-required">필수</span></label><span class="ees-origin" data-origin-for="description">AI 작성</span></div>
+              <textarea id="ees-description" name="description" rows="6" maxlength="2500" required class="ees-changed">3호기 모터에서 평소와 다른 소음이 발생합니다.
+소음 발생 부위와 원인을 확인해 주세요.</textarea>
+            </div>
+          </div>
+          <div class="ees-changebar"><span id="ees-change-note" role="status">AI가 채운 항목을 확인해 주세요.</span><button type="button" class="ees-text-button" id="ees-undo" hidden>AI 수정 되돌리기</button></div>
+          <p id="ees-validation" class="ees-error" role="alert" hidden></p>
+          <div class="ees-actions"><span class="ees-caption">다음 화면에서 내용을 확인하고 발행해요.</span><button class="ees-button ees-primary" type="submit">발행 내용 확인</button></div>
+        </form>
+        <div id="ees-review-panel" hidden>
+          <dl class="ees-review" id="ees-review-values"></dl>
+          <p class="ees-review-note">확인한 내용으로 발행합니다. 대화에서 내용을 바꾸면 작성 화면으로 돌아가요.</p>
+          <div class="ees-actions"><button class="ees-button" type="button" id="ees-edit">돌아가서 수정</button><button class="ees-button ees-primary" type="button" id="ees-issue">WO 발행</button></div>
+        </div>
+        <div id="ees-result-panel" hidden>
+          <div class="ees-result"><h3>발행 완료 예시</h3><p class="ees-result-number">WO-MOCK-0001</p><p>샘플 결과입니다. 실제 WO는 생성되지 않았어요.</p></div>
+          <dl class="ees-review" id="ees-result-values"></dl>
+        </div>
+      </section>
+    </main>
+    <footer class="ees-bottom">샘플 설비·입력 항목입니다. 실제 EMS 연결과 WO 저장은 수행하지 않습니다.</footer>
+  </div>
+  <script>
+    (() => {
+      const root = document.getElementById('ees-wo-mockup');
+      const q = (selector) => root.querySelector(selector);
+      const fields = ['equipment', 'title', 'type', 'priority', 'description'];
+      const labels = { equipment: '설비', title: '작업 제목', type: '작업 구분', priority: '우선순위', description: '요청 내용' };
+      const controls = Object.fromEntries(fields.map((key) => [key, q('#ees-' + key)]));
+      const draft = Object.fromEntries(fields.map((key) => [key, controls[key].value]));
+      const origins = { equipment: 'ai', title: 'ai', type: '', priority: '', description: 'ai' };
+      let phase = 'edit';
+      let revision = 0;
+      let reviewed = null;
+      let undo = null;
+      const nl = String.fromCharCode(10);
+      const fieldOrigin = (key, origin) => {
+        origins[key] = origin;
+        const badge = q('[data-origin-for="' + key + '"]');
+        badge.textContent = origin === 'ai' ? 'AI 작성' : origin === 'user' ? '직접 수정' : '';
+        badge.dataset.origin = origin;
+        controls[key].classList.toggle('ees-changed', origin === 'ai');
+      };
+      const message = (text, user = false) => {
+        const item = document.createElement('div');
+        item.className = 'ees-message' + (user ? ' ees-message-user' : '');
+        if (user) item.textContent = text;
+        else {
+          const name = document.createElement('span'); name.className = 'ees-message-name'; name.textContent = 'EES Assistant';
+          const body = document.createElement('p'); body.className = 'ees-message-assistant'; body.textContent = text;
+          item.append(name, body);
+        }
+        const log = q('#ees-chatlog'); log.append(item);
+        while (log.children.length > 6) log.firstElementChild.remove();
+      };
+      const setPhase = (next) => {
+        phase = next;
+        q('#ees-wo-form').hidden = next !== 'edit';
+        q('#ees-review-panel').hidden = next !== 'review';
+        q('#ees-result-panel').hidden = next !== 'issued';
+        q('#ees-work-title').textContent = next === 'edit' ? 'WO 작성' : next === 'review' ? '발행 내용 확인' : '작업지시 결과';
+        q('#ees-stage').textContent = next === 'edit' ? '발행 전' : next === 'review' ? '최종 확인' : '발행 완료 예시';
+        q('#ees-work-subtitle').textContent = next === 'edit' ? '직접 입력하거나 대화로 수정할 수 있어요.' : next === 'review' ? '설비와 작업 내용을 확인해 주세요.' : '확인한 내용으로 처리된 결과를 보여줘요.';
+      };
+      const changed = (note) => {
+        revision += 1; reviewed = null;
+        if (phase === 'review') setPhase('edit');
+        q('#ees-validation').hidden = true;
+        q('#ees-change-note').textContent = note;
+      };
+      fields.forEach((key) => controls[key].addEventListener('input', () => {
+        if (phase === 'issued') return;
+        draft[key] = controls[key].value;
+        fieldOrigin(key, 'user');
+        changed('직접 수정한 내용을 기준으로 AI가 도와드려요.');
+      }));
+      const renderValues = (target, values) => {
+        target.replaceChildren();
+        fields.forEach((key) => {
+          const row = document.createElement('div'), label = document.createElement('dt'), value = document.createElement('dd');
+          label.textContent = labels[key];
+          value.textContent = key === 'equipment' ? Array.from(controls.equipment.options).find((option) => option.value === values[key]).textContent : values[key];
+          row.append(label, value); target.append(row);
+        });
+      };
+      const applyAI = (patch) => {
+        const touched = Object.keys(patch).filter((key) => draft[key] !== patch[key]);
+        if (!touched.length) return false;
+        undo = touched.map((key) => ({ key, before: draft[key], after: patch[key], origin: origins[key] }));
+        touched.forEach((key) => { draft[key] = patch[key]; controls[key].value = patch[key]; fieldOrigin(key, 'ai'); });
+        changed('AI가 수정한 항목: ' + touched.map((key) => labels[key]).join(', '));
+        q('#ees-undo').hidden = false;
+        return true;
+      };
+      const request = (raw) => {
+        const text = raw.trim(); if (!text) return;
+        message(text, true);
+        if (phase === 'issued') { message('이 예시는 발행이 완료된 상태예요. 발행된 내용은 대화로 변경하지 않아요.'); return; }
+        if (/발행|등록|저장/.test(text)) { message('아직 발행하지 않았어요. 작성 내용을 확인한 뒤 화면의 WO 발행 버튼으로 결정해 주세요.'); return; }
+        let patch = {}, response = '';
+        if (/점검\s*항목/.test(text)) {
+          const extra = ['소음이 발생하는 운전 조건과 위치를 확인해 주세요.', '모터 고정부와 주변 체결부의 이상 유무를 확인해 주세요.', '확인 결과와 필요한 후속 조치를 기록해 주세요.'];
+          const missing = extra.filter((line) => !draft.description.includes(line));
+          patch.description = draft.description.trimEnd() + (missing.length ? nl + nl + missing.join(nl) : '');
+          response = missing.length ? '현재 요청 내용을 유지하면서 예시 점검 항목을 덧붙였어요. 작업 구분과 우선순위는 그대로예요.' : '예시 점검 항목이 이미 포함되어 있어요.';
+        } else if (/우선순위|긴급|일반으로/.test(text)) {
+          const match = text.match(/긴급|일반/);
+          if (match) { patch.priority = match[0]; response = '우선순위를 ' + match[0] + '(으)로 바꿨어요. 다른 내용은 유지했어요.'; }
+        } else if (/제목/.test(text)) {
+          if (/간결|짧게|다듬/.test(text)) { patch.title = draft.title.replace(/\s*요청\s*$/, '').trim(); response = '현재 제목에서 불필요한 표현을 줄였어요.'; }
+          else {
+            const match = text.match(/제목(?:을|은|:)?\s*["“]?(.+?)["”]?(?:으로|로)\s*(?:바꿔|수정|변경)/);
+            if (match) { patch.title = match[1].replace(/["“”]/g, '').trim(); response = '요청한 제목으로 바꿨어요.'; }
+          }
+        } else if (/[234]호기/.test(text)) {
+          const number = text.match(/([234])호기/)[1];
+          patch.equipment = 'EQ-00' + number;
+          response = '선택 설비를 ' + number + '호기로 바꿨어요. 직접 작성한 제목과 요청 내용은 유지했으니 설비 표현을 함께 확인해 주세요.';
+        } else if (/작업\s*구분|수리로|점검으로/.test(text)) {
+          const match = text.match(/수리|점검/);
+          if (match) { patch.type = match[0]; response = '작업 구분을 ' + match[0] + '(으)로 바꿨어요.'; }
+        }
+        if (!Object.keys(patch).length) {
+          message('목업에서는 점검 항목 추가, 우선순위 변경, 제목 수정, 2·3·4호기 선택을 체험할 수 있어요. 다른 내용은 작성 화면에서 직접 수정해 주세요.');
+          return;
+        }
+        if ((patch.title && patch.title.length > 100) || (patch.description && patch.description.length > 2500)) { message('제목은 100자, 요청 내용은 2,500자까지 입력할 수 있어요. 내용을 줄인 뒤 다시 요청해 주세요.'); return; }
+        const wasReview = phase === 'review';
+        const didChange = applyAI(patch);
+        message((didChange ? response : '요청한 내용이 이미 반영되어 있어요.') + (wasReview && didChange ? ' 내용이 바뀌어 최종 확인을 다시 진행해 주세요.' : ''));
+      };
+      q('#ees-chat-form').addEventListener('submit', (event) => { event.preventDefault(); const input = q('#ees-chat-input'); const text = input.value; input.value = ''; request(text); });
+      root.querySelectorAll('[data-request]').forEach((button) => button.addEventListener('click', () => request(button.dataset.request)));
+      q('#ees-undo').addEventListener('click', () => {
+        if (!undo || phase === 'issued') return;
+        const reversible = undo.filter((entry) => draft[entry.key] === entry.after && origins[entry.key] === 'ai');
+        reversible.forEach((entry) => { draft[entry.key] = entry.before; controls[entry.key].value = entry.before; fieldOrigin(entry.key, entry.origin); });
+        undo = null; q('#ees-undo').hidden = true;
+        changed(reversible.length ? '마지막 AI 수정을 되돌렸어요. 이후 직접 수정한 값은 유지했어요.' : '이후 직접 수정한 값이 있어 그대로 유지했어요.');
+      });
+      q('#ees-wo-form').addEventListener('submit', (event) => {
+        event.preventDefault(); if (phase === 'issued') return;
+        const missing = ['equipment', 'title', 'description'].filter((key) => !draft[key].trim());
+        const invalid = fields.filter((key) => !controls[key].checkValidity() || (key === 'title' && draft[key].length > 100) || (key === 'description' && draft[key].length > 2500));
+        const errors = Array.from(new Set(missing.concat(invalid)));
+        if (errors.length) {
+          q('#ees-validation').textContent = errors.map((key) => labels[key]).join(', ') + ' 항목을 확인해 주세요.';
+          q('#ees-validation').hidden = false; controls[errors[0]].focus(); return;
+        }
+        reviewed = { revision, values: { ...draft } };
+        renderValues(q('#ees-review-values'), reviewed.values); setPhase('review');
+        q('#ees-issue').focus();
+      });
+      q('#ees-edit').addEventListener('click', () => { reviewed = null; setPhase('edit'); controls.title.focus(); });
+      q('#ees-issue').addEventListener('click', () => {
+        if (phase !== 'review' || !reviewed || reviewed.revision !== revision) return;
+        const issued = { ...reviewed.values }; reviewed = null;
+        q('#ees-issue').disabled = true;
+        renderValues(q('#ees-result-values'), issued); setPhase('issued');
+        fields.forEach((key) => { controls[key].disabled = true; });
+        message('발행 완료 화면 예시예요. 확인한 내용과 샘플 번호 WO-MOCK-0001을 표시했어요. 실제 EMS에 저장하지 않았어요.');
+      });
+    })();
+  </script>
+</div>
