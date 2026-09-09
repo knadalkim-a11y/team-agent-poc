@@ -8,9 +8,10 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **초기 기능 확인용 Rich UI를 세 읽기 Tool에서 제거하고 일반 문장·표·원문 링크로 전환함.** Confluence/Jira v0.1.6·GitHub v0.1.4와 공통 Prompt를 수정하며 기존 API·페이지 이동·ID·PAT·설정·모델 연결을 유지함. 합성 HTML 예제와 UI 전용 검사를 제거하고 조회·권한·오류·출력 계약 검사는 유지함. 관련 검사 144개가 로컬과 Windows/Linux Python 3.11에서 각각 통과했고, 독립 검토·필요한 시험 fixture 보완·기존 배포 CI와 PR #18 main 반영을 완료함. **이후 사용자가 다른 대화에서 기존 Rich UI 제거 작업을 마치고 변경된 프롬프트를 WebUI에 모두 반영했다고 보고함.** 제거·프롬프트 반영은 사용자 보고로 완료 처리하고, 개별 Tool 등록 내용·적용 SHA와 새 조회/원문 결과의 직접 대조는 별도 미확인으로 둠. [최신 적용 보고](../evals/scenarios.md#plain-output-applied-report). [이번 변경·검증](../evals/scenarios.md#prototype-rich-ui-removal).
-- 다음 작업 하나: **기존 실행 계획에 따라 EES 전용 공통 정책의 적용 범위와 관리 위치를 정리한다.** 합의한 사용자 최종 실행 경계는 후속 업무 화면 설계에 적용함. 완료 보고를 받은 Rich UI 제거·프롬프트 저장 절차를 반복 안내하지 않으며, 새 조회의 개별 출력·원문 확인은 다음 관련 사용/변경 시 묶어서 확인함. [실행 계획](#delivery-plan), [적용 보고 범위](../evals/scenarios.md#plain-output-applied-report).
-- 후속 UI 방향: **준비된 업무 화면을 상황에 맞게 활용하고, 같은 폼에서 사용자 직접 입력과 AI 작성·수정을 함께 지원하는 방향을 합의함.** 새 화면은 클릭 가능한 목업 → 사용자 확인 → 실제 기능 연결 → 업무 흐름 검증 순서로 진행하며, WO 발행 같은 상태 변경은 사용자의 최종 버튼과 서버 검증을 거침. 설계 상세는 [Native 가이드](03-openwebui-native-agent.md#legacy-ui-design), 합의·미구현 범위는 [검토 기록](../evals/scenarios.md#legacy-ui-design)에서 관리함. 실제 목업·EMS 연동·쓰기 기능 구현/허용은 아직 없음.
+- 이번 작업: **사용자의 목업 제작 요청에 따라 WO 작성 화면을 먼저 구체화함.** 직접 입력·수정과 규칙 기반 예시 채팅의 같은 폼 반영, AI 변경 표시, 내용 확인 → 사용자 최종 버튼 → 샘플 결과 흐름을 단일 HTML 참고 목업으로 준비함. 실제 AI·EMS 호출과 WebUI 배포는 없으며 입력 항목은 설계 검토용 예시임. [목업과 확인 방법](03-openwebui-native-agent.md#wo-mockup), [검증·미확인 범위](../evals/scenarios.md#wo-mockup).
+- 다음 작업 하나: **사용자가 WO 목업을 조작해 보고 화면·입력·채팅 수정·최종 결정 흐름에 대한 피드백을 주면 반영하고 확인받는다.** 디자인 승인과 실제 EMS 기능 연결은 아직 완료하지 않음. EES 전용 공통 정책 등 기존 실행 계획은 유지하되 이번 명시 요청의 목업을 먼저 진행함.
+- 완료한 이전 단위: 초기 Rich UI 제거·일반 문장/표/원문 링크 전환의 구현·검증·main 반영에 이어 **제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 확인함.** 개별 Tool 등록 내용·적용 SHA·새 조회/원문 결과의 직접 대조는 미확인으로 유지하며 저장 절차를 반복 안내하지 않음. [적용 보고](../evals/scenarios.md#plain-output-applied-report), [변경·검증](../evals/scenarios.md#prototype-rich-ui-removal).
+- 후속 UI 방향: **준비된 업무 화면을 상황에 맞게 활용하고, 같은 폼에서 사용자 직접 입력과 AI 작성·수정을 함께 지원함.** 클릭 가능한 목업 → 사용자 확인 → 실제 기능 연결 → 업무 흐름 검증 순서를 유지하며 WO 발행 같은 상태 변경은 사용자의 최종 버튼과 서버 검증을 거침. 설계 상세는 [Native 가이드](03-openwebui-native-agent.md#legacy-ui-design)에서 관리함. 현재는 참고 목업 단계이며 EMS 연동·실제 쓰기 기능 구현/허용은 없음.
 - 관리자 공지 후속 요구: 첫 시작의 영어 `새로운 기능 EES Assistant`·v0.11.3 릴리스 노트는 향후 관리자 팀 공지 용도로 활용하고자 함. UI 설계 방향 기록에 팝업 수정·공지 구현은 포함하지 않음.
 
 아래는 **중단한 후보 환경 방식의 구현·진단 이력**이며 현재 재실행 목록이 아닙니다. [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py)와 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)은 보존합니다. 기존 도구의 Rollback을 새 직접 적용 방식의 원복 기능으로 간주하지 않습니다. 마지막 실패와 원인 미확정 상태를 유지하며 관리 방식 변경을 배포 성공으로 기록하지 않습니다.
@@ -36,7 +37,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 **2026-09-09 구현 시작 기준:** 원격 main `99ab68064a70a88da4b988d349dd1c45e30e7022`, tree `482e8853f71d60799a6dfc80294bf7b6ff6a775e`, 당시 관련 열린 PR 0개를 확인했습니다. 같은 tree의 로컬 비교 스냅샷에서 구현한 `feat/simple-webui-wrapper`를 [PR #15](https://github.com/knadalkim-a11y/team-agent-poc/pull/15)에 게시했습니다. 실행 코드 원본 `aa005f0edad338357438d70b9933a2bdb58c5b50`의 Windows/Linux CI와 독립 검토는 완료했으며 [PR #15 병합 b65e7fb](https://github.com/knadalkim-a11y/team-agent-poc/commit/b65e7fbbee612a8e34f7fd4136ca5cdc919fd082)을 확인했습니다. 다음 작업에서 이 SHA를 최신 head로 고정하지 않고 그때의 main·관련 열린 PR을 확인합니다. 이전 새 대화 준비 근거는 [기존 기록](../evals/scenarios.md#ees-wrapper-resume)에 보존합니다.
 
 - 이번 Rich UI 제거 시작 기준: 2026-09-09 원격 main `99a9ee`·관련 열린 PR 0개를 확인함. 다음 재개 때 이 SHA를 최신 head로 고정하지 않음.
-- 읽을 범위: AGENTS·이 문서 → [공통 정책·관리자 워크플로](03-openwebui-native-agent.md#managed-policy-workflow) → 필요한 공통 Prompt·정책·해당 기능. 새 화면을 준비할 때 [합의한 설계 기준](03-openwebui-native-agent.md#legacy-ui-design)을 적용함. 완료한 일반 출력 전환의 저장 절차와 중단한 후보 진단을 재실행 목록으로 읽지 않음.
+- 읽을 범위: AGENTS·이 문서 → [WO 목업](03-openwebui-native-agent.md#wo-mockup)·[합의한 설계 기준](03-openwebui-native-agent.md#legacy-ui-design) → 피드백에 관련된 파일. 공통 정책 단계로 돌아갈 때 [공통 정책·관리자 워크플로](03-openwebui-native-agent.md#managed-policy-workflow)를 읽음. 완료한 일반 출력 전환의 저장 절차와 중단한 후보 진단을 재실행 목록으로 읽지 않음.
 - 완료한 단위: 초기 Rich UI 제거의 Git 구현·검증·main 반영에 이어, 제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 확인함. 실제 등록 코드·적용 SHA·새 조회의 상세 출력 검증과 구분하며, 기존 프로그램 적용·기동·인증 전수 검사를 반복하지 않음. [적용 보고](../evals/scenarios.md#plain-output-applied-report).
 - 마지막 서버 증거: **2026-09-09 실제 운영 폴더 수동 이름 변경 뒤 Apply=result ok/changed true/commit 4a8779bbf3ee/complete/customized와 Start=result ok/같은 commit/complete/customized/running true, 이어 이름·로고 변경·기존 대화 유지·Jira/Confluence/GitHub 조회 정상을 사용자 보고로 확인함.** 해당 사내 적용과 확인한 사용 흐름의 성공이며 보고 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확대하지 않음. 이전 원본 Restore/Start 성공과 적용 실패는 당시 이력으로 유지함. [최신 적용 근거](../evals/scenarios.md#ees-wrapper-manual-resume), [이전 실패·원본 복원](../evals/scenarios.md#ees-wrapper-apply-resume).
 - 사내 결과는 직접 타이핑 1~2줄만 가능하며 전체 출력·파일·화면 사진을 요청하지 않습니다. 명령 블록은 각각 2,500자 이내로 준비하고, 상세 결과는 사내에 저장합니다. [재개 준비 점검](../evals/scenarios.md#ees-wrapper-resume).
@@ -52,9 +53,11 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 | 3. 관리자 공통 정책 | EES Assistant에 합성 공통 지침·정책 답변 Skill 저장 보고. 실제 사내 정책 적용은 미완료 | EES 전용 공통 원칙·상세 절차·권한/Tool 제한의 배치와 관리자 변경 반영을 정리 |
 | 4. 관리자 워크플로 | Skill의 절차 지침과 Native 호출 기능은 사용 중. 관리자가 단계·분기·검사를 제어하는 업무 워크플로는 설계 전 | 기존 문서/조회 기능으로 대표 업무 하나를 정하고 입력·단계·분기·완료 조건을 정의. 필요한 제어 수준에 맞춰 구현 수단 선택 |
 | 5. 레거시 시스템 연동 | EMS/APC/FDC의 실제 업무 기능은 미연결 | 승인된 API 또는 Query Broker로 가치가 있는 읽기 기능 하나 연결. 기존 서비스 권한·업무 규칙 활용 |
-| 6. 레거시 간접 UI | 준비된 업무 화면·사람/AI 공동 편집·목업 우선 방향 합의. 실제 업무 화면은 미구현 | 대표 업무의 클릭 가능한 목업에서 직접 입력·AI 수정·최종 결정 흐름을 확인받은 뒤 실제 기능 연결. [설계 기준](03-openwebui-native-agent.md#legacy-ui-design) |
+| 6. 레거시 간접 UI | WO 작성 참고 목업으로 직접 입력·예시 채팅 수정·최종 결정 흐름 준비. 디자인 승인·실환경 연결은 미완료 | 사용자 피드백을 반영하고 목업을 확인받은 뒤 실제 기능 연결 범위를 정함. [목업](03-openwebui-native-agent.md#wo-mockup) |
 
 **개발 순서:** 1·2의 이름·로고와 래퍼 사내 적용 완료 → 초기 Rich UI 제거·변경 프롬프트 WebUI 반영 완료 보고 → 3의 EES 전용 공통 정책 → 4의 대표 워크플로 하나 → 5·6의 레거시 업무 하나를 함께 연결. 새 UI는 해당 업무 수요를 정하고 목업·사용자 확인을 거쳐 하나씩 구현하며, 4번은 단순 절차 지침과 실행 코드로 보장할 단계를 구분함. [구현 수단 선택](03-openwebui-native-agent.md#managed-policy-workflow)과 [남은 권한·격리 조건](../evals/scenarios.md#validation-timing)을 따름.
+
+2026-09-09 사용자의 명시 요청으로 **6의 WO 목업·피드백을 먼저 진행**합니다. 이는 실제 연동이나 쓰기 허용의 순서를 앞당긴 것이 아니며 공통 정책·대표 워크플로의 미완료 상태는 유지합니다.
 
 현재 첫 공용 파일럿에 준비한 업무 기반은 **범용 채팅 + Confluence·Jira·GitHub 읽기**입니다. 여기에 EES 공통 정책과 대표 워크플로를 적용하는 방향으로 확장합니다. 기존 Tool·Skill·모델 전체를 Public으로 바꿨다는 사용자 보고가 있으며, 개인 환경의 조회 성공과 이 설정 변경을 모든 연동의 일반 사용자 조회·격리 검증 완료로 간주하지 않습니다. GitHub·EMS/APC/FDC 전체 연동이나 Hermes 도입을 MVP 완료 조건으로 두지 않습니다. 파일럿에서 비개발자가 실제 업무 흐름을 완료하고 결과·오류·공유를 이해하는 것까지가 첫 배포의 목표입니다.
 
@@ -109,7 +112,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-09: 원격 main `f2e0f9f`와 관련 PR #19 head `3b3a2f1`의 지침·상태, 변경 없는 로컬 작업본을 확인함. 사용자의 다른 대화 작업 완료 보고를 받아 Rich UI 제거·변경 프롬프트 WebUI 반영을 완료로 기록하고, 반복 저장 안내와 현재 프롬프트 미반영 표현을 정리함. 개별 Tool 코드·적용 SHA·새 조회/원문 검증까지 확대하지 않았으며 기존 실행 계획의 다음 단계를 유지함. 문서 검사와 기록 범위는 [최신 적용 보고](../evals/scenarios.md#plain-output-applied-report), 합의한 UI 원칙은 [설계 검토](../evals/scenarios.md#legacy-ui-design)에 연결함.
+2026-09-09: 원격 main `f2e0f9f`와 관련 PR #19 head `f91ff10a`의 지침·상태를 기준으로 사용자가 요청한 WO 참고 목업을 준비함. 기존 Rich UI 제거·프롬프트 반영 보고를 보존하고 현재 작업·다음 작업을 목업 검토로 갱신함. 입력 항목과 예시 채팅은 합성이며 실제 AI·EMS·WebUI 통합, 디자인 승인, 쓰기 권한 확대와 구분함. 실행한 검사와 미확인 범위는 [목업 기록](../evals/scenarios.md#wo-mockup)에 관리함.
 
 ## 갱신 규칙
 
