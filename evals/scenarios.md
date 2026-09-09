@@ -1433,3 +1433,10 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 기존 등록 계정 PowerShell에서 Process 범위 실행 정책 → Update → Stop → Start -UseWindowsCA -HealthTimeout 120 -Summary를 단일 실패 중단 블록으로 안내함. 마지막 EES 줄과 웹 접속 여부만 전달받으며 콘솔 창은 유지함. Start 요약의 commit은 적용 프로그램 원본으로, 래퍼 병합 SHA와 구분함. 사내 Update·CA 내보내기·재시작·복구는 아직 미확인이고 최초 종료 원인도 확정하지 않음. 이번 병합 후 기록은 STATUS와 이 문서만 갱신하며 코드·설정·이미 통과한 기능 검사를 반복하지 않음.
 
 직전 STATUS 점검 보존(Start CA 준비, 2026-09-09): 2026-09-09: main `f2e0f9f`, PR #19 head `bd953a2f`·동일 tree와 지침/상태를 대조함. 사내 실패 요약과 이전 Windows CA 비교 성공 기록을 연결하고 Start의 CA 선택·자식 환경 적용·재사용을 보완함. 관련 관리 시험 79개 중 77개 통과, 로컬 pwsh 부재 2개 건너뜀. 손상 CA의 Status/Stop도 추가 확인했으며 문서/diff를 점검함. 원격 CI와 실제 Windows CA 내보내기·서버 복구는 각각 별도 확인 대상. [진단·검증 기록](../evals/scenarios.md#ees-start-health-followup).
+
+
+**CA 적용 안내 후 지연 접속 성공 (2026-09-09):** 사용자 보고로 `EES action=stop result=ok`, 이어 `action=start result=failed changed=- commit=- stage=health_check program=- running=-`를 수신함. 실패 요약은 해당 예외 결과에 성공 필드가 없어 하이픈을 표시하는 구조이며 데이터 삭제·복원·프로세스 종료의 증거가 아님. 최신 Start 실패·현재 process/health·runtime CA 해시/파일 유효성·실패 log_id와 연결한 로그 요약을 두 줄로 읽는 2,317자 명령을 준비하고 Python 문법 PASS를 확인했으나 사내 실행은 하지 않음.
+
+준비 도중 사용자가 기존 웹 주소에 직접 접속했고 서버가 켜졌다고 보고함. 이에 추가 진단 실행·로그 수집·반복 Start 요청을 취소함. 현재 코드가 health timeout 뒤 서버를 자동 종료하지 않는 점과 이후 접속 보고는 지연 기동 경로와 일치함. 이번 실패의 세부 reason/초수는 직접 확인하지 않았으며 앞선 실패의 reason=health_timeout/120초를 이번 실행의 측정값으로 복제하지 않음. 이전 로그에 인증서 실패·다운로드·모델 캐시 누락이 있었으므로 그 경로의 지연 가능성을 설명하되, 이번 CA 적용 뒤에도 동일 인증서 오류가 지속됐는지 또는 정상 다운로드/초기화 시간이 걸렸는지는 미확정으로 둠. 최초 서버 종료 원인·정확한 모델/호스트·기능 전수·장기 안정성도 별도 미확인임. 현재 서버와 콘솔 창을 유지하고 기존 목업 시연 흐름을 이어가며 새 환경 설치·TLS 해제·대기 한도 변경은 없음.
+
+직전 STATUS 점검 보존(PR #19 병합, 2026-09-09): 2026-09-09: 사용자 병합 승인에 따라 PR #19 head `f30e056e`·main `f2e0f9f`·병합 가능 상태와 해당 코드의 Windows/Linux CI completed/success를 다시 확인하고 main에 병합함. 원격 main `cb3a922d870663abd7f5fd576ba23456575e49a2`를 확인했으며 운영 명령의 Update/Stop 실패 시 중단·기존 환경 재사용·시작 요약을 읽기 대조함. 이번 후속은 상태·평가 문서만 갱신하고 문서/diff를 검사함. 기존 코드 시험은 반복하지 않았으며 실제 사내 실행과 최초 종료 원인은 미확인. [병합·복구 안내 근거](../evals/scenarios.md#ees-start-health-followup).

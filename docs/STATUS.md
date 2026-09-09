@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **Start의 120초 health timeout 뒤 process=true/health=false와 인증서 실패·다운로드·모델 캐시 누락 신호를 사용자 보고로 확인함.** 기존 Start가 Windows 신뢰 CA를 적용할 경로를 제공하지 않던 점을 보완한 `Start -UseWindowsCA`의 Windows/Linux CI 성공과 사용자 승인에 따른 PR #19 main 병합을 확인함. 정확한 모델·다운로드 주소, 최초 종료 원인과 실제 사내 복구는 미확인임.
-- 다음 작업 하나: **사내에서 기존 Update → Stop → Start -UseWindowsCA로 한 번 복구 확인한다.** 코드 원본 `f30e056e6e98363f04acafa117c7743e8adfa392`의 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34412665441) 성공과 [PR #19 병합 cb3a922](https://github.com/knadalkim-a11y/team-agent-poc/commit/cb3a922d870663abd7f5fd576ba23456575e49a2)을 확인했으며 [운영 절차](03-openwebui-native-agent.md#ees-start-windows-ca)를 안내함. 사내 Update/Stop/Start·접속 성공은 아직 미확인임. 같은 설정의 대기 연장·재설치·후보 Deploy를 반복하지 않으며 완료한 v0.1.6 적용·크기 조절 정상 보고는 유지함.
+- 이번 작업: **Windows CA 적용 안내 후 Stop 성공·Start health_check 실패에 이어, 사용자가 기존 웹 주소의 접속 성공을 보고함.** 시작 명령의 대기가 끝난 뒤에도 프로세스가 계속 초기화할 수 있는 경로와 일치함. 이전 로그의 인증서 실패·다운로드·캐시 누락은 보존하지만 이번 Start의 인증서 오류 지속 여부·정확한 지연 원인과 최초 서버 종료 원인은 미확인임. 추가 읽기 진단·재시작은 요청하지 않음.
+- 다음 작업 하나: **현재 서버를 유지하고 WO 목업의 시연 피드백 흐름을 이어간다.** 이번 접속 성공 뒤 추가 Start·대기 연장·재설치·로그 수집을 선행하지 않음. 코드 원본 `f30e056e6e98363f04acafa117c7743e8adfa392`의 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34412665441) 성공과 [PR #19 병합 cb3a922](https://github.com/knadalkim-a11y/team-agent-poc/commit/cb3a922d870663abd7f5fd576ba23456575e49a2)은 유지하며 실제 CA 신뢰 파일·사내 checkout 전체 SHA는 직접 대조하지 않음.
 - 설비 조회 관리 합의: 여러 업무에서 쓰는 공통 기능이므로 운영용 설계에서는 독립 Tool로 등록·관리하는 방향을 유지함. 사용자는 이번 시연에 한해 적용이 간단한 기존 단일 등록 항목을 유지하기로 함. 현재는 같은 Tool 안의 함수 분리이며 별도 등록 완료가 아님. 후속 요청의 설비 조회 패널도 같은 등록 항목에서 제공하며 새 적용 성공 보고로 간주하지 않음.
 - 첫 화면 제안: 기본 영어 문구를 대체할 천안 설비·헝가리 설비·AI WO 초안·직접 선택의 네 질문을 준비하고, v0.1.2의 Tool·WO 지침·제안 갱신 안내를 수행했다는 사용자 보고를 받음. 첫 조회 시연 중 대화 이동 후 패널 소실을 보고했으며 제안 네 개의 실제 등록 원문·각 클릭 결과를 직접 대조한 것은 아님. 이번 수정은 제안 JSON을 바꾸지 않음. [적용 안내](03-openwebui-native-agent.md#first-use-entry).
 - 완료한 이전 단위: 초기 Rich UI 제거·일반 문장/표/원문 링크 전환의 구현·검증·main 반영에 이어 **제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 확인함.** 개별 Tool 등록 내용·적용 SHA·새 조회/원문 결과의 직접 대조는 미확인으로 유지하며 저장 절차를 반복 안내하지 않음. [적용 보고](../evals/scenarios.md#plain-output-applied-report), [변경·검증](../evals/scenarios.md#prototype-rich-ui-removal).
@@ -41,7 +41,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 - 이번 Rich UI 제거 시작 기준: 2026-09-09 원격 main `99a9ee`·관련 열린 PR 0개를 확인함. 다음 재개 때 이 SHA를 최신 head로 고정하지 않음.
 - 읽을 범위: AGENTS·이 문서 → [WO 목업](03-openwebui-native-agent.md#wo-mockup)·[합의한 설계 기준](03-openwebui-native-agent.md#legacy-ui-design) → 피드백에 관련된 파일. 공통 정책 단계로 돌아갈 때 [공통 정책·관리자 워크플로](03-openwebui-native-agent.md#managed-policy-workflow)를 읽음. 완료한 일반 출력 전환의 저장 절차와 중단한 후보 진단을 재실행 목록으로 읽지 않음.
 - 완료한 단위: 초기 Rich UI 제거의 Git 구현·검증·main 반영에 이어, 제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 확인함. 실제 등록 코드·적용 SHA·새 조회의 상세 출력 검증과 구분하며, 기존 프로그램 적용·기동·인증 전수 검사를 반복하지 않음. [적용 보고](../evals/scenarios.md#plain-output-applied-report).
-- 마지막 서버 증거: **2026-09-09 Start 실패 reason=health_timeout/seconds=120.0/exit=-, 현재 process=true/health=false, 로그 cert_verify_failed/download_activity/model_cache_missing을 사용자 보고로 확인함.** 이번 시작의 다운로드·TLS 지연 가능성을 좁혔으며 최초 종료 원인은 미확인임. 이전 정상 근거는 다음과 같음: **2026-09-09 실제 운영 폴더 수동 이름 변경 뒤 Apply=result ok/changed true/commit 4a8779bbf3ee/complete/customized와 Start=result ok/같은 commit/complete/customized/running true, 이어 이름·로고 변경·기존 대화 유지·Jira/Confluence/GitHub 조회 정상을 사용자 보고로 확인함.** 해당 사내 적용과 확인한 사용 흐름의 성공이며 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소로 확대하지 않음. [현재 진단](../evals/scenarios.md#ees-start-health-followup), [이전 적용·사용 성공](../evals/scenarios.md#ees-wrapper-manual-resume), [이전 실패·원본 복원](../evals/scenarios.md#ees-wrapper-apply-resume).
+- 마지막 서버 증거: **2026-09-09 Windows CA 적용 복구 안내 후 Stop=result ok, Start=result failed/stage=health_check/changed·commit·program·running=-에 이어 기존 웹 주소 접속 성공을 사용자 보고로 확인함.** 실패 요약의 하이픈은 성공 필드가 없는 실패 결과의 미확인 표시이며 데이터 삭제나 원본 복원을 뜻하지 않음. 이번 실패의 세부 reason/초수·현재 health 직접 조회·인증서 오류 지속 여부는 추가 검사하지 않았음. 앞선 120초 timeout·TLS/다운로드/캐시 신호와 최초 종료 원인 미확정은 [후속 기록](../evals/scenarios.md#ees-start-health-followup)에 보존함. 이전 이름·로고·기존 대화·대표 연동 정상은 [기존 적용 성공](../evals/scenarios.md#ees-wrapper-manual-resume) 범위로 유지하며 이번 웹 접속 보고를 전체 기능 재검증·장기 안정성 성공으로 확대하지 않음.
 - 사내 결과는 직접 타이핑 1~2줄만 가능하며 전체 출력·파일·화면 사진을 요청하지 않습니다. 명령 블록은 각각 2,500자 이내로 준비하고, 상세 결과는 사내에 저장합니다. [재개 준비 점검](../evals/scenarios.md#ees-wrapper-resume).
 
 <a id="delivery-plan"></a>
@@ -115,7 +115,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-09: 사용자 병합 승인에 따라 PR #19 head `f30e056e`·main `f2e0f9f`·병합 가능 상태와 해당 코드의 Windows/Linux CI completed/success를 다시 확인하고 main에 병합함. 원격 main `cb3a922d870663abd7f5fd576ba23456575e49a2`를 확인했으며 운영 명령의 Update/Stop 실패 시 중단·기존 환경 재사용·시작 요약을 읽기 대조함. 이번 후속은 상태·평가 문서만 갱신하고 문서/diff를 검사함. 기존 코드 시험은 반복하지 않았으며 실제 사내 실행과 최초 종료 원인은 미확인. [병합·복구 안내 근거](../evals/scenarios.md#ees-start-health-followup).
+2026-09-09: main `48d8e0ee`와 같은 로컬 원본에서 Start 실패 요약의 표시 방식·기록 연결·timeout 뒤 프로세스 유지 경로를 읽기 확인함. CA 선택 상태를 포함한 2,317자 읽기 진단을 준비하고 문법을 확인했으나, 사용자가 기존 웹 주소 접속 성공을 보고하여 실행 요청을 취소함. 이번 후속은 STATUS·평가 문서만 갱신하고 문서/diff를 확인함. 코드·설정·완료한 시험은 변경/반복하지 않았으며 새 CA의 실제 적용 내용·지연 원인·최초 종료 원인은 미확정으로 유지함. [접속 성공·판정 경계](../evals/scenarios.md#ees-start-health-followup).
 
 ## 갱신 규칙
 
