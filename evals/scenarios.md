@@ -1129,9 +1129,19 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 로컬 검증: 기존 Python 3.12.13/Pydantic 2.13.4에서 Confluence 읽기/보안 canary 85개, Jira 25개, GitHub 34개 **총 144개 PASS, skip 없음**. 제거한 DOM 시험의 중요 JSON/범위/조회 시각/대형 ID/본문/부분 실패 계약은 기존 읽기 시험에서 확인함. [Confluence](confluence-offline.md#plain-results), [Jira](jira-offline.md#rich-ui-removed), [GitHub](github-offline.md#rich-ui-removed)에 명령·증거를 기록함.
 - 독립 검토: 실제 diff/AST로 표시 계층 외 API·인증·마스킹·URL·pagination 보존, 삭제 범위, 새 대화와 기존 기록의 구분, 과설계를 대조함. 조회 회귀 결함은 발견하지 못함. Windows에서 연속 Python 명령의 앞 실패가 가려질 수 있어 CI의 읽기 검사 3개를 별도 step으로 분리함. 불필요한 Confluence Skill 한 줄 갱신과 사내 재등록 요구도 제거하여 대상은 기존 Tool 3개·공통 Prompt로 맞춤. 새 기능/보안 설정이나 사내 패키지 설치는 추가하지 않음.
 - 전달 검수: 지적 두 건의 수정 후 독립 대조를 통과함. 중앙 안내의 PowerShell 4개 블록은 317/162/166/167자로 제한 이내이며 명령/저장 실패 시 다음 단계로 넘어가지 않도록 안내함. 문서 검사 DOCS OK(files=25, links=627, errors=0, review_candidates=0)와 diff 검사 통과. 실제 사내 새 출력은 미실행임.
-- 사내 안내·남은 확인: [기존 항목 갱신 안내](../docs/03-openwebui-native-agent.md#plain-output-update)에 따라 main Update 후 기존 Tool 코드 3개와 공통 Prompt만 교체·저장함. 기존 ID·관리자/개인 설정·PAT·모델/Skill/Knowledge 연결과 추가 지침을 보존함. 새 대화에서 세 조회를 한 번씩 요청하고 카드 없는 일반 답변/원문 정상 여부를 1~2줄로 받음. 이전 대화의 카드는 기록으로 남을 수 있으며 DB/대화를 지우지 않음. Apply/Stop/Start·wheel·인증/격리 전수 검사는 반복하지 않음. **구현·자동 검사·독립 검토·main 반영 완료, 사내 Tool/Prompt 갱신·새 출력 확인 미완료**임.
+- 당시 사내 안내·남은 확인(후속 완료 보고 수신 전): [기존 항목 갱신 안내](../docs/03-openwebui-native-agent.md#plain-output-update)에 따라 main Update 후 기존 Tool 코드 3개와 공통 Prompt만 교체·저장함. 기존 ID·관리자/개인 설정·PAT·모델/Skill/Knowledge 연결과 추가 지침을 보존함. 새 대화에서 세 조회를 한 번씩 요청하고 카드 없는 일반 답변/원문 정상 여부를 1~2줄로 받음. 이전 대화의 카드는 기록으로 남을 수 있으며 DB/대화를 지우지 않음. Apply/Stop/Start·wheel·인증/격리 전수 검사는 반복하지 않음. **구현·자동 검사·독립 검토·main 반영 완료, 사내 Tool/Prompt 갱신·새 출력 확인 미완료**임.
 
 - 최종 CI·게시: [PR #18](https://github.com/knadalkim-a11y/team-agent-poc/pull/18)의 최종 원본 `61568f119f6b2bec03e29adaa24b207d00585a2e`, tree `c9ed44a513328f6d31907fdf1275023b9ad41275`가 [Windows/Linux Python 3.11 CI 34308748946](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34308748946) success임. 각 플랫폼에서 Confluence 85/Jira 25/GitHub 34 총 144개, 실제 wheel customization 31개, manager 72개가 모두 통과함. 기존 deployment 139개는 Windows 전부 통과/Linux 플랫폼 전용 3개 skip, 초기 branding 단위 시험의 실제 wheel 미지정 1개 skip은 뒤의 실제 wheel 검사와 구분함. 번들·PowerShell·문서 검사도 통과함. 첫 두 CI의 Windows 시험 fixture 실패는 Confluence/Jira/GitHub 기존 기록에 남기고 SQLite 정리·OS 인증서 호출·테스트 루프 초기화만 보완했으며 생산 코드를 바꾸거나 검사를 skip하지 않음. 시험 보완의 독립 검토도 통과함. [main 병합 b105a14](https://github.com/knadalkim-a11y/team-agent-poc/commit/b105a1441d1bb403684b985e20dc1a43a6519564)와 최종 원본의 tree 일치를 확인함. 이후 STATUS/이 기록의 현재 상태만 갱신하며 사내 새 Tool/Prompt 반영 성공은 아직 확인하지 않음.
+
+<a id="plain-output-applied-report"></a>
+
+### 초기 Rich UI 제거·변경 프롬프트 WebUI 반영 완료 보고 (2026-09-09)
+
+- 사용자 보고: 다른 대화에서 기존에 만든 Rich UI를 모두 제거하는 작업을 했고, 변경된 프롬프트들을 WebUI에 모두 반영했다고 알림. **Rich UI 제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 인정**함.
+- 판정 범위: 개별 Tool 3개의 등록 버전/코드, 실제 적용 SHA, 새 조회에서 카드 부재·원문 링크·세 연동 출력의 개별 확인 결과는 이번 보고에 없음. 완료한 작업을 다시 저장하도록 안내하지 않고 해당 미확인은 다음 관련 사용/변경에 묶음. 실제 코드·설정·조회 결과를 GPT가 직접 확인한 것으로 기록하지 않음.
+- 기록 변경: 원격 main `f2e0f9f`와 PR #19 head `3b3a2f1`을 기준으로 STATUS의 현재 반영 상태·반복 저장 안내·프롬프트 미반영 표현, Native 가이드의 현재 상태 참조를 정리함. 과거 실패·당시 미완료/설계 검토 기록은 보존하고 이번 보고를 추가함. 기존 실행 계획의 EES 전용 공통 정책 단계와 합의한 목업 우선 설계를 유지함.
+- 검증: 문서 3개만 변경. 관련 표현과 사용자 보고 범위를 대조하고 Linux에서 `python scripts/check_docs.py` = `DOCS OK | files=25 links=640 errors=0 review_candidates=0`, `git diff --check` 통과. 실행 코드·정책·시험·CI·실환경을 변경하거나 기존 기능 검사를 반복하지 않음.
+
 
 ## 결과 기록
 
@@ -1274,7 +1284,7 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 확인 범위: 해당 AGENTS/STATUS·README의 관리 경계, Native 가이드의 Rich UI/현재 일반 출력 절차, CHANGELOG와 본 기록. 구현·정책을 바꾸지 않고 기존 문서 안에서 결정과 후속 범위를 연결함.
 - 검토 사항: 최신 폼 기준의 AI 편집과 사용자 수정 보존, 확인한 내용만 실행하는 서버 경계, 중복/결과 불명 처리, 실제 EMS 업무 로직 재사용, 개별 목업 승인과 개발 방식 합의 구분, 기존 Python·작은 웹 화면부터 시작하는 과설계 방지 기준을 대조함. 별도 검토에서도 네 문서의 diff와 합의/실행 경계·기존 상태 보존·중복을 대조했으며 수정이 필요한 중요한 문제는 발견되지 않음.
 - 검증: Linux의 원격 내용 일치 snapshot에서 `python scripts/check_docs.py` = `DOCS OK | files=25 links=634 errors=0 review_candidates=0`, `git diff --check` 통과. 원본 74개 파일의 bytes·mode·blob SHA와 tree `77f0b13a9413871d4c144a2de75210e1c0c39d1d`를 원격 기준과 대조함. 문서 4개만 변경했으며 실행 코드·시험·의존성·CI 변경과 기존 기능 전체 재시험은 없음.
-- 미구현/미확인: 실제 목업·사용자 사용성 확인·폼 상태 연동·최종 실행 경로·EMS API/필드/업무 로직·WO 발행 모두 미구현 또는 미확인. 이번 합의가 개별 목업 승인이나 쓰기 권한/정책의 확대, 사내 반영 완료를 뜻하지 않음. 현재 읽기 전용 범위와 세 Tool/Prompt의 사내 갱신 대기를 유지함.
+- 미구현/미확인: 실제 목업·사용자 사용성 확인·폼 상태 연동·최종 실행 경로·EMS API/필드/업무 로직·WO 발행 모두 미구현 또는 미확인. 이번 합의가 개별 목업 승인이나 쓰기 권한/정책의 확대, 사내 반영 완료를 뜻하지 않음. 이 설계 검토 당시에는 현재 읽기 전용 범위와 세 Tool/Prompt의 사내 갱신 대기를 유지함. 이후 [사용자 완료 보고](#plain-output-applied-report)는 별도 기록으로 추가함.
 
 직전 STATUS 점검의 보존 기록(초기 Rich UI 제거, 2026-09-09):
 
