@@ -1024,6 +1024,12 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 최종 검토·반영: 오류 정보의 고정 allowlist·정확한 내부 checkout 코드 위치·원문/경로/임의 stage 비출력, 상세 기록 실패 시 원래 번호 보존과 자동 재시도 없음에 대한 독립 검토의 차단사항을 해소함. [PR #16](https://github.com/knadalkim-a11y/team-agent-poc/pull/16)을 예상 head `234f8d56`로 main에 병합하고 [병합 커밋 2555b6d](https://github.com/knadalkim-a11y/team-agent-poc/commit/2555b6d0dcae7fc26c2a8cf3e1a669ef6195e80b)의 tree `8158c6bf50207332681d7efd8ff3bdd5eace4ab0`가 검증한 tree와 같음을 확인함. 이 후속 증거 기록은 STATUS와 이 문서만 변경하고 문서/diff를 확인하며 코드/기능 시험을 다시 바꾸거나 반복하지 않음.
 - 사내 전달·한계: 기존 PowerShell의 Update→Restore→Start(120초) 블록은 262자로 2,500자 이내이며 독립 읽기 대조에서 단계별 실패 중단·Restore의 서버 종료/포트 확인·자동 Apply 재시도 없음·출력 1~2줄을 확인함. 성공 보고는 restore=ok/original 및 start=ok/original/기존 주소 접속으로 받으며 실패 시 마지막 EES 줄의 해당 오류 필드만 받음. 추가 error/errno/winerror/at는 일반 로컬 예외에 있을 때만 표시됨. **오류 보존 구현·Windows/Linux CI·main 병합 완료, 사내 Update/Restore/Start·UI는 미실행; 사내 OS 원인과 EES 수정본 적용 성공은 미확인**임.
 
+
+- 후속 사내 복원·시작 보고: Update→Restore→Start 안내 뒤 사용자가 `restore ok true - complete original -`, `start failed - - process_start - -`를 전달함. Restore의 프로그램 선택 복원 완료는 확인됐으나 Start 성공은 아님. 위 사내 미실행 기록은 이 보고 전 시점으로 보존함. 현재 프로세스 가동/잔존·구체 오류·사내 checkout 전체 SHA는 직접 확인하지 않았으며 사내 EES 수정본 적용 성공으로 기록하지 않음.
+- 후속 코드 대조·다음: 최신 main `57b897a98aee26c0c04d780999fab60551373183`, 관련 열린 PR 0개, 로컬 tree `e904d70b4b0bdd6b36a59ad9133b209dec1c0ff7`를 확인함. start_selected는 서버 생성/최초 신원 확인 동안 process_start를 사용하며 identity 저장 뒤 health_check로 넘어감. 따라서 보고는 health timeout의 증거가 아님. start_server의 실행 실패/초기 종료/신원 미확인 등은 기존 last-operation.json의 result.reason과 process.reason/errno/winerror/exit_code로 구분할 수 있어 그 두 줄만 읽도록 안내함. launch_unverified라면 프로세스가 남았을 수 있으므로 현재 죽었다고 가정하거나 Start를 반복하지 않음.
+- 기존 실행 명령 보충: 사용자는 이전 직접 실행이 `uvx --python 3.11 open-webui@0.11.3 serve --host <기존 등록 주소> --port 8080`이었다고 설명함. 실제 사내 주소는 이 기록에 저장하지 않음. 현재 래퍼의 original Start는 등록된 Python 경로로 `from open_webui import serve`를 실행하며 새 uvx 환경을 만들거나 패키지를 설치하지 않음. uvx의 해석/실행 경로와 등록된 Python 직접 실행은 구분하되, 이번 process_start만으로 Python 버전/의존성 문제나 그 실행 방식 차이를 원인으로 확정하지 않음. 생성 후 신원 확인 실패 가능성이 있어 기존 uvx 명령도 실패 이유 확인 전에 병행 실행하지 않음.
+- 후속 검증·한계: STATUS·이 기록만 갱신하고 문서/diff를 검사함. 이미 검증한 코드/시험/CI·Restore·Start를 반복하거나 변경하지 않음. 확인용 PowerShell은 기존 결과 파일만 읽고 서버·설정·데이터를 변경하지 않으며 2,500자 이내/출력 두 줄로 준비함. 사내 이유/코드 조회·원인 확인·서버 가동 성공은 대기 중임.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
