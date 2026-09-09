@@ -1,7 +1,7 @@
 """
 title: EES WO Demo
 description: Sample equipment selection and WO drafting beside the existing chat. No EMS connection or real issuance.
-version: 0.1.5
+version: 0.1.6
 required_open_webui_version: 0.11.3
 """
 
@@ -575,12 +575,13 @@ try {
       drag={id:event.pointerId,x:event.clientX,width:panelWidth,selection:document.body.style.userSelect,cursor:document.body.style.cursor};
       document.body.style.userSelect='none';document.body.style.cursor='col-resize';
       try{divider.setPointerCapture(event.pointerId);}catch(_){finishDrag();return;}
-      divider.focus({preventScroll:true});event.preventDefault();
+      divider.focus({preventScroll:true});divider.style.outline='none';event.preventDefault();
     });
     divider.addEventListener('pointermove',event=>{if(drag && event.pointerId===drag.id)setWidth(drag.width+drag.x-event.clientX);});
     ['pointerup','pointercancel','lostpointercapture'].forEach(type=>divider.addEventListener(type,finishDrag));
     divider.addEventListener('keydown',event=>{
       if(divider.hidden || !['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      divider.style.outline='2px solid #6b91d5';
       event.preventDefault();setWidth(event.key==='Home'?350:event.key==='End'?maximumWidth:panelWidth+(event.key==='ArrowLeft'?20:-20));
     });
     divider.addEventListener('focus',()=>divider.style.outline='2px solid #6b91d5');
@@ -643,7 +644,7 @@ try {
 } catch (error) {
   // Return fixed diagnostic labels only; exception messages/stacks may contain user data.
   const exception=['TypeError','ReferenceError','RangeError','SyntaxError','Error','NotFoundError','NotSupportedError','SecurityError','InvalidStateError','InvalidCharacterError'].includes(error?.name)?error.name:'Error';
-  return {ok:false,demo:true,error:{code:'panel_error',message:'시연 화면을 처리하지 못했습니다. 화면의 현재 내용을 확인한 뒤 다시 열어 주세요.',diagnostic:{script_version:'0.1.5',stage:panelStage,exception}}};
+  return {ok:false,demo:true,error:{code:'panel_error',message:'시연 화면을 처리하지 못했습니다. 화면의 현재 내용을 확인한 뒤 다시 열어 주세요.',diagnostic:{script_version:'0.1.6',stage:panelStage,exception}}};
 }
 """
 
