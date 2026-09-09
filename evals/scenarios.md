@@ -1108,6 +1108,10 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 독립 최종 검토·전달: 실제 코드/시험/두 명령 블록을 대조해 차단 결함을 발견하지 못함. 프로그램/원본 데이터 경계·동시 작업/복원·과설계를 검토했고 새 모듈/환경/파일 이동 대체를 추가하지 않음. 안내 블록은 1,283자/356자이며 Windows CI에서 문서의 해당 블록과 어댑터 구문/인자 전달을 검사함. 문서 검사는 DOCS OK, 25 files / 617 links / errors=0 / review_candidates=0이며 diff 검사도 통과함. 이 시점의 사내 Resume·수정본 Start/화면 확인은 미실행임.
 - 최종 CI·병합: [PR #17](https://github.com/knadalkim-a11y/team-agent-poc/pull/17) 원본 `dd7d5065f953fb5fdfea7cd376d1e33539dd5899`, tree `f631c7f1e04b1a1080c4a1c36a62dd170677aaeb`의 [Windows/Linux Python 3.11 CI 34304725241](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34304725241)가 success임. 각 플랫폼에서 customization 31/31, manager 72/72 통과, 실제 wheel의 수동 승격/Resume/Restore 및 PowerShell 어댑터 인자 전달·문서 두 블록 구문 검사 모두 통과함. 기존 deployment 139개는 Windows 전부 통과/Linux 플랫폼 전용 3개 skip이며 기존 빌더/번들·문서 검사도 통과함. [main 병합 5c87d6b](https://github.com/knadalkim-a11y/team-agent-poc/commit/5c87d6bb5345a48ece26669bf2b1d596cdc18736)와 같은 tree를 확인함. 뒤따른 현재 상태 갱신은 STATUS/이 기록만 변경하며 이미 통과한 실행 코드/시험/CI 설정은 변경하지 않음. **구현·자동 검사·독립 검토·main 반영 완료 / 사내 실제 운영 폴더 변경·Resume·수정본 기동·화면 확인 미완료**를 구분함.
 
+- 사내 실제 운영 폴더 변경·재개 명령 실행 보고: 사용자는 안내한 실제 program.staging→program 수동 이름 변경에 성공했고 이어진 아래 명령 블록을 실행한 상태라고 보고함. 수동 변경도 처음에는 다른 프로세스가 붙잡은 것 같았으나 조금 기다렸다 다시 시도하니 성공했다고 설명함. 대기 뒤 수동 변경 성공을 사용자 관찰로 인정하되 실제 오류 코드·점유 프로세스·정확한 원인은 확인하지 않았으며 이전 Win5를 이번 수동 시도의 오류로 복제하지 않음. 시험용 복사본 비교와 이번 운영 폴더 변경을 구분함.
+- 현재 결과 경계·다음: Resume와 Start의 개별 result/stage, 수정본 화면·기존 대화·대표 조회 결과는 아직 전달받지 못함. 명령 블록 실행 보고만으로 Resume 성공이나 서버 시작/실시간 가동을 추정하지 않음. 실행 중이면 현재 결과를 기다리고, 끝났다면 이미 표시된 Apply/Start 결과 한 줄과 가능할 때 화면 확인 한 줄만 받음. 같은 명령 재실행·추가 Apply/Restore/Start·프로세스/권한 검사·자동 지연/재시도 기능을 추가하지 않음. 구현·CI·main 반영 완료, 실제 운영 폴더 수동 변경 성공, 수정본 적용/기동/사용 성공 미확인을 구분함.
+- 보고 반영 점검: 최신 main `842c158bd5fefebba085af76a8ac29ff839073bd`, tree `76c0afe852afb7b0a5d604c47bc73b79b8965553`, 관련 열린 PR 0개와 로컬 tree 일치를 확인함. STATUS/이 기록만 갱신하고 문서/diff를 검사함. 이미 통과한 코드/시험/CI를 변경·반복하거나 사내 로그·파일·사진을 요청하지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
