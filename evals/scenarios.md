@@ -999,6 +999,9 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 다음 확인·중단 조건: 실패 전 `action=stop result=ok`가 있었다면 재적용 없이 마지막 저장 결과의 시각/action/failed와 reason만 두 줄로 읽음. 없었다면 기존 입력의 `Apply -CheckOnly`에서 `-Summary`만 제외해 읽기 전용으로 한 번 확인하고 `Operation stopped:` 이유 한 줄만 받음. 전체 출력·파일·사진은 요구하지 않음. 결과가 없거나 맞지 않으면 미확인으로 남기며 실제 Apply/Start/Restore 재시도·잠금 삭제·후보 Diagnose/Deploy/ProbeImports·pandas 진단을 안내하지 않음.
 - 검토·검증: 독립된 짧은 읽기 검토로 CheckOnly 기록 부재·과거 결과 오인 위험·두 분기의 최소 확인을 대조함. STATUS와 이 기록만 변경하고 문서 점검·diff를 확인함. 실행 코드·기존 자동 시험을 변경/반복하지 않음. 사내 상세 원인 조회·PowerShell 후속 블록 실행은 미실행이며 **구현/CI 완료, 실제 사내 적용 성공 미확인**을 유지함.
 
+- 후속 경로 보완·사전 확인: 사용자가 ZIP 입력에 파일명 없이 Downloads 폴더 경로만 지정했다고 설명함. `EES-demo-4a8779bbf3ee.zip` 파일명까지 포함한 경로와 기존 프로그램 Commit `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`으로 읽기 전용 Apply/CheckOnly를 안내했고, **`checked=true`, `changed=false`, `already_applied=false`, `requires_stopped_server=true`, `data_changed=false`** 보고를 수신함. 이번 입력의 사전 검사가 통과했으며 해당 ZIP은 현재 적용본과 일치하지 않고 이 검사에서 프로그램/데이터 변경도 없음을 뜻함. 최초 실패의 상세 예외·Stop 실행 여부를 소급해 확정하거나 현재 서버 가동을 추정하지 않음.
+- 후속 처리·다음: 원격 main `abdd449828e9382fc5aed7ca8d1e5a83a3c52da6`·관련 열린 PR 0개·로컬 tree `73c640f4253043034a56932d6745e19b0bb56e6c` 일치를 확인함. STATUS와 이 기록만 갱신하고 문서/diff를 검사함. 경로 문제를 분리하기 위한 추가 진단이나 이미 통과한 CheckOnly를 반복하지 않고, 같은 ZIP/Commit의 Stop→Apply→Start(health 최대 120초) 후 기존 화면/대화·채팅/대표 조회를 확인하도록 안내함. 첫 실패에서 중단하며 결과는 1~2줄만 받음. **사전 확인 PASS, 실제 Apply/Start·UI 성공은 아직 미확인**임. 원격 main의 문서 기록 갱신 때문에 사내 코드 Update를 다시 요구하지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
