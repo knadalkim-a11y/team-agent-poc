@@ -32,12 +32,13 @@ class CanaryCheckTests(unittest.TestCase):
         self.secret = "synthetic-local-key-with-newline\n"
         (self.root / ".webui_secret_key").write_text(self.secret, encoding="utf-8")
         self.fernet = Fernet(base64.urlsafe_b64encode(hashlib.sha256(self.secret.encode()).digest()))
-        with sqlite3.connect(self.db) as db:
+        # The SQLite transaction context commits/rolls back but does not close.
+        with contextlib.closing(sqlite3.connect(self.db)) as db, db:
             db.execute('CREATE TABLE "user" (settings TEXT)')
             db.execute('CREATE TABLE "tool" (id TEXT PRIMARY KEY, name TEXT)')
 
     def store(self, stored, tool_id="synthetic-tool"):
-        with sqlite3.connect(self.db) as db:
+        with contextlib.closing(sqlite3.connect(self.db)) as db, db:
             db.execute('INSERT INTO "user" VALUES (?)',
                        (json.dumps({"tools": {"valves": {tool_id: stored}}}),))
 
@@ -45,11 +46,11 @@ class CanaryCheckTests(unittest.TestCase):
         return self.fernet.encrypt(json.dumps({"PAT": canary}).encode()).decode()
 
     def jira_tool(self, tool_id="synthetic-jira", name="EES Jira Read"):
-        with sqlite3.connect(self.db) as db:
+        with contextlib.closing(sqlite3.connect(self.db)) as db, db:
             db.execute('INSERT INTO "tool" VALUES (?, ?)', (tool_id, name))
 
     def github_tool(self, tool_id="synthetic-github", name="EES GitHub Read"):
-        with sqlite3.connect(self.db) as db:
+        with contextlib.closing(sqlite3.connect(self.db)) as db, db:
             db.execute('INSERT INTO "tool" VALUES (?, ?)', (tool_id, name))
 
     def test_encrypted_value_matches_existing_key_and_db_is_unchanged(self):
@@ -179,7 +180,7 @@ class CanaryCheckTests(unittest.TestCase):
         self.jira_tool()
         for other_tool in ("synthetic-jira", "synthetic-other"):
             with self.subTest(other_tool=other_tool):
-                with sqlite3.connect(self.db) as db:
+                with contextlib.closing(sqlite3.connect(self.db)) as db, db:
                     db.execute('DELETE FROM "user"')
                 self.store(self.encrypted(checker.JIRA_CANARY), "synthetic-jira")
                 self.store(self.encrypted(checker.JIRA_CANARY), other_tool)
@@ -194,7 +195,7 @@ class CanaryCheckTests(unittest.TestCase):
         self.assertEqual(result["PlaintextCanaryMatches"], 1)
         self.assertTrue(result["PlaintextInDatabaseFiles"])
         self.assertFalse(result["DatabaseCheckPassed"])
-        with sqlite3.connect(self.db) as db:
+        with contextlib.closing(sqlite3.connect(self.db)) as db, db:
             db.execute('DELETE FROM "user"')
             db.commit()
             db.execute("VACUUM")
@@ -317,7 +318,7 @@ class CanaryCheckTests(unittest.TestCase):
         self.github_tool()
         for other_tool in ("synthetic-github", "synthetic-other"):
             with self.subTest(other_tool=other_tool):
-                with sqlite3.connect(self.db) as db:
+                with contextlib.closing(sqlite3.connect(self.db)) as db, db:
                     db.execute('DELETE FROM "user"')
                 self.store(self.encrypted(checker.GITHUB_CANARY), "synthetic-github")
                 self.store(self.encrypted(checker.GITHUB_CANARY), other_tool)
@@ -332,7 +333,7 @@ class CanaryCheckTests(unittest.TestCase):
         self.assertEqual(result["PlaintextCanaryMatches"], 1)
         self.assertTrue(result["PlaintextInDatabaseFiles"])
         self.assertFalse(result["DatabaseCheckPassed"])
-        with sqlite3.connect(self.db) as db:
+        with contextlib.closing(sqlite3.connect(self.db)) as db, db:
             db.execute('DELETE FROM "user"')
             db.commit()
             db.execute("VACUUM")

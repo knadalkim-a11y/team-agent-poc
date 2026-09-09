@@ -260,7 +260,9 @@ class ConfluenceReadTests(unittest.IsolatedAsyncioTestCase):
         self.tool.valves.CA_BUNDLE_PATH = "synthetic-ca.pem"
         with patch.object(ssl.SSLContext, "load_verify_locations") as load_ca:
             self.assertTrue(self.result(await self.tool.check_access(__user__=self.user()))["ok"])
-        load_ca.assert_called_once_with(cafile="synthetic-ca.pem")
+        # Windows may also load its default certificate stores through this method.
+        self.assertEqual(sum(call.kwargs.get("cafile") == "synthetic-ca.pem"
+                             for call in load_ca.call_args_list), 1)
         handler = next(h for h in self.openers[0].handlers if isinstance(h, urllib.request.HTTPSHandler))
         self.assertEqual(handler._context.verify_mode, ssl.CERT_REQUIRED)
         self.assertTrue(handler._context.check_hostname)
