@@ -395,7 +395,7 @@ class CustomizationTests(unittest.TestCase):
         self.assertNotIn("program_applied", self.events)
         self.assertFalse(self.program.exists())
         custom.validate_program(staged, pending["target"])
-        self.assertEqual(before, {name: value for name, value in self.tree().items() if not name.startswith("state/")})
+        self.assertEqual(before, {name: value for name, value in self.tree().items() if Path(name).parts[0] != "state"})
         with self.assertRaisesRegex(custom.CustomizationError, "Restore"):
             self.apply()
         self.assertTrue(self.restore()["original_program"])
