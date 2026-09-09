@@ -1,7 +1,7 @@
 """
 title: EES WO Demo
 description: Sample equipment selection and WO drafting beside the existing chat. No EMS connection or real issuance.
-version: 0.1.1
+version: 0.1.2
 required_open_webui_version: 0.11.3
 """
 
@@ -167,12 +167,16 @@ PANEL_HTML = r"""<style>
   <header class="header">
     <div>
       <p class="eyebrow">EES Assistant</p>
-      <div class="heading"><h2>설비 WO</h2><span class="badge">시연용</span><span id="stage" class="badge" role="status">발행 전</span></div>
+      <div class="heading"><h2 id="panel-title">설비 WO</h2><span class="badge">시연용</span><span id="stage" class="badge" role="status">발행 전</span></div>
     </div>
     <button id="close" class="close" type="button" aria-label="설비 WO 패널 닫기">닫기</button>
   </header>
 
-  <p class="intro">대화로 요청하거나 이 화면에서 직접 선택·수정할 수 있어요.</p>
+  <p id="intro" class="intro">대화로 요청하거나 이 화면에서 직접 선택·수정할 수 있어요.</p>
+  <div class="section-title">
+    <button id="browse-equipment" type="button">설비 조회</button>
+    <button id="back-to-wo" type="button" hidden>작성 중인 WO 보기</button>
+  </div>
   <p id="change-note" class="change-note" role="status" aria-live="polite"></p>
   <p id="validation" class="validation" role="alert" hidden></p>
 
@@ -203,12 +207,17 @@ PANEL_HTML = r"""<style>
         <label for="query">설비 검색</label>
         <input id="query" type="search" maxlength="100" placeholder="설비명 또는 설비 코드" autocomplete="off">
       </div>
+      <div id="equipment-code-field" class="field full" hidden>
+        <label for="equipment-code">설비 코드 · 정확히 일치</label>
+        <input id="equipment-code" type="search" maxlength="100" placeholder="예: KR-CA-211" autocomplete="off">
+      </div>
     </div>
     <p id="count" class="result-count" role="status" aria-live="polite">시연용 설비를 불러오는 중이에요.</p>
     <div id="results" class="equipment-list" aria-label="설비 검색 결과"></div>
   </section>
 
   <div id="selected" class="selected-equipment" role="status" hidden></div>
+  <p id="search-hint" class="hint" hidden>설비를 선택한 뒤 대화에서 “이 설비로 WO 초안 작성해줘”라고 요청해 주세요. 선택만으로 WO를 작성하지 않아요.</p>
   <button id="choose-again" class="undo" type="button" hidden>설비 다시 선택</button>
 
   <form id="form" class="work-form" novalidate hidden>
@@ -274,7 +283,7 @@ try {
   if (controller && (controller.chatId !== request.chat_id || !controller.alive())) {
     controller.destroy(); controller = null;
   }
-  if (!controller && request.action !== 'view') {
+  if (!controller && !['view','equipment'].includes(request.action)) {
     return fail('view_required', '먼저 시연 화면의 현재 상태를 확인해 주세요. 이전 화면의 수정 요청은 적용하지 않았습니다.');
   }
   if (!controller) {
@@ -283,6 +292,9 @@ try {
     const fieldNames = {corporation:'법인',site:'사업장',shop:'SHOP',line:'LINE',process:'PROCESS',query:'설비 검색',equipment_id:'설비',title:'작업 제목',type:'작업 구분',priority:'우선순위',description:'요청 내용'};
     const catalog = equipmentCatalog;
     const state = {revision:Date.now(),phase:'edit',filters:Object.fromEntries([...hierarchy,'query'].map(k=>[k,''])),equipment_id:'',fields:{title:'',type:'점검',priority:'일반',description:''}};
+    // Browsing equipment is independent of a draft, including a reviewed or issued WO.
+    const search = {filters:Object.fromEntries([...hierarchy,'query','equipment_id'].map(k=>[k,''])),selected_id:''};
+    let screen=request.action==='equipment'?'equipment':'wo', searchNote='샘플 설비를 조회하고 선택할 수 있어요.';
     const origins = {};
     let reviewed = null, lastAI = null, visibleLimit = 8, choosing = true, note = '법인·사업장이나 설비명으로 대상 설비를 찾아보세요.';
     const mountedPath = location.pathname;
@@ -293,7 +305,7 @@ try {
     const divider = document.createElement('div');
     divider.id='ees-wo-demo-resizer';divider.tabIndex=0;
     divider.setAttribute('role','separator');divider.setAttribute('aria-orientation','vertical');
-    divider.setAttribute('aria-label','대화와 WO 화면 너비 조절');divider.setAttribute('aria-controls',host.id);
+    divider.setAttribute('aria-label','대화와 업무 화면 너비 조절');divider.setAttribute('aria-controls',host.id);
     divider.title='드래그하거나 좌우 방향키로 화면 너비를 조절하세요.';
     divider.style.cssText='flex:0 0 10px;width:10px;align-self:stretch;display:flex;align-items:center;justify-content:center;cursor:col-resize;touch-action:none;user-select:none;z-index:31;';
     const grip=document.createElement('span');grip.style.cssText='width:3px;height:36px;border-radius:2px;background:#8888;pointer-events:none;';divider.append(grip);
@@ -303,12 +315,16 @@ try {
     const q = id => shadow.getElementById(id);
     const findEquipment = id => catalog.find(e=>e.id===id) || null;
     const path = e => [e.corporation,e.site,e.shop,e.line,e.process].join(' / ');
-    const matches = filters => catalog.filter(e=>hierarchy.every(k=>!filters[k] || e[k]===filters[k]) && (!filters.query || (e.id+' '+e.name).toLowerCase().includes(filters.query.toLowerCase().trim())));
+    const matches = filters => catalog.filter(e=>hierarchy.every(k=>!filters[k] || e[k]===filters[k]) && (!filters.equipment_id?.trim() || e.id===filters.equipment_id.trim()) && (!filters.query || (e.id+' '+e.name).toLowerCase().includes(filters.query.toLowerCase().trim())));
     const options = (key, filters) => [...new Set(catalog.filter(e=>hierarchy.slice(0,hierarchy.indexOf(key)).every(k=>!filters[k] || e[k]===filters[k])).map(e=>e[key]))];
     const alive = () => location.pathname === mountedPath && row.isConnected && document.querySelector('#chat-container #chat-pane') === anchor;
+    const searchView = () => {
+      const list=matches(search.filters);
+      return {filters:{...search.filters},selected_equipment:findEquipment(search.selected_id),available_options:Object.fromEntries(hierarchy.map(k=>[k,options(k,search.filters)])),matches_count:list.length,matches:list.slice(0,8),matches_truncated:list.length>8};
+    };
     const view = () => {
       const list = matches(state.filters);
-      return {ok:true,demo:true,revision:state.revision,phase:state.phase,filters:{...state.filters},equipment:findEquipment(state.equipment_id),fields:{...state.fields},available_options:Object.fromEntries(hierarchy.map(k=>[k,options(k,state.filters)])),matches_count:list.length,matches:list.slice(0,8),matches_truncated:list.length>8,message:note};
+      return {ok:true,demo:true,screen,revision:state.revision,phase:state.phase,filters:{...state.filters},equipment:findEquipment(state.equipment_id),fields:{...state.fields},equipment_search:searchView(),available_options:Object.fromEntries(hierarchy.map(k=>[k,options(k,state.filters)])),matches_count:list.length,matches:list.slice(0,8),matches_truncated:list.length>8,message:screen==='equipment'?searchNote:note};
     };
     const displayError = message => { q('validation').textContent=message; q('validation').hidden=false; };
     const renderValues = (target, values) => {
@@ -319,28 +335,45 @@ try {
     };
     const render = () => {
       const complete=state.phase==='issued', checking=state.phase==='review';
+      const browsing=screen==='equipment', filters=browsing?search.filters:state.filters;
+      q('panel-title').textContent=browsing?'설비 조회':'설비 WO';
+      host.setAttribute('aria-label',browsing?'설비 조회 시연':'설비 WO 시연');
+      q('close').setAttribute('aria-label',browsing?'설비 조회 패널 닫기':'설비 WO 패널 닫기');
+      q('intro').textContent=browsing?'대화에서 받은 검색 조건을 보여드려요. 필터를 바꾸거나 설비를 눌러 상세 정보를 확인하세요.':'대화로 요청하거나 이 화면에서 직접 선택·수정할 수 있어요.';
       q('stage').textContent=complete?'발행 완료 예시':checking?'최종 확인':'발행 전';
-      q('filters').hidden=complete || checking || !choosing;
-      q('form').hidden=complete || checking || choosing || !state.equipment_id;
-      q('choose-again').hidden=complete || checking || choosing || !state.equipment_id;
-      q('review').hidden=!checking; q('result').hidden=!complete;
+      q('stage').hidden=browsing;
+      q('browse-equipment').hidden=browsing;
+      q('back-to-wo').hidden=!browsing || !(state.equipment_id || state.fields.title || state.fields.description || checking || complete);
+      q('back-to-wo').textContent=complete?'발행 완료 예시 보기':'작성 중인 WO 보기';
+      q('filters').hidden=!browsing && (complete || checking || !choosing);
+      q('form').hidden=browsing || complete || checking || choosing || !state.equipment_id;
+      q('choose-again').hidden=browsing || complete || checking || choosing || !state.equipment_id;
+      q('review').hidden=browsing || !checking; q('result').hidden=browsing || !complete;
+      q('equipment-code-field').hidden=!browsing;q('equipment-code').value=search.filters.equipment_id;
+      q('search-hint').hidden=!browsing;
       hierarchy.forEach((key,index)=>{
         const select=q(key), all=document.createElement('option');all.value='';all.textContent='전체';
         select.replaceChildren(all);
-        options(key,state.filters).forEach(value=>{const option=document.createElement('option');option.value=value;option.textContent=value;select.append(option);});
-        select.value=state.filters[key];select.disabled=complete || (index>0 && !state.filters[hierarchy[index-1]]);
+        const values=options(key,filters);
+        // Even an unknown/conflicting chat condition stays visible with its zero results.
+        if(filters[key] && !values.includes(filters[key]))values.push(filters[key]);
+        values.forEach(value=>{const option=document.createElement('option');option.value=value;option.textContent=value;select.append(option);});
+        select.value=filters[key];select.disabled=!browsing && (complete || (index>0 && !state.filters[hierarchy[index-1]]));
       });
-      q('query').value=state.filters.query;
-      const list=matches(state.filters);q('count').textContent=list.length+'개 설비 · 샘플';
+      q('query').value=filters.query;
+      const list=matches(filters);q('count').textContent=list.length+'개 설비 · 샘플';
       q('results').replaceChildren();
       list.slice(0,visibleLimit).forEach(e=>{
-        const button=document.createElement('button');button.type='button';button.className='equipment-option';button.dataset.equipmentId=e.id;button.setAttribute('aria-pressed',String(state.equipment_id===e.id));
+        const button=document.createElement('button');button.type='button';button.className='equipment-option';button.dataset.equipmentId=e.id;button.setAttribute('aria-pressed',String((browsing?search.selected_id:state.equipment_id)===e.id));
         const name=document.createElement('strong'),detail=document.createElement('span');name.textContent=e.name+' · '+e.id;detail.textContent=path(e);button.append(name,detail);
-        button.addEventListener('click',()=>apply({equipment_id:e.id},'user'));q('results').append(button);
+        button.addEventListener('click',()=>{
+          if(screen==='equipment'){search.selected_id=e.id;searchNote='설비 상세 정보를 확인해 주세요. WO가 필요하면 대화에서 작성을 요청하세요.';render();}
+          else apply({equipment_id:e.id},'user');
+        });q('results').append(button);
       });
       if(!list.length){const empty=document.createElement('p');empty.textContent='조건에 맞는 설비가 없습니다. 필터나 검색어를 바꿔보세요.';q('results').append(empty);}
       if(list.length>visibleLimit){const more=document.createElement('button');more.type='button';more.textContent='설비 더 보기';more.addEventListener('click',()=>{visibleLimit+=8;render();});q('results').append(more);}
-      const selected=findEquipment(state.equipment_id);q('selected').hidden=!selected;
+      const selected=findEquipment(browsing?search.selected_id:state.equipment_id);q('selected').hidden=!selected;
       q('selected').textContent=selected?'선택 설비: '+selected.name+' · '+selected.id+' — '+path(selected):'';
       contentFields.forEach(key=>{
         q(key).value=state.fields[key];q(key).disabled=complete;
@@ -348,7 +381,7 @@ try {
         badge.textContent=origins[key]==='ai'?'AI 수정':origins[key]==='user'?'직접 수정':'';
         q(key).classList.toggle('ai-changed',origins[key]==='ai');
       });
-      q('change-note').textContent=note;
+      q('change-note').textContent=browsing?searchNote:note;
       q('undo').hidden=!lastAI || complete;
       if(checking && reviewed)renderValues(q('review-values'),reviewed);
     };
@@ -400,8 +433,28 @@ try {
       if(wasReview)note+=' · 내용이 바뀌어 다시 최종 확인이 필요해요.';
       q('validation').hidden=true;render();if(changes.equipment_id)host.scrollTop=0;return view();
     };
-    hierarchy.forEach(key=>q(key).addEventListener('change',()=>{const result=apply({[key]:q(key).value},'user');if(!result.ok)displayError(result.error.message);}));
-    q('query').addEventListener('input',()=>apply({query:q('query').value},'user'));
+    const browse = filters => {
+      search.filters={...filters};search.selected_id='';screen='equipment';visibleLimit=8;
+      searchNote='검색 조건에 맞는 샘플 설비입니다. 설비를 선택하면 상세 정보를 확인할 수 있어요.';
+      q('validation').hidden=true;render();host.scrollTop=0;
+      return {...view(),opened:host.isConnected};
+    };
+    const changeSearch = (key,value) => {
+      // Keep spaces while typing (e.g. "권취 설비"); matching normalizes text.
+      search.filters[key]=['query','equipment_id'].includes(key)?value:value.trim();
+      if(hierarchy.includes(key))hierarchy.slice(hierarchy.indexOf(key)+1).forEach(child=>search.filters[child]='');
+      if(!matches(search.filters).some(e=>e.id===search.selected_id))search.selected_id='';
+      visibleLimit=8;searchNote='검색 조건을 변경했어요. 작성 중인 WO는 그대로 유지돼요.';
+      q('validation').hidden=true;render();
+    };
+    hierarchy.forEach(key=>q(key).addEventListener('change',()=>{
+      if(screen==='equipment'){changeSearch(key,q(key).value);return;}
+      const result=apply({[key]:q(key).value},'user');if(!result.ok)displayError(result.error.message);
+    }));
+    q('query').addEventListener('input',()=>screen==='equipment'?changeSearch('query',q('query').value):apply({query:q('query').value},'user'));
+    q('equipment-code').addEventListener('input',()=>changeSearch('equipment_id',q('equipment-code').value));
+    q('browse-equipment').addEventListener('click',()=>{screen='equipment';q('validation').hidden=true;render();host.scrollTop=0;});
+    q('back-to-wo').addEventListener('click',()=>{screen='wo';q('validation').hidden=true;render();host.scrollTop=0;});
     q('choose-again').addEventListener('click',()=>{choosing=true;render();host.scrollTop=0;});
     contentFields.forEach(key=>q(key).addEventListener('input',()=>apply({[key]:q(key).value},'user')));
     q('undo').addEventListener('click',()=>{
@@ -486,9 +539,10 @@ try {
     const close=()=>{finishDrag();resizeObserver.disconnect();divider.remove();host.remove();column.style.minWidth=originalMinWidth;};
     const open=()=>{if(!host.isConnected){row.append(divider,host);observeLayout();}column.style.minWidth='0';host.hidden=false;resize();theme();};
     const destroy=()=>{observer.disconnect();themeObserver.disconnect();window.removeEventListener('resize',resize);close();if(window.__eesWODemoV1===controller)delete window.__eesWODemoV1;};
-    controller={chatId:request.chat_id,alive,destroy,open,view,update:(revision,changes)=>{
+    controller={chatId:request.chat_id,alive,destroy,open,view,browse,woView:()=>{screen='wo';render();return view();},update:(revision,changes)=>{
       if(revision!==state.revision)return {...fail('revision_conflict','사용자가 화면을 수정했습니다. 현재 값을 확인하고 요청한 부분만 다시 수정해 주세요.'),current:view()};
-      const result=apply(changes,'ai');if(!result.ok)displayError(result.error.message);return result;
+      const result=apply(changes,'ai');if(!result.ok){displayError(result.error.message);return result;}
+      screen='wo';render();return view();
     }};
     window.__eesWODemoV1=controller;
     q('close').addEventListener('click',close);
@@ -496,7 +550,8 @@ try {
     render();open();
   }
   controller.open();
-  return request.action==='view'?controller.view():controller.update(request.expected_revision,request.changes);
+  if(request.action==='equipment')return controller.browse(request.filters);
+  return request.action==='view'?controller.woView():controller.update(request.expected_revision,request.changes);
 } catch (_) {
   return {ok:false,demo:true,error:{code:'panel_error',message:'시연 화면을 처리하지 못했습니다. 화면의 현재 내용을 확인한 뒤 다시 열어 주세요.'}};
 }
@@ -531,8 +586,8 @@ async def _call(action, event_call, metadata, **values):
 class Tools:
     async def ems_demo_find_equipment(self, corporation: str = "", site: str = "", shop: str = "",
                                       line: str = "", process: str = "", query: str = "",
-                                      equipment_id: str = "") -> dict:
-        """Find SAMPLE equipment independently of WO. No browser/chat is required; no panel opens or selection changes. Use for equipment-only questions or to resolve a WO target before drafting. Zero/multiple matches are normal results, not a selected equipment. Never invent an ID or select the first of multiple matches. No real EMS connection.
+                                      equipment_id: str = "", __event_call__=None, __metadata__=None) -> dict:
+        """Find SAMPLE equipment and show matching filters/results in the existing chat's resizable side panel. Equipment selection displays details, never creates/retargets a WO. The separate panel.ok reports whether the UI opened; lookup results can succeed even if the panel fails. Zero/multiple matches are normal results. Never invent an ID or select the first of multiple matches. No real EMS connection. A later wo_demo_view returns equipment_search.selected_equipment chosen in the panel; use that ID explicitly when drafting.
 
         :param corporation: Exact corporation, e.g. 한국. Empty means all.
         :param site: Exact site, e.g. 천안. Known conditions can be supplied without all parents.
@@ -542,12 +597,23 @@ class Tools:
         :param query: Equipment name or code substring. At most 100 characters.
         :param equipment_id: Exact returned equipment ID. Combined with other conditions using AND.
         """
-        return _find_demo_equipment({"corporation": corporation, "site": site, "shop": shop,
-                                     "line": line, "process": process, "query": query,
-                                     "equipment_id": equipment_id})
+        found = _find_demo_equipment({"corporation": corporation, "site": site, "shop": shop,
+                                      "line": line, "process": process, "query": query,
+                                      "equipment_id": equipment_id})
+        if not found["ok"]:
+            return found
+        panel = await _call("equipment", __event_call__, __metadata__, filters=found["filters"])
+        if panel["ok"] and (panel.get("opened") is not True or panel.get("screen") != "equipment"):
+            panel = _error("browser_response_unconfirmed", "조회 화면이 열렸는지 확인하지 못했습니다. 현재 화면을 확인한 뒤 다시 요청해 주세요.")
+        elif panel["ok"]:
+            # Return one search dataset; unrelated WO contents stay in wo_demo_view.
+            panel = {"ok": True, "demo": True, "opened": True, "screen": "equipment"}
+        message = ("샘플 설비 조회 결과를 옆 패널에 표시했습니다. 설비를 선택해 상세 정보를 확인할 수 있습니다. WO 작성은 별도로 요청해 주세요."
+                   if panel["ok"] else "샘플 설비 조회는 완료했지만 옆 패널 표시를 확인하지 못했습니다. 조회 결과를 안내하고 화면 상태를 확인해 주세요.")
+        return {**found, "panel": panel, "message": message}
 
     async def wo_demo_view(self, __event_call__=None, __metadata__=None) -> dict:
-        """Open the SAMPLE WO side panel and read its latest form, revision, filter options and matching equipment. Use before editing, including after manual UI input. This never reads EMS or issues a WO. Keep using the existing chat; no separate mode. Follow returned options and sample equipment IDs, never invent them."""
+        """Open/resume the SAMPLE WO side panel and read its latest form, revision, filter options and matching equipment. Also returns equipment_search.selected_equipment from the independent lookup panel; that selection does not change the existing WO equipment. Use before editing, including after manual UI input. This never reads EMS or issues a WO. Follow returned options and sample equipment IDs, never invent them."""
         return await _call("view", __event_call__, __metadata__)
 
     async def wo_demo_update(self, expected_revision: int, changes: dict, __event_call__=None, __metadata__=None) -> dict:

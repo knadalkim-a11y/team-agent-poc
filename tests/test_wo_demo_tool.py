@@ -75,6 +75,10 @@ class WODemoToolTests(unittest.IsolatedAsyncioTestCase):
         args = {"__event_call__": self.browser, "__metadata__": METADATA, **overrides}
         return await self.tool.wo_demo_update(expected_revision=revision, changes=changes, **args)
 
+    async def find_equipment(self, **filters):
+        args = {"__event_call__": self.browser, "__metadata__": METADATA, **filters}
+        return await self.tool.ems_demo_find_equipment(**args)
+
     async def test_source_parses_and_view_reads_current_browser_snapshot(self):
         ast.parse(PATH.read_text(encoding="utf-8"))
         data = self.result(await self.view())
@@ -130,29 +134,29 @@ class WODemoToolTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(self.result(await self.update({"title": "수정"}, revision=0))["ok"])
 
     async def test_equipment_lookup_is_independent_and_never_selects_first_match(self):
-        all_items = self.result(await self.tool.ems_demo_find_equipment())
+        all_items = self.result(module._find_demo_equipment({}))
         self.assertTrue(all_items["ok"])
         self.assertEqual(all_items["matches_count"], 32)
         self.assertEqual(len(all_items["matches"]), 8)
         self.assertTrue(all_items["matches_truncated"])
         self.assertNotIn("equipment", all_items)
-        missing = self.result(await self.tool.ems_demo_find_equipment(query="없는 샘플 설비"))
+        missing = self.result(module._find_demo_equipment({"query": "없는 샘플 설비"}))
         self.assertTrue(missing["ok"])
         self.assertEqual(missing["matches"], [])
         self.assertEqual(missing["matches_count"], 0)
         self.assertEqual(self.events, [])
 
     async def test_equipment_lookup_scope_exact_id_and_shared_panel_catalog(self):
-        found = self.result(await self.tool.ems_demo_find_equipment(
-            site="천안", shop="조립", line="조립 1라인", process="권취", query="kr-ca"))
+        found = self.result(module._find_demo_equipment(
+            {"site": "천안", "shop": "조립", "line": "조립 1라인", "process": "권취", "query": "kr-ca"}))
         self.assertEqual(found["matches_count"], 1)
         self.assertFalse(found["matches_truncated"])
         self.assertEqual(found["matches"][0]["id"], "KR-CA-211")
         self.assertEqual(found["available_options"]["process"], ["권취", "조립"])
-        scoped_out = self.result(await self.tool.ems_demo_find_equipment(
-            equipment_id="KR-CA-211", site="울산"))
+        scoped_out = self.result(module._find_demo_equipment(
+            {"equipment_id": "KR-CA-211", "site": "울산"}))
         self.assertEqual(scoped_out["matches_count"], 0)
-        partial_id = self.result(await self.tool.ems_demo_find_equipment(equipment_id="KR-CA"))
+        partial_id = self.result(module._find_demo_equipment({"equipment_id": "KR-CA"}))
         self.assertEqual(partial_id["matches_count"], 0)
         self.assertEqual(self.events, [])
         await self.view()
@@ -162,14 +166,89 @@ class WODemoToolTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(catalog), 32)
         self.assertEqual(next(item for item in catalog if item["id"] == "KR-CA-211"), found["matches"][0])
         found["matches"][0]["name"] = "caller changed copy"
-        again = await self.tool.ems_demo_find_equipment(equipment_id="KR-CA-211")
+        again = module._find_demo_equipment({"equipment_id": "KR-CA-211"})
         self.assertEqual(again["matches"][0]["name"], "권취 설비 1호")
+
+    async def test_equipment_lookup_opens_search_panel_with_filters_as_json_only(self):
+        self.browser_result = {"ok": True, "opened": True, "screen": "equipment",
+                               "fields": {"description": "unrelated current WO"}, "matches_count": 32}
+        found = self.result(await self.find_equipment(site="  천안 ", equipment_id="KR-CA-211"))
+        self.assertTrue(found["ok"])
+        self.assertEqual(found["matches_count"], 1)
+        self.assertEqual(found["panel"], {"ok": True, "demo": True, "opened": True, "screen": "equipment"})
+        request, _ = self.request()
+        self.assertEqual(request["action"], "equipment")
+        self.assertEqual(request["chat_id"], METADATA["chat_id"])
+        self.assertEqual(request["filters"], found["filters"])
+        self.assertEqual(request["filters"]["site"], "천안")
+        self.assertNotIn("changes", request)
+        self.assertNotIn("expected_revision", request)
+
+        query = '\"; globalThis.EES_SEARCH_INJECTION = true; //\n</script>'
+        empty = self.result(await self.find_equipment(query=query))
+        self.assertTrue(empty["ok"])
+        self.assertEqual(empty["matches_count"], 0)
+        self.assertTrue(empty["panel"]["opened"])
+        request, executable = self.request()
+        self.assertEqual(request["filters"]["query"], query)
+        self.assertNotIn("EES_SEARCH_INJECTION", executable)
+
+    async def test_equipment_lookup_retains_results_when_browser_is_unavailable(self):
+        for overrides, code in (({"__metadata__": None}, "chat_required"),
+                                ({"__event_call__": None}, "browser_required")):
+            with self.subTest(overrides=overrides):
+                found = self.result(await self.find_equipment(equipment_id="KR-CA-211", **overrides))
+                self.assertTrue(found["ok"])
+                self.assertEqual(found["matches"][0]["id"], "KR-CA-211")
+                panel = self.failure(found["panel"])
+                self.assertEqual(panel["error"]["code"], code)
+                self.assertIsNot(panel.get("opened"), True)
+        self.assertEqual(self.events, [])
+
+    async def test_equipment_lookup_does_not_claim_opened_for_malformed_panel_status(self):
+        marker = "SYNTHETIC_PRIVATE_PANEL_DETAIL"
+        for response in (None, [], marker, {}, {"ok": "true"}, {"ok": True},
+                         {"ok": True, "opened": False, "screen": "equipment"},
+                         {"ok": True, "opened": 1, "screen": "equipment"},
+                         {"ok": True, "opened": True, "screen": "wo"}):
+            with self.subTest(response=response):
+                self.browser_result = response
+                found = self.result(await self.find_equipment(equipment_id="KR-CA-211"))
+                self.assertTrue(found["ok"])
+                self.assertEqual(found["matches_count"], 1)
+                panel = self.failure(found["panel"])
+                self.assertIsNot(panel.get("opened"), True)
+                self.assertNotIn(marker, json.dumps(found))
+
+    async def test_equipment_lookup_sanitizes_transport_failure_and_cancels_timeout(self):
+        marker = "SYNTHETIC_PRIVATE_SEARCH_EXCEPTION"
+        cancelled = asyncio.Event()
+
+        async def broken(_event):
+            raise RuntimeError(marker)
+
+        async def unavailable(_event):
+            try:
+                await asyncio.sleep(60)
+            finally:
+                cancelled.set()
+
+        with patch.object(module, "EVENT_TIMEOUT_SECONDS", 0.001):
+            for callback in (broken, unavailable):
+                found = self.result(await self.find_equipment(equipment_id="KR-CA-211", __event_call__=callback))
+                self.assertTrue(found["ok"])
+                self.assertEqual(found["matches_count"], 1)
+                panel = self.failure(found["panel"])
+                self.assertEqual(panel["error"]["code"], "browser_response_unconfirmed")
+                self.assertIsNot(panel.get("opened"), True)
+                self.assertNotIn(marker, json.dumps(found))
+        self.assertTrue(cancelled.is_set())
 
     async def test_equipment_lookup_rejects_bad_filters_without_browser(self):
         for field in ("corporation", "site", "shop", "line", "process", "query", "equipment_id"):
             for value in (None, 42, True, [], {}, "가" * 101):
                 with self.subTest(field=field, value=value):
-                    result = self.failure(await self.tool.ems_demo_find_equipment(**{field: value}))
+                    result = self.failure(await self.find_equipment(**{field: value}))
                     self.assertEqual(result["error"]["code"], "invalid_filters")
         self.assertEqual(self.events, [])
 
