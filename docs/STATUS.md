@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **초기 기능 확인용 Rich UI를 세 읽기 Tool에서 제거하고 일반 문장·표·원문 링크로 전환함.** Confluence/Jira v0.1.6·GitHub v0.1.4와 공통 Prompt를 수정하며 기존 API·페이지 이동·ID·PAT·설정·모델 연결을 유지함. 합성 HTML 예제와 UI 전용 검사를 제거하고 조회·권한·오류·출력 계약 검사는 유지함. 로컬 관련 검사 144개 통과·독립 검토 완료, 검토에서 찾은 두 사항을 수정하고 후속 대조를 통과함. PR/CI/main 반영과 사내 Tool/Prompt 갱신은 아직 미완료임. [이번 변경·검증](../evals/scenarios.md#prototype-rich-ui-removal).
-- 다음 작업 하나: **CI·main 반영을 마친 뒤 기존 세 Tool 코드와 공통 Prompt를 사내에 갱신하고 새 조회 출력을 한 번씩 확인한다.** Git Update만으로 WebUI 등록본이 바뀌지는 않으며 Tool 삭제/재생성·프로그램 Apply/Stop/Start·환경 재설치 없이 진행함. 새 일반 대화의 조회·카드 부재·원문 링크 결과만 1~2줄로 받고, 이전 인증 전수 시험·잠금 진단을 반복하지 않음. [사내 갱신 안내](03-openwebui-native-agent.md#plain-output-update).
+- 이번 작업: **초기 기능 확인용 Rich UI를 세 읽기 Tool에서 제거하고 일반 문장·표·원문 링크로 전환함.** Confluence/Jira v0.1.6·GitHub v0.1.4와 공통 Prompt를 수정하며 기존 API·페이지 이동·ID·PAT·설정·모델 연결을 유지함. 합성 HTML 예제와 UI 전용 검사를 제거하고 조회·권한·오류·출력 계약 검사는 유지함. 관련 검사 144개가 로컬과 Windows/Linux Python 3.11에서 각각 통과했고, 독립 검토·필요한 시험 fixture 보완·기존 배포 CI와 PR #18 main 반영을 완료함. 사내 Tool/Prompt 갱신과 새 출력 확인은 아직 미완료임. [이번 변경·검증](../evals/scenarios.md#prototype-rich-ui-removal).
+- 다음 작업 하나: **main에 반영한 기존 세 Tool 코드와 공통 Prompt를 사내에 갱신하고 새 조회 출력을 한 번씩 확인한다.** Git Update만으로 WebUI 등록본이 바뀌지는 않으며 Tool 삭제/재생성·프로그램 Apply/Stop/Start·환경 재설치 없이 진행함. 새 일반 대화의 조회·카드 부재·원문 링크 결과만 1~2줄로 받고, 이전 인증 전수 시험·잠금 진단을 반복하지 않음. [사내 갱신 안내](03-openwebui-native-agent.md#plain-output-update).
 - 후속 UI 방향: 기존 카드 디자인 보완 대신 실제 업무를 골라 하나씩 새로 설계함. 첫 시작의 영어 `새로운 기능 EES Assistant`·v0.11.3 릴리스 노트는 향후 관리자 팀 공지 용도로 쓰고자 한다는 요구를 기록하며, 이번 변경에 팝업 수정·공지 기능 구현은 포함하지 않음. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
 
 아래는 **중단한 후보 환경 방식의 구현·진단 이력**이며 현재 재실행 목록이 아닙니다. [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py)와 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)은 보존합니다. 기존 도구의 Rollback을 새 직접 적용 방식의 원복 기능으로 간주하지 않습니다. 마지막 실패와 원인 미확정 상태를 유지하며 관리 방식 변경을 배포 성공으로 기록하지 않습니다.
@@ -108,7 +108,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-09: 원격 main `99a9ee`·관련 열린 PR 0개에서 시작함. 사용자 보고의 이름·로고·기존 대화·Jira/Confluence/GitHub 정상으로 기존 래퍼 사내 적용 단위를 마감하고, 새 요청에 따라 세 Tool의 HTML/UI 반환·합성 예제와 UI 전용 검사를 제거하며 공통 Prompt·관련 가이드를 일반 출력으로 정리함. 로컬 관련 검사 **144개(Confluence 85·Jira 25·GitHub 34) 통과**, 독립 검토 완료. 검토 지적 두 건의 보완·후속 대조와 문서/diff 검사를 통과함. PR/CI/main 반영은 진행 중이며 사내 새 코드/Prompt 저장·출력 확인은 미완료. 이전 카드·프로그램 적용/실패 증거는 기존 evals에서 유지하고, 원격 게시·사내 반영 결과는 완료 후 각각 갱신함. [이번 변경 근거](../evals/scenarios.md#prototype-rich-ui-removal), [완료한 사내 적용](../evals/scenarios.md#ees-wrapper-manual-resume).
+2026-09-09: 원격 main `99a9ee`·관련 열린 PR 0개에서 시작해 사용자가 확인한 EES 이름·로고·기존 대화·세 연동 정상으로 래퍼 사내 적용 단위를 마감함. 초기 Rich UI 제거·일반 답변 지침·가이드·시험을 [PR #18](https://github.com/knadalkim-a11y/team-agent-poc/pull/18)로 구현하고 독립 검토·보완을 완료함. 최종 원본 `61568f119f6b2bec03e29adaa24b207d00585a2e`의 Windows/Linux CI `34308748946` success와 main 병합 `b105a1441d1bb403684b985e20dc1a43a6519564`를 확인함. 각 플랫폼에서 세 조회 144개·실제 wheel Apply/Restore 31개·manager 72개 통과. 초기 Windows 시험 fixture 실패와 수정 후 통과를 기존 evals에 보존함. 사내 Tool 3개/Prompt 저장·카드 없는 새 출력은 미완료이며 이번 안내 원본은 위 최종 커밋임. 후속 현재 상태 갱신은 문서만 수정하고 실행 코드·CI를 다시 변경하지 않음. [최종 검증·반영 경계](../evals/scenarios.md#prototype-rich-ui-removal).
 
 ## 갱신 규칙
 
