@@ -1440,3 +1440,21 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 준비 도중 사용자가 기존 웹 주소에 직접 접속했고 서버가 켜졌다고 보고함. 이에 추가 진단 실행·로그 수집·반복 Start 요청을 취소함. 현재 코드가 health timeout 뒤 서버를 자동 종료하지 않는 점과 이후 접속 보고는 지연 기동 경로와 일치함. 이번 실패의 세부 reason/초수는 직접 확인하지 않았으며 앞선 실패의 reason=health_timeout/120초를 이번 실행의 측정값으로 복제하지 않음. 이전 로그에 인증서 실패·다운로드·모델 캐시 누락이 있었으므로 그 경로의 지연 가능성을 설명하되, 이번 CA 적용 뒤에도 동일 인증서 오류가 지속됐는지 또는 정상 다운로드/초기화 시간이 걸렸는지는 미확정으로 둠. 최초 서버 종료 원인·정확한 모델/호스트·기능 전수·장기 안정성도 별도 미확인임. 현재 서버와 콘솔 창을 유지하고 기존 목업 시연 흐름을 이어가며 새 환경 설치·TLS 해제·대기 한도 변경은 없음.
 
 직전 STATUS 점검 보존(PR #19 병합, 2026-09-09): 2026-09-09: 사용자 병합 승인에 따라 PR #19 head `f30e056e`·main `f2e0f9f`·병합 가능 상태와 해당 코드의 Windows/Linux CI completed/success를 다시 확인하고 main에 병합함. 원격 main `cb3a922d870663abd7f5fd576ba23456575e49a2`를 확인했으며 운영 명령의 Update/Stop 실패 시 중단·기존 환경 재사용·시작 요약을 읽기 대조함. 이번 후속은 상태·평가 문서만 갱신하고 문서/diff를 검사함. 기존 코드 시험은 반복하지 않았으며 실제 사내 실행과 최초 종료 원인은 미확인. [병합·복구 안내 근거](../evals/scenarios.md#ees-start-health-followup).
+
+
+**밤사이 접속 불가 후속·진단 보류 합의 (2026-09-09):** 사용자는 콘솔 창을 닫거나 재부팅하지 않았고, 퇴근 전까지 접속되었으나 화면을 잠가 둔 뒤 다음 날 아침 포탈 URL에 접속할 수 없었다고 설명함. Power-Troubleshooter/1의 최근 2일 조회 결과 `POWER event=none`을 보고함. 해당 조회에서 복귀 이벤트가 없다는 뜻으로만 해석하며 모든 전원 상태 변경을 배제하거나 잠금을 원인으로 확정하지 않음. 최초 실제 프로세스 종료·네트워크 단절·앱 응답 불능을 구분할 증거는 없음. 사용자는 다음 재발 시 확인하기로 하고 서비스 이름 변경을 요청함. 추가 진단을 중단하고 재발 때 재시작 전에 등록 프로세스·health·당시 로그 연결을 확인하는 방향만 보존함.
+
+직전 STATUS 점검 보존(지연 접속 성공, 2026-09-09): 2026-09-09: main `48d8e0ee`와 같은 로컬 원본에서 Start 실패 요약의 표시 방식·기록 연결·timeout 뒤 프로세스 유지 경로를 읽기 확인함. CA 선택 상태를 포함한 2,317자 읽기 진단을 준비하고 문법을 확인했으나, 사용자가 기존 웹 주소 접속 성공을 보고하여 실행 요청을 취소함. 이번 후속은 STATUS·평가 문서만 갱신하고 문서/diff를 확인함. 코드·설정·완료한 시험은 변경/반복하지 않았으며 새 CA의 실제 적용 내용·지연 원인·최초 종료 원인은 미확정으로 유지함. [접속 성공·판정 경계](../evals/scenarios.md#ees-start-health-followup).
+
+<a id="ees-portal-name"></a>
+
+### EES Portal 서비스 이름 변경 (2026-09-09)
+
+- 요청·범위: 사용자가 EES Assistant로 표시되던 서비스 이름을 EES Portal로 바꾸도록 요청함. main `8a6049a3785f35349d82a91381544d45dc56ee42`·동일 로컬 tree와 관련 열린 PR 없음을 확인함. 브라우저 탭·로그인/앱 이름·알림/채널 이름·WO 패널 서비스 표기를 변경하며 Workspace Model 식별자·모델 이름·Prompt/정책·API·제안은 유지함.
+- 프로그램: 고정된 공식 Open WebUI 0.11.3 wheel에서 새 `0.11.3+ees.2`를 만들고 프런트 경로를 `_ees2`로 갱신함. 등록 환경의 정확한 옛 이름 `EES Assistant`도 새 이름으로 해석하되 다른 명시적 이름과 저장된 환경 자체는 바꾸지 않음. 아이콘 SVG 접근성 이름만 갱신하며 E 로고 이미지·기존 Python/의존성·데이터/키는 그대로 사용함.
+- 호환성: 최신 VERSION만 검사하던 기존 구조로는 Update 직후 설치된 ees.1의 Start/Restore가 거부됨을 발견함. 지원 버전 두 개만 허용하고 선택된 프로그램의 RECORD·metadata·프런트 경로로 검증/정리/실행하도록 수정함. child에서도 버전/경로 조합을 확인함. 신규 Apply 입력은 ees.2만 허용하며 기존 ees.1 active/previous/pending과 중단된 Restore를 지원함. 저장된 Windows CA 선택은 유지하고 새 venv·서비스·의존성 설치 계층을 추가하지 않음.
+- 목업: 기존 EES WO Demo의 패널 서비스 표기만 바꾸어 v0.1.7로 올림. 독립 설비 Tool 신규 등록·EMS 실제 발행 연동은 이번 범위에 포함하지 않음. 정적 참고 목업의 서비스 헤더도 갱신함.
+- 로컬 검증(Linux/Python/Node): branding 8개 중 7개 통과·실제 upstream wheel 부재 1개 생략, bundle 7개 통과, customization 35개 중 34개 통과·실제 wheel 1개 생략, process 31개 중 30개 통과·Windows 전용 1개 생략, manage 79개 중 77개 통과·pwsh 부재 2개 생략, release 21개 중 20개 통과·실제 wheel 1개 생략. `node tests/test_wo_demo_state.cjs` 기존 11개 묶음 통과. 각 관련 `python -m unittest discover -s tests -p test_<대상>.py`를 실행했으며 customization의 마지막 legacy Restore 정리 검사는 추가 1개를 별도로 실행함. 옛 이름/사용자 지정 이름 처리·ees.1→ees.2→ees.1 복원·중단 복구·버전 불일치 거부·기존 데이터/키/의존성/CA 보존과 생성 패널 동작 경계를 확인함. 전체 기능 검사는 반복하지 않음.
+- 독립 검토: 버전 allowlist에서 경로 결정, 선택된 RECORD를 마지막에 정리하는 순서, launcher 인수와 import 이전 검증, 최신 입력 ZIP 제한을 대조했고 확인한 범위의 차단 문제는 없음. 중단된 schema1 후보 Deploy 경로까지 확장하지 않음. 실제 upstream wheel 빌드·Windows 실행 검사는 기존 CI, 사내 새 이름 표시는 사용자 적용 후 확인 대상임.
+- 적용 경계: 현재 사내 확인된 프로그램 원본은 ees.1 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`, WO Tool은 v0.1.6 안내 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc`임. 새 변경은 main 반영·해당 CI 성공 뒤 프로그램 포함 새 ZIP과 manifest source_commit으로 CheckOnly→Stop→Apply→Start하며 기존 WO 등록 코드를 갱신함. 이전 ZIP을 새 이름 적용에 재사용하지 않음. 사내에서 새 Portal 이름·기존 대화·패널 표기를 확인하기 전 실제 적용 완료로 기록하지 않음.
+- 문서·diff 확인: `python scripts/check_docs.py`에서 files=25, links=695, errors=0, review_candidates=0, `git diff --check` 통과. 현재 적용 가이드의 새 ZIP/source_commit 선택과 과거 ees.1 고정 명령의 이력 표시를 대조함.

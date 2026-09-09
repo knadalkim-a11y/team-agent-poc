@@ -18,14 +18,15 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
-VERSION = "0.11.3+ees.1"
+VERSION = "0.11.3+ees.2"
+PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2"}
 SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
 SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
 WHEEL_FILENAME = f"open_webui-{VERSION}-py3-none-any.whl"
 SOURCE_INFO = f"open_webui-{UPSTREAM_VERSION}.dist-info/"
 TARGET_INFO = f"open_webui-{VERSION}.dist-info/"
 SOURCE_APP = "open_webui/frontend/_app/"
-TARGET_APP = "open_webui/frontend/_ees1/"
+TARGET_APP = "open_webui/frontend/_ees2/"
 ASSET_DIR = Path(__file__).resolve().parents[1] / "branding" / "ees" / "assets"
 ASSET_NAMES = (
     "favicon.svg", "favicon.png", "favicon-96x96.png", "favicon.ico",
@@ -38,30 +39,31 @@ PATCHES = {
     "open_webui/env.py": [(
         b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'Open WebUI')\n"
         b"if WEBUI_NAME != 'Open WebUI':\n    WEBUI_NAME += ' (Open WebUI)'",
-        b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'EES Assistant')", 1,
+        b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'EES Portal')\n"
+        b"if WEBUI_NAME == 'EES Assistant':\n    WEBUI_NAME = 'EES Portal'", 1,
     )],
     "open_webui/frontend/index.html": [
-        (b"<title>Open WebUI</title>", b"<title>EES Assistant</title>", 1),
-        (b"/_app/", b"/_ees1/", 49),
+        (b"<title>Open WebUI</title>", b"<title>EES Portal</title>", 1),
+        (b"/_app/", b"/_ees2/", 49),
     ],
     SOURCE_APP + "immutable/chunks/CHq18Uto.js": [
-        (b'const ca="Open WebUI"', b'const ca="EES Assistant"', 1),
+        (b'const ca="Open WebUI"', b'const ca="EES Portal"', 1),
     ],
     SOURCE_APP + "immutable/nodes/0.CvnwnD8l.js": [
-        (b" / Open WebUI`", b" / EES Assistant`", 3),
+        (b" / Open WebUI`", b" / EES Portal`", 3),
     ],
     SOURCE_APP + "immutable/nodes/26.Ck8JdNW5.js": [
-        (b" / Open WebUI`", b" / EES Assistant`", 2),
+        (b" / Open WebUI`", b" / EES Portal`", 2),
     ],
     SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
-        (b"/_app/version.json", b"/_ees1/version.json", 1),
-        (b'an="0.11.3"', b'an="0.11.3+ees.1"', 1),
+        (b"/_app/version.json", b"/_ees2/version.json", 1),
+        (b'an="0.11.3"', b'an="0.11.3+ees.2"', 1),
     ],
     SOURCE_APP + "version.json": [
-        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.1"}', 1),
+        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.2"}', 1),
     ],
     SOURCE_INFO + "METADATA": [
-        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.1\n", 1),
+        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.2\n", 1),
     ],
 }
 

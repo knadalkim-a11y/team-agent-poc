@@ -1,7 +1,7 @@
 """
 title: EES WO Demo
 description: Sample equipment selection and WO drafting beside the existing chat. No EMS connection or real issuance.
-version: 0.1.6
+version: 0.1.7
 required_open_webui_version: 0.11.3
 """
 
@@ -166,7 +166,7 @@ PANEL_HTML = r"""<style>
 <div class="panel">
   <header class="header">
     <div>
-      <p class="eyebrow">EES Assistant</p>
+      <p class="eyebrow">EES Portal</p>
       <div class="heading"><h2 id="panel-title">설비 WO</h2><span class="badge">시연용</span><span id="stage" class="badge" role="status">발행 전</span></div>
     </div>
     <button id="close" class="close" type="button" aria-label="설비 WO 패널 닫기">닫기</button>
@@ -644,7 +644,7 @@ try {
 } catch (error) {
   // Return fixed diagnostic labels only; exception messages/stacks may contain user data.
   const exception=['TypeError','ReferenceError','RangeError','SyntaxError','Error','NotFoundError','NotSupportedError','SecurityError','InvalidStateError','InvalidCharacterError'].includes(error?.name)?error.name:'Error';
-  return {ok:false,demo:true,error:{code:'panel_error',message:'시연 화면을 처리하지 못했습니다. 화면의 현재 내용을 확인한 뒤 다시 열어 주세요.',diagnostic:{script_version:'0.1.6',stage:panelStage,exception}}};
+  return {ok:false,demo:true,error:{code:'panel_error',message:'시연 화면을 처리하지 못했습니다. 화면의 현재 내용을 확인한 뒤 다시 열어 주세요.',diagnostic:{script_version:'0.1.7',stage:panelStage,exception}}};
 }
 """
 

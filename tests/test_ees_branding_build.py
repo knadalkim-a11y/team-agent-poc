@@ -118,13 +118,13 @@ class BrandingBuildTests(unittest.TestCase):
                     self.assertEqual(built.read(target), original, name)
             self.assertEqual(built.read(builder.TARGET_INFO + "licenses/LICENSE"), LICENSE)
             self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.1\n"))
+                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.2\n"))
             self.assertEqual(built.read("open_webui/env.py").count(NOTICE), 2)
             self.assertNotIn(b"WEBUI_NAME +=", built.read("open_webui/env.py"))
-            self.assertIn(b"EES Assistant", built.read("open_webui/frontend/index.html"))
+            self.assertIn(b"EES Portal", built.read("open_webui/frontend/index.html"))
             self.assertNotIn(b"/_app/", built.read("open_webui/frontend/index.html"))
             runtime = built.read(builder.TARGET_APP + "immutable/chunks/DKj2ZiCb.js")
-            self.assertIn(b"/_ees1/version.json", runtime)
+            self.assertIn(b"/_ees2/version.json", runtime)
             self.assertEqual(json.loads(built.read(builder.TARGET_APP + "version.json"))["version"], builder.VERSION)
             for prefix in ("open_webui/static/", "open_webui/frontend/static/"):
                 for name in builder.ASSET_NAMES:
@@ -135,6 +135,20 @@ class BrandingBuildTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "pinned official"):
             self.build()
         self.assertFalse((self.root / "release").exists())
+
+    def test_portal_name_migrates_registered_assistant_and_preserves_custom_name(self):
+        self.build()
+        with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
+            synthetic_env = built.read("open_webui/env.py")
+        for registered, expected in ((None, "EES Portal"), ("EES Assistant", "EES Portal"),
+                                     ("EES Portal", "EES Portal"), ("Team Custom", "Team Custom")):
+            with self.subTest(registered=registered):
+                environment = {} if registered is None else {"WEBUI_NAME": registered}
+                with mock.patch.dict(os.environ, environment, clear=True):
+                    namespace = {"os": os}
+                    exec(synthetic_env, namespace)
+                    self.assertEqual(namespace["WEBUI_NAME"], expected)
+                    self.assertEqual(dict(os.environ), environment)
 
     def test_patch_drift_fails_before_writing(self):
         self.members["open_webui/env.py"] += self.members["open_webui/env.py"]
@@ -185,7 +199,7 @@ class OfficialWheelTests(unittest.TestCase):
                         self.assertEqual(built.read(target), source.read(name), name)
                 metadata = source.read(builder.SOURCE_INFO + "METADATA")
                 self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.1\n"))
+                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.2\n"))
                 for name in ("open_webui/env.py", "open_webui/frontend/index.html"):
                     self.assertEqual(source.read(name).count(b"LICENSE"), built.read(name).count(b"LICENSE"))
 

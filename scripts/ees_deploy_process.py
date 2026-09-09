@@ -77,7 +77,11 @@ def reject():
 
 try:
     root = Path(sys.argv[3])
-    version, info_name = sys.argv[4:6]
+    version, info_name, frontend_name = sys.argv[4:7]
+    frontends = {'0.11.3+ees.1': '_ees1', '0.11.3+ees.2': '_ees2'}
+    if (version not in frontends or info_name != f'open_webui-{version}.dist-info'
+            or frontend_name != frontends[version]):
+        reject()
     if not root.is_absolute() or not root.is_dir() or root.is_symlink():
         reject()
     root = root.resolve()
@@ -85,7 +89,7 @@ try:
     metadata_dir = root / info_name
     code = package / '__init__.py'
     required = (code, metadata_dir / 'METADATA', package / 'frontend' / 'index.html',
-                package / 'frontend' / '_ees1' / 'version.json')
+                package / 'frontend' / frontend_name / 'version.json')
     if (package.is_symlink() or metadata_dir.is_symlink()
             or any(not item.is_file() or item.is_symlink() for item in required)):
         reject()
@@ -240,7 +244,7 @@ def verify_identity(identity):
     return isinstance(identity, dict) and _same(_identity(identity.get('pid')), identity)
 
 
-def start_server(python_exe, cwd, env, host, port, log_dir, *, program_path=None):
+def start_server(python_exe, cwd, env, host, port, log_dir, *, program_path=None, program_version=None):
     started = time.monotonic()
     if not port_is_free(host, port, raise_on_error=True):
         raise ProcessError("The listen port is unavailable; no existing process was stopped.")
@@ -258,8 +262,12 @@ def start_server(python_exe, cwd, env, host, port, log_dir, *, program_path=None
             from . import build_ees_webui as branding
         except ImportError:
             import build_ees_webui as branding
+        version = branding.VERSION if program_version is None else program_version
+        if type(version) is not str or version not in branding.PROGRAM_FRONTENDS:
+            raise ProcessError("The selected program version is unsupported; no fallback was started.")
         command = [str(python_exe), '-I', '-B', '-c', CUSTOMIZED_SERVER_CODE, host, str(port),
-                   str(Path(program_path).resolve()), branding.VERSION, branding.TARGET_INFO.rstrip('/')]
+                   str(Path(program_path).resolve()), version, f'open_webui-{version}.dist-info',
+                   branding.PROGRAM_FRONTENDS[version]]
     log_dir = Path(log_dir)
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = (log_dir / ('server-' + uuid.uuid4().hex + '.log')).resolve()

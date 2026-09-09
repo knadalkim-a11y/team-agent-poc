@@ -25,9 +25,6 @@ branding = releases.branding
 RECORD = branding.TARGET_INFO + "RECORD"
 # Present in the pinned upstream wheel: Docker reference text, never app files.
 PACKAGING_FILES = frozenset({"requirements-min.txt", "data/readme.txt"})
-REQUIRED = {RECORD, branding.TARGET_INFO + "METADATA", branding.TARGET_INFO + "WHEEL",
-            "open_webui/__init__.py", "open_webui/env.py", "open_webui/main.py",
-            "open_webui/frontend/index.html", branding.TARGET_APP + "version.json"}
 
 
 class CustomizationError(ValueError):
@@ -38,11 +35,15 @@ def _selection(value):
     if value is None:
         return
     if (not isinstance(value, dict) or set(value) != {"source_commit", "wheel_sha256", "record_sha256", "webui_version"}
-            or value["webui_version"] != branding.VERSION
+            or not isinstance(value["webui_version"], str) or value["webui_version"] not in branding.PROGRAM_FRONTENDS
             or not isinstance(value["source_commit"], str) or not releases.HEX40.fullmatch(value["source_commit"])
             or any(not isinstance(value[key], str) or not releases.HEX64.fullmatch(value[key])
                    for key in ("wheel_sha256", "record_sha256"))):
         raise CustomizationError("The saved program selection is invalid; preserve the deployment record.")
+
+
+def _version_paths(version):
+    return f"open_webui-{version}.dist-info/", f"open_webui/frontend/{branding.PROGRAM_FRONTENDS[version]}/"
 
 
 def _previous(value):
@@ -85,29 +86,33 @@ def validate_registry(registry):
     return value
 
 
-def _allowed_name(name):
+def _allowed_name(name, info=branding.TARGET_INFO):
     # Reuse the ZIP path rules, also when validating an extracted RECORD.
     parts = name.split("/")
     return (isinstance(name, str) and 0 < len(name) <= 240
             and not any(ord(char) < 32 for char in name) and "\\" not in name
             and not any(part in {"", ".", ".."} or part.endswith((".", " "))
                         or ":" in part or releases.RESERVED.fullmatch(part) for part in parts)
-            and (name.startswith("open_webui/") or name.startswith(branding.TARGET_INFO))
+            and (name.startswith("open_webui/") or name.startswith(info))
             and not any(part.lower().endswith((".pth", ".data")) or part in {"__pycache__", ".env"} for part in parts)
             and not name.lower().endswith((".pyc", ".pyo")))
 
 
-def _record_rows(content, *, allow_packaging=False):
+def _record_rows(content, *, allow_packaging=False, version=branding.VERSION):
+    info, app = _version_paths(version)
+    record_name = info + "RECORD"
+    required = {record_name, info + "METADATA", info + "WHEEL", "open_webui/__init__.py",
+                "open_webui/env.py", "open_webui/main.py", "open_webui/frontend/index.html", app + "version.json"}
     rows = {}
     folded = set()
     try:
         for row in csv.reader(io.StringIO(content.decode("utf-8"))):
-            if (len(row) != 3 or (not _allowed_name(row[0])
+            if (len(row) != 3 or (not _allowed_name(row[0], info)
                                  and not (allow_packaging and row[0] in PACKAGING_FILES))
                     or row[0].casefold() in folded):
                 raise CustomizationError("Program RECORD contains an unsupported or duplicate path.")
             name, digest, size = row
-            if name == RECORD:
+            if name == record_name:
                 if digest or size:
                     raise CustomizationError("Program RECORD self entry is invalid.")
             elif (not digest.startswith("sha256=") or len(digest) != 50
@@ -116,10 +121,13 @@ def _record_rows(content, *, allow_packaging=False):
                 raise CustomizationError("Program RECORD requires exact SHA256 hashes and file sizes.")
             rows[name] = (digest, size)
             folded.add(name.casefold())
-        if not REQUIRED.issubset(rows) or len(rows) > 10000:
+        if not required.issubset(rows) or len(rows) > 10000:
             raise CustomizationError("The complete app, frontend and metadata must be present together.")
         if any(name.startswith(branding.SOURCE_APP) for name in rows):
             raise CustomizationError("The selected wheel still contains the original frontend location.")
+        if any(name.startswith(f"open_webui/frontend/{namespace}/")
+               for item, namespace in branding.PROGRAM_FRONTENDS.items() if item != version for name in rows):
+            raise CustomizationError("The selected program contains another release's frontend.")
         for name in folded:
             if any("/".join(name.split("/")[:i]) in folded for i in range(1, name.count("/") + 1)):
                 raise CustomizationError("Program RECORD contains conflicting paths.")
@@ -130,18 +138,19 @@ def _record_rows(content, *, allow_packaging=False):
         raise CustomizationError("Program RECORD is invalid.") from None
 
 
-def _metadata(read):
-    metadata = BytesParser().parsebytes(read(branding.TARGET_INFO + "METADATA"))
-    wheel = BytesParser().parsebytes(read(branding.TARGET_INFO + "WHEEL"))
-    if (metadata.get_all("Name") != ["open-webui"] or metadata.get_all("Version") != [branding.VERSION]
+def _metadata(read, version=branding.VERSION):
+    info, app = _version_paths(version)
+    metadata = BytesParser().parsebytes(read(info + "METADATA"))
+    wheel = BytesParser().parsebytes(read(info + "WHEEL"))
+    if (metadata.get_all("Name") != ["open-webui"] or metadata.get_all("Version") != [version]
             or wheel.get_all("Wheel-Version") != ["1.0"] or wheel.get_all("Root-Is-Purelib") != ["true"]
             or wheel.get_all("Tag") != ["py3-none-any"]):
         raise CustomizationError("Only the supported purelib Open WebUI app wheel is allowed.")
     try:
-        frontend = json.loads(read(branding.TARGET_APP + "version.json"))
+        frontend = json.loads(read(app + "version.json"))
     except (ValueError, UnicodeError):
         raise CustomizationError("The selected frontend version metadata is invalid.") from None
-    if not isinstance(frontend, dict) or frontend.get("version") != branding.VERSION:
+    if not isinstance(frontend, dict) or frontend.get("version") != version:
         raise CustomizationError("The selected app and frontend versions differ.")
     return sorted(metadata.get_all("Requires-Dist", []))
 
@@ -238,25 +247,27 @@ def _check_tree(path, selection, *, partial=False, staging=False):
     _selection(selection)
     if selection is None:
         raise CustomizationError("An original app has no wrapper program directory.")
+    version = selection["webui_version"]
+    record_name = _version_paths(version)[0] + "RECORD"
     path = states._safe(path)
     if not path.is_dir():
         raise CustomizationError("The selected program directory is missing.")
     files = _files(path)
-    if RECORD not in files:
+    if record_name not in files:
         if partial and not files:
             return {}
         # An interrupted first RECORD write cannot contain any app files yet.
         if staging and set(files) <= {".record.part"}:
             return files
         raise CustomizationError("The selected program metadata is missing; fallback is disabled.")
-    record = files[RECORD].read_bytes()
+    record = files[record_name].read_bytes()
     if hashlib.sha256(record).hexdigest() != selection["record_sha256"]:
         raise CustomizationError("The selected program RECORD changed; preserve it for review.")
-    rows = _record_rows(record)
+    rows = _record_rows(record, version=version)
     if (not set(files).issubset(rows) or (not partial and set(files) != set(rows))):
         raise CustomizationError("The selected program has missing or unexpected files.")
     for name, target in files.items():
-        if name == RECORD:
+        if name == record_name:
             continue
         digest, size = rows[name]
         if staging:
@@ -269,7 +280,7 @@ def _check_tree(path, selection, *, partial=False, staging=False):
         if digest != "sha256=" + encoded or size != str(count):
             raise CustomizationError("A selected program file changed; preserve it for review.")
     if not partial:
-        _metadata(lambda name: files[name].read_bytes())
+        _metadata(lambda name: files[name].read_bytes(), version)
     return files
 
 
@@ -283,9 +294,10 @@ def _remove(path, selection, *, partial=False, staging=False):
     if not path.exists():
         return
     files = _check_tree(path, selection, partial=partial, staging=staging)
+    record_name = _version_paths(selection["webui_version"])[0] + "RECORD"
     # Keep RECORD until all app files are removed so interrupted deletion remains
     # verifiable. No traversal follows links or deletes unknown file contents.
-    for name in sorted(files, key=lambda name: name == RECORD):
+    for name in sorted(files, key=lambda name: name == record_name):
         files[name].unlink()
     for directory, _, _ in os.walk(path, topdown=False, followlinks=False):
         Path(directory).rmdir()

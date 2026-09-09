@@ -1124,7 +1124,8 @@ class CustomizationIntegrationTests(unittest.TestCase):
         self.assertTrue(result["started"])
         call = self.mocks["start_server"].call_args
         self.assertEqual(call.args[:3], ("original-python", "original-cwd", self.env))
-        self.assertEqual(call.kwargs, {"program_path": str(self.root / "program")})
+        self.assertEqual(call.kwargs, {"program_path": str(self.root / "program"),
+                                       "program_version": self.selection["webui_version"]})
         self.mocks["wait_healthy"].assert_called_once_with({"pid": 123}, timeout=120)
 
     def test_start_windows_ca_persists_for_original_and_customized_child_only(self):
@@ -1159,7 +1160,8 @@ class CustomizationIntegrationTests(unittest.TestCase):
                     self.assertEqual(call.args[:2], ("original-python", "original-cwd"))
                     self.assertEqual(call.args[2], dict(registered, REQUESTS_CA_BUNDLE=str(bundle), SSL_CERT_FILE=str(bundle)))
                     self.assertIsNot(call.args[2], self.env)
-                    self.assertEqual(call.kwargs, {"program_path": str(self.root / "program")} if active else {})
+                    self.assertEqual(call.kwargs, {"program_path": str(self.root / "program"),
+                                                   "program_version": active["webui_version"]} if active else {})
 
     def test_start_windows_ca_selection_survives_health_timeout(self):
         digest = "d" * 64

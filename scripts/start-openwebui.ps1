@@ -4,7 +4,7 @@
 param(
     [string]$ProxyUrl = $env:CORP_PROXY_URL,
     [string]$NoProxy = $env:CORP_NO_PROXY,
-    [string]$WebUiName = "EES Assistant",
+    [string]$WebUiName = "EES Portal",
     [switch]$ConfluenceReady
 )
 

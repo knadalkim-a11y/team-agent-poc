@@ -15,6 +15,8 @@ import unittest
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from unittest.mock import MagicMock, Mock, patch
 
+from scripts import build_ees_webui as branding
+
 
 MODULE = Path(__file__).resolve().parents[1] / 'scripts' / 'ees_deploy_process.py'
 SPEC = importlib.util.spec_from_file_location('ees_deploy_process_test', MODULE)
@@ -555,14 +557,16 @@ class CustomizedLauncherTests(unittest.TestCase):
             directory.mkdir()
         self.package = self.program / 'open_webui'
         self.package.mkdir()
-        self.info = self.program / 'open_webui-0.11.3+ees.1.dist-info'
+        self.version = branding.VERSION
+        self.frontend_name = branding.PROGRAM_FRONTENDS[self.version]
+        self.info = self.program / f'open_webui-{self.version}.dist-info'
         self.info.mkdir()
         self.metadata = self.info / 'METADATA'
-        self.metadata.write_text('Metadata-Version: 2.1\nName: open-webui\nVersion: 0.11.3+ees.1\n', encoding='utf-8')
+        self.metadata.write_text(f'Metadata-Version: 2.1\nName: open-webui\nVersion: {self.version}\n', encoding='utf-8')
         frontend = self.package / 'frontend'
-        (frontend / '_ees1').mkdir(parents=True)
+        (frontend / self.frontend_name).mkdir(parents=True)
         (frontend / 'index.html').write_text('synthetic-selected-frontend', encoding='utf-8')
-        (frontend / '_ees1' / 'version.json').write_text('{"version":"0.11.3+ees.1"}', encoding='utf-8')
+        (frontend / self.frontend_name / 'version.json').write_text(json.dumps({'version': self.version}), encoding='utf-8')
         (self.data / 'webui.db').write_bytes(b'synthetic-existing-data')
         (self.cwd / '.webui_secret_key').write_bytes(b'synthetic-existing-key')
         (self.package / '__init__.py').write_text('''
@@ -586,7 +590,7 @@ def serve(*, host, port):
         for name in ('WEBUI_SECRET_KEY', 'UVICORN_WORKERS', 'WEB_CONCURRENCY', 'UVICORN_RELOAD', 'WEBUI_RELOAD'):
             self.env.pop(name, None)
 
-    def command(self, program_path=None, *, original=False):
+    def command(self, program_path=None, *, original=False, version=None):
         saved = {'pid': 123, 'executable': 'python', 'created_at': '456'}
         child = Mock(pid=123)
         with patch.object(manager, 'port_is_free', return_value=True), \
@@ -594,6 +598,8 @@ def serve(*, host, port):
                 patch.object(manager.subprocess, 'Popen', return_value=child) as spawn, \
                 patch.object(sys, 'path', [str(MODULE.parent), *sys.path]):
             options = {} if original else {'program_path': str(self.program) if program_path is None else program_path}
+            if version is not None:
+                options['program_version'] = version
             try:
                 manager.start_server(sys.executable, self.cwd, self.env, '127.0.0.1', 8080,
                                      self.root / 'logs', **options)
@@ -620,7 +626,7 @@ def serve(*, host, port):
         observation = json.loads((self.cwd / 'observed.json').read_text(encoding='utf-8'))
         self.assertEqual(Path(observation['code']), self.package / '__init__.py')
         self.assertEqual(Path(observation['metadata_root']), self.program)
-        self.assertEqual(observation['version'], '0.11.3+ees.1')
+        self.assertEqual(observation['version'], self.version)
         self.assertEqual(Path(observation['dependency']), Path(cryptography.__file__))
         self.assertEqual(observation['static'], 'synthetic-selected-frontend')
         self.assertEqual(observation['prefix'], sys.prefix)
@@ -639,7 +645,33 @@ def serve(*, host, port):
         selected = self.command()
         self.assertEqual(selected[1:4], ['-I', '-B', '-c'])
         self.assertEqual(selected[4], manager.CUSTOMIZED_SERVER_CODE)
-        self.assertEqual(selected[7:], [str(self.program), '0.11.3+ees.1', self.info.name])
+        self.assertEqual(selected[7:], [str(self.program), self.version, self.info.name, self.frontend_name])
+
+    def test_legacy_selected_version_launches_after_wrapper_update(self):
+        legacy = '0.11.3+ees.1'
+        legacy_info = self.program / f'open_webui-{legacy}.dist-info'
+        self.info.rename(legacy_info)
+        (legacy_info / 'METADATA').write_text(f'Name: open-webui\nVersion: {legacy}\n', encoding='utf-8')
+        frontend = self.package / 'frontend'
+        (frontend / self.frontend_name).rename(frontend / '_ees1')
+        (frontend / '_ees1/version.json').write_text(json.dumps({'version': legacy}), encoding='utf-8')
+        result = subprocess.run(self.command(version=legacy), cwd=self.cwd, env=self.env,
+                                capture_output=True, text=True, timeout=15)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads((self.cwd / 'observed.json').read_text(encoding='utf-8'))['version'], legacy)
+
+    def test_unsupported_and_mixed_release_arguments_refuse_app_import(self):
+        for version in ('0.11.3+ees.3', [], '0.11.3'):
+            with self.subTest(version=version), self.assertRaises(manager.ProcessError):
+                self.command(version=version)
+        for index, value in ((8, '0.11.3+ees.3'), (9, 'open_webui-0.11.3+ees.1.dist-info'), (10, '_ees1')):
+            command = self.command()
+            command[index] = value
+            with self.subTest(index=index):
+                result = subprocess.run(command, cwd=self.cwd, env=self.env, capture_output=True, text=True, timeout=15)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('no fallback was started', result.stderr)
+                self.assertFalse((self.cwd / 'imported.txt').exists())
 
     def test_nonabsolute_or_nonstring_program_path_refuses_launch(self):
         for value in ('relative', str(self.root / 'missing'), self.program):
@@ -648,7 +680,7 @@ def serve(*, host, port):
 
     def test_missing_code_metadata_or_static_never_falls_back(self):
         for target in (self.package / '__init__.py', self.metadata, self.package / 'frontend' / 'index.html',
-                       self.package / 'frontend' / '_ees1' / 'version.json'):
+                       self.package / 'frontend' / self.frontend_name / 'version.json'):
             with self.subTest(target=target.name):
                 original = target.read_bytes()
                 target.unlink()
@@ -687,10 +719,10 @@ def serve(*, host, port):
                     target.write_bytes(content)
 
     def test_mismatched_metadata_or_static_version_refuses_import(self):
-        for target in (self.metadata, self.package / 'frontend' / '_ees1' / 'version.json'):
+        for target in (self.metadata, self.package / 'frontend' / self.frontend_name / 'version.json'):
             with self.subTest(target=target.name):
                 original = target.read_bytes()
-                target.write_bytes(original.replace(b'0.11.3+ees.1', b'0.11.3'))
+                target.write_bytes(original.replace(self.version.encode(), b'0.11.3'))
                 try:
                     self.assert_rejected_without_app_import()
                 finally:

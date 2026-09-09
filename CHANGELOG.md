@@ -4,6 +4,8 @@
 
 ## 2026-09-09
 
+- 서비스 브랜딩을 EES Portal로 변경하는 ees.2와 별도 frontend 캐시 경로를 준비함. 저장된 옛 이름만 새 이름으로 표시하고 기존 데이터·환경·CA 선택을 유지하며, 설치된 ees.1의 시작과 ees.2 적용 후 직전 Restore를 지원함. WO 시연 v0.1.7은 서비스 표기만 변경하고 모델·정책·업무 기능은 유지함. [적용 안내](docs/03-openwebui-native-agent.md#ees-portal-name).
+
 - 등록된 서버의 SSL 다운로드 지연에 대응해 현재 래퍼에 `Start -UseWindowsCA`를 추가함. 종료된 서버에 Windows 신뢰 인증서 스냅샷을 선택하고 서버 자식 환경에만 적용하며 이후 일반 Start에서도 재사용함. 기존 CA 검증·프로세스 보호를 재사용하고 등록 설정·Python·데이터·키·TLS 검증은 유지함. [복구 절차](docs/03-openwebui-native-agent.md#ees-start-windows-ca), [진단·검증 범위](evals/scenarios.md#ees-start-health-followup).
 
 - WO 시연 v0.1.6: 크기 조절 바의 마우스 클릭·드래그 직후 파란 포커스 테두리를 숨기고 Tab·방향키 조작의 표시는 유지함. 기존 너비 조절·WO 상태 검사 통과, 사내 표시 변경은 적용 후 확인 대상.
