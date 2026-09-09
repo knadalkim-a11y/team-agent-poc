@@ -70,6 +70,10 @@ def query(request):
 
 class JiraReadTests(unittest.TestCase):
     def setUp(self):
+        # Windows creates a local socket pair while initializing the event loop.
+        self.runner = asyncio.Runner()
+        self.runner.get_loop()
+        self.addCleanup(self.runner.close)
         self.tool = module.Tools()
         self.tool.valves.ENABLED = True
         self.tool.valves.JIRA_BASE_URL = BASE
@@ -296,7 +300,7 @@ class JiraReadTests(unittest.TestCase):
             self.assertEqual(result["issues"], [])
 
     def test_public_dashboard_returns_json_with_counts_scope_and_next_page(self):
-        output = asyncio.run(self.tool.jira_dashboard(project_key="SYSA", __user__=self.user()))
+        output = self.runner.run(self.tool.jira_dashboard(project_key="SYSA", __user__=self.user()))
         self.assertIsInstance(output, str)
         result = json.loads(output)
         self.assertTrue(result["ok"])
@@ -307,7 +311,7 @@ class JiraReadTests(unittest.TestCase):
         self.assertEqual(result["issues"][0]["url"], BASE + "/browse/SYSA-1")
         self.assertNotIn("display_notice", result)
         self.assertNotIn(PAT_A, output)
-        following = json.loads(asyncio.run(self.tool.jira_dashboard(
+        following = json.loads(self.runner.run(self.tool.jira_dashboard(
             project_key="SYSA", start_at=result["listing"]["next_start_at"], __user__=self.user())))
         self.assertEqual(following["issues"][0]["key"], "SYSA-31")
         self.assertIsNone(following["listing"]["next_start_at"])
@@ -318,7 +322,7 @@ class JiraReadTests(unittest.TestCase):
                 return Response({}, status=403)
             return self.normal_response(request)
         self.responder = respond
-        output = asyncio.run(self.tool.jira_dashboard(__user__=self.user()))
+        output = self.runner.run(self.tool.jira_dashboard(__user__=self.user()))
         self.assertIsInstance(output, str)
         result = json.loads(output)
         self.assertEqual(result["status"], "partial")
@@ -327,14 +331,14 @@ class JiraReadTests(unittest.TestCase):
         self.assertIsNone(result["listing"]["next_start_at"])
         self.tool.valves.ENABLED = False
         self.calls.clear()
-        failed = json.loads(asyncio.run(self.tool.jira_dashboard(__user__=self.user())))
+        failed = json.loads(self.runner.run(self.tool.jira_dashboard(__user__=self.user())))
         self.assertFalse(failed["ok"])
         self.assertIn("error", failed)
         self.assertEqual(self.calls, [])
         self.assertNotIn(PAT_A, json.dumps(failed))
 
     def test_public_issue_wrapper_reads_text_with_fixed_source(self):
-        result = json.loads(asyncio.run(self.tool.jira_get_issue("SYSA-1", __user__=self.user())))
+        result = json.loads(self.runner.run(self.tool.jira_get_issue("SYSA-1", __user__=self.user())))
         self.assertTrue(result["ok"])
         self.assertEqual(result["description"], "Synthetic details")
         self.assertEqual(result["issue"]["url"], BASE + "/browse/SYSA-1")

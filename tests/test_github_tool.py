@@ -17,7 +17,6 @@ import unittest
 import urllib.error
 import urllib.parse
 import urllib.request
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import patch
 
@@ -87,6 +86,10 @@ def page_link(page, relation, repository_id=None, **changes):
 
 class GitHubReadTests(unittest.TestCase):
     def setUp(self):
+        # Windows creates its loop wakeup socket before network guards apply.
+        self.runner = asyncio.Runner()
+        self.runner.get_loop()
+        self.addCleanup(self.runner.close)
         self.tool = module.Tools()
         self.tool.valves.ENABLED = True
         self.tool.valves.GITHUB_BASE_URL = BASE
@@ -124,7 +127,7 @@ class GitHubReadTests(unittest.TestCase):
             kwargs = {"repository": REPOSITORY, "state": "open", "page": 1, **kwargs}
         elif operation == "detail":
             kwargs = {"repository": REPOSITORY, "number": 11, **kwargs}
-        result = asyncio.run(getattr(self.tool, methods[operation])(__user__=self.user() if user is DEFAULT_USER else user, **kwargs))
+        result = self.runner.run(getattr(self.tool, methods[operation])(__user__=self.user() if user is DEFAULT_USER else user, **kwargs))
         return self.result_data(result)
 
     def result_data(self, result):
@@ -197,7 +200,7 @@ class GitHubReadTests(unittest.TestCase):
     def test_direct_detail_omits_single_repository_without_list_preflight(self):
         self.tool.valves.ALLOWED_REPOSITORIES = REPOSITORY
         self.responder = lambda request: Response(pull_request())
-        result = self.result_data(asyncio.run(self.tool.github_get_pull_request(number=11, __user__=self.user())))
+        result = self.result_data(self.runner.run(self.tool.github_get_pull_request(number=11, __user__=self.user())))
         self.assertTrue(result["ok"])
         self.assertEqual(result["repository"], REPOSITORY)
         self.assertEqual(result["pull_request"]["number"], 11)
@@ -205,7 +208,7 @@ class GitHubReadTests(unittest.TestCase):
                          [BASE + "/api/v3/user", BASE + "/api/v3/repos/" + REPOSITORY + "/pulls/11"])
 
     def test_direct_detail_omitted_repository_requires_choice_before_network(self):
-        result = self.result_data(asyncio.run(self.tool.github_get_pull_request(number=11, __user__=self.user())))
+        result = self.result_data(self.runner.run(self.tool.github_get_pull_request(number=11, __user__=self.user())))
         self.assertFalse(result["ok"])
         self.assertEqual(result["error"]["code"], "repository_required")
         self.assertEqual(self.calls, [])
@@ -566,9 +569,12 @@ class GitHubReadTests(unittest.TestCase):
             item["title"] = "Reflected " + pat
             return Response([item])
         self.responder = respond
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            outcomes = list(pool.map(lambda pair: self.call(user=self.user(*pair)),
-                                     ((PAT_A, "synthetic-a"), (PAT_B, "synthetic-b"))))
+        async def concurrent_requests():
+            return await asyncio.gather(*(
+                self.tool.github_list_pull_requests(repository=REPOSITORY, __user__=self.user(*pair))
+                for pair in ((PAT_A, "synthetic-a"), (PAT_B, "synthetic-b"))
+            ))
+        outcomes = [self.result_data(value) for value in self.runner.run(concurrent_requests())]
         self.assertTrue(all(outcome["ok"] for outcome in outcomes))
         self.assertEqual([result["pull_requests"][0]["number"] for result in outcomes], [11, 12])
         self.assertEqual({request.get_header("Authorization") for request in self.calls},

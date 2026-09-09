@@ -136,3 +136,5 @@ test_github_tool.GitHubReadTests.test_case_insensitive_repository_and_single_def
 - 사외 Linux / Python 3.12.13 / Pydantic 2.13.4에서 `python -m unittest discover -s tests -p 'test_github_tool.py' -v`: **34 PASS, 0.491초**. HTTP는 기존 합성 응답으로 대체하고 DNS·소켓 접속을 금지함. 성공/빈 결과/오류·직접 상세·페이지·원문 URL·본문 잘림·사용자별 토큰 격리/비노출을 확인함. FastAPI나 Node는 필요하지 않음.
 - 변경 전후 23개 비동기 반환부 외 정의의 AST가 동일함: 기존 `_run`·API 요청·권한/허용 저장소·리디렉션/TLS·개인 필드/저장 전제·Valves/UserValves를 그대로 유지함. 소스 컴파일과 HTML 응답 import 제거도 확인함.
 - [기존 항목 갱신 안내](../docs/06-github-read-tool.md#followup-update)는 같은 Tool ID의 코드 교체와 현재 Prompt 반영, 기존 설정/PAT/대화 보존, 새 채팅의 일반 답변·원문 확인으로 갱신함. 기존 대화에 저장된 과거 카드 기록은 삭제하지 않음. 실제 사내 제거본 등록·모델 응답·사용성은 미실행이며 사용자 보고 1~2줄로 확인함. 기존 저장/인증/재시작·장기 안정성 검사를 다시 요구하지 않음.
+
+- Windows 시험 보완: 2차 CI에서 Jira의 새 asyncio.run 루프 생성이 테스트 socket.connect 가드에 막힌 실제 실패를 확인하고 같은 구조의 GitHub도 함께 수정함. setUp에서 asyncio.Runner/get_loop를 가드 전에 준비하고 cleanup을 등록함. 공개 함수는 준비한 Runner에서 실행하고, 동시 사용자 검사는 asyncio.gather로 같은 루프의 두 요청을 시작해 기존 to_thread/Barrier(2)와 PAT 격리 검증을 유지함. 생산 코드·DNS/socket 차단·API 전송 가로채기는 바꾸지 않음. Linux Python3.12.13의 기존 환경에서 34/34 재검사 PASS(0.301초), diff 검사 통과. 실제 사내 반영/Windows 성공을 로컬 결과로 대신하지 않음.
