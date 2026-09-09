@@ -84,36 +84,87 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 
 ## 되묻기와 Rich UI 선택 기준
 
-업무 Tool을 연결한 뒤 실제 사용 흐름에 필요한 화면을 선택합니다. Rich UI가 있어야 API 연동을 시작할 수 있는 것은 아닙니다.
+현재 조회 결과는 **Tool의 JSON → Assistant의 일반 문장·표·원문 링크**로 제공합니다. 초기 기능 확인용 Confluence·Jira·GitHub의 Rich UI와 합성 HTML 예제는 제거하며, 기존 사내 등록본에는 [Tool·Prompt 갱신](#plain-output-update)이 필요합니다. 과거 채팅과 화면 검증 증거는 보존합니다.
 
-필요한 업무 화면은 [실행 계획](STATUS.md#delivery-plan)의 읽기 업무 하나에 포함해 구현합니다. 팀 시연을 위한 이름·소개·빠른 제안과 짧은 시작 안내를 먼저 준비합니다. 조회 결과 Rich UI의 전체 시각 디자인 튜닝은 후속으로 둡니다. 실제 Tool 결과의 필터·펼치기·원문 열기처럼 업무 완료에 필요한 조작을 우선하고, 현재 합성 HTML 예제를 그대로 배포 완료로 간주하지 않습니다.
+향후 화면은 [실행 계획](STATUS.md#delivery-plan)의 실제 업무 흐름을 고른 뒤 하나씩 설계합니다. 기존 카드의 전체 디자인 튜닝이나 새 UI 공통 기반을 이번 제거 작업에 붙이지 않습니다. 이름·로고와 대화 시작 예시는 조회 결과 Rich UI와 별도입니다.
 
 | 상황 | 우선 사용할 방식 |
 |---|---|
 | 검색어·대상 등이 모호하거나 후보 중 하나를 골라야 함 | 기본 `ask_user`로 필요한 조건만 확인; 사용할 수 없으면 일반 대화로 질문 |
 | 정해진 여러 값을 한 번 입력 | 기존 프롬프트 변수 입력 화면으로 충족되는지 먼저 확인 |
-| 짧은 답변·소수의 결과 링크 | 일반 채팅 답변 |
-| 받은 결과를 반복해서 필터링·펼치기·비교 | 업무 Tool 또는 사용자 클릭 Action에서 반환하는 Rich UI |
+| 조회 결과·근거·소수의 결과 링크 | 일반 문장·목록·표·Markdown 링크 |
+| 받은 결과를 반복해서 필터링·펼치기·비교할 실제 수요가 확인됨 | 그 업무에 필요한 Rich UI를 별도 구현·검증할 후보로 검토 |
 
 `ask_user`는 [Open WebUI 0.11.3 내장 Tool](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/tools.py)입니다. Native 호출·내장 Tool·User Input 설정과 모델의 실제 호출 여부를 해당 환경에서 확인합니다. 알려진 조건을 다시 입력시키거나 동일한 질문용 Tool을 새로 만들지 않습니다.
 
-Rich UI를 구현할 때의 경계:
+향후 Rich UI를 구현할 때도 지킬 경계:
 
-- 모델이 업무 Tool을 선택하면 연결된 코드가 조회·입력·권한 검증 후 화면을 반환할 수 있습니다. [Jira 대시보드](05-jira-read-tool.md#5-구현-경계와-운영)에 이어 [GitHub PR 카드](06-github-read-tool.md#followup-update)·[Confluence 검색/본문 카드](04-confluence-read-tool.md#rich-ui-results)를 기존 Tool 안에 준비했습니다. 실제 적용 상태는 STATUS를 따릅니다. [0.11.3 Action 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/actions.py)도 Rich UI 반환을 지원하지만 별도 Action은 이 패키지에 구현하지 않았습니다. HTML은 고정 템플릿으로 만들고 외부 자료는 텍스트로 삽입합니다.
-- `HTMLResponse`와 `Content-Disposition: inline`으로 화면을 반환하고, 모델의 설명에 필요한 데이터는 `(HTMLResponse, context)`로 함께 제공합니다. HTML만 반환했다고 모델이 화면 내용을 읽을 수 있다고 가정하지 않습니다. [공식 Rich UI 안내](https://docs.openwebui.com/features/extensibility/plugin/development/rich-ui/)
-- 받은 결과 안의 필터·상세 펼치기는 브라우저에서 처리합니다. 추가 검색·본문 조회는 업무 Tool과 사용자별 권한 검사를 거칩니다. iframe에 PAT를 넣거나 원 시스템 API를 직접 호출시키지 않습니다.
-- Rich UI 안의 HTML 버튼은 자동으로 Python Tool을 재호출하지 않습니다. 현재 Jira 시스템/다음 목록·GitHub 다음 목록 질문은 `input:prompt`로 입력 초안을 전달하고 사용자가 검토·전송합니다. 문서·PR·이슈의 본문 질문 버튼은 제거했으며 본문은 같은 대화에서 대상을 지정해 요청합니다. 기존 입력을 바꿀 수 있다는 안내와 복사 가능한 초안을 제공하며 자동 전송·원 시스템 직접 API 호출·same-origin 권한 추가는 하지 않습니다.
-- 저장된 채팅의 화면은 당시 결과일 수 있습니다. 갱신 여부를 표시하고, 필터·입력 상태가 재접속 후 자동 복원되거나 항상 최신이라고 설명하지 않습니다.
+- 업무 Tool의 조회·입력·사용자별 권한 검사를 유지하고, 화면과 모델의 설명에 같은 조회 데이터를 제공합니다. HTML을 반환했다는 이유로 모델이 화면 내용을 읽을 수 있다고 가정하지 않습니다. 반환 방식은 [공식 Rich UI 안내](https://docs.openwebui.com/features/extensibility/plugin/development/rich-ui/)와 해당 버전에서 확인합니다.
+- 외부 자료는 실행 가능한 HTML로 삽입하지 않습니다. iframe에 PAT를 넣거나 원 시스템 API를 직접 호출시키지 않습니다. 추가 검색·본문 조회는 업무 Tool과 사용자별 권한 검사를 거칩니다.
+- 버튼의 입력 초안 생성·추가 조회·전송은 각각 실제 구현된 동작만 안내합니다. 저장된 채팅의 결과를 항상 최신이라고 설명하지 않습니다.
 
 코드 위치는 [AGENTS의 구현 규칙](../AGENTS.md#3-구현-위치와-과설계-방지)을 따릅니다. 기능별 API 코드는 원 시스템에 요청하는 클라이언트 코드입니다. 원 시스템 서버 구현을 이 저장소에 가져오지 않으며, 둘 이상의 실제 기능에서 같은 코드의 반복 수정이 생기면 공통화를 검토합니다.
+
+<a id="plain-output-update"></a>
+
+### 기존 조회를 일반 답변으로 전환
+
+기존 **Confluence·Jira·GitHub Tool 세 개의 코드와 EES 통합 Assistant의 공통 System Prompt**를 갱신합니다. 카드·필터·펼치기·질문 버튼을 제거하고 읽기 API·페이지 이동·개인 인증·권한 검사와 실제 원문 링크는 유지합니다. 이번 변경은 Agent Pack 자산 갱신으로, 이미 성공한 프로그램 Apply·Stop·Start나 wheel 재생성·환경 재설치가 필요하지 않습니다.
+
+1. 기존 `manage-ees.ps1 -Action Update`로 검토된 main을 받습니다. Git 갱신만으로 WebUI에 저장된 코드는 바뀌지 않습니다.
+2. **Workspace → Tools**에서 아래 기존 항목을 각각 편집하고 코드 전체를 해당 파일로 교체·저장합니다. Tool을 삭제하거나 새로 만들지 않으며 ID·접근 권한·관리자 Valves·사용자 PAT/UserValves·모델 연결은 유지합니다.
+
+| 기존 항목 | 코드 원본 |
+|---|---|
+| EES Confluence Read | [confluence_tool.py](../agent-pack/skills/confluence-read/scripts/confluence_tool.py) |
+| EES Jira Read | [jira_tool.py](../agent-pack/skills/jira-read/scripts/jira_tool.py) |
+| EES GitHub Read | [github_tool.py](../agent-pack/skills/github-read/scripts/github_tool.py) |
+
+3. **Workspace → Models → 기존 EES 통합 Assistant**에서 [System Prompt 원본](../agent-pack/system-prompts/ees-integrated-assistant.md)의 변경된 공통 지침을 반영하고 저장·업데이트합니다. 별도로 추가한 사용자 지침은 보존하며 기존 모델·Skill·Knowledge 연결을 유지합니다. 이전 카드 중복 억제·화면 필터·질문 버튼 안내는 새 지침으로 바뀝니다.
+4. 새 일반 대화에서 평소의 Confluence 검색·Jira 현황·GitHub PR 조회를 한 번씩 요청해 **카드 없이 일반 답변과 원문 링크가 나오는지** 확인합니다. 저장 완료와 조회/출력 결과를 1~2줄로 보고하며 전체 로그·파일·사진이나 이전 인증 전수 검사를 요구하지 않습니다.
+
+과거 대화에 저장된 카드는 당시 출력이므로 남을 수 있습니다. 이번 변경은 새 조회의 출력에 적용하며 기존 대화·DB를 지우거나 다시 작성하지 않습니다. Git 구현·검증과 사내 Tool/Prompt 반영·새 출력 확인은 [STATUS](STATUS.md)에 나누어 기록합니다.
+
+사내 PowerShell에서는 다음 블록을 **하나 실행할 때마다 해당 편집 화면에 붙여넣고 저장한 뒤** 다음 블록으로 넘어갑니다. 어느 명령이나 저장이든 실패하면 다음 단계로 넘어가지 않습니다. 명령은 파일 내용을 로컬 클립보드에 복사하므로 코드 전체를 외부 채팅에 옮길 필요가 없습니다.
+
+먼저 main을 받고 Confluence 코드를 복사합니다. 기존 Confluence Tool의 코드 전체를 교체하고 헤더 `version: 0.1.6`을 확인해 저장합니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    & (Join-Path $eesRepo 'scripts\manage-ees.ps1') -Action Update
+    Get-Content -LiteralPath (Join-Path $eesRepo 'agent-pack\skills\confluence-read\scripts\confluence_tool.py') -Raw -Encoding UTF8 | Set-Clipboard
+}
+```
+
+이어서 Jira 코드를 복사해 기존 Jira Tool에 붙여넣고 `version: 0.1.6`으로 저장합니다.
+
+```powershell
+Get-Content -LiteralPath "$env:USERPROFILE\team-agent-poc\agent-pack\skills\jira-read\scripts\jira_tool.py" -Raw -Encoding UTF8 -ErrorAction Stop | Set-Clipboard
+```
+
+GitHub도 기존 항목에 붙여넣고 `version: 0.1.4`로 저장합니다.
+
+```powershell
+Get-Content -LiteralPath "$env:USERPROFILE\team-agent-poc\agent-pack\skills\github-read\scripts\github_tool.py" -Raw -Encoding UTF8 -ErrorAction Stop | Set-Clipboard
+```
+
+마지막으로 공통 System Prompt를 복사해 기존 EES 통합 Assistant에 반영합니다. 별도로 덧붙인 사내 지침이 있다면 보존하고 저장·업데이트합니다.
+
+```powershell
+Get-Content -LiteralPath "$env:USERPROFILE\team-agent-poc\agent-pack\system-prompts\ees-integrated-assistant.md" -Raw -Encoding UTF8 -ErrorAction Stop | Set-Clipboard
+```
+
+새 대화에서 세 조회를 확인한 뒤 `3도구/Prompt 저장, 카드 없음, 3조회/원문 정상`처럼 실제 확인한 결과만 1~2줄로 전달합니다. 한 항목이 실패하면 그 이름과 짧은 증상만 함께 적습니다.
 
 ### 후속 연동을 시작할 때
 
 아래 표는 새 연동을 선정할 때의 범용 검토 기준입니다. 이미 연결한 Confluence·Jira·GitHub의 제품·인증을 다시 확인하는 순서가 아닙니다. 현재 구현·배포 상태와 진행 순서는 [STATUS](STATUS.md)에서 관리합니다.
 
-| 대상 | 구현 전에 확인할 정보 | 첫 읽기 기능 후보 | Rich UI 후보 |
+| 대상 | 구현 전에 확인할 정보 | 첫 읽기 기능 후보 | 향후 화면 후보 |
 |---|---|---|---|
-| Confluence | 제품·버전, 개인 인증, 허용 Space | 문서 검색·본문 조회 | [검색·본문·근거 카드](04-confluence-read-tool.md#rich-ui-results) |
+| Confluence | 제품·버전, 개인 인증, 허용 Space | 문서 검색·본문 조회 | 필요한 문서 비교·근거 탐색 |
 | Jira | Cloud/Data Center·버전, 개인 인증, 허용 프로젝트·조회 필드 | 이슈 검색·상세 조회 | 이슈 목록에서 상태·담당자별 좁히기, 상세 펼치기 |
 | GitHub | GitHub.com/Enterprise Server·버전, 개인 인증, 허용 저장소 | 이슈·PR 목록과 상세 조회 | PR 목록의 리뷰·검사 상태 비교 |
 
@@ -124,7 +175,7 @@ Rich UI를 구현할 때의 경계:
 ### 업무 흐름 하나를 배포하는 단위
 
 - 제품/버전·개인 인증 방식·첫 조회 업무를 한 번에 확인합니다. 예를 들어 Jira의 특정 프로젝트 열린 이슈 조회처럼 좁게 시작하고, 허용 프로젝트·필드는 승인된 사내 설정으로 제한합니다. 기능 수가 늘기 전에 공통 adapter·registry를 만들지 않습니다.
-- 검색 → 받은 결과 탐색 → 필요한 상세/원문 확인까지 준비합니다. 모델이 고정 Tool의 인자를 선택하고, 화면과 모델 답변은 같은 조회 데이터를 사용합니다. 추가 API 조회가 필요한 버튼은 별도 동작으로 구현·검증하기 전까지 약속하지 않습니다.
+- 검색 → 받은 결과 탐색 → 필요한 상세/원문 확인까지 준비합니다. 모델이 고정 Tool의 인자를 선택하고 실제 반환 데이터로 답합니다. 별도 화면이나 추가 API 조회 버튼은 업무상 필요를 정하고 구현·검증하기 전까지 약속하지 않습니다.
 - 처음 쓰는 팀원에게 실제 가능한 질문 예시 3개와 부족한 조건의 입력 방법을 제공합니다. 일반 요약·Confluence 문서 찾기·새 이슈 조회처럼 연결된 기능만 소개하며 Skill 이름이나 모델 선택법을 학습해야 업무를 시작하는 구조로 만들지 않습니다.
 - GPT가 가능한 코드·합성 시험을 끝낸 뒤 사내에서는 정상 업무 흐름·권한 제한·대표 실패와 실제 화면을 짧은 묶음으로 확인합니다. [사용성·공유 기준](../evals/scenarios.md#usability)은 파일럿 참여자의 실제 사용으로 확인합니다.
 - 팀원 Prompt·Skill 생성/공유 권한은 필요한 범위로 설정하고 같은 파일럿에서 공유·비공유 사용자를 확인합니다. Python Tool 등록·수정 권한이나 자격증명 공유를 함께 열지 않습니다. 공식 채택과 Git 관리는 [원본 경계](../README.md#원본과-배포본)를 따릅니다.
@@ -437,6 +488,8 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 팀 시연 안내는 [처음 사용하기](07-team-quickstart.md)를 사용합니다. GitHub 예시는 저장소 형식을 무조건 먼저 묻지 않으며 기존 Prompt에 따라 단일 허용 저장소는 자동 선택하고 여러 개일 때 필요한 대상만 확인합니다. 실제 사용 확인은 그때 자주 쓰는 업무로 선정합니다. 일반 사용자 한 명이 본인 Jira PAT로 **시스템별 현황 → 관심 시스템의 받은 목록 → 원문**을 보는 흐름은 가능한 예시 중 하나입니다. 도움 없이 시작했는지, 막힌 단계가 있었는지, 결과·조회 범위를 이해했는지를 기록하며 같은 실행이 실제 만족한 평가 조건만 연결합니다. 이 흐름은 모든 연동이나 사용자 격리 전체의 통과를 대신하지 않습니다. 완료한 관리자 인증·저장·재시작·건수 대조 시험이나 별도 연결 확인을 반복하지 않습니다.
 
+**시작 공지의 후속 방향:** 2026-09-09 사용자는 첫 시작의 `새로운 기능 EES Assistant`·v0.11.3 영어 릴리스 노트가 팀 사용자에게 도움이 적다고 보고했습니다. 해당 영역을 향후 관리자가 팀 공지를 올리는 용도로 쓰고자 한다는 요구를 기록합니다. 이번 Rich UI 제거에는 팝업 수정이나 공지 기능 구현을 포함하지 않으며, 실제 게시·수정 방법과 노출 방식은 그 기능을 만들 때 정합니다.
+
 ## 4. 공개 전 검증
 
 현재 파일럿은 [기존 Windows PC](01-openwebui-install.md#local-pc-pilot)를 호스트로 사용합니다. 공개할 기능을 정하고 [검증 시점](../evals/scenarios.md#validation-timing)의 공용 파일럿 전 조건을 묶어서 확인합니다. 같은 DB·키·버전·실행 경로의 기존 저장·조회 증거는 재사용하며, 변경된 접속 경로와 일반 사용자 계정의 격리·자산 권한을 확인합니다. LAN 접속·전송 보호는 개인 환경의 DB 저장 PASS와 별개입니다. 추후 다른 서버로 옮기면 그때 바뀐 환경의 조건을 확인합니다.
@@ -516,7 +569,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 #### 구현 범위와 완료 기준
 
-아래 1·2의 구현·검증을 완료했습니다. [2026-09-08 설계 검토](../evals/scenarios.md#ees-wrapper-design)와 [2026-09-09 구현 검증](../evals/scenarios.md#ees-wrapper-implementation)을 구분합니다. 3은 사내 수동 폴더 변경 뒤 Apply -Resume·수정본 Start 성공을 보고받았으며 화면·기존 대화·대표 조회 확인이 남아 있습니다. [최신 사내 결과](../evals/scenarios.md#ees-wrapper-manual-resume).
+아래 1·2의 구현·검증을 완료했습니다. [2026-09-08 설계 검토](../evals/scenarios.md#ees-wrapper-design)와 [2026-09-09 구현 검증](../evals/scenarios.md#ees-wrapper-implementation)을 구분합니다. 3은 사내 수동 폴더 변경 뒤 Apply -Resume·수정본 Start 성공과 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 2026-09-09 사용자 보고로 확인했습니다. 이는 해당 적용과 사용 흐름의 성공이며 보고 이후의 실시간 가동이나 rename/SSL 원인 해소를 뜻하지 않습니다. [최신 사내 결과](../evals/scenarios.md#ees-wrapper-manual-resume).
 
 | 순서 | 작업 | 완료 기준 |
 |---|---|---|

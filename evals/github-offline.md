@@ -124,3 +124,17 @@ test_github_tool.GitHubReadTests.test_case_insensitive_repository_and_single_def
 | Node 미설치 경로 | `shutil.which`를 None으로 모킹해 DOM 진입 시 SkipTest를 확인함. Python wrapper 검사는 Node 없이도 남음 |
 
 최종 전체 변경에서 `python scripts/check_docs.py`는 25개 파일·421개 링크·오류 0·검토 후보 0이며 `git diff --check`도 통과함. 실제 브라우저 배치는 미실행: 앞선 로컬 HTML 탐색의 URL 보안 정책 차단을 우회하거나 반복하지 않음. 사내 WebUI 등록·iframe/입력 반영·모델 자연어 선택·GHES·Windows 복구·실제 사용성은 미실행. 기존 저장/인증/안정성 시험을 반복하지 않고 [사내 변경 범위](../docs/06-github-read-tool.md#followup-update)에 남김.
+
+
+<a id="rich-ui-removed"></a>
+
+## 초기 Rich UI 제거, 일반 답변으로 복귀 — 2026-09-09
+
+- 기준 main `99a9ee6584a3b23a2dd26ebb94ede079886b2831`의 AGENTS·STATUS·GitHub 코드/가이드/시험을 확인함. 사용자는 EES 수정본에서 기존 GitHub 조회와 대화 보존을 확인한 뒤 초기 시험용 Rich UI 전체 제거를 요청함. 과거 카드 사용 증거는 위에 보존하며 이번 제거본의 사내 적용 성공으로 바꾸지 않음.
+- GitHub Tool v0.1.4에서 목록·상세의 `HTMLResponse` tuple, 렌더링 템플릿·버튼·표시 실패 안내를 제거함. 세 공개 함수는 기존 `_run`의 비밀정보 제거 결과를 `json.dumps(..., ensure_ascii=False)` 문자열로 반환함. 실제 PR 번호·원문 URL·본문/잘림·페이지/오류/조회 범위 근거를 유지하며 Assistant는 일반 채팅으로 답함.
+- UI만 확인하던 `tests/test_github_ui.py`를 삭제하고 기존 `test_github_tool.py`가 모든 공개 응답에서 JSON 문자열·PAT 비노출·표시 전용 필드 부재를 검사하도록 맞춤. 본문의 한글·HTML처럼 생긴 문자열은 원래 자료로 보존하되 반사된 PAT만 가려지는지 기존 본문 검사에서 대조함. 새 테스트 모듈·표시 옵션·라이브러리·서버·자동 수집을 추가하지 않음.
+- 사외 Linux / Python 3.12.13 / Pydantic 2.13.4에서 `python -m unittest discover -s tests -p 'test_github_tool.py' -v`: **34 PASS, 0.491초**. HTTP는 기존 합성 응답으로 대체하고 DNS·소켓 접속을 금지함. 성공/빈 결과/오류·직접 상세·페이지·원문 URL·본문 잘림·사용자별 토큰 격리/비노출을 확인함. FastAPI나 Node는 필요하지 않음.
+- 변경 전후 23개 비동기 반환부 외 정의의 AST가 동일함: 기존 `_run`·API 요청·권한/허용 저장소·리디렉션/TLS·개인 필드/저장 전제·Valves/UserValves를 그대로 유지함. 소스 컴파일과 HTML 응답 import 제거도 확인함.
+- [기존 항목 갱신 안내](../docs/06-github-read-tool.md#followup-update)는 같은 Tool ID의 코드 교체와 현재 Prompt 반영, 기존 설정/PAT/대화 보존, 새 채팅의 일반 답변·원문 확인으로 갱신함. 기존 대화에 저장된 과거 카드 기록은 삭제하지 않음. 실제 사내 제거본 등록·모델 응답·사용성은 미실행이며 사용자 보고 1~2줄로 확인함. 기존 저장/인증/재시작·장기 안정성 검사를 다시 요구하지 않음.
+
+- Windows 시험 보완: 2차 CI에서 Jira의 새 asyncio.run 루프 생성이 테스트 socket.connect 가드에 막힌 실제 실패를 확인하고 같은 구조의 GitHub도 함께 수정함. setUp에서 asyncio.Runner/get_loop를 가드 전에 준비하고 cleanup을 등록함. 공개 함수는 준비한 Runner에서 실행하고, 동시 사용자 검사는 asyncio.gather로 같은 루프의 두 요청을 시작해 기존 to_thread/Barrier(2)와 PAT 격리 검증을 유지함. 생산 코드·DNS/socket 차단·API 전송 가로채기는 바꾸지 않음. Linux Python3.12.13의 기존 환경에서 34/34 재검사 PASS(0.301초), diff 검사 통과. 실제 사내 반영/Windows 성공을 로컬 결과로 대신하지 않음.
