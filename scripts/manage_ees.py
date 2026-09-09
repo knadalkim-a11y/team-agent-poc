@@ -689,6 +689,46 @@ def render_diagnosis(result):
     return "\n".join(lines + ["last_traceback:", *candidate["frames"]])
 
 
+LOCAL_ERROR_TYPES = frozenset({
+    "OSError", "PermissionError", "FileNotFoundError", "FileExistsError", "NotADirectoryError",
+    "IsADirectoryError", "ValueError", "KeyError", "TypeError", "UnicodeEncodeError",
+    "UnicodeDecodeError", "JSONDecodeError",
+})
+LOCAL_ERROR_SOURCES = frozenset({
+    "manage_ees.py", "ees_webui_customization.py", "ees_deploy_state.py",
+    "ees_deploy_release.py", "ees_deploy_process.py",
+})
+
+
+def safe_local_error(value):
+    """Only fixed labels and bounded numbers; never exception text or file paths."""
+    value = value if isinstance(value, dict) else {}
+    kind, source, line = value.get("type"), value.get("source"), value.get("line")
+    source = source if isinstance(source, str) and source in LOCAL_ERROR_SOURCES else None
+    return {
+        "type": kind if isinstance(kind, str) and kind in LOCAL_ERROR_TYPES else "unknown",
+        "errno": value.get("errno") if type(value.get("errno")) is int and 0 <= value["errno"] <= 0xFFFFFFFF else None,
+        "winerror": value.get("winerror") if type(value.get("winerror")) is int and 0 <= value["winerror"] <= 0xFFFFFFFF else None,
+        "source": source,
+        "line": line if source and type(line) is int and 1 <= line <= 1000000 else None,
+    }
+
+
+def local_error_detail(error):
+    # Match complete checkout paths, then retain only the innermost known code
+    # location. Traceback text, source lines, exception args and locals stay out.
+    sources = {os.path.normcase(os.path.abspath(Path(__file__).with_name(name))): name
+               for name in LOCAL_ERROR_SOURCES}
+    source, line, frame = None, None, error.__traceback__
+    while frame is not None:
+        name = sources.get(os.path.normcase(os.path.abspath(frame.tb_frame.f_code.co_filename)))
+        if name:
+            source, line = name, frame.tb_lineno
+        frame = frame.tb_next
+    return safe_local_error({"type": type(error).__name__, "errno": getattr(error, "errno", None),
+                             "winerror": getattr(error, "winerror", None), "source": source, "line": line})
+
+
 def render_summary(action, result, *, failed=False):
     def flag(value):
         return "true" if value is True else "false" if value is False else "-"
@@ -702,9 +742,15 @@ def render_summary(action, result, *, failed=False):
     program = ("incomplete" if result.get("program_incomplete") else "invalid" if result.get("program_valid") is False
                else "original" if result.get("original_program") is True
                else "customized" if result.get("original_program") is False else "-")
+    detail = ""
+    if failed and "local_error" in result:
+        error = safe_local_error(result["local_error"])
+        location = f"{error['source']}:{error['line']}" if error["source"] and error["line"] else "-"
+        detail = (f" error={error['type']} errno={error['errno'] if error['errno'] is not None else '-'}"
+                  f" winerror={error['winerror'] if error['winerror'] is not None else '-'} at={location}")
     return (f"EES action={action} result={'failed' if failed else 'ok'} changed={flag(result.get('changed'))} "
             f"commit={commit} stage={stage} program={program} "
-            f"running={flag(result.get('managed_process_running', result.get('started', result.get('already_running'))))}")
+            f"running={flag(result.get('managed_process_running', result.get('started', result.get('already_running'))))}{detail}")
 
 
 def save_operation(args, result, *, failed=False):
@@ -770,13 +816,16 @@ def main(argv=None):
         if not diagnostics and isinstance(error, processes.ProcessError):
             detail = "\nDiagnostics: " + json.dumps(failure_detail({}, error))
         parser.exit(1, f"Operation stopped: {error}{detail}\n")
-    except (OSError, ValueError, KeyError, TypeError):
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        detail = local_error_detail(error)
         if args.summary:
-            result = {"stage": args.action, "reason": "local_state_or_file_unavailable", "changed": None}
+            result = {"stage": args.action, "reason": "local_state_or_file_unavailable",
+                      "changed": None, "local_error": detail}
             saved = save_operation(args, result, failed=True)
             print(render_summary(args.action, result, failed=True) + (" report=unavailable" if not saved else ""))
             return 1
-        parser.exit(1, "Operation stopped: local state or a required file could not be inspected. No secrets were printed.\n")
+        parser.exit(1, "Operation stopped: local state or a required file could not be inspected.\n"
+                    + "Local error: " + json.dumps(detail) + "\n")
     if args.summary:
         saved = save_operation(args, result)
         print(render_summary(args.action, result) + (" report=unavailable" if not saved else ""))

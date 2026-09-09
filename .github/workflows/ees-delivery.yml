@@ -79,15 +79,13 @@ jobs:
         run: python -m unittest discover -s tests -p test_ees_deploy_*.py -v
       - run: python -m unittest discover -s tests -p test_manage_ees.py -v
       - name: Download the fixed upstream wheel for program validation
-        if: runner.os == 'Linux'
         run: |
           python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
       - name: Build the real program fixture without installing it
-        if: runner.os == 'Linux'
         run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
       - name: Verify program-only Apply and Restore
         env:
-          EES_TEST_BRANDING_DIR: ${{ runner.os == 'Linux' && 'dist/branding' || '' }}
+          EES_TEST_BRANDING_DIR: dist/branding
         run: python -m unittest discover -s tests -p test_ees_webui_customization.py -v
       - name: Parse the Windows PowerShell entry point
         if: runner.os == 'Windows'

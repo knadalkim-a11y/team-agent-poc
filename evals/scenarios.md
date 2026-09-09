@@ -1008,6 +1008,19 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 다음 확인 범위: 기존 config의 state_root에서 deployment.json의 허용된 pending.stage/last_event, program/program.staging/deployment.lock 존재, staging 파일 수와 해당 드라이브 여유 GB를 읽기 전용으로 한 번에 요약하도록 준비함. stage/event 한 줄과 폴더/파일 수/여유 한 줄만 받으며 경로·키·원문 로그를 출력하지 않음. 파일 수/디스크 조회 불가는 unavailable로 구분하고 확보한 단계 정보는 유지함. 프로그램/DB import·쓰기·Apply/CheckOnly/Restore/Start·이전 Diagnose/Deploy/ProbeImports를 실행하지 않음. 단계/폴더 상태가 맞지 않으면 멈추며 이 조회 자체를 정확한 원인 확정이나 복원 성공으로 해석하지 않음.
 - 이번 검증·한계: STATUS와 기존 평가 기록만 변경하며 문서/diff를 검사함. 실행 코드·기존 자동 시험/CI는 변경/반복하지 않음. PowerShell 5 구문과 출력·부작용을 읽기 대조했으나 로컬 pwsh 부재로 새 조회 블록의 실제 실행은 미검증임. 사내 조회 결과와 원인·실제 적용/기동 성공은 대기 중임. 원래 예외를 잃은 과거 오류는 뒤늦게 복원할 수 없으며, 그 정보를 얻기 위한 실제 Apply 반복은 안내하지 않음.
 
+
+<a id="ees-wrapper-error-evidence"></a>
+
+### 최종 프로그램 전환 단계의 오류 보존 보완 — 2026-09-09
+
+- 사내 증거: 읽기 전용 조회에서 **`stage=promote`, `event=program_promote`, `program=False`, `staging=True`, `lock=False`, `files=5892`, `freeGB=69.7`**을 수신함. 현재 코드 순서상 임시 프로그램 추출과 전체 파일/RECORD 검증을 통과하고 마지막 전환 단계까지 기록됨. program 부재/staging 잔존을 함께 보면 최종 폴더 이동 직전 또는 이동 중의 실패로 좁혀짐. 상태 기록의 replace 후 임시파일 정리 등 예외 가능성 때문에 rename 시스템 호출 자체의 실패로 확정하지 않음. 확인 시점의 디스크 여유 부족은 지지되지 않으며 실제 OS 오류·보안 프로그램 개입·현재 서버 가동은 미확인임.
+- 개발 기준·검토: 원격 main `c7cfcebd76f3062fef566cececac593645e8bdbc`, tree `2a266185a84ad9cc0706a35fb7f121c1466e052d`, 관련 열린 PR 0개를 확인함. 같은 tree의 AGENTS/STATUS·Apply/Restore·오류 처리·관련 시험을 읽음. 독립 검토에서 추출·검증 후 열린 파일 핸들을 유지하는 코드나 확정적인 폴더 이동 결함을 발견하지 못함. 환경을 추측해 권한/보안 설정을 변경하거나 자동 rename 재시도를 추가하지 않음.
+- 구현: 기존 `manage_ees.py` 일반 예외 처리에 고정 오류 종류·32비트 범위 errno/winerror·고정 저장소 모듈명/숫자 코드 행만 남김. 실제 checkout의 traceback 경로와 일치하는 가장 안쪽 위치만 선택하며 예외 메시지·filename·args·locals·소스 행은 저장/출력하지 않음. 기존 Summary 한 줄에 `error/errno/winerror/at`를 추가하고 같은 값은 last-operation.json에 보존함. 새 명령·모듈·서비스·수집기·전환/복원 동작은 추가하지 않음. CheckOnly는 실패해도 무쓰기이며 요약 없이 실행한 일반 오류도 안전한 세부 필드만 표시함. 과거에 버린 예외 정보는 복원하지 못함.
+- 로컬 검증: manager 62개 PASS. 실제 customization.apply 경로의 최종 rename에 PermissionError(errno=13, winerror=5)를 주입해 pending=promote 보존·자동 재시도/Restore/Start 없음·고정 내부 위치와 번호 저장/한 줄 출력·원문 비출력을 확인함. 임의 오류 클래스·checkout 밖 동일 파일명·문자열/과대 숫자·불린 코드·임의 stage의 유출 차단, 상세 결과 쓰기 실패에도 원래 오류 번호 유지, CheckOnly 실패의 무쓰기를 검증함. 독립 검토가 지적한 임의 exception.stage 저장은 action 고정으로 수정함.
+- 실제 파일/플랫폼 검사: customization 24개 중 로컬 23개 PASS·실제 wheel fixture 부재로 1개 skip. 최초 Apply의 최종 이동 실패 후 원본·키·DB 보존, Restore 전 Apply 차단, 명시적 Restore·복원 후 변경 없음 회귀를 추가함. 기존 실제 wheel 시험을 실제 Apply의 추출→폴더 이동→검증과 Restore로 확장하고 같은 시험을 Windows/Linux에서 실행하도록 기존 CI 조건을 보완함. 원래 환경 조회 경계만 합성 fixture로 대체하며 앱 import·실제 DB/키는 사용하지 않음. Windows/Linux 실제 wheel CI 결과는 아래 반영 시 기록함.
+- 사내 다음 조치: 검증/병합 후 기존 Update→Restore→Start를 사용함. 현재 미완료 작업은 Restore가 서버 종료/포트·기록·앱 경계를 다시 검사하며, 첫 Apply의 직전 상태가 original임을 확인한 경우 검증된 임시 프로그램만 정리하고 원래 Python/앱/데이터/키 선택으로 돌아감. Restore 실패 시 Start는 실행하지 않고 새 오류 종류/번호/위치 한 줄을 받음. 이 절차는 원래 서비스 복원이며 EES 수정본 적용 성공이나 사내 OS 원인 해결을 뜻하지 않음. 동일 Apply를 단지 새 오류 형식 수집을 위해 다시 실행하지 않음.
+- 현재 반영·한계: 관련 코드/시험·기존 가이드/상태/변경 기록을 보완했으며 원격 게시·Windows/Linux 실제 wheel 검사·main 병합은 진행 중임. 사내 Update/Restore/Start·UI 확인은 미실행, 사내 OS 원인과 EES 수정본 적용 성공은 미확인임.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
