@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **v0.1.2 갱신 수행 보고 후 발견된 대화 이동 시 패널 소실·직접 재열기 부재를 보완함.** 같은 브라우저 탭에서 대화별 검색·WO 내용·화면·너비·열림 상태를 보관하고 복귀 시 복원하며 채팅 안의 버튼으로 패널을 접고 펼치도록 준비함. 영구 저장·서버·등록 항목은 추가하지 않으며 실제 EMS 연결·업무 저장은 없음. [시연 안내](03-openwebui-native-agent.md#wo-mockup), [검증 범위](../evals/scenarios.md#wo-mockup).
-- 다음 작업 하나: **기존 EES WO Demo 코드만 갱신하고, 설비 조회 후 다른 대화로 이동·복귀 및 버튼으로 닫기·재열기를 확인한다.** WO 지침·제안 재등록과 이미 확인한 설치를 반복하지 않음. 이후 시연 피드백 → 운영용 목업 → 실제 EMS 구현 순서를 유지하며 권한 세분화와 상세 운영 설계는 후속임.
+- 이번 작업: **v0.1.3의 업무 패널 열기/닫기·기능 정상 보고를 반영하고 버튼 디자인을 다듬음.** v0.1.4에서는 채팅 상단 ‘제어’ 옆에 같은 크기·색상·hover 스타일의 업무 패널 아이콘을 배치함. 기존 대화별 상태·WO 흐름은 유지하며 실제 EMS 연결은 없음. [시연 안내](03-openwebui-native-agent.md#wo-mockup), [검증 범위](../evals/scenarios.md#wo-mockup).
+- 다음 작업 하나: **기존 EES WO Demo 코드만 갱신하고 상단 아이콘의 배치를 확인한다.** 정상 보고된 기능의 전체 재검사·WO 지침/제안 재등록은 요구하지 않음. 이후 시연 피드백 → 운영용 목업 → 실제 EMS 구현 순서를 유지함.
 - 설비 조회 관리 합의: 여러 업무에서 쓰는 공통 기능이므로 운영용 설계에서는 독립 Tool로 등록·관리하는 방향을 유지함. 사용자는 이번 시연에 한해 적용이 간단한 기존 단일 등록 항목을 유지하기로 함. 현재는 같은 Tool 안의 함수 분리이며 별도 등록 완료가 아님. 후속 요청의 설비 조회 패널도 같은 등록 항목에서 제공하며 새 적용 성공 보고로 간주하지 않음.
 - 첫 화면 제안: 기본 영어 문구를 대체할 천안 설비·헝가리 설비·AI WO 초안·직접 선택의 네 질문을 준비하고, v0.1.2의 Tool·WO 지침·제안 갱신 안내를 수행했다는 사용자 보고를 받음. 첫 조회 시연 중 대화 이동 후 패널 소실을 보고했으며 제안 네 개의 실제 등록 원문·각 클릭 결과를 직접 대조한 것은 아님. 이번 수정은 제안 JSON을 바꾸지 않음. [적용 안내](03-openwebui-native-agent.md#first-use-entry).
 - 완료한 이전 단위: 초기 Rich UI 제거·일반 문장/표/원문 링크 전환의 구현·검증·main 반영에 이어 **제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 확인함.** 개별 Tool 등록 내용·적용 SHA·새 조회/원문 결과의 직접 대조는 미확인으로 유지하며 저장 절차를 반복 안내하지 않음. [적용 보고](../evals/scenarios.md#plain-output-applied-report), [변경·검증](../evals/scenarios.md#prototype-rich-ui-removal).
@@ -55,7 +55,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 | 3. 관리자 공통 정책 | EES Assistant에 합성 공통 지침·정책 답변 Skill 저장 보고. 실제 사내 정책 적용은 미완료 | EES 전용 공통 원칙·상세 절차·권한/Tool 제한의 배치와 관리자 변경 반영을 정리 |
 | 4. 관리자 워크플로 | Skill의 절차 지침과 Native 호출 기능은 사용 중. 관리자가 단계·분기·검사를 제어하는 업무 워크플로는 설계 전 | 기존 문서/조회 기능으로 대표 업무 하나를 정하고 입력·단계·분기·완료 조건을 정의. 필요한 제어 수준에 맞춰 구현 수단 선택 |
 | 5. 레거시 시스템 연동 | EMS/APC/FDC의 실제 업무 기능은 미연결 | 승인된 API 또는 Query Broker로 가치가 있는 읽기 기능 하나 연결. 기존 서비스 권한·업무 규칙 활용 |
-| 6. 레거시 간접 UI | 기존 WO 시연 동작과 v0.1.2 갱신 수행 보고 수신. 대화 이동 후 패널 소실을 보완하는 v0.1.3 준비, 수정본 사내 확인과 실제 EMS 연결은 미완료 | 시연 피드백 반영 → 운영용 목업 → 실제 EMS 구현. [목업](03-openwebui-native-agent.md#wo-mockup) |
+| 6. 레거시 간접 UI | v0.1.3의 패널 열기/닫기·기능 정상 보고 수신. ‘제어’ 스타일의 v0.1.4 아이콘 준비, 디자인 사내 확인과 실제 EMS 연결은 미완료 | 시연 피드백 반영 → 운영용 목업 → 실제 EMS 구현. [목업](03-openwebui-native-agent.md#wo-mockup) |
 
 **개발 순서:** 1·2의 이름·로고와 래퍼 사내 적용 완료 → 초기 Rich UI 제거·변경 프롬프트 WebUI 반영 완료 보고 → 3의 EES 전용 공통 정책 → 4의 대표 워크플로 하나 → 5·6의 레거시 업무 하나를 함께 연결. 새 UI는 해당 업무 수요를 정하고 목업·사용자 확인을 거쳐 하나씩 구현하며, 4번은 단순 절차 지침과 실행 코드로 보장할 단계를 구분함. [구현 수단 선택](03-openwebui-native-agent.md#managed-policy-workflow)과 [남은 권한·격리 조건](../evals/scenarios.md#validation-timing)을 따름.
 
@@ -72,7 +72,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 | 대상 | Git에서 준비한 것 | WebUI 반영 마지막 확인 | 검증 근거 | 적용 원본 커밋 |
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
-| WO 시연 목업 | EES WO Demo v0.1.3: 대화별 패널 상태 복원과 직접 열기/닫기, 기존 조회/WO 화면·너비 조절·AI 작성 | 2026-09-09 v0.1.2 갱신 안내 수행 및 첫 조회 시연 중 대화 이동 후 패널 소실 보고. 이번 v0.1.3 적용·복원 동작은 미확인. 실제 EMS는 미연결 | [시연 검사·후속 보고](../evals/scenarios.md#wo-mockup), [기존 항목 갱신](03-openwebui-native-agent.md#wo-mockup) | 마지막 갱신 안내 `5a80ac6db0a088d0f0e3711ec9dc883c36c99466`; 실제 등록 바이트·SHA 직접 대조 미실행. 첫 시연 `450cc136`·이전 개선 `aecbe642` 이력은 평가 기록에 보존. 이번 준비본은 PR #19 `docs/legacy-ui-workflow`, main 미병합 |
+| WO 시연 목업 | EES WO Demo v0.1.4: 상단 ‘제어’와 같은 스타일의 업무 패널 아이콘. 기존 대화별 복원·조회/WO·너비 조절·AI 작성 유지 | 2026-09-09 v0.1.3 안내 후 업무 패널 열기/닫기와 기능 정상 동작 보고. v0.1.4 디자인 적용은 미확인. 실제 EMS는 미연결 | [시연 검사·후속 보고](../evals/scenarios.md#wo-mockup), [기존 항목 갱신](03-openwebui-native-agent.md#wo-mockup) | 정상 보고 직전 안내 원본 `dd2c3767112cf30762df77ca4d3de2f836fc303f`; 실제 등록 바이트·SHA 직접 대조 미실행. 이전 이력은 평가 기록에 보존. 이번 준비본은 PR #19 `docs/legacy-ui-workflow`, main 미병합 |
 | 팀 시연용 이름·소개·시작 질문 | 기존 모델 이름·소개·프로필 적용 안내, 목업 제안 JSON 4개·짧은 팀원 안내 | 2026-09-09 서비스 이름·로고 변경에 이어 목업 제안을 포함한 v0.1.2 갱신 수행 보고 수신. 모델 소개·팀원 전달·제안별 전체 클릭 결과는 미확인 | [목업 적용 보고](../evals/scenarios.md#wo-mockup), [서비스 이름·로고 확인](../evals/scenarios.md#ees-wrapper-manual-resume), [시연 준비](../evals/scenarios.md#team-demo-customization), [이전 준비](../evals/scenarios.md#team-first-use-preparation), [당시 보류](../evals/scenarios.md#onboarding-deferred) | 서비스 브랜딩은 아래 프로그램 원본. [제안 JSON](../agent-pack/ees-prompt-suggestions.json)의 안내 원본 `5a80ac6d`; 사내 등록 내용·SHA 직접 대조 미실행 |
 | EES 프로그램·전달 도구 | 기존 이름·아이콘 wheel/ZIP/Actions 재사용, Apply/CheckOnly·직전 Restore·기존 운영 명령 연결과 한 줄 요약 | Apply/CheckOnly·직전 Restore·운영 연결·오류 보존·수동 승격 후 Resume 구현/Windows/Linux 실제 wheel CI/독립 검토/main 반영 완료(PR #15~17). 2026-09-09 수동 변경 뒤 Apply -Resume=ok/changed true/4a8779bbf3ee/complete/customized, Start=ok/같은 commit/complete/customized/running true와 이름·로고·기존 대화·세 연동 정상 보고. 사내 적용 작업 단위 완료이며 이후 실시간 가동·rename/SSL 원인 해소는 미확정 | [사내 성공과 CI](../evals/scenarios.md#ees-wrapper-manual-resume), [현재 적용 안내](03-openwebui-native-agent.md#ees-wrapper-apply), [구현 검증](../evals/scenarios.md#ees-wrapper-implementation), [준비 성공](../evals/scenarios.md#ees-prepare-completed), [이전 복구](../evals/scenarios.md#ees-original-recovered), [이번 health 실패·복구](../evals/scenarios.md#ees-retransition-health-failure), [프로그램 CI](../evals/scenarios.md#ees-program-deployment) | 프로그램 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`, 내부 ZIP `EES-demo-4a8779bbf3ee.zip`. 운영 코드의 [캐시 복구 추가 원본 15cd88b](https://github.com/knadalkim-a11y/team-agent-poc/commit/15cd88b5a99142c07c4d8cca4dcdd957354d48cb)와 구분. 사내 checkout 전체 SHA 직접 대조 미실행 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 2026-09-07 두 지침 UI 저장 보고; 개정 후 P02 PASS, P03 창작 거절 부분 확인, P04~P10 미완료; 실행 시점은 평가표 | [P02~P10 재검증](../evals/scenarios.md#instruction-revision), [기존 지침 갱신](03-openwebui-native-agent.md#update-existing-instructions) | 전달·저장 안내 원본 [dfeb95f](https://github.com/knadalkim-a11y/team-agent-poc/commit/dfeb95fbf96cf6a2bb75a3ba75fac3bc92ed60fc); 등록 내용·사용자 추가 규칙·사내 checkout SHA 직접 대조는 미실행 |
@@ -115,7 +115,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-09: main `f2e0f9f`, 작업 기준 PR #19 head `5a80ac6d`와 이전 개선본 CI success를 확인하고, 사용자의 v0.1.2 갱신 수행·대화 이동 후 패널 소실 보고를 반영함. 이동 때 상태를 폐기하던 동작을 대화별 복원·직접 열기/닫기로 보완함. 기존 Python 19개·생성 JavaScript 10개 묶음·문서/diff 검사 통과. 코드·검사·보고 경계는 [목업 기록](../evals/scenarios.md#wo-mockup)에 보존함. 이번 수정본의 사내 적용·실제 이동/버튼 동작은 미확인임.
+2026-09-09: main `f2e0f9f`, 작업 기준 PR #19 head `dd2c3767`와 같은 로컬 tree를 확인함. 사용자의 패널 열기/닫기·기능 정상 보고를 반영하고 Open WebUI v0.11.3 상단 ‘제어’ 버튼 원본에 맞춰 업무 패널 아이콘과 배치를 조정함. 기존 생성 JavaScript 10개 묶음·문서/diff 검사 통과. 범위·검사와 앞선 복원 구현 기록은 [목업 기록](../evals/scenarios.md#wo-mockup)에 보존함. 이번 디자인의 사내 적용은 미확인임.
 
 ## 갱신 규칙
 

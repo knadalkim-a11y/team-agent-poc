@@ -47,6 +47,11 @@ class Element {
     root.onMutation?.({ target: this });
   }
   append(...nodes) { nodes.forEach(node => { node.remove(); node.parentElement = this; this.children.push(node); this.recordMutation(); }); }
+  insertBefore(node, reference) {
+    if (!reference) { this.append(node); return; }
+    assert.ok(this.children.includes(reference)); node.remove(); node.parentElement = this;
+    this.children.splice(this.children.indexOf(reference), 0, node); this.recordMutation();
+  }
   replaceChildren(...nodes) { [...this.children].forEach(node => node.remove()); this.append(...nodes); }
   remove() { const parent = this.parentElement; if (parent) parent.children = parent.children.filter(c => c !== this); this.parentElement = null; parent?.recordMutation(); }
   setAttribute(key, value) { this.attributes[key] = String(value); }
@@ -78,16 +83,26 @@ class Shadow extends Element {
   getElementById(id) { return this.ids.get(id) || null; }
   querySelector(selector) { return this.origins.get(selector.match(/data-origin-for="([^"]+)"/)?.[1]) || null; }
 }
-function environment({ layout = true, navigation = true } = {}) {
+function environment({ layout = true, navigation = true, controls = true } = {}) {
   const body = new Element('body'); body.connected = true;
-  let row = new Element(), column = new Element(), anchor = new Element();
+  let row = new Element(), column = new Element(), anchor = new Element(), navbar, toolbar, nativeControls;
   row.clientWidth = 1200;
   body.append(row); row.append(column); column.append(anchor);
+  const replaceNavbar = () => {
+    navbar?.remove(); navbar = new Element('nav'); toolbar = new Element();
+    const controlsWrapper = new Element(); nativeControls = new Element('button');
+    nativeControls.setAttribute('aria-label', 'Controls'); controlsWrapper.append(nativeControls);
+    if (controls) toolbar.append(controlsWrapper);
+    navbar.append(toolbar); column.insertBefore(navbar, anchor);
+    column.querySelector = selector => selector === 'nav button[aria-label="Controls"]' ? (controls ? nativeControls : null)
+      : selector === 'nav .flex-none.items-center.gap-2.self-center' ? toolbar : null;
+  };
+  replaceNavbar();
   const documentElement = new Element('html'), observers = [], window = new Element('window');
   window.innerWidth = 1440;
   if (navigation) window.navigation = new Element('navigation');
   const pendingMutations = []; body.onMutation = record => pendingMutations.push(record);
-  const document = { body, documentElement, createElement: tag => new Element(tag), querySelector: selector => layout && selector === '#chat-container #chat-pane' ? anchor : null };
+  const document = { body, documentElement, createElement: tag => new Element(tag), createElementNS: (namespace, tag) => new Element(tag), querySelector: selector => layout && selector === '#chat-container #chat-pane' ? anchor : null };
   class MutationObserver {
     constructor(callback) { this.callback = callback; observers.push(this); }
     observe(target) { this.active = true; this.target = target; }
@@ -111,7 +126,8 @@ function environment({ layout = true, navigation = true } = {}) {
   const mutate = (records = []) => observers.filter(o => o.active && o.target === body).forEach(o => o.callback(records));
   return { window, location, get row() { return row; }, get column() { return column; }, body, host, q, call, context, sizeObservers, observers,
     divider: () => row.children.find(node => node.id === 'ees-wo-demo-resizer'),
-    launcher: () => column.children.find(node => node.id === 'ees-work-panel-toggle'),
+    launcher: () => toolbar.children.flatMap(node => node.children).find(node => node.id === 'ees-work-panel-toggle'),
+    get toolbar() { return toolbar; }, get nativeControls() { return nativeControls; }, replaceNavbar,
     mutate,
     flushMutations: () => {
       let deliveries = 0;
@@ -124,7 +140,7 @@ function environment({ layout = true, navigation = true } = {}) {
     replaceLayout: () => {
       const old = { row, column, anchor }; row.remove();
       row = new Element(); column = new Element(); anchor = new Element(); row.clientWidth = 1200;
-      body.append(row); row.append(column); column.append(anchor);
+      body.append(row); row.append(column); column.append(anchor); replaceNavbar();
       return old;
     },
     resize: () => sizeObservers.filter(o => o.active).forEach(o => o.callback()),
@@ -367,10 +383,14 @@ const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert
   };
   ok(await retained.call('equipment', { site: '천안', line: '조립 1라인' }));
   const retainedHost = retained.host(), retainedLauncher = retained.launcher();
-  assert.equal(retainedLauncher.textContent, '업무 패널 닫기');
+  assert.equal(retainedLauncher.title, '업무 패널 닫기');
+  assert.equal(retainedLauncher.attributes['aria-label'], '업무 패널 닫기');
+  assert.equal(retainedLauncher.textContent, '');
   assert.equal(retainedLauncher.attributes['aria-expanded'], 'true');
   assert.equal(retainedLauncher.attributes['aria-controls'], retainedHost.id);
-  assert.equal(retained.column.style.position, 'relative');
+  assert.equal(retained.toolbar.children[0], retainedLauncher.parentElement);
+  assert.equal(retained.toolbar.children[1], retained.nativeControls.parentElement);
+  assert.equal(retained.column.style.position, undefined);
   assert.ok(!retainedHost.children.includes(retainedLauncher));
   retained.q('results').children.find(node => node.dataset.equipmentId === 'KR-CA-211').fire('click');
   retained.q('query').value = '권취'; retained.q('query').fire('input');
@@ -392,19 +412,27 @@ const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert
   assert.equal(retained.q('panel-title').textContent, '설비 조회');
   retainedLauncher.fire('click'); retained.flushMutations();
   assert.equal(retained.host(), undefined); assert.equal(retained.launcher(), retainedLauncher);
-  assert.equal(retainedLauncher.textContent, '업무 패널 열기');
+  assert.equal(retainedLauncher.title, '업무 패널 열기');
+  assert.equal(retainedLauncher.attributes['aria-label'], '업무 패널 열기');
   assert.equal(retainedLauncher.attributes['aria-expanded'], 'false');
   assert.equal(retained.window.events.resize.length, 0);
   navigate('unvisited'); navigate('sample-chat');
   assert.equal(retained.host(), undefined); assert.equal(retained.launcher(), retainedLauncher);
-  assert.equal(retainedLauncher.textContent, '업무 패널 열기');
+  assert.equal(retainedLauncher.title, '업무 패널 열기');
   retainedLauncher.fire('click'); retained.flushMutations();
   assert.equal(retained.host(), retainedHost); assert.deepEqual(retainedView(), retainedSearch);
   retained.q('close').fire('click'); retainedLauncher.fire('click');
   assert.deepEqual(retainedView(), retainedSearch);
+  retained.replaceNavbar(); retained.flushMutations();
+  assert.equal(retained.host(), retainedHost); assert.equal(retained.launcher(), retainedLauncher);
+  assert.deepEqual(retainedView(), retainedSearch);
   assert.equal(retained.window.events.resize.length, 1);
   assert.equal(retained.observers.filter(observer => observer.active).length, 2);
-  console.log('PASS retained search/selection/width, replaced anchors, direct toggle, closed preference and mutation quiescence');
+  const noControls = environment({ controls: false });
+  ok(await noControls.call()); assert.ok(noControls.launcher());
+  noControls.launcher().fire('click'); assert.equal(noControls.host(), undefined);
+  noControls.launcher().fire('click'); assert.ok(noControls.host());
+  console.log('PASS retained search/selection/width, replaced anchors/navbar, native toolbar toggle, closed preference and mutation quiescence');
 
   let retainedDraft = ok(await retained.call());
   retainedDraft = ok(await retained.call('update', { equipment_id: 'KR-CA-211', ...fields }, retainedDraft.revision));

@@ -1,7 +1,7 @@
 """
 title: EES WO Demo
 description: Sample equipment selection and WO drafting beside the existing chat. No EMS connection or real issuance.
-version: 0.1.3
+version: 0.1.4
 required_open_webui_version: 0.11.3
 """
 
@@ -276,7 +276,10 @@ try {
   }
   const getLayout = () => {
     const anchor=document.querySelector('#chat-container #chat-pane'),column=anchor?.parentElement,row=column?.parentElement;
-    return row?.isConnected && getComputedStyle(row).display==='flex'?{anchor,column,row}:null;
+    // v0.11.3 keeps the English aria-label even when the Controls tooltip is translated.
+    const controls=column?.querySelector('nav button[aria-label="Controls"]'),controlsWrapper=controls?.parentElement;
+    const toolbar=controlsWrapper?.parentElement || column?.querySelector('nav .flex-none.items-center.gap-2.self-center');
+    return row?.isConnected && toolbar?.isConnected && getComputedStyle(row).display==='flex'?{anchor,column,row,toolbar,controlsWrapper}:null;
   };
   const layout=getLayout();
   if (!layout) {
@@ -323,7 +326,7 @@ try {
     return fail('view_required', '먼저 시연 화면의 현재 상태를 확인해 주세요. 이전 화면의 수정 요청은 적용하지 않았습니다.');
   }
   if (!controller) {
-    let {anchor,column,row}=layout;
+    let {anchor,column,row,toolbar}=layout;
     const hierarchy = ['corporation', 'site', 'shop', 'line', 'process'];
     const contentFields = ['title', 'type', 'priority', 'description'];
     const fieldNames = {corporation:'법인',site:'사업장',shop:'SHOP',line:'LINE',process:'PROCESS',query:'설비 검색',equipment_id:'설비',title:'작업 제목',type:'작업 구분',priority:'우선순위',description:'요청 내용'};
@@ -335,7 +338,7 @@ try {
     const origins = {};
     let reviewed = null, lastAI = null, visibleLimit = 8, choosing = true, note = '법인·사업장이나 설비명으로 대상 설비를 찾아보세요.';
     const mountedPath = location.pathname;
-    let originalMinWidth,originalPosition,positionChanged=false,attached=false,wantsOpen=true;
+    let originalMinWidth,attached=false,wantsOpen=true;
     const host = document.createElement('aside');
     host.id = 'ees-wo-demo-panel'; host.setAttribute('aria-label','설비 WO 시연');
     host.style.cssText = 'flex:0 0 420px;width:420px;min-width:0;box-sizing:border-box;height:100%;min-height:0;overflow:auto;border-left:1px solid #8886;z-index:30;';
@@ -349,16 +352,22 @@ try {
     const shadow = host.attachShadow({mode:'open'});
     // Only this reviewed, constant template is assigned as HTML. All data use textContent/value.
     shadow.innerHTML = panelHTML;
+    const launcherSlot=document.createElement('div');launcherSlot.className='flex';
     const launcher=document.createElement('button');
     launcher.id='ees-work-panel-toggle';launcher.type='button';
     launcher.setAttribute('aria-controls',host.id);
-    launcher.style.cssText='position:absolute;top:64px;right:16px;z-index:32;display:inline-flex;align-items:center;min-height:34px;padding:7px 12px;border:1px solid #8886;border-radius:8px;font:600 12px/1.4 system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 6px #0001;';
+    launcher.className='flex size-6 cursor-pointer items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-50/40 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/40 dark:hover:text-gray-200';
+    const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    Object.entries({viewBox:'0 0 24 24',width:'20',height:'20',fill:'none',stroke:'currentColor','stroke-width':'1','stroke-linecap':'round','stroke-linejoin':'round','aria-hidden':'true'}).forEach(([key,value])=>icon.setAttribute(key,value));
+    const iconPath=document.createElementNS('http://www.w3.org/2000/svg','path');
+    iconPath.setAttribute('d','M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm10 0v18');
+    icon.append(iconPath);launcher.append(icon);launcherSlot.append(launcher);
     const q = id => shadow.getElementById(id);
     const findEquipment = id => catalog.find(e=>e.id===id) || null;
     const path = e => [e.corporation,e.site,e.shop,e.line,e.process].join(' / ');
     const matches = filters => catalog.filter(e=>hierarchy.every(k=>!filters[k] || e[k]===filters[k]) && (!filters.equipment_id?.trim() || e.id===filters.equipment_id.trim()) && (!filters.query || (e.id+' '+e.name).toLowerCase().includes(filters.query.toLowerCase().trim())));
     const options = (key, filters) => [...new Set(catalog.filter(e=>hierarchy.slice(0,hierarchy.indexOf(key)).every(k=>!filters[k] || e[k]===filters[k])).map(e=>e[key]))];
-    const alive = () => attached && location.pathname === mountedPath && row.isConnected && document.querySelector('#chat-container #chat-pane') === anchor && anchor.parentElement===column && column.parentElement===row && launcher.isConnected;
+    const alive = () => attached && location.pathname === mountedPath && row.isConnected && document.querySelector('#chat-container #chat-pane') === anchor && anchor.parentElement===column && column.parentElement===row && launcher.isConnected && launcherSlot.parentElement===toolbar;
     const searchView = () => {
       const list=matches(search.filters);
       return {filters:{...search.filters},selected_equipment:findEquipment(search.selected_id),available_options:Object.fromEntries(hierarchy.map(k=>[k,options(k,search.filters)])),matches_count:list.length,matches:list.slice(0,8),matches_truncated:list.length>8};
@@ -576,11 +585,13 @@ try {
     };
     const theme = () => {
       const dark=document.documentElement.classList.contains('dark');
-      host.style.colorScheme=dark?'dark':'light';launcher.style.color=dark?'#ededed':'#242424';launcher.style.background=dark?'#262626':'#ffffff';
+      host.style.colorScheme=dark?'dark':'light';
     };
     const updateLauncher=()=>{
-      launcher.textContent=wantsOpen?'업무 패널 닫기':'업무 패널 열기';
+      launcher.title=wantsOpen?'업무 패널 닫기':'업무 패널 열기';
+      launcher.setAttribute('aria-label',launcher.title);
       launcher.setAttribute('aria-expanded',String(wantsOpen));
+      launcher.style.backgroundColor=wantsOpen?'#8882':'';
     };
     const hidePanel=()=>{
       finishDrag();resizeObserver.disconnect();window.removeEventListener('resize',resize);
@@ -593,14 +604,11 @@ try {
       column.style.minWidth='0';host.hidden=false;updateLauncher();resize();theme();
     };
     const detach=()=>{
-      hidePanel();launcher.remove();
-      if(attached && positionChanged)column.style.position=originalPosition;
-      attached=false;positionChanged=false;
+      hidePanel();launcherSlot.remove();attached=false;
     };
     const attach=nextLayout=>{
-      ({anchor,column,row}=nextLayout);originalMinWidth=column.style.minWidth;originalPosition=column.style.position;
-      positionChanged=getComputedStyle(column).position==='static';if(positionChanged)column.style.position='relative';
-      attached=true;column.append(launcher);updateLauncher();theme();if(wantsOpen)open();
+      ({anchor,column,row,toolbar}=nextLayout);originalMinWidth=column.style.minWidth;
+      attached=true;toolbar.insertBefore(launcherSlot,nextLayout.controlsWrapper || null);updateLauncher();theme();if(wantsOpen)open();
     };
     controller={chatId:request.chat_id,pathname:mountedPath,alive,attach,detach,theme,open,view,browse,
       layoutChanged:records=>{if(records.some(record=>record.target===row)){observeLayout();resize();}},

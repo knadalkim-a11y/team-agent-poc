@@ -1352,3 +1352,12 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 문서·범위 검사: `python scripts/check_docs.py`의 files=25, links=670, errors=0, review_candidates=0과 `git diff --check` 통과. 시연 Tool·해당 JavaScript 시험·기존 가이드/상태/기록만 변경하며 Prompt·제안 JSON·서버·프로그램 wheel은 변경하지 않음. 이번 원격 CI는 PR의 새 head 상태로 확인하며 앞선 CI 성공과 구분함.
 
 직전 STATUS 점검 보존(검색 패널·제안 준비, 2026-09-09): main `f2e0f9f`, 관련 PR #19 head `2beca411`에서 설비 조회 우측 패널과 목업 제안을 준비하고 기존 WO 상태 보존·선택에서 초안 작성으로 연결함. 당시 새 Tool·Prompt·제안의 사내 저장/동작은 미확인이었으며 구현 검사는 위 검색 패널 기록, 이후 갱신 수행 보고는 이번 기록에 구분함.
+
+**업무 패널 정상 보고와 상단 아이콘 스타일 (2026-09-09):**
+
+- 사용자 보고: v0.1.3 원본 `dd2c3767112cf30762df77ca4d3de2f836fc303f`의 갱신 안내 뒤 업무 패널 닫기/열기를 직접 확인했고 기능이 정상 작동한다고 보고함. 이전 대화 이동 복원 확인 안내에 대한 기능 정상 보고로 인정하며 등록 코드 원문·모든 경계 조건을 직접 대조한 것으로 확대하지 않음. 이번 요청은 오른쪽 위 ‘제어’와 어울리는 버튼 디자인이며 기능 전수 재검사를 요구하지 않음.
+- 기준·범위: main `f2e0f9f`, PR #19 head `dd2c3767`, 같은 로컬 tree `29b06961add9c925427b6d3ba99b38f4908a6f0e`와 지침·상태를 대조함. v0.1.4는 [v0.11.3 Navbar](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Navbar.svelte)의 Controls 버튼 스타일과 상단 배치를 사용함. 버튼은 패널 아이콘과 이름 안내·열림 상태를 제공하고 원래 Controls 동작은 유지함. 기존 Tool 코드만 갱신하며 Prompt·제안 JSON·서버·의존성·업무 처리 계약은 변경하지 않음.
+
+- 검토·검증: 버튼은 기존 Controls와 같은 24px 영역·20px 선 아이콘을 사용하고 title/aria-label/aria-expanded로 이름과 상태를 알림. Controls가 숨겨진 경우에도 같은 상단 도구 모음을 사용함. 기존 Node 생성 JavaScript 검사 10개 묶음을 통과했으며 기존 검사에 상단 재생성·Controls 부재·아이콘 위치 및 닫기/재열기를 반영함. 대화별 복원·수동 초안·검토/시연 결과·관찰자 안정성도 유지됨을 확인함. `python scripts/check_docs.py`는 files=25, links=672, errors=0, review_candidates=0이며 `git diff --check` 통과. 공개 Python API는 변경하지 않아 기존 Python 검사는 반복하지 않음. 실제 WebUI의 픽셀 배치·디자인 만족도는 사내 적용 전이며 소스·합성 검사와 구분함.
+
+직전 STATUS 점검 보존(대화별 복원 준비, 2026-09-09): 2026-09-09: main `f2e0f9f`, 작업 기준 PR #19 head `5a80ac6d`와 이전 개선본 CI success를 확인하고, 사용자의 v0.1.2 갱신 수행·대화 이동 후 패널 소실 보고를 반영함. 이동 때 상태를 폐기하던 동작을 대화별 복원·직접 열기/닫기로 보완함. 기존 Python 19개·생성 JavaScript 10개 묶음·문서/diff 검사 통과. 코드·검사·보고 경계는 [목업 기록](../evals/scenarios.md#wo-mockup)에 보존함. 이번 수정본의 사내 적용·실제 이동/버튼 동작은 미확인임.
