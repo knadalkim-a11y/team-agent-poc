@@ -4,6 +4,8 @@
 
 ## 2026-09-09
 
+- 사용자 합의로 레거시 업무 화면은 준비된 화면·부품의 상황별 활용과 사람/AI의 같은 폼 편집을 기본으로 정함. 클릭 가능한 목업을 사용자에게 확인받고 실제 기능을 연결하며, WO 발행 같은 상태 변경은 최종 버튼과 서버 검증으로 실행하도록 설계함. 기존 래퍼 안에서 작게 시작하고 실제 반복이 생길 때 공통화함. 설계 방향 기록이며 목업 승인·EMS 연동·쓰기 정책 변경은 아님. [설계 기준](docs/03-openwebui-native-agent.md#legacy-ui-design), [검토와 미구현 범위](evals/scenarios.md#legacy-ui-design).
+
 - 사용자가 초기 시험용 Rich UI를 모두 걷어내고 업무별로 새로 설계하기로 결정함. Confluence/Jira v0.1.6·GitHub v0.1.4는 기존 검증·마스킹 JSON을 직접 반환하고 공통 Prompt는 일반 답변·표·원문 링크를 안내함. 렌더러·HTML 예제·전용 UI 시험을 제거하고 중요한 데이터 계약 검사를 기존 읽기 시험에 유지함. 조회·권한·개인 설정과 대화 기록은 보존하며 사내 기존 Tool 3개·Prompt 갱신 안내를 제공함. 영문 새 기능/릴리스 팝업은 추후 관리자 공지에 활용하자는 요구로 기록하고 이번에는 변경하지 않음. [검증·사내 반영 경계](evals/scenarios.md#prototype-rich-ui-removal).
 
 - 실제 Apply의 promote 미완료 뒤 사용자가 program.staging을 program으로 옮긴 경우, 같은 ZIP·기록·전체 파일을 검증해 완료하는 명시적 Apply -Resume을 추가함. 기존 잠금/서버 종료·직전 Restore 보호를 재사용하며 시험 폴더 채택·자동 파일 이동/재시도·새 환경을 추가하지 않음. [검증과 사내 적용 구분](evals/scenarios.md#ees-wrapper-manual-resume).

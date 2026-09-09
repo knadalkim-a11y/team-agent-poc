@@ -10,7 +10,8 @@
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
 - 이번 작업: **초기 기능 확인용 Rich UI를 세 읽기 Tool에서 제거하고 일반 문장·표·원문 링크로 전환함.** Confluence/Jira v0.1.6·GitHub v0.1.4와 공통 Prompt를 수정하며 기존 API·페이지 이동·ID·PAT·설정·모델 연결을 유지함. 합성 HTML 예제와 UI 전용 검사를 제거하고 조회·권한·오류·출력 계약 검사는 유지함. 관련 검사 144개가 로컬과 Windows/Linux Python 3.11에서 각각 통과했고, 독립 검토·필요한 시험 fixture 보완·기존 배포 CI와 PR #18 main 반영을 완료함. 사내 Tool/Prompt 갱신과 새 출력 확인은 아직 미완료임. [이번 변경·검증](../evals/scenarios.md#prototype-rich-ui-removal).
 - 다음 작업 하나: **main에 반영한 기존 세 Tool 코드와 공통 Prompt를 사내에 갱신하고 새 조회 출력을 한 번씩 확인한다.** Git Update만으로 WebUI 등록본이 바뀌지는 않으며 Tool 삭제/재생성·프로그램 Apply/Stop/Start·환경 재설치 없이 진행함. 새 일반 대화의 조회·카드 부재·원문 링크 결과만 1~2줄로 받고, 이전 인증 전수 시험·잠금 진단을 반복하지 않음. [사내 갱신 안내](03-openwebui-native-agent.md#plain-output-update).
-- 후속 UI 방향: 기존 카드 디자인 보완 대신 실제 업무를 골라 하나씩 새로 설계함. 첫 시작의 영어 `새로운 기능 EES Assistant`·v0.11.3 릴리스 노트는 향후 관리자 팀 공지 용도로 쓰고자 한다는 요구를 기록하며, 이번 변경에 팝업 수정·공지 기능 구현은 포함하지 않음. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
+- 후속 UI 방향: **준비된 업무 화면을 상황에 맞게 활용하고, 같은 폼에서 사용자 직접 입력과 AI 작성·수정을 함께 지원하는 방향을 합의함.** 새 화면은 클릭 가능한 목업 → 사용자 확인 → 실제 기능 연결 → 업무 흐름 검증 순서로 진행하며, WO 발행 같은 상태 변경은 사용자의 최종 버튼과 서버 검증을 거침. 설계 상세는 [Native 가이드](03-openwebui-native-agent.md#legacy-ui-design), 합의·미구현 범위는 [검토 기록](../evals/scenarios.md#legacy-ui-design)에서 관리함. 실제 목업·EMS 연동·쓰기 기능 구현/허용은 아직 없음.
+- 관리자 공지 후속 요구: 첫 시작의 영어 `새로운 기능 EES Assistant`·v0.11.3 릴리스 노트는 향후 관리자 팀 공지 용도로 활용하고자 함. UI 설계 방향 기록에 팝업 수정·공지 구현은 포함하지 않음.
 
 아래는 **중단한 후보 환경 방식의 구현·진단 이력**이며 현재 재실행 목록이 아닙니다. [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py)와 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)은 보존합니다. 기존 도구의 Rollback을 새 직접 적용 방식의 원복 기능으로 간주하지 않습니다. 마지막 실패와 원인 미확정 상태를 유지하며 관리 방식 변경을 배포 성공으로 기록하지 않습니다.
 
@@ -51,9 +52,9 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 | 3. 관리자 공통 정책 | EES Assistant에 합성 공통 지침·정책 답변 Skill 저장 보고. 실제 사내 정책 적용은 미완료 | EES 전용 공통 원칙·상세 절차·권한/Tool 제한의 배치와 관리자 변경 반영을 정리 |
 | 4. 관리자 워크플로 | Skill의 절차 지침과 Native 호출 기능은 사용 중. 관리자가 단계·분기·검사를 제어하는 업무 워크플로는 설계 전 | 기존 문서/조회 기능으로 대표 업무 하나를 정하고 입력·단계·분기·완료 조건을 정의. 필요한 제어 수준에 맞춰 구현 수단 선택 |
 | 5. 레거시 시스템 연동 | EMS/APC/FDC의 실제 업무 기능은 미연결 | 승인된 API 또는 Query Broker로 가치가 있는 읽기 기능 하나 연결. 기존 서비스 권한·업무 규칙 활용 |
-| 6. 레거시 간접 UI | 초기 조회 카드의 시험 이력은 보존하며 레거시 업무에 연결된 간접 UI는 미구현 | 5번의 같은 업무에 필요한 조건 입력·결과 선택·필터·비교를 묶어 사용 흐름 완성 |
+| 6. 레거시 간접 UI | 준비된 업무 화면·사람/AI 공동 편집·목업 우선 방향 합의. 실제 업무 화면은 미구현 | 대표 업무의 클릭 가능한 목업에서 직접 입력·AI 수정·최종 결정 흐름을 확인받은 뒤 실제 기능 연결. [설계 기준](03-openwebui-native-agent.md#legacy-ui-design) |
 
-**개발 순서:** 1·2의 이름·로고와 래퍼 사내 적용 완료 → 초기 Rich UI 제거·일반 답변 반영 → 3의 EES 전용 공통 정책 → 4의 대표 워크플로 하나 → 5·6의 레거시 업무 하나를 함께 연결. 새 UI는 해당 업무 수요를 정한 뒤 하나씩 진행하며, 4번은 단순 절차 지침과 실행 코드로 보장할 단계를 구분함. [구현 수단 선택](03-openwebui-native-agent.md#managed-policy-workflow)과 [남은 권한·격리 조건](../evals/scenarios.md#validation-timing)을 따름.
+**개발 순서:** 1·2의 이름·로고와 래퍼 사내 적용 완료 → 초기 Rich UI 제거·일반 답변 반영 → 3의 EES 전용 공통 정책 → 4의 대표 워크플로 하나 → 5·6의 레거시 업무 하나를 함께 연결. 새 UI는 해당 업무 수요를 정하고 목업·사용자 확인을 거쳐 하나씩 구현하며, 4번은 단순 절차 지침과 실행 코드로 보장할 단계를 구분함. [구현 수단 선택](03-openwebui-native-agent.md#managed-policy-workflow)과 [남은 권한·격리 조건](../evals/scenarios.md#validation-timing)을 따름.
 
 현재 첫 공용 파일럿에 준비한 업무 기반은 **범용 채팅 + Confluence·Jira·GitHub 읽기**입니다. 여기에 EES 공통 정책과 대표 워크플로를 적용하는 방향으로 확장합니다. 기존 Tool·Skill·모델 전체를 Public으로 바꿨다는 사용자 보고가 있으며, 개인 환경의 조회 성공과 이 설정 변경을 모든 연동의 일반 사용자 조회·격리 검증 완료로 간주하지 않습니다. GitHub·EMS/APC/FDC 전체 연동이나 Hermes 도입을 MVP 완료 조건으로 두지 않습니다. 파일럿에서 비개발자가 실제 업무 흐름을 완료하고 결과·오류·공유를 이해하는 것까지가 첫 배포의 목표입니다.
 
@@ -108,7 +109,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-09: 원격 main `99a9ee`·관련 열린 PR 0개에서 시작해 사용자가 확인한 EES 이름·로고·기존 대화·세 연동 정상으로 래퍼 사내 적용 단위를 마감함. 초기 Rich UI 제거·일반 답변 지침·가이드·시험을 [PR #18](https://github.com/knadalkim-a11y/team-agent-poc/pull/18)로 구현하고 독립 검토·보완을 완료함. 최종 원본 `61568f119f6b2bec03e29adaa24b207d00585a2e`의 Windows/Linux CI `34308748946` success와 main 병합 `b105a1441d1bb403684b985e20dc1a43a6519564`를 확인함. 각 플랫폼에서 세 조회 144개·실제 wheel Apply/Restore 31개·manager 72개 통과. 초기 Windows 시험 fixture 실패와 수정 후 통과를 기존 evals에 보존함. 사내 Tool 3개/Prompt 저장·카드 없는 새 출력은 미완료이며 이번 안내 원본은 위 최종 커밋임. 후속 현재 상태 갱신은 문서만 수정하고 실행 코드·CI를 다시 변경하지 않음. [최종 검증·반영 경계](../evals/scenarios.md#prototype-rich-ui-removal).
+2026-09-09: 원격 main `f2e0f9f`·관련 열린 PR 0개와 해당 AGENTS/STATUS를 기준으로 레거시 업무 화면의 사용자 합의를 기존 Native 가이드·실행 계획·CHANGELOG에 기록함. 준비된 화면 재사용, 같은 폼의 직접/AI 편집, 사용자 최종 실행, 목업 확인 후 구현과 최소 기술 구성을 명시함. 초기 Rich UI 제거의 main 반영·사내 갱신 대기와 현재 읽기 전용 범위를 보존함. 문서·diff 검사 결과와 미구현 경계는 [설계 검토 기록](../evals/scenarios.md#legacy-ui-design)에 둠.
 
 ## 갱신 규칙
 

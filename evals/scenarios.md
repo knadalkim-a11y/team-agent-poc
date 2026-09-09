@@ -1265,3 +1265,17 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 최신 main `028287e2ca77c3b14424b51a49871f025943554d`·AGENTS·STATUS와 열린 PR 0개를 확인하고 GitHub/Confluence의 기존 조회 뒤 카드·후속 질문 흐름을 준비함. 새 화면 검사 17개·변경된 기존 직접 상세 2개 PASS. [GitHub 실행 증거](github-offline.md#rich-ui-results), [Confluence 실행 증거](confluence-offline.md#rich-ui-results).
 - 변경 범위의 사내 기준: 실제 ID·원문·조회 범위/시각이 보이고 목록을 전체 건수나 본문으로 해석하지 않음. 질문 넣기는 입력 교체 안내·복사 초안·수동 전송을 제공하며 API를 자동 호출하지 않음. 본문은 접어 두고 키보드/좁은 화면에서 읽을 수 있으며 모델 근거와 일치함. 오류/빈 결과를 구분하고 같은 표를 답변에 반복하지 않음. Confluence는 검색→본문을 C04, GitHub는 GH02/GH04의 변경 범위에 묶어 확인함.
 - 판정: Git 준비·합성 확인이며 실제 브라우저·사내 WebUI·모델 호출·사용성은 미실행. C04/GH02·Jira UX02의 과거 PASS와 저장 보고를 보존하고 새 카드 적용 성공으로 확대하지 않음. 첫 화면·온보딩은 보류하며 기존 저장·인증·20회 안정성 검사를 반복하지 않음.
+
+<a id="legacy-ui-design"></a>
+
+### 레거시 업무 화면 설계 합의와 문서 검토 (2026-09-09)
+
+- 기준: 원격 main `f2e0f9fbf717f00e8cb6e4fe154777f4f08b7c5d`, 관련 열린 PR 0개. 사용자가 준비된 업무 화면·상황별 부품 활용, 직접 입력과 AI 작성/수정, 사용자 버튼으로 최종 결정, 목업 확인 후 실제 기능 구현 순서에 동의함. [설계 관리 원본](../docs/03-openwebui-native-agent.md#legacy-ui-design).
+- 확인 범위: 해당 AGENTS/STATUS·README의 관리 경계, Native 가이드의 Rich UI/현재 일반 출력 절차, CHANGELOG와 본 기록. 구현·정책을 바꾸지 않고 기존 문서 안에서 결정과 후속 범위를 연결함.
+- 검토 사항: 최신 폼 기준의 AI 편집과 사용자 수정 보존, 확인한 내용만 실행하는 서버 경계, 중복/결과 불명 처리, 실제 EMS 업무 로직 재사용, 개별 목업 승인과 개발 방식 합의 구분, 기존 Python·작은 웹 화면부터 시작하는 과설계 방지 기준을 대조함. 별도 검토에서도 네 문서의 diff와 합의/실행 경계·기존 상태 보존·중복을 대조했으며 수정이 필요한 중요한 문제는 발견되지 않음.
+- 검증: Linux의 원격 내용 일치 snapshot에서 `python scripts/check_docs.py` = `DOCS OK | files=25 links=634 errors=0 review_candidates=0`, `git diff --check` 통과. 원본 74개 파일의 bytes·mode·blob SHA와 tree `77f0b13a9413871d4c144a2de75210e1c0c39d1d`를 원격 기준과 대조함. 문서 4개만 변경했으며 실행 코드·시험·의존성·CI 변경과 기존 기능 전체 재시험은 없음.
+- 미구현/미확인: 실제 목업·사용자 사용성 확인·폼 상태 연동·최종 실행 경로·EMS API/필드/업무 로직·WO 발행 모두 미구현 또는 미확인. 이번 합의가 개별 목업 승인이나 쓰기 권한/정책의 확대, 사내 반영 완료를 뜻하지 않음. 현재 읽기 전용 범위와 세 Tool/Prompt의 사내 갱신 대기를 유지함.
+
+직전 STATUS 점검의 보존 기록(초기 Rich UI 제거, 2026-09-09):
+
+2026-09-09: 원격 main `99a9ee`·관련 열린 PR 0개에서 시작해 사용자가 확인한 EES 이름·로고·기존 대화·세 연동 정상으로 래퍼 사내 적용 단위를 마감함. 초기 Rich UI 제거·일반 답변 지침·가이드·시험을 [PR #18](https://github.com/knadalkim-a11y/team-agent-poc/pull/18)로 구현하고 독립 검토·보완을 완료함. 최종 원본 `61568f119f6b2bec03e29adaa24b207d00585a2e`의 Windows/Linux CI `34308748946` success와 main 병합 `b105a1441d1bb403684b985e20dc1a43a6519564`를 확인함. 각 플랫폼에서 세 조회 144개·실제 wheel Apply/Restore 31개·manager 72개 통과. 초기 Windows 시험 fixture 실패와 수정 후 통과를 기존 evals에 보존함. 사내 Tool 3개/Prompt 저장·카드 없는 새 출력은 미완료이며 이번 안내 원본은 위 최종 커밋임. 후속 현재 상태 갱신은 문서만 수정하고 실행 코드·CI를 다시 변경하지 않음. [최종 검증·반영 경계](../evals/scenarios.md#prototype-rich-ui-removal).
