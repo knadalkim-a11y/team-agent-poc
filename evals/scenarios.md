@@ -1112,6 +1112,11 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 현재 결과 경계·다음: Resume와 Start의 개별 result/stage, 수정본 화면·기존 대화·대표 조회 결과는 아직 전달받지 못함. 명령 블록 실행 보고만으로 Resume 성공이나 서버 시작/실시간 가동을 추정하지 않음. 실행 중이면 현재 결과를 기다리고, 끝났다면 이미 표시된 Apply/Start 결과 한 줄과 가능할 때 화면 확인 한 줄만 받음. 같은 명령 재실행·추가 Apply/Restore/Start·프로세스/권한 검사·자동 지연/재시도 기능을 추가하지 않음. 구현·CI·main 반영 완료, 실제 운영 폴더 수동 변경 성공, 수정본 적용/기동/사용 성공 미확인을 구분함.
 - 보고 반영 점검: 최신 main `842c158bd5fefebba085af76a8ac29ff839073bd`, tree `76c0afe852afb7b0a5d604c47bc73b79b8965553`, 관련 열린 PR 0개와 로컬 tree 일치를 확인함. STATUS/이 기록만 갱신하고 문서/diff를 검사함. 이미 통과한 코드/시험/CI를 변경·반복하거나 사내 로그·파일·사진을 요청하지 않음.
 
+- 사내 수정본 Apply/Start 성공 수신: 사용자는 `apply ok true 4a8779bbf3ee complete customized`와 `start ok 4a8779bbf3ee complete customized true`를 전달함. 안내한 실제 운영 폴더의 수동 이름 변경 후 두 번째 블록 결과로, Apply -Resume의 result=ok/changed=true/commit=4a8779bbf3ee/stage=complete/program=customized와 Start의 result=ok/같은 commit/stage=complete/program=customized/running=true로 대응함. 짧은 commit은 보존한 고정 프로그램 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`의 접두사와 일치하며 사내 checkout 전체 SHA·파일 원문을 직접 대조한 것은 아님.
+- 코드 대조·완료 판정: render_summary의 필드 순서와 Resume 완료 기록/Start의 selected_program·wait_healthy 경로를 대조함. **사내 수정본의 프로그램 적용·관리 Start/health 성공을 사용자 보고로 확인**하며 이전 original 기동과 구분함. 수동 이름 변경을 포함한 경로의 성공이고 Python rename 원인 해결·자동 Apply 전체 성공·과거 SSL 지연 원인 해소를 뜻하지 않음. 보고 뒤 현재 실시간 가동·장기 안정성까지 확대하지 않으며 기존 원본 Restore/Start 및 이전 실패는 당시 증거로 보존함.
+- 남은 사용자 확인: 기존 주소에서 변경한 이름/아이콘, 기존 대화 유지, 기존 Jira/Confluence/GitHub 중 대표 조회 한 건을 확인해 한 줄로 받음. 추가 Apply/Resume/Start/Restore·로그/프로세스/권한 검사·새 환경/재설치·이전 인증/사용자 격리 전수 검사를 요구하지 않음. 구현·자동 검사·독립 검토·main 반영과 사내 프로그램 적용·기동은 완료, 화면/기존 대화/대표 조회는 아직 미확인으로 기록함.
+- 성공 반영 점검: 최신 main `e941c3bd331e32dbbb7655aa0463df6fbf2249a1`, tree `5a34d57a6d95d892cef86292606b62dc7416f1f7`, 관련 열린 PR 0개와 로컬 tree 일치를 확인함. STATUS의 누적 프로그램 행은 현재 판정으로 정리하고 과거 원인/실패는 기존 평가 기록에 유지함. STATUS/Native 가이드/이 기록만 갱신해 문서/diff를 검사하고 이미 통과한 실행 코드/시험/CI는 변경·반복하지 않음.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |

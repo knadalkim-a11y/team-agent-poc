@@ -516,7 +516,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 #### 구현 범위와 완료 기준
 
-아래 1·2를 하나의 적용/되돌리기 구현 단위로 준비했습니다. [2026-09-08 설계 검토](../evals/scenarios.md#ees-wrapper-design)와 [2026-09-09 구현 검증](../evals/scenarios.md#ees-wrapper-implementation)을 구분하며, 3의 사내 적용은 아직 수행하지 않았습니다.
+아래 1·2의 구현·검증을 완료했습니다. [2026-09-08 설계 검토](../evals/scenarios.md#ees-wrapper-design)와 [2026-09-09 구현 검증](../evals/scenarios.md#ees-wrapper-implementation)을 구분합니다. 3은 사내 수동 폴더 변경 뒤 Apply -Resume·수정본 Start 성공을 보고받았으며 화면·기존 대화·대표 조회 확인이 남아 있습니다. [최신 사내 결과](../evals/scenarios.md#ees-wrapper-manual-resume).
 
 | 순서 | 작업 | 완료 기준 |
 |---|---|---|
@@ -584,7 +584,7 @@ Start의 `stage=health_check` 시간 초과는 지정한 시간 안에 정상 �
 
 2026-09-09 사내 별도 프로그램 복사본에서 Python의 rename 실패 뒤 같은 폴더의 탐색기 이름 변경 성공을 보고받았습니다. 실행 프로세스와 경과 시간이 함께 달라졌으므로 Python 결함이나 특정 보안 제품을 원인으로 단정하지 않습니다. 원인을 알아내기 위한 반복 검사 대신, 사용자가 폴더를 옮기고 래퍼가 검증·완료하는 명시적 경로를 지원합니다. 시험용 `done-*`은 운영 적용 기록에 속하지 않으므로 채택하지 않습니다.
 
-아래 첫 블록은 원본으로 Restore된 현재 적용 상태에서 사용합니다. 기존 ZIP을 Downloads에 보존한 경우의 경로이며 다른 위치라면 `$b`만 실제 ZIP 파일 전체 경로로 바꿉니다. Update→CheckOnly→Stop→Apply 순서로 한 번 실행합니다. Apply가 바로 성공하면 Start까지 진행하므로 수동 변경/Resume을 생략합니다. Apply가 promote에서 중단되고 staging만 남아 있으며 잠금이 해제된 경우에만 관리 폴더를 열고 `next=manual_rename`으로 끝냅니다. 이때 서버는 아직 시작하지 않습니다.
+아래 첫 블록은 원본으로 Restore된 상태에서 새로 적용할 때 사용합니다. 이미 Apply·Start를 완료했다면 반복 실행하지 않습니다. 기존 ZIP을 Downloads에 보존한 경우의 경로이며 다른 위치라면 `$b`만 실제 ZIP 파일 전체 경로로 바꿉니다. Update→CheckOnly→Stop→Apply 순서로 한 번 실행합니다. Apply가 바로 성공하면 Start까지 진행하므로 수동 변경/Resume을 생략합니다. Apply가 promote에서 중단되고 staging만 남아 있으며 잠금이 해제된 경우에만 관리 폴더를 열고 `next=manual_rename`으로 끝냅니다. 이때 서버는 아직 시작하지 않습니다.
 
 ```powershell
 & {
