@@ -39,11 +39,16 @@ class Element {
     this.classList = { contains: value => classes.has(value), toggle: (value, on) => on ? classes.add(value) : classes.delete(value) };
   }
   get isConnected() { return Boolean(this.connected || this.parentElement?.isConnected); }
-  set textContent(value) { this._text = String(value); this.replaceChildren(); }
+  set textContent(value) { this._text = String(value); this.replaceChildren(); this.recordMutation(); }
   get textContent() { return (this._text || '') + this.children.map(c => c.textContent).join(''); }
-  append(...nodes) { nodes.forEach(node => { node.remove(); node.parentElement = this; this.children.push(node); }); }
+  recordMutation() {
+    if (!this.isConnected) return;
+    let root = this; while (root.parentElement) root = root.parentElement;
+    root.onMutation?.({ target: this });
+  }
+  append(...nodes) { nodes.forEach(node => { node.remove(); node.parentElement = this; this.children.push(node); this.recordMutation(); }); }
   replaceChildren(...nodes) { [...this.children].forEach(node => node.remove()); this.append(...nodes); }
-  remove() { if (this.parentElement) this.parentElement.children = this.parentElement.children.filter(c => c !== this); this.parentElement = null; }
+  remove() { const parent = this.parentElement; if (parent) parent.children = parent.children.filter(c => c !== this); this.parentElement = null; parent?.recordMutation(); }
   setAttribute(key, value) { this.attributes[key] = String(value); }
   getBoundingClientRect() { return { width: this.rectWidth ?? (parseFloat(this.style.width) || this.clientWidth || 0) }; }
   setPointerCapture(id) { this.captureId = id; }
@@ -73,17 +78,19 @@ class Shadow extends Element {
   getElementById(id) { return this.ids.get(id) || null; }
   querySelector(selector) { return this.origins.get(selector.match(/data-origin-for="([^"]+)"/)?.[1]) || null; }
 }
-function environment({ layout = true } = {}) {
+function environment({ layout = true, navigation = true } = {}) {
   const body = new Element('body'); body.connected = true;
-  const row = new Element(), column = new Element(), anchor = new Element();
+  let row = new Element(), column = new Element(), anchor = new Element();
   row.clientWidth = 1200;
   body.append(row); row.append(column); column.append(anchor);
   const documentElement = new Element('html'), observers = [], window = new Element('window');
   window.innerWidth = 1440;
+  if (navigation) window.navigation = new Element('navigation');
+  const pendingMutations = []; body.onMutation = record => pendingMutations.push(record);
   const document = { body, documentElement, createElement: tag => new Element(tag), querySelector: selector => layout && selector === '#chat-container #chat-pane' ? anchor : null };
   class MutationObserver {
     constructor(callback) { this.callback = callback; observers.push(this); }
-    observe() { this.active = true; }
+    observe(target) { this.active = true; this.target = target; }
     disconnect() { this.active = false; }
   }
   const sizeObservers = [];
@@ -93,7 +100,7 @@ function environment({ layout = true } = {}) {
     disconnect() { this.active = false; }
   }
   const location = { pathname: '/c/sample-chat' };
-  const context = vm.createContext({ window, document, location, MutationObserver, ResizeObserver, getComputedStyle: node => ({ display: 'flex', position: node.style.position }) });
+  const context = vm.createContext({ window, document, location, MutationObserver, ResizeObserver, getComputedStyle: node => ({ display: 'flex', position: node.style.position || 'static' }) });
   const host = () => row.children.find(node => node.id === 'ees-wo-demo-panel');
   const q = id => host()?.shadowRoot.getElementById(id);
   async function call(action = 'view', changes = {}, revision, chat_id = 'sample-chat') {
@@ -101,9 +108,25 @@ function environment({ layout = true } = {}) {
     const result = await vm.runInContext('(async () => {\n' + payload.code + '\n})()', context);
     return JSON.parse(JSON.stringify(result));
   }
-  return { window, location, row, body, host, q, call, context, sizeObservers,
+  const mutate = (records = []) => observers.filter(o => o.active && o.target === body).forEach(o => o.callback(records));
+  return { window, location, get row() { return row; }, get column() { return column; }, body, host, q, call, context, sizeObservers, observers,
     divider: () => row.children.find(node => node.id === 'ees-wo-demo-resizer'),
-    mutate: (records = []) => observers.filter(o => o.active).forEach(o => o.callback(records)),
+    launcher: () => column.children.find(node => node.id === 'ees-work-panel-toggle'),
+    mutate,
+    flushMutations: () => {
+      let deliveries = 0;
+      while (pendingMutations.length) {
+        assert.ok(++deliveries <= 10, 'Panel manager must settle after its own DOM mutations');
+        mutate(pendingMutations.splice(0));
+      }
+      return deliveries;
+    },
+    replaceLayout: () => {
+      const old = { row, column, anchor }; row.remove();
+      row = new Element(); column = new Element(); anchor = new Element(); row.clientWidth = 1200;
+      body.append(row); row.append(column); column.append(anchor);
+      return old;
+    },
     resize: () => sizeObservers.filter(o => o.active).forEach(o => o.callback()),
   };
 }
@@ -181,7 +204,7 @@ const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert
   const unsupported = environment({ layout: false });
   bad(await unsupported.call(), 'unsupported_layout');
   assert.equal(unsupported.row.children.length, 1); assert.equal(unsupported.window.__eesWODemoV1, undefined);
-  console.log('PASS close/reopen, changed-chat reset and unsupported routes/layout');
+  console.log('PASS close/reopen, isolated new-chat state and unsupported routes/layout');
 
   const sized = environment(); let draft = ok(await sized.call());
   const initialRevision = draft.revision;
@@ -332,5 +355,120 @@ const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert
   bad(await lookup.call('equipment', { site: '천안' }, undefined, 'next-search'), 'regular_chat_required');
   assert.equal(lookup.host(), undefined);
   console.log('PASS selected equipment to complete WO, existing manual/review/issued data preserved, return/close/reopen and lookup lifecycle errors');
-  console.log('7 grouped JS state checks passed (synthetic DOM; browser rendering unverified).');
+  const retained = environment();
+  const retainedView = () => JSON.parse(JSON.stringify(retained.window.__eesWODemoV1.view()));
+  const navigate = (chat, { replace = true, event } = {}) => {
+    retained.location.pathname = chat.startsWith('/') ? chat : '/c/' + chat;
+    const previous = replace ? retained.replaceLayout() : null;
+    if (event === 'popstate') retained.window.fire('popstate');
+    else if (event === 'navigation') retained.window.navigation.fire('navigatesuccess');
+    retained.flushMutations();
+    return previous;
+  };
+  ok(await retained.call('equipment', { site: '천안', line: '조립 1라인' }));
+  const retainedHost = retained.host(), retainedLauncher = retained.launcher();
+  assert.equal(retainedLauncher.textContent, '업무 패널 닫기');
+  assert.equal(retainedLauncher.attributes['aria-expanded'], 'true');
+  assert.equal(retainedLauncher.attributes['aria-controls'], retainedHost.id);
+  assert.equal(retained.column.style.position, 'relative');
+  assert.ok(!retainedHost.children.includes(retainedLauncher));
+  retained.q('results').children.find(node => node.dataset.equipmentId === 'KR-CA-211').fire('click');
+  retained.q('query').value = '권취'; retained.q('query').fire('input');
+  retained.divider().fire('keydown', { key: 'End' });
+  const retainedSearch = retainedView();
+  retained.flushMutations();
+  assert.equal(retained.flushMutations(), 0);
+  const firstColumn = navigate('unvisited').column;
+  assert.equal(retained.host(), undefined); assert.equal(retained.launcher(), undefined);
+  assert.equal(firstColumn.style.minWidth, ''); assert.equal(firstColumn.style.position, undefined);
+  assert.equal(retained.window.__eesWODemoV1, undefined);
+  assert.equal(retained.window.events.resize.length, 0);
+  assert.equal(retained.sizeObservers.some(observer => observer.active), false);
+  bad(await retained.call('view', {}, undefined, 'sample-chat'), 'regular_chat_required');
+  navigate('sample-chat'); // No Tool call: the existing search and DOM return automatically.
+  assert.equal(retained.host(), retainedHost); assert.equal(retained.launcher(), retainedLauncher);
+  assert.deepEqual(retainedView(), retainedSearch);
+  assert.equal(retained.host().style.width, '800px');
+  assert.equal(retained.q('panel-title').textContent, '설비 조회');
+  retainedLauncher.fire('click'); retained.flushMutations();
+  assert.equal(retained.host(), undefined); assert.equal(retained.launcher(), retainedLauncher);
+  assert.equal(retainedLauncher.textContent, '업무 패널 열기');
+  assert.equal(retainedLauncher.attributes['aria-expanded'], 'false');
+  assert.equal(retained.window.events.resize.length, 0);
+  navigate('unvisited'); navigate('sample-chat');
+  assert.equal(retained.host(), undefined); assert.equal(retained.launcher(), retainedLauncher);
+  assert.equal(retainedLauncher.textContent, '업무 패널 열기');
+  retainedLauncher.fire('click'); retained.flushMutations();
+  assert.equal(retained.host(), retainedHost); assert.deepEqual(retainedView(), retainedSearch);
+  retained.q('close').fire('click'); retainedLauncher.fire('click');
+  assert.deepEqual(retainedView(), retainedSearch);
+  assert.equal(retained.window.events.resize.length, 1);
+  assert.equal(retained.observers.filter(observer => observer.active).length, 2);
+  console.log('PASS retained search/selection/width, replaced anchors, direct toggle, closed preference and mutation quiescence');
+
+  let retainedDraft = ok(await retained.call());
+  retainedDraft = ok(await retained.call('update', { equipment_id: 'KR-CA-211', ...fields }, retainedDraft.revision));
+  retained.q('description').value = '사용자가 직접 쓴 증상과 요청'; retained.q('description').fire('input');
+  const manualDraft = retainedView();
+  navigate('second-chat');
+  const independent = ok(await retained.call('equipment', { site: '울산' }, undefined, 'second-chat'));
+  const secondHost = retained.host(), secondLauncher = retained.launcher();
+  assert.notEqual(secondHost, retainedHost); assert.notEqual(secondLauncher, retainedLauncher);
+  assert.equal(independent.fields.description, '');
+  retained.q('results').children.find(node => node.dataset.equipmentId).fire('click');
+  const secondState = retainedView();
+  bad(await retained.call('update', { description: 'late edit from another chat' }, manualDraft.revision, 'sample-chat'), 'regular_chat_required');
+  assert.equal(retained.host(), secondHost); assert.deepEqual(retainedView(), secondState);
+  navigate('sample-chat');
+  assert.deepEqual(retainedView(), manualDraft);
+  assert.equal(retained.q('description').value, manualDraft.fields.description);
+  retained.q('form').fire('submit');
+  const reviewedDraft = retainedView(), retainedReviewText = retained.q('review-values').textContent;
+  navigate('second-chat'); assert.equal(retained.host(), secondHost); assert.deepEqual(retainedView(), secondState);
+  navigate('sample-chat');
+  assert.deepEqual(retainedView(), reviewedDraft); assert.equal(retained.q('review').hidden, false);
+  assert.equal(retained.q('review-values').textContent, retainedReviewText);
+  retained.q('issue').fire('click');
+  const issuedDraft = retainedView(), retainedIssueText = retained.q('result-values').textContent;
+  navigate('second-chat'); navigate('sample-chat');
+  assert.deepEqual(retainedView(), issuedDraft); assert.equal(retained.q('result').hidden, false);
+  assert.equal(retained.q('result-values').textContent, retainedIssueText);
+  assert.equal(retained.q('result-number').textContent, 'WO-DEMO-0001');
+  retained.q('issue').fire('click'); assert.deepEqual(retainedView(), issuedDraft);
+  assert.equal(retained.window.events.resize.length, 1);
+  assert.equal(retained.sizeObservers.filter(observer => observer.active).length, 1);
+  console.log('PASS chat isolation, delayed responses, manual draft/review/issued restoration and no duplicate global listeners');
+
+  navigate('second-chat', { replace: false, event: 'popstate' });
+  assert.equal(retained.host(), secondHost);
+  navigate('sample-chat', { replace: false, event: 'navigation' });
+  assert.equal(retained.host(), retainedHost); assert.deepEqual(retainedView(), issuedDraft);
+  navigate('/', { event: 'popstate' });
+  assert.equal(retained.host(), undefined); assert.equal(retained.launcher(), undefined);
+  assert.ok(retained.window.__eesWODemoManagerV1);
+  navigate('sample-chat'); assert.deepEqual(retainedView(), issuedDraft);
+  retained.divider().fire('pointerdown', { clientX: 700 });
+  navigate('/auth', { event: 'popstate' });
+  assert.equal(retained.host(), undefined); assert.equal(retained.launcher(), undefined);
+  assert.equal(retained.window.__eesWODemoManagerV1, undefined);
+  assert.equal(retained.window.__eesWODemoV1, undefined);
+  for (const event of ['resize', 'popstate', 'pagehide']) assert.equal(retained.window.events[event].length, 0);
+  assert.equal(retained.window.navigation.events.navigatesuccess.length, 0);
+  assert.equal(retained.observers.some(observer => observer.active), false);
+  assert.equal(retained.sizeObservers.some(observer => observer.active), false);
+  navigate('sample-chat'); assert.equal(retained.host(), undefined); assert.equal(retained.launcher(), undefined);
+  const afterAuth = ok(await retained.call());
+  assert.equal(afterAuth.equipment, null); assert.equal(afterAuth.fields.description, '');
+  retained.window.fire('pagehide');
+  assert.equal(retained.window.__eesWODemoManagerV1, undefined);
+  assert.equal(retained.host(), undefined); assert.equal(retained.launcher(), undefined);
+  assert.equal(retained.observers.some(observer => observer.active), false);
+  const noNavigationAPI = environment({ navigation: false });
+  ok(await noNavigationAPI.call()); const fallbackHost = noNavigationAPI.host();
+  noNavigationAPI.location.pathname = '/c/another-chat'; noNavigationAPI.replaceLayout(); noNavigationAPI.flushMutations();
+  assert.equal(noNavigationAPI.host(), undefined);
+  noNavigationAPI.location.pathname = '/c/sample-chat'; noNavigationAPI.replaceLayout(); noNavigationAPI.flushMutations();
+  assert.equal(noNavigationAPI.host(), fallbackHost);
+  console.log('PASS SPA navigation events, new-chat entry, auth/pagehide cleanup and MutationObserver fallback');
+  console.log('10 grouped JS state checks passed (synthetic DOM; browser rendering unverified).');
 })().catch(error => { console.error(error); process.exitCode = 1; });

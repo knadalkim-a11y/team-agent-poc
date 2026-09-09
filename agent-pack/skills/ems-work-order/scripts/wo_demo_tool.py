@@ -1,7 +1,7 @@
 """
 title: EES WO Demo
 description: Sample equipment selection and WO drafting beside the existing chat. No EMS connection or real issuance.
-version: 0.1.2
+version: 0.1.3
 required_open_webui_version: 0.11.3
 """
 
@@ -270,23 +270,60 @@ PANEL_SCRIPT = r"""
 try {
   const fail = (code, message) => ({ok: false, demo: true, error: {code, message}});
   if (location.pathname !== '/c/' + encodeURIComponent(request.chat_id)) {
-    if (window.__eesWODemoV1) window.__eesWODemoV1.destroy();
+    // A late response from another chat must not clear the currently open draft.
+    window.__eesWODemoManagerV1?.sync();
     return fail('regular_chat_required', '시연은 일반 대화에서 사용할 수 있습니다. 임시 대화나 노트 대신 일반 대화에서 요청해 주세요.');
   }
-  const anchor = document.querySelector('#chat-container #chat-pane');
-  const column = anchor && anchor.parentElement;
-  const row = column && column.parentElement;
-  if (!row || getComputedStyle(row).display !== 'flex') {
+  const getLayout = () => {
+    const anchor=document.querySelector('#chat-container #chat-pane'),column=anchor?.parentElement,row=column?.parentElement;
+    return row?.isConnected && getComputedStyle(row).display==='flex'?{anchor,column,row}:null;
+  };
+  const layout=getLayout();
+  if (!layout) {
     return fail('unsupported_layout', '이 화면에서 시연 패널을 열 수 없습니다. 일반 대화 화면과 WebUI 버전을 확인해 주세요.');
   }
-  let controller = window.__eesWODemoV1;
-  if (controller && (controller.chatId !== request.chat_id || !controller.alive())) {
-    controller.destroy(); controller = null;
+  let manager=window.__eesWODemoManagerV1;
+  if(!manager){
+    // v0.1.2 had one disposable controller. A refresh is recommended on upgrade.
+    window.__eesWODemoV1?.destroy();
+    const chats=new Map();let active=null,disposed=false;
+    const sync=records=>{
+      if(disposed)return;
+      if(/^\/(auth|logout)(\/|$)/.test(location.pathname)){destroy();return;}
+      const current=Array.from(chats.values()).find(item=>item.pathname===location.pathname)||null;
+      const nextLayout=current?getLayout():null;
+      if(active && (active!==current || !active.alive())){
+        active.detach();active=null;delete window.__eesWODemoV1;
+      }
+      if(current && nextLayout){
+        if(!active){active=current;active.attach(nextLayout);window.__eesWODemoV1=active;}
+        else active.layoutChanged(Array.isArray(records)?records:[]);
+      }
+    };
+    const theme=()=>active?.theme();
+    const observer=new MutationObserver(sync),themeObserver=new MutationObserver(theme);
+    const navigation=window.navigation;
+    const destroy=()=>{
+      if(disposed)return;disposed=true;
+      observer.disconnect();themeObserver.disconnect();
+      window.removeEventListener('popstate',sync);window.removeEventListener('pagehide',destroy);
+      navigation?.removeEventListener('navigatesuccess',sync);
+      chats.forEach(item=>item.detach());chats.clear();active=null;
+      delete window.__eesWODemoV1;delete window.__eesWODemoManagerV1;
+    };
+    manager={chats,sync,destroy};window.__eesWODemoManagerV1=manager;
+    observer.observe(document.body,{childList:true,subtree:true});
+    themeObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+    window.addEventListener('popstate',sync);window.addEventListener('pagehide',destroy);
+    navigation?.addEventListener('navigatesuccess',sync);
   }
+  manager.sync();
+  let controller=manager.chats.get(request.chat_id);
   if (!controller && !['view','equipment'].includes(request.action)) {
     return fail('view_required', '먼저 시연 화면의 현재 상태를 확인해 주세요. 이전 화면의 수정 요청은 적용하지 않았습니다.');
   }
   if (!controller) {
+    let {anchor,column,row}=layout;
     const hierarchy = ['corporation', 'site', 'shop', 'line', 'process'];
     const contentFields = ['title', 'type', 'priority', 'description'];
     const fieldNames = {corporation:'법인',site:'사업장',shop:'SHOP',line:'LINE',process:'PROCESS',query:'설비 검색',equipment_id:'설비',title:'작업 제목',type:'작업 구분',priority:'우선순위',description:'요청 내용'};
@@ -298,7 +335,7 @@ try {
     const origins = {};
     let reviewed = null, lastAI = null, visibleLimit = 8, choosing = true, note = '법인·사업장이나 설비명으로 대상 설비를 찾아보세요.';
     const mountedPath = location.pathname;
-    const originalMinWidth = column.style.minWidth;
+    let originalMinWidth,originalPosition,positionChanged=false,attached=false,wantsOpen=true;
     const host = document.createElement('aside');
     host.id = 'ees-wo-demo-panel'; host.setAttribute('aria-label','설비 WO 시연');
     host.style.cssText = 'flex:0 0 420px;width:420px;min-width:0;box-sizing:border-box;height:100%;min-height:0;overflow:auto;border-left:1px solid #8886;z-index:30;';
@@ -312,12 +349,16 @@ try {
     const shadow = host.attachShadow({mode:'open'});
     // Only this reviewed, constant template is assigned as HTML. All data use textContent/value.
     shadow.innerHTML = panelHTML;
+    const launcher=document.createElement('button');
+    launcher.id='ees-work-panel-toggle';launcher.type='button';
+    launcher.setAttribute('aria-controls',host.id);
+    launcher.style.cssText='position:absolute;top:64px;right:16px;z-index:32;display:inline-flex;align-items:center;min-height:34px;padding:7px 12px;border:1px solid #8886;border-radius:8px;font:600 12px/1.4 system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 6px #0001;';
     const q = id => shadow.getElementById(id);
     const findEquipment = id => catalog.find(e=>e.id===id) || null;
     const path = e => [e.corporation,e.site,e.shop,e.line,e.process].join(' / ');
     const matches = filters => catalog.filter(e=>hierarchy.every(k=>!filters[k] || e[k]===filters[k]) && (!filters.equipment_id?.trim() || e.id===filters.equipment_id.trim()) && (!filters.query || (e.id+' '+e.name).toLowerCase().includes(filters.query.toLowerCase().trim())));
     const options = (key, filters) => [...new Set(catalog.filter(e=>hierarchy.slice(0,hierarchy.indexOf(key)).every(k=>!filters[k] || e[k]===filters[k])).map(e=>e[key]))];
-    const alive = () => location.pathname === mountedPath && row.isConnected && document.querySelector('#chat-container #chat-pane') === anchor;
+    const alive = () => attached && location.pathname === mountedPath && row.isConnected && document.querySelector('#chat-container #chat-pane') === anchor && anchor.parentElement===column && column.parentElement===row && launcher.isConnected;
     const searchView = () => {
       const list=matches(search.filters);
       return {filters:{...search.filters},selected_equipment:findEquipment(search.selected_id),available_options:Object.fromEntries(hierarchy.map(k=>[k,options(k,search.filters)])),matches_count:list.length,matches:list.slice(0,8),matches_truncated:list.length>8};
@@ -533,21 +574,45 @@ try {
       resizeObserver.observe(row);
       Array.from(row.children).filter(child=>child!==host && child!==divider).forEach(child=>resizeObserver.observe(child));
     };
-    const theme = () => {host.style.colorScheme=document.documentElement.classList.contains('dark')?'dark':'light';};
-    const observer=new MutationObserver(records=>{if(!alive())controller.destroy();else if(records.some(record=>record.target===row)){observeLayout();resize();}});
-    const themeObserver=new MutationObserver(theme);
-    const close=()=>{finishDrag();resizeObserver.disconnect();divider.remove();host.remove();column.style.minWidth=originalMinWidth;};
-    const open=()=>{if(!host.isConnected){row.append(divider,host);observeLayout();}column.style.minWidth='0';host.hidden=false;resize();theme();};
-    const destroy=()=>{observer.disconnect();themeObserver.disconnect();window.removeEventListener('resize',resize);close();if(window.__eesWODemoV1===controller)delete window.__eesWODemoV1;};
-    controller={chatId:request.chat_id,alive,destroy,open,view,browse,woView:()=>{screen='wo';render();return view();},update:(revision,changes)=>{
+    const theme = () => {
+      const dark=document.documentElement.classList.contains('dark');
+      host.style.colorScheme=dark?'dark':'light';launcher.style.color=dark?'#ededed':'#242424';launcher.style.background=dark?'#262626':'#ffffff';
+    };
+    const updateLauncher=()=>{
+      launcher.textContent=wantsOpen?'업무 패널 닫기':'업무 패널 열기';
+      launcher.setAttribute('aria-expanded',String(wantsOpen));
+    };
+    const hidePanel=()=>{
+      finishDrag();resizeObserver.disconnect();window.removeEventListener('resize',resize);
+      divider.remove();host.remove();if(attached)column.style.minWidth=originalMinWidth;
+    };
+    const close=()=>{wantsOpen=false;hidePanel();updateLauncher();launcher.focus({preventScroll:true});};
+    const open=()=>{
+      wantsOpen=true;if(!attached)return;
+      if(!host.isConnected){row.append(divider,host);observeLayout();window.addEventListener('resize',resize);}
+      column.style.minWidth='0';host.hidden=false;updateLauncher();resize();theme();
+    };
+    const detach=()=>{
+      hidePanel();launcher.remove();
+      if(attached && positionChanged)column.style.position=originalPosition;
+      attached=false;positionChanged=false;
+    };
+    const attach=nextLayout=>{
+      ({anchor,column,row}=nextLayout);originalMinWidth=column.style.minWidth;originalPosition=column.style.position;
+      positionChanged=getComputedStyle(column).position==='static';if(positionChanged)column.style.position='relative';
+      attached=true;column.append(launcher);updateLauncher();theme();if(wantsOpen)open();
+    };
+    controller={chatId:request.chat_id,pathname:mountedPath,alive,attach,detach,theme,open,view,browse,
+      layoutChanged:records=>{if(records.some(record=>record.target===row)){observeLayout();resize();}},
+      woView:()=>{screen='wo';render();return view();},update:(revision,changes)=>{
       if(revision!==state.revision)return {...fail('revision_conflict','사용자가 화면을 수정했습니다. 현재 값을 확인하고 요청한 부분만 다시 수정해 주세요.'),current:view()};
       const result=apply(changes,'ai');if(!result.ok){displayError(result.error.message);return result;}
       screen='wo';render();return view();
     }};
-    window.__eesWODemoV1=controller;
+    manager.chats.set(request.chat_id,controller);
     q('close').addEventListener('click',close);
-    observer.observe(document.body,{childList:true,subtree:true});themeObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class']});window.addEventListener('resize',resize);
-    render();open();
+    launcher.addEventListener('click',()=>wantsOpen?close():open());
+    render();manager.sync();
   }
   controller.open();
   if(request.action==='equipment')return controller.browse(request.filters);
