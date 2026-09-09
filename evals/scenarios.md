@@ -1040,6 +1040,11 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 새 증거에 따른 단일 시작: 최신 main `65c3457f89b16d902de74d3a93506d4a5d913257`, tree `40b80f61a54c171755db94e4e57242199cc0541e`, 관련 열린 PR 0개를 확인함. 등록된 기존 Start는 선택/idle·등록 신원·포트를 실행 직전에 다시 검사하고 원래 Python/환경으로 한 자식만 시작함. 이전 10048은 자식 생성 전 실패였으므로 새 점유 항목 부재 증거에 따라 `Start -HealthTimeout 120 -Summary` 한 번을 안내함. health가 확인되면 상한 전에도 종료하며 실패 시 서버를 자동 종료/복구하거나 Start를 반복하지 않음. 동일한 장시간 health 실패를 다시 시도하는 절차나 포트 강제 재사용 설정 변경이 아님.
 - 후속 전달·검증: 2,500자 이내 PowerShell 블록은 기존 Start 한 번과 실패 시 저장된 결과 읽기만 포함함. action=start·failed=true·기록 시각이 이번 시작 이후인 경우에만 이유/errno/winerror/exit_code를 두 번째 줄로 표시해 과거 오류 재전달을 막고 추가 수집 왕복을 줄임. 새 기록이 없으면 detail=unavailable로 끝남. 성공 시 EES 요약과 기존 주소 접속 여부를 합해 1~2줄로 받음. 코드 경로/필드와 블록을 좁게 대조하고 STATUS·이 기록의 문서/diff를 검사함. Windows PowerShell 실실행·사내 Start/접속은 미실행이며 이미 통과한 운영 코드·자동 시험·CI를 변경/반복하지 않음.
 
+
+- 후속 단일 Start 결과: 사용자가 `action=start`, `result=failed`, `stage=health_check`, `reason=Server health timed out; inspect the local server log.`를 전달함. 앞서 안내한 Start의 health 상한은 120초이며, 이전 단일 시작 미실행 표기는 이 보고 전 시점으로 보존함. 최신 main `7c8b40c61698e52be73ba25a28c76557c92afc2c`, tree `a094bc2ae9efa98df4b027fb887383df8d2325e7`, 관련 열린 PR 0개를 확인함. 기존 코드와 좁은 독립 대조에서 정상 Start는 자식 신원을 저장한 뒤 health를 기다리고, 대기 중 신원을 확인하지만 마지막 deadline 뒤 추가 신원 확인 없이 timeout을 반환함을 확인함. **이번 실패는 앞선 자식 생성 전 10048과 다르며 정상 health를 기한 내 확인하지 못한 결과임. 실패 시 자동 종료·신원 삭제·복구·재시작은 하지 않으므로 현재 프로세스는 남아 있을 수 있음.** 사내 가동 성공이나 특정 import/네트워크/대기 시간 부족 원인을 확정하지 않음.
+- 현재 Start 로그 확인 준비: `last-operation.json`의 action=start·failed=true·stage=health_check와 고정 log_id 형식을 확인하고, 기존 `_regular`로 관리 logs 아래 해당 파일을 읽으며 현재 registry process.log_file과 일치할 때만 요약함. 과거 로그를 시간순으로 고르거나 기존 candidate `collect`/Diagnose를 호출하지 않음. 기존 `_summarize`의 고정 오류/신호·검증된 공개 프레임 한 개만 사용하고, 기록 시점 크기 최대 4MiB를 읽어 full/tail을 구분함. 진행 중 로그 증가 자체는 실패로 취급하지 않음. 기존 verify_identity와 제한된 `_healthy(..., 3)`를 한 번 읽고 registry 재읽기 일치 뒤 두 줄만 표시함. 현재 작업이 바뀌었거나 기록을 읽을 수 없으면 check=unavailable로 끝나며 서버/상태/데이터를 변경하지 않음.
+- 이번 검증·한계: 전달 블록 2,243자·내장 Python 구문 확인, 기존 함수/결과 경로·앱 import/설치/서버 신호/새 bind/상태 쓰기 없음 대조, 문서/diff 점검을 수행함. 로그 오류/신호가 없더라도 읽은 범위에서 검출되지 않았다는 뜻이며 정상 기동이나 원인 부재로 확대하지 않음. Windows PowerShell 실실행·사내 이번 로그/현재 신원/health 결과는 미확인임. 운영 코드/기능 시험/CI 변경·반복 없음. 원래 서버 복원 성공·원래 서버 가동 실패·EES 수정본 미적용을 구분해 유지함.
+
 ## 결과 기록
 
 | 날짜 | ID | 버전 조합 | 상태 | 비식별 증거 | 비고 |
