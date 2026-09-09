@@ -77,10 +77,10 @@ jobs:
           EES_RUN_REAL_NLTK_TEST: '1'
         run: python -m unittest discover -s tests -p test_ees_deploy_*.py -v
       - run: python -m unittest discover -s tests -p test_manage_ees.py -v
-      - name: Verify one-command upgrade and download boundaries
-        run: |
-          python -m unittest discover -s tests -p test_ees_upgrade.py -v
-          python -m unittest discover -s tests -p test_ees_update_download.py -v
+      - name: Verify one-command upgrade
+        run: python -m unittest discover -s tests -p test_ees_upgrade.py -v
+      - name: Verify download boundaries
+        run: python -m unittest discover -s tests -p test_ees_update_download.py -v
       - name: Download the fixed upstream wheel for program validation
         run: |
           python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
