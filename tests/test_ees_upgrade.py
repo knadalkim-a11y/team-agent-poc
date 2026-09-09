@@ -1,0 +1,522 @@
+"""Upgrade orchestration tests use synthetic state and no network or server."""
+
+import argparse
+import copy
+from contextlib import contextmanager, nullcontext, redirect_stdout
+import io
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+from unittest.mock import Mock, patch
+
+from scripts import ees_upgrade as upgrade
+
+
+HEAD = "a" * 40
+OLDER = "b" * 40
+TOKEN = "synthetic-update-token"
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class UpgradeDeploymentTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.config = {"state_root": str(self.root), "source_python": "registered-python"}
+        self.active = {"source_commit": OLDER, "wheel_sha256": "1" * 64,
+                       "record_sha256": "2" * 64, "webui_version": "0.11.3+ees.2"}
+        self.selected = dict(self.active, source_commit=HEAD, wheel_sha256="3" * 64)
+        self.registry = {"schema_version": 2, "phase": "idle", "pending": None,
+                         "current": {"kind": "original", "source_commit": None,
+                                     "python": "registered-python"},
+                         "process": {"pid": 123, "executable": "registered-python"},
+                         "customization": {"active": self.active, "previous": None, "pending": None}}
+        self.artifact = {"id": 10, "digest": "sha256:" + "4" * 64, "source_commit": HEAD}
+        self.events = []
+        self.progress = {}
+        self.output = io.StringIO()
+        self.mock = {}
+
+        def download(_, directory):
+            self.events.append("download")
+            bundle = directory / "synthetic.zip"
+            bundle.write_bytes(b"synthetic program bundle")
+            return bundle
+
+        def stop(config, registry, *, progress):
+            self.events.append("stop")
+            registry["process"] = None
+
+        def apply(config, registry, bundle, commit, env, record, owner):
+            self.events.append("apply")
+            self.assertEqual(commit, HEAD)
+            registry["customization"]["active"] = copy.deepcopy(self.selected)
+
+        def start(config, selected, env, registry, *, health_timeout, progress):
+            self.events.append("start")
+            self.assertEqual(health_timeout, 120)
+            self.assertNotIn(TOKEN, env.values())
+            registry["process"] = {"pid": 456, "executable": "registered-python"}
+            progress["stage"] = "health_check"
+
+        self.client = Mock()
+        self.client.download_artifact.side_effect = download
+        overrides = {
+            "checkout": patch.object(upgrade, "checkout", return_value=HEAD),
+            "artifact": patch.object(upgrade.downloads, "select_program", return_value=self.artifact),
+            "lock": patch.object(upgrade.manager, "locked", side_effect=lambda *a, **k: nullcontext({"pid": 9})),
+            "environment": patch.object(upgrade.manager.states, "runtime_environment", return_value={"DATA_DIR": "existing"}),
+            "read": patch.object(upgrade.manager, "read_registry", side_effect=lambda _: copy.deepcopy(self.registry)),
+            "validate": patch.object(upgrade.manager.customization, "validate_program", return_value=self.root / "program"),
+            "applicability": patch.object(upgrade.manager.customization, "check_applicability"),
+            "inspect": patch.object(upgrade.manager.customization, "inspect_bundle", side_effect=lambda *a: self.selected),
+            "stop": patch.object(upgrade.manager, "stop_registered", side_effect=stop),
+            "stopped": patch.object(upgrade.manager, "require_stopped", side_effect=lambda *a: self.events.append("require_stopped")),
+            "apply": patch.object(upgrade.manager.customization, "apply", side_effect=apply),
+            "start": patch.object(upgrade.manager, "start_selected", side_effect=start),
+            "record": patch.object(upgrade.manager, "record"),
+            "identity": patch.object(upgrade.manager.processes, "verify_identity", return_value=True),
+            "health": patch.object(upgrade.manager.processes, "wait_healthy"),
+        }
+        for name, override in overrides.items():
+            self.mock[name] = override.start()
+            self.addCleanup(override.stop)
+
+    def deploy(self):
+        with redirect_stdout(self.output):
+            return upgrade.deploy(self.config, self.client, HEAD, 120, self.progress)
+
+    def assert_no_server_changes(self):
+        for name in ("stop", "stopped", "apply", "start"):
+            self.mock[name].assert_not_called()
+
+    def test_download_and_preflight_failures_never_stop_server(self):
+        for failing in ("download", "applicability", "inspect"):
+            with self.subTest(failing=failing):
+                target = self.client.download_artifact if failing == "download" else self.mock[failing]
+                original = target.side_effect
+                target.side_effect = ValueError("synthetic failure")
+                try:
+                    with self.assertRaises(ValueError):
+                        self.deploy()
+                    self.assert_no_server_changes()
+                finally:
+                    target.side_effect = original
+
+    def test_cached_noop_validates_program_process_and_health_without_download(self):
+        upgrade.save_receipt(self.config, self.artifact, self.active)
+        result = self.deploy()
+        self.assertFalse(result["changed"])
+        self.assertFalse(result["downloaded"])
+        self.assertEqual(result["source_commit"], OLDER)
+        self.mock["validate"].assert_called_once_with(self.root / "program", self.active)
+        self.mock["applicability"].assert_called_once()
+        self.mock["identity"].assert_called_once_with(self.registry["process"])
+        self.mock["health"].assert_called_once_with(self.registry["process"], timeout=5)
+        self.client.download_artifact.assert_not_called()
+        self.assert_no_server_changes()
+
+    def test_cached_receipt_cannot_hide_damaged_program_or_dead_process(self):
+        upgrade.save_receipt(self.config, self.artifact, self.active)
+        self.mock["validate"].side_effect = ValueError("program damaged")
+        with self.assertRaisesRegex(ValueError, "program damaged"):
+            self.deploy()
+        self.mock["validate"].side_effect = None
+        self.mock["identity"].return_value = False
+        with self.assertRaisesRegex(upgrade.UpgradeError, "server_not_running"):
+            self.deploy()
+        self.mock["health"].assert_not_called()
+        self.client.download_artifact.assert_not_called()
+        self.assert_no_server_changes()
+
+    def test_identical_downloaded_program_preserves_installed_source_commit(self):
+        self.selected = dict(self.active, source_commit=HEAD)
+        result = self.deploy()
+        self.assertFalse(result["changed"])
+        self.assertTrue(result["downloaded"])
+        self.assertEqual(result["source_commit"], OLDER)
+        self.assertTrue(upgrade.receipt_matches(self.config, self.artifact, self.active))
+        self.assert_no_server_changes()
+        self.mock["health"].assert_called_once()
+        self.events.clear()
+        self.client.download_artifact.reset_mock()
+        self.assertFalse(self.deploy()["downloaded"])
+        self.client.download_artifact.assert_not_called()
+
+    def test_success_downloads_and_checks_before_stop_then_applies_and_starts(self):
+        result = self.deploy()
+        self.assertEqual(self.events, ["download", "stop", "require_stopped", "apply", "start"])
+        self.assertTrue(result["changed"])
+        self.assertEqual(result["source_commit"], HEAD)
+        self.assertEqual(self.mock["applicability"].call_count, 2)
+        self.assertTrue(upgrade.receipt_matches(self.config, self.artifact, self.selected))
+        self.mock["record"].assert_called_once()
+        self.assertFalse(Path(self.progress["bundle"]).exists())
+
+    def test_changed_deployment_during_download_blocks_stop(self):
+        original = self.client.download_artifact.side_effect
+
+        def changed(*args):
+            self.registry["process"]["pid"] = 999
+            return original(*args)
+
+        self.client.download_artifact.side_effect = changed
+        with self.assertRaisesRegex(upgrade.UpgradeError, "deployment_changed"):
+            self.deploy()
+        self.assert_no_server_changes()
+
+    def test_apply_failure_does_not_start_or_write_success_receipt(self):
+        self.mock["apply"].side_effect = ValueError("apply failed")
+        with self.assertRaisesRegex(ValueError, "apply failed"):
+            self.deploy()
+        self.mock["stop"].assert_called_once()
+        self.mock["stopped"].assert_called_once()
+        self.mock["start"].assert_not_called()
+        self.assertEqual(self.progress["stage"], "apply")
+        self.assertFalse((self.root / "upgrade-receipt.json").exists())
+        self.assertEqual(Path(self.progress["bundle"]).read_bytes(), b"synthetic program bundle")
+
+    def test_health_failure_preserves_new_process_without_cleanup_or_retry(self):
+        start = self.mock["start"].side_effect
+        observed = []
+
+        def unhealthy(*args, **kwargs):
+            start(*args, **kwargs)
+            observed.append(args[3])
+            raise upgrade.manager.processes.ProcessError("synthetic health timeout")
+
+        self.mock["start"].side_effect = unhealthy
+        with self.assertRaises(upgrade.manager.processes.ProcessError):
+            self.deploy()
+        self.assertEqual(self.events, ["download", "stop", "require_stopped", "apply", "start"])
+        self.assertEqual(observed[0]["process"]["pid"], 456)
+        self.assertEqual(observed[0]["customization"]["active"], self.selected)
+        self.assertEqual(self.progress["stage"], "health_check")
+        self.assertTrue(self.progress["changed"])
+        self.assertFalse((self.root / "upgrade-receipt.json").exists())
+
+
+class BootstrapTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.config = {"state_root": temporary.name}
+        self.args = argparse.Namespace(config=Path(temporary.name) / "config.json", prepared_head=None,
+                                       wrapper_before=None, health_timeout=120, reset_token=False)
+        self.head = OLDER
+        self.target = HEAD
+        self.branch = "main"
+        self.origin = upgrade.REPOSITORY + ".git"
+        self.dirty = ""
+        self.ancestry = 0
+        self.events = []
+
+        def git(*args, optional=False, proxy=None):
+            if args == ("remote", "get-url", "origin"):
+                return 0, self.origin
+            if args == ("branch", "--show-current"):
+                return 0, self.branch
+            if args[:2] == ("status", "--porcelain"):
+                return 0, self.dirty
+            if args == ("rev-parse", "HEAD"):
+                return 0, self.head
+            if args == ("rev-parse", "origin/main"):
+                return 0, self.target
+            self.events.append(args[0])
+            if args[0] == "merge-base":
+                return self.ancestry, ""
+            if args[0] == "merge":
+                self.assertEqual(args, ("merge", "--ff-only", HEAD))
+                self.head = HEAD
+            return 0, ""
+
+        self.process = Mock()
+        self.process.wait.return_value = 7
+        overrides = [patch.object(upgrade, "git", side_effect=git),
+                     patch.object(upgrade.manager, "locked", side_effect=lambda *a, **k: nullcontext()),
+                     patch.object(upgrade.downloads, "require_successful_head", side_effect=lambda *a: self.events.append("ci")),
+                     patch.object(upgrade.subprocess, "Popen", side_effect=lambda *a, **k: self.events.append("child") or self.process)]
+        self.git, self.lock, self.ci, self.child = [item.start() for item in overrides]
+        for item in overrides:
+            self.addCleanup(item.stop)
+
+    def test_checks_exact_fetched_head_then_merges_and_reexecutes_updated_runner(self):
+        client = object()
+        result = upgrade.bootstrap(self.config, self.args, client, {})
+        self.assertEqual(result, (7, HEAD, OLDER))
+        self.assertEqual(self.events, ["fetch", "merge-base", "ci", "merge", "child"])
+        self.ci.assert_called_once_with(client, HEAD)
+        self.child.assert_called_once_with([
+            sys.executable, "-I", "-B", str(upgrade.ROOT / "scripts" / "ees_upgrade.py"),
+            "--config", str(self.args.config), "--prepared-head", HEAD,
+            "--wrapper-before", OLDER, "--health-timeout", "120"])
+        self.process.wait.assert_called_once_with()
+
+    def test_failed_ci_prevents_wrapper_merge_and_child(self):
+        self.ci.side_effect = upgrade.downloads.DownloadError("main_checks_not_successful")
+        with self.assertRaises(upgrade.downloads.DownloadError):
+            upgrade.bootstrap(self.config, self.args, object(), {})
+        self.assertNotIn("merge", self.events)
+        self.child.assert_not_called()
+        self.assertEqual(self.head, OLDER)
+
+    def test_wrong_repository_branch_dirty_and_ahead_or_diverged_main_rejected(self):
+        for attribute, value, code in (("origin", "https://github.com/another/repo", "wrong_repository"),
+                                       ("branch", "feature", "main_required"),
+                                       ("dirty", " M scripts/ees_upgrade.py", "local_changes"),
+                                       ("ancestry", 1, "local_main_ahead_or_diverged")):
+            with self.subTest(code=code):
+                before = getattr(self, attribute)
+                setattr(self, attribute, value)
+                try:
+                    with self.assertRaisesRegex(upgrade.UpgradeError, code):
+                        upgrade.bootstrap(self.config, self.args, object(), {})
+                    self.child.assert_not_called()
+                    self.ci.assert_not_called()
+                finally:
+                    setattr(self, attribute, before)
+
+    def test_existing_lock_blocks_fetch_and_prepared_head_must_still_match(self):
+        lock = Path(self.config["state_root"]) / "deployment.lock"
+        lock.touch()
+        with self.assertRaisesRegex(upgrade.UpgradeError, "operation_busy"):
+            upgrade.bootstrap(self.config, self.args, object(), {})
+        self.assertEqual(self.events, [])
+        self.args.prepared_head, self.args.wrapper_before = OLDER, OLDER
+        with self.assertRaisesRegex(upgrade.UpgradeError, "checkout_changed"):
+            upgrade.bootstrap(self.config, self.args, object(), {})
+        self.child.assert_not_called()
+
+    def test_current_wrapper_still_requires_successful_ci_without_reexec(self):
+        self.head = HEAD
+        self.assertEqual(upgrade.bootstrap(self.config, self.args, object(), {}), (None, HEAD, HEAD))
+        self.ci.assert_called_once()
+        self.child.assert_not_called()
+
+    def test_parent_interrupt_leaves_operation_report_to_updated_child(self):
+        self.process.wait.side_effect = [KeyboardInterrupt(), 1]
+        with patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                patch.object(upgrade, "github_client"), patch.object(upgrade, "report") as report, \
+                patch.object(upgrade, "deploy") as deploy, redirect_stdout(io.StringIO()):
+            self.assertEqual(upgrade.main(["--config", str(self.args.config)]), 1)
+            report.assert_not_called()
+            deploy.assert_not_called()
+        self.assertEqual([call.kwargs for call in self.process.wait.call_args_list], [{}, {"timeout": 5}])
+        self.process.kill.assert_not_called()
+        self.process.terminate.assert_not_called()
+
+    def test_interrupted_parent_does_not_kill_slow_child_or_clear_delegation(self):
+        self.process.wait.side_effect = [KeyboardInterrupt(), subprocess.TimeoutExpired("updated runner", 5)]
+        progress = {}
+        self.assertEqual(upgrade.bootstrap(self.config, self.args, object(), progress), (130, HEAD, OLDER))
+        self.assertTrue(progress["delegated"])
+        self.process.kill.assert_not_called()
+        self.process.terminate.assert_not_called()
+
+    def test_manual_update_holds_deployment_lock_through_git_operations(self):
+        held = []
+
+        @contextmanager
+        def locked(*args, **kwargs):
+            held.append(True)
+            try:
+                yield
+            finally:
+                held.pop()
+
+        git = self.git.side_effect
+
+        def check_lock(*args, **kwargs):
+            self.assertEqual(held, [True])
+            return git(*args, **kwargs)
+
+        self.lock.side_effect = locked
+        self.git.side_effect = check_lock
+        result = upgrade.update_only(self.config, proxy="http://synthetic-proxy:8080")
+        self.assertTrue(result["wrapper_changed"])
+        self.assertFalse(result["changed"])
+        self.assertEqual(result["wrapper_commit"], HEAD)
+        self.git.assert_any_call("fetch", "origin", "main", proxy="http://synthetic-proxy:8080")
+        self.ci.assert_not_called()
+        self.child.assert_not_called()
+
+    def test_busy_deployment_blocks_manual_update_before_any_git_call(self):
+        self.lock.side_effect = upgrade.UpgradeError("operation_busy")
+        with self.assertRaisesRegex(upgrade.UpgradeError, "operation_busy"):
+            upgrade.update_only(self.config)
+        self.git.assert_not_called()
+        self.ci.assert_not_called()
+        self.child.assert_not_called()
+
+
+@unittest.skipUnless(shutil.which("git"), "Git compatibility integration requires git")
+class RealGitCompatibilityTests(unittest.TestCase):
+    def test_program_reuse_checks_real_ancestry_inputs_and_clean_main(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+
+            def git(*arguments):
+                return subprocess.run([shutil.which("git"), "-C", str(root), *arguments],
+                                      check=True, capture_output=True, text=True, timeout=10).stdout.strip()
+
+            def commit(message):
+                git("add", ".")
+                git("commit", "-m", message)
+                return git("rev-parse", "HEAD")
+
+            git("init", "--initial-branch=main", "--template=")
+            git("config", "user.name", "Synthetic Upgrade Test")
+            git("config", "user.email", "upgrade-test@example.invalid")
+            git("config", "commit.gpgsign", "false")
+            git("config", "core.hooksPath", str(root / "unused-hooks"))
+            git("remote", "add", "origin", upgrade.REPOSITORY + ".git")
+            (root / "branding").mkdir()
+            program = root / "branding" / "program.txt"
+            notes = root / "notes.txt"
+            program.write_text("first program\n", encoding="utf-8")
+            notes.write_text("initial notes\n", encoding="utf-8")
+            initial = commit("program release")
+            with patch.object(upgrade, "ROOT", root):
+                self.assertEqual(upgrade.checkout(), initial)
+                notes.write_text("updated notes\n", encoding="utf-8")
+                notes_only = commit("notes only")
+                self.assertTrue(upgrade.compatible_program(initial, notes_only))
+                program.write_text("changed program\n", encoding="utf-8")
+                changed = commit("program changed")
+                self.assertFalse(upgrade.compatible_program(initial, changed))
+                unrelated = git("commit-tree", "HEAD^{tree}", "-m", "unrelated history")
+                self.assertFalse(upgrade.compatible_program(unrelated, changed))
+                self.assertEqual(upgrade.checkout(changed), changed)
+                notes.write_text("uncommitted local notes\n", encoding="utf-8")
+                with self.assertRaisesRegex(upgrade.UpgradeError, "local_changes"):
+                    upgrade.checkout()
+
+
+class CredentialsTests(unittest.TestCase):
+    def test_token_is_dpapi_only_and_does_not_change_environment(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            config = {"state_root": temporary}
+            encrypted = b"synthetic-DPAPI-ciphertext"
+            environment = dict(os.environ)
+            with patch.object(upgrade.sys.stdin, "isatty", return_value=True), \
+                    patch.object(upgrade.getpass, "getpass", return_value=TOKEN) as prompt, \
+                    patch.object(upgrade.manager.states, "_protect", return_value=encrypted) as protect, \
+                    patch.object(upgrade.manager.states, "_unprotect", return_value=TOKEN.encode()) as unprotect:
+                self.assertEqual(upgrade.token_for(config), TOKEN)
+                self.assertEqual(upgrade.token_for(config), TOKEN)
+                path = Path(temporary) / "github-update.dpapi"
+                self.assertEqual(path.read_bytes(), encrypted)
+                self.assertNotIn(TOKEN.encode(), path.read_bytes())
+                self.assertEqual(list(Path(temporary).iterdir()), [path])
+                prompt.assert_called_once()
+                protect.assert_called_once_with(TOKEN.encode())
+                unprotect.assert_called_once_with(encrypted)
+                self.assertEqual(dict(os.environ), environment)
+
+    def test_noninteractive_missing_token_and_invalid_token_leave_no_credentials(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            config = {"state_root": temporary}
+            with patch.object(upgrade.sys.stdin, "isatty", return_value=False):
+                with self.assertRaisesRegex(upgrade.UpgradeError, "credentials_required"):
+                    upgrade.token_for(config)
+            with patch.object(upgrade.sys.stdin, "isatty", return_value=True), \
+                    patch.object(upgrade.getpass, "getpass", return_value=TOKEN + "\n"), \
+                    patch.object(upgrade.manager.states, "_protect") as protect:
+                with self.assertRaisesRegex(upgrade.UpgradeError, "credentials_invalid"):
+                    upgrade.token_for(config)
+                protect.assert_not_called()
+            self.assertEqual(list(Path(temporary).iterdir()), [])
+
+    def test_reset_replaces_encrypted_token_without_decrypting_old_value(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "github-update.dpapi"
+            path.write_bytes(b"old ciphertext")
+            with patch.object(upgrade.sys.stdin, "isatty", return_value=True), \
+                    patch.object(upgrade.getpass, "getpass", return_value=TOKEN), \
+                    patch.object(upgrade.manager.states, "_protect", return_value=b"new ciphertext"), \
+                    patch.object(upgrade.manager.states, "_unprotect") as unprotect:
+                self.assertEqual(upgrade.token_for({"state_root": temporary}, reset=True), TOKEN)
+                self.assertEqual(path.read_bytes(), b"new ciphertext")
+                unprotect.assert_not_called()
+
+
+class UpgradeEntryPointTests(unittest.TestCase):
+    def test_manual_update_never_requests_github_client_or_token(self):
+        result = {"changed": False, "wrapper_changed": True, "wrapper_commit": HEAD}
+        with patch.object(upgrade.manager.states, "load_config", return_value={}), \
+                patch.object(upgrade, "checkout"), patch.object(upgrade, "github_client") as client, \
+                patch.object(upgrade, "token_for") as token, \
+                patch.object(upgrade, "update_only", return_value=result) as update, \
+                patch.object(upgrade, "deploy") as deploy, patch.object(upgrade, "report"), \
+                redirect_stdout(io.StringIO()):
+            self.assertEqual(upgrade.main(["--config", "synthetic.json", "--update-only"]), 0)
+            update.assert_called_once_with({}, None)
+            client.assert_not_called()
+            token.assert_not_called()
+            deploy.assert_not_called()
+
+    def test_bootstrap_child_result_never_runs_deployment_in_stale_parent(self):
+        with patch.object(upgrade.manager.states, "load_config", return_value={}), \
+                patch.object(upgrade, "checkout"), patch.object(upgrade, "github_client"), \
+                patch.object(upgrade, "bootstrap", return_value=(7, HEAD, OLDER)), \
+                patch.object(upgrade, "deploy") as deploy, patch.object(upgrade, "report") as report, \
+                redirect_stdout(io.StringIO()):
+            self.assertEqual(upgrade.main(["--config", "synthetic.json"]), 7)
+            deploy.assert_not_called()
+            report.assert_not_called()
+
+    def test_api_rejected_token_gives_reset_instruction_without_raw_exception(self):
+        def rejected(config, args, client, progress):
+            progress["stage"] = "ci_check"
+            raise upgrade.downloads.DownloadError("credentials_rejected")
+
+        output = io.StringIO()
+        with patch.object(upgrade.manager.states, "load_config", return_value={}), \
+                patch.object(upgrade, "checkout"), patch.object(upgrade, "github_client"), \
+                patch.object(upgrade, "bootstrap", side_effect=rejected), \
+                patch.object(upgrade, "deploy") as deploy, \
+                patch.object(upgrade.manager, "save_operation", return_value=True), redirect_stdout(output):
+            self.assertEqual(upgrade.main(["--config", "synthetic.json"]), 1)
+            deploy.assert_not_called()
+        self.assertIn("code=credentials_rejected next=reset_update_token", output.getvalue())
+        self.assertNotIn("Traceback", output.getvalue())
+
+
+@unittest.skipUnless(shutil.which("pwsh"), "PowerShell adapter execution requires pwsh")
+class PowerShellUpgradeTests(unittest.TestCase):
+    def test_adapter_runs_upgrade_entrypoint_and_forwards_only_upgrade_arguments(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            scripts = root / "scripts"
+            scripts.mkdir()
+            adapter = scripts / "manage-ees.ps1"
+            shutil.copyfile(ROOT / "scripts" / "manage-ees.ps1", adapter)
+            (scripts / "ees_upgrade.py").write_text("import json, sys\nprint(json.dumps(sys.argv[1:]))\n", encoding="utf-8")
+            config = root / "config.json"
+            config.write_text(json.dumps({"source_python": sys.executable}), encoding="utf-8")
+            command = [shutil.which("pwsh"), "-NoProfile", "-File", str(adapter),
+                       "-Action", "Upgrade", "-Config", str(config)]
+            result = subprocess.run(command + ["-HealthTimeout", "90", "-ResetUpdateToken", "-Summary"],
+                                    capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), ["--config", str(config), "--health-timeout", "90", "--reset-token"])
+            result = subprocess.run(command + ["-Bundle", "untrusted.zip"], capture_output=True, text=True, timeout=30)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(result.stdout.strip(), "")
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(adapter),
+                                     "-Action", "Update", "-Config", str(config),
+                                     "-GitProxy", "http://synthetic-proxy:8080"],
+                                    capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), ["--config", str(config), "--update-only",
+                                                        "--git-proxy", "http://synthetic-proxy:8080"])
+
+
+if __name__ == "__main__":
+    unittest.main()

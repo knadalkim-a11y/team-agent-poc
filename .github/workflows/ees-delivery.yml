@@ -13,9 +13,13 @@ on:
       - 'scripts/manage_ees.py'
       - 'scripts/manage-ees.ps1'
       - 'scripts/ees_webui_customization.py'
+      - 'scripts/ees_upgrade.py'
+      - 'scripts/ees_update_download.py'
       - 'tests/test_ees_deploy_*.py'
       - 'tests/test_ees_webui_customization.py'
       - 'tests/test_manage_ees.py'
+      - 'tests/test_ees_upgrade.py'
+      - 'tests/test_ees_update_download.py'
       - 'tests/test_confluence*.py'
       - 'tests/test_jira_read.py'
       - 'tests/test_github_tool.py'
@@ -27,29 +31,6 @@ on:
       - 'versions.md'
   push:
     branches: [main]
-    paths:
-      - '.github/workflows/ees-delivery.yml'
-      - 'branding/**'
-      - 'agent-pack/**'
-      - 'scripts/build_*.py'
-      - 'scripts/render_ees_brand_assets.py'
-      - 'scripts/check_docs.py'
-      - 'scripts/ees_deploy_*.py'
-      - 'scripts/manage_ees.py'
-      - 'scripts/manage-ees.ps1'
-      - 'scripts/ees_webui_customization.py'
-      - 'tests/test_ees_deploy_*.py'
-      - 'tests/test_ees_webui_customization.py'
-      - 'tests/test_manage_ees.py'
-      - 'tests/test_confluence*.py'
-      - 'tests/test_jira_read.py'
-      - 'tests/test_github_tool.py'
-      - 'tests/test_wo_demo*'
-      - 'tests/test_ees_branding_build.py'
-      - 'tests/test_demo_bundle.py'
-      - 'docs/**'
-      - 'README.md'
-      - 'versions.md'
   workflow_dispatch:
     inputs:
       include_branding:
@@ -96,6 +77,10 @@ jobs:
           EES_RUN_REAL_NLTK_TEST: '1'
         run: python -m unittest discover -s tests -p test_ees_deploy_*.py -v
       - run: python -m unittest discover -s tests -p test_manage_ees.py -v
+      - name: Verify one-command upgrade and download boundaries
+        run: |
+          python -m unittest discover -s tests -p test_ees_upgrade.py -v
+          python -m unittest discover -s tests -p test_ees_update_download.py -v
       - name: Download the fixed upstream wheel for program validation
         run: |
           python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
@@ -172,8 +157,8 @@ jobs:
         run: python scripts/build_demo_bundle.py --output-dir dist/delivery
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: ees-demo-${{ github.sha }}
+          name: ees-${{ steps.branding.outputs.enabled == 'true' && 'program' || 'demo' }}-${{ github.sha }}
           path: dist/delivery/*.zip
           if-no-files-found: error
           compression-level: 0
-          retention-days: 14
+          retention-days: ${{ steps.branding.outputs.enabled == 'true' && 90 || 14 }}
