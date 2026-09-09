@@ -9,7 +9,7 @@
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: 사용자가 여섯 목표의 본격 구현 전에 **팀원 시연용 커스터마이징과 수정·배포 방식 준비**를 우선 요청함. 이전 첫 화면/소개·예시·짧은 안내 보류는 이 범위에서 해제하고, 조회 결과 Rich UI 전체 디자인 튜닝은 후속으로 유지함. EES 전용 공통 정책·관리자 워크플로·레거시 목표는 유지함.
 - 이번 작업: **단순 래퍼 Apply/CheckOnly·직전 Restore·Start/Stop/Status 연결은 PR #15로 main에 반영했고, [PR #16](https://github.com/knadalkim-a11y/team-agent-poc/pull/16)의 오류 정보 보존·Windows/Linux Python 3.11 실제 wheel 검사까지 완료함. 2026-09-09 사내 오류 기록 보존과 원본 Restore·Start 성공을 사용자 보고로 확인함.** `evidence_saved=true`, Restore=result ok/changed true/complete/original, Start=result ok/complete/original/running true임. **EES 수정본 사내 적용은 미완료**이며 `ees_webui_customization.py:386`의 staging→program rename 접근 거부(errno=13/winerror=5) 원인은 미확정임. 보존된 오류 기록 시각은 사용자 조회 보고 기준 `2026-09-09T10:46:21+09:00`이며 사내 관리 기록과의 대조는 미실행임. 후속 폴더 접근 두 항목은 성공했고 목적지/리소스 모니터 검색 결과는 없었으나 원인 해소나 보안 차단 확정으로 해석하지 않음. 기존 Python/의존성·uvx 설치·데이터·키·사용자 설정을 유지하고 과거 SSL 지연·실패는 당시 관찰로 보존함. [구현 범위](03-openwebui-native-agent.md#ees-wrapper-design), [적용 실패와 이번 복원 성공](../evals/scenarios.md#ees-wrapper-apply-resume).
-- 다음 작업 하나: **오류 기록 시각 2026-09-09 10:46:21 한국시간 전후의 폴더 rename 접근 거부 기록 유무와 확인된 원인을 사내 PC 관리 측에 문의한다.** 보존 기록 조회는 사용자 보고로 완료했으며 해당 시각을 넣은 전달 문구를 제공함. 이것은 예외 처리 후 기록한 시각으로, 정확한 OS 이벤트 시각이나 복사 시각과 구분함. 담당자 회신은 기록 있음/없음/조회 불가와 원인 요지 1~2줄만 받음. 문의 전송·관리 시스템 조회·원인 확인 여부는 아직 보고받지 못했으며 특정 보안 제품/코드를 원인으로 단정하지 않음. 추가 명령·자료 전달·Apply/Restore/Start 반복 없이 원본 사용을 유지하고 새 원인 근거가 확보되면 필요한 수정과 적용을 재개함. [수신 시각과 확인 범위](../evals/scenarios.md#ees-wrapper-apply-resume).
+- 다음 작업 하나: **사용자의 직접 이름 변경 요청에 따라 실제 관리 폴더와 당시 대상 이름을 안내한다.** 당시 작업은 state_root/program.staging → program이며, 성공한 Restore가 staging을 정리했으므로 현재 같은 실제 파일로 바로 시험할 수는 없음. 저장 config의 state_root를 탐색기로 열고, 사용자가 새 빈 ees-rename-test 폴더를 만들어 ees-rename-test-ok로 한 번 변경하는 범위만 안내함. 예약된 program/program.staging이나 선택 기록을 수동 생성·수정하지 않으며 서버 조작/Apply는 추가하지 않음. 결과는 성공/실패와 오류 요지 한 줄로 받음. 빈 폴더의 탐색기 변경 성공을 실제 수정본·Python의 rename 성공이나 사내 적용 성공으로 확대하지 않음. 특정 담당자 문의를 적용 재개의 필수 조건으로 두었던 안내는 정정하며, 보안 제품 원인이나 담당 주체는 확인되지 않았음. [직접 시험 요청과 범위](../evals/scenarios.md#ees-wrapper-apply-resume).
 
 아래는 **중단한 후보 환경 방식의 구현·진단 이력**이며 현재 재실행 목록이 아닙니다. [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py)와 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)은 보존합니다. 기존 도구의 Rollback을 새 직접 적용 방식의 원복 기능으로 간주하지 않습니다. 마지막 실패와 원인 미확정 상태를 유지하며 관리 방식 변경을 배포 성공으로 기록하지 않습니다.
 
@@ -106,7 +106,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-09: 보존 오류 조회 결과 recorded_at=2026-09-09T10:46:21+09:00, operation=folder_rename, errno=13/winerror=5를 수신함. 최신 main `7db992a`·관련 열린 PR 0개·로컬 tree 일치를 확인하고 한국시간/UTC 대응과 오류 저장 시각의 의미를 대조함. STATUS/평가 기록을 갱신하고 시각을 채운 담당자 전달 문구를 제공함. 문서/diff만 검사했으며 실행 코드/시험/CI 설정·서버는 변경하지 않음. 구현·검증 완료, 이전 원본 Restore/Start 성공, 수정본 적용 미완료·사내 원인 확인 대기를 구분함. [수신 증거](../evals/scenarios.md#ees-wrapper-apply-resume).
+2026-09-09: 사용자가 자신이 사용하는 PC이며 직접 이름 변경을 시도하겠다고 설명함. 최신 main `18f2ae3`·관련 열린 PR 0개·로컬 무변경을 확인하고 init_config의 state_root/등록 위치, Restore의 staging 정리와 Start의 선택/미완료 검사를 대조함. 담당자 문의를 필수 대기로 둔 안내를 정정하고 실제 경로를 여는 방법과 새 빈 시험 폴더의 수동 이름 변경 범위를 준비함. 문서/diff만 검사하며 실행 코드/시험/CI 설정·서버는 변경하지 않음. 실제 수정본 Apply 실패 원인과 사내 적용은 미해결이고 이번 사용자 수동 시험 결과는 대기임. [정정과 후속 범위](../evals/scenarios.md#ees-wrapper-apply-resume).
 
 ## 갱신 규칙
 
