@@ -323,6 +323,10 @@ def require_legacy(registry):
 
 def selected_program(config, registry):
     """Validate the app selection before even returning already_running."""
+    if "runtime_ca_sha256" in registry:
+        if registry["schema_version"] != 2:
+            raise DeploymentError("Runtime Windows CA selection requires the Apply/Restore wrapper.")
+        releases.windows_ca_path(Path(config["state_root"]), registry["runtime_ca_sha256"])
     if registry["schema_version"] == 1:
         return None
     customization.validate_registry(registry)
@@ -406,6 +410,10 @@ def start_selected(config, selected, env, registry, health_timeout=DEFAULT_HEALT
     progress["stage"] = "select_program"
     executable, child_env = selected_environment(config, selected, env)
     program = selected_program(config, registry)
+    if "runtime_ca_sha256" in registry:
+        ca_path = releases.windows_ca_path(Path(config["state_root"]), registry["runtime_ca_sha256"])
+        child_env["REQUESTS_CA_BUNDLE"] = str(ca_path)
+        child_env["SSL_CERT_FILE"] = str(ca_path)
     progress["stage"] = "port_check"
     require_free_port(config)
     progress["stage"] = "process_start"
@@ -636,7 +644,8 @@ def operate(args):
                 "rollback_available": registry["schema_version"] == 1 and registry.get("previous") is not None,
                 "restore_available": registry.get("customization", {}).get("previous") is not None or bool(pending),
                 "program_valid": valid, "program_incomplete": bool(pending),
-                "ca_mode": "windows_snapshot" if "ca_bundle_sha256" in registry["current"] else "registered",
+                "ca_mode": "windows_snapshot" if "ca_bundle_sha256" in registry["current"]
+                or "runtime_ca_sha256" in registry else "registered",
                 "last_failure": safe_last_failure(registry.get("last_failure"))}
     with locked(config):
         env = states.runtime_environment(config)
@@ -648,9 +657,14 @@ def operate(args):
                 registry.pop("pending", None)
             record(config, registry, "stopped_by_operator")
             return {"stopped": True, "data_changed": False, **program_result(registry)}
+        use_windows_ca = getattr(args, "use_windows_ca", False)
+        if use_windows_ca and registry["schema_version"] != 2:
+            raise DeploymentError("Start --use-windows-ca requires the Apply/Restore wrapper.")
         selected_program(config, registry)
         require_idle(registry)
         if registry.get("process") and processes.verify_identity(registry["process"]):
+            if use_windows_ca:
+                raise DeploymentError("Stop the existing server before changing runtime trust.")
             try:
                 processes.wait_healthy(registry["process"], timeout=args.health_timeout)
             except processes.ProcessError as error:
@@ -659,8 +673,20 @@ def operate(args):
             return {"already_running": True, **program_result(registry)}
         progress = {}
         try:
+            if use_windows_ca:
+                progress["stage"] = "select_program"
+                executable, _ = selected_environment(config, registry["current"], env)
+                progress["stage"] = "port_check"
+                require_free_port(config)
+                progress["stage"] = "select_program"
+                digest = releases.prepare_windows_ca(Path(config["state_root"]), executable, env,
+                                                     cwd=config["cwd"])
+                releases.windows_ca_path(Path(config["state_root"]), digest)
+                registry["runtime_ca_sha256"] = digest
+                # Keep this selection for ordinary Start, including after a health timeout.
+                record(config, registry, "runtime_windows_ca_selected")
             start_selected(config, registry["current"], env, registry, health_timeout=args.health_timeout, progress=progress)
-        except (processes.ProcessError, DeploymentError, OSError) as error:
+        except (processes.ProcessError, DeploymentError, releases.ReleaseError, OSError) as error:
             error.stage = progress.get("stage", "start")
             raise
         record(config, registry, "started_by_operator")
@@ -798,7 +824,7 @@ def main(argv=None):
     parser.add_argument("--health-timeout", type=health_timeout_arg, default=DEFAULT_HEALTH_TIMEOUT,
                         help="Seconds to wait for each server's health (default: 300; range: 1-900).")
     parser.add_argument("--use-windows-ca", action="store_true",
-                        help="Deploy with a Windows CA snapshot retained for this release's Start/Rollback.")
+                        help="Select Windows CA trust for a stopped Apply/Restore Start or a legacy Deploy.")
     args = parser.parse_args(argv)
     if args.check_only and args.action != "apply":
         parser.error("--check-only is supported only with apply.")
@@ -806,8 +832,8 @@ def main(argv=None):
         parser.error("--resume is supported only with apply.")
     if args.summary and args.action not in ("apply", "restore", "start", "stop", "status"):
         parser.error("--summary is supported with Apply/Restore/Start/Stop/Status only.")
-    if args.use_windows_ca and args.action != "deploy":
-        parser.error("--use-windows-ca is supported only with deploy.")
+    if args.use_windows_ca and args.action not in ("deploy", "start"):
+        parser.error("--use-windows-ca is supported only with deploy or start.")
     needed = {"init": ["source_python", "cwd", "data_dir", "listen_host", "port", "uv"],
               "plan": ["bundle", "commit"], "prepare": ["bundle", "commit"], "deploy": ["commit"],
               "probe-imports": ["commit"], "apply": ["bundle", "commit"]}

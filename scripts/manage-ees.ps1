@@ -27,8 +27,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-if ($UseWindowsCA -and $Action -ne 'Deploy') {
-    throw 'UseWindowsCA is supported only with Deploy.'
+if ($UseWindowsCA -and $Action -notin @('Deploy', 'Start')) {
+    throw 'UseWindowsCA is supported only with Deploy or Start.'
 }
 if ($CheckOnly -and $Action -ne 'Apply') { throw 'CheckOnly is supported only with Apply.' }
 if ($Resume -and $Action -ne 'Apply') { throw 'Resume is supported only with Apply.' }

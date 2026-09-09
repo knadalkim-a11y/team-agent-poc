@@ -1413,3 +1413,16 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 검증: 진단 Python 문법 검사 PASS, 읽기 경로와 출력 항목을 검토함. 실제 Windows/사내 진단은 다음 사용자 실행 대상이며 코드·설정·서버를 수정하지 않음. 이번 변경은 STATUS와 이 기록 두 문서뿐이며 문서 25개·링크 676개 오류 0, diff 검사 PASS.
 
 직전 STATUS 점검 보존(크기 조절 적용 확인, 2026-09-09): 2026-09-09: main `f2e0f9f`, PR #19 head `ba396da8`·로컬 동일 tree와 지침/상태를 대조함. v0.1.6 적용과 크기 조절 정상 동작을 사용자 보고로 확인하고 현재 상태·평가 기록만 갱신함. 문서/diff를 점검하며 코드·설정·완료한 기능 검사는 반복 변경/실행하지 않음. [표시 수정·사내 확인 근거](../evals/scenarios.md#wo-mockup).
+
+**Start 실패 요약 수신·Windows CA 경로 보완 (2026-09-09):**
+
+- 사용자 입력: `fail reason=health_timeout seconds=120.0 exit=-`, `now process=true health=false`, `log error=other signals=cert_verify_failed,download_activity,model_cache_missing frame=httpcore/_exceptions.py:14:map_exceptions`. 현재 프로세스 생존과 응답 실패를 구분했으며, 모델 자산 다운로드의 TLS 실패/재시도 때문에 초기화가 지연될 가능성을 좁힘. 정확한 모델·요청 호스트·최초 서버 종료 원인은 이 요약만으로 확정하지 않음.
+- 이전 근거: 이 문서의 Windows CA 비교에서 ca_count=35와 GitHub/Hugging Face HTTP 200을 보고받았음. 원본 시작에도 SSL 재시도·지연이 있었다는 후속 보고를 보존함. 당시 두 URL 접속 성공이 현재 모든 다운로드 호스트나 앱 기동 성공을 보장하지는 않음.
+- 코드 확인: 현재 schema2 원본 Python/커스터마이징 경로는 등록 환경을 복원하며 과거 후보 Deploy의 릴리스별 CA를 상속하지 않음. 새 PowerShell의 SSL_CERT_FILE 설정만으로 이 간극을 해결할 수 없어 기존 Start에 명시적인 CA 선택을 추가함. 최근 패널 변경은 이 운영 코드를 변경하지 않았지만 이번 복구 보완은 운영 코드 변경임.
+- 변경: 기존 CA 내보내기·PEM/해시 검증을 재사용해 종료된 schema2 서버에만 `Start -UseWindowsCA` 허용. 빈 포트와 프로그램/환경을 확인한 뒤 state_root에 CA를 보존하고 기존 deployment의 `runtime_ca_sha256`에 선택을 저장함. 자식의 REQUESTS_CA_BUNDLE/SSL_CERT_FILE에만 적용하며 health timeout 이후와 다음 일반 Start에서도 재사용함. config/DPAPI·current/customization·기존 Python·DB·키·TLS 검증은 유지함. 실행 중 옵션 변경은 거부하고 손상 CA는 Start를 차단하지만 Status/Stop은 가능함.
+- 시작 기준: 원격 main `f2e0f9fbf717f00e8cb6e4fe154777f4f08b7c5d`, PR #19 head `bd953a2f0306fe2a43dc5fd04af9a6384ef9a378`, 동일 로컬 tree `67d1441a79ef5039b2eea0c49b9c31b312aa76a0`와 지침/상태를 확인함. 관련 세 실행/시험 파일과 기존 운영 안내·상태·평가·변경 기록만 갱신하며 Tool·Prompt·제안·프로그램 wheel은 변경하지 않음.
+- 검사: `python -m unittest discover -s tests -p test_manage_ees.py -v`에서 79개 중 77개 통과, pwsh 부재로 PowerShell 관련 2개 건너뜀. 원본/커스터마이징 CA 선택·자식 환경만 변경·Stop/Start 재사용·health timeout 뒤 선택 보존, live 프로세스 거부, 누락/변조/잘못된 PEM 차단과 Stop 허용, export 실패/사용 중인 포트의 실행 방지를 확인함. 추가로 기존 손상 CA 시험 하나에서 다섯 경우의 Status program_valid=false와 비변경을 확인해 통과함. 실제 Windows 신뢰 저장소·사내 네트워크/앱 실행은 하지 않음. 문서·diff 검사와 원격 Windows/Linux CI는 게시 단계에서 확인함.
+- 다음 절차: [현재 Start CA 안내](../docs/03-openwebui-native-agent.md#ees-start-windows-ca)는 main 반영·해당 CI 통과 후 Update → Stop → Start -UseWindowsCA/120초를 한 번 수행하도록 준비함. 현재 main 미병합, 사내 실행·복구 미확인. `result=ok/running=true`와 기존 주소 접속을 성공 기준으로 삼고 실패하면 해당 실패 단계에 따라 다음 판단을 정함. 같은 대기 반복·오프라인 강제·후보 Deploy 재개·TLS 해제는 하지 않음.
+- 문서 확인: `python scripts/check_docs.py`의 files=25, links=685, errors=0, review_candidates=0 및 `git diff --check` 통과. 현재 Start 안내와 과거 Deploy 안내의 적용 범위·main/CI 조건·수동 환경변수의 한계를 대조함.
+
+직전 STATUS 점검 보존(읽기 진단 준비, 2026-09-09): main `f2e0f9f`, PR #19 head `986f9412`·동일 tree와 지침/상태를 대조함. 현재 Start의 실패 기록 저장 위치·프로세스/health 확인·로그 연결과 Windows 콘솔 공유 구조를 읽기 검토함. 최근 패널 변경에 서버 실행 코드 변경은 없음. 사내 읽기 진단 블록의 Python 문법을 확인했으며 당시 Windows 실행/실제 원인은 미확인. 상태·평가 문서만 갱신하고 문서/diff를 점검함.

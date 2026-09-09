@@ -634,6 +634,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA> -Resume` | promote에서 중단된 실제 적용의 폴더를 사용자가 옮긴 뒤, 같은 ZIP·기록·전체 파일을 대조해 완료 기록만 남김. 파일 이동/추출·자동 시작 없음. `-CheckOnly`를 함께 쓰면 읽기 검증만 수행 |
 | `Restore` | **직전 적용 전 프로그램 상태**로 한 번 되돌림. 최초 적용의 직전 상태는 원래 Open WebUI. 복원 뒤 같은 Restore는 변경 없음 |
 | 기존 Start / Stop / Status | 같은 interpreter/cwd/데이터로 시작·정상 종료·상태 표시. 실제 앱 원본/사내 수정 여부와 적용 커밋을 구분 |
+| `Start -UseWindowsCA` | 종료된 서버에 Windows 신뢰 CA 스냅샷을 선택하고 시작. 이후 일반 Start에서도 재사용. [SSL 복구 절차](#ees-start-windows-ca) |
 
 일상 흐름은 **CheckOnly → Stop → Apply → Start → 변경 부분 확인**입니다. 사전 확인이 실패하면 서버를 중지하지 않습니다. 적용 실패 시 서버를 자동으로 다른 프로그램으로 시작하지 않고 결과에서 멈춥니다. 필요하면 사용자가 Stop 상태를 확인하고 Restore·Start를 실행합니다. 기존 Start의 한 번의 명시적 health 대기만 사용하며, 같은 실패를 자동 반복하거나 후보 import 검사를 붙이지 않습니다.
 
@@ -676,6 +677,32 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 | 모델 이름·소개·빠른 제안 | 기존 모델 ID의 메타데이터. [소개·제안 적용](#first-use-entry), 프로필은 [EES 아이콘](../branding/ees/assets/favicon.png) | 반영 전 이름·소개·제안·프로필만 복구 |
 | 공통 Prompt·Skill·Tool | 커밋별 Agent Pack ZIP에서 바뀐 항목만 기존 ID에 반영 | 실제 적용했던 직전 커밋의 해당 항목 |
 | 서비스 이름·아이콘 | 기존 `open_webui-0.11.3+ees.1-py3-none-any.whl`과 브랜딩 manifest를 재사용 가능 | 변경 전 프로그램 복원·같은 DATA_DIR/키/접속 설정 유지. [Apply/Restore 안내](#ees-wrapper-apply) 사용 |
+
+<a id="ees-start-windows-ca"></a>
+
+#### Start에서 Windows 신뢰 인증서 사용
+
+**이 옵션이 main에 반영되고 해당 CI가 통과한 뒤 사용합니다.** 현재 Apply/Restore 래퍼에서 `health_timeout`과 `cert_verify_failed`·다운로드·모델 캐시 누락 신호가 함께 나타나면, 등록된 환경이 Windows의 사내 인증서를 사용하지 못하는지 확인합니다. 2026-09-09의 [진단 결과와 이전 CA 비교](../evals/scenarios.md#ees-start-health-followup)는 이 복구 경로를 뒷받침하지만 정확한 모델·다운로드 주소와 최초 서버 종료 원인은 아직 미확인입니다.
+
+현재 PowerShell의 인증서 환경변수만 바꿔도 Start는 등록한 환경을 복원하므로 그 값이 서버에 전달된다고 가정하지 않습니다. `Start -UseWindowsCA`는 기존 Python으로 Windows ROOT/CA와 기본 경로의 신뢰 인증서를 읽고 검증한 PEM을 `state_root/trusted-ca/<sha256>.pem`에 저장합니다. 해시는 기존 배포 기록의 `runtime_ca_sha256`에 보존하고, 서버 자식 환경의 `REQUESTS_CA_BUNDLE`·`SSL_CERT_FILE`만 바꿉니다. 등록 config/DPAPI·원본 Python·패키지·DB·키·시스템 신뢰 저장소는 수정하지 않으며 TLS 인증서·호스트 이름 검증을 유지합니다. 명시적으로 별도 SSL 설정을 쓰는 클라이언트까지 바꾸지는 않습니다([HTTPX SSL 설정](https://www.python-httpx.org/advanced/ssl/)).
+
+실행 중인 서버에는 새 CA를 적용할 수 없어 Stop이 먼저 필요합니다. 아래 블록은 기존 등록 계정의 PowerShell에서 **Update → Stop → CA 선택 후 Start**를 한 번 수행하며 앞 단계가 실패하면 멈춥니다. Tool·Prompt 갱신, Apply, 새 환경 설치는 필요하지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    Set-Location "$env:USERPROFILE\team-agent-poc"
+    .\scripts\manage-ees.ps1 -Action Update
+    .\scripts\manage-ees.ps1 -Action Stop -Summary
+    .\scripts\manage-ees.ps1 -Action Start -UseWindowsCA -HealthTimeout 120 -Summary
+}
+```
+
+성공 기준은 마지막 Start의 `result=ok`, `running=true`와 기존 주소의 접속입니다. 마지막 EES 요약 한 줄과 접속 여부만 전달합니다. PowerShell 창은 열어 둡니다. 현재 실행 방식은 콘솔 분리를 보장하지 않으며, 이것이 최초 종료 원인이었는지는 확인되지 않았습니다.
+
+CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로그램 Apply/Restore에서 유지됩니다. `Status.ca_mode=windows_snapshot`으로 선택을 확인하며, Windows 신뢰 저장소 변경을 반영하려면 서버를 Stop한 뒤 옵션을 다시 지정합니다. PEM이 없거나 변조되면 시작을 차단하고 Status는 `program_valid=false`로 표시하지만 Stop은 허용합니다. CA 내보내기/검증 실패나 사용 중인 포트에는 새 서버를 실행하지 않습니다. 신뢰 파일은 DATA_DIR와 별도이므로 운영 상태 폴더와 함께 보존합니다.
+
+다시 실패하면 마지막 EES 줄의 실패 단계만 전달하고 같은 긴 대기나 재설치를 반복하지 않습니다. 인증서 해결만으로 모든 다운로드 호스트 접근·모델 캐시 확보가 보장되지는 않습니다. 캐시가 없다는 신호가 있는 동안 오류를 숨기려고 offline 모드부터 켜지 않습니다. 구형 후보 `Deploy -UseWindowsCA`를 현재 복구 절차로 사용하지 않습니다.
 
 <a id="ees-wrapper-apply"></a>
 
@@ -1896,6 +1923,8 @@ except Exception as e:
 임시 PEM은 부모 프로세스의 TemporaryDirectory 아래에 만들어 자식 종료/timeout 뒤 정리합니다. 인증서 내용·개인키·실제 경로는 출력하지 않으며 `.netrc`/앱 인증 토큰·redirect는 쓰지 않습니다. SSLKEYLOGFILE은 진단 자식 환경에서만 제외해 키 로그를 남기지 않습니다. HTTP 응답 성공은 해당 두 URL에서 CA 입력을 바꾼 결과로 인정하며 기동 지연의 인과나 앱 전체 복구로 확대하지 않습니다. 비교 성공 뒤에는 아래 릴리스별 옵션으로 적용하며, 현재 창의 REQUESTS_CA_BUNDLE만 설정해 등록 스냅샷이 바뀌었다고 보지 않습니다.
 
 <a id="ees-windows-ca-deploy"></a>
+
+다음은 **중단한 후보 Deploy 방식의 과거 안내**입니다. 현재 Apply/Restore 서버의 인증서 복구는 [Start -UseWindowsCA](#ees-start-windows-ca)를 사용합니다.
 
 **CA 비교 성공 후 배포:** `Deploy -UseWindowsCA`는 후보 Python의 표준 SSL 모듈로 Windows ROOT/CA와 기본 인증서 경로에서 CA를 읽습니다. 등록 환경과 작업 폴더를 사용하고 Open WebUI는 import하지 않습니다. 기존 서버를 멈추기 전에 비어 있지 않은 PEM과 해시를 검증하고, 해당 릴리스의 `trusted-ca/<sha256>.pem`에 저장합니다. 기존 파일을 덮어쓰지 않으며 경로 재지정·내용 변경은 거부합니다. CA 준비 실패는 기존 서버를 둔 채 종료됩니다.
 

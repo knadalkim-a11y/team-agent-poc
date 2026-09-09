@@ -2,6 +2,7 @@
 
 import argparse
 from contextlib import redirect_stderr, redirect_stdout
+import hashlib
 import importlib.util
 import io
 import json
@@ -616,7 +617,7 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.assertEqual(self.read()["last_failure"]["recovery_status"], "succeeded")
 
     def test_windows_ca_cli_rejects_other_actions_and_forwards_deploy_option(self):
-        for action in ("init", "status", "diagnose", "probe-imports", "plan", "prepare", "rollback", "start", "stop"):
+        for action in ("init", "status", "diagnose", "probe-imports", "plan", "prepare", "rollback", "stop", "apply", "restore"):
             with self.subTest(action=action), patch.object(MANAGER, "operate") as operate, \
                     redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
                 MANAGER.main([action, "--config", "unused.json", "--use-windows-ca"])
@@ -626,6 +627,18 @@ class DeploymentTransactionTests(unittest.TestCase):
                 patch.object(MANAGER, "switch", return_value={}) as switch, redirect_stdout(io.StringIO()):
             MANAGER.main(["deploy", "--config", "unused.json", "--commit", COMMIT, "--use-windows-ca"])
         self.assertTrue(switch.call_args.kwargs["use_windows_ca"])
+
+    def test_start_windows_ca_rejects_legacy_registry_without_export_or_launch(self):
+        before = MANAGER.registry_path(self.config).read_bytes()
+        args = argparse.Namespace(action="start", config="unused", use_windows_ca=True, health_timeout=120)
+        with patch.object(MANAGER.states, "load_config", return_value=self.config), \
+                patch.object(MANAGER.releases, "prepare_windows_ca") as export, \
+                self.assertRaisesRegex(MANAGER.DeploymentError, "Apply/Restore"):
+            MANAGER.operate(args)
+        export.assert_not_called()
+        self.mocks[5].assert_not_called()
+        self.mocks[6].assert_not_called()
+        self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
 
 
 class ImportProbeIntegrationTests(unittest.TestCase):
@@ -860,7 +873,7 @@ class CustomizationIntegrationTests(unittest.TestCase):
     def args(self, action, **kw):
         return argparse.Namespace(action=action, config="unused", bundle="unused.zip", commit=COMMIT,
                                   check_only=kw.get("check_only", False), resume=kw.get("resume", False),
-                                  health_timeout=120)
+                                  use_windows_ca=kw.get("use_windows_ca", False), health_timeout=120)
 
     def pending(self):
         self.registry["customization"]["pending"] = {
@@ -1114,6 +1127,112 @@ class CustomizationIntegrationTests(unittest.TestCase):
         self.assertEqual(call.kwargs, {"program_path": str(self.root / "program")})
         self.mocks["wait_healthy"].assert_called_once_with({"pid": 123}, timeout=120)
 
+    def test_start_windows_ca_persists_for_original_and_customized_child_only(self):
+        digest = "d" * 64
+        bundle = self.root / "trusted-ca" / (digest + ".pem")
+        self.env.update(REQUESTS_CA_BUNDLE="registered-requests", SSL_CERT_FILE="registered-ssl")
+        registered = dict(self.env)
+        config_before = dict(self.config)
+        for active in (None, self.selection):
+            with self.subTest(customized=bool(active)):
+                self.registry["customization"]["active"] = active
+                self.write()
+                self.mocks["start_server"].reset_mock()
+                with patch.object(MANAGER.releases, "prepare_windows_ca", return_value=digest) as export, \
+                        patch.object(MANAGER.releases, "windows_ca_path", return_value=bundle), \
+                        patch.dict(MANAGER.os.environ, {"SSL_CERT_FILE": "parent-ssl", "REQUESTS_CA_BUNDLE": "parent-requests"}):
+                    result = MANAGER.operate(self.args("start", use_windows_ca=True))
+                    self.assertTrue(result["started"])
+                    export.assert_called_once_with(self.root, "original-python", registered, cwd="original-cwd")
+                    self.assertEqual(MANAGER.read_registry(self.config)["runtime_ca_sha256"], digest)
+                    self.assertEqual(MANAGER.operate(self.args("status"))["ca_mode"], "windows_snapshot")
+                    MANAGER.operate(self.args("stop"))
+                    self.assertEqual(MANAGER.read_registry(self.config)["runtime_ca_sha256"], digest)
+                    self.assertTrue(MANAGER.operate(self.args("start"))["started"])
+                    export.assert_called_once()
+                    self.assertEqual(MANAGER.os.environ["SSL_CERT_FILE"], "parent-ssl")
+                    self.assertEqual(MANAGER.os.environ["REQUESTS_CA_BUNDLE"], "parent-requests")
+                self.assertEqual(self.env, registered)
+                self.assertEqual(self.config, config_before)
+                self.assertEqual(self.mocks["start_server"].call_count, 2)
+                for call in self.mocks["start_server"].call_args_list:
+                    self.assertEqual(call.args[:2], ("original-python", "original-cwd"))
+                    self.assertEqual(call.args[2], dict(registered, REQUESTS_CA_BUNDLE=str(bundle), SSL_CERT_FILE=str(bundle)))
+                    self.assertIsNot(call.args[2], self.env)
+                    self.assertEqual(call.kwargs, {"program_path": str(self.root / "program")} if active else {})
+
+    def test_start_windows_ca_selection_survives_health_timeout(self):
+        digest = "d" * 64
+        self.mocks["wait_healthy"].side_effect = MANAGER.processes.ProcessError("synthetic timeout", reason="health_timeout")
+        with patch.object(MANAGER.releases, "prepare_windows_ca", return_value=digest), \
+                patch.object(MANAGER.releases, "windows_ca_path", return_value=self.root / "synthetic-ca.pem"), \
+                self.assertRaises(MANAGER.processes.ProcessError) as error:
+            MANAGER.operate(self.args("start", use_windows_ca=True))
+        self.assertEqual(error.exception.stage, "health_check")
+        saved = MANAGER.read_registry(self.config)
+        self.assertEqual(saved["runtime_ca_sha256"], digest)
+        self.assertEqual(saved["process"], {"pid": 123})
+        self.assertNotEqual(saved["last_event"], "started_by_operator")
+        self.mocks["stop_server"].assert_not_called()
+
+    def test_start_windows_ca_refuses_live_process_without_export_or_mutation(self):
+        self.registry["process"] = {"pid": 123}
+        self.write()
+        before = MANAGER.registry_path(self.config).read_bytes()
+        self.mocks["verify_identity"].return_value = True
+        with patch.object(MANAGER.releases, "prepare_windows_ca") as export, \
+                self.assertRaisesRegex(MANAGER.DeploymentError, "Stop"):
+            MANAGER.operate(self.args("start", use_windows_ca=True))
+        export.assert_not_called()
+        for name in ("start_server", "stop_server", "wait_healthy"):
+            self.mocks[name].assert_not_called()
+        self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+
+    def test_invalid_runtime_ca_blocks_start_but_does_not_block_stop(self):
+        directory = self.root / "trusted-ca"
+        directory.mkdir()
+        payload = b"synthetic invalid certificate"
+        invalid_digest = hashlib.sha256(payload).hexdigest()
+        (directory / (invalid_digest + ".pem")).write_bytes(payload)
+        tampered_digest = "d" * 64
+        (directory / (tampered_digest + ".pem")).write_bytes(b"changed snapshot")
+        for digest in (None, "not-a-digest", "e" * 64, tampered_digest, invalid_digest):
+            with self.subTest(digest=digest):
+                self.registry["runtime_ca_sha256"] = digest
+                self.write()
+                before = MANAGER.registry_path(self.config).read_bytes()
+                with patch.object(MANAGER.releases, "prepare_windows_ca") as export, \
+                        self.assertRaises(MANAGER.releases.ReleaseError):
+                    MANAGER.operate(self.args("start"))
+                export.assert_not_called()
+                self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+                status = MANAGER.operate(self.args("status"))
+                self.assertFalse(status["program_valid"])
+                self.assertEqual(status["ca_mode"], "windows_snapshot")
+                self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+                self.assertTrue(MANAGER.operate(self.args("stop"))["stopped"])
+                self.assertEqual(MANAGER.read_registry(self.config)["runtime_ca_sha256"], digest)
+        self.mocks["start_server"].assert_not_called()
+        self.mocks["wait_healthy"].assert_not_called()
+
+    def test_start_windows_ca_export_failure_or_busy_port_does_not_launch(self):
+        before = MANAGER.registry_path(self.config).read_bytes()
+        for busy in (False, True):
+            with self.subTest(busy=busy):
+                self.mocks["port_is_free"].return_value = not busy
+                with patch.object(MANAGER.releases, "prepare_windows_ca", side_effect=MANAGER.releases.ReleaseError("synthetic export failure")) as export, \
+                        self.assertRaises((MANAGER.releases.ReleaseError, MANAGER.DeploymentError)):
+                    MANAGER.operate(self.args("start", use_windows_ca=True))
+                self.assertEqual(export.call_count, int(not busy))
+                self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+        for name in ("start_server", "stop_server", "wait_healthy"):
+            self.mocks[name].assert_not_called()
+
+    def test_start_windows_ca_cli_forwards_explicit_selection(self):
+        with patch.object(MANAGER, "operate", return_value={}) as operate, redirect_stdout(io.StringIO()):
+            self.assertEqual(MANAGER.main(["start", "--config", "unused", "--use-windows-ca"]), 0)
+        self.assertTrue(operate.call_args.args[0].use_windows_ca)
+
     def test_health_failure_does_not_switch_or_start_original_automatically(self):
         self.mocks["wait_healthy"].side_effect = MANAGER.processes.ProcessError("synthetic health failure")
         with self.assertRaises(MANAGER.processes.ProcessError):
@@ -1327,6 +1446,16 @@ if ($parseErrors.Count -gt 0) {
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), ["apply", "--config", str(config), "--bundle", "synthetic.zip",
                                                         "--commit", COMMIT, "--check-only", "--resume"])
+            result = subprocess.run(command + ["-Action", "Start", "-Config", str(config), "-UseWindowsCA",
+                "-HealthTimeout", "120", "-Summary"], capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), ["start", "--config", str(config), "--health-timeout", "120",
+                                                        "--use-windows-ca", "--summary"])
+            result = subprocess.run(command + ["-Action", "Apply", "-Config", str(config), "-UseWindowsCA"],
+                                    capture_output=True, text=True, timeout=30)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("UseWindowsCA is supported only with Deploy or Start", result.stderr)
+            self.assertEqual(result.stdout.strip(), "")
             for action in ("Start", "Restore", "Update"):
                 with self.subTest(action=action):
                     result = subprocess.run(command + ["-Action", action, "-Config", str(config), "-Resume"],
