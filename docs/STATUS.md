@@ -8,10 +8,10 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **사용자의 목업 제작 요청에 따라 WO 작성 화면을 먼저 구체화함.** 직접 입력·수정과 규칙 기반 예시 채팅의 같은 폼 반영, AI 변경 표시, 내용 확인 → 사용자 최종 버튼 → 샘플 결과 흐름을 단일 HTML 참고 목업으로 준비함. 실제 AI·EMS 호출과 WebUI 배포는 없으며 입력 항목은 설계 검토용 예시임. [목업과 확인 방법](03-openwebui-native-agent.md#wo-mockup), [검증·미확인 범위](../evals/scenarios.md#wo-mockup).
-- 다음 작업 하나: **사용자가 WO 목업을 조작해 보고 화면·입력·채팅 수정·최종 결정 흐름에 대한 피드백을 주면 반영하고 확인받는다.** 디자인 승인과 실제 EMS 기능 연결은 아직 완료하지 않음. EES 전용 공통 정책 등 기존 실행 계획은 유지하되 이번 명시 요청의 목업을 먼저 진행함.
+- 이번 작업: **기존 WebUI 대화창과 우측 패널을 함께 쓰는 WO 시연용 목업을 준비함.** Python Tool 한 개로 법인·사업장·SHOP·LINE·PROCESS에 따른 샘플 설비 선택, 직접 입력·AI 수정, 사용자 최종 확인·샘플 결과를 연결함. 첫 단독 HTML은 배치 참고로 보존함. 실제 EMS 연결·업무 저장은 없으며 WebUI 등록·사내 모델 동작 확인은 미완료임. [시연 안내](03-openwebui-native-agent.md#wo-mockup), [검증 범위](../evals/scenarios.md#wo-mockup).
+- 다음 작업 하나: **사용자가 기존 사내 WebUI에 시연 Tool을 추가하고 대화·우측 패널의 WO 흐름을 체험한 뒤 피드백을 준다.** 먼저 시연용 목업을 확인하고 피드백 → 운영용 목업 → 실제 EMS 구현 순서로 진행함. 권한 세분화와 상세 운영 설계는 후속이며 이번 시연의 선행 작업으로 확대하지 않음.
 - 완료한 이전 단위: 초기 Rich UI 제거·일반 문장/표/원문 링크 전환의 구현·검증·main 반영에 이어 **제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 확인함.** 개별 Tool 등록 내용·적용 SHA·새 조회/원문 결과의 직접 대조는 미확인으로 유지하며 저장 절차를 반복 안내하지 않음. [적용 보고](../evals/scenarios.md#plain-output-applied-report), [변경·검증](../evals/scenarios.md#prototype-rich-ui-removal).
-- 후속 UI 방향: **준비된 업무 화면을 상황에 맞게 활용하고, 같은 폼에서 사용자 직접 입력과 AI 작성·수정을 함께 지원함.** 클릭 가능한 목업 → 사용자 확인 → 실제 기능 연결 → 업무 흐름 검증 순서를 유지하며 WO 발행 같은 상태 변경은 사용자의 최종 버튼과 서버 검증을 거침. 설계 상세는 [Native 가이드](03-openwebui-native-agent.md#legacy-ui-design)에서 관리함. 현재는 참고 목업 단계이며 EMS 연동·실제 쓰기 기능 구현/허용은 없음.
+- 후속 UI 방향: **준비된 업무 화면을 상황에 맞게 활용하고 같은 폼에서 직접 입력과 AI 작성·수정을 함께 지원함.** 사용자가 확인한 검색 계층은 SHOP → LINE → PROCESS이며, 시연 피드백을 받은 뒤 운영용 화면을 구체화함. 실제 WO 발행은 사용자의 최종 버튼과 서버 검증을 거치는 [설계 기준](03-openwebui-native-agent.md#legacy-ui-design)을 유지하며 현재는 샘플 시연만 제공함.
 - 관리자 공지 후속 요구: 첫 시작의 영어 `새로운 기능 EES Assistant`·v0.11.3 릴리스 노트는 향후 관리자 팀 공지 용도로 활용하고자 함. UI 설계 방향 기록에 팝업 수정·공지 구현은 포함하지 않음.
 
 아래는 **중단한 후보 환경 방식의 구현·진단 이력**이며 현재 재실행 목록이 아닙니다. [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py)와 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)은 보존합니다. 기존 도구의 Rollback을 새 직접 적용 방식의 원복 기능으로 간주하지 않습니다. 마지막 실패와 원인 미확정 상태를 유지하며 관리 방식 변경을 배포 성공으로 기록하지 않습니다.
@@ -53,11 +53,11 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 | 3. 관리자 공통 정책 | EES Assistant에 합성 공통 지침·정책 답변 Skill 저장 보고. 실제 사내 정책 적용은 미완료 | EES 전용 공통 원칙·상세 절차·권한/Tool 제한의 배치와 관리자 변경 반영을 정리 |
 | 4. 관리자 워크플로 | Skill의 절차 지침과 Native 호출 기능은 사용 중. 관리자가 단계·분기·검사를 제어하는 업무 워크플로는 설계 전 | 기존 문서/조회 기능으로 대표 업무 하나를 정하고 입력·단계·분기·완료 조건을 정의. 필요한 제어 수준에 맞춰 구현 수단 선택 |
 | 5. 레거시 시스템 연동 | EMS/APC/FDC의 실제 업무 기능은 미연결 | 승인된 API 또는 Query Broker로 가치가 있는 읽기 기능 하나 연결. 기존 서비스 권한·업무 규칙 활용 |
-| 6. 레거시 간접 UI | WO 작성 참고 목업으로 직접 입력·예시 채팅 수정·최종 결정 흐름 준비. 디자인 승인·실환경 연결은 미완료 | 사용자 피드백을 반영하고 목업을 확인받은 뒤 실제 기능 연결 범위를 정함. [목업](03-openwebui-native-agent.md#wo-mockup) |
+| 6. 레거시 간접 UI | 기존 WebUI 대화·우측 패널을 잇는 WO 시연 Tool 준비. 사내 등록·시연 확인과 실제 EMS 연결은 미완료 | 시연용 목업 → 시연 피드백 → 운영용 목업 → 실제 EMS 구현. [목업](03-openwebui-native-agent.md#wo-mockup) |
 
 **개발 순서:** 1·2의 이름·로고와 래퍼 사내 적용 완료 → 초기 Rich UI 제거·변경 프롬프트 WebUI 반영 완료 보고 → 3의 EES 전용 공통 정책 → 4의 대표 워크플로 하나 → 5·6의 레거시 업무 하나를 함께 연결. 새 UI는 해당 업무 수요를 정하고 목업·사용자 확인을 거쳐 하나씩 구현하며, 4번은 단순 절차 지침과 실행 코드로 보장할 단계를 구분함. [구현 수단 선택](03-openwebui-native-agent.md#managed-policy-workflow)과 [남은 권한·격리 조건](../evals/scenarios.md#validation-timing)을 따름.
 
-2026-09-09 사용자의 명시 요청으로 **6의 WO 목업·피드백을 먼저 진행**합니다. 이는 실제 연동이나 쓰기 허용의 순서를 앞당긴 것이 아니며 공통 정책·대표 워크플로의 미완료 상태는 유지합니다.
+2026-09-09 사용자의 명시 요청으로 **6의 WO 시연용 목업·피드백을 먼저 진행**합니다. 기존 대화창과 우측 패널에서 시연한 뒤 운영용 목업을 정하고 실제 EMS를 연결합니다. 공통 정책·대표 워크플로의 미완료 상태는 유지하며 권한 세분화·상세 운영 설계를 시연의 선행 조건으로 늘리지 않습니다.
 
 현재 첫 공용 파일럿에 준비한 업무 기반은 **범용 채팅 + Confluence·Jira·GitHub 읽기**입니다. 여기에 EES 공통 정책과 대표 워크플로를 적용하는 방향으로 확장합니다. 기존 Tool·Skill·모델 전체를 Public으로 바꿨다는 사용자 보고가 있으며, 개인 환경의 조회 성공과 이 설정 변경을 모든 연동의 일반 사용자 조회·격리 검증 완료로 간주하지 않습니다. GitHub·EMS/APC/FDC 전체 연동이나 Hermes 도입을 MVP 완료 조건으로 두지 않습니다. 파일럿에서 비개발자가 실제 업무 흐름을 완료하고 결과·오류·공유를 이해하는 것까지가 첫 배포의 목표입니다.
 
@@ -70,6 +70,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 | 대상 | Git에서 준비한 것 | WebUI 반영 마지막 확인 | 검증 근거 | 적용 원본 커밋 |
 |---|---|---|---|---|
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
+| WO 시연 목업 | EES WO Demo Tool 한 개와 조건부 Prompt 안내, 샘플 설비·작성 폼·샘플 발행 | 사내 Tool 저장·모델 연결·실제 대화/우측 패널 시연 미확인. 실제 EMS 기능은 미연결 | [시연 검사](../evals/scenarios.md#wo-mockup), [적용 준비](03-openwebui-native-agent.md#wo-mockup) | PR #19 `docs/legacy-ui-workflow` 준비본. main 미병합이며 사내 적용 원본 없음 |
 | 팀 시연용 이름·소개·시작 질문 | 기존 모델 이름·소개·프로필 적용 안내, 제안 JSON 4개·짧은 팀원 안내 | 2026-09-09 EES 서비스 이름·로고 변경을 사용자 보고로 확인. 모델 소개·제안 저장과 팀원 전달은 별도 미확인 | [서비스 이름·로고 확인](../evals/scenarios.md#ees-wrapper-manual-resume), [시연 준비](../evals/scenarios.md#team-demo-customization), [이전 준비](../evals/scenarios.md#team-first-use-preparation), [당시 보류](../evals/scenarios.md#onboarding-deferred) | 서비스 브랜딩은 아래 프로그램 원본. 모델 메타데이터 [제안 JSON](../agent-pack/ees-prompt-suggestions.json)의 사내 적용 원본은 미확인 |
 | EES 프로그램·전달 도구 | 기존 이름·아이콘 wheel/ZIP/Actions 재사용, Apply/CheckOnly·직전 Restore·기존 운영 명령 연결과 한 줄 요약 | Apply/CheckOnly·직전 Restore·운영 연결·오류 보존·수동 승격 후 Resume 구현/Windows/Linux 실제 wheel CI/독립 검토/main 반영 완료(PR #15~17). 2026-09-09 수동 변경 뒤 Apply -Resume=ok/changed true/4a8779bbf3ee/complete/customized, Start=ok/같은 commit/complete/customized/running true와 이름·로고·기존 대화·세 연동 정상 보고. 사내 적용 작업 단위 완료이며 이후 실시간 가동·rename/SSL 원인 해소는 미확정 | [사내 성공과 CI](../evals/scenarios.md#ees-wrapper-manual-resume), [현재 적용 안내](03-openwebui-native-agent.md#ees-wrapper-apply), [구현 검증](../evals/scenarios.md#ees-wrapper-implementation), [준비 성공](../evals/scenarios.md#ees-prepare-completed), [이전 복구](../evals/scenarios.md#ees-original-recovered), [이번 health 실패·복구](../evals/scenarios.md#ees-retransition-health-failure), [프로그램 CI](../evals/scenarios.md#ees-program-deployment) | 프로그램 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`, 내부 ZIP `EES-demo-4a8779bbf3ee.zip`. 운영 코드의 [캐시 복구 추가 원본 15cd88b](https://github.com/knadalkim-a11y/team-agent-poc/commit/15cd88b5a99142c07c4d8cca4dcdd957354d48cb)와 구분. 사내 checkout 전체 SHA 직접 대조 미실행 |
 | 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 2026-09-07 두 지침 UI 저장 보고; 개정 후 P02 PASS, P03 창작 거절 부분 확인, P04~P10 미완료; 실행 시점은 평가표 | [P02~P10 재검증](../evals/scenarios.md#instruction-revision), [기존 지침 갱신](03-openwebui-native-agent.md#update-existing-instructions) | 전달·저장 안내 원본 [dfeb95f](https://github.com/knadalkim-a11y/team-agent-poc/commit/dfeb95fbf96cf6a2bb75a3ba75fac3bc92ed60fc); 등록 내용·사용자 추가 규칙·사내 checkout SHA 직접 대조는 미실행 |
@@ -112,7 +113,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-09: 원격 main `f2e0f9f`와 관련 PR #19 head `f91ff10a`의 지침·상태를 기준으로 사용자가 요청한 WO 참고 목업을 준비함. 기존 Rich UI 제거·프롬프트 반영 보고를 보존하고 현재 작업·다음 작업을 목업 검토로 갱신함. 입력 항목과 예시 채팅은 합성이며 실제 AI·EMS·WebUI 통합, 디자인 승인, 쓰기 권한 확대와 구분함. 실행한 검사와 미확인 범위는 [목업 기록](../evals/scenarios.md#wo-mockup)에 관리함.
+2026-09-09: 사용자의 기존 WebUI 대화·우측 패널 시연 요청, SHOP → LINE → PROCESS 계층과 시연 피드백 후 운영용 목업을 만드는 순서를 반영함. Open WebUI 0.11.3의 execute 이벤트·화면 구조를 대조하여 단일 Tool과 조건부 Prompt 추가로 시연을 준비하고, 첫 HTML·기존 Rich UI 제거·프롬프트 반영 보고는 보존함. 실제 사내 저장·패널 표시·모델의 최신 입력 수정과 시연 피드백은 미확인임. 검사 결과와 제한은 [목업 기록](../evals/scenarios.md#wo-mockup)에서 관리함.
 
 ## 갱신 규칙
 

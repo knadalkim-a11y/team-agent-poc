@@ -4,6 +4,8 @@
 
 ## 2026-09-09
 
+- 기존 Open WebUI 대화창과 우측 패널에서 WO를 체험하는 시연 Tool을 준비함. 법인·사업장·SHOP·LINE·PROCESS의 샘플 설비 선택, 최신 폼 읽기·변경 번호를 대조한 AI 수정과 사용자 최종 버튼의 샘플 결과를 연결함. 단일 Python Tool과 조건부 Prompt 추가로 제공하며 실제 EMS 연결·저장은 없음. 사용자가 시연용 목업 → 피드백 → 운영용 목업 → 실제 EMS 구현 순서를 확정했으며 권한 세분화는 후속으로 둠. [시연 안내와 적용 경계](docs/03-openwebui-native-agent.md#wo-mockup), [검증 기록](evals/scenarios.md#wo-mockup).
+
 - 사용자 요청으로 WO 작성의 클릭 가능한 참고 목업을 준비함. 직접 입력·예시 채팅의 같은 폼 수정·변경 표시·내용 확인·사용자 최종 버튼·샘플 결과 흐름을 단일 HTML에 담으며 실제 AI·EMS 호출과 WebUI 배포는 없음. 입력 항목은 예시이고 디자인 승인·쓰기 권한 확대와 구분함. [목업 안내](docs/03-openwebui-native-agent.md#wo-mockup), [검증 범위](evals/scenarios.md#wo-mockup).
 
 - 사용자 합의로 레거시 업무 화면은 준비된 화면·부품의 상황별 활용과 사람/AI의 같은 폼 편집을 기본으로 정함. 클릭 가능한 목업을 사용자에게 확인받고 실제 기능을 연결하며, WO 발행 같은 상태 변경은 최종 버튼과 서버 검증으로 실행하도록 설계함. 기존 래퍼 안에서 작게 시작하고 실제 반복이 생길 때 공통화함. 설계 방향 기록이며 목업 승인·EMS 연동·쓰기 정책 변경은 아님. [설계 기준](docs/03-openwebui-native-agent.md#legacy-ui-design), [검토와 미구현 범위](evals/scenarios.md#legacy-ui-design).

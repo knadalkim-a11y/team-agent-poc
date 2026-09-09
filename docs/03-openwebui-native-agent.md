@@ -122,16 +122,51 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 
 <a id="wo-mockup"></a>
 
-### WO 작성 참고 목업
+### WO 시연 목업
 
-2026-09-09 사용자 요청으로 [WO 목업 HTML](../agent-pack/skills/ems-work-order/references/wo-mockup.html)을 준비합니다. 같은 화면에서 직접 입력과 채팅 수정을 함께 사용하고, 사용자가 내용을 확인한 뒤 최종 버튼을 누르는 흐름을 검토하는 용도입니다. 단일 HTML 참고 자료이며 배포 Skill·Tool·별도 서버·추가 의존성을 만들지 않습니다.
+사용자가 정한 순서는 **시연용 목업 → 시연 피드백 → 운영용 목업 → 실제 EMS 구현**입니다. 지금은 기존 Open WebUI 대화창을 그대로 쓰고 오른쪽에서 설비를 선택하고 WO 내용을 작성하는 시연을 준비합니다. 실제 업무 항목·권한 세분화를 먼저 상세 설계하지 않습니다. 첫 [단독 HTML 목업](../agent-pack/skills/ems-work-order/references/wo-mockup.html)은 화면 배치 참고로 보존하며, WebUI 시연에는 아래 Python Tool 한 개를 사용합니다.
 
-- 설비·작업 내용 등 입력값은 샘플입니다. 실제 EMS의 필수 필드·허용 값·권한·업무 규칙을 확정한 화면이 아닙니다.
-- 화면에서 내용을 직접 수정하고 예시 채팅으로 작성을 요청하면 같은 폼에 반영하고 바뀐 항목을 표시합니다. 채팅은 규칙 기반 시연임을 표시하며 실제 모델을 호출하지 않습니다.
-- 작성 내용을 확인한 뒤 최종 발행 버튼으로 **샘플 결과**를 표시합니다. 확인 중 내용을 수정하면 이전 확인을 무효로 하고 새 내용을 다시 확인하도록 합니다. 실제 EMS 조회·발행·저장은 없습니다.
-- 확인할 사용 흐름은 직접 입력 → 채팅으로 일부 수정 → 변경 항목 확인 → 최종 내용 확인 → 샘플 발행입니다. 피드백을 반영하고 목업 확인을 받은 뒤 실제 AI/화면 상태 전달·인증된 서버 실행 경로를 구현할 범위를 정합니다.
+- 화면에서 직접 입력하거나 기존 채팅으로 AI에게 수정 요청을 할 수 있습니다. `wo_demo_view`가 현재 화면과 변경 번호를 읽고 `wo_demo_update`가 요청한 항목만 바꿉니다. 그사이 사용자 입력이 바뀌면 이전 변경 번호의 수정을 거부하고 최신 값을 다시 읽도록 합니다.
+- 설비 검색 조건은 **법인 → 사업장 → SHOP → LINE → PROCESS**입니다. 샘플 32개 설비를 사용하며 한국/헝가리/미국 법인, 천안/울산/헝가리 사업장/미국 사업장, 전극/조립 SHOP과 각 1·2라인, 전극의 믹싱·코팅 및 조립의 권취·조립 공정을 제공합니다. 실제 EMS 조회 결과나 확정 스키마가 아닙니다.
+- 사용자가 작성 내용을 확인하고 최종 버튼을 누르면 샘플 WO 결과만 표시합니다. AI에게 실제 발행 기능을 제공하지 않으며 EMS 조회·발행·저장도 하지 않습니다.
+- 작성 내용은 브라우저 메모리에만 있습니다. 같은 대화에서 패널을 닫았다 다시 요청하면 유지하지만 새로고침·대화 이동 시 초기화합니다. 일반 대화에서 사용하며 임시 대화·노트에는 붙이지 않습니다.
 
-WebUI에 설치하거나 현재 읽기 Tool에 연결하는 배포본이 아닙니다. 사외 목업 동작 검사, 사용자 디자인 확인, 실제 업무 기능 구현은 [검증 기록](../evals/scenarios.md#wo-mockup)에서 구분합니다.
+구현은 [wo_demo_tool.py](../agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)의 고정된 화면 코드와 Open WebUI 0.11.3의 [공식 execute 이벤트](https://docs.openwebui.com/features/extensibility/plugin/development/events/#execute-works-with-both-__event_call__-and-__event_emitter__)를 사용합니다. 우측 패널을 붙이는 위치는 [0.11.3 Chat 화면 구조](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte)에 의존하며 공식 업무 패널 등록 API가 아닙니다. 모델이 실행할 JavaScript를 작성하지 않고 정해진 입력값만 전달합니다. 프런트엔드 재빌드·재설치·추가 서버·CDN은 필요하지 않습니다. 사외 검사와 실제 사내 WebUI·모델 동작 확인은 [검증 기록](../evals/scenarios.md#wo-mockup)에서 구분합니다.
+
+**사내 시연 적용 준비:** [PR #19](https://github.com/knadalkim-a11y/team-agent-poc/pull/19)의 `docs/legacy-ui-workflow` 준비본이며 아직 main 배포본이 아닙니다. 아래 명령은 해당 원격 브랜치에서 필요한 파일 두 개만 임시 폴더에 꺼냅니다. 기존 checkout의 브랜치·작업 파일·실행 프로그램을 바꾸지 않습니다. 실제 저장·모델 연결·시연 결과는 사용자 확인 전까지 미완료로 둡니다.
+
+1. 사내 PowerShell에서 다음 블록을 실행하면 준비본을 받고 Tool 코드 전체가 클립보드에 복사됩니다. 실패하면 다음 단계로 넘어가지 않습니다.
+
+   ```powershell
+   & {
+       $ErrorActionPreference = 'Stop'
+       $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+       $eesDemo = Join-Path $env:TEMP 'ees-wo-demo'
+       New-Item -ItemType Directory -Path $eesDemo -Force | Out-Null
+       git -C $eesRepo fetch origin docs/legacy-ui-workflow
+       if ($LASTEXITCODE -ne 0) { throw 'Git fetch failed' }
+       git -C $eesRepo archive FETCH_HEAD --format=zip --output="$eesDemo\source.zip" agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py agent-pack/system-prompts/ees-integrated-assistant.md
+       if ($LASTEXITCODE -ne 0) { throw 'Source export failed' }
+       Expand-Archive -LiteralPath "$eesDemo\source.zip" -DestinationPath $eesDemo -Force
+       Get-Content -LiteralPath "$eesDemo\agent-pack\skills\ems-work-order\scripts\wo_demo_tool.py" -Raw -Encoding UTF8 | Set-Clipboard
+   }
+   ```
+
+2. **Workspace → Tools**에서 새 항목 **EES WO Demo**를 만들고 코드 전체를 붙여 넣어 저장합니다. 새 Skill은 등록하지 않습니다.
+3. 사용 중인 EES 모델의 Tools에 **EES WO Demo만 추가**합니다. 기존 Tool 선택을 해제하지 않습니다.
+4. [공통 Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)의 **WO 시연 도구가 연결된 경우** 절만 현재 프롬프트 끝에 한 번 추가합니다. 기존 프롬프트 전체를 교체하거나 사용자 추가 내용을 지우지 않습니다. 프로그램 Apply·재시작은 필요하지 않습니다.
+
+   ```powershell
+   & {
+       $ErrorActionPreference = 'Stop'
+       $eesPrompt = Get-Content -LiteralPath "$env:TEMP\ees-wo-demo\agent-pack\system-prompts\ees-integrated-assistant.md" -Raw -Encoding UTF8
+       $eesSection = [regex]::Match($eesPrompt, '(?ms)^## WO 시연 도구가 연결된 경우\r?\n.*?(?=^## |\z)')
+       if (-not $eesSection.Success) { throw 'Demo instructions missing' }
+       Set-Clipboard -Value $eesSection.Value.Trim()
+   }
+   ```
+
+**첫 시연:** 기존 EES 대화에서 “WO 시연 열어줘” → 천안 / 조립 / 조립 1라인 / 권취 조건 → `KR-CA-211` 선택·WO 초안 작성 → 화면에서 내용 직접 수정 → 채팅으로 “긴급으로 변경해줘”, “점검 항목을 추가해줘” → 변경 내용 확인 → 최종 확인·샘플 발행 순서로 진행합니다. 화면과 대화가 함께 동작하는지 보고, 시연 피드백으로 운영용 목업을 다듬습니다.
 
 <a id="plain-output-update"></a>
 
