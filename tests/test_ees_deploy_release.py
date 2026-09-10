@@ -252,7 +252,7 @@ class ReleaseTests(unittest.TestCase):
     def prepare_members(self, corrupt_record=False):
         wheel = wheel_bytes(corrupt_record)
         branding = {
-            "schema_version": 1, "upstream_version": "0.11.3", "version": "0.11.3+ees.2",
+            "schema_version": 1, "upstream_version": "0.11.3", "version": "0.11.3+ees.3",
             "source": {"filename": release.branding.SOURCE_FILENAME, "sha256": release.branding.SOURCE_SHA256},
             "wheel": {"filename": release.branding.WHEEL_FILENAME, "sha256": digest(wheel), "size": len(wheel)},
         }
@@ -275,7 +275,7 @@ class ReleaseTests(unittest.TestCase):
 
     def baseline(self, after=False):
         return {"python_version": "3.11.9 (synthetic Windows runtime)", "platform": "win32",
-                "packages": {"open-webui": "0.11.3+ees.2" if after else "0.11.3", "example": "1.0"},
+                "packages": {"open-webui": "0.11.3+ees.3" if after else "0.11.3", "example": "1.0"},
                 "requires": ["example==1.0"]}
 
     def prepare(self, **kwargs):

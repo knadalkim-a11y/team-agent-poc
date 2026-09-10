@@ -28,7 +28,7 @@ def digest(content):
     return hashlib.sha256(content).hexdigest()
 
 
-def make_wheel(extra=None, replacement=None, *, version=branding.VERSION):
+def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missing=()):
     info = f"open_webui-{version}.dist-info/"
     app = f"open_webui/frontend/{branding.PROGRAM_FRONTENDS[version]}/"
     record_name = info + "RECORD"
@@ -44,8 +44,12 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION):
         app + "version.json": json.dumps({"version": version}).encode(),
         app + "immutable/chunks/test.js": b"const title = 'EES Portal';\n",
     }
+    if version == "0.11.3+ees.3":
+        members.update({app + name: b"synthetic checked theme asset\n" for name in branding.THEME_FILES})
     members.update(extra or {})
     members.update(replacement or {})
+    for name in missing:
+        members.pop(name)
     record = io.StringIO()
     writer = csv.writer(record, lineterminator="\n")
     for name, content in members.items():
@@ -117,13 +121,13 @@ class CustomizationTests(unittest.TestCase):
     def restore(self):
         return custom.restore(self.config, self.registry, self.record, OWNER)
 
-    def install_legacy_program(self, *, replacement=None, extra=None):
-        content = make_wheel(version="0.11.3+ees.1", replacement=replacement, extra=extra)
+    def install_legacy_program(self, *, replacement=None, extra=None, version="0.11.3+ees.1"):
+        content = make_wheel(version=version, replacement=replacement, extra=extra)
         with zipfile.ZipFile(io.BytesIO(content)) as wheel:
             wheel.extractall(self.program)
             selection = {"source_commit": "e" * 40, "wheel_sha256": digest(content),
-                         "record_sha256": digest(wheel.read("open_webui-0.11.3+ees.1.dist-info/RECORD")),
-                         "webui_version": "0.11.3+ees.1"}
+                         "record_sha256": digest(wheel.read(f"open_webui-{version}.dist-info/RECORD")),
+                         "webui_version": version}
         self.registry["schema_version"] = 2
         self.registry["customization"] = {"active": selection, "previous": {"active": None}, "pending": None}
         self.registry["runtime_ca_sha256"] = "d" * 64
@@ -213,7 +217,7 @@ class CustomizationTests(unittest.TestCase):
         custom.validate_program(self.program, legacy)
         self.assertEqual(custom.inspect_bundle(self.config, self.bundle, COMMIT, self.env)["webui_version"], branding.VERSION)
         self.assertTrue(self.apply()["changed"])
-        self.assertEqual(self.registry["customization"]["active"]["webui_version"], "0.11.3+ees.2")
+        self.assertEqual(self.registry["customization"]["active"]["webui_version"], branding.VERSION)
         self.assertEqual(self.registry["customization"]["previous"]["active"], legacy)
         self.assertFalse((self.program / "open_webui/frontend/_ees1").exists())
         self.assertEqual(self.restore()["source_commit"], legacy["source_commit"])
@@ -222,8 +226,8 @@ class CustomizationTests(unittest.TestCase):
         self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
         self.assertFalse(self.restore()["changed"])
 
-    def test_legacy_before_portal_pending_can_resume_and_restore(self):
-        legacy = self.install_legacy_program()
+    def test_ees2_before_theme_pending_can_resume_and_restore(self):
+        legacy = self.install_legacy_program(version="0.11.3+ees.2")
         self.interrupt_promotion()
         pending = self.registry["customization"]["pending"]
         self.assertEqual(pending["before"], legacy)
@@ -233,6 +237,34 @@ class CustomizationTests(unittest.TestCase):
         self.assertEqual(self.restore()["source_commit"], legacy["source_commit"])
         custom.validate_program(self.program, legacy)
         self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
+
+    def test_ees2_theme_upgrade_checkonly_apply_and_restore_preserve_runtime(self):
+        previous = self.install_legacy_program(version="0.11.3+ees.2")
+        before = self.tree()
+        self.assertEqual(custom.inspect_bundle(self.config, self.bundle, COMMIT, self.env)["webui_version"],
+                         "0.11.3+ees.3")
+        self.assertEqual(before, self.tree())
+        self.assertTrue(self.apply()["changed"])
+        selected = self.registry["customization"]["active"]
+        custom.validate_program(self.program, selected)
+        for relative in branding.THEME_FILES:
+            self.assertTrue((self.program / branding.TARGET_APP / relative).is_file())
+        self.assertFalse((self.program / "open_webui/frontend/_ees2").exists())
+        self.assertFalse(self.apply()["changed"])
+        self.assertEqual(self.restore()["source_commit"], previous["source_commit"])
+        custom.validate_program(self.program, previous)
+        self.assertEqual(before, self.tree())
+        self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
+
+    def test_theme_assets_missing_from_otherwise_valid_record_stop_before_changes(self):
+        for relative in branding.THEME_FILES:
+            with self.subTest(relative=relative):
+                self.write_bundle(make_wheel(missing=(branding.TARGET_APP + relative,)))
+                before = self.tree()
+                with self.assertRaises(custom.CustomizationError):
+                    self.apply()
+                self.assertEqual(before, self.tree())
+                self.assertEqual(self.events, [])
 
     def test_interrupted_legacy_restore_keeps_legacy_record_until_cleanup(self):
         legacy = self.install_legacy_program()

@@ -103,6 +103,8 @@ def _record_rows(content, *, allow_packaging=False, version=branding.VERSION):
     record_name = info + "RECORD"
     required = {record_name, info + "METADATA", info + "WHEEL", "open_webui/__init__.py",
                 "open_webui/env.py", "open_webui/main.py", "open_webui/frontend/index.html", app + "version.json"}
+    if version == "0.11.3+ees.3":
+        required.update(app + name for name in branding.THEME_FILES)
     rows = {}
     folded = set()
     try:

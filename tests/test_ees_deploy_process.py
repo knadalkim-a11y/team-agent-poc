@@ -648,23 +648,25 @@ def serve(*, host, port):
         self.assertEqual(selected[7:], [str(self.program), self.version, self.info.name, self.frontend_name])
 
     def test_legacy_selected_version_launches_after_wrapper_update(self):
-        legacy = '0.11.3+ees.1'
-        legacy_info = self.program / f'open_webui-{legacy}.dist-info'
-        self.info.rename(legacy_info)
-        (legacy_info / 'METADATA').write_text(f'Name: open-webui\nVersion: {legacy}\n', encoding='utf-8')
-        frontend = self.package / 'frontend'
-        (frontend / self.frontend_name).rename(frontend / '_ees1')
-        (frontend / '_ees1/version.json').write_text(json.dumps({'version': legacy}), encoding='utf-8')
-        result = subprocess.run(self.command(version=legacy), cwd=self.cwd, env=self.env,
-                                capture_output=True, text=True, timeout=15)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(json.loads((self.cwd / 'observed.json').read_text(encoding='utf-8'))['version'], legacy)
+        for legacy, namespace in (('0.11.3+ees.1', '_ees1'), ('0.11.3+ees.2', '_ees2')):
+            with self.subTest(version=legacy):
+                self.setUp()
+                legacy_info = self.program / f'open_webui-{legacy}.dist-info'
+                self.info.rename(legacy_info)
+                (legacy_info / 'METADATA').write_text(f'Name: open-webui\nVersion: {legacy}\n', encoding='utf-8')
+                frontend = self.package / 'frontend'
+                (frontend / self.frontend_name).rename(frontend / namespace)
+                (frontend / namespace / 'version.json').write_text(json.dumps({'version': legacy}), encoding='utf-8')
+                result = subprocess.run(self.command(version=legacy), cwd=self.cwd, env=self.env,
+                                        capture_output=True, text=True, timeout=15)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(json.loads((self.cwd / 'observed.json').read_text(encoding='utf-8'))['version'], legacy)
 
     def test_unsupported_and_mixed_release_arguments_refuse_app_import(self):
-        for version in ('0.11.3+ees.3', [], '0.11.3'):
+        for version in ('0.11.3+ees.4', [], '0.11.3'):
             with self.subTest(version=version), self.assertRaises(manager.ProcessError):
                 self.command(version=version)
-        for index, value in ((8, '0.11.3+ees.3'), (9, 'open_webui-0.11.3+ees.1.dist-info'), (10, '_ees1')):
+        for index, value in ((8, '0.11.3+ees.4'), (9, 'open_webui-0.11.3+ees.1.dist-info'), (10, '_ees1')):
             command = self.command()
             command[index] = value
             with self.subTest(index=index):
