@@ -1,6 +1,6 @@
 # 버전 및 환경 기준
 
-문서 갱신일: 2026-09-08. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
+문서 갱신일: 2026-09-09. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
 
 ## Open WebUI 대상 환경
 
@@ -13,7 +13,7 @@
 | 로컬 접속 예제 | http://127.0.0.1:8080 | 신규 설치 예제. 현재 서버는 등록한 기존 LAN IP·포트 사용 |
 | 작업 디렉터리 예제 | %LOCALAPPDATA%\EES-Agent-POC\open-webui | 신규 설치 예제. 기존 서버는 등록된 cwd 유지 |
 | DATA_DIR 예제 | 위 예제 작업 디렉터리의 data 폴더 | 신규 설치 예제. 기존 서버는 등록된 data_dir 유지; Git 제외 |
-| 표시 이름 | 공식본: EES Assistant (Open WebUI) / EES 패키지: EES Assistant | 사내 브랜딩 전환은 미확인 |
+| 표시 이름 | 새 기본값: EES Portal (공식본은 Open WebUI 접미사), ees.2 브랜딩: EES Portal | 사내 마지막 확인은 ees.1의 EES Assistant. Portal 적용은 미확인 |
 | 모델·프록시 | 승인된 사내 값; 저장소에는 placeholder | 실제 주소·키·모델 경로는 Git에 저장하지 않음 |
 
 이 표의 예제 경로를 이미 등록한 서버에 다시 적용하지 않습니다. 실제 Python·작업 위치·DATA_DIR·수신 주소는 사내 등록 설정이 원본이며 값을 추측하거나 재등록하지 않습니다. [기존 등록과 기록 위치](docs/03-openwebui-native-agent.md#ees-local-state)를 따릅니다.
@@ -22,7 +22,7 @@
 
 프로그램 운영 스크립트는 Windows의 기존 Python 3.11·Open WebUI 0.11.3·로컬 SQLite/Chroma 구성 등록과 uv 0.12.7 오프라인 준비를 대상으로 합니다. 새 환경은 기존 Python 패치 버전과 전체 의존성 버전을 그대로 유지합니다. 별도 Windows/Linux CI의 합성 서버 검증과 사내 실제 전환을 구분합니다. [운영 명령](docs/03-openwebui-native-agent.md#기존-windows-서버에-적용).
 
-브랜딩 배포물은 **0.11.3+ees.1**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 위 표와 STATUS의 실제 적용 기록으로 구분합니다. 아래 Selector 실행 파일은 공식 0.11.3만 허용하고 현재 미적용이므로 EES 전환에 함께 사용하지 않습니다.
+새 브랜딩 배포물은 **0.11.3+ees.2**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 위 표와 STATUS의 실제 적용 기록으로 구분합니다. 이미 적용된 ees.1과 새 ees.2의 시작·직전 Restore를 지원하며, 새 Apply에는 ees.2 프로그램 ZIP을 사용합니다. 아래 Selector 실행 파일은 공식 0.11.3만 허용하고 현재 미적용이므로 EES 전환에 함께 사용하지 않습니다.
 
 Windows 접속 수락 오류용 [선택 실행 파일](scripts/serve_openwebui_windows.py)은 위 WebUI·Python 버전과 공식 고정 의존성 **Uvicorn 0.51.0**, 기존 SQLite·단일 worker에 한정합니다. 별도 설치·업그레이드를 수행하지 않으며 실제 사내 의존성 버전은 아직 미대조입니다. 사전검사에서 다르면 기존 환경을 보존한 채 검토합니다. [Selector 제한·적용 조건](docs/troubleshooting.md#windows-accept-winerror64).
 

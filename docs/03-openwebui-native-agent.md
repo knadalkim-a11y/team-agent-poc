@@ -612,7 +612,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 | 별도 가상환경에 전체 의존성 복제 | 제외. 중단한 후보 환경 방식이며 현재 커스터마이징에 불필요 |
 | 수정된 Open WebUI 프로그램만 별도 위치에 두고 기존 Python/의존성 사용 | 채택. 기존 브랜딩 wheel을 재사용하고 실제 교체 범위를 앱 파일로 제한 |
 
-`build_ees_webui.py`의 공식 wheel SHA·정확한 패치 위치/횟수 확인·이름/아이콘 변경·manifest/RECORD 생성은 재사용합니다. **현재 manifest의 changed_files는 설치용 파일 목록이 아닙니다.** `_app/`에서 `_ees1/`로의 전체 frontend 이동과 버전 metadata 변경도 있으므로 일부 파일 복사 대신 검증된 앱과 metadata 전체를 함께 적용합니다. 다른 upstream 버전·의존성 변경·범용 wheel 설치는 이번 지원 범위가 아닙니다. 공식 wheel에 함께 들어 있는 Docker 참고 파일 `requirements-min.txt`·`data/readme.txt`는 전체 wheel 해시/RECORD 검증 후 추출에서 제외합니다. 앱·metadata만 포함한 RECORD를 재생성하고 원본 wheel 해시와 별도로 기록하므로 보존한 프로그램 ZIP을 그대로 사용할 수 있습니다.
+`build_ees_webui.py`의 공식 wheel SHA·정확한 패치 위치/횟수 확인·이름/아이콘 변경·manifest/RECORD 생성은 재사용합니다. **현재 manifest의 changed_files는 설치용 파일 목록이 아닙니다.** 공식 `_app/`에서 브랜딩별 `_ees1/`(기존)·`_ees2/`(새 Portal)로의 전체 frontend 이동과 버전 metadata 변경도 있으므로 일부 파일 복사 대신 검증된 앱과 metadata 전체를 함께 적용합니다. 다른 upstream 버전·의존성 변경·범용 wheel 설치는 이번 지원 범위가 아닙니다. 공식 wheel에 함께 들어 있는 Docker 참고 파일 `requirements-min.txt`·`data/readme.txt`는 전체 wheel 해시/RECORD 검증 후 추출에서 제외합니다. 앱·metadata만 포함한 RECORD를 재생성하고 원본 wheel 해시와 별도로 기록하므로 보존한 프로그램 ZIP을 그대로 사용할 수 있습니다.
 
 #### 실행 경로와 데이터 경계
 
@@ -624,11 +624,12 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 #### 관리자 작업
 
-진입점은 기존 `manage-ees.ps1` 하나를 유지합니다. 사내 실행은 [적용 안내](#ees-wrapper-apply)를 사용하며, 구현 브랜치/PR과 main 반영 상태를 [STATUS](STATUS.md)에서 먼저 구분합니다.
+진입점은 기존 `manage-ees.ps1` 하나를 유지합니다. 일상 업데이트는 [Upgrade 안내](#ees-wrapper-upgrade), 수동 전달·복구는 [Apply/Restore 안내](#ees-wrapper-apply)를 사용하며, 구현 브랜치/PR과 main 반영 상태를 [STATUS](STATUS.md)에서 먼저 구분합니다.
 
 | 작업 | 동작·끝나는 조건 |
 |---|---|
 | 기존 Update | 래퍼 Git 갱신만 수행. 서버·프로그램을 자동 교체하지 않음 |
+| `Upgrade` | main CI 확인·래퍼 갱신·호환 프로그램 ZIP 다운로드/검증 후 기존 Stop/Apply/Start 실행. 이미 적용된 프로그램은 재시작 생략. [최초 준비·결과 안내](#ees-wrapper-upgrade) |
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA> -CheckOnly` | 저장 설정·버전/의존성 요구·전달물·설치 경로와 적용 가능 여부를 읽어 표시. 앱 import·서버 중지·쓰기 없음 |
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA>` | 서버가 종료됐음을 확인한 뒤 검증된 프로그램만 적용. 같은 커밋/해시이면 변경 없음. 자동 시작·health 대기 없음 |
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA> -Resume` | promote에서 중단된 실제 적용의 폴더를 사용자가 옮긴 뒤, 같은 ZIP·기록·전체 파일을 대조해 완료 기록만 남김. 파일 이동/추출·자동 시작 없음. `-CheckOnly`를 함께 쓰면 읽기 검증만 수행 |
@@ -636,7 +637,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 | 기존 Start / Stop / Status | 같은 interpreter/cwd/데이터로 시작·정상 종료·상태 표시. 실제 앱 원본/사내 수정 여부와 적용 커밋을 구분 |
 | `Start -UseWindowsCA` | 종료된 서버에 Windows 신뢰 CA 스냅샷을 선택하고 시작. 이후 일반 Start에서도 재사용. [SSL 복구 절차](#ees-start-windows-ca) |
 
-일상 흐름은 **CheckOnly → Stop → Apply → Start → 변경 부분 확인**입니다. 사전 확인이 실패하면 서버를 중지하지 않습니다. 적용 실패 시 서버를 자동으로 다른 프로그램으로 시작하지 않고 결과에서 멈춥니다. 필요하면 사용자가 Stop 상태를 확인하고 Restore·Start를 실행합니다. 기존 Start의 한 번의 명시적 health 대기만 사용하며, 같은 실패를 자동 반복하거나 후보 import 검사를 붙이지 않습니다.
+일상 흐름은 **Upgrade → 변경 부분 확인**이며, 내부에서 전달물·사전 확인을 마친 뒤 필요한 경우에만 Stop → Apply → Start를 실행합니다. 수동 Apply도 같은 순서를 따릅니다. 사전 확인이 실패하면 서버를 중지하지 않습니다. 적용 실패 시 결과에서 멈추며 필요하면 사용자가 상태를 확인하고 명시적 Resume 또는 Restore·Start를 실행합니다. 기존 Start의 한 번의 health 대기만 사용하며 같은 실패를 자동 반복하지 않습니다.
 
 전달물은 기존 CI·Git 전달 방식을 재사용합니다. `Apply/Restore/Start/Stop/Status -Summary`는 상태·변경 여부·적용 커밋·실패 단계·프로그램 선택을 한 줄로 출력합니다. `-Summary`를 사용한 Apply/Restore/Start/Stop의 마지막 상세 결과는 `state_root/last-operation.json`에 저장하며, CheckOnly와 Status는 결과 파일이나 잠금을 쓰지 않습니다. 상세 결과 저장이 실패하면 `report=unavailable`로 표시하므로 이전 파일을 새 결과로 해석하지 않습니다. 파일 적용과 실제 기동 결과를 구분하고 외부 전달은 **마지막 요약과 화면 확인 1~2줄**로 제한합니다. 이미 실행한 결과를 요약 형식 때문에 다시 측정하지 않습니다. Tool/Skill/Prompt는 지금처럼 바뀐 항목만 기존 ID에 반영하며 자동 API 동기화는 추가하지 않습니다.
 
@@ -676,7 +677,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 |---|---|---|
 | 모델 이름·소개·빠른 제안 | 기존 모델 ID의 메타데이터. [소개·제안 적용](#first-use-entry), 프로필은 [EES 아이콘](../branding/ees/assets/favicon.png) | 반영 전 이름·소개·제안·프로필만 복구 |
 | 공통 Prompt·Skill·Tool | 커밋별 Agent Pack ZIP에서 바뀐 항목만 기존 ID에 반영 | 실제 적용했던 직전 커밋의 해당 항목 |
-| 서비스 이름·아이콘 | 기존 `open_webui-0.11.3+ees.1-py3-none-any.whl`과 브랜딩 manifest를 재사용 가능 | 변경 전 프로그램 복원·같은 DATA_DIR/키/접속 설정 유지. [Apply/Restore 안내](#ees-wrapper-apply) 사용 |
+| 서비스 이름·아이콘 | EES Portal의 새 `open_webui-0.11.3+ees.2-py3-none-any.whl`과 브랜딩 manifest. 기존 ees.1 보관본은 Restore에 사용 | 변경 전 프로그램 복원·같은 DATA_DIR/키/접속 설정 유지. [Apply/Restore 안내](#ees-wrapper-apply) 사용 |
 
 <a id="ees-start-windows-ca"></a>
 
@@ -704,15 +705,69 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 다시 실패하면 마지막 EES 줄의 실패 단계만 전달하고 같은 긴 대기나 재설치를 반복하지 않습니다. 인증서 해결만으로 모든 다운로드 호스트 접근·모델 캐시 확보가 보장되지는 않습니다. 캐시가 없다는 신호가 있는 동안 오류를 숨기려고 offline 모드부터 켜지 않습니다. 구형 후보 `Deploy -UseWindowsCA`를 현재 복구 절차로 사용하지 않습니다.
 
+<a id="ees-portal-name"></a>
+
+#### EES Portal로 서비스 이름 변경
+
+2026-09-09 요청에 따라 서비스 표시 이름을 **EES Portal**로 변경합니다. 브라우저 탭·로그인/초기 화면·서비스명을 쓰는 알림/채널 제목과 SVG 접근성 이름이 대상입니다. 새 브랜딩은 `0.11.3+ees.2`, frontend 경로는 `/_ees2/`로 구분해 기존 JavaScript 캐시와 섞이지 않도록 합니다. E 아이콘 그림과 기반 Open WebUI 0.11.3·Python·의존성은 유지합니다.
+
+등록된 환경의 WEBUI_NAME이 옛 이름 `EES Assistant`이면 새 프로그램이 `EES Portal`로 표시합니다. config/DPAPI를 직접 수정하지 않으며 별도로 지정한 다른 이름은 보존합니다. 기존 ees.1 보관본을 Restore하면 그 프로그램의 이름 규칙으로 돌아갑니다. 래퍼 Update 직후에도 설치된 ees.1을 시작·검증·복원할 수 있도록 선택 기록의 버전별 metadata/RECORD/frontend 경로를 확인합니다. 새 Apply 전달물은 ees.2로 제한하며 메타데이터와 캐시 경로가 섞인 프로그램은 거부합니다.
+
+서비스 이름과 채팅에서 선택하는 **EES Assistant Workspace Model**은 구분합니다. 이번 변경은 모델 ID·표시 이름·Prompt·Skill·Tool 연결과 공통 정책 범위를 바꾸지 않습니다. WO 목업의 서비스 표기는 Tool v0.1.7에서 EES Portal로 바뀌며, [기존 WO Tool 코드 갱신 절차](#wo-mockup)로 같은 등록 항목의 코드만 바꿉니다. 새 등록·Prompt 갱신·동작 재설계는 필요하지 않습니다.
+
+**반영 순서:** main 반영 및 해당 CI 성공 → [Upgrade 실행](#ees-wrapper-upgrade) → 브라우저 새로고침 → 기존 WO Tool 코드 갱신. Upgrade가 새 프로그램 ZIP과 원본 커밋을 선택하며 이미 선택한 Windows CA를 재사용합니다. 자동 다운로드 경로를 사용할 수 없어 수동 전달하는 경우 아래 Apply 안내를 따릅니다. 이전 `EES-demo-4a8779bbf3ee.zip`은 새 이름이 없어 이번 Portal 적용에 재사용하지 않습니다. WO Tool 등록 코드는 이번 Upgrade가 자동 반영하지 않습니다.
+
+확인은 브라우저 탭/로그인 화면의 EES Portal 표시와 기존 대화 접근, 갱신한 업무 패널의 Portal 표기로 한정합니다. 일반 조회·인증·정책 검사를 다시 처음부터 수행하지 않습니다. 실제 사내 적용은 [STATUS](STATUS.md), 준비·검증은 [변경 기록](../evals/scenarios.md#ees-portal-name)에서 구분합니다.
+
+<a id="ees-wrapper-upgrade"></a>
+
+#### 사내 명령 한 번으로 업데이트
+
+**이 변경이 main에 반영되고 EES delivery CI와 프로그램 산출물 생성이 성공한 뒤 사용합니다.** 이미 등록한 Windows 계정·기존 checkout·Python 환경이 필요합니다. `Upgrade`는 프로그램·래퍼 업데이트만 처리하고 WebUI에 저장한 Tool·Skill·Prompt는 기존 등록 절차로 관리합니다.
+
+최초 한 번은 기존 스크립트의 `Update`로 새 명령을 받은 뒤 같은 블록에서 실행합니다. 아래 블록은 저장소 폴더가 기존 안내 위치인 경우이며 앞 단계 실패 시 멈춥니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    Set-Location (Join-Path $env:USERPROFILE 'team-agent-poc')
+    .\scripts\manage-ees.ps1 -Action Update
+    .\scripts\manage-ees.ps1 -Action Upgrade
+}
+```
+
+그다음부터 저장소 폴더에서 실행할 명령은 하나입니다. `-Summary`를 생략해도 마지막 결과를 짧게 출력합니다.
+
+```powershell
+.\scripts\manage-ees.ps1 -Action Upgrade
+```
+
+**첫 실행의 인증:** 사내 PowerShell에 표시되는 숨김 입력창에 GitHub 읽기 토큰을 입력합니다. 비공개 저장소는 fine-grained PAT에서 이 저장소만 선택하고 **Actions: Read-only**를 부여합니다. Git fetch 인증은 기존 Git 설정을 사용합니다. 토큰은 현재 Windows 사용자만 복호화하는 DPAPI로 `state_root/github-update.dpapi`에 저장하고 이후 재사용합니다. 만료·교체 시 `-Action Upgrade -ResetUpdateToken`으로 다시 입력합니다. 실제 PAT를 명령 인수·채팅·Git에 넣거나 외부로 전달하지 않습니다.
+
+GitHub URL에 저장된 기존 Git 프록시 설정을 API·artifact 다운로드에도 사용하고 TLS 검증을 유지합니다. **Git 접속 성공과 GitHub API·실제 artifact 저장소 접속은 별개**이며 사내의 정확한 다운로드 경로·프록시 인증 동작은 아직 미확인입니다. 접근 실패는 짧은 오류로 끝내고 서버를 중지하지 않습니다.
+
+실행은 다음 순서입니다.
+
+1. origin이 지정 HTTPS 저장소이고 브랜치가 main이며 추적 파일에 로컬 수정이 없는지 확인합니다. main을 fetch하고 그 커밋의 성공한 EES delivery CI를 확인한 뒤 fast-forward합니다. 래퍼가 바뀌면 갱신된 Python 코드로 이어서 실행합니다.
+2. 새 main과 프로그램 빌드 입력이 같은 조상 커밋 중 가장 최근의 유효한 프로그램 artifact를 선택합니다. 임의의 최신 ZIP·실패한 CI·Agent Pack 전용 ZIP으로 대체하지 않습니다. 해당 프로그램이 없거나 만료됐다면 관리자가 Actions의 **EES delivery → Run workflow → main → include_branding=true**로 생성하고 성공 뒤 다시 실행합니다. Upgrade가 workflow를 자동 실행하거나 쓰기 토큰을 요구하지 않습니다.
+3. 바깥 artifact ZIP의 digest를 확인하고 안쪽 EES-demo ZIP을 자동 선택합니다. manifest·프로그램 해시·버전/의존성과 등록 상태를 확인한 뒤 기존 잠금·Stop/Apply/Start를 사용합니다. Python·의존성 전체 재설치와 데이터·키 재생성은 없습니다. Start의 정상 응답 확인은 기본 120초로 한 번만 수행합니다.
+4. 적용 기록과 현재 설치본이 일치하면 다운로드와 재시작을 생략합니다. 다른 커밋의 ZIP이라도 프로그램 wheel이 같으면 다시 시작하지 않습니다. 이 경우에도 현재 관리 프로세스·정상 응답을 확인하고, 정지/비정상이면 실패를 알리며 자동 복구하지 않습니다.
+
+마지막 `EES action=upgrade` 줄에서 `wrapper`는 래퍼 커밋, `commit`은 실제 프로그램 원본입니다. 두 값은 달라도 정상일 수 있으며 `changed`는 프로그램 변경, `wrapper_changed`는 래퍼 변경입니다. `result=ok` 후 브라우저를 새로고침하고 Portal 이름·기존 대화 접근을 확인합니다. 외부에는 마지막 요약과 화면 확인 1~2줄만 입력합니다.
+
+실패 시 `stage/code/next`로 다음 행동을 구분합니다. `check_ci`는 main CI/프로그램 산출물, `check_download_access`는 사내 다운로드 접근, `reset_update_token`은 인증, `check_status`는 현재 서버 상태를 확인하라는 뜻입니다. 원문 오류·토큰·내부 경로를 전달하지 않습니다. 자세한 결과는 사내 `state_root/last-operation.json`에 남으며 저장 실패는 `report=unavailable`로 표시합니다. 다운로드·사전 검사 실패는 서버 종료 전에 멈추지만 이미 끝난 래퍼 Git 갱신을 되돌리지는 않습니다.
+
+Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `result.bundle`에 보존합니다. 이 기록과 현재 미완료 상태를 대조해 기존의 **명시적 Apply -Resume 또는 Restore**를 선택합니다. 과거 ees.1 고정 ZIP 명령을 새 실패에 그대로 재사용하지 않습니다. 자동 재시도·되돌리기는 없고 health 시간 초과 뒤에도 서버가 늦게 켜질 수 있으므로 Start/Upgrade를 반복하기 전에 현재 상태를 확인합니다. [수동 복구 조건](#ees-wrapper-manual-promote), [검증·사내 적용 경계](../evals/scenarios.md#ees-wrapper-upgrade).
+
 <a id="ees-wrapper-apply"></a>
 
-#### 사내 적용·확인 안내
+#### 수동 ZIP 적용·확인 안내
 
 **구현본이 main에 반영되고 해당 CI가 통과한 뒤 사용합니다.** 현재 게시·검증 상태는 [STATUS](STATUS.md), 실제 사내 결과는 [구현 기록](../evals/scenarios.md#ees-wrapper-implementation)에서 구분합니다. 이미 등록한 운영 PowerShell과 `%USERPROFILE%\team-agent-poc` checkout을 사용하며 최초 Init·후보 Prepare·pandas 진단을 반복하지 않습니다. 기존 저장 설정과 Python이 있어야 하며 누락·불일치는 사전 확인에서 중단합니다.
 
-프로그램 ZIP은 보존 중인 `EES-demo-4a8779bbf3ee.zip`과 전체 프로그램 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`을 재사용할 수 있습니다. Apply는 이 ZIP의 해시·wheel·대상 버전/의존성·앱 경로를 다시 확인합니다. 운영 코드 최신 HEAD를 프로그램 Commit에 넣지 않으며, Agent Pack 전용 ZIP이나 후보 venv를 새 전달물로 사용하지 않습니다.
+현재 새 Apply에는 EES Portal `0.11.3+ees.2`를 포함한 프로그램 ZIP과 그 ZIP의 `manifest.json`에 있는 전체 `source_commit`을 사용합니다. [전달물 준비](#release-delivery)의 프로그램 포함 산출물을 선택하며, 과거 ees.1 ZIP의 재사용은 이번 새 이름 적용 절차가 아닙니다. Apply는 새 ZIP의 해시·wheel·대상 버전/의존성·앱 경로를 다시 확인합니다. 운영 코드 최신 HEAD를 프로그램 Commit에 넣지 않으며, Agent Pack 전용 ZIP이나 후보 venv를 새 전달물로 사용하지 않습니다.
 
-`$eesBundle`의 자리표시자만 보존한 ZIP의 **파일명과 `.zip` 확장자까지 포함한 전체 경로**로 바꿉니다. Downloads 같은 폴더만 지정하면 실패합니다. 경로를 채팅에 알려줄 필요는 없습니다. 아래 블록은 **Git 갱신 → 읽기 전용 사전 확인 → 정상 종료 → 프로그램 적용 → 명시적인 시작** 순서입니다. 앞 단계가 실패하면 그 자리에서 멈춥니다. 특히 CheckOnly 실패 시 Stop을 실행하지 않습니다. 기존 프로세스를 식별하지 못하거나 포트가 사용 중이면 임의 종료하지 않습니다. 자동 전환·복구·재시도 없이 첫 기동의 health 확인을 최대 120초로 요청하며, 시간 초과를 배포 성공으로 해석하지 않습니다. 기존 기본값이나 등록 설정은 바꾸지 않습니다.
+`$eesBundle`에는 **파일명과 `.zip` 확장자까지 포함한 새 ZIP의 전체 경로**, `$eesProgramCommit`에는 manifest의 40자리 source_commit을 넣습니다. Downloads 같은 폴더만 지정하면 실패합니다. 경로를 채팅에 알려줄 필요는 없습니다. 아래 블록은 **Git 갱신 → 읽기 전용 사전 확인 → 정상 종료 → 프로그램 적용 → 명시적인 시작** 순서입니다. 앞 단계가 실패하면 그 자리에서 멈춥니다. 특히 CheckOnly 실패 시 Stop을 실행하지 않습니다. 기존 프로세스를 식별하지 못하거나 포트가 사용 중이면 임의 종료하지 않습니다. 자동 전환·복구·재시도 없이 첫 기동의 health 확인을 최대 120초로 요청하며, 시간 초과를 배포 성공으로 해석하지 않습니다. 기존 기본값이나 등록 설정은 바꾸지 않습니다.
 
 ```powershell
 & {
@@ -720,8 +775,8 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
     $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
     $eesManager = Join-Path $eesRepo 'scripts\manage-ees.ps1'
     & $eesManager -Action Update
-    $eesBundle = '보존한 EES-demo-4a8779bbf3ee.zip의 전체 경로'
-    $eesProgramCommit = '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
+    $eesBundle = '새 EES Portal 프로그램 ZIP의 전체 경로'
+    $eesProgramCommit = '이 ZIP manifest.json의 40자리 source_commit'
     & $eesManager -Action Apply -Bundle $eesBundle -Commit $eesProgramCommit -CheckOnly -Summary
     & $eesManager -Action Stop -Summary
     & $eesManager -Action Apply -Bundle $eesBundle -Commit $eesProgramCommit -Summary
@@ -729,11 +784,11 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 }
 ```
 
-성공한 경우 기존 주소에서 강력 새로고침 한 번 뒤 **EES 이름·아이콘, 기존 대화 유지, 일반 채팅 스트리밍과 대표 조회 한 건**을 함께 확인합니다. 대표 조회는 기존에 쓰던 Confluence·Jira·GitHub 중 하나면 충분합니다. 인증/저장·20회 안정성 등 완료한 전수 검사를 반복하지 않습니다. 외부에는 아래 두 줄만 직접 타이핑하며 경로·주소·로그·파일·사진은 전달하지 않습니다.
+이번 이름 변경이 성공하면 기존 주소에서 새로고침 뒤 **탭/로그인 화면의 EES Portal 이름과 기존 대화 접근**을 확인합니다. 새 기능 연결을 포함한 다른 프로그램 변경 때는 그 변경에 해당하는 대표 흐름 한 건을 추가합니다. 인증/저장·20회 안정성 등 완료한 전수 검사를 반복하지 않습니다. 외부에는 아래 두 줄만 직접 타이핑하며 경로·주소·로그·파일·사진은 전달하지 않습니다.
 
 ```text
 마지막 EES 줄: action=... result=... changed=... commit=... stage=... program=... running=...
-화면: 이름·아이콘=정상/미확인, 기존 대화=유지/미확인, 채팅·대표 조회=정상/미확인
+화면: Portal 이름=정상/미확인, 기존 대화=유지/미확인
 ```
 
 실패하면 마지막 `EES` 줄에서 `action/result/stage`와 표시된 `error/errno/winerror/at`만 한 줄로 전달합니다. 일반 파일/상태 예외의 `at`는 저장소 내부 코드 파일명/행이며 개인 경로나 원문 오류는 출력하지 않습니다. `stage`는 작업 종류일 수 있으므로 코드 위치와 함께 판단하고, 이미 실패한 Apply를 새 출력 형식을 얻기 위해 반복하지 않습니다. 이전 버전의 `local_state_or_file_unavailable`만 남은 오류는 원래 예외를 복원할 수 없습니다. [이번 보완과 사내 실패 근거](../evals/scenarios.md#ees-wrapper-error-evidence). PowerShell에서 먼저 막혀 EES 줄이 없다면 실패한 작업명과 짧은 오류 종류만 전달하고 나머지 명령을 실행하지 않습니다. `result=ok`인 Apply는 프로그램 파일 적용 성공이며, Start의 health와 화면 확인까지 완료해야 실제 사내 적용 성공으로 기록합니다. 마지막 서버 가동 보고는 현재 상태로 간주하지 않습니다.
@@ -743,6 +798,8 @@ Start의 `stage=health_check` 시간 초과는 지정한 시간 안에 정상 �
 <a id="ees-wrapper-manual-promote"></a>
 
 #### 탐색기에서 실제 프로그램 폴더를 옮긴 뒤 적용 완료
+
+아래 고정 ZIP·커밋 명령은 **ees.1 최초 적용 당시의 복구 안내**입니다. 현재 Portal 신규 적용에는 [새 프로그램 ZIP 절차](#ees-wrapper-apply)를 사용하며, 기존 미완료 ees.1 기록의 재개가 필요할 때만 그 기록·보존한 전달물을 별도로 대조합니다.
 
 2026-09-09 사내 별도 프로그램 복사본에서 Python의 rename 실패 뒤 같은 폴더의 탐색기 이름 변경 성공을 보고받았습니다. 실행 프로세스와 경과 시간이 함께 달라졌으므로 Python 결함이나 특정 보안 제품을 원인으로 단정하지 않습니다. 원인을 알아내기 위한 반복 검사 대신, 사용자가 폴더를 옮기고 래퍼가 검증·완료하는 명시적 경로를 지원합니다. 시험용 `done-*`은 운영 적용 기록에 속하지 않으므로 채택하지 않습니다.
 
@@ -822,9 +879,9 @@ Resume은 정상 작업 잠금과 서버 종료·포트 검사를 유지합니�
 
 ### 검사와 전달물 생성
 
-PR과 관련 main 변경에 Python 3.11 / Windows·Linux의 패키징 시험, 문서·diff 점검을 실행합니다. main에서는 `EES-demo-<commit>.zip`을 Actions artifact로 생성합니다. Prompt·Skill 수정만 있으면 작은 Agent Pack 묶음만 만들며 브랜딩 자산·패키징 도구/검사·workflow가 바뀐 커밋에만 프로그램 wheel도 포함합니다. 기존 커밋의 프로그램을 다시 만들려면 Actions → **EES delivery → Run workflow → include_branding**을 선택합니다. 자동 검사에는 패키징, 배포 상태·백업, 고정 의존성의 오프라인 설치, 실제 합성 서버의 시작·정상 종료가 포함됩니다. 개별 업무 Tool 기능 시험·사내 Open WebUI 사용 확인을 대신하지 않습니다.
+관련 PR과 모든 main 변경에 Python 3.11 / Windows·Linux의 패키징 시험, 문서·diff 점검을 실행합니다. Upgrade가 정확한 main HEAD의 성공 CI를 요구하므로 main은 문서만 바뀌어도 검사합니다. main에서는 `EES-demo-<commit>.zip`을 Actions artifact로 생성합니다. Prompt·Skill 수정만 있으면 작은 Agent Pack 묶음만 만들며 브랜딩 자산·패키징 도구/검사·workflow가 바뀐 커밋에만 프로그램 wheel도 포함합니다. 프로그램을 다시 만들려면 Actions → **EES delivery → Run workflow → main → include_branding=true**를 선택합니다. 자동 검사에는 패키징, 배포 상태·백업, 고정 의존성의 오프라인 설치, 실제 합성 서버의 시작·정상 종료와 Upgrade의 선택/다운로드/실패 경계가 포함됩니다. 개별 업무 Tool 기능 시험·사내 Open WebUI 사용 확인을 대신하지 않습니다.
 
-Artifacts 보존 기간은 14일입니다. 적용할 ZIP과 직전 배포 ZIP은 승인된 내부 위치에 보관합니다. ZIP의 `manifest.json`에 원본 커밋·파일별 SHA-256/크기를 기록하며 브랜딩 포함 시 그 manifest도 넣습니다. 배포 도구는 Git 추적 파일 중 정한 경로만 포함하고 `.env`·DB·키·비추적 파일을 제외합니다. 운영 데이터나 사용자 작성물을 Git/전달 폴더에 넣지 않습니다.
+프로그램 포함 artifact는 `ees-program-<40자리 SHA>`로 **90일**, Agent Pack 전용은 `ees-demo-<40자리 SHA>`로 **14일** 보존합니다. 한 실행에서는 둘 중 해당하는 artifact 한 개만 만들며 안쪽 ZIP 이름은 계속 `EES-demo-<commit>.zip`입니다. Upgrade는 이름으로 프로그램 산출물을 구분하고 내용도 검증합니다. 적용할 ZIP과 직전 배포 ZIP은 승인된 내부 위치에 보관합니다. ZIP의 `manifest.json`에 원본 커밋·파일별 SHA-256/크기를 기록하며 브랜딩 포함 시 그 manifest도 넣습니다. 배포 도구는 Git 추적 파일 중 정한 경로만 포함하고 `.env`·DB·키·비추적 파일을 제외합니다. 운영 데이터나 사용자 작성물을 Git/전달 폴더에 넣지 않습니다.
 
 로컬 개발 환경에서도 다음 명령으로 만들 수 있습니다. 실제 배포에는 검토한 clean checkout을 사용하며 로컬 개발용 `--allow-dirty` 산출물은 미커밋 상태로 표시됩니다.
 
@@ -842,7 +899,7 @@ python scripts/build_demo_bundle.py --output-dir dist/delivery --branding-dir di
 
 [브랜딩 빌더](../scripts/build_ees_webui.py)는 공식 wheel의 고정 SHA-256과 패치 위치를 확인한 뒤 별도 파일을 만듭니다. 이름 기본값·자동 접미사·브라우저 제목/알림·아이콘을 변경하고, frontend 경로를 릴리스별로 바꿔 이전 JavaScript 캐시와 분리합니다. upstream 라이선스·주석·의존성 요구는 보존하고 wheel RECORD를 다시 계산합니다. 버전·원본 파일이나 패치 위치가 다르면 중단합니다. 임의 버전에 패치를 강제 적용하지 않습니다.
 
-아이콘은 저장소의 SVG가 원본입니다. 수정할 때만 개발 환경의 CairoSVG 2.8.2·Pillow 12.3.0과 시스템 Cairo로 [렌더 스크립트](../scripts/render_ees_brand_assets.py)를 실행하고 파생 파일을 함께 커밋합니다. 일반 wheel 빌드와 사내 서버에는 이 렌더 의존성이 필요하지 않습니다. 다음 브랜딩 변경은 패키지 버전·frontend 경로를 함께 올려 별도 릴리스로 관리합니다.
+아이콘은 저장소의 SVG가 원본입니다. 그림을 수정할 때만 개발 환경의 CairoSVG 2.8.2·Pillow 12.3.0과 시스템 Cairo로 [렌더 스크립트](../scripts/render_ees_brand_assets.py)를 실행하고 파생 파일을 함께 커밋합니다. 일반 wheel 빌드와 사내 서버에는 이 렌더 의존성이 필요하지 않습니다. 다음 브랜딩 변경은 패키지 버전·frontend 경로를 함께 올려 별도 릴리스로 관리합니다.
 
 ### 데이터 보존과 사내 자동화 계획
 

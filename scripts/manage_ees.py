@@ -420,7 +420,9 @@ def start_selected(config, selected, env, registry, health_timeout=DEFAULT_HEALT
     try:
         identity = processes.start_server(executable, config["cwd"], child_env,
                                           config["host"], config["port"], Path(config["state_root"]) / "logs",
-                                          **({"program_path": str(program)} if program else {}))
+                                          **({"program_path": str(program),
+                                              "program_version": registry["customization"]["active"]["webui_version"]}
+                                             if program else {}))
     except processes.LaunchUncertain as error:
         progress["log_id"] = safe_log_id(getattr(error, "log_id", None))
         registry["phase"] = "recovery_required"

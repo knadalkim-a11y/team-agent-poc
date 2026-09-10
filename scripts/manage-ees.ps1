@@ -5,7 +5,7 @@ Settings and data stay outside Git. This does not synchronize Agent Pack items.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('Init', 'Update', 'Status', 'Diagnose', 'ProbeImports', 'Plan', 'Prepare', 'Deploy', 'Rollback', 'Start', 'Stop', 'Apply', 'Restore')]
+    [ValidateSet('Init', 'Update', 'Upgrade', 'Status', 'Diagnose', 'ProbeImports', 'Plan', 'Prepare', 'Deploy', 'Rollback', 'Start', 'Stop', 'Apply', 'Restore')]
     [string]$Action,
     [string]$Config = (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'),
     [string]$SourcePython,
@@ -23,21 +23,40 @@ param(
     [switch]$CheckOnly,
     [switch]$Resume,
     [switch]$Summary,
+    [switch]$ResetUpdateToken,
     [string]$GitProxy
 )
 
 $ErrorActionPreference = 'Stop'
+if ($ResetUpdateToken -and $Action -ne 'Upgrade') { throw 'ResetUpdateToken is supported only with Upgrade.' }
+if ($Action -eq 'Upgrade' -and ($Bundle -or $Commit -or $Wheelhouse -or $GitProxy)) {
+    throw 'Upgrade selects a verified artifact and reuses the saved Git proxy; omit Bundle/Commit/Wheelhouse/GitProxy.'
+}
 if ($UseWindowsCA -and $Action -notin @('Deploy', 'Start')) {
     throw 'UseWindowsCA is supported only with Deploy or Start.'
 }
 if ($CheckOnly -and $Action -ne 'Apply') { throw 'CheckOnly is supported only with Apply.' }
 if ($Resume -and $Action -ne 'Apply') { throw 'Resume is supported only with Apply.' }
-if ($Summary -and $Action -notin @('Apply', 'Restore', 'Start', 'Stop', 'Status')) {
-    throw 'Summary is supported with Apply/Restore/Start/Stop/Status only.'
+if ($Summary -and $Action -notin @('Apply', 'Restore', 'Start', 'Stop', 'Status', 'Upgrade')) {
+    throw 'Summary is supported with Apply/Restore/Start/Stop/Status/Upgrade only.'
 }
 $repoPath = Split-Path $PSScriptRoot -Parent
 
 if ($Action -eq 'Update') {
+    # Registered Update shares the same lock as program operations. The
+    # original Git-only bootstrap remains available before initial registration.
+    if (Test-Path -LiteralPath $Config -PathType Leaf) {
+        $updateConfig = Get-Content -LiteralPath $Config -Raw -Encoding UTF8 | ConvertFrom-Json
+        $updatePython = $updateConfig.source_python
+        if (-not $updatePython -or -not (Test-Path -LiteralPath $updatePython -PathType Leaf)) {
+            throw 'The registered Python environment is unavailable; preserve the existing installation.'
+        }
+        $updateArgs = @('-I', '-B', (Join-Path $PSScriptRoot 'ees_upgrade.py'), '--config', $Config, '--update-only')
+        if ($GitProxy) { $updateArgs += @('--git-proxy', $GitProxy) }
+        & $updatePython @updateArgs
+        if ($LASTEXITCODE -ne 0) { throw 'EES update stopped; use the final EES summary.' }
+        return
+    }
     $gitArgs = @('-C', $repoPath)
     if ($GitProxy) { $gitArgs = @('-c', "http.proxy=$GitProxy") + $gitArgs }
     $branch = & git @gitArgs branch --show-current
@@ -67,6 +86,14 @@ if (-not $operatorPython -or -not (Test-Path -LiteralPath $operatorPython -PathT
     throw 'The registered Python environment is unavailable. Preserve its uv cache and inspect the existing installation.'
 }
 $pythonOptions = @('-I', '-B')
+if ($Action -eq 'Upgrade') {
+    $upgradeArgs = $pythonOptions + @((Join-Path $PSScriptRoot 'ees_upgrade.py'), '--config', $Config)
+    if ($PSBoundParameters.ContainsKey('HealthTimeout')) { $upgradeArgs += @('--health-timeout', "$HealthTimeout") }
+    if ($ResetUpdateToken) { $upgradeArgs += '--reset-token' }
+    & $operatorPython @upgradeArgs
+    if ($LASTEXITCODE -ne 0) { throw 'EES upgrade stopped; use the final EES summary.' }
+    return
+}
 if ($Action -in @('Diagnose', 'ProbeImports')) { $pythonOptions += @('-S', '-B') }
 $pythonAction = $Action.ToLowerInvariant()
 if ($Action -eq 'ProbeImports') { $pythonAction = 'probe-imports' }

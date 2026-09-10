@@ -28,18 +28,21 @@ def digest(content):
     return hashlib.sha256(content).hexdigest()
 
 
-def make_wheel(extra=None, replacement=None):
+def make_wheel(extra=None, replacement=None, *, version=branding.VERSION):
+    info = f"open_webui-{version}.dist-info/"
+    app = f"open_webui/frontend/{branding.PROGRAM_FRONTENDS[version]}/"
+    record_name = info + "RECORD"
     members = {
-        branding.TARGET_INFO + "METADATA": ("Metadata-Version: 2.1\nName: open-webui\nVersion: " + branding.VERSION +
+        info + "METADATA": ("Metadata-Version: 2.1\nName: open-webui\nVersion: " + version +
                                                "\nRequires-Dist: example==1.0\n").encode(),
-        branding.TARGET_INFO + "WHEEL": b"Wheel-Version: 1.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
-        branding.TARGET_INFO + "licenses/LICENSE": b"synthetic license\n",
+        info + "WHEEL": b"Wheel-Version: 1.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
+        info + "licenses/LICENSE": b"synthetic license\n",
         "open_webui/__init__.py": b"raise RuntimeError('never import this application')\n",
         "open_webui/env.py": b"# synthetic env module\n",
         "open_webui/main.py": b"# synthetic main module\n",
-        "open_webui/frontend/index.html": b"<title>EES Assistant</title>\n",
-        branding.TARGET_APP + "version.json": json.dumps({"version": branding.VERSION}).encode(),
-        branding.TARGET_APP + "immutable/chunks/test.js": b"const title = 'EES Assistant';\n",
+        "open_webui/frontend/index.html": b"<title>EES Portal</title>\n",
+        app + "version.json": json.dumps({"version": version}).encode(),
+        app + "immutable/chunks/test.js": b"const title = 'EES Portal';\n",
     }
     members.update(extra or {})
     members.update(replacement or {})
@@ -47,8 +50,8 @@ def make_wheel(extra=None, replacement=None):
     writer = csv.writer(record, lineterminator="\n")
     for name, content in members.items():
         writer.writerow([name, "sha256=" + base64.urlsafe_b64encode(hashlib.sha256(content).digest()).rstrip(b"=").decode(), str(len(content))])
-    writer.writerow([custom.RECORD, "", ""])
-    members[custom.RECORD] = record.getvalue().encode()
+    writer.writerow([record_name, "", ""])
+    members[record_name] = record.getvalue().encode()
     output = io.BytesIO()
     with zipfile.ZipFile(output, "w") as wheel:
         for name, content in members.items():
@@ -113,6 +116,18 @@ class CustomizationTests(unittest.TestCase):
 
     def restore(self):
         return custom.restore(self.config, self.registry, self.record, OWNER)
+
+    def install_legacy_program(self, *, replacement=None, extra=None):
+        content = make_wheel(version="0.11.3+ees.1", replacement=replacement, extra=extra)
+        with zipfile.ZipFile(io.BytesIO(content)) as wheel:
+            wheel.extractall(self.program)
+            selection = {"source_commit": "e" * 40, "wheel_sha256": digest(content),
+                         "record_sha256": digest(wheel.read("open_webui-0.11.3+ees.1.dist-info/RECORD")),
+                         "webui_version": "0.11.3+ees.1"}
+        self.registry["schema_version"] = 2
+        self.registry["customization"] = {"active": selection, "previous": {"active": None}, "pending": None}
+        self.registry["runtime_ca_sha256"] = "d" * 64
+        return selection
 
     def interrupt_promotion(self, commit=COMMIT, *, manually_promote=True):
         staged = self.root / "state" / "program.staging"
@@ -190,6 +205,69 @@ class CustomizationTests(unittest.TestCase):
         self.assertNotEqual(second, first)
         self.assertFalse(self.restore()["changed"])
         self.assertEqual([path.name for path in (self.root / "state").iterdir()], ["program"])
+
+    def test_installed_legacy_apply_portal_restore_preserves_original_runtime_and_ca(self):
+        legacy = self.install_legacy_program()
+        files = self.tree()
+        custom.validate_registry(self.registry)
+        custom.validate_program(self.program, legacy)
+        self.assertEqual(custom.inspect_bundle(self.config, self.bundle, COMMIT, self.env)["webui_version"], branding.VERSION)
+        self.assertTrue(self.apply()["changed"])
+        self.assertEqual(self.registry["customization"]["active"]["webui_version"], "0.11.3+ees.2")
+        self.assertEqual(self.registry["customization"]["previous"]["active"], legacy)
+        self.assertFalse((self.program / "open_webui/frontend/_ees1").exists())
+        self.assertEqual(self.restore()["source_commit"], legacy["source_commit"])
+        custom.validate_program(self.program, legacy)
+        self.assertEqual(self.tree(), files)
+        self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
+        self.assertFalse(self.restore()["changed"])
+
+    def test_legacy_before_portal_pending_can_resume_and_restore(self):
+        legacy = self.install_legacy_program()
+        self.interrupt_promotion()
+        pending = self.registry["customization"]["pending"]
+        self.assertEqual(pending["before"], legacy)
+        self.assertEqual(pending["target"]["webui_version"], branding.VERSION)
+        custom.validate_registry(self.registry)
+        self.assertTrue(self.resume()["changed"])
+        self.assertEqual(self.restore()["source_commit"], legacy["source_commit"])
+        custom.validate_program(self.program, legacy)
+        self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
+
+    def test_interrupted_legacy_restore_keeps_legacy_record_until_cleanup(self):
+        legacy = self.install_legacy_program()
+        original_unlink = Path.unlink
+        deleted = 0
+        def unlink(path, *args, **kwargs):
+            nonlocal deleted
+            if self.program in path.parents:
+                deleted += 1
+                if deleted == 2:
+                    raise KeyboardInterrupt()
+            return original_unlink(path, *args, **kwargs)
+        with mock.patch.object(Path, "unlink", unlink), self.assertRaises(KeyboardInterrupt):
+            self.restore()
+        self.assertEqual(self.registry["customization"]["pending"]["target"], legacy)
+        self.assertTrue((self.program / "open_webui-0.11.3+ees.1.dist-info/RECORD").is_file())
+        self.assertTrue(self.restore()["original_program"])
+        self.assertFalse(self.program.exists())
+        self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
+
+    def test_legacy_selection_rejects_mixed_metadata_and_frontend(self):
+        variants = (
+            ({"open_webui-0.11.3+ees.1.dist-info/METADATA": b"Name: open-webui\nVersion: 0.11.3+ees.2\n"}, None),
+            ({"open_webui/frontend/_ees1/version.json": b'{"version":"0.11.3+ees.2"}'}, None),
+            (None, {"open_webui/frontend/_ees2/extra.js": b"mixed release"}),
+        )
+        for replacement, extra in variants:
+            with self.subTest(replacement=replacement):
+                legacy = self.install_legacy_program(replacement=replacement, extra=extra)
+                with self.assertRaises(custom.CustomizationError):
+                    custom.validate_program(self.program, legacy)
+                shutil.rmtree(self.program)
+        self.write_bundle(make_wheel(version="0.11.3+ees.1"))
+        with self.assertRaises(release.ReleaseError):
+            custom.inspect_bundle(self.config, self.bundle, COMMIT, self.env)
 
     def test_wheel_install_paths_hooks_metadata_frontend_and_record_rejected(self):
         variants = [make_wheel(extra={name: b"unexpected"}) for name in (
@@ -706,7 +784,7 @@ class RealBrandingWheelTests(unittest.TestCase):
             self.assertEqual(distributions[0].version, branding.VERSION)
             self.assertEqual(Path(distributions[0].locate_file("")), program)
             self.assertEqual(json.loads((program / (branding.TARGET_APP + "version.json")).read_bytes())["version"], branding.VERSION)
-            self.assertIn(b"EES Assistant", (program / "open_webui/frontend/index.html").read_bytes())
+            self.assertIn(b"EES Portal", (program / "open_webui/frontend/index.html").read_bytes())
             # v0.11.3 config.py rewrites package/static from frontend/static
             # at startup. Reproduce those file operations without app imports.
             static = program / "open_webui/static"

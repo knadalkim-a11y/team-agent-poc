@@ -512,7 +512,7 @@ const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert
   } finally {
     Element.prototype.attachShadow = originalAttachShadow;
   }
-  assert.deepEqual(initialFailure.error.diagnostic, { script_version: '0.1.6', stage: 'initial_render', exception: 'TypeError' });
+  assert.deepEqual(initialFailure.error.diagnostic, { script_version: '0.1.7', stage: 'initial_render', exception: 'TypeError' });
   assert.equal(recovery.window.__eesWODemoManagerV1.chats.size, 0);
   assert.equal(recovery.host(), undefined); assert.equal(recovery.launcher(), undefined);
   let recovered = ok(await recovery.call('equipment'));
@@ -536,7 +536,7 @@ const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert
   } finally {
     recoveredShadow.getElementById = originalGetElementById;
   }
-  assert.deepEqual(renderFailure.error.diagnostic, { script_version: '0.1.6', stage: 'equipment_render', exception: 'Error' });
+  assert.deepEqual(renderFailure.error.diagnostic, { script_version: '0.1.7', stage: 'equipment_render', exception: 'Error' });
   assert.deepEqual(Object.keys(renderFailure.error).sort(), ['code', 'diagnostic', 'message']);
   assert.equal(JSON.stringify(renderFailure).includes(privateMarker), false);
   assert.equal(recovery.host(), recoveredHost); assert.equal(recovery.window.__eesWODemoV1, recoveredController);
