@@ -6,6 +6,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -1401,6 +1402,158 @@ class CustomizationIntegrationTests(unittest.TestCase):
         self.assertIn("error=FileNotFoundError errno=2", output.getvalue())
         self.assertNotIn("synthetic-private", output.getvalue())
         self.assertEqual(before, {path.name: path.read_bytes() for path in self.root.iterdir()})
+
+    def test_direct_stop_failure_is_saved_with_log_id_in_summary_and_plain_modes(self):
+        private = "synthetic-private-stop-exception"
+        log_id = "server-" + "d" * 32 + ".log"
+        self.registry["process"] = {"pid": 123, "log_file": str(self.root / log_id)}
+        self.write()
+        for summary in (False, True):
+            with self.subTest(summary=summary):
+                error = MANAGER.processes.ProcessError(private, operation="process_wait", reason="stop_timeout",
+                    elapsed_seconds=30.25, timeout_seconds=30)
+                self.mocks["stop_server"].side_effect = error
+                output, stderr = io.StringIO(), io.StringIO()
+                with redirect_stdout(output), redirect_stderr(stderr):
+                    argv = ["stop", "--config", "unused"] + (["--summary"] if summary else [])
+                    if summary:
+                        self.assertEqual(MANAGER.main(argv), 1)
+                    else:
+                        with self.assertRaises(SystemExit) as caught:
+                            MANAGER.main(argv)
+                        self.assertEqual(caught.exception.code, 1)
+                saved = json.loads((self.root / "last-failure.json").read_bytes())
+                self.assertEqual(saved, json.loads((self.root / "last-operation.json").read_bytes()))
+                self.assertEqual(saved["action"], "stop")
+                self.assertTrue(saved["failed"])
+                self.assertEqual(saved["result"]["stage"], "process_stop")
+                self.assertEqual(saved["result"]["reason"], "stop_timeout")
+                detail = saved["result"]["process"]
+                self.assertEqual(detail["log_id"], log_id)
+                self.assertEqual(detail["operation"], "process_wait")
+                self.assertEqual(detail["reason"], "stop_timeout")
+                self.assertEqual(detail["elapsed_seconds"], 30.25)
+                self.assertEqual(detail["timeout_seconds"], 30)
+                self.assertNotIn(private, json.dumps(saved))
+                self.assertEqual(MANAGER.read_registry(self.config)["process"], self.registry["process"])
+                if summary:
+                    self.assertIn("operation=process_wait reason=stop_timeout seconds=30.25 timeout=30", output.getvalue())
+                    self.assertNotIn(private, output.getvalue())
+
+    def test_direct_apply_os_failure_is_saved_without_raw_text_in_both_modes(self):
+        private = "synthetic-private-apply-PAT-and-path"
+        for summary in (False, True):
+            with self.subTest(summary=summary):
+                error = PermissionError(13, private, private)
+                error.winerror = 5
+                output, stderr = io.StringIO(), io.StringIO()
+                with patch.object(MANAGER.customization, "apply", side_effect=error), \
+                        redirect_stdout(output), redirect_stderr(stderr):
+                    argv = ["apply", "--config", "unused", "--bundle", "unused.zip", "--commit", COMMIT]
+                    if summary:
+                        self.assertEqual(MANAGER.main(argv + ["--summary"]), 1)
+                    else:
+                        with self.assertRaises(SystemExit) as caught:
+                            MANAGER.main(argv)
+                        self.assertEqual(caught.exception.code, 1)
+                saved = json.loads((self.root / "last-failure.json").read_bytes())
+                self.assertEqual(saved, json.loads((self.root / "last-operation.json").read_bytes()))
+                self.assertEqual(saved["action"], "apply")
+                self.assertTrue(saved["failed"])
+                self.assertEqual(saved["result"]["stage"], "apply")
+                detail = saved["result"]["local_error"]
+                self.assertEqual((detail["type"], detail["errno"], detail["winerror"]), ("PermissionError", 13, 5))
+                self.assertNotIn(private, output.getvalue() + stderr.getvalue() + json.dumps(saved))
+                self.mocks["start_server"].assert_not_called()
+
+
+class OperationFailureRetentionTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name).resolve()
+        self.config = {"state_root": str(self.root)}
+        self.args = argparse.Namespace(action="upgrade", config="synthetic.json", check_only=False)
+        replacement = patch.object(MANAGER.states, "load_config", return_value=self.config)
+        self.load = replacement.start()
+        self.addCleanup(replacement.stop)
+        self.failure = {"stage": "apply", "local_error": {"type": "PermissionError", "errno": 13,
+                          "winerror": 5, "source": "ees_upgrade.py", "line": 277}}
+
+    def snapshot(self):
+        return {path.name: path.read_bytes() for path in self.root.iterdir()}
+
+    def test_failure_is_retained_across_update_and_status_then_replaced_only_by_new_failure(self):
+        protected = {self.root / "webui.db": b"synthetic DB bytes", self.root / "secret.key": b"synthetic key"}
+        for path, data in protected.items():
+            path.write_bytes(data)
+        self.assertTrue(MANAGER.save_operation(self.args, self.failure, failed=True))
+        retained = (self.root / "last-failure.json").read_bytes()
+        self.assertEqual(json.loads(retained), json.loads((self.root / "last-operation.json").read_bytes()))
+        self.args.action = "update"
+        self.assertTrue(MANAGER.save_operation(self.args, {"stage": "complete", "changed": False}))
+        self.assertEqual((self.root / "last-failure.json").read_bytes(), retained)
+        self.assertEqual(json.loads((self.root / "last-operation.json").read_bytes())["action"], "update")
+        before_status = self.snapshot()
+        self.args.action = "status"
+        self.assertTrue(MANAGER.save_operation(self.args, {"stage": "complete"}))
+        self.assertEqual(self.snapshot(), before_status)
+        self.args.action = "stop"
+        newer = {"stage": "process_stop", "process": {"reason": "stop_timeout"}}
+        self.assertTrue(MANAGER.save_operation(self.args, newer, failed=True))
+        current = json.loads((self.root / "last-failure.json").read_bytes())
+        self.assertEqual(current["action"], "stop")
+        self.assertTrue(current["failed"])
+        self.assertEqual(current["result"], newer)
+        self.assertEqual(current, json.loads((self.root / "last-operation.json").read_bytes()))
+        for path, data in protected.items():
+            self.assertEqual(path.read_bytes(), data)
+
+    def test_check_only_and_status_never_load_config_or_write_failure_history(self):
+        for populated in (False, True):
+            with self.subTest(populated=populated):
+                if populated:
+                    (self.root / "last-operation.json").write_bytes(b"synthetic previous result")
+                    (self.root / "last-failure.json").write_bytes(b"synthetic previous failure")
+                before = self.snapshot()
+                for action, check_only in (("apply", True), ("status", False)):
+                    args = argparse.Namespace(action=action, config="synthetic.json", check_only=check_only)
+                    for failed in (True, False):
+                        self.assertTrue(MANAGER.save_operation(args, self.failure, failed=failed))
+                self.assertEqual(self.snapshot(), before)
+                self.load.assert_not_called()
+
+    def test_linked_report_destinations_reject_all_writes_and_preserve_both_records(self):
+        self.assertTrue(MANAGER.save_operation(self.args, self.failure, failed=True))
+        before = self.snapshot()
+        for name in ("last-operation.json", "last-failure.json"):
+            for kind in ("hard", "symbolic"):
+                with self.subTest(name=name, kind=kind):
+                    target, outside = self.root / name, self.root / "synthetic-unrelated.json"
+                    if kind == "hard":
+                        try:
+                            os.link(target, outside)
+                        except OSError:
+                            self.skipTest("This volume cannot create a hard link for the guard check.")
+                    else:
+                        target.rename(outside)
+                        try:
+                            target.symlink_to(outside)
+                        except OSError:
+                            outside.rename(target)
+                            self.skipTest("Symbolic link creation needs an unavailable platform privilege.")
+                    try:
+                        self.assertFalse(MANAGER.save_operation(self.args, {"new": "failure"}, failed=True))
+                        for filename, data in before.items():
+                            self.assertEqual((self.root / filename).read_bytes(), data)
+                        self.assertEqual(outside.read_bytes(), before[name])
+                    finally:
+                        if kind == "symbolic":
+                            target.unlink()
+                            outside.rename(target)
+                        else:
+                            outside.unlink()
+        self.assertEqual(self.snapshot(), before)
 
 
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell adapter execution requires pwsh")

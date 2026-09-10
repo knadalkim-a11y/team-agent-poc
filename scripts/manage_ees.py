@@ -36,11 +36,13 @@ class DeploymentError(RuntimeError):
 FAILURE_STAGES = frozenset({
     "preflight", "select_program", "port_check", "process_start", "process_record",
     "health_check", "process_stop", "stop_record", "backup", "backup_record", "switch_record",
+    "inspect_bundle", "apply", "restore",
 })
 ERROR_TYPES = frozenset({"launch_uncertain", "process", "state", "release", "deployment", "os_error", "unexpected"})
 RECOVERY_STATES = frozenset({"not_attempted", "blocked", "failed", "succeeded"})
 FAILURE_REASONS = ("health_timeout", "process_exited", "identity_unavailable", "identity_changed",
-                   "launch_failed", "launch_unverified", "termination_failed", "termination_timeout")
+                   "launch_failed", "launch_unverified", "termination_failed", "termination_timeout",
+                   "stop_signal_failed", "stop_helper_failed", "stop_helper_timeout", "stop_timeout")
 
 
 def safe_log_id(value):
@@ -66,7 +68,8 @@ def safe_failure_detail(value):
         "stage": value.get("stage") if value.get("stage") in tuple(FAILURE_STAGES) else "preflight",
         "error_type": value.get("error_type") if value.get("error_type") in tuple(ERROR_TYPES) else "unexpected",
         "operation": value.get("operation") if value.get("operation") in (
-            "port_probe", "port_bind", "process_open", "process_inspect", "process_terminate", "process_wait") else None,
+            "port_probe", "port_bind", "process_open", "process_inspect", "process_terminate", "process_wait",
+            "console_attach", "console_signal", "stop_helper") else None,
         "errno": value.get("errno") if type(value.get("errno")) is int else None,
         "winerror": value.get("winerror") if type(value.get("winerror")) is int else None,
         "reason": value.get("reason") if value.get("reason") in FAILURE_REASONS else None,
@@ -452,7 +455,15 @@ def stop_registered(config, registry, *, progress=None):
     if registry.get("launch_uncertain"):
         raise DeploymentError("A launched process could not be identified. Inspect and stop that process locally before recovering the deployment record.")
     if registry.get("process"):
-        processes.stop_server(registry["process"])
+        log_file = registry["process"].get("log_file")
+        progress["log_id"] = safe_log_id(Path(log_file).name) if isinstance(log_file, str) else None
+        try:
+            processes.stop_server(registry["process"])
+        except processes.ProcessError as error:
+            error.stage = "process_stop"
+            if not error.log_id:
+                error.log_id = progress["log_id"]
+            raise
         registry["process"] = None
         progress["stage"] = "stop_record"
         record(config, registry, "process_stopped")
@@ -732,10 +743,11 @@ LOCAL_ERROR_TYPES = frozenset({
     "OSError", "PermissionError", "FileNotFoundError", "FileExistsError", "NotADirectoryError",
     "IsADirectoryError", "ValueError", "KeyError", "TypeError", "UnicodeEncodeError",
     "UnicodeDecodeError", "JSONDecodeError",
+    "ProcessError", "LaunchUncertain", "DeploymentError", "CustomizationError", "StateError", "ReleaseError",
 })
 LOCAL_ERROR_SOURCES = frozenset({
     "manage_ees.py", "ees_webui_customization.py", "ees_deploy_state.py",
-    "ees_deploy_release.py", "ees_deploy_process.py",
+    "ees_deploy_release.py", "ees_deploy_process.py", "ees_upgrade.py",
 })
 
 
@@ -768,6 +780,25 @@ def local_error_detail(error):
                              "winerror": getattr(error, "winerror", None), "source": source, "line": line})
 
 
+def failure_fields(result):
+    """Safe one-line details shared by direct operations and Upgrade."""
+    fields = ""
+    process = safe_failure_detail(result.get("process"))
+    number = lambda value: str(value) if value is not None else "-"
+    if "local_error" in result:
+        error = safe_local_error(result["local_error"])
+        location = f"{error['source']}:{error['line']}" if error["source"] and error["line"] else "-"
+        fields = (f" error={error['type']} errno={number(error['errno'])}"
+                  f" winerror={number(error['winerror'])} at={location}")
+    elif process["error_type"] == "process":
+        fields = f" error=process errno={number(process['errno'])} winerror={number(process['winerror'])}"
+    if process["error_type"] in ("process", "launch_uncertain"):
+        fields += (f" operation={process['operation'] or '-'} reason={process['reason'] or '-'}"
+                   f" seconds={number(process['elapsed_seconds'])} timeout={number(process['timeout_seconds'])}"
+                   f" exit={number(process['exit_code'])}")
+    return fields
+
+
 def render_summary(action, result, *, failed=False):
     def flag(value):
         return "true" if value is True else "false" if value is False else "-"
@@ -776,33 +807,33 @@ def render_summary(action, result, *, failed=False):
     stage = result.get("stage", "complete")
     # Fixed labels only: never echo paths, environment, artifact payloads or logs.
     stages = {"complete", "preflight", "inspect_bundle", "apply", "restore", "start", "stop", "status",
-              "select_program", "port_check", "process_start", "process_record", "health_check"}
+              "select_program", "port_check", "process_start", "process_record", "health_check", "process_stop", "stop_record"}
     stage = stage if isinstance(stage, str) and stage in stages else action
     program = ("incomplete" if result.get("program_incomplete") else "invalid" if result.get("program_valid") is False
                else "original" if result.get("original_program") is True
                else "customized" if result.get("original_program") is False else "-")
-    detail = ""
-    if failed and "local_error" in result:
-        error = safe_local_error(result["local_error"])
-        location = f"{error['source']}:{error['line']}" if error["source"] and error["line"] else "-"
-        detail = (f" error={error['type']} errno={error['errno'] if error['errno'] is not None else '-'}"
-                  f" winerror={error['winerror'] if error['winerror'] is not None else '-'} at={location}")
+    detail = failure_fields(result) if failed else ""
     return (f"EES action={action} result={'failed' if failed else 'ok'} changed={flag(result.get('changed'))} "
             f"commit={commit} stage={stage} program={program} "
             f"running={flag(result.get('managed_process_running', result.get('started', result.get('already_running'))))}{detail}")
 
 
 def save_operation(args, result, *, failed=False):
-    """One local result; CheckOnly and Status remain read-only."""
+    """Keep the last result and retain the last failure across later successes."""
     if getattr(args, "check_only", False) or args.action == "status":
         return True
     try:
         config = states.load_config(args.config)
         target = Path(config["state_root"]) / "last-operation.json"
-        if target.exists() or target.is_symlink():
-            states._regular(target)
-        write_json(target, {"action": args.action, "failed": failed,
-                           "at": datetime.now(timezone.utc).isoformat(), "result": result})
+        failure = Path(config["state_root"]) / "last-failure.json"
+        for path in (target, failure) if failed else (target,):
+            if path.exists() or path.is_symlink():
+                states._regular(path)
+        payload = {"action": args.action, "failed": failed,
+                   "at": datetime.now(timezone.utc).isoformat(), "result": result}
+        if failed:
+            write_json(failure, payload)
+        write_json(target, payload)
         return True
     except (OSError, ValueError, TypeError, KeyError, states.StateError):
         return False
@@ -846,28 +877,32 @@ def main(argv=None):
         result = operate(args)
     except (DeploymentError, states.StateError, releases.ReleaseError, processes.ProcessError,
             customization.CustomizationError) as error:
+        reason = getattr(error, "reason", None)
+        result = {"stage": getattr(error, "stage", args.action), "changed": None,
+                  "reason": reason if reason in FAILURE_REASONS else "operation_failed",
+                  "process": failure_detail({"stage": getattr(error, "stage", args.action)}, error),
+                  "local_error": local_error_detail(error)}
+        saved = save_operation(args, result, failed=True)
         if args.summary:
-            result = {"stage": getattr(error, "stage", args.action), "changed": None,
-                      "reason": str(error), "process": failure_detail({}, error)}
-            saved = save_operation(args, result, failed=True)
             print(render_summary(args.action, result, failed=True) + (" report=unavailable" if not saved else ""))
             return 1
+        if isinstance(error, processes.ProcessError):
+            parser.exit(1, render_summary(args.action, result, failed=True)
+                        + (" report=unavailable" if not saved else "") + "\n")
         # Module errors deliberately contain no settings, keys, API responses, or child logs.
         diagnostics = safe_last_failure(error.diagnostics) if isinstance(error, DeploymentError) else None
         detail = "\nDiagnostics: " + json.dumps(diagnostics) if diagnostics else ""
-        if not diagnostics and isinstance(error, processes.ProcessError):
-            detail = "\nDiagnostics: " + json.dumps(failure_detail({}, error))
-        parser.exit(1, f"Operation stopped: {error}{detail}\n")
+        parser.exit(1, f"Operation stopped: {error}{detail}" + ("\nReport unavailable." if not saved else "") + "\n")
     except (OSError, ValueError, KeyError, TypeError) as error:
         detail = local_error_detail(error)
+        result = {"stage": args.action, "reason": "local_state_or_file_unavailable",
+                  "changed": None, "local_error": detail}
+        saved = save_operation(args, result, failed=True)
         if args.summary:
-            result = {"stage": args.action, "reason": "local_state_or_file_unavailable",
-                      "changed": None, "local_error": detail}
-            saved = save_operation(args, result, failed=True)
             print(render_summary(args.action, result, failed=True) + (" report=unavailable" if not saved else ""))
             return 1
         parser.exit(1, "Operation stopped: local state or a required file could not be inspected.\n"
-                    + "Local error: " + json.dumps(detail) + "\n")
+                    + "Local error: " + json.dumps(detail) + ("\nReport unavailable." if not saved else "") + "\n")
     if args.summary:
         saved = save_operation(args, result)
         print(render_summary(args.action, result) + (" report=unavailable" if not saved else ""))

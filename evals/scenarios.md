@@ -1715,6 +1715,30 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 
 직전 STATUS 최근 점검 보존(계획·업무 패널 수용): 2026-09-10: 수정 ApplyDemo·계획/오른쪽 패널 확인 안내 후 사용자 정상 보고를 수신해 이번 적용 단위를 완료로 기록함. 안내 원본과 실제 SHA의 직접 대조, 일반 정상 보고와 분석 정확성·개별 WO 동작 전수 확인을 구분함. 상태·기존 평가 기록만 갱신하고 문서/diff를 점검하며 실행 코드·추가 사내 시험·재배포는 진행하지 않음. [확인 범위](#plan-work-panel-accepted).
 
+<a id="ees-update-failure-causes"></a>
+
+### 반복 업데이트 실패의 원인 구분과 확정 결함 조치 (2026-09-10)
+
+- 시작: 사용자 요청은 업데이트/패치 스크립트의 반복 실패 원인 파악과 조치임. 최신 main `d5cadc9cc5c8d9ebf817842185a58cb67d55b1ec`, tree `4872c4e175130ef85cbd65db500455b2c2cda7d4`, 열린 PR 0개·로컬 동일 tree/clean을 확인하고 관련 코드·기록만 검토함. 사내 c099 수정본의 적용·기동·폭/테두리 확인은 이미 완료된 상태이며 이 조사로 현재 서버를 재시작하지 않음.
+
+| 실패 종류 | 확인된 사실과 원인 | 현재 조치·경계 |
+|---|---|---|
+| 이전 후보 환경 설치 | antlr4 4.9.3의 오프라인 wheel 부재로 설치가 막힘 | 기존 Python/의존성 재사용 방식으로 경로 제거. 중단한 후보 진단을 다시 시작하지 않음 |
+| WO 등록본 인식 | 공식 편집기의 자동 정렬이 원본 코드 해시를 바꿈. 고정 Black 정렬본으로 재현 | 검증한 공식 정렬 해시 허용으로 조치했고 사내 정상 보고를 받음 |
+| 일반 Stop·신원 확인 | 실행 중 확인 직후 종료되면 이미지 조회 실패를 종료 실패로 처리. WAIT_FAILED도 실행 중으로 취급하여 모의 조건에서 신호를 보내는 결함을 재현 | 같은 OS 핸들로 종료를 재확인하고 WAIT_FAILED/알 수 없는 상태는 신호 전에 차단. 사내 stop 실패가 반드시 이 결함 때문이었다고 단정하지 않음 |
+| `operation_failed` 반복 | 신원·console helper·5초 helper 만료·30초 종료 만료가 구분되지 않고, Upgrade는 직접 Apply의 오류 위치도 누락 | 고정 단계·숫자 오류·경과/한도·실행 종료값·로그 ID 보존. 마지막 실패는 이후 성공과 별도 파일로 유지 |
+| Windows 프로그램 rename | `program.staging→program`에서 WinError5가 확인됐고, 시간이 지난 뒤 수동 rename/Resume 성공 | 실패 위치는 확정. 파일 점유·ACL·보안 필터 중 원인은 미확정이며 임의 재시도·보안 설정 변경을 추가하지 않음 |
+| 기동 지연·접속 불가 | 일부 기동에서 TLS/다운로드 활동이 보고됐고, 다른 사건은 PID 생존/listen 없음으로 확인 | TLS 초기화 지연과 접속 소실을 하나로 단정하지 않음. 현재 서버와 구분한 보존 로그만 읽어 다음 판단에 사용 |
+
+- Windows 재현·수정 근거: [WaitForSingleObject 공식 계약](https://learn.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-waitforsingleobject)의 DWORD 반환·WAIT_FAILED/오류 조회를 대조함. 모의 Windows에서 query 실패 직후 동일 핸들 종료, 계속 실행 중의 조회 실패, WAIT_FAILED 뒤 신호 금지를 구분함. `OpenProcess`의 실패 숫자를 유지하고 query·console attach/signal 실패 직후에는 같은 핸들이 종료됐다고 확인될 때만 정상 종료로 반환함. 기존 PID/실행 파일/생성 시각 검증과 정상 신호 1회·helper 5초/종료 30초 한도, 명시적 강제 복구의 경계는 유지함.
+- 진단 보존: helper는 stdout으로 4개 고정 메타데이터만 부모에 전달하고 부모는 크기·스키마·허용값을 검사함. stderr/원문 오류·사내 경로는 요약에 전달하지 않음. Upgrade는 기존 안전한 `local_error_detail`을 재사용해 알려진 코드 파일/행과 숫자 오류를 남김. 기본 명령과 Summary 실패 모두 `last-operation.json` 및 `last-failure.json`에 기록하며 이후 성공은 마지막 실패를 덮지 않음. CheckOnly/Status는 계속 읽기 전용임.
+- 접속 소실의 소스 근거·한계: [CPython 3.11 proactor_events](https://github.com/python/cpython/blob/3.11/Lib/asyncio/proactor_events.py)의 `_start_serving`은 accept future의 OSError를 보고하고 listener를 닫는 경로가 있음. [windows_events](https://github.com/python/cpython/blob/3.11/Lib/asyncio/windows_events.py)의 `accept_coro`에서도 같은 future 오류가 드러날 수 있음. 과거 WinError64·accept_coro 관찰과 부합하는 가설이나 사내 동일 traceback 확인 전에는 원인 확정이나 이벤트 루프 변경으로 연결하지 않음.
+- SIGBREAK 검토: [Open WebUI v0.11.3](https://github.com/open-webui/open-webui/blob/v0.11.3/pyproject.toml)의 고정 [Uvicorn 0.51.0](https://github.com/Kludex/uvicorn/blob/0.51.0/uvicorn/server.py)은 Windows SIGBREAK를 정상 종료 신호로 처리하고, 종료 후 원래 핸들러에 다시 전달할 수 있음. import 중 인터럽트와 종료 후 KeyboardInterrupt를 구분하며 문자열 하나로 원인을 판정하지 않음. 등록 환경의 실제 설치 파일 전체를 직접 대조한 것은 아님.
+- 보존 로그 검사: 기존 `ees_deploy_report.py --inspect-recovery`에 한정된 읽기 경로를 추가함. c099 process_stop 보존 요청들의 고유 로그 하나만 선택하고 `source=stop_failure`를 명시함. 중간 Stop/Start 이전 최초 ApplyDemo 접속 실패와 같은 사건이라고 가정하지 않음. 현재 active 로그·잠금·미완료·다중 원본·경로/링크 이상·읽는 동안의 변경을 차단하고, 최대 4MiB tail은 partial/truncated로 표시함. listener64는 Accept failed 메시지와 같은 완전한 traceback의 proactor loop/Win64 조합만 인정하며 future64·TLS를 별도로 표시함. 값 false는 읽은 범위에서 발견하지 못했음을 뜻함.
+- 검증·검토: Linux/Python 3.12.14에서 관련 프로세스/운영/Upgrade/로그/ApplyDemo 271개 중 262개 통과·Windows 등 플랫폼 검사 9개 미실행. Windows 실제 helper 실패 출력 검사는 기존 CI에 연결함. 독립 검토에서 기본 비-Summary 실패 기록 누락과 깊은 JSON의 예외 누출을 찾아 보완하고 실제 `-I -B` CLI의 한 줄 출력·stderr 비노출도 검사함. 문서 29개·링크 801개와 diff 검사를 통과함. PR/main Windows/Linux CI는 확인 뒤 해당 PR에 기록하며, 사내 새 래퍼 적용·보존 로그 결과는 아직 미확인임. [실행·판정](../docs/03-openwebui-native-agent.md#ees-update-failure-causes).
+
+직전 STATUS 최근 점검 보존(폭·테두리 완료): 2026-09-10: 사용자 보고로 c099e427f62b 수정본의 복구·적용·기동 성공에 이어 기본 대화 폭 확대와 분석 패널 드래그 시 파란 테두리 제거가 모두 정상임을 확인함. 이번 수정 작업을 완료 처리하고 기존 CI·실패·복구 기록은 보존함. [완료 근거와 확인 범위](../evals/scenarios.md#ees-stop-recovery).
+
 <a id="ees-stop-recovery"></a>
 
 ### UI 적용 중 서버 종료 실패와 승인된 복구 (2026-09-10)

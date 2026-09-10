@@ -1,6 +1,7 @@
 """Real local fake-child lifecycle tests; never import or install Open WebUI."""
 
 import importlib.util
+import io
 import errno
 import json
 import os
@@ -545,6 +546,206 @@ class ProcessContracts(unittest.TestCase):
                 worker.join(timeout=2)
 
 
+class WindowsIdentityContracts(unittest.TestCase):
+    """Reproduce exit races and failed Windows waits without a real process."""
+
+    def setUp(self):
+        import ctypes
+        self.ctypes = ctypes
+        self.saved = {'pid': 123, 'group_id': 123, 'created_at': '456',
+                      'executable': os.path.normcase(os.path.realpath('/synthetic-private/python.exe'))}
+        self.kernel = MagicMock()
+        self.kernel.OpenProcess.return_value = 987654
+        self.kernel.WaitForSingleObject.return_value = 258
+
+        def times(handle, created, *_):
+            created._obj.dwHighDateTime = 0
+            created._obj.dwLowDateTime = 456
+            return 1
+
+        def image(handle, flags, buffer, length):
+            buffer.value = self.saved['executable']
+            return 1
+
+        self.kernel.GetProcessTimes.side_effect = times
+        self.kernel.QueryFullProcessImageNameW.side_effect = image
+        for fixture in (patch.object(ctypes, 'WinDLL', return_value=self.kernel, create=True),
+                        patch.object(ctypes, 'get_last_error', return_value=5, create=True)):
+            fixture.start()
+            self.addCleanup(fixture.stop)
+
+    def test_failed_or_unknown_wait_never_inspects_or_signals(self):
+        for status in (0xFFFFFFFF, 128, 1):
+            with self.subTest(status=status):
+                self.kernel.WaitForSingleObject.return_value = status
+                with self.assertRaises(manager.ProcessError) as failure:
+                    manager._windows_identity(123, send_to=self.saved)
+                self.assertEqual((failure.exception.operation, failure.exception.reason,
+                                  failure.exception.winerror),
+                                 ('process_wait', 'identity_unavailable', 5 if status == 0xFFFFFFFF else None))
+        self.kernel.GetProcessTimes.assert_not_called()
+        self.kernel.AttachConsole.assert_not_called()
+        self.kernel.GenerateConsoleCtrlEvent.assert_not_called()
+        self.assertEqual(self.kernel.CloseHandle.call_count, 3)
+
+    def test_exit_between_wait_and_query_is_confirmed_on_the_same_handle(self):
+        for name in ('GetProcessTimes', 'QueryFullProcessImageNameW'):
+            function = getattr(self.kernel, name)
+            original = function.side_effect
+            with self.subTest(query=name):
+                function.side_effect = None
+                function.return_value = 0
+                self.kernel.WaitForSingleObject.side_effect = [258, 0]
+                try:
+                    self.assertIsNone(manager._windows_identity(123, send_to=self.saved))
+                finally:
+                    function.side_effect = original
+        self.assertTrue(all(call.args == (987654, 0) for call in self.kernel.WaitForSingleObject.call_args_list))
+        self.kernel.GenerateConsoleCtrlEvent.assert_not_called()
+        self.assertEqual(self.kernel.CloseHandle.call_count, 2)
+
+    def test_live_query_failure_preserves_numeric_error_and_refuses_signal(self):
+        self.kernel.QueryFullProcessImageNameW.side_effect = None
+        self.kernel.QueryFullProcessImageNameW.return_value = 0
+        with patch.object(self.ctypes, 'get_last_error', side_effect=[299, 12345]):
+            with self.assertRaises(manager.ProcessError) as failure:
+                manager._windows_identity(123, send_to=self.saved)
+        error = failure.exception
+        self.assertEqual((error.operation, error.reason, error.winerror),
+                         ('process_inspect', 'identity_unavailable', 299))
+        self.assertEqual(self.kernel.WaitForSingleObject.call_count, 2)
+        self.assertNotIn('synthetic-private', str(error) + json.dumps(vars(error)))
+        self.kernel.GenerateConsoleCtrlEvent.assert_not_called()
+
+    def test_open_access_denial_is_distinct_from_absent_process(self):
+        self.kernel.OpenProcess.return_value = 0
+        with patch.object(self.ctypes, 'get_last_error', return_value=87):
+            self.assertIsNone(manager._windows_identity(123))
+        with self.assertRaises(manager.ProcessError) as failure:
+            manager._windows_identity(123)
+        self.assertEqual((failure.exception.operation, failure.exception.winerror), ('process_open', 5))
+        self.kernel.GenerateConsoleCtrlEvent.assert_not_called()
+        self.kernel.CloseHandle.assert_not_called()
+
+    def test_console_attach_and_signal_failures_keep_numeric_stage(self):
+        for name, operation in (('AttachConsole', 'console_attach'), ('GenerateConsoleCtrlEvent', 'console_signal')):
+            with self.subTest(api=name):
+                self.kernel.AttachConsole.return_value = 1
+                self.kernel.GenerateConsoleCtrlEvent.return_value = 1
+                getattr(self.kernel, name).return_value = 0
+                with self.assertRaises(manager.ProcessError) as failure:
+                    manager._windows_identity(123, send_to=self.saved)
+                self.assertEqual((failure.exception.operation, failure.exception.reason, failure.exception.winerror),
+                                 (operation, 'stop_signal_failed', 5))
+
+    def test_target_exit_during_console_attach_is_a_noop(self):
+        self.kernel.AttachConsole.return_value = 0
+        self.kernel.WaitForSingleObject.side_effect = [258, 0]
+        self.assertIsNone(manager._windows_identity(123, send_to=self.saved))
+        self.kernel.GenerateConsoleCtrlEvent.assert_not_called()
+
+
+class StopFailureContracts(unittest.TestCase):
+    def setUp(self):
+        self.saved = {'pid': 123, 'group_id': 123, 'created_at': '456', 'executable': '/synthetic-private/python.exe',
+                      'log_file': '/synthetic-private/server-' + 'a' * 32 + '.log'}
+        self.helper = Mock()
+        self.helper.wait.return_value = 1
+        self.helper.stdout = io.BytesIO()
+        concrete_path = type(Path())
+        for fixture in (patch.object(manager, 'Path', concrete_path),
+                        patch.object(manager.os, 'name', 'nt'),
+                        patch.object(manager.subprocess, 'CREATE_NO_WINDOW', 0x08000000, create=True),
+                        patch.object(manager, '_identity', return_value=self.saved),
+                        patch.object(manager.subprocess, 'Popen', return_value=self.helper)):
+            fixture.start()
+            self.addCleanup(fixture.stop)
+
+    def test_helper_serializes_only_safe_error_metadata_and_parent_preserves_it(self):
+        original = OSError(13, 'synthetic-private-os-error')
+        original.winerror = 5
+        error = manager.ProcessError('synthetic-private-error', cause=original,
+                                     operation='console_signal', reason='stop_signal_failed')
+        output = io.StringIO()
+        with patch.object(manager.sys, 'argv', ['helper', '--break', json.dumps(self.saved)]), \
+                patch.object(manager, '_windows_identity', side_effect=error), \
+                patch.object(manager.sys, 'stdout', output):
+            self.assertEqual(manager._console_helper_main(), 1)
+        payload = output.getvalue().encode()
+        self.assertNotIn(b'synthetic-private', payload)
+        self.assertEqual(set(json.loads(payload)), {'operation', 'reason', 'errno', 'winerror'})
+        self.helper.stdout = io.BytesIO(payload)
+        with patch.object(manager.time, 'monotonic', side_effect=[10, 10.25]):
+            with self.assertRaises(manager.ProcessError) as failure:
+                manager.stop_server(self.saved)
+        result = failure.exception
+        self.assertEqual((result.operation, result.reason, result.errno, result.winerror,
+                          result.elapsed_seconds, result.exit_code, result.log_id),
+                         ('console_signal', 'stop_signal_failed', 13, 5, .25, 1,
+                          'server-' + 'a' * 32 + '.log'))
+        self.assertNotIn('synthetic-private', str(result) + json.dumps(vars(result)))
+        self.helper.wait.assert_called_once_with(timeout=5)
+        self.assertTrue(self.helper.stdout.closed)
+
+    def test_unknown_unbounded_or_non_schema_helper_output_is_discarded(self):
+        valid = {'operation': 'console_attach', 'reason': 'stop_signal_failed', 'errno': None, 'winerror': 5}
+        payloads = [b'synthetic-private-traceback', b'x' * 4097, b'null', b'[]',
+                    json.dumps({**valid, 'message': 'synthetic-private'}).encode(),
+                    json.dumps({**valid, 'winerror': True}).encode(),
+                    json.dumps({**valid, 'reason': 'synthetic-private'}).encode()]
+        for payload in payloads:
+            with self.subTest(payload=payload[:20]):
+                self.helper.stdout = io.BytesIO(payload)
+                with self.assertRaises(manager.ProcessError) as failure:
+                    manager.stop_server(self.saved)
+                self.assertEqual((failure.exception.operation, failure.exception.reason, failure.exception.exit_code),
+                                 ('stop_helper', 'stop_helper_failed', 1))
+                self.assertNotIn('synthetic-private', str(failure.exception) + json.dumps(vars(failure.exception)))
+        self.helper.kill.assert_not_called()
+        self.helper.terminate.assert_not_called()
+
+    def test_helper_five_second_timeout_is_distinct_from_server_thirty_second_timeout(self):
+        self.helper.wait.side_effect = subprocess.TimeoutExpired('synthetic-private-command', 5)
+        with patch.object(manager.time, 'monotonic', side_effect=[10, 15.25]):
+            with self.assertRaises(manager.ProcessError) as failure:
+                manager.stop_server(self.saved)
+        self.assertEqual((failure.exception.operation, failure.exception.reason,
+                          failure.exception.timeout_seconds, failure.exception.elapsed_seconds),
+                         ('stop_helper', 'stop_helper_timeout', 5, 5.25))
+        self.helper.wait.side_effect = None
+        self.helper.wait.return_value = 0
+        self.helper.stdout = io.BytesIO()
+        with patch.object(manager.time, 'monotonic', side_effect=[10, 11, 41, 41.25]):
+            with self.assertRaises(manager.ProcessError) as failure:
+                manager.stop_server(self.saved)
+        self.assertEqual((failure.exception.operation, failure.exception.reason,
+                          failure.exception.timeout_seconds, failure.exception.elapsed_seconds),
+                         ('process_wait', 'stop_timeout', 30, 31.25))
+        self.helper.kill.assert_not_called()
+        self.helper.terminate.assert_not_called()
+
+    def test_helper_success_without_payload_allows_normal_exit(self):
+        self.helper.wait.return_value = 0
+        with patch.object(manager, '_identity', side_effect=[self.saved, None]):
+            manager.stop_server(self.saved)
+        self.assertTrue(self.helper.stdout.closed)
+
+    def test_identity_failure_is_not_hidden_or_echoed(self):
+        original = OSError(13, 'synthetic-private-identity')
+        original.winerror = 5
+        error = manager.ProcessError('synthetic-private-message', cause=original,
+                                     operation='process_inspect', reason='identity_unavailable')
+        with patch.object(manager, '_identity', side_effect=error), \
+                patch.object(manager.subprocess, 'Popen') as spawn:
+            with self.assertRaises(manager.ProcessError) as failure:
+                manager.stop_server(self.saved)
+        self.assertEqual((failure.exception.operation, failure.exception.reason,
+                          failure.exception.errno, failure.exception.winerror),
+                         ('process_inspect', 'identity_unavailable', 13, 5))
+        self.assertNotIn('synthetic-private', str(failure.exception) + json.dumps(vars(failure.exception)))
+        spawn.assert_not_called()
+
+
 class ExplicitTerminationContracts(unittest.TestCase):
     """Exercise Windows refusal boundaries on every CI platform."""
 
@@ -761,6 +962,106 @@ class WindowsExplicitTerminationTests(unittest.TestCase):
                     # Test-owned Popen handles only; production never sweeps child trees.
                     child.kill()
                 child.wait(timeout=5)
+
+
+@unittest.skipUnless(os.name == 'nt', 'Real console helper IPC is Windows-only.')
+class WindowsStopHelperTests(unittest.TestCase):
+    def test_console_attach_failure_survives_real_helper_stdout_and_parent_parsing(self):
+        # Creation flags alone did not guarantee a detached fixture in Windows
+        # CI. Detach inside the test-owned child and verify that before ready.
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        ready = Path(temporary.name) / 'ready'
+        fixture_code = r'''
+import ctypes
+from ctypes import wintypes
+from pathlib import Path
+import sys
+
+kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+kernel.FreeConsole.argtypes = []
+kernel.FreeConsole.restype = wintypes.BOOL
+kernel.GetConsoleProcessList.argtypes = [ctypes.POINTER(wintypes.DWORD), wintypes.DWORD]
+kernel.GetConsoleProcessList.restype = wintypes.DWORD
+if not kernel.FreeConsole():
+    raise SystemExit(81)
+processes = (wintypes.DWORD * 1)()
+ctypes.set_last_error(0)
+if kernel.GetConsoleProcessList(processes, 1) != 0 or ctypes.get_last_error() != 6:
+    raise SystemExit(82)
+marker = Path(sys.argv[1])
+pending = marker.with_suffix('.tmp')
+pending.write_text('detached')
+pending.replace(marker)
+sys.stdin.buffer.read(1)
+'''
+        target = subprocess.Popen(
+            [sys._base_executable, '-I', '-c', fixture_code, str(ready)],
+            stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            creationflags=subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP)
+        captured = []
+        real_popen = subprocess.Popen
+
+        class RecordedOutput:
+            def __init__(self, stream):
+                self.stream = stream
+
+            def read(self, limit):
+                payload = self.stream.read(limit)
+                captured.append(payload)
+                return payload
+
+            def close(self):
+                self.stream.close()
+
+        def spawn_helper(*args, **kwargs):
+            helper = real_popen(*args, **kwargs)
+            helper.stdout = RecordedOutput(helper.stdout)
+            return helper
+
+        try:
+            deadline = time.monotonic() + 5
+            while not ready.exists() and target.poll() is None and time.monotonic() < deadline:
+                time.sleep(.01)
+            self.assertTrue(ready.exists(), f'fixture readiness missing; exit_code={target.poll()}')
+            self.assertEqual(ready.read_text(), 'detached')
+            self.assertIsNone(target.poll(), 'fixture exited before the helper request')
+            identity = manager._windows_identity(target.pid)
+            self.assertIsNotNone(identity)
+            identity.update(group_id=target.pid, log_file='C:/synthetic-private/server-' + 'b' * 32 + '.log')
+            # Match start_server's ownership registration. A directly created
+            # fixture must not inherit an old test's cached Popen after PID reuse.
+            with patch.dict(manager._CHILDREN, {target.pid: target}), \
+                    patch.object(manager.subprocess, 'Popen', side_effect=spawn_helper) as spawn:
+                self.assertTrue(manager.verify_identity(identity), 'ready fixture identity is not current')
+                try:
+                    manager.stop_server(identity)
+                except manager.ProcessError as error:
+                    failure = error
+                else:
+                    self.fail(f'helper unexpectedly succeeded; exit_code={target.poll()}; records={len(captured)}')
+            error = failure
+            self.assertEqual((error.operation, error.reason, error.winerror, error.exit_code),
+                             ('console_attach', 'stop_signal_failed', 6, 1))  # ERROR_INVALID_HANDLE
+            self.assertEqual(error.timeout_seconds, 5)
+            self.assertIsNone(target.poll())
+            self.assertEqual(len(captured), 1)
+            self.assertLessEqual(len(captured[0]), 4096)
+            self.assertEqual(json.loads(captured[0]),
+                             {'operation': 'console_attach', 'reason': 'stop_signal_failed',
+                              'errno': None, 'winerror': 6})
+            self.assertNotIn('synthetic-private', captured[0].decode() + str(error) + json.dumps(vars(error)))
+            self.assertEqual(spawn.call_args.kwargs['stdout'], subprocess.PIPE)
+            self.assertEqual(spawn.call_args.kwargs['stderr'], subprocess.DEVNULL)
+        finally:
+            # EOF releases the ready child; its lifetime is owned by this test,
+            # not by a wall-clock sleep that can expire during CI scheduling.
+            target.stdin.close()
+            try:
+                target.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                target.kill()  # Only this test-owned Popen handle.
+                target.wait(timeout=5)
 
 
 class CustomizedLauncherTests(unittest.TestCase):

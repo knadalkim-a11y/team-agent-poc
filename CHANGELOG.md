@@ -4,6 +4,8 @@
 
 ## 2026-09-10
 
+- 반복 업데이트 실패 조사에서 Windows 종료/신원 조회 경합과 WAIT_FAILED 처리 결함을 수정하고, 정상 종료 helper·Upgrade 오류의 고정 단계/숫자/위치를 보존함. 최신 실패를 성공 뒤에도 유지하며 보존된 종료 실패 로그만 읽는 한정 검사를 추가함. 기존 정상 종료·데이터 보존 경계와 미확정 원인 구분을 유지함. [근거·조치](evals/scenarios.md#ees-update-failure-causes).
+
 - 사용자 승인된 Upgrade `process_stop` 실패에 한해 같은 핸들로 검증된 서버 하나를 종료하고 보관 ZIP으로 적용·기동하는 명시적 복구 경로를 추가함. 실패/registry 보존·venv 실행기 관계 검증·일반 Stop/Upgrade의 정상 종료 경계를 유지함. [절차](docs/03-openwebui-native-agent.md#ees-stop-recovery), [사건·검증](evals/scenarios.md#ees-stop-recovery).
 
 - ees.3 글꼴·업무 패널 변경 확인 후의 피드백을 반영해 기본 본문·입력창 폭을 672→1024px로 넓힘(ees.4). 분석 패널 드래그의 전체 높이 파란 테두리를 제거하고 키보드 포커스는 작은 손잡이에 유지함. 기존 글꼴·색상·크기 저장·키보드 조절을 보존하며 자산 v0.2.3 ApplyDemo 후 Upgrade로 반영함. [사용법](docs/03-openwebui-native-agent.md#ees-chat-width-resize), [검증](evals/scenarios.md#ees-chat-width-resize).

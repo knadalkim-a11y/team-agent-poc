@@ -311,7 +311,9 @@ def report(args, result, failed=False):
           f"wrapper={sha(result.get('wrapper_commit'))} commit={sha(result.get('source_commit'))} "
           f"version={version} stage={word(result.get('stage', 'complete'))} "
           f"running={flag(result.get('started'))} code={word(result.get('code'))} "
-          f"next={word(result.get('next', 'refresh_browser'))}" + (" report=unavailable" if not saved else ""))
+          f"next={word(result.get('next', 'refresh_browser'))}"
+          + (manager.failure_fields(result) if failed else "")
+          + (" report=unavailable" if not saved else ""))
 
 
 def main(argv=None):
@@ -360,7 +362,8 @@ def main(argv=None):
         result = {"stage": stage, "code": code, "changed": progress.get("changed"),
                   "wrapper_commit": head or progress.get("wrapper_commit"),
                   "wrapper_changed": head != before if head and before else progress.get("wrapper_changed"),
-                  "next": next_step, "process": manager.failure_detail(progress, error)}
+                  "next": next_step, "process": manager.failure_detail(progress, error),
+                  "local_error": manager.local_error_detail(error)}
         if "bundle" in progress:
             result["bundle"] = progress["bundle"]
         report(args, result, failed=True)
