@@ -185,6 +185,10 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(metadata["session_id"])
         self.assertIs(self.request.state.metadata, self.metadata)
         self.assertEqual(self.metadata["model_id"], "existing-ees")
+        self.assertEqual(result["results"][0]["request"], {
+            "question": form["messages"][0]["content"], "kind": "initial",
+        })
+        self.assertFalse(result["results"][0]["analysis_truncated"])
         self.assertEqual(result["results"][0]["evidence"][0]["result"]["records"][0]["id"], "EMS-001")
         self.assertNotIn("private reasoning", json.dumps(result))
         self.runtime.check_access.assert_awaited_once()
@@ -236,8 +240,17 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.calls, [])
 
     async def test_three_initial_then_one_followup_only(self):
-        self.assertTrue((await self.consult(("EMS", "APC", "FDC")))["ok"])
-        fourth = await self.consult(("APC",))
+        tasks = [{"system": s, "question": f"sample_a에서 {s}의 개선 근거를 확인해줘"}
+                 for s in ("EMS", "APC", "FDC")]
+        first = await self.consult(tasks=tasks)
+        self.assertTrue(first["ok"])
+        self.assertEqual([r["request"] for r in first["results"]], [
+            {"question": t["question"], "kind": "initial"} for t in tasks])
+        followup_question = "sample_a의 APC 조건 변경 전후를 다시 비교해줘"
+        fourth = await self.consult(tasks=[{"system": "APC", "question": followup_question}])
+        self.assertEqual(fourth["results"][0]["request"], {
+            "question": followup_question, "kind": "followup",
+        })
         self.assertEqual(fourth["budget"], {"used": 4, "remaining": 0, "followup_remaining": 0})
         fifth = await self.consult(("EMS",))
         self.assertEqual(fifth["error"]["code"], "consultation_limit")
@@ -253,9 +266,13 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
     async def test_budget_reserved_before_concurrent_calls_and_new_request_is_fresh(self):
         results = await asyncio.gather(self.consult(), self.consult(), self.consult())
         self.assertEqual(sum(r["ok"] for r in results), 2)
+        self.assertEqual([r["results"][0]["request"]["kind"] for r in results if r["ok"]],
+                         ["initial", "followup"])
         self.assertEqual(len(self.calls), 2)
         self.request = request()
-        self.assertTrue((await self.consult())["ok"])
+        fresh = await self.consult()
+        self.assertTrue(fresh["ok"])
+        self.assertEqual(fresh["results"][0]["request"]["kind"], "initial")
 
     async def test_recursive_wrong_ees_and_missing_context_are_blocked(self):
         for metadata in [None, {}, {"model_id": "ees_demo_ems"}, {"model_id": "another-model"}]:
@@ -289,19 +306,34 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(result["evidence"]), 3)
 
     async def test_timeout_preserves_evidence_and_other_specialist_success(self):
+        # APC was already consulted; one batch now mixes an initial success, a
+        # follow-up timeout and an initial access failure with different questions.
+        await self.consult(("APC",))
+        async def allow(user, model, model_info):
+            if model_info.id == "ees_demo_fdc":
+                raise PermissionError("token=DO-NOT-RETURN")
         async def slow(response, ctx):
             await self.response(response, ctx)
             if ctx["metadata"]["model_id"] == "ees_demo_apc":
                 await asyncio.Event().wait()
+        self.runtime.check_access.side_effect = allow
         self.runtime.process_response = slow
         # Bypass only Pydantic assignment validation for a fast synthetic timeout.
         self.tool.valves.specialist_timeout_seconds = 0.02
-        result = await self.consult(("EMS", "APC"))
+        tasks = [{"system": s, "question": f"sample_a의 {s} 상세 근거를 확인해줘"}
+                 for s in ("EMS", "APC", "FDC")]
+        result = await self.consult(tasks=tasks)
         self.assertTrue(result["ok"])
         self.assertTrue(result["partial"])
-        self.assertEqual([r["status"] for r in result["results"]], ["completed", "partial"])
+        self.assertEqual([r["status"] for r in result["results"]], ["completed", "partial", "failed"])
         self.assertEqual(result["results"][1]["error"], "timeout")
         self.assertEqual(len(result["results"][1]["evidence"]), 1)
+        self.assertEqual(result["results"][2]["error"], "specialist_unavailable")
+        self.assertEqual([r["request"] for r in result["results"]], [
+            {"question": t["question"], "kind": "followup" if t["system"] == "APC" else "initial"}
+            for t in tasks])
+        self.assertEqual(result["budget"]["used"], 4)
+        self.assertNotIn("DO-NOT-RETURN", json.dumps(result))
 
     async def test_cancellation_propagates_and_preserves_completed_evidence(self):
         entered = asyncio.Event()
@@ -320,7 +352,45 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(partial), 2)
         self.assertTrue(all(r["evidence"] for r in partial))
         self.assertEqual(partial[1]["error"], "cancelled")
+        self.assertEqual([r["request"] for r in partial], [
+            {"question": "sample_a의 개선 기회를 확인해줘", "kind": "initial"}] * 2)
         self.assertEqual(self.events[-1]["data"]["phase"], "cancelled")
+
+    async def test_returned_reply_truncation_tracks_final_output_without_reasoning(self):
+        limit = module.MAX_ANALYSIS_CHARS
+        long_text = "clipped-prefix:" + "가" * limit + "확인된 근거 EMS-001"
+        private = "DO-NOT-RETURN-REASONING" * limit
+
+        def output(text):
+            return [
+                {"type": "reasoning", "content": [{"type": "output_text", "text": private}]},
+                {"type": "function_call", "arguments": "DO-NOT-RETURN-ARGUMENTS"},
+                {"type": "message", "content": [{"type": "output_text", "text": text}]},
+            ]
+
+        cases = [
+            ("streamed", long_text, None, long_text),
+            ("final_output", "short partial", {"output": output(long_text)}, long_text),
+            ("final_content", "short partial", {"content": long_text}, long_text),
+            ("replaced_short", long_text, {"output": output("최종 짧은 회신")}, "최종 짧은 회신"),
+            ("exact_limit", "나" * limit, None, "나" * limit),
+        ]
+        for name, streamed, final, expected in cases:
+            with self.subTest(name=name):
+                self.request = request()
+                async def respond(response, ctx):
+                    await self.response(response, ctx)
+                    await ctx["event_emitter"]({"type": "chat:completion", "data": {
+                        "output": output(streamed)}})
+                    if final is not None:
+                        ctx["assistant_message"] = final
+                self.runtime.process_response = respond
+                result = await self.consult()
+                returned = result["results"][0]
+                self.assertEqual(returned["analysis"], expected[-limit:])
+                self.assertEqual(returned["analysis_truncated"], len(expected) > limit)
+                self.assertEqual(returned["status"], "completed")
+                self.assertNotIn("DO-NOT-RETURN", json.dumps(result))
 
     async def test_non_stream_provider_never_claims_tool_execution(self):
         self.runtime.generate = AsyncMock(return_value={"choices": [{"message": {"content": "pretend answer"}}]})

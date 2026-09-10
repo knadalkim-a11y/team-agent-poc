@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **교차 분석 시연 구현·검토에 이어 사내 ApplyDemo 적용 성공을 사용자 보고로 확인함.** 2026-09-10 `result=ok changed=8 commit=502344d55154 stage=complete next=new_chat`을 수신함. Tool 2개·연결 설정 2개·전문 모델 3개·기존 EES 모델 1개의 변경과 API 재조회 검증 완료에 해당함. [PR #21](https://github.com/knadalkim-a11y/team-agent-poc/pull/21)의 Windows/Linux CI·합성 시험 성공과 구분하며 실제 사내 LLM의 선택·분석 품질은 아직 미확인임. [시연](03-openwebui-native-agent.md#cross-system-demo), [적용 근거](../evals/scenarios.md#cross-system-demo-internal-apply).
-- 다음 작업 하나: **EES 통합 Assistant의 새 대화에서 sample_a 개선 기회 탐색을 확인한다.** 최초 인증·등록과 반복 배포를 다시 요구하지 않는다. 포털 새로고침 뒤 시작 질문 또는 `sample_a 시연 데이터에서 놓치고 있는 개선 기회를 찾아줘.`를 사용하고, 실제 호출 상태의 전문 Assistant 이름과 최종 제안 요지 한 문장만 받는다. 이후 반증·EMS 단독 사례는 첫 결과에 맞춰 진행하며 실제 DB 조사는 하지 않는다. [실행과 결과 전달](03-openwebui-native-agent.md#demo-assets-deployment).
+- 이번 작업: **시연 분석의 요청·전문 회신·EES 종합을 사람이 읽을 수 있게 v0.1.1을 개선함.** 사내 v0.1.0 적용 성공과 새로고침 뒤 도구 자동 선택을 보고받았으나, 사용자는 세 분야 분석·교차 계산 횟수 안내만으로 협업 내용을 이해하기 어렵다고 설명함. 실제 요청·첫 분석/보완·회신 잘림 표시와 전문가별 회신 표·교차 비교·지표/다음 행동의 답변 형식을 구현·검토함. 관련 70개 시험과 실제 관리 목록의 v0.1.0→v0.1.1 갱신 모의시험 통과. 새 표현의 사내 적용·LLM 출력은 미확인임. [형식·검증](../evals/scenarios.md#cross-system-demo-readable-results), [최초 적용](../evals/scenarios.md#cross-system-demo-internal-apply).
+- 다음 작업 하나: **검증된 main의 v0.1.1을 ApplyDemo 한 번으로 갱신하고 새 대화의 협업 설명을 확인한다.** 저장된 인증을 재사용하며 브라우저를 완전히 새로고침한 뒤 EES 통합 Assistant에서 같은 sample_a 질문을 사용한다. 각 전문가에 맡긴 질문·회신·대표 근거와 EES 비교·결론을 사람이 이해할 수 있는지 짧은 답변 요지만 받는다. 실제 전문가 회신 원문·이전 계산의 정확성·반증/EMS 단독 시연·장기 안정성은 확인 범위를 넘겨 성공으로 기록하지 않는다. [적용·결과 형식](03-openwebui-native-agent.md#demo-assets-deployment).
 - 공유 DB 전제와 후속: 여러 시스템이 하나의 물리 DB와 일부 공통 데이터를 사용하나 각 담당자는 자기 시스템 지식에 집중되어 있음. [관계 발견 설계](03-openwebui-native-agent.md#shared-db-relations)는 운영 데이터 연결을 준비할 때 사용하며 현재 시연 범위에서 제외함. 시스템 간 실제 의미·접근 권한·스키마는 아직 조사하지 않음.
 - 배포 확인 대기: Portal 이름 변경과 Upgrade는 [PR #20](https://github.com/knadalkim-a11y/team-agent-poc/pull/20)에서 main `704dddbb72bd03ff1a0f3ed20fc2125b094484f6`에 반영함. [main Windows/Linux CI와 패키징](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34419567419)이 성공하고 실제 ees.2 산출물의 digest·전체 ZIP 검증까지 완료함. 최초 실행 블록을 안내했으며 사내 인증/다운로드·Upgrade 결과·Portal 표시는 아직 미확인임. 현재 확인된 사내 프로그램은 ees.1이며 이번 ApplyDemo 성공이 프로그램 Upgrade 성공을 뜻하지 않음. 접속 불가의 새 관찰과 원인 미확정은 아래 마지막 서버 증거에 연결함. [사용법](03-openwebui-native-agent.md#ees-wrapper-upgrade), [이전 검증](../evals/scenarios.md#ees-wrapper-upgrade).
 - 설비 조회 관리 합의: 여러 업무에서 쓰는 공통 기능이므로 운영용 설계에서는 독립 Tool로 등록·관리하는 방향을 유지함. 사용자는 이번 시연에 한해 적용이 간단한 기존 단일 등록 항목을 유지하기로 함. 현재는 같은 Tool 안의 함수 분리이며 별도 등록 완료가 아님. 후속 요청의 설비 조회 패널도 같은 등록 항목에서 제공하며 새 적용 성공 보고로 간주하지 않음.
@@ -55,7 +55,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 | 1. 쉬운 Chat UI | 대화·스트리밍·이름/로고와 초기 Rich UI 제거 작업 완료 보고. 실제 비개발자 사용성 전체는 미확인 | 합의한 목업 우선 방식으로 필요한 업무 화면을 하나씩 설계. 관리자 공지는 후속 요구 |
 | 2. 문서 시스템 연동 | 평소 세 연동 조회 정상의 기존 보고와 Rich UI 제거·변경 프롬프트 WebUI 반영 완료 보고. 새 출력의 개별 검증은 별도 미확인 | 실제 업무에 필요한 조회·후속 해석 보완. 새 일반 답변·원문 확인은 다음 관련 사용/변경에 묶음 |
 | 3. 관리자 공통 정책 | EES Assistant에 합성 공통 지침·정책 답변 Skill 저장 보고. 실제 사내 정책 적용은 미완료 | EES 전용 공통 원칙·상세 절차·권한/Tool 제한의 배치와 관리자 변경 반영을 정리 |
-| 4. 관리자 워크플로 | 합성 교차 분석·전문 실행 경로·ApplyDemo 구현/검토와 사내 API 적용 성공 보고 수신. 실제 LLM 선택·발견 품질은 미확인 | 새 대화의 sample_a 발견 시연부터 확인하고 반증·EMS 단독으로 이어감. 기존 공통 조회·WO 패널 유지 |
+| 4. 관리자 워크플로 | 사내 최초 등록·새로고침 뒤 기본 도구 선택 보고. 전문 분석 답변의 설명 부족에 따라 요청·회신·종합 표 v0.1.1 구현/검토 | ApplyDemo 갱신 후 같은 시연에서 협업 내용·근거·결론의 이해 가능성 확인. 반증·EMS 단독은 후속 |
 | 5. 레거시 시스템 연동 | EMS/APC/FDC의 실제 업무 기능은 미연결 | 승인된 API 또는 Query Broker로 가치가 있는 읽기 기능 하나 연결. 기존 서비스 권한·업무 규칙 활용 |
 | 6. 레거시 간접 UI | v0.1.3 기능 정상 보고와 이후 `panel_error` 이력 보존. v0.1.5 갱신 안내 후 패널 표시 성공을 사용자 보고로 확인. 최초 원인·장기 재발 여부는 미확정 | 시연 피드백 반영 → 운영용 목업 → 실제 EMS 구현. [목업](03-openwebui-native-agent.md#wo-mockup) |
 
@@ -75,7 +75,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 | 대상 | Git에서 준비한 것 | WebUI 반영 마지막 확인 | 검증 근거 | 적용 원본 커밋 |
 |---|---|---|---|---|
-| 교차 분석 시연 | EMS/APC/FDC 모델 정의·지침·자료/전문 Tool·ApplyDemo 구현 | 2026-09-10 사내 API 적용 result=ok/changed=8/complete 보고. 실제 모델 분석·UI 확인은 미실행 | [사내 적용](../evals/scenarios.md#cross-system-demo-internal-apply), [구현·검증](../evals/scenarios.md#cross-system-demo-implementation), [사용법](03-openwebui-native-agent.md#demo-assets-deployment) | 보고된 적용 원본 `502344d55154`는 main `502344d5515461ee0640b9fbfd96fe66ebd2edb4`의 접두사와 일치. 프로그램 원본 `4a8779bbf3ee`와 별개 |
+| 교차 분석 시연 | EMS/APC/FDC·Tool·ApplyDemo, v0.1.1 요청/회신 표시와 종합 설명 | 2026-09-10 v0.1.0 API 적용 성공·새로고침 뒤 자동 선택 보고. 세 분야 분석/계산 횟수는 모델 답변을 통한 사용자 보고이며 실제 회신·계산 원문은 미대조. v0.1.1 사내 표현은 미확인 | [설명 개선](../evals/scenarios.md#cross-system-demo-readable-results), [최초 적용](../evals/scenarios.md#cross-system-demo-internal-apply), [사용법](03-openwebui-native-agent.md#demo-assets-deployment) | 확인된 사내 자산 원본 `502344d55154`(v0.1.0). v0.1.1 원본은 이번 후속 변경이며 프로그램 원본 `4a8779bbf3ee`와 별개 |
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | WO 시연 목업 | EES WO Demo v0.1.7: 패널 서비스 이름 EES Portal. v0.1.6 크기 조절 표시·기존 진단·복원·조회/WO 동작 유지 | 2026-09-09 v0.1.6 적용·크기 조절 정상 보고. 앞선 v0.1.5 패널 표시 성공과 최초 예외 원인 미확정은 보존. 실제 EMS 미연결 | [시연 검사·후속 보고](../evals/scenarios.md#wo-mockup), [기존 항목 갱신](03-openwebui-native-agent.md#wo-mockup) | 적용·정상 보고 직전 안내 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc`(v0.1.6); 사내 등록 바이트·전체 SHA 직접 대조 미실행. 이전 성공·실패 이력은 평가 기록에 보존. PR #19 main 병합 `cb3a922d870663abd7f5fd576ba23456575e49a2` 확인 |
 | 팀 시연용 이름·소개·시작 질문 | 기존 모델 이름·소개·프로필 적용 안내, 목업 제안 JSON 4개·짧은 팀원 안내 | 2026-09-09 서비스 이름·로고 변경에 이어 목업 제안을 포함한 v0.1.2 갱신 수행 보고 수신. 모델 소개·팀원 전달·제안별 전체 클릭 결과는 미확인 | [목업 적용 보고](../evals/scenarios.md#wo-mockup), [서비스 이름·로고 확인](../evals/scenarios.md#ees-wrapper-manual-resume), [시연 준비](../evals/scenarios.md#team-demo-customization), [이전 준비](../evals/scenarios.md#team-first-use-preparation), [당시 보류](../evals/scenarios.md#onboarding-deferred) | 서비스 브랜딩은 아래 프로그램 원본. [제안 JSON](../agent-pack/ees-prompt-suggestions.json)의 안내 원본 `5a80ac6d`; 사내 등록 내용·SHA 직접 대조 미실행 |
@@ -120,7 +120,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-10: GitHub 인증 실패·WebUI 접속 실패 후 사용자 보고의 ApplyDemo 성공을 코드의 변경 횟수·재조회 조건과 대조함. API 적용과 실제 LLM 분석을 구분하고 현재 상태·다음 새 대화·장애 미확정을 기록함. 상태·평가·적용 안내의 문서만 변경하며 실행 코드·Prompt·등록 자산은 그대로 두고 문서/diff만 검사함. 이전 구현·Windows/Linux CI 근거는 [구현 검증](../evals/scenarios.md#cross-system-demo-implementation), 이번 사내 보고는 [적용 기록](../evals/scenarios.md#cross-system-demo-internal-apply)에 보존함.
+2026-09-10: 협업 가독성 v0.1.1의 실제 요청·첫 분석/보완·긴 회신 표시와 기존 권한/예산/부분 실패를 검토함. 전문·자료·등록·진입점 70개 시험과 실제 관리 목록의 최초8/갱신5/재실행0 모의시험이 통과했고 기존 도구·Skill·Knowledge·사용자 추가 필드·Valves 보존을 확인함. 독립 검토에서 차단 이슈가 없었으며 문서/diff를 점검함. 사내 모델의 새 결과 표현은 배포 후 확인함. [변경·검증](../evals/scenarios.md#cross-system-demo-readable-results).
 
 ## 갱신 규칙
 

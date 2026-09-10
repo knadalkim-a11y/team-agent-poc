@@ -1,7 +1,7 @@
 """
 title: EES Specialists
 description: Consult EMS, APC and FDC demo Assistants with the current user's access.
-version: 0.1.0
+version: 0.1.1
 required_open_webui_version: 0.11.3
 ees_demo_pack: ees-demo-v1
 """
@@ -111,7 +111,14 @@ def _visible_text(output):
         for item in output if isinstance(item, dict) and item.get("type") == "message"
         for part in (item.get("content") or [])
         if isinstance(part, dict) and part.get("type") == "output_text" and isinstance(part.get("text"), str)
-    )[-MAX_ANALYSIS_CHARS:]
+    )
+
+
+def _record_analysis(record, text):
+    # A final outlet response can replace a streamed partial. The flag describes
+    # the returned text, not whether an earlier partial happened to be longer.
+    record["analysis"] = text[-MAX_ANALYSIS_CHARS:]
+    record["analysis_truncated"] = len(text) > MAX_ANALYSIS_CHARS
 
 
 def _result(system, record, error=None):
@@ -125,7 +132,9 @@ def _result(system, record, error=None):
     return {
         "system": system, "model_id": SPECIALISTS[system]["model_id"], "demo": True,
         "status": "partial" if code and (analysis or evidence) else "failed" if code else "completed",
-        "analysis": analysis, "evidence": evidence, "data_calls": record["data_calls"],
+        "request": record["request"], "analysis": analysis,
+        "analysis_truncated": record["analysis_truncated"],
+        "evidence": evidence, "data_calls": record["data_calls"],
         "error": code,
     }
 
@@ -209,7 +218,7 @@ async def _run_specialist(runtime, source, user, system, question, record, emitt
         data = event.get("data") or {}
         if event.get("type") == "chat:completion":
             if isinstance(data.get("output"), list):
-                record["analysis"] = _visible_text(data["output"])
+                _record_analysis(record, _visible_text(data["output"]))
             if data.get("error"):
                 record["error"] = "model_response_failed"
         elif event.get("type") == "chat:message:error":
@@ -228,9 +237,9 @@ async def _run_specialist(runtime, source, user, system, question, record, emitt
     # the complete response path as well as collecting intermediate partials.
     final = context.get("assistant_message") or {}
     if isinstance(final.get("output"), list):
-        record["analysis"] = _visible_text(final["output"])
+        _record_analysis(record, _visible_text(final["output"]))
     elif isinstance(final.get("content"), str):
-        record["analysis"] = final["content"][-MAX_ANALYSIS_CHARS:]
+        _record_analysis(record, final["content"])
     return _result(system, record)
 
 
@@ -304,6 +313,10 @@ class Tools:
         repeats = sum(t["system"] in budget["counts"] for t in tasks)
         if budget["total"] + len(tasks) > MAX_CONSULTATIONS or budget["followups"] + repeats > 1:
             return _json(_failure("consultation_limit", "전문 분석 한도에 도달했습니다. 확보한 근거와 남은 확인 사항을 종합해 주세요."))
+        records = [{"request": {"question": task["question"],
+                                "kind": "followup" if task["system"] in budget["counts"] else "initial"},
+                    "evidence": [], "data_calls": 0, "analysis": "", "analysis_truncated": False}
+                   for task in tasks]
         # Reserve before the first await, so concurrent calls on this request
         # cannot both pass the same budget check. Failures also consume calls.
         budget["total"] += len(tasks)
@@ -317,8 +330,6 @@ class Tools:
                 raise RuntimeError("user_unavailable")
         except Exception:
             return _json(_failure("runtime_unavailable", "전문 Assistant 등록·버전·사용자 연결을 확인해 주세요."))
-
-        records = [{"evidence": [], "data_calls": 0, "analysis": ""} for _ in tasks]
 
         async def run(task, record):
             system = task["system"]
@@ -361,4 +372,4 @@ class Tools:
                       "partial": any(r["status"] != "completed" for r in results), "results": results,
                       "budget": {"used": budget["total"], "remaining": MAX_CONSULTATIONS - budget["total"],
                                  "followup_remaining": 1 - budget["followups"]},
-                      "message": "합성 자료를 실제 모델로 분석한 결과입니다. 근거·대상·시간 범위를 대조하고 미확인 사항을 구분하세요."})
+                      "message": "합성 자료를 실제 모델로 분석한 결과입니다. 각 전문 Assistant에 요청한 내용(request)·실제 회신(analysis)·조회 근거(evidence)를 사람이 이해할 수 있는 협업 요약으로 정리하세요. 분야별 근거와 교차 계산을 대조해 EES의 종합 판단을 설명하고, 부분·실패·잘린 회신은 구분하세요. 호출 횟수나 남은 한도를 결론으로 대신하지 마세요."})
