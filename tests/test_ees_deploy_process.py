@@ -969,9 +969,14 @@ class WindowsStopHelperTests(unittest.TestCase):
     def test_console_attach_failure_survives_real_helper_stdout_and_parent_parsing(self):
         # A base CPython process with CREATE_NO_WINDOW has no console, so the
         # helper must fail AttachConsole without delivering any stop signal.
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        ready = Path(temporary.name) / 'ready'
         target = subprocess.Popen(
-            [sys._base_executable, '-I', '-c', 'import time; time.sleep(15)'],
-            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            [sys._base_executable, '-I', '-c',
+             "import sys; from pathlib import Path; Path(sys.argv[1]).write_text('ready'); sys.stdin.buffer.read(1)",
+             str(ready)],
+            stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             creationflags=subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP)
         captured = []
         real_popen = subprocess.Popen
@@ -994,13 +999,26 @@ class WindowsStopHelperTests(unittest.TestCase):
             return helper
 
         try:
+            deadline = time.monotonic() + 5
+            while not ready.exists() and target.poll() is None and time.monotonic() < deadline:
+                time.sleep(.01)
+            self.assertTrue(ready.exists(), f'fixture readiness missing; exit_code={target.poll()}')
+            self.assertIsNone(target.poll(), 'fixture exited before the helper request')
             identity = manager._windows_identity(target.pid)
             self.assertIsNotNone(identity)
             identity.update(group_id=target.pid, log_file='C:/synthetic-private/server-' + 'b' * 32 + '.log')
-            with patch.object(manager.subprocess, 'Popen', side_effect=spawn_helper) as spawn:
-                with self.assertRaises(manager.ProcessError) as failure:
+            # Match start_server's ownership registration. A directly created
+            # fixture must not inherit an old test's cached Popen after PID reuse.
+            with patch.dict(manager._CHILDREN, {target.pid: target}), \
+                    patch.object(manager.subprocess, 'Popen', side_effect=spawn_helper) as spawn:
+                self.assertTrue(manager.verify_identity(identity), 'ready fixture identity is not current')
+                try:
                     manager.stop_server(identity)
-            error = failure.exception
+                except manager.ProcessError as error:
+                    failure = error
+                else:
+                    self.fail(f'helper unexpectedly succeeded; exit_code={target.poll()}; records={len(captured)}')
+            error = failure
             self.assertEqual((error.operation, error.reason, error.winerror, error.exit_code),
                              ('console_attach', 'stop_signal_failed', 6, 1))  # ERROR_INVALID_HANDLE
             self.assertEqual(error.timeout_seconds, 5)
@@ -1014,9 +1032,14 @@ class WindowsStopHelperTests(unittest.TestCase):
             self.assertEqual(spawn.call_args.kwargs['stdout'], subprocess.PIPE)
             self.assertEqual(spawn.call_args.kwargs['stderr'], subprocess.DEVNULL)
         finally:
-            if target.poll() is None:
+            # EOF releases the ready child; its lifetime is owned by this test,
+            # not by a wall-clock sleep that can expire during CI scheduling.
+            target.stdin.close()
+            try:
+                target.wait(timeout=5)
+            except subprocess.TimeoutExpired:
                 target.kill()  # Only this test-owned Popen handle.
-            target.wait(timeout=5)
+                target.wait(timeout=5)
 
 
 class CustomizedLauncherTests(unittest.TestCase):
