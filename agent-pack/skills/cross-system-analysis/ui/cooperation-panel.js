@@ -112,6 +112,9 @@ try {
       const divider = element('div'); divider.id = 'ees-cooperation-resizer'; divider.tabIndex = 0;
       divider.style.cssText = 'flex:0 0 10px;width:10px;cursor:col-resize;touch-action:none;display:flex;align-items:center;justify-content:center;z-index:31;';
       Object.entries({role: 'separator', 'aria-label': '대화와 협업 과정 너비 조절', 'aria-orientation': 'vertical', 'aria-controls': host.id}).forEach(([key, value]) => divider.setAttribute(key, value));
+      // The separator is outside the panel shadow root. Keep keyboard focus on
+      // its grip without drawing a full-height outline during pointer resizing.
+      divider.append(element('style', '#ees-cooperation-resizer:focus{outline:none}#ees-cooperation-resizer:focus-visible>span{outline:2px solid var(--ees-blue,#6b91d5);outline-offset:3px}'));
       const grip = element('span'); grip.style.cssText = 'width:3px;height:36px;background:#8888;border-radius:2px;pointer-events:none;'; divider.append(grip);
       const slot = element('div'); slot.className = 'flex';
       const launcher = element('button', '업무 패널'); launcher.id = 'ees-work-panel-toggle'; launcher.type = 'button';
@@ -479,8 +482,6 @@ try {
         if (divider.hidden || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
         event.preventDefault(); setWidth(event.key === 'Home' ? 350 : event.key === 'End' ? maximumWidth : panelWidth + (event.key === 'ArrowLeft' ? 20 : -20));
       });
-      divider.addEventListener('focus', () => { divider.style.outline = '2px solid #6b91d5'; });
-      divider.addEventListener('blur', () => { divider.style.outline = ''; });
       q('close').addEventListener('click', () => { open(false); if (work) work.focus(chatId); else launcher.focus({preventScroll: true}); });
       launcher.addEventListener('click', () => open(!wantsOpen, true));
       shadow.addEventListener('keydown', event => { if (event.key === 'Escape') { open(false); if (work) work.focus(chatId); else launcher.focus({preventScroll: true}); } });

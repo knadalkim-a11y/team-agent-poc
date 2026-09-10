@@ -18,7 +18,7 @@ Inter
 Original wheel path:
 open_webui/frontend/assets/fonts/Inter-Variable.ttf
 Bundled path:
-open_webui/frontend/_ees3/fonts/Inter-Variable.ttf
+open_webui/frontend/_ees4/fonts/Inter-Variable.ttf
 Size: 804612 bytes
 SHA256:
 cf3cb43b0366e2dc6df60e1132b1c9a4c15777f0cd8e5a53e0c15124003e9ed4
@@ -142,7 +142,7 @@ Noto Sans KR
 Original wheel path:
 open_webui/static/fonts/NotoSansKR-Variable.ttf
 Bundled path:
-open_webui/frontend/_ees3/fonts/NotoSansKR-Variable.ttf
+open_webui/frontend/_ees4/fonts/NotoSansKR-Variable.ttf
 Size: 10361060 bytes
 SHA256:
 2d2267a83d089cb1a517a4f901676d05d283346e650d1b1845d601cbd696a98e

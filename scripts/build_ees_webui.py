@@ -18,15 +18,15 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
-VERSION = "0.11.3+ees.3"
-PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3"}
+VERSION = "0.11.3+ees.4"
+PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4"}
 SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
 SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
 WHEEL_FILENAME = f"open_webui-{VERSION}-py3-none-any.whl"
 SOURCE_INFO = f"open_webui-{UPSTREAM_VERSION}.dist-info/"
 TARGET_INFO = f"open_webui-{VERSION}.dist-info/"
 SOURCE_APP = "open_webui/frontend/_app/"
-TARGET_APP = "open_webui/frontend/_ees3/"
+TARGET_APP = "open_webui/frontend/_ees4/"
 ASSET_DIR = Path(__file__).resolve().parents[1] / "branding" / "ees" / "assets"
 UI_DIR = ASSET_DIR.parent / "ui"
 ASSET_NAMES = (
@@ -43,7 +43,7 @@ FONT_SOURCES = {
                                 "2d2267a83d089cb1a517a4f901676d05d283346e650d1b1845d601cbd696a98e"),
 }
 THEME_FILES = tuple(UI_FILES.values()) + tuple("fonts/" + name for name in FONT_SOURCES)
-THEME_LINK = b'<link rel="stylesheet" href="/_ees3/chat-theme.css" crossorigin="use-credentials" />'
+THEME_LINK = b'<link rel="stylesheet" href="/_ees4/chat-theme.css" crossorigin="use-credentials" />'
 
 # Every replacement is pinned to one reviewed upstream file and occurrence count.
 # Upstream comments, attribution strings, documentation, and source maps remain.
@@ -56,7 +56,7 @@ PATCHES = {
     )],
     "open_webui/frontend/index.html": [
         (b"<title>Open WebUI</title>", b"<title>EES Portal</title>", 1),
-        (b"/_app/", b"/_ees3/", 49),
+        (b"/_app/", b"/_ees4/", 49),
         (b"</head>", THEME_LINK + b"\n\t</head>", 1),
     ],
     SOURCE_APP + "immutable/chunks/CHq18Uto.js": [
@@ -69,14 +69,14 @@ PATCHES = {
         (b" / Open WebUI`", b" / EES Portal`", 2),
     ],
     SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
-        (b"/_app/version.json", b"/_ees3/version.json", 1),
-        (b'an="0.11.3"', b'an="0.11.3+ees.3"', 1),
+        (b"/_app/version.json", b"/_ees4/version.json", 1),
+        (b'an="0.11.3"', b'an="0.11.3+ees.4"', 1),
     ],
     SOURCE_APP + "version.json": [
-        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.3"}', 1),
+        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.4"}', 1),
     ],
     SOURCE_INFO + "METADATA": [
-        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.3\n", 1),
+        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.4\n", 1),
     ],
 }
 

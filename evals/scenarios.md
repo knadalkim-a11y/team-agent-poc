@@ -1714,3 +1714,17 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 브라우저·CI 경계: 로컬 Chrome 실행파일이 없어 실제 렌더는 skip. Linux CI의 기본 Chrome을 명시적으로 요구하고 실제 빌드 wheel의 CSS/폰트·기존 패널 style을 사용하는 최소 native DOM fixture를 밝은/어두운/좁은 화면에서 렌더해 계산된 폰트·색·간격·가로 넘침·코드/KaTeX 보존·Shadow cascade를 검사함. 명시한 Chrome이 없으면 실패하며 전체 WebUI 로그인/스트리밍 통합·사내 실제 화면 확인과 구분함. PR/main CI와 프로그램 산출물 완료를 확인한 후 적용 명령을 전달함.
 
 직전 STATUS 최근 점검 보존(계획·업무 패널 수용): 2026-09-10: 수정 ApplyDemo·계획/오른쪽 패널 확인 안내 후 사용자 정상 보고를 수신해 이번 적용 단위를 완료로 기록함. 안내 원본과 실제 SHA의 직접 대조, 일반 정상 보고와 분석 정확성·개별 WO 동작 전수 확인을 구분함. 상태·기존 평가 기록만 갱신하고 문서/diff를 점검하며 실행 코드·추가 사내 시험·재배포는 진행하지 않음. [확인 범위](#plan-work-panel-accepted).
+
+<a id="ees-chat-width-resize"></a>
+
+### 글꼴·업무 패널 적용 보고와 1920px 폭·조절 표시 보완 (2026-09-10)
+
+- 사용자 보고: PR #28의 ees.3 배포 안내 뒤 “글꼴이랑 업무패널 바뀐거 확인”했다고 답함. 표시 변경의 사용자 확인으로 기록하며 ApplyDemo/Upgrade 출력의 실제 SHA·모든 상태/권한/정량 결과 직접 대조로 확대하지 않음. “조립 2라인 분석해서 생산 손실을 줄일 수 있는 개선 기회를 찾아줘.”에서 분석 과정 패널을 열고 크기를 조절하면 파란 테두리가 생긴다는 피드백과 기본 대화 폭이 너무 좁다는 피드백, 일반 화면 기준 1920×1080을 수신함.
+- 시작: 원격 main `13f6406f91668c65d6c4caebc689342376f8268a`, tree `cc056f20dc47736a2c1805edee5f514a6f3aa0dc`, 관련 열린 PR 0개를 확인함. 이전 [PR/main CI](https://github.com/knadalkim-a11y/team-agent-poc/pull/28)와 프로그램 artifact 생성 완료를 확인했으며 이번 새 적용 상태와 구분함.
+- 원인·수정: 분석 panel Shadow DOM 밖의 separator가 pointerdown에서 focus()되고 focus 이벤트가 전체 높이에 `2px solid #6b91d5` outline을 강제로 지정했음. 이 이벤트 표시를 제거하고 해당 조절기의 `:focus-visible` 때 작은 grip에만 표시함. 본문·입력창의 공통 max-width는 42→64rem(기본 672→1024px), 본문 유효 폭은 여백 제외 약 968px. native w-full로 좁은 화면/패널 확장에 맞춰 축소하고 와이드 옵션·글자 배율·기존 폰트/색은 유지함.
+- 전달: 새 ees.4 / _ees4 프로그램과 자산 v0.2.3으로 묶고 ApplyDemo → Upgrade 순서로 반영함. 전문 Tool의 버전 호환만 추가하며 기존 WO 소스·인정 해시·데이터/키/연결 설정을 유지함. ees.3의 테마 필수 파일 검증과 이전 버전 Start/Restore도 보존함.
+- 로컬 검증: 분석 패널 합성 JS 10개 그룹과 방향키·Home·End/ARIA/포인터 정리, 관련 배포 검사 20개 PASS. 실제 ees.4 wheel의 RECORD·폰트 해시·변경 대상 외 원본 5,868개 파일을 대조함. 보관한 실제 ees.3 payload→ees.4→Restore3에서 CheckOnly/재적용 무변경과 이전 모든 파일 해시·원본 환경·합성 DB/키·CA·실패 이력 보존을 확인함. 이 ees.3 fixture는 이전 폰트 우선순위 수정 전의 공식 기반 보관본이며 사내 최종 설치본의 바이트 대조는 아님. 새 wheel SHA-256은 `2d482b00fcc7c57c228f88146cc905ce7bf3913436cdfa76d50aadee39e30b1c`, 151,753,005 bytes. 문서 점검 오류/검토 후보 0·diff PASS.
+- 독립 검토: 고정 Svelte 메시지·입력 wrapper의 기본/와이드 분기와 CSS 범위를 대조하고 별도 layer/Shadow 위치·키보드 접근성·ees.3 필수 파일 검증/복원·WO 해시 불변을 확인함. 차단 이슈 없음.
+- 브라우저·CI: 로컬 Chrome이 없어 실제 렌더/입력 검사는 skip이며 Linux CI의 기존 Chrome 단계에서 실행함. 고정 CSS와 실제 분석/공통 패널 JS를 쓰는 native DOM fixture에서 1920×1080·sidebar 260px·패널 닫힘/480/640/660px 폭을 검사하고 실제 Chrome 입력으로 마우스 드래그·Tab/방향키와 isTrusted를 확인함. 별도 브라우저 패키지나 서비스는 추가하지 않으며 기존 폰트/색/좁은 화면 검사는 유지함. fixture 검사와 전체 사내 WebUI 통합·실제 사용자 화면의 최종 확인을 구분하고, 수정 PR/main CI·프로그램 산출물 완료 후 적용 명령을 안내함.
+
+직전 STATUS 최근 점검 보존(대화 스타일): 2026-09-10: 승인한 시안과 고정 WebUI의 실제 DOM·폰트를 대조하고 전용 CSS·오프라인 폰트를 ees.3 프로그램으로 묶음. CSS를 마지막 stylesheet로 연결하고 버전별 파일 검증·기존 ees.1/ees.2 시작/Restore·도구 호환을 함께 확인함. 관련 검사와 독립 검토·PR/main CI·산출물 확인을 마무리 조건으로 두며 실제 사내 화면과 설치 폰트의 적용은 배포 후 구분해 확인함. [검증 범위와 결과](../evals/scenarios.md#ees-chat-theme).

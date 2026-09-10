@@ -1,4 +1,4 @@
-/* EES Portal conversation theme — Open WebUI 0.11.3 (ees.3).
+/* EES Portal conversation theme — Open WebUI 0.11.3 (ees.4).
  * Palette and typography: approved ees-chat-redesign mockup, 2026-09-10.
  * Same-origin font bytes are copied from the pinned wheel by the builder.
  * Native content, controls, scrolling, resizing and saved preferences stay native.
@@ -74,10 +74,11 @@ html.dark #chat-container { color-scheme: dark; }
   font-weight: 500;
 }
 
-/* Standard-width conversations share one readable measure. Explicit native
+/* Standard-width conversations use the space on 1920px desktop displays.
+ * Native w-full still shrinks with the sidebar or right panel. Explicit native
  * widescreen mode remains wide; no fixed panel, scroll or flex dimensions. */
 #chat-container #messages-container .message-listitem:not(.max-w-full) {
-  max-width: 42rem;
+  max-width: 64rem;
 }
 #chat-container #messages-container .message-listitem {
   padding-inline: 1.75rem;
@@ -196,7 +197,7 @@ html.dark #chat-container { color-scheme: dark; }
 /* Align only standard-width input wrappers emitted by MessageInput; preserve
  * native widescreen mode and menus nested inside the composer. */
 #chat-container #chat-pane [class~="max-w-[58rem]"]:has(#message-input-container) {
-  max-width: 42rem;
+  max-width: 64rem;
 }
 
 /* Expanded navigation is role=navigation; the compact native rail uses

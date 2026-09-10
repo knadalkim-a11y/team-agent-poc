@@ -44,7 +44,7 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missin
         app + "version.json": json.dumps({"version": version}).encode(),
         app + "immutable/chunks/test.js": b"const title = 'EES Portal';\n",
     }
-    if version == "0.11.3+ees.3":
+    if version in {"0.11.3+ees.3", "0.11.3+ees.4"}:
         members.update({app + name: b"synthetic checked theme asset\n" for name in branding.THEME_FILES})
     members.update(extra or {})
     members.update(replacement or {})
@@ -121,8 +121,8 @@ class CustomizationTests(unittest.TestCase):
     def restore(self):
         return custom.restore(self.config, self.registry, self.record, OWNER)
 
-    def install_legacy_program(self, *, replacement=None, extra=None, version="0.11.3+ees.1"):
-        content = make_wheel(version=version, replacement=replacement, extra=extra)
+    def install_legacy_program(self, *, replacement=None, extra=None, version="0.11.3+ees.1", missing=()):
+        content = make_wheel(version=version, replacement=replacement, extra=extra, missing=missing)
         with zipfile.ZipFile(io.BytesIO(content)) as wheel:
             wheel.extractall(self.program)
             selection = {"source_commit": "e" * 40, "wheel_sha256": digest(content),
@@ -226,35 +226,41 @@ class CustomizationTests(unittest.TestCase):
         self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
         self.assertFalse(self.restore()["changed"])
 
-    def test_ees2_before_theme_pending_can_resume_and_restore(self):
-        legacy = self.install_legacy_program(version="0.11.3+ees.2")
-        self.interrupt_promotion()
-        pending = self.registry["customization"]["pending"]
-        self.assertEqual(pending["before"], legacy)
-        self.assertEqual(pending["target"]["webui_version"], branding.VERSION)
-        custom.validate_registry(self.registry)
-        self.assertTrue(self.resume()["changed"])
-        self.assertEqual(self.restore()["source_commit"], legacy["source_commit"])
-        custom.validate_program(self.program, legacy)
-        self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
+    def test_previous_theme_versions_pending_can_resume_and_restore(self):
+        for version in ("0.11.3+ees.2", "0.11.3+ees.3"):
+            with self.subTest(version=version):
+                legacy = self.install_legacy_program(version=version)
+                self.interrupt_promotion()
+                pending = self.registry["customization"]["pending"]
+                self.assertEqual(pending["before"], legacy)
+                self.assertEqual(pending["target"]["webui_version"], branding.VERSION)
+                custom.validate_registry(self.registry)
+                self.assertTrue(self.resume()["changed"])
+                self.assertEqual(self.restore()["source_commit"], legacy["source_commit"])
+                custom.validate_program(self.program, legacy)
+                self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
+                shutil.rmtree(self.program)
 
-    def test_ees2_theme_upgrade_checkonly_apply_and_restore_preserve_runtime(self):
-        previous = self.install_legacy_program(version="0.11.3+ees.2")
-        before = self.tree()
-        self.assertEqual(custom.inspect_bundle(self.config, self.bundle, COMMIT, self.env)["webui_version"],
-                         "0.11.3+ees.3")
-        self.assertEqual(before, self.tree())
-        self.assertTrue(self.apply()["changed"])
-        selected = self.registry["customization"]["active"]
-        custom.validate_program(self.program, selected)
-        for relative in branding.THEME_FILES:
-            self.assertTrue((self.program / branding.TARGET_APP / relative).is_file())
-        self.assertFalse((self.program / "open_webui/frontend/_ees2").exists())
-        self.assertFalse(self.apply()["changed"])
-        self.assertEqual(self.restore()["source_commit"], previous["source_commit"])
-        custom.validate_program(self.program, previous)
-        self.assertEqual(before, self.tree())
-        self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
+    def test_previous_theme_versions_checkonly_apply_and_restore_preserve_runtime(self):
+        for version in ("0.11.3+ees.2", "0.11.3+ees.3"):
+            with self.subTest(version=version):
+                previous = self.install_legacy_program(version=version)
+                before = self.tree()
+                self.assertEqual(custom.inspect_bundle(self.config, self.bundle, COMMIT, self.env)["webui_version"],
+                                 "0.11.3+ees.4")
+                self.assertEqual(before, self.tree())
+                self.assertTrue(self.apply()["changed"])
+                selected = self.registry["customization"]["active"]
+                custom.validate_program(self.program, selected)
+                for relative in branding.THEME_FILES:
+                    self.assertTrue((self.program / branding.TARGET_APP / relative).is_file())
+                self.assertFalse((self.program / "open_webui/frontend" / branding.PROGRAM_FRONTENDS[version]).exists())
+                self.assertFalse(self.apply()["changed"])
+                self.assertEqual(self.restore()["source_commit"], previous["source_commit"])
+                custom.validate_program(self.program, previous)
+                self.assertEqual(before, self.tree())
+                self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
+                shutil.rmtree(self.program)
 
     def test_theme_assets_missing_from_otherwise_valid_record_stop_before_changes(self):
         for relative in branding.THEME_FILES:
@@ -265,6 +271,17 @@ class CustomizationTests(unittest.TestCase):
                     self.apply()
                 self.assertEqual(before, self.tree())
                 self.assertEqual(self.events, [])
+
+    def test_installed_ees3_still_requires_theme_assets_after_wrapper_update(self):
+        for relative in branding.THEME_FILES:
+            with self.subTest(relative=relative):
+                previous = self.install_legacy_program(version="0.11.3+ees.3",
+                    missing=("open_webui/frontend/_ees3/" + relative,))
+                before = self.tree()
+                with self.assertRaises(custom.CustomizationError):
+                    custom.validate_program(self.program, previous)
+                self.assertEqual(before, self.tree())
+                shutil.rmtree(self.program)
 
     def test_interrupted_legacy_restore_keeps_legacy_record_until_cleanup(self):
         legacy = self.install_legacy_program()
