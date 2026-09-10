@@ -966,6 +966,41 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 성공 뒤 브라우저에서 `Ctrl+F5`로 완전히 새로고침합니다. 1920×1080의 기본 대화에서 본문·입력창 폭과 분석 과정 패널의 마우스 크기 조절 표시를 확인합니다. 이미 확인한 글꼴·패널 기능을 처음부터 다시 검사하지 않습니다. 외부에는 마지막 EES 결과와 화면 확인 여부만 1~2줄로 전달합니다. 실패 시 마지막 요약의 stage/code를 기준으로 기존 복구 절차를 사용하며 과거 promote 복구 블록을 반복 실행하지 않습니다. 프로그램을 Restore하면 직전 스타일로 돌아가고 갱신한 전문 도구는 이전 ees.1/ees.2/ees.3에서도 동작합니다. [검증과 사내 적용 경계](../evals/scenarios.md#ees-chat-theme).
 
+<a id="ees-stop-recovery"></a>
+
+#### 승인된 Upgrade 종료 실패의 한 번 복구
+
+2026-09-10의 `c099e427f62b / process_stop / operation_failed / changed=false` 사건에 대한 명시적 사용자 승인 범위입니다. 프로세스가 살아 있고 접속 포트는 없으며 로그에 KeyboardInterrupt가 있었지만, 그 문자열로 최초 원인이나 종료 신호 전달 성공을 확정하지 않습니다. 이 복구를 일반 Stop·Upgrade의 자동 대체 절차로 사용하지 않습니다. [사건과 확인 범위](../evals/scenarios.md#ees-stop-recovery).
+
+[복구 코드](../scripts/ees_deploy_stop_recovery.py)는 실패/registry 스냅샷, 보관 ZIP의 source commit·무결성, 현재 프로그램·환경·빈 포트를 먼저 검사합니다. 명시 플래그가 있고 상태가 그대로일 때만 검증된 서버 한 개를 동일 Windows 핸들에서 종료합니다. CPython venv 실행기 아래의 단일 실제 서버인 경우 부모/자식 관계·실행 파일·생성 시각을 확인하여 실제 서버만 종료하고 실행기의 자연 종료를 기다립니다. 알 수 없는 자식·상태 변경·식별 실패·종료 실패·포트 점유는 적용 전에 중단합니다. 프로세스 이름 전체, 임의 자식 트리, 콘솔 창을 종료하지 않습니다.
+
+**복구 코드의 Windows/Linux CI와 main 반영을 확인한 뒤**, 기존 등록 계정의 PowerShell에서 아래를 한 번 실행합니다. Update가 마지막 결과를 바꾸므로 **실패와 registry를 먼저 사내 요청 파일에 보존**합니다. 요청 파일·원래 로그·기존 ZIP은 사내에 남깁니다. 이후 새 다운로드 없이 보관 ZIP으로 기존 Apply→Start 경로를 실행하며 Python·의존성·DB·키를 재생성하지 않습니다. 실제 강제 종료에서는 앱의 미완료 정리 작업이 중단될 수 있습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $repo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $cfg = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $c = Get-Content -Raw -Encoding UTF8 $cfg | ConvertFrom-Json
+    $failureJson = Get-Content -Raw -Encoding UTF8 (Join-Path $c.state_root 'last-operation.json')
+    $last = $failureJson | ConvertFrom-Json
+    if ($last.action -ne 'upgrade' -or $last.result.stage -ne 'process_stop' -or $last.failed -ne $true) {
+        throw 'Saved stop failure changed; recovery stopped.'
+    }
+    $registryJson = Get-Content -Raw -Encoding UTF8 (Join-Path $c.state_root 'deployment.json')
+    $request = Join-Path $c.state_root ('stop-recovery-' + [guid]::NewGuid().ToString('N') + '.json')
+    $json = '{"failure":' + $failureJson + ',"registry":' + $registryJson + '}'
+    [IO.File]::WriteAllText($request, $json, [Text.UTF8Encoding]::new($false))
+    & (Join-Path $repo 'scripts\manage-ees.ps1') -Action Update
+    & $c.source_python -I -B (Join-Path $repo 'scripts\ees_deploy_stop_recovery.py') `
+        --config $cfg --request $request --commit c099e427f62bcdb752fe4321e39223915cac035a `
+        --terminate-recorded-process --health-timeout 120
+    if ($LASTEXITCODE -ne 0) { throw 'EES recovery stopped; use the final EES result.' }
+}
+```
+
+성공 기준은 마지막 `EES action=recover_stop result=ok ... running=true`와 Ctrl+F5 후 폭·드래그 표시 확인입니다. 외부에는 마지막 결과와 화면 확인 여부만 1~2줄로 전달합니다. 실패하면 블록을 반복하거나 요청 파일·잠금을 지우지 않고 마지막 `stage/code/operation/errno/winerror`로 이어갑니다. 종료가 성공하고 Apply/Start가 실패한 상태도 별도로 남기며 자동 Restore·다른 서버 시작을 하지 않습니다. 이번 복구 준비와 실제 사내 실행 성공·원인 해결은 구분합니다.
+
 <a id="ees-wrapper-upgrade"></a>
 
 #### 사내 명령 한 번으로 업데이트

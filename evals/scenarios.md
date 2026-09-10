@@ -1715,6 +1715,24 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 
 직전 STATUS 최근 점검 보존(계획·업무 패널 수용): 2026-09-10: 수정 ApplyDemo·계획/오른쪽 패널 확인 안내 후 사용자 정상 보고를 수신해 이번 적용 단위를 완료로 기록함. 안내 원본과 실제 SHA의 직접 대조, 일반 정상 보고와 분석 정확성·개별 WO 동작 전수 확인을 구분함. 상태·기존 평가 기록만 갱신하고 문서/diff를 점검하며 실행 코드·추가 사내 시험·재배포는 진행하지 않음. [확인 범위](#plan-work-panel-accepted).
 
+<a id="ees-stop-recovery"></a>
+
+### UI 적용 중 서버 종료 실패와 승인된 복구 (2026-09-10)
+
+- 시작 원본: 원격 main `c099e427f62bcdb752fe4321e39223915cac035a`, tree `56255071fab7e7191d0a696f42d169f160c80d4c`, 관련 열린 PR 0개. GitHub 연결로 파일을 읽어 로컬 비교 스냅샷 tree와 일치시킴. 사내 PC에는 직접 접근할 수 없음.
+- UI 전달 상태: PR #29 병합과 main CI run 34461921457의 최종 attempt 2 성공(Windows/Linux·Chrome·프로그램 생성), artifact 10146281258(152,433,113 bytes, expired=false, 동일 head)을 다시 확인함. 처음 Windows identity 검사 실패 이력은 PR 기록에 보존하며 재실행 성공을 근본 원인 해결로 확대하지 않음.
+- 사내 첫 실패: ApplyDemo `changed=0`, `commit=c099e427f62b`, `stage=webui_version`, `code=webui_connection_failed`. 이후 읽기 전용 probe `listen=false, http=000, curl=7`; Status `result=ok, commit=13f6406f9166, program=customized, running=true`. API 버전 요청 이전 연결 실패이며 auth·자산 변경·프로그램 Upgrade 성공으로 기록하지 않음.
+- 안내한 Stop→Start→ApplyDemo→Upgrade fail-fast 블록의 마지막 보고: Upgrade `changed=false, wrapper_changed=false, wrapper=c099e427f62b, stage=process_stop, code=operation_failed`. 블록 순서상 앞 단계 통과와 부합하나 개별 출력·ApplyDemo 변경 수·새 UI 검증을 직접 받은 것은 아님. 새 프로그램 파일 적용 전 실패임.
+- 추가 보고: 저장 결과 `error_type=process`, errno/winerror 없음; 현재 `running=true, listen=false, shutdown=false, interrupt=true`. 마지막 두 값은 같은 등록 로그 끝 200줄의 문자열 존재 여부이며 신호 도달 시각·실제 원인·완전한 종료 경로를 확정하지 않음. 기존 Upgrade는 stop ProcessError 메시지·위치를 버리고 여러 실패를 통합하므로 이번 저장 결과만으로 helper 실패와 종료 대기 만료를 구분할 수 없음.
+- 사용자 승인: 등록된 EES 서버 하나를 PID·실행 파일·생성 시각으로 재검증해 강제 종료하고 보관 ZIP으로 Apply→Start한다는 범위에 “응 너판단대로 하자.”라고 승인함. 같은 승인 재확인을 요구하지 않으며 다른 프로세스·일반 자동 강제 종료의 승인으로 확대하지 않음.
+- 구현 범위: 명시적 `ees_deploy_stop_recovery.py`와 단일 서버 대상 판별, 동일 Windows 핸들의 조회·종료·완료 확인. 원래 실패와 registry는 Update 전에 로컬 요청에 보존함. 실패 단계·프로그램·빈 포트·보관 ZIP을 검증하고 lock 아래 현재 상태와 다시 대조한 후에만 종료함. CPython venv 실행기인 경우 검증된 단일 실제 서버만 종료하고 부모 자연 종료와 잔존 자식 부재를 확인함. 기존 Stop/Upgrade의 정상 종료·적용·기동 로직과 DB/키/환경은 유지함.
+- 로컬 검증: Linux/Python 3.12에서 `tests.test_ees_deploy_stop_recovery tests.test_ees_deploy_stop_target tests.test_ees_deploy_process tests.test_manage_ees tests.test_ees_upgrade` 194개를 실행해 PASS(Windows/옵션 대상 8개 skip). 승인·실패/ZIP/registry 재검증·실제 preflight·실패 시 후속 차단·DB/키 보존·비밀 비노출을 검사함. Windows API 모의 시험은 동일 핸들·접근 거부·PID 재사용·경로/생성 시각 변경·종료 실패/시간 초과를 확인함. 실제 Windows 단일 프로세스 및 venv 서버 자식 종료는 기존 Windows/Python 3.11 CI에서 별도 실행하며 사내 실행과 구분함.
+- 독립 검토: 상태/잠금·종료 대상·적용 경계를 대조하고, 종료 성공 후 Start 등의 오류가 `terminated=true`를 미확인으로 덮는 표시 결함을 수정함. `main/report` 회귀 검사로 종료 이후 오류의 기본 None/명시 False 모두에서 확인된 종료 상태와 적용 상태를 보존함. [공식 CPython 3.11 실행기](https://github.com/python/cpython/blob/3.11/PC/launcher.c)의 명령 전달·단일 자식 대기와 job 종료 동작을 대조하여 실제 자식만 종료하고 부모 자연 종료를 확인함. 추가 차단 사항 없음. PR/main CI 결과는 해당 PR에 기록하며 실제 사내 강제 종료·ees.4 적용·새 화면은 사용자 실행 전 미확인.
+- 명령 대조: PowerShell 6+의 JSON 왕복 변환이 ISO 날짜를 로컬 시간대로 바꿔 registry 비교를 차단할 수 있음을 찾아, 실패/registry JSON 원문을 결합해 보존하도록 수정함. 검증용 파싱만 별도로 하며 Update 전 요청 저장·Update 실패 시 중단·기존 Python 실행 경로를 대조함. 실제 명령의 저장 부분과 전체 문법은 Windows PowerShell 및 사용 가능한 pwsh의 합성 파일 검사를 CI 확인 조건에 포함함.
+- 후속 범위: 종료 중 남은 스레드나 원래 listener 소실 원인, 일반 stop 오류 분류의 보완은 이 복구 성공과 별개다. KeyboardInterrupt를 특정 패키지 손상의 근거로 삼아 재설치를 반복하지 않음. [복구 명령](../docs/03-openwebui-native-agent.md#ees-stop-recovery).
+
+직전 STATUS 최근 점검 보존(폭·조절): 2026-09-10: 사용자 보고로 이전 글꼴·패널 변경을 확인하고, 분석 조절기의 강제 focus outline과 42rem 본문 폭 제한을 원본에서 확인함. 전체 높이 테두리를 작은 손잡이의 키보드 표시로 바꾸고 본문·입력창을 64rem로 확장함. 1920×1080의 패널 열림/너비 변경 및 포인터·키보드를 브라우저 검사에 연결하며 버전별 프로그램 검증·기존 설정 보존을 유지함. 문서·관련 검사·PR/main CI·프로그램 산출물 확인 후 사내 적용을 안내함. [범위·증거](../evals/scenarios.md#ees-chat-width-resize).
+
 <a id="ees-chat-width-resize"></a>
 
 ### 글꼴·업무 패널 적용 보고와 1920px 폭·조절 표시 보완 (2026-09-10)
