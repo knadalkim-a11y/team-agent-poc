@@ -545,6 +545,224 @@ class ProcessContracts(unittest.TestCase):
                 worker.join(timeout=2)
 
 
+class ExplicitTerminationContracts(unittest.TestCase):
+    """Exercise Windows refusal boundaries on every CI platform."""
+
+    def setUp(self):
+        import ctypes
+        self.ctypes = ctypes
+        self.saved = {'pid': 123, 'group_id': 123, 'created_at': str((3 << 32) | 456),
+                      'executable': os.path.normcase(os.path.realpath('/synthetic-private/python.exe'))}
+        self.kernel = MagicMock()
+        self.handle = 987654
+        self.kernel.OpenProcess.return_value = self.handle
+        self.kernel.WaitForSingleObject.side_effect = [258, 258, 0]
+        self.kernel.TerminateProcess.return_value = 1
+        self.kernel.CloseHandle.return_value = 1
+
+        def times(handle, created, *_):
+            created._obj.dwHighDateTime = 3
+            created._obj.dwLowDateTime = 456
+            return 1
+
+        def image(handle, flags, buffer, length):
+            buffer.value = self.saved['executable']
+            length._obj.value = len(buffer.value)
+            return 1
+
+        self.kernel.GetProcessTimes.side_effect = times
+        self.kernel.QueryFullProcessImageNameW.side_effect = image
+        for fixture in (
+                patch.object(manager.os, 'name', 'nt'),
+                patch.object(ctypes, 'WinDLL', return_value=self.kernel, create=True),
+                patch.object(ctypes, 'get_last_error', return_value=5, create=True)):
+            fixture.start()
+            self.addCleanup(fixture.stop)
+
+    def test_exact_handle_is_used_for_identity_termination_and_exit_wait(self):
+        with patch.object(manager.subprocess, 'Popen') as spawn, \
+                patch.object(manager, '_identity') as identity:
+            self.assertIs(manager.terminate_registered_process(self.saved), True)
+        self.kernel.OpenProcess.assert_called_once_with(0x101001, False, 123)
+        self.assertEqual(self.kernel.GetProcessTimes.call_args.args[0], self.handle)
+        self.assertEqual(self.kernel.QueryFullProcessImageNameW.call_args.args[0], self.handle)
+        self.kernel.TerminateProcess.assert_called_once_with(self.handle, 1)
+        self.assertEqual(self.kernel.WaitForSingleObject.call_args_list,
+                         [unittest.mock.call(self.handle, 0), unittest.mock.call(self.handle, 0),
+                          unittest.mock.call(self.handle, 10000)])
+        self.kernel.CloseHandle.assert_called_once_with(self.handle)
+        self.kernel.AttachConsole.assert_not_called()
+        self.kernel.GenerateConsoleCtrlEvent.assert_not_called()
+        spawn.assert_not_called()
+        identity.assert_not_called()
+
+    def test_invalid_saved_identity_is_rejected_before_opening_any_process(self):
+        invalid = [None, {}, True]
+        for field, values in (
+                ('pid', [True, '123', 123.0, 0, -1, 0x100000000]),
+                ('group_id', [True, '123', 123.0, 124]),
+                ('executable', [None, '', 'relative', 123]),
+                ('created_at', [None, 456, '', '0', '0123', '456-private'])):
+            invalid.extend({**self.saved, field: value} for value in values)
+        for saved in invalid:
+            with self.subTest(saved=saved), self.assertRaises(manager.ProcessError):
+                manager.terminate_registered_process(saved)
+        self.kernel.OpenProcess.assert_not_called()
+        self.kernel.TerminateProcess.assert_not_called()
+
+    def test_timeout_must_be_finite_positive_and_bounded(self):
+        for timeout in (True, None, '10', 0, -1, 61, float('inf'), float('nan')):
+            with self.subTest(timeout=timeout), self.assertRaises(manager.ProcessError):
+                manager.terminate_registered_process(self.saved, timeout=timeout)
+        self.kernel.OpenProcess.assert_not_called()
+
+    def test_child_group_requires_explicit_independently_verified_expected_group(self):
+        child = {**self.saved, 'group_id': 99}
+        for expected in (None, True, '99', 99.0, 0, -1, 0x100000000, 98):
+            with self.subTest(expected=expected), self.assertRaises(manager.ProcessError):
+                manager.terminate_registered_process(child, expected_group_id=expected)
+        self.kernel.OpenProcess.assert_not_called()
+        self.assertTrue(manager.terminate_registered_process(child, expected_group_id=99))
+        self.kernel.OpenProcess.assert_called_once_with(0x101001, False, 123)
+        self.kernel.TerminateProcess.assert_called_once_with(self.handle, 1)
+
+    def test_unsupported_platform_never_opens_a_process(self):
+        with patch.object(manager.os, 'name', 'posix'):
+            with self.assertRaisesRegex(manager.ProcessError, 'only on Windows'):
+                manager.terminate_registered_process(self.saved)
+        self.kernel.OpenProcess.assert_not_called()
+
+    def test_nonexistent_pid_is_only_open_failure_treated_as_already_stopped(self):
+        self.kernel.OpenProcess.return_value = 0
+        with patch.object(self.ctypes, 'get_last_error', return_value=87):
+            self.assertIs(manager.terminate_registered_process(self.saved), False)
+        for code in (5, 6, 0, 299):
+            with self.subTest(code=code), patch.object(self.ctypes, 'get_last_error', return_value=code):
+                with self.assertRaises(manager.ProcessError) as failure:
+                    manager.terminate_registered_process(self.saved)
+                self.assertEqual((failure.exception.operation, failure.exception.reason,
+                                  failure.exception.winerror), ('process_open', 'identity_unavailable', code))
+                self.assertIs(failure.exception.terminated, False)
+        self.kernel.CloseHandle.assert_not_called()
+        self.kernel.TerminateProcess.assert_not_called()
+
+    def test_already_signaled_handle_never_queries_or_terminates(self):
+        self.kernel.WaitForSingleObject.side_effect = [0]
+        self.assertIs(manager.terminate_registered_process(self.saved), False)
+        self.kernel.GetProcessTimes.assert_not_called()
+        self.kernel.QueryFullProcessImageNameW.assert_not_called()
+        self.kernel.TerminateProcess.assert_not_called()
+        self.kernel.CloseHandle.assert_called_once_with(self.handle)
+
+    def test_exit_after_verification_is_a_noop_on_the_same_handle(self):
+        self.kernel.WaitForSingleObject.side_effect = [258, 0]
+        self.assertIs(manager.terminate_registered_process(self.saved), False)
+        self.kernel.TerminateProcess.assert_not_called()
+        self.kernel.CloseHandle.assert_called_once_with(self.handle)
+
+    def test_failed_or_unknown_initial_wait_never_attempts_termination(self):
+        for status in (0xFFFFFFFF, 128, 1):
+            with self.subTest(status=status):
+                self.kernel.WaitForSingleObject.side_effect = [status]
+                with self.assertRaises(manager.ProcessError) as failure:
+                    manager.terminate_registered_process(self.saved)
+                self.assertEqual(failure.exception.operation, 'process_wait')
+                self.assertEqual(failure.exception.winerror, 5 if status == 0xFFFFFFFF else None)
+                self.assertIs(failure.exception.terminated, False)
+        self.kernel.GetProcessTimes.assert_not_called()
+        self.kernel.TerminateProcess.assert_not_called()
+        self.assertEqual(self.kernel.CloseHandle.call_count, 3)
+
+    def test_failed_identity_queries_preserve_only_numeric_os_cause(self):
+        for name in ('GetProcessTimes', 'QueryFullProcessImageNameW'):
+            function = getattr(self.kernel, name)
+            original = function.side_effect
+            with self.subTest(name=name):
+                function.side_effect = None
+                function.return_value = 0
+                self.kernel.WaitForSingleObject.side_effect = [258]
+                try:
+                    with self.assertRaises(manager.ProcessError) as failure:
+                        manager.terminate_registered_process(self.saved)
+                    error = failure.exception
+                    self.assertEqual((error.operation, error.reason, error.winerror),
+                                     ('process_inspect', 'identity_unavailable', 5))
+                    self.assertIs(error.terminated, False)
+                    self.assertNotIn('synthetic-private', str(error))
+                    self.assertNotIn('synthetic-private', json.dumps(vars(error)))
+                finally:
+                    function.side_effect = original
+        self.kernel.TerminateProcess.assert_not_called()
+        self.assertEqual(self.kernel.CloseHandle.call_count, 2)
+
+    def test_mismatched_image_or_creation_time_never_terminates(self):
+        for field, value in (('executable', self.saved['executable'] + '-other'),
+                             ('created_at', str(int(self.saved['created_at']) + 1))):
+            with self.subTest(field=field):
+                self.kernel.WaitForSingleObject.side_effect = [258]
+                with self.assertRaises(manager.ProcessError) as failure:
+                    manager.terminate_registered_process({**self.saved, field: value})
+                self.assertEqual(failure.exception.reason, 'identity_changed')
+                self.assertIs(failure.exception.terminated, False)
+                self.assertNotIn('synthetic-private', str(failure.exception))
+        self.kernel.TerminateProcess.assert_not_called()
+        self.assertEqual(self.kernel.CloseHandle.call_count, 2)
+
+    def test_failed_termination_is_not_retried_or_reported_as_stopped(self):
+        self.kernel.TerminateProcess.return_value = 0
+        with self.assertRaises(manager.ProcessError) as failure:
+            manager.terminate_registered_process(self.saved)
+        error = failure.exception
+        self.assertEqual((error.operation, error.reason, error.winerror),
+                         ('process_terminate', 'termination_failed', 5))
+        self.assertIs(error.terminated, False)
+        self.kernel.TerminateProcess.assert_called_once_with(self.handle, 1)
+        self.assertEqual(self.kernel.WaitForSingleObject.call_count, 2)
+        self.kernel.CloseHandle.assert_called_once_with(self.handle)
+
+    def test_termination_wait_timeout_and_wait_failure_block_success(self):
+        for status, reason in ((258, 'termination_timeout'), (0xFFFFFFFF, 'identity_unavailable')):
+            with self.subTest(status=status):
+                self.kernel.WaitForSingleObject.side_effect = [258, 258, status]
+                with self.assertRaises(manager.ProcessError) as failure:
+                    manager.terminate_registered_process(self.saved, timeout=.125)
+                self.assertEqual((failure.exception.operation, failure.exception.reason,
+                                  failure.exception.timeout_seconds), ('process_wait', reason, .125))
+                self.assertIsNone(failure.exception.terminated)
+                self.kernel.WaitForSingleObject.assert_called_with(self.handle, 125)
+        self.assertEqual(self.kernel.TerminateProcess.call_count, 2)
+        self.assertEqual(self.kernel.CloseHandle.call_count, 2)
+
+
+@unittest.skipUnless(os.name == 'nt', 'Real handle termination is Windows-only.')
+class WindowsExplicitTerminationTests(unittest.TestCase):
+    def test_disposable_child_identity_refusal_then_termination_preserves_other_child(self):
+        children = []
+        try:
+            for _ in range(2):
+                children.append(subprocess.Popen(
+                    [sys.executable, '-c', 'import time; time.sleep(15)'],
+                    stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP))
+            target, other = children
+            identity = manager._windows_identity(target.pid)
+            self.assertIsNotNone(identity)
+            identity['group_id'] = target.pid
+            with self.assertRaises(manager.ProcessError):
+                manager.terminate_registered_process({**identity, 'created_at': '1'})
+            self.assertIsNone(target.poll())
+            self.assertTrue(manager.terminate_registered_process(identity, timeout=5))
+            target.wait(timeout=5)
+            self.assertIsNone(other.poll())
+            self.assertFalse(manager.terminate_registered_process(identity, timeout=5))
+        finally:
+            for child in children:
+                if child.poll() is None:
+                    # Test-owned Popen handles only; production never sweeps child trees.
+                    child.kill()
+                child.wait(timeout=5)
+
+
 class CustomizedLauncherTests(unittest.TestCase):
     """Execute the real selected-program child code with a synthetic app."""
 

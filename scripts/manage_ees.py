@@ -40,7 +40,7 @@ FAILURE_STAGES = frozenset({
 ERROR_TYPES = frozenset({"launch_uncertain", "process", "state", "release", "deployment", "os_error", "unexpected"})
 RECOVERY_STATES = frozenset({"not_attempted", "blocked", "failed", "succeeded"})
 FAILURE_REASONS = ("health_timeout", "process_exited", "identity_unavailable", "identity_changed",
-                   "launch_failed", "launch_unverified")
+                   "launch_failed", "launch_unverified", "termination_failed", "termination_timeout")
 
 
 def safe_log_id(value):
@@ -65,7 +65,8 @@ def safe_failure_detail(value):
     return {
         "stage": value.get("stage") if value.get("stage") in tuple(FAILURE_STAGES) else "preflight",
         "error_type": value.get("error_type") if value.get("error_type") in tuple(ERROR_TYPES) else "unexpected",
-        "operation": value.get("operation") if value.get("operation") in ("port_probe", "port_bind") else None,
+        "operation": value.get("operation") if value.get("operation") in (
+            "port_probe", "port_bind", "process_open", "process_inspect", "process_terminate", "process_wait") else None,
         "errno": value.get("errno") if type(value.get("errno")) is int else None,
         "winerror": value.get("winerror") if type(value.get("winerror")) is int else None,
         "reason": value.get("reason") if value.get("reason") in FAILURE_REASONS else None,

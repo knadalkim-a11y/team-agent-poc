@@ -1,6 +1,7 @@
 """Own one foreground-console WebUI process; never kill an unrelated process.
 
 Only the recorded executable + creation time authorize a graceful signal.
+Explicit recovery can terminate that one Windows process through a verified handle.
 Windows signals use an isolated helper so another PowerShell can stop the group.
 Logs stay on this PC. Linux support exists for offline lifecycle tests.
 """
@@ -22,10 +23,11 @@ import uuid
 
 
 class ProcessError(RuntimeError):
-    """Starting, identifying, or gracefully stopping the managed server failed."""
+    """Starting, identifying, or stopping the managed server failed."""
 
     def __init__(self, message, *, cause=None, operation=None, reason=None,
-                 elapsed_seconds=None, timeout_seconds=None, exit_code=None, log_id=None):
+                 elapsed_seconds=None, timeout_seconds=None, exit_code=None, log_id=None,
+                 terminated=None):
         super().__init__(message)
         self.errno = getattr(cause, 'errno', None)
         self.winerror = getattr(cause, 'winerror', None)
@@ -33,15 +35,19 @@ class ProcessError(RuntimeError):
             self.errno = None
         if type(self.winerror) is not int:
             self.winerror = None
-        self.operation = operation if type(operation) is str and operation in {'port_probe', 'port_bind'} else None
+        operations = {'port_probe', 'port_bind', 'process_open', 'process_inspect',
+                      'process_terminate', 'process_wait'}
+        self.operation = operation if type(operation) is str and operation in operations else None
         reasons = {'health_timeout', 'process_exited', 'identity_unavailable',
-                   'identity_changed', 'launch_failed', 'launch_unverified'}
+                   'identity_changed', 'launch_failed', 'launch_unverified',
+                   'termination_failed', 'termination_timeout'}
         self.reason = reason if type(reason) is str and reason in reasons else None
         self.elapsed_seconds = _duration(elapsed_seconds)
         self.timeout_seconds = _duration(timeout_seconds)
         self.exit_code = exit_code if type(exit_code) is int else None
         self.log_id = (log_id if type(log_id) is str
                        and re.fullmatch(r'server-[0-9a-f]{32}\.log', log_id) else None)
+        self.terminated = terminated if type(terminated) is bool else None
 
 
 def _duration(value):
@@ -242,6 +248,117 @@ def _identity(pid):
 
 def verify_identity(identity):
     return isinstance(identity, dict) and _same(_identity(identity.get('pid')), identity)
+
+
+def terminate_registered_process(identity, timeout=10, *, expected_group_id=None):
+    """Explicit Windows recovery only; return whether this call terminated one process.
+
+    The caller must obtain recovery authorization and hold its operation lock.
+    PID, image, creation time, and the recorded group must all match. A verified
+    redirector child requires the caller's independently checked launcher group.
+    All queries,
+    termination, and exit confirmation use the same handle so PID reuse cannot
+    redirect the operation. This never signals a console, descendant, or group.
+    """
+    pid = identity.get('pid') if isinstance(identity, dict) else None
+    group_id = pid if expected_group_id is None else expected_group_id
+    if (type(pid) is not int or not 1 <= pid <= 0xFFFFFFFF
+            or type(group_id) is not int or not 1 <= group_id <= 0xFFFFFFFF
+            or type(identity.get('group_id')) is not int or identity['group_id'] != group_id
+            or type(identity.get('executable')) is not str or not identity['executable']
+            or not os.path.isabs(identity['executable'])
+            or type(identity.get('created_at')) is not str
+            or re.fullmatch(r'[1-9][0-9]*', identity['created_at']) is None):
+        raise ProcessError("The saved process identity is invalid; no process was terminated.",
+                           reason='identity_changed', terminated=False)
+    if (type(timeout) not in (int, float) or not 0 < timeout <= 60
+            or not math.isfinite(timeout)):
+        raise ProcessError("Use a termination timeout greater than zero and no more than 60 seconds.",
+                           terminated=False)
+    if os.name != 'nt':
+        raise ProcessError("Explicit registered-process termination is available only on Windows.",
+                           terminated=False)
+
+    import ctypes
+    from ctypes import wintypes
+
+    started = time.monotonic()
+    termination_requested = False
+
+    def failure(message, operation, reason, *, windows_error=False):
+        cause = None
+        if windows_error:
+            # Store only the numeric Windows cause, never its path-bearing text.
+            cause = OSError()
+            cause.winerror = ctypes.get_last_error()
+        return ProcessError(message, cause=cause, operation=operation, reason=reason,
+                            elapsed_seconds=time.monotonic() - started,
+                            timeout_seconds=timeout,
+                            terminated=None if termination_requested else False)
+
+    try:
+        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    except OSError as error:
+        raise ProcessError("Process access could not be prepared; no process was terminated.",
+                           cause=error, operation='process_open', reason='identity_unavailable',
+                           terminated=False) from None
+    kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel.OpenProcess.restype = wintypes.HANDLE
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel.CloseHandle.restype = wintypes.BOOL
+    kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+    kernel.WaitForSingleObject.restype = wintypes.DWORD
+    kernel.GetProcessTimes.argtypes = [wintypes.HANDLE] + [ctypes.POINTER(wintypes.FILETIME)] * 4
+    kernel.GetProcessTimes.restype = wintypes.BOOL
+    kernel.QueryFullProcessImageNameW.argtypes = [wintypes.HANDLE, wintypes.DWORD,
+                                                wintypes.LPWSTR, ctypes.POINTER(wintypes.DWORD)]
+    kernel.QueryFullProcessImageNameW.restype = wintypes.BOOL
+    kernel.TerminateProcess.argtypes = [wintypes.HANDLE, wintypes.UINT]
+    kernel.TerminateProcess.restype = wintypes.BOOL
+    # PROCESS_TERMINATE | PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE.
+    handle = kernel.OpenProcess(0x0001 | 0x1000 | 0x100000, False, pid)
+    if not handle:
+        if ctypes.get_last_error() == 87:  # ERROR_INVALID_PARAMETER: PID no longer exists.
+            return False
+        raise failure("Process access was refused; no process was terminated.",
+                      'process_open', 'identity_unavailable', windows_error=True) from None
+
+    def wait(milliseconds):
+        result = kernel.WaitForSingleObject(handle, milliseconds)
+        if result == 0xFFFFFFFF:  # WAIT_FAILED, never treat it as a running process.
+            raise failure("Process exit could not be inspected.", 'process_wait',
+                          'identity_unavailable', windows_error=True) from None
+        if result not in (0, 258):  # WAIT_OBJECT_0 or WAIT_TIMEOUT only.
+            raise failure("Process exit status is unknown.", 'process_wait',
+                          'identity_unavailable') from None
+        return result
+
+    try:
+        if wait(0) == 0:
+            return False
+        times = [wintypes.FILETIME() for _ in range(4)]
+        image, length = ctypes.create_unicode_buffer(32768), wintypes.DWORD(32768)
+        if (not kernel.GetProcessTimes(handle, *(ctypes.byref(value) for value in times))
+                or not kernel.QueryFullProcessImageNameW(handle, 0, image, ctypes.byref(length))):
+            raise failure("Process identity could not be inspected; no process was terminated.",
+                          'process_inspect', 'identity_unavailable', windows_error=True) from None
+        actual = {'pid': pid, 'executable': os.path.normcase(os.path.realpath(image.value)),
+                  'created_at': str((times[0].dwHighDateTime << 32) | times[0].dwLowDateTime)}
+        if not _same(actual, identity):
+            raise failure("Process identity changed; no process was terminated.",
+                          'process_inspect', 'identity_changed') from None
+        if wait(0) == 0:
+            return False
+        if not kernel.TerminateProcess(handle, 1):
+            raise failure("The registered process could not be terminated.",
+                          'process_terminate', 'termination_failed', windows_error=True) from None
+        termination_requested = True
+        if wait(math.ceil(timeout * 1000)) != 0:
+            raise failure("The registered process did not finish terminating in time.",
+                          'process_wait', 'termination_timeout') from None
+        return True
+    finally:
+        kernel.CloseHandle(handle)
 
 
 def start_server(python_exe, cwd, env, host, port, log_dir, *, program_path=None, program_version=None):
