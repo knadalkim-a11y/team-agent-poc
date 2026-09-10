@@ -4,6 +4,8 @@
 
 ## 2026-09-10
 
+- 교차 분석 시연 v0.1.1은 호출 횟수 대신 전문가별 맡긴 질문·실제 회신·대표 근거와 EES의 비교·종합 결과를 문장/표로 설명하도록 개선함. 전문 반환값에 첫 분석/보완 요청과 회신 잘림 여부를 보존하고 각 전문 지침·EES 결과 형식을 함께 갱신함. 별도 UI·서버·추가 LLM 호출 없이 기존 ApplyDemo로 반영하며 브라우저 새로고침 뒤 기본 도구 선택을 안내함. [결과 형식](docs/03-openwebui-native-agent.md#cross-system-demo), [검증과 사내 확인 구분](evals/scenarios.md#cross-system-demo-readable-results).
+
 - 합성 교차 분석 시연을 구현함. 기존 EES가 EMS/APC/FDC 전문 Workspace 모델을 실제 호출하며 근거를 취합하고 조건별 수치를 계산한다. 자료·전문 호출·보완 횟수와 사용자 권한을 코드에서 제한한다. ApplyDemo가 검증된 main을 갱신한 뒤 지정 Tool/Valves·전문 모델·기존 EES 관리 구역을 API로 병합하고, 기존 설정·개인 PAT를 유지하며 응답 유실 뒤 재실행을 지원한다. 최초 인증은 WebUI 관리자 API Key를 별도 DPAPI 저장한다. 기존 서버 재시작·운영 DB 조사·새 서버 없이 적용한다. [사용법](docs/03-openwebui-native-agent.md#demo-assets-deployment), [검증 및 사내 미확인 범위](evals/scenarios.md#cross-system-demo-implementation).
 
 - EES 기본 창구·시스템별 전문 Assistant·공통 도구 재사용 합의와 개선 기회/KPI 후보 발견 목표를 반영함. 합성 시연 3개, 전문 호출 최대 4회, 기존 EES+신규 전문 모델 3개·Tool 2개·Prompt/시작 질문 일괄 적용을 설계·독립 검토함. 고정 0.11.3의 자산 API·관리자 인증·설정 보존 경로를 확인했으며 ApplyDemo와 실행 자산은 아직 미구현. [시연 및 한 번 적용 설계](docs/03-openwebui-native-agent.md#demo-assets-deployment).
