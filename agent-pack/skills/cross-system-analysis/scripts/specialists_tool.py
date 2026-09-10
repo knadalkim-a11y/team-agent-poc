@@ -1,7 +1,7 @@
 """
 title: EES Specialists
 description: Consult EMS, APC and FDC demo Assistants with the current user's access.
-version: 0.1.2
+version: 0.1.3
 required_open_webui_version: 0.11.3
 ees_demo_pack: ees-demo-v1
 """

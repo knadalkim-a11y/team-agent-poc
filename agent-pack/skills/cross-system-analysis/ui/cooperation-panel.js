@@ -37,20 +37,70 @@ try {
     const number = value => value === null || value === undefined ? '미확인' : String(value);
     const text = value => value === null || value === undefined || value === '' ? '미지정' : Array.isArray(value) ? value.join(', ') || '없음' : String(value);
     const labels = {dataset: '시연 자료', group_by: '비교 단위', equipment_id: '설비', recipe_id: '레시피', event_id: '사건', event_ids: '사건', system: '분야', detailed: '상세 조회', detail: '상세 조회'};
-    const descriptions = {planned_start: '계획 기동', maintenance: '정비 후 재개', overall: '전체', equipment_id: '설비별', recipe_id: '레시피별', equipment_recipe: '설비·레시피별'};
+    const descriptions = {sample_a: '조립 2라인 · 기본 시연', sample_b: '조립 2라인 · 다른 시연 사례', planned_start: '계획 기동', maintenance: '정비 후 재개', overall: '전체', equipment_id: '설비별', recipe_id: '레시피별', equipment_recipe: '설비·레시피별'};
     const argumentsText = values => Object.entries(values || {}).filter(([, value]) => value !== '' && value !== undefined && value !== null)
       .map(([key, value]) => (labels[key] || key) + ': ' + (descriptions[value] || text(value))).join(' · ') || '별도 조건 없음';
+    // A small display-only Markdown subset. Never parse HTML, build links, or
+    // evaluate content. Unsupported notation remains visible as ordinary text.
+    const inline = (target, value) => {
+      const pattern = /\*\*([^*\n]+)\*\*|`([^`\n]+)`/g;
+      let offset = 0;
+      for (const match of value.matchAll(pattern)) {
+        if (match.index > offset) target.append(element('span', value.slice(offset, match.index)));
+        target.append(element(match[1] === undefined ? 'code' : 'strong', match[1] ?? match[2]));
+        offset = match.index + match[0].length;
+      }
+      if (offset < value.length) target.append(element('span', value.slice(offset)));
+    };
+    const readable = (target, value) => {
+      const lines = value.replace(/\r\n?/g, '\n').split('\n');
+      let paragraph = [], list = null, fenced = null;
+      const flush = () => { if (paragraph.length) { const p = element('p'); inline(p, paragraph.join('\n')); target.append(p); paragraph = []; } };
+      lines.forEach(line => {
+        if (/^\s*```[\w-]*\s*$/.test(line)) {
+          flush(); list = null;
+          if (fenced) { target.append(element('pre', fenced.join('\n'))); fenced = null; }
+          else fenced = [];
+          return;
+        }
+        if (fenced) { fenced.push(line); return; }
+        if (!line.trim()) { flush(); list = null; return; }
+        const heading = line.match(/^\s{0,3}#{1,6}\s+(.+)$/) || line.match(/^\s*\*\*([^*]+)\*\*\s*[:：]?\s*$/);
+        const item = line.match(/^\s*([-+*]|\d+[.)])\s+(.+)$/);
+        if (heading) { flush(); list = null; const h = element('h4'); inline(h, heading[1]); target.append(h); }
+        else if (item) {
+          flush(); const ordered = /^\d/.test(item[1]), tag = ordered ? 'ol' : 'ul';
+          if (!list || list.tagName.toLowerCase() !== tag) { list = element(tag); if (ordered) list.setAttribute('start', parseInt(item[1], 10)); target.append(list); }
+          const li = element('li'); if (ordered) li.setAttribute('value', parseInt(item[1], 10)); inline(li, item[2]); list.append(li);
+        } else { list = null; paragraph.push(line); }
+      });
+      flush(); if (fenced) target.append(element('pre', fenced.join('\n')));
+    };
     const create = chatId => {
-      const messages = new Map(), cardNodes = new Map(), expanded = new Set(), evidenceOpen = new Set();
+      const messages = new Map(), cardNodes = new Map(), expanded = new Set(), disclosures = new Map();
       let selectedMessage = null, selectedCall = null, latestMessage = null, wantsOpen = true, attached = false, autoOpenRequested = false;
       let layout = null, originalMinWidth, panelWidth = null, maximumWidth = 800, drag = null;
+      let renderedDisclosures = [];
       const host = element('aside'); host.id = 'ees-cooperation-panel'; host.setAttribute('aria-label', '협업 과정');
       host.style.cssText = 'flex:0 0 480px;width:480px;min-width:0;height:100%;min-height:0;overflow:hidden;box-sizing:border-box;z-index:30;';
       const shadow = host.attachShadow({mode: 'open'});
       // This template is constant. Requests, replies and results use textContent.
       shadow.innerHTML = `<style>
         :host{--bg:light-dark(#fff,#191b1f);--soft:light-dark(#f6f7f9,#22252a);--ink:light-dark(#202630,#ebedf2);--muted:light-dark(#646d7a,#a9b1bf);--line:light-dark(#dce1e8,#3b424d);--blue:light-dark(#315e9e,#a4c6ff);--blue-bg:light-dark(#edf3ff,#25364f);--green:light-dark(#35664e,#abd3bb);--green-bg:light-dark(#edf6f0,#263c30);--warn:light-dark(#8a4d18,#edbd8c);font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:13px;color:var(--ink);line-height:1.6}
-        *{box-sizing:border-box}[hidden]{display:none!important}button,select{font:inherit;color:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:3px}button{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 10px}h2,h3,p{margin:0}h2{font-size:16px;font-weight:600}h3{font-size:14px;font-weight:600}.frame{height:100%;display:flex;flex-direction:column;background:var(--soft);border-left:1px solid var(--line)}header{padding:17px 18px 13px;background:var(--bg);border-bottom:1px solid var(--line)}.heading,.node-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.muted{color:var(--muted);font-size:12px}.scroll{overflow:auto;padding:18px;flex:1;min-height:0;overscroll-behavior:contain}.node{border:1px solid var(--line);border-radius:11px;padding:12px 14px;background:var(--bg)}.node p{margin-top:4px}.node-label{font-size:13px;font-weight:600}.line{width:1px;height:21px;background:var(--line);margin:0 auto}.batch{margin:0 0 10px}.batch-caption{text-align:center;margin:0 0 8px;color:var(--muted);font-size:11px}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.cards[data-count="1"]{grid-template-columns:1fr}.cards[data-count="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:12px 5px;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;border-radius:10px}.card[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-bg)}.name{font-size:15px;font-weight:600}.pill{font-size:11px;border-radius:5px;padding:2px 5px;background:var(--blue-bg);color:var(--blue)}.pill[data-phase="completed"]{background:var(--green-bg);color:var(--green)}.pill[data-phase="failed"],.pill[data-phase="partial"],.pill[data-phase="cancelled"]{color:var(--warn);background:var(--soft)}.join{margin-bottom:10px}.comparison{width:100%;text-align:left;margin-top:8px}.comparison[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-bg)}.detail{margin-top:20px;padding-top:17px;border-top:1px solid var(--line)}.detail>p{margin-top:5px}dl{display:grid;gap:14px;margin:16px 0 0}dt{font-size:12px;color:var(--muted);margin-bottom:4px}dd{margin:0;overflow-wrap:anywhere}.plain{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75}.query{border:1px solid var(--line);background:var(--bg);padding:10px 12px;border-radius:8px;margin-top:8px}.query p{margin-top:3px}.notice{color:var(--warn);font-size:12px;margin:8px 0}.footnote{color:var(--muted);font-size:11px;margin-top:20px}.history{margin-top:11px}.history select{display:block;width:100%;border:1px solid var(--line);background:var(--soft);border-radius:7px;padding:6px}.history label{font-size:11px;color:var(--muted)}.metrics{width:100%;border-collapse:collapse;margin:8px 0 15px;font-size:12px}.metrics th,.metrics td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:6px 4px;overflow-wrap:anywhere}.metrics th{color:var(--muted);font-weight:400}.metric-title{margin-top:14px;font-weight:600}.expand{margin-top:8px;font-size:12px}details{margin-top:12px}summary{cursor:pointer;color:var(--blue)}.evidence{padding:8px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.truncate{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}.branch{height:11px;border-top:1px solid var(--line);margin:0 16.6%}.close{font-size:12px;white-space:nowrap}@media(pointer:coarse){button,select,summary{min-height:40px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+        *{box-sizing:border-box}[hidden]{display:none!important}button,select{font:inherit;color:inherit}button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:3px}button{cursor:pointer;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 10px}h2,h3,p{margin:0}h2{font-size:16px;font-weight:600}h3{font-size:16px;font-weight:600}
+        .frame{height:100%;display:flex;flex-direction:column;background:var(--soft);border-left:1px solid var(--line)}header{padding:17px 18px 13px;background:var(--bg);border-bottom:1px solid var(--line)}.heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.muted{color:var(--muted);font-size:12px}.scroll{overflow:auto;padding:18px;flex:1;min-height:0;overscroll-behavior:contain}.close{font-size:12px;white-space:nowrap}
+        .node{border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:var(--bg)}.node p{margin-top:4px}.node-label{font-size:13px;font-weight:600}.line{width:1px;height:15px;background:var(--line);margin:0 auto}.join{margin-bottom:10px}.batch{margin-bottom:4px}.batch-caption{text-align:center;margin:0 0 8px;color:var(--muted);font-size:11px}.branch{height:11px;border-top:1px solid var(--line);margin:0 16.6%}
+        .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.cards[data-count="1"]{grid-template-columns:1fr}.cards[data-count="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:10px 5px;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;border-radius:10px}.card[aria-pressed="true"],.comparison[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-bg)}.card .muted{font-size:11px}.name{font-size:15px;font-weight:600}
+        .pill{font-size:11px;border-radius:5px;padding:2px 5px;background:var(--blue-bg);color:var(--blue)}.pill[data-phase="completed"]{background:var(--green-bg);color:var(--green)}.pill[data-phase="failed"],.pill[data-phase="partial"],.pill[data-phase="cancelled"]{color:var(--warn);background:var(--soft)}.comparison{width:100%;text-align:left;margin-top:8px}
+        .detail{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:18px}.detail>p{margin-top:5px}.detail-section{margin-top:18px}.section-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px}.question{border-left:3px solid var(--line);padding:6px 10px;font-size:12px;color:var(--muted)}
+        dl{display:grid;gap:14px;margin:16px 0 0}dt{font-size:12px;color:var(--muted);margin-bottom:4px}dd{margin:0;overflow-wrap:anywhere}.plain{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75}
+        .reply{font-size:14px;line-height:1.8;overflow-wrap:anywhere}.reply>p{white-space:pre-wrap;margin:0 0 12px}.reply h4{font-size:14px;font-weight:650;margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}.reply h4:first-child{margin-top:0}.reply ul,.reply ol{padding-left:22px;margin:8px 0 14px}.reply li{padding-left:3px;margin:6px 0;white-space:pre-wrap}
+        .reply code{font-family:ui-monospace,monospace;font-size:.92em;background:var(--soft);border-radius:4px;padding:1px 4px}.reply pre{white-space:pre-wrap;background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:10px;font-size:12px}.reply.truncate{max-height:300px;overflow:hidden}.preview-label{font-size:11px;color:var(--muted);margin-bottom:8px}.expand{width:100%;padding:8px 12px;margin-top:10px;font-size:12px;color:var(--blue)}
+        .disclosure{border-top:1px solid var(--line);padding-top:12px;margin-top:16px}.disclosure summary{cursor:pointer;color:var(--blue);font-size:12px;font-weight:600;line-height:1.6}.disclosure[open]>summary{margin-bottom:10px}.disclosure>dl{margin-top:8px}.query{border:1px solid var(--line);background:var(--soft);padding:10px 12px;border-radius:8px;margin-top:8px;font-size:12px}.query p{margin-top:3px}
+        .metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}.metric{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:10px 12px}.metric dt{font-size:11px}.metric dd{font-size:19px;font-weight:600;line-height:1.4}.metric dd.small-value{font-size:15px}
+        .metrics{width:100%;border-collapse:collapse;margin:8px 0 15px;font-size:12px}.metrics th,.metrics td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:6px 4px;overflow-wrap:anywhere}.metrics th{color:var(--muted);font-weight:400}.metric-title{margin-top:14px;font-size:12px;font-weight:600}.evidence{padding:8px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+        .notice{color:var(--warn);font-size:12px;background:var(--soft);border-left:3px solid var(--warn);padding:8px 10px;line-height:1.7;margin:8px 0}.footnote{color:var(--muted);font-size:11px;line-height:1.65;margin-top:16px}.history{margin-top:11px}.history select{display:block;width:100%;border:1px solid var(--line);background:var(--soft);border-radius:7px;padding:6px}.history label{font-size:11px;color:var(--muted)}
+        @media(pointer:coarse){button,select,summary{min-height:40px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
       </style>
       <section class="frame"><header><div class="heading"><h2>협업 과정</h2><button id="close" class="close" type="button" aria-label="협업 과정 접기">접기</button></div><p id="live" class="muted" role="status" aria-live="polite"></p><div id="history" class="history" hidden><label for="message-select">이 대화의 분석</label><select id="message-select"></select></div></header>
       <div id="scroll" class="scroll"><div class="node"><span class="node-label">EES 통합 Assistant</span><p id="assignment" class="muted"></p></div><div class="line" aria-hidden="true"></div><div id="batches"></div><div id="join" class="line join" aria-hidden="true"></div><div class="node"><span class="node-label">EES · 결과 연결</span><p id="synthesis" class="muted"></p><div id="comparisons"></div></div><section class="detail" aria-labelledby="detail-title"><h3 id="detail-title"></h3><p id="detail-status" class="muted"></p><div id="detail-body"></div></section><p class="footnote">합성 시연 자료 · 실제 요청·조회·회신을 표시합니다.<br>최종 해석과 제안은 대화 답변에서 확인하세요. 새로고침하면 이 패널 기록은 초기화됩니다.</p></div></section>`;
@@ -130,45 +180,78 @@ try {
         if (header) { const head = element('thead'), row = element('tr'); header.forEach(value => row.append(element('th', value))); head.append(row); node.append(head); }
         const body = element('tbody'); rows.forEach(values => { const row = element('tr'); values.forEach(value => row.append(element('td', value))); body.append(row); }); node.append(body); target.append(node);
       };
+      const disclosure = (target, call, key, label) => {
+        if (!disclosures.has(call.call_id)) disclosures.set(call.call_id, new Set());
+        const openKeys = disclosures.get(call.call_id), details = element('details', undefined, 'disclosure'), summary = element('summary', label);
+        details.open = openKeys.has(key); summary.dataset.focusKey = key;
+        const record = {details, openKeys, key}; renderedDisclosures.push(record);
+        details.addEventListener('toggle', () => {
+          if (!renderedDisclosures.includes(record)) return;
+          if (details.open) openKeys.add(key); else openKeys.delete(key);
+        });
+        details.append(summary); target.append(details); return details;
+      };
       const renderComparison = (target, call) => {
-        const dl = element('dl'); target.append(dl); detailLine(dl, '비교 조건', argumentsText(call.arguments));
+        target.append(element('p', argumentsText(call.arguments), 'question detail-section'));
         const result = call.result;
-        if (!result || result.ok !== true) { detailLine(dl, '계산 결과', call.phase === 'failed' ? '비교를 완료하지 못했습니다.' : '아직 계산 결과를 받지 못했습니다.'); return; }
+        if (!result || result.ok !== true) { target.append(element('p', call.phase === 'failed' ? '비교를 완료하지 못했습니다.' : '아직 계산 결과를 받지 못했습니다.', 'muted detail-section')); return; }
         const calc = result.calculation || {};
-        detailLine(dl, '판정 기준', [calc.conditions, calc.consecutive_samples == null ? null : calc.consecutive_samples + '개 연속 표본', calc.end].filter(Boolean).join(' · ') || '결과에 기준이 포함되지 않았습니다.');
         const summary = result.summary || {};
-        table(target, [['대상 사건', number(summary.total_events) + '건'], ['확인 / 미확인 / 판정 불가', [summary.confirmed_events, summary.not_confirmed_events, summary.unassessable_events].map(number).join(' / ') + '건'], ['확인된 사건 평균', summary.mean_confirmed_minutes == null ? '계산 불가' : number(summary.mean_confirmed_minutes) + '분'], ['평균 분모', number(summary.mean_denominator) + '건']]);
+        const metrics = element('dl', undefined, 'metric-grid'); target.append(metrics);
+        [['대상 사건', number(summary.total_events) + '건'], ['확인된 사건 평균', summary.mean_confirmed_minutes == null ? '계산 불가' : number(summary.mean_confirmed_minutes) + '분'], ['확인 / 미확인 / 판정 불가', [summary.confirmed_events, summary.not_confirmed_events, summary.unassessable_events].map(number).join(' / ') + '건'], ['평균 분모', number(summary.mean_denominator) + '건']].forEach(([label, value], index) => {
+          const metric = element('div', undefined, 'metric'); metric.append(element('dt', label), element('dd', value, index === 2 ? 'small-value' : '')); metrics.append(metric);
+        });
         (result.comparisons || []).forEach(comparison => {
           target.append(element('p', argumentsText(comparison.conditions), 'metric-title'));
           const rows = Object.entries(comparison.groups || {}).map(([key, group]) => [descriptions[key] || key, group.mean_confirmed_minutes == null ? '계산 불가' : number(group.mean_confirmed_minutes) + '분', number(group.mean_denominator), number(group.not_confirmed_events), number(group.unassessable_events)]);
           table(target, rows, ['구분', '평균', '분모', '미확인', '판정 불가']);
           target.append(element('p', '정비 후 재개 − 계획 기동: ' + (comparison.maintenance_minus_planned_minutes == null ? '계산 불가' : number(comparison.maintenance_minus_planned_minutes) + '분'), 'muted'));
         });
-        if (calc.mean_policy) target.append(element('p', calc.mean_policy, 'muted'));
-        if (calc.missing_policy) target.append(element('p', calc.missing_policy, 'muted'));
+        const criteria = disclosure(target, call, 'criteria', '계산 기준과 자료 한계'), dl = element('dl'); criteria.append(dl);
+        detailLine(dl, '판정 기준', [calc.conditions, calc.consecutive_samples == null ? null : calc.consecutive_samples + '개 연속 표본', calc.end].filter(Boolean).join(' · ') || '결과에 기준이 포함되지 않았습니다.');
+        if (calc.mean_policy) detailLine(dl, '평균 계산', calc.mean_policy);
+        if (calc.missing_policy) detailLine(dl, '누락 처리', calc.missing_policy);
         if (result.events?.length) {
-          const details = element('details'), summaryNode = element('summary', '사건별 근거 ' + result.events.length + '건'); details.open = evidenceOpen.has(call.call_id);
-          summaryNode.dataset.focusKey = 'evidence'; details.addEventListener('toggle', () => { if (details.open) evidenceOpen.add(call.call_id); else evidenceOpen.delete(call.call_id); }); details.append(summaryNode);
+          const details = disclosure(target, call, 'evidence', '사건별 근거 ' + result.events.length + '건');
           result.events.forEach(event => {
             const row = element('div', undefined, 'evidence'); row.append(element('p', [event.event_id, event.equipment_id, event.recipe_id].filter(Boolean).join(' · ')));
             row.append(element('p', '생산 재개: ' + text(event.resumed_at) + ' · ' + ({confirmed: '확인됨', not_confirmed_within_window: '관측 시간 내 미확인', unassessable: '자료 부족으로 판정 불가'}[event.state] || '상태 미확인'), 'muted'));
             row.append(element('p', '확인 소요: ' + (event.confirmed_after_minutes == null ? '계산 불가' : number(event.confirmed_after_minutes) + '분') + ' · 누락 표본: APC ' + number(event.missing_samples?.APC) + ', FDC ' + number(event.missing_samples?.FDC), 'muted'));
             row.append(element('p', '근거: ' + text(event.evidence_record_ids), 'muted')); details.append(row);
-          }); target.append(details);
+          });
         }
         if (result.message) target.append(element('p', result.message, 'notice'));
       };
       const renderDetail = call => {
+        // Native toggle dispatch is queued. Capture live state before replacing
+        // nodes so an arriving specialist event cannot undo a user's click.
+        renderedDisclosures.forEach(({details, openKeys, key}) => { if (details.open) openKeys.add(key); else openKeys.delete(key); });
+        renderedDisclosures = [];
         const target = q('detail-body'); target.replaceChildren();
         if (!call) { q('detail-title').textContent = '작업 상세'; q('detail-status').textContent = '확인할 작업을 선택하세요.'; return; }
         q('detail-title').textContent = call.kind === 'specialist' ? call.system + ' Assistant' : 'EES · 교차 비교';
         q('detail-status').textContent = call.stale ? '최신 진행 상태 미확인 · 마지막 확인: ' + statusText(call.phase) : call.kind === 'comparison' && call.phase === 'completed' ? '비교 완료' : statusText(call.phase);
+        if (call.phase === 'partial') target.append(element('p', '일부 회신 또는 근거만 확보했습니다. 한계를 함께 확인하세요.', 'notice'));
+        if (call.phase === 'failed' || call.phase === 'cancelled') target.append(element('p', call.phase === 'cancelled' ? '이 작업은 취소되었습니다. 다른 작업의 결과는 유지됩니다.' : '이 작업을 완료하지 못했습니다. 다른 작업의 결과는 유지됩니다.', 'notice'));
         if (call.kind === 'comparison') renderComparison(target, call);
         else {
-          const dl = element('dl'); target.append(dl);
-          detailLine(dl, call.request?.kind === 'followup' ? '보완 요청' : '맡긴 질문', call.request?.question || '요청 내용이 전달되지 않았습니다.', 'plain');
-          const queries = detailLine(dl, '확인한 자료', '');
-          if (!call.queries?.length) queries.textContent = call.phase === 'requested' ? '아직 자료 조회를 시작하지 않았습니다.' : '기록된 자료 조회가 없습니다.';
+          const question = call.request?.question || '요청 내용이 전달되지 않았습니다.', questionLabel = call.request?.kind === 'followup' ? '보완 요청' : '맡긴 질문';
+          if (question.length > 180 || question.split('\n').length > 3) disclosure(target, call, 'question', questionLabel + ' 전체 보기').append(element('p', question, 'plain question'));
+          else { const section = element('section', undefined, 'detail-section'); section.append(element('p', questionLabel, 'section-label'), element('p', question, 'plain question')); target.append(section); }
+          const analysis = typeof call.analysis === 'string' ? call.analysis : '', isExpanded = expanded.has(call.call_id), preview = analysis.length > 700 && !isExpanded;
+          const replySection = element('section', undefined, 'detail-section'), reply = element('div', undefined, 'reply' + (preview ? ' truncate' : ''));
+          replySection.append(element('p', '전문가 회신', 'section-label')); target.append(replySection);
+          if (call.analysis_truncated) replySection.append(element('p', '회신이 길어 끝부분 16,000자만 전달되었습니다. 전체 회신으로 간주하지 마세요.', 'notice'));
+          if (preview) replySection.append(element('p', '전달된 회신 앞부분 · 전체 보기로 이어서 확인', 'preview-label'));
+          if (analysis) readable(reply, analysis);
+          else reply.append(element('p', ['completed', 'partial'].includes(call.phase) ? '표시할 회신이 없습니다.' : '아직 회신을 받지 못했습니다.', 'muted'));
+          replySection.append(reply);
+          if (analysis.length > 700) {
+            const button = element('button', isExpanded ? '회신 접기' : '회신 전체 보기', 'expand'); button.type = 'button'; button.dataset.focusKey = 'expand'; button.setAttribute('aria-expanded', String(isExpanded));
+            button.addEventListener('click', () => { if (expanded.has(call.call_id)) expanded.delete(call.call_id); else expanded.add(call.call_id); render(); }); replySection.append(button);
+          }
+          const queries = disclosure(target, call, 'queries', '조회 근거 · ' + (call.queries?.length ? call.queries.length + '회 요청' : '기록 없음'));
+          if (!call.queries?.length) queries.append(element('p', call.phase === 'requested' ? '아직 자료 조회를 시작하지 않았습니다.' : '기록된 자료 조회가 없습니다.', 'muted'));
           (call.queries || []).forEach(query => {
             const card = element('div', undefined, 'query');
             card.append(element('p', '조회 ' + number(query.index) + ' · ' + ({querying: '조회 중', completed: '조회 완료', failed: '조회 실패', cancelled: '조회 취소'}[query.status] || '상태 미확인')));
@@ -177,17 +260,7 @@ try {
             if (query.event_ids?.length) card.append(element('p', '사건: ' + query.event_ids.join(', '), 'muted'));
             queries.append(card);
           });
-          const analysis = typeof call.analysis === 'string' ? call.analysis : '';
-          const reply = detailLine(dl, '전문가 회신', analysis || (['completed', 'partial'].includes(call.phase) ? '표시할 회신이 없습니다.' : '아직 회신을 받지 못했습니다.'), 'plain');
-          if (analysis.length > 700) {
-            const isExpanded = expanded.has(call.call_id); reply.className = 'plain' + (isExpanded ? '' : ' truncate');
-            const button = element('button', isExpanded ? '회신 접기' : '회신 전체 보기', 'expand'); button.type = 'button'; button.dataset.focusKey = 'expand'; button.setAttribute('aria-expanded', String(isExpanded));
-            button.addEventListener('click', () => { if (expanded.has(call.call_id)) expanded.delete(call.call_id); else expanded.add(call.call_id); render(); }); target.append(button);
-          }
-          if (call.analysis_truncated) target.append(element('p', '회신이 길어 끝부분 16,000자만 전달되었습니다. 전체 회신으로 간주하지 마세요.', 'notice'));
         }
-        if (call.phase === 'partial') target.append(element('p', '일부 회신 또는 근거만 확보했습니다. 한계를 함께 확인하세요.', 'notice'));
-        if (call.phase === 'failed' || call.phase === 'cancelled') target.append(element('p', call.phase === 'cancelled' ? '이 작업은 취소되었습니다. 다른 작업의 결과는 유지됩니다.' : '이 작업을 완료하지 못했습니다. 다른 작업의 결과는 유지됩니다.', 'notice'));
       };
       const render = () => {
         const message = messages.get(selectedMessage); if (!message) return;
@@ -209,7 +282,7 @@ try {
             const card = element('button', undefined, 'card'); card.type = 'button'; card.dataset.callId = call.call_id; card.dataset.focusKey = call.call_id;
             card.setAttribute('aria-pressed', String(selectedCall === call.call_id)); card.setAttribute('aria-label', call.system + ' Assistant · ' + callStatus(call));
             card.append(element('span', call.system, 'name')); const pill = element('span', callStatus(call), 'pill'); pill.dataset.phase = call.stale ? 'partial' : call.phase; card.append(pill);
-            card.append(element('span', call.request?.kind === 'followup' ? '보완 분석' : '전문 분석', 'muted'));
+            card.append(element('span', call.request?.kind === 'followup' ? '보완 분석' : call.queries?.length ? '조회 요청 ' + call.queries.length + '회' : '전문 분석', 'muted'));
             card.addEventListener('click', () => { selectedCall = call.call_id; render(); }); cards.append(card); cardNodes.set(call.call_id, card);
           }); section.append(cards); q('batches').append(section);
         });
@@ -229,7 +302,7 @@ try {
         const select = q('message-select'); select.replaceChildren(); q('history').hidden = messages.size < 2;
         let index = 0; messages.forEach((item, id) => { index += 1; const first = Array.from(item.calls.values())[0]; const label = first?.request?.question || '교차 비교'; const option = element('option', '분석 ' + index + (id === latestMessage ? ' · 최근' : '') + ' — ' + label.slice(0, 42)); option.value = id; select.append(option); }); select.value = selectedMessage;
         renderDetail(message.calls.get(selectedCall)); q('scroll').scrollTop = scrollTop;
-        if (focusKey) { const node = cardNodes.get(focusKey) || (['expand', 'evidence'].includes(focusKey) ? q('detail-body').querySelector('[data-focus-key="' + focusKey + '"]') : null); node?.focus({preventScroll: true}); }
+        if (focusKey) { const node = cardNodes.get(focusKey) || (['expand', 'question', 'queries', 'criteria', 'evidence'].includes(focusKey) ? q('detail-body').querySelector('[data-focus-key="' + focusKey + '"]') : null); node?.focus({preventScroll: true}); }
       };
       const receive = event => {
         let message = messages.get(event.message_id);

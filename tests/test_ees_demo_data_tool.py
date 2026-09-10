@@ -170,8 +170,29 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(event["source_records"], [detailed["records"][0]["record_id"], detailed["records"][-1]["record_id"]])
         self.assertIsNotNone(datetime.fromisoformat(detailed["records"][0]["observed_at"]).tzinfo)
 
+    async def test_fictional_line_scope_keeps_both_equipment_and_separate_scenarios(self):
+        for dataset, scenario, total in (("sample_a", "기본 사례", 15), ("sample_b", "다른 사례", 20)):
+            with self.subTest(dataset=dataset):
+                reads = [await self.read(domain, dataset=dataset) for domain in ("ems", "apc", "fdc")]
+                comparison = await self.compare(dataset=dataset)
+                for result in [*reads, comparison]:
+                    self.assertEqual(result["dataset"], dataset)
+                    self.assertTrue(result["demo"])
+                    self.assertEqual(result["scope"], {"line_name": "조립 2라인", "synthetic": True,
+                        "scenario_label": scenario, "equipment_ids": ["EQ-01", "EQ-02"]})
+                    rows = result.get("records", result.get("events"))
+                    self.assertEqual(len(rows), total)
+                    self.assertEqual({row["equipment_id"] for row in rows}, {"EQ-01", "EQ-02"})
+                    self.assertTrue(all(row["event_id"].startswith(dataset + "-") for row in rows))
+                selected = await self.read(dataset=dataset, equipment_id="EQ-01")
+                self.assertTrue(selected["records"])
+                self.assertTrue(all(row["equipment_id"] == "EQ-01" for row in selected["records"]))
+                reads[0]["scope"]["equipment_ids"].clear()
+                self.assertEqual((await self.read(dataset=dataset))["scope"]["equipment_ids"], ["EQ-01", "EQ-02"])
+
     async def test_invalid_selectors_do_not_silently_read_other_data(self):
         for args in ({"dataset": "sample_b_override"}, {"equipment_id": "EQ-99"}, {"recipe_id": "R-03"},
+                     {"dataset": "조립 2라인"}, {"equipment_id": "조립 2라인"},
                      {"event_id": "sample_b-01"}, {"dataset": []}, {"event_id": "x" * 81}):
             with self.subTest(args=args):
                 self.assertFalse((await self.read(**args))["ok"])
