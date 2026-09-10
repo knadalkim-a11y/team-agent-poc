@@ -462,7 +462,7 @@ class PinnedWebUILoopTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_runtime_import_names_exist_in_fixed_wheel(self):
         with zipfile.ZipFile(WHEEL) as wheel:
-            for node in ast.walk(ast.parse(PATH.read_text())):
+            for node in ast.walk(ast.parse(PATH.read_text(encoding="utf-8"))):
                 if not isinstance(node, ast.ImportFrom) or not (node.module or "").startswith("open_webui."):
                     continue
                 source = ast.parse(wheel.read(node.module.replace(".", "/") + ".py").decode())

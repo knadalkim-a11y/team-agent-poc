@@ -115,7 +115,7 @@ class WebUIHTTPTests(unittest.TestCase):
             self.assertEqual([v[1] for v in self.server.seen], ["/api/version", "/api/v1/auths/", "/api/v1/models/model?id=existing"])
             self.assertIsNone(self.server.seen[0][2])
             self.assertEqual(core.call_args.args[3:], ("existing", HEAD))
-            saved = json.loads((Path(directory) / "demo-connection.json").read_text())
+            saved = json.loads((Path(directory) / "demo-connection.json").read_text(encoding="utf-8"))
             self.assertNotIn(TOKEN, json.dumps(saved))
             stop.assert_not_called()
             start.assert_not_called()
@@ -130,7 +130,7 @@ class WebUIHTTPTests(unittest.TestCase):
                   patch.object(demo.assets, "apply_assets", side_effect=demo.DemoError("api_request_failed"))):
                 with self.assertRaises(demo.DemoError):
                     demo.apply(config, args, HEAD, {})
-            saved = json.loads(Path(directory, "demo-connection.json").read_text())
+            saved = json.loads(Path(directory, "demo-connection.json").read_text(encoding="utf-8"))
             self.assertEqual(saved["ees_model_id"], "existing")
             self.assertEqual(saved["url"], self.url)
 
@@ -171,7 +171,7 @@ class OperatorTests(unittest.TestCase):
     def test_connection_override_does_not_reuse_other_servers_model(self):
         with tempfile.TemporaryDirectory() as directory:
             config = {"state_root": directory, "host": "127.0.0.1", "port": 8080}
-            Path(directory, "demo-connection.json").write_text(json.dumps({"url": "http://127.0.0.1:8080", "ees_model_id": "old"}))
+            Path(directory, "demo-connection.json").write_text(json.dumps({"url": "http://127.0.0.1:8080", "ees_model_id": "old"}), encoding="utf-8")
             _, value = demo.connection(config, argparse.Namespace(webui_url="https://example.invalid", ees_model_id=None, ca_file=None))
             self.assertIsNone(value["ees_model_id"])
 

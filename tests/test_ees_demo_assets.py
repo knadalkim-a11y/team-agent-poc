@@ -164,10 +164,10 @@ class ApplyAssetsTests(unittest.TestCase):
             self.assertNotIn("skillIds", child["meta"])
             self.assertTrue(all(g["permission"] == "read" for g in child["access_grants"]))
         count = len(self.api.writes)
-        state_before = json.loads((self.state / assets.STATE_FILE).read_text())
+        state_before = json.loads((self.state / assets.STATE_FILE).read_text(encoding="utf-8"))
         self.assertEqual(0, self.apply()["changed"])
         self.assertEqual(count, len(self.api.writes))
-        state_after = json.loads((self.state / assets.STATE_FILE).read_text())
+        state_after = json.loads((self.state / assets.STATE_FILE).read_text(encoding="utf-8"))
         self.assertEqual(state_before["assets"]["model:existing-ees"]["previous_value"],
                          state_after["assets"]["model:existing-ees"]["previous_value"])
         self.assertFalse(any("jira_real" in path or "/valves/user" in path for _, path, _ in self.api.calls))
@@ -181,7 +181,7 @@ class ApplyAssetsTests(unittest.TestCase):
         model["meta"]["suggestionPrompts"].append({"title": ["사용자", "추가"], "content": "추가 질문"})
         self.api.valves["ees_demo_data"]["timeout_seconds"] = 150
         (self.root / "agent-pack/ees.md").write_text("개선한 시연 지침", encoding="utf-8")
-        (self.root / "agent-pack/data.py").write_text((self.root / "agent-pack/data.py").read_text() + "# version 2\n")
+        (self.root / "agent-pack/data.py").write_text((self.root / "agent-pack/data.py").read_text(encoding="utf-8") + "# version 2\n", encoding="utf-8")
         self.manifest["ees"]["suggestions"][0]["title"] = ["새 제목", "시연"]
         self.write_manifest()
         self.assertEqual(2, self.apply("b" * 40)["changed"])
@@ -233,7 +233,7 @@ class ApplyAssetsTests(unittest.TestCase):
         self.assertEqual(2, result["changed"])
         paths = [p for m, p, body in self.api.writes if body.get("id") == "ees-demo-apc"]
         self.assertEqual(["/api/v1/models/create"], paths)
-        state = json.loads((self.state / assets.STATE_FILE).read_text())
+        state = json.loads((self.state / assets.STATE_FILE).read_text(encoding="utf-8"))
         self.assertTrue(all(r["status"] == "applied" for r in state["assets"].values()))
 
     def test_failure_before_write_can_retry_same_intent(self):
@@ -281,10 +281,10 @@ class ApplyAssetsTests(unittest.TestCase):
     def test_noop_refreshes_current_hash_and_expectation_but_keeps_prior_values(self):
         self.apply()
         state_path = self.state / assets.STATE_FILE
-        before = json.loads(state_path.read_text())["assets"]["model:existing-ees"]
+        before = json.loads(state_path.read_text(encoding="utf-8"))["assets"]["model:existing-ees"]
         self.api.rows[("model", "existing-ees")]["params"]["temperature"] = 0.5
         self.assertEqual(0, self.apply("b" * 40)["changed"])
-        after = json.loads(state_path.read_text())["assets"]["model:existing-ees"]
+        after = json.loads(state_path.read_text(encoding="utf-8"))["assets"]["model:existing-ees"]
         self.assertEqual(before["before"], after["before"])
         self.assertEqual(before["previous_value"], after["previous_value"])
         self.assertNotEqual(before["source_hash"], after["source_hash"])
@@ -321,7 +321,7 @@ class ApplyAssetsTests(unittest.TestCase):
         old_temp = journal.with_suffix(".tmp")
         old_temp.symlink_to(outside)
         self.apply()
-        self.assertEqual("untouched", outside.read_text())
+        self.assertEqual("untouched", outside.read_text(encoding="utf-8"))
         self.assertTrue(old_temp.is_symlink())
         self.assertEqual([], list(self.state.glob(".ees-demo-assets-*.tmp")))
 
@@ -351,7 +351,7 @@ class ApplyAssetsTests(unittest.TestCase):
     def test_verification_failure_preserves_partial_journal(self):
         self.api.drop_grants = True
         self.expect_error("verification_failed")
-        state = json.loads((self.state / assets.STATE_FILE).read_text())
+        state = json.loads((self.state / assets.STATE_FILE).read_text(encoding="utf-8"))
         self.assertEqual("pending", state["assets"]["tool:ees_demo_data"]["status"])
         self.assertNotIn(("tool", "ees_demo_delegate"), self.api.rows)
         count = len(self.api.writes)
