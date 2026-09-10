@@ -4,6 +4,7 @@
 
 ## 2026-09-10
 
+- 시연 자산 v0.2.1은 Open WebUI 0.11.3이 저장 전에 자동 정렬한 공식 WO 등록본도 인식함. 고정 Black 26.5.1로 검증한 v0.1.6/v0.1.7/v0.1.8의 완전 해시만 추가하며 사용자 수정·이름/권한/설정 보호와 기존 적용 절차를 유지함. [실패·재현·수정 근거](evals/scenarios.md#wo-editor-format-adoption).
 - 교차 분석 v0.2.0은 EES가 실행 계획을 먼저 등록하고 실제 전문·비교 결과에 맞춰 단계를 표시함. 본문은 짧은 결론과 다음 행동으로 줄이고 실행 전 선택 이유·결과 후 판단·불확실성·상세 자료는 오른쪽 업무 패널에서 확인함. 분석·설비 조회·WO를 기존 업무 패널 버튼으로 연결하고 초안을 유지함. ApplyDemo는 공식 기존 WO 등록본만 같은 ID로 갱신하며 현장 수정은 보존·충돌로 처리함. 별도 진행 시연·서버·요약 모델 호출은 추가하지 않음. [사용법](docs/03-openwebui-native-agent.md#cooperation-panel), [검증과 사내 확인 경계](evals/scenarios.md#cross-system-plan-work-panel).
 - 교차 분석 시연 v0.1.3은 회신을 먼저 읽는 패널·접을 수 있는 질문/조회 근거·핵심 수치 표시와 업무 중심의 가상 조립 2라인 시작 질문으로 개선함. 원래 합성 사건·계산과 현재 호출 구조를 유지하고 실제 운영 자료와 구분함. Portal 이름은 이미 구현된 프로그램 Upgrade와 ApplyDemo를 같은 블록으로 적용하도록 안내함. [사용법](docs/03-openwebui-native-agent.md#cooperation-panel), [사용자 확인·검증](evals/scenarios.md#cross-system-demo-readability).
 - 교차 분석 시연 v0.1.2는 우측 협업 과정 패널에 실제 전문 요청·자료 확인·회신·보완·교차 계산을 표시함. 질문과 호출별 상태를 구분하고 부분 실패·취소·대화 이동 중 놓친 상태를 명시함. 고정 화면 코드를 기존 두 Tool에 포함해 ApplyDemo 한 번으로 갱신하며 전문 호출 구조·한도·계산·기존 사용자 설정을 유지함. [패널과 한계](docs/03-openwebui-native-agent.md#cooperation-panel), [검증](evals/scenarios.md#cross-system-demo-panel).

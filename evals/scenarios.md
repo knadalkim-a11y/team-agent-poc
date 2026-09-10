@@ -1666,3 +1666,25 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 원격 CI·배포: 해당 PR의 Windows/Linux 검증과 병합 뒤 main 산출물 생성을 확인한 후 ApplyDemo를 안내함. 실제 사내 적용·사용자 화면 확인은 아직 미실행이며 이전 Portal 이름 표시 확인과 구분함.
 
 직전 STATUS 최근 점검 보존(Portal 표시 확인): 2026-09-10: 사용자 보고로 EES Portal 이름 표시를 확인하고 복구 실행 대기 상태를 화면 확인 단계로 갱신함. 개별 명령 성공·실제 적용 SHA·패널 v0.1.3·접근 거부 원인 해소는 미확인으로 유지함. 기존 복구 안내를 날짜가 있는 과거 절차로 표시해 반복 실행을 방지하고, 문서 구조·링크와 diff를 점검함. 실행 코드·설정·테스트·사내 환경은 변경하지 않음. [확인 범위](#ees-portal-upgrade-apply-failure).
+
+<a id="wo-editor-format-adoption"></a>
+
+### WO 편집기 자동 정렬본의 ApplyDemo 인식 보완 v0.2.1 (2026-09-10)
+
+- 사내 실패: 사용자가 `action=apply_demo result=failed changed=0 commit=b480325f78d4 stage=apply_assets code=unrecognized_existing_wo_source next=inspect_local_result`를 보고함. [PR #26](https://github.com/knadalkim-a11y/team-agent-poc/pull/26)의 main `b480325f78d468dc86e8d7e6ddc63881b1e55202`와 [main CI·Agent Pack 생성](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34450414261)은 통과했지만 사내 자산 적용은 실패했음을 구분함. 새 분석 계획·통합 패널의 실제 표시 성공은 아직 미확인임.
+- 작업 기준: 원격 main의 tree `a6a4c574f4f2aa6ed66cf71ad1bde510db41cd5e`와 로컬 배포 스냅샷이 같고 열린 PR 0개임을 확인함. source digest 검사는 줄바꿈/마지막 빈 줄만 정규화하여 서식이 달라지면 공식 원본도 거부함. 사용자 수정을 확인한 것으로 해석하거나 이름만으로 덮어쓰지 않음.
+- 저장 경로: 고정 Open WebUI 0.11.3 wheel의 Tool 편집기 `D7nr4Vao.js`는 저장 전 `formatPythonCodeHandler()`를 실행함. 공유 편집기 `DsQQBrwS.js`의 관리자 경로는 `/api/v1/utils/code/format`, backend `utils.py`는 `black.format_str(code, mode=black.Mode())`를 사용함. wheel METADATA의 고정 의존성은 `black==26.5.1`이며 비관리자 편집기는 별도 Pyodide Black을 사용하므로 그 버전까지 이번에 확인한 것으로 확대하지 않음. Tool API의 `replace_imports` 대상 옛 import가 지원 WO 원본에는 없음을 대조함.
+- 결정적 재현: 사내에 마지막 안내된 공식 WO v0.1.6 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc`를 고정 Black 26.5.1로 정렬하고, 실제 이전 v0.1.3 관리 목록의 모의 등록 내용에서 WO만 이 결과로 바꾸면 v0.2.0이 같은 오류·변경0으로 중단됨. 해당 정렬본의 완전 해시만 추가하면 갱신4/재실행0과 기존 설정 보존을 통과함. 사내 등록 코드를 직접 읽은 것은 아니므로 실제 실패본이 이 형태인지는 수정본 재적용 결과로 확인함.
+- 최소 수정: 실행기·Tool·Prompt·UI·서버·런타임 의존성은 변경하지 않고 관리 목록에 아래 검증한 정렬본 해시만 추가함. 기존 완전 해시 검사, 사용자 수정/모호한 후보/동시 편집 차단, 같은 ID·이름·권한·Valves·사용자 지침 보존을 유지함. 임의 AST 유사성이나 버전 문자열만으로 허용하지 않음. 세 결과는 AST·모듈 문자열 literal·Black 의미 동등성·포맷 멱등 검사를 통과함.
+
+| 공식 WO 원본 | Black 26.5.1 정렬본의 정규화 SHA-256 |
+|---|---|
+| v0.1.6 · `ba396da8d1d0abcb4e17494e8d9b37c5add514fc` | `2023d4fab7d983af15d800c1ab4d02f3ca986fe19583f42d6f8d4bbf97500e8d` |
+| v0.1.7 · `b2bcfc4ba14614ec84d4a91eb2cf69622bb029eb` | `406ebced27094a1210ccc0053c9157d64020199dd7eec240e29c82893cc4af87` |
+| v0.1.8 · `b480325f78d468dc86e8d7e6ddc63881b1e55202` | `401536920e2b595e453d718690a87d0db08901b540e72ef915f084fbfa2b7d28` |
+
+- 유지보수: WO 원본 또는 고정 편집기 formatter가 바뀌면 해당 공식 원본의 실제 정렬 결과를 다시 검증해 목록을 갱신함. 해시가 다르다는 이유로 사내 등록 코드를 수동 교체하거나 보호 조건을 해제하지 않음.
+- 수정 후 검증: Linux Python 3.12에서 `tests.test_ees_demo_assets` 36개·`tests.test_ees_apply_demo` 13개·`tests.test_demo_bundle` 7개가 통과함. 수정된 실제 manifest로 세 버전의 자동 정렬 등록본을 각각 적용해 이전 v0.1.3 최초8/갱신4/재실행0과 사용자 지침·추가 연결·권한·WO ID/이름/meta/Valves 보존을 확인함. 독립 검토자가 고정 formatter로 세 해시를 재계산하고 실제 wheel의 import 변환 함수가 코드를 바꾸지 않음, 주석을 한 줄 추가한 사용자 수정은 거부됨을 확인함. 실행기·제품 소스와 기존 검증 조건을 바꾸지 않았으며 관련 시험은 기존 버전 기대값만 갱신함. 문서 검사 `files=29 links=776 errors=0 review_candidates=0`, diff 검사 통과. 실제 사내 재적용·브라우저 검증과 구분함.
+- 전달: 수정본의 Windows/Linux CI와 병합 뒤 main 검증·산출물을 확인한 후 기존 ApplyDemo 한 명령으로 재개함. 앞선 실패가 변경0이므로 서버 재시작·프로그램 Upgrade·수동 WO 삭제/재등록은 재개 절차에 포함하지 않음. 성공 후 완전 새로고침·새 EES 대화에서 계획/오른쪽 패널 표시를 짧게 확인함.
+
+직전 STATUS 최근 점검 보존(실행 계획·통합 패널): 2026-09-10: 계획·실제 상태·공개 판단 근거, 오른쪽 통합 패널, 기존 WO 갱신을 구현하고 관련 Python·합성 DOM·실제 0.11.3 호출 바인더를 검사함. 실제 이전 v0.1.3→v0.2.0 모의 적용은 최초8/갱신4/재실행0이며 기존 설정·연결·권한·WO 등록을 보존함. 독립 검토에서 초기 계획 화면 선택·화면 전환 뒤 레이아웃 복원과 차트 근거 탐색을 보완함. CI에서 확인한 병렬 알림 snapshot 중복과 Python 3.11 취소 경합을 재현·수정하고 기존 시간 제한·프로세스 보호를 유지함. 문서·diff 점검과 원격 CI를 마무리 조건으로 두며 실제 사내 화면·모델 품질은 적용 후 확인함. [범위·검증 증거](#cross-system-plan-work-panel).

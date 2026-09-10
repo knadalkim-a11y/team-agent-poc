@@ -137,7 +137,7 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 
 구현은 [wo_demo_tool.py](../agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)의 고정된 화면 코드와 Open WebUI 0.11.3의 [공식 execute 이벤트](https://docs.openwebui.com/features/extensibility/plugin/development/events/#execute-works-with-both-__event_call__-and-__event_emitter__)를 사용합니다. 우측 패널을 붙이는 위치는 [0.11.3 Chat 화면 구조](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte)에 의존하며 공식 업무 패널 등록 API가 아닙니다. 모델이 실행할 JavaScript를 작성하지 않고 정해진 입력값만 전달합니다. 프런트엔드 재빌드·재설치·추가 서버·CDN은 필요하지 않습니다. 사외 검사와 실제 사내 WebUI·모델 동작 확인은 [검증 기록](../evals/scenarios.md#wo-mockup)에서 구분합니다.
 
-**현재 기존 사용자 갱신:** PR #19는 main에 병합됐으며, 현재 v0.1.8은 [ApplyDemo](#demo-assets-deployment)가 이미 EES에 연결된 공식 v0.1.6/v0.1.7 등록본을 같은 ID로 갱신합니다. 아래 수동 복사를 반복하지 않습니다. 새 통합 업무 패널의 공통 코드는 ApplyDemo가 포함하며 초기 등록과 현장 수정 여부에 따라 지원되지 않는 원본이면 먼저 대조합니다. 마지막 사내 확인 버전과 결과는 [평가 기록](../evals/scenarios.md#wo-mockup)을 따릅니다.
+**현재 기존 사용자 갱신:** PR #19는 main에 병합됐으며, 현재 v0.1.8은 [ApplyDemo](#demo-assets-deployment)가 이미 EES에 연결된 공식 v0.1.6/v0.1.7 등록본을 같은 ID로 갱신합니다. 시연 자산 v0.2.1부터는 고정 WebUI 편집기가 자동 정렬해 저장한 공식 등록본도 지원합니다. 아래 수동 복사를 반복하지 않습니다. 새 통합 업무 패널의 공통 코드는 ApplyDemo가 포함하며 초기 등록과 현장 수정 여부에 따라 지원되지 않는 원본이면 먼저 대조합니다. 마지막 사내 확인 버전과 결과는 [평가 기록](../evals/scenarios.md#wo-mockup)을 따릅니다.
 
 **처음 설치할 때만:** 최신 main의 [Tool 원본](../agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)을 EES WO Demo로 등록해 EES에 연결합니다. 같은 main의 [공통 Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)에서 `WO 시연 도구가 연결된 경우` 절을 기존 EES 지침 끝에 한 번 추가하고, [시작 질문 JSON](../agent-pack/ees-prompt-suggestions.json)의 네 질문을 기존 질문을 유지하면서 추가합니다. 이어 ApplyDemo로 공통 패널 코드를 포함합니다. 이미 등록된 사용자의 Tool을 삭제·재생성하지 않습니다.
 
@@ -433,7 +433,7 @@ v0.1.3의 회신 중심 표현을 거쳐, 이번에는 사용자가 확인한 �
 | 전문 호출 Tool | `ees_specialists`: 역량 조회, 현재 사용자 권한의 전문 모델 실행, 실제 조회 근거와 진행 상태 반환 |
 | 합성 자료 Tool | `ees_demo_data`: 도메인별 내장 자료 조회, EES의 조건별 수치 비교. 실제 DB·추가 서버·외부 다운로드 없음 |
 | 업무 패널 화면 | 공통 버튼과 분석 화면 코드를 두 Tool에 포함해 독립 실행 가능한 등록 소스로 구성. 별도 프런트엔드 빌드·서버 재시작 없음 |
-| 기존 EES WO Demo | EES에 이미 연결된 공식 v0.1.6/v0.1.7 또는 현재 Git 원본의 최초 수동 등록본만 같은 ID로 갱신. 이름·권한·설정과 기존 연결을 보존하며 새 WO 항목은 생성하지 않음. 지원 원본과 다른 현장 수정은 덮어쓰지 않고 적용 전 중단 |
+| 기존 EES WO Demo | EES에 이미 연결된 공식 v0.1.6/v0.1.7 또는 현재 Git 원본의 최초 수동 등록본만 같은 ID로 갱신. 고정 편집기의 검증된 자동 정렬본도 포함함. 이름·권한·설정과 기존 연결을 보존하며 새 WO 항목은 생성하지 않음. 지원 원본과 다른 현장 수정은 덮어쓰지 않고 적용 전 중단 |
 | 모델별 시작 질문 | [전문 지침과 EES 관리 구역](../agent-pack/system-prompts/ees-orchestration-demo.md), EMS/APC/FDC 지침을 모델 필드에 등록. 별도 Workspace Prompts·Skill 등록 없음 |
 
 실행 코드는 [전문 호출](../agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py)과 [합성 자료](../agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py), 운영 코드는 [ApplyDemo 진입점](../scripts/ees_apply_demo.py)과 [자산 병합](../scripts/ees_demo_assets.py)에 있습니다. 공유 자료의 도메인은 서버가 주입하는 `__metadata__.model_id`로 정하며 LLM이 제공한 모델 이름이나 Task Model의 `__model__`을 사용하지 않습니다. 전문 모델은 자기 자료만 조회하고 EES는 조건별 비교만 수행합니다. 모델 ID 검사는 기존 사용자·Tool 접근권한 검사를 대신하지 않습니다.
@@ -480,7 +480,9 @@ v0.1.3의 회신 중심 표현을 거쳐, 이번에는 사용자가 확인한 �
 
 일반적인 API 실패 뒤에는 같은 `ApplyDemo`를 다시 실행할 수 있습니다. 프로세스 강제 종료나 OS 파일 잠금까지 자동 복구한다고 보장하지 않으며, 잠금·로컬 기록 문제는 마지막 오류 코드로 확인합니다. 자동 삭제·DB 전체 복원·시연 자산 원복 명령은 제공하지 않습니다. 필요하면 기록된 이전 필드와 실제 상태를 먼저 대조합니다.
 
-WO 갱신에서 `unrecognized_existing_wo_source`는 등록 코드가 지원 원본과 다르다는 뜻입니다. 코드를 덮어쓰지 말고 등록 버전과 수정 의도를 확인합니다. `ambiguous_existing_work_order`는 대상 EES에 후보가 둘 이상 연결됐다는 뜻이고, `pending_work_order_unbound`는 앞선 미완료 갱신의 도구 연결이 바뀌었다는 뜻입니다. 이 경우 연결을 임의로 삭제하거나 같은 명령을 반복하지 않고 마지막 오류 코드만 전달합니다.
+WO 갱신에서 `unrecognized_existing_wo_source`는 등록 코드가 지원하는 저장 형태와 일치하지 않는다는 뜻이며 사용자 수정이 있었다는 확정은 아닙니다. v0.2.0은 편집기의 자동 정렬본을 누락해 공식 등록본도 거부했으며 v0.2.1에서 보완했습니다. 이 오류와 `changed=0`을 받은 기존 사용자는 수정본 CI 성공 뒤 위 ApplyDemo 한 명령으로 재개합니다. 수정본에서도 같으면 코드를 덮어쓰지 말고 마지막 오류 코드를 전달합니다. [실패와 확인 범위](../evals/scenarios.md#wo-editor-format-adoption).
+
+`ambiguous_existing_work_order`는 대상 EES에 후보가 둘 이상 연결됐다는 뜻이고, `pending_work_order_unbound`는 앞선 미완료 갱신의 도구 연결이 바뀌었다는 뜻입니다. 이 경우 연결을 임의로 삭제하거나 같은 명령을 반복하지 않고 마지막 오류 코드만 전달합니다.
 
 | 필요한 경우 | 옵션·대응 |
 |---|---|
