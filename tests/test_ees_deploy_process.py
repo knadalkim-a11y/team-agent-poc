@@ -967,15 +967,36 @@ class WindowsExplicitTerminationTests(unittest.TestCase):
 @unittest.skipUnless(os.name == 'nt', 'Real console helper IPC is Windows-only.')
 class WindowsStopHelperTests(unittest.TestCase):
     def test_console_attach_failure_survives_real_helper_stdout_and_parent_parsing(self):
-        # A base CPython process with CREATE_NO_WINDOW has no console, so the
-        # helper must fail AttachConsole without delivering any stop signal.
+        # Creation flags alone did not guarantee a detached fixture in Windows
+        # CI. Detach inside the test-owned child and verify that before ready.
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         ready = Path(temporary.name) / 'ready'
+        fixture_code = r'''
+import ctypes
+from ctypes import wintypes
+from pathlib import Path
+import sys
+
+kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+kernel.FreeConsole.argtypes = []
+kernel.FreeConsole.restype = wintypes.BOOL
+kernel.GetConsoleProcessList.argtypes = [ctypes.POINTER(wintypes.DWORD), wintypes.DWORD]
+kernel.GetConsoleProcessList.restype = wintypes.DWORD
+if not kernel.FreeConsole():
+    raise SystemExit(81)
+processes = (wintypes.DWORD * 1)()
+ctypes.set_last_error(0)
+if kernel.GetConsoleProcessList(processes, 1) != 0 or ctypes.get_last_error() != 6:
+    raise SystemExit(82)
+marker = Path(sys.argv[1])
+pending = marker.with_suffix('.tmp')
+pending.write_text('detached')
+pending.replace(marker)
+sys.stdin.buffer.read(1)
+'''
         target = subprocess.Popen(
-            [sys._base_executable, '-I', '-c',
-             "import sys; from pathlib import Path; Path(sys.argv[1]).write_text('ready'); sys.stdin.buffer.read(1)",
-             str(ready)],
+            [sys._base_executable, '-I', '-c', fixture_code, str(ready)],
             stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             creationflags=subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP)
         captured = []
@@ -1003,6 +1024,7 @@ class WindowsStopHelperTests(unittest.TestCase):
             while not ready.exists() and target.poll() is None and time.monotonic() < deadline:
                 time.sleep(.01)
             self.assertTrue(ready.exists(), f'fixture readiness missing; exit_code={target.poll()}')
+            self.assertEqual(ready.read_text(), 'detached')
             self.assertIsNone(target.poll(), 'fixture exited before the helper request')
             identity = manager._windows_identity(target.pid)
             self.assertIsNotNone(identity)
