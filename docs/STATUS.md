@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **대화 폭 확대·분석 패널 드래그 테두리 수정과 사내 적용을 완료함.** `c099e427f62b`의 복구·적용·기동 성공 보고 후, Ctrl+F5 뒤 넓어진 기본 대화 본문·입력창과 파란 테두리 제거에 대해 사용자가 “응 둘다 정상이야”라고 확인함. 이번 UI 수정 작업을 완료 처리하며 [사건·적용·화면 확인](../evals/scenarios.md#ees-stop-recovery)을 보존함.
-- 다음 작업 하나: **다음 사용자 요구가 정해지면 해당 기능 단위로 진행한다.** 이번 폭·테두리 수정은 실제 화면 확인까지 완료됐으므로 복구·ApplyDemo·Upgrade나 같은 확인을 반복하지 않음. 원래 접속 장애의 원인과 장기 안정성은 별도 미확인으로 유지함.
+- 이번 작업: **반복된 업데이트·패치 실패의 원인을 구분하고 확인된 래퍼 결함을 수정함.** Windows 종료 중 신원 조회 경합과 WAIT_FAILED 처리, 정상 종료 helper의 오류 손실, Upgrade 파일 오류 위치 누락과 마지막 실패 보존을 보완함. 사내 UI 수정은 정상 확인된 상태로 유지하며 현재 서버를 재시작하지 않음. [분석·조치·미확정 범위](../evals/scenarios.md#ees-update-failure-causes).
+- 다음 작업 하나: **검증된 래퍼 수정본을 Update하고 보존된 종료 실패 로그만 읽어 원인을 확인한다.** 원본이 정확히 연결되는 저장 로그만 검사하며 원문·사내 경로를 외부로 내보내지 않음. 현재 서버와 다른 사건을 섞지 않고 결과 한 줄로 다음 판단을 이어감. [읽기 검사](03-openwebui-native-agent.md#ees-update-failure-causes).
 - 공유 DB 전제와 후속: 여러 시스템이 하나의 물리 DB와 일부 공통 데이터를 사용하나 각 담당자는 자기 시스템 지식에 집중되어 있음. [관계 발견 설계](03-openwebui-native-agent.md#shared-db-relations)는 운영 데이터 연결을 준비할 때 사용하며 현재 시연 범위에서 제외함. 시스템 간 실제 의미·접근 권한·스키마는 아직 조사하지 않음.
 - 배포 확인: UI 수정본 [PR #29](https://github.com/knadalkim-a11y/team-agent-poc/pull/29)의 프로그램 원본 `c099e427f62bcdb752fe4321e39223915cac035a`를 사내에 적용·기동했다고 보고받음. 복구 코드 [PR #30](https://github.com/knadalkim-a11y/team-agent-poc/pull/30)은 main `ab97218a9957eb43d436ea02d4fee9a20021c7c3`에 병합됐고 [main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34540099706) attempt 2의 Windows/Linux·전달물 생성 성공을 확인함. attempt 1의 기존 Windows 테스트 cleanup 조회 실패는 PR에 보존하며 서버 장애의 원인 해결이나 장기 안정성으로 확대하지 않음.
 - 설비 조회 관리 합의: 여러 업무에서 쓰는 공통 기능이므로 운영용 설계에서는 독립 Tool로 등록·관리하는 방향을 유지함. 사용자는 이번 시연에 한해 적용이 간단한 기존 단일 등록 항목을 유지하기로 함. 현재는 같은 Tool 안의 함수 분리이며 별도 등록 완료가 아님. 후속 요청의 설비 조회 패널도 같은 등록 항목에서 제공하며 새 적용 성공 보고로 간주하지 않음.
@@ -41,7 +41,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 **2026-09-09 구현 시작 기준:** 원격 main `99ab68064a70a88da4b988d349dd1c45e30e7022`, tree `482e8853f71d60799a6dfc80294bf7b6ff6a775e`, 당시 관련 열린 PR 0개를 확인했습니다. 같은 tree의 로컬 비교 스냅샷에서 구현한 `feat/simple-webui-wrapper`를 [PR #15](https://github.com/knadalkim-a11y/team-agent-poc/pull/15)에 게시했습니다. 실행 코드 원본 `aa005f0edad338357438d70b9933a2bdb58c5b50`의 Windows/Linux CI와 독립 검토는 완료했으며 [PR #15 병합 b65e7fb](https://github.com/knadalkim-a11y/team-agent-poc/commit/b65e7fbbee612a8e34f7fd4136ca5cdc919fd082)을 확인했습니다. 다음 작업에서 이 SHA를 최신 head로 고정하지 않고 그때의 main·관련 열린 PR을 확인합니다. 이전 새 대화 준비 근거는 [기존 기록](../evals/scenarios.md#ees-wrapper-resume)에 보존합니다.
 
 - 이번 Rich UI 제거 시작 기준: 2026-09-09 원격 main `99a9ee`·관련 열린 PR 0개를 확인함. 다음 재개 때 이 SHA를 최신 head로 고정하지 않음.
-- 읽을 범위: AGENTS·이 문서 → [이번 종료 복구](03-openwebui-native-agent.md#ees-stop-recovery)·[증거](../evals/scenarios.md#ees-stop-recovery) → `scripts/ees_deploy_stop_recovery.py`·`scripts/ees_deploy_stop_target.py`와 관련 시험. 시작 main `c099e427f62bcdb752fe4321e39223915cac035a`, 관련 열린 PR 0개를 확인함. 중단한 후보 환경 진단·이전 promote 복구를 재실행하지 않음.
+- 읽을 범위: AGENTS·이 문서 → [반복 실패 원인·조치](../evals/scenarios.md#ees-update-failure-causes)·[읽기 검사](03-openwebui-native-agent.md#ees-update-failure-causes) → `scripts/ees_deploy_process.py`·`scripts/ees_deploy_report.py`·`scripts/manage_ees.py`·`scripts/ees_upgrade.py`와 관련 시험. 이번 시작 main `d5cadc9cc5c8d9ebf817842185a58cb67d55b1ec`, 관련 열린 PR 0개를 확인함. 완료한 종료 복구와 중단한 후보 환경 진단·이전 promote 복구를 재실행하지 않음.
 - 완료한 단위: 초기 Rich UI 제거의 Git 구현·검증·main 반영에 이어, 제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 확인함. 실제 등록 코드·적용 SHA·새 조회의 상세 출력 검증과 구분하며, 기존 프로그램 적용·기동·인증 전수 검사를 반복하지 않음. [적용 보고](../evals/scenarios.md#plain-output-applied-report).
 - 마지막 서버 증거: **2026-09-10 접속 불가 시 등록 프로세스는 생존했으나 해당 포트의 Listen은 없었고, Stop/Start/ApplyDemo 순차 안내 뒤 ApplyDemo 성공을 보고받음.** 당시 `ip=True listen=False http=000 curl=28`, 현재 프로세스 로그 `age_min=31.1 tail200=winerror_64`를 수신함. WinError 64의 원인 여부와 장애 발생 시각은 미확정이며 31.1분은 로그 마지막 수정 후 경과 시간임. 성공 시점의 WebUI API 접근·자산 적용은 확인됐으나 이번 Stop/Start 개별 출력·브라우저 채팅·장기 안정성은 별도 확인하지 않음. [이번 적용·장애 근거](../evals/scenarios.md#cross-system-demo-internal-apply), [이전 접속·기동 지연](../evals/scenarios.md#ees-start-health-followup).
 - 사내 결과는 직접 타이핑 1~2줄만 가능하며 전체 출력·파일·화면 사진을 요청하지 않습니다. 명령 블록은 각각 2,500자 이내로 준비하고, 상세 결과는 사내에 저장합니다. [재개 준비 점검](../evals/scenarios.md#ees-wrapper-resume).
@@ -120,7 +120,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-10: 사용자 보고로 c099e427f62b 수정본의 복구·적용·기동 성공에 이어 기본 대화 폭 확대와 분석 패널 드래그 시 파란 테두리 제거가 모두 정상임을 확인함. 이번 수정 작업을 완료 처리하고 기존 CI·실패·복구 기록은 보존함. [완료 근거와 확인 범위](../evals/scenarios.md#ees-stop-recovery).
+2026-09-10: 반복 실패 이력과 코드·공식 Windows/CPython/Uvicorn 동작을 대조함. Windows 종료 경합과 잘못된 대기 상태 처리, helper·Upgrade 진단 손실을 재현·보완하고 기존 파일의 읽기 검사로 보존된 종료 실패 로그를 제한하여 확인함. 사내 접속 장애·파일 접근 거부의 원인은 아직 미확정이며 재설치·자동 강제 종료로 확대하지 않음. [근거·검증 범위](../evals/scenarios.md#ees-update-failure-causes).
 
 ## 갱신 규칙
 

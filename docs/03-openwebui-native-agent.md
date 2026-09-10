@@ -966,6 +966,30 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 성공 뒤 브라우저에서 `Ctrl+F5`로 완전히 새로고침합니다. 1920×1080의 기본 대화에서 본문·입력창 폭과 분석 과정 패널의 마우스 크기 조절 표시를 확인합니다. 이미 확인한 글꼴·패널 기능을 처음부터 다시 검사하지 않습니다. 외부에는 마지막 EES 결과와 화면 확인 여부만 1~2줄로 전달합니다. 실패 시 마지막 요약의 stage/code를 기준으로 기존 복구 절차를 사용하며 과거 promote 복구 블록을 반복 실행하지 않습니다. 프로그램을 Restore하면 직전 스타일로 돌아가고 갱신한 전문 도구는 이전 ees.1/ees.2/ees.3에서도 동작합니다. [검증과 사내 적용 경계](../evals/scenarios.md#ees-chat-theme).
 
+<a id="ees-update-failure-causes"></a>
+
+#### 반복 실패 조치와 보존 로그의 읽기 검사
+
+기존 UI 수정은 정상 확인됐습니다. 이번 래퍼 수정은 Windows 종료 경합·잘못된 대기 상태 처리와 오류 기록 누락을 보완합니다. 정상 종료 실패를 자동 강제 종료로 바꾸거나 Python·의존성·DB·키를 다시 만들지 않습니다. [실패별 원인·조치와 미확정 범위](../evals/scenarios.md#ees-update-failure-causes).
+
+실패 요약은 `operation/reason`, Windows 숫자 오류, 경과 시간·한도와 알려진 코드 위치를 표시합니다. `last-operation.json`은 최신 작업 결과이고 `last-failure.json`은 최신 실패를 이후 성공과 구분해 보존합니다. 파일은 사내에 남기며 원문을 외부로 옮기지 않습니다.
+
+**수정본의 검증·main 반영을 확인한 뒤**, 아래 한 블록으로 래퍼를 Update하고 보존된 종료 실패 로그만 읽습니다. Update는 서버를 재시작하지 않고, 읽기 검사도 프로그램·프로세스·데이터·로그를 변경하거나 네트워크 요청을 하지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $repo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $cfg = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    & (Join-Path $repo 'scripts\manage-ees.ps1') -Action Update
+    $c = Get-Content -Raw -Encoding UTF8 $cfg | ConvertFrom-Json
+    & $c.source_python -I -B (Join-Path $repo 'scripts\ees_deploy_report.py') --inspect-recovery --config $cfg
+    if ($LASTEXITCODE -ne 0) { throw 'EES log inspection stopped; use the final result.' }
+}
+```
+
+`source=stop_failure`는 마지막 Upgrade 종료 실패 당시 서버를 가리킵니다. 앞선 접속 장애의 서버와 같다고 가정하지 않습니다. `accept_listener64=true`는 같은 traceback의 listener 오류 조합을 확인한 것이며 `accept_future64=true`만으로 listener 종료까지 확정하지 않습니다. TLS는 별도 관찰입니다. `truncated=true`이거나 `status=unavailable`이면 부재·정상으로 판정하지 않습니다. 현재 서버 로그나 최신 로그로 임의 대체하지 않습니다. 결과에서 `status/code`, `accept_listener64/accept_future64`, `tls_verify_failed/truncated`만 한 줄로 전달하면 됩니다.
+
 <a id="ees-stop-recovery"></a>
 
 #### 승인된 Upgrade 종료 실패의 한 번 복구

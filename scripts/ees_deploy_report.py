@@ -4,13 +4,16 @@ Recorded log IDs bind new failures to their logs. Legacy creation times identify
 only a likely log. Only fixed labels and public Python frame locations leave here.
 """
 
+import argparse
 from collections import deque
 from datetime import datetime, timezone
+import json
 import os
 from pathlib import Path
 import re
 import sys
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import ees_deploy_state as states
 
 
@@ -260,3 +263,194 @@ No URLs, exception messages, absolute paths or source lines are returned.
         return _unavailable("unsafe_or_missing_log_path")
     except (OSError, ValueError, TypeError, KeyError, AttributeError, OverflowError):
         return _unavailable("log_or_record_unavailable")
+
+
+_RECOVERY_NAME = re.compile(r"stop-recovery-[0-9a-f]{32}\.json\Z")
+_RECOVERY_COMMIT = "c099e427f62bcdb752fe4321e39223915cac035a"
+_ACCEPT_MESSAGE = re.compile(
+    r"(?:(?:ERROR|CRITICAL):(?:asyncio:)?\s*|[0-9][^\r\n]{0,200} - )?Accept failed on a socket\Z")
+
+
+def _accept64_summary(payload):
+    """Associate fixed labels within one complete traceback, never across errors."""
+    pending, context_lines, current = False, 0, None
+    listener, future = False, False
+    for line in payload.decode("utf-8", errors="replace").splitlines():
+        if _ACCEPT_MESSAGE.fullmatch(line):
+            pending, context_lines, current = True, 0, None
+            continue
+        if line == "Traceback (most recent call last):":
+            current = {"message": pending, "loop": False, "accept": False}
+            pending = False
+            continue
+        if pending:
+            # asyncio's default handler prints the socket context before exc_info.
+            context_lines += 1
+            if not line.startswith("socket: ") or context_lines > 8:
+                pending = False
+        if current is None:
+            continue
+        match = _FRAME.fullmatch(line)
+        if match:
+            label = _frame_label(*match.groups())
+            current["loop"] |= bool(re.fullmatch(r"stdlib/asyncio/proactor_events\.py:[0-9]+:loop", label))
+            current["accept"] |= bool(re.fullmatch(r"stdlib/asyncio/windows_events\.py:[0-9]+:accept_coro", label))
+            continue
+        if re.fullmatch(r"OSError: \[WinError 64\](?: .*)?", line):
+            matched = current["message"] and current["loop"]
+            listener |= matched
+            future |= current["accept"] and not matched
+            current = None
+        elif line and not line[0].isspace():
+            # An exception, chained traceback delimiter, or another log event
+            # ends the association, including a different WinError in this trace.
+            current = None
+    return {"accept_listener64": listener, "accept_future64": future}
+
+
+def _stamp(path):
+    info = states._regular(path).stat()
+    return info.st_size, info.st_mtime_ns, info.st_ino, info.st_dev
+
+
+def _recovery_json(path):
+    before = _stamp(path)
+    if before[0] > 1024 * 1024:
+        raise ValueError()
+    with path.open("rb") as handle:
+        payload = handle.read(1024 * 1024 + 1)
+    if len(payload) != before[0] or _stamp(path) != before:
+        raise ValueError()
+    try:
+        return json.loads(payload.decode("utf-8-sig")), payload
+    except RecursionError:
+        # The byte limit does not bound JSON nesting. Keep parser failures out
+        # of the operator output just like malformed or oversized evidence.
+        raise ValueError() from None
+
+
+def _recovery_paths(root):
+    paths = []
+    for count, path in enumerate(root.iterdir(), 1):
+        if count > MAX_LOG_FILES:
+            raise ValueError()
+        if _RECOVERY_NAME.fullmatch(path.name):
+            paths.append(path)
+    return sorted(paths)
+
+
+def inspect_recovery(config):
+    """Read the recorded c099 stop-failure log; no server or state is changed.
+
+    Multiple request copies may name the same log. Different recorded logs are
+    ambiguous; timestamps never substitute a different server's log. This is
+    the final Upgrade stop failure, not necessarily the earlier lost listener.
+    """
+    try:
+        root = states._safe(config["state_root"])
+        lock = root / "deployment.lock"
+        if lock.exists() or lock.is_symlink():
+            return {"status": "busy", "reason": "deployment_in_progress"}
+        registry_path = root / "deployment.json"
+        registry, registry_bytes = _recovery_json(registry_path)
+        if (not isinstance(registry, dict) or registry.get("schema_version") != 2
+                or registry.get("phase") != "idle" or registry.get("pending")
+                or registry.get("launch_uncertain")
+                or not isinstance(registry.get("customization"), dict)
+                or registry["customization"].get("pending")):
+            return _unavailable("deployment_not_idle")
+        logs = states._safe(root / "logs")
+        paths = _recovery_paths(root)
+        snapshots, candidates = [], set()
+        for path in paths:
+            request, raw = _recovery_json(path)
+            snapshots.append((path, raw))
+            if not isinstance(request, dict) or set(request) != {"failure", "registry"}:
+                return _unavailable("invalid_recovery_request")
+            failure, recorded = request["failure"], request["registry"]
+            if not isinstance(failure, dict) or not isinstance(recorded, dict):
+                return _unavailable("invalid_recovery_request")
+            result = failure.get("result")
+            if (failure.get("action") != "upgrade" or failure.get("failed") is not True
+                    or not isinstance(result, dict) or result.get("stage") != "process_stop"
+                    or result.get("changed") is not False or result.get("wrapper_commit") != _RECOVERY_COMMIT
+                    or not isinstance(result.get("process"), dict)
+                    or result["process"].get("error_type") != "process"):
+                continue
+            process = recorded.get("process")
+            if recorded.get("schema_version") != 2 or not isinstance(process, dict):
+                return _unavailable("invalid_recovery_request")
+            log_file = process.get("log_file")
+            if not isinstance(log_file, str):
+                return _unavailable("invalid_recorded_log_id")
+            candidate = states._regular(log_file)
+            if candidate.parent != logs or not _LOG_NAME.fullmatch(candidate.name):
+                return _unavailable("recorded_log_outside_managed_logs")
+            candidates.add(candidate)
+        if not candidates:
+            return _unavailable("recorded_stop_failure_missing")
+        if len(candidates) != 1:
+            return _unavailable("multiple_recorded_stop_logs", ambiguous=True)
+        candidate = next(iter(candidates))
+        active = registry.get("process")
+        if active is not None:
+            if not isinstance(active, dict) or not isinstance(active.get("log_file"), str):
+                return _unavailable("invalid_active_log_record")
+            if states._safe(active["log_file"], exists=False) == candidate:
+                return _unavailable("recorded_log_is_active", ambiguous=True)
+        before = _stamp(candidate)
+        scope = "tail" if before[0] > MAX_LOG_BYTES else "full"
+        with candidate.open("rb") as handle:
+            handle.seek(max(0, before[0] - MAX_LOG_BYTES))
+            payload = handle.read(MAX_LOG_BYTES)
+        if scope == "tail":
+            payload = payload.partition(b"\n")[2]
+        if (lock.exists() or lock.is_symlink() or _recovery_paths(root) != paths
+                or _recovery_json(registry_path)[1] != registry_bytes
+                or any(_recovery_json(path)[1] != raw for path, raw in snapshots)
+                or _stamp(candidate) != before):
+            return _unavailable("evidence_changed", ambiguous=True)
+        summary = _summarize(payload, scope=scope, log_bytes=before[0])
+        return {"status": "ok", "scan_scope": scope, "bytes_read": len(payload),
+                "truncated": scope == "tail", **_accept64_summary(payload),
+                "tls_verify_failed": summary["signals"]["cert_verify_failed"],
+                "startup_complete": summary["signals"]["startup_complete"]}
+    except states.StateError:
+        return _unavailable("unsafe_or_missing_evidence")
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, OverflowError):
+        return _unavailable("evidence_unavailable")
+
+
+def render_recovery(result):
+    """One line containing fixed labels and bounded numbers only."""
+    status = result.get("status")
+    status = status if status in {"ok", "busy", "unavailable", "ambiguous"} else "unavailable"
+    reasons = {"deployment_in_progress", "deployment_not_idle", "invalid_recovery_request",
+               "invalid_recorded_log_id", "recorded_log_outside_managed_logs",
+               "recorded_stop_failure_missing", "multiple_recorded_stop_logs",
+               "invalid_active_log_record", "recorded_log_is_active", "evidence_changed",
+               "unsafe_or_missing_evidence", "evidence_unavailable"}
+    code = result.get("reason") if result.get("reason") in reasons else "-"
+    scope = result.get("scan_scope") if result.get("scan_scope") in {"full", "tail"} else "-"
+    size = result.get("bytes_read")
+    size = size if type(size) is int and 0 <= size <= MAX_LOG_BYTES else "-"
+    fields = " ".join(f"{key}={'true' if result.get(key) is True else 'false' if result.get(key) is False else '-'}"
+                      for key in ("truncated", "accept_listener64", "accept_future64", "tls_verify_failed", "startup_complete"))
+    return f"EES inspect=recovery source=stop_failure status={status} scope={scope} bytes={size} {fields} code={code}"
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Inspect the saved stop-failure log without changing the server.")
+    parser.add_argument("--inspect-recovery", action="store_true", required=True)
+    parser.add_argument("--config", type=Path, required=True)
+    args = parser.parse_args(argv)
+    try:
+        result = inspect_recovery(states.load_config(args.config))
+    except (states.StateError, OSError, ValueError, TypeError, KeyError, AttributeError, RecursionError):
+        result = _unavailable("evidence_unavailable")
+    print(render_recovery(result))
+    return 0 if result["status"] == "ok" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

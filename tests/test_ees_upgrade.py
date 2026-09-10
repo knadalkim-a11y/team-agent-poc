@@ -42,6 +42,7 @@ class UpgradeDeploymentTests(unittest.TestCase):
         self.progress = {}
         self.output = io.StringIO()
         self.mock = {}
+        self.original_stop_registered = upgrade.manager.stop_registered
 
         def download(_, directory):
             self.events.append("download")
@@ -200,6 +201,70 @@ class UpgradeDeploymentTests(unittest.TestCase):
         self.assertEqual(self.progress["stage"], "health_check")
         self.assertTrue(self.progress["changed"])
         self.assertFalse((self.root / "upgrade-receipt.json").exists())
+
+    def test_main_apply_permission_error_retains_codes_and_actual_upgrade_frame(self):
+        private = "synthetic-private-PAT-and-exception-path"
+        error = PermissionError(13, private, private)
+        error.winerror = 5
+        self.mock["apply"].side_effect = error
+        with patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                patch.object(upgrade, "github_client", return_value=self.client), \
+                patch.object(upgrade, "bootstrap", return_value=(None, HEAD, OLDER)), \
+                redirect_stdout(self.output):
+            self.assertEqual(upgrade.main(["--config", "synthetic.json"]), 1)
+        saved = json.loads((self.root / "last-operation.json").read_bytes())
+        retained = json.loads((self.root / "last-failure.json").read_bytes())
+        self.assertEqual(retained, saved)
+        self.assertEqual(saved["result"]["stage"], "apply")
+        detail = saved["result"]["local_error"]
+        self.assertEqual((detail["type"], detail["errno"], detail["winerror"]), ("PermissionError", 13, 5))
+        self.assertEqual(detail["source"], "ees_upgrade.py")
+        source = (ROOT / "scripts" / detail["source"]).read_text(encoding="utf-8").splitlines()
+        self.assertTrue(source[detail["line"] - 1].strip().startswith("manager.customization.apply(config"))
+        summary = self.output.getvalue().splitlines()[-1]
+        self.assertIn("error=PermissionError errno=13 winerror=5 at=ees_upgrade.py:", summary)
+        self.assertNotIn(str(self.root), summary)
+        self.assertNotIn(private, self.output.getvalue() + json.dumps(saved))
+        self.assertNotIn("Traceback", self.output.getvalue())
+        self.mock["start"].assert_not_called()
+
+    def test_main_preserves_structured_stop_failures_and_registered_log_id(self):
+        log_id = "server-" + "e" * 32 + ".log"
+        self.registry["process"]["log_file"] = str(self.root / log_id)
+        self.mock["stop"].side_effect = self.original_stop_registered
+        cases = (("stop_timeout", "process_wait", 32.125, 30, None),
+                 ("stop_helper_timeout", "stop_helper", 8.125, 8, None),
+                 ("stop_signal_failed", "console_signal", 0.125, 8, 3))
+        for reason, operation, elapsed, timeout, exit_code in cases:
+            with self.subTest(reason=reason):
+                private = "synthetic-private-stop-exception"
+                error = upgrade.manager.processes.ProcessError(private, reason=reason, operation=operation,
+                    elapsed_seconds=elapsed, timeout_seconds=timeout, exit_code=exit_code)
+                self.output = io.StringIO()
+                with patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                        patch.object(upgrade, "github_client", return_value=self.client), \
+                        patch.object(upgrade, "bootstrap", return_value=(None, HEAD, OLDER)), \
+                        patch.object(upgrade.manager.processes, "stop_server", side_effect=error), \
+                        redirect_stdout(self.output):
+                    self.assertEqual(upgrade.main(["--config", "synthetic.json"]), 1)
+                saved = json.loads((self.root / "last-failure.json").read_bytes())
+                detail = saved["result"]["process"]
+                self.assertEqual(detail["stage"], "process_stop")
+                self.assertEqual(detail["error_type"], "process")
+                self.assertEqual(detail["reason"], reason)
+                self.assertEqual(detail["operation"], operation)
+                self.assertEqual(detail["elapsed_seconds"], elapsed)
+                self.assertEqual(detail["timeout_seconds"], timeout)
+                self.assertEqual(detail["exit_code"], exit_code)
+                self.assertEqual(detail["log_id"], log_id)
+                summary = self.output.getvalue().splitlines()[-1]
+                self.assertIn("operation=" + operation + " reason=" + reason, summary)
+                self.assertIn("seconds=" + str(elapsed) + " timeout=" + str(timeout), summary)
+                self.assertIn("exit=" + (str(exit_code) if exit_code is not None else "-"), summary)
+                self.assertNotIn(private, self.output.getvalue() + json.dumps(saved))
+                self.assertNotIn(str(self.root), summary)
+                self.mock["apply"].assert_not_called()
+                self.mock["start"].assert_not_called()
 
 
 class BootstrapTests(unittest.TestCase):

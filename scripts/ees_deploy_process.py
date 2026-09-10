@@ -22,6 +22,14 @@ import urllib.request
 import uuid
 
 
+_OPERATIONS = {'port_probe', 'port_bind', 'process_open', 'process_inspect',
+               'process_terminate', 'process_wait', 'console_attach', 'console_signal', 'stop_helper'}
+_REASONS = {'health_timeout', 'process_exited', 'identity_unavailable',
+            'identity_changed', 'launch_failed', 'launch_unverified',
+            'termination_failed', 'termination_timeout', 'stop_signal_failed',
+            'stop_helper_failed', 'stop_helper_timeout', 'stop_timeout'}
+
+
 class ProcessError(RuntimeError):
     """Starting, identifying, or stopping the managed server failed."""
 
@@ -35,13 +43,8 @@ class ProcessError(RuntimeError):
             self.errno = None
         if type(self.winerror) is not int:
             self.winerror = None
-        operations = {'port_probe', 'port_bind', 'process_open', 'process_inspect',
-                      'process_terminate', 'process_wait'}
-        self.operation = operation if type(operation) is str and operation in operations else None
-        reasons = {'health_timeout', 'process_exited', 'identity_unavailable',
-                   'identity_changed', 'launch_failed', 'launch_unverified',
-                   'termination_failed', 'termination_timeout'}
-        self.reason = reason if type(reason) is str and reason in reasons else None
+        self.operation = operation if type(operation) is str and operation in _OPERATIONS else None
+        self.reason = reason if type(reason) is str and reason in _REASONS else None
         self.elapsed_seconds = _duration(elapsed_seconds)
         self.timeout_seconds = _duration(timeout_seconds)
         self.exit_code = exit_code if type(exit_code) is int else None
@@ -180,42 +183,85 @@ def _windows_identity(pid, send_to=None):
     import ctypes
     from ctypes import wintypes
 
-    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    def failure(message, operation, reason='identity_unavailable', *, windows_error=True):
+        cause = None
+        if windows_error:
+            cause = OSError()
+            cause.winerror = ctypes.get_last_error()
+        return ProcessError(message, cause=cause, operation=operation, reason=reason)
+
+    try:
+        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    except OSError as error:
+        raise ProcessError("Process access could not be prepared; no signal was sent.",
+                           cause=error, operation='process_open', reason='identity_unavailable') from None
     kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
     kernel.OpenProcess.restype = wintypes.HANDLE
     kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel.CloseHandle.restype = wintypes.BOOL
     kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+    kernel.WaitForSingleObject.restype = wintypes.DWORD
     kernel.GetProcessTimes.argtypes = [wintypes.HANDLE] + [ctypes.POINTER(wintypes.FILETIME)] * 4
+    kernel.GetProcessTimes.restype = wintypes.BOOL
     kernel.QueryFullProcessImageNameW.argtypes = [wintypes.HANDLE, wintypes.DWORD,
                                                 wintypes.LPWSTR, ctypes.POINTER(wintypes.DWORD)]
+    kernel.QueryFullProcessImageNameW.restype = wintypes.BOOL
     kernel.AttachConsole.argtypes = [wintypes.DWORD]
+    kernel.AttachConsole.restype = wintypes.BOOL
     kernel.GenerateConsoleCtrlEvent.argtypes = [wintypes.DWORD, wintypes.DWORD]
+    kernel.GenerateConsoleCtrlEvent.restype = wintypes.BOOL
+    kernel.FreeConsole.argtypes = []
+    kernel.FreeConsole.restype = wintypes.BOOL
     handle = kernel.OpenProcess(0x1000 | 0x100000, False, pid)
     if not handle:
         if ctypes.get_last_error() == 87:  # No such process, not an access denial.
             return None
-        raise ProcessError("Process identity could not be inspected; no signal was sent.")
+        raise failure("Process identity could not be inspected; no signal was sent.", 'process_open')
+
+    def exited():
+        result = kernel.WaitForSingleObject(handle, 0)
+        if result == 0xFFFFFFFF:
+            raise failure("Process exit could not be inspected; no signal was sent.", 'process_wait')
+        if result not in (0, 258):
+            raise failure("Process exit status is unknown; no signal was sent.", 'process_wait',
+                          windows_error=False)
+        return result == 0
+
     try:
-        if kernel.WaitForSingleObject(handle, 0) == 0:
+        if exited():
             return None
         times = [wintypes.FILETIME() for _ in range(4)]
         image, length = ctypes.create_unicode_buffer(32768), wintypes.DWORD(32768)
         if (not kernel.GetProcessTimes(handle, *(ctypes.byref(value) for value in times))
                 or not kernel.QueryFullProcessImageNameW(handle, 0, image, ctypes.byref(length))):
-            raise ProcessError("Process identity could not be inspected; no signal was sent.")
+            error = failure("Process identity could not be inspected; no signal was sent.", 'process_inspect')
+            # A process can finish between the wait and image query. Only the
+            # same handle becoming signaled proves that this is an ordinary exit.
+            if exited():
+                return None
+            raise error
         actual = {'pid': pid, 'executable': os.path.normcase(os.path.realpath(image.value)),
                   'created_at': str((times[0].dwHighDateTime << 32) | times[0].dwLowDateTime)}
         if send_to is not None:
             if not _same(actual, send_to) or send_to.get('group_id') != pid:
-                raise ProcessError("Process identity changed; no signal was sent.")
+                raise ProcessError("Process identity changed; no signal was sent.",
+                                   operation='process_inspect', reason='identity_changed')
             # Keep the process handle open across identity check and signal.
             # A separate helper detaches itself, never the user's PowerShell.
             kernel.FreeConsole()
             if not kernel.AttachConsole(pid):
-                raise ProcessError("Cannot attach to the server console; stop it in its original window.")
+                error = failure("Cannot attach to the server console; stop it in its original window.",
+                                'console_attach', 'stop_signal_failed')
+                if exited():
+                    return None
+                raise error
             try:
                 if not kernel.GenerateConsoleCtrlEvent(1, pid):  # CTRL_BREAK_EVENT, never broadcast.
-                    raise ProcessError("The graceful stop signal could not be delivered.")
+                    error = failure("The graceful stop signal could not be delivered.",
+                                    'console_signal', 'stop_signal_failed')
+                    if exited():
+                        return None
+                    raise error
             finally:
                 kernel.FreeConsole()
         return actual
@@ -484,40 +530,133 @@ def wait_healthy(identity, timeout=60, interval=0.2):
     raise failure("Server health timed out; inspect the local server log.", 'health_timeout')
 
 
-def stop_server(identity, timeout=30):
+def _parse_stop_helper_failure(payload):
+    """Accept only the helper's bounded, fixed metadata; never propagate its text."""
+    if type(payload) is not bytes or len(payload) > 4096:
+        return None
+    try:
+        detail = json.loads(payload.decode('utf-8'))
+    except (ValueError, UnicodeError, RecursionError):
+        return None
+    if type(detail) is not dict or set(detail) != {'operation', 'reason', 'errno', 'winerror'}:
+        return None
+    for key, allowed in (('operation', _OPERATIONS), ('reason', _REASONS)):
+        if detail[key] is not None and (type(detail[key]) is not str or detail[key] not in allowed):
+            return None
+    if any(detail[key] is not None and type(detail[key]) is not int for key in ('errno', 'winerror')):
+        return None
+    cause = OSError()
+    cause.errno, cause.winerror = detail['errno'], detail['winerror']
+    return ProcessError("Graceful stop could not be delivered; use the original server console.",
+                        cause=cause, operation=detail['operation'] or 'stop_helper',
+                        reason=detail['reason'] or 'stop_helper_failed')
+
+
+def _request_windows_stop(identity):
+    try:
+        helper = subprocess.Popen([sys.executable, '-I', str(Path(__file__).resolve()), '--break', json.dumps(identity)],
+                                  stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                  creationflags=subprocess.CREATE_NO_WINDOW)
+    except OSError as error:
+        raise ProcessError("The console helper could not be started; no signal was sent.",
+                           cause=error, operation='stop_helper', reason='stop_helper_failed',
+                           timeout_seconds=5) from None
+    try:
+        try:
+            exit_code = helper.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            raise ProcessError("The console helper did not finish; no force kill was attempted.",
+                               operation='stop_helper', reason='stop_helper_timeout', timeout_seconds=5) from None
+        if exit_code != 0:
+            # The internal helper emits at most one small JSON record and has
+            # exited before this bounded read. Arbitrary output is discarded.
+            error = _parse_stop_helper_failure(helper.stdout.read(4097))
+            if error is None:
+                error = ProcessError("Graceful stop could not be delivered; use the original server console.",
+                                     operation='stop_helper', reason='stop_helper_failed')
+            error.exit_code = exit_code if type(exit_code) is int else None
+            error.timeout_seconds = 5
+            raise error
+    except OSError as error:
+        raise ProcessError("The console helper result could not be inspected.",
+                           cause=error, operation='stop_helper', reason='stop_helper_failed',
+                           timeout_seconds=5) from None
+    finally:
+        if helper.stdout is not None:
+            helper.stdout.close()
+
+
+def _stop_server(identity, timeout):
     if not isinstance(identity, dict) or identity.get('group_id') != identity.get('pid'):
-        raise ProcessError("The saved process group is invalid; no signal was sent.")
+        raise ProcessError("The saved process group is invalid; no signal was sent.",
+                           operation='process_inspect', reason='identity_changed')
     actual = _identity(identity.get('pid'))
     if actual is None:
         return
     if not _same(actual, identity):
-        raise ProcessError("Process identity changed; no signal was sent.")
+        raise ProcessError("Process identity changed; no signal was sent.",
+                           operation='process_inspect', reason='identity_changed')
     if os.name == 'nt':
-        helper = subprocess.Popen([sys.executable, '-I', str(Path(__file__).resolve()), '--break', json.dumps(identity)],
-                                  stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                  creationflags=subprocess.CREATE_NO_WINDOW)
-        try:
-            if helper.wait(timeout=5) != 0:
-                raise ProcessError("Graceful stop could not be delivered; use the original server console.")
-        except subprocess.TimeoutExpired:
-            raise ProcessError("The console helper did not finish; no force kill was attempted.") from None
+        _request_windows_stop(identity)
     else:
         if os.getpgid(identity['pid']) != identity['group_id'] or not verify_identity(identity):
-            raise ProcessError("Process group changed; no signal was sent.")
-        os.killpg(identity['group_id'], signal.SIGINT)
+            raise ProcessError("Process group changed; no signal was sent.",
+                               operation='process_inspect', reason='identity_changed')
+        try:
+            os.killpg(identity['group_id'], signal.SIGINT)
+        except OSError as error:
+            raise ProcessError("The graceful stop signal could not be delivered.", cause=error,
+                               operation='console_signal', reason='stop_signal_failed') from None
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         if not _same(_identity(identity['pid']), identity):
             return
         time.sleep(min(0.1, max(0, deadline - time.monotonic())))
-    raise ProcessError("Graceful stop timed out; the process was not force-killed.")
+    raise ProcessError("Graceful stop timed out; the process was not force-killed.",
+                       operation='process_wait', reason='stop_timeout', timeout_seconds=timeout)
 
 
-if __name__ == '__main__':
+def stop_server(identity, timeout=30):
+    started = time.monotonic()
+    try:
+        _stop_server(identity, timeout)
+    except (ProcessError, OSError) as error:
+        log_file = identity.get('log_file') if isinstance(identity, dict) else None
+        messages = {
+            'identity_changed': "Process identity changed; no signal was sent.",
+            'stop_signal_failed': "The graceful stop signal could not be delivered.",
+            'stop_helper_failed': "Graceful stop could not be delivered; use the original server console.",
+            'stop_helper_timeout': "The console helper did not finish; no force kill was attempted.",
+            'stop_timeout': "Graceful stop timed out; the process was not force-killed.",
+        }
+        message = messages.get(getattr(error, 'reason', None),
+                               "Graceful stop failed; inspect the saved operation details.")
+        failure = ProcessError(message, cause=error,
+                               operation=getattr(error, 'operation', None) or 'process_inspect',
+                               reason=getattr(error, 'reason', None) or 'identity_unavailable',
+                               elapsed_seconds=time.monotonic() - started,
+                               timeout_seconds=(getattr(error, 'timeout_seconds', None)
+                                                if getattr(error, 'timeout_seconds', None) is not None else timeout),
+                               exit_code=getattr(error, 'exit_code', None),
+                               log_id=Path(log_file).name if type(log_file) is str else None)
+        raise failure from None
+
+
+def _console_helper_main():
     try:
         if os.name != 'nt' or len(sys.argv) != 3 or sys.argv[1] != '--break':
             raise ProcessError("Internal console helper only.")
         saved = json.loads(sys.argv[2])
         _windows_identity(saved['pid'], send_to=saved)
-    except (ProcessError, OSError, ValueError, KeyError, TypeError):
-        sys.exit(1)
+    except (ProcessError, OSError, ValueError, KeyError, TypeError) as error:
+        safe = ProcessError("Console helper failed.", cause=error,
+                            operation=getattr(error, 'operation', None) or 'stop_helper',
+                            reason=getattr(error, 'reason', None) or 'stop_helper_failed')
+        print(json.dumps({key: getattr(safe, key) for key in ('operation', 'reason', 'errno', 'winerror')},
+                         separators=(',', ':')))
+        return 1
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(_console_helper_main())

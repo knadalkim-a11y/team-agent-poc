@@ -3,6 +3,7 @@
 from copy import deepcopy
 from datetime import datetime, timezone
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -377,6 +378,253 @@ class FailedStartupReportTests(unittest.TestCase):
         self.assertEqual(result["reason"], "candidate_log_changed")
         self.assertEqual(exact_result["status"], "ambiguous")
         self.assertEqual(exact_result["reason"], "candidate_log_changed")
+
+
+class RecoveryIncidentReportTests(unittest.TestCase):
+    SECRET = "SYNTHETIC_PRIVATE_65C9"
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.logs = self.root / "logs"
+        self.logs.mkdir()
+        self.config = {"state_root": str(self.root)}
+        self.old_log = self.logs / ("server-" + "a" * 32 + ".log")
+        self.active_log = self.logs / ("server-" + "b" * 32 + ".log")
+        self.old_log.write_bytes(self.trace().encode())
+        self.active_log.write_bytes(b"current server\n")
+        self.registry = {"schema_version": 2, "phase": "idle", "pending": None,
+                         "customization": {"pending": None},
+                         "process": {"log_file": str(self.active_log)}}
+        self.registry_path = self.root / "deployment.json"
+        self.registry_path.write_text(json.dumps(self.registry), encoding="utf-8")
+        self.request = {"failure": {"action": "upgrade", "failed": True,
+            "at": "2026-09-10T12:00:00+00:00", "result": {"stage": "process_stop", "changed": False,
+                "wrapper_commit": REPORT._RECOVERY_COMMIT, "process": {"error_type": "process"}}},
+            "registry": {"schema_version": 2, "process": {"log_file": str(self.old_log)}}}
+        self.request_path = self.root / ("stop-recovery-" + "c" * 32 + ".json")
+        self.save_request()
+
+    def save_request(self):
+        self.request_path.write_text(json.dumps(self.request), encoding="utf-8-sig")
+
+    @classmethod
+    def trace(cls, *, message=True, loop=True, future=True, error=64):
+        value = ("ERROR:    Accept failed on a socket\nsocket: " + cls.SECRET + "\n") if message else ""
+        value += "Traceback (most recent call last):\n"
+        if loop:
+            value += f'  File "C:/Users/{cls.SECRET}/Python/Lib/asyncio/proactor_events.py", line 835, in loop\n'
+            value += "    conn, addr = f.result()\n"
+        if future:
+            value += f'  File "C:/Users/{cls.SECRET}/Python/Lib/asyncio/windows_events.py", line 605, in accept_coro\n'
+            value += "    await future\n"
+        return value + f"OSError: [WinError {error}] {cls.SECRET}\n"
+
+    def inspect(self):
+        return REPORT.inspect_recovery(self.config)
+
+    def test_exact_recorded_trace_is_read_without_process_or_network_calls_or_writes(self):
+        before = {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()}
+        with patch.object(subprocess, "Popen", side_effect=AssertionError("process call")), \
+                patch.object(socket, "socket", side_effect=AssertionError("network call")):
+            result = self.inspect()
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["scan_scope"], "full")
+        self.assertTrue(result["accept_listener64"])
+        self.assertFalse(result["accept_future64"])
+        self.assertFalse(result["tls_verify_failed"])
+        self.assertFalse(result["truncated"])
+        self.assertEqual(before, {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()})
+        encoded = REPORT.render_recovery(result)
+        self.assertEqual(len(encoded.splitlines()), 1)
+        self.assertIn("source=stop_failure", encoded)
+        for private in (self.SECRET, "C:/", str(self.root), "OSError:"):
+            self.assertNotIn(private, encoded)
+
+    def test_future_error_only_is_separate_lower_confidence_evidence(self):
+        self.old_log.write_text(self.trace(message=False, loop=False), encoding="utf-8")
+        result = self.inspect()
+        self.assertFalse(result["accept_listener64"])
+        self.assertTrue(result["accept_future64"])
+
+    def test_common_fixed_logging_prefixes_preserve_message_association(self):
+        for prefix in ("", "ERROR:asyncio:", "2026-09-10 12:00:00 | ERROR | asyncio.base_events - "):
+            with self.subTest(prefix=prefix):
+                text = self.trace().replace("ERROR:    Accept failed", prefix + "Accept failed")
+                self.assertTrue(REPORT._accept64_summary(text.encode())["accept_listener64"])
+
+    def test_tls_and_startup_signals_are_independent_from_accept_trace(self):
+        self.old_log.write_text("SSLError: certificate verify failed " + self.SECRET + "\n"
+                                "Application startup complete\n" + self.trace(), encoding="utf-8")
+        result = self.inspect()
+        self.assertTrue(result["tls_verify_failed"])
+        self.assertTrue(result["startup_complete"])
+        self.assertTrue(result["accept_listener64"])
+
+    def test_message_and_frames_from_different_errors_do_not_match(self):
+        for content in (
+            self.trace(error=5) + self.trace(message=False, loop=False),
+            self.trace(future=False, error=5) + self.trace(message=False, loop=False),
+            "Accept failed on a socket\nUNRELATED EVENT\n" + self.trace(message=False),
+            "Accept failed on a socket\n" + self.trace(message=False).split("OSError:")[0]
+                + self.trace(message=False, loop=False),
+            "Accept failed on a socket\nTraceback (most recent call last):\n"
+                '  File "C:/private/proactor_events.py", line 10, in loop\nOSError: [WinError 64] private\n',
+        ):
+            with self.subTest(content=content):
+                result = REPORT._accept64_summary(content.encode())
+                self.assertFalse(result["accept_listener64"])
+
+    def test_missing_header_or_exception_does_not_confirm_a_trace(self):
+        for content in (self.trace().replace("Traceback (most recent call last):\n", ""),
+                        self.trace().split("OSError:")[0],
+                        self.trace(error=5), self.trace(future=False, loop=False)):
+            with self.subTest(content=content):
+                self.assertFalse(REPORT._accept64_summary(content.encode())["accept_listener64"])
+
+    def test_tail_cut_does_not_join_a_missing_message_to_trace_and_signals_are_scoped(self):
+        self.old_log.write_text("certificate verify failed\nAccept failed on a socket\n"
+                                + "padding\n" * 50 + self.trace(message=False), encoding="utf-8")
+        with patch.object(REPORT, "MAX_LOG_BYTES", 400):
+            result = self.inspect()
+        self.assertEqual(result["scan_scope"], "tail")
+        self.assertTrue(result["truncated"])
+        self.assertFalse(result["tls_verify_failed"])
+        self.assertFalse(result["accept_listener64"])
+        self.assertLessEqual(result["bytes_read"], 400)
+
+    def test_duplicate_requests_select_same_log_without_timestamp_guessing(self):
+        other = self.root / ("stop-recovery-" + "d" * 32 + ".json")
+        other.write_bytes(self.request_path.read_bytes())
+        unrelated = self.logs / ("server-" + "e" * 32 + ".log")
+        unrelated.write_bytes(b"later unrelated log\n")
+        with patch.object(REPORT, "_created_at", side_effect=AssertionError("creation inference")):
+            self.assertTrue(self.inspect()["accept_listener64"])
+
+    def test_multiple_distinct_recorded_logs_are_ambiguous(self):
+        other_log = self.logs / ("server-" + "e" * 32 + ".log")
+        other_log.write_bytes(b"another incident\n")
+        other = deepcopy(self.request)
+        other["registry"]["process"]["log_file"] = str(other_log)
+        (self.root / ("stop-recovery-" + "d" * 32 + ".json")).write_text(json.dumps(other))
+        self.assertEqual(self.inspect(), {"status": "ambiguous", "reason": "multiple_recorded_stop_logs"})
+
+    def test_active_log_and_busy_deployment_are_not_read(self):
+        self.registry["process"]["log_file"] = str(self.old_log)
+        self.registry_path.write_text(json.dumps(self.registry))
+        self.assertEqual(self.inspect()["reason"], "recorded_log_is_active")
+        (self.root / "deployment.lock").write_bytes(b"busy")
+        with patch.object(REPORT, "_recovery_json", side_effect=AssertionError("evidence read")):
+            self.assertEqual(self.inspect()["status"], "busy")
+
+    def test_nonmatching_incidents_and_changed_state_do_not_select_fallback_log(self):
+        for key, value in (("stage", "health_check"), ("changed", True), ("wrapper_commit", "d" * 40)):
+            original = self.request["failure"]["result"][key]
+            self.request["failure"]["result"][key] = value
+            self.save_request()
+            self.assertEqual(self.inspect()["reason"], "recorded_stop_failure_missing")
+            self.request["failure"]["result"][key] = original
+        self.save_request()
+        self.registry["customization"]["pending"] = {"action": "apply"}
+        self.registry_path.write_text(json.dumps(self.registry))
+        self.assertEqual(self.inspect()["reason"], "deployment_not_idle")
+
+    def test_outside_relative_and_nonstandard_recorded_logs_are_rejected(self):
+        outside = self.root / "outside.log"
+        outside.write_bytes(b"private")
+        for name in (str(outside), "logs/" + self.old_log.name, str(self.logs / "wrong.log")):
+            self.request["registry"]["process"]["log_file"] = name
+            self.save_request()
+            self.assertEqual(self.inspect()["status"], "unavailable")
+
+    def test_linked_recovery_log_is_rejected(self):
+        other = self.root / "other.log"
+        other.write_bytes(b"private")
+        self.old_log.unlink()
+        try:
+            os.link(other, self.old_log)
+        except (OSError, NotImplementedError):
+            self.skipTest("Hardlinks unavailable")
+        self.assertEqual(self.inspect()["reason"], "unsafe_or_missing_evidence")
+
+    def test_request_limit_and_malformed_request_do_not_fallback(self):
+        self.request_path.write_bytes(b"x" * (1024 * 1024 + 1))
+        self.assertEqual(self.inspect()["status"], "unavailable")
+        self.request_path.write_bytes(b"{}")
+        self.assertEqual(self.inspect()["reason"], "invalid_recovery_request")
+        self.save_request()
+        with patch.object(REPORT, "MAX_LOG_FILES", 1):
+            self.assertEqual(self.inspect()["status"], "unavailable")
+
+    def test_deep_json_in_request_registry_and_cli_config_is_sanitized(self):
+        payload = ("[" * 20000 + json.dumps(self.SECRET) + "]" * 20000).encode()
+        self.assertLess(len(payload), 1024 * 1024)
+        for path in (self.request_path, self.registry_path):
+            with self.subTest(path=path.name):
+                before = path.read_bytes()
+                path.write_bytes(payload)
+                try:
+                    result = self.inspect()
+                    self.assertEqual(result, {"status": "unavailable", "reason": "evidence_unavailable"})
+                    self.assertNotIn(self.SECRET, REPORT.render_recovery(result))
+                finally:
+                    path.write_bytes(before)
+        config_path = self.root / "deep-config.json"
+        config_path.write_bytes(payload)
+        completed = subprocess.run([sys.executable, "-I", "-B", str(SCRIPTS / "ees_deploy_report.py"),
+                                    "--inspect-recovery", "--config", str(config_path)],
+                                   capture_output=True, text=True, timeout=10)
+        self.assertEqual(completed.returncode, 1)
+        self.assertEqual(len(completed.stdout.splitlines()), 1)
+        self.assertIn("code=evidence_unavailable", completed.stdout)
+        self.assertEqual(completed.stderr, "")
+        self.assertNotIn(self.SECRET, completed.stdout)
+        self.assertNotIn("Traceback", completed.stdout)
+
+    def test_log_append_during_read_invalidates_all_signals(self):
+        original = Path.open
+
+        def opened(path, *args, **kwargs):
+            if path == self.old_log and args == ("rb",):
+                with original(path, "ab") as handle:
+                    handle.write(b"later content\n")
+            return original(path, *args, **kwargs)
+
+        with patch.object(Path, "open", opened):
+            result = self.inspect()
+        self.assertEqual(result, {"status": "ambiguous", "reason": "evidence_changed"})
+        self.assertNotIn("accept_listener64", result)
+
+    def test_registry_request_or_request_set_change_during_log_read_is_rejected(self):
+        original = Path.open
+        for change in ("registry", "request", "new_request", "lock"):
+            with self.subTest(change=change):
+                def opened(path, *args, **kwargs):
+                    if path == self.old_log and args == ("rb",):
+                        target = {"registry": self.registry_path, "request": self.request_path,
+                                  "new_request": self.root / ("stop-recovery-" + "d" * 32 + ".json"),
+                                  "lock": self.root / "deployment.lock"}[change]
+                        with original(target, "ab") as handle:
+                            handle.write(b" ")
+                    return original(path, *args, **kwargs)
+                with patch.object(Path, "open", opened):
+                    self.assertEqual(self.inspect()["reason"], "evidence_changed")
+                for name in ("stop-recovery-" + "d" * 32 + ".json", "deployment.lock"):
+                    (self.root / name).unlink(missing_ok=True)
+
+    def test_cli_uses_only_read_only_config_load_and_prints_one_sanitized_line(self):
+        with patch.object(REPORT.states, "load_config", return_value=self.config), \
+                patch.object(sys, "stdout", new_callable=io.StringIO) as output:
+            result = REPORT.main(["--inspect-recovery", "--config", str(self.root / "config.json")])
+        self.assertEqual(result, 0)
+        self.assertEqual(len(output.getvalue().splitlines()), 1)
+        self.assertNotIn(self.SECRET, output.getvalue())
+        with patch.object(REPORT.states, "load_config", side_effect=OSError(self.SECRET)), \
+                patch.object(sys, "stdout", new_callable=io.StringIO) as output:
+            self.assertEqual(REPORT.main(["--inspect-recovery", "--config", str(self.root / "config.json")]), 1)
+        self.assertNotIn(self.SECRET, output.getvalue())
+        self.assertIn("code=evidence_unavailable", output.getvalue())
 
 
 if __name__ == "__main__":
