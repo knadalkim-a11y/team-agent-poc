@@ -114,7 +114,7 @@ try {
       Object.entries({role: 'separator', 'aria-label': '대화와 협업 과정 너비 조절', 'aria-orientation': 'vertical', 'aria-controls': host.id}).forEach(([key, value]) => divider.setAttribute(key, value));
       // The separator is outside the panel shadow root. Keep keyboard focus on
       // its grip without drawing a full-height outline during pointer resizing.
-      divider.append(element('style', '#ees-cooperation-resizer:focus{outline:none}#ees-cooperation-resizer:focus-visible>span{outline:2px solid var(--ees-blue,#6b91d5);outline-offset:3px}'));
+      divider.append(element('style', '#ees-cooperation-resizer:focus{outline:none}#ees-cooperation-resizer:focus-visible:not([data-pointer-focus])>span{outline:2px solid var(--ees-blue,#6b91d5);outline-offset:3px}'));
       const grip = element('span'); grip.style.cssText = 'width:3px;height:36px;background:#8888;border-radius:2px;pointer-events:none;'; divider.append(grip);
       const slot = element('div'); slot.className = 'flex';
       const launcher = element('button', '업무 패널'); launcher.id = 'ees-work-panel-toggle'; launcher.type = 'button';
@@ -474,14 +474,18 @@ try {
         finishDrag(); drag = {id: event.pointerId, x: event.clientX, width: panelWidth, selection: document.body.style.userSelect, cursor: document.body.style.cursor};
         document.body.style.userSelect = 'none'; document.body.style.cursor = 'col-resize';
         try { divider.setPointerCapture(event.pointerId); } catch (_) { finishDrag(); return; }
+        // Programmatic focus can retain :focus-visible after keyboard input.
+        divider.dataset.pointerFocus = 'true';
         divider.focus({preventScroll: true}); event.preventDefault();
       });
       divider.addEventListener('pointermove', event => { if (drag && drag.id === event.pointerId) setWidth(drag.width + drag.x - event.clientX); });
       ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(type => divider.addEventListener(type, finishDrag));
       divider.addEventListener('keydown', event => {
+        delete divider.dataset.pointerFocus;
         if (divider.hidden || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
         event.preventDefault(); setWidth(event.key === 'Home' ? 350 : event.key === 'End' ? maximumWidth : panelWidth + (event.key === 'ArrowLeft' ? 20 : -20));
       });
+      divider.addEventListener('blur', () => { delete divider.dataset.pointerFocus; });
       q('close').addEventListener('click', () => { open(false); if (work) work.focus(chatId); else launcher.focus({preventScroll: true}); });
       launcher.addEventListener('click', () => open(!wantsOpen, true));
       shadow.addEventListener('keydown', event => { if (event.key === 'Escape') { open(false); if (work) work.focus(chatId); else launcher.focus({preventScroll: true}); } });

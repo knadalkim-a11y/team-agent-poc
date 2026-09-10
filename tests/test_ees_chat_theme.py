@@ -16,6 +16,7 @@ from pathlib import Path
 import re
 import select
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -50,22 +51,49 @@ class ChromePipe:
         try:
             self.process = subprocess.Popen(
                 [sys.executable, "-c", launch, str(request_read), str(response_write)] + command,
-                pass_fds=(request_read, response_write), stdout=subprocess.DEVNULL, stderr=self.errors)
+                pass_fds=(request_read, response_write), start_new_session=True,
+                stdout=subprocess.DEVNULL, stderr=self.errors)
         finally:
             os.close(request_read)
             os.close(response_write)
         self.counter, self.buffer, self.events, self.session = 0, b"", [], None
 
     def close(self):
-        self.process.terminate()
         try:
-            self.process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            self.process.kill()
-            self.process.wait(timeout=5)
-        os.close(self.request_write)
-        os.close(self.response_read)
-        self.errors.close()
+            # Let Chrome finish its profile writes before TemporaryDirectory
+            # removes them. SIGTERM on the parent alone leaves writers behind.
+            self.session = None
+            if self.process.poll() is None:
+                try:
+                    self.call("Browser.close", timeout=5)
+                except (AssertionError, OSError):
+                    # Chrome can close the pipe before returning this response.
+                    pass
+                try:
+                    self.process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    try:
+                        os.killpg(self.process.pid, signal.SIGTERM)
+                    except ProcessLookupError:
+                        pass
+                    try:
+                        self.process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        try:
+                            os.killpg(self.process.pid, signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass
+                        self.process.wait(timeout=5)
+            # This test starts a dedicated session, so only its own leftover
+            # Chrome subprocesses can belong to this process group.
+            try:
+                os.killpg(self.process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        finally:
+            os.close(self.request_write)
+            os.close(self.response_read)
+            self.errors.close()
 
     def receive(self, deadline):
         while b"\0" not in self.buffer:
@@ -80,7 +108,7 @@ class ChromePipe:
         message, self.buffer = self.buffer.split(b"\0", 1)
         return json.loads(message)
 
-    def call(self, method, params=None):
+    def call(self, method, params=None, timeout=15):
         self.counter += 1
         request = {"id": self.counter, "method": method, "params": params or {}}
         if self.session:
@@ -88,7 +116,7 @@ class ChromePipe:
         payload = json.dumps(request).encode() + b"\0"
         while payload:
             payload = payload[os.write(self.request_write, payload):]
-        deadline = time.monotonic() + 15
+        deadline = time.monotonic() + timeout
         while True:
             response = self.receive(deadline)
             if response.get("id") == self.counter:
@@ -447,7 +475,8 @@ class ChatThemeBrowserTests(unittest.TestCase):
                 dragging = measure()
                 widths(dragging, 640)
                 self.assertEqual(dragging["focused"], "ees-cooperation-resizer", dragging)
-                self.assertFalse(dragging["focusVisible"], dragging)
+                # Chrome may retain :focus-visible after programmatic focus in
+                # pointerdown. Assert the actual visible outline, not heuristics.
                 self.assertEqual(dragging["outline"]["style"], "none", dragging)
                 self.assertEqual(dragging["grip"]["outline"]["style"], "none", dragging)
                 self.assertEqual(dragging["selection"], "none", dragging)
@@ -456,6 +485,8 @@ class ChatThemeBrowserTests(unittest.TestCase):
                 released = measure()
                 self.assertEqual(released["selection"], "", released)
                 self.assertEqual(released["cursor"], "", released)
+                self.assertEqual(released["outline"]["style"], "none", released)
+                self.assertEqual(released["grip"]["outline"]["style"], "none", released)
 
                 # Put the starting focus in the last native chat control. The
                 # following Tab and ArrowLeft go through Chrome's trusted input
