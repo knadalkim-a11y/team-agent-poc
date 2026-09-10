@@ -1007,7 +1007,9 @@ Start의 `stage=health_check` 시간 초과는 지정한 시간 안에 정상 �
 
 #### 탐색기에서 실제 프로그램 폴더를 옮긴 뒤 적용 완료
 
-**Upgrade가 promote에서 멈춘 현재 복구:** [실패 기록](../evals/scenarios.md#ees-portal-upgrade-apply-failure)의 `errno=13/winerror=5`, program 없음·previous/staging/ZIP 있음·lock 없음에 맞춘 절차입니다. 아래 블록은 기존 상태를 다시 확인하고 보존 ZIP과 target commit을 먼저 읽습니다. 탐색기가 열리면 `program.staging`을 F2로 `program`으로 변경한 뒤 PowerShell에서 Enter를 누릅니다. 이름 변경이 거부되면 Ctrl+C로 끝내고 그 사실만 전달합니다. `program.previous`는 보존합니다.
+**2026-09-10 Portal 표시 확인 전에 안내한 복구 절차:** [실패 기록](../evals/scenarios.md#ees-portal-upgrade-apply-failure)의 `errno=13/winerror=5`, program 없음·previous/staging/ZIP 있음·lock 없음에 맞춘 절차입니다. 아래 블록은 기존 상태를 다시 확인하고 보존 ZIP과 target commit을 먼저 읽습니다. 탐색기가 열리면 `program.staging`을 F2로 `program`으로 변경한 뒤 PowerShell에서 Enter를 누릅니다. 이름 변경이 거부되면 Ctrl+C로 끝내고 그 사실만 전달합니다. `program.previous`는 보존합니다.
+
+이후 사용자가 **EES Portal 이름 표시를 확인했으므로 현재 아래 블록을 다시 실행하지 않습니다.** 개별 Resume/Start/ApplyDemo 결과·패널 v0.1.3 반영은 별도 미확인입니다. 다음 확인은 새 대화의 패널 가독성과 예시질문이며, 아래 명령은 당시 실패 상태에 대한 복구 이력으로 보존합니다.
 
 ```powershell
 & {
