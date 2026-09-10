@@ -4,6 +4,8 @@
 
 ## 2026-09-10
 
+- ees.3 글꼴·업무 패널 변경 확인 후의 피드백을 반영해 기본 본문·입력창 폭을 672→1024px로 넓힘(ees.4). 분석 패널 드래그의 전체 높이 파란 테두리를 제거하고 키보드 포커스는 작은 손잡이에 유지함. 기존 글꼴·색상·크기 저장·키보드 조절을 보존하며 자산 v0.2.3 ApplyDemo 후 Upgrade로 반영함. [사용법](docs/03-openwebui-native-agent.md#ees-chat-width-resize), [검증](evals/scenarios.md#ees-chat-width-resize).
+
 - 승인한 대화창 시안의 글꼴·색상·간격을 EES Portal ees.3에 적용함. 고정 wheel의 Inter/Noto Sans KR를 프로그램과 함께 제공하고 대화·입력창·사이드바·오른쪽 업무 패널의 톤을 맞춤. 기존 의존성·데이터·키·설정과 ees.1/ees.2 Restore를 보존하며, 시연 자산 v0.2.2의 전문 도구 호환을 먼저 갱신한 뒤 프로그램 Upgrade를 실행함. [적용 순서](docs/03-openwebui-native-agent.md#ees-chat-theme), [검증](evals/scenarios.md#ees-chat-theme).
 
 - 시연 자산 v0.2.1은 Open WebUI 0.11.3이 저장 전에 자동 정렬한 공식 WO 등록본도 인식함. 고정 Black 26.5.1로 검증한 v0.1.6/v0.1.7/v0.1.8의 완전 해시만 추가하며 사용자 수정·이름/권한/설정 보호와 기존 적용 절차를 유지함. [실패·재현·수정 근거](evals/scenarios.md#wo-editor-format-adoption).

@@ -78,7 +78,7 @@ def reject():
 try:
     root = Path(sys.argv[3])
     version, info_name, frontend_name = sys.argv[4:7]
-    frontends = {'0.11.3+ees.1': '_ees1', '0.11.3+ees.2': '_ees2', '0.11.3+ees.3': '_ees3'}
+    frontends = {'0.11.3+ees.1': '_ees1', '0.11.3+ees.2': '_ees2', '0.11.3+ees.3': '_ees3', '0.11.3+ees.4': '_ees4'}
     if (version not in frontends or info_name != f'open_webui-{version}.dist-info'
             or frontend_name != frontends[version]):
         reject()

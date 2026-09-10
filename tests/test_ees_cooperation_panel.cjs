@@ -31,7 +31,7 @@ class Element {
   removeEventListener(type, handler) { this.events[type] = (this.events[type] || []).filter(item => item !== handler); }
   fire(type, changes = {}) { (this.events[type] || []).forEach(handler => handler({target: this, button: 0, pointerId: 1, preventDefault() {}, ...changes})); }
   click() { this.fire('click'); }
-  focus() { this.focused = true; let root = this; while (root.parentElement) root = root.parentElement; root.activeElement = this; }
+  focus() { this.focused = true; let root = this; while (root.parentElement) root = root.parentElement; root.activeElement = this; this.fire('focus'); }
   attachShadow() { this.shadowRoot = new Shadow(); return this.shadowRoot; }
   querySelector(selector) {
     const match = selector.match(/^\[data-focus-key="([^"]+)"\]$/);
@@ -210,10 +210,24 @@ const bad = (value, code) => { assert.equal(value.ok, false); assert.equal(value
 
   const width = () => parseFloat(env.host().style.width); assert.equal(width(), 480);
   env.divider().fire('keydown', {key: 'ArrowLeft'}); assert.equal(width(), 500);
+  env.divider().fire('keydown', {key: 'ArrowRight'}); assert.equal(width(), 480);
+  env.divider().fire('keydown', {key: 'Home'}); assert.equal(width(), 350);
+  env.divider().fire('keydown', {key: 'End'}); assert.equal(width(), 800);
+  env.divider().fire('keydown', {key: 'ArrowRight'}); assert.equal(width(), 780);
+  assert.equal(env.divider().attributes['aria-valuenow'], '780');
   env.body.style.userSelect = 'text'; env.body.style.cursor = 'auto';
-  env.divider().fire('pointerdown', {clientX: 800}); env.divider().fire('pointermove', {clientX: -1000, pointerId: 2}); assert.equal(width(), 500);
+  env.divider().fire('pointerdown', {clientX: 800});
+  assert.equal(env.divider().focused, true); assert.ok(!env.divider().style.outline, 'Pointer focus must not add an inline full-height outline');
+  assert.equal(env.divider().dataset.pointerFocus, 'true');
+  env.divider().fire('pointermove', {clientX: -1000, pointerId: 2}); assert.equal(width(), 780);
   env.divider().fire('pointermove', {clientX: -1000}); assert.equal(width(), 800);
   env.divider().fire('pointercancel'); assert.equal(env.body.style.userSelect, 'text'); assert.equal(env.body.style.cursor, 'auto');
+  assert.equal(env.divider().dataset.pointerFocus, 'true', 'Pointer cancellation must not bring back the keyboard indicator');
+  env.divider().fire('keydown', {key: 'ArrowRight'}); assert.equal(width(), 780);
+  assert.equal(env.divider().dataset.pointerFocus, undefined, 'Keyboard resizing must restore its focus indicator');
+  env.divider().fire('pointerdown', {clientX: 800}); env.divider().fire('pointerup');
+  assert.equal(env.divider().dataset.pointerFocus, 'true', 'Pointer release must not bring back the keyboard indicator');
+  env.divider().fire('blur'); assert.equal(env.divider().dataset.pointerFocus, undefined);
   env.row.clientWidth = 720; env.resize(); assert.equal(width(), 350);
   env.window.innerWidth = 600; env.resize(); assert.equal(env.host().style.position, 'fixed'); assert.equal(env.divider().hidden, true);
   env.q('close').click(); env.launcher().click(); assert.equal(env.q('close').focused, true);
