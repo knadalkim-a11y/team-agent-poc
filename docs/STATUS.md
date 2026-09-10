@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **폭·테두리 수정본 ees.4의 사내 복구·적용·기동 성공을 사용자 보고로 확인함.** `recover_stop` 결과 `ok, changed=true, terminated=true, commit=c099e427f62b, stage=complete, running=true, code=-`를 수신함. 등록 서버 종료와 보관 수정본 적용·기동은 완료됐으며 실제 대화 폭·드래그 표시는 아직 확인하지 않음. [사건·검증·적용 보고](../evals/scenarios.md#ees-stop-recovery).
-- 다음 작업 하나: **Ctrl+F5 후 대화 폭과 분석 패널 드래그 표시를 확인한다.** 기본 본문·입력창이 넓어졌는지, 조립 2라인 분석의 업무 패널 크기를 바꿀 때 파란 테두리가 사라졌는지만 확인함. 성공한 복구·ApplyDemo·Upgrade를 반복하지 않음. [수정 범위](03-openwebui-native-agent.md#ees-chat-width-resize).
+- 이번 작업: **대화 폭 확대·분석 패널 드래그 테두리 수정과 사내 적용을 완료함.** `c099e427f62b`의 복구·적용·기동 성공 보고 후, Ctrl+F5 뒤 넓어진 기본 대화 본문·입력창과 파란 테두리 제거에 대해 사용자가 “응 둘다 정상이야”라고 확인함. 이번 UI 수정 작업을 완료 처리하며 [사건·적용·화면 확인](../evals/scenarios.md#ees-stop-recovery)을 보존함.
+- 다음 작업 하나: **다음 사용자 요구가 정해지면 해당 기능 단위로 진행한다.** 이번 폭·테두리 수정은 실제 화면 확인까지 완료됐으므로 복구·ApplyDemo·Upgrade나 같은 확인을 반복하지 않음. 원래 접속 장애의 원인과 장기 안정성은 별도 미확인으로 유지함.
 - 공유 DB 전제와 후속: 여러 시스템이 하나의 물리 DB와 일부 공통 데이터를 사용하나 각 담당자는 자기 시스템 지식에 집중되어 있음. [관계 발견 설계](03-openwebui-native-agent.md#shared-db-relations)는 운영 데이터 연결을 준비할 때 사용하며 현재 시연 범위에서 제외함. 시스템 간 실제 의미·접근 권한·스키마는 아직 조사하지 않음.
 - 배포 확인: UI 수정본 [PR #29](https://github.com/knadalkim-a11y/team-agent-poc/pull/29)의 프로그램 원본 `c099e427f62bcdb752fe4321e39223915cac035a`를 사내에 적용·기동했다고 보고받음. 복구 코드 [PR #30](https://github.com/knadalkim-a11y/team-agent-poc/pull/30)은 main `ab97218a9957eb43d436ea02d4fee9a20021c7c3`에 병합됐고 [main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34540099706) attempt 2의 Windows/Linux·전달물 생성 성공을 확인함. attempt 1의 기존 Windows 테스트 cleanup 조회 실패는 PR에 보존하며 서버 장애의 원인 해결이나 장기 안정성으로 확대하지 않음.
 - 설비 조회 관리 합의: 여러 업무에서 쓰는 공통 기능이므로 운영용 설계에서는 독립 Tool로 등록·관리하는 방향을 유지함. 사용자는 이번 시연에 한해 적용이 간단한 기존 단일 등록 항목을 유지하기로 함. 현재는 같은 Tool 안의 함수 분리이며 별도 등록 완료가 아님. 후속 요청의 설비 조회 패널도 같은 등록 항목에서 제공하며 새 적용 성공 보고로 간주하지 않음.
@@ -120,7 +120,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-10: 사용자 결과로 등록 서버 종료·c099e427f62b 수정본 적용·기동 성공을 확인함. 복구 코드의 PR/main Windows/Linux 검사와 병합·전달물 생성도 확인했으며 최초 main Windows cleanup 실패는 보존함. 실제 대화 폭·패널 드래그 표시는 다음 확인으로 남기고, 성공한 적용을 반복하지 않음. [근거와 남은 범위](../evals/scenarios.md#ees-stop-recovery).
+2026-09-10: 사용자 보고로 c099e427f62b 수정본의 복구·적용·기동 성공에 이어 기본 대화 폭 확대와 분석 패널 드래그 시 파란 테두리 제거가 모두 정상임을 확인함. 이번 수정 작업을 완료 처리하고 기존 CI·실패·복구 기록은 보존함. [완료 근거와 확인 범위](../evals/scenarios.md#ees-stop-recovery).
 
 ## 갱신 규칙
 

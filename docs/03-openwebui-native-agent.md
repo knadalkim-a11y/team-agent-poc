@@ -970,7 +970,7 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 #### 승인된 Upgrade 종료 실패의 한 번 복구
 
-**이번 사건은 복구·적용·기동 성공을 사용자 보고로 확인했습니다.** 아래 명령은 사건의 절차 기록이며 다시 실행하지 않습니다. 남은 확인은 Ctrl+F5 후 대화 폭과 분석 패널 드래그 표시입니다. [적용 결과](../evals/scenarios.md#ees-stop-recovery).
+**이번 사건은 복구·적용·기동과 실제 화면 확인까지 완료했습니다.** 사용자가 넓어진 기본 대화창과 분석 패널 드래그 시 파란 테두리 제거 모두 정상이라고 확인했습니다. 아래 명령은 사건의 절차 기록이며 다시 실행하지 않습니다. [적용·화면 확인 결과](../evals/scenarios.md#ees-stop-recovery).
 
 2026-09-10의 `c099e427f62b / process_stop / operation_failed / changed=false` 사건에 대한 명시적 사용자 승인 범위입니다. 프로세스가 살아 있고 접속 포트는 없으며 로그에 KeyboardInterrupt가 있었지만, 그 문자열로 최초 원인이나 종료 신호 전달 성공을 확정하지 않습니다. 이 복구를 일반 Stop·Upgrade의 자동 대체 절차로 사용하지 않습니다. [사건과 확인 범위](../evals/scenarios.md#ees-stop-recovery).
 
