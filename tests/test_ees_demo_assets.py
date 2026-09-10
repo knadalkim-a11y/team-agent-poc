@@ -58,7 +58,10 @@ class FakeAPI:
             if self.concurrent == key:
                 reads = sum(1 for m, p, _ in self.calls if m == "GET" and p == path)
                 if reads == 2:
-                    self.rows[key]["params"]["system"] += "\n동시 편집"
+                    if kind == "tool":
+                        self.rows[key]["content"] += "\n# concurrent edit\n"
+                    else:
+                        self.rows[key]["params"]["system"] += "\n동시 편집"
             row = self.valves.get(identifier) if kind == "valves" else self.rows.get(key)
             if kind == "valves" and row is None and ("tool", identifier) in self.rows:
                 row = self.valve_defaults
@@ -302,6 +305,165 @@ class ApplyAssetsTests(unittest.TestCase):
                          {body["id"] for _, _, body in self.api.writes[writes:]})
         self.assertEqual(0, self.apply("c" * 40)["changed"])
 
+    def add_existing_work_order(self, identifier="wo_demo", bind=True):
+        old_source = ('"""\ntitle: EES WO Demo\nversion: 0.1.6\n"""\n'
+                      'class Tools:\n'
+                      '    async def ems_demo_find_equipment(self): pass\n'
+                      '    async def wo_demo_view(self): pass\n'
+                      '    async def wo_demo_update(self): pass\n')
+        new_source = old_source.replace('version: 0.1.6',
+                                        'version: 0.2.0\nees_demo_pack: ees-demo-v1')
+        new_source += '\nWORK_PANEL_SCRIPT = ""\nPANEL_SCRIPT = "existing WO panel"\n'
+        (self.root / "agent-pack/wo.py").write_text(new_source, encoding="utf-8")
+        (self.root / "agent-pack/work-panel.js").write_text("/* shared work panel */\n", encoding="utf-8")
+        self.manifest["optional_existing_tools"] = [{
+            "kind": "work_order", "path": "agent-pack/wo.py",
+            "ui_script_path": "agent-pack/work-panel.js", "ui_script_slot": "WORK_PANEL_SCRIPT",
+            "accepted_source_sha256": [assets._source_digest(old_source)]}]
+        self.write_manifest()
+        row = {"id": identifier, "name": "현장 설비·WO", "user_id": "wo-owner",
+               "content": old_source, "meta": {"description": "현장 설명", "custom": {"keep": True},
+                                                    "manifest": {"title": "EES WO Demo"}},
+               "access_grants": [read_grant("wo-team")]}
+        self.api.rows[("tool", identifier)] = row
+        self.api.valves[identifier] = {"private_setting": "preserve-me"}
+        bound = self.api.rows[("model", "existing-ees")]["meta"]["toolIds"]
+        if bind and identifier not in bound:
+            bound.append(identifier)
+        if not bind and identifier in bound:
+            bound.remove(identifier)
+        return row
+
+    def test_two_scripts_are_embedded_in_order_without_runtime_file_dependencies(self):
+        first = self.add_panel_script()
+        (self.root / "agent-pack/work-panel.js").write_text("/* shared coordinator */\n", encoding="utf-8")
+        for item in self.manifest["tools"]:
+            item["ui_script_paths"] = ["agent-pack/work-panel.js", item.pop("ui_script_path")]
+        self.write_manifest()
+        self.apply()
+        for item in self.manifest["tools"]:
+            scope = {}
+            exec(self.api.rows[("tool", item["id"])]["content"], scope)
+            self.assertEqual("/* shared coordinator */\n\n" + first, scope["PANEL_SCRIPT"])
+
+    def test_invalid_script_lists_or_slot_cannot_write_assets(self):
+        for mode in ("both", "empty", "non-list", "too-many", "invalid-slot"):
+            with self.subTest(mode=mode):
+                self.setUp()
+                self.add_panel_script()
+                item = self.manifest["tools"][0]
+                path = item["ui_script_path"]
+                if mode == "invalid-slot":
+                    item["ui_script_slot"] = "USER_CONFIG"
+                else:
+                    item["ui_script_paths"] = {"both": [path], "empty": [],
+                                               "non-list": path, "too-many": [path] * 3}[mode]
+                    if mode != "both":
+                        item.pop("ui_script_path")
+                self.write_manifest()
+                self.expect_error("invalid_panel_script_slot" if mode == "invalid-slot" else "invalid_manifest")
+                self.assertEqual([], self.api.writes)
+
+    def test_existing_wo_is_updated_in_place_and_preserves_name_grants_and_valves(self):
+        row = self.add_existing_work_order("custom-wo-registration")
+        # Editing line endings/final blank lines does not change approved source.
+        row["content"] = row["content"].replace("\n", "\r\n") + "\r\n"
+        before = copy.deepcopy(row)
+        valves = copy.deepcopy(self.api.valves)
+        self.assertEqual(9, self.apply()["changed"])
+        after = self.api.rows[("tool", row["id"])]
+        for key in ("id", "name", "user_id"):
+            self.assertEqual(before[key], after[key])
+        self.assertEqual(assets._grants(before["access_grants"]), assets._grants(after["access_grants"]))
+        self.assertEqual(before["meta"]["description"], after["meta"]["description"])
+        self.assertEqual(before["meta"]["custom"], after["meta"]["custom"])
+        self.assertEqual(valves[row["id"]], self.api.valves[row["id"]])
+        scope = {}
+        exec(after["content"], scope)
+        self.assertEqual("/* shared work panel */\n", scope["WORK_PANEL_SCRIPT"])
+        self.assertEqual("existing WO panel", scope["PANEL_SCRIPT"])
+        self.assertFalse(any("/valves" in path and row["id"] in path for _, path, _ in self.api.calls))
+        self.assertEqual(["/api/v1/tools/id/custom-wo-registration/update"],
+                         [path for _, path, body in self.api.writes if body.get("id") == row["id"]])
+        after["name"] = "새 현장 이름"
+        self.assertEqual(0, self.apply()["changed"])
+        self.assertEqual("새 현장 이름", self.api.rows[("tool", row["id"])]["name"])
+
+    def test_optional_wo_is_not_created_or_connected_when_absent(self):
+        self.add_existing_work_order("unbound-wo", bind=False)
+        before = copy.deepcopy(self.api.rows[("tool", "unbound-wo")])
+        self.assertEqual(8, self.apply()["changed"])
+        self.assertEqual(before, self.api.rows[("tool", "unbound-wo")])
+        self.assertFalse(any("unbound-wo" in path for _, path, _ in self.api.calls))
+        self.assertNotIn("unbound-wo", self.api.rows[("model", "existing-ees")]["meta"]["toolIds"])
+
+    def test_new_manual_wo_registration_gets_shared_script_without_new_registration(self):
+        row = self.add_existing_work_order()
+        row["content"] = (self.root / "agent-pack/wo.py").read_text(encoding="utf-8")
+        self.assertEqual(9, self.apply()["changed"])
+        scope = {}
+        exec(self.api.rows[("tool", "wo_demo")]["content"], scope)
+        self.assertEqual("/* shared work panel */\n", scope["WORK_PANEL_SCRIPT"])
+        self.assertFalse(any(path.endswith("/create") and body.get("id") == "wo_demo"
+                             for _, path, body in self.api.writes))
+
+    def test_unrecognized_or_edited_wo_source_stops_before_any_write(self):
+        for tracked in (False, True):
+            with self.subTest(tracked=tracked):
+                self.setUp()
+                self.add_existing_work_order()
+                if tracked:
+                    self.apply()
+                self.api.rows[("tool", "wo_demo")]["content"] += "\n# User customization\n"
+                before = len(self.api.writes)
+                self.expect_error("managed_field_conflict" if tracked else "unrecognized_existing_wo_source")
+                self.assertEqual(before, len(self.api.writes))
+
+    def test_ambiguous_wo_and_unreadable_wo_stop_preflight(self):
+        self.add_existing_work_order()
+        second = copy.deepcopy(self.api.rows[("tool", "wo_demo")])
+        second["id"] = "another-wo"
+        self.api.rows[("tool", "another-wo")] = second
+        self.api.rows[("model", "existing-ees")]["meta"]["toolIds"].append("another-wo")
+        self.expect_error("ambiguous_existing_work_order")
+        self.assertEqual([], self.api.writes)
+        del self.api.rows[("tool", "another-wo")]
+        self.api.hide_content = True
+        self.expect_error("tool_source_not_readable")
+        self.assertEqual([], self.api.writes)
+
+    def test_similar_user_tool_is_left_untouched(self):
+        row = self.add_existing_work_order()
+        row["meta"]["manifest"]["title"] = "My WO Helper"
+        row["content"] = '"""title: My WO Helper"""\nclass Tools:\n    def wo_demo_view(self): pass\n'
+        before = copy.deepcopy(row)
+        self.assertEqual(8, self.apply()["changed"])
+        self.assertEqual(before, self.api.rows[("tool", "wo_demo")])
+
+    def test_existing_wo_lost_response_recovers_without_duplicate_write(self):
+        self.add_existing_work_order()
+        self.api.fail_after = ("tool", "wo_demo")
+        error = self.expect_error("asset_apply_failed")
+        self.assertTrue(error.pending)
+        self.api.fail_after = None
+        self.assertEqual(4, self.apply()["changed"])
+        self.assertEqual(1, len([body for _, _, body in self.api.writes if body.get("id") == "wo_demo"]))
+
+    def test_existing_wo_concurrent_edit_and_unbound_pending_are_preserved(self):
+        self.add_existing_work_order()
+        self.api.concurrent = ("tool", "wo_demo")
+        self.expect_error("concurrent_edit")
+        self.assertTrue(self.api.rows[("tool", "wo_demo")]["content"].endswith("# concurrent edit\n"))
+        self.assertFalse(any(body.get("id") == "wo_demo" for _, _, body in self.api.writes))
+        self.setUp()
+        self.add_existing_work_order()
+        self.api.fail_after = ("tool", "wo_demo")
+        self.expect_error("asset_apply_failed")
+        self.api.rows[("model", "existing-ees")]["meta"]["toolIds"].remove("wo_demo")
+        count = len(self.api.writes)
+        self.expect_error("pending_work_order_unbound")
+        self.assertEqual(count, len(self.api.writes))
+
     def test_conflicts_stop_before_any_write(self):
         for mutation in ("prompt", "tool", "suggestion", "native", "valves"):
             with self.subTest(mutation=mutation):
@@ -470,12 +632,13 @@ class ApplyAssetsTests(unittest.TestCase):
 
     def test_real_manifest_sources_pass_preflight(self):
         manifest = assets.load_manifest(MODULE.parents[1])
-        self.assertEqual("0.1.3", manifest["version"])
+        self.assertEqual("0.2.0", manifest["version"])
         self.assertEqual({"ees_specialists", "ees_demo_data"}, {t["id"] for t in manifest["tools"]})
         self.assertEqual({"ees_demo_ems", "ees_demo_apc", "ees_demo_fdc"},
                          {m["id"] for m in manifest["models"]})
         for tool in manifest["tools"]:
-            script = (MODULE.parents[1] / tool["ui_script_path"]).read_text(encoding="utf-8")
+            script = "\n".join((MODULE.parents[1] / path).read_text(encoding="utf-8")
+                               for path in tool["ui_script_paths"])
             original = (MODULE.parents[1] / tool["path"]).read_text(encoding="utf-8")
             tree = ast.parse(tool["content"])
             panel = [node.value.value for node in tree.body if isinstance(node, ast.Assign)
@@ -485,6 +648,12 @@ class ApplyAssetsTests(unittest.TestCase):
             self.assertEqual(ast.get_docstring(ast.parse(original), clean=False),
                              ast.get_docstring(tree, clean=False))
             compile(tool["content"], tool["path"], "exec")
+        self.assertEqual(1, len(manifest["optional_existing_tools"]))
+        wo = manifest["optional_existing_tools"][0]
+        scope = {}
+        exec(compile(wo["content"], wo["path"], "exec"), scope)
+        self.assertEqual((MODULE.parents[1] / wo["ui_script_path"]).read_text(encoding="utf-8"),
+                         scope["WORK_PANEL_SCRIPT"])
 
     def test_concurrent_edit_not_overwritten(self):
         self.api.concurrent = ("model", "existing-ees")

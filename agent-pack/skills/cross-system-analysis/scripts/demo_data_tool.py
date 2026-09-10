@@ -1,7 +1,7 @@
 """
 title: EES Demo Data
 description: Synthetic EMS/APC/FDC observations and bounded comparisons. No production connection.
-version: 0.1.3
+version: 0.2.0
 required_open_webui_version: 0.11.3
 ees_demo_pack: ees-demo-v1
 """
@@ -36,12 +36,35 @@ async def _panel(emitter, state, phase, result=None, error=None):
         if result is not None:
             snapshot["result"] = result
         code = "const eesPanelUpdate=" + json.dumps(snapshot, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
-        await asyncio.wait_for(emitter({"type": "execute", "data": {"code": code}}),
-                               timeout=PANEL_SEND_TIMEOUT)
+        async with asyncio.timeout(PANEL_SEND_TIMEOUT):
+            await emitter({"type": "execute", "data": {"code": code}})
     except Exception:
         # A cancelled parent must stay cancelled; UI errors are optional.
         pass
 
+
+
+async def _plan_panel(emitter, plan, step, phase, call_id):
+    # Both independently registered Tools share only this request-local state.
+    # No user IDs, credentials, child metadata or internal reasoning are sent.
+    state = plan["snapshot"]
+    if state["phase"] in {"completed", "partial"}:
+        return
+    step["status"] = phase if phase in {"completed", "failed", "cancelled"} else "running"
+    if call_id not in step["call_ids"]:
+        step["call_ids"].append(call_id)
+    state["phase"] = ("awaiting_summary" if all(
+        item["status"] in {"completed", "partial", "failed", "cancelled"}
+        for item in state["steps"] if item["type"] != "synthesis") else "running")
+    state["seq"] += 1
+    if not PANEL_SCRIPT or not emitter or not state["chat_id"] or not state["message_id"]:
+        return
+    try:
+        code = "const eesPanelUpdate=" + json.dumps(state, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
+        async with asyncio.timeout(PANEL_SEND_TIMEOUT):
+            await emitter({"type": "execute", "data": {"code": code}})
+    except Exception:
+        pass
 
 def _error(code, message):
     return {"ok": False, "demo": True, "error": {"code": code, "message": message}}
@@ -298,6 +321,7 @@ class Tools:
 
     async def compare_demo_data(self, dataset: str = "sample_a", group_by: str = "overall",
                                 equipment_id: str = "", recipe_id: str = "", event_ids: str = "",
+                                step_id: str = "", __user__: dict = None, __request__=None,
                                 __metadata__=None, __event_emitter__=None) -> dict:
         """Compute paired observations for EES using synthetic records; no causal conclusion.
 
@@ -306,14 +330,35 @@ class Tools:
         :param equipment_id: Optional equipment ID, EQ-01 or EQ-02.
         :param recipe_id: Optional recipe ID, R-01 or R-02.
         :param event_ids: Optional comma-separated event IDs returned by specialist analyses.
+        :param step_id: Required comparison step ID from the current EES execution plan.
         """
         if self._role(__metadata__) != "EES":
             return _error("comparison_not_allowed", "종합 비교는 EES에서 수행합니다. 담당 자료 근거를 반환해 주세요.")
         if any(not isinstance(value, str) or len(value) > maximum for value, maximum in
                ((dataset, 80), (group_by, 80), (equipment_id, 80), (recipe_id, 80), (event_ids, 1000))):
             return _error("invalid_filters", "비교 조건 형식을 확인해 주세요.")
+        plan = getattr(getattr(__request__, "state", None), "ees_analysis_plan", None)
+        user_id = __user__.get("id") if isinstance(__user__, dict) else None
+        identity = (user_id, __metadata__.get("model_id"),
+                    __metadata__.get("chat_id"), __metadata__.get("message_id"))
+        if (not isinstance(__user__, dict) or not __user__.get("id") or not isinstance(plan, dict)
+                or plan.get("identity") != identity):
+            return _error("plan_required", "같은 EES 요청에서 실행 계획을 먼저 등록해 주세요.")
+        snapshot = plan["snapshot"]
+        step = next((item for item in snapshot["steps"] if item["id"] == step_id), None)
+        by_id = {item["id"]: item for item in snapshot["steps"]}
+        if (snapshot["phase"] in {"completed", "partial"} or not step or step["type"] != "comparison"
+                or step["status"] != "pending"
+                or any(by_id[dep]["status"] not in {"completed", "partial", "failed", "cancelled"}
+                       for dep in step["depends_on"])):
+            return _error("step_not_ready", "계획의 대기 중인 비교 단계와 선행 실행 결과를 확인해 주세요.")
+        if dataset != snapshot["dataset"]:
+            return _error("plan_dataset_mismatch", "계획과 같은 합성 자료를 사용해 주세요.")
         call_id = str(uuid4())
-        state = {"version": 1, "kind": "comparison", "call_id": call_id, "batch_id": call_id,
+        # Reserve before yielding so parallel calls cannot reuse the same step.
+        step["status"] = "running"
+        step["call_ids"].append(call_id)
+        state = {"version": 1, "kind": "comparison", "plan_id": snapshot["plan_id"], "step_id": step_id, "call_id": call_id, "batch_id": call_id,
                  "seq": 0, "arguments": {"dataset": dataset, "group_by": group_by,
                      "equipment_id": equipment_id, "recipe_id": recipe_id, "event_ids": event_ids}}
         for key in ("chat_id", "message_id"):
@@ -321,20 +366,24 @@ class Tools:
             state[key] = value if isinstance(value, str) and len(value) <= 200 else ""
         result = None
         try:
+            await _plan_panel(__event_emitter__, plan, step, "requested", call_id)
             await _panel(__event_emitter__, state, "requested")
             await _panel(__event_emitter__, state, "querying")
             result = self._compare(dataset, group_by, equipment_id, recipe_id, event_ids)
+            await _plan_panel(__event_emitter__, plan, step, "completed" if result["ok"] else "failed", call_id)
             await _panel(__event_emitter__, state, "completed" if result["ok"] else "failed",
                          result, (result.get("error") or {}).get("code"))
         except asyncio.CancelledError:
             # If calculation already finished, preserve its real outcome even
             # when cancellation arrives during the optional final UI emission.
             phase = ("completed" if result["ok"] else "failed") if result is not None else "cancelled"
+            await _plan_panel(__event_emitter__, plan, step, phase, call_id)
             await _panel(__event_emitter__, state, phase, result,
                          (result.get("error") or {}).get("code") if result is not None else "cancelled")
             raise
         except Exception:
             result = _error("comparison_failed", "교차 계산을 완료하지 못했습니다. 확보된 전문 근거를 사용해 주세요.")
+            await _plan_panel(__event_emitter__, plan, step, "failed", call_id)
             await _panel(__event_emitter__, state, "failed", result, "comparison_failed")
         return result
 

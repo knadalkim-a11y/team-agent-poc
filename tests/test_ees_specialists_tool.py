@@ -31,6 +31,17 @@ SPEC.loader.exec_module(module)
 LOAD_RUNTIME = module._load_runtime
 
 
+async def _wait_test_event(event):
+    # Fixture failures must fail this test instead of occupying the CI job until
+    # its 10-minute limit. Production cancellation/deadline assertions remain.
+    try:
+        async with asyncio.timeout(2):
+            await event.wait()
+    except TimeoutError as exc:
+        # This must never be mistaken for the production specialist timeout.
+        raise AssertionError("Fixture event did not arrive within two seconds") from exc
+
+
 class State:
     def __init__(self, state):
         object.__setattr__(self, "_state", state)
@@ -164,9 +175,31 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
                 "__user__": self.user.model_dump(), "__request__": self.request,
                 "__metadata__": self.metadata, "__event_emitter__": self.emit}
         args.update(overrides)
+        # These adapter/budget tests supply an already registered plan fixture.
+        # Workflow registration and dependencies are exercised separately below.
+        if (self.tool._authorized(args["__request__"], args["__metadata__"], args["__user__"])
+                and isinstance(args["tasks"], list)):
+            selected = copy.deepcopy(args["tasks"])
+            plan = getattr(args["__request__"].state, "ees_analysis_plan", None)
+            if plan is None:
+                plan = {"identity": module._identity(args["__user__"], args["__metadata__"]), "snapshot": {
+                    "version": 1, "kind": "plan", "plan_id": "adapter-plan", "call_id": "adapter-plan",
+                    "batch_id": "adapter-plan", "seq": 0, "phase": "planned", "dataset": "sample_a",
+                    "chat_id": args["__metadata__"].get("chat_id", ""),
+                    "message_id": args["__metadata__"].get("message_id", ""), "steps": []}}
+                args["__request__"].state.ees_analysis_plan = plan
+            for task in selected:
+                if isinstance(task, dict) and set(task) == {"system", "question"}:
+                    step_id = str(uuid4())
+                    task["step_id"] = step_id
+                    plan["snapshot"]["steps"].append({"id": step_id, "type": "specialist",
+                        "system": task["system"], "status": "pending", "depends_on": [],
+                        "call_ids": [], "reason_before": "공개 확인 목적", "result_summary": "",
+                        "judgment_after": "", "uncertainty": ""})
+            args["tasks"] = selected
         return json.loads(await self.tool.consult_specialists(**args))
 
-    def panel_updates(self):
+    def panel_updates(self, include_plans=False):
         updates = []
         for event in self.events:
             if event["type"] == "execute":
@@ -174,7 +207,8 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
                 self.assertTrue(code.startswith("const eesPanelUpdate="))
                 value, end = json.JSONDecoder().raw_decode(code[len("const eesPanelUpdate="):])
                 self.assertEqual(code[len("const eesPanelUpdate=") + end:], ";\n" + module.PANEL_SCRIPT)
-                updates.append(value)
+                if include_plans or value["kind"] != "plan":
+                    updates.append(value)
         return updates
 
     async def test_panel_tracks_real_requests_queries_replies_and_followup_without_private_data(self):
@@ -228,24 +262,25 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_panel_parallel_queries_keep_their_own_results_and_monotonic_snapshots(self):
         original = self.payload
-        entered = {name: asyncio.Event() for name in ("sample_a", "sample_b")}
+        entered = {name: asyncio.Event() for name in ("sample_a-01", "sample_a-02")}
         release = {name: asyncio.Event() for name in entered}
         async def payload(child, form, user, metadata, model):
             result = await original(child, form, user, metadata, model)
-            async def data(dataset):
-                entered[dataset].set()
-                await release[dataset].wait()
-                return {"ok": True, "record_count": 1 if dataset == "sample_a" else 2,
-                        "records": [{"event_id": dataset + "-01"}]}
+            async def data(dataset, event_id):
+                entered[event_id].set()
+                await _wait_test_event(release[event_id])
+                return {"ok": True, "record_count": 1 if event_id == "sample_a-01" else 2,
+                        "records": [{"event_id": event_id}]}
             metadata["tools"]["read_demo_data"]["callable"] = data
+            metadata["tools"]["read_demo_data"]["spec"]["parameters"]["properties"]["event_id"] = {"type": "string"}
             return result
         async def response(_, ctx):
             function = ctx["metadata"]["tools"]["read_demo_data"]["callable"]
-            jobs = [asyncio.create_task(function(dataset=name)) for name in entered]
-            await asyncio.gather(*(event.wait() for event in entered.values()))
-            release["sample_b"].set()
+            jobs = [asyncio.create_task(function(dataset="sample_a", event_id=name)) for name in entered]
+            await asyncio.gather(*(_wait_test_event(event) for event in entered.values()))
+            release["sample_a-02"].set()
             await jobs[1]
-            release["sample_a"].set()
+            release["sample_a-01"].set()
             await jobs[0]
             ctx["assistant_message"] = {"content": "두 자료 확인"}
         self.runtime.process_payload = payload
@@ -259,7 +294,88 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
                             and u["queries"][0]["status"] == "querying")
         self.assertEqual(intermediate["phase"], "querying")
         self.assertEqual([q["record_count"] for q in updates[-1]["queries"]], [1, 2])
-        self.assertEqual([q["event_ids"] for q in updates[-1]["queries"]], [["sample_a-01"], ["sample_b-01"]])
+        self.assertEqual([q["event_ids"] for q in updates[-1]["queries"]], [["sample_a-01"], ["sample_a-02"]])
+
+    async def test_panel_freezes_query_and_plan_snapshots_before_slow_plan_emission(self):
+        # Force query 2 to enter while query 1 is waiting for its plan event.
+        # Both packets must retain the sequence and data at their own boundary.
+        first_plan = asyncio.Event()
+        second_plan = asyncio.Event()
+        release = asyncio.Event()
+        step = {"id": "ems", "type": "specialist", "status": "pending", "call_ids": [],
+                "result_summary": "first"}
+        plan = {"snapshot": {"version": 1, "kind": "plan", "phase": "planned", "seq": 0,
+                "chat_id": "chat", "message_id": "message", "call_id": "plan", "steps": [step]}}
+        record = {"panel": {"version": 1, "kind": "specialist", "seq": 0,
+                    "chat_id": "chat", "message_id": "message", "call_id": "ems-call"},
+                  "plan": plan, "step": step, "request": {"question": "sample_a", "kind": "initial"},
+                  "queries": [{"index": 1, "status": "querying"}], "analysis": "first",
+                  "analysis_truncated": False}
+        async def emit(event):
+            payload, _ = json.JSONDecoder().raw_decode(event["data"]["code"][len("const eesPanelUpdate="):])
+            self.events.append(event)
+            if payload["kind"] == "plan":
+                (first_plan if payload["seq"] == 1 else second_plan).set()
+                await _wait_test_event(release)
+        with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+            first = asyncio.create_task(module._panel(emit, record, "querying"))
+            await _wait_test_event(first_plan)
+            record["queries"].append({"index": 2, "status": "querying"})
+            record["analysis"] = "second"
+            step["result_summary"] = "second"
+            second = asyncio.create_task(module._panel(emit, record, "querying"))
+            await _wait_test_event(second_plan)
+            release.set()
+            await asyncio.gather(first, second)
+            specialists = self.panel_updates()
+            plans = [event for event in self.panel_updates(include_plans=True) if event["kind"] == "plan"]
+        self.assertEqual([event["seq"] for event in specialists], [1, 2])
+        self.assertEqual([len(event["queries"]) for event in specialists], [1, 2])
+        self.assertEqual([event["analysis"] for event in specialists], ["first", "second"])
+        self.assertEqual([event["seq"] for event in plans], [1, 2])
+        self.assertEqual([event["steps"][0]["result_summary"] for event in plans], ["first", "second"])
+
+    async def test_emitter_completion_race_preserves_parent_cancellation(self):
+        # On Python 3.11, wait_for's emitter task can finish immediately before
+        # the parent receives cancel; its fut.done() branch then loses cancel.
+        # Exercise each public-event boundary with that exact scheduling order.
+        for boundary in ("status", "plan", "specialist"):
+            with self.subTest(boundary=boundary):
+                step = {"id": "ems", "type": "specialist", "status": "pending", "call_ids": []}
+                plan = {"snapshot": {"version": 1, "kind": "plan", "phase": "planned", "seq": 0,
+                    "chat_id": "chat", "message_id": "message", "call_id": "plan", "steps": [step]}}
+                record = {"panel": {"version": 1, "kind": "specialist", "seq": 0,
+                    "chat_id": "chat", "message_id": "message", "call_id": "ems-call"},
+                    "plan": plan, "step": step, "request": {}, "queries": [], "analysis": "",
+                    "analysis_truncated": False}
+                cancellation_scheduled = False
+                async def emit(event):
+                    nonlocal cancellation_scheduled
+                    if boundary == "specialist":
+                        payload, _ = json.JSONDecoder().raw_decode(
+                            event["data"]["code"][len("const eesPanelUpdate="):])
+                        if payload["kind"] != "specialist":
+                            return
+                    if not cancellation_scheduled:
+                        cancellation_scheduled = True
+                        asyncio.get_running_loop().call_soon(job.cancel)
+                async def worker():
+                    if boundary == "status":
+                        await module._status(emit, "EMS", "started", "fixture")
+                    elif boundary == "plan":
+                        await module._plan_panel(emit, plan)
+                    else:
+                        await module._panel(emit, record, "querying")
+                    await _wait_test_event(asyncio.Event())
+                with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+                    job = asyncio.create_task(worker())
+                    try:
+                        _, pending = await asyncio.wait({job}, timeout=0.5)
+                        self.assertFalse(pending, "Emitter completion swallowed parent cancellation")
+                        self.assertTrue(job.cancelled())
+                    finally:
+                        job.cancel()
+                        await asyncio.gather(job, return_exceptions=True)
 
     async def test_panel_denial_timeout_and_runtime_failure_are_terminal_without_fake_completion(self):
         async def allow(user, model, model_info):
@@ -270,7 +386,7 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         async def response(response, ctx):
             await self.response(response, ctx)
             if ctx["metadata"]["model_id"] == "ees_demo_apc":
-                await asyncio.Event().wait()
+                await _wait_test_event(asyncio.Event())
         self.runtime.check_access.side_effect = allow
         self.runtime.process_response = response
         self.tool.valves.specialist_timeout_seconds = 0.04
@@ -301,7 +417,7 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
             result = await original(child, form, user, metadata, model)
             async def data(**kwargs):
                 entered.set()
-                await asyncio.Event().wait()
+                await _wait_test_event(asyncio.Event())
             metadata["tools"]["read_demo_data"]["callable"] = data
             return result
         async def response(_, ctx):
@@ -312,7 +428,7 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         self.runtime.process_response = response
         with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
             job = asyncio.create_task(self.consult())
-            await entered.wait()
+            await _wait_test_event(entered)
             job.cancel()
             with self.assertRaises(asyncio.CancelledError):
                 await job
@@ -325,7 +441,7 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
     async def test_panel_unavailable_ui_is_bounded_and_missing_context_is_not_broadcast(self):
         async def unavailable(event):
             if event["type"] == "execute":
-                await asyncio.Event().wait()
+                await _wait_test_event(asyncio.Event())
         with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"), patch.object(module, "PANEL_SEND_TIMEOUT", 0.002):
             result = await asyncio.wait_for(self.consult(__event_emitter__=unavailable), timeout=1)
             self.assertTrue(result["ok"])
@@ -483,7 +599,7 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         async def slow(response, ctx):
             await self.response(response, ctx)
             if ctx["metadata"]["model_id"] == "ees_demo_apc":
-                await asyncio.Event().wait()
+                await _wait_test_event(asyncio.Event())
         self.runtime.check_access.side_effect = allow
         self.runtime.process_response = slow
         # Bypass only Pydantic assignment validation for a fast synthetic timeout.
@@ -509,10 +625,10 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
             await self.response(response, ctx)
             if ctx["metadata"]["model_id"] == "ees_demo_apc":
                 entered.set()
-                await asyncio.Event().wait()
+                await _wait_test_event(asyncio.Event())
         self.runtime.process_response = slow
         job = asyncio.create_task(self.consult(("EMS", "APC")))
-        await entered.wait()
+        await _wait_test_event(entered)
         job.cancel()
         with self.assertRaises(asyncio.CancelledError):
             await job
@@ -625,6 +741,178 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(arguments, {"dataset": "sample_a"})
         self.assertNotIn("DO-NOT-RETURN", json.dumps(result))
         self.assertEqual(self.data_calls[0][2], {"dataset": "sample_a"})
+
+class WorkflowTests(unittest.IsolatedAsyncioTestCase):
+    """Actual registered-plan → specialist → comparison → summary contract."""
+
+    setUp = SpecialistsTests.setUp
+    emit = SpecialistsTests.emit
+    payload = SpecialistsTests.payload
+    generate = SpecialistsTests.generate
+    response = SpecialistsTests.response
+    panel_updates = SpecialistsTests.panel_updates
+
+    @staticmethod
+    def step(identifier, kind="specialist", system="EMS", dependencies=()):
+        return {"id": identifier, "type": kind, "system": system, "title": identifier,
+                "reason_before": "실행 전에 기록한 확인 목적", "depends_on": list(dependencies)}
+
+    async def plan(self, action, **kwargs):
+        return json.loads(await self.tool.manage_analysis_plan(action, __user__=self.user.model_dump(),
+            __request__=self.request, __metadata__=self.metadata, __event_emitter__=self.emit, **kwargs))
+
+    async def create(self, comparison=True):
+        steps = [self.step("ems")]
+        if comparison:
+            steps.append(self.step("compare", "comparison", "EES", ["ems"]))
+        steps.append(self.step("summary", "synthesis", "EES", [steps[-1]["id"]]))
+        return await self.plan("create", title="조립 2라인 분석", steps=steps)
+
+    async def execute(self, step_id="ems", system="EMS"):
+        return json.loads(await self.tool.consult_specialists(
+            tasks=[{"step_id": step_id, "system": system, "question": "sample_a의 정비 이력 확인"}],
+            __user__=self.user.model_dump(), __request__=self.request,
+            __metadata__=self.metadata, __event_emitter__=self.emit))
+
+    async def compare(self):
+        path = PATH.with_name("demo_data_tool.py")
+        spec = importlib.util.spec_from_file_location("ees_workflow_comparison_tests", path)
+        comparison = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(comparison)
+        tool = comparison.Tools()
+        tool.valves.ees_model_id = "existing-ees"
+        with patch.object(comparison, "PANEL_SCRIPT", module.PANEL_SCRIPT):
+            return await tool.compare_demo_data(step_id="compare", __user__=self.user.model_dump(),
+                __request__=self.request, __metadata__=self.metadata, __event_emitter__=self.emit)
+
+    def reviews(self):
+        return [{"step_id": step["id"], "result_summary": "실제 반환된 자료를 확인함",
+                 "judgment_after": "운영 원인은 아직 확정하지 않음", "uncertainty": "합성 자료 범위"}
+                for step in self.request.state.ees_analysis_plan["snapshot"]["steps"]
+                if step["type"] != "synthesis"]
+
+    async def finish(self):
+        return await self.plan("finish", reviews=self.reviews(), conclusion="합성 자료의 확인된 차이",
+                               next_action="관련 조건을 추가 검증", limitations="실제 운영 원인은 미확정")
+
+    async def test_plan_required_and_invalid_steps_cannot_claim_or_run_work(self):
+        self.assertEqual((await self.execute())["error"]["code"], "plan_required")
+        self.assertEqual((await self.compare())["error"]["code"], "plan_required")
+        for patch_value in ({"status": "completed"}, {"depends_on": ["future"]}, {"system": []}):
+            steps = [self.step("ems"), self.step("summary", "synthesis", "EES")]
+            steps[0].update(patch_value)
+            invalid = await self.plan("create", title="검사", steps=steps)
+            self.assertEqual(invalid["error"]["code"], "invalid_plan")
+        excessive = [self.step(f"ems{i}") for i in range(3)] + [self.step("summary", "synthesis", "EES")]
+        self.assertEqual((await self.plan("create", title="검사", steps=excessive))["error"]["code"], "invalid_plan")
+        self.assertFalse(hasattr(self.request.state, "ees_analysis_plan"))
+        self.assertEqual(self.calls, [])
+
+    async def test_complete_plan_uses_real_dependencies_and_public_reviews_without_rewriting_reason(self):
+        with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+            created = await self.create()
+            self.assertTrue(created["ok"])
+            self.assertEqual((await self.compare())["error"]["code"], "step_not_ready")
+            self.assertEqual((await self.plan("finish", conclusion="fake", next_action="fake"))["error"]["code"], "plan_unfinished")
+            specialist = await self.execute()
+            self.assertTrue(specialist["ok"])
+            self.assertEqual((await self.execute())["error"]["code"], "step_not_ready")
+            comparison = await self.compare()
+            self.assertEqual(comparison["summary"]["total_events"], 15)
+            state = self.request.state.ees_analysis_plan["snapshot"]
+            self.assertEqual(state["phase"], "awaiting_summary")
+            self.assertEqual(state["steps"][-1]["status"], "pending")
+            self.assertTrue((await self.finish())["ok"])
+            state = self.request.state.ees_analysis_plan["snapshot"]
+            self.assertEqual([step["status"] for step in state["steps"]], ["completed"] * 3)
+            self.assertTrue(all(step["reason_before"] == "실행 전에 기록한 확인 목적" for step in state["steps"]))
+            self.assertEqual(len(state["steps"][-1]["call_ids"]), 2)
+            self.assertEqual(state["steps"][0]["call_ids"], [specialist["results"][0]["call_id"]])
+            events = self.panel_updates(include_plans=True)
+        plans = [event for event in events if event["kind"] == "plan"]
+        self.assertEqual([event["seq"] for event in plans], list(range(1, len(plans) + 1)))
+        self.assertEqual(plans[0]["phase"], "planned")
+        self.assertTrue(all(step["status"] == "pending" for step in plans[0]["steps"]))
+        self.assertEqual(plans[-1]["phase"], "completed")
+        self.assertNotIn("private reasoning", json.dumps(plans))
+        for event in events:
+            if event["kind"] != "plan":
+                self.assertEqual(event["plan_id"], created["plan_id"])
+                self.assertIn(event["step_id"], ("ems", "compare"))
+        self.assertEqual((await self.plan("create", title="reset", steps=[]))["error"]["code"], "plan_exists")
+        self.assertEqual((await self.plan("update", reviews=[]))["error"]["code"], "plan_closed")
+
+    async def test_update_adds_real_followup_before_synthesis_and_cannot_forge_review_status(self):
+        await self.create(comparison=False)
+        premature = [{"step_id": "ems", "result_summary": "fake", "judgment_after": "fake", "uncertainty": ""}]
+        self.assertEqual((await self.plan("update", reviews=premature))["error"]["code"], "step_not_reviewable")
+        await self.execute()
+        reviews = self.reviews()
+        reviews[0]["status"] = "failed"
+        self.assertEqual((await self.plan("update", reviews=reviews))["error"]["code"], "invalid_reviews")
+        added = await self.plan("update", steps=[self.step("ems_more", dependencies=["ems"])],
+                                change_reason="정비 회신에 없는 운전 재개 조건 확인")
+        self.assertTrue(added["ok"])
+        state = self.request.state.ees_analysis_plan["snapshot"]
+        self.assertEqual([step["id"] for step in state["steps"]], ["ems", "ems_more", "summary"])
+        self.assertEqual(state["steps"][-1]["depends_on"], ["ems", "ems_more"])
+        self.assertEqual(state["changes"], ["정비 회신에 없는 운전 재개 조건 확인"])
+        self.assertEqual((await self.finish())["error"]["code"], "step_not_reviewable")
+        result = await self.execute("ems_more")
+        self.assertEqual(result["results"][0]["request"]["kind"], "followup")
+        self.assertTrue((await self.finish())["ok"])
+
+    async def test_plan_identity_and_parallel_duplicate_step_do_not_bypass_execution_budget(self):
+        await self.create(comparison=False)
+        results = await asyncio.gather(self.execute(), self.execute())
+        self.assertEqual(sum(result["ok"] for result in results), 1)
+        self.assertEqual(len(self.calls), 1)
+        original = dict(self.metadata)
+        self.metadata["message_id"] = "another-message"
+        self.assertEqual((await self.execute())["error"]["code"], "plan_required")
+        self.assertEqual((await self.compare())["error"]["code"], "plan_required")
+        self.metadata = original
+        self.assertEqual(self.request.state.ees_consultation_budget["total"], 1)
+
+    async def test_partial_failure_requires_visible_limits_and_keeps_real_failed_state(self):
+        await self.create(comparison=False)
+        self.runtime.check_access.side_effect = PermissionError("DO-NOT-RETURN")
+        self.assertFalse((await self.execute())["ok"])
+        state = self.request.state.ees_analysis_plan["snapshot"]
+        self.assertEqual(state["steps"][0]["status"], "failed")
+        result = await self.plan("finish", reviews=self.reviews(), conclusion="자료 확보 실패", next_action="접근 확인")
+        self.assertEqual(result["error"]["code"], "limitations_required")
+        self.assertTrue((await self.finish())["ok"])
+        state = self.request.state.ees_analysis_plan["snapshot"]
+        self.assertEqual(state["phase"], "partial")
+        self.assertEqual(state["steps"][0]["status"], "failed")
+        self.assertNotIn("DO-NOT-RETURN", json.dumps(state))
+
+    async def test_plan_cancellation_and_scope_mismatch_never_become_completed(self):
+        await self.create(comparison=False)
+        async def mismatched(response, ctx):
+            result = json.loads(await ctx["metadata"]["tools"]["read_demo_data"]["callable"](dataset="sample_b"))
+            self.assertEqual(result["error"]["code"], "plan_dataset_mismatch")
+            ctx["assistant_message"] = {"content": "다른 자료로 요청하여 조회하지 못함"}
+        self.runtime.process_response = mismatched
+        result = await self.execute()
+        self.assertEqual(result["results"][0]["status"], "partial")
+        self.assertEqual(self.data_calls, [])
+        self.request = request()
+        await self.create(comparison=False)
+        entered = asyncio.Event()
+        async def waiting(response, ctx):
+            entered.set()
+            await _wait_test_event(asyncio.Event())
+        self.runtime.process_response = waiting
+        job = asyncio.create_task(self.execute())
+        await _wait_test_event(entered)
+        self.assertEqual((await self.plan("update", reviews=[]))["error"]["code"], "plan_busy")
+        job.cancel()
+        with self.assertRaises(asyncio.CancelledError):
+            await job
+        self.assertEqual(self.request.state.ees_analysis_plan["snapshot"]["steps"][0]["status"], "cancelled")
+        self.assertEqual(self.request.state.ees_analysis_plan["snapshot"]["steps"][-1]["status"], "pending")
 
 
 WHEEL = Path(os.environ.get("EES_TEST_UPSTREAM_WHEEL", "/tmp/ees-upstream-verification/open_webui-0.11.3-py3-none-any.whl"))

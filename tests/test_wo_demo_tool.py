@@ -89,6 +89,15 @@ class WODemoToolTests(unittest.IsolatedAsyncioTestCase):
         request, _ = self.request()
         self.assertEqual(request["chat_id"], METADATA["chat_id"])
 
+    async def test_deployed_shared_coordinator_precedes_tool_request(self):
+        coordinator = (PATH.parents[2] / "cross-system-analysis/ui/work-panel.js").read_text(encoding="utf-8")
+        with patch.object(module, "WORK_PANEL_SCRIPT", coordinator):
+            self.assertTrue(self.result(await self.view())["ok"])
+        code = self.events[-1]["data"]["code"]
+        self.assertTrue(code.startswith(coordinator + "\nconst request = "))
+        request, _ = self.request()
+        self.assertEqual(request["chat_id"], METADATA["chat_id"])
+
     async def test_update_keeps_untrusted_content_in_json_data(self):
         text = '사용자 입력 " ; globalThis.EES_TEST_INJECTION = true; //\n</script>\u2028'
         changes = {"description": text, "priority": "긴급"}

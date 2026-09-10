@@ -137,9 +137,11 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 
 구현은 [wo_demo_tool.py](../agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)의 고정된 화면 코드와 Open WebUI 0.11.3의 [공식 execute 이벤트](https://docs.openwebui.com/features/extensibility/plugin/development/events/#execute-works-with-both-__event_call__-and-__event_emitter__)를 사용합니다. 우측 패널을 붙이는 위치는 [0.11.3 Chat 화면 구조](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte)에 의존하며 공식 업무 패널 등록 API가 아닙니다. 모델이 실행할 JavaScript를 작성하지 않고 정해진 입력값만 전달합니다. 프런트엔드 재빌드·재설치·추가 서버·CDN은 필요하지 않습니다. 사외 검사와 실제 사내 WebUI·모델 동작 확인은 [검증 기록](../evals/scenarios.md#wo-mockup)에서 구분합니다.
 
-**사내 시연 적용·갱신:** [PR #19](https://github.com/knadalkim-a11y/team-agent-poc/pull/19)의 `docs/legacy-ui-workflow` 준비본이며 아직 main 배포본이 아닙니다. 아래 명령은 해당 원격 브랜치에서 Tool·Prompt·첫 화면 제안 파일 세 개만 임시 폴더에 꺼냅니다. 기존 checkout의 브랜치·작업 파일·실행 프로그램은 그대로 둡니다. v0.1.3의 기능 정상 보고와 이후 패널 예외, v0.1.5 안내 후 표시 성공 보고를 구분해 기록합니다. v0.1.6의 크기 조절 표시 변경은 기존 Tool 코드만 갱신합니다. 패널 오류 진단을 위해 같은 확인을 반복하지 않습니다. 초기 등록 내용·정확한 적용 파일은 직접 대조하지 않았으며 마지막 전달 원본과 결과는 [평가 기록](../evals/scenarios.md#wo-mockup)을 따릅니다.
+**현재 기존 사용자 갱신:** PR #19는 main에 병합됐으며, 현재 v0.1.8은 [ApplyDemo](#demo-assets-deployment)가 이미 EES에 연결된 공식 v0.1.6/v0.1.7 등록본을 같은 ID로 갱신합니다. 아래 수동 복사를 반복하지 않습니다. 새 통합 업무 패널의 공통 코드는 ApplyDemo가 포함하며 초기 등록과 현장 수정 여부에 따라 지원되지 않는 원본이면 먼저 대조합니다. 마지막 사내 확인 버전과 결과는 [평가 기록](../evals/scenarios.md#wo-mockup)을 따릅니다.
 
-**v0.1.2 이후 버전을 적용한 경우:** 아래 1·2번으로 기존 Tool 코드만 교체한 뒤 한 번 새로고침합니다. WO 지침·제안 JSON은 이번에 변경하지 않았으므로 3·4번을 반복하지 않습니다. 패널을 열고 크기 조절 바를 클릭·드래그할 때 테두리가 없는지 사용 중 확인합니다. 이전 전체 기능 검사를 반복하지 않으며, 패널 오류가 재발한 경우에만 아래의 짧은 진단값을 확인합니다.
+**처음 설치할 때만:** 최신 main의 [Tool 원본](../agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)을 EES WO Demo로 등록해 EES에 연결합니다. 같은 main의 [공통 Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)에서 `WO 시연 도구가 연결된 경우` 절을 기존 EES 지침 끝에 한 번 추가하고, [시작 질문 JSON](../agent-pack/ees-prompt-suggestions.json)의 네 질문을 기존 질문을 유지하면서 추가합니다. 이어 ApplyDemo로 공통 패널 코드를 포함합니다. 이미 등록된 사용자의 Tool을 삭제·재생성하지 않습니다.
+
+**아래는 2026-09-09 v0.1.6 수동 적용 이력입니다.** 당시에는 1·2번으로 기존 Tool 코드만 교체하고 WO 지침·제안 JSON은 변경하지 않아 3·4번을 반복하지 않았습니다. 현재 갱신 명령으로 사용하지 않습니다. 패널 오류가 재발한 경우에만 아래의 짧은 진단값을 확인합니다.
 
 1. 사내 PowerShell에서 다음 블록을 실행하면 준비본을 받고 Tool 코드 전체가 클립보드에 복사됩니다. 실패하면 다음 단계로 넘어가지 않습니다.
 
@@ -381,39 +383,42 @@ EES만 위임하며 첫 분석은 필요한 전문 Assistant별 최대 1회, 추
 
 화면에는 선택한 Assistant와 분석 목적, 실제 조회/완료/실패 상태, 근거에 따른 추가 확인 이유와 최종 결과를 보여줍니다. 긴 내부 사고 전문 대신 사용자가 판단 과정을 검토할 수 있는 짧은 설명과 근거를 제공합니다. 합성 데이터 표시를 유지하고, “여러 Assistant를 호출했다”는 사실만으로 교차 분석 성공으로 판정하지 않습니다. 이 시연의 성공은 합성 사례에서 오케스트레이션이 작동한 증거이며, 실제 사내 데이터의 관계·원인 분석 정확도가 검증됐다는 뜻은 아닙니다.
 
-**사람이 읽는 협업 결과:** v0.1.1에서 도입한 일반 대화의 문장·표 형식을 유지하고, v0.1.2에서 아래 [협업 과정 패널](#cooperation-panel)을 추가합니다. v0.1.3 전문 회신은 핵심 확인·근거·한계 순서의 짧은 제목과 항목으로 작성하며 맡긴 질문은 패널에서 별도로 확인합니다. EES는 실제 요청과 회신을 연결해 종합합니다. 텍스트 개선에 대한 사용자 피드백과 실제 사내 패널 확인은 [평가 기록](../evals/scenarios.md#cross-system-demo-panel)에 구분합니다.
+**사람이 읽는 분석 결과:** v0.2.0은 EES가 실행 전에 계획과 선택 이유를 등록하고 실제 실행 결과에 따라 상태를 표시합니다. 대화에는 결론과 다음 행동을 간결하게 남기고, 상세 회신·판단 근거·자료는 아래 [오른쪽 업무 패널](#cooperation-panel)에서 확인합니다. 일반 문서 조회에 이 계획을 강제하지 않습니다. 이전 가독성 피드백과 패널 열림 확인은 [기존 기록](../evals/scenarios.md#cross-system-demo-panel)에 보존합니다.
 
 | 답변 구성 | 사용자가 이해할 내용 |
 |---|---|
-| 핵심 발견·합성 자료 범위 | 무엇이 발견됐고 업무상 왜 중요한지 |
-| 전문가별 요청·회신 표 | 실제 호출한 분야·첫 분석/보완·완료/부분/실패, 맡긴 질문, 회신의 핵심과 대표 근거 ID |
-| EES의 비교·종합 | 어떤 회신을 같은 사건·설비·레시피·시간으로 연결했고, 실제 계산에서 무엇이 달랐는지. 평균의 분모·미확인·결측 포함 |
-| 개선 기회·다음 행동 | 근거가 있는 KPI 후보의 정의·업무 활용, 반증 가능성과 추가 확인할 일 |
+| 대화의 결론 | 핵심 발견 1~3개와 업무 의미. 필요한 실제 수치·분모와 합성 자료 범위 |
+| 대화의 다음 행동 | 우선 행동 한 줄과 판단을 제한하는 주요 미확인 사항 |
+| 패널의 실행 계획 | 단계별 목적·선행 관계와 실제 실행 상태. 필요한 경우 근거를 갖춘 보완 단계 추가 |
+| 패널의 단계 상세 | 실행 전 선택 이유, 실제 결과·회신·자료, 실행 후 판단 요약과 불확실성 |
 
 전문 Tool은 각 결과의 `request.question`과 `request.kind`로 실제 요청·첫 분석/보완을 연결하고, `analysis`·`evidence`는 실제 회신·조회 결과로 유지합니다. 회신의 기존 길이 제한에 걸리면 `analysis_truncated=true`로 표시하며 전체 회신으로 설명하지 않습니다. 미호출 분야의 가짜 행, 실패를 정상으로 바꾼 요약, 병렬 요청을 순차 호출로 꾸민 설명을 만들지 않습니다. 남은 호출 횟수는 내부 제어용이며 추가 분석을 권하는 기본 문구로 쓰지 않습니다. 추가 서버·LLM 요약 호출은 없습니다.
 
 <a id="cooperation-panel"></a>
 
-#### 협업 과정 패널
+#### 실행 계획과 오른쪽 업무 패널
 
-시연 분석에서 실제 전문 요청이나 EES 교차 비교가 시작되면 일반 대화의 오른쪽에 **협업 과정**을 표시합니다. 기존 EES → EMS/APC/FDC 구조를 유지하며 전문 Assistant 아래에 에이전트를 추가하지 않습니다. 왼쪽 대화에는 최종 발견·연결 근거·KPI 후보를 남기고, 우측에는 실제 실행 중인 작업과 회신을 표시합니다.
+EES가 시연 분석 계획을 먼저 등록하고 자동 실행합니다. **업무 패널 열기** 버튼 하나로 대화 오른쪽의 분석·설비 조회·WO 화면을 전환합니다. 각 화면은 해당 기능이 현재 대화에서 준비된 뒤 사용할 수 있습니다. 좁은 화면에서도 패널을 아래로 쌓지 않으며, 기존 크기 조절과 설비 선택·WO 초안을 유지합니다. 기존 EES → EMS/APC/FDC 호출 구조를 유지하고 별도 실행 서버나 요약 모델을 추가하지 않습니다. 목업용 ‘진행 시연’ 버튼은 배포 화면에 없습니다.
 
 | 화면 | 표시 기준 |
 |---|---|
-| 전문 Assistant 카드 | 실제 요청한 분야만 표시. 요청·분석·조회·완료·부분·실패·취소를 구분하며 같은 요청 묶음의 병렬 작업과 별도 보완 호출을 구별 |
-| 선택한 전문 분석 | 회신을 먼저 읽고 제목·문단·목록으로 내용을 구분. 긴 질문과 자료 확인 조건·건수·사건 ID는 필요할 때 펼침. 회신 없음·잘림과 미확인 상태 표시 |
-| EES 교차 비교 | 실제 비교 조건과 결과를 표시. 평균의 분모·미확인·판정 불가를 함께 읽으며 없는 수치를 0으로 바꾸지 않음 |
+| 실행 계획 | 실제 실행 전에 등록한 목적·단계·선행 관계를 표시. 대기·실행·완료·부분·실패·취소를 구분하며 독립된 전문 작업은 병렬 실행 가능 |
+| 결과 요약 | EES가 확보한 결과를 정리한 결론·다음 행동·한계. 전문 회신 수신과 최종 분석 정리를 구분 |
+| 단계 상세 | 선택한 단계의 결과·판단 근거·상세 자료를 클릭해 확인. 실행 전 선택 이유와 실제 결과 후 판단·불확실성을 분리 |
+| EES 교차 비교 | 실제 계산값의 비교와 근거를 표시. 평균의 분모·미확인·판정 불가를 함께 읽으며 없는 수치를 0으로 바꾸지 않음 |
 | 질문별 기록 | 대화·답변 메시지·호출별로 구분하고 지연·중복 이벤트가 새 상태를 덮지 않도록 처리. 첫 분석과 보완 회신을 별도로 유지 |
 
-전문 회신 수신·교차 계산 완료를 EES 최종 답변 완료로 표시하지 않습니다. 전문가 선택 이유는 실제 전달 질문을 기준으로 이해하며 보이지 않는 내부 추론을 만들어내지 않습니다. 화면을 접어도 분석은 계속되고, 화면 전달 실패는 분석 실패로 바꾸지 않습니다. 기존 WO 패널이 있는 화면에서는 한쪽 패널을 접어 업무 내용이 겹치지 않게 합니다.
+`manage_analysis_plan`은 최초 계획과 공개 판단 요약을 관리하고, `consult_specialists`·`compare_demo_data`는 계획 단계 ID와 선행 실행을 확인한 뒤 실제 결과로 상태를 갱신합니다. 기본 추가 호출은 계획 등록 한 번과 분석 정리 한 번입니다. 실행 전 이유는 나중에 덮어쓰지 않으며, 새 근거에 따른 보완은 변경 이유와 함께 추가합니다. 종료되지 않은 실행 단계가 있으면 분석 정리를 거부합니다. 실패한 단계의 한계는 최종 정리에도 남깁니다.
+
+판단 근거는 사용자가 검토할 수 있는 **선택 이유·근거·불확실성의 공개 요약**입니다. 내부 사고 원문이 아니며 공개 요약의 정확성은 실제 근거와 대조해야 합니다. 전문 회신 수신·교차 계산 완료를 최종 답변 전달 완료로 표시하지 않습니다. 화면을 접어도 분석은 계속되고, 화면 전달 실패는 분석 실패로 바꾸지 않습니다. 상세를 펼치는 것은 이미 받은 기록을 보는 동작이며 모델을 다시 호출하지 않습니다.
 
 화면 기록은 **현재 브라우저 탭의 메모리**에만 유지합니다. 같은 탭에서 대화를 이동했다 돌아올 때 확보한 기록을 다시 볼 수 있지만, 다른 대화를 보고 있는 동안 WebUI가 전달하지 않은 이벤트는 복원할 수 없습니다. 이때 미완료 기록의 최신 상태는 미확인으로 표시합니다. 새로고침·탭 종료 뒤 패널 기록의 복원은 이번 범위에 없습니다. 채팅의 기존 결과는 그대로 남습니다. 같은 사용자가 같은 대화를 여러 탭에서 열면 각 탭에 이벤트가 표시될 수 있습니다.
 
-구현은 [고정 화면 코드](../agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js)와 기존 두 Tool의 부모 대화 `execute` 이벤트를 사용합니다. 패널 배치는 고정 Open WebUI 0.11.3의 화면 구조에 의존하며 공식 패널 등록 API가 아닙니다. 화면 코드·스타일은 고정하고 질문·회신·조회 결과는 텍스트로 넣습니다. 하위 실행의 메모리·DB 격리, 현재 사용자 권한, 호출/조회 한도와 계산 정의는 유지합니다. 일반 브라우저 렌더링과 실제 사내 LLM 검증의 범위는 [이번 검증](../evals/scenarios.md#cross-system-demo-panel)에 기록합니다.
+구현은 [분석 화면](../agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js), [공통 버튼·화면 전환](../agent-pack/skills/cross-system-analysis/ui/work-panel.js)과 기존 Tool의 부모 대화 `execute` 이벤트를 사용합니다. 패널 배치는 고정 Open WebUI 0.11.3의 화면 구조에 의존하며 공식 패널 등록 API가 아닙니다. 화면 코드·스타일은 고정하고 질문·회신·조회 결과는 텍스트로 넣습니다. 하위 실행의 메모리·DB 격리, 현재 사용자 권한, 호출/조회 한도와 계산 정의는 유지합니다. [검증 범위와 한계](../evals/scenarios.md#cross-system-plan-work-panel).
 
 이 업데이트는 아래 `ApplyDemo`로 적용합니다. Tool 원본 파일만 UI에 복사하면 비어 있는 화면 코드 삽입 위치가 채워지지 않아 협업 패널이 포함되지 않습니다. 별도 프롬프트·도구 복사 작업은 필요하지 않습니다.
 
-v0.1.3은 패널이 열리고 전문가 질문·회신이 보인다는 사내 확인 뒤, 글이 빽빽하다는 피드백을 반영한 가독성 개선입니다. 별도 요약 모델을 부르지 않고 실제 회신의 문장·제목·목록을 안전한 화면 요소로 표시합니다. 상세 기록을 접어도 실패·부분 결과·회신 잘림 안내는 숨기지 않습니다. [사내 확인과 후속 검증](../evals/scenarios.md#cross-system-demo-readability).
+v0.1.3의 회신 중심 표현을 거쳐, 이번에는 사용자가 확인한 목업의 계획 우선·결론 중심·오른쪽 통합 패널 방향을 구현합니다. 상세 기록을 접어도 실패·부분 결과·회신 잘림 안내는 숨기지 않습니다. 이전 수치와 판정 기준은 유지하며 화면 목업의 예시 수치를 실제 결과로 사용하지 않습니다.
 
 <a id="demo-assets-deployment"></a>
 
@@ -427,7 +432,8 @@ v0.1.3은 패널이 열리고 전문가 질문·회신이 보인다는 사내 �
 | 전문 모델 3개 | `ees_demo_ems`, `ees_demo_apc`, `ees_demo_fdc`. 기존 EES의 기반 LLM을 재사용하고 전문 지침·합성 자료 도구 연결. 전문 모델 메모리는 OFF |
 | 전문 호출 Tool | `ees_specialists`: 역량 조회, 현재 사용자 권한의 전문 모델 실행, 실제 조회 근거와 진행 상태 반환 |
 | 합성 자료 Tool | `ees_demo_data`: 도메인별 내장 자료 조회, EES의 조건별 수치 비교. 실제 DB·추가 서버·외부 다운로드 없음 |
-| 협업 패널 화면 | `ui_script_path`의 고정 코드를 두 Tool의 `PANEL_SCRIPT`에 포함해 독립 실행 가능한 등록 소스로 구성. 별도 Tool 등록·프런트엔드 빌드·서버 재시작 없음 |
+| 업무 패널 화면 | 공통 버튼과 분석 화면 코드를 두 Tool에 포함해 독립 실행 가능한 등록 소스로 구성. 별도 프런트엔드 빌드·서버 재시작 없음 |
+| 기존 EES WO Demo | EES에 이미 연결된 공식 v0.1.6/v0.1.7 또는 현재 Git 원본의 최초 수동 등록본만 같은 ID로 갱신. 이름·권한·설정과 기존 연결을 보존하며 새 WO 항목은 생성하지 않음. 지원 원본과 다른 현장 수정은 덮어쓰지 않고 적용 전 중단 |
 | 모델별 시작 질문 | [전문 지침과 EES 관리 구역](../agent-pack/system-prompts/ees-orchestration-demo.md), EMS/APC/FDC 지침을 모델 필드에 등록. 별도 Workspace Prompts·Skill 등록 없음 |
 
 실행 코드는 [전문 호출](../agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py)과 [합성 자료](../agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py), 운영 코드는 [ApplyDemo 진입점](../scripts/ees_apply_demo.py)과 [자산 병합](../scripts/ees_demo_assets.py)에 있습니다. 공유 자료의 도메인은 서버가 주입하는 `__metadata__.model_id`로 정하며 LLM이 제공한 모델 이름이나 Task Model의 `__model__`을 사용하지 않습니다. 전문 모델은 자기 자료만 조회하고 EES는 조건별 비교만 수행합니다. 모델 ID 검사는 기존 사용자·Tool 접근권한 검사를 대신하지 않습니다.
@@ -449,6 +455,8 @@ v0.1.3은 패널이 열리고 전문가 질문·회신이 보인다는 사내 �
 .\scripts\manage-ees.ps1 -Action ApplyDemo
 ```
 
+**이미 EES Portal 표시를 확인한 이번 적용:** 위 `ApplyDemo`만 실행합니다. 완료 후 완전히 새로고침하고 새 EES 대화에서 “조립 2라인에서 놓치고 있는 개선 기회를 찾아줘”라고 질문합니다. 계획이 먼저 보이고 실제 실행 상태로 바뀌는지, **업무 패널 열기** 하나로 오른쪽 상세를 볼 수 있는지만 짧게 확인합니다. 이전 Upgrade 복구 블록을 다시 실행하지 않습니다.
+
 **화면 이름이 아직 EES Assistant인 경우:** `ApplyDemo`는 서비스 이름을 바꾸는 프로그램 업데이트를 포함하지 않습니다. Portal 이름과 최신 시연 자산을 함께 적용하려면 같은 저장소 폴더에서 아래 블록을 한 번 실행합니다. 앞 단계가 실패하면 멈춥니다.
 
 ```powershell
@@ -467,10 +475,12 @@ v0.1.3은 패널이 열리고 전문가 질문·회신이 보인다는 사내 �
 
 1. **준비 확인:** 저장한 Git 프록시·인증으로 정확한 main 커밋의 CI 성공을 확인하고 래퍼를 갱신합니다. 갱신된 실행기가 같은 커밋의 관리 목록과 파일을 읽습니다. WebUI 0.11.3 또는 EES 수정 버전, 관리자 인증, 기존 EES와 모든 입력 파일을 쓰기 전에 확인합니다.
 2. **기존 설정 병합:** 현재 모델·도구를 API로 읽고 변경 전 값과 적용 의도를 사내에 기록합니다. 모델 GET 응답의 `write_access=true`를 요구하며 관리자가 쓰기 API를 호출할 수 있어도 원본 설정이 가려져 있으면 중단합니다. 기존 EES의 사용자 추가 지침·다른 도구/Skill/Knowledge·메모리·공유 권한과 시작 질문을 보존하고 이번 관리 구역만 추가·갱신합니다.
-3. **순서대로 적용:** Tool 2개와 EES 연결 설정 → 전문 모델 3개 → 기존 EES 연결 순서로 적용합니다. 새 항목은 기존 EES의 조회 대상에게 필요한 읽기 권한을 부여합니다. 기존 Jira/Confluence/GitHub·WO 도구와 개인 PAT는 변경하지 않습니다. 신규 시연 Tool의 관리자 설정 중 EES 모델 ID만 관리하고 다른 설정은 보존합니다.
+3. **순서대로 적용:** 분석 Tool 2개와 연결 설정, 대상인 기존 WO Tool, 전문 모델 3개, 기존 EES 연결을 적용합니다. 새 항목은 기존 EES의 조회 대상에게 필요한 읽기 권한을 부여합니다. 기존 Jira/Confluence/GitHub와 개인 PAT는 변경하지 않습니다. 신규 시연 Tool의 관리자 설정 중 EES 모델 ID만 관리하고 다른 설정은 보존합니다. WO는 기존 EES에 연결된 지원 원본만 같은 등록 항목에서 갱신하며 설치되지 않았다면 건너뜁니다.
 4. **재조회와 재실행:** 각 쓰기 후 API 재조회로 실제 관리 필드·연결·권한을 확인하고 마지막에 실행 모델 목록을 갱신합니다. 같은 원본을 다시 적용하면 무변경으로 끝납니다. 일반 API 부분 실패·응답 유실 뒤에는 기록과 현재 ID를 대조해 완료된 항목을 건너뜁니다. 관리 구역의 현장 수정이나 기존 ID 충돌은 덮어쓰지 않고 중단합니다.
 
 일반적인 API 실패 뒤에는 같은 `ApplyDemo`를 다시 실행할 수 있습니다. 프로세스 강제 종료나 OS 파일 잠금까지 자동 복구한다고 보장하지 않으며, 잠금·로컬 기록 문제는 마지막 오류 코드로 확인합니다. 자동 삭제·DB 전체 복원·시연 자산 원복 명령은 제공하지 않습니다. 필요하면 기록된 이전 필드와 실제 상태를 먼저 대조합니다.
+
+WO 갱신에서 `unrecognized_existing_wo_source`는 등록 코드가 지원 원본과 다르다는 뜻입니다. 코드를 덮어쓰지 말고 등록 버전과 수정 의도를 확인합니다. `ambiguous_existing_work_order`는 대상 EES에 후보가 둘 이상 연결됐다는 뜻이고, `pending_work_order_unbound`는 앞선 미완료 갱신의 도구 연결이 바뀌었다는 뜻입니다. 이 경우 연결을 임의로 삭제하거나 같은 명령을 반복하지 않고 마지막 오류 코드만 전달합니다.
 
 | 필요한 경우 | 옵션·대응 |
 |---|---|
@@ -921,7 +931,7 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 등록된 환경의 WEBUI_NAME이 옛 이름 `EES Assistant`이면 새 프로그램이 `EES Portal`로 표시합니다. config/DPAPI를 직접 수정하지 않으며 별도로 지정한 다른 이름은 보존합니다. 기존 ees.1 보관본을 Restore하면 그 프로그램의 이름 규칙으로 돌아갑니다. 래퍼 Update 직후에도 설치된 ees.1을 시작·검증·복원할 수 있도록 선택 기록의 버전별 metadata/RECORD/frontend 경로를 확인합니다. 새 Apply 전달물은 ees.2로 제한하며 메타데이터와 캐시 경로가 섞인 프로그램은 거부합니다.
 
-서비스 이름과 채팅에서 선택하는 **EES Assistant Workspace Model**은 구분합니다. 이번 변경은 모델 ID·표시 이름·Prompt·Skill·Tool 연결과 공통 정책 범위를 바꾸지 않습니다. WO 목업의 서비스 표기는 Tool v0.1.7에서 EES Portal로 바뀌며, [기존 WO Tool 코드 갱신 절차](#wo-mockup)로 같은 등록 항목의 코드만 바꿉니다. 새 등록·Prompt 갱신·동작 재설계는 필요하지 않습니다.
+서비스 이름과 채팅에서 선택하는 **EES Assistant Workspace Model**은 구분합니다. 이름 변경 자체는 모델 ID·표시 이름·Prompt·Skill·Tool 연결과 공통 정책 범위를 바꾸지 않습니다. WO 목업의 서비스 표기는 Tool v0.1.7에서 EES Portal로 바뀌었고 현재 v0.1.8은 [ApplyDemo](#demo-assets-deployment)로 기존 지원 등록본의 코드와 공통 업무 패널을 함께 갱신합니다. 새 Tool 등록이나 WO 지침 재입력은 필요하지 않습니다.
 
 **반영 순서:** main 반영 및 해당 CI 성공 → [Upgrade 실행](#ees-wrapper-upgrade) → 브라우저 새로고침 → 기존 WO Tool 코드 갱신. Upgrade가 새 프로그램 ZIP과 원본 커밋을 선택하며 이미 선택한 Windows CA를 재사용합니다. 자동 다운로드 경로를 사용할 수 없어 수동 전달하는 경우 아래 Apply 안내를 따릅니다. 이전 `EES-demo-4a8779bbf3ee.zip`은 새 이름이 없어 이번 Portal 적용에 재사용하지 않습니다. WO Tool 등록 코드는 이번 Upgrade가 자동 반영하지 않습니다.
 
@@ -1006,6 +1016,59 @@ Start의 `stage=health_check` 시간 초과는 지정한 시간 안에 정상 �
 <a id="ees-wrapper-manual-promote"></a>
 
 #### 탐색기에서 실제 프로그램 폴더를 옮긴 뒤 적용 완료
+
+**2026-09-10 Portal 표시 확인 전에 안내한 복구 절차:** [실패 기록](../evals/scenarios.md#ees-portal-upgrade-apply-failure)의 `errno=13/winerror=5`, program 없음·previous/staging/ZIP 있음·lock 없음에 맞춘 절차입니다. 아래 블록은 기존 상태를 다시 확인하고 보존 ZIP과 target commit을 먼저 읽습니다. 탐색기가 열리면 `program.staging`을 F2로 `program`으로 변경한 뒤 PowerShell에서 Enter를 누릅니다. 이름 변경이 거부되면 Ctrl+C로 끝내고 그 사실만 전달합니다. `program.previous`는 보존합니다.
+
+이후 사용자가 **EES Portal 이름 표시를 확인했으므로 현재 아래 블록을 다시 실행하지 않습니다.** 개별 Resume/Start/ApplyDemo 결과·패널 v0.1.3 반영은 별도 미확인입니다. 다음 확인은 새 대화의 패널 가독성과 예시질문이며, 아래 명령은 당시 실패 상태에 대한 복구 이력으로 보존합니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $m = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1'
+    $f = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $c = Get-Content -LiteralPath $f -Raw -Encoding UTF8 | ConvertFrom-Json
+    $lastFile = Join-Path $c.state_root 'last-operation.json'
+    $s = Get-Content -LiteralPath $lastFile -Raw -Encoding UTF8 | ConvertFrom-Json
+    $r = Get-Content -LiteralPath (Join-Path $c.state_root 'deployment.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    $p = $r.customization.pending
+    $b = $s.result.bundle
+    $k = $p.target.source_commit
+    $program = Join-Path $c.state_root 'program'
+    $staging = Join-Path $c.state_root 'program.staging'
+    $previous = Join-Path $c.state_root 'program.previous'
+    $lockFile = Join-Path $c.state_root 'deployment.lock'
+
+    if ($s.action -ne 'upgrade' -or $s.failed -ne $true -or
+        $s.result.stage -ne 'apply' -or $p.action -ne 'apply' -or
+        $p.stage -ne 'promote' -or $r.phase -ne 'idle' -or
+        $r.process -or $r.pending -or $r.launch_uncertain -or
+        $k -notmatch '^[a-f0-9]{40}$' -or -not $b -or
+        -not (Test-Path -LiteralPath $b -PathType Leaf) -or
+        (Test-Path -LiteralPath $lockFile) -or
+        (Test-Path -LiteralPath $program) -or
+        -not (Test-Path -LiteralPath $staging -PathType Container) -or
+        -not (Test-Path -LiteralPath $previous -PathType Container)) {
+        throw 'EES recovery stopped: state changed.'
+    }
+
+    $backup = Join-Path (Split-Path -Parent $b) 'upgrade-failure.json'
+    if (-not (Test-Path -LiteralPath $backup)) {
+        Copy-Item -LiteralPath $lastFile -Destination $backup
+    }
+    Invoke-Item -LiteralPath $c.state_root
+    [void](Read-Host 'Rename program.staging to program in Explorer, then press Enter')
+
+    if ((Test-Path -LiteralPath $staging) -or
+        -not (Test-Path -LiteralPath $program -PathType Container)) {
+        throw 'EES recovery stopped: rename not completed.'
+    }
+    & $m -Action Apply -Bundle $b -Commit $k -Resume -Summary
+    & $m -Action Start -HealthTimeout 120 -Summary
+    & $m -Action ApplyDemo
+}
+```
+
+원래 Upgrade 오류 기록은 보존 ZIP 옆의 `upgrade-failure.json`에 한 번 복사합니다. Resume/Start가 마지막 작업 결과를 갱신해도 원래 ZIP 위치를 잃지 않기 위한 사내 기록이며 외부로 전달하지 않습니다. Resume은 현재 정지/포트·잠금·같은 ZIP/commit·새 program과 직전 previous 전체를 검증한 뒤 적용 기록을 완료합니다. 그 성공 뒤에만 Start, Start 성공 뒤에만 ApplyDemo를 실행합니다. 실제 재설치·권한 변경·자동 재시도는 없으며 실패 후 같은 블록을 반복하지 않습니다. 마지막 실패한 EES 요약이나 폴더 이름 변경 실패 여부만 전달합니다.
 
 아래 고정 ZIP·커밋 명령은 **ees.1 최초 적용 당시의 복구 안내**입니다. 현재 Portal 신규 적용에는 [새 프로그램 ZIP 절차](#ees-wrapper-apply)를 사용하며, 기존 미완료 ees.1 기록의 재개가 필요할 때만 그 기록·보존한 전달물을 별도로 대조합니다.
 

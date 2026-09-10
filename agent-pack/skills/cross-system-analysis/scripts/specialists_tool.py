@@ -1,7 +1,7 @@
 """
 title: EES Specialists
 description: Consult EMS, APC and FDC demo Assistants with the current user's access.
-version: 0.1.3
+version: 0.2.0
 required_open_webui_version: 0.11.3
 ees_demo_pack: ees-demo-v1
 """
@@ -9,6 +9,7 @@ ees_demo_pack: ees-demo-v1
 import asyncio
 import copy
 import json
+import re
 from importlib.metadata import version
 from types import SimpleNamespace
 from uuid import uuid4
@@ -37,6 +38,89 @@ def _json(value):
 
 def _failure(code, message):
     return {"ok": False, "demo": True, "error": {"code": code, "message": message}}
+
+
+TERMINAL_STEPS = {"completed", "partial", "failed", "cancelled"}
+
+
+def _identity(user, metadata):
+    return (user.get("id"), metadata.get("model_id"), metadata.get("chat_id"), metadata.get("message_id"))
+
+
+def _active_plan(request, user, metadata):
+    plan = getattr(request.state, "ees_analysis_plan", None)
+    if not isinstance(plan, dict) or plan.get("identity") != _identity(user, metadata):
+        return None
+    return plan
+
+
+async def _plan_panel(emitter, plan):
+    state = plan["snapshot"]
+    state["seq"] += 1
+    if not PANEL_SCRIPT or not emitter or not state["chat_id"] or not state["message_id"]:
+        return
+    try:
+        code = "const eesPanelUpdate=" + json.dumps(state, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
+        async with asyncio.timeout(PANEL_SEND_TIMEOUT):
+            await emitter({"type": "execute", "data": {"code": code}})
+    except Exception:
+        pass
+
+
+def _validate_steps(values, existing=()):
+    if not isinstance(values, list) or not values or len(values) + len(existing) > 8:
+        return None
+    known = {step["id"] for step in existing}
+    steps = []
+    for value in values:
+        if (not isinstance(value, dict) or set(value) != {
+                "id", "type", "title", "system", "reason_before", "depends_on"}
+                or not isinstance(value["id"], str)
+                or not re.fullmatch(r"[a-zA-Z][a-zA-Z0-9_-]{0,39}", value["id"])
+                or value["id"] in known
+                or value["type"] not in ("specialist", "comparison", "synthesis")
+                or any(not isinstance(value[key], str) or not value[key].strip() or len(value[key]) > limit
+                       for key, limit in (("title", 100), ("reason_before", 600)))
+                or not isinstance(value["system"], str)
+                or value["system"] not in (SPECIALISTS if value["type"] == "specialist" else {"EES"})
+                or not isinstance(value["depends_on"], list)
+                or any(not isinstance(dep, str) or dep not in known for dep in value["depends_on"])
+                or len(set(value["depends_on"])) != len(value["depends_on"])):
+            return None
+        step = copy.deepcopy(value)
+        step.update({"status": "pending", "result_summary": "", "judgment_after": "",
+                     "uncertainty": "", "call_ids": []})
+        steps.append(step)
+        known.add(step["id"])
+    return steps
+
+
+def _within_plan_budget(steps):
+    specialists = [step["system"] for step in steps if step["type"] == "specialist"]
+    return (len(specialists) <= MAX_CONSULTATIONS and len(specialists) - len(set(specialists)) <= 1
+            and sum(step["type"] == "comparison" for step in steps) <= 3)
+
+
+def _step_ready(plan, step_id, kind, system=None):
+    state = plan["snapshot"]
+    step = next((item for item in state["steps"] if item["id"] == step_id), None)
+    by_id = {item["id"]: item for item in state["steps"]}
+    if (state["phase"] in {"completed", "partial"} or not step or step["type"] != kind
+            or step["status"] != "pending" or (system and step["system"] != system)
+            or any(by_id[dep]["status"] not in TERMINAL_STEPS for dep in step["depends_on"])):
+        return None
+    return step
+
+
+def _step_phase(plan, step, phase, call_id):
+    if plan["snapshot"]["phase"] in {"completed", "partial"}:
+        return
+    step["status"] = phase if phase in TERMINAL_STEPS else "running"
+    if call_id not in step["call_ids"]:
+        step["call_ids"].append(call_id)
+    state = plan["snapshot"]
+    state["phase"] = ("awaiting_summary" if all(
+        item["status"] in TERMINAL_STEPS for item in state["steps"] if item["type"] != "synthesis") else "running")
 
 
 def _load_runtime():
@@ -97,10 +181,13 @@ async def _model(runtime, request, user, model_id):
 async def _status(emitter, system, phase, description, done=False):
     if emitter:
         try:
-            await asyncio.wait_for(emitter({"type": "status", "data": {
-                "action": "ees_specialist", "system": system, "phase": phase,
-                "description": description, "done": done,
-            }}), timeout=3)
+            # Direct await preserves parent cancellation when an emitter finishes
+            # in the same loop turn (Python 3.11 wait_for can lose that race).
+            async with asyncio.timeout(3):
+                await emitter({"type": "status", "data": {
+                    "action": "ees_specialist", "system": system, "phase": phase,
+                    "description": description, "done": done,
+                }})
         except Exception:
             # An unavailable UI must not turn a successful analysis into a failure.
             pass
@@ -111,17 +198,27 @@ async def _panel(emitter, record, phase, error=None):
     state = record["panel"]
     state["seq"] += 1
     state["phase"] = phase
-    if not PANEL_SCRIPT or not emitter or not state["chat_id"] or not state["message_id"]:
+    plan = record["plan"]
+    step = record["step"]
+    _step_phase(plan, step, phase, state["call_id"])
+    code = None
+    if PANEL_SCRIPT and emitter and state["chat_id"] and state["message_id"]:
+        try:
+            # Freeze before ANY await, including the plan event: another query
+            # can change this same record while either UI emission is waiting.
+            # Never include child metadata, raw records or reasoning.
+            snapshot = {**state, "request": record["request"], "queries": record["queries"],
+                        "analysis": record["analysis"],
+                        "analysis_truncated": record["analysis_truncated"], "error": error}
+            code = "const eesPanelUpdate=" + json.dumps(snapshot, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
+        except Exception:
+            pass
+    await _plan_panel(emitter, plan)
+    if code is None:
         return
     try:
-        # Serialize before yielding: parallel queries must not mutate an earlier
-        # snapshot. Never include child metadata, raw records or reasoning.
-        snapshot = {**state, "request": record["request"], "queries": record["queries"],
-                    "analysis": record["analysis"],
-                    "analysis_truncated": record["analysis_truncated"], "error": error}
-        code = "const eesPanelUpdate=" + json.dumps(snapshot, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
-        await asyncio.wait_for(emitter({"type": "execute", "data": {"code": code}}),
-                               timeout=PANEL_SEND_TIMEOUT)
+        async with asyncio.timeout(PANEL_SEND_TIMEOUT):
+            await emitter({"type": "execute", "data": {"code": code}})
     except Exception:
         # CancelledError is deliberately not swallowed (it is a BaseException).
         pass
@@ -180,6 +277,7 @@ def _result(system, record, error=None):
         "request": record["request"], "analysis": analysis,
         "analysis_truncated": record["analysis_truncated"],
         "evidence": evidence, "data_calls": record["data_calls"],
+        "step_id": record["step"]["id"], "call_id": record["panel"]["call_id"],
         "error": code,
     }
 
@@ -221,7 +319,7 @@ async def _run_specialist(runtime, source, user, system, question, record, emitt
     # get_tools() above performs normal per-user Tool/UserValves access checks.
     # Do not accept injected tools, inherited browser capabilities or delegation.
     resolved = {name: tool for name, tool in metadata.get("tools", {}).items()
-                if tool.get("tool_id") == DATA_TOOL_ID and not tool.get("direct")}
+                if name == "read_demo_data" and tool.get("tool_id") == DATA_TOOL_ID and not tool.get("direct")}
     if not resolved:
         raise RuntimeError("data_tool_unavailable")
 
@@ -230,6 +328,9 @@ async def _run_specialist(runtime, source, user, system, question, record, emitt
         # this budget guard and rebind the original callable around it.
         async def guarded(**kwargs):
             kwargs = {key: value for key, value in kwargs.items() if key in allowed_params}
+            if kwargs.get("dataset", "sample_a") != record["plan"]["snapshot"]["dataset"]:
+                record["error"] = "plan_dataset_mismatch"
+                return _json(_failure("plan_dataset_mismatch", "계획에 등록된 합성 자료 ID로만 확인해 주세요."))
             if record["data_calls"] >= MAX_DATA_CALLS:
                 record["error"] = "data_call_limit"
                 return _json(_failure("data_call_limit", "전문 분석의 자료 확인 한도에 도달했습니다."))
@@ -342,24 +443,135 @@ class Tools:
         except Exception:
             return _json(_failure("runtime_unavailable", "전문 Assistant 등록·버전·사용자 연결을 확인해 주세요."))
 
+    async def manage_analysis_plan(self, action: str, title: str = "", steps: list[dict] = None,
+                                   reviews: list[dict] = None, change_reason: str = "",
+                                   conclusion: str = "", next_action: str = "", limitations: str = "",
+                                   dataset: str = "sample_a", __user__: dict = None,
+                                   __request__=None, __metadata__: dict = None,
+                                   __event_emitter__=None) -> str:
+        """실행 전 계획을 등록하고, 실제 근거를 받은 뒤 사용자용 판단 요약을 기록합니다.
+
+        :param action: create(분석 전 1회), update(필요한 보완 단계 추가·공개 요약), finish(실제 실행 후 정리).
+        :param title: create의 짧은 분석 제목.
+        :param steps: create의 전체 단계 또는 update의 추가 단계. 각 항목 {"id":"ems", "type":"specialist|comparison|synthesis", "title":"정비 이력 확인", "system":"EMS|APC|FDC|EES", "reason_before":"확인 목적과 선택 이유", "depends_on":[]} . 앞에 등록된 단계만 의존 가능. create 마지막 단계는 synthesis 하나. 총 8단계까지.
+        :param reviews: update/finish에서 실제 종료된 단계의 공개 설명 목록. {"step_id":"ems", "result_summary":"결과 한 줄", "judgment_after":"근거를 보고 내린 판단·변화", "uncertainty":"미확인·한계"}. 내부 사고 원문을 넣지 않습니다. 상태와 실행 전 이유는 바꿀 수 없습니다.
+        :param change_reason: update에서 보완 단계가 필요한 실제 근거와 변경 이유.
+        :param conclusion: finish의 핵심 결론, 최대 600자. 수치는 실제 조회·계산 근거만 사용합니다.
+        :param next_action: finish의 추천 행동, 최대 400자.
+        :param limitations: finish의 자료 부족·부분 실패·가설 수준 등 한계, 최대 600자.
+        :param dataset: create의 합성 자료 ID sample_a 또는 sample_b. 실제 운영 자료가 아닙니다.
+        """
+        if not self._authorized(__request__, __metadata__, __user__):
+            return _json(_failure("ees_only", "연결된 EES에서 분석 계획을 등록해 주세요."))
+        if action not in ("create", "update", "finish"):
+            return _json(_failure("invalid_plan_action", "create, update, finish 중 선택해 주세요."))
+        if any(not isinstance(value, str) or len(value) > maximum for value, maximum in (
+                (title, 120), (change_reason, 600), (conclusion, 600), (next_action, 400), (limitations, 600))):
+            return _json(_failure("invalid_plan_text", "계획과 판단은 짧은 사용자용 요약으로 입력해 주세요."))
+        plan = _active_plan(__request__, __user__, __metadata__)
+        if action == "create":
+            normalized = _validate_steps(steps)
+            if (plan is not None or getattr(__request__.state, "ees_analysis_plan", None) is not None):
+                return _json(_failure("plan_exists", "현재 요청의 계획을 유지하고 필요한 경우 update로 보완해 주세요."))
+            if (not normalized or not title.strip() or dataset not in ("sample_a", "sample_b")
+                    or len(normalized) < 2 or not _within_plan_budget(normalized) or normalized[-1]["type"] != "synthesis"
+                    or sum(step["type"] == "synthesis" for step in normalized) != 1
+                    or reviews or conclusion or next_action or limitations):
+                return _json(_failure("invalid_plan", "실행할 단계와 마지막 종합 단계, 선택 이유·선행 단계를 확인해 주세요."))
+            normalized[-1]["depends_on"] = [step["id"] for step in normalized[:-1]]
+            plan_id = str(uuid4())
+            ids = {key: value if isinstance(value, str) and len(value) <= 200 else ""
+                   for key, value in ((key, __metadata__.get(key)) for key in ("chat_id", "message_id"))}
+            plan = {"identity": _identity(__user__, __metadata__), "snapshot": {
+                "version": 1, "kind": "plan", **ids, "call_id": plan_id, "batch_id": plan_id,
+                "plan_id": plan_id, "seq": 0, "phase": "planned", "title": title,
+                "dataset": dataset, "steps": normalized, "conclusion": "", "next_action": "",
+                "limitations": "", "changes": [],
+            }}
+            __request__.state.ees_analysis_plan = plan
+        else:
+            if plan is None:
+                return _json(_failure("plan_required", "같은 요청에서 실행 계획을 먼저 등록해 주세요."))
+            current = plan["snapshot"]
+            if current["phase"] in {"completed", "partial"}:
+                return _json(_failure("plan_closed", "정리된 분석은 변경할 수 없습니다. 새 질문에서 다시 분석해 주세요."))
+            if any(step["status"] == "running" for step in current["steps"]):
+                return _json(_failure("plan_busy", "실행 중인 단계의 결과를 받은 뒤 계획을 보완·정리해 주세요."))
+            candidate = copy.deepcopy(current)
+            if steps:
+                added = _validate_steps(steps, candidate["steps"])
+                if (action != "update" or not change_reason.strip() or not added
+                        or not _within_plan_budget([*candidate["steps"], *added])
+                        or any(step["type"] == "synthesis" for step in added)
+                        or any(candidate["steps"][-1]["id"] in step["depends_on"] for step in added)):
+                    return _json(_failure("invalid_plan_change", "보완 근거와 실행 단계만 추가해 주세요."))
+                candidate["steps"][-1:-1] = added
+                candidate["steps"][-1]["depends_on"] = [step["id"] for step in candidate["steps"][:-1]]
+                candidate["changes"].append(change_reason)
+                candidate["phase"] = "running"
+            if reviews is not None:
+                if not isinstance(reviews, list) or len(reviews) > 8:
+                    return _json(_failure("invalid_reviews", "종료된 단계별 결과·판단·한계를 입력해 주세요."))
+                reviewed_ids = set()
+                for review in reviews:
+                    if (not isinstance(review, dict) or set(review) != {
+                            "step_id", "result_summary", "judgment_after", "uncertainty"}
+                            or any(not isinstance(review[key], str) or len(review[key]) > 600 for key in review)):
+                        return _json(_failure("invalid_reviews", "단계별 공개 요약만 입력할 수 있습니다."))
+                    step = next((item for item in candidate["steps"] if item["id"] == review["step_id"]), None)
+                    if (not step or step["type"] == "synthesis" or step["status"] not in TERMINAL_STEPS
+                            or step["id"] in reviewed_ids):
+                        return _json(_failure("step_not_reviewable", "실제 종료된 실행 단계만 요약할 수 있습니다."))
+                    reviewed_ids.add(step["id"])
+                    for key in ("result_summary", "judgment_after", "uncertainty"):
+                        step[key] = review[key]
+            if action == "finish":
+                executed = candidate["steps"][:-1]
+                if any(step["status"] not in TERMINAL_STEPS for step in executed):
+                    return _json(_failure("plan_unfinished", "미실행·진행 중인 단계가 남아 있습니다. 실제 결과를 확인한 후 정리해 주세요."))
+                if (not conclusion.strip() or not next_action.strip()
+                        or any(not step["result_summary"].strip() or not step["judgment_after"].strip()
+                               for step in executed)):
+                    return _json(_failure("summary_required", "종료된 단계의 결과·판단과 핵심 결론·다음 행동을 기록해 주세요."))
+                partial = any(step["status"] != "completed" for step in executed)
+                if partial and (not limitations.strip() or any(not step["uncertainty"].strip()
+                        for step in executed if step["status"] != "completed")):
+                    return _json(_failure("limitations_required", "부분·실패·취소 단계의 미확인 사항을 결론과 함께 밝혀 주세요."))
+                candidate.update({"conclusion": conclusion, "next_action": next_action,
+                                  "limitations": limitations, "phase": "partial" if partial else "completed"})
+                candidate["steps"][-1].update({"status": candidate["phase"], "result_summary": conclusion,
+                    "judgment_after": "확보된 결과와 미확인 사항을 구분해 분석을 정리했습니다.",
+                    "uncertainty": limitations,
+                    "call_ids": [cid for step in executed for cid in step["call_ids"]]})
+            plan["snapshot"] = candidate
+        await _plan_panel(__event_emitter__, plan)
+        return _json({"ok": True, "demo": True, "plan_id": plan["snapshot"]["plan_id"],
+                      "phase": plan["snapshot"]["phase"],
+                      "steps": [{key: step[key] for key in ("id", "type", "system", "status", "depends_on")}
+                                for step in plan["snapshot"]["steps"]],
+                      "message": "계획에 연결된 실제 실행만 상태를 변경합니다. 본문에는 짧은 결론·한계·다음 행동만 남기고 상세는 업무 패널에서 확인하도록 안내하세요."})
+
     async def consult_specialists(self, tasks: list[dict], __user__: dict = None,
                                   __request__=None, __metadata__: dict = None,
                                   __event_emitter__=None) -> str:
         """필요한 전문 Assistant에 분석을 요청합니다. 독립된 요청은 함께 실행합니다.
 
-        :param tasks: 1~3개 항목. 각 항목은 {"system":"EMS 또는 APC 또는 FDC", "question":"확인 목적·설비·기간·자료 ID(sample_a/sample_b)를 포함한 질문"}. 최초 분야별 1회와 전체 추가 보완 1회까지 가능합니다.
+        :param tasks: 1~3개 항목. 실행 계획 등록 후 각 항목은 {"step_id":"계획의 단계 ID", "system":"EMS 또는 APC 또는 FDC", "question":"확인 목적·설비·기간·자료 ID(sample_a/sample_b)를 포함한 질문"}. 최초 분야별 1회와 전체 추가 보완 1회까지 가능합니다.
         """
         if not self._authorized(__request__, __metadata__, __user__):
             return _json(_failure("ees_only", "연결된 EES 통합 Assistant에서 전문 분석을 요청해 주세요."))
         if (not isinstance(tasks, list) or not 1 <= len(tasks) <= 3
-                or any(not isinstance(t, dict) or set(t) != {"system", "question"}
+                or any(not isinstance(t, dict) or set(t) != {"step_id", "system", "question"}
+                       or not isinstance(t.get("step_id"), str)
                        or not isinstance(t.get("system"), str) or t.get("system") not in SPECIALISTS
                        or not isinstance(t.get("question"), str) or not t["question"].strip()
                        or len(t["question"]) > MAX_QUESTION_CHARS for t in tasks)
                 or len({t["system"] for t in tasks}) != len(tasks)):
             return _json(_failure("invalid_tasks", "서로 다른 EMS/APC/FDC와 확인 질문을 1~3개 입력해 주세요."))
-        identity = (__user__["id"], __metadata__.get("model_id"),
-                    __metadata__.get("chat_id"), __metadata__.get("message_id"))
+        plan = _active_plan(__request__, __user__, __metadata__)
+        if plan is None:
+            return _json(_failure("plan_required", "전문 분석 전에 실행 계획을 등록해 주세요."))
+        identity = _identity(__user__, __metadata__)
         budget = getattr(__request__.state, "ees_consultation_budget", None)
         if budget is None:
             budget = {"identity": identity, "counts": {}, "followups": 0, "total": 0}
@@ -369,15 +581,21 @@ class Tools:
         repeats = sum(t["system"] in budget["counts"] for t in tasks)
         if budget["total"] + len(tasks) > MAX_CONSULTATIONS or budget["followups"] + repeats > 1:
             return _json(_failure("consultation_limit", "전문 분석 한도에 도달했습니다. 확보한 근거와 남은 확인 사항을 종합해 주세요."))
+        selected_steps = [_step_ready(plan, task["step_id"], "specialist", task["system"]) for task in tasks]
+        if any(step is None for step in selected_steps) or len({task["step_id"] for task in tasks}) != len(tasks):
+            return _json(_failure("step_not_ready", "계획의 대기 중인 해당 전문 단계와 선행 실행 결과를 확인해 주세요."))
         batch_id = str(uuid4())
         parent_ids = {key: value if isinstance(value, str) and len(value) <= 200 else ""
                       for key, value in ((key, __metadata__.get(key)) for key in ("chat_id", "message_id"))}
         records = [{"request": {"question": task["question"],
                                 "kind": "followup" if task["system"] in budget["counts"] else "initial"},
                     "evidence": [], "data_calls": 0, "analysis": "", "analysis_truncated": False,
-                    "queries": [], "panel": {"version": 1, "kind": "specialist", **parent_ids,
+                    "queries": [], "plan": plan, "step": step, "panel": {"version": 1, "kind": "specialist", **parent_ids,
+                        "plan_id": plan["snapshot"]["plan_id"], "step_id": step["id"],
                         "call_id": str(uuid4()), "seq": 0, "batch_id": batch_id, "system": task["system"]}}
-                   for task in tasks]
+                   for task, step in zip(tasks, selected_steps)]
+        for record in records:
+            _step_phase(plan, record["step"], "requested", record["panel"]["call_id"])
         # Reserve before the first await, so concurrent calls on this request
         # cannot both pass the same budget check. Failures also consume calls.
         budget["total"] += len(tasks)
@@ -388,10 +606,9 @@ class Tools:
             system = task["system"]
             await _status(__event_emitter__, system, "started", f"{system}: {task['question'][:160]}")
             try:
-                result = await asyncio.wait_for(
-                    _run_specialist(runtime, __request__, user, system, task["question"], record, __event_emitter__),
-                    timeout=self.valves.specialist_timeout_seconds,
-                )
+                async with asyncio.timeout(self.valves.specialist_timeout_seconds):
+                    result = await _run_specialist(
+                        runtime, __request__, user, system, task["question"], record, __event_emitter__)
             except asyncio.TimeoutError:
                 result = _result(system, record, "timeout")
             except asyncio.CancelledError:
@@ -453,4 +670,4 @@ class Tools:
                       "partial": any(r["status"] != "completed" for r in results), "results": results,
                       "budget": {"used": budget["total"], "remaining": MAX_CONSULTATIONS - budget["total"],
                                  "followup_remaining": 1 - budget["followups"]},
-                      "message": "합성 자료를 실제 모델로 분석한 결과입니다. 각 전문 Assistant에 요청한 내용(request)·실제 회신(analysis)·조회 근거(evidence)를 사람이 이해할 수 있는 협업 요약으로 정리하세요. 분야별 근거와 교차 계산을 대조해 EES의 종합 판단을 설명하고, 부분·실패·잘린 회신은 구분하세요. 호출 횟수나 남은 한도를 결론으로 대신하지 마세요."})
+                      "message": "합성 자료의 실제 전문 분석 결과입니다. 실제 회신·조회 근거와 교차 계산을 대조하고 부분·실패·잘린 회신을 구분하세요. 단계별 공개 판단은 finish에 모아 기록하고, 본문에는 핵심 결론·한계·다음 행동만 짧게 설명하세요. 긴 전문 회신·원시 자료는 업무 패널에서 확인합니다."})

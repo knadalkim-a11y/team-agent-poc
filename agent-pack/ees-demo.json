@@ -1,19 +1,37 @@
 {
-  "version": "0.1.3",
+  "version": "0.2.0",
   "tools": [
     {
       "id": "ees_specialists",
       "name": "EES Specialists",
       "path": "agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py",
-      "ui_script_path": "agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js",
+      "ui_script_paths": [
+        "agent-pack/skills/cross-system-analysis/ui/work-panel.js",
+        "agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js"
+      ],
       "managed_valves": {"ees_model_id": "$EES_MODEL_ID"}
     },
     {
       "id": "ees_demo_data",
       "name": "EES Demo Data",
       "path": "agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py",
-      "ui_script_path": "agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js",
+      "ui_script_paths": [
+        "agent-pack/skills/cross-system-analysis/ui/work-panel.js",
+        "agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js"
+      ],
       "managed_valves": {"ees_model_id": "$EES_MODEL_ID"}
+    }
+  ],
+  "optional_existing_tools": [
+    {
+      "kind": "work_order",
+      "path": "agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py",
+      "ui_script_path": "agent-pack/skills/cross-system-analysis/ui/work-panel.js",
+      "ui_script_slot": "WORK_PANEL_SCRIPT",
+      "accepted_source_sha256": [
+        "368696d00233ab859bccd997ba28aad23b6c96b805eb6e53b0499adfd8a4689d",
+        "c46f45d6cb939a581910b47c5af159ad59f3d0e69f901f16510b5c3be8c85868"
+      ]
     }
   ],
   "models": [
