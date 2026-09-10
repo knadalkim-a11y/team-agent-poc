@@ -8,10 +8,10 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **폭·테두리 수정본 ees.4의 사내 적용 중 남은 서버 종료 실패를 복구함.** ApplyDemo 연결 실패 뒤 관리 프로세스 생존·Listen 없음이 확인됐고, Stop→Start→ApplyDemo→Upgrade 블록은 마지막 process_stop에서 실패함. 사용자 승인으로 동일 EES 서버 한 개의 명시적 종료와 보관 ZIP 재사용 적용·기동 경로를 준비함. 구현 준비·CI·실제 복구를 구분하며 [사건·검증](../evals/scenarios.md#ees-stop-recovery)을 따름.
-- 다음 작업 하나: **검증된 복구 코드로 승인된 사내 종료·적용·기동을 실행한다.** 실패/registry 요청을 Update 전에 보존하고, 기존 ZIP을 재검증한 뒤 정확히 식별한 서버만 종료함. 성공 후 Ctrl+F5와 대화 폭·패널 드래그만 확인함. 원래 ApplyDemo를 반복하지 않으며 [복구 명령](03-openwebui-native-agent.md#ees-stop-recovery)을 사용함.
+- 이번 작업: **폭·테두리 수정본 ees.4의 사내 복구·적용·기동 성공을 사용자 보고로 확인함.** `recover_stop` 결과 `ok, changed=true, terminated=true, commit=c099e427f62b, stage=complete, running=true, code=-`를 수신함. 등록 서버 종료와 보관 수정본 적용·기동은 완료됐으며 실제 대화 폭·드래그 표시는 아직 확인하지 않음. [사건·검증·적용 보고](../evals/scenarios.md#ees-stop-recovery).
+- 다음 작업 하나: **Ctrl+F5 후 대화 폭과 분석 패널 드래그 표시를 확인한다.** 기본 본문·입력창이 넓어졌는지, 조립 2라인 분석의 업무 패널 크기를 바꿀 때 파란 테두리가 사라졌는지만 확인함. 성공한 복구·ApplyDemo·Upgrade를 반복하지 않음. [수정 범위](03-openwebui-native-agent.md#ees-chat-width-resize).
 - 공유 DB 전제와 후속: 여러 시스템이 하나의 물리 DB와 일부 공통 데이터를 사용하나 각 담당자는 자기 시스템 지식에 집중되어 있음. [관계 발견 설계](03-openwebui-native-agent.md#shared-db-relations)는 운영 데이터 연결을 준비할 때 사용하며 현재 시연 범위에서 제외함. 시스템 간 실제 의미·접근 권한·스키마는 아직 조사하지 않음.
-- 배포 확인: [PR #29](https://github.com/knadalkim-a11y/team-agent-poc/pull/29)는 main `c099e427f62bcdb752fe4321e39223915cac035a`, tree `56255071fab7e7191d0a696f42d169f160c80d4c`에 병합됐으며 [Windows/Linux·Chrome·프로그램 생성 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34461921457) 최종 성공과 만료되지 않은 artifact 10146281258을 재확인함. 사내 마지막 Status는 `13f6406f9166` customized였으며 ees.4 적용 성공은 아직 미확인. 이전 글꼴/패널 표시 확인과 복구 성공은 구분함.
+- 배포 확인: UI 수정본 [PR #29](https://github.com/knadalkim-a11y/team-agent-poc/pull/29)의 프로그램 원본 `c099e427f62bcdb752fe4321e39223915cac035a`를 사내에 적용·기동했다고 보고받음. 복구 코드 [PR #30](https://github.com/knadalkim-a11y/team-agent-poc/pull/30)은 main `ab97218a9957eb43d436ea02d4fee9a20021c7c3`에 병합됐고 [main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34540099706) attempt 2의 Windows/Linux·전달물 생성 성공을 확인함. attempt 1의 기존 Windows 테스트 cleanup 조회 실패는 PR에 보존하며 서버 장애의 원인 해결이나 장기 안정성으로 확대하지 않음.
 - 설비 조회 관리 합의: 여러 업무에서 쓰는 공통 기능이므로 운영용 설계에서는 독립 Tool로 등록·관리하는 방향을 유지함. 사용자는 이번 시연에 한해 적용이 간단한 기존 단일 등록 항목을 유지하기로 함. 현재는 같은 Tool 안의 함수 분리이며 별도 등록 완료가 아님. 후속 요청의 설비 조회 패널도 같은 등록 항목에서 제공하며 새 적용 성공 보고로 간주하지 않음.
 - 첫 화면 제안: 기본 영어 문구를 대체할 천안 설비·헝가리 설비·AI WO 초안·직접 선택의 네 질문을 준비하고, v0.1.2의 Tool·WO 지침·제안 갱신 안내를 수행했다는 사용자 보고를 받음. 첫 조회 시연 중 대화 이동 후 패널 소실을 보고했으며 제안 네 개의 실제 등록 원문·각 클릭 결과를 직접 대조한 것은 아님. 이번 수정은 제안 JSON을 바꾸지 않음. [적용 안내](03-openwebui-native-agent.md#first-use-entry).
 - 완료한 이전 단위: 초기 Rich UI 제거·일반 문장/표/원문 링크 전환의 구현·검증·main 반영에 이어 **제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 확인함.** 개별 Tool 등록 내용·적용 SHA·새 조회/원문 결과의 직접 대조는 미확인으로 유지하며 저장 절차를 반복 안내하지 않음. [적용 보고](../evals/scenarios.md#plain-output-applied-report), [변경·검증](../evals/scenarios.md#prototype-rich-ui-removal).
@@ -120,7 +120,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-10: 연속된 ApplyDemo 연결 실패·Upgrade process_stop 실패와 사용자 승인 범위를 대조함. 명시적 복구 경로는 실패/registry 스냅샷·포트·원본/보관 ZIP을 먼저 검증하고 동일 OS 핸들로 한 서버만 종료하며 종료 완료 후 기존 Apply/Start를 호출함. Windows venv 실행기는 실제 자식 서버의 신원과 단일 관계까지 확인하고 자연 종료를 검증함. 정상 Stop·Upgrade의 자동 강제 종료는 추가하지 않음. 검사·CI와 사내 실행의 경계를 [이번 기록](../evals/scenarios.md#ees-stop-recovery)에 둠.
+2026-09-10: 사용자 결과로 등록 서버 종료·c099e427f62b 수정본 적용·기동 성공을 확인함. 복구 코드의 PR/main Windows/Linux 검사와 병합·전달물 생성도 확인했으며 최초 main Windows cleanup 실패는 보존함. 실제 대화 폭·패널 드래그 표시는 다음 확인으로 남기고, 성공한 적용을 반복하지 않음. [근거와 남은 범위](../evals/scenarios.md#ees-stop-recovery).
 
 ## 갱신 규칙
 

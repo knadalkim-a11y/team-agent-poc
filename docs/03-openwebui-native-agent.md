@@ -970,6 +970,8 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 #### 승인된 Upgrade 종료 실패의 한 번 복구
 
+**이번 사건은 복구·적용·기동 성공을 사용자 보고로 확인했습니다.** 아래 명령은 사건의 절차 기록이며 다시 실행하지 않습니다. 남은 확인은 Ctrl+F5 후 대화 폭과 분석 패널 드래그 표시입니다. [적용 결과](../evals/scenarios.md#ees-stop-recovery).
+
 2026-09-10의 `c099e427f62b / process_stop / operation_failed / changed=false` 사건에 대한 명시적 사용자 승인 범위입니다. 프로세스가 살아 있고 접속 포트는 없으며 로그에 KeyboardInterrupt가 있었지만, 그 문자열로 최초 원인이나 종료 신호 전달 성공을 확정하지 않습니다. 이 복구를 일반 Stop·Upgrade의 자동 대체 절차로 사용하지 않습니다. [사건과 확인 범위](../evals/scenarios.md#ees-stop-recovery).
 
 [복구 코드](../scripts/ees_deploy_stop_recovery.py)는 실패/registry 스냅샷, 보관 ZIP의 source commit·무결성, 현재 프로그램·환경·빈 포트를 먼저 검사합니다. 명시 플래그가 있고 상태가 그대로일 때만 검증된 서버 한 개를 동일 Windows 핸들에서 종료합니다. CPython venv 실행기 아래의 단일 실제 서버인 경우 부모/자식 관계·실행 파일·생성 시각을 확인하여 실제 서버만 종료하고 실행기의 자연 종료를 기다립니다. 알 수 없는 자식·상태 변경·식별 실패·종료 실패·포트 점유는 적용 전에 중단합니다. 프로세스 이름 전체, 임의 자식 트리, 콘솔 창을 종료하지 않습니다.
