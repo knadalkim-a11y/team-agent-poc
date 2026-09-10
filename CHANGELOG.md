@@ -2,6 +2,10 @@
 
 완료된 변경·중요 결정과 날짜별 관찰을 기록합니다. 다음 작업과 최신 배포 상태는 [STATUS](docs/STATUS.md), 시험별 현재 판정은 [평가표](evals/scenarios.md)가 원본입니다. 과거 실패 기록을 현재 장애나 재실행 지시로 해석하지 않습니다.
 
+## 2026-09-10
+
+- EES가 EMS/APC/EGIS/FDC/EPT와 추가 전문 Assistant를 선택·위임하고, 시스템 간 근거 대조와 보완 요청으로 분석하는 목표를 기록함. 역량 설명·공통 식별자·개인 권한 유지, 합성 교차 분석 시연과 반증/미연결 판정 기준을 기존 문서에 정리함. 설계 기록이며 실행 코드·모델 등록·사내 데이터 연결은 미변경. [설계와 시연 제안](docs/03-openwebui-native-agent.md#cross-system-orchestration).
+
 ## 2026-09-09
 
 - 기존 운영 진입점에 `Upgrade`를 추가해 성공한 main CI 확인·래퍼 갱신·호환 프로그램 ZIP 다운로드·검증·Stop/Apply/Start를 한 번에 수행하도록 준비함. 같은 프로그램은 재시작하지 않고 적용 기록이 일치하면 다운로드도 생략함. 읽기 전용 GitHub 인증을 Windows 사용자별 DPAPI로 보존하며 기존 환경·데이터·키·CA와 명시적 복구를 유지함. 프로그램 artifact는 별도 이름과 90일 보존으로 구분하고 공통 Tool/Skill/Prompt 자동 반영은 포함하지 않음. [사용법](docs/03-openwebui-native-agent.md#ees-wrapper-upgrade), [검증·적용 구분](evals/scenarios.md#ees-wrapper-upgrade).

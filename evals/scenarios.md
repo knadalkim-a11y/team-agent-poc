@@ -1475,3 +1475,25 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 
 - 2026-09-10 PR 자동 검토 후속: 설치 가이드의 남은 `EES Assistant`·ees.1 현재 안내를 Portal·ees.2와 Upgrade/Apply 안내로 수정함. DB `ui.name`이 이름을 덮어쓴다는 지적은 고정 SHA-256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`의 실제 공식 0.11.3 wheel을 다운로드해 `config.py`·`main.py`·`env.py`로 대조함. 세 파일에 `PersistentConfig`·`ui.name` 참조가 없고 config는 env의 이름을 가져와 main의 `app.state.WEBUI_NAME`과 API 응답에 전달함을 확인했으므로 DB 수정은 추가하지 않음. 공식 v0.11.3 태그 소스로 독립 재검토했고 `CUSTOM_NAME` 외부 브랜딩은 기존 안내대로 사용하지 않음. Windows에서 Upgrade 시험 실패가 다음 download 시험 성공에 가려지지 않도록 두 CI step을 분리함. 후속 `python scripts/check_docs.py`는 files=25, links=712, errors=0, review_candidates=0이고 `git diff --check`도 통과함.
 - 2026-09-10 원격 검증: 실행 코드 원본 `968f48913207e65442bb8c6b3e12270024213144`의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34418955399)가 성공함. 두 환경의 Upgrade·download 검사, 실제 고정 wheel 빌드와 Apply/Restore, Windows PowerShell 구문 검사를 포함함. 이후 설치 가이드·검증 기록만 보완하며 실행 코드는 변경하지 않음. 사내 인증·실제 Upgrade 성공과는 구분함.
+
+- 2026-09-10 Upgrade 배포물 후속: [PR #20](https://github.com/knadalkim-a11y/team-agent-poc/pull/20)을 main `704dddbb72bd03ff1a0f3ed20fc2125b094484f6`에 병합했고 [main Windows/Linux CI·패키징](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34419567419)이 성공함. artifact `10130545951`의 실제 ZIP 146,482,522 bytes를 내려받아 API SHA-256 `43fca62a5da0327684f5000ee50eecf222df551cf0caf331c68587498341e4c2`와 대조하고 새 다운로드 코드의 ZIP 검사·기존 전체 bundle 검증을 통과함. source_commit은 위 main, source_dirty=false, 프로그램은 `0.11.3+ees.2`임. 최초 실행 블록을 안내했으며 사내 Upgrade·Portal 실제 적용 결과는 아직 받지 않음.
+
+<a id="cross-system-orchestration"></a>
+
+### 시스템 간 분석 오케스트레이션 설계 (2026-09-10)
+
+- 요청: EES 통합 Assistant가 EMS/APC/EGIS/FDC/EPT와 추가 전문 Assistant를 필요에 따라 선택·위임하고, 시스템 간 근거를 연결해 분석·보완·최종 판단하는 것을 목표로 함. 시스템별 담당자의 데이터 사일로를 넘어 관계를 검토하는 것이 가치이며, 모든 질문에 모든 Assistant를 호출하는 고정 경로는 목표가 아님.
+- 원본: [교차 분석 설계와 시연 제안](../docs/03-openwebui-native-agent.md#cross-system-orchestration). 현재는 문서 설계이며 실행 Tool·전문 모델 등록·실제 도메인 연결·사내 추론 성공은 미확인임. 기존 문서 시스템의 정상 조회나 WO 합성 패널 성공을 이 기능의 성공 증거로 재사용하지 않음.
+- 기술 확인: SHA-256이 고정된 실제 공식 Open WebUI 0.11.3 wheel의 `tools/builtin.py`, `utils/subagents.py`, `main.py`, `utils/middleware.py`, `utils/tools.py`를 읽기 검토함. 내장 delegate_task는 부모 모델·도구·스킬을 사용하며 대상 모델 인자가 없음. 전체 chat 처리 경로의 대상 모델 지침·Skill/사용자 접근 검사와 개인 UserValves 로딩을 확인했으며, 대상 model.meta.toolIds는 일반 backend chat에서 자동으로 모두 적재되지 않아 명시 연결이 필요함. 실제 중첩 호출·스트리밍·사내 PAT 위임을 실행한 검증은 아님.
+- 독립 설계 검토: 이름만으로 전문 역량을 추정하는 위험과 고정 순서 시연이 지능적 선택으로 오인될 수 있음을 지적받아 역량 설명·미공개 변형·조건부 보완·ID/시간 대조·반증 반영을 포함함. 최초 연결은 한 단계, 첫 교차 분석 시연은 EMS/APC/FDC 합성 자료와 보완 한 차례로 제안함. 실제 역할·지원 데이터·구체 한도는 구현 때 확정하며 별도 서버·전사 온톨로지를 선행 조건으로 추가하지 않음.
+
+| 시연 판정 대상 | 통과 조건 | 현재 판정 |
+|---|---|---|
+| 필요한 대상 선택 | 단일/두 시스템/세 시스템 질문과 표현을 바꾼 미공개 사례에서 필요한 Assistant만 선택하고 무관한 대상은 호출하지 않음 | 미구현·미실행 |
+| 근거에 따른 보완 | 모순·빈틈이 있을 때 필요한 대상에 구체적인 추가 조회를 요청하고 충분할 때 종료함. 매번 같은 보완 호출을 반복하지 않음 | 미구현·미실행 |
+| 시스템 간 연결 | 설비 ID 대응·시간대·조회/집계 구간과 필요한 LOT 대응이 맞는 근거만 연결함. 불명확하면 연결을 보류함 | 미구현·미실행 |
+| 가설 수정 | 최초 가설을 반박하는 자료에 따라 결론을 바꾸고, 단순 동시 발생을 원인으로 확정하지 않음. 주요 판단마다 근거를 추적할 수 있음 | 미구현·미실행 |
+| 미연결·실패·권한 | 미연결/오류 결과를 창작하지 않고 실제 사용자 권한으로 호출함. 허용하지 않은 대상·재위임과 실행 한도를 코드에서 제한함 | 미구현·미실행 |
+| 사용자 이해와 비용 | 화면의 호출 목적·상태·근거·미확인이 실제 실행과 일치하고 합성임을 표시함. 동일 질문의 직접 답변과 비교해 근거 품질·호출 수·전체 시간의 효과를 기록함 | 미구현·미실행 |
+
+- 검증 범위: 설계·현재 설명·계획·판정 기준의 일치와 문서 구조/링크·diff. Linux/Python 3.12.14에서 `python scripts/check_docs.py`는 files=25, links=718, errors=0, review_candidates=0이며 `git diff --check`도 통과함. 실행 코드·Workflow·등록용 Prompt/Skill·도구 정의는 이번에 수정하지 않음. 추가 자동 기능 시험이나 실제 사내 데이터 검증은 수행하지 않음.

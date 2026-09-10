@@ -67,7 +67,7 @@
 
 ## 실행 구조와 관리 원본
 
-`EES 통합 Assistant`는 별도 학습 모델이나 독립 Agent 서버가 아니라 Open WebUI의 Workspace Model preset입니다. 여기서 “통합”은 공통 지침·Skill·Knowledge·허용 Tool을 묶는 뜻이며, 여러 Agent의 자동 라우팅을 의미하지 않습니다.
+현재 `EES 통합 Assistant`는 승인된 기반 LLM에 공통 지침·Skill·Knowledge·허용 Tool을 묶는 Open WebUI Workspace Model preset입니다. 후속 목표는 EMS/APC/EGIS/FDC/EPT 등 전문 Assistant를 선택해 분석을 맡기고, 시스템 간 근거를 대조·보완해 종합 판단하는 것입니다. 새 시스템을 추가할 수 있는 [교차 분석 설계](docs/03-openwebui-native-agent.md#cross-system-orchestration)를 따르며 전문 Assistant 오케스트레이션의 실제 구현·등록·연결은 아직 완료되지 않았습니다.
 
 ```mermaid
 flowchart TB
