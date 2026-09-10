@@ -198,16 +198,22 @@ async def _panel(emitter, record, phase, error=None):
     plan = record["plan"]
     step = record["step"]
     _step_phase(plan, step, phase, state["call_id"])
+    code = None
+    if PANEL_SCRIPT and emitter and state["chat_id"] and state["message_id"]:
+        try:
+            # Freeze before ANY await, including the plan event: another query
+            # can change this same record while either UI emission is waiting.
+            # Never include child metadata, raw records or reasoning.
+            snapshot = {**state, "request": record["request"], "queries": record["queries"],
+                        "analysis": record["analysis"],
+                        "analysis_truncated": record["analysis_truncated"], "error": error}
+            code = "const eesPanelUpdate=" + json.dumps(snapshot, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
+        except Exception:
+            pass
     await _plan_panel(emitter, plan)
-    if not PANEL_SCRIPT or not emitter or not state["chat_id"] or not state["message_id"]:
+    if code is None:
         return
     try:
-        # Serialize before yielding: parallel queries must not mutate an earlier
-        # snapshot. Never include child metadata, raw records or reasoning.
-        snapshot = {**state, "request": record["request"], "queries": record["queries"],
-                    "analysis": record["analysis"],
-                    "analysis_truncated": record["analysis_truncated"], "error": error}
-        code = "const eesPanelUpdate=" + json.dumps(snapshot, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
         await asyncio.wait_for(emitter({"type": "execute", "data": {"code": code}}),
                                timeout=PANEL_SEND_TIMEOUT)
     except Exception:

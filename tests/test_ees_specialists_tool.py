@@ -285,6 +285,45 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([q["record_count"] for q in updates[-1]["queries"]], [1, 2])
         self.assertEqual([q["event_ids"] for q in updates[-1]["queries"]], [["sample_a-01"], ["sample_a-02"]])
 
+    async def test_panel_freezes_query_and_plan_snapshots_before_slow_plan_emission(self):
+        # Force query 2 to enter while query 1 is waiting for its plan event.
+        # Both packets must retain the sequence and data at their own boundary.
+        first_plan = asyncio.Event()
+        second_plan = asyncio.Event()
+        release = asyncio.Event()
+        step = {"id": "ems", "type": "specialist", "status": "pending", "call_ids": [],
+                "result_summary": "first"}
+        plan = {"snapshot": {"version": 1, "kind": "plan", "phase": "planned", "seq": 0,
+                "chat_id": "chat", "message_id": "message", "call_id": "plan", "steps": [step]}}
+        record = {"panel": {"version": 1, "kind": "specialist", "seq": 0,
+                    "chat_id": "chat", "message_id": "message", "call_id": "ems-call"},
+                  "plan": plan, "step": step, "request": {"question": "sample_a", "kind": "initial"},
+                  "queries": [{"index": 1, "status": "querying"}], "analysis": "first",
+                  "analysis_truncated": False}
+        async def emit(event):
+            payload, _ = json.JSONDecoder().raw_decode(event["data"]["code"][len("const eesPanelUpdate="):])
+            self.events.append(event)
+            if payload["kind"] == "plan":
+                (first_plan if payload["seq"] == 1 else second_plan).set()
+                await release.wait()
+        with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+            first = asyncio.create_task(module._panel(emit, record, "querying"))
+            await first_plan.wait()
+            record["queries"].append({"index": 2, "status": "querying"})
+            record["analysis"] = "second"
+            step["result_summary"] = "second"
+            second = asyncio.create_task(module._panel(emit, record, "querying"))
+            await second_plan.wait()
+            release.set()
+            await asyncio.gather(first, second)
+            specialists = self.panel_updates()
+            plans = [event for event in self.panel_updates(include_plans=True) if event["kind"] == "plan"]
+        self.assertEqual([event["seq"] for event in specialists], [1, 2])
+        self.assertEqual([len(event["queries"]) for event in specialists], [1, 2])
+        self.assertEqual([event["analysis"] for event in specialists], ["first", "second"])
+        self.assertEqual([event["seq"] for event in plans], [1, 2])
+        self.assertEqual([event["steps"][0]["result_summary"] for event in plans], ["first", "second"])
+
     async def test_panel_denial_timeout_and_runtime_failure_are_terminal_without_fake_completion(self):
         async def allow(user, model, model_info):
             self.assertTrue(any(u["system"] == model_info.id.removeprefix("ees_demo_").upper()
