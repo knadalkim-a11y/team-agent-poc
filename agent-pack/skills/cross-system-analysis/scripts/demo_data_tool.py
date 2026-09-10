@@ -1,7 +1,7 @@
 """
 title: EES Demo Data
 description: Synthetic EMS/APC/FDC observations and bounded comparisons. No production connection.
-version: 0.1.2
+version: 0.1.3
 required_open_webui_version: 0.11.3
 ees_demo_pack: ees-demo-v1
 """
@@ -49,6 +49,13 @@ def _error(code, message):
 
 def _time(value):
     return value.isoformat(timespec="seconds")
+
+
+def _scope(dataset):
+    """Display-only fictional scope; existing dataset IDs select the evidence."""
+    return {"line_name": "조립 2라인", "synthetic": True,
+            "scenario_label": "기본 사례" if dataset == "sample_a" else "다른 사례",
+            "equipment_ids": ["EQ-01", "EQ-02"]}
 
 
 def _fixtures(dataset):
@@ -269,6 +276,7 @@ class Tools:
         records = [_domain_view(event, domain, bool(event_id)) for event in events]
         result = {
             "ok": True, "demo": True, "dataset": dataset, "domain": domain,
+            "scope": _scope(dataset),
             "time_basis": "UTC; 생산 재개 후 1~30분, 1분 간격",
             "join_keys": ["site_id", "equipment_id", "event_id", "recipe_id", "resumed_at"],
             "message": "합성 시연 자료이며 실제 사내 조회가 아닙니다.",
@@ -357,6 +365,7 @@ class Tools:
             })
         return {
             "ok": True, "demo": True, "dataset": dataset, "group_by": group_by,
+            "scope": _scope(dataset),
             "calculation": {
                 "observation_minutes": 30, "sample_interval_minutes": 1,
                 "conditions": "같은 시각의 APC와 FDC가 모두 각 레시피 허용 범위 이내",

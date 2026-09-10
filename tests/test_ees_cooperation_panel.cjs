@@ -128,10 +128,43 @@ const bad = (value, code) => { assert.equal(value.ok, false); assert.equal(value
   const group = {total_events: 2, confirmed_events: 0, mean_confirmed_minutes: null, mean_denominator: 0, not_confirmed_events: 1, unassessable_events: 1};
   ok(await env.call({...comparison, seq: 2, phase: 'completed', result: {ok: true, summary: group, calculation: {conditions: 'APC와 FDC 동시 허용 범위', consecutive_samples: 5, end: '5번째 표본 - 생산 재개', missing_policy: '누락 표본은 0으로 치환하지 않음'}, comparisons: [{conditions: {equipment_id: 'EQ-02'}, groups: {planned_start: group, maintenance: group}, maintenance_minus_planned_minutes: null}], events: [{event_id: 'B-01', equipment_id: 'EQ-02', recipe_id: 'R-01', resumed_at: '2026-09-10T09:00:00', state: 'unassessable', confirmed_after_minutes: null, missing_samples: {APC: 1, FDC: 0}, evidence_record_ids: ['EMS-B-01']}], message: '합성 관측치입니다.'}}));
   assert.match(env.q('detail-body').textContent, /계산 불가/); assert.doesNotMatch(env.q('detail-body').textContent, /0분/); assert.match(env.q('detail-body').textContent, /평균 분모0건/); assert.match(env.q('detail-body').textContent, /누락 표본: APC 1, FDC 0/);
-  let details = env.q('detail-body').querySelector('details'); details.open = true; details.fire('toggle'); details.querySelector('summary').focus();
+  let details = env.q('detail-body').querySelector('[data-focus-key="evidence"]').parentElement; details.open = true; details.fire('toggle'); details.querySelector('summary').focus();
   ok(await env.call(event({call_id: 'call-ems-followup', batch_id: 'batch-b', seq: 2, phase: 'cancelled'})));
-  details = env.q('detail-body').querySelector('details'); assert.equal(details.open, true); assert.equal(details.querySelector('summary').focused, true);
+  details = env.q('detail-body').querySelector('[data-focus-key="evidence"]').parentElement; assert.equal(details.open, true); assert.equal(details.querySelector('summary').focused, true);
+  assert.equal(env.q('detail-body').querySelector('[data-focus-key="criteria"]').parentElement.open, false);
+  assert.equal(descendants(env.q('detail-body')).filter(node => node.className === 'metric').length, 4);
   console.log('PASS actual comparison metrics, null is not zero, denominators/missing evidence and expanded evidence retention');
+
+  const readableEnv = environment(), longQuestion = '사건 조건을 확인해 주세요. '.repeat(20) + injection;
+  const formattedReply = ['## 핵심 확인', '', '- **생산 재개** 후 12분을 확인했습니다.', '- 근거 `EMS-A-01`을 사용했습니다.', '', '**한계·추가 확인**', '', '반복 정비를 원인으로 확정할 수 없습니다.', '두 번째 문장은 같은 문단입니다.', '', '2. 비교할 조건을 확인합니다.', '4. 누락 표본을 점검합니다.', '', '```text', injection, '```', '', injection].join('\n');
+  const readableEvent = event({phase: 'completed', request: {question: longQuestion, kind: 'initial'}, analysis: formattedReply, queries: [{index: 1, arguments: {dataset: 'sample_a'}, status: 'completed', record_count: 1, event_ids: ['A-01']}]});
+  ok(await readableEnv.call(readableEvent));
+  const all = () => descendants(readableEnv.q('detail-body'));
+  const disclosure = key => readableEnv.q('detail-body').querySelector('[data-focus-key="' + key + '"]').parentElement;
+  assert.equal(disclosure('question').open, false); assert.equal(disclosure('queries').open, false);
+  assert.ok(disclosure('question').textContent.includes(longQuestion));
+  assert.match(disclosure('queries').textContent, /조립 2라인 · 기본 시연/); assert.doesNotMatch(disclosure('queries').textContent, /sample_a/);
+  assert.deepEqual(all().filter(node => node.tagName === 'h4').map(node => node.textContent), ['핵심 확인', '한계·추가 확인']);
+  assert.equal(all().find(node => node.tagName === 'strong').textContent, '생산 재개');
+  assert.equal(all().find(node => node.tagName === 'code').textContent, 'EMS-A-01');
+  assert.equal(all().filter(node => node.tagName === 'li').length, 4);
+  assert.equal(all().find(node => node.tagName === 'ol').attributes.start, '2');
+  assert.deepEqual(all().filter(node => node.tagName === 'li' && node.parentElement.tagName === 'ol').map(node => node.attributes.value), ['2', '4']);
+  assert.equal(all().find(node => node.tagName === 'pre').textContent, injection);
+  assert.ok(all().some(node => node.tagName === 'p' && node.textContent.includes('반복 정비를 원인으로 확정할 수 없습니다.\n두 번째 문장')));
+  assert.equal(all().some(node => ['img', 'script', 'a'].includes(node.tagName)), false); assert.equal(readableEnv.context.EES_INJECTION, undefined);
+  assert.ok(readableEnv.q('detail-body').textContent.indexOf('전문가 회신') < readableEnv.q('detail-body').textContent.indexOf('조회 근거'));
+  // Native toggle may still be queued when a different specialist updates.
+  const oldQuestion = disclosure('question'), oldQueries = disclosure('queries');
+  oldQuestion.open = true; oldQueries.open = true; oldQueries.querySelector('summary').focus();
+  readableEnv.q('scroll').scrollTop = 340;
+  ok(await readableEnv.call(event({system: 'FDC', call_id: 'readability-other', phase: 'requested'})));
+  assert.equal(disclosure('question').open, true); assert.equal(disclosure('queries').open, true); assert.equal(disclosure('queries').querySelector('summary').focused, true); assert.equal(readableEnv.q('scroll').scrollTop, 340);
+  disclosure('question').open = false; disclosure('question').fire('toggle');
+  oldQuestion.fire('toggle'); oldQueries.fire('toggle');
+  ok(await readableEnv.call(event({system: 'FDC', call_id: 'readability-other', phase: 'completed', seq: 2})));
+  assert.equal(disclosure('question').open, false); assert.equal(disclosure('queries').open, true);
+  console.log('PASS readable exact reply blocks, safe formatting, reply-first detail, collapsed questions/queries and retained disclosure focus');
 
   ok(await env.call(event({message_id: 'message-b', call_id: 'new-question', batch_id: 'batch-new', request: {question: '이번 질문입니다.', kind: 'initial'}})));
   assert.match(env.q('detail-body').textContent, /이번 질문/); assert.equal(env.q('history').hidden, false);
