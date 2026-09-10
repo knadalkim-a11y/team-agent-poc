@@ -1,16 +1,18 @@
 {
-  "version": "0.1.1",
+  "version": "0.1.2",
   "tools": [
     {
       "id": "ees_specialists",
       "name": "EES Specialists",
       "path": "agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py",
+      "ui_script_path": "agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js",
       "managed_valves": {"ees_model_id": "$EES_MODEL_ID"}
     },
     {
       "id": "ees_demo_data",
       "name": "EES Demo Data",
       "path": "agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py",
+      "ui_script_path": "agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js",
       "managed_valves": {"ees_model_id": "$EES_MODEL_ID"}
     }
   ],

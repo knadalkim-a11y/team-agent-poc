@@ -1,13 +1,16 @@
 """
 title: EES Demo Data
 description: Synthetic EMS/APC/FDC observations and bounded comparisons. No production connection.
-version: 0.1.0
+version: 0.1.2
 required_open_webui_version: 0.11.3
 ees_demo_pack: ees-demo-v1
 """
 
+import asyncio
+import json
 from datetime import datetime, timedelta, timezone
 from statistics import mean
+from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
@@ -19,6 +22,25 @@ _RECIPES = {
     "R-02": {"APC": (1.8, 2.2), "FDC": (18.0, 22.0)},
 }
 _UNITS = {"APC": "mm (시연 보정량)", "FDC": "시연 신호 단위"}
+PANEL_SCRIPT = ""  # ApplyDemo embeds the reviewed, fixed cooperation panel script.
+PANEL_SEND_TIMEOUT = 0.25
+
+
+async def _panel(emitter, state, phase, result=None, error=None):
+    """Publish only comparison arguments/results, never caller metadata."""
+    state["seq"] += 1
+    if not PANEL_SCRIPT or not emitter or not state["chat_id"] or not state["message_id"]:
+        return
+    try:
+        snapshot = {**state, "phase": phase, "error": error}
+        if result is not None:
+            snapshot["result"] = result
+        code = "const eesPanelUpdate=" + json.dumps(snapshot, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
+        await asyncio.wait_for(emitter({"type": "execute", "data": {"code": code}}),
+                               timeout=PANEL_SEND_TIMEOUT)
+    except Exception:
+        # A cancelled parent must stay cancelled; UI errors are optional.
+        pass
 
 
 def _error(code, message):
@@ -268,7 +290,7 @@ class Tools:
 
     async def compare_demo_data(self, dataset: str = "sample_a", group_by: str = "overall",
                                 equipment_id: str = "", recipe_id: str = "", event_ids: str = "",
-                                __metadata__=None) -> dict:
+                                __metadata__=None, __event_emitter__=None) -> dict:
         """Compute paired observations for EES using synthetic records; no causal conclusion.
 
         :param dataset: Synthetic dataset ID: sample_a or sample_b.
@@ -282,12 +304,40 @@ class Tools:
         if any(not isinstance(value, str) or len(value) > maximum for value, maximum in
                ((dataset, 80), (group_by, 80), (equipment_id, 80), (recipe_id, 80), (event_ids, 1000))):
             return _error("invalid_filters", "비교 조건 형식을 확인해 주세요.")
+        call_id = str(uuid4())
+        state = {"version": 1, "kind": "comparison", "call_id": call_id, "batch_id": call_id,
+                 "seq": 0, "arguments": {"dataset": dataset, "group_by": group_by,
+                     "equipment_id": equipment_id, "recipe_id": recipe_id, "event_ids": event_ids}}
+        for key in ("chat_id", "message_id"):
+            value = __metadata__.get(key)
+            state[key] = value if isinstance(value, str) and len(value) <= 200 else ""
+        result = None
+        try:
+            await _panel(__event_emitter__, state, "requested")
+            await _panel(__event_emitter__, state, "querying")
+            result = self._compare(dataset, group_by, equipment_id, recipe_id, event_ids)
+            await _panel(__event_emitter__, state, "completed" if result["ok"] else "failed",
+                         result, (result.get("error") or {}).get("code"))
+        except asyncio.CancelledError:
+            # If calculation already finished, preserve its real outcome even
+            # when cancellation arrives during the optional final UI emission.
+            phase = ("completed" if result["ok"] else "failed") if result is not None else "cancelled"
+            await _panel(__event_emitter__, state, phase, result,
+                         (result.get("error") or {}).get("code") if result is not None else "cancelled")
+            raise
+        except Exception:
+            result = _error("comparison_failed", "교차 계산을 완료하지 못했습니다. 확보된 전문 근거를 사용해 주세요.")
+            await _panel(__event_emitter__, state, "failed", result, "comparison_failed")
+        return result
+
+    @staticmethod
+    def _compare(dataset, group_by, equipment_id, recipe_id, event_ids):
         groupings = {"overall": (), "equipment_id": ("equipment_id",), "recipe_id": ("recipe_id",),
                      "equipment_recipe": ("equipment_id", "recipe_id")}
         if group_by not in groupings:
             return _error("invalid_grouping", "overall, equipment_id, recipe_id, equipment_recipe 중 선택해 주세요.")
         selected = [part.strip() for part in event_ids.split(",") if part.strip()]
-        events = self._select(dataset, equipment_id, recipe_id, selected)
+        events = Tools._select(dataset, equipment_id, recipe_id, selected)
         if isinstance(events, dict):
             return events
         rows = [_joint_observation(event) for event in events]
