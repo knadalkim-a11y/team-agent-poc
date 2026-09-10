@@ -8,10 +8,10 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **v0.2.0 사내 ApplyDemo의 WO 등록본 인식 실패를 v0.2.1에서 보완함.** 사용자가 `commit=b480325f78d4 changed=0 stage=apply_assets code=unrecognized_existing_wo_source`를 보고함. 고정 WebUI가 공식 WO 코드를 자동 정렬한 것만으로 같은 오류가 재현돼, 검증한 자동 정렬본의 완전 해시만 추가함. 계획·짧은 결론·오른쪽 통합 패널 구현은 유지하며 사내 적용·새 화면 성공은 아직 미확인임. [실패·재현·보완](../evals/scenarios.md#wo-editor-format-adoption).
-- 다음 작업 하나: **수정본 CI·배포 준비를 마친 뒤 ApplyDemo 한 명령으로 재개하고 새 EES 대화에서 계획과 통합 패널을 확인한다.** 앞선 시도는 변경0으로 중단됨. 기존 WO 수동 교체·재등록과 이미 완료한 Portal Upgrade 복구를 반복하지 않음. 자산 적용 성공 뒤 완전히 새로고침하고 조립 2라인 질문으로 확인함. [한 번 적용](03-openwebui-native-agent.md#demo-assets-deployment).
+- 이번 작업: **v0.2.1 적용과 실행 계획·오른쪽 통합 업무 패널 표시 정상을 사용자 보고로 확인하여 이번 적용 단위를 완료함.** WO 자동 정렬본 인식 보완 뒤 ApplyDemo·새 대화 확인 안내에 사용자가 “응 전부 정상인거 확인했어”라고 답함. 실제 적용 SHA·등록 바이트·개별 분석 수치와 모든 WO 세부 동작의 직접 대조로 확대하지 않음. [확인 범위와 이전 실패](../evals/scenarios.md#plan-work-panel-accepted).
+- 다음 작업 하나: **기본 대화창의 디자인 개선 목업을 먼저 검토한다.** 정상 동작 확인 뒤 사용자가 기본 대화창의 외형이 앞선 목업보다 아쉽다고 피드백함. 본문 폭·여백·타이포·결론/진행 상태의 구분을 기존 업무 패널과 어울리게 제안하며 실제 제품 변경은 목업 확인 후 범위를 정함. 이번 적용·패널 표시 확인을 반복 요청하지 않음. [현재 사용법](03-openwebui-native-agent.md#cooperation-panel).
 - 공유 DB 전제와 후속: 여러 시스템이 하나의 물리 DB와 일부 공통 데이터를 사용하나 각 담당자는 자기 시스템 지식에 집중되어 있음. [관계 발견 설계](03-openwebui-native-agent.md#shared-db-relations)는 운영 데이터 연결을 준비할 때 사용하며 현재 시연 범위에서 제외함. 시스템 간 실제 의미·접근 권한·스키마는 아직 조사하지 않음.
-- 배포 확인: 계획·통합 패널 [PR #26](https://github.com/knadalkim-a11y/team-agent-poc/pull/26)을 main `b480325f78d468dc86e8d7e6ddc63881b1e55202`에 병합했고 Windows/Linux PR·main CI와 Agent Pack 생성을 완료함. 이후 사내 ApplyDemo는 위 WO 인식 오류로 변경0에서 중단됐음. 이번 v0.2.1은 그 호환성 보완이며 사내 성공으로 기록하지 않음. 이전 [PR #24](https://github.com/knadalkim-a11y/team-agent-poc/pull/24)의 프로그램 입력과 Portal 표시 확인, promote 접근 거부·wrapper 접두사 불일치와 개별 명령 결과 미확인은 [기존 실패 기록](../evals/scenarios.md#ees-portal-upgrade-apply-failure)에 보존함.
+- 배포 확인: [PR #27](https://github.com/knadalkim-a11y/team-agent-poc/pull/27)의 안내 원본 main `bc8bffbb6043fb1401f995b312bf5709f50e5983`은 Windows/Linux PR·main CI와 Agent Pack 생성을 완료함. 이후 위 적용·화면 정상 보고를 받았으며 실제 사내 SHA의 직접 대조와 구분함. [PR #26](https://github.com/knadalkim-a11y/team-agent-poc/pull/26) 적용 때의 WO 인식 오류·변경0은 [보완 기록](../evals/scenarios.md#wo-editor-format-adoption), 기존 Portal 표시·promote 접근 거부 등은 [이전 실패 기록](../evals/scenarios.md#ees-portal-upgrade-apply-failure)에 보존함.
 - 설비 조회 관리 합의: 여러 업무에서 쓰는 공통 기능이므로 운영용 설계에서는 독립 Tool로 등록·관리하는 방향을 유지함. 사용자는 이번 시연에 한해 적용이 간단한 기존 단일 등록 항목을 유지하기로 함. 현재는 같은 Tool 안의 함수 분리이며 별도 등록 완료가 아님. 후속 요청의 설비 조회 패널도 같은 등록 항목에서 제공하며 새 적용 성공 보고로 간주하지 않음.
 - 첫 화면 제안: 기본 영어 문구를 대체할 천안 설비·헝가리 설비·AI WO 초안·직접 선택의 네 질문을 준비하고, v0.1.2의 Tool·WO 지침·제안 갱신 안내를 수행했다는 사용자 보고를 받음. 첫 조회 시연 중 대화 이동 후 패널 소실을 보고했으며 제안 네 개의 실제 등록 원문·각 클릭 결과를 직접 대조한 것은 아님. 이번 수정은 제안 JSON을 바꾸지 않음. [적용 안내](03-openwebui-native-agent.md#first-use-entry).
 - 완료한 이전 단위: 초기 Rich UI 제거·일반 문장/표/원문 링크 전환의 구현·검증·main 반영에 이어 **제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 확인함.** 개별 Tool 등록 내용·적용 SHA·새 조회/원문 결과의 직접 대조는 미확인으로 유지하며 저장 절차를 반복 안내하지 않음. [적용 보고](../evals/scenarios.md#plain-output-applied-report), [변경·검증](../evals/scenarios.md#prototype-rich-ui-removal).
@@ -55,7 +55,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 | 1. 쉬운 Chat UI | 대화·스트리밍·이름/로고와 초기 Rich UI 제거 작업 완료 보고. 실제 비개발자 사용성 전체는 미확인 | 합의한 목업 우선 방식으로 필요한 업무 화면을 하나씩 설계. 관리자 공지는 후속 요구 |
 | 2. 문서 시스템 연동 | 평소 세 연동 조회 정상의 기존 보고와 Rich UI 제거·변경 프롬프트 WebUI 반영 완료 보고. 새 출력의 개별 검증은 별도 미확인 | 실제 업무에 필요한 조회·후속 해석 보완. 새 일반 답변·원문 확인은 다음 관련 사용/변경에 묶음 |
 | 3. 관리자 공통 정책 | EES Assistant에 합성 공통 지침·정책 답변 Skill 저장 보고. 실제 사내 정책 적용은 미완료 | EES 전용 공통 원칙·상세 절차·권한/Tool 제한의 배치와 관리자 변경 반영을 정리 |
-| 4. 관리자 워크플로 | 도구 자동 선택과 협업 패널 열림의 기존 보고. 계획 우선·결론 중심·오른쪽 통합 화면 목업 합의와 v0.2.0 구현 | ApplyDemo 후 실제 계획 진행·짧은 결론·단계 상세를 확인. 반증·EMS 단독·분석 정확성은 후속 |
+| 4. 관리자 워크플로 | 계획 우선·결론 중심·오른쪽 통합 화면 구현과 v0.2.1 적용·계획/패널 표시 정상 보고 | 실사용 중 가독성·흐름 피드백 반영. 반증·EMS 단독·분석 정확성은 별도 후속 |
 | 5. 레거시 시스템 연동 | EMS/APC/FDC의 실제 업무 기능은 미연결 | 승인된 API 또는 Query Broker로 가치가 있는 읽기 기능 하나 연결. 기존 서비스 권한·업무 규칙 활용 |
 | 6. 레거시 간접 UI | v0.1.3 기능 정상 보고와 이후 `panel_error` 이력 보존. v0.1.5 갱신 안내 후 패널 표시 성공을 사용자 보고로 확인. 최초 원인·장기 재발 여부는 미확정 | 시연 피드백 반영 → 운영용 목업 → 실제 EMS 구현. [목업](03-openwebui-native-agent.md#wo-mockup) |
 
@@ -75,7 +75,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 | 대상 | Git에서 준비한 것 | WebUI 반영 마지막 확인 | 검증 근거 | 적용 원본 커밋 |
 |---|---|---|---|---|
-| 교차 분석 시연 | v0.2.0 사전 실행 계획·실제 상태·짧은 결론·단계별 공개 판단 근거와 통합 업무 패널 | 이전 패널 열림·전문가 질문/회신 표시 보고와 목업 합의. 새 v0.2.0 사내 사용·실제 수치/회신 정확성은 미확인 | [이번 구현](../evals/scenarios.md#cross-system-plan-work-panel), [이전 개선](../evals/scenarios.md#cross-system-demo-readability), [최초 적용](../evals/scenarios.md#cross-system-demo-internal-apply) | 구현 시작 main `a6f108796d818510c44a6c0d6408823bdb8b6611`. 새 자산의 사내 적용 SHA 미확인. 이전 패널 안내 원본 `0336cb8311789cd3f70785f1bd170cd2bd9148ce`와 최초 적용 보고는 보존 |
+| 교차 분석 시연 | v0.2.1: 사전 실행 계획·실제 상태·짧은 결론·단계별 공개 판단 근거와 통합 업무 패널·WO 저장 형태 호환성 보완 | 2026-09-10 사용자 보고로 적용·계획/오른쪽 패널 표시 정상 확인. 개별 수치/회신 정확성의 직접 대조는 미실행 | [이번 정상 보고](../evals/scenarios.md#plan-work-panel-accepted), [구현](../evals/scenarios.md#cross-system-plan-work-panel), [최초 적용](../evals/scenarios.md#cross-system-demo-internal-apply) | 안내 원본 `bc8bffbb6043fb1401f995b312bf5709f50e5983`. 실제 사내 적용 SHA·등록 바이트 직접 대조 미실행. 이전 원본·성공/실패 이력은 평가 기록에 보존 |
 | 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](../evals/scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
 | WO 시연 목업 | EES WO Demo v0.1.8: 통합 업무 패널 연결. 기존 크기 조절·진단·복원·조회/WO 동작 유지 | 2026-09-09 v0.1.6 적용·크기 조절 정상 보고. 앞선 v0.1.5 패널 표시 성공과 최초 예외 원인 미확정은 보존. 실제 EMS 미연결 | [시연 검사·후속 보고](../evals/scenarios.md#wo-mockup), [기존 항목 갱신](03-openwebui-native-agent.md#wo-mockup) | 적용·정상 보고 직전 안내 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc`(v0.1.6); 사내 등록 바이트·전체 SHA 직접 대조 미실행. 이전 성공·실패 이력은 평가 기록에 보존. PR #19 main 병합 `cb3a922d870663abd7f5fd576ba23456575e49a2` 확인 |
 | 팀 시연용 이름·소개·시작 질문 | 기존 모델 이름·소개·프로필 적용 안내, 목업 제안 JSON 4개·짧은 팀원 안내 | 2026-09-09 서비스 이름·로고 변경에 이어 목업 제안을 포함한 v0.1.2 갱신 수행 보고 수신. 모델 소개·팀원 전달·제안별 전체 클릭 결과는 미확인 | [목업 적용 보고](../evals/scenarios.md#wo-mockup), [서비스 이름·로고 확인](../evals/scenarios.md#ees-wrapper-manual-resume), [시연 준비](../evals/scenarios.md#team-demo-customization), [이전 준비](../evals/scenarios.md#team-first-use-preparation), [당시 보류](../evals/scenarios.md#onboarding-deferred) | 서비스 브랜딩은 아래 프로그램 원본. [제안 JSON](../agent-pack/ees-prompt-suggestions.json)의 안내 원본 `5a80ac6d`; 사내 등록 내용·SHA 직접 대조 미실행 |
@@ -120,7 +120,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-10: 사내 WO 인식 실패·변경0을 고정 0.11.3의 관리자 저장/자동 정렬 경로와 대조함. 정확한 Black 26.5.1로 같은 실패를 재현하고 공식 세 버전의 검증된 정렬 해시만 추가함. 자산36·ApplyDemo13·번들7개, 정렬본 세 버전의 실제 이전 관리 목록→갱신4/재실행0·설정 보존을 확인함. 독립 검토로 해시·AST/문자열·import 변환 없음·사용자 수정 차단을 대조했으며 문서·diff 및 원격 CI를 마무리 조건으로 둠. 사내 실제 등록본 일치·새 화면은 재적용 뒤 확인함. [근거·한계](../evals/scenarios.md#wo-editor-format-adoption).
+2026-09-10: 수정 ApplyDemo·계획/오른쪽 패널 확인 안내 후 사용자 정상 보고를 수신해 이번 적용 단위를 완료로 기록함. 안내 원본과 실제 SHA의 직접 대조, 일반 정상 보고와 분석 정확성·개별 WO 동작 전수 확인을 구분함. 상태·기존 평가 기록만 갱신하고 문서/diff를 점검하며 실행 코드·추가 사내 시험·재배포는 진행하지 않음. [확인 범위](../evals/scenarios.md#plan-work-panel-accepted).
 
 ## 갱신 규칙
 
