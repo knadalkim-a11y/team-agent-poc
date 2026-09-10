@@ -61,8 +61,8 @@ async def _plan_panel(emitter, plan):
         return
     try:
         code = "const eesPanelUpdate=" + json.dumps(state, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
-        await asyncio.wait_for(emitter({"type": "execute", "data": {"code": code}}),
-                               timeout=PANEL_SEND_TIMEOUT)
+        async with asyncio.timeout(PANEL_SEND_TIMEOUT):
+            await emitter({"type": "execute", "data": {"code": code}})
     except Exception:
         pass
 
@@ -181,10 +181,13 @@ async def _model(runtime, request, user, model_id):
 async def _status(emitter, system, phase, description, done=False):
     if emitter:
         try:
-            await asyncio.wait_for(emitter({"type": "status", "data": {
-                "action": "ees_specialist", "system": system, "phase": phase,
-                "description": description, "done": done,
-            }}), timeout=3)
+            # Direct await preserves parent cancellation when an emitter finishes
+            # in the same loop turn (Python 3.11 wait_for can lose that race).
+            async with asyncio.timeout(3):
+                await emitter({"type": "status", "data": {
+                    "action": "ees_specialist", "system": system, "phase": phase,
+                    "description": description, "done": done,
+                }})
         except Exception:
             # An unavailable UI must not turn a successful analysis into a failure.
             pass
@@ -214,8 +217,8 @@ async def _panel(emitter, record, phase, error=None):
     if code is None:
         return
     try:
-        await asyncio.wait_for(emitter({"type": "execute", "data": {"code": code}}),
-                               timeout=PANEL_SEND_TIMEOUT)
+        async with asyncio.timeout(PANEL_SEND_TIMEOUT):
+            await emitter({"type": "execute", "data": {"code": code}})
     except Exception:
         # CancelledError is deliberately not swallowed (it is a BaseException).
         pass
@@ -603,10 +606,9 @@ class Tools:
             system = task["system"]
             await _status(__event_emitter__, system, "started", f"{system}: {task['question'][:160]}")
             try:
-                result = await asyncio.wait_for(
-                    _run_specialist(runtime, __request__, user, system, task["question"], record, __event_emitter__),
-                    timeout=self.valves.specialist_timeout_seconds,
-                )
+                async with asyncio.timeout(self.valves.specialist_timeout_seconds):
+                    result = await _run_specialist(
+                        runtime, __request__, user, system, task["question"], record, __event_emitter__)
             except asyncio.TimeoutError:
                 result = _result(system, record, "timeout")
             except asyncio.CancelledError:

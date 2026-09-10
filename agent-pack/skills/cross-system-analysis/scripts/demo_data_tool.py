@@ -36,8 +36,8 @@ async def _panel(emitter, state, phase, result=None, error=None):
         if result is not None:
             snapshot["result"] = result
         code = "const eesPanelUpdate=" + json.dumps(snapshot, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
-        await asyncio.wait_for(emitter({"type": "execute", "data": {"code": code}}),
-                               timeout=PANEL_SEND_TIMEOUT)
+        async with asyncio.timeout(PANEL_SEND_TIMEOUT):
+            await emitter({"type": "execute", "data": {"code": code}})
     except Exception:
         # A cancelled parent must stay cancelled; UI errors are optional.
         pass
@@ -61,8 +61,8 @@ async def _plan_panel(emitter, plan, step, phase, call_id):
         return
     try:
         code = "const eesPanelUpdate=" + json.dumps(state, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
-        await asyncio.wait_for(emitter({"type": "execute", "data": {"code": code}}),
-                               timeout=PANEL_SEND_TIMEOUT)
+        async with asyncio.timeout(PANEL_SEND_TIMEOUT):
+            await emitter({"type": "execute", "data": {"code": code}})
     except Exception:
         pass
 

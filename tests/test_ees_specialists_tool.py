@@ -31,6 +31,17 @@ SPEC.loader.exec_module(module)
 LOAD_RUNTIME = module._load_runtime
 
 
+async def _wait_test_event(event):
+    # Fixture failures must fail this test instead of occupying the CI job until
+    # its 10-minute limit. Production cancellation/deadline assertions remain.
+    try:
+        async with asyncio.timeout(2):
+            await event.wait()
+    except TimeoutError as exc:
+        # This must never be mistaken for the production specialist timeout.
+        raise AssertionError("Fixture event did not arrive within two seconds") from exc
+
+
 class State:
     def __init__(self, state):
         object.__setattr__(self, "_state", state)
@@ -257,7 +268,7 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
             result = await original(child, form, user, metadata, model)
             async def data(dataset, event_id):
                 entered[event_id].set()
-                await release[event_id].wait()
+                await _wait_test_event(release[event_id])
                 return {"ok": True, "record_count": 1 if event_id == "sample_a-01" else 2,
                         "records": [{"event_id": event_id}]}
             metadata["tools"]["read_demo_data"]["callable"] = data
@@ -266,7 +277,7 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         async def response(_, ctx):
             function = ctx["metadata"]["tools"]["read_demo_data"]["callable"]
             jobs = [asyncio.create_task(function(dataset="sample_a", event_id=name)) for name in entered]
-            await asyncio.gather(*(event.wait() for event in entered.values()))
+            await asyncio.gather(*(_wait_test_event(event) for event in entered.values()))
             release["sample_a-02"].set()
             await jobs[1]
             release["sample_a-01"].set()
@@ -305,15 +316,15 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
             self.events.append(event)
             if payload["kind"] == "plan":
                 (first_plan if payload["seq"] == 1 else second_plan).set()
-                await release.wait()
+                await _wait_test_event(release)
         with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
             first = asyncio.create_task(module._panel(emit, record, "querying"))
-            await first_plan.wait()
+            await _wait_test_event(first_plan)
             record["queries"].append({"index": 2, "status": "querying"})
             record["analysis"] = "second"
             step["result_summary"] = "second"
             second = asyncio.create_task(module._panel(emit, record, "querying"))
-            await second_plan.wait()
+            await _wait_test_event(second_plan)
             release.set()
             await asyncio.gather(first, second)
             specialists = self.panel_updates()
@@ -324,6 +335,48 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([event["seq"] for event in plans], [1, 2])
         self.assertEqual([event["steps"][0]["result_summary"] for event in plans], ["first", "second"])
 
+    async def test_emitter_completion_race_preserves_parent_cancellation(self):
+        # On Python 3.11, wait_for's emitter task can finish immediately before
+        # the parent receives cancel; its fut.done() branch then loses cancel.
+        # Exercise each public-event boundary with that exact scheduling order.
+        for boundary in ("status", "plan", "specialist"):
+            with self.subTest(boundary=boundary):
+                step = {"id": "ems", "type": "specialist", "status": "pending", "call_ids": []}
+                plan = {"snapshot": {"version": 1, "kind": "plan", "phase": "planned", "seq": 0,
+                    "chat_id": "chat", "message_id": "message", "call_id": "plan", "steps": [step]}}
+                record = {"panel": {"version": 1, "kind": "specialist", "seq": 0,
+                    "chat_id": "chat", "message_id": "message", "call_id": "ems-call"},
+                    "plan": plan, "step": step, "request": {}, "queries": [], "analysis": "",
+                    "analysis_truncated": False}
+                cancellation_scheduled = False
+                async def emit(event):
+                    nonlocal cancellation_scheduled
+                    if boundary == "specialist":
+                        payload, _ = json.JSONDecoder().raw_decode(
+                            event["data"]["code"][len("const eesPanelUpdate="):])
+                        if payload["kind"] != "specialist":
+                            return
+                    if not cancellation_scheduled:
+                        cancellation_scheduled = True
+                        asyncio.get_running_loop().call_soon(job.cancel)
+                async def worker():
+                    if boundary == "status":
+                        await module._status(emit, "EMS", "started", "fixture")
+                    elif boundary == "plan":
+                        await module._plan_panel(emit, plan)
+                    else:
+                        await module._panel(emit, record, "querying")
+                    await _wait_test_event(asyncio.Event())
+                with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+                    job = asyncio.create_task(worker())
+                    try:
+                        _, pending = await asyncio.wait({job}, timeout=0.5)
+                        self.assertFalse(pending, "Emitter completion swallowed parent cancellation")
+                        self.assertTrue(job.cancelled())
+                    finally:
+                        job.cancel()
+                        await asyncio.gather(job, return_exceptions=True)
+
     async def test_panel_denial_timeout_and_runtime_failure_are_terminal_without_fake_completion(self):
         async def allow(user, model, model_info):
             self.assertTrue(any(u["system"] == model_info.id.removeprefix("ees_demo_").upper()
@@ -333,7 +386,7 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         async def response(response, ctx):
             await self.response(response, ctx)
             if ctx["metadata"]["model_id"] == "ees_demo_apc":
-                await asyncio.Event().wait()
+                await _wait_test_event(asyncio.Event())
         self.runtime.check_access.side_effect = allow
         self.runtime.process_response = response
         self.tool.valves.specialist_timeout_seconds = 0.04
@@ -364,7 +417,7 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
             result = await original(child, form, user, metadata, model)
             async def data(**kwargs):
                 entered.set()
-                await asyncio.Event().wait()
+                await _wait_test_event(asyncio.Event())
             metadata["tools"]["read_demo_data"]["callable"] = data
             return result
         async def response(_, ctx):
@@ -375,7 +428,7 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         self.runtime.process_response = response
         with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
             job = asyncio.create_task(self.consult())
-            await entered.wait()
+            await _wait_test_event(entered)
             job.cancel()
             with self.assertRaises(asyncio.CancelledError):
                 await job
@@ -388,7 +441,7 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
     async def test_panel_unavailable_ui_is_bounded_and_missing_context_is_not_broadcast(self):
         async def unavailable(event):
             if event["type"] == "execute":
-                await asyncio.Event().wait()
+                await _wait_test_event(asyncio.Event())
         with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"), patch.object(module, "PANEL_SEND_TIMEOUT", 0.002):
             result = await asyncio.wait_for(self.consult(__event_emitter__=unavailable), timeout=1)
             self.assertTrue(result["ok"])
@@ -546,7 +599,7 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         async def slow(response, ctx):
             await self.response(response, ctx)
             if ctx["metadata"]["model_id"] == "ees_demo_apc":
-                await asyncio.Event().wait()
+                await _wait_test_event(asyncio.Event())
         self.runtime.check_access.side_effect = allow
         self.runtime.process_response = slow
         # Bypass only Pydantic assignment validation for a fast synthetic timeout.
@@ -572,10 +625,10 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
             await self.response(response, ctx)
             if ctx["metadata"]["model_id"] == "ees_demo_apc":
                 entered.set()
-                await asyncio.Event().wait()
+                await _wait_test_event(asyncio.Event())
         self.runtime.process_response = slow
         job = asyncio.create_task(self.consult(("EMS", "APC")))
-        await entered.wait()
+        await _wait_test_event(entered)
         job.cancel()
         with self.assertRaises(asyncio.CancelledError):
             await job
@@ -850,10 +903,10 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         entered = asyncio.Event()
         async def waiting(response, ctx):
             entered.set()
-            await asyncio.Event().wait()
+            await _wait_test_event(asyncio.Event())
         self.runtime.process_response = waiting
         job = asyncio.create_task(self.execute())
-        await entered.wait()
+        await _wait_test_event(entered)
         self.assertEqual((await self.plan("update", reviews=[]))["error"]["code"], "plan_busy")
         job.cancel()
         with self.assertRaises(asyncio.CancelledError):

@@ -16,6 +16,17 @@ module = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(module)
 
 
+async def _wait_test_event(event):
+    # Fixture failures must fail this test instead of occupying the CI job until
+    # its 10-minute limit. Production cancellation/deadline assertions remain.
+    try:
+        async with asyncio.timeout(2):
+            await event.wait()
+    except TimeoutError as exc:
+        # This must never be mistaken for the production specialist timeout.
+        raise AssertionError("Fixture event did not arrive within two seconds") from exc
+
+
 class DemoDataTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.tool = module.Tools()
@@ -105,7 +116,7 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_panel_unavailable_or_unauthorized_does_not_change_calculation(self):
         async def unavailable(event):
-            await asyncio.Event().wait()
+            await _wait_test_event(asyncio.Event())
         metadata = {"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"}
         with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"), patch.object(module, "PANEL_SEND_TIMEOUT", 0.002):
             result = await asyncio.wait_for(self.tool.compare_demo_data(
@@ -126,13 +137,13 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
             events.append(event)
             if self.panel_updates([event]) and self.panel_updates([event])[0]["phase"] == "querying":
                 entered.set()
-                await asyncio.Event().wait()
+                await _wait_test_event(asyncio.Event())
         context = self.context({"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"})
         with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
             job = asyncio.create_task(self.tool.compare_demo_data(
                 **context,
                 __event_emitter__=emit))
-            await entered.wait()
+            await _wait_test_event(entered)
             job.cancel()
             with self.assertRaises(asyncio.CancelledError):
                 await job
@@ -140,6 +151,31 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([u["phase"] for u in updates], ["requested", "querying", "cancelled"])
         self.assertNotIn("result", updates[-1])
         self.assertEqual(context["__request__"].state.ees_analysis_plan["snapshot"]["steps"][0]["status"], "cancelled")
+
+    async def test_comparison_emitter_completion_race_preserves_parent_cancellation(self):
+        for boundary in ("plan", "comparison"):
+            with self.subTest(boundary=boundary):
+                context = self.context({"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"})
+                plan = context["__request__"].state.ees_analysis_plan
+                step = plan["snapshot"]["steps"][0]
+                state = {"seq": 0, "kind": "comparison", "chat_id": "chat", "message_id": "message"}
+                async def emit(event):
+                    asyncio.get_running_loop().call_soon(job.cancel)
+                async def worker():
+                    if boundary == "plan":
+                        await module._plan_panel(emit, plan, step, "querying", "call")
+                    else:
+                        await module._panel(emit, state, "querying")
+                    await _wait_test_event(asyncio.Event())
+                with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+                    job = asyncio.create_task(worker())
+                    try:
+                        _, pending = await asyncio.wait({job}, timeout=0.5)
+                        self.assertFalse(pending, "Emitter completion swallowed parent cancellation")
+                        self.assertTrue(job.cancelled())
+                    finally:
+                        job.cancel()
+                        await asyncio.gather(job, return_exceptions=True)
 
     async def test_comparison_plan_scope_identity_and_duplicate_execution_are_guarded(self):
         metadata = {"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"}
