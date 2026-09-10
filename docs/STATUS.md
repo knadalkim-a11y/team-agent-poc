@@ -8,10 +8,10 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **협업 패널 v0.1.3 가독성과 업무 중심 시연 질문을 개선하고 Portal 이름 적용 경로를 정리함.** 사용자는 패널 열림과 전문가 카드의 질문·회신 표시를 확인했으나 글이 많아 읽기 어렵다고 보고함. 실제 회신을 먼저 읽고 상세 질문·조회 근거는 펼치는 방식과 가상 조립 2라인 질문을 준비함. 서비스 이름 코드는 이미 ees.2에 있지만 ApplyDemo는 프로그램을 갱신하지 않으므로 Upgrade가 별도로 필요함. [사내 확인·개선 검증](../evals/scenarios.md#cross-system-demo-readability).
-- 다음 작업 하나: **검증된 main에서 Upgrade → ApplyDemo 블록을 한 번 실행해 Portal 이름과 개선된 패널·시작 질문을 적용한다.** 프로그램 변경 시 재시작이 필요하며 기존 환경·데이터·키는 유지함. 완전 새로고침 뒤 새 EES 대화에서 조립 2라인 질문으로 가독성과 서비스 이름을 짧게 확인함. [한 번 적용](03-openwebui-native-agent.md#demo-assets-deployment).
+- 이번 작업: **사내 Upgrade가 stage=apply에서 실패해 기존 기록을 읽는 진단을 준비함.** 사용자 보고는 result=failed/changed=-/wrapper_changed=true/code=operation_failed/next=inspect_apply. 코드상 Stop·정지/포트 확인 뒤 Apply 안에서 실패했고 프로그램 변경 여부와 현재 가동은 미확인. 앞선 블록은 Upgrade 실패 시 중단하므로 후속 ApplyDemo의 성공으로 기록하지 않음. [이번 실패·진단 경계](../evals/scenarios.md#ees-portal-upgrade-apply-failure).
+- 다음 작업 하나: **재시도 없이 last-operation.json과 deployment.json에서 오류 종류·errno/winerror·pending 단계·프로그램 폴더/ZIP 존재만 두 줄로 확인한다.** 사내 결과를 받은 뒤 중단 위치에 맞는 Resume/Restore 또는 코드 보완을 선택함. 기존 수동 promote 우회를 현재 Upgrade에 바로 적용하거나 Start/Upgrade를 반복하지 않음. [이전 복구 조건](03-openwebui-native-agent.md#ees-wrapper-manual-promote).
 - 공유 DB 전제와 후속: 여러 시스템이 하나의 물리 DB와 일부 공통 데이터를 사용하나 각 담당자는 자기 시스템 지식에 집중되어 있음. [관계 발견 설계](03-openwebui-native-agent.md#shared-db-relations)는 운영 데이터 연결을 준비할 때 사용하며 현재 시연 범위에서 제외함. 시스템 간 실제 의미·접근 권한·스키마는 아직 조사하지 않음.
-- 배포 확인 대기: Portal 이름 변경과 Upgrade는 [PR #20](https://github.com/knadalkim-a11y/team-agent-poc/pull/20)에 이미 반영했고 ees.2 프로그램 검증을 완료함. 현재 사용자는 여전히 EES Assistant라고 보고함. 마지막 확인 프로그램은 ees.1 `4a8779bbf3ee`이며 Upgrade의 사내 성공은 미확인. 앞서 안내한 ApplyDemo는 프로그램을 변경하지 않으므로 이번에는 Upgrade와 ApplyDemo를 같은 블록으로 안내함. 모델의 EES 통합 Assistant 이름은 유지함. 실제 설치 버전을 새로 직접 조회한 것은 아님. [서비스 이름](03-openwebui-native-agent.md#ees-portal-name), [이전 검증](../evals/scenarios.md#ees-wrapper-upgrade).
+- 배포 확인 대기: 패널 v0.1.3 [PR #24](https://github.com/knadalkim-a11y/team-agent-poc/pull/24)를 main `a6f108796d818510c44a6c0d6408823bdb8b6611`에 반영했고 PR/main Windows/Linux CI·Agent Pack 생성을 완료함. Portal 프로그램 입력은 같아 기존 `0336cb8311789cd3f70785f1bd170cd2bd9148ce` 산출물을 재사용할 수 있음을 확인함. 사내 Upgrade는 apply에서 실패했으며 Portal 및 v0.1.3 자산 실적용은 미확인. 사용자 전달 wrapper는 `a6f108798d81`로 원격 SHA 접두사와 한 글자 차이가 있어 전체 사내 checkout 대조 없이 동일 SHA로 확정하지 않음. [실패 기록](../evals/scenarios.md#ees-portal-upgrade-apply-failure).
 - 설비 조회 관리 합의: 여러 업무에서 쓰는 공통 기능이므로 운영용 설계에서는 독립 Tool로 등록·관리하는 방향을 유지함. 사용자는 이번 시연에 한해 적용이 간단한 기존 단일 등록 항목을 유지하기로 함. 현재는 같은 Tool 안의 함수 분리이며 별도 등록 완료가 아님. 후속 요청의 설비 조회 패널도 같은 등록 항목에서 제공하며 새 적용 성공 보고로 간주하지 않음.
 - 첫 화면 제안: 기본 영어 문구를 대체할 천안 설비·헝가리 설비·AI WO 초안·직접 선택의 네 질문을 준비하고, v0.1.2의 Tool·WO 지침·제안 갱신 안내를 수행했다는 사용자 보고를 받음. 첫 조회 시연 중 대화 이동 후 패널 소실을 보고했으며 제안 네 개의 실제 등록 원문·각 클릭 결과를 직접 대조한 것은 아님. 이번 수정은 제안 JSON을 바꾸지 않음. [적용 안내](03-openwebui-native-agent.md#first-use-entry).
 - 완료한 이전 단위: 초기 Rich UI 제거·일반 문장/표/원문 링크 전환의 구현·검증·main 반영에 이어 **제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 확인함.** 개별 Tool 등록 내용·적용 SHA·새 조회/원문 결과의 직접 대조는 미확인으로 유지하며 저장 절차를 반복 안내하지 않음. [적용 보고](../evals/scenarios.md#plain-output-applied-report), [변경·검증](../evals/scenarios.md#prototype-rich-ui-removal).
@@ -120,7 +120,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-10: v0.1.2 패널 열림·질문/회신의 사내 사용자 확인을 반영하고 v0.1.3 가독성·업무 중심 질문을 개선함. 이름이 그대로라는 보고를 브랜딩 소스·ApplyDemo/Upgrade 범위와 대조해 프로그램 적용이 필요함을 확인함. 관련 Python83개·패널8그룹·실제 v0.1.2→v0.1.3 최초8/갱신6/재실행0 보존 검사와 독립 검토를 완료하고 펼침 직후 알림이 도착할 때 상태 보존을 보완함. 원격 CI와 배포물 생성 결과는 해당 PR에 보존하며 사내 새 화면 검증과 구분함. [범위·증거](../evals/scenarios.md#cross-system-demo-readability).
+2026-09-10: Upgrade의 apply 실패 보고를 현재 코드와 대조함. 서버 중지/포트 확인 이후 진입한 사실과 현재 상태 미확인을 구분하고, 저장된 OS 오류 번호·pending 단계 확인을 준비함. Upgrade 진단이 apply 하위 단계/정확한 예외 위치를 보존하지 않는 결함을 확인했으나 기존 저장 기록으로 먼저 범위를 좁힘. 실행 코드·서버·데이터는 변경하지 않고 문서/diff를 점검함. [근거](../evals/scenarios.md#ees-portal-upgrade-apply-failure).
 
 ## 갱신 규칙
 

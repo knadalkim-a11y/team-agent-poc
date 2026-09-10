@@ -1611,3 +1611,16 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 기록 검증: 상태·평가·적용 안내의 문서 3개만 변경함. ApplyDemo의 자산 목록·변경 횟수·재조회·성공 단계와 시작 질문/전문 실행 상태 코드를 읽기 대조함. Linux의 `python scripts/check_docs.py`는 files=29, links=751, errors=0, review_candidates=0이며 `git diff --check`도 통과함. 실행 코드·Prompt·Tool·테스트는 변경하지 않고 기존 통과 시험을 반복하지 않음. 사내 결과 전달·새 대화 안내의 독립 읽기 검토도 같은 판정 범위를 확인함.
 
 직전 STATUS 최근 점검 보존(시연 구현·원격 CI 완료, 2026-09-10): EMS/APC/FDC 합성 자료·Prompt·전문 호출과 ApplyDemo를 구현하고 고정 0.11.3의 native 응답 루프를 합성 provider로 실행함. API 필드·관리자 권한·재실행·응답 유실, 사내 버전 허용·비공개 설정 덮어쓰기 차단·자료 실패 상태·새 Tool 기본 Valves·저널 재시도를 검토함. 당시 실제 사내 API·LLM 품질·지연은 미검증이었고 Windows/Linux CI 성공과 첫 Windows 시험 인코딩 실패·수정은 위 구현 근거에 보존함.
+
+<a id="ees-portal-upgrade-apply-failure"></a>
+
+### Portal Upgrade 파일 적용 실패 보고 (2026-09-10)
+
+- 사용자 출력: `action=upgrade result=failed changed=- wrapper_changed=true wrapper=a6f108798d81 commit=- version=- stage=apply running=- code=operation_failed next=inspect_apply`. 전달된 wrapper는 안내 원본 `a6f108796d818510c44a6c0d6408823bdb8b6611` 접두사와 한 글자 다르므로 오타로 단정하지 않고 사내 정확한 SHA는 미확인으로 둠.
+- 코드 대조: ees_upgrade.deploy는 stop_registered·require_stopped 뒤에 stage=apply와 changed=None을 설정함. 따라서 정지/포트 해제 확인을 지나 Apply 안에서 실패한 것으로 판단하며 현재 서버 상태나 파일 무변경을 뜻하지 않음. 안내 PowerShell 블록은 Upgrade 예외 뒤 중단하므로 후속 ApplyDemo 성공은 확인되지 않음. 자동 재시도·Restore·Start를 수행하지 않음.
+- 기록과 보존: Upgrade는 last-operation.json에 action/failed/at/result 및 result.process의 고정 오류 종류·errno/winerror와 result.bundle 경로를 저장함. 결과에 report=unavailable은 보고되지 않음. 실제 오류 문장·예외 위치는 저장되지 않아 이번 요약만으로 파일 잠금·권한·디스크/경로 등 원인을 확정할 수 없음. result.process.stage는 기존 허용 단계에 apply가 없어 preflight로 축약되는 진단 결함이며 원인 판정에 사용하지 않음. 프로그램 미완료 단계는 deployment.json의 customization.pending를 읽음.
+- 다음 확인: 기본 config에서 state_root를 읽고 두 JSON의 최신 upgrade/apply 실패를 확인한 뒤 오류 종류/번호·기록 경과 시간, pending 단계와 program/program.previous/program.staging/deployment.lock/보존 ZIP 존재만 두 줄로 받음. 경로·원문 로그·환경값·토큰은 출력하지 않으며 파일이나 프로세스를 변경하지 않음. 기록이 없거나 다른 작업이면 중단함.
+- 복구 경계: 과거 성공한 수동 promote는 최초 설치의 다른 상태였음. 현재는 기존 program이 있어 move_active 실패 가능성도 있지만 미확정. Resume는 apply/promote에서 staging이 없고 정확한 target/previous/ZIP을 검증한 경우만 가능하며, Restore도 보관 파일·소유자·프로세스 경계를 확인해야 함. 결과를 받기 전에 과거 폴더 이동·구형 후보 진단·재설치를 안내하지 않음.
+- 사외 검토: 독립 읽기 검토로 실제 단계·오류 보존 결함·두 줄 확인·Resume/Restore 조건을 대조함. 새 실행 코드나 테스트를 추가하지 않았고 문서·diff를 점검함. 실제 사내 상세 오류·pending 상태·프로그램 복구·Portal/v0.1.3 적용은 미확인.
+
+직전 STATUS 최근 점검 보존(v0.1.3): 2026-09-10: v0.1.2 패널 열림·질문/회신의 사내 사용자 확인을 반영하고 v0.1.3 가독성·업무 중심 질문을 개선함. 이름이 그대로라는 보고를 브랜딩 소스·ApplyDemo/Upgrade 범위와 대조해 프로그램 적용이 필요함을 확인함. 관련 Python83개·패널8그룹·실제 v0.1.2→v0.1.3 최초8/갱신6/재실행0 보존 검사와 독립 검토를 완료하고 펼침 직후 알림이 도착할 때 상태 보존을 보완함. 원격 CI와 배포물 생성 결과는 해당 PR에 보존하며 사내 새 화면 검증과 구분함. [범위·증거](../evals/scenarios.md#cross-system-demo-readability).
