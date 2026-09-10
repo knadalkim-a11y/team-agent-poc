@@ -103,7 +103,7 @@ FIXTURE = """<!doctype html><html class="__MODE__"><head><meta charset="utf-8">
 <span id="answer-math" class="katex">x + y</span>
 </div></div></div></div>
 <div class="w-full max-w-[58rem] mx-auto"><div id="message-input-container" class="border rounded-3xl bg-gray-50">
-<div class="px-2 relative"><div id="chat-input-container"><div id="chat-input" contenteditable="true">다음에 확인할 내용을 입력하세요.</div></div></div>
+<div class="px-2 relative"><div id="chat-input-container"><div class="relative w-full min-w-full input-prose min-h-fit h-full"><div id="chat-input" class="tiptap ProseMirror" contenteditable="true"><p>다음에 확인할 내용을 입력하세요.</p></div></div></div></div>
 </div></div></div></main></div>
 <aside id="ees-cooperation-panel" style="width:480px;max-width:100%"></aside>
 <aside id="ees-wo-demo-panel"></aside>
@@ -143,6 +143,9 @@ FIXTURE = """<!doctype html><html class="__MODE__"><head><meta charset="utf-8">
         input:style(wo.getElementById('input')), muted:style(wo.getElementById('muted')),
         accent:style(wo.getElementById('accent'))},
     };
+    document.documentElement.style.setProperty('--app-text-scale', '1.25');
+    result.scaledAnswerSize = getComputedStyle(document.getElementById('answer')).fontSize;
+    document.documentElement.style.removeProperty('--app-text-scale');
     output.textContent = JSON.stringify(result);
   } catch(error) { output.textContent = JSON.stringify({error:String(error)}); }
 })();
@@ -217,46 +220,53 @@ class ChatThemeBrowserTests(unittest.TestCase):
         for mode, width in (("light", 1240), ("dark", 1240), ("light", 640)):
             with self.subTest(mode=mode, width=width):
                 r = self.render(mode, width)
-                dark = mode == "dark"
-                paper = "rgb(25, 29, 35)" if dark else "rgb(255, 255, 255)"
-                ink = "rgb(232, 237, 245)" if dark else "rgb(32, 44, 62)"
-                side = "rgb(20, 24, 30)" if dark else "rgb(245, 247, 250)"
-                soft = "rgb(36, 44, 54)" if dark else "rgb(240, 244, 248)"
-                muted = "rgb(166, 178, 195)" if dark else "rgb(100, 113, 135)"
-                blue = "rgb(145, 189, 223)" if dark else "rgb(55, 101, 139)"
-                for loaded, family in zip(r["fonts"], ("EES Inter", "EES Noto Sans KR")):
-                    self.assertTrue(any(face["family"].strip('"') == family and face["status"] == "loaded"
-                                        for face in loaded), loaded)
-                self.assertEqual(r["chat"]["background"], paper)
-                self.assertEqual(r["sidebar"]["background"], side)
-                self.assertEqual(r["text"]["color"], ink)
-                self.assertEqual(r["link"]["color"], blue)
-                self.assertEqual(r["bubble"]["background"], soft)
-                self.assertEqual(r["composer"]["background"], paper)
-                self.assertEqual(r["composer"]["radius"], "12px")
-                self.assertEqual(r["answer"]["size"], "14px")
-                self.assertAlmostEqual(float(r["answer"]["line"].removesuffix("px")), 27.3, places=1)
-                self.assertEqual(r["input"]["size"], "13px")
-                self.assertIn("monospace", r["code"]["font"])
-                self.assertNotIn("EES", r["code"]["font"])
-                self.assertIn("KaTeX", r["math"]["font"])
-                self.assertNotIn("EES", r["math"]["font"])
-                for node in (r["answer"], r["input"], r["analysis"]["text"],
-                             r["analysis"]["button"], r["wo"]["text"], r["wo"]["input"]):
-                    self.assertTrue(node["font"].startswith('"EES Inter"'), node["font"])
-                    self.assertIn('"EES Noto Sans KR"', node["font"])
-                self.assertEqual(r["analysis"]["frame"]["background"], side)
-                for panel in (r["analysis"], r["wo"]):
-                    self.assertEqual(panel["text"]["color"], ink)
-                    self.assertEqual(panel["muted"]["color"], muted)
-                    self.assertEqual(panel["accent"]["color"], blue)
-                self.assertEqual(r["wo"]["host"]["background"], paper)
-                self.assertEqual(r["row"]["maxWidth"], "672px")
-                self.assertLessEqual(r["scrollWidth"], r["width"] + 1)
-                self.assertEqual(r["row"]["padding"], "18px" if width <= 700 else "28px")
-                self.assertEqual(r["heading"]["size"], "20px" if width <= 700 else "21px")
-                if width <= 700:
-                    self.assertLessEqual(r["width"], 700)
+                try:
+                    dark = mode == "dark"
+                    paper = "rgb(25, 29, 35)" if dark else "rgb(255, 255, 255)"
+                    ink = "rgb(232, 237, 245)" if dark else "rgb(32, 44, 62)"
+                    side = "rgb(20, 24, 30)" if dark else "rgb(245, 247, 250)"
+                    soft = "rgb(36, 44, 54)" if dark else "rgb(240, 244, 248)"
+                    muted = "rgb(166, 178, 195)" if dark else "rgb(100, 113, 135)"
+                    blue = "rgb(145, 189, 223)" if dark else "rgb(55, 101, 139)"
+                    for loaded, family in zip(r["fonts"], ("EES Inter", "EES Noto Sans KR")):
+                        self.assertTrue(any(face["family"].strip('"') == family and face["status"] == "loaded"
+                                            for face in loaded), loaded)
+                    self.assertEqual(r["chat"]["background"], paper)
+                    self.assertEqual(r["sidebar"]["background"], side)
+                    self.assertEqual(r["text"]["color"], ink)
+                    self.assertEqual(r["link"]["color"], blue)
+                    self.assertEqual(r["bubble"]["background"], soft)
+                    self.assertEqual(r["composer"]["background"], paper)
+                    self.assertEqual(r["composer"]["radius"], "12px")
+                    self.assertEqual(r["answer"]["size"], "14px")
+                    self.assertEqual(r["scaledAnswerSize"], "17.5px")
+                    self.assertAlmostEqual(float(r["answer"]["line"].removesuffix("px")), 27.3, places=1)
+                    self.assertEqual(r["input"]["size"], "13px")
+                    self.assertIn("monospace", r["code"]["font"])
+                    self.assertNotIn("EES", r["code"]["font"])
+                    self.assertIn("KaTeX", r["math"]["font"])
+                    self.assertNotIn("EES", r["math"]["font"])
+                    for node in (r["answer"], r["input"], r["analysis"]["text"],
+                                 r["analysis"]["button"], r["wo"]["text"], r["wo"]["input"]):
+                        self.assertTrue(node["font"].startswith('"EES Inter"'), node["font"])
+                        self.assertIn('"EES Noto Sans KR"', node["font"])
+                    self.assertEqual(r["analysis"]["frame"]["background"], side)
+                    for panel in (r["analysis"], r["wo"]):
+                        self.assertEqual(panel["text"]["color"], ink)
+                        self.assertEqual(panel["muted"]["color"], muted)
+                        self.assertEqual(panel["accent"]["color"], blue)
+                    self.assertEqual(r["wo"]["host"]["background"], paper)
+                    self.assertEqual(r["row"]["maxWidth"], "672px")
+                    self.assertLessEqual(r["scrollWidth"], r["width"] + 1)
+                    self.assertEqual(r["row"]["padding"], "18px" if width <= 700 else "28px")
+                    self.assertEqual(r["heading"]["size"], "20px" if width <= 700 else "21px")
+                    if width <= 700:
+                        self.assertLessEqual(r["width"], 700)
+                except AssertionError as error:
+                    # One failed expectation must still expose every computed
+                    # value, so a remote CI round can reveal all cascade clashes.
+                    diagnostics = json.dumps(r, ensure_ascii=False, sort_keys=True)
+                    raise self.failureException(str(error) + "\nComputed styles: " + diagnostics) from None
 
 
 if __name__ == "__main__":

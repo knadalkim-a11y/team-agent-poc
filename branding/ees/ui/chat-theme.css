@@ -106,7 +106,9 @@ html.dark #chat-container { color-scheme: dark; }
   --tw-prose-th-borders: var(--ees-line);
   --tw-prose-td-borders: var(--ees-line);
   font-family: var(--ees-font);
-  font-size: .875rem;
+  /* Pinned global .markdown-prose uses an unlayered 15px !important.
+   * Match that priority only for the chat prose size; keep native text scaling. */
+  font-size: .875rem !important;
   font-weight: 400;
   color: var(--ees-ink);
   line-height: 1.95;
