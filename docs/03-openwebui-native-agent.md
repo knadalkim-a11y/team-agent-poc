@@ -385,7 +385,7 @@ EES만 위임하며 첫 분석은 필요한 전문 Assistant별 최대 1회, 추
 
 #### 시연 자산과 한 번 적용하는 방식
 
-`manage-ees.ps1 -Action ApplyDemo`는 **[시연 관리 목록](../agent-pack/ees-demo.json)에 지정한 모델·Tool·Prompt·시작 질문만 등록·갱신**합니다. 구현과 사외 합성 검사는 준비했으며 사내 API 적용·실제 모델 분석은 미확인입니다. 원격 병합·CI 진행 상태는 [STATUS](STATUS.md)를 따릅니다. 기존 `Update`는 파일, `Upgrade`는 파일·프로그램을 갱신하고 WebUI 안의 자산 등록은 `ApplyDemo`가 담당합니다.
+`manage-ees.ps1 -Action ApplyDemo`는 **[시연 관리 목록](../agent-pack/ees-demo.json)에 지정한 모델·Tool·Prompt·시작 질문만 등록·갱신**합니다. API 등록 성공과 실제 모델의 분석 성공은 별도로 확인합니다. 사내 적용·시연 및 원격 병합·CI의 현재 상태는 [STATUS](STATUS.md)를 따릅니다. 기존 `Update`는 파일, `Upgrade`는 파일·프로그램을 갱신하고 WebUI 안의 자산 등록은 `ApplyDemo`가 담당합니다.
 
 | 관리 대상 | 적용 내용 |
 |---|---|

@@ -1519,10 +1519,10 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 |---|---|---|
 | 실제 전문 실행 | 대상 모델 지침·자료 Tool과 현재 사용자 권한이 적용되고 다른 Task Model에 자료 범위가 바뀌지 않음 | 고정 wheel 실제 native 루프·합성 provider 시험 통과. 실제 사내 모델 호출 미실행 |
 | 발견·반증·단일 시스템 | 위 3개 흐름에서 선택·보완·결론이 질문/자료와 일치, KPI 수치·관찰 범위·미확인 근거를 추적 가능 | 합성 자료/수치·Prompt 준비 완료. 사내 새 대화 3건 판정 미확인 |
-| 최초·반복 적용 | 필요한 자산만 생성·갱신, 기존 EES ID 유지, 동일 버전 두 번째 실행은 무변경 | API 계약 모의시험 통과. 실제 사내 등록 미실행 |
+| 최초·반복 적용 | 필요한 자산만 생성·갱신, 기존 EES ID 유지, 동일 버전 두 번째 실행은 무변경 | API 계약 모의시험 통과. 2026-09-10 사내 최초 적용 result=ok/changed=8 보고. 사내 무변경 재실행은 미확인 |
 | 부분 실패·응답 유실 | 실패 단계를 보고하고 재조회·같은 명령 재실행으로 완료 항목을 중복 생성하지 않음 | 실패 주입·재조회·재실행 시험 통과. 강제 프로세스 종료의 잠금 회수 자동화 없음 |
 | 현장 설정·인증 보존 | 모델/Tool 미관리 필드와 기존 PAT 유지, 현장 수정·고정 ID 충돌 시 덮어쓰기 중단, 토큰 비노출 | 병합·충돌·토큰 비노출 시험 통과. 실제 사내 권한·저장 미확인 |
-| 등록과 시연의 구분 | API 재조회 결과와 실제 새 대화의 시연 결과를 별도로 기록. 등록 성공을 LLM 분석 성공으로 간주하지 않음 | 별도 판정·안내 구현. 실제 등록/시연 결과 미확인 |
+| 등록과 시연의 구분 | API 재조회 결과와 실제 새 대화의 시연 결과를 별도로 기록. 등록 성공을 LLM 분석 성공으로 간주하지 않음 | 별도 판정·안내 구현. 2026-09-10 사내 API 적용 성공 보고, 실제 모델 시연은 미확인 |
 
 - 설계 후속 문서 검증: 최종 적용 절차 독립 검토에서 초기 연결/이후 한 명령, ID·개인 설정 보존, 부분 실패 재실행, 미구현 표시의 일치를 확인했고 검토 범위 내 치명적 누락·과설계는 발견하지 않음. Linux/Python 3.12.14에서 `python scripts/check_docs.py`는 files=25, links=729, errors=0, review_candidates=0이며 `git diff --check`도 통과함. 기존 문서 6개만 수정했고 실행 코드·설정·Prompt 원본·자동 테스트·사내 데이터는 변경하지 않음.
 
@@ -1546,3 +1546,19 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 첫 원격 CI: 실행 코드 `887cec6f2524a745248c9eb6173941977e13473a`의 [PR Windows/Linux 검사](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34429581261)에서 Linux는 성공하고 Windows는 자산 시험 4건의 UTF-8 저널을 기본 cp1252로 읽어 실패했다. 실제 저장·읽기 코드는 UTF-8을 명시하고 있었으며 시험의 파일 읽기/쓰기에 인코딩을 명시해 수정했다. 이후 단계의 전문 Tool 소스 읽기도 같은 방식으로 보완한다. 첫 실패를 사내 등록 실패로 간주하지 않으며 수정 후 원격 결과를 별도로 확인한다.
 
 - 원격 검증 완료: 인코딩 보완 원본 `1da6a13094ad5140c9523c3b5543490469257e77`의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34429876696)가 모두 성공했다. ApplyDemo/기존 Upgrade PowerShell 인자 전달, 자산 등록·재실행 23건, 자료 계산 13건, 고정 wheel 전문 호출 20건, 기존 프로그램의 실제 wheel Apply/Restore와 Windows PowerShell 구문 검사를 포함한다. 인코딩 누락을 오류로 처리한 관련 56건의 로컬 검사도 통과했다. 실행 코드는 `887cec6f2524a745248c9eb6173941977e13473a`와 동일하며 이후 인증 안내·상태·검증 기록만 보완한다. 실제 사내 적용과 LLM 분석 품질은 계속 미확인이다.
+
+
+<a id="cross-system-demo-internal-apply"></a>
+
+### 사내 ApplyDemo 최초 적용 성공과 접속 불가 관찰 (2026-09-10)
+
+- 환경·원본: 기존 Windows Open WebUI 0.11.3 커스터마이징 환경. 사용자 Status 보고의 적용 프로그램은 `4a8779bbf3ee`, ApplyDemo 성공 원본은 `502344d55154`임. 후자는 원격 main `502344d5515461ee0640b9fbfd96fe66ebd2edb4`의 접두사와 일치함. 이번 기록 전 main tree `629d4c92247e48123df125bdc7bbc17a19cab913`와 로컬 동일 tree·관련 열린 PR 0개를 확인함. 사내 checkout 전체 SHA·API 응답 원문은 직접 대조하지 않음.
+- 선행 인증 실패: 처음 `stage=ci_check code=credentials_rejected changed=0 commit=-`를 보고받았고 기존 GitHub 토큰 교체 뒤 다음 단계로 진행함. 실제 토큰 값·사내 주소는 수집하지 않음. GitHub.com 배포용 토큰과 사내 GitHub Enterprise/Confluence/Jira PAT·WebUI 관리자 API 키를 구분함.
+- 선행 접속 실패: 교체 뒤 `stage=webui_version code=webui_connection_failed changed=0 commit=502344d55154`와 브라우저 접속 불가를 보고받음. 이 단계는 WebUI 인증 전 `/api/version` 조회이고 자산 쓰기 전임. Status는 `result=ok program=customized running=true`였으나 이는 등록 프로세스 identity 일치만 뜻하며 HTTP 정상의 증거는 아님.
+- 재시작 전 관찰: 등록 설정·현재 프로세스 로그를 읽는 짧은 PowerShell 점검 후 `NET ip=True listen=False http=000 curl=28`, `LOG age_min=31.1 tail200=winerror_64`를 수신함. 당시 등록 IP는 로컬에 있었고 해당 포트의 Listen은 발견되지 않았으며 직접 HTTP 요청은 시간 초과함. WinError 64는 현재 로그 끝 200줄에 나온 신호일 뿐 최초 원인·해당 시각의 예외로 확정하지 않음. 31.1분은 로그 수정 후 경과 시간이며 장애 지속 시간이 아님. 과거 인증서/기동 지연과 동일 원인이라고 단정하지 않음.
+- 복구·적용 안내: 기존 `Stop -Summary` → `Start -HealthTimeout 120 -Summary` → `ApplyDemo`를 앞 단계 실패 시 중단하는 한 블록으로 안내함. Stop은 등록 identity를 확인한 정상 종료이며 강제 종료하지 않음. Start는 기존 환경·저장된 CA·프로그램을 재사용하고 별도 로그에 기록함. 프로그램/의존성 재설치·환경 재등록·TLS 해제·기본 대기 변경은 안내하지 않음.
+- 성공 보고: 사용자는 WebUI API 키 입력 후 `EES action=apply_demo result=ok changed=8 commit=502344d55154 stage=complete code=- next=new_chat`을 전달함. 구현과 대조하면 Tool 2개·각 Tool의 연결 설정 2개·전문 모델 3개·기존 EES 모델 1개의 총 8회 API 변경이며 각 변경의 재조회 검증까지 성공한 결과임. 8개 모델 생성으로 해석하지 않음. API 연결·인증·지정 자산 반영 성공을 사용자 보고 범위에서 인정하며 개별 Stop/Start 출력·기동 소요 시간·브라우저 채팅·장기 안정성은 별도 확인하지 않음. ApplyDemo는 서버 중지/시작을 호출하지 않으며, 이 성공을 앞선 접속 불가 원인 해결 또는 Portal 프로그램 Upgrade 완료로 기록하지 않음.
+- 다음 확인: 포털 새로고침 후 기존 EES 통합 Assistant의 새 대화에서 `sample_a 시연 데이터에서 놓치고 있는 개선 기회를 찾아줘.`를 사용함. 질문에 호출 대상·원인·KPI 정답을 주입하지 않음. 사용자는 실제 전문 실행 상태의 Assistant 이름과 최종 제안 요지 한 문장만 전달함. 전문 호출·발견 품질·반증 반영·EMS 단독 선택·사용자별 권한/기존 설정 보존 실측·사내 재실행 무변경은 미확인으로 남김. 최초 API 키 입력이나 완료한 등록 검사를 반복하지 않음.
+- 기록 검증: 상태·평가·적용 안내의 문서 3개만 변경함. ApplyDemo의 자산 목록·변경 횟수·재조회·성공 단계와 시작 질문/전문 실행 상태 코드를 읽기 대조함. Linux의 `python scripts/check_docs.py`는 files=29, links=751, errors=0, review_candidates=0이며 `git diff --check`도 통과함. 실행 코드·Prompt·Tool·테스트는 변경하지 않고 기존 통과 시험을 반복하지 않음. 사내 결과 전달·새 대화 안내의 독립 읽기 검토도 같은 판정 범위를 확인함.
+
+직전 STATUS 최근 점검 보존(시연 구현·원격 CI 완료, 2026-09-10): EMS/APC/FDC 합성 자료·Prompt·전문 호출과 ApplyDemo를 구현하고 고정 0.11.3의 native 응답 루프를 합성 provider로 실행함. API 필드·관리자 권한·재실행·응답 유실, 사내 버전 허용·비공개 설정 덮어쓰기 차단·자료 실패 상태·새 Tool 기본 Valves·저널 재시도를 검토함. 당시 실제 사내 API·LLM 품질·지연은 미검증이었고 Windows/Linux CI 성공과 첫 Windows 시험 인코딩 실패·수정은 위 구현 근거에 보존함.
