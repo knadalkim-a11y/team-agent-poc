@@ -632,7 +632,7 @@ class ApplyAssetsTests(unittest.TestCase):
 
     def test_real_manifest_sources_pass_preflight(self):
         manifest = assets.load_manifest(MODULE.parents[1])
-        self.assertEqual("0.2.0", manifest["version"])
+        self.assertEqual("0.2.1", manifest["version"])
         self.assertEqual({"ees_specialists", "ees_demo_data"}, {t["id"] for t in manifest["tools"]})
         self.assertEqual({"ees_demo_ems", "ees_demo_apc", "ees_demo_fdc"},
                          {m["id"] for m in manifest["models"]})

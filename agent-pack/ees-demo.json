@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.2.1",
   "tools": [
     {
       "id": "ees_specialists",
@@ -30,7 +30,10 @@
       "ui_script_slot": "WORK_PANEL_SCRIPT",
       "accepted_source_sha256": [
         "368696d00233ab859bccd997ba28aad23b6c96b805eb6e53b0499adfd8a4689d",
-        "c46f45d6cb939a581910b47c5af159ad59f3d0e69f901f16510b5c3be8c85868"
+        "c46f45d6cb939a581910b47c5af159ad59f3d0e69f901f16510b5c3be8c85868",
+        "2023d4fab7d983af15d800c1ab4d02f3ca986fe19583f42d6f8d4bbf97500e8d",
+        "406ebced27094a1210ccc0053c9157d64020199dd7eec240e29c82893cc4af87",
+        "401536920e2b595e453d718690a87d0db08901b540e72ef915f084fbfa2b7d28"
       ]
     }
   ],
