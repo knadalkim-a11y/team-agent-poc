@@ -1,6 +1,6 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-09
+갱신일: 2026-09-10
 
 계획·다음 작업·적용 원본을 관리합니다. 시험 판정은 [평가표](../evals/scenarios.md), 환경은 [versions](../versions.md), 과거 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
@@ -9,7 +9,7 @@
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
 - 이번 작업: **EES Portal 이름 변경에 프로그램·래퍼 일괄 업데이트 명령을 추가함.** 사용자가 승인한 범위는 기존 `manage-ees.ps1 -Action Upgrade`에서 main CI 확인·래퍼 갱신·호환 프로그램 ZIP 자동 선택/다운로드·사전 확인·Stop/Apply/Start를 묶는 것임. 같은 프로그램의 다운로드/재시작을 줄이며 Tool·Skill·Prompt 자동 반영은 포함하지 않음. 설치된 ees.1과 기존 환경·데이터·키·Windows CA를 유지하고 Portal ees.2·WO v0.1.7의 준비/실제 적용을 구분함. [이름 변경 근거](../evals/scenarios.md#ees-portal-name), [Upgrade 범위·검증](../evals/scenarios.md#ees-wrapper-upgrade).
-- 다음 작업 하나: **기존 PR #20에서 Upgrade 검토·새 CI를 마치고 main 반영·프로그램 산출물 성공 후 사내 최초 실행을 안내한다.** 관련 로컬 검사에서 실행 항목은 통과했으며 CI의 최신 결과는 [PR #20 검사](https://github.com/knadalkim-a11y/team-agent-poc/pull/20/checks)에서 확인함. 사내 API/다운로드 접근·DPAPI 입력·실제 Upgrade와 Portal 표시는 미확인임. 현재 확인된 프로그램은 ees.1임. 밤사이 접속 불가 원인은 미확정으로 보존하고 사용자 합의대로 재발 시 재시작 전에 확인함. [한 번 실행 안내](03-openwebui-native-agent.md#ees-wrapper-upgrade), [장애 후속](../evals/scenarios.md#ees-start-health-followup).
+- 다음 작업 하나: **검증된 main 프로그램 산출물로 사내 최초 Upgrade 결과와 Portal 표시를 확인한다.** 기존 PR #20에서 코드 검토·CI·main 반영과 산출물 생성을 마친 뒤 최초 실행 블록을 사용함. 실행 코드 원본 `968f48913207e65442bb8c6b3e12270024213144`의 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34418955399)가 성공했고 이후 문서만 보완함. 최종 main 산출물은 [EES delivery](https://github.com/knadalkim-a11y/team-agent-poc/actions/workflows/ees-delivery.yml)에서 확인함. 사내 API/다운로드 접근·DPAPI 입력·실제 Upgrade와 Portal 표시는 미확인임. 현재 확인된 프로그램은 ees.1임. 밤사이 접속 불가 원인은 미확정으로 보존하고 사용자 합의대로 재발 시 재시작 전에 확인함. [한 번 실행 안내](03-openwebui-native-agent.md#ees-wrapper-upgrade), [장애 후속](../evals/scenarios.md#ees-start-health-followup).
 - 설비 조회 관리 합의: 여러 업무에서 쓰는 공통 기능이므로 운영용 설계에서는 독립 Tool로 등록·관리하는 방향을 유지함. 사용자는 이번 시연에 한해 적용이 간단한 기존 단일 등록 항목을 유지하기로 함. 현재는 같은 Tool 안의 함수 분리이며 별도 등록 완료가 아님. 후속 요청의 설비 조회 패널도 같은 등록 항목에서 제공하며 새 적용 성공 보고로 간주하지 않음.
 - 첫 화면 제안: 기본 영어 문구를 대체할 천안 설비·헝가리 설비·AI WO 초안·직접 선택의 네 질문을 준비하고, v0.1.2의 Tool·WO 지침·제안 갱신 안내를 수행했다는 사용자 보고를 받음. 첫 조회 시연 중 대화 이동 후 패널 소실을 보고했으며 제안 네 개의 실제 등록 원문·각 클릭 결과를 직접 대조한 것은 아님. 이번 수정은 제안 JSON을 바꾸지 않음. [적용 안내](03-openwebui-native-agent.md#first-use-entry).
 - 완료한 이전 단위: 초기 Rich UI 제거·일반 문장/표/원문 링크 전환의 구현·검증·main 반영에 이어 **제거 작업과 변경 프롬프트의 WebUI 반영 완료를 사용자 보고로 확인함.** 개별 Tool 등록 내용·적용 SHA·새 조회/원문 결과의 직접 대조는 미확인으로 유지하며 저장 절차를 반복 안내하지 않음. [적용 보고](../evals/scenarios.md#plain-output-applied-report), [변경·검증](../evals/scenarios.md#prototype-rich-ui-removal).
@@ -115,7 +115,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-09: 기존 PR #20의 Portal 변경에 승인된 Upgrade 범위를 연결함. main HEAD 성공 CI·호환 프로그램 산출물·다운로드 검증·중복 다운로드/재시작 생략·실패 ZIP 보존과 명시적 복구를 기준으로 코드·가이드를 대조함. 로컬 관련 161개 검사 중 157개 통과·4개 환경 조건 생략이며 문서·diff 검사도 통과함. CI의 최신 결과는 [PR #20 검사](https://github.com/knadalkim-a11y/team-agent-poc/pull/20/checks)에서 확인함. 독립 검토에서 발견한 main 검사 누락·Update 잠금 경쟁·부모 중단 보고 문제를 보완하고 재검토함. 사내 인증/다운로드·실제 적용은 미확인임. 기존 Portal 변경 검증·ees.1 적용 원본·장애 이력은 보존함. [이번 근거](../evals/scenarios.md#ees-wrapper-upgrade), [이름 변경 검증](../evals/scenarios.md#ees-portal-name).
+2026-09-09: 기존 PR #20의 Portal 변경에 승인된 Upgrade 범위를 연결함. main HEAD 성공 CI·호환 프로그램 산출물·다운로드 검증·중복 다운로드/재시작 생략·실패 ZIP 보존과 명시적 복구를 기준으로 코드·가이드를 대조함. 로컬 관련 161개 검사 중 157개 통과·4개 환경 조건 생략이며 문서·diff 검사도 통과함. CI의 최신 결과는 [PR #20 검사](https://github.com/knadalkim-a11y/team-agent-poc/pull/20/checks)에서 확인함. 독립 검토에서 발견한 main 검사 누락·Update 잠금 경쟁·부모 중단 보고 문제를 보완하고 재검토함. 2026-09-10 설치 가이드 누락도 수정했고, DB 이름 우선순위 지적은 실제 고정 upstream wheel 대조로 해당 버전의 오탐임을 확인함. 사내 인증/다운로드·실제 적용은 미확인임. 기존 Portal 변경 검증·ees.1 적용 원본·장애 이력은 보존함. [이번 근거](../evals/scenarios.md#ees-wrapper-upgrade), [이름 변경 검증](../evals/scenarios.md#ees-portal-name).
 
 ## 갱신 규칙
 
