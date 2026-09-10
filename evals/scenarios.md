@@ -1624,3 +1624,13 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 사외 검토: 독립 읽기 검토로 실제 단계·오류 보존 결함·두 줄 확인·Resume/Restore 조건을 대조함. 새 실행 코드나 테스트를 추가하지 않았고 문서·diff를 점검함. 실제 사내 상세 오류·pending 상태·프로그램 복구·Portal/v0.1.3 적용은 미확인.
 
 직전 STATUS 최근 점검 보존(v0.1.3): 2026-09-10: v0.1.2 패널 열림·질문/회신의 사내 사용자 확인을 반영하고 v0.1.3 가독성·업무 중심 질문을 개선함. 이름이 그대로라는 보고를 브랜딩 소스·ApplyDemo/Upgrade 범위와 대조해 프로그램 적용이 필요함을 확인함. 관련 Python83개·패널8그룹·실제 v0.1.2→v0.1.3 최초8/갱신6/재실행0 보존 검사와 독립 검토를 완료하고 펼침 직후 알림이 도착할 때 상태 보존을 보완함. 원격 CI와 배포물 생성 결과는 해당 PR에 보존하며 사내 새 화면 검증과 구분함. [범위·증거](../evals/scenarios.md#cross-system-demo-readability).
+
+#### 후속: promote 접근 거부와 보존 상태 확인 (2026-09-10)
+
+- 사용자 보고: `age_min=7.2 type=os_error errno=13 winerror=5`, `pending=promote program=false previous=true staging=true lock=false zip=true`. 7.2분은 실패 기록 후 경과 시간이다. 새 최종 program은 아직 없고 이전/준비 폴더와 ZIP이 남아 있는 상태를 확인했으며 전체 파일 무결성이나 현재 가동을 이 존재 검사로 대신하지 않음.
+- 판정: apply 소스의 retire_previous·move_active 뒤 promote에서 program.staging→program 이름 변경이 접근 거부된 상태와 일치함. 최초 사내 설치 때와 같은 중단 단계이나 근본 원인이 같다는 증거는 없음. 파일 사용 주체·ACL·보안 프로그램·시간 경과 영향은 미확정임.
+- 재개 검토: check_resume은 기존 active가 있는 경우 previous를 pending.before와 전체 대조하고, target과 같은 ZIP/commit 및 새 program 전체를 검증함. `test_legacy_before_portal_pending_can_resume_and_restore`와 `test_resume_updated_and_identical_bytes_preserves_exact_predecessor`의 기존 검증 범위를 재사용함. 코드/시험 변경과 같은 검사 반복은 하지 않음.
+- 안내: 한 블록에서 최신 실패/pending·정지 기록·폴더/잠금/ZIP 존재와 commit 형식을 확인하고 원래 ZIP/target commit을 먼저 읽음. 원래 실패 보고를 ZIP 옆 upgrade-failure.json에 한 번 보존한 후 탐색기를 열고 수동 이름 변경을 기다림. 이름 변경 성공을 확인한 뒤 Apply -Resume → Start120 → ApplyDemo를 순서대로 실행하며 앞 단계 실패 시 다음 작업은 실행하지 않음. 기존 ZIP 재사용, DB/키/CA/이전 프로그램 보존, 수동 이름 변경 거부 시 중단 기준을 유지함.
+- 검토 결과: 독립 읽기 검토로 현재 기존 수정본의 재개 지원·보고 덮어쓰기 전 ZIP 보존·실패 전파를 대조함. 복사 블록은 2,146자로 제한 이내. 문서/diff를 점검하며 사내 수동 이름 변경·Resume·Start·Portal/v0.1.3 성공은 후속 보고 전까지 미확인임.
+
+직전 STATUS 최근 점검 보존(최초 Upgrade 실패 진단): 2026-09-10: Upgrade의 apply 실패 보고를 현재 코드와 대조함. 서버 중지/포트 확인 이후 진입한 사실과 현재 상태 미확인을 구분하고, 저장된 OS 오류 번호·pending 단계 확인을 준비함. Upgrade 진단이 apply 하위 단계/정확한 예외 위치를 보존하지 않는 결함을 확인했으나 기존 저장 기록으로 먼저 범위를 좁힘. 실행 코드·서버·데이터는 변경하지 않고 문서/diff를 점검함. [근거](../evals/scenarios.md#ees-portal-upgrade-apply-failure).

@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **사내 Upgrade가 stage=apply에서 실패해 기존 기록을 읽는 진단을 준비함.** 사용자 보고는 result=failed/changed=-/wrapper_changed=true/code=operation_failed/next=inspect_apply. 코드상 Stop·정지/포트 확인 뒤 Apply 안에서 실패했고 프로그램 변경 여부와 현재 가동은 미확인. 앞선 블록은 Upgrade 실패 시 중단하므로 후속 ApplyDemo의 성공으로 기록하지 않음. [이번 실패·진단 경계](../evals/scenarios.md#ees-portal-upgrade-apply-failure).
-- 다음 작업 하나: **재시도 없이 last-operation.json과 deployment.json에서 오류 종류·errno/winerror·pending 단계·프로그램 폴더/ZIP 존재만 두 줄로 확인한다.** 사내 결과를 받은 뒤 중단 위치에 맞는 Resume/Restore 또는 코드 보완을 선택함. 기존 수동 promote 우회를 현재 Upgrade에 바로 적용하거나 Start/Upgrade를 반복하지 않음. [이전 복구 조건](03-openwebui-native-agent.md#ees-wrapper-manual-promote).
+- 이번 작업: **Upgrade의 promote 접근 거부와 복구 조건을 사내 보고로 확인함.** 오류는 os_error/errno13/winerror5, pending=promote, program 없음·previous/staging/보존 ZIP 있음·lock 없음이다. 준비한 새 프로그램의 마지막 이름 변경 단계와 일치하며 실제 파일 잠금/보안 제품 등 근본 원인은 미확정. 기존 Resume 코드로 앞선 수정본을 보존하는 재개 경로를 검토함. [실패·후속 상태](../evals/scenarios.md#ees-portal-upgrade-apply-failure).
+- 다음 작업 하나: **기존 상태를 확인하는 한 블록에서 탐색기 이름 변경 → Apply -Resume → Start → ApplyDemo를 순서대로 진행한다.** program.staging을 program으로 바꾼 뒤 Enter를 누르며 이전 프로그램·ZIP을 보존한다. Resume이 같은 ZIP/target commit·전체 프로그램/보관본·정지/포트를 검증하고 성공한 단계만 이어감. 이름 변경이 거부되거나 EES 단계가 실패하면 멈추고 짧은 결과만 받음. [현재 복구 블록](03-openwebui-native-agent.md#ees-wrapper-manual-promote).
 - 공유 DB 전제와 후속: 여러 시스템이 하나의 물리 DB와 일부 공통 데이터를 사용하나 각 담당자는 자기 시스템 지식에 집중되어 있음. [관계 발견 설계](03-openwebui-native-agent.md#shared-db-relations)는 운영 데이터 연결을 준비할 때 사용하며 현재 시연 범위에서 제외함. 시스템 간 실제 의미·접근 권한·스키마는 아직 조사하지 않음.
 - 배포 확인 대기: 패널 v0.1.3 [PR #24](https://github.com/knadalkim-a11y/team-agent-poc/pull/24)를 main `a6f108796d818510c44a6c0d6408823bdb8b6611`에 반영했고 PR/main Windows/Linux CI·Agent Pack 생성을 완료함. Portal 프로그램 입력은 같아 기존 `0336cb8311789cd3f70785f1bd170cd2bd9148ce` 산출물을 재사용할 수 있음을 확인함. 사내 Upgrade는 apply에서 실패했으며 Portal 및 v0.1.3 자산 실적용은 미확인. 사용자 전달 wrapper는 `a6f108798d81`로 원격 SHA 접두사와 한 글자 차이가 있어 전체 사내 checkout 대조 없이 동일 SHA로 확정하지 않음. [실패 기록](../evals/scenarios.md#ees-portal-upgrade-apply-failure).
 - 설비 조회 관리 합의: 여러 업무에서 쓰는 공통 기능이므로 운영용 설계에서는 독립 Tool로 등록·관리하는 방향을 유지함. 사용자는 이번 시연에 한해 적용이 간단한 기존 단일 등록 항목을 유지하기로 함. 현재는 같은 Tool 안의 함수 분리이며 별도 등록 완료가 아님. 후속 요청의 설비 조회 패널도 같은 등록 항목에서 제공하며 새 적용 성공 보고로 간주하지 않음.
@@ -120,7 +120,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-10: Upgrade의 apply 실패 보고를 현재 코드와 대조함. 서버 중지/포트 확인 이후 진입한 사실과 현재 상태 미확인을 구분하고, 저장된 OS 오류 번호·pending 단계 확인을 준비함. Upgrade 진단이 apply 하위 단계/정확한 예외 위치를 보존하지 않는 결함을 확인했으나 기존 저장 기록으로 먼저 범위를 좁힘. 실행 코드·서버·데이터는 변경하지 않고 문서/diff를 점검함. [근거](../evals/scenarios.md#ees-portal-upgrade-apply-failure).
+2026-09-10: 사내 errno13/winerror5와 promote·폴더/ZIP 존재 보고를 기존 파일 적용/Resume 코드 및 ees.1→ees.2 재개 시험과 대조함. 독립 검토로 기존 수정본·직전 보관본·정확한 ZIP/commit의 재개 지원을 확인함. 2,146자 한 블록이 상태 확인·원래 오류 보고 로컬 보존·탐색기 수동 이름 변경·검증/시작/시연 자산 적용을 잇도록 준비함. 새 실행 코드·테스트·사내 작업은 수행하지 않고 문서/diff를 점검함. [증거](../evals/scenarios.md#ees-portal-upgrade-apply-failure).
 
 ## 갱신 규칙
 

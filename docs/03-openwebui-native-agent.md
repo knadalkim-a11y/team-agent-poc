@@ -1007,6 +1007,57 @@ Start의 `stage=health_check` 시간 초과는 지정한 시간 안에 정상 �
 
 #### 탐색기에서 실제 프로그램 폴더를 옮긴 뒤 적용 완료
 
+**Upgrade가 promote에서 멈춘 현재 복구:** [실패 기록](../evals/scenarios.md#ees-portal-upgrade-apply-failure)의 `errno=13/winerror=5`, program 없음·previous/staging/ZIP 있음·lock 없음에 맞춘 절차입니다. 아래 블록은 기존 상태를 다시 확인하고 보존 ZIP과 target commit을 먼저 읽습니다. 탐색기가 열리면 `program.staging`을 F2로 `program`으로 변경한 뒤 PowerShell에서 Enter를 누릅니다. 이름 변경이 거부되면 Ctrl+C로 끝내고 그 사실만 전달합니다. `program.previous`는 보존합니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $m = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1'
+    $f = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $c = Get-Content -LiteralPath $f -Raw -Encoding UTF8 | ConvertFrom-Json
+    $lastFile = Join-Path $c.state_root 'last-operation.json'
+    $s = Get-Content -LiteralPath $lastFile -Raw -Encoding UTF8 | ConvertFrom-Json
+    $r = Get-Content -LiteralPath (Join-Path $c.state_root 'deployment.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    $p = $r.customization.pending
+    $b = $s.result.bundle
+    $k = $p.target.source_commit
+    $program = Join-Path $c.state_root 'program'
+    $staging = Join-Path $c.state_root 'program.staging'
+    $previous = Join-Path $c.state_root 'program.previous'
+    $lockFile = Join-Path $c.state_root 'deployment.lock'
+
+    if ($s.action -ne 'upgrade' -or $s.failed -ne $true -or
+        $s.result.stage -ne 'apply' -or $p.action -ne 'apply' -or
+        $p.stage -ne 'promote' -or $r.phase -ne 'idle' -or
+        $r.process -or $r.pending -or $r.launch_uncertain -or
+        $k -notmatch '^[a-f0-9]{40}$' -or -not $b -or
+        -not (Test-Path -LiteralPath $b -PathType Leaf) -or
+        (Test-Path -LiteralPath $lockFile) -or
+        (Test-Path -LiteralPath $program) -or
+        -not (Test-Path -LiteralPath $staging -PathType Container) -or
+        -not (Test-Path -LiteralPath $previous -PathType Container)) {
+        throw 'EES recovery stopped: state changed.'
+    }
+
+    $backup = Join-Path (Split-Path -Parent $b) 'upgrade-failure.json'
+    if (-not (Test-Path -LiteralPath $backup)) {
+        Copy-Item -LiteralPath $lastFile -Destination $backup
+    }
+    Invoke-Item -LiteralPath $c.state_root
+    [void](Read-Host 'Rename program.staging to program in Explorer, then press Enter')
+
+    if ((Test-Path -LiteralPath $staging) -or
+        -not (Test-Path -LiteralPath $program -PathType Container)) {
+        throw 'EES recovery stopped: rename not completed.'
+    }
+    & $m -Action Apply -Bundle $b -Commit $k -Resume -Summary
+    & $m -Action Start -HealthTimeout 120 -Summary
+    & $m -Action ApplyDemo
+}
+```
+
+원래 Upgrade 오류 기록은 보존 ZIP 옆의 `upgrade-failure.json`에 한 번 복사합니다. Resume/Start가 마지막 작업 결과를 갱신해도 원래 ZIP 위치를 잃지 않기 위한 사내 기록이며 외부로 전달하지 않습니다. Resume은 현재 정지/포트·잠금·같은 ZIP/commit·새 program과 직전 previous 전체를 검증한 뒤 적용 기록을 완료합니다. 그 성공 뒤에만 Start, Start 성공 뒤에만 ApplyDemo를 실행합니다. 실제 재설치·권한 변경·자동 재시도는 없으며 실패 후 같은 블록을 반복하지 않습니다. 마지막 실패한 EES 요약이나 폴더 이름 변경 실패 여부만 전달합니다.
+
 아래 고정 ZIP·커밋 명령은 **ees.1 최초 적용 당시의 복구 안내**입니다. 현재 Portal 신규 적용에는 [새 프로그램 ZIP 절차](#ees-wrapper-apply)를 사용하며, 기존 미완료 ees.1 기록의 재개가 필요할 때만 그 기록·보존한 전달물을 별도로 대조합니다.
 
 2026-09-09 사내 별도 프로그램 복사본에서 Python의 rename 실패 뒤 같은 폴더의 탐색기 이름 변경 성공을 보고받았습니다. 실행 프로세스와 경과 시간이 함께 달라졌으므로 Python 결함이나 특정 보안 제품을 원인으로 단정하지 않습니다. 원인을 알아내기 위한 반복 검사 대신, 사용자가 폴더를 옮기고 래퍼가 검증·완료하는 명시적 경로를 지원합니다. 시험용 `done-*`은 운영 적용 기록에 속하지 않으므로 채택하지 않습니다.
