@@ -166,6 +166,174 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         args.update(overrides)
         return json.loads(await self.tool.consult_specialists(**args))
 
+    def panel_updates(self):
+        updates = []
+        for event in self.events:
+            if event["type"] == "execute":
+                code = event["data"]["code"]
+                self.assertTrue(code.startswith("const eesPanelUpdate="))
+                value, end = json.JSONDecoder().raw_decode(code[len("const eesPanelUpdate="):])
+                self.assertEqual(code[len("const eesPanelUpdate=") + end:], ";\n" + module.PANEL_SCRIPT)
+                updates.append(value)
+        return updates
+
+    async def test_panel_tracks_real_requests_queries_replies_and_followup_without_private_data(self):
+        original = self.payload
+        async def payload(child, form, user, metadata, model):
+            result = await original(child, form, user, metadata, model)
+            async def data(**kwargs):
+                return {"ok": True, "record_count": 1, "records": [{
+                    "event_id": "sample_a-01", "records": [{"secret": "DO-NOT-RETURN-RAW"}]}]}
+            metadata["tools"]["read_demo_data"]["callable"] = data
+            metadata["private"] = "DO-NOT-RETURN-METADATA"
+            return result
+        async def response(_, ctx):
+            await ctx["metadata"]["tools"]["read_demo_data"]["callable"](
+                dataset="sample_a", __user__={"pat": "DO-NOT-RETURN-VALVES"})
+            await ctx["event_emitter"]({"type": "chat:completion", "data": {"output": [
+                {"type": "reasoning", "content": [{"type": "output_text", "text": "DO-NOT-RETURN-REASONING"}]},
+                {"type": "message", "content": [{"type": "output_text", "text": "확인한 회신"}]}]}})
+        self.runtime.process_payload = payload
+        self.runtime.process_response = response
+        questions = [{"system": system, "question": f'{system}의 질문 "sample_a";\n상세 확인'}
+                     for system in ("EMS", "APC", "FDC")]
+        with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+            first = await self.consult(tasks=questions)
+            await self.consult(tasks=[{"system": "APC", "question": "sample_a 보완 질문"}])
+            updates = self.panel_updates()
+        self.assertTrue(first["ok"])
+        self.assertEqual(len(self.calls), 4)
+        grouped = {}
+        for update in updates:
+            grouped.setdefault(update["call_id"], []).append(update)
+            self.assertEqual((update["chat_id"], update["message_id"]), ("parent-chat", "parent-message"))
+            self.assertEqual((update["kind"], update["version"]), ("specialist", 1))
+        self.assertEqual(len(grouped), 4)
+        self.assertEqual(len({v[0]["batch_id"] for v in grouped.values()}), 2)
+        for rows in grouped.values():
+            self.assertEqual([r["seq"] for r in rows], [1, 2, 3, 4, 5])
+            self.assertEqual([r["phase"] for r in rows], ["requested", "analyzing", "querying", "analyzing", "completed"])
+            self.assertEqual(rows[0]["queries"], [])
+            self.assertEqual(rows[2]["queries"][0]["status"], "querying")
+            self.assertEqual(rows[-1]["queries"], [{"index": 1, "tool": "read_demo_data",
+                "arguments": {"dataset": "sample_a"}, "status": "completed",
+                "record_count": 1, "event_ids": ["sample_a-01"]}])
+            self.assertEqual(rows[-1]["analysis"], "확인한 회신")
+        final = [rows[-1] for rows in grouped.values()]
+        self.assertEqual([r["request"] for r in final], [
+            {"question": t["question"], "kind": "initial"} for t in questions
+        ] + [{"question": "sample_a 보완 질문", "kind": "followup"}])
+        self.assertNotIn("DO-NOT-RETURN", json.dumps(updates))
+        self.assertNotIn('"evidence"', json.dumps(updates))
+
+    async def test_panel_parallel_queries_keep_their_own_results_and_monotonic_snapshots(self):
+        original = self.payload
+        entered = {name: asyncio.Event() for name in ("sample_a", "sample_b")}
+        release = {name: asyncio.Event() for name in entered}
+        async def payload(child, form, user, metadata, model):
+            result = await original(child, form, user, metadata, model)
+            async def data(dataset):
+                entered[dataset].set()
+                await release[dataset].wait()
+                return {"ok": True, "record_count": 1 if dataset == "sample_a" else 2,
+                        "records": [{"event_id": dataset + "-01"}]}
+            metadata["tools"]["read_demo_data"]["callable"] = data
+            return result
+        async def response(_, ctx):
+            function = ctx["metadata"]["tools"]["read_demo_data"]["callable"]
+            jobs = [asyncio.create_task(function(dataset=name)) for name in entered]
+            await asyncio.gather(*(event.wait() for event in entered.values()))
+            release["sample_b"].set()
+            await jobs[1]
+            release["sample_a"].set()
+            await jobs[0]
+            ctx["assistant_message"] = {"content": "두 자료 확인"}
+        self.runtime.process_payload = payload
+        self.runtime.process_response = response
+        with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+            await self.consult()
+            updates = self.panel_updates()
+        self.assertEqual([u["seq"] for u in updates], list(range(1, len(updates) + 1)))
+        intermediate = next(u for u in updates if len(u["queries"]) == 2
+                            and u["queries"][1]["status"] == "completed"
+                            and u["queries"][0]["status"] == "querying")
+        self.assertEqual(intermediate["phase"], "querying")
+        self.assertEqual([q["record_count"] for q in updates[-1]["queries"]], [1, 2])
+        self.assertEqual([q["event_ids"] for q in updates[-1]["queries"]], [["sample_a-01"], ["sample_b-01"]])
+
+    async def test_panel_denial_timeout_and_runtime_failure_are_terminal_without_fake_completion(self):
+        async def allow(user, model, model_info):
+            self.assertTrue(any(u["system"] == model_info.id.removeprefix("ees_demo_").upper()
+                                and u["phase"] == "requested" for u in self.panel_updates()))
+            if model_info.id == "ees_demo_fdc":
+                raise PermissionError("DO-NOT-RETURN")
+        async def response(response, ctx):
+            await self.response(response, ctx)
+            if ctx["metadata"]["model_id"] == "ees_demo_apc":
+                await asyncio.Event().wait()
+        self.runtime.check_access.side_effect = allow
+        self.runtime.process_response = response
+        self.tool.valves.specialist_timeout_seconds = 0.04
+        with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+            await self.consult(("EMS", "APC", "FDC"))
+            updates = self.panel_updates()
+            final = {system: [u for u in updates if u["system"] == system][-1]
+                     for system in ("EMS", "APC", "FDC")}
+            self.assertEqual([final[s]["phase"] for s in final], ["completed", "partial", "failed"])
+            self.assertEqual(final["APC"]["error"], "timeout")
+            self.assertEqual(final["APC"]["analysis"], "확인된 정비 근거 EMS-001")
+            self.assertEqual(final["FDC"]["queries"], [])
+            self.assertNotIn("DO-NOT-RETURN", json.dumps(updates))
+            self.request = request()
+            self.events.clear()
+            with patch.object(module, "_load_runtime", side_effect=RuntimeError("DO-NOT-RETURN")):
+                failed = await self.consult(("EMS", "APC"))
+            self.assertEqual(failed["error"]["code"], "runtime_unavailable")
+            for system in ("EMS", "APC"):
+                rows = [u for u in self.panel_updates() if u["system"] == system]
+                self.assertEqual([u["phase"] for u in rows], ["requested", "failed"])
+                self.assertEqual(rows[-1]["error"], "runtime_unavailable")
+
+    async def test_panel_cancellation_marks_inflight_query_and_retains_visible_partial(self):
+        original = self.payload
+        entered = asyncio.Event()
+        async def payload(child, form, user, metadata, model):
+            result = await original(child, form, user, metadata, model)
+            async def data(**kwargs):
+                entered.set()
+                await asyncio.Event().wait()
+            metadata["tools"]["read_demo_data"]["callable"] = data
+            return result
+        async def response(_, ctx):
+            await ctx["event_emitter"]({"type": "chat:completion", "data": {"output": [
+                {"type": "message", "content": [{"type": "output_text", "text": "부분 회신"}]}]}})
+            await ctx["metadata"]["tools"]["read_demo_data"]["callable"](dataset="sample_a")
+        self.runtime.process_payload = payload
+        self.runtime.process_response = response
+        with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+            job = asyncio.create_task(self.consult())
+            await entered.wait()
+            job.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await job
+            final = self.panel_updates()[-1]
+        self.assertEqual(final["phase"], "cancelled")
+        self.assertEqual(final["queries"][0]["status"], "cancelled")
+        self.assertEqual(final["analysis"], "부분 회신")
+        self.assertEqual(self.request.state.ees_specialist_partial_results[0]["error"], "cancelled")
+
+    async def test_panel_unavailable_ui_is_bounded_and_missing_context_is_not_broadcast(self):
+        async def unavailable(event):
+            if event["type"] == "execute":
+                await asyncio.Event().wait()
+        with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"), patch.object(module, "PANEL_SEND_TIMEOUT", 0.002):
+            result = await asyncio.wait_for(self.consult(__event_emitter__=unavailable), timeout=1)
+            self.assertTrue(result["ok"])
+            self.request = request()
+            result = await self.consult(__metadata__={"model_id": "existing-ees"})
+            self.assertTrue(result["ok"])
+            self.assertEqual(self.panel_updates(), [])
+
     async def test_full_adapter_uses_child_identity_prompt_tools_and_evidence(self):
         self.request.state.metadata = self.metadata
         self.request.state.token = object()
@@ -385,12 +553,17 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
                     if final is not None:
                         ctx["assistant_message"] = final
                 self.runtime.process_response = respond
-                result = await self.consult()
+                with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+                    result = await self.consult()
+                    final_panel = self.panel_updates()[-1]
                 returned = result["results"][0]
                 self.assertEqual(returned["analysis"], expected[-limit:])
                 self.assertEqual(returned["analysis_truncated"], len(expected) > limit)
                 self.assertEqual(returned["status"], "completed")
                 self.assertNotIn("DO-NOT-RETURN", json.dumps(result))
+                self.assertEqual(final_panel["analysis"], returned["analysis"])
+                self.assertEqual(final_panel["analysis_truncated"], returned["analysis_truncated"])
+                self.assertNotIn("DO-NOT-RETURN", json.dumps(final_panel))
 
     async def test_non_stream_provider_never_claims_tool_execution(self):
         self.runtime.generate = AsyncMock(return_value={"choices": [{"message": {"content": "pretend answer"}}]})

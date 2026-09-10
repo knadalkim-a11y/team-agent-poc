@@ -1,4 +1,5 @@
 """Offline preservation, partial-write recovery and conflict tests for ApplyDemo."""
+import ast
 import copy
 import importlib.util
 import json
@@ -193,6 +194,114 @@ class ApplyAssetsTests(unittest.TestCase):
         self.assertIn("추가 질문", [s["content"] for s in model["meta"]["suggestionPrompts"]])
         self.assertEqual(150, self.api.valves["ees_demo_data"]["timeout_seconds"])
 
+    def add_panel_script(self, script="(() => { const title = '협업 과정'; })();\n"):
+        relative = "agent-pack/cooperation-panel.js"
+        (self.root / relative).write_text(script, encoding="utf-8")
+        for tool in self.manifest["tools"]:
+            tool["ui_script_path"] = relative
+            path = self.root / tool["path"]
+            path.write_text(path.read_text(encoding="utf-8") + '\nPANEL_SCRIPT = ""  # fixed UI\n',
+                            encoding="utf-8")
+        self.write_manifest()
+        return script
+
+    def test_panel_is_embedded_in_registered_standalone_tools(self):
+        script = self.add_panel_script("const title = `협업 '과정'`;\nconst text = '\\\\n</script>';\n")
+        before = [(self.root / tool["path"]).read_text(encoding="utf-8")
+                  for tool in self.manifest["tools"]]
+        self.assertEqual(8, self.apply()["changed"])
+        # The API receives one standalone Python file. No sibling JS is needed at runtime.
+        (self.root / self.manifest["tools"][0]["ui_script_path"]).unlink()
+        for tool, original in zip(self.manifest["tools"], before):
+            registered = self.api.rows[("tool", tool["id"])]["content"]
+            scope = {}
+            exec(compile(registered, "<registered-tool>", "exec"), scope)
+            self.assertEqual(script, scope["PANEL_SCRIPT"])
+            self.assertEqual(ast.get_docstring(ast.parse(original), clean=False),
+                             scope["__doc__"])
+            self.assertEqual(original.replace('PANEL_SCRIPT = ""',
+                                             "PANEL_SCRIPT = " + repr(script)), registered)
+
+    def test_panel_source_and_slot_errors_stop_before_any_write(self):
+        cases = (("missing", "invalid_source_path"), ("escape", "invalid_source_path"),
+                 ("nonstring", "invalid_manifest"), ("empty", "empty_source"),
+                 ("no-slot", "invalid_panel_script_slot"),
+                 ("duplicate", "invalid_panel_script_slot"),
+                 ("nonempty", "invalid_panel_script_slot"),
+                 ("nested", "invalid_panel_script_slot"))
+        for mode, code in cases:
+            with self.subTest(mode=mode):
+                self.setUp()
+                self.add_panel_script()
+                tool = self.manifest["tools"][-1]
+                if mode in ("missing", "escape", "nonstring"):
+                    tool["ui_script_path"] = {"missing": "agent-pack/missing.js",
+                                              "escape": "../outside.js", "nonstring": None}[mode]
+                    self.write_manifest()
+                elif mode == "empty":
+                    (self.root / tool["ui_script_path"]).write_text(" \n", encoding="utf-8")
+                else:
+                    path = self.root / tool["path"]
+                    source = path.read_text(encoding="utf-8")
+                    replacements = {"no-slot": "OTHER_SCRIPT = ''",
+                                    "duplicate": 'PANEL_SCRIPT = ""\nPANEL_SCRIPT = ""',
+                                    "nonempty": "PANEL_SCRIPT = 'already filled'",
+                                    "nested": 'if True:\n    PANEL_SCRIPT = ""'}
+                    path.write_text(source.replace('PANEL_SCRIPT = ""', replacements[mode]),
+                                    encoding="utf-8")
+                self.expect_error(code)
+                self.assertEqual([], self.api.writes)
+
+    def test_panel_upgrade_changes_only_tools_and_prompt_and_is_idempotent(self):
+        self.manifest["version"] = "0.1.1"
+        self.write_manifest()
+        self.apply()
+        ees = self.api.rows[("model", "existing-ees")]
+        ees["params"]["system"] += "\n현장 추가 규칙"
+        ees["params"]["temperature"] = 0.4
+        ees["meta"]["toolIds"].insert(0, "additional-tool")
+        ees["meta"]["skillIds"].append("additional-skill")
+        ees["meta"]["knowledge"].append({"id": "additional-manual"})
+        before = copy.deepcopy(self.api.rows)
+        for tool in self.manifest["tools"]:
+            self.api.valves[tool["id"]]["specialist_timeout_seconds"] = 77
+            self.api.rows[("tool", tool["id"])]["meta"]["user_extra"] = {"keep": True}
+        before_valves = copy.deepcopy(self.api.valves)
+        script = self.add_panel_script()
+        self.manifest["version"] = "0.1.2"
+        self.write_manifest()
+        (self.root / "agent-pack/ees.md").write_text("실시간 협업 패널 사용 지침", encoding="utf-8")
+        writes = len(self.api.writes)
+        self.assertEqual(3, self.apply("b" * 40)["changed"])
+        changed = {body["id"] for _, _, body in self.api.writes[writes:]}
+        self.assertEqual({"existing-ees", "ees_demo_data", "ees_demo_delegate"}, changed)
+        updated = self.api.rows[("model", "existing-ees")]
+        self.assertEqual(before[("model", "existing-ees")]["meta"], updated["meta"])
+        self.assertEqual(0.4, updated["params"]["temperature"])
+        self.assertTrue(updated["params"]["system"].startswith("사내 공통 정책\n사용자 추가 지침"))
+        self.assertTrue(updated["params"]["system"].endswith("현장 추가 규칙"))
+        for key in ("name", "user_id", "base_model_id", "is_active"):
+            self.assertEqual(before[("model", "existing-ees")][key], updated[key])
+        self.assertEqual(assets._grants(before[("model", "existing-ees")]["access_grants"]),
+                         assets._grants(updated["access_grants"]))
+        self.assertEqual(before_valves, self.api.valves)
+        for name in ("ems", "apc", "fdc"):
+            key = ("model", "ees-demo-" + name)
+            self.assertEqual(before[key], self.api.rows[key])
+        for tool in self.manifest["tools"]:
+            row = self.api.rows[("tool", tool["id"])]
+            self.assertEqual({"keep": True}, row["meta"]["user_extra"])
+            self.assertIn(repr(script), row["content"])
+        writes = len(self.api.writes)
+        self.assertEqual(0, self.apply("b" * 40)["changed"])
+        self.assertEqual(writes, len(self.api.writes))
+        script_path = self.root / self.manifest["tools"][0]["ui_script_path"]
+        script_path.write_text(script + "// updated panel\n", encoding="utf-8")
+        self.assertEqual(2, self.apply("c" * 40)["changed"])
+        self.assertEqual({"ees_demo_data", "ees_demo_delegate"},
+                         {body["id"] for _, _, body in self.api.writes[writes:]})
+        self.assertEqual(0, self.apply("c" * 40)["changed"])
+
     def test_conflicts_stop_before_any_write(self):
         for mutation in ("prompt", "tool", "suggestion", "native", "valves"):
             with self.subTest(mutation=mutation):
@@ -361,9 +470,21 @@ class ApplyAssetsTests(unittest.TestCase):
 
     def test_real_manifest_sources_pass_preflight(self):
         manifest = assets.load_manifest(MODULE.parents[1])
+        self.assertEqual("0.1.2", manifest["version"])
         self.assertEqual({"ees_specialists", "ees_demo_data"}, {t["id"] for t in manifest["tools"]})
         self.assertEqual({"ees_demo_ems", "ees_demo_apc", "ees_demo_fdc"},
                          {m["id"] for m in manifest["models"]})
+        for tool in manifest["tools"]:
+            script = (MODULE.parents[1] / tool["ui_script_path"]).read_text(encoding="utf-8")
+            original = (MODULE.parents[1] / tool["path"]).read_text(encoding="utf-8")
+            tree = ast.parse(tool["content"])
+            panel = [node.value.value for node in tree.body if isinstance(node, ast.Assign)
+                     and any(isinstance(target, ast.Name) and target.id == "PANEL_SCRIPT"
+                             for target in node.targets)]
+            self.assertEqual([script], panel)
+            self.assertEqual(ast.get_docstring(ast.parse(original), clean=False),
+                             ast.get_docstring(tree, clean=False))
+            compile(tool["content"], tool["path"], "exec")
 
     def test_concurrent_edit_not_overwritten(self):
         self.api.concurrent = ("model", "existing-ees")

@@ -23,6 +23,7 @@ on:
       - 'tests/test_ees_upgrade.py'
       - 'tests/test_ees_apply_demo.py'
       - 'tests/test_ees_demo*.py'
+      - 'tests/test_ees_cooperation_panel.cjs'
       - 'tests/test_ees_specialists_tool.py'
       - 'tests/test_ees_update_download.py'
       - 'tests/test_confluence*.py'
@@ -76,6 +77,8 @@ jobs:
         run: python -m unittest discover -s tests -p test_wo_demo_tool.py -v
       - name: Verify WO demo local form state
         run: node tests/test_wo_demo_state.cjs
+      - name: Verify cooperation panel state and isolation
+        run: node tests/test_ees_cooperation_panel.cjs
       - name: Verify deployment boundaries, child lifecycle, and NLTK imports
         env:
           EES_RUN_REAL_UV_TEST: '1'

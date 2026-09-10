@@ -72,6 +72,26 @@ def _suggestions(value):
     return copy.deepcopy(value)
 
 
+def _embed_panel_script(content, tree, script, asset):
+    """Fill the one module-level panel literal without rewriting tool frontmatter."""
+    bindings = [node for node in ast.walk(tree) if isinstance(node, ast.Name)
+                and node.id == "PANEL_SCRIPT" and isinstance(node.ctx, ast.Store)]
+    assignments = [node for node in tree.body if isinstance(node, ast.Assign)
+                   and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+                   and node.targets[0].id == "PANEL_SCRIPT"]
+    if (len(bindings) != 1 or len(assignments) != 1
+            or not isinstance(assignments[0].value, ast.Constant)
+            or assignments[0].value.value != ""):
+        raise DemoAssetsError("invalid_panel_script_slot", asset)
+    value = assignments[0].value
+    # AST columns are UTF-8 byte offsets, including when a line contains Korean.
+    encoded = content.encode("utf-8")
+    lines = encoded.splitlines(keepends=True)
+    start = sum(map(len, lines[:value.lineno - 1])) + value.col_offset
+    end = sum(map(len, lines[:value.end_lineno - 1])) + value.end_col_offset
+    return (encoded[:start] + repr(script).encode("utf-8") + encoded[end:]).decode("utf-8")
+
+
 def load_manifest(root: Path):
     """Read and statically validate every source before any remote mutation."""
     manifest = _dict(json.loads(_read_source(root, "agent-pack/ees-demo.json")), "invalid_manifest")
@@ -86,6 +106,10 @@ def load_manifest(root: Path):
         identifiers.append(item["id"])
         item["content"] = _read_source(root, item["path"])
         tree = ast.parse(item["content"])
+        if "ui_script_path" in item:
+            script = _read_source(root, item["ui_script_path"])
+            item["content"] = _embed_panel_script(item["content"], tree, script, item["id"])
+            tree = ast.parse(item["content"])
         frontmatter = ast.get_docstring(tree, clean=False) or ""
         if not re.search(r"(?m)^ees_demo_pack:\s*" + re.escape(PACK) + r"\s*$", frontmatter):
             raise DemoAssetsError("tool_marker_missing", item["id"])

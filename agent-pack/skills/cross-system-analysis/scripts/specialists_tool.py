@@ -1,7 +1,7 @@
 """
 title: EES Specialists
 description: Consult EMS, APC and FDC demo Assistants with the current user's access.
-version: 0.1.1
+version: 0.1.2
 required_open_webui_version: 0.11.3
 ees_demo_pack: ees-demo-v1
 """
@@ -27,6 +27,8 @@ MAX_DATA_CALLS = 3
 MAX_QUESTION_CHARS = 5000
 MAX_ANALYSIS_CHARS = 16000
 SUPPORTED_WEBUI_VERSIONS = {"0.11.3", "0.11.3+ees.1", "0.11.3+ees.2"}
+PANEL_SCRIPT = ""  # ApplyDemo embeds the reviewed, fixed cooperation panel script.
+PANEL_SEND_TIMEOUT = 0.25
 
 
 def _json(value):
@@ -102,6 +104,49 @@ async def _status(emitter, system, phase, description, done=False):
         except Exception:
             # An unavailable UI must not turn a successful analysis into a failure.
             pass
+
+
+async def _panel(emitter, record, phase, error=None):
+    """Send a read-only snapshot; a missing browser never blocks analysis."""
+    state = record["panel"]
+    state["seq"] += 1
+    state["phase"] = phase
+    if not PANEL_SCRIPT or not emitter or not state["chat_id"] or not state["message_id"]:
+        return
+    try:
+        # Serialize before yielding: parallel queries must not mutate an earlier
+        # snapshot. Never include child metadata, raw records or reasoning.
+        snapshot = {**state, "request": record["request"], "queries": record["queries"],
+                    "analysis": record["analysis"],
+                    "analysis_truncated": record["analysis_truncated"], "error": error}
+        code = "const eesPanelUpdate=" + json.dumps(snapshot, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
+        await asyncio.wait_for(emitter({"type": "execute", "data": {"code": code}}),
+                               timeout=PANEL_SEND_TIMEOUT)
+    except Exception:
+        # CancelledError is deliberately not swallowed (it is a BaseException).
+        pass
+
+
+def _panel_arguments(kwargs):
+    # Only known public filter strings belong in the browser, even when a tool
+    # spec or rebinder accidentally includes a reserved or nested argument.
+    return {key: value for key, value in kwargs.items()
+            if key in {"dataset", "group_by", "equipment_id", "recipe_id", "event_id", "event_ids"}
+            and isinstance(value, str) and len(value) <= (1000 if key == "event_ids" else 80)}
+
+
+def _query_summary(query, result):
+    query["status"] = "failed" if isinstance(result, dict) and result.get("ok") is False else "completed"
+    if not isinstance(result, dict):
+        return
+    count = result.get("record_count")
+    if type(count) is int and 0 <= count <= 1000:
+        query["record_count"] = count
+    records = result.get("records")
+    if isinstance(records, list):
+        query["event_ids"] = [row["event_id"] for row in records[:30]
+                              if isinstance(row, dict) and isinstance(row.get("event_id"), str)
+                              and len(row["event_id"]) <= 80]
 
 
 def _visible_text(output):
@@ -189,9 +234,16 @@ async def _run_specialist(runtime, source, user, system, question, record, emitt
                 record["error"] = "data_call_limit"
                 return _json(_failure("data_call_limit", "전문 분석의 자료 확인 한도에 도달했습니다."))
             record["data_calls"] += 1
+            query = {"index": record["data_calls"], "tool": name,
+                     "arguments": _panel_arguments(kwargs), "status": "querying"}
+            record["queries"].append(query)
+            await _panel(emitter, record, "querying")
             await _status(emitter, system, "querying", f"{system}: 합성 자료 확인 {record['data_calls']}/{MAX_DATA_CALLS}")
             try:
                 result = await function(**kwargs)
+            except asyncio.CancelledError:
+                query["status"] = "cancelled"
+                raise
             except Exception:
                 record["error"] = "data_query_failed"
                 result = _json(_failure("data_query_failed", "합성 자료 확인에 실패했습니다. 확보된 근거만 사용하세요."))
@@ -204,6 +256,9 @@ async def _run_specialist(runtime, source, user, system, question, record, emitt
             record["evidence"].append({"tool": name, "arguments": dict(kwargs), "result": safe_result})
             if isinstance(safe_result, dict) and safe_result.get("ok") is False:
                 record["error"] = "data_query_failed"
+            _query_summary(query, safe_result)
+            phase = "querying" if any(q["status"] == "querying" for q in record["queries"]) else "analyzing"
+            await _panel(emitter, record, phase)
             return result
         return guarded
 
@@ -224,6 +279,7 @@ async def _run_specialist(runtime, source, user, system, question, record, emitt
         elif event.get("type") == "chat:message:error":
             record["error"] = "model_response_failed"
 
+    await _panel(emitter, record, "analyzing")
     response = await runtime.generate(child, form, user)
     if not isinstance(response, runtime.StreamingResponse):
         # 0.11.3's non-streaming response handler does not execute tool calls.
@@ -313,9 +369,14 @@ class Tools:
         repeats = sum(t["system"] in budget["counts"] for t in tasks)
         if budget["total"] + len(tasks) > MAX_CONSULTATIONS or budget["followups"] + repeats > 1:
             return _json(_failure("consultation_limit", "전문 분석 한도에 도달했습니다. 확보한 근거와 남은 확인 사항을 종합해 주세요."))
+        batch_id = str(uuid4())
+        parent_ids = {key: value if isinstance(value, str) and len(value) <= 200 else ""
+                      for key, value in ((key, __metadata__.get(key)) for key in ("chat_id", "message_id"))}
         records = [{"request": {"question": task["question"],
                                 "kind": "followup" if task["system"] in budget["counts"] else "initial"},
-                    "evidence": [], "data_calls": 0, "analysis": "", "analysis_truncated": False}
+                    "evidence": [], "data_calls": 0, "analysis": "", "analysis_truncated": False,
+                    "queries": [], "panel": {"version": 1, "kind": "specialist", **parent_ids,
+                        "call_id": str(uuid4()), "seq": 0, "batch_id": batch_id, "system": task["system"]}}
                    for task in tasks]
         # Reserve before the first await, so concurrent calls on this request
         # cannot both pass the same budget check. Failures also consume calls.
@@ -323,14 +384,6 @@ class Tools:
         budget["followups"] += repeats
         for task in tasks:
             budget["counts"][task["system"]] = budget["counts"].get(task["system"], 0) + 1
-        try:
-            runtime = _load_runtime()
-            user = await runtime.Users.get_user_by_id(__user__["id"])
-            if not user:
-                raise RuntimeError("user_unavailable")
-        except Exception:
-            return _json(_failure("runtime_unavailable", "전문 Assistant 등록·버전·사용자 연결을 확인해 주세요."))
-
         async def run(task, record):
             system = task["system"]
             await _status(__event_emitter__, system, "started", f"{system}: {task['question'][:160]}")
@@ -347,13 +400,31 @@ class Tools:
                 safe_codes = {"model_unavailable", "data_tool_not_connected", "data_tool_unavailable", "streaming_required"}
                 code = str(exc) if str(exc) in safe_codes else "specialist_unavailable"
                 result = _result(system, record, code)
+            # A timeout cancels in-flight queries, including a query interrupted
+            # while its optional UI update was being sent.
+            for query in record["queries"]:
+                if query["status"] == "querying":
+                    query["status"] = "cancelled"
+            record["final_result"] = result
             phase = result["status"]
             label = {"completed": "분석 완료", "partial": "부분 결과 확보", "failed": "분석 미완료"}[phase]
+            await _panel(__event_emitter__, record, phase, result["error"])
             await _status(__event_emitter__, system, phase, f"{system}: {label}", done=True)
             return result
 
-        jobs = [asyncio.create_task(run(task, record)) for task, record in zip(tasks, records)]
+        jobs = []
         try:
+            await asyncio.gather(*(_panel(__event_emitter__, record, "requested") for record in records))
+            try:
+                runtime = _load_runtime()
+                user = await runtime.Users.get_user_by_id(__user__["id"])
+                if not user:
+                    raise RuntimeError("user_unavailable")
+            except Exception:
+                await asyncio.gather(*(_panel(__event_emitter__, record, "failed", "runtime_unavailable")
+                                       for record in records))
+                return _json(_failure("runtime_unavailable", "전문 Assistant 등록·버전·사용자 연결을 확인해 주세요."))
+            jobs = [asyncio.create_task(run(task, record)) for task, record in zip(tasks, records)]
             results = await asyncio.gather(*jobs)
         except asyncio.CancelledError:
             for job in jobs:
@@ -361,11 +432,21 @@ class Tools:
             await asyncio.gather(*jobs, return_exceptions=True)
             # Preserve evidence for request-local diagnostics without restarting a
             # cancelled parent generation or claiming all specialists completed.
-            __request__.state.ees_specialist_partial_results = [
-                job.result() if not job.cancelled() and job.exception() is None
-                else _result(task["system"], record, "cancelled")
-                for job, task, record in zip(jobs, tasks, records)
-            ]
+            partial_results = []
+            for task, record in zip(tasks, records):
+                result = record.get("final_result")
+                if result is None:
+                    for query in record["queries"]:
+                        if query["status"] == "querying":
+                            query["status"] = "cancelled"
+                    result = _result(task["system"], record, "cancelled")
+                    await _panel(__event_emitter__, record, "cancelled", "cancelled")
+                else:
+                    # A completed computation may have been interrupted while
+                    # sending its final UI update. Re-send that real outcome.
+                    await _panel(__event_emitter__, record, result["status"], result["error"])
+                partial_results.append(result)
+            __request__.state.ees_specialist_partial_results = partial_results
             await _status(__event_emitter__, "EES", "cancelled", "전문 분석이 중단됐습니다. 완료된 결과만 보존했습니다.", done=True)
             raise
         return _json({"ok": any(r["status"] == "completed" for r in results), "demo": True,

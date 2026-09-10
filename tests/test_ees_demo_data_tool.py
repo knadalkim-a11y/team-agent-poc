@@ -1,9 +1,12 @@
 """Synthetic data boundaries and numerical evidence; no WebUI or LLM is invoked."""
 
+import asyncio
 import importlib.util
+import json
 import unittest
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import patch
 
 
 PATH = Path(__file__).resolve().parents[1] / "agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py"
@@ -22,6 +25,104 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
 
     async def compare(self, **kwargs):
         return await self.tool.compare_demo_data(__metadata__={"model_id": "existing-ees"}, **kwargs)
+
+    @staticmethod
+    def panel_updates(events):
+        updates = []
+        for event in events:
+            if event["type"] == "execute":
+                code = event["data"]["code"]
+                prefix = "const eesPanelUpdate="
+                if not code.startswith(prefix):
+                    raise AssertionError("Unexpected executable prefix")
+                value, end = json.JSONDecoder().raw_decode(code[len(prefix):])
+                if code[len(prefix) + end:] != ";\n" + module.PANEL_SCRIPT:
+                    raise AssertionError("The executable suffix must be the fixed script")
+                updates.append(value)
+        return updates
+
+    async def test_panel_shows_exact_comparison_conditions_results_and_independent_calls(self):
+        events = []
+        async def emit(event):
+            events.append(event)
+        metadata = {"model_id": "existing-ees", "chat_id": "parent-chat", "message_id": "parent-message",
+                    "user": {"pat": "DO-NOT-RETURN"}, "provider": "DO-NOT-RETURN"}
+        with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+            results = await asyncio.gather(*(
+                self.tool.compare_demo_data(dataset=dataset, group_by="recipe_id",
+                    __metadata__=metadata, __event_emitter__=emit) for dataset in ("sample_a", "sample_b")))
+            updates = self.panel_updates(events)
+        grouped = {}
+        for update in updates:
+            grouped.setdefault(update["call_id"], []).append(update)
+            self.assertEqual((update["chat_id"], update["message_id"]), ("parent-chat", "parent-message"))
+            self.assertEqual((update["kind"], update["version"]), ("comparison", 1))
+            self.assertEqual(update["batch_id"], update["call_id"])
+        self.assertEqual(len(grouped), 2)
+        for rows, result in zip(grouped.values(), results):
+            self.assertEqual([u["seq"] for u in rows], [1, 2, 3])
+            self.assertEqual([u["phase"] for u in rows], ["requested", "querying", "completed"])
+            self.assertNotIn("result", rows[0])
+            self.assertEqual(rows[-1]["result"], result)
+            self.assertEqual(rows[-1]["arguments"], {"dataset": result["dataset"], "group_by": "recipe_id",
+                "equipment_id": "", "recipe_id": "", "event_ids": ""})
+        self.assertNotIn("DO-NOT-RETURN", json.dumps(updates))
+
+    async def test_panel_marks_validation_or_calculation_failure_without_leaking_exception(self):
+        events = []
+        async def emit(event):
+            events.append(event)
+        kwargs = {"__metadata__": {"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"},
+                  "__event_emitter__": emit}
+        with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+            failed = await self.tool.compare_demo_data(group_by='invalid";\nfilter', **kwargs)
+            rows = self.panel_updates(events)
+            self.assertEqual(rows[-1]["phase"], "failed")
+            self.assertEqual(rows[-1]["error"], "invalid_grouping")
+            self.assertEqual(rows[-1]["result"], failed)
+            self.assertEqual(rows[-1]["arguments"]["group_by"], 'invalid";\nfilter')
+            events.clear()
+            with patch.object(module, "_joint_observation", side_effect=RuntimeError("DO-NOT-RETURN")):
+                result = await self.tool.compare_demo_data(**kwargs)
+            self.assertEqual(result["error"]["code"], "comparison_failed")
+            self.assertEqual(self.panel_updates(events)[-1]["phase"], "failed")
+            self.assertNotIn("DO-NOT-RETURN", json.dumps(events))
+
+    async def test_panel_unavailable_or_unauthorized_does_not_change_calculation(self):
+        async def unavailable(event):
+            await asyncio.Event().wait()
+        metadata = {"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"}
+        with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"), patch.object(module, "PANEL_SEND_TIMEOUT", 0.002):
+            result = await asyncio.wait_for(self.tool.compare_demo_data(
+                __metadata__=metadata, __event_emitter__=unavailable), timeout=1)
+            self.assertEqual(result, await self.compare())
+            events = []
+            async def emit(event):
+                events.append(event)
+            for metadata in ({"model_id": "ees_demo_ems", "chat_id": "chat", "message_id": "message"},
+                             {"model_id": "existing-ees"}):
+                await self.tool.compare_demo_data(__metadata__=metadata, __event_emitter__=emit)
+            self.assertEqual(events, [])
+
+    async def test_panel_cancellation_propagates_and_never_claims_an_unstarted_calculation(self):
+        events = []
+        entered = asyncio.Event()
+        async def emit(event):
+            events.append(event)
+            if self.panel_updates([event])[0]["phase"] == "querying":
+                entered.set()
+                await asyncio.Event().wait()
+        with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
+            job = asyncio.create_task(self.tool.compare_demo_data(
+                __metadata__={"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"},
+                __event_emitter__=emit))
+            await entered.wait()
+            job.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await job
+            updates = self.panel_updates(events)
+        self.assertEqual([u["phase"] for u in updates], ["requested", "querying", "cancelled"])
+        self.assertNotIn("result", updates[-1])
 
     async def test_domain_is_server_metadata_and_never_model_argument(self):
         for metadata in (None, {}, {"model_id": "unknown"}, {"model_id": ["ees_demo_ems"]},
