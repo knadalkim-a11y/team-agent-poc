@@ -6,6 +6,7 @@ import json
 import unittest
 from datetime import datetime
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 
@@ -23,8 +24,20 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
     async def read(self, domain="ems", **kwargs):
         return await self.tool.read_demo_data(__metadata__={"model_id": f"ees_demo_{domain}"}, **kwargs)
 
+    def context(self, metadata=None, dataset="sample_a"):
+        metadata = metadata or {"model_id": "existing-ees"}
+        state = {"version": 1, "kind": "plan", "call_id": "comparison-plan", "plan_id": "comparison-plan",
+                 "batch_id": "comparison-plan", "seq": 0, "phase": "planned", "dataset": dataset,
+                 "chat_id": metadata.get("chat_id", ""), "message_id": metadata.get("message_id", ""),
+                 "steps": [{"id": "comparison", "type": "comparison", "status": "pending", "depends_on": [],
+                            "call_ids": []}]}
+        plan = {"identity": ("user-one", metadata.get("model_id"), metadata.get("chat_id"), metadata.get("message_id")),
+                "snapshot": state}
+        return {"__request__": SimpleNamespace(state=SimpleNamespace(ees_analysis_plan=plan)),
+                "__user__": {"id": "user-one"}, "step_id": "comparison", "__metadata__": metadata}
+
     async def compare(self, **kwargs):
-        return await self.tool.compare_demo_data(__metadata__={"model_id": "existing-ees"}, **kwargs)
+        return await self.tool.compare_demo_data(**self.context(dataset=kwargs.get("dataset", "sample_a")), **kwargs)
 
     @staticmethod
     def panel_updates(events):
@@ -38,7 +51,8 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
                 value, end = json.JSONDecoder().raw_decode(code[len(prefix):])
                 if code[len(prefix) + end:] != ";\n" + module.PANEL_SCRIPT:
                     raise AssertionError("The executable suffix must be the fixed script")
-                updates.append(value)
+                if value["kind"] != "plan":
+                    updates.append(value)
         return updates
 
     async def test_panel_shows_exact_comparison_conditions_results_and_independent_calls(self):
@@ -50,7 +64,7 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
         with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
             results = await asyncio.gather(*(
                 self.tool.compare_demo_data(dataset=dataset, group_by="recipe_id",
-                    __metadata__=metadata, __event_emitter__=emit) for dataset in ("sample_a", "sample_b")))
+                    **self.context(metadata, dataset), __event_emitter__=emit) for dataset in ("sample_a", "sample_b")))
             updates = self.panel_updates(events)
         grouped = {}
         for update in updates:
@@ -72,7 +86,7 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
         events = []
         async def emit(event):
             events.append(event)
-        kwargs = {"__metadata__": {"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"},
+        kwargs = {**self.context({"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"}),
                   "__event_emitter__": emit}
         with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
             failed = await self.tool.compare_demo_data(group_by='invalid";\nfilter', **kwargs)
@@ -82,6 +96,7 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(rows[-1]["result"], failed)
             self.assertEqual(rows[-1]["arguments"]["group_by"], 'invalid";\nfilter')
             events.clear()
+            kwargs.update(self.context(kwargs["__metadata__"]))
             with patch.object(module, "_joint_observation", side_effect=RuntimeError("DO-NOT-RETURN")):
                 result = await self.tool.compare_demo_data(**kwargs)
             self.assertEqual(result["error"]["code"], "comparison_failed")
@@ -94,7 +109,7 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
         metadata = {"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"}
         with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"), patch.object(module, "PANEL_SEND_TIMEOUT", 0.002):
             result = await asyncio.wait_for(self.tool.compare_demo_data(
-                __metadata__=metadata, __event_emitter__=unavailable), timeout=1)
+                **self.context(metadata), __event_emitter__=unavailable), timeout=1)
             self.assertEqual(result, await self.compare())
             events = []
             async def emit(event):
@@ -109,12 +124,13 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
         entered = asyncio.Event()
         async def emit(event):
             events.append(event)
-            if self.panel_updates([event])[0]["phase"] == "querying":
+            if self.panel_updates([event]) and self.panel_updates([event])[0]["phase"] == "querying":
                 entered.set()
                 await asyncio.Event().wait()
+        context = self.context({"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"})
         with patch.object(module, "PANEL_SCRIPT", "/* fixed panel */"):
             job = asyncio.create_task(self.tool.compare_demo_data(
-                __metadata__={"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"},
+                **context,
                 __event_emitter__=emit))
             await entered.wait()
             job.cancel()
@@ -123,6 +139,27 @@ class DemoDataTests(unittest.IsolatedAsyncioTestCase):
             updates = self.panel_updates(events)
         self.assertEqual([u["phase"] for u in updates], ["requested", "querying", "cancelled"])
         self.assertNotIn("result", updates[-1])
+        self.assertEqual(context["__request__"].state.ees_analysis_plan["snapshot"]["steps"][0]["status"], "cancelled")
+
+    async def test_comparison_plan_scope_identity_and_duplicate_execution_are_guarded(self):
+        metadata = {"model_id": "existing-ees", "chat_id": "chat", "message_id": "message"}
+        context = self.context(metadata)
+        self.assertEqual((await self.tool.compare_demo_data(dataset="sample_b", **context))["error"]["code"],
+                         "plan_dataset_mismatch")
+        step = context["__request__"].state.ees_analysis_plan["snapshot"]["steps"][0]
+        self.assertEqual(step["status"], "pending")
+        self.assertEqual(step["call_ids"], [])
+        wrong_user = {**context, "__user__": {"id": "another-user"}}
+        self.assertEqual((await self.tool.compare_demo_data(**wrong_user))["error"]["code"], "plan_required")
+        wrong_message = {**context, "__metadata__": {**metadata, "message_id": "another-message"}}
+        self.assertEqual((await self.tool.compare_demo_data(**wrong_message))["error"]["code"], "plan_required")
+        invalid_user = {**context, "__user__": "invalid"}
+        self.assertEqual((await self.tool.compare_demo_data(**invalid_user))["error"]["code"], "plan_required")
+        results = await asyncio.gather(*(self.tool.compare_demo_data(**context) for _ in range(2)))
+        self.assertEqual(sum(result["ok"] for result in results), 1)
+        self.assertEqual(next(result for result in results if not result["ok"])["error"]["code"], "step_not_ready")
+        self.assertEqual(step["status"], "completed")
+        self.assertEqual(len(step["call_ids"]), 1)
 
     async def test_domain_is_server_metadata_and_never_model_argument(self):
         for metadata in (None, {}, {"model_id": "unknown"}, {"model_id": ["ees_demo_ems"]},

@@ -6,7 +6,7 @@ Open WebUI의 `EES 통합 Assistant`에 등록할 Git 관리 원본입니다. �
 
 | 원본 | Open WebUI 반영 위치 |
 |---|---|
-| [ees-demo.json](ees-demo.json) | ApplyDemo가 관리할 전문 모델 3개·Tool 2개·EES 관리 구역과 시작 질문 목록 |
+| [ees-demo.json](ees-demo.json) | ApplyDemo가 관리할 전문 모델 3개·분석 Tool 2개·EES 관리 구역과 시작 질문, 이미 연결된 지원 WO Tool의 갱신 목록 |
 | `ees-prompt-suggestions.json` | 팀 시연용 예시 질문 4개; [기존 모델에 적용](../docs/03-openwebui-native-agent.md#first-use-entry) |
 | `system-prompts/*.md` | Workspace Model의 System Prompt |
 | `policies/*.md` | 공통 규칙의 검토·관리 원본 |
@@ -15,8 +15,9 @@ Open WebUI의 `EES 통합 Assistant`에 등록할 Git 관리 원본입니다. �
 | `skills/confluence-read/scripts/confluence_tool.py` | Workspace Tools; 별도 등록 후 Assistant에 연결 |
 | `skills/jira-read/scripts/jira_tool.py` | Workspace Tools; 프로젝트 집계·이슈 목록·본문 읽기 |
 | `skills/github-read/scripts/github_tool.py` | Workspace Tools; GHES의 개인 PAT 기반 PR 목록·본문 읽기 |
-| [cross-system-analysis/scripts/specialists_tool.py](skills/cross-system-analysis/scripts/specialists_tool.py) | `ees_specialists`: 전문 역량 조회·선택 실행·근거 반환 |
+| [cross-system-analysis/scripts/specialists_tool.py](skills/cross-system-analysis/scripts/specialists_tool.py) | `ees_specialists`: 실행 계획·공개 판단 요약, 전문 역량 조회·선택 실행·근거 반환 |
 | [cross-system-analysis/scripts/demo_data_tool.py](skills/cross-system-analysis/scripts/demo_data_tool.py) | `ees_demo_data`: 담당 시스템 합성 자료 조회·EES 조건별 비교 |
+| [cross-system-analysis/ui/work-panel.js](skills/cross-system-analysis/ui/work-panel.js) | 공통 업무 패널 버튼·화면 전환. 등록 Tool에 포함하며 별도 UI 설치 없음 |
 
 Confluence 묶음은 **Skill 지침 + 실행 코드**를 함께 관리하는 예시입니다. Open WebUI가 폴더를 자동 설치·실행하지는 않습니다. [설치 안내](../docs/04-confluence-read-tool.md)에 따라 두 항목을 등록합니다. 코드 기본값은 비활성화이며 실제 준비·배포 상태는 [STATUS](../docs/STATUS.md), 실환경 판정은 [평가표](../evals/scenarios.md#confluence-live)에만 기록합니다.
 

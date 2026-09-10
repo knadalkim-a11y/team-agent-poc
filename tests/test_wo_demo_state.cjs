@@ -12,6 +12,8 @@ p = Path('agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py')
 s = importlib.util.spec_from_file_location('wo_demo_state_capture', p)
 m = importlib.util.module_from_spec(s); s.loader.exec_module(m)
 r = json.load(sys.stdin); captured = []
+if r.get('coordinated'):
+    m.WORK_PANEL_SCRIPT = Path('agent-pack/skills/cross-system-analysis/ui/work-panel.js').read_text(encoding='utf-8')
 async def callback(event):
     captured.append(event['data']['code']); return {'ok': True}
 async def run():
@@ -83,7 +85,7 @@ class Shadow extends Element {
   getElementById(id) { return this.ids.get(id) || null; }
   querySelector(selector) { return this.origins.get(selector.match(/data-origin-for="([^"]+)"/)?.[1]) || null; }
 }
-function environment({ layout = true, navigation = true, controls = true } = {}) {
+function environment({ layout = true, navigation = true, controls = true, coordinated = false } = {}) {
   const body = new Element('body'); body.connected = true;
   let row = new Element(), column = new Element(), anchor = new Element(), navbar, toolbar, nativeControls;
   row.clientWidth = 1200;
@@ -102,7 +104,8 @@ function environment({ layout = true, navigation = true, controls = true } = {})
   window.innerWidth = 1440;
   if (navigation) window.navigation = new Element('navigation');
   const pendingMutations = []; body.onMutation = record => pendingMutations.push(record);
-  const document = { body, documentElement, createElement: tag => new Element(tag), createElementNS: (namespace, tag) => new Element(tag), querySelector: selector => layout && selector === '#chat-container #chat-pane' ? anchor : null };
+  const findId = (node, id) => node.id === id ? node : node.children.map(child => findId(child, id)).find(Boolean) || null;
+  const document = { body, documentElement, createElement: tag => new Element(tag), createElementNS: (namespace, tag) => new Element(tag), getElementById: id => findId(body, id), querySelector: selector => layout && selector === '#chat-container #chat-pane' ? anchor : null };
   class MutationObserver {
     constructor(callback) { this.callback = callback; observers.push(this); }
     observe(target) { this.active = true; this.target = target; }
@@ -119,7 +122,7 @@ function environment({ layout = true, navigation = true, controls = true } = {})
   const host = () => row.children.find(node => node.id === 'ees-wo-demo-panel');
   const q = id => host()?.shadowRoot.getElementById(id);
   async function call(action = 'view', changes = {}, revision, chat_id = 'sample-chat') {
-    const payload = capture({ action, changes, revision, chat_id });
+    const payload = capture({ action, changes, revision, chat_id, coordinated });
     const result = await vm.runInContext('(async () => {\n' + payload.code + '\n})()', context);
     return JSON.parse(JSON.stringify(result));
   }
@@ -512,7 +515,7 @@ const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert
   } finally {
     Element.prototype.attachShadow = originalAttachShadow;
   }
-  assert.deepEqual(initialFailure.error.diagnostic, { script_version: '0.1.7', stage: 'initial_render', exception: 'TypeError' });
+  assert.deepEqual(initialFailure.error.diagnostic, { script_version: '0.1.8', stage: 'initial_render', exception: 'TypeError' });
   assert.equal(recovery.window.__eesWODemoManagerV1.chats.size, 0);
   assert.equal(recovery.host(), undefined); assert.equal(recovery.launcher(), undefined);
   let recovered = ok(await recovery.call('equipment'));
@@ -536,7 +539,7 @@ const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert
   } finally {
     recoveredShadow.getElementById = originalGetElementById;
   }
-  assert.deepEqual(renderFailure.error.diagnostic, { script_version: '0.1.7', stage: 'equipment_render', exception: 'Error' });
+  assert.deepEqual(renderFailure.error.diagnostic, { script_version: '0.1.8', stage: 'equipment_render', exception: 'Error' });
   assert.deepEqual(Object.keys(renderFailure.error).sort(), ['code', 'diagnostic', 'message']);
   assert.equal(JSON.stringify(renderFailure).includes(privateMarker), false);
   assert.equal(recovery.host(), recoveredHost); assert.equal(recovery.window.__eesWODemoV1, recoveredController);
@@ -546,5 +549,56 @@ const bad = (result, code) => { assert.equal(result.ok, false); if (code) assert
   }
   assert.equal(recovery.q('description').value, preservedDraft.fields.description);
   console.log('PASS initial-render recovery without broken cache, safe diagnostic fields and existing draft preservation');
-  console.log('11 grouped JS state checks passed (synthetic DOM; browser rendering unverified).');
+  // Exercise the same fixed coordinator embedded by ApplyDemo, with WO and
+  // equipment sharing their real controller and one synthetic analysis host.
+  const shared = environment({ coordinated: true });
+  let sharedState = ok(await shared.call());
+  const sharedHost = shared.host(), common = shared.window.__eesWorkPanelV1;
+  assert.equal(common.selected('sample-chat'), 'wo');
+  assert.equal(shared.q('work-tabs').hidden, false);
+  assert.equal(shared.q('work-tab-analysis').hidden, true);
+  sharedState = ok(await shared.call('update', { equipment_id: 'KR-CA-211', ...fields }, sharedState.revision));
+  shared.q('description').value = '공통 패널 전환 뒤에도 유지할 수동 입력'; shared.q('description').fire('input');
+  const sharedDraft = JSON.parse(JSON.stringify(shared.window.__eesWODemoV1.view()));
+  const sharedWidth = sharedHost.style.width;
+  shared.q('work-tab-equipment').fire('click'); shared.flushMutations();
+  assert.equal(common.selected('sample-chat'), 'equipment');
+  assert.equal(shared.q('panel-title').textContent, '설비 조회');
+  assert.equal(shared.host(), sharedHost);
+  const analysis = new Element('aside'); analysis.id = 'test-analysis-panel';
+  common.register('sample-chat', { key: 'analysis', label: '분석 과정', hostId: analysis.id,
+    open: () => shared.row.append(analysis), close: () => analysis.remove(), isOpen: () => analysis.isConnected });
+  assert.equal(shared.q('work-tab-analysis').hidden, false);
+  shared.q('work-tab-analysis').fire('click'); shared.flushMutations();
+  assert.equal(analysis.isConnected, true); assert.equal(shared.host(), undefined);
+  assert.equal(shared.toolbar.children.flatMap(node => node.children).filter(node => node.id === 'ees-work-panel-toggle').length, 1);
+  const sharedLauncher = shared.launcher();
+  assert.equal(sharedLauncher.attributes['aria-controls'], analysis.id);
+  common.select('sample-chat', 'wo', { open: true }); shared.flushMutations();
+  assert.equal(analysis.isConnected, false); assert.equal(shared.host(), sharedHost);
+  assert.equal(shared.q('description').value, sharedDraft.fields.description);
+  assert.equal(sharedHost.style.width, sharedWidth);
+  for (const key of ['revision', 'phase', 'equipment', 'fields', 'filters']) assert.deepEqual(JSON.parse(JSON.stringify(shared.window.__eesWODemoV1.view()))[key], sharedDraft[key]);
+  shared.q('form').fire('submit'); const reviewBeforeTabs = shared.q('review-values').textContent;
+  shared.q('work-tab-equipment').fire('click'); shared.q('work-tab-wo').fire('click');
+  assert.equal(shared.q('review').hidden, false); assert.equal(shared.q('review-values').textContent, reviewBeforeTabs);
+  shared.q('close').fire('click'); shared.flushMutations();
+  assert.equal(shared.host(), undefined); assert.equal(sharedLauncher.attributes['aria-expanded'], 'false');
+  shared.location.pathname = '/c/elsewhere'; shared.replaceLayout(); shared.flushMutations();
+  assert.equal(shared.launcher(), undefined);
+  shared.location.pathname = '/c/sample-chat'; shared.replaceLayout(); shared.flushMutations();
+  assert.equal(shared.host(), undefined); assert.equal(shared.launcher(), sharedLauncher);
+  sharedLauncher.fire('click'); shared.flushMutations(); assert.equal(shared.host(), sharedHost);
+  assert.equal(shared.q('review').hidden, false); assert.equal(shared.q('review-values').textContent, reviewBeforeTabs);
+  shared.q('issue').fire('click'); const issuedBeforeTabs = shared.q('result-values').textContent;
+  common.select('sample-chat', 'analysis', { open: true }); common.select('sample-chat', 'wo', { open: true });
+  assert.equal(shared.q('result').hidden, false); assert.equal(shared.q('result-values').textContent, issuedBeforeTabs);
+  shared.replaceNavbar(); shared.flushMutations();
+  assert.equal(shared.launcher(), sharedLauncher); assert.equal(shared.host(), sharedHost);
+  assert.equal(shared.flushMutations(), 0);
+  shared.location.pathname = '/auth'; shared.replaceLayout(); shared.flushMutations();
+  assert.equal(shared.window.__eesWorkPanelV1, undefined); assert.equal(shared.window.__eesWODemoManagerV1, undefined);
+  assert.equal(shared.host(), undefined); assert.equal(shared.launcher(), undefined);
+  console.log('PASS shared deployed coordinator, three screens/one launcher, preserved draft/review/issued state, closed-route restoration and auth cleanup');
+  console.log('12 grouped JS state checks passed (synthetic DOM; browser rendering unverified).');
 })().catch(error => { console.error(error); process.exitCode = 1; });

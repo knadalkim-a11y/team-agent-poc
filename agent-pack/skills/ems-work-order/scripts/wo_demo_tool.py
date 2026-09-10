@@ -1,8 +1,9 @@
 """
 title: EES WO Demo
 description: Sample equipment selection and WO drafting beside the existing chat. No EMS connection or real issuance.
-version: 0.1.7
+version: 0.1.8
 required_open_webui_version: 0.11.3
+ees_demo_pack: ees-demo-v1
 """
 
 import asyncio
@@ -10,6 +11,8 @@ import json
 
 
 EVENT_TIMEOUT_SECONDS = 8
+# ApplyDemo embeds the reviewed shared coordinator here for the deployed Tool.
+WORK_PANEL_SCRIPT = ''
 _LIMITS = {
     "corporation": 100, "site": 100, "shop": 100, "line": 100,
     "process": 100, "query": 100, "equipment_id": 100,
@@ -117,6 +120,9 @@ PANEL_HTML = r"""<style>
   h3 { font-size: 16px; font-weight: 650; letter-spacing: -.2px; }
   .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 5px; background: var(--wo-soft); color: var(--wo-muted); font-size: 11px; font-weight: 600; }
   .close { flex: 0 0 auto; padding-inline: 12px; font-size: 13px; }
+  .work-tabs { display: flex; gap: 6px; padding-bottom: 16px; }
+  .work-tabs button { flex: 1; padding: 9px 7px; font-size: 13px; }
+  .work-tabs button[aria-selected="true"] { color: var(--wo-accent); background: var(--wo-accent-soft); border-color: var(--wo-accent); }
   .intro { padding: 12px; margin-bottom: 20px; background: var(--wo-soft); border-radius: 9px; color: var(--wo-muted); font-size: 13px; }
   .section-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 13px; }
   .section-title .badge { color: var(--wo-accent); background: var(--wo-accent-soft); }
@@ -171,6 +177,12 @@ PANEL_HTML = r"""<style>
     </div>
     <button id="close" class="close" type="button" aria-label="설비 WO 패널 닫기">닫기</button>
   </header>
+
+  <nav id="work-tabs" class="work-tabs" role="tablist" aria-label="업무 화면" hidden>
+    <button id="work-tab-analysis" type="button" role="tab" aria-selected="false" hidden>분석 과정</button>
+    <button id="work-tab-equipment" type="button" role="tab" aria-selected="false">설비 조회</button>
+    <button id="work-tab-wo" type="button" role="tab" aria-selected="false">WO 작성</button>
+  </nav>
 
   <p id="intro" class="intro">대화로 요청하거나 이 화면에서 직접 선택·수정할 수 있어요.</p>
   <div class="section-title">
@@ -270,6 +282,7 @@ PANEL_SCRIPT = r"""
 let panelStage='route_check';
 try {
   const fail = (code, message) => ({ok: false, demo: true, error: {code, message}});
+  const workPanel = window.__eesWorkPanelV1;
   if (location.pathname !== '/c/' + encodeURIComponent(request.chat_id)) {
     // A late response from another chat must not clear the currently open draft.
     window.__eesWODemoManagerV1?.sync();
@@ -314,7 +327,7 @@ try {
       observer.disconnect();themeObserver.disconnect();
       window.removeEventListener('popstate',sync);window.removeEventListener('pagehide',destroy);
       navigation?.removeEventListener('navigatesuccess',sync);
-      chats.forEach(item=>item.detach());chats.clear();active=null;
+      chats.forEach(item=>{item.detach();workPanel?.unregister(item.chatId,'equipment');workPanel?.unregister(item.chatId,'wo');});chats.clear();active=null;
       delete window.__eesWODemoV1;delete window.__eesWODemoManagerV1;
     };
     manager={chats,sync,destroy};window.__eesWODemoManagerV1=manager;
@@ -374,7 +387,16 @@ try {
     const path = e => [e.corporation,e.site,e.shop,e.line,e.process].join(' / ');
     const matches = filters => catalog.filter(e=>hierarchy.every(k=>!filters[k] || e[k]===filters[k]) && (!filters.equipment_id?.trim() || e.id===filters.equipment_id.trim()) && (!filters.query || (e.id+' '+e.name).toLowerCase().includes(filters.query.toLowerCase().trim())));
     const options = (key, filters) => [...new Set(catalog.filter(e=>hierarchy.slice(0,hierarchy.indexOf(key)).every(k=>!filters[k] || e[k]===filters[k])).map(e=>e[key]))];
-    const alive = () => attached && location.pathname === mountedPath && row.isConnected && document.querySelector('#chat-container #chat-pane') === anchor && anchor.parentElement===column && column.parentElement===row && launcher.isConnected && launcherSlot.parentElement===toolbar;
+    const alive = () => attached && location.pathname === mountedPath && row.isConnected && document.querySelector('#chat-container #chat-pane') === anchor && anchor.parentElement===column && column.parentElement===row && (workPanel || (launcher.isConnected && launcherSlot.parentElement===toolbar));
+    const renderTabs = () => {
+      q('work-tabs').hidden=!workPanel;
+      if(!workPanel)return;
+      ['analysis','equipment','wo'].forEach(key=>{
+        const tab=q('work-tab-'+key);
+        tab.hidden=!workPanel.available(request.chat_id,key);
+        tab.setAttribute('aria-selected',String(workPanel.selected(request.chat_id)===key));
+      });
+    };
     const searchView = () => {
       const list=matches(search.filters);
       return {filters:{...search.filters},selected_equipment:findEquipment(search.selected_id),available_options:Object.fromEntries(hierarchy.map(k=>[k,options(k,search.filters)])),matches_count:list.length,matches:list.slice(0,8),matches_truncated:list.length>8};
@@ -399,8 +421,8 @@ try {
       q('intro').textContent=browsing?'대화에서 받은 검색 조건을 보여드려요. 필터를 바꾸거나 설비를 눌러 상세 정보를 확인하세요.':'대화로 요청하거나 이 화면에서 직접 선택·수정할 수 있어요.';
       q('stage').textContent=complete?'발행 완료 예시':checking?'최종 확인':'발행 전';
       q('stage').hidden=browsing;
-      q('browse-equipment').hidden=browsing;
-      q('back-to-wo').hidden=!browsing || !(state.equipment_id || state.fields.title || state.fields.description || checking || complete);
+      q('browse-equipment').hidden=Boolean(workPanel) || browsing;
+      q('back-to-wo').hidden=Boolean(workPanel) || !browsing || !(state.equipment_id || state.fields.title || state.fields.description || checking || complete);
       q('back-to-wo').textContent=complete?'발행 완료 예시 보기':'작성 중인 WO 보기';
       q('filters').hidden=!browsing && (complete || checking || !choosing);
       q('form').hidden=browsing || complete || checking || choosing || !state.equipment_id;
@@ -441,6 +463,7 @@ try {
       q('change-note').textContent=browsing?searchNote:note;
       q('undo').hidden=!lastAI || complete;
       if(checking && reviewed)renderValues(q('review-values'),reviewed);
+      renderTabs();
     };
     const apply = (changes, origin) => {
       if(state.phase==='issued')return fail('already_issued','발행 완료 예시는 수정하지 않습니다. 새 시연은 새 대화에서 시작해 주세요.');
@@ -505,14 +528,15 @@ try {
       q('validation').hidden=true;render();
     };
     panelStage='event_bind';
+    ['analysis','equipment','wo'].forEach(key=>q('work-tab-'+key).addEventListener('click',()=>workPanel?.select(request.chat_id,key,{open:true})));
     hierarchy.forEach(key=>q(key).addEventListener('change',()=>{
       if(screen==='equipment'){changeSearch(key,q(key).value);return;}
       const result=apply({[key]:q(key).value},'user');if(!result.ok)displayError(result.error.message);
     }));
     q('query').addEventListener('input',()=>screen==='equipment'?changeSearch('query',q('query').value):apply({query:q('query').value},'user'));
     q('equipment-code').addEventListener('input',()=>changeSearch('equipment_id',q('equipment-code').value));
-    q('browse-equipment').addEventListener('click',()=>{screen='equipment';q('validation').hidden=true;render();host.scrollTop=0;});
-    q('back-to-wo').addEventListener('click',()=>{screen='wo';q('validation').hidden=true;render();host.scrollTop=0;});
+    q('browse-equipment').addEventListener('click',()=>{if(workPanel){workPanel.select(request.chat_id,'equipment',{open:true});return;}screen='equipment';q('validation').hidden=true;render();host.scrollTop=0;});
+    q('back-to-wo').addEventListener('click',()=>{if(workPanel){workPanel.select(request.chat_id,'wo',{open:true});return;}screen='wo';q('validation').hidden=true;render();host.scrollTop=0;});
     q('choose-again').addEventListener('click',()=>{choosing=true;render();host.scrollTop=0;});
     contentFields.forEach(key=>q(key).addEventListener('input',()=>apply({[key]:q(key).value},'user')));
     q('undo').addEventListener('click',()=>{
@@ -598,6 +622,7 @@ try {
       host.style.colorScheme=dark?'dark':'light';
     };
     const updateLauncher=()=>{
+      if(workPanel)return;
       launcher.title=wantsOpen?'업무 패널 닫기':'업무 패널 열기';
       launcher.setAttribute('aria-label',launcher.title);
       launcher.setAttribute('aria-expanded',String(wantsOpen));
@@ -605,20 +630,28 @@ try {
     };
     const hidePanel=()=>{
       finishDrag();resizeObserver.disconnect();window.removeEventListener('resize',resize);
-      divider.remove();host.remove();if(attached)column.style.minWidth=originalMinWidth;
+      divider.remove();host.remove();if(attached && !workPanel)column.style.minWidth=originalMinWidth;
     };
-    const close=()=>{wantsOpen=false;hidePanel();updateLauncher();launcher.focus({preventScroll:true});};
-    const open=()=>{
+    const closeRaw=()=>{wantsOpen=false;hidePanel();updateLauncher();};
+    const close=()=>{if(workPanel){workPanel.close(request.chat_id);workPanel.focus(request.chat_id);return;}closeRaw();launcher.focus({preventScroll:true});};
+    const openRaw=()=>{
       wantsOpen=true;if(!attached)return;
       if(!host.isConnected){row.append(divider,host);observeLayout();window.addEventListener('resize',resize);}
       column.style.minWidth='0';host.hidden=false;updateLauncher();resize();theme();
     };
+    const open=(key=screen)=>{if(workPanel){workPanel.select(request.chat_id,key,{open:true,focus:false});return;}openRaw();};
     const detach=()=>{
       hidePanel();launcherSlot.remove();attached=false;
     };
     const attach=nextLayout=>{
       ({anchor,column,row,toolbar}=nextLayout);originalMinWidth=column.style.minWidth;
-      attached=true;toolbar.insertBefore(launcherSlot,nextLayout.controlsWrapper || null);updateLauncher();theme();if(wantsOpen)open();
+      attached=true;theme();
+      if(workPanel){
+        ['equipment','wo'].forEach(key=>workPanel.register(request.chat_id,{key,label:key==='equipment'?'설비 조회':'WO 작성',hostId:host.id,
+          open:()=>{if(screen!==key){screen=key;q('validation').hidden=true;render();host.scrollTop=0;}openRaw();},
+          close:closeRaw,isOpen:()=>attached && host.isConnected && screen===key,onChange:renderTabs,focus:()=>q('work-tab-'+key).focus({preventScroll:true})}));
+        workPanel.restore(request.chat_id);workPanel.sync();renderTabs();
+      }else{toolbar.insertBefore(launcherSlot,nextLayout.controlsWrapper || null);updateLauncher();if(wantsOpen)openRaw();}
     };
     controller={chatId:request.chat_id,pathname:mountedPath,alive,attach,detach,theme,open,view,browse,
       layoutChanged:records=>{if(records.some(record=>record.target===row)){observeLayout();resize();}},
@@ -637,14 +670,14 @@ try {
     manager.sync();
   }
   panelStage='panel_open';
-  controller.open();
+  controller.open(request.action==='equipment'?'equipment':'wo');
   panelStage=request.action==='equipment'?'equipment_render':request.action==='view'?'wo_render':'wo_update';
   if(request.action==='equipment')return controller.browse(request.filters);
   return request.action==='view'?controller.woView():controller.update(request.expected_revision,request.changes);
 } catch (error) {
   // Return fixed diagnostic labels only; exception messages/stacks may contain user data.
   const exception=['TypeError','ReferenceError','RangeError','SyntaxError','Error','NotFoundError','NotSupportedError','SecurityError','InvalidStateError','InvalidCharacterError'].includes(error?.name)?error.name:'Error';
-  return {ok:false,demo:true,error:{code:'panel_error',message:'시연 화면을 처리하지 못했습니다. 화면의 현재 내용을 확인한 뒤 다시 열어 주세요.',diagnostic:{script_version:'0.1.7',stage:panelStage,exception}}};
+  return {ok:false,demo:true,error:{code:'panel_error',message:'시연 화면을 처리하지 못했습니다. 화면의 현재 내용을 확인한 뒤 다시 열어 주세요.',diagnostic:{script_version:'0.1.8',stage:panelStage,exception}}};
 }
 """
 
@@ -660,7 +693,7 @@ async def _call(action, event_call, metadata, **values):
     if not callable(event_call):
         return _error("browser_required", "WebUI 대화 화면의 연결을 확인해 주세요.")
     request = {"action": action, "chat_id": chat_id, **values}
-    code = "const request = " + json.dumps(request, ensure_ascii=True) + ";\n"
+    code = WORK_PANEL_SCRIPT + "\nconst request = " + json.dumps(request, ensure_ascii=True) + ";\n"
     code += "const equipmentCatalog = " + json.dumps(_DEMO_EQUIPMENT, ensure_ascii=True) + ";\n"
     code += "const panelHTML = " + json.dumps(PANEL_HTML, ensure_ascii=True) + ";\n" + PANEL_SCRIPT
     try:

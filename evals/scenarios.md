@@ -1611,3 +1611,53 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 기록 검증: 상태·평가·적용 안내의 문서 3개만 변경함. ApplyDemo의 자산 목록·변경 횟수·재조회·성공 단계와 시작 질문/전문 실행 상태 코드를 읽기 대조함. Linux의 `python scripts/check_docs.py`는 files=29, links=751, errors=0, review_candidates=0이며 `git diff --check`도 통과함. 실행 코드·Prompt·Tool·테스트는 변경하지 않고 기존 통과 시험을 반복하지 않음. 사내 결과 전달·새 대화 안내의 독립 읽기 검토도 같은 판정 범위를 확인함.
 
 직전 STATUS 최근 점검 보존(시연 구현·원격 CI 완료, 2026-09-10): EMS/APC/FDC 합성 자료·Prompt·전문 호출과 ApplyDemo를 구현하고 고정 0.11.3의 native 응답 루프를 합성 provider로 실행함. API 필드·관리자 권한·재실행·응답 유실, 사내 버전 허용·비공개 설정 덮어쓰기 차단·자료 실패 상태·새 Tool 기본 Valves·저널 재시도를 검토함. 당시 실제 사내 API·LLM 품질·지연은 미검증이었고 Windows/Linux CI 성공과 첫 Windows 시험 인코딩 실패·수정은 위 구현 근거에 보존함.
+
+<a id="ees-portal-upgrade-apply-failure"></a>
+
+### Portal Upgrade 파일 적용 실패 보고 (2026-09-10)
+
+- 사용자 출력: `action=upgrade result=failed changed=- wrapper_changed=true wrapper=a6f108798d81 commit=- version=- stage=apply running=- code=operation_failed next=inspect_apply`. 전달된 wrapper는 안내 원본 `a6f108796d818510c44a6c0d6408823bdb8b6611` 접두사와 한 글자 다르므로 오타로 단정하지 않고 사내 정확한 SHA는 미확인으로 둠.
+- 코드 대조: ees_upgrade.deploy는 stop_registered·require_stopped 뒤에 stage=apply와 changed=None을 설정함. 따라서 정지/포트 해제 확인을 지나 Apply 안에서 실패한 것으로 판단하며 현재 서버 상태나 파일 무변경을 뜻하지 않음. 안내 PowerShell 블록은 Upgrade 예외 뒤 중단하므로 후속 ApplyDemo 성공은 확인되지 않음. 자동 재시도·Restore·Start를 수행하지 않음.
+- 기록과 보존: Upgrade는 last-operation.json에 action/failed/at/result 및 result.process의 고정 오류 종류·errno/winerror와 result.bundle 경로를 저장함. 결과에 report=unavailable은 보고되지 않음. 실제 오류 문장·예외 위치는 저장되지 않아 이번 요약만으로 파일 잠금·권한·디스크/경로 등 원인을 확정할 수 없음. result.process.stage는 기존 허용 단계에 apply가 없어 preflight로 축약되는 진단 결함이며 원인 판정에 사용하지 않음. 프로그램 미완료 단계는 deployment.json의 customization.pending를 읽음.
+- 다음 확인: 기본 config에서 state_root를 읽고 두 JSON의 최신 upgrade/apply 실패를 확인한 뒤 오류 종류/번호·기록 경과 시간, pending 단계와 program/program.previous/program.staging/deployment.lock/보존 ZIP 존재만 두 줄로 받음. 경로·원문 로그·환경값·토큰은 출력하지 않으며 파일이나 프로세스를 변경하지 않음. 기록이 없거나 다른 작업이면 중단함.
+- 복구 경계: 과거 성공한 수동 promote는 최초 설치의 다른 상태였음. 현재는 기존 program이 있어 move_active 실패 가능성도 있지만 미확정. Resume는 apply/promote에서 staging이 없고 정확한 target/previous/ZIP을 검증한 경우만 가능하며, Restore도 보관 파일·소유자·프로세스 경계를 확인해야 함. 결과를 받기 전에 과거 폴더 이동·구형 후보 진단·재설치를 안내하지 않음.
+- 사외 검토: 독립 읽기 검토로 실제 단계·오류 보존 결함·두 줄 확인·Resume/Restore 조건을 대조함. 새 실행 코드나 테스트를 추가하지 않았고 문서·diff를 점검함. 실제 사내 상세 오류·pending 상태·프로그램 복구·Portal/v0.1.3 적용은 미확인.
+
+직전 STATUS 최근 점검 보존(v0.1.3): 2026-09-10: v0.1.2 패널 열림·질문/회신의 사내 사용자 확인을 반영하고 v0.1.3 가독성·업무 중심 질문을 개선함. 이름이 그대로라는 보고를 브랜딩 소스·ApplyDemo/Upgrade 범위와 대조해 프로그램 적용이 필요함을 확인함. 관련 Python83개·패널8그룹·실제 v0.1.2→v0.1.3 최초8/갱신6/재실행0 보존 검사와 독립 검토를 완료하고 펼침 직후 알림이 도착할 때 상태 보존을 보완함. 원격 CI와 배포물 생성 결과는 해당 PR에 보존하며 사내 새 화면 검증과 구분함. [범위·증거](../evals/scenarios.md#cross-system-demo-readability).
+
+#### 후속: promote 접근 거부와 보존 상태 확인 (2026-09-10)
+
+- 사용자 보고: `age_min=7.2 type=os_error errno=13 winerror=5`, `pending=promote program=false previous=true staging=true lock=false zip=true`. 7.2분은 실패 기록 후 경과 시간이다. 새 최종 program은 아직 없고 이전/준비 폴더와 ZIP이 남아 있는 상태를 확인했으며 전체 파일 무결성이나 현재 가동을 이 존재 검사로 대신하지 않음.
+- 판정: apply 소스의 retire_previous·move_active 뒤 promote에서 program.staging→program 이름 변경이 접근 거부된 상태와 일치함. 최초 사내 설치 때와 같은 중단 단계이나 근본 원인이 같다는 증거는 없음. 파일 사용 주체·ACL·보안 프로그램·시간 경과 영향은 미확정임.
+- 재개 검토: check_resume은 기존 active가 있는 경우 previous를 pending.before와 전체 대조하고, target과 같은 ZIP/commit 및 새 program 전체를 검증함. `test_legacy_before_portal_pending_can_resume_and_restore`와 `test_resume_updated_and_identical_bytes_preserves_exact_predecessor`의 기존 검증 범위를 재사용함. 코드/시험 변경과 같은 검사 반복은 하지 않음.
+- 안내: 한 블록에서 최신 실패/pending·정지 기록·폴더/잠금/ZIP 존재와 commit 형식을 확인하고 원래 ZIP/target commit을 먼저 읽음. 원래 실패 보고를 ZIP 옆 upgrade-failure.json에 한 번 보존한 후 탐색기를 열고 수동 이름 변경을 기다림. 이름 변경 성공을 확인한 뒤 Apply -Resume → Start120 → ApplyDemo를 순서대로 실행하며 앞 단계 실패 시 다음 작업은 실행하지 않음. 기존 ZIP 재사용, DB/키/CA/이전 프로그램 보존, 수동 이름 변경 거부 시 중단 기준을 유지함.
+- 검토 결과: 독립 읽기 검토로 현재 기존 수정본의 재개 지원·보고 덮어쓰기 전 ZIP 보존·실패 전파를 대조함. 복사 블록은 2,146자로 제한 이내. 문서/diff를 점검하며 사내 수동 이름 변경·Resume·Start·Portal/v0.1.3 성공은 후속 보고 전까지 미확인임.
+
+직전 STATUS 최근 점검 보존(최초 Upgrade 실패 진단): 2026-09-10: Upgrade의 apply 실패 보고를 현재 코드와 대조함. 서버 중지/포트 확인 이후 진입한 사실과 현재 상태 미확인을 구분하고, 저장된 OS 오류 번호·pending 단계 확인을 준비함. Upgrade 진단이 apply 하위 단계/정확한 예외 위치를 보존하지 않는 결함을 확인했으나 기존 저장 기록으로 먼저 범위를 좁힘. 실행 코드·서버·데이터는 변경하지 않고 문서/diff를 점검함. [근거](../evals/scenarios.md#ees-portal-upgrade-apply-failure).
+
+
+#### 후속: EES Portal 이름 표시 확인 (2026-09-10)
+
+- 사용자 보고: `응 EES Portal로 바뀐거 확인했어`. 수동 이름 변경 → Apply -Resume → Start → ApplyDemo 복구 블록 안내 뒤 화면의 서비스 이름 변경을 확인한 보고로 기록함.
+- 확인 범위: 사용자 화면의 EES Portal 표시. 개별 명령 성공 출력·실제 프로그램/래퍼 SHA·패널 v0.1.3·예시질문 적용 결과는 전달받지 않았으므로 별도 미확인으로 유지함. 이전 promote 접근 거부와 기동 지연의 원인 해소·장기 안정성까지 확인한 것으로 확대하지 않음.
+- 다음 작업: 복구 블록을 반복하지 않고 새 EES 대화에서 전문가 회신 중심 패널의 가독성과 조립 2라인 예시질문을 짧게 확인함. 저장소에는 STATUS·기존 복구 가이드·이 기록만 갱신하며 실행 코드·설정·테스트·사내 환경은 변경하지 않음.
+- 문서 검수: 보고 범위와 현재 안내를 대조하고 문서 구조·링크 및 diff를 점검함. 실제 Windows 운영 명령이나 화면 검사를 대신하지 않음.
+
+직전 STATUS 최근 점검 보존(promote 복구 준비): 2026-09-10: 사내 errno13/winerror5와 promote·폴더/ZIP 존재 보고를 기존 파일 적용/Resume 코드 및 ees.1→ees.2 재개 시험과 대조함. 독립 검토로 기존 수정본·직전 보관본·정확한 ZIP/commit의 재개 지원을 확인함. 2,146자 한 블록이 상태 확인·원래 오류 보고 로컬 보존·탐색기 수동 이름 변경·검증/시작/시연 자산 적용을 잇도록 준비함. 새 실행 코드·테스트·사내 작업은 수행하지 않고 문서/diff를 점검함. [증거](../evals/scenarios.md#ees-portal-upgrade-apply-failure).
+
+<a id="cross-system-plan-work-panel"></a>
+
+### 실행 계획과 통합 업무 패널 v0.2.0 (2026-09-10)
+
+- 요청·범위: 사용자가 EES의 사전 계획과 실제 실행 표시, 기존 업무 패널 버튼 하나, 오른쪽 화면, 짧은 결론과 클릭해 보는 시각 자료·공개 판단 근거를 제안함. 목업을 수정·확인한 뒤 현재 구현대로 배포해 확인하고 싶다고 요청함. 당시 목업만 존재한 점을 알리고 실제 Tool·화면·배포 연결까지 진행함. ‘진행 시연’은 목업용이며 제품에는 넣지 않음.
+- 시작 원본: main `a6f108796d818510c44a6c0d6408823bdb8b6611`, tree `b41c432aa2d262cb4ee2700416495b2c6e7bec77`의 97개 파일을 Git blob 해시로 대조한 로컬 스냅샷에서 개발함. 열린 PR #25의 장애·Portal 표시 확인 문서 변경을 함께 보존함. Portal 표시 보고를 새 자산의 사내 적용 성공으로 확대하지 않음.
+- 실행: `manage_analysis_plan`의 create/update/finish와 실제 전문·비교 Tool의 단계 ID·선행 관계 검증을 연결함. 실행 전 이유는 불변이며 결과 후 공개 판단 요약과 불확실성을 별도 기록함. 실행 상태는 실제 호출 결과만 변경하고 미종료 계획의 finish는 거부함. 기존 사용자·요청 격리, 전문 호출 총 4회와 하위 자료 조회 3회, 합성 계산 정의를 유지함. 기본 추가 도구 호출은 최초 계획과 마지막 정리 2회이며 별도 LLM 요약 호출은 없음.
+- 화면: 공통 업무 패널 버튼과 분석·설비 조회·WO 화면 전환, 실행 계획·결과 요약·단계별 판단/상세 자료를 연결함. 그래프와 근거는 실제 계산 반환값으로 만들며 목업 예시 숫자를 넣지 않음. 좁은 화면도 오른쪽에 열고 기존 WO 초안·설비 선택을 보존함. 화면 기록은 현재 탭 메모리에만 있으므로 새로고침 복원은 지원하지 않음.
+- 배포: ApplyDemo에 공통 화면 코드 삽입과 기존 WO 등록 갱신을 연결함. 이미 EES에 연결된 공식 v0.1.6/v0.1.7 또는 현재 Git 원본의 최초 수동 등록본만 같은 ID로 갱신하고 미설치는 건너뜀. 사용자 수정·모호한 후보는 쓰기 전에 중단함. 프로그램 교체·의존성 설치·서버 재시작 없이 자산만 갱신하며 DB·키·PAT와 대상 밖 자산을 보존함.
+- 검증 환경: Linux Python 3.12.14·Node 24.19.0. 고정 Open WebUI 0.11.3 wheel 146,072,797바이트, SHA256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`의 native 응답 루프 fixture를 사용함. 브라우저 실행 파일이 없어 실제 브라우저 렌더링은 미실행이며 합성 DOM 검사와 구분함. 사내 모델의 계획 작성·분석 품질·지연과 실제 사용자 화면은 배포 후 확인 대상임.
+- 자동 검사: `test_ees_specialists_tool.py` 32개, `test_ees_demo_data_tool.py` 19개, `test_ees_demo_assets.py` 36개, `test_ees_apply_demo.py` 13개, `test_demo_bundle.py` 7개, `test_wo_demo_tool.py` 20개로 관련 Python 총127개 통과. `node tests/test_ees_cooperation_panel.cjs` 10그룹과 `node tests/test_wo_demo_state.cjs` 12그룹 통과. 실제 등록 Python이 만든 execute payload와 두 실제 화면 코드를 함께 실행해 버튼 하나·탭 전환·초안/검토 유지·닫힘/대화 복원·계획 우선·공개 근거·조건별 차트 탐색을 확인함. `python scripts/check_docs.py`는 errors=0/review_candidates=0, `git diff --check`도 통과함.
+- 실제 관리 목록 갱신: main v0.1.3의 Git archive와 당시 적용 코드를 사용해 초기 자산을 등록한 뒤 현재 v0.2.0으로 갱신하는 FakeAPI 시험을 수행함. 최초8/갱신4/재실행0이며 갱신 대상은 분석 Tool 2개·기존 WO v0.1.6·기존 EES 관리 구역임. 재실행 POST 0회와 모든 journal applied를 확인함. EES 사용자 지침·질문·params·추가 도구/Skill/Knowledge·소유자/권한/custom meta, WO ID·이름·소유자·권한·설명·Valves를 보존함. 관리 도구·제안은 기존 병합 규칙에 따라 목록 끝으로 정렬되며 사용자 항목과 상대 순서는 유지됨.
+- 독립 검토: 실행 상태·권한·요청 격리·의존 관계·예산·데이터셋과 API/journal 보존을 대조함. 실제 0.11.3의 Tool 바인더와 반복 재바인더로 별도 등록 Tool의 create→consult→compare→finish를 실행하여 동일 request.state와 실제 조회 연결을 확인함. 초기 planned 상태에서 계획 목록이 숨겨지는 화면 문제, 화면 전환 뒤 원래 대화 최소 너비 복원, 차트 클릭 후 근거 위치·포커스 유지와 미확인 단계 상세 표시를 보완함. 모델 내부 사고 원문을 공개 판단 요약으로 가장하지 않으며 전체 부모 스트리밍·사내 추론 품질은 이 시험에 포함하지 않음.
+- 원격 CI·배포: 해당 PR의 Windows/Linux 검증과 병합 뒤 main 산출물 생성을 확인한 후 ApplyDemo를 안내함. 실제 사내 적용·사용자 화면 확인은 아직 미실행이며 이전 Portal 이름 표시 확인과 구분함.
+
+직전 STATUS 최근 점검 보존(Portal 표시 확인): 2026-09-10: 사용자 보고로 EES Portal 이름 표시를 확인하고 복구 실행 대기 상태를 화면 확인 단계로 갱신함. 개별 명령 성공·실제 적용 SHA·패널 v0.1.3·접근 거부 원인 해소는 미확인으로 유지함. 기존 복구 안내를 날짜가 있는 과거 절차로 표시해 반복 실행을 방지하고, 문서 구조·링크와 diff를 점검함. 실행 코드·설정·테스트·사내 환경은 변경하지 않음. [확인 범위](#ees-portal-upgrade-apply-failure).
