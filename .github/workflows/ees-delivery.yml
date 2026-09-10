@@ -14,11 +14,16 @@ on:
       - 'scripts/manage-ees.ps1'
       - 'scripts/ees_webui_customization.py'
       - 'scripts/ees_upgrade.py'
+      - 'scripts/ees_apply_demo.py'
+      - 'scripts/ees_demo_assets.py'
       - 'scripts/ees_update_download.py'
       - 'tests/test_ees_deploy_*.py'
       - 'tests/test_ees_webui_customization.py'
       - 'tests/test_manage_ees.py'
       - 'tests/test_ees_upgrade.py'
+      - 'tests/test_ees_apply_demo.py'
+      - 'tests/test_ees_demo*.py'
+      - 'tests/test_ees_specialists_tool.py'
       - 'tests/test_ees_update_download.py'
       - 'tests/test_confluence*.py'
       - 'tests/test_jira_read.py'
@@ -81,11 +86,19 @@ jobs:
         run: python -m unittest discover -s tests -p test_ees_upgrade.py -v
       - name: Verify download boundaries
         run: python -m unittest discover -s tests -p test_ees_update_download.py -v
+      - name: Verify demo data and asset provisioning
+        run: python -m unittest discover -s tests -p "test_ees_demo*.py" -v
+      - name: Verify ApplyDemo operator entry
+        run: python -m unittest discover -s tests -p test_ees_apply_demo.py -v
       - name: Download the fixed upstream wheel for program validation
         run: |
           python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
       - name: Build the real program fixture without installing it
         run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
+      - name: Verify specialist execution against the fixed WebUI source
+        env:
+          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+        run: python -m unittest discover -s tests -p test_ees_specialists_tool.py -v
       - name: Verify program-only Apply and Restore
         env:
           EES_TEST_BRANDING_DIR: dist/branding

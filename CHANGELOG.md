@@ -4,6 +4,8 @@
 
 ## 2026-09-10
 
+- 합성 교차 분석 시연을 구현함. 기존 EES가 EMS/APC/FDC 전문 Workspace 모델을 실제 호출하며 근거를 취합하고 조건별 수치를 계산한다. 자료·전문 호출·보완 횟수와 사용자 권한을 코드에서 제한한다. ApplyDemo가 검증된 main을 갱신한 뒤 지정 Tool/Valves·전문 모델·기존 EES 관리 구역을 API로 병합하고, 기존 설정·개인 PAT를 유지하며 응답 유실 뒤 재실행을 지원한다. 최초 인증은 WebUI 관리자 API Key를 별도 DPAPI 저장한다. 기존 서버 재시작·운영 DB 조사·새 서버 없이 적용한다. [사용법](docs/03-openwebui-native-agent.md#demo-assets-deployment), [검증 및 사내 미확인 범위](evals/scenarios.md#cross-system-demo-implementation).
+
 - EES 기본 창구·시스템별 전문 Assistant·공통 도구 재사용 합의와 개선 기회/KPI 후보 발견 목표를 반영함. 합성 시연 3개, 전문 호출 최대 4회, 기존 EES+신규 전문 모델 3개·Tool 2개·Prompt/시작 질문 일괄 적용을 설계·독립 검토함. 고정 0.11.3의 자산 API·관리자 인증·설정 보존 경로를 확인했으며 ApplyDemo와 실행 자산은 아직 미구현. [시연 및 한 번 적용 설계](docs/03-openwebui-native-agent.md#demo-assets-deployment).
 
 - 컨셉 시연을 우선한다는 사용자 결정에 따라 실제 DB·코드 관계 조사를 운영 준비 단계로 미룸. 합성 EMS/APC/FDC 자료·공통 관계를 준비하고 실제 모델의 전문 Assistant 선택·호출·조건부 보완·종합 분석을 보여주는 범위를 확정함. 다음 작업을 DB 조사 준비에서 시연 구현으로 수정했으며 실행 기능은 아직 미구현. [현재 시연 범위](docs/03-openwebui-native-agent.md#cross-system-demo).

@@ -266,6 +266,18 @@ class BootstrapTests(unittest.TestCase):
         self.child.assert_not_called()
         self.assertEqual(self.head, OLDER)
 
+    def test_asset_runner_uses_same_verified_update_without_program_options(self):
+        del self.args.health_timeout
+        options = ["--ees-model-id", "existing", "--reset-token"]
+        result = upgrade.bootstrap(self.config, self.args, object(), {},
+                                   runner="ees_apply_demo.py", runner_options=options)
+        self.assertEqual(result, (7, HEAD, OLDER))
+        command = self.child.call_args.args[0]
+        self.assertIn(str(upgrade.ROOT / "scripts" / "ees_apply_demo.py"), command)
+        self.assertEqual(command[-3:], options)
+        self.assertNotIn("--health-timeout", command)
+        self.assertEqual(self.events, ["fetch", "merge-base", "ci", "merge", "child"])
+
     def test_wrong_repository_branch_dirty_and_ahead_or_diverged_main_rejected(self):
         for attribute, value, code in (("origin", "https://github.com/another/repo", "wrong_repository"),
                                        ("branch", "feature", "main_required"),
@@ -490,6 +502,28 @@ class UpgradeEntryPointTests(unittest.TestCase):
 
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell adapter execution requires pwsh")
 class PowerShellUpgradeTests(unittest.TestCase):
+    def test_adapter_runs_demo_with_saved_environment_and_separate_auth_options(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            scripts = root / "scripts"
+            scripts.mkdir()
+            adapter = scripts / "manage-ees.ps1"
+            shutil.copyfile(ROOT / "scripts" / "manage-ees.ps1", adapter)
+            (scripts / "ees_apply_demo.py").write_text("import json, sys\nprint(json.dumps(sys.argv[1:]))\n", encoding="utf-8")
+            config = root / "config.json"
+            config.write_text(json.dumps({"source_python": sys.executable}), encoding="utf-8")
+            command = [shutil.which("pwsh"), "-NoProfile", "-File", str(adapter),
+                       "-Action", "ApplyDemo", "-Config", str(config)]
+            result = subprocess.run(command + ["-ResetDemoToken", "-ResetUpdateToken",
+                                    "-WebUIUrl", "http://127.0.0.1:8080", "-EesModelId", "existing", "-Summary"],
+                                    capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), ["--config", str(config), "--reset-token",
+                            "--reset-update-token", "--webui-url", "http://127.0.0.1:8080", "--ees-model-id", "existing"])
+            result = subprocess.run(command + ["-Bundle", "untrusted.zip"], capture_output=True, text=True, timeout=30)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(result.stdout.strip(), "")
+
     def test_adapter_runs_upgrade_entrypoint_and_forwards_only_upgrade_arguments(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

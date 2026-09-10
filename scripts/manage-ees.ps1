@@ -1,11 +1,11 @@
 <#
 One operator entry point for the existing Windows EES instance.
-Settings and data stay outside Git. This does not synchronize Agent Pack items.
+Settings and data stay outside Git. ApplyDemo manages only the declared demo assets.
 #>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('Init', 'Update', 'Upgrade', 'Status', 'Diagnose', 'ProbeImports', 'Plan', 'Prepare', 'Deploy', 'Rollback', 'Start', 'Stop', 'Apply', 'Restore')]
+    [ValidateSet('Init', 'Update', 'Upgrade', 'ApplyDemo', 'Status', 'Diagnose', 'ProbeImports', 'Plan', 'Prepare', 'Deploy', 'Rollback', 'Start', 'Stop', 'Apply', 'Restore')]
     [string]$Action,
     [string]$Config = (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'),
     [string]$SourcePython,
@@ -24,11 +24,21 @@ param(
     [switch]$Resume,
     [switch]$Summary,
     [switch]$ResetUpdateToken,
+    [switch]$ResetDemoToken,
+    [string]$WebUIUrl,
+    [string]$EesModelId,
+    [string]$WebUICaFile,
     [string]$GitProxy
 )
 
 $ErrorActionPreference = 'Stop'
-if ($ResetUpdateToken -and $Action -ne 'Upgrade') { throw 'ResetUpdateToken is supported only with Upgrade.' }
+if ($ResetUpdateToken -and $Action -notin @('Upgrade', 'ApplyDemo')) { throw 'ResetUpdateToken is supported only with Upgrade or ApplyDemo.' }
+if (($ResetDemoToken -or $WebUIUrl -or $EesModelId -or $WebUICaFile) -and $Action -ne 'ApplyDemo') {
+    throw 'Demo connection options are supported only with ApplyDemo.'
+}
+if ($Action -eq 'ApplyDemo' -and ($Bundle -or $Commit -or $Wheelhouse -or $GitProxy -or $HealthTimeout)) {
+    throw 'ApplyDemo reuses the saved environment and verified main checkout; omit program deployment options.'
+}
 if ($Action -eq 'Upgrade' -and ($Bundle -or $Commit -or $Wheelhouse -or $GitProxy)) {
     throw 'Upgrade selects a verified artifact and reuses the saved Git proxy; omit Bundle/Commit/Wheelhouse/GitProxy.'
 }
@@ -37,8 +47,8 @@ if ($UseWindowsCA -and $Action -notin @('Deploy', 'Start')) {
 }
 if ($CheckOnly -and $Action -ne 'Apply') { throw 'CheckOnly is supported only with Apply.' }
 if ($Resume -and $Action -ne 'Apply') { throw 'Resume is supported only with Apply.' }
-if ($Summary -and $Action -notin @('Apply', 'Restore', 'Start', 'Stop', 'Status', 'Upgrade')) {
-    throw 'Summary is supported with Apply/Restore/Start/Stop/Status/Upgrade only.'
+if ($Summary -and $Action -notin @('Apply', 'Restore', 'Start', 'Stop', 'Status', 'Upgrade', 'ApplyDemo')) {
+    throw 'Summary is supported with Apply/Restore/Start/Stop/Status/Upgrade/ApplyDemo only.'
 }
 $repoPath = Split-Path $PSScriptRoot -Parent
 
@@ -86,6 +96,17 @@ if (-not $operatorPython -or -not (Test-Path -LiteralPath $operatorPython -PathT
     throw 'The registered Python environment is unavailable. Preserve its uv cache and inspect the existing installation.'
 }
 $pythonOptions = @('-I', '-B')
+if ($Action -eq 'ApplyDemo') {
+    $demoArgs = $pythonOptions + @((Join-Path $PSScriptRoot 'ees_apply_demo.py'), '--config', $Config)
+    if ($ResetDemoToken) { $demoArgs += '--reset-token' }
+    if ($ResetUpdateToken) { $demoArgs += '--reset-update-token' }
+    if ($WebUIUrl) { $demoArgs += @('--webui-url', $WebUIUrl) }
+    if ($EesModelId) { $demoArgs += @('--ees-model-id', $EesModelId) }
+    if ($WebUICaFile) { $demoArgs += @('--ca-file', $WebUICaFile) }
+    & $operatorPython @demoArgs
+    if ($LASTEXITCODE -ne 0) { throw 'EES demo apply stopped; use the final EES summary.' }
+    return
+}
 if ($Action -eq 'Upgrade') {
     $upgradeArgs = $pythonOptions + @((Join-Path $PSScriptRoot 'ees_upgrade.py'), '--config', $Config)
     if ($PSBoundParameters.ContainsKey('HealthTimeout')) { $upgradeArgs += @('--health-timeout', "$HealthTimeout") }

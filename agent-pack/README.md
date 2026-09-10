@@ -4,29 +4,9 @@ Open WebUI의 `EES 통합 Assistant`에 등록할 Git 관리 원본입니다. �
 
 이 폴더는 담당자가 관리하는 공통 배포 자산의 원본입니다. 팀원 작성물과의 구분은 [관리 경계](../README.md#원본과-배포본)를 따릅니다. 프로젝트를 코딩하는 GPT의 규칙은 [AGENTS.md](../AGENTS.md), Git 준비·WebUI 반영·다음 작업은 [STATUS](../docs/STATUS.md)를 확인합니다. 아래 파일 목록은 Git 원본이며 실제 배포 상태표가 아닙니다.
 
-```text
-agent-pack/
-├─ ees-prompt-suggestions.json
-├─ system-prompts/
-│  └─ ees-integrated-assistant.md
-├─ policies/
-│  └─ common-policy.md
-├─ knowledge/
-│  └─ poc-policy.md
-└─ skills/
-   ├─ policy-grounded-answer/SKILL.md
-   ├─ structured-troubleshooting/SKILL.md
-   ├─ confluence-read/
-   │  ├─ SKILL.md
-   │  └─ scripts/confluence_tool.py
-   ├─ jira-read/
-   │  └─ scripts/jira_tool.py
-   └─ github-read/
-      └─ scripts/github_tool.py
-```
-
 | 원본 | Open WebUI 반영 위치 |
 |---|---|
+| [ees-demo.json](ees-demo.json) | ApplyDemo가 관리할 전문 모델 3개·Tool 2개·EES 관리 구역과 시작 질문 목록 |
 | `ees-prompt-suggestions.json` | 팀 시연용 예시 질문 4개; [기존 모델에 적용](../docs/03-openwebui-native-agent.md#first-use-entry) |
 | `system-prompts/*.md` | Workspace Model의 System Prompt |
 | `policies/*.md` | 공통 규칙의 검토·관리 원본 |
@@ -35,6 +15,8 @@ agent-pack/
 | `skills/confluence-read/scripts/confluence_tool.py` | Workspace Tools; 별도 등록 후 Assistant에 연결 |
 | `skills/jira-read/scripts/jira_tool.py` | Workspace Tools; 프로젝트 집계·이슈 목록·본문 읽기 |
 | `skills/github-read/scripts/github_tool.py` | Workspace Tools; GHES의 개인 PAT 기반 PR 목록·본문 읽기 |
+| [cross-system-analysis/scripts/specialists_tool.py](skills/cross-system-analysis/scripts/specialists_tool.py) | `ees_specialists`: 전문 역량 조회·선택 실행·근거 반환 |
+| [cross-system-analysis/scripts/demo_data_tool.py](skills/cross-system-analysis/scripts/demo_data_tool.py) | `ees_demo_data`: 담당 시스템 합성 자료 조회·EES 조건별 비교 |
 
 Confluence 묶음은 **Skill 지침 + 실행 코드**를 함께 관리하는 예시입니다. Open WebUI가 폴더를 자동 설치·실행하지는 않습니다. [설치 안내](../docs/04-confluence-read-tool.md)에 따라 두 항목을 등록합니다. 코드 기본값은 비활성화이며 실제 준비·배포 상태는 [STATUS](../docs/STATUS.md), 실환경 판정은 [평가표](../evals/scenarios.md#confluence-live)에만 기록합니다.
 
@@ -56,11 +38,11 @@ flowchart LR
     Eval --> Release["POC 사용자 공개"]
 ```
 
-초기에는 관리자가 수동 반영합니다. [배포 단위·원복 기준](../docs/03-openwebui-native-agent.md#release-delivery)에 따라 검사·전달물 생성부터 자동화를 준비하며 현재 자동 배포는 미구현입니다. 소스 커스터마이징 산출물은 Agent Pack과 별도로 관리합니다.
+기존 공통 자산은 해당 가이드에 따라 수동 반영하고, 교차 분석 시연 목록은 `ApplyDemo`로 일괄 적용합니다. [배포 단위·원복 기준](../docs/03-openwebui-native-agent.md#release-delivery)을 따르며 프로그램 산출물은 Agent Pack과 별도로 관리합니다. 모든 개인·공유 자산을 동기화하는 기능은 포함하지 않습니다.
 
-2026-09-10 요청으로 [교차 분석 시연 자산의 일괄 등록](../docs/03-openwebui-native-agent.md#demo-assets-deployment)을 설계했습니다. 기존 EES와 전문 모델 3개·Tool 2개·모델 Prompt/시작 질문을 명시적 관리 목록으로 적용하는 범위이며, 실제 자산 파일·ApplyDemo 명령은 아직 구현하지 않았습니다. 기존 EES ID·사용자 추가 지침·연결·개인 PAT를 유지하고 수동 복사/등록을 줄이는 것이 목표입니다.
+교차 분석 시연 자산과 `ApplyDemo`의 구현 준비본은 [최초 연결·실행 안내](../docs/03-openwebui-native-agent.md#demo-assets-deployment)를 따릅니다. 기존 EES의 기반 LLM을 재사용해 EMS/APC/FDC를 등록하고 도구·지침·시작 질문을 연결합니다. EES ID·사용자 추가 지침·기존 연결·개인 PAT를 보존하며 별도 Skill을 등록하지 않습니다. 기존 서버를 켠 채 실행하고 이후 새 대화에서 sample_a/sample_b 탐색과 EMS 단독 분석을 확인합니다. 사외 합성 검사와 사내 API 적용·모델 분석 결과는 구분해 STATUS에 기록합니다.
 
-이 변경 절차와 공통 정책의 변경 관리 규칙은 이 폴더에서 관리하는 공통 배포 자산에 적용합니다. 변경은 Git 원본에서 검토한 뒤 반영하며, 해당 배포본을 UI에서 먼저 수정했다면 검토 후 Git 원본과 일치시킵니다. STATUS에는 실제 반영한 원본 커밋과 검증 증거를 남기며, 모르는 적용 버전은 미확인으로 둡니다. Skill 내부 `scripts/`는 기능 실행 코드이고, 저장소 최상위 `scripts/`는 개발·운영자용 실행 스크립트입니다.
+이 변경 절차와 공통 정책의 변경 관리 규칙은 이 폴더에서 관리하는 공통 배포 자산에 적용합니다. 변경은 Git 원본에서 검토한 뒤 반영하며, 해당 배포본을 UI에서 먼저 수정했다면 검토 후 Git 원본과 일치시킵니다. ApplyDemo의 관리 구역을 현장에서 수정한 경우에는 다음 적용이 충돌로 중단하므로 관리 구역 밖의 사용자 지침과 구분합니다. STATUS에는 실제 반영한 원본 커밋과 검증 증거를 남기며, 모르는 적용 버전은 미확인으로 둡니다. Skill 내부 `scripts/`는 기능 실행 코드이고, 저장소 최상위 `scripts/`는 개발·운영자용 실행 스크립트입니다.
 
 ## 금지 사항
 
