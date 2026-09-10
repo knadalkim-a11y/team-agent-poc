@@ -8,9 +8,9 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **EES의 시스템 간 분석 오케스트레이션 목표를 구체화함.** EMS/APC/EGIS/FDC/EPT와 추가 전문 Assistant를 필요한 경우 선택하고, 근거를 대조·보완하여 시스템 간 관계를 분석하는 방향을 기존 문서에 기록함. 역량 설명·공통 대상/시간·근거/가설 구분을 기준으로 첫 EMS/APC/FDC 합성 시연을 제안함. 이번 변경은 설계 기록이며 전문 모델·연결 Tool·도메인 데이터는 미구현/미연결임. [설계](03-openwebui-native-agent.md#cross-system-orchestration), [검토·판정 기준](../evals/scenarios.md#cross-system-orchestration).
-- 다음 작업 하나: **첫 교차 분석 질문에 필요한 공유 DB 관계 조사 범위와 승인된 구조·코드 자료를 정한다.** 동일 물리 DB와 공통 데이터가 있다는 사용자 설명을 반영해, 공통 설비/공정 기준과 관련 조회 코드에서 관계 후보를 발견하고 각 담당자가 자기 쪽 의미를 검증하는 방식을 설계함. 실제 자료 분석은 미실행이며 합성 시연과 운영 관계 검증을 구분함. [공유 DB 관계 발견](03-openwebui-native-agent.md#shared-db-relations).
-- 공유 DB 전제: 여러 시스템이 하나의 물리 DB와 일부 공통 데이터를 사용하나 각 담당자는 자기 시스템 지식에 집중되어 있음. AI가 DDL/키·공통 마스터·실제 코드 조인과 업무 조건을 대조해 관계 목록 초안을 만들고, 식별자 연결 검증과 영향/원인 가설을 구분하는 방향을 추가함. 시스템 간 전체 의미·실제 접근 권한·스키마는 아직 확인하지 않음.
+- 이번 작업: **실제 DB 조사를 운영 준비 단계로 미루고, 작동하는 컨셉 시연을 우선하도록 범위를 확정함.** EMS/APC/FDC의 합성 자료·공통 식별자·관계는 미리 준비하고, EES의 전문 Assistant 선택·실제 호출·조건부 보완·종합 분석을 시연하는 방향으로 계획을 수정함. 이번 변경은 설계 기록이며 전문 모델·연결 Tool·시연 실행은 미구현/미실행임. [시연 범위](03-openwebui-native-agent.md#cross-system-demo), [검토·판정 기준](../evals/scenarios.md#cross-system-orchestration).
+- 다음 작업 하나: **EES·EMS/APC/FDC의 합성 데이터 기반 오케스트레이션 시연을 구현한다.** 질문과 반환 근거에 따라 필요한 Assistant·추가 확인·결론이 달라지는 모습을 실제 모델 호출과 진행 표시로 보여준다. 실제 DB·코드 조사나 전 시스템 관계 정리는 선행하지 않는다. [시연 범위](03-openwebui-native-agent.md#cross-system-demo).
+- 공유 DB 전제와 후속: 여러 시스템이 하나의 물리 DB와 일부 공통 데이터를 사용하나 각 담당자는 자기 시스템 지식에 집중되어 있음. [관계 발견 설계](03-openwebui-native-agent.md#shared-db-relations)는 운영 데이터 연결을 준비할 때 사용하며 현재 시연 범위에서 제외함. 시스템 간 실제 의미·접근 권한·스키마는 아직 조사하지 않음.
 - 배포 확인 대기: Portal 이름 변경과 Upgrade는 [PR #20](https://github.com/knadalkim-a11y/team-agent-poc/pull/20)에서 main `704dddbb72bd03ff1a0f3ed20fc2125b094484f6`에 반영함. [main Windows/Linux CI와 패키징](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34419567419)이 성공하고 실제 ees.2 산출물의 digest·전체 ZIP 검증까지 완료함. 최초 실행 블록을 안내했으며 사내 인증/다운로드·Upgrade 결과·Portal 표시는 아직 미확인임. 현재 확인된 사내 프로그램은 ees.1이고 밤사이 접속 불가 원인은 재발 시 확인한다는 합의를 유지함. [사용법](03-openwebui-native-agent.md#ees-wrapper-upgrade), [이전 검증](../evals/scenarios.md#ees-wrapper-upgrade).
 - 설비 조회 관리 합의: 여러 업무에서 쓰는 공통 기능이므로 운영용 설계에서는 독립 Tool로 등록·관리하는 방향을 유지함. 사용자는 이번 시연에 한해 적용이 간단한 기존 단일 등록 항목을 유지하기로 함. 현재는 같은 Tool 안의 함수 분리이며 별도 등록 완료가 아님. 후속 요청의 설비 조회 패널도 같은 등록 항목에서 제공하며 새 적용 성공 보고로 간주하지 않음.
 - 첫 화면 제안: 기본 영어 문구를 대체할 천안 설비·헝가리 설비·AI WO 초안·직접 선택의 네 질문을 준비하고, v0.1.2의 Tool·WO 지침·제안 갱신 안내를 수행했다는 사용자 보고를 받음. 첫 조회 시연 중 대화 이동 후 패널 소실을 보고했으며 제안 네 개의 실제 등록 원문·각 클릭 결과를 직접 대조한 것은 아님. 이번 수정은 제안 JSON을 바꾸지 않음. [적용 안내](03-openwebui-native-agent.md#first-use-entry).
@@ -55,7 +55,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 | 1. 쉬운 Chat UI | 대화·스트리밍·이름/로고와 초기 Rich UI 제거 작업 완료 보고. 실제 비개발자 사용성 전체는 미확인 | 합의한 목업 우선 방식으로 필요한 업무 화면을 하나씩 설계. 관리자 공지는 후속 요구 |
 | 2. 문서 시스템 연동 | 평소 세 연동 조회 정상의 기존 보고와 Rich UI 제거·변경 프롬프트 WebUI 반영 완료 보고. 새 출력의 개별 검증은 별도 미확인 | 실제 업무에 필요한 조회·후속 해석 보완. 새 일반 답변·원문 확인은 다음 관련 사용/변경에 묶음 |
 | 3. 관리자 공통 정책 | EES Assistant에 합성 공통 지침·정책 답변 Skill 저장 보고. 실제 사내 정책 적용은 미완료 | EES 전용 공통 원칙·상세 절차·권한/Tool 제한의 배치와 관리자 변경 반영을 정리 |
-| 4. 관리자 워크플로 | 기존 Skill·Native 호출 사용 중. EES의 전문 Assistant 선택·시스템 간 근거 대조·보완 요청 설계를 기록함. 실행 제어 구현은 미완료 | [교차 분석 시연 제안](03-openwebui-native-agent.md#cross-system-orchestration)의 합성 사례·역량·완료 조건을 구체화하고 작은 연결부터 구현 |
+| 4. 관리자 워크플로 | 기존 Skill·Native 호출 사용 중. EES의 전문 Assistant 선택·시스템 간 근거 대조·보완 요청 설계를 기록함. 실행 제어 구현은 미완료 | [합성 교차 분석 시연](03-openwebui-native-agent.md#cross-system-demo)을 실제 모델 호출로 구현. DB·코드 관계 조사는 운영 연결 때 진행 |
 | 5. 레거시 시스템 연동 | EMS/APC/FDC의 실제 업무 기능은 미연결 | 승인된 API 또는 Query Broker로 가치가 있는 읽기 기능 하나 연결. 기존 서비스 권한·업무 규칙 활용 |
 | 6. 레거시 간접 UI | v0.1.3 기능 정상 보고와 이후 `panel_error` 이력 보존. v0.1.5 갱신 안내 후 패널 표시 성공을 사용자 보고로 확인. 최초 원인·장기 재발 여부는 미확정 | 시연 피드백 반영 → 운영용 목업 → 실제 EMS 구현. [목업](03-openwebui-native-agent.md#wo-mockup) |
 
@@ -119,7 +119,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-10: 현재 0.11.3의 내장 서브에이전트 범위와 전문 Workspace 모델 선택 호출의 차이를 실제 wheel·공식 설명으로 대조함. 도메인 역량·개인 권한·공통 식별자·근거 대조와 조건부 보완을 설계에 반영하고, 독립 검토의 고정 호출/대본과 구별할 판정 조건을 포함함. 공유 DB 설명을 반영해 관계 발견·복합키/유효기간·한 행의 의미/연결 수·시각 종류·근거 버전과 확인 상태를 보완함. 문서·diff 검사를 통과했으며 실행 코드·사내 모델 선택 성능·도메인 연결·분석 정확도는 이번 설계 검증 대상에 포함하지 않음. [이번 근거](../evals/scenarios.md#cross-system-orchestration), [이전 Upgrade 근거](../evals/scenarios.md#ees-wrapper-upgrade).
+2026-09-10: 사용자 결정에 따라 실제 DB·코드 조사는 운영 준비로 미루고 합성 데이터 기반 컨셉 시연을 다음 작업으로 정함. 시연용 자료·관계와 실제 모델의 선택·호출·보완·종합 실행을 구분하고, 첫 시연을 교차 분석·단순 질문·반증 변형으로 좁힘. 기존 관계 발견 설계는 운영 후속으로 보존함. 문서·diff 검사를 통과했으며 실행 코드·사내 모델 선택 성능·도메인 연결·분석 정확도는 이번 설계 검증 대상에 포함하지 않음. [이번 근거](../evals/scenarios.md#cross-system-orchestration), [이전 Upgrade 근거](../evals/scenarios.md#ees-wrapper-upgrade).
 
 ## 갱신 규칙
 
