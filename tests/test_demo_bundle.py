@@ -124,9 +124,9 @@ class DemoBundleTests(unittest.TestCase):
         branding = self.base / "branding"
         branding.mkdir()
         wheel = b"Synthetic wheel bytes; not an install test"
-        wheel_name = "open_webui-0.11.3+ees.2-py3-none-any.whl"
+        wheel_name = "open_webui-0.11.3+ees.3-py3-none-any.whl"
         (branding / wheel_name).write_bytes(wheel)
-        manifest = {"schema_version": 1, "upstream_version": "0.11.3", "version": "0.11.3+ees.2",
+        manifest = {"schema_version": 1, "upstream_version": "0.11.3", "version": "0.11.3+ees.3",
                     "source": {"filename": "open_webui-0.11.3-py3-none-any.whl",
                                "sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"},
                     "wheel": {"filename": wheel_name, "size": len(wheel),

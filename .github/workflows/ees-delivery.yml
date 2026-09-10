@@ -31,6 +31,7 @@ on:
       - 'tests/test_github_tool.py'
       - 'tests/test_wo_demo*'
       - 'tests/test_ees_branding_build.py'
+      - 'tests/test_ees_chat_theme.py'
       - 'tests/test_demo_bundle.py'
       - 'docs/**'
       - 'README.md'
@@ -98,6 +99,12 @@ jobs:
           python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
       - name: Build the real program fixture without installing it
         run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
+      - name: Verify chat theme in the runner's Chrome
+        if: runner.os == 'Linux'
+        env:
+          EES_TEST_CHROME: google-chrome
+          EES_TEST_BRANDING_DIR: dist/branding
+        run: python -m unittest discover -s tests -p test_ees_chat_theme.py -v
       - name: Verify specialist execution against the fixed WebUI source
         env:
           EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl

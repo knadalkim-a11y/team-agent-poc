@@ -832,7 +832,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 | 별도 가상환경에 전체 의존성 복제 | 제외. 중단한 후보 환경 방식이며 현재 커스터마이징에 불필요 |
 | 수정된 Open WebUI 프로그램만 별도 위치에 두고 기존 Python/의존성 사용 | 채택. 기존 브랜딩 wheel을 재사용하고 실제 교체 범위를 앱 파일로 제한 |
 
-`build_ees_webui.py`의 공식 wheel SHA·정확한 패치 위치/횟수 확인·이름/아이콘 변경·manifest/RECORD 생성은 재사용합니다. **현재 manifest의 changed_files는 설치용 파일 목록이 아닙니다.** 공식 `_app/`에서 브랜딩별 `_ees1/`(기존)·`_ees2/`(새 Portal)로의 전체 frontend 이동과 버전 metadata 변경도 있으므로 일부 파일 복사 대신 검증된 앱과 metadata 전체를 함께 적용합니다. 다른 upstream 버전·의존성 변경·범용 wheel 설치는 이번 지원 범위가 아닙니다. 공식 wheel에 함께 들어 있는 Docker 참고 파일 `requirements-min.txt`·`data/readme.txt`는 전체 wheel 해시/RECORD 검증 후 추출에서 제외합니다. 앱·metadata만 포함한 RECORD를 재생성하고 원본 wheel 해시와 별도로 기록하므로 보존한 프로그램 ZIP을 그대로 사용할 수 있습니다.
+`build_ees_webui.py`의 공식 wheel SHA·정확한 패치 위치/횟수 확인·이름/아이콘 변경·manifest/RECORD 생성은 재사용합니다. **현재 manifest의 changed_files는 설치용 파일 목록이 아닙니다.** 공식 `_app/`에서 브랜딩별 `_ees1/`(기존)·`_ees2/`(Portal 이름)·`_ees3/`(대화 스타일)로의 전체 frontend 이동과 버전 metadata 변경도 있으므로 일부 파일 복사 대신 검증된 앱과 metadata 전체를 함께 적용합니다. 다른 upstream 버전·의존성 변경·범용 wheel 설치는 이번 지원 범위가 아닙니다. 공식 wheel에 함께 들어 있는 Docker 참고 파일 `requirements-min.txt`·`data/readme.txt`는 전체 wheel 해시/RECORD 검증 후 추출에서 제외합니다. 앱·metadata만 포함한 RECORD를 재생성하고 원본 wheel 해시와 별도로 기록하므로 보존한 프로그램 ZIP을 그대로 사용할 수 있습니다.
 
 #### 실행 경로와 데이터 경계
 
@@ -897,7 +897,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 |---|---|---|
 | 모델 이름·소개·빠른 제안 | 기존 모델 ID의 메타데이터. [소개·제안 적용](#first-use-entry), 프로필은 [EES 아이콘](../branding/ees/assets/favicon.png) | 반영 전 이름·소개·제안·프로필만 복구 |
 | 공통 Prompt·Skill·Tool | 커밋별 Agent Pack ZIP에서 바뀐 항목만 기존 ID에 반영 | 실제 적용했던 직전 커밋의 해당 항목 |
-| 서비스 이름·아이콘 | EES Portal의 새 `open_webui-0.11.3+ees.2-py3-none-any.whl`과 브랜딩 manifest. 기존 ees.1 보관본은 Restore에 사용 | 변경 전 프로그램 복원·같은 DATA_DIR/키/접속 설정 유지. [Apply/Restore 안내](#ees-wrapper-apply) 사용 |
+| 서비스 이름·아이콘·대화 스타일 | EES Portal의 새 `open_webui-0.11.3+ees.3-py3-none-any.whl`과 브랜딩 manifest. 기존 ees.1/ees.2 보관본은 Restore에 사용 | 변경 전 프로그램 복원·같은 DATA_DIR/키/접속 설정 유지. [Apply/Restore 안내](#ees-wrapper-apply) 사용 |
 
 <a id="ees-start-windows-ca"></a>
 
@@ -931,13 +931,34 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 2026-09-09 요청에 따라 서비스 표시 이름을 **EES Portal**로 변경합니다. 브라우저 탭·로그인/초기 화면·서비스명을 쓰는 알림/채널 제목과 SVG 접근성 이름이 대상입니다. 새 브랜딩은 `0.11.3+ees.2`, frontend 경로는 `/_ees2/`로 구분해 기존 JavaScript 캐시와 섞이지 않도록 합니다. E 아이콘 그림과 기반 Open WebUI 0.11.3·Python·의존성은 유지합니다.
 
-등록된 환경의 WEBUI_NAME이 옛 이름 `EES Assistant`이면 새 프로그램이 `EES Portal`로 표시합니다. config/DPAPI를 직접 수정하지 않으며 별도로 지정한 다른 이름은 보존합니다. 기존 ees.1 보관본을 Restore하면 그 프로그램의 이름 규칙으로 돌아갑니다. 래퍼 Update 직후에도 설치된 ees.1을 시작·검증·복원할 수 있도록 선택 기록의 버전별 metadata/RECORD/frontend 경로를 확인합니다. 새 Apply 전달물은 ees.2로 제한하며 메타데이터와 캐시 경로가 섞인 프로그램은 거부합니다.
+등록된 환경의 WEBUI_NAME이 옛 이름 `EES Assistant`이면 새 프로그램이 `EES Portal`로 표시합니다. config/DPAPI를 직접 수정하지 않으며 별도로 지정한 다른 이름은 보존합니다. 기존 ees.1 보관본을 Restore하면 그 프로그램의 이름 규칙으로 돌아갑니다. 래퍼 Update 직후에도 설치된 이전 버전을 시작·검증·복원할 수 있도록 선택 기록의 버전별 metadata/RECORD/frontend 경로를 확인합니다. 당시 새 Apply 전달물은 ees.2였으며, 현재는 아래 ees.3 대화 스타일 릴리스를 사용합니다. 메타데이터와 캐시 경로가 섞인 프로그램은 거부합니다.
 
 서비스 이름과 채팅에서 선택하는 **EES Assistant Workspace Model**은 구분합니다. 이름 변경 자체는 모델 ID·표시 이름·Prompt·Skill·Tool 연결과 공통 정책 범위를 바꾸지 않습니다. WO 목업의 서비스 표기는 Tool v0.1.7에서 EES Portal로 바뀌었고 현재 v0.1.8은 [ApplyDemo](#demo-assets-deployment)로 기존 지원 등록본의 코드와 공통 업무 패널을 함께 갱신합니다. 새 Tool 등록이나 WO 지침 재입력은 필요하지 않습니다.
 
 **반영 순서:** main 반영 및 해당 CI 성공 → [Upgrade 실행](#ees-wrapper-upgrade) → 브라우저 새로고침 → 기존 WO Tool 코드 갱신. Upgrade가 새 프로그램 ZIP과 원본 커밋을 선택하며 이미 선택한 Windows CA를 재사용합니다. 자동 다운로드 경로를 사용할 수 없어 수동 전달하는 경우 아래 Apply 안내를 따릅니다. 이전 `EES-demo-4a8779bbf3ee.zip`은 새 이름이 없어 이번 Portal 적용에 재사용하지 않습니다. WO Tool 등록 코드는 이번 Upgrade가 자동 반영하지 않습니다.
 
 확인은 브라우저 탭/로그인 화면의 EES Portal 표시와 기존 대화 접근, 갱신한 업무 패널의 Portal 표기로 한정합니다. 일반 조회·인증·정책 검사를 다시 처음부터 수행하지 않습니다. 실제 사내 적용은 [STATUS](STATUS.md), 준비·검증은 [변경 기록](../evals/scenarios.md#ees-portal-name)에서 구분합니다.
+
+<a id="ees-chat-theme"></a>
+
+#### 승인한 대화창 시안 적용
+
+2026-09-10 사용자가 확인한 목업의 글꼴·색상·간격을 EES Portal `0.11.3+ees.3`에 적용합니다. 기본 대화 본문·사용자 메시지·입력창·사이드바와 오른쪽 업무 패널을 같은 팔레트로 맞추며 밝은 화면과 어두운 화면을 지원합니다. 메시지 내용·모델 호출 방식·업무 패널의 열림 방향과 기존 너비 조절은 유지합니다. 실제 답변의 제목과 문단 구성은 모델 응답을 따르며 목업의 예시 분석 결과를 삽입하지 않습니다.
+
+시안에 선언한 Inter와 Noto Sans KR를 고정 공식 wheel에서 그대로 가져와 `/_ees3/fonts/`에서 제공합니다. 사내 브라우저가 외부 폰트 서버에 접속하거나 사용자 PC에 폰트를 설치할 필요가 없습니다. 기존 `STATIC_DIR` 설정과 별개로 제공하고 `custom.css` 파일은 보존합니다. [전용 CSS](../branding/ees/ui/chat-theme.css)와 [폰트 출처·라이선스](../branding/ees/ui/font-licenses.txt)는 프로그램에 포함되며 새 브라우저 캐시 경로 `/_ees3/`를 사용합니다. 목업 당시 PC에서 실제 선택된 설치 폰트·화면 배율은 측정하지 않았으므로 픽셀 단위의 동일성까지 확인한 것으로 기록하지 않습니다.
+
+**main CI와 프로그램 산출물 생성이 성공한 뒤**, 기존 등록 계정의 PowerShell에서 아래 블록을 실행합니다. ApplyDemo가 기존 프로그램에서 전문 도구의 ees.3 호환을 먼저 반영한 뒤 Upgrade가 프로그램을 갱신합니다. 앞 단계가 실패하면 다음 단계로 진행하지 않습니다. 저장된 연결·인증·설정을 재사용하고 새 Tool 등록이나 Python·의존성 재설치는 필요하지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    Set-Location (Join-Path $env:USERPROFILE 'team-agent-poc')
+    .\scripts\manage-ees.ps1 -Action ApplyDemo
+    .\scripts\manage-ees.ps1 -Action Upgrade
+}
+```
+
+성공 뒤 브라우저에서 `Ctrl+F5`로 완전히 새로고침합니다. 기존 대화 하나에서 본문·입력창과 업무 패널의 글꼴/색상, 평소 사용하는 화면 크기의 읽기·입력 동작을 확인합니다. 외부에는 마지막 EES 결과와 화면 확인 여부만 1~2줄로 전달합니다. 실패 시 마지막 요약의 stage/code를 기준으로 기존 복구 절차를 사용하며 과거 promote 복구 블록을 반복 실행하지 않습니다. 프로그램을 Restore하면 직전 스타일로 돌아가고 갱신한 전문 도구는 이전 ees.1/ees.2에서도 동작합니다. [검증과 사내 적용 경계](../evals/scenarios.md#ees-chat-theme).
 
 <a id="ees-wrapper-upgrade"></a>
 
@@ -985,7 +1006,7 @@ Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `resul
 
 **구현본이 main에 반영되고 해당 CI가 통과한 뒤 사용합니다.** 현재 게시·검증 상태는 [STATUS](STATUS.md), 실제 사내 결과는 [구현 기록](../evals/scenarios.md#ees-wrapper-implementation)에서 구분합니다. 이미 등록한 운영 PowerShell과 `%USERPROFILE%\team-agent-poc` checkout을 사용하며 최초 Init·후보 Prepare·pandas 진단을 반복하지 않습니다. 기존 저장 설정과 Python이 있어야 하며 누락·불일치는 사전 확인에서 중단합니다.
 
-현재 새 Apply에는 EES Portal `0.11.3+ees.2`를 포함한 프로그램 ZIP과 그 ZIP의 `manifest.json`에 있는 전체 `source_commit`을 사용합니다. [전달물 준비](#release-delivery)의 프로그램 포함 산출물을 선택하며, 과거 ees.1 ZIP의 재사용은 이번 새 이름 적용 절차가 아닙니다. Apply는 새 ZIP의 해시·wheel·대상 버전/의존성·앱 경로를 다시 확인합니다. 운영 코드 최신 HEAD를 프로그램 Commit에 넣지 않으며, Agent Pack 전용 ZIP이나 후보 venv를 새 전달물로 사용하지 않습니다.
+현재 새 Apply에는 EES Portal `0.11.3+ees.3`를 포함한 프로그램 ZIP과 그 ZIP의 `manifest.json`에 있는 전체 `source_commit`을 사용합니다. [전달물 준비](#release-delivery)의 프로그램 포함 산출물을 선택하며, 과거 ees.1/ees.2 ZIP의 재사용은 이번 대화 스타일 적용 절차가 아닙니다. Apply는 새 ZIP의 해시·wheel·대상 버전/의존성·앱 경로를 다시 확인합니다. 운영 코드 최신 HEAD를 프로그램 Commit에 넣지 않으며, Agent Pack 전용 ZIP이나 후보 venv를 새 전달물로 사용하지 않습니다.
 
 `$eesBundle`에는 **파일명과 `.zip` 확장자까지 포함한 새 ZIP의 전체 경로**, `$eesProgramCommit`에는 manifest의 40자리 source_commit을 넣습니다. Downloads 같은 폴더만 지정하면 실패합니다. 경로를 채팅에 알려줄 필요는 없습니다. 아래 블록은 **Git 갱신 → 읽기 전용 사전 확인 → 정상 종료 → 프로그램 적용 → 명시적인 시작** 순서입니다. 앞 단계가 실패하면 그 자리에서 멈춥니다. 특히 CheckOnly 실패 시 Stop을 실행하지 않습니다. 기존 프로세스를 식별하지 못하거나 포트가 사용 중이면 임의 종료하지 않습니다. 자동 전환·복구·재시도 없이 첫 기동의 health 확인을 최대 120초로 요청하며, 시간 초과를 배포 성공으로 해석하지 않습니다. 기존 기본값이나 등록 설정은 바꾸지 않습니다.
 
@@ -1152,7 +1173,7 @@ Resume은 정상 작업 잠금과 서버 종료·포트 검사를 유지합니�
 
 ### 검사와 전달물 생성
 
-관련 PR과 모든 main 변경에 Python 3.11 / Windows·Linux의 패키징 시험, 문서·diff 점검을 실행합니다. Upgrade가 정확한 main HEAD의 성공 CI를 요구하므로 main은 문서만 바뀌어도 검사합니다. main에서는 `EES-demo-<commit>.zip`을 Actions artifact로 생성합니다. Prompt·Skill 수정만 있으면 작은 Agent Pack 묶음만 만들며 브랜딩 자산·패키징 도구/검사·workflow가 바뀐 커밋에만 프로그램 wheel도 포함합니다. 프로그램을 다시 만들려면 Actions → **EES delivery → Run workflow → main → include_branding=true**를 선택합니다. 자동 검사에는 패키징, 배포 상태·백업, 고정 의존성의 오프라인 설치, 실제 합성 서버의 시작·정상 종료와 Upgrade의 선택/다운로드/실패 경계가 포함됩니다. 개별 업무 Tool 기능 시험·사내 Open WebUI 사용 확인을 대신하지 않습니다.
+관련 PR과 모든 main 변경에 Python 3.11 / Windows·Linux의 패키징 시험, 문서·diff 점검을 실행합니다. Upgrade가 정확한 main HEAD의 성공 CI를 요구하므로 main은 문서만 바뀌어도 검사합니다. main에서는 `EES-demo-<commit>.zip`을 Actions artifact로 생성합니다. Prompt·Skill 수정만 있으면 작은 Agent Pack 묶음만 만들며 브랜딩 자산·패키징 도구/검사·workflow가 바뀐 커밋에만 프로그램 wheel도 포함합니다. 프로그램을 다시 만들려면 Actions → **EES delivery → Run workflow → main → include_branding=true**를 선택합니다. 자동 검사에는 패키징, 배포 상태·백업, 고정 의존성의 오프라인 설치, 실제 합성 서버의 시작·정상 종료와 Upgrade의 선택/다운로드/실패 경계가 포함됩니다. Linux CI는 기본 Chrome에서 실제 wheel의 CSS·폰트와 기본 대화 구조의 fixture를 사용해 밝은/어두운/좁은 화면의 계산된 스타일도 확인합니다. 전체 WebUI 로그인·스트리밍 통합이나 사내 실제 화면 확인을 대신하지 않습니다.
 
 프로그램 포함 artifact는 `ees-program-<40자리 SHA>`로 **90일**, Agent Pack 전용은 `ees-demo-<40자리 SHA>`로 **14일** 보존합니다. 한 실행에서는 둘 중 해당하는 artifact 한 개만 만들며 안쪽 ZIP 이름은 계속 `EES-demo-<commit>.zip`입니다. Upgrade는 이름으로 프로그램 산출물을 구분하고 내용도 검증합니다. 적용할 ZIP과 직전 배포 ZIP은 승인된 내부 위치에 보관합니다. ZIP의 `manifest.json`에 원본 커밋·파일별 SHA-256/크기를 기록하며 브랜딩 포함 시 그 manifest도 넣습니다. 배포 도구는 Git 추적 파일 중 정한 경로만 포함하고 `.env`·DB·키·비추적 파일을 제외합니다. 운영 데이터나 사용자 작성물을 Git/전달 폴더에 넣지 않습니다.
 
@@ -1170,7 +1191,7 @@ python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-no
 python scripts/build_demo_bundle.py --output-dir dist/delivery --branding-dir dist/branding
 ```
 
-[브랜딩 빌더](../scripts/build_ees_webui.py)는 공식 wheel의 고정 SHA-256과 패치 위치를 확인한 뒤 별도 파일을 만듭니다. 이름 기본값·자동 접미사·브라우저 제목/알림·아이콘을 변경하고, frontend 경로를 릴리스별로 바꿔 이전 JavaScript 캐시와 분리합니다. upstream 라이선스·주석·의존성 요구는 보존하고 wheel RECORD를 다시 계산합니다. 버전·원본 파일이나 패치 위치가 다르면 중단합니다. 임의 버전에 패치를 강제 적용하지 않습니다.
+[브랜딩 빌더](../scripts/build_ees_webui.py)는 공식 wheel의 고정 SHA-256과 패치 위치를 확인한 뒤 별도 파일을 만듭니다. 이름 기본값·자동 접미사·브라우저 제목/알림·아이콘과 대화 스타일을 변경하고, frontend 경로를 릴리스별로 바꿔 이전 JavaScript 캐시와 분리합니다. upstream 라이선스·주석·의존성 요구는 보존하고 wheel RECORD를 다시 계산합니다. 버전·원본 파일이나 패치 위치가 다르면 중단합니다. 임의 버전에 패치를 강제 적용하지 않습니다.
 
 아이콘은 저장소의 SVG가 원본입니다. 그림을 수정할 때만 개발 환경의 CairoSVG 2.8.2·Pillow 12.3.0과 시스템 Cairo로 [렌더 스크립트](../scripts/render_ees_brand_assets.py)를 실행하고 파생 파일을 함께 커밋합니다. 일반 wheel 빌드와 사내 서버에는 이 렌더 의존성이 필요하지 않습니다. 다음 브랜딩 변경은 패키지 버전·frontend 경로를 함께 올려 별도 릴리스로 관리합니다.
 

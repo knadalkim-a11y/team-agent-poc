@@ -18,20 +18,32 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
-VERSION = "0.11.3+ees.2"
-PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2"}
+VERSION = "0.11.3+ees.3"
+PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3"}
 SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
 SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
 WHEEL_FILENAME = f"open_webui-{VERSION}-py3-none-any.whl"
 SOURCE_INFO = f"open_webui-{UPSTREAM_VERSION}.dist-info/"
 TARGET_INFO = f"open_webui-{VERSION}.dist-info/"
 SOURCE_APP = "open_webui/frontend/_app/"
-TARGET_APP = "open_webui/frontend/_ees2/"
+TARGET_APP = "open_webui/frontend/_ees3/"
 ASSET_DIR = Path(__file__).resolve().parents[1] / "branding" / "ees" / "assets"
+UI_DIR = ASSET_DIR.parent / "ui"
 ASSET_NAMES = (
     "favicon.svg", "favicon.png", "favicon-96x96.png", "favicon.ico",
     "apple-touch-icon.png", "logo.png", "splash.png", "splash-dark.png",
 )
+UI_FILES = {"chat-theme.css": "chat-theme.css", "font-licenses.txt": "fonts/LICENSE.txt"}
+# Copy these already bundled upstream fonts byte-for-byte into the new cache
+# namespace; no font download, transformation, or runtime dependency is needed.
+FONT_SOURCES = {
+    "Inter-Variable.ttf": ("open_webui/frontend/assets/fonts/Inter-Variable.ttf",
+                           "cf3cb43b0366e2dc6df60e1132b1c9a4c15777f0cd8e5a53e0c15124003e9ed4"),
+    "NotoSansKR-Variable.ttf": ("open_webui/static/fonts/NotoSansKR-Variable.ttf",
+                                "2d2267a83d089cb1a517a4f901676d05d283346e650d1b1845d601cbd696a98e"),
+}
+THEME_FILES = tuple(UI_FILES.values()) + tuple("fonts/" + name for name in FONT_SOURCES)
+THEME_LINK = b'<link rel="stylesheet" href="/_ees3/chat-theme.css" crossorigin="use-credentials" />'
 
 # Every replacement is pinned to one reviewed upstream file and occurrence count.
 # Upstream comments, attribution strings, documentation, and source maps remain.
@@ -44,7 +56,8 @@ PATCHES = {
     )],
     "open_webui/frontend/index.html": [
         (b"<title>Open WebUI</title>", b"<title>EES Portal</title>", 1),
-        (b"/_app/", b"/_ees2/", 49),
+        (b"/_app/", b"/_ees3/", 49),
+        (b"</head>", THEME_LINK + b"\n\t</head>", 1),
     ],
     SOURCE_APP + "immutable/chunks/CHq18Uto.js": [
         (b'const ca="Open WebUI"', b'const ca="EES Portal"', 1),
@@ -56,14 +69,14 @@ PATCHES = {
         (b" / Open WebUI`", b" / EES Portal`", 2),
     ],
     SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
-        (b"/_app/version.json", b"/_ees2/version.json", 1),
-        (b'an="0.11.3"', b'an="0.11.3+ees.2"', 1),
+        (b"/_app/version.json", b"/_ees3/version.json", 1),
+        (b'an="0.11.3"', b'an="0.11.3+ees.3"', 1),
     ],
     SOURCE_APP + "version.json": [
-        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.2"}', 1),
+        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.3"}', 1),
     ],
     SOURCE_INFO + "METADATA": [
-        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.2\n", 1),
+        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.3\n", 1),
     ],
 }
 
@@ -133,7 +146,26 @@ def zip_entry(name, attributes=0o100644 << 16):
     return entry
 
 
-def build(wheel, output_dir, asset_dir=ASSET_DIR):
+def prepare_additions(source, ui_dir):
+    additions = {}
+    for filename, relative in UI_FILES.items():
+        path = Path(ui_dir) / filename
+        if path.is_symlink() or not path.is_file() or not path.stat().st_size:
+            raise ValueError(f"Missing, empty, or linked EES UI asset: {filename}")
+        additions[TARGET_APP + relative] = path.read_bytes()
+    for filename, (origin, expected) in FONT_SOURCES.items():
+        if origin not in source.namelist():
+            raise ValueError(f"Missing pinned upstream font: {filename}")
+        content = source.read(origin)
+        if hashlib.sha256(content).hexdigest() != expected:
+            raise ValueError(f"Pinned upstream font hash differs: {filename}")
+        additions[TARGET_APP + "fonts/" + filename] = content
+    if set(additions) & {target_name(name) for name in source.namelist()}:
+        raise ValueError("The source wheel already contains an EES UI target.")
+    return additions
+
+
+def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
     wheel, output_dir = Path(wheel), Path(output_dir)
     if wheel.name != SOURCE_FILENAME or sha256_file(wheel) != SOURCE_SHA256:
         raise ValueError("Expected the unchanged, pinned official Open WebUI 0.11.3 wheel.")
@@ -144,6 +176,7 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR):
 
     with ZipFile(wheel) as source:
         replacements = prepare_replacements(source, asset_dir)
+        additions = prepare_additions(source, ui_dir)
         entries = sorted(source.infolist(), key=lambda entry: target_name(entry.filename))
         output_dir.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix=".ees-build-", dir=output_dir) as temporary:
@@ -160,6 +193,10 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR):
                     digest = base64.urlsafe_b64encode(hashlib.sha256(content).digest()).rstrip(b"=").decode("ascii")
                     destination.writestr(zip_entry(name, entry.external_attr), content, compresslevel=6)
                     record.append((name, "sha256=" + digest, str(len(content))))
+                for name, content in sorted(additions.items()):
+                    digest = base64.urlsafe_b64encode(hashlib.sha256(content).digest()).rstrip(b"=").decode("ascii")
+                    destination.writestr(zip_entry(name), content, compresslevel=6)
+                    record.append((name, "sha256=" + digest, str(len(content))))
                 record_name = TARGET_INFO + "RECORD"
                 record.append((record_name, "", ""))
                 csv_text = io.StringIO(newline="")
@@ -172,7 +209,7 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR):
                 "version": VERSION,
                 "source": {"filename": SOURCE_FILENAME, "sha256": SOURCE_SHA256},
                 "wheel": {"filename": WHEEL_FILENAME, "sha256": sha256_file(built), "size": built.stat().st_size},
-                "changed_files": sorted([target_name(name) for name in replacements] + [record_name]),
+                "changed_files": sorted([target_name(name) for name in replacements] + list(additions) + [record_name]),
                 "relocated_frontend": {
                     "from": SOURCE_APP, "to": TARGET_APP,
                     "file_count": sum(entry.filename.startswith(SOURCE_APP) for entry in entries),
