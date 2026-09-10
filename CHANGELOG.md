@@ -2,6 +2,18 @@
 
 완료된 변경·중요 결정과 날짜별 관찰을 기록합니다. 다음 작업과 최신 배포 상태는 [STATUS](docs/STATUS.md), 시험별 현재 판정은 [평가표](evals/scenarios.md)가 원본입니다. 과거 실패 기록을 현재 장애나 재실행 지시로 해석하지 않습니다.
 
+## 2026-09-10
+
+- 합성 교차 분석 시연을 구현함. 기존 EES가 EMS/APC/FDC 전문 Workspace 모델을 실제 호출하며 근거를 취합하고 조건별 수치를 계산한다. 자료·전문 호출·보완 횟수와 사용자 권한을 코드에서 제한한다. ApplyDemo가 검증된 main을 갱신한 뒤 지정 Tool/Valves·전문 모델·기존 EES 관리 구역을 API로 병합하고, 기존 설정·개인 PAT를 유지하며 응답 유실 뒤 재실행을 지원한다. 최초 인증은 WebUI 관리자 API Key를 별도 DPAPI 저장한다. 기존 서버 재시작·운영 DB 조사·새 서버 없이 적용한다. [사용법](docs/03-openwebui-native-agent.md#demo-assets-deployment), [검증 및 사내 미확인 범위](evals/scenarios.md#cross-system-demo-implementation).
+
+- EES 기본 창구·시스템별 전문 Assistant·공통 도구 재사용 합의와 개선 기회/KPI 후보 발견 목표를 반영함. 합성 시연 3개, 전문 호출 최대 4회, 기존 EES+신규 전문 모델 3개·Tool 2개·Prompt/시작 질문 일괄 적용을 설계·독립 검토함. 고정 0.11.3의 자산 API·관리자 인증·설정 보존 경로를 확인했으며 ApplyDemo와 실행 자산은 아직 미구현. [시연 및 한 번 적용 설계](docs/03-openwebui-native-agent.md#demo-assets-deployment).
+
+- 컨셉 시연을 우선한다는 사용자 결정에 따라 실제 DB·코드 관계 조사를 운영 준비 단계로 미룸. 합성 EMS/APC/FDC 자료·공통 관계를 준비하고 실제 모델의 전문 Assistant 선택·호출·조건부 보완·종합 분석을 보여주는 범위를 확정함. 다음 작업을 DB 조사 준비에서 시연 구현으로 수정했으며 실행 기능은 아직 미구현. [현재 시연 범위](docs/03-openwebui-native-agent.md#cross-system-demo).
+
+- 시스템들이 하나의 물리 DB와 일부 공통 데이터를 사용한다는 설명을 반영해, 승인된 DB 구조·실제 코드에서 관계를 발견하고 담당자가 자기 영역의 의미를 확인하는 설계를 추가함. 복합키·사업장·유효기간·행 단위/연결 수·시각 의미와 관계 검증/인과 가설을 구분함. 실제 DB 조사·실행 기능 변경은 없음. [관계 발견](docs/03-openwebui-native-agent.md#shared-db-relations).
+
+- EES가 EMS/APC/EGIS/FDC/EPT와 추가 전문 Assistant를 선택·위임하고, 시스템 간 근거 대조와 보완 요청으로 분석하는 목표를 기록함. 역량 설명·공통 식별자·개인 권한 유지, 합성 교차 분석 시연과 반증/미연결 판정 기준을 기존 문서에 정리함. 설계 기록이며 실행 코드·모델 등록·사내 데이터 연결은 미변경. [설계와 시연 제안](docs/03-openwebui-native-agent.md#cross-system-orchestration).
+
 ## 2026-09-09
 
 - 기존 운영 진입점에 `Upgrade`를 추가해 성공한 main CI 확인·래퍼 갱신·호환 프로그램 ZIP 다운로드·검증·Stop/Apply/Start를 한 번에 수행하도록 준비함. 같은 프로그램은 재시작하지 않고 적용 기록이 일치하면 다운로드도 생략함. 읽기 전용 GitHub 인증을 Windows 사용자별 DPAPI로 보존하며 기존 환경·데이터·키·CA와 명시적 복구를 유지함. 프로그램 artifact는 별도 이름과 90일 보존으로 구분하고 공통 Tool/Skill/Prompt 자동 반영은 포함하지 않음. [사용법](docs/03-openwebui-native-agent.md#ees-wrapper-upgrade), [검증·적용 구분](evals/scenarios.md#ees-wrapper-upgrade).

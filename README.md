@@ -67,11 +67,11 @@
 
 ## 실행 구조와 관리 원본
 
-`EES 통합 Assistant`는 별도 학습 모델이나 독립 Agent 서버가 아니라 Open WebUI의 Workspace Model preset입니다. 여기서 “통합”은 공통 지침·Skill·Knowledge·허용 Tool을 묶는 뜻이며, 여러 Agent의 자동 라우팅을 의미하지 않습니다.
+현재 `EES 통합 Assistant`는 승인된 기반 LLM에 공통 지침·Skill·Knowledge·허용 Tool을 묶는 Open WebUI Workspace Model preset입니다. [교차 분석 시연](docs/03-openwebui-native-agent.md#cross-system-orchestration)은 EES가 EMS/APC/FDC 전문 Assistant를 선택하고 합성 근거를 대조·보완해 이슈·KPI 후보를 제안하는 구성입니다. 시연 자산과 일괄 적용 코드의 구현 준비본을 두며 사내 API 등록·실제 모델 분석과 구분합니다. EGIS/EPT 등 추가 시스템과 운영 DB 관계 조사는 후속 범위입니다.
 
 ```mermaid
 flowchart TB
-    Git["Git Agent Pack 원본"] -->|"관리자 수동 등록"| Preset["Open WebUI Workspace Model"]
+    Git["Git Agent Pack 원본"] -->|"시연 ApplyDemo · 기존 자산 수동 등록"| Preset["Open WebUI Workspace Model"]
     User["팀 사용자"] --> Chat["일반 Chat"]
     Chat --> Preset
     Preset --> Loop["Open WebUI Native 호출 루프"]
@@ -80,13 +80,13 @@ flowchart TB
 ```
 
 - `AGENTS.md`는 **코딩하는 GPT**의 지침이고, `agent-pack/`은 **담당자가 관리하는 공통 배포 자산**의 원본입니다.
-- Git의 Skill 지침과 Python Tool은 Open WebUI에서 서로 다른 항목으로 등록합니다. 폴더 전체가 자동 설치되는 구조는 아닙니다.
+- Git의 Skill 지침과 Python Tool은 Open WebUI에서 서로 다른 항목으로 등록합니다. `ApplyDemo`는 [시연 목록](agent-pack/ees-demo.json)만 적용하며 폴더 전체나 사용자 작성물을 자동 등록하지 않습니다.
 - Git 커밋 완료는 WebUI 반영 완료가 아닙니다. 실제 적용한 원본 커밋과 검증 증거는 STATUS에서 추적합니다.
 - Skill·Prompt의 금지 지침은 보안 경계가 아닙니다. 실행 가능한 범위는 Tool 내부 검사·권한·자격증명·네트워크 구성에서 제한합니다.
 
 ### 원본과 배포본
 
-팀원이 만든 개인·공유 프롬프트와 Skill은 허용된 생성·공유·수정 권한 안에서 WebUI에서 관리합니다. 공유할 때마다 담당자의 채택이나 Git 반영을 거칠 필요는 없습니다. 담당자가 팀 공통 배포 대상으로 채택한 항목만 검토한 버전을 Git에 보관하고, 이후에는 Git에서 변경을 관리해 WebUI에 수동 반영합니다.
+팀원이 만든 개인·공유 프롬프트와 Skill은 허용된 생성·공유·수정 권한 안에서 WebUI에서 관리합니다. 공유할 때마다 담당자의 채택이나 Git 반영을 거칠 필요는 없습니다. 담당자가 팀 공통 배포 대상으로 채택한 항목만 검토한 버전을 Git에 보관하고, 이후에는 Git에서 변경을 관리해 해당 배포 절차로 반영합니다. 교차 분석 시연의 지정 자산은 `ApplyDemo`, 그 밖의 기존 자산은 해당 가이드의 수동 절차를 사용합니다.
 
 사용자 작성물은 WebUI 실행 데이터와 함께 승인된 내부 백업으로 보존하는 운영 방침이며, 모든 작성물을 Git에 수집하지 않습니다. 이는 실제 사용자 권한 설정·공유 시험·백업이 완료됐다는 뜻이 아니며 자동 동기화도 구성하지 않았습니다. 실제 적용 상태는 [STATUS](docs/STATUS.md)에서 확인합니다.
 
@@ -96,6 +96,7 @@ flowchart TB
 | 업무 공통 정책 | `agent-pack/policies/` | 검토 후 Prompt·Tool 구성에 반영; 자동 적용 아님 |
 | 공통 배포 Skill 절차 | `agent-pack/skills/*/SKILL.md` | Workspace Skills |
 | 실행 코드 | 해당 Skill의 `scripts/` | Workspace Tools |
+| 교차 분석 시연 구성 | `agent-pack/ees-demo.json` | ApplyDemo로 전문 모델·Tool·EES 관리 구역과 시작 질문 연결 |
 | 합성 지식 | `agent-pack/knowledge/` | Workspace Knowledge |
 | 팀원 개인·공유 프롬프트와 Skill | 승인된 실행 환경의 WebUI | Workspace Prompts·Skills; 내부 백업 대상 |
 | 실제 PAT·DB·대화 | 승인된 실행 환경 | Git에 저장하지 않음 |
@@ -111,6 +112,7 @@ flowchart TB
 | 초기 Rich UI 제거·일반 답변으로 전환 | [기존 Tool·Prompt 갱신](docs/03-openwebui-native-agent.md#plain-output-update) |
 | 수정·배포·원복 방식 | [배포 단위와 운영 명령](docs/03-openwebui-native-agent.md#release-delivery) |
 | 사내 명령 한 번으로 프로그램·래퍼 업데이트 | [Upgrade 최초 준비·실행·실패 시 확인](docs/03-openwebui-native-agent.md#ees-wrapper-upgrade) |
+| 교차 분석 시연과 모델·Tool·Prompt 일괄 등록 | [ApplyDemo 최초 연결·한 번 적용·시연 질문](docs/03-openwebui-native-agent.md#demo-assets-deployment) |
 | 팀 시연용 첫 화면 적용 준비 | [소개 문구·예시 질문 초안](docs/03-openwebui-native-agent.md#first-use-entry) |
 | Confluence Skill·Tool 등록 | [04-confluence-read-tool](docs/04-confluence-read-tool.md) |
 | Jira 읽기·프로젝트별 현황 | [05-jira-read-tool](docs/05-jira-read-tool.md) |

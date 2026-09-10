@@ -1475,3 +1475,74 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 
 - 2026-09-10 PR 자동 검토 후속: 설치 가이드의 남은 `EES Assistant`·ees.1 현재 안내를 Portal·ees.2와 Upgrade/Apply 안내로 수정함. DB `ui.name`이 이름을 덮어쓴다는 지적은 고정 SHA-256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`의 실제 공식 0.11.3 wheel을 다운로드해 `config.py`·`main.py`·`env.py`로 대조함. 세 파일에 `PersistentConfig`·`ui.name` 참조가 없고 config는 env의 이름을 가져와 main의 `app.state.WEBUI_NAME`과 API 응답에 전달함을 확인했으므로 DB 수정은 추가하지 않음. 공식 v0.11.3 태그 소스로 독립 재검토했고 `CUSTOM_NAME` 외부 브랜딩은 기존 안내대로 사용하지 않음. Windows에서 Upgrade 시험 실패가 다음 download 시험 성공에 가려지지 않도록 두 CI step을 분리함. 후속 `python scripts/check_docs.py`는 files=25, links=712, errors=0, review_candidates=0이고 `git diff --check`도 통과함.
 - 2026-09-10 원격 검증: 실행 코드 원본 `968f48913207e65442bb8c6b3e12270024213144`의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34418955399)가 성공함. 두 환경의 Upgrade·download 검사, 실제 고정 wheel 빌드와 Apply/Restore, Windows PowerShell 구문 검사를 포함함. 이후 설치 가이드·검증 기록만 보완하며 실행 코드는 변경하지 않음. 사내 인증·실제 Upgrade 성공과는 구분함.
+
+- 2026-09-10 Upgrade 배포물 후속: [PR #20](https://github.com/knadalkim-a11y/team-agent-poc/pull/20)을 main `704dddbb72bd03ff1a0f3ed20fc2125b094484f6`에 병합했고 [main Windows/Linux CI·패키징](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34419567419)이 성공함. artifact `10130545951`의 실제 ZIP 146,482,522 bytes를 내려받아 API SHA-256 `43fca62a5da0327684f5000ee50eecf222df551cf0caf331c68587498341e4c2`와 대조하고 새 다운로드 코드의 ZIP 검사·기존 전체 bundle 검증을 통과함. source_commit은 위 main, source_dirty=false, 프로그램은 `0.11.3+ees.2`임. 최초 실행 블록을 안내했으며 사내 Upgrade·Portal 실제 적용 결과는 아직 받지 않음.
+
+<a id="cross-system-orchestration"></a>
+
+### 시스템 간 분석 오케스트레이션 설계·구현 (2026-09-10)
+
+- 요청: EES 통합 Assistant가 EMS/APC/EGIS/FDC/EPT와 추가 전문 Assistant를 필요에 따라 선택·위임하고, 시스템 간 근거를 연결해 분석·보완·최종 판단하는 것을 목표로 함. 시스템별 담당자의 데이터 사일로를 넘어 관계를 검토하는 것이 가치이며, 모든 질문에 모든 Assistant를 호출하는 고정 경로는 목표가 아님.
+- 원본: [교차 분석 설계와 시연 제안](../docs/03-openwebui-native-agent.md#cross-system-orchestration). 초기 설계 읽기 검토를 아래에 보존하며 최신 구현 근거는 [시연 구현 검증](#cross-system-demo-implementation)으로 이어짐. 실제 도메인 연결·사내 추론 성공은 미확인임. 기존 문서 시스템의 정상 조회나 WO 합성 패널 성공을 이 기능의 성공 증거로 재사용하지 않음.
+- 기술 확인: SHA-256이 고정된 실제 공식 Open WebUI 0.11.3 wheel의 `tools/builtin.py`, `utils/subagents.py`, `main.py`, `utils/middleware.py`, `utils/tools.py`를 읽기 검토함. 내장 delegate_task는 부모 모델·도구·스킬을 사용하며 대상 모델 인자가 없음. 전체 chat 처리 경로의 대상 모델 지침·Skill/사용자 접근 검사와 개인 UserValves 로딩을 확인했으며, 대상 model.meta.toolIds는 일반 backend chat에서 자동으로 모두 적재되지 않아 명시 연결이 필요함. 실제 중첩 호출·스트리밍·사내 PAT 위임을 실행한 검증은 아님.
+- 독립 설계 검토: 이름만으로 전문 역량을 추정하는 위험과 고정 순서 시연이 지능적 선택으로 오인될 수 있음을 지적받아 역량 설명·미공개 변형·조건부 보완·ID/시간 대조·반증 반영을 포함함. 최초 연결은 한 단계, 첫 교차 분석 시연은 EMS/APC/FDC 합성 자료와 보완 한 차례로 제안함. 실제 역할·지원 데이터·구체 한도는 구현 때 확정하며 별도 서버·전사 온톨로지를 선행 조건으로 추가하지 않음.
+
+첫 컨셉 시연은 아래 기준 중 필요한 대상 선택·근거에 따른 보완·가설 수정을 작은 합성 사례로 보여주고, 화면과 실제 실행의 일치를 확인함. 공통 식별자·시간·관계는 시연 자료에 미리 정의하며 실제 DB에서 발견할 필요는 없음. 나머지 변형·운영 조건은 해당 구현을 검증할 때 확인하고 모두를 첫 시연의 선행 과제로 삼지 않음.
+
+| 시연 및 후속 판정 대상 | 통과 조건 | 현재 판정 |
+|---|---|---|
+| 필요한 대상 선택 | 단일/두 시스템/세 시스템 질문과 표현을 바꾼 미공개 사례에서 필요한 Assistant만 선택하고 무관한 대상은 호출하지 않음 | 호출 가능 대상 목록·권한·한도 구현/합성 시험. 실제 LLM 선택은 미확인 |
+| 근거에 따른 보완 | 모순·빈틈이 있을 때 필요한 대상에 구체적인 추가 조회를 요청하고 충분할 때 종료함. 매번 같은 보완 호출을 반복하지 않음 | 보완 1회 제어 구현/합성 시험. LLM의 보완 필요 판단은 미확인 |
+| 시스템 간 연결 | 근거가 있는 복합키·사업장/유효기간·시간대·조회/집계 구간과 필요한 LOT 대응으로 연결함. 한 행의 의미와 예상 연결 수를 확인해 중복 집계를 피하고, 불명확하면 연결을 보류함 | 합성 사건 키·관측 계산 시험 통과. 운영 복합키/의미 연결은 미구현 |
+| 가설 수정 | 최초 가설을 반박하는 자료에 따라 결론을 바꾸고, 단순 동시 발생을 원인으로 확정하지 않음. 주요 판단마다 근거를 추적할 수 있음 | 반증 자료와 Prompt 구현·수치 시험 통과. 실제 LLM 가설 수정은 미확인 |
+| 미연결·실패·권한 | 미연결/오류 결과를 창작하지 않고 실제 사용자 권한으로 호출함. 허용하지 않은 대상·재위임과 실행 한도를 코드에서 제한함 | 코드 경계·합성 실패/권한 시험 통과. 사내 사용자 계정별 검증 미실행 |
+| 사용자 이해와 비용 | 화면의 호출 목적·상태·근거·미확인이 실제 실행과 일치하고 합성임을 표시함. 동일 질문의 직접 답변과 비교해 근거 품질·호출 수·전체 시간의 효과를 기록함 | 실제 호출 상태 반영 구현. 사내 사용성·분석 품질·시간 비교 미실행 |
+
+- 검증 범위: 설계·현재 설명·계획·판정 기준의 일치와 문서 구조/링크·diff. Linux/Python 3.12.14에서 `python scripts/check_docs.py`는 files=25, links=718, errors=0, review_candidates=0이며 `git diff --check`도 통과함. 실행 코드·Workflow·등록용 Prompt/Skill·도구 정의는 이번에 수정하지 않음. 추가 자동 기능 시험이나 실제 사내 데이터 검증은 수행하지 않음.
+
+- 2026-09-10 공유 DB 설명 후속: 시스템들이 하나의 물리 DB와 일부 공통 데이터를 사용하지만 담당자들이 공통 관계를 잘 모른다는 사용자 설명을 반영함. [관계 발견 설계](../docs/03-openwebui-native-agent.md#shared-db-relations)에 승인된 메타데이터·서비스/UI 코드에서 공통 참조·조인·변환·업무 조건을 찾고 담당자가 자기 시스템의 의미를 검증하는 단계를 추가함. 실제 스키마·코드·행 데이터는 분석하지 않았음.
+- 추가 독립 검토: 같은 코드의 사업장별 재사용·설비 교체/유효기간, 1:N 조인에 따른 중복 집계, 발생/기록/수집 시각 구분을 포함함. 관계 목록은 연결 대상·키/범위·행/연결 수·시간·근거/상태로 시작하고, 코드에서 사용한 조인을 모든 업무의 검증된 연결이나 인과 증거로 간주하지 않음. 관계/코드 변화는 원본 버전과 영향받는 관계를 확인하는 범위로 관리하며 전사 관계 전수 조사·공통 모델·그래프 서버를 선행 요구하지 않음.
+- 운영 연결 단계의 관계 발견 판정: FK가 없는 실제 코드 조인 발견, 이름/값만 같은 무관 후보 보류, 복합키/유효기간 누락 차단, 신호 다건 연결 시 정비 건수 중복 방지, 시각 의미 차이·변경된 코드 근거 재검토, 확인된 연결과 원인 가설 구분을 작은 사례로 확인해야 함. 현재 모두 설계 기준이며 미구현·미실행이고 컨셉 시연의 선행 조건이 아님.
+- 공유 DB 후속 문서 검증: Linux/Python 3.12.14에서 `python scripts/check_docs.py`는 files=25, links=720, errors=0, review_candidates=0이며 `git diff --check`도 통과함. 변경 대상은 기존 설계·STATUS·평가 기준·CHANGELOG 4개이고 실행 코드·설정·테스트·사내 자산은 수정하지 않음.
+
+- 2026-09-10 시연 우선 결정: 실제 DB·코드·관계 조사는 운영 준비 때로 미루라는 사용자 요청을 반영함. [현재 시연 범위](../docs/03-openwebui-native-agent.md#cross-system-demo)는 합성 EMS/APC/FDC 자료·역량 설명·공통 식별자·관계를 준비하고, 실제 모델이 Assistant를 선택·호출해 반환 근거에 따라 보완·종합하는 것임. 고정 응답이나 진행 문구만 재생하는 방식으로 완료 처리하지 않음.
+- 최소 시연의 완료 조건: 교차 분석 사례에서 전문 Assistant의 실제 조회 근거를 연결하며 부족한 근거를 해당 Assistant에 추가 질문하고, 충분한 자료가 있는 단순 질문에서는 불필요한 대상·보완 호출을 줄이며, 반증 자료 변형에서는 최초 가설을 수정함. 화면의 선택 목적·진행·근거·미확인이 실제 실행과 일치해야 함. 합성 사례에서의 실행 성공과 운영 데이터의 관계·원인 정확도 검증은 구분함. 현재 시연은 미구현·미실행임.
+- 시연 범위 후속 검증: 독립 검토에서 실제 선택·호출, 필요한 경우에만 보완, 근거를 연결한 종합을 최소 성공 조건으로 대조함. Linux/Python 3.12.14에서 `python scripts/check_docs.py`는 files=25, links=723, errors=0, review_candidates=0이며 `git diff --check`도 통과함. 기존 문서 4개만 수정했고 실행 코드·설정·테스트·실제 DB 조사와 배포는 수행하지 않음.
+
+- 2026-09-10 설계·검토 요청: 시스템별 전문 Assistant·공통 도구 재사용에 동의하고 미발견 이슈/KPI 후보 발견을 최종 목표로 정함. 사용자가 모델·Tool·Prompt를 매번 UI에 복사하지 않고 사내에서 한 명령으로 적용하는 방식을 요청하여 [최소 시연과 자산 적용](../docs/03-openwebui-native-agent.md#demo-assets-deployment)을 설계함. 기존 EES 1개에 신규 전문 모델 3개와 Tool 2개, 모델 필드의 지침·시작 질문으로 제한하며 별도 Agent 서버·신규 Skill·전사 동기화·실제 DB 조사를 추가하지 않음. 현재는 설계·검토이고 등록 자산·ApplyDemo 구현 및 사내 적용은 미실행임.
+- 시연 독립 검토 반영: 원인을 알려주지 않는 개선 기회 탐색, 레시피별 비교에서 가설이 기각되는 변형, EMS만 필요한 질문의 세 흐름을 정함. 최초 전문 호출은 각 1회, 추가 보완은 전체 1회로 최대 4회이며 하위 LLM 내부 호출 수와 구분함. KPI 예시의 생산 재개 시작·5번째 연속 표본 종료·30분 관찰·그룹별 비교·결측/미안정 분모를 명시함. 기대 답변·원인 라벨은 모델에 제공하지 않고 수치 계산은 Tool이 수행하게 설계함. 현재 후보 발견·정확도·지연은 미검증임.
+- API 독립 읽기 검토: SHA-256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`의 실제 0.11.3 wheel에서 `routers/models.py`, `models/models.py`, `routers/tools.py`, `models/tools.py`, `routers/auths.py`, `utils/auth.py`, `main.py`, `utils/models.py`를 확인함. 관리자 API Key와 endpoint 허용 범위가 필요하고 GitHub PAT와 별개임. Models의 meta/params 전체 교체, 동일 Tool ID의 Valves/UserValves 유지, Tool 등록 시 코드 즉시 로드, `GET /api/models`의 실행 목록 갱신 경로를 확인함. 미활성 API Key 설정 변경·키 발급·사내 API 요청은 실행하지 않음.
+- 호출 맥락 검토: `utils/middleware.py`가 `__metadata__.model_id`에 현재 모델을 제공하지만 `__model__`은 Task Model일 수 있음. `utils/tools.py:get_tools`는 로컬 Tool의 모든 함수 specs를 노출하므로 함수별 숨김을 전제하지 않고 조회 범위를 서버 맥락으로 제한하도록 설계함. 기존 사용자 권한 검사도 별도로 유지함. 실제 중첩 호출에서의 동작 검증은 후속 구현 대상임.
+- 배포 독립 검토 반영: 기존 manage-ees/ees_upgrade는 프로그램·파일 갱신만 담당하므로 시연 자산 전용 ApplyDemo 진입점을 설계함. 기존 Git 프록시·성공 CI·커밋 고정·DPAPI 방식을 재사용하고 최초 WebUI 인증/모델 연결 뒤 한 명령으로 처리함. 기존 EES ID·사용자 지침·Tool/Skill/Knowledge·시작 질문·권한·메모리·PAT 보존, 명시한 관리 구역만 변경, Tool→전문 모델→EES 순서와 부분 실패 재조회·재실행을 포함함. 대형 동기화 프레임워크·프로그램 재시작·DB 전체 원복은 시연 범위에서 제외함.
+
+| 후속 구현의 최소 검증 | 판정할 내용 | 현재 상태 |
+|---|---|---|
+| 실제 전문 실행 | 대상 모델 지침·자료 Tool과 현재 사용자 권한이 적용되고 다른 Task Model에 자료 범위가 바뀌지 않음 | 고정 wheel 실제 native 루프·합성 provider 시험 통과. 실제 사내 모델 호출 미실행 |
+| 발견·반증·단일 시스템 | 위 3개 흐름에서 선택·보완·결론이 질문/자료와 일치, KPI 수치·관찰 범위·미확인 근거를 추적 가능 | 합성 자료/수치·Prompt 준비 완료. 사내 새 대화 3건 판정 미확인 |
+| 최초·반복 적용 | 필요한 자산만 생성·갱신, 기존 EES ID 유지, 동일 버전 두 번째 실행은 무변경 | API 계약 모의시험 통과. 실제 사내 등록 미실행 |
+| 부분 실패·응답 유실 | 실패 단계를 보고하고 재조회·같은 명령 재실행으로 완료 항목을 중복 생성하지 않음 | 실패 주입·재조회·재실행 시험 통과. 강제 프로세스 종료의 잠금 회수 자동화 없음 |
+| 현장 설정·인증 보존 | 모델/Tool 미관리 필드와 기존 PAT 유지, 현장 수정·고정 ID 충돌 시 덮어쓰기 중단, 토큰 비노출 | 병합·충돌·토큰 비노출 시험 통과. 실제 사내 권한·저장 미확인 |
+| 등록과 시연의 구분 | API 재조회 결과와 실제 새 대화의 시연 결과를 별도로 기록. 등록 성공을 LLM 분석 성공으로 간주하지 않음 | 별도 판정·안내 구현. 실제 등록/시연 결과 미확인 |
+
+- 설계 후속 문서 검증: 최종 적용 절차 독립 검토에서 초기 연결/이후 한 명령, ID·개인 설정 보존, 부분 실패 재실행, 미구현 표시의 일치를 확인했고 검토 범위 내 치명적 누락·과설계는 발견하지 않음. Linux/Python 3.12.14에서 `python scripts/check_docs.py`는 files=25, links=729, errors=0, review_candidates=0이며 `git diff --check`도 통과함. 기존 문서 6개만 수정했고 실행 코드·설정·Prompt 원본·자동 테스트·사내 데이터는 변경하지 않음.
+
+<a id="cross-system-demo-implementation"></a>
+
+### 합성 교차 분석 시연·ApplyDemo 구현 검증 (2026-09-10)
+
+- 요청과 범위: 사용자의 진행 요청에 따라 기존 설계를 구현함. 기존 EES에 관리 지침·도구 연결·시작 질문을 병합하고 같은 base_model_id를 쓰는 EMS/APC/FDC Workspace 모델과 신규 Tool 두 개를 등록한다. 별도 서버·신규 기반 모델·운영 DB 연결·기존 공통 Tool/PAT 교체는 없음.
+- 원본: [시연 자산 목록](../agent-pack/ees-demo.json), [전문 호출](../agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py), [합성 데이터](../agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py), [운영 진입점](../scripts/ees_apply_demo.py), [등록·병합](../scripts/ees_demo_assets.py). 사용자 절차는 [ApplyDemo 안내](../docs/03-openwebui-native-agent.md#demo-assets-deployment)가 관리 원본이다.
+- 실행 경로: 고정 공식 0.11.3 wheel(SHA-256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`)의 `process_chat_payload` → 실제 `generate_chat_completion` → `process_chat_response`를 조합하고 자식 Request/metadata를 분리한다. 대상 모델의 현재 지침·params, 사용자 모델/Tool 접근 검사를 유지하며 자식 채팅은 저장하지 않는다. 전문 호출은 3개 도메인 최초 각 1회+전체 보완 1회, 각 호출 자료 실행은 3회로 제한한다. 시간초과/조회 실패는 부분 결과, 사용자 취소는 중단으로 반환하며 진행 문구는 실행 상태에 연결한다.
+- 실제 소스 실행과 한계: 시험에서는 wheel에서 변경하지 않은 native streaming handler와 Tool callable 재결합 함수를 추출해 실행하고, 외부 provider·DB·payload 로딩은 합성 대체한다. 최초 도구 호출 뒤 근거를 포함한 후속 LLM 요청과 한 번에 5개 호출을 제시해도 3회만 실행되는 경계를 확인한다. 이는 전체 WebUI 기동·실제 사내 LLM·종단 UI 시험과 구분한다.
+- 자료 계산: sample_a는 15건 중 판정 가능 13건, 5연속 표본 확인 12건, 관찰 내 미확인 1건, 결측/중단 2건이다. EQ-01/R-02의 확인 사건 평균은 정비 후 23분·계획 재개 8.5분이고 차이는 14.5분이다. sample_b 20건의 전체 차이는 5.2분이지만 각 레시피 내부 차이는 0분이다. EMS 전용 사례의 반복 작업은 5회·150분이다. 기대 결론은 시연 지침이나 읽기 응답에 정답 라벨로 넣지 않고 사건·조건·시각을 반환한다. 계산 Tool의 정의·분모·결측 규칙은 공개해 LLM이 수치를 검증할 수 있게 한다.
+- API·보존 독립 검토: 실제 wheel의 model/tool/auth 라우트·저장 모델과 대조함. Model GET이 관리자에게도 설정을 숨길 수 있어 기존 모델의 `write_access is True`를 필수로 하고, `meta`/`params` 전체 교체 API에는 현재 값을 병합해 보낸다. Tool frontmatter의 pack 표식, public/user/group 읽기 권한, Valves/UserValves 보존, 실행 모델 목록 갱신을 확인함. 고정 ID 충돌·관리 구역 현장 수정은 등록 전에 중단한다.
+- 재실행 검토: Tool → Valves → 전문 모델 → EES 순서로 적용한다. POST 이전 intent 저널과 재조회로 응답 유실 후 같은 ID를 채택하고 중복 생성하지 않는다. 새 Tool의 초기 기본 Valves를 보존하며 기존 미관리 값은 병합한다. 응답을 확인하지 못한 쓰기는 `pending=true changed=-`로 표시한다. 정상 예외/취소 시 잠금을 해제하지만 OS 강제 종료의 잠금 회수는 자동 처리하지 않는다. 최초·이전 관리 값은 사내 로컬 저널에 보존하며 전체 DB 원복을 추가하지 않는다.
+- 운영 경계 검토: 기존 Upgrade의 Git 프록시·깨끗한 main·성공 CI·고정 커밋 재실행을 재사용한다. WebUI 버전 확인 뒤 관리자 API 인증을 확인하고 최초 연결/모델 선택을 기억한다. WebUI 키는 GitHub PAT와 별도 CurrentUser DPAPI로 URL에 결합해 저장한다. TLS 검증 유지·리디렉션 차단·응답 제한·고정 오류 코드·한 줄 결과를 시험하며 Stop/Start·의존성 설치를 호출하지 않는다. 공식 0.11.3과 기존 사내 ees.1/ees.2를 지원한다.
+- 독립 검토에서 수정한 사항: 사내 배포 버전 허용, 비공개 params 덮어쓰기 차단, 조회 실패의 완료 오표시, 증거 인자의 내부 정보 제외, 최초 부분 실패의 연결 선택 보존, 새 Tool 기본 Valves 처리, 응답 미확인 쓰기 표시, no-op 저널 관리 기준 갱신, 안전한 인증 오류 코드 보존과 원자적 저널 저장.
+- 사내 미확인: API Key 활성/endpoint 허용·실제 등록과 권한, 기존 UI 설정 보존 실측, 실제 LLM의 필요한 대상 선택·조건부 보완·발견/반증 품질·시간, 일반 사용자 사용성은 미실행이다. 합성 시험 통과를 사내 시연 성공으로 기록하지 않는다. 최초 적용 후 짧은 등록 결과와 새 대화 3건의 답변 요지로 확인한다.
+
+- 로컬 검증: Linux/Python 3.12.14에서 `python -m unittest tests.test_ees_apply_demo tests.test_ees_demo_assets tests.test_ees_demo_data_tool tests.test_ees_specialists_tool tests.test_ees_upgrade tests.test_ees_update_download tests.test_manage_ees tests.test_ees_branding_build tests.test_demo_bundle -q`는 205건 중 200건 통과·환경 조건 5건 제외였다. 고정 wheel native 경로 시험 3건은 실제 실행했고 시연 자산 시험 23건은 응답 유실·Ctrl+C 복구를 포함한다. `python scripts/check_docs.py`는 files=29, links=750, errors=0, review_candidates=0, `git diff --check`도 통과했다. Windows/PowerShell과 전체 실제 wheel 적용/복원은 PR의 Windows/Linux CI에서 별도로 확인한다.
+
+- 첫 원격 CI: 실행 코드 `887cec6f2524a745248c9eb6173941977e13473a`의 [PR Windows/Linux 검사](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34429581261)에서 Linux는 성공하고 Windows는 자산 시험 4건의 UTF-8 저널을 기본 cp1252로 읽어 실패했다. 실제 저장·읽기 코드는 UTF-8을 명시하고 있었으며 시험의 파일 읽기/쓰기에 인코딩을 명시해 수정했다. 이후 단계의 전문 Tool 소스 읽기도 같은 방식으로 보완한다. 첫 실패를 사내 등록 실패로 간주하지 않으며 수정 후 원격 결과를 별도로 확인한다.
+
+- 원격 검증 완료: 인코딩 보완 원본 `1da6a13094ad5140c9523c3b5543490469257e77`의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34429876696)가 모두 성공했다. ApplyDemo/기존 Upgrade PowerShell 인자 전달, 자산 등록·재실행 23건, 자료 계산 13건, 고정 wheel 전문 호출 20건, 기존 프로그램의 실제 wheel Apply/Restore와 Windows PowerShell 구문 검사를 포함한다. 인코딩 누락을 오류로 처리한 관련 56건의 로컬 검사도 통과했다. 실행 코드는 `887cec6f2524a745248c9eb6173941977e13473a`와 동일하며 이후 인증 안내·상태·검증 기록만 보완한다. 실제 사내 적용과 LLM 분석 품질은 계속 미확인이다.

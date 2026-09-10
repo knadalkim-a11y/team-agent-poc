@@ -131,7 +131,7 @@ def update_only(config, proxy=None):
                 "wrapper_commit": target, "next": "upgrade"}
 
 
-def bootstrap(config, args, client, progress):
+def bootstrap(config, args, client, progress, *, runner="ees_upgrade.py", runner_options=None):
     """Verify the fetched commit before updating, then execute the updated code."""
     before = checkout()
     progress.update(wrapper_commit=before, wrapper_changed=False)
@@ -160,9 +160,11 @@ def bootstrap(config, args, client, progress):
         checkout(target)
         progress.update(wrapper_commit=target, wrapper_changed=True)
     # Do not continue a deployment using Python modules loaded before git merge.
-    command = [sys.executable, "-I", "-B", str(ROOT / "scripts" / "ees_upgrade.py"),
+    command = [sys.executable, "-I", "-B", str(ROOT / "scripts" / runner),
                "--config", str(args.config), "--prepared-head", target,
-               "--wrapper-before", before, "--health-timeout", str(args.health_timeout)]
+               "--wrapper-before", before]
+    command += (["--health-timeout", str(args.health_timeout)]
+                if runner_options is None else list(runner_options))
     try:
         child = subprocess.Popen(command)
     except OSError:
