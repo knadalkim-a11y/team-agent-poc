@@ -8,7 +8,7 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **개선 기회·KPI 후보 발견 시연과 ApplyDemo 일괄 등록을 구현·검토함.** EMS/APC/FDC 전문 모델 3개·Tool 2개·모델 지침/시작 질문을 준비하고, 기존 EES를 유지한 실제 전문 실행 경로와 등록·재실행을 연결함. 고정 WebUI 소스의 native 호출 루프·합성 계산·사용자 권한·설정 보존을 자동 시험하고 독립 검토의 보완을 반영함. [PR #21](https://github.com/knadalkim-a11y/team-agent-poc/pull/21)의 구현본이며 사내 API 적용·모델 분석 품질은 미확인임. [시연](03-openwebui-native-agent.md#cross-system-demo), [실행 안내](03-openwebui-native-agent.md#demo-assets-deployment), [검증 근거](../evals/scenarios.md#cross-system-demo-implementation).
+- 이번 작업: **개선 기회·KPI 후보 발견 시연과 ApplyDemo 일괄 등록을 구현·검토함.** EMS/APC/FDC 전문 모델 3개·Tool 2개·모델 지침/시작 질문을 준비하고, 기존 EES를 유지한 실제 전문 실행 경로와 등록·재실행을 연결함. 고정 WebUI 소스의 native 호출 루프·합성 계산·사용자 권한·설정 보존을 자동 시험하고 독립 검토의 보완을 반영함. Windows/Linux CI도 통과함. [PR #21](https://github.com/knadalkim-a11y/team-agent-poc/pull/21)의 구현본이며 사내 API 적용·모델 분석 품질은 미확인임. [시연](03-openwebui-native-agent.md#cross-system-demo), [실행 안내](03-openwebui-native-agent.md#demo-assets-deployment), [검증 근거](../evals/scenarios.md#cross-system-demo-implementation).
 - 다음 작업 하나: **검증된 main에서 ApplyDemo를 사내 실행하고 새 대화의 시연 결과를 확인한다.** 첫 도입은 Update와 ApplyDemo를 같은 블록에서 실행하며 WebUI 관리자 API Key를 숨김 입력하고 필요한 경우 기존 EES를 한 번 선택한다. 이후 ApplyDemo 한 명령으로 갱신한다. 등록 결과 한 줄과 발견·반증·EMS 단독 사례의 답변 요지로 확인하며 실제 DB 조사는 진행하지 않는다. [실행과 결과 전달](03-openwebui-native-agent.md#demo-assets-deployment).
 - 공유 DB 전제와 후속: 여러 시스템이 하나의 물리 DB와 일부 공통 데이터를 사용하나 각 담당자는 자기 시스템 지식에 집중되어 있음. [관계 발견 설계](03-openwebui-native-agent.md#shared-db-relations)는 운영 데이터 연결을 준비할 때 사용하며 현재 시연 범위에서 제외함. 시스템 간 실제 의미·접근 권한·스키마는 아직 조사하지 않음.
 - 배포 확인 대기: Portal 이름 변경과 Upgrade는 [PR #20](https://github.com/knadalkim-a11y/team-agent-poc/pull/20)에서 main `704dddbb72bd03ff1a0f3ed20fc2125b094484f6`에 반영함. [main Windows/Linux CI와 패키징](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34419567419)이 성공하고 실제 ees.2 산출물의 digest·전체 ZIP 검증까지 완료함. 최초 실행 블록을 안내했으며 사내 인증/다운로드·Upgrade 결과·Portal 표시는 아직 미확인임. 현재 확인된 사내 프로그램은 ees.1이고 밤사이 접속 불가 원인은 재발 시 확인한다는 합의를 유지함. [사용법](03-openwebui-native-agent.md#ees-wrapper-upgrade), [이전 검증](../evals/scenarios.md#ees-wrapper-upgrade).
@@ -120,7 +120,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-10: EMS/APC/FDC 합성 자료·Prompt·전문 호출과 ApplyDemo를 구현함. 고정 0.11.3의 실제 native 응답 루프를 합성 provider로 실행하고 API 필드·관리자 권한·재실행·응답 유실을 검토함. 사내 패키지 버전 허용, 비공개 모델 설정 덮어쓰기 차단, 자료 실패의 부분 결과 표시, 새 Tool 기본 Valves와 저널 재시도 조건을 보완함. 실제 사내 API·LLM 품질·지연은 미검증이며 원격 CI/게시 결과는 [구현 근거](../evals/scenarios.md#cross-system-demo-implementation)에 기록함.
+2026-09-10: EMS/APC/FDC 합성 자료·Prompt·전문 호출과 ApplyDemo를 구현함. 고정 0.11.3의 실제 native 응답 루프를 합성 provider로 실행하고 API 필드·관리자 권한·재실행·응답 유실을 검토함. 사내 패키지 버전 허용, 비공개 모델 설정 덮어쓰기 차단, 자료 실패의 부분 결과 표시, 새 Tool 기본 Valves와 저널 재시도 조건을 보완함. 실제 사내 API·LLM 품질·지연은 미검증이며 Windows/Linux CI 성공과 첫 Windows 시험 인코딩 실패·수정은 [구현 근거](../evals/scenarios.md#cross-system-demo-implementation)에 기록함.
 
 ## 갱신 규칙
 
