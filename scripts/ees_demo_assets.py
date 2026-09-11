@@ -155,7 +155,15 @@ def load_manifest(root: Path):
         item["prompt"] = _read_source(root, item["prompt_path"]).strip()
         if BEGIN in item["prompt"] or END in item["prompt"]:
             raise DemoAssetsError("reserved_prompt_marker")
+        if "suggestions_path" in item:
+            if item is not manifest["ees"] or "suggestions" in item:
+                raise DemoAssetsError("invalid_manifest")
+            item["suggestions"] = json.loads(_read_source(root, item["suggestions_path"]))
         item["suggestions"] = _suggestions(item.get("suggestions", []))
+        if "retired_suggestions" in item:
+            if item is not manifest["ees"]:
+                raise DemoAssetsError("invalid_manifest")
+            item["retired_suggestions"] = _suggestions(item["retired_suggestions"])
         if (not isinstance(item.get("tool_ids"), list) or not set(item["tool_ids"]) <= tool_ids
                 or len(item["tool_ids"]) != len(set(item["tool_ids"]))):
             raise DemoAssetsError("invalid_tool_binding")
@@ -288,6 +296,9 @@ def _merge_model(current, item, ees, previous):
     if not isinstance(tools, list) or not isinstance(suggestions, list):
         raise DemoAssetsError("invalid_model_lists")
     meta["toolIds"] = [x for x in tools if x not in old_tools and x not in item["tool_ids"]] + item["tool_ids"]
+    # Retire only exact, formerly shipped starter rows; preserve local edits.
+    retired = item.get("retired_suggestions", []) if ees else []
+    suggestions = [row for row in suggestions if row not in retired]
     old_content = {x["content"] for x in (previous or {}).get("suggestions", [])}
     new_content = {x["content"] for x in item["suggestions"]}
     for proposed in item["suggestions"]:

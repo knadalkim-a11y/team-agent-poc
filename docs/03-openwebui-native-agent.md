@@ -139,7 +139,7 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 
 **현재 기존 사용자 갱신:** PR #19는 main에 병합됐으며, 현재 v0.1.8은 [ApplyDemo](#demo-assets-deployment)가 이미 EES에 연결된 공식 v0.1.6/v0.1.7 등록본을 같은 ID로 갱신합니다. 시연 자산 v0.2.1부터는 고정 WebUI 편집기가 자동 정렬해 저장한 공식 등록본도 지원합니다. 아래 수동 복사를 반복하지 않습니다. 새 통합 업무 패널의 공통 코드는 ApplyDemo가 포함하며 초기 등록과 현장 수정 여부에 따라 지원되지 않는 원본이면 먼저 대조합니다. 마지막 사내 확인 버전과 결과는 [평가 기록](../evals/scenarios.md#wo-mockup)을 따릅니다.
 
-**처음 설치할 때만:** 최신 main의 [Tool 원본](../agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)을 EES WO Demo로 등록해 EES에 연결합니다. 같은 main의 [공통 Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)에서 `WO 시연 도구가 연결된 경우` 절을 기존 EES 지침 끝에 한 번 추가하고, [시작 질문 JSON](../agent-pack/ees-prompt-suggestions.json)의 네 질문을 기존 질문을 유지하면서 추가합니다. 이어 ApplyDemo로 공통 패널 코드를 포함합니다. 이미 등록된 사용자의 Tool을 삭제·재생성하지 않습니다.
+**처음 설치할 때만:** 최신 main의 [Tool 원본](../agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)을 EES WO Demo로 등록해 EES에 연결합니다. 같은 main의 [공통 Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)에서 `WO 시연 도구가 연결된 경우` 절을 기존 EES 지침 끝에 한 번 추가하고, [시작 질문 안내](#first-use-entry)를 따릅니다. 이어 ApplyDemo로 공통 패널 코드와 대표 시연 질문 세 개를 함께 반영합니다. 이미 등록된 사용자의 Tool을 삭제·재생성하지 않습니다.
 
 **아래는 2026-09-09 v0.1.6 수동 적용 이력입니다.** 당시에는 1·2번으로 기존 Tool 코드만 교체하고 WO 지침·제안 JSON은 변경하지 않아 3·4번을 반복하지 않았습니다. 현재 갱신 명령으로 사용하지 않습니다. 패널 오류가 재발한 경우에만 아래의 짧은 진단값을 확인합니다.
 
@@ -175,7 +175,7 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
    }
    ```
 
-4. 같은 EES 모델 편집 화면에서 **프롬프트(Prompts) → 기본값(Default)을 눌러 사용자 정의(Custom)**로 전환합니다. 아래 명령으로 가져올 파일 경로를 복사한 뒤 **가져오기(Import)** 파일 선택창의 파일 이름 칸에 붙여넣습니다. 사용자 정의 목록은 EES 모델의 기본 영어 제안을 대신하며, 목록 안의 기존 예시·빈 항목은 정리하여 아래 네 문구만 남깁니다. 가져오기는 추가 방식이므로 중복으로 가져오지 않습니다. 모델 전체 가져오기나 System Prompt에 넣는 JSON이 아닙니다. [제안 편집 상세](#first-use-entry).
+4. 같은 EES 모델 편집 화면에서 **프롬프트(Prompts) → 기본값(Default)을 눌러 사용자 정의(Custom)**로 전환합니다. 아래 명령으로 가져올 파일 경로를 복사한 뒤 **가져오기(Import)** 파일 선택창의 파일 이름 칸에 붙여넣습니다. 사용자 정의 목록은 EES 모델의 기본 영어 제안을 대신하며, 새 설치에서 목록 안의 기본 예시·빈 항목을 정리하고 JSON의 세 문구를 사용합니다. 이미 ApplyDemo로 관리 중인 모델은 [자동 갱신 안내](#first-use-entry)를 따릅니다. 가져오기는 추가 방식이므로 중복으로 가져오지 않습니다. 모델 전체 가져오기나 System Prompt에 넣는 JSON이 아닙니다. [제안 편집 상세](#first-use-entry).
 
    ```powershell
    Set-Clipboard -Value (Join-Path $env:TEMP 'ees-wo-demo\agent-pack\ees-prompt-suggestions.json')
@@ -768,7 +768,28 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 ### 기존 Assistant의 팀 시연용 첫 화면 — 적용 준비
 
-사용자가 여섯 목표의 본격 구현 전에 팀원 시연을 위한 이름·로고·빠른 제안과 배포 방식을 먼저 준비하자고 요청했습니다. [이전 보류 결정](../evals/scenarios.md#onboarding-deferred)은 당시 이력으로 보존합니다. 현재 [제안 JSON](../agent-pack/ees-prompt-suggestions.json)은 후속 요청에 따라 **설비 조회·WO 목업을 확인하기 위한 네 질문**으로 구성합니다. 범용 Assistant의 역할·최종 기능 목록을 제한하지 않으며 준비·실제 UI 저장·팀원 시연 결과는 구분합니다. 이번 제안만 갱신할 때는 아래 3·4번을 적용하며 이름·소개를 다시 바꾸지 않습니다.
+사용자가 여섯 목표의 본격 구현 전에 팀원 시연을 위한 이름·로고·빠른 제안과 배포 방식을 먼저 준비하자고 요청했습니다. [이전 보류 결정](../evals/scenarios.md#onboarding-deferred)은 당시 이력으로 보존합니다. 현재 [제안 JSON](../agent-pack/ees-prompt-suggestions.json)은 **생산 손실 분석·설비 조회·점검 WO 초안 작성의 대표 질문 세 개**로 구성합니다. ApplyDemo는 이 파일을 직접 읽으며, 별도의 분석 질문 목록을 중복 관리하지 않습니다. 범용 Assistant의 역할·최종 기능 목록을 제한하지 않으며 준비·실제 UI 저장·팀원 시연 결과는 구분합니다.
+
+**이미 시연 자산을 적용한 사용자:** 변경이 main에 반영되고 해당 CI가 성공한 뒤 기존 저장소 폴더에서 아래 명령 한 번으로 갱신합니다. ApplyDemo가 최신 파일을 가져오므로 별도 Update·Upgrade·프로그램 다운로드·재시작은 필요하지 않습니다. 기존 연결된 WO 시연 기능과 지침을 사용합니다.
+
+```powershell
+Set-Location "$env:USERPROFILE\team-agent-poc"
+.\scripts\manage-ees.ps1 -Action ApplyDemo
+```
+
+기존 관리 분석 질문 세 개를 교체하고, 과거 공식 수동 질문 네 개는 제목·부제·본문·추가 필드까지 원본과 같은 항목만 정리합니다. 사용자가 고치거나 추가한 항목은 보존하므로 그런 항목이 있으면 전체 개수는 세 개보다 많을 수 있습니다. 새 질문과 본문이 같은 사용자 수정 항목은 덮어쓰지 않고 충돌을 알립니다. 관리 중인 제안은 수동으로 삭제·가져오기하지 않습니다.
+
+완료 후 새로고침하고 **폴더 밖의 새 EES 대화**에서 세 제목을 확인합니다. 시연은 아래 순서로 진행하면 됩니다. 조회·WO와 분석은 각각의 합성 자료를 사용하며 서로 같은 설비 기록이라고 연결하지 않습니다.
+
+| 시작 질문 제목 | 시연할 동작 |
+|---|---|
+| 생산 손실 줄이기 | 조립 2라인의 계획·EMS/APC/FDC 분석·근거와 우선 확인 항목 |
+| 라인 설비 한눈에 보기 | 천안 조립 1라인의 권취·조립 설비를 조회 패널에서 확인 |
+| 점검 WO 초안 작성 | 권취 설비 1호의 소음 점검 초안을 AI가 채우고 화면에서 검토·수정 |
+
+실제 운영 데이터 조회와 WO 발행은 연결하지 않았습니다. 분석은 시작 답변에서 합성 자료임을 밝히고, 설비·WO 질문은 시연용임을 명시합니다. 사내 적용 후 모델의 질문 해석·패널 표시·초안 작성 성공 여부는 별도로 확인합니다.
+
+**새로 설치하거나 수동 설정할 때만:** 아래 이름·소개·제안 편집 절차를 사용합니다.
 
 이미 동작하는 Assistant에서 **표시 이름·소개 문구·예시 질문**을 정리합니다. 초기 기준선의 Skill 2개로 되돌리거나 모델·Tool을 다시 만들지 않습니다. 기존 System Prompt·기능·개인 설정은 유지합니다. 이 절은 적용 안내이며 실제 UI 저장 여부는 [STATUS](STATUS.md)에 기록합니다.
 
@@ -779,7 +800,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 궁금한 것을 묻고, 글을 쓰거나 업무 내용을 정리해 보세요. 연결된 문서와 이슈도 내 권한 안에서 찾아볼 수 있습니다.
 ```
 
-3. **프롬프트(Prompts) → 기본값(Default)을 눌러 사용자 정의(Custom) → 가져오기(Import)**에서 [ees-prompt-suggestions.json](../agent-pack/ees-prompt-suggestions.json)을 선택합니다. 사용자 정의 목록은 해당 EES 모델의 전역 기본 제안을 대체하므로 전역 영어 목록을 삭제할 필요가 없습니다. 사용자 정의 안에 남은 기존 예시·처음 전환할 때 생긴 빈 항목은 정리해 목업 제안 네 개만 남깁니다. 가져오기는 기존 목록에 **추가**하므로 같은 예시가 이미 있으면 반복하지 않습니다. 파일 전달이 어려우면 같은 JSON의 `title` 두 값을 **Title / Subtitle**, `content`를 **Content**에 입력해 항목을 추가할 수 있습니다.
+3. **프롬프트(Prompts) → 기본값(Default)을 눌러 사용자 정의(Custom) → 가져오기(Import)**에서 [ees-prompt-suggestions.json](../agent-pack/ees-prompt-suggestions.json)을 선택합니다. 사용자 정의 목록은 해당 EES 모델의 전역 기본 제안을 대체하므로 전역 영어 목록을 삭제할 필요가 없습니다. 새 설치의 사용자 정의 안에 남은 기본 예시·처음 전환할 때 생긴 빈 항목은 정리해 대표 시연 제안 세 개를 사용합니다. 별도로 작성한 사용자 질문은 보존합니다. 가져오기는 기존 목록에 **추가**하므로 같은 예시가 이미 있으면 반복하지 않습니다. 파일 전달이 어려우면 같은 JSON의 `title` 두 값을 **Title / Subtitle**, `content`를 **Content**에 입력해 항목을 추가할 수 있습니다.
 4. 저장 및 업데이트 후 새로고침하고 **폴더 밖의 새 일반 대화**에서 Assistant를 선택합니다. 소개와 예시 질문을 확인합니다. 예시 순서는 달라질 수 있고 입력 상태에 따라 일부만 보일 수 있습니다.
 
 이 JSON은 Prompts 목록만 가져오는 형식입니다. 모델 전체 Import나 System Prompt 입력란에 넣지 않습니다. 일반 팀원이 이 설정을 반복할 필요는 없습니다. 소개 문구는 두 줄로 줄여 보일 수 있으며, 예시 질문은 개인 설정에 따라 클릭 즉시 전송되거나 입력창에 채워집니다. 토큰이나 미치환된 placeholder를 예시에 넣지 않습니다.

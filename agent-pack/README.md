@@ -7,7 +7,7 @@ Open WebUI의 `EES 통합 Assistant`에 등록할 Git 관리 원본입니다. �
 | 원본 | Open WebUI 반영 위치 |
 |---|---|
 | [ees-demo.json](ees-demo.json) | ApplyDemo가 관리할 전문 모델 3개·분석 Tool 2개·EES 관리 구역과 시작 질문, 이미 연결된 지원 WO Tool의 갱신 목록 |
-| `ees-prompt-suggestions.json` | 팀 시연용 예시 질문 4개; [기존 모델에 적용](../docs/03-openwebui-native-agent.md#first-use-entry) |
+| `ees-prompt-suggestions.json` | 생산 손실 분석·설비 조회·점검 WO 초안의 시연 질문 3개. ApplyDemo와 수동 가져오기의 공통 원본; [기존 모델에 적용](../docs/03-openwebui-native-agent.md#first-use-entry) |
 | `system-prompts/*.md` | Workspace Model의 System Prompt |
 | `policies/*.md` | 공통 규칙의 검토·관리 원본 |
 | `knowledge/*.md` | Workspace Knowledge |
