@@ -267,6 +267,45 @@ class ApplyAssetsTests(unittest.TestCase):
                                  self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"])
                 self.assertEqual(0, self.apply()["changed"])
 
+    def test_v025_starters_replace_equipment_entry_with_connector_briefing(self):
+        # Exact previously shipped UI rows: exercise ownership across the release.
+        previous = [
+            {
+                "title": [
+                    "생산 손실 줄이기",
+                    "조립 2라인 개선 기회 분석"
+                ],
+                "content": "조립 2라인을 분석해서 생산 손실을 줄일 수 있는 개선 기회를 찾아줘. 우선 확인할 항목도 정리해줘."
+            },
+            {
+                "title": [
+                    "라인 설비 한눈에 보기",
+                    "천안 조립 1라인 설비 조회"
+                ],
+                "content": "시연용으로 한국 천안 사업장의 조립 SHOP, 조립 1라인 설비를 찾아줘."
+            },
+            {
+                "title": [
+                    "점검 WO 초안 작성",
+                    "권취 설비 이상 소음 점검"
+                ],
+                "content": "시연용으로 한국 천안 사업장의 조립 SHOP, 조립 1라인, 권취 공정의 권취 설비 1호에서 평소보다 큰 소음이 나고 있어. 점검 WO 초안을 작성해줘. 작업 구분은 점검, 우선순위는 일반으로 해줘."
+            }
+        ]
+        expected, _ = self.use_shipped_starter_suggestions()
+        self.manifest["ees"].pop("suggestions_path")
+        self.manifest["ees"].pop("retired_suggestions")
+        self.manifest["ees"]["suggestions"] = previous
+        self.write_manifest()
+        self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"] = []
+        self.apply()
+        self.use_shipped_starter_suggestions()
+        self.assertEqual(1, self.apply("b" * 40)["changed"])
+        self.assertEqual(expected, self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"])
+        count = len(self.api.writes)
+        self.assertEqual(0, self.apply("b" * 40)["changed"])
+        self.assertEqual(count, len(self.api.writes))
+
     def test_canonical_starters_replace_old_manual_and_managed_questions_once(self):
         # A later release must also replace questions already managed in the UI field.
         previous = [
@@ -284,7 +323,7 @@ class ApplyAssetsTests(unittest.TestCase):
         self.write_manifest()
         self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"] = retired
         self.apply()
-        self.assertEqual(7, len(self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"]))
+        self.assertEqual(len(retired) + len(previous), len(self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"]))
 
         self.use_shipped_starter_suggestions()
         self.assertEqual(1, self.apply("b" * 40)["changed"])
@@ -295,7 +334,7 @@ class ApplyAssetsTests(unittest.TestCase):
 
     def test_retiring_starters_preserves_edited_rows_and_user_questions(self):
         expected, retired = self.use_shipped_starter_suggestions()
-        edited_title = copy.deepcopy(retired[1])
+        edited_title = copy.deepcopy(retired[-1])
         edited_title["title"] = ["내 설비 검색", "현장 편집"]
         edited_content = copy.deepcopy(retired[3])
         edited_content["content"] += " 조립 2라인부터 찾아줘."
@@ -308,16 +347,25 @@ class ApplyAssetsTests(unittest.TestCase):
         self.assertEqual(0, self.apply()["changed"])
         self.assertEqual(count, len(self.api.writes))
 
-    def test_edited_legacy_title_colliding_with_new_starter_stops_before_writes(self):
+    def test_user_title_colliding_with_new_starter_stops_before_writes(self):
         expected, retired = self.use_shipped_starter_suggestions()
-        edited = copy.deepcopy(retired[0])
-        self.assertIn(edited["content"], [row["content"] for row in expected])
-        edited["title"] = ["내가 수정한", "천안 조회"]
+        edited = copy.deepcopy(expected[0])
+        edited["title"] = ["내가 수정한", "업무 질문"]
         self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"] = retired + [edited]
         before = copy.deepcopy(self.api.rows)
         self.expect_error("suggestion_collision")
         self.assertEqual([], self.api.writes)
         self.assertEqual(before, self.api.rows)
+
+    def test_active_starters_with_same_content_still_stop_before_api_calls(self):
+        expected, _ = self.use_shipped_starter_suggestions()
+        duplicate = copy.deepcopy(expected[0])
+        duplicate["title"] = ["같은 질문", "다른 제목"]
+        source = self.root / self.manifest["ees"]["suggestions_path"]
+        source.write_text(json.dumps(expected + [duplicate]), encoding="utf-8")
+        self.expect_error("duplicate_suggestions")
+        self.assertEqual([], self.api.calls)
+        self.assertEqual([], self.api.writes)
 
     def test_starter_path_errors_and_duplicate_source_stop_before_api_calls(self):
         cases = (("missing", "invalid_source_path"), ("escape", "invalid_source_path"),
@@ -820,11 +868,11 @@ class ApplyAssetsTests(unittest.TestCase):
 
     def test_real_manifest_sources_pass_preflight(self):
         manifest = assets.load_manifest(MODULE.parents[1])
-        self.assertEqual("0.2.5", manifest["version"])
+        self.assertEqual("0.2.6", manifest["version"])
         suggestions = json.loads((MODULE.parents[1] / "agent-pack/ees-prompt-suggestions.json").read_text(encoding="utf-8"))
         self.assertEqual(3, len(suggestions))
         self.assertEqual(suggestions, manifest["ees"]["suggestions"])
-        self.assertEqual(4, len(manifest["ees"]["retired_suggestions"]))
+        self.assertEqual(5, len(manifest["ees"]["retired_suggestions"]))
         self.assertEqual({"ees_specialists", "ees_demo_data"}, {t["id"] for t in manifest["tools"]})
         self.assertEqual({"ees_demo_ems", "ees_demo_apc", "ees_demo_fdc"},
                          {m["id"] for m in manifest["models"]})

@@ -57,7 +57,7 @@ def _read_source(root, relative):
     return content
 
 
-def _suggestions(value):
+def _suggestions(value, *, unique_content=True):
     if not isinstance(value, list):
         raise DemoAssetsError("invalid_suggestions")
     contents = []
@@ -66,7 +66,9 @@ def _suggestions(value):
                 or not row["content"].strip() or not isinstance(row.get("title"), list)
                 or len(row["title"]) != 2 or not all(isinstance(x, str) for x in row["title"])):
             raise DemoAssetsError("invalid_suggestions")
-        contents.append(row["content"])
+        # Retirement matches whole historical rows; title revisions may share
+        # content. Active prompts still require unique content for ownership.
+        contents.append(row["content"] if unique_content else _hash(row))
     if len(contents) != len(set(contents)):
         raise DemoAssetsError("duplicate_suggestions")
     return copy.deepcopy(value)
@@ -163,7 +165,7 @@ def load_manifest(root: Path):
         if "retired_suggestions" in item:
             if item is not manifest["ees"]:
                 raise DemoAssetsError("invalid_manifest")
-            item["retired_suggestions"] = _suggestions(item["retired_suggestions"])
+            item["retired_suggestions"] = _suggestions(item["retired_suggestions"], unique_content=False)
         if (not isinstance(item.get("tool_ids"), list) or not set(item["tool_ids"]) <= tool_ids
                 or len(item["tool_ids"]) != len(set(item["tool_ids"]))):
             raise DemoAssetsError("invalid_tool_binding")
