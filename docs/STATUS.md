@@ -6,9 +6,9 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: v0.2.6 제안 변경은 PR #34/main `492eb5bc4145002db15090230cfd3bf3a40862fe`와 delivery CI 성공까지 확인했으나, 사용자의 사내 ApplyDemo는 `webui_version/webui_connection_failed`, `changed=0`으로 실패함. 인증·제안 갱신 전 연결 실패이며 원인은 미확정. [변경·실패·진단 범위](../evals/scenarios.md#connector-demo-starters).
+- 이번 작업: v0.2.6 제안 변경은 PR #34/main `492eb5bc4145002db15090230cfd3bf3a40862fe`와 delivery CI 성공까지 확인했으나, 사용자의 사내 ApplyDemo는 `webui_version/webui_connection_failed`, `changed=0`으로 실패함. 후속 확인은 `same=true`, 두 API 조회 모두 연결 거절, Status는 `customized/c099e427f62b/running=true`임. 프로세스 생존과 HTTP 응답 정상은 별개이며 포트 수신 상태·현재 로그 원인은 미확정. [변경·실패·진단 범위](../evals/scenarios.md#connector-demo-starters).
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
-- 다음 제품 작업 하나: 실패한 ApplyDemo가 사용하는 주소와 등록 서버 주소에 같은 Python·CA·프록시 미사용 조건으로 `/api/version` 읽기만 수행해 연결 상태를 구분함. 주소·토큰·원문 오류 없이 짧은 결과를 받음. 원인 확인 전 ApplyDemo 반복·토큰 초기화·주소 변경·서버 재시작을 선행하지 않으며, 연결 해결 뒤 제안 적용·새 화면 확인으로 이어감.
+- 다음 제품 작업 하나: .NET으로 등록 IP 존재·설정 포트의 수신 상태를 확인하고 현재 `deployment.json/process/log_file`의 제한된 로그만 기존 요약기로 읽음. 예전에 미지원이었던 Get-NetTCPConnection과 과거 종료 실패 로그 재검사는 사용하지 않음. 결과는 두 줄만 받고 수신이 사라졌는지/다른 바인딩인지 구분해 현재 프로그램의 복구 여부를 결정한 뒤 제안 적용으로 이어감.
 
 ## 마지막으로 확인된 적용 상태
 
@@ -59,6 +59,6 @@
 
 ## 최근 점검
 
-2026-09-11: 사내 실패 보고를 최신 main `492eb5bc4145`의 진입점·접속 주소 선택·오류 처리와 대조했습니다. 버전 조회에서 멈춰 인증·자산 쓰기는 실행하지 않았고, 현재 오류 요약은 상세 연결 원인을 보존하지 않습니다. 같은 접속 방식의 읽기 전용 확인을 로컬 정상/저장 주소 연결 거절 사례로 검증했습니다. 사내 원인·새 제안은 미확인입니다. [실패·진단 근거](../evals/scenarios.md#connector-demo-starters).
+2026-09-11: 동일 주소 연결 거절과 등록 프로세스 생존 보고를 현재 Status·프로세스 식별 코드와 대조했습니다. 원격 main `31b6cc7d6bb4`·열린 PR 0개·동일 로컬 tree를 확인했습니다. 저장 주소 불일치와 인증 단계 문제는 이번 증거에 맞지 않으며 포트 수신·현재 실행 로그를 다음 최소 확인으로 정했습니다. 당시 WinError64와 같은 원인으로 확정하거나 정상 서버라고 처리하지 않았습니다. 실행 코드 변경·사내 복구는 아직 없습니다. [실패·진단 근거](../evals/scenarios.md#connector-demo-starters).
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.

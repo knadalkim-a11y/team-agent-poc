@@ -1852,6 +1852,9 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 후속 사내 실패(2026-09-11 사용자 보고): `action=apply_demo result=failed changed=0 commit=492eb5bc4145 stage=webui_version code=webui_connection_failed next=inspect_local_result`. 최신 main·열린 PR 0개·동일 로컬 tree를 확인하고 현재 진입점을 대조함. `/api/version` GET은 관리자 토큰 로딩·모델 선택·자산 쓰기보다 먼저이므로 이번 시도는 제안을 변경하지 않았음. 연결 거절·시간 초과·TLS·DNS 등의 구체 원인이나 서버 중지를 이 코드만으로 확정하지 않음.
 - 진단 공백과 최소 확인: 현재 WebUIClient는 연결 예외를 같은 코드로 바꾸고 원인을 보존하지 않아 `last-operation/last-failure`를 다시 읽어도 구분할 수 없음. `Status -Summary`도 프로세스 식별 상태이며 HTTP 응답을 검증하지 않음. 현재 선택 주소와 등록 주소를 같은 Python·저장 CA·프록시 미사용·리다이렉트 차단 조건으로 `/api/version`만 최대5초씩 조회하고 두 주소의 일치 여부와 고정 원인 분류를 출력하는 임시 확인 블록을 준비함. 로컬 합성 서버에서 정상 동일 주소, 저장 주소만 연결 거절/등록 주소 정상 두 경우를 직접 실행하여 예상 한 줄과 인증 없는 GET만 수행함을 확인함. 토큰 로딩·API 쓰기·설정 변경 없음. 사내에서는 이 짧은 결과와 필요 시 기존 Status 요약만 받으며 원문 로그/주소/토큰은 받지 않음. 주소 차이는 의도한 별도 경로일 수도 있어 자동 덮어쓰지 않음. 사내 연결 원인·후속 적용은 미확인이고 반복 ApplyDemo·Upgrade·재시작을 안내하지 않음.
 
+- 후속 접속/프로세스 보고(2026-09-11): 사용자 입력은 `EES probe same=true active=refuse registered=refused`, `Status result=ok commit=c099e427f62b stage=complete program=customized running=true`임. 양쪽은 동일 URL을 한 번 조회한 결과를 재사용하므로 독립된 두 번의 실패로 세지 않음. 현재 Status의 running은 PID·실행 파일·생성 시각 신원 일치만 확인하며 HTTP·수신 포트는 확인하지 않음. venv 부모 실행기가 살아 있는 경우도 있으므로 서비스 정상으로 확대하지 않음. 실행 프로그램 c099와 시연 자산492의 커밋 차이는 별도 관리 범위이며 이번 연결 거절의 원인으로 단정하지 않음.
+- 다음 구분: 현재 등록 IP 존재 여부와 해당 포트의 TCP 수신을 .NET 기본 기능으로 읽고, 현재 registry의 process.log_file만 기존 `_summarize`/`_accept64_summary`로 제한하여 요약하는 두 줄 확인을 준비함. 과거 사용자에게 Get-NetTCPConnection 미지원 보고가 있었으므로 같은 cmdlet을 다시 요구하지 않으며, 이전 archived stop-failure 검사도 반복하지 않음. 로그 WinError64 표시를 listener/future 예외로 구분하고 시각·전체 원인 입증과 혼동하지 않음. 현재 Windows 수신 상태/로그·복구는 사용자 확인 전이며 코드/재시작/강제 종료/포트·IP·토큰 변경을 수행하지 않음. 로컬은 코드·문서와 독립 검토만 수행했고 PowerShell/Windows 실행은 미실행임.
+
 <a id="status-history-20260911"></a>
 
 ## 상태 문서에서 옮긴 과거 적용 원본과 검증 근거 — 2026-09-11
