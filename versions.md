@@ -1,6 +1,6 @@
 # 버전 및 환경 기준
 
-문서 갱신일: 2026-09-10. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
+문서 갱신일: 2026-09-11. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
 
 ## Open WebUI 대상 환경
 
@@ -13,16 +13,16 @@
 | 로컬 접속 예제 | http://127.0.0.1:8080 | 신규 설치 예제. 현재 서버는 등록한 기존 LAN IP·포트 사용 |
 | 작업 디렉터리 예제 | %LOCALAPPDATA%\EES-Agent-POC\open-webui | 신규 설치 예제. 기존 서버는 등록된 cwd 유지 |
 | DATA_DIR 예제 | 위 예제 작업 디렉터리의 data 폴더 | 신규 설치 예제. 기존 서버는 등록된 data_dir 유지; Git 제외 |
-| 표시 이름 | 새 기본값: EES Portal (공식본은 Open WebUI 접미사), ees.2/ees.3/ees.4 브랜딩: EES Portal | 2026-09-10 Portal 표시 정상 보고. 글꼴·업무 패널 변경도 사용자 확인. ees.4의 폭·조절 표시는 적용 후 확인 |
+| 표시 이름 | 새 기본값: EES Portal (공식본은 Open WebUI 접미사), ees.2/ees.3/ees.4 브랜딩: EES Portal | 실제 적용 원본은 [STATUS](docs/STATUS.md), ees.4의 대화 폭·조절 표시 정상 보고는 [화면 확인 기록](evals/scenarios.md#ees-stop-recovery)에서 관리 |
 | 모델·프록시 | 승인된 사내 값; 저장소에는 placeholder | 실제 주소·키·모델 경로는 Git에 저장하지 않음 |
 
 이 표의 예제 경로를 이미 등록한 서버에 다시 적용하지 않습니다. 실제 Python·작업 위치·DATA_DIR·수신 주소는 사내 등록 설정이 원본이며 값을 추측하거나 재등록하지 않습니다. [기존 등록과 기록 위치](docs/03-openwebui-native-agent.md#ees-local-state)를 따릅니다.
 
-2026-09-08 [antlr4 준비 실패 로그](evals/scenarios.md#ees-antlr-runtime-observation)에서 후보 venv의 Python **3.11.16**을 사용자 보고로 확인했습니다. 원래 설치 전체·실제 Uvicorn 버전을 직접 대조한 기록은 아니며 3.11 지원 기준과 구분합니다. 후보는 등록된 원래 Python 패치 버전을 유지하도록 준비하는 구조입니다.
+2026-09-08 [antlr4 준비 실패 로그](evals/scenarios.md#ees-antlr-runtime-observation)에서 당시 후보 venv의 Python **3.11.16**을 사용자 보고로 확인했습니다. 원래 설치 전체·실제 Uvicorn 버전을 직접 대조한 기록은 아니며 3.11 지원 기준과 구분합니다. 이는 중단한 후보 환경 방식의 관찰로, 현재 실행 환경을 새로 만들라는 지침이 아닙니다.
 
-프로그램 운영 스크립트는 Windows의 기존 Python 3.11·Open WebUI 0.11.3·로컬 SQLite/Chroma 구성 등록과 uv 0.12.7 오프라인 준비를 대상으로 합니다. 새 환경은 기존 Python 패치 버전과 전체 의존성 버전을 그대로 유지합니다. 별도 Windows/Linux CI의 합성 서버 검증과 사내 실제 전환을 구분합니다. [운영 명령](docs/03-openwebui-native-agent.md#기존-windows-서버에-적용).
+현재 프로그램 운영은 Windows의 등록된 Python 3.11·Open WebUI 0.11.3·로컬 SQLite/Chroma 구성을 대상으로 합니다. [단순 래퍼 방식](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)은 기존 Python·호환 의존성을 재사용하며 프로그램 파일만 관리합니다. uv 0.12.7로 별도 환경과 전체 의존성을 준비하던 이전 절차는 중단했습니다. Windows/Linux CI의 합성 검증과 사내 실제 적용 결과는 구분합니다.
 
-새 브랜딩 배포물은 **0.11.3+ees.4**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 위 표와 STATUS의 실제 적용 기록으로 구분합니다. ees.1/ees.2/ees.3/ees.4의 시작·직전 Restore를 지원하며, 새 Apply에는 ees.4 프로그램 ZIP을 사용합니다. 시연 자산 v0.2.3를 먼저 ApplyDemo로 반영한 뒤 Upgrade하는 [대화 스타일 적용 순서](docs/03-openwebui-native-agent.md#ees-chat-theme)를 따릅니다. 아래 Selector 실행 파일은 공식 0.11.3만 허용하고 현재 미적용이므로 EES 전환에 함께 사용하지 않습니다.
+새 브랜딩 배포물은 **0.11.3+ees.4**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 STATUS의 실제 적용 기록으로 구분합니다. ees.1/ees.2/ees.3/ees.4의 시작·직전 Restore를 지원하며, 새 Apply에는 ees.4 프로그램 ZIP을 사용합니다. 별도 적용 대상인 시연 자산의 버전은 [시연 목록](agent-pack/ees-demo.json)이 원본이며, 프로그램과 함께 갱신할 때는 [대화 스타일 적용 순서](docs/03-openwebui-native-agent.md#ees-chat-theme)를 따릅니다. 아래 Selector 실행 파일은 공식 0.11.3만 허용하고 현재 미적용이므로 EES 전환에 함께 사용하지 않습니다.
 
 Windows 접속 수락 오류용 [선택 실행 파일](scripts/serve_openwebui_windows.py)은 위 WebUI·Python 버전과 공식 고정 의존성 **Uvicorn 0.51.0**, 기존 SQLite·단일 worker에 한정합니다. 별도 설치·업그레이드를 수행하지 않으며 실제 사내 의존성 버전은 아직 미대조입니다. 사전검사에서 다르면 기존 환경을 보존한 채 검토합니다. [Selector 제한·적용 조건](docs/troubleshooting.md#windows-accept-winerror64).
 

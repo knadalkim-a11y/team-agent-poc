@@ -20,7 +20,7 @@
 ## 어디부터 읽나
 
 - **개발을 이어갈 GPT**: [AGENTS.md](AGENTS.md) → [현재 상태](docs/STATUS.md) → 해당 기능 파일과 테스트.
-- **설치·운영할 사람**: [환경 기준](versions.md) → [설치·기동](docs/01-openwebui-install.md) → 해당 연동 가이드.
+- **설치·운영할 사람**: [환경 기준](versions.md)을 읽고, 최초 설치는 [설치·기동](docs/01-openwebui-install.md), 기존 EES 환경의 업데이트는 [래퍼 운영](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)에서 시작합니다.
 - **팀원 안내 초안**: [EES Portal 시작 안내](docs/07-team-quickstart.md) — 팀 시연용 준비본. 실제 전달 상태는 STATUS에서 확인.
 - **준비·배포·검증 여부 확인**: [STATUS](docs/STATUS.md)의 요약과 연결된 [평가표](evals/scenarios.md)를 확인합니다. README에는 진행 상태를 복제하지 않습니다.
 
@@ -112,6 +112,7 @@ flowchart TB
 | 초기 Rich UI 제거·일반 답변으로 전환 | [기존 Tool·Prompt 갱신](docs/03-openwebui-native-agent.md#plain-output-update) |
 | 수정·배포·원복 방식 | [배포 단위와 운영 명령](docs/03-openwebui-native-agent.md#release-delivery) |
 | 사내 명령 한 번으로 프로그램·래퍼 업데이트 | [Upgrade 최초 준비·실행·실패 시 확인](docs/03-openwebui-native-agent.md#ees-wrapper-upgrade) |
+| 업데이트·패치 반복 실패의 원인과 조치 확인 | [확인한 원인·보존 로그의 해석 범위](docs/03-openwebui-native-agent.md#ees-update-failure-causes), [날짜별 실패·수정·사내 결과](evals/scenarios.md#ees-update-failure-causes) |
 | 승인된 Upgrade 종료 실패 복구 | [대상 식별·보관 ZIP 재사용](docs/03-openwebui-native-agent.md#ees-stop-recovery) |
 | 교차 분석 시연과 모델·Tool·Prompt 일괄 등록 | [ApplyDemo 최초 연결·한 번 적용·시연 질문](docs/03-openwebui-native-agent.md#demo-assets-deployment) |
 | 팀 시연용 첫 화면 적용 준비 | [소개 문구·예시 질문 초안](docs/03-openwebui-native-agent.md#first-use-entry) |
@@ -122,6 +123,7 @@ flowchart TB
 | 합격 기준·실환경 기록 | [evals/scenarios](evals/scenarios.md) |
 | Confluence 사외 시험 증거 | [evals/confluence-offline](evals/confluence-offline.md) |
 | Jira 사외 시험 증거 | [evals/jira-offline](evals/jira-offline.md) |
+| GitHub 사외 시험 증거 | [evals/github-offline](evals/github-offline.md) |
 | 필요 시 Hermes 비교 | [03-hermes-integration](docs/03-hermes-integration.md) |
 
 ## 문서가 쌓이지 않게 유지하는 방법
@@ -146,6 +148,60 @@ python scripts/check_docs.py --root . --json
 - `.git`·가상환경·`node_modules`·`data`·`runtime`·`logs` 등 코드의 `IGNORED_DIRS`에 정한 폴더와 심볼릭 링크·경로가 재지정되는 항목을 스캔하지 않습니다. `.gitignore` 규칙을 해석하는 방식은 아니며, 개별 문서는 1 MiB까지 읽습니다.
 - 링크가 살아 있어도 내용이 오래됐을 수 있고, 링크가 없어도 필요한 문서일 수 있습니다. 점검 통과는 문서 전체가 최신이라는 보장이 아닙니다.
 - 현재는 GPT 종료 규칙과 검사 명령까지 제공합니다. 모든 커밋을 차단하는 필수 CI나 자동 삭제·정기 실행은 구성하지 않았습니다.
+
+<a id="branch-maintenance"></a>
+
+## 병합 브랜치 정리
+
+2026-09-11 점검에서 원격 34개 중 **32개는 병합된 PR의 마지막 head 그대로**이고, `main`과 미병합 커밋이 있는 `fix/upgrade-apply-failure`는 보존 대상입니다. 이름·전체 SHA·PR은 [고정 점검 목록](evals/scenarios.md#repository-maintenance-20260911)에 남깁니다. 현재 연결에는 삭제 기능이 없어 실제 삭제는 아직 수행하지 않았습니다.
+
+이미 사용하는 Windows 저장소와 Git 인증으로 아래 블록을 한 번 실행합니다. 코드가 최신 origin/main의 점검 데이터를 읽으므로 로컬 파일·브랜치를 전환하거나 프로그램을 업데이트하지 않습니다. 고정 32개 중 이미 없는 브랜치는 건너뛰고, 원격 head 변경·main 미병합이면 삭제 전에 중단합니다. Git 서버가 보호 정책·권한·원자적 처리를 거부하면 일괄 삭제도 중단하며 강제 우회·부분 삭제로 재시도하지 않습니다. `--force-with-lease`는 점검 후 head가 바뀐 브랜치의 삭제를 막는 조건이며 커밋을 덮어쓰는 동작은 없습니다.
+
+```powershell
+& {
+  $ErrorActionPreference = 'Stop'
+  Set-Location "$env:USERPROFILE\team-agent-poc"
+  $pattern = '^(https://github\.com/|git@github\.com:|ssh://git@github\.com/)knadalkim-a11y/team-agent-poc(?:\.git)?$'
+  $fetch = @(git remote get-url --all origin)
+  if ($LASTEXITCODE -ne 0 -or $fetch.Count -ne 1 -or $fetch[0] -notmatch $pattern) { throw 'repository_mismatch' }
+  $push = @(git remote get-url --push --all origin)
+  if ($LASTEXITCODE -ne 0 -or $push.Count -ne 1 -or $push[0] -notmatch $pattern) { throw 'push_repository_mismatch' }
+  git fetch --prune origin
+  if ($LASTEXITCODE -ne 0) { throw 'fetch_failed' }
+  $doc = @(git show origin/main:evals/scenarios.md)
+  if ($LASTEXITCODE -ne 0) { throw 'audit_read_failed' }
+  $rows = @($doc | Where-Object { $_ -match '^BRANCH-20260911 [a-zA-Z0-9_./-]+ [a-f0-9]{40} [0-9]+$' })
+  if ($rows.Count -ne 32) { throw 'audit_count_mismatch' }
+  $names = @($rows | ForEach-Object { ($_ -split ' ')[1] })
+  if (@($names | Sort-Object -Unique).Count -ne 32) { throw 'duplicate_branch' }
+  $lines = @(git ls-remote --heads origin)
+  if ($LASTEXITCODE -ne 0) { throw 'remote_read_failed' }
+  $live = @{}
+  foreach ($line in $lines) { $v = $line -split '\s+'; $live[$v[1]] = $v[0] }
+  $leases = @(); $targets = @()
+  foreach ($row in $rows) {
+    $v = $row -split ' '; $name = $v[1]; $sha = $v[2]; $ref = "refs/heads/$name"
+    if ($name -in @('main','fix/upgrade-apply-failure')) { throw 'preserved_branch' }
+    if (-not $live.ContainsKey($ref)) { continue }
+    if ($live[$ref] -ne $sha) { throw "head_changed: $name" }
+    git merge-base --is-ancestor $sha origin/main
+    if ($LASTEXITCODE -ne 0) { throw "not_merged: $name" }
+    $leases += ('--force-with-lease={0}:{1}' -f $ref,$sha)
+    $targets += ":$ref"
+  }
+  if ($targets.Count -eq 0) { 'branch_cleanup=ok deleted=0'; return }
+  git push --atomic @leases origin @targets
+  if ($LASTEXITCODE -ne 0) { throw 'atomic_delete_failed' }
+  $after = @(git ls-remote --heads origin)
+  if ($LASTEXITCODE -ne 0) { throw 'delete_sent_verify_failed' }
+  foreach ($line in $after) {
+    if ($targets -contains (':' + ($line -split '\s+')[1])) { throw 'branch_present_recheck' }
+  }
+  "branch_cleanup=ok deleted=$($targets.Count)"
+}
+```
+
+마지막 `branch_cleanup=ok deleted=숫자` 한 줄이면 결과를 전달할 수 있습니다. push 중 통신이 끊기면 실패 출력만으로 삭제 0개라고 판단하지 않고 원격 상태부터 확인합니다. 사용자 로컬 작업 브랜치는 삭제하지 않습니다. 이번 목록에 없거나 보존 대상으로 둔 브랜치는 별도 검토 없이 추가하지 않습니다. 향후 병합 브랜치 누적을 줄이려면 저장소 Settings → General → Pull Requests의 **Automatically delete head branches**를 사용할 수 있습니다. 점검 당시 설정은 꺼져 있었고 이번 작업에서 변경하지 않았습니다.
 
 ## 범위와 안전 경계
 

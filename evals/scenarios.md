@@ -4,6 +4,22 @@
 
 이 문서는 항목별 판정과 검증 증거의 기준 기록입니다. 현재 진행 단계·다음 작업·배포 준비 상태는 [STATUS](../docs/STATUS.md)에서 확인합니다. 과거 PASS를 버전 변경 후의 재검증으로 간주하지 않습니다.
 
+<a id="evidence-index"></a>
+
+## 기록 찾기
+
+시험별 판정은 아래 A~J와 [결과 기록](#결과-기록), 발생한 이슈는 다음 근거에서 확인합니다. 날짜별 실패·관찰은 당시 상태이며 현재 실행 지시가 아닙니다.
+
+| 찾는 내용 | 이슈·조치·확인 범위 |
+|---|---|
+| 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
+| 서버 종료 실패와 명시적 복구 | [process_stop 실패·복구 결과](#ees-stop-recovery) |
+| 대화 폭·파란 조절 테두리 | [1920px 화면 보완](#ees-chat-width-resize), [사용자 정상 확인](#ees-stop-recovery) |
+| WO 코드 인식·폴더 변경 실패 | [공식 편집기 정렬본](#wo-editor-format-adoption), [rename/Resume](#ees-wrapper-manual-resume), [Portal 적용 실패](#ees-portal-upgrade-apply-failure) |
+| 적용 뒤에도 옛 제안 표시 | [실제 UI 필드 오류·모의 검사 공백·v0.2.5 보완](#starter-ui-field-fix) |
+| 중단한 후보 배포 방식 | [단순 래퍼로 전환한 결정](#ees-wrapper-maintenance), [과거 상태 문서의 적용 원본·CI 증거](#status-history-20260911) |
+| 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
 ## 상태 규칙
 
 - 대기: 아직 실행하지 않음
@@ -1817,3 +1833,121 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 실제 계약 재현: 공식 v0.11.3의 고정 커밋 `2a960a59fe1dbbd35282f0556b3666d81102e781`에서 [backend models.py](https://github.com/open-webui/open-webui/blob/2a960a59fe1dbbd35282f0556b3666d81102e781/backend/open_webui/models/models.py)의 ModelMeta/ModelParams/ModelForm AST와 필요한 정규화 함수를 추출해 Pydantic 2.13.5로 검증하고, [Placeholder 소비 식](https://github.com/open-webui/open-webui/blob/2a960a59fe1dbbd35282f0556b3666d81102e781/src/lib/components/chat/Placeholder.svelte)의 실제 `suggestionPrompts={...}` 내부 식을 Node 24.19.0에서 평가함. backend의 extra 허용으로 잘못된 camel 필드와 옛 snake 필드가 함께 보존되고, 이전 merge 출력은 실제 소비 식에서 옛4개를 선택하는 것을 재현함. 수정 merge→동일 실제 schema→실제 소비 식은 새3개를 선택하고 재반영 무변경을 확인함. camel만 존재할 때 전역 기본값 사용 및 @선택 모델 우선도 확인함. 전체 WebUI 서버/브라우저 E2E와 구분함.
 - 자동 회귀: `tests/test_ees_apply_demo.py`에 출처·고정 커밋이 명시된 실제 frontend 소비 식으로 merge payload를 확인하는 독립 계약 검사 1개를 추가함. 현재 필드 구현과 별개로 읽으며 Node가 없으면 명시적으로 skip함. 이전 HEAD의 잘못된 merge 함수만 메모리에서 대입한 mutation 실행은 기대한 assertion failure 1개로 실패하여 종전 오류를 검출함(errors/skips 0). `tests/test_ees_demo_assets.py`는 실제 UI 필드를 기본값으로 사용하고 이전 v0.2.4 journal/두 필드 상태, 실제4→3, 재실행0, 사용자 추가/수정·권한·공통 지침 보존, 충돌 전 쓰기0과 구 pending/새 POST 응답유실 복구를 검증함.
 - 사외 결과(Linux/Python 3.12.14): 자산44개 + 진입점/실제 frontend 계약14개 + 전달 번들7개 총65개 PASS. 문서 files=29/links=811/errors=0/review_candidates=0 및 diff 점검 PASS. 이전 60개/CI는 잘못된 필드를 공유한 범위의 기록으로 보존하며 이번 실제 계약 검증과 구분함. 새 원격 CI·main 반영·사내 재적용은 각 실제 결과로 따로 확인함.
+
+- 원격 반영 확인(2026-09-11): [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33)은 main `5c6926b943e6c7a0d7785403d19f604686724c65`에 병합됐고 [main EES delivery CI #100](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)은 첫 실행 `completed/success`임을 확인함. 수정본의 사내 ApplyDemo 결과·실제 새 제안 화면은 아직 미확인.
+
+
+<a id="status-history-20260911"></a>
+
+## 상태 문서에서 옮긴 과거 적용 원본과 검증 근거 — 2026-09-11
+
+아래는 main `5c6926b943e6c7a0d7785403d19f604686724c65`의 STATUS에 누적되어 있던 2026-09-07~11 기록을 옮긴 것입니다. 당시 안내 SHA·실환경 확인 한계를 보존하며, 표의 “현재/이번/다음”은 작성 당시의 표현입니다. 최신 적용 상태는 [STATUS](../docs/STATUS.md)가 원본이고 아래 옛 명령·후보 환경 진단을 재실행하지 않습니다. 특히 프로그램은 이후 `c099e427f62b` 정상 보고, 래퍼는 `62a112c78a78` Update 성공 보고가 있으며, v0.2.5는 main 병합·CI 성공과 사내 적용 미확인을 구분합니다.
+
+<details>
+<summary>중단한 후보 운영 코드·CI·사내 보고와 과거 개발 시작점</summary>
+
+아래는 **중단한 후보 환경 방식의 구현·진단 이력**이며 현재 재실행 목록이 아닙니다. [manage_ees.py](../scripts/manage_ees.py)·[ees_deploy_process.py](../scripts/ees_deploy_process.py)와 [전환 시험](../tests/test_manage_ees.py)·[프로세스 시험](../tests/test_ees_deploy_process.py)은 보존합니다. 기존 도구의 Rollback을 새 직접 적용 방식의 원복 기능으로 간주하지 않습니다. 마지막 실패와 원인 미확정 상태를 유지하며 관리 방식 변경을 배포 성공으로 기록하지 않습니다.
+
+진단 보완 코드 원본은 `1ac1c33cf50cb3135f63c7ed8ac5ccaf22cdab30`이며 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34184761238) 성공을 확인했습니다. PR #7의 main 병합과 사내 `c5f1690...` Update/Status 실행은 사용자 보고로 확인했으며 전체 SHA·등록 내용 직접 대조는 미실행입니다. 프로그램 후보 ZIP 원본 및 EES 전환 성공 여부와 구분합니다.
+
+CA 옵션 운영 코드 원본은 `6a2638be157c125dd12ad70c95de075cbe77d1ce`, main 병합은 `d9cb7cd87d0c93dec6485407b280aa04b505e4a3`입니다. [PR의 Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34190121123)는 성공했습니다. Update/옵션을 포함한 명령 안내 뒤 위 배포 실패를 보고받았으며, 실제 명령·checkout SHA·후보 환경 원문은 직접 대조하지 않았습니다. 이 SHA를 프로그램 Deploy의 Commit으로 사용하지 않습니다.
+
+Diagnose 운영 코드 원본은 `70e7b9f268029bbc161f03b5f364130d2cd24239`, [PR #9](https://github.com/knadalkim-a11y/team-agent-poc/pull/9) 병합은 `36974ce45ff46a1e7fc830c2325873f14546f8e5`입니다. [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34201413944)는 성공했습니다. 이후 수신한 v2 사내 결과는 아래 기록으로 이어집니다. 프로그램 후보의 Deploy Commit과 구분합니다.
+
+Diagnose v2 운영 코드 원본은 `2cb6b55f8ff2dc38ecd8a2ca39d30a7e6951d876`이며 [PR #10](https://github.com/knadalkim-a11y/team-agent-poc/pull/10)의 [Windows/Linux CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34281735662)는 성공했습니다. main 병합은 `50c2a1f7bcaa80b6ee64252bd74bbece30fb098d`입니다. 사내 v2 실행 결과를 수신했으며 전체 checkout SHA 직접 대조·추가 Deploy는 미실행입니다. 기존 준비 프로그램 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`과 DB·키·CA 선택·대기 한도를 유지하며, 프로그램 ZIP을 다시 준비하지 않습니다.
+
+ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa96502b`이며 [PR #14](https://github.com/knadalkim-a11y/team-agent-poc/pull/14)의 [Windows/Linux Python 3.11 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34288461465)는 성공했습니다. main 병합은 `4656464b76e94222378872b76d56d3e87adedc76`입니다. 앞선 PR #11~13 근거는 [기본 검사](scenarios.md#ees-import-probe)·[전달 보완](scenarios.md#ees-typed-handoff)·[프로필 수정](scenarios.md#ees-import-followup)에 보존합니다. 수정 후 안내에 따른 새 I1/T1 사용자 보고를 수신했으며, 전체 사내 checkout SHA·후보 세부 지연 원인·실제 EES 전환 성공은 미확인입니다. 기존 프로그램 ZIP의 Deploy Commit은 계속 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`입니다.
+
+**2026-09-09 구현 시작 기준:** 원격 main `99ab68064a70a88da4b988d349dd1c45e30e7022`, tree `482e8853f71d60799a6dfc80294bf7b6ff6a775e`, 당시 관련 열린 PR 0개를 확인했습니다. 같은 tree의 로컬 비교 스냅샷에서 구현한 `feat/simple-webui-wrapper`를 [PR #15](https://github.com/knadalkim-a11y/team-agent-poc/pull/15)에 게시했습니다. 실행 코드 원본 `aa005f0edad338357438d70b9933a2bdb58c5b50`의 Windows/Linux CI와 독립 검토는 완료했으며 [PR #15 병합 b65e7fb](https://github.com/knadalkim-a11y/team-agent-poc/commit/b65e7fbbee612a8e34f7fd4136ca5cdc919fd082)을 확인했습니다. 다음 작업에서 이 SHA를 최신 head로 고정하지 않고 그때의 main·관련 열린 PR을 확인합니다. 이전 새 대화 준비 근거는 [기존 기록](scenarios.md#ees-wrapper-resume)에 보존합니다.
+
+- 이번 Rich UI 제거 시작 기준: 2026-09-09 원격 main `99a9ee`·관련 열린 PR 0개를 확인함. 다음 재개 때 이 SHA를 최신 head로 고정하지 않음.
+
+</details>
+
+<details>
+<summary>이전 자산별 전달 커밋·등록 보고·직접 대조 한계</summary>
+
+## Git 준비와 WebUI 적용을 구분
+
+| 대상 | Git에서 준비한 것 | WebUI 반영 마지막 확인 | 검증 근거 | 적용 원본 커밋 |
+|---|---|---|---|---|
+| 교차 분석 시연 | v0.2.5: 실제 UI 제안 필드와 이전 적용 상태의 호환 갱신. 대표 제안 세 개·공통 원본 유지. 기존 조절 손잡이 표시·ees.4 전문 도구 호환 유지. v0.2.1의 사전 실행 계획·실제 상태·짧은 결론·단계별 공개 판단 근거와 통합 업무 패널·WO 저장 형태 호환성 보완 | 2026-09-10 사용자 보고로 적용·계획/오른쪽 패널 표시 정상 확인. 개별 수치/회신 정확성의 직접 대조는 미실행 | [이번 정상 보고](scenarios.md#plan-work-panel-accepted), [구현](scenarios.md#cross-system-plan-work-panel), [최초 적용](scenarios.md#cross-system-demo-internal-apply) | 안내 원본 `bc8bffbb6043fb1401f995b312bf5709f50e5983`. 실제 사내 적용 SHA·등록 바이트 직접 대조 미실행. 이전 원본·성공/실패 이력은 평가 기록에 보존 |
+| 기본 Assistant | Prompt·정책·기존 Skill 2개·합성 Knowledge | 사용자 보고로 생성·사용 확인 | [W·D·P 시험 및 기록](scenarios.md); 전체 Gate 통과를 뜻하지 않음 | 당시 수동 반영 SHA 미기록 |
+| WO 시연 목업 | EES WO Demo v0.1.8: 통합 업무 패널 연결. 기존 크기 조절·진단·복원·조회/WO 동작 유지 | 2026-09-09 v0.1.6 적용·크기 조절 정상 보고. 앞선 v0.1.5 패널 표시 성공과 최초 예외 원인 미확정은 보존. 실제 EMS 미연결 | [시연 검사·후속 보고](scenarios.md#wo-mockup), [기존 항목 갱신](../docs/03-openwebui-native-agent.md#wo-mockup) | 적용·정상 보고 직전 안내 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc`(v0.1.6); 사내 등록 바이트·전체 SHA 직접 대조 미실행. 이전 성공·실패 이력은 평가 기록에 보존. PR #19 main 병합 `cb3a922d870663abd7f5fd576ba23456575e49a2` 확인 |
+| 팀 시연용 이름·소개·시작 질문 | 기존 모델 이름·소개·프로필 적용 안내, 대표 시연 제안 JSON 3개·짧은 팀원 안내 | 2026-09-09 서비스 이름·로고 변경에 이어 목업 제안을 포함한 v0.1.2 갱신 수행 보고 수신. 2026-09-11 패치 후 기존 제안 표시 보고로 이번 세 제안의 화면 반영 실패 확인. 수정 후 재확인은 미완료 | [목업 적용 보고](scenarios.md#wo-mockup), [서비스 이름·로고 확인](scenarios.md#ees-wrapper-manual-resume), [시연 준비](scenarios.md#team-demo-customization), [이전 준비](scenarios.md#team-first-use-preparation), [당시 보류](scenarios.md#onboarding-deferred) | 서비스 브랜딩은 아래 프로그램 원본. [제안 JSON](../agent-pack/ees-prompt-suggestions.json)의 안내 원본 `5a80ac6d`; 사내 등록 내용·SHA 직접 대조 미실행 |
+| EES 프로그램·전달 도구 | EES Portal ees.4 대화 폭·오프라인 폰트와 Upgrade 일괄 갱신 준비. 기존 ees.1/ees.2/ees.3 Start/Restore와 수동 Apply 유지 | Apply/CheckOnly·직전 Restore·운영 연결·오류 보존·수동 승격 후 Resume 구현/Windows/Linux 실제 wheel CI/독립 검토/main 반영 완료(PR #15~17). 2026-09-09 수동 변경 뒤 Apply -Resume=ok/changed true/4a8779bbf3ee/complete/customized, Start=ok/같은 commit/complete/customized/running true와 이름·로고·기존 대화·세 연동 정상 보고. 이후 접속 불가·Start health_check 실패에 이어 기존 웹 주소 접속 성공 보고. 최초 프로세스 종료는 확인되지 않았으며 밤사이 접속 불가·기동 지연 원인은 미확정. 2026-09-10 복구 안내 뒤 사용자 화면의 EES Portal 이름 표시 확인. 개별 Resume/Start/ApplyDemo 결과·실제 적용 SHA·패널 v0.1.3은 별도 미확인 | [Upgrade 준비·검증](scenarios.md#ees-wrapper-upgrade), [사내 성공과 CI](scenarios.md#ees-wrapper-manual-resume), [현재 적용 안내](../docs/03-openwebui-native-agent.md#ees-wrapper-upgrade), [구현 검증](scenarios.md#ees-wrapper-implementation), [준비 성공](scenarios.md#ees-prepare-completed), [이전 복구](scenarios.md#ees-original-recovered), [이번 health 실패·복구](scenarios.md#ees-retransition-health-failure), [프로그램 CI](scenarios.md#ees-program-deployment) | 이전 확인 프로그램 원본 `4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50`, 내부 ZIP `EES-demo-4a8779bbf3ee.zip`. 운영 코드의 [캐시 복구 추가 원본 15cd88b](https://github.com/knadalkim-a11y/team-agent-poc/commit/15cd88b5a99142c07c4d8cca4dcdd957354d48cb)와 구분. 사내 checkout 전체 SHA 직접 대조 미실행. Portal 표시 확인 시점의 실제 적용 SHA도 미확인 |
+| 지침 개정 | 2026-09-06 Prompt·공통 정책 v0.2·정책 답변 Skill 명확화 | 2026-09-07 두 지침 UI 저장 보고; 개정 후 P02 PASS, P03 창작 거절 부분 확인, P04~P10 미완료; 실행 시점은 평가표 | [P02~P10 재검증](scenarios.md#instruction-revision), [기존 지침 갱신](../docs/03-openwebui-native-agent.md#update-existing-instructions) | 전달·저장 안내 원본 [dfeb95f](https://github.com/knadalkim-a11y/team-agent-poc/commit/dfeb95fbf96cf6a2bb75a3ba75fac3bc92ed60fc); 등록 내용·사용자 추가 규칙·사내 checkout SHA 직접 대조는 미실행 |
+| 조회 경로 보완 | Prompt의 [현재 POC 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션 | 부분 적용 당시 C04·P02 정상·임베딩 오류 재발 없음 보고; 이번 전체 Prompt에도 포함해 저장 안내 | [실환경 결과](scenarios.md#결과-기록), [당시 소스 검토](confluence-offline.md#knowledge-routing) | 부분 추가 안내 원본 [28f526a](https://github.com/knadalkim-a11y/team-agent-poc/blob/28f526a39162e54f126f577554f8c15fdd5940f1/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로); 현재 전체 지침 안내 원본은 위 행. 부분 적용 당시 성공을 이번 개정 후 재평가로 간주하지 않음 |
+| 일반 답변·후속 조회 지침 | 카드/화면 필터/질문 버튼 전제를 제거하고 일반 문장·표·원문 Markdown 링크로 답변. Confluence 본문·Jira/GitHub 실제 ID·페이지 범위는 유지 | 2026-09-07 전체 Prompt 저장·업데이트와 당시 GitHub/Jira 후속 흐름 정상 보고는 보존. 이후 변경된 프롬프트의 WebUI 반영 완료를 사용자 보고로 확인함. 실제 등록 내용·새 모델 출력은 직접 대조하지 않음 | [이번 변경](scenarios.md#prototype-rich-ui-removal), [이전 전체 지침 저장 보고](scenarios.md#rich-ui-prompt-saved) | [현재 Prompt 원본](../agent-pack/system-prompts/ees-integrated-assistant.md)과 실제 등록본의 직접 대조·적용 SHA는 미확인. 변경 프롬프트 반영 완료 보고와 별개로, 이전 전달·저장 안내 원본은 [7c8a65b](https://github.com/knadalkim-a11y/team-agent-poc/blob/7c8a65b0e2eed6d22109b8770e97b9e6908ad68a/agent-pack/system-prompts/ees-integrated-assistant.md); 실제 등록 내용·사용자 추가 지침 직접 대조 미실행 |
+| Confluence 추가 기능 | Skill 1개 + Python 읽기 Tool v0.1.6. JSON 검색·본문/오류 반환, HTML 카드·예제 제거. 검색 400과 비검색 오류·본문 텍스트 추출·개인 인증 유지 | 2026-09-09 EES 수정본에서 평소 Confluence 조회 정상 보고. 마지막 코드 저장 보고는 2026-09-07 v0.1.4이며 v0.1.6 일반 출력·검색 400 안내의 사내 반영은 미확인. 기존 연결·권한·확인한 비밀 비노출·쓰기 차단·PAT 교체 근거는 보존 | [이번 일반 출력 전환](scenarios.md#prototype-rich-ui-removal), [검색 오류 사외 검증](confluence-offline.md#search-error-guidance), [버튼 부재 보고](scenarios.md#body-query-buttons-observed), [버튼 제거본 저장 보고](scenarios.md#body-query-buttons-saved), [버튼 제거 검수](scenarios.md#body-query-buttons-removed), [도구 3개 저장 보고](scenarios.md#rich-ui-tools-saved), [v0.1.3 사외 검증](confluence-offline.md#rich-ui-results), [HTTP 지원 사외 검증](confluence-offline.md#http-opt-in), [실환경 C01~C09 및 결과](scenarios.md#confluence-live) | 마지막 v0.1.4 저장 안내 원본 [a778e5d](https://github.com/knadalkim-a11y/team-agent-poc/blob/a778e5d41d9213c58dc997a6acdd5603c4df1251/agent-pack/skills/confluence-read/scripts/confluence_tool.py). 기존 Skill은 [3495c2c](https://github.com/knadalkim-a11y/team-agent-poc/blob/3495c2c9d0fd30c6fc13c8a09e28f7ba59bb3e3f/agent-pack/skills/confluence-read/SKILL.md) 유지. 등록 코드·사내 checkout 직접 대조 미실행; 이전 v0.1.2 적용 근거는 실환경 기록에 보존 |
+| 초기 Rich UI 참고 예제 | 합성 검색 결과 HTML을 사용자 요청에 따라 제거. 새 UI는 업무별 후속 설계 | 기존 대화에 남은 카드·사용자 데이터는 보존하며 예제를 새 배포 대상으로 두지 않음 | [이번 제거](scenarios.md#prototype-rich-ui-removal), [과거 사전 준비 검증](confluence-offline.md#status-history) | 해당 없음 |
+| Jira 읽기 | Python Tool v0.1.6. JSON 집계·목록·본문/오류 반환. 차트·카드·필터·질문 버튼 제거, 함수·API·페이지 이동·개인 설정 유지 | 2026-09-09 EES 수정본에서 평소 Jira 조회 정상 보고. 마지막 코드 저장 보고는 2026-09-07 v0.1.5이며 v0.1.6 일반 출력의 사내 반영은 미확인. 이전 이슈 본문·원문/조회·저장 근거는 보존 | [이번 일반 출력 전환](scenarios.md#prototype-rich-ui-removal), [버튼 제거본 저장 보고](scenarios.md#body-query-buttons-saved), [버튼 제거 검수](scenarios.md#body-query-buttons-removed), [이슈 본문 흐름 확인](scenarios.md#jira-rich-ui-acceptance), [도구 3개 저장 보고](scenarios.md#rich-ui-tools-saved), [v0.1.4 사외 검증](jira-offline.md#mvp-usability), [v0.1.3 사외 검증](jira-offline.md#followup-actions), [저장 보고](scenarios.md#followup-tools-saved), [v0.1.2 사외 검증](jira-offline.md#merge-review-fixes), [기존 v0.1.1 기본 흐름](scenarios.md#jira-dashboard-acceptance), [J01~J05](scenarios.md#jira-live) | 마지막 v0.1.5 저장 안내 원본 [a778e5d](https://github.com/knadalkim-a11y/team-agent-poc/blob/a778e5d41d9213c58dc997a6acdd5603c4df1251/agent-pack/skills/jira-read/scripts/jira_tool.py). 전체 Prompt 안내 원본도 [7c8a65b](https://github.com/knadalkim-a11y/team-agent-poc/blob/7c8a65b0e2eed6d22109b8770e97b9e6908ad68a/agent-pack/system-prompts/ees-integrated-assistant.md). 등록 코드·사내 checkout 직접 대조 미실행; 앞선 적용 근거는 위 기존 기록에 보존 |
+| GitHub PR 읽기 | Python Tool v0.1.4. JSON 목록·본문/오류 반환. 카드·다음 목록 질문 버튼 제거, API·페이지 이동·개인 설정 유지 | 2026-09-09 EES 수정본에서 평소 GitHub 조회 정상 보고. 마지막 코드 저장 보고는 2026-09-07 v0.1.3이며 v0.1.4 일반 출력의 사내 반영은 미확인. 이전 PR 본문·원문/조회·저장 근거는 보존 | [이번 일반 출력 전환](scenarios.md#prototype-rich-ui-removal), [버튼 제거본 저장 보고](scenarios.md#body-query-buttons-saved), [버튼 제거 검수](scenarios.md#body-query-buttons-removed), [새 카드 흐름 확인](scenarios.md#github-rich-ui-acceptance), [도구 3개 저장 보고](scenarios.md#rich-ui-tools-saved), [저장 보고](scenarios.md#followup-tools-saved), [기존 기본 흐름](scenarios.md#github-read-acceptance), [DB 저장 증거](scenarios.md#github-storage-check), [사외 검증](github-offline.md), [GH01~GH04](scenarios.md#github-live) | 마지막 v0.1.3 저장 안내 원본 [a778e5d](https://github.com/knadalkim-a11y/team-agent-poc/blob/a778e5d41d9213c58dc997a6acdd5603c4df1251/agent-pack/skills/github-read/scripts/github_tool.py). 전체 Prompt 안내 원본도 [7c8a65b](https://github.com/knadalkim-a11y/team-agent-poc/blob/7c8a65b0e2eed6d22109b8770e97b9e6908ad68a/agent-pack/system-prompts/ees-integrated-assistant.md). 등록 코드·사내 checkout 직접 대조 미실행; 앞선 적용 근거는 위 기존 기록에 보존 |
+| 실행 스크립트 | 시작·smoke test·암호화 준비 옵션; smoke 자동 리디렉션 차단 | 사용자 보고로 명령 복사 후 수동 실행; 정해진 기동 스크립트 채택은 안정화 이후 | UI의 /health 성공과 Windows 스크립트 실행 검증은 별개 | 미확인 |
+| Windows 수락 오류 선택 기동 | [Selector 실행 파일](../scripts/serve_openwebui_windows.py)·읽기 전용 사전검사·복구 안내. 기존 SQLite·단일 worker 범위 | 선택 실행 파일 미적용. 기존 기동으로 `/health` true, 이후 CORS 안내 뒤 일반 채팅 스트리밍 복구 보고; 수락 오류 재발 방지는 미확인 | [소스·합성 검사](scenarios.md#windows-accept-preparation); 실제 Windows 동작과 구분 | Git 준비본만 반영. 사내 적용 원본 없음; 기존 기동 스크립트·명령을 자동 교체하지 않음 |
+
+**Skill은 Git과 UI 등록 보고 기준 모두 3개이며, Skill 자체 사용 확인은 기존 2개입니다.** Confluence Tool의 `check_access` 성공 보고는 있으나 `confluence-read`를 `view_skill`로 불러왔는지는 별도 확인되지 않았습니다. 적용 원본은 Git 최신 커밋과 구분하며, 안내 원본·사용자 보고·등록 내용 대조 여부를 함께 기록합니다.
+
+과거 ees.1/ees.2/ees.3 프로그램 ZIP·설치본은 보존하되 이번 대화 폭 적용에는 ees.4이 포함된 새 ZIP을 사용합니다. Upgrade는 검증된 프로그램 artifact를 선택하며 성공 결과의 래퍼 커밋과 프로그램 커밋을 따로 표시합니다. 기존 설치본의 Start/Restore는 계속 지원하고 Agent Pack 전용 ZIP은 프로그램 ZIP을 대체하지 않습니다. **번들에 포함된 Prompt·Skill·Tool의 API 자동 동기화는 이번 범위에서 제외**하며 기존 UI 등록 항목을 계속 사용합니다.
+
+</details>
+
+
+<a id="documentation-procedure-cleanup"></a>
+
+### 중단·완료 절차의 운영 문서 정리 — 2026-09-11
+
+- Native 가이드에서 2026-09-08 중단한 후보 Prepare/Deploy·캐시/import 진단과 완료한 2026-09-11 로그 상세 조회 코드를 현재 실행 안내에서 제외함. 당시 날짜별 결과·검증·미확정 원인은 기존 이 기록에 유지하고, 명령 원문은 [정리 전 고정 커밋](https://github.com/knadalkim-a11y/team-agent-poc/blob/5c6926b943e6c7a0d7785403d19f604686724c65/docs/03-openwebui-native-agent.md)에 보존함. 후보 관련 기존 24개 앵커는 최초 등록/현재 상태 위치 또는 해당 과거 근거 연결로 유지함.
+- 현재도 필요한 Init의 최초 연결·DPAPI 등록·데이터/키/로그 위치와 Upgrade·Apply/Restore·승인된 종료 복구는 유지함. 전체 자산 API 동기화·별도 후보 전환 계획은 2026-09-08 관리 범위 결정으로 연결함. 코드·시험·실행 설정·사내 데이터는 변경하지 않음.
+- Troubleshooting은 현재 래퍼의 상태/실패 기록을 먼저 안내하고, 수동 uvx·Selector·User 환경변수 예제가 등록된 수정본/저장 환경의 갱신을 대신하지 않음을 명시함. listener 없음의 원인을 다운로드로 단정하거나 승인된 팀 접속 주소를 무조건 loopback으로 바꾸던 안내를 수정함.
+
+<a id="repository-maintenance-20260911"></a>
+
+## 문서·브랜치 정리 — 2026-09-11
+
+- 기준: 원격 main `5c6926b943e6c7a0d7785403d19f604686724c65`, tree `f7d4a09166cb8ecf0c4815167f509d17047d653b`, 열린 PR 0개와 동일 로컬 tree에서 시작함. 다른 대화의 PR #32/33 제안 수정을 보존하고 main CI #100 성공을 실제 조회해 반영함. 사내 v0.2.5 적용·화면은 미확인으로 유지함.
+- 확인 범위·발견: Markdown 29개의 용도·참조와 변경된 기능의 설명을 대조함. 관리 원본 4개·STATUS 1개·가이드 9개·평가 4개·Agent Pack 11개 모두 사용 목적이 있어 문서 파일 삭제는 0개. 선택 Hermes/실행 Skill/실패 증거도 유지함. STATUS에 오래된 "다음 작업"·적용 상태가 누적됐고 후보 환경 절차가 현행 운영 안내와 섞여 있었음. 설치 문서의 ees.2 고정, versions의 후보 방식 전제와 이미 끝난 폭/조절 확인, 팀원 안내의 제거된 Jira 화면 필터도 수정함.
+- 처리: STATUS는 현재 작업·마지막 확인·미해결·다음 제품 작업으로 줄이고 과거 원본·CI·적용 보고는 [위 기존 기록](#status-history-20260911)으로 옮김. 이 문서에 이슈별 찾아보기를 추가하고 사용 가이드의 중단 명령은 기존 평가 증거·불변 Git 원문으로 연결함. 새 archive/handoff/관리 서비스·문서 파일을 만들지 않음.
+- 브랜치 점검: 34개 중 기본 `main`과 [미병합 PR #25](https://github.com/knadalkim-a11y/team-agent-poc/pull/25)의 `fix/upgrade-apply-failure`를 보존함. 후자는 head `b088f3be029dae108d82d6feec003fbd55bf5245`에 main에 없는 커밋 3개가 있음. 아래 32개는 각 현재 head가 병합된 PR head와 일치하고 `protected=false`, head→main 비교 `ahead_by=0/merge_base=head`임을 개별 확인함.
+- 실제 처리 한계: 현재 GitHub 연결에는 브랜치/ref 삭제·저장소 설정 변경 기능이 없고 로컬 Git 원격 인증도 없어 **원격 브랜치 삭제 0개**. `delete_branch_on_merge=false`를 확인했으며 변경하지 않음. 사용자 요청 범위의 병합 브랜치 정리를 위해 [현재 head 재검증·원자적 삭제 명령](../README.md#branch-maintenance)을 준비함. 아래 고정 head가 달라지거나 main 조상이 아니면 삭제 전에 중단하며 보호 정책은 Git 서버의 거부를 따름. 삭제 후 실제 결과를 별도 기록하기 전까지 완료로 바꾸지 않음.
+- 검증(Linux/Python 3.12): `python scripts/check_docs.py`는 files=29/links=844/errors=0/review_candidates=0, `git diff --check` PASS. 변경 9개가 모두 기존 Markdown이고 실행 코드·설정·시험 파일 변경은 0개임. 이전 STATUS의 전체 SHA가 현재 상태 또는 평가 기록에 모두 남고 Native 가이드의 기존 명시 앵커 49개가 유지됨을 확인함. STATUS는 40,721→10,914바이트, Native 가이드는 2,546→1,430줄로 줄임.
+- 브랜치 명령 검토: 고정 32개 이름/전체 SHA/병합 PR이 원격 점검 목록과 일치하며 마지막 재조회에서도 34개·대상 head/보호 상태 변경 없음. 독립 검토에서 fetch URL만 확인하던 초안이 별도 pushurl로 다른 저장소를 지울 수 있는 결함을 발견해 fetch/push 모두 단일 canonical 저장소인지 확인하도록 수정함. 최종 PowerShell 블록은 2,219자. 격리된 로컬 bare Git fixture의 정상 lease 원자적 삭제(main/미병합 보존), 중간 head 변경, 서버의 단일 ref 거부, atomic 미지원, 이미 없는 대상 건너뛰기, 미병합 ancestry 차단 6조건 PASS. 현재 열린 PR/보호 설정은 실행 시 API 재조회하지 않으며 이번 점검과 Git 서버 거부에 의존함. push 응답 중 통신이 끊기면 삭제 여부는 미확정이며 실제 원격 상태를 확인해야 함. 실제 Windows/PowerShell 실행·원격 브랜치 삭제·저장소 설정 변경·사내 서버 변경은 미실행.
+
+### 이번 브랜치 정리의 고정 대상
+
+아래는 실행 코드가 아닌 점검 데이터입니다. 각 행은 `BRANCH-20260911 이름 전체headSHA 병합PR번호`이며 현재 main 외의 모든 브랜치를 동적으로 지우는 목록이 아닙니다. 삭제 후에도 이 원본·PR 이력을 보존합니다.
+
+```text
+BRANCH-20260911 codex/bounded-import-comparison eac9a91f53da6d5a7bfae319f1eaabfd5717fd46 11
+BRANCH-20260911 codex/deployment-failure-diagnostics 53180c41666612a33f69b742c7ec79d3492c9091 7
+BRANCH-20260911 codex/ees-program-deployment-20260908 05448a930ae7666932c448f876bb5546d8db2662 6
+BRANCH-20260911 codex/github-followup-flow-20260907 baf3f08bd7cedec09ce2d578354a2fbd6e764c58 5
+BRANCH-20260911 codex/github-pr-read-20260907 1b7651b91a31e805d1ce0add67b9d8db829f7184 3
+BRANCH-20260911 codex/jira-project-dashboard-20260907 2de96b4c4b9963f03c3651b2aab51654ccdac5f0 2
+BRANCH-20260911 codex/prepare-rich-ui-reference 1a48f6999128fc6338e862275cfee22a4c9f00fe 1
+BRANCH-20260911 codex/typed-diagnostic-handoff dba8b78801192acf5eff1a9a2431b4c5cb4adac2 12
+BRANCH-20260911 codex/windows-local-pilot-20260907 4585af040890228d0b4bbf09dd65bf1a5e5191cc 4
+BRANCH-20260911 docs/ees-cross-system-orchestration 7a79fb326293b343d894e1094965b1eb2e7e76e6 21
+BRANCH-20260911 docs/legacy-ui-workflow f30e056e6e98363f04acafa117c7743e8adfa392 19
+BRANCH-20260911 feat/cooperation-panel b382acb74517a59f8d447d1d3295edff9a68acc4 23
+BRANCH-20260911 feat/ees-chat-theme 888a373f3ff49064cc315abce8907aecf842d5b9 28
+BRANCH-20260911 feat/ees-portal-name 47a6d2923b2bcdf8fa483178c16abf356d4aa1da 20
+BRANCH-20260911 feat/panel-readability d02f9ad0c2e25d2aa9d4a1cd35ec25ffe068f8bb 24
+BRANCH-20260911 feat/planned-work-panel 9fb1bf15027280804bd4542a55113e32c35d9a51 26
+BRANCH-20260911 feat/simple-webui-wrapper 69888ec055d3235dbb35f12e7a817bf3a88fb75b 15
+BRANCH-20260911 fix/approved-stop-recovery 8f2c0ee41dc28486d0025fe61a7c61b332000583 30
+BRANCH-20260911 fix/demo-cooperation-summary 1e253948ad9ca1fc8f96bf79dd2438bc7eb0dd6a 22
+BRANCH-20260911 fix/ees-chat-width-resize 18254efa2b1c80f850f72e47484ad5e09868bff1 29
+BRANCH-20260911 fix/ees-diagnose-once 70e7b9f268029bbc161f03b5f364130d2cd24239 9
+BRANCH-20260911 fix/ees-diagnostic-evidence 2cb6b55f8ff2dc38ecd8a2ca39d30a7e6951d876 10
+BRANCH-20260911 fix/import-watchdog-deadline 25e4af3972d3b46a232c24216741aececa96502b 14
+BRANCH-20260911 fix/manual-apply-resume dd7d5065f953fb5fdfea7cd376d1e33539dd5899 17
+BRANCH-20260911 fix/nltk-probe-profile 7dfa93e1f30fdb6f253a6dfcd6316b2f89b0f4ef 13
+BRANCH-20260911 fix/starter-ui-field 441106200ba871be590346116d0e99014e755e9c 33
+BRANCH-20260911 fix/three-demo-starters aba06f0dfcf1def7245a83fea6677aa8202620e5 32
+BRANCH-20260911 fix/windows-ca-deployment 6a2638be157c125dd12ad70c95de075cbe77d1ce 8
+BRANCH-20260911 fix/windows-stop-diagnostics d5e20369f6f86a30f97232fc87ad98dde6240ae6 31
+BRANCH-20260911 fix/wo-editor-formatted-source 3f275aa913ae64ecac6c19d4a4ad56bffcb0907c 27
+BRANCH-20260911 fix/wrapper-error-evidence 234f8d56b90d74e3d6f77d14772f9a4ca63226a1 16
+BRANCH-20260911 refactor/remove-prototype-rich-ui 61568f119f6b2bec03e29adaa24b207d00585a2e 18
+```

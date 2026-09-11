@@ -83,7 +83,7 @@ EES Portal (Open WebUI)
 |---|---|
 | EES 선택 시 모델 이름·소개·빠른 제안 | 기존 Model의 메타데이터 편집. [첫 화면 적용 안내](03-openwebui-native-agent.md#first-use-entry) |
 | 서비스 표시 이름 | EES 패키지의 기본값은 `EES Portal`, 자동 접미사는 제거함. 기존 `EES Assistant` 이름은 Portal로 호환 처리하고 다른 사용자 지정 이름은 유지함. [이름 변경 안내](03-openwebui-native-agent.md#ees-portal-name) |
-| 로그인·사이드바·시작 로고·favicon·제목 | [EES 아이콘](../branding/ees/assets/favicon.svg)과 이름을 넣은 `0.11.3+ees.2` 프로그램. upstream 0.11.3 유지, 기존 Python·의존성을 사용하는 [래퍼 적용 방식](03-openwebui-native-agent.md#ees-wrapper-maintenance)을 따름 |
+| 로그인·사이드바·시작 로고·favicon·제목 | [EES 아이콘](../branding/ees/assets/favicon.svg)과 이름을 넣은 프로그램. 배포물 버전은 [환경 기준](../versions.md#open-webui-대상-환경), 적용은 기존 Python·의존성을 사용하는 [래퍼 방식](03-openwebui-native-agent.md#ees-wrapper-maintenance)을 따름 |
 
 첫 화면의 모델 이름·프로필 이미지와 서비스 전체 로고는 서로 다른 위치입니다. 기존 모델의 프로필도 바꾸려면 편집 화면에 [favicon.png](../branding/ees/assets/favicon.png)를 올립니다. 도움말·라이선스·출처 링크나 CLI의 upstream 이름까지 전부 지우는 패키지는 아닙니다. 사내망에서 외부 메타데이터를 조회하는 legacy `CUSTOM_NAME`은 사용하지 않습니다. uvx 캐시나 설치된 파일을 직접 덮어쓰는 대신 [Upgrade 업데이트](03-openwebui-native-agent.md#ees-wrapper-upgrade) 또는 [수동 Apply·Restore](03-openwebui-native-agent.md#ees-wrapper-apply)를 따릅니다. 현재 사내 적용본과 준비된 변경은 [STATUS](STATUS.md)에서 구분합니다.
 

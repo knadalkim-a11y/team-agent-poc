@@ -6,6 +6,15 @@
 
 최신 적용 상태는 [STATUS](STATUS.md), 시험 판정은 [평가표](../evals/scenarios.md)를 확인합니다. 아래 2-Skill 구성은 합성 문서 기반의 초기 기준선입니다. Confluence 패키지의 추가 적용 절차는 [04. Confluence 읽기 Tool](04-confluence-read-tool.md)에서 다루며, Git에 준비된 것과 실제 UI에 적용된 것은 구분합니다.
 
+운영 작업은 필요한 절로 바로 이동합니다.
+
+| 할 일 | 안내 |
+|---|---|
+| 시연 자산·첫 화면 제안 적용 | [ApplyDemo](#demo-assets-deployment)·[소개와 제안](#first-use-entry) |
+| 프로그램·래퍼 업데이트 | [Upgrade](#ees-wrapper-upgrade) |
+| 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
+| 실패 기록·등록 위치 확인 | [실패 판단](#ees-update-failure-causes)·[사내 기록](#ees-local-state) |
+
 ## 30초 구조 요약
 
 Git에서는 공식 배포 자산을 하나의 Agent Package로 관리합니다. 팀원이 WebUI에서 만들고 공유하는 개인·팀 자산과의 경계는 [README의 원본과 배포본](../README.md#원본과-배포본)을 따릅니다. Open WebUI Skill 하나가 패키지 전체를 실행할 수 없으므로, 공식 패키지를 배포할 때 **지침**과 **실행 기능**이 서로 다른 위치에 놓입니다.
@@ -976,7 +985,7 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 분석 과정 패널의 크기 조절 손잡이에 포커스가 갈 때 높이 전체에 강제로 그리던 파란 테두리를 제거했습니다. 마우스·터치 조절은 테두리 없이 작동하고 키보드 Tab으로 이동할 때만 작은 손잡이에 포커스를 표시합니다. 방향키·Home·End 조절, 패널 폭 기억과 닫기 동작은 유지합니다. [피드백·검증 근거](../evals/scenarios.md#ees-chat-width-resize).
 
-**main CI와 프로그램 산출물 생성이 성공한 뒤**, 기존 등록 계정의 PowerShell에서 아래 블록을 실행합니다. ApplyDemo가 기존 프로그램에서 분석 패널의 조절 표시와 전문 도구의 ees.4 호환을 먼저 반영한 뒤 Upgrade가 프로그램을 갱신합니다. 앞 단계가 실패하면 다음 단계로 진행하지 않습니다. 저장된 연결·인증·설정을 재사용하고 새 Tool 등록이나 Python·의존성 재설치는 필요하지 않습니다.
+**이 UI 수정은 사내 적용과 두 항목의 정상 표시까지 사용자 확인을 받았습니다.** 기존 사용자는 아래 적용을 반복하지 않습니다. 새 대상에 적용할 때만 main CI와 프로그램 산출물 생성을 확인하고 아래 순서를 사용합니다. ApplyDemo는 [현재 관리 목록](../agent-pack/ees-demo.json)의 자산으로 분석 패널·전문 도구 호환을 먼저 반영하고, Upgrade가 프로그램을 갱신합니다. 앞 단계가 실패하면 멈추며 저장된 연결·인증·설정을 재사용합니다.
 
 ```powershell
 & {
@@ -997,74 +1006,13 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 실패 요약은 `operation/reason`, Windows 숫자 오류, 경과 시간·한도와 알려진 코드 위치를 표시합니다. `last-operation.json`은 최신 작업 결과이고 `last-failure.json`은 최신 실패를 이후 성공과 구분해 보존합니다. 파일은 사내에 남기며 원문을 외부로 옮기지 않습니다.
 
-**최초 검사 절차 기록:** 2026-09-11 사용자 보고로 아래 Update와 전체 로그 검사가 완료됐습니다. 이번 사용자는 이 블록을 반복하지 않고 뒤의 오류 위치 확인만 진행합니다. 처음 실행하는 경우에는 수정본의 검증·main 반영을 확인한 뒤 아래 한 블록으로 래퍼를 Update하고 보존된 종료 실패 로그만 읽습니다. Update는 서버를 재시작하지 않고, 읽기 검사도 프로그램·프로세스·데이터·로그를 변경하거나 네트워크 요청을 하지 않습니다.
+2026-09-11 사용자의 Update 성공과 보존 종료 실패 로그 검사를 확인했습니다. 전체 28,850바이트에서 지정 accept/Win64·TLS·기동 완료 표시는 모두 false였으며, 추가 오류 위치 확인까지 완료했습니다. `startup_complete=false`는 문구 부재이고 현재 서버의 기동 실패를 뜻하지 않습니다. `source=stop_failure`를 앞선 접속 장애와 같은 서버·같은 원인으로 가정하지 않습니다.
 
-```powershell
-& {
-    $ErrorActionPreference = 'Stop'
-    $repo = Join-Path $env:USERPROFILE 'team-agent-poc'
-    $cfg = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-    & (Join-Path $repo 'scripts\manage-ees.ps1') -Action Update
-    $c = Get-Content -Raw -Encoding UTF8 $cfg | ConvertFrom-Json
-    & $c.source_python -I -B (Join-Path $repo 'scripts\ees_deploy_report.py') --inspect-recovery --config $cfg
-    if ($LASTEXITCODE -ne 0) { throw 'EES log inspection stopped; use the final result.' }
-}
-```
+오류 종류는 `KeyboardInterrupt,other,ValueError,OperationalError`, 첫 공개 위치는 `sqlalchemy/util/_concurrency_py3k.py:196:greenlet_spawn`, 마지막 위치는 `sqlalchemy/dialects/sqlite/aiosqlite.py:339:_handle_exception`이었습니다. 이 목록은 중복 제거한 종류이며 전체 예외 순서·인과관계가 아닙니다. 고정 소스의 마지막 위치는 활성 연결 부재 오류의 변환 지점으로, 중단 뒤 정리 과정의 후속 오류 가능성은 있으나 최초 장애 원인은 미확정입니다.
 
-`source=stop_failure`는 마지막 Upgrade 종료 실패 당시 서버를 가리킵니다. 앞선 접속 장애의 서버와 같다고 가정하지 않습니다. `accept_listener64=true`는 같은 traceback의 listener 오류 조합을 확인한 것이며 `accept_future64=true`만으로 listener 종료까지 확정하지 않습니다. TLS는 별도 관찰입니다. `truncated=true`이거나 `status=unavailable`이면 부재·정상으로 판정하지 않습니다. 현재 서버 로그나 최신 로그로 임의 대체하지 않습니다. 결과에서 `status/code`, `accept_listener64/accept_future64`, `tls_verify_failed/truncated`만 한 줄로 전달하면 됩니다.
+**이전 검사는 마쳤으므로 반복 실행하지 않습니다.** Update의 `next=upgrade`는 일반 안내로, 이 결과만으로 Upgrade를 다시 실행할 이유가 아닙니다. 정상 확인된 구성을 유지하고 자연 재발 시 이미 보완한 실패 기록으로 판단합니다. 당시 읽기 검사·한시적 두 줄 조회의 원문은 [고정 커밋](https://github.com/knadalkim-a11y/team-agent-poc/blob/5c6926b943e6c7a0d7785403d19f604686724c65/docs/03-openwebui-native-agent.md#ees-update-failure-causes), 실행 결과·소스 대조·한계는 [기존 평가 기록](../evals/scenarios.md#ees-update-failure-causes)에 보존합니다.
 
-
-##### 보존 로그의 오류 위치 확인 — 완료 기록
-
-2026-09-11 첫 검사에서는 종료 실패 로그 전체 28,850바이트를 읽었고 지정된 accept/Win64·TLS·기동 완료 표시가 모두 false였습니다. `startup_complete=false`는 완료 문구 부재이며 현재 서버의 상태나 기동 실패 확정이 아닙니다. Update의 `next=upgrade`는 일반 안내이므로 이 조사에서는 실행하지 않습니다. [사용자 결과와 판단 범위](../evals/scenarios.md#ees-update-failure-causes).
-
-**2026-09-11 두 줄 확인까지 완료했습니다. 아래 블록은 수행 기록이며 이번 사용자에게 반복 실행을 요구하지 않습니다.** 결과는 KeyboardInterrupt와 SQLAlchemy/SQLite 예외 경로를 보였고, 고정 소스 기준 마지막 위치는 활성 연결 부재 오류의 변환 지점이었습니다. 중단 뒤 정리 과정의 후속 오류 가능성은 있으나 최초 장애 원인은 미확정으로 남깁니다. 정상 확인된 구성을 유지하고 자연 재발 시 개선 래퍼의 실패 기록으로 판단합니다. [소스 대조·종결 판단](../evals/scenarios.md#ees-update-failure-causes).
-
-아래 기록된 절차는 같은 보존 로그의 오류 유형과 공개 코드 위치만 확인했습니다. 기존 선택·검증을 통과했을 때만 두 줄을 출력하고 프로그램·서버·로그·상태를 쓰지 않습니다.
-
-```powershell
-& {
-    $ErrorActionPreference = 'Stop'
-    $repo = Join-Path $env:USERPROFILE 'team-agent-poc'
-    $cfg = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-    $c = Get-Content -Raw -Encoding UTF8 $cfg | ConvertFrom-Json
-    $probe = @'
-import sys
-from pathlib import Path
-try:
-    sys.path.insert(0, str(Path(sys.argv[1]) / 'scripts'))
-    import ees_deploy_report as r
-    saved, original = {}, r._summarize
-    def capture(payload, **kw):
-        value = original(payload, **kw)
-        saved.update(value)
-        return value
-    r._summarize = capture
-    try:
-        result = r.inspect_recovery(r.states.load_config(Path(sys.argv[2])))
-    finally:
-        r._summarize = original
-    if result.get('status') != 'ok' or not saved:
-        print(r.render_recovery(result))
-        raise SystemExit(1)
-    def public(frames):
-        return next((x for x in reversed(frames) if x != 'other'), '-')
-    first = saved['first_error_type'] or '-'
-    frames = saved['frames'] if saved['first_error_matches_last_traceback'] else saved['first_error_frames']
-    first_at = public(frames) if first != '-' else '-'
-    errors = ','.join(saved['error_types']) or '-'
-    print('EES detail=stop_failure status=ok scope=' + result['scan_scope'] + ' errors=' + errors + ' first=' + first)
-    print('first_at=' + first_at + ' last_at=' + public(saved['frames']))
-except Exception:
-    print('EES detail=stop_failure status=unavailable')
-    raise SystemExit(1)
-'@
-    & $c.source_python -I -B -c $probe $repo $cfg
-    if ($LASTEXITCODE -ne 0) { throw 'EES detail unavailable; use the final result.' }
-}
-```
-
-당시 출력 두 줄의 `errors/first`, `first_at/last_at`만 전달받았습니다. `errors`는 처음 인식된 순서대로 중복 제거한 오류 종류이며 전체 예외 순서·같은 traceback·인과관계나 마지막 오류 하나를 뜻하지 않습니다. `first`는 첫 비인터럽트 오류이고 코드 위치는 각 traceback에서 마지막으로 식별된 공개 프레임이므로 근본 원인으로 자동 판정하지 않습니다. 현재 서버나 더 앞선 다른 로그로 바꾸지 않습니다. 이 결과에도 단서가 없으면 과거 사고의 원인은 미확정으로 남기고, 재발 시 이미 보완한 실패 기록으로 확인합니다.
+새 실패에서도 보존된 해당 실패 기록을 먼저 확인합니다. `truncated=true`·`status=unavailable`이면 오류 부재로 판정하지 않고, 현재 서버 로그나 최신 로그로 임의 대체하지 않습니다. 외부 전달은 기존 마지막 요약의 필요한 항목 1~2줄로 제한합니다.
 
 <a id="ees-stop-recovery"></a>
 
@@ -1338,9 +1286,11 @@ python scripts/build_demo_bundle.py --output-dir dist/delivery --branding-dir di
 
 아이콘은 저장소의 SVG가 원본입니다. 그림을 수정할 때만 개발 환경의 CairoSVG 2.8.2·Pillow 12.3.0과 시스템 Cairo로 [렌더 스크립트](../scripts/render_ees_brand_assets.py)를 실행하고 파생 파일을 함께 커밋합니다. 일반 wheel 빌드와 사내 서버에는 이 렌더 의존성이 필요하지 않습니다. 다음 브랜딩 변경은 패키지 버전·frontend 경로를 함께 올려 별도 릴리스로 관리합니다.
 
-### 데이터 보존과 사내 자동화 계획
+<a id="데이터-보존과-사내-자동화-계획"></a>
 
-래핑의 필수 조건은 **프로그램·지정한 공통 자산을 갱신하면서 기존 운영 데이터를 계속 사용하는 것**입니다. 현재 적용 기준은 위의 단순 유지보수이며 이 절의 광범위한 자동화 단계는 이전 설계 이력으로 남깁니다. 현재 구현한 자산 적용은 [시연 자산의 한 번 적용](#demo-assets-deployment)이며 `ApplyDemo` 관리 목록에 한정합니다. `Update`/`Upgrade`와 ZIP 배포는 그 안의 모든 Prompt·Skill·Tool을 자동 등록하지 않습니다.
+### 데이터 보존과 적용 범위
+
+래핑의 필수 조건은 **프로그램·지정한 공통 자산을 갱신하면서 기존 운영 데이터를 계속 사용하는 것**입니다. 현재 적용 기준은 위의 단순 유지보수입니다. 현재 구현한 자산 적용은 [시연 자산의 한 번 적용](#demo-assets-deployment)이며 `ApplyDemo` 관리 목록에 한정합니다. `Update`/`Upgrade`와 ZIP 배포는 그 안의 모든 Prompt·Skill·Tool을 자동 등록하지 않습니다.
 
 | 대상 | 관리·보존 방식 |
 |---|---|
@@ -1353,39 +1303,13 @@ python scripts/build_demo_bundle.py --output-dir dist/delivery --branding-dir di
 
 0.11.3에서 Skills·Tools·Models·사용자·대화·Native Memory는 관계형 DB에 저장됩니다. 기본 DB는 `DATA_DIR/webui.db`이고 키 파일은 기본적으로 작업 폴더의 `.webui_secret_key`에 있습니다. 개인 Tool 설정은 User ID와 Tool ID에 연결되고 암호화에는 기존 `WEBUI_SECRET_KEY`가 필요합니다. 따라서 프로그램 폴더 교체와 데이터 폴더 교체를 같은 작업으로 취급하지 않습니다. Workspace Model의 보존은 사내 모델 연결·설정의 보존이며 vLLM 가중치를 배포하는 의미는 아닙니다.
 
-아래는 별도 후보 환경을 사용하던 이전 프로그램 배포 설계와 미구현 API 동기화 계획입니다. 현재 구현·실행 목록으로 재개하지 않습니다.
+현재 공통 자산 갱신은 [ApplyDemo 관리 목록](#demo-assets-deployment)에 한정합니다. 기존 항목을 읽어 관리 필드만 변경하며 ID·연결·공유 권한·개인 valves를 보존합니다. 관리 필드의 수동 변경이 마지막 적용본과 충돌하면 자동 덮어쓰기를 멈춥니다. 여러 API 호출의 일괄 트랜잭션을 가정하지 않고 항목별 결과와 실패 후 복구 범위를 남깁니다.
 
-1. **개발·검토:** Git에서 수정하고 관련 검사 후 main에 통합합니다. 사내에 적용할 대상은 성공한 CI의 커밋·해시로 고정합니다.
-2. **초기 연결 한 번:** 사내 전용 설정에 기존 실행 환경·데이터/키/저장소 경로·기동 인자와 기존 EES 자산 ID를 연결합니다. 기존 자산을 새 ID로 재생성하지 않으며 정상 사용자 데이터와 직접 추가한 설정을 초기 기준으로 보존합니다.
-3. **배포 계획:** 사내에서 스크립트로 Git을 갱신하고, 성공한 Actions에서 프로그램을 포함한 커밋별 ZIP을 내려받습니다. 버전·해시·기존 설정을 확인하고 변경 항목·재시작 여부·원복 대상을 보여줍니다. 설치 준비는 운영 서버를 계속 둔 상태에서 진행하고 다운로드/준비 실패는 현재 서버에 영향을 주지 않게 합니다.
-4. **변경별 적용:** 화면/프로그램이면 별도 릴리스 환경을 준비한 뒤 기존 서버 종료·일관된 내부 백업·실행 버전 전환·재시작을 처리합니다. 공통 자산이면 기존 WebUI API로 해당 ID를 조회하고 관리 필드만 병합해 갱신합니다. 프로그램이 바뀌지 않는 자산 갱신은 일반적으로 서버 전체 재시작 없이 처리합니다.
-5. **보존·변경 확인:** 이번에 바뀐 화면/기능과 ID·소유자·권한·연결·개인 설정 보존을 관련 범위만 확인합니다. 최초 전환에서는 저장된 데이터·키/저장소가 이어지는지도 확인하고, 이후 무관한 배포에서 완료한 전수 시험은 반복하지 않습니다. 사용한 커밋·자산별 적용 해시·이전 버전·결과는 사내 배포 기록에 남깁니다.
-6. **원복:** 같은 DB 스키마의 프로그램은 기존 실행 버전으로 돌아갑니다. 공통 자산은 변경했던 필드만 직전 값으로 되돌립니다. 정상 대화·메모리가 계속 쌓인 DB 전체를 평소 원복 수단으로 덮어쓰지 않습니다. upstream 업그레이드로 DB 스키마가 바뀌는 경우는 별도 백업·마이그레이션·복구 계획을 검토하며 자동 원복을 보장하지 않습니다.
-
-기존 운영자 진입점은 **manage-ees.ps1**이며 이미 등록된 설정과 시작/종료 기능은 검토 후 재사용합니다. 아래 명령을 새 직접 적용 기능으로 해석하지 않습니다. Git은 코드와 원하는 공통 설정을 관리하고 사내 설정·사용자 데이터·API 인증정보·백업·배포 이력은 사내에 둡니다. 기존 허용된 프록시/전달 경로를 사용하며 외부 CI에서 사내 PC로 접속하는 연결은 전제하지 않습니다.
-
-API 동기화는 관리 목록에 지정한 EES 자산·필드만 대상으로 합니다. 현재 0.11.3 업데이트 API는 완전한 부분 갱신 API가 아니므로 현재 값을 먼저 읽고 병합해야 합니다. 모델의 params/meta·활성 여부·연결과 공유 권한, Tool의 관리자/개인 valves를 기본값이나 빈 값으로 덮어쓰지 않습니다. UI에서 관리 필드를 직접 수정해 마지막 적용본과 충돌하면 그 항목의 자동 갱신을 멈추고 차이를 보여줍니다. 사용자 작성 자산을 삭제하거나 전체 DB를 Git 상태에 맞추는 동기화는 제공하지 않습니다. 여러 API 호출의 일괄 트랜잭션을 가정하지 않고 항목별 적용 결과와 실패 후 복구 범위를 기록합니다.
+별도 후보 환경·전체 자산 API 동기화·자동 전환/원복 확대는 현재 계획에서 제외합니다. [2026-09-08 결정과 이유](../evals/scenarios.md#ees-wrapper-maintenance)에 당시 범위 변경을 보존합니다. 프로그램은 직전 적용 전 상태로 Restore하며, 정상 대화가 계속 쌓인 DB 전체를 평소 원복 수단으로 덮어쓰지 않습니다. upstream 업그레이드로 DB 스키마가 바뀌는 경우의 백업·마이그레이션·복구는 별도 검토 대상입니다.
 
 ### 기존 Windows 서버에 적용
 
-**이하 후보 준비·전환 절차는 2026-09-08 중단한 이전 구현 이력입니다. 현재 실행 안내는 [Apply/Restore](#ees-wrapper-apply)입니다.** 아래 Init/Prepare/Deploy/ProbeImports·캐시/진단 명령을 순서대로 다시 실행하지 않습니다. 이전 코드는 보존하지만 새 상태 형식 채택 후 후보 작업과의 혼용은 거부합니다.
-
-당시 후보 방식의 지원 범위는 **기존 Windows / Python 3.11 / Open WebUI 0.11.3 / 로컬 SQLite·Chroma·업로드 / 단일 서버**에서 `0.11.3+ees.1`로의 프로그램 전환입니다. 새 서비스나 Selector 실행 파일은 추가하지 않습니다. 기존 환경의 Python 패치 버전·모든 설치 패키지를 고정하고 Open WebUI 항목만 교체합니다. 운영 중인 uvx 환경과 캐시는 보존합니다. 후속 브랜딩 버전은 해당 버전의 호환성·원복 지원을 함께 갱신한 뒤 사용합니다.
-
-[manage-ees.ps1](../scripts/manage-ees.ps1)은 아래 작업을 제공합니다. 상대 경로는 저장소 루트 기준입니다.
-
-| Action | 동작 |
-|---|---|
-| `Init` | 기존 Python·작업 폴더·DATA_DIR·IP/포트·uv를 한 번 등록. 기존 서버/데이터를 수정하거나 시작하지 않음 |
-| `Update` | 현재 main의 추적 파일이 깨끗할 때만 `fetch`와 `merge --ff-only`. 저장된 Git 프록시 설정을 사용하거나 해당 명령에만 `-GitProxy`로 전달 |
-| `Status` | 현재 프로그램·관리 프로세스·원복 가능 여부·CA 모드와 마지막 전환 실패 요약 표시. 키/환경 값 출력 없음 |
-| `Diagnose` | 실패 후보·실패 이유/시간·해당 로그의 기동/네트워크 마커·공개 traceback 위치를 한 번에 요약. 기존 형식은 시간으로 로그 추정. 재기동·앱 import·통신 없음 |
-| `ProbeImports` | 지정한 준비 후보와 기존 환경에서 고정 NLTK import의 시간·오류를 한 번에 비교. 각 자식 60초 자가 종료, 서버 전환 없음. [범위와 해석](#ees-import-probe) |
-| `Plan` | 지정 커밋의 프로그램 포함 ZIP·모든 파일 해시/크기·wheel RECORD 확인 |
-| `Prepare` | 기존 서버를 둔 채 별도 venv에 정확한 기존 의존성을 오프라인 설치·검사. 운영 환경은 수정하지 않음 |
-| `Deploy` | 등록된 서버 정상 종료 → 전체 기존 data/키/설정 백업·검사 → 준비된 프로그램 시작 → health 확인·기록. 선택적 `-UseWindowsCA`는 종료 전에 CA를 준비하고 해당 릴리스의 기동에 적용 |
-| `Rollback` | 직전 프로그램으로 전환. 최신 대화/메모리가 있는 현재 DATA_DIR 사용, DB 전체 복구 안 함 |
-| `Start` / `Stop` | 현재 등록된 프로그램의 시작 / 기록된 프로세스의 정상 종료 |
+등록된 서버의 일상 운영은 [관리자 작업](#관리자-작업)·[Upgrade](#ees-wrapper-upgrade)·[Apply/Restore](#ees-wrapper-apply)를 따릅니다. 아래에는 현재도 사용하는 최초 등록과 사내 기록 위치만 둡니다. 기존 Python·호환 의존성을 재사용하고, 서버·DB·키·접속 설정을 새 예제로 덮어쓰지 않습니다.
 
 최초 운영 전 `Get-ExecutionPolicy -List`로 PowerShell 실행 정책을 확인합니다. 모든 범위가 `Undefined`이고 유효 정책이 `Restricted`인 Windows 기본 상태라면, 아래 설정을 **실제 운영 명령을 실행할 창**에만 적용합니다. `MachinePolicy`/`UserPolicy` 등 별도 정책이 있는 경우 해당 정책의 허용·서명 절차를 따릅니다. 스크립트가 실행 정책을 자동 변경하지는 않습니다. [Microsoft 실행 정책 안내](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies).
 
@@ -1395,7 +1319,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned -Force
 
 `Process` 설정은 영구 저장되지 않으므로 새 운영 창에서는 다시 적용 여부를 확인합니다. 서버를 실행했던 창의 환경변수를 보존하려고 관리자 권한의 새 창으로 바꾸지 않습니다.
 
-**첫 등록:** 현재 서버를 실행한 PowerShell에서 Ctrl+C로 종료하고 **그 창을 닫지 않은 상태**로 진행합니다. 새 창에서 등록하면 기존 창에만 설정한 값이 빠질 수 있으며 이를 자동 복원한다고 보장하지 않습니다. `SourcePython`은 실제 WebUI가 설치된 uvx 환경의 `Scripts\python.exe`이고, uv의 기본 Python 경로가 아닙니다. 아래 자리표시자는 현재 실행 명령·경로에서 확인한 값으로 바꿉니다. 같은 창에서 저장소 폴더로 이동한 뒤 실행하되 `WorkingDirectory`는 원래 서버 폴더로 지정합니다. 사내 경로/환경 값은 외부에 붙여넣지 않습니다.
+**래퍼를 처음 연결할 때만 등록:** 이미 등록된 서버는 Init을 반복하지 않습니다. 신규 등록에 한해 현재 서버를 실행한 PowerShell에서 Ctrl+C로 종료하고 **그 창을 닫지 않은 상태**로 진행합니다. 새 창에서 등록하면 기존 창에만 설정한 값이 빠질 수 있으며 이를 자동 복원한다고 보장하지 않습니다. `SourcePython`은 실제 WebUI가 설치된 uvx 환경의 `Scripts\python.exe`이고, uv의 기본 Python 경로가 아닙니다. 아래 자리표시자는 현재 실행 명령·경로에서 확인한 값으로 바꿉니다. 같은 창에서 저장소 폴더로 이동한 뒤 실행하되 `WorkingDirectory`는 원래 서버 폴더로 지정합니다. 사내 경로/환경 값은 외부에 붙여넣지 않습니다.
 
 ```powershell
 $setup = @{
@@ -1422,1107 +1346,67 @@ $setup = @{
 | 보존 환경 스냅샷 | `config.environment_file`의 DPAPI 파일 |
 | 현재/직전 프로그램·프로세스·실패 상태·백업 참조 | `config.state_root/deployment.json` |
 | 기동 로그 | `config.state_root/logs/server-*.log` |
-| 준비한 프로그램·준비 로그 | `config.releases_dir/<commit>/release.json`, `prepare.log` |
+| 현재/직전 수정 프로그램 | `config.state_root/program`, `program.previous` |
+| 최신 작업/실패의 상세 결과 | `config.state_root/last-operation.json`, `last-failure.json` |
+| 중단한 후보 방식의 준비 기록 | `config.releases_dir/<commit>/release.json`, `prepare.log` — 현재 실행 대상 아님 |
 | 기존 데이터·키·설정의 백업 | `config.backups_dir/<backup_id>/`와 `manifest.json` |
 
 이 경로는 확인 위치이며 파일 전체를 채팅·Git에 옮기는 목록이 아닙니다. 진단에는 필요한 상태 필드와 비식별 오류만 사용합니다.
 
 기존 `.env`, 외부 DB/벡터 저장소, 별도 업로드/정적 파일 경로, 다중 worker, 네트워크 경로가 있으면 초기 구현은 중단합니다. 검사를 통과시키려고 설정을 지우지 말고 기존 수동 환경을 계속 사용하면서 해당 구성을 검토합니다. 프로그램의 환경변수 이름은 설치된 소스에서 정적으로 조사하고 앱을 import하지 않습니다. 등록 과정이 원래 창의 환경을 확인하는 절차를 대신하지 않습니다.
 
-**이후 배포:** 성공한 이 저장소 Actions artifact를 승인된 내부 위치로 내려받아 바깥 ZIP을 풉니다. 아래 `$bundle`에는 그 안의 `EES-demo-<12자리>.zip`, `$commit`에는 같은 Actions의 **전체 40자리 원본 커밋**을 넣습니다. GitHub 로그인/다운로드는 현재 사용 중인 허용 경로를 사용하며 스크립트에 GitHub 토큰을 저장하지 않습니다. Agent Pack 전용 ZIP은 프로그램 배포 대상이 아닙니다.
+#### 중단한 후보 환경 방식의 이력
 
-```powershell
-.\scripts\manage-ees.ps1 -Action Update -GitProxy $gitProxy
-$bundle = '내려받은 EES-demo-12자리커밋.zip 절대 경로'
-$commit = 'Actions 원본 커밋 40자리'
-.\scripts\manage-ees.ps1 -Action Plan -Bundle $bundle -Commit $commit
-.\scripts\manage-ees.ps1 -Action Prepare -Bundle $bundle -Commit $commit
-```
+**2026-09-08 중단한 Prepare/Deploy/Rollback/ProbeImports·후보 캐시/진단 절차는 현재 실행 목록에서 제외합니다.** 새 래퍼 상태와 옛 후보 명령의 혼용은 지원하지 않습니다. 당시 코드·시험·날짜별 결과는 보존하며, 아래 앵커는 기존 변경 기록에서 과거 근거를 찾기 위한 연결입니다.
 
-준비는 uv 0.12.7의 오프라인 캐시만 사용합니다. 정확한 기존 버전의 패키지가 부족하면 서버를 바꾸지 않고 실패하며 `releases/<commit>/prepare.log`에 내부 진단을 남깁니다. 필요한 Windows wheel을 승인된 방식으로 준비한 경우 `Prepare`에 `-Wheelhouse '절대 경로'`를 추가할 수 있습니다. 실패한 후보 폴더는 자동 삭제하지 않습니다. 현재/직전 실행 대상이 아닌 실패 후보임을 확인한 뒤 그 폴더를 내부 격리 위치로 옮기고 같은 커밋으로 다시 준비합니다. 운영 환경에 새 의존성을 설치하거나 버전 고정을 풀지 않습니다.
+당시 지원 범위는 Windows/Python 3.11/Open WebUI 0.11.3의 별도 후보 환경에서 `0.11.3+ees.1`로 전환하는 것이었습니다. [원래 절차의 고정 커밋 원문](https://github.com/knadalkim-a11y/team-agent-poc/blob/5c6926b943e6c7a0d7785403d19f604686724c65/docs/03-openwebui-native-agent.md#기존-windows-서버에-적용)과 [후보 준비·복구 기록](../evals/scenarios.md#ees-program-deployment)을 보존합니다. 과거 명령을 복사해 실행하거나 처음부터 순서대로 재시험하지 않습니다.
 
 <a id="ees-offline-recovery"></a>
 
-**첫 준비의 antlr4 캐시 복구:** `antlr4-python3-runtime==4.9.3 has no usable wheels`로 첫 Prepare가 실패했고 기존 uv 빌드 캐시에 해당 wheel 한 개가 있을 때는 [복구 명령](../scripts/ees_deploy_recover.py)을 사용합니다. 기존 original 프로그램이 현재 대상이고 이전 배포·전환 중 상태가 없는 경우에만 지원합니다. 등록된 실행 환경의 캐시를 읽어 패키지 이름·버전·wheel 무결성을 검사하고 별도 wheelhouse에 복사합니다. 실패 후보는 고유 이름으로 보존 이동하고 같은 잠금 안에서 원래 버전 고정·오프라인 Prepare를 다시 수행합니다. 서버 종료·배포·DB 변경·캐시 정리는 하지 않습니다.
-
-Git을 갱신한 뒤 위에서 선택한 `$bundle`과 `$commit`을 그대로 사용합니다. 성공 출력은 `prepared=true`이며 이후 Deploy는 별도입니다. 다른 패키지나 캐시 부재 오류는 해당 로그에 따라 필요한 파일을 준비하며, 이 명령을 범용 의존성 자동 수리로 사용하지 않습니다.
-
-```powershell
-$eesConfigPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-$eesConfig = Get-Content -LiteralPath $eesConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
-& $eesConfig.source_python -I .\scripts\ees_deploy_recover.py `
-    --config $eesConfigPath --bundle $bundle --commit $commit
-```
-
-준비 성공 후 사용이 적은 시간에 적용합니다. 기존 수동 서버가 아직 실행 중이면 이를 자동 종료하지 않으며, 한 번 Ctrl+C로 종료한 뒤 `Deploy`를 실행합니다. 이후 스크립트가 시작한 서버는 PID·실행 파일·생성 시각을 대조하고 정상 종료합니다. 현재 방식은 Windows 서비스가 아니므로 서버를 시작한 콘솔은 유지합니다.
-
-```powershell
-.\scripts\manage-ees.ps1 -Action Deploy -Commit $commit
-.\scripts\manage-ees.ps1 -Action Status
-```
-
-백업은 서버 종료와 포트 반환 확인 후 수행합니다. 기존 DATA_DIR 전체(uploads/vector_db 포함), 키 파일, 등록 설정/암호화 스냅샷을 내부 `backups/`에 복사해 파일별 해시와 복사본 SQLite `quick_check`를 확인합니다. 파일 해시는 스트리밍 계산하며 백업을 자동 정리하지 않습니다. 로그와 백업에는 내부 데이터가 있을 수 있으므로 Git/공유 폴더에 옮기지 않습니다.
-
-기동 health 대기는 기본 **300초(5분)**입니다. `Start`·`Deploy`·`Rollback`에 `-HealthTimeout 600`처럼 1~900초를 지정할 수 있으며, 배포 실패 후 기존 프로그램 자동 복구에도 같은 제한을 적용합니다. 이 값은 명령 인자로 전달하므로 이미 등록한 config/암호화 스냅샷을 편집하거나 다시 `Init`할 필요가 없습니다. 각 프로그램의 대기 제한이며 전체 배포 소요 시간 제한은 아닙니다.
-
-첫 사내 등록에서는 종전 60초 대기가 만료됐지만 관리 프로세스가 살아 있었고, 이후 `/health`가 `status=true`/HTTP 200으로 응답했습니다. `Start` 시간 초과는 프로세스 종료를 뜻하지 않으므로 현재 `Status`와 `/health`를 보고 계속 진행합니다. 단순 `Status`의 `managed_process_running=true`는 프로세스 생존 확인이며 응답 준비까지 보증하지 않습니다. 정상 응답을 확인한 뒤 대기 시간 변경만을 이유로 다시 재기동하지 않습니다.
-
-새 프로그램의 health가 실패하면 새 프로세스의 정상 종료를 확인하고 기존 프로그램을 같은 현재 데이터로 다시 시작합니다. 프로세스 식별/종료를 확인하지 못하면 자동 복구를 멈춰 이중 서버를 방지합니다. `/health` 성공은 앱의 기동 확인이며 로그인·화면·스트리밍 전체 성공을 뜻하지 않습니다.
-
-<a id="ees-diagnose-once"></a>
-
-**현재 진입점 — 실패 뒤 한 번에 진단하기:** 기존 상태·로그부터 한 번 수집하고, 결과에 따라 필요한 검사나 수정을 정합니다. 아래 v2 안내는 해당 변경이 main에 병합된 뒤 `Update`한 운영 코드 기준입니다. 새 PowerShell 창에서도 기존 변수·클립보드 없이 실행할 수 있습니다. `Update`는 Git 통신으로 운영 코드를 갱신하며 준비한 프로그램 ZIP/후보를 바꾸지 않습니다. 실패하면 블록이 중단됩니다.
-
-```powershell
-& {
-  $ErrorActionPreference = 'Stop'
-  Set-Location (Join-Path $env:USERPROFILE 'team-agent-poc')
-  .\scripts\manage-ees.ps1 -Action Update
-  .\scripts\manage-ees.ps1 -Action Diagnose
-}
-```
-
-현재 환경에서는 결과를 직접 타이핑해서만 전달할 수 있습니다. 전체 출력·파일·화면 사진을 요구하지 않습니다. 이미 받은 Diagnose v2 결과는 다시 입력하지 않으며, 새로운 진단이 필요할 때는 GPT가 다음 판단에 필요한 소수 값만 지정합니다. `Diagnose`에는 600초 기동 대기가 없습니다. 등록 상태·현재 프로세스 식별 정보와 기존 로그만 읽으며 DB 조회·앱 import·네트워크 요청·캐시 쓰기·배포/복구를 실행하지 않습니다. Diagnose 관리 Python은 `-I -S -B`로 실행됩니다. 현재 프로세스 검사를 할 수 없으면 `process_check=inspection_unavailable`, `managed_process_running=null`로 남기고 가능한 로그 요약은 계속 제공합니다. 이는 서버 종료 판정이 아닙니다.
-
-v2는 새 실패의 기록된 이유·실제 health 검사 경과 시간·설정한 제한·관찰한 종료 코드를 보여줍니다. 값이 없으면 `null`로 남기며 과거 실패를 복원하지 않습니다. 기존 형식의 `candidate_seconds`·`recovery_seconds`는 로그 생성부터 실패/복구 기록까지의 **근사 시간**입니다. 600초는 `-HealthTimeout 600`을 전달한 경우의 프로그램별 최대 health 대기 한도이며 정상 기동 또는 프로세스 종료를 확인하면 일찍 끝납니다. 기본 300초·허용 1~900초는 유지하고, 실패 후 복구에는 별도 대기가 붙습니다. 기존 `health_check/process`만으로 시간 만료라고 판단하지 않습니다.
-
-새 실패는 후보와 로그 ID를 함께 보존하고 `selection=recorded_log_id`로 해당 로그를 선택합니다. 후속 Start/Stop 뒤에도 관리 상태가 idle이고 선택 로그가 현재 활성 로그가 아니면 읽을 수 있습니다. 기록된 ID가 없거나 잘못됐거나 파일을 찾을 수 없으면 시각 추정으로 대체하지 않고 이유를 출력합니다. 새 필드가 없는 기존 실패만 마지막 실패·복구 상태와 Windows 생성 시각을 대조해 `inferred_from_creation_time`으로 표시합니다. 이 추정은 후속 Start/Stop·경합·로그 이동/삭제·이상한 시각 때문에 unavailable/ambiguous/busy가 될 수 있습니다.
-
-읽은 범위의 첫 비중단 오류와 마지막 traceback을 함께 요약합니다. `first_error_type`은 KeyboardInterrupt/SystemExit를 제외한 첫 오류이며, 최초 장애 원인이라는 뜻은 아닙니다. 두 위치가 같으면 프레임을 중복 출력하지 않고, 공개 패키지 하위 경로·표준 라이브러리·frozen 위치는 합계 최대 20개로 제한합니다. 미분류 위치·생략 수·traceback 시작부 확인 여부를 표시하고 예외 메시지·코드 행·사용자 절대경로·주소·환경 값은 출력하지 않습니다. `scan_scope=tail`이면 끝 4 MiB만 읽은 부분 결과이며, 마커의 false는 읽은 범위에서 해당 문자열을 찾지 못했다는 뜻입니다. KeyboardInterrupt는 종료 신호의 정리 시점일 수 있고 네트워크 마커도 전체 지연의 원인을 증명하지 않습니다.
-
-| 받은 결과 | 다음 행동 |
-|---|---|
-| 읽을 수 있는 구체적 오류·호출 위치 | 해당 경로에 필요한 좁은 수정/검사를 GPT가 준비하고 독립 검사는 한 묶음으로 안내 |
-| `health_timeout` 또는 KeyboardInterrupt만 확인 | 지연 가설과 이를 구분할 증거를 먼저 정함. 같은 설정으로 Deploy·600초 대기 반복 금지 |
-| `process_exited` 또는 `launch_failed` | 종료 코드와 첫 오류를 함께 보고 기동 실패 경로를 좁힘. 시간이 부족했다고 단정하지 않음 |
-| `identity_unavailable`·`identity_changed`·`launch_unverified` | 프로세스 식별 문제부터 확인. 이중 기동을 막는 기존 중단/복구 조건 유지 |
-| unavailable·ambiguous·busy 또는 프로세스 검사 불가 | 출력된 이유에 맞춰 필요한 로컬 확인만 준비. 원문 로그 전체나 동일 명령 반복을 기본 요청으로 삼지 않음 |
-| `startup_complete`·`listening` 마커 | 로그의 문자열 관찰로 기록. 실제 `/health`와 필요한 사용 흐름 확인이 있어야 전환 성공 판단 |
-
-<a id="ees-diagnostic-workflow"></a>
-
-다음 재배포를 안내하기 전에 **가설·필요한 증거·성공 조건·중단/복구 조건**을 정합니다. GPT가 외부 코드·합성 검사를 처리하고, 사내에서만 가능한 독립 검사는 짧은 명령 한 번으로 묶습니다. 추가 왕복은 이전 결과에 따라 달라지는 검사에만 사용합니다. 별도 진단 서비스·상시 수집·실제 DB를 공유하는 병렬 앱은 추가하지 않습니다.
-
-Diagnose v2 뒤 import 비교·시간 기준 수정·저장 보고서 상세 조회까지 수신했고 **사용자의 관리 범위 단순화 결정에 따라 후보 환경 진단을 중단했습니다.** watchdog 덤프와 pandas 일부 모듈의 긴 self 시간이 관측됐지만 원인은 미해결로 보존합니다. 다음 작업은 [기존 환경에서 사내 수정 적용·되돌리기](#ees-wrapper-maintenance)이며 이 지연 해결을 선행 조건으로 두지 않습니다. 아래 과거 명령을 다시 실행하거나 추가 필드를 요청하지 않습니다.
-
-<a id="ees-import-probe"></a>
-
-**기존/후보 NLTK import 비교:** 2026-09-08에 받은 v2 결과는 추정 후보 로그 전체 10,228바이트에서 KeyboardInterrupt만 확인했고 종료 위치는 NLTK → scikit-learn → pandas → importlib의 파일 조회 경로였습니다. 이 위치만으로 pandas 결함이나 파일 접근 지연을 확정하지 않습니다. 이미 빠르게 통과한 NumPy 단독 검사·전체 캐시 작업은 반복하지 않습니다. [수신 근거](../evals/scenarios.md#ees-import-probe).
-
-**아래 비교는 수정 후 실행까지 이미 완료한 이력입니다. 현재 재실행하지 않습니다.** 첫 실행의 기존 `import_failed/11.157초/ValueError`·후보 `parent_timeout_cleanup_unverified/70.0초`와 표식 T/T/F/F·P=0/U=0, 후보 오류 빈 목록·전체 stderr·self 합 54.817145초·마지막 계측 `pandas.errors.cow`는 [당시 판정과 한계](#ees-import-followup)에 보존합니다. 수정 후에는 `O=OK/5.3 C=CLEANUP/70.0 saved=yes`와 양쪽 `0.5/59.5`를 받았습니다. 다음은 [저장 결과 조회](#ees-import-saved-followup)입니다. 아래 가설·범위·명령은 완료한 비교의 재현 정보입니다.
-
-- 가설: 프로필 필터 수정으로 기존 환경의 비교 기준을 다시 확보하고, 자식 시작이 늦어 부모가 watchdog보다 먼저 중단할 수 있던 시간 기준 결함을 제거하면 후보의 완료/시간 제한을 더 정확하게 관측할 수 있습니다. 이는 기존 pandas 이름을 원인으로 확정하거나 대기 한도를 늘리는 검사가 아닙니다.
-- 범위: 준비된 동일 후보를 사용해 고정 `import nltk`만 기존/후보 Python에서 순차 실행합니다. 앱 entry point를 호출하거나 운영 DATA_DIR·키·등록 환경을 자식에 전달하지 않습니다. 기존 관리 잠금으로 동시 배포를 막고 임시 작업 폴더와 필요한 OS 환경을 사용합니다. HOME·USERPROFILE·APPDATA·LOCALAPPDATA·HOMEDRIVE·HOMEPATH는 사용자 폴더 해석에 필요해 유지하며 이 실제 경로를 외부 요약에 출력하지 않습니다.
-- 한도: 각 환경의 부모 측 시작+60초를 자식 종료 목표로 사용해 Python 초기화 시간도 포함합니다. 자식은 남은 시간만 watchdog에 예약하며, 이미 예산이 소진됐으면 site/NLTK를 시작하지 않고 끝냅니다. 부모의 각 70초 감시와 한도 초과 시 최대 2초 회수 대기는 유지합니다. 부모 시간 제한/정리 미확인이면 다음 비교를 중단합니다. 감시·회수 대기 예산은 두 환경 합계 약 144초이며, OS의 프로세스/파일 생성 호출 자체까지 강제하는 전체 시간 상한은 아닙니다. 배포·복구 대기는 붙지 않고 결과가 느리다는 이유로 자동 재시도하지 않습니다.
-
-아래는 시간 기준 수정본의 Windows/Linux CI·main 반영 뒤 안내했던 실행 블록입니다. 이번 결과를 이미 수신했으므로 다시 실행하지 않습니다.
-
-```powershell
-& {
-  $ErrorActionPreference = 'Stop'
-  Set-Location (Join-Path $env:USERPROFILE 'team-agent-poc')
-  .\scripts\manage-ees.ps1 -Action Update
-  .\scripts\manage-ees.ps1 -Action ProbeImports -Commit '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
-}
-```
-
-출력 형식은 마지막 **`SEND I1`과 `SEND T1` 두 줄**이며 이번 값은 이미 수신했습니다. 위의 상세 JSON·모듈 목록·traceback은 옮기지 않습니다. I1 예시는 `SEND I1 O=OK/2.1 C=TIME-IMPORT/60.0 saved=yes`, T1 예시는 `SEND T1 O=0.1/59.9 C=12.0/48.0`이며 모두 실제 결과가 아닙니다. O는 기존, C는 후보입니다. I1의 `/` 뒤는 전체 경과 초, T1의 두 숫자는 watchdog 예약 직전 예산 확인까지 걸린 초/그때 남은 예산 초입니다. 미확인 값은 `-`입니다. 출력은 상태·숫자·허용된 공개 모듈/프레임만 포함합니다. 준비 메타데이터 검사는 선택 대상 확인이며 설치 파일 전체의 무결성/버전 재검증은 아닙니다.
-
-전달 값은 `OK` 완료, `TIME-BOOT` site/NLTK 시작 전 예산 소진, `TIME-SITE`/`TIME-IMPORT`/`TIME-EXIT` 시간 제한 시 관찰 단계, `TIME-?` 단계 미확인, `ERROR` import 실패, `LAUNCH` 실행 실패, `CLEANUP` 검사 자식의 정리 미확인, `STOP` 사용자 중단, `SKIP` 후속 비교 생략, `UNKNOWN` 미완료/분류 불가입니다. `partial=yes`는 일부 출력만 읽은 경우이며 누락 시간은 `-`로 남깁니다. 실패뿐 아니라 CLEANUP 중 관측된 허용 예외도 `errO`/`errC`로 붙습니다. 이 값은 원인 판정이나 추가 배포 지시가 아닙니다.
-
-상세 비식별 결과는 기존 관리 상태 폴더의 `last-import-probe.json`에 실행 UTC 시각·후보 커밋과 함께 최근 한 건을 저장합니다. `saved=yes`일 때 저장을 확인한 것이며, `saved=no`면 현재 콘솔 결과를 전달하고 이전 파일을 이번 결과로 간주하지 않습니다. 후속 정보가 꼭 필요하면 이 저장 결과에서 필요한 항목만 조회하도록 안내하고 측정을 반복하지 않습니다. 새 조회 서비스나 별도 보고 명령은 추가하지 않습니다.
-
-**이전 실행의 status·elapsed_seconds·추가 필드는 이미 받았습니다.** 같은 실행의 값을 더 옮기지 않습니다. 위 한 번의 비교는 아래 시간 기준 결함과 프로필 필터를 고친 뒤 새 근거를 얻기 위한 것이며, 단지 새 출력 형식을 적용하기 위한 반복과 구분합니다.
-
-`timed_import_events`는 계측된 import 시도 수이며 성공한 모듈 수가 아닙니다. `self`는 하위 import를 제외한 시간이므로 합산할 수 있지만 미완료 시도의 시간은 빠질 수 있습니다. `cumulative`를 합산하지 않습니다. 시간 제한 stack은 종료 순간의 관찰이며 전체 시간 동안 같은 곳에 있었다는 증거가 아닙니다. [Python importtime](https://docs.python.org/3.11/using/cmdline.html#cmdoption-X), [자가 종료](https://docs.python.org/3.11/library/faulthandler.html#faulthandler.dump_traceback_later).
-
-| 결과 | 판단과 다음 행동 |
-|---|---|
-| 기존 완료·후보 시간 제한/큰 지연 | 분리된 의존성 로딩에서도 차이가 재현됨. 측정된 모듈·호출 경로의 파일/설치 상태로 다음 비교를 좁힘 |
-| 둘 다 빠르게 완료 | 이 조건에서는 지연이 재현되지 않음. 실제 기동의 선행 단계·환경 차이를 검토한 뒤 다음 계측을 결정 |
-| 둘 다 지연 | 후보에만 국한됐다고 보기 어려움. 공통 환경·파일 접근·의존성 경로 확인 |
-| 실제 예외 | 출력된 예외 종류와 관련 경로에 직접 대응 |
-| 부모 제한/정리 미확인 | 진단 자체가 미완료. 추가 실행을 멈추고 검사 자식의 상태부터 확인 |
-
-성공 조건은 두 환경의 비교 근거 확보입니다. 앱 전환 성공이나 원인 해소를 의미하지 않습니다. `-I -S -B` 뒤 `site.main()`을 수행하므로 사용자 site·PYTHON 환경·작업 폴더 등이 실제 서버와 다릅니다. pyc 쓰기는 막지만 설치된 모듈/site 코드의 일반적인 부작용까지 차단하는 격리 환경은 아닙니다. 코드는 서버 기동·다운로드·재설치·캐시 복구를 호출하지 않습니다. 임시 로그·관리 잠금·최근 비식별 검사 결과 파일을 사용하며 기존 배포 기록·프로그램·DB·키는 수정하지 않습니다.
-
-<a id="ees-import-followup"></a>
-
-**기존 import 결과의 후속 확인:** 11.157초/70.0초 결과는 앞서 안내한 기본 순서(original, candidate)로 해석합니다. 기존 `import_failed`는 분리한 검사 자식의 오류이며 운영 서버 장애를 뜻하지 않습니다. 후보의 부모 시간 제한은 실제 검사 자식의 잔존을 확정하지 못한 상태로, 60초 watchdog 종료와 구분합니다. 원본 서버를 종료하거나 같은 검사를 반복하지 않습니다.
-
-기존 필터가 모든 사용자 폴더 변수를 제외한 것은 진단 결함입니다. NLTK는 import 도중 Downloader를 초기화하며 기존 corpus 경로를 선택하지 못하면 APPDATA 또는 사용자 홈 경로를 찾습니다. Windows에서 이 변수를 모두 빼면 ValueError를 유발할 수 있어 일반 프로필 변수는 보존하도록 수정했습니다. 이번 사용자의 실제 오류가 그것인지는 아직 미확인이고, 후보 70초와 과거 EES 600초 실패의 원인으로 확대하지 않습니다. [NLTK 소스](https://www.nltk.org/_modules/nltk/downloader.html#Downloader.default_download_dir), [Windows 홈 경로 처리](https://docs.python.org/3.11/library/os.path.html#os.path.expanduser).
-
-**후속 결과 수신 완료:** 후보의 `watchdog_armed=true`, `import_entered=true`, `import_completed=false`, `watchdog_dump_seen=false`와 CIM `P=0/U=0`을 받았습니다. 코드 순서상 watchdog 등록·site 초기화 뒤 `import nltk` 직전 표식까지 도달했지만 완료 표식과 watchdog 덤프는 관측되지 않았습니다. NLTK 내부 지연과 import 오류 뒤 종료 지연을 아직 구분하지 못하며 watchdog이 정상 종료시켰다고 판정하지 않습니다. 조회 순간 검사 표식 Python은 미관측이므로 지금 종료할 대상을 특정할 근거도 없습니다.
-
-**기존(original)의 `error_types=ValueError`도 수신했습니다.** 이는 위 프로필 필터 결함과 부합하지만 발생 프레임이 없어 동일 원인으로 확정하지 않습니다. 원본 오류명 하나만 남았다는 직전 안내는 후보 지연 판단에 필요한 항목을 빠뜨린 것으로 정정합니다. 원본 예외와 후보 지연을 같은 원인으로 묶지 않습니다.
-
-**후보의 마지막 네 값도 수신했습니다:** `error_types=[]`, `stderr_scope=full`, `observed_self_seconds=54.817145`, `last_timed_import=pandas.errors.cow`. 키의 `last_time_import` 전사는 기존 필드 의미로 읽으며 다시 입력시키지 않습니다. 수집된 전체 stderr에서 인식된 예외가 없고, 완료되어 기록된 import들의 self 시간 합계가 약 54.8초라는 근거입니다. pandas 한 모듈의 시간이나 CPU 시간은 아닙니다. 마지막 계측 이름도 정체 위치를 증명하지 않으므로 특정 pandas 모듈·파일 손상·백신·네트워크를 원인으로 확정하지 않습니다.
-
-이 묶음으로 기존 검사의 정보 수집과 해석을 마칩니다. 원본 프레임·top_self·다른 필드를 더 요청하지 않으며, 사내 지연의 세부 원인은 미확정으로 남깁니다. 54.8초와 전체 70초의 차이를 특정 I/O 대기나 watchdog 등록 지연으로 계산하지 않습니다. 다음 비교는 아래에서 외부 재현한 검사 결함을 실제로 수정한 경우에만 진행합니다.
-
-아래는 이미 P=0/U=0을 받은 읽기 전용 조회 절차입니다. **현재 다시 실행하지 않습니다.** Python/서버를 새로 실행하거나 프로세스를 종료하지 않고 숫자만 출력했던 명령으로 보존합니다.
-
-```powershell
-& {
-  try {
-    $eesProbeProcesses = @(Get-CimInstance Win32_Process -Filter "Name='python.exe'" -ErrorAction Stop)
-    $eesProbeMatches = @($eesProbeProcesses | Where-Object { $_.CommandLine -like '*EES_IMPORT_WATCHDOG_ARMED*' }).Count
-    $eesProbeUnknown = @($eesProbeProcesses | Where-Object { [string]::IsNullOrWhiteSpace($_.CommandLine) }).Count
-    "P=$eesProbeMatches U=$eesProbeUnknown"
-  } catch { 'P=? U=?' }
-}
-```
-
-P는 해당 검사 표식이 있는 python.exe 수이며 launcher/실제 자식이 각각 잡힐 수 있습니다. U는 명령행을 읽을 수 없는 python.exe 수입니다. P가 양수면 검사가 관측된 것이고, P=0/U>0 또는 조회 실패는 판단 불가입니다. 받은 P=0/U=0은 그 순간 조회한 목록에서 발견하지 못했다는 뜻이며 과거의 종료 시점·원인을 증명하지 않습니다. 표식과 python.exe 이름을 함께 사용해 운영 서버나 PowerShell 자신의 명령문을 집계하지 않습니다. [조회 정보의 범위](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-process). 이 값만으로 재검사·재배포를 시작하지 않습니다.
-
-<a id="ees-import-deadline"></a>
-
-**검사 시간 기준 수정:** 기존 부모의 70초는 실행 요청 전부터, 자식 watchdog의 60초는 Python 초기화 뒤 예약 호출부터 시작했습니다. 자식 예약이 10초보다 늦으면 watchdog이 정상이어도 부모가 덤프 전에 중단할 수 있습니다. 외부 Linux의 축소 재현(부모 1.8초/자식 1초/예약 전 1.2초 지연)에서 기존 코드는 1.802초에 T/T/F/F·정리 미확인, 부모 deadline에 맞춘 시험 코드는 1.619초에 T/T/F/T·watchdog 종료를 보였습니다. 사내도 같은 이유였다는 증거는 아닙니다.
-
-수정본은 공통 monotonic 기준으로 부모 시작+60초/70초를 정하고, 자식은 남은 시간만 예약합니다. 이미 60초가 지났다면 새 import 없이 TIME-BOOT로 끝내며 `watchdog_arm_seconds`·`watchdog_budget_seconds`를 비식별로 저장하고 T1에 요약합니다. 초기화 자체가 부모 한도까지 끝나지 않는 경우는 계속 CLEANUP으로 남깁니다. [프로세스 공통 시계](https://docs.python.org/3.11/library/time.html#time.monotonic), [watchdog 예약의 상대 시간](https://docs.python.org/3.11/library/faulthandler.html#faulthandler.dump_traceback_later).
-
-수정 후 한 번 비교한 결과 original은 5.3초에 완료했고 후보는 예산 확인까지 0.5초였지만 CLEANUP/70.0으로 끝났습니다. 이 시점에서 검사를 멈추고 [저장 보고서 조회](#ees-import-saved-followup)로 이어갑니다. CLEANUP을 후보 정상 완료·덤프 부재로 해석하거나 같은 검사를 자동 반복/Deploy로 이어가지 않습니다. 실제 사내 지연 원인·EES 전환 성공은 별도 판정입니다. [검증과 반영 상태](STATUS.md).
-
-<a id="ees-import-saved-followup"></a>
-
-**수정 후 비교 결과의 저장 보고서 조회:** `SEND I1 O=OK/5.3 C=CLEANUP/70.0 saved=yes`, `SEND T1 O=0.5/59.5 C=0.5/59.5`를 수신했습니다. original의 분리 import는 정상 완료했고 후보도 예산 확인 지점까지 약 0.5초였으므로 늦은 초기화 때문에 watchdog 예산을 잃는다는 앞선 가설은 이번 결과를 설명하지 못합니다. CLEANUP은 덤프 유무보다 우선 표시되므로 이 두 줄만으로 이번 watchdog 덤프가 없었다고 판단하지 않습니다. 이전 실행의 T/T/F/F·54.8초·마지막 pandas 이름·P=0/U=0은 이번 값으로 재사용하지 않습니다.
-
-**아래 D1/F1 조회는 완료한 이력입니다. 현재 다음 조회는 [덤프 상세](#ees-import-dump-detail)입니다.** 아래 블록은 기본 config와 마지막 비식별 보고서, 조회 시점 검사 표식 프로세스 수만 읽었습니다. Python·서버를 실행하거나 종료하지 않습니다. 후보 commit·대상·저장 여부·O/C 상태·반올림한 여섯 시간값을 받은 두 줄과 대조하며 불일치/읽기 실패는 R=?로 남깁니다. UTC 저장 시각도 출력하지만 조건이 같은 다른 실행까지 구분하는 고유 실행 ID는 아닙니다. 저장된 source_commit은 검사기 코드가 아닌 후보 프로그램 commit입니다.
-
-```powershell
-& {
-  $ErrorActionPreference='Stop'
-  $d='R=?'; $f='F=?'; $p='?'; $u='?'
-  function safe($x,$n=60) {
-    $x=[string]$x
-    if(!$x){'-'}elseif($x.Length -le $n -and $x -cmatch '^[A-Za-z0-9_./:<>,?-]+\z'){$x}else{'?'}
-  }
-  function sec($x) {
-    if($null -eq $x -or $x -is [bool]){return '-'}
-    $x=[double]$x
-    if($x -ge 0 -and $x -le 86400){$x.ToString('F1',[Globalization.CultureInfo]::InvariantCulture)}else{'-'}
-  }
-  try {
-    $cfg=Get-Content -LiteralPath (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json') -Encoding UTF8 -Raw | ConvertFrom-Json
-    $r=Get-Content -LiteralPath (Join-Path $cfg.state_root 'last-import-probe.json') -Encoding UTF8 -Raw | ConvertFrom-Json
-    $o=@($r.results | Where-Object program -eq original)
-    $c=@($r.results | Where-Object program -eq candidate)
-    if($o.Count -ne 1 -or $c.Count -ne 1){throw 'report'}
-    $o=$o[0]; $c=$c[0]
-    $v=@($o.elapsed_seconds,$c.elapsed_seconds,$o.watchdog_arm_seconds,$o.watchdog_budget_seconds,$c.watchdog_arm_seconds,$c.watchdog_budget_seconds)
-    $v=($v | ForEach-Object {sec $_}) -join '/'
-    if($r.source_commit -ne '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50' -or $r.recorded_at -notmatch '^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ\z' -or $r.target -ne 'nltk' -or $r.report_saved -ne $true -or $o.status -ne 'completed' -or $c.status -ne 'parent_timeout_cleanup_unverified' -or $v -ne '5.3/70.0/0.5/59.5/0.5/59.5'){throw 'report'}
-    $m=(@($c.watchdog_armed,$c.import_entered,$c.import_completed,$c.watchdog_dump_seen) | ForEach-Object {if($_ -isnot [bool]){'?'}elseif($_){'T'}else{'F'}}) -join ''
-    $sc=(@($c.stdout_scope,$c.stderr_scope) | ForEach-Object {if($_ -eq 'full'){'F'}elseif($_ -eq 'tail'){'T'}else{'?'}}) -join '/'
-    $e=safe (@($c.error_types) -join ',') 40
-    $fr=@($c.watchdog_first_thread_frames | Where-Object {$_ -ne 'other'}) | Select-Object -First 1
-    $f="W=$(safe $c.watchdog_threads_seen 5) F=$(safe $fr 80) T=$(safe (sec $c.observed_self_seconds) 10) L=$(safe $c.last_timed_import)"
-    $d="R=$($r.recorded_at) M=$m X=$(safe $c.exit_code 11) S=$sc E=$e"
-  } catch {}
-  try {
-    $q=@(Get-CimInstance Win32_Process -Filter "Name='python.exe'")
-    $p=@($q | Where-Object {$_.CommandLine -like '*EES_IMPORT_WATCHDOG_ARMED*'}).Count
-    $u=@($q | Where-Object {[string]::IsNullOrWhiteSpace($_.CommandLine)}).Count
-  } catch {}
-  "SEND D1 $d P=$p U=$u"
-  "SEND F1 $f"
-}
-```
-
-`SEND D1`·`SEND F1` 두 줄만 전달합니다. M은 이번 후보의 watchdog_armed/import_entered/import_completed/watchdog_dump_seen 순서(T/F/?), X는 기록된 종료 코드, S는 stdout/stderr의 full=F·tail=T, E는 인식 오류 종류입니다. X는 부모의 종료 시도 후 값일 수 있어 자연 종료 원인으로 해석하지 않습니다. P/U는 이번 조회의 검사 표식 Python/명령행 미열람 개수이며 보고서 읽기와 독립해서 조회합니다. W는 덤프 thread 수, F는 첫 덤프 thread에서 other를 제외한 첫 비식별 프레임(없으면 -), T는 self 합 초, L은 마지막 계측 이름입니다. 첫 thread가 main thread라는 보장은 없고 프레임 하나를 원인으로 단정하지 않습니다. 값이 길거나 허용 문자 밖이면 ?이며 시간 null은 0으로 바꾸지 않습니다.
-
-위 조회를 준비할 때는 R=?도 재검사 없이 그대로 전달하도록 안내했습니다. 이후 D1/F1 사용자 출력 보고를 수신했으며 결과는 아래와 같습니다. GPT의 사외 준비 당시에는 PowerShell이 없어 실제 실행 검증을 하지 못했고 저장 필드·문법·읽기 전용 동작을 검토했습니다. 정리 대상을 확인하지 않은 상태에서 Python 전체 종료·기존 서버 재시작·캐시/패키지 재작업을 안내하지 않습니다.
-
-
-<a id="ees-import-dump-detail"></a>
-
-**조회 완료·진단 중단:** S1/T2를 수신했습니다. `K=create_module A=pandas/core/indexes/base.py:37:<module> B=- N=10 O=90`; 계측 1,331개에서 상위 self 시간은 pandas._libs.index 24.2초, pandas._libs.writers 24.1초, numpy.testing._private.utils 0.7초였습니다. 아래 조회는 완료한 이력이며 [단순 유지보수 결정](#ees-wrapper-maintenance)에 따라 반복하지 않습니다. 이 결과를 Python 자체 결함·손상 패키지·기존 600초 실패의 전체 원인으로 확정하지 않습니다.
-
-**덤프 관측 후 저장 상세 조회:** 저장 시각 `2026-09-08T23:04:17Z`의 D1/F1을 수신했습니다. `M=TTFT`는 watchdog 예약·import 진입·덤프 관측이 있고 완료 표식이 없다는 뜻입니다. 이번 CIM의 `P=0 U=0`은 조회 순간 검사 표식 Python과 명령행 미열람 Python이 없다는 범위이며 70초 시점의 정리 완료를 소급 증명하지 않습니다. `S=F/F E=- W=1`은 수집 앞부분 생략 없이 인식 오류가 없고 Python 덤프 thread 하나를 인식했다는 뜻입니다. 덤프 전체 작성 완료·native thread 수·정확한 발생 시각을 뜻하지 않습니다.
-
-`X=1`은 watchdog의 의도된 종료나 부모 강제 종료 후 값일 수 있어 자연 오류의 증거로 쓰지 않습니다. [Python faulthandler](https://docs.python.org/3.11/library/faulthandler.html#faulthandler.dump_traceback_later)는 `exit=True`에서 덤프 뒤 종료 코드 1을 사용하지만 이번에는 부모의 70초 대기 만료도 기록됐으므로 종료 경로·시각은 미확정입니다. `T=51.1`은 기록된 import self 합이고 `L=pandas._libs.writers`는 마지막 계측 이름입니다. 공통 함수 `frozen/importlib._bootstrap:241:_call_with_frames_removed` 하나만으로 pandas 손상·정체 지점을 판정하지 않습니다.
-
-앞선 첫 프레임 요약은 호출 위치를 좁히기에 부족했습니다. 아래는 같은 저장 보고서의 호출 위치·상위 self 시간을 함께 읽도록 안내했던 블록입니다. 결과를 이미 받았으므로 다시 실행하지 않습니다.
-
-```powershell
-& {
-  $ErrorActionPreference='Stop'
-  $s='R=?'; $t='R=?'
-  function safe($x,$n) {
-    $x=[string]$x
-    if(!$x){'-'}elseif($x.Length -le $n -and $x -cmatch '^[A-Za-z0-9_./:<>-]+\z'){$x}else{'?'}
-  }
-  function timing($x) {
-    if($null -eq $x -or $x -is [bool]){return '?'}
-    $v=[double]$x
-    if($v -ge 0 -and $v -le 86400){$v.ToString('F1',[Globalization.CultureInfo]::InvariantCulture)}else{'?'}
-  }
-  try {
-    $cfg=Get-Content -LiteralPath (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json') -Encoding UTF8 -Raw | ConvertFrom-Json
-    $r=Get-Content -LiteralPath (Join-Path $cfg.state_root 'last-import-probe.json') -Encoding UTF8 -Raw | ConvertFrom-Json
-    if($r.recorded_at -ne '2026-09-08T23:04:17Z' -or $r.source_commit -ne '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50' -or $r.target -ne 'nltk'){throw 'report'}
-    $c=@($r.results | Where-Object program -eq candidate)
-    if($c.Count -ne 1 -or $c[0].watchdog_dump_seen -ne $true){throw 'report'}
-    $c=$c[0]; $f=@($c.watchdog_first_thread_frames)
-    $a=@($f | Where-Object {$_ -ne 'other' -and $_ -notmatch '^(frozen/|stdlib/importlib/)'}) + @($null,$null)
-    $k=$f | Where-Object {$_ -match '^(frozen/importlib\.|stdlib/importlib/)' -and $_ -match ':(create_module|exec_module|_find_spec)$'} | Select-Object -First 1
-    if($k){$k=($k -split ':')[-1]}
-    $b=@($c.top_self | Select-Object -First 3)
-    $v=@(0..2 | ForEach-Object {
-      if($_ -lt $b.Count){"$(safe $b[$_].module 43)/$(timing $b[$_].seconds)"}else{'-'}
-    })
-    $s="K=$(safe $k 13) A=$(safe $a[0] 55) B=$(safe $a[1] 55) N=$($f.Count) O=$(safe $c.watchdog_first_thread_frames_omitted 4)"
-    $t="N=$(safe $c.timed_import_events 7) A=$($v[0]) B=$($v[1]) C=$($v[2])"
-  } catch {}
-  "SEND S1 $s"
-  "SEND T2 $t"
-}
-```
-
-`SEND S1`·`SEND T2` 두 줄만 전달합니다. S1의 K는 보존된 importlib 프레임에서 첫 create_module/exec_module/_find_spec 함수명, A/B는 frozen/importlib를 제외한 첫 두 비식별 호출 위치, N/O는 첫 thread의 보존/생략 프레임 수입니다. T2의 N은 계측 import 수, A/B/C는 self 시간이 큰 세 모듈과 초입니다. 빈 값은 -, 길이/문자/시간값이 부적합하면 ?로 남깁니다. 보존된 것은 첫 thread의 최초 10프레임뿐이므로 A/B가 전체 덤프의 꼬리라는 뜻은 아니며 그 밖의 프레임은 복원하지 못합니다. top_self는 이미 기록된 import 시간이고 실행 중인 모듈의 현재 경과 시간이 아닙니다.
-
-이 조회는 사외에서 저장 구조·읽기 전용 동작·출력 한도를 독립 검토했고 이후 사용자 실행 결과를 수신했습니다. GPT의 사내 직접 실행은 미실행입니다. 지연이 기록된 위치와 덤프 당시 호출 위치는 위 근거로 남기며 후보 환경 추가 조사·패키지/캐시 재작업·같은 검사 반복으로 이어가지 않습니다.
+**오프라인 후보 준비:** antlr4 wheel 준비 실패와 보존 캐시 복구, 후보 준비 성공은 당시 시험입니다. 현재 Apply는 별도 후보 환경을 준비하지 않습니다. [당시 증거](../evals/scenarios.md#ees-antlr-runtime-observation).
 
 <a id="ees-deployment-diagnostics"></a>
-
-**전환 실패 진단:** 보완된 운영 스크립트는 전환 중 오류가 나면 짧은 `Diagnostics` JSON을 출력하고, 기존 `deployment.json`의 `last_failure`에도 저장합니다. `Status`에서는 허용된 진단 필드만 다시 골라 표시합니다. 이전 등록 파일에 이 필드가 없으면 `null`이며 재등록할 필요가 없습니다. 이 진단은 코드 반영 뒤 발생한 실패부터 남고, 과거 오류를 역으로 복원하지 않습니다.
-
-| 필드 | 의미 |
-|---|---|
-| `action`, `failed_at` | 실패한 Deploy/Rollback과 UTC 발생 시각. 마지막 실패는 이후 성공·Stop·Start에도 이력으로 유지하며 현재 `phase`와 구분 |
-| `evidence_version`, `candidate` | 새 실패 증거 버전 `1`과 전환하려던 `kind`/`source_commit`. Diagnose 출력 버전 `2`와 구분하며 original의 커밋은 `null` |
-| `switch` | 처음 실패한 단계·오류 분류·숫자 코드 |
-| `switch.reason` | `health_timeout` 제한 만료, `process_exited` 종료 관찰, `identity_unavailable` 식별 검사 불가, `identity_changed` 식별 불일치, `launch_failed` 실행 실패, `launch_unverified` 실행 후 식별 미확정. 해당 정보가 없으면 `null` |
-| `elapsed_seconds`, `timeout_seconds`, `exit_code` | 해당 실패의 검사 경과 시간·설정 제한·관찰한 종료 코드. 알 수 없거나 해당 없으면 `null`; 전체 배포 시간과 구분 |
-| `switch.log_id`, `recovery_log_id` | 실패 후보 로그와 복구 시도 로그의 관리용 파일명. 절대 경로를 내보내지 않고 서로 별도 보존. 로그 생성 전 실패 등에서는 `null` |
-| `recovery`, `recovery_status` | 자동 복구 자체의 실패와 결과. `succeeded`는 기존 프로그램 health 확인, `failed`는 복구 실패, `blocked`는 식별 불명으로 미시도, `not_attempted`는 사전 확인·전환 기록 실패로 자동 복구 미시도 |
-| `stage` | `select_program` 환경 선택, `port_check` 포트 확인, `process_start` 실행, `health_check` 응답 대기, `process_stop` 종료, `backup` 백업. `process_record`·`stop_record`·`backup_record`·`switch_record`는 해당 상태 기록 실패 |
-| `operation`, `errno`, `winerror` | `port_probe`는 소켓 준비/정리, `port_bind`는 주소 바인딩. 운영체제가 제공한 정수만 남으며 없으면 `null` |
-
-포트 확인은 같은 검사에서 나온 오류 번호를 보존하며 진단 때문에 다시 bind하거나 재시도하지 않습니다. “포트 사용 불가”를 곧바로 다른 프로세스의 점유로 단정하지 않습니다. 전환 실패의 Diagnostics는 자식 로그를 읽지 않으며, 복구 뒤 [Diagnose](#ees-diagnose-once)로 허용된 요약을 함께 확인합니다. Diagnostics에는 예외 원문·내부 주소·사용자 경로·키·로그 내용이 포함되지 않습니다. 마지막 실패 기록 저장까지 실패하면 콘솔에 저장 실패 안내와 확보한 진단을 남깁니다.
-
-현재 서버의 적용 상태와 다음 실행 여부는 [STATUS](STATUS.md)를 따릅니다. 진단 기능 확인만을 위해 정상 서버에 실패를 만들거나 Deploy·재기동·기존 연동 검증을 반복하지 않습니다.
-
-**과거 수동 진단 기록 — 기존 형식의 health 실패 뒤 자동 복구가 성공한 경우:** 아래는 2026-09-08까지의 실패 증거와 개별 명령을 보존한 절차입니다. 당시 진입점은 위 Diagnose였으며, 현재는 [Apply/Restore 안내](#ees-wrapper-apply)를 따르고 아래 명령을 순서대로 다시 실행하지 않습니다. 당시 `deployment.json`의 `process.log_file`은 복구된 기존 프로그램의 로그입니다. 기존 형식은 실패 후보 로그 경로를 별도로 보존하지 않으므로 현재 로그를 제외하고, 실패 시각과 복구 로그보다 앞선 **생성 시각**으로 직전 기동 로그를 좁힙니다. 수정 시각 최신순은 현재 서버의 로그를 고를 수 있습니다. 로그 이동/삭제나 이후 재기동이 있었다면 시각만으로 이번 후보를 확정하지 않습니다. `health_check`와 숫자 코드 null만으로 기동 중 종료·응답 대기 만료·프로세스 확인 오류를 구분할 수 없으며, 종료 정리 중 찍힌 `KeyboardInterrupt`도 최초 실패 원인으로 단정하지 않습니다. 로그는 사내에서 읽고 필요한 오류 종류·기동 완료 여부만 비식별로 전달합니다.
-
 <a id="ees-failed-candidate-summary"></a>
-
-**자동 복구된 최신 후보 로그 요약:** 다음 블록은 CA 옵션 배포 실패 `2026-09-08T05:33:02Z`에 맞춘 읽기 전용 명령입니다. 다른 실패에는 먼저 보고된 시각으로 비교 값을 바꿉니다. 등록 기록과 시각을 대조하고 현재 복구 로그를 제외해 생성 시각으로 후보를 좁힙니다. 이동/삭제된 로그나 시계 변경이 있으면 확정하지 않습니다. 전체 로그를 복사하지 않고 고정된 오류 분류·공개 패키지 이름/파일명/행 번호만 전달합니다.
-
-```powershell
-& {
-  $ErrorActionPreference = 'Stop'
-  $cfg = Get-Content -LiteralPath (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-  $reg = Get-Content -LiteralPath (Join-Path $cfg.state_root 'deployment.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-  if ($reg.phase -ne 'idle' -or $reg.last_event -ne 'previous_program_recovered' -or
-      $reg.last_failure.failed_at -ne '2026-09-08T05:33:02Z' -or
-      $reg.last_failure.recovery_status -ne 'succeeded') { throw '보고된 복구 기록과 다릅니다.' }
-  $active = Get-Item -LiteralPath $reg.process.log_file
-  $at = [DateTimeOffset]::Parse($reg.last_failure.failed_at).UtcDateTime
-  if ($active.CreationTimeUtc -lt $at) { throw '로그 시각을 확인해야 합니다.' }
-  $cand = Get-ChildItem (Join-Path $cfg.state_root 'logs') -Filter 'server-*.log' -File |
-      Where-Object { $_.FullName -ne $active.FullName -and
-          $_.CreationTimeUtc -lt $active.CreationTimeUtc -and $_.CreationTimeUtc -lt $at.AddSeconds(1) } |
-      Sort-Object CreationTimeUtc -Descending | Select-Object -First 1
-  if (-not $cand) { throw '후보 로그가 없습니다.' }
-  $marks = @(Select-String -LiteralPath $cand.FullName -SimpleMatch -Pattern 'Application startup complete','Uvicorn running on','CERTIFICATE_VERIFY_FAILED')
-  $frames = @(); $types = @()
-  foreach ($line in (Get-Content -LiteralPath $cand.FullName -Tail 160)) {
-      if ($line -match '^Traceback \(most recent call last\):') { $frames = @(); $types = @() }
-      if ($line -match '^\s*File "' -and
-          $line -match '[\\/]site-packages[\\/](numpy|chromadb|sqlalchemy|open_webui|scipy|torch|requests|urllib3|huggingface_hub|transformers)[\\/](?:[^"]*[\\/])?([A-Za-z0-9_.-]+\.py)", line (\d+)') {
-          $frames += "$($Matches[1])/$($Matches[2]):$($Matches[3])"
-      }
-      if ($line -cmatch '^(KeyboardInterrupt|[A-Za-z_]\w*(?:Error|Exception))(?::|$)') { $types += $Matches[1] }
-  }
-  [ordered]@{
-      candidate_seconds = [math]::Round(($at - $cand.CreationTimeUtc).TotalSeconds,1)
-      startup_complete = $marks.Pattern -contains 'Application startup complete'
-      listening = $marks.Pattern -contains 'Uvicorn running on'
-      cert_verify_failed = $marks.Pattern -contains 'CERTIFICATE_VERIFY_FAILED'
-      error_types = @($types | Select-Object -Last 3)
-      last_package_frames = @($frames | Select-Object -Last 4)
-  } | ConvertTo-Json
-}
-```
-
-candidate_seconds는 로그 생성부터 실패 기록까지의 근사 시간입니다. 약 600초면 이번에도 대기 한도 만료와 부합하지만 최초 지연 원인은 따로 확인합니다. 마커는 전체 후보 로그에서 찾고, error_types/last_package_frames는 끝 160줄 중 마지막 Traceback 이후(시작이 잘린 경우 남아 있는 부분)만 요약합니다. last_package_frames에는 허용 목록에 있는 패키지 프레임만 남기며, 실제 경로·코드 행·예외 메시지는 출력하지 않습니다. KeyboardInterrupt의 마지막 호출 위치는 후보 정리 시점의 표본이며 해당 패키지 손상 증거가 아닙니다. 복구 후 Status.ca_mode는 original의 값이므로 실패 후보의 CA 적용 여부로 해석하지 않습니다.
-
 <a id="ees-failed-network-frames"></a>
+<a id="ees-failure-timing"></a>
+<a id="ees-resume-prepared-release"></a>
 
-**화이트리스트 환경에서 하위 호출 위치 확인:** 앞선 요약은 허용 목록에 없는 LangChain 등의 프레임과 표준 라이브러리 프레임을 생략했습니다. 그 출력의 마지막 파일이 실제 traceback 끝이라는 뜻은 아닙니다. 다음은 같은 2026-09-08T05:33:02Z 후보 로그에서 LangChain·다운로드 관련 패키지와 표준 라이브러리까지 마지막 호출 위치를 읽습니다. 네트워크 요청이나 프로그램 실행·설정 변경은 하지 않습니다.
-
-```powershell
-& {
-  $ErrorActionPreference = 'Stop'
-  $cfg = Get-Content -LiteralPath (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-  $reg = Get-Content -LiteralPath (Join-Path $cfg.state_root 'deployment.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-  if ($reg.phase -ne 'idle' -or $reg.last_event -ne 'previous_program_recovered' -or
-      $reg.last_failure.failed_at -ne '2026-09-08T05:33:02Z') { throw '이번 실패 기록과 다릅니다.' }
-  $active = Get-Item -LiteralPath $reg.process.log_file
-  $at = [DateTimeOffset]::Parse($reg.last_failure.failed_at).UtcDateTime
-  if ($active.CreationTimeUtc -lt $at) { throw '로그 시각이 맞지 않습니다.' }
-  $cand = Get-ChildItem (Join-Path $cfg.state_root 'logs') -Filter 'server-*.log' -File |
-      Where-Object { $_.FullName -ne $active.FullName -and
-          $_.CreationTimeUtc -lt $active.CreationTimeUtc -and $_.CreationTimeUtc -lt $at.AddSeconds(1) } |
-      Sort-Object CreationTimeUtc -Descending | Select-Object -First 1
-  if (-not $cand) { throw '후보 로그가 없습니다.' }
-  $allow = '^(open_webui|langchain(?:_community|_core|_classic|_text_splitters)?|unstructured|nltk|playwright|bs4|lxml|requests|urllib3|httpx|httpcore|huggingface_hub|transformers|sentence_transformers|numpy|scipy|sklearn|torch)$'
-  $frames = @()
-  foreach ($line in (Get-Content -LiteralPath $cand.FullName -Tail 200)) {
-      if ($line -match '^Traceback \(most recent call last\):') { $frames = @() }
-      if (-not ($line -match '^\s*File "([^"]+)", line (\d+), in ([A-Za-z0-9_.<>]+)')) { continue }
-      $path = $Matches[1] -replace '\\','/'
-      $num = $Matches[2]; $func = $Matches[3]; $label = 'other'
-      if ($path -match '/site-packages/([^/]+)/(?:.*/)?([A-Za-z0-9_.-]+\.py)$') {
-          $pkg = $Matches[1]; $file = $Matches[2]
-          if ($pkg -match $allow) { $label = "$pkg/$file" }
-      } elseif ($path -match '/Lib/(?!site-packages/)(?:.*/)?([A-Za-z0-9_.-]+\.py)$') {
-          $label = "stdlib/$($Matches[1])"
-      } elseif ($path -match '^<frozen importlib\.[A-Za-z_.]+>$') { $label = 'importlib' }
-      if ($label -eq 'other') { $frames += 'other' }
-      else { $frames += "$($label):$($num):$func" }
-  }
-  @{ last_frames = @($frames | Select-Object -Last 12) } | ConvertTo-Json
-}
-```
-
-패키지/파일명·행 번호·함수명만 출력하고 사내 절대 경로·URL·오류 메시지는 내보내지 않습니다. 허용 목록 밖의 프레임은 위치를 보존해 other로 남깁니다. 마지막 Traceback이 끝 200줄에 없으면 남아 있는 tail의 부분 정보이며, 로그 이동/삭제나 시계 변경이 있으면 시각으로 고른 후보도 확정하지 않습니다. 이 stack은 종료 시점 표본입니다. 네트워크 함수가 보이면 그 호출 경로의 필요한 목적지/캐시를 확인하고, 파일 읽기/컴파일 위치라면 파일 준비 경로를 검토합니다. 어느 쪽도 이 표본만으로 600초 전체의 원인을 확정하지 않습니다.
+**후보 전환·실패 로그:** 후보 전환 health 실패와 기존 프로그램 복구, 로그 시간·공개 프레임의 관측 범위는 날짜별 기록에 보존합니다. 복구 성공을 최초 장애 원인 해소로 판정하지 않습니다. [당시 증거](../evals/scenarios.md#ees-retransition-health-failure).
 
 <a id="ees-candidate-bytecode"></a>
-
-**FileFinder 중단 표본 뒤 후보 캐시 준비:** 반복된 기동 한도 만료 후, 후보의 Python 소스를 실행하지 않고 bytecode 캐시를 준비하는 완화 작업입니다. FileFinder.find_spec의 파일 존재 확인은 컴파일 지연이나 600초 전체의 원인을 증명하지 않습니다. 현재 copy 설치는 uv의 bytecode 사전 컴파일을 지정하지 않으므로 준비할 여지는 있지만 효과는 실제 결과로 판단합니다. 화이트리스트 조건은 유지하며 외부 요청은 하지 않습니다.
-
-같은 PowerShell 창에서 두 블록을 순서대로 실행합니다. 첫 블록은 코드 변수만 준비하고 두 번째 블록이 실행합니다. 2026-09-08T05:33:02Z 실패 후 original로 복구한 기존 prepared 후보에만 사용하며 기존 서버는 유지합니다. 부모·자식 모두 -I -S -B로 시작하고, 원본/후보 앱을 추가 import하거나 원본 Python의 site 초기화로 의존성을 다시 검사하지 않습니다.
-
-```powershell
-$eesCode = @'
-import json,pathlib,subprocess,sys
-sys.path.insert(0,sys.argv[2])
-try:
-    import manage_ees as m
-    cfg=m.states.load_config(pathlib.Path(sys.argv[1]))
-    with m.locked(cfg):
-        reg=m.read_registry(cfg)
-        if (reg['phase']!='idle' or reg['current']['kind']!='original'
-            or reg['last_failure']['failed_at']!='2026-09-08T05:33:02Z'
-            or reg['last_failure']['recovery_status']!='succeeded'): raise ValueError()
-        env=m.states.runtime_environment(cfg)
-        root=m.target_for(cfg,'4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50')
-        meta=json.loads(m.states._regular(root/'release.json').read_bytes())
-        if (meta['state']!='prepared' or meta['source_commit']!=root.name
-            or meta['metadata_sha256']!=m.releases._metadata_digest(meta)
-            or meta['source_python']!=cfg['source_python']
-            or pathlib.Path(meta['target_python'])!=root/'venv/Scripts/python.exe'): raise ValueError()
-        m.states._regular(meta['target_python'],allow_hardlinks=True)
-        site=m.states._safe(root/'venv/Lib/site-packages')
-        if not site.is_dir(): raise ValueError()
-        code="""
-import compileall,json,os,pathlib,py_compile,sys,time
-started=time.monotonic()
-root=pathlib.Path(sys.argv[1])
-files=[]
-def walk_error(e): raise e
-for folder,dirs,names in os.walk(root,onerror=walk_error):
-    for name in dirs+names:
-        p=pathlib.Path(folder)/name
-        if p.is_symlink() or getattr(p.lstat(),'st_file_attributes',0)&0x400: raise ValueError()
-    files.extend(pathlib.Path(folder)/n for n in names if n.endswith('.py') and (pathlib.Path(folder)/n).is_file())
-if not files: raise ValueError()
-failed=sum(not compileall.compile_file(str(p),quiet=2,optimize=0,
-    invalidation_mode=py_compile.PycInvalidationMode.TIMESTAMP) for p in files)
-print(json.dumps({'status':'ready' if failed==0 else 'partial',
-    'checked_files':len(files),'failed_files':failed,
-    'elapsed_seconds':round(time.monotonic()-started,1)}))
-"""
-        r=subprocess.run([meta['target_python'],'-I','-S','-B','-c',code,str(site)],
-            env=env,cwd=cfg['cwd'],stdin=subprocess.DEVNULL,capture_output=True,timeout=900)
-        if r.returncode: raise RuntimeError()
-        print(json.dumps(json.loads(r.stdout)))
-except subprocess.TimeoutExpired:
-    print(json.dumps({'status':'timeout','limit_seconds':900}))
-except Exception as e:
-    print(json.dumps({'status':'stopped','error_type':type(e).__name__}))
-'@
-```
-
-```powershell
-& {
-  $ErrorActionPreference = 'Stop'
-  if (-not $eesCode) { throw '먼저 첫 번째 블록을 실행합니다.' }
-  $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-  $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
-  $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
-  $eesCode | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
-}
-```
-
-배포 잠금과 등록 fingerprint·후보 release.json fingerprint/대상 경로를 확인하고, 후보 Lib/site-packages의 모든 하위 경로(기존 __pycache__ 포함)를 먼저 확인해 링크·Windows reparse point·디렉터리 순회 오류를 거부합니다. 전체 패키지 inventory 비교는 이후 Deploy의 기존 검증에 맡기며 캐시 준비가 이를 대신하지 않습니다. 임시 deployment.lock과 후보 캐시만 쓰고 Python 소스·패키지 버전·DB·키·config/DPAPI·기존 서버 설정은 편집하지 않습니다.
-
-캐시 자식의 제한은 **900초(15분)**이고 부모의 등록 기록 확인은 별도입니다. elapsed_seconds는 자식의 파일 순회·캐시 처리 시간입니다. [compileall](https://docs.python.org/3.11/library/compileall.html)로 기존 유효 캐시를 강제로 다시 만들지 않으며, checked_files는 기존 캐시 확인을 포함한 파일 수입니다. ready는 캐시 작업의 성공으로 기동 성공을 보증하지 않습니다. partial은 test/example 문법 파일 등에서도 발생할 수 있어 환경 손상·재설치 근거로 단정하지 않습니다. timeout/stopped에서도 이미 생성한 정상 캐시가 남을 수 있습니다. 결과를 받은 뒤 다음 배포 여부를 정하고 Deploy를 자동 연결하지 않습니다.
-
 <a id="ees-candidate-cache-partial"></a>
-
-**캐시 준비가 partial인 경우:** 성공 수는 새 생성과 기존 유효 캐시 확인을 포함합니다. 실패 개수만으로 기동 실패·환경 손상·test/example 파일로 판정하지 않습니다. 아래는 캐시를 다시 만들지 않고 현재 누락/헤더 불일치 후보를 읽는 후속 명령이며, 앞선 실패 파일 목록을 정확히 복원하는 검사는 아닙니다.
-
-방금 캐시 준비에 사용한 같은 PowerShell 창에서 두 블록을 실행합니다. $eesCode에 남은 기존 부모 코드의 후보/복구 상태·메타데이터·경로 검증과 배포 잠금을 재사용하고 자식의 캐시 생성 부분만 읽기 점검으로 교체합니다. 코드 변수 형태가 다르면 멈춥니다. 부모/자식 -I -S -B와 900초 자식 제한을 유지하며 앱 import·외부 접속·소스/캐시 저장·서버 재기동은 하지 않습니다. 임시 배포 잠금만 생성/해제합니다.
-
-```powershell
-$eesProbe = @'
-import importlib.util as u,json,os,pathlib,struct,sys,time,warnings
-warnings.simplefilter('ignore')
-start=time.monotonic()
-root=pathlib.Path(sys.argv[1])
-files=[]
-def walk_error(e): raise e
-for folder,dirs,names in os.walk(root,onerror=walk_error):
-    for name in dirs+names:
-        p=pathlib.Path(folder)/name
-        if p.is_symlink() or getattr(p.lstat(),'st_file_attributes',0)&0x400: raise ValueError()
-    files.extend(pathlib.Path(folder)/n for n in names if n.endswith('.py') and (pathlib.Path(folder)/n).is_file())
-if not files: raise ValueError()
-public=set('open_webui numpy scipy pandas sympy sklearn numba torch transformers sentence_transformers langchain langchain_core langchain_community langchain_classic future past libfuturize libpasteurize parso jedi IPython networkx sqlalchemy chromadb'.split())
-rows=[]
-current=0
-suspects=0
-for p in files:
-    try:
-        s=p.stat()
-        expected=u.MAGIC_NUMBER+struct.pack('<III',0,int(s.st_mtime)&0xffffffff,s.st_size&0xffffffff)
-        q=pathlib.Path(u.cache_from_source(str(p),optimization=''))
-        with q.open('rb') as f: header=f.read(16)
-        if header==expected:
-            current+=1
-            continue
-        state='header_diff'
-    except FileNotFoundError: state='missing'
-    except OSError as e: state=type(e).__name__
-    suspects+=1
-    if len(rows)>=50: continue
-    error='none'
-    try: compile(p.read_bytes(),'<candidate>','exec',dont_inherit=True,optimize=0)
-    except Exception as e: error=type(e).__name__
-    rel=p.relative_to(root)
-    rows.append({'file':rel.as_posix() if rel.parts[0] in public else 'other',
-        'test_path':any(x in {'test','tests','testing','testdata','examples'} for x in rel.parts[:-1]),
-        'cache':state,'compile_error':error})
-print(json.dumps({'checked_files':len(files),'current_headers':current,
-    'suspect_files':suspects,'omitted':max(0,suspects-len(rows)),
-    'files':rows,'elapsed_seconds':round(time.monotonic()-start,1)}))
-'@
-```
-
-```powershell
-& {
-  $ErrorActionPreference = 'Stop'
-  if (-not $eesCode -or -not $eesProbe) { throw '앞선 코드 변수와 첫 블록이 필요합니다.' }
-  $eesParts = [regex]::Split($eesCode, '"""')
-  if ($eesParts.Count -ne 3 -or $eesParts[1] -notmatch 'compileall\.compile_file' -or
-      $eesParts[0] -notmatch '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50') {
-    throw '앞서 사용한 캐시 준비 코드와 다릅니다.'
-  }
-  $eesRead = $eesParts[0] + '"""' + $eesProbe + '"""' + $eesParts[2]
-  $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-  $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
-  $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
-  $eesRead | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
-}
-```
-
-전체 하위 링크/reparse point를 먼저 거부하고 캐시 첫 16바이트의 magic/flags/수정시각/크기를 확인합니다. current_headers는 현재 소스와 timestamp 헤더가 일치한 수이며 bytecode 전체 무결성 검사가 아닙니다. 누락·불일치·읽기 오류 후보 중 최대 50개만 [compile](https://docs.python.org/3.11/library/functions.html#compile)로 메모리에서 문법을 확인하며 실행/저장하지 않습니다. 경고·예외 원문·코드 행·절대 경로를 출력하지 않고 공개 패키지 허용 목록의 상대 경로만 표시하며 나머지는 other입니다.
-
-compile_error=none이면 문법 확인은 성공했지만 캐시가 없거나 헤더/읽기 문제가 남은 경우입니다. test_path=true도 테스트 디렉터리 이름의 단서일 뿐 기동에서 미사용이라는 증명이 아닙니다. omitted가 있으면 모든 후보를 문법 검사한 것이 아닙니다. 결과를 받아 실제 기동에 필요한 파일인지 판단한 뒤 재배포 여부를 정합니다.
-
-
-**긴 files 결과를 모바일로 옮기기 어려운 경우:** 기존 JSON 출력만 사내 PC 안에서 묶으며 파일 점검을 다시 실행하지 않습니다. 아래 블록을 먼저 실행하면 입력을 기다립니다. 그때 위 점검 결과의 여는 {부터 마지막 }까지 PC 클립보드에 복사하고 Enter를 누릅니다. 명령 복사로 JSON 클립보드가 덮이는 순서를 피하기 위한 대기입니다.
-
-```powershell
-& {
-  $ErrorActionPreference = 'Stop'
-  $null = Read-Host '위 JSON 결과의 {부터 마지막 }까지 복사한 뒤 Enter'
-  try {
-    $eesReport = Get-Clipboard -Raw | ConvertFrom-Json
-  } catch {
-    throw 'JSON 결과 부분만 다시 복사해주세요.'
-  }
-  $eesFiles = @($eesReport.files)
-  if ($eesReport.suspect_files -ne 14 -or $eesReport.omitted -ne 0 -or $eesFiles.Count -ne 14) {
-    throw '방금 나온 14개 점검 결과가 아닙니다.'
-  }
-  $eesAllowed = '^(open_webui|numpy|scipy|pandas|sympy|sklearn|numba|torch|transformers|sentence_transformers|langchain|langchain_core|langchain_community|langchain_classic|future|past|libfuturize|libpasteurize|parso|jedi|IPython|networkx|sqlalchemy|chromadb)$'
-  $eesGroups = foreach ($f in $eesFiles) {
-    if ($f.test_path -isnot [bool]) { throw '점검 결과 형식이 다릅니다.' }
-    $pkg = ($f.file -split '/')[0]
-    if ($pkg -notmatch $eesAllowed) { $pkg = 'other' }
-    $err = $f.compile_error
-    if ($err -notmatch '^(none|SyntaxError|IndentationError|TabError|UnicodeDecodeError|ValueError|OSError|PermissionError|FileNotFoundError|MemoryError|RecursionError|OverflowError)$') { $err = 'other' }
-    $cache = $f.cache
-    if ($cache -notmatch '^(missing|header_diff|OSError|PermissionError|FileNotFoundError)$') { $cache = 'other' }
-    "$pkg / $err / test=$($f.test_path) / $cache"
-  }
-  $eesGroups | Group-Object | ForEach-Object { "$($_.Count) : $($_.Name)" }
-}
-```
-
-suspect_files=14·omitted=0·files 14개인 결과를 확인하고 공개 패키지/문법 오류 종류/test_path/캐시 상태별 개수만 출력합니다. 긴 파일명·경로·클립보드 원문·파싱 오류 원문은 출력하지 않으며 허용 목록 밖 값은 other로 묶습니다. JSON 이외의 내용을 복사했거나 결과 형식이 다르면 고정 안내로 멈춥니다. 패키지/테스트 경로 분류는 기동 미사용을 보증하지 않으며 묶인 결과를 받은 뒤 판단합니다.
-
-
 <a id="ees-candidate-cache-write"></a>
-
-**문법 정상인데 캐시가 missing인 경우:** 메모리 compile 성공은 캐시 저장 성공을 뜻하지 않습니다. [py_compile](https://docs.python.org/3.11/library/py_compile.html)은 소스보다 긴 __pycache__ 파일과 원자적 저장용 임시 파일을 사용하므로 경로 길이·권한·잠금 등 저장 오류를 구분해야 합니다. [Windows 긴 경로 조건](https://docs.python.org/3.11/using/windows.html#removing-the-max-path-limitation)은 가능성의 근거이며 실제 오류 확인 없이 레지스트리/정책을 바꾸지 않습니다.
-
-아래 두 블록은 기존 14개 JSON을 재사용하고 torch/transformers/sentence_transformers의 문법 정상·missing 항목 중 상대 경로가 가장 긴 한 개만 선택합니다. 앞선 다른 값들과 같은 PowerShell 창이 필요합니다. 두 번째 블록에서 입력을 기다리면 14개 files가 있던 원래 JSON을 PC 안에서 복사하고 Enter를 누릅니다. 검증에 사용한 JSON은 이번부터 eesCacheReport 변수에 보존합니다. 전체 파일 순회·앱 import·외부 요청·서버 전환은 없으며 성공하면 해당 후보 캐시 한 개를 유지합니다.
-
-```powershell
-$eesWriteProbe = @'
-import base64,importlib.util as u,json,pathlib,py_compile,sys,warnings
-warnings.simplefilter('ignore')
-def units(x): return len(str(x).encode('utf-16-le'))//2
-r={'status':'failed','stage':'path_check'}
-p=q=None
-try:
-    name=base64.b64decode('EES_TARGET_BASE64',validate=True).decode()
-    rel=pathlib.PurePosixPath(name)
-    if (rel.is_absolute() or '..' in rel.parts or chr(92) in name or ':' in name
-        or rel.parts[0] not in {'torch','transformers','sentence_transformers'}): raise ValueError()
-    root=pathlib.Path(sys.argv[1])
-    p=root.joinpath(*rel.parts)
-    if p.suffix!='.py': raise ValueError()
-    q=pathlib.Path(u.cache_from_source(str(p),optimization=''))
-    r.update(package=rel.parts[0],source_units=units(p),cache_units=units(q))
-    for target in (p,q):
-        for x in (target,*target.parents):
-            try: st=x.lstat()
-            except FileNotFoundError: continue
-            if x.is_symlink() or getattr(st,'st_file_attributes',0)&0x400: raise ValueError()
-    if not p.is_file(): raise ValueError()
-    if q.exists():
-        if not q.is_file(): raise ValueError()
-        r.update(status='already_present')
-    else:
-        r['stage']='compile_write'
-        py_compile.compile(str(p),doraise=True,quiet=0,optimize=0,
-            invalidation_mode=py_compile.PycInvalidationMode.TIMESTAMP)
-        r.update(status='written')
-except Exception as e:
-    f=getattr(e,'filename',None)
-    where='other'
-    if f and p and q:
-        f=str(f)
-        if f==str(p): where='source'
-        elif f==str(q): where='cache'
-        elif f.startswith(str(q)+'.'): where='cache_temp'
-        elif f==str(q.parent): where='cache_directory'
-    r.update(error_type=getattr(e,'exc_type_name',type(e).__name__),
-        errno=getattr(e,'errno',None),winerror=getattr(e,'winerror',None),
-        failed_path=where,failed_units=units(f) if f else None)
-print(json.dumps(r))
-'@
-```
-
-```powershell
-& {
-  $ErrorActionPreference = 'Stop'
-  if (-not $eesCode -or -not $eesWriteProbe) { throw '같은 창의 앞선 코드 변수와 첫 블록이 필요합니다.' }
-  $eesReport = $global:eesCacheReport
-  if (-not $eesReport) {
-    $null = Read-Host '14개 files가 있던 JSON 전체를 복사한 뒤 Enter'
-    try { $eesReport = Get-Clipboard -Raw | ConvertFrom-Json }
-    catch { throw 'JSON 결과만 다시 복사해주세요.' }
-  }
-  if ($eesReport.suspect_files -ne 14 -or $eesReport.omitted -ne 0 -or @($eesReport.files).Count -ne 14) {
-    $global:eesCacheReport = $null
-    throw '앞선 14개 점검 결과가 아닙니다.'
-  }
-  $eesPick = $eesReport.files |
-    Where-Object { $_.compile_error -eq 'none' -and $_.cache -eq 'missing' -and
-      $_.file -match '^(torch|transformers|sentence_transformers)/' } |
-    Sort-Object { $_.file.Length } -Descending | Select-Object -First 1
-  if (-not $eesPick) { throw '대상 공개 패키지 파일이 없습니다.' }
-  $global:eesCacheReport = $eesReport
-  $eesParts = [regex]::Split($eesCode, '"""')
-  if ($eesParts.Count -ne 3 -or $eesParts[1] -notmatch 'compileall\.compile_file' -or
-      $eesParts[0] -notmatch '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50') {
-    throw '앞선 캐시 준비 코드와 다릅니다.'
-  }
-  $eesPayload = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($eesPick.file))
-  $eesWorker = $eesWriteProbe.Replace('EES_TARGET_BASE64', $eesPayload)
-  $eesRun = $eesParts[0] + '"""' + $eesWorker + '"""' + $eesParts[2]
-  $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-  $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
-  $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
-  $eesRun | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
-}
-```
-
-기존 부모 코드의 idle/original/실패 시각/복구 성공·준비 메타데이터·후보 Python 경로 검증과 배포 잠금/900초 자식 제한을 재사용합니다. 입력 상대 경로는 base64 데이터로 전달하며 절대/상위/드라이브 경로를 거부하고 소스/캐시와 상위 경로의 링크/reparse point를 검사합니다. Python 소스·원본 venv·DB·키·config/DPAPI는 편집하지 않습니다. 후보 캐시가 이미 있으면 already_present로 알리고 다시 쓰지 않습니다.
-
-오류 수집에서는 quiet=0/doraise=True를 사용합니다. quiet=2는 doraise도 무효화하므로 사용하지 않습니다. 경고와 오류 원문은 숨기고 패키지·오류 클래스·errno/winerror·단계와 경로 길이(UTF-16 단위)만 출력합니다. failed_path는 source/cache/cache_temp/cache_directory/other 분류이며 실제 경로를 포함하지 않습니다. written은 선택한 파일의 캐시 저장 성공이며 기동 성공을 뜻하지 않습니다. 한 파일의 결과를 나머지 누락 파일 전체·600초 실패의 원인으로 확대하지 않으며, other로 가려진 파일과 두 SyntaxError의 실제 기동 영향은 별도로 남깁니다.
-
-
 <a id="ees-candidate-cache-extended"></a>
-
-**캐시 임시 파일만 260자를 넘는 경우:** 선택 파일에서 source_units=231, cache_units=256, FileNotFoundError/errno=2/winerror=null, cache_temp/failed_units=270을 보고받은 뒤의 한 파일 조치입니다. 경로 제한을 강하게 시사하지만 오류 번호와 길이만으로 원인 전체를 확정하지 않습니다. [Microsoft의 확장 길이 경로](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation)는 로컬 파일 API에서 지원하는 표기입니다. 레지스트리/정책·등록 경로·릴리스 위치를 바꾸지 않고 검증한 같은 후보 캐시의 cfile에만 이를 적용합니다.
-
-직전 점검에 사용한 같은 PowerShell 창에서 실행합니다. eesCacheReport와 eesWriteProbe를 재사용하므로 JSON을 다시 복사하거나 전체 파일을 순회하지 않습니다. 같은 공개 패키지의 문법 정상·missing 목록에서 경로가 가장 긴 한 파일을 선택하며 앱 import·외부 요청·서버 전환은 없습니다.
-
-```powershell
-& {
-  $ErrorActionPreference = 'Stop'
-  if (-not $eesCode -or -not $eesWriteProbe -or -not $global:eesCacheReport) { throw '앞선 같은 PowerShell 창이 필요합니다.' }
-  $eesParts = [regex]::Split($eesCode, '"""')
-  if ($eesParts.Count -ne 3 -or $eesParts[0] -notmatch '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50') { throw '후보 코드가 다릅니다.' }
-  $eesPick = $global:eesCacheReport.files | Where-Object {
-    $_.compile_error -eq 'none' -and $_.cache -eq 'missing' -and
-    $_.file -match '^(torch|transformers|sentence_transformers)/'
-  } | Sort-Object { $_.file.Length } -Descending | Select-Object -First 1
-  if (-not $eesPick) { throw '대상이 없습니다.' }
-  $eesOld = '        py_compile.compile(str(p),doraise=True,quiet=0,optimize=0,'
-  if (-not $eesWriteProbe.Contains($eesOld)) { throw '직전 점검 코드가 다릅니다.' }
-  $eesNew = @'
-        import struct
-        if (sys.platform!='win32' or not q.is_absolute() or len(q.drive)!=2
-            or q.drive[1]!=':' or units(q)>=260
-            or any(x.endswith((' ','.')) for x in q.parts[1:])): raise ValueError()
-        long_cache=chr(92)*2+'?'+chr(92)+str(q)
-        py_compile.compile(str(p),cfile=long_cache,doraise=True,quiet=0,optimize=0,
-'@
-  $eesVerify = @'
-r['stage']='verify_cache'
-        with q.open('rb') as f: header=f.read(16)
-        s=p.stat()
-        expected=u.MAGIC_NUMBER+struct.pack('<III',0,int(s.st_mtime)&0xffffffff,s.st_size&0xffffffff)
-        if header!=expected: raise ValueError()
-        r.update(status='written',cache_readable=True)
-'@
-  $eesWorker = $eesWriteProbe.Replace($eesOld,$eesNew).Replace("r.update(status='written')",$eesVerify)
-  $eesPayload = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($eesPick.file))
-  $eesWorker = $eesWorker.Replace('EES_TARGET_BASE64',$eesPayload)
-  $eesRun = $eesParts[0] + '"""' + $eesWorker + '"""' + $eesParts[2]
-  $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-  $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
-  $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
-  $eesRun | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
-}
-```
-
-일반 경로의 기존 후보/복구 상태·메타데이터·로컬 드라이브·링크/reparse 검증을 먼저 유지합니다. _safe를 약화하거나 확장 표기를 config/메타데이터에 등록하지 않습니다. Windows 절대 드라이브 경로와 260 미만의 최종 캐시 경로만 허용하고, 확장 표기의 정규화 차이를 막기 위해 비앵커 구성요소 끝의 점/공백을 거부합니다. 소스 file은 일반 경로로 유지하고 cfile만 확장하므로 [CPython py_compile](https://docs.python.org/3.11/library/py_compile.html)의 소스/코드 파일명은 유지합니다. 기존 캐시가 있으면 앞선 already_present 동작을 유지하며 성공으로 새로 판정하지 않습니다.
-
-저장 후 일반 경로 q.open으로 16바이트 timestamp 헤더를 확인하고 written/cache_readable=true를 받습니다. 이는 선택 캐시의 일반 경로 읽기와 헤더 확인이며 전체 bytecode 무결성·앱 기동 성공은 아닙니다. 실패 시 앞선 클래스/오류 번호/길이 요약을 유지하되, 확장 표기의 실패 경로는 기존 분류에서 other가 될 수 있고 failed_units에는 표기 접두어 길이도 포함될 수 있습니다. 이미 기록된 캐시를 오류 때문에 삭제하지 않습니다. 나머지 캐시 누락과 두 문법 오류·600초 기동 실패의 영향은 후속 결과와 구분합니다.
-
-
 <a id="ees-candidate-cache-finish"></a>
 
-**완료된 캐시 배치 기록:** 2026-09-08 사용자 보고로 예상 집계와 뒤이은 전환 실패/복구 성공을 확인했습니다. 아래 절차를 반복하지 않고 [한 번에 진단](#ees-diagnose-once)으로 이어갑니다.
-
-**당시 긴 경로 한 파일 성공 뒤 나머지 캐시와 재배포:** 동일 파일의 written/verify_cache/source_units=231/cache_units=256/cache_readable=true 보고 후 사용하는 절차입니다. 한 파일의 일반 표기 실패→확장 cfile 성공과 일반 경로 읽기를 확인한 범위이며 600초 기동 원인은 아직 확정하지 않습니다.
-
-기존 JSON은 other 파일의 경로를 숨겼으므로 나머지 전체를 처리하려면 후보를 한 번 순회해야 합니다. 아래 첫 블록은 코드를 준비하고 두 번째 블록이 작업을 실행합니다. 기존 서버를 유지한 채 모든 하위 경로의 링크/reparse를 먼저 검사한 뒤, 기존 캐시는 일반 경로의 16바이트 timestamp 헤더만 확인해 유지하고 없는 캐시만 같은 확장 cfile 방식으로 저장합니다. 앱 import·소스 수정·외부 요청·PC 정책/등록 경로 변경은 하지 않습니다. 기존 부모의 후보/복구 상태·준비 메타데이터/경로 검사·잠금과 900초 자식 제한을 유지합니다.
-
-```powershell
-$eesFinish = @'
-import importlib.util as u,json,os,pathlib,py_compile,struct,sys,warnings
-warnings.simplefilter('ignore')
-root=pathlib.Path(sys.argv[1])
-if sys.platform!='win32': raise ValueError()
-def units(x): return len(str(x).encode('utf-16-le'))//2
-files=[]
-def walk_error(e): raise e
-for folder,dirs,names in os.walk(root,onerror=walk_error):
-    for name in dirs+names:
-        p=pathlib.Path(folder)/name
-        if p.is_symlink() or getattr(p.lstat(),'st_file_attributes',0)&0x400: raise ValueError()
-    files.extend(pathlib.Path(folder)/n for n in names if n.endswith('.py') and (pathlib.Path(folder)/n).is_file())
-if not files: raise ValueError()
-r=dict(checked_files=len(files),existing_valid=0,written=0,syntax_errors=0,other_errors=0,long_final=0)
-for p in files:
-    try:
-        q=pathlib.Path(u.cache_from_source(str(p),optimization=''))
-        s=p.stat()
-        expected=u.MAGIC_NUMBER+struct.pack('<III',0,int(s.st_mtime)&0xffffffff,s.st_size&0xffffffff)
-        try:
-            with q.open('rb') as f: header=f.read(16)
-        except FileNotFoundError: header=None
-        if header is not None:
-            r['existing_valid' if header==expected else 'other_errors']+=1
-            continue
-        try: compile(p.read_bytes(),'<candidate>','exec',dont_inherit=True,optimize=0)
-        except SyntaxError:
-            r['syntax_errors']+=1
-            continue
-        if units(q)>=260:
-            r['long_final']+=1
-            continue
-        if (not q.is_absolute() or len(q.drive)!=2 or q.drive[1]!=':'
-            or any(x.endswith((' ','.')) for x in q.parts[1:])): raise ValueError()
-        py_compile.compile(str(p),cfile=chr(92)*2+'?'+chr(92)+str(q),
-            doraise=True,quiet=0,optimize=0,invalidation_mode=py_compile.PycInvalidationMode.TIMESTAMP)
-        with q.open('rb') as f: header=f.read(16)
-        if header!=expected: raise ValueError()
-        r['written']+=1
-    except Exception: r['other_errors']+=1
-print(json.dumps(r))
-'@
-```
-
-```powershell
-& {
-  $ErrorActionPreference = 'Stop'
-  if (-not $eesCode -or -not $eesFinish) { throw '같은 창의 앞선 코드와 첫 블록이 필요합니다.' }
-  $eesParts = [regex]::Split($eesCode, '"""')
-  if ($eesParts.Count -ne 3 -or $eesParts[1] -notmatch 'compileall\.compile_file' -or
-      $eesParts[0] -notmatch '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50') {
-    throw '앞선 후보 코드가 다릅니다.'
-  }
-  $eesRun = $eesParts[0] + '"""' + $eesFinish + '"""' + $eesParts[2]
-  $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-  $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
-  $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
-  $eesRaw = $eesRun | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
-  if ($LASTEXITCODE -ne 0) { throw '캐시 작업이 중단됐습니다.' }
-  try { $global:eesCacheBatch = $eesRaw | ConvertFrom-Json }
-  catch { throw '캐시 결과를 해석하지 못했습니다.' }
-  $eesResult = $global:eesCacheBatch
-  $eesResult | ConvertTo-Json -Compress
-  if ($eesResult.checked_files -ne 26713 -or $eesResult.existing_valid -ne 26700 -or
-      $eesResult.written -ne 11 -or $eesResult.syntax_errors -ne 2 -or
-      $eesResult.other_errors -ne 0 -or $eesResult.long_final -ne 0) {
-    Write-Output '예상과 달라 배포하지 않았습니다. 위 요약을 보내주세요.'
-    return
-  }
-  & (Join-Path $eesScripts 'manage-ees.ps1') -Action Deploy -Commit '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50' -UseWindowsCA -HealthTimeout 600
-}
-```
-
-checked_files=26713, existing_valid=26700, written=11, syntax_errors=2, other_errors=0, long_final=0을 모두 만족한 경우에만 같은 준비 후보의 Deploy -UseWindowsCA -HealthTimeout 600을 한 번 실행합니다. 두 번째 블록은 이 조건에서 기존 서버 종료·백업·후보 기동으로 이어지므로 이를 실행 전에 안내합니다. 숫자가 다르거나 부모/캐시 검사가 중단되면 결과만 남기고 서버 전환은 하지 않습니다. JSON 요약은 eesCacheBatch 변수에도 보존해 다시 복사/검사하지 않고 후속에서 사용할 수 있게 합니다.
-
-existing_valid는 일반 경로에서 현재 소스와 timestamp 헤더가 일치한 개수이며 bytecode 전체 무결성 판정은 아닙니다. 최종 일반 캐시 경로 260 이상은 long_final로, 기존 헤더 불일치/읽기/저장 오류는 other_errors로 집계해 배포를 막습니다. SyntaxError 두 개는 수정/삭제하지 않고 무해하다고 분류하지 않습니다. 그중 other/test=False의 실제 기동 영향도 미확인으로 유지한 채 기존 복구 관리가 있는 Deploy 결과로 확인합니다. 같은 준비 후보·CA 옵션·600초 한도를 유지하고 새 ZIP/Prepare/Init을 요구하지 않습니다. 후보 기동 실패 시 기존 복구 동작을 따르며, 캐시 완료를 데이터/화면/모델 응답 성공으로 확대하지 않습니다.
-
-
-<a id="ees-failure-timing"></a>
-
-**실패까지의 시간과 기동 완료 흔적 확인:** 자동 복구 성공 뒤 추가 Start/Stop/Deploy 없이 읽는 명령입니다. 현재 복구 로그를 제외하고 생성 시각으로 실패 후보를 좁히므로 로그 이동/삭제나 시각 변경이 있었다면 이번 후보로 확정하지 않습니다. 원문 대신 시간·기동 완료 문자열 존재 여부만 출력합니다.
-
-```powershell
-& {
-    $ErrorActionPreference = 'Stop'
-    $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-    $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
-    $eesState = Join-Path $eesCfg.state_root 'deployment.json'
-    $eesReg = Get-Content -LiteralPath $eesState -Raw -Encoding UTF8 | ConvertFrom-Json
-    $eesFailure = $eesReg.last_failure
-    if ($eesReg.phase -ne 'idle' -or
-        $eesReg.last_event -ne 'previous_program_recovered' -or
-        $eesFailure.action -ne 'deploy' -or
-        $eesFailure.switch.stage -ne 'health_check' -or
-        $eesFailure.recovery_status -ne 'succeeded') {
-        throw '보고된 복구 상태와 다릅니다.'
-    }
-    $eesActive = Get-Item -LiteralPath $eesReg.process.log_file
-    $eesFailedAt = [DateTimeOffset]::Parse($eesFailure.failed_at).UtcDateTime
-    $eesUpdatedAt = [DateTimeOffset]::Parse($eesReg.updated_at).UtcDateTime
-    if ($eesActive.CreationTimeUtc -lt $eesFailedAt -or
-        $eesUpdatedAt -lt $eesActive.CreationTimeUtc) {
-        throw '기록 시각이 맞지 않습니다.'
-    }
-    $eesLogs = Join-Path $eesCfg.state_root 'logs'
-    $eesCandidate = Get-ChildItem -LiteralPath $eesLogs -Filter 'server-*.log' -File |
-        Where-Object {
-            $_.FullName -ne $eesActive.FullName -and
-            $_.CreationTimeUtc -lt $eesActive.CreationTimeUtc -and
-            $_.CreationTimeUtc -lt $eesFailedAt.AddSeconds(1)
-        } | Sort-Object CreationTimeUtc -Descending | Select-Object -First 1
-    if (-not $eesCandidate) { throw '후보 로그를 찾지 못했습니다.' }
-    $eesMarks = @(Select-String -LiteralPath $eesCandidate.FullName -SimpleMatch -Pattern `
-        'Application startup complete', 'Uvicorn running on')
-    [ordered]@{
-        candidate_seconds = [math]::Round(($eesFailedAt - $eesCandidate.CreationTimeUtc).TotalSeconds, 1)
-        recovery_seconds = [math]::Round(($eesUpdatedAt - $eesActive.CreationTimeUtc).TotalSeconds, 1)
-        startup_complete = [bool]($eesMarks | Where-Object { $_.Line -like '*Application startup complete*' })
-        listening = [bool]($eesMarks | Where-Object { $_.Line -like '*Uvicorn running on*' })
-    } | ConvertTo-Json
-}
-```
-
-`candidate_seconds`는 후보 로그 생성부터 실패 기록까지, `recovery_seconds`는 복구 로그 생성부터 복구 완료 기록까지의 근사 시간입니다. 프로세스 생성/기록 시간도 포함하며 정확한 health 대기 측정값은 아닙니다. 후보 시간이 약 600초면 전달한 대기 한도 만료와 부합하지만 최초 지연 원인까지 확정하지 않습니다. 두 boolean은 해당 로그의 문자열 존재 여부이며 false를 절대적 미기동 증거로 보지 않습니다. 결과를 보고 다음 진단을 정하며 별도 패키지 검사·재설치·재배포를 자동으로 이어 붙이지 않습니다.
+**후보 bytecode·경로 길이 진단:** 후보 캐시 생성·부분 실패·임시 파일 경로 길이 관측과 후속 배치 결과는 당시 기록입니다. 캐시 작업 후에도 후보 전환은 실패했으며 현재 재실행하지 않습니다. [당시 증거](../evals/scenarios.md#ees-windows-ca-support).
 
 <a id="ees-startup-proxy-check"></a>
-
-**기동 지연의 프록시 확인:** Git의 `http.https://github.com.proxy`와 WebUI의 HTTP 클라이언트 설정은 별개입니다. 관리 스크립트의 health 요청은 프록시를 명시적으로 사용하지 않습니다. 기존/후보 프로그램은 같은 등록 환경을 복원하며 후보에 WEBUI_NAME을 추가합니다. `-UseWindowsCA`를 선택한 릴리스는 그 뒤 자식 환경에 CA 경로도 지정합니다. 새 창의 프록시 환경변수를 바꿔도 등록 때 저장한 값을 대신하지 않습니다.
-
-아래는 기존 `runtime_environment`로 등록 환경을 읽고, 후보 Python의 Requests로 GitHub/Hugging Face에 각 HEAD 요청 한 번을 보내는 진단입니다. 릴리스별 CA 옵션을 추가하기 전 등록 환경의 비교이며 `-UseWindowsCA` 적용 여부를 검사하는 명령은 아닙니다. 환경변수 외 Windows 프록시 설정과 NO_PROXY도 Requests의 실제 선택에 반영합니다([Requests 프록시](https://requests.readthedocs.io/en/latest/user/advanced/#proxies)). TLS 검증은 유지하고 redirect를 따라가지 않으며 `.netrc` 인증과 앱 토큰은 보내지 않습니다. Git 프록시를 다른 호스트에 강제로 적용하거나 서버 설정을 변경하지 않습니다. 외부 요청을 사용자가 요청한 이번 프록시 진단 범위로만 수행합니다.
-
-```powershell
-& {
-    $ErrorActionPreference = 'Stop'
-    $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-    $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
-    $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
-    $eesCode = @'
-import json, pathlib, subprocess, sys
-sys.path.insert(0, sys.argv[2])
-try:
-    from ees_deploy_state import runtime_environment
-    cfg = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
-    env = runtime_environment(cfg)
-    root = pathlib.Path(cfg['releases_dir']) / '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
-    meta = json.loads((root / 'release.json').read_text(encoding='utf-8'))
-    if (meta['state']!='prepared' or meta['source_commit']!=root.name
-        or pathlib.Path(meta['target_python'])!=root/'venv/Scripts/python.exe'): raise ValueError()
-    print(json.dumps({'saved_proxy_env': any(env.get(k) for k in
-        ('HTTP_PROXY','HTTPS_PROXY','ALL_PROXY')),
-        'offline_mode': env.get('OFFLINE_MODE','false').lower() == 'true'}), flush=True)
-    code = '''
-import json, requests, sys, time
-url = sys.argv[1]
-out = {'target': sys.argv[2]}
-start = time.monotonic()
-try:
-    out['proxy_selected'] = bool(requests.utils.select_proxy(url, requests.utils.get_environ_proxies(url)))
-    with requests.Session() as session:
-        session.auth = lambda request: request
-        with session.head(url, timeout=(8,8), allow_redirects=False) as response:
-            out.update(status='response', http_status=response.status_code)
-except Exception as error:
-    out.update(status='failed', error_type=type(error).__name__)
-out['elapsed_seconds'] = round(time.monotonic() - start, 2)
-print(json.dumps(out))
-'''
-    for name, url in (('github','https://github.com/'), ('huggingface','https://huggingface.co/')):
-        try:
-            run = subprocess.run([meta['target_python'],'-I','-B','-c',code,url,name],
-                env=env, cwd=cfg['cwd'], stdin=subprocess.DEVNULL,
-                capture_output=True, timeout=30)
-            print(json.dumps(json.loads(run.stdout)), flush=True)
-        except Exception as error:
-            print(json.dumps({'target':name,'status':'probe_failed','error_type':type(error).__name__}), flush=True)
-except Exception as error:
-    print(json.dumps({'status':'settings_check_failed','error_type':type(error).__name__}))
-'@
-    $eesCode | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
-}
-```
-
-처음 설정 요약과 접속 결과 두 개만 전달합니다. `proxy_selected`는 해당 URL에 대한 Requests의 선택이며, 환경변수 부재만으로 Windows의 직접 통신을 단정하지 않습니다. 응답은 해당 공개 URL/HEAD의 범위로 실제 모델 파일·CDN·인증 API·기동 시 모든 통신을 보증하지 않습니다. ProxyError·SSLError·timeout을 구분하고 403도 프록시 원인으로 즉시 단정하지 않습니다. probe_failed/TimeoutExpired는 자식 Python의 시작/Requests import를 포함한 30초 제한이며 HTTP 요청만의 시간 초과와 구분합니다. Open WebUI를 import하지 않으며 DB·저장 설정·키·서버는 변경하지 않습니다.
-
 <a id="ees-startup-tls-detail"></a>
-
-**프록시 선택 뒤 SSLError가 보고된 경우:** Git 영구 프록시 설정 시점과 Init 때 저장한 앱 환경을 구분합니다. `saved_proxy_env=true`는 앱의 복원 환경에 값이 있다는 의미이며 새 Git 설정을 읽었다는 뜻이 아닙니다. SSLError만으로 인증서 신뢰 실패·프록시 접속 방식·기동 지연의 원인을 확정하지 않습니다. 다음 명령은 같은 환경으로 GitHub HEAD 한 번을 보내 프록시 URL의 scheme, Requests CA 설정의 출처, 허용한 SSL 오류 분류만 출력합니다. 실제 주소·경로·키·예외 원문은 출력하지 않습니다.
-
-```powershell
-& {
-    $ErrorActionPreference = 'Stop'
-    $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-    $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
-    $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
-    $eesCode = @'
-import json, pathlib, subprocess, sys
-sys.path.insert(0, sys.argv[2])
-try:
-    from ees_deploy_state import runtime_environment
-    cfg = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
-    env = runtime_environment(cfg)
-    root = pathlib.Path(cfg['releases_dir']) / '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
-    meta = json.loads((root/'release.json').read_text(encoding='utf-8'))
-    if (meta['state']!='prepared' or meta['source_commit']!=root.name
-        or pathlib.Path(meta['target_python'])!=root/'venv/Scripts/python.exe'): raise ValueError()
-    code = '''
-import json, os, requests
-from urllib.parse import urlsplit
-out = {}
-try:
-    url = 'https://github.com/'
-    proxy = requests.utils.select_proxy(url, requests.utils.get_environ_proxies(url))
-    scheme = urlsplit(proxy or '').scheme.lower()
-    out['proxy_scheme'] = scheme if scheme in ('http','https','socks5','socks5h') else 'other_or_none'
-    out['ca_source'] = next((k for k in ('REQUESTS_CA_BUNDLE','CURL_CA_BUNDLE') if os.environ.get(k)), 'default')
-    with requests.Session() as session:
-        session.auth = lambda request: request
-        with session.head(url, timeout=(8,8), allow_redirects=False) as response:
-            out.update(status='response', http_status=response.status_code)
-except Exception as error:
-    known = ('CERTIFICATE_VERIFY_FAILED','WRONG_VERSION_NUMBER','TLSV1_ALERT_PROTOCOL_VERSION',
-             'UNSUPPORTED_PROTOCOL','TLSV1_ALERT_UNKNOWN_CA','SSLV3_ALERT_HANDSHAKE_FAILURE','UNEXPECTED_EOF_WHILE_READING')
-    out.update(status='failed', error_type=type(error).__name__,
-        ssl_reason=next((k for k in known if k in str(error)), 'unclassified'))
-print(json.dumps(out))
-'''
-    run = subprocess.run([meta['target_python'],'-I','-B','-c',code], env=env, cwd=cfg['cwd'],
-        stdin=subprocess.DEVNULL, capture_output=True, timeout=30)
-    print(json.dumps(json.loads(run.stdout)))
-except Exception as error:
-    print(json.dumps({'status':'probe_failed','error_type':type(error).__name__}))
-'@
-    $eesCode | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
-}
-```
-
-[Requests의 CA 선택](https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification)은 REQUESTS_CA_BUNDLE을 먼저, CURL_CA_BUNDLE을 다음으로 사용합니다. `default`는 해당 환경변수 지정이 없는 경우이며 Windows 저장소와 같다고 가정하지 않습니다. `proxy_scheme=http`인 프록시를 통해 HTTPS 목적지로 CONNECT하는 것도 지원되므로 이름만 보고 https로 바꾸지 않습니다([urllib3 프록시 설명](https://urllib3.readthedocs.io/en/stable/advanced-usage.html#http-and-https-proxies)). 인증서 검증을 유지하며 저장 설정·프록시·CA·서버를 변경하지 않습니다. 해당 진단의 오류 분류가 전체 기동 실패의 인과 증거는 아닙니다.
-
 <a id="ees-windows-ca-check"></a>
-
-**default CA에서 CERTIFICATE_VERIFY_FAILED인 경우:** `proxy_scheme=http`는 HTTPS 목적지의 CONNECT에 사용할 수 있는 값이며 그 자체를 오류로 보지 않습니다. 같은 후보 Requests/저장 환경을 유지하고, Windows ROOT/CA 저장소를 포함해 Python SSL이 불러온 기본 CA를 이번 요청의 임시 PEM으로 지정해 비교합니다([Python CA 로딩](https://docs.python.org/3.11/library/ssl.html#ssl.SSLContext.load_default_certs)). 인증서 이름·유효기간·신뢰 검증은 계속 수행하며 새 루트 인증서를 시스템에 설치하지 않습니다. 이는 Windows 고유 검증 엔진/폐기 확인 전체와 동일한 시험은 아닙니다. SSL_CERT_FILE/DIR 등 OpenSSL 기본 경로도 포함할 수 있어 특정 사내 CA 부재의 확정 증거와 구분합니다.
-
-```powershell
-& {
-    $ErrorActionPreference = 'Stop'
-    $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-    $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
-    $eesScripts = Join-Path $env:USERPROFILE 'team-agent-poc\scripts'
-    $eesCode = @'
-import json, pathlib, subprocess, sys, tempfile
-sys.path.insert(0, sys.argv[2])
-try:
-    from ees_deploy_state import runtime_environment
-    cfg = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'))
-    env = runtime_environment(cfg)
-    env.pop('SSLKEYLOGFILE', None)
-    root = pathlib.Path(cfg['releases_dir'])/'4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
-    m = json.loads((root/'release.json').read_text(encoding='utf-8'))
-    if (m['state']!='prepared' or m['source_commit']!=root.name
-        or pathlib.Path(m['target_python'])!=root/'venv/Scripts/python.exe'): raise ValueError()
-    code = '''
-import json, pathlib, requests, ssl, sys
-ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-ctx.load_default_certs(ssl.Purpose.SERVER_AUTH)
-certs = ctx.get_ca_certs(binary_form=True)
-if not certs: raise ValueError()
-bundle = pathlib.Path(sys.argv[1])/'ca.pem'
-bundle.write_text(''.join(ssl.DER_cert_to_PEM_cert(c) for c in certs), encoding='ascii')
-results = []
-for name, url in (('github','https://github.com/'),('huggingface','https://huggingface.co/')):
-    out = {'target':name}
-    try:
-        with requests.Session() as s:
-            s.auth = lambda r:r
-            with s.head(url, verify=str(bundle), timeout=(8,8), allow_redirects=False) as r:
-                out.update(status='response', http_status=r.status_code)
-    except Exception as e:
-        out.update(status='failed', error_type=type(e).__name__,
-            cert_verify_failed='CERTIFICATE_VERIFY_FAILED' in str(e))
-    results.append(out)
-print(json.dumps({'ca_count':len(certs),'results':results}))
-'''
-    with tempfile.TemporaryDirectory(prefix='ees-ca-check-') as folder:
-        r = subprocess.run([m['target_python'],'-I','-B','-c',code,folder], env=env,
-            cwd=cfg['cwd'], stdin=subprocess.DEVNULL, capture_output=True, timeout=60)
-        print(json.dumps(json.loads(r.stdout)))
-except Exception as e:
-    print(json.dumps({'status':'probe_failed','error_type':type(e).__name__}))
-'@
-    $eesCode | & $eesCfg.source_python -I -S -B - $eesPath $eesScripts
-}
-```
-
-임시 PEM은 부모 프로세스의 TemporaryDirectory 아래에 만들어 자식 종료/timeout 뒤 정리합니다. 인증서 내용·개인키·실제 경로는 출력하지 않으며 `.netrc`/앱 인증 토큰·redirect는 쓰지 않습니다. SSLKEYLOGFILE은 진단 자식 환경에서만 제외해 키 로그를 남기지 않습니다. HTTP 응답 성공은 해당 두 URL에서 CA 입력을 바꾼 결과로 인정하며 기동 지연의 인과나 앱 전체 복구로 확대하지 않습니다. 비교 성공 뒤에는 아래 릴리스별 옵션으로 적용하며, 현재 창의 REQUESTS_CA_BUNDLE만 설정해 등록 스냅샷이 바뀌었다고 보지 않습니다.
-
 <a id="ees-windows-ca-deploy"></a>
 
-다음은 **중단한 후보 Deploy 방식의 과거 안내**입니다. 현재 Apply/Restore 서버의 인증서 복구는 [Start -UseWindowsCA](#ees-start-windows-ca)를 사용합니다.
-
-**CA 비교 성공 후 배포:** `Deploy -UseWindowsCA`는 후보 Python의 표준 SSL 모듈로 Windows ROOT/CA와 기본 인증서 경로에서 CA를 읽습니다. 등록 환경과 작업 폴더를 사용하고 Open WebUI는 import하지 않습니다. 기존 서버를 멈추기 전에 비어 있지 않은 PEM과 해시를 검증하고, 해당 릴리스의 `trusted-ca/<sha256>.pem`에 저장합니다. 기존 파일을 덮어쓰지 않으며 경로 재지정·내용 변경은 거부합니다. CA 준비 실패는 기존 서버를 둔 채 종료됩니다.
-
-EES 자식 프로세스에만 이 파일의 REQUESTS_CA_BUNDLE·SSL_CERT_FILE을 지정합니다. 이 변수를 사용하는 사내·사외 HTTPS 모두에 적용되며, 명시적으로 별도 SSL 설정을 쓰는 클라이언트까지 강제로 바꾸지는 않습니다([Requests CA 설정](https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification)). 인증서·호스트 이름 검증은 유지합니다. 기존 프로그램의 자동 복구는 처음 등록한 환경을 사용합니다. config/DPAPI·원본 패키지·certifi·DB·키·시스템 인증서 저장소는 편집하지 않습니다.
-
-선택한 CA 해시는 프로그램 선택 기록에 남으므로 이후 `Start` 및 해당 릴리스로의 `Rollback`에도 같은 파일을 사용합니다. `Status.ca_mode`는 `windows_snapshot` 또는 `registered`입니다. 이 파일은 프로그램에 딸린 신뢰 자료이며 DATA_DIR 백업에 포함되지 않으므로 릴리스와 함께 보존합니다. Windows 인증서가 바뀌어도 기존 스냅샷을 자동 교체하지 않습니다. 새로운 CA를 반영하거나 다른 프로그램을 배포할 때는 다시 `Deploy -UseWindowsCA`를 명시합니다. 옵션 없이 Deploy하면 등록 환경을 선택합니다.
-
-아래는 **CA 옵션을 포함한 운영 코드가 main에 반영되고 해당 CI가 성공한 뒤** 실행합니다. 프로그램 후보는 기존 준비본을 사용합니다. Update 실패 시 Deploy를 진행하지 않으며 별도 Stop/Init/Prepare는 필요하지 않습니다.
-
-```powershell
-& {
-    $ErrorActionPreference = 'Stop'
-    $eesManager = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1'
-    & $eesManager -Action Update
-    if (-not $?) { throw 'Git 갱신이 완료되지 않았습니다.' }
-    & $eesManager -Action Deploy `
-        -Commit '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50' `
-        -UseWindowsCA -HealthTimeout 600
-    if (-not $?) { throw '전환 결과의 Diagnostics를 확인합니다.' }
-    & $eesManager -Action Status
-}
-```
-
-성공 시 active=true·해당 current_commit·ca_mode=windows_snapshot과 기존 주소 접속을 확인합니다. 내부 모델 응답도 한 번 확인해 새 CA가 적용된 HTTPS 사용 범위를 구분합니다. 실패하면 마지막 Diagnostics로 이어가며 같은 전환을 반복하지 않습니다. 과거 CA 비교의 200 응답만으로 기동 지연 해결이나 다른 연동 성공을 미리 판정하지 않습니다.
+**후보 프록시·인증서 비교:** 공개 URL의 TLS 비교 성공과 후보 기동 실패를 구분해 보존합니다. 현재 래퍼의 인증서 선택은 [Start -UseWindowsCA](#ees-start-windows-ca)를 따릅니다. [당시 증거](../evals/scenarios.md#ees-windows-ca-support).
 
 <a id="ees-numpy-import-check"></a>
 
-**후보 로그가 NumPy import 중 KeyboardInterrupt로 끝난 경우:** 아래는 기존/준비 후보 Python에서 NumPy만 각각 한 번 읽는 독립 진단입니다. 기존 서버를 종료하거나 Open WebUI를 불러오지 않고 패키지를 설치하지 않습니다. 고정 커밋은 현재 준비 후보이며 새 후보에서는 해당 원본으로 바꿉니다. 로그 위치와 준비 메타데이터 원문은 출력하지 않습니다.
+**독립 NumPy 비교:** 기존/후보 NumPy 단독 import는 성공했으나 전체 Open WebUI 기동의 성공이나 누적 지연 원인 해소를 증명하지 않았습니다. [당시 증거](../evals/scenarios.md#ees-retransition-health-failure).
 
-```powershell
-& {
-    $ErrorActionPreference = 'Stop'
-    $eesPath = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
-    $eesCfg = Get-Content -LiteralPath $eesPath -Raw -Encoding UTF8 | ConvertFrom-Json
-    $eesCommit = '4a8779bbf3ee078abe8c94ff75b59fa3bb7aad50'
-    $eesReleasePath = Join-Path (Join-Path $eesCfg.releases_dir $eesCommit) 'release.json'
-    $eesRelease = Get-Content -LiteralPath $eesReleasePath -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($eesRelease.state -ne 'prepared' -or $eesRelease.source_commit -ne $eesCommit) {
-        throw '준비 후보 기록이 일치하지 않습니다.'
-    }
-    $eesProbe = @'
-import json, re, subprocess, sys, time
-code = "import numpy; print('NUMPY_VERSION='+numpy.__version__)"
-for label, executable in zip(('original', 'candidate'), sys.argv[1:]):
-    print(label + ': checking', flush=True)
-    start = time.monotonic()
-    out = {'target': label}
-    try:
-        run = subprocess.run([executable, '-I', '-B', '-c', code],
-            stdin=subprocess.DEVNULL, capture_output=True, timeout=60)
-        version = re.search(rb'(?m)^NUMPY_VERSION=([0-9][A-Za-z0-9.+_-]*)\r?$', run.stdout)
-        errors = re.findall(rb'(?m)^([A-Za-z_][A-Za-z0-9_]*(?:Error|Exception)):', run.stderr)
-        out.update(status='ok' if run.returncode == 0 and version else 'failed',
-            returncode=run.returncode,
-            version=version[1].decode('ascii') if version else None,
-            error_type=errors[-1].decode('ascii') if errors else None)
-    except subprocess.TimeoutExpired:
-        out.update(status='timeout', limit_seconds=60)
-    except OSError as error:
-        out.update(status='launch_failed', error_type=type(error).__name__)
-    out['elapsed_seconds'] = round(time.monotonic() - start, 2)
-    print(json.dumps(out), flush=True)
-'@
-    $eesProbe | & $eesCfg.source_python -I -B - $eesCfg.source_python $eesRelease.target_python
-}
-```
+<a id="ees-diagnose-once"></a>
+<a id="ees-diagnostic-workflow"></a>
 
-각 자식 검사는 60초 timeout 뒤 그 검사 프로세스만 종료합니다. 프로세스 생성 지연은 제한을 넘을 수 있어 전체 실행 시간을 보장하지 않습니다([Python subprocess](https://docs.python.org/3.11/library/subprocess.html#subprocess.run)). `-I`는 현재 디렉터리/사용자 site와 PYTHON* 변수를 제외하며 실제 서버 기동과 구분합니다. `-B`는 새 bytecode 쓰기를 막고 기존 bytecode 읽기는 허용합니다([Python 옵션](https://docs.python.org/3.11/using/cmdline.html)). 두 JSON만 전달하며 raw stderr/config는 전달하지 않습니다. 실패 시 종료 코드와 오류 분류로 후속 진단하고, 성공해도 이번 단독 import가 가능하다는 범위만 인정합니다. 콜드 기동·누적 import·저장 환경·보안 검사 지연의 해소나 배포 성공을 뜻하지 않습니다.
+**당시 Diagnose·전달 방식:** 후보 로그 선택·비식별 요약과 기록 보완의 검증은 보존합니다. 현재 장애는 [래퍼 실패 기록](#ees-update-failure-causes)으로 확인하며, 별도 후보 진단을 재개하지 않습니다. [당시 증거](../evals/scenarios.md#ees-diagnostic-workflow).
 
-<a id="ees-resume-prepared-release"></a>
+<a id="ees-import-probe"></a>
+<a id="ees-import-followup"></a>
+<a id="ees-import-deadline"></a>
 
-**2026-09-07~08 당시 준비 후보 재전환 안내 — 현재 재실행하지 않음:** 프로그램 준비 성공 후 기존 서버로 복구한 경우에는 [STATUS의 프로그램 원본](STATUS.md)을 유지합니다. 운영 스크립트 갱신과 프로그램 교체는 별개이므로 Git 최신 커밋을 `Deploy -Commit`에 넣거나 프로그램을 다시 다운로드·Prepare하지 않습니다.
+**고정 import 비교·검사 결함 보완:** ProbeImports의 환경 필터·시간 기준 결함을 수정한 이력과 관측 한계는 [후속 검사](../evals/scenarios.md#ees-import-followup)·[deadline 수정](../evals/scenarios.md#ees-import-deadline)에 보존합니다. [당시 증거](../evals/scenarios.md#ees-import-probe).
 
-첫 단계는 기존 운영 PowerShell에서 아래 블록으로 checkout만 갱신하고 현재 관리 상태를 읽는 것입니다. 저장한 GitHub.com용 Git 프록시 설정이 있으면 `$gitProxy`를 다시 입력할 필요가 없습니다. 임시 프록시가 필요한 경우에만 이전 값을 `$gitProxy`에 로컬로 설정하고 Update 호출에 `-GitProxy $gitProxy`를 추가합니다. 값이나 config 원문을 외부에 전달하지 않습니다. 실행 정책 오류는 기존 [Windows 적용 안내](#기존-windows-서버에-적용)를 따르며 이 블록이 정책을 변경하지는 않습니다.
+<a id="ees-import-saved-followup"></a>
+<a id="ees-import-dump-detail"></a>
 
-```powershell
-& {
-    $ErrorActionPreference = 'Stop'
-    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
-    $eesManager = Join-Path $eesRepo 'scripts\manage-ees.ps1'
-    & $eesManager -Action Update
-    if (-not $?) { throw 'Git 갱신이 완료되지 않았습니다.' }
-    $eesHead = & git -C $eesRepo rev-parse HEAD
-    if ($LASTEXITCODE -ne 0) { throw '갱신 커밋을 확인하지 못했습니다.' }
-    "head=$eesHead"
-    & $eesManager -Action Status
-}
-```
-
-외부에는 `head=` 줄과 마지막 상태 JSON만 전달합니다. 기존 서버가 관리 중인 original로 복구된 현재 재개 조건은 `phase=idle`, `original_program=true`, `managed_process_running=true`이며 실제 결과를 확인한 뒤 다음 명령을 정합니다. 이 조회는 health·데이터·연동 재시험이 아닙니다. 결과가 다르거나 명령이 실패하면 자동으로 Stop·Start·Deploy를 이어 붙이지 않습니다.
-
-이후 전환은 확인한 프로그램 원본으로 기존 `Deploy` 경로를 한 번 사용하며, 이전 장기 기동 관찰을 고려한 `-HealthTimeout 600`은 그 명령에만 적용합니다. 기본 300초·등록 환경은 바꾸지 않습니다. Deploy가 준비 상태·환경·프로세스를 확인하고 종료·백업·기동을 관리하므로 별도 수동 Stop을 먼저 요구하지 않습니다. 실행 결과에 따라 active/화면 확인 또는 `Diagnostics`의 실패 단계 확인으로 이어갑니다.
-
-첫 전환 후 기존 계정의 대화/Memory·등록 항목이 이어지는지 확인하고, 브라우저 강력 새로고침 한 번 뒤 EES 이름·아이콘과 일반 대화 스트리밍 한 건을 확인합니다. 완료한 연동·PAT·권한 시험과 전체 Prompt 입력은 반복하지 않습니다. 적용 커밋과 결과만 STATUS에 연결합니다.
-
-**일반 원복과 중단 복구:**
-
-```powershell
-.\scripts\manage-ees.ps1 -Action Rollback
-```
-
-원복은 현재 DB를 직전 Python 환경에서 계속 사용합니다. upstream 버전/DB 스키마 업그레이드는 이번 명령의 지원 범위가 아닙니다. `recovery_required`이면 `Status`와 내부 로그를 확인하고, 식별 가능한 관리 프로세스만 `Stop`한 뒤 `Start`로 기록된 기존 프로그램을 시작합니다. `launch_uncertain`은 시작한 프로세스 식별 자체가 불명확한 상태여서 `Stop`도 자동 처리하지 않습니다. 이 경우 먼저 해당 서버의 종료를 로컬에서 확인하고 배포 기록을 검토해야 합니다. 비정상 종료 뒤 남은 `deployment.lock`도 실제 작업이 끝났는지 확인하기 전 제거하지 않습니다. 강제 PID 종료·DB/키 재생성·캐시 정리·전체 DB 자동 복구는 제공하지 않습니다.
-
-프로그램과 함께 들어 있는 Agent Pack의 자동 등록/갱신은 다음 단위입니다. 현재는 [기존 항목 갱신](#update-existing-instructions) 안내를 따릅니다. 모델 메타데이터만 바꾸는 작업에는 서버 재시작이 필요하지 않습니다.
+**저장 보고서 조회·진단 종료:** S1/T2 조회를 마친 뒤 2026-09-08 사용자 결정으로 후보 진단을 종료했습니다. pandas/create_module 위치와 self 시간만으로 최초 원인을 확정하지 않았습니다. [저장 결과](../evals/scenarios.md#ees-import-saved-followup)·[관측 범위](../evals/scenarios.md#ees-import-dump-detail). [당시 증거](../evals/scenarios.md#ees-wrapper-maintenance).
 
 <a id="update-existing-instructions"></a>
 

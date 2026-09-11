@@ -1,31 +1,28 @@
 # Troubleshooting
 
-Windows 로컬 POC의 장애를 계층별로 분리합니다. 실제 구성한 경로에서 앞 단계가 실패하면 뒤 단계를 수정하지 않습니다. 최신 적용 경로는 [STATUS](STATUS.md), 실행 환경은 [versions](../versions.md)를 확인합니다. 아래 ③·④는 Hermes 비교를 선택해 연동한 경우에만 진단하며 Native MVP의 필수 단계가 아닙니다.
+현재 EES Portal은 등록된 `manage-ees.ps1`로 운영합니다. [STATUS](STATUS.md)의 실제 적용 상태와 [환경 기준](../versions.md)을 먼저 확인하고, 실패한 경로에 맞는 절차만 선택합니다.
 
-```text
-① 사내 vLLM API 직접 호출
-        ↓
-② Open WebUI → 사내 vLLM
-        ↓
-③ Hermes API → 사내 vLLM
-        ↓
-④ Open WebUI → Hermes → 사내 vLLM
-```
+| 증상 | 먼저 확인할 안내 |
+|---|---|
+| Update·Upgrade·패치 실패 | [현재 래퍼의 결과·실패 단계](03-openwebui-native-agent.md#ees-wrapper-upgrade) |
+| 프로세스는 있는데 접속 안 됨·종료 실패 | [보존된 실패 기록과 판단 범위](03-openwebui-native-agent.md#ees-update-failure-causes), [종료 복구 조건](03-openwebui-native-agent.md#ees-stop-recovery) |
+| 일반 사용자만 Assistant 사용 불가 | [모델·기반 모델 권한](#user-model-not-found) |
+| 채팅 답변이 새로고침 후 표시됨 | [실시간 연결 오류](#chat-visible-after-refresh) |
+| 모델·연동 요청 실패 | 사내 vLLM 직접 호출 → Open WebUI 연결 순서로 실패한 계층 확인 |
+
+Hermes 진단은 비교 구성을 실제로 선택한 경우에만 수행합니다. 아래 `uvx`·직접 실행·환경변수 예제는 **래퍼 등록 전의 수동 기동 환경**에 해당합니다. 이미 등록한 서버에 그대로 실행하면 선택한 EES 수정본이나 저장된 환경을 사용하지 않을 수 있으므로, 현재 래퍼를 우회하는 복구 명령으로 사용하지 않습니다.
 
 ## 안전한 진단 정보
 
-```powershell
-Get-Date
-uv --version
-hermes --version
-hermes profile list
-hermes gateway status
+등록된 서버에서는 기존 저장소 폴더에서 현재 선택·프로세스 상태를 읽습니다.
 
-Get-NetTCPConnection -LocalPort 8080,8642 -State Listen -ErrorAction SilentlyContinue |
-    Select-Object LocalAddress, LocalPort, OwningProcess
+```powershell
+.\scripts\manage-ees.ps1 -Action Status -Summary
 ```
 
-공유 전 API Key, 실제 사내 URL·IP·모델 경로, 사용자명·개인 경로, 업무 질문과 응답을 제거합니다.
+`running=true`는 관리 프로세스 생존 여부이며 listener·HTTP 응답 성공을 뜻하지 않습니다. 실패한 작업이 있다면 이미 출력된 `stage/code/next`와 [사내 상세 기록 위치](03-openwebui-native-agent.md#ees-local-state)를 함께 해석합니다. 원인 미확정 상태에서 같은 Upgrade·Start나 과거 후보 진단을 반복하지 않습니다.
+
+사용자는 마지막 요약과 화면 상태 등 1~2줄만 직접 입력합니다. 전체 로그·파일·사진·API Key·사내 URL/IP·모델 경로·개인 경로·업무 질문과 응답은 외부로 전달하지 않습니다.
 
 <a id="user-model-not-found"></a>
 
@@ -49,6 +46,8 @@ Get-NetTCPConnection -LocalPort 8080,8642 -State Listen -ErrorAction SilentlyCon
 사내 PC에 접근할 수 없다면 Git의 준비 작업과 실제 복구를 구분합니다. 다음 접속 때 기존 기본 주소의 `/health`를 한 번 확인합니다. 정상 응답이면 곧바로 실행 방식을 바꾸지 않고 보류했던 후속 조회를 이어갑니다. 응답이 없으면 실행 PC에서도 같은 수신 주소·포트로 확인해 로컬 서버와 팀원 접속 경로를 구분하고, 같은 시점의 `Accept failed on a socket` 유무만 확인합니다. 연결 대상 IP·전체 로그·토큰은 외부에 전달하지 않습니다.
 
 ### 재발 시 선택할 기동 준비본
+
+이 절은 **2026-09-07 원본 Open WebUI 0.11.3용 선택 준비본**입니다. 현재 래퍼의 수정본 실행·종료 방식을 교체하는 안내가 아니며, 당시 준비와 실제 적용 여부는 [기록](../evals/scenarios.md#windows-accept-preparation)에 구분합니다. 현재 서버의 재발만으로 아래 `uvx` 실행을 선택하지 않습니다.
 
 기존 서버의 수락 오류와 접속 중단이 함께 확인되면 [Windows 선택 실행 파일](../scripts/serve_openwebui_windows.py)로 Proactor 수락 경로를 피하는 방안을 검토할 수 있습니다. 실행 파일은 `WindowsSelectorEventLoopPolicy`를 설정한 뒤 원래 `open_webui.serve()`를 호출합니다. v0.11.3의 Windows `serve()`는 `loop='none'`을 사용하므로 이 정책을 유지합니다. WebUI·Python 설치 파일을 수정하거나 오류 로그를 숨기는 방식이 아닙니다. [WebUI 기동 소스](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/__init__.py), [Uvicorn 0.51.0 loop 선택](https://github.com/Kludex/uvicorn/blob/0.51.0/uvicorn/config.py).
 
@@ -98,6 +97,8 @@ loopback에서 사내 IP로 접속 주소를 바꾼 뒤부터라는 단서가 �
 
 ### 현재 브라우저 주소를 허용 목록에 영구 저장
 
+아래 User 환경변수 방식은 래퍼 등록 전 수동 기동용입니다. 등록된 래퍼는 DPAPI에 보존한 실행 환경을 복원하므로 이 블록만으로 저장 환경이 갱신되지 않습니다. 현재 서버에서는 실제 origin 거부가 확인됐을 때 등록 설정과 기존 허용 목록을 먼저 대조하며, 적용을 위해 Init을 반복하거나 저장 파일을 임의 편집하지 않습니다.
+
 `is not an accepted origin`이 확인됐거나 승인된 브라우저 접속 주소를 변경할 때 사용합니다. 서버가 수신하는 `--host`와 브라우저 origin 허용 설정은 별개입니다. v0.11.3의 [CORS 설정](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/config.py)은 주소를 세미콜론으로 나누며, 빈 항목이나 `*;주소` 혼합은 기동 오류를 낼 수 있습니다.
 
 1. **현재 WebUI 서버를 실행한 원래 PowerShell**에서 `Ctrl+C`를 누르고 입력 가능한 상태가 될 때까지 기다립니다. 같은 창·기존 폴더를 유지합니다.
@@ -141,6 +142,8 @@ $env:CORS_ALLOW_ORIGIN = [Environment]::GetEnvironmentVariable('CORS_ALLOW_ORIGI
 
 ## 프록시 다운로드 실패
 
+아래는 수동 설치 때 해당 PowerShell의 다운로드 경로를 구분하는 예제입니다. 현재 래퍼의 Git/API/artifact 다운로드는 [Upgrade의 기존 프록시·인증 안내](03-openwebui-native-agent.md#ees-wrapper-upgrade)를 따르며, 이 예제의 `NO_PROXY`로 검증된 사내 모델 경로를 덮어쓰지 않습니다.
+
 ```powershell
 $proxyUrl = "http://<CORPORATE_PROXY_HOST>:<PORT>"
 $env:HTTP_PROXY = $proxyUrl
@@ -155,7 +158,7 @@ curl.exe -I --proxy $proxyUrl https://huggingface.co
 
 | 결과 | 의미 | 조치 |
 |---|---|---|
-| 200·301·302 | 경로 정상 | 같은 PowerShell에서 재시도 |
+| 200·301·302 | 해당 공개 URL의 HEAD 응답 확인 | 실제 패키지·artifact URL과 인증 경로는 별도 확인 |
 | 407 | 프록시 인증 필요 | 사내 인증·미러 방식 확인 |
 | 403 | 정책 차단 가능성 | allowlist 또는 패키지 미러 요청 |
 | 인증서 오류 | 사내 CA 문제 가능성 | 승인된 CA 신뢰 설정 |
@@ -164,6 +167,8 @@ curl.exe -I --proxy $proxyUrl https://huggingface.co
 --insecure, verify=false 등 TLS 검증 해제는 사용하지 않습니다.
 
 ## Open WebUI 시작 실패
+
+수동 최초 설치와 등록된 래퍼 기동을 구분합니다. 아래 `uvx`·임시 DEBUG 예제는 수동 설치의 진단 참고이며, 현재 래퍼의 접속 장애에서는 위의 [안전한 진단 정보](#안전한-진단-정보)부터 확인합니다. 등록된 서버를 다른 실행 방식으로 다시 띄우거나 후보 import 검사를 재개하지 않습니다.
 
 ### WEBUI_SECRET_KEY 로그 뒤 잠시 출력이 없음
 
@@ -325,7 +330,7 @@ Confluence `get_page`와 `query_knowledge_files`는 별도 경로입니다. 저�
 Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue
 ```
 
-출력이 없으면 아직 다운로드 중이거나 시작 전에 실패한 것입니다. 0.0.0.0:8080으로 열렸다면 중단하고 --host 127.0.0.1로 다시 시작합니다.
+8080은 기본 예제 포트이며 실제로 등록한 포트를 확인합니다. 출력이 없다는 것은 조회한 포트에 listener가 없다는 뜻입니다. 기동 전 대기·기동 실패·기동 후 수신 중단은 상태와 같은 시점의 로그로 구분하며, 프로세스 생존만으로 정상이라고 판정하지 않습니다. 수신 주소는 승인된 기존 접속 범위를 유지하고, 팀 파일럿 서버를 임의로 loopback 주소로 바꾸지 않습니다. [팀 접속 범위](01-openwebui-install.md#local-pc-pilot).
 
 ### Address already in use
 
