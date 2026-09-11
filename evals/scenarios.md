@@ -1848,6 +1848,10 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 사외 검증(Linux/Python 3.12.14): `python -m unittest discover -s tests -p 'test_ees_demo_assets.py' -q` 46개, `test_ees_apply_demo.py` 14개, `test_demo_bundle.py` 7개로 총67개 PASS. 관리/수동 질문 교체·재실행 무변경·제목을 고친 옛 설비 질문 보존·활성 본문 중복과 사용자 질문 충돌 전 쓰기 차단을 확인함. 실제 v0.2.5 세 질문에서 갱신하는 사례와 고정 frontend 소비 식의 새 세 질문 선택도 PASS. `python scripts/check_docs.py` files=29/links=847/errors=0/review_candidates=0 및 `git diff --check` PASS. 사내 모델/브라우저 E2E는 실행하지 않았음.
 - 사내 확인: 최신 main delivery CI 성공 뒤 기존 ApplyDemo 한 번, Ctrl+F5와 폴더 밖 새 EES 대화에서 세 제목 확인. 업무 현황은 개인 계정으로 연결된 실제 세 서비스 읽기이며 합성 분석/WO와 구분함. 저장소 복수면 대상 선택, EMS 문서가 없으면 존재하는 주제로 후속 요청. 전체 로그/사진 대신 적용 결과·제안 변경 여부 1~2줄만 받음. 실제 사내 등록·모델 호출·데이터/문서 존재·답변 정확성은 미확인으로 유지하며 과거 구문구 표시 실패를 지우지 않음.
 
+- 원격 완료(2026-09-11): [PR #34](https://github.com/knadalkim-a11y/team-agent-poc/pull/34)을 main `492eb5bc4145002db15090230cfd3bf3a40862fe`에 병합하고 [main EES delivery](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34554267099)의 Linux·Windows·전달 파일 생성 모두 첫 실행 성공을 확인함. 원격 tree와 사외 검증 tree가 일치함.
+- 후속 사내 실패(2026-09-11 사용자 보고): `action=apply_demo result=failed changed=0 commit=492eb5bc4145 stage=webui_version code=webui_connection_failed next=inspect_local_result`. 최신 main·열린 PR 0개·동일 로컬 tree를 확인하고 현재 진입점을 대조함. `/api/version` GET은 관리자 토큰 로딩·모델 선택·자산 쓰기보다 먼저이므로 이번 시도는 제안을 변경하지 않았음. 연결 거절·시간 초과·TLS·DNS 등의 구체 원인이나 서버 중지를 이 코드만으로 확정하지 않음.
+- 진단 공백과 최소 확인: 현재 WebUIClient는 연결 예외를 같은 코드로 바꾸고 원인을 보존하지 않아 `last-operation/last-failure`를 다시 읽어도 구분할 수 없음. `Status -Summary`도 프로세스 식별 상태이며 HTTP 응답을 검증하지 않음. 현재 선택 주소와 등록 주소를 같은 Python·저장 CA·프록시 미사용·리다이렉트 차단 조건으로 `/api/version`만 최대5초씩 조회하고 두 주소의 일치 여부와 고정 원인 분류를 출력하는 임시 확인 블록을 준비함. 로컬 합성 서버에서 정상 동일 주소, 저장 주소만 연결 거절/등록 주소 정상 두 경우를 직접 실행하여 예상 한 줄과 인증 없는 GET만 수행함을 확인함. 토큰 로딩·API 쓰기·설정 변경 없음. 사내에서는 이 짧은 결과와 필요 시 기존 Status 요약만 받으며 원문 로그/주소/토큰은 받지 않음. 주소 차이는 의도한 별도 경로일 수도 있어 자동 덮어쓰지 않음. 사내 연결 원인·후속 적용은 미확인이고 반복 ApplyDemo·Upgrade·재시작을 안내하지 않음.
+
 <a id="status-history-20260911"></a>
 
 ## 상태 문서에서 옮긴 과거 적용 원본과 검증 근거 — 2026-09-11

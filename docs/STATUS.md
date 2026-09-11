@@ -6,9 +6,9 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: v0.2.6에서 대표 제안 세 개 중 독립 설비 조회를 WO 흐름에 묶고 Jira·GitHub·Confluence 업무 현황 질문을 추가함. 실제 읽기 범위·이전 관리/수동 질문 갱신·사내 안내를 대조함. [변경·검증](../evals/scenarios.md#connector-demo-starters). 문서·브랜치 정리 완료와 [과거 근거](../evals/scenarios.md#repository-maintenance-20260911)는 유지함.
+- 이번 작업: v0.2.6 제안 변경은 PR #34/main `492eb5bc4145002db15090230cfd3bf3a40862fe`와 delivery CI 성공까지 확인했으나, 사용자의 사내 ApplyDemo는 `webui_version/webui_connection_failed`, `changed=0`으로 실패함. 인증·제안 갱신 전 연결 실패이며 원인은 미확정. [변경·실패·진단 범위](../evals/scenarios.md#connector-demo-starters).
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
-- 다음 제품 작업 하나: [기존 ApplyDemo 절차](03-openwebui-native-agent.md#first-use-entry)로 main CI 성공 후 v0.2.6을 한 번 갱신하고 새 EES 대화의 제안 세 개와 업무 현황 조회를 확인함. 실제 결과를 받기 전 완료 처리하지 않으며 서버 재시작·수동 제안 삭제를 선행하지 않음.
+- 다음 제품 작업 하나: 실패한 ApplyDemo가 사용하는 주소와 등록 서버 주소에 같은 Python·CA·프록시 미사용 조건으로 `/api/version` 읽기만 수행해 연결 상태를 구분함. 주소·토큰·원문 오류 없이 짧은 결과를 받음. 원인 확인 전 ApplyDemo 반복·토큰 초기화·주소 변경·서버 재시작을 선행하지 않으며, 연결 해결 뒤 제안 적용·새 화면 확인으로 이어감.
 
 ## 마지막으로 확인된 적용 상태
 
@@ -19,7 +19,7 @@
 | EES Portal 프로그램 | 2026-09-10 `c099e427f62b` 복구·적용·기동 성공, 대화 폭 확대·분석 패널 조절 시 파란 테두리 제거 모두 정상 보고 | 장기 안정성·최초 접속 소실 원인은 미확정. [복구·화면 확인](../evals/scenarios.md#ees-stop-recovery) |
 | 운영 래퍼 | 2026-09-11 `Update result=ok wrapper_changed=true wrapper=62a112c78a78` 보고. 프로그램 교체 없음 | 종료 처리·진단 보존 수정 적용 완료. `next=upgrade`만으로 추가 Upgrade를 요구하지 않음. [근거](../evals/scenarios.md#ees-update-failure-causes) |
 | 분석·업무 패널 자산 | v0.2.1 안내 원본 `bc8bffbb6043fb1401f995b312bf5709f50e5983` 이후 계획·오른쪽 패널 표시 정상 보고 | 실제 사내 SHA·개별 수치/회신 정확성 직접 대조 미실행. [확인 범위](../evals/scenarios.md#plan-work-panel-accepted) |
-| 대표 시작 질문 | Git v0.2.5, PR #33/main `5c6926b943e6c7a0d7785403d19f604686724c65` 및 CI 성공 | 패치 후 옛 질문 표시 보고가 마지막 화면 증거. 수정본 적용 SHA·화면 미확인. [원인·실제 UI 계약 검사](../evals/scenarios.md#starter-ui-field-fix) |
+| 대표 시작 질문 | Git v0.2.6, PR #34/main `492eb5bc4145002db15090230cfd3bf3a40862fe` 및 CI 성공. 사용자 실행도 `commit=492eb5bc4145` | 사내는 `webui_version/webui_connection_failed`, `changed=0`으로 갱신 전 중단. 새 화면 미확인. [결과](../evals/scenarios.md#connector-demo-starters), [이전 필드 오류](../evals/scenarios.md#starter-ui-field-fix) |
 | WO 목업 | v0.1.6 안내 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc` 뒤 크기 조절 정상 보고; Git은 v0.1.8 통합 패널 원본 | 실제 EMS 미연결. 이후 패널 적용 보고와 개별 등록 바이트 검증을 구분. [목업 이력](../evals/scenarios.md#wo-mockup) |
 | 기본 Assistant·기존 조회 | 이름·로고·기존 대화·평소 Confluence/Jira/GitHub 조회 정상, 초기 Rich UI 제거·변경 Prompt 반영 완료 보고 | Tool별 최신 등록 코드·SHA·새 일반 답변/원문 직접 대조 미실행. [반영 보고](../evals/scenarios.md#plain-output-applied-report), [이전 자산별 SHA](../evals/scenarios.md#status-history-20260911) |
 | 정책·Skill | 합성 정책·지침 저장 보고, P02 PASS·P03 일부 확인. Git/UI 등록 Skill 3개, 기존 2개의 사용 확인 | 실제 사내 정책·나머지 P 시험·confluence-read 실제 로딩 미확인. [기준](../evals/scenarios.md#instruction-revision) |
@@ -59,6 +59,6 @@
 
 ## 최근 점검
 
-2026-09-11: 최신 main `0913d506ed595af71594adb5177ec1fdb36e3353`와 같은 tree에서 시작하고 열린 PR 0개를 확인했습니다. v0.2.6 문구를 기존 세 연동의 읽기 범위와 대조하고 제안 적용·실제 frontend 필드 계약·이전 질문 보존 관련67개와 문서/diff 점검을 통과했습니다. 사내 수정본 화면과 실제 연동 시연은 아직 미확인입니다. [검사 결과·범위](../evals/scenarios.md#connector-demo-starters).
+2026-09-11: 사내 실패 보고를 최신 main `492eb5bc4145`의 진입점·접속 주소 선택·오류 처리와 대조했습니다. 버전 조회에서 멈춰 인증·자산 쓰기는 실행하지 않았고, 현재 오류 요약은 상세 연결 원인을 보존하지 않습니다. 같은 접속 방식의 읽기 전용 확인을 로컬 정상/저장 주소 연결 거절 사례로 검증했습니다. 사내 원인·새 제안은 미확인입니다. [실패·진단 근거](../evals/scenarios.md#connector-demo-starters).
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
