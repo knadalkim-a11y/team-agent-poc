@@ -770,6 +770,8 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 사용자가 여섯 목표의 본격 구현 전에 팀원 시연을 위한 이름·로고·빠른 제안과 배포 방식을 먼저 준비하자고 요청했습니다. [이전 보류 결정](../evals/scenarios.md#onboarding-deferred)은 당시 이력으로 보존합니다. 현재 [제안 JSON](../agent-pack/ees-prompt-suggestions.json)은 **생산 손실 분석·설비 조회·점검 WO 초안 작성의 대표 질문 세 개**로 구성합니다. ApplyDemo는 이 파일을 직접 읽으며, 별도의 분석 질문 목록을 중복 관리하지 않습니다. 범용 Assistant의 역할·최종 기능 목록을 제한하지 않으며 준비·실제 UI 저장·팀원 시연 결과는 구분합니다.
 
+**v0.2.4 적용 뒤 제안이 그대로인 경우:** 이전 래퍼는 화면이 읽지 않는 `meta.suggestionPrompts`에 저장했습니다. v0.2.5는 실제 편집기·메인 화면이 사용하는 `meta.suggestion_prompts`를 갱신하고 기존 적용 기록과 관리 질문을 호환 처리합니다. 새 수정본의 main CI 성공 뒤 아래 ApplyDemo를 한 번 사용합니다. 이전 버전 반복 실행·서버 재시작·수동 모델/질문 삭제는 해결 절차가 아닙니다. [사용자 보고·원인·검증](../evals/scenarios.md#starter-ui-field-fix).
+
 **이미 시연 자산을 적용한 사용자:** 변경이 main에 반영되고 해당 CI가 성공한 뒤 기존 저장소 폴더에서 아래 명령 한 번으로 갱신합니다. ApplyDemo가 최신 파일을 가져오므로 별도 Update·Upgrade·프로그램 다운로드·재시작은 필요하지 않습니다. 기존 연결된 WO 시연 기능과 지침을 사용합니다.
 
 ```powershell

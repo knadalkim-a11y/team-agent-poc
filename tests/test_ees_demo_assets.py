@@ -19,7 +19,11 @@ def read_grant(principal="team"):
 
 
 class FakeAPI:
-    """Models API whole-field replacement + tools frontmatter/grant normalization."""
+    """Models API replacement; visible prompts use meta.suggestion_prompts.
+
+    Unknown metadata, including the broken suggestionPrompts field, persists in
+    API round trips but is not the field read by the Open WebUI placeholder.
+    """
     def __init__(self):
         self.rows = {("model", "existing-ees"): {
             "id": "existing-ees", "user_id": "original-owner", "name": "EES 통합 Assistant",
@@ -29,7 +33,7 @@ class FakeAPI:
             "meta": {"toolIds": ["jira_real", "wo_demo"], "skillIds": ["policy"],
                      "knowledge": [{"id": "manual"}], "custom": {"keep": True},
                      "capabilities": {"memory": True},
-                     "suggestionPrompts": [{"title": ["기존", "업무"], "content": "기존 질문"}]},
+                     "suggestion_prompts": [{"title": ["기존", "업무"], "content": "기존 질문"}]},
             "access_grants": [read_grant(), {"principal_type": "user", "principal_id": "editor",
                                               "permission": "write"}]}}
         self.valves, self.calls = {}, []
@@ -159,8 +163,112 @@ class ApplyAssetsTests(unittest.TestCase):
         self.write_manifest()
         return json.loads(source), copy.deepcopy(shipped["retired_suggestions"])
 
-    def test_three_starters_replace_old_manual_and_managed_questions_once(self):
-        # Reproduce the previously shipped four manual + three ApplyDemo rows.
+    def install_v024_state(self):
+        """Represent the shipped API/journal shape without invoking a legacy merge."""
+        expected, retired = self.use_shipped_starter_suggestions()
+        self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"] = retired
+        self.apply()
+        path = self.state / assets.STATE_FILE
+        state = json.loads(path.read_text(encoding="utf-8"))
+        for key, record in state["assets"].items():
+            record["version"] = "0.2.4"
+            if not key.startswith("model:"):
+                continue
+            identifier = key.split(":", 1)[1]
+            row = self.api.rows[("model", identifier)]
+            row["meta"]["suggestionPrompts"] = copy.deepcopy(record["spec"]["suggestions"])
+            row["meta"].pop("suggestion_prompts")
+            if identifier == "existing-ees":
+                row["meta"]["suggestion_prompts"] = copy.deepcopy(retired)
+            record["spec"].pop("suggestion_key")
+            record["desired_value"] = assets._view(row, "model")
+            record["source_hash"] = assets._hash(assets._payload(row, "model"))
+        state["version"] = "0.2.4"
+        path.write_text(json.dumps(state), encoding="utf-8")
+        self.api.calls.clear()
+        return expected, retired
+
+    def test_v024_journal_migrates_visible_starters_and_reapplies_without_writes(self):
+        expected, retired = self.install_v024_state()
+        old = copy.deepcopy(self.api.rows[("model", "existing-ees")])
+        self.assertEqual(retired, old["meta"]["suggestion_prompts"])
+        self.assertEqual(expected, old["meta"]["suggestionPrompts"])
+        self.assertEqual(4, self.apply("b" * 40)["changed"])
+        new = self.api.rows[("model", "existing-ees")]
+        self.assertEqual(expected, new["meta"]["suggestion_prompts"])
+        for key in ("name", "base_model_id", "is_active", "params", "user_id"):
+            self.assertEqual(old[key], new[key])
+        self.assertEqual(assets._grants(old["access_grants"]), assets._grants(new["access_grants"]))
+        for key in ("toolIds", "skillIds", "knowledge", "custom", "capabilities"):
+            self.assertEqual(old["meta"][key], new["meta"][key])
+        for (kind, _), row in self.api.rows.items():
+            if kind == "model":
+                self.assertNotIn("suggestionPrompts", row["meta"])
+                self.assertIn("suggestion_prompts", row["meta"])
+        state = json.loads((self.state / assets.STATE_FILE).read_text(encoding="utf-8"))
+        for key, record in state["assets"].items():
+            if key.startswith("model:"):
+                self.assertEqual("suggestion_prompts", record["spec"]["suggestion_key"])
+        count = len(self.api.writes)
+        self.assertEqual(0, self.apply("b" * 40)["changed"])
+        self.assertEqual(count, len(self.api.writes))
+
+    def test_v024_migration_preserves_user_rows_in_both_metadata_fields(self):
+        expected, retired = self.install_v024_state()
+        meta = self.api.rows[("model", "existing-ees")]["meta"]
+        edited = copy.deepcopy(retired[1])
+        edited["title"] = ["내 설비 검색", "현장 편집"]
+        extras = [edited, {"title": ["사용자", "추가"], "content": "현장 추가 질문"}]
+        meta["suggestion_prompts"].extend(copy.deepcopy(extras))
+        legacy_extra = {"title": ["이전 사용자", "추가"], "content": "별도 저장 질문"}
+        meta["suggestionPrompts"].append(legacy_extra)
+        self.apply()
+        meta = self.api.rows[("model", "existing-ees")]["meta"]
+        self.assertEqual(extras + expected, meta["suggestion_prompts"])
+        self.assertEqual([legacy_extra], meta["suggestionPrompts"])
+        self.assertEqual(0, self.apply()["changed"])
+
+    def test_v024_migration_stops_on_managed_legacy_edit_or_visible_collision(self):
+        for key, code in (("suggestionPrompts", "managed_field_conflict"),
+                          ("suggestion_prompts", "suggestion_collision")):
+            with self.subTest(key=key):
+                self.setUp()
+                expected, _ = self.install_v024_state()
+                meta = self.api.rows[("model", "existing-ees")]["meta"]
+                edited = copy.deepcopy(expected[0])
+                edited["title"] = ["사용자 지정", "보존할 제목"]
+                if key == "suggestionPrompts":
+                    meta[key][0] = edited
+                else:
+                    meta[key].append(edited)
+                before = copy.deepcopy(self.api.rows)
+                self.expect_error(code)
+                self.assertEqual([], self.api.writes)
+                self.assertEqual(before, self.api.rows)
+
+    def test_v024_migration_recovers_old_pending_and_new_write_response_loss(self):
+        for mode in ("legacy-pending", "before", "after"):
+            with self.subTest(mode=mode):
+                self.setUp()
+                expected, _ = self.install_v024_state()
+                if mode == "legacy-pending":
+                    path = self.state / assets.STATE_FILE
+                    state = json.loads(path.read_text(encoding="utf-8"))
+                    state["assets"]["model:existing-ees"]["status"] = "pending"
+                    path.write_text(json.dumps(state), encoding="utf-8")
+                    self.assertEqual(4, self.apply()["changed"])
+                else:
+                    setattr(self.api, "fail_" + mode, ("model", "existing-ees"))
+                    error = self.expect_error("asset_apply_failed")
+                    self.assertTrue(error.pending)
+                    setattr(self.api, "fail_" + mode, None)
+                    self.assertEqual(1 if mode == "before" else 0, self.apply()["changed"])
+                self.assertEqual(expected,
+                                 self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"])
+                self.assertEqual(0, self.apply()["changed"])
+
+    def test_canonical_starters_replace_old_manual_and_managed_questions_once(self):
+        # A later release must also replace questions already managed in the UI field.
         previous = [
             {"title": ["개선 기회 찾기", "조립 2라인 · 시연"],
              "content": "조립 2라인을 분석해서 생산 손실을 줄일 수 있는 개선 기회를 찾아줘."},
@@ -174,13 +282,13 @@ class ApplyAssetsTests(unittest.TestCase):
         self.manifest["ees"].pop("retired_suggestions")
         self.manifest["ees"]["suggestions"] = previous
         self.write_manifest()
-        self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"] = retired
+        self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"] = retired
         self.apply()
-        self.assertEqual(7, len(self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"]))
+        self.assertEqual(7, len(self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"]))
 
         self.use_shipped_starter_suggestions()
         self.assertEqual(1, self.apply("b" * 40)["changed"])
-        self.assertEqual(expected, self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"])
+        self.assertEqual(expected, self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"])
         count = len(self.api.writes)
         self.assertEqual(0, self.apply("b" * 40)["changed"])
         self.assertEqual(count, len(self.api.writes))
@@ -192,10 +300,10 @@ class ApplyAssetsTests(unittest.TestCase):
         edited_content = copy.deepcopy(retired[3])
         edited_content["content"] += " 조립 2라인부터 찾아줘."
         extras = [edited_title, edited_content, {"title": ["사용자", "추가"], "content": "추가 질문"}]
-        self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"] = retired + copy.deepcopy(extras)
+        self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"] = retired + copy.deepcopy(extras)
         self.apply()
         self.assertEqual(extras + expected,
-                         self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"])
+                         self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"])
         count = len(self.api.writes)
         self.assertEqual(0, self.apply()["changed"])
         self.assertEqual(count, len(self.api.writes))
@@ -205,7 +313,7 @@ class ApplyAssetsTests(unittest.TestCase):
         edited = copy.deepcopy(retired[0])
         self.assertIn(edited["content"], [row["content"] for row in expected])
         edited["title"] = ["내가 수정한", "천안 조회"]
-        self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"] = retired + [edited]
+        self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"] = retired + [edited]
         before = copy.deepcopy(self.api.rows)
         self.expect_error("suggestion_collision")
         self.assertEqual([], self.api.writes)
@@ -262,7 +370,7 @@ class ApplyAssetsTests(unittest.TestCase):
         model["params"]["system"] += "\n현장 추가 규칙"
         model["params"]["temperature"] = 0.4
         model["meta"]["toolIds"].append("new-real-tool")
-        model["meta"]["suggestionPrompts"].append({"title": ["사용자", "추가"], "content": "추가 질문"})
+        model["meta"]["suggestion_prompts"].append({"title": ["사용자", "추가"], "content": "추가 질문"})
         self.api.valves["ees_demo_data"]["timeout_seconds"] = 150
         (self.root / "agent-pack/ees.md").write_text("개선한 시연 지침", encoding="utf-8")
         (self.root / "agent-pack/data.py").write_text((self.root / "agent-pack/data.py").read_text(encoding="utf-8") + "# version 2\n", encoding="utf-8")
@@ -274,7 +382,7 @@ class ApplyAssetsTests(unittest.TestCase):
         self.assertIn("개선한 시연 지침", model["params"]["system"])
         self.assertEqual(0.4, model["params"]["temperature"])
         self.assertIn("new-real-tool", model["meta"]["toolIds"])
-        self.assertIn("추가 질문", [s["content"] for s in model["meta"]["suggestionPrompts"]])
+        self.assertIn("추가 질문", [s["content"] for s in model["meta"]["suggestion_prompts"]])
         self.assertEqual(150, self.api.valves["ees_demo_data"]["timeout_seconds"])
 
     def add_panel_script(self, script="(() => { const title = '협업 과정'; })();\n"):
@@ -555,7 +663,7 @@ class ApplyAssetsTests(unittest.TestCase):
                 elif mutation == "tool":
                     model["meta"]["toolIds"].remove("ees_demo_data")
                 elif mutation == "suggestion":
-                    model["meta"]["suggestionPrompts"][-1]["title"] = ["수정", "제목"]
+                    model["meta"]["suggestion_prompts"][-1]["title"] = ["수정", "제목"]
                 elif mutation == "native":
                     model["params"]["function_calling"] = "legacy"
                 else:
@@ -712,7 +820,7 @@ class ApplyAssetsTests(unittest.TestCase):
 
     def test_real_manifest_sources_pass_preflight(self):
         manifest = assets.load_manifest(MODULE.parents[1])
-        self.assertEqual("0.2.4", manifest["version"])
+        self.assertEqual("0.2.5", manifest["version"])
         suggestions = json.loads((MODULE.parents[1] / "agent-pack/ees-prompt-suggestions.json").read_text(encoding="utf-8"))
         self.assertEqual(3, len(suggestions))
         self.assertEqual(suggestions, manifest["ees"]["suggestions"])
@@ -750,7 +858,7 @@ class ApplyAssetsTests(unittest.TestCase):
         self.assertEqual([], self.api.writes)
 
     def test_user_suggestion_with_same_content_is_not_silently_replaced(self):
-        self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"].append(
+        self.api.rows[("model", "existing-ees")]["meta"]["suggestion_prompts"].append(
             {"title": ["내가 만든", "제목"], "content": self.manifest["ees"]["suggestions"][0]["content"]})
         self.expect_error("suggestion_collision")
         self.assertEqual([], self.api.writes)

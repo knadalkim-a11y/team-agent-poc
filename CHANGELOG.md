@@ -4,6 +4,8 @@
 
 ## 2026-09-11
 
+- v0.2.4 적용 후에도 제안이 바뀌지 않는 필드명 오류를 수정함. 실제 WebUI의 `suggestion_prompts`를 사용하고 이전 잘못된 필드/적용 기록에서 갱신하며, 실제 UI 계약과 사용자 수정 보존을 대조함. 이전 모의 검사 통과를 화면 반영 성공으로 보지 않음. [원인·검증](evals/scenarios.md#starter-ui-field-fix).
+
 - 메인 화면의 대표 시연 질문을 생산 손실 분석·천안 설비 조회·점검 WO 초안 세 개로 정리함. ApplyDemo와 수동 가져오기가 같은 JSON을 사용하고, 과거 공식 수동 질문은 전체 일치일 때만 정리해 사용자 질문을 보존함. [적용](docs/03-openwebui-native-agent.md#first-use-entry), [검증](evals/scenarios.md#three-demo-starters).
 
 ## 2026-09-10

@@ -215,7 +215,8 @@ def _spec(item, kind, ees=False):
         return {"keys": sorted(item)}
     if kind == "tool":
         return {"existing_only": True} if item.get("kind") == "work_order" else {}
-    return {"ees": ees, "tool_ids": item["tool_ids"], "suggestions": item["suggestions"]}
+    return {"ees": ees, "tool_ids": item["tool_ids"], "suggestions": item["suggestions"],
+            "suggestion_key": "suggestion_prompts"}
 
 
 def _projection(asset, kind, spec):
@@ -232,7 +233,10 @@ def _projection(asset, kind, spec):
         return result
     params = _dict(asset.get("params"))
     tools = meta.get("toolIds") or []
-    suggestions = meta.get("suggestionPrompts") or []
+    # Journals through v0.2.4 tracked the wrong camelCase metadata field. Check
+    # those records against that field before migrating; do not claim ownership
+    # of the independent, visible UI suggestions from a legacy record.
+    suggestions = meta.get(spec.get("suggestion_key", "suggestionPrompts")) or []
     if not isinstance(tools, list) or not isinstance(suggestions, list):
         raise DemoAssetsError("invalid_model_lists")
     selected = []
@@ -292,14 +296,17 @@ def _merge_model(current, item, ees, previous):
     params["function_calling"] = "native"
     old_tools = (previous or {}).get("tool_ids", [])
     tools = meta.get("toolIds") or []
-    suggestions = meta.get("suggestionPrompts") or []
+    suggestions = meta.get("suggestion_prompts") or []
     if not isinstance(tools, list) or not isinstance(suggestions, list):
         raise DemoAssetsError("invalid_model_lists")
     meta["toolIds"] = [x for x in tools if x not in old_tools and x not in item["tool_ids"]] + item["tool_ids"]
     # Retire only exact, formerly shipped starter rows; preserve local edits.
     retired = item.get("retired_suggestions", []) if ees else []
     suggestions = [row for row in suggestions if row not in retired]
-    old_content = {x["content"] for x in (previous or {}).get("suggestions", [])}
+    previous_key = (previous or {}).get("suggestion_key", "suggestionPrompts")
+    previous_suggestions = (previous or {}).get("suggestions", [])
+    old_content = ({x["content"] for x in previous_suggestions}
+                   if previous_key == "suggestion_prompts" else set())
     new_content = {x["content"] for x in item["suggestions"]}
     for proposed in item["suggestions"]:
         if proposed["content"] not in old_content:
@@ -307,8 +314,17 @@ def _merge_model(current, item, ees, previous):
                        and row.get("content") == proposed["content"]]
             if matches and matches != [proposed]:
                 raise DemoAssetsError("suggestion_collision")
-    meta["suggestionPrompts"] = [x for x in suggestions if not (isinstance(x, dict)
+    meta["suggestion_prompts"] = [x for x in suggestions if not (isinstance(x, dict)
         and x.get("content") in old_content | new_content)] + item["suggestions"]
+    if previous and previous_key == "suggestionPrompts" and "suggestionPrompts" in meta:
+        # The legacy projection has already verified its managed rows. Remove
+        # only those exact rows and preserve any unrelated camelCase metadata.
+        remaining = [row for row in (meta["suggestionPrompts"] or [])
+                     if row not in previous_suggestions]
+        if remaining:
+            meta["suggestionPrompts"] = remaining
+        else:
+            meta.pop("suggestionPrompts")
     meta["ees_demo_pack"] = PACK
     if not ees:
         result["name"] = item["name"]
