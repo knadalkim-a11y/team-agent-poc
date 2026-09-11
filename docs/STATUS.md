@@ -6,7 +6,7 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 문서의 오래된 현재 상태와 중단한 절차를 정돈하고 브랜치 병합 상태를 점검함. 누적 적용 SHA·CI·실패 증거는 [기존 평가 기록](../evals/scenarios.md#status-history-20260911)에 보존함. [정리 결과와 남은 범위](../evals/scenarios.md#repository-maintenance-20260911).
+- 이번 작업: 문서 정리와 병합 브랜치 32개 삭제를 완료함. 사용자 성공 보고에 이어 원격에서 main·미병합 작업 보존을 확인함. 누적 적용 SHA·CI·실패 증거는 [기존 평가 기록](../evals/scenarios.md#status-history-20260911)에 보존함. [정리 결과와 남은 범위](../evals/scenarios.md#repository-maintenance-20260911).
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
 - 다음 제품 작업 하나: [기존 ApplyDemo 절차](03-openwebui-native-agent.md#first-use-entry)로 v0.2.5를 한 번 갱신한 뒤 새 EES 대화의 대표 제안 세 개를 확인함. 실제 결과를 받기 전 완료 처리하지 않으며 서버 재시작·수동 제안 삭제를 선행하지 않음.
 
@@ -52,13 +52,13 @@
 ## 재개와 환경 유지
 
 - 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. 이번 관련 문서는 [첫 화면](03-openwebui-native-agent.md#first-use-entry)·[필드 오류 근거](../evals/scenarios.md#starter-ui-field-fix)이며 필요할 때만 해당 코드/시험을 읽습니다.
-- 브랜치는 main 포함 34개 중 병합된 32개를 정리 대상으로 확인함. `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`를 보존함. 현재 연결에 삭제 기능이 없어 **원격 삭제는 미실행**이며 [고정 대상·실행 절차](../README.md#branch-maintenance)를 준비함.
+- 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`이며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245`도 그대로임. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
 - GLM 5.2 기준의 작은 Tool·짧은 절차·일반 JSON을 유지하고 모델 교체 때 대표 업무·실패/금지 요청을 비교함. 화면·답변에 이모지를 쓰지 않음. 기존 Hermes·팀원 작성물은 보존하며 서비스화·서버 이전·별도 Router/A2A/자동 동기화·공통 UI 프레임워크는 실제 필요에 따라 후속으로 다룸. [공통 자산 관리 경계](../README.md#원본과-배포본).
 
 ## 최근 점검
 
-2026-09-11: 최신 main의 문서 29개와 이슈 기록·실제 적용 보고·브랜치 34개를 대조했습니다. 누적 이력은 기존 evals로 옮기고 현재 상태와 중단한 사용 절차를 정돈했습니다. v0.2.5의 main 병합·CI 성공을 반영하되 사내 적용 미확인은 유지합니다. 문서 29개·링크 844개와 diff 검사를 통과했습니다. 원격 반영과 브랜치 삭제 실행 여부는 [정리 기록](../evals/scenarios.md#repository-maintenance-20260911)에서 구분합니다.
+2026-09-11: 사용자 삭제 성공 결과를 원격 브랜치 전체 목록과 대조해 34→2개, 대상 32개 부재와 미병합 head 보존을 확인했습니다. 문서의 삭제 대기 표시를 완료로 갱신하고 실행 명령은 과거 절차로 표시했습니다. 제품의 다음 확인은 v0.2.5 제안의 사내 적용·화면 확인으로 유지합니다. [정리·검증 기록](../evals/scenarios.md#repository-maintenance-20260911).
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.

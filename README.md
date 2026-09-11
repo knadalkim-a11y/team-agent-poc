@@ -153,9 +153,12 @@ python scripts/check_docs.py --root . --json
 
 ## 병합 브랜치 정리
 
-2026-09-11 점검에서 원격 34개 중 **32개는 병합된 PR의 마지막 head 그대로**이고, `main`과 미병합 커밋이 있는 `fix/upgrade-apply-failure`는 보존 대상입니다. 이름·전체 SHA·PR은 [고정 점검 목록](evals/scenarios.md#repository-maintenance-20260911)에 남깁니다. 현재 연결에는 삭제 기능이 없어 실제 삭제는 아직 수행하지 않았습니다.
+2026-09-11 점검에서 원격 34개 중 **32개는 병합된 PR의 마지막 head 그대로**이고, `main`과 미병합 커밋이 있는 `fix/upgrade-apply-failure`는 보존 대상입니다. 이름·전체 SHA·PR은 [고정 점검 목록](evals/scenarios.md#repository-maintenance-20260911)에 남깁니다. **정리 완료:** 사용자가 `branch_cleanup=ok, deleted=32`를 보고했고 원격에서도 대상 32개 삭제와 `main`·`fix/upgrade-apply-failure` 두 브랜치 보존을 확인했습니다.
 
-이미 사용하는 Windows 저장소와 Git 인증으로 아래 블록을 한 번 실행합니다. 코드가 최신 origin/main의 점검 데이터를 읽으므로 로컬 파일·브랜치를 전환하거나 프로그램을 업데이트하지 않습니다. 고정 32개 중 이미 없는 브랜치는 건너뛰고, 원격 head 변경·main 미병합이면 삭제 전에 중단합니다. Git 서버가 보호 정책·권한·원자적 처리를 거부하면 일괄 삭제도 중단하며 강제 우회·부분 삭제로 재시도하지 않습니다. `--force-with-lease`는 점검 후 head가 바뀐 브랜치의 삭제를 막는 조건이며 커밋을 덮어쓰는 동작은 없습니다.
+아래는 2026-09-11에 실행한 절차 보존본이며 이번 정리를 위해 다시 실행할 필요는 없습니다. 당시 기존 Windows 저장소와 Git 인증으로 실행했습니다. 코드가 최신 origin/main의 점검 데이터를 읽으므로 로컬 파일·브랜치를 전환하거나 프로그램을 업데이트하지 않습니다. 고정 32개 중 이미 없는 브랜치는 건너뛰고, 원격 head 변경·main 미병합이면 삭제 전에 중단합니다. Git 서버가 보호 정책·권한·원자적 처리를 거부하면 일괄 삭제도 중단하며 강제 우회·부분 삭제로 재시도하지 않습니다. `--force-with-lease`는 점검 후 head가 바뀐 브랜치의 삭제를 막는 조건이며 커밋을 덮어쓰는 동작은 없습니다.
+
+<details>
+<summary>완료한 브랜치 정리 명령</summary>
 
 ```powershell
 & {
@@ -201,7 +204,9 @@ python scripts/check_docs.py --root . --json
 }
 ```
 
-마지막 `branch_cleanup=ok deleted=숫자` 한 줄이면 결과를 전달할 수 있습니다. push 중 통신이 끊기면 실패 출력만으로 삭제 0개라고 판단하지 않고 원격 상태부터 확인합니다. 사용자 로컬 작업 브랜치는 삭제하지 않습니다. 이번 목록에 없거나 보존 대상으로 둔 브랜치는 별도 검토 없이 추가하지 않습니다. 향후 병합 브랜치 누적을 줄이려면 저장소 Settings → General → Pull Requests의 **Automatically delete head branches**를 사용할 수 있습니다. 점검 당시 설정은 꺼져 있었고 이번 작업에서 변경하지 않았습니다.
+</details>
+
+당시 마지막 `branch_cleanup=ok deleted=32` 한 줄로 실행 결과를 받았으며 원격 확인 결과는 위 완료 기록에 남겼습니다. push 중 통신이 끊기면 실패 출력만으로 삭제 0개라고 판단하지 않고 원격 상태부터 확인합니다. 사용자 로컬 작업 브랜치는 삭제하지 않습니다. 이번 목록에 없거나 보존 대상으로 둔 브랜치는 별도 검토 없이 추가하지 않습니다. 향후 병합 브랜치 누적을 줄이려면 저장소 Settings → General → Pull Requests의 **Automatically delete head branches**를 사용할 수 있습니다. 점검 당시 설정은 꺼져 있었고 이번 작업에서 변경하지 않았습니다.
 
 ## 범위와 안전 경계
 
