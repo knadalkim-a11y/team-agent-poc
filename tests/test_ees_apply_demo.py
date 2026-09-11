@@ -6,6 +6,8 @@ import io
 import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+import shutil
+import subprocess
 import tempfile
 import threading
 import unittest
@@ -133,6 +135,51 @@ class WebUIHTTPTests(unittest.TestCase):
             saved = json.loads(Path(directory, "demo-connection.json").read_text(encoding="utf-8"))
             self.assertEqual(saved["ees_model_id"], "existing")
             self.assertEqual(saved["url"], self.url)
+
+
+class PromptFrontendContractTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("node"), "Node is required to execute the upstream frontend expression")
+    def test_model_payload_changes_the_actual_frontend_suggestions(self):
+        manifest = demo.assets.load_manifest(Path(__file__).resolve().parents[1])
+        item = manifest["ees"]
+        expected, retired = item["suggestions"], item["retired_suggestions"]
+        current = {"id": "existing-ees", "name": "EES 통합 Assistant",
+                   "base_model_id": "synthetic-base", "params": {"system": ""},
+                   "meta": {"suggestion_prompts": retired, "suggestionPrompts": expected},
+                   "access_grants": [], "is_active": True}
+        previous = {"tool_ids": item["tool_ids"], "suggestions": expected}
+        updated = demo.assets._merge_model(current, item, True, previous)
+        # The return expression is copied verbatim from Open WebUI 0.11.3:
+        # https://github.com/open-webui/open-webui/blob/2a960a59fe1dbbd35282f0556b3666d81102e781/src/lib/components/chat/Placeholder.svelte#L283-L286
+        # Keep this consumer contract independent of the writer/state key. The
+        # API accepts unknown metadata, so payload echo tests missed this bug.
+        consumer = """
+const input = JSON.parse(require('node:fs').readFileSync(0, 'utf8'));
+function suggestions(meta) {
+    const atSelectedModel = null;
+    const models = [{info: {meta}}];
+    const selectedModelIdx = 0;
+    const $config = {default_prompt_suggestions: input.retired};
+    return atSelectedModel?.info?.meta?.suggestion_prompts ??
+        models[selectedModelIdx]?.info?.meta?.suggestion_prompts ??
+        $config?.default_prompt_suggestions ??
+        [];
+}
+process.stdout.write(JSON.stringify({
+    before: suggestions(input.before),
+    after: suggestions(input.after),
+    camelOnly: suggestions({suggestionPrompts: input.expected})
+}));
+"""
+        result = subprocess.run([shutil.which("node"), "-e", consumer],
+                                input=json.dumps({"before": current["meta"], "after": updated["meta"],
+                                                  "retired": retired, "expected": expected}),
+                                capture_output=True, text=True, encoding="utf-8", check=True, timeout=10)
+        visible = json.loads(result.stdout)
+        self.assertEqual(visible["before"], retired)
+        self.assertEqual(visible["camelOnly"], retired)
+        self.assertEqual(visible["after"], expected)
+        self.assertEqual(len(visible["after"]), 3)
 
 
 class OperatorTests(unittest.TestCase):
