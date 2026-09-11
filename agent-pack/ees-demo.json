@@ -1,5 +1,5 @@
 {
-  "version": "0.2.3",
+  "version": "0.2.4",
   "tools": [
     {
       "id": "ees_specialists",
@@ -63,10 +63,36 @@
   "ees": {
     "prompt_path": "agent-pack/system-prompts/ees-orchestration-demo.md",
     "tool_ids": ["ees_specialists", "ees_demo_data"],
-    "suggestions": [
-      {"title": ["개선 기회 찾기", "조립 2라인 · 시연"], "content": "조립 2라인을 분석해서 생산 손실을 줄일 수 있는 개선 기회를 찾아줘."},
-      {"title": ["다른 사례 분석하기", "조립 2라인 · 시연"], "content": "조립 2라인의 다른 시연 사례에서도 개선 기회가 있는지 확인해줘."},
-      {"title": ["반복 정비 줄이기", "조립 2라인 · 시연"], "content": "조립 2라인에서 반복 정비를 줄일 수 있는 부분을 찾아줘."}
+    "suggestions_path": "agent-pack/ees-prompt-suggestions.json",
+    "retired_suggestions": [
+      {
+        "title": [
+          "천안 설비 찾기",
+          "조립 1라인의 설비 조회"
+        ],
+        "content": "시연용으로 한국 천안 사업장의 조립 SHOP, 조립 1라인 설비를 찾아줘."
+      },
+      {
+        "title": [
+          "헝가리 설비 찾기",
+          "전극 2라인의 코팅 설비"
+        ],
+        "content": "시연용으로 헝가리 법인 헝가리 사업장의 전극 SHOP, 전극 2라인, 코팅 공정 설비를 찾아줘."
+      },
+      {
+        "title": [
+          "AI로 WO 초안 작성",
+          "소음 점검 요청 자동 작성"
+        ],
+        "content": "시연용으로 한국 천안 사업장의 조립 SHOP, 조립 1라인, 권취 설비에서 소음이 나는 상황이야. 점검 WO 초안을 작성해줘. 작업 구분은 점검, 우선순위는 일반으로 해줘."
+      },
+      {
+        "title": [
+          "직접 설비 선택하기",
+          "검색 패널에서 찾아보기"
+        ],
+        "content": "시연용 설비 조회 화면을 열어줘. 내가 필터로 설비를 고른 뒤에 WO 초안 작성을 요청할게."
+      }
     ]
   }
 }

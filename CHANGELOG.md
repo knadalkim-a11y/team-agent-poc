@@ -2,6 +2,10 @@
 
 완료된 변경·중요 결정과 날짜별 관찰을 기록합니다. 다음 작업과 최신 배포 상태는 [STATUS](docs/STATUS.md), 시험별 현재 판정은 [평가표](evals/scenarios.md)가 원본입니다. 과거 실패 기록을 현재 장애나 재실행 지시로 해석하지 않습니다.
 
+## 2026-09-11
+
+- 메인 화면의 대표 시연 질문을 생산 손실 분석·천안 설비 조회·점검 WO 초안 세 개로 정리함. ApplyDemo와 수동 가져오기가 같은 JSON을 사용하고, 과거 공식 수동 질문은 전체 일치일 때만 정리해 사용자 질문을 보존함. [적용](docs/03-openwebui-native-agent.md#first-use-entry), [검증](evals/scenarios.md#three-demo-starters).
+
 ## 2026-09-10
 
 - 반복 업데이트 실패 조사에서 Windows 종료/신원 조회 경합과 WAIT_FAILED 처리 결함을 수정하고, 정상 종료 helper·Upgrade 오류의 고정 단계/숫자/위치를 보존함. 최신 실패를 성공 뒤에도 유지하며 보존된 종료 실패 로그만 읽는 한정 검사를 추가함. 기존 정상 종료·데이터 보존 경계와 미확정 원인 구분을 유지함. [근거·조치](evals/scenarios.md#ees-update-failure-causes).

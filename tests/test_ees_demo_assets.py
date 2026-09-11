@@ -148,6 +148,86 @@ class ApplyAssetsTests(unittest.TestCase):
         self.assertNotIn("private API", str(caught.exception))
         return caught.exception
 
+    def use_shipped_starter_suggestions(self):
+        shipped = json.loads((MODULE.parents[1] / "agent-pack/ees-demo.json").read_text(encoding="utf-8"))["ees"]
+        relative = shipped["suggestions_path"]
+        source = (MODULE.parents[1] / relative).read_text(encoding="utf-8")
+        (self.root / relative).write_text(source, encoding="utf-8")
+        self.manifest["ees"].pop("suggestions", None)
+        for key in ("suggestions_path", "retired_suggestions"):
+            self.manifest["ees"][key] = copy.deepcopy(shipped[key])
+        self.write_manifest()
+        return json.loads(source), copy.deepcopy(shipped["retired_suggestions"])
+
+    def test_three_starters_replace_old_manual_and_managed_questions_once(self):
+        # Reproduce the previously shipped four manual + three ApplyDemo rows.
+        previous = [
+            {"title": ["개선 기회 찾기", "조립 2라인 · 시연"],
+             "content": "조립 2라인을 분석해서 생산 손실을 줄일 수 있는 개선 기회를 찾아줘."},
+            {"title": ["다른 사례 분석하기", "조립 2라인 · 시연"],
+             "content": "조립 2라인의 다른 시연 사례에서도 개선 기회가 있는지 확인해줘."},
+            {"title": ["반복 정비 줄이기", "조립 2라인 · 시연"],
+             "content": "조립 2라인에서 반복 정비를 줄일 수 있는 부분을 찾아줘."},
+        ]
+        expected, retired = self.use_shipped_starter_suggestions()
+        self.manifest["ees"].pop("suggestions_path")
+        self.manifest["ees"].pop("retired_suggestions")
+        self.manifest["ees"]["suggestions"] = previous
+        self.write_manifest()
+        self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"] = retired
+        self.apply()
+        self.assertEqual(7, len(self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"]))
+
+        self.use_shipped_starter_suggestions()
+        self.assertEqual(1, self.apply("b" * 40)["changed"])
+        self.assertEqual(expected, self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"])
+        count = len(self.api.writes)
+        self.assertEqual(0, self.apply("b" * 40)["changed"])
+        self.assertEqual(count, len(self.api.writes))
+
+    def test_retiring_starters_preserves_edited_rows_and_user_questions(self):
+        expected, retired = self.use_shipped_starter_suggestions()
+        edited_title = copy.deepcopy(retired[1])
+        edited_title["title"] = ["내 설비 검색", "현장 편집"]
+        edited_content = copy.deepcopy(retired[3])
+        edited_content["content"] += " 조립 2라인부터 찾아줘."
+        extras = [edited_title, edited_content, {"title": ["사용자", "추가"], "content": "추가 질문"}]
+        self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"] = retired + copy.deepcopy(extras)
+        self.apply()
+        self.assertEqual(extras + expected,
+                         self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"])
+        count = len(self.api.writes)
+        self.assertEqual(0, self.apply()["changed"])
+        self.assertEqual(count, len(self.api.writes))
+
+    def test_edited_legacy_title_colliding_with_new_starter_stops_before_writes(self):
+        expected, retired = self.use_shipped_starter_suggestions()
+        edited = copy.deepcopy(retired[0])
+        self.assertIn(edited["content"], [row["content"] for row in expected])
+        edited["title"] = ["내가 수정한", "천안 조회"]
+        self.api.rows[("model", "existing-ees")]["meta"]["suggestionPrompts"] = retired + [edited]
+        before = copy.deepcopy(self.api.rows)
+        self.expect_error("suggestion_collision")
+        self.assertEqual([], self.api.writes)
+        self.assertEqual(before, self.api.rows)
+
+    def test_starter_path_errors_and_duplicate_source_stop_before_api_calls(self):
+        cases = (("missing", "invalid_source_path"), ("escape", "invalid_source_path"),
+                 ("duplicate", "invalid_manifest"))
+        for mode, code in cases:
+            with self.subTest(mode=mode):
+                self.setUp()
+                expected, _ = self.use_shipped_starter_suggestions()
+                if mode == "missing":
+                    self.manifest["ees"]["suggestions_path"] = "agent-pack/missing.json"
+                elif mode == "escape":
+                    self.manifest["ees"]["suggestions_path"] = str(MODULE.parents[1] / "agent-pack/ees-prompt-suggestions.json")
+                else:
+                    self.manifest["ees"]["suggestions"] = expected
+                self.write_manifest()
+                self.expect_error(code)
+                self.assertEqual([], self.api.calls)
+
     def test_creates_then_reapplies_without_mutation_and_preserves_ees(self):
         old = copy.deepcopy(self.api.rows[("model", "existing-ees")])
         result = self.apply()
@@ -632,7 +712,11 @@ class ApplyAssetsTests(unittest.TestCase):
 
     def test_real_manifest_sources_pass_preflight(self):
         manifest = assets.load_manifest(MODULE.parents[1])
-        self.assertEqual("0.2.3", manifest["version"])
+        self.assertEqual("0.2.4", manifest["version"])
+        suggestions = json.loads((MODULE.parents[1] / "agent-pack/ees-prompt-suggestions.json").read_text(encoding="utf-8"))
+        self.assertEqual(3, len(suggestions))
+        self.assertEqual(suggestions, manifest["ees"]["suggestions"])
+        self.assertEqual(4, len(manifest["ees"]["retired_suggestions"]))
         self.assertEqual({"ees_specialists", "ees_demo_data"}, {t["id"] for t in manifest["tools"]})
         self.assertEqual({"ees_demo_ems", "ees_demo_apc", "ees_demo_fdc"},
                          {m["id"] for m in manifest["models"]})
