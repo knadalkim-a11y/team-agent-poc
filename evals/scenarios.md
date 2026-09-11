@@ -16,6 +16,7 @@
 | 서버 종료 실패와 명시적 복구 | [process_stop 실패·복구 결과](#ees-stop-recovery) |
 | 대화 폭·파란 조절 테두리 | [1920px 화면 보완](#ees-chat-width-resize), [사용자 정상 확인](#ees-stop-recovery) |
 | WO 코드 인식·폴더 변경 실패 | [공식 편집기 정렬본](#wo-editor-format-adoption), [rename/Resume](#ees-wrapper-manual-resume), [Portal 적용 실패](#ees-portal-upgrade-apply-failure) |
+| Jira·GitHub·Confluence 대표 질문 | [v0.2.6 구성·갱신·조회 범위](#connector-demo-starters) |
 | 적용 뒤에도 옛 제안 표시 | [실제 UI 필드 오류·모의 검사 공백·v0.2.5 보완](#starter-ui-field-fix) |
 | 중단한 후보 배포 방식 | [단순 래퍼로 전환한 결정](#ees-wrapper-maintenance), [과거 상태 문서의 적용 원본·CI 증거](#status-history-20260911) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
@@ -1836,6 +1837,16 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 
 - 원격 반영 확인(2026-09-11): [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33)은 main `5c6926b943e6c7a0d7785403d19f604686724c65`에 병합됐고 [main EES delivery CI #100](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)은 첫 실행 `completed/success`임을 확인함. 수정본의 사내 ApplyDemo 결과·실제 새 제안 화면은 아직 미확인.
 
+
+<a id="connector-demo-starters"></a>
+
+### Jira·GitHub·Confluence를 포함한 대표 질문 — 2026-09-11
+
+- 사용자 요청: 첫 화면은 약 세 개로 유지하면서 최근 시연과 GitHub·Jira·Confluence 활용을 포함함. 최신 main `0913d506ed595af71594adb5177ec1fdb36e3353`, tree `f5e54616502ece8611950adc5d6a84160185a4af`와 열린 PR 0개를 확인하고 문서 정리 결과를 보존함.
+- 구성: v0.2.6은 생산 손실 분석·점검 WO·회의 전 업무 현황의 세 질문을 제공함. 기존 WO 질문에 설비 검색 조건이 이미 포함되어 독립 목록 질문을 업무 현황으로 교체함. Jira는 허용 시스템별 전체/미완료 집계, GitHub는 연결 저장소의 열린 PR 목록, Confluence는 EMS 검색 결과의 실제 ID로 문서 1개 본문을 읽고 요약/원문을 제시하도록 함. 현행 Tool과 공통 Prompt를 독립 대조했으며 지원하지 않는 기간 필터·코드 검토·리뷰 승인·CI 조회나 근거 없는 시스템 간 연관을 요구하지 않음.
+- 갱신: 제안 JSON 공통 원본과 v0.2.5의 실제 `suggestion_prompts` 갱신 경로를 유지함. 관리된 이전 세 질문은 기록에 따라 교체하고 수동 가져오기의 독립 설비 질문도 전체 일치 항목만 은퇴 목록으로 정리함. 처음 검사에서 구/신 설비 제목의 같은 본문을 은퇴 목록까지 중복으로 거절하는 제한을 발견함. 은퇴 목록의 중복 검증만 전체 행 기준으로 바꾸고, 활성 제안의 본문 중복 차단과 사용자 수정/추가·기존 권한·토큰·연동 설정 보호를 유지함. 이전 camel 필드·pending 복구는 변경하지 않음.
+- 사외 검증(Linux/Python 3.12.14): `python -m unittest discover -s tests -p 'test_ees_demo_assets.py' -q` 46개, `test_ees_apply_demo.py` 14개, `test_demo_bundle.py` 7개로 총67개 PASS. 관리/수동 질문 교체·재실행 무변경·제목을 고친 옛 설비 질문 보존·활성 본문 중복과 사용자 질문 충돌 전 쓰기 차단을 확인함. 실제 v0.2.5 세 질문에서 갱신하는 사례와 고정 frontend 소비 식의 새 세 질문 선택도 PASS. `python scripts/check_docs.py` files=29/links=847/errors=0/review_candidates=0 및 `git diff --check` PASS. 사내 모델/브라우저 E2E는 실행하지 않았음.
+- 사내 확인: 최신 main delivery CI 성공 뒤 기존 ApplyDemo 한 번, Ctrl+F5와 폴더 밖 새 EES 대화에서 세 제목 확인. 업무 현황은 개인 계정으로 연결된 실제 세 서비스 읽기이며 합성 분석/WO와 구분함. 저장소 복수면 대상 선택, EMS 문서가 없으면 존재하는 주제로 후속 요청. 전체 로그/사진 대신 적용 결과·제안 변경 여부 1~2줄만 받음. 실제 사내 등록·모델 호출·데이터/문서 존재·답변 정확성은 미확인으로 유지하며 과거 구문구 표시 실패를 지우지 않음.
 
 <a id="status-history-20260911"></a>
 
