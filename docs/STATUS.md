@@ -6,9 +6,9 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: v0.2.6 제안 변경은 PR #34/main `492eb5bc4145002db15090230cfd3bf3a40862fe`와 delivery CI 성공까지 확인했으나, 사용자의 사내 ApplyDemo는 `webui_version/webui_connection_failed`, `changed=0`으로 실패함. 후속 확인은 `same=true`, 두 API 조회 모두 연결 거절, Status는 `customized/c099e427f62b/running=true`임. 프로세스 생존과 HTTP 응답 정상은 별개이며 포트 수신 상태·현재 로그 원인은 미확정. [변경·실패·진단 범위](../evals/scenarios.md#connector-demo-starters).
+- 이번 작업: v0.2.6 제안 변경은 PR #34/main `492eb5bc4145002db15090230cfd3bf3a40862fe`와 delivery CI 성공까지 확인했으나, 사용자의 사내 ApplyDemo는 `webui_version/webui_connection_failed`, `changed=0`으로 실패함. 후속 확인은 `same=true`, 두 API 조회 모두 연결 거절, Status는 `customized/c099e427f62b/running=true`임. 후속 `ip_present=True/listeners=0/bind_match=False`로 등록 IP는 있지만 서비스 포트 수신이 없음을 확인함. 현재 로그는 full/age_min40/startup·listener64·future64=false/OSError이며 수신 소실 원인은 미확정. [변경·실패·진단 범위](../evals/scenarios.md#connector-demo-starters).
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
-- 다음 제품 작업 하나: .NET으로 등록 IP 존재·설정 포트의 수신 상태를 확인하고 현재 `deployment.json/process/log_file`의 제한된 로그만 기존 요약기로 읽음. 예전에 미지원이었던 Get-NetTCPConnection과 과거 종료 실패 로그 재검사는 사용하지 않음. 결과는 두 줄만 받고 수신이 사라졌는지/다른 바인딩인지 구분해 현재 프로그램의 복구 여부를 결정한 뒤 제안 적용으로 이어감.
+- 다음 제품 작업 하나: 현재 deployment 기록·실행 로그·마지막 실패 기록을 사내에 복사 보존한 뒤 기존 프로그램을 정상 Stop→Start 한 번으로 재기동함. 시작 health 확인은 최대120초이며 응답하면 즉시 진행함. main delivery CI 성공과 Start 성공 뒤에만 ApplyDemo로 제안을 적용함. 어느 단계든 실패하면 후속을 중단하고 짧은 결과만 받음. 강제 종료·Upgrade·DB/키/환경 변경을 선행하지 않음.
 
 ## 마지막으로 확인된 적용 상태
 
@@ -16,7 +16,7 @@
 
 | 대상 | 마지막 확인과 적용 원본 | 남은 한계·근거 |
 |---|---|---|
-| EES Portal 프로그램 | 2026-09-10 `c099e427f62b` 복구·적용·기동 성공, 대화 폭 확대·분석 패널 조절 시 파란 테두리 제거 모두 정상 보고 | 장기 안정성·최초 접속 소실 원인은 미확정. [복구·화면 확인](../evals/scenarios.md#ees-stop-recovery) |
+| EES Portal 프로그램 | 2026-09-10 `c099e427f62b` 복구·화면 수정 정상 보고 이후, 2026-09-11 같은 프로그램의 프로세스 생존·IP 존재·수신 포트0·API 연결 거절 보고 | 현재 접속 불가를 조사 중이며 재기동 성공은 미확인. 수신 소실 원인은 미확정. [복구·화면 확인](../evals/scenarios.md#ees-stop-recovery) |
 | 운영 래퍼 | 2026-09-11 `Update result=ok wrapper_changed=true wrapper=62a112c78a78` 보고. 프로그램 교체 없음 | 종료 처리·진단 보존 수정 적용 완료. `next=upgrade`만으로 추가 Upgrade를 요구하지 않음. [근거](../evals/scenarios.md#ees-update-failure-causes) |
 | 분석·업무 패널 자산 | v0.2.1 안내 원본 `bc8bffbb6043fb1401f995b312bf5709f50e5983` 이후 계획·오른쪽 패널 표시 정상 보고 | 실제 사내 SHA·개별 수치/회신 정확성 직접 대조 미실행. [확인 범위](../evals/scenarios.md#plan-work-panel-accepted) |
 | 대표 시작 질문 | Git v0.2.6, PR #34/main `492eb5bc4145002db15090230cfd3bf3a40862fe` 및 CI 성공. 사용자 실행도 `commit=492eb5bc4145` | 사내는 `webui_version/webui_connection_failed`, `changed=0`으로 갱신 전 중단. 새 화면 미확인. [결과](../evals/scenarios.md#connector-demo-starters), [이전 필드 오류](../evals/scenarios.md#starter-ui-field-fix) |
@@ -59,6 +59,6 @@
 
 ## 최근 점검
 
-2026-09-11: 동일 주소 연결 거절과 등록 프로세스 생존 보고를 현재 Status·프로세스 식별 코드와 대조했습니다. 원격 main `31b6cc7d6bb4`·열린 PR 0개·동일 로컬 tree를 확인했습니다. 저장 주소 불일치와 인증 단계 문제는 이번 증거에 맞지 않으며 포트 수신·현재 실행 로그를 다음 최소 확인으로 정했습니다. 당시 WinError64와 같은 원인으로 확정하거나 정상 서버라고 처리하지 않았습니다. 실행 코드 변경·사내 복구는 아직 없습니다. [실패·진단 근거](../evals/scenarios.md#connector-demo-starters).
+2026-09-11: 등록 IP 존재·설정 포트 수신0·현재 로그 요약을 확인했습니다. 최신 main `af539106f927`·열린 PR 0개·같은 로컬 tree에서 기존 Stop/Start/ApplyDemo의 실패 전파와 보존 경계를 독립 대조했습니다. 정상 Stop 후 현재 프로그램의 Start가 health를 확인해야 제안 적용으로 진행하는 한 번의 복구를 준비했습니다. 실제 Windows 복구·새 화면은 미확인입니다. 기록 갱신은 복구 중 main을 바꾸지 않도록 별도 문서 PR에서 관리합니다. [실패·진단 근거](../evals/scenarios.md#connector-demo-starters).
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
