@@ -974,7 +974,7 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 실패 요약은 `operation/reason`, Windows 숫자 오류, 경과 시간·한도와 알려진 코드 위치를 표시합니다. `last-operation.json`은 최신 작업 결과이고 `last-failure.json`은 최신 실패를 이후 성공과 구분해 보존합니다. 파일은 사내에 남기며 원문을 외부로 옮기지 않습니다.
 
-**수정본의 검증·main 반영을 확인한 뒤**, 아래 한 블록으로 래퍼를 Update하고 보존된 종료 실패 로그만 읽습니다. Update는 서버를 재시작하지 않고, 읽기 검사도 프로그램·프로세스·데이터·로그를 변경하거나 네트워크 요청을 하지 않습니다.
+**최초 검사 절차 기록:** 2026-09-11 사용자 보고로 아래 Update와 전체 로그 검사가 완료됐습니다. 이번 사용자는 이 블록을 반복하지 않고 뒤의 오류 위치 확인만 진행합니다. 처음 실행하는 경우에는 수정본의 검증·main 반영을 확인한 뒤 아래 한 블록으로 래퍼를 Update하고 보존된 종료 실패 로그만 읽습니다. Update는 서버를 재시작하지 않고, 읽기 검사도 프로그램·프로세스·데이터·로그를 변경하거나 네트워크 요청을 하지 않습니다.
 
 ```powershell
 & {
@@ -989,6 +989,57 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 ```
 
 `source=stop_failure`는 마지막 Upgrade 종료 실패 당시 서버를 가리킵니다. 앞선 접속 장애의 서버와 같다고 가정하지 않습니다. `accept_listener64=true`는 같은 traceback의 listener 오류 조합을 확인한 것이며 `accept_future64=true`만으로 listener 종료까지 확정하지 않습니다. TLS는 별도 관찰입니다. `truncated=true`이거나 `status=unavailable`이면 부재·정상으로 판정하지 않습니다. 현재 서버 로그나 최신 로그로 임의 대체하지 않습니다. 결과에서 `status/code`, `accept_listener64/accept_future64`, `tls_verify_failed/truncated`만 한 줄로 전달하면 됩니다.
+
+
+##### 보존 로그의 오류 위치 확인 — 추가 배포 없음
+
+2026-09-11 첫 검사에서는 종료 실패 로그 전체 28,850바이트를 읽었고 지정된 accept/Win64·TLS·기동 완료 표시가 모두 false였습니다. `startup_complete=false`는 완료 문구 부재이며 현재 서버의 상태나 기동 실패 확정이 아닙니다. Update의 `next=upgrade`는 일반 안내이므로 이 조사에서는 실행하지 않습니다. [사용자 결과와 판단 범위](../evals/scenarios.md#ees-update-failure-causes).
+
+아래는 **같은 보존 로그의 실제 오류 유형과 공개 코드 위치만 한 번 확인**합니다. 기존 선택·검증을 통과했을 때만 두 줄을 출력하고 프로그램·서버·로그·상태를 쓰지 않습니다. 추가 Update·패키지 설치가 필요하지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $repo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $cfg = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $c = Get-Content -Raw -Encoding UTF8 $cfg | ConvertFrom-Json
+    $probe = @'
+import sys
+from pathlib import Path
+try:
+    sys.path.insert(0, str(Path(sys.argv[1]) / 'scripts'))
+    import ees_deploy_report as r
+    saved, original = {}, r._summarize
+    def capture(payload, **kw):
+        value = original(payload, **kw)
+        saved.update(value)
+        return value
+    r._summarize = capture
+    try:
+        result = r.inspect_recovery(r.states.load_config(Path(sys.argv[2])))
+    finally:
+        r._summarize = original
+    if result.get('status') != 'ok' or not saved:
+        print(r.render_recovery(result))
+        raise SystemExit(1)
+    def public(frames):
+        return next((x for x in reversed(frames) if x != 'other'), '-')
+    first = saved['first_error_type'] or '-'
+    frames = saved['frames'] if saved['first_error_matches_last_traceback'] else saved['first_error_frames']
+    first_at = public(frames) if first != '-' else '-'
+    errors = ','.join(saved['error_types']) or '-'
+    print('EES detail=stop_failure status=ok scope=' + result['scan_scope'] + ' errors=' + errors + ' first=' + first)
+    print('first_at=' + first_at + ' last_at=' + public(saved['frames']))
+except Exception:
+    print('EES detail=stop_failure status=unavailable')
+    raise SystemExit(1)
+'@
+    & $c.source_python -I -B -c $probe $repo $cfg
+    if ($LASTEXITCODE -ne 0) { throw 'EES detail unavailable; use the final result.' }
+}
+```
+
+출력 두 줄의 `errors/first`, `first_at/last_at`만 전달합니다. `errors`는 발견한 오류 종류이며 발생 순서나 마지막 오류 하나를 뜻하지 않습니다. `first`는 첫 비인터럽트 오류이고 코드 위치는 각 traceback에서 마지막으로 식별된 공개 프레임이므로 근본 원인으로 자동 판정하지 않습니다. 현재 서버나 더 앞선 다른 로그로 바꾸지 않습니다. 이 결과에도 단서가 없으면 과거 사고의 원인은 미확정으로 남기고, 재발 시 이미 보완한 실패 기록으로 확인합니다.
 
 <a id="ees-stop-recovery"></a>
 

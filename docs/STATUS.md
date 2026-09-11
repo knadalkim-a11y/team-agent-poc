@@ -1,6 +1,6 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-10
+갱신일: 2026-09-11
 
 계획·다음 작업·적용 원본을 관리합니다. 시험 판정은 [평가표](../evals/scenarios.md), 환경은 [versions](../versions.md), 과거 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
@@ -8,8 +8,8 @@
 
 - 목표: [여섯 가지 프로젝트 목표](../README.md#프로젝트-목표)에 따라 쉬운 Chat UI·문서 시스템·관리자 공통 정책·관리자 워크플로·레거시 연동·레거시 간접 UI를 제공함. 범용 Assistant·팀원 Prompt/Skill 공유를 유지하고 Open WebUI Native와 Git Agent Pack을 우선 활용함.
 - 현재 위치: **단순 래퍼와 EES 이름·로고의 사내 적용 작업 단위를 완료함.** 2026-09-09 사용자 보고로 Apply -Resume/Start 성공에 이어 이름·로고 변경, 기존 대화 유지, 평소 Jira·Confluence·GitHub 조회 정상을 확인함. 이후 실시간 가동·장기 안정성·rename/SSL 원인 해소까지 확인한 것은 아님. [적용·사용 흐름 근거](../evals/scenarios.md#ees-wrapper-manual-resume).
-- 이번 작업: **반복된 업데이트·패치 실패의 원인을 구분하고 확인된 래퍼 결함을 수정함.** Windows 종료 중 신원 조회 경합과 WAIT_FAILED 처리, 정상 종료 helper의 오류 손실, Upgrade 파일 오류 위치 누락과 마지막 실패 보존을 보완함. 사내 UI 수정은 정상 확인된 상태로 유지하며 현재 서버를 재시작하지 않음. [분석·조치·미확정 범위](../evals/scenarios.md#ees-update-failure-causes).
-- 다음 작업 하나: **검증된 래퍼 수정본을 Update하고 보존된 종료 실패 로그만 읽어 원인을 확인한다.** 원본이 정확히 연결되는 저장 로그만 검사하며 원문·사내 경로를 외부로 내보내지 않음. 현재 서버와 다른 사건을 섞지 않고 결과 한 줄로 다음 판단을 이어감. [읽기 검사](03-openwebui-native-agent.md#ees-update-failure-causes).
+- 이번 작업: **반복 실패를 보완한 래퍼 62a112c78a78의 사내 Update 성공과 보존 로그 검사 결과를 확인함.** 프로그램 교체 없이 래퍼만 갱신됐으며 마지막 종료 실패 로그 전체 28,850바이트에서 지정한 accept/Win64·TLS·기동 완료 표시를 찾지 못함. 원인 확정·현재 서버 상태 판정으로 확대하지 않음. [분석·사용자 결과](../evals/scenarios.md#ees-update-failure-causes).
+- 다음 작업 하나: **추가 배포 없이 같은 보존 로그의 오류 유형과 공개 코드 위치를 한 번 확인한다.** 기존 로그 선택·안전 검사를 재사용하며 원문·사내 경로는 출력하지 않음. 단서가 없으면 과거 사고는 원인 미확정으로 남기고 재발 시 이미 보완한 실패 기록을 사용함. Update 출력의 일반적인 next=upgrade를 이번 실행 지시로 해석하지 않음. [두 줄 확인](03-openwebui-native-agent.md#ees-update-failure-causes).
 - 공유 DB 전제와 후속: 여러 시스템이 하나의 물리 DB와 일부 공통 데이터를 사용하나 각 담당자는 자기 시스템 지식에 집중되어 있음. [관계 발견 설계](03-openwebui-native-agent.md#shared-db-relations)는 운영 데이터 연결을 준비할 때 사용하며 현재 시연 범위에서 제외함. 시스템 간 실제 의미·접근 권한·스키마는 아직 조사하지 않음.
 - 배포 확인: UI 수정본 [PR #29](https://github.com/knadalkim-a11y/team-agent-poc/pull/29)의 프로그램 원본 `c099e427f62bcdb752fe4321e39223915cac035a`를 사내에 적용·기동했다고 보고받음. 복구 코드 [PR #30](https://github.com/knadalkim-a11y/team-agent-poc/pull/30)은 main `ab97218a9957eb43d436ea02d4fee9a20021c7c3`에 병합됐고 [main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34540099706) attempt 2의 Windows/Linux·전달물 생성 성공을 확인함. attempt 1의 기존 Windows 테스트 cleanup 조회 실패는 PR에 보존하며 서버 장애의 원인 해결이나 장기 안정성으로 확대하지 않음.
 - 설비 조회 관리 합의: 여러 업무에서 쓰는 공통 기능이므로 운영용 설계에서는 독립 Tool로 등록·관리하는 방향을 유지함. 사용자는 이번 시연에 한해 적용이 간단한 기존 단일 등록 항목을 유지하기로 함. 현재는 같은 Tool 안의 함수 분리이며 별도 등록 완료가 아님. 후속 요청의 설비 조회 패널도 같은 등록 항목에서 제공하며 새 적용 성공 보고로 간주하지 않음.
@@ -120,7 +120,7 @@ ProbeImports 시간 기준 수정 원본은 `25e4af3972d3b46a232c24216741aececa9
 
 ## 최근 점검
 
-2026-09-10: 반복 실패 이력과 코드·공식 Windows/CPython/Uvicorn 동작을 대조함. Windows 종료 경합과 잘못된 대기 상태 처리, helper·Upgrade 진단 손실을 재현·보완하고 기존 파일의 읽기 검사로 보존된 종료 실패 로그를 제한하여 확인함. 사내 접속 장애·파일 접근 거부의 원인은 아직 미확정이며 재설치·자동 강제 종료로 확대하지 않음. [근거·검증 범위](../evals/scenarios.md#ees-update-failure-causes).
+2026-09-11: 사용자 Update 성공과 종료 실패 보존 로그의 full/28,850bytes·모든 검사 표시 false 결과를 코드와 대조함. next=upgrade가 Update의 일반 안내임을 확인하고 기동 실패·과거 접속 소실 원인으로 단정하지 않음. 제품 코드 변경 없이 같은 검사 경계에서 오류 유형·공개 프레임을 두 줄로 받는 안내를 준비하고 합성 7개 조건의 무쓰기·원문 비노출을 확인함. 단서가 없으면 과거 원인은 미확정으로 유지하며 재현·반복 배포를 요구하지 않음. [근거·검증 범위](../evals/scenarios.md#ees-update-failure-causes).
 
 ## 갱신 규칙
 
