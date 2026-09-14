@@ -935,13 +935,13 @@ Set-Location "$env:USERPROFILE\team-agent-poc"
 
 #### WinError64 수신 보호와 정지 전 확인
 
-09-14 장애는 임시 복구했으며 같은 진단·재시작을 반복하지 않습니다. 재발 방지 코드는 [PR #35](https://github.com/knadalkim-a11y/team-agent-poc/pull/35)에서 검증하며 **수정 head의 Windows/Linux CI 통과와 명시적 병합·사내 적용 승인 뒤** 아래 절차를 사용합니다. 현재 반영·실환경 판정은 [검증 근거](../evals/scenarios.md#accept64-guard-20260914)에서 확인합니다.
+09-14 장애의 임시 복구 이후 [PR #35](https://github.com/knadalkim-a11y/team-agent-poc/pull/35)의 검증·병합·승인된 사내 보호 적용까지 확인했습니다. 현재 보호 적용·기동 health는 확인됐고 유휴 이후 안정성은 미확인입니다. 이미 완료한 진단·적용·재시작을 반복하지 않으며 다음 자연 유휴 이후 접속 유지 여부만 확인합니다. 실제 적용 원본·사용자 보고·과거 실패는 [검증 근거](../evals/scenarios.md#accept64-guard-20260914)에서 관리합니다.
 
 기존 래퍼는 원본·커스터마이즈 모두 자식 기동에서만 [수락 보호](../scripts/ees_deploy_accept.py)를 설치합니다. 검토한 Windows CPython 3.11 `IocpProactor.accept` AST·필요 메서드·오류 상수가 다르면 WebUI import 전에 중단합니다. WinError64는 실패한 연결 소켓을 닫고 0.1초 뒤 재수락합니다. 다른 오류는 전파하고 취소·수신 종료 때 재시도하지 않습니다. 로그는 고정 오류 번호와 1·2·4·8…회 누계만 남깁니다. Proactor의 비동기 subprocess 지원과 원래 종료·식별 경계를 유지합니다. 시스템 Python·패키지·DB·키·등록 주소는 바꾸지 않습니다.
 
 `Start -CheckOnly -Summary`는 실행 중인 서버에서도 등록 Python의 호환성을 읽기 전용으로 확인합니다. 앱 import·포트 바인드·Stop·health 대기·기록 쓰기를 하지 않습니다. `guard=compatible`은 적용 가능성이고, 새 Start의 `guard=win64_retry`는 현재 자식 로그의 보호 설치 표시입니다. 기존 프로세스에 Start만 실행해 `already_running`을 받은 것은 보호 적용 증거가 아닙니다. 보관된 과거 로그는 재사용하지 않습니다.
 
-아래는 **승인된 적용 시점용** 블록입니다. 기존 checkout·등록 환경을 사용하고 Update 이후 호환성 확인이 실패하면 Stop 전에 끝납니다. 코드 전송은 파일 실행을 사용하며 PowerShell `python -c`로 Python 소스를 전달하지 않습니다. 기존 포털 프로그램 교체·ApplyDemo·모델 변경은 포함하지 않습니다.
+아래는 **향후 별도로 승인된 적용 시점용** 절차이며, 이번 적용 성공 뒤 다시 실행할 명령이 아닙니다. 그 시점의 검증된 main·변경 범위를 먼저 확인하고 기존 checkout·등록 환경을 사용합니다. Update 이후 호환성 확인이 실패하면 Stop 전에 끝납니다. 코드 전송은 파일 실행을 사용하며 PowerShell `python -c`로 Python 소스를 전달하지 않습니다. 기존 포털 프로그램 교체·ApplyDemo·모델 변경은 포함하지 않습니다. Update 결과의 `next=upgrade`만으로 추가 Upgrade를 실행하지 않습니다.
 
 ```powershell
 & {
