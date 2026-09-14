@@ -183,6 +183,7 @@ try {
         return openRaw(value, explicit, focusOnOpen);
       };
       const updateWorkTabs = () => {
+        if (work?.renderTabs) return work.renderTabs(chatId, shadow, 'work-');
         ['analysis', 'equipment', 'wo'].forEach(key => {
           const button = q('work-' + key); button.disabled = key !== 'analysis' && !work?.available(chatId, key);
           button.setAttribute('aria-selected', String((work?.selected(chatId) || 'analysis') === key));

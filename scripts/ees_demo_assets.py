@@ -126,7 +126,10 @@ def load_manifest(root: Path):
     manifest = _dict(json.loads(_read_source(root, "agent-pack/ees-demo.json")), "invalid_manifest")
     if not isinstance(manifest.get("version"), (str, int)):
         raise DemoAssetsError("invalid_manifest")
-    if len(manifest.get("tools", [])) != 2 or len(manifest.get("models", [])) != 3:
+    count = len(manifest.get("tools", []))
+    if count not in {2, 3} or len(manifest.get("models", [])) != 3:
+        raise DemoAssetsError("invalid_manifest_scope")
+    if count == 3 and not any(item.get("id") == "ees_workflow" for item in manifest["tools"]):
         raise DemoAssetsError("invalid_manifest_scope")
     identifiers = []
     for item in manifest["tools"]:

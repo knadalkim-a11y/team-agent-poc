@@ -868,15 +868,20 @@ class ApplyAssetsTests(unittest.TestCase):
 
     def test_real_manifest_sources_pass_preflight(self):
         manifest = assets.load_manifest(MODULE.parents[1])
-        self.assertEqual("0.2.6", manifest["version"])
+        self.assertEqual("0.2.7", manifest["version"])
         suggestions = json.loads((MODULE.parents[1] / "agent-pack/ees-prompt-suggestions.json").read_text(encoding="utf-8"))
         self.assertEqual(3, len(suggestions))
         self.assertEqual(suggestions, manifest["ees"]["suggestions"])
         self.assertEqual(5, len(manifest["ees"]["retired_suggestions"]))
-        self.assertEqual({"ees_specialists", "ees_demo_data"}, {t["id"] for t in manifest["tools"]})
+        self.assertEqual({"ees_specialists", "ees_demo_data", "ees_workflow"}, {t["id"] for t in manifest["tools"]})
         self.assertEqual({"ees_demo_ems", "ees_demo_apc", "ees_demo_fdc"},
                          {m["id"] for m in manifest["models"]})
         for tool in manifest["tools"]:
+            if "ui_script_paths" not in tool:
+                self.assertEqual("ees_workflow", tool["id"])
+                compile(tool["content"], tool["path"], "exec")
+                self.assertIn("ees_workflow", tool["content"])
+                continue
             script = "\n".join((MODULE.parents[1] / path).read_text(encoding="utf-8")
                                for path in tool["ui_script_paths"])
             original = (MODULE.parents[1] / tool["path"]).read_text(encoding="utf-8")

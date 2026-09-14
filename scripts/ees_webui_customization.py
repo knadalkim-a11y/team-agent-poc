@@ -103,9 +103,11 @@ def _record_rows(content, *, allow_packaging=False, version=branding.VERSION):
     record_name = info + "RECORD"
     required = {record_name, info + "METADATA", info + "WHEEL", "open_webui/__init__.py",
                 "open_webui/env.py", "open_webui/main.py", "open_webui/frontend/index.html", app + "version.json"}
-    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5"}:
+    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6"}:
         required.update(app + name for name in branding.THEME_FILES)
     if version == "0.11.3+ees.5":
+        required.update(branding.LEGACY_WORK_FILES)
+    if version == "0.11.3+ees.6":
         required.update(branding.WORK_FILES)
     rows = {}
     folded = set()

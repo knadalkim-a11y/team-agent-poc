@@ -1,8 +1,13 @@
 /* Fixed bootstrap shared by the existing analysis and WO Tools. It coordinates
  * one launcher and registered screens; business state remains in each Tool. */
-(function () {
-  if (window.__eesWorkPanelV1) return;
-  const chats = new Map(), legacyLaunchers = new Map(), route = id => '/c/' + encodeURIComponent(id);
+(function startWorkPanel() {
+  // Keep only this fixed factory across logout. The native SPA can start a
+  // fresh coordinator after login without fetching or evaluating another script.
+  window.__eesStartWorkPanelV1 = startWorkPanel;
+  if (window.__eesWorkPanelV1) return window.__eesWorkPanelV1;
+  const chats = new Map(), legacyLaunchers = new Map(), route = id => id === '' ? '/' : '/c/' + encodeURIComponent(id);
+  const labels = {workflow: '업무 진행', analysis: '분석 과정', equipment: '설비 조회', wo: 'WO 작성'};
+  const list = chatId => Array.from(chats.get(chatId)?.screens.values() || [], screen => ({key: screen.key, label: screen.label || labels[screen.key]}));
   let active = null, disposed = false, restoring = false;
   const layout = () => {
     const anchor = document.querySelector('#chat-container #chat-pane'), column = anchor?.parentElement, row = column?.parentElement;
@@ -21,9 +26,40 @@
     launcher.addEventListener('click', () => chat.opened ? close(chatId) : select(chatId, chat.selected, {open: true}));
     return chat;
   };
+  const renderTabs = (chatId, shadow, prefix) => {
+    const container = shadow?.getElementById('work-tabs'), chat = chats.get(chatId);
+    if (!container || !chat) return;
+    container.hidden = false;
+    Object.keys(labels).forEach(key => {
+      const screen = chat.screens.get(key);
+      let button = shadow.getElementById(prefix + key);
+      if (!button && screen) {
+        button = document.createElement('button'); button.id = prefix + key; button.type = 'button';
+        button.setAttribute('role', 'tab');
+        button.addEventListener('click', () => select(chatId, key, {open: true}));
+        container.append(button);
+      }
+      if (!button) return;
+      const label = screen?.label || labels[key];
+      if (button.textContent !== label) button.textContent = label;
+      button.hidden = !screen; button.disabled = !screen;
+      button.setAttribute('aria-selected', String(chat.selected === key));
+      button.title = screen ? '' : '이 대화에서 해당 업무를 요청하면 사용할 수 있습니다.';
+    });
+  };
   const notify = chat => {
-    const info = {selected: chat.selected, open: chat.opened, available: Array.from(chat.screens.keys())};
+    const info = {selected: chat.selected, open: chat.opened, available: Array.from(chat.screens.keys()), screens: list(chat.chatId)};
     chat.screens.forEach(screen => screen.onChange?.(info));
+    // Previously registered Tools contain a fixed three-tab template. The
+    // program bootstrap extends those reviewed hosts without replacing drafts.
+    const hosts = new Set();
+    chat.screens.forEach(screen => {
+      if (hosts.has(screen.hostId)) return;
+      hosts.add(screen.hostId);
+      const shadow = document.getElementById(screen.hostId)?.shadowRoot;
+      if (screen.hostId === 'ees-cooperation-panel') renderTabs(chat.chatId, shadow, 'work-');
+      if (screen.hostId === 'ees-wo-demo-panel') renderTabs(chat.chatId, shadow, 'work-tab-');
+    });
     const title = chat.opened ? '업무 패널 닫기' : '업무 패널 열기';
     chat.launcher.title = title; chat.launcher.setAttribute('aria-label', title); chat.launcher.setAttribute('aria-expanded', String(chat.opened));
     chat.launcher.setAttribute('aria-controls', chat.screens.get(chat.selected)?.hostId || ''); chat.launcher.style.backgroundColor = chat.opened ? '#8882' : '';
@@ -57,7 +93,10 @@
     if (disposed) return;
     if (/^\/(auth|logout)(\/|$)/.test(location.pathname)) { destroy(); return; }
     const next = Array.from(chats.values()).find(chat => location.pathname === route(chat.chatId)) || null;
-    if (active && active !== next) { active.slot.remove(); if (active.column) active.column.style.minWidth = active.originalMinWidth; }
+    if (active && active !== next) {
+      active.screens.forEach(screen => { if (screen.isOpen()) screen.close(); });
+      active.slot.remove(); if (active.column) active.column.style.minWidth = active.originalMinWidth;
+    }
     active = next; const nextLayout = next ? layout() : null;
     if (!nextLayout) { next?.slot.remove(); return; }
     if (next.column !== nextLayout.column) { next.column = nextLayout.column; next.originalMinWidth = next.column.style.minWidth; }
@@ -74,7 +113,8 @@
     restore(next.chatId);
   };
   const register = (chatId, screen) => {
-    if (disposed || typeof chatId !== 'string' || !['analysis', 'equipment', 'wo'].includes(screen?.key)
+    if (disposed || typeof chatId !== 'string' || !Object.hasOwn(labels, screen?.key)
+        || (chatId === '' && screen.key !== 'workflow')
         || !['open', 'close', 'isOpen'].every(key => typeof screen[key] === 'function')) return false;
     let chat = chats.get(chatId); if (!chat) { chat = create(chatId); chats.set(chatId, chat); }
     chat.screens.set(screen.key, screen); if (!chat.selected) chat.selected = screen.key;
@@ -84,6 +124,8 @@
   };
   const unregister = (chatId, key) => {
     const chat = chats.get(chatId); if (!chat) return;
+    const removed = chat.screens.get(key);
+    if (removed?.isOpen()) removed.close();
     chat.screens.delete(key);
     if (chat.selected === key) { chat.selected = chat.screens.keys().next().value || null; chat.opened = false; }
     if (!chat.screens.size) { chat.slot.remove(); chats.delete(chatId); }
@@ -94,12 +136,13 @@
   const destroy = () => {
     if (disposed) return; disposed = true; observer.disconnect();
     window.removeEventListener('popstate', sync); window.removeEventListener('pagehide', destroy); navigation?.removeEventListener('navigatesuccess', sync);
-    chats.forEach(chat => { chat.slot.remove(); if (chat.column) chat.column.style.minWidth = chat.originalMinWidth; }); chats.clear();
+    chats.forEach(chat => { chat.screens.forEach(screen => { if (screen.isOpen()) screen.close(); }); chat.slot.remove(); if (chat.column) chat.column.style.minWidth = chat.originalMinWidth; }); chats.clear();
     legacyLaunchers.forEach((previous, button) => { button.id = previous.id; button.style.display = previous.display; }); legacyLaunchers.clear();
     active = null; delete window.__eesWorkPanelV1;
   };
-  window.__eesWorkPanelV1 = {register, select, close, restore, sync, unregister, destroy,
+  window.__eesWorkPanelV1 = {register, select, close, restore, sync, unregister, destroy, list, renderTabs,
     available: (chatId, key) => Boolean(chats.get(chatId)?.screens.has(key)), selected: chatId => chats.get(chatId)?.selected || null,
     isOpen: chatId => Boolean(chats.get(chatId)?.opened), focus: chatId => chats.get(chatId)?.launcher.focus({preventScroll: true})};
   observer.observe(document.body, {childList: true, subtree: true}); window.addEventListener('popstate', sync); window.addEventListener('pagehide', destroy); navigation?.addEventListener('navigatesuccess', sync);
+  return window.__eesWorkPanelV1;
 })();

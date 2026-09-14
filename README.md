@@ -22,7 +22,7 @@
 - **개발을 이어갈 GPT**: [AGENTS.md](AGENTS.md) → [현재 상태](docs/STATUS.md) → 해당 기능 파일과 테스트.
 - **설치·운영할 사람**: [환경 기준](versions.md)을 읽고, 최초 설치는 [설치·기동](docs/01-openwebui-install.md), 기존 EES 환경의 업데이트는 [래퍼 운영](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)에서 시작합니다.
 - **팀원 안내 초안**: [EES Portal 시작 안내](docs/07-team-quickstart.md) — 팀 시연용 준비본. 실제 전달 상태는 STATUS에서 확인.
-- **EES Work 통합 목업 구현**: [작업 지시](docs/mockups/ees-work/TASK.md) → [목업 원본](docs/mockups/ees-work/ees-demo-workspace.html). ZIP 첨부 없이 저장소에서 읽는 구현 기준 자료입니다. [포털 적용·3~5분 시연 안내](docs/03-openwebui-native-agent.md#ees-work-demo).
+- **EES Work 기존 UI 통합**: [정정된 작업 지시](docs/mockups/ees-work/TASK.md) → [목업 참고 원본](docs/mockups/ees-work/ees-demo-workspace.html). 기존 사이드바·실제 AI 대화·오른쪽 업무 패널·워크스페이스에 업무 구조를 연결하는 기준입니다. [적용·사용과 합성 점검 범위](docs/03-openwebui-native-agent.md#ees-work-demo).
 - **준비·배포·검증 여부 확인**: [STATUS](docs/STATUS.md)의 요약과 연결된 [평가표](evals/scenarios.md)를 확인합니다. README에는 진행 상태를 복제하지 않습니다.
 
 매번 시작 문구를 입력하는 대신 아래의 일회성 프로젝트 지침을 사용합니다. 현재 상태는 대화 기억이 아니라 저장소에서 확인합니다.
@@ -98,6 +98,7 @@ flowchart TB
 | 공통 배포 Skill 절차 | `agent-pack/skills/*/SKILL.md` | Workspace Skills |
 | 실행 코드 | 해당 Skill의 `scripts/` | Workspace Tools |
 | 교차 분석 시연 구성 | `agent-pack/ees-demo.json` | ApplyDemo로 전문 모델·Tool·EES 관리 구역과 시작 질문 연결 |
+| EES Work 업무 절차·진행 건 | 업무 절차는 관리자 워크스페이스, 진행 건은 사용자 업무 화면 | 기존 DATA_DIR의 `ees-work.sqlite3`; 대화·버전·현장별 실행 결과 보존. [관리·실행 경계](docs/03-openwebui-native-agent.md#ees-work-demo) |
 | 합성 지식 | `agent-pack/knowledge/` | Workspace Knowledge |
 | 팀원 개인·공유 프롬프트와 Skill | 승인된 실행 환경의 WebUI | Workspace Prompts·Skills; 내부 백업 대상 |
 | 실제 PAT·DB·대화 | 승인된 실행 환경 | Git에 저장하지 않음 |
@@ -116,6 +117,7 @@ flowchart TB
 | 업데이트·패치 반복 실패의 원인과 조치 확인 | [확인한 원인·보존 로그의 해석 범위](docs/03-openwebui-native-agent.md#ees-update-failure-causes), [날짜별 실패·수정·사내 결과](evals/scenarios.md#ees-update-failure-causes) |
 | 승인된 Upgrade 종료 실패 복구 | [대상 식별·보관 ZIP 재사용](docs/03-openwebui-native-agent.md#ees-stop-recovery) |
 | 교차 분석 시연과 모델·Tool·Prompt 일괄 등록 | [ApplyDemo 최초 연결·한 번 적용·시연 질문](docs/03-openwebui-native-agent.md#demo-assets-deployment) |
+| 기존 AI 대화에서 업무 탐색·실행·절차 관리 | [EES Work 적용·사용](docs/03-openwebui-native-agent.md#ees-work-demo) |
 | 팀 시연용 첫 화면 적용 준비 | [소개 문구·예시 질문 초안](docs/03-openwebui-native-agent.md#first-use-entry) |
 | Confluence Skill·Tool 등록 | [04-confluence-read-tool](docs/04-confluence-read-tool.md) |
 | Jira 읽기·프로젝트별 현황 | [05-jira-read-tool](docs/05-jira-read-tool.md) |

@@ -120,7 +120,7 @@ PANEL_HTML = r"""<style>
   h3 { font-size: 16px; font-weight: 650; letter-spacing: -.2px; }
   .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 5px; background: var(--wo-soft); color: var(--wo-muted); font-size: 11px; font-weight: 600; }
   .close { flex: 0 0 auto; padding-inline: 12px; font-size: 13px; }
-  .work-tabs { display: flex; gap: 6px; padding-bottom: 16px; }
+  .work-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 16px; }
   .work-tabs button { flex: 1; padding: 9px 7px; font-size: 13px; }
   .work-tabs button[aria-selected="true"] { color: var(--wo-accent); background: var(--wo-accent-soft); border-color: var(--wo-accent); }
   .intro { padding: 12px; margin-bottom: 20px; background: var(--wo-soft); border-radius: 9px; color: var(--wo-muted); font-size: 13px; }
@@ -391,6 +391,7 @@ try {
     const renderTabs = () => {
       q('work-tabs').hidden=!workPanel;
       if(!workPanel)return;
+      if(workPanel.renderTabs)return workPanel.renderTabs(request.chat_id,shadow,'work-tab-');
       ['analysis','equipment','wo'].forEach(key=>{
         const tab=q('work-tab-'+key);
         tab.hidden=!workPanel.available(request.chat_id,key);
