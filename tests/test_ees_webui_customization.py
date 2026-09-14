@@ -267,14 +267,20 @@ class ProgramRenameTests(unittest.TestCase):
         create.restype = wintypes.HANDLE
         close = kernel.CloseHandle
         close.argtypes, close.restype = (wintypes.HANDLE,), wintypes.BOOL
-        # Directory handle permits reads/writes but omits FILE_SHARE_DELETE.
-        handle = create(str(self.source), 0, 0x1 | 0x2, None, 3, 0x02000000, None)
+        # Use a real read handle: a zero-access metadata handle did not block
+        # rename on Windows CI. Share reads/writes, but omit FILE_SHARE_DELETE.
+        handle = create(str(self.source), 0x80000000, 0x1 | 0x2, None, 3, 0x02000000, None)
         self.assertNotEqual(handle, wintypes.HANDLE(-1).value, ctypes.get_last_error())
         def release_lock(_delay):
             nonlocal handle
             self.assertTrue(close(handle), ctypes.get_last_error())
             handle = None
         try:
+            with self.assertRaises(OSError) as blocked:
+                self.source.rename(self.destination)
+            self.assertIn(getattr(blocked.exception, "winerror", None), (5, 32, 33))
+            self.assertTrue(self.source.is_dir())
+            self.assertFalse(self.destination.exists())
             with mock.patch.object(custom.time, "sleep", side_effect=release_lock) as sleep:
                 self.move()
             sleep.assert_called_once_with(1)
@@ -772,7 +778,7 @@ class CustomizationTests(unittest.TestCase):
 
     def test_exhausted_windows_promote_preserves_pending_and_can_manually_resume(self):
         before = self.install_legacy_program()
-        preserved = {name: value for name, value in self.tree().items() if not name.startswith("state/")}
+        preserved = {name: value for name, value in self.tree().items() if Path(name).parts[0] != "state"}
         staged, previous = (self.root / "state" / name for name in ("program.staging", "program.previous"))
         original = Path.rename
         attempts = []
@@ -794,7 +800,7 @@ class CustomizationTests(unittest.TestCase):
         self.assertFalse(self.program.exists())
         custom.validate_program(previous, before)
         custom.validate_program(staged, pending["target"])
-        self.assertEqual(preserved, {name: value for name, value in self.tree().items() if not name.startswith("state/")})
+        self.assertEqual(preserved, {name: value for name, value in self.tree().items() if Path(name).parts[0] != "state"})
         staged.rename(self.program)
         self.assertTrue(self.resume()["changed"])
         self.assertIsNone(self.saved["customization"]["pending"])
