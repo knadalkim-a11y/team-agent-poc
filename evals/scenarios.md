@@ -20,7 +20,19 @@
 | Jira·GitHub·Confluence 대표 질문 | [v0.2.6 구성·갱신·조회 범위](#connector-demo-starters) |
 | 적용 뒤에도 옛 제안 표시 | [실제 UI 필드 오류·모의 검사 공백·v0.2.5 보완](#starter-ui-field-fix) |
 | 중단한 후보 배포 방식 | [단순 래퍼로 전환한 결정](#ees-wrapper-maintenance), [과거 상태 문서의 적용 원본·CI 증거](#status-history-20260911) |
+| EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="ees-work-mockup-reference-20260914"></a>
+
+## 2026-09-14 EES Work 목업 원본의 저장소 등록
+
+- 범위: 사용자가 ZIP 전달을 생략하고 다음 작업자가 레포에서 원본과 TASK.md를 읽는 방식을 승인함. [목업 원본](../docs/mockups/ees-work/ees-demo-workspace.html)과 [후속 구현 지시](../docs/mockups/ees-work/TASK.md)를 같은 경로에 보관하고 README·STATUS에서 연결함. 이 참고자료 등록이 후속 지시 안의 UI 통합·배포를 실행한 것은 아님.
+- 기준: 원격 main `96c51db5702e58b1313f64ae2e25df177039d3ca`, tree `7591169814895dfde6b24de16a796e3c5b645bd8`, 관련 열린 PR 0개. 기존 로컬 tree의 일치를 확인해 별도 복사본에서 작업하며 다른 세션의 미커밋 변경은 보존함.
+- 원본: 기존 대화 목업과 87,747 bytes·SHA-256 `802a8943870e568e58f17976f2c478470b47a6a12b30b9caec486cf008687f67` 일치. HTML·CSS·JS 원본 바이트는 변경하지 않음. 실제 업무 주소·자격증명이 없는 합성 예시와 공통 정책을 확인함.
+- 검수: TASK의 ZIP 첨부·임시 경로 의존을 제거하고 저장소 상대 링크로 연결함. 준비/실행 중 셋업과 게시 버전의 구분, 현장 조건, 실제 호출·배포와 모의 결과의 경계를 소스·작업 지시와 대조함. 일반 앱·등록 자산·실행 스크립트·테스트·CI·의존성 변경 없음.
+- 이번 검사: Linux / Python 3.12.14 / v24.19.0. `python scripts/check_docs.py`: 문서30·링크867·오류0·검토후보0. `git diff --check`: 통과. 추출한 원본 script의 `node --check`, 원본/기존 전달본 바이트 일치, 원본의 네트워크 URL·fetch/XHR/WebSocket 부재와 TASK의 저장소 상대 경로를 확인함. UI 동작을 변경하지 않았으므로 전체 제품 회귀는 로컬에서 반복하지 않음.
+- 미확인: 실제 브라우저 레이아웃·E2E·Open WebUI 화면 연결·사내 배포 모두 미실행. 원본의 과거 모의 DOM 검사를 실제 앱 검증으로 확대하지 않음. 후속 구현 담당자가 구현한 커밋에서 TASK의 시연 경로와 배포 확인을 수행함.
 
 ## 상태 규칙
 
