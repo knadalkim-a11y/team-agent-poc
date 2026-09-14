@@ -1,6 +1,6 @@
 # 버전 및 환경 기준
 
-문서 갱신일: 2026-09-11. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
+문서 갱신일: 2026-09-14. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
 
 ## Open WebUI 대상 환경
 
@@ -22,7 +22,7 @@
 
 현재 프로그램 운영은 Windows의 등록된 Python 3.11·Open WebUI 0.11.3·로컬 SQLite/Chroma 구성을 대상으로 합니다. [단순 래퍼 방식](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)은 기존 Python·호환 의존성을 재사용하며 프로그램 파일만 관리합니다. uv 0.12.7로 별도 환경과 전체 의존성을 준비하던 이전 절차는 중단했습니다. Windows/Linux CI의 합성 검증과 사내 실제 적용 결과는 구분합니다.
 
-새 브랜딩 배포물은 **0.11.3+ees.4**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 STATUS의 실제 적용 기록으로 구분합니다. ees.1/ees.2/ees.3/ees.4의 시작·직전 Restore를 지원하며, 새 Apply에는 ees.4 프로그램 ZIP을 사용합니다. 별도 적용 대상인 시연 자산의 버전은 [시연 목록](agent-pack/ees-demo.json)이 원본이며, 프로그램과 함께 갱신할 때는 [대화 스타일 적용 순서](docs/03-openwebui-native-agent.md#ees-chat-theme)를 따릅니다. 아래 Selector 실행 파일은 공식 0.11.3만 허용하고 현재 미적용이므로 EES 전환에 함께 사용하지 않습니다.
+새 브랜딩 배포물은 **0.11.3+ees.5**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 STATUS의 실제 적용 기록으로 구분합니다. ees.1/ees.2/ees.3/ees.4/ees.5의 시작·직전 Restore를 지원하며, 새 Apply에는 ees.5 프로그램 ZIP을 사용합니다. ees.5에는 [EES Work 시연 화면](docs/03-openwebui-native-agent.md#ees-work-demo)이 포함되며 실제 업무 API·모델·자산 등록은 없습니다. 별도 적용 대상인 기존 시연 자산의 버전은 [시연 목록](agent-pack/ees-demo.json)이 원본이며, 프로그램과 함께 갱신할 때는 [대화 스타일 적용 순서](docs/03-openwebui-native-agent.md#ees-chat-theme)를 따릅니다. 아래 Selector 실행 파일은 공식 0.11.3만 허용하고 현재 미적용이므로 EES 전환에 함께 사용하지 않습니다.
 
 Windows 접속 수락 오류용 [선택 실행 파일](scripts/serve_openwebui_windows.py)은 위 WebUI·Python 버전과 공식 고정 의존성 **Uvicorn 0.51.0**, 기존 SQLite·단일 worker에 한정합니다. 별도 설치·업그레이드를 수행하지 않으며 실제 사내 의존성 버전은 아직 미대조입니다. 사전검사에서 다르면 기존 환경을 보존한 채 검토합니다. [Selector 제한·적용 조건](docs/troubleshooting.md#windows-accept-winerror64).
 

@@ -31,6 +31,7 @@ def fixture_members():
     app = "open_webui/frontend/_app/"
     info = "open_webui-0.11.3.dist-info/"
     members = {
+        "open_webui/main.py": b"# preserved upstream routes\nif os.path.exists(FRONTEND_BUILD_DIR):\n    app.mount('/', existing_spa)\n",
         "open_webui/env.py": NOTICE + b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'Open WebUI')\n"
         b"if WEBUI_NAME != 'Open WebUI':\n    WEBUI_NAME += ' (Open WebUI)'\n" + NOTICE,
         "open_webui/frontend/index.html": b"<!-- Open WebUI license notice -->\n<title>Open WebUI</title>\n"
@@ -122,20 +123,26 @@ class BrandingBuildTests(unittest.TestCase):
         manifest = self.build()
         with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
             self.assertFalse(any(name.startswith(builder.SOURCE_APP) for name in built.namelist()))
-            self.assertEqual(len(built.namelist()), len(self.members) + len(builder.THEME_FILES))
+            self.assertEqual(len(built.namelist()), len(self.members) + (len(builder.THEME_FILES) + len(builder.WORK_FILES)))
             for name, original in self.members.items():
                 target = builder.target_name(name)
                 if target not in manifest["changed_files"]:
                     self.assertEqual(built.read(target), original, name)
             self.assertEqual(built.read(builder.TARGET_INFO + "licenses/LICENSE"), LICENSE)
             self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.4\n"))
+                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.5\n"))
             self.assertEqual(built.read("open_webui/env.py").count(NOTICE), 2)
             self.assertNotIn(b"WEBUI_NAME +=", built.read("open_webui/env.py"))
             self.assertIn(b"EES Portal", built.read("open_webui/frontend/index.html"))
             self.assertNotIn(b"/_app/", built.read("open_webui/frontend/index.html"))
             index = built.read("open_webui/frontend/index.html")
             self.assertEqual(index.count(builder.THEME_LINK), 1)
+            self.assertEqual(index.count(builder.WORK_LINK), 1)
+            main = built.read("open_webui/main.py")
+            self.assertLess(main.index(b"install_ees_work_demo(app, get_verified_user)"), main.index(b"app.mount"))
+            for relative, target in builder.WORK_ASSETS.items():
+                self.assertEqual(built.read(target), (builder.WORK_DIR / relative).read_bytes())
+                self.assertFalse(target.startswith("open_webui/frontend/"))
             self.assertLess(index.index(b"/static/custom.css"), index.index(builder.THEME_LINK))
             self.assertLess(index.index(builder.THEME_LINK), index.index(b"</head>"))
             for name, relative in builder.UI_FILES.items():
@@ -143,11 +150,17 @@ class BrandingBuildTests(unittest.TestCase):
             for name, (origin, _) in builder.FONT_SOURCES.items():
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/" + name), self.members[origin])
             runtime = built.read(builder.TARGET_APP + "immutable/chunks/DKj2ZiCb.js")
-            self.assertIn(b"/_ees4/version.json", runtime)
+            self.assertIn(b"/_ees5/version.json", runtime)
             self.assertEqual(json.loads(built.read(builder.TARGET_APP + "version.json"))["version"], builder.VERSION)
             for prefix in ("open_webui/static/", "open_webui/frontend/static/"):
                 for name in builder.ASSET_NAMES:
                     self.assertEqual(built.read(prefix + name), (self.assets / name).read_bytes())
+
+    def test_missing_mock_runtime_fails_before_writing(self):
+        with tempfile.TemporaryDirectory() as empty:
+            with ZipFile(self.wheel) as archive:
+                with self.assertRaisesRegex(ValueError, "EES Work asset"):
+                    builder.prepare_additions(archive, self.ui, Path(empty))
 
     def test_wrong_source_hash_fails_without_output(self):
         self.wheel.write_bytes(self.wheel.read_bytes() + b"changed")
@@ -231,7 +244,7 @@ class OfficialWheelTests(unittest.TestCase):
             built_path = Path(temporary) / builder.WHEEL_FILENAME
             assert_record(self, built_path)
             with ZipFile(source_path) as source, ZipFile(built_path) as built:
-                self.assertEqual(len(source.namelist()) + len(builder.THEME_FILES), len(built.namelist()))
+                self.assertEqual(len(source.namelist()) + (len(builder.THEME_FILES) + len(builder.WORK_FILES)), len(built.namelist()))
                 changed = set(manifest["changed_files"])
                 for name in source.namelist():
                     target = builder.target_name(name)
@@ -239,7 +252,7 @@ class OfficialWheelTests(unittest.TestCase):
                         self.assertEqual(built.read(target), source.read(name), name)
                 metadata = source.read(builder.SOURCE_INFO + "METADATA")
                 self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.4\n"))
+                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.5\n"))
                 for filename, (origin, expected) in builder.FONT_SOURCES.items():
                     copied = built.read(builder.TARGET_APP + "fonts/" + filename)
                     self.assertEqual(copied, source.read(origin))

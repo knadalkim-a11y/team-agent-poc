@@ -44,8 +44,10 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missin
         app + "version.json": json.dumps({"version": version}).encode(),
         app + "immutable/chunks/test.js": b"const title = 'EES Portal';\n",
     }
-    if version in {"0.11.3+ees.3", "0.11.3+ees.4"}:
+    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5"}:
         members.update({app + name: b"synthetic checked theme asset\n" for name in branding.THEME_FILES})
+    if version == "0.11.3+ees.5":
+        members.update({name: b"synthetic checked work asset\n" for name in branding.WORK_FILES})
     members.update(extra or {})
     members.update(replacement or {})
     for name in missing:
@@ -227,7 +229,7 @@ class CustomizationTests(unittest.TestCase):
         self.assertFalse(self.restore()["changed"])
 
     def test_previous_theme_versions_pending_can_resume_and_restore(self):
-        for version in ("0.11.3+ees.2", "0.11.3+ees.3"):
+        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4"):
             with self.subTest(version=version):
                 legacy = self.install_legacy_program(version=version)
                 self.interrupt_promotion()
@@ -242,12 +244,12 @@ class CustomizationTests(unittest.TestCase):
                 shutil.rmtree(self.program)
 
     def test_previous_theme_versions_checkonly_apply_and_restore_preserve_runtime(self):
-        for version in ("0.11.3+ees.2", "0.11.3+ees.3"):
+        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4"):
             with self.subTest(version=version):
                 previous = self.install_legacy_program(version=version)
                 before = self.tree()
                 self.assertEqual(custom.inspect_bundle(self.config, self.bundle, COMMIT, self.env)["webui_version"],
-                                 "0.11.3+ees.4")
+                                 "0.11.3+ees.5")
                 self.assertEqual(before, self.tree())
                 self.assertTrue(self.apply()["changed"])
                 selected = self.registry["customization"]["active"]
@@ -266,6 +268,16 @@ class CustomizationTests(unittest.TestCase):
         for relative in branding.THEME_FILES:
             with self.subTest(relative=relative):
                 self.write_bundle(make_wheel(missing=(branding.TARGET_APP + relative,)))
+                before = self.tree()
+                with self.assertRaises(custom.CustomizationError):
+                    self.apply()
+                self.assertEqual(before, self.tree())
+                self.assertEqual(self.events, [])
+
+    def test_work_files_missing_from_otherwise_valid_record_stop_before_changes(self):
+        for name in branding.WORK_FILES:
+            with self.subTest(name=name):
+                self.write_bundle(make_wheel(missing=(name,)))
                 before = self.tree()
                 with self.assertRaises(custom.CustomizationError):
                     self.apply()

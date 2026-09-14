@@ -929,7 +929,7 @@ Set-Location "$env:USERPROFILE\team-agent-poc"
 |---|---|---|
 | 모델 이름·소개·빠른 제안 | 기존 모델 ID의 메타데이터. [소개·제안 적용](#first-use-entry), 프로필은 [EES 아이콘](../branding/ees/assets/favicon.png) | 반영 전 이름·소개·제안·프로필만 복구 |
 | 공통 Prompt·Skill·Tool | 커밋별 Agent Pack ZIP에서 바뀐 항목만 기존 ID에 반영 | 실제 적용했던 직전 커밋의 해당 항목 |
-| 서비스 이름·아이콘·대화 스타일 | EES Portal의 새 `open_webui-0.11.3+ees.4-py3-none-any.whl`과 브랜딩 manifest. 기존 ees.1/ees.2/ees.3 보관본은 Restore에 사용 | 변경 전 프로그램 복원·같은 DATA_DIR/키/접속 설정 유지. [Apply/Restore 안내](#ees-wrapper-apply) 사용 |
+| 서비스 이름·아이콘·대화 스타일 | EES Portal의 새 `open_webui-0.11.3+ees.5-py3-none-any.whl`과 브랜딩 manifest. 기존 ees.1/ees.2/ees.3/ees.4 보관본은 Restore에 사용 | 변경 전 프로그램 복원·같은 DATA_DIR/키/접속 설정 유지. [Apply/Restore 안내](#ees-wrapper-apply) 사용 |
 
 <a id="ees-accept64-guard"></a>
 
@@ -988,7 +988,7 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 2026-09-09 요청에 따라 서비스 표시 이름을 **EES Portal**로 변경합니다. 브라우저 탭·로그인/초기 화면·서비스명을 쓰는 알림/채널 제목과 SVG 접근성 이름이 대상입니다. 새 브랜딩은 `0.11.3+ees.2`, frontend 경로는 `/_ees2/`로 구분해 기존 JavaScript 캐시와 섞이지 않도록 합니다. E 아이콘 그림과 기반 Open WebUI 0.11.3·Python·의존성은 유지합니다.
 
-등록된 환경의 WEBUI_NAME이 옛 이름 `EES Assistant`이면 새 프로그램이 `EES Portal`로 표시합니다. config/DPAPI를 직접 수정하지 않으며 별도로 지정한 다른 이름은 보존합니다. 기존 ees.1 보관본을 Restore하면 그 프로그램의 이름 규칙으로 돌아갑니다. 래퍼 Update 직후에도 설치된 이전 버전을 시작·검증·복원할 수 있도록 선택 기록의 버전별 metadata/RECORD/frontend 경로를 확인합니다. 당시 새 Apply 전달물은 ees.2였으며, 현재는 아래 ees.4 대화 스타일 릴리스를 사용합니다. 메타데이터와 캐시 경로가 섞인 프로그램은 거부합니다.
+등록된 환경의 WEBUI_NAME이 옛 이름 `EES Assistant`이면 새 프로그램이 `EES Portal`로 표시합니다. config/DPAPI를 직접 수정하지 않으며 별도로 지정한 다른 이름은 보존합니다. 기존 ees.1 보관본을 Restore하면 그 프로그램의 이름 규칙으로 돌아갑니다. 래퍼 Update 직후에도 설치된 이전 버전을 시작·검증·복원할 수 있도록 선택 기록의 버전별 metadata/RECORD/frontend 경로를 확인합니다. 당시 새 Apply 전달물은 ees.2였으며, 현재 새 배포는 [ees.5 EES Work 시연](#ees-work-demo)을 사용합니다. 메타데이터와 캐시 경로가 섞인 프로그램은 거부합니다.
 
 서비스 이름과 채팅에서 선택하는 **EES Assistant Workspace Model**은 구분합니다. 이름 변경 자체는 모델 ID·표시 이름·Prompt·Skill·Tool 연결과 공통 정책 범위를 바꾸지 않습니다. WO 목업의 서비스 표기는 Tool v0.1.7에서 EES Portal로 바뀌었고 현재 v0.1.8은 [ApplyDemo](#demo-assets-deployment)로 기존 지원 등록본의 코드와 공통 업무 패널을 함께 갱신합니다. 새 Tool 등록이나 WO 지침 재입력은 필요하지 않습니다.
 
@@ -1000,9 +1000,9 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 #### 승인한 대화창 시안 적용
 
-2026-09-10 사용자가 확인한 목업의 글꼴·색상·간격을 EES Portal `0.11.3+ees.3`에 처음 적용했으며, 현재 `0.11.3+ees.4`는 아래 가로 폭·크기 조절 피드백을 반영합니다. 기본 대화 본문·사용자 메시지·입력창·사이드바와 오른쪽 업무 패널을 같은 팔레트로 맞추며 밝은 화면과 어두운 화면을 지원합니다. 메시지 내용·모델 호출 방식·업무 패널의 열림 방향과 기존 너비 조절은 유지합니다. 실제 답변의 제목과 문단 구성은 모델 응답을 따르며 목업의 예시 분석 결과를 삽입하지 않습니다.
+2026-09-10 사용자가 확인한 목업의 글꼴·색상·간격을 EES Portal `0.11.3+ees.3`에 처음 적용했으며, `0.11.3+ees.4`에서 아래 가로 폭·크기 조절 피드백을 반영했으며 ees.5에서도 유지합니다. 기본 대화 본문·사용자 메시지·입력창·사이드바와 오른쪽 업무 패널을 같은 팔레트로 맞추며 밝은 화면과 어두운 화면을 지원합니다. 메시지 내용·모델 호출 방식·업무 패널의 열림 방향과 기존 너비 조절은 유지합니다. 실제 답변의 제목과 문단 구성은 모델 응답을 따르며 목업의 예시 분석 결과를 삽입하지 않습니다.
 
-시안에 선언한 Inter와 Noto Sans KR를 고정 공식 wheel에서 그대로 가져와 `/_ees4/fonts/`에서 제공합니다. 사내 브라우저가 외부 폰트 서버에 접속하거나 사용자 PC에 폰트를 설치할 필요가 없습니다. 기존 `STATIC_DIR` 설정과 별개로 제공하고 `custom.css` 파일은 보존합니다. [전용 CSS](../branding/ees/ui/chat-theme.css)와 [폰트 출처·라이선스](../branding/ees/ui/font-licenses.txt)는 프로그램에 포함되며 새 브라우저 캐시 경로 `/_ees4/`를 사용합니다. 목업 당시 PC에서 실제 선택된 설치 폰트·화면 배율은 측정하지 않았으므로 픽셀 단위의 동일성까지 확인한 것으로 기록하지 않습니다.
+시안에 선언한 Inter와 Noto Sans KR를 고정 공식 wheel에서 그대로 가져와 `/_ees5/fonts/`에서 제공합니다. 사내 브라우저가 외부 폰트 서버에 접속하거나 사용자 PC에 폰트를 설치할 필요가 없습니다. 기존 `STATIC_DIR` 설정과 별개로 제공하고 `custom.css` 파일은 보존합니다. [전용 CSS](../branding/ees/ui/chat-theme.css)와 [폰트 출처·라이선스](../branding/ees/ui/font-licenses.txt)는 프로그램에 포함되며 새 브라우저 캐시 경로 `/_ees5/`를 사용합니다. 목업 당시 PC에서 실제 선택된 설치 폰트·화면 배율은 측정하지 않았으므로 픽셀 단위의 동일성까지 확인한 것으로 기록하지 않습니다.
 
 <a id="ees-chat-width-resize"></a>
 
@@ -1076,6 +1076,46 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 성공 기준은 마지막 `EES action=recover_stop result=ok ... running=true`와 Ctrl+F5 후 폭·드래그 표시 확인입니다. 외부에는 마지막 결과와 화면 확인 여부만 1~2줄로 전달합니다. 실패하면 블록을 반복하거나 요청 파일·잠금을 지우지 않고 마지막 `stage/code/operation/errno/winerror`로 이어갑니다. 종료가 성공하고 Apply/Start가 실패한 상태도 별도로 남기며 자동 Restore·다른 서버 시작을 하지 않습니다. 이번 복구 준비와 실제 사내 실행 성공·원인 해결은 구분합니다.
 
+<a id="ees-work-demo"></a>
+
+#### EES Work 시연 화면 적용·사용
+
+EES Work는 [저장소 참고 원본](mockups/ees-work/ees-demo-workspace.html)을 포털에 연결한 브라우저 목업입니다. 배포용 HTML·CSS·JS와 인증된 파일 제공 코드는 [기능 폴더](../agent-pack/skills/ees-work-demo/)에서 관리합니다. `0.11.3+ees.5` 프로그램에 포함하며 실제 모델·Skill·Tool 등록이나 ApplyDemo가 필요하지 않습니다. 기준·실행 여부는 [검증 기록](../evals/scenarios.md#ees-work-demo-integration-20260914)에서 구분합니다.
+
+**적용 전제:** 구현 PR의 main 병합, 해당 EES delivery 검사와 프로그램 포함 산출물 생성 성공. 기존 등록 Windows 계정과 checkout에서 다음 한 블록을 실행합니다. 이미 등록한 주소·Python·DB·키·인증서·Git 프록시를 재사용하며 실행 정책을 변경하지 않습니다. Update/Upgrade가 실패하면 다음 조작을 중단하고 기존 짧은 `stage/code/next`를 사용합니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    try {
+        Set-Location (Join-Path $env:USERPROFILE 'team-agent-poc')
+        .\scripts\manage-ees.ps1 -Action Update
+        .\scripts\manage-ees.ps1 -Action Upgrade -HealthTimeout 120 | Tee-Object -Variable eesWorkResult
+        if (-not ($eesWorkResult -match '^EES action=upgrade result=ok .*version=0\.11\.3\+ees\.5 .*running=true ')) {
+            'EES work result=unconfirmed health=unconfirmed screen=unconfirmed next=inspect_upgrade_summary'
+            return
+        }
+        'EES work version=0.11.3+ees.5 running=true health=ok screen=unconfirmed next=open_demo_menu'
+    } catch {
+        'EES work result=failed screen=unconfirmed next=follow_last_stage_code_next'
+    }
+}
+```
+
+`health=ok`는 Upgrade 성공 경로의 정상 응답 검사 결과이며 화면 검사가 아닙니다. 사내 PC는 이 대화에서 직접 접근하지 못하므로 실행 후 마지막 `EES action=upgrade` 줄과 `menu=ok flow=ok return=ok` 같은 화면 확인 한 줄만 전달합니다. 실패 시 성공 확인 문구를 입력하지 않고 `menu=missing` 또는 멈춘 단계만 알려줍니다. 상세 기록·토큰·로그는 전달하지 않습니다. health 시간 초과는 자동 재실행하지 말고 [현재 실패 안내](#ees-wrapper-upgrade)를 따릅니다.
+
+브라우저를 새로고침하고 기존 포털에 로그인한 뒤 사이드바를 펼쳐 **EES Work 시연**을 누릅니다. 별도 시연 창 안의 `업무 실행`과 `설계 워크스페이스`에서 조작합니다. 상단 **기존 대화로 돌아가기**나 목업의 **EES Portal로 돌아가기**로 닫으면 원래 대화·작성 중 입력이 유지됩니다. 창을 닫거나 새로고침하면 목업 상태는 초기화되며 **시연 초기화**도 같은 최초 상태를 만듭니다.
+
+3~5분 대표 순서는 다음과 같습니다.
+
+1. 미국 EMS 신규 공장 횡전개에서 `시스템 설치 → DB 연결 확인` 실행: 3개 점검 통과. `AP 연결 확인` 첫 실행: 상태 API 실패·후속 기능 응답 미수행. 재시도 후 이전 실패 이력과 새 통과를 확인합니다.
+2. `각 시스템간 인터페이스 확인 → 인터페이스 검증`을 실행하고 상위 완료·결과 요약을 확인합니다. 선행 AP 실패 상태에서는 인터페이스 실행이 차단됩니다.
+3. 설계 워크스페이스에서 DB 잡 입력 매핑을 AP로 바꿔 시험 실패를 확인합니다. DB로 수정하고 초안 저장·재시험·변경 검토·목업 내 게시를 진행합니다. 시험 뒤 다시 수정하면 재시험이 필요합니다.
+4. 새 버전으로 헝가리 셋업을 만들고 연계 미사용에 따른 인터페이스 제외를 확인합니다. 기존 미국 셋업으로 돌아가 이전 버전과 실행 결과가 유지되는지 확인합니다. 운영·장애대응 메뉴에서도 대표 절차를 열 수 있습니다.
+5. 기존 대화로 돌아가 일반 채팅 화면·기존 Jira/Confluence/GitHub 진입과 작성 중 입력을 확인합니다. 실제 일반 대화·연동의 응답 검증은 목업 E2E와 별도이며 사내에서 확인합니다.
+
+모든 업무 실행·AI 초안·도구 시험·게시·현장 결과는 합성 데이터입니다. `/ees-work-demo/`와 고정 CSS/JS 요청은 기존 `get_verified_user`로 인증하고, 목업의 `connect-src 'none'` 정책으로 업무 네트워크 호출을 허용하지 않습니다. 별도 DB·서비스·자동 발행·실제 공용 설정 쓰기는 없습니다. 런처는 기존 로그인 쿠키를 사용하며 실제 SSO·쿠키 정책별 동작은 사내 확인 대상입니다. 동일 출처 iframe은 독립 권한 보안 경계라고 주장하지 않으며 검토된 정적 코드만 포함합니다.
+
 <a id="ees-wrapper-upgrade"></a>
 
 #### 사내 명령 한 번으로 업데이트
@@ -1122,7 +1162,7 @@ Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `resul
 
 **구현본이 main에 반영되고 해당 CI가 통과한 뒤 사용합니다.** 현재 게시·검증 상태는 [STATUS](STATUS.md), 실제 사내 결과는 [구현 기록](../evals/scenarios.md#ees-wrapper-implementation)에서 구분합니다. 이미 등록한 운영 PowerShell과 `%USERPROFILE%\team-agent-poc` checkout을 사용하며 최초 Init·후보 Prepare·pandas 진단을 반복하지 않습니다. 기존 저장 설정과 Python이 있어야 하며 누락·불일치는 사전 확인에서 중단합니다.
 
-현재 새 Apply에는 EES Portal `0.11.3+ees.4`를 포함한 프로그램 ZIP과 그 ZIP의 `manifest.json`에 있는 전체 `source_commit`을 사용합니다. [전달물 준비](#release-delivery)의 프로그램 포함 산출물을 선택하며, 과거 ees.1/ees.2/ees.3 ZIP의 재사용은 이번 대화 스타일 적용 절차가 아닙니다. Apply는 새 ZIP의 해시·wheel·대상 버전/의존성·앱 경로를 다시 확인합니다. 운영 코드 최신 HEAD를 프로그램 Commit에 넣지 않으며, Agent Pack 전용 ZIP이나 후보 venv를 새 전달물로 사용하지 않습니다.
+현재 새 Apply에는 EES Portal `0.11.3+ees.5`를 포함한 프로그램 ZIP과 그 ZIP의 `manifest.json`에 있는 전체 `source_commit`을 사용합니다. [전달물 준비](#release-delivery)의 프로그램 포함 산출물을 선택하며, 과거 ees.1/ees.2/ees.3/ees.4 ZIP에는 이번 EES Work 화면이 없습니다. Apply는 새 ZIP의 해시·wheel·대상 버전/의존성·앱 경로를 다시 확인합니다. 운영 코드 최신 HEAD를 프로그램 Commit에 넣지 않으며, Agent Pack 전용 ZIP이나 후보 venv를 새 전달물로 사용하지 않습니다.
 
 `$eesBundle`에는 **파일명과 `.zip` 확장자까지 포함한 새 ZIP의 전체 경로**, `$eesProgramCommit`에는 manifest의 40자리 source_commit을 넣습니다. Downloads 같은 폴더만 지정하면 실패합니다. 경로를 채팅에 알려줄 필요는 없습니다. 아래 블록은 **Git 갱신 → 읽기 전용 사전 확인 → 정상 종료 → 프로그램 적용 → 명시적인 시작** 순서입니다. 앞 단계가 실패하면 그 자리에서 멈춥니다. 특히 CheckOnly 실패 시 Stop을 실행하지 않습니다. 기존 프로세스를 식별하지 못하거나 포트가 사용 중이면 임의 종료하지 않습니다. 자동 전환·복구·재시도 없이 첫 기동의 health 확인을 최대 120초로 요청하며, 시간 초과를 배포 성공으로 해석하지 않습니다. 기존 기본값이나 등록 설정은 바꾸지 않습니다.
 
