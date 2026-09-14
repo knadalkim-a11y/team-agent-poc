@@ -180,10 +180,22 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.browser.call("Input.insertText", {"text": value})
         self.key("Tab", 9)
 
+    def wait_scope_ready(self, kind):
+        trigger = '#ees-work-' + kind + '-trigger'
+        self.wait("(() => {const controls=document.querySelector('#ees-work-entry .ew-scope-pickers');"
+                  + "const trigger=document.querySelector(" + json.dumps(trigger) + ");"
+                  + "return controls?.getAttribute('aria-busy') === 'false'"
+                  + " && controls.dataset.readyRoute === location.pathname + location.search"
+                  + " && trigger?.getClientRects().length > 0 && !trigger.disabled"
+                  + " && window.__eesNativeDraftV1?.ready();})()")
+
     def select_scope(self, kind, value):
         # Exercise the visible picker with trusted mouse input. The old native
         # selects are gone, so draft/route tests also cover the shipped control.
+        # The composer can survive an SPA route change while scope state and
+        # native draft loading are still pending; DOM presence is not readiness.
         trigger = '#ees-work-' + kind + '-trigger'
+        self.wait_scope_ready(kind)
         self.click(trigger)
         option = ('#ees-work-scope-popover [data-action="scope_choose"]'
                   '[data-picker="' + kind + '"][data-value="' + value + '"]')
@@ -807,8 +819,30 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(second_state["case"]["jobs"]["scope-j"]["status"], "pending")
 
     def test_empty_enter_does_not_bind_a_pending_case_to_an_existing_chat(self):
-        self.click('a#sidebar-new-chat-button')
-        self.wait("location.pathname === '/' && !!document.querySelector('#chat-input.ProseMirror')")
+        requested, release = threading.Event(), threading.Event()
+        original_get_state = self.server.workflow.get_state
+
+        async def hold_new_chat_state(*args, **kwargs):
+            if kwargs.get("chat_id") == "" and not kwargs.get("case_id"):
+                requested.set()
+                release.wait(timeout=8)
+            return await original_get_state(*args, **kwargs)
+
+        # Hold the real workflow response at the transition that previously
+        # exposed clickable stale controls. No timing-only sleep or retry.
+        with patch.object(self.server.workflow, "get_state", side_effect=hold_new_chat_state):
+            try:
+                self.click('a#sidebar-new-chat-button')
+                self.wait("location.pathname === '/' && !!document.querySelector('#chat-input.ProseMirror')")
+                self.assertTrue(requested.wait(timeout=2), "New-chat workflow state was not requested")
+                self.assertEqual(self.read('#ees-work-entry .ew-scope-pickers', "getAttribute('aria-busy')"), "true")
+                self.assertEqual(self.read('#ees-work-entry .ew-scope-pickers', "dataset.readyRoute"), "")
+                self.assertTrue(self.read('#ees-work-site-trigger', "disabled"))
+                self.assertTrue(self.read('#ees-work-system-trigger', "disabled"))
+                self.assertIsNone(self.read('#ees-work-scope-popover'))
+            finally:
+                release.set()
+            self.wait_scope_ready("site")
         self.create_case(chat_id="")
         pending = [case for case in self.current("")["cases"] if not case["chat_id"]]
         self.assertEqual(len(pending), 1)

@@ -9,7 +9,7 @@
   const levels = {p:'프로세스',t:'태스크',j:'잡'};
   const statuses = {unstarted:'시작 전',ready:'준비',pending:'대기',in_progress:'진행 중',running:'실행 중',success:'완료',completed:'완료',passed:'완료',failed:'실패',blocked:'선행 작업 대기',skipped:'적용 제외',draft:'초안',review:'검토 필요'};
   let state = null, generation = 0, request = 0, busy = false, scheduled = false;
-  let lastRoute = '', identity = '', pendingId = '', pendingSubmitted = false;
+  let lastRoute = '', acceptedRoute = '', identity = '', pendingId = '', pendingSubmitted = false;
   let category = 'setup', browsingSystem = 'EMS', browsingSite = '', navOpen = true, newCase = false, activeRegistration = null;
   let browseActive = false, browseNodeId = '', runView = 'current', historyCase = null, historyRequest = 0, navigationRequest = 0;
   let desiredCase = '', desiredNode = '', reopenPanel = false, navigationTarget = '';
@@ -82,7 +82,7 @@
     return result;
   }
   function accept(result) {
-    const previousCase=state?.case?.id;state = result;
+    const previousCase=state?.case?.id;state = result;acceptedRoute=location.pathname+location.search;
     if(state.case)browseActive=true;
     if(state.case&&state.case.id!==previousCase){browsingSite=state.case.site.id;browsingSystem=state.case.system;category=state.case.definition.nodes[state.case.process_id]?.category || 'setup';browseNodeId=state.case.selected_id;newCase=false;chosenCases.set(caseKey(state.case.process_id),state.case.id);}
     if(!state.case){const params=new URLSearchParams(location.search);if(params.has('ees_site')){browseActive=true;browsingSite=params.get('ees_site');browsingSystem=params.get('ees_system') || browsingSystem;browseNodeId=params.get('ees_process') || browseNodeId;category=state.catalog.nodes[browseNodeId]?.category || category;}}
@@ -150,10 +150,18 @@
     container.__eesHTML=html;container.innerHTML=html;
     if(focused){const replacement=Array.from(container.querySelectorAll('button')).find(el=>focused.id?el.id===focused.id:el.dataset.action===focused.action&&el.dataset.nodeId===focused.node&&el.dataset.picker===focused.picker&&el.dataset.value===focused.value&&el.dataset.workCategory===focused.category);replacement?.focus({preventScroll:true});}
   }
+  const scopeReady = () => Boolean(state&&acceptedRoute===location.pathname+location.search&&lastRoute===acceptedRoute&&(!chatRoute()||window.__eesNativeDraftV1?.ready()));
+  function updateScopeReadiness() {
+    const controls=$('#ees-work-entry .ew-scope-pickers');if(!controls)return;
+    const ready=scopeReady(),busy=String(!ready),route=ready?acceptedRoute:'';
+    if(controls.getAttribute('aria-busy')!==busy)controls.setAttribute('aria-busy',busy);
+    if(controls.dataset.readyRoute!==route)controls.dataset.readyRoute=route;
+    controls.querySelectorAll('[data-action=scope_toggle]').forEach(el=>{if(el.disabled!==!ready)el.disabled=!ready;});
+  }
   function renderScopeControls(container,data) {
     const site=data.sites[browsingSite],label=siteLabel(site);
     updateNavHTML(container,`<div class="ew-scope-card">${['site','system'].map(kind=>`<button type="button" id="ees-work-${kind}-trigger" class="ew-scope-trigger" data-action="scope_toggle" data-picker="${kind}" data-value="${esc(kind==='site'?browsingSite:browsingSystem)}" value="${esc(kind==='site'?browsingSite:browsingSystem)}" aria-haspopup="dialog" aria-expanded="${scopePicker===kind}" aria-controls="ees-work-scope-popover" aria-label="${kind==='site'?'작업 공장 선택: '+esc(label):'시스템 선택: '+esc(browsingSystem)}"><span class="ew-scope-icon">${scopeIcon(kind)}</span><span class="ew-scope-text"><span class="ew-scope-label">${kind==='site'?'작업 공장':'시스템'}</span><span class="ew-scope-value">${kind==='site'?`<span>${esc(site?.name || site?.factory || label)}</span><small>${esc(site?.country || '')}</small>`:esc(browsingSystem)}</span></span><span class="ew-scope-chevron">${scopeIcon('chevron')}</span></button>`).join('<div class="ew-scope-divider"></div>')}</div>`);
-    renderScopePopover();
+    updateScopeReadiness();renderScopePopover();
   }
   function renderScopePopover() {
     let popup=$('#ees-work-scope-popover');
@@ -174,7 +182,8 @@
     if(restoreFocus)$(`#ees-work-${kind}-trigger`)?.focus({preventScroll:true});
   }
   function openScopePicker(kind,last=false) {
-    if(!['site','system'].includes(kind)||!state)return;
+    if(!['site','system'].includes(kind))return;
+    if(!scopeReady()){updateScopeReadiness();return;}
     scopePicker=kind;renderNavigator();
     const popup=$('#ees-work-scope-popover'),options=popup?.querySelectorAll('[data-action=scope_choose]');
     (last?options?.[options.length-1]:popup?.querySelector('[aria-pressed=true]') || options?.[0])?.focus({preventScroll:true});
@@ -183,7 +192,7 @@
     $('#ees-work-navigator')?.remove();
     const entry=$('#ees-work-entry');if(!entry)return;
     const data=state?.catalog;
-    if(!data){if(!entry.firstChild)entry.innerHTML='<p class="ew-caption">업무</p><p class="ew-muted">업무 절차를 불러오는 중입니다.</p>';return;}
+    if(!data){if(!entry.firstChild)entry.innerHTML='<p class="ew-caption">업무</p><p class="ew-muted">업무 절차를 불러오는 중입니다.</p>';updateScopeReadiness();return;}
     if(!entry.querySelector('.ew-scope-pickers'))entry.innerHTML='<div class="ew-scope-pickers"></div><div class="ew-work-navigation"></div>';
     renderScopeControls(entry.querySelector('.ew-scope-pickers'),data);
     const html=`<p class="ew-caption">업무 · 현재 진행</p>${Object.entries(categories).map(([id,label])=>{
@@ -434,7 +443,7 @@
         const restored=await bridge.restore(saved || JSON.stringify({prompt:'',files:[]}));
         if(!restored){if(serial===draftSerial)draftTimer=setTimeout(apply,50);return;}
       }
-      if(serial===draftSerial){visibleDraftKey=target.key;draftTarget=null;}
+      if(serial===draftSerial){visibleDraftKey=target.key;draftTarget=null;updateScopeReadiness();}
     };
     apply();
   }
@@ -547,7 +556,7 @@
     const target=event.target.closest('[data-action]');if(!target?.closest('[data-ees-work]'))return;
     event.stopPropagation();const a=target.dataset.action;
     if(a==='scope_toggle'){scopePicker===target.dataset.picker?closeScopePicker(true):openScopePicker(target.dataset.picker);}
-    else if(a==='scope_choose'){const kind=target.dataset.picker,value=target.dataset.value;if(kind!==scopePicker||!['site','system'].includes(kind)||!(kind==='site'?Object.hasOwn(state.catalog.sites,value):state.catalog.systems.includes(value)))return;closeScopePicker(true);if(value===(kind==='site'?browsingSite:browsingSystem))return;await switchScope(kind==='site'?value:browsingSite,kind==='system'?value:browsingSystem);}
+    else if(a==='scope_choose'){if(!scopeReady()){closeScopePicker();updateScopeReadiness();return;}const kind=target.dataset.picker,value=target.dataset.value;if(kind!==scopePicker||!['site','system'].includes(kind)||!(kind==='site'?Object.hasOwn(state.catalog.sites,value):state.catalog.systems.includes(value)))return;closeScopePicker(true);if(value===(kind==='site'?browsingSite:browsingSystem))return;await switchScope(kind==='site'?value:browsingSite,kind==='system'?value:browsingSystem);}
     else if(a==='nav_close'){navOpen=false;renderNavigator();}
     else if(a==='nav_open'){navOpen=true;renderNavigator();}
     else if(a==='expand'){const id=target.dataset.nodeId;if(target.closest('#ees-work-designer')){captureEditor();editorCollapsed.has(id)?editorCollapsed.delete(id):editorCollapsed.add(id);renderDesigner();}else{const run=state?.cases.find(c=>c.id===target.dataset.caseId),data=run?.tree_nodes?{nodes:run.tree_nodes}:run&&run.id===selectedCase()?.id?selectedCase().definition:state?.catalog;toggleBranch(id,target.dataset.expansionKey,data);renderNavigator();}}
@@ -583,7 +592,7 @@
   }
   function render(){sidebar();renderNavigator();renderContext();renderPanel();renderDesigner();}
   function cleanup() {
-    closeScopePicker();treeExpansions.clear();generation++;request++;state=null;pendingId='';pendingSubmitted=false;browseActive=false;scopeSelections.clear();chosenCases.clear();draftSnapshots.clear();creationTickets.clear();createdChats.clear();draftSerial++;draftTarget=null;clearTimeout(draftTimer);resetHistory();editor=null;editorDirty=false;errorMessage='';navOpen=false;
+    closeScopePicker();treeExpansions.clear();generation++;request++;state=null;acceptedRoute='';pendingId='';pendingSubmitted=false;browseActive=false;scopeSelections.clear();chosenCases.clear();draftSnapshots.clear();creationTickets.clear();createdChats.clear();draftSerial++;draftTarget=null;clearTimeout(draftTimer);resetHistory();editor=null;editorDirty=false;errorMessage='';navOpen=false;
     if(activeRegistration!==null)window.__eesWorkPanelV1?.unregister(activeRegistration,'workflow');activeRegistration=null;closeHost();
     ['ees-work-entry','ees-work-admin-link','ees-work-navigator','ees-work-context'].forEach(id=>document.getElementById(id)?.remove());restoreWorkspace(true);
   }
@@ -593,7 +602,7 @@
     if(!available()){if(state||$('#ees-work-entry'))cleanup();lastRoute='';identity=auth;return;}
     if(identity!==auth){cleanup();window.__eesWorkPanelV1?.destroy();identity=auth;lastRoute='';}
     if(!window.__eesWorkPanelV1)window.__eesStartWorkPanelV1?.();
-    sidebar();workspaceTab();
+    sidebar();workspaceTab();updateScopeReadiness();
     const path=location.pathname+location.search;
     if(lastRoute!==path){
       closeScopePicker();const previous=lastRoute;lastRoute=path;generation++;request++;resetHistory();
@@ -606,7 +615,7 @@
       if(activeRegistration!==null){window.__eesWorkPanelV1?.unregister(activeRegistration,'workflow');activeRegistration=null;}closeHost();$('#ees-work-context')?.remove();
       if(!adminRoute())restoreWorkspace();else{navOpen=false;renderNavigator();sidebar();}
       if(pendingId&&pendingSubmitted&&previous.split('?')[0]==='/'&&chatId()){ensureChat(chatId());return;}
-      state=null;refresh();return;
+      state=null;updateScopeReadiness();refresh();return;
     }
     if(state){
       if(browseActive&&chatRoute()){
