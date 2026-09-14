@@ -13,7 +13,7 @@
 | 로컬 접속 예제 | http://127.0.0.1:8080 | 신규 설치 예제. 현재 서버는 등록한 기존 LAN IP·포트 사용 |
 | 작업 디렉터리 예제 | %LOCALAPPDATA%\EES-Agent-POC\open-webui | 신규 설치 예제. 기존 서버는 등록된 cwd 유지 |
 | DATA_DIR 예제 | 위 예제 작업 디렉터리의 data 폴더 | 신규 설치 예제. 기존 서버는 등록된 data_dir 유지; Git 제외 |
-| 표시 이름 | 새 기본값: EES Portal (공식본은 Open WebUI 접미사), ees.2/ees.3/ees.4 브랜딩: EES Portal | 실제 적용 원본은 [STATUS](docs/STATUS.md), ees.4의 대화 폭·조절 표시 정상 보고는 [화면 확인 기록](evals/scenarios.md#ees-stop-recovery)에서 관리 |
+| 표시 이름 | 새 기본값: EES Portal (공식본은 Open WebUI 접미사), ees.2/ees.3/ees.4/ees.5 브랜딩: EES Portal | 실제 적용 원본은 [STATUS](docs/STATUS.md), ees.4의 대화 폭·조절 표시 정상 보고는 [화면 확인 기록](evals/scenarios.md#ees-stop-recovery)에서 관리 |
 | 모델·프록시 | 승인된 사내 값; 저장소에는 placeholder | 실제 주소·키·모델 경로는 Git에 저장하지 않음 |
 
 이 표의 예제 경로를 이미 등록한 서버에 다시 적용하지 않습니다. 실제 Python·작업 위치·DATA_DIR·수신 주소는 사내 등록 설정이 원본이며 값을 추측하거나 재등록하지 않습니다. [기존 등록과 기록 위치](docs/03-openwebui-native-agent.md#ees-local-state)를 따릅니다.
