@@ -6,9 +6,10 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: PR #35의 자식 IOCP 수락 보호를 main에 병합하고 사용자 승인 후 사내 적용을 확인함. 래퍼 `ec9be8ee2210`, 정지 전 `guard=compatible`, 정상 Stop 뒤 Start의 `result=ok running=true guard=win64_retry`를 보고받음. **보호 적용·기동 health 확인 완료, 유휴 이후 안정성 미확인**. [증거와 검증 구분](../evals/scenarios.md#accept64-guard-20260914).
+- 이번 작업: EES Work 통합 목업의 [원본·구현 작업 지시](mockups/ees-work/TASK.md)를 저장소에 보관하고 README에서 연결함. ZIP 첨부 없이 다음 작업자가 원본을 찾을 수 있도록 준비함. **참고 원본 등록이며 실제 포털 UI 연결·사내 배포는 미실행**. [확인 범위](../evals/scenarios.md#ees-work-mockup-reference-20260914).
+- 최근 운영 확인: PR #35의 자식 IOCP 수락 보호를 main에 병합하고 사용자 승인 후 사내 적용을 확인함. 래퍼 `ec9be8ee2210`, 정지 전 `guard=compatible`, 정상 Stop 뒤 Start의 `result=ok running=true guard=win64_retry`를 보고받음. **보호 적용·기동 health 확인 완료, 유휴 이후 안정성 미확인**. [증거와 검증 구분](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
-- 다음 제품 작업 하나: 평소 퇴근·유휴 시간을 지난 뒤 기존 포털 접속 유지 여부를 한 번 확인함. 이미 완료한 Update·호환성 검사·Stop→Start·health 확인은 반복하지 않음. 보호 적용 성공을 재발 방지 효과 입증으로 확대하지 않으며 GLM 5.3·ApplyDemo·화면 변경은 별도 범위임.
+- 다음 제품 작업 하나: [EES Work 목업 통합 작업 지시](mockups/ees-work/TASK.md)를 기준으로 사내 시스템 안의 시연 진입점·화면 연결을 구현하고 검증·배포를 진행함. 이번 원본 등록에서 해당 구현을 수행한 것은 아님. 자연 유휴 이후 기존 포털 안정성은 아래 미해결로 보존하며 완료한 보호 적용·기동 검사를 반복하지 않음.
 
 ## 마지막으로 확인된 적용 상태
 
@@ -41,7 +42,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | 분석 계획·실제 진행·통합 업무 패널 구현/정상 보고 | 가독성 피드백, 반증·EMS 단독·분석 정확성 |
+| 4. 관리자 워크플로 | 기존 분석 계획·업무 패널 정상 보고; EES Work P/T/J·설계 워크스페이스 참고 목업 보관 | [목업의 포털 연결·시연 구현](mockups/ees-work/TASK.md), 기존 분석 정확성 미확인 유지 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -51,7 +52,7 @@
 
 ## 재개와 환경 유지
 
-- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. 이번 관련 문서는 [수락 보호 적용](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)이며 필요할 때만 해당 코드/시험을 읽습니다.
+- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work 목업 구현은 [작업 지시와 원본](mockups/ees-work/TASK.md)에서 시작합니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
@@ -59,6 +60,6 @@
 
 ## 최근 점검
 
-2026-09-14: main `ec9be8ee2210`·병합된 PR #35와 AGENTS/STATUS를 확인하고 로컬 tree의 원격 일치를 대조함. 사용자의 Update→CheckOnly→Stop→Start 네 단계 보고를 관리·기동 코드와 대조해 래퍼 적용, 등록 프로그램 유지, 정지 전 호환성, 새 기동의 health·보호 표시 확인으로 접수함. 원본 로그 직접 실측이나 유휴 이후 안정성으로 확대하지 않음. 문서만 갱신하며 실행 코드·서버 조작을 반복하지 않음. [명령·결과·과거 실패·남은 확인](../evals/scenarios.md#accept64-guard-20260914).
+2026-09-14: 최신 main `96c51db5702e`·열린 PR 0개·AGENTS/STATUS를 확인하고 동일 tree의 별도 작업 복사본에서 목업 원본·작업 지시·문서 연결을 준비함. 이전 ZIP 원본과 SHA-256이 일치하며 실제 프로그램·등록 자산·CI·서버는 변경하지 않음. 문서·diff와 원본 구문·격리 검사를 수행하고 범위와 결과를 [기존 평가 기록](../evals/scenarios.md#ees-work-mockup-reference-20260914)에 남김. 사내 배포·실제 브라우저 E2E는 미실행. 앞선 수락 보호 적용 확인은 [기존 증거](../evals/scenarios.md#accept64-guard-20260914)에 보존함.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
