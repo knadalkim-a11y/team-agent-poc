@@ -1832,6 +1832,8 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 
 ### ees_specialists 자동 정렬로 인한 관리 필드 충돌 보완 (2026-09-14)
 
+**현재 판정: 사내 수정 적용 확인.** 사용자 `ees action=apply_demo result=ok changed=8 commit=76e566622e74 stage=complete code=- next=new_chat` 보고로 자산 8건 갱신 완료를 확인함. 아래 실패·진단 단계의 미확인은 당시 상태이며, 새 UI·실제 모델 호출·유휴 안정성은 이 성공 보고에서도 아직 미확인임.
+
 - 사내 실패: 사용자 `action=apply_demo result=failed changed=0 commit=9ecc9eadc5ec stage=apply_assets code=managed_field_conflict next=inspect_local_result` 보고. 수기 전사의 `cahnged`/`confliect`는 정규 필드명으로 정리함. 프로그램 폴더 교체가 아닌 자산 사전 대조에서 이번 API 쓰기 전에 멈춘 사건임. 앞선 Windows rename 실패·복구는 [당시 기록](#ees7-apply-recovery-20260914)에 보존함.
 - 첫 읽기 전용 대조 결과: `target=ees_specialists kind=tool fields=content record=applied version=0.2.6`, `kind=valves fields=match record=applied version=0.2.6`. 버전은 관리 기록의 Agent Pack 버전이고 Tool frontmatter 버전이 아님. 관리 Valve `ees_model_id`의 일치만 확인했으며 모든 Valve·모델·사용자 설정이 최신이라는 뜻은 아님. 고정 ID만 출력하는 진단이므로 수기 `ees_speciallists`를 새 자산 ID로 취급하지 않음.
 - 후속 읽기 전용 결과: `ees source eol=different, ast=match, formatted=match, target=different`, `ees program=0.11.3+ees.7`. `formatted=match`는 사내의 정확한 Black 26.5.1로 마지막 applied 기록의 desired 본문을 기본 Mode로 정렬한 결과와 현재 GET 본문의 정규화 완전 일치임. AST 일치는 진단 보조값이며 수락 조건이 아님. `target=different`는 최신 관리 목록의 본문과 다름을 뜻함. GET 버전으로 ees.7 실행은 확인했지만 정확 프로그램 소스 SHA·새 UI 표시·유휴 안정성·최신 자산 적용 성공은 아직 미확인임.
@@ -1850,7 +1852,23 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 배포 검증: 문서 검사 `files=30 links=947 errors=0 review_candidates=0`과 `git diff --check`를 통과함. 수정 PR의 Windows/Linux CI, 병합 후 main CI·자산 산출물을 완료 조건으로 둠. 결과는 해당 PR과 workflow에 연결하며 사내 새 적용 성공으로 확대하지 않음.
 - 재개 범위: 수정 main의 CI 성공 뒤 기존 clone에서 래퍼 Update와 ApplyDemo만 실행함. 이미 ees.7 실행을 확인했으므로 Upgrade·Restore·Start 반복, program.staging 수동 변경, 자산 삭제/재등록은 이번 재개에 필요하지 않음. 성공 뒤 새로고침하여 새 UI를 확인하며 사용자는 마지막 짧은 결과 1줄만 전달하면 됨. 재충돌 시 원문 코드나 전체 로그 대신 새 결과의 코드·대상부터 확인함.
 
+- PR·배포 검증 완료: [PR #45](https://github.com/knadalkim-a11y/team-agent-poc/pull/45)가 main `76e566622e744fc2f1670350d91d6a4cbe3c802e`에 병합됨. [PR Windows/Linux 검사](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34900406042)와 [main 최종 검사](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34901170378/attempts/2), 정확한 main의 만료 전 `ees-demo-76e566622e744fc2f1670350d91d6a4cbe3c802e` 자산 파일 생성을 확인함. 실제 적용 보고의 짧은 커밋은 이 원본과 일치함.
+- 보존한 CI 실패: [main 첫 시도](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34901170378/attempts/1)의 Linux job `104167212569`는 자산/자료 검사72개와 ApplyDemo14개 통과 후, 첫 브라우저 시험 setUp에서 `about:blank`의 `Target.createTarget` 응답을 기다리다 `Chrome DevTools response timed out`으로 실패함. 나머지 화면 검사9개와 같은 트리의 PR 검사는 통과함. Windows 성공을 보존한 채 실패 작업만 한 번 재실행하여 Linux·배포 파일 준비가 성공했음. 코드·검사 단언·시간 한도는 바꾸지 않았으며, 재시도 성공으로 Chrome 지연의 근본원인이 해결됐다고 간주하지 않음.
+- 사내 확인 범위: 사용자 `result=ok changed=8 stage=complete code=- next=new_chat`와 “성공했어”를 받아 이 ApplyDemo 충돌의 수정 적용을 확인함. 사외 공식 출하 자료의 갱신8과 일치하지만 실제 모든 등록 바이트·개인 설정을 직접 열람한 것은 아님. 프로그램의 정확한 소스 커밋·브라우저 새 화면·실제 전문 호출·장기 안정성과 분리하고 같은 ApplyDemo·Upgrade·Restore를 다시 요청하지 않음.
+
+<a id="failure-learning-20260914"></a>
+
+**과거 기록을 재발 방지에 연결한 검토**
+
+- 빈틈: [09-10 WO 정렬본 인식](#wo-editor-format-adoption)은 기존 WO 최초 인식과 해시 관리에 한정됐음. 이번에는 같은 공식 편집기 변환이 이미 applied된 전문 Tool과 journal을 대조하는 다른 경로에서 충돌함. 과거 기록은 있었지만 같은 변환을 겪는 다른 자산·관리 상태의 예방 기준까지 연결되지 않았음. 모든 오류나 모든 버전을 같은 원인으로 일반화하지 않음.
+- 반영: [AGENTS 실패 학습 규칙](../AGENTS.md#failure-learning)에 관련 이력 조회, 시도·증거 보존, 이전 조치가 놓친 경로 확인, 코드·회귀 검사·운영 가이드와 교훈의 연결을 추가함. 같은 자산 저장/갱신 경로를 변경할 때 공식 소스의 실제 저장 변환과 신규 등록/기존 적용/미완료 상태의 관련 경계를 검토하도록 함. 알려지지 않은 원본을 일괄 수락하거나 해시 보호를 우회하는 지침이 아님.
+- 코드·검사 연결: 이번 확정된 false conflict는 [자산 실행기](../scripts/ees_demo_assets.py)의 applied 공식 해시 쌍 인식으로 고쳤고, [기존 자산 시험](../tests/test_ees_demo_assets.py)에 갱신·재적용·사용자 수정·다른 관리 필드·미완료·동시 변경·쓰기 후 검증을 추가했음. [운영 가이드](../docs/03-openwebui-native-agent.md#specialists-editor-format)는 ees.7에서 자산만 갱신하고 성공 후 반복하지 않도록 연결함. 다른 출하 원본/formatter의 호환성은 확인되지 않았으므로 관련 변경 때 재현할 항목임.
+- 미확정 사건과 구분: [Windows rename 대기](#windows-program-rename-20260914)는 잠금 주체를 밝힌 결과가 아니며, [수신 보호](#accept64-guard-20260914)는 최초 연결 단절 주체·유휴 안정성을 확정하지 않음. 증상이 자연 재발하거나 관련 경로를 변경할 때 기존 증거를 먼저 읽고 필요한 최소 증거로 원인을 좁힘. 정상 서버를 반복 재진단하거나 단순 복구를 근본원인 해결로 종결하지 않음.
+- 유지 위치: 사건의 상세 증거·실패한 시도·교훈은 이 기존 evals, 현재 미해결·다음 작업은 STATUS, 반복 적용할 개발 기준은 AGENTS, 사용자가 실행할 대응은 기존 가이드에 둠. 새 실패 보고서·체크리스트·관리 서비스를 추가하지 않음. 이번 후속은 문서 변경만이며 코드·의존성·CI·사내 설정을 변경하지 않음. 문서 검사 `files=30 links=961 errors=0 review_candidates=0`과 `git diff --check`를 통과함. 독립 문서 검토에서 rename 접근 거부와 잠금 원인 가설을 혼동한 표현을 바로잡고, 성공 보고 범위·관련 경로만 점검하는 지침·기존 증거 보존을 대조함. 이번 문서 변경을 위해 실행 코드 검사를 반복하지 않음.
+
 직전 STATUS 최근 점검 보존(공동 작업 설계 기록): 2026-09-14: 새 세션 전환 요청에 따라 공동 작업 목표와 현행 개인 진행 건의 차이, 개인 채팅·권한 분리, 현장 조건·절차 버전·도구/스킬 매핑, 다음 설계 항목을 기존 문서에 정리함. PR #43의 병합·실제 Windows 잠금 시험·main 배포 CI 증거를 [기존 기록](#windows-program-rename-20260914)에 추가함. 당시 마지막 사내 확인은 `83d56a186382` Restore·Start·웹 접속 성공이었고 새 보완 적용·ees.7 화면·유휴 안정성은 미확인이었음. 이 문서 작업의 검수는 [당시 기록](#ees-work-shared-design-20260914)을 따름. 후속 ees.7 버전 관찰과 자산 실패는 위 새 증거로 구분함.
+
+직전 STATUS 최근 점검 보존(정렬 충돌 수정 준비): 2026-09-14: 사내 ApplyDemo `changed=0` 실패와 읽기 진단으로 기록된 v0.2.6 전문 Tool의 자동 정렬 차이, 관리 Valve 일치, 실행 프로그램 ees.7을 확인함. 사외 관련 자동 시험 73개와 실제 공식 소스를 사용한 v0.2.6 → 최신 자산 재현을 통과함. 정확한 원본·정렬본 쌍 인식과 기존 변경 보호의 [검증 범위](../evals/scenarios.md#specialists-editor-format-20260914)를 따르며 실제 사내 적용 성공을 뜻하지 않음. 최신 자산 적용·새 UI 표시·유휴 안정성은 미확인. 앞선 [공동 작업 설계 검수](../evals/scenarios.md#ees-work-shared-design-20260914)와 [Windows rename 시험](../evals/scenarios.md#windows-program-rename-20260914)은 당시 기록으로 보존하며 팀 공유 구현은 후속 범위임. 당시 사내 자산 적용 성공은 미확인이었고, 후속 성공 보고는 위 현재 판정에 반영함.
 
 <a id="wo-editor-format-adoption"></a>
 
