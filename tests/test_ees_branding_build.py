@@ -134,7 +134,7 @@ class BrandingBuildTests(unittest.TestCase):
                     self.assertEqual(built.read(target), original, name)
             self.assertEqual(built.read(builder.TARGET_INFO + "licenses/LICENSE"), LICENSE)
             self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.7\n"))
+                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.8\n"))
             self.assertEqual(built.read("open_webui/env.py").count(NOTICE), 2)
             self.assertNotIn(b"WEBUI_NAME +=", built.read("open_webui/env.py"))
             self.assertIn(b"EES Work", built.read("open_webui/frontend/index.html"))
@@ -154,7 +154,7 @@ class BrandingBuildTests(unittest.TestCase):
             for name, (origin, _) in builder.FONT_SOURCES.items():
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/" + name), self.members[origin])
             runtime = built.read(builder.TARGET_APP + "immutable/chunks/DKj2ZiCb.js")
-            self.assertIn(b"/_ees7/version.json", runtime)
+            self.assertIn(b"/_ees8/version.json", runtime)
             chat = built.read(builder.TARGET_APP + "immutable/chunks/zKJlHFgk.js")
             self.assertIn(builder.NATIVE_DRAFT_HOOK, chat)
             self.assertIn(b'if(window.__eesNativeDraftV1===eesNativeDraftApi)delete window.__eesNativeDraftV1;', chat)
@@ -196,6 +196,7 @@ class BrandingBuildTests(unittest.TestCase):
         # import boundary simulates Ci's side effect if mode reaches it, so an
         # accidental restore of `full` is observable rather than a text check.
         probe = r'''
+process.stderr.write('ees_probe=node-entry version=' + process.version + '\n', () => {
 const assert = require('node:assert/strict');
 let current = {prompt:'original', selectedToolIds:['existing'], toolApprovalMode:'ask'};
 let approvalCalls = 0, imported = [], persisted = [], _r = null;
@@ -239,11 +240,21 @@ const qi = async serialized => {
   assert.equal(persisted.every(item => !Object.hasOwn(item.draft, 'toolApprovalMode') && item.chatId === 'native-chat' && item.debounce === false), true);
   for (const invalid of ['{', 'null', '[]', '"text"', 'false']) assert.equal(await hook.restore(invalid), false);
   assert.equal(imported.length, 1);
+  await new Promise(resolve => process.stderr.write('ees_probe=node-complete\n', resolve));
   console.log('draft_approval_boundary=pass');
 })().catch(error => {console.error(error); process.exitCode = 1;});
+});
 '''
-        result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
-                                text=True, timeout=10)
+        try:
+            result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
+                                    text=True, timeout=10)
+        except subprocess.TimeoutExpired as error:
+            stderr = error.stderr or ""
+            if isinstance(stderr, bytes):
+                stderr = stderr.decode("utf-8", errors="replace")
+            stages = [line for line in stderr.splitlines() if line.startswith("ees_probe=")]
+            raise AssertionError("Node draft probe timed out after 10s; stderr stages: "
+                                 + (", ".join(stages) or "entry not observed")) from None
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.strip(), "draft_approval_boundary=pass")
 
@@ -398,7 +409,7 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
                         self.assertEqual(built.read(target), source.read(name), name)
                 metadata = source.read(builder.SOURCE_INFO + "METADATA")
                 self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.7\n"))
+                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.8\n"))
                 for filename, (origin, expected) in builder.FONT_SOURCES.items():
                     copied = built.read(builder.TARGET_APP + "fonts/" + filename)
                     self.assertEqual(copied, source.read(origin))

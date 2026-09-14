@@ -57,6 +57,15 @@ html.dark #chat-container { color-scheme: dark; }
   font-family: var(--ees-font);
 }
 
+/* Use the same already-bundled family outside the chat column as well.
+ * Workspace tabs keep their native sizing and weight. Code/math descendants
+ * retain their own families; do not apply a wildcard font reset. */
+:is(#sidebar, [role="navigation"]:has(> div > .sidebar), #workspace-container),
+nav:has(a[href="/workspace/models"]),
+:is(#sidebar, [role="navigation"]:has(> div > .sidebar), #workspace-container) :is(button, input, textarea, select) {
+  font-family: var(--ees-font);
+}
+
 /* Keep the native toolbar's controls and its existing position/height. */
 #chat-container nav:has(#navbar-bg-gradient-to-b) {
   color: var(--ees-ink);

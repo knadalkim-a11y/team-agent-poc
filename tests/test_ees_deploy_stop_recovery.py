@@ -460,11 +460,13 @@ class PowerShellCaptureTests(unittest.TestCase):
         self.assertNotIn("source_python -I", prefix)
         self.assertNotIn("ees_deploy_stop_recovery.py", prefix)
         parser = (
+            "[Console]::Error.WriteLine('ees_probe=powershell-entry version=' + $PSVersionTable.PSVersion.ToString()); [Console]::Error.Flush()\n"
             "$tokens = $null; $parseErrors = $null\n"
             "$full = [IO.File]::ReadAllText($env:EES_TEST_CAPTURE_GUIDE)\n"
             "[void][System.Management.Automation.Language.Parser]::ParseInput("
             "$full, [ref]$tokens, [ref]$parseErrors)\n"
             "if ($parseErrors.Count -ne 0) { throw 'Guide PowerShell syntax invalid.' }\n"
+            "[Console]::Error.WriteLine('ees_probe=powershell-parsed'); [Console]::Error.Flush()\n"
         )
         for shell in shells:
             with self.subTest(shell=Path(shell).name), tempfile.TemporaryDirectory() as temporary:
@@ -493,9 +495,18 @@ class PowerShellCaptureTests(unittest.TestCase):
                 full_path.write_text(block, encoding="utf-8")
                 env = dict(os.environ, USERPROFILE=str(profile), LOCALAPPDATA=str(local),
                            EES_TEST_CAPTURE_GUIDE=str(full_path))
-                result = subprocess.run([shell, "-NoLogo", "-NoProfile", "-NonInteractive",
-                                         "-Command", parser + prefix], env=env, cwd=root,
-                                        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20)
+                command = parser + prefix + "[Console]::Error.WriteLine('ees_probe=powershell-captured'); [Console]::Error.Flush()\n"
+                try:
+                    result = subprocess.run([shell, "-NoLogo", "-NoProfile", "-NonInteractive",
+                                             "-Command", command], env=env, cwd=root,
+                                            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20)
+                except subprocess.TimeoutExpired as error:
+                    stderr = error.stderr or ""
+                    if isinstance(stderr, bytes):
+                        stderr = stderr.decode("utf-8", errors="replace")
+                    stages = [line for line in stderr.splitlines() if line.startswith("ees_probe=")]
+                    raise AssertionError(Path(shell).name + " capture probe timed out after 20s; stderr stages: "
+                                         + (", ".join(stages) or "entry not observed")) from None
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 captures = list(state.glob("stop-recovery-*.json"))
                 self.assertEqual(len(captures), 1)

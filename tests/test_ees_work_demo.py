@@ -180,17 +180,29 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.browser.call("Input.insertText", {"text": value})
         self.key("Tab", 9)
 
-    def select(self, selector, value):
-        index = self.browser.evaluate("[...document.querySelector(" + json.dumps(selector)
-            + ").options].findIndex(o=>o.value===" + json.dumps(value) + ")")
-        self.assertGreaterEqual(index, 0)
-        self.click(selector)
-        self.key("Home", 36)
-        for _ in range(index):
-            self.key("ArrowDown", 40)
-        self.key("Enter", 13)
-        self.key("Tab", 9)
-        self.assertEqual(self.read(selector, "value"), value)
+    def wait_scope_ready(self, kind):
+        trigger = '#ees-work-' + kind + '-trigger'
+        self.wait("(() => {const controls=document.querySelector('#ees-work-entry .ew-scope-pickers');"
+                  + "const trigger=document.querySelector(" + json.dumps(trigger) + ");"
+                  + "return controls?.getAttribute('aria-busy') === 'false'"
+                  + " && controls.dataset.readyRoute === location.pathname + location.search"
+                  + " && trigger?.getClientRects().length > 0 && !trigger.disabled"
+                  + " && window.__eesNativeDraftV1?.ready();})()")
+
+    def select_scope(self, kind, value):
+        # Exercise the visible picker with trusted mouse input. The old native
+        # selects are gone, so draft/route tests also cover the shipped control.
+        # The composer can survive an SPA route change while scope state and
+        # native draft loading are still pending; DOM presence is not readiness.
+        trigger = '#ees-work-' + kind + '-trigger'
+        self.wait_scope_ready(kind)
+        self.click(trigger)
+        option = ('#ees-work-scope-popover [data-action="scope_choose"]'
+                  '[data-picker="' + kind + '"][data-value="' + value + '"]')
+        self.wait('!!document.querySelector(' + json.dumps(option) + ')')
+        self.click(option)
+        self.wait('document.querySelector(' + json.dumps(trigger) + ')?.value === ' + json.dumps(value)
+                  + " && !document.querySelector('#ees-work-scope-popover')")
 
     def open_category(self, category):
         selector = '[data-work-category="' + category + '"]'
@@ -231,8 +243,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                   + " && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
 
     def create_case(self, site="us-a", chat_id="existing-chat", system="EMS"):
-        self.select("#ees-work-site-filter", site)
-        self.select("#ees-work-system-filter", system)
+        self.select_scope("site", site)
+        self.select_scope("system", system)
         self.open_category("setup")
         self.assertIsNone(self.read("#ees-work-navigator"))
         self.assertIsNone(self.read('#ees-work-entry [data-action="pin"]'))
@@ -297,6 +309,171 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                                                         "selector": 'input[type="file"]'})
         self.browser.call("DOM.setFileInputFiles", {"nodeId": field["nodeId"], "files": [str(path)]})
         self.wait("document.querySelector('#chat-container')?.innerText.includes('attachment.txt')")
+
+    def test_sidebar_expands_one_level_and_respects_collapse_after_selection_and_refresh(self):
+        self.create_case()
+        nodes = self.current()["case"]["definition"]["nodes"]
+        expand = lambda node_id: '#ees-work-tree [data-action="expand"][data-node-id="' + node_id + '"]'
+        visible_ids = lambda: self.browser.evaluate(
+            "[...document.querySelectorAll('#ees-work-tree [data-action=select]')].map(e=>e.dataset.nodeId)")
+        self.assertNotIn("P 프로세스", self.text("#ees-work-entry"))
+        self.assertNotIn("T 태스크", self.text("#ees-work-entry"))
+        self.assertNotIn("J 잡", self.text("#ees-work-entry"))
+        if self.read(expand("setup-p"), "getAttribute('aria-expanded')") == "false":
+            self.click(expand("setup-p"))
+        self.assertEqual(set(visible_ids()), {"setup-p", *nodes["setup-p"]["children"]})
+        for task_id in nodes["setup-p"]["children"]:
+            self.assertEqual(self.read(expand(task_id), "getAttribute('aria-expanded')"), "false")
+
+        # Selecting details must preserve an explicit collapse. A job still
+        # becomes available when the user deliberately expands that task.
+        self.click(expand("prep-t"))
+        self.click(expand("prep-t"))
+        self.choose("prep-t")
+        self.assertEqual(self.read(expand("prep-t"), "getAttribute('aria-expanded')"), "false")
+        self.assertNotIn("scope-j", visible_ids())
+        self.choose("scope-j")
+        self.assertIn("scope-j", visible_ids())
+        self.click(expand("prep-t"))
+        self.assertNotIn("scope-j", visible_ids())
+        self.browser.evaluate("window.__eesNativeWorkV1.refresh()")
+        self.assertEqual(self.read(expand("prep-t"), "getAttribute('aria-expanded')"), "false")
+        self.assertEqual(self.text("#ees-work-content h2"), nodes["scope-j"]["name"])
+        # An action response also passes through accept(); it must update the
+        # result without reopening the ancestor the user deliberately closed.
+        self.click("#ees-work-run")
+        self.wait("!document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
+        self.assertEqual(self.current()["case"]["jobs"]["scope-j"]["status"], "passed")
+        self.assertNotIn("scope-j", visible_ids())
+        self.assertEqual(self.read(expand("prep-t"), "getAttribute('aria-expanded')"), "false")
+
+        self.click(expand("prep-t"))
+        self.click(expand("setup-p"))
+        self.browser.evaluate("window.__eesNativeWorkV1.refresh()")
+        self.assertEqual(visible_ids(), ["setup-p"])
+        self.click('[data-work-category="setup"]')
+        self.open_category("setup")
+        self.assertEqual(visible_ids(), ["setup-p"])
+        self.click(expand("setup-p"))
+        self.assertEqual(set(visible_ids()), {"setup-p", *nodes["setup-p"]["children"]})
+        for task_id in nodes["setup-p"]["children"]:
+            self.assertEqual(self.read(expand(task_id), "getAttribute('aria-expanded')"), "false")
+
+    def test_scope_picker_keyboard_and_outside_dismiss_preserve_current_work(self):
+        self.create_case()
+        self.fill("#chat-input", "선택창을 닫아도 유지할 초안")
+        before = self.current()["case"]
+        post_count = self.server.requests.count(("POST", "/api/ees-work/action"))
+        completion_count = len(self.server.completions)
+        new_chat_count = self.server.requests.count(("POST", "/api/v1/chats/new"))
+        for kind in ("site", "system"):
+            with self.subTest(picker=kind):
+                trigger = "#ees-work-" + kind + "-trigger"
+                self.click(trigger)
+                self.assertEqual(self.read(trigger, "getAttribute('aria-expanded')"), "true")
+                self.assertEqual(self.read("#ees-work-scope-popover", "getAttribute('role')"), "dialog")
+                self.browser.evaluate("window.__eesPickerFocus = document.activeElement")
+                self.browser.evaluate("window.__eesNativeWorkV1.refresh()")
+                self.assertTrue(self.browser.evaluate("document.activeElement === window.__eesPickerFocus && document.activeElement.isConnected"))
+                self.key("End", 35)
+                focused = self.browser.evaluate("document.activeElement?.dataset.value")
+                last = self.browser.evaluate("[...document.querySelectorAll('#ees-work-scope-popover [data-action=scope_choose]')].at(-1)?.dataset.value")
+                self.assertEqual(focused, last)
+                self.key("Home", 36)
+                self.assertEqual(self.browser.evaluate("document.activeElement?.dataset.value"),
+                                 self.read('#ees-work-scope-popover [data-action="scope_choose"]', "dataset.value"))
+                self.key("Escape", 27)
+                self.assertIsNone(self.read("#ees-work-scope-popover"))
+                self.assertEqual(self.browser.evaluate("document.activeElement?.id"), trigger[1:])
+                self.assertEqual(self.read(trigger, "getAttribute('aria-expanded')"), "false")
+                # ArrowDown reopens from the focused trigger; Enter on the
+                # selected option should close without changing scope or draft.
+                self.key("ArrowDown", 40)
+                self.wait("!!document.querySelector('#ees-work-scope-popover')")
+                self.assertEqual(self.browser.evaluate("document.activeElement?.getAttribute('aria-pressed')"), "true")
+                self.key("Enter", 13)
+                self.wait("!document.querySelector('#ees-work-scope-popover')")
+                # Native WebUI has a global Enter shortcut. Picker activation
+                # must be handled before it can send the existing chat draft.
+                self.assertEqual(len(self.server.completions), completion_count)
+                self.assertEqual(self.browser.evaluate("location.pathname"), "/c/existing-chat")
+                self.key(" ", 32)
+                self.wait("!!document.querySelector('#ees-work-scope-popover')")
+                self.assertEqual(self.browser.evaluate("document.activeElement?.getAttribute('aria-pressed')"), "true")
+                self.key(" ", 32)
+                self.wait("!document.querySelector('#ees-work-scope-popover')")
+                self.key("Enter", 13)
+                self.wait("!!document.querySelector('#ees-work-scope-popover')")
+                self.key("Escape", 27)
+                self.click(trigger)
+                self.click("#chat-input")
+                self.assertIsNone(self.read("#ees-work-scope-popover"))
+                self.assert_draft_stays("선택창을 닫아도 유지할 초안")
+                self.assertEqual(len(self.server.completions), completion_count)
+                self.assertEqual(self.server.requests.count(("POST", "/api/v1/chats/new")), new_chat_count)
+                self.assertEqual(self.browser.evaluate("location.pathname"), "/c/existing-chat")
+        self.assertEqual(self.current()["case"], before)
+        self.assertEqual(self.server.requests.count(("POST", "/api/ees-work/action")), post_count)
+
+    def test_native_chat_sidebar_fonts_and_scope_layout_in_light_dark_and_narrow_view(self):
+        self.server.chats["existing-chat"]["chat"]["history"]["messages"]["previous-answer"]["content"] = (
+            "기존 대화와 업무 선택의 글꼴을 확인합니다.\n\n`scope_id`는 코드 글꼴을 유지합니다.")
+        self.navigate("/c/existing-chat")
+        self.wait("!!document.querySelector('#chat-input.ProseMirror')"
+                  + " && !!document.querySelector('#ees-work-site-trigger')"
+                  + " && !!document.querySelector('#chat-container .chat-assistant code')")
+        self.create_case()
+        loaded = self.browser.evaluate("""(async()=>{
+            const faces=await Promise.all([
+                document.fonts.load('400 14px "EES Inter"','EES 0123'),
+                document.fonts.load('400 14px "EES Noto Sans KR"','공장 업무')]);
+            await document.fonts.ready;
+            return faces.map(list=>list.map(face=>({family:face.family,status:face.status})));
+        })()""")
+        for faces, expected in zip(loaded, ("EES Inter", "EES Noto Sans KR")):
+            self.assertTrue(faces, expected)
+            self.assertTrue(all(face["family"] == expected and face["status"] == "loaded" for face in faces))
+        for width, height in ((1920, 1080), (900, 900)):
+            for theme in ("light", "dark"):
+                with self.subTest(width=width, theme=theme):
+                    self.browser.call("Emulation.setDeviceMetricsOverride", {
+                        "width": width, "height": height, "deviceScaleFactor": 1, "mobile": False})
+                    self.browser.evaluate("document.documentElement.classList.toggle('dark'," + str(theme == "dark").lower() + ")")
+                    self.browser.evaluate("new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))")
+                    self.screenshot("ees-native-sidebar-" + theme + "-" + str(width))
+                    measures = self.browser.evaluate("""(()=>{
+                        const visible=s=>[...document.querySelectorAll(s)].find(e=>e.getClientRects().length);
+                        const font=s=>getComputedStyle(visible(s)).fontFamily;
+                        const rect=s=>visible(s).getBoundingClientRect().toJSON();
+                        return {fonts:[font('#chat-input'),font('#chat-container .chat-assistant .markdown-prose > p'),
+                            font('a#sidebar-new-chat-button'),font('#ees-work-site-trigger'),font('#ees-work-system-trigger'),
+                            font('#ees-work-tree [data-action=select]'),font('#ees-work-content h2')],
+                            code:font('#chat-container .chat-assistant code'),
+                            site:rect('#ees-work-site-trigger'),system:rect('#ees-work-system-trigger'),
+                            sidebar:visible('#ees-work-entry').closest('[role=navigation]').getBoundingClientRect().toJSON(),
+                            scroll:document.documentElement.scrollWidth,width:innerWidth};
+                    })()""")
+                    self.assertEqual(len(set(measures["fonts"])), 1, measures["fonts"])
+                    self.assertIn('"EES Inter"', measures["fonts"][0])
+                    self.assertIn('"EES Noto Sans KR"', measures["fonts"][0])
+                    self.assertIn("monospace", measures["code"])
+                    self.assertNotIn("EES", measures["code"])
+                    self.assertLessEqual(measures["scroll"], measures["width"] + 1)
+                    self.assertAlmostEqual(measures["site"]["left"], measures["system"]["left"], delta=1)
+                    self.assertAlmostEqual(measures["site"]["width"], measures["system"]["width"], delta=1)
+                    self.assertLessEqual(measures["site"]["bottom"], measures["system"]["top"] + 1)
+                    for key in ("site", "system"):
+                        self.assertGreaterEqual(measures[key]["height"], 40)
+                        self.assertGreaterEqual(measures[key]["left"], measures["sidebar"]["left"])
+                        self.assertLessEqual(measures[key]["right"], measures["sidebar"]["right"] + 1)
+                    self.click("#ees-work-site-trigger")
+                    popover = self.read("#ees-work-scope-popover", "getBoundingClientRect().toJSON()")
+                    self.screenshot("ees-native-sidebar-" + theme + "-" + str(width))
+                    self.assertGreaterEqual(popover["left"], 0)
+                    self.assertGreaterEqual(popover["top"], 0)
+                    self.assertLessEqual(popover["right"], width + 1)
+                    self.assertLessEqual(popover["bottom"], height + 1)
+                    self.key("Escape", 27)
 
     def test_real_tiptap_chat_stream_and_sidebar_panel_share_one_screen(self):
         self.assertIn("기존 대화 기록", self.text("#chat-container"))
@@ -410,6 +587,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertFalse(self.current()["can_manage"])
 
     def test_workspace_tab_uses_native_type_and_does_not_flicker_on_idle_or_route_change(self):
+        chat_font = self.browser.evaluate("getComputedStyle(document.querySelector('#chat-input')).fontFamily")
         self.navigate("/workspace/models")
         for path in ("models", "knowledge", "prompts", "workflow", "models"):
             if path == "workflow":
@@ -450,6 +628,10 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             self.assertEqual(observed["count"], 1, (path, observed))
             self.assertEqual(observed["text"], "업무 절차")
             self.assertEqual(observed["added"], observed["native"], (path, observed))
+            self.assertEqual(observed["added"]["fontFamily"], chat_font, (path, observed))
+            if path == "workflow":
+                self.assertEqual(self.browser.evaluate(
+                    "getComputedStyle(document.querySelector('#ees-work-node-form input[name=name]')).fontFamily"), chat_font)
             if path != "workflow":
                 self.assertIsNone(self.read("#ees-work-designer"))
                 self.assertIsNone(self.read(".ees-work-native-hidden"))
@@ -465,7 +647,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             "type": "function_call", "id": "fixture-pending-call", "call_id": "fixture-pending-call",
             "name": "fixture_read", "arguments": "{}", "status": "requires_approval"}]
         self.navigate("/c/existing-chat")
-        self.wait("document.querySelector('#ees-work-site-filter')?.value === 'us-a'"
+        self.wait("document.querySelector('#ees-work-site-trigger')?.value === 'us-a'"
                   + " && !!document.querySelector('#chat-input.ProseMirror')")
         self.choose("db-j")
         self.assertIn("existing-chat의 기존 질문", self.text("#chat-container"))
@@ -482,9 +664,12 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertTrue(restored["restored"])
         self.attach_file()
         self.fill("#chat-input", "미국 EMS에서 작성 중인 내용")
-        self.select("#ees-work-site-filter", "hu-a")
+        collapsed_task = '#ees-work-tree [data-action="expand"][data-node-id="install-t"]'
+        self.click(collapsed_task)
+        self.assertEqual(self.read(collapsed_task, "getAttribute('aria-expanded')"), "false")
+        self.select_scope("site", "hu-a")
         self.wait("location.pathname === '/c/other-chat'"
-                  + " && document.querySelector('#ees-work-site-filter')?.value === 'hu-a'"
+                  + " && document.querySelector('#ees-work-site-trigger')?.value === 'hu-a'"
                   + " && document.querySelector('#chat-container')?.innerText.includes('other-chat의 기존 대화')")
         self.assertNotIn("existing-chat의 기존 질문", self.text("#chat-container"))
         self.assertNotIn("미국 EMS에서 작성 중인 내용", self.text("#chat-input"))
@@ -494,25 +679,27 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertIn("적용 제외", self.text("#ees-work-tree"))
         self.assertEqual(self.current("other-chat")["case"]["progress"], {"done": 5, "total": 5})
         self.fill("#chat-input", "헝가리 공장에서 작성 중인 내용")
-        self.select("#ees-work-site-filter", "us-a")
+        self.select_scope("site", "us-a")
         self.wait("location.pathname === '/c/existing-chat'"
                   + " && document.querySelector('#chat-input')?.innerText === '미국 EMS에서 작성 중인 내용'")
         self.assert_draft_stays("미국 EMS에서 작성 중인 내용")
         self.assertEqual(self.current()["case"]["jobs"]["db-j"]["status"], "pending")
+        self.assertEqual(self.read(collapsed_task, "getAttribute('aria-expanded')"), "false")
         self.assertIn("미국", self.text("#ees-work-context"))
         self.assertIn("attachment.txt", self.text("#chat-container"))
-        self.select("#ees-work-system-filter", "APC")
+        self.select_scope("system", "APC")
         self.wait("location.pathname === '/c/apc-chat'"
-                  + " && document.querySelector('#ees-work-system-filter')?.value === 'APC'"
+                  + " && document.querySelector('#ees-work-system-trigger')?.value === 'APC'"
                   + " && document.querySelector('#chat-container')?.innerText.includes('apc-chat의 기존 대화')")
         self.assertNotIn("미국 EMS에서 작성 중인 내용", self.text("#chat-input"))
         self.assertNotIn("attachment.txt", self.text("#chat-container"))
         self.assertEqual(self.current("apc-chat")["case"]["jobs"]["scope-j"]["status"], "pending")
         self.fill("#chat-input", "미국 APC의 별도 초안")
-        self.select("#ees-work-system-filter", "EMS")
+        self.select_scope("system", "EMS")
         self.wait("location.pathname === '/c/existing-chat'"
                   + " && document.querySelector('#chat-input')?.innerText === '미국 EMS에서 작성 중인 내용'")
         self.assert_draft_stays("미국 EMS에서 작성 중인 내용")
+        self.assertEqual(self.read(collapsed_task, "getAttribute('aria-expanded')"), "false")
         self.assertIn("attachment.txt", self.text("#chat-container"))
         self.choose("db-j")
         current = self.current()["case"]
@@ -533,7 +720,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.click('#ees-work-run-view [data-action="current_view"]')
         self.wait("document.querySelector('#ees-work-content h2')?.textContent === 'DB 연결 확인'")
         self.assertEqual(self.current()["case"], current)
-        self.select("#ees-work-site-filter", "hu-a")
+        self.select_scope("site", "hu-a")
         self.wait("location.pathname === '/c/other-chat'"
                   + " && document.querySelector('#chat-input')?.innerText === '헝가리 공장에서 작성 중인 내용'")
         approval_writes = [path for method, path in self.server.requests[approval_requests_before:]
@@ -547,12 +734,12 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.wait("location.pathname === '/' && !!document.querySelector('#chat-input')")
         self.choose("setup-p", chat_id="")
         self.fill("#chat-input", "첫 미국 업무의 전송 전 초안")
-        self.select("#ees-work-site-filter", "hu-a")
+        self.select_scope("site", "hu-a")
         self.wait("location.pathname === '/' && new URLSearchParams(location.search).get('ees_site') === 'hu-a'"
                   + " && document.querySelector('#chat-input')?.innerText !== '첫 미국 업무의 전송 전 초안'")
         self.fill("#chat-input", "첫 헝가리 업무의 전송 전 초안")
-        self.select("#ees-work-site-filter", "us-a")
-        self.wait("location.pathname === '/' && document.querySelector('#ees-work-site-filter')?.value === 'us-a'"
+        self.select_scope("site", "us-a")
+        self.wait("location.pathname === '/' && document.querySelector('#ees-work-site-trigger')?.value === 'us-a'"
                   + " && document.querySelector('#chat-input')?.innerText === '첫 미국 업무의 전송 전 초안'")
         self.assert_draft_stays("첫 미국 업무의 전송 전 초안")
         self.create_case(chat_id="")
@@ -632,8 +819,30 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(second_state["case"]["jobs"]["scope-j"]["status"], "pending")
 
     def test_empty_enter_does_not_bind_a_pending_case_to_an_existing_chat(self):
-        self.click('a#sidebar-new-chat-button')
-        self.wait("location.pathname === '/' && !!document.querySelector('#chat-input.ProseMirror')")
+        requested, release = threading.Event(), threading.Event()
+        original_get_state = self.server.workflow.get_state
+
+        async def hold_new_chat_state(*args, **kwargs):
+            if kwargs.get("chat_id") == "" and not kwargs.get("case_id"):
+                requested.set()
+                release.wait(timeout=8)
+            return await original_get_state(*args, **kwargs)
+
+        # Hold the real workflow response at the transition that previously
+        # exposed clickable stale controls. No timing-only sleep or retry.
+        with patch.object(self.server.workflow, "get_state", side_effect=hold_new_chat_state):
+            try:
+                self.click('a#sidebar-new-chat-button')
+                self.wait("location.pathname === '/' && !!document.querySelector('#chat-input.ProseMirror')")
+                self.assertTrue(requested.wait(timeout=2), "New-chat workflow state was not requested")
+                self.assertEqual(self.read('#ees-work-entry .ew-scope-pickers', "getAttribute('aria-busy')"), "true")
+                self.assertEqual(self.read('#ees-work-entry .ew-scope-pickers', "dataset.readyRoute"), "")
+                self.assertTrue(self.read('#ees-work-site-trigger', "disabled"))
+                self.assertTrue(self.read('#ees-work-system-trigger', "disabled"))
+                self.assertIsNone(self.read('#ees-work-scope-popover'))
+            finally:
+                release.set()
+            self.wait_scope_ready("site")
         self.create_case(chat_id="")
         pending = [case for case in self.current("")["cases"] if not case["chat_id"]]
         self.assertEqual(len(pending), 1)
@@ -660,9 +869,9 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.click("#send-message-button")
         self.assertTrue(self.server.completion_response_started.wait(timeout=2))
         # Let Svelte finish the initial send render while its HTTP response is
-        # deliberately held, then change the factory through the native select.
+        # deliberately held, then change the factory through the visible picker.
         self.browser.evaluate("new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))")
-        self.select("#ees-work-site-filter", "hu-a")
+        self.select_scope("site", "hu-a")
         self.wait("location.pathname === '/' && new URLSearchParams(location.search).get('ees_site') === 'hu-a'"
                   + " && !!document.querySelector('#ees-work-case-start')")
         self.create_case(site="hu-a", chat_id="")
@@ -675,7 +884,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         bound = self.current("fixture-new-chat")["case"]
         self.assertEqual(bound["id"], first["id"])
         self.assertEqual(bound["site"]["id"], "us-a")
-        self.assertEqual(self.read("#ees-work-site-filter", "value"), "us-a")
+        self.assertEqual(self.read("#ees-work-site-trigger", "value"), "us-a")
         self.assertIn("미국", self.text("#ees-work-context"))
         state = asyncio.run(self.server.workflow.get_state(self.server.user, case_id=second["id"]))
         self.assertEqual(state["case"]["chat_id"], "")
