@@ -352,6 +352,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.fill("#chat-input", "선택창을 닫아도 유지할 초안")
         before = self.current()["case"]
         post_count = self.server.requests.count(("POST", "/api/ees-work/action"))
+        completion_count = len(self.server.completions)
+        new_chat_count = self.server.requests.count(("POST", "/api/v1/chats/new"))
         for kind in ("site", "system"):
             with self.subTest(picker=kind):
                 trigger = "#ees-work-" + kind + "-trigger"
@@ -379,10 +381,25 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                 self.assertEqual(self.browser.evaluate("document.activeElement?.getAttribute('aria-pressed')"), "true")
                 self.key("Enter", 13)
                 self.wait("!document.querySelector('#ees-work-scope-popover')")
+                # Native WebUI has a global Enter shortcut. Picker activation
+                # must be handled before it can send the existing chat draft.
+                self.assertEqual(len(self.server.completions), completion_count)
+                self.assertEqual(self.browser.evaluate("location.pathname"), "/c/existing-chat")
+                self.key(" ", 32)
+                self.wait("!!document.querySelector('#ees-work-scope-popover')")
+                self.assertEqual(self.browser.evaluate("document.activeElement?.getAttribute('aria-pressed')"), "true")
+                self.key(" ", 32)
+                self.wait("!document.querySelector('#ees-work-scope-popover')")
+                self.key("Enter", 13)
+                self.wait("!!document.querySelector('#ees-work-scope-popover')")
+                self.key("Escape", 27)
                 self.click(trigger)
                 self.click("#chat-input")
                 self.assertIsNone(self.read("#ees-work-scope-popover"))
-                self.assertEqual(self.text("#chat-input"), "선택창을 닫아도 유지할 초안")
+                self.assert_draft_stays("선택창을 닫아도 유지할 초안")
+                self.assertEqual(len(self.server.completions), completion_count)
+                self.assertEqual(self.server.requests.count(("POST", "/api/v1/chats/new")), new_chat_count)
+                self.assertEqual(self.browser.evaluate("location.pathname"), "/c/existing-chat")
         self.assertEqual(self.current()["case"], before)
         self.assertEqual(self.server.requests.count(("POST", "/api/ees-work/action")), post_count)
 
@@ -411,15 +428,18 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                         "width": width, "height": height, "deviceScaleFactor": 1, "mobile": False})
                     self.browser.evaluate("document.documentElement.classList.toggle('dark'," + str(theme == "dark").lower() + ")")
                     self.browser.evaluate("new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))")
+                    self.screenshot("ees-native-sidebar-" + theme + "-" + str(width))
                     measures = self.browser.evaluate("""(()=>{
-                        const font=s=>getComputedStyle(document.querySelector(s)).fontFamily;
-                        const rect=s=>document.querySelector(s).getBoundingClientRect().toJSON();
+                        const visible=s=>[...document.querySelectorAll(s)].find(e=>e.getClientRects().length);
+                        const font=s=>getComputedStyle(visible(s)).fontFamily;
+                        const rect=s=>visible(s).getBoundingClientRect().toJSON();
                         return {fonts:[font('#chat-input'),font('#chat-container .chat-assistant .markdown-prose > p'),
-                            font('#sidebar-new-chat-button'),font('#ees-work-site-trigger'),font('#ees-work-system-trigger'),
+                            font('a#sidebar-new-chat-button'),font('#ees-work-site-trigger'),font('#ees-work-system-trigger'),
                             font('#ees-work-tree [data-action=select]'),font('#ees-work-content h2')],
                             code:font('#chat-container .chat-assistant code'),
                             site:rect('#ees-work-site-trigger'),system:rect('#ees-work-system-trigger'),
-                            sidebar:rect('#sidebar'),scroll:document.documentElement.scrollWidth,width:innerWidth};
+                            sidebar:visible('#ees-work-entry').closest('[role=navigation]').getBoundingClientRect().toJSON(),
+                            scroll:document.documentElement.scrollWidth,width:innerWidth};
                     })()""")
                     self.assertEqual(len(set(measures["fonts"])), 1, measures["fonts"])
                     self.assertIn('"EES Inter"', measures["fonts"][0])
@@ -436,11 +456,11 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                         self.assertLessEqual(measures[key]["right"], measures["sidebar"]["right"] + 1)
                     self.click("#ees-work-site-trigger")
                     popover = self.read("#ees-work-scope-popover", "getBoundingClientRect().toJSON()")
+                    self.screenshot("ees-native-sidebar-" + theme + "-" + str(width))
                     self.assertGreaterEqual(popover["left"], 0)
                     self.assertGreaterEqual(popover["top"], 0)
                     self.assertLessEqual(popover["right"], width + 1)
                     self.assertLessEqual(popover["bottom"], height + 1)
-                    self.screenshot("ees-native-sidebar-" + theme + "-" + str(width))
                     self.key("Escape", 27)
 
     def test_real_tiptap_chat_stream_and_sidebar_panel_share_one_screen(self):

@@ -7,7 +7,7 @@
 ## 현재 작업과 다음 작업
 
 - 이번 작업: 승인한 사이드바 목업을 기존 WebUI에 반영하는 ees.8 후보를 구현·검증 중. P/T/J 설명 행 제거, 직계 하위만 펼침, 공장·시스템 통합 선택 영역, 번들 글꼴의 적용 범위를 보완함. [승인 기준](mockups/ees-work/TASK.md#sidebar-refinement), [검증·미확인](../evals/scenarios.md#sidebar-refinement-20260914).
-- 최근 Git 반영: 시작 main은 [PR #46](https://github.com/knadalkim-a11y/team-agent-poc/pull/46)의 `53b3d4c3081d0406d265b59f43e65bf9adf1370b`이며 실패 학습 지침·ApplyDemo 성공 기록을 포함함. 이번 UI 후보의 PR·CI·main 반영과 사내 적용은 [새 검증 기록](../evals/scenarios.md#sidebar-refinement-20260914)에서 구분함.
+- 최근 Git 반영: 시작 main은 [PR #46](https://github.com/knadalkim-a11y/team-agent-poc/pull/46)의 `53b3d4c3081d0406d265b59f43e65bf9adf1370b`이며 실패 학습 지침·ApplyDemo 성공 기록을 포함함. 이번 UI는 [PR #47](https://github.com/knadalkim-a11y/team-agent-poc/pull/47)에서 검증 중. 첫 CI의 Enter 충돌·숨은 요소 검사 오류와 조치를 [새 검증 기록](../evals/scenarios.md#sidebar-refinement-20260914)에 보존하며 main 반영·사내 적용과 구분함.
 - 최근 UI 확인: 사용자가 P/T/J 설명 행·하위 전체 펼침·새 영역 글꼴 차이·공장/시스템 선택 디자인을 지적하고 개선 목업을 승인함. 실제 새 프로그램 UI의 사내 확인은 아직 미실행임.
 - 최근 운영 확인: 09-14 읽기 진단의 `/api/version` 응답으로 **현재 실행 프로그램 `0.11.3+ees.7`**을 확인함. 프로그램의 정확한 원본 커밋·새 UI 표시·유휴 안정성은 미확인임. 그 전 `dba0677ffe3e` Upgrade의 promote 접근 거부와 `83d56a186382` Restore·Start·기존 주소 접속 성공은 [당시 복구 기록](../evals/scenarios.md#ees7-apply-recovery-20260914)으로 보존함. [최신 진단](../evals/scenarios.md#specialists-editor-format-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 시작 질문 필드 불일치 수정은 v0.2.5부터 반영됐고, 이번 `76e566622e74` ApplyDemo로 v0.2.8 관리 자산의 API 적용 성공을 확인함. 새 질문의 실제 화면·모델 동작은 미확인임. [기존 필드 오류](../evals/scenarios.md#starter-ui-field-fix)와 [이번 적용 결과](../evals/scenarios.md#specialists-editor-format-20260914)를 구분함.

@@ -642,16 +642,27 @@
   document.addEventListener('pointerdown',event=>{if(scopePicker&&!event.target.closest?.('#ees-work-scope-popover, .ew-scope-pickers'))closeScopePicker();},true);
   document.addEventListener('focusin',event=>{if(scopePicker&&!event.target.closest?.('#ees-work-scope-popover, .ew-scope-pickers'))closeScopePicker();});
   document.addEventListener('scroll',positionNav,true);
-  document.addEventListener('keydown',event=>{
-    const trigger=event.target.closest?.('[data-action=scope_toggle]');
-    if(trigger&&['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();openScopePicker(trigger.dataset.picker,event.key==='ArrowUp');return;}
-    if(scopePicker){
-      if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeScopePicker(true);return;}
-      const popup=$('#ees-work-scope-popover');
-      if(popup?.contains(event.target)&&['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();const options=Array.from(popup.querySelectorAll('[data-action=scope_choose]')),index=options.indexOf(event.target),next=event.key==='Home'?0:event.key==='End'?options.length-1:(index+(event.key==='ArrowDown'?1:-1)+options.length)%options.length;options[next]?.focus();return;}
-    }
-    if(event.key==='Escape'&&navOpen){navOpen=false;renderNavigator();sidebar();}
-  });
+  // Native WebUI handles Enter globally. Capture picker keys before that
+  // handler can focus/submit the composer instead of activating this control.
+  window.addEventListener('keydown',event=>{
+    const trigger=event.target.closest?.('#ees-work-entry [data-action=scope_toggle]');
+    const popup=$('#ees-work-scope-popover'),inside=scopePicker&&popup?.contains(event.target);
+    if(!trigger&&!inside)return;
+    const activate=['Enter',' ','Spacebar'].includes(event.key);
+    if(!activate&&!['ArrowDown','ArrowUp','Home','End','Escape'].includes(event.key))return;
+    event.preventDefault();event.stopImmediatePropagation();
+    if(activate){if(!event.repeat)(trigger || event.target.closest('[data-action=scope_choose]'))?.click();return;}
+    if(event.key==='Escape'){closeScopePicker(true);return;}
+    if(trigger){if(['ArrowDown','ArrowUp'].includes(event.key))openScopePicker(trigger.dataset.picker,event.key==='ArrowUp');return;}
+    const options=Array.from(popup.querySelectorAll('[data-action=scope_choose]')),index=options.indexOf(event.target),next=event.key==='Home'?0:event.key==='End'?options.length-1:(index+(event.key==='ArrowDown'?1:-1)+options.length)%options.length;
+    options[next]?.focus();
+  },true);
+  // Space normally activates a button on keyup; the captured keydown above
+  // already performed the action and can have returned focus to its trigger.
+  window.addEventListener('keyup',event=>{
+    if(['Enter',' ','Spacebar'].includes(event.key)&&event.target.closest?.('#ees-work-entry [data-action=scope_toggle], #ees-work-scope-popover [data-action=scope_choose]')){event.preventDefault();event.stopImmediatePropagation();}
+  },true);
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&navOpen){navOpen=false;renderNavigator();sidebar();}});
   window.addEventListener('ees-work-changed',async event=>{const detail=event.detail||{};if(detail.chat_id!==undefined&&detail.chat_id!==chatId())return;const at=generation;await refresh();if(at===generation&&detail.open_requested)openPanel();});
   window.addEventListener('popstate',schedule);window.navigation?.addEventListener('navigatesuccess',schedule);
   window.addEventListener('storage',schedule);window.addEventListener('resize',()=>{positionNav();sizePanel();});
