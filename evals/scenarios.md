@@ -20,10 +20,27 @@
 | Jira·GitHub·Confluence 대표 질문 | [v0.2.6 구성·갱신·조회 범위](#connector-demo-starters) |
 | 적용 뒤에도 옛 제안 표시 | [실제 UI 필드 오류·모의 검사 공백·v0.2.5 보완](#starter-ui-field-fix) |
 | 중단한 후보 배포 방식 | [단순 래퍼로 전환한 결정](#ees-wrapper-maintenance), [과거 상태 문서의 적용 원본·CI 증거](#status-history-20260911) |
+| EES Work 공장별 업무 트리·Workspace 깜빡임 | [ees.7 UX·기존 채팅·읽기 전용 이력·검증 진행과 사내 경계](#ees-work-factory-ux-20260914) |
 | EES Work 기존 UI 통합 | [ees.6 실제 채팅·공유 업무 상태·검증 경계](#ees-work-native-integration-20260914) |
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="ees-work-factory-ux-20260914"></a>
+
+## 2026-09-14 EES Work 공장별 업무 트리와 기존 WebUI UX 보완
+
+- 사용자 확인·승인: 워크스페이스 업무 절차가 있는 것은 괜찮으나 업무 탐색이 혼란스럽고, 새 업무 절차 탭의 글꼴이 어색하며 반복 깜빡임이 있다고 보고함. 공장·시스템을 먼저 선택하고 분류 아래 P/T/J를 펼치는 [후속 목업](../docs/mockups/ees-work/ees-factory-workspace.html)을 승인함. 구조·동작은 목업을 따르되 외형은 기존 WebUI를 사용하고 EES Portal 표시를 EES Work로 변경하는 구현 요청을 받음. 사용자 확인은 업무 절차 화면의 존재·피드백 범위이며 정확한 사내 SHA와 ees.7 적용은 미확인임.
+- 시작 기준: 원격 main `83d56a18638296d64130f008cdbcd0f3bf3d8878`, tree `415cffc4309bb67cdcb62c8ce064e7bb51d1c11a`; [PR #40](https://github.com/knadalkim-a11y/team-agent-poc/pull/40)의 병합을 확인함. 기존 ees.6 통합·검증은 [당시 기록](#ees-work-native-integration-20260914), ees.5 사내 `d4e2cde2a556` 적용·health는 [사용자 보고](#ees-work-demo-integration-20260914), WinError64 보호는 [별도 근거](#accept64-guard-20260914)를 보존함.
+- 구현 범위: ees.7·`/_ees7/`·Agent Pack v0.2.8에서 기존 사이드바의 공장·시스템 선택 아래 셋업·운영·장애대응과 프로세스·태스크·잡을 인라인으로 배치함. 가운데 실제 Native 대화와 기존 모델·첨부·문서 조회를 유지하고, 오른쪽 현재 작업/실행 이력 및 관리자 Workspace 업무 절차를 연결함. 새 메뉴·폼은 기존 UI 글꼴·탭 스타일을 사용하며 모델·지식기반·프롬프트 등 기존 메뉴를 보존함. [관리 원본·적용 안내](../docs/03-openwebui-native-agent.md#ees-work-demo).
+- 상태·이력 계약: 공장·시스템·프로세스별 실행은 별도로 보존하고 여러 진행 건 중 하나를 임의로 선택하지 않음. 진행률의 적용 제외 분모, 실패·선행 대기·일부 진행을 구분함. 실행 요약에는 시작 당시 절차 트리와 생성/수정 시각을 제공하며 기존 미기록 생성 시각은 null로 유지함. 과거 실행 조회는 현재 대화·선택·revision을 바꾸지 않고, 본인 실행과 연결 대화의 접근 권한을 목록·조회·재개에서 확인함. AI Tool에도 공장/프로세스 탐색·현재 실행 재개·읽기 전용 과거 조회를 연결함.
+- Workspace 깜빡임 재현·보완: 실제 고정 upstream 프런트의 기존 통합본에서 업무 절차 탭이 관찰 32프레임 중 1프레임 분리되고 30프레임에서 DOM 동일성을 잃는 반복 재삽입을 확인함. 같은 탭을 유지하면서 필요한 상태만 갱신하도록 보완한 뒤 탭 동일성·기존 글꼴 상속 검사를 통과함. 이는 사외 재현과 코드 보완 근거이며 사내 브라우저 표시 정상 확인은 별도임.
+- 초안 보존·발견/조치: 대화 전환의 텍스트·일반 첨부·도구/스킬 선택은 upstream의 초안 직렬화·복원 경로를 사용함. 이미지 임시 첨부는 upstream 기본 초안 보존 범위와 구분함. 실제 첫 전송이 `kt` 대신 `xa/Qm`에서 대화를 생성하는 경로와 native 로딩 표시가 사라진 뒤 초안을 다시 적용하는 경합을 확인함. 서버 생성 성공 티켓과 중첩 초기화 완료/실제 대화 ID 확인으로 보완하고, 생성 대기 중 다른 공장을 미리 본 경우에도 실제 생성 티켓의 업무에 연결함. 초안에는 승인 설정을 포함하지 않아 복원이 pending Tool을 자동 승인하지 않게 함. 같은 root 경로의 지연 응답이 다른 업무 선택을 덮는 경계도 navigation 순서 검사로 차단함. 최종 브라우저 검사는 별도 기록하며 이전 ees.6의 5/5를 재사용하지 않음.
+- 업무 서비스·Tool 검사: Linux/Python 3.12.14에서 `python -m unittest discover -s tests -p 'test_ees_workflow*.py' -q` → `Ran 39 / OK (skipped=1)`. FastAPI/httpx가 없는 환경의 경로 시험 1개는 SKIP으로 유지함. 공장별 상태·실행 생성 시각, 게시본에서 삭제된 잡의 기존 실행 트리 보존, 읽기 전용 조회의 저장 바이트 불변, 타 사용자/연결 대화 권한, AI 탐색·이력 옵션을 확인함. 삭제 잡 시험의 초기 fixture에 남은 선행 참조는 유효한 정의로 정리한 후 재검증함.
+- 독립 검토의 완료 실행 보호: UI는 완료 실행을 읽기 전용으로 표시했지만 Native Tool과 서버는 입력 변경·재점검을 허용하던 차이를 확인함. 전체 프로세스 완료/적용 제외 이후 `run`·`update_inputs`는 `case_completed`로 거부하고 새 실행을 안내하도록 수정함. 문서 초안 저장·사람 확인도 `run` 경로이므로 같은 보호가 적용됨. Tool은 완료 실행의 변경 액션을 제공하지 않고 실행 전에도 차단함. 조회·하위 선택과 첫 저장 대화 bind는 보존하며, 미완료 프로세스 안의 부분 완료 잡 재실행·후속 무효화는 계속 허용함. 거부 후 원본 불변·새 실행 분리와 Tool 거부를 위 39개 검사에 포함함.
+- 전체·패키지 검사: 첫 `python -m unittest discover -s tests -v`는 `Ran 797 / FAILED (failures=1, skipped=25)`였음. 실패는 Agent Pack manifest의 이전 `0.2.7` 기대값이며 v0.2.8에 맞춰 수정함. 보완 후 로컬 전체 검사 `Ran 799 tests in 14.790s / OK (skipped=26)`를 확인했으며, 완료 실행 보호와 native hook을 포함한 전체 검사는 `Ran 801 tests in 16.540s / OK (skipped=26)`로 완료함. 실제 초안 전환의 후속 보완은 브라우저 검사로 별도 확인함. 최종 wheel SHA-256은 `86345bd59b83cff274f1f8d5ed11addf41283bdb034cc8a541b95f2a89cbfa6e`이며, 실제 고정 upstream의 초안·생성 분기 실행과 파일/RECORD 대조를 포함한 브랜딩 12개 PASS(16.696초), 같은 배포 코드의 직전 후보에서 Apply/Restore 40개 PASS(25.275초)를 확인함. 이 결과는 사내 기동 증거가 아님. Linux/Windows CI에도 실제 upstream 초안·생성 소스 검사를 연결함.
+- 최종 브라우저: 실제 고정 upstream Svelte/Tiptap와 Chromium에서 10/10 PASS(34.760초). 공장/시스템별 초안·일반 첨부의 복원 뒤 12프레임 유지, pending Tool 승인 설정/자동승인 요청 0건, 정상 첫 메시지 및 생성 대기 중 다른 공장으로 전환한 뒤 원래 티켓·실제 대화 복원, 빈 Enter의 오연결 차단, 같은 URL의 지연 응답 격리, Workspace idle/SPA 탭 동일성과 native 글꼴 상속을 확인함. 마지막 후보 이전 10개 중 2개는 권한 재조회 중 탭 삭제와 native 첫 대화 history 미로딩으로 실패했으며, null 상태에서 탭 유지와 정상 대화 링크 재진입으로 보완함. 이전 후보에서 드러난 50ms 초안 소유권 공백은 현재 native chat ID로 저장하고 준비된 입력기의 복원을 즉시 시작하도록 수정함. 테스트 대기를 늘려 실패를 숨기지 않음. 1920px 채팅·Workspace 이미지도 직접 확인함. 모델·인증 응답은 합성 fixture이며 실제 사내 모델/SSO 검증은 아님.
+- 원격 반영·사내 경계: 이번 구현의 커밋·PR Checks와 main의 EES delivery/프로그램 산출물을 기준으로 배포 준비 상태를 확인함. main/CI와 프로그램 산출물 성공 뒤 [기존 Update → Upgrade → ApplyDemo](../docs/03-openwebui-native-agent.md#ees-work-demo)로 사내 확인함. 실제 LLM의 업무 Tool 선택·SSO·DB/AP·문서시스템의 최신 응답과 ees.7 화면·유휴 안정성은 미확인임. DB/AP는 모의 실행이며 운영 DB 직접 접근·SQL·Shell·업무 발행을 추가하지 않음.
 
 <a id="ees-work-native-integration-20260914"></a>
 

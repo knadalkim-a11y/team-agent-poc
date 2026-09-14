@@ -94,6 +94,93 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(restored["selected_id"], "db-j")
         self.assertEqual(restored["jobs"]["db-j"]["inputs"]["db"], "승인 진단 대상 A")
 
+    async def test_case_summaries_keep_factory_history_and_snapshot_node_progress(self):
+        american = await self.create(site_id="us-a", system="EMS")
+        created_at = american["created_at"]
+        self.assertIsNotNone(created_at)
+        self.assertEqual(american["status"], "pending")
+        with patch.object(workflow, "_now", return_value="2026-09-15T10:00:00.000+00:00"):
+            american = await self.step(american, "run", "scope-j", {"confirm": True})
+        self.assertEqual(american["status"], "in_progress")
+        hungarian = await self.create(site_id="hu-a", system="FDC")
+        summaries = {item["id"]: item for item in (await self.service.get_state(self.alice))["cases"]}
+        summary = summaries[american["id"]]
+        self.assertEqual(summary["created_at"], created_at)
+        self.assertEqual(summary["updated_at"], "2026-09-15T10:00:00.000+00:00")
+        self.assertEqual(summary["process_name"], american["definition"]["nodes"]["setup-p"]["name"])
+        self.assertEqual(summary["category"], "setup")
+        self.assertEqual(summary["node_states"], american["node_states"])
+        self.assertEqual(summary["tree_nodes"]["setup-p"]["children"], american["definition"]["nodes"]["setup-p"]["children"])
+        self.assertNotIn("instructions", summary["tree_nodes"]["setup-p"])
+        self.assertNotIn("skills", summary["tree_nodes"]["setup-p"])
+        self.assertEqual(summary["progress"], {"done": 1, "total": 6})
+        other = summaries[hungarian["id"]]
+        self.assertEqual(other["progress"], {"done": 0, "total": 5})
+        self.assertEqual(other["node_states"]["setup-p"]["excluded_count"], 1)
+        self.assertEqual(other["node_states"]["interface-j"]["status"], "skipped")
+        self.assertNotIn("definition", summary)
+        self.assertNotIn("jobs", summary)
+        self.assertEqual((await self.service.get_state(self.users["bob"]))["cases"], [])
+
+    async def test_case_tree_uses_frozen_structure_after_catalog_removes_a_job(self):
+        old = await self.create()
+        definition = workflow._seed()
+        definition["nodes"].pop("db-j")
+        definition["nodes"]["install-t"]["children"].remove("db-j")
+        definition["nodes"]["interface-j"]["deps"].remove("db-j")
+        await self.publish(definition)
+        newer = await self.create()
+        state = await self.service.get_state(self.alice)
+        summaries = {item["id"]: item for item in state["cases"]}
+        self.assertNotIn("db-j", state["catalog"]["nodes"])
+        self.assertIn("db-j", summaries[old["id"]]["tree_nodes"])
+        self.assertIn("db-j", summaries[old["id"]]["tree_nodes"]["install-t"]["children"])
+        self.assertNotIn("db-j", summaries[newer["id"]]["tree_nodes"])
+
+    async def test_history_read_does_not_change_current_selection_revision_or_timestamps(self):
+        old = await self.step(await self.create(), "bind", chat_id="chat-a")
+        old = await self.step(old, "select", "db-j")
+        current = await self.step(await self.create(site_id="hu-a"), "bind", chat_id="chat-a2")
+        current = await self.step(current, "select", "install-t")
+        with self.service._db() as db:
+            before = [tuple(row) for row in db.execute("SELECT id,data FROM cases ORDER BY id")]
+        history = await self.service.get_state(self.alice, case_id=old["id"])
+        self.assertEqual(history["case"], old)
+        self.assertEqual((await self.service.get_state(self.alice, chat_id="chat-a2"))["case"], current)
+        with self.service._db() as db:
+            after = [tuple(row) for row in db.execute("SELECT id,data FROM cases ORDER BY id")]
+        self.assertEqual(before, after)
+        self.chats["chat-a"]["user_id"] = "bob"
+        denied = await self.service.get_state(self.alice, case_id=old["id"])
+        self.assertEqual(denied["error"]["code"], "chat_forbidden")
+
+    async def test_inaccessible_linked_chats_are_omitted_from_read_and_action_summaries(self):
+        inaccessible = await self.step(await self.create(), "bind", chat_id="chat-a")
+        current = await self.step(await self.create(), "bind", chat_id="chat-a2")
+        self.chats["chat-a"]["user_id"] = "bob"
+        state = await self.service.get_state(self.alice, chat_id="chat-a2")
+        self.assertEqual([item["id"] for item in state["cases"]], [current["id"]])
+        state = await self.act(current, "select", "install-t")
+        self.assertTrue(state["ok"])
+        self.assertEqual([item["id"] for item in state["cases"]], [current["id"]])
+        with self.service._db() as db:
+            self.assertIsNotNone(self.service._case(db, "alice", inaccessible["id"]))
+        del self.chats["chat-a2"]
+        self.assertEqual((await self.service.get_state(self.alice))["cases"], [])
+
+    async def test_legacy_creation_timestamp_stays_unknown_without_a_read_migration(self):
+        case = await self.create()
+        with self.service._db(write=True) as db:
+            saved = self.service._case(db, "alice", case["id"])
+            del saved["created_at"]
+            raw = workflow._dump(saved)
+            db.execute("UPDATE cases SET data=? WHERE id=?", (raw, case["id"]))
+        state = await self.service.get_state(self.alice, case_id=case["id"])
+        self.assertIsNone(state["case"]["created_at"])
+        self.assertIsNone(state["cases"][0]["created_at"])
+        with self.service._db() as db:
+            self.assertEqual(db.execute("SELECT data FROM cases WHERE id=?", (case["id"],)).fetchone()[0], raw)
+
     async def test_current_identity_and_user_ownership_cannot_be_forged(self):
         case = await self.create()
         bob = self.users["bob"]
@@ -156,6 +243,8 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([check["status"] for check in first[0]["checks"]], ["passed", "passed", "failed", "skipped"])
         self.assertEqual(case["node_states"]["interface-j"]["status"], "blocked")
         self.assertEqual(case["status"], "failed")
+        self.assertEqual(case["node_states"]["setup-p"]["failed_count"], 1)
+        self.assertEqual(case["node_states"]["install-t"]["failed_count"], 1)
         case = await self.step(case, "select", "interface-t")
         case = await self.step(case, "run", "ap-j")
         self.assertEqual(case["selected_id"], "interface-t")
@@ -165,11 +254,20 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         case = await self.step(case, "run", "interface-j")
         self.assertEqual(case["status"], "passed")
         self.assertEqual(case["progress"], {"done": 6, "total": 6})
+        self.assertEqual(case["node_states"]["setup-p"]["failed_count"], 0)
 
     async def test_input_change_invalidates_only_dependent_results_preserving_evidence(self):
+        definition = workflow._seed()
+        definition["nodes"]["handoff-j"] = {
+            **deepcopy(definition["nodes"]["scope-j"]), "id": "handoff-j", "name": "최종 인계 확인",
+            "parent": "interface-t", "deps": ["interface-j"],
+        }
+        definition["nodes"]["interface-t"]["children"].append("handoff-j")
+        await self.publish(definition)
         case = await self.ready(await self.create())
         for job in ("db-j", "ap-j", "ap-j", "interface-j"):
             case = await self.step(case, "run", job)
+        self.assertEqual(case["status"], "in_progress")
         before = deepcopy(case)
         case = await self.step(case, "update_inputs", "db-j", {"inputs": {"db": "다른 승인 진단 대상"}})
         for job in ("db-j", "interface-j"):
@@ -177,6 +275,29 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(case["jobs"][job]["history"], before["jobs"][job]["history"])
         self.assertEqual(case["jobs"]["ap-j"], before["jobs"]["ap-j"])
         self.assertEqual(case["node_states"]["interface-j"]["status"], "blocked")
+
+    async def test_completed_execution_blocks_result_changes_and_keeps_new_runs_separate(self):
+        case = await self.ready(await self.create())
+        for job in ("db-j", "ap-j", "ap-j", "interface-j"):
+            case = await self.step(case, "run", job)
+        self.assertEqual(case["status"], "passed")
+        for action, node_id, payload in (
+                ("run", "db-j", {}), ("run", "setup-p", {}),
+                ("run", "scope-j", {"confirm": True}), ("run", "scope-j", {"document": "변경 초안"}),
+                ("update_inputs", "db-j", {"inputs": {"db": "다른 대상"}})):
+            denied = await self.act(case, action, node_id, payload)
+            self.assertEqual(denied["error"]["code"], "case_completed")
+            self.assertIn("새 실행", denied["error"]["message"])
+            self.assertEqual((await self.service.get_state(self.alice, case_id=case["id"]))["case"], case)
+        # Completion does not prevent inspecting another node or binding a
+        # finished pending execution when its first real chat message is saved.
+        bound = await self.step(case, "bind", chat_id="chat-a")
+        selected = await self.step(bound, "select", "ap-j")
+        self.assertEqual(selected["jobs"], case["jobs"])
+        newer = await self.create(site_id=case["site"]["id"], system=case["system"], process_id=case["process_id"])
+        self.assertNotEqual(newer["id"], case["id"])
+        self.assertEqual(newer["status"], "pending")
+        self.assertEqual((await self.service.get_state(self.alice, case_id=case["id"]))["case"], selected)
 
     async def test_parent_execution_never_bulk_confirms_manual_jobs(self):
         case = await self.create()

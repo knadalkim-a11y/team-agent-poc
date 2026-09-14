@@ -112,6 +112,11 @@ jobs:
           python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
       - name: Build the real program fixture without installing it
         run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
+      - name: Verify patched native draft and chat creation against the pinned source
+        env:
+          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+          EES_TEST_BRANDING_DIR: dist/branding
+        run: python -m unittest discover -s tests -p test_ees_branding_build.py -v
       - name: Verify native Open WebUI workflow and real composer integration
         if: runner.os == 'Linux'
         env:

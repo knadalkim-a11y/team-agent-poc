@@ -18,15 +18,15 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
-VERSION = "0.11.3+ees.6"
-PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6"}
+VERSION = "0.11.3+ees.7"
+PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6", "0.11.3+ees.7": "_ees7"}
 SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
 SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
 WHEEL_FILENAME = f"open_webui-{VERSION}-py3-none-any.whl"
 SOURCE_INFO = f"open_webui-{UPSTREAM_VERSION}.dist-info/"
 TARGET_INFO = f"open_webui-{VERSION}.dist-info/"
 SOURCE_APP = "open_webui/frontend/_app/"
-TARGET_APP = "open_webui/frontend/_ees6/"
+TARGET_APP = "open_webui/frontend/_ees7/"
 ASSET_DIR = Path(__file__).resolve().parents[1] / "branding" / "ees" / "assets"
 UI_DIR = ASSET_DIR.parent / "ui"
 ASSET_NAMES = (
@@ -54,10 +54,62 @@ FONT_SOURCES = {
                                 "2d2267a83d089cb1a517a4f901676d05d283346e650d1b1845d601cbd696a98e"),
 }
 THEME_FILES = ("chat-theme.css", "fonts/LICENSE.txt") + tuple("fonts/" + name for name in FONT_SOURCES)
-THEME_LINK = b'<link rel="stylesheet" href="/_ees6/chat-theme.css" crossorigin="use-credentials" />'
-WORK_LINK = (b'<link rel="stylesheet" href="/_ees6/ees-work-launcher.css" />'
-             b'<script defer src="/_ees6/ees-work-panel.js"></script>'
-             b'<script defer src="/_ees6/ees-work-launcher.js"></script>')
+THEME_LINK = b'<link rel="stylesheet" href="/_ees7/chat-theme.css" crossorigin="use-credentials" />'
+WORK_LINK = (b'<link rel="stylesheet" href="/_ees7/ees-work-launcher.css" />'
+             b'<script defer src="/_ees7/ees-work-panel.js"></script>'
+             b'<script defer src="/_ees7/ees-work-launcher.js"></script>')
+
+# The pinned Chat component already owns draft serialization, editor updates,
+# file/tool selections and debounced native sessionStorage writes. Expose only
+# those operations so switching work scopes can flush the last keystroke and
+# restore a root-chat draft without reproducing or mutating editor DOM.
+# A note/embedded Chat must not replace the main Chat's hook. Its owner removes
+# the hook on unmount, and callers wait for the native editor to finish loading.
+# Tool approval mode is a user/chat setting, not work-scope draft content. The
+# native import applies it through Ci(), which may approve pending tool calls;
+# therefore never export, persist or import that field through this hook.
+NATIVE_DRAFT_MOUNT = b'ii(()=>{var Ne,Pe,me,Ve,vt;c(ce,!0),window.addEventListener("message",Uo)'
+NATIVE_DRAFT_UNMOUNT = b'()=>{var Ie,ct;try{clearTimeout(r(Ii)),sr(),G()&&!g()&&Yi(G()),$(),K(),ie()'
+NATIVE_DRAFT_LOAD_DECLARATION = b'let Ii=P();const ro=async()=>{var K,ie;'
+NATIVE_DRAFT_LOAD_GUARD = (
+    b'let eesNativeDraftLoads=0;const eesNativeDraftLoad=async load=>{'
+    b'eesNativeDraftLoads++;try{return await load();}finally{eesNativeDraftLoads--;}};'
+)
+NATIVE_COMPLETION_CREATE_BEGIN = b'Tt=!ue||g()||la(ue),Ot=await Qm('
+NATIVE_COMPLETION_CREATE_END = b'!g()&&!j()&&(window.history.replaceState(r(Ae).state,"",`/c/${Ot.chat_id}`)'
+NATIVE_COMPLETION_CAPTURE = (
+    b'eesCompletionOwner=window.__eesNativeWorkV1,eesCompletionCreation=(()=>{'
+    b'try{return!j()&&!g()?eesCompletionOwner?.beginChatCreation?.():null;}catch{return null;}})(),'
+)
+NATIVE_COMPLETION_NOTIFY = (
+    b'(()=>{try{if(eesCompletionCreation)eesCompletionOwner?.finishChatCreation?.(eesCompletionCreation,Ot.chat_id);}catch{}})(),'
+)
+NATIVE_CHAT_CREATE_BEGIN = b'kt=async x=>{var ie,ue,Te;let $=d();const K='
+NATIVE_CHAT_CREATE_END = b'$=r(Br).id,await xi.set($),j()||window.history.replaceState(x.state,"",`/c/${$}`)'
+NATIVE_CHAT_CREATE_CAPTURE = (
+    b'let eesCreation=null;const eesWorkOwner=window.__eesNativeWorkV1;'
+    b'try{if(!j()&&!g())eesCreation=eesWorkOwner?.beginChatCreation?.();}catch{}'
+)
+NATIVE_CHAT_CREATE_NOTIFY = (
+    b'(()=>{try{if(eesCreation)eesWorkOwner?.finishChatCreation?.(eesCreation,$);}catch{}})(),'
+)
+NATIVE_DRAFT_HOOK = (
+    b'const eesNativeDraftApi={ready:()=>{'
+    b'if(j()||g()||r(ce)||!r(le)||eesNativeDraftLoads)return!1;'
+    br'const path=window.location.pathname,match=path.match(/^\/c\/([^/]+)\/?$/);'
+    b'let expected;try{expected=match?decodeURIComponent(match[1]):path==="/"?"":null;}catch{return!1;}'
+    b'return expected!==null&&(G()||"")===expected&&(d()||"")===expected;},'
+    b'read:()=>{if(!eesNativeDraftApi.ready())return null;'
+    b'const snapshot={...us()};delete snapshot.toolApprovalMode;return snapshot;},'
+    b'flush:()=>{const snapshot=eesNativeDraftApi.read();return snapshot?Ps(snapshot,Fr(),!1):!1;},'
+    b'restore:async serialized=>{if(!eesNativeDraftApi.ready()||typeof serialized!=="string")return!1;'
+    b'let snapshot;try{snapshot=JSON.parse(serialized);'
+    b'if(!snapshot||typeof snapshot!=="object"||Array.isArray(snapshot))return!1;'
+    b'delete snapshot.toolApprovalMode;}catch{return!1;}'
+    b'_r&&clearTimeout(_r);const restored=await qi(JSON.stringify(snapshot));'
+    b'if(restored)await eesNativeDraftApi.flush();return restored;}};'
+    b'if(!j())window.__eesNativeDraftV1=eesNativeDraftApi;'
+)
 
 # Every replacement is pinned to one reviewed upstream file and occurrence count.
 # Upstream comments, attribution strings, documentation, and source maps remain.
@@ -73,32 +125,71 @@ PATCHES = {
     "open_webui/env.py": [(
         b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'Open WebUI')\n"
         b"if WEBUI_NAME != 'Open WebUI':\n    WEBUI_NAME += ' (Open WebUI)'",
-        b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'EES Portal')\n"
-        b"if WEBUI_NAME == 'EES Assistant':\n    WEBUI_NAME = 'EES Portal'", 1,
+        b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'EES Work')\n"
+        b"if WEBUI_NAME in {'EES Assistant', 'EES Portal'}:\n    WEBUI_NAME = 'EES Work'", 1,
     )],
     "open_webui/frontend/index.html": [
-        (b"<title>Open WebUI</title>", b"<title>EES Portal</title>", 1),
-        (b"/_app/", b"/_ees6/", 49),
+        (b"<title>Open WebUI</title>", b"<title>EES Work</title>", 1),
+        (b"/_app/", b"/_ees7/", 49),
         (b"</head>", THEME_LINK + WORK_LINK + b"\n\t</head>", 1),
     ],
     SOURCE_APP + "immutable/chunks/CHq18Uto.js": [
-        (b'const ca="Open WebUI"', b'const ca="EES Portal"', 1),
+        (b'const ca="Open WebUI"', b'const ca="EES Work"', 1),
     ],
     SOURCE_APP + "immutable/nodes/0.CvnwnD8l.js": [
-        (b" / Open WebUI`", b" / EES Portal`", 3),
+        (b" / Open WebUI`", b" / EES Work`", 3),
     ],
     SOURCE_APP + "immutable/nodes/26.Ck8JdNW5.js": [
-        (b" / Open WebUI`", b" / EES Portal`", 2),
+        (b" / Open WebUI`", b" / EES Work`", 2),
     ],
     SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
-        (b"/_app/version.json", b"/_ees6/version.json", 1),
-        (b'an="0.11.3"', b'an="0.11.3+ees.6"', 1),
+        (b"/_app/version.json", b"/_ees7/version.json", 1),
+        (b'an="0.11.3"', b'an="0.11.3+ees.7"', 1),
+    ],
+    SOURCE_APP + "immutable/chunks/zKJlHFgk.js": [
+        # Loading may turn its spinner off before native cached drafts finish
+        # restoring. Count all overlapping native draft loads in Chat's scope;
+        # workflow restoration waits until each completes and route IDs match.
+        (NATIVE_DRAFT_LOAD_DECLARATION,
+         NATIVE_DRAFT_LOAD_GUARD + b'let Ii=P();const ro=()=>eesNativeDraftLoad(async()=>{var K,ie;', 1),
+        (b')):await To("/")},li=async()=>{var x,$;',
+         b')):await To("/")}),li=()=>eesNativeDraftLoad(async()=>{var x,$;', 1),
+        (b'($=r(le))==null||$.focus({preventScroll:!0})},yo=async x=>',
+         b'($=r(le))==null||$.focus({preventScroll:!0})}),yo=async x=>', 1),
+        (b',ns=async()=>{var ue,Te,Ne,Pe,me,Ve,vt,Ie,ct,tt,Qe,Pt,_t,ot,Mt,Tt,Ot,It,Dt,lr,Vt,Mr,ss,rr,Lr;',
+         b',ns=()=>eesNativeDraftLoad(async()=>{var ue,Te,Ne,Pe,me,Ve,vt,Ie,ct,tt,Qe,Pt,_t,ot,Mt,Tt,Ot,It,Dt,lr,Vt,Mr,ss,rr,Lr;', 1),
+        (b'(Lr=r(le))==null||Lr.focus({preventScroll:!0})},ts=async()=>',
+         b'(Lr=r(le))==null||Lr.focus({preventScroll:!0})}),ts=async()=>', 1),
+        (b'return(async()=>{var Ie,ct;G()||(c(ce,!1),await Ft()),ue&&',
+         b'return eesNativeDraftLoad(async()=>{var Ie,ct;G()||(c(ce,!1),await Ft()),ue&&', 1),
+        (b'(ct=r(le))==null||ct.focus({preventScroll:!0})})(),()=>{var Ie,ct;try{',
+         b'(ct=r(le))==null||ct.focus({preventScroll:!0})}),()=>{var Ie,ct;try{', 1),
+        (NATIVE_DRAFT_MOUNT,
+         b'ii(()=>{var Ne,Pe,me,Ve,vt;' + NATIVE_DRAFT_HOOK +
+         b'c(ce,!0),window.addEventListener("message",Uo)', 1),
+        (NATIVE_DRAFT_UNMOUNT,
+         b'()=>{var Ie,ct;if(window.__eesNativeDraftV1===eesNativeDraftApi)delete window.__eesNativeDraftV1;'
+         b'try{clearTimeout(r(Ii)),sr(),G()&&!g()&&Yi(G()),$(),K(),ie()', 1),
+        # Only the main Chat's first successful server creation can bind a work
+        # case. A submit gesture or an unrelated API chat import is not proof.
+        (NATIVE_CHAT_CREATE_BEGIN,
+         b'kt=async x=>{var ie,ue,Te;let $=d();' + NATIVE_CHAT_CREATE_CAPTURE + b'const K=', 1),
+        (NATIVE_CHAT_CREATE_END,
+         b'$=r(Br).id,' + NATIVE_CHAT_CREATE_NOTIFY +
+         b'await xi.set($),j()||window.history.replaceState(x.state,"",`/c/${$}`)', 1),
+        # Normal first prompts create their chat through the completions API;
+        # kt above covers the native explicit-message creation path as well.
+        (NATIVE_COMPLETION_CREATE_BEGIN,
+         b'Tt=!ue||g()||la(ue),' + NATIVE_COMPLETION_CAPTURE + b'Ot=await Qm(', 1),
+        (NATIVE_COMPLETION_CREATE_END,
+         b'!g()&&!j()&&(' + NATIVE_COMPLETION_NOTIFY +
+         b'window.history.replaceState(r(Ae).state,"",`/c/${Ot.chat_id}`)', 1),
     ],
     SOURCE_APP + "version.json": [
-        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.6"}', 1),
+        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.7"}', 1),
     ],
     SOURCE_INFO + "METADATA": [
-        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.6\n", 1),
+        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.7\n", 1),
     ],
 }
 

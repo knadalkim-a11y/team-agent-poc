@@ -108,7 +108,8 @@ def _view(case):
     nodes = case["definition"]["nodes"]
     node_states = {}
     for node_id in nodes:
-        relevant = [leaf for leaf in _leaves(nodes, node_id) if _applicable(case, leaf)]
+        leaves = _leaves(nodes, node_id)
+        relevant = [leaf for leaf in leaves if _applicable(case, leaf)]
         statuses = [case["jobs"][leaf]["status"] for leaf in relevant]
         done = sum(status == "passed" for status in statuses)
         missing = _missing(case, node_id)
@@ -122,13 +123,25 @@ def _view(case):
             status = "review"
         elif "blocked" in statuses or all(_missing(case, leaf) for leaf in relevant):
             status = "blocked"
+        elif "running" in statuses:
+            status = "running"
+        elif nodes[node_id]["type"] != "j" and (
+                done or any(case["jobs"][leaf]["attempt"] or case["jobs"][leaf]["history"] for leaf in relevant)):
+            status = "in_progress"
         else:
             status = "pending"
         node_states[node_id] = {"status": status, "applicable": _applicable(case, node_id),
-                                "missing": missing, "progress": {"done": done, "total": len(relevant)}}
+                                "missing": missing, "progress": {"done": done, "total": len(relevant)},
+                                "failed_count": statuses.count("failed"),
+                                "excluded_count": len(leaves) - len(relevant)}
     case["node_states"] = node_states
     case["status"] = node_states[case["process_id"]]["status"]
     case["progress"] = node_states[case["process_id"]]["progress"]
+    case["process_name"] = nodes[case["process_id"]]["name"]
+    case["category"] = nodes[case["process_id"]]["category"]
+    # Older saved executions did not record their creation time. Keep that
+    # unknown instead of relabelling their last selection/edit as creation.
+    case.setdefault("created_at", None)
     selected = _ancestors(nodes, case["selected_id"])
     skill_ids = list(dict.fromkeys(["common", *(skill for node in selected for skill in node["skills"])]))
     case["context"] = {
@@ -421,8 +434,14 @@ class WorkflowService:
         cases = []
         for row in db.execute("SELECT data FROM cases WHERE owner=? ORDER BY rowid DESC", (_value(user, "id"),)):
             item = _view(json.loads(row["data"]))
-            cases.append({key: item[key] for key in ("id", "chat_id", "site", "system", "process_id",
-                                                    "selected_id", "revision", "version", "status", "progress")})
+            summary = {key: item[key] for key in ("id", "chat_id", "site", "system", "process_id",
+                                                 "process_name", "category", "selected_id", "revision", "version",
+                                                 "status", "progress", "created_at", "updated_at", "node_states")}
+            summary["tree_nodes"] = {
+                node_id: {key: node[key] for key in ("id", "name", "type", "parent", "children", "description", "category") if key in node}
+                for node_id, node in item["definition"]["nodes"].items()
+            }
+            cases.append(summary)
         assets = assets or {"tools": [], "skills": [], "available": True}
         for definition in (published, draft):
             definition["available_tools"] = assets["tools"]
@@ -448,6 +467,24 @@ class WorkflowService:
                 "draft_revision": revision if _value(user, "role") == "admin" else None,
                 "validated_revision": validated if _value(user, "role") == "admin" else None}
 
+    async def _visible_cases(self, user, state):
+        """The navigation list respects the same linked-chat access as a read.
+
+        Keep inaccessible saved executions intact; only omit their summaries.
+        Run lookups after the workflow transaction, without holding a write lock.
+        """
+        accessible = []
+        for case in state["cases"]:
+            try:
+                await self._chat(user, case["chat_id"])
+            except WorkflowError as error:
+                if error.code == "chat_forbidden":
+                    continue
+                raise
+            accessible.append(case)
+        state["cases"] = accessible
+        return state
+
     async def get_state(self, user, chat_id="", case_id=""):
         try:
             current = await self._user(user)
@@ -459,7 +496,7 @@ class WorkflowService:
                 state = self._state(db, current, case_id, chat_id, assets)
             if state["case"]:
                 await self._chat(current, state["case"]["chat_id"])
-            return state
+            return await self._visible_cases(current, state)
         except WorkflowError as error:
             return {"ok": False, "error": {"code": error.code, "message": error.message}}
         except sqlite3.Error:
@@ -474,6 +511,7 @@ class WorkflowService:
     def _save_case(db, user, case, new=False):
         case["updated_at"] = _now()
         if new:
+            case["created_at"] = case["updated_at"]
             db.execute("INSERT INTO cases VALUES(?,?,?,?)", (case["id"], _value(user, "id"), case["chat_id"] or None, _dump(case)))
         else:
             case["revision"] += 1
@@ -682,6 +720,8 @@ class WorkflowService:
                         raise WorkflowError("case_required", "진행할 업무를 먼저 선택해 주세요.")
                     case_id = case["id"]
                     self._revision(body, case["revision"])
+                    if action in {"update_inputs", "run"} and _finished(case, case["process_id"]):
+                        raise WorkflowError("case_completed", "완료된 실행의 결과는 변경할 수 없습니다. 새 실행을 시작해 주세요.")
                     if action == "bind":
                         if not chat_id:
                             raise WorkflowError("chat_required", "저장된 대화가 생긴 뒤 연결해 주세요.")
@@ -736,7 +776,7 @@ class WorkflowService:
                 state = self._state(db, current, case_id, chat_id, assets)
                 if result is not None:
                     state["result"] = result
-                return state
+            return await self._visible_cases(current, state)
         except WorkflowError as error:
             return {"ok": False, "error": {"code": error.code, "message": error.message}}
         except sqlite3.Error:

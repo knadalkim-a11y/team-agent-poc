@@ -23,7 +23,7 @@ import ees_demo_assets as assets
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_RESPONSE = 8 * 1024 * 1024
-SUPPORTED = {"0.11.3", "0.11.3+ees.1", "0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6"}
+SUPPORTED = {"0.11.3", "0.11.3+ees.1", "0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7"}
 
 
 class DemoError(ValueError):

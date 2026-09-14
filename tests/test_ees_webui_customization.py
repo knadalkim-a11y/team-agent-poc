@@ -40,16 +40,17 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missin
         "open_webui/__init__.py": b"raise RuntimeError('never import this application')\n",
         "open_webui/env.py": b"# synthetic env module\n",
         "open_webui/main.py": b"# synthetic main module\n",
-        "open_webui/frontend/index.html": b"<title>EES Portal</title>\n",
+        "open_webui/frontend/index.html": b"<title>EES Work</title>\n",
         app + "version.json": json.dumps({"version": version}).encode(),
-        app + "immutable/chunks/test.js": b"const title = 'EES Portal';\n",
+        app + "immutable/chunks/test.js": b"const title = 'EES Work';\n",
     }
-    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6"}:
+    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7"}:
         members.update({app + name: b"synthetic checked theme asset\n" for name in branding.THEME_FILES})
     if version == "0.11.3+ees.5":
         members.update({name: b"synthetic checked work asset\n" for name in branding.LEGACY_WORK_FILES})
-    if version == "0.11.3+ees.6":
-        members.update({name: b"synthetic checked work asset\n" for name in branding.WORK_FILES})
+    if version in {"0.11.3+ees.6", "0.11.3+ees.7"}:
+        members.update({app + name[len(branding.TARGET_APP):] if name.startswith(branding.TARGET_APP) else name:
+                        b"synthetic checked work asset\n" for name in branding.WORK_FILES})
     members.update(extra or {})
     members.update(replacement or {})
     for name in missing:
@@ -231,7 +232,7 @@ class CustomizationTests(unittest.TestCase):
         self.assertFalse(self.restore()["changed"])
 
     def test_previous_theme_versions_pending_can_resume_and_restore(self):
-        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5"):
+        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6"):
             with self.subTest(version=version):
                 legacy = self.install_legacy_program(version=version)
                 self.interrupt_promotion()
@@ -246,7 +247,7 @@ class CustomizationTests(unittest.TestCase):
                 shutil.rmtree(self.program)
 
     def test_previous_theme_versions_checkonly_apply_and_restore_preserve_runtime(self):
-        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5"):
+        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6"):
             with self.subTest(version=version):
                 previous = self.install_legacy_program(version=version)
                 before = self.tree()
@@ -315,6 +316,17 @@ class CustomizationTests(unittest.TestCase):
         self.assertTrue(self.restore()["original_program"])
         self.assertFalse(self.program.exists())
         self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
+
+    def test_installed_ees6_still_requires_its_own_work_assets_after_wrapper_update(self):
+        for name in branding.WORK_FILES:
+            previous_name = name.replace(branding.TARGET_APP, "open_webui/frontend/_ees6/", 1)
+            with self.subTest(name=previous_name):
+                previous = self.install_legacy_program(version="0.11.3+ees.6", missing=(previous_name,))
+                before = self.tree()
+                with self.assertRaises(custom.CustomizationError):
+                    custom.validate_program(self.program, previous)
+                self.assertEqual(before, self.tree())
+                shutil.rmtree(self.program)
 
     def test_legacy_selection_rejects_mixed_metadata_and_frontend(self):
         variants = (
@@ -847,7 +859,7 @@ class RealBrandingWheelTests(unittest.TestCase):
             self.assertEqual(distributions[0].version, branding.VERSION)
             self.assertEqual(Path(distributions[0].locate_file("")), program)
             self.assertEqual(json.loads((program / (branding.TARGET_APP + "version.json")).read_bytes())["version"], branding.VERSION)
-            self.assertIn(b"EES Portal", (program / "open_webui/frontend/index.html").read_bytes())
+            self.assertIn(b"EES Work", (program / "open_webui/frontend/index.html").read_bytes())
             # v0.11.3 config.py rewrites package/static from frontend/static
             # at startup. Reproduce those file operations without app imports.
             static = program / "open_webui/static"
