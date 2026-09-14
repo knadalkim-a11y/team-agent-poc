@@ -6,10 +6,10 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 사용자 화면 피드백에 따라 기존 sidebar·실제 AI 대화·오른쪽 패널·관리자 Workspace에 업무 기능을 통합하는 ees.6 / Agent Pack v0.2.7 구현과 로컬 검증을 완료함. 실제 프런트 E2E 5/5, 전체 unittest 791개(23 SKIP), 배포·복원 39개 PASS. 원격 PR/CI 반영을 진행하며 기존 ees.5 설치·health 근거는 보존함. [변경·검증·사내 경계](../evals/scenarios.md#ees-work-native-integration-20260914).
+- 이번 작업: 사용자 화면 피드백에 따라 기존 sidebar·실제 AI 대화·오른쪽 패널·관리자 Workspace에 업무 기능을 통합하는 ees.6 / Agent Pack v0.2.7을 [PR #40](https://github.com/knadalkim-a11y/team-agent-poc/pull/40)에 반영함. 실제 프런트 E2E 5/5, 전체 unittest 791개(23 SKIP), 배포·복원 39개 PASS. 원격 검사·병합 상태는 PR의 현재 head와 Checks를 기준으로 확인하며 기존 ees.5 설치·health 근거는 보존함. [변경·검증·사내 경계](../evals/scenarios.md#ees-work-native-integration-20260914).
 - 최근 운영 확인: 09-14 EES Work Upgrade는 `commit=d4e2cde2a556 version=0.11.3+ees.5 result=ok stage=complete running=true`, 후속 요약은 `health=ok screen=unconfirmed`로 보고됨. 같은 날 앞서 확인한 PR #35 보호 적용(`ec9be8ee2210`, `guard=win64_retry`)의 [당시 증거](../evals/scenarios.md#accept64-guard-20260914)는 보존함. **유휴 이후 안정성은 미확인**.
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
-- 다음 제품 작업 하나: 기존 UI 통합의 PR/CI를 완료하고 사내 ees.6 확인으로 이어감. main 병합·성공 프로그램 산출물 이후 기존 Update/Upgrade/ApplyDemo 경로를 사용함.
+- 다음 제품 작업 하나: 사내 ees.6의 기존 채팅·업무 패널 연결을 확인함. [PR #40](https://github.com/knadalkim-a11y/team-agent-poc/pull/40)의 main 병합·성공 프로그램 산출물 이후 기존 Update/Upgrade/ApplyDemo 경로를 사용함.
 
 ## 마지막으로 확인된 적용 상태
 
@@ -17,7 +17,7 @@
 
 | 대상 | 마지막 확인과 적용 원본 | 남은 한계·근거 |
 |---|---|---|
-| EES Work 업무 UI | ees.6 기존 UI 통합·로컬 검증 완료, 원격 반영 진행·사내 미적용. 이전 PR #38/main `d4e2cde2a556`·main CI/프로그램 산출물 완료; 09-14 사용자 보고로 ees.5 사내 적용·기동·health 확인 | 별도 시연 화면으로 열리는 것을 사용자가 확인하고 통합 방식 정정을 요청함. ees.6 실제 AI 업무 호출·로그인/SSO·일반 연동은 사내 미확인. [현재 검증](../evals/scenarios.md#ees-work-native-integration-20260914), [이전 적용](../evals/scenarios.md#ees-work-demo-integration-20260914) |
+| EES Work 업무 UI | ees.6 기존 UI 통합·로컬 검증 완료, PR #40 반영·사내 미적용. 이전 PR #38/main `d4e2cde2a556`·main CI/프로그램 산출물 완료; 09-14 사용자 보고로 ees.5 사내 적용·기동·health 확인 | 별도 시연 화면으로 열리는 것을 사용자가 확인하고 통합 방식 정정을 요청함. ees.6 실제 AI 업무 호출·로그인/SSO·일반 연동은 사내 미확인. [현재 검증](../evals/scenarios.md#ees-work-native-integration-20260914), [이전 적용](../evals/scenarios.md#ees-work-demo-integration-20260914) |
 | EES Portal 프로그램 | 09-14 `Upgrade result=ok changed=true commit=d4e2cde2a556 version=0.11.3+ees.5 stage=complete running=true`; 후속 요약 `health=ok` 사용자 보고 | 기존 별도 시연 화면에 대한 정정 피드백 확인; ees.6 화면·유휴 이후 안정성 미확인. 이전 `c099e427f62b`의 보호 적용은 [당시 증거](../evals/scenarios.md#accept64-guard-20260914)로 보존. [이번 적용](../evals/scenarios.md#ees-work-demo-integration-20260914) |
 | 운영 래퍼 | 09-14 `Update result=ok changed=false wrapper_changed=true wrapper=d4e2cde2a556`, 이어진 Upgrade `result=ok` 사용자 보고 | Update/Upgrade 추가 실행 불필요. 이전 `ec9be8ee2210` 보호 적용은 [당시 증거](../evals/scenarios.md#accept64-guard-20260914)로 보존. [이번 적용](../evals/scenarios.md#ees-work-demo-integration-20260914) |
 | 분석·업무 패널 자산 | v0.2.1 안내 원본 `bc8bffbb6043fb1401f995b312bf5709f50e5983` 이후 계획·오른쪽 패널 표시 정상 보고 | 실제 사내 SHA·개별 수치/회신 정확성 직접 대조 미실행. [확인 범위](../evals/scenarios.md#plan-work-panel-accepted) |

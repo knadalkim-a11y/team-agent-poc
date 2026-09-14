@@ -40,6 +40,7 @@
 - 최종 브라우저: 실제 프런트 E2E 5/5 PASS(12.630초). 실제 Tiptap 초안·첨부 보존, 스트리밍 중 선택, 탐색창 고정·패널 닫기/복원, AI Tool과 패널의 같은 진행 건 실행·AP 실패/재시도 이력, 관리자 게시·기존 진행 버전 보존·일반 사용자 제한, 새 대화의 첫 송신과 pending 연결, 지연 응답 이후 다른 대화 보존을 검증함. 1920px 채팅·절차 편집 이미지 직접 검수로 영역 중첩과 상단 진행 정보 가림 해소를 확인함.
 - 배포 후보: 최종 ees.6 wheel SHA-256 `cf5c6bdb6ef612183245e0e512ef453f47760a25f4faf7a4364853ac9c3739af`, 실제 패키지와 작업 원본의 launcher/업무 서비스/시드 일치. 이 wheel을 사용한 배포·복원 39개 PASS(19.420초). 사내 설치 성공 근거가 아니라 로컬 프로그램 패키지 검사임.
 - 별도 테마 검사: 같은 wheel의 CDP 키보드·마우스 패널 조절은 PASS. 로컬 최소 Chromium의 `--dump-dom` 기반 밝음/어두움/좁은 화면 3개는 각각 45초 TimeoutExpired(`Ran 2 / FAILED(errors=3)`)로 스타일 판정까지 도달하지 못함. 변경한 기대값은 `_ees6` 경로뿐이며 이 검사를 생략하거나 통과로 바꾸지 않음. 정식 google-chrome가 제공되는 Linux delivery CI에서 같은 검사를 확인함. 실제 프런트 E2E 5/5와 이 별도 실패를 구분함.
+- 원격 반영: [PR #40](https://github.com/knadalkim-a11y/team-agent-poc/pull/40), 구현 commit `1b1bf49a62eef3efdf08941ab6b734d4da2934cb`, tree `f74579793a59d9506908ac20ab1063efca734660`. 로컬 검증한 staged tree와 API 생성 원격 tree가 정확히 일치함. 이 구현의 [Windows/Linux delivery 실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34811497544)과 후속 head의 Checks를 구분해 확인하며, PR 게시를 main 병합·사내 적용 완료로 간주하지 않음.
 - 현재 경계: 코드·배포 산출물 준비와 사내 적용을 구분함. ees.6 사내 Update/Upgrade/ApplyDemo·실제 모델의 업무 도구 선택과 화면 확인은 미실행. 마지막 사내 적용은 아래 ees.5 사용자 보고이며 유휴 안정성은 별도 미확인으로 유지함.
 
 <a id="ees-work-demo-integration-20260914"></a>
