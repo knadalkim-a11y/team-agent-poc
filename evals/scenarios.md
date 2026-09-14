@@ -22,11 +22,22 @@
 | Jira·GitHub·Confluence 대표 질문 | [v0.2.6 구성·갱신·조회 범위](#connector-demo-starters) |
 | 적용 뒤에도 옛 제안 표시 | [실제 UI 필드 오류·모의 검사 공백·v0.2.5 보완](#starter-ui-field-fix) |
 | 중단한 후보 배포 방식 | [단순 래퍼로 전환한 결정](#ees-wrapper-maintenance), [과거 상태 문서의 적용 원본·CI 증거](#status-history-20260911) |
+| EES Work 공장·시스템 공동 작업 설계 | [최종 합의·현행 구현과의 차이·새 세션 기록 검수](#ees-work-shared-design-20260914) |
 | EES Work 공장별 업무 트리·Workspace 깜빡임 | [ees.7 UX·기존 채팅·읽기 전용 이력·검증 진행과 사내 경계](#ees-work-factory-ux-20260914) |
-| EES Work 기존 UI 통합 | [ees.6 실제 채팅·공유 업무 상태·검증 경계](#ees-work-native-integration-20260914) |
+| EES Work 기존 UI 통합 | [ees.6 실제 채팅·사용자별 업무 상태·검증 경계](#ees-work-native-integration-20260914) |
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="ees-work-shared-design-20260914"></a>
+
+### 공장·시스템 공동 작업 설계 기록 (2026-09-14)
+
+- 요청·기준: 사용자가 새 대화에서 이어가기 전에 합의한 설계를 모두 기록하도록 요청함. 시작 당시 최신 main `4ffa2d6864804c95c452fa9b800930b47d44ee06`, tree `c2604bf22f50cab8679eba4c0f23f840850a6772`, 관련 열린 PR 없음과 동일 tree의 깨끗한 로컬 상태를 확인함. 새 인계 파일을 만들지 않고 기존 설계 원본·STATUS·사용 가이드·README·CHANGELOG를 연결함.
+- 합의 원본: [TASK의 공동 작업 목표](../docs/mockups/ees-work/TASK.md#ees-work-shared-target). 공장 → 시스템 → 업무 분류 → P/T/J, 여러 담당자의 같은 진행 건·결과·이력 보존, 개인 AI 대화·권한 분리가 핵심임. 기존 WebUI 외형·실제 중앙 대화·우측 작업 패널·관리자/전문가 Workspace, 현장 조건·절차 버전·단계별 도구/스킬/지침·잡의 복수 도구와 점검 상태 구분도 대화 요구와 대조함.
+- 발견·처리: 기존 문서는 ees.7의 사용자별 진행 건과 본인 대화 연결만 기술해 최종 팀 공동 작업 목표를 잃을 수 있었음. `WorkflowService`의 `cases.owner`와 `_case` 소유자 조회, `_chat`의 본인 대화 검사로 현행 구현 범위를 확인함. 같은 서버에서 UI·Tool이 상태를 공유한다는 표현을 여러 사용자 사이의 공유로 확대하지 않고, 현재 구현·후속 목표·미결정 권한/이관/동시 작업을 구분함. 기존 개인 건의 자동 공개나 타인의 채팅·자격증명 공유를 새 합의로 만들지 않음.
+- 배포 기록 정리: PR #43의 최종 Windows/Linux 검사·main 병합·배포 산출물 확인을 [기존 Windows rename 기록](#windows-program-rename-20260914)에 추가함. 마지막 사내 결과는 `83d56a186382` Restore·Start·웹 접속 성공이며, 이후 전달한 Update→Upgrade→ApplyDemo 및 조건부 수동 변경 블록의 실행 결과는 미수신임. 복구·CI 성공을 새 보완·ees.7·공동 작업의 사내 성공으로 바꾸지 않음.
+- 검수 범위: 사용자 합의와 TASK/STATUS/사용 가이드/README의 의미·링크, 다음 작업과 미확인 구분을 검토함. 문서만 변경하고 HTML·실행/시험 코드·CI·브랜딩·버전·Agent Pack·사내 환경을 변경하지 않음. `python scripts/check_docs.py` → `DOCS OK | files=30 links=936 errors=0 review_candidates=0`, `git diff --check` 통과. 독립 읽기 검토에서 새 승인 절차를 합의로 오해할 수 있는 표현과 과거 색인의 공유 범위 표현을 정리하고, 추가 차단 문제는 발견하지 못함. 원격 반영 정보는 해당 PR에 남기며 기존 자동 시험·브라우저 검사를 새로 수행한 것으로 기록하지 않음.
 
 <a id="ees-work-factory-ux-20260914"></a>
 
@@ -76,6 +87,9 @@
 - 문서·검수: `python scripts/check_docs.py` → `DOCS OK | files=30 links=922 errors=0 review_candidates=0`, `git diff --check` 통과. 현재 Update→Upgrade→ApplyDemo 블록은 258자, 수동 복구 블록은 2,363자이며 모두 2,500자 이내임. 실제 adapter가 허용하지 않는 `Update -Summary`를 검토에서 발견해 제거함. P2 보완 후 독립 읽기 재검토에서 추가 결함을 찾지 못함. 새 UI·브랜딩·의존성·CI 설정은 변경하지 않고 원격 검사와 반영 SHA는 해당 PR에서 확인함.
 - 첫 원격 검사와 시험 보완: PR #43의 `5ef241113f49f42a060fa176cd61e32d4c234264`, [EES delivery 34826488676](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34826488676)는 Linux 성공·Windows 실패였음. Windows에서는 보존 데이터 비교의 `state/` 문자열이 역슬래시 경로를 제외하지 못한 사례와, access=0으로 연 메타데이터 핸들이 실제 rename을 막지 않은 잠금 fixture 두 건이 실패함. 실제 프로그램 wheel 검사는 통과했지만 이 두 건을 통과로 처리하지 않음. 경로를 `Path.parts`로 비교하고, 잠금 fixture를 `GENERIC_READ`로 연 뒤 helper 이전의 직접 rename 거부까지 필수 확인하도록 수정함. 접근 0·속성 조회와 공유 모드의 차이는 [Microsoft CreateFileW 문서](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)로 대조함. 실패한 시험을 생략하거나 조건을 약화하지 않았고 실행 코드는 그대로 유지함. 수정 뒤 Windows 결과는 해당 PR의 후속 검사에서 확인함.
 - 원격 검토 보완: PR #43에서 첫 customization(`before=None`, previous 없음)에도 수동 안내가 나가지만 기존 수동 블록은 previous를 요구한다는 P2를 확인함. 안내를 기존 customized 프로그램 교체와 previous가 있는 경우로 제한하고, 첫 적용은 previous 유무에 관계없이 `manual_promote`를 안내하지 않도록 검사함. 수동 블록의 범위를 넓히거나 첫 적용을 복구 성공으로 간주하지 않음.
+- 최종 원격 검증·병합: [PR #43](https://github.com/knadalkim-a11y/team-agent-poc/pull/43)의 최종 head `1a0caa152048990829197ecbccbbd35874c6931e`, [EES delivery 34827990863](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34827990863)는 Windows·Linux SUCCESS. Windows job 103924451522의 실제 디렉터리 공유 잠금 해제 후 rename, 재시도 소진 후 수동 Resume, Restore 재시도, 실제 built wheel 검사를 직접 확인함. customization 54개/220.441초, manage_ees 92개/7.995초, upgrade 38개/4.256초로 관련 184개 모두 PASS·SKIP 없음. 앞선 실패와 수정 기록은 위에 유지함.
+- 배포 준비 확인: PR #43은 main `4ffa2d6864804c95c452fa9b800930b47d44ee06`, tree `c2604bf22f50cab8679eba4c0f23f840850a6772`로 병합됐고 검증한 파일 tree와 일치함. [main EES delivery 34828809926](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34828809926)의 Windows·Linux·Prepare delivery files SUCCESS와 `ees-demo-4ffa2d6864804c95c452fa9b800930b47d44ee06` 게시를 확인함. 프로그램 입력은 이전 ees.7 빌드와 같으므로 [run 34819968880](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34819968880)의 `ees-program-dba0677ffe3ed64535f36e306721098f22206fe7`(artifact 10338326985, 확인 당시 미만료)을 기존 선택 규칙으로 재사용할 수 있음. 래퍼와 적용 프로그램의 커밋은 서로 다를 수 있으며 이 증거는 이후 main head의 CI 성공을 대신하지 않음.
+- 사용자에게 전달한 다음 절차: Update→Upgrade→ApplyDemo 258자 블록과, 새 `code=program_rename_blocked next=manual_promote` 직후만 쓰는 2,363자 수동 블록을 안내함. 탐색기 F2 변경 성공 후 Enter로 기존 Apply -Resume→Start→ApplyDemo를 이어가며, 변경 거부 시 Ctrl+C 뒤 `rename=failed` 한 줄만 받도록 함. 새 세션 전환 요청 시점까지 실행 결과는 미수신이며 기존 복구를 반복하지 않음.
 - 사내 경계: 과거 Restore·Start·웹 접속 성공은 `83d56a186382`의 증거이며 이번 보완이나 ees.7 적용 성공이 아님. 대기는 일시적 잠금에 대한 대응이고 특정 잠금 주체·ACL·보안 제품을 확정하거나 영구 접근 거부를 해결했다는 뜻은 아님. main·CI 반영 후 새 Update→Upgrade→ApplyDemo를 한 번 실행하고 해당 새 실패일 때만 수동 블록을 사용함.
 
 <a id="ees-work-native-integration-20260914"></a>

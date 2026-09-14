@@ -6,11 +6,13 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 사용자 요청으로 Windows 프로그램 폴더 변경에 제한적인 대기·재시도와 수동 변경 안내를 보완함. 각 rename에서 1·2·4·8초(합계 최대 15초)만 대기하고, 정확한 promote 실패이면 기존 가드 블록·Apply -Resume으로 이어짐. 새 CLI·환경·배포 상태 구조는 추가하지 않음. [변경·검증·사내 경계](../evals/scenarios.md#windows-program-rename-20260914). ees.7 UI 구현과 기존 검증은 [별도 근거](../evals/scenarios.md#ees-work-factory-ux-20260914)에 보존함.
+- 이번 작업: 새 세션에서 이어갈 수 있도록 [공장 → 시스템 → 업무의 공동 작업 목표](mockups/ees-work/TASK.md#ees-work-shared-target)를 기존 설계 원본에 기록함. 같은 공장·시스템의 진행 상태·결과·이력은 함께 사용하고 개인 AI 채팅·권한은 별도로 관리한다는 합의임. **현재 ees.7의 사용자별 진행 건을 팀 공유 구현으로 간주하지 않음.** [설계 기록과 구현 경계](../evals/scenarios.md#ees-work-shared-design-20260914).
+- 최근 Git 반영: Windows rename 대기·수동 진행 보완은 [PR #43](https://github.com/knadalkim-a11y/team-agent-poc/pull/43), main `4ffa2d6864804c95c452fa9b800930b47d44ee06`에 병합됨. 해당 [main EES delivery](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34828809926)의 Windows·Linux·배포 파일 준비 SUCCESS와 기존 ees.7 프로그램 산출물 호환성을 확인함. [검증·산출물 근거](../evals/scenarios.md#windows-program-rename-20260914). 이후 문서 커밋의 CI나 사내 적용 성공을 뜻하지 않음.
 - 최근 UI 확인: 사용자가 기존 Workspace의 업무 절차 존재·내용을 확인하고 새 탭의 어색한 글꼴·반복 깜빡임과 업무 탐색 UX 보완을 요청함. 정확한 사내 SHA는 미보고이며 ees.7 적용·새 화면 정상 확인으로 확대하지 않음.
 - 최근 운영 확인: 09-14 래퍼 `dba0677ffe3e`의 Upgrade가 promote 접근 거부로 실패한 뒤, 사용자가 `Restore/Start result=ok commit=83d56a186382`, `running=true guard=win64_retry`와 **기존 주소 접속·복구 성공**까지 확인함. 유휴 이후 안정성·ees.7 적용 성공은 미확인. [이번 실패와 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [이전 ees.5 적용](../evals/scenarios.md#ees-work-demo-integration-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
-- 다음 작업 하나: 이번 래퍼 보완의 main 반영·CI 성공 후 복구된 서버에서 [Update → Upgrade → ApplyDemo](03-openwebui-native-agent.md#ees-wrapper-upgrade)를 한 번 적용함. `next=manual_promote`이면 같은 실패의 [수동 변경·Resume 블록](03-openwebui-native-agent.md#ees-wrapper-manual-promote)으로 이어가고, 성공 뒤 ees.7 화면을 확인함. 전체 Upgrade·기동 대기를 반복하지 않음.
+- 다음 작업 하나: 새 세션에서 [최신 공동 작업 합의](mockups/ees-work/TASK.md#ees-work-shared-target)와 현행 사용자별 저장·대화 연결의 차이를 대조하고, 공장·시스템 공유 진행 건을 위한 최소 변경 범위와 검증 기준을 구체화함. 멤버·역할과 실행 권한, 개인 대화와 공유 업무의 연결, 기존 데이터 이관·동시 수정은 구현 전 검토할 항목임. 새 권한 정책이나 기존 개인 진행 건의 자동 공개를 이미 승인된 것으로 간주하지 않음.
+- 사내 확인 대기: PR #43 뒤 [Update → Upgrade → ApplyDemo](03-openwebui-native-agent.md#ees-wrapper-upgrade)와 조건부 [수동 변경·Resume](03-openwebui-native-agent.md#ees-wrapper-manual-promote) 명령을 전달했으나 사용자의 실행 결과는 아직 받지 못함. 다음 세션에 결과가 있으면 기존 출력의 짧은 요지만 반영하고, 결과 확보를 위해 같은 Upgrade·복구·긴 기동 대기를 반복하지 않음. 새 적용을 안내할 때는 그때의 main CI를 확인함.
 
 ## 마지막으로 확인된 적용 상태
 
@@ -29,6 +31,7 @@
 
 ## 남아 있는 이슈와 확인 범위
 
+- **팀 공동 작업:** 최종 목표와 현재 구현의 차이가 남아 있음. 현재 `ees.7`의 진행 건·대화 연결은 사용자 소유이고, 공장·시스템 선택만으로 여러 사용자의 같은 진행 건 공유가 구현된 것은 아님. [합의·미결정·검증할 범위](mockups/ees-work/TASK.md#ees-work-shared-target).
 - **공장별 업무 UX:** Workspace 탭 반복 재삽입은 사외 실제 프런트에서 재현하고 동일 탭 유지·글꼴 상속 검사를 통과함. Native 첫 메시지의 경로 전환과 초안 복원 경합을 보완하고 최종 브라우저 10/10을 완료함. ees.7 사내 적용은 실패 후 직전 프로그램으로 복구했으며 새 글꼴·깜빡임 해소는 미확인임. [현재 검증](../evals/scenarios.md#ees-work-factory-ux-20260914).
 - **현재 업데이트 실패:** `dba0677ffe3e`의 Apply 407행 rename 접근 거부 뒤 Restore·Start·웹 접속 복구를 확인함. 이번에 제한적인 rename 대기와 수동 진행을 보완했으나 사내 새 래퍼 적용과 효과는 미확인. 파일 잠금·ACL·특정 보안 제품의 원인은 미확정이며 [복구 증거](../evals/scenarios.md#ees7-apply-recovery-20260914)와 [실패 대응 보완](../evals/scenarios.md#windows-program-rename-20260914)을 구분함.
 - **과거 업데이트 장애 조사:** 종료 처리·오류 보존의 재현 가능한 결함은 수정/적용했으나 최초 포트 소실과 Windows rename 접근 거부의 근본 원인은 미확정. 마지막 종료 실패 로그의 `KeyboardInterrupt/other/ValueError/OperationalError`만으로 DB 손상·잠금·취소 원인을 확정하지 않음. 약속한 추가 확인은 끝났으며 정상 서버 재현·반복 진단 없이 유지함. 자연 재발 시 개선된 래퍼의 실패 요약을 사용함. [조치와 조사 종결](../evals/scenarios.md#ees-update-failure-causes).
@@ -46,7 +49,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | ees.7 공장별 트리·완료 기록 보존·Native 대화·관리자 편집 구현/로컬 검증 완료 | [사내 적용·화면 확인](03-openwebui-native-agent.md#ees-work-demo), 기존 분석 정확성 미확인 유지 |
+| 4. 관리자 워크플로 | ees.7 공장별 트리·개인 진행 건 보존·Native 대화·관리자 편집 구현, 사내 새 화면 미확인 | [공장·시스템의 공동 작업 목표](mockups/ees-work/TASK.md#ees-work-shared-target)를 다음 설계로 구체화. 기존 분석 정확성 미확인 유지 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -56,7 +59,7 @@
 
 ## 재개와 환경 유지
 
-- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work 기존 UI 통합은 [정정된 작업 지시와 참고 원본](mockups/ees-work/TASK.md)에서 시작합니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
+- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work는 [최종 공동 작업 합의를 포함한 작업 지시](mockups/ees-work/TASK.md#ees-work-shared-target)와 그 문서가 연결한 목업을 읽습니다. HTML은 이전 화면 참고이며 공동 작업·권한 설계는 최신 문구가 우선합니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
@@ -64,6 +67,6 @@
 
 ## 최근 점검
 
-2026-09-14: 복구 후 웹 접속 성공을 확인하고, 사용자 요청에 따라 Windows rename 한 연산의 15초 이내 대기·재시도와 안전한 수동 승격 안내를 구현함. 원본·부모 식별자/목적지·미완료 상태를 다시 확인하고 기존 ZIP·previous·Resume 보호를 유지함. 독립 검토에서 재시도 중 경로 확인 오류를 rename 오류로 오분류할 수 있는 경계를 찾아 최종 rename 실패 표식으로 구분함. 사내 새 보완 적용·ees.7 화면·유휴 안정성은 미확인. [검증과 적용 경계](../evals/scenarios.md#windows-program-rename-20260914).
+2026-09-14: 새 세션 전환 요청에 따라 공동 작업 목표와 현행 개인 진행 건의 차이, 개인 채팅·권한 분리, 현장 조건·절차 버전·도구/스킬 매핑, 다음 설계 항목을 기존 문서에 정리함. PR #43의 병합·실제 Windows 잠금 시험·main 배포 CI 증거를 [기존 기록](../evals/scenarios.md#windows-program-rename-20260914)에 추가함. 마지막 사내 확인은 `83d56a186382` Restore·Start·웹 접속 성공이며 새 보완 적용·ees.7 화면·유휴 안정성은 여전히 미확인. 이번 변경은 문서에 한정하며 [기록 검수](../evals/scenarios.md#ees-work-shared-design-20260914)를 따른다.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.

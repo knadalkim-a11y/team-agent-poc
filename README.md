@@ -22,7 +22,7 @@
 - **개발을 이어갈 GPT**: [AGENTS.md](AGENTS.md) → [현재 상태](docs/STATUS.md) → 해당 기능 파일과 테스트.
 - **설치·운영할 사람**: [환경 기준](versions.md)을 읽고, 최초 설치는 [설치·기동](docs/01-openwebui-install.md), 기존 EES 환경의 업데이트는 [래퍼 운영](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)에서 시작합니다.
 - **팀원 안내 초안**: [EES Work 시작 안내](docs/07-team-quickstart.md) — 팀 시연용 준비본. 실제 전달 상태는 STATUS에서 확인.
-- **EES Work 기존 UI 통합**: [후속 UX 합의를 포함한 작업 지시](docs/mockups/ees-work/TASK.md) → [최초 목업 참고 원본](docs/mockups/ees-work/ees-demo-workspace.html). 기존 사이드바의 공장·시스템 선택 아래 셋업·운영·장애대응과 P/T/J 트리를 펼치고, 실제 AI 대화·오른쪽 현재 작업/실행 이력·워크스페이스 업무 절차에 연결합니다. 외형은 기존 WebUI를 따릅니다. [적용·사용과 합성 점검 범위](docs/03-openwebui-native-agent.md#ees-work-demo).
+- **EES Work 기존 UI 통합**: [후속 UX 합의를 포함한 작업 지시](docs/mockups/ees-work/TASK.md) → [최초 목업 참고 원본](docs/mockups/ees-work/ees-demo-workspace.html). 기존 사이드바의 공장·시스템 선택 아래 셋업·운영·장애대응과 P/T/J 트리를 펼치고, 실제 AI 대화·오른쪽 현재 작업/실행 이력·워크스페이스 업무 절차에 연결합니다. 외형은 기존 WebUI를 따릅니다. 최종 목표는 [공장 → 시스템 → 업무의 공동 진행과 개인 채팅·권한 분리](docs/mockups/ees-work/TASK.md#ees-work-shared-target)이며, 현재 사용자별 진행 건과 후속 공유 설계를 구분합니다. [적용·사용과 합성 점검 범위](docs/03-openwebui-native-agent.md#ees-work-demo).
 - **준비·배포·검증 여부 확인**: [STATUS](docs/STATUS.md)의 요약과 연결된 [평가표](evals/scenarios.md)를 확인합니다. README에는 진행 상태를 복제하지 않습니다.
 
 매번 시작 문구를 입력하는 대신 아래의 일회성 프로젝트 지침을 사용합니다. 현재 상태는 대화 기억이 아니라 저장소에서 확인합니다.
