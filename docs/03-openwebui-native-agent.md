@@ -448,7 +448,7 @@ v0.1.3의 회신 중심 표현을 거쳐, 이번에는 사용자가 확인한 �
 
 실행 코드는 [전문 호출](../agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py)과 [합성 자료](../agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py), 운영 코드는 [ApplyDemo 진입점](../scripts/ees_apply_demo.py)과 [자산 병합](../scripts/ees_demo_assets.py)에 있습니다. 공유 자료의 도메인은 서버가 주입하는 `__metadata__.model_id`로 정하며 LLM이 제공한 모델 이름이나 Task Model의 `__model__`을 사용하지 않습니다. 전문 모델은 자기 자료만 조회하고 EES는 조건별 비교만 수행합니다. 모델 ID 검사는 기존 사용자·Tool 접근권한 검사를 대신하지 않습니다.
 
-**자산 적용:** 기존 서버와 배포 환경 등록을 유지한 상태에서, 변경이 main에 반영되고 해당 CI가 성공한 뒤 아래 블록을 사용합니다. `Update`로 운영 스크립트의 보완을 받고 `ApplyDemo`로 지정 자산을 갱신합니다. 공장별 업무 기능을 처음 적용하거나 ees.7보다 이전 프로그램이면 [프로그램과 자산을 함께 갱신하는 순서](#ees-work-demo)를 먼저 따릅니다.
+**자산만 갱신할 때:** 프로그램이 이미 [현재 버전](../versions.md)이면, 기존 서버와 배포 환경 등록을 유지한 상태에서 변경의 main 반영·해당 CI 성공 뒤 아래 블록을 사용합니다. `Update`로 운영 스크립트의 보완을 받고 `ApplyDemo`로 지정 자산을 갱신합니다. **이번 ees.8 사이드바 개선은 프로그램 화면도 바꾸므로 아래 자산 전용 블록 대신 [Update → Upgrade → ApplyDemo](#sidebar-refinement)를 따릅니다.** 공장별 업무 기능을 처음 적용할 때도 [프로그램과 자산을 함께 갱신하는 순서](#ees-work-demo)를 사용합니다.
 
 ```powershell
 & {
@@ -465,7 +465,7 @@ v0.1.3의 회신 중심 표현을 거쳐, 이번에는 사용자가 확인한 �
 .\scripts\manage-ees.ps1 -Action ApplyDemo
 ```
 
-**프로그램이 이미 현재 버전인 경우:** 위 `ApplyDemo`로 지정 자산을 갱신합니다. 2026-09-14 읽기 진단에서 `0.11.3+ees.7`을 확인한 서버도 여기에 해당합니다. 운영 스크립트 보완을 받은 뒤 ApplyDemo만 이어가며 Upgrade·Restore·Start를 반복하지 않습니다. 분석 패널만 확인할 때는 완전히 새로고침하고 새 EES 대화에서 “조립 2라인에서 놓치고 있는 개선 기회를 찾아줘”라고 질문해 계획·실행 상태와 **업무 패널 열기**를 확인합니다.
+**이미 완료된 정렬 충돌 수정 이력(2026-09-14):** 당시 읽기 진단에서 `0.11.3+ees.7` 실행을 확인했고, 운영 스크립트를 갱신한 뒤 `76e566622e74`의 ApplyDemo로 v0.2.8 자산 적용을 마쳤습니다. 이 자산 전용 수정 때문에 Upgrade·Restore·Start를 반복하지 않는다는 안내였으며, ees.7이 현재 UI 배포 버전이라는 뜻은 아닙니다. [당시 적용 결과](../evals/scenarios.md#specialists-editor-format-20260914)를 보존하고, 이번 ees.8 화면 변경은 별도의 [Update → Upgrade → ApplyDemo](#sidebar-refinement)로 적용합니다. 분석 패널만 확인할 때는 완전히 새로고침하고 새 EES 대화에서 “조립 2라인에서 놓치고 있는 개선 기회를 찾아줘”라고 질문해 계획·실행 상태와 **업무 패널 열기**를 확인합니다.
 
 **프로그램이 이전 버전인 경우:** `ApplyDemo`는 서비스 이름을 바꾸는 프로그램 업데이트를 포함하지 않습니다. EES Work 이름과 최신 시연 자산을 함께 적용하려면 [현재 업무 통합 안내](#ees-work-demo)를 따릅니다. 이미 Update를 마친 같은 저장소 폴더에서는 아래 블록으로 이어갑니다. 앞 단계가 실패하면 멈춥니다.
 
