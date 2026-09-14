@@ -20,8 +20,26 @@
 | Jira·GitHub·Confluence 대표 질문 | [v0.2.6 구성·갱신·조회 범위](#connector-demo-starters) |
 | 적용 뒤에도 옛 제안 표시 | [실제 UI 필드 오류·모의 검사 공백·v0.2.5 보완](#starter-ui-field-fix) |
 | 중단한 후보 배포 방식 | [단순 래퍼로 전환한 결정](#ees-wrapper-maintenance), [과거 상태 문서의 적용 원본·CI 증거](#status-history-20260911) |
+| EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="ees-work-demo-integration-20260914"></a>
+
+## 2026-09-14 EES Work 목업 포털 통합
+
+- 기준: 최신 main `3573444550f95e7820a3febad8a6eafa232e344e`, tree `b01f44506c9a1e5e538ade7a4dbd274cfe4b671c`, 관련 열린 PR 0개. AGENTS·STATUS·TASK·원본을 읽고 원격 109개 blob을 별도 작업 복사본과 대조해 모두 일치함. 기존 사용자 변경·과거 WinError64 적용 근거를 보존함.
+- 구현: ees.5 프로그램 빌드에 로그인된 사용자의 ‘EES Work 시연’ 진입점, 브라우저 메모리 목업, 인증된 고정 HTML/CSS/JS 제공을 포함함. 원본 HTML은 87,747 bytes·기존 SHA-256 그대로 유지하고 실제 배포용 코드만 기능 폴더로 분리함. 기존 대화 DOM을 유지한 창으로 열고 닫으며 새로고침·창 닫기·초기화 시 목업 상태를 폐기함.
+- 핵심 동작: P/T/J 탐색과 실행·상위 진행률, AP 첫 실패/후속 미수행/재시도 이력, 선행 재실행에 따른 결과 무효화와 진행 중 작업 취소, 공유 액션을 통한 시연 채팅, 미지원 요청 안내. 설계 폼·지침/도구 연결·입력 매핑·순환/미연결 검출, 저장·시험·수정 후 재시험·게시, 현장 조건·버전별 셋업 스냅샷을 연결함. 실제 LLM·업무 API·DB·등록 자산 쓰기는 없음.
+- 배포 경로: 기존 Update/Upgrade→검증된 main 프로그램 artifact→Stop/Apply/Start를 재사용함. 모델·Skill·Tool 등록용 ApplyDemo와 분리함. 새 필수 파일의 RECORD 검증과 빌드 입력 비교를 추가하고 ees.1~ees.4 시작·직전 Restore를 유지함. 발견한 구버전 THEME_FILES 요구 오류를 수정해 새 런처 파일이 과거 배포본의 필수 파일로 취급되지 않도록 함.
+- 로컬 검사: Linux / Python 3.12.14 / Node 24.19.0. 전체 unittest `Ran 759 / OK (skipped=24)` 12.424초. 건너뜀에는 실제 wheel·Chrome·FastAPI/httpx·Windows/PowerShell·일부 플랫폼/선택 의존성 검사가 포함됨. 관련 배포/복원/시작 회귀, 합성 빌드10개 중9 PASS·공식 wheel1 SKIP, JavaScript 구문을 확인함. 미실행을 PASS로 합치지 않음.
+- 브라우저·인증 검사 구성: 실제 패키지에서 가져온 정적 코드로 Chrome E2E 5경로(DB/AP·버전 게시·현장 제외·창 크기·런처 복귀), 업무 네트워크 요청 0건 검사, 실제 FastAPI 고정 경로/인증 dependency 검사3개. 런처의 기존 대화/설정 검사는 native 형태 DOM fixture이며 전체 Open WebUI 로그인·실제 연동 E2E가 아님. 인증 helper는 테스트 principal을 사용하고 실제 사용자 DB는 열지 않음.
+- 로컬 한계: 설치된 Chrome 없음. control-browser의 localhost 접근 `ERR_BLOCKED_BY_CLIENT`, 공식 wheel 다운로드 timeout으로 로컬 실제 패키지/브라우저 검사는 미실행. CI에서 Linux Chrome·Windows 및 공식 해시 고정 wheel 검증을 강제하도록 연결했으며 아래에 실제 실행 결과를 추가함. 통신 제한을 우회하지 않음.
+- 첫 Git/CI: 원격 PR #38 코드 `eb402af5b8461b4010b31cab673b6c9127727663`, tree `656e8ec70e5c08d604515bd4250d7501f601d205`로 로컬 검사 tree 일치를 확인함. [CI34806949083](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34806949083) Linux에서 실제 고정 wheel 빌드·인증 경로3개 통과. Chrome 5경로 중 설계/게시와 런처 복귀2개 통과, 나머지3개는 시험의 이전 aria 진행률 selector가 현재 native progress 요소와 달라 실패함. 실제 value/max와 화면 완료 문구를 검사하도록 수정하며 실패를 보존함.
+- 독립 검토·보완: 편집 가능한 현장명·시스템명4곳의 HTML 이스케이프 누락을 수정함. 악성 태그 문자열을 현장명으로 입력·게시·새 셋업·다음 게시 검토까지 진행해 문자 그대로 표시되고 업무 URL 요청이 발생하지 않는 E2E를 추가함. CSP에서 inline style·동일 출처 이미지·웹 폰트 요청을 제거함. 실제 보안 사고나 사내 호출이 관찰된 것은 아님. CI 스크린샷은 artifact에 저장했지만 이 환경의 내려받기는403으로 직접 시각 검수하지 못함.
+- 보완 코드 검증 완료: `9122db97d29df8c60fe28f1e86b3cf1af5229af1`, tree `0ff439e831391d077b730c582d3729e74f8b9ffd`. [CI34807146795](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34807146795)는 Ubuntu-24.04·Windows-2022 모두 completed/success. Linux Chrome E2E5개가28.446초에 모두 통과함: 전체 DB/AP·후속 실행/무효화, 게시/버전 보존/악성 현장명, 네비게이션·입력/팝업·운영/장애·초기화, 미국/한국/헝가리 및1920/1280/960/640창 크기, 런처 복귀. 정적/인증 요청 외 업무 요청0건, 예기치 않은 JS/CSP 오류0건을 확인함. 실제 FastAPI 경로3개는 두 OS에서 통과함. 공식 고정 wheel 빌드·프로그램 Apply/Restore·구버전 시작/복원, 기존 연동/WO/분석 회귀, Windows 실제 IOCP·PowerShell, 문서/diff 검사도 성공함.
+- 인계: [PR #38](https://github.com/knadalkim-a11y/team-agent-poc/pull/38)에 구현과 근거를 반영함. 위 코드 이후의 정리 커밋은 문서만 변경하고 docs/diff를 확인함. 병합·main 프로그램 artifact 생성 여부는 PR과 해당 EES delivery 실행에서 확인하며, 사내 적용과 혼동하지 않음. PR 이벤트의 package job은 기존 정책대로 SKIP이고 main 병합 뒤 프로그램 포함 artifact를 생성함.
+- 사내: 배포·화면·로그인 쿠키/SSO 조합·일반 대화와 Jira/Confluence/GitHub의 실제 응답 모두 이번 변경 기준 미확인. 기존 사내 성공 기록은 당시 범위로 유지함. [한 블록 적용 명령·3~5분 시연·기존 화면 복귀](../docs/03-openwebui-native-agent.md#ees-work-demo)를 제공함.
 
 <a id="ees-work-mockup-reference-20260914"></a>
 

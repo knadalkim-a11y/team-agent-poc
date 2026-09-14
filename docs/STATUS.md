@@ -6,10 +6,10 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: EES Work 통합 목업의 [원본·구현 작업 지시](mockups/ees-work/TASK.md)를 저장소에 보관하고 README에서 연결함. ZIP 첨부 없이 다음 작업자가 원본을 찾을 수 있도록 준비함. **참고 원본 등록이며 실제 포털 UI 연결·사내 배포는 미실행**. [확인 범위](../evals/scenarios.md#ees-work-mockup-reference-20260914).
+- 이번 작업: [EES Work 시연](03-openwebui-native-agent.md#ees-work-demo)의 실행·설계 워크스페이스와 ees.5 프로그램 배포 경로를 구현하고 [PR #38](https://github.com/knadalkim-a11y/team-agent-poc/pull/38)에 반영함. **코드의 Windows/Linux CI·Chrome E2E5경로 완료, 사내 배포·화면 미확인**. 병합·main 산출물 여부는 PR/CI에서 확인하며 [검사·실환경 경계](../evals/scenarios.md#ees-work-demo-integration-20260914)를 따름.
 - 최근 운영 확인: PR #35의 자식 IOCP 수락 보호를 main에 병합하고 사용자 승인 후 사내 적용을 확인함. 래퍼 `ec9be8ee2210`, 정지 전 `guard=compatible`, 정상 Stop 뒤 Start의 `result=ok running=true guard=win64_retry`를 보고받음. **보호 적용·기동 health 확인 완료, 유휴 이후 안정성 미확인**. [증거와 검증 구분](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
-- 다음 제품 작업 하나: [EES Work 목업 통합 작업 지시](mockups/ees-work/TASK.md)를 기준으로 사내 시스템 안의 시연 진입점·화면 연결을 구현하고 검증·배포를 진행함. 이번 원본 등록에서 해당 구현을 수행한 것은 아님. 자연 유휴 이후 기존 포털 안정성은 아래 미해결로 보존하며 완료한 보호 적용·기동 검사를 반복하지 않음.
+- 다음 제품 작업 하나: main 병합·프로그램 포함 CI 산출물 성공을 확인한 뒤 사내 기존 포털에서 [한 블록 Upgrade](03-openwebui-native-agent.md#ees-work-demo)와 메뉴·시연 흐름·기존 대화 복귀를 확인함. 자연 유휴 이후 포털 안정성은 별도 미확인으로 보존함.
 
 ## 마지막으로 확인된 적용 상태
 
@@ -17,6 +17,7 @@
 
 | 대상 | 마지막 확인과 적용 원본 | 남은 한계·근거 |
 |---|---|---|
+| EES Work 시연 | Git ees.5 구현·PR #38, 코드 `9122db97d29d`의 Windows/Linux CI와 Chrome5경로 통과 | 사내 적용 원본·메뉴/흐름/복귀 미확인. main 병합·프로그램 산출물은 PR/CI 확인. [근거](../evals/scenarios.md#ees-work-demo-integration-20260914) |
 | EES Portal 프로그램 | 원본 `c099e427f62b`·customized 유지; 09-14 보호 적용 후 Start의 `result=ok running=true guard=win64_retry` 사용자 보고 | 현재 기동의 health·자식 보호 설치 확인. 유휴 이후 안정성·최초 단절 주체는 미확인. [복구·적용 근거](../evals/scenarios.md#accept64-guard-20260914) |
 | 운영 래퍼 | 2026-09-14 `Update result=ok changed=false wrapper_changed=true wrapper=ec9be8ee2210`; 정지 전 `guard=compatible`·정상 Stop 뒤 보호 적용 확인 | 프로그램 교체 없음. `next=upgrade`는 일반 안내이며 이번 보호 적용에 추가 Upgrade가 필요하지 않음. [근거](../evals/scenarios.md#accept64-guard-20260914) |
 | 분석·업무 패널 자산 | v0.2.1 안내 원본 `bc8bffbb6043fb1401f995b312bf5709f50e5983` 이후 계획·오른쪽 패널 표시 정상 보고 | 실제 사내 SHA·개별 수치/회신 정확성 직접 대조 미실행. [확인 범위](../evals/scenarios.md#plan-work-panel-accepted) |
@@ -42,7 +43,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | 기존 분석 계획·업무 패널 정상 보고; EES Work P/T/J·설계 워크스페이스 참고 목업 보관 | [목업의 포털 연결·시연 구현](mockups/ees-work/TASK.md), 기존 분석 정확성 미확인 유지 |
+| 4. 관리자 워크플로 | 기존 분석 패널 확인; EES Work 실행·설계·현장 버전 목업·ees.5 배포 및 CI 완료 | [사내 시연 확인](../evals/scenarios.md#ees-work-demo-integration-20260914), 기존 분석 정확성 미확인 유지 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -60,6 +61,6 @@
 
 ## 최근 점검
 
-2026-09-14: 최신 main `96c51db5702e`·열린 PR 0개·AGENTS/STATUS를 확인하고 동일 tree의 별도 작업 복사본에서 목업 원본·작업 지시·문서 연결을 준비함. 이전 ZIP 원본과 SHA-256이 일치하며 실제 프로그램·등록 자산·CI·서버는 변경하지 않음. 문서·diff와 원본 구문·격리 검사를 수행하고 범위와 결과를 [기존 평가 기록](../evals/scenarios.md#ees-work-mockup-reference-20260914)에 남김. 사내 배포·실제 브라우저 E2E는 미실행. 앞선 수락 보호 적용 확인은 [기존 증거](../evals/scenarios.md#accept64-guard-20260914)에 보존함.
+2026-09-14: main `3573444550f95`·AGENTS/STATUS/TASK·원본을 확인해 EES Work를 구현함. PR #38 코드 `9122db97d29d`의 CI34807146795에서 Windows/Linux 검사·실제 고정 wheel 적용/복원·Chrome E2E5개가 통과함. 편집값 HTML 삽입과 진행률 시험 selector 문제를 수정하고 첫 실패를 보존함. 로컬 전체 unittest 출력759/OK(skipped=24), 문서·diff 확인. 사내 실제 로그인·화면·일반 대화/연동 응답은 이번 변경 기준 미확인. [근거](../evals/scenarios.md#ees-work-demo-integration-20260914).
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.

@@ -476,9 +476,14 @@ class RealGitCompatibilityTests(unittest.TestCase):
                 program.write_text("changed program\n", encoding="utf-8")
                 changed = commit("program changed")
                 self.assertFalse(upgrade.compatible_program(initial, changed))
+                work = root / "agent-pack" / "skills" / "ees-work-demo" / "ui" / "ees-work.js"
+                work.parent.mkdir(parents=True)
+                work.write_text("const demo = true;\n", encoding="utf-8")
+                work_changed = commit("work demonstration changed")
+                self.assertFalse(upgrade.compatible_program(changed, work_changed))
                 unrelated = git("commit-tree", "HEAD^{tree}", "-m", "unrelated history")
-                self.assertFalse(upgrade.compatible_program(unrelated, changed))
-                self.assertEqual(upgrade.checkout(changed), changed)
+                self.assertFalse(upgrade.compatible_program(unrelated, work_changed))
+                self.assertEqual(upgrade.checkout(work_changed), work_changed)
                 notes.write_text("uncommitted local notes\n", encoding="utf-8")
                 with self.assertRaisesRegex(upgrade.UpgradeError, "local_changes"):
                     upgrade.checkout()

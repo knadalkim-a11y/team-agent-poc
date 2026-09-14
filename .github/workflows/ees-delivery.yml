@@ -32,6 +32,8 @@ on:
       - 'tests/test_wo_demo*'
       - 'tests/test_ees_branding_build.py'
       - 'tests/test_ees_chat_theme.py'
+      - 'tests/test_ees_work_demo.py'
+      - 'tests/test_ees_work_routes.py'
       - 'tests/test_demo_bundle.py'
       - 'docs/**'
       - 'README.md'
@@ -67,7 +69,11 @@ jobs:
       - run: python -m unittest discover -s tests -p test_ees_branding_build.py -v
       - run: python -m unittest discover -s tests -p test_demo_bundle.py -v
       - name: Install fixed test dependencies
-        run: python -m pip install uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4
+        run: python -m pip install uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1
+      - name: Verify authenticated demo file routes without user data
+        env:
+          EES_REQUIRE_WORK_ROUTES: '1'
+        run: python -m unittest discover -s tests -p test_ees_work_routes.py -v
       - name: Verify Confluence read and plain results
         run: python -m unittest discover -s tests -p "test_confluence*.py" -v
       - name: Verify Jira read and plain results
@@ -102,6 +108,21 @@ jobs:
           python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
       - name: Build the real program fixture without installing it
         run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
+      - name: Verify EES Work browser demonstration and isolation
+        if: runner.os == 'Linux'
+        env:
+          EES_TEST_CHROME: google-chrome
+          EES_TEST_BRANDING_DIR: dist/branding
+          EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
+        run: python -m unittest discover -s tests -p test_ees_work_demo.py -v
+      - name: Keep EES Work browser evidence
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ees-work-browser-evidence
+          path: dist/ees-work-screenshots
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Verify chat theme in the runner's Chrome
         if: runner.os == 'Linux'
         env:
@@ -157,7 +178,7 @@ jobs:
               enabled=true
             else
               git diff --name-only "$BEFORE_SHA" HEAD > "$RUNNER_TEMP/ees-changed.txt"
-              if grep -Eq '^(branding/|scripts/build_(ees_webui|demo_bundle)\.py$|scripts/render_ees_brand_assets\.py$|tests/test_(ees_branding_build|demo_bundle)\.py$|\.github/workflows/ees-delivery\.yml$)' "$RUNNER_TEMP/ees-changed.txt"; then
+              if grep -Eq '^(branding/|agent-pack/skills/ees-work-demo/|scripts/build_(ees_webui|demo_bundle)\.py$|scripts/render_ees_brand_assets\.py$|tests/test_(ees_branding_build|demo_bundle)\.py$|\.github/workflows/ees-delivery\.yml$)' "$RUNNER_TEMP/ees-changed.txt"; then
                 enabled=true
               fi
             fi

@@ -4,6 +4,8 @@
 
 ## 2026-09-14
 
+- EES Portal ees.5에 로그인된 사용자가 여는 EES Work 시연과 실행·설계 워크스페이스를 연결함. 브라우저 메모리에서만 P/T/J 실행·실패/재시도·버전 게시·현장 제외를 시뮬레이션하고 기존 대화로 복귀함. 고정 파일 인증·업무 네트워크 차단·구버전 시작/복원을 유지하며 기존 프로그램 Upgrade 경로로 배포함. [범위·검증·실제 배포 구분](evals/scenarios.md#ees-work-demo-integration-20260914).
+
 - EES Work 통합 목업 원본과 [구현 작업 지시](docs/mockups/ees-work/TASK.md)를 저장소 경로로 제공함. ZIP·대화 파일 접근에 의존하지 않고 다음 구현 담당자가 같은 기준을 읽을 수 있도록 README에서 연결함. 이번 변경은 참고 원본·지시 등록이며 실제 포털 UI·배포 동작은 변경하지 않음.
 
 - 원본·커스터마이즈 자식 기동에 CPython 3.11 IOCP WinError64 수락 보호를 추가함. 실패한 연결만 정리하고 지연 재수락하며 다른 오류·취소·종료를 유지함. `Start -CheckOnly`와 기존 교체 사전검사로 정지 전 호환성을 확인하고 새 Start는 health·보호 표시를 함께 확인함. 시스템 Python·패키지·DB·키·주소·TLS·종료 권한은 변경하지 않음. [시험·배포 구분](evals/scenarios.md#accept64-guard-20260914).

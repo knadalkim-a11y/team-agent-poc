@@ -18,22 +18,28 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
-VERSION = "0.11.3+ees.4"
-PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4"}
+VERSION = "0.11.3+ees.5"
+PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5"}
 SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
 SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
 WHEEL_FILENAME = f"open_webui-{VERSION}-py3-none-any.whl"
 SOURCE_INFO = f"open_webui-{UPSTREAM_VERSION}.dist-info/"
 TARGET_INFO = f"open_webui-{VERSION}.dist-info/"
 SOURCE_APP = "open_webui/frontend/_app/"
-TARGET_APP = "open_webui/frontend/_ees4/"
+TARGET_APP = "open_webui/frontend/_ees5/"
 ASSET_DIR = Path(__file__).resolve().parents[1] / "branding" / "ees" / "assets"
 UI_DIR = ASSET_DIR.parent / "ui"
 ASSET_NAMES = (
     "favicon.svg", "favicon.png", "favicon-96x96.png", "favicon.ico",
     "apple-touch-icon.png", "logo.png", "splash.png", "splash-dark.png",
 )
-UI_FILES = {"chat-theme.css": "chat-theme.css", "font-licenses.txt": "fonts/LICENSE.txt"}
+UI_FILES = {"chat-theme.css": "chat-theme.css", "font-licenses.txt": "fonts/LICENSE.txt",
+            "ees-work-launcher.js": "ees-work-launcher.js", "ees-work-launcher.css": "ees-work-launcher.css"}
+WORK_DIR = ASSET_DIR.parents[2] / "agent-pack" / "skills" / "ees-work-demo"
+WORK_ASSETS = {"scripts/ees_work_demo.py": "open_webui/ees_work_demo.py",
+               **{"ui/" + name: "open_webui/ees_work_demo_ui/" + name
+                  for name in ("index.html", "ees-work.css", "ees-work.js")}}
+WORK_FILES = tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {
@@ -42,12 +48,20 @@ FONT_SOURCES = {
     "NotoSansKR-Variable.ttf": ("open_webui/static/fonts/NotoSansKR-Variable.ttf",
                                 "2d2267a83d089cb1a517a4f901676d05d283346e650d1b1845d601cbd696a98e"),
 }
-THEME_FILES = tuple(UI_FILES.values()) + tuple("fonts/" + name for name in FONT_SOURCES)
-THEME_LINK = b'<link rel="stylesheet" href="/_ees4/chat-theme.css" crossorigin="use-credentials" />'
+THEME_FILES = ("chat-theme.css", "fonts/LICENSE.txt") + tuple("fonts/" + name for name in FONT_SOURCES)
+THEME_LINK = b'<link rel="stylesheet" href="/_ees5/chat-theme.css" crossorigin="use-credentials" />'
+WORK_LINK = (b'<link rel="stylesheet" href="/_ees5/ees-work-launcher.css" />'
+             b'<script defer src="/_ees5/ees-work-launcher.js"></script>')
 
 # Every replacement is pinned to one reviewed upstream file and occurrence count.
 # Upstream comments, attribution strings, documentation, and source maps remain.
 PATCHES = {
+    "open_webui/main.py": [(
+        b"if os.path.exists(FRONTEND_BUILD_DIR):",
+        b"from open_webui.ees_work_demo import install as install_ees_work_demo\n"
+        b"install_ees_work_demo(app, get_verified_user)\n\n"
+        b"if os.path.exists(FRONTEND_BUILD_DIR):", 1,
+    )],
     "open_webui/env.py": [(
         b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'Open WebUI')\n"
         b"if WEBUI_NAME != 'Open WebUI':\n    WEBUI_NAME += ' (Open WebUI)'",
@@ -56,8 +70,8 @@ PATCHES = {
     )],
     "open_webui/frontend/index.html": [
         (b"<title>Open WebUI</title>", b"<title>EES Portal</title>", 1),
-        (b"/_app/", b"/_ees4/", 49),
-        (b"</head>", THEME_LINK + b"\n\t</head>", 1),
+        (b"/_app/", b"/_ees5/", 49),
+        (b"</head>", THEME_LINK + WORK_LINK + b"\n\t</head>", 1),
     ],
     SOURCE_APP + "immutable/chunks/CHq18Uto.js": [
         (b'const ca="Open WebUI"', b'const ca="EES Portal"', 1),
@@ -69,14 +83,14 @@ PATCHES = {
         (b" / Open WebUI`", b" / EES Portal`", 2),
     ],
     SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
-        (b"/_app/version.json", b"/_ees4/version.json", 1),
-        (b'an="0.11.3"', b'an="0.11.3+ees.4"', 1),
+        (b"/_app/version.json", b"/_ees5/version.json", 1),
+        (b'an="0.11.3"', b'an="0.11.3+ees.5"', 1),
     ],
     SOURCE_APP + "version.json": [
-        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.4"}', 1),
+        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.5"}', 1),
     ],
     SOURCE_INFO + "METADATA": [
-        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.4\n", 1),
+        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.5\n", 1),
     ],
 }
 
@@ -146,13 +160,18 @@ def zip_entry(name, attributes=0o100644 << 16):
     return entry
 
 
-def prepare_additions(source, ui_dir):
+def prepare_additions(source, ui_dir, work_dir=WORK_DIR):
     additions = {}
     for filename, relative in UI_FILES.items():
         path = Path(ui_dir) / filename
         if path.is_symlink() or not path.is_file() or not path.stat().st_size:
             raise ValueError(f"Missing, empty, or linked EES UI asset: {filename}")
         additions[TARGET_APP + relative] = path.read_bytes()
+    for relative, target in WORK_ASSETS.items():
+        path = Path(work_dir) / relative
+        if path.is_symlink() or not path.is_file() or not path.stat().st_size:
+            raise ValueError(f"Missing, empty, or linked EES Work asset: {relative}")
+        additions[target] = path.read_bytes()
     for filename, (origin, expected) in FONT_SOURCES.items():
         if origin not in source.namelist():
             raise ValueError(f"Missing pinned upstream font: {filename}")

@@ -21,7 +21,7 @@ HEX40 = re.compile(r"[0-9a-f]{40}")
 # Keep in step with the workflow's program-change decision. Wrapper-only changes
 # can reuse an earlier program artifact, but never one with different inputs.
 PROGRAM_INPUTS = (
-    "branding", "scripts/build_ees_webui.py", "scripts/build_demo_bundle.py",
+    "branding", "agent-pack/skills/ees-work-demo", "scripts/build_ees_webui.py", "scripts/build_demo_bundle.py",
     "scripts/render_ees_brand_assets.py", "tests/test_ees_branding_build.py",
     "tests/test_demo_bundle.py", ".github/workflows/ees-delivery.yml",
 )
