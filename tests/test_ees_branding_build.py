@@ -196,6 +196,7 @@ class BrandingBuildTests(unittest.TestCase):
         # import boundary simulates Ci's side effect if mode reaches it, so an
         # accidental restore of `full` is observable rather than a text check.
         probe = r'''
+process.stderr.write('ees_probe=node-entry version=' + process.version + '\n', () => {
 const assert = require('node:assert/strict');
 let current = {prompt:'original', selectedToolIds:['existing'], toolApprovalMode:'ask'};
 let approvalCalls = 0, imported = [], persisted = [], _r = null;
@@ -239,11 +240,21 @@ const qi = async serialized => {
   assert.equal(persisted.every(item => !Object.hasOwn(item.draft, 'toolApprovalMode') && item.chatId === 'native-chat' && item.debounce === false), true);
   for (const invalid of ['{', 'null', '[]', '"text"', 'false']) assert.equal(await hook.restore(invalid), false);
   assert.equal(imported.length, 1);
+  await new Promise(resolve => process.stderr.write('ees_probe=node-complete\n', resolve));
   console.log('draft_approval_boundary=pass');
 })().catch(error => {console.error(error); process.exitCode = 1;});
+});
 '''
-        result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
-                                text=True, timeout=10)
+        try:
+            result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
+                                    text=True, timeout=10)
+        except subprocess.TimeoutExpired as error:
+            stderr = error.stderr or ""
+            if isinstance(stderr, bytes):
+                stderr = stderr.decode("utf-8", errors="replace")
+            stages = [line for line in stderr.splitlines() if line.startswith("ees_probe=")]
+            raise AssertionError("Node draft probe timed out after 10s; stderr stages: "
+                                 + (", ".join(stages) or "entry not observed")) from None
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.strip(), "draft_approval_boundary=pass")
 
