@@ -804,6 +804,28 @@ def local_error_detail(error):
                              "winerror": getattr(error, "winerror", None), "source": source, "line": line})
 
 
+def safe_program_rename(value):
+    """Only fixed rename stages and bounded counters; never paths or error text."""
+    if not isinstance(value, dict):
+        return None
+    stage, attempts, waited = value.get("stage"), value.get("attempts"), value.get("waited_seconds")
+    if (not isinstance(stage, str) or stage not in {"move_active", "promote", "restore"}
+            or type(attempts) is not int or not 1 <= attempts <= 5
+            or type(waited) is not int or not 0 <= waited <= 15):
+        return None
+    return {"stage": stage, "attempts": attempts, "waited_seconds": waited}
+
+
+def program_rename_detail(error):
+    winerror = getattr(error, "winerror", None)
+    if (not isinstance(error, OSError) or type(winerror) is not int or winerror not in (5, 32, 33)
+            or getattr(error, "program_rename_failed", None) is not True):
+        return None
+    return safe_program_rename({"stage": getattr(error, "program_rename_stage", None),
+                               "attempts": getattr(error, "program_rename_attempts", None),
+                               "waited_seconds": getattr(error, "program_rename_wait_seconds", None)})
+
+
 def failure_fields(result):
     """Safe one-line details shared by direct operations and Upgrade."""
     fields = ""
@@ -820,6 +842,10 @@ def failure_fields(result):
         fields += (f" operation={process['operation'] or '-'} reason={process['reason'] or '-'}"
                    f" seconds={number(process['elapsed_seconds'])} timeout={number(process['timeout_seconds'])}"
                    f" exit={number(process['exit_code'])}")
+    rename = safe_program_rename(result.get("program_rename"))
+    if rename:
+        fields += (f" rename={rename['stage']} attempts={rename['attempts']}"
+                   f" waited={rename['waited_seconds']}")
     return fields
 
 
@@ -925,6 +951,9 @@ def main(argv=None):
         detail = local_error_detail(error)
         result = {"stage": args.action, "reason": "local_state_or_file_unavailable",
                   "changed": None, "local_error": detail}
+        rename = program_rename_detail(error)
+        if rename:
+            result["program_rename"] = rename
         saved = save_operation(args, result, failed=True)
         if args.summary:
             print(render_summary(args.action, result, failed=True) + (" report=unavailable" if not saved else ""))

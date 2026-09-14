@@ -317,6 +317,27 @@ def report(args, result, failed=False):
           + (" report=unavailable" if not saved else ""))
 
 
+def manual_promote_ready(config):
+    """A read-only hint, never authorization to skip the later Resume checks."""
+    try:
+        registry = manager.read_registry(config)
+        current = manager.customization.validate_registry(registry)
+        pending = current["pending"]
+        if (registry.get("phase") != "idle" or registry.get("process") or registry.get("pending")
+                or registry.get("launch_uncertain") or not pending or pending["action"] != "apply"
+                or pending["stage"] != "promote" or pending["before"] != current["active"]
+                or pending["old_previous"] != current["previous"]
+                or registry.get("current") != {"kind": "original", "source_commit": None,
+                                               "python": config["source_python"]}):
+            return False
+        program, previous, staged = manager.customization._paths(config)
+        lock = Path(config["state_root"]) / "deployment.lock"
+        return (not lock.exists() and not lock.is_symlink() and not program.exists()
+                and staged.is_dir() and (previous.is_dir() if pending["before"] else not previous.exists()))
+    except (OSError, ValueError, TypeError, KeyError, RuntimeError):
+        return False
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", required=True, type=Path)
@@ -355,11 +376,17 @@ def main(argv=None):
             return 130
         code = getattr(error, "code", None) or getattr(error, "reason", None) or "operation_failed"
         stage = progress["stage"]
+        rename = manager.program_rename_detail(error)
+        if rename:
+            code = "program_rename_blocked"
         next_step = ("reset_update_token" if stage == "authentication" or code in {"credentials_rejected", "credentials_missing"}
                      else "check_status" if stage == "health_check" or code == "server_not_running"
                      else "inspect_apply" if stage == "apply"
                      else "check_ci" if stage in {"ci_check", "artifact_select"}
                      else "check_download_access" if stage == "download" else "inspect_local_result")
+        if (stage == "apply" and rename and rename["stage"] == "promote"
+                and manual_promote_ready(config)):
+            next_step = "manual_promote"
         result = {"stage": stage, "code": code, "changed": progress.get("changed"),
                   "wrapper_commit": head or progress.get("wrapper_commit"),
                   "wrapper_changed": head != before if head and before else progress.get("wrapper_changed"),
@@ -367,6 +394,8 @@ def main(argv=None):
                   "local_error": manager.local_error_detail(error)}
         if "bundle" in progress:
             result["bundle"] = progress["bundle"]
+        if rename:
+            result["program_rename"] = rename
         report(args, result, failed=True)
         return 1
     report(args, result)

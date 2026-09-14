@@ -225,6 +225,9 @@ class UpgradeDeploymentTests(unittest.TestCase):
         retained = json.loads((self.root / "last-failure.json").read_bytes())
         self.assertEqual(retained, saved)
         self.assertEqual(saved["result"]["stage"], "apply")
+        self.assertEqual(saved["result"]["code"], "operation_failed")
+        self.assertEqual(saved["result"]["next"], "inspect_apply")
+        self.assertNotIn("program_rename", saved["result"])
         detail = saved["result"]["local_error"]
         self.assertEqual((detail["type"], detail["errno"], detail["winerror"]), ("PermissionError", 13, 5))
         self.assertEqual(detail["source"], "ees_upgrade.py")
@@ -236,6 +239,98 @@ class UpgradeDeploymentTests(unittest.TestCase):
         self.assertNotIn(private, self.output.getvalue() + json.dumps(saved))
         self.assertNotIn("Traceback", self.output.getvalue())
         self.mock["start"].assert_not_called()
+
+    def test_main_hints_manual_promotion_only_for_eligible_exhausted_promotion(self):
+        private = "synthetic-private-PAT-and-path"
+        for rename_stage, ready, expected in (("promote", True, "manual_promote"),
+                                               ("promote", False, "inspect_apply"),
+                                               ("move_active", True, "inspect_apply"),
+                                               ("restore", True, "inspect_apply"),
+                                               (private, True, "inspect_apply")):
+            with self.subTest(rename_stage=rename_stage, ready=ready):
+                error = PermissionError(13, private, private)
+                error.winerror = 5
+                error.program_rename_failed = True
+                error.program_rename_stage = rename_stage
+                error.program_rename_attempts = 5
+                error.program_rename_wait_seconds = 15
+                self.mock["apply"].side_effect = error
+                self.output = io.StringIO()
+                with patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                        patch.object(upgrade, "github_client", return_value=self.client), \
+                        patch.object(upgrade, "bootstrap", return_value=(None, HEAD, OLDER)), \
+                        patch.object(upgrade, "manual_promote_ready", return_value=ready) as check, \
+                        redirect_stdout(self.output):
+                    self.assertEqual(upgrade.main(["--config", "synthetic.json"]), 1)
+                saved = json.loads((self.root / "last-failure.json").read_bytes())
+                result = saved["result"]
+                self.assertEqual(result["next"], expected)
+                self.assertEqual(result["stage"], "apply")
+                self.assertEqual(Path(result["bundle"]).read_bytes(), b"synthetic program bundle")
+                summary = self.output.getvalue().splitlines()[-1]
+                self.assertIn("next=" + expected, summary)
+                if rename_stage == private:
+                    self.assertEqual(result["code"], "operation_failed")
+                    self.assertNotIn("program_rename", result)
+                    self.assertNotIn(" rename=", summary)
+                else:
+                    self.assertEqual(result["code"], "program_rename_blocked")
+                    self.assertEqual(result["program_rename"],
+                                     {"stage": rename_stage, "attempts": 5, "waited_seconds": 15})
+                    self.assertIn("rename=" + rename_stage + " attempts=5 waited=15", summary)
+                self.assertEqual(check.call_count, int(rename_stage == "promote"))
+                self.assertNotIn(private, self.output.getvalue() + json.dumps(saved))
+                self.assertNotIn(str(self.root), summary)
+                self.mock["start"].assert_not_called()
+
+    def test_main_non_apply_rename_failure_cannot_hint_manual_promotion(self):
+        error = PermissionError(13, "synthetic-private-path")
+        error.winerror = 32
+        error.program_rename_failed = True
+        error.program_rename_stage = "promote"
+        error.program_rename_attempts = 5
+        error.program_rename_wait_seconds = 15
+        self.client.download_artifact.side_effect = error
+        with patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                patch.object(upgrade, "github_client", return_value=self.client), \
+                patch.object(upgrade, "bootstrap", return_value=(None, HEAD, OLDER)), \
+                patch.object(upgrade, "manual_promote_ready", return_value=True) as check, \
+                redirect_stdout(self.output):
+            self.assertEqual(upgrade.main(["--config", "synthetic.json"]), 1)
+        result = json.loads((self.root / "last-failure.json").read_bytes())["result"]
+        self.assertEqual(result["stage"], "download")
+        self.assertEqual(result["code"], "program_rename_blocked")
+        self.assertEqual(result["next"], "check_download_access")
+        check.assert_not_called()
+        self.assert_no_server_changes()
+
+    def test_main_path_guard_error_with_stale_counters_cannot_hint_manual_promotion(self):
+        private = "synthetic-private-path"
+        for marker in (None, False):
+            with self.subTest(marker=marker):
+                error = PermissionError(13, private)
+                error.winerror = 5
+                if marker is not None:
+                    error.program_rename_failed = marker
+                error.program_rename_stage = "promote"
+                error.program_rename_attempts = 5
+                error.program_rename_wait_seconds = 15
+                self.mock["apply"].side_effect = error
+                self.output = io.StringIO()
+                with patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                        patch.object(upgrade, "github_client", return_value=self.client), \
+                        patch.object(upgrade, "bootstrap", return_value=(None, HEAD, OLDER)), \
+                        patch.object(upgrade, "manual_promote_ready", return_value=True) as check, \
+                        redirect_stdout(self.output):
+                    self.assertEqual(upgrade.main(["--config", "synthetic.json"]), 1)
+                saved = json.loads((self.root / "last-failure.json").read_bytes())
+                self.assertEqual(saved["result"]["code"], "operation_failed")
+                self.assertEqual(saved["result"]["next"], "inspect_apply")
+                self.assertNotIn("program_rename", saved["result"])
+                self.assertNotIn("rename=", self.output.getvalue())
+                self.assertNotIn(private, self.output.getvalue() + json.dumps(saved))
+                check.assert_not_called()
+                self.mock["start"].assert_not_called()
 
     def test_main_preserves_structured_stop_failures_and_registered_log_id(self):
         log_id = "server-" + "e" * 32 + ".log"
@@ -274,6 +369,118 @@ class UpgradeDeploymentTests(unittest.TestCase):
                 self.assertNotIn(str(self.root), summary)
                 self.mock["apply"].assert_not_called()
                 self.mock["start"].assert_not_called()
+
+
+class ManualPromotionReadinessTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        base = Path(temporary.name).resolve()
+        self.root = base / "state"
+        paths = {"state_root": self.root, "source_prefix": base / "python",
+                 "package_dir": base / "python" / "site-packages",
+                 "data_dir": base / "data", "cwd": base / "work"}
+        for path in paths.values():
+            path.mkdir(parents=True, exist_ok=True)
+        executable = paths["source_prefix"] / "python.exe"
+        executable.write_bytes(b"synthetic executable")
+        self.config = {key: str(path) for key, path in paths.items()}
+        self.config["source_python"] = str(executable)
+        self.active = {"source_commit": OLDER, "wheel_sha256": "1" * 64,
+                       "record_sha256": "2" * 64, "webui_version": "0.11.3+ees.2"}
+        self.selected = dict(self.active, source_commit=HEAD, wheel_sha256="3" * 64)
+        self.pending = {"action": "apply", "stage": "promote", "before": self.active,
+                        "target": self.selected, "old_previous": None,
+                        "owner": {"pid": 123, "executable": "synthetic-python", "created_at": "1234"}}
+        self.registry = {"schema_version": 2, "phase": "idle", "process": None, "pending": None,
+                         "current": {"kind": "original", "source_commit": None, "python": str(executable)},
+                         "customization": {"active": self.active, "previous": None, "pending": self.pending}}
+        self.program = self.root / "program"
+        self.previous = self.root / "program.previous"
+        self.staged = self.root / "program.staging"
+        self.previous.mkdir()
+        self.staged.mkdir()
+        override = patch.object(upgrade.manager, "read_registry", side_effect=lambda _: copy.deepcopy(self.registry))
+        self.read = override.start()
+        self.addCleanup(override.stop)
+
+    def test_stopped_consistent_customized_and_original_states_are_read_only_eligible(self):
+        before = copy.deepcopy(self.registry)
+        snapshot = sorted(str(path.relative_to(self.root)) for path in self.root.rglob("*"))
+        with patch.object(upgrade.manager, "record") as record, \
+                patch.object(upgrade.manager, "stop_registered") as stop, \
+                patch.object(upgrade.manager, "start_selected") as start:
+            self.assertTrue(upgrade.manual_promote_ready(self.config))
+        self.assertEqual(self.registry, before)
+        self.assertEqual(sorted(str(path.relative_to(self.root)) for path in self.root.rglob("*")), snapshot)
+        for mutation in (record, stop, start):
+            mutation.assert_not_called()
+        self.pending["before"] = None
+        self.registry["customization"]["active"] = None
+        self.assertFalse(upgrade.manual_promote_ready(self.config))
+        self.previous.rmdir()
+        self.assertTrue(upgrade.manual_promote_ready(self.config))
+
+    def test_running_uncertain_or_inconsistent_registry_does_not_offer_manual_rename(self):
+        original = copy.deepcopy(self.registry)
+        cases = (((), "phase", "recovery_required"), ((), "process", {"pid": 321}),
+                 ((), "pending", {"action": "start"}), ((), "launch_uncertain", True),
+                 ((), "current", None), ((), "current", []),
+                 (("current",), "kind", "release"), (("current",), "source_commit", HEAD),
+                 (("current",), "python", "synthetic-unregistered-python"),
+                 (("customization", "pending"), "action", "restore"),
+                 (("customization", "pending"), "stage", "move_active"),
+                 (("customization", "pending"), "before", None),
+                 (("customization", "pending"), "old_previous", {"active": None}),
+                 (("customization",), "pending", None),
+                 (("customization", "pending"), "target", None),
+                 (("customization", "pending"), "owner", {"pid": 123}))
+        for path, key, value in cases:
+            with self.subTest(path=path, key=key):
+                self.registry = copy.deepcopy(original)
+                selected = self.registry
+                for name in path:
+                    selected = selected[name]
+                selected[key] = value
+                self.assertFalse(upgrade.manual_promote_ready(self.config))
+
+    def test_missing_staging_previous_or_existing_program_blocks_manual_rename(self):
+        self.staged.rmdir()
+        self.assertFalse(upgrade.manual_promote_ready(self.config))
+        self.staged.mkdir()
+        self.previous.rmdir()
+        self.assertFalse(upgrade.manual_promote_ready(self.config))
+        self.previous.mkdir()
+        self.program.mkdir()
+        self.assertFalse(upgrade.manual_promote_ready(self.config))
+        self.program.rmdir()
+        self.program.write_bytes(b"unexpected file")
+        self.assertFalse(upgrade.manual_promote_ready(self.config))
+
+    def test_lock_and_dangling_lock_link_are_preserved_and_block_manual_rename(self):
+        lock = self.root / "deployment.lock"
+        lock.write_bytes(b"synthetic-owner")
+        self.assertFalse(upgrade.manual_promote_ready(self.config))
+        self.assertEqual(lock.read_bytes(), b"synthetic-owner")
+        lock.unlink()
+        try:
+            lock.symlink_to(self.root / "missing-lock-target")
+        except (OSError, NotImplementedError):
+            self.skipTest("This platform cannot create the dangling lock link guard fixture.")
+        self.assertFalse(upgrade.manual_promote_ready(self.config))
+        self.assertTrue(lock.is_symlink())
+
+    def test_unsafe_or_uninspectable_paths_never_offer_manual_rename(self):
+        (self.staged / ".env").write_bytes(b"synthetic-private-environment")
+        self.assertFalse(upgrade.manual_promote_ready(self.config))
+        (self.staged / ".env").unlink()
+        overlapping = dict(self.config, data_dir=str(self.root / "program"))
+        self.assertFalse(upgrade.manual_promote_ready(overlapping))
+        for error in (PermissionError("synthetic-private-path"), ValueError("malformed registry"),
+                      TypeError("malformed registry"), KeyError("missing registry")):
+            with self.subTest(error=type(error)):
+                self.read.side_effect = error
+                self.assertFalse(upgrade.manual_promote_ready(self.config))
 
 
 class BootstrapTests(unittest.TestCase):
