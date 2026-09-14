@@ -20,9 +20,28 @@
 | Jira·GitHub·Confluence 대표 질문 | [v0.2.6 구성·갱신·조회 범위](#connector-demo-starters) |
 | 적용 뒤에도 옛 제안 표시 | [실제 UI 필드 오류·모의 검사 공백·v0.2.5 보완](#starter-ui-field-fix) |
 | 중단한 후보 배포 방식 | [단순 래퍼로 전환한 결정](#ees-wrapper-maintenance), [과거 상태 문서의 적용 원본·CI 증거](#status-history-20260911) |
+| EES Work 기존 UI 통합 | [ees.6 실제 채팅·공유 업무 상태·검증 경계](#ees-work-native-integration-20260914) |
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="ees-work-native-integration-20260914"></a>
+
+## 2026-09-14 EES Work 기존 UI 통합
+
+- 사용자 정정·승인: ees.5의 별도 버튼/창/모의 채팅은 의도와 달랐다는 실제 화면 피드백을 받음. 구현을 중단하고 기존 사이드바·실제 AI 대화·오른쪽 업무 패널·관리자 Workspace 재사용을 합의한 뒤 전체 구현 승인을 받아 진행함. [정정된 관리 원본](../docs/mockups/ees-work/TASK.md). 과거 ees.5 CI PASS를 현재 요구 충족으로 재사용하지 않음.
+- 기준: 원격 main `3d0e75fcd8fb626b857550b0f19424e701b78e48`, tree `0f6e33134f1c2dd101dd21bfd52e293ef7ebc35f`, 열린 PR 0개. 사용자 사내 ees.5 설치·health 보고와 기존 장애 근거를 보존함. 동일 tree의 격리 작업 복사본에서 수정하며 다른 세션 파일을 덮지 않음.
+- 구현 범위: ees.6/_ees6의 기존 sidebar 탐색·실제 Tiptap/모델/대화 이력·우측 패널 조정기·Workspace 편집을 연결함. 같은 FastAPI 내 업무 서비스와 Native Tool이 같은 사용자별 SQLite 진행 건을 읽고 수정함. 별도 서버·새 채팅·임의 코드 실행은 추가하지 않음. 기존 등록 도구의 실행 어댑터가 없으면 blocked, DB/AP 예시는 합성 결과로 표시함.
+- 핵심 계약: 진행 건별 공장·시스템·절차 버전과 결과 보존, 한 대화 한 진행 건, 하위 선택은 조회, 버튼과 AI의 공통 입력/실행, 현재 역할·대화 소유 재확인, 낙관적 revision 검사, 선행 조건·입력 변경에 따른 후속 무효화와 실패/재시도 이력, 관리자 초안 저장/검증/게시를 적용함.
+- 발견·조치: 이전 모델 도구/ApplyDemo의 ees.5 미허용 버전 가드를 ees.5/ees.6에 맞게 갱신하고 구등록 WO 해시를 보존함. 최초 대화 bind 실패를 무시하던 Tool 경로와 이전 대화의 지연 이벤트가 새 pending 건을 붙일 수 있던 조건을 수정함. 잘못된 관리자 입력·외부 스킬 reference/source·누락 필드가 TypeError/KeyError로 이어지는 사례를 재현해 오류 응답과 검증으로 보완함.
+- 자동 검사: 업무 서비스 21개·Tool 계약 8개, Agent Pack 46개, ApplyDemo 14개, 배포 복원 39개(실제 pinned wheel 포함), 협업 패널 14그룹·WO 상태 12그룹 PASS. 초기 전체 unittest `Ran 789 / FAILED(failures=7,errors=3,skipped=23)`는 이전 버전 fixture와 미래 버전 거부값이 ees.6과 충돌한 검사였으며 이를 갱신함. Linux/Python 3.12.14 최종 전체 검사 `Ran 791 / OK (skipped=23)`를 확인함. Chrome·실제 wheel·Windows 전용 등 선택 조건이 없는 SKIP은 해당 실환경 검사와 구분함.
+- 실제 프런트 검증 방식: 공식 해시 고정 0.11.3 wheel의 Svelte/Tiptap 번들과 Chrome 143.0.7499.0을 사용함. 로그인·대화 저장 API와 모델 응답은 loopback 합성 fixture이고 업무 서비스는 임시 DB의 실제 구현임. 실제 Tool의 view/action과 프런트 Socket.IO execute 응답을 통과시킴. 실제 모델/사내 인증·SSO·문서시스템 응답을 검증한 것으로 확대하지 않음.
+- 실제 화면 발견·조치: 업무 form submit이 기존 Svelte GET navigation에 선점되는 충돌을 찾아 업무 폼에만 capture 처리함. 현재 경로·대화 ID 검증으로 늦은 응답이 다른 대화에 표시되지 않게 하고, 로그인 후 패널 조정기 재초기화·Workspace 지연 DOM 복원을 보완함. 상단 진행 건 표시를 기존 nav 음수 여백/배경이 덮는 문제는 실제 화면 이미지로 확인해 해당 표시가 있을 때만 배경 범위를 조정함.
+- 최종 브라우저: 실제 프런트 E2E 5/5 PASS(12.630초). 실제 Tiptap 초안·첨부 보존, 스트리밍 중 선택, 탐색창 고정·패널 닫기/복원, AI Tool과 패널의 같은 진행 건 실행·AP 실패/재시도 이력, 관리자 게시·기존 진행 버전 보존·일반 사용자 제한, 새 대화의 첫 송신과 pending 연결, 지연 응답 이후 다른 대화 보존을 검증함. 1920px 채팅·절차 편집 이미지 직접 검수로 영역 중첩과 상단 진행 정보 가림 해소를 확인함.
+- 배포 후보: 최종 ees.6 wheel SHA-256 `cf5c6bdb6ef612183245e0e512ef453f47760a25f4faf7a4364853ac9c3739af`, 실제 패키지와 작업 원본의 launcher/업무 서비스/시드 일치. 이 wheel을 사용한 배포·복원 39개 PASS(19.420초). 사내 설치 성공 근거가 아니라 로컬 프로그램 패키지 검사임.
+- 별도 테마 검사: 같은 wheel의 CDP 키보드·마우스 패널 조절은 PASS. 로컬 최소 Chromium의 `--dump-dom` 기반 밝음/어두움/좁은 화면 3개는 각각 45초 TimeoutExpired(`Ran 2 / FAILED(errors=3)`)로 스타일 판정까지 도달하지 못함. 변경한 기대값은 `_ees6` 경로뿐이며 이 검사를 생략하거나 통과로 바꾸지 않음. 정식 google-chrome가 제공되는 Linux delivery CI에서 같은 검사를 확인함. 실제 프런트 E2E 5/5와 이 별도 실패를 구분함.
+- 원격 반영: [PR #40](https://github.com/knadalkim-a11y/team-agent-poc/pull/40), 구현 commit `1b1bf49a62eef3efdf08941ab6b734d4da2934cb`, tree `f74579793a59d9506908ac20ab1063efca734660`. 로컬 검증한 staged tree와 API 생성 원격 tree가 정확히 일치함. 이 구현의 [Windows/Linux delivery 실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34811497544)과 후속 head의 Checks를 구분해 확인하며, PR 게시를 main 병합·사내 적용 완료로 간주하지 않음.
+- 현재 경계: 코드·배포 산출물 준비와 사내 적용을 구분함. ees.6 사내 Update/Upgrade/ApplyDemo·실제 모델의 업무 도구 선택과 화면 확인은 미실행. 마지막 사내 적용은 아래 ees.5 사용자 보고이며 유휴 안정성은 별도 미확인으로 유지함.
 
 <a id="ees-work-demo-integration-20260914"></a>
 

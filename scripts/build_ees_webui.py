@@ -18,15 +18,15 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
-VERSION = "0.11.3+ees.5"
-PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5"}
+VERSION = "0.11.3+ees.6"
+PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6"}
 SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
 SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
 WHEEL_FILENAME = f"open_webui-{VERSION}-py3-none-any.whl"
 SOURCE_INFO = f"open_webui-{UPSTREAM_VERSION}.dist-info/"
 TARGET_INFO = f"open_webui-{VERSION}.dist-info/"
 SOURCE_APP = "open_webui/frontend/_app/"
-TARGET_APP = "open_webui/frontend/_ees5/"
+TARGET_APP = "open_webui/frontend/_ees6/"
 ASSET_DIR = Path(__file__).resolve().parents[1] / "branding" / "ees" / "assets"
 UI_DIR = ASSET_DIR.parent / "ui"
 ASSET_NAMES = (
@@ -39,7 +39,12 @@ WORK_DIR = ASSET_DIR.parents[2] / "agent-pack" / "skills" / "ees-work-demo"
 WORK_ASSETS = {"scripts/ees_work_demo.py": "open_webui/ees_work_demo.py",
                **{"ui/" + name: "open_webui/ees_work_demo_ui/" + name
                   for name in ("index.html", "ees-work.css", "ees-work.js")}}
-WORK_FILES = tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
+LEGACY_WORK_FILES = tuple(WORK_ASSETS.values()) + tuple("open_webui/frontend/_ees5/" + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
+WORK_ASSETS.update({"scripts/ees_workflow.py": "open_webui/ees_workflow.py",
+                    "scripts/workflow_seed.json": "open_webui/workflow_seed.json"})
+WORK_BOOTSTRAP = WORK_DIR.parent / "cross-system-analysis" / "ui" / "work-panel.js"
+WORK_BOOTSTRAP_TARGET = TARGET_APP + "ees-work-panel.js"
+WORK_FILES = (WORK_BOOTSTRAP_TARGET,) + tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {
@@ -49,9 +54,10 @@ FONT_SOURCES = {
                                 "2d2267a83d089cb1a517a4f901676d05d283346e650d1b1845d601cbd696a98e"),
 }
 THEME_FILES = ("chat-theme.css", "fonts/LICENSE.txt") + tuple("fonts/" + name for name in FONT_SOURCES)
-THEME_LINK = b'<link rel="stylesheet" href="/_ees5/chat-theme.css" crossorigin="use-credentials" />'
-WORK_LINK = (b'<link rel="stylesheet" href="/_ees5/ees-work-launcher.css" />'
-             b'<script defer src="/_ees5/ees-work-launcher.js"></script>')
+THEME_LINK = b'<link rel="stylesheet" href="/_ees6/chat-theme.css" crossorigin="use-credentials" />'
+WORK_LINK = (b'<link rel="stylesheet" href="/_ees6/ees-work-launcher.css" />'
+             b'<script defer src="/_ees6/ees-work-panel.js"></script>'
+             b'<script defer src="/_ees6/ees-work-launcher.js"></script>')
 
 # Every replacement is pinned to one reviewed upstream file and occurrence count.
 # Upstream comments, attribution strings, documentation, and source maps remain.
@@ -59,7 +65,9 @@ PATCHES = {
     "open_webui/main.py": [(
         b"if os.path.exists(FRONTEND_BUILD_DIR):",
         b"from open_webui.ees_work_demo import install as install_ees_work_demo\n"
-        b"install_ees_work_demo(app, get_verified_user)\n\n"
+        b"install_ees_work_demo(app, get_verified_user)\n"
+        b"from open_webui.ees_workflow import install as install_ees_workflow\n"
+        b"install_ees_workflow(app, get_verified_user)\n\n"
         b"if os.path.exists(FRONTEND_BUILD_DIR):", 1,
     )],
     "open_webui/env.py": [(
@@ -70,7 +78,7 @@ PATCHES = {
     )],
     "open_webui/frontend/index.html": [
         (b"<title>Open WebUI</title>", b"<title>EES Portal</title>", 1),
-        (b"/_app/", b"/_ees5/", 49),
+        (b"/_app/", b"/_ees6/", 49),
         (b"</head>", THEME_LINK + WORK_LINK + b"\n\t</head>", 1),
     ],
     SOURCE_APP + "immutable/chunks/CHq18Uto.js": [
@@ -83,14 +91,14 @@ PATCHES = {
         (b" / Open WebUI`", b" / EES Portal`", 2),
     ],
     SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
-        (b"/_app/version.json", b"/_ees5/version.json", 1),
-        (b'an="0.11.3"', b'an="0.11.3+ees.5"', 1),
+        (b"/_app/version.json", b"/_ees6/version.json", 1),
+        (b'an="0.11.3"', b'an="0.11.3+ees.6"', 1),
     ],
     SOURCE_APP + "version.json": [
-        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.5"}', 1),
+        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.6"}', 1),
     ],
     SOURCE_INFO + "METADATA": [
-        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.5\n", 1),
+        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.6\n", 1),
     ],
 }
 
@@ -172,6 +180,9 @@ def prepare_additions(source, ui_dir, work_dir=WORK_DIR):
         if path.is_symlink() or not path.is_file() or not path.stat().st_size:
             raise ValueError(f"Missing, empty, or linked EES Work asset: {relative}")
         additions[target] = path.read_bytes()
+    if WORK_BOOTSTRAP.is_symlink() or not WORK_BOOTSTRAP.is_file():
+        raise ValueError("Missing EES work panel bootstrap.")
+    additions[WORK_BOOTSTRAP_TARGET] = WORK_BOOTSTRAP.read_bytes()
     for filename, (origin, expected) in FONT_SOURCES.items():
         if origin not in source.namelist():
             raise ValueError(f"Missing pinned upstream font: {filename}")

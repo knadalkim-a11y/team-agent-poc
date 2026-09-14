@@ -6,10 +6,10 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: [EES Work 시연](03-openwebui-native-agent.md#ees-work-demo)의 실행·설계 워크스페이스와 ees.5 프로그램 배포 경로를 구현하고 [PR #38](https://github.com/knadalkim-a11y/team-agent-poc/pull/38)을 main `d4e2cde2a556`에 병합함. Windows/Linux CI·Chrome E2E5경로·main 프로그램 산출물 완료. **사용자 보고로 사내 ees.5 적용·기동·health 확인, 메뉴·시연 흐름·기존 대화 복귀는 미확인**. [검사·실환경 경계와 적용 근거](../evals/scenarios.md#ees-work-demo-integration-20260914).
+- 이번 작업: 사용자 화면 피드백에 따라 기존 sidebar·실제 AI 대화·오른쪽 패널·관리자 Workspace에 업무 기능을 통합하는 ees.6 / Agent Pack v0.2.7을 [PR #40](https://github.com/knadalkim-a11y/team-agent-poc/pull/40)에 반영함. 실제 프런트 E2E 5/5, 전체 unittest 791개(23 SKIP), 배포·복원 39개 PASS. 원격 검사·병합 상태는 PR의 현재 head와 Checks를 기준으로 확인하며 기존 ees.5 설치·health 근거는 보존함. [변경·검증·사내 경계](../evals/scenarios.md#ees-work-native-integration-20260914).
 - 최근 운영 확인: 09-14 EES Work Upgrade는 `commit=d4e2cde2a556 version=0.11.3+ees.5 result=ok stage=complete running=true`, 후속 요약은 `health=ok screen=unconfirmed`로 보고됨. 같은 날 앞서 확인한 PR #35 보호 적용(`ec9be8ee2210`, `guard=win64_retry`)의 [당시 증거](../evals/scenarios.md#accept64-guard-20260914)는 보존함. **유휴 이후 안정성은 미확인**.
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
-- 다음 제품 작업 하나: 사내 포털을 새로고침하고 [EES Work 시연](03-openwebui-native-agent.md#ees-work-demo)의 메뉴·시연 흐름·기존 대화 복귀를 확인함. 완료된 Update/Upgrade·health 검사는 반복하지 않음. 자연 유휴 이후 포털 안정성은 별도 미확인으로 보존함.
+- 다음 제품 작업 하나: 사내 ees.6의 기존 채팅·업무 패널 연결을 확인함. [PR #40](https://github.com/knadalkim-a11y/team-agent-poc/pull/40)의 main 병합·성공 프로그램 산출물 이후 기존 Update/Upgrade/ApplyDemo 경로를 사용함.
 
 ## 마지막으로 확인된 적용 상태
 
@@ -17,8 +17,8 @@
 
 | 대상 | 마지막 확인과 적용 원본 | 남은 한계·근거 |
 |---|---|---|
-| EES Work 시연 | PR #38/main `d4e2cde2a556`·main CI/프로그램 산출물 완료; 09-14 사용자 보고로 ees.5 사내 적용·기동·health 확인 | 메뉴/흐름/복귀·로그인 쿠키/SSO 조합·실제 일반 대화/연동 응답은 이번 변경 기준 미확인. [근거](../evals/scenarios.md#ees-work-demo-integration-20260914) |
-| EES Portal 프로그램 | 09-14 `Upgrade result=ok changed=true commit=d4e2cde2a556 version=0.11.3+ees.5 stage=complete running=true`; 후속 요약 `health=ok` 사용자 보고 | 화면·유휴 이후 안정성 미확인. 이전 `c099e427f62b`의 보호 적용은 [당시 증거](../evals/scenarios.md#accept64-guard-20260914)로 보존. [이번 적용](../evals/scenarios.md#ees-work-demo-integration-20260914) |
+| EES Work 업무 UI | ees.6 기존 UI 통합·로컬 검증 완료, PR #40 반영·사내 미적용. 이전 PR #38/main `d4e2cde2a556`·main CI/프로그램 산출물 완료; 09-14 사용자 보고로 ees.5 사내 적용·기동·health 확인 | 별도 시연 화면으로 열리는 것을 사용자가 확인하고 통합 방식 정정을 요청함. ees.6 실제 AI 업무 호출·로그인/SSO·일반 연동은 사내 미확인. [현재 검증](../evals/scenarios.md#ees-work-native-integration-20260914), [이전 적용](../evals/scenarios.md#ees-work-demo-integration-20260914) |
+| EES Portal 프로그램 | 09-14 `Upgrade result=ok changed=true commit=d4e2cde2a556 version=0.11.3+ees.5 stage=complete running=true`; 후속 요약 `health=ok` 사용자 보고 | 기존 별도 시연 화면에 대한 정정 피드백 확인; ees.6 화면·유휴 이후 안정성 미확인. 이전 `c099e427f62b`의 보호 적용은 [당시 증거](../evals/scenarios.md#accept64-guard-20260914)로 보존. [이번 적용](../evals/scenarios.md#ees-work-demo-integration-20260914) |
 | 운영 래퍼 | 09-14 `Update result=ok changed=false wrapper_changed=true wrapper=d4e2cde2a556`, 이어진 Upgrade `result=ok` 사용자 보고 | Update/Upgrade 추가 실행 불필요. 이전 `ec9be8ee2210` 보호 적용은 [당시 증거](../evals/scenarios.md#accept64-guard-20260914)로 보존. [이번 적용](../evals/scenarios.md#ees-work-demo-integration-20260914) |
 | 분석·업무 패널 자산 | v0.2.1 안내 원본 `bc8bffbb6043fb1401f995b312bf5709f50e5983` 이후 계획·오른쪽 패널 표시 정상 보고 | 실제 사내 SHA·개별 수치/회신 정확성 직접 대조 미실행. [확인 범위](../evals/scenarios.md#plan-work-panel-accepted) |
 | 대표 시작 질문 | Git v0.2.6, PR #34/main `492eb5bc4145002db15090230cfd3bf3a40862fe` 및 CI 성공. 사용자 실행도 `commit=492eb5bc4145` | 사내는 `webui_version/webui_connection_failed`, `changed=0`으로 갱신 전 중단. 새 화면 미확인. [결과](../evals/scenarios.md#connector-demo-starters), [이전 필드 오류](../evals/scenarios.md#starter-ui-field-fix) |
@@ -43,7 +43,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | 기존 분석 패널 확인; EES Work 목업·CI 완료 및 ees.5 사내 적용·기동·health 확인 | [메뉴·시연 흐름·복귀 확인](../evals/scenarios.md#ees-work-demo-integration-20260914), 기존 분석 정확성 미확인 유지 |
+| 4. 관리자 워크플로 | 기존 UI에 P/T/J·공유 상태·AI Tool·관리자 편집을 통합하는 ees.6 로컬 검증 완료 | [실제 프런트·사내 확인 구분](../evals/scenarios.md#ees-work-native-integration-20260914), 기존 분석 정확성 미확인 유지 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -53,7 +53,7 @@
 
 ## 재개와 환경 유지
 
-- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work 목업 구현은 [작업 지시와 원본](mockups/ees-work/TASK.md)에서 시작합니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
+- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work 기존 UI 통합은 [정정된 작업 지시와 참고 원본](mockups/ees-work/TASK.md)에서 시작합니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
@@ -61,6 +61,6 @@
 
 ## 최근 점검
 
-2026-09-14: 사용자 Update/Upgrade 보고에서 래퍼·프로그램 `d4e2cde2a556`, `0.11.3+ees.5`, `result=ok stage=complete running=true`와 후속 `health=ok screen=unconfirmed`를 확인함. 현재 적용 원본과 다음 작업을 갱신하고 과거 보호·실패·CI 증거를 보존함. 문서·diff 검사 통과; 코드 변경·재배포·전체 회귀 반복 없음. 사내 메뉴·시연·복귀·인증 조합·실제 일반 대화/연동은 미확인. [근거](../evals/scenarios.md#ees-work-demo-integration-20260914).
+2026-09-14: 승인된 기존 UI 통합을 구현하고 격리·버전 보존·실제 wheel 검사와 독립 코드 검토를 완료함. 버전 fixture 충돌·첫 대화 연결·지연 응답·잘못된 관리자 입력·기존 Svelte 제출 충돌·상단 정보 가림을 보완함. 전체 unittest 791개(23 SKIP)·실제 upstream 프런트 E2E 5/5·실제 wheel 배포 복원 39개 PASS. 사내 ees.6 적용·실제 모델 업무 호출·일반 사용자 사용성은 미확인. [근거](../evals/scenarios.md#ees-work-native-integration-20260914).
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.

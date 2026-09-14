@@ -54,7 +54,7 @@ class Shadow extends Element {
       this.append(node);
     }
   }
-  getElementById(id) { return this.ids.get(id) || null; }
+  getElementById(id) { return descendants(this).find(node => node.id === id) || this.ids.get(id) || null; }
   querySelector(selector) { const origin = selector.match(/^\[data-origin-for="([^"]+)"\]$/); return origin ? this.origins.get(origin[1]) || null : super.querySelector(selector); }
 }
 function environment({supported = true} = {}) {
@@ -302,12 +302,15 @@ async def callback(event): captured.append(event['data']['code']); return {'ok':
 asyncio.run(m._call(r['action'], callback, {'chat_id': 'chat-a'}, **r.get('values', {})))
 print(json.dumps(captured[0]))
 `;
-  const runWO = async (action, values = {}) => {
+  const runWO = async (action, values = {}, legacyTabs = false) => {
     const captured = spawnSync(process.env.PYTHON || 'python', ['-c', woPython], {cwd: root, input: JSON.stringify({action, values}), encoding: 'utf8', timeout: 10000, env: {...process.env, PYTHONUTF8: '1'}});
     assert.equal(captured.status, 0, captured.stderr || String(captured.error || ''));
-    return ok(await planned.run(JSON.parse(captured.stdout)));
+    const code = JSON.parse(captured.stdout);
+    // Cached pre-upgrade Tools retain this fixed-three-tab fallback. Exercise
+    // the program manager's compatibility path without registering new assets.
+    return ok(await planned.run(legacyTabs ? code.replace("      if(workPanel.renderTabs)return workPanel.renderTabs(request.chat_id,shadow,'work-tab-');\n", '') : code));
   };
-  let woState = await runWO('view');
+  let woState = await runWO('view', {}, true);
   const actualWO = planned.document.getElementById('ees-wo-demo-panel'), woQ = id => actualWO.shadowRoot.getElementById(id), launcherBeforeSwitch = planned.launcher();
   assert.equal(planned.host(), null); assert.equal(actualWO.isConnected, true);
   woState = await runWO('update', {expected_revision: woState.revision, changes: {equipment_id: 'KR-CA-211', title: '정비 점검', description: '공통 패널의 작성 내용', type: '점검', priority: '일반'}});
@@ -333,6 +336,88 @@ print(json.dumps(captured[0]))
   assert.equal(descendants(planned.body).filter(node => node.id === 'ees-work-panel-toggle').length, 1);
   assert.equal(planned.flush(), 0);
   console.log('PASS real analysis + real WO execute payloads, one launcher/three screens, manual draft/review retention and min-width/closed-route restoration');
+
+  const manager = planned.window.__eesWorkPanelV1, workflowHost = new Element('aside');
+  workflowHost.id = 'ees-native-work-panel';
+  const workflowChanges = [];
+  const workflowScreen = {key: 'workflow', label: '업무 진행', hostId: workflowHost.id,
+    open: () => planned.row.append(workflowHost), close: () => workflowHost.remove(),
+    isOpen: () => workflowHost.isConnected, onChange: info => workflowChanges.push(info)};
+  assert.equal(manager.register('chat-a', workflowScreen), true);
+  assert.equal(woQ('work-tab-workflow').textContent, '업무 진행');
+  assert.equal(woQ('work-tab-workflow').hidden, false);
+  assert.equal(workflowHost.isConnected, false, 'Registration never opens another panel.');
+  const beforeWorkflow = JSON.parse(JSON.stringify(planned.window.__eesWODemoV1.view()));
+  woQ('work-tab-workflow').click(); planned.flush();
+  assert.equal(workflowHost.isConnected, true); assert.equal(actualWO.isConnected, false); assert.equal(planned.host(), null);
+  assert.equal(manager.selected('chat-a'), 'workflow');
+  assert.equal(manager.list('chat-a').find(item => item.key === 'workflow').label, '업무 진행');
+  assert.equal(workflowChanges.at(-1).screens.find(item => item.key === 'workflow').label, '업무 진행');
+  manager.select('chat-a', 'analysis'); planned.flush();
+  assert.equal(workflowHost.isConnected, false); assert.ok(planned.host());
+  planned.q('work-workflow').click(); planned.flush();
+  assert.equal(workflowHost.isConnected, true); assert.equal(planned.host(), null);
+  manager.select('chat-a', 'wo'); planned.flush();
+  assert.equal(workflowHost.isConnected, false); assert.equal(actualWO.isConnected, true);
+  assert.equal(woQ('description').value, beforeWorkflow.fields.description);
+  assert.equal(planned.window.__eesWODemoV1.view().revision, beforeWorkflow.revision);
+  assert.equal(woQ('review-values').textContent, reviewedText);
+  assert.equal(descendants(planned.body).filter(node => node.id === 'ees-work-panel-toggle').length, 1);
+  manager.unregister('chat-a', 'workflow'); planned.flush();
+  assert.equal(woQ('work-tab-workflow').hidden, true);
+  assert.equal(manager.available('chat-a', 'workflow'), false);
+  assert.equal(manager.register('chat-a', {...workflowScreen, key: '__proto__'}), false);
+  console.log('PASS dynamic workflow tabs in cached WO and current analysis, four screens/one panel, draft preservation and unregister');
+
+  const legacy = environment();
+  const legacyCooperation = script.replace("        if (work?.renderTabs) return work.renderTabs(chatId, shadow, 'work-');\n", '');
+  ok(await legacy.run('const eesPanelUpdate=' + JSON.stringify(event()) + ';\n' + workScript + '\n' + legacyCooperation));
+  const legacyWorkflow = new Element('aside');
+  legacy.window.__eesWorkPanelV1.register('chat-a', {...workflowScreen, hostId: 'legacy-workflow',
+    open: () => legacy.row.append(legacyWorkflow), close: () => legacyWorkflow.remove(), isOpen: () => legacyWorkflow.isConnected});
+  legacy.q('work-workflow').click(); legacy.flush();
+  assert.equal(legacyWorkflow.isConnected, true); assert.equal(legacy.host(), null);
+  legacy.window.__eesWorkPanelV1.select('chat-a', 'analysis'); legacy.flush();
+  assert.ok(legacy.host()); assert.equal(legacyWorkflow.isConnected, false);
+  console.log('PASS program bootstrap adds workflow switching to cached analysis tabs');
+
+  const pending = environment(); pending.location.pathname = '/';
+  vm.runInContext(workScript, pending.context);
+  const pendingManager = pending.window.__eesWorkPanelV1, pendingHost = new Element('aside');
+  const pendingScreen = {...workflowScreen, hostId: 'pending-workflow', onChange: () => {},
+    open: () => pending.row.append(pendingHost), close: () => pendingHost.remove(), isOpen: () => pendingHost.isConnected};
+  assert.equal(pendingManager.register('', {...pendingScreen, key: 'analysis'}), false);
+  assert.equal(pendingManager.register('', {...pendingScreen, key: 'wo'}), false);
+  assert.equal(pendingManager.register('', pendingScreen), true);
+  assert.equal(pendingManager.select('', 'workflow'), true); pending.flush();
+  assert.equal(pendingHost.isConnected, true);
+  pendingManager.unregister('', 'workflow'); pending.flush();
+  assert.equal(pendingHost.isConnected, false);
+  assert.equal(pendingManager.register('created-chat', pendingScreen), true);
+  pending.route('/c/created-chat'); pendingManager.select('created-chat', 'workflow'); pending.flush();
+  assert.equal(pendingHost.isConnected, true);
+  pending.route('/c/another-chat'); pending.flush(); assert.equal(pendingHost.isConnected, false);
+  pending.route('/c/created-chat'); pending.flush(); assert.equal(pendingHost.isConnected, true);
+  pending.route('/auth'); pending.flush(); assert.equal(pendingHost.isConnected, false);
+  assert.equal(pending.window.__eesWorkPanelV1, undefined);
+  console.log('PASS pending new-chat workflow, bind/unregister lifecycle, cross-chat isolation and logout cleanup');
+
+  assert.equal(typeof pending.window.__eesStartWorkPanelV1, 'function');
+  pending.route('/c/next-session');
+  const restartedManager = pending.window.__eesStartWorkPanelV1();
+  assert.notEqual(restartedManager, pendingManager);
+  assert.equal(restartedManager.list('created-chat').length, 0);
+  assert.equal(restartedManager.available('created-chat', 'workflow'), false);
+  assert.equal(pendingManager.register('next-session', pendingScreen), false);
+  assert.equal(restartedManager.register('next-session', pendingScreen), true);
+  assert.equal(restartedManager.select('next-session', 'workflow'), true); pending.flush();
+  assert.equal(pendingHost.isConnected, true);
+  const listenerCount = pending.window.events.popstate.length;
+  assert.equal(pending.window.__eesStartWorkPanelV1(), restartedManager);
+  assert.equal(pending.window.events.popstate.length, listenerCount);
+  assert.equal(pending.observers.filter(observer => observer.active).length, 1);
+  assert.equal(descendants(pending.body).filter(node => node.id === 'ees-work-panel-toggle').length, 1);
+  console.log('PASS fixed bootstrap factory restarts after SPA login with no previous session state or duplicate listeners');
 
   // End-to-end boundary: capture the real standalone compiled Python sender,
   // then execute its JS payload, including non-ASCII/code-like request content.

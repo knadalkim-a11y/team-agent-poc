@@ -13,7 +13,7 @@
 | 로컬 접속 예제 | http://127.0.0.1:8080 | 신규 설치 예제. 현재 서버는 등록한 기존 LAN IP·포트 사용 |
 | 작업 디렉터리 예제 | %LOCALAPPDATA%\EES-Agent-POC\open-webui | 신규 설치 예제. 기존 서버는 등록된 cwd 유지 |
 | DATA_DIR 예제 | 위 예제 작업 디렉터리의 data 폴더 | 신규 설치 예제. 기존 서버는 등록된 data_dir 유지; Git 제외 |
-| 표시 이름 | 새 기본값: EES Portal (공식본은 Open WebUI 접미사), ees.2/ees.3/ees.4/ees.5 브랜딩: EES Portal | 실제 적용 원본은 [STATUS](docs/STATUS.md), ees.4의 대화 폭·조절 표시 정상 보고는 [화면 확인 기록](evals/scenarios.md#ees-stop-recovery)에서 관리 |
+| 표시 이름 | 새 기본값: EES Portal (공식본은 Open WebUI 접미사), ees.2/ees.3/ees.4/ees.5/ees.6 브랜딩: EES Portal | 실제 적용 원본은 [STATUS](docs/STATUS.md), ees.4의 대화 폭·조절 표시 정상 보고는 [화면 확인 기록](evals/scenarios.md#ees-stop-recovery)에서 관리 |
 | 모델·프록시 | 승인된 사내 값; 저장소에는 placeholder | 실제 주소·키·모델 경로는 Git에 저장하지 않음 |
 
 이 표의 예제 경로를 이미 등록한 서버에 다시 적용하지 않습니다. 실제 Python·작업 위치·DATA_DIR·수신 주소는 사내 등록 설정이 원본이며 값을 추측하거나 재등록하지 않습니다. [기존 등록과 기록 위치](docs/03-openwebui-native-agent.md#ees-local-state)를 따릅니다.
@@ -22,7 +22,7 @@
 
 현재 프로그램 운영은 Windows의 등록된 Python 3.11·Open WebUI 0.11.3·로컬 SQLite/Chroma 구성을 대상으로 합니다. [단순 래퍼 방식](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)은 기존 Python·호환 의존성을 재사용하며 프로그램 파일만 관리합니다. uv 0.12.7로 별도 환경과 전체 의존성을 준비하던 이전 절차는 중단했습니다. Windows/Linux CI의 합성 검증과 사내 실제 적용 결과는 구분합니다.
 
-새 브랜딩 배포물은 **0.11.3+ees.5**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 STATUS의 실제 적용 기록으로 구분합니다. ees.1/ees.2/ees.3/ees.4/ees.5의 시작·직전 Restore를 지원하며, 새 Apply에는 ees.5 프로그램 ZIP을 사용합니다. ees.5에는 [EES Work 시연 화면](docs/03-openwebui-native-agent.md#ees-work-demo)이 포함되며 실제 업무 API·모델·자산 등록은 없습니다. 별도 적용 대상인 기존 시연 자산의 버전은 [시연 목록](agent-pack/ees-demo.json)이 원본이며, 프로그램과 함께 갱신할 때는 [대화 스타일 적용 순서](docs/03-openwebui-native-agent.md#ees-chat-theme)를 따릅니다. 아래 Selector 실행 파일은 공식 0.11.3만 허용하고 현재 미적용이므로 EES 전환에 함께 사용하지 않습니다.
+새 브랜딩 배포물은 **0.11.3+ees.6**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 STATUS의 실제 적용 기록으로 구분합니다. ees.1/ees.2/ees.3/ees.4/ees.5/ees.6의 시작·직전 Restore를 지원하며 새 Apply에는 ees.6 프로그램 ZIP을 사용합니다. ees.6은 [EES Work 기존 UI 통합](docs/03-openwebui-native-agent.md#ees-work-demo)을 포함하며 정적 자산 경로는 `/_ees6/`입니다. 기존 실제 AI 대화와 공장별 업무 상태를 연결하고 DB/AP 점검은 모의 실행으로 구분합니다. Agent Pack v0.2.7의 `ees_workflow` Tool과 기존 EES preset 관리 구역은 ApplyDemo로 반영합니다. 관리 목록의 정확한 버전은 [시연 목록](agent-pack/ees-demo.json)이 원본이며 프로그램과 함께 갱신할 때는 [업무 통합 적용 순서](docs/03-openwebui-native-agent.md#ees-work-demo)를 따릅니다. 업무 정의·사용자별 진행 건은 기존 DATA_DIR의 `ees-work.sqlite3`에 저장하며 기존 Open WebUI DB·키·의존성은 유지합니다. 아래 Selector 실행 파일은 공식 0.11.3만 허용하고 현재 미적용이므로 EES 전환에 함께 사용하지 않습니다.
 
 Windows 접속 수락 오류용 [선택 실행 파일](scripts/serve_openwebui_windows.py)은 위 WebUI·Python 버전과 공식 고정 의존성 **Uvicorn 0.51.0**, 기존 SQLite·단일 worker에 한정합니다. 별도 설치·업그레이드를 수행하지 않으며 실제 사내 의존성 버전은 아직 미대조입니다. 사전검사에서 다르면 기존 환경을 보존한 채 검토합니다. [Selector 제한·적용 조건](docs/troubleshooting.md#windows-accept-winerror64).
 

@@ -34,6 +34,8 @@ on:
       - 'tests/test_ees_chat_theme.py'
       - 'tests/test_ees_work_demo.py'
       - 'tests/test_ees_work_routes.py'
+      - 'tests/test_ees_workflow*.py'
+      - 'tests/native_ui_fixture.py'
       - 'tests/test_demo_bundle.py'
       - 'docs/**'
       - 'README.md'
@@ -80,6 +82,8 @@ jobs:
         run: python -m unittest discover -s tests -p test_jira_read.py -v
       - name: Verify GitHub read and plain results
         run: python -m unittest discover -s tests -p test_github_tool.py -v
+      - name: Verify shared workflow service and real chat Tool
+        run: python -m unittest discover -s tests -p "test_ees_workflow*.py" -v
       - name: Verify WO demo Tool
         run: python -m unittest discover -s tests -p test_wo_demo_tool.py -v
       - name: Verify WO demo local form state
@@ -108,7 +112,7 @@ jobs:
           python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
       - name: Build the real program fixture without installing it
         run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
-      - name: Verify EES Work browser demonstration and isolation
+      - name: Verify native Open WebUI workflow and real composer integration
         if: runner.os == 'Linux'
         env:
           EES_TEST_CHROME: google-chrome
@@ -178,7 +182,7 @@ jobs:
               enabled=true
             else
               git diff --name-only "$BEFORE_SHA" HEAD > "$RUNNER_TEMP/ees-changed.txt"
-              if grep -Eq '^(branding/|agent-pack/skills/ees-work-demo/|scripts/build_(ees_webui|demo_bundle)\.py$|scripts/render_ees_brand_assets\.py$|tests/test_(ees_branding_build|demo_bundle)\.py$|\.github/workflows/ees-delivery\.yml$)' "$RUNNER_TEMP/ees-changed.txt"; then
+              if grep -Eq '^(branding/|agent-pack/skills/ees-work-demo/|agent-pack/skills/cross-system-analysis/ui/work-panel\.js$|scripts/build_(ees_webui|demo_bundle)\.py$|scripts/render_ees_brand_assets\.py$|tests/test_(ees_branding_build|demo_bundle)\.py$|\.github/workflows/ees-delivery\.yml$)' "$RUNNER_TEMP/ees-changed.txt"; then
                 enabled=true
               fi
             fi
