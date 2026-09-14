@@ -448,7 +448,7 @@ v0.1.3의 회신 중심 표현을 거쳐, 이번에는 사용자가 확인한 �
 
 실행 코드는 [전문 호출](../agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py)과 [합성 자료](../agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py), 운영 코드는 [ApplyDemo 진입점](../scripts/ees_apply_demo.py)과 [자산 병합](../scripts/ees_demo_assets.py)에 있습니다. 공유 자료의 도메인은 서버가 주입하는 `__metadata__.model_id`로 정하며 LLM이 제공한 모델 이름이나 Task Model의 `__model__`을 사용하지 않습니다. 전문 모델은 자기 자료만 조회하고 EES는 조건별 비교만 수행합니다. 모델 ID 검사는 기존 사용자·Tool 접근권한 검사를 대신하지 않습니다.
 
-**자산 적용:** 기존 서버와 배포 환경 등록을 유지한 상태에서, 변경이 main에 반영되고 해당 CI가 성공한 뒤 아래 블록을 사용합니다. `Update`는 처음 `ApplyDemo`가 없는 스크립트를 갱신하는 단계입니다. 공장별 업무 기능을 처음 적용하거나 ees.7보다 이전 프로그램이면 [프로그램과 자산을 함께 갱신하는 순서](#ees-work-demo)를 먼저 따릅니다.
+**자산 적용:** 기존 서버와 배포 환경 등록을 유지한 상태에서, 변경이 main에 반영되고 해당 CI가 성공한 뒤 아래 블록을 사용합니다. `Update`로 운영 스크립트의 보완을 받고 `ApplyDemo`로 지정 자산을 갱신합니다. 공장별 업무 기능을 처음 적용하거나 ees.7보다 이전 프로그램이면 [프로그램과 자산을 함께 갱신하는 순서](#ees-work-demo)를 먼저 따릅니다.
 
 ```powershell
 & {
@@ -465,7 +465,7 @@ v0.1.3의 회신 중심 표현을 거쳐, 이번에는 사용자가 확인한 �
 .\scripts\manage-ees.ps1 -Action ApplyDemo
 ```
 
-**프로그램이 이미 현재 버전인 경우:** 위 `ApplyDemo`로 지정 자산을 갱신합니다. 이전 분석 패널 변경 때에는 EES Portal 이름 확인 후 ApplyDemo만 안내했지만, 이번 공장별 업무 트리와 EES Work 이름에는 [ees.7 프로그램 적용 순서](#ees-work-demo)가 필요합니다. 분석 패널만 확인할 때는 완전히 새로고침하고 새 EES 대화에서 “조립 2라인에서 놓치고 있는 개선 기회를 찾아줘”라고 질문해 계획·실행 상태와 **업무 패널 열기**를 확인합니다. 과거 Upgrade 복구 블록을 다시 실행하지 않습니다.
+**프로그램이 이미 현재 버전인 경우:** 위 `ApplyDemo`로 지정 자산을 갱신합니다. 2026-09-14 읽기 진단에서 `0.11.3+ees.7`을 확인한 서버도 여기에 해당합니다. 운영 스크립트 보완을 받은 뒤 ApplyDemo만 이어가며 Upgrade·Restore·Start를 반복하지 않습니다. 분석 패널만 확인할 때는 완전히 새로고침하고 새 EES 대화에서 “조립 2라인에서 놓치고 있는 개선 기회를 찾아줘”라고 질문해 계획·실행 상태와 **업무 패널 열기**를 확인합니다.
 
 **프로그램이 이전 버전인 경우:** `ApplyDemo`는 서비스 이름을 바꾸는 프로그램 업데이트를 포함하지 않습니다. EES Work 이름과 최신 시연 자산을 함께 적용하려면 [현재 업무 통합 안내](#ees-work-demo)를 따릅니다. 이미 Update를 마친 같은 저장소 폴더에서는 아래 블록으로 이어갑니다. 앞 단계가 실패하면 멈춥니다.
 
@@ -492,6 +492,25 @@ v0.1.3의 회신 중심 표현을 거쳐, 이번에는 사용자가 확인한 �
 
 WO 갱신에서 `unrecognized_existing_wo_source`는 등록 코드가 지원하는 저장 형태와 일치하지 않는다는 뜻이며 사용자 수정이 있었다는 확정은 아닙니다. v0.2.0은 편집기의 자동 정렬본을 누락해 공식 등록본도 거부했으며 v0.2.1에서 보완했습니다. 이 오류와 `changed=0`을 받은 기존 사용자는 수정본 CI 성공 뒤 위 ApplyDemo 한 명령으로 재개합니다. 수정본에서도 같으면 코드를 덮어쓰지 말고 마지막 오류 코드를 전달합니다. [실패와 확인 범위](../evals/scenarios.md#wo-editor-format-adoption).
 
+<a id="specialists-editor-format"></a>
+
+**전문 Tool의 자동 정렬 충돌(2026-09-14):** `managed_field_conflict changed=0` 뒤 읽기 진단에서 `ees_specialists`의 마지막 적용 기록은 Agent Pack v0.2.6 / `applied`, 차이 필드는 `content`, 관리 Valve `ees_model_id`는 일치함을 확인했습니다. 현재 본문은 기록본을 고정 WebUI 편집기의 Black 26.5.1로 정렬한 결과와 줄끝·앞뒤 공백을 정규화한 뒤 정확히 일치했습니다. `ast=match`만으로 적용을 허용하는 방식은 사용하지 않습니다.
+
+보완된 ApplyDemo는 이미 적용된 공식 원본과 해당 정렬본의 검증된 해시 쌍을 도구 ID와 함께 확인합니다. 다른 이름·관리 표식은 기록과 같아야 하며 실제 코드·주석 변경이나 알 수 없는 원본은 계속 차단합니다. 미완료 적용 기록, 적용 직전 동시 수정, 쓰기 후 재조회 검사는 그대로 유지합니다. 사내 Python에 포맷터를 설치하거나 적용 기록을 지울 필요가 없습니다. [진단·검증 근거](../evals/scenarios.md#specialists-editor-format-20260914).
+
+**이 보완이 main에 병합되고 해당 CI가 성공한 뒤**, ees.7 실행을 확인한 기존 서버에서는 아래 블록만 실행합니다. 프로그램 다운로드·재시작·복구는 포함하지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    Set-Location (Join-Path $env:USERPROFILE 'team-agent-poc')
+    .\scripts\manage-ees.ps1 -Action Update
+    .\scripts\manage-ees.ps1 -Action ApplyDemo -Summary
+}
+```
+
+마지막 `EES action=apply_demo` 결과 한 줄만 전달합니다. 같은 충돌이 남으면 반복 실행하거나 기록을 초기화하지 않고 해당 `stage/code/next`로 이어갑니다. `result=ok` 뒤에는 브라우저를 새로고침해 [업무 대표 흐름](#ees-work-demo)을 확인하며 API 적용 성공을 화면·모델 동작 확인으로 간주하지 않습니다.
+
 `ambiguous_existing_work_order`는 대상 EES에 후보가 둘 이상 연결됐다는 뜻이고, `pending_work_order_unbound`는 앞선 미완료 갱신의 도구 연결이 바뀌었다는 뜻입니다. 이 경우 연결을 임의로 삭제하거나 같은 명령을 반복하지 않고 마지막 오류 코드만 전달합니다.
 
 | 필요한 경우 | 옵션·대응 |
@@ -501,7 +520,8 @@ WO 갱신에서 `unrecognized_existing_wo_source`는 등록 코드가 지원하�
 | 기본 주소 또는 EES 대상 변경 | `-WebUIUrl` 또는 `-EesModelId`; API Key를 인자로 넣지 않음 |
 | WebUI HTTPS에 별도 CA 필요 | `-WebUICaFile`에 승인된 CA 파일 경로 지정 |
 | `model_write_access_required` | 기존 EES의 소유자·편집 권한과 모델 설정 조회 가능 여부 확인 |
-| `managed_field_conflict` / `asset_id_collision` | 기록된 관리 필드·기존 항목의 수정을 검토. 자동 덮어쓰기·삭제하지 않음 |
+| `managed_field_conflict` | 기록된 관리 필드와 현재 값을 대조. 확인된 [전문 Tool 정렬 차이](#specialists-editor-format)는 보완된 ApplyDemo로 이어가고, 다른 변경은 자동 덮어쓰기·기록 삭제 없이 검토 |
+| `asset_id_collision` | 같은 ID의 기존 항목을 검토. 자동 덮어쓰기·삭제하지 않음 |
 
 마지막 출력은 `EES action=apply_demo result=... changed=... commit=... stage=... code=... next=...` 한 줄입니다. 사용자는 **result와 실패 시 code**, 성공 뒤에는 아래 질문의 답변 요지만 전달하면 됩니다. 상세 기록은 사내에 남기며 원문 로그·토큰·전체 결과를 옮길 필요가 없습니다. `changed`는 자산 수가 아니라 API 변경 횟수이며 신규 Tool의 연결 설정도 포함합니다. 쓰기 응답을 확인하지 못했다면 `changed=- pending=true`로 표시하며 미반영으로 단정하지 않습니다.
 
@@ -1087,7 +1107,7 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 EES Work는 기존 WebUI의 사이드바에서 공장별 업무를 고르고, **가운데 실제 AI 대화와 오른쪽 업무 패널에서 같은 진행 건을 다루는 기능**입니다. 기존 모델 선택·메시지 입력·스트리밍·첨부·대화 이력·문서 조회를 사용하며 서비스 표시 이름은 EES Portal에서 **EES Work**로 바뀝니다. 별도 시연 창과 모의 대화를 제공했던 ees.5는 [당시 구현 기록](../evals/scenarios.md#ees-work-demo-integration-20260914)으로 보존합니다. 현재 기준은 [후속 UX 합의를 포함한 통합 지시](mockups/ees-work/TASK.md)이며 [최초 목업 HTML](mockups/ees-work/ees-demo-workspace.html)은 업무 예시의 참고자료입니다.
 
-프로그램은 `0.11.3+ees.7`·정적 자산 `/_ees7/`, 지정 자산은 Agent Pack v0.2.8입니다. [기능 폴더](../agent-pack/skills/ees-work-demo/)의 상태·액션을 같은 Open WebUI 서버에서 제공하고, `ees_workflow` Tool을 기존 EES preset에 연결합니다. 사용자는 이전 통합본의 워크스페이스 업무 절차를 확인했고 새 탭의 글꼴과 반복 깜빡임을 보고했습니다. 이 보고의 정확한 사내 설치 SHA와 ees.7 적용 여부는 구분하며, 실제 사내 반영·검사 결과는 [STATUS](STATUS.md)와 연결된 평가 기록에서 관리합니다.
+프로그램은 `0.11.3+ees.7`·정적 자산 `/_ees7/`, 지정 자산은 Agent Pack v0.2.8입니다. [기능 폴더](../agent-pack/skills/ees-work-demo/)의 상태·액션을 같은 Open WebUI 서버에서 제공하고, `ees_workflow` Tool을 기존 EES preset에 연결합니다. 사용자는 이전 통합본의 워크스페이스 업무 절차를 확인했고 새 탭의 글꼴과 반복 깜빡임을 보고했습니다. 이후 2026-09-14 읽기 진단으로 ees.7 실행을 확인했으나 최신 자산 적용과 새 화면 확인은 남아 있습니다. 정확한 프로그램 원본 커밋과 실제 사내 반영·검사 결과는 [STATUS](STATUS.md)와 연결된 평가 기록에서 구분합니다.
 
 **공동 작업 목표와 현재 범위:** 위 ees.7은 사용자별 진행 건을 저장하며 다른 사용자가 같은 공장·시스템의 진행 건을 이어받는 기능은 아직 구현하지 않았습니다. 후속 합의는 [공장 → 시스템 → 업무의 공동 진행](mockups/ees-work/TASK.md#ees-work-shared-target)입니다. 업무 진행·결과·이력을 함께 유지하되 개인 대화·첨부·개인 자격증명과 권한은 별도로 관리합니다. 현재 사용자별 격리를 해제하거나 기존 개인 결과를 자동 공개하는 절차로 해석하지 않습니다.
 
@@ -1098,7 +1118,7 @@ EES Work는 기존 WebUI의 사이드바에서 공장별 업무를 고르고, **
 | 기존 오른쪽 업무 패널 | 현재 작업의 전체 현황·입력·점검·결과, 실행 이력의 읽기 전용 과거 결과 |
 | 기존 워크스페이스 | 모델·지식기반·프롬프트 등 기존 메뉴 유지, 업무 절차 탭에서 관리자 정의·도구·스킬/지침·공장 조건·게시 관리 |
 
-**적용 전제:** 구현 PR의 main 병합, 해당 EES delivery 검사와 프로그램 포함 산출물 생성 성공. 기존 등록 Windows 계정과 checkout에서 아래 한 블록을 실행합니다. Update·Upgrade·ApplyDemo는 등록된 주소·Python·DATA_DIR·키·인증·Git 프록시를 재사용합니다. 새 프로그램이 업무 서버 기능을 제공한 뒤 ApplyDemo가 지정 Tool과 기존 EES 관리 구역을 갱신합니다. 실패하면 다음 단계로 진행하지 않습니다.
+**처음 적용하거나 프로그램이 이전 버전인 경우:** 구현 PR의 main 병합, 해당 EES delivery 검사와 프로그램 포함 산출물 생성 성공을 확인한 뒤 기존 등록 Windows 계정과 checkout에서 아래 한 블록을 실행합니다. Update·Upgrade·ApplyDemo는 등록된 주소·Python·DATA_DIR·키·인증·Git 프록시를 재사용합니다. 새 프로그램이 업무 서버 기능을 제공한 뒤 ApplyDemo가 지정 Tool과 기존 EES 관리 구역을 갱신합니다. 실패하면 다음 단계로 진행하지 않습니다. **ees.7 실행을 이미 확인했고 자산 정렬 충돌만 남은 서버는 [Update → ApplyDemo](#specialists-editor-format)를 따르며 아래 Upgrade를 반복하지 않습니다.**
 
 ```powershell
 & {
@@ -1145,7 +1165,7 @@ Upgrade는 프로그램·기동 상태를, ApplyDemo는 지정 자산 등록을 
 
 **이 변경이 main에 반영되고 EES delivery CI와 프로그램 산출물 생성이 성공한 뒤 사용합니다.** 이미 등록한 Windows 계정·기존 checkout·Python 환경이 필요합니다. `Upgrade`는 프로그램·래퍼 업데이트만 처리하고 WebUI에 저장한 Tool·Skill·Prompt는 기존 등록 절차로 관리합니다.
 
-2026-09-14 실패 뒤 `83d56a186382`로 Restore·Start하고 기존 주소 접속까지 확인했습니다. **이번 폴더 변경 보완이 main에 반영되고 CI가 성공한 뒤**, 복구한 서버에서 아래 블록을 한 번 실행합니다. 기존 `Update`로 래퍼를 받고 Upgrade가 성공한 뒤에만 ApplyDemo로 EES Work 공통 자산을 반영합니다. 저장소 폴더가 기존 안내 위치인 경우이며 앞 단계 실패 시 멈춥니다.
+2026-09-14 실패 뒤 `83d56a186382`로 Restore·Start하고 기존 주소 접속까지 확인했으며, 이후 읽기 진단에서 ees.7 실행을 확인했습니다. **이 서버에 남은 자산 정렬 충돌은 [Update → ApplyDemo](#specialists-editor-format)로 이어갑니다.** 아래 블록은 프로그램이 이전 버전인 서버에서 새 프로그램과 자산을 함께 적용할 때 사용합니다. 해당 main CI와 프로그램 산출물 성공을 확인한 뒤 기존 `Update`로 래퍼를 받고 Upgrade가 성공한 뒤에만 ApplyDemo로 EES Work 공통 자산을 반영합니다. 저장소 폴더가 기존 안내 위치인 경우이며 앞 단계 실패 시 멈춥니다.
 
 ```powershell
 & {
@@ -1157,7 +1177,7 @@ Upgrade는 프로그램·기동 상태를, ApplyDemo는 지정 자산 등록을 
 }
 ```
 
-그다음부터 저장소 폴더에서 실행할 명령은 하나입니다. `-Summary`를 생략해도 마지막 결과를 짧게 출력합니다.
+이후 프로그램을 갱신할 때는 저장소 폴더에서 아래 한 명령을 사용합니다. 자산만 갱신할 때는 ApplyDemo를 사용합니다. `-Summary`를 생략해도 마지막 결과를 짧게 출력합니다.
 
 ```powershell
 .\scripts\manage-ees.ps1 -Action Upgrade
@@ -1222,7 +1242,7 @@ Start의 `stage=health_check` 시간 초과는 지정한 시간 안에 정상 �
 
 #### 탐색기에서 실제 프로그램 폴더를 옮긴 뒤 적용 완료
 
-**현재 복구한 서버에서 이 블록부터 실행하지 않습니다.** 위의 새 Update→Upgrade→ApplyDemo를 실행하다 `code=program_rename_blocked next=manual_promote`로 멈춘 직후에만 사용합니다. 실패 기록과 현재 pending을 다시 읽어 `apply/promote`, 서버 정지, program 없음·previous/staging/ZIP 있음·lock 없음인 경우에만 탐색기를 엽니다. 이 블록은 기존 customized 프로그램을 업데이트하던 상황용입니다.
+**정상 실행 중인 서버나 ApplyDemo 자산 충돌에는 이 블록을 사용하지 않습니다.** 프로그램 Upgrade를 실행하다 `code=program_rename_blocked next=manual_promote`로 멈춘 직후에만 사용합니다. 실패 기록과 현재 pending을 다시 읽어 `apply/promote`, 서버 정지, program 없음·previous/staging/ZIP 있음·lock 없음인 경우에만 탐색기를 엽니다. 이 블록은 기존 customized 프로그램을 업데이트하던 상황용입니다.
 
 탐색기가 열리면 **`program.staging`을 F2로 `program`으로 변경하고 성공한 뒤에만 PowerShell에서 Enter**를 누릅니다. 이름 변경이 거부되면 Ctrl+C로 끝내고 `rename=failed` 한 줄만 전달합니다. `program.previous`는 그대로 보존하고 기존 폴더를 덮어쓰지 않습니다. Restore·Start·Update 등 다른 작업을 했다면 오래된 실패 기록으로 이 블록을 재사용하지 않습니다.
 

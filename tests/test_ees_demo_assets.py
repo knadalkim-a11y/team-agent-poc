@@ -6,6 +6,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 from urllib.parse import parse_qs, unquote, urlsplit
 
 MODULE = Path(__file__).resolve().parents[1] / "scripts" / "ees_demo_assets.py"
@@ -432,6 +433,146 @@ class ApplyAssetsTests(unittest.TestCase):
         self.assertIn("new-real-tool", model["meta"]["toolIds"])
         self.assertIn("추가 질문", [s["content"] for s in model["meta"]["suggestion_prompts"]])
         self.assertEqual(150, self.api.valves["ees_demo_data"]["timeout_seconds"])
+
+    def prepare_editor_formatted_upgrade(self, lost_response=False):
+        """A tiny approved formatting pair; real release hashes are checked separately."""
+        header = '"""\ntitle: Demo\nees_demo_pack: ees-demo-v1\n"""\n'
+        raw = header + 'class Tools:\n    def query(self): return {"count":1}  # keep comment\n'
+        formatted = (header + '\n\nclass Tools:\n    def query(self):\n'
+                     '        return {"count": 1}  # keep comment\n')
+        source = self.root / "agent-pack/data.py"
+        source.write_text(raw, encoding="utf-8")
+        if lost_response:
+            self.api.fail_after = ("tool", "ees_demo_data")
+            self.assertTrue(self.expect_error("asset_apply_failed").pending)
+            self.api.fail_after = None
+        else:
+            self.apply()
+        row = self.api.rows[("tool", "ees_demo_data")]
+        row["content"] = formatted
+        source.write_text(raw + "\n# newer managed version\n", encoding="utf-8")
+        allowlist = mock.patch.dict(assets._APPLIED_TOOL_EDITOR_FORMATS, {
+            "ees_demo_data": {assets._source_digest(raw): assets._source_digest(formatted)}
+        }, clear=True)
+        allowlist.start()
+        self.addCleanup(allowlist.stop)
+        self.api.calls.clear()
+        return row, raw, formatted, source
+
+    def test_known_editor_format_upgrades_and_preserves_live_backup_and_settings(self):
+        row, _, formatted, source = self.prepare_editor_formatted_upgrade()
+        row["content"] = formatted.replace("\n", "\r\n") + "\r\n"
+        row["user_id"] = "original-tool-owner"
+        row["meta"]["custom"] = {"keep": True}
+        row["meta"]["description"] = "현장 설명"
+        row["access_grants"] = [read_grant("factory"), {
+            "principal_type": "user", "principal_id": "editor", "permission": "write"}]
+        self.api.valves["ees_demo_data"]["timeout_seconds"] = 150
+        before, valves = copy.deepcopy(row), copy.deepcopy(self.api.valves)
+
+        self.assertEqual(1, self.apply("b" * 40)["changed"])
+        self.assertEqual(["/api/v1/tools/id/ees_demo_data/update"],
+                         [path for _, path, _ in self.api.writes])
+        after = self.api.rows[("tool", "ees_demo_data")]
+        self.assertEqual(source.read_text(encoding="utf-8"), after["content"])
+        for key in ("name", "user_id"):
+            self.assertEqual(before[key], after[key])
+        for key in ("custom", "description"):
+            self.assertEqual(before["meta"][key], after["meta"][key])
+        self.assertEqual(assets._grants(before["access_grants"]),
+                         assets._grants(after["access_grants"]))
+        self.assertEqual(valves, self.api.valves)
+        journal = self.state / assets.STATE_FILE
+        record = json.loads(journal.read_text(encoding="utf-8"))["assets"]["tool:ees_demo_data"]
+        self.assertEqual(before["content"], record["previous_value"]["content"])
+        self.assertEqual(before["meta"]["custom"], record["previous_value"]["meta"]["custom"])
+        self.assertEqual(0, self.apply("b" * 40)["changed"])
+        self.assertEqual(1, len(self.api.writes))
+        again = json.loads(journal.read_text(encoding="utf-8"))["assets"]["tool:ees_demo_data"]
+        self.assertEqual(record["previous_value"], again["previous_value"])
+
+    def test_editor_format_does_not_adopt_edits_other_fields_or_unknown_sources(self):
+        for mutation in ("behavior", "comment", "literal-style", "name", "marker",
+                         "managed-valve", "unknown-baseline", "wrong-tool-id"):
+            with self.subTest(mutation=mutation):
+                self.setUp()
+                row, raw, formatted, _ = self.prepare_editor_formatted_upgrade()
+                journal = self.state / assets.STATE_FILE
+                if mutation == "behavior":
+                    row["content"] = formatted.replace('"count": 1', '"count": 2')
+                elif mutation in ("comment", "literal-style"):
+                    row["content"] = (formatted.replace("keep comment", "my local comment")
+                                      if mutation == "comment" else
+                                      formatted.replace('"count"', "'count'"))
+                    self.assertEqual(ast.dump(ast.parse(raw)), ast.dump(ast.parse(row["content"])))
+                elif mutation == "name":
+                    row["name"] = "현장에서 바꾼 이름"
+                elif mutation == "marker":
+                    row["meta"]["manifest"]["ees_demo_pack"] = "another-pack"
+                elif mutation == "managed-valve":
+                    self.api.valves["ees_demo_data"]["ees_model_id"] = "another-model"
+                elif mutation == "unknown-baseline":
+                    state = json.loads(journal.read_text(encoding="utf-8"))
+                    state["assets"]["tool:ees_demo_data"]["desired"]["content"] = raw + "# local baseline\n"
+                    journal.write_text(json.dumps(state), encoding="utf-8")
+                    row["content"] += "# local baseline\n"
+                else:
+                    assets._APPLIED_TOOL_EDITOR_FORMATS["another-tool"] = (
+                        assets._APPLIED_TOOL_EDITOR_FORMATS.pop("ees_demo_data"))
+                before, saved = copy.deepcopy(self.api.rows), journal.read_text(encoding="utf-8")
+                self.assertEqual(0, self.expect_error("managed_field_conflict").changed)
+                self.assertEqual([], self.api.writes)
+                self.assertEqual(before, self.api.rows)
+                self.assertEqual(saved, journal.read_text(encoding="utf-8"))
+
+    def test_editor_format_cannot_confirm_a_pending_lost_creation_response(self):
+        self.prepare_editor_formatted_upgrade(lost_response=True)
+        journal = self.state / assets.STATE_FILE
+        saved = journal.read_text(encoding="utf-8")
+        self.assertTrue(self.expect_error("managed_field_conflict").pending)
+        self.assertEqual([], self.api.writes)
+        self.assertEqual(saved, journal.read_text(encoding="utf-8"))
+
+    def test_editor_format_upgrade_lost_response_recovers_exact_written_value(self):
+        _, _, formatted, _ = self.prepare_editor_formatted_upgrade()
+        self.api.fail_after = ("tool", "ees_demo_data")
+        self.assertTrue(self.expect_error("asset_apply_failed").pending)
+        self.api.fail_after = None
+        self.assertEqual(0, self.apply()["changed"])
+        self.assertEqual(1, len(self.api.writes))
+        record = json.loads((self.state / assets.STATE_FILE).read_text(encoding="utf-8"))["assets"]["tool:ees_demo_data"]
+        self.assertEqual("applied", record["status"])
+        self.assertEqual(formatted, record["previous_value"]["content"])
+
+    def test_editor_format_preflight_still_rejects_a_later_concurrent_edit(self):
+        self.prepare_editor_formatted_upgrade()
+        self.api.concurrent = ("tool", "ees_demo_data")
+        self.expect_error("concurrent_edit")
+        self.assertEqual([], self.api.writes)
+        self.assertTrue(self.api.rows[("tool", "ees_demo_data")]["content"].endswith("# concurrent edit\n"))
+
+    def test_editor_format_never_relaxes_post_write_verification_or_pending_retry(self):
+        _, _, formatted, source = self.prepare_editor_formatted_upgrade()
+        newer_raw = source.read_text(encoding="utf-8")
+        newer_formatted = formatted + "\n# newer managed version\n"
+        assets._APPLIED_TOOL_EDITOR_FORMATS["ees_demo_data"][assets._source_digest(newer_raw)] = (
+            assets._source_digest(newer_formatted))
+        request = self.api.request
+        def format_after_write(method, path, body=None):
+            result = request(method, path, body)
+            if method == "POST" and path == "/api/v1/tools/id/ees_demo_data/update":
+                self.api.rows[("tool", "ees_demo_data")]["content"] = newer_formatted
+            return result
+        self.api.request = format_after_write
+        error = self.expect_error("verification_failed")
+        self.assertEqual(1, error.changed)
+        self.assertTrue(error.pending)
+        self.api.request = request
+        self.expect_error("managed_field_conflict")
+        self.assertEqual(1, len(self.api.writes))
+        record = json.loads((self.state / assets.STATE_FILE).read_text(encoding="utf-8"))["assets"]["tool:ees_demo_data"]
+        self.assertEqual("pending", record["status"])
+        self.assertEqual(newer_raw, record["desired"]["content"])
 
     def add_panel_script(self, script="(() => { const title = '협업 과정'; })();\n"):
         relative = "agent-pack/cooperation-panel.js"

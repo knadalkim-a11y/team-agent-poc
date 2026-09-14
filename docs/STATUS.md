@@ -6,13 +6,13 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 새 세션에서 이어갈 수 있도록 [공장 → 시스템 → 업무의 공동 작업 목표](mockups/ees-work/TASK.md#ees-work-shared-target)를 기존 설계 원본에 기록함. 같은 공장·시스템의 진행 상태·결과·이력은 함께 사용하고 개인 AI 채팅·권한은 별도로 관리한다는 합의임. **현재 ees.7의 사용자별 진행 건을 팀 공유 구현으로 간주하지 않음.** [설계 기록과 구현 경계](../evals/scenarios.md#ees-work-shared-design-20260914).
-- 최근 Git 반영: Windows rename 대기·수동 진행 보완은 [PR #43](https://github.com/knadalkim-a11y/team-agent-poc/pull/43), main `4ffa2d6864804c95c452fa9b800930b47d44ee06`에 병합됨. 해당 [main EES delivery](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34828809926)의 Windows·Linux·배포 파일 준비 SUCCESS와 기존 ees.7 프로그램 산출물 호환성을 확인함. [검증·산출물 근거](../evals/scenarios.md#windows-program-rename-20260914). 이후 문서 커밋의 CI나 사내 적용 성공을 뜻하지 않음.
-- 최근 UI 확인: 사용자가 기존 Workspace의 업무 절차 존재·내용을 확인하고 새 탭의 어색한 글꼴·반복 깜빡임과 업무 탐색 UX 보완을 요청함. 정확한 사내 SHA는 미보고이며 ees.7 적용·새 화면 정상 확인으로 확대하지 않음.
-- 최근 운영 확인: 09-14 래퍼 `dba0677ffe3e`의 Upgrade가 promote 접근 거부로 실패한 뒤, 사용자가 `Restore/Start result=ok commit=83d56a186382`, `running=true guard=win64_retry`와 **기존 주소 접속·복구 성공**까지 확인함. 유휴 이후 안정성·ees.7 적용 성공은 미확인. [이번 실패와 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [이전 ees.5 적용](../evals/scenarios.md#ees-work-demo-integration-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
+- 이번 작업: ApplyDemo가 WebUI 편집기의 자동 정렬본을 관리 필드 변경으로 거부한 사건을 보완함. 마지막 적용 기록의 공식 `ees_specialists` 원본과 Black 26.5.1 정렬본 사이의 검증된 해시 쌍만 인식하며, 다른 코드·이름·표식 변경이나 미완료 기록은 기존 보호를 유지함. AST 유사성으로 적용을 허용하지 않음. [사내 진단·수정·검증 경계](../evals/scenarios.md#specialists-editor-format-20260914).
+- 최근 Git 반영: 공동 작업 설계 기록은 [PR #44](https://github.com/knadalkim-a11y/team-agent-poc/pull/44), main `9ecc9eadc5ec1e4bdf1533ec69eafb6e13b751fc`에 병합됨. 앞선 [PR #43](https://github.com/knadalkim-a11y/team-agent-poc/pull/43)의 Windows rename 대기·수동 진행 보완과 [main CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34828809926)은 [기존 증거](../evals/scenarios.md#windows-program-rename-20260914)에 보존함. 이번 정렬본 보완의 병합·CI와 실제 자산 적용 성공은 별도로 확인함.
+- 최근 UI 확인: 사용자가 기존 Workspace의 업무 절차 존재·내용을 확인하고 새 탭의 어색한 글꼴·반복 깜빡임과 업무 탐색 UX 보완을 요청함. 이후 ees.7 실행 버전은 별도로 확인했으나 새 화면 정상 보고는 아직 없음.
+- 최근 운영 확인: 09-14 읽기 진단의 `/api/version` 응답으로 **현재 실행 프로그램 `0.11.3+ees.7`**을 확인함. 프로그램의 정확한 원본 커밋·새 UI 표시·유휴 안정성은 미확인임. 그 전 `dba0677ffe3e` Upgrade의 promote 접근 거부와 `83d56a186382` Restore·Start·기존 주소 접속 성공은 [당시 복구 기록](../evals/scenarios.md#ees7-apply-recovery-20260914)으로 보존함. [최신 진단](../evals/scenarios.md#specialists-editor-format-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
-- 다음 작업 하나: 새 세션에서 [최신 공동 작업 합의](mockups/ees-work/TASK.md#ees-work-shared-target)와 현행 사용자별 저장·대화 연결의 차이를 대조하고, 공장·시스템 공유 진행 건을 위한 최소 변경 범위와 검증 기준을 구체화함. 멤버·역할과 실행 권한, 개인 대화와 공유 업무의 연결, 기존 데이터 이관·동시 수정은 구현 전 검토할 항목임. 새 권한 정책이나 기존 개인 진행 건의 자동 공개를 이미 승인된 것으로 간주하지 않음.
-- 사내 확인 대기: PR #43 뒤 [Update → Upgrade → ApplyDemo](03-openwebui-native-agent.md#ees-wrapper-upgrade)와 조건부 [수동 변경·Resume](03-openwebui-native-agent.md#ees-wrapper-manual-promote) 명령을 전달했으나 사용자의 실행 결과는 아직 받지 못함. 다음 세션에 결과가 있으면 기존 출력의 짧은 요지만 반영하고, 결과 확보를 위해 같은 Upgrade·복구·긴 기동 대기를 반복하지 않음. 새 적용을 안내할 때는 그때의 main CI를 확인함.
+- 다음 작업 하나: 정렬본 보완이 main에 반영되고 해당 CI가 성공하면 기존 서버에서 [Update → ApplyDemo](03-openwebui-native-agent.md#specialists-editor-format)로 자산 적용을 이어감. ees.7 실행을 확인했으므로 이 사건 때문에 Upgrade·Restore·Start를 반복하지 않음. 실패하면 마지막 요약 한 줄로 판단하며 기록 삭제나 강제 덮어쓰기를 하지 않음.
+- 사내 확인 대기: `commit=9ecc9eadc5ec stage=apply_assets code=managed_field_conflict changed=0`으로 멈췄으며 아직 최신 자산 적용 성공은 미확인임. 적용 기록은 Agent Pack v0.2.6의 `applied` 상태이고 `ees_specialists` 본문만 차이가 났으며 관리 Valve `ees_model_id`는 일치함. `eol=different ast=match formatted=match target=different`는 기록본의 고정 편집기 정렬 결과와 현재 본문이 일치한다는 증거이며 최신 자산 적용 성공을 뜻하지 않음.
 
 ## 마지막으로 확인된 적용 상태
 
@@ -21,9 +21,9 @@
 | 대상 | 마지막 확인과 적용 원본 | 남은 한계·근거 |
 |---|---|---|
 | EES Work 업무 UI | ees.7 / v0.2.8 공장별 인라인 트리·이력·기존 UI 글꼴·탭 안정화·명칭 변경 구현 및 로컬 검증 완료 | 사용자가 이전 업무 절차의 존재와 글꼴·깜빡임을 보고함. 정확 사내 SHA 및 ees.7 화면·실제 모델 호출은 미확인. [현재 검증](../evals/scenarios.md#ees-work-factory-ux-20260914), [이전 통합](../evals/scenarios.md#ees-work-native-integration-20260914) |
-| EES 프로그램 | 09-14 Restore와 Start 모두 `result=ok stage=complete commit=83d56a186382 program=customized`; Start `running=true guard=win64_retry`, 후속 기존 주소 접속 성공 보고 | 직전 프로그램 복구·기동 health·웹 접속 확인. 유휴 안정성과 ees.7 적용은 미확인. [이번 증거](../evals/scenarios.md#ees7-apply-recovery-20260914), [이전 ees.5 보고 보존](../evals/scenarios.md#ees-work-demo-integration-20260914) |
-| 운영 래퍼 | 09-14 실패한 Upgrade의 `wrapper=dba0677ffe3e wrapper_changed=false` 보고 | 래퍼 SHA는 실행 프로그램 적용 성공을 뜻하지 않음. 실패 위치·복구 프로그램을 [이번 기록](../evals/scenarios.md#ees7-apply-recovery-20260914)에 구분함. 이전 `ec9be8ee2210` 보호와 `d4e2cde2a556` 적용 증거는 보존 |
-| 분석·업무 패널 자산 | v0.2.1 안내 원본 `bc8bffbb6043fb1401f995b312bf5709f50e5983` 이후 계획·오른쪽 패널 표시 정상 보고 | 실제 사내 SHA·개별 수치/회신 정확성 직접 대조 미실행. [확인 범위](../evals/scenarios.md#plan-work-panel-accepted) |
+| EES 프로그램 | 09-14 읽기 진단의 `/api/version` 응답 `0.11.3+ees.7` | 실행 버전 확인. 정확한 프로그램 원본 커밋·새 화면·유휴 안정성은 미확인. [최신 증거](../evals/scenarios.md#specialists-editor-format-20260914). 이전 `83d56a186382` 복구·접속 성공은 [당시 기록](../evals/scenarios.md#ees7-apply-recovery-20260914)에 보존 |
+| 운영 래퍼 | 09-14 ApplyDemo 실패 요약의 원본 `commit=9ecc9eadc5ec` | 자산 사전 대조에서 `managed_field_conflict changed=0`으로 중단. 앞선 `wrapper=dba0677ffe3e` Upgrade 실패와 프로그램 복구는 [별도 기록](../evals/scenarios.md#ees7-apply-recovery-20260914). 래퍼 커밋을 프로그램 원본으로 간주하지 않음 |
+| 분석·업무 패널 자산 | 09-14 `ees_specialists` 적용 기록은 Agent Pack v0.2.6 / `applied`. 현재 Tool 본문은 해당 기록본의 Black 26.5.1 정렬 결과와 일치하며 최신 대상 본문과는 다름 | 관리 Valve `ees_model_id` 일치만 확인했으며 전체 설정 정상·최신 자산 적용 성공을 뜻하지 않음. [충돌 진단](../evals/scenarios.md#specialists-editor-format-20260914). 이전 계획·패널 정상 표시는 [당시 관찰](../evals/scenarios.md#plan-work-panel-accepted)로 보존 |
 | 대표 시작 질문 | Git v0.2.6, PR #34/main `492eb5bc4145002db15090230cfd3bf3a40862fe` 및 CI 성공. 사용자 실행도 `commit=492eb5bc4145` | 사내는 `webui_version/webui_connection_failed`, `changed=0`으로 갱신 전 중단. 새 화면 미확인. [결과](../evals/scenarios.md#connector-demo-starters), [이전 필드 오류](../evals/scenarios.md#starter-ui-field-fix) |
 | WO 목업 | v0.1.6 안내 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc` 뒤 크기 조절 정상 보고; Git은 v0.1.8 통합 패널 원본 | 실제 EMS 미연결. 이후 패널 적용 보고와 개별 등록 바이트 검증을 구분. [목업 이력](../evals/scenarios.md#wo-mockup) |
 | 기본 Assistant·기존 조회 | 이름·로고·기존 대화·평소 Confluence/Jira/GitHub 조회 정상, 초기 Rich UI 제거·변경 Prompt 반영 완료 보고 | Tool별 최신 등록 코드·SHA·새 일반 답변/원문 직접 대조 미실행. [반영 보고](../evals/scenarios.md#plain-output-applied-report), [이전 자산별 SHA](../evals/scenarios.md#status-history-20260911) |
@@ -32,8 +32,9 @@
 ## 남아 있는 이슈와 확인 범위
 
 - **팀 공동 작업:** 최종 목표와 현재 구현의 차이가 남아 있음. 현재 `ees.7`의 진행 건·대화 연결은 사용자 소유이고, 공장·시스템 선택만으로 여러 사용자의 같은 진행 건 공유가 구현된 것은 아님. [합의·미결정·검증할 범위](mockups/ees-work/TASK.md#ees-work-shared-target).
-- **공장별 업무 UX:** Workspace 탭 반복 재삽입은 사외 실제 프런트에서 재현하고 동일 탭 유지·글꼴 상속 검사를 통과함. Native 첫 메시지의 경로 전환과 초안 복원 경합을 보완하고 최종 브라우저 10/10을 완료함. ees.7 사내 적용은 실패 후 직전 프로그램으로 복구했으며 새 글꼴·깜빡임 해소는 미확인임. [현재 검증](../evals/scenarios.md#ees-work-factory-ux-20260914).
-- **현재 업데이트 실패:** `dba0677ffe3e`의 Apply 407행 rename 접근 거부 뒤 Restore·Start·웹 접속 복구를 확인함. 이번에 제한적인 rename 대기와 수동 진행을 보완했으나 사내 새 래퍼 적용과 효과는 미확인. 파일 잠금·ACL·특정 보안 제품의 원인은 미확정이며 [복구 증거](../evals/scenarios.md#ees7-apply-recovery-20260914)와 [실패 대응 보완](../evals/scenarios.md#windows-program-rename-20260914)을 구분함.
+- **공장별 업무 UX:** Workspace 탭 반복 재삽입은 사외 실제 프런트에서 재현하고 동일 탭 유지·글꼴 상속 검사를 통과함. Native 첫 메시지의 경로 전환과 초안 복원 경합을 보완하고 최종 브라우저 10/10을 완료함. 사내 실행 버전은 ees.7로 확인했으나 최신 자산 적용과 새 글꼴·깜빡임 해소는 미확인임. [현재 UI 검증](../evals/scenarios.md#ees-work-factory-ux-20260914), [자산 충돌](../evals/scenarios.md#specialists-editor-format-20260914).
+- **현재 자산 적용 실패:** `ees_specialists`의 자동 정렬본을 기존의 원문 대조가 거부함. 검증된 공식 원본·정렬본 해시 쌍만 인식하도록 보완하며 실제 코드 변경·주석 변경·다른 관리 필드 충돌은 계속 차단함. 최신 ApplyDemo 성공은 아직 미확인. [진단·검증 경계](../evals/scenarios.md#specialists-editor-format-20260914).
+- **이전 폴더 변경 실패:** `dba0677ffe3e`의 Apply 407행 rename 접근 거부 뒤 Restore·Start·웹 접속 복구를 확인함. 이후 ees.7 실행은 확인했으나 어떤 재시도·수동 복구 경로로 적용됐는지와 제한 대기의 사내 효과는 미보고. 파일 잠금·ACL·특정 보안 제품의 원인은 미확정이며 [당시 복구](../evals/scenarios.md#ees7-apply-recovery-20260914)와 [실패 대응 보완](../evals/scenarios.md#windows-program-rename-20260914)을 구분함.
 - **과거 업데이트 장애 조사:** 종료 처리·오류 보존의 재현 가능한 결함은 수정/적용했으나 최초 포트 소실과 Windows rename 접근 거부의 근본 원인은 미확정. 마지막 종료 실패 로그의 `KeyboardInterrupt/other/ValueError/OperationalError`만으로 DB 손상·잠금·취소 원인을 확정하지 않음. 약속한 추가 확인은 끝났으며 정상 서버 재현·반복 진단 없이 유지함. 자연 재발 시 개선된 래퍼의 실패 요약을 사용함. [조치와 조사 종결](../evals/scenarios.md#ees-update-failure-causes).
 - **접속·스트리밍:** 09-14 수신 소실은 CPython accept 오류→listener 종료 경로와 일치함. 임시 복구 이후 자식 Proactor 보호를 사내 적용하고 기동 health를 확인했으나 유휴 이후 안정성은 미확인. 최초 단절 주체는 미확정이고 제한된 System 이벤트 0건으로 모든 전원·세션 원인을 배제하지 않음. 과거 Selector 준비본은 미적용. [검증·남은 확인](../evals/scenarios.md#accept64-guard-20260914).
 - **연동과 팀 공개:** 최신 일반 출력·페이지 이동·부분 실패/빈 결과·개인 권한/비밀 보호는 다음 관련 사용·변경 또는 공개 시점에 확인함. Confluence 검색 범위/시각·본문 근거·C07 개별 오류·Skill 로딩은 일반 조회 성공으로 통과 처리하지 않음. 초기 카드 디자인/키보드 검사는 제거 작업의 남은 게이트가 아님. [시점과 공개 기준](../evals/scenarios.md#validation-timing).
@@ -67,6 +68,6 @@
 
 ## 최근 점검
 
-2026-09-14: 새 세션 전환 요청에 따라 공동 작업 목표와 현행 개인 진행 건의 차이, 개인 채팅·권한 분리, 현장 조건·절차 버전·도구/스킬 매핑, 다음 설계 항목을 기존 문서에 정리함. PR #43의 병합·실제 Windows 잠금 시험·main 배포 CI 증거를 [기존 기록](../evals/scenarios.md#windows-program-rename-20260914)에 추가함. 마지막 사내 확인은 `83d56a186382` Restore·Start·웹 접속 성공이며 새 보완 적용·ees.7 화면·유휴 안정성은 여전히 미확인. 이번 변경은 문서에 한정하며 [기록 검수](../evals/scenarios.md#ees-work-shared-design-20260914)를 따른다.
+2026-09-14: 사내 ApplyDemo `changed=0` 실패와 읽기 진단으로 기록된 v0.2.6 전문 Tool의 자동 정렬 차이, 관리 Valve 일치, 실행 프로그램 ees.7을 확인함. 사외 관련 자동 시험 73개와 실제 공식 소스를 사용한 v0.2.6 → 최신 자산 재현을 통과함. 정확한 원본·정렬본 쌍 인식과 기존 변경 보호의 [검증 범위](../evals/scenarios.md#specialists-editor-format-20260914)를 따르며 실제 사내 적용 성공을 뜻하지 않음. 최신 자산 적용·새 UI 표시·유휴 안정성은 미확인. 앞선 [공동 작업 설계 검수](../evals/scenarios.md#ees-work-shared-design-20260914)와 [Windows rename 시험](../evals/scenarios.md#windows-program-rename-20260914)은 당시 기록으로 보존하며 팀 공유 구현은 후속 범위임.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
