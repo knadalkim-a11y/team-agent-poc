@@ -13,6 +13,7 @@
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
+| ees.7 적용 실패와 직전 버전 복구 | [09-14 rename 접근 거부, Restore·Start 성공, 새 화면 미확인](#ees7-apply-recovery-20260914) |
 | WinError64 수신 소실·임시 복구·재발 방지 | [09-14 증거, 후보 검토, 현재 검사·배포 구분](#accept64-guard-20260914) |
 | 서버 종료 실패와 명시적 복구 | [process_stop 실패·복구 결과](#ees-stop-recovery) |
 | 대화 폭·파란 조절 테두리 | [1920px 화면 보완](#ees-chat-width-resize), [사용자 정상 확인](#ees-stop-recovery) |
@@ -41,6 +42,23 @@
 - 전체·패키지 검사: 첫 `python -m unittest discover -s tests -v`는 `Ran 797 / FAILED (failures=1, skipped=25)`였음. 실패는 Agent Pack manifest의 이전 `0.2.7` 기대값이며 v0.2.8에 맞춰 수정함. 보완 후 로컬 전체 검사 `Ran 799 tests in 14.790s / OK (skipped=26)`를 확인했으며, 완료 실행 보호와 native hook을 포함한 전체 검사는 `Ran 801 tests in 16.540s / OK (skipped=26)`로 완료함. 실제 초안 전환의 후속 보완은 브라우저 검사로 별도 확인함. 최종 wheel SHA-256은 `86345bd59b83cff274f1f8d5ed11addf41283bdb034cc8a541b95f2a89cbfa6e`이며, 실제 고정 upstream의 초안·생성 분기 실행과 파일/RECORD 대조를 포함한 브랜딩 12개 PASS(16.696초), 같은 배포 코드의 직전 후보에서 Apply/Restore 40개 PASS(25.275초)를 확인함. 이 결과는 사내 기동 증거가 아님. Linux/Windows CI에도 실제 upstream 초안·생성 소스 검사를 연결함.
 - 최종 브라우저: 실제 고정 upstream Svelte/Tiptap와 Chromium에서 10/10 PASS(34.760초). 공장/시스템별 초안·일반 첨부의 복원 뒤 12프레임 유지, pending Tool 승인 설정/자동승인 요청 0건, 정상 첫 메시지 및 생성 대기 중 다른 공장으로 전환한 뒤 원래 티켓·실제 대화 복원, 빈 Enter의 오연결 차단, 같은 URL의 지연 응답 격리, Workspace idle/SPA 탭 동일성과 native 글꼴 상속을 확인함. 마지막 후보 이전 10개 중 2개는 권한 재조회 중 탭 삭제와 native 첫 대화 history 미로딩으로 실패했으며, null 상태에서 탭 유지와 정상 대화 링크 재진입으로 보완함. 이전 후보에서 드러난 50ms 초안 소유권 공백은 현재 native chat ID로 저장하고 준비된 입력기의 복원을 즉시 시작하도록 수정함. 테스트 대기를 늘려 실패를 숨기지 않음. 1920px 채팅·Workspace 이미지도 직접 확인함. 모델·인증 응답은 합성 fixture이며 실제 사내 모델/SSO 검증은 아님.
 - 원격 반영·사내 경계: 이번 구현의 커밋·PR Checks와 main의 EES delivery/프로그램 산출물을 기준으로 배포 준비 상태를 확인함. main/CI와 프로그램 산출물 성공 뒤 [기존 Update → Upgrade → ApplyDemo](../docs/03-openwebui-native-agent.md#ees-work-demo)로 사내 확인함. 실제 LLM의 업무 Tool 선택·SSO·DB/AP·문서시스템의 최신 응답과 ees.7 화면·유휴 안정성은 미확인임. DB/AP는 모의 실행이며 운영 DB 직접 접근·SQL·Shell·업무 발행을 추가하지 않음.
+
+<a id="ees7-apply-recovery-20260914"></a>
+
+### 사내 ees.7 적용 실패와 직전 프로그램 복구 (2026-09-14)
+
+- 실패 보고: `Upgrade result=failed wrapper_changed=false wrapper=dba0677ffe3e commit=- version=- stage=apply running=- code=operation_failed next=inspect_apply error=PermissionsError errno=13 winerror=5 at=ees_webui_customization.py:407`. 오류 이름은 사용자 입력 그대로 보존함. 같은 시점에 등록 웹 주소 접속 불가를 보고받았고 사내 주소는 기록하지 않음. 래퍼 SHA만으로 새 프로그램 설치·기동 성공을 추정하지 않음.
+- 소스 대조: 원격 main `dba0677ffe3ed64535f36e306721098f22206fe7`의 `scripts/ees_webui_customization.py` 407행은 `staged.rename(program)`임. Apply는 이전 프로그램 보관과 `pending=apply/promote` 기록 후 새 디렉터리 이름을 변경함. Upgrade는 등록 서버 Stop·중지 확인 후 Apply를 실행하고 성공한 뒤에만 Start하므로, 이번 실패로 재기동에 도달하지 못한 흐름과 접속 불가 보고가 일치함. 이것은 실패 연산의 확인이며 사내 파일 핸들·ACL·특정 보안 제품을 원인으로 확정한 결과가 아님.
+- 복구 안내: 현재 `last-operation`과 `deployment`가 실패한 Upgrade·apply/promote·idle 상태이며 보존 ZIP이 있는지 확인하는 블록을 제공함. 실패 기록과 deployment를 해당 ZIP 옆 사건 폴더에 보존한 후 기존 `Restore -Summary` → 성공 시 `Start -HealthTimeout 120 -Summary`만 수행하도록 함. `$ErrorActionPreference='Stop'`과 관리 스크립트의 실패 예외로 실패 후 다음 단계를 차단함. Restore의 등록 프로세스·포트·프로그램 무결성·잠금 소유 검사와 기존 DB·키·Python·등록 주소를 유지하며 수동 rename·강제 종료·ACL 변경·재설치·ApplyDemo를 추가하지 않음. 백업 파일의 실제 내용은 사외에서 직접 열람하지 않음.
+
+| 사용자 실행 결과 | 판정 |
+|---|---|
+| `restore result=ok changed=true commit=83d56a186382 stage=complete program=customized running=-` | 직전 커스터마이즈 프로그램 복구 성공. 실행 여부는 후속 Start로 판단 |
+| `start result=ok changed=- commit=83d56a186382 stage=complete program=customized running=true guard=win64_retry` | 등록 프로세스 기동·로컬 health 통과와 수신 보호 활성화 보고. 사용자가 입력한 `gurad` 표기는 `guard` 필드로 정리 |
+
+- 확인 경계: `83d56a18638296d64130f008cdbcd0f3bf3d8878`는 ees.6 기존 UI 통합 PR #40 병합 커밋임. 이번 보고는 직전 프로그램 복구 성공이며 ees.7 적용 성공이 아님. Start는 `wait_healthy` 후 성공을 반환하고 `guard=win64_retry`는 이번 자식의 보호 설치 표시이며 실제 WinError64 발생·재시도 횟수·유휴 안정성 증거가 아님. 브라우저 재접속·새 UI·ApplyDemo·실제 LLM 업무 호출은 아직 미확인이고 이전 ees.5 성공과 WinError64 조사 근거는 보존함.
+- 복구 후 검토: 소스 읽기와 독립 검토에서 추출 ZIP·입출력 스트림·해시 검증 읽기·기록 쓰기는 rename 전에 닫히고, 새 staging 앱은 승격 전에 실행하지 않음을 확인함. 등록 서버 종료는 식별된 프로세스 종료와 포트 확인을 거침. 이 범위에서 래퍼 자신의 핸들 누수 결함은 찾지 못했으며 사내 외부 핸들·권한 원인을 배제한 것은 아님. 근거 없는 대기·재시도·권한 변경을 추가하지 않음. 문서 두 파일만 변경하고 `python scripts/check_docs.py` → `DOCS OK | files=30 links=916 errors=0 review_candidates=0`, `git diff --check`를 통과함. 실행 코드가 같으므로 기존 자동 검증을 반복하지 않으며 사내 복구 보고와 원격 CI를 구분함.
+- 후속 범위: 복구된 웹 화면 접속을 한 번 확인하고 운영을 유지함. 이 두 줄만으로 Windows 접근 거부 원인을 확정하거나 같은 Upgrade를 반복하지 않음. 새 버전 적용은 실패 대응을 정한 뒤 별도로 진행함. 이번 상태 기록은 실행 코드·패키지·CI·사내 설정을 변경하지 않음.
 
 <a id="ees-work-native-integration-20260914"></a>
 

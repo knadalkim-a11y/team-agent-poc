@@ -8,9 +8,9 @@
 
 - 이번 작업: 승인된 공장·시스템 우선 인라인 P/T/J 트리, 현재 작업/읽기 전용 실행 이력, 기존 Native 대화·초안 연결, Workspace 글꼴·깜빡임 보완, EES Work 이름 변경을 ees.7 / Agent Pack v0.2.8에 반영함. PR #40 병합본을 기준으로 구현했고 로컬 전체 801개(26 SKIP), 실제 프런트 10/10, 고정 wheel 브랜딩 12개·배포 복원 40개 검증을 완료함. 원격 PR Checks와 main EES delivery의 프로그램 산출물을 배포 기준으로 사용함. [변경·검증·사내 경계](../evals/scenarios.md#ees-work-factory-ux-20260914).
 - 최근 UI 확인: 사용자가 기존 Workspace의 업무 절차 존재·내용을 확인하고 새 탭의 어색한 글꼴·반복 깜빡임과 업무 탐색 UX 보완을 요청함. 정확한 사내 SHA는 미보고이며 ees.7 적용·새 화면 정상 확인으로 확대하지 않음.
-- 최근 운영 확인: 09-14 EES Work Upgrade는 `commit=d4e2cde2a556 version=0.11.3+ees.5 result=ok stage=complete running=true`, 후속 요약은 `health=ok screen=unconfirmed`로 보고됨. 같은 날 앞서 확인한 PR #35 보호 적용(`ec9be8ee2210`, `guard=win64_retry`)의 [당시 증거](../evals/scenarios.md#accept64-guard-20260914)는 보존함. **유휴 이후 안정성은 미확인**.
+- 최근 운영 확인: 09-14 래퍼 `dba0677ffe3e`의 Upgrade가 `apply`의 `program.staging → program` 변경에서 Windows 접근 거부로 실패하고 등록 주소 접속 불가가 보고됨. 실패 기록 보존 후 명시적 Restore와 Start를 안내했고 사용자가 두 작업의 `result=ok stage=complete commit=83d56a186382 program=customized`, Start의 `running=true guard=win64_retry`를 보고함. 기동 시 로컬 health 통과이며 브라우저 재접속·유휴 이후 안정성·ees.7 적용 성공은 미확인. [이번 실패와 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [이전 ees.5 적용](../evals/scenarios.md#ees-work-demo-integration-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
-- 다음 제품 작업 하나: ees.7의 main 병합·성공 프로그램 산출물을 기준으로 [기존 Update/Upgrade/ApplyDemo](03-openwebui-native-agent.md#ees-work-demo)를 적용하고 공장 트리·대화 전환·실행 이력·Workspace 탭을 사내에서 확인함.
+- 다음 작업 하나: 복구한 `83d56a186382`의 기존 웹 주소 재접속을 확인함. ees.7 재적용은 폴더 변경 실패의 대응을 정한 뒤 진행하고, 같은 Upgrade·장시간 health 검사를 반복하지 않음. [실패·복구와 미확정 범위](../evals/scenarios.md#ees7-apply-recovery-20260914).
 
 ## 마지막으로 확인된 적용 상태
 
@@ -19,8 +19,8 @@
 | 대상 | 마지막 확인과 적용 원본 | 남은 한계·근거 |
 |---|---|---|
 | EES Work 업무 UI | ees.7 / v0.2.8 공장별 인라인 트리·이력·기존 UI 글꼴·탭 안정화·명칭 변경 구현 및 로컬 검증 완료 | 사용자가 이전 업무 절차의 존재와 글꼴·깜빡임을 보고함. 정확 사내 SHA 및 ees.7 화면·실제 모델 호출은 미확인. [현재 검증](../evals/scenarios.md#ees-work-factory-ux-20260914), [이전 통합](../evals/scenarios.md#ees-work-native-integration-20260914) |
-| EES 프로그램 | 마지막 버전 명시 보고는 09-14 `Upgrade result=ok changed=true commit=d4e2cde2a556 version=0.11.3+ees.5 stage=complete running=true`, 후속 `health=ok` | 후속 Workspace 화면 보고는 설치 SHA를 특정하지 않음. ees.7 화면·유휴 이후 안정성 미확인. 이전 `c099e427f62b`의 보호는 [당시 증거](../evals/scenarios.md#accept64-guard-20260914), ees.5 적용은 [사용자 보고](../evals/scenarios.md#ees-work-demo-integration-20260914)로 보존 |
-| 운영 래퍼 | 마지막 SHA 명시 보고는 09-14 `Update result=ok changed=false wrapper_changed=true wrapper=d4e2cde2a556`, 이어진 Upgrade `result=ok` | 당시 적용을 다시 확인하려고 반복 실행하지 않음. ees.7 갱신은 해당 main/CI/산출물 이후 별도 안내. 이전 `ec9be8ee2210` 보호는 [당시 증거](../evals/scenarios.md#accept64-guard-20260914), ees.5 적용은 [사용자 보고](../evals/scenarios.md#ees-work-demo-integration-20260914)로 보존 |
+| EES 프로그램 | 09-14 Restore와 Start 모두 `result=ok stage=complete commit=83d56a186382 program=customized`; Start `running=true guard=win64_retry` | 직전 프로그램 복구·기동 health 통과. 복구 후 브라우저·유휴 안정성과 ees.7 적용은 미확인. [이번 증거](../evals/scenarios.md#ees7-apply-recovery-20260914), [이전 ees.5 보고 보존](../evals/scenarios.md#ees-work-demo-integration-20260914) |
+| 운영 래퍼 | 09-14 실패한 Upgrade의 `wrapper=dba0677ffe3e wrapper_changed=false` 보고 | 래퍼 SHA는 실행 프로그램 적용 성공을 뜻하지 않음. 실패 위치·복구 프로그램을 [이번 기록](../evals/scenarios.md#ees7-apply-recovery-20260914)에 구분함. 이전 `ec9be8ee2210` 보호와 `d4e2cde2a556` 적용 증거는 보존 |
 | 분석·업무 패널 자산 | v0.2.1 안내 원본 `bc8bffbb6043fb1401f995b312bf5709f50e5983` 이후 계획·오른쪽 패널 표시 정상 보고 | 실제 사내 SHA·개별 수치/회신 정확성 직접 대조 미실행. [확인 범위](../evals/scenarios.md#plan-work-panel-accepted) |
 | 대표 시작 질문 | Git v0.2.6, PR #34/main `492eb5bc4145002db15090230cfd3bf3a40862fe` 및 CI 성공. 사용자 실행도 `commit=492eb5bc4145` | 사내는 `webui_version/webui_connection_failed`, `changed=0`으로 갱신 전 중단. 새 화면 미확인. [결과](../evals/scenarios.md#connector-demo-starters), [이전 필드 오류](../evals/scenarios.md#starter-ui-field-fix) |
 | WO 목업 | v0.1.6 안내 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc` 뒤 크기 조절 정상 보고; Git은 v0.1.8 통합 패널 원본 | 실제 EMS 미연결. 이후 패널 적용 보고와 개별 등록 바이트 검증을 구분. [목업 이력](../evals/scenarios.md#wo-mockup) |
@@ -29,7 +29,8 @@
 
 ## 남아 있는 이슈와 확인 범위
 
-- **공장별 업무 UX:** Workspace 탭 반복 재삽입은 사외 실제 프런트에서 재현하고 동일 탭 유지·글꼴 상속 검사를 통과함. Native 첫 메시지의 경로 전환과 초안 복원 경합은 보완·최종 E2E 진행 중이며 ees.7 사내 글꼴·깜빡임 해소는 아직 미확인임. [현재 검증](../evals/scenarios.md#ees-work-factory-ux-20260914).
+- **공장별 업무 UX:** Workspace 탭 반복 재삽입은 사외 실제 프런트에서 재현하고 동일 탭 유지·글꼴 상속 검사를 통과함. Native 첫 메시지의 경로 전환과 초안 복원 경합을 보완하고 최종 브라우저 10/10을 완료함. ees.7 사내 적용은 실패 후 직전 프로그램으로 복구했으며 새 글꼴·깜빡임 해소는 미확인임. [현재 검증](../evals/scenarios.md#ees-work-factory-ux-20260914).
+- **현재 업데이트 실패:** `dba0677ffe3e`의 Apply 407행 rename 접근 거부가 재발함. 명시적 Restore·Start 복구 성공은 확인했으나 파일 잠금·ACL·보안 소프트웨어 중 원인은 미확정이며 정상 서버에서 원인 재현을 위한 Stop/Upgrade를 반복하지 않음. [소스 대조·복구 결과](../evals/scenarios.md#ees7-apply-recovery-20260914).
 - **과거 업데이트 장애 조사:** 종료 처리·오류 보존의 재현 가능한 결함은 수정/적용했으나 최초 포트 소실과 Windows rename 접근 거부의 근본 원인은 미확정. 마지막 종료 실패 로그의 `KeyboardInterrupt/other/ValueError/OperationalError`만으로 DB 손상·잠금·취소 원인을 확정하지 않음. 약속한 추가 확인은 끝났으며 정상 서버 재현·반복 진단 없이 유지함. 자연 재발 시 개선된 래퍼의 실패 요약을 사용함. [조치와 조사 종결](../evals/scenarios.md#ees-update-failure-causes).
 - **접속·스트리밍:** 09-14 수신 소실은 CPython accept 오류→listener 종료 경로와 일치함. 임시 복구 이후 자식 Proactor 보호를 사내 적용하고 기동 health를 확인했으나 유휴 이후 안정성은 미확인. 최초 단절 주체는 미확정이고 제한된 System 이벤트 0건으로 모든 전원·세션 원인을 배제하지 않음. 과거 Selector 준비본은 미적용. [검증·남은 확인](../evals/scenarios.md#accept64-guard-20260914).
 - **연동과 팀 공개:** 최신 일반 출력·페이지 이동·부분 실패/빈 결과·개인 권한/비밀 보호는 다음 관련 사용·변경 또는 공개 시점에 확인함. Confluence 검색 범위/시각·본문 근거·C07 개별 오류·Skill 로딩은 일반 조회 성공으로 통과 처리하지 않음. 초기 카드 디자인/키보드 검사는 제거 작업의 남은 게이트가 아님. [시점과 공개 기준](../evals/scenarios.md#validation-timing).
@@ -63,6 +64,6 @@
 
 ## 최근 점검
 
-2026-09-14: ees.7 공장별 인라인 탐색·완료 이력·Workspace 글꼴/깜빡임·EES Work 이름 변경을 구현함. 실제 첫 전송 경로·빠른 전환의 초안 소유권·권한 재조회 탭 삭제·생성 중 전환 후 대화 복원을 보완함. 전체 801개(26 SKIP), 실제 프런트 10/10, 실제 고정 wheel 브랜딩 12개와 배포 복원 40개 검증을 완료함. 사내 ees.7 적용·실제 모델 업무 호출·유휴 안정성은 미확인. [근거](../evals/scenarios.md#ees-work-factory-ux-20260914).
+2026-09-14: 래퍼 `dba0677ffe3e`의 Apply 407행 접근 거부와 접속 불가 보고를 정확한 소스로 대조하고 기존 Restore·Start를 안내함. 사용자가 `83d56a186382` 복원과 `running=true guard=win64_retry`를 보고해 복구·기동 health 성공을 기록함. 새 UI 적용·브라우저 재접속·유휴 안정성·rename 근본 원인은 미확인. 실행 코드·사내 설정은 변경하지 않음. [실패와 복구 근거](../evals/scenarios.md#ees7-apply-recovery-20260914), [기존 구현·자동 검증 보존](../evals/scenarios.md#ees-work-factory-ux-20260914).
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
