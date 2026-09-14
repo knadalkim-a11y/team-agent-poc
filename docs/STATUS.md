@@ -8,7 +8,7 @@
 
 - 이번 작업: 09-14 `live=true/http=false/listen=0/0` 및 `finish_accept/WinError64` 증거 뒤 정상 Stop→Start와 표준입력 확인으로 사용자가 `live=true/http=true`를 확인함. **임시 복구 완료·재발 방지 미완료**. PR #35에서 자식 IOCP 수락 보호·정지 전 호환성 검사·합성 시험을 보완함. [증거와 검증 구분](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
-- 다음 제품 작업 하나: PR #35 수정 head의 Windows/Linux CI와 실제 IOCP 시험 결과를 확인하고, 통과한 변경의 병합·사내 적용 범위를 결정함. 이미 완료한 진단·임시 재시작을 반복하지 않음. GLM 5.3·ApplyDemo·화면 변경은 이번 범위 밖임.
+- 다음 제품 작업 하나: PR #35의 최종 head CI 성공을 확인한 상태에서 병합 승인을 받아 main 반영을 진행함. 사내 적용은 별도 명시 승인 후 정지 전 CheckOnly→정상 Stop→Start→health/보호 표시 순서로 진행함. 이미 완료한 진단·임시 재시작을 반복하지 않으며 GLM 5.3·ApplyDemo·화면 변경은 범위 밖임.
 
 ## 마지막으로 확인된 적용 상태
 
@@ -59,6 +59,6 @@
 
 ## 최근 점검
 
-2026-09-14: 최신 main `af539106f927`·PR #35 head `595714d146ae` 및 본문·댓글을 대조함. 105개 파일의 Git blob을 원격 head와 대조한 격리 사본에서 첨부 후보를 검토하고 정지 전 CheckOnly·기동 표시·종료 중 재시도 시험을 보완함. Linux CPython 3.12.14 검사와 Windows/사내 미실행을 구분함. 이전 코드의 main CI 성공을 이번 보호 검증으로 재사용하지 않음. [명령·결과·남은 확인](../evals/scenarios.md#accept64-guard-20260914).
+2026-09-14: 최신 main `af539106f927`·PR #35 head `595714d146ae` 및 본문·댓글을 대조함. 105개 파일의 Git blob을 원격 head와 대조한 격리 사본에서 첨부 후보를 검토하고 정지 전 CheckOnly·기동 표시·종료 중 재시도 시험을 보완함. 보호 코드 `5d39b5f715ad`의 Windows/Linux delivery CI 성공과 Windows CPython 3.11.9 실제 IOCP·비동기 subprocess·종료/자원 정리 시험을 확인함. 사내 적용·유휴 이후 안정성은 미실행으로 유지하며 이전 main CI 성공을 재사용하지 않음. [명령·결과·남은 확인](../evals/scenarios.md#accept64-guard-20260914).
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
