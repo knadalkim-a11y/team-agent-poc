@@ -42,7 +42,7 @@ ERROR_TYPES = frozenset({"launch_uncertain", "process", "state", "release", "dep
 RECOVERY_STATES = frozenset({"not_attempted", "blocked", "failed", "succeeded"})
 FAILURE_REASONS = ("health_timeout", "process_exited", "identity_unavailable", "identity_changed",
                    "launch_failed", "launch_unverified", "termination_failed", "termination_timeout",
-                   "stop_signal_failed", "stop_helper_failed", "stop_helper_timeout", "stop_timeout")
+                   "stop_signal_failed", "stop_helper_failed", "stop_helper_timeout", "stop_timeout", "accept_guard_incompatible")
 
 
 def safe_log_id(value):
@@ -384,6 +384,7 @@ def customize(config, args):
         selection = customization.inspect_bundle(config, args.bundle, commit_id(args.commit), env)
         if resume:
             customization.check_resume(config, registry, env, selection)
+        processes.check_accept_runtime(config["source_python"], config["cwd"])
         if read_registry(config) != registry or (Path(config["state_root"]) / "deployment.lock").exists():
             raise DeploymentError("The deployment changed during CheckOnly; no applicability result was accepted.")
         return {"checked": True, "changed": False, "source_commit": selection["source_commit"],
@@ -446,6 +447,7 @@ def start_selected(config, selected, env, registry, health_timeout=DEFAULT_HEALT
     record(config, registry, "process_started")
     progress["stage"] = "health_check"
     processes.wait_healthy(identity, timeout=health_timeout)
+    progress["accept_guard"] = processes.accept_guard_status(identity)
     return identity
 
 
@@ -521,7 +523,8 @@ def switch(config, selected, event, health_timeout=DEFAULT_HEALTH_TIMEOUT, *, us
         old = dict(registry["current"])
         progress = {"stage": "select_program"}
         try:
-            selected_environment(config, old, env)
+            old_executable, _ = selected_environment(config, old, env)
+            processes.check_accept_runtime(old_executable, config["cwd"])
             if use_windows_ca:
                 if selected["kind"] != "release":
                     raise DeploymentError("Windows CA selection is supported only for an EES release.")
@@ -529,7 +532,8 @@ def switch(config, selected, event, health_timeout=DEFAULT_HEALTH_TIMEOUT, *, us
                 digest = releases.prepare_windows_ca(target_for(config, selected["source_commit"]), executable, env,
                                                      cwd=config["cwd"])
                 selected = dict(selected, ca_bundle_sha256=digest)
-            selected_environment(config, selected, env)
+            executable, _ = selected_environment(config, selected, env)
+            processes.check_accept_runtime(executable, config["cwd"])
             if selected == old and registry.get("process") and processes.verify_identity(registry["process"]):
                 progress["stage"] = "health_check"
                 processes.wait_healthy(registry["process"], timeout=health_timeout)
@@ -597,6 +601,26 @@ def operate(args):
     if args.action == "init":
         return initialize(args)
     config = states.load_config(args.config)
+    if args.action == "start" and getattr(args, "check_only", False):
+        # This check is intentionally usable while the registered server is live.
+        # No lock/report writes, health wait, socket bind, app import or Stop.
+        registry = read_registry(config)
+        require_idle(registry)
+        lock = Path(config["state_root"]) / "deployment.lock"
+        if registry.get("launch_uncertain") or lock.exists():
+            raise DeploymentError("The deployment is busy or unverified; preflight stopped.")
+        selected_program(config, registry)
+        env = states.runtime_environment(config)
+        executable, _ = selected_environment(config, registry["current"], env)
+        try:
+            guard = processes.check_accept_runtime(executable, config["cwd"])
+        except processes.ProcessError as error:
+            error.stage = "preflight"
+            raise
+        if read_registry(config) != registry or lock.exists():
+            raise DeploymentError("The deployment changed during preflight; no result was accepted.")
+        return {"checked": True, "changed": False, "stage": "preflight", "accept_guard": guard,
+                **program_result(registry)}
     if args.action in ("apply", "restore"):
         return customize(config, args)
     if args.action in ("plan", "prepare", "deploy", "rollback", "probe-imports", "diagnose"):
@@ -704,7 +728,7 @@ def operate(args):
             error.stage = progress.get("stage", "start")
             raise
         record(config, registry, "started_by_operator")
-        return {"started": True, **program_result(registry)}
+        return {"started": True, "accept_guard": progress["accept_guard"], **program_result(registry)}
 
 
 def render_diagnosis(result):
@@ -813,6 +837,8 @@ def render_summary(action, result, *, failed=False):
                else "original" if result.get("original_program") is True
                else "customized" if result.get("original_program") is False else "-")
     detail = failure_fields(result) if failed else ""
+    if result.get("accept_guard") in ("compatible", "win64_retry", "not_applicable"):
+        detail += f" guard={result['accept_guard']}"
     return (f"EES action={action} result={'failed' if failed else 'ok'} changed={flag(result.get('changed'))} "
             f"commit={commit} stage={stage} program={program} "
             f"running={flag(result.get('managed_process_running', result.get('started', result.get('already_running'))))}{detail}")
@@ -852,7 +878,7 @@ def main(argv=None):
     parser.add_argument("--port", type=int)
     parser.add_argument("--uv", type=Path)
     parser.add_argument("--wheelhouse", type=Path)
-    parser.add_argument("--check-only", action="store_true", help="Read-only Apply preflight; never imports or stops the app.")
+    parser.add_argument("--check-only", action="store_true", help="Read-only Apply or Start preflight; never imports or stops the app.")
     parser.add_argument("--resume", action="store_true", help="Explicitly finish Apply after its staged program was manually renamed.")
     parser.add_argument("--summary", action="store_true", help="Print a single safe line for manual result handoff.")
     parser.add_argument("--health-timeout", type=health_timeout_arg, default=DEFAULT_HEALTH_TIMEOUT,
@@ -860,8 +886,10 @@ def main(argv=None):
     parser.add_argument("--use-windows-ca", action="store_true",
                         help="Select Windows CA trust for a stopped Apply/Restore Start or a legacy Deploy.")
     args = parser.parse_args(argv)
-    if args.check_only and args.action != "apply":
-        parser.error("--check-only is supported only with apply.")
+    if args.check_only and args.action not in ("apply", "start"):
+        parser.error("--check-only is supported only with apply or start.")
+    if args.check_only and args.use_windows_ca:
+        parser.error("--check-only cannot change runtime trust.")
     if args.resume and args.action != "apply":
         parser.error("--resume is supported only with apply.")
     if args.summary and args.action not in ("apply", "restore", "start", "stop", "status"):

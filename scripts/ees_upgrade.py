@@ -190,6 +190,7 @@ def preflight(config, registry, env):
         raise UpgradeError("original_interpreter_required")
     manager.selected_program(config, registry)
     manager.customization.check_applicability(config, registry, env)
+    manager.processes.check_accept_runtime(config["source_python"], config["cwd"])
 
 
 def artifact_key(artifact):

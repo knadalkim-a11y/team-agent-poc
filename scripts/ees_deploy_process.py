@@ -27,7 +27,7 @@ _OPERATIONS = {'port_probe', 'port_bind', 'process_open', 'process_inspect',
 _REASONS = {'health_timeout', 'process_exited', 'identity_unavailable',
             'identity_changed', 'launch_failed', 'launch_unverified',
             'termination_failed', 'termination_timeout', 'stop_signal_failed',
-            'stop_helper_failed', 'stop_helper_timeout', 'stop_timeout'}
+            'stop_helper_failed', 'stop_helper_timeout', 'stop_timeout', 'accept_guard_incompatible'}
 
 
 class ProcessError(RuntimeError):
@@ -407,6 +407,37 @@ def terminate_registered_process(identity, timeout=10, *, expected_group_id=None
         kernel.CloseHandle(handle)
 
 
+def check_accept_runtime(python_exe, cwd):
+    """Probe the selected interpreter without importing WebUI or binding a port."""
+    if sys.platform != 'win32':
+        return 'not_applicable'
+    guard = Path(__file__).resolve().with_name('ees_deploy_accept.py')
+    try:
+        result = subprocess.run([str(python_exe), '-I', '-B', str(guard), '--check'],
+                                cwd=cwd, stdin=subprocess.DEVNULL, capture_output=True,
+                                timeout=10, check=False)
+        if result.returncode == 0 and result.stdout.strip() == b'EES accept_check=compatible':
+            return 'compatible'
+    except (OSError, subprocess.SubprocessError):
+        pass
+    raise ProcessError('The selected Python does not pass the accept guard check; no server was changed.',
+                       reason='accept_guard_incompatible') from None
+
+
+def accept_guard_status(identity):
+    """Read only the new child's fixed startup marker, without exposing its log."""
+    if sys.platform != 'win32':
+        return 'not_applicable'
+    try:
+        with Path(identity['log_file']).open('rb') as log:
+            if b'EES accept_guard=win64_retry loop=proactor' in log.read(4096).splitlines():
+                return 'win64_retry'
+    except (KeyError, TypeError, OSError):
+        pass
+    raise ProcessError('The current child accept guard could not be verified; inspect its local log.',
+                       reason='accept_guard_incompatible') from None
+
+
 def start_server(python_exe, cwd, env, host, port, log_dir, *, program_path=None, program_version=None):
     started = time.monotonic()
     if not port_is_free(host, port, raise_on_error=True):
@@ -431,6 +462,11 @@ def start_server(python_exe, cwd, env, host, port, log_dir, *, program_path=None
         command = [str(python_exe), '-I', '-B', '-c', CUSTOMIZED_SERVER_CODE, host, str(port),
                    str(Path(program_path).resolve()), version, f'open_webui-{version}.dist-info',
                    branding.PROGRAM_FRONTENDS[version]]
+    # Only the child changes IOCP accept; Stop/Status and the operator are unchanged.
+    guard = Path(__file__).resolve().with_name('ees_deploy_accept.py')
+    guard_code = f"import runpy; runpy.run_path({str(guard)!r})['install']()\n"
+    code_index = command.index('-c') + 1
+    command[code_index] = guard_code + command[code_index]
     log_dir = Path(log_dir)
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file = (log_dir / ('server-' + uuid.uuid4().hex + '.log')).resolve()

@@ -28,7 +28,7 @@ class UpgradeDeploymentTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.config = {"state_root": str(self.root), "source_python": "registered-python"}
+        self.config = {"state_root": str(self.root), "source_python": "registered-python", "cwd": "registered-cwd"}
         self.active = {"source_commit": OLDER, "wheel_sha256": "1" * 64,
                        "record_sha256": "2" * 64, "webui_version": "0.11.3+ees.2"}
         self.selected = dict(self.active, source_commit=HEAD, wheel_sha256="3" * 64)
@@ -76,6 +76,7 @@ class UpgradeDeploymentTests(unittest.TestCase):
             "read": patch.object(upgrade.manager, "read_registry", side_effect=lambda _: copy.deepcopy(self.registry)),
             "validate": patch.object(upgrade.manager.customization, "validate_program", return_value=self.root / "program"),
             "applicability": patch.object(upgrade.manager.customization, "check_applicability"),
+            "accept_check": patch.object(upgrade.manager.processes, "check_accept_runtime", return_value="compatible"),
             "inspect": patch.object(upgrade.manager.customization, "inspect_bundle", side_effect=lambda *a: self.selected),
             "stop": patch.object(upgrade.manager, "stop_registered", side_effect=stop),
             "stopped": patch.object(upgrade.manager, "require_stopped", side_effect=lambda *a: self.events.append("require_stopped")),
@@ -109,6 +110,14 @@ class UpgradeDeploymentTests(unittest.TestCase):
                     self.assert_no_server_changes()
                 finally:
                     target.side_effect = original
+
+    def test_incompatible_runtime_is_rejected_before_download_and_stop(self):
+        self.mock["accept_check"].side_effect = upgrade.manager.processes.ProcessError(
+            "synthetic incompatible runtime", reason="accept_guard_incompatible")
+        with self.assertRaises(upgrade.manager.processes.ProcessError):
+            self.deploy()
+        self.assert_no_server_changes()
+        self.client.download_artifact.assert_not_called()
 
     def test_cached_noop_validates_program_process_and_health_without_download(self):
         upgrade.save_receipt(self.config, self.artifact, self.active)
