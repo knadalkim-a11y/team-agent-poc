@@ -325,7 +325,8 @@ def manual_promote_ready(config):
         pending = current["pending"]
         if (registry.get("phase") != "idle" or registry.get("process") or registry.get("pending")
                 or registry.get("launch_uncertain") or not pending or pending["action"] != "apply"
-                or pending["stage"] != "promote" or pending["before"] != current["active"]
+                or pending["stage"] != "promote" or pending["before"] is None
+                or pending["before"] != current["active"]
                 or pending["old_previous"] != current["previous"]
                 or registry.get("current") != {"kind": "original", "source_commit": None,
                                                "python": config["source_python"]}):
@@ -333,7 +334,7 @@ def manual_promote_ready(config):
         program, previous, staged = manager.customization._paths(config)
         lock = Path(config["state_root"]) / "deployment.lock"
         return (not lock.exists() and not lock.is_symlink() and not program.exists()
-                and staged.is_dir() and (previous.is_dir() if pending["before"] else not previous.exists()))
+                and staged.is_dir() and previous.is_dir())
     except (OSError, ValueError, TypeError, KeyError, RuntimeError):
         return False
 

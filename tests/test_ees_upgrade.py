@@ -404,7 +404,7 @@ class ManualPromotionReadinessTests(unittest.TestCase):
         self.read = override.start()
         self.addCleanup(override.stop)
 
-    def test_stopped_consistent_customized_and_original_states_are_read_only_eligible(self):
+    def test_stopped_customized_state_is_eligible_but_first_install_is_not(self):
         before = copy.deepcopy(self.registry)
         snapshot = sorted(str(path.relative_to(self.root)) for path in self.root.rglob("*"))
         with patch.object(upgrade.manager, "record") as record, \
@@ -417,9 +417,20 @@ class ManualPromotionReadinessTests(unittest.TestCase):
             mutation.assert_not_called()
         self.pending["before"] = None
         self.registry["customization"]["active"] = None
-        self.assertFalse(upgrade.manual_promote_ready(self.config))
-        self.previous.rmdir()
-        self.assertTrue(upgrade.manual_promote_ready(self.config))
+        for previous_exists in (True, False):
+            with self.subTest(previous_exists=previous_exists):
+                if not previous_exists:
+                    self.previous.rmdir()
+                before = copy.deepcopy(self.registry)
+                snapshot = sorted(str(path.relative_to(self.root)) for path in self.root.rglob("*"))
+                with patch.object(upgrade.manager, "record") as record, \
+                        patch.object(upgrade.manager, "stop_registered") as stop, \
+                        patch.object(upgrade.manager, "start_selected") as start:
+                    self.assertFalse(upgrade.manual_promote_ready(self.config))
+                self.assertEqual(self.registry, before)
+                self.assertEqual(sorted(str(path.relative_to(self.root)) for path in self.root.rglob("*")), snapshot)
+                for mutation in (record, stop, start):
+                    mutation.assert_not_called()
 
     def test_running_uncertain_or_inconsistent_registry_does_not_offer_manual_rename(self):
         original = copy.deepcopy(self.registry)
