@@ -6,13 +6,13 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 사용자 `ApplyDemo result=ok changed=8 commit=76e566622e74 stage=complete code=- next=new_chat` 보고로 공식 정렬본 인식 보완의 사내 자산 적용 성공을 확인함. 실패 이력을 다음 변경·재시도·회귀 검증에 재사용하도록 [개발 지침](../AGENTS.md#failure-learning)을 보완함. [적용 결과·재발 교훈](../evals/scenarios.md#specialists-editor-format-20260914).
-- 최근 Git 반영: 정렬본 인식 수정은 [PR #45](https://github.com/knadalkim-a11y/team-agent-poc/pull/45), main `76e566622e744fc2f1670350d91d6a4cbe3c802e`에 병합됐고 [main CI 최종 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34901170378/attempts/2) 및 자산 파일 생성을 확인함. 최초 Linux 브라우저 준비 시간 초과와 실패 작업 재검사 성공은 [사건 기록](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 이후 문서 변경의 검증·CI와 구분함.
-- 최근 UI 확인: 사용자가 기존 Workspace의 업무 절차 존재·내용을 확인하고 새 탭의 어색한 글꼴·반복 깜빡임과 업무 탐색 UX 보완을 요청함. 이후 ees.7 실행 버전은 별도로 확인했으나 새 화면 정상 보고는 아직 없음.
+- 이번 작업: 승인한 사이드바 목업을 기존 WebUI에 반영하는 ees.8 후보를 구현·검증 중. P/T/J 설명 행 제거, 직계 하위만 펼침, 공장·시스템 통합 선택 영역, 번들 글꼴의 적용 범위를 보완함. [승인 기준](mockups/ees-work/TASK.md#sidebar-refinement), [검증·미확인](../evals/scenarios.md#sidebar-refinement-20260914).
+- 최근 Git 반영: 시작 main은 [PR #46](https://github.com/knadalkim-a11y/team-agent-poc/pull/46)의 `53b3d4c3081d0406d265b59f43e65bf9adf1370b`이며 실패 학습 지침·ApplyDemo 성공 기록을 포함함. 이번 UI 후보의 PR·CI·main 반영과 사내 적용은 [새 검증 기록](../evals/scenarios.md#sidebar-refinement-20260914)에서 구분함.
+- 최근 UI 확인: 사용자가 P/T/J 설명 행·하위 전체 펼침·새 영역 글꼴 차이·공장/시스템 선택 디자인을 지적하고 개선 목업을 승인함. 실제 새 프로그램 UI의 사내 확인은 아직 미실행임.
 - 최근 운영 확인: 09-14 읽기 진단의 `/api/version` 응답으로 **현재 실행 프로그램 `0.11.3+ees.7`**을 확인함. 프로그램의 정확한 원본 커밋·새 UI 표시·유휴 안정성은 미확인임. 그 전 `dba0677ffe3e` Upgrade의 promote 접근 거부와 `83d56a186382` Restore·Start·기존 주소 접속 성공은 [당시 복구 기록](../evals/scenarios.md#ees7-apply-recovery-20260914)으로 보존함. [최신 진단](../evals/scenarios.md#specialists-editor-format-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 시작 질문 필드 불일치 수정은 v0.2.5부터 반영됐고, 이번 `76e566622e74` ApplyDemo로 v0.2.8 관리 자산의 API 적용 성공을 확인함. 새 질문의 실제 화면·모델 동작은 미확인임. [기존 필드 오류](../evals/scenarios.md#starter-ui-field-fix)와 [이번 적용 결과](../evals/scenarios.md#specialists-editor-format-20260914)를 구분함.
-- 다음 작업 하나: 새 세션에서 [공장 → 시스템 → 업무 공동 작업 목표](mockups/ees-work/TASK.md#ees-work-shared-target)와 현재 사용자별 진행 건·대화 연결을 대조해 최소 변경 범위와 검증 기준을 구체화함. 멤버·역할·실행 권한, 개인 대화와 공유 업무 연결, 기존 데이터 이관·동시 수정이 검토 대상이며 기존 개인 결과의 자동 공개를 승인된 것으로 간주하지 않음.
-- 최신 사내 확인: 자산 적용은 `changed=8 stage=complete`로 성공함. 이전 `9ecc9eadc5ec`의 `managed_field_conflict changed=0`과 두 차례 읽기 진단은 [기존 사건](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 같은 적용·Upgrade·복구를 다시 요청하지 않음. 새 화면·실제 모델 호출·유휴 안정성은 아직 미확인이고 후속 정상 사용에서 확인된 범위만 반영함.
+- 다음 작업 하나: ees.8 후보의 관련 검증·PR 반영을 마치고, main 병합·CI·프로그램 산출물 성공 뒤 [사이드바 적용·최소 확인](03-openwebui-native-agent.md#sidebar-refinement)으로 이어감. 공동 작업 설계 목표는 유지하되 이번 UI 변경에서 공유 권한·저장 구조를 변경하지 않음.
+- 최신 사내 확인: 자산 적용은 `changed=8 stage=complete`로 성공함. 이전 `9ecc9eadc5ec`의 `managed_field_conflict changed=0`과 두 차례 읽기 진단은 [기존 사건](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 정렬 충돌 해결을 위해 같은 적용·복구를 반복하지 않음. 새 UI ees.8의 프로그램 갱신은 별도 변경임. 새 화면·실제 모델 호출·유휴 안정성은 아직 미확인이고 후속 정상 사용에서 확인된 범위만 반영함.
 
 ## 마지막으로 확인된 적용 상태
 
@@ -31,7 +31,7 @@
 
 ## 남아 있는 이슈와 확인 범위
 
-- **팀 공동 작업:** 최종 목표와 현재 구현의 차이가 남아 있음. 현재 `ees.7`의 진행 건·대화 연결은 사용자 소유이고, 공장·시스템 선택만으로 여러 사용자의 같은 진행 건 공유가 구현된 것은 아님. [합의·미결정·검증할 범위](mockups/ees-work/TASK.md#ees-work-shared-target).
+- **팀 공동 작업:** 최종 목표와 현재 구현의 차이가 남아 있음. 현재 사용자별 구현과 ees.8 후보의 진행 건·대화 연결은 사용자 소유이고, 공장·시스템 선택만으로 여러 사용자의 같은 진행 건 공유가 구현된 것은 아님. [합의·미결정·검증할 범위](mockups/ees-work/TASK.md#ees-work-shared-target).
 - **공장별 업무 UX:** Workspace 탭 반복 재삽입은 사외 실제 프런트에서 재현하고 동일 탭 유지·글꼴 상속 검사를 통과함. Native 첫 메시지의 경로 전환과 초안 복원 경합을 보완하고 브라우저 검사를 완료함. 사내 ees.7 실행과 최신 관리 자산 적용은 확인했으나 새 글꼴·깜빡임 해소의 실제 화면은 미확인임. [UI 검증](../evals/scenarios.md#ees-work-factory-ux-20260914), [자산 적용 확인](../evals/scenarios.md#specialists-editor-format-20260914).
 - **이전 폴더 변경 실패:** `dba0677ffe3e`의 Apply 407행 rename 접근 거부 뒤 Restore·Start·웹 접속 복구를 확인함. 이후 ees.7 실행은 확인했으나 어떤 재시도·수동 복구 경로로 적용됐는지와 제한 대기의 사내 효과는 미보고. 파일 잠금·ACL·특정 보안 제품의 원인은 미확정이며 [당시 복구](../evals/scenarios.md#ees7-apply-recovery-20260914)와 [실패 대응 보완](../evals/scenarios.md#windows-program-rename-20260914)을 구분함.
 - **과거 업데이트 장애 조사:** 종료 처리·오류 보존의 재현 가능한 결함은 수정/적용했으나 최초 포트 소실과 Windows rename 접근 거부의 근본 원인은 미확정. 마지막 종료 실패 로그의 `KeyboardInterrupt/other/ValueError/OperationalError`만으로 DB 손상·잠금·취소 원인을 확정하지 않음. 약속한 추가 확인은 끝났으며 정상 서버 재현·반복 진단 없이 유지함. 자연 재발 시 개선된 래퍼의 실패 요약을 사용함. [조치와 조사 종결](../evals/scenarios.md#ees-update-failure-causes).
@@ -67,6 +67,6 @@
 
 ## 최근 점검
 
-2026-09-14: `76e566622e74` ApplyDemo 8건 갱신 성공을 사용자 보고로 확인함. 과거 WO·이번 전문 Tool의 서로 다른 관리 경로에서 같은 자동 정렬 변환을 놓친 교훈과, 원인 미확정인 Windows rename 접근 거부·최초 연결 단절을 대조해 [실패 학습 지침](../AGENTS.md#failure-learning)을 보완함. 기존 실패·모의 검사·PR #45 CI 최초 실패와 재검사·최종 사내 결과를 [같은 사건 기록](../evals/scenarios.md#specialists-editor-format-20260914)에 연결함. 이번 변경은 문서에 한정하며 새 화면·유휴 안정성·팀 공유 구현 성공으로 확대하지 않음.
+2026-09-14: 원격 main tree와 로컬 검증 snapshot의 일치를 확인하고 승인한 목업을 실제 launcher·번들 폰트·기존 실행 경로에 반영함. 관련 로컬 230개 중 220 PASS/10 SKIP, JS/Python 문법·문서 점검·diff 확인과 독립 코드 검토를 완료함. 이전 자동 정렬 충돌·Workspace 재삽입·초안 소유권 경합의 [관련 교훈과 검증](../evals/scenarios.md#sidebar-refinement-20260914)을 연결함. 실제 Native 브라우저 검사는 CI, 사내 화면은 후속 적용 확인으로 구분함.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.

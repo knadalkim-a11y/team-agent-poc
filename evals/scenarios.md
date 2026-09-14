@@ -12,6 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| 사이드바 목업 후속 반영 | [ees.8 선택 영역·직계 펼침·폰트·검증 경계](#sidebar-refinement-20260914) |
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
 | ees.7 적용 실패와 직전 버전 복구 | [09-14 rename 접근 거부, Restore·Start 성공, 새 화면 미확인](#ees7-apply-recovery-20260914) |
 | Windows 폴더 변경 대기·수동 진행 | [제한적 rename 재시도·경로 보호·기존 Resume 연결](#windows-program-rename-20260914) |
@@ -39,6 +40,21 @@
 - 발견·처리: 기존 문서는 ees.7의 사용자별 진행 건과 본인 대화 연결만 기술해 최종 팀 공동 작업 목표를 잃을 수 있었음. `WorkflowService`의 `cases.owner`와 `_case` 소유자 조회, `_chat`의 본인 대화 검사로 현행 구현 범위를 확인함. 같은 서버에서 UI·Tool이 상태를 공유한다는 표현을 여러 사용자 사이의 공유로 확대하지 않고, 현재 구현·후속 목표·미결정 권한/이관/동시 작업을 구분함. 기존 개인 건의 자동 공개나 타인의 채팅·자격증명 공유를 새 합의로 만들지 않음.
 - 배포 기록 정리: PR #43의 최종 Windows/Linux 검사·main 병합·배포 산출물 확인을 [기존 Windows rename 기록](#windows-program-rename-20260914)에 추가함. 마지막 사내 결과는 `83d56a186382` Restore·Start·웹 접속 성공이며, 이후 전달한 Update→Upgrade→ApplyDemo 및 조건부 수동 변경 블록의 실행 결과는 미수신임. 복구·CI 성공을 새 보완·ees.7·공동 작업의 사내 성공으로 바꾸지 않음.
 - 검수 범위: 사용자 합의와 TASK/STATUS/사용 가이드/README의 의미·링크, 다음 작업과 미확인 구분을 검토함. 문서만 변경하고 HTML·실행/시험 코드·CI·브랜딩·버전·Agent Pack·사내 환경을 변경하지 않음. `python scripts/check_docs.py` → `DOCS OK | files=30 links=936 errors=0 review_candidates=0`, `git diff --check` 통과. 독립 읽기 검토에서 새 승인 절차를 합의로 오해할 수 있는 표현과 과거 색인의 공유 범위 표현을 정리하고, 추가 차단 문제는 발견하지 못함. 원격 반영 정보는 해당 PR에 남기며 기존 자동 시험·브라우저 검사를 새로 수행한 것으로 기록하지 않음.
+
+<a id="sidebar-refinement-20260914"></a>
+
+## 2026-09-14 승인한 사이드바 목업의 Native UI 반영
+
+- 사용자 요청·승인: P/T/J 설명 행 제거, 프로세스 직계 하위만 펼침, 기존 WebUI와 새 영역의 글꼴 차이 확인, 작업 공장·시스템 선택 디자인 개선을 요청함. [목업](../docs/mockups/ees-work/ees-sidebar-refinement.html)을 확인한 뒤 “지금 목업이 최대한 webui에 자연스럽게 반영되면 좋겠네”라고 구현을 승인함. [구현 기준](../docs/mockups/ees-work/TASK.md#sidebar-refinement).
+- 시작 원본: main `53b3d4c3081d0406d265b59f43e65bf9adf1370b`, tree `37f0bb5219dd61e0dcb1bf050b862cd6a23bbd46`. 관련 열린 PR은 없었음. 격리한 로컬 snapshot의 전체 tree가 원격 Git tree와 같음을 대조했으며 기존 작업 checkout은 보존함.
+- 관련 실패 재사용: [ees.7 Workspace 재삽입·초안 경합](#ees-work-factory-ux-20260914) 때문에 실제 Native 프런트의 DOM 유지·초안/첨부·공장 전환을 검사 범위에 포함함. [정렬본 충돌](#specialists-editor-format-20260914)은 이미 사용자 `76e566622e74 changed=8` 적용 성공이므로 재진단하지 않음. 이번 프로그램 버전 변경에서 전문 Tool 호환성이 끊기지 않게 정확한 새 버전만 추가하고 기존 applied/사용자 수정/동시 변경 보호를 유지함.
+- 소스에서 확인한 원인: 실행 트리는 초기 `install-t` 열림과 부모를 접어도 남는 하위 상태, `accept`·업무 선택 때의 lineage 추가가 겹침. 기존 채팅 테마의 폰트는 일부 채팅·사이드바에만 지정되고 새 영역은 `inherit`; 기존 대화목록과 새 트리의 크기·색상·행간도 달랐음. 사내 브라우저의 실제 로딩 폰트를 직접 조사한 결과는 아님.
+- 구현 범위: 기존 launcher의 P/T/J 설명 행을 제거하고 노드 표식·선택·현재 작업·진행 상태를 유지함. 펼침 상태와 업무 선택을 구분하고 직계 하위만 펼치며 부모 접기 뒤 숨은 자손을 재개방하지 않음. 공장/시스템은 하나의 두 행 선택 영역·선택 목록으로 바꾸고 기존 `switchScope`와 초안 보존을 재사용함. 기존 번들 Inter/Noto Sans KR를 Native UI와 새 업무 영역에 일관되게 적용하고 코드·수식 폰트를 보존함. 독립 목업 창·가짜 AI·외부 CDN을 제품에 추가하지 않음.
+- 배포 범위: 프로그램 `0.11.3+ees.8` / `/_ees8/`로 정적 자산 캐시를 분리함. Agent Pack v0.2.9·specialists Tool v0.2.3은 ees.8 버전 허용을 추가하며 실제 전문 호출 계약은 유지함. ees.7 및 이전 시작·Restore와 자산 관리 경계는 유지함. 새 프로그램과 Tool의 적용·검증이 필요하며 UI 변경을 공유 업무 구현·권한 변경으로 확대하지 않음.
+- 로컬 검증: Linux/Python 3.12.14에서 관련 7개 suite 합계 230개 중 220 PASS/10 SKIP. 브랜딩 10/2, Apply/Restore 52/2, 번들 7/0, 시연 자산 52/0, ApplyDemo 14/0, 전문 Tool 31/3, 기동 54/3(PASS/SKIP)이며 실제 wheel·Windows·해당 런타임 부재만 SKIP임. Chrome과 고정 upstream wheel이 없어 실제 Native 브라우저 suite는 로컬 0개 실행/1 class SKIP으로 별도 기록하며 기존 Linux CI에서 필수 실행함. Node 문법·실제 launcher 소스의 단계별 펼침/접힘·선택 응답·범위별 상태 VM 검사와 Python 문법 검사를 통과함. 독립 코드 검토에서 팝오버·초점·같은 값 재선택·트리 상태·로그아웃 정리·폰트 범위를 대조했으며 추가 확정 결함은 발견하지 못함. 문서 점검은 `files=30 links=975 errors=0 review_candidates=0`, `git diff --check` 통과. 실제 폰트·배치·브라우저 초점은 CI에서 확인함.
+- 원격·사내 판정: 이번 후보의 커밋·PR CI·main 병합·산출물과 실제 사내 적용은 아직 미확인. main CI·프로그램 산출물 성공 뒤 [기존 Update → Upgrade → ApplyDemo](../docs/03-openwebui-native-agent.md#sidebar-refinement)를 사용함. 서버·등록 주소·Python·DB·키·실제 업무 시스템을 이 사외 작업에서 변경하지 않음.
+
+직전 STATUS 최근 점검 보존(실패 학습 규칙·사내 자산 적용): 2026-09-14: `76e566622e74` ApplyDemo 8건 갱신 성공을 사용자 보고로 확인함. 과거 WO·이번 전문 Tool의 서로 다른 관리 경로에서 같은 자동 정렬 변환을 놓친 교훈과, 원인 미확정인 Windows rename 접근 거부·최초 연결 단절을 대조해 [실패 학습 지침](../AGENTS.md#failure-learning)을 보완함. 기존 실패·모의 검사·PR #45 CI 최초 실패와 재검사·최종 사내 결과를 [같은 사건 기록](../evals/scenarios.md#specialists-editor-format-20260914)에 연결함. 이번 변경은 문서에 한정하며 새 화면·유휴 안정성·팀 공유 구현 성공으로 확대하지 않음.
 
 <a id="ees-work-factory-ux-20260914"></a>
 

@@ -331,9 +331,9 @@ class ChatThemeBrowserTests(unittest.TestCase):
             for name in wheel.namelist():
                 if name.startswith(prefix) and name.endswith((".css", ".ttf", ".woff", ".woff2")):
                     cls.assets["/" + name[len(prefix):]] = wheel.read(name)
-        theme = "/_ees7/chat-theme.css"
+        theme = "/_ees8/chat-theme.css"
         if theme not in cls.assets:
-            raise AssertionError("The built wheel does not contain the ees.7 theme.")
+            raise AssertionError("The built wheel does not contain the ees.8 theme.")
         # Use actual upstream global/chat/markdown/KaTeX styles. The theme is the
         # last initial index.html link; lazy chat styles may arrive afterward.
         css = sorted(path for path in cls.assets if path.endswith(".css")

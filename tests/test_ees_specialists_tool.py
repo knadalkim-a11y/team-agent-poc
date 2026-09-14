@@ -495,13 +495,13 @@ class SpecialistsTests(unittest.IsolatedAsyncioTestCase):
         }
         def imported(name, *args, **kwargs):
             return modules[name]
-        for version in ("0.11.3", "0.11.3+ees.1", "0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7"):
+        for version in ("0.11.3", "0.11.3+ees.1", "0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8"):
             with self.subTest(version=version), patch.object(module, "version", return_value=version):
                 with patch("builtins.__import__", side_effect=imported):
                     runtime = LOAD_RUNTIME()
                 self.assertIs(runtime.Request, Request)
                 self.assertIs(runtime.process_response, self.runtime.process_response)
-        for version in ("0.11.4", "0.11.3+ees.8"):
+        for version in ("0.11.4", "0.11.3+ees.9"):
             with self.subTest(version=version), patch.object(module, "version", return_value=version):
                 with self.assertRaisesRegex(RuntimeError, "unsupported_webui_version"):
                     LOAD_RUNTIME()

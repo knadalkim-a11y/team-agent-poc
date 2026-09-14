@@ -18,15 +18,15 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
-VERSION = "0.11.3+ees.7"
-PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6", "0.11.3+ees.7": "_ees7"}
+VERSION = "0.11.3+ees.8"
+PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6", "0.11.3+ees.7": "_ees7", "0.11.3+ees.8": "_ees8"}
 SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
 SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
 WHEEL_FILENAME = f"open_webui-{VERSION}-py3-none-any.whl"
 SOURCE_INFO = f"open_webui-{UPSTREAM_VERSION}.dist-info/"
 TARGET_INFO = f"open_webui-{VERSION}.dist-info/"
 SOURCE_APP = "open_webui/frontend/_app/"
-TARGET_APP = "open_webui/frontend/_ees7/"
+TARGET_APP = "open_webui/frontend/_ees8/"
 ASSET_DIR = Path(__file__).resolve().parents[1] / "branding" / "ees" / "assets"
 UI_DIR = ASSET_DIR.parent / "ui"
 ASSET_NAMES = (
@@ -54,10 +54,10 @@ FONT_SOURCES = {
                                 "2d2267a83d089cb1a517a4f901676d05d283346e650d1b1845d601cbd696a98e"),
 }
 THEME_FILES = ("chat-theme.css", "fonts/LICENSE.txt") + tuple("fonts/" + name for name in FONT_SOURCES)
-THEME_LINK = b'<link rel="stylesheet" href="/_ees7/chat-theme.css" crossorigin="use-credentials" />'
-WORK_LINK = (b'<link rel="stylesheet" href="/_ees7/ees-work-launcher.css" />'
-             b'<script defer src="/_ees7/ees-work-panel.js"></script>'
-             b'<script defer src="/_ees7/ees-work-launcher.js"></script>')
+THEME_LINK = b'<link rel="stylesheet" href="/_ees8/chat-theme.css" crossorigin="use-credentials" />'
+WORK_LINK = (b'<link rel="stylesheet" href="/_ees8/ees-work-launcher.css" />'
+             b'<script defer src="/_ees8/ees-work-panel.js"></script>'
+             b'<script defer src="/_ees8/ees-work-launcher.js"></script>')
 
 # The pinned Chat component already owns draft serialization, editor updates,
 # file/tool selections and debounced native sessionStorage writes. Expose only
@@ -130,7 +130,7 @@ PATCHES = {
     )],
     "open_webui/frontend/index.html": [
         (b"<title>Open WebUI</title>", b"<title>EES Work</title>", 1),
-        (b"/_app/", b"/_ees7/", 49),
+        (b"/_app/", b"/_ees8/", 49),
         (b"</head>", THEME_LINK + WORK_LINK + b"\n\t</head>", 1),
     ],
     SOURCE_APP + "immutable/chunks/CHq18Uto.js": [
@@ -143,8 +143,8 @@ PATCHES = {
         (b" / Open WebUI`", b" / EES Work`", 2),
     ],
     SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
-        (b"/_app/version.json", b"/_ees7/version.json", 1),
-        (b'an="0.11.3"', b'an="0.11.3+ees.7"', 1),
+        (b"/_app/version.json", b"/_ees8/version.json", 1),
+        (b'an="0.11.3"', b'an="0.11.3+ees.8"', 1),
     ],
     SOURCE_APP + "immutable/chunks/zKJlHFgk.js": [
         # Loading may turn its spinner off before native cached drafts finish
@@ -186,10 +186,10 @@ PATCHES = {
          b'window.history.replaceState(r(Ae).state,"",`/c/${Ot.chat_id}`)', 1),
     ],
     SOURCE_APP + "version.json": [
-        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.7"}', 1),
+        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.8"}', 1),
     ],
     SOURCE_INFO + "METADATA": [
-        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.7\n", 1),
+        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.8\n", 1),
     ],
 }
 
