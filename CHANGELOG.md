@@ -2,6 +2,10 @@
 
 완료된 변경·중요 결정과 날짜별 관찰을 기록합니다. 다음 작업과 최신 배포 상태는 [STATUS](docs/STATUS.md), 시험별 현재 판정은 [평가표](evals/scenarios.md)가 원본입니다. 과거 실패 기록을 현재 장애나 재실행 지시로 해석하지 않습니다.
 
+## 2026-09-14
+
+- 원본·커스터마이즈 자식 기동에 CPython 3.11 IOCP WinError64 수락 보호를 추가함. 실패한 연결만 정리하고 지연 재수락하며 다른 오류·취소·종료를 유지함. `Start -CheckOnly`와 기존 교체 사전검사로 정지 전 호환성을 확인하고 새 Start는 health·보호 표시를 함께 확인함. 시스템 Python·패키지·DB·키·주소·TLS·종료 권한은 변경하지 않음. [시험·배포 구분](evals/scenarios.md#accept64-guard-20260914).
+
 ## 2026-09-11
 
 - v0.2.6의 첫 화면 제안은 세 개를 유지하면서 설비 조회를 WO 작성 흐름에 묶고, Jira·GitHub·Confluence 업무 현황 시연을 추가함. 실제 계정 조회와 합성 분석/WO의 범위를 안내하고 이전 공식 설비 제안도 정확히 일치할 때만 정리함. [검증·미확인](evals/scenarios.md#connector-demo-starters).

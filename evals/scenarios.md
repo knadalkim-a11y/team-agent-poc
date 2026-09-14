@@ -13,6 +13,7 @@
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
+| WinError64 수신 소실·임시 복구·재발 방지 | [09-14 증거, 후보 검토, 현재 검사·배포 구분](#accept64-guard-20260914) |
 | 서버 종료 실패와 명시적 복구 | [process_stop 실패·복구 결과](#ees-stop-recovery) |
 | 대화 폭·파란 조절 테두리 | [1920px 화면 보완](#ees-chat-width-resize), [사용자 정상 확인](#ees-stop-recovery) |
 | WO 코드 인식·폴더 변경 실패 | [공식 편집기 정렬본](#wo-editor-format-adoption), [rename/Resume](#ees-wrapper-manual-resume), [Portal 적용 실패](#ees-portal-upgrade-apply-failure) |
@@ -430,6 +431,20 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 사외 검사 환경: Linux / Python 3.12.13, 표준 라이브러리만 사용. `python -m unittest discover -s tests -p test_openwebui_windows_launcher.py -v` **10개 PASS**, 0.034초. 임시 합성 상태·모의 Windows/패키지 정보로 사전검사의 무변경·비밀 비출력, missing DB/key·빈 환경 키·버전/worker/custom DB/패키지 `.env` 차단, 정책 설정 후 기존 serve 위임, cwd/env/host/port 유지와 앱 예외 전파를 확인함. 실제 Windows 이벤트 루프·설치된 WebUI·네트워크 장애 재현을 실행한 것은 아님.
 - Linux에서 실제 `--check` 직접 실행은 지원 플랫폼 아님으로 종료 코드 1과 안전한 안내를 반환함. 사내 PC 원격접속·현재 프로세스 조치·PowerShell/Windows 실행·`/health`·스트리밍·장애 복구는 **미실행**. 관련 없는 Tool·인증·저장·20회 검사는 재실행하지 않음. 다음 사내 확인과 원복은 [기존 장애 가이드](../docs/troubleshooting.md#windows-accept-winerror64)에 정리함. 문서 점검은 문서 25개·내부 링크 384개·오류 0·검토 후보 0이며 diff 검사도 통과함.
 
+
+<a id="accept64-guard-20260914"></a>
+
+## 2026-09-14 수신 소실·임시 복구와 자식 수락 보호
+
+- 확정한 관찰: `live=true http=false listen=0/0 ip=true os=ok/0`, `log=full accept=true win=64 errno=- err=OSError at=stdlib/asyncio/windows_events.py:597:finish_accept`. 프로세스·등록 IP는 존재하고 수신만 소실됨. [CPython #93821](https://github.com/python/cpython/issues/93821) 및 공식 3.11의 [IocpProactor.accept/_register/_poll/close](https://github.com/python/cpython/blob/3.11/Lib/asyncio/windows_events.py), [BaseProactorEventLoop 수락·종료](https://github.com/python/cpython/blob/3.11/Lib/asyncio/proactor_events.py)를 대조함. 오류→listener 종료 경로와 일치하나 최초 단절 주체는 미확정. 제한된 System 이벤트 0건으로 모든 전원·세션 원인을 배제하지 않음.
+- 임시 복구 완료: 증거 보존 후 기존 정상 Stop→Start를 수행함. 마지막 확인의 `python -c` 소스 전달 SyntaxError는 제공한 PowerShell 인수 처리 결함이며 서버 기동 실패로 단정하지 않음. 표준입력 방식의 읽기 전용 후속 확인에서 사용자가 정상 출력을 보고해 `live=true/http=true` 확인으로 접수함. [PR 복구 보고](https://github.com/knadalkim-a11y/team-agent-poc/pull/35#issuecomment-5657246830). 원문 전체·직접 실측으로 확대하지 않음. 같은 진단·재시작을 반복하지 않고 마지막 사내 프로그램 `c099e427f62b`를 유지함.
+- 이전 후보 이력 보존: 첨부 `ees_accept64_candidate_review.patch`는 미적용 후보였음. 이전 Linux Python 3.13.5의 16개 중15 PASS·Windows1 SKIP는 당시 부분 사본의 결과임. 이전 일부 blob/tree 생성 뒤 시험 파일 게시·커밋 생성이 안전 검사에서 차단됐고 브랜치 반영·CI·사내 적용은 없었음. 파일 생성이나 임시 복구를 후보 적용으로 바꾸지 않음.
+- 이번 검토 시작점: 최신 main `af539106f927e35f1844de8cdb11ccdb3b4267bd`, PR #35 head `595714d146aef547bdd19df2b5f06142cfbc5fbc`의 AGENTS/STATUS·PR 본문/댓글을 확인함. 다른 로컬 수정은 보존하고 105개 파일의 Git blob을 원격 head와 전부 대조한 격리 사본을 사용함. 첨부를 실제 확보해 검토했으며 공식 3.11 accept AST digest `d8f4c966cac56c7940ddda0020dfee3f50dde12a57f1a931326bfa565f3c57e6` 일치를 별도 확인함.
+- 후보 보완: 원본·커스터마이즈 자식 기동만 보호. WinError64의 실패한 연결 소켓을 닫고 0.1초 뒤 재수락하며 정상 수락·다른 오류 전파·취소·종료·IOCP 완료까지 OVERLAPPED 보존을 유지함. 고정 라벨·지수 간격 로그로 원문/주소 유출과 과다 로그를 피함. `Start -CheckOnly`로 실제 등록 Python의 호환성을 정지 전에 확인하고 새 기동에서는 health 뒤 현재 자식의 보호 표시를 검증함. 기존 Upgrade와 과거 switch의 정지 전 검사에도 호환성 확인을 연결했으나 해당 운영 절차를 실행하거나 재개하지 않음. 시스템 Python·패키지·DB·키·TLS·주소·강제 종료 권한은 변경하지 않음.
+- 검사 범위: [수락 시험](../tests/test_ees_deploy_accept.py)은 합성 정상·오류64(동기/완료)·다른 오류·취소 전후·재시도 중 취소/종료·소켓 정리·로그 제한·호환성 실패·기동 연결을 검사함. Windows 전용 시험은 `127.0.0.1:0` 임시 포트에서 실제 AcceptEx 완료 뒤 합성64를 주입하고 다음 연결·비동기 subprocess를 확인함. 별도 실제 완료 후 다른 오류 전파 및 재시도 대기 중 정상 종료·남은 task/socket/IOCP cache도 검사함. 운영 서버·DB로 오류를 주입하지 않음. `--require-windows`는 지원 Windows가 아니면 실패하여 SKIP를 통과로 바꾸지 않음.
+- 이번 로컬 검사: Linux / CPython 3.12.14. 원래 첨부 시험 재현은 16개 중15 PASS·Windows1 SKIP. 보완 후 전체 `python -m unittest discover -s tests -v` 및 문서·diff 검사는 아래 최신 결과로 관리함. 최초 통합 검사에서 새 사전검사에 필요한 합성 cwd 누락·변경된 기동 prefix 예상과 번호 기반 mock 위치 문제를 발견해 시험 fixture/예상을 보완했으며 실패 이력을 최종 통과로 숨기지 않음.
+- 최신 결과: 전체 unittest 보고 `Ran 757 / OK (skipped=22)`(11.808초, 종료 코드0); SKIP에는 Windows·PowerShell·실제 wheel/Chrome·선택 의존성과 PID namespace가 다른 환경의 lifecycle class가 포함됨. Apply CheckOnly의 마지막 동시 변경 검사를 호환성 확인 뒤로 옮긴 후 관리 회귀87개(2 SKIP)를 재확인함. 수락 시험은20개 중18 PASS·실제 Windows2 SKIP. `python scripts/check_docs.py`: 문서29·링크852·오류0·검토후보0. `git diff --check`: 통과. Windows 실제 IOCP·PowerShell과 사내 적용은 로컬에서 실행하지 못함. 기존 main의 delivery34559142260 attempt2 성공은 과거 코드 결과이며 이번 CI로 재사용하지 않음. 수정 head Git 반영과 CI 결과는 PR #35의 해당 head/실행 링크로 확인함.
+- 사내 적용: 미실행. 현재는 임시 복구 완료·재발 방지 미완료. 병합·사내 적용 승인 및 Windows/Linux CI 통과 뒤 [기존 래퍼 적용 블록](../docs/03-openwebui-native-agent.md#ees-accept64-guard)을 사용함. 정지 전 호환성→정상 Stop→Start→health/보호 표시 순서에서 실패하면 중단함. 결과는 1~2줄만 받으며 자연 유휴 이후 안정성은 별도 확인. GLM 5.3·ApplyDemo·새 화면은 범위 밖임.
 
 <a id="windows-existing-restart"></a>
 

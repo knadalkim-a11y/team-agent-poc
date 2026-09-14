@@ -41,9 +41,9 @@ Hermes 진단은 비교 구성을 실제로 선택한 경우에만 수행합니�
 
 ## Windows WinError 64와 accept_coro
 
-`Task exception was never retrieved`에 `IocpProactor.accept.<locals>.accept_coro()`가 함께 있으면 들어오는 연결을 수락하는 Windows asyncio 경로에서 난 예외입니다. CPython 3.11의 Proactor 서버는 이 과정의 `OSError`에서 listener를 닫는 경로가 있습니다. 사용자에게서 받은 두 로그만으로 실제 listener 종료·끊긴 상대·발생 동작이나 Jira/GitHub 변경과의 인과관계는 확정하지 않습니다. [CPython 보고](https://github.com/python/cpython/issues/93821), [수락 예외 처리](https://github.com/python/cpython/blob/3.11/Lib/asyncio/proactor_events.py).
+2026-09-14에는 `live=true http=false listen=0/0 ip=true`와 `finish_accept/WinError64`가 함께 확인됐습니다. CPython 3.11의 수락 오류→listener 종료 경로와 일치합니다. 최초 단절 주체는 미확정이고 제한된 System 이벤트 0건으로 전원·세션 원인을 모두 배제하지 않습니다. 증거 보존 후 정상 Stop→Start와 표준입력 확인으로 사용자가 `live=true/http=true`를 확인했습니다. 이는 임시 복구이며 동일 진단·재시작을 다시 요구하지 않습니다. [현재 증거](../evals/scenarios.md#accept64-guard-20260914), [CPython 보고](https://github.com/python/cpython/issues/93821), [수락 예외 처리](https://github.com/python/cpython/blob/3.11/Lib/asyncio/proactor_events.py).
 
-사내 PC에 접근할 수 없다면 Git의 준비 작업과 실제 복구를 구분합니다. 다음 접속 때 기존 기본 주소의 `/health`를 한 번 확인합니다. 정상 응답이면 곧바로 실행 방식을 바꾸지 않고 보류했던 후속 조회를 이어갑니다. 응답이 없으면 실행 PC에서도 같은 수신 주소·포트로 확인해 로컬 서버와 팀원 접속 경로를 구분하고, 같은 시점의 `Accept failed on a socket` 유무만 확인합니다. 연결 대상 IP·전체 로그·토큰은 외부에 전달하지 않습니다.
+현재 수정은 자식 Proactor의 실패한 연결만 정리하는 방식입니다. [정지 전 CheckOnly·보호 적용 절차](03-openwebui-native-agent.md#ees-accept64-guard)를 따르며 수정 head의 Windows CI·명시적 적용 승인 전에는 정상 서버를 바꾸지 않습니다. 사내 최초 트리거와 자연 유휴 이후 안정성은 별도 미확인입니다.
 
 ### 재발 시 선택할 기동 준비본
 

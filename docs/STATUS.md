@@ -1,14 +1,14 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-11
+갱신일: 2026-09-14
 
 현재 작업·다음 작업·미해결·실제 적용 원본을 관리합니다. 이슈·검증 근거는 [평가 기록 찾아보기](../evals/scenarios.md#evidence-index), 환경은 [versions](../versions.md), 완료된 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: v0.2.6 제안 변경은 PR #34/main `492eb5bc4145002db15090230cfd3bf3a40862fe`와 delivery CI 성공까지 확인했으나, 사용자의 사내 ApplyDemo는 `webui_version/webui_connection_failed`, `changed=0`으로 실패함. 후속 확인은 `same=true`, 두 API 조회 모두 연결 거절, Status는 `customized/c099e427f62b/running=true`임. 후속 `ip_present=True/listeners=0/bind_match=False`로 등록 IP는 있지만 서비스 포트 수신이 없음을 확인함. 현재 로그는 full/age_min40/startup·listener64·future64=false/OSError이며 수신 소실 원인은 미확정. [변경·실패·진단 범위](../evals/scenarios.md#connector-demo-starters).
+- 이번 작업: 09-14 `live=true/http=false/listen=0/0` 및 `finish_accept/WinError64` 증거 뒤 정상 Stop→Start와 표준입력 확인으로 사용자가 `live=true/http=true`를 확인함. **임시 복구 완료·재발 방지 미완료**. PR #35에서 자식 IOCP 수락 보호·정지 전 호환성 검사·합성 시험을 보완함. [증거와 검증 구분](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 옛 제안이 계속 표시되던 `suggestionPrompts`/`suggestion_prompts` 불일치를 v0.2.5에서 수정함. [PR #33](https://github.com/knadalkim-a11y/team-agent-poc/pull/33) main 병합과 [CI 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34549891999)을 확인함. **사내 수정본 적용·새 화면은 아직 미확인**이며 이전 v0.2.4 적용 안내 후의 화면 실패를 지우지 않음.
-- 다음 제품 작업 하나: 현재 deployment 기록·실행 로그·마지막 실패 기록을 사내에 복사 보존한 뒤 기존 프로그램을 정상 Stop→Start 한 번으로 재기동함. 시작 health 확인은 최대120초이며 응답하면 즉시 진행함. main delivery CI 성공과 Start 성공 뒤에만 ApplyDemo로 제안을 적용함. 어느 단계든 실패하면 후속을 중단하고 짧은 결과만 받음. 강제 종료·Upgrade·DB/키/환경 변경을 선행하지 않음.
+- 다음 제품 작업 하나: PR #35 수정 head의 Windows/Linux CI와 실제 IOCP 시험 결과를 확인하고, 통과한 변경의 병합·사내 적용 범위를 결정함. 이미 완료한 진단·임시 재시작을 반복하지 않음. GLM 5.3·ApplyDemo·화면 변경은 이번 범위 밖임.
 
 ## 마지막으로 확인된 적용 상태
 
@@ -16,7 +16,7 @@
 
 | 대상 | 마지막 확인과 적용 원본 | 남은 한계·근거 |
 |---|---|---|
-| EES Portal 프로그램 | 2026-09-10 `c099e427f62b` 복구·화면 수정 정상 보고 이후, 2026-09-11 같은 프로그램의 프로세스 생존·IP 존재·수신 포트0·API 연결 거절 보고 | 현재 접속 불가를 조사 중이며 재기동 성공은 미확인. 수신 소실 원인은 미확정. [복구·화면 확인](../evals/scenarios.md#ees-stop-recovery) |
+| EES Portal 프로그램 | 마지막 확인 원본 `c099e427f62b`; 09-14 증거 보존 후 정상 Stop→Start 및 `live=true/http=true` 사용자 확인 | 임시 복구이며 보호 패치 사내 적용·유휴 이후 안정성 미확인. [복구·원인 범위](../evals/scenarios.md#accept64-guard-20260914) |
 | 운영 래퍼 | 2026-09-11 `Update result=ok wrapper_changed=true wrapper=62a112c78a78` 보고. 프로그램 교체 없음 | 종료 처리·진단 보존 수정 적용 완료. `next=upgrade`만으로 추가 Upgrade를 요구하지 않음. [근거](../evals/scenarios.md#ees-update-failure-causes) |
 | 분석·업무 패널 자산 | v0.2.1 안내 원본 `bc8bffbb6043fb1401f995b312bf5709f50e5983` 이후 계획·오른쪽 패널 표시 정상 보고 | 실제 사내 SHA·개별 수치/회신 정확성 직접 대조 미실행. [확인 범위](../evals/scenarios.md#plan-work-panel-accepted) |
 | 대표 시작 질문 | Git v0.2.6, PR #34/main `492eb5bc4145002db15090230cfd3bf3a40862fe` 및 CI 성공. 사용자 실행도 `commit=492eb5bc4145` | 사내는 `webui_version/webui_connection_failed`, `changed=0`으로 갱신 전 중단. 새 화면 미확인. [결과](../evals/scenarios.md#connector-demo-starters), [이전 필드 오류](../evals/scenarios.md#starter-ui-field-fix) |
@@ -27,7 +27,7 @@
 ## 남아 있는 이슈와 확인 범위
 
 - **과거 업데이트 장애 조사:** 종료 처리·오류 보존의 재현 가능한 결함은 수정/적용했으나 최초 포트 소실과 Windows rename 접근 거부의 근본 원인은 미확정. 마지막 종료 실패 로그의 `KeyboardInterrupt/other/ValueError/OperationalError`만으로 DB 손상·잠금·취소 원인을 확정하지 않음. 약속한 추가 확인은 끝났으며 정상 서버 재현·반복 진단 없이 유지함. 자연 재발 시 개선된 래퍼의 실패 요약을 사용함. [조치와 조사 종결](../evals/scenarios.md#ees-update-failure-causes).
-- **접속·스트리밍:** 기존 기동 재시작 뒤 health 성공, CORS 안내 뒤 실시간 답변 복구 보고는 유효함. 수락 오류 재발 방지·재부팅 뒤 설정 유지·장기 안정성은 미확인. 선택 Windows 실행 파일은 미적용이며 현행 래퍼 기동을 임의 교체하지 않음. [접속](../evals/scenarios.md#windows-existing-restart), [스트리밍](../evals/scenarios.md#chat-live-update-observation).
+- **접속·스트리밍:** 09-14 수신 소실은 CPython accept 오류→listener 종료 경로와 일치하며 임시 복구를 확인함. 최초 단절 주체는 미확정이고 제한된 System 이벤트 0건으로 모든 전원·세션 원인을 배제하지 않음. 자식 Proactor 보호는 사내 미적용, 과거 Selector 준비본도 미적용. [검증·미완료](../evals/scenarios.md#accept64-guard-20260914).
 - **연동과 팀 공개:** 최신 일반 출력·페이지 이동·부분 실패/빈 결과·개인 권한/비밀 보호는 다음 관련 사용·변경 또는 공개 시점에 확인함. Confluence 검색 범위/시각·본문 근거·C07 개별 오류·Skill 로딩은 일반 조회 성공으로 통과 처리하지 않음. 초기 카드 디자인/키보드 검사는 제거 작업의 남은 게이트가 아님. [시점과 공개 기준](../evals/scenarios.md#validation-timing).
 - **정책·격리·사용성:** 팀원 로그인 화면 접속과 자산 Public 설정 보고는 있으나 전송 보호·I01~I05·비개발자 실제 업무/공유 확인은 미완료. 합성 Knowledge POC-POL-001 v0.1과 공통 정책 v0.2를 구분하고 기존 PASS를 미확인 시험으로 확대하지 않음. 초기 EES Memory·Chat History·위험 실행 기능 OFF를 유지함. 운영 DB 직접 연결·자격증명·범용 SQL·Shell·쓰기를 제공하지 않으며 S06은 승인된 DB 중계 기능을 도입할 때만 실행함.
 - **운영 연동:** EMS/APC/FDC 시연은 합성 자료임. 공유 DB의 실제 의미/권한·스키마는 미조사이고 실제 발행은 미구현. 설비 조회는 운영 설계에서 독립 Tool로 관리하되 이번 시연은 기존 단일 등록 항목을 유지하는 합의임. [관계 발견](03-openwebui-native-agent.md#shared-db-relations), [발행 경계](03-openwebui-native-agent.md#legacy-ui-design).
@@ -51,7 +51,7 @@
 
 ## 재개와 환경 유지
 
-- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. 이번 관련 문서는 [첫 화면](03-openwebui-native-agent.md#first-use-entry)·[연동 시연](../evals/scenarios.md#connector-demo-starters)·[필드 오류 근거](../evals/scenarios.md#starter-ui-field-fix)이며 필요할 때만 해당 코드/시험을 읽습니다.
+- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. 이번 관련 문서는 [수락 보호 적용](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)이며 필요할 때만 해당 코드/시험을 읽습니다.
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
@@ -59,6 +59,6 @@
 
 ## 최근 점검
 
-2026-09-11: 등록 IP 존재·설정 포트 수신0·현재 로그 요약을 확인했습니다. 최신 main `af539106f927`·열린 PR 0개·같은 로컬 tree에서 기존 Stop/Start/ApplyDemo의 실패 전파와 보존 경계를 독립 대조했습니다. 정상 Stop 후 현재 프로그램의 Start가 health를 확인해야 제안 적용으로 진행하는 한 번의 복구를 준비했습니다. 실제 Windows 복구·새 화면은 미확인입니다. 기록 갱신은 복구 중 main을 바꾸지 않도록 별도 문서 PR에서 관리합니다. [실패·진단 근거](../evals/scenarios.md#connector-demo-starters).
+2026-09-14: 최신 main `af539106f927`·PR #35 head `595714d146ae` 및 본문·댓글을 대조함. 105개 파일의 Git blob을 원격 head와 대조한 격리 사본에서 첨부 후보를 검토하고 정지 전 CheckOnly·기동 표시·종료 중 재시도 시험을 보완함. Linux CPython 3.12.14 검사와 Windows/사내 미실행을 구분함. 이전 코드의 main CI 성공을 이번 보호 검증으로 재사용하지 않음. [명령·결과·남은 확인](../evals/scenarios.md#accept64-guard-20260914).
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.

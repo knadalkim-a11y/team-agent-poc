@@ -1158,12 +1158,16 @@ def serve(*, host, port):
         self.assertEqual((self.data / 'webui.db').read_bytes(), b'synthetic-existing-data')
         self.assertEqual((self.cwd / '.webui_secret_key').read_bytes(), b'synthetic-existing-key')
 
-    def test_original_command_is_unchanged_and_customized_command_is_isolated(self):
-        self.assertEqual(self.command(original=True),
+    def test_guard_prefix_preserves_original_arguments_and_customized_isolation(self):
+        original = self.command(original=True)
+        prefix, code = original[2].split('\n', 1)
+        self.assertIn("['install']()", prefix)
+        self.assertIn('ees_deploy_accept.py', prefix)
+        self.assertEqual([*original[:2], code, *original[3:]],
                          [str(Path(sys.executable).absolute()), '-c', manager.SERVER_CODE, '127.0.0.1', '8080'])
         selected = self.command()
         self.assertEqual(selected[1:4], ['-I', '-B', '-c'])
-        self.assertEqual(selected[4], manager.CUSTOMIZED_SERVER_CODE)
+        self.assertEqual(selected[4], prefix + '\n' + manager.CUSTOMIZED_SERVER_CODE)
         self.assertEqual(selected[7:], [str(self.program), self.version, self.info.name, self.frontend_name])
 
     def test_legacy_selected_version_launches_after_wrapper_update(self):

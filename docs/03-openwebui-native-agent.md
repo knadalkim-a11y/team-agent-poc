@@ -931,6 +931,31 @@ Set-Location "$env:USERPROFILE\team-agent-poc"
 | 공통 Prompt·Skill·Tool | 커밋별 Agent Pack ZIP에서 바뀐 항목만 기존 ID에 반영 | 실제 적용했던 직전 커밋의 해당 항목 |
 | 서비스 이름·아이콘·대화 스타일 | EES Portal의 새 `open_webui-0.11.3+ees.4-py3-none-any.whl`과 브랜딩 manifest. 기존 ees.1/ees.2/ees.3 보관본은 Restore에 사용 | 변경 전 프로그램 복원·같은 DATA_DIR/키/접속 설정 유지. [Apply/Restore 안내](#ees-wrapper-apply) 사용 |
 
+<a id="ees-accept64-guard"></a>
+
+#### WinError64 수신 보호와 정지 전 확인
+
+09-14 장애는 임시 복구했으며 같은 진단·재시작을 반복하지 않습니다. 재발 방지 코드는 [PR #35](https://github.com/knadalkim-a11y/team-agent-poc/pull/35)에서 검증하며 **수정 head의 Windows/Linux CI 통과와 명시적 병합·사내 적용 승인 뒤** 아래 절차를 사용합니다. 현재 반영·실환경 판정은 [검증 근거](../evals/scenarios.md#accept64-guard-20260914)에서 확인합니다.
+
+기존 래퍼는 원본·커스터마이즈 모두 자식 기동에서만 [수락 보호](../scripts/ees_deploy_accept.py)를 설치합니다. 검토한 Windows CPython 3.11 `IocpProactor.accept` AST·필요 메서드·오류 상수가 다르면 WebUI import 전에 중단합니다. WinError64는 실패한 연결 소켓을 닫고 0.1초 뒤 재수락합니다. 다른 오류는 전파하고 취소·수신 종료 때 재시도하지 않습니다. 로그는 고정 오류 번호와 1·2·4·8…회 누계만 남깁니다. Proactor의 비동기 subprocess 지원과 원래 종료·식별 경계를 유지합니다. 시스템 Python·패키지·DB·키·등록 주소는 바꾸지 않습니다.
+
+`Start -CheckOnly -Summary`는 실행 중인 서버에서도 등록 Python의 호환성을 읽기 전용으로 확인합니다. 앱 import·포트 바인드·Stop·health 대기·기록 쓰기를 하지 않습니다. `guard=compatible`은 적용 가능성이고, 새 Start의 `guard=win64_retry`는 현재 자식 로그의 보호 설치 표시입니다. 기존 프로세스에 Start만 실행해 `already_running`을 받은 것은 보호 적용 증거가 아닙니다. 보관된 과거 로그는 재사용하지 않습니다.
+
+아래는 **승인된 적용 시점용** 블록입니다. 기존 checkout·등록 환경을 사용하고 Update 이후 호환성 확인이 실패하면 Stop 전에 끝납니다. 코드 전송은 파일 실행을 사용하며 PowerShell `python -c`로 Python 소스를 전달하지 않습니다. 기존 포털 프로그램 교체·ApplyDemo·모델 변경은 포함하지 않습니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    Set-Location "$env:USERPROFILE\team-agent-poc"
+    .\scripts\manage-ees.ps1 -Action Update
+    .\scripts\manage-ees.ps1 -Action Start -CheckOnly -Summary
+    .\scripts\manage-ees.ps1 -Action Stop -Summary
+    .\scripts\manage-ees.ps1 -Action Start -HealthTimeout 120 -Summary
+}
+```
+
+성공 기준은 사전검사의 `guard=compatible`, 마지막 Start의 `result=ok running=true guard=win64_retry`입니다. Start는 등록 프로세스와 프록시 없는 로컬 `/health`를 확인하며 응답하면 120초 전에 즉시 끝납니다. 실패하면 후속 실행·강제 종료·자동 재시작 없이 중단합니다. 마지막 성공 또는 실패 EES 줄 하나만 전달하며 상세 기록은 기존 state_root에 보존합니다. 이후 평소 유휴 시간을 지난 뒤 접속 유지 여부를 별도로 확인해야 재발 방지의 실환경 효과를 판단할 수 있습니다. 단기 health 성공을 장기 안정성으로 기록하지 않습니다.
+
 <a id="ees-start-windows-ca"></a>
 
 #### Start에서 Windows 신뢰 인증서 사용

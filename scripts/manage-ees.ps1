@@ -45,7 +45,8 @@ if ($Action -eq 'Upgrade' -and ($Bundle -or $Commit -or $Wheelhouse -or $GitProx
 if ($UseWindowsCA -and $Action -notin @('Deploy', 'Start')) {
     throw 'UseWindowsCA is supported only with Deploy or Start.'
 }
-if ($CheckOnly -and $Action -ne 'Apply') { throw 'CheckOnly is supported only with Apply.' }
+if ($CheckOnly -and $Action -notin @('Apply', 'Start')) { throw 'CheckOnly is supported only with Apply or Start.' }
+if ($CheckOnly -and $UseWindowsCA) { throw 'CheckOnly cannot change runtime trust.' }
 if ($Resume -and $Action -ne 'Apply') { throw 'Resume is supported only with Apply.' }
 if ($Summary -and $Action -notin @('Apply', 'Restore', 'Start', 'Stop', 'Status', 'Upgrade', 'ApplyDemo')) {
     throw 'Summary is supported with Apply/Restore/Start/Stop/Status/Upgrade/ApplyDemo only.'

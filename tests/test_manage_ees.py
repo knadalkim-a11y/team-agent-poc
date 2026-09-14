@@ -81,6 +81,8 @@ class DeploymentTransactionTests(unittest.TestCase):
             patch.object(MANAGER.processes, "start_server", side_effect=start),
             patch.object(MANAGER.processes, "wait_healthy", side_effect=lambda _, **kwargs: self.events.append("health")),
             patch.object(MANAGER.states, "backup_state", side_effect=backup),
+            patch.object(MANAGER.processes, "check_accept_runtime", return_value="compatible"),
+            patch.object(MANAGER.processes, "accept_guard_status", return_value="win64_retry"),
         ]
         self.mocks = []
         for override in overrides:
@@ -859,6 +861,8 @@ class CustomizationIntegrationTests(unittest.TestCase):
             (MANAGER.processes, "verify_identity", {"return_value": False}),
             (MANAGER.processes, "wait_healthy", {}),
             (MANAGER.processes, "start_server", {"return_value": {"pid": 123}}),
+            (MANAGER.processes, "check_accept_runtime", {"return_value": "compatible"}),
+            (MANAGER.processes, "accept_guard_status", {"return_value": "win64_retry"}),
             (MANAGER.processes, "stop_server", {}),
             (MANAGER.customization, "validate_program", {"return_value": self.root / "program"}),
             (MANAGER.customization, "inspect_bundle", {"return_value": self.selection}),
@@ -1083,6 +1087,45 @@ class CustomizationIntegrationTests(unittest.TestCase):
         self.mocks["inspect_bundle"].side_effect = changed
         with self.assertRaisesRegex(MANAGER.DeploymentError, "changed during CheckOnly"):
             MANAGER.operate(self.args("apply", check_only=True))
+
+    def test_start_check_only_preserves_live_server_state_and_has_no_health_wait(self):
+        self.registry["process"] = {"pid": 123}
+        self.write()
+        before = {p.name: p.read_bytes() for p in self.root.iterdir() if p.is_file()}
+        self.mocks["port_is_free"].side_effect = AssertionError("must not bind a live port")
+        with patch.object(MANAGER, "locked", side_effect=AssertionError("must not lock")):
+            result = MANAGER.operate(self.args("start", check_only=True))
+        self.assertEqual(result["accept_guard"], "compatible")
+        self.assertFalse(result["changed"])
+        for name in ("start_server", "stop_server", "wait_healthy", "accept_guard_status"):
+            self.mocks[name].assert_not_called()
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.root.iterdir() if p.is_file()})
+        self.assertIn("guard=compatible", MANAGER.render_summary("start", result))
+
+    def test_start_check_only_runtime_failure_or_state_race_never_stops_server(self):
+        before = MANAGER.registry_path(self.config).read_bytes()
+        self.mocks["check_accept_runtime"].side_effect = MANAGER.processes.ProcessError(
+            "synthetic", reason="accept_guard_incompatible")
+        with self.assertRaises(MANAGER.processes.ProcessError) as caught:
+            MANAGER.operate(self.args("start", check_only=True))
+        self.assertEqual(caught.exception.stage, "preflight")
+        self.assertEqual(before, MANAGER.registry_path(self.config).read_bytes())
+        def race(*args):
+            (self.root / "deployment.lock").write_text("synthetic concurrent operation")
+            return "compatible"
+        self.mocks["check_accept_runtime"].side_effect = race
+        with self.assertRaisesRegex(MANAGER.DeploymentError, "changed during preflight"):
+            MANAGER.operate(self.args("start", check_only=True))
+        self.mocks["stop_server"].assert_not_called()
+        self.mocks["start_server"].assert_not_called()
+
+    def test_guard_marker_failure_after_health_is_not_start_success(self):
+        self.mocks["accept_guard_status"].side_effect = MANAGER.processes.ProcessError("missing guard")
+        with self.assertRaises(MANAGER.processes.ProcessError):
+            MANAGER.operate(self.args("start"))
+        self.mocks["wait_healthy"].assert_called_once()
+        self.mocks["stop_server"].assert_not_called()
+        self.assertEqual(MANAGER.read_registry(self.config)["process"], {"pid": 123})
 
     def test_apply_refuses_running_unidentified_or_occupied_server(self):
         self.registry["process"] = {"pid": 123}
@@ -1606,6 +1649,10 @@ if ($parseErrors.Count -gt 0) {
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), ["start", "--config", str(config), "--health-timeout", "120",
                                                         "--use-windows-ca", "--summary"])
+            result = subprocess.run(command + ["-Action", "Start", "-Config", str(config), "-CheckOnly", "-Summary"],
+                                    capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), ["start", "--config", str(config), "--check-only", "--summary"])
             result = subprocess.run(command + ["-Action", "Apply", "-Config", str(config), "-UseWindowsCA"],
                                     capture_output=True, text=True, timeout=30)
             self.assertNotEqual(result.returncode, 0)
