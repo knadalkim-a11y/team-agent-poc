@@ -15,6 +15,7 @@
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
 | ees.7 적용 실패와 직전 버전 복구 | [09-14 rename 접근 거부, Restore·Start 성공, 새 화면 미확인](#ees7-apply-recovery-20260914) |
 | Windows 폴더 변경 대기·수동 진행 | [제한적 rename 재시도·경로 보호·기존 Resume 연결](#windows-program-rename-20260914) |
+| ees_specialists 자산 관리 필드 충돌 | [0.2.6 공식 자동 정렬본 인식·ees.7 실행 확인·ApplyDemo 재개](#specialists-editor-format-20260914) |
 | WinError64 수신 소실·임시 복구·재발 방지 | [09-14 증거, 후보 검토, 현재 검사·배포 구분](#accept64-guard-20260914) |
 | 서버 종료 실패와 명시적 복구 | [process_stop 실패·복구 결과](#ees-stop-recovery) |
 | 대화 폭·파란 조절 테두리 | [1920px 화면 보완](#ees-chat-width-resize), [사용자 정상 확인](#ees-stop-recovery) |
@@ -1826,6 +1827,30 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 원격 CI·배포: 해당 PR의 Windows/Linux 검증과 병합 뒤 main 산출물 생성을 확인한 후 ApplyDemo를 안내함. 실제 사내 적용·사용자 화면 확인은 아직 미실행이며 이전 Portal 이름 표시 확인과 구분함.
 
 직전 STATUS 최근 점검 보존(Portal 표시 확인): 2026-09-10: 사용자 보고로 EES Portal 이름 표시를 확인하고 복구 실행 대기 상태를 화면 확인 단계로 갱신함. 개별 명령 성공·실제 적용 SHA·패널 v0.1.3·접근 거부 원인 해소는 미확인으로 유지함. 기존 복구 안내를 날짜가 있는 과거 절차로 표시해 반복 실행을 방지하고, 문서 구조·링크와 diff를 점검함. 실행 코드·설정·테스트·사내 환경은 변경하지 않음. [확인 범위](#ees-portal-upgrade-apply-failure).
+
+<a id="specialists-editor-format-20260914"></a>
+
+### ees_specialists 자동 정렬로 인한 관리 필드 충돌 보완 (2026-09-14)
+
+- 사내 실패: 사용자 `action=apply_demo result=failed changed=0 commit=9ecc9eadc5ec stage=apply_assets code=managed_field_conflict next=inspect_local_result` 보고. 수기 전사의 `cahnged`/`confliect`는 정규 필드명으로 정리함. 프로그램 폴더 교체가 아닌 자산 사전 대조에서 이번 API 쓰기 전에 멈춘 사건임. 앞선 Windows rename 실패·복구는 [당시 기록](#ees7-apply-recovery-20260914)에 보존함.
+- 첫 읽기 전용 대조 결과: `target=ees_specialists kind=tool fields=content record=applied version=0.2.6`, `kind=valves fields=match record=applied version=0.2.6`. 버전은 관리 기록의 Agent Pack 버전이고 Tool frontmatter 버전이 아님. 관리 Valve `ees_model_id`의 일치만 확인했으며 모든 Valve·모델·사용자 설정이 최신이라는 뜻은 아님. 고정 ID만 출력하는 진단이므로 수기 `ees_speciallists`를 새 자산 ID로 취급하지 않음.
+- 후속 읽기 전용 결과: `ees source eol=different, ast=match, formatted=match, target=different`, `ees program=0.11.3+ees.7`. `formatted=match`는 사내의 정확한 Black 26.5.1로 마지막 applied 기록의 desired 본문을 기본 Mode로 정렬한 결과와 현재 GET 본문의 정규화 완전 일치임. AST 일치는 진단 보조값이며 수락 조건이 아님. `target=different`는 최신 관리 목록의 본문과 다름을 뜻함. GET 버전으로 ees.7 실행은 확인했지만 정확 프로그램 소스 SHA·새 UI 표시·유휴 안정성·최신 자산 적용 성공은 아직 미확인임.
+- 저장 경로 근거: 고정 [ToolkitEditor.svelte](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Tools/ToolkitEditor.svelte)는 저장 전 자동 정렬을 호출하고, [CodeEditor.svelte](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/common/CodeEditor.svelte)의 관리자 경로는 [utils.py](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/routers/utils.py)의 `black.format_str(code, mode=black.Mode())`를 사용함. [requirements.txt](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/requirements.txt)는 Black 26.5.1을 고정함. 사내 진단도 동일 버전을 확인했으며 다른 편집기 버전까지 확장하지 않음.
+- 출하 원본 재현: [492eb5bc4145002db15090230cfd3bf3a40862fe](https://github.com/knadalkim-a11y/team-agent-poc/tree/492eb5bc4145002db15090230cfd3bf3a40862fe)의 관리 목록·specialists Python·두 UI 파일을 Git blob 해시와 대조함. 당시 loader와 별도 AST 슬롯 치환 구현으로 만든 결합 원본이 같고, 정확한 개발 전용 Black 26.5.1의 의미 동등성·안정성·멱등 검사, type comments 포함 AST·PANEL_SCRIPT 문자열 보존을 통과함. 기존 [WO 0.1.6 정렬 해시](#wo-editor-format-adoption)도 같은 환경에서 재현함. 등록 대상 코드를 실행하거나 사내 의존성을 설치하지 않음.
+
+| 대상 | 정규화 SHA-256 |
+|---|---|
+| 공식 0.2.6 결합 원본 · 111,705 bytes | `9634453ace35fb11ff67d0d373611db9b67540dff802df85e9bfd2285a412ca2` |
+| Black 26.5.1 기본 Mode 결과 · 118,410 bytes | `05f93e10052750ee2c56e449cabec66f281564a2e29aa8b5677a8c8d9806626d` |
+
+- 수정 범위: `scripts/ees_demo_assets.py`의 applied Tool 사전 대조에만 위 해시 쌍을 사용함. ID가 `ees_specialists`이고 journal desired가 해당 공식 원본이며 현재 본문이 정확한 정렬본이고 content 외 관리 필드가 모두 같아야 함. digest는 기존과 같은 CRLF/CR→LF·양끝 공백 제거·UTF-8을 사용하므로 그 범위 외 주석·문자열·코드 변경은 허용하지 않음. 정상 갱신이 현재 정렬본을 previous_value에 보관한 뒤 최신 본문을 적용함. 알 수 없는 과거 원본·다른 버전·다른 Tool은 자동 수락하지 않음.
+- 보호 유지: pending 응답 유실 복구의 before/desired 완전 비교, 모든 사전 대조 후 동시 편집 검사, 쓰기 뒤 전체 값 확인은 변경하지 않음. journal 초기화·강제 덮어쓰기·범용 AST 비교·런타임 Black 의존성·DB/API 권한 변경·프로그램 교체를 추가하지 않음. 향후 다른 출하 원본의 같은 문제는 정확한 원본과 고정 formatter의 결과를 재현한 뒤 쌍을 추가하며 버전 문자열만으로 인정하지 않음.
+- 로컬 검증: Linux Python 3.12.14에서 자산 회귀 52개(새 검사 6개·거부 조건 8개 subtest 포함), ApplyDemo 진입 14개, 번들 7개를 통과함. CRLF 정렬본의 갱신·실제 이전 값 보관·재실행, 별도 코드/주석/따옴표/이름/표식/관리 Valve 수정, 모르는 원본·다른 ID, pending 응답 유실·동시 편집·POST 뒤 변형을 검사함. 독립 코드 검토에서도 예외가 applied Tool 사전 대조에만 있음을 확인함.
+- 실제 출하 자료 모의 재현: 공식 0.2.6 manifest 입력 11개를 Git blob과 대조하고 기존 WO를 포함해 당시 helper로 최초9건을 적용함. specialists만 위 Black 결과로 바꾼 뒤 수정 전 `9ecc9eadc5ec` helper는 `managed_field_conflict changed=0`과 API·journal 불변을 재현함. 수정 helper의 최신 0.2.8 적용은 8건 갱신·재실행0이며 EES 개인 지침·temperature·기반 모델·Skill/Knowledge·추가 연결/질문, 기존 권한·소유자·Tool Valve·WO ID/이름/meta를 보존함. 정렬본에 사용자 주석 한 줄을 추가하면 다시 쓰기0·journal 불변으로 거부함. 실제 사내 API 적용이 아닌 공식 출하 원본과 모의 API의 검사임.
+- 배포 검증: 문서 검사 `files=30 links=947 errors=0 review_candidates=0`과 `git diff --check`를 통과함. 수정 PR의 Windows/Linux CI, 병합 후 main CI·자산 산출물을 완료 조건으로 둠. 결과는 해당 PR과 workflow에 연결하며 사내 새 적용 성공으로 확대하지 않음.
+- 재개 범위: 수정 main의 CI 성공 뒤 기존 clone에서 래퍼 Update와 ApplyDemo만 실행함. 이미 ees.7 실행을 확인했으므로 Upgrade·Restore·Start 반복, program.staging 수동 변경, 자산 삭제/재등록은 이번 재개에 필요하지 않음. 성공 뒤 새로고침하여 새 UI를 확인하며 사용자는 마지막 짧은 결과 1줄만 전달하면 됨. 재충돌 시 원문 코드나 전체 로그 대신 새 결과의 코드·대상부터 확인함.
+
+직전 STATUS 최근 점검 보존(공동 작업 설계 기록): 2026-09-14: 새 세션 전환 요청에 따라 공동 작업 목표와 현행 개인 진행 건의 차이, 개인 채팅·권한 분리, 현장 조건·절차 버전·도구/스킬 매핑, 다음 설계 항목을 기존 문서에 정리함. PR #43의 병합·실제 Windows 잠금 시험·main 배포 CI 증거를 [기존 기록](#windows-program-rename-20260914)에 추가함. 당시 마지막 사내 확인은 `83d56a186382` Restore·Start·웹 접속 성공이었고 새 보완 적용·ees.7 화면·유휴 안정성은 미확인이었음. 이 문서 작업의 검수는 [당시 기록](#ees-work-shared-design-20260914)을 따름. 후속 ees.7 버전 관찰과 자산 실패는 위 새 증거로 구분함.
 
 <a id="wo-editor-format-adoption"></a>
 

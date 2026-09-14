@@ -20,6 +20,16 @@ PACK = "ees-demo-v1"
 BEGIN = "<!-- EES-DEMO:BEGIN -->"
 END = "<!-- EES-DEMO:END -->"
 STATE_FILE = "ees-demo-assets.json"
+# Only verified editor output of a previously applied official source is allowed.
+# Agent Pack 0.2.6, commit 492eb5bc4145002db15090230cfd3bf3a40862fe,
+# with both panel scripts embedded; Open WebUI 0.11.3 / Black 26.5.1 default Mode.
+# Provenance: evals/scenarios.md#specialists-editor-format-20260914.
+_APPLIED_TOOL_EDITOR_FORMATS = {
+    "ees_specialists": {
+        "9634453ace35fb11ff67d0d373611db9b67540dff802df85e9bfd2285a412ca2":
+            "05f93e10052750ee2c56e449cabec66f281564a2e29aa8b5677a8c8d9806626d",
+    },
+}
 TRANSPORT_CODES = frozenset({"webui_authentication_failed", "webui_permission_denied",
     "webui_connection_failed", "redirect_blocked", "api_conflict", "api_rate_limited",
     "api_request_failed", "api_response_too_large", "api_response_invalid", "api_path_invalid"})
@@ -119,6 +129,20 @@ def _source_digest(content):
     # Pasting a complete source in the editor may change line endings or the
     # final blank line. All substantive text, including comments, must match.
     return hashlib.sha256(content.replace("\r\n", "\n").replace("\r", "\n").strip().encode("utf-8")).hexdigest()
+
+
+def _applied_tool_editor_match(identifier, got, desired):
+    """Recognize one proven formatting transition, keeping other fields exact."""
+    if not isinstance(got, dict) or not isinstance(desired, dict):
+        return False
+    current, recorded = got.get("content"), desired.get("content")
+    if not isinstance(current, str) or not isinstance(recorded, str):
+        return False
+    if {k: v for k, v in got.items() if k != "content"} != {
+            k: v for k, v in desired.items() if k != "content"}:
+        return False
+    expected = _APPLIED_TOOL_EDITOR_FORMATS.get(identifier, {}).get(_source_digest(recorded))
+    return expected is not None and _source_digest(current) == expected
 
 
 def load_manifest(root: Path):
@@ -520,6 +544,11 @@ def apply_assets(client, root: Path, state_dir: Path, ees_model_id: str, source_
                     pending_view.pop("user_id", None)
                 if got == record["desired"] and (record["status"] == "applied"
                         or pending_view == record.get("desired_value")):
+                    previous = record["spec"]
+                elif (kind == "tool" and record["status"] == "applied"
+                        and _applied_tool_editor_match(identifier, got, record["desired"])):
+                    # Do not relax pending recovery, concurrent edits or post-write
+                    # verification. The normal write records the live prior source.
                     previous = record["spec"]
                 elif record["status"] == "pending" and _view(current, kind) == record["before"]:
                     previous = record.get("previous_spec")
