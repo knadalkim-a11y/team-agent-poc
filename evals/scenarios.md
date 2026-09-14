@@ -35,6 +35,8 @@
 - 로컬 검사: Linux / Python 3.12.14 / Node 24.19.0. 전체 unittest `Ran 759 / OK (skipped=24)` 12.424초. 건너뜀에는 실제 wheel·Chrome·FastAPI/httpx·Windows/PowerShell·일부 플랫폼/선택 의존성 검사가 포함됨. 관련 배포/복원/시작 회귀, 합성 빌드10개 중9 PASS·공식 wheel1 SKIP, JavaScript 구문을 확인함. 미실행을 PASS로 합치지 않음.
 - 브라우저·인증 검사 구성: 실제 패키지에서 가져온 정적 코드로 Chrome E2E 5경로(DB/AP·버전 게시·현장 제외·창 크기·런처 복귀), 업무 네트워크 요청 0건 검사, 실제 FastAPI 고정 경로/인증 dependency 검사3개. 런처의 기존 대화/설정 검사는 native 형태 DOM fixture이며 전체 Open WebUI 로그인·실제 연동 E2E가 아님. 인증 helper는 테스트 principal을 사용하고 실제 사용자 DB는 열지 않음.
 - 로컬 한계: 설치된 Chrome 없음. control-browser의 localhost 접근 `ERR_BLOCKED_BY_CLIENT`, 공식 wheel 다운로드 timeout으로 로컬 실제 패키지/브라우저 검사는 미실행. CI에서 Linux Chrome·Windows 및 공식 해시 고정 wheel 검증을 강제하도록 연결했으며 아래에 실제 실행 결과를 추가함. 통신 제한을 우회하지 않음.
+- 첫 Git/CI: 원격 PR #38 코드 `eb402af5b8461b4010b31cab673b6c9127727663`, tree `656e8ec70e5c08d604515bd4250d7501f601d205`로 로컬 검사 tree 일치를 확인함. [CI34806949083](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34806949083) Linux에서 실제 고정 wheel 빌드·인증 경로3개 통과. Chrome 5경로 중 설계/게시와 런처 복귀2개 통과, 나머지3개는 시험의 이전 aria 진행률 selector가 현재 native progress 요소와 달라 실패함. 실제 value/max와 화면 완료 문구를 검사하도록 수정하며 실패를 보존함.
+- 독립 검토·보완: 편집 가능한 현장명·시스템명4곳의 HTML 이스케이프 누락을 수정함. 악성 태그 문자열을 현장명으로 입력·게시·새 셋업·다음 게시 검토까지 진행해 문자 그대로 표시되고 업무 URL 요청이 발생하지 않는 E2E를 추가함. CSP에서 inline style·동일 출처 이미지·웹 폰트 요청을 제거함. 실제 보안 사고나 사내 호출이 관찰된 것은 아님. CI 스크린샷은 artifact에 저장했지만 이 환경의 내려받기는403으로 직접 시각 검수하지 못함.
 - 사내: 배포·화면·로그인 쿠키/SSO 조합·일반 대화와 Jira/Confluence/GitHub의 실제 응답 모두 이번 변경 기준 미확인. 기존 사내 성공 기록은 당시 범위로 유지함. [한 블록 적용 명령·3~5분 시연·기존 화면 복귀](../docs/03-openwebui-native-agent.md#ees-work-demo)를 제공함.
 
 <a id="ees-work-mockup-reference-20260914"></a>

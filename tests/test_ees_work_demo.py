@@ -219,8 +219,9 @@ class EESWorkDemoBrowserTests(unittest.TestCase):
 
     def progress(self, done, total):
         self.choose("setup-p")
-        self.assertEqual(self.read('[role="progressbar"]', "getAttribute('aria-valuenow')"), str(done))
-        self.assertEqual(self.read('[role="progressbar"]', "getAttribute('aria-valuemax')"), str(total))
+        self.assertEqual(self.read('progress[aria-label="필수 잡 완료"]', "value"), done)
+        self.assertEqual(self.read('progress[aria-label="필수 잡 완료"]', "max"), total or 1)
+        self.assertIn(f"필수 잡 {done} / {total} 완료", self.text("#m-work-content .section-row"))
 
     def test_launcher_preserves_native_chat_and_is_absent_on_auth_route(self):
         # Only the surrounding native-shaped DOM is a fixture. The launcher,
@@ -352,6 +353,7 @@ class EESWorkDemoBrowserTests(unittest.TestCase):
         self.progress(3, 6)
 
     def test_designer_validation_retest_publish_and_case_version_pin(self):
+        malicious_name = '공장 A</small><img src="/api/v1/chats/"><small>'
         self.choose("db-j")
         self.run_job()
         self.click("#m-design-mode")
@@ -390,6 +392,11 @@ class EESWorkDemoBrowserTests(unittest.TestCase):
         self.assertIn("목표: 셋업 검토 보조", self.read('[data-kind="skill"][data-field="body"]', "value"))
         self.click('[data-section="sites"]')
         self.select('[data-select-site]', "us-a")
+        # Administrator-entered text stays text through preview, option labels,
+        # case snapshots and later publication review; it cannot issue API GETs.
+        self.fill('[data-kind="site"][data-field="name"]', malicious_name)
+        self.assertIn(malicious_name, self.text("#m-preview-content"))
+        self.assertIsNone(self.read('img[src="/api/v1/chats/"]'))
         self.fill('[data-kind="site"][data-field="line"]', "조립 3라인")
         self.click("#m-save-draft")
         self.click("#m-test-draft")
@@ -408,10 +415,22 @@ class EESWorkDemoBrowserTests(unittest.TestCase):
         self.assertIn("적용 절차 v1.4", self.text("#m-site-plan"))
         self.click('[data-action="create-case"]')
         self.assertIn("조립 4라인", self.text("#m-work-content"))
+        self.assertIn(malicious_name, self.text("#m-work-content"))
+        self.assertIn(malicious_name, self.read("#m-case option:checked"))
+        self.assertIsNone(self.read('img[src="/api/v1/chats/"]'))
         self.choose("install-t")
         self.choose("db-j")
         self.assertEqual(self.text("#m-work-content h2"), "DB 연결 확인 개정")
         self.assertTrue(self.read('[data-action="run"]', "disabled"))
+        self.click("#m-design-mode")
+        self.fill('[data-kind="node"][data-field="description"]', "현장 이름의 안전한 표시 확인")
+        self.click("#m-save-draft")
+        self.click("#m-test-draft")
+        self.click("#m-review-publish")
+        self.assertIn("게시 전 변경 확인", self.text("#m-preview-title"))
+        self.assertIn(malicious_name, self.text("#m-preview-content"))
+        self.assertIsNone(self.read('img[src="/api/v1/chats/"]'))
+        self.click("#m-run-mode")
         # Old case retains its original procedure, site and successful run.
         self.select("#m-case", "case-1")
         self.choose("db-j")

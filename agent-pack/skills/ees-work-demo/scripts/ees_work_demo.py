@@ -17,8 +17,8 @@ HEADERS = {
     "X-Frame-Options": "SAMEORIGIN",
     "Referrer-Policy": "no-referrer",
     "Content-Security-Policy": (
-        "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' data:; font-src 'self'; connect-src 'none'; "
+        "default-src 'none'; script-src 'self'; style-src 'self'; "
+        "img-src data:; font-src 'none'; connect-src 'none'; "
         "frame-ancestors 'self'; base-uri 'none'; form-action 'none'"
     ),
 }
