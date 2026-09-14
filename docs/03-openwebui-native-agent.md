@@ -901,7 +901,7 @@ Set-Location "$env:USERPROFILE\team-agent-poc"
 - 임시 앱 폴더 검증을 마친 뒤 직전 프로그램을 한 개 보관하고 교체합니다. **여러 파일 교체를 원자적이라고 주장하지 않습니다.** 기존 상태 파일에 적용 미완료를 먼저 기록하고, 성공한 경우에만 완료로 바꿉니다.
 - 적용 중 중단되면 Start를 차단합니다. 명시적인 Restore로 되돌리거나, Apply의 promote 단계에서 사용자가 실제 폴더 이동을 마친 경우에만 [Apply -Resume](#ees-wrapper-manual-promote)으로 전체 파일/기록을 검증해 완료할 수 있습니다. 다른 단계·남은 staging·다른 ZIP/기록·손상 파일은 재개하지 않습니다. Start의 수정본 선택·완료/일치 검사는 기존 already_running 빠른 반환보다 먼저 수행하며 Stop은 미완료 기록·보관본·소유자를 지우지 않습니다.
 - Restore는 잠금 내용이 저장된 미완료 작업의 소유자 PID·생성시각과 일치하고 그 프로세스의 종료가 확인된 경우에만 해당 잠금을 회수합니다. PID만 있는 구형 잠금·식별 불가·기록 불일치는 제거하지 않고 중단합니다. 별도 잠금 정리 명령이나 백그라운드 복구는 추가하지 않습니다.
-- Restore는 보관본·기록을 대조해 복원하며 손상·예상 밖 변경이면 덮어쓰기를 멈춥니다. DB 전체 복구·자동 재시도·여러 릴리스 이력 관리로 확대하지 않습니다.
+- Restore는 보관본·기록을 대조해 복원하며 손상·예상 밖 변경이면 덮어쓰기를 멈춥니다. DB 전체 복구·작업 전체 자동 재시도·여러 릴리스 이력 관리로 확대하지 않습니다. Windows의 일시적인 프로그램 폴더 rename 거부에만 아래의 제한된 재시도를 적용합니다.
 - 프로그램 선택은 기존 배포 기록에서 관리하되 `original` Python 사용을 “원본 앱 실행”으로 오표시하지 않습니다. 새 기록 형식은 구형 도구가 거부하도록 하고, 새 방식 채택 후 옛 Prepare/Deploy/Rollback/ProbeImports와 혼용하지 않습니다. 이전 실패·배포 기록은 보존합니다.
 
 #### 구현 범위와 완료 기준
@@ -1143,14 +1143,15 @@ Upgrade는 프로그램·기동 상태를, ApplyDemo는 지정 자산 등록을 
 
 **이 변경이 main에 반영되고 EES delivery CI와 프로그램 산출물 생성이 성공한 뒤 사용합니다.** 이미 등록한 Windows 계정·기존 checkout·Python 환경이 필요합니다. `Upgrade`는 프로그램·래퍼 업데이트만 처리하고 WebUI에 저장한 Tool·Skill·Prompt는 기존 등록 절차로 관리합니다.
 
-최초 한 번은 기존 스크립트의 `Update`로 새 명령을 받은 뒤 같은 블록에서 실행합니다. 아래 블록은 저장소 폴더가 기존 안내 위치인 경우이며 앞 단계 실패 시 멈춥니다.
+2026-09-14 실패 뒤 `83d56a186382`로 Restore·Start하고 기존 주소 접속까지 확인했습니다. **이번 폴더 변경 보완이 main에 반영되고 CI가 성공한 뒤**, 복구한 서버에서 아래 블록을 한 번 실행합니다. 기존 `Update`로 래퍼를 받고 Upgrade가 성공한 뒤에만 ApplyDemo로 EES Work 공통 자산을 반영합니다. 저장소 폴더가 기존 안내 위치인 경우이며 앞 단계 실패 시 멈춥니다.
 
 ```powershell
 & {
     $ErrorActionPreference = 'Stop'
     Set-Location (Join-Path $env:USERPROFILE 'team-agent-poc')
     .\scripts\manage-ees.ps1 -Action Update
-    .\scripts\manage-ees.ps1 -Action Upgrade
+    .\scripts\manage-ees.ps1 -Action Upgrade -Summary
+    .\scripts\manage-ees.ps1 -Action ApplyDemo -Summary
 }
 ```
 
@@ -1171,11 +1172,13 @@ GitHub URL에 저장된 기존 Git 프록시 설정을 API·artifact 다운로�
 3. 바깥 artifact ZIP의 digest를 확인하고 안쪽 EES-demo ZIP을 자동 선택합니다. manifest·프로그램 해시·버전/의존성과 등록 상태를 확인한 뒤 기존 잠금·Stop/Apply/Start를 사용합니다. Python·의존성 전체 재설치와 데이터·키 재생성은 없습니다. Start의 정상 응답 확인은 기본 120초로 한 번만 수행합니다.
 4. 적용 기록과 현재 설치본이 일치하면 다운로드와 재시작을 생략합니다. 다른 커밋의 ZIP이라도 프로그램 wheel이 같으면 다시 시작하지 않습니다. 이 경우에도 현재 관리 프로세스·정상 응답을 확인하고, 정지/비정상이면 실패를 알리며 자동 복구하지 않습니다.
 
-마지막 `EES action=upgrade` 줄에서 `wrapper`는 래퍼 커밋, `commit`은 실제 프로그램 원본입니다. 두 값은 달라도 정상일 수 있으며 `changed`는 프로그램 변경, `wrapper_changed`는 래퍼 변경입니다. `result=ok` 후 브라우저를 새로고침하고 Portal 이름·기존 대화 접근을 확인합니다. 외부에는 마지막 요약과 화면 확인 1~2줄만 입력합니다.
+마지막 `EES action=upgrade` 줄에서 `wrapper`는 래퍼 커밋, `commit`은 실제 프로그램 원본입니다. 두 값은 달라도 정상일 수 있으며 `changed`는 프로그램 변경, `wrapper_changed`는 래퍼 변경입니다. `result=ok` 후 브라우저를 새로고침하고 EES Work 이름·기존 대화 접근을 확인합니다. 외부에는 마지막 요약과 화면 확인 1~2줄만 입력합니다.
 
 실패 시 `stage/code/next`로 다음 행동을 구분합니다. `check_ci`는 main CI/프로그램 산출물, `check_download_access`는 사내 다운로드 접근, `reset_update_token`은 인증, `check_status`는 현재 서버 상태를 확인하라는 뜻입니다. 원문 오류·토큰·내부 경로를 전달하지 않습니다. 자세한 결과는 사내 `state_root/last-operation.json`에 남으며 저장 실패는 `report=unavailable`로 표시합니다. 다운로드·사전 검사 실패는 서버 종료 전에 멈추지만 이미 끝난 래퍼 Git 갱신을 되돌리지는 않습니다.
 
-Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `result.bundle`에 보존합니다. 이 기록과 현재 미완료 상태를 대조해 기존의 **명시적 Apply -Resume 또는 Restore**를 선택합니다. 과거 ees.1 고정 ZIP 명령을 새 실패에 그대로 재사용하지 않습니다. 자동 재시도·되돌리기는 없고 health 시간 초과 뒤에도 서버가 늦게 켜질 수 있으므로 Start/Upgrade를 반복하기 전에 현재 상태를 확인합니다. [수동 복구 조건](#ees-wrapper-manual-promote), [검증·사내 적용 경계](../evals/scenarios.md#ees-wrapper-upgrade).
+Windows에서 `program → program.previous`, `program.staging → program`, Restore의 `program.previous → program` 이름 변경이 `winerror=5/32/33`으로 거부될 때만 1·2·4·8초 기다려 다시 시도합니다. **이름 변경 한 단계마다 최대 5회, 누적 대기 15초**이며 매번 경로와 보관 상태를 확인합니다. 다른 오류에는 대기하지 않고, 전체 Upgrade·서버 시작·복원 작업은 자동 반복하지 않습니다. 일시적인 잠금이 풀리면 이어서 진행하지만 ACL이나 보안 제품 설정을 변경하지 않으며 원인이 해결됐다고 단정하지 않습니다.
+
+Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `result.bundle`에 보존합니다. 기존 `error/errno/winerror/at`에 `rename=promote attempts=5 waited=15` 같은 요약을 추가하며, 제한 횟수 소진 후 현재 미완료 상태까지 수동 승격 조건에 맞으면 `code=program_rename_blocked next=manual_promote`를 표시합니다. **이번 Upgrade 직후 이 값이 나온 경우에만** 아래 [수동 복구 블록](#ees-wrapper-manual-promote)을 사용합니다. 다른 단계·현재 상태 불일치는 수동 이름 변경 대상으로 안내하지 않습니다. 과거 ees.1 고정 ZIP 명령을 새 실패에 그대로 재사용하지 않습니다. 자동 되돌리기는 없으며 health 시간 초과 뒤에는 늦게 켜질 수 있으므로 Start/Upgrade를 반복하기 전에 현재 상태를 확인합니다. [검증·사내 적용 경계](../evals/scenarios.md#ees-wrapper-upgrade).
 
 <a id="ees-wrapper-apply"></a>
 
@@ -1185,7 +1188,7 @@ Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `resul
 
 현재 새 Apply에는 EES Work `0.11.3+ees.7`을 포함한 프로그램 ZIP과 그 ZIP의 `manifest.json`에 있는 전체 `source_commit`을 사용합니다. [전달물 준비](#release-delivery)의 프로그램 포함 산출물을 선택하며, 과거 ees.1/ees.2/ees.3/ees.4/ees.5/ees.6 ZIP에는 이번 공장별 업무 트리·새 이름·Workspace 보완이 없습니다. Apply는 새 ZIP의 해시·wheel·대상 버전/의존성·앱 경로를 다시 확인합니다. 운영 코드 최신 HEAD를 프로그램 Commit에 넣지 않으며, Agent Pack 전용 ZIP이나 후보 venv를 새 전달물로 사용하지 않습니다.
 
-`$eesBundle`에는 **파일명과 `.zip` 확장자까지 포함한 새 ZIP의 전체 경로**, `$eesProgramCommit`에는 manifest의 40자리 source_commit을 넣습니다. Downloads 같은 폴더만 지정하면 실패합니다. 경로를 채팅에 알려줄 필요는 없습니다. 아래 블록은 **Git 갱신 → 읽기 전용 사전 확인 → 정상 종료 → 프로그램 적용 → 명시적인 시작** 순서입니다. 앞 단계가 실패하면 그 자리에서 멈춥니다. 특히 CheckOnly 실패 시 Stop을 실행하지 않습니다. 기존 프로세스를 식별하지 못하거나 포트가 사용 중이면 임의 종료하지 않습니다. 자동 전환·복구·재시도 없이 첫 기동의 health 확인을 최대 120초로 요청하며, 시간 초과를 배포 성공으로 해석하지 않습니다. 기존 기본값이나 등록 설정은 바꾸지 않습니다.
+`$eesBundle`에는 **파일명과 `.zip` 확장자까지 포함한 새 ZIP의 전체 경로**, `$eesProgramCommit`에는 manifest의 40자리 source_commit을 넣습니다. Downloads 같은 폴더만 지정하면 실패합니다. 경로를 채팅에 알려줄 필요는 없습니다. 아래 블록은 **Git 갱신 → 읽기 전용 사전 확인 → 정상 종료 → 프로그램 적용 → 명시적인 시작** 순서입니다. 앞 단계가 실패하면 그 자리에서 멈춥니다. 특히 CheckOnly 실패 시 Stop을 실행하지 않습니다. 기존 프로세스를 식별하지 못하거나 포트가 사용 중이면 임의 종료하지 않습니다. 전체 적용·자동 전환·복구·서버 시작을 반복하지 않고 첫 기동의 health 확인을 최대 120초로 요청하며, 시간 초과를 배포 성공으로 해석하지 않습니다. 기존 기본값이나 등록 설정은 바꾸지 않습니다.
 
 ```powershell
 & {
@@ -1217,9 +1220,9 @@ Start의 `stage=health_check` 시간 초과는 지정한 시간 안에 정상 �
 
 #### 탐색기에서 실제 프로그램 폴더를 옮긴 뒤 적용 완료
 
-**2026-09-10 Portal 표시 확인 전에 안내한 복구 절차:** [실패 기록](../evals/scenarios.md#ees-portal-upgrade-apply-failure)의 `errno=13/winerror=5`, program 없음·previous/staging/ZIP 있음·lock 없음에 맞춘 절차입니다. 아래 블록은 기존 상태를 다시 확인하고 보존 ZIP과 target commit을 먼저 읽습니다. 탐색기가 열리면 `program.staging`을 F2로 `program`으로 변경한 뒤 PowerShell에서 Enter를 누릅니다. 이름 변경이 거부되면 Ctrl+C로 끝내고 그 사실만 전달합니다. `program.previous`는 보존합니다.
+**현재 복구한 서버에서 이 블록부터 실행하지 않습니다.** 위의 새 Update→Upgrade→ApplyDemo를 실행하다 `code=program_rename_blocked next=manual_promote`로 멈춘 직후에만 사용합니다. 실패 기록과 현재 pending을 다시 읽어 `apply/promote`, 서버 정지, program 없음·previous/staging/ZIP 있음·lock 없음인 경우에만 탐색기를 엽니다. 이 블록은 기존 customized 프로그램을 업데이트하던 상황용입니다.
 
-이후 사용자가 **EES Portal 이름 표시를 확인했으므로 현재 아래 블록을 다시 실행하지 않습니다.** 개별 Resume/Start/ApplyDemo 결과·패널 v0.1.3 반영은 별도 미확인입니다. 다음 확인은 새 대화의 패널 가독성과 예시질문이며, 아래 명령은 당시 실패 상태에 대한 복구 이력으로 보존합니다.
+탐색기가 열리면 **`program.staging`을 F2로 `program`으로 변경하고 성공한 뒤에만 PowerShell에서 Enter**를 누릅니다. 이름 변경이 거부되면 Ctrl+C로 끝내고 `rename=failed` 한 줄만 전달합니다. `program.previous`는 그대로 보존하고 기존 폴더를 덮어쓰지 않습니다. Restore·Start·Update 등 다른 작업을 했다면 오래된 실패 기록으로 이 블록을 재사용하지 않습니다.
 
 ```powershell
 & {
@@ -1227,48 +1230,49 @@ Start의 `stage=health_check` 시간 초과는 지정한 시간 안에 정상 �
     $m = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1'
     $f = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
     $c = Get-Content -LiteralPath $f -Raw -Encoding UTF8 | ConvertFrom-Json
-    $lastFile = Join-Path $c.state_root 'last-operation.json'
-    $s = Get-Content -LiteralPath $lastFile -Raw -Encoding UTF8 | ConvertFrom-Json
-    $r = Get-Content -LiteralPath (Join-Path $c.state_root 'deployment.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    $last = Join-Path $c.state_root 'last-operation.json'
+    $reg = Join-Path $c.state_root 'deployment.json'
+    $s = Get-Content -LiteralPath $last -Raw -Encoding UTF8 | ConvertFrom-Json
+    $r = Get-Content -LiteralPath $reg -Raw -Encoding UTF8 | ConvertFrom-Json
     $p = $r.customization.pending
     $b = $s.result.bundle
     $k = $p.target.source_commit
     $program = Join-Path $c.state_root 'program'
     $staging = Join-Path $c.state_root 'program.staging'
     $previous = Join-Path $c.state_root 'program.previous'
-    $lockFile = Join-Path $c.state_root 'deployment.lock'
-
+    $lock = Join-Path $c.state_root 'deployment.lock'
     if ($s.action -ne 'upgrade' -or $s.failed -ne $true -or
-        $s.result.stage -ne 'apply' -or $p.action -ne 'apply' -or
-        $p.stage -ne 'promote' -or $r.phase -ne 'idle' -or
-        $r.process -or $r.pending -or $r.launch_uncertain -or
+        $s.result.stage -ne 'apply' -or $s.result.next -ne 'manual_promote' -or
+        $s.result.code -ne 'program_rename_blocked' -or
+        $s.result.program_rename.stage -ne 'promote' -or
+        $p.action -ne 'apply' -or $p.stage -ne 'promote' -or
+        $r.phase -ne 'idle' -or $r.process -or $r.pending -or $r.launch_uncertain -or
         $k -notmatch '^[a-f0-9]{40}$' -or -not $b -or
         -not (Test-Path -LiteralPath $b -PathType Leaf) -or
-        (Test-Path -LiteralPath $lockFile) -or
-        (Test-Path -LiteralPath $program) -or
+        (Test-Path -LiteralPath $lock) -or (Test-Path -LiteralPath $program) -or
         -not (Test-Path -LiteralPath $staging -PathType Container) -or
         -not (Test-Path -LiteralPath $previous -PathType Container)) {
-        throw 'EES recovery stopped: state changed.'
+        throw 'EES recovery stopped: state_changed'
     }
-
-    $backup = Join-Path (Split-Path -Parent $b) 'upgrade-failure.json'
-    if (-not (Test-Path -LiteralPath $backup)) {
-        Copy-Item -LiteralPath $lastFile -Destination $backup
-    }
+    $backup = Join-Path (Split-Path -Parent $b) ('recovery-' + [guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $backup | Out-Null
+    Copy-Item -LiteralPath $last -Destination $backup
+    Copy-Item -LiteralPath $reg -Destination $backup
     Invoke-Item -LiteralPath $c.state_root
     [void](Read-Host 'Rename program.staging to program in Explorer, then press Enter')
-
     if ((Test-Path -LiteralPath $staging) -or
         -not (Test-Path -LiteralPath $program -PathType Container)) {
-        throw 'EES recovery stopped: rename not completed.'
+        throw 'EES recovery stopped: rename_incomplete'
     }
     & $m -Action Apply -Bundle $b -Commit $k -Resume -Summary
     & $m -Action Start -HealthTimeout 120 -Summary
-    & $m -Action ApplyDemo
+    & $m -Action ApplyDemo -Summary
 }
 ```
 
-원래 Upgrade 오류 기록은 보존 ZIP 옆의 `upgrade-failure.json`에 한 번 복사합니다. Resume/Start가 마지막 작업 결과를 갱신해도 원래 ZIP 위치를 잃지 않기 위한 사내 기록이며 외부로 전달하지 않습니다. Resume은 현재 정지/포트·잠금·같은 ZIP/commit·새 program과 직전 previous 전체를 검증한 뒤 적용 기록을 완료합니다. 그 성공 뒤에만 Start, Start 성공 뒤에만 ApplyDemo를 실행합니다. 실제 재설치·권한 변경·자동 재시도는 없으며 실패 후 같은 블록을 반복하지 않습니다. 마지막 실패한 EES 요약이나 폴더 이름 변경 실패 여부만 전달합니다.
+원래 Upgrade 오류와 적용 상태 기록은 보존 ZIP 옆의 새 `recovery-*` 폴더에 함께 복사하며, 복사 실패 시 이름 변경 안내 전에 멈춥니다. 이 기록은 사내에 보존하고 외부로 전달하지 않습니다. Resume은 같은 보존 ZIP/commit, 현재 정지/포트·잠금 상태, 새 program과 직전 previous의 전체 파일·기록을 검증한 뒤 적용 기록을 완료합니다. 재다운로드·재추출·재설치는 없고, Apply -Resume 성공 뒤에만 Start, Start 성공 뒤에만 ApplyDemo를 실행합니다. 실패한 블록이나 health 시간 초과 뒤의 Start를 반복하지 않으며 마지막 실패한 EES 요약 한 줄만 전달합니다.
+
+**과거 이력:** 2026-09-10의 `errno=13/winerror=5` 수동 변경 안내 뒤 사용자가 EES Portal 이름 표시를 확인했습니다. 당시 개별 Resume/Start/ApplyDemo 출력과 패널 v0.1.3 반영은 별도 미확인이며, 그 이름 확인을 이번 ees.7 성공으로 간주하지 않습니다. [당시 실패·후속 관찰](../evals/scenarios.md#ees-portal-upgrade-apply-failure). 2026-09-14의 복구·현재 적용 경계는 [별도 기록](../evals/scenarios.md#ees7-apply-recovery-20260914)에서 관리합니다.
 
 아래 고정 ZIP·커밋 명령은 **ees.1 최초 적용 당시의 복구 안내**입니다. 현재 Portal 신규 적용에는 [새 프로그램 ZIP 절차](#ees-wrapper-apply)를 사용하며, 기존 미완료 ees.1 기록의 재개가 필요할 때만 그 기록·보존한 전달물을 별도로 대조합니다.
 

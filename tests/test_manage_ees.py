@@ -1363,7 +1363,7 @@ class CustomizationIntegrationTests(unittest.TestCase):
         self.assertTrue(saved["failed"])
         self.assertNotIn("synthetic-private", json.dumps(saved))
 
-    def test_apply_promotion_failure_preserves_codes_location_and_pending_without_retry(self):
+    def test_apply_promotion_retry_exhaustion_preserves_codes_location_and_pending(self):
         self.registry["customization"] = {"active": None, "previous": None, "pending": None}
         self.write()
         self.mocks["check_applicability"].return_value = self.registry["customization"]
@@ -1376,12 +1376,16 @@ class CustomizationIntegrationTests(unittest.TestCase):
         with patch.object(MANAGER.customization, "_paths", return_value=(program, previous, staged)), \
                 patch.object(MANAGER.customization, "_load_bundle", return_value=(self.selection, b"unused")), \
                 patch.object(MANAGER.customization, "_extract", side_effect=lambda _, path: path.mkdir()), \
+                patch.object(MANAGER.customization.sys, "platform", "win32"), \
+                patch.object(MANAGER.customization.time, "sleep") as sleep, \
                 patch.object(Path, "rename", side_effect=error) as rename, \
                 patch.object(MANAGER.customization, "restore") as restore, redirect_stdout(output):
             result = MANAGER.main(["apply", "--config", "unused", "--bundle", "unused.zip",
                                    "--commit", COMMIT, "--summary"])
         self.assertEqual(result, 1)
-        rename.assert_called_once_with(program)
+        self.assertEqual(rename.call_count, 5)
+        self.assertTrue(all(call.args == (program,) for call in rename.call_args_list))
+        self.assertEqual([call.args[0] for call in sleep.call_args_list], [1, 2, 4, 8])
         restore.assert_not_called()
         self.mocks["start_server"].assert_not_called()
         self.assertTrue(staged.is_dir())
@@ -1393,10 +1397,36 @@ class CustomizationIntegrationTests(unittest.TestCase):
         self.assertEqual((detail["type"], detail["errno"], detail["winerror"]), ("PermissionError", 13, 5))
         self.assertEqual(detail["source"], "ees_webui_customization.py")
         source = (ROOT / "scripts" / detail["source"]).read_text(encoding="utf-8").splitlines()
-        self.assertEqual(source[detail["line"] - 1].strip(), "staged.rename(program)")
+        self.assertEqual(source[detail["line"] - 1].strip(), "source.rename(destination)")
+        self.assertEqual(saved["result"]["program_rename"],
+                         {"stage": "promote", "attempts": 5, "waited_seconds": 15})
         self.assertIn("error=PermissionError errno=13 winerror=5 at=ees_webui_customization.py:", output.getvalue())
+        self.assertIn("rename=promote attempts=5 waited=15", output.getvalue())
         self.assertEqual(len(output.getvalue().splitlines()), 1)
         self.assertNotIn(private, output.getvalue() + json.dumps(saved))
+
+    def test_direct_rename_error_keeps_safe_metadata_and_filters_malformed_metadata(self):
+        private = "synthetic-private-PAT-and-path"
+        for stage in ("move_active", "promote", "restore", private):
+            with self.subTest(stage=stage):
+                error = PermissionError(13, private, private)
+                error.winerror = 32
+                error.program_rename_failed = True
+                error.program_rename_stage = stage
+                error.program_rename_attempts = 5
+                error.program_rename_wait_seconds = 15
+                output = io.StringIO()
+                with patch.object(MANAGER, "operate", side_effect=error), redirect_stdout(output):
+                    self.assertEqual(MANAGER.main(["restore", "--config", "unused", "--summary"]), 1)
+                saved = json.loads((self.root / "last-failure.json").read_bytes())
+                if stage == private:
+                    self.assertNotIn("program_rename", saved["result"])
+                    self.assertNotIn(" rename=", output.getvalue())
+                else:
+                    self.assertEqual(saved["result"]["program_rename"],
+                                     {"stage": stage, "attempts": 5, "waited_seconds": 15})
+                    self.assertIn("rename=" + stage + " attempts=5 waited=15", output.getvalue())
+                self.assertNotIn(private, output.getvalue() + json.dumps(saved))
 
     def test_local_error_filters_private_frames_classes_and_malformed_fields(self):
         private = "synthetic-private-PAT-and-path"
@@ -1508,6 +1538,62 @@ class CustomizationIntegrationTests(unittest.TestCase):
                 self.assertEqual((detail["type"], detail["errno"], detail["winerror"]), ("PermissionError", 13, 5))
                 self.assertNotIn(private, output.getvalue() + stderr.getvalue() + json.dumps(saved))
                 self.mocks["start_server"].assert_not_called()
+
+
+class ProgramRenameSummaryTests(unittest.TestCase):
+    def test_summary_retains_only_fixed_stage_and_bounded_integer_counters(self):
+        private = "synthetic-private-PAT-and-path"
+        for stage in ("move_active", "promote", "restore"):
+            for attempts, waited in ((1, 0), (5, 15)):
+                expected = {"stage": stage, "attempts": attempts, "waited_seconds": waited}
+                value = dict(expected, private=private)
+                self.assertEqual(MANAGER.safe_program_rename(value), expected)
+                text = MANAGER.failure_fields({"program_rename": value})
+                self.assertIn(f"rename={stage} attempts={attempts} waited={waited}", text)
+                self.assertNotIn(private, text)
+
+    def test_malformed_metadata_never_reaches_summary(self):
+        private = "synthetic-private-PAT-and-path"
+        valid = {"stage": "promote", "attempts": 5, "waited_seconds": 15}
+        values = [None, [], private, {}, {"stage": "promote"}]
+        for field, invalid in (("stage", [private, [], None, "apply"]),
+                               ("attempts", [True, "5", 5.0, 0, 6, private]),
+                               ("waited_seconds", [False, "15", 15.0, -1, 16, private])):
+            values.extend(dict(valid, **{field: value}) for value in invalid)
+        for value in values:
+            with self.subTest(value=value):
+                self.assertIsNone(MANAGER.safe_program_rename(value))
+                text = MANAGER.failure_fields({"program_rename": value})
+                self.assertNotIn("rename=", text)
+                self.assertNotIn(private, text)
+
+    def test_exception_metadata_requires_supported_windows_os_error(self):
+        for kind, code, allowed in ((PermissionError, 5, True), (OSError, 32, True),
+                                     (OSError, 33, True), (ValueError, 5, False),
+                                     (OSError, None, False), (OSError, 13, False),
+                                     (OSError, True, False), (OSError, "5", False),
+                                     (OSError, 5.0, False)):
+            with self.subTest(kind=kind, code=code):
+                error = kind("synthetic-private-PAT-and-path")
+                error.winerror = code
+                error.program_rename_failed = True
+                error.program_rename_stage = "promote"
+                error.program_rename_attempts = 5
+                error.program_rename_wait_seconds = 15
+                expected = {"stage": "promote", "attempts": 5, "waited_seconds": 15} if allowed else None
+                self.assertEqual(MANAGER.program_rename_detail(error), expected)
+
+    def test_path_guard_errors_cannot_reuse_rename_counters_without_explicit_failure_marker(self):
+        error = PermissionError(13, "synthetic-private-path")
+        error.winerror = 5
+        error.program_rename_stage = "promote"
+        error.program_rename_attempts = 5
+        error.program_rename_wait_seconds = 15
+        self.assertIsNone(MANAGER.program_rename_detail(error))
+        for marker in (False, None, 1, "true", "synthetic-private-path"):
+            with self.subTest(marker=marker):
+                error.program_rename_failed = marker
+                self.assertIsNone(MANAGER.program_rename_detail(error))
 
 
 class OperationFailureRetentionTests(unittest.TestCase):

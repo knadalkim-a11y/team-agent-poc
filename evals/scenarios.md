@@ -14,6 +14,7 @@
 |---|---|
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
 | ees.7 적용 실패와 직전 버전 복구 | [09-14 rename 접근 거부, Restore·Start 성공, 새 화면 미확인](#ees7-apply-recovery-20260914) |
+| Windows 폴더 변경 대기·수동 진행 | [제한적 rename 재시도·경로 보호·기존 Resume 연결](#windows-program-rename-20260914) |
 | WinError64 수신 소실·임시 복구·재발 방지 | [09-14 증거, 후보 검토, 현재 검사·배포 구분](#accept64-guard-20260914) |
 | 서버 종료 실패와 명시적 복구 | [process_stop 실패·복구 결과](#ees-stop-recovery) |
 | 대화 폭·파란 조절 테두리 | [1920px 화면 보완](#ees-chat-width-resize), [사용자 정상 확인](#ees-stop-recovery) |
@@ -59,6 +60,23 @@
 - 확인 경계: `83d56a18638296d64130f008cdbcd0f3bf3d8878`는 ees.6 기존 UI 통합 PR #40 병합 커밋임. 이번 보고는 직전 프로그램 복구 성공이며 ees.7 적용 성공이 아님. Start는 `wait_healthy` 후 성공을 반환하고 `guard=win64_retry`는 이번 자식의 보호 설치 표시이며 실제 WinError64 발생·재시도 횟수·유휴 안정성 증거가 아님. 브라우저 재접속·새 UI·ApplyDemo·실제 LLM 업무 호출은 아직 미확인이고 이전 ees.5 성공과 WinError64 조사 근거는 보존함.
 - 복구 후 검토: 소스 읽기와 독립 검토에서 추출 ZIP·입출력 스트림·해시 검증 읽기·기록 쓰기는 rename 전에 닫히고, 새 staging 앱은 승격 전에 실행하지 않음을 확인함. 등록 서버 종료는 식별된 프로세스 종료와 포트 확인을 거침. 이 범위에서 래퍼 자신의 핸들 누수 결함은 찾지 못했으며 사내 외부 핸들·권한 원인을 배제한 것은 아님. 근거 없는 대기·재시도·권한 변경을 추가하지 않음. 문서 두 파일만 변경하고 `python scripts/check_docs.py` → `DOCS OK | files=30 links=916 errors=0 review_candidates=0`, `git diff --check`를 통과함. 실행 코드가 같으므로 기존 자동 검증을 반복하지 않으며 사내 복구 보고와 원격 CI를 구분함.
 - 후속 범위: 복구된 웹 화면 접속을 한 번 확인하고 운영을 유지함. 이 두 줄만으로 Windows 접근 거부 원인을 확정하거나 같은 Upgrade를 반복하지 않음. 새 버전 적용은 실패 대응을 정한 뒤 별도로 진행함. 이번 상태 기록은 실행 코드·패키지·CI·사내 설정을 변경하지 않음.
+
+- 후속 사용자 확인: 같은 날 사용자가 “접속은 가능해 복구 성공했어”라고 보고함. `83d56a186382`의 복구 후 웹 접속 성공을 추가 확인했으며 앞의 두 줄만 받았을 때의 미확인 기록은 당시 범위로 보존함. 사용자는 폴더 변경 전에 잠깐 대기·재시도하거나 직접 이름을 바꿀 수 있다고 제안하고 실패 대응 보완을 요청함. 아래 구현은 그 요청에 따른 후속이며 사내 적용·근본 원인 해소는 아직 확인되지 않음.
+
+<a id="windows-program-rename-20260914"></a>
+
+### Windows 프로그램 폴더 변경 대기와 수동 진행 보완 (2026-09-14)
+
+- 기준·범위: main `1edbc63362ec414e91db3031e563f1b15e2addaa`, 관련 열린 PR 없음, 동일 tree의 무변경 로컬 상태에서 시작함. 사용자가 직전 프로그램의 웹 접속 복구와 짧은 대기·수동 변경을 명시함. 새 환경·CLI·상태 파일·폴더 구조 변경 없이 기존 Apply/Restore·실패 요약·수동 가드 블록을 보완함.
+- 동작: Windows의 실제 `source.rename(destination)`이 `winerror=5/32/33`으로 거부된 경우만 1·2·4·8초 후 재시도함. 한 rename 경계에서 총 5회 시도·대기 합계 15초이며 즉시 성공하면 대기하지 않음. Apply의 active→previous와 staging→program, Restore의 previous→program에 적용함. 두 Apply 이동이 각각 마지막 시도에 성공하면 총 추가 대기는 30초가 될 수 있음. 다른 OS/오류·경로 불일치·취소를 반복하지 않고 전체 Apply·Upgrade·Start를 재실행하지 않음.
+- 보호: 매 시도 전 같은 디렉터리·부모의 device/inode 식별자, 일반 디렉터리·reparse/link 안전성, 목적지 부재를 재확인함. 외부에서 이미 옮겼거나 대상이 생긴 상태를 성공으로 채택하지 않음. 기존 pending 기록·ZIP·이전 프로그램을 보존하고 원래 예외와 errno/winerror·코드 위치를 유지함. 사내 ACL·계정·DATA_DIR·DB·키·Python·프록시·모델은 변경하지 않음.
+- 수동 진행: 최종 rename 오류에만 고정 stage/attempts/waited_seconds를 기록하고, Upgrade 실패 후 현재 저장 상태가 안전한 apply/promote일 때만 `code=program_rename_blocked next=manual_promote`를 제공함. 그 직후 [현재 수동 블록](../docs/03-openwebui-native-agent.md#ees-wrapper-manual-promote)이 실패·pending·프로그램/ZIP·잠금 상태를 재확인하고 사내 실패/적용 기록을 함께 보존한 뒤 탐색기를 엶. 사용자의 이름 변경 이후 기존 `Apply -Resume`이 같은 ZIP·대상·이전 프로그램 전체와 정지/포트/잠금을 검증하고 성공 후에만 Start·ApplyDemo로 이어짐. Restore/Start/Update 후의 오래된 블록 재사용이나 health 실패 뒤 전체 재시도를 안내하지 않음.
+- 독립 검토·수정: 재시도 사이 `_safe`/`lstat`에서 발생한 OSError에도 공통 메타데이터가 붙어 실제 rename 거부처럼 안내될 수 있는 경계를 발견함. 최종 rename 호출에서 나온 오류만 표시하는 내부 표식과 요약의 엄격한 검사로 구분하고, 동일 예외 객체가 재사용되는 모의 사례도 확인함. 문자열·불리언·비정상 수치·개인 경로/오류 원문은 요약에서 제외함.
+- 검증: Linux/Python 3.12에서 `python -m unittest tests.test_ees_webui_customization tests.test_manage_ees tests.test_ees_upgrade -q` → `Ran 184 tests in 2.362s / OK (skipped=6)`로 178개 통과. 일시적/영구 접근 거부·다른 OS/오류·목적지 출현·원본 변경·취소·오류 위치·pending/ZIP/previous 보존·수동 Resume·실패 Restore 재개·요약/수동 안내의 경계를 확인함. 6개 SKIP은 실제 Windows 디렉터리 공유 잠금 1개, 로컬 실제 wheel 부재 1개, PowerShell 4개이며 사내 성공으로 바꾸지 않음. Windows CI에는 삭제 공유 없이 잡은 실제 디렉터리 핸들을 첫 대기에서 해제하고 다음 실제 rename의 성공을 검사하는 시험을 추가함. 기존 실제 wheel·PowerShell 검사는 유지함.
+- 문서·검수: `python scripts/check_docs.py` → `DOCS OK | files=30 links=922 errors=0 review_candidates=0`, `git diff --check` 통과. 현재 Update→Upgrade→ApplyDemo 블록은 258자, 수동 복구 블록은 2,363자이며 모두 2,500자 이내임. 실제 adapter가 허용하지 않는 `Update -Summary`를 검토에서 발견해 제거함. P2 보완 후 독립 읽기 재검토에서 추가 결함을 찾지 못함. 새 UI·브랜딩·의존성·CI 설정은 변경하지 않고 원격 검사와 반영 SHA는 해당 PR에서 확인함.
+- 첫 원격 검사와 시험 보완: PR #43의 `5ef241113f49f42a060fa176cd61e32d4c234264`, [EES delivery 34826488676](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34826488676)는 Linux 성공·Windows 실패였음. Windows에서는 보존 데이터 비교의 `state/` 문자열이 역슬래시 경로를 제외하지 못한 사례와, access=0으로 연 메타데이터 핸들이 실제 rename을 막지 않은 잠금 fixture 두 건이 실패함. 실제 프로그램 wheel 검사는 통과했지만 이 두 건을 통과로 처리하지 않음. 경로를 `Path.parts`로 비교하고, 잠금 fixture를 `GENERIC_READ`로 연 뒤 helper 이전의 직접 rename 거부까지 필수 확인하도록 수정함. 접근 0·속성 조회와 공유 모드의 차이는 [Microsoft CreateFileW 문서](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)로 대조함. 실패한 시험을 생략하거나 조건을 약화하지 않았고 실행 코드는 그대로 유지함. 수정 뒤 Windows 결과는 해당 PR의 후속 검사에서 확인함.
+- 원격 검토 보완: PR #43에서 첫 customization(`before=None`, previous 없음)에도 수동 안내가 나가지만 기존 수동 블록은 previous를 요구한다는 P2를 확인함. 안내를 기존 customized 프로그램 교체와 previous가 있는 경우로 제한하고, 첫 적용은 previous 유무에 관계없이 `manual_promote`를 안내하지 않도록 검사함. 수동 블록의 범위를 넓히거나 첫 적용을 복구 성공으로 간주하지 않음.
+- 사내 경계: 과거 Restore·Start·웹 접속 성공은 `83d56a186382`의 증거이며 이번 보완이나 ees.7 적용 성공이 아님. 대기는 일시적 잠금에 대한 대응이고 특정 잠금 주체·ACL·보안 제품을 확정하거나 영구 접근 거부를 해결했다는 뜻은 아님. main·CI 반영 후 새 Update→Upgrade→ApplyDemo를 한 번 실행하고 해당 새 실패일 때만 수동 블록을 사용함.
 
 <a id="ees-work-native-integration-20260914"></a>
 

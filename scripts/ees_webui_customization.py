@@ -13,6 +13,9 @@ import io
 import json
 import os
 from pathlib import Path
+import stat
+import sys
+import time
 import zipfile
 
 try:
@@ -25,6 +28,7 @@ branding = releases.branding
 RECORD = branding.TARGET_INFO + "RECORD"
 # Present in the pinned upstream wheel: Docker reference text, never app files.
 PACKAGING_FILES = frozenset({"requirements-min.txt", "data/readme.txt"})
+PROGRAM_RENAME_DELAYS = (1, 2, 4, 8)
 
 
 class CustomizationError(ValueError):
@@ -356,6 +360,58 @@ def _complete(config, registry, record, *, active, previous, event):
         raise
 
 
+def _rename_program(source, destination, stage):
+    """Retry only a still-owned directory move briefly after Windows denies it.
+
+    The caller has validated the program contents and saved its pending stage.
+    Never adopt a move performed by another process or replay the whole Apply.
+    """
+    attempts, waited = 0, 0
+    rename_error = None
+    try:
+        names = {"move_active": ("program", "program.previous"),
+                 "promote": ("program.staging", "program"),
+                 "restore": ("program.previous", "program")}
+        if source.parent != destination.parent or (source.name, destination.name) != names.get(stage):
+            raise CustomizationError("Only the registered program directory moves are supported.")
+        identity = None
+        while True:
+            states._safe(source)
+            states._safe(destination, exists=False)
+            info, parent = source.lstat(), source.parent.lstat()
+            if not stat.S_ISDIR(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+                raise CustomizationError("The program move source is not an ordinary directory.")
+            current = (info.st_dev, info.st_ino, parent.st_dev, parent.st_ino)
+            if identity is not None and current != identity:
+                raise CustomizationError("The program move source changed; preserve it for review.")
+            identity = current
+            try:
+                destination.lstat()
+            except FileNotFoundError:
+                pass
+            else:
+                raise CustomizationError("The program move destination appeared; it was not replaced.")
+            attempts += 1
+            try:
+                source.rename(destination)
+                return
+            except OSError as exc:
+                if (sys.platform != "win32" or getattr(exc, "winerror", None) not in {5, 32, 33}
+                        or attempts > len(PROGRAM_RENAME_DELAYS)):
+                    rename_error = exc
+                    raise
+            delay = PROGRAM_RENAME_DELAYS[attempts - 1]
+            time.sleep(delay)
+            waited += delay
+    except BaseException as exc:
+        # Fixed fields only: do not expose file paths or the OS error message.
+        exc.program_rename_stage = stage
+        exc.program_rename_attempts = attempts
+        exc.program_rename_wait_seconds = waited
+        exc.program_rename_failed = exc is rename_error
+        raise
+
+
 def check_applicability(config, registry, env):
     """Check both retained app states and unused staging before asking to stop."""
     current = validate_registry(registry)
@@ -402,9 +458,9 @@ def apply(config, registry, bundle, commit, env, record, owner):
         _remove(previous, old_previous["active"])
     _save(config, registry, record, "move_active")
     if before:
-        program.rename(previous)
+        _rename_program(program, previous, "move_active")
     _save(config, registry, record, "promote")
-    staged.rename(program)
+    _rename_program(staged, program, "promote")
     validate_program(program, selected)
     _complete(config, registry, record, active=selected, previous={"active": before}, event="program_applied")
     return _result(selected, True, "apply")
@@ -508,7 +564,7 @@ def restore(config, registry, record, owner):
     if program.exists() and not desired_in_program:
         _remove(program, discarded, partial=True)
     if desired is not None and not desired_in_program:
-        previous.rename(program)
+        _rename_program(previous, program, "restore")
     elif previous.exists():
         _remove(previous, pending["old_previous"]["active"], partial=True)
     if staged.exists():

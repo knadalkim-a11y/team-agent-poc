@@ -11,6 +11,7 @@ import json
 import os
 import shutil
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -66,6 +67,228 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missin
         for name, content in members.items():
             wheel.writestr(name, content)
     return output.getvalue()
+
+
+def rename_denied(winerror=5):
+    error = PermissionError(13, "synthetic Windows directory denial")
+    error.winerror = winerror
+    return error
+
+
+class ProgramRenameTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.source = self.root / "program.staging"
+        self.destination = self.root / "program"
+        self.source.mkdir()
+        (self.source / "owned.txt").write_bytes(b"owned program")
+
+    def move(self):
+        custom._rename_program(self.source, self.destination, "promote")
+
+    def test_transient_windows_denials_retry_only_the_same_fixed_move(self):
+        original = Path.rename
+        for stage, names in (("move_active", ("program", "program.previous")),
+                             ("promote", ("program.staging", "program")),
+                             ("restore", ("program.previous", "program"))):
+            for winerror in (5, 32, 33):
+                with self.subTest(stage=stage, winerror=winerror):
+                    directory = self.root / (stage + str(winerror))
+                    directory.mkdir()
+                    source, destination = (directory / name for name in names)
+                    source.mkdir()
+                    (source / "owned.txt").write_bytes(b"owned")
+                    attempts = []
+                    def rename(path, target):
+                        attempts.append((path, target))
+                        if len(attempts) < 3:
+                            raise rename_denied(winerror)
+                        return original(path, target)
+                    with mock.patch.object(custom.sys, "platform", "win32"), \
+                            mock.patch.object(Path, "rename", rename), \
+                            mock.patch.object(custom.time, "sleep") as sleep:
+                        custom._rename_program(source, destination, stage)
+                    self.assertEqual(attempts, [(source, destination)] * 3)
+                    self.assertEqual(sleep.call_args_list, [mock.call(1), mock.call(2)])
+                    self.assertFalse(source.exists())
+                    self.assertEqual((destination / "owned.txt").read_bytes(), b"owned")
+
+    def test_exhaustion_preserves_original_error_and_owned_directory(self):
+        denied = rename_denied()
+        with mock.patch.object(custom.sys, "platform", "win32"), \
+                mock.patch.object(Path, "rename", side_effect=denied) as rename, \
+                mock.patch.object(custom.time, "sleep") as sleep, self.assertRaises(PermissionError) as caught:
+            self.move()
+        self.assertIs(caught.exception, denied)
+        self.assertEqual((denied.errno, denied.winerror), (13, 5))
+        self.assertEqual((denied.program_rename_stage, denied.program_rename_attempts,
+                          denied.program_rename_wait_seconds), ("promote", 5, 15))
+        self.assertIs(denied.program_rename_failed, True)
+        self.assertEqual(rename.call_count, 5)
+        self.assertEqual(sleep.call_args_list, [mock.call(1), mock.call(2), mock.call(4), mock.call(8)])
+        self.assertFalse(self.destination.exists())
+        self.assertEqual((self.source / "owned.txt").read_bytes(), b"owned program")
+
+    def test_non_windows_and_other_errors_do_not_wait_or_retry(self):
+        cases = (("linux", rename_denied()), ("win32", PermissionError(13, "plain errno")),
+                 ("win32", rename_denied(2)), ("win32", rename_denied(145)),
+                 ("win32", OSError(5, "unrelated filesystem failure")))
+        for platform, denied in cases:
+            with self.subTest(platform=platform, winerror=getattr(denied, "winerror", None)), \
+                    mock.patch.object(custom.sys, "platform", platform), \
+                    mock.patch.object(Path, "rename", side_effect=denied) as rename, \
+                    mock.patch.object(custom.time, "sleep") as sleep, self.assertRaises(OSError) as caught:
+                self.move()
+            self.assertIs(caught.exception, denied)
+            self.assertEqual(rename.call_count, 1)
+            self.assertEqual((denied.program_rename_attempts, denied.program_rename_wait_seconds), (1, 0))
+            sleep.assert_not_called()
+
+    def test_destination_created_during_wait_is_never_replaced(self):
+        def appeared(_delay):
+            self.destination.mkdir()
+            (self.destination / "unowned.txt").write_bytes(b"preserved outsider")
+        with mock.patch.object(custom.sys, "platform", "win32"), \
+                mock.patch.object(Path, "rename", side_effect=rename_denied()) as rename, \
+                mock.patch.object(custom.time, "sleep", side_effect=appeared), \
+                self.assertRaisesRegex(custom.CustomizationError, "destination appeared") as caught:
+            self.move()
+        self.assertEqual(rename.call_count, 1)
+        self.assertEqual(caught.exception.program_rename_attempts, 1)
+        self.assertEqual((self.destination / "unowned.txt").read_bytes(), b"preserved outsider")
+        self.assertEqual((self.source / "owned.txt").read_bytes(), b"owned program")
+
+    def test_dangling_destination_link_is_rejected_before_any_rename(self):
+        try:
+            self.destination.symlink_to(self.root / "missing", target_is_directory=True)
+        except OSError as exc:
+            self.skipTest("This test account cannot create symlinks: " + type(exc).__name__)
+        with mock.patch.object(Path, "rename") as rename, mock.patch.object(custom.time, "sleep") as sleep, \
+                self.assertRaises(custom.states.StateError):
+            self.move()
+        rename.assert_not_called()
+        sleep.assert_not_called()
+        self.assertTrue(self.destination.is_symlink())
+
+    def test_replaced_source_identity_stops_after_wait(self):
+        original = Path.rename
+        retained = self.root / "retained"
+        def replaced(_delay):
+            original(self.source, retained)
+            self.source.mkdir()
+            (self.source / "unowned.txt").write_bytes(b"new directory")
+        with mock.patch.object(custom.sys, "platform", "win32"), \
+                mock.patch.object(Path, "rename", side_effect=rename_denied()) as rename, \
+                mock.patch.object(custom.time, "sleep", side_effect=replaced), \
+                self.assertRaisesRegex(custom.CustomizationError, "source changed"):
+            self.move()
+        self.assertEqual(rename.call_count, 1)
+        self.assertFalse(self.destination.exists())
+        self.assertEqual((retained / "owned.txt").read_bytes(), b"owned program")
+        self.assertEqual((self.source / "unowned.txt").read_bytes(), b"new directory")
+
+    def test_external_promotion_is_not_adopted_as_success(self):
+        original = Path.rename
+        with mock.patch.object(custom.sys, "platform", "win32"), \
+                mock.patch.object(Path, "rename", side_effect=rename_denied()) as rename, \
+                mock.patch.object(custom.time, "sleep", side_effect=lambda _: original(self.source, self.destination)), \
+                self.assertRaises(custom.states.StateError):
+            self.move()
+        self.assertEqual(rename.call_count, 1)
+        self.assertEqual((self.destination / "owned.txt").read_bytes(), b"owned program")
+
+    def test_path_safety_is_rechecked_after_wait(self):
+        safe = custom.states._safe
+        moved = False
+        def checked(path, *args, **kwargs):
+            if moved:
+                raise custom.states.StateError("synthetic newly introduced reparse point")
+            return safe(path, *args, **kwargs)
+        def changed(_delay):
+            nonlocal moved
+            moved = True
+        with mock.patch.object(custom.sys, "platform", "win32"), \
+                mock.patch.object(custom.states, "_safe", side_effect=checked), \
+                mock.patch.object(Path, "rename", side_effect=rename_denied()) as rename, \
+                mock.patch.object(custom.time, "sleep", side_effect=changed), \
+                self.assertRaises(custom.states.StateError):
+            self.move()
+        self.assertEqual(rename.call_count, 1)
+        self.assertFalse(self.destination.exists())
+
+    def test_cancellation_during_wait_stops_without_retry(self):
+        with mock.patch.object(custom.sys, "platform", "win32"), \
+                mock.patch.object(Path, "rename", side_effect=rename_denied()) as rename, \
+                mock.patch.object(custom.time, "sleep", side_effect=KeyboardInterrupt()) as sleep, \
+                self.assertRaises(KeyboardInterrupt) as caught:
+            self.move()
+        self.assertEqual(rename.call_count, 1)
+        sleep.assert_called_once_with(1)
+        self.assertEqual((caught.exception.program_rename_attempts,
+                          caught.exception.program_rename_wait_seconds), (1, 0))
+        self.assertIs(caught.exception.program_rename_failed, False)
+        self.assertTrue(self.source.is_dir())
+        self.assertFalse(self.destination.exists())
+
+    def test_path_denial_after_wait_is_not_misreported_as_a_rename_failure(self):
+        denied = rename_denied()
+        safe = custom.states._safe
+        after_wait = False
+        def checked(path, *args, **kwargs):
+            if after_wait:
+                # Reuse even the same exception object as the first rename.
+                raise denied
+            return safe(path, *args, **kwargs)
+        def waited(_delay):
+            nonlocal after_wait
+            after_wait = True
+        with mock.patch.object(custom.sys, "platform", "win32"), \
+                mock.patch.object(custom.states, "_safe", side_effect=checked), \
+                mock.patch.object(Path, "rename", side_effect=denied) as rename, \
+                mock.patch.object(custom.time, "sleep", side_effect=waited), \
+                self.assertRaises(PermissionError) as caught:
+            self.move()
+        self.assertIs(caught.exception, denied)
+        self.assertIs(denied.program_rename_failed, False)
+        self.assertEqual((denied.program_rename_attempts, denied.program_rename_wait_seconds), (1, 1))
+        self.assertEqual(rename.call_count, 1)
+        self.assertFalse(self.destination.exists())
+
+    @unittest.skipUnless(sys.platform == "win32", "Requires an actual Windows directory sharing lock")
+    def test_real_windows_directory_lock_released_during_wait_then_promotes(self):
+        import ctypes
+        from ctypes import wintypes
+        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        create = kernel.CreateFileW
+        create.argtypes = (wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID,
+                           wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE)
+        create.restype = wintypes.HANDLE
+        close = kernel.CloseHandle
+        close.argtypes, close.restype = (wintypes.HANDLE,), wintypes.BOOL
+        # Use a real read handle: a zero-access metadata handle did not block
+        # rename on Windows CI. Share reads/writes, but omit FILE_SHARE_DELETE.
+        handle = create(str(self.source), 0x80000000, 0x1 | 0x2, None, 3, 0x02000000, None)
+        self.assertNotEqual(handle, wintypes.HANDLE(-1).value, ctypes.get_last_error())
+        def release_lock(_delay):
+            nonlocal handle
+            self.assertTrue(close(handle), ctypes.get_last_error())
+            handle = None
+        try:
+            with self.assertRaises(OSError) as blocked:
+                self.source.rename(self.destination)
+            self.assertIn(getattr(blocked.exception, "winerror", None), (5, 32, 33))
+            self.assertTrue(self.source.is_dir())
+            self.assertFalse(self.destination.exists())
+            with mock.patch.object(custom.time, "sleep", side_effect=release_lock) as sleep:
+                self.move()
+            sleep.assert_called_once_with(1)
+        finally:
+            if handle is not None:
+                close(handle)
+        self.assertFalse(self.source.exists())
+        self.assertEqual((self.destination / "owned.txt").read_bytes(), b"owned program")
 
 
 class CustomizationTests(unittest.TestCase):
@@ -552,6 +775,62 @@ class CustomizationTests(unittest.TestCase):
         self.assertEqual(self.registry["customization"]["pending"]["stage"], "move_active")
         self.restore()
         self.assertEqual(self.registry["customization"]["active"], first)
+
+    def test_exhausted_windows_promote_preserves_pending_and_can_manually_resume(self):
+        before = self.install_legacy_program()
+        preserved = {name: value for name, value in self.tree().items() if Path(name).parts[0] != "state"}
+        staged, previous = (self.root / "state" / name for name in ("program.staging", "program.previous"))
+        original = Path.rename
+        attempts = []
+        def rename(path, target):
+            attempts.append((path, target))
+            if path == staged:
+                raise rename_denied()
+            return original(path, target)
+        with mock.patch.object(custom.sys, "platform", "win32"), \
+                mock.patch.object(Path, "rename", rename), mock.patch.object(custom.time, "sleep") as sleep, \
+                self.assertRaises(PermissionError) as caught:
+            self.apply()
+        self.assertEqual(caught.exception.program_rename_attempts, 5)
+        self.assertEqual(attempts, [(self.program, previous)] + [(staged, self.program)] * 5)
+        self.assertEqual(sleep.call_count, 4)
+        pending = self.saved["customization"]["pending"]
+        self.assertEqual((pending["action"], pending["stage"], pending["before"]), ("apply", "promote", before))
+        self.assertEqual(self.events.count("program_apply_started"), 1)
+        self.assertFalse(self.program.exists())
+        custom.validate_program(previous, before)
+        custom.validate_program(staged, pending["target"])
+        self.assertEqual(preserved, {name: value for name, value in self.tree().items() if Path(name).parts[0] != "state"})
+        staged.rename(self.program)
+        self.assertTrue(self.resume()["changed"])
+        self.assertIsNone(self.saved["customization"]["pending"])
+        self.assertEqual(self.restore()["source_commit"], before["source_commit"])
+
+    def test_exhausted_windows_restore_retains_verified_previous_for_explicit_retry(self):
+        before = self.install_legacy_program()
+        self.apply()
+        previous = self.root / "state" / "program.previous"
+        denied = rename_denied(32)
+        with mock.patch.object(custom.sys, "platform", "win32"), \
+                mock.patch.object(Path, "rename", side_effect=denied), \
+                mock.patch.object(custom.time, "sleep"), self.assertRaises(PermissionError) as caught:
+            self.restore()
+        self.assertIs(caught.exception, denied)
+        self.assertEqual((denied.program_rename_stage, denied.program_rename_attempts), ("restore", 5))
+        pending = self.saved["customization"]["pending"]
+        self.assertEqual((pending["action"], pending["stage"]), ("restore", "restore"))
+        custom.validate_program(previous, before)
+        self.assertFalse(self.program.exists())
+        self.assertEqual(self.restore()["source_commit"], before["source_commit"])
+        custom.validate_program(self.program, before)
+
+    def test_successful_and_noop_apply_restore_never_wait(self):
+        with mock.patch.object(custom.time, "sleep") as sleep:
+            self.assertTrue(self.apply()["changed"])
+            self.assertFalse(self.apply()["changed"])
+            self.assertTrue(self.restore()["changed"])
+            self.assertFalse(self.restore()["changed"])
+        sleep.assert_not_called()
 
     def test_failed_first_program_promotion_requires_restore_and_preserves_original(self):
         before = self.tree()
