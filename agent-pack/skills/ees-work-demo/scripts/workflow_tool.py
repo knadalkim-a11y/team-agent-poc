@@ -1,7 +1,7 @@
 """
 title: EES Workflow
 description: 기존 대화와 업무 패널이 공유하는 공장별 업무 진행 및 절차 관리
-version: 0.1.0
+version: 0.2.0
 required_open_webui_version: 0.11.3
 ees_demo_pack: ees-demo-v1
 """
@@ -46,7 +46,10 @@ def _compact(state):
     if case:
         # Snapshot definitions contain the effective instructions, mappings and
         # field constraints. Keep those; never copy unrelated users/drafts.
-        result["available_actions"] = ["select", "update_inputs", "run"]
+        completed = case.get("status") in {"passed", "completed", "success", "skipped"}
+        result["available_actions"] = ["select"] if completed else ["select", "update_inputs", "run"]
+        if completed:
+            result["message"] += " 완료된 실행의 결과는 보존합니다. 다시 수행하려면 새 실행을 시작해 주세요."
     else:
         catalog = state.get("catalog", {})
         result["catalog"] = {key: catalog.get(key, []) for key in ("systems", "sites", "nodes")}
@@ -62,6 +65,7 @@ def _compact(state):
 
 class Tools:
     async def ees_workflow_view(self, include_draft: bool = False,
+                                case_id: str = "", include_navigation: bool = False,
                                 __user__=None, __metadata__=None, __event_call__=None) -> dict:
         """Read the current chat's latest selected process/task/job, factory, inputs,
         tools, effective instructions and execution results. Call this BEFORE
@@ -70,19 +74,35 @@ class Tools:
         workflow call. DB/AP results are simulations, never real connectivity.
 
         :param include_draft: Admin only: include the editable procedure draft and its revision when the user asks to edit procedures.
+        :param case_id: Optional exact case ID from navigation for read-only execution history. Does not switch the current chat or selected job. History has no available actions; read the current view again before an action.
+        :param include_navigation: Include published factory/system/process navigation and this user's execution summaries when asked to browse work or compare current and past runs.
         """
+        if not isinstance(case_id, str) or len(case_id) > 200:
+            return _error("invalid_request", "조회할 진행 건 정보를 확인해 주세요.")
         chat_id = _chat(__metadata__)
         if not chat_id:
             return _error("chat_required", "기존 대화창에서 업무를 선택해 주세요.")
-        binding = await _ensure_chat(__event_call__, chat_id)
         try:
             from open_webui.ees_workflow import get_state
         except ImportError:
-            return _error("program_upgrade_required", "업무 기능을 포함한 EES Portal 프로그램 업데이트가 필요합니다.")
-        state = await get_state(__user__, chat_id=chat_id)
-        if state.get("ok") and not state.get("case") and not binding.get("ok"):
-            return _error("binding_unconfirmed", "선택한 업무와 대화 연결을 확인하지 못했습니다. 현재 화면에서 연결 상태를 확인해 주세요.")
+            return _error("program_upgrade_required", "업무 기능을 포함한 EES Work 프로그램 업데이트가 필요합니다.")
+        if case_id:
+            # Historical reads must not bind a pending case or move the live
+            # conversation. The service checks case and linked-chat ownership.
+            state = await get_state(__user__, case_id=case_id)
+        else:
+            binding = await _ensure_chat(__event_call__, chat_id)
+            state = await get_state(__user__, chat_id=chat_id)
+            if state.get("ok") and not state.get("case") and not binding.get("ok"):
+                return _error("binding_unconfirmed", "선택한 업무와 대화 연결을 확인하지 못했습니다. 현재 화면에서 연결 상태를 확인해 주세요.")
         result = _compact(state)
+        if case_id and state.get("ok"):
+            result["read_only"] = True
+            result["available_actions"] = []
+        if include_navigation and state.get("ok"):
+            catalog = state.get("catalog", {})
+            result["navigation"] = {key: catalog.get(key, {}) for key in ("systems", "sites", "roots", "nodes")}
+            result["cases"] = state.get("cases", [])
         if include_draft and state.get("ok"):
             if not state.get("can_manage"):
                 return _error("admin_required", "업무 절차 편집은 관리자 권한이 필요합니다.")
@@ -116,13 +136,15 @@ class Tools:
         try:
             from open_webui.ees_workflow import get_state, handle_action
         except ImportError:
-            return _error("program_upgrade_required", "업무 기능을 포함한 EES Portal 프로그램 업데이트가 필요합니다.")
+            return _error("program_upgrade_required", "업무 기능을 포함한 EES Work 프로그램 업데이트가 필요합니다.")
         state = await get_state(__user__, chat_id=chat_id)
         if not state.get("ok"):
             return state
         if not state.get("case") and not binding.get("ok"):
             return _error("binding_unconfirmed", "선택한 업무와 대화 연결을 확인하지 못했습니다. 현재 화면에서 연결 상태를 확인해 주세요.")
         case = state.get("case") or {}
+        if action in {"update_inputs", "run"} and case.get("status") in {"passed", "completed", "success", "skipped"}:
+            return _error("case_completed", "완료된 실행의 결과는 변경할 수 없습니다. 새 실행을 시작해 주세요.")
         body = {"action": action, "chat_id": chat_id, "case_id": case.get("id", ""),
                 "node_id": node_id or case.get("selected_id", ""), "payload": payload or {},
                 "expected_revision": expected_revision}
@@ -140,11 +162,14 @@ class Tools:
         """Adjust workflow navigation or the existing right panel when requested.
         This only changes presentation; it never runs a job or changes inputs.
 
-        :param options: Any of panel_open, navigator_open, pinned as booleans; category as setup/ops/incident; system as EMS/APC/FDC/EGIS/EPT; workspace:true to open procedure editing (admin only). Use ees_workflow_action(select) for a particular process/task/job.
+        :param options: Any of panel_open, navigator_open, pinned, history_open as booleans; category as setup/ops/incident; system as EMS/APC/FDC/EGIS/EPT; site_id and process_id from navigation to browse work; case_id to resume an accessible execution in its own conversation; history_case_id to inspect a past execution read-only without changing the current conversation; workspace:true to open procedure editing (admin only). Do not combine case_id and history_case_id. Use ees_workflow_action(select) for a particular task/job in the current execution.
         """
-        allowed = {"panel_open", "navigator_open", "pinned", "category", "system", "workspace"}
+        identifiers = {"site_id", "process_id", "case_id", "history_case_id"}
+        allowed = {"panel_open", "navigator_open", "pinned", "category", "system", "workspace", "history_open", *identifiers}
         if (not isinstance(options, dict) or not options or set(options) - allowed
-                or any(type(value) is not bool for key, value in options.items() if key not in {"category", "system"})
+                or any(type(value) is not bool for key, value in options.items() if key not in {"category", "system", *identifiers})
+                or any(not isinstance(options[key], str) or not 0 < len(options[key]) <= 200 for key in identifiers if key in options)
+                or ("case_id" in options and "history_case_id" in options)
                 or ("category" in options and (not isinstance(options["category"], str) or options["category"] not in {"setup", "ops", "incident"}))
                 or ("system" in options and (not isinstance(options["system"], str) or options["system"] not in {"EMS", "APC", "FDC", "EGIS", "EPT"}))):
             return _error("invalid_display", "표시할 업무 화면과 탐색 조건을 확인해 주세요.")
@@ -154,12 +179,21 @@ class Tools:
         try:
             from open_webui.ees_workflow import get_state
         except ImportError:
-            return _error("program_upgrade_required", "EES Portal 프로그램 업데이트가 필요합니다.")
+            return _error("program_upgrade_required", "EES Work 프로그램 업데이트가 필요합니다.")
         state = await get_state(__user__, chat_id=chat_id)
         if not state.get("ok"):
             return state
         if options.get("workspace") and not state.get("can_manage"):
             return _error("admin_required", "업무 절차 편집은 관리자 권한이 필요합니다.")
+        catalog = state.get("catalog", {})
+        if (("site_id" in options and options["site_id"] not in catalog.get("sites", {}))
+                or ("process_id" in options and catalog.get("nodes", {}).get(options["process_id"], {}).get("type") != "p")):
+            return _error("invalid_display", "등록된 공장과 프로세스를 선택해 주세요.")
+        for key in ("case_id", "history_case_id"):
+            if key in options:
+                execution = await get_state(__user__, case_id=options[key])
+                if not execution.get("ok"):
+                    return execution
         return await _browser(__event_call__, chat_id,
             "const options = " + json.dumps(options, ensure_ascii=True) + ";\n"
             "return window.__eesNativeWorkV1?.display ? await window.__eesNativeWorkV1.display(chatId,options) : {ok:false,code:'ui_unavailable'};")

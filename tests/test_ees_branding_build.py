@@ -12,6 +12,8 @@ import io
 import json
 import os
 from pathlib import Path
+import shutil
+import subprocess
 import tempfile
 import unittest
 from unittest import mock
@@ -41,6 +43,8 @@ def fixture_members():
         app + "immutable/nodes/0.CvnwnD8l.js": b'new Notification(`${title} / Open WebUI`);' * 3,
         app + "immutable/nodes/26.Ck8JdNW5.js": b'document.title=`${channel} / Open WebUI`;' * 2,
         app + "immutable/chunks/DKj2ZiCb.js": b'const an="0.11.3";fetch(`${base}/_app/version.json`);',
+        app + "immutable/chunks/zKJlHFgk.js": b';'.join(
+            before for before, _, _ in builder.PATCHES[app + "immutable/chunks/zKJlHFgk.js"]),
         app + "version.json": b'{"version":"0.11.3"}',
         app + "immutable/entry/start.js": b'import "../chunks/CHq18Uto.js";\n//# sourceMappingURL=start.js.map',
         app + "immutable/entry/start.js.map": b'{"file":"_app/immutable/entry/start.js","sourcesContent":["Open WebUI"]}',
@@ -130,10 +134,10 @@ class BrandingBuildTests(unittest.TestCase):
                     self.assertEqual(built.read(target), original, name)
             self.assertEqual(built.read(builder.TARGET_INFO + "licenses/LICENSE"), LICENSE)
             self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.6\n"))
+                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.7\n"))
             self.assertEqual(built.read("open_webui/env.py").count(NOTICE), 2)
             self.assertNotIn(b"WEBUI_NAME +=", built.read("open_webui/env.py"))
-            self.assertIn(b"EES Portal", built.read("open_webui/frontend/index.html"))
+            self.assertIn(b"EES Work", built.read("open_webui/frontend/index.html"))
             self.assertNotIn(b"/_app/", built.read("open_webui/frontend/index.html"))
             index = built.read("open_webui/frontend/index.html")
             self.assertEqual(index.count(builder.THEME_LINK), 1)
@@ -150,7 +154,10 @@ class BrandingBuildTests(unittest.TestCase):
             for name, (origin, _) in builder.FONT_SOURCES.items():
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/" + name), self.members[origin])
             runtime = built.read(builder.TARGET_APP + "immutable/chunks/DKj2ZiCb.js")
-            self.assertIn(b"/_ees6/version.json", runtime)
+            self.assertIn(b"/_ees7/version.json", runtime)
+            chat = built.read(builder.TARGET_APP + "immutable/chunks/zKJlHFgk.js")
+            self.assertIn(builder.NATIVE_DRAFT_HOOK, chat)
+            self.assertIn(b'if(window.__eesNativeDraftV1===eesNativeDraftApi)delete window.__eesNativeDraftV1;', chat)
             self.assertEqual(json.loads(built.read(builder.TARGET_APP + "version.json"))["version"], builder.VERSION)
             for prefix in ("open_webui/static/", "open_webui/frontend/static/"):
                 for name in builder.ASSET_NAMES:
@@ -168,12 +175,13 @@ class BrandingBuildTests(unittest.TestCase):
             self.build()
         self.assertFalse((self.root / "release").exists())
 
-    def test_portal_name_migrates_registered_assistant_and_preserves_custom_name(self):
+    def test_work_name_migrates_registered_brand_names_and_preserves_custom_name(self):
         self.build()
         with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
             synthetic_env = built.read("open_webui/env.py")
-        for registered, expected in ((None, "EES Portal"), ("EES Assistant", "EES Portal"),
-                                     ("EES Portal", "EES Portal"), ("Team Custom", "Team Custom")):
+        for registered, expected in ((None, "EES Work"), ("EES Assistant", "EES Work"),
+                                     ("EES Portal", "EES Work"), ("EES Work", "EES Work"),
+                                     ("Team Custom", "Team Custom")):
             with self.subTest(registered=registered):
                 environment = {} if registered is None else {"WEBUI_NAME": registered}
                 with mock.patch.dict(os.environ, environment, clear=True):
@@ -181,6 +189,63 @@ class BrandingBuildTests(unittest.TestCase):
                     exec(synthetic_env, namespace)
                     self.assertEqual(namespace["WEBUI_NAME"], expected)
                     self.assertEqual(dict(os.environ), environment)
+
+    @unittest.skipUnless(shutil.which("node"), "Node is required for the native draft boundary probe.")
+    def test_work_draft_hook_never_imports_or_persists_tool_approval_mode(self):
+        # Run the exact emitted hook against the native qi/Ps boundary. The
+        # import boundary simulates Ci's side effect if mode reaches it, so an
+        # accidental restore of `full` is observable rather than a text check.
+        probe = r'''
+const assert = require('node:assert/strict');
+let current = {prompt:'original', selectedToolIds:['existing'], toolApprovalMode:'ask'};
+let approvalCalls = 0, imported = [], persisted = [], _r = null;
+const window = {location:{pathname:'/'}}, ce = false, le = {}, r = value => value;
+const j = () => false, g = () => false, Fr = () => 'native-chat',G=()=>'',d=()=>'';
+const us = () => current;
+const Ps = async (draft, chatId, debounce) => persisted.push({draft, chatId, debounce});
+const qi = async serialized => {
+  const incoming = JSON.parse(serialized);
+  imported.push(incoming);
+  if (incoming.toolApprovalMode) {
+    approvalCalls += incoming.toolApprovalMode === 'full' ? 1 : 0;
+    current.toolApprovalMode = incoming.toolApprovalMode;
+  }
+  current = {...current, ...incoming};
+  return true;
+};
+'''+builder.NATIVE_DRAFT_LOAD_GUARD.decode()+builder.NATIVE_DRAFT_HOOK.decode()+r'''
+(async () => {
+  const hook = window.__eesNativeDraftV1;
+  let finishFirst,finishSecond;
+  const first=eesNativeDraftLoad(()=>new Promise(resolve=>{finishFirst=resolve;}));
+  const second=eesNativeDraftLoad(()=>new Promise(resolve=>{finishSecond=resolve;}));
+  assert.equal(hook.ready(),false);
+  finishFirst();await first;assert.equal(hook.ready(),false);
+  finishSecond();await second;assert.equal(hook.ready(),true);
+  window.location.pathname='/c/other';assert.equal(hook.ready(),false);
+  window.location.pathname='/';
+  const draft = hook.read();
+  assert.equal(Object.hasOwn(draft, 'toolApprovalMode'), false);
+  assert.equal(current.toolApprovalMode, 'ask');
+  await hook.flush();
+  assert.equal(await hook.restore(JSON.stringify({prompt:'restored', selectedToolIds:['kept'], toolApprovalMode:'full'})), true);
+  assert.equal(current.prompt, 'restored');
+  assert.deepEqual(current.selectedToolIds, ['kept']);
+  assert.equal(current.toolApprovalMode, 'ask');
+  assert.equal(approvalCalls, 0);
+  assert.equal(imported.length, 1);
+  assert.equal(Object.hasOwn(imported[0], 'toolApprovalMode'), false);
+  assert.equal(persisted.length, 2);
+  assert.equal(persisted.every(item => !Object.hasOwn(item.draft, 'toolApprovalMode') && item.chatId === 'native-chat' && item.debounce === false), true);
+  for (const invalid of ['{', 'null', '[]', '"text"', 'false']) assert.equal(await hook.restore(invalid), false);
+  assert.equal(imported.length, 1);
+  console.log('draft_approval_boundary=pass');
+})().catch(error => {console.error(error); process.exitCode = 1;});
+'''
+        result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
+                                text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "draft_approval_boundary=pass")
 
     def test_patch_drift_fails_before_writing(self):
         self.members["open_webui/env.py"] += self.members["open_webui/env.py"]
@@ -237,6 +302,87 @@ class BrandingBuildTests(unittest.TestCase):
 
 @unittest.skipUnless(os.environ.get("EES_TEST_UPSTREAM_WHEEL"), "Set EES_TEST_UPSTREAM_WHEEL for the offline official wheel audit.")
 class OfficialWheelTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("node"), "Node is required for the pinned native Chat probe.")
+    def test_native_chat_bridges_preserve_approval_and_bind_only_successful_main_creation(self):
+        with ZipFile(Path(os.environ["EES_TEST_UPSTREAM_WHEEL"])) as source:
+            name = builder.SOURCE_APP + "immutable/chunks/zKJlHFgk.js"
+            chat = source.read(name)
+        for before, after, count in builder.PATCHES[name]:
+            self.assertEqual(chat.count(before), count)
+            chat = chat.replace(before, after)
+        chat = chat.decode()
+        # Execute actual pinned native functions with only stores/API/UI
+        # boundaries stubbed. In particular qi's real Ci(mode) branch remains.
+        native_functions = []
+        for start, end in ((",qi=async x=>", ",po=x=>"),
+                           (",us=()=>", ",Ps=async"),
+                           (",kt=async x=>", ",Ht=async")):
+            index = chat.index(start)
+            native_functions.append("const " + chat[index + 1:chat.index(end, index)] + ";")
+        completion_start = chat.index("Ot&&(Ot.error?await Ko(Ot.error,me)")
+        completion_end = chat.index(",await Ft(),rs()&&os()},Ko=async", completion_start)
+        native_functions.append("const eesProbeCompletion=async response=>{const ue=d(),me={},Tt=true,"
+            + builder.NATIVE_COMPLETION_CAPTURE.decode() + "Ot=await response;"
+            + chat[completion_start:completion_end] + ";};")
+        probe = r'''
+const assert = require('node:assert/strict');
+const state = value => ({value}), r = item => item.value, c = (item, value) => item.value = value;
+const Qr=state('draft'),mr=state([]),Ut=state(['tool']),Qt=state([]),Lt=state([]),cr=state(false),Sr=state(false),$r=state(false),L=state('ask');
+const ce=state(false),le=state({setText(){}}),Br=state(null),oe=state(['model']),Hr=state({}),ls=state({});
+const Ae=state({state:{}}),Fn={update:callback=>callback({})},Ki=()=>{},Ko=async()=>{},Io=async()=>{};
+let embedded=false,temporary=false,nativeId='',failCreation=false,approvalCalls=0,beginCalls=0,_r=null;
+const j=()=>embedded,g=()=>temporary,d=()=>nativeId,G=()=>nativeId,H=()=>null,R=()=>null,Fr=()=>nativeId||null;
+const Ci=async mode=>{approvalCalls++;c(L,mode);},Ps=async()=>{},Ft=async()=>{},fn=async()=>{},wl=async()=>{};
+const xi={set:async id=>{nativeId=id;}},aa={set(){}},wu=()=> 'temporary',l=()=>({t:s=>s}),n=()=>({}),ti=()=>[];
+const localStorage={token:'synthetic'},notifications=[];
+const window={location:{pathname:'/'},history:{replaceState(state,title,path){window.location.pathname=path;}},__eesNativeWorkV1:{
+  beginChatCreation(){if(window.location.pathname!=='/')return null;beginCalls++;return {sequence:beginCalls};},
+  finishChatCreation(ticket,id){notifications.push({ticket,id});}
+}};
+const bu=async()=>{if(failCreation)throw Error('synthetic create failure');return {id:'server-created-chat'};};
+'''+"\n".join(native_functions)+builder.NATIVE_DRAFT_LOAD_GUARD.decode()+builder.NATIVE_DRAFT_HOOK.decode()+r'''
+(async()=>{
+  assert.equal(await window.__eesNativeDraftV1.restore(JSON.stringify({prompt:'restored',selectedToolIds:['kept'],toolApprovalMode:'full'})),true);
+  assert.equal(r(Qr),'restored');assert.deepEqual(r(Ut),['kept']);assert.equal(r(L),'ask');assert.equal(approvalCalls,0);
+  assert.equal(Object.hasOwn(window.__eesNativeDraftV1.read(),'toolApprovalMode'),false);
+  nativeId='provisional';failCreation=true;
+  await assert.rejects(kt({currentId:'message',state:{}}),/synthetic create failure/);
+  assert.equal(beginCalls,1);assert.equal(notifications.length,0);
+  failCreation=false;
+  assert.equal(await kt({currentId:'message',state:{}}),'server-created-chat');
+  assert.equal(notifications.length,1);assert.equal(notifications[0].id,'server-created-chat');
+  assert.equal(notifications[0].ticket.sequence,2);
+  await kt({currentId:'message',state:{}});
+  assert.equal(beginCalls,2);assert.equal(notifications.length,1);
+  nativeId='';temporary=true;await kt({currentId:'message',state:{}});
+  assert.equal(beginCalls,2);assert.equal(notifications.length,1);
+  nativeId='';temporary=false;embedded=true;await kt({currentId:'message',state:{}});
+  assert.equal(beginCalls,2);assert.equal(notifications.length,1);
+  embedded=false;nativeId='provisional-2';window.location.pathname='/';
+  await eesProbeCompletion({chat_id:'completion-created-chat'});
+  assert.equal(notifications.length,2);assert.equal(notifications[1].id,'completion-created-chat');
+  assert.equal(window.location.pathname,'/c/completion-created-chat');
+  nativeId='provisional-3';window.location.pathname='/';
+  await eesProbeCompletion({error:'synthetic response error',chat_id:'must-not-bind'});
+  await eesProbeCompletion(null);
+  assert.equal(notifications.length,2);
+  temporary=true;await eesProbeCompletion({chat_id:'temporary-result'});
+  temporary=false;embedded=true;await eesProbeCompletion({chat_id:'embedded-result'});
+  assert.equal(notifications.length,2);
+  embedded=false;nativeId='provisional-4';window.location.pathname='/';
+  let finishResponse;
+  const pending=eesProbeCompletion(new Promise(resolve=>{finishResponse=resolve;}));
+  nativeId='another-chat';window.location.pathname='/c/another-chat';
+  finishResponse({chat_id:'late-result'});await pending;
+  assert.equal(notifications.length,2);
+  console.log('pinned_native_bridges=pass');
+})().catch(error=>{console.error(error);process.exitCode=1;});
+'''
+        result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
+                                text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "pinned_native_bridges=pass")
+
     def test_real_pinned_wheel_patches_records_and_unrelated_content(self):
         source_path = Path(os.environ["EES_TEST_UPSTREAM_WHEEL"])
         with tempfile.TemporaryDirectory() as temporary:
@@ -252,7 +398,7 @@ class OfficialWheelTests(unittest.TestCase):
                         self.assertEqual(built.read(target), source.read(name), name)
                 metadata = source.read(builder.SOURCE_INFO + "METADATA")
                 self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.6\n"))
+                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.7\n"))
                 for filename, (origin, expected) in builder.FONT_SOURCES.items():
                     copied = built.read(builder.TARGET_APP + "fonts/" + filename)
                     self.assertEqual(copied, source.read(origin))

@@ -64,6 +64,10 @@ class NativeUIServer(ThreadingHTTPServer):
         self.action_response_started = threading.Event()
         self.action_response_hold = threading.Event()
         self.action_response_hold.set()
+        self.delay_next_completion = False
+        self.completion_response_started = threading.Event()
+        self.completion_response_hold = threading.Event()
+        self.completion_response_hold.set()
 
     @property
     def url(self):
@@ -126,6 +130,7 @@ class NativeUIServer(ThreadingHTTPServer):
     def server_close(self):
         self.stream_hold.set()
         self.action_response_hold.set()
+        self.completion_response_hold.set()
         super().server_close()
         self.wheel.close()
 
@@ -168,7 +173,7 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                     packet = "2"
                 return self.send_content(packet, "text/plain")
             if path == "/api/config":
-                return self.send_content({"status": True, "name": "EES Portal", "version": "0.11.3",
+                return self.send_content({"status": True, "name": "EES Work", "version": "0.11.3",
                     "default_locale": "ko-KR", "default_models": "fixture-model", "default_prompt_suggestions": [],
                     "oauth": {"providers": {}}, "features": {"auth": True, "enable_websocket": False,
                     "enable_login_form": True, "enable_folders": True, "enable_version_update_check": False},
@@ -221,7 +226,7 @@ class NativeUIHandler(BaseHTTPRequestHandler):
             if path.endswith("/info") and path.startswith("/api/v1/users/"):
                 return self.send_content(self.server.user)
             name = "open_webui/frontend" + path
-            if path in {"/", "/auth"} or path.startswith(("/c/", "/workspace/")):
+            if path in {"/", "/auth", "/workspace"} or path.startswith(("/c/", "/workspace/")):
                 name = "open_webui/frontend/index.html"
             if name in self.server.assets:
                 return self.send_content(self.server.wheel.read(name), mimetypes.guess_type(name)[0] or "application/octet-stream")
@@ -276,6 +281,10 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                     record["chat"]["history"] = {"currentId": body["id"],
                         "messages": {user_message["id"]: user_message, body["id"]: assistant}}
                     self.server.chats[reply_body["chat_id"]] = record
+                if self.server.delay_next_completion:
+                    self.server.delay_next_completion = False
+                    self.server.completion_response_started.set()
+                    self.server.completion_response_hold.wait(timeout=8)
                 self.send_content({"task_id": "fixture-task", "chat_id": reply_body["chat_id"]})
                 threading.Thread(target=self.server.model_reply, args=(reply_body,), daemon=True).start()
                 return

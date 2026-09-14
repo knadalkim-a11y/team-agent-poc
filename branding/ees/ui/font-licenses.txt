@@ -1,4 +1,4 @@
-EES Portal bundled font notices
+EES Work bundled font notices
 ===============================
 
 The EES theme uses byte-for-byte copies of the font files already included
@@ -256,4 +256,3 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
-

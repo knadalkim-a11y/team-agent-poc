@@ -172,7 +172,7 @@ PANEL_HTML = r"""<style>
 <div class="panel">
   <header class="header">
     <div>
-      <p class="eyebrow">EES Portal</p>
+      <p class="eyebrow">EES Work</p>
       <div class="heading"><h2 id="panel-title">설비 WO</h2><span class="badge">시연용</span><span id="stage" class="badge" role="status">발행 전</span></div>
     </div>
     <button id="close" class="close" type="button" aria-label="설비 WO 패널 닫기">닫기</button>
