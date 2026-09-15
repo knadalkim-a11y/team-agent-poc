@@ -23,6 +23,14 @@ release = custom.releases
 branding = custom.branding
 COMMIT = "a" * 40
 OWNER = {"pid": 321, "executable": "registered-python", "created_at": "123.45"}
+# Frozen shipped inventory, independent of the builder's current list.
+PRE_SPLIT_WORK_FILES = (
+    "open_webui/ees_work_demo.py", "open_webui/ees_work_demo_ui/index.html",
+    "open_webui/ees_work_demo_ui/ees-work.css", "open_webui/ees_work_demo_ui/ees-work.js",
+    "open_webui/ees_workflow.py", "open_webui/workflow_seed.json",
+    branding.TARGET_APP + "ees-work-panel.js", branding.TARGET_APP + "ees-work-launcher.js",
+    branding.TARGET_APP + "ees-work-launcher.css",
+)
 
 
 def digest(content):
@@ -50,8 +58,12 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missin
     if version == "0.11.3+ees.5":
         members.update({name: b"synthetic checked work asset\n" for name in branding.LEGACY_WORK_FILES})
     if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9"}:
+        if version == "0.11.3+ees.9":
+            work_files = branding.WORK_FILES
+        else:
+            work_files = PRE_SPLIT_WORK_FILES
         members.update({app + name[len(branding.TARGET_APP):] if name.startswith(branding.TARGET_APP) else name:
-                        b"synthetic checked work asset\n" for name in branding.WORK_FILES})
+                        b"synthetic checked work asset\n" for name in work_files})
     if version == "0.11.3+ees.9":
         members.update({name: b"# synthetic checked asset guard\n" for name in branding.ASSET_GUARD_FILES})
     members.update(extra or {})
@@ -475,6 +487,8 @@ class CustomizationTests(unittest.TestCase):
         for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8"):
             with self.subTest(version=version):
                 previous = self.install_legacy_program(version=version)
+                for name in ("ees_workflow_definition.py", "ees_workflow_view.py", "workflow_policy.json"):
+                    self.assertFalse((self.program / "open_webui" / name).exists())
                 before = self.tree()
                 self.assertEqual(custom.inspect_bundle(self.config, self.bundle, COMMIT, self.env)["webui_version"],
                                  branding.VERSION)
@@ -572,7 +586,7 @@ class CustomizationTests(unittest.TestCase):
         self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
 
     def test_installed_ees6_still_requires_its_own_work_assets_after_wrapper_update(self):
-        for name in branding.WORK_FILES:
+        for name in PRE_SPLIT_WORK_FILES:
             previous_name = name.replace(branding.TARGET_APP, "open_webui/frontend/_ees6/", 1)
             with self.subTest(name=previous_name):
                 previous = self.install_legacy_program(version="0.11.3+ees.6", missing=(previous_name,))

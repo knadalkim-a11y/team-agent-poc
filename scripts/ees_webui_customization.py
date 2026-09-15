@@ -114,8 +114,9 @@ def _record_rows(content, *, allow_packaging=False, version=branding.VERSION):
     if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9"}:
         # Previous installations keep their own frontend namespace after the
         # wrapper upgrades. Validate their files before Apply/Restore as well.
+        work_files = branding.WORK_FILES if version == "0.11.3+ees.9" else branding.WORK_FILES_V6
         required.update(app + name[len(branding.TARGET_APP):] if name.startswith(branding.TARGET_APP)
-                        else name for name in branding.WORK_FILES)
+                        else name for name in work_files)
     if version == "0.11.3+ees.9":
         # Earlier program backups predate the guard and must remain restorable.
         required.update(branding.ASSET_GUARD_FILES)

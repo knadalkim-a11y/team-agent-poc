@@ -92,7 +92,7 @@
 
 ## 제한적 리팩토링 구현 설계 (2026-09-15)
 
-목적은 AI가 한 기능의 변경 범위와 호환 조건을 파악하기 쉽게 만들고, 사내에서 작성한 자산을 보존하면서 공동 작업 기반을 추가할 준비를 하는 것이다. 현재 WebUI·Python 빌더·래퍼·업무 저장소를 유지한다. 이 절은 구현 기준 설계이며, R0의 후속 구현은 [조건부 자산 적용 기록](../../../evals/scenarios.md#conditional-assets-20260915)에 연결한다. R1·R2의 코드 분리는 아직 미구현이다. 설계 검토 결과와 실제 구현/시험 여부는 [설계 검토 기록](../../../evals/scenarios.md#refactoring-design-review-20260915)에서 구분한다.
+목적은 AI가 한 기능의 변경 범위와 호환 조건을 파악하기 쉽게 만들고, 사내에서 작성한 자산을 보존하면서 공동 작업 기반을 추가할 준비를 하는 것이다. 현재 WebUI·Python 빌더·래퍼·업무 저장소를 유지한다. 이 절은 구현 기준 설계이며, R0의 후속 구현은 [조건부 자산 적용 기록](../../../evals/scenarios.md#conditional-assets-20260915)에 연결한다. R1 서버/정책 분리는 [구현·호환 검증](../../../evals/scenarios.md#workflow-refactor-20260915)에 연결하며, R2 화면 분리는 아직 미구현이다. 설계 검토 결과와 실제 구현/시험 여부는 [설계 검토 기록](../../../evals/scenarios.md#refactoring-design-review-20260915)에서 구분한다.
 
 ### 범위와 작업 단위
 
@@ -176,7 +176,7 @@ Tool 캐시는 기존처럼 DB 성공 전에 새 module을 전역 공개하지 �
 
 분리 전후 `_dump(_seed())`의 **완성 정의 bytes·키 순서·version=1·ID·공통 정책 객체**가 같아야 한다. seed 원본 파일 자체는 common 이동으로 바뀐다. validation은 새 policy 원본을 읽되 판정·오류 순서/문구를 유지한다. 현재 생성자의 seed 읽기와 catalog `INSERT OR IGNORE`를 유지하고, 기존 draft/게시본/진행 건/Skill snapshot에는 새 policy를 다시 적용하지 않는다. db/ap/site/interface 등의 고정 입력과 mock/unavailable 판정도 유지하므로 이 작업을 범용 실무 엔진 완성으로 해석하지 않는다.
 
-빌더 `WORK_ASSETS`에 새 Python 두 개와 policy를 포함하고 설치 위치는 모두 `open_webui/` 아래로 유지한다. `WORK_FILES`·manifest·Restore 대상도 같은 원본에서 산출한다. `ees_upgrade.py`의 프로그램 입력 목록과 CI 변경 경로 필터가 새 파일을 포함하는지 대조한다. `test_ees_workflow.py`·`test_ees_work_demo.py`·`test_ees_specialists_tool.py`의 현행 `spec_from_file_location` 로더는 시험 전용 package namespace로 바꿔 상대 import를 실행하고, 실제 wheel의 `open_webui.ees_workflow` import와 서비스 호출도 검사한다. Tool의 기존 공개 모듈 mock 계약은 유지한다.
+빌더 `WORK_ASSETS`에 새 Python 두 개와 policy를 포함하고 설치 위치는 모두 `open_webui/` 아래로 유지한다. `WORK_FILES`·manifest·새 버전 Restore 대상도 같은 원본에서 산출한다. ees.6~ees.8은 분리 이전 `WORK_FILES_V6` 목록을 유지해 새 파일을 과거 백업에 요구하지 않는다. `ees_upgrade.py`의 프로그램 입력 목록과 CI 변경 경로 필터가 새 파일을 포함하는지 대조한다. `test_ees_workflow.py`·`test_ees_work_demo.py`의 업무 서버 로더는 시험 전용 package namespace로 바꿔 상대 import를 실행하고, 실제 wheel의 `open_webui.ees_workflow` import와 서비스 호출도 검사한다. `test_ees_workflow_tool.py`의 기존 공개 모듈 mock 계약은 유지한다. 설계 초안에 포함했던 `test_ees_specialists_tool.py`의 comparison 로더는 실제로 `demo_data_tool.py`를 읽으므로 분리 대상이 아니다. R1 구현 때 실제 파일 경로를 대조해 이 오기를 정정했다.
 
 ### R2: 업무 화면의 제어·표시·편집 분리
 

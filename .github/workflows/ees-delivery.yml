@@ -87,7 +87,7 @@ jobs:
       - name: Verify GitHub read and plain results
         run: python -m unittest discover -s tests -p test_github_tool.py -v
       - name: Verify shared workflow service and real chat Tool
-        run: python -m unittest discover -s tests -p "test_ees_workflow*.py" -v
+        run: python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p "test_ees_workflow*.py" -v
       - name: Verify WO demo Tool
         run: python -m unittest discover -s tests -p test_wo_demo_tool.py -v
       - name: Verify WO demo local form state

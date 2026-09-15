@@ -1,7 +1,9 @@
 """Offline release integrity tests; real upstream wheel check is opt-in.
 
 Set EES_TEST_UPSTREAM_WHEEL to the verified official wheel path to additionally
-build and audit that wheel. Tests never install or import Open WebUI.
+build and audit that wheel. The workflow probe imports emitted modules under
+their public package name with the unrelated CLI initializer isolated; it never
+installs or starts Open WebUI or accesses its user database.
 """
 
 import ast
@@ -15,6 +17,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -28,6 +31,72 @@ spec.loader.exec_module(builder)
 
 NOTICE = b"# LICENSE: Open WebUI branding is governed by the bundled license.\n"
 LICENSE = b"Synthetic license fixture; copyright and branding conditions must survive.\n"
+
+
+def assert_workflow_package(test, wheel):
+    """Resolve the actual emitted sibling imports/resources and native Tool API."""
+    probe = r'''
+import asyncio, hashlib, importlib, importlib.util, json, sys, types
+from pathlib import Path
+root = Path(sys.argv[1])
+# The unchanged WebUI CLI initializer imports serving dependencies. Only that
+# parent initializer is isolated; workflow imports resolve real wheel files.
+package = types.ModuleType("open_webui")
+package.__path__ = [str(root / "open_webui")]
+sys.modules["open_webui"] = package
+workflow = importlib.import_module("open_webui.ees_workflow")
+for name in ("ees_workflow", "ees_workflow_definition", "ees_workflow_view"):
+    assert Path(sys.modules["open_webui." + name].__file__).parent == root / "open_webui"
+seed = workflow._dump(workflow._seed()).encode("utf-8")
+assert len(seed) == 11651
+assert hashlib.sha256(seed).hexdigest() == "a68dda6dbcfa55184653816a0e4774ac7e4b60619cec962edbc26434e6200451"
+assert workflow.validate_definition(workflow._seed()) == []
+users = {key: {"id": key, "role": "user"} for key in ("alice", "bob")}
+chats = {"chat-a": {"id": "chat-a", "user_id": "alice"}}
+service = workflow.WorkflowService(root / "data" / "ees-work.sqlite3", users.get, chats.get)
+workflow._service = service
+spec = importlib.util.spec_from_file_location("installed_workflow_tool", sys.argv[2])
+tool_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(tool_module)
+tool = tool_module.Tools()
+async def event(_):
+    return {"ok": True}
+async def run():
+    created = await workflow.handle_action(users["alice"], {"action": "create", "chat_id": "chat-a", "payload": {}})
+    assert created["ok"], created
+    before = created["case"]
+    args = {"__user__": users["alice"], "__metadata__": {"chat_id": "chat-a"}, "__event_call__": event}
+    selected = await tool.ees_workflow_action("select", node_id="db-j", expected_revision=before["revision"], **args)
+    assert selected["ok"], selected
+    seen = await tool.ees_workflow_view(**args)
+    assert seen["case"] == selected["case"]
+    assert seen["case"]["selected_id"] == "db-j"
+    assert seen["case"]["revision"] == before["revision"] + 1
+    conflict = await tool.ees_workflow_action("select", node_id="ap-j", expected_revision=before["revision"], **args)
+    assert conflict["error"]["code"] == "revision_conflict", conflict
+    forbidden = await workflow.get_state(users["bob"], case_id=before["id"])
+    assert forbidden["error"]["code"] == "case_not_found", forbidden
+    workflow._service = workflow.WorkflowService(service.database, users.get, chats.get)
+    assert (await workflow.get_state(users["alice"], chat_id="chat-a"))["case"] == seen["case"]
+    assert not (root / ".webui_secret_key").exists()
+    assert not (root / "data" / "webui.db").exists()
+asyncio.run(run())
+print("installed_workflow_contract=pass")
+'''
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        with ZipFile(wheel) as archive:
+            for name in ("ees_workflow.py", "ees_workflow_definition.py", "ees_workflow_view.py",
+                         "workflow_seed.json", "workflow_policy.json"):
+                target = root / "open_webui" / name
+                target.parent.mkdir(exist_ok=True)
+                target.write_bytes(archive.read("open_webui/" + name))
+        result = subprocess.run(
+            [sys.executable, "-I", "-B", "-X", "warn_default_encoding", "-W", "error::EncodingWarning",
+             "-c", probe, str(root), str(builder.WORK_DIR / "scripts/workflow_tool.py")],
+            cwd=root, capture_output=True, text=True, encoding="utf-8", timeout=20)
+        test.assertEqual(result.returncode, 0, result.stderr)
+        test.assertEqual(result.stdout.strip(), "installed_workflow_contract=pass")
 
 
 # Independent expected writer/normalization boundary inventory. These minimal
@@ -640,6 +709,7 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
                                  (builder.UI_DIR / "font-licenses.txt").read_bytes())
                 for name in ("open_webui/env.py", "open_webui/frontend/index.html"):
                     self.assertEqual(source.read(name).count(b"LICENSE"), built.read(name).count(b"LICENSE"))
+            assert_workflow_package(self, built_path)
 
 
 if __name__ == "__main__":

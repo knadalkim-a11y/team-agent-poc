@@ -45,6 +45,12 @@ WORK_ASSETS.update({"scripts/ees_workflow.py": "open_webui/ees_workflow.py",
                     "scripts/workflow_seed.json": "open_webui/workflow_seed.json"})
 WORK_BOOTSTRAP = WORK_DIR.parent / "cross-system-analysis" / "ui" / "work-panel.js"
 WORK_BOOTSTRAP_TARGET = TARGET_APP + "ees-work-panel.js"
+# ees.6 through ees.8 shipped the single-file workflow. Their backups must not
+# acquire new required modules when this wrapper adds the split implementation.
+WORK_FILES_V6 = (WORK_BOOTSTRAP_TARGET,) + tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
+WORK_ASSETS.update({"scripts/ees_workflow_definition.py": "open_webui/ees_workflow_definition.py",
+                    "scripts/ees_workflow_view.py": "open_webui/ees_workflow_view.py",
+                    "scripts/workflow_policy.json": "open_webui/workflow_policy.json"})
 WORK_FILES = (WORK_BOOTSTRAP_TARGET,) + tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.

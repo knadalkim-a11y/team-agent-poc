@@ -8,6 +8,7 @@ is used. Linux CI requires the browser and built wheel instead of skipping.
 
 import asyncio
 import base64
+import importlib
 import importlib.util
 import json
 import os
@@ -30,6 +31,11 @@ SCRIPTS = ROOT / "agent-pack/skills/ees-work-demo/scripts"
 
 
 def load_module(name, path):
+    if path.name == "ees_workflow.py":
+        package = types.ModuleType(name)
+        package.__path__ = [str(path.parent)]
+        with patch.dict(sys.modules, {name: package}):
+            return importlib.import_module(f"{name}.ees_workflow")
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

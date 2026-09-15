@@ -1109,9 +1109,11 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 EES Work는 기존 WebUI의 사이드바에서 공장별 업무를 고르고, **가운데 실제 AI 대화와 오른쪽 업무 패널에서 같은 진행 건을 다루는 기능**입니다. 기존 모델 선택·메시지 입력·스트리밍·첨부·대화 이력·문서 조회를 사용하며 서비스 표시 이름은 EES Portal에서 **EES Work**로 바뀝니다. 별도 시연 창과 모의 대화를 제공했던 ees.5는 [당시 구현 기록](../evals/scenarios.md#ees-work-demo-integration-20260914)으로 보존합니다. 현재 기준은 [후속 UX 합의를 포함한 통합 지시](mockups/ees-work/TASK.md)이며 [최초 목업 HTML](mockups/ees-work/ees-demo-workspace.html)은 업무 예시의 참고자료입니다.
 
-프로그램 배포본은 `0.11.3+ees.8`·정적 자산 `/_ees8/`, 지정 자산은 Agent Pack v0.2.9입니다. [기능 폴더](../agent-pack/skills/ees-work-demo/)의 상태·액션과 기존 실제 대화를 유지하며, [승인한 사이드바 목업](mockups/ees-work/ees-sidebar-refinement.html)의 표현·동작을 Native UI에 반영합니다. 09-14 ees.7 실행·v0.2.8 적용에 이어 2026-09-15 `9a90e19fb7f5`의 v0.2.9 ApplyDemo 1건 갱신 성공과 사용자 `ui ok / tree ok / font ok / chat ok` 보고로 이번 선택 영역·직계 펼침·글꼴/설명 행·대화/초안의 사내 확인을 마쳤습니다. 현재 실행 프로그램의 정확한 버전·원본 SHA는 별도로 보고되지 않았으며, Git·CI·실제 사내 반영은 [STATUS](STATUS.md)와 [검증 기록](../evals/scenarios.md#sidebar-refinement-20260914)에서 구분합니다.
+마지막 사내 UI 수락 대상은 `0.11.3+ees.8`·정적 자산 `/_ees8/`, 지정 자산은 Agent Pack v0.2.9입니다. [기능 폴더](../agent-pack/skills/ees-work-demo/)의 상태·액션과 기존 실제 대화를 유지하며, [승인한 사이드바 목업](mockups/ees-work/ees-sidebar-refinement.html)의 표현·동작을 Native UI에 반영합니다. 09-14 ees.7 실행·v0.2.8 적용에 이어 2026-09-15 `9a90e19fb7f5`의 v0.2.9 ApplyDemo 1건 갱신 성공과 사용자 `ui ok / tree ok / font ok / chat ok` 보고로 이번 선택 영역·직계 펼침·글꼴/설명 행·대화/초안의 사내 확인을 마쳤습니다. 현재 실행 프로그램의 정확한 버전·원본 SHA는 별도로 보고되지 않았으며, Git·CI·실제 사내 반영은 [STATUS](STATUS.md)와 [검증 기록](../evals/scenarios.md#sidebar-refinement-20260914)에서 구분합니다.
 
-**공동 작업 목표와 현재 범위:** ees.7과 이번 ees.8 배포본은 사용자별 진행 건을 저장하며 다른 사용자가 같은 공장·시스템의 진행 건을 이어받는 기능은 아직 구현하지 않았습니다. 후속 합의는 [공장 → 시스템 → 업무의 공동 진행](mockups/ees-work/TASK.md#ees-work-shared-target)입니다. 업무 진행·결과·이력을 함께 유지하되 개인 대화·첨부·개인 자격증명과 권한은 별도로 관리합니다. 현재 사용자별 격리를 해제하거나 기존 개인 결과를 자동 공개하는 절차로 해석하지 않습니다.
+현재 미배포 ees.9 준비본에는 [조건부 자산 보호](#conditional-assets)와 [업무 서버·정책 분리](../evals/scenarios.md#workflow-refactor-20260915)를 포함합니다. 코드가 나뉘어도 기존 Tool ID·호출 방법, 저장한 절차·진행 건·이력·Skill 참조는 유지됩니다. 분리 파일은 프로그램 ZIP에 함께 들어가며 별도 수동 복사·사용자 자산 재등록·절차 재게시를 요구하지 않습니다. 기존 실행 어댑터가 없는 Tool 참조는 계속 미연결로 처리합니다. 아래 절차는 main 병합·CI·산출물 준비 뒤 한 번 적용하며 R1만을 이유로 ApplyDemo를 추가 반복하지 않습니다.
+
+**공동 작업 목표와 현재 범위:** 기존 ees.7/ees.8과 ees.9 준비본은 사용자별 진행 건을 저장하며 다른 사용자가 같은 공장·시스템의 진행 건을 이어받는 기능은 아직 구현하지 않았습니다. 후속 합의는 [공장 → 시스템 → 업무의 공동 진행](mockups/ees-work/TASK.md#ees-work-shared-target)입니다. 업무 진행·결과·이력을 함께 유지하되 개인 대화·첨부·개인 자격증명과 권한은 별도로 관리합니다. 현재 사용자별 격리를 해제하거나 기존 개인 결과를 자동 공개하는 절차로 해석하지 않습니다.
 
 | 화면 | 사용하는 기능 |
 |---|---|
