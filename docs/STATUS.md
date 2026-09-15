@@ -6,19 +6,19 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 사용자 배포 요청에 따라 ees.9/v0.2.10의 리팩토링·메인 채팅 업무 탐색 준비본에 공개 TrialCommit 자산 적용과 기존 데이터 Backup 명령을 연결하고 배포 전 검증을 마침. 프로그램은 검토한 원본의 ZIP Apply, 자산은 같은 설치 원본을 확인하는 TrialCommit을 사용하며 기본 CI 경로는 유지함. [배포 대상 PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48)의 최종 원본과 제공 ZIP manifest를 연결하고 사내 실행 결과는 아직 수신하지 않음. [검증·배포 구분](../evals/scenarios.md#work-ui-refactor-20260915), [적용 순서](03-openwebui-native-agent.md#ees-wrapper-trial).
-- Git 원본: 이번 배포 대상은 [PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48)의 최종 변경임. 병합 원본과 실제 ZIP source_commit은 배포 안내에서 제공하며 실제 사내 설치와 구분함. 앞선 #47·ees.8의 main CI 성공과 사내 결과는 [기존 기록](../evals/scenarios.md#sidebar-refinement-20260914)에 보존하고 이번 원격 검사 성공으로 재사용하지 않음.
+- 이번 작업: 수동 ZIP 저장·경로 입력을 없애도록 `Upgrade -TrialCommit`에 공식 고정 wheel의 다운로드/검증 캐시, 정확한 Git 원본 패키징, 기존 Stop/Backup/Apply/Start/ApplyDemo를 연결함. 기존 Python·데이터·사용자 자산을 유지하며 준비 실패는 Stop 이전에 멈춤. 인자 없는 기본 CI 경로는 유지함. 이번 자동 준비 코드의 사내 실행 결과는 아직 수신하지 않음. [검증·배포 구분](../evals/scenarios.md#work-ui-refactor-20260915), [적용 순서](03-openwebui-native-agent.md#ees-wrapper-trial).
+- Git 원본: 리팩토링·메인 채팅의 업무 탐색·자산 보호는 [PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48)의 병합 `8e1e2ff86efa847b136ae57b8f4cf355dead5b8f`에 반영됨. 그 원본의 ZIP은 앞선 전달물이며 이번 자동 준비 경로는 그 이후 원본을 사용함. 배포 안내의 정확한 SHA로 실행하고 Git 병합과 실제 사내 설치를 구분함. 앞선 #47·ees.8의 CI/사내 결과는 [기존 기록](../evals/scenarios.md#sidebar-refinement-20260914)에 보존함.
 - 최근 UI 확인: 09-15 사용자 보고로 공장·시스템 선택 박스, 프로세스 직계 태스크만 펼침, 글꼴 통일·P/T/J 설명 행 제거, 기존 대화·작성 중 초안 유지의 네 항목을 정상 확인함. 이번 UI 개선의 사내 수락 범위를 완료로 처리하며 같은 확인을 반복하지 않음.
 - 최근 운영 확인: 09-15 새 UI 네 항목 정상 보고를 확인함. 프로그램 버전 문자열·정확한 설치 원본 SHA·개별 Upgrade 출력은 별도 미보고이며, 마지막 직접 버전 응답은 09-14의 `0.11.3+ees.7`임. 이를 현재 프로그램 버전으로 고정하지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 별도 미확인임. [새 UI 확인](../evals/scenarios.md#sidebar-refinement-20260914), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 09-15 `9a90e19fb7f5` ApplyDemo로 v0.2.9 관리 자산 1건 갱신 성공 후 새 UI 네 항목의 사용자 확인까지 마침. 이전 `76e566622e74`의 v0.2.8·8건 적용은 [정렬 충돌 수정 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 대표 질문·실제 모델 호출은 이번 UI 확인과 구분함.
-- 다음 작업 하나: 사내 PC에서 제공한 정확한 ZIP/원본으로 Update → 해시/CheckOnly → Stop → Backup → Apply → Start → TrialCommit ApplyDemo를 한 번 실행함. 앞 단계 실패 시 멈추고 마지막 결과와 기존 대화·새 업무 흐름 확인을 1~2줄로 받음. 완료한 UI 확인을 반복하는 대신 사이드바 미선택의 목표 탐색·조건 확인·계획을 새 EES 대화에서 확인함. 실제 적용 전에는 배포 성공으로 기록하지 않음. [시험 적용·복원 경계](03-openwebui-native-agent.md#ees-wrapper-trial).
+- 다음 작업 하나: 사내 PC에서 제공한 정확한 SHA로 Update → Upgrade -TrialCommit을 한 번 실행함. ZIP 준비·검증과 백업·프로그램/지정 자산 적용은 명령 내부에서 이어지며 실패 시 다음 단계 전에 멈춤. 마지막 결과와 기존 대화·사이드바 미선택의 목표 탐색/조건 확인/계획을 새 EES 대화에서 확인한 요지만 1~2줄 받음. 실제 적용 전에는 배포 성공으로 기록하지 않음. [시험 적용·복원 경계](03-openwebui-native-agent.md#ees-wrapper-trial).
 - 최신 사내 확인: 09-15 `apply_demo result=ok changed=1 commit=9a90e19fb7f5 stage=complete code=- next=new_chat`, 이어 `ui=ok tree=ok font=ok chat=ok` 보고. 지정 자산 적용과 요청한 새 화면·트리·글꼴·대화/초안 확인을 완료함. 실제 모델의 업무 호출·공유 권한·유휴 안정성까지 통과한 것으로 확대하지 않음. [이번 적용·화면 확인](../evals/scenarios.md#sidebar-refinement-20260914).
 
 ## 2026년 9월 개발·검사 방침
 
 사용자 선택으로 **2026-09-30까지 이 작업의 GitHub 원격 검사를 생략**한다. 이 저장소에 게시하는 개발·문서 커밋 메시지마다 `[skip ci]`를 넣어 기존 `push`/`pull_request` 자동 검사를 생략하며 수동 실행·재실행은 요청하지 않는다. PR 본문에만 적거나 이전 커밋의 표시가 이후 커밋에도 적용된다고 가정하지 않는다. 이는 작업 커밋별 생략이며 계정 전체 Actions를 비활성화한 것이 아니다.
 
-코드 작성·Git 반영·변경 범위의 로컬 검토/시험과 문서 검사는 계속한다. **후속 사용자 합의로 원격 검사 생략을 9월 전체 배포 금지로 확대하지 않고, 로컬 검증 후 변경별로 제한된 시험 적용을 준비한다.** 검토한 정확한 원본·배포물 해시·자료 보존·기존 프로그램 복원 수단을 확보하고 적용 뒤 기동·기존 대화·업무 저장·변경 화면을 필요한 소수 항목으로 확인한다. 사내 사용자 자료의 백업과 프로그램 Restore를 구분한다. Windows·Native 브라우저 미실행은 그대로 남기고 실제 사내 적용 전후 결과를 별도로 기록한다. 기본 Upgrade/ApplyDemo의 CI 확인은 유지한다. 후속 사용자가 배포 진행을 요청해 공개 TrialCommit 경로와 Backup을 준비했으며, 검토한 원본의 병합·ZIP 전달과 사내 적용 성공은 각각 확인한다. 자체 실행기·Linux 가상환경 설치·브라우저 시험 이식·결제 설정 변경은 추가하지 않는다.
+코드 작성·Git 반영·변경 범위의 로컬 검토/시험과 문서 검사는 계속한다. **후속 사용자 합의로 원격 검사 생략을 9월 전체 배포 금지로 확대하지 않고, 로컬 검증 후 변경별로 제한된 시험 적용을 준비한다.** 검토한 정확한 원본·배포물 해시·자료 보존·기존 프로그램 복원 수단을 확보하고 적용 뒤 기동·기존 대화·업무 저장·변경 화면을 필요한 소수 항목으로 확인한다. 사내 사용자 자료의 백업과 프로그램 Restore를 구분한다. Windows·Native 브라우저 미실행은 그대로 남기고 실제 사내 적용 전후 결과를 별도로 기록한다. 기본 Upgrade/ApplyDemo의 CI 확인은 유지한다. 후속 사용자가 배포 진행과 수동 ZIP 단계 자동화를 요청해 공개 TrialCommit 경로·Backup·자동 묶음 준비를 연결했으며, 검토한 원본의 병합과 실제 사내 적용 성공은 각각 확인한다. 자체 실행기·Linux 가상환경 설치·브라우저 시험 이식·결제 설정 변경은 추가하지 않는다.
 
 **2026-10-01 이후 처음 작업을 재개할 때** 이 한시 생략을 종료하고 무료분 복구 상태와 최종 변경 범위를 확인한다. 마지막 코드에 대해 표시 없는 새 커밋 또는 기존 수동 실행으로 필요한 원격 검사를 수행한다. 10월 1일 예약 실행을 만든 것은 아니며 과거 생략된 검사가 자동으로 재개되지 않는다. 사용자 변경 지시가 있으면 해당 지시를 우선한다. [근거·재개 조건](../evals/scenarios.md#work-ui-refactor-20260915).
 
@@ -80,6 +80,6 @@
 
 ## 최근 점검
 
-2026-09-15: 배포 경로 독립 검토와 Python 3.11 엄격 인코딩 검사에서 ApplyDemo 28 PASS, manager 93 PASS/PowerShell 2 SKIP, Upgrade 36 PASS/PowerShell 2 SKIP, 상태·백업 11 PASS/Windows DPAPI 1 SKIP를 확인함. 최신 프로그램 wheel의 실제 Apply → 추가 업무 저장 → 이전 ees.8 Restore도 1 PASS임. 초기 Git helper/시험 fixture 인코딩 실패·보완과 검사 범위를 [기존 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 남김. 앞선 채팅 기능 관련 117개 통과와 구분하며 사내 GLM·Windows·Native 브라우저 및 이번 실제 설치는 미확인임.
+2026-09-15: 수동 ZIP 자동화의 독립 검토와 엄격 UTF-8 검사에서 기존 Upgrade/ApplyDemo/manager 157 PASS/PowerShell 4 SKIP, 신규 묶음/시험 업데이트 30 PASS/PowerShell 1 SKIP를 확인함. 별도 실제 CRLF Git checkout에서 원본을 보존해 패키징하고 전체 release validator와 기존 검증 프로그램 wheel SHA 일치를 확인함. 최초 CRLF fixture 실패와 stage/cleanup 검토 보완, 앞선 실제 Apply/Restore 결과는 [기존 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 보존함. 실제 Windows·PowerShell·사내 다운로드/기동·모델은 미실행임.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.

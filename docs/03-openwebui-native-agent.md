@@ -1247,14 +1247,29 @@ Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `resul
 
 #### 2026년 9월 고정 원본 시험 적용
 
-사용자 결정으로 9월에는 GitHub 원격 검사를 생략하고 변경별 로컬 검증을 마친 원본을 시험 적용합니다. 기본 `Upgrade`·인자 없는 `ApplyDemo`는 성공한 main CI를 확인하는 기존 동작을 유지합니다. 이 기간의 프로그램은 별도로 제공한 검증된 ZIP으로 `Apply`하며 자산은 **`ApplyDemo -TrialCommit <같은 40자리 원본 SHA>`**로 적용합니다. 새 실행기·가상환경·의존성 전체 재설치를 추가하지 않습니다.
+사용자 결정으로 9월에는 GitHub 원격 검사를 생략하고 변경별 로컬 검증을 마친 원본을 시험 적용합니다. **`Upgrade -TrialCommit <검토한 40자리 원본 SHA>`**는 필요한 프로그램 묶음 준비부터 백업·적용·기동·지정 자산 반영까지 연결합니다. ZIP을 브라우저에서 내려받거나 저장 경로를 입력할 필요가 없습니다. 인자 없는 기본 `Upgrade`·`ApplyDemo`는 성공한 main CI를 확인하는 기존 동작을 유지하며 CI 실패 시 시험 경로로 자동 전환하지 않습니다.
 
-- 기존 `Update`로 canonical origin의 clean main을 갱신한 뒤, 검토한 원본과 HEAD·origin/main이 모두 같아야 합니다. 설치된 프로그램도 같은 원본이어야 하며 프로그램 파일/미완료 상태를 확인합니다. TrialCommit은 다른 브랜치·로컬 수정·다른 SHA를 허용하지 않고 GitHub 검사 성공을 뜻하지 않습니다. GitHub PAT를 새로 요구하거나 CI를 조회/실행하지 않습니다. 숨겨진 prepared-head 인자는 운영 명령으로 사용하지 않습니다.
-- 제공한 ZIP의 전체 SHA-256과 manifest 원본을 확인하고 `Apply -CheckOnly`를 먼저 실행합니다. 실패하면 Stop 이전에 멈춥니다. 이후 **Stop → Backup → Apply → Start → ApplyDemo -TrialCommit**을 한 번 수행하며 앞 단계가 실패하면 다음 단계는 실행하지 않습니다. 기존 Start의 최대 120초 health 확인을 사용하고 시간 초과 뒤 자동 반복·원복하지 않습니다.
-- `Backup`은 기존 등록 경로의 DATA_DIR 전체(업무 DB 포함)·키·설정을 서버 종료와 작업 잠금 아래 복사합니다. 파일 해시·원본 무변경·복사한 WebUI DB 검사를 마친 뒤 내부 백업 참조를 저장하고 `backup=verified`만 짧게 출력합니다. 경로·백업·DB·키 파일을 외부로 전달하지 않습니다. 백업 실패 시 프로그램·자산을 적용하지 않습니다.
-- 프로그램 `Restore`는 직전 프로그램만 복원합니다. 백업 자료로 현재 DB를 자동 덮어쓰지 않으며 ApplyDemo의 공통 자산 변경까지 취소하는 기능은 아닙니다. 사용자 작성 Skill·Tool·Prompt·모델·연결은 기존 관리 경계와 조건부 저장 보호를 유지합니다.
+배포 안내에서 받은 정확한 SHA로 다음 블록을 한 번 실행합니다. 기존 Update로 래퍼를 먼저 갱신하며 앞 단계가 실패하면 멈춥니다. `Upgrade -TrialCommit`이 마지막 ApplyDemo도 호출하므로 따로 반복하지 않습니다.
 
-배포 ZIP과 정확한 SHA는 이번 배포 안내에서 함께 제공합니다. 사내 실행 후 마지막 `EES` 결과와 기존 대화/업무 화면 확인을 1~2줄만 전달합니다. 실제 모델 확인은 새 EES 대화에서 사이드바를 먼저 선택하지 않고 “셋업 업무를 진행하려고 해. 등록된 절차를 찾아 필요한 조건부터 확인해 줘”라고 요청해 후보 탐색·필요한 질문·계획이 이어지는지 봅니다. 모의 점검을 실제 설치 완료로 기록하지 않습니다. 실제 적용 및 미실행 Windows/브라우저/모델 범위는 [STATUS](STATUS.md)를 따릅니다.
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesManager = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1'
+    & $eesManager -Action Update
+    & $eesManager -Action Upgrade -TrialCommit '배포 안내의 40자리 원본 SHA' -Summary
+}
+```
+
+- canonical origin의 clean main·HEAD·origin/main이 검토한 원본과 같아야 합니다. 작업 잠금과 기존 프로그램/미완료 상태를 확인하며 다른 브랜치·로컬 수정·다른 SHA는 거절합니다. TrialCommit은 GitHub 검사 성공을 뜻하지 않습니다. GitHub PAT나 새 실행기·가상환경·의존성 설치를 요구하지 않습니다.
+- 첫 준비에서는 기존 Git 프록시와 TLS 검증으로 [PyPI의 고정 버전 정보](https://docs.pypi.org/api/json/#get-a-release)와 `files.pythonhosted.org`의 공식 Open WebUI 0.11.3 wheel을 받습니다. 파일명·고정 SHA-256·크기를 대조한 원본만 기존 운영 상태 폴더에 보관하고 이후에도 재사용 전에 해시를 확인합니다. 초기 설치 때의 PyPI 접속 성공을 실제 파일 호스트의 현재 접근 성공으로 확대하지 않습니다. 다운로드 실패·손상된 캐시에서는 서버 종료 전에 멈추며 인증서 검증 해제나 허용 목록 변경을 하지 않습니다.
+- 지정 Git 커밋을 줄바꿈이 변환되지 않는 임시 작업 폴더에서 기존 두 빌더로 묶습니다. Windows checkout 설정에 따른 CRLF 변환을 배포 원본으로 쓰지 않습니다. 기존 등록 Python의 표준 라이브러리만 사용하며 설치된 uvx 환경·의존성·사용자 자료를 수정하지 않습니다. ZIP은 내부 전달 형식으로 자동 준비·검증됩니다.
+- 원본·프로그램 해시/RECORD·대상 버전/의존성 확인을 마친 뒤 **Stop → Backup → Apply → Start → 같은 원본의 ApplyDemo**를 한 번 수행합니다. 앞 단계 실패 시 다음 단계는 실행하지 않습니다. 이미 같은 원본이 설치되어 있고 파일·관리 프로세스·정상 응답이 확인되면 프로그램 재준비/재시작을 생략하고 지정 자산 확인으로 이어집니다. 다른 원본이면 같은 버전 문자열이어도 검토한 원본으로 적용합니다.
+- `Backup`은 기존 등록 경로의 DATA_DIR 전체(업무 DB 포함)·키·설정을 서버 종료와 작업 잠금 아래 복사합니다. 파일 해시·원본 무변경·복사한 WebUI DB 검사를 마친 뒤 내부 백업 참조를 저장합니다. 백업 실패 시 프로그램·자산을 적용하지 않습니다. 기존 Start의 최대 120초 health 확인을 사용하고 시간 초과 뒤 자동 반복·원복하지 않습니다.
+- 실패한 적용에 필요한 ZIP 경로와 상세 결과는 사내 기록에 남깁니다. 프로그램 성공 뒤 자산 적용이 실패하면 프로그램을 자동 복원하지 않고 해당 자산 단계의 실패를 알립니다. 성공한 준비 임시 폴더는 정리하고 공식 원본 캐시는 유지합니다. 프로그램 `Restore`는 직전 프로그램만 복원하며 현재 DB를 백업으로 덮거나 ApplyDemo의 자산 변경을 취소하지 않습니다. 사용자 작성 Skill·Tool·Prompt·모델·연결은 기존 관리 경계와 조건부 저장 보호를 유지합니다.
+
+기존에 검증한 ZIP 파일이 있는 경우의 `Apply`·`Backup`·`ApplyDemo -TrialCommit`도 계속 지원하며 아래 수동 안내를 따릅니다. 새 자동 준비 경로의 원본은 [시험 업데이트](../scripts/ees_trial_upgrade.py)와 [묶음 준비](../scripts/ees_trial_bundle.py), 기존 적용 코드는 [운영자 진입점](../scripts/manage_ees.py)입니다.
+
+사내 실행 후 마지막 `EES` 결과와 기존 대화/업무 화면 확인을 1~2줄만 전달합니다. 실제 모델 확인은 새 EES 대화에서 사이드바를 먼저 선택하지 않고 “셋업 업무를 진행하려고 해. 등록된 절차를 찾아 필요한 조건부터 확인해 줘”라고 요청해 후보 탐색·필요한 질문·계획이 이어지는지 봅니다. 모의 점검을 실제 설치 완료로 기록하지 않습니다. 실제 적용 및 미실행 Windows/브라우저/모델 범위는 [STATUS](STATUS.md)를 따릅니다.
 
 <a id="ees-wrapper-apply"></a>
 

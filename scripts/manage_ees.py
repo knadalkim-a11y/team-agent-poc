@@ -787,10 +787,12 @@ LOCAL_ERROR_TYPES = frozenset({
     "IsADirectoryError", "ValueError", "KeyError", "TypeError", "UnicodeEncodeError",
     "UnicodeDecodeError", "JSONDecodeError",
     "ProcessError", "LaunchUncertain", "DeploymentError", "CustomizationError", "StateError", "ReleaseError",
+    "TrialBundleError",
 })
 LOCAL_ERROR_SOURCES = frozenset({
     "manage_ees.py", "ees_webui_customization.py", "ees_deploy_state.py",
     "ees_deploy_release.py", "ees_deploy_process.py", "ees_upgrade.py",
+    "ees_trial_bundle.py", "ees_trial_upgrade.py",
 })
 
 
