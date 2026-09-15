@@ -6,12 +6,12 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: R1 업무 서버·정책/예시 분리를 같은 ees.9/v0.2.10 준비본에 구현함. 저장·권한·공개 API를 유지하고 정의/검증과 화면 파생 계산을 나눴으며 완성 seed bytes·기존 자료·구코드 재열기 호환을 확인함. 새 파일의 실제 wheel import/Tool 연결, 이전 ees.6~ees.8 Apply/Restore를 포함한 로컬 196개 중 193 PASS/플랫폼 3 SKIP와 독립 검토를 마쳤으며 PR·원격 Windows/브라우저 CI 반영 단계임. 병합·사내 적용은 미실행. [R1 구현·검증](../evals/scenarios.md#workflow-refactor-20260915), [앞선 R0 결과](../evals/scenarios.md#conditional-assets-20260915).
+- 이번 작업: R1 업무 서버·정책/예시 분리는 [PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48)의 구현 원본 `ff9b42281cece8adfc9a1d7afbb5852ebcb99a1a`에 반영됨. 기존 저장·권한·공개 API 보존의 로컬 193 PASS/플랫폼 3 SKIP와 독립 검토를 유지하고, 재개 시 업무 42/42·실제 wheel 빌드/공개 연결 18/18을 다시 확인함. 원격 CI는 최초·제한 재시도 모두 Linux/Windows 실행기 미배정·시험 단계 0건으로 종료해 Windows/브라우저 검증이 막혀 있음. 코드 실패로 단정하지 않으며 R1 검증 전체 완료·병합·사내 적용으로 처리하지 않음. [R1 구현·실패·남은 확인](../evals/scenarios.md#workflow-refactor-20260915), [앞선 R0 결과](../evals/scenarios.md#conditional-assets-20260915).
 - 최근 Git 반영: [PR #47](https://github.com/knadalkim-a11y/team-agent-poc/pull/47)을 `02b880b19db6ffb353daf3309e3ff1354730e815`로 병합하고 [병합 main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910676906)의 Linux·Windows·ees.8 프로그램 산출물 성공을 확인함. 사내 가이드 원본 `9a90e19fb7f5f7d967d47c1f811d648b4dc1ee52`의 [main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910881151)도 전체 성공했으며 이번 사용자 ApplyDemo 보고의 원본과 같음. 이후 상태 기록은 문서만 갱신하며 검사 결과는 [최신 main 실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/workflows/ees-delivery.yml?query=branch%3Amain)에서 확인함. 최초 실패·수정·원격 검증과 실제 사내 결과는 [같은 기록](../evals/scenarios.md#sidebar-refinement-20260914)에서 구분함.
 - 최근 UI 확인: 09-15 사용자 보고로 공장·시스템 선택 박스, 프로세스 직계 태스크만 펼침, 글꼴 통일·P/T/J 설명 행 제거, 기존 대화·작성 중 초안 유지의 네 항목을 정상 확인함. 이번 UI 개선의 사내 수락 범위를 완료로 처리하며 같은 확인을 반복하지 않음.
 - 최근 운영 확인: 09-15 새 UI 네 항목 정상 보고를 확인함. 프로그램 버전 문자열·정확한 설치 원본 SHA·개별 Upgrade 출력은 별도 미보고이며, 마지막 직접 버전 응답은 09-14의 `0.11.3+ees.7`임. 이를 현재 프로그램 버전으로 고정하지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 별도 미확인임. [새 UI 확인](../evals/scenarios.md#sidebar-refinement-20260914), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 09-15 `9a90e19fb7f5` ApplyDemo로 v0.2.9 관리 자산 1건 갱신 성공 후 새 UI 네 항목의 사용자 확인까지 마침. 이전 `76e566622e74`의 v0.2.8·8건 적용은 [정렬 충돌 수정 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 대표 질문·실제 모델 호출은 이번 UI 확인과 구분함.
-- 다음 작업 하나: R1의 검증·PR 반영을 마친 뒤 [설계 R2](mockups/ees-work/TASK.md#refactoring-design)의 업무 화면 제어·표시·편집 책임 분리가 다음 구현 단위임. R2·전체 R3 배포 호환 확인·공동 진행 건·새 실무 절차·실제 파일럿은 아직 미완료. 사내 ees.9 적용은 main 병합·CI·프로그램 산출물 성공 뒤 [조건부 자산 가이드](03-openwebui-native-agent.md#conditional-assets)로 한 번 수행하며 현재 상태표를 병합·배포 권한으로 해석하지 않음.
+- 다음 작업 하나: [R1 CI 실행 화면](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34936796710)의 실행 전 오류 문구를 확인해 GitHub 실행기 미배정 원인을 구분하고, 조건이 달라진 뒤 R1 Windows/브라우저 검증을 마침. 현재 연결 도구는 단계/로그가 없는 이 실행의 annotation 본문을 제공하지 않으므로 화면의 오류 한 줄이 필요함. 동일 조건의 추가 재시도·새 사내 검사는 하지 않음. R1 검증 완료 뒤 [설계 R2](mockups/ees-work/TASK.md#refactoring-design)의 화면 책임 분리로 이어감. R2·전체 R3·공동 작업·실무 파일럿은 아직 미완료이며, 사내 ees.9 적용은 main 병합·CI·산출물 성공 뒤 [조건부 자산 가이드](03-openwebui-native-agent.md#conditional-assets)로 수행함.
 - 최신 사내 확인: 09-15 `apply_demo result=ok changed=1 commit=9a90e19fb7f5 stage=complete code=- next=new_chat`, 이어 `ui=ok tree=ok font=ok chat=ok` 보고. 지정 자산 적용과 요청한 새 화면·트리·글꼴·대화/초안 확인을 완료함. 실제 모델의 업무 호출·공유 권한·유휴 안정성까지 통과한 것으로 확대하지 않음. [이번 적용·화면 확인](../evals/scenarios.md#sidebar-refinement-20260914).
 
 ## 마지막으로 확인된 적용 상태
@@ -31,6 +31,7 @@
 
 ## 남아 있는 이슈와 확인 범위
 
+- **R1 원격 검증 실행 전 종료:** 09-15 CI `34936796710`의 attempt 1/2가 모두 `runner_id=0`, 실행 단계 0건으로 종료함. 로컬 성공과 별개로 Windows·브라우저 검증은 미실행이며 실행 전 오류 본문을 확인할 때까지 추가 재시도와 R2 착수를 보류함. 구체 원인은 미확정이고 사내 서버 장애로 연결하지 않음. [관측·시도·확인 범위](../evals/scenarios.md#workflow-refactor-20260915).
 - **공통 자산 업데이트 중 동시 편집:** 기존 GET→POST 사이 지원 description 유실의 합성 결함을 R0 조건부 저장·native 보호 경로로 수정하고 실제 wheel 회귀에서 확인함. 현재 PR 구현이며 사내 반영은 미실행이므로 기존 설치의 보호가 완료됐다고 표현하지 않음. 보호 미적용 원본 서버·외부 DB writer·일반 UI끼리의 오래된 폼 충돌은 보장 밖. [원래 재현/오탐 정정](../evals/scenarios.md#ai-runtime-preservation-20260915), [수정·검증·적용 경계](../evals/scenarios.md#conditional-assets-20260915).
 - **사외 Windows CI 지연:** 이전에 통과한 동일 코드에서 PowerShell 20초·Node 10초 제한시간 초과가 각각 발생했으며 원인은 미확정임. 두 시험의 단계 표식·런타임 버전·timeout의 단계 표식를 보존하도록 보완했으므로 자연 재발 시 그 증거로 진입 관측 여부와 시험 내부 단계를 구분함. 재검사 성공을 근본원인 해결이나 사내 서버 진단 필요로 바꾸지 않음. [실패·관측·최종 CI](../evals/scenarios.md#sidebar-refinement-20260914).
 - **팀 공동 작업:** 사용자가 공장 1개·시스템 1개·프로세스 1개, 참여자 2~3명의 첫 단위를 선택함. 현재 진행 건과 대화 연결은 사용자 소유이며 개인 선택 상태도 진행 건에 있어 공동화 때 분리가 필요함. 참여/역할·이력·충돌 처리는 아직 구체화·구현 전임. [새 단위·현황 표시 제안](mockups/ees-work/TASK.md#shared-pilot-first), [전체 목표](mockups/ees-work/TASK.md#ees-work-shared-target).
@@ -69,6 +70,6 @@
 
 ## 최근 점검
 
-2026-09-15: R1 서버/정책 분리의 실제 변경 범위·기존 저장 자료·공개 연결을 대조함. 서비스·권한·SQL·API AST와 완성 정의 bytes는 유지되며 새 모듈의 실제 wheel import 및 기존 Tool 연결을 확인함. ees.6~ees.8 Restore의 과거 파일 목록과 관련 시험을 보완하고 설계의 specialists 로더 오기를 정정함. 로컬 검증·독립 검토와 원격 CI의 실행 범위/결과는 [R1 기록](../evals/scenarios.md#workflow-refactor-20260915)에 연결함. 실제 사내 서버·데이터·자산 변경은 없으며 앞선 [R0 최종 결과](../evals/scenarios.md#conditional-assets-20260915)는 보존함.
+2026-09-15 재개: 최신 main·PR #48·로컬 변경을 대조하고 R1 원격 tree와 로컬 원본이 같은 것을 확인함. 업무 42개와 실제 고정 wheel 빌드/공개 모듈·Tool 연결 18개가 통과함. 원격 첫 실패와 재시도 1회 모두 실행기 배정 전 종료한 증거를 보존하고, 낡은 R0 전용 PR 설명을 R0/R1 구현·검증 상태에 맞춤. 문서만 갱신하며 현재 R1 Windows/브라우저 미실행·R2 보류를 명시함. [R1 재개 근거](../evals/scenarios.md#workflow-refactor-20260915). 기존 제품/시험/CI 코드·사내 서버·사용자 자산과 [R0 결과](../evals/scenarios.md#conditional-assets-20260915)는 유지함.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
