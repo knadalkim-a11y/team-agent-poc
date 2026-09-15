@@ -12,6 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| AI 개발 구조·사내 UI 작성 자산 보존 | [관리 경계·기존 보호·동시 편집 한계와 합성 검증](#ai-runtime-preservation-20260915) |
 | 공동 작업 첫 단위·현황판 시점 | [팀 사용 우선 목표·진척률과 일정 데이터 범위](#shared-pilot-priority-20260915) |
 | 사이드바 목업 후속 반영 | [ees.8 선택 영역·직계 펼침·폰트·검증 경계](#sidebar-refinement-20260914) |
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
@@ -41,6 +42,20 @@
 - 발견·처리: 기존 문서는 ees.7의 사용자별 진행 건과 본인 대화 연결만 기술해 최종 팀 공동 작업 목표를 잃을 수 있었음. `WorkflowService`의 `cases.owner`와 `_case` 소유자 조회, `_chat`의 본인 대화 검사로 현행 구현 범위를 확인함. 같은 서버에서 UI·Tool이 상태를 공유한다는 표현을 여러 사용자 사이의 공유로 확대하지 않고, 현재 구현·후속 목표·미결정 권한/이관/동시 작업을 구분함. 기존 개인 건의 자동 공개나 타인의 채팅·자격증명 공유를 새 합의로 만들지 않음.
 - 배포 기록 정리: PR #43의 최종 Windows/Linux 검사·main 병합·배포 산출물 확인을 [기존 Windows rename 기록](#windows-program-rename-20260914)에 추가함. 마지막 사내 결과는 `83d56a186382` Restore·Start·웹 접속 성공이며, 이후 전달한 Update→Upgrade→ApplyDemo 및 조건부 수동 변경 블록의 실행 결과는 미수신임. 복구·CI 성공을 새 보완·ees.7·공동 작업의 사내 성공으로 바꾸지 않음.
 - 검수 범위: 사용자 합의와 TASK/STATUS/사용 가이드/README의 의미·링크, 다음 작업과 미확인 구분을 검토함. 문서만 변경하고 HTML·실행/시험 코드·CI·브랜딩·버전·Agent Pack·사내 환경을 변경하지 않음. `python scripts/check_docs.py` → `DOCS OK | files=30 links=936 errors=0 review_candidates=0`, `git diff --check` 통과. 독립 읽기 검토에서 새 승인 절차를 합의로 오해할 수 있는 표현과 과거 색인의 공유 범위 표현을 정리하고, 추가 차단 문제는 발견하지 못함. 원격 반영 정보는 해당 PR에 남기며 기존 자동 시험·브라우저 검사를 새로 수행한 것으로 기록하지 않음.
+
+<a id="ai-runtime-preservation-20260915"></a>
+
+## 2026-09-15 AI 개발 구조와 사내 사용자 자산 보존 검토
+
+- 요청·기준: 사용자는 모든 개발을 AI가 맡고, 사내 UI에서 작성한 Skill·Tool은 이 개발 환경에서 알 수 없어도 훼손 없이 계속 사용해야 한다고 명시함. 실제 셋업 절차는 예시를 확정하는 것이 아니라 새로 정의한다는 정정도 유지함. 검토 시작 기준은 원격 main `006d9befcf1095397c70773f171c1403bf2b80d6`, 동일 source tree `1f6a045a30cc5b9896d0f1cd77b4eabf7354c3e2`의 깨끗한 로컬과 관련 열린 PR 없음임. 이번 작업은 읽기·합성 검증·기존 지침/기록 갱신이며 실행 코드·시험 코드·CI·사내 데이터·배포 동작은 변경하지 않음.
+- 구조 판단: 기능별 지침/코드 묶음, 기존 WebUI+래퍼, UI/AI의 공통 WorkflowService는 재사용할 수 있음. `ees-work-launcher.js`는 API·대화 전환/초안·탐색/패널·절차 편집을 함께 처리하므로 책임 분리 후보임. 공통 패널 관리자는 이미 있고 일부 배치/크기 처리가 기능별로 중복됨. 업무 엔진의 고정 입력과 공통 지침 검증이 seed에 결합되어 있어 실제 절차 작성 전에 정책과 예시의 경계를 정리할 필요가 있음. 이전 독립 데모도 빌더에 포함돼 있으나 참조·호환성 확인 없이 삭제하지 않음. 전면 재작성·새 서비스/DB·폴더 일괄 이동은 제안하지 않음. 전체 subtree 감시와 진행 건 전체 조회는 성능 측정 후보이며 현재 체감 지연의 원인으로 확정하지 않음.
+- 관리 경계·확인된 보호: [자산 실행기](../scripts/ees_demo_assets.py)는 관리 목록의 Tool 3개·시연 모델 3개·선택 EES 모델과 알려진 원본의 기존 WO만 갱신함. Skills·개인 UserValves의 쓰기/삭제 경로는 없으며 기존 연결·권한·개인 Prompt·비관리 설정을 합쳐 보존함. ID 충돌·읽기 실패/비공개 원본·추적되지 않은 관리 구역·관리 필드 현장 수정은 중단함. [프로그램 적용기](../scripts/ees_webui_customization.py)는 프로그램 경로와 등록 DATA_DIR/원본 환경의 겹침을 차단하고 프로그램 파일만 교체/복원함. 현재 Upgrade는 Stop→Apply→Start이며 과거 후보 방식의 전체 데이터 백업을 수행한다고 해석하지 않음. 프로그램 Restore는 DB·개인 자산·ApplyDemo 변경의 되돌리기가 아님.
+- 저장·호환 한계: 업무 catalog는 `INSERT OR IGNORE`로 초기화하여 UI 게시 절차를 매 시작마다 seed로 덮지 않음. 진행 건은 시작 당시 게시본을 유지함. 향후 공유 저장 형식 변경은 기존 개인 건·이력·절차 스냅샷 및 이전 프로그램과의 호환 범위를 별도로 검증해야 함. 데이터가 남아 있다는 것과 사용자 Tool이 계속 실행된다는 것은 구분함. `open_webui.ees_workflow` 설치 모듈, Tool ID/호출 인자/결과, UI 연결, 기존 의존성 등 공개 연결을 내부 리팩토링에서 보존해야 함. 모든 사내 사용자 자산의 실제 실행은 이번에 확인하지 않음.
+- 기존 보존 검사: `tests.test_ees_demo_assets.ApplyAssetsTests`에서 다음 8개를 선택 실행하여 **8/8 PASS**(합성·0.212초). `test_creates_then_reapplies_without_mutation_and_preserves_ees`, `test_new_version_preserves_ui_extras_and_unmanaged_valves`, `test_similar_user_tool_is_left_untouched`, `test_conflicts_stop_before_any_write`, `test_collision_and_invalid_source_preflight_before_writes`, `test_tool_source_not_visible_stops_before_changes`, `test_redacted_admin_model_response_cannot_erase_existing_prompt`, `test_public_anyone_grant_is_preserved_without_write_expansion`. 전체 사내 자산/실환경 보장을 뜻하지 않음.
+- 첫 가설과 정정: 합성 FakeAPI의 Tool `meta.custom`을 쓰기 직전 재조회 때 수정하면 비교가 놓치는 결과를 관찰함. 그러나 [고정 v0.11.3 ToolMeta](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/models/tools.py)는 `description`, `manifest`, `has_user_valves`만 지원하고 [라우터](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/routers/tools.py)는 뒤 두 필드를 원본에서 재생성함. 따라서 이 임의 필드 재현을 현행 API 결함으로 분류한 초기 판단과 metadata 비교 확대 제안은 철회함. 모의 API가 받아 준 필드를 실제 지원 계약과 대조한 뒤 결함을 판단해야 한다는 교훈을 남김.
+- 지원 필드의 동시 변경 재현: 기존 FakeAPI를 메모리에서 임시 확장하여, 최종 GET 직후 해당 Tool의 update POST가 저장되기 직전에 서버의 `meta.description`을 다른 사용자 값으로 바꿈. 이후 이전 GET 값으로 만든 payload가 저장되어 `apply_result=ok`, `race_fired=True`, `final_description=before-description`, `edit_preserved=False`를 확인함. 현재 쓰기 직전 재조회는 변경 감지 보호지만 GET→POST를 원자적으로 묶지 못한다는 **합성 증거**임. 사내 실제 발생/피해는 미확인. 원인은 단순 metadata 축약이 아니라 재조회와 무조건 갱신 사이의 경합이며, 관리 목록 밖 별도 사용자 Tool/Skill의 삭제를 재현한 것은 아님.
+- 다음 관련 변경의 검증 기준: 명시된 관리 ID/필드만 변경, Git에 없는 사용자 자산·연결·권한·개인 설정 보존, 충돌 때 덮어쓰기 중단, 지원 필드의 최종 조회 이후 동시 편집 처리, 반복 적용/실패/프로그램 Restore 후 최신 사용자 자료 유지, 공개 API/설치 모듈과 실제 배포물의 연결을 검사함. 동시 편집의 보장 방법은 서버의 조건부 저장/직렬화 범위를 포함해 구현 전에 정해야 하며 기존 재조회만으로 해결됐다고 표현하지 않음. 미연결 실제 업무 호출·운영 DB 접근·자동 데이터 이관을 추가하지 않음.
+- 기록·처리: [개발 지침](../AGENTS.md#3-구현-위치와-과설계-방지)에 AI 개발·현장 자산 보존·공개 연결/저장 호환 기준을, [관리 원본](../README.md#원본과-배포본)에 사용자 Tool을 명시함. TASK의 예시 재사용 지시를 최신 사용자 의도에 맞게 정정함. 새 보고서·지원하지 않는 필드용 회귀 코드·자동 동기화를 만들지 않음. 확인한 동시 편집 한계는 STATUS에 연결하고 이번 검토를 수정·배포 완료로 표시하지 않음. 문서 6개만 변경, `python scripts/check_docs.py` → `files=30 links=1000 errors=0 review_candidates=0`, `git diff --check` 통과. 독립 문서 대조에서 오탐 정정·동시 편집 조건·보호 범위·미구현/실환경 구분이 증거와 일치함을 확인함.
 
 <a id="shared-pilot-priority-20260915"></a>
 

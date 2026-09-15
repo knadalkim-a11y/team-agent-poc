@@ -6,12 +6,12 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 사용자가 첫 공동 작업 영역으로 셋업을 선택함. 기존 신규 공장 횡전개를 공장 1개·시스템 1개·프로세스 1개·참여자 2~3명의 범위로 우선 진행하며, 빠른 UI/UX 개선과 실제 팀 사용 목표를 유지함. [셋업 우선 범위](mockups/ees-work/TASK.md#setup-first), [공동 작업·현황판 검토 근거](../evals/scenarios.md#shared-pilot-priority-20260915).
+- 이번 작업: AI가 모든 개발을 맡는 전제에서 구조·리팩토링과 사내 UI 작성 Skill·Tool의 보존을 검토함. 기존 프로그램/운영 데이터 분리와 지정 자산 갱신은 유지하고, 지원 필드의 최종 조회 이후 동시 수정이 덮일 수 있는 한계를 합성으로 확인함. 실제 셋업 절차는 새로 정의하며 기존 신규 공장 횡전개는 참고 예시라는 사용자 정정을 반영함. 이번 변경은 지침·문서에 한정함. [검토 근거·미해결](../evals/scenarios.md#ai-runtime-preservation-20260915), [셋업 우선 범위](mockups/ees-work/TASK.md#setup-first).
 - 최근 Git 반영: [PR #47](https://github.com/knadalkim-a11y/team-agent-poc/pull/47)을 `02b880b19db6ffb353daf3309e3ff1354730e815`로 병합하고 [병합 main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910676906)의 Linux·Windows·ees.8 프로그램 산출물 성공을 확인함. 사내 가이드 원본 `9a90e19fb7f5f7d967d47c1f811d648b4dc1ee52`의 [main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910881151)도 전체 성공했으며 이번 사용자 ApplyDemo 보고의 원본과 같음. 이후 상태 기록은 문서만 갱신하며 검사 결과는 [최신 main 실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/workflows/ees-delivery.yml?query=branch%3Amain)에서 확인함. 최초 실패·수정·원격 검증과 실제 사내 결과는 [같은 기록](../evals/scenarios.md#sidebar-refinement-20260914)에서 구분함.
 - 최근 UI 확인: 09-15 사용자 보고로 공장·시스템 선택 박스, 프로세스 직계 태스크만 펼침, 글꼴 통일·P/T/J 설명 행 제거, 기존 대화·작성 중 초안 유지의 네 항목을 정상 확인함. 이번 UI 개선의 사내 수락 범위를 완료로 처리하며 같은 확인을 반복하지 않음.
 - 최근 운영 확인: 09-15 새 UI 네 항목 정상 보고를 확인함. 프로그램 버전 문자열·정확한 설치 원본 SHA·개별 Upgrade 출력은 별도 미보고이며, 마지막 직접 버전 응답은 09-14의 `0.11.3+ees.7`임. 이를 현재 프로그램 버전으로 고정하지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 별도 미확인임. [새 UI 확인](../evals/scenarios.md#sidebar-refinement-20260914), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 09-15 `9a90e19fb7f5` ApplyDemo로 v0.2.9 관리 자산 1건 갱신 성공 후 새 UI 네 항목의 사용자 확인까지 마침. 이전 `76e566622e74`의 v0.2.8·8건 적용은 [정렬 충돌 수정 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 대표 질문·실제 모델 호출은 이번 UI 확인과 구분함.
-- 다음 작업 하나: [셋업 → 신규 공장 횡전개](mockups/ees-work/TASK.md#setup-first)의 참여·역할·공유 기록·개인 대화/선택 분리·동시 변경을 구체화하고, A가 준비한 같은 진행 건을 B가 이어가는 화면·실행 흐름을 구현함. 기본 진척·다음 할 일 표시는 기존 UI를 재사용하는 방향으로 진행하며 공동 작업 기능·실제 파일럿은 아직 미완료임.
+- 다음 작업 하나: [자산 보존·호환 기준](../evals/scenarios.md#ai-runtime-preservation-20260915)을 먼저 적용할 제한적 정리 범위를 구체화함. 공통 자산의 동시 편집 보장, 공개 연결/저장 호환, 화면 책임·예시/실무 경계를 정리한 뒤 A/B의 같은 업무 이어가기로 연결하는 방향을 제안함. 현재 요청은 검토이며 이 다음 작업 표를 코드 변경·배포 권한으로 해석하지 않음. 공동 작업 기능·새 실무 절차·실제 파일럿은 미완료임.
 - 최신 사내 확인: 09-15 `apply_demo result=ok changed=1 commit=9a90e19fb7f5 stage=complete code=- next=new_chat`, 이어 `ui=ok tree=ok font=ok chat=ok` 보고. 지정 자산 적용과 요청한 새 화면·트리·글꼴·대화/초안 확인을 완료함. 실제 모델의 업무 호출·공유 권한·유휴 안정성까지 통과한 것으로 확대하지 않음. [이번 적용·화면 확인](../evals/scenarios.md#sidebar-refinement-20260914).
 
 ## 마지막으로 확인된 적용 상태
@@ -31,6 +31,7 @@
 
 ## 남아 있는 이슈와 확인 범위
 
+- **공통 자산 업데이트 중 동시 편집:** 최종 GET 뒤 POST 직전 관리 Tool의 지원 필드 `meta.description`을 다른 값으로 바꾸는 합성 조건에서 이전 값으로 덮이고 적용 성공이 반환됨. 기존 재조회 보호를 서버의 원자적 조건부 저장으로 볼 수 없음. 사내 실제 발생/피해는 미확인이고 관리 목록 밖 사용자 자산 삭제를 재현한 것은 아님. 지원하지 않는 `meta.custom`의 최초 모의 관찰은 현행 결함 분류에서 제외함. [재현·정정·다음 검증 기준](../evals/scenarios.md#ai-runtime-preservation-20260915).
 - **사외 Windows CI 지연:** 이전에 통과한 동일 코드에서 PowerShell 20초·Node 10초 제한시간 초과가 각각 발생했으며 원인은 미확정임. 두 시험의 단계 표식·런타임 버전·timeout의 단계 표식를 보존하도록 보완했으므로 자연 재발 시 그 증거로 진입 관측 여부와 시험 내부 단계를 구분함. 재검사 성공을 근본원인 해결이나 사내 서버 진단 필요로 바꾸지 않음. [실패·관측·최종 CI](../evals/scenarios.md#sidebar-refinement-20260914).
 - **팀 공동 작업:** 사용자가 공장 1개·시스템 1개·프로세스 1개, 참여자 2~3명의 첫 단위를 선택함. 현재 진행 건과 대화 연결은 사용자 소유이며 개인 선택 상태도 진행 건에 있어 공동화 때 분리가 필요함. 참여/역할·이력·충돌 처리는 아직 구체화·구현 전임. [새 단위·현황 표시 제안](mockups/ees-work/TASK.md#shared-pilot-first), [전체 목표](mockups/ees-work/TASK.md#ees-work-shared-target).
 - **공장별 업무 UX:** 09-15 사용자 보고로 이번 사이드바 선택 영역·직계 펼침·글꼴·대화/초안 유지의 사내 확인을 완료함. Workspace 탭 반복 재삽입·첫 메시지 경합의 사외 재현과 자동 검사는 [기존 근거](../evals/scenarios.md#ees-work-factory-ux-20260914)에 보존함. 이번 네 항목에 없던 Workspace 반복 전환·실제 모델 호출 등으로 확인 범위를 확대하지 않고 다음 관련 사용·변경 시점에만 판단함. [새 UI 수락](../evals/scenarios.md#sidebar-refinement-20260914).
@@ -68,6 +69,6 @@
 
 ## 최근 점검
 
-2026-09-15: 사용자 요청에 따라 첫 공동 작업 영역을 셋업·신규 공장 횡전개로 좁히고 기존 네 단계·담당자 이어가기·기본 진행 현황을 작업 원본에 연결함. 실제 파일럿 공장·시스템·참여 계정은 미지정이며 예시 선택을 실제 선정으로 간주하지 않음. 실제 사람 확인과 합성 DB/AP 점검을 구분하고, 확정한 우선순위와 아직 구체화·구현할 공유 정책을 분리함. [범위·근거](../evals/scenarios.md#shared-pilot-priority-20260915). 이번 갱신은 문서에 한정하며 기존 UI 수락·실패·수정 기록을 보존함.
+2026-09-15: AI 개발 구조·사내 UI 작성 자산의 관리 원본·지정 필드 갱신·프로그램/데이터 분리·공개 연결/이전 저장 호환을 검토함. 기존 자산 보존 검사 8개 PASS와 별도 지원 필드 동시 편집 합성 재현의 미해결을 구분하고, 지원하지 않는 임의 metadata를 실제 API 결함으로 오인한 초기 분류를 정정함. 실제 셋업은 새로 정의한다는 최신 요구와 사용자 Tool 보존을 기존 지침·문서에 반영함. [검토·검사·한계](../evals/scenarios.md#ai-runtime-preservation-20260915). 실행 코드·시험·사내 자산은 변경하지 않았으며, 이전 셋업 우선 기록은 [당시 근거](../evals/scenarios.md#shared-pilot-priority-20260915)에 보존함.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
