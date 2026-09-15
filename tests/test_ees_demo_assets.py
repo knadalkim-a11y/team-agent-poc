@@ -2,6 +2,7 @@
 import ast
 import copy
 import importlib.util
+import hashlib
 import json
 import tempfile
 import unittest
@@ -44,9 +45,60 @@ class FakeAPI:
         self.redact_model = False
         self.concurrent = None
         self.valve_defaults = None
+        self.capabilities = {"version": 1, "conditional_apply": True, "process_scope": "single"}
+        self.before_conditional_write = None
+        self.after_conditional_write = None
+
+    def snapshot(self, kind, identifier, *, read=True):
+        asset = (self._native("GET", self.native_path(kind, identifier)) if read else
+                 copy.deepcopy(self.valves.get(identifier, self.valve_defaults)
+                 if kind == "valves" and ("tool", identifier) in self.rows else self.rows.get((kind, identifier))))
+        parent = copy.deepcopy(self.rows.get(("tool", identifier))) if kind == "valves" else None
+        if kind == "valves" and parent is None:
+            asset = None
+        state = {"kind": kind, "id": identifier, "asset": asset, "parent": parent}
+        if kind == "tool":
+            state["valves"] = copy.deepcopy(self.valves.get(identifier, self.valve_defaults))
+        token = hashlib.sha256(json.dumps(state, sort_keys=True).encode()).hexdigest()
+        value = {"asset": asset, "exists": parent is not None if kind == "valves" else asset is not None, "token": token}
+        if kind == "valves":
+            value["parent"] = parent
+        return value
+
+    @staticmethod
+    def native_path(kind, identifier, *, operation=None):
+        if operation == "create":
+            return "/api/v1/models/create" if kind == "model" else "/api/v1/tools/create"
+        if kind == "model":
+            return "/api/v1/models/model/update" if operation else "/api/v1/models/model?id=" + identifier
+        return "/api/v1/tools/id/" + identifier + ("/valves" if kind == "valves" else "") + ("/update" if operation else "")
 
     def request(self, method, path, body=None):
         self.calls.append((method, path, copy.deepcopy(body)))
+        if path == assets.ASSET_API + "/capabilities":
+            return copy.deepcopy(self.capabilities)
+        if path == assets.ASSET_API + "/snapshot":
+            return self.snapshot(body["kind"], body["id"])
+        if path == assets.ASSET_API + "/apply":
+            kind, identifier = body["kind"], body["id"]
+            if self.before_conditional_write:
+                self.before_conditional_write(kind, identifier)
+            baseline = self.snapshot(kind, identifier, read=False)
+            # Include native read-derived values consistently in fake signed state.
+            if kind == "model" and baseline["asset"]:
+                baseline = self.snapshot(kind, identifier)
+            if body["expected_token"] != baseline["token"]:
+                raise assets.DemoAssetsError("concurrent_edit", identifier)
+            self._native("POST", self.native_path(kind, identifier, operation=body["operation"]), body["payload"])
+            if self.after_conditional_write:
+                self.after_conditional_write(kind, identifier)
+            result = self.snapshot(kind, identifier)
+            if kind == "tool":
+                result["valves_snapshot"] = self.snapshot("valves", identifier)
+            return result
+        return self._native(method, path, body)
+
+    def _native(self, method, path, body=None):
         if path == "/api/models":
             return {"data": [{"id": "internal-llm"}]}
         if "/models/" in path:
@@ -61,7 +113,8 @@ class FakeAPI:
             if self.fail_read == key:
                 raise TimeoutError("private API response must never leak")
             if self.concurrent == key:
-                reads = sum(1 for m, p, _ in self.calls if m == "GET" and p == path)
+                reads = sum(1 for m, p, b in self.calls if p == assets.ASSET_API + "/snapshot"
+                            and b == {"kind": kind, "id": identifier})
                 if reads == 2:
                     if kind == "tool":
                         self.rows[key]["content"] += "\n# concurrent edit\n"
@@ -108,7 +161,10 @@ class FakeAPI:
 
     @property
     def writes(self):
-        return [call for call in self.calls if call[0] == "POST"]
+        # Preserve old native payload assertions while recording actual HTTP
+        # requests in calls for separate no-fallback/conditional contract checks.
+        return [("POST", self.native_path(body["kind"], body["id"], operation=body["operation"]), body["payload"])
+                for method, path, body in self.calls if path == assets.ASSET_API + "/apply"]
 
 
 class ApplyAssetsTests(unittest.TestCase):
@@ -560,7 +616,7 @@ class ApplyAssetsTests(unittest.TestCase):
         request = self.api.request
         def format_after_write(method, path, body=None):
             result = request(method, path, body)
-            if method == "POST" and path == "/api/v1/tools/id/ees_demo_data/update":
+            if method == "POST" and path == assets.ASSET_API + "/apply" and body["id"] == "ees_demo_data":
                 self.api.rows[("tool", "ees_demo_data")]["content"] = newer_formatted
             return result
         self.api.request = format_after_write
@@ -903,7 +959,7 @@ class ApplyAssetsTests(unittest.TestCase):
         request = self.api.request
         def interrupted(method, path, body=None):
             response = request(method, path, body)
-            if method == "POST":
+            if method == "POST" and path == assets.ASSET_API + "/apply":
                 raise KeyboardInterrupt()
             return response
         self.api.request = interrupted
@@ -1009,7 +1065,7 @@ class ApplyAssetsTests(unittest.TestCase):
 
     def test_real_manifest_sources_pass_preflight(self):
         manifest = assets.load_manifest(MODULE.parents[1])
-        self.assertEqual("0.2.9", manifest["version"])
+        self.assertEqual("0.2.10", manifest["version"])
         suggestions = json.loads((MODULE.parents[1] / "agent-pack/ees-prompt-suggestions.json").read_text(encoding="utf-8"))
         self.assertEqual(3, len(suggestions))
         self.assertEqual(suggestions, manifest["ees"]["suggestions"])
@@ -1040,6 +1096,130 @@ class ApplyAssetsTests(unittest.TestCase):
         exec(compile(wo["content"], wo["path"], "exec"), scope)
         self.assertEqual((MODULE.parents[1] / wo["ui_script_path"]).read_text(encoding="utf-8"),
                          scope["WORK_PANEL_SCRIPT"])
+
+    def test_missing_or_incomplete_guard_refuses_before_writes(self):
+        for capability in (None, {}, {"version": 1, "conditional_apply": False, "process_scope": "single"},
+                           {"version": True, "conditional_apply": True, "process_scope": "single"},
+                           {"version": 1, "conditional_apply": True, "process_scope": "multi"}):
+            with self.subTest(capability=capability):
+                self.api.capabilities = capability
+                original = copy.deepcopy(self.api.rows)
+                error = self.expect_error("conditional_write_unavailable")
+                self.assertEqual(0, error.changed)
+                self.assertFalse(error.pending)
+                self.assertEqual([], self.api.writes)
+                self.assertEqual(original, self.api.rows)
+                self.assertFalse((self.state / assets.STATE_FILE).exists())
+
+    def test_guard_unavailable_keeps_earlier_unconfirmed_intent(self):
+        self.api.fail_after = ("tool", "ees_demo_data")
+        self.expect_error("asset_apply_failed")
+        journal = self.state / assets.STATE_FILE
+        before = journal.read_bytes()
+        self.api.capabilities = None
+        error = self.expect_error("conditional_write_unavailable")
+        self.assertTrue(error.pending)
+        self.assertEqual(before, journal.read_bytes())
+
+    def test_all_mutations_use_conditional_api_and_keep_tokens_out_of_journal(self):
+        self.apply()
+        posts = [(path, body) for method, path, body in self.api.calls if method == "POST"]
+        self.assertTrue(posts)
+        self.assertTrue(all(path in {assets.ASSET_API + "/snapshot", assets.ASSET_API + "/apply"}
+                            for path, _ in posts))
+        journal = (self.state / assets.STATE_FILE).read_text(encoding="utf-8")
+        for path, body in posts:
+            if path.endswith("/apply"):
+                self.assertNotIn(body["expected_token"], journal)
+                self.assertNotIn("UserValves", body)
+        self.assertNotIn("expected_token", journal)
+
+    def test_supported_description_change_after_final_snapshot_is_never_overwritten(self):
+        self.apply()
+        source = self.root / "agent-pack/data.py"
+        source.write_text(source.read_text(encoding="utf-8") + "\n# next source\n", encoding="utf-8")
+        before = json.loads((self.state / assets.STATE_FILE).read_text(encoding="utf-8"))
+        self.api.calls.clear()
+        def edit(kind, identifier):
+            if (kind, identifier) == ("tool", "ees_demo_data"):
+                self.api.rows[(kind, identifier)]["meta"]["description"] = "현장 수정 최신 설명"
+        self.api.before_conditional_write = edit
+        error = self.expect_error("concurrent_edit")
+        self.assertEqual(0, error.changed)
+        self.assertFalse(error.pending)
+        self.assertEqual("현장 수정 최신 설명", self.api.rows[("tool", "ees_demo_data")]["meta"]["description"])
+        self.assertEqual(before, json.loads((self.state / assets.STATE_FILE).read_text(encoding="utf-8")))
+        self.assertEqual(1, len(self.api.writes))  # One rejected request; no token refresh/retry.
+        self.assertEqual("EES 합성 데이터 시연", self.api.writes[0][2]["meta"]["description"])
+        self.assertFalse(any(path.endswith("/update") for _, path, _ in self.api.calls))
+
+    def test_new_id_collision_after_snapshot_is_not_adopted_or_overwritten(self):
+        inserted = {"id": "ees_demo_data", "name": "현장 자산", "content": "local source",
+                    "meta": {"description": "keep"}, "access_grants": [], "user_id": "local-owner"}
+        def create(kind, identifier):
+            if (kind, identifier) == ("tool", "ees_demo_data"):
+                self.api.rows[(kind, identifier)] = copy.deepcopy(inserted)
+        self.api.before_conditional_write = create
+        error = self.expect_error("concurrent_edit")
+        self.assertFalse(error.pending)
+        self.assertEqual(0, error.changed)
+        self.assertEqual(inserted, self.api.rows[("tool", "ees_demo_data")])
+        self.assertNotIn("tool:ees_demo_data", json.loads((self.state / assets.STATE_FILE).read_text(encoding="utf-8"))["assets"])
+
+    def test_parent_tool_change_after_own_success_cannot_refresh_valve_token(self):
+        def edit(kind, identifier):
+            if (kind, identifier) == ("valves", "ees_demo_data"):
+                self.api.rows[("tool", identifier)]["content"] += "\n# local parent edit\n"
+        self.api.before_conditional_write = edit
+        error = self.expect_error("concurrent_edit")
+        self.assertEqual(1, error.changed)
+        self.assertFalse(error.pending)
+        self.assertNotIn("ees_demo_data", self.api.valves)
+        self.assertTrue(self.api.rows[("tool", "ees_demo_data")]["content"].endswith("# local parent edit\n"))
+        self.assertEqual(2, len(self.api.writes))
+
+    def test_common_valves_edit_conflicts_with_parent_tool_update(self):
+        self.apply()
+        source = self.root / "agent-pack/data.py"
+        source.write_text(source.read_text(encoding="utf-8") + "\n# new version\n", encoding="utf-8")
+        original = self.api.rows[("tool", "ees_demo_data")]["content"]
+        def edit(kind, identifier):
+            if (kind, identifier) == ("tool", "ees_demo_data"):
+                self.api.valves[identifier]["timeout_seconds"] = 999
+        self.api.before_conditional_write = edit
+        self.assertEqual(0, self.expect_error("concurrent_edit").changed)
+        self.assertEqual(999, self.api.valves["ees_demo_data"]["timeout_seconds"])
+        self.assertEqual(original, self.api.rows[("tool", "ees_demo_data")]["content"])
+
+    def test_own_tool_snapshot_does_not_refresh_other_targets(self):
+        self.apply()
+        (self.root / "agent-pack/data.py").write_text((self.root / "agent-pack/data.py").read_text(encoding="utf-8") + "\n# update\n", encoding="utf-8")
+        (self.root / "agent-pack/apc.md").write_text("새 APC 지침", encoding="utf-8")
+        def edit(kind, identifier):
+            if (kind, identifier) == ("tool", "ees_demo_data"):
+                self.api.rows[("model", "ees-demo-apc")]["params"]["temperature"] = 0.9
+        self.api.after_conditional_write = edit
+        error = self.expect_error("concurrent_edit")
+        self.assertEqual(1, error.changed)
+        self.assertEqual(0.9, self.api.rows[("model", "ees-demo-apc")]["params"]["temperature"])
+        self.assertNotIn("새 APC 지침", self.api.rows[("model", "ees-demo-apc")]["params"]["system"])
+
+    def test_unknown_assets_and_supported_links_remain_available_after_update(self):
+        custom = {"id": "jira_real", "name": "현장 조회", "content": "def query(): return 'local'",
+                  "meta": {"description": "사용자 작성 도구"}, "access_grants": [read_grant()], "user_id": "local-owner"}
+        self.api.rows[("tool", "jira_real")] = copy.deepcopy(custom)
+        self.api.valves["jira_real"] = {"timeout_seconds": 23}
+        self.api.rows[("skill", "policy")] = {"id": "policy", "content": "사용자 정책"}
+        untouched = copy.deepcopy(self.api.rows[("skill", "policy")])
+        self.apply()
+        self.assertEqual(custom, self.api.request("GET", "/api/v1/tools/id/jira_real"))
+        self.assertEqual({"timeout_seconds": 23}, self.api.request("GET", "/api/v1/tools/id/jira_real/valves"))
+        self.assertEqual(untouched, self.api.rows[("skill", "policy")])
+        model = self.api.request("GET", "/api/v1/models/model?id=existing-ees")
+        self.assertIn("jira_real", model["meta"]["toolIds"])
+        self.assertIn("policy", model["meta"]["skillIds"])
+        self.assertTrue(all(body["id"] != "jira_real" for _, path, body in self.api.calls
+                            if path == assets.ASSET_API + "/apply"))
 
     def test_concurrent_edit_not_overwritten(self):
         self.api.concurrent = ("model", "existing-ees")

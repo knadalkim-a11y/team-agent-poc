@@ -22,7 +22,8 @@ HEX40 = re.compile(r"[0-9a-f]{40}")
 # can reuse an earlier program artifact, but never one with different inputs.
 PROGRAM_INPUTS = (
     "branding", "agent-pack/skills/ees-work-demo", "scripts/build_ees_webui.py", "scripts/build_demo_bundle.py",
-    "scripts/render_ees_brand_assets.py", "tests/test_ees_branding_build.py",
+    "agent-pack/skills/cross-system-analysis/ui/work-panel.js",
+    "scripts/render_ees_brand_assets.py", "scripts/ees_asset_guard.py", "tests/test_ees_branding_build.py",
     "tests/test_demo_bundle.py", ".github/workflows/ees-delivery.yml",
 )
 
@@ -38,7 +39,7 @@ def git(*arguments, optional=False, proxy=None):
     try:
         options = ["-c", "http.proxy=" + proxy] if proxy else []
         result = subprocess.run(["git", *options, "-C", str(ROOT), *arguments], env=env,
-                                capture_output=True, text=True, timeout=60)
+                                capture_output=True, text=True, encoding="utf-8", timeout=60)
     except (OSError, subprocess.SubprocessError):
         raise UpgradeError("git_unavailable") from None
     if result.returncode and not (optional and result.returncode == 1):

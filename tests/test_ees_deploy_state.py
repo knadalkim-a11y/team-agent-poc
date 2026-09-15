@@ -101,7 +101,7 @@ class DeploymentStateTests(unittest.TestCase):
                 path.write_text("SYNTHETIC_ENV_CONTENT", encoding="utf-8")
                 with self.assertRaisesRegex(STATE.StateError, "existing .env"):
                     self.init()
-                self.assertEqual(path.read_text(), "SYNTHETIC_ENV_CONTENT")
+                self.assertEqual(path.read_text(encoding="utf-8"), "SYNTHETIC_ENV_CONTENT")
                 self.assertFalse(self.config_path.parent.exists())
                 path.unlink()
         for name, value in (("DATABASE_URL", "synthetic-external-db"), ("VECTOR_DB", "qdrant"),

@@ -4,6 +4,20 @@
 
 ## 2026-09-15
 
+- 사용자 배포 요청에 따라 [9월 고정 원본 시험 적용](docs/03-openwebui-native-agent.md#ees-wrapper-trial)을 연결함. ApplyDemo의 공개 TrialCommit은 검토한 clean main·origin/main·설치 프로그램 원본을 확인하고 기존 자산 보호를 유지함. 기본 CI 경로는 유지하며 기존 내부 백업 기능을 공개 Backup 명령으로 재사용해 Stop 뒤 데이터/키/설정 검증 백업을 수행함. 실제 사내 실행은 배포 결과 보고와 구분함.
+
+- [메인 채팅의 업무 탐색·계획](docs/mockups/ees-work/TASK.md#chat-workflow-entry-20260915)을 기존 Workflow Tool과 관리 Prompt에 구현함. 조회 중 업무 생성·선택 연결 없이 게시 절차의 단계/입력/지침을 읽고, 기존 진행은 고정된 절차와 현재 접근 가능한 스킬로 계획함. 동일 액션·권한·사람 확인 경계를 유지하며 새 계획 서버·모델·저장 형식을 추가하지 않음. 같은 ees.9/v0.2.10 준비본이며 사내 모델 확인·배포 여부는 STATUS에서 구분함.
+
+- [R2 업무 화면 분리](evals/scenarios.md#work-ui-refactor-20260915)를 기존 요청 제어·표시·관리자 편집 책임으로 구현하고 단일 배포 JS/공개 연결을 유지함. 기존 브라우저 초안 보존 검사를 보강하고 R3 실제 프로그램 Apply→추가 저장→이전 ees.8 Restore 시험을 추가함. 같은 미배포 ees.9 준비본이며 Windows/브라우저 결과·사내 적용은 별도로 추적함.
+
+- AI가 업무 변경 책임을 좁혀 찾도록 [R1 서버·정책 분리](evals/scenarios.md#workflow-refactor-20260915)를 구현함. 저장·권한·공개 facade는 유지하고 정의/검증과 화면 파생 계산을 분리했으며 공통 정책을 참고 seed에서 분리함. 완성 seed·저장 형식·기존 자료를 유지하고 새 파일의 wheel 포함과 ees.6~ees.8 Restore 목록을 구분함. 같은 미배포 ees.9 PR에 반영하며 자산 재등록·공동 권한 변경은 포함하지 않음.
+
+- ees.9와 Agent Pack v0.2.10에 [R0 조건부 자산 적용](docs/03-openwebui-native-agent.md#conditional-assets)을 구현함. 서버가 최신 상태·권한과 저장을 같은 잠금으로 보호하고 ApplyDemo의 오래된 payload를 거절함. 실제 wheel 대조/독립 검토로 Tool import·지식 정리·채팅 캐시 경로를 포함하고 불필요한 외부 모델 조회 잠금은 제거함. 기존 자산 ID·사용자 자료·DB 형식과 구버전 프로그램 Restore를 유지하며, 구서버에서는 새 ApplyDemo 쓰기를 중단함. 구현과 사내 반영 여부는 [검증 기록](evals/scenarios.md#conditional-assets-20260915)에서 구분함.
+
+- [제한적 리팩토링 설계](docs/mockups/ees-work/TASK.md#refactoring-design)에 파일별 책임·공개 연결·사용자 자료 보존·작업 순서·실제 배포물/Restore 검증 기준을 명시함. 독립 검토로 패널 동작 공통화를 제외하고 화면 상태/이벤트 소유권과 서버 자산 조건부 저장의 경계를 보완함. 자산 결함 수정과 순수 구조 정리를 분리했으며 이번 변경은 구현·배포를 포함하지 않음. [검토 근거](evals/scenarios.md#refactoring-design-review-20260915).
+
+- 모든 개발을 AI가 맡는 전제와, 개발 환경에 없는 사내 UI 작성 Skill·Tool·연결·권한·설정의 보존 요구를 개발 지침·관리 원본에 명시함. 기존 예시 셋업을 확정 실무로 오해하지 않도록 최신 요구를 정정하고, 프로그램/자산 갱신의 보호와 지원 필드 동시 편집의 미해결 한계를 [검토 기록](evals/scenarios.md#ai-runtime-preservation-20260915)에 남김. 실행 코드·사용자 데이터·배포 동작은 변경하지 않음.
+
 - 사용자 요청으로 첫 공동 작업 영역을 [셋업·신규 공장 횡전개](docs/mockups/ees-work/TASK.md#setup-first)로 확정함. 기존 네 단계와 A/B 이어가기 수락 예시를 연결하고 실제 파일럿 대상·공유 정책·합성 점검의 미확정/미구현 범위를 유지함.
 
 - 사용자가 선택한 공장 1개·시스템 1개·프로세스 1개·2~3명의 첫 공동 작업 단위와 빠른 팀 사용 우선 목표를 [설계 원본](docs/mockups/ees-work/TASK.md#shared-pilot-first)에 기록함. 기존 진행 요약을 활용하고 일정·종합 현황판은 실사용 후 확장하는 제안을 구분했으며, 현재 진행률·날짜 데이터의 한계와 공동 작업 수락 기준을 연결함. 이번 반영은 문서에 한정함.

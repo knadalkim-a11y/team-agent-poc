@@ -667,7 +667,7 @@ class RealGitCompatibilityTests(unittest.TestCase):
 
             def git(*arguments):
                 return subprocess.run([shutil.which("git"), "-C", str(root), *arguments],
-                                      check=True, capture_output=True, text=True, timeout=10).stdout.strip()
+                                      check=True, capture_output=True, text=True, encoding="utf-8", timeout=10).stdout.strip()
 
             def commit(message):
                 git("add", ".")
@@ -699,9 +699,22 @@ class RealGitCompatibilityTests(unittest.TestCase):
                 work.write_text("const demo = true;\n", encoding="utf-8")
                 work_changed = commit("work demonstration changed")
                 self.assertFalse(upgrade.compatible_program(changed, work_changed))
+                guard = root / "scripts" / "ees_asset_guard.py"
+                guard.parent.mkdir()
+                guard.write_text("# conditional asset writer\n", encoding="utf-8")
+                guard_changed = commit("asset guard added")
+                self.assertFalse(upgrade.compatible_program(work_changed, guard_changed))
+                guard.write_text("# changed conditional asset writer\n", encoding="utf-8")
+                guard_updated = commit("asset guard changed")
+                self.assertFalse(upgrade.compatible_program(guard_changed, guard_updated))
+                panel = root / "agent-pack" / "skills" / "cross-system-analysis" / "ui" / "work-panel.js"
+                panel.parent.mkdir(parents=True)
+                panel.write_text("const panel = true;\n", encoding="utf-8")
+                panel_changed = commit("shared work panel changed")
+                self.assertFalse(upgrade.compatible_program(guard_updated, panel_changed))
                 unrelated = git("commit-tree", "HEAD^{tree}", "-m", "unrelated history")
-                self.assertFalse(upgrade.compatible_program(unrelated, work_changed))
-                self.assertEqual(upgrade.checkout(work_changed), work_changed)
+                self.assertFalse(upgrade.compatible_program(unrelated, panel_changed))
+                self.assertEqual(upgrade.checkout(panel_changed), panel_changed)
                 notes.write_text("uncommitted local notes\n", encoding="utf-8")
                 with self.assertRaisesRegex(upgrade.UpgradeError, "local_changes"):
                     upgrade.checkout()
@@ -813,11 +826,11 @@ class PowerShellUpgradeTests(unittest.TestCase):
                        "-Action", "ApplyDemo", "-Config", str(config)]
             result = subprocess.run(command + ["-ResetDemoToken", "-ResetUpdateToken",
                                     "-WebUIUrl", "http://127.0.0.1:8080", "-EesModelId", "existing", "-Summary"],
-                                    capture_output=True, text=True, timeout=30)
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), ["--config", str(config), "--reset-token",
                             "--reset-update-token", "--webui-url", "http://127.0.0.1:8080", "--ees-model-id", "existing"])
-            result = subprocess.run(command + ["-Bundle", "untrusted.zip"], capture_output=True, text=True, timeout=30)
+            result = subprocess.run(command + ["-Bundle", "untrusted.zip"], capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(result.stdout.strip(), "")
 
@@ -834,16 +847,16 @@ class PowerShellUpgradeTests(unittest.TestCase):
             command = [shutil.which("pwsh"), "-NoProfile", "-File", str(adapter),
                        "-Action", "Upgrade", "-Config", str(config)]
             result = subprocess.run(command + ["-HealthTimeout", "90", "-ResetUpdateToken", "-Summary"],
-                                    capture_output=True, text=True, timeout=30)
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), ["--config", str(config), "--health-timeout", "90", "--reset-token"])
-            result = subprocess.run(command + ["-Bundle", "untrusted.zip"], capture_output=True, text=True, timeout=30)
+            result = subprocess.run(command + ["-Bundle", "untrusted.zip"], capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(result.stdout.strip(), "")
             result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(adapter),
                                      "-Action", "Update", "-Config", str(config),
                                      "-GitProxy", "http://synthetic-proxy:8080"],
-                                    capture_output=True, text=True, timeout=30)
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), ["--config", str(config), "--update-only",
                                                         "--git-proxy", "http://synthetic-proxy:8080"])

@@ -8,6 +8,7 @@ is used. Linux CI requires the browser and built wheel instead of skipping.
 
 import asyncio
 import base64
+import importlib
 import importlib.util
 import json
 import os
@@ -30,6 +31,11 @@ SCRIPTS = ROOT / "agent-pack/skills/ees-work-demo/scripts"
 
 
 def load_module(name, path):
+    if path.name == "ees_workflow.py":
+        package = types.ModuleType(name)
+        package.__path__ = [str(path.parent)]
+        with patch.dict(sys.modules, {name: package}):
+            return importlib.import_module(f"{name}.ees_workflow")
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -562,10 +568,32 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.wait("!!document.querySelector('#ees-work-designer')")
         self.assertIsNotNone(self.read('#workspace-container'))
         self.click('#ees-work-designer [data-action="edit_node"][data-node-id="db-j"]')
+        writes_before = self.server.requests.count(("POST", "/api/ees-work/action"))
         self.fill('#ees-work-node-form input[name="name"]', "DB 연결 확인 개정")
         self.click('#ees-work-node-form button[type="submit"]')
+        # Applying the form changes only the local editor draft. The designer
+        # may detach during ordinary SPA navigation, but must retain that draft
+        # and its dirty state until the explicit server save.
+        for route in ("models", "knowledge"):
+            self.click('nav a[href="/workspace/' + route + '"]')
+            self.wait("location.pathname === " + json.dumps("/workspace/" + route)
+                      + " && !location.search && !document.querySelector('#ees-work-designer')"
+                      + " && !document.querySelector('.ees-work-native-hidden')")
+            self.click("#ees-work-workspace-tab")
+            self.wait("document.querySelector('#ees-work-node-form input[name=name]')?.value === 'DB 연결 확인 개정'"
+                      + " && document.querySelector('.ew-designer-status')?.innerText.includes('저장하지 않은 변경')")
+            self.assertEqual(self.browser.evaluate(
+                "document.querySelectorAll('#ees-work-workspace-tab').length"), 1)
+        self.browser.evaluate("window.__eesNativeWorkV1.refresh()")
+        self.assertEqual(self.read('#ees-work-node-form input[name="name"]', "value"), "DB 연결 확인 개정")
+        self.assertIn("저장하지 않은 변경", self.text(".ew-designer-status"))
+        self.assertEqual(self.server.requests.count(("POST", "/api/ees-work/action")), writes_before)
+        self.assertEqual(self.current()["catalog"]["nodes"]["db-j"]["name"], "DB 연결 확인")
         self.click('#ees-work-designer [data-action="save_draft"]')
         self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('초안 1')")
+        self.assertEqual(self.server.requests.count(("POST", "/api/ees-work/action")), writes_before + 1)
+        self.assertNotIn("저장하지 않은 변경", self.text(".ew-designer-status"))
+        self.assertEqual(self.current()["draft"]["nodes"]["db-j"]["name"], "DB 연결 확인 개정")
         self.click('#ees-work-designer [data-action="validate_draft"]')
         self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('검증 완료')")
         self.click('#ees-work-designer [data-action="publish"]', confirm=True)

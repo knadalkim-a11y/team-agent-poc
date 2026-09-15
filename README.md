@@ -85,9 +85,34 @@ flowchart TB
 - Git 커밋 완료는 WebUI 반영 완료가 아닙니다. 실제 적용한 원본 커밋과 검증 증거는 STATUS에서 추적합니다.
 - Skill·Prompt의 금지 지침은 보안 경계가 아닙니다. 실행 가능한 범위는 Tool 내부 검사·권한·자격증명·네트워크 구성에서 제한합니다.
 
+AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs/mockups/ees-work/TASK.md#refactoring-design)의 파일별 책임·공개 연결·자료 보존·검증 기준을 따른다. 설계와 실제 구현/배포 상태는 구분한다.
+
+업무 서버 변경은 아래 책임에서 시작합니다. 설치 후 공개 진입점은 계속 `open_webui.ees_workflow`이며, 기능 설명·수락 조건은 위 설계, 현재 구현·배포 상태는 STATUS가 관리합니다.
+
+| 변경할 책임 | 원본 |
+|---|---|
+| 저장·권한·업무 액션·API | [ees_workflow.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow.py) |
+| 정의 읽기·참조/입력/게시 검증 | [ees_workflow_definition.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_definition.py) |
+| 진행률·선행 대기·표시 상태 계산 | [ees_workflow_view.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_view.py) |
+| 공통 실행 정책 | [workflow_policy.json](agent-pack/skills/ees-work-demo/scripts/workflow_policy.json) |
+| 참고 업무 절차·공장 예시 | [workflow_seed.json](agent-pack/skills/ees-work-demo/scripts/workflow_seed.json) |
+
+정책과 예시의 분리는 현재 저장된 게시본·초안·진행 건을 재작성하지 않습니다. AI Tool의 [workflow_tool.py](agent-pack/skills/ees-work-demo/scripts/workflow_tool.py)와 UI는 같은 공개 서비스와 권한 판정을 사용합니다.
+
+업무 화면 변경은 다음 책임에서 시작합니다. 세 JS 소스는 기존 Python 빌더의 `assemble_work_launcher`에서 하나의 배포 JS로 조립되며 별도 로더나 서버를 추가하지 않습니다.
+
+| 변경할 책임 | 원본 |
+|---|---|
+| 서버 요청·대화 연결·개인 초안·응답 순서 | [ees-work-launcher.js](branding/ees/ui/ees-work-launcher.js) |
+| 공장 선택·트리·업무 패널 표시·크기 | [ees-work-view.js](branding/ees/ui/ees-work-view.js) |
+| 관리자 절차 편집·미저장 초안·Workspace 복원 | [ees-work-designer.js](branding/ees/ui/ees-work-designer.js) |
+| 소스 조립·wheel 파일 목록·해시 | [build_ees_webui.py](scripts/build_ees_webui.py) |
+
+factory는 배포 JS 내부에만 존재하고 기존 UI/Tool 연결과 저장 형식은 유지합니다. 화면 분리와 이전 프로그램 복원 검증의 실제 범위는 [R2/R3 기록](evals/scenarios.md#work-ui-refactor-20260915)을 따릅니다.
+
 ### 원본과 배포본
 
-팀원이 만든 개인·공유 프롬프트와 Skill은 허용된 생성·공유·수정 권한 안에서 WebUI에서 관리합니다. 공유할 때마다 담당자의 채택이나 Git 반영을 거칠 필요는 없습니다. 담당자가 팀 공통 배포 대상으로 채택한 항목만 검토한 버전을 Git에 보관하고, 이후에는 Git에서 변경을 관리해 해당 배포 절차로 반영합니다. 교차 분석 시연의 지정 자산은 `ApplyDemo`, 그 밖의 기존 자산은 해당 가이드의 수동 절차를 사용합니다.
+팀원이 만든 개인·공유 프롬프트·Skill·Tool은 허용된 생성·공유·수정 권한 안에서 WebUI에서 관리합니다. 공유할 때마다 담당자의 채택이나 Git 반영을 거칠 필요는 없습니다. 담당자가 팀 공통 배포 대상으로 채택한 항목만 검토한 버전을 Git에 보관하고, 이후에는 Git에서 변경을 관리해 해당 배포 절차로 반영합니다. 교차 분석 시연의 지정 자산은 `ApplyDemo`, 그 밖의 기존 자산은 해당 가이드의 수동 절차를 사용합니다. 개발 환경에 없는 사용자 자산도 계속 보존하며, 프로그램 내부 리팩토링을 자산 ID 변경·재등록·초기화와 결합하지 않습니다.
 
 사용자 작성물은 WebUI 실행 데이터와 함께 승인된 내부 백업으로 보존하는 운영 방침이며, 모든 작성물을 Git에 수집하지 않습니다. 이는 실제 사용자 권한 설정·공유 시험·백업이 완료됐다는 뜻이 아니며 자동 동기화도 구성하지 않았습니다. 실제 적용 상태는 [STATUS](docs/STATUS.md)에서 확인합니다.
 
@@ -96,11 +121,11 @@ flowchart TB
 | Assistant 기본 지시 | `agent-pack/system-prompts/` | Workspace Model의 System Prompt |
 | 업무 공통 정책 | `agent-pack/policies/` | 검토 후 Prompt·Tool 구성에 반영; 자동 적용 아님 |
 | 공통 배포 Skill 절차 | `agent-pack/skills/*/SKILL.md` | Workspace Skills |
-| 실행 코드 | 해당 Skill의 `scripts/` | Workspace Tools |
+| Git 관리 공통 실행 코드 | 해당 Skill의 `scripts/` | 지정 Workspace Tools에 해당 배포 절차로 반영 |
 | 교차 분석 시연 구성 | `agent-pack/ees-demo.json` | ApplyDemo로 전문 모델·Tool·EES 관리 구역과 시작 질문 연결 |
 | EES Work 업무 절차·진행 건 | 업무 절차는 관리자 워크스페이스, 진행 건은 사용자 업무 화면 | 기존 DATA_DIR의 `ees-work.sqlite3`; 대화·버전·현장별 실행 결과 보존. [관리·실행 경계](docs/03-openwebui-native-agent.md#ees-work-demo) |
 | 합성 지식 | `agent-pack/knowledge/` | Workspace Knowledge |
-| 팀원 개인·공유 프롬프트와 Skill | 승인된 실행 환경의 WebUI | Workspace Prompts·Skills; 내부 백업 대상 |
+| 팀원 개인·공유 프롬프트·Skill·Tool·모델 | 승인된 실행 환경의 WebUI | 등록 ID·내용·연결·권한·개인 설정 보존; 내부 백업 대상 |
 | 실제 PAT·DB·대화 | 승인된 실행 환경 | Git에 저장하지 않음 |
 
 ## 설치·검증 안내

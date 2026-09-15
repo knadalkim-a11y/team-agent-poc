@@ -5,7 +5,7 @@ Settings and data stay outside Git. ApplyDemo manages only the declared demo ass
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('Init', 'Update', 'Upgrade', 'ApplyDemo', 'Status', 'Diagnose', 'ProbeImports', 'Plan', 'Prepare', 'Deploy', 'Rollback', 'Start', 'Stop', 'Apply', 'Restore')]
+    [ValidateSet('Init', 'Update', 'Upgrade', 'ApplyDemo', 'Status', 'Diagnose', 'ProbeImports', 'Plan', 'Prepare', 'Deploy', 'Rollback', 'Start', 'Stop', 'Backup', 'Apply', 'Restore')]
     [string]$Action,
     [string]$Config = (Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'),
     [string]$SourcePython,
@@ -16,6 +16,7 @@ param(
     [string]$UvPath,
     [string]$Bundle,
     [string]$Commit,
+    [string]$TrialCommit,
     [string]$Wheelhouse,
     [ValidateRange(1, 900)]
     [int]$HealthTimeout,
@@ -32,6 +33,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+if ($TrialCommit -and ($Action -ne 'ApplyDemo' -or $ResetUpdateToken)) {
+    throw 'TrialCommit is supported only with ApplyDemo and cannot reset GitHub credentials.'
+}
 if ($ResetUpdateToken -and $Action -notin @('Upgrade', 'ApplyDemo')) { throw 'ResetUpdateToken is supported only with Upgrade or ApplyDemo.' }
 if (($ResetDemoToken -or $WebUIUrl -or $EesModelId -or $WebUICaFile) -and $Action -ne 'ApplyDemo') {
     throw 'Demo connection options are supported only with ApplyDemo.'
@@ -48,8 +52,8 @@ if ($UseWindowsCA -and $Action -notin @('Deploy', 'Start')) {
 if ($CheckOnly -and $Action -notin @('Apply', 'Start')) { throw 'CheckOnly is supported only with Apply or Start.' }
 if ($CheckOnly -and $UseWindowsCA) { throw 'CheckOnly cannot change runtime trust.' }
 if ($Resume -and $Action -ne 'Apply') { throw 'Resume is supported only with Apply.' }
-if ($Summary -and $Action -notin @('Apply', 'Restore', 'Start', 'Stop', 'Status', 'Upgrade', 'ApplyDemo')) {
-    throw 'Summary is supported with Apply/Restore/Start/Stop/Status/Upgrade/ApplyDemo only.'
+if ($Summary -and $Action -notin @('Apply', 'Restore', 'Start', 'Stop', 'Backup', 'Status', 'Upgrade', 'ApplyDemo')) {
+    throw 'Summary is supported with Apply/Restore/Start/Stop/Backup/Status/Upgrade/ApplyDemo only.'
 }
 $repoPath = Split-Path $PSScriptRoot -Parent
 
@@ -99,6 +103,7 @@ if (-not $operatorPython -or -not (Test-Path -LiteralPath $operatorPython -PathT
 $pythonOptions = @('-I', '-B')
 if ($Action -eq 'ApplyDemo') {
     $demoArgs = $pythonOptions + @((Join-Path $PSScriptRoot 'ees_apply_demo.py'), '--config', $Config)
+    if ($TrialCommit) { $demoArgs += @('--trial-commit', $TrialCommit) }
     if ($ResetDemoToken) { $demoArgs += '--reset-token' }
     if ($ResetUpdateToken) { $demoArgs += '--reset-update-token' }
     if ($WebUIUrl) { $demoArgs += @('--webui-url', $WebUIUrl) }

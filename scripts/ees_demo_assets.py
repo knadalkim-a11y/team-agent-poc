@@ -32,7 +32,9 @@ _APPLIED_TOOL_EDITOR_FORMATS = {
 }
 TRANSPORT_CODES = frozenset({"webui_authentication_failed", "webui_permission_denied",
     "webui_connection_failed", "redirect_blocked", "api_conflict", "api_rate_limited",
-    "api_request_failed", "api_response_too_large", "api_response_invalid", "api_path_invalid"})
+    "api_request_failed", "api_response_too_large", "api_response_invalid", "api_path_invalid",
+    "concurrent_edit", "conditional_write_unavailable"})
+ASSET_API = "/api/v1/ees/assets"
 
 
 class DemoAssetsError(RuntimeError):
@@ -369,12 +371,38 @@ def _get_path(kind, identifier):
     return "/api/v1/tools/id/" + encoded + ("/valves" if kind == "valves" else "")
 
 
-def _write_path(kind, identifier, create):
-    if kind == "model":
-        return "/api/v1/models/" + ("create" if create else "model/update")
+def _check_capabilities(client):
+    value = client.request("GET", ASSET_API + "/capabilities")
+    if (not isinstance(value, dict) or type(value.get("version")) is not int
+            or value["version"] != 1 or value.get("conditional_apply") is not True
+            or value.get("process_scope") != "single"):
+        raise DemoAssetsError("conditional_write_unavailable")
+
+
+def _checked_snapshot(value, kind, identifier):
+    if (not isinstance(value, dict) or type(value.get("exists")) is not bool
+            or not isinstance(value.get("token"), str) or not value["token"]
+            or len(value["token"]) > 4096):
+        raise DemoAssetsError("api_response_invalid", identifier)
+    asset = value.get("asset")
+    if (value["exists"] and not isinstance(asset, dict) and not (kind == "valves" and asset is None)
+            or not value["exists"] and asset is not None and not (kind == "valves" and asset == {})):
+        raise DemoAssetsError("api_response_invalid", identifier)
     if kind == "valves":
-        return _get_path(kind, identifier) + "/update"
-    return "/api/v1/tools/create" if create else _get_path(kind, identifier) + "/update"
+        if "parent" not in value or value["parent"] is not None and not isinstance(value["parent"], dict):
+            raise DemoAssetsError("api_response_invalid", identifier)
+        if value["exists"] != (value["parent"] is not None):
+            raise DemoAssetsError("api_response_invalid", identifier)
+        if value["parent"] is not None and value["parent"].get("id") != identifier:
+            raise DemoAssetsError("response_id_mismatch", identifier)
+    elif asset is not None and asset.get("id") != identifier:
+        raise DemoAssetsError("response_id_mismatch", identifier)
+    return copy.deepcopy(value)
+
+
+def _snapshot(client, kind, identifier):
+    return _checked_snapshot(client.request("POST", ASSET_API + "/snapshot",
+                             {"kind": kind, "id": identifier}), kind, identifier)
 
 
 def _is_work_order_tool(current):
@@ -396,7 +424,7 @@ def _is_work_order_tool(current):
     return {"ems_demo_find_equipment", "wo_demo_view", "wo_demo_update"} <= methods
 
 
-def _existing_work_order(client, ees, item, state, reserved_ids):
+def _existing_work_order(client, ees, item, state, reserved_ids, snapshots):
     """Adopt only an exact known source already bound to this EES model."""
     bound = (ees.get("meta") or {}).get("toolIds") or []
     if not isinstance(bound, list) or any(not isinstance(identifier, str) for identifier in bound):
@@ -418,8 +446,11 @@ def _existing_work_order(client, ees, item, state, reserved_ids):
             continue
         if not tracked and not _is_work_order_tool(current):
             continue
-        if current.get("id") != identifier:
-            raise DemoAssetsError("response_id_mismatch", identifier)
+        snapshot = _snapshot(client, "tool", identifier)
+        current = snapshot["asset"]
+        if current is None:
+            raise DemoAssetsError("concurrent_edit", identifier)
+        snapshots[("tool", identifier)] = snapshot
         if not isinstance(current.get("content"), str):
             raise DemoAssetsError("tool_source_not_readable", identifier)
         if not tracked and _source_digest(current["content"]) not in item["accepted_source_sha256"]:
@@ -494,7 +525,15 @@ def apply_assets(client, root: Path, state_dir: Path, ees_model_id: str, source_
                 or state.get("ees_model_id") != ees_model_id or not isinstance(state.get("assets"), dict)):
             raise DemoAssetsError("state_scope_mismatch")
         pending = {key for key, row in state["assets"].items() if row.get("status") == "pending"}
-        ees = client.request("GET", _get_path("model", ees_model_id))
+        # Capability failure happens before any new asset write or pending intent.
+        # Earlier unconfirmed writes remain uncertain until they can be checked.
+        _check_capabilities(client)
+        snapshots = {}
+        def read(kind, identifier):
+            snapshot = _snapshot(client, kind, identifier)
+            snapshots[(kind, identifier)] = snapshot
+            return snapshot["asset"]
+        ees = read("model", ees_model_id)
         if not ees or ees.get("id") != ees_model_id or not ees.get("base_model_id"):
             raise DemoAssetsError("existing_ees_required", ees_model_id)
         # The GET route can redact params even for an administrator while the
@@ -507,20 +546,18 @@ def apply_assets(client, root: Path, state_dir: Path, ees_model_id: str, source_
         candidates = []
         for item in manifest["tools"]:
             active = item["id"]
-            current = client.request("GET", _get_path("tool", active))
+            current = read("tool", active)
             candidates.append(("tool", active, item, current, False))
             if item.get("managed_valves"):
-                current_valves = client.request("GET", _get_path("valves", active)) if current else None
+                current_valves = read("valves", active)
                 candidates.append(("valves", active, {"ees_model_id": ees_model_id}, current_valves or {}, False))
         for item in manifest.get("optional_existing_tools", []):
             candidates.extend(_existing_work_order(client, ees, item, state,
-                                                  {tool["id"] for tool in manifest["tools"]}))
+                                                  {tool["id"] for tool in manifest["tools"]}, snapshots))
         for item in manifest["models"]:
             active = item["id"]
-            candidates.append(("model", active, item, client.request("GET", _get_path("model", active)), False))
+            candidates.append(("model", active, item, read("model", active), False))
         candidates.append(("model", ees_model_id, manifest["ees"], ees, True))
-        new_tools = {identifier for kind, identifier, _, current, _ in candidates
-                     if kind == "tool" and current is None}
         plan = []
         for kind, identifier, item, current, is_ees in candidates:
             active = identifier
@@ -579,22 +616,29 @@ def apply_assets(client, root: Path, state_dir: Path, ees_model_id: str, source_
                     "meta": {}, "is_active": True, "access_grants": grants}
                 desired = _merge_model(template, item, is_ees, previous)
             plan.append({"kind": kind, "id": identifier, "key": key, "current": current,
-                         "body": desired, "spec": spec, "previous_spec": previous})
-        # Everything above is read-only. Persist intent before each non-transactional API write.
+                         "body": desired, "spec": spec, "previous_spec": previous,
+                         "snapshot": snapshots[(kind, identifier)], "item": item})
+        # Everything above is read-only. Persist intent before each API write.
+        own_valves = {}
         for step in plan:
             active = step["id"]
             kind, body, current = step["kind"], step["body"], step["current"]
-            fresh = client.request("GET", _get_path(kind, active))
-            if kind == "valves":
-                fresh = fresh or {}
-                if active in new_tools:
-                    # The newly created Tools.Valves may expose defaults which
-                    # did not exist at preflight. Preserve them as the baseline.
-                    if fresh.get("ees_model_id") not in (None, "", ees_model_id):
+            baseline = step["snapshot"]
+            if kind == "valves" and active in own_valves:
+                # Only our confirmed Tool response can advance this paired plan.
+                # Never refresh a token while retaining an older merged payload.
+                baseline = own_valves.pop(active)
+                current = baseline["asset"] or {}
+                previous_record = state["assets"].get(step["key"])
+                if previous_record:
+                    if (_projection(current, kind, previous_record["spec"])
+                            != _projection(step["current"], kind, previous_record["spec"])):
                         raise DemoAssetsError("managed_field_conflict", active)
-                    current = _dict(fresh)
-                    body = {**current, **body}
-            if _view(fresh, kind) != _view(current, kind):
+                elif current.get("ees_model_id") not in (None, "", ees_model_id):
+                    raise DemoAssetsError("managed_field_conflict", active)
+                body = {**current, **step["item"]}
+            fresh_snapshot = _snapshot(client, kind, active)
+            if fresh_snapshot["token"] != baseline["token"]:
                 raise DemoAssetsError("concurrent_edit", active)
             record = {"status": "pending", "source_commit": source_commit,
                       "version": manifest["version"], "spec": step["spec"],
@@ -610,14 +654,35 @@ def apply_assets(client, root: Path, state_dir: Path, ees_model_id: str, source_
                     wanted.pop("user_id", None)
             record["desired_value"] = wanted
             if actual != wanted:
+                old_record = copy.deepcopy(state["assets"].get(step["key"]))
                 state["assets"][step["key"]] = record
                 _save(path, state)
                 pending.add(step["key"])
-                client.request("POST", _write_path(kind, active, current is None), body)
+                try:
+                    response = client.request("POST", ASSET_API + "/apply", {
+                        "kind": kind, "id": active,
+                        "operation": "update" if kind == "valves" or baseline["exists"] else "create",
+                        "expected_token": baseline["token"], "payload": body})
+                except Exception as error:
+                    if getattr(error, "code", None) in {"concurrent_edit", "conditional_write_unavailable"}:
+                        # A definitive pre-write rejection did not apply this intent.
+                        if old_record is None:
+                            state["assets"].pop(step["key"], None)
+                        else:
+                            state["assets"][step["key"]] = old_record
+                        _save(path, state)
+                        if not old_record or old_record.get("status") != "pending":
+                            pending.discard(step["key"])
+                    raise
                 changed += 1
-                fresh = client.request("GET", _get_path(kind, active))
-                if fresh is None:
+                confirmed = _checked_snapshot(response, kind, active)
+                fresh = _snapshot(client, kind, active)["asset"]
+                if fresh is None or _view(confirmed["asset"], kind) != _view(fresh, kind):
                     raise DemoAssetsError("verification_failed", active)
+                if kind == "tool":
+                    own_valves[active] = _checked_snapshot(response.get("valves_snapshot"), "valves", active)
+                    if _view(own_valves[active]["parent"], "tool") != _view(confirmed["asset"], "tool"):
+                        raise DemoAssetsError("verification_failed", active)
                 result = _view(fresh, kind)
                 # New objects obtain their owner from authenticated API creation.
                 if current is None:

@@ -63,14 +63,27 @@
 
 <a id="setup-first"></a>
 
-**첫 업무 영역 확정(2026-09-15): 셋업을 우선한다.** 사용자가 “우선적으로 셋업쪽을 먼저 진행했으면 좋겠다”고 요청했다. 기존 **셋업 → 신규 공장 횡전개**를 첫 공동 작업 프로세스로 삼고, 선택한 공장 1개·시스템 1개·참여자 2~3명의 범위를 유지한다. 실제 파일럿 공장·시스템·참여 계정은 아직 지정되지 않았으므로 예시 데이터를 실제 선정으로 기록하지 않는다.
+**첫 업무 영역과 후속 정정(2026-09-15): 셋업을 우선하되 실제 의미 있는 절차는 새로 정의한다.** 사용자는 기존 흐름이 임의 예시임을 명확히 하고 실제 업무 절차를 새로 만들겠다고 정정했다. 기존 **셋업 → 신규 공장 횡전개**는 화면·검증의 참고 예시이며 확정된 사내 실무 절차가 아니다. 공장 1개·시스템 1개·참여자 2~3명의 첫 단위는 유지한다. 실제 파일럿 공장·시스템·참여 계정은 아직 지정되지 않았다.
 
-- 기존 **사전준비 → AP, DB 인프라 준비 → 시스템 설치 → 각 시스템간 인터페이스 확인** 트리를 재사용한다. 운영·장애대응 절차는 보존하고 첫 공동 작업 구현·확인의 대상은 셋업으로 한정한다.
+- 기존 **사전준비 → AP, DB 인프라 준비 → 시스템 설치 → 각 시스템간 인터페이스 확인** 트리는 참고·회귀 검증 자료로 보존한다. 실제 새 절차에 이 단계·입력을 강제하지 않는다. 운영·장애대응 절차는 보존하고 첫 공동 작업 구현·확인의 대상은 셋업으로 한정한다.
 - 첫 사용 흐름은 참여 가능한 셋업 진행 건 찾기/시작 → 현재 단계·다음 할 일 확인 → 입력·실행/사람 확인 → 다른 담당자가 이어가기이다. 기존 업무 목록·트리·오른쪽 패널에서 완료 수·막힌 이유·담당/수행자를 연결하며 일정표·간트·공장별 종합 현황판은 첫 사용의 선행 과제로 두지 않는 방향을 제안한다.
 - 첫 수락 예시는 **A가 사전준비를 마치고 B가 같은 진행 건의 인프라 준비를 이어서 수행하며 두 사람이 같은 결과·진척·변경 주체를 확인하는 것**이다. 각자의 대화·초안·탐색 위치 보존과 동시 변경·권한·재접속 조건도 위 첫 단위의 기준을 그대로 적용한다.
 - 기존 셋업은 태스크 4개·잡 6개이며 수동 확인 2개(셋업 범위, 설치·설정)와 모의 점검 4개(인프라, DB, AP, 인터페이스)로 구성된다. 실제로 확인한 준비·설치 항목은 사람 확인으로 기록할 수 있다. 인프라 준비를 실제 업무 인계로 사용할 때는 담당자 확인 방식과 게시할 실무 절차를 먼저 정한다. 모의 점검 결과를 실제 셋업 완료율에 섞어 표시하지 않으며, 실제 자동 점검은 승인된 API가 연결된 잡부터 별도 검증한다.
 
 셋업 우선 범위는 확정됐으며, 참여자 등록·역할·공유 기록·개인 대화 연결·동시 실행 정책은 위 미결정 사항을 구체화한 뒤 구현한다. 이 우선순위 기록을 공동 작업 기능의 구현·사내 적용 완료로 표현하지 않는다.
+
+<a id="chat-workflow-entry-20260915"></a>
+
+**메인 채팅에서 업무 찾기·계획·진행 요구(2026-09-15):** 사용자가 메인 채팅에서 해야 할 일을 말하면 AI가 게시된 워크플로를 찾아 활용할 수 있어야 한다. 사이드바의 사전 선택을 필수로 하지 않으며, 직접 화면에서 선택하는 진입도 유지한다. 이 요구는 R0~R3 리팩토링의 기존 검수와 구분하는 업무 흐름이며, 후속 사용자 요청으로 아래 최소 구현을 같은 준비본에 반영했다.
+
+- 사용자 목표에 맞는 프로세스와 접근 가능한 기존 진행 건을 찾고, 공장·시스템·대상 범위 중 빠진 값만 확인한다. 여러 후보가 있으면 선택 이유와 차이를 짧게 설명하고 필요한 구분을 묻는다. 임의의 최신 진행 건이나 예시 현장을 실제 대상으로 확정하지 않는다.
+- 단계·선행 조건·필수 입력·연결된 도구와 스킬의 유효한 지침을 읽어 수행 순서, 자동으로 가능한 일, 사람 확인과 미연결로 남는 일을 짧은 계획으로 제시한다. 실제 사내 절차가 정해지지 않은 부분을 새로 만들어 확정하지 않는다.
+- 대상이 정해지면 알맞은 진행 건을 이어가거나 새로 만들고, 기존 UI와 동일한 업무 액션·권한·revision·결과 저장 경로로 선택·입력·실행을 수행한다. 사람 확인이 필요한 단계와 미연결 도구에서 멈추고 필요한 다음 행동을 설명한다. 포괄적인 자동화 요청을 사람의 실제 확인·완료 응답으로 간주하지 않는다.
+- 현재 [업무 Tool](../../../agent-pack/skills/ees-work-demo/scripts/workflow_tool.py)의 `ees_workflow_view(include_navigation=true)`와 `ees_workflow_action`에 목록 탐색·생성·선택·입력·실행 기반이 있다. `process_id`로 게시 절차의 단계·참조 도구/스킬을 읽고 `case_id`로 기존 실행의 고정본을 읽도록 보강했다. 탐색·상세 조회는 선택 연결·진행 건 생성·쓰기 없이 수행하며 스킬 본문은 현재 접근 권한을 확인한다. 별도 모델·에이전트·계획 서버를 추가하지 않는다. 현행은 일반 저장 대화 하나에 본인 진행 건 하나를 연결하고 DB/AP 실행은 모의 어댑터이며, 이 경계를 공동 작업·실제 운영 연결 완료로 확대하지 않는다.
+
+구현의 로컬 검수는 읽기 무변경·절차 범위/고정본·권한·실행 보호·구서버 안내로 확인했다. 사내 후속 검수는 **사이드바 미선택 상태의 자연어 요청 → 후보 탐색·필수값 확인 → 짧은 계획 → 진행 건 연결 → 같은 상태의 실행 결과와 화면 반영** 한 흐름으로 정한다. 기존 Tool·합성 시험 통과와 사내 GLM의 자연어 호출 성공은 구분하며, 실제 모델의 이 흐름은 아직 미확인이다. [현재 코드 검토·리팩토링과의 경계](../../../evals/scenarios.md#work-ui-refactor-20260915).
+
+**AI 개발·현장 자산 보존 요구(2026-09-15):** 사용자는 모든 개발을 AI가 맡으며 이 환경에서 알 수 없는 사내 UI 작성 Skill·Tool도 훼손 없이 계속 사용할 수 있어야 한다고 명시했다. 기능별 지침·실행 코드 묶음, 기존 WebUI·래퍼·업무 저장소, 버튼/AI의 공통 서버 액션을 유지하는 방향을 권한다. 당시 필요성 검토를 구체화한 후속 원본은 아래 [제한적 리팩토링 설계](#refactoring-design)이며, 패널 크기/배치 공통화는 최종 범위에서 제외했다. 현재 단계는 설계·검토이고 코드 구현·배포와 구분한다. 사용자 자산은 WebUI를 관리 원본으로 두고 지정 공통 자산의 관리 필드만 Git 배포 대상으로 삼는다. 프로그램/자산 갱신·데이터 이관의 보존 기준과 지원 필드의 동시 편집 한계는 [검토 기록](../../../evals/scenarios.md#ai-runtime-preservation-20260915)을 따른다.
 
 **현황 표시의 단계적 범위 제안**
 
@@ -85,6 +98,126 @@
 첫 단위의 수락 기준은 A가 만든 지정 공유 건을 B가 이어서 처리하고 같은 결과·변경자를 확인하는 것, 각자의 대화·초안·선택 유지, 동시 변경의 덮어쓰기·중복 실행 방지, 권한 없는 계정의 접근 차단, 재접속 후 결과·이력 유지이다. 실제 자동 점검은 승인된 API가 연결된 범위만 판단하며 사람 확인 업무로 먼저 공동 사용을 검증할 수 있다. 공개할 기능의 계정·자산 권한·전송 보호·가동 조건은 [공용 파일럿 기준](../../../evals/scenarios.md#validation-timing)에 맞춰 확인한다. 전용 서버·새 DB 제품·공통 대시보드 프레임워크를 먼저 도입하지 않고 기존 WebUI·래퍼·업무 저장소의 재사용 가능 범위부터 구체화한다.
 
 위 우선순위는 현황판 시점에 대한 제안이며, 공동 작업 구현·일정 기능·팀 파일럿 성공은 아직 미완료다. [현재 근거와 검수 범위](../../../evals/scenarios.md#shared-pilot-priority-20260915).
+
+<a id="refactoring-design"></a>
+
+## 제한적 리팩토링 구현 설계 (2026-09-15)
+
+목적은 AI가 한 기능의 변경 범위와 호환 조건을 파악하기 쉽게 만들고, 사내에서 작성한 자산을 보존하면서 공동 작업 기반을 추가할 준비를 하는 것이다. 현재 WebUI·Python 빌더·래퍼·업무 저장소를 유지한다. 이 절은 구현 기준 설계이며, R0의 후속 구현은 [조건부 자산 적용 기록](../../../evals/scenarios.md#conditional-assets-20260915)에 연결한다. R1 서버/정책 분리는 [구현·호환 검증](../../../evals/scenarios.md#workflow-refactor-20260915)에 연결하며, R2 화면 분리 구현과 R3 배포 호환 검증은 [후속 기록](../../../evals/scenarios.md#work-ui-refactor-20260915)에 연결한다. 원격 Windows/브라우저 통과와 사내 적용 여부는 해당 기록과 STATUS를 따르며 구현만으로 완료 처리하지 않는다. 설계 검토 결과와 실제 구현/시험 여부는 [설계 검토 기록](../../../evals/scenarios.md#refactoring-design-review-20260915)에서 구분한다.
+
+### 범위와 작업 단위
+
+| 단위 | 변경 목적·대상 | 끝내야 할 조건 |
+|---|---|---|
+| R0 자산 동시 편집 결함 수정 | ApplyDemo의 조회 이후 현장 수정 덮어쓰기를 서버 조건부 저장으로 차단. 클라이언트·고정 upstream 저장 경로·빌더 변경 | UI 저장과 ApplyDemo의 실제 서버 경합, 취소·부분 실패·권한·구버전 거절 검사. 순수 리팩토링과 별도 커밋/검수 |
+| R1 업무 서버 책임 분리 | 정의/검증·화면용 파생 상태·저장/권한을 기존 기능 폴더에서 분리. 공통 정책과 참고 seed 분리 | 공개 모듈/API·완성 seed·기존 저장 자료·오류/결과 호환. 사용자 자료 재작성 없음 |
+| R2 업무 화면 책임 분리 | launcher의 제어·표시·절차 편집 책임을 세 소스로 분리하고 기존 빌더에서 한 JS로 조립 | 실제 배포 JS로 기존 UI·대화/초안·요청 순서 회귀 확인. 기존 분석 패널 동작 유지 |
+| R3 배포 호환 확인 | 앞 단계의 실제 wheel·파일 목록·기존 래퍼 Apply/Restore 검증 | 기존 자료를 가진 합성 환경에서 갱신·추가 저장·이전 프로그램 Restore 후 자료/공개 연결 확인 |
+
+구현 순서는 R0 → R1 → R2 → R3이다. R1·R2는 R0의 새 API를 업무 처리에 사용하지 않으며 독립적으로 되돌릴 수 있다. 각 구현 단위는 코드·의미 있는 검사·가이드·실패 기록까지 끝낸 뒤 다음으로 넘어간다. 구조 정리를 자산 재등록·ApplyDemo 실행·DB 이관과 묶지 않는다. 공동 진행 건/역할/개인 선택 분리, 실제 셋업 절차, 실제 시스템 연결, 일정·종합 현황판은 후속 기능이다.
+
+패널 공통화와 성능 최적화는 이번 범위에서 제외한다. 기존 공통 패널 관리자는 재사용하되 업무 패널의 기본 520px/340~760px·850px 전환과 분석 패널의 기본 480px/350~800px·형제 폭/ResizeObserver는 서로 다르다. 이를 합치면 사용자 동작까지 바뀐다. 전체 subtree 감시·진행 건 전체 조회도 측정된 병목이 아니므로 이 설계에서 교체하지 않는다.
+
+### 모든 단계의 보존 계약
+
+- 운영 DATA_DIR·DB·키·계정·PAT·개인 대화와 Git에 없는 Skill/Tool/Prompt/모델·연결·권한·개인 설정을 보존한다. 등록 ID를 바꾸거나 보이지 않는 자산을 미사용으로 판정하지 않는다. 공통 자산은 기존 명시 ID와 관리 필드만 갱신한다.
+- `open_webui.ees_workflow`, 기존 Tool ID·`workflow_tool.py` 호출 인자/결과, 업무 API/action 이름·오류 코드/HTTP 상태·revision·권한 판정을 유지한다. 현재 사용자별 진행 건을 자동 공유하지 않는다.
+- `ees-work.sqlite3`의 파일명·테이블/인덱스·owner/chat/선택/버전·catalog/draft/게시본/case/이력/Skill snapshot 형식은 바꾸지 않는다. 기존 자료를 새 seed·정책으로 재합성하거나 재게시하지 않는다.
+- 데이터 보존과 이용 가능성을 함께 확인한다. Git에 없는 합성 Skill/Tool을 기존 사용자 권한으로 조회·참조·게시하고 지원 공개 인터페이스를 통해 재사용한다. 업무 엔진의 미지원 실행 어댑터는 계속 차단하며 이를 임의 Tool 실행 가능으로 바꾸지 않는다.
+- 실제 배포 시에만 프로그램 버전·정적 캐시 경로·파일 manifest를 함께 갱신한다. 설계 문서 작성은 새 프로그램 생성이나 사내 반영이 아니다. 프로그램 Restore는 최신 DB·자산을 남기며 자산 변경 자체를 되돌리지 않는다.
+
+### R0: 조건부 자산 저장
+
+새 원본 `scripts/ees_asset_guard.py`를 기존 Python 빌더로 `open_webui/ees_asset_guard.py`에 포함한다. 기존 `ees_deploy_accept.py`처럼 프로그램 운용을 보호하는 런타임 코드이며 업무 Skill 규칙과 분리한다. 별도 폴더 계층·서비스·DB·배포 체계는 만들지 않는다. 기존 `scripts/ees_demo_assets.py`와 `scripts/ees_apply_demo.py`는 새 조건부 API를 사용하고 현재 관리 필드 비교·journal·부분 실패/재실행 처리를 유지한다.
+
+| API | 요청·응답 계약 |
+|---|---|
+| `GET /api/v1/ees/assets/capabilities` | 관리자 인증. 전체 보호 설치와 지원 환경 확인 후에만 `version=1`, `conditional_apply=true`, `process_scope=single` 반환 |
+| `POST /api/v1/ees/assets/snapshot` | 관리자 인증과 대상 권한 확인. `kind=tool/model/valves`, `id`. 기존 native 읽기·쓰기 권한과 원본 가시성을 확인한 `asset`, `exists`, `token` 반환. valves에는 비교용 부모 Tool 상태도 포함 |
+| `POST /api/v1/ees/assets/apply` | 관리자 인증과 대상 권한 재확인. 같은 `kind/id`, `operation=create/update`, `expected_token`, native Form에 맞는 `payload`. 잠금 안에서 최신 권한/상태 확인 → token 비교 → native 검증/저장 → 재조회. 성공 응답은 저장 후 snapshot과 token, Tool이면 다음 valves 작업용 부모 포함 snapshot도 반환 |
+
+관리자 인증만으로 다른 소유자의 읽기 전용/비공개 자산을 수정할 수 있게 하지 않는다. 기존 owner·ACL·원본 가시성·grant 필터를 재사용한다. kind는 고정 세 종류이고 요청 id와 payload id가 달라지거나 임의 URL·메서드를 지정하면 거절한다. 새 API는 개인 UserValves·Skill 쓰기·삭제를 제공하지 않는다.
+
+token은 매 프로세스 메모리에서 생성한 키로 protocol/사용자 ID/kind/id/존재 여부와 **native 저장이 덮을 수 있는 전체 지원 상태**에 HMAC을 적용한다. 기존 비밀 키/파일을 변경하지 않으며 재시작 전 token은 무효다. Tool은 owner/name/content/지원 meta/정규화 ACL/common Valves를 한 충돌 범위로 묶고, 모델은 owner/id/name/base/meta/params/활성 상태/정규화 ACL을 포함한다. 개인 UserValves는 제외한다. 관리 필드만 뽑는 기존 projection은 현장 수정 판정에 계속 쓰며 token을 대신하지 않는다. 새 보호 코드에서 원문·자격증명·token을 진단 로그에 복제하지 않으며 native 저장 오류는 고정 응답으로 바꾼다. 이 범위를 기존 WebUI 전체 예외 로그의 비밀정보 차단 보장으로 확대하지 않는다.
+
+조회·계획·저장은 다음 규칙을 따른다.
+
+1. 전체 대상의 사전 검사를 먼저 수행한다. 각 쓰기 계획의 `{baseline asset, expected_token, merged payload}`는 같은 snapshot에서 만든다. 이후 token이 달라지면 `409 concurrent_edit`로 중단하며 새 token만 받아 예전 payload를 재전송하지 않는다. 자동 강제 적용·무조건 POST fallback은 없다.
+2. Tool 저장으로 자신의 부모 token이 바뀐 뒤 valves를 갱신하는 경우에만 성공 응답의 부모 포함 snapshot을 다음 기준으로 삼는다. 그 snapshot으로 관리 필드 충돌 검사와 기존 비관리 값 보존 merge를 다시 수행한다. 기존 journal에 확인된 자신의 변경만 반영하고, 반환된 snapshot 이후 다른 변경은 다음 apply 비교에서 중단한다. 다른 대상의 사전 계획 token은 교체하지 않는다.
+3. Tool 응답이 유실되면 성공을 가정하지 않는다. 기존 pending journal과 재조회로 실제 저장을 확인하기 전에는 valves 등 후속 쓰기를 하지 않는다. 별도 자산들의 일괄 트랜잭션이나 자동 원복을 약속하지 않는다.
+4. 보호가 없는 구버전 서버에는 첫 쓰기 전에 `changed=0`, `conditional_write_unavailable`로 중단하고 프로그램 갱신을 안내한다. 새 프로그램 Upgrade 후 새 ApplyDemo를 사용한다. 이전 프로그램으로 Restore하면 새 ApplyDemo 쓰기는 다시 차단된다. 구형 클라이언트의 무조건 POST까지 소급해 보호했다고 표현하지 않는다.
+
+**서버 잠금의 경계:** 한 event loop의 공통 재진입 잠금으로 아래 native 경로와 조건부 API를 모두 보호한다. 현재 Task가 소유권을 갖고 중첩 호출만 재진입한다. 자식 Task로 복사되는 ContextVar만으로 소유권을 판정하지 않는다. 잠금 획득 뒤 새 DB session에서 현재 사용자·owner·ACL·자산을 다시 읽고 그 session과 사용자 객체를 native 호출에 명시적으로 전달한다. snapshot만 새로 읽고 저장은 요청의 오래된 ORM/session으로 하는 구현은 허용하지 않는다. 기존 외부 caller session을 강제로 rollback/expire하여 미완료 작업을 버리지 않는다.
+
+취소된 요청보다 DB 작업이 오래 살 수 있으므로 실제 작업 Task가 **잠금 획득부터 DB 종료·실패 정리·캐시 처리까지** 소유한다. 요청 취소는 시작된 작업을 중간 취소하지 않으며 작업 완료까지 잠금/session을 유지한다. 외부 Task가 잠금을 잡고 shield 자식 Task에 native 쓰기를 넘기는 교착 형태는 사용하지 않는다. 대기 중 취소는 쓰기 없이 끝내고, 쓰기 시작 후 취소/연결 소실은 journal 재확인 대상으로 남긴다.
+
+지원 실행 환경은 기존 등록 래퍼가 시작하는 로컬 DB·단일 프로세스/worker다. `workers=1` 검사 외에 정규화한 실제 DATA_DIR/DB에 대응하는 `ees-assets.lock`의 **프로세스 수명 OS 배타 잠금**을 startup 때 확보한다. Linux `flock`/Windows 파일 잠금으로 커널이 소유권을 관리하고, PID·TTL 파일 삭제로 빼앗지 않는다. 두 번째 앱은 capability만 끄는 것이 아니라 startup을 거절한다. shutdown 때도 남은 guarded Task와 DB 작업의 종료·정리를 마친 뒤 OS 잠금을 해제한다. symlink/경로 우회는 기존 경로 보호 방식으로 거절한다. 보호 미적용 원본 앱·외부 DB writer·다중 프로세스/서버는 보장 밖이며 기존 래퍼의 등록 프로세스 확인을 유지한다. 지원 여부를 확인하지 못하면 조건부 쓰기를 제공하지 않는다.
+
+설치는 `routers/models.py`·`routers/tools.py`의 `APIRouter(route_class=AssetGuardRoute)` 생성 시 고정 patch한다. `AssetGuardRoute.get_route_handler()`가 두 router 전체의 원래 handler를 감싸 **Depends의 인증/session 생성 이전**에 잠금을 잡는다. endpoint 함수 decorator나 include 후 함수 변수 교체로 대신하지 않는다. 새 assets router도 같은 route class를 쓰고 기존 router include 부근, SPA mount 전에 등록한다. lifespan은 `app.state.main_loop` 설정 직후·첫 config/model 조회 전에 guard를 시작하고 startup 실패와 정상 종료 모두 finally에서 정리한다. 새 API는 잠금 뒤 자기 소유 fresh session을 열어 조회/권한을 확인하고 native 저장에 전달하며, upstream session-sharing 설정 자체나 native의 기존 commit 정책은 바꾸지 않는다. 외부 `session.begin()`으로 전체 작업을 감싸지 않는다.
+
+고정 Open WebUI `v0.11.3`의 보호 대상은 다음과 같다. 빌더에서 고정 입력 hash·함수/삽입 위치·횟수를 대조하고 앱 요청 수락 전에 모두 설치한다. 누락·불일치는 빌드/기동 실패이며 부분 설치로 capability를 활성화하지 않는다.
+
+| upstream 경로 | 보호할 경계 |
+|---|---|
+| `routers/tools.py` | `create_new_tools`, `update_tools_by_id`, `update_tool_access_by_id`, `delete_tools_by_id`, `update_tools_valves_by_id`: 권한 확인·module 준비부터 DB/ACL·캐시 처리까지 |
+| `models/tools.py`의 `ToolsTable` | `insert_new_tool`, `update_tool_by_id`, `update_tool_valves_by_id`, `delete_tool_by_id`. 내부 table 직접 호출도 동일 잠금 사용 |
+| `routers/models.py` | `create_new_model`, `update_model_by_id`, `update_model_access_by_id`, `toggle_model_by_id`, `import_models`, `sync_models`, `delete_model_by_id`, `delete_all_models` |
+| `models/models.py`의 `ModelsTable` | `insert_new_model`, `update_model_by_id`, `update_model_updated_at_by_id`, `toggle_model_by_id`, `sync_models`, `delete_model_by_id`, `delete_all_models`. `_to_model_model`의 knowledge 정상화 저장을 유발하는 조회도 최초 ORM 읽기 전부터 보호 |
+| `models/access_grants.py`의 `AccessGrantsTable` | Tool/Model 대상 `grant_access`, `revoke_access`, `revoke_all_access`, `set_access_control`, `set_access_grants` |
+
+실제 wheel 전수 대조에서 `utils/plugin.py`의 Tool import 정상화, `routers/knowledge.py`의 지식 삭제 후 모델 재저장, 여러 native 조회 caller의 선행 session, `utils/tools.py`의 채팅용 Tool 캐시 공개도 보호 범위에 추가했다. 빌더의 `ASSET_GUARD_HOOKS`·고정 파일 hash와 서버의 설치 검사를 함께 대조한다. 채팅 Tool 로딩은 로컬 조회/권한/module/valves/호출 연결만 같은 Task에서 보호하고 원격 Tool 호출은 밖에 유지한다. Ollama 외부 모델 조회 전체를 잠그던 초안 hook은 제거하고 첫 자산 조회의 table 경계를 보호한다.
+
+읽기 중 정상화하는 모델 조회는 `get_all_models`, `get_models`, `get_base_models`, `search_models`, `get_model_by_id`, `get_models_by_ids`를 보호 목록에 포함한다. 보호 대상 내부 호출은 같은 작업 Task/session을 명시적으로 이어받는다. 독립 table 진입은 잠금 뒤 새 session을 열고, 기존 session을 가진 내부 호출은 최초 읽기/트랜잭션 시작 이전의 caller 경계까지 보호 위치를 올린다. 새 session으로 미완료 트랜잭션을 몰래 대체하지 않는다. 고정 wheel에서 해당 caller·직접 SQL writer를 대조해 보호 밖 쓰기가 있으면 출하하지 않는다.
+
+Tool 캐시는 기존처럼 DB 성공 전에 새 module을 전역 공개하지 않는다. 잠금 안에서 지역 준비하고 DB·ACL 성공 후 공개하며 실패하면 해당 Tool 캐시를 무효화해 DB를 원본으로 삼는다. 이미 실행 중인 Tool 호출을 강제 교체하지 않는다. 본체·ACL 저장의 별도 commit은 mutex를 적용해도 전체 원자적 DB 트랜잭션이 되지 않으므로 부분 실패를 기록하고 재조회하며 과거 payload 자동 복구는 하지 않는다. 보장 범위는 **ApplyDemo가 비교 이후의 다른 사용자 저장을 덮지 않는 것**이고, 일반 UI 두 편집기의 오래된 폼 충돌 해결은 별도다.
+
+### R1: 업무 서버와 정책/예시 분리
+
+파일은 기존 `agent-pack/skills/ees-work-demo/scripts/`에 둔다. 새 계층·서버·저장소를 만들지 않는다.
+
+| 소스 | 단일 책임·공개 연결 |
+|---|---|
+| 기존 `ees_workflow.py` | `WorkflowService`, 권한/SQL/변경, `WorkflowError`, `_value`, `_resolve`, `_now`, `_service`, `_production_service`, `_registered_assets`, `get_state`, `handle_action`, `install`. 공개 facade 유지 |
+| 새 `ees_workflow_definition.py` | 상수/크기 제한, `_dump`, `_seed`, 정책 읽기, `_ancestors`, `_leaves`, `_dependencies`, `_draft_shape_errors`, `validate_definition` |
+| 새 `ees_workflow_view.py` | `_applicable`, `_finished`, `_missing`, `_view`의 순수 파생 상태 계산. DB·인증·저장 수행 없음 |
+| 새 `workflow_policy.json` | 기존 seed의 `skills.common` 객체를 ID·본문·값 그대로 이동 |
+| 기존 `workflow_seed.json` | 참고 업무 예시. `_seed`가 policy를 `common` 첫 키에 결합해 기존 완성 정의 반환 |
+
+의존 방향은 facade → definition/view, view → definition이다. definition/view가 facade를 역참조하지 않는다. 기존 외부/시험에서 참조하는 이동 helper는 facade에서 명시적으로 다시 노출한다. `_now`·`_service`는 기존 위치를 유지한다. 단독 파일 실행을 맞추려고 production `sys.path` 수정이나 광범위 `ImportError` fallback을 넣지 않는다.
+
+분리 전후 `_dump(_seed())`의 **완성 정의 bytes·키 순서·version=1·ID·공통 정책 객체**가 같아야 한다. seed 원본 파일 자체는 common 이동으로 바뀐다. validation은 새 policy 원본을 읽되 판정·오류 순서/문구를 유지한다. 현재 생성자의 seed 읽기와 catalog `INSERT OR IGNORE`를 유지하고, 기존 draft/게시본/진행 건/Skill snapshot에는 새 policy를 다시 적용하지 않는다. db/ap/site/interface 등의 고정 입력과 mock/unavailable 판정도 유지하므로 이 작업을 범용 실무 엔진 완성으로 해석하지 않는다.
+
+빌더 `WORK_ASSETS`에 새 Python 두 개와 policy를 포함하고 설치 위치는 모두 `open_webui/` 아래로 유지한다. `WORK_FILES`·manifest·새 버전 Restore 대상도 같은 원본에서 산출한다. ees.6~ees.8은 분리 이전 `WORK_FILES_V6` 목록을 유지해 새 파일을 과거 백업에 요구하지 않는다. `ees_upgrade.py`의 프로그램 입력 목록과 CI 변경 경로 필터가 새 파일을 포함하는지 대조한다. `test_ees_workflow.py`·`test_ees_work_demo.py`의 업무 서버 로더는 시험 전용 package namespace로 바꿔 상대 import를 실행하고, 실제 wheel의 `open_webui.ees_workflow` import와 서비스 호출도 검사한다. `test_ees_workflow_tool.py`의 기존 공개 모듈 mock 계약은 유지한다. 설계 초안에 포함했던 `test_ees_specialists_tool.py`의 comparison 로더는 실제로 `demo_data_tool.py`를 읽으므로 분리 대상이 아니다. R1 구현 때 실제 파일 경로를 대조해 이 오기를 정정했다.
+
+### R2: 업무 화면의 제어·표시·편집 분리
+
+파일은 기존 `branding/ees/ui/`에 둔다. 세 파일을 한 lexical scope의 자유변수 공유로만 나누지 않고 다음 factory와 인자로 책임을 분리한다.
+
+| 소스 | 소유 상태·역할 |
+|---|---|
+| 기존 `ees-work-launcher.js` | controller. 서버 state/revision/busy/error, 인증/route/generation/request/navigation 순서, 공장/시스템/진행 건 선택, 이력 요청 token, 개인 대화 초안·생성 ticket. API/액션/대화 전환과 전역 이벤트·MutationObserver의 유일한 소유자 |
+| 새 `ees-work-view.js` | `createWorkView`. 사이드바·선택 영역·트리·업무 패널/결과/이력 DOM. nav/picker/트리 펼침/패널 폭·열림·drag 등 화면 상태만 소유 |
+| 새 `ees-work-designer.js` | `createWorkDesigner`. Workspace 탭 숨김/복원과 절차 편집 DOM, 편집 대상·revision·dirty·tab·접힘 및 편집 초안 소유 |
+
+controller → view는 `render(snapshot)`, `setBusy`, `openPanel`, `closeHost`, `reset`, `readJobEdits`와 `handleEvent(event)`/`updateLayout()`으로 연결한다. view → controller는 `selectWork`, `switchScope`, `openCase`, `startCase`, `showHistory`, `saveInputs`, `saveDocument`, `runJob` 콜백으로 기존 액션을 요청한다. 서버 snapshot은 view에서 변경하지 않는다.
+
+controller → designer는 `acceptServer(result)`, `readDraft()`의 `{definition, revision, dirty}`, `markSaved`, `render`, `restoreWorkspace(removeTab)`, `reset`이다. designer는 저장/검증/게시를 기존 `save_draft`, `validate_draft`, `publish` 콜백으로 요청하며 직접 fetch하지 않는다. 공용 순수 tree renderer는 데이터·선택 ID와 `editing/selectedId/collapsed/expanded/statuses/summaries` 옵션을 받고 editor/controller 자유변수를 읽지 않는다. 전역 click/input/change/keydown/scroll/resize는 controller가 해당 view/designer의 `handleEvent(event)`로 전달한다. 수신 객체는 자신의 DOM/상태에만 반응하고 `{handled, preventDefault}`를 동기 반환하며 controller가 중복 처리·기본 동작 여부를 결정한다. 일반 SPA route 전환에서는 DOM detach/Workspace 복원·관찰 대상 갱신만 하고 현재 동작대로 editor dirty·트리 펼침·폭을 보존한다. 인증 사용자 변경/로그아웃 때 개인 상태를 reset한다. 전역 listener/observer는 기존 document 수명과 런처 중복 로딩 방지를 유지하며 SPA 이동마다 새로 등록하지 않는다. R2에서는 별도 dispose API나 pagehide 수명 변경을 추가하지 않는다.
+
+`scripts/build_ees_webui.py`의 조립 함수 하나로 **view → designer → launcher** 순서를 고정하고 외부 IIFE 안에 넣어 기존 단일 `ees-work-launcher.js`를 생성한다. 기존 launcher IIFE는 마지막에 실행하고 새 factory를 전역으로 노출하지 않는다. WebUI 로딩은 기존 work-panel → launcher의 defer 순서를 유지한다. 입력 없음/빈 파일/symlink/중복 factory·잘못된 순서는 빌드 실패로 처리하고 bytes·hash·wheel RECORD/manifest를 결정적으로 생성한다. 런타임 module loader·npm bundler·외부 CDN을 추가하지 않는다.
+
+호환 대상은 `__eesNativeWorkV1`의 ensureChat/beginChatCreation/finishChatCreation/refresh/open/display, `__eesNativeDraftV1`의 기존 read/flush/ready/restore 연결, `__eesWorkPanelV1` 전체 계약, `ees-work-changed`, display allowlist, DOM ID/CSS class/data-action 및 기존 업무 API payload다. 초안에 `toolApprovalMode`를 직렬화하지 않는다. 이전 generation/route/auth의 응답과 navigation/history/draft ticket은 계속 무시한다. source 이동 과정에서 개인 선택의 DB 의미나 기존 폼 저장 시점을 바꾸지 않는다.
+
+### 검증·되돌리기와 완료 판정
+
+| 대상 | 구현 시 필요한 증거 |
+|---|---|
+| R0 조건부 저장 | 고정 wheel의 실제 native router/table/ACL 경로에서 최종 snapshot 뒤 지원 `meta.description`·Tool code/valves·모델 params/ACL 변경을 각각 삽입해 409와 새 값 보존 확인. 생성 ID 충돌·비공개/읽기 전용 거절·다른 ID/개인 UserValves 불변·응답 유실/pending/부분 commit 재조회 |
+| R0 잠금 경계 | 단일 worker와 같은 DB의 두 프로세스 기동 거절, 내부 writer·정상화 GET 경합, session sharing 켜짐/꺼짐, 대기/쓰기 중 취소·DB 예외·캐시 실패에서 교착/조기 잠금 해제 없음. hash/함수/삽입점 불일치와 구버전 서버는 쓰기 전 중단 |
+| R1 저장/계약 | 기존 관리자 수정 게시본·검증된/미검증 draft·진행 건/이력·Skill snapshot을 가진 합성 DB로 전후 결과 대조. 완성 seed bytes 일치, 시작만으로 기존 row 변경 없음, 공개 모듈/Tool 호출·권한/오류/revision 호환 |
+| R2 화면 | `test_ees_branding_build.py` 조립/실패/manifest 검사, `test_ees_work_demo.py`의 기존 native browser 시나리오. `native_ui_fixture.py`가 빌더의 같은 조립 결과를 제공. `test_ees_cooperation_panel.cjs`·`test_wo_demo_state.cjs`로 단일 관리자/탭·초안·닫기/대화 복원 호환 |
+| R3 실제 배포물 | Python 3.11·고정 Open WebUI 0.11.3 wheel의 import/서비스/브라우저 검사와 기존 Linux/Windows Apply/Restore CI. 분리 파일 누락 없음, Git 밖 합성 사용자 자산 재사용, 업그레이드 뒤 추가 저장한 자료가 이전 프로그램 Restore 뒤에도 유지됨 |
+
+설계 검토 완료는 위 시험이 통과했다는 뜻이 아니다. 구현 PR마다 실제 실행 명령·환경·실패와 수정·미실행을 기존 evals에 남긴다. 사내 확인은 코드/배포 준비가 끝난 뒤 변경에 필요한 소수 항목만 기존 1~2줄 보고 방식으로 묶고 이미 받은 `ui/tree/font/chat=ok`를 문서 변경 때문에 반복 요구하지 않는다. R0는 프로그램 Restore로 기능을 되돌릴 수 있어도 이미 저장한 자산/ACL까지 자동 복원하지 않는다. R1·R2는 DB 형식·공개 API가 같으므로 코드 revert와 기존 Restore 경로를 유지한다.
 
 아래 1~6절은 **현재 ees.7 통합 구현·검증 기준**을 보존한 것이다. 공동 작업 구현 시에는 이 최신 합의를 적용하고, 사용자별 격리·대화 연결 기준을 필요한 범위에서 함께 갱신한다. 다음 세션의 실제 작업 순서와 배포 상태는 [STATUS](../../STATUS.md)를 따른다.
 

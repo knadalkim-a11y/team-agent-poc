@@ -12,16 +12,18 @@ from datetime import datetime, timezone
 import inspect
 import json
 from pathlib import Path
-import re
 import sqlite3
 from uuid import uuid4
 
 
-CATEGORIES = ("setup", "ops", "incident")
-SYSTEMS = ("EMS", "APC", "FDC", "EGIS", "EPT")
-INPUTS = ("db", "ap", "site", "interface")
-IDENTIFIER = re.compile(r"^[A-Za-z0-9_.:-]{1,160}$")
-MAX_DOCUMENT_BYTES = 750_000
+# Keep the existing module as the public facade for callers and Tools.
+from .ees_workflow_definition import (
+    CATEGORIES, SYSTEMS, INPUTS, IDENTIFIER, MAX_DOCUMENT_BYTES,
+    _dump, _seed, _ancestors, _leaves, _dependencies,
+    _draft_shape_errors, validate_definition,
+)
+from .ees_workflow_view import _applicable, _finished, _missing, _view, _workflow
+
 _service = None
 
 
@@ -41,317 +43,6 @@ async def _resolve(value):
 
 def _now():
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
-
-
-def _dump(value):
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
-
-
-def _seed():
-    return json.loads(Path(__file__).with_name("workflow_seed.json").read_text(encoding="utf-8"))
-
-
-def _ancestors(nodes, node_id):
-    result, seen = [], set()
-    while node_id and node_id not in seen and node_id in nodes:
-        seen.add(node_id)
-        result.append(nodes[node_id])
-        node_id = nodes[node_id].get("parent")
-    return list(reversed(result))
-
-
-def _leaves(nodes, node_id):
-    node = nodes[node_id]
-    return [node_id] if node["type"] == "j" else [
-        leaf for child in node["children"] for leaf in _leaves(nodes, child)
-    ]
-
-
-def _dependencies(nodes, node_id):
-    return list(dict.fromkeys(dep for node in _ancestors(nodes, node_id) for dep in node["deps"]))
-
-
-def _applicable(case, node_id):
-    site = case["site"]
-    for node in _ancestors(case["definition"]["nodes"], node_id):
-        condition = node.get("condition", "all")
-        if not node.get("enabled", True) or case["system"] not in node.get("systems", SYSTEMS):
-            return False
-        if condition == "interface" and not site["interface"]:
-            return False
-        if condition == "reuse" and not site["reuse"]:
-            return False
-        if condition == "new-infra" and site["reuse"]:
-            return False
-        for prefix, key in (("country:", "country"), ("factory:", "id"), ("line:", "line")):
-            if condition.startswith(prefix) and condition[len(prefix):] != site[key]:
-                return False
-    return True
-
-
-def _finished(case, node_id):
-    return all(not _applicable(case, leaf) or case["jobs"][leaf]["status"] == "passed"
-               for leaf in _leaves(case["definition"]["nodes"], node_id))
-
-
-def _missing(case, node_id):
-    return [dep for dep in _dependencies(case["definition"]["nodes"], node_id)
-            if not _finished(case, dep)]
-
-
-def _view(case):
-    """Derive displayed parent state without persisting a second truth."""
-    if case is None:
-        return None
-    case = deepcopy(case)
-    case.pop("_skill_snapshots", None)
-    nodes = case["definition"]["nodes"]
-    node_states = {}
-    for node_id in nodes:
-        leaves = _leaves(nodes, node_id)
-        relevant = [leaf for leaf in leaves if _applicable(case, leaf)]
-        statuses = [case["jobs"][leaf]["status"] for leaf in relevant]
-        done = sum(status == "passed" for status in statuses)
-        missing = _missing(case, node_id)
-        if not relevant:
-            status = "skipped"
-        elif done == len(relevant):
-            status = "passed"
-        elif "failed" in statuses:
-            status = "failed"
-        elif "review" in statuses:
-            status = "review"
-        elif "blocked" in statuses or all(_missing(case, leaf) for leaf in relevant):
-            status = "blocked"
-        elif "running" in statuses:
-            status = "running"
-        elif nodes[node_id]["type"] != "j" and (
-                done or any(case["jobs"][leaf]["attempt"] or case["jobs"][leaf]["history"] for leaf in relevant)):
-            status = "in_progress"
-        else:
-            status = "pending"
-        node_states[node_id] = {"status": status, "applicable": _applicable(case, node_id),
-                                "missing": missing, "progress": {"done": done, "total": len(relevant)},
-                                "failed_count": statuses.count("failed"),
-                                "excluded_count": len(leaves) - len(relevant)}
-    case["node_states"] = node_states
-    case["status"] = node_states[case["process_id"]]["status"]
-    case["progress"] = node_states[case["process_id"]]["progress"]
-    case["process_name"] = nodes[case["process_id"]]["name"]
-    case["category"] = nodes[case["process_id"]]["category"]
-    # Older saved executions did not record their creation time. Keep that
-    # unknown instead of relabelling their last selection/edit as creation.
-    case.setdefault("created_at", None)
-    selected = _ancestors(nodes, case["selected_id"])
-    skill_ids = list(dict.fromkeys(["common", *(skill for node in selected for skill in node["skills"])]))
-    case["context"] = {
-        "breadcrumb": [{"id": node["id"], "name": node["name"], "type": node["type"]} for node in selected],
-        "skills": [deepcopy(case["definition"]["skills"][key]) for key in skill_ids],
-        "instructions": [node.get("instructions", "") for node in selected if node.get("instructions")],
-        "simulation": True,
-    }
-    return case
-
-
-def _draft_shape_errors(definition):
-    """Accept unfinished references, but never persist an unreadable editor."""
-    if not isinstance(definition, dict):
-        return ["업무 절차는 객체여야 합니다."]
-    errors = []
-    for key, maximum in (("nodes", 250), ("tools", 200), ("skills", 200), ("sites", 100)):
-        entries = definition.get(key)
-        if not isinstance(entries, dict) or not entries or len(entries) > maximum:
-            errors.append(f"{key}: 기본 목록 형식과 항목 수를 확인해 주세요.")
-            continue
-        for item_id, item in entries.items():
-            if (not isinstance(item_id, str) or not IDENTIFIER.fullmatch(item_id) or not isinstance(item, dict)
-                    or item.get("id") != item_id or not isinstance(item.get("name"), str)
-                    or not item["name"].strip() or len(item["name"]) > 160):
-                errors.append(f"{key}: 각 항목의 ID와 이름이 필요합니다.")
-                continue
-            valid = True
-            if key == "nodes":
-                valid = (item.get("type") in ("p", "t", "j") and item.get("category") in CATEGORIES
-                         and item.get("mode") in ("manual", "tool", "draft")
-                         and "parent" in item and isinstance(item["parent"], (str, type(None))) and isinstance(item.get("bindings"), dict)
-                         and all(isinstance(item.get(field), list) and all(isinstance(value, str) for value in item[field])
-                                 for field in ("children", "tools", "skills", "deps"))
-                         and all(isinstance(item.get(field, ""), str) for field in ("description", "instructions", "rule", "condition")))
-            elif key == "tools":
-                valid = item.get("input") in INPUTS and item.get("adapter", "unavailable") in ("mock", "unavailable")
-            elif key == "skills":
-                valid = item.get("type") in ("skill", "instruction") and isinstance(item.get("body", ""), str)
-            elif key == "sites":
-                valid = (all(isinstance(item.get(field), str) for field in ("country", "line", "zone", "db", "ap"))
-                         and all(isinstance(item.get(field), bool) for field in ("reuse", "interface")))
-            if key in ("tools", "skills") and item.get("source") == "open_webui":
-                valid = valid and isinstance(item.get("reference"), str) and bool(item["reference"]) and len(item["reference"]) <= 200
-            if key in ("tools", "skills") and item.get("source") not in (None, "example", "open_webui"):
-                valid = False
-            if not valid:
-                errors.append(f"{item_id}: 편집 항목의 기본 형식을 확인해 주세요.")
-    roots = definition.get("roots")
-    if (not isinstance(roots, dict) or set(roots) != set(CATEGORIES)
-            or any(not isinstance(ids, list) or any(not isinstance(item, str) for item in ids) for ids in roots.values())):
-        errors.append("셋업·운영·장애대응의 최상위 목록을 확인해 주세요.")
-    if definition.get("systems") != list(SYSTEMS):
-        errors.append("지원 시스템 목록을 확인해 주세요.")
-    if isinstance(definition.get("skills"), dict) and definition["skills"].get("common") != _seed()["skills"]["common"]:
-        errors.append("공통 실행 지침은 변경하거나 해제할 수 없습니다.")
-    return errors
-
-
-def validate_definition(definition):
-    """Validate editable P/T/J structure, inherited prerequisites and mappings."""
-    errors = []
-
-    def reject(message):
-        errors.append(message)
-
-    if not isinstance(definition, dict):
-        return ["업무 절차는 객체여야 합니다."]
-    try:
-        if len(_dump(definition).encode("utf-8")) > MAX_DOCUMENT_BYTES:
-            return ["업무 절차가 허용 크기를 초과했습니다."]
-    except (TypeError, ValueError):
-        return ["업무 절차를 JSON으로 저장할 수 없습니다."]
-    shape_errors = _draft_shape_errors(definition)
-    if shape_errors:
-        return shape_errors
-    limits = {"nodes": 250, "tools": 200, "skills": 200, "sites": 100}
-    for field, maximum in limits.items():
-        value = definition.get(field)
-        if not isinstance(value, dict) or not value or len(value) > maximum:
-            reject(f"{field}: 항목 수와 형식을 확인해 주세요.")
-        elif any(not isinstance(key, str) or not IDENTIFIER.fullmatch(key)
-                 or not isinstance(item, dict) or item.get("id") != key
-                 or not isinstance(item.get("name"), str) or not item["name"].strip()
-                 or len(item["name"]) > 160 for key, item in value.items()):
-            reject(f"{field}: 항목의 ID와 이름을 확인해 주세요.")
-    if errors:
-        return errors
-    nodes, tools, skills, sites = (definition[name] for name in limits)
-    roots = definition.get("roots")
-    if not isinstance(roots, dict) or set(roots) != set(CATEGORIES):
-        return ["셋업·운영·장애대응의 최상위 목록을 확인해 주세요."]
-    if definition.get("systems") != list(SYSTEMS):
-        reject("지원 시스템 목록을 확인해 주세요.")
-    if skills.get("common") != _seed()["skills"]["common"]:
-        reject("공통 실행 지침은 변경하거나 해제할 수 없습니다.")
-    for category, ids in roots.items():
-        if not isinstance(ids, list) or any(not isinstance(i, str) for i in ids) or len(set(ids)) != len(ids):
-            reject(f"{category}: 최상위 목록에 중복 또는 잘못된 ID가 있습니다.")
-            continue
-        for node_id in ids:
-            node = nodes.get(node_id, {})
-            if node.get("type") != "p" or node.get("parent") is not None or node.get("category") != category:
-                reject(f"{node_id}: 최상위 프로세스 연결을 확인해 주세요.")
-    if errors:
-        return list(dict.fromkeys(errors))
-    for tool in tools.values():
-        if tool.get("input") not in INPUTS or not isinstance(tool.get("enabled", True), bool):
-            reject(f"{tool['id']}: 입력 종류와 사용 여부를 확인해 주세요.")
-        if tool.get("adapter", "unavailable") not in ("mock", "unavailable"):
-            reject(f"{tool['id']}: 지원하지 않는 실행 연결입니다.")
-        if tool.get("mockResult", "success") not in ("success", "failure"):
-            reject(f"{tool['id']}: 예시 응답을 확인해 주세요.")
-        if tool.get("source") == "open_webui" and (not tool.get("reference") or tool.get("adapter") == "mock"):
-            reject(f"{tool['id']}: 기존 도구를 예시 실행으로 바꿀 수 없습니다.")
-    for skill in skills.values():
-        if skill.get("type") not in ("skill", "instruction") or not isinstance(skill.get("body", ""), str):
-            reject(f"{skill['id']}: 스킬·지침 내용을 확인해 주세요.")
-    for site in sites.values():
-        if (any(not isinstance(site.get(key), str) or not site[key].strip()
-                for key in ("country", "line", "zone", "db", "ap"))
-                or any(not isinstance(site.get(key), bool) for key in ("reuse", "interface"))):
-            reject(f"{site['id']}: 현장 조건을 확인해 주세요.")
-    for node_id, node in nodes.items():
-        if node.get("type") not in ("p", "t", "j") or node.get("category") not in CATEGORIES:
-            reject(f"{node_id}: 단계와 업무 분류를 확인해 주세요.")
-            continue
-        invalid_lists = [key for key in ("children", "tools", "skills", "deps")
-                         if not isinstance(node.get(key), list)
-                         or any(not isinstance(item, str) for item in node[key])
-                         or len(set(node[key])) != len(node[key])]
-        if invalid_lists:
-            reject(f"{node_id}: 중복 또는 잘못된 목록이 있습니다.")
-            continue
-        if (not isinstance(node.get("parent"), (str, type(None)))
-                or not isinstance(node.get("bindings"), dict)
-                or any(not isinstance(node.get(key, ""), str) for key in ("description", "instructions", "rule"))):
-            reject(f"{node_id}: 작업 내용과 입력 연결 형식을 확인해 주세요.")
-            continue
-        if node.get("mode") not in ("manual", "tool", "draft"):
-            reject(f"{node_id}: 수행 방식을 확인해 주세요.")
-        if not isinstance(node.get("enabled", True), bool) or not isinstance(node.get("failOnce", False), bool):
-            reject(f"{node_id}: 사용 여부를 확인해 주세요.")
-        if "systems" in node and (not isinstance(node["systems"], list) or not node["systems"]
-                                  or any(system not in SYSTEMS for system in node["systems"])):
-            reject(f"{node_id}: 적용 시스템을 확인해 주세요.")
-        condition = node.get("condition", "all")
-        conditions = {"all", "interface", "reuse", "new-infra"}
-        conditions.update("country:" + site["country"] for site in sites.values() if isinstance(site.get("country"), str))
-        conditions.update("factory:" + site_id for site_id in sites)
-        conditions.update("line:" + site["line"] for site in sites.values() if isinstance(site.get("line"), str))
-        if not isinstance(condition, str) or condition not in conditions:
-            reject(f"{node_id}: 적용 조건을 확인해 주세요.")
-        parent = nodes.get(node["parent"])
-        expected_parent = {"p": None, "t": "p", "j": "t"}[node["type"]]
-        if node["type"] == "p":
-            if node["parent"] is not None or node_id not in roots.get(node["category"], []):
-                reject(f"{node_id}: 최상위 목록에 등록해 주세요.")
-        elif (not parent or parent.get("type") != expected_parent or parent.get("category") != node["category"]
-              or not isinstance(parent.get("children"), list)
-              or node_id not in parent.get("children", [])):
-            reject(f"{node_id}: 상위 단계 연결을 확인해 주세요.")
-        if node["type"] == "j" and node["children"]:
-            reject(f"{node_id}: 잡에는 하위 단계를 추가할 수 없습니다.")
-        if node["type"] != "j" and not node["children"]:
-            reject(f"{node_id}: 하나 이상의 하위 작업이 필요합니다.")
-        for child in node["children"]:
-            if child not in nodes or nodes[child].get("parent") != node_id:
-                reject(f"{node_id}: 하위 작업 연결이 일치하지 않습니다.")
-        for field, available in (("tools", tools), ("skills", skills), ("deps", nodes)):
-            if any(item not in available for item in node[field]):
-                reject(f"{node_id}: 삭제되거나 없는 {field} 참조가 있습니다.")
-        if node["type"] == "j" and node["mode"] == "tool" and not node["tools"]:
-            reject(f"{node_id}: 실행할 도구를 연결해 주세요.")
-        for tool_id in node["tools"]:
-            if tool_id in tools and node["bindings"].get(tool_id, tools[tool_id].get("input")) != tools[tool_id].get("input"):
-                reject(f"{node_id}: 도구가 요구하는 입력 종류와 연결이 다릅니다.")
-    if errors:
-        return list(dict.fromkeys(errors))
-    # The P/T/J parent types prevent structural cycles; expanding inherited
-    # prerequisites catches deadlocks such as a task depending on its own child.
-    graph = {}
-    for node_id, node in nodes.items():
-        ancestors = _ancestors(nodes, node_id)
-        for ancestor in ancestors[:-1]:
-            if ancestor["tools"] and any(tool not in ancestor["tools"] for tool in node["tools"]):
-                reject(f"{node_id}: 상위 단계가 허용한 도구 범위를 벗어났습니다.")
-        deps = _dependencies(nodes, node_id)
-        for dep in deps:
-            if _ancestors(nodes, dep)[0]["id"] != ancestors[0]["id"]:
-                reject(f"{node_id}: 다른 프로세스의 진행 결과를 선행 조건으로 사용할 수 없습니다.")
-        if node["type"] == "j":
-            graph[node_id] = {leaf for dep in deps for leaf in _leaves(nodes, dep)}
-    visited, active = set(), set()
-
-    def visit(node_id):
-        if node_id in active:
-            return False
-        if node_id in visited:
-            return True
-        active.add(node_id)
-        if any(not visit(dep) for dep in graph[node_id]):
-            return False
-        active.remove(node_id)
-        visited.add(node_id)
-        return True
-
-    if any(not visit(node_id) for node_id in graph):
-        reject("선행 작업이 순환합니다. 서로를 기다리는 의존 관계를 수정해 주세요.")
-    return list(dict.fromkeys(errors))
 
 
 class WorkflowService:
@@ -428,7 +119,7 @@ class WorkflowService:
             row = db.execute("SELECT * FROM cases WHERE chat_id=? AND owner=?", (chat_id, user_id)).fetchone()
         return json.loads(row["data"]) if row else None
 
-    def _state(self, db, user, case_id="", chat_id="", assets=None):
+    def _state(self, db, user, case_id="", chat_id="", assets=None, process_id=""):
         published, draft, revision, validated = self._catalog(db)
         case = self._case(db, _value(user, "id"), case_id, chat_id)
         cases = []
@@ -461,11 +152,20 @@ class WorkflowService:
                         skill["snapshot_updated_at"] = snapshots[reference].get("updated_at")
                     else:
                         skill["message"] = "진행 건에 고정된 스킬을 현재 계정으로 사용할 수 없습니다. 권한·사용 여부를 확인해 주세요."
-        return {"ok": True, "catalog": published, "cases": cases, "case": case_view,
-                "can_manage": _value(user, "role") == "admin",
-                "draft": draft if _value(user, "role") == "admin" else None,
-                "draft_revision": revision if _value(user, "role") == "admin" else None,
-                "validated_revision": validated if _value(user, "role") == "admin" else None}
+        result = {"ok": True, "catalog": published, "cases": cases, "case": case_view,
+                  "can_manage": _value(user, "role") == "admin",
+                  "draft": draft if _value(user, "role") == "admin" else None,
+                  "draft_revision": revision if _value(user, "role") == "admin" else None,
+                  "validated_revision": validated if _value(user, "role") == "admin" else None}
+        if process_id:
+            process = published["nodes"].get(process_id)
+            if not process or process.get("type") != "p" or process.get("parent") is not None:
+                raise WorkflowError("process_not_found", "게시된 업무 절차의 프로세스를 선택해 주세요.")
+            result["workflow"] = _workflow(published, process_id, assets)
+        elif case_id and case:
+            result["workflow"] = _workflow(case["definition"], case["process_id"], assets,
+                                           case_id=case["id"], snapshots=case.get("_skill_snapshots", {}))
+        return result
 
     async def _visible_cases(self, user, state):
         """The navigation list respects the same linked-chat access as a read.
@@ -485,15 +185,17 @@ class WorkflowService:
         state["cases"] = accessible
         return state
 
-    async def get_state(self, user, chat_id="", case_id=""):
+    async def get_state(self, user, chat_id="", case_id="", process_id=""):
         try:
             current = await self._user(user)
-            if not isinstance(case_id, str) or len(case_id) > 200:
+            if (not isinstance(case_id, str) or len(case_id) > 200
+                    or not isinstance(process_id, str) or len(process_id) > 200
+                    or (case_id and process_id)):
                 raise WorkflowError("invalid_request", "진행 건 식별 정보를 확인해 주세요.")
             await self._chat(current, chat_id)
             assets = await self._assets(current)
             with self._db() as db:
-                state = self._state(db, current, case_id, chat_id, assets)
+                state = self._state(db, current, case_id, chat_id, assets, process_id)
             if state["case"]:
                 await self._chat(current, state["case"]["chat_id"])
             return await self._visible_cases(current, state)
@@ -818,8 +520,8 @@ async def _registered_assets(user):
     }
 
 
-async def get_state(user, chat_id="", case_id=""):
-    return await _production_service().get_state(user, chat_id, case_id)
+async def get_state(user, chat_id="", case_id="", process_id=""):
+    return await _production_service().get_state(user, chat_id, case_id, process_id)
 
 
 async def handle_action(user, body):

@@ -16,6 +16,7 @@ on:
       - 'scripts/ees_upgrade.py'
       - 'scripts/ees_apply_demo.py'
       - 'scripts/ees_demo_assets.py'
+      - 'scripts/ees_asset_guard.py'
       - 'scripts/ees_update_download.py'
       - 'tests/test_ees_deploy_*.py'
       - 'tests/test_ees_webui_customization.py'
@@ -23,6 +24,9 @@ on:
       - 'tests/test_ees_upgrade.py'
       - 'tests/test_ees_apply_demo.py'
       - 'tests/test_ees_demo*.py'
+      - 'tests/test_ees_asset_guard.py'
+      - 'tests/test_ees_asset_native.py'
+      - 'tests/ees_asset_native_fixture.py'
       - 'tests/test_ees_cooperation_panel.cjs'
       - 'tests/test_ees_specialists_tool.py'
       - 'tests/test_ees_update_download.py'
@@ -71,7 +75,7 @@ jobs:
       - run: python -m unittest discover -s tests -p test_ees_branding_build.py -v
       - run: python -m unittest discover -s tests -p test_demo_bundle.py -v
       - name: Install fixed test dependencies
-        run: python -m pip install uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1
+        run: python -m pip install uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5
       - name: Verify authenticated demo file routes without user data
         env:
           EES_REQUIRE_WORK_ROUTES: '1'
@@ -83,7 +87,7 @@ jobs:
       - name: Verify GitHub read and plain results
         run: python -m unittest discover -s tests -p test_github_tool.py -v
       - name: Verify shared workflow service and real chat Tool
-        run: python -m unittest discover -s tests -p "test_ees_workflow*.py" -v
+        run: python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p "test_ees_workflow*.py" -v
       - name: Verify WO demo Tool
         run: python -m unittest discover -s tests -p test_wo_demo_tool.py -v
       - name: Verify WO demo local form state
@@ -112,6 +116,18 @@ jobs:
           python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
       - name: Build the real program fixture without installing it
         run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
+      - name: Require guarded asset writes
+        env:
+          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+          EES_TEST_BRANDING_DIR: dist/branding
+          EES_REQUIRE_ASSET_GUARD: '1'
+        run: python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_asset_guard.py -v
+      - name: Require native asset writer integration
+        env:
+          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+          EES_TEST_BRANDING_DIR: dist/branding
+          EES_REQUIRE_ASSET_NATIVE: '1'
+        run: python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_asset_native.py -v
       - name: Verify patched native draft and chat creation against the pinned source
         env:
           EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
@@ -187,7 +203,7 @@ jobs:
               enabled=true
             else
               git diff --name-only "$BEFORE_SHA" HEAD > "$RUNNER_TEMP/ees-changed.txt"
-              if grep -Eq '^(branding/|agent-pack/skills/ees-work-demo/|agent-pack/skills/cross-system-analysis/ui/work-panel\.js$|scripts/build_(ees_webui|demo_bundle)\.py$|scripts/render_ees_brand_assets\.py$|tests/test_(ees_branding_build|demo_bundle)\.py$|\.github/workflows/ees-delivery\.yml$)' "$RUNNER_TEMP/ees-changed.txt"; then
+              if grep -Eq '^(branding/|agent-pack/skills/ees-work-demo/|agent-pack/skills/cross-system-analysis/ui/work-panel\.js$|scripts/build_(ees_webui|demo_bundle)\.py$|scripts/(render_ees_brand_assets|ees_asset_guard)\.py$|tests/test_(ees_branding_build|demo_bundle)\.py$|\.github/workflows/ees-delivery\.yml$)' "$RUNNER_TEMP/ees-changed.txt"; then
                 enabled=true
               fi
             fi

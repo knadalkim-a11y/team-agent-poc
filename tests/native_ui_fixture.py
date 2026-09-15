@@ -15,6 +15,8 @@ import threading
 from urllib.parse import parse_qs, urlsplit
 from zipfile import ZipFile
 
+from scripts.build_ees_webui import TARGET_APP, assemble_work_launcher
+
 
 USER = {"id": "fixture-admin", "name": "Fixture Administrator", "email": "fixture@example.invalid",
         "role": "admin", "profile_image_url": "/static/user.png", "permissions": {}, "settings": {}}
@@ -40,6 +42,12 @@ class NativeUIServer(ThreadingHTTPServer):
     daemon_threads = True
 
     def __init__(self, wheel_path):
+        # Use the production builder contract while continuing to serve the
+        # actual wheel. A stale wheel must fail instead of silently testing a
+        # source overlay that was never packaged for deployment.
+        with ZipFile(wheel_path) as wheel:
+            if wheel.read(TARGET_APP + "ees-work-launcher.js") != assemble_work_launcher():
+                raise ValueError("Native UI wheel launcher differs from the current assembled sources.")
         super().__init__(("127.0.0.1", 0), NativeUIHandler)
         self.wheel = ZipFile(wheel_path)
         self.assets = set(self.wheel.namelist())

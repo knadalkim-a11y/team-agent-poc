@@ -409,6 +409,23 @@ def require_free_port(config):
         raise DeploymentError("The configured port is unavailable; no unrelated process was stopped.")
 
 
+def backup(config):
+    """Verify a local data/key/settings copy while the registered server is stopped."""
+    with locked(config, track_owner=True):
+        registry = read_registry(config)
+        require_idle(registry)
+        if registry.get("pending") or registry.get("customization", {}).get("pending"):
+            raise DeploymentError("Resolve the incomplete program operation before backing up data.")
+        require_stopped(config, registry)
+        saved = states.backup_state(config)
+        registry["last_backup"] = saved
+        record(config, registry, "data_backup_verified")
+        # The backup reference stays in the private deployment record. Neither
+        # JSON nor Summary needs to disclose its path or its user-data manifest.
+        return {"backup_verified": True, "changed": False, "data_changed": False,
+                **program_result(registry)}
+
+
 def start_selected(config, selected, env, registry, health_timeout=DEFAULT_HEALTH_TIMEOUT, *, progress=None):
     progress = progress if progress is not None else {}
     progress.pop("log_id", None)
@@ -601,6 +618,8 @@ def operate(args):
     if args.action == "init":
         return initialize(args)
     config = states.load_config(args.config)
+    if args.action == "backup":
+        return backup(config)
     if args.action == "start" and getattr(args, "check_only", False):
         # This check is intentionally usable while the registered server is live.
         # No lock/report writes, health wait, socket bind, app import or Stop.
@@ -856,7 +875,7 @@ def render_summary(action, result, *, failed=False):
     commit = commit[:12] if isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}", commit) else "-"
     stage = result.get("stage", "complete")
     # Fixed labels only: never echo paths, environment, artifact payloads or logs.
-    stages = {"complete", "preflight", "inspect_bundle", "apply", "restore", "start", "stop", "status",
+    stages = {"complete", "preflight", "inspect_bundle", "apply", "restore", "start", "stop", "status", "backup",
               "select_program", "port_check", "process_start", "process_record", "health_check", "process_stop", "stop_record"}
     stage = stage if isinstance(stage, str) and stage in stages else action
     program = ("incomplete" if result.get("program_incomplete") else "invalid" if result.get("program_valid") is False
@@ -865,6 +884,8 @@ def render_summary(action, result, *, failed=False):
     detail = failure_fields(result) if failed else ""
     if result.get("accept_guard") in ("compatible", "win64_retry", "not_applicable"):
         detail += f" guard={result['accept_guard']}"
+    if action == "backup" and not failed and result.get("backup_verified") is True:
+        detail += " backup=verified"
     return (f"EES action={action} result={'failed' if failed else 'ok'} changed={flag(result.get('changed'))} "
             f"commit={commit} stage={stage} program={program} "
             f"running={flag(result.get('managed_process_running', result.get('started', result.get('already_running'))))}{detail}")
@@ -893,7 +914,7 @@ def save_operation(args, result, *, failed=False):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["init", "status", "diagnose", "probe-imports", "plan", "prepare", "deploy", "rollback", "start", "stop", "apply", "restore"])
+    parser.add_argument("action", choices=["init", "status", "diagnose", "probe-imports", "plan", "prepare", "deploy", "rollback", "start", "stop", "apply", "restore", "backup"])
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--bundle", type=Path)
     parser.add_argument("--commit")
@@ -918,8 +939,8 @@ def main(argv=None):
         parser.error("--check-only cannot change runtime trust.")
     if args.resume and args.action != "apply":
         parser.error("--resume is supported only with apply.")
-    if args.summary and args.action not in ("apply", "restore", "start", "stop", "status"):
-        parser.error("--summary is supported with Apply/Restore/Start/Stop/Status only.")
+    if args.summary and args.action not in ("apply", "restore", "start", "stop", "status", "backup"):
+        parser.error("--summary is supported with Apply/Restore/Start/Stop/Status/Backup only.")
     if args.use_windows_ca and args.action not in ("deploy", "start"):
         parser.error("--use-windows-ca is supported only with deploy or start.")
     needed = {"init": ["source_python", "cwd", "data_dir", "listen_host", "port", "uv"],

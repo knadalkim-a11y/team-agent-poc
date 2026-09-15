@@ -448,7 +448,7 @@ v0.1.3의 회신 중심 표현을 거쳐, 이번에는 사용자가 확인한 �
 
 실행 코드는 [전문 호출](../agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py)과 [합성 자료](../agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py), 운영 코드는 [ApplyDemo 진입점](../scripts/ees_apply_demo.py)과 [자산 병합](../scripts/ees_demo_assets.py)에 있습니다. 공유 자료의 도메인은 서버가 주입하는 `__metadata__.model_id`로 정하며 LLM이 제공한 모델 이름이나 Task Model의 `__model__`을 사용하지 않습니다. 전문 모델은 자기 자료만 조회하고 EES는 조건별 비교만 수행합니다. 모델 ID 검사는 기존 사용자·Tool 접근권한 검사를 대신하지 않습니다.
 
-**자산만 갱신할 때:** 프로그램이 이미 [현재 버전](../versions.md)이면, 기존 서버와 배포 환경 등록을 유지한 상태에서 변경의 main 반영·해당 CI 성공 뒤 아래 블록을 사용합니다. `Update`로 운영 스크립트의 보완을 받고 `ApplyDemo`로 지정 자산을 갱신합니다. **이번 ees.8 사이드바 개선은 프로그램 화면도 바꾸므로 아래 자산 전용 블록 대신 [Update → Upgrade → ApplyDemo](#sidebar-refinement)를 따릅니다.** 공장별 업무 기능을 처음 적용할 때도 [프로그램과 자산을 함께 갱신하는 순서](#ees-work-demo)를 사용합니다.
+**자산만 갱신할 때:** 프로그램이 이미 [현재 버전](../versions.md)이면, 기존 서버와 배포 환경 등록을 유지한 상태에서 변경의 main 반영·해당 CI 성공 뒤 아래 블록을 사용합니다. `Update`로 운영 스크립트의 보완을 받고 `ApplyDemo`로 지정 자산을 갱신합니다. **ees.9의 조건부 자산 적용을 처음 도입할 때는 아래 자산 전용 블록 대신 [Update → Upgrade → ApplyDemo](#conditional-assets)를 따릅니다.** 공장별 업무 기능을 처음 적용할 때도 [프로그램과 자산을 함께 갱신하는 순서](#ees-work-demo)를 사용합니다.
 
 ```powershell
 & {
@@ -483,9 +483,9 @@ v0.1.3의 회신 중심 표현을 거쳐, 이번에는 사용자가 확인한 �
 
 `ApplyDemo` 자체는 기존 서버를 켠 상태에서 진행하며 프로그램 wheel 다운로드·Stop/Start·의존성 설치가 없습니다. 적용 중 대상 모델의 UI 편집과 대화는 피하고, 완료 후 **브라우저를 완전히 새로고침한 다음 EES 통합 Assistant의 새 대화**에서 시연합니다. 이미 열려 있던 화면의 도구 목록·대화 선택 상태는 API 등록과 별개입니다. 새로고침 뒤 모델의 기본 연결 도구가 자동 선택되어야 하며 매 대화마다 수동으로 도구를 켜는 운영을 전제로 하지 않습니다.
 
-1. **준비 확인:** 저장한 Git 프록시·인증으로 정확한 main 커밋의 CI 성공을 확인하고 래퍼를 갱신합니다. 갱신된 실행기가 같은 커밋의 관리 목록과 파일을 읽습니다. WebUI 0.11.3 또는 EES 수정 버전, 관리자 인증, 기존 EES와 모든 입력 파일을 쓰기 전에 확인합니다.
+1. **준비 확인:** 저장한 Git 프록시·인증으로 정확한 main 커밋의 CI 성공을 확인하고 래퍼를 갱신합니다. 갱신된 실행기가 같은 커밋의 관리 목록과 파일을 읽습니다. 지원 WebUI 버전·조건부 저장 capability·관리자 인증·기존 EES와 모든 입력 파일을 쓰기 전에 확인합니다. 새 ApplyDemo는 보호 API가 없는 이전 서버에 쓰지 않습니다.
 2. **기존 설정 병합:** 현재 모델·도구를 API로 읽고 변경 전 값과 적용 의도를 사내에 기록합니다. 모델 GET 응답의 `write_access=true`를 요구하며 관리자가 쓰기 API를 호출할 수 있어도 원본 설정이 가려져 있으면 중단합니다. 기존 EES의 사용자 추가 지침·다른 도구/Skill/Knowledge·메모리·공유 권한과 시작 질문을 보존하고 이번 관리 구역만 추가·갱신합니다.
-3. **순서대로 적용:** 분석 Tool 2개와 연결 설정, 대상인 기존 WO Tool, 전문 모델 3개, 기존 EES 연결을 적용합니다. 새 항목은 기존 EES의 조회 대상에게 필요한 읽기 권한을 부여합니다. 기존 Jira/Confluence/GitHub와 개인 PAT는 변경하지 않습니다. 신규 시연 Tool의 관리자 설정 중 EES 모델 ID만 관리하고 다른 설정은 보존합니다. WO는 기존 EES에 연결된 지원 원본만 같은 등록 항목에서 갱신하며 설치되지 않았다면 건너뜁니다.
+3. **순서대로 적용:** 같은 snapshot의 token과 병합 payload를 서버로 보내며, 조회 이후 다른 변경이 있으면 저장 전에 중단합니다. 자신의 Tool 저장 성공 뒤 연결 설정만 확인된 새 snapshot으로 재계획합니다. 분석 Tool 2개와 연결 설정, 대상인 기존 WO Tool, 전문 모델 3개, 기존 EES 연결을 적용합니다. 새 항목은 기존 EES의 조회 대상에게 필요한 읽기 권한을 부여합니다. 기존 Jira/Confluence/GitHub와 개인 PAT는 변경하지 않습니다. 신규 시연 Tool의 관리자 설정 중 EES 모델 ID만 관리하고 다른 설정은 보존합니다. WO는 기존 EES에 연결된 지원 원본만 같은 등록 항목에서 갱신하며 설치되지 않았다면 건너뜁니다.
 4. **재조회와 재실행:** 각 쓰기 후 API 재조회로 실제 관리 필드·연결·권한을 확인하고 마지막에 실행 모델 목록을 갱신합니다. 같은 원본을 다시 적용하면 무변경으로 끝납니다. 일반 API 부분 실패·응답 유실 뒤에는 기록과 현재 ID를 대조해 완료된 항목을 건너뜁니다. 관리 구역의 현장 수정이나 기존 ID 충돌은 덮어쓰지 않고 중단합니다.
 
 일반적인 API 실패 뒤에는 같은 `ApplyDemo`를 다시 실행할 수 있습니다. 프로세스 강제 종료나 OS 파일 잠금까지 자동 복구한다고 보장하지 않으며, 잠금·로컬 기록 문제는 마지막 오류 코드로 확인합니다. 자동 삭제·DB 전체 복원·시연 자산 원복 명령은 제공하지 않습니다. 필요하면 기록된 이전 필드와 실제 상태를 먼저 대조합니다.
@@ -908,6 +908,7 @@ Set-Location "$env:USERPROFILE\team-agent-poc"
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA> -CheckOnly` | 저장 설정·버전/의존성 요구·전달물·설치 경로와 적용 가능 여부를 읽어 표시. 앱 import·서버 중지·쓰기 없음 |
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA>` | 서버가 종료됐음을 확인한 뒤 검증된 프로그램만 적용. 같은 커밋/해시이면 변경 없음. 자동 시작·health 대기 없음 |
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA> -Resume` | promote에서 중단된 실제 적용의 폴더를 사용자가 옮긴 뒤, 같은 ZIP·기록·전체 파일을 대조해 완료 기록만 남김. 파일 이동/추출·자동 시작 없음. `-CheckOnly`를 함께 쓰면 읽기 검증만 수행 |
+| `Backup -Summary` | 정상 종료된 등록 서버의 DATA_DIR·키·설정을 기존 내부 백업 경로에 복사하고 파일 해시와 DB를 확인. 프로그램 적용·서버 시작·데이터 원복 없음 |
 | `Restore` | **직전 적용 전 프로그램 상태**로 한 번 되돌림. 최초 적용의 직전 상태는 원래 Open WebUI. 복원 뒤 같은 Restore는 변경 없음 |
 | 기존 Start / Stop / Status | 같은 interpreter/cwd/데이터로 시작·정상 종료·상태 표시. 실제 앱 원본/사내 수정 여부와 적용 커밋을 구분 |
 | `Start -UseWindowsCA` | 종료된 서버에 Windows 신뢰 CA 스냅샷을 선택하고 시작. 이후 일반 Start에서도 재사용. [SSL 복구 절차](#ees-start-windows-ca) |
@@ -1109,9 +1110,11 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 EES Work는 기존 WebUI의 사이드바에서 공장별 업무를 고르고, **가운데 실제 AI 대화와 오른쪽 업무 패널에서 같은 진행 건을 다루는 기능**입니다. 기존 모델 선택·메시지 입력·스트리밍·첨부·대화 이력·문서 조회를 사용하며 서비스 표시 이름은 EES Portal에서 **EES Work**로 바뀝니다. 별도 시연 창과 모의 대화를 제공했던 ees.5는 [당시 구현 기록](../evals/scenarios.md#ees-work-demo-integration-20260914)으로 보존합니다. 현재 기준은 [후속 UX 합의를 포함한 통합 지시](mockups/ees-work/TASK.md)이며 [최초 목업 HTML](mockups/ees-work/ees-demo-workspace.html)은 업무 예시의 참고자료입니다.
 
-프로그램 배포본은 `0.11.3+ees.8`·정적 자산 `/_ees8/`, 지정 자산은 Agent Pack v0.2.9입니다. [기능 폴더](../agent-pack/skills/ees-work-demo/)의 상태·액션과 기존 실제 대화를 유지하며, [승인한 사이드바 목업](mockups/ees-work/ees-sidebar-refinement.html)의 표현·동작을 Native UI에 반영합니다. 09-14 ees.7 실행·v0.2.8 적용에 이어 2026-09-15 `9a90e19fb7f5`의 v0.2.9 ApplyDemo 1건 갱신 성공과 사용자 `ui ok / tree ok / font ok / chat ok` 보고로 이번 선택 영역·직계 펼침·글꼴/설명 행·대화/초안의 사내 확인을 마쳤습니다. 현재 실행 프로그램의 정확한 버전·원본 SHA는 별도로 보고되지 않았으며, Git·CI·실제 사내 반영은 [STATUS](STATUS.md)와 [검증 기록](../evals/scenarios.md#sidebar-refinement-20260914)에서 구분합니다.
+마지막 사내 UI 수락 대상은 `0.11.3+ees.8`·정적 자산 `/_ees8/`, 지정 자산은 Agent Pack v0.2.9입니다. [기능 폴더](../agent-pack/skills/ees-work-demo/)의 상태·액션과 기존 실제 대화를 유지하며, [승인한 사이드바 목업](mockups/ees-work/ees-sidebar-refinement.html)의 표현·동작을 Native UI에 반영합니다. 09-14 ees.7 실행·v0.2.8 적용에 이어 2026-09-15 `9a90e19fb7f5`의 v0.2.9 ApplyDemo 1건 갱신 성공과 사용자 `ui ok / tree ok / font ok / chat ok` 보고로 이번 선택 영역·직계 펼침·글꼴/설명 행·대화/초안의 사내 확인을 마쳤습니다. 현재 실행 프로그램의 정확한 버전·원본 SHA는 별도로 보고되지 않았으며, Git·CI·실제 사내 반영은 [STATUS](STATUS.md)와 [검증 기록](../evals/scenarios.md#sidebar-refinement-20260914)에서 구분합니다.
 
-**공동 작업 목표와 현재 범위:** ees.7과 이번 ees.8 배포본은 사용자별 진행 건을 저장하며 다른 사용자가 같은 공장·시스템의 진행 건을 이어받는 기능은 아직 구현하지 않았습니다. 후속 합의는 [공장 → 시스템 → 업무의 공동 진행](mockups/ees-work/TASK.md#ees-work-shared-target)입니다. 업무 진행·결과·이력을 함께 유지하되 개인 대화·첨부·개인 자격증명과 권한은 별도로 관리합니다. 현재 사용자별 격리를 해제하거나 기존 개인 결과를 자동 공개하는 절차로 해석하지 않습니다.
+현재 미배포 ees.9 준비본에는 [조건부 자산 보호](#conditional-assets)와 [업무 서버·정책 분리](../evals/scenarios.md#workflow-refactor-20260915)를 포함합니다. 코드가 나뉘어도 기존 Tool ID·호출 방법, 저장한 절차·진행 건·이력·Skill 참조는 유지됩니다. 분리 파일은 프로그램 ZIP에 함께 들어가며 별도 수동 복사·사용자 자산 재등록·절차 재게시를 요구하지 않습니다. 기존 실행 어댑터가 없는 Tool 참조는 계속 미연결로 처리합니다. 아래 절차는 main 병합·CI·산출물 준비 뒤 한 번 적용하며 R1만을 이유로 ApplyDemo를 추가 반복하지 않습니다.
+
+**공동 작업 목표와 현재 범위:** 기존 ees.7/ees.8과 ees.9 준비본은 사용자별 진행 건을 저장하며 다른 사용자가 같은 공장·시스템의 진행 건을 이어받는 기능은 아직 구현하지 않았습니다. 후속 합의는 [공장 → 시스템 → 업무의 공동 진행](mockups/ees-work/TASK.md#ees-work-shared-target)입니다. 업무 진행·결과·이력을 함께 유지하되 개인 대화·첨부·개인 자격증명과 권한은 별도로 관리합니다. 현재 사용자별 격리를 해제하거나 기존 개인 결과를 자동 공개하는 절차로 해석하지 않습니다.
 
 | 화면 | 사용하는 기능 |
 |---|---|
@@ -1120,7 +1123,7 @@ EES Work는 기존 WebUI의 사이드바에서 공장별 업무를 고르고, **
 | 기존 오른쪽 업무 패널 | 현재 작업의 전체 현황·입력·점검·결과, 실행 이력의 읽기 전용 과거 결과 |
 | 기존 워크스페이스 | 모델·지식기반·프롬프트 등 기존 메뉴 유지, 업무 절차 탭에서 관리자 정의·도구·스킬/지침·공장 조건·게시 관리 |
 
-**처음 적용하거나 프로그램이 이전 버전인 경우:** 구현 PR의 main 병합, 해당 EES delivery 검사와 프로그램 포함 산출물 생성 성공을 확인한 뒤 기존 등록 Windows 계정과 checkout에서 아래 한 블록을 실행합니다. Update·Upgrade·ApplyDemo는 등록된 주소·Python·DATA_DIR·키·인증·Git 프록시를 재사용합니다. 새 프로그램이 업무 서버 기능을 제공한 뒤 ApplyDemo가 지정 Tool과 기존 EES 관리 구역을 갱신합니다. 실패하면 다음 단계로 진행하지 않습니다. **이번 ees.8은 프로그램 화면 파일을 변경하므로 ees.7에서 Upgrade가 필요합니다. ApplyDemo만으로 새 화면이 바뀌지는 않습니다.** 과거 정렬 충돌만 해결하는 [Update → ApplyDemo](#specialists-editor-format)와 이번 UI 프로그램 갱신을 구분합니다.
+**처음 적용하거나 프로그램이 이전 버전인 경우:** 구현 PR의 main 병합, 해당 EES delivery 검사와 프로그램 포함 산출물 생성 성공을 확인한 뒤 기존 등록 Windows 계정과 checkout에서 아래 한 블록을 실행합니다. Update·Upgrade·ApplyDemo는 등록된 주소·Python·DATA_DIR·키·인증·Git 프록시를 재사용합니다. 새 프로그램이 업무 서버 기능을 제공한 뒤 ApplyDemo가 지정 Tool과 기존 EES 관리 구역을 갱신합니다. 실패하면 다음 단계로 진행하지 않습니다. **현재 ees.9는 서버 자산 보호 코드도 바꾸므로 이전 프로그램에서 Upgrade가 필요합니다. [조건부 자산 적용](#conditional-assets)의 지원 범위와 실패 처리를 따릅니다.** 과거 정렬 충돌만 해결하는 [Update → ApplyDemo](#specialists-editor-format)와 이번 UI 프로그램 갱신을 구분합니다.
 
 ```powershell
 & {
@@ -1133,6 +1136,29 @@ EES Work는 기존 WebUI의 사이드바에서 공장별 업무를 고르고, **
 ```
 
 Upgrade는 프로그램·기동 상태를, ApplyDemo는 지정 자산 등록을 확인합니다. 성공 응답만으로 화면과 사내 모델의 실제 업무 호출까지 검증된 것은 아닙니다. 브라우저를 새로고침한 뒤 **EES 통합 Assistant**의 대화에서 아래 흐름을 확인합니다. 개인 모델의 선택·기존 연결은 유지하며, 해당 모델에 업무 Tool이 연결되지 않았다면 업무 실행을 지원한다고 가정하지 않습니다. 이미 등록한 ApplyDemo 관리자 인증을 재사용하고 자산 충돌은 수동 수정 내용을 덮어쓰지 않은 채 중단합니다. 실패 시 [기존 Upgrade 안내](#ees-wrapper-upgrade)·[자산 적용 안내](#demo-assets-deployment)의 마지막 `stage/code/next`만으로 이어갑니다.
+
+<a id="conditional-assets"></a>
+
+### ees.9 조건부 자산 적용
+
+ees.9는 공통 자산 갱신과 다른 사용자의 편집이 겹칠 때 최신 저장을 덮지 않도록 서버에서 확인합니다. Git에 없는 사용자 Skill/Tool/모델·연결·권한·개인 설정을 유지하며 관리 ID와 필드만 갱신합니다. 보호는 같은 로컬 DB를 쓰는 단일 프로세스/worker에 한정되고, 같은 DATA_DIR/DB의 두 번째 수정 프로그램은 기동을 거절합니다. 임의 외부 DB 쓰기나 보호 미적용 원본 서버의 동시 실행은 지원하지 않습니다. 일반 UI 편집기 두 개의 오래된 폼 충돌까지 해결하는 기능은 아닙니다.
+
+**처음 반영:** 해당 구현의 main 병합·Linux/Windows CI·프로그램 포함 산출물 성공을 [STATUS](STATUS.md)에서 확인한 뒤, 기존 등록 계정과 checkout에서 실행합니다. 현재 등록 Python·주소·DATA_DIR·키·인증을 재사용합니다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    .\scripts\manage-ees.ps1 -Action Update
+    .\scripts\manage-ees.ps1 -Action Upgrade
+    .\scripts\manage-ees.ps1 -Action ApplyDemo
+}
+```
+
+- `conditional_write_unavailable`, `changed=0`, `next=upgrade`: 보호 API가 없거나 지원 환경이 아니므로 자산을 쓰기 전에 멈춘 상태입니다. 무조건 POST나 옛 ApplyDemo로 우회하지 않고 프로그램/기동 상태를 확인합니다.
+- `concurrent_edit`: 조회 뒤 대상이 바뀌었습니다. 다른 사용자의 새 값을 보존하고 현재 시도를 중단합니다. 편집을 마친 뒤 같은 ApplyDemo를 재실행하면 전체 사전 검사와 병합부터 다시 수행합니다. 관리 필드를 현장에서 바꾼 경우에는 `managed_field_conflict`가 계속 중단하며 강제로 덮지 않습니다.
+- 응답 유실·부분 실패: 서버 쓰기가 끝났을 수 있으므로 기존 pending 기록과 재조회로 판단합니다. 이전 값 자동 덮어쓰기나 자산 전체 복원을 하지 않습니다. 프로그램 Restore 뒤에도 최신 사용자 자료·자산을 유지하며, 이전 프로그램에서 새 ApplyDemo 쓰기는 다시 차단됩니다.
+
+새로고침 후 기존 사용자 Skill/Tool 한 개의 조회·지원 호출과 기존 대화를 한 번 확인합니다. 마지막 적용 요약과 `user_asset=ok chat=ok`처럼 실제 확인한 항목만 1~2줄로 전달합니다. 이미 확인한 사이드바 네 항목이나 장문의 서버 로그·사진을 반복 요청하지 않습니다. 새 보호 코드의 진단에는 원문을 기록하지 않고 native 저장 오류는 고정 응답으로 바꿉니다. Tool 갱신의 원문 debug 출력도 제거했습니다. 기존 WebUI 전체 예외 로그의 비밀정보 차단을 검증했다는 뜻은 아닙니다. [구현·검증 범위](../evals/scenarios.md#conditional-assets-20260915).
 
 <a id="sidebar-refinement"></a>
 
@@ -1156,7 +1182,7 @@ Upgrade는 프로그램·기동 상태를, ApplyDemo는 지정 자산 등록을 
 5. 관리자 워크스페이스에서 모델·지식기반·프롬프트와 **업무 절차**를 오갈 때 새 탭이 깜빡이거나 중복되지 않고 기존 UI 글꼴·간격을 따르는지 확인합니다. 절차·입력 매핑·공장 조건을 저장·검증·게시한 뒤 새 실행만 새 버전을 사용하고 기존 실행의 트리·결과는 유지되는지 봅니다.
 6. 패널을 닫고 일반 질문·기존 문서 조회를 이어갑니다. 같은 실행의 태스크·잡 이동과 다른 실행의 대화 전환에서 작성 중 문장이 복원되고 새로고침 후 업무 결과도 유지되는지 확인합니다. 탭·로그인 화면의 **EES Work** 표기도 확인합니다.
 
-사내 결과는 `program=ees.8 assets=ok name=ok`와 `tree=ok history=ok chat=ok workspace=ok`처럼 실제 확인한 항목만 1~2줄로 전달합니다. 실패한 항목은 `workspace=flicker` 또는 멈춘 단계로 표시합니다. 전체 로그·토큰·화면 사진을 전달할 필요는 없습니다. 사외 브라우저 fixture와 모의 모델의 성공을 사내 LLM·SSO·개별 연동 검증으로 대신하지 않습니다.
+사내 결과는 `program=ees.9 assets=ok name=ok`와 `tree=ok history=ok chat=ok workspace=ok`처럼 실제 확인한 항목만 1~2줄로 전달합니다. 실패한 항목은 `workspace=flicker` 또는 멈춘 단계로 표시합니다. 전체 로그·토큰·화면 사진을 전달할 필요는 없습니다. 사외 브라우저 fixture와 모의 모델의 성공을 사내 LLM·SSO·개별 연동 검증으로 대신하지 않습니다.
 
 **업무 상태와 대화의 연결:** ‘신규 공장 횡전개’는 공통 절차이고, 공장·시스템별 셋업은 각기 다른 진행 건입니다. 본인 소유의 일반 저장 대화에 진행 건 하나를 연결합니다. 임시 대화(`temporary-chat=true`)에서는 업무 진행을 지원하지 않습니다. 공장·시스템·프로세스에 진행 중인 실행이 있으면 이어갈 실행을 먼저 표시하며, 여러 건이면 사용자가 선택합니다. 완료된 실행은 결과를 보존하고 새 실행을 따로 시작합니다. 하위 태스크·잡의 선택만으로 실행하지 않으며, 다른 진행 건은 연결된 대화에서 이어가거나 새 일반 대화로 시작합니다. 패널을 닫아도 진행 건·결과는 지워지지 않고, 입력을 바꿨다면 관련 후속 결과를 무효화하고 이력을 남깁니다. 이전 결과를 새 입력의 성공으로 재사용하지 않습니다.
 
@@ -1164,7 +1190,7 @@ Upgrade는 프로그램·기동 상태를, ApplyDemo는 지정 자산 등록을 
 
 전체 프로세스가 완료되면 입력 변경·재점검·초안 수정·완료 확인을 UI·AI Tool·서버에서 차단하고 새 실행을 안내합니다. 하위 결과 조회·선택과 기존 실행의 첫 대화 연결은 유지합니다. 프로세스가 아직 끝나지 않았다면 부분 완료한 잡을 다시 점검하거나 입력을 수정할 수 있으며 관련 후속 결과를 무효화합니다.
 
-**AI와 같은 기능 사용:** `ees_workflow_view(include_navigation=true)`는 공장·시스템·절차와 본인 실행 목록을, `case_id` 조회는 읽기 전용 과거 결과를 제공합니다. `ees_workflow_display`에서 공장·프로세스 탐색, 실행 재개, 이력 열기를 지원하고 `ees_workflow_action`은 현재 실행의 선택·입력·점검에 기존 액션을 사용합니다. 과거 기록 조회만으로 점검을 실행하거나 현재 실행의 완료 상태를 바꾸지 않습니다.
+**AI와 같은 기능 사용:** 메인 채팅에 업무 목표를 말하면 기존 Assistant가 게시 절차와 접근 가능한 진행 건을 찾고, 빠진 조건만 확인해 짧은 계획을 세우도록 관리 지침을 제공합니다. `ees_workflow_view(include_navigation=true)`는 공장·시스템·절차와 본인 실행 목록을 읽기 전용으로 찾습니다. `process_id` 조회는 새 업무의 단계·선행 조건·입력·도구 연결과 접근 가능한 스킬 지침을, `case_id` 조회는 기존 진행의 고정된 절차·스킬과 결과를 제공합니다. 이 탐색·상세 조회는 사이드바 선택을 대화에 연결하거나 업무를 생성하지 않습니다. `ees_workflow_display`에서 공장·프로세스 탐색, 실행 재개, 이력 열기를 지원하고 `ees_workflow_action`은 현재 실행의 선택·입력·점검에 기존 액션을 사용합니다. 과거 기록 조회만으로 점검을 실행하거나 현재 실행의 완료 상태를 바꾸지 않습니다. 실제 생성·변경 전에는 현재 대화 상태를 다시 읽으며 다른 대화로 재개한 뒤에는 그 대화에서 이어갑니다. 사람 확인·미연결 단계에서 멈추고 DB/AP 모의 결과와 실제 업무를 구분합니다. 이 보강은 같은 ees.9/v0.2.10 준비본에 포함되며 사내 GLM의 전체 자연어 흐름과 실제 배포 확인은 [현재 상태](STATUS.md)를 따릅니다.
 
 **초안과 UI 유지:** 대화 전환 시 텍스트·일반 첨부·도구/스킬 선택은 upstream 초안 직렬화·복원 경로를 사용합니다. 이미지 임시 첨부는 upstream 기본 초안 보존 범위와 구분합니다. 업무 절차 탭은 기존 Workspace 메뉴의 글꼴·간격을 따르고 같은 탭을 반복 제거·재삽입하지 않도록 관리합니다. 기존 모델·지식기반·프롬프트의 화면과 데이터는 기존 경로를 사용합니다.
 
@@ -1217,15 +1243,28 @@ Windows에서 `program → program.previous`, `program.staging → program`, Res
 
 Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `result.bundle`에 보존합니다. 기존 `error/errno/winerror/at`에 `rename=promote attempts=5 waited=15` 같은 요약을 추가하며, 제한 횟수 소진 후 현재 미완료 상태까지 수동 승격 조건에 맞으면 `code=program_rename_blocked next=manual_promote`를 표시합니다. **이번 Upgrade 직후 이 값이 나온 경우에만** 아래 [수동 복구 블록](#ees-wrapper-manual-promote)을 사용합니다. 다른 단계·현재 상태 불일치는 수동 이름 변경 대상으로 안내하지 않습니다. 과거 ees.1 고정 ZIP 명령을 새 실패에 그대로 재사용하지 않습니다. 자동 되돌리기는 없으며 health 시간 초과 뒤에는 늦게 켜질 수 있으므로 Start/Upgrade를 반복하기 전에 현재 상태를 확인합니다. [검증·사내 적용 경계](../evals/scenarios.md#ees-wrapper-upgrade).
 
+<a id="ees-wrapper-trial"></a>
+
+#### 2026년 9월 고정 원본 시험 적용
+
+사용자 결정으로 9월에는 GitHub 원격 검사를 생략하고 변경별 로컬 검증을 마친 원본을 시험 적용합니다. 기본 `Upgrade`·인자 없는 `ApplyDemo`는 성공한 main CI를 확인하는 기존 동작을 유지합니다. 이 기간의 프로그램은 별도로 제공한 검증된 ZIP으로 `Apply`하며 자산은 **`ApplyDemo -TrialCommit <같은 40자리 원본 SHA>`**로 적용합니다. 새 실행기·가상환경·의존성 전체 재설치를 추가하지 않습니다.
+
+- 기존 `Update`로 canonical origin의 clean main을 갱신한 뒤, 검토한 원본과 HEAD·origin/main이 모두 같아야 합니다. 설치된 프로그램도 같은 원본이어야 하며 프로그램 파일/미완료 상태를 확인합니다. TrialCommit은 다른 브랜치·로컬 수정·다른 SHA를 허용하지 않고 GitHub 검사 성공을 뜻하지 않습니다. GitHub PAT를 새로 요구하거나 CI를 조회/실행하지 않습니다. 숨겨진 prepared-head 인자는 운영 명령으로 사용하지 않습니다.
+- 제공한 ZIP의 전체 SHA-256과 manifest 원본을 확인하고 `Apply -CheckOnly`를 먼저 실행합니다. 실패하면 Stop 이전에 멈춥니다. 이후 **Stop → Backup → Apply → Start → ApplyDemo -TrialCommit**을 한 번 수행하며 앞 단계가 실패하면 다음 단계는 실행하지 않습니다. 기존 Start의 최대 120초 health 확인을 사용하고 시간 초과 뒤 자동 반복·원복하지 않습니다.
+- `Backup`은 기존 등록 경로의 DATA_DIR 전체(업무 DB 포함)·키·설정을 서버 종료와 작업 잠금 아래 복사합니다. 파일 해시·원본 무변경·복사한 WebUI DB 검사를 마친 뒤 내부 백업 참조를 저장하고 `backup=verified`만 짧게 출력합니다. 경로·백업·DB·키 파일을 외부로 전달하지 않습니다. 백업 실패 시 프로그램·자산을 적용하지 않습니다.
+- 프로그램 `Restore`는 직전 프로그램만 복원합니다. 백업 자료로 현재 DB를 자동 덮어쓰지 않으며 ApplyDemo의 공통 자산 변경까지 취소하는 기능은 아닙니다. 사용자 작성 Skill·Tool·Prompt·모델·연결은 기존 관리 경계와 조건부 저장 보호를 유지합니다.
+
+배포 ZIP과 정확한 SHA는 이번 배포 안내에서 함께 제공합니다. 사내 실행 후 마지막 `EES` 결과와 기존 대화/업무 화면 확인을 1~2줄만 전달합니다. 실제 모델 확인은 새 EES 대화에서 사이드바를 먼저 선택하지 않고 “셋업 업무를 진행하려고 해. 등록된 절차를 찾아 필요한 조건부터 확인해 줘”라고 요청해 후보 탐색·필요한 질문·계획이 이어지는지 봅니다. 모의 점검을 실제 설치 완료로 기록하지 않습니다. 실제 적용 및 미실행 Windows/브라우저/모델 범위는 [STATUS](STATUS.md)를 따릅니다.
+
 <a id="ees-wrapper-apply"></a>
 
 #### 수동 ZIP 적용·확인 안내
 
-**구현본이 main에 반영되고 해당 CI가 통과한 뒤 사용합니다.** 현재 게시·검증 상태는 [STATUS](STATUS.md), 실제 사내 결과는 [구현 기록](../evals/scenarios.md#ees-wrapper-implementation)에서 구분합니다. 이미 등록한 운영 PowerShell과 `%USERPROFILE%\team-agent-poc` checkout을 사용하며 최초 Init·후보 Prepare·pandas 진단을 반복하지 않습니다. 기존 저장 설정과 Python이 있어야 하며 누락·불일치는 사전 확인에서 중단합니다.
+**검토한 구현본이 main에 반영된 뒤 사용합니다.** 기본 전달은 CI 산출물을 사용하고, 2026년 9월에는 [고정 원본 시험 적용](#ees-wrapper-trial)을 사용합니다. 현재 게시·검증 상태는 [STATUS](STATUS.md), 실제 사내 결과는 [구현 기록](../evals/scenarios.md#ees-wrapper-implementation)에서 구분합니다. 이미 등록한 운영 PowerShell과 `%USERPROFILE%\team-agent-poc` checkout을 사용하며 최초 Init·후보 Prepare·pandas 진단을 반복하지 않습니다. 기존 저장 설정과 Python이 있어야 하며 누락·불일치는 사전 확인에서 중단합니다.
 
-현재 새 Apply에는 EES Work `0.11.3+ees.8`을 포함한 프로그램 ZIP과 그 ZIP의 `manifest.json`에 있는 전체 `source_commit`을 사용합니다. [전달물 준비](#release-delivery)의 프로그램 포함 산출물을 선택하며, 과거 ees.1/ees.2/ees.3/ees.4/ees.5/ees.6/ees.7 ZIP에는 이번 사이드바 선택 영역·직계 펼침·글꼴 보완이 없습니다. Apply는 새 ZIP의 해시·wheel·대상 버전/의존성·앱 경로를 다시 확인합니다. 운영 코드 최신 HEAD를 프로그램 Commit에 넣지 않으며, Agent Pack 전용 ZIP이나 후보 venv를 새 전달물로 사용하지 않습니다.
+현재 새 Apply에는 EES Work `0.11.3+ees.9`를 포함한 프로그램 ZIP과 그 ZIP의 `manifest.json`에 있는 전체 `source_commit`을 사용합니다. [전달물 준비](#release-delivery)의 프로그램 포함 산출물을 선택하며, 과거 ees.1/ees.2/ees.3/ees.4/ees.5/ees.6/ees.7 ZIP에는 이번 사이드바 선택 영역·직계 펼침·글꼴 보완이 없습니다. Apply는 새 ZIP의 해시·wheel·대상 버전/의존성·앱 경로를 다시 확인합니다. 운영 코드 최신 HEAD를 프로그램 Commit에 넣지 않으며, Agent Pack 전용 ZIP이나 후보 venv를 새 전달물로 사용하지 않습니다.
 
-`$eesBundle`에는 **파일명과 `.zip` 확장자까지 포함한 새 ZIP의 전체 경로**, `$eesProgramCommit`에는 manifest의 40자리 source_commit을 넣습니다. Downloads 같은 폴더만 지정하면 실패합니다. 경로를 채팅에 알려줄 필요는 없습니다. 아래 블록은 **Git 갱신 → 읽기 전용 사전 확인 → 정상 종료 → 프로그램 적용 → 명시적인 시작** 순서입니다. 앞 단계가 실패하면 그 자리에서 멈춥니다. 특히 CheckOnly 실패 시 Stop을 실행하지 않습니다. 기존 프로세스를 식별하지 못하거나 포트가 사용 중이면 임의 종료하지 않습니다. 전체 적용·자동 전환·복구·서버 시작을 반복하지 않고 첫 기동의 health 확인을 최대 120초로 요청하며, 시간 초과를 배포 성공으로 해석하지 않습니다. 기존 기본값이나 등록 설정은 바꾸지 않습니다.
+`$eesBundle`에는 **파일명과 `.zip` 확장자까지 포함한 새 ZIP의 전체 경로**, `$eesProgramCommit`에는 manifest의 40자리 source_commit을 넣습니다. Downloads 같은 폴더만 지정하면 실패합니다. 경로를 채팅에 알려줄 필요는 없습니다. 아래 블록은 **Git 갱신 → 읽기 전용 사전 확인 → 정상 종료 → 데이터 백업 → 프로그램 적용 → 명시적인 시작** 순서입니다. 앞 단계가 실패하면 그 자리에서 멈춥니다. 특히 CheckOnly 실패 시 Stop을 실행하지 않습니다. 기존 프로세스를 식별하지 못하거나 포트가 사용 중이면 임의 종료하지 않습니다. 전체 적용·자동 전환·복구·서버 시작을 반복하지 않고 첫 기동의 health 확인을 최대 120초로 요청하며, 시간 초과를 배포 성공으로 해석하지 않습니다. 기존 기본값이나 등록 설정은 바꾸지 않습니다.
 
 ```powershell
 & {
@@ -1237,6 +1276,7 @@ Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `resul
     $eesProgramCommit = '이 ZIP manifest.json의 40자리 source_commit'
     & $eesManager -Action Apply -Bundle $eesBundle -Commit $eesProgramCommit -CheckOnly -Summary
     & $eesManager -Action Stop -Summary
+    & $eesManager -Action Backup -Summary
     & $eesManager -Action Apply -Bundle $eesBundle -Commit $eesProgramCommit -Summary
     & $eesManager -Action Start -HealthTimeout 120 -Summary
 }
