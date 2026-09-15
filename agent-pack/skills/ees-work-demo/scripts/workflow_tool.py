@@ -1,12 +1,13 @@
 """
 title: EES Workflow
 description: 기존 대화와 업무 패널이 공유하는 공장별 업무 진행 및 절차 관리
-version: 0.2.0
+version: 0.2.1
 required_open_webui_version: 0.11.3
 ees_demo_pack: ees-demo-v1
 """
 
 import asyncio
+import inspect
 import json
 
 
@@ -57,7 +58,7 @@ def _compact(state):
     if state.get("can_manage"):
         result["draft_revision"] = state.get("draft_revision")
         result["validated_revision"] = state.get("validated_revision")
-    for key in ("validation", "message", "action", "result"):
+    for key in ("validation", "message", "action", "result", "workflow"):
         if key in state:
             result[key] = state[key]
     return result
@@ -66,19 +67,27 @@ def _compact(state):
 class Tools:
     async def ees_workflow_view(self, include_draft: bool = False,
                                 case_id: str = "", include_navigation: bool = False,
+                                process_id: str = "",
                                 __user__=None, __metadata__=None, __event_call__=None) -> dict:
         """Read the current chat's latest selected process/task/job, factory, inputs,
         tools, effective instructions and execution results. Call this BEFORE
         answering a workflow question or modifying/running its job; manual panel
         edits may have changed it. General conversation/document search needs no
-        workflow call. DB/AP results are simulations, never real connectivity.
+        workflow call. For a new work goal, discover candidates with
+        include_navigation=True, then read process_id before creating anything.
+        Discovery/details are read-only and need no sidebar selection. Ask only
+        missing scope/inputs, explain the plan, then use the existing actions.
+        DB/AP results are simulations, never real connectivity.
 
         :param include_draft: Admin only: include the editable procedure draft and its revision when the user asks to edit procedures.
-        :param case_id: Optional exact case ID from navigation for read-only execution history. Does not switch the current chat or selected job. History has no available actions; read the current view again before an action.
-        :param include_navigation: Include published factory/system/process navigation and this user's execution summaries when asked to browse work or compare current and past runs.
+        :param case_id: Optional exact case ID from navigation for read-only execution history and its frozen workflow plan. Does not switch the current chat or selected job. Do not combine with process_id. Read the current view again before an action.
+        :param include_navigation: Read-only published factory/system/process navigation and this user's accessible execution summaries. Does not create/bind work or change the sidebar; use to find a workflow for the user's goal.
+        :param process_id: Exact published process ID from navigation. Return its workflow definition, ordered children/dependencies/conditions, inputs via tool.input and node.bindings, and accessible Skill instructions without creating/selecting/running work. Read source/version: an existing case must use its frozen case_id plan instead. Missing Skill bodies and non-executable tools cannot be treated as available. Read the current view again before an action.
         """
-        if not isinstance(case_id, str) or len(case_id) > 200:
-            return _error("invalid_request", "조회할 진행 건 정보를 확인해 주세요.")
+        if (not isinstance(case_id, str) or len(case_id) > 200
+                or not isinstance(process_id, str) or len(process_id) > 200
+                or (case_id and process_id)):
+            return _error("invalid_request", "조회할 진행 건 또는 절차 정보를 확인해 주세요.")
         chat_id = _chat(__metadata__)
         if not chat_id:
             return _error("chat_required", "기존 대화창에서 업무를 선택해 주세요.")
@@ -90,13 +99,23 @@ class Tools:
             # Historical reads must not bind a pending case or move the live
             # conversation. The service checks case and linked-chat ownership.
             state = await get_state(__user__, case_id=case_id)
+        elif process_id:
+            parameters = inspect.signature(get_state).parameters
+            if "process_id" not in parameters and not any(
+                    parameter.kind == inspect.Parameter.VAR_KEYWORD for parameter in parameters.values()):
+                return _error("program_upgrade_required", "업무 절차 상세 조회를 지원하는 EES Work 프로그램 업데이트가 필요합니다.")
+            state = await get_state(__user__, chat_id=chat_id, process_id=process_id)
+        elif include_navigation:
+            # Candidate discovery is independent of a pending sidebar choice.
+            # Only explicit action/current-view calls may bind that choice.
+            state = await get_state(__user__, chat_id=chat_id)
         else:
             binding = await _ensure_chat(__event_call__, chat_id)
             state = await get_state(__user__, chat_id=chat_id)
             if state.get("ok") and not state.get("case") and not binding.get("ok"):
                 return _error("binding_unconfirmed", "선택한 업무와 대화 연결을 확인하지 못했습니다. 현재 화면에서 연결 상태를 확인해 주세요.")
         result = _compact(state)
-        if case_id and state.get("ok"):
+        if (case_id or process_id or include_navigation) and state.get("ok"):
             result["read_only"] = True
             result["available_actions"] = []
         if include_navigation and state.get("ok"):

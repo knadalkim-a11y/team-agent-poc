@@ -22,7 +22,7 @@ from .ees_workflow_definition import (
     _dump, _seed, _ancestors, _leaves, _dependencies,
     _draft_shape_errors, validate_definition,
 )
-from .ees_workflow_view import _applicable, _finished, _missing, _view
+from .ees_workflow_view import _applicable, _finished, _missing, _view, _workflow
 
 _service = None
 
@@ -119,7 +119,7 @@ class WorkflowService:
             row = db.execute("SELECT * FROM cases WHERE chat_id=? AND owner=?", (chat_id, user_id)).fetchone()
         return json.loads(row["data"]) if row else None
 
-    def _state(self, db, user, case_id="", chat_id="", assets=None):
+    def _state(self, db, user, case_id="", chat_id="", assets=None, process_id=""):
         published, draft, revision, validated = self._catalog(db)
         case = self._case(db, _value(user, "id"), case_id, chat_id)
         cases = []
@@ -152,11 +152,20 @@ class WorkflowService:
                         skill["snapshot_updated_at"] = snapshots[reference].get("updated_at")
                     else:
                         skill["message"] = "진행 건에 고정된 스킬을 현재 계정으로 사용할 수 없습니다. 권한·사용 여부를 확인해 주세요."
-        return {"ok": True, "catalog": published, "cases": cases, "case": case_view,
-                "can_manage": _value(user, "role") == "admin",
-                "draft": draft if _value(user, "role") == "admin" else None,
-                "draft_revision": revision if _value(user, "role") == "admin" else None,
-                "validated_revision": validated if _value(user, "role") == "admin" else None}
+        result = {"ok": True, "catalog": published, "cases": cases, "case": case_view,
+                  "can_manage": _value(user, "role") == "admin",
+                  "draft": draft if _value(user, "role") == "admin" else None,
+                  "draft_revision": revision if _value(user, "role") == "admin" else None,
+                  "validated_revision": validated if _value(user, "role") == "admin" else None}
+        if process_id:
+            process = published["nodes"].get(process_id)
+            if not process or process.get("type") != "p" or process.get("parent") is not None:
+                raise WorkflowError("process_not_found", "게시된 업무 절차의 프로세스를 선택해 주세요.")
+            result["workflow"] = _workflow(published, process_id, assets)
+        elif case_id and case:
+            result["workflow"] = _workflow(case["definition"], case["process_id"], assets,
+                                           case_id=case["id"], snapshots=case.get("_skill_snapshots", {}))
+        return result
 
     async def _visible_cases(self, user, state):
         """The navigation list respects the same linked-chat access as a read.
@@ -176,15 +185,17 @@ class WorkflowService:
         state["cases"] = accessible
         return state
 
-    async def get_state(self, user, chat_id="", case_id=""):
+    async def get_state(self, user, chat_id="", case_id="", process_id=""):
         try:
             current = await self._user(user)
-            if not isinstance(case_id, str) or len(case_id) > 200:
+            if (not isinstance(case_id, str) or len(case_id) > 200
+                    or not isinstance(process_id, str) or len(process_id) > 200
+                    or (case_id and process_id)):
                 raise WorkflowError("invalid_request", "진행 건 식별 정보를 확인해 주세요.")
             await self._chat(current, chat_id)
             assets = await self._assets(current)
             with self._db() as db:
-                state = self._state(db, current, case_id, chat_id, assets)
+                state = self._state(db, current, case_id, chat_id, assets, process_id)
             if state["case"]:
                 await self._chat(current, state["case"]["chat_id"])
             return await self._visible_cases(current, state)
@@ -509,8 +520,8 @@ async def _registered_assets(user):
     }
 
 
-async def get_state(user, chat_id="", case_id=""):
-    return await _production_service().get_state(user, chat_id, case_id)
+async def get_state(user, chat_id="", case_id="", process_id=""):
+    return await _production_service().get_state(user, chat_id, case_id, process_id)
 
 
 async def handle_action(user, body):

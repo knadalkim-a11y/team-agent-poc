@@ -40,7 +40,7 @@ class DemoBundleTests(unittest.TestCase):
 
     def git(self, *arguments):
         return subprocess.run(["git", "-C", str(self.root), *arguments], check=True,
-                              capture_output=True, text=True).stdout.strip()
+                              capture_output=True, text=True, encoding="utf-8").stdout.strip()
 
     def write(self, name, text):
         path = self.root / name
@@ -138,7 +138,7 @@ class DemoBundleTests(unittest.TestCase):
                     "changed_files": ["synthetic.txt"]}
         original = json.dumps(manifest, indent=2).encode()
         (branding / "manifest.json").write_bytes(original)
-        (branding / ".env").write_text("SYNTHETIC_EXCLUDED_VALUE")
+        (branding / ".env").write_text("SYNTHETIC_EXCLUDED_VALUE", encoding="utf-8")
         contents = self.contents(self.build(branding_dir=branding))
         self.assertEqual(json.loads(contents["manifest.json"])["branding"], manifest)
         self.assertEqual(contents["branding/manifest.json"], original)
@@ -151,7 +151,7 @@ class DemoBundleTests(unittest.TestCase):
         for key, value in (("schema_version", True), ("upstream_version", "0.11.4"),
                            ("version", "0.11.3"), ("source", {}), ("wheel", {})):
             with self.subTest(key=key):
-                (branding / "manifest.json").write_text(json.dumps(dict(manifest, **{key: value})))
+                (branding / "manifest.json").write_text(json.dumps(dict(manifest, **{key: value})), encoding="utf-8")
                 with self.assertRaisesRegex(BUNDLE.BundleError, "do not match"):
                     self.build("invalid-" + key, branding_dir=branding)
         (branding / "manifest.json").write_bytes(original)

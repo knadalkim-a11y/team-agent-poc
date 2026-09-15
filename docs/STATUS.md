@@ -6,12 +6,12 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: R2 업무 화면의 요청 제어·표시·관리자 편집을 세 소스로 분리하고 기존 빌더에서 단일 JS로 조립하도록 구현함. 기존 API·UI 연결·데이터 형식을 유지하며 route/event/snapshot 독립 검토의 발견 사항을 수정함. R3는 실제 이전 ees.8 프로그램 갱신 후 추가 저장·Restore·이전 서비스 재사용 검사로 보강함. 로컬 최종 결과와 원격 Windows/브라우저 미확인은 [R2/R3 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 구분함. 같은 PR #48의 ees.9/v0.2.10 준비본이며 병합·사내 적용은 미실행. [앞선 R1](../evals/scenarios.md#workflow-refactor-20260915), [R0](../evals/scenarios.md#conditional-assets-20260915).
+- 이번 작업: 사용자가 요청한 메인 채팅의 목표 → 워크플로우 탐색 → 부족한 조건 확인 → 계획 → 재개/생성 → 실행 흐름을 기존 Tool·관리 Prompt에 구현함. 게시 절차와 기존 실행의 고정된 지침을 읽기 전용으로 조회하고 현재 권한을 확인하며, 같은 서버 액션·사람 확인·모의 실행 경계를 유지함. 같은 Draft PR #48의 ees.9/v0.2.10 준비본이며 로컬 검사와 사내 GLM·실제 적용은 구분함. [구현·검증](../evals/scenarios.md#work-ui-refactor-20260915), [업무 기준](mockups/ees-work/TASK.md#chat-workflow-entry-20260915).
 - 최근 Git 반영: [PR #47](https://github.com/knadalkim-a11y/team-agent-poc/pull/47)을 `02b880b19db6ffb353daf3309e3ff1354730e815`로 병합하고 [병합 main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910676906)의 Linux·Windows·ees.8 프로그램 산출물 성공을 확인함. 사내 가이드 원본 `9a90e19fb7f5f7d967d47c1f811d648b4dc1ee52`의 [main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910881151)도 전체 성공했으며 이번 사용자 ApplyDemo 보고의 원본과 같음. 이후 상태 기록은 문서만 갱신하며 검사 결과는 [최신 main 실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/workflows/ees-delivery.yml?query=branch%3Amain)에서 확인함. 최초 실패·수정·원격 검증과 실제 사내 결과는 [같은 기록](../evals/scenarios.md#sidebar-refinement-20260914)에서 구분함.
 - 최근 UI 확인: 09-15 사용자 보고로 공장·시스템 선택 박스, 프로세스 직계 태스크만 펼침, 글꼴 통일·P/T/J 설명 행 제거, 기존 대화·작성 중 초안 유지의 네 항목을 정상 확인함. 이번 UI 개선의 사내 수락 범위를 완료로 처리하며 같은 확인을 반복하지 않음.
 - 최근 운영 확인: 09-15 새 UI 네 항목 정상 보고를 확인함. 프로그램 버전 문자열·정확한 설치 원본 SHA·개별 Upgrade 출력은 별도 미보고이며, 마지막 직접 버전 응답은 09-14의 `0.11.3+ees.7`임. 이를 현재 프로그램 버전으로 고정하지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 별도 미확인임. [새 UI 확인](../evals/scenarios.md#sidebar-refinement-20260914), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 09-15 `9a90e19fb7f5` ApplyDemo로 v0.2.9 관리 자산 1건 갱신 성공 후 새 UI 네 항목의 사용자 확인까지 마침. 이전 `76e566622e74`의 v0.2.8·8건 적용은 [정렬 충돌 수정 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 대표 질문·실제 모델 호출은 이번 UI 확인과 구분함.
-- 다음 작업 하나: 로컬 검증을 마친 R0~R3 리팩토링 준비본의 최소 시험 적용 경로를 마무리함. 기존 프로그램 ZIP의 CheckOnly/Apply/Restore를 재사용하되 현재 ApplyDemo의 CI 의존을 공개된 고정 원본 적용 경로로 처리하는 준비가 남아 있음. 해당 준비·원본 확인 없이 기존 Upgrade/ApplyDemo를 실행하거나 배포 완료로 처리하지 않음. 새 [메인 채팅의 업무 탐색·계획 요구](mockups/ees-work/TASK.md#chat-workflow-entry-20260915)는 리팩토링 배포에 추가로 묶지 않고 후속 기능으로 구체화함. [확인한 경로와 한계](../evals/scenarios.md#work-ui-refactor-20260915).
+- 다음 작업 하나: 로컬 검증한 준비본의 최소 시험 적용 경로를 마무리함. 기존 프로그램 ZIP의 CheckOnly/Apply/Restore를 재사용하되 ApplyDemo의 CI 의존을 기존 보호를 유지한 공개 고정 원본 경로로 처리하는 준비가 남아 있음. 이번 채팅 기능도 프로그램·관리 자산 양쪽 변경이므로 실제 게시 원본에서 새 배포물을 준비함. 적용 후에는 사이드바 미선택 상태에서 목표를 말해 탐색·계획·진행하는 짧은 사내 확인으로 연결하며, 앞선 UI 수락을 반복하거나 미실행 Windows/모델 검사를 통과로 처리하지 않음. [경로·남은 범위](../evals/scenarios.md#work-ui-refactor-20260915).
 - 최신 사내 확인: 09-15 `apply_demo result=ok changed=1 commit=9a90e19fb7f5 stage=complete code=- next=new_chat`, 이어 `ui=ok tree=ok font=ok chat=ok` 보고. 지정 자산 적용과 요청한 새 화면·트리·글꼴·대화/초안 확인을 완료함. 실제 모델의 업무 호출·공유 권한·유휴 안정성까지 통과한 것으로 확대하지 않음. [이번 적용·화면 확인](../evals/scenarios.md#sidebar-refinement-20260914).
 
 ## 2026년 9월 개발·검사 방침
@@ -43,7 +43,7 @@
 
 - **공통 자산 업데이트 중 동시 편집:** 기존 GET→POST 사이 지원 description 유실의 합성 결함을 R0 조건부 저장·native 보호 경로로 수정하고 실제 wheel 회귀에서 확인함. 현재 PR 구현이며 사내 반영은 미실행이므로 기존 설치의 보호가 완료됐다고 표현하지 않음. 보호 미적용 원본 서버·외부 DB writer·일반 UI끼리의 오래된 폼 충돌은 보장 밖. [원래 재현/오탐 정정](../evals/scenarios.md#ai-runtime-preservation-20260915), [수정·검증·적용 경계](../evals/scenarios.md#conditional-assets-20260915).
 - **사외 Windows CI 지연:** 이전에 통과한 동일 코드에서 PowerShell 20초·Node 10초 제한시간 초과가 각각 발생했으며 원인은 미확정임. 두 시험의 단계 표식·런타임 버전·timeout의 단계 표식를 보존하도록 보완했으므로 자연 재발 시 그 증거로 진입 관측 여부와 시험 내부 단계를 구분함. 재검사 성공을 근본원인 해결이나 사내 서버 진단 필요로 바꾸지 않음. [실패·관측·최종 CI](../evals/scenarios.md#sidebar-refinement-20260914).
-- **메인 채팅의 업무 활용:** 기존 EES 모델에 Workflow Tool을 연결하고 게시 절차·본인 진행 건 탐색, 생성/재개, 입력/실행을 UI와 같은 서버 경로로 처리하는 기반은 있음. 사이드바 사전 선택을 필수로 두지 않음. 목표에서 후보를 고르고 부족한 조건을 확인해 계획·실행까지 이어가는 지침과 사내 GLM 확인은 후속이며, DB/AP 모의 점검·현재 한 진행 건/한 대화의 한계를 유지함. [개발 기준](mockups/ees-work/TASK.md#chat-workflow-entry-20260915).
+- **메인 채팅의 업무 활용:** 읽기 전용 후보/절차 조회, 접근 가능한 스킬 지침, 기존 진행의 고정본 계획과 목표 기반 관리 Prompt를 구현하고 실제 SQLite 서비스 회귀를 확인함. 사내 GLM의 자연어 후보 선정·되묻기·계획·실행·화면 반영은 적용 후 미확인임. 현재 한 진행 건/한 대화, 외부 도구 미연결, DB/AP 모의 점검 경계를 유지함. [개발 기준](mockups/ees-work/TASK.md#chat-workflow-entry-20260915).
 - **팀 공동 작업:** 사용자가 공장 1개·시스템 1개·프로세스 1개, 참여자 2~3명의 첫 단위를 선택함. 현재 진행 건과 대화 연결은 사용자 소유이며 개인 선택 상태도 진행 건에 있어 공동화 때 분리가 필요함. 참여/역할·이력·충돌 처리는 아직 구체화·구현 전임. [새 단위·현황 표시 제안](mockups/ees-work/TASK.md#shared-pilot-first), [전체 목표](mockups/ees-work/TASK.md#ees-work-shared-target).
 - **공장별 업무 UX:** 09-15 사용자 보고로 이번 사이드바 선택 영역·직계 펼침·글꼴·대화/초안 유지의 사내 확인을 완료함. Workspace 탭 반복 재삽입·첫 메시지 경합의 사외 재현과 자동 검사는 [기존 근거](../evals/scenarios.md#ees-work-factory-ux-20260914)에 보존함. 이번 네 항목에 없던 Workspace 반복 전환·실제 모델 호출 등으로 확인 범위를 확대하지 않고 다음 관련 사용·변경 시점에만 판단함. [새 UI 수락](../evals/scenarios.md#sidebar-refinement-20260914).
 - **이전 폴더 변경 실패:** `dba0677ffe3e`의 Apply 407행 rename 접근 거부 뒤 Restore·Start·웹 접속 복구를 확인함. 이후 ees.7 실행은 확인했으나 어떤 재시도·수동 복구 경로로 적용됐는지와 제한 대기의 사내 효과는 미보고. 파일 잠금·ACL·특정 보안 제품의 원인은 미확정이며 [당시 복구](../evals/scenarios.md#ees7-apply-recovery-20260914)와 [실패 대응 보완](../evals/scenarios.md#windows-program-rename-20260914)을 구분함.
@@ -80,6 +80,6 @@
 
 ## 최근 점검
 
-2026-09-15: 사용자가 로컬 검증 후 제한된 시험 적용 방침에 동의하고 메인 채팅 AI의 워크플로우 탐색·계획·실행을 요구함. 기존 Tool·관리 모델 연결·UI/서버 액션·검사 코드를 대조해 탐색/생성/재개/실행 기반은 확인했으나 자연어 목표에서 시작하는 실제 사내 모델 동작은 미확인임을 기록함. 원격 검사 생략을 전면 배포 금지로 확대했던 상태를 정정하고 프로그램/자산 시험 적용의 남은 연결을 명시함. 이번 변경은 문서이며 런타임·Prompt·CI·사내 서버/자산은 변경하지 않음. [근거와 후속 범위](../evals/scenarios.md#work-ui-refactor-20260915).
+2026-09-15: 메인 채팅의 업무 탐색·계획 구현을 독립 검토하고 기존 업무/Tool 48개·지정 자산 보존 61개·bundle 8개 로컬 검사를 통과함. 읽기 무변경·권한/고정 스킬·사람 확인/입력/선행/충돌·구서버 안내를 확인함. 엄격한 인코딩 검사에서 드러난 기존 시험 fixture 누락은 명시적 UTF-8로 보완했으며 최초 실패를 [기존 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 보존함. 새 소스의 프로그램 wheel 검증은 배포 성공과 구분하며 9월 원격 검사는 생략함. 실제 사내 GLM·Windows·Native 브라우저와 새 버전 적용은 미확인임.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.

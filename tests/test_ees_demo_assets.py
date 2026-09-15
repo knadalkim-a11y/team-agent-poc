@@ -1164,7 +1164,7 @@ class ApplyAssetsTests(unittest.TestCase):
         self.assertFalse(error.pending)
         self.assertEqual(0, error.changed)
         self.assertEqual(inserted, self.api.rows[("tool", "ees_demo_data")])
-        self.assertNotIn("tool:ees_demo_data", json.loads((self.state / assets.STATE_FILE).read_text())["assets"])
+        self.assertNotIn("tool:ees_demo_data", json.loads((self.state / assets.STATE_FILE).read_text(encoding="utf-8"))["assets"])
 
     def test_parent_tool_change_after_own_success_cannot_refresh_valve_token(self):
         def edit(kind, identifier):
@@ -1181,7 +1181,7 @@ class ApplyAssetsTests(unittest.TestCase):
     def test_common_valves_edit_conflicts_with_parent_tool_update(self):
         self.apply()
         source = self.root / "agent-pack/data.py"
-        source.write_text(source.read_text() + "\n# new version\n")
+        source.write_text(source.read_text(encoding="utf-8") + "\n# new version\n", encoding="utf-8")
         original = self.api.rows[("tool", "ees_demo_data")]["content"]
         def edit(kind, identifier):
             if (kind, identifier) == ("tool", "ees_demo_data"):
@@ -1193,7 +1193,7 @@ class ApplyAssetsTests(unittest.TestCase):
 
     def test_own_tool_snapshot_does_not_refresh_other_targets(self):
         self.apply()
-        (self.root / "agent-pack/data.py").write_text((self.root / "agent-pack/data.py").read_text() + "\n# update\n")
+        (self.root / "agent-pack/data.py").write_text((self.root / "agent-pack/data.py").read_text(encoding="utf-8") + "\n# update\n", encoding="utf-8")
         (self.root / "agent-pack/apc.md").write_text("새 APC 지침", encoding="utf-8")
         def edit(kind, identifier):
             if (kind, identifier) == ("tool", "ees_demo_data"):

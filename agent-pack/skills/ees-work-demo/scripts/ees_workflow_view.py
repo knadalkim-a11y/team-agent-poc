@@ -1,8 +1,60 @@
-"""Pure display state derived from a saved workflow case."""
+"""Pure procedure planning and saved workflow case views."""
 
 from copy import deepcopy
 
 from .ees_workflow_definition import SYSTEMS, _ancestors, _dependencies, _leaves
+
+
+def _workflow(definition, process_id, assets, *, case_id="", snapshots=None):
+    """Project one procedure for planning without creating/selecting an execution.
+
+    Published procedures use currently accessible Skill content. An execution
+    instead uses its frozen content, and only while current access remains.
+    Never include the registry or raw snapshot map in the returned definition.
+    """
+    nodes = definition["nodes"]
+    included = {node_id for node_id in nodes
+                if _ancestors(nodes, node_id)[0]["id"] == process_id}
+    tool_ids = {tool for node_id in included for tool in nodes[node_id]["tools"]}
+    skill_ids = {"common", *(skill for node_id in included for skill in nodes[node_id]["skills"])}
+    projected = {
+        "systems": deepcopy(definition["systems"]),
+        "sites": deepcopy(definition["sites"]),
+        "roots": {category: [process_id] if process_id in roots else []
+                  for category, roots in definition["roots"].items()},
+        "nodes": {key: deepcopy(value) for key, value in nodes.items() if key in included},
+        "tools": {key: deepcopy(value) for key, value in definition["tools"].items() if key in tool_ids},
+        "skills": {key: deepcopy(value) for key, value in definition["skills"].items() if key in skill_ids},
+    }
+    available_tools = {tool["id"] for tool in assets.get("tools", [])}
+    for tool in projected["tools"].values():
+        external = tool.get("source") == "open_webui"
+        tool["available"] = tool.get("reference") in available_tools if external else tool.get("enabled", True)
+        tool["simulation"] = not external and tool.get("adapter") == "mock"
+        tool["executable"] = bool(tool["simulation"] and tool.get("enabled", True))
+        if not tool["executable"]:
+            tool["message"] = ("사용 중지된 점검은 수행할 수 없습니다." if not tool.get("enabled", True)
+                               else "현재 업무 실행 연결이 없어 수행할 수 없습니다.")
+    bodies, versions = assets.get("skill_bodies", {}), assets.get("skill_versions", {})
+    for skill in projected["skills"].values():
+        if skill.get("source") != "open_webui":
+            continue
+        reference = skill.get("reference")
+        available = reference in bodies and (not case_id or reference in (snapshots or {}))
+        skill["available"] = available
+        skill["body"] = (snapshots[reference]["body"] if case_id else bodies[reference]) if available else ""
+        if available:
+            if case_id:
+                skill["snapshot_updated_at"] = snapshots[reference].get("updated_at")
+            else:
+                skill["updated_at"] = versions.get(reference)
+        else:
+            skill["message"] = "이 스킬을 현재 계정으로 사용할 수 없습니다. 권한·사용 여부를 확인해 주세요."
+    result = {"source": "case" if case_id else "published", "process_id": process_id,
+              "version": definition["version"], "definition": projected}
+    if case_id:
+        result["case_id"] = case_id
+    return result
 
 
 def _applicable(case, node_id):
