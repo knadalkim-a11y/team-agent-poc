@@ -6,12 +6,12 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: ees.8 사이드바 개선의 사내 UI 확인을 마친 뒤, 사용자가 공장 1개·시스템 1개·프로세스 1개를 2~3명이 함께 처리하는 첫 단위를 선택함. 빠른 UI/UX 개선과 실제 팀 사용을 우선하고 현황판의 개발 시점을 검토함. [첫 단위·우선순위 제안](mockups/ees-work/TASK.md#shared-pilot-first), [근거](../evals/scenarios.md#shared-pilot-priority-20260915).
+- 이번 작업: 사용자가 첫 공동 작업 영역으로 셋업을 선택함. 기존 신규 공장 횡전개를 공장 1개·시스템 1개·프로세스 1개·참여자 2~3명의 범위로 우선 진행하며, 빠른 UI/UX 개선과 실제 팀 사용 목표를 유지함. [셋업 우선 범위](mockups/ees-work/TASK.md#setup-first), [공동 작업·현황판 검토 근거](../evals/scenarios.md#shared-pilot-priority-20260915).
 - 최근 Git 반영: [PR #47](https://github.com/knadalkim-a11y/team-agent-poc/pull/47)을 `02b880b19db6ffb353daf3309e3ff1354730e815`로 병합하고 [병합 main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910676906)의 Linux·Windows·ees.8 프로그램 산출물 성공을 확인함. 사내 가이드 원본 `9a90e19fb7f5f7d967d47c1f811d648b4dc1ee52`의 [main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910881151)도 전체 성공했으며 이번 사용자 ApplyDemo 보고의 원본과 같음. 이후 상태 기록은 문서만 갱신하며 검사 결과는 [최신 main 실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/workflows/ees-delivery.yml?query=branch%3Amain)에서 확인함. 최초 실패·수정·원격 검증과 실제 사내 결과는 [같은 기록](../evals/scenarios.md#sidebar-refinement-20260914)에서 구분함.
 - 최근 UI 확인: 09-15 사용자 보고로 공장·시스템 선택 박스, 프로세스 직계 태스크만 펼침, 글꼴 통일·P/T/J 설명 행 제거, 기존 대화·작성 중 초안 유지의 네 항목을 정상 확인함. 이번 UI 개선의 사내 수락 범위를 완료로 처리하며 같은 확인을 반복하지 않음.
 - 최근 운영 확인: 09-15 새 UI 네 항목 정상 보고를 확인함. 프로그램 버전 문자열·정확한 설치 원본 SHA·개별 Upgrade 출력은 별도 미보고이며, 마지막 직접 버전 응답은 09-14의 `0.11.3+ees.7`임. 이를 현재 프로그램 버전으로 고정하지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 별도 미확인임. [새 UI 확인](../evals/scenarios.md#sidebar-refinement-20260914), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 09-15 `9a90e19fb7f5` ApplyDemo로 v0.2.9 관리 자산 1건 갱신 성공 후 새 UI 네 항목의 사용자 확인까지 마침. 이전 `76e566622e74`의 v0.2.8·8건 적용은 [정렬 충돌 수정 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 대표 질문·실제 모델 호출은 이번 UI 확인과 구분함.
-- 다음 작업 하나: [첫 공동 작업 단위](mockups/ees-work/TASK.md#shared-pilot-first)의 참여·역할·개인 대화/선택 분리·동시 변경·이어가기 화면 흐름을 구체화해 구현으로 연결함. 기존 진행 요약을 재사용하는 간단한 현황 표시를 우선 제안하며 일정표·종합 현황판은 실사용 이후의 별도 범위로 둠. 현재 공동 작업 구현·팀 파일럿은 미완료임.
+- 다음 작업 하나: [셋업 → 신규 공장 횡전개](mockups/ees-work/TASK.md#setup-first)의 참여·역할·공유 기록·개인 대화/선택 분리·동시 변경을 구체화하고, A가 준비한 같은 진행 건을 B가 이어가는 화면·실행 흐름을 구현함. 기본 진척·다음 할 일 표시는 기존 UI를 재사용하는 방향으로 진행하며 공동 작업 기능·실제 파일럿은 아직 미완료임.
 - 최신 사내 확인: 09-15 `apply_demo result=ok changed=1 commit=9a90e19fb7f5 stage=complete code=- next=new_chat`, 이어 `ui=ok tree=ok font=ok chat=ok` 보고. 지정 자산 적용과 요청한 새 화면·트리·글꼴·대화/초안 확인을 완료함. 실제 모델의 업무 호출·공유 권한·유휴 안정성까지 통과한 것으로 확대하지 않음. [이번 적용·화면 확인](../evals/scenarios.md#sidebar-refinement-20260914).
 
 ## 마지막으로 확인된 적용 상태
@@ -68,6 +68,6 @@
 
 ## 최근 점검
 
-2026-09-15: 사용자에게 첫 공동 작업 단위의 동의를 받고 빠른 팀 사용 우선·현황판 시점 질문을 기록함. 실제 업무 서버·launcher 읽기 대조로 완료 잡 수의 진척률과 기존 진행/이력 UI를 재사용할 수 있으나 일정·담당 데이터는 미구현임을 확인함. `updated_at`이 탐색에도 바뀌는 점과 blocked의 여러 원인을 현황 표시 설계에 연결함. [합의·제안·읽기 검수 근거](../evals/scenarios.md#shared-pilot-priority-20260915). 실행 코드·권한·저장 구조·사내 환경은 이번 논의에서 변경하지 않음. 앞선 UI 수락·실패·수정은 기존 기록에 보존함.
+2026-09-15: 사용자 요청에 따라 첫 공동 작업 영역을 셋업·신규 공장 횡전개로 좁히고 기존 네 단계·담당자 이어가기·기본 진행 현황을 작업 원본에 연결함. 실제 파일럿 공장·시스템·참여 계정은 미지정이며 예시 선택을 실제 선정으로 간주하지 않음. 실제 사람 확인과 합성 DB/AP 점검을 구분하고, 확정한 우선순위와 아직 구체화·구현할 공유 정책을 분리함. [범위·근거](../evals/scenarios.md#shared-pilot-priority-20260915). 이번 갱신은 문서에 한정하며 기존 UI 수락·실패·수정 기록을 보존함.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
