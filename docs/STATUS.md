@@ -1,18 +1,18 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-14
+갱신일: 2026-09-15
 
 현재 작업·다음 작업·미해결·실제 적용 원본을 관리합니다. 이슈·검증 근거는 [평가 기록 찾아보기](../evals/scenarios.md#evidence-index), 환경은 [versions](../versions.md), 완료된 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 승인한 사이드바 목업을 반영한 ees.8의 구현·실제 Native 화면 검증·main 병합을 마치고 기존 환경의 사내 적용 순서를 정리함. P/T/J 설명 행 제거, 직계 하위만 펼침, 공장·시스템 통합 선택 영역, 번들 글꼴을 반영함. [승인 기준](mockups/ees-work/TASK.md#sidebar-refinement), [검증·미확인](../evals/scenarios.md#sidebar-refinement-20260914).
-- 최근 Git 반영: 사용자의 마무리·배포 가이드 요청에 따라 [PR #47](https://github.com/knadalkim-a11y/team-agent-poc/pull/47)을 main `02b880b19db6ffb353daf3309e3ff1354730e815`로 병합함. 최종 PR head `cc2da5d58d20af1c38ed89a875dec046bce5d8c4`의 [Linux·Windows CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34909367484)는 성공했으며 병합 tree 일치를 확인함. 프로그램을 만드는 [병합 main CI·산출물](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910676906)과 후속 문서 갱신을 포함한 [최신 main 검사](https://github.com/knadalkim-a11y/team-agent-poc/actions/workflows/ees-delivery.yml?query=branch%3Amain)는 이 링크에서 확인함. 최초 실패·확인 원인·수정·재검사 범위는 [같은 검증 기록](../evals/scenarios.md#sidebar-refinement-20260914)에 보존함. 실제 사내 적용은 별도 미확인임.
+- 이번 작업: 승인한 사이드바 ees.8의 구현·검증·main 병합·프로그램 배포 준비를 마쳤고, 09-15 사용자 보고로 `9a90e19fb7f5`의 v0.2.9 ApplyDemo 1건 갱신 성공을 확인함. 새 화면 확인은 별도로 남아 있음. [승인 기준](mockups/ees-work/TASK.md#sidebar-refinement), [검증·사내 결과](../evals/scenarios.md#sidebar-refinement-20260914).
+- 최근 Git 반영: [PR #47](https://github.com/knadalkim-a11y/team-agent-poc/pull/47)을 `02b880b19db6ffb353daf3309e3ff1354730e815`로 병합하고 [병합 main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910676906)의 Linux·Windows·ees.8 프로그램 산출물 성공을 확인함. 사내 가이드 원본 `9a90e19fb7f5f7d967d47c1f811d648b4dc1ee52`의 [main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910881151)도 전체 성공했으며 이번 사용자 ApplyDemo 보고의 원본과 같음. 이후 상태 기록은 문서만 갱신하며 검사 결과는 [최신 main 실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/workflows/ees-delivery.yml?query=branch%3Amain)에서 확인함. 최초 실패·수정·원격 검증과 실제 사내 결과는 [같은 기록](../evals/scenarios.md#sidebar-refinement-20260914)에서 구분함.
 - 최근 UI 확인: 사용자가 P/T/J 설명 행·하위 전체 펼침·새 영역 글꼴 차이·공장/시스템 선택 디자인을 지적하고 개선 목업을 승인함. 실제 새 프로그램 UI의 사내 확인은 아직 미실행임.
-- 최근 운영 확인: 09-14 읽기 진단의 `/api/version` 응답으로 **현재 실행 프로그램 `0.11.3+ees.7`**을 확인함. 프로그램의 정확한 원본 커밋·새 UI 표시·유휴 안정성은 미확인임. 그 전 `dba0677ffe3e` Upgrade의 promote 접근 거부와 `83d56a186382` Restore·Start·기존 주소 접속 성공은 [당시 복구 기록](../evals/scenarios.md#ees7-apply-recovery-20260914)으로 보존함. [최신 진단](../evals/scenarios.md#specialists-editor-format-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
-- 최근 제품 변경: 시작 질문 필드 불일치 수정은 v0.2.5부터 반영됐고, 이번 `76e566622e74` ApplyDemo로 v0.2.8 관리 자산의 API 적용 성공을 확인함. 새 질문의 실제 화면·모델 동작은 미확인임. [기존 필드 오류](../evals/scenarios.md#starter-ui-field-fix)와 [이번 적용 결과](../evals/scenarios.md#specialists-editor-format-20260914)를 구분함.
-- 다음 작업 하나: 성공한 main CI·프로그램 산출물을 기준으로 기존 사내 환경에서 [Update → Upgrade → ApplyDemo와 사이드바 최소 확인](03-openwebui-native-agent.md#sidebar-refinement)을 한 번 수행하고 짧은 결과를 반영함. 공동 작업 설계 목표는 유지하되 이번 UI 변경에서 공유 권한·저장 구조를 변경하지 않음.
-- 최신 사내 확인: 자산 적용은 `changed=8 stage=complete`로 성공함. 이전 `9ecc9eadc5ec`의 `managed_field_conflict changed=0`과 두 차례 읽기 진단은 [기존 사건](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 정렬 충돌 해결을 위해 같은 적용·복구를 반복하지 않음. 새 UI ees.8의 프로그램 갱신은 별도 변경임. 새 화면·실제 모델 호출·유휴 안정성은 아직 미확인이고 후속 정상 사용에서 확인된 범위만 반영함.
+- 최근 운영 확인: 09-14 읽기 진단의 `/api/version` 응답으로 **당시 실행 프로그램 `0.11.3+ees.7`**을 확인함. 프로그램의 정확한 원본 커밋·새 UI 표시·유휴 안정성은 미확인임. 그 전 `dba0677ffe3e` Upgrade의 promote 접근 거부와 `83d56a186382` Restore·Start·기존 주소 접속 성공은 [당시 복구 기록](../evals/scenarios.md#ees7-apply-recovery-20260914)으로 보존함. [최신 진단](../evals/scenarios.md#specialists-editor-format-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
+- 최근 제품 변경: 09-15 `9a90e19fb7f5` ApplyDemo로 v0.2.9 관리 자산 적용과 1건 갱신 성공을 확인함. 이전 `76e566622e74`의 v0.2.8·8건 적용은 [정렬 충돌 수정 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 새 질문·새 UI·실제 모델 호출은 이번 자산 성공만으로 확인하지 않음.
+- 다음 작업 하나: 브라우저 새로고침 뒤 [선택 영역·직계 펼침·글꼴·대화/초안의 최소 확인](03-openwebui-native-agent.md#sidebar-refinement)을 하고 짧은 결과를 반영함. 이미 성공한 ApplyDemo를 반복하지 않으며 이번 UI 변경에서 공유 권한·저장 구조를 변경하지 않음.
+- 최신 사내 확인: 09-15 사용자 `apply_demo result=ok changed=1 commit=9a90e19fb7f5 stage=complete code=- next=new_chat` 보고. v0.2.9 자산 적용·쓰기 후 확인 성공이며 프로그램 Upgrade의 출력·현재 실행 버전/원본·새 UI·실제 모델 호출·유휴 안정성은 별도 미확인임. 앞서 안내한 블록의 중단 조건만으로 개별 Upgrade 출력을 추정하지 않음. [이번 적용 근거](../evals/scenarios.md#sidebar-refinement-20260914).
 
 ## 마지막으로 확인된 적용 상태
 
@@ -22,9 +22,9 @@
 |---|---|---|
 | EES Work 업무 UI | ees.7 / v0.2.8 공장별 인라인 트리·이력·기존 UI 글꼴·탭 안정화·명칭 변경 구현 및 로컬 검증 완료 | 사용자가 이전 업무 절차의 존재와 글꼴·깜빡임을 보고함. ees.7 실행과 `76e566622e74` 자산 적용은 확인했으나 프로그램의 정확한 SHA·새 화면·실제 모델 호출은 미확인. [현재 검증](../evals/scenarios.md#ees-work-factory-ux-20260914), [이전 통합](../evals/scenarios.md#ees-work-native-integration-20260914) |
 | EES 프로그램 | 09-14 읽기 진단의 `/api/version` 응답 `0.11.3+ees.7` | 실행 버전 확인. 정확한 프로그램 원본 커밋·새 화면·유휴 안정성은 미확인. [최신 증거](../evals/scenarios.md#specialists-editor-format-20260914). 이전 `83d56a186382` 복구·접속 성공은 [당시 기록](../evals/scenarios.md#ees7-apply-recovery-20260914)에 보존 |
-| 운영 래퍼 | 09-14 ApplyDemo 성공의 원본 `76e566622e74`, `result=ok changed=8 stage=complete` | 자산 실행기 원본 확인이며 실행 프로그램 원본 SHA와 구분함. [이번 적용과 이전 실패](../evals/scenarios.md#specialists-editor-format-20260914) |
-| 분석·업무 패널 자산 | 09-14 `76e566622e74` / Agent Pack v0.2.8 ApplyDemo 성공, 변경 8건 | 관리 자산 API 갱신과 쓰기 후 확인을 마친 사용자 보고. 실제 새 UI·개별 분석 수치·모든 사용자 설정 직접 대조까지 확인한 것은 아님. [실패→수정→사내 적용](../evals/scenarios.md#specialists-editor-format-20260914) |
-| 대표 시작 질문 | 09-14 `76e566622e74`의 v0.2.8 관리 목록을 포함한 ApplyDemo 성공 | 새 질문 화면은 미확인. 이전 `492eb5bc4145` 접속 실패는 [당시 결과](../evals/scenarios.md#connector-demo-starters)로 보존. [최신 API 적용](../evals/scenarios.md#specialists-editor-format-20260914) |
+| 운영 래퍼 | 09-15 ApplyDemo 실행 원본 `9a90e19fb7f5`, `result=ok changed=1 stage=complete` | 실행 프로그램 원본 SHA와 구분함. [이번 적용 보고](../evals/scenarios.md#sidebar-refinement-20260914) |
+| 분석·업무 패널 자산 | 09-15 `9a90e19fb7f5` / Agent Pack v0.2.9 ApplyDemo 성공, 변경 1건 | 관리 목록의 적용·쓰기 후 확인을 마친 사용자 보고. 변경한 개별 대상은 요약에 없으며 새 UI·실제 분석 결과까지 확인한 것은 아님. [이번 보고](../evals/scenarios.md#sidebar-refinement-20260914), [이전 v0.2.8 성공과 실패](../evals/scenarios.md#specialists-editor-format-20260914) |
+| 대표 시작 질문 | 09-15 `9a90e19fb7f5`의 v0.2.9 관리 목록을 포함한 ApplyDemo 성공 | 새 질문의 실제 화면은 미확인. 변경 1건을 시작 질문 갱신으로 단정하지 않음. [이번 적용](../evals/scenarios.md#sidebar-refinement-20260914), [이전 접속 실패](../evals/scenarios.md#connector-demo-starters) |
 | WO 목업 | v0.1.6 안내 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc` 뒤 크기 조절 정상 보고; Git은 v0.1.8 통합 패널 원본 | 실제 EMS 미연결. 이후 패널 적용 보고와 개별 등록 바이트 검증을 구분. [목업 이력](../evals/scenarios.md#wo-mockup) |
 | 기본 Assistant·기존 조회 | 이름·로고·기존 대화·평소 Confluence/Jira/GitHub 조회 정상, 초기 Rich UI 제거·변경 Prompt 반영 완료 보고 | Tool별 최신 등록 코드·SHA·새 일반 답변/원문 직접 대조 미실행. [반영 보고](../evals/scenarios.md#plain-output-applied-report), [이전 자산별 SHA](../evals/scenarios.md#status-history-20260911) |
 | 정책·Skill | 합성 정책·지침 저장 보고, P02 PASS·P03 일부 확인. Git/UI 등록 Skill 3개, 기존 2개의 사용 확인 | 실제 사내 정책·나머지 P 시험·confluence-read 실제 로딩 미확인. [기준](../evals/scenarios.md#instruction-revision) |
@@ -68,6 +68,6 @@
 
 ## 최근 점검
 
-2026-09-14: 최종 PR의 Linux·Windows CI 성공을 확인하고 사용자 요청에 따라 PR #47을 병합했으며 tree 일치를 확인함. 기존 로컬 220 PASS/10 SKIP·실제 Native 13/13·채팅 테마 2/2와 최초 실패·수정·관측 보완은 [같은 기록](../evals/scenarios.md#sidebar-refinement-20260914)에 보존함. 기존 PowerShell 래퍼와 적용 가이드를 독립 대조해 실패 시 다음 단계 중단을 확인하고, 과거 ees.7 자산 전용 안내를 이번 ees.8 프로그램 갱신과 구분함. 사내에는 Update → Upgrade → ApplyDemo와 선택 영역·직계 펼침·글꼴·대화/초안의 최소 확인을 안내함. 프로그램 산출물은 병합 CI, 최신 문서 원본은 해당 main CI를 기준으로 확인하며 실제 사내 적용·실모델·공유 업무 성공은 별도 미확인임.
+2026-09-15: 사용자 ApplyDemo 성공 요약을 원본 `9a90e19fb7f5`의 v0.2.9와 대조해 자산 1건 갱신·완료로 기록함. 프로그램 Upgrade·실행 버전·새 UI 확인은 해당 출력이 없어 미확인으로 유지하고 이미 성공한 적용을 반복하지 않음. 병합본과 가이드 원본 main의 Linux·Windows 검사·프로그램 준비 성공, 과거 실패와 수정은 [기존 평가 기록](../evals/scenarios.md#sidebar-refinement-20260914)에 연결함. 이번 변경은 상태·평가·관련 안내 문서에 한정함.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
