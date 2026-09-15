@@ -11,7 +11,7 @@
 - 최근 UI 확인: 09-15 사용자 보고로 공장·시스템 선택 박스, 프로세스 직계 태스크만 펼침, 글꼴 통일·P/T/J 설명 행 제거, 기존 대화·작성 중 초안 유지의 네 항목을 정상 확인함. 이번 UI 개선의 사내 수락 범위를 완료로 처리하며 같은 확인을 반복하지 않음.
 - 최근 운영 확인: 09-15 새 UI 네 항목 정상 보고를 확인함. 프로그램 버전 문자열·정확한 설치 원본 SHA·개별 Upgrade 출력은 별도 미보고이며, 마지막 직접 버전 응답은 09-14의 `0.11.3+ees.7`임. 이를 현재 프로그램 버전으로 고정하지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 별도 미확인임. [새 UI 확인](../evals/scenarios.md#sidebar-refinement-20260914), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 09-15 `9a90e19fb7f5` ApplyDemo로 v0.2.9 관리 자산 1건 갱신 성공 후 새 UI 네 항목의 사용자 확인까지 마침. 이전 `76e566622e74`의 v0.2.8·8건 적용은 [정렬 충돌 수정 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 대표 질문·실제 모델 호출은 이번 UI 확인과 구분함.
-- 다음 작업 하나: [최종 구현 CI 실행 화면](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34938361364)의 오류 한 줄로 실행기 미배정 원인을 구분한 뒤 R1~R3의 Windows·Native 브라우저 검증을 마침. 구현 head `2573de9541da6ef3c79dddceae2a59778b3bac9e`도 두 OS 모두 runner_id=0·단계 0건으로 종료했고 현재 연결 도구는 annotation 본문을 제공하지 못함. 같은 수동 재실행을 반복하지 않음. 로컬 통과를 원격/사내 수락으로 대체하지 않음. ees.9 사내 적용은 main 병합·CI·프로그램 산출물 성공 뒤 [조건부 자산 가이드](03-openwebui-native-agent.md#conditional-assets)로 한 번 수행함. 공동 진행 건·실제 셋업 절차·파일럿은 후속 구현이며 현재 상태표를 병합·배포 권한으로 해석하지 않음.
+- 다음 작업 하나: 계정 소유자가 GitHub Billing의 결제 실패 내역·Actions 지출 한도를 확인하고 해당 제한을 해소한 뒤 R1~R3의 Windows·Native 브라우저 검증을 재개함. 사용자가 제공한 [최종 구현 CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34938361364)의 두 OS Annotation으로 결제 실패 또는 지출 한도에 따른 작업 시작 차단을 확인함. 어느 세부 원인인지와 계정 조치·해소 여부는 미확인이고 조건 변경 전 같은 수동 재실행을 반복하지 않음. 로컬 통과를 원격/사내 수락으로 대체하지 않음. ees.9 사내 적용은 main 병합·CI·프로그램 산출물 성공 뒤 [조건부 자산 가이드](03-openwebui-native-agent.md#conditional-assets)로 한 번 수행함. 공동 진행 건·실제 셋업 절차·파일럿은 후속 구현이며 현재 상태표를 병합·배포 권한으로 해석하지 않음.
 - 최신 사내 확인: 09-15 `apply_demo result=ok changed=1 commit=9a90e19fb7f5 stage=complete code=- next=new_chat`, 이어 `ui=ok tree=ok font=ok chat=ok` 보고. 지정 자산 적용과 요청한 새 화면·트리·글꼴·대화/초안 확인을 완료함. 실제 모델의 업무 호출·공유 권한·유휴 안정성까지 통과한 것으로 확대하지 않음. [이번 적용·화면 확인](../evals/scenarios.md#sidebar-refinement-20260914).
 
 ## 마지막으로 확인된 적용 상태
@@ -31,7 +31,7 @@
 
 ## 남아 있는 이슈와 확인 범위
 
-- **리팩토링 원격 검증 실행 전 종료:** R1 CI `34936796710` attempt 1/2와 후속 문서 CI가 실행기 미배정·시험 단계 0건으로 종료함. 구체 원인은 미확정이며 사내 서버 문제로 연결하지 않음. 이번 R2/R3 구현·로컬 준비와 별개로 Windows/브라우저 게이트는 남아 있음. [앞선 관측·재시도 중단](../evals/scenarios.md#workflow-refactor-20260915), [이번 준비 상태](../evals/scenarios.md#work-ui-refactor-20260915).
+- **리팩토링 원격 검증의 계정 결제·한도 차단:** CI `34938361364`의 Linux·Windows Annotation을 사용자에게 받아 최근 계정 결제 실패 또는 지출 한도로 작업 시작이 차단됐음을 확인함. 결제 실패/한도 중 실제 해당 항목과 해소 여부는 미확인임. 앞선 R1 CI `34936796710` attempt 1/2·후속 문서 CI의 실행기 미배정 기록은 보존하며 같은 원인으로 소급 확정하지 않음. 계정 조치 뒤 Windows/브라우저 검증이 남아 있음. [앞선 관측·재시도 중단](../evals/scenarios.md#workflow-refactor-20260915), [이번 원인 확인·준비 상태](../evals/scenarios.md#work-ui-refactor-20260915).
 
 - **공통 자산 업데이트 중 동시 편집:** 기존 GET→POST 사이 지원 description 유실의 합성 결함을 R0 조건부 저장·native 보호 경로로 수정하고 실제 wheel 회귀에서 확인함. 현재 PR 구현이며 사내 반영은 미실행이므로 기존 설치의 보호가 완료됐다고 표현하지 않음. 보호 미적용 원본 서버·외부 DB writer·일반 UI끼리의 오래된 폼 충돌은 보장 밖. [원래 재현/오탐 정정](../evals/scenarios.md#ai-runtime-preservation-20260915), [수정·검증·적용 경계](../evals/scenarios.md#conditional-assets-20260915).
 - **사외 Windows CI 지연:** 이전에 통과한 동일 코드에서 PowerShell 20초·Node 10초 제한시간 초과가 각각 발생했으며 원인은 미확정임. 두 시험의 단계 표식·런타임 버전·timeout의 단계 표식를 보존하도록 보완했으므로 자연 재발 시 그 증거로 진입 관측 여부와 시험 내부 단계를 구분함. 재검사 성공을 근본원인 해결이나 사내 서버 진단 필요로 바꾸지 않음. [실패·관측·최종 CI](../evals/scenarios.md#sidebar-refinement-20260914).
@@ -71,6 +71,6 @@
 
 ## 최근 점검
 
-2026-09-15: 이전 R1 작업·원격 실패 상태를 복원하고 R2 화면 책임 분리 및 R3 실제 프로그램 복원 검증을 이어 구현함. 대화 전환 순서·기존 모달/공장 선택 이벤트·snapshot/dirty 보존·단일 배포물 일치를 검토하고 발견한 분리 회귀를 수정함. 최종 로컬 검증과 Git/CI 반영은 [R2/R3 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 연결하며 사내 서버·데이터·자산은 변경하지 않음. 이전 실패·수정·사용자 수락 근거는 보존함.
+2026-09-15: 사용자가 제공한 최종 구현 CI 두 OS의 Annotation으로 결제 실패 또는 지출 한도에 따른 작업 시작 차단을 확인함. 기존 STATUS·평가 기록·PR #48에 확인 범위와 계정 조치 후 재개 조건을 반영함. 앞선 원인 미확정 관측과 R2/R3 로컬 결과는 [같은 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 보존함. 이번 변경은 상태 문서이며 계정 결제 설정·코드·CI·사내 서버·데이터·자산은 변경하지 않고 수동 재실행도 요청하지 않음. Windows/브라우저 미실행 및 Draft·미병합·사내 미배포 상태를 유지함.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
