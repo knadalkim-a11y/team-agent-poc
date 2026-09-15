@@ -92,7 +92,7 @@
 
 ## 제한적 리팩토링 구현 설계 (2026-09-15)
 
-목적은 AI가 한 기능의 변경 범위와 호환 조건을 파악하기 쉽게 만들고, 사내에서 작성한 자산을 보존하면서 공동 작업 기반을 추가할 준비를 하는 것이다. 현재 WebUI·Python 빌더·래퍼·업무 저장소를 유지한다. 이 절은 구현 전 설계이며, 검토 결과와 실제 구현/시험 여부는 [설계 검토 기록](../../../evals/scenarios.md#refactoring-design-review-20260915)에서 구분한다.
+목적은 AI가 한 기능의 변경 범위와 호환 조건을 파악하기 쉽게 만들고, 사내에서 작성한 자산을 보존하면서 공동 작업 기반을 추가할 준비를 하는 것이다. 현재 WebUI·Python 빌더·래퍼·업무 저장소를 유지한다. 이 절은 구현 기준 설계이며, R0의 후속 구현은 [조건부 자산 적용 기록](../../../evals/scenarios.md#conditional-assets-20260915)에 연결한다. R1·R2의 코드 분리는 아직 미구현이다. 설계 검토 결과와 실제 구현/시험 여부는 [설계 검토 기록](../../../evals/scenarios.md#refactoring-design-review-20260915)에서 구분한다.
 
 ### 범위와 작업 단위
 
@@ -127,7 +127,7 @@
 
 관리자 인증만으로 다른 소유자의 읽기 전용/비공개 자산을 수정할 수 있게 하지 않는다. 기존 owner·ACL·원본 가시성·grant 필터를 재사용한다. kind는 고정 세 종류이고 요청 id와 payload id가 달라지거나 임의 URL·메서드를 지정하면 거절한다. 새 API는 개인 UserValves·Skill 쓰기·삭제를 제공하지 않는다.
 
-token은 매 프로세스 메모리에서 생성한 키로 protocol/사용자 ID/kind/id/존재 여부와 **native 저장이 덮을 수 있는 전체 지원 상태**에 HMAC을 적용한다. 기존 비밀 키/파일을 변경하지 않으며 재시작 전 token은 무효다. Tool은 owner/name/content/지원 meta/정규화 ACL/common Valves를 한 충돌 범위로 묶고, 모델은 owner/id/name/base/meta/params/활성 상태/정규화 ACL을 포함한다. 개인 UserValves는 제외한다. 관리 필드만 뽑는 기존 projection은 현장 수정 판정에 계속 쓰며 token을 대신하지 않는다. 원문·자격증명·token을 로그나 오류 메시지에 복제하지 않는다.
+token은 매 프로세스 메모리에서 생성한 키로 protocol/사용자 ID/kind/id/존재 여부와 **native 저장이 덮을 수 있는 전체 지원 상태**에 HMAC을 적용한다. 기존 비밀 키/파일을 변경하지 않으며 재시작 전 token은 무효다. Tool은 owner/name/content/지원 meta/정규화 ACL/common Valves를 한 충돌 범위로 묶고, 모델은 owner/id/name/base/meta/params/활성 상태/정규화 ACL을 포함한다. 개인 UserValves는 제외한다. 관리 필드만 뽑는 기존 projection은 현장 수정 판정에 계속 쓰며 token을 대신하지 않는다. 새 보호 코드에서 원문·자격증명·token을 진단 로그에 복제하지 않으며 native 저장 오류는 고정 응답으로 바꾼다. 이 범위를 기존 WebUI 전체 예외 로그의 비밀정보 차단 보장으로 확대하지 않는다.
 
 조회·계획·저장은 다음 규칙을 따른다.
 
@@ -153,6 +153,8 @@ token은 매 프로세스 메모리에서 생성한 키로 protocol/사용자 ID
 | `routers/models.py` | `create_new_model`, `update_model_by_id`, `update_model_access_by_id`, `toggle_model_by_id`, `import_models`, `sync_models`, `delete_model_by_id`, `delete_all_models` |
 | `models/models.py`의 `ModelsTable` | `insert_new_model`, `update_model_by_id`, `update_model_updated_at_by_id`, `toggle_model_by_id`, `sync_models`, `delete_model_by_id`, `delete_all_models`. `_to_model_model`의 knowledge 정상화 저장을 유발하는 조회도 최초 ORM 읽기 전부터 보호 |
 | `models/access_grants.py`의 `AccessGrantsTable` | Tool/Model 대상 `grant_access`, `revoke_access`, `revoke_all_access`, `set_access_control`, `set_access_grants` |
+
+실제 wheel 전수 대조에서 `utils/plugin.py`의 Tool import 정상화, `routers/knowledge.py`의 지식 삭제 후 모델 재저장, 여러 native 조회 caller의 선행 session, `utils/tools.py`의 채팅용 Tool 캐시 공개도 보호 범위에 추가했다. 빌더의 `ASSET_GUARD_HOOKS`·고정 파일 hash와 서버의 설치 검사를 함께 대조한다. 채팅 Tool 로딩은 로컬 조회/권한/module/valves/호출 연결만 같은 Task에서 보호하고 원격 Tool 호출은 밖에 유지한다. Ollama 외부 모델 조회 전체를 잠그던 초안 hook은 제거하고 첫 자산 조회의 table 경계를 보호한다.
 
 읽기 중 정상화하는 모델 조회는 `get_all_models`, `get_models`, `get_base_models`, `search_models`, `get_model_by_id`, `get_models_by_ids`를 보호 목록에 포함한다. 보호 대상 내부 호출은 같은 작업 Task/session을 명시적으로 이어받는다. 독립 table 진입은 잠금 뒤 새 session을 열고, 기존 session을 가진 내부 호출은 최초 읽기/트랜잭션 시작 이전의 caller 경계까지 보호 위치를 올린다. 새 session으로 미완료 트랜잭션을 몰래 대체하지 않는다. 고정 wheel에서 해당 caller·직접 SQL writer를 대조해 보호 밖 쓰기가 있으면 출하하지 않는다.
 

@@ -23,7 +23,7 @@ import ees_demo_assets as assets
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_RESPONSE = 8 * 1024 * 1024
-SUPPORTED = {"0.11.3", "0.11.3+ees.1", "0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8"}
+SUPPORTED = {"0.11.3", "0.11.3+ees.1", "0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9"}
 
 
 class DemoError(ValueError):
@@ -96,6 +96,11 @@ class WebUIClient:
             error.close()
             if code == 404 and method == "GET":
                 return None
+            if path.startswith(assets.ASSET_API + "/"):
+                if code == 409:
+                    raise DemoError("concurrent_edit") from None
+                if code in {404, 405, 503}:
+                    raise DemoError("conditional_write_unavailable") from None
             category = {401: "webui_authentication_failed", 403: "webui_permission_denied",
                         409: "api_conflict", 429: "api_rate_limited"}.get(code, "api_request_failed")
             raise DemoError(category) from None
@@ -325,7 +330,8 @@ def main(argv=None):
         if progress.get("delegated"):
             return 130
         code = getattr(error, "code", None) or "operation_failed"
-        next_step = ("reset_demo_token" if code in {"webui_authentication_failed", "webui_credentials_invalid"}
+        next_step = ("upgrade" if code == "conditional_write_unavailable"
+                     else "reset_demo_token" if code in {"webui_authentication_failed", "webui_credentials_invalid"}
                      else "setup_webui_api_key" if progress["stage"] == "webui_authentication"
                      else "check_ci" if progress["stage"] == "ci_check"
                      else "check_existing_ees" if progress["stage"] == "model_selection"

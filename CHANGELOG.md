@@ -4,6 +4,8 @@
 
 ## 2026-09-15
 
+- ees.9와 Agent Pack v0.2.10에 [R0 조건부 자산 적용](docs/03-openwebui-native-agent.md#conditional-assets)을 구현함. 서버가 최신 상태·권한과 저장을 같은 잠금으로 보호하고 ApplyDemo의 오래된 payload를 거절함. 실제 wheel 대조/독립 검토로 Tool import·지식 정리·채팅 캐시 경로를 포함하고 불필요한 외부 모델 조회 잠금은 제거함. 기존 자산 ID·사용자 자료·DB 형식과 구버전 프로그램 Restore를 유지하며, 구서버에서는 새 ApplyDemo 쓰기를 중단함. 구현과 사내 반영 여부는 [검증 기록](evals/scenarios.md#conditional-assets-20260915)에서 구분함.
+
 - [제한적 리팩토링 설계](docs/mockups/ees-work/TASK.md#refactoring-design)에 파일별 책임·공개 연결·사용자 자료 보존·작업 순서·실제 배포물/Restore 검증 기준을 명시함. 독립 검토로 패널 동작 공통화를 제외하고 화면 상태/이벤트 소유권과 서버 자산 조건부 저장의 경계를 보완함. 자산 결함 수정과 순수 구조 정리를 분리했으며 이번 변경은 구현·배포를 포함하지 않음. [검토 근거](evals/scenarios.md#refactoring-design-review-20260915).
 
 - 모든 개발을 AI가 맡는 전제와, 개발 환경에 없는 사내 UI 작성 Skill·Tool·연결·권한·설정의 보존 요구를 개발 지침·관리 원본에 명시함. 기존 예시 셋업을 확정 실무로 오해하지 않도록 최신 요구를 정정하고, 프로그램/자산 갱신의 보호와 지원 필드 동시 편집의 미해결 한계를 [검토 기록](evals/scenarios.md#ai-runtime-preservation-20260915)에 남김. 실행 코드·사용자 데이터·배포 동작은 변경하지 않음.

@@ -18,6 +18,10 @@ SPEC.loader.exec_module(BUNDLE)
 
 
 class DemoBundleTests(unittest.TestCase):
+    def test_bundle_accepts_the_current_program_builder_version(self):
+        from scripts import build_ees_webui as branding
+        self.assertEqual(BUNDLE.BRANDING_VERSION, branding.VERSION)
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="demo-bundle-test-")
         self.addCleanup(self.temporary.cleanup)
@@ -124,9 +128,9 @@ class DemoBundleTests(unittest.TestCase):
         branding = self.base / "branding"
         branding.mkdir()
         wheel = b"Synthetic wheel bytes; not an install test"
-        wheel_name = "open_webui-0.11.3+ees.8-py3-none-any.whl"
+        wheel_name = "open_webui-0.11.3+ees.9-py3-none-any.whl"
         (branding / wheel_name).write_bytes(wheel)
-        manifest = {"schema_version": 1, "upstream_version": "0.11.3", "version": "0.11.3+ees.8",
+        manifest = {"schema_version": 1, "upstream_version": "0.11.3", "version": "0.11.3+ees.9",
                     "source": {"filename": "open_webui-0.11.3-py3-none-any.whl",
                                "sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"},
                     "wheel": {"filename": wheel_name, "size": len(wheel),

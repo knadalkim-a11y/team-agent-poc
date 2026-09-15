@@ -4,6 +4,7 @@ Set EES_TEST_UPSTREAM_WHEEL to the verified official wheel path to additionally
 build and audit that wheel. Tests never install or import Open WebUI.
 """
 
+import ast
 import base64
 import csv
 import hashlib
@@ -29,11 +30,80 @@ NOTICE = b"# LICENSE: Open WebUI branding is governed by the bundled license.\n"
 LICENSE = b"Synthetic license fixture; copyright and branding conditions must survive.\n"
 
 
+# Independent expected writer/normalization boundary inventory. These minimal
+# sources exercise patch structure without storing a copy of upstream Python.
+GUARD_METHODS = {
+    "open_webui/models/tools.py": ("ToolsTable", (
+        "insert_new_tool", "update_tool_by_id", "update_tool_valves_by_id", "delete_tool_by_id")),
+    "open_webui/models/models.py": ("ModelsTable", (
+        "insert_new_model", "update_model_by_id", "update_model_updated_at_by_id", "toggle_model_by_id",
+        "sync_models", "delete_model_by_id", "delete_all_models", "get_all_models", "get_models",
+        "get_base_models", "search_models", "get_model_by_id", "get_models_by_ids")),
+    "open_webui/models/access_grants.py": ("AccessGrantsTable", (
+        "grant_access", "revoke_access", "revoke_all_access", "set_access_control", "set_access_grants")),
+    "open_webui/utils/plugin.py": (None, ("load_tool_module_by_id", "get_tool_module_from_cache")),
+    "open_webui/routers/knowledge.py": (None, ("delete_knowledge_by_id",)),
+    "open_webui/utils/models.py": (None, ("check_model_access",)),
+    "open_webui/routers/users.py": (None, ("get_user_preview",)),
+    "open_webui/routers/ollama.py": (None, ("get_filtered_models",)),
+    "open_webui/routers/openai.py": (None, ("get_filtered_models",)),
+    "open_webui/routers/groups.py": (None, ("preview_group_access",)),
+    "open_webui/utils/access_control/__init__.py": (None, ("has_base_model_access",)),
+}
+
+
+def guard_fixture_members():
+    members = {}
+    for filename, (class_name, methods) in GUARD_METHODS.items():
+        indent = "    " if class_name else ""
+        source = '\"\"\"Synthetic asset boundary.\"\"\"\nfrom __future__ import annotations\n'
+        if class_name:
+            source += "class " + class_name + ":\n"
+        for method in methods:
+            source += indent + "async def " + method + "(self=None, db=None):\n" + indent + "    return None\n"
+        members[filename] = source.encode()
+    members["open_webui/routers/models.py"] = b"router = APIRouter()\n"
+    members["open_webui/routers/tools.py"] = b"router = APIRouter()\n"
+    for function, key, nest in (("create_new_tools", "form_data.id", True), ("update_tools_by_id", "id", False)):
+        source = "async def " + function + "(request, form_data, id=None):\n"
+        if nest:
+            source += "    if True:\n"
+        indent = "        " if nest else "    "
+        source += (indent + "try:\n" + indent + "    TOOLS[" + key + "] = tool_module\n"
+                   + indent + "    specs = get_tool_specs(TOOLS[" + key + "])\n"
+                   + indent + "    tools = await native_save(form_data, specs)\n"
+                   + indent + "    if tools:\n" + indent + "        await publish_event(request)\n"
+                   + indent + "except HTTPException:\n" + indent + "    raise\n"
+                   + indent + "except Exception as e:\n" + indent + "    raise\n")
+        if function == "update_tools_by_id":
+            source = source.replace("        specs =", "        log.debug(updated)\n        specs =", 1)
+        members["open_webui/routers/tools.py"] += source.encode()
+    members["open_webui/utils/tools.py"] = b"""async def get_tools(request, user, tool_ids, extra_params):
+    tools_dict = {}
+    # Batch-fetch all DB tools in one query instead of one per tool_id
+    tool_models = await Tools.get_tools_by_ids(tool_ids)
+    for tool_id in tool_ids:
+        tool = tool_models.get(tool_id)
+        if tool:
+            if not await has_access(tool, user):
+                continue
+            tools_cache = get_tools_cache(request)
+            tools_cache[tool_id] = await load_tool_module_by_id(tool_id, content=tool.content)
+        else:
+            await get_tool_servers(request)
+    return tools_dict
+"""
+    return members
+
+
 def fixture_members():
     app = "open_webui/frontend/_app/"
     info = "open_webui-0.11.3.dist-info/"
     members = {
-        "open_webui/main.py": b"# preserved upstream routes\nif os.path.exists(FRONTEND_BUILD_DIR):\n    app.mount('/', existing_spa)\n",
+        "open_webui/main.py": b"# preserved upstream routes\nasync def lifespan(app):\n"
+        b"    app.state.main_loop = asyncio.get_running_loop()\n    await existing_startup(app)\n    yield\n    await existing_shutdown(app)\n"
+        b"app.include_router(tools.router, prefix='/api/v1/tools', tags=['tools'])\n"
+        b"if os.path.exists(FRONTEND_BUILD_DIR):\n    app.mount('/', existing_spa)\n",
         "open_webui/env.py": NOTICE + b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'Open WebUI')\n"
         b"if WEBUI_NAME != 'Open WebUI':\n    WEBUI_NAME += ' (Open WebUI)'\n" + NOTICE,
         "open_webui/frontend/index.html": b"<!-- Open WebUI license notice -->\n<title>Open WebUI</title>\n"
@@ -58,6 +128,7 @@ def fixture_members():
         "open_webui/static/custom.css": b"/* existing user style stays intact */\n",
         "open_webui/frontend/static/custom.css": b"/* original frontend style stays intact */\n",
     }
+    members.update(guard_fixture_members())
     for prefix in ("open_webui/static/", "open_webui/frontend/static/"):
         for name in builder.ASSET_NAMES:
             members[prefix + name] = b"old artwork " + name.encode()
@@ -83,6 +154,83 @@ def assert_record(test, wheel):
             test.assertEqual(int(size), len(content), path)
 
 
+def assert_asset_guard_patches(test, built):
+    for filename, (class_name, methods) in GUARD_METHODS.items():
+        tree = ast.parse(built.read(filename))
+        nodes = tree.body
+        if class_name:
+            nodes = next(node for node in nodes if isinstance(node, ast.ClassDef) and node.name == class_name).body
+        for name in methods:
+            node = next(node for node in nodes if isinstance(node, ast.AsyncFunctionDef) and node.name == name)
+            decorators = [ast.unparse(value) for value in node.decorator_list]
+            wanted = ("guard_operation" if filename == "open_webui/utils/plugin.py" else
+                      "guard_table_method(asset_types_only=True)" if class_name == "AccessGrantsTable" else "guard_table_method")
+            test.assertEqual(1, decorators.count(wanted), (filename, name))
+    for filename in ("open_webui/routers/tools.py", "open_webui/routers/models.py"):
+        text = built.read(filename).decode()
+        test.assertEqual(1, text.count("router = APIRouter(route_class=AssetGuardRoute)"))
+        compile(text, filename, "exec")
+    tools = ast.parse(built.read("open_webui/routers/tools.py"))
+    for name in ("create_new_tools", "update_tools_by_id"):
+        node = next(node for node in tools.body if isinstance(node, ast.AsyncFunctionDef) and node.name == name)
+        assignments = [child for child in ast.walk(node) if isinstance(child, ast.Assign)
+                       and any(isinstance(target, ast.Subscript) and isinstance(target.value, ast.Name)
+                               and target.value.id == "TOOLS" for target in child.targets)]
+        test.assertEqual(1, len(assignments), name)
+        saves = [child for child in ast.walk(node) if isinstance(child, ast.Assign)
+                 and isinstance(child.value, ast.Await)
+                 and any(isinstance(target, ast.Name) and target.id == "tools" for target in child.targets)]
+        test.assertTrue(saves and saves[-1].lineno < assignments[0].lineno, name)
+        guarded = next(child for child in ast.walk(node) if isinstance(child, ast.If)
+                       and isinstance(child.test, ast.Name) and child.test.id == "tools")
+        test.assertIs(guarded.body[0], assignments[0])
+        calls = [child for child in ast.walk(guarded) if isinstance(child, ast.Call)
+                 and isinstance(child.func, ast.Name) and child.func.id == "publish_event"]
+        test.assertTrue(calls and calls[0].lineno > assignments[0].lineno)
+        evictions = [child for child in ast.walk(node) if isinstance(child, ast.Call)
+                     and isinstance(child.func, ast.Attribute) and child.func.attr == "pop"
+                     and isinstance(child.func.value, ast.Call) and isinstance(child.func.value.func, ast.Name)
+                     and child.func.value.func.id == "get_tools_cache"]
+        test.assertEqual(2, len(evictions), name)
+        if name == "update_tools_by_id":
+            test.assertFalse(any(isinstance(child, ast.Call) and isinstance(child.func, ast.Attribute)
+                                 and child.func.attr == "debug" and any(isinstance(arg, ast.Name) and arg.id == "updated"
+                                 for arg in child.args) for child in ast.walk(node)))
+    loader_text = built.read("open_webui/utils/tools.py").decode()
+    loader_tree = ast.parse(loader_text)
+    loader = next(node for node in loader_tree.body if isinstance(node, ast.AsyncFunctionDef) and node.name == "get_tools")
+    test.assertFalse(loader.decorator_list)  # Remote preparation must not hold the asset guard.
+    loop = next(node for node in loader.body if isinstance(node, ast.For) and isinstance(node.target, ast.Name)
+                and node.target.id == "tool_id")
+    local = next(node for node in loop.body if isinstance(node, ast.AsyncFunctionDef) and node.name == "ees_load_local_tool")
+    test.assertEqual(["guard_operation"], [ast.unparse(value) for value in local.decorator_list])
+    local_calls = [node for node in ast.walk(local) if isinstance(node, ast.Call)]
+    tool_reads = [node for node in local_calls if isinstance(node.func, ast.Attribute) and node.func.attr == "get_tool_by_id"]
+    loads = [node for node in local_calls if isinstance(node.func, ast.Name) and node.func.id == "load_tool_module_by_id"]
+    test.assertEqual(1, len(tool_reads))
+    test.assertTrue(loads and tool_reads[0].lineno < loads[0].lineno)
+    test.assertFalse(any(isinstance(node.func, ast.Name) and node.func.id in {"get_tool_servers", "execute_tool_server"}
+                         for node in local_calls))
+    test.assertFalse(any(isinstance(node, ast.Continue) for node in ast.walk(local)))
+    remote_branch = next(node for node in loop.body if isinstance(node, ast.If) and node.orelse)
+    test.assertEqual("await ees_load_local_tool()", ast.unparse(remote_branch.test))
+    test.assertTrue(any(isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "get_tool_servers"
+                        for child in remote_branch.orelse for node in ast.walk(child)))
+    test.assertNotIn("tool_models = await Tools.get_tools_by_ids(tool_ids)", loader_text)
+    test.assertIn("EES_ASSET_LOCAL_TOOL_GUARD = 1", loader_text)
+    main = built.read("open_webui/main.py").decode()
+    tree = ast.parse(main)
+    life = next(node for node in tree.body if isinstance(node, ast.AsyncFunctionDef) and node.name == "lifespan")
+    start = next(node for node in life.body if isinstance(node, ast.Expr) and isinstance(node.value, ast.Await)
+                 and isinstance(node.value.value, ast.Call) and isinstance(node.value.value.func, ast.Name)
+                 and node.value.value.func.id == "start_asset_guard")
+    protected = next(node for node in life.body if isinstance(node, ast.Try) and node.finalbody)
+    test.assertLess(start.lineno, protected.lineno)
+    test.assertIn("await stop_asset_guard(app)", ast.unparse(protected.finalbody[0]))
+    test.assertTrue(any(isinstance(node, ast.Yield) for node in ast.walk(protected)))
+    test.assertLess(main.index("app.include_router(create_asset_router()"), main.index("if os.path.exists(FRONTEND_BUILD_DIR):"))
+
+
 class BrandingBuildTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -98,6 +246,8 @@ class BrandingBuildTests(unittest.TestCase):
         for name in builder.UI_FILES:
             (self.ui / name).write_bytes(b"reviewed UI asset " + name.encode())
         self.members = fixture_members()
+        self.guard_hashes = {name: hashlib.sha256(self.members[name]).hexdigest()
+                             for name in builder.ASSET_GUARD_SOURCE_HASHES}
         self.write_fixture()
 
     def write_fixture(self):
@@ -109,7 +259,9 @@ class BrandingBuildTests(unittest.TestCase):
     def build(self, directory="release"):
         fonts = {name: (origin, hashlib.sha256(b"unchanged upstream font " + name.encode()).hexdigest())
                  for name, (origin, _) in builder.FONT_SOURCES.items()}
-        with mock.patch.object(builder, "SOURCE_SHA256", self.source_hash), mock.patch.object(builder, "FONT_SOURCES", fonts):
+        with (mock.patch.object(builder, "SOURCE_SHA256", self.source_hash),
+              mock.patch.object(builder, "FONT_SOURCES", fonts),
+              mock.patch.object(builder, "ASSET_GUARD_SOURCE_HASHES", self.guard_hashes)):
             return builder.build(self.wheel, self.root / directory, self.assets, self.ui)
 
     def test_reproducible_wheel_manifest_and_record_preserve_original(self):
@@ -127,14 +279,14 @@ class BrandingBuildTests(unittest.TestCase):
         manifest = self.build()
         with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
             self.assertFalse(any(name.startswith(builder.SOURCE_APP) for name in built.namelist()))
-            self.assertEqual(len(built.namelist()), len(self.members) + (len(builder.THEME_FILES) + len(builder.WORK_FILES)))
+            self.assertEqual(len(built.namelist()), len(self.members) + (len(builder.THEME_FILES) + len(builder.WORK_FILES) + len(builder.ASSET_GUARD_FILES)))
             for name, original in self.members.items():
                 target = builder.target_name(name)
                 if target not in manifest["changed_files"]:
                     self.assertEqual(built.read(target), original, name)
             self.assertEqual(built.read(builder.TARGET_INFO + "licenses/LICENSE"), LICENSE)
             self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.8\n"))
+                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.9\n"))
             self.assertEqual(built.read("open_webui/env.py").count(NOTICE), 2)
             self.assertNotIn(b"WEBUI_NAME +=", built.read("open_webui/env.py"))
             self.assertIn(b"EES Work", built.read("open_webui/frontend/index.html"))
@@ -154,7 +306,7 @@ class BrandingBuildTests(unittest.TestCase):
             for name, (origin, _) in builder.FONT_SOURCES.items():
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/" + name), self.members[origin])
             runtime = built.read(builder.TARGET_APP + "immutable/chunks/DKj2ZiCb.js")
-            self.assertIn(b"/_ees8/version.json", runtime)
+            self.assertIn(b"/_ees9/version.json", runtime)
             chat = built.read(builder.TARGET_APP + "immutable/chunks/zKJlHFgk.js")
             self.assertIn(builder.NATIVE_DRAFT_HOOK, chat)
             self.assertIn(b'if(window.__eesNativeDraftV1===eesNativeDraftApi)delete window.__eesNativeDraftV1;', chat)
@@ -162,6 +314,72 @@ class BrandingBuildTests(unittest.TestCase):
             for prefix in ("open_webui/static/", "open_webui/frontend/static/"):
                 for name in builder.ASSET_NAMES:
                     self.assertEqual(built.read(prefix + name), (self.assets / name).read_bytes())
+
+    def test_asset_guard_inventory_and_emitted_lifecycle_cache_order(self):
+        self.assertEqual(GUARD_METHODS, builder.ASSET_GUARD_HOOKS)
+        self.assertEqual(set(GUARD_METHODS) | {"open_webui/main.py", "open_webui/routers/tools.py", "open_webui/routers/models.py", "open_webui/utils/tools.py"},
+                         set(builder.ASSET_GUARD_SOURCE_HASHES))
+        self.assertEqual(15, len(builder.ASSET_GUARD_SOURCE_HASHES))
+        manifest = self.build()
+        with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
+            assert_asset_guard_patches(self, built)
+            self.assertEqual(built.read(builder.ASSET_GUARD_FILES[0]), builder.ASSET_GUARD_SOURCE.read_bytes())
+        self.assertTrue(set(builder.ASSET_GUARD_SOURCE_HASHES) | set(builder.ASSET_GUARD_FILES)
+                        <= set(manifest["changed_files"]))
+
+    def test_runtime_installation_inventory_matches_all_builder_hooks(self):
+        tree = ast.parse(builder.ASSET_GUARD_SOURCE.read_bytes())
+        inventory = {node.targets[0].id: ast.literal_eval(node.value) for node in tree.body
+                     if isinstance(node, ast.Assign) and len(node.targets) == 1
+                     and isinstance(node.targets[0], ast.Name)
+                     and node.targets[0].id in {"TABLE_METHODS", "CALLER_HOOKS"}}
+        expected_tables = {Path(filename).stem: methods for filename, (class_name, methods) in GUARD_METHODS.items()
+                           if class_name}
+        expected_callers = {filename.removesuffix(".py").replace("/", ".").removesuffix(".__init__"): methods
+                            for filename, (class_name, methods) in GUARD_METHODS.items() if not class_name}
+        self.assertEqual(expected_tables, inventory["TABLE_METHODS"])
+        self.assertEqual(expected_callers, inventory["CALLER_HOOKS"])
+
+    def test_asset_writer_hash_drift_fails_even_when_patch_anchor_remains(self):
+        self.members["open_webui/models/tools.py"] += b"# unreviewed writer outside a hook\n"
+        self.write_fixture()
+        with self.assertRaisesRegex(ValueError, "Pinned asset writer source differs"):
+            self.build()
+        self.assertFalse((self.root / "release").exists())
+
+    def test_missing_required_hook_fails_after_whole_file_hash_check(self):
+        filename = "open_webui/models/models.py"
+        self.members[filename] = self.members[filename].replace(b"async def get_model_by_id(", b"async def renamed_reader(")
+        self.guard_hashes[filename] = hashlib.sha256(self.members[filename]).hexdigest()
+        self.write_fixture()
+        with self.assertRaisesRegex(ValueError, "Asset guard method differs"):
+            self.build()
+        self.assertFalse((self.root / "release").exists())
+
+    def test_missing_asset_writer_member_fails_before_writing(self):
+        del self.members["open_webui/utils/plugin.py"]
+        self.write_fixture()
+        with self.assertRaisesRegex(ValueError, "Missing wheel entries"):
+            self.build()
+        self.assertFalse((self.root / "release").exists())
+
+    def test_missing_empty_and_linked_asset_guard_runtime_fail_before_writing(self):
+        missing = self.root / "missing-runtime.py"
+        empty = self.root / "empty-runtime.py"
+        empty.write_bytes(b"")
+        candidates = [missing, empty]
+        linked = self.root / "linked-runtime.py"
+        try:
+            linked.symlink_to(builder.ASSET_GUARD_SOURCE)
+        except OSError:
+            pass
+        else:
+            candidates.append(linked)
+        for runtime in candidates:
+            with self.subTest(runtime=runtime.name), mock.patch.object(builder, "ASSET_GUARD_SOURCE", runtime):
+                with self.assertRaisesRegex(ValueError, "asset guard runtime"):
+                    self.build()
+                self.assertFalse((self.root / "release").exists())
 
     def test_missing_mock_runtime_fails_before_writing(self):
         with tempfile.TemporaryDirectory() as empty:
@@ -401,7 +619,9 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
             built_path = Path(temporary) / builder.WHEEL_FILENAME
             assert_record(self, built_path)
             with ZipFile(source_path) as source, ZipFile(built_path) as built:
-                self.assertEqual(len(source.namelist()) + (len(builder.THEME_FILES) + len(builder.WORK_FILES)), len(built.namelist()))
+                self.assertEqual(len(source.namelist()) + (len(builder.THEME_FILES) + len(builder.WORK_FILES) + len(builder.ASSET_GUARD_FILES)), len(built.namelist()))
+                assert_asset_guard_patches(self, built)
+                self.assertEqual(built.read(builder.ASSET_GUARD_FILES[0]), builder.ASSET_GUARD_SOURCE.read_bytes())
                 changed = set(manifest["changed_files"])
                 for name in source.namelist():
                     target = builder.target_name(name)
@@ -409,7 +629,7 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
                         self.assertEqual(built.read(target), source.read(name), name)
                 metadata = source.read(builder.SOURCE_INFO + "METADATA")
                 self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.8\n"))
+                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.9\n"))
                 for filename, (origin, expected) in builder.FONT_SOURCES.items():
                     copied = built.read(builder.TARGET_APP + "fonts/" + filename)
                     self.assertEqual(copied, source.read(origin))

@@ -40,7 +40,9 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             return
         status = 404 if self.path == "/api/missing" else 500 if self.path == "/api/fail" else 200
-        payload = ({"version": "0.11.3+ees.8"} if self.path == "/api/version"
+        if self.path.startswith(demo.assets.ASSET_API + "/"):
+            status = getattr(self.server, "asset_status", 503)
+        payload = ({"version": "0.11.3+ees.9"} if self.path == "/api/version"
                    else {"role": "admin"} if self.path == "/api/v1/auths/"
                    else {"id": "existing", "base_model_id": "base", "params": {"system": "user text"}, "write_access": True}
                    if self.path == "/api/v1/models/model?id=existing"
@@ -71,6 +73,7 @@ class WebUIHTTPTests(unittest.TestCase):
 
     def setUp(self):
         self.server.seen.clear()
+        self.server.asset_status = 503
         self.client = demo.WebUIClient(self.url, TOKEN, timeout=2)
 
     def test_json_utf8_and_bearer_request(self):
@@ -89,6 +92,16 @@ class WebUIHTTPTests(unittest.TestCase):
             with self.assertRaises(demo.DemoError) as raised:
                 self.client.request(method, path, {} if method == "POST" else None)
             self.assertNotIn(TOKEN, str(raised.exception))
+
+    def test_conditional_conflict_and_unavailable_are_safe_typed_errors(self):
+        for status, code in ((409, "concurrent_edit"), (404, "conditional_write_unavailable"),
+                             (405, "conditional_write_unavailable"), (503, "conditional_write_unavailable")):
+            with self.subTest(status=status):
+                self.server.asset_status = status
+                with self.assertRaisesRegex(demo.DemoError, code) as raised:
+                    self.client.request("POST", demo.assets.ASSET_API + "/apply", {"kind": "tool", "id": "test"})
+                self.assertNotIn(TOKEN, str(raised.exception))
+        self.assertTrue(all(path == demo.assets.ASSET_API + "/apply" for _, path, _, _ in self.server.seen))
 
     def test_response_size_and_url_boundaries(self):
         with patch.object(demo, "MAX_RESPONSE", 4):
@@ -238,6 +251,18 @@ class OperatorTests(unittest.TestCase):
                     with self.assertRaisesRegex(demo.DemoError, code):
                         demo.apply(config, args, HEAD, {})
                 core.assert_not_called()
+
+    def test_guard_unavailable_reports_program_upgrade_and_zero_changes(self):
+        output = io.StringIO()
+        with (patch.object(demo.upgrade.manager.states, "load_config", return_value={}),
+              patch.object(demo.upgrade, "checkout"), patch.object(demo.upgrade, "github_client"),
+              patch.object(demo.upgrade, "bootstrap", return_value=(None, HEAD, None)),
+              patch.object(demo, "apply", side_effect=demo.assets.DemoAssetsError("conditional_write_unavailable")),
+              patch.object(demo.upgrade.manager, "save_operation", return_value=True), redirect_stdout(output)):
+            self.assertEqual(1, demo.main(["--config", "synthetic.json"]))
+        self.assertIn("code=conditional_write_unavailable", output.getvalue())
+        self.assertIn("next=upgrade", output.getvalue())
+        self.assertIn("changed=0", output.getvalue())
 
     def test_error_report_contains_only_short_labels(self):
         output = io.StringIO()

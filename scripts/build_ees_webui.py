@@ -6,6 +6,7 @@ meet the upstream license; this builder preserves every bundled license notice.
 """
 
 import argparse
+import ast
 import base64
 import csv
 import hashlib
@@ -18,15 +19,15 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
-VERSION = "0.11.3+ees.8"
-PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6", "0.11.3+ees.7": "_ees7", "0.11.3+ees.8": "_ees8"}
+VERSION = "0.11.3+ees.9"
+PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6", "0.11.3+ees.7": "_ees7", "0.11.3+ees.8": "_ees8", "0.11.3+ees.9": "_ees9"}
 SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
 SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
 WHEEL_FILENAME = f"open_webui-{VERSION}-py3-none-any.whl"
 SOURCE_INFO = f"open_webui-{UPSTREAM_VERSION}.dist-info/"
 TARGET_INFO = f"open_webui-{VERSION}.dist-info/"
 SOURCE_APP = "open_webui/frontend/_app/"
-TARGET_APP = "open_webui/frontend/_ees8/"
+TARGET_APP = "open_webui/frontend/_ees9/"
 ASSET_DIR = Path(__file__).resolve().parents[1] / "branding" / "ees" / "assets"
 UI_DIR = ASSET_DIR.parent / "ui"
 ASSET_NAMES = (
@@ -54,10 +55,10 @@ FONT_SOURCES = {
                                 "2d2267a83d089cb1a517a4f901676d05d283346e650d1b1845d601cbd696a98e"),
 }
 THEME_FILES = ("chat-theme.css", "fonts/LICENSE.txt") + tuple("fonts/" + name for name in FONT_SOURCES)
-THEME_LINK = b'<link rel="stylesheet" href="/_ees8/chat-theme.css" crossorigin="use-credentials" />'
-WORK_LINK = (b'<link rel="stylesheet" href="/_ees8/ees-work-launcher.css" />'
-             b'<script defer src="/_ees8/ees-work-panel.js"></script>'
-             b'<script defer src="/_ees8/ees-work-launcher.js"></script>')
+THEME_LINK = b'<link rel="stylesheet" href="/_ees9/chat-theme.css" crossorigin="use-credentials" />'
+WORK_LINK = (b'<link rel="stylesheet" href="/_ees9/ees-work-launcher.css" />'
+             b'<script defer src="/_ees9/ees-work-panel.js"></script>'
+             b'<script defer src="/_ees9/ees-work-launcher.js"></script>')
 
 # The pinned Chat component already owns draft serialization, editor updates,
 # file/tool selections and debounced native sessionStorage writes. Expose only
@@ -130,7 +131,7 @@ PATCHES = {
     )],
     "open_webui/frontend/index.html": [
         (b"<title>Open WebUI</title>", b"<title>EES Work</title>", 1),
-        (b"/_app/", b"/_ees8/", 49),
+        (b"/_app/", b"/_ees9/", 49),
         (b"</head>", THEME_LINK + WORK_LINK + b"\n\t</head>", 1),
     ],
     SOURCE_APP + "immutable/chunks/CHq18Uto.js": [
@@ -143,8 +144,8 @@ PATCHES = {
         (b" / Open WebUI`", b" / EES Work`", 2),
     ],
     SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
-        (b"/_app/version.json", b"/_ees8/version.json", 1),
-        (b'an="0.11.3"', b'an="0.11.3+ees.8"', 1),
+        (b"/_app/version.json", b"/_ees9/version.json", 1),
+        (b'an="0.11.3"', b'an="0.11.3+ees.9"', 1),
     ],
     SOURCE_APP + "immutable/chunks/zKJlHFgk.js": [
         # Loading may turn its spinner off before native cached drafts finish
@@ -186,12 +187,189 @@ PATCHES = {
          b'window.history.replaceState(r(Ae).state,"",`/c/${Ot.chat_id}`)', 1),
     ],
     SOURCE_APP + "version.json": [
-        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.8"}', 1),
+        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.9"}', 1),
     ],
     SOURCE_INFO + "METADATA": [
-        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.8\n", 1),
+        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.9\n", 1),
     ],
 }
+
+
+# This inventory is audited against every Python file in the pinned wheel.
+# Plugin import normalization and knowledge deletion also write assets; a
+# table-only lock would start after their stale read and lose the user's edit.
+ASSET_GUARD_FILES = ("open_webui/ees_asset_guard.py",)
+ASSET_GUARD_SOURCE = Path(__file__).resolve().with_name("ees_asset_guard.py")
+ASSET_GUARD_HOOKS = {
+    "open_webui/models/tools.py": ("ToolsTable", (
+        "insert_new_tool", "update_tool_by_id", "update_tool_valves_by_id", "delete_tool_by_id")),
+    "open_webui/models/models.py": ("ModelsTable", (
+        "insert_new_model", "update_model_by_id", "update_model_updated_at_by_id",
+        "toggle_model_by_id", "sync_models", "delete_model_by_id", "delete_all_models",
+        "get_all_models", "get_models", "get_base_models", "search_models",
+        "get_model_by_id", "get_models_by_ids")),
+    "open_webui/models/access_grants.py": ("AccessGrantsTable", (
+        "grant_access", "revoke_access", "revoke_all_access", "set_access_control", "set_access_grants")),
+    "open_webui/utils/plugin.py": (None, ("load_tool_module_by_id", "get_tool_module_from_cache")),
+    "open_webui/routers/knowledge.py": (None, ("delete_knowledge_by_id",)),
+    "open_webui/utils/models.py": (None, ("check_model_access",)),
+    "open_webui/routers/users.py": (None, ("get_user_preview",)),
+    "open_webui/routers/ollama.py": (None, ("get_filtered_models",)),
+    "open_webui/routers/openai.py": (None, ("get_filtered_models",)),
+    "open_webui/routers/groups.py": (None, ("preview_group_access",)),
+    "open_webui/utils/access_control/__init__.py": (None, ("has_base_model_access",)),
+}
+ASSET_GUARD_SOURCE_HASHES = {
+    "open_webui/utils/tools.py": 'fb9ac81cf7bb4dbc9eef06a0dc8a8fb2f7314cbf62f49a8cbc86dfe6020edd0e','open_webui/main.py': 'e5cbc9326266a7c0983061ecf8b792184f91e13a0e245c3e520549ec0a2978e1',
+ 'open_webui/models/access_grants.py': 'c034481518fa1cacf3fcba003c18692bbf8947395b8543a011ea7ab860b7e914',
+ 'open_webui/models/models.py': 'd07887f09d157062834798cb42f4fd6d2025fe3c39af1caeb2ad582d0b0e48ae',
+ 'open_webui/models/tools.py': '9d22ae68828f5285fe3f72d8297322dca536381b355262315bb0ac80ba868ba7',
+ 'open_webui/routers/groups.py': 'be2181a97cc371b1ebc67794a81ff4196b57c8aa4996a02b54424053af23b7ba',
+ 'open_webui/routers/knowledge.py': '242898318117c38c29327f9739d6cd751ffee1876d93861d4c0fd089de5b8258',
+ 'open_webui/routers/models.py': 'e1c157f6f441d2e862604e066de18081d89bd41dfad42ee437742815cc8c515b',
+ 'open_webui/routers/ollama.py': '2dcd5311688bc6ba6b6b4a4f976e4518cd399d68662ab54da77b37643a3594b1',
+ 'open_webui/routers/openai.py': '4d21f5b2e4bdf447199e5665c54408b41d3f60b64ad43402ce1e3f1bbf19c46f',
+ 'open_webui/routers/tools.py': '14988ae70f6621f9952452d34dd81fe29107d0e8821cb20508119cf9b582abf2',
+ 'open_webui/routers/users.py': '00ff1e38635a2058befcb92f955da0811ffae7ab85fd6ac50471e4ae55319c41',
+ 'open_webui/utils/access_control/__init__.py': 'af269f2055421e27f7268a4bd8238769f22c99c59059c5b153fdeeb6581fa8f7',
+ 'open_webui/utils/models.py': 'c699a22aba417aaa599364d19613d5ef87431db3bb58fd0c5e8edc2e6601fa9c',
+ 'open_webui/utils/plugin.py': '3c5d5c66cd81f242b595b4ab71b73fbf92c617b2c7b8655a9a4ffe46b1c1b83e'}
+
+
+def _one_replace(text, before, after, filename):
+    if text.count(before) != 1:
+        raise ValueError(f"Asset guard patch precondition failed: {filename}")
+    return text.replace(before, after, 1)
+
+
+def _guard_import(text, statement):
+    tree = ast.parse(text)
+    futures = [node for node in tree.body if isinstance(node, ast.ImportFrom) and node.module == "__future__"]
+    if futures:
+        at = futures[-1].end_lineno
+    elif tree.body and isinstance(tree.body[0], ast.Expr) and isinstance(tree.body[0].value, ast.Constant):
+        at = tree.body[0].end_lineno
+    else:
+        at = 0
+    lines = text.splitlines(keepends=True)
+    lines.insert(at, "\n" + statement + "\n")
+    return "".join(lines)
+
+
+def _guard_decorate(text, filename, class_name, functions):
+    tree = ast.parse(text)
+    nodes = tree.body
+    if class_name:
+        classes = [node for node in nodes if isinstance(node, ast.ClassDef) and node.name == class_name]
+        if len(classes) != 1:
+            raise ValueError(f"Asset guard class differs: {filename}")
+        nodes = classes[0].body
+    lines = text.splitlines(keepends=True)
+    decorator = "guard_operation" if filename == "open_webui/utils/plugin.py" else "guard_table_method"
+    found = []
+    for name in functions:
+        matches = [node for node in nodes if isinstance(node, ast.AsyncFunctionDef) and node.name == name]
+        if len(matches) != 1:
+            raise ValueError(f"Asset guard method differs: {filename}:{name}")
+        node = matches[0]
+        # Place beneath existing route decorators so APIRoute receives the
+        # guarded callable during registration, preserving its typed signature.
+        option = "(asset_types_only=True)" if class_name == "AccessGrantsTable" else ""
+        found.append((node.lineno - 1, " " * node.col_offset + "@" + decorator + option + "\n"))
+    for at, line in sorted(found, reverse=True):
+        lines.insert(at, line)
+    return _guard_import("".join(lines), "from open_webui.ees_asset_guard import " + decorator)
+
+
+def _guard_tool_cache(text, filename):
+    # Prepare specs locally; only a confirmed native DB/ACL save can publish
+    # the new module. Native permission checks and source compilation stay put.
+    for name, key in (("create_new_tools", "form_data.id"), ("update_tools_by_id", "id")):
+        node, = [n for n in ast.parse(text).body if isinstance(n, ast.AsyncFunctionDef) and n.name == name]
+        lines = text.splitlines(keepends=True)
+        body = "".join(lines[node.lineno - 1:node.end_lineno])
+        body = _one_replace(body, f"TOOLS[{key}] = tool_module\n", "# Publish only after DB and ACL commit.\n", filename)
+        body = _one_replace(body, f"get_tool_specs(TOOLS[{key}])", "get_tool_specs(tool_module)", filename)
+        marker = "if tools:\n" + (" " * (16 if name == "create_new_tools" else 12)) + "await publish_event("
+        indent = " " * (16 if name == "create_new_tools" else 12)
+        body = _one_replace(body, marker, "if tools:\n" + indent + f"TOOLS[{key}] = tool_module\n" + indent + "await publish_event(", filename)
+        for clause in ("except HTTPException:\n", "except Exception as e:\n"):
+            indent = " " * (12 if name == "create_new_tools" else 8)
+            body = _one_replace(body, clause, clause + indent + f"get_tools_cache(request).pop({key}, None)\n", filename)
+        if name == "update_tools_by_id":
+            body = _one_replace(body, "        log.debug(updated)\n", "        # Asset source and settings must not enter debug logs.\n", filename)
+        lines[node.lineno - 1:node.end_lineno] = [body]
+        text = "".join(lines)
+    return text
+
+
+
+def _guard_local_tool_loading(text, filename):
+    # Only local Tool preparation owns the lock. Keep remote OpenAPI/MCP I/O
+    # outside it and re-read each local Tool instead of publishing a cached
+    # module from the earlier, unprotected batch snapshot.
+    node, = [n for n in ast.parse(text).body if isinstance(n, ast.AsyncFunctionDef) and n.name == "get_tools"]
+    loop, = [n for n in node.body if isinstance(n, ast.For) and isinstance(n.target, ast.Name) and n.target.id == "tool_id"]
+    if len(loop.body) != 2 or not isinstance(loop.body[1], ast.If) or not loop.body[1].orelse:
+        raise ValueError("Local Tool loading boundary differs.")
+    branch = loop.body[1]
+    lines = text.splitlines(keepends=True)
+    local = "".join(lines[branch.body[0].lineno - 1:branch.body[-1].end_lineno])
+    local = _one_replace(local, "                continue\n", "                return True\n", filename)
+    replacement = (
+        "        @guard_operation\n"
+        "        async def ees_load_local_tool():\n"
+        "            tool = await Tools.get_tool_by_id(tool_id)\n"
+        "            if tool is None:\n                return False\n"
+        "            user_group_ids = {group.id for group in await Groups.get_groups_by_member_id(user.id)}\n" +
+        local + "\n            return True\n\n"
+        "        if await ees_load_local_tool():\n            pass\n"
+    )
+    lines[loop.body[0].lineno - 1:branch.body[-1].end_lineno] = [replacement]
+    text = "".join(lines)
+    text = _one_replace(text, "    # Batch-fetch all DB tools in one query instead of one per tool_id\n"
+                        "    tool_models = await Tools.get_tools_by_ids(tool_ids)\n",
+                        "    # Local assets are read and prepared together under the asset guard.\n", filename)
+    text = _guard_import(text, "from open_webui.ees_asset_guard import guard_operation")
+    return text + "\nEES_ASSET_LOCAL_TOOL_GUARD = 1\n"
+
+
+def prepare_asset_guard_replacements(source, replacements):
+    for filename, expected_hash in ASSET_GUARD_SOURCE_HASHES.items():
+        raw = source.read(filename)
+        if hashlib.sha256(raw).hexdigest() != expected_hash:
+            raise ValueError(f"Pinned asset writer source differs: {filename}")
+        text = replacements.get(filename, raw).decode("utf-8")
+        if filename in ASSET_GUARD_HOOKS:
+            text = _guard_decorate(text, filename, *ASSET_GUARD_HOOKS[filename])
+        if filename in {"open_webui/routers/tools.py", "open_webui/routers/models.py"}:
+            text = _one_replace(text, "router = APIRouter()", "router = APIRouter(route_class=AssetGuardRoute)", filename)
+            text = _guard_import(text, "from open_webui.ees_asset_guard import AssetGuardRoute")
+        if filename == "open_webui/routers/tools.py":
+            text = _guard_tool_cache(text, filename)
+            text += "\nEES_ASSET_CACHE_COMMIT_ORDER = 1\n"
+        if filename == "open_webui/utils/tools.py":
+            text = _guard_local_tool_loading(text, filename)
+        if filename == "open_webui/main.py":
+            node, = [n for n in ast.parse(text).body if isinstance(n, ast.AsyncFunctionDef) and n.name == "lifespan"]
+            lines = text.splitlines(keepends=True)
+            body = "".join(lines[node.lineno - 1:node.end_lineno])
+            start = "    app.state.main_loop = asyncio.get_running_loop()\n"
+            if body.count(start) != 1:
+                raise ValueError("Asset guard lifespan boundary differs.")
+            before, after = body.split(start)
+            body = (before + start + "    from open_webui.ees_asset_guard import start_asset_guard, stop_asset_guard\n"
+                    "    await start_asset_guard(app)\n    try:\n" +
+                    "".join("    " + line if line.strip() else line for line in after.splitlines(keepends=True)) +
+                    "    finally:\n        await stop_asset_guard(app)\n")
+            lines[node.lineno - 1:node.end_lineno] = [body]
+            text = "".join(lines)
+            text = _one_replace(text, "app.include_router(tools.router, prefix='/api/v1/tools', tags=['tools'])",
+                                "app.include_router(tools.router, prefix='/api/v1/tools', tags=['tools'])\n"
+                                "from open_webui.ees_asset_guard import create_asset_router\n"
+                                "app.include_router(create_asset_router(), prefix='/api/v1/ees/assets', tags=['ees-assets'])", filename)
+        compile(text, filename, "exec")
+        replacements[filename] = text.encode("utf-8")
 
 
 def sha256_file(path):
@@ -220,7 +398,7 @@ def prepare_replacements(source, asset_dir):
         raise ValueError("The target wheel would contain duplicate entries.")
     if any(name.endswith(("/RECORD.jws", "/RECORD.p7s")) for name in names):
         raise ValueError("Signed wheels cannot be repacked by this builder.")
-    required = set(PATCHES) | {SOURCE_INFO + "RECORD", SOURCE_INFO + "WHEEL"}
+    required = set(PATCHES) | set(ASSET_GUARD_SOURCE_HASHES) | {SOURCE_INFO + "RECORD", SOURCE_INFO + "WHEEL"}
     asset_targets = {
         prefix + name: name
         for prefix in ("open_webui/static/", "open_webui/frontend/static/")
@@ -241,6 +419,7 @@ def prepare_replacements(source, asset_dir):
                 raise ValueError(f"Patch precondition failed: {name}: expected {expected}, got {actual}.")
             content = content.replace(old, new)
         replacements[name] = content
+    prepare_asset_guard_replacements(source, replacements)
     assets = {}
     for name in ASSET_NAMES:
         path = Path(asset_dir) / name
@@ -271,6 +450,9 @@ def prepare_additions(source, ui_dir, work_dir=WORK_DIR):
         if path.is_symlink() or not path.is_file() or not path.stat().st_size:
             raise ValueError(f"Missing, empty, or linked EES Work asset: {relative}")
         additions[target] = path.read_bytes()
+    if ASSET_GUARD_SOURCE.is_symlink() or not ASSET_GUARD_SOURCE.is_file() or not ASSET_GUARD_SOURCE.stat().st_size:
+        raise ValueError("Missing, empty, or linked asset guard runtime.")
+    additions[ASSET_GUARD_FILES[0]] = ASSET_GUARD_SOURCE.read_bytes()
     if WORK_BOOTSTRAP.is_symlink() or not WORK_BOOTSTRAP.is_file():
         raise ValueError("Missing EES work panel bootstrap.")
     additions[WORK_BOOTSTRAP_TARGET] = WORK_BOOTSTRAP.read_bytes()

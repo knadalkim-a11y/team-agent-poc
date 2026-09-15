@@ -6,12 +6,12 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: AI 개발과 현장 자산 보존을 위한 [제한적 리팩토링 설계](mockups/ees-work/TASK.md#refactoring-design)를 작성하고 독립 검토로 보완함. 자산 동시 편집 결함 수정(R0), 업무 서버/정책 분리(R1), 업무 화면 책임 분리(R2), 실제 배포물 호환 확인(R3)의 파일·인터페이스·검증/Restore 기준을 정함. 이번 변경은 설계·검토 문서이며 실행 코드·시험·사내 환경은 변경하지 않음. [검토 결과와 미실행 범위](../evals/scenarios.md#refactoring-design-review-20260915).
+- 이번 작업: 설계의 R0 자산 동시 편집 보호를 ees.9/v0.2.10에 구현하고 실제 고정 WebUI 저장 코드로 검증함. 서버 조건부 API·native 쓰기/정상화/Tool 캐시·Task/프로세스 잠금, 클라이언트 snapshot/journal, 구버전 거절·프로그램 Restore 연결을 반영함. 독립 검토의 캐시 경합과 불필요한 외부 호출 잠금을 보완함. Python 3.11 최종 회귀 330개 중 324 PASS/플랫폼 6 SKIP이며 PR 원격 검사 확인 단계. 병합·사내 적용은 미실행. [구현·검증·남은 범위](../evals/scenarios.md#conditional-assets-20260915).
 - 최근 Git 반영: [PR #47](https://github.com/knadalkim-a11y/team-agent-poc/pull/47)을 `02b880b19db6ffb353daf3309e3ff1354730e815`로 병합하고 [병합 main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910676906)의 Linux·Windows·ees.8 프로그램 산출물 성공을 확인함. 사내 가이드 원본 `9a90e19fb7f5f7d967d47c1f811d648b4dc1ee52`의 [main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34910881151)도 전체 성공했으며 이번 사용자 ApplyDemo 보고의 원본과 같음. 이후 상태 기록은 문서만 갱신하며 검사 결과는 [최신 main 실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/workflows/ees-delivery.yml?query=branch%3Amain)에서 확인함. 최초 실패·수정·원격 검증과 실제 사내 결과는 [같은 기록](../evals/scenarios.md#sidebar-refinement-20260914)에서 구분함.
 - 최근 UI 확인: 09-15 사용자 보고로 공장·시스템 선택 박스, 프로세스 직계 태스크만 펼침, 글꼴 통일·P/T/J 설명 행 제거, 기존 대화·작성 중 초안 유지의 네 항목을 정상 확인함. 이번 UI 개선의 사내 수락 범위를 완료로 처리하며 같은 확인을 반복하지 않음.
 - 최근 운영 확인: 09-15 새 UI 네 항목 정상 보고를 확인함. 프로그램 버전 문자열·정확한 설치 원본 SHA·개별 Upgrade 출력은 별도 미보고이며, 마지막 직접 버전 응답은 09-14의 `0.11.3+ees.7`임. 이를 현재 프로그램 버전으로 고정하지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 별도 미확인임. [새 UI 확인](../evals/scenarios.md#sidebar-refinement-20260914), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 09-15 `9a90e19fb7f5` ApplyDemo로 v0.2.9 관리 자산 1건 갱신 성공 후 새 UI 네 항목의 사용자 확인까지 마침. 이전 `76e566622e74`의 v0.2.8·8건 적용은 [정렬 충돌 수정 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 대표 질문·실제 모델 호출은 이번 UI 확인과 구분함.
-- 다음 작업 하나: 설계의 R0 자산 동시 편집 결함 수정부터 별도 구현/검수 단위로 진행할 준비를 마침. 고정 wheel의 실제 저장 경로·조건부 API·잠금/취소/session·클라이언트 journal을 함께 검증해야 하며, 현재 재조회만으로 동시 편집이 보호되는 것은 아님. 이 상태표는 구현·병합·배포 권한을 대신하지 않는다. 공동 작업 기능·새 실무 절차·실제 파일럿은 후속 미완료 범위임.
+- 다음 작업 하나: R0의 PR/CI·배포 준비를 마무리한 뒤 [설계 R1](mockups/ees-work/TASK.md#refactoring-design)의 업무 서버/정책 책임 분리를 다음 구현 단위로 진행함. R1·R2·공동 진행 건·새 실무 절차·실제 파일럿은 아직 미완료. 사내 R0 적용은 main 병합·CI·프로그램 산출물 성공 뒤 [조건부 자산 가이드](03-openwebui-native-agent.md#conditional-assets)로 한 번 수행하며 현재 상태표를 병합·배포 권한으로 해석하지 않음.
 - 최신 사내 확인: 09-15 `apply_demo result=ok changed=1 commit=9a90e19fb7f5 stage=complete code=- next=new_chat`, 이어 `ui=ok tree=ok font=ok chat=ok` 보고. 지정 자산 적용과 요청한 새 화면·트리·글꼴·대화/초안 확인을 완료함. 실제 모델의 업무 호출·공유 권한·유휴 안정성까지 통과한 것으로 확대하지 않음. [이번 적용·화면 확인](../evals/scenarios.md#sidebar-refinement-20260914).
 
 ## 마지막으로 확인된 적용 상태
@@ -31,7 +31,7 @@
 
 ## 남아 있는 이슈와 확인 범위
 
-- **공통 자산 업데이트 중 동시 편집:** 최종 GET 뒤 POST 직전 관리 Tool의 지원 필드 `meta.description`을 다른 값으로 바꾸는 합성 조건에서 이전 값으로 덮이고 적용 성공이 반환됨. 기존 재조회 보호를 서버의 원자적 조건부 저장으로 볼 수 없음. 사내 실제 발생/피해는 미확인이고 관리 목록 밖 사용자 자산 삭제를 재현한 것은 아님. 지원하지 않는 `meta.custom`의 최초 모의 관찰은 현행 결함 분류에서 제외함. [재현·정정·다음 검증 기준](../evals/scenarios.md#ai-runtime-preservation-20260915).
+- **공통 자산 업데이트 중 동시 편집:** 기존 GET→POST 사이 지원 description 유실의 합성 결함을 R0 조건부 저장·native 보호 경로로 수정하고 실제 wheel 회귀에서 확인함. 현재 PR 구현이며 사내 반영은 미실행이므로 기존 설치의 보호가 완료됐다고 표현하지 않음. 보호 미적용 원본 서버·외부 DB writer·일반 UI끼리의 오래된 폼 충돌은 보장 밖. [원래 재현/오탐 정정](../evals/scenarios.md#ai-runtime-preservation-20260915), [수정·검증·적용 경계](../evals/scenarios.md#conditional-assets-20260915).
 - **사외 Windows CI 지연:** 이전에 통과한 동일 코드에서 PowerShell 20초·Node 10초 제한시간 초과가 각각 발생했으며 원인은 미확정임. 두 시험의 단계 표식·런타임 버전·timeout의 단계 표식를 보존하도록 보완했으므로 자연 재발 시 그 증거로 진입 관측 여부와 시험 내부 단계를 구분함. 재검사 성공을 근본원인 해결이나 사내 서버 진단 필요로 바꾸지 않음. [실패·관측·최종 CI](../evals/scenarios.md#sidebar-refinement-20260914).
 - **팀 공동 작업:** 사용자가 공장 1개·시스템 1개·프로세스 1개, 참여자 2~3명의 첫 단위를 선택함. 현재 진행 건과 대화 연결은 사용자 소유이며 개인 선택 상태도 진행 건에 있어 공동화 때 분리가 필요함. 참여/역할·이력·충돌 처리는 아직 구체화·구현 전임. [새 단위·현황 표시 제안](mockups/ees-work/TASK.md#shared-pilot-first), [전체 목표](mockups/ees-work/TASK.md#ees-work-shared-target).
 - **공장별 업무 UX:** 09-15 사용자 보고로 이번 사이드바 선택 영역·직계 펼침·글꼴·대화/초안 유지의 사내 확인을 완료함. Workspace 탭 반복 재삽입·첫 메시지 경합의 사외 재현과 자동 검사는 [기존 근거](../evals/scenarios.md#ees-work-factory-ux-20260914)에 보존함. 이번 네 항목에 없던 Workspace 반복 전환·실제 모델 호출 등으로 확인 범위를 확대하지 않고 다음 관련 사용·변경 시점에만 판단함. [새 UI 수락](../evals/scenarios.md#sidebar-refinement-20260914).
@@ -69,6 +69,6 @@
 
 ## 최근 점검
 
-2026-09-15: 구현용 설계 본문과 독립 구조/안전 검토를 기존 문서 PR에 반영함. 패널 동작 통합 제외, 명시적 화면 상태/이벤트 소유권, 정책 분리 시 기존 자료 불변, 실제 조립/설치 모듈 시험, 서버 조건부 저장의 프로세스·취소·session·snapshot 경계를 보완함. 문서 검사와 최종 검토 결과는 [설계 검토 기록](../evals/scenarios.md#refactoring-design-review-20260915)에 남기며 코드 구현·서버 경합 시험·사내 반영은 미실행임. 기존 보존 8개 PASS와 동시 편집 합성 재현은 [앞선 검토](../evals/scenarios.md#ai-runtime-preservation-20260915)의 증거로 보존함.
+2026-09-15: R0 서버·클라이언트·빌더/Apply/Restore를 구현하고 독립 코드 검토로 local Tool cache 경합과 외부 모델 조회 잠금 범위를 보완함. 실제 wheel·async SQLite와 실제 manifest의 첫 적용/무변경 재실행을 검증하고 Python 3.11 최종 회귀 330개 중 324 PASS/플랫폼 6 SKIP와 문서 검사를 마침. 원격 Windows·브라우저 CI는 후속 확인 단계임. [정확한 실행 결과·실패와 조치·미확인](../evals/scenarios.md#conditional-assets-20260915). 사내 서버·데이터·자산은 변경하지 않았고 앞선 설계 검토는 [기록](../evals/scenarios.md#refactoring-design-review-20260915)에 보존함.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
