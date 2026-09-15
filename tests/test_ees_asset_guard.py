@@ -326,12 +326,12 @@ print('released')
 """
             command = [sys.executable, "-c", code, str(SOURCE), str(data)]
             try:
-                blocked = subprocess.run(command, capture_output=True, text=True, timeout=20)
+                blocked = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", timeout=20)
                 self.assertEqual(blocked.returncode, 23, blocked.stderr)
                 self.assertEqual(blocked.stdout.strip(), "ees_asset_guard_database_in_use")
             finally:
                 first.release()
-            restarted = subprocess.run(command, capture_output=True, text=True, timeout=20)
+            restarted = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", timeout=20)
             self.assertEqual(restarted.returncode, 0, restarted.stderr)
             self.assertEqual(restarted.stdout.strip(), "released")
             self.assertTrue((data / "ees-assets.lock").is_file())
@@ -346,7 +346,7 @@ print('released')
         with tempfile.TemporaryDirectory() as directory:
             data = Path(directory)
             target = data / "another-file"
-            target.write_text("untouched")
+            target.write_text("untouched", encoding="utf-8")
             try:
                 (data / "ees-assets.lock").symlink_to(target)
             except (NotImplementedError, OSError):
@@ -354,7 +354,7 @@ print('released')
             lock = guard_module.ProcessLock(data, data / "webui.db")
             with self.assertRaisesRegex(guard_module.AssetGuardError, "unsafe_path"):
                 lock.acquire()
-            self.assertEqual(target.read_text(), "untouched")
+            self.assertEqual(target.read_text(encoding="utf-8"), "untouched")
 
     def test_rejects_hard_linked_database(self):
         with tempfile.TemporaryDirectory() as directory:

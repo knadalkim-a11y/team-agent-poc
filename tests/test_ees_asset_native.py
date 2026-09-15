@@ -405,7 +405,7 @@ class NativeAssetCases:
         self.assertEqual(repeated["result"], "ok")
         self.assertEqual(repeated["changed"], 0)
         self.assertEqual(len(client.writes), expected)
-        journal = json.loads((state / assets.STATE_FILE).read_text())
+        journal = json.loads((state / assets.STATE_FILE).read_text(encoding="utf-8"))
         self.assertTrue(all(row["status"] == "applied" for row in journal["assets"].values()))
         for item in manifest["tools"]:
             if item.get("managed_valves"):
