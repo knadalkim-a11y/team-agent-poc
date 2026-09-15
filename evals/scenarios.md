@@ -127,6 +127,8 @@
 - 최종 자산 보호 재검증: 최종 wheel의 실제 native 경로를 대상으로 엄격한 인코딩 옵션과 `EES_REQUIRE_ASSET_GUARD=1`, `EES_REQUIRE_ASSET_NATIVE=1`로 guard 16/16 PASS(0.626초), native 26/26 PASS(29.845초). Git 밖 합성 자산·개인 설정·동시 편집·실패 후 보존의 지원 범위를 확인하며 모든 사내 사용자 작성물의 실실행을 확인한 것으로 확대하지 않음. 최종 소스/문서 diff와 파일 연결을 대조했고 문서 점검은 아래 최종 반영 결과에 기록함.
 - 미실행·재현: 로컬 Chrome이 없어 Native 브라우저 13개 흐름 및 실제 레이아웃은 실행하지 못했으며 Windows도 미실행임. 새 R3 역호환 시험은 이전 wheel 환경변수가 없는 기본 CI에서는 SKIP되므로 로컬 Linux 성공을 Windows의 새 역호환 검사 성공으로 쓰지 않음. 최종 산출물 경로를 `EES_TEST_BRANDING_DIR`, 이전 ees.8 경로를 `EES_TEST_PREVIOUS_BRANDING_DIR`로 지정하고 기존 `test_ees_webui_customization.py`를 실행함. 원격 실행기 문제가 남으면 수동 재시도나 사내 사용자 검사를 반복하지 않고 실행 화면의 오류 한 줄로 다음 조건을 구분함.
 
+- Git 반영·원격 결과: 구현/시험 원본 `2573de9541da6ef3c79dddceae2a59778b3bac9e`, tree `c24f76714d7193328ed9f6bcbd2c40354538b02e`로 로컬/원격 파일 일치를 확인함. 문서 점검 `files=30 links=1064 errors=0 review_candidates=0`, diff 검사 통과. [최종 구현 CI 34938361364](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/34938361364)의 Windows `104281134817`·Linux `104281134869`도 06:45:14~06:45:16 UTC에 `runner_id=0`, `steps=[]`, `failure`로 종료함. 패키징은 SKIP이고 제품 시험·브라우저·Windows 검증을 실행한 결과가 아님. 별도 수동 재시도는 요청하지 않았으며 앞선 annotation 본문 접근 한계가 남아 있으므로 사용자 실행 화면의 오류 한 줄로 다음 조건을 구분함. 이 결과를 기록하는 후속 문서 변경은 같은 구현/시험 코드를 유지하며 사내 적용 없이 PR을 Draft로 둠.
+
 <a id="shared-pilot-priority-20260915"></a>
 
 ## 2026-09-15 첫 공동 작업 단위와 현황판 우선순위 검토
