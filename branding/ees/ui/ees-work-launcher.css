@@ -138,7 +138,10 @@
 #ees-work-resizer:focus {outline:0;}
 #ees-work-resizer:focus-visible:not([data-pointer]) > span {outline:2px solid var(--ew-muted);outline-offset:3px;}
 #ees-work-panel.ew-narrow {position:fixed;inset:0 0 0 auto;z-index:60;box-shadow:-12px 0 35px #0002;}
-#ees-work-designer {max-width:1400px;margin:0 auto;padding:20px 12px 40px;}
+/* Workspace already provides the page gutters and scrolling. Match its native
+   detail forms without inheriting the chat/panel's branded accent palette. */
+#ees-work-designer {--ew-bg:var(--color-white,#fff);--ew-soft:var(--color-gray-50,#fafafa);--ew-ink:var(--color-gray-900,#171717);--ew-muted:var(--color-gray-500,#737373);--ew-line:var(--color-gray-200,#e5e5e5);--ew-blue:var(--color-gray-900,#171717);--ew-tint:var(--color-gray-100,#f5f5f5);width:100%;min-width:0;margin:0;padding:0 0 32px;font-family:inherit;background:transparent;}
+.dark #ees-work-designer {--ew-bg:var(--color-gray-900,#171717);--ew-soft:var(--color-gray-850,#262626);--ew-ink:var(--color-gray-100,#f5f5f5);--ew-muted:var(--color-gray-400,#a3a3a3);--ew-line:var(--color-gray-800,#404040);--ew-blue:var(--color-gray-100,#f5f5f5);--ew-tint:var(--color-gray-800,#404040);}
 /* The added Workspace tab borrows native layout/type classes, but gets its own
    active state. Override Models only while the workflow view occupies it. */
 #ees-work-workspace-tab,nav:has(#ees-work-workspace-tab[aria-current=page]) a[href="/workspace/models"] {color:var(--color-gray-300,#d4d4d4);}
@@ -147,20 +150,45 @@
 .dark #ees-work-workspace-tab,.dark nav:has(#ees-work-workspace-tab[aria-current=page]) a[href="/workspace/models"] {color:var(--color-gray-600,#525252);}
 .dark #ees-work-workspace-tab:hover,.dark nav:has(#ees-work-workspace-tab[aria-current=page]) a[href="/workspace/models"]:hover {color:var(--color-white,#fff);}
 .dark #ees-work-workspace-tab[aria-current=page] {color:var(--color-gray-100,#f5f5f5);}
-#ees-work-designer > header {display:flex;justify-content:space-between;align-items:flex-start;gap:20px;}
-#ees-work-designer > header .ew-muted {margin-top:6px;}
-.ew-designer-status {font-size:var(--text-sm,.875rem);color:var(--ew-muted);padding:12px 0 16px;}
+#ees-work-designer > header {display:flex;justify-content:space-between;align-items:center;gap:8px 16px;min-height:36px;flex-wrap:wrap;}
+#ees-work-designer .ew-designer-heading {display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px;min-width:0;}
+#ees-work-designer h1 {font-size:var(--text-sm,.875rem);font-weight:500;line-height:1.5;letter-spacing:normal;}
+#ees-work-designer h2,#ees-work-designer h3 {font-size:var(--text-sm,.875rem);font-weight:500;}
+#ees-work-designer .ew-designer-status {font-size:var(--text-xs,.75rem);color:var(--ew-muted);overflow-wrap:anywhere;}
+#ees-work-designer .ew-designer-description {font-size:var(--text-xs,.75rem);margin:4px 0 14px;}
+#ees-work-designer button {border-color:transparent;border-radius:var(--radius-lg,.5rem);padding:6px 10px;background:transparent;font-size:.8125rem;}
+#ees-work-designer button:hover {background:var(--ew-tint);}
+#ees-work-designer .ew-primary {background:var(--ew-blue);color:var(--ew-bg);border-color:var(--ew-blue);border-radius:9999px;padding-inline:14px;}
+#ees-work-designer .ew-primary:hover {background:var(--ew-blue);}
+#ees-work-designer button[data-action=save_draft],#ees-work-designer button[type=submit] {background:var(--ew-soft);border-color:var(--ew-line);border-radius:9999px;}
+#ees-work-designer button[data-action=save_draft]:hover,#ees-work-designer button[type=submit]:hover {background:var(--ew-tint);}
+#ees-work-designer input:not([type=checkbox]),#ees-work-designer select,#ees-work-designer textarea {border-color:transparent;background:var(--ew-soft);border-radius:var(--radius-lg,.5rem);}
+#ees-work-designer label {font-weight:400;}
+#ees-work-designer input[readonly],#ees-work-designer textarea[readonly] {color:var(--ew-muted);}
+#ees-work-designer a {color:var(--ew-muted);font-size:var(--text-xs,.75rem);}
+#ees-work-designer a:hover {color:var(--ew-ink);}
 [data-ees-work] .ew-editor-tabs,[data-ees-work] .ew-run-tabs {display:flex;flex-wrap:wrap;gap:6px;padding-bottom:10px;border-bottom:1px solid var(--ew-line);}
 [data-ees-work] .ew-editor-tabs button,[data-ees-work] .ew-run-tabs button {border-color:transparent;background:transparent;}
 [data-ees-work] .ew-editor-tabs button[aria-selected=true],[data-ees-work] .ew-run-tabs button[aria-pressed=true] {background:var(--ew-tint);color:var(--ew-ink);font-weight:500;}
 [data-ees-work] .ew-run-tabs {margin:12px 0 16px;}
-.ew-editor-layout {display:grid;grid-template-columns:280px minmax(0,1fr);gap:30px;margin-top:22px;}
-.ew-editor-layout > aside {padding-right:18px;border-right:1px solid var(--ew-line);}
-.ew-editor-layout > aside > .ew-heading button {font-size:var(--text-xs,.75rem);}
-.ew-node-editor > .ew-heading {margin-bottom:18px;flex-wrap:wrap;}
-.ew-node-editor > .ew-heading button {font-size:var(--text-xs,.75rem);}
+#ees-work-designer .ew-editor-tabs {gap:2px;padding-bottom:8px;}
+#ees-work-designer .ew-editor-tabs button {border-radius:9999px;color:var(--ew-muted);}
+#ees-work-designer .ew-editor-tabs button[aria-selected=true] {background:var(--ew-tint);color:var(--ew-ink);font-weight:500;}
+#ees-work-designer .ew-editor-layout {display:grid;grid-template-columns:260px minmax(0,1fr);gap:24px;margin-top:16px;}
+#ees-work-designer .ew-editor-layout > aside {padding-right:16px;border-right:1px solid var(--ew-line);min-width:0;}
+#ees-work-designer .ew-editor-layout > aside > .ew-heading {gap:4px;flex-wrap:wrap;}
+#ees-work-designer .ew-editor-layout > aside > .ew-heading button {font-size:var(--text-xs,.75rem);}
+#ees-work-designer .ew-tree-row > button:not(.ew-expand) {font-size:.8125rem;padding:7px 5px;}
+#ees-work-designer .ew-tree-row > button[aria-current=step] {background:var(--ew-tint);color:var(--ew-ink);}
+#ees-work-designer .ew-expand {padding:0;}
+#ees-work-designer .ew-node-editor {min-width:0;max-width:960px;}
+#ees-work-designer .ew-node-editor > .ew-heading {margin-bottom:12px;flex-wrap:wrap;}
+#ees-work-designer .ew-node-editor > .ew-heading button {font-size:var(--text-xs,.75rem);}
 [data-ees-work] fieldset {border:1px solid var(--ew-line);border-radius:8px;padding:12px 14px;margin:15px 0;}
 [data-ees-work] legend {font-size:var(--text-sm,.875rem);font-weight:500;padding:0 6px;}
+#ees-work-designer fieldset {border-width:1px 0 0;border-radius:0;padding:8px 0 0;margin:20px 0;}
+#ees-work-designer legend {padding:0 8px 0 0;}
+#ees-work-designer fieldset label {margin:8px 0;}
 [data-ees-work] .ew-checkbox {display:flex;flex-direction:row;align-items:center;gap:8px;font-weight:400;}
 [data-ees-work] .ew-option-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;}
 [data-ees-work] .ew-form-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px;}
@@ -168,10 +196,12 @@
 [data-ees-work] .ew-tool-editor select,[data-ees-work] .ew-tool-editor button {font-size:var(--text-xs,.75rem);padding:6px 8px;}
 [data-ees-work] .ew-inline {margin-top:10px;}
 [data-ees-work] .ew-inline button {white-space:nowrap;}
-.ew-assets {max-width:850px;margin-top:22px;}
-.ew-assets > .ew-muted {margin:10px 0;}
-@media(max-width:1100px) {#ees-work-context small{display:none}.ew-editor-layout{grid-template-columns:240px minmax(0,1fr);gap:18px}#ees-work-designer{padding:20px 8px}#ees-work-designer>header{flex-direction:column;gap:12px}}
-@media(max-width:760px) {#ees-work-context{padding:8px}#ees-work-context>button:first-child{flex-wrap:wrap;gap:3px 6px}#ees-work-context>button:first-child>span:last-child{width:100%}.ew-editor-layout{display:block}.ew-editor-layout>aside{border-right:0;border-bottom:1px solid var(--ew-line);padding:0 0 16px;margin-bottom:20px}.ew-form-grid,.ew-option-grid{grid-template-columns:1fr!important}[data-ees-work] .ew-tool-editor{grid-template-columns:minmax(0,1fr) 90px auto auto}#ees-work-content{padding:17px}}
+#ees-work-designer .ew-assets {max-width:960px;margin-top:16px;}
+#ees-work-designer .ew-assets > .ew-muted {margin:6px 0;font-size:var(--text-xs,.75rem);}
+#ees-work-designer .ew-assets > .ew-heading {flex-wrap:wrap;}
+#ees-work-designer .ew-card {border:0;border-bottom:1px solid var(--ew-line);border-radius:0;background:transparent;padding:12px 0 20px;margin:12px 0;}
+@media(max-width:1100px) {#ees-work-context small{display:none}#ees-work-designer .ew-editor-layout{grid-template-columns:220px minmax(0,1fr);gap:18px}}
+@media(max-width:760px) {#ees-work-context{padding:8px}#ees-work-context>button:first-child{flex-wrap:wrap;gap:3px 6px}#ees-work-context>button:first-child>span:last-child{width:100%}#ees-work-designer .ew-editor-layout{display:block}#ees-work-designer .ew-editor-layout>aside{border-right:0;border-bottom:1px solid var(--ew-line);padding:0 0 16px;margin-bottom:20px}.ew-form-grid,.ew-option-grid{grid-template-columns:1fr!important}[data-ees-work] .ew-tool-editor{grid-template-columns:minmax(0,1fr) 90px auto auto}#ees-work-content{padding:17px}}
 @media(pointer:coarse) {[data-ees-work] button,[data-ees-work] select,[data-ees-work] summary{min-height:40px}}
 #chat-container .ees-work-chat-column {min-width:0!important;flex:1 1 0%;}
 /* Upstream chat navbar overlays messages with -mb-12. The added context strip

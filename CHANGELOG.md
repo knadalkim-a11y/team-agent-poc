@@ -4,6 +4,8 @@
 
 ## 2026-09-15
 
+- [업무절차 Workspace 화면](docs/mockups/ees-work/TASK.md#workspace-native-design-20260915)을 기존 Native 정렬·서체·회색 버튼/입력폼에 맞춰 정리하고, 중복 큰 제목과 카드 테두리를 줄임. 기존 편집·초안·검증·게시 동작을 유지하며 사이드바 제목은 `업무`로 단순화함. GLM 5.3의 사용자 UI 반영 보고를 환경 기준에 갱신함. 실제 새 화면·모델 검증 및 배포는 [확인 범위](evals/scenarios.md#workspace-native-design-20260915)에서 구분함.
+
 - [고정 원본 시험 업데이트](docs/03-openwebui-native-agent.md#ees-wrapper-trial)에 `Upgrade -TrialCommit`을 연결해 수동 ZIP 저장·경로 입력을 없앰. 공식 고정 wheel 다운로드/검증 캐시와 Git 원본의 줄바꿈 보존 패키징을 기존 Python으로 수행하고, 검증 뒤 기존 백업·Apply·Start·조건부 ApplyDemo를 순서대로 사용함. 기본 CI 경로와 사내 데이터/환경을 유지하며 준비 실패는 Stop 이전에 멈춤.
 
 - 사용자 배포 요청에 따라 [9월 고정 원본 시험 적용](docs/03-openwebui-native-agent.md#ees-wrapper-trial)을 연결함. ApplyDemo의 공개 TrialCommit은 검토한 clean main·origin/main·설치 프로그램 원본을 확인하고 기존 자산 보호를 유지함. 기본 CI 경로는 유지하며 기존 내부 백업 기능을 공개 Backup 명령으로 재사용해 Stop 뒤 데이터/키/설정 검증 백업을 수행함. 실제 사내 실행은 배포 결과 보고와 구분함.

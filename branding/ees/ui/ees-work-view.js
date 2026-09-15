@@ -139,7 +139,7 @@ function createWorkView({callbacks}) {
     if(!data){if(!entry.firstChild)entry.innerHTML='<p class="ew-caption">업무</p><p class="ew-muted">업무 절차를 불러오는 중입니다.</p>';updateScopeReadiness();return;}
     if(!entry.querySelector('.ew-scope-pickers'))entry.innerHTML='<div class="ew-scope-pickers"></div><div class="ew-work-navigation"></div>';
     renderScopeControls(entry.querySelector('.ew-scope-pickers'),data);
-    const html=`<p class="ew-caption">업무 · 현재 진행</p>${Object.entries(categories).map(([id,label])=>{
+    const html=`<p class="ew-caption">업무</p>${Object.entries(categories).map(([id,label])=>{
       const roots=visibleRoots(id);
       return `<button type="button" class="ew-category" data-work-category="${id}" aria-expanded="${navOpen&&category===id}"><span>${label}</span><span aria-hidden="true">${navOpen&&category===id?'⌄':'›'}</span></button>${navOpen&&category===id?`<div class="ew-inline-tree" id="ees-work-tree">${roots.map(p=>{const c=chosenCase(p),tree=c?.tree_nodes?{nodes:c.tree_nodes}:c&&c.id===selectedCase()?.id?selectedCase().definition:data;return treeHTML(tree,[p],c);}).join('') || '<p class="ew-muted">게시된 절차가 없습니다.</p>'}</div>`:''}`;
     }).join('')}`;

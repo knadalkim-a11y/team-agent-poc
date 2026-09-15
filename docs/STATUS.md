@@ -6,12 +6,12 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: ees.9·Agent Pack v0.2.10 배포 뒤 메인 채팅이 Knowledge만 검색하고 업무 도구 미연결로 답한 현상을 읽기 대조함. 조사 중 사용자가 재시도 정상 동작을 보고함. 최초 증상과 재시도 성공을 함께 보존하며 실제 도구 선택 상태·원인은 미확정으로 둠. 추가 수정·재배포·반복 검사는 진행하지 않음. [증거·확인 경계](../evals/scenarios.md#work-ui-refactor-20260915).
+- 이번 작업: 업무절차 Workspace의 제목·간격·버튼·입력폼을 기존 Native 디자인에 맞추고 사이드바 제목을 `업무`로 줄임. 기존 폼·액션·저장·검증·게시·미저장 초안 처리와 사내 사용자 자산을 유지함. GLM 5.3은 사용자가 사내 UI에 반영 완료한 것으로 [환경 기준](../versions.md#사내-모델-운용-기준)에 기록함. 코드 검토와 실제 화면·사내 적용은 구분함. [변경·로컬 확인·미실행](../evals/scenarios.md#workspace-native-design-20260915).
 - Git 원본: 리팩토링·메인 채팅 업무 탐색·자산 보호는 [PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48), ZIP 자동 준비는 [PR #49](https://github.com/knadalkim-a11y/team-agent-poc/pull/49)에 반영됨. 이번 확인된 래퍼·프로그램·자산 원본은 `87f3f2922a4ab830bcee1022ed7045e624a36777`임. 이후 상태 문서 커밋은 실제 설치 원본과 구분하며 이 기록 갱신만으로 재배포하지 않음.
 - 최근 UI 확인: 09-15 앞선 ees.8의 공장·시스템 선택 박스, 프로세스 직계 태스크 펼침, 글꼴·설명 행 정리, 대화·작성 중 초안 유지 네 항목 정상 보고는 보존함. 이번 ees.9 설치 후 화면·기존 대화 확인은 아직 미보고이며 앞선 수락을 새 화면 결과로 바꾸지 않음. [앞선 수락](../evals/scenarios.md#sidebar-refinement-20260914).
 - 최근 운영 확인: 09-15 `stop → backup → apply`, `upgrade result=ok changed=true wrapper_changed=false version=0.11.3+ees.9 running=true` 보고. 정상 완료의 실행 순서상 검증 백업과 기동 health도 통과한 것으로 판단함. 새 다운로드와 원본 캐시 재사용 중 어느 경로였는지는 출력에서 구분되지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 이번 성공으로 확정하지 않음. [이번 적용](../evals/scenarios.md#work-ui-refactor-20260915), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 같은 원본의 `apply_demo result=ok changed=3 stage=complete code=- next=new_chat` 보고. 관리 목록 내 적용·쓰기 후 확인 성공이며 개별 변경 대상 3개를 추측하지 않음. 기존 v0.2.9/ees.8 수락과 과거 자산 충돌은 [앞선 기록](../evals/scenarios.md#sidebar-refinement-20260914), [정렬 충돌 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함.
-- 다음 작업 하나: 현재 배포본으로 업무 사용을 이어감. 같은 현상이 자연 재발할 때만 선택한 Assistant와 해당 대화의 EES Workflow 도구 표시/선택 상태를 짧게 확인해 요청에서의 도구 누락과 모델의 미사용을 구분함. 정상 사용 중에는 이미 성공한 배포·질문을 반복시키지 않음. 업무 실행·화면 반영·기존 대화 확인은 다음 관련 사용 결과로 구분함.
+- 다음 작업 하나: 이번 Workspace 외형 수정 PR의 검토 결과를 확인한 뒤, 승인된 후속 병합·시험 적용 범위에서 새 프로그램을 준비함. 적용 시 기존 Workspace와의 디자인 조화 및 편집 후 다른 탭을 오갔을 때 초안 유지 여부를 함께 확인함. 현재 정상 배포본의 재시도 성공을 도구 미노출 원인 해결로 바꾸거나 이번 변경 전에 재배포하지 않음.
 - 최신 사내 확인: 09-15 래퍼/프로그램 `87f3f2922a4a`의 ees.9 기동과 같은 자산 원본의 변경 3건 성공에 이어, 메인 채팅의 업무 요청 재시도 정상 동작을 사용자가 보고함. 첫 Knowledge 전용 응답과 일반 Upgrade의 CI 실패를 보존하며 재시도 성공을 원인 해결로 해석하지 않음. [실패·성공·한계](../evals/scenarios.md#work-ui-refactor-20260915).
 
 ## 2026년 9월 개발·검사 방침
@@ -76,10 +76,10 @@
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
-- GLM 5.2 기준의 작은 Tool·짧은 절차·일반 JSON을 유지하고 모델 교체 때 대표 업무·실패/금지 요청을 비교함. 화면·답변에 이모지를 쓰지 않음. 기존 Hermes·팀원 작성물은 보존하며 서비스화·서버 이전·별도 Router/A2A/자동 동기화·공통 UI 프레임워크는 실제 필요에 따라 후속으로 다룸. [공통 자산 관리 경계](../README.md#원본과-배포본).
+- 현재 사내 모델은 [GLM 5.3 UI 반영 보고](../versions.md#사내-모델-운용-기준)를 따르며 작은 Tool·짧은 절차·일반 JSON을 유지함. 과거 GLM 5.2 결과를 새 모델의 검증으로 바꾸지 않고 다음 관련 사용에서 대표 업무·실패/금지 요청을 비교함. 화면·답변에 이모지를 쓰지 않음. 기존 Hermes·팀원 작성물은 보존하며 서비스화·서버 이전·별도 Router/A2A/자동 동기화·공통 UI 프레임워크는 실제 필요에 따라 후속으로 다룸. [공통 자산 관리 경계](../README.md#원본과-배포본).
 
 ## 최근 점검
 
-2026-09-15: ees.9 배포 후 Knowledge만 검색한 첫 응답과 사용자의 재시도 정상 보고를 기록함. 고정 Open WebUI 0.11.3의 모델 기본 도구·브라우저 선택·요청 전달·백엔드 로딩과 관리 자산 등록 경로를 읽기 대조함. 사내 최초 요청의 도구 목록은 보지 못했으므로 원인이나 코드 수정 완료로 단정하지 않음. 기존 배포/로컬 검증과 최초 실패는 [평가 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 보존함. 이번 변경은 상태·증거 문서뿐이며 정상 서버 재배포·제품 재시험·원격 CI를 진행하지 않음.
+2026-09-15: 업무절차 화면을 고정 0.11.3의 Workspace/Models/Tools/Skills 소스와 대조함. 빌드 관련 엄격 인코딩 검사에서 기존 Node subprocess의 인코딩 누락 한 곳을 수정한 뒤 20 PASS/2 SKIP, 실제 조립 JS 구문 PASS를 확인함. Native 브라우저 검사는 Chrome/wheel 부재로 실제 0개 실행이며 사내 UI/모델 확인으로 확대하지 않음. 이전 도구 미노출·재시도 성공·사내 적용 증거는 [기존 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 보존하고 이번 결과는 [Workspace 변경 기록](../evals/scenarios.md#workspace-native-design-20260915)에서 관리함.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.

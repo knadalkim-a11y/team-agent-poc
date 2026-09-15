@@ -19,6 +19,7 @@
 | R2 업무 화면 분리·R3 배포 호환 | [화면 책임·단일 배포 JS·갱신 후 추가 저장과 이전 프로그램 복원](#work-ui-refactor-20260915) |
 | 공동 작업 첫 단위·현황판 시점 | [팀 사용 우선 목표·진척률과 일정 데이터 범위](#shared-pilot-priority-20260915) |
 | 사이드바 목업 후속 반영 | [ees.8 선택 영역·직계 펼침·폰트·검증 경계](#sidebar-refinement-20260914) |
+| 업무절차 Workspace 디자인 통합 | [기존 화면 스타일 대조·편집 기능 보존·검증 한계](#workspace-native-design-20260915) |
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
 | ees.7 적용 실패와 직전 버전 복구 | [09-14 rename 접근 거부, Restore·Start 성공, 새 화면 미확인](#ees7-apply-recovery-20260914) |
 | Windows 폴더 변경 대기·수동 진행 | [제한적 rename 재시도·경로 보호·기존 Resume 연결](#windows-program-rename-20260914) |
@@ -36,6 +37,19 @@
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="workspace-native-design-20260915"></a>
+
+## 2026-09-15 업무절차 Workspace 디자인 통합
+
+- 요청·원본: 사용자는 업무 절차 탭이 기존 모델·지식기반·프롬프트·스킬·도구와 달리 별도 HTML 화면처럼 보인다고 보고하고 기존 디자인에 맞추기를 요청함. 앞선 사이드바 `현재 진행` 제거 요구와 GLM 5.3의 사내 UI 반영 완료 보고도 함께 반영함. 시작 원격 main은 `3fa326323839d5fbcc817c8aeb8b81a727fb8bd2`, 관련 열린 PR 없음. 기존 로컬의 source tree `5e54d54a562ae5324b371d37d4db58bae2f1fd52`가 해당 main의 tree와 같음을 확인하고 별도 작업 사본에서 변경함. 사내 적용 원본 `87f3f2922a4a`와 이번 개발 원본을 구분함.
+- 관측·판단: 실제 업무절차는 Native `#workspace-container` 안에 들어가 있지만 별도 큰 제목, max-width/가운데 정렬/추가 padding, EES 채팅 색상 토큰과 카드·폼 규칙을 사용하고 있었음. 고정 upstream [Workspace layout](https://github.com/open-webui/open-webui/blob/v0.11.3/src/routes/(app)/workspace/+layout.svelte), [Models](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models.svelte), [Tools](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Tools.svelte), [Skills](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Skills.svelte)의 간격·본문 정렬·서체·버튼·선택 표시를 소스로 대조함. 사내 화면을 직접 관측한 결과는 아님.
+- 변경: `ees-work-designer.js`의 중복 큰 제목을 작은 제목/상태/기존 저장·검증·게시 toolbar로 정리하고 첫 내부 탭 이름을 `업무 구조`로 줄임. `ees-work-launcher.css`에서 해당 designer ID에만 Native 회색 계열·기존 Workspace 여백·compact 폼과 구분선을 적용함. 어두운 테마의 작은 안내/읽기 전용 텍스트는 gray-400을 써 대비를 유지함. `ees-work-view.js`는 사이드바 제목 한 곳만 `업무`로 변경함. 모든 폼 name·data-action·callback·capture/저장/검증/게시/DOM 복원 로직을 유지함.
+- 범위·기존 교훈: [Workspace 재삽입·초안 경합](#ees-work-factory-ux-20260914)을 재사용해 탭 생성/복원과 미저장 초안 처리 코드를 변경하지 않음. 현재 여러 프로세스·연결 자산이 한 초안 revision이므로 목록을 독립 저장 단위처럼 바꾸지 않고 기존 상세 편집 구조를 유지함. 게시 절차·업무 DB·모델/Skill/Tool·사용자 자산·실제 연결·개인 설정·프로그램 버전·Agent Pack 등록·배포 경로는 변경하지 않음. 같은 버전의 후속 프로그램 준비 시 원본 커밋과 새 JS/CSS bytes를 구분해야 하며 현재 배포물로 준비됐다고 표시하지 않음.
+- 최초 검사 실패·수정: Linux/Python 3.12.14에서 `python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p 'test_ees_branding_build.py' -q`는 22개 중 1 ERROR/2 SKIP. 기존 `test_work_draft_hook_never_imports_or_persists_tool_approval_mode`의 Node subprocess `text=True`에 encoding이 없어 Node 실행 전에 EncodingWarning이 발생함. 앞선 인코딩 보완이 이 subprocess 호출에는 적용되지 않았음을 확인하고 해당 호출 한 곳에 `encoding="utf-8"`을 추가함. 같은 파일의 다른 text subprocess에는 명시된 encoding이 있음을 확인했고 검사 경고·timeout·권한 조건은 완화하지 않음.
+- 로컬 확인: 같은 엄격 명령 재실행으로 **22개 중 20 PASS/2 SKIP**(0.371초). 두 SKIP은 공식 wheel 미제공으로 인한 기존 opt-in 검사이며 synthetic wheel/manifest/RECORD·소스 조립·기존 초안 승인 보호 검사와 구분함. 실제 이번 소스의 `assemble_work_launcher()` 결과 89,657 bytes에 `node --check` PASS. UI 개별 JS·diff 검사도 PASS. 소스 검토에서 편집/저장 동작 변경 없음과 designer 밖의 기존 업무 패널/사이드바 스타일 유지 범위를 확인함.
+- 독립 검토·문서: Native 소스와 CSS 적용 범위/우선순위·1100/760px 분기·회귀 영향을 읽기 검토하고, 어두운 테마 대비를 보완한 뒤 중대한 새 결함을 발견하지 못함. 폼 식별자와 기존 capture/저장/복원 함수의 원본 동일성도 확인함. 문서 검사 `files=30 links=1089 errors=0 review_candidates=0`, `git diff --check` PASS. 인코딩 누락의 재발 방지는 해당 기존 시험의 UTF-8 명시와 이번 사건 기록에 반영했고, 이미 있는 AGENTS의 인코딩 규칙을 중복 추가하지 않음.
+- 브라우저·사내 한계: 기존 `test_existing_workspace_editor_publication_and_user_denial`과 `test_workspace_tab_uses_native_type_and_does_not_flicker_on_idle_or_route_change`를 선택 실행했으나 Native Chrome/wheel 부재로 setUpClass SKIP, 실제 0개 실행임. 새 브라우저나 의존성을 설치하지 않음. 따라서 새 밝은/어두운 화면·좁은 폭·실제 포커스/초안/게시·사내 GLM 5.3의 호출 품질은 확인하지 않았음. 원격 검사는 기존 사용자 결정에 따라 `[skip ci]`로 생략하며 main 병합·프로그램 생성·사내 반영은 이번 소스 검토와 구분함.
 
 <a id="ees-work-shared-design-20260914"></a>
 
