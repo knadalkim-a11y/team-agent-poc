@@ -6,12 +6,12 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 업무절차 Workspace의 제목·간격·버튼·입력폼을 기존 Native 디자인에 맞추고 사이드바 제목을 `업무`로 줄임. 기존 폼·액션·저장·검증·게시·미저장 초안 처리와 사내 사용자 자산을 유지함. GLM 5.3은 사용자가 사내 UI에 반영 완료한 것으로 [환경 기준](../versions.md#사내-모델-운용-기준)에 기록함. 코드 검토와 실제 화면·사내 적용은 구분함. [변경·로컬 확인·미실행](../evals/scenarios.md#workspace-native-design-20260915).
+- 이번 작업: 사용자 지시대로 [업무 패널 설계](mockups/ees-work/TASK.md#work-panel-goal-design-20260915) → 독립 검토 → 구현 순서로 진행함. 잡의 수행·근거를 기반으로 태스크/프로세스 자동화와 자연어 관리를 확장하는 목표에 맞춰 P/T/J 내용을 구분하고, Workspace는 기존 Native 디자인과 구조 검증 의미를 맞춤. 관련 Draft [PR #52](https://github.com/knadalkim-a11y/team-agent-poc/pull/52)의 준비본으로 구현·검토함. 로컬 계약/조립/표시 검사 77 PASS·3 SKIP이며 실제 사내 설치본과 구분함. GLM 5.3은 사용자가 사내 UI에 반영한 [환경 기준](../versions.md#사내-모델-운용-기준)을 유지함. [설계·검토·시험 근거](../evals/scenarios.md#workspace-native-design-20260915).
 - Git 원본: 리팩토링·메인 채팅 업무 탐색·자산 보호는 [PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48), ZIP 자동 준비는 [PR #49](https://github.com/knadalkim-a11y/team-agent-poc/pull/49)에 반영됨. 이번 확인된 래퍼·프로그램·자산 원본은 `87f3f2922a4ab830bcee1022ed7045e624a36777`임. 이후 상태 문서 커밋은 실제 설치 원본과 구분하며 이 기록 갱신만으로 재배포하지 않음.
 - 최근 UI 확인: 09-15 앞선 ees.8의 공장·시스템 선택 박스, 프로세스 직계 태스크 펼침, 글꼴·설명 행 정리, 대화·작성 중 초안 유지 네 항목 정상 보고는 보존함. 이번 ees.9 설치 후 화면·기존 대화 확인은 아직 미보고이며 앞선 수락을 새 화면 결과로 바꾸지 않음. [앞선 수락](../evals/scenarios.md#sidebar-refinement-20260914).
 - 최근 운영 확인: 09-15 `stop → backup → apply`, `upgrade result=ok changed=true wrapper_changed=false version=0.11.3+ees.9 running=true` 보고. 정상 완료의 실행 순서상 검증 백업과 기동 health도 통과한 것으로 판단함. 새 다운로드와 원본 캐시 재사용 중 어느 경로였는지는 출력에서 구분되지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 이번 성공으로 확정하지 않음. [이번 적용](../evals/scenarios.md#work-ui-refactor-20260915), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 같은 원본의 `apply_demo result=ok changed=3 stage=complete code=- next=new_chat` 보고. 관리 목록 내 적용·쓰기 후 확인 성공이며 개별 변경 대상 3개를 추측하지 않음. 기존 v0.2.9/ees.8 수락과 과거 자산 충돌은 [앞선 기록](../evals/scenarios.md#sidebar-refinement-20260914), [정렬 충돌 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함.
-- 다음 작업 하나: 이번 Workspace 외형 수정 PR의 검토 결과를 확인한 뒤, 승인된 후속 병합·시험 적용 범위에서 새 프로그램을 준비함. 적용 시 기존 Workspace와의 디자인 조화 및 편집 후 다른 탭을 오갔을 때 초안 유지 여부를 함께 확인함. 현재 정상 배포본의 재시도 성공을 도구 미노출 원인 해결로 바꾸거나 이번 변경 전에 재배포하지 않음.
+- 다음 작업 하나: 목표 기반 P/T/J 패널과 Workspace의 PR #52 준비본을 대상으로 후속 병합·시험 적용을 요청받으면 정확한 원본의 새 프로그램을 준비하고 패널별 목적·결과/이력과 Workspace 편집/탭 이동을 소수 항목으로 확인함. 현재 정상 배포본의 재시도 성공을 도구 미노출 원인 해결로 바꾸지 않음.
 - 최신 사내 확인: 09-15 래퍼/프로그램 `87f3f2922a4a`의 ees.9 기동과 같은 자산 원본의 변경 3건 성공에 이어, 메인 채팅의 업무 요청 재시도 정상 동작을 사용자가 보고함. 첫 Knowledge 전용 응답과 일반 Upgrade의 CI 실패를 보존하며 재시도 성공을 원인 해결로 해석하지 않음. [실패·성공·한계](../evals/scenarios.md#work-ui-refactor-20260915).
 
 ## 2026년 9월 개발·검사 방침

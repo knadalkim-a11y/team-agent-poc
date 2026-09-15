@@ -51,8 +51,8 @@ function createWorkDesigner({callbacks}) {
       for (const child of container.children) {hiddenWorkspace.push([child,child.hidden]);child.hidden=true;}
       designer=document.createElement('section');designer.id='ees-work-designer';designer.dataset.eesWork='';container.append(designer);workspaceTab();hideWorkspaceContent();
     }
-    designer.innerHTML=`<header class="ew-designer-toolbar"><div class="ew-designer-heading"><h1>업무 절차</h1><div class="ew-designer-status">게시 v${esc(state.catalog.version)} · 초안 ${esc(editorRevision)}${editorDirty?' · 저장하지 않은 변경':''} · ${state.validated_revision===editorRevision&&!editorDirty?'검증 완료':'검증 필요'}</div></div><div class="ew-actions">${button('초안 저장','save_draft','data-mutation')}${button('검증','validate_draft','data-mutation')}${button('게시','publish','data-mutation class="ew-primary"')}</div></header>
-      <p class="ew-designer-description ew-muted">업무 구조·도구·지침·공장 조건을 하나의 초안으로 관리합니다. 게시한 변경은 새 진행 건부터 적용됩니다.</p>${alertHTML()}
+    designer.innerHTML=`<header class="ew-designer-toolbar"><div class="ew-designer-heading"><h1>업무 절차</h1><div class="ew-designer-status">게시 v${esc(state.catalog.version)} · 초안 ${esc(editorRevision)}${editorDirty?' · 저장하지 않은 변경':''} · ${state.validated_revision===editorRevision&&!editorDirty?'구조 검증 완료':'구조 검증 필요'}</div></div><div class="ew-actions">${button('초안 저장','save_draft','data-mutation')}${button('구조 검증','validate_draft','data-mutation')}${button('게시','publish','data-mutation class="ew-primary"')}</div></header>
+      <p class="ew-designer-description ew-muted">업무 구조·도구·지침·공장 조건을 하나의 초안으로 관리합니다. 게시한 변경은 새 진행 건부터 적용됩니다. 구조 검증은 절차의 연결 관계를 확인하며, 실제 업무 점검 결과는 진행 건에서 확인합니다.</p>${alertHTML()}
       <nav class="ew-editor-tabs" aria-label="업무 절차 설정">${[['workflow','업무 구조'],['tools','도구 연결'],['skills','스킬 · 지침'],['sites','공장 조건']].map(([id,label])=>button(label,'editor_tab',`data-tab="${id}" aria-selected="${editorTab===id}"`)).join('')}</nav>${editorTab==='workflow'?workflowEditor():assetEditor()}`;
     setBusy();
   }

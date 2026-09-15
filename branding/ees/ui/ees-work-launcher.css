@@ -130,6 +130,8 @@
 [data-ees-work] pre {white-space:pre-wrap;overflow-wrap:anywhere;font-size:var(--text-xs,.75rem);background:var(--ew-soft);padding:10px;border-radius:6px;}
 [data-ees-work] details {margin-top:16px;}
 [data-ees-work] summary {cursor:pointer;font-size:var(--text-sm,.875rem);color:var(--ew-muted);}
+#ees-work-content .ew-history-node {min-width:0;}
+#ees-work-content .ew-history-node summary {white-space:normal;overflow-wrap:anywhere;}
 [data-ees-work] .ew-instructions > div {padding:12px 0;border-bottom:1px solid var(--ew-line);font-size:var(--text-sm,.875rem);}
 [data-ees-work] .ew-instructions p {white-space:pre-wrap;color:var(--ew-muted);}
 [data-ees-work] .ew-footnote {color:var(--ew-muted);font-size:var(--text-xs,.75rem);line-height:1.5;margin-top:24px;padding-top:16px;border-top:1px solid var(--ew-line);}
