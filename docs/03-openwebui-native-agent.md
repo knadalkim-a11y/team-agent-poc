@@ -908,6 +908,7 @@ Set-Location "$env:USERPROFILE\team-agent-poc"
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA> -CheckOnly` | 저장 설정·버전/의존성 요구·전달물·설치 경로와 적용 가능 여부를 읽어 표시. 앱 import·서버 중지·쓰기 없음 |
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA>` | 서버가 종료됐음을 확인한 뒤 검증된 프로그램만 적용. 같은 커밋/해시이면 변경 없음. 자동 시작·health 대기 없음 |
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA> -Resume` | promote에서 중단된 실제 적용의 폴더를 사용자가 옮긴 뒤, 같은 ZIP·기록·전체 파일을 대조해 완료 기록만 남김. 파일 이동/추출·자동 시작 없음. `-CheckOnly`를 함께 쓰면 읽기 검증만 수행 |
+| `Backup -Summary` | 정상 종료된 등록 서버의 DATA_DIR·키·설정을 기존 내부 백업 경로에 복사하고 파일 해시와 DB를 확인. 프로그램 적용·서버 시작·데이터 원복 없음 |
 | `Restore` | **직전 적용 전 프로그램 상태**로 한 번 되돌림. 최초 적용의 직전 상태는 원래 Open WebUI. 복원 뒤 같은 Restore는 변경 없음 |
 | 기존 Start / Stop / Status | 같은 interpreter/cwd/데이터로 시작·정상 종료·상태 표시. 실제 앱 원본/사내 수정 여부와 적용 커밋을 구분 |
 | `Start -UseWindowsCA` | 종료된 서버에 Windows 신뢰 CA 스냅샷을 선택하고 시작. 이후 일반 Start에서도 재사용. [SSL 복구 절차](#ees-start-windows-ca) |
@@ -1242,15 +1243,28 @@ Windows에서 `program → program.previous`, `program.staging → program`, Res
 
 Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `result.bundle`에 보존합니다. 기존 `error/errno/winerror/at`에 `rename=promote attempts=5 waited=15` 같은 요약을 추가하며, 제한 횟수 소진 후 현재 미완료 상태까지 수동 승격 조건에 맞으면 `code=program_rename_blocked next=manual_promote`를 표시합니다. **이번 Upgrade 직후 이 값이 나온 경우에만** 아래 [수동 복구 블록](#ees-wrapper-manual-promote)을 사용합니다. 다른 단계·현재 상태 불일치는 수동 이름 변경 대상으로 안내하지 않습니다. 과거 ees.1 고정 ZIP 명령을 새 실패에 그대로 재사용하지 않습니다. 자동 되돌리기는 없으며 health 시간 초과 뒤에는 늦게 켜질 수 있으므로 Start/Upgrade를 반복하기 전에 현재 상태를 확인합니다. [검증·사내 적용 경계](../evals/scenarios.md#ees-wrapper-upgrade).
 
+<a id="ees-wrapper-trial"></a>
+
+#### 2026년 9월 고정 원본 시험 적용
+
+사용자 결정으로 9월에는 GitHub 원격 검사를 생략하고 변경별 로컬 검증을 마친 원본을 시험 적용합니다. 기본 `Upgrade`·인자 없는 `ApplyDemo`는 성공한 main CI를 확인하는 기존 동작을 유지합니다. 이 기간의 프로그램은 별도로 제공한 검증된 ZIP으로 `Apply`하며 자산은 **`ApplyDemo -TrialCommit <같은 40자리 원본 SHA>`**로 적용합니다. 새 실행기·가상환경·의존성 전체 재설치를 추가하지 않습니다.
+
+- 기존 `Update`로 canonical origin의 clean main을 갱신한 뒤, 검토한 원본과 HEAD·origin/main이 모두 같아야 합니다. 설치된 프로그램도 같은 원본이어야 하며 프로그램 파일/미완료 상태를 확인합니다. TrialCommit은 다른 브랜치·로컬 수정·다른 SHA를 허용하지 않고 GitHub 검사 성공을 뜻하지 않습니다. GitHub PAT를 새로 요구하거나 CI를 조회/실행하지 않습니다. 숨겨진 prepared-head 인자는 운영 명령으로 사용하지 않습니다.
+- 제공한 ZIP의 전체 SHA-256과 manifest 원본을 확인하고 `Apply -CheckOnly`를 먼저 실행합니다. 실패하면 Stop 이전에 멈춥니다. 이후 **Stop → Backup → Apply → Start → ApplyDemo -TrialCommit**을 한 번 수행하며 앞 단계가 실패하면 다음 단계는 실행하지 않습니다. 기존 Start의 최대 120초 health 확인을 사용하고 시간 초과 뒤 자동 반복·원복하지 않습니다.
+- `Backup`은 기존 등록 경로의 DATA_DIR 전체(업무 DB 포함)·키·설정을 서버 종료와 작업 잠금 아래 복사합니다. 파일 해시·원본 무변경·복사한 WebUI DB 검사를 마친 뒤 내부 백업 참조를 저장하고 `backup=verified`만 짧게 출력합니다. 경로·백업·DB·키 파일을 외부로 전달하지 않습니다. 백업 실패 시 프로그램·자산을 적용하지 않습니다.
+- 프로그램 `Restore`는 직전 프로그램만 복원합니다. 백업 자료로 현재 DB를 자동 덮어쓰지 않으며 ApplyDemo의 공통 자산 변경까지 취소하는 기능은 아닙니다. 사용자 작성 Skill·Tool·Prompt·모델·연결은 기존 관리 경계와 조건부 저장 보호를 유지합니다.
+
+배포 ZIP과 정확한 SHA는 이번 배포 안내에서 함께 제공합니다. 사내 실행 후 마지막 `EES` 결과와 기존 대화/업무 화면 확인을 1~2줄만 전달합니다. 실제 모델 확인은 새 EES 대화에서 사이드바를 먼저 선택하지 않고 “셋업 업무를 진행하려고 해. 등록된 절차를 찾아 필요한 조건부터 확인해 줘”라고 요청해 후보 탐색·필요한 질문·계획이 이어지는지 봅니다. 모의 점검을 실제 설치 완료로 기록하지 않습니다. 실제 적용 및 미실행 Windows/브라우저/모델 범위는 [STATUS](STATUS.md)를 따릅니다.
+
 <a id="ees-wrapper-apply"></a>
 
 #### 수동 ZIP 적용·확인 안내
 
-**구현본이 main에 반영되고 해당 CI가 통과한 뒤 사용합니다.** 현재 게시·검증 상태는 [STATUS](STATUS.md), 실제 사내 결과는 [구현 기록](../evals/scenarios.md#ees-wrapper-implementation)에서 구분합니다. 이미 등록한 운영 PowerShell과 `%USERPROFILE%\team-agent-poc` checkout을 사용하며 최초 Init·후보 Prepare·pandas 진단을 반복하지 않습니다. 기존 저장 설정과 Python이 있어야 하며 누락·불일치는 사전 확인에서 중단합니다.
+**검토한 구현본이 main에 반영된 뒤 사용합니다.** 기본 전달은 CI 산출물을 사용하고, 2026년 9월에는 [고정 원본 시험 적용](#ees-wrapper-trial)을 사용합니다. 현재 게시·검증 상태는 [STATUS](STATUS.md), 실제 사내 결과는 [구현 기록](../evals/scenarios.md#ees-wrapper-implementation)에서 구분합니다. 이미 등록한 운영 PowerShell과 `%USERPROFILE%\team-agent-poc` checkout을 사용하며 최초 Init·후보 Prepare·pandas 진단을 반복하지 않습니다. 기존 저장 설정과 Python이 있어야 하며 누락·불일치는 사전 확인에서 중단합니다.
 
-현재 새 Apply에는 EES Work `0.11.3+ees.8`을 포함한 프로그램 ZIP과 그 ZIP의 `manifest.json`에 있는 전체 `source_commit`을 사용합니다. [전달물 준비](#release-delivery)의 프로그램 포함 산출물을 선택하며, 과거 ees.1/ees.2/ees.3/ees.4/ees.5/ees.6/ees.7 ZIP에는 이번 사이드바 선택 영역·직계 펼침·글꼴 보완이 없습니다. Apply는 새 ZIP의 해시·wheel·대상 버전/의존성·앱 경로를 다시 확인합니다. 운영 코드 최신 HEAD를 프로그램 Commit에 넣지 않으며, Agent Pack 전용 ZIP이나 후보 venv를 새 전달물로 사용하지 않습니다.
+현재 새 Apply에는 EES Work `0.11.3+ees.9`를 포함한 프로그램 ZIP과 그 ZIP의 `manifest.json`에 있는 전체 `source_commit`을 사용합니다. [전달물 준비](#release-delivery)의 프로그램 포함 산출물을 선택하며, 과거 ees.1/ees.2/ees.3/ees.4/ees.5/ees.6/ees.7 ZIP에는 이번 사이드바 선택 영역·직계 펼침·글꼴 보완이 없습니다. Apply는 새 ZIP의 해시·wheel·대상 버전/의존성·앱 경로를 다시 확인합니다. 운영 코드 최신 HEAD를 프로그램 Commit에 넣지 않으며, Agent Pack 전용 ZIP이나 후보 venv를 새 전달물로 사용하지 않습니다.
 
-`$eesBundle`에는 **파일명과 `.zip` 확장자까지 포함한 새 ZIP의 전체 경로**, `$eesProgramCommit`에는 manifest의 40자리 source_commit을 넣습니다. Downloads 같은 폴더만 지정하면 실패합니다. 경로를 채팅에 알려줄 필요는 없습니다. 아래 블록은 **Git 갱신 → 읽기 전용 사전 확인 → 정상 종료 → 프로그램 적용 → 명시적인 시작** 순서입니다. 앞 단계가 실패하면 그 자리에서 멈춥니다. 특히 CheckOnly 실패 시 Stop을 실행하지 않습니다. 기존 프로세스를 식별하지 못하거나 포트가 사용 중이면 임의 종료하지 않습니다. 전체 적용·자동 전환·복구·서버 시작을 반복하지 않고 첫 기동의 health 확인을 최대 120초로 요청하며, 시간 초과를 배포 성공으로 해석하지 않습니다. 기존 기본값이나 등록 설정은 바꾸지 않습니다.
+`$eesBundle`에는 **파일명과 `.zip` 확장자까지 포함한 새 ZIP의 전체 경로**, `$eesProgramCommit`에는 manifest의 40자리 source_commit을 넣습니다. Downloads 같은 폴더만 지정하면 실패합니다. 경로를 채팅에 알려줄 필요는 없습니다. 아래 블록은 **Git 갱신 → 읽기 전용 사전 확인 → 정상 종료 → 데이터 백업 → 프로그램 적용 → 명시적인 시작** 순서입니다. 앞 단계가 실패하면 그 자리에서 멈춥니다. 특히 CheckOnly 실패 시 Stop을 실행하지 않습니다. 기존 프로세스를 식별하지 못하거나 포트가 사용 중이면 임의 종료하지 않습니다. 전체 적용·자동 전환·복구·서버 시작을 반복하지 않고 첫 기동의 health 확인을 최대 120초로 요청하며, 시간 초과를 배포 성공으로 해석하지 않습니다. 기존 기본값이나 등록 설정은 바꾸지 않습니다.
 
 ```powershell
 & {
@@ -1262,6 +1276,7 @@ Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `resul
     $eesProgramCommit = '이 ZIP manifest.json의 40자리 source_commit'
     & $eesManager -Action Apply -Bundle $eesBundle -Commit $eesProgramCommit -CheckOnly -Summary
     & $eesManager -Action Stop -Summary
+    & $eesManager -Action Backup -Summary
     & $eesManager -Action Apply -Bundle $eesBundle -Commit $eesProgramCommit -Summary
     & $eesManager -Action Start -HealthTimeout 120 -Summary
 }

@@ -1,7 +1,8 @@
 """Transaction tests use synthetic state; never start or inspect a real server."""
 
 import argparse
-from contextlib import redirect_stderr, redirect_stdout
+from contextlib import closing, redirect_stderr, redirect_stdout
+import copy
 import hashlib
 import importlib.util
 import io
@@ -10,6 +11,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import sqlite3
 import subprocess
 import sys
 import tempfile
@@ -644,6 +646,127 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
 
 
+class BackupOperationTests(unittest.TestCase):
+    """Exercise the public action with real copies and synthetic stopped state."""
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory(prefix="ees-backup-test-")
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name).resolve()
+        data = self.root / "existing-data"
+        data.mkdir()
+        with closing(sqlite3.connect(data / "webui.db")) as db, db:
+            db.execute("CREATE TABLE assets (content TEXT)")
+            db.execute("INSERT INTO assets VALUES ('user-created skill and model')")
+        (data / "ees-work.sqlite3").write_bytes(b"synthetic workflow state")
+        (data / "user-tool.txt").write_text("사용자가 작성한 도구", encoding="utf-8")
+        state = self.root / "deployment"
+        state.mkdir()
+        self.config = {"state_root": str(state), "source_python": str(self.root / "python.exe"),
+                       "data_dir": str(data), "backups_dir": str(state / "backups"),
+                       "config_path": str(state / "config.json"),
+                       "environment_file": str(state / "environment.dpapi"),
+                       "key_file": str(self.root / ".webui_secret_key"), "host": "127.0.0.1", "port": 8080}
+        Path(self.config["source_python"]).write_bytes(b"existing interpreter")
+        Path(self.config["environment_file"]).write_bytes(b"synthetic encrypted environment")
+        Path(self.config["key_file"]).write_bytes(b"synthetic existing key")
+        MANAGER.write_json(Path(self.config["config_path"]), self.config)
+        program = state / "program"
+        program.mkdir()
+        (program / "marker").write_bytes(b"existing customized program")
+        self.selection = {"source_commit": COMMIT, "webui_version": "0.11.3+ees.8",
+                          "wheel_sha256": "b" * 64, "record_sha256": "c" * 64}
+        self.registry = {"schema_version": 2, "phase": "idle", "process": None, "previous": None,
+                         "current": {"kind": "original", "source_commit": None, "python": self.config["source_python"]},
+                         "customization": {"active": self.selection, "previous": {"active": None}, "pending": None}}
+        MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
+        self.originals = {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()
+                          and path != MANAGER.registry_path(self.config)}
+        self.enterContext(patch.object(MANAGER.states, "load_config", return_value=self.config))
+        self.enterContext(patch.object(MANAGER.states, "runtime_environment", return_value={"DATA_DIR": str(data)}))
+        self.identity = self.enterContext(patch.object(MANAGER.processes, "_identity", return_value=OPERATOR))
+        self.port = self.enterContext(patch.object(MANAGER.processes, "port_is_free", return_value=True))
+        self.enterContext(patch.object(MANAGER.processes, "start_server", side_effect=AssertionError("No automatic Start")))
+        self.enterContext(patch.object(MANAGER.processes, "stop_server", side_effect=AssertionError("No automatic Stop")))
+
+    def test_public_backup_verifies_copies_preserves_sources_and_keeps_reference_local(self):
+        actual_backup = MANAGER.states.backup_state
+
+        def while_locked(config):
+            self.assertTrue((Path(config["state_root"]) / "deployment.lock").is_file())
+            return actual_backup(config)
+
+        output = io.StringIO()
+        with patch.object(MANAGER.states, "backup_state", side_effect=while_locked), redirect_stdout(output):
+            self.assertEqual(MANAGER.main(["backup", "--config", "unused.json", "--summary"]), 0)
+        saved_registry = MANAGER.read_registry(self.config)
+        self.assertEqual(saved_registry["current"], self.registry["current"])
+        self.assertEqual(saved_registry["customization"], self.registry["customization"])
+        self.assertEqual(saved_registry["last_event"], "data_backup_verified")
+        saved = saved_registry["last_backup"]
+        destination = Path(saved["path"])
+        manifest_bytes = (destination / "manifest.json").read_bytes()
+        self.assertEqual(hashlib.sha256(manifest_bytes).hexdigest(), saved["manifest_sha256"])
+        manifest = json.loads(manifest_bytes)
+        self.assertEqual(manifest["database_check"], "ok")
+        for entry in manifest["files"]:
+            content = (destination / entry["path"]).read_bytes()
+            self.assertEqual((hashlib.sha256(content).hexdigest(), len(content)), (entry["sha256"], entry["size"]))
+        names = {entry["path"] for entry in manifest["files"]}
+        self.assertTrue({"data/webui.db", "data/ees-work.sqlite3", "data/user-tool.txt",
+                         "key/.webui_secret_key", "configuration/config.json", "configuration/environment.dpapi"} <= names)
+        for path, content in self.originals.items():
+            self.assertEqual(path.read_bytes(), content)
+        self.assertIn("EES action=backup result=ok", output.getvalue())
+        self.assertIn("backup=verified", output.getvalue())
+        self.assertIn("program=customized", output.getvalue())
+        self.assertNotIn(saved["backup_id"], output.getvalue())
+        self.assertNotIn(str(self.root), output.getvalue())
+        self.assertFalse((Path(self.config["state_root"]) / "deployment.lock").exists())
+
+    def test_running_busy_pending_and_unverified_states_cannot_create_a_backup(self):
+        pending = {"action": "apply", "owner": OPERATOR, "before": self.selection,
+                   "target": dict(self.selection, source_commit="d" * 40), "old_previous": {"active": None}, "stage": "promote"}
+        variations = [{"process": {"pid": 123}}, {"phase": "switching"}, {"pending": {"source_commit": COMMIT}},
+                      {"launch_uncertain": True}, {"customization": dict(self.registry["customization"], pending=pending)}]
+        for changes in variations:
+            with self.subTest(changes=changes), patch.object(MANAGER.states, "backup_state") as writer:
+                registry = dict(copy.deepcopy(self.registry), **changes)
+                MANAGER.write_json(MANAGER.registry_path(self.config), registry)
+                before = MANAGER.registry_path(self.config).read_bytes()
+                with self.assertRaises(MANAGER.DeploymentError):
+                    MANAGER.operate(argparse.Namespace(action="backup", config="unused.json"))
+                writer.assert_not_called()
+                self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+                self.assertFalse(Path(self.config["backups_dir"]).exists())
+        MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
+        self.port.return_value = False
+        with patch.object(MANAGER.states, "backup_state") as writer, self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.operate(argparse.Namespace(action="backup", config="unused.json"))
+        writer.assert_not_called()
+        self.port.return_value = True
+        lock = Path(self.config["state_root"]) / "deployment.lock"
+        lock.write_text("123", encoding="ascii")
+        with patch.object(MANAGER.states, "backup_state") as writer, self.assertRaises(MANAGER.DeploymentError):
+            MANAGER.operate(argparse.Namespace(action="backup", config="unused.json"))
+        writer.assert_not_called()
+        self.assertEqual(lock.read_bytes(), b"123")
+
+    def test_failed_backup_keeps_prior_reference_and_reports_no_verified_success(self):
+        self.registry["last_backup"] = {"backup_id": "prior-private-id"}
+        MANAGER.write_json(MANAGER.registry_path(self.config), self.registry)
+        before = MANAGER.registry_path(self.config).read_bytes()
+        output = io.StringIO()
+        with patch.object(MANAGER.states, "backup_state", side_effect=MANAGER.states.StateError("Local state backup failed.")), \
+                redirect_stdout(output):
+            self.assertEqual(MANAGER.main(["backup", "--config", "unused.json", "--summary"]), 1)
+        self.assertEqual(MANAGER.registry_path(self.config).read_bytes(), before)
+        self.assertIn("action=backup result=failed", output.getvalue())
+        self.assertNotIn("backup=verified", output.getvalue())
+        self.assertNotIn("prior-private-id", output.getvalue())
+        self.assertFalse((Path(self.config["state_root"]) / "deployment.lock").exists())
+
+
 class ImportProbeIntegrationTests(unittest.TestCase):
     """Use static prepared files; an import probe must not reach app operations."""
 
@@ -982,13 +1105,13 @@ class CustomizationIntegrationTests(unittest.TestCase):
                         self.registry["last_event"] = "concurrent-operation"
                         self.write()
                     else:
-                        lock.write_text(json.dumps(OPERATOR))
+                        lock.write_text(json.dumps(OPERATOR), encoding="utf-8")
                     return self.selection
                 self.mocks["inspect_bundle"].side_effect = changed
                 with patch.object(MANAGER.customization, "_paths", return_value=paths), \
                         self.assertRaisesRegex(MANAGER.DeploymentError, "changed during CheckOnly"):
                     MANAGER.operate(self.args("apply", resume=True, check_only=True))
-        self.assertEqual(lock.read_text(), json.dumps(OPERATOR))
+        self.assertEqual(lock.read_text(encoding="utf-8"), json.dumps(OPERATOR))
 
     def test_resume_rejects_no_pending_and_default_apply_does_not_implicitly_resume(self):
         before = MANAGER.registry_path(self.config).read_bytes()
@@ -1033,7 +1156,7 @@ class CustomizationIntegrationTests(unittest.TestCase):
     def test_resume_never_reclaims_even_exact_dead_owner_lock(self):
         self.pending()
         lock = self.root / "deployment.lock"
-        lock.write_text(json.dumps(OPERATOR))
+        lock.write_text(json.dumps(OPERATOR), encoding="utf-8")
         before = {p.name: p.read_bytes() for p in self.root.iterdir()}
         for check_only in (False, True):
             with self.subTest(check_only=check_only), \
@@ -1111,7 +1234,7 @@ class CustomizationIntegrationTests(unittest.TestCase):
         self.assertEqual(caught.exception.stage, "preflight")
         self.assertEqual(before, MANAGER.registry_path(self.config).read_bytes())
         def race(*args):
-            (self.root / "deployment.lock").write_text("synthetic concurrent operation")
+            (self.root / "deployment.lock").write_text("synthetic concurrent operation", encoding="utf-8")
             return "compatible"
         self.mocks["check_accept_runtime"].side_effect = race
         with self.assertRaisesRegex(MANAGER.DeploymentError, "changed during preflight"):
@@ -1310,7 +1433,7 @@ class CustomizationIntegrationTests(unittest.TestCase):
     def test_restore_reclaims_only_exact_recorded_dead_owner(self):
         self.pending()
         lock = self.root / "deployment.lock"
-        lock.write_text(json.dumps(OPERATOR))
+        lock.write_text(json.dumps(OPERATOR), encoding="utf-8")
         with patch.object(MANAGER.customization, "restore", return_value={"changed": True}) as restore:
             self.assertTrue(MANAGER.operate(self.args("restore"))["changed"])
         restore.assert_called_once()
@@ -1325,7 +1448,7 @@ class CustomizationIntegrationTests(unittest.TestCase):
                  (json.dumps(OPERATOR), MANAGER.processes.ProcessError("unavailable"))]
         for content, state in cases:
             with self.subTest(content=content, state=state):
-                lock.write_text(content)
+                lock.write_text(content, encoding="utf-8")
                 def identify(pid):
                     if pid == MANAGER.os.getpid():
                         return self.owner
@@ -1335,7 +1458,7 @@ class CustomizationIntegrationTests(unittest.TestCase):
                 self.mocks["_identity"].side_effect = identify
                 with self.assertRaises((MANAGER.DeploymentError, MANAGER.processes.ProcessError)):
                     MANAGER.operate(self.args("restore"))
-                self.assertEqual(lock.read_text(), content)
+                self.assertEqual(lock.read_text(encoding="utf-8"), content)
 
     def test_summary_is_one_line_and_check_only_leaves_no_report(self):
         output = io.StringIO()
@@ -1711,7 +1834,7 @@ if ($parseErrors.Count -gt 0) {
                     source = root / (name + ".ps1")
                     source.write_text(block, encoding="utf-8")
                     result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(parser), str(source)],
-                                            capture_output=True, text=True, timeout=30)
+                                            capture_output=True, text=True, encoding="utf-8", timeout=30)
                     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_adapter_forwards_resume_and_check_only_and_rejects_other_actions(self):
@@ -1726,28 +1849,28 @@ if ($parseErrors.Count -gt 0) {
             config.write_text(json.dumps({"source_python": sys.executable}), encoding="utf-8")
             command = [shutil.which("pwsh"), "-NoProfile", "-File", str(adapter)]
             result = subprocess.run(command + ["-Action", "Apply", "-Config", str(config), "-Bundle", "synthetic.zip",
-                "-Commit", COMMIT, "-Resume", "-CheckOnly"], capture_output=True, text=True, timeout=30)
+                "-Commit", COMMIT, "-Resume", "-CheckOnly"], capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), ["apply", "--config", str(config), "--bundle", "synthetic.zip",
                                                         "--commit", COMMIT, "--check-only", "--resume"])
             result = subprocess.run(command + ["-Action", "Start", "-Config", str(config), "-UseWindowsCA",
-                "-HealthTimeout", "120", "-Summary"], capture_output=True, text=True, timeout=30)
+                "-HealthTimeout", "120", "-Summary"], capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), ["start", "--config", str(config), "--health-timeout", "120",
                                                         "--use-windows-ca", "--summary"])
             result = subprocess.run(command + ["-Action", "Start", "-Config", str(config), "-CheckOnly", "-Summary"],
-                                    capture_output=True, text=True, timeout=30)
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), ["start", "--config", str(config), "--check-only", "--summary"])
             result = subprocess.run(command + ["-Action", "Apply", "-Config", str(config), "-UseWindowsCA"],
-                                    capture_output=True, text=True, timeout=30)
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("UseWindowsCA is supported only with Deploy or Start", result.stderr)
             self.assertEqual(result.stdout.strip(), "")
             for action in ("Start", "Restore", "Update"):
                 with self.subTest(action=action):
                     result = subprocess.run(command + ["-Action", action, "-Config", str(config), "-Resume"],
-                                            capture_output=True, text=True, timeout=30)
+                                            capture_output=True, text=True, encoding="utf-8", timeout=30)
                     self.assertNotEqual(result.returncode, 0)
                     self.assertIn("Resume is supported only with Apply", result.stderr)
                     self.assertEqual(result.stdout.strip(), "")

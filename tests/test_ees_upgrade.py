@@ -667,7 +667,7 @@ class RealGitCompatibilityTests(unittest.TestCase):
 
             def git(*arguments):
                 return subprocess.run([shutil.which("git"), "-C", str(root), *arguments],
-                                      check=True, capture_output=True, text=True, timeout=10).stdout.strip()
+                                      check=True, capture_output=True, text=True, encoding="utf-8", timeout=10).stdout.strip()
 
             def commit(message):
                 git("add", ".")
@@ -826,11 +826,11 @@ class PowerShellUpgradeTests(unittest.TestCase):
                        "-Action", "ApplyDemo", "-Config", str(config)]
             result = subprocess.run(command + ["-ResetDemoToken", "-ResetUpdateToken",
                                     "-WebUIUrl", "http://127.0.0.1:8080", "-EesModelId", "existing", "-Summary"],
-                                    capture_output=True, text=True, timeout=30)
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), ["--config", str(config), "--reset-token",
                             "--reset-update-token", "--webui-url", "http://127.0.0.1:8080", "--ees-model-id", "existing"])
-            result = subprocess.run(command + ["-Bundle", "untrusted.zip"], capture_output=True, text=True, timeout=30)
+            result = subprocess.run(command + ["-Bundle", "untrusted.zip"], capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(result.stdout.strip(), "")
 
@@ -847,16 +847,16 @@ class PowerShellUpgradeTests(unittest.TestCase):
             command = [shutil.which("pwsh"), "-NoProfile", "-File", str(adapter),
                        "-Action", "Upgrade", "-Config", str(config)]
             result = subprocess.run(command + ["-HealthTimeout", "90", "-ResetUpdateToken", "-Summary"],
-                                    capture_output=True, text=True, timeout=30)
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), ["--config", str(config), "--health-timeout", "90", "--reset-token"])
-            result = subprocess.run(command + ["-Bundle", "untrusted.zip"], capture_output=True, text=True, timeout=30)
+            result = subprocess.run(command + ["-Bundle", "untrusted.zip"], capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(result.stdout.strip(), "")
             result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(adapter),
                                      "-Action", "Update", "-Config", str(config),
                                      "-GitProxy", "http://synthetic-proxy:8080"],
-                                    capture_output=True, text=True, timeout=30)
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), ["--config", str(config), "--update-only",
                                                         "--git-proxy", "http://synthetic-proxy:8080"])

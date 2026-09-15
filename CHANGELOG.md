@@ -4,6 +4,8 @@
 
 ## 2026-09-15
 
+- 사용자 배포 요청에 따라 [9월 고정 원본 시험 적용](docs/03-openwebui-native-agent.md#ees-wrapper-trial)을 연결함. ApplyDemo의 공개 TrialCommit은 검토한 clean main·origin/main·설치 프로그램 원본을 확인하고 기존 자산 보호를 유지함. 기본 CI 경로는 유지하며 기존 내부 백업 기능을 공개 Backup 명령으로 재사용해 Stop 뒤 데이터/키/설정 검증 백업을 수행함. 실제 사내 실행은 배포 결과 보고와 구분함.
+
 - [메인 채팅의 업무 탐색·계획](docs/mockups/ees-work/TASK.md#chat-workflow-entry-20260915)을 기존 Workflow Tool과 관리 Prompt에 구현함. 조회 중 업무 생성·선택 연결 없이 게시 절차의 단계/입력/지침을 읽고, 기존 진행은 고정된 절차와 현재 접근 가능한 스킬로 계획함. 동일 액션·권한·사람 확인 경계를 유지하며 새 계획 서버·모델·저장 형식을 추가하지 않음. 같은 ees.9/v0.2.10 준비본이며 사내 모델 확인·배포 여부는 STATUS에서 구분함.
 
 - [R2 업무 화면 분리](evals/scenarios.md#work-ui-refactor-20260915)를 기존 요청 제어·표시·관리자 편집 책임으로 구현하고 단일 배포 JS/공개 연결을 유지함. 기존 브라우저 초안 보존 검사를 보강하고 R3 실제 프로그램 Apply→추가 저장→이전 ees.8 Restore 시험을 추가함. 같은 미배포 ees.9 준비본이며 Windows/브라우저 결과·사내 적용은 별도로 추적함.

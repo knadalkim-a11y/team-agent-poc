@@ -39,7 +39,7 @@ def git(*arguments, optional=False, proxy=None):
     try:
         options = ["-c", "http.proxy=" + proxy] if proxy else []
         result = subprocess.run(["git", *options, "-C", str(ROOT), *arguments], env=env,
-                                capture_output=True, text=True, timeout=60)
+                                capture_output=True, text=True, encoding="utf-8", timeout=60)
     except (OSError, subprocess.SubprocessError):
         raise UpgradeError("git_unavailable") from None
     if result.returncode and not (optional and result.returncode == 1):

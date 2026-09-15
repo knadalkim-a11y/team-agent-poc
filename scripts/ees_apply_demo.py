@@ -1,6 +1,8 @@
 """Apply the small EES demo pack through the running WebUI's authenticated API.
 
-Uses the registered Python and verified main checkout. Never imports WebUI,
+Uses the registered Python and verified main checkout. An explicit trial commit
+can use a reviewed, clean main checkout without GitHub Actions verification.
+Never imports WebUI,
 opens its database, installs dependencies, or stops/restarts the server.
 """
 
@@ -233,9 +235,30 @@ def select_ees(client, chosen=None):
         raise DemoError("ees_model_selection_required") from None
 
 
+def trial_checkout(commit):
+    """Verify the explicitly chosen local main without selecting/fetching a release."""
+    upgrade.checkout(commit)
+    if upgrade.git("rev-parse", "origin/main")[1] != commit:
+        raise DemoError("trial_main_mismatch")
+    return commit
+
+
 def apply(config, args, commit, progress):
     with upgrade.manager.locked(config, track_owner=True):
-        upgrade.checkout(commit)
+        if getattr(args, "trial_commit", None) is not None:
+            progress["stage"] = "trial_source"
+            trial_checkout(commit)
+            progress["stage"] = "trial_program"
+            registry = upgrade.manager.read_registry(config)
+            upgrade.manager.require_idle(registry)
+            if registry.get("pending") or registry.get("launch_uncertain"):
+                raise DemoError("trial_program_incomplete")
+            active = registry.get("customization", {}).get("active")
+            if not active or active.get("source_commit") != commit:
+                raise DemoError("trial_program_mismatch")
+            upgrade.manager.selected_program(config, registry)
+        else:
+            upgrade.checkout(commit)
         path, settings = connection(config, args)
         progress["stage"] = "webui_version"
         client = WebUIClient(settings["url"], ca_file=settings["ca_file"])
@@ -301,36 +324,50 @@ def main(argv=None):
     parser.add_argument("--ca-file")
     parser.add_argument("--reset-token", action="store_true")
     parser.add_argument("--reset-update-token", action="store_true")
+    parser.add_argument("--trial-commit", help=("Apply a reviewed full commit from the clean canonical main "
+                                               "checkout; origin/main and the installed program must match. "
+                                               "Does not check GitHub Actions."))
     parser.add_argument("--prepared-head", help=argparse.SUPPRESS)
     parser.add_argument("--wrapper-before", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     if (bool(args.prepared_head) != bool(args.wrapper_before)
             or any(v and not upgrade.HEX40.fullmatch(v) for v in (args.prepared_head, args.wrapper_before))):
         parser.error("Invalid prepared update identity.")
+    if args.trial_commit is not None and (not upgrade.HEX40.fullmatch(args.trial_commit)
+                              or args.prepared_head or args.wrapper_before or args.reset_update_token):
+        parser.error("Trial commit requires a full lowercase commit SHA and cannot use release-bootstrap options.")
     progress = {"stage": "configuration", "changed": 0}
     head = None
     try:
         config = upgrade.manager.states.load_config(args.config)
-        upgrade.checkout()
-        progress["stage"] = "release_authentication"
-        github = upgrade.github_client(config, args.reset_update_token)
-        options = []
-        for key in ("webui_url", "ees_model_id", "ca_file"):
-            if getattr(args, key):
-                options.extend(["--" + key.replace("_", "-"), getattr(args, key)])
-        if args.reset_token:
-            options.append("--reset-token")
-        print("EES demo step=check_release", flush=True)
-        child, head, _ = upgrade.bootstrap(config, args, github, progress,
-                                           runner="ees_apply_demo.py", runner_options=options)
-        if child is not None:
-            return child
+        if args.trial_commit is not None:
+            progress["stage"] = "trial_source"
+            print("EES demo step=check_trial_source", flush=True)
+            head = trial_checkout(args.trial_commit)
+        else:
+            upgrade.checkout()
+            progress["stage"] = "release_authentication"
+            github = upgrade.github_client(config, args.reset_update_token)
+            options = []
+            for key in ("webui_url", "ees_model_id", "ca_file"):
+                if getattr(args, key):
+                    options.extend(["--" + key.replace("_", "-"), getattr(args, key)])
+            if args.reset_token:
+                options.append("--reset-token")
+            print("EES demo step=check_release", flush=True)
+            child, head, _ = upgrade.bootstrap(config, args, github, progress,
+                                               runner="ees_apply_demo.py", runner_options=options)
+            if child is not None:
+                return child
         result = apply(config, args, head, progress)
+        if args.trial_commit is not None:
+            result["source_verification"] = "local_trial"
     except (ValueError, RuntimeError, OSError, KeyError, TypeError, EOFError, KeyboardInterrupt) as error:
         if progress.get("delegated"):
             return 130
         code = getattr(error, "code", None) or "operation_failed"
-        next_step = ("upgrade" if code == "conditional_write_unavailable"
+        next_step = ("apply_trial_program" if progress["stage"] == "trial_program"
+                     else "upgrade" if code == "conditional_write_unavailable"
                      else "reset_demo_token" if code in {"webui_authentication_failed", "webui_credentials_invalid"}
                      else "setup_webui_api_key" if progress["stage"] == "webui_authentication"
                      else "check_ci" if progress["stage"] == "ci_check"
@@ -340,6 +377,8 @@ def main(argv=None):
                   "changed": getattr(error, "changed", progress.get("changed")),
                   "pending": getattr(error, "pending", False),
                   "source_commit": head, "asset": getattr(error, "asset", ""), "next": next_step}
+        if args.trial_commit is not None:
+            result["source_verification"] = "local_trial"
         report(args.config, result, failed=True)
         return 1
     report(args.config, result)

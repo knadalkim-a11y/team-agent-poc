@@ -1,7 +1,7 @@
 """Operator entry tests use a local synthetic HTTP API; no WebUI or credentials."""
 
 import argparse
-from contextlib import nullcontext, redirect_stdout
+from contextlib import contextmanager, nullcontext, redirect_stderr, redirect_stdout
 import io
 import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -281,6 +281,188 @@ class OperatorTests(unittest.TestCase):
                         "next": "inspect_local_result"}, failed=True)
         self.assertIn("changed=-", output.getvalue())
         self.assertIn("pending=true", output.getvalue())
+
+
+@unittest.skipUnless(shutil.which("git"), "Git is required for canonical checkout boundaries")
+class TrialSourceTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.repo = self.root / "repo"
+        self.repo.mkdir()
+        self.git("init", "-b", "main")
+        self.git("config", "user.name", "Synthetic Test")
+        self.git("config", "user.email", "synthetic@example.invalid")
+        self.git("remote", "add", "origin", demo.upgrade.REPOSITORY + ".git")
+        (self.repo / "source.txt").write_text("reviewed source\n", encoding="utf-8")
+        self.git("add", "source.txt")
+        self.git("commit", "-m", "synthetic [skip ci]")
+        self.head = self.git("rev-parse", "HEAD")
+        self.git("update-ref", "refs/remotes/origin/main", self.head)
+        self.root_patch = patch.object(demo.upgrade, "ROOT", self.repo)
+        self.root_patch.start()
+        self.addCleanup(self.root_patch.stop)
+
+    def git(self, *arguments):
+        return subprocess.run(["git", "-C", str(self.repo), *arguments], capture_output=True,
+                              text=True, encoding="utf-8", check=True, timeout=10).stdout.strip()
+
+    def assert_trial_stops(self, code, commit=None):
+        with (patch.object(demo.upgrade.manager.states, "load_config", return_value={}),
+              patch.object(demo.upgrade, "github_client") as github,
+              patch.object(demo.upgrade, "bootstrap") as bootstrap,
+              patch.object(demo, "WebUIClient") as webui,
+              patch.object(demo, "report") as report, redirect_stdout(io.StringIO())):
+            self.assertEqual(1, demo.main(["--config", "synthetic.json", "--trial-commit", commit or self.head]))
+        self.assertEqual(report.call_args.args[1]["code"], code)
+        self.assertEqual(report.call_args.args[1]["stage"], "trial_source")
+        self.assertEqual(report.call_args.args[1]["source_verification"], "local_trial")
+        github.assert_not_called()
+        bootstrap.assert_not_called()
+        webui.assert_not_called()
+
+    def test_trial_clean_main_uses_common_locked_asset_path_without_ci_or_git_update(self):
+        state_root = self.root / "state"
+        state_root.mkdir()
+        config = {"state_root": str(state_root), "host": "127.0.0.1", "port": 8080}
+        client = Mock()
+        client.request.side_effect = [{"version": "0.11.3+ees.9"}, {"role": "admin"},
+                                      {"id": "existing", "base_model_id": "base", "params": {}, "write_access": True}]
+        before = self.git("rev-parse", "HEAD")
+        with (patch.object(demo.upgrade.manager.states, "load_config", return_value=config),
+              patch.object(demo.upgrade.manager, "locked", return_value=nullcontext()) as locked,
+              patch.object(demo.upgrade, "github_client") as github,
+              patch.object(demo.upgrade, "bootstrap") as bootstrap,
+              patch.object(demo.upgrade, "git", wraps=demo.upgrade.git) as git,
+              patch.object(demo.upgrade.manager, "read_registry", return_value={"phase": "idle", "customization": {"active": {"source_commit": self.head}}}),
+              patch.object(demo.upgrade.manager, "selected_program", return_value=state_root / "program") as selected,
+              patch.object(demo, "WebUIClient", return_value=client),
+              patch.object(demo, "load_token", return_value=(TOKEN, False)),
+              patch.object(demo.assets, "apply_assets", return_value={"changed": 1, "source_commit": self.head}) as core,
+              patch.object(demo, "report") as report, redirect_stdout(io.StringIO())):
+            self.assertEqual(0, demo.main(["--config", "synthetic.json", "--trial-commit", self.head,
+                                           "--ees-model-id", "existing"]))
+        locked.assert_called_once_with(config, track_owner=True)
+        selected.assert_called_once()
+        core.assert_called_once()
+        self.assertEqual(core.call_args.args[3:], ("existing", self.head))
+        self.assertEqual(report.call_args.args[1]["source_verification"], "local_trial")
+        self.assertEqual(report.call_args.args[1]["stage"], "complete")
+        self.assertEqual(self.git("rev-parse", "HEAD"), before)
+        self.assertEqual(sum(call.args == ("rev-parse", "origin/main") for call in git.call_args_list), 2)
+        self.assertFalse(any(call.args[0] in {"fetch", "merge", "checkout", "reset"} for call in git.call_args_list))
+        github.assert_not_called()
+        bootstrap.assert_not_called()
+
+    def test_trial_rejects_other_repository(self):
+        self.git("remote", "set-url", "origin", "https://github.com/another/repo.git")
+        self.assert_trial_stops("wrong_repository")
+
+    def test_trial_rejects_non_main_checkout(self):
+        self.git("checkout", "-b", "local-feature")
+        self.assert_trial_stops("main_required")
+
+    def test_trial_rejects_dirty_tracked_source(self):
+        (self.repo / "source.txt").write_text("unreviewed edit\n", encoding="utf-8")
+        self.assert_trial_stops("local_changes")
+
+    def test_trial_rejects_wrong_pinned_commit(self):
+        self.assert_trial_stops("checkout_changed", HEAD)
+
+    def test_trial_rejects_locally_committed_main_not_matching_fetched_main(self):
+        (self.repo / "source.txt").write_text("local commit\n", encoding="utf-8")
+        self.git("commit", "-am", "local [skip ci]")
+        self.assert_trial_stops("trial_main_mismatch", self.git("rev-parse", "HEAD"))
+
+    def test_trial_rechecks_fetched_identity_inside_existing_operation_lock(self):
+        self.git("commit", "--allow-empty", "-m", "second [skip ci]")
+        target = self.git("rev-parse", "HEAD")
+        self.git("update-ref", "refs/remotes/origin/main", target)
+
+        @contextmanager
+        def change_source_under_lock(*args, **kwargs):
+            self.git("update-ref", "refs/remotes/origin/main", self.head)
+            yield
+
+        with patch.object(demo.upgrade.manager, "locked", side_effect=change_source_under_lock) as locked:
+            self.assert_trial_stops("trial_main_mismatch", target)
+        locked.assert_called_once_with({}, track_owner=True)
+
+    def test_trial_argument_rejects_abbreviation_and_release_bootstrap_mixing(self):
+        for options in (["--trial-commit", self.head[:12]], ["--trial-commit", self.head.upper()],
+                        ["--trial-commit", ""], ["--trial-commit", " "],
+                        ["--trial-commit", self.head, "--reset-update-token"],
+                        ["--trial-commit", self.head, "--prepared-head", self.head, "--wrapper-before", self.head]):
+            with self.subTest(options=options), patch.object(demo.upgrade.manager.states, "load_config") as load:
+                with self.assertRaises(SystemExit) as raised, redirect_stderr(io.StringIO()):
+                    demo.main(["--config", "synthetic.json", *options])
+                self.assertEqual(raised.exception.code, 2)
+                load.assert_not_called()
+
+    def test_trial_refuses_old_or_missing_program_before_api_or_asset_writes(self):
+        for registry in ({"phase": "idle", "customization": {"active": None}},
+                         {"phase": "idle", "customization": {"active": {"source_commit": HEAD}}}):
+            with (self.subTest(registry=registry),
+                  patch.object(demo.upgrade.manager, "locked", return_value=nullcontext()),
+                  patch.object(demo.upgrade.manager, "read_registry", return_value=registry),
+                  patch.object(demo.upgrade.manager, "selected_program") as selected,
+                  patch.object(demo, "WebUIClient") as webui):
+                progress = {}
+                with self.assertRaisesRegex(demo.DemoError, "trial_program_mismatch"):
+                    demo.apply({}, argparse.Namespace(trial_commit=self.head), self.head, progress)
+                self.assertEqual(progress["stage"], "trial_program")
+            selected.assert_not_called()
+            webui.assert_not_called()
+
+    def test_trial_keeps_existing_program_validation_before_api_and_reports_repair_step(self):
+        with (patch.object(demo.upgrade.manager.states, "load_config", return_value={}),
+              patch.object(demo.upgrade.manager, "locked", return_value=nullcontext()),
+              patch.object(demo.upgrade.manager, "read_registry", return_value={"phase": "idle", "customization": {"active": {"source_commit": self.head}}}),
+              patch.object(demo.upgrade.manager, "selected_program", side_effect=demo.upgrade.manager.DeploymentError("incomplete program")),
+              patch.object(demo, "WebUIClient") as webui,
+              patch.object(demo, "report") as report, redirect_stdout(io.StringIO())):
+            self.assertEqual(1, demo.main(["--config", "synthetic.json", "--trial-commit", self.head]))
+        webui.assert_not_called()
+        self.assertEqual(report.call_args.args[1]["stage"], "trial_program")
+        self.assertEqual(report.call_args.args[1]["next"], "apply_trial_program")
+
+    def test_trial_refuses_incomplete_operation_or_uncertain_launch_before_api(self):
+        for status in ({"phase": "switching"}, {"phase": "recovery_required"},
+                       {"phase": "idle", "pending": {"source_commit": self.head}},
+                       {"phase": "idle", "launch_uncertain": True}):
+            registry = {"customization": {"active": {"source_commit": self.head}}, **status}
+            with (self.subTest(status=status),
+                  patch.object(demo.upgrade.manager.states, "load_config", return_value={}),
+                  patch.object(demo.upgrade.manager, "locked", return_value=nullcontext()),
+                  patch.object(demo.upgrade.manager, "read_registry", return_value=registry),
+                  patch.object(demo.upgrade.manager, "selected_program") as selected,
+                  patch.object(demo, "WebUIClient") as webui,
+                  patch.object(demo, "report") as report, redirect_stdout(io.StringIO())):
+                self.assertEqual(1, demo.main(["--config", "synthetic.json", "--trial-commit", self.head]))
+            selected.assert_not_called()
+            webui.assert_not_called()
+            self.assertEqual(report.call_args.args[1]["stage"], "trial_program")
+            self.assertEqual(report.call_args.args[1]["next"], "apply_trial_program")
+
+    def test_default_still_requires_ci_and_does_not_fall_back_to_trial(self):
+        def ci_failure(config, args, client, progress, **kwargs):
+            progress["stage"] = "ci_check"
+            raise demo.upgrade.UpgradeError("ci_not_successful")
+
+        with (patch.object(demo.upgrade.manager.states, "load_config", return_value={}),
+              patch.object(demo.upgrade, "github_client") as github,
+              patch.object(demo.upgrade, "bootstrap", side_effect=ci_failure) as bootstrap,
+              patch.object(demo, "trial_checkout") as trial,
+              patch.object(demo, "apply") as apply,
+              patch.object(demo, "report") as report, redirect_stdout(io.StringIO())):
+            self.assertEqual(1, demo.main(["--config", "synthetic.json"]))
+        github.assert_called_once()
+        bootstrap.assert_called_once()
+        trial.assert_not_called()
+        apply.assert_not_called()
+        self.assertEqual(report.call_args.args[1]["next"], "check_ci")
+        self.assertNotIn("source_verification", report.call_args.args[1])
 
 
 if __name__ == "__main__":
