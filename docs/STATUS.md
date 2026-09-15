@@ -6,13 +6,13 @@
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 수동 ZIP 저장·경로 입력을 없애도록 `Upgrade -TrialCommit`에 공식 고정 wheel의 다운로드/검증 캐시, 정확한 Git 원본 패키징, 기존 Stop/Backup/Apply/Start/ApplyDemo를 연결함. 기존 Python·데이터·사용자 자산을 유지하며 준비 실패는 Stop 이전에 멈춤. 인자 없는 기본 CI 경로는 유지함. 이번 자동 준비 코드의 사내 실행 결과는 아직 수신하지 않음. [검증·배포 구분](../evals/scenarios.md#work-ui-refactor-20260915), [적용 순서](03-openwebui-native-agent.md#ees-wrapper-trial).
-- Git 원본: 리팩토링·메인 채팅의 업무 탐색·자산 보호는 [PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48)의 병합 `8e1e2ff86efa847b136ae57b8f4cf355dead5b8f`에 반영됨. 그 원본의 ZIP은 앞선 전달물이며 이번 자동 준비 경로는 그 이후 원본을 사용함. 배포 안내의 정확한 SHA로 실행하고 Git 병합과 실제 사내 설치를 구분함. 앞선 #47·ees.8의 CI/사내 결과는 [기존 기록](../evals/scenarios.md#sidebar-refinement-20260914)에 보존함.
-- 최근 UI 확인: 09-15 사용자 보고로 공장·시스템 선택 박스, 프로세스 직계 태스크만 펼침, 글꼴 통일·P/T/J 설명 행 제거, 기존 대화·작성 중 초안 유지의 네 항목을 정상 확인함. 이번 UI 개선의 사내 수락 범위를 완료로 처리하며 같은 확인을 반복하지 않음.
-- 최근 운영 확인: 09-15 새 UI 네 항목 정상 보고를 확인함. 프로그램 버전 문자열·정확한 설치 원본 SHA·개별 Upgrade 출력은 별도 미보고이며, 마지막 직접 버전 응답은 09-14의 `0.11.3+ees.7`임. 이를 현재 프로그램 버전으로 고정하지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 별도 미확인임. [새 UI 확인](../evals/scenarios.md#sidebar-refinement-20260914), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호 근거](../evals/scenarios.md#accept64-guard-20260914).
-- 최근 제품 변경: 09-15 `9a90e19fb7f5` ApplyDemo로 v0.2.9 관리 자산 1건 갱신 성공 후 새 UI 네 항목의 사용자 확인까지 마침. 이전 `76e566622e74`의 v0.2.8·8건 적용은 [정렬 충돌 수정 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함. 대표 질문·실제 모델 호출은 이번 UI 확인과 구분함.
-- 다음 작업 하나: 사내 PC에서 제공한 정확한 SHA로 Update → Upgrade -TrialCommit을 한 번 실행함. ZIP 준비·검증과 백업·프로그램/지정 자산 적용은 명령 내부에서 이어지며 실패 시 다음 단계 전에 멈춤. 마지막 결과와 기존 대화·사이드바 미선택의 목표 탐색/조건 확인/계획을 새 EES 대화에서 확인한 요지만 1~2줄 받음. 실제 적용 전에는 배포 성공으로 기록하지 않음. [시험 적용·복원 경계](03-openwebui-native-agent.md#ees-wrapper-trial).
-- 최신 사내 확인: 09-15 `apply_demo result=ok changed=1 commit=9a90e19fb7f5 stage=complete code=- next=new_chat`, 이어 `ui=ok tree=ok font=ok chat=ok` 보고. 지정 자산 적용과 요청한 새 화면·트리·글꼴·대화/초안 확인을 완료함. 실제 모델의 업무 호출·공유 권한·유휴 안정성까지 통과한 것으로 확대하지 않음. [이번 적용·화면 확인](../evals/scenarios.md#sidebar-refinement-20260914).
+- 이번 작업: 사용자 보고로 사내 Windows의 고정 원본 시험 배포 완료를 확인함. `87f3f2922a4a`에서 프로그램 `0.11.3+ees.9` 적용·기동과 Agent Pack v0.2.10의 지정 자산 적용 3건이 성공함. 수동 ZIP 전달 없이 준비·백업·프로그램·자산 적용이 이어진 이번 실행의 성공이며 기존 대화·새 업무 흐름의 화면/모델 확인은 다음 단계임. [실행 증거·남은 범위](../evals/scenarios.md#work-ui-refactor-20260915).
+- Git 원본: 리팩토링·메인 채팅 업무 탐색·자산 보호는 [PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48), ZIP 자동 준비는 [PR #49](https://github.com/knadalkim-a11y/team-agent-poc/pull/49)에 반영됨. 이번 확인된 래퍼·프로그램·자산 원본은 `87f3f2922a4ab830bcee1022ed7045e624a36777`임. 이후 상태 문서 커밋은 실제 설치 원본과 구분하며 이 기록 갱신만으로 재배포하지 않음.
+- 최근 UI 확인: 09-15 앞선 ees.8의 공장·시스템 선택 박스, 프로세스 직계 태스크 펼침, 글꼴·설명 행 정리, 대화·작성 중 초안 유지 네 항목 정상 보고는 보존함. 이번 ees.9 설치 후 화면·기존 대화 확인은 아직 미보고이며 앞선 수락을 새 화면 결과로 바꾸지 않음. [앞선 수락](../evals/scenarios.md#sidebar-refinement-20260914).
+- 최근 운영 확인: 09-15 `stop → backup → apply`, `upgrade result=ok changed=true wrapper_changed=false version=0.11.3+ees.9 running=true` 보고. 정상 완료의 실행 순서상 검증 백업과 기동 health도 통과한 것으로 판단함. 새 다운로드와 원본 캐시 재사용 중 어느 경로였는지는 출력에서 구분되지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 이번 성공으로 확정하지 않음. [이번 적용](../evals/scenarios.md#work-ui-refactor-20260915), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호](../evals/scenarios.md#accept64-guard-20260914).
+- 최근 제품 변경: 같은 원본의 `apply_demo result=ok changed=3 stage=complete code=- next=new_chat` 보고. 관리 목록 내 적용·쓰기 후 확인 성공이며 개별 변경 대상 3개를 추측하지 않음. 기존 v0.2.9/ees.8 수락과 과거 자산 충돌은 [앞선 기록](../evals/scenarios.md#sidebar-refinement-20260914), [정렬 충돌 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함.
+- 다음 작업 하나: 배포 명령을 반복하지 않고 브라우저를 완전히 새로고침해 기존 대화를 열어 본 뒤, 새 EES 통합 Assistant 대화에서 사이드바 업무를 선택하지 않은 채 셋업 목표를 요청함. 등록된 절차 후보 탐색·필요한 조건 질문·계획이 이어지는지와 기존 대화 접근 결과만 1~2줄로 받음. 실제 사용자 확인 전 화면·모델·업무 실행까지 완료 처리하지 않음. [적용 후 확인](03-openwebui-native-agent.md#ees-wrapper-trial).
+- 최신 사내 확인: 09-15 래퍼/프로그램 `87f3f2922a4a`의 ees.9 기동과 같은 자산 원본의 변경 3건 성공. 앞선 일반 Upgrade의 CI 확인 실패는 보존하며 원격 검사 재개·시험 옵션 미적용 원인 해결로 해석하지 않음. [실패·다음 실행의 성공](../evals/scenarios.md#work-ui-refactor-20260915).
 
 ## 2026년 9월 개발·검사 방침
 
@@ -28,20 +28,20 @@
 
 | 대상 | 마지막 확인과 적용 원본 | 남은 한계·근거 |
 |---|---|---|
-| EES Work 업무 UI | 09-15 ees.8 사이드바 개선의 `ui=ok tree=ok font=ok chat=ok` 사용자 보고 | 선택 박스·직계 펼침·글꼴/P/T/J 설명 제거·대화/초안 유지 확인. 정확한 설치 프로그램 SHA와 실제 업무 모델 호출은 별도 미확인. [이번 수락 결과](../evals/scenarios.md#sidebar-refinement-20260914) |
-| EES 프로그램 | 09-15 새 UI 네 항목 정상 확인. 마지막 직접 버전 응답은 09-14의 `0.11.3+ees.7` | 개별 Upgrade 출력·현재 버전 문자열·설치 원본 SHA·유휴 안정성은 별도 미보고. 새 UI 확인과 구분하며 버전 확인만을 위해 정상 서버를 다시 적용하지 않음. [이번 보고](../evals/scenarios.md#sidebar-refinement-20260914), [이전 실행 증거](../evals/scenarios.md#specialists-editor-format-20260914) |
-| 운영 래퍼 | 09-15 ApplyDemo 실행 원본 `9a90e19fb7f5`, `result=ok changed=1 stage=complete` | 실행 프로그램 원본 SHA와 구분함. [이번 적용 보고](../evals/scenarios.md#sidebar-refinement-20260914) |
-| 분석·업무 패널 자산 | 09-15 `9a90e19fb7f5` / Agent Pack v0.2.9 ApplyDemo 성공, 변경 1건 | 관리 목록의 적용·쓰기 후 확인을 마친 사용자 보고. 변경한 개별 대상·실제 분석 결과는 미보고이며 UI 네 항목 정상 확인과 구분함. [이번 보고](../evals/scenarios.md#sidebar-refinement-20260914), [이전 v0.2.8 성공과 실패](../evals/scenarios.md#specialists-editor-format-20260914) |
-| 대표 시작 질문 | 09-15 `9a90e19fb7f5`의 v0.2.9 관리 목록을 포함한 ApplyDemo 성공 | 새 질문의 실제 화면은 미확인. 변경 1건을 시작 질문 갱신으로 단정하지 않음. [이번 적용](../evals/scenarios.md#sidebar-refinement-20260914), [이전 접속 실패](../evals/scenarios.md#connector-demo-starters) |
+| EES Work 업무 UI | 09-15 ees.9 설치 완료, 앞선 ees.8의 `ui=ok tree=ok font=ok chat=ok` 수락 유지 | 이번 새로고침 후 화면·기존 대화·실제 모델의 업무 활용은 미확인. [이번 배포](../evals/scenarios.md#work-ui-refactor-20260915), [앞선 수락](../evals/scenarios.md#sidebar-refinement-20260914) |
+| EES 프로그램 | 09-15 `87f3f2922a4a`, `0.11.3+ees.9`, Upgrade `changed=true running=true` | 사용자 실행 결과로 적용·기동 확인. 유휴 안정성·실제 업무 모델 호출은 별도 미확인. [이번 실행](../evals/scenarios.md#work-ui-refactor-20260915) |
+| 운영 래퍼 | 09-15 `87f3f2922a4a`, `wrapper_changed=false`, 시험 Upgrade/ApplyDemo 성공 | 해당 사내 실행의 성공이며 전체 Windows/PowerShell 자동 시험 PASS를 뜻하지 않음. [이번 실행](../evals/scenarios.md#work-ui-refactor-20260915) |
+| 분석·업무 패널 자산 | 09-15 `87f3f2922a4a` / Agent Pack v0.2.10 ApplyDemo 성공, 변경 3건 | 관리 목록 적용·쓰기 후 확인 성공. 개별 변경 항목·새 대화의 실제 분석/업무 사용은 미보고. [이번 적용](../evals/scenarios.md#work-ui-refactor-20260915) |
+| 대표 시작 질문 | 09-15 `87f3f2922a4a`의 v0.2.10 관리 목록을 포함한 ApplyDemo 성공 | 질문의 실제 표시 여부는 미확인. 변경 3건을 특정 질문 변경으로 단정하지 않음. [이번 적용](../evals/scenarios.md#work-ui-refactor-20260915), [이전 접속 실패](../evals/scenarios.md#connector-demo-starters) |
 | WO 목업 | v0.1.6 안내 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc` 뒤 크기 조절 정상 보고; Git은 v0.1.8 통합 패널 원본 | 실제 EMS 미연결. 이후 패널 적용 보고와 개별 등록 바이트 검증을 구분. [목업 이력](../evals/scenarios.md#wo-mockup) |
 | 기본 Assistant·기존 조회 | 이름·로고·기존 대화·평소 Confluence/Jira/GitHub 조회 정상, 초기 Rich UI 제거·변경 Prompt 반영 완료 보고 | Tool별 최신 등록 코드·SHA·새 일반 답변/원문 직접 대조 미실행. [반영 보고](../evals/scenarios.md#plain-output-applied-report), [이전 자산별 SHA](../evals/scenarios.md#status-history-20260911) |
 | 정책·Skill | 합성 정책·지침 저장 보고, P02 PASS·P03 일부 확인. Git/UI 등록 Skill 3개, 기존 2개의 사용 확인 | 실제 사내 정책·나머지 P 시험·confluence-read 실제 로딩 미확인. [기준](../evals/scenarios.md#instruction-revision) |
 
 ## 남아 있는 이슈와 확인 범위
 
-- **9월 원격 검증 보류:** 사용자 Billing 화면에서 Actions 무료분 `2,000/2,000` 사용 및 현재 Actions 청구 대상 `$0`를 확인함. 사용자는 9월 원격 검사 생략·개발 계속을 선택함. 결제 실패로 단정하거나 예산 상향을 다음 작업으로 요구하지 않음. R1~R3의 Windows·브라우저 검사와 사내 적용은 미확인이며 이전 실패와 로컬 결과를 보존함. [이번 무료분 확인·한시 방침](../evals/scenarios.md#work-ui-refactor-20260915), [앞선 관측](../evals/scenarios.md#workflow-refactor-20260915).
+- **9월 원격 검증 보류:** 사용자 Billing 화면에서 Actions 무료분 `2,000/2,000` 사용 및 현재 Actions 청구 대상 `$0`를 확인함. 사용자는 9월 원격 검사 생략·개발 계속을 선택함. 결제 실패로 단정하거나 예산 상향을 다음 작업으로 요구하지 않음. R1~R3의 Windows·브라우저 자동 검사는 미실행이며 이전 실패와 로컬 결과를 보존함. ees.9 사내 적용·기동·지정 자산 반영 성공은 이번 사용자 보고로 따로 확인함. [이번 무료분 확인·한시 방침](../evals/scenarios.md#work-ui-refactor-20260915), [앞선 관측](../evals/scenarios.md#workflow-refactor-20260915).
 
-- **공통 자산 업데이트 중 동시 편집:** 기존 GET→POST 사이 지원 description 유실의 합성 결함을 R0 조건부 저장·native 보호 경로로 수정하고 실제 wheel 회귀에서 확인함. 현재 PR 구현이며 사내 반영은 미실행이므로 기존 설치의 보호가 완료됐다고 표현하지 않음. 보호 미적용 원본 서버·외부 DB writer·일반 UI끼리의 오래된 폼 충돌은 보장 밖. [원래 재현/오탐 정정](../evals/scenarios.md#ai-runtime-preservation-20260915), [수정·검증·적용 경계](../evals/scenarios.md#conditional-assets-20260915).
+- **공통 자산 업데이트 중 동시 편집:** 기존 GET→POST 사이 지원 description 유실의 합성 결함을 R0 조건부 저장·native 보호 경로로 수정하고 실제 wheel 회귀에서 확인함. 이번 ees.9 설치와 보호 API를 사용하는 ApplyDemo 성공으로 사내 반영을 확인함. 실제 사내 동시 편집 충돌 재현까지 확인한 것은 아님. 보호 미적용 원본 서버·외부 DB writer·일반 UI끼리의 오래된 폼 충돌은 보장 밖. [원래 재현/오탐 정정](../evals/scenarios.md#ai-runtime-preservation-20260915), [수정·검증·적용 경계](../evals/scenarios.md#conditional-assets-20260915).
 - **사외 Windows CI 지연:** 이전에 통과한 동일 코드에서 PowerShell 20초·Node 10초 제한시간 초과가 각각 발생했으며 원인은 미확정임. 두 시험의 단계 표식·런타임 버전·timeout의 단계 표식를 보존하도록 보완했으므로 자연 재발 시 그 증거로 진입 관측 여부와 시험 내부 단계를 구분함. 재검사 성공을 근본원인 해결이나 사내 서버 진단 필요로 바꾸지 않음. [실패·관측·최종 CI](../evals/scenarios.md#sidebar-refinement-20260914).
 - **메인 채팅의 업무 활용:** 읽기 전용 후보/절차 조회, 접근 가능한 스킬 지침, 기존 진행의 고정본 계획과 목표 기반 관리 Prompt를 구현하고 실제 SQLite 서비스 회귀를 확인함. 사내 GLM의 자연어 후보 선정·되묻기·계획·실행·화면 반영은 적용 후 미확인임. 현재 한 진행 건/한 대화, 외부 도구 미연결, DB/AP 모의 점검 경계를 유지함. [개발 기준](mockups/ees-work/TASK.md#chat-workflow-entry-20260915).
 - **팀 공동 작업:** 사용자가 공장 1개·시스템 1개·프로세스 1개, 참여자 2~3명의 첫 단위를 선택함. 현재 진행 건과 대화 연결은 사용자 소유이며 개인 선택 상태도 진행 건에 있어 공동화 때 분리가 필요함. 참여/역할·이력·충돌 처리는 아직 구체화·구현 전임. [새 단위·현황 표시 제안](mockups/ees-work/TASK.md#shared-pilot-first), [전체 목표](mockups/ees-work/TASK.md#ees-work-shared-target).
@@ -80,6 +80,6 @@
 
 ## 최근 점검
 
-2026-09-15: 수동 ZIP 자동화의 독립 검토와 엄격 UTF-8 검사에서 기존 Upgrade/ApplyDemo/manager 157 PASS/PowerShell 4 SKIP, 신규 묶음/시험 업데이트 30 PASS/PowerShell 1 SKIP를 확인함. 별도 실제 CRLF Git checkout에서 원본을 보존해 패키징하고 전체 release validator와 기존 검증 프로그램 wheel SHA 일치를 확인함. 최초 CRLF fixture 실패와 stage/cleanup 검토 보완, 앞선 실제 Apply/Restore 결과는 [기존 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 보존함. 실제 Windows·PowerShell·사내 다운로드/기동·모델은 미실행임.
+2026-09-15: 사용자 보고로 `87f3f2922a4a`의 ees.9 Upgrade `result=ok running=true`와 같은 원본 ApplyDemo `result=ok changed=3`을 확인함. 이번에는 상태·증거 문서만 갱신하며 제품 시험이나 정상 서버 배포를 반복하지 않음. 앞선 로컬 187 PASS/PowerShell 5 SKIP·실제 CRLF 패키징·검토 보완·일반 CI 경로 실패는 [기존 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 보존함. 사내 실행 성공과 원격 Windows 자동 검사·브라우저·실제 모델의 미확인을 구분함.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
