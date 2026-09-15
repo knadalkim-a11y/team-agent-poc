@@ -13,6 +13,7 @@
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
 | AI 개발 구조·사내 UI 작성 자산 보존 | [관리 경계·기존 보호·동시 편집 한계와 합성 검증](#ai-runtime-preservation-20260915) |
+| 제한적 리팩토링 설계·독립 검토 | [설계 범위·검토 보완·구현 전 검증 경계](#refactoring-design-review-20260915) |
 | 공동 작업 첫 단위·현황판 시점 | [팀 사용 우선 목표·진척률과 일정 데이터 범위](#shared-pilot-priority-20260915) |
 | 사이드바 목업 후속 반영 | [ees.8 선택 영역·직계 펼침·폰트·검증 경계](#sidebar-refinement-20260914) |
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
@@ -56,6 +57,16 @@
 - 지원 필드의 동시 변경 재현: 기존 FakeAPI를 메모리에서 임시 확장하여, 최종 GET 직후 해당 Tool의 update POST가 저장되기 직전에 서버의 `meta.description`을 다른 사용자 값으로 바꿈. 이후 이전 GET 값으로 만든 payload가 저장되어 `apply_result=ok`, `race_fired=True`, `final_description=before-description`, `edit_preserved=False`를 확인함. 현재 쓰기 직전 재조회는 변경 감지 보호지만 GET→POST를 원자적으로 묶지 못한다는 **합성 증거**임. 사내 실제 발생/피해는 미확인. 원인은 단순 metadata 축약이 아니라 재조회와 무조건 갱신 사이의 경합이며, 관리 목록 밖 별도 사용자 Tool/Skill의 삭제를 재현한 것은 아님.
 - 다음 관련 변경의 검증 기준: 명시된 관리 ID/필드만 변경, Git에 없는 사용자 자산·연결·권한·개인 설정 보존, 충돌 때 덮어쓰기 중단, 지원 필드의 최종 조회 이후 동시 편집 처리, 반복 적용/실패/프로그램 Restore 후 최신 사용자 자료 유지, 공개 API/설치 모듈과 실제 배포물의 연결을 검사함. 동시 편집의 보장 방법은 서버의 조건부 저장/직렬화 범위를 포함해 구현 전에 정해야 하며 기존 재조회만으로 해결됐다고 표현하지 않음. 미연결 실제 업무 호출·운영 DB 접근·자동 데이터 이관을 추가하지 않음.
 - 기록·처리: [개발 지침](../AGENTS.md#3-구현-위치와-과설계-방지)에 AI 개발·현장 자산 보존·공개 연결/저장 호환 기준을, [관리 원본](../README.md#원본과-배포본)에 사용자 Tool을 명시함. TASK의 예시 재사용 지시를 최신 사용자 의도에 맞게 정정함. 새 보고서·지원하지 않는 필드용 회귀 코드·자동 동기화를 만들지 않음. 확인한 동시 편집 한계는 STATUS에 연결하고 이번 검토를 수정·배포 완료로 표시하지 않음. 문서 6개만 변경, `python scripts/check_docs.py` → `files=30 links=1000 errors=0 review_candidates=0`, `git diff --check` 통과. 독립 문서 대조에서 오탐 정정·동시 편집 조건·보호 범위·미구현/실환경 구분이 증거와 일치함을 확인함.
+
+<a id="refactoring-design-review-20260915"></a>
+
+## 2026-09-15 제한적 리팩토링 설계와 독립 검토
+
+- 요청·기준: 사용자가 필요성 검토와 구현 설계/검토의 완료 여부를 구분해 묻고 설계 → 검토 → 진행 순서를 제안함. 기존 main `006d9befcf1095397c70773f171c1403bf2b80d6`, 문서 Draft [PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48)의 시작 head `818593a54dc04d5f04f50338331ff8321795c2d3`와 같은 source tree `27f89412b7bb267cd477c738d9326a248a946eaf`에서 검토함. [TASK 설계 원본](../docs/mockups/ees-work/TASK.md#refactoring-design)에 파일별 책임·인터페이스·보존 조건·작업 순서·검증/Restore 기준을 구체화함. 이번 작업은 문서 설계와 독립 검토이며 실행 코드·시험 코드·사용자 자료·사내 환경·프로그램 버전은 변경하지 않음.
+- 구조 검토와 보완: 업무 서버와 화면을 각각 기능 경계로 나누되 facade/public API·실제 배포 모듈을 유지함. AI의 참조량을 줄이지 못하는 자유변수 공유 분할을 피하고 controller/view/designer의 상태 소유자와 factory 연결을 명시함. 기존 업무/분석 패널은 폭·반응형 기준이 달라 한꺼번에 공통화하면 동작이 바뀌므로 이번 대상에서 제외함. 공통 정책과 예시 분리는 완성 seed bytes를 유지하며 기존 DB의 사용자 수정 절차·snapshot을 재작성하지 않도록 한정함. 빌더 조립 결과를 브라우저 fixture도 사용하고 package-aware 시험 loader와 실제 wheel import를 함께 확인하도록 정함.
+- 자산 보호 검토와 보완: R0를 순수 리팩토링과 별도의 기능 수정으로 분리함. token·payload를 동일 snapshot에 묶고 현장 수정 검사 없이 token만 갱신하는 재시도를 금지함. Tool 저장 후 valves는 확인된 성공 snapshot으로 다시 검사/merge하도록 정함. 잠금만으로 다중 프로세스·취소 후 DB 작업·오래된 session을 보호하지 못한다는 독립 검토에 따라 프로세스 수명 OS 배타 잠금, 실제 작업 Task의 종료까지 잠금 유지, native Depends 이전 route guard와 fresh session 경계를 명시함. Tool 캐시는 DB/ACL 성공 뒤 공개하고 부분 commit/응답 유실은 journal·재조회로 처리하며 자동 원복하지 않음.
+- upstream 확인 범위: 고정 v0.11.3의 [Tool router](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/routers/tools.py), [Tool table](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/models/tools.py), [Model router](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/routers/models.py), [Model table](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/models/models.py), [ACL](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/models/access_grants.py), [session](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/internal/db.py), main lifespan/router include 순서를 소스로 대조함. Model 조회의 knowledge 정상화 commit과 session-sharing 경계를 보호 대상에 포함함. 실제 pinned wheel의 writer/caller 전수 대조와 경합·취소·Windows 잠금 시험은 미실행이며 R0 구현 완료 게이트임. 이 기록을 서버 보호 검증 PASS나 사내 데이터 보존 완료로 해석하지 않음.
+- 최종 설계 원문 검토·문서 검사: 구조/과설계와 자산 안전을 서로 다른 검토자가 독립 검토한 뒤 보완 원문을 재확인함. 추가 지적한 일반 route 이동의 초안/펼침 보존, view/designer 이벤트 전달 계약, specialists 비교 시험의 직접 import 로더 누락을 수정함. 두 최종 검토 모두 해당 설계 범위에서 미해결 차단사항 없음으로 판정함. Linux에서 `python scripts/check_docs.py` → `files=30 links=1006 errors=0 review_candidates=0`, `git diff --check` 통과. 이번 후속 diff는 기존 Markdown 5개이며 누적 PR은 지침을 포함한 문서 6개만 변경함. 실행/시험 코드·설정 변경 없음. 앞선 기존 자산 보존 8개 PASS와 지원 필드 race 재현은 이전 검토의 증거이며 이번 새 서버 설계의 실행 결과가 아님.
 
 <a id="shared-pilot-priority-20260915"></a>
 
