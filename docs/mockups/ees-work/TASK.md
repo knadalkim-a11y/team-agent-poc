@@ -92,7 +92,7 @@
 
 ## 제한적 리팩토링 구현 설계 (2026-09-15)
 
-목적은 AI가 한 기능의 변경 범위와 호환 조건을 파악하기 쉽게 만들고, 사내에서 작성한 자산을 보존하면서 공동 작업 기반을 추가할 준비를 하는 것이다. 현재 WebUI·Python 빌더·래퍼·업무 저장소를 유지한다. 이 절은 구현 기준 설계이며, R0의 후속 구현은 [조건부 자산 적용 기록](../../../evals/scenarios.md#conditional-assets-20260915)에 연결한다. R1 서버/정책 분리는 [구현·호환 검증](../../../evals/scenarios.md#workflow-refactor-20260915)에 연결하며, R2 화면 분리는 아직 미구현이다. 설계 검토 결과와 실제 구현/시험 여부는 [설계 검토 기록](../../../evals/scenarios.md#refactoring-design-review-20260915)에서 구분한다.
+목적은 AI가 한 기능의 변경 범위와 호환 조건을 파악하기 쉽게 만들고, 사내에서 작성한 자산을 보존하면서 공동 작업 기반을 추가할 준비를 하는 것이다. 현재 WebUI·Python 빌더·래퍼·업무 저장소를 유지한다. 이 절은 구현 기준 설계이며, R0의 후속 구현은 [조건부 자산 적용 기록](../../../evals/scenarios.md#conditional-assets-20260915)에 연결한다. R1 서버/정책 분리는 [구현·호환 검증](../../../evals/scenarios.md#workflow-refactor-20260915)에 연결하며, R2 화면 분리 구현과 R3 배포 호환 검증은 [후속 기록](../../../evals/scenarios.md#work-ui-refactor-20260915)에 연결한다. 원격 Windows/브라우저 통과와 사내 적용 여부는 해당 기록과 STATUS를 따르며 구현만으로 완료 처리하지 않는다. 설계 검토 결과와 실제 구현/시험 여부는 [설계 검토 기록](../../../evals/scenarios.md#refactoring-design-review-20260915)에서 구분한다.
 
 ### 범위와 작업 단위
 
@@ -190,7 +190,7 @@ Tool 캐시는 기존처럼 DB 성공 전에 새 module을 전역 공개하지 �
 
 controller → view는 `render(snapshot)`, `setBusy`, `openPanel`, `closeHost`, `reset`, `readJobEdits`와 `handleEvent(event)`/`updateLayout()`으로 연결한다. view → controller는 `selectWork`, `switchScope`, `openCase`, `startCase`, `showHistory`, `saveInputs`, `saveDocument`, `runJob` 콜백으로 기존 액션을 요청한다. 서버 snapshot은 view에서 변경하지 않는다.
 
-controller → designer는 `acceptServer(result)`, `readDraft()`의 `{definition, revision, dirty}`, `markSaved`, `render`, `restoreWorkspace(removeTab)`, `reset`이다. designer는 저장/검증/게시를 기존 `save_draft`, `validate_draft`, `publish` 콜백으로 요청하며 직접 fetch하지 않는다. 공용 순수 tree renderer는 데이터·선택 ID와 `editing/selectedId/collapsed/expanded/statuses/summaries` 옵션을 받고 editor/controller 자유변수를 읽지 않는다. 전역 click/input/change/keydown/scroll/resize는 controller가 해당 view/designer의 `handleEvent(event)`로 전달한다. 수신 객체는 자신의 DOM/상태에만 반응하고 `{handled, preventDefault}`를 동기 반환하며 controller가 중복 처리·기본 동작 여부를 결정한다. 일반 SPA route 전환에서는 DOM detach/Workspace 복원·관찰 대상 갱신만 하고 현재 동작대로 editor dirty·트리 펼침·폭을 보존한다. 인증 사용자 변경/로그아웃 때 개인 상태를 reset하고, 최종 dispose 때만 전역 listener/observer를 해제한다.
+controller → designer는 `acceptServer(result)`, `readDraft()`의 `{definition, revision, dirty}`, `markSaved`, `render`, `restoreWorkspace(removeTab)`, `reset`이다. designer는 저장/검증/게시를 기존 `save_draft`, `validate_draft`, `publish` 콜백으로 요청하며 직접 fetch하지 않는다. 공용 순수 tree renderer는 데이터·선택 ID와 `editing/selectedId/collapsed/expanded/statuses/summaries` 옵션을 받고 editor/controller 자유변수를 읽지 않는다. 전역 click/input/change/keydown/scroll/resize는 controller가 해당 view/designer의 `handleEvent(event)`로 전달한다. 수신 객체는 자신의 DOM/상태에만 반응하고 `{handled, preventDefault}`를 동기 반환하며 controller가 중복 처리·기본 동작 여부를 결정한다. 일반 SPA route 전환에서는 DOM detach/Workspace 복원·관찰 대상 갱신만 하고 현재 동작대로 editor dirty·트리 펼침·폭을 보존한다. 인증 사용자 변경/로그아웃 때 개인 상태를 reset한다. 전역 listener/observer는 기존 document 수명과 런처 중복 로딩 방지를 유지하며 SPA 이동마다 새로 등록하지 않는다. R2에서는 별도 dispose API나 pagehide 수명 변경을 추가하지 않는다.
 
 `scripts/build_ees_webui.py`의 조립 함수 하나로 **view → designer → launcher** 순서를 고정하고 외부 IIFE 안에 넣어 기존 단일 `ees-work-launcher.js`를 생성한다. 기존 launcher IIFE는 마지막에 실행하고 새 factory를 전역으로 노출하지 않는다. WebUI 로딩은 기존 work-panel → launcher의 defer 순서를 유지한다. 입력 없음/빈 파일/symlink/중복 factory·잘못된 순서는 빌드 실패로 처리하고 bytes·hash·wheel RECORD/manifest를 결정적으로 생성한다. 런타임 module loader·npm bundler·외부 CDN을 추가하지 않는다.
 

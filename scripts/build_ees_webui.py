@@ -14,6 +14,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import tempfile
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
@@ -36,6 +37,7 @@ ASSET_NAMES = (
 )
 UI_FILES = {"chat-theme.css": "chat-theme.css", "font-licenses.txt": "fonts/LICENSE.txt",
             "ees-work-launcher.js": "ees-work-launcher.js", "ees-work-launcher.css": "ees-work-launcher.css"}
+WORK_LAUNCHER_SOURCES = ("ees-work-view.js", "ees-work-designer.js", "ees-work-launcher.js")
 WORK_DIR = ASSET_DIR.parents[2] / "agent-pack" / "skills" / "ees-work-demo"
 WORK_ASSETS = {"scripts/ees_work_demo.py": "open_webui/ees_work_demo.py",
                **{"ui/" + name: "open_webui/ees_work_demo_ui/" + name
@@ -444,13 +446,46 @@ def zip_entry(name, attributes=0o100644 << 16):
     return entry
 
 
+def assemble_work_launcher(ui_dir=UI_DIR):
+    """Build one private runtime scope in the reviewed dependency order.
+
+    Factories are named declarations in their own source unit. Reject misplaced
+    or duplicate declarations instead of shipping a partly assembled launcher.
+    Bytes are preserved, including line endings; no loader or JS bundler runs.
+    """
+    expected = (("ees-work-view.js", "createWorkView"),
+                ("ees-work-designer.js", "createWorkDesigner"),
+                ("ees-work-launcher.js", None))
+    if WORK_LAUNCHER_SOURCES != tuple(name for name, _ in expected):
+        raise ValueError("EES Work launcher source order differs.")
+    root = Path(ui_dir)
+    if any(path.is_symlink() for path in (root, *root.parents)):
+        raise ValueError("Linked EES Work launcher source directory.")
+    parts = []
+    declaration = re.compile(rb"\b(?:function\s+|(?:const|let|var)\s+)(createWorkView|createWorkDesigner)\b")
+    for filename, factory in expected:
+        path = root / filename
+        if path.is_symlink() or not path.is_file():
+            raise ValueError(f"Missing or linked EES Work launcher source: {filename}")
+        content = path.read_bytes()
+        if not content.strip():
+            raise ValueError(f"Empty EES Work launcher source: {filename}")
+        wanted = [factory.encode("ascii")] if factory else []
+        if declaration.findall(content) != wanted or (factory and not re.search(
+                rb"\bfunction\s+" + factory.encode("ascii") + rb"\s*\(", content)):
+            raise ValueError(f"EES Work launcher factory/order differs: {filename}")
+        parts.append(content)
+    return b"(() => {\n'use strict';\n" + b"\n;\n".join(parts) + b"\n})();\n"
+
+
 def prepare_additions(source, ui_dir, work_dir=WORK_DIR):
     additions = {}
     for filename, relative in UI_FILES.items():
         path = Path(ui_dir) / filename
         if path.is_symlink() or not path.is_file() or not path.stat().st_size:
             raise ValueError(f"Missing, empty, or linked EES UI asset: {filename}")
-        additions[TARGET_APP + relative] = path.read_bytes()
+        additions[TARGET_APP + relative] = (assemble_work_launcher(ui_dir)
+            if filename == "ees-work-launcher.js" else path.read_bytes())
     for relative, target in WORK_ASSETS.items():
         path = Path(work_dir) / relative
         if path.is_symlink() or not path.is_file() or not path.stat().st_size:

@@ -99,6 +99,17 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 
 정책과 예시의 분리는 현재 저장된 게시본·초안·진행 건을 재작성하지 않습니다. AI Tool의 [workflow_tool.py](agent-pack/skills/ees-work-demo/scripts/workflow_tool.py)와 UI는 같은 공개 서비스와 권한 판정을 사용합니다.
 
+업무 화면 변경은 다음 책임에서 시작합니다. 세 JS 소스는 기존 Python 빌더의 `assemble_work_launcher`에서 하나의 배포 JS로 조립되며 별도 로더나 서버를 추가하지 않습니다.
+
+| 변경할 책임 | 원본 |
+|---|---|
+| 서버 요청·대화 연결·개인 초안·응답 순서 | [ees-work-launcher.js](branding/ees/ui/ees-work-launcher.js) |
+| 공장 선택·트리·업무 패널 표시·크기 | [ees-work-view.js](branding/ees/ui/ees-work-view.js) |
+| 관리자 절차 편집·미저장 초안·Workspace 복원 | [ees-work-designer.js](branding/ees/ui/ees-work-designer.js) |
+| 소스 조립·wheel 파일 목록·해시 | [build_ees_webui.py](scripts/build_ees_webui.py) |
+
+factory는 배포 JS 내부에만 존재하고 기존 UI/Tool 연결과 저장 형식은 유지합니다. 화면 분리와 이전 프로그램 복원 검증의 실제 범위는 [R2/R3 기록](evals/scenarios.md#work-ui-refactor-20260915)을 따릅니다.
+
 ### 원본과 배포본
 
 팀원이 만든 개인·공유 프롬프트·Skill·Tool은 허용된 생성·공유·수정 권한 안에서 WebUI에서 관리합니다. 공유할 때마다 담당자의 채택이나 Git 반영을 거칠 필요는 없습니다. 담당자가 팀 공통 배포 대상으로 채택한 항목만 검토한 버전을 Git에 보관하고, 이후에는 Git에서 변경을 관리해 해당 배포 절차로 반영합니다. 교차 분석 시연의 지정 자산은 `ApplyDemo`, 그 밖의 기존 자산은 해당 가이드의 수동 절차를 사용합니다. 개발 환경에 없는 사용자 자산도 계속 보존하며, 프로그램 내부 리팩토링을 자산 ID 변경·재등록·초기화와 결합하지 않습니다.

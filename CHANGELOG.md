@@ -4,6 +4,8 @@
 
 ## 2026-09-15
 
+- [R2 업무 화면 분리](evals/scenarios.md#work-ui-refactor-20260915)를 기존 요청 제어·표시·관리자 편집 책임으로 구현하고 단일 배포 JS/공개 연결을 유지함. 기존 브라우저 초안 보존 검사를 보강하고 R3 실제 프로그램 Apply→추가 저장→이전 ees.8 Restore 시험을 추가함. 같은 미배포 ees.9 준비본이며 Windows/브라우저 결과·사내 적용은 별도로 추적함.
+
 - AI가 업무 변경 책임을 좁혀 찾도록 [R1 서버·정책 분리](evals/scenarios.md#workflow-refactor-20260915)를 구현함. 저장·권한·공개 facade는 유지하고 정의/검증과 화면 파생 계산을 분리했으며 공통 정책을 참고 seed에서 분리함. 완성 seed·저장 형식·기존 자료를 유지하고 새 파일의 wheel 포함과 ees.6~ees.8 Restore 목록을 구분함. 같은 미배포 ees.9 PR에 반영하며 자산 재등록·공동 권한 변경은 포함하지 않음.
 
 - ees.9와 Agent Pack v0.2.10에 [R0 조건부 자산 적용](docs/03-openwebui-native-agent.md#conditional-assets)을 구현함. 서버가 최신 상태·권한과 저장을 같은 잠금으로 보호하고 ApplyDemo의 오래된 payload를 거절함. 실제 wheel 대조/독립 검토로 Tool import·지식 정리·채팅 캐시 경로를 포함하고 불필요한 외부 모델 조회 잠금은 제거함. 기존 자산 ID·사용자 자료·DB 형식과 구버전 프로그램 Restore를 유지하며, 구서버에서는 새 ApplyDemo 쓰기를 중단함. 구현과 사내 반영 여부는 [검증 기록](evals/scenarios.md#conditional-assets-20260915)에서 구분함.

@@ -314,6 +314,12 @@ class BrandingBuildTests(unittest.TestCase):
         self.ui.mkdir()
         for name in builder.UI_FILES:
             (self.ui / name).write_bytes(b"reviewed UI asset " + name.encode())
+        for name, content in {
+            "ees-work-view.js": b"function createWorkView() { return 'view'; }\n",
+            "ees-work-designer.js": b"function createWorkDesigner() { return 'designer'; }\n",
+            "ees-work-launcher.js": b"(() => { window.fixture = [createWorkView(), createWorkDesigner()]; })();\n",
+        }.items():
+            (self.ui / name).write_bytes(content)
         self.members = fixture_members()
         self.guard_hashes = {name: hashlib.sha256(self.members[name]).hexdigest()
                              for name in builder.ASSET_GUARD_SOURCE_HASHES}
@@ -344,6 +350,73 @@ class BrandingBuildTests(unittest.TestCase):
         self.assertEqual(first["source"]["sha256"], self.source_hash)
         self.assertEqual(first["wheel"]["sha256"], builder.sha256_file(self.root / "first" / builder.WHEEL_FILENAME))
 
+    def test_launcher_assembly_order_is_private_and_has_one_runtime_asset(self):
+        source = builder.assemble_work_launcher(self.ui)
+        self.assertLess(source.index(b"function createWorkView"), source.index(b"function createWorkDesigner"))
+        self.assertLess(source.index(b"function createWorkDesigner"), source.index(b"window.fixture"))
+        manifest = self.build()
+        self.assertEqual([name for name in manifest["changed_files"] if name.endswith((
+            "ees-work-view.js", "ees-work-designer.js", "ees-work-launcher.js"))],
+            [builder.TARGET_APP + "ees-work-launcher.js"])
+        if shutil.which("node"):
+            probe = """const vm=require('node:vm'),assert=require('node:assert/strict');
+const scope={window:{}};vm.createContext(scope);vm.runInContext(process.argv[1],scope);
+assert.equal(JSON.stringify(scope.window.fixture),'["view","designer"]');
+assert.equal(scope.createWorkView,undefined);assert.equal(scope.createWorkDesigner,undefined);
+assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.createWorkDesigner,undefined);
+"""
+            result = subprocess.run([shutil.which("node"), "-e", probe, source.decode("utf-8")],
+                                    capture_output=True, text=True, encoding="utf-8", timeout=10)
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_launcher_missing_empty_duplicate_and_swapped_units_fail_before_output(self):
+        originals = {name: (self.ui / name).read_bytes() for name in builder.WORK_LAUNCHER_SOURCES}
+        invalid = [(name, value) for name in originals for value in (None, b"", b" \r\n\t")]
+        invalid += [("ees-work-view.js", originals["ees-work-view.js"] * 2),
+                    ("ees-work-designer.js", originals["ees-work-view.js"]),
+                    ("ees-work-launcher.js", originals["ees-work-launcher.js"] + originals["ees-work-designer.js"]),
+                    ("ees-work-view.js", b"const createWorkView = () => {};\n")]
+        for name, value in invalid:
+            with self.subTest(name=name, value=value):
+                path = self.ui / name
+                path.unlink()
+                if value is not None:
+                    path.write_bytes(value)
+                with self.assertRaisesRegex(ValueError, "launcher|UI asset"):
+                    self.build()
+                self.assertFalse((self.root / "release").exists())
+                path.write_bytes(originals[name])
+        with mock.patch.object(builder, "WORK_LAUNCHER_SOURCES", tuple(reversed(builder.WORK_LAUNCHER_SOURCES))):
+            with self.assertRaisesRegex(ValueError, "source order"):
+                self.build()
+        self.assertFalse((self.root / "release").exists())
+
+    def test_launcher_linked_source_or_directory_fails_before_output(self):
+        target = self.root / "source.js"
+        target.write_bytes((self.ui / "ees-work-view.js").read_bytes())
+        linked = self.root / "linked-ui"
+        try:
+            linked.symlink_to(self.ui, target_is_directory=True)
+        except OSError:
+            self.skipTest("Symlinks unavailable for this account")
+        with self.assertRaisesRegex(ValueError, "Linked"):
+            builder.assemble_work_launcher(linked)
+        # A symlink above ui_dir is equally unsupported.
+        with self.assertRaisesRegex(ValueError, "Linked"):
+            builder.assemble_work_launcher(linked / "child")
+        (self.ui / "ees-work-view.js").unlink()
+        (self.ui / "ees-work-view.js").symlink_to(target)
+        with self.assertRaisesRegex(ValueError, "linked"):
+            self.build()
+        self.assertFalse((self.root / "release").exists())
+
+    def test_native_fixture_rejects_a_launcher_not_built_from_current_sources(self):
+        import native_ui_fixture
+        self.build()
+        with mock.patch.object(native_ui_fixture, "assemble_work_launcher", return_value=b"new source revision"), \
+                self.assertRaisesRegex(ValueError, "assembled sources"):
+            native_ui_fixture.NativeUIServer(self.root / "release" / builder.WHEEL_FILENAME)
+
     def test_only_reviewed_content_changes_and_frontend_cache_namespace_moves(self):
         manifest = self.build()
         with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
@@ -371,7 +444,11 @@ class BrandingBuildTests(unittest.TestCase):
             self.assertLess(index.index(b"/static/custom.css"), index.index(builder.THEME_LINK))
             self.assertLess(index.index(builder.THEME_LINK), index.index(b"</head>"))
             for name, relative in builder.UI_FILES.items():
-                self.assertEqual(built.read(builder.TARGET_APP + relative), (self.ui / name).read_bytes())
+                expected = (builder.assemble_work_launcher(self.ui) if name == "ees-work-launcher.js"
+                            else (self.ui / name).read_bytes())
+                self.assertEqual(built.read(builder.TARGET_APP + relative), expected)
+            self.assertNotIn(builder.TARGET_APP + "ees-work-view.js", built.namelist())
+            self.assertNotIn(builder.TARGET_APP + "ees-work-designer.js", built.namelist())
             for name, (origin, _) in builder.FONT_SOURCES.items():
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/" + name), self.members[origin])
             runtime = built.read(builder.TARGET_APP + "immutable/chunks/DKj2ZiCb.js")
@@ -707,6 +784,8 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
                                  (builder.UI_DIR / "chat-theme.css").read_bytes())
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/LICENSE.txt"),
                                  (builder.UI_DIR / "font-licenses.txt").read_bytes())
+                self.assertEqual(built.read(builder.TARGET_APP + "ees-work-launcher.js"),
+                                 builder.assemble_work_launcher())
                 for name in ("open_webui/env.py", "open_webui/frontend/index.html"):
                     self.assertEqual(source.read(name).count(b"LICENSE"), built.read(name).count(b"LICENSE"))
             assert_workflow_package(self, built_path)

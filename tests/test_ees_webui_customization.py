@@ -1,4 +1,8 @@
-"""App-only deployment tests; no Open WebUI application or dependencies imported."""
+"""App-only deployment tests; never start WebUI or open its user database.
+
+The optional current/previous-wheel gate imports each selected WorkflowService
+to verify new saves remain reusable after Restore, using a fresh test database.
+"""
 
 import base64
 import copy
@@ -11,6 +15,7 @@ import json
 import os
 import shutil
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -1135,6 +1140,144 @@ class CustomizationTests(unittest.TestCase):
 
 
 class RealBrandingWheelTests(unittest.TestCase):
+    @unittest.skipUnless(os.environ.get("EES_TEST_BRANDING_DIR") and os.environ.get("EES_TEST_PREVIOUS_BRANDING_DIR"),
+                         "Supply current and previous shipped wheels for the reverse-compatibility gate")
+    def test_saved_workflow_survives_real_upgrade_then_previous_program_restore(self):
+        current = Path(os.environ["EES_TEST_BRANDING_DIR"])
+        previous = Path(os.environ["EES_TEST_PREVIOUS_BRANDING_DIR"])
+        old_manifest = json.loads((previous / "manifest.json").read_text(encoding="utf-8"))
+        version = old_manifest["version"]
+        self.assertIn(version, {"0.11.3+ees.7", "0.11.3+ees.8"})
+        self.assertEqual(old_manifest["source"]["sha256"], branding.SOURCE_SHA256)
+        old_bytes = (previous / old_manifest["wheel"]["filename"]).read_bytes()
+        self.assertEqual(digest(old_bytes), old_manifest["wheel"]["sha256"])
+        content = (current / branding.WHEEL_FILENAME).read_bytes()
+        release._wheel(content, json.loads((current / "manifest.json").read_text(encoding="utf-8")))
+        layout = custom._wheel_layout(content)
+        selection = {"source_commit": COMMIT, "wheel_sha256": digest(content),
+                     "record_sha256": layout["record_sha256"], "webui_version": branding.VERSION}
+        # Import each actual selected program in a fresh interpreter. Only the
+        # unrelated WebUI CLI initializer and user/chat lookup surroundings are
+        # isolated; persistence, API validation and read/reuse run real code.
+        probe = r'''
+import asyncio, importlib, json, sys, types
+from pathlib import Path
+program, data, phase = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+package = types.ModuleType("open_webui")
+package.__path__ = [str(program / "open_webui")]
+sys.modules["open_webui"] = package
+workflow = importlib.import_module("open_webui.ees_workflow")
+assert Path(workflow.__file__).parent == program / "open_webui"
+user = {"id": "fixture-admin", "role": "admin"}
+users = {user["id"]: user, "other": {"id": "other", "role": "user"}}
+chats = {name: {"id": name, "user_id": user["id"]} for name in ("before-chat", "after-chat")}
+service = workflow.WorkflowService(data / "ees-work.sqlite3", users.get, chats.get)
+async def state():
+    result = {}
+    for chat in chats:
+        value = await service.get_state(user, chat_id=chat)
+        assert value["ok"], value
+        result[chat] = value
+    return result
+async def run():
+    expected_file = data.parent / "expected-workflow.json"
+    if phase != "before":
+        assert await state() == json.loads(expected_file.read_text(encoding="utf-8"))
+    chat = "before-chat" if phase == "before" else "after-chat"
+    if phase != "restore":
+        value = await service.handle_action(user, {"action": "create", "chat_id": chat, "payload": {}})
+        assert value["ok"], value
+        case = value["case"]
+        actions = [("run", "scope-j", {"confirm": True}),
+                   ("update_inputs", "db-j", {"inputs": {"db": phase + "-target"}})]
+        for action, node, payload in actions:
+            value = await service.handle_action(user, {"action": action, "chat_id": chat,
+                "case_id": case["id"], "node_id": node, "expected_revision": case["revision"], "payload": payload})
+            assert value["ok"], value
+            case = value["case"]
+        definition = value["draft"]
+        definition["nodes"]["setup-p"]["name"] = phase + "-saved-user-draft"
+        saved = await service.handle_action(user, {"action": "save_draft",
+            "expected_revision": value["draft_revision"], "payload": {"definition": definition}})
+        assert saved["ok"], saved
+        expected_file.write_text(json.dumps(await state(), ensure_ascii=False), encoding="utf-8")
+    else:
+        value = await service.get_state(user, chat_id=chat)
+        case = value["case"]
+        assert value["draft"]["nodes"]["setup-p"]["name"] == "after-saved-user-draft"
+        assert case["jobs"]["scope-j"]["history"]
+        assert case["jobs"]["db-j"]["inputs"]["db"] == "after-target"
+        denied = await service.get_state(users["other"], case_id=case["id"])
+        assert denied["error"]["code"] == "case_not_found"
+        # The restored old code can continue a new-version save, not just read
+        # bytes. The original case revision/history remain available as well.
+        continued = await service.handle_action(user, {"action": "select", "chat_id": chat,
+            "case_id": case["id"], "node_id": "db-j", "expected_revision": case["revision"]})
+        assert continued["ok"], continued
+        assert continued["case"]["revision"] == case["revision"] + 1
+asyncio.run(run())
+print("workflow_" + phase + "=pass")
+'''
+        with tempfile.TemporaryDirectory() as temporary:
+            fixture = Path(temporary)
+            for name in ("state/program", "original/open_webui", "data", "cwd"):
+                (fixture / name).mkdir(parents=True)
+            program = fixture / "state/program"
+            info = f"open_webui-{version}.dist-info/"
+            record_name = info + "RECORD"
+            # Reconstruct the already-installed predecessor using the same
+            # app-only inventory: upstream packaging references stay outside.
+            with zipfile.ZipFile(io.BytesIO(old_bytes)) as wheel:
+                rows = custom._record_rows(wheel.read(record_name), allow_packaging=True, version=version)
+                rows = {name: values for name, values in rows.items() if name not in custom.PACKAGING_FILES}
+                record = io.StringIO()
+                writer = csv.writer(record, lineterminator="\n")
+                for name in sorted(set(rows) - {record_name}):
+                    writer.writerow([name, *rows[name]])
+                    target = program / name
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(wheel.read(name))
+                writer.writerow([record_name, "", ""])
+                (program / record_name).write_text(record.getvalue(), encoding="utf-8", newline="\n")
+            old_selection = {"source_commit": "e" * 40, "wheel_sha256": digest(old_bytes),
+                             "record_sha256": digest((program / record_name).read_bytes()), "webui_version": version}
+            custom.validate_program(program, old_selection)
+            config = {"state_root": str(fixture / "state"), "source_prefix": str(fixture / "original"),
+                      "source_python": str(fixture / "original/python.exe"), "package_dir": str(fixture / "original/open_webui"),
+                      "data_dir": str(fixture / "data"), "cwd": str(fixture / "cwd")}
+            registry = {"schema_version": 2, "phase": "idle",
+                "current": {"kind": "original", "python": config["source_python"]}, "customization": {
+                "active": old_selection, "previous": {"active": None}, "pending": None}}
+            preserved = {"original/python.exe": b"registered-original-interpreter",
+                         "original/open_webui/__init__.py": b"original-application",
+                         "data/webui.db": b"unrelated-user-assets-and-chat", "cwd/.webui_secret_key": b"fixture-key"}
+            for name, value in preserved.items():
+                (fixture / name).write_bytes(value)
+            def run_phase(phase):
+                result = subprocess.run([sys.executable, "-I", "-B", "-X", "warn_default_encoding",
+                    "-W", "error::EncodingWarning", "-c", probe, str(program), config["data_dir"], phase],
+                    cwd=fixture, capture_output=True, text=True, encoding="utf-8", timeout=20)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stdout.strip(), "workflow_" + phase + "=pass")
+            run_phase("before")
+            database = fixture / "data/ees-work.sqlite3"
+            before = database.read_bytes()
+            with mock.patch.object(custom, "_load_bundle", return_value=(selection, content)):
+                self.assertTrue(custom.apply(config, registry, None, COMMIT,
+                    {"DATA_DIR": config["data_dir"]}, lambda *_: None, OWNER)["changed"])
+            self.assertEqual(database.read_bytes(), before)
+            custom.validate_program(program, selection)
+            run_phase("after")
+            after = database.read_bytes()
+            self.assertNotEqual(after, before)
+            self.assertEqual(custom.restore(config, registry, lambda *_: None, OWNER)["source_commit"], old_selection["source_commit"])
+            self.assertEqual(database.read_bytes(), after)
+            custom.validate_program(program, old_selection)
+            self.assertFalse((program / "open_webui/ees_workflow_definition.py").exists())
+            run_phase("restore")
+            for name, value in preserved.items():
+                self.assertEqual((fixture / name).read_bytes(), value)
+
     @unittest.skipUnless(os.environ.get("EES_TEST_BRANDING_DIR"), "Real built wheel is supplied by Windows/Linux delivery CI")
     def test_real_built_wheel_has_complete_purelib_app_metadata_and_frontend(self):
         root = Path(os.environ["EES_TEST_BRANDING_DIR"])
