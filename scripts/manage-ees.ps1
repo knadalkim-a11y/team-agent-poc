@@ -33,8 +33,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-if ($TrialCommit -and ($Action -ne 'ApplyDemo' -or $ResetUpdateToken)) {
-    throw 'TrialCommit is supported only with ApplyDemo and cannot reset GitHub credentials.'
+if ($PSBoundParameters.ContainsKey('TrialCommit') -and
+    ($Action -notin @('Upgrade', 'ApplyDemo') -or $ResetUpdateToken -or $TrialCommit -cnotmatch '\A[0-9a-f]{40}\z')) {
+    throw 'TrialCommit requires a full lowercase SHA with Upgrade or ApplyDemo and cannot reset GitHub credentials.'
 }
 if ($ResetUpdateToken -and $Action -notin @('Upgrade', 'ApplyDemo')) { throw 'ResetUpdateToken is supported only with Upgrade or ApplyDemo.' }
 if (($ResetDemoToken -or $WebUIUrl -or $EesModelId -or $WebUICaFile) -and $Action -ne 'ApplyDemo') {
@@ -114,7 +115,9 @@ if ($Action -eq 'ApplyDemo') {
     return
 }
 if ($Action -eq 'Upgrade') {
-    $upgradeArgs = $pythonOptions + @((Join-Path $PSScriptRoot 'ees_upgrade.py'), '--config', $Config)
+    $upgradeScript = if ($PSBoundParameters.ContainsKey('TrialCommit')) { 'ees_trial_upgrade.py' } else { 'ees_upgrade.py' }
+    $upgradeArgs = $pythonOptions + @((Join-Path $PSScriptRoot $upgradeScript), '--config', $Config)
+    if ($PSBoundParameters.ContainsKey('TrialCommit')) { $upgradeArgs += @('--trial-commit', $TrialCommit) }
     if ($PSBoundParameters.ContainsKey('HealthTimeout')) { $upgradeArgs += @('--health-timeout', "$HealthTimeout") }
     if ($ResetUpdateToken) { $upgradeArgs += '--reset-token' }
     & $operatorPython @upgradeArgs
