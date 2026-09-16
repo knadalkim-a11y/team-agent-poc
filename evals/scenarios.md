@@ -19,6 +19,7 @@
 | R2 업무 화면 분리·R3 배포 호환 | [화면 책임·단일 배포 JS·갱신 후 추가 저장과 이전 프로그램 복원](#work-ui-refactor-20260915) |
 | 공동 작업 첫 단위·현황판 시점 | [팀 사용 우선 목표·진척률과 일정 데이터 범위](#shared-pilot-priority-20260915) |
 | 사이드바 목업 후속 반영 | [ees.8 선택 영역·직계 펼침·폰트·검증 경계](#sidebar-refinement-20260914) |
+| 업무 패널 목표 설계·Workspace 디자인 통합 | [설계→독립 검토→구현, 기존 화면·실행 경계·검증 한계](#workspace-native-design-20260915) |
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
 | ees.7 적용 실패와 직전 버전 복구 | [09-14 rename 접근 거부, Restore·Start 성공, 새 화면 미확인](#ees7-apply-recovery-20260914) |
 | Windows 폴더 변경 대기·수동 진행 | [제한적 rename 재시도·경로 보호·기존 Resume 연결](#windows-program-rename-20260914) |
@@ -36,6 +37,40 @@
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="workspace-native-design-20260915"></a>
+
+## 2026-09-15 업무절차 Workspace 디자인 통합
+
+- 요청·원본: 사용자는 업무 절차 탭이 기존 모델·지식기반·프롬프트·스킬·도구와 달리 별도 HTML 화면처럼 보인다고 보고하고 기존 디자인에 맞추기를 요청함. 앞선 사이드바 `현재 진행` 제거 요구와 GLM 5.3의 사내 UI 반영 완료 보고도 함께 반영함. 시작 원격 main은 `3fa326323839d5fbcc817c8aeb8b81a727fb8bd2`, 관련 열린 PR 없음. 기존 로컬의 source tree `5e54d54a562ae5324b371d37d4db58bae2f1fd52`가 해당 main의 tree와 같음을 확인하고 별도 작업 사본에서 변경함. 사내 적용 원본 `87f3f2922a4a`와 이번 개발 원본을 구분함.
+- 관측·판단: 실제 업무절차는 Native `#workspace-container` 안에 들어가 있지만 별도 큰 제목, max-width/가운데 정렬/추가 padding, EES 채팅 색상 토큰과 카드·폼 규칙을 사용하고 있었음. 고정 upstream [Workspace layout](https://github.com/open-webui/open-webui/blob/v0.11.3/src/routes/(app)/workspace/+layout.svelte), [Models](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models.svelte), [Tools](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Tools.svelte), [Skills](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Skills.svelte)의 간격·본문 정렬·서체·버튼·선택 표시를 소스로 대조함. 사내 화면을 직접 관측한 결과는 아님.
+- 변경: `ees-work-designer.js`의 중복 큰 제목을 작은 제목/상태/기존 저장·검증·게시 toolbar로 정리하고 첫 내부 탭 이름을 `업무 구조`로 줄임. `ees-work-launcher.css`에서 해당 designer ID에만 Native 회색 계열·기존 Workspace 여백·compact 폼과 구분선을 적용함. 어두운 테마의 작은 안내/읽기 전용 텍스트는 gray-400을 써 대비를 유지함. `ees-work-view.js`는 사이드바 제목 한 곳만 `업무`로 변경함. 모든 폼 name·data-action·callback·capture/저장/검증/게시/DOM 복원 로직을 유지함.
+- 범위·기존 교훈: [Workspace 재삽입·초안 경합](#ees-work-factory-ux-20260914)을 재사용해 탭 생성/복원과 미저장 초안 처리 코드를 변경하지 않음. 현재 여러 프로세스·연결 자산이 한 초안 revision이므로 목록을 독립 저장 단위처럼 바꾸지 않고 기존 상세 편집 구조를 유지함. 게시 절차·업무 DB·모델/Skill/Tool·사용자 자산·실제 연결·개인 설정·프로그램 버전·Agent Pack 등록·배포 경로는 변경하지 않음. 같은 버전의 후속 프로그램 준비 시 원본 커밋과 새 JS/CSS bytes를 구분해야 하며 현재 배포물로 준비됐다고 표시하지 않음.
+- 최초 검사 실패·수정: Linux/Python 3.12.14에서 `python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p 'test_ees_branding_build.py' -q`는 22개 중 1 ERROR/2 SKIP. 기존 `test_work_draft_hook_never_imports_or_persists_tool_approval_mode`의 Node subprocess `text=True`에 encoding이 없어 Node 실행 전에 EncodingWarning이 발생함. 앞선 인코딩 보완이 이 subprocess 호출에는 적용되지 않았음을 확인하고 해당 호출 한 곳에 `encoding="utf-8"`을 추가함. 같은 파일의 다른 text subprocess에는 명시된 encoding이 있음을 확인했고 검사 경고·timeout·권한 조건은 완화하지 않음.
+- 로컬 확인: 같은 엄격 명령 재실행으로 **22개 중 20 PASS/2 SKIP**(0.371초). 두 SKIP은 공식 wheel 미제공으로 인한 기존 opt-in 검사이며 synthetic wheel/manifest/RECORD·소스 조립·기존 초안 승인 보호 검사와 구분함. 실제 이번 소스의 `assemble_work_launcher()` 결과 89,657 bytes에 `node --check` PASS. UI 개별 JS·diff 검사도 PASS. 소스 검토에서 편집/저장 동작 변경 없음과 designer 밖의 기존 업무 패널/사이드바 스타일 유지 범위를 확인함.
+- 독립 검토·문서: Native 소스와 CSS 적용 범위/우선순위·1100/760px 분기·회귀 영향을 읽기 검토하고, 어두운 테마 대비를 보완한 뒤 중대한 새 결함을 발견하지 못함. 폼 식별자와 기존 capture/저장/복원 함수의 원본 동일성도 확인함. 문서 검사 `files=30 links=1089 errors=0 review_candidates=0`, `git diff --check` PASS. 인코딩 누락의 재발 방지는 해당 기존 시험의 UTF-8 명시와 이번 사건 기록에 반영했고, 이미 있는 AGENTS의 인코딩 규칙을 중복 추가하지 않음.
+- 브라우저·사내 한계: 기존 `test_existing_workspace_editor_publication_and_user_denial`과 `test_workspace_tab_uses_native_type_and_does_not_flicker_on_idle_or_route_change`를 선택 실행했으나 Native Chrome/wheel 부재로 setUpClass SKIP, 실제 0개 실행임. 새 브라우저나 의존성을 설치하지 않음. 따라서 새 밝은/어두운 화면·좁은 폭·실제 포커스/초안/게시·사내 GLM 5.3의 호출 품질은 확인하지 않았음. 원격 검사는 기존 사용자 결정에 따라 `[skip ci]`로 생략하며 main 병합·프로그램 생성·사내 반영은 이번 소스 검토와 구분함.
+
+### 후속 업무 패널: 설계 → 검토 → 진행 (2026-09-15)
+
+- 사용자 지시: 업무 목표와 패널 내용의 일치를 우선하고 작업 설계→검토→진행 순서를 명시함. [TASK 설계](../docs/mockups/ees-work/TASK.md#work-panel-goal-design-20260915)를 제품 코드 변경 전에 작성하고, AGENTS에 이 순서를 재사용할 개발 기준으로 기록함. 관련 열린 Draft [PR #52](https://github.com/knadalkim-a11y/team-agent-poc/pull/52)의 head `82e12fd2cf3dcccb6298572b4cd23bfe5f3b3f08`과 최신 main `3fa326323839d5fbcc817c8aeb8b81a727fb8bd2`를 대조했으며, 앞선 Workspace 수정은 미병합 상태에서 함께 검토함. 시작 로컬 tree `bb721ce84161b05014f384a09ee8df4483017282`는 PR head와 동일함.
+- 설계·목표: Workspace는 전문가의 절차/자산 연결 설계, J는 입력·수행/확인·결과 근거, T는 완료 조건·선행·잡 조합, P는 전체 목표·하위 진행·실행 범위를 담당함. 기존 부모 `run`과 UI/AI의 공통 액션을 유지해 잡→태스크/프로세스→자연어 관리 목표에 연결하고 별도 실행 엔진/저장 구조를 추가하지 않음. 명시적인 프롬프트/지식기반 잡 연결·실제 어댑터·공동 작업은 현행 완료로 표시하지 않음.
+- 코드 근거 검토: 서버의 부모 실행은 하위 잡의 mode를 보고 선행이 충족되는 자동 점검을 진행하므로 부모 mode를 자동화 여부로 해석하지 않음. 사람 확인 후속은 대기하지만 독립된 잡은 진행 가능함. 기존 nextJob은 선행만 확인하므로 바로 실행 가능이라는 뜻이 아니며, `validate_draft`는 미연결 어댑터도 허용하는 구조 검증임. 수동 확인은 `confirm:true` 기록이고 별도 자유형 근거 저장은 없음.
+- 구현 전 독립 검토: 서버 계약 검토와 목표/UX 검토에서 설계 진행 가능 판정을 받음. 반영한 보완은 적용 대상 미완료 잡 종류별 집계(실제 실행 예정 수와 구분), 전체 제외 0건의 통과 오해 방지, 입력/초안/선행 재실행으로 무효화된 과거 결과 구분, 시작 전/완료/과거 화면의 동일한 역할·근거 표시임. 과거 부모에서 하위 잡 근거를 펼치는 읽기 전용 경로를 명시하고 현재 실행 선택/채팅을 변경하지 않게 함. 이 보완 이후 제품 구현에 착수함.
+- 사전 계약 확인: Linux/Python 3.12.14에서 `python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p 'test_ees_workflow.py' -q` → **30개 중 29 PASS/1 SKIP**(0.503초), FastAPI/httpx 부재로 native HTTP route 1개 미실행. 같은 옵션의 `test_ees_branding_build.py` → **22개 중 20 PASS/2 SKIP**(0.383초), 공식 wheel opt-in 2개 미실행. 같은 옵션의 `test_ees_workflow_tool.py` → **18 PASS**(0.108초)로 UI 상태 읽기·공통 액션/사람 확인·권한·revision·과거 읽기·화면 실패 시 재실행 금지 경계를 확인함. 부모 실행·사람 확인·미연결·입력 무효화·이력 저장의 기존 계약과 조립 검사를 확인한 것이며 실제 UI/GLM 호출 결과가 아님.
+
+- 구현·재검토: 기존 view 파일의 순수 표시 함수 `workPanelNodeHTML`로 P/T/J의 미리보기·현재·완료·과거 표시를 구성함. P는 목표/태스크 진행, T는 기준/선행/잡 구성, J는 최근 점검·확인 기록과 입력/수행/이전 근거를 먼저 보여줌. 과거 이력은 프로세스부터 하위 잡을 `details`로 펼치고 현재 실행의 선택/변경 액션을 생성하지 않음. 시작/이어서 진행 카드는 미리보기 목적·기준 직후에 유지함. 기존 `renderPanel/previewHTML/readOnlyNode/historyHTML` 연결과 snapshot/폼 제출/이벤트 callback의 변경 없음을 대조함. 새 CSS는 과거 details의 줄바꿈·들여쓰기 두 규칙이며, Workspace의 구조 검증 문구 외 저장/검증/게시 로직은 그대로임.
+- 구현 독립 검토: 현재 서버 `_invalidate`의 상태·checks·document 초기화와 최신 기록 선택을 대조하고, 입력/초안/선행 재실행 뒤 이전 성공을 이력에만 남기는 조건을 확인함. 모의/사람 확인, 전체 제외·미수행 구분, 사용자 문자열 escaping과 배열 복사로 원본 자료 불변을 확인함. 현재 잡에서 과거 이력을 열 때 다른 잡 근거가 안 보이는 기존 선택 경로는 과거 프로세스부터 펼치도록 수정함. 읽기 검토 범위에서 중대한 남은 결함을 발견하지 못했으며 실제 화면 수락으로 표현하지 않음.
+- 새 표시 검사: `python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p 'test_ees_work_panel.py' -q`는 실제 합성 SQLite 서비스 상태를 Node VM의 제품 표시 함수에 입력하고 HTML의 결과/근거/액션을 확인함. 최초 **9 PASS/1 FAIL**은 사람 확인 표현을 `사람` 단어 하나로 제한한 시험이 실제 `담당자 확인 기록`을 거절한 과제약이었음. 저장된 kind·시각/입력 검사는 유지하고 표현 조건만 `사람|담당자`로 바꾼 뒤 **10 PASS**. P/T/J·시작 전·사람 확인·실패/재시도·입력/초안/선행 무효화·전체 제외·미완료 잡 종류별 집계·입력/연결/스킬 차단·완료/과거 근거와 원본 불변을 확인함. 별도 브라우저 모조 환경이나 새 의존성을 추가하지 않음.
+- 최종 소스 확인: 이번 실제 `assemble_work_launcher()` **96,079 bytes**, `node --check` PASS. snapshot 수용·폼 제출/이벤트 callback 원본 동일성 PASS, 서버·Tool/controller·Agent Pack·모델·저장·권한·배포 코드 변경 없음. 앞선 계약/조립 검사와 새 표시 검사의 합계는 **77 PASS/3 SKIP**이며 SKIP은 native HTTP route 1개와 공식 wheel opt-in 2개임. 실제 Native 브라우저·Windows·사내 GLM 5.3 및 새 화면 검증/배포는 미실행이며, 새 검사를 브라우저 검증으로 간주하지 않음. 문서 검사 `files=30 links=1096 errors=0 review_candidates=0`와 `git diff --check` PASS. 원격 검사는 사용자 한시 방침의 `[skip ci]`를 유지함.
+
+### 병합·고정 원본 시험 적용 준비 (2026-09-16)
+
+- 사용자 후속 요청: `이어서 진행해줘`에 따라 검토·구현한 PR #52의 병합과 사내 실행 안내 준비를 진행함. 최신 main `3fa326323839d5fbcc817c8aeb8b81a727fb8bd2`, PR head `33e54be08bf90cbf0ffd34bfbe9fc8472c73aa67` 및 두 원본의 AGENTS/STATUS를 재확인함. 제품 소스는 앞선 검증 원본과 동일하고 변경 범위는 적용 안내·현재 상태·이번 근거뿐임. 실제 사내 적용 원본은 여전히 `87f3f2922a4a`이며 이번 병합/준비로 설치·UI 수락을 갱신하지 않음.
+- 적용 설계·검토: 기존 TrialCommit 경로는 active.source_commit이 일치할 때만 생략하므로 같은 ees.9 버전명의 다른 UI 원본도 새 묶음으로 준비·검증하고 Stop→Backup→Apply→Start로 적용함. 마지막 ApplyDemo는 경로에 포함되어 있어 별도 추가하지 않음. 새/직전 프로그램과 현재 DB/자산의 보존 범위를 유지하며 원격 CI를 호출하거나 새 실행기/의존성/브라우저를 설치하지 않음. `/_ees9/` 정적 경로가 같으므로 Ctrl+F5 후 화면 판정을 안내함.
+- 로컬 검사: Linux/Python 3.12.14, `python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p 'test_ees_trial_upgrade.py' -q` → **16 PASS/1 SKIP**(17개, 0.053초, PowerShell 부재); 같은 옵션의 `test_ees_trial_bundle.py` → **14 PASS**(0.197초). 기존 적용 순서·원본/진행 조건 변경·백업/기동/자산 실패·정확한 원본 재실행·캐시 해시/손상·Git 원본 묶음 경계를 확인한 합성 검사이며 사내 실배포 성공을 의미하지 않음. 앞선 77 PASS·3 SKIP 제품 검사를 중복 실행한 것으로 합산하지 않음.
+- 독립 점검: 실제 적용 원본부터 이번 제품 head까지 Agent Pack·빌드/적용/Trial/PowerShell 스크립트 변경 없음과 같은 버전의 원본 비교를 대조해 진행 차단 문제를 발견하지 못함. 기존 자산의 현재값과 적용할 값이 다를 때만 저장하며 모델 base_model_id는 현재 payload에서 유지함. 프로그램/데이터 경로 중첩 차단·현재/직전 RECORD·기존 의존성·백업 확인과 프로그램만 되돌리는 Restore 경계를 확인함. 실제 HTTP 캐시 헤더·브라우저 자동 갱신은 확인하지 못했으며 Ctrl+F5 안내를 캐시 자동 무효화 검증으로 표현하지 않음.
+- 전달·확인 범위: 최종 병합 SHA를 정확히 넣은 기존 Update→Upgrade -TrialCommit 블록 한 번과 [화면 확인 항목](../docs/03-openwebui-native-agent.md#ees-work-panel-trial-20260916)을 준비함. 초기 설치/모델 재등록·별도 ApplyDemo·실무 자동화 성공을 전제로 하지 않음. 사용자 입력은 마지막 요약과 기존 대화/초안·계층별 패널·과거 근거의 짧은 판정으로 제한하고 새 브라우저·Windows·사내 GLM/화면은 결과 수신 전까지 미확인임. 실제 원격 병합 SHA·시각은 연결된 PR의 merge 기록을 기준으로 함. 문서 검사 `files=30 links=1096 errors=0 review_candidates=0`와 `git diff --check` PASS, 변경 파일은 적용 가이드·STATUS·본 평가 기록 3개뿐임.
 
 <a id="ees-work-shared-design-20260914"></a>
 

@@ -611,7 +611,7 @@ const qi = async serialized => {
 '''
         try:
             result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
-                                    text=True, timeout=10)
+                                    text=True, encoding="utf-8", timeout=10)
         except subprocess.TimeoutExpired as error:
             stderr = error.stderr or ""
             if isinstance(stderr, bytes):

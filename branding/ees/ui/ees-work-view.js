@@ -5,7 +5,7 @@ const workUI = (() => {
   const clone = value => JSON.parse(JSON.stringify(value));
   const categories = {setup:'셋업',ops:'운영',incident:'장애대응'};
   const levels = {p:'프로세스',t:'태스크',j:'잡'};
-  const statuses = {unstarted:'시작 전',ready:'준비',pending:'대기',in_progress:'진행 중',running:'실행 중',success:'완료',completed:'완료',passed:'완료',failed:'실패',blocked:'선행 작업 대기',skipped:'적용 제외',draft:'초안',review:'검토 필요'};
+  const statuses = {unstarted:'시작 전',ready:'준비',pending:'대기',in_progress:'진행 중',running:'실행 중',success:'완료',completed:'완료',passed:'완료',failed:'실패',blocked:'진행 조건 확인',skipped:'적용 제외',draft:'초안',review:'검토 필요'};
   const badge = value => `<span class="ew-badge" data-status="${esc(value)}">${esc(statuses[value] || value || '대기')}</span>`;
   const button = (label, action, attrs = '') => `<button type="button" data-action="${action}" ${attrs}>${esc(label)}</button>`;
   const finished = c => ['passed','completed','success','skipped'].includes(c?.status);
@@ -24,6 +24,78 @@ const workUI = (() => {
   }
   return Object.freeze({$, esc, clone, categories, levels, statuses, badge, button, finished, siteLabel, lineage, treeHTML});
 })();
+
+/* Render the saved case only. These summaries never decide what may execute. */
+function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=false,previewActions=''}={}) {
+  const {esc,levels,statuses,badge,button,finished,lineage}=workUI;
+  const preview=!c,locked=readOnly||history||finished(c),nodes=definition.nodes,tools=definition.tools || {};
+  const ns=c?.node_states?.[n.id] || {},job=c?.jobs?.[n.id] || {},progress=ns.progress || {done:0,total:0};
+  const labels={db:'DB 대상',ap:'AP 대상',site:'공장 확인',interface:'인터페이스 대상'};
+  const children=(n.children || []).map(id=>nodes[id]).filter(Boolean);
+  const descendants=item=>item.type==='j'?[item]:(item.children || []).flatMap(id=>nodes[id]?descendants(nodes[id]):[]);
+  const valuesFor=item=>({db:c?.site?.db,ap:c?.site?.ap,site:[c?.site?.country,c?.site?.name,c?.site?.line].filter(Boolean).join(' · '),interface:c?.site?.interface?c.system+' · '+c.site.name+' 시스템 간 연계 · 예시':'',...(c?.jobs?.[item.id]?.inputs || {})});
+  const fieldsFor=item=>Array.from(new Set((item.tools || []).map(id=>item.bindings?.[id] || tools[id]?.input).filter(key=>Object.hasOwn(labels,key))));
+  const unavailable=item=>item.mode==='tool'&&(!(item.tools || []).length||(item.tools || []).some(id=>!tools[id]||tools[id].adapter!=='mock'||tools[id].source==='open_webui'||tools[id].enabled===false));
+  const modeLabel=item=>item.mode==='manual'?'사람 확인':item.mode==='draft'?'초안 검토':unavailable(item)?'실행 연결 필요':'모의 점검';
+  const nameOf=id=>nodes[id]?.name || id;
+  const reasonFor=item=>{
+    const state=c?.node_states?.[item.id] || {},saved=c?.jobs?.[item.id] || {};
+    if(state.applicable===false||state.status==='skipped')return '현장 조건에 따라 적용 제외';
+    if(state.status==='passed')return '완료 기록 확인';
+    if((state.missing || []).length)return '선행 작업 확인: '+state.missing.map(nameOf).join(', ');
+    if(saved.blocked_reason)return saved.blocked_reason;
+    if(unavailable(item))return '실행 연결이 필요합니다. 등록된 도구와 실제 연결을 확인해 주세요.';
+    const inputs=valuesFor(item),missing=fieldsFor(item).filter(key=>!String(inputs[key] ?? '').trim());
+    if(missing.length)return '입력 보완: '+missing.map(key=>labels[key]).join(', ');
+    if(item.mode==='manual')return '기준을 확인한 담당자의 완료 확인이 필요합니다.';
+    if(item.mode==='draft')return saved.document?'저장한 초안을 검토하고 완료를 확인해 주세요.':'초안을 작성하고 저장한 뒤 검토해 주세요.';
+    if(state.status==='failed')return '실패한 점검과 입력을 확인한 뒤 다시 점검해 주세요.';
+    if(state.status==='blocked')return '입력·연결·스킬·선행 작업 등 진행 조건을 확인해 주세요.';
+    return '예시 점검 실행 시 진행 조건을 확인합니다.';
+  };
+  const dataHTML=(values,document)=>`${Object.entries(values || {}).map(([key,value])=>`<p><strong>${esc(labels[key] || key)}</strong> · ${esc(value)}</p>`).join('')}${document?`<p><strong>저장된 초안</strong></p><pre>${esc(document)}</pre>`:''}`;
+  const checksHTML=checks=>(checks || []).map(check=>`<div class="ew-check"><div class="ew-heading"><strong>${esc(check.name || tools[check.id || check.tool_id || check.tool]?.name || check.id || check.tool_id || check.tool || '점검')}</strong>${check.status==='skipped'?'<span class="ew-badge" data-status="skipped">미수행</span>':badge(check.status)}</div><p>${esc(check.message || check.detail || check.summary || '')}</p>${check.input!==undefined?`<p>점검 입력 · ${esc(check.input)}</p>`:''}${check.at?`<p>점검 시각 · ${esc(check.at)}</p>`:''}${check.evidence?`<pre>${esc(typeof check.evidence==='string'?check.evidence:JSON.stringify(check.evidence,null,2))}</pre>`:''}</div>`).join('');
+  const recordHTML=record=>`<div class="ew-heading"><strong>${esc(record.attempt || '?')}차 · ${record.kind==='human_confirmation'?'담당자 확인 기록':record.kind==='simulation'||record.simulation?'모의 점검 기록':'저장된 실행 기록'}</strong>${badge(record.status)}</div><p class="ew-muted">${esc(record.at || record.completed_at || '실행 시각 미기록')}</p>${record.detail?`<p>${esc(record.detail)}</p>`:''}${checksHTML(record.checks)}${record.inputs||record.document?`<details><summary>시도 당시 입력·초안</summary>${dataHTML(record.inputs,record.document)}</details>`:''}`;
+  const path=lineage(n.id,definition),deps=Array.from(new Set(path.flatMap(item=>item.deps || [])));
+  const depsHTML=deps.length?`<section class="ew-card"><h3>선행 작업</h3>${deps.map(id=>`<div class="ew-tool"><span>${esc(nameOf(id))}</span>${preview?'':badge(c.node_states?.[id]?.status)}</div>`).join('')}</section>`:'';
+  const skillIds=Array.from(new Set(['common',...path.flatMap(item=>item.skills || [])]));
+  const instructions=`<details class="ew-instructions"><summary>적용 지침과 스킬</summary>${skillIds.map(id=>{
+    const stored=definition.skills?.[id];if(!stored)return '';
+    const contextual=c?.context?.skills?.find(skill=>skill.id===id),skill=contextual || stored;
+    // Only the server's selected-node context carries external Skill bodies
+    // checked for this user. A descendant's registry reference is not access.
+    const body=stored.source==='open_webui'&&!contextual?'등록된 스킬 · 현재 이용 가능 여부는 해당 작업 실행 시 확인합니다.':skill.body || skill.message || '';
+    return `<div><strong>${esc(skill.name)}</strong><p>${esc(body)}</p></div>`;
+  }).join('')}${path.map(item=>`<div><strong>${esc(item.name)}</strong><p>${esc(item.instructions || '별도 지침 없음')}</p></div>`).join('')}</details>`;
+  const header=`<div class="ew-heading"><span class="ew-caption">${levels[n.type]} · ${preview?'절차 미리보기':'예시 진행'}</span>${badge(preview?'unstarted':ns.status)}</div><h2 class="ew-title">${esc(n.name)}</h2><p class="ew-muted">${esc(n.description || '')}</p><section class="ew-card ew-work-purpose"><h3>${n.type==='p'?'프로세스 목표와 완료 기준':n.type==='t'?'태스크 목적과 완료 기준':'수행 방식과 완료 기준'}</h3>${n.type==='j'?`<p>${esc(modeLabel(n))}</p>`:''}<p>${esc(n.rule || '별도 완료 기준 없음')}</p>${n.type!=='j'?'<p class="ew-muted">적용 대상 하위 잡의 완료 기록을 모두 확인합니다. 위 기준 문구는 담당자 확인용입니다.</p>':''}</section>`;
+  if(n.type!=='j') {
+    const remaining=preview?[]:descendants(n).filter(item=>{const s=c.node_states?.[item.id];return s&&s.applicable!==false&&!['passed','skipped'].includes(s.status);});
+    const next=remaining.find(item=>!(c.node_states[item.id].missing || []).length) || remaining[0];
+    const counts={simulation:0,human:0,unavailable:0};
+    remaining.forEach(item=>counts[item.mode!=='tool'?'human':unavailable(item)?'unavailable':'simulation']++);
+    const progressHTML=preview?'<p class="ew-notice">아직 시작하지 않은 절차입니다. 적용 대상과 진행 상태는 시작할 때 공장 조건을 반영해 정해집니다.</p>':`<section class="ew-card"><div class="ew-heading"><h3>${n.type==='p'?'전체 예시 진행':'태스크 완료 조건'}</h3><strong>${progress.done} / ${progress.total}</strong></div>${progress.total?`<progress max="${progress.total}" value="${progress.done}"></progress>`:''}<p class="ew-muted">적용 잡 ${progress.total}개 중 ${progress.done}개 완료 · 적용 제외 ${ns.excluded_count || 0}개</p>${progress.total===0?'<p>적용 대상 잡이 없습니다. 이 범위는 적용 제외입니다.</p>':''}</section>`;
+    const nextHTML=!locked&&next?`<section class="ew-card"><h3>${n.type==='p'?'먼저 확인할 잡':'다음 행동'}</h3>${button(next.name,'select',`data-node-id="${esc(next.id)}"`)}<p class="ew-muted">${esc(reasonFor(next))}</p></section>`:'';
+    const childrenHTML=`<section><h3>${n.type==='p'?'태스크별 진행':'잡별 수행과 상태'}</h3><div class="ew-children">${children.map(child=>{
+      const childState=c?.node_states?.[child.id] || {},count=childState.progress;
+      const detail=child.type==='j'?modeLabel(child)+(preview?'':' · '+reasonFor(child)):preview?child.description || '시작 전':`${count?.done || 0}/${count?.total || 0} 잡 완료 · 적용 제외 ${childState.excluded_count || 0}개`;
+      const content=`<span class="ew-type">${esc(child.type.toUpperCase())}</span><span><strong>${esc(child.name)}</strong><small>${esc(detail)}</small></span>${preview?'':badge(childState.status)}`;
+      return history?`<details class="ew-history-node"><summary>${esc(child.name)} · ${esc(statuses[childState.status] || '기록 확인')}</summary>${workPanelNodeHTML(c,child,{definition,readOnly:true,history:true})}</details>`:`<button type="button" data-action="select" data-node-id="${esc(child.id)}">${content}</button>`;
+    }).join('')}</div></section>`;
+    const execution=!preview&&!locked?`<section class="ew-card" data-work-section="execution-scope"><h3>하위 예시 점검 범위</h3><p>모의 점검 <span data-work-count="simulation">${counts.simulation}</span>개 · 사람 확인/검토 <span data-work-count="human">${counts.human}</span>개 · 실행 연결 필요 <span data-work-count="unavailable">${counts.unavailable}</span>개</p><p class="ew-muted">적용 대상 미완료 잡의 구성입니다. 이번 실행 예정 수가 아닙니다.</p>${button('하위 예시 점검 실행','run',`id="ees-work-run" data-node-id="${esc(n.id)}" class="ew-primary" data-mutation ${!remaining.length?'disabled data-unavailable="true"':''}`)}<p class="ew-muted">선행이 충족된 점검만 진행하며 실행 시 입력·권한·스킬·연결을 확인합니다. 사람 확인 단계의 후속은 대기하고 독립적인 다른 잡은 계속될 수 있습니다.</p></section>`:'';
+    return header+(preview?previewActions:'')+progressHTML+depsHTML+nextHTML+childrenHTML+execution+instructions;
+  }
+  const records=job.history || [],last=records[records.length-1],checks=job.checks || [];
+  const latest=!preview&&ns.applicable!==false&&ns.status!=='skipped'&&!['pending','review'].includes(job.status)&&last&&last.status===job.status&&last.attempt===job.attempt&&(n.mode!=='tool'||checks.length)?last:null;
+  const previous=latest?records.slice(0,-1):records;
+  const result=preview?'<p class="ew-notice">시작 전에는 수행 결과가 없습니다.</p>':`<section class="ew-card" data-work-section="current-result"><h3>${n.mode==='tool'?'최근 점검 결과':'최근 확인 기록'}</h3>${latest?recordHTML(latest):`<p>${ns.status==='skipped'?'현장 조건에 따라 적용 제외된 잡입니다.':records.length?'현재 조건의 유효한 완료·점검 결과가 없습니다. 이전 시도는 이력에 보존됩니다.':'아직 완료·점검 결과가 없습니다.'}</p>`}${!locked&&ns.status!=='passed'?`<p class="ew-muted">다음 행동 · ${esc(reasonFor(n))}</p>`:''}</section>`;
+  const inputs=valuesFor(n),fields=fieldsFor(n),unusable=ns.applicable===false||ns.status==='skipped'||(ns.missing || []).length;
+  const inputHTML=!preview&&!locked&&fields.length?`<form id="ees-work-inputs" class="ew-card"><h3>점검 입력</h3>${fields.map(key=>`<label>${labels[key]}<input name="${key}" value="${esc(inputs[key] || '')}" autocomplete="off" placeholder="시연용 대상 입력"></label>`).join('')}<button id="ees-work-inputs-save" type="submit" data-mutation>입력값 저장</button><p class="ew-muted">저장한 입력값은 이 대화의 AI도 참고합니다. 비밀번호·접속 키는 입력하지 마세요.</p></form>`:'';
+  const form=!preview&&!locked?`<section class="ew-card"><h3>${n.mode==='manual'?'담당자 확인':n.mode==='draft'?'초안 작성과 검토':'예시 점검 수행'}</h3>${n.mode==='draft'?`<form id="ees-work-document"><label>작업 초안<textarea name="document" rows="6" placeholder="가운데 AI에게 초안을 요청하거나 직접 작성하세요.">${esc(job.document || '')}</textarea></label><button type="submit" data-mutation>초안 저장</button></form>`:''}<p class="ew-muted">${n.mode==='manual'?'완료 기준을 직접 확인한 뒤 기록해 주세요. 자동 점검 결과와 구분해 보존됩니다.':n.mode==='draft'?'초안 저장 후 담당자가 기준 충족 여부를 검토합니다.':unavailable(n)?'실행 연결이 없는 도구는 수행하지 않습니다.':'현재 연결은 모의 점검이며 실제 업무 시스템을 호출하지 않습니다.'}</p>${button(n.mode==='manual'?'확인 완료':n.mode==='draft'?'검토 완료':job.attempt?'다시 점검':'점검 실행','run',`id="ees-work-run" data-node-id="${esc(n.id)}" class="ew-primary" data-mutation ${unusable?'disabled data-unavailable="true"':''}`)}</section>`:'';
+  const order=(n.tools || []).length?`<details><summary>도구 순서와 점검 기준</summary>${(n.tools || []).map((id,index)=>`<div class="ew-tool"><span class="ew-index">${index+1}</span><div><strong>${esc(tools[id]?.name || id)}</strong><small>${esc(tools[id]?.description || tools[id]?.purpose || '')}</small><small>판정 기준 · ${esc(tools[id]?.success || '별도 기준 없음')}</small></div></div>`).join('')}</details>`:'';
+  const saved=locked&&!preview?`<details><summary>저장된 입력과 초안</summary>${dataHTML(inputs,job.document)}</details>`:'';
+  const old=previous.length?`<details class="ew-history" data-work-section="history"><summary>이전 시도 (${previous.length}) · 현재 판정 아님</summary>${[...previous].reverse().map(record=>`<section class="ew-card">${recordHTML(record)}</section>`).join('')}</details>`:'';
+  return header+(preview?previewActions:'')+result+depsHTML+inputHTML+form+saved+order+instructions+old;
+}
 
 /* Owns display state and DOM; server snapshots are copied and never mutated. */
 function createWorkView({callbacks}) {
@@ -139,7 +211,7 @@ function createWorkView({callbacks}) {
     if(!data){if(!entry.firstChild)entry.innerHTML='<p class="ew-caption">업무</p><p class="ew-muted">업무 절차를 불러오는 중입니다.</p>';updateScopeReadiness();return;}
     if(!entry.querySelector('.ew-scope-pickers'))entry.innerHTML='<div class="ew-scope-pickers"></div><div class="ew-work-navigation"></div>';
     renderScopeControls(entry.querySelector('.ew-scope-pickers'),data);
-    const html=`<p class="ew-caption">업무 · 현재 진행</p>${Object.entries(categories).map(([id,label])=>{
+    const html=`<p class="ew-caption">업무</p>${Object.entries(categories).map(([id,label])=>{
       const roots=visibleRoots(id);
       return `<button type="button" class="ew-category" data-work-category="${id}" aria-expanded="${navOpen&&category===id}"><span>${label}</span><span aria-hidden="true">${navOpen&&category===id?'⌄':'›'}</span></button>${navOpen&&category===id?`<div class="ew-inline-tree" id="ees-work-tree">${roots.map(p=>{const c=chosenCase(p),tree=c?.tree_nodes?{nodes:c.tree_nodes}:c&&c.id===selectedCase()?.id?selectedCase().definition:data;return treeHTML(tree,[p],c);}).join('') || '<p class="ew-muted">게시된 절차가 없습니다.</p>'}</div>`:''}`;
     }).join('')}`;
@@ -193,50 +265,32 @@ function createWorkView({callbacks}) {
     if (tabs.innerHTML !== html) tabs.innerHTML = html;
   }
   function openPanel() {if(!chatRoute()||!state||!selectedId())return;callbacks.registerPanel(); window.__eesWorkPanelV1?.select(chatId(),'workflow',{open:true,focus:false});}
-  function nextJob(n) {
-    const candidates=n.type==='j'?[n]:(n.children||[]).flatMap(id=>{const child=node(id);return child?.type==='j'?[child]:(child?.children||[]).map(node);});
-    return candidates.find(item=>item&&status(item.id).applicable!==false&&status(item.id).status!=='passed'&&!(status(item.id).missing||[]).length);
-  }
   function runTabs() {
     const active=scopeCases(processId()).filter(c=>!finished(c)),current=selectedCase();
     const picker=active.length>1?`<label>현재 실행<select id="ees-work-run-select">${active.map(c=>`<option value="${esc(c.id)}" ${c.id===current?.id?'selected':''}>${esc(runLabel(c))}</option>`).join('')}</select></label>`:'';
     return picker+`<nav class="ew-run-tabs" id="ees-work-run-view" aria-label="실행 기록"><button type="button" data-action="current_view" aria-pressed="${runView==='current'}">현재 작업</button><button type="button" data-action="history_view" aria-pressed="${runView==='history'}">실행 이력</button></nav>`;
   }
-  function readOnlyNode(c,n) {
-    const ns=c.node_states[n.id] || {},job=c.jobs[n.id],children=n.children || [];
-    const header=`<div class="ew-heading"><span class="ew-caption">${levels[n.type]}</span>${badge(ns.status)}</div><h2 class="ew-title">${esc(n.name)}</h2>`;
-    if(children.length)return header+`<p class="ew-muted">${ns.progress?.done || 0}/${ns.progress?.total || 0} 잡 완료 · 적용 제외 ${ns.excluded_count || 0}개</p><div class="ew-children">${children.map(id=>`<div class="ew-tool"><span class="ew-type">${esc(c.definition.nodes[id].type.toUpperCase())}</span><span>${esc(c.definition.nodes[id].name)}</span>${badge(c.node_states[id].status)}</div>`).join('')}</div>`;
-    return header+((job?.checks || []).map(check=>`<section class="ew-check"><div class="ew-heading"><strong>${esc(check.name || check.tool_id || '')}</strong>${badge(check.status)}</div><p>${esc(check.message || check.detail || '')}</p></section>`).join('') || '<p class="ew-muted">기록된 점검 결과가 없습니다.</p>')+(job?.document?`<pre>${esc(job.document)}</pre>`:'');
-  }
+  function readOnlyNode(c,n,history=false) {return workPanelNodeHTML(c,n,{readOnly:true,history});}
 
   function historyHTML() {
     const p=processId(),c=selectedCase(),cases=scopeCases(p);
-    if(historyCase){const n=historyCase.definition.nodes[selectedId()] || historyCase.definition.nodes[historyCase.process_id];return `${button('실행 목록으로','history_view')}<p class="ew-notice">이전 실행 · 읽기 전용<br>가운데 대화와 왼쪽 트리는 현재 실행을 유지합니다.</p><p class="ew-muted">${esc(siteLabel(historyCase.site))} · ${esc(historyCase.system)}<br>${esc(runLabel(historyCase))}</p>${readOnlyNode(historyCase,n)}`;}
+    if(historyCase){const n=historyCase.definition.nodes[historyCase.process_id];return `${button('실행 목록으로','history_view')}<p class="ew-notice">이전 실행 · 읽기 전용<br>가운데 대화와 왼쪽 트리는 현재 실행을 유지합니다.</p><p class="ew-muted">${esc(siteLabel(historyCase.site))} · ${esc(historyCase.system)}<br>${esc(runLabel(historyCase))}</p>${readOnlyNode(historyCase,n,true)}`;}
     return `<h2 class="ew-title">실행 이력</h2><p class="ew-muted">${esc(siteLabel(state.catalog.sites[browsingSite]))} · ${esc(browsingSystem)} · ${esc(nameOf(p))}</p><div class="ew-case-list">${cases.map(item=>`<button type="button" data-action="history_case" data-case-id="${esc(item.id)}" ${item.id===c?.id?'disabled':''}><strong>${esc(runLabel(item))}</strong><span>${item.id===c?.id?'현재 실행 · ':''}${esc(statuses[item.status])} · ${item.progress.done}/${item.progress.total} 완료</span></button>`).join('') || '<p class="ew-notice">아직 기록된 실행이 없습니다.</p>'}</div>`;
   }
   function previewHTML() {
     const n=node(browseNodeId);if(!n)return '<p class="ew-muted">왼쪽에서 업무 절차를 선택하세요.</p>';
     const p=lineage(n.id)[0],cases=scopeCases(p.id),active=cases.filter(c=>!finished(c));
-    return `<div class="ew-heading"><span class="ew-caption">${levels[n.type]} · 절차 미리보기</span>${badge(active.length?'in_progress':'unstarted')}</div><h2 class="ew-title">${esc(n.name)}</h2><p class="ew-muted">${esc(n.description || '')}</p><p class="ew-breadcrumb">${esc(siteLabel(state.catalog.sites[browsingSite]))} · ${esc(browsingSystem)}<br>${esc(lineage(n.id).map(v=>v.name).join(' › '))}</p>${active.length?`<section class="ew-card"><h3>이어서 진행할 실행 선택</h3><p class="ew-muted">이 공장에 진행 중인 실행이 ${active.length}건 있습니다.</p><div class="ew-case-list">${active.map(c=>`<button type="button" data-action="open_case" data-case-id="${esc(c.id)}"><strong>${esc(runLabel(c))}</strong><span>${esc(statuses[c.status])} · ${c.progress.done}/${c.progress.total} 완료</span></button>`).join('')}</div></section>`:`<section class="ew-card"><h3>이 공장에서 시작</h3><p class="ew-muted">게시된 절차 v${state.catalog.version}에 공장 조건을 적용합니다. 시작한 실행은 고정된 절차와 별도의 대화를 사용합니다.</p>${button('이 공장에서 시작','start_case','id="ees-work-case-start" class="ew-primary" data-mutation')}</section>`}${n.children?.length?`<h3>${n.type==='p'?'하위 태스크':'하위 잡'}</h3><div class="ew-children">${n.children.map(id=>`<button type="button" data-action="select" data-node-id="${esc(id)}"><span class="ew-type">${esc(node(id).type.toUpperCase())}</span><span>${esc(node(id).name)}</span></button>`).join('')}</div>`:`<section class="ew-card"><h3>점검 기준</h3><p>${esc(n.rule || '')}</p>${(n.tools || []).map(id=>`<div class="ew-tool">${esc(state.catalog.tools[id]?.name || id)}</div>`).join('')}</section>`}`;
+    const start=active.length?`<section class="ew-card"><h3>이어서 진행할 실행 선택</h3><p class="ew-muted">이 공장에 진행 중인 실행이 ${active.length}건 있습니다.</p><div class="ew-case-list">${active.map(c=>`<button type="button" data-action="open_case" data-case-id="${esc(c.id)}"><strong>${esc(runLabel(c))}</strong><span>${esc(statuses[c.status])} · ${c.progress.done}/${c.progress.total} 완료</span></button>`).join('')}</div></section>`:`<section class="ew-card"><h3>이 공장에서 시작</h3><p class="ew-muted">게시된 절차 v${state.catalog.version}에 공장 조건을 적용합니다. 시작한 실행은 고정된 절차와 별도의 대화를 사용합니다.</p>${button('이 공장에서 시작','start_case','id="ees-work-case-start" class="ew-primary" data-mutation')}</section>`;
+    return `<p class="ew-breadcrumb">${esc(siteLabel(state.catalog.sites[browsingSite]))} · ${esc(browsingSystem)}</p>`+workPanelNodeHTML(null,n,{definition:definition(),previewActions:start});
   }
   function renderPanel() {
     if (!chatRoute() || !state || !selectedId()) {closeHost(); return;} ensureHost();
     if(runView==='history' || !selectedCase()) {$('#ees-work-content',host).innerHTML=runTabs()+alertHTML()+(runView==='history'?historyHTML():previewHTML());renderTabs();callbacks.registerPanel();setBusy();return;}
-    const c = currentCase(), n = node(c.selected_id) || node(c.process_id), ns = status(n.id);
-    const progress = ns.progress || {done:0,total:0},next=nextJob(n);
-    $('#ees-work-content',host).innerHTML = `${runTabs()}${alertHTML()}<div class="ew-heading"><span class="ew-caption">${levels[n.type]} · ${esc(c.system)}</span>${badge(ns.status)}</div><h2 class="ew-title">${esc(n.name)}</h2><p class="ew-muted">${esc(n.description || '')}</p><p class="ew-breadcrumb">${esc(lineage(n.id).map(v=>v.name).join(' › '))}</p>${n.type==='j'?jobHTML(n,c,ns):`<section class="ew-card"><div class="ew-heading"><h3>진행 상황</h3><strong>${progress.done} / ${progress.total}</strong></div><progress max="${Math.max(1,progress.total)}" value="${progress.done}"></progress><p class="ew-muted">${esc(c.site?.name || c.site?.factory)} · 절차 v${c.version}</p>${next?button('다음 작업: '+next.name,'select',`data-node-id="${esc(next.id)}"`):''}</section>${missingHTML(ns)}<section><h3>${n.type==='p'?'단계별 진행':'하위 작업'}</h3><div class="ew-children">${(n.children || []).map(id=>{const child=node(id),s=status(id);return `<button type="button" data-action="select" data-node-id="${esc(id)}"><span class="ew-type">${esc(child?.type?.toUpperCase())}</span><span><strong>${esc(child?.name)}</strong><small>${esc(child?.description || '')}</small></span>${badge(s.status)}</button>`;}).join('')}</div></section><button type="button" id="ees-work-run" data-action="run" data-node-id="${esc(n.id)}" class="ew-primary" data-mutation>준비된 하위 작업 실행</button><p class="ew-muted">수동 확인·초안 검토가 필요한 작업에서는 멈춥니다.</p>`}<details class="ew-instructions"><summary>적용 지침과 스킬</summary>${(c.context?.skills || []).map(skill=>`<div><strong>${esc(skill.name)}</strong><p>${esc(skill.body || skill.message || '')}</p></div>`).join('')}${lineage(n.id).map(v => `<div><strong>${esc(v.name)}</strong><p>${esc(v.instructions || '별도 지침 없음')}</p>${(v.skills || []).map(id=>`<span class="ew-badge">${esc(c.definition.skills?.[id]?.name || id)}</span>`).join('')}</div>`).join('')}</details><p class="ew-footnote">연결 점검은 합성 시연 결과입니다. 실제 업무 시스템은 호출하지 않습니다. 가운데 AI 대화는 기존 모델을 사용합니다.</p>`;
-    if(finished(c)){$('#ees-work-content',host).innerHTML=runTabs()+alertHTML()+`<p class="ew-muted">${esc(siteLabel(c.site))} · ${esc(c.system)} · ${esc(runLabel(c))}</p><p class="ew-notice">이 실행은 완료됐습니다. 새 실행을 시작해도 기존 기록은 유지됩니다.</p>`+readOnlyNode(c,n)+(n.type==='p'?button('새 실행 시작','start_case','class="ew-primary" data-mutation'):button('프로세스 완료 보기','select',`data-node-id="${esc(c.process_id)}"`));}
-    renderTabs(); callbacks.registerPanel(); setBusy();
+    const c=currentCase(),n=node(c.selected_id) || node(c.process_id),done=finished(c);
+    const closed=done?`<p class="ew-notice">${c.status==='skipped'?'이 실행에는 적용 대상 잡이 없습니다.':'이 실행은 완료됐습니다.'} 새 실행을 시작해도 기존 기록은 유지됩니다.</p>`:'';
+    $('#ees-work-content',host).innerHTML=runTabs()+alertHTML()+`<p class="ew-breadcrumb">${esc(siteLabel(c.site))} · ${esc(c.system)} · 절차 v${esc(c.version)}<br>${esc(lineage(n.id).map(item=>item.name).join(' › '))}</p>`+closed+workPanelNodeHTML(c,n,{readOnly:done})+(done?(n.type==='p'?button('새 실행 시작','start_case','class="ew-primary" data-mutation'):button('프로세스 완료 보기','select',`data-node-id="${esc(c.process_id)}"`)):'')+'<p class="ew-footnote">연결 점검은 합성 시연 결과입니다. 실제 업무 시스템은 호출하지 않습니다. 가운데 AI 대화는 기존 모델을 사용합니다.</p>';
+    renderTabs();callbacks.registerPanel();setBusy();
   }
-  function missingHTML(ns) {return (ns.missing || []).length ? `<p class="ew-notice">먼저 완료할 작업: ${ns.missing.map(id=>esc(nameOf(id))).join(', ')}</p>` : '';}
-  function jobHTML(n,c,ns) {
-    const job = c.jobs[n.id] || {}, inputs = {db:c.site.db,ap:c.site.ap,site:[c.site.country,c.site.name,c.site.line].join(' · '),interface:c.site.interface?c.system+' · '+c.site.name+' 시스템 간 연계 · 예시':'',...(job.inputs || {})};
-    const fields = Array.from(new Set(Object.values(n.bindings || {}).filter(v=>['db','ap','site','interface'].includes(v))));
-    const labels = {db:'DB 대상',ap:'AP 대상',site:'공장 확인',interface:'인터페이스 대상'};
-    const checks = job.checks || [], history = job.history || [];
-    return `${missingHTML(ns)}${!ns.applicable ? '<p class="ew-notice">이 공장 조건에서는 적용하지 않는 작업입니다.</p>':''}${fields.length?`<form id="ees-work-inputs" class="ew-card"><h3>점검 입력</h3>${fields.map(key=>`<label>${labels[key]}<input name="${key}" value="${esc(inputs[key] || '')}" autocomplete="off" placeholder="시연용 대상 입력"></label>`).join('')}<button id="ees-work-inputs-save" type="submit" data-mutation>입력값 저장</button><p class="ew-muted">저장한 입력값은 이 대화의 AI도 참고합니다. 비밀번호·접속 키는 입력하지 마세요.</p></form>`:''}<section class="ew-card"><h3>${n.mode==='manual'?'확인할 내용':n.mode==='draft'?'검토할 초안':'실행 순서와 점검 기준'}</h3><p>${esc(n.rule || n.description)}</p>${(n.tools || []).map((id,i)=>`<div class="ew-tool"><span class="ew-index">${i+1}</span><div><strong>${esc(c.definition.tools?.[id]?.name || id)}</strong><small>${esc(c.definition.tools?.[id]?.description || c.definition.tools?.[id]?.purpose || '')}</small></div></div>`).join('')}${n.mode==='draft'?`<form id="ees-work-document"><label>작업 초안<textarea name="document" rows="6" placeholder="가운데 AI에게 초안을 요청하거나 직접 작성하세요.">${esc(job.document || '')}</textarea></label><button type="submit" data-mutation>초안 저장</button></form>`:''}<button type="button" id="ees-work-run" data-action="run" data-node-id="${esc(n.id)}" class="ew-primary" data-mutation ${ns.applicable===false||(ns.missing || []).length?'disabled data-unavailable="true"':''}>${n.mode==='manual'?'확인 완료':n.mode==='draft'?'검토 완료':job.attempt?'다시 점검':'점검 실행'}</button></section>${checks.length?`<section class="ew-card"><div class="ew-heading"><h3>점검 결과</h3><span>${esc(job.attempt || 1)}차 실행</span></div>${checks.map(check=>`<div class="ew-check"><div class="ew-heading"><strong>${esc(check.name || c.definition.tools?.[check.id || check.tool_id || check.tool]?.name || check.id || check.tool_id || check.tool)}</strong>${badge(check.status)}</div><p>${esc(check.message || check.detail || check.summary || '')}</p>${check.evidence?`<pre>${esc(typeof check.evidence==='string'?check.evidence:JSON.stringify(check.evidence,null,2))}</pre>`:''}</div>`).join('')}</section>`:''}${history.length?`<details class="ew-history"><summary>이전 실행 기록 (${history.length})</summary>${history.map((run,i)=>`<section class="ew-card"><strong>${esc(run.attempt || i+1)}차 실행</strong> ${badge(run.status)}<p>${esc(run.at || run.completed_at || '')}</p>${(run.checks || []).map(check=>`<p>${esc(check.name || check.id || check.tool_id || check.tool)} · ${esc(statuses[check.status] || check.status)} · ${esc(check.message || check.detail || '')}</p>`).join('')}</section>`).join('')}</details>`:''}`;
-  }
-
 
   function panelRegistration() {
     ensureHost();
