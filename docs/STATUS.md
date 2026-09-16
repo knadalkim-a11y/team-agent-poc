@@ -1,17 +1,17 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-15
+갱신일: 2026-09-16
 
 현재 작업·다음 작업·미해결·실제 적용 원본을 관리합니다. 이슈·검증 근거는 [평가 기록 찾아보기](../evals/scenarios.md#evidence-index), 환경은 [versions](../versions.md), 완료된 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 사용자 지시대로 [업무 패널 설계](mockups/ees-work/TASK.md#work-panel-goal-design-20260915) → 독립 검토 → 구현 순서로 진행함. 잡의 수행·근거를 기반으로 태스크/프로세스 자동화와 자연어 관리를 확장하는 목표에 맞춰 P/T/J 내용을 구분하고, Workspace는 기존 Native 디자인과 구조 검증 의미를 맞춤. 관련 Draft [PR #52](https://github.com/knadalkim-a11y/team-agent-poc/pull/52)의 준비본으로 구현·검토함. 로컬 계약/조립/표시 검사 77 PASS·3 SKIP이며 실제 사내 설치본과 구분함. GLM 5.3은 사용자가 사내 UI에 반영한 [환경 기준](../versions.md#사내-모델-운용-기준)을 유지함. [설계·검토·시험 근거](../evals/scenarios.md#workspace-native-design-20260915).
-- Git 원본: 리팩토링·메인 채팅 업무 탐색·자산 보호는 [PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48), ZIP 자동 준비는 [PR #49](https://github.com/knadalkim-a11y/team-agent-poc/pull/49)에 반영됨. 이번 확인된 래퍼·프로그램·자산 원본은 `87f3f2922a4ab830bcee1022ed7045e624a36777`임. 이후 상태 문서 커밋은 실제 설치 원본과 구분하며 이 기록 갱신만으로 재배포하지 않음.
+- 이번 작업: 설계→독립 검토→구현을 마친 업무 패널·Workspace [PR #52](https://github.com/knadalkim-a11y/team-agent-poc/pull/52)를 사용자 후속 진행 요청에 따라 병합·고정 원본 시험 적용 단계로 진행함. P/T/J 역할 구분과 기존 Native 디자인 통합의 로컬 계약/조립/표시 검사는 77 PASS·3 SKIP이며, 이번 적용 경로 검사는 추가 30 PASS·1 SKIP임. [적용 안내](03-openwebui-native-agent.md#ees-work-panel-trial-20260916), [설계·검토·시험 근거](../evals/scenarios.md#workspace-native-design-20260915). 사내 GLM 5.3의 사용자 UI 설정과 기존 자산을 유지하며 새 원본의 실제 설치·화면 확인은 아직 미수신임.
+- Git 원본: 업무 패널·Workspace 시험 대상은 [PR #52](https://github.com/knadalkim-a11y/team-agent-poc/pull/52)의 최종 병합 커밋이며 전달한 40자리 SHA로 고정함. 앞선 리팩토링·업무 탐색·자산 보호는 [PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48), ZIP 자동 준비는 [PR #49](https://github.com/knadalkim-a11y/team-agent-poc/pull/49)에 반영됨. 마지막 사내 확인 원본은 여전히 `87f3f2922a4ab830bcee1022ed7045e624a36777`이며 Git 병합·안내 전달만으로 설치 원본을 갱신하지 않음.
 - 최근 UI 확인: 09-15 앞선 ees.8의 공장·시스템 선택 박스, 프로세스 직계 태스크 펼침, 글꼴·설명 행 정리, 대화·작성 중 초안 유지 네 항목 정상 보고는 보존함. 이번 ees.9 설치 후 화면·기존 대화 확인은 아직 미보고이며 앞선 수락을 새 화면 결과로 바꾸지 않음. [앞선 수락](../evals/scenarios.md#sidebar-refinement-20260914).
 - 최근 운영 확인: 09-15 `stop → backup → apply`, `upgrade result=ok changed=true wrapper_changed=false version=0.11.3+ees.9 running=true` 보고. 정상 완료의 실행 순서상 검증 백업과 기동 health도 통과한 것으로 판단함. 새 다운로드와 원본 캐시 재사용 중 어느 경로였는지는 출력에서 구분되지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 이번 성공으로 확정하지 않음. [이번 적용](../evals/scenarios.md#work-ui-refactor-20260915), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 같은 원본의 `apply_demo result=ok changed=3 stage=complete code=- next=new_chat` 보고. 관리 목록 내 적용·쓰기 후 확인 성공이며 개별 변경 대상 3개를 추측하지 않음. 기존 v0.2.9/ees.8 수락과 과거 자산 충돌은 [앞선 기록](../evals/scenarios.md#sidebar-refinement-20260914), [정렬 충돌 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함.
-- 다음 작업 하나: 목표 기반 P/T/J 패널과 Workspace의 PR #52 준비본을 대상으로 후속 병합·시험 적용을 요청받으면 정확한 원본의 새 프로그램을 준비하고 패널별 목적·결과/이력과 Workspace 편집/탭 이동을 소수 항목으로 확인함. 현재 정상 배포본의 재시도 성공을 도구 미노출 원인 해결로 바꾸지 않음.
+- 다음 작업 하나: 사용자가 고정 원본 `Update → Upgrade -TrialCommit` 블록을 실행한 뒤 마지막 결과와 Ctrl+F5 후 패널/Workspace·기존 대화/초안·과거 근거 확인을 한 번에 받음. Upgrade가 마지막 ApplyDemo도 호출하므로 별도 반복하지 않음. 실패 시 마지막 실패 요약으로 다음 판단을 하며 정상 배포본의 과거 재시도 성공을 도구 미노출 원인 해결로 바꾸지 않음.
 - 최신 사내 확인: 09-15 래퍼/프로그램 `87f3f2922a4a`의 ees.9 기동과 같은 자산 원본의 변경 3건 성공에 이어, 메인 채팅의 업무 요청 재시도 정상 동작을 사용자가 보고함. 첫 Knowledge 전용 응답과 일반 Upgrade의 CI 실패를 보존하며 재시도 성공을 원인 해결로 해석하지 않음. [실패·성공·한계](../evals/scenarios.md#work-ui-refactor-20260915).
 
 ## 2026년 9월 개발·검사 방침
@@ -80,6 +80,6 @@
 
 ## 최근 점검
 
-2026-09-15: 업무절차 화면을 고정 0.11.3의 Workspace/Models/Tools/Skills 소스와 대조함. 빌드 관련 엄격 인코딩 검사에서 기존 Node subprocess의 인코딩 누락 한 곳을 수정한 뒤 20 PASS/2 SKIP, 실제 조립 JS 구문 PASS를 확인함. Native 브라우저 검사는 Chrome/wheel 부재로 실제 0개 실행이며 사내 UI/모델 확인으로 확대하지 않음. 이전 도구 미노출·재시도 성공·사내 적용 증거는 [기존 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 보존하고 이번 결과는 [Workspace 변경 기록](../evals/scenarios.md#workspace-native-design-20260915)에서 관리함.
+2026-09-16: 최신 main·PR #52의 지침/원본을 재확인하고 같은 ees.9의 다른 source_commit 갱신·묶음 검증·Stop→Backup→Apply→Start·자동 자산 확인·직전 프로그램 Restore 범위를 코드로 대조함. 고정 원본 적용/묶음 로컬 검사는 30 PASS·1 SKIP(PowerShell 부재). 앞선 패널 77 PASS·3 SKIP과 새 실제 브라우저/Windows/사내 모델 미실행을 구분하며 원격 검사는 사용자 한시 방침대로 생략함. 사건별 결과와 최초 실패는 [기존 평가 기록](../evals/scenarios.md#workspace-native-design-20260915)에 보존함.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.

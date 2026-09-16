@@ -64,6 +64,14 @@
 - 새 표시 검사: `python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p 'test_ees_work_panel.py' -q`는 실제 합성 SQLite 서비스 상태를 Node VM의 제품 표시 함수에 입력하고 HTML의 결과/근거/액션을 확인함. 최초 **9 PASS/1 FAIL**은 사람 확인 표현을 `사람` 단어 하나로 제한한 시험이 실제 `담당자 확인 기록`을 거절한 과제약이었음. 저장된 kind·시각/입력 검사는 유지하고 표현 조건만 `사람|담당자`로 바꾼 뒤 **10 PASS**. P/T/J·시작 전·사람 확인·실패/재시도·입력/초안/선행 무효화·전체 제외·미완료 잡 종류별 집계·입력/연결/스킬 차단·완료/과거 근거와 원본 불변을 확인함. 별도 브라우저 모조 환경이나 새 의존성을 추가하지 않음.
 - 최종 소스 확인: 이번 실제 `assemble_work_launcher()` **96,079 bytes**, `node --check` PASS. snapshot 수용·폼 제출/이벤트 callback 원본 동일성 PASS, 서버·Tool/controller·Agent Pack·모델·저장·권한·배포 코드 변경 없음. 앞선 계약/조립 검사와 새 표시 검사의 합계는 **77 PASS/3 SKIP**이며 SKIP은 native HTTP route 1개와 공식 wheel opt-in 2개임. 실제 Native 브라우저·Windows·사내 GLM 5.3 및 새 화면 검증/배포는 미실행이며, 새 검사를 브라우저 검증으로 간주하지 않음. 문서 검사 `files=30 links=1096 errors=0 review_candidates=0`와 `git diff --check` PASS. 원격 검사는 사용자 한시 방침의 `[skip ci]`를 유지함.
 
+### 병합·고정 원본 시험 적용 준비 (2026-09-16)
+
+- 사용자 후속 요청: `이어서 진행해줘`에 따라 검토·구현한 PR #52의 병합과 사내 실행 안내 준비를 진행함. 최신 main `3fa326323839d5fbcc817c8aeb8b81a727fb8bd2`, PR head `33e54be08bf90cbf0ffd34bfbe9fc8472c73aa67` 및 두 원본의 AGENTS/STATUS를 재확인함. 제품 소스는 앞선 검증 원본과 동일하고 변경 범위는 적용 안내·현재 상태·이번 근거뿐임. 실제 사내 적용 원본은 여전히 `87f3f2922a4a`이며 이번 병합/준비로 설치·UI 수락을 갱신하지 않음.
+- 적용 설계·검토: 기존 TrialCommit 경로는 active.source_commit이 일치할 때만 생략하므로 같은 ees.9 버전명의 다른 UI 원본도 새 묶음으로 준비·검증하고 Stop→Backup→Apply→Start로 적용함. 마지막 ApplyDemo는 경로에 포함되어 있어 별도 추가하지 않음. 새/직전 프로그램과 현재 DB/자산의 보존 범위를 유지하며 원격 CI를 호출하거나 새 실행기/의존성/브라우저를 설치하지 않음. `/_ees9/` 정적 경로가 같으므로 Ctrl+F5 후 화면 판정을 안내함.
+- 로컬 검사: Linux/Python 3.12.14, `python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p 'test_ees_trial_upgrade.py' -q` → **16 PASS/1 SKIP**(17개, 0.053초, PowerShell 부재); 같은 옵션의 `test_ees_trial_bundle.py` → **14 PASS**(0.197초). 기존 적용 순서·원본/진행 조건 변경·백업/기동/자산 실패·정확한 원본 재실행·캐시 해시/손상·Git 원본 묶음 경계를 확인한 합성 검사이며 사내 실배포 성공을 의미하지 않음. 앞선 77 PASS·3 SKIP 제품 검사를 중복 실행한 것으로 합산하지 않음.
+- 독립 점검: 실제 적용 원본부터 이번 제품 head까지 Agent Pack·빌드/적용/Trial/PowerShell 스크립트 변경 없음과 같은 버전의 원본 비교를 대조해 진행 차단 문제를 발견하지 못함. 기존 자산의 현재값과 적용할 값이 다를 때만 저장하며 모델 base_model_id는 현재 payload에서 유지함. 프로그램/데이터 경로 중첩 차단·현재/직전 RECORD·기존 의존성·백업 확인과 프로그램만 되돌리는 Restore 경계를 확인함. 실제 HTTP 캐시 헤더·브라우저 자동 갱신은 확인하지 못했으며 Ctrl+F5 안내를 캐시 자동 무효화 검증으로 표현하지 않음.
+- 전달·확인 범위: 최종 병합 SHA를 정확히 넣은 기존 Update→Upgrade -TrialCommit 블록 한 번과 [화면 확인 항목](../docs/03-openwebui-native-agent.md#ees-work-panel-trial-20260916)을 준비함. 초기 설치/모델 재등록·별도 ApplyDemo·실무 자동화 성공을 전제로 하지 않음. 사용자 입력은 마지막 요약과 기존 대화/초안·계층별 패널·과거 근거의 짧은 판정으로 제한하고 새 브라우저·Windows·사내 GLM/화면은 결과 수신 전까지 미확인임. 실제 원격 병합 SHA·시각은 연결된 PR의 merge 기록을 기준으로 함. 문서 검사 `files=30 links=1096 errors=0 review_candidates=0`와 `git diff --check` PASS, 변경 파일은 적용 가이드·STATUS·본 평가 기록 3개뿐임.
+
 <a id="ees-work-shared-design-20260914"></a>
 
 ### 공장·시스템 공동 작업 설계 기록 (2026-09-14)
