@@ -237,7 +237,7 @@ class ProcessContracts(unittest.TestCase):
         self.saved = {'pid': 123, 'executable': 'python', 'created_at': '456', 'group_id': 123,
                       'host': '127.0.0.1', 'port': 8080, 'log_file': 'local-only.log'}
 
-    def test_bind_failure_preserves_only_numeric_codes_without_reprobe_or_launch(self):
+    def test_bind_failure_preserves_only_numeric_codes_without_launch(self):
         private = 'synthetic-private-key C:/private/server.log 192.0.2.123'
         for code, windows_code in [(errno.EADDRINUSE, 10048), (errno.EADDRNOTAVAIL, 10049),
                                    (errno.EACCES, 10013)]:
@@ -248,16 +248,21 @@ class ProcessContracts(unittest.TestCase):
                 listener = resource.__enter__.return_value
                 listener.bind.side_effect = original
                 with patch.object(manager.socket, 'socket', return_value=resource) as probe, \
-                        patch.object(manager.subprocess, 'Popen') as spawn:
+                        patch.object(manager.subprocess, 'Popen') as spawn, \
+                        patch.object(manager.time, 'monotonic', return_value=0), \
+                        patch.object(manager.time, 'sleep') as sleep:
                     with self.assertRaises(manager.ProcessError) as failure:
                         manager.start_server(sys.executable, '.', {'KEY': private}, '192.0.2.123', 8080, '.')
                 error = failure.exception
                 self.assertEqual((error.errno, error.winerror, error.operation), (code, windows_code, 'port_bind'))
-                self.assertEqual(str(error), 'The listen port is unavailable; no existing process was stopped.')
+                self.assertEqual(str(error), 'The listen port is unavailable; no process was stopped by this check.')
                 self.assertNotIn('synthetic-private', repr(error))
                 self.assertTrue(error.__suppress_context__)
-                probe.assert_called_once()
-                listener.bind.assert_called_once_with(('192.0.2.123', 8080))
+                attempts = 41 if os.name == 'nt' and windows_code == 10048 else 1
+                self.assertEqual(probe.call_count, attempts)
+                self.assertEqual(listener.bind.call_count, attempts)
+                listener.bind.assert_called_with(('192.0.2.123', 8080))
+                self.assertEqual(sleep.call_count, attempts - 1)
                 spawn.assert_not_called()
 
     def test_port_probe_boolean_api_remains_available(self):

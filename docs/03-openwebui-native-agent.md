@@ -1067,6 +1067,10 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 새 실패에서도 보존된 해당 실패 기록을 먼저 확인합니다. `truncated=true`·`status=unavailable`이면 오류 부재로 판정하지 않고, 현재 서버 로그나 최신 로그로 임의 대체하지 않습니다. 외부 전달은 기존 마지막 요약의 필요한 항목 1~2줄로 제한합니다.
 
+**2026-09-18 `port_check / port_bind / 10048` 재발 방지:** ees.10 시험 Upgrade에서 기존 서버 Stop 뒤 프로그램 Apply 전에 이 오류가 발생했고, 사용자는 Restore 없이 기존 프로그램을 Start 한 번 실행해 정상 서비스를 복구했습니다. 당시 main은 Windows bind를 한 번만 확인했으므로 일시적인 10048도 즉시 실패했습니다. 수정본은 **Windows operational bind의 10048만** 0.25초 간격, 총 10초·최대 40회 추가 확인하며 실패 소켓을 먼저 닫습니다. 계속 점유되거나 10013/10049·socket 생성/종료 오류이면 기존처럼 중단합니다. Windows 포트 공유, 다른 프로세스 종료, 자동 Restore는 추가하지 않습니다. [사건·수정·검증](../evals/scenarios.md#windows-port-bind-10048-20260918).
+
+같은 실패가 **프로그램 적용 전에** 다시 발생하면 Upgrade를 반복하지 않습니다. 먼저 `Status -Summary` 한 번으로 현재 선택 프로그램·`running`·미완료 적용 여부를 확인합니다. Status가 기존 프로그램을 정상 선택하고 `running=false`이며 미완료 Apply가 없으면 `Start -Summary`를 한 번 실행해 기존 서비스를 복구합니다. Start가 성공하면 Restore를 추가로 실행하지 않습니다. 프로그램 선택 불일치·미완료 적용·지속 포트 점유가 보이면 Start/Restore를 추측해 반복하지 말고 마지막 요약으로 중단 지점을 판단합니다. 수정본 재배포는 병합된 최종 main의 고정 SHA를 사용합니다.
+
 <a id="ees-stop-recovery"></a>
 
 #### 승인된 Upgrade 종료 실패의 한 번 복구

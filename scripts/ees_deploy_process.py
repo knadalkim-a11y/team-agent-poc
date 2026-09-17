@@ -156,22 +156,55 @@ def _address(host, port):
 
 
 def port_is_free(host, port, *, raise_on_error=False):
-    """Probe binding with asyncio's platform defaults, without stopping a listener."""
+    """Use strict platform binds; operational Windows checks allow a short wait.
+
+    A closed listener does not prove that Winsock has released its address.
+    Retry only WSAEADDRINUSE from bind, never relax socket options or signal an
+    owner. Boolean observations remain single-probe. This cannot reserve the
+    port for a later launch or identify the cause of an earlier busy result.
+    """
     address = _address(host, port)
-    operation = 'port_probe'
-    try:
-        with socket.socket(socket.AF_INET6 if address.version == 6 else socket.AF_INET) as listener:
-            if os.name != 'nt':
-                listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    started = None
+    retries = 0
+    while True:
+        operation = 'port_probe'
+        failure = None
+        try:
+            with socket.socket(socket.AF_INET6 if address.version == 6 else socket.AF_INET) as listener:
+                if os.name != 'nt':
+                    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                try:
+                    listener.bind((host, port))
+                except OSError as error:
+                    # Retain a bind error only if the socket closes normally.
+                    # A close failure must not be mistaken for a retryable bind.
+                    failure = error
+        except OSError as error:
+            failure = error
+        else:
+            if failure is None:
+                return True
             operation = 'port_bind'
-            listener.bind((host, port))
-            operation = 'port_probe'
-    except OSError as error:
+        code = getattr(failure, 'winerror', None)
+        if code is None:
+            code = failure.errno
+        if raise_on_error and os.name == 'nt' and operation == 'port_bind' and code == 10048:
+            now = time.monotonic()
+            if started is None:
+                started = now
+            remaining = started + 10.0 - now
+            # Both limits matter: no infinite retry even with a stalled
+            # clock. The failed socket is closed before every wait.
+            if remaining > 0 and retries < 40:
+                retries += 1
+                time.sleep(min(0.25, remaining))
+                continue
         if raise_on_error:
-            raise ProcessError("The listen port is unavailable; no existing process was stopped.",
-                               cause=error, operation=operation) from None
+            raise ProcessError("The listen port is unavailable; no process was stopped by this check.",
+                               cause=failure, operation=operation,
+                               elapsed_seconds=time.monotonic() - started if started is not None else None,
+                               timeout_seconds=10.0 if started is not None else None) from None
         return False
-    return True
 
 
 def _same(actual, expected):

@@ -2,6 +2,11 @@
 
 완료된 변경·중요 결정과 날짜별 관찰을 기록합니다. 다음 작업과 최신 배포 상태는 [STATUS](docs/STATUS.md), 시험별 현재 판정은 [평가표](evals/scenarios.md)가 원본입니다. 과거 실패 기록을 현재 장애나 재실행 지시로 해석하지 않습니다.
 
+## 2026-09-18
+
+- ees.10 시험 Upgrade가 기존 서버 Stop 뒤 `port_check / port_bind / WinError 10048`에서 `changed=false`로 중단된 사건을 분석함. 당시 `port_is_free`의 단발 Windows bind가 일시적인 10048도 즉시 배포 실패로 확정하던 결함을 재현하고, Windows operational bind의 10048만 0.25초 간격·10초 예산·최대 40회 재확인하도록 보완함. 포트 공유·다른 프로세스 종료·자동 Restore는 추가하지 않고 지속 점유·다른 오류는 계속 실패시킴. 사용자는 Restore 없이 기존 Start 한 번으로 서비스를 정상 복구했다고 보고했으며 이를 새 프로그램 적용 성공이나 TIME_WAIT 원인 확정으로 해석하지 않음. [증거와 한계](evals/scenarios.md#windows-port-bind-10048-20260918).
+- 독립 후속 검토에서 bind 실패 뒤 socket close도 실패할 때 close 오류를 retryable bind로 오인할 수 있는 초안 경계를 3개 subcase 실패로 확인하고 수정함. 최종 포트 시험 23 PASS·0 SKIP에 실제 Linux 모의 자식의 시작→health→종료→같은 포트 재시작과 합성 사용자 파일 보존을 포함함. 실제 Windows/Python 3.11/사내 Upgrade와 9월 원격 CI는 미실행으로 구분하며, 수정은 기존 PR #55에서 관리하고 최종 main 병합 SHA를 시험 적용 원본으로 사용함.
+
 ## 2026-09-17
 
 - 후속 구현·배포 승인에 따라 [09-16 설계](docs/mockups/ees-work/TASK.md#work-panel-chat-design-20260916)의 P/T/J 패널을 ees.10에 반영함. P는 직속 T, T는 직속 J의 정렬된 현황을 표시하고 J는 입력·최근 유효한 결과·완료 기준·다음 조치를 우선함. 수행 근거는 접어서 열람하고 자산 연결 설정은 Workspace에서 관리하며 부모의 가능한 점검과 사람 확인의 경계를 유지함.
