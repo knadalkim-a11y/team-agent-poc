@@ -1,18 +1,20 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-16
+갱신일: 2026-09-17
 
 현재 작업·다음 작업·미해결·실제 적용 원본을 관리합니다. 이슈·검증 근거는 [평가 기록 찾아보기](../evals/scenarios.md#evidence-index), 환경은 [versions](../versions.md), 완료된 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 사용자 요청으로 P/T/J Contract·검증 연결·최소 Runtime POC·장기 확장·현재 상태를 종합 재검토해 **문서만 반영**함. [설계 관리 원본](08-ees-work-contract-runtime.md), [POC 수락 기준·검토 기록](../evals/ees-work-runtime-poc.md). 코드·UI·자산·모델·저장 형식·CI·사내 환경은 변경하지 않으며, 문서 게시를 구현·적용 완료로 보지 않음.
+- 이번 작업: 사용자 요청으로 Figma 중심 UI/UX의 준비 범위·검토·승인·구현 인계 절차를 설계하고 문서에 반영함. [Figma 작업 가이드](09-figma-workflow.md), [검토·실행 증거](../evals/ees-work-runtime-poc.md#figma-preparation-20260917). 기존 설계 PR #53을 재사용하며 별도 적층 PR을 만들지 않음. Figma 현 상태 조회는 Starter MCP 호출 한도로 차단되어 이번 파일 구조/컴포넌트/연결 수정은 미실행임. 제품 코드·사내 환경·결제·권한·공개 공유는 변경하지 않음.
 - Git 원본: 업무 패널·Workspace 시험 대상은 [PR #52](https://github.com/knadalkim-a11y/team-agent-poc/pull/52)의 최종 병합 커밋 `7bdd2ce93dc47ffb58b732f35662ad8e849c7215`이며 전달한 40자리 SHA로 고정함. 앞선 리팩토링·업무 탐색·자산 보호는 [PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48), ZIP 자동 준비는 [PR #49](https://github.com/knadalkim-a11y/team-agent-poc/pull/49)에 반영됨. 마지막 사내 확인 원본은 여전히 `87f3f2922a4ab830bcee1022ed7045e624a36777`이며 Git 병합·안내 전달만으로 설치 원본을 갱신하지 않음.
 - 최근 UI 확인: 09-15 앞선 ees.8의 공장·시스템 선택 박스, 프로세스 직계 태스크 펼침, 글꼴·설명 행 정리, 대화·작성 중 초안 유지 네 항목 정상 보고는 보존함. 이번 ees.9 설치 후 화면·기존 대화 확인은 아직 미보고이며 앞선 수락을 새 화면 결과로 바꾸지 않음. [앞선 수락](../evals/scenarios.md#sidebar-refinement-20260914).
 - 최근 운영 확인: 09-15 `stop → backup → apply`, `upgrade result=ok changed=true wrapper_changed=false version=0.11.3+ees.9 running=true` 보고. 정상 완료의 실행 순서상 검증 백업과 기동 health도 통과한 것으로 판단함. 새 다운로드와 원본 캐시 재사용 중 어느 경로였는지는 출력에서 구분되지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 이번 성공으로 확정하지 않음. [이번 적용](../evals/scenarios.md#work-ui-refactor-20260915), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 같은 원본의 `apply_demo result=ok changed=3 stage=complete code=- next=new_chat` 보고. 관리 목록 내 적용·쓰기 후 확인 성공이며 개별 변경 대상 3개를 추측하지 않음. 기존 v0.2.9/ees.8 수락과 과거 자산 충돌은 [앞선 기록](../evals/scenarios.md#sidebar-refinement-20260914), [정렬 충돌 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함.
-- 다음 작업 하나: 이 문서 변경을 검토한 뒤 **대표 실제 업무 P 하나와 첫 읽기 J의 입력·승인 도구·판정 명세·정답 대조 방법을 확정**함. [선정·개발 순서](08-ees-work-contract-runtime.md#pilot-selection). 구현은 그 업무 단위로 설계·검토 후 진행하며 이 문서 요청을 코드/배포 승인으로 확대하지 않음.
+- 다음 작업 하나: 사용자가 Figma 이용 조건을 정하고 접근이 가능한 시점에 기존 파일의 현재 변경을 확인한 뒤, [파일 준비와 P/T/J 왕복 흐름](09-figma-workflow.md#first-slice)을 한 묶음으로 완성함. 패널 닫기/재열기를 우선 보완하고 사용자 클릭 검토까지 확인함. 이 준비 요청을 코드/배포 승인으로 확대하지 않음.
 - 최신 사내 확인: 09-15 래퍼/프로그램 `87f3f2922a4a`의 ees.9 기동과 같은 자산 원본의 변경 3건 성공에 이어, 메인 채팅의 업무 요청 재시도 정상 동작을 사용자가 보고함. 첫 Knowledge 전용 응답과 일반 Upgrade의 CI 실패를 보존하며 재시도 성공을 원인 해결로 해석하지 않음. [실패·성공·한계](../evals/scenarios.md#work-ui-refactor-20260915).
+
+- 기존 Runtime 다음 단위는 보존함: 대표 실제 P와 첫 읽기 J의 입력·승인 도구·판정 명세·정답 대조 방법을 정하는 [계획](08-ees-work-contract-runtime.md#pilot-selection)은 취소하지 않음. Figma 도입 준비 뒤 실제 업무 단위로 구체화하며 모의 클릭 시연을 실제 읽기 실행 수락으로 대체하지 않음.
 
 - 앞선 패널 시험 적용은 별도로 남아 있음: PR #52는 설계·독립 검토·구현 뒤 병합된 상태이고 사내 설치·화면 확인은 미수신임. 기존 로컬 패널 77 PASS·3 SKIP, 적용 경로 30 PASS·1 SKIP과 [고정 원본 적용 안내](03-openwebui-native-agent.md#ees-work-panel-trial-20260916)를 보존함. 사용자가 이미 전달된 블록을 실행한 경우 마지막 결과와 패널/Workspace·기존 대화/초안·이력을 한 번에 확인하며, Upgrade에 포함된 ApplyDemo를 반복하지 않음. 이번 문서 작업 때문에 정상 서버를 재진단하지 않음.
 
@@ -64,7 +66,7 @@
 - **메인 채팅의 업무 활용:** 읽기 전용 후보/절차 조회·스킬 지침·기존 진행의 고정본 계획과 목표 기반 Prompt를 구현함. 사내 첫 요청은 Knowledge 검색만 한 뒤 업무 도구 미연결로 답했으나 사용자가 재시도 정상 동작을 보고함. 요청의 도구 선택 상태와 실제 호출 이력은 미확인으로, 일시적 비활성화·브라우저 갱신 지연·모델 선택 중 원인을 확정하지 않음. 정상 사용을 계속하며 자연 재발 시에만 해당 대화의 도구 노출을 확인함. 단계별 실행·화면 반영·공유 검증으로 확대하지 않고 한 진행 건/한 대화·외부 도구 미연결·DB/AP 모의 점검 경계를 유지함. [이번 관측·판단](../evals/scenarios.md#work-ui-refactor-20260915).
 - **팀 공동 작업:** 사용자가 공장 1개·시스템 1개·프로세스 1개, 참여자 2~3명의 첫 단위를 선택함. 현재 진행 건과 대화 연결은 사용자 소유이며 개인 선택 상태도 진행 건에 있어 공동화 때 분리가 필요함. 참여/역할·이력·충돌 처리는 아직 구체화·구현 전임. [새 단위·현황 표시 제안](mockups/ees-work/TASK.md#shared-pilot-first), [전체 목표](mockups/ees-work/TASK.md#ees-work-shared-target).
 - **공장별 업무 UX:** 09-15 사용자 보고로 이번 사이드바 선택 영역·직계 펼침·글꼴·대화/초안 유지의 사내 확인을 완료함. Workspace 탭 반복 재삽입·첫 메시지 경합의 사외 재현과 자동 검사는 [기존 근거](../evals/scenarios.md#ees-work-factory-ux-20260914)에 보존함. 이번 네 항목에 없던 Workspace 반복 전환·실제 모델 호출 등으로 확인 범위를 확대하지 않고 다음 관련 사용·변경 시점에만 판단함. [새 UI 수락](../evals/scenarios.md#sidebar-refinement-20260914).
-- **이전 폴더 변경 실패:** `dba0677ffe3e`의 Apply 407행 rename 접근 거부 뒤 Restore·Start·웹 접속 복구를 확인함. 이후 ees.7 실행은 확인했으나 어떤 재시도·수동 복구 경로로 적용됐는지와 제한 대기의 사내 효과는 미보고. 파일 잠금·ACL·특정 보안 제품의 원인은 미확정이며 [당시 복구](../evals/scenarios.md#ees7-apply-recovery-20260914)와 [실패 대응 보완](../evals/scenarios.md#windows-program-rename-20260914)을 구분함.
+- **이전 폴더 변경 실패:** `dba0677ffe3e`의 Apply 407행 rename 접근 거부 뒤 Restore·Start·웹 접속 복구를 확인함. 이후 ees.7 실행은 확인했으나 어떤 재시도·수동 복구 경로로 적용됐는지와 제한 대기의 사내 효과는 미보고. 파일 잠금·ACL·특정 보안 제품의 원인은 미확정이며 [당시 복구](../evals/scenarios.md#ees7-apply-recovery-20260914)와 [실패 대응 보완](../evals/scenarios.md#windows-program-rename-20260914)를 구분함.
 - **과거 업데이트 장애 조사:** 종료 처리·오류 보존의 재현 가능한 결함은 수정/적용했으나 최초 포트 소실과 Windows rename 접근 거부의 근본 원인은 미확정. 마지막 종료 실패 로그의 `KeyboardInterrupt/other/ValueError/OperationalError`만으로 DB 손상·잠금·취소 원인을 확정하지 않음. 약속한 추가 확인은 끝났으며 정상 서버 재현·반복 진단 없이 유지함. 자연 재발 시 개선된 래퍼의 실패 요약을 사용함. [조치와 조사 종결](../evals/scenarios.md#ees-update-failure-causes).
 - **접속·스트리밍:** 09-14 수신 소실은 CPython accept 오류→listener 종료 경로와 일치함. 임시 복구 이후 자식 Proactor 보호를 사내 적용하고 기동 health를 확인했으나 유휴 이후 안정성은 미확인. 최초 단절 주체는 미확정이고 제한된 System 이벤트 0건으로 모든 전원·세션 원인을 배제하지 않음. 과거 Selector 준비본은 미적용. [검증·남은 확인](../evals/scenarios.md#accept64-guard-20260914).
 - **연동과 팀 공개:** 최신 일반 출력·페이지 이동·부분 실패/빈 결과·개인 권한/비밀 보호는 다음 관련 사용·변경 또는 공개 시점에 확인함. Confluence 검색 범위/시각·본문 근거·C07 개별 오류·Skill 로딩은 일반 조회 성공으로 통과 처리하지 않음. 초기 카드 디자인/키보드 검사는 제거 작업의 남은 게이트가 아님. [시점과 공개 기준](../evals/scenarios.md#validation-timing).
@@ -90,7 +92,7 @@
 
 ## 재개와 환경 유지
 
-- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work는 [Contract·Runtime 설계](08-ees-work-contract-runtime.md)와 [POC 수락 기준](../evals/ees-work-runtime-poc.md)을 읽고, 기존 화면·공유 범위는 [최종 공동 작업 합의를 포함한 작업 지시](mockups/ees-work/TASK.md#ees-work-shared-target)와 그 문서가 연결한 목업을 읽습니다. HTML은 이전 화면 참고이며 공동 작업·권한 설계는 최신 문구가 우선합니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
+- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. UI/UX 변경은 [Figma 작업 가이드](09-figma-workflow.md)의 현재 파일 조회·승인 revision·코드 인계 기준을 먼저 확인합니다. EES Work는 [Contract·Runtime 설계](08-ees-work-contract-runtime.md)와 [POC 수락 기준](../evals/ees-work-runtime-poc.md)을 읽고, 기존 화면·공유 범위는 [최종 공동 작업 합의를 포함한 작업 지시](mockups/ees-work/TASK.md#ees-work-shared-target)와 그 문서가 연결한 목업을 읽습니다. HTML은 이전 화면 참고이며 공동 작업·권한 설계는 최신 문구가 우선합니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
@@ -98,6 +100,6 @@
 
 ## 최근 점검
 
-2026-09-16: main `7bdd2ce93dc47ffb58b732f35662ad8e849c7215`와 열린 PR 0건, 기존 정의/실행/편집 경계 및 대화 합의를 대조해 문서 설계를 정리함. Criterion과 검증 연결, UNKNOWN, 상위 절차 완료/목표 확인, 준비 상태/안전한 병렬성, 기존 의존·자료 보존을 보완함. 컨테이너 Git 접속 실패로 전체 `scripts/check_docs.py`와 제품·사내 검사는 미실행이며, 변경 문서의 로컬 검사·원격 diff 확인과 구분함. [이번 검토·검사 한계](../evals/ees-work-runtime-poc.md#review-20260916). 앞선 패널 77 PASS·3 SKIP과 적용 경로 30 PASS·1 SKIP은 [기존 평가 기록](../evals/scenarios.md#workspace-native-design-20260915)에 보존하며 이번 시험 결과로 복제하지 않음.
+2026-09-17: Figma 읽기 준비 호출이 Starter 한도 오류로 차단됐고 whoami에서 Starter/View를 확인함. 재시도·우회·결제 변경 없이 문서 작업으로 한정함. 기존 PR #53 head의 지침·현재 상태·P/T/J 설계와 공식 Figma 접근/좌석/Prototype/Code Connect 안내를 대조하고, 관리 원본 분리·최소 파일 구성·특정 revision 승인·UI/AI 동일 행동·합성 시연/제품 검증 분리를 보완함. 변경 Markdown의 부분 검사와 전체 저장소/브라우저/실환경 미검증을 구분함. [이번 증거·남은 조건](../evals/ees-work-runtime-poc.md#figma-preparation-20260917). 09-16 설계 재검토와 앞선 패널/배포 시험은 기존 평가 기록에 보존함.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다. 날짜별 증거와 과거 적용 원본은 기존 evals에 기록합니다.
