@@ -207,8 +207,11 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                         "/api/v1/knowledge/search", "/api/v1/prompts/list", "/api/v1/skills/list"}:
                 return self.send_content({"items": [], "total": 0})
             if path == "/api/ees-work/state" and self.server.workflow:
+                selection = query.get("selection", [""])[0]
                 response = asyncio.run(self.server.workflow.get_state(self.server.user,
-                    chat_id=query.get("chat_id", [""])[0], case_id=query.get("case_id", [""])[0]))
+                    chat_id=query.get("chat_id", [""])[0], case_id=query.get("case_id", [""])[0],
+                    process_id=query.get("process_id", [""])[0],
+                    selection=json.loads(selection) if selection else None))
                 return self.send_content(response)
             if path == "/api/v1/chats/":
                 self.server.new_chat_ready.set()

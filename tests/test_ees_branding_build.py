@@ -59,20 +59,36 @@ spec = importlib.util.spec_from_file_location("installed_workflow_tool", sys.arg
 tool_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(tool_module)
 tool = tool_module.Tools()
-async def event(_):
-    return {"ok": True}
+screen = {"kind": "published", "selection": {"site_id": "us-a", "system": "EMS",
+    "process_id": "setup-p", "node_id": "db-j", "version": 1}}
+async def event(value):
+    if "__eesNativeWorkV1?.selection" in value["data"]["code"]:
+        return {"ok": True, **screen}
+    return {"ok": True, "notified": True}
 async def run():
-    created = await workflow.handle_action(users["alice"], {"action": "create", "chat_id": "chat-a", "payload": {}})
+    args = {"__user__": users["alice"], "__metadata__": {"chat_id": "chat-a"}, "__event_call__": event}
+    published = await tool.ees_workflow_view(**args)
+    assert published["ok"] and published["case"] is None, published
+    assert not (await workflow.get_state(users["alice"], chat_id="chat-a"))["cases"]
+    write = {"target": published["target"], "request_id": "packaged-input-1",
+             "payload": {"inputs": {"db": "synthetic package target"}}}
+    created = await tool.ees_workflow_action("update_inputs", **write, **args)
     assert created["ok"], created
     before = created["case"]
-    args = {"__user__": users["alice"], "__metadata__": {"chat_id": "chat-a"}, "__event_call__": event}
-    selected = await tool.ees_workflow_action("select", node_id="db-j", expected_revision=before["revision"], **args)
+    replayed = await tool.ees_workflow_action("update_inputs", **write, **args)
+    assert replayed["ok"] and replayed["replayed"], replayed
+    assert replayed["case"] == before
+    screen.clear()
+    screen.update(kind="case", case_id=before["id"], node_id="db-j", revision=before["revision"])
+    seen = await tool.ees_workflow_view(**args)
+    selected = await tool.ees_workflow_action("select", node_id="ap-j", expected_revision=before["revision"], target=seen["target"], **args)
     assert selected["ok"], selected
+    screen.update(node_id="ap-j", revision=selected["case"]["revision"])
     seen = await tool.ees_workflow_view(**args)
     assert seen["case"] == selected["case"]
-    assert seen["case"]["selected_id"] == "db-j"
+    assert seen["case"]["selected_id"] == "ap-j"
     assert seen["case"]["revision"] == before["revision"] + 1
-    conflict = await tool.ees_workflow_action("select", node_id="ap-j", expected_revision=before["revision"], **args)
+    conflict = await tool.ees_workflow_action("select", node_id="db-j", expected_revision=before["revision"], target=seen["target"], **args)
     assert conflict["error"]["code"] == "revision_conflict", conflict
     forbidden = await workflow.get_state(users["bob"], case_id=before["id"])
     assert forbidden["error"]["code"] == "case_not_found", forbidden
@@ -350,6 +366,12 @@ class BrandingBuildTests(unittest.TestCase):
         self.assertEqual(first["source"]["sha256"], self.source_hash)
         self.assertEqual(first["wheel"]["sha256"], builder.sha256_file(self.root / "first" / builder.WHEEL_FILENAME))
 
+    def test_packaged_workflow_and_managed_tool_share_public_contract(self):
+        # Workflow files are actual shipped sources even when the surrounding
+        # upstream wheel is a disposable fixture. This is not a native UI test.
+        self.build()
+        assert_workflow_package(self, self.root / "release" / builder.WHEEL_FILENAME)
+
     def test_launcher_assembly_order_is_private_and_has_one_runtime_asset(self):
         source = builder.assemble_work_launcher(self.ui)
         self.assertLess(source.index(b"function createWorkView"), source.index(b"function createWorkDesigner"))
@@ -411,7 +433,9 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
         self.assertFalse((self.root / "release").exists())
 
     def test_native_fixture_rejects_a_launcher_not_built_from_current_sources(self):
-        import native_ui_fixture
+        fixture_spec = importlib.util.spec_from_file_location("native_ui_fixture", ROOT / "tests/native_ui_fixture.py")
+        native_ui_fixture = importlib.util.module_from_spec(fixture_spec)
+        fixture_spec.loader.exec_module(native_ui_fixture)
         self.build()
         with mock.patch.object(native_ui_fixture, "assemble_work_launcher", return_value=b"new source revision"), \
                 self.assertRaisesRegex(ValueError, "assembled sources"):
@@ -428,7 +452,7 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
                     self.assertEqual(built.read(target), original, name)
             self.assertEqual(built.read(builder.TARGET_INFO + "licenses/LICENSE"), LICENSE)
             self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.9\n"))
+                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.10\n"))
             self.assertEqual(built.read("open_webui/env.py").count(NOTICE), 2)
             self.assertNotIn(b"WEBUI_NAME +=", built.read("open_webui/env.py"))
             self.assertIn(b"EES Work", built.read("open_webui/frontend/index.html"))
@@ -452,7 +476,7 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
             for name, (origin, _) in builder.FONT_SOURCES.items():
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/" + name), self.members[origin])
             runtime = built.read(builder.TARGET_APP + "immutable/chunks/DKj2ZiCb.js")
-            self.assertIn(b"/_ees9/version.json", runtime)
+            self.assertIn(b"/_ees10/version.json", runtime)
             chat = built.read(builder.TARGET_APP + "immutable/chunks/zKJlHFgk.js")
             self.assertIn(builder.NATIVE_DRAFT_HOOK, chat)
             self.assertIn(b'if(window.__eesNativeDraftV1===eesNativeDraftApi)delete window.__eesNativeDraftV1;', chat)
@@ -775,7 +799,7 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
                         self.assertEqual(built.read(target), source.read(name), name)
                 metadata = source.read(builder.SOURCE_INFO + "METADATA")
                 self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.9\n"))
+                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.10\n"))
                 for filename, (origin, expected) in builder.FONT_SOURCES.items():
                     copied = built.read(builder.TARGET_APP + "fonts/" + filename)
                     self.assertEqual(copied, source.read(origin))

@@ -1,6 +1,6 @@
 # 버전 및 환경 기준
 
-문서 갱신일: 2026-09-15. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
+문서 갱신일: 2026-09-17. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
 
 ## Open WebUI 대상 환경
 
@@ -22,15 +22,17 @@
 
 현재 프로그램 운영은 Windows의 등록된 Python 3.11·Open WebUI 0.11.3·로컬 SQLite/Chroma 구성을 대상으로 합니다. [단순 래퍼 방식](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)은 기존 Python·호환 의존성을 재사용하며 프로그램 파일만 관리합니다. uv 0.12.7로 별도 환경과 전체 의존성을 준비하던 이전 절차는 중단했습니다. Windows/Linux CI의 합성 검증과 사내 실제 적용 결과는 구분합니다.
 
-새 브랜딩 배포물은 **0.11.3+ees.9**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 STATUS의 실제 적용 기록으로 구분합니다. ees.1~ees.9의 시작·직전 Restore를 지원하며 새 Apply에는 ees.9 프로그램 ZIP을 사용합니다. 정적 자산 경로는 `/_ees9/`이고 ees.8에서 수락한 공장/시스템 선택·직계 펼침·글꼴·대화 동작을 유지합니다.
+새 브랜딩 배포물은 **0.11.3+ees.10**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 STATUS의 실제 적용 기록으로 구분합니다. ees.1~ees.10의 시작·직전 Restore를 지원하며 새 Apply에는 ees.10 프로그램 ZIP을 사용합니다. 새 정적 자산은 `/_ees10/`에 넣어 ees.9 브라우저 캐시와 분리하고, 공장/시스템 선택·직계 펼침·글꼴·기존 대화 동작을 유지합니다.
 
 ees.9는 [조건부 자산 적용](docs/03-openwebui-native-agent.md#conditional-assets)을 추가합니다. 단일 프로세스·등록 DATA_DIR의 로컬 SQLite에서 ApplyDemo와 native 저장 경로를 함께 보호하며 DB 형식·키·사용자 자료는 바꾸지 않습니다. Agent Pack v0.2.10은 지정 전문가 Tool의 ees.9 버전 호환을 추가하고 기존 ID를 유지합니다. 새 ApplyDemo는 보호 API가 없는 이전 프로그램에서 쓰기 전에 중단하므로 처음에는 Update → Upgrade → ApplyDemo 순서입니다. 프로그램 Restore는 사용자 자산을 되돌리지 않으며 구프로그램에서는 새 ApplyDemo가 다시 중단합니다. 기본 적용은 병합·CI·프로그램 산출물 확인 뒤 수행합니다. 2026년 9월에는 [고정 원본 시험 적용](docs/03-openwebui-native-agent.md#ees-wrapper-trial)의 `Upgrade -TrialCommit`으로 ZIP 준비·백업·프로그램/지정 자산 적용을 연결하며 데이터 Backup·프로그램 Restore를 구분합니다. 기존 ZIP Apply도 지원합니다. 실제 적용 상태는 [STATUS](docs/STATUS.md)를 따릅니다.
 
-같은 미배포 PR의 ees.9 준비본에는 [R1 업무 서버·정책 분리](evals/scenarios.md#workflow-refactor-20260915)도 포함합니다. 새 형제 Python 모듈 두 개와 공통 정책 JSON을 프로그램에 함께 넣고 공개 모듈·완성 예시 정의·업무 DB 형식을 유지합니다. ees.6~ees.8 백업에는 새 파일을 요구하지 않습니다. R1 자체는 Agent Pack의 Tool ID·등록 소스·관리 필드를 변경하지 않으므로 v0.2.10을 유지합니다.
+ees.9에서 추가한 [R1 업무 서버·정책 분리](evals/scenarios.md#workflow-refactor-20260915)를 유지합니다. 형제 Python 모듈 두 개와 공통 정책 JSON을 프로그램에 함께 넣고 공개 모듈·완성 예시 정의를 유지합니다. ees.6~ees.8 백업에는 새 파일을 요구하지 않으며 ees.9 백업은 당시 분리 모듈과 자산 보호 파일을 계속 검증합니다. R1 자체의 Agent Pack 버전은 v0.2.10이었습니다.
 
-같은 ees.9 준비본의 [R2 화면 분리](evals/scenarios.md#work-ui-refactor-20260915)는 소스 세 개를 기존 런처 한 개로 조립합니다. 런타임 정적 파일 경로·JS 공개 연결·Agent Pack v0.2.10을 유지하며 자산 재등록이나 데이터 이관을 요구하지 않습니다. R3는 고정 wheel로 만든 이전 ees.8 프로그램에서 갱신 후 새 자료 저장·Restore·기존 공개 서비스 재사용을 검증합니다. 시험 통과 범위와 원격/사내 미확인은 같은 기록에서 구분합니다.
+ees.9의 [R2 화면 분리](evals/scenarios.md#work-ui-refactor-20260915) 방식대로 소스 세 개를 런처 한 개로 조립합니다. 당시 R2는 정적 파일 경로·JS 공개 연결·Agent Pack v0.2.10을 유지했고 자산 재등록이나 데이터 이관을 요구하지 않았습니다. R3의 고정 wheel 기반 ees.8 갱신·새 자료 저장·Restore 검증은 당시 근거이며 ees.10 시험의 대체가 아닙니다. 시험 통과 범위와 원격/사내 미확인은 같은 기록에서 구분합니다.
 
-같은 미배포 ees.9/v0.2.10 준비본에 [메인 채팅의 업무 탐색·계획](docs/mockups/ees-work/TASK.md#chat-workflow-entry-20260915)을 보강합니다. Workflow Tool 0.2.1과 관리 Prompt가 읽기 전용 절차 상세 및 기존 실행의 고정된 지침을 사용합니다. 새 서버 조회 인자가 필요하므로 프로그램과 지정 관리 자산을 함께 적용하며 기존 모델 ID·비관리 자산·업무 DB 형식은 유지합니다. 앞서 만든 R2 wheel을 이 후속 코드의 배포물로 재사용하지 않습니다.
+ees.9/v0.2.10의 [메인 채팅 업무 탐색·계획](docs/mockups/ees-work/TASK.md#chat-workflow-entry-20260915)은 Workflow Tool 0.2.1과 관리 Prompt로 읽기 전용 절차 상세 및 기존 실행의 고정된 지침을 제공했습니다. ees.10/Agent Pack **v0.2.11**은 [P/T/J 패널과 대화의 공통 업무 설계](docs/mockups/ees-work/TASK.md#work-panel-chat-design-20260916)를 적용합니다. 서버의 선택 업무 조회와 최초 저장·실행 계약, Workflow Tool **0.3.0**의 대상·요청 식별자, P/T/J 표시와 Workspace 디자인을 함께 갱신하므로 프로그램과 지정 관리 자산을 같은 원본으로 적용해야 합니다. 전문가 Tool에는 ees.10 지원만 추가하며 기존 Tool·모델 ID, 개인 모델 선택·연결·비관리 자산은 유지합니다.
+
+ees.10의 `ees-work.sqlite3`에는 첫 저장·실행의 중복 요청을 구분하는 `action_requests` 테이블을 추가합니다. 기존 정의·진행 건·결과·이력 테이블과 그 자료를 삭제하거나 재작성하지 않습니다. 이전 프로그램은 추가 테이블을 사용하지 않고 기존 진행 자료를 계속 읽고 변경할 수 있지만 새 첫 쓰기 중복 방지·선택 대상 계약을 제공하지 않습니다. 프로그램 Restore는 DB나 Agent Pack을 되돌리지 않습니다. 따라서 ees.9로 Restore한 뒤 새 Workflow Tool 0.3.0의 업무 선택·실행은 프로그램 갱신 필요로 중단하며, 구프로그램의 기존 화면과 저장 자료를 사용하는 범위만 호환 대상으로 봅니다. 실제 새 저장 자료의 구프로그램 재사용 검증 및 플랫폼별 미실행 범위는 [이번 평가 기록](evals/scenarios.md#work-panel-chat-implementation-20260917)에 따릅니다. 새 원본은 [09-17 고정 원본 시험 적용](docs/03-openwebui-native-agent.md#ees-work-panel-trial-20260917)으로 프로그램과 지정 자산을 함께 반영하며 마지막 확인된 사내 ees.9 설치와 구분합니다.
 
 [EES Work 업무 트리](docs/03-openwebui-native-agent.md#ees-work-demo)와 기존 중앙 AI 대화·업무 패널·절차 편집은 그대로 연결됩니다. 업무 정의·사용자별 진행 건은 기존 DATA_DIR의 `ees-work.sqlite3`에 저장하며 DB/AP 점검은 모의 실행입니다. 아래 Selector 실행 파일은 공식 0.11.3만 허용하고 현재 미적용이므로 EES 전환에 함께 사용하지 않습니다.
 

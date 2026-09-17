@@ -5,6 +5,7 @@ No Open WebUI user database, business endpoint, model or external network is use
 
 from contextlib import closing
 from copy import deepcopy
+import asyncio
 import hashlib
 import importlib
 import json
@@ -12,6 +13,7 @@ from pathlib import Path
 import sqlite3
 import sys
 import tempfile
+import threading
 from types import ModuleType, SimpleNamespace
 import unittest
 from unittest.mock import AsyncMock, patch
@@ -457,6 +459,251 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(case["jobs"]["scope-j"]["status"], "passed")
         self.assertIn("공장 A", case["jobs"]["scope-j"]["document"])
 
+    @staticmethod
+    def selection(**changes):
+        return {"site_id": "us-a", "system": "EMS", "process_id": "setup-p",
+                "node_id": "scope-j", "version": 1, **changes}
+
+    def first_request(self, action="run", node_id="scope-j", payload=None, **changes):
+        scope = self.selection()
+        scope.pop("node_id")
+        return {"action": action, "scope": scope, "node_id": node_id,
+                "expected_revision": -1, "request_id": "first-write-1",
+                "payload": {"confirm": True} if payload is None else payload, **changes}
+
+    async def test_selection_read_does_not_adopt_other_chat_case_or_write(self):
+        bound = await self.step(await self.create(site_id="hu-a"), "bind", chat_id="chat-a")
+        before = self.database.read_bytes()
+        selection = self.selection(node_id="db-j")
+        state = await self.service.get_state(self.alice, chat_id="chat-a", selection=selection)
+        self.assertTrue(state["ok"], state)
+        self.assertTrue(state["read_only"])
+        self.assertIsNone(state["case"])
+        self.assertEqual(state["selection"], selection)
+        self.assertEqual(state["workflow"]["source"], "published")
+        self.assertNotIn("jobs", state["workflow"])
+        self.assertEqual(self.database.read_bytes(), before)
+        self.assertEqual((await self.service.get_state(self.alice, chat_id="chat-a"))["case"], bound)
+
+    async def test_selection_validates_scope_version_and_access_but_allows_excluded_read(self):
+        for changes, code in (({"version": 0}, "published_version_conflict"),
+                              ({"version": True}, "invalid_selection"),
+                              ({"site_id": "unknown"}, "invalid_selection"),
+                              ({"process_id": "install-t"}, "invalid_selection"),
+                              ({"node_id": "unknown"}, "invalid_selection")):
+            with self.subTest(changes=changes):
+                state = await self.service.get_state(self.alice, selection=self.selection(**changes))
+                self.assertEqual(state["error"]["code"], code)
+        denied = await self.service.get_state(self.alice, chat_id="chat-b", selection=self.selection())
+        self.assertEqual(denied["error"]["code"], "chat_forbidden")
+        definition = workflow._seed()
+        definition["nodes"]["scope-j"]["enabled"] = False
+        await self.publish(definition)
+        read = await self.service.get_state(self.alice, selection=self.selection(version=2))
+        self.assertTrue(read["ok"], read)
+        self.assertFalse(read["selection_applicable"])
+        body = self.first_request()
+        body["scope"]["version"] = 2
+        denied = await self.service.handle_action(self.alice, body)
+        self.assertEqual(denied["error"]["code"], "not_applicable")
+        self.assertEqual((await self.service.get_state(self.alice))["cases"], [])
+
+    async def test_selection_projects_external_skills_only_with_current_access(self):
+        assets = {"tools": [], "skills": [], "skill_bodies": {"owned": "허용된 작업 지침"}}
+        self.service.asset_lookup = lambda _: deepcopy(assets)
+        definition = workflow._seed()
+        definition["skills"]["team"] = {"id": "team", "name": "팀 지침", "type": "skill",
+                                        "source": "open_webui", "reference": "owned", "body": ""}
+        definition["nodes"]["scope-j"]["skills"] = ["team"]
+        await self.publish(definition)
+        selected = self.selection(version=2)
+        allowed = await self.service.get_state(self.alice, selection=selected)
+        self.assertEqual(allowed["workflow"]["definition"]["skills"]["team"]["body"], "허용된 작업 지침")
+        assets["skill_bodies"].clear()
+        denied = await self.service.get_state(self.alice, selection=selected)
+        skill = denied["workflow"]["definition"]["skills"]["team"]
+        self.assertFalse(skill["available"])
+        self.assertEqual(skill["body"], "")
+        self.assertNotIn("허용된 작업 지침", json.dumps(denied, ensure_ascii=False))
+
+    async def test_first_input_write_is_atomic_and_replays_after_restart(self):
+        body = self.first_request("update_inputs", "db-j", {"inputs": {"db": "선택한 승인 대상"}})
+        original = deepcopy(body)
+        first = await self.service.handle_action(self.alice, body)
+        self.assertTrue(first["ok"], first)
+        self.assertFalse(first["replayed"])
+        self.assertEqual(first["case"]["selected_id"], "db-j")
+        self.assertEqual(first["case"]["jobs"]["db-j"]["inputs"], {"db": "선택한 승인 대상"})
+        self.assertTrue(all(job["attempt"] == 0 for job in first["case"]["jobs"].values()))
+        restarted = workflow.WorkflowService(self.database, self.lookup_user, self.lookup_chat)
+        replay = await restarted.handle_action(self.alice, body)
+        self.assertTrue(replay["replayed"])
+        self.assertEqual(replay["case"], first["case"])
+        self.assertEqual(len(replay["cases"]), 1)
+        self.assertEqual(body, original)
+        changed = deepcopy(body)
+        changed["payload"]["inputs"]["db"] = "다른 대상"
+        denied = await restarted.handle_action(self.alice, changed)
+        self.assertEqual(denied["error"]["code"], "request_conflict")
+        self.assertEqual((await restarted.get_state(self.alice, case_id=first["case"]["id"]))["case"], first["case"])
+
+    async def test_first_failed_action_keeps_case_and_replay_does_not_create_again(self):
+        body = self.first_request(node_id="infra-j", payload={})
+        first = await self.service.handle_action(self.alice, body)
+        self.assertFalse(first["ok"])
+        self.assertEqual(first["error"]["code"], "prerequisite_required")
+        self.assertEqual(first["case"]["jobs"]["infra-j"]["attempt"], 0)
+        replay = await self.service.handle_action(self.alice, body)
+        self.assertTrue(replay["replayed"])
+        self.assertEqual(replay["case"], first["case"])
+        case = await self.step(first["case"], "run", "scope-j", {"confirm": True})
+        case = await self.step(case, "run", "infra-j", request_id="continue-existing")
+        self.assertEqual(case["id"], first["case"]["id"])
+        self.assertEqual(case["jobs"]["infra-j"]["attempt"], 1)
+        self.assertEqual(len((await self.service.get_state(self.alice))["cases"]), 1)
+
+    async def test_unexpected_failure_rolls_back_case_receipt_and_execution(self):
+        body = self.first_request()
+        run = self.service._run_job
+        def interrupted(*args):
+            run(*args)
+            raise RuntimeError("synthetic interruption before commit")
+        with patch.object(self.service, "_run_job", side_effect=interrupted):
+            with self.assertRaises(RuntimeError):
+                await self.service.handle_action(self.alice, body)
+        self.assertEqual((await self.service.get_state(self.alice))["cases"], [])
+        with closing(sqlite3.connect(self.database)) as db:
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM action_requests").fetchone()[0], 0)
+        result = await self.service.handle_action(self.alice, body)
+        self.assertEqual(result["case"]["jobs"]["scope-j"]["attempt"], 1)
+
+    async def test_exact_run_retry_returns_current_state_without_reexecuting_or_reselecting(self):
+        first = await self.service.handle_action(self.alice, self.first_request())
+        case = first["case"]
+        request = {"action": "run", "case_id": case["id"], "node_id": "infra-j",
+                   "expected_revision": case["revision"], "request_id": "run-infra", "payload": {}}
+        executed = await self.service.handle_action(self.alice, request)
+        current = await self.step(executed["case"], "select", "install-t")
+        replay = await self.service.handle_action(self.alice, request)
+        self.assertEqual(replay["case"], current)
+        self.assertTrue(replay["replayed"])
+        self.assertEqual(replay["request_outcome_revision"], executed["case"]["revision"])
+        self.assertEqual(replay["case"]["jobs"]["infra-j"]["attempt"], 1)
+        stale = await self.service.handle_action(self.alice, {**request, "request_id": "different-request"})
+        self.assertEqual(stale["error"]["code"], "revision_conflict")
+
+    async def test_first_write_requires_existing_scope_choice_and_hides_inaccessible_candidates(self):
+        hidden = await self.step(await self.create(), "bind", chat_id="chat-a")
+        self.chats["chat-a"]["user_id"] = "bob"
+        denied = await self.service.handle_action(self.alice, self.first_request())
+        self.assertEqual(denied["error"]["code"], "case_selection_required")
+        self.assertEqual(denied["cases"], [])
+        self.assertIsNone(denied["case"])
+        self.assertNotIn(hidden["id"], json.dumps(denied))
+        self.chats["chat-a"]["user_id"] = "alice"
+        visible = await self.service.handle_action(self.alice, self.first_request())
+        self.assertEqual([case["id"] for case in visible["cases"]], [hidden["id"]])
+        other_scope = self.first_request(request_id="different-scope")
+        other_scope["scope"]["site_id"] = "hu-a"
+        self.assertTrue((await self.service.handle_action(self.alice, other_scope))["ok"])
+
+    async def test_first_write_completed_scope_requires_explicit_new_case(self):
+        case = await self.ready(await self.create())
+        for job in ("db-j", "ap-j", "ap-j", "interface-j"):
+            case = await self.step(case, "run", job)
+        denied = await self.service.handle_action(self.alice, self.first_request())
+        self.assertEqual(denied["error"]["code"], "case_selection_required")
+        self.assertEqual(denied["cases"][0]["status"], "passed")
+        create = {"action": "create", "request_id": "explicit-new", "payload": self.selection()}
+        create["payload"].pop("node_id")
+        created = await self.service.handle_action(self.alice, create)
+        self.assertNotEqual(created["case"]["id"], case["id"])
+        replay = await self.service.handle_action(self.alice, create)
+        self.assertEqual(replay["case"], created["case"])
+        self.assertEqual(len(replay["cases"]), 2)
+
+    async def test_request_and_published_version_guards_precede_creation(self):
+        for changes, code in (({"request_id": ""}, "invalid_request_id"),
+                              ({"request_id": "../bad value"}, "invalid_request_id"),
+                              ({"request_id": None}, "invalid_request"),
+                              ({"expected_revision": 99}, "revision_conflict")):
+            denied = await self.service.handle_action(self.alice, self.first_request(**changes))
+            self.assertEqual(denied["error"]["code"], code)
+        for action in ("run", "create"):
+            body = self.first_request() if action == "run" else {"action": "create", "payload": {"version": 0}}
+            if action == "run":
+                body["scope"]["version"] = 0
+            denied = await self.service.handle_action(self.alice, body)
+            self.assertEqual(denied["error"]["code"], "published_version_conflict")
+        self.assertEqual((await self.service.get_state(self.alice))["cases"], [])
+
+    async def test_replay_rechecks_user_and_current_linked_chat_access(self):
+        body = self.first_request()
+        first = await self.service.handle_action(self.alice, body)
+        await self.step(first["case"], "bind", chat_id="chat-a")
+        self.chats["chat-a"]["user_id"] = "bob"
+        denied = await self.service.handle_action(self.alice, body)
+        self.assertEqual(denied["error"]["code"], "chat_forbidden")
+        self.assertNotIn("case", denied)
+        other = await self.service.handle_action(self.users["bob"], body)
+        self.assertTrue(other["ok"], other)
+        self.assertNotEqual(other["case"]["id"], first["case"]["id"])
+
+    async def test_parent_can_skip_failed_jobs_while_running_independent_work(self):
+        case = await self.ready(await self.create())
+        case = await self.step(case, "run", "ap-j")
+        failure = deepcopy(case["jobs"]["ap-j"])
+        result = await self.act(case, "run", "install-t", {"retry_failed": False}, request_id="continue-independent")
+        self.assertTrue(result["ok"], result)
+        case = result["case"]
+        self.assertEqual(case["jobs"]["db-j"]["status"], "passed")
+        self.assertEqual(case["jobs"]["ap-j"], failure)
+        denied = await self.act(case, "run", "install-t", {"retry_failed": "false"})
+        self.assertEqual(denied["error"]["code"], "invalid_request")
+        # Existing callers retain their previous retry behavior when omitted.
+        case = await self.step(case, "run", "install-t")
+        self.assertEqual(case["jobs"]["ap-j"]["attempt"], 2)
+
+    async def test_additive_receipts_keep_legacy_read_write_and_new_replay_compatible(self):
+        body = self.first_request()
+        first = await self.service.handle_action(self.alice, body)
+        with closing(sqlite3.connect(self.database)) as db, db:
+            # Same SELECT/UPDATE shape used by the previous program; it does
+            # not need to know the additive receipt table exists.
+            published, draft, revision, validated = db.execute(
+                "SELECT published,draft,revision,validated FROM catalog WHERE id=1").fetchone()
+            row = db.execute("SELECT * FROM cases WHERE id=? AND owner=?", (first["case"]["id"], "alice")).fetchone()
+            legacy = json.loads(row[3])
+            legacy["selected_id"] = "install-t"
+            legacy["revision"] += 1
+            db.execute("UPDATE cases SET chat_id=?,data=? WHERE id=? AND owner=?",
+                       (None, workflow._dump(legacy), legacy["id"], "alice"))
+            receipt = db.execute("SELECT * FROM action_requests").fetchone()
+        restarted = workflow.WorkflowService(self.database, self.lookup_user, self.lookup_chat)
+        replay = await restarted.handle_action(self.alice, body)
+        self.assertTrue(replay["replayed"])
+        self.assertEqual(replay["case"]["selected_id"], "install-t")
+        self.assertEqual(replay["case"]["jobs"]["scope-j"]["attempt"], 1)
+        with closing(sqlite3.connect(self.database)) as db:
+            self.assertEqual(db.execute("SELECT * FROM action_requests").fetchone(), receipt)
+            self.assertEqual(db.execute("SELECT published,draft,revision,validated FROM catalog WHERE id=1").fetchone(),
+                             (published, draft, revision, validated))
+
+    async def test_concurrent_first_requests_do_not_duplicate_case_or_execution(self):
+        services = [workflow.WorkflowService(self.database, self.users.get, self.chats.get) for _ in range(2)]
+        barrier = threading.Barrier(2, timeout=5)
+        body = self.first_request()
+        def send(service):
+            barrier.wait()
+            return asyncio.run(service.handle_action(self.alice, deepcopy(body)))
+        results = await asyncio.gather(*(asyncio.to_thread(send, service) for service in services))
+        self.assertTrue(all(result["ok"] for result in results), results)
+        self.assertEqual(sorted(result["replayed"] for result in results), [False, True])
+        self.assertEqual(results[0]["case"]["id"], results[1]["case"]["id"])
+        self.assertEqual(results[0]["case"]["jobs"]["scope-j"]["attempt"], 1)
+        state = await self.service.get_state(self.alice)
+        self.assertEqual(len(state["cases"]), 1)
+
 
 class DefinitionValidationTests(unittest.TestCase):
     def test_composed_seed_preserves_pre_split_bytes_and_order(self):
@@ -624,7 +871,11 @@ class WorkflowPreservationTests(unittest.IsolatedAsyncioTestCase):
                 database = Path(directory) / "ees-work.sqlite3"
                 before_service, users, assets = await self.prepare(workflow, database, validated)
                 before = self.rows(database)
-                encoded = json.dumps(before, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+                # The receipt table is additive. Keep the historical digest of
+                # every original schema/row byte rather than accepting rewrites.
+                legacy = dict(before, schema=[row for row in before["schema"]
+                    if row[0] not in {"action_requests", "sqlite_autoindex_action_requests_1"}])
+                encoded = json.dumps(legacy, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
                 self.assertEqual(hashlib.sha256(encoded).hexdigest(), expected[validated])
                 prior_state = await before_service.get_state(users["alice"], case_id="preserved-case")
                 prior_admin = await before_service.get_state(users["admin"])
