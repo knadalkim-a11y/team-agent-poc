@@ -123,7 +123,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                 __user__=self.server.user, __metadata__={"chat_id": body["chat_id"]}, __event_call__=event_call)
             case = state["case"]
             return await self.workflow_tool.ees_workflow_action("run", node_id=case["selected_id"],
-                expected_revision=case["revision"], __user__=self.server.user,
+                expected_revision=case["revision"], target=state["target"],
+                request_id="native-run-" + body["id"], __user__=self.server.user,
                 __metadata__={"chat_id": body["chat_id"]}, __event_call__=event_call)
         return asyncio.run(invoke())
 
@@ -254,10 +255,28 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.open_category("setup")
         self.assertIsNone(self.read("#ees-work-navigator"))
         self.assertIsNone(self.read('#ees-work-entry [data-action="pin"]'))
+        cases_before = self.current(chat_id)["cases"]
         self.choose("setup-p", chat_id=chat_id)
-        self.wait("!!document.querySelector('#ees-work-case-start')")
-        self.assertEqual(self.read("#ees-work-case-start", "type"), "button")
-        self.click("#ees-work-case-start")
+        self.assertIsNone(self.read("#ees-work-case-start"))
+        self.assertEqual(self.current(chat_id)["cases"], cases_before,
+                         "Browsing a published procedure must not create a case")
+        # First input save creates the case without running or confirming a J.
+        # Return to P so the callers keep testing the same starting selection.
+        self.choose("db-j", chat_id=chat_id)
+        self.wait("!!document.querySelector('#ees-work-inputs-save')")
+        self.assertEqual(self.read("#ees-work-inputs-save", "type"), "submit")
+        self.click("#ees-work-inputs-save")
+        self.wait("document.querySelector('#ees-work-context')?.innerText.includes('" +
+                  ("이 대화에 연결됨" if chat_id else "첫 메시지") + "')"
+                  + " && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
+        created = next(case for case in self.current(chat_id)["cases"]
+                       if case["id"] not in {item["id"] for item in cases_before})
+        saved = asyncio.run(self.server.workflow.get_state(self.server.user, case_id=created["id"]))["case"]
+        self.assertTrue(all(job["attempt"] == 0 for job in saved["jobs"].values()))
+        expanded_task = '#ees-work-tree [data-action="expand"][data-node-id="install-t"]'
+        if self.read(expanded_task, "getAttribute('aria-expanded')") == "true":
+            self.click(expanded_task)
+        self.choose("setup-p", chat_id=chat_id)
         self.wait("document.querySelector('#ees-work-content h2')?.textContent === '신규 공장 횡전개'"
                   + " && !document.querySelector('#ees-work-case-start')"
                   + " && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
@@ -542,7 +561,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(len(self.server.tool_results), 1)
         self.assertTrue(self.server.tool_results[0]["ok"], self.server.tool_results)
         self.assertEqual(self.current()["case"]["jobs"]["db-j"]["status"], "passed")
-        self.wait("document.querySelector('#ees-work-content')?.innerText.includes('점검 결과')")
+        self.wait("document.querySelector('#ees-work-content [data-work-section=current-result]')?.innerText.includes('모의 점검을 완료했습니다.')")
         self.run_job("ap-j", "failed")
         self.assertEqual([x["status"] for x in self.current()["case"]["jobs"]["ap-j"]["checks"]],
                          ["passed", "passed", "failed", "skipped"])
@@ -901,7 +920,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.browser.evaluate("new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))")
         self.select_scope("site", "hu-a")
         self.wait("location.pathname === '/' && new URLSearchParams(location.search).get('ees_site') === 'hu-a'"
-                  + " && !!document.querySelector('#ees-work-case-start')")
+                  + " && !!document.querySelector('#ees-work-content .ew-work-preview-note')")
         self.create_case(site="hu-a", chat_id="")
         second = next(case for case in self.current("")["cases"] if case["site"]["id"] == "hu-a")
         self.assertNotEqual(first["id"], second["id"])

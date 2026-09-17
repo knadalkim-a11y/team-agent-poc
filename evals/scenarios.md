@@ -20,6 +20,8 @@
 | 공동 작업 첫 단위·현황판 시점 | [팀 사용 우선 목표·진척률과 일정 데이터 범위](#shared-pilot-priority-20260915) |
 | 사이드바 목업 후속 반영 | [ees.8 선택 영역·직계 펼침·폰트·검증 경계](#sidebar-refinement-20260914) |
 | 업무 패널 목표 설계·Workspace 디자인 통합 | [설계→독립 검토→구현, 기존 화면·실행 경계·검증 한계](#workspace-native-design-20260915) |
+| 업무 패널·메인 대화 후속 설계 | [09-16 설계 전용 범위·현재 계약 대조·검토 보완](#work-panel-chat-review-20260916) |
+| 업무 패널·대화 구현과 ees.10 시험 적용 | [09-17 첫 쓰기·대상 고정·초안 보존·검사 경계](#work-panel-chat-implementation-20260917) |
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
 | ees.7 적용 실패와 직전 버전 복구 | [09-14 rename 접근 거부, Restore·Start 성공, 새 화면 미확인](#ees7-apply-recovery-20260914) |
 | Windows 폴더 변경 대기·수동 진행 | [제한적 rename 재시도·경로 보호·기존 Resume 연결](#windows-program-rename-20260914) |
@@ -37,6 +39,51 @@
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="work-panel-chat-implementation-20260917"></a>
+
+## 2026-09-17 업무 패널·대화 구현과 시험 적용 준비
+
+- 승인·기준: 09-16의 설계 전용 작업 뒤 사용자가 `구현배포도 진행하자`, `이어서 진행해줘`로 구현·시험 배포를 요청함. [합의한 설계](../docs/mockups/ees-work/TASK.md#work-panel-chat-design-20260916)를 기준으로 기존 서비스·Native 패널·Tool을 확장함. 최신 main `7bdd2ce93dc47ffb58b732f35662ad8e849c7215`와 tree `30d6091807d1ba541c9adc9afb7dc094792ce55d`를 재확인함. 별도 Draft [PR #53](https://github.com/knadalkim-a11y/team-agent-poc/pull/53)의 head `3aadd7279276914fb790fdb496ceb37b223ec737`와 AGENTS/STATUS를 조회함. 그 PR은 Runtime/Figma 설계 전용이므로 그 문서·브랜치·미완료 수락을 변경하거나 이번 구현과 함께 병합하지 않음. 현재 승인된 패널 계약을 배포하는 독립 변경으로 관리함.
+- 표시·업무 역할: P는 직속 T 표, T는 직속 J 표와 실제 완료/적용 제외 분모를 사용함. 실패 확인·계속 진행·다음 업무 열기의 한 가지 주요 행동, J의 최근 유효 결과·필요 입력·완료 기준·업무 수행 지침을 우선함. 실제 수행 내역/입력/시각·이전 시도는 펼쳐 보고, 기술 설정은 Workspace에 유지함. 부모 실행은 가능한 모의 점검만 진행하고 실패 잡의 일괄 재시도와 사람 확인 대행을 하지 않음. 기존 Workspace 디자인과 사이드바 `업무` 제목을 유지함.
+- 서버·대화 계약: 게시된 공장/시스템/P/T/J 선택은 검증된 읽기 전용 조회이며 생성·연결을 하지 않음. 첫 입력 반영·실행에서 고정된 게시 version으로 진행 건을 확보하고, 같은 범위의 기존/복수/완료 건은 명시적 선택으로 구분함. additive `action_requests` 영수증은 같은 owner/request_id/요청 내용의 재전송을 저장 결과로 복구하며 새 실행·잘못된 대상/내용을 허용하지 않음. 예상 가능한 첫 동작 실패는 이미 생성된 건과 실패 영수증을 보존하고 예상 밖 예외는 전체 롤백함. 기존 건의 revision·대화 소유·완료 기록 보호와 구프로그램 자료 읽기/쓰기 호환을 유지함.
+- 입력·알림: Native 첫 메시지 hook이 선택 맥락만 전달하고, Tool 조회의 target을 입력/실행 전 현재 화면과 재확인함. 대화 제안은 저장이 아니며 UI 미저장 값도 실행 전에 따로 반영함. 잡·진행 건·게시 version별 초안, 최신 저장값 비교·충돌 해제, 첫 건 생성 시 같은 범위의 형제 J 초안 보존을 구현함. 늦은 실행 결과는 현재 선택을 강제로 이동하지 않고 알림 실패로 재실행하지 않음. 전체 브라우저 새로고침 후 미저장 값 영구 보존은 제공하지 않음.
+- 독립 검토의 결함·수정: Tool이 target의 잡과 다른 node_id를 받아 쓰던 실패 1개를 회귀시험으로 확인하고 `update_inputs/run`은 정확한 노드 일치, 탐색 select만 이동 가능하도록 수정함. view의 원래 값 복귀 시 이전 초안 잔존, 미저장 DOM 표식 누락, 게시 version rebase의 영구 충돌, 첫 쓰기 때 다른 J/부모 실행의 초안 미채택을 수정함. controller의 revision 충돌 뒤 오래된 상태 반복, 같은 경로의 URL이 새 선택/version을 덮는 문제, 첫 대화 preview 전환 뒤 다른 대화로 맥락이 새거나 이미 처리한 생성 ticket이 복귀 시 새 선택을 덮는 문제도 수정하고 실제 JS를 Node VM에서 호출하는 회귀검사를 추가함.
+- 재발 방지 범위: 서버/Tool 경계는 `test_ees_workflow.py`·`test_ees_workflow_tool.py`, 실제 view와 임시 폼/이벤트는 `test_ees_work_panel.py`, 실제 controller와 Native/HTTP 모의 경계는 `test_ees_work_controller.py`에서 검사함. Node VM·모의 DOM은 실제 브라우저 E2E가 아님. 기존 브라우저 fixture는 selection 조회와 target/request_id, 최초 입력 반영 계약에 맞추되 실제 실행 여부를 아래에 따로 기록함. 새로운 개발 지침·별도 실행 엔진을 추가하지 않음.
+- 배포·보존: 프로그램 `0.11.3+ees.10`과 `/_ees10/`, Agent Pack `0.2.11`, Workflow Tool `0.3.0`을 함께 갱신함. 지정 관리 자산만 조건부 갱신하며 UI에서 반영된 GLM 5.3·사용자 Skill/Tool/Prompt·연결/권한/개인 설정을 재등록하거나 초기화하지 않음. 구 ees.9 프로그램은 추가 영수증 테이블을 무시하며 기존 자료를 읽을 수 있음. 프로그램 Restore는 DB·자산 복원이 아니므로 새 Tool은 구서버의 지원되지 않는 새 계약에서 갱신 필요로 중단함. [시험 적용 안내](../docs/03-openwebui-native-agent.md#ees-work-panel-trial-20260917)는 기존 Update→고정 SHA Upgrade의 자동 준비·백업·적용·기동·ApplyDemo를 재사용함.
+
+### 로컬 검증과 미실행 범위
+
+Linux/Python 3.12에서 관련 Python 검사는 `python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p '<해당 파일>' -q`로 실행함. `deploy_process`는 `unittest.defaultTestLoader.discover("tests", pattern="test_ees_deploy_process.py")`의 suite를 평탄화한 뒤 `.id().endswith("test_venv_redirector_or_symlink_preserves_environment_and_graceful_stop")`인 기존 사례 1개를 제외하고 같은 strict encoding Python에서 실행함. 최종 관련 시험은 **398 PASS·12 SKIP**이며 별도 Native browser class는 0개 실행·1 SKIP임.
+
+| 범위 | 확인 결과 |
+|---|---|
+| 업무 서비스·Tool | 76개 중 75 PASS·1 SKIP. FastAPI 부재의 route 시험은 미실행. 최초 Tool target override FAIL 1건 뒤 수정한 결과 |
+| 패널 렌더·입력 초안 | 19 PASS. 실제 production view 함수와 Node 임시 DOM 경계 |
+| controller·첫 대화·늦은 응답 | 9 PASS. 다른 대화의 맥락 격리 회귀는 수정 제거 시 실패함도 확인 |
+| 프로그램 묶음·조립 | demo_bundle 8 PASS; branding_build 21 PASS·2 SKIP |
+| 자산 보존·등록 | demo_assets 61 PASS; specialists_tool 31 PASS·3 SKIP; apply_demo 28 PASS |
+| 기동·복원 | deploy_process 62 PASS·2 SKIP; webui_customization 54 PASS·3 SKIP. 합성 ees.9→ees.10→Restore, 자료·키 보존 |
+| 고정 원본 시험 적용 | trial_upgrade 16 PASS·1 SKIP; trial_bundle 14 PASS |
+| 실제 Native 브라우저 | class 전체 1 SKIP, 실행 0개. fixture Python 문법 검사만 통과 |
+
+- release 시험 최초 실패: `test_ees_deploy_process.py`의 `/proc/self/stat` 기본 인코딩이 strict 모드에서 class setup을 중단함. 시험만 고친 뒤 production `_identity`의 같은 누락이 `EncodingWarning`을 불확실한 신원으로 처리해 lifecycle 검사 6 ERROR/1 FAIL을 냄. 두 경로의 UTF-8을 명시하고 신원·종료 보호를 완화하지 않음. 기존 시험의 일회용 `--without-pip` 환경 생성 사례가 첫 전체 실행에 포함됐으며 후속 반복에서는 제외함. 새 의존성·브라우저 설치나 원격 CI는 수행하지 않음.
+- 최종 문서·조립 확인: `python scripts/check_docs.py` → `files=30 links=1132 errors=0 review_candidates=0`, `git diff --check`, production launcher 조립본 113,370 bytes의 `node --check` 통과. 문서 편집 통합 중 새 적용 안내 anchor가 아직 저장되지 않아 missing_anchor 5건, 뒤이어 7건이 발생했고 해당 절이 포함된 최종본으로 해소함. 오류를 숨기기 위해 링크·검사를 제거하지 않음.
+- 현재 한계: 공식 upstream wheel/Native Chrome과 Windows/PowerShell이 없어 해당 실제 경로는 미실행 또는 명시적 SKIP. 합성 wheel과 기존 공개 인터페이스 검사로 실제 새 화면·사내 GLM 5.3 호출 품질·운영 연동·사용성·공동 작업을 통과 처리하지 않음. DB/AP는 계속 모의 점검이고 실제 외부 실행 어댑터·공유 소유권은 별도 후속 범위임. 09-30까지의 원격 CI 생략은 커밋마다 `[skip ci]`로 유지함.
+- 원격 게시: [PR #54](https://github.com/knadalkim-a11y/team-agent-poc/pull/54), 코드 원본 `cb48636887d144b0436e86e34f3669941ff3d64f`, tree `2fef5b4b5e3b73365487f3e6f82c3d51a3a1a41b`를 확인함. GitHub에 쓴 모든 blob과 최종 tree가 검사한 로컬 원본과 같음. 뒤따른 현재 상태·본 증거의 게시 링크 갱신은 문서만 변경하며 제품·시험 코드는 동일함. 사내 안내에는 PR의 최종 병합 SHA를 사용하고 병합 결과는 PR 기록으로 확인함.
+- 마지막 사내 확인은 계속 `87f3f2922a4ab830bcee1022ed7045e624a36777` / ees.9 / Pack 0.2.10임. 이번 게시/병합/적용 안내와 실제 설치·기동·화면 확인은 구분한다. 사용자는 적용 후 결과와 필요한 화면 확인만 1~2줄로 전달하며 전체 로그·사진·파일을 요구하지 않는다.
+
+<a id="work-panel-chat-review-20260916"></a>
+
+## 2026-09-16 업무 패널·대화 통합 설계 검토
+
+- 요청·범위: 사용자는 P/T의 직속 하위 관리, J 실제 처리, 비개발자용 업무 패널, 메인 대화의 설명·가이드·반자동 입력·명령 역할을 확인한 뒤 `설계까지만 진행`을 요청함. 기존 TASK의 [상세 설계](../docs/mockups/ees-work/TASK.md#work-panel-chat-design-20260916)와 README/STATUS/CHANGELOG 및 본 검토 기록만 갱신함. 대화 목업은 화면 방향의 참고이며 실제 제품 코드·시험 코드·모델·사용자 자산·사내 환경·배포는 변경하지 않음.
+- 확인 기준: GitHub 연결로 원격 main `7bdd2ce93dc47ffb58b732f35662ad8e849c7215`, tree `30d6091807d1ba541c9adc9afb7dc094792ce55d`, 열린 PR 없음을 확인함. 변경 전 로컬은 깨끗하고 head `5f79e5c`의 tree가 원격 main과 동일했음. 최신 AGENTS/STATUS·기존 TASK·README, 관련 업무 서비스/조회/Tool/화면 경계를 대조함. 마지막 사내 적용 원본 `87f3f2922a4a`와 PR #52 적용 결과 미수신 상태는 유지함.
+- 독립 계약 검토: 현재 `node_states.progress`는 잡 기준이라 P의 직속 T 완료 수와 구분해야 함. `update_inputs/run`은 진행 건을 요구하며 `create`가 같은 업무의 중복 생성을 방지하지 않으므로 시작 버튼 삭제만으로 새 진입을 구현할 수 없음. `browseNodeId`는 화면 상태이고 기본 AI 조회는 대화에 연결된 진행 건을 읽으므로 진행 건 없는 선택 맥락의 조회 전용 전달·검증이 필요함. 문서형 잡의 `run(document)` 후 `review`와 별도 `confirm:true` 의미도 유지해야 함. 위 내용을 첫 쓰기·재시도·조회 맥락·액션 의미 설계에 보완함.
+- 독립 UX/범위 검토: P/T/J와 대화의 역할, 완료 건 읽기 전용, 입력 저장 뒤 결과 무효화, 원래 대상에 결과 기록, Workspace 설정 분리를 대조함. 설정 숨김이 수행 안내까지 숨기는 것으로 읽히지 않도록 짧은 업무 안내·주의사항을 패널에 남기고, 자연어 입력 변경과 절차 편집/게시를 구분함. 선택 이동·패널 닫기·조회 갱신 때 임시값의 수명과 브라우저 전체 새로고침의 보장 범위도 명시함. 새 실행 엔진·별도 대화창·DB 제품·현황판을 선행 도입하지 않아 해당 검토 범위에서 과설계 문제는 발견하지 못함.
+- 목업과 실제 계약 구분: 대화 목업의 입력 타이핑 즉시 상태 변경·전체 완료 뒤 입력 변경·초안 반영 후 강제 선택 이동을 제품 계약으로 채택하지 않음. 임시값과 저장을 구분하고 진행 중인 건의 저장 성공 후에만 결과를 무효화하며, 완료 건과 과거 이력은 읽기 전용으로 유지함. 원래 업무에 입력/결과를 기록하되 현재 선택을 강제로 덮지 않게 설계함.
+- 최종 문서 확인: Linux에서 `python scripts/check_docs.py` → `files=30 links=1107 errors=0 review_candidates=0`, `git diff --check` 통과. 변경은 기존 Markdown 5개뿐이며 실행 코드·시험 코드·설정 파일 변경 없음. 현재 산출물은 로컬 설계 문서이며 GitHub 게시·병합·배포는 이번에 수행하지 않음.
+- 한계: 이번 문서에 적은 8개 사용자 흐름은 후속 시험 설계이며 실행 PASS가 아님. 이전 모의 상호작용·PR #52 제품 검사 결과를 이번 새 계약·실제 브라우저·사내 GLM 5.3·공동 작업·운영 자동화의 성공으로 확대하지 않음. 새 서버/Tool 계약, 실제 실무 절차·연결, 사용자 화면 수락은 구현 후 해당 범위에서 확인해야 함.
 
 <a id="workspace-native-design-20260915"></a>
 

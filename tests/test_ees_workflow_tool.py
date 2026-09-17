@@ -28,7 +28,14 @@ class WorkflowToolTests(unittest.IsolatedAsyncioTestCase):
         self.user = {'id': 'u1', 'role': 'user'}
         self.metadata = {'chat_id': 'chat-a'}
         self.case = {'id': 'case-a', 'selected_id': 'db-j', 'revision': 7,
+                     'site': {'id': 'us-a'}, 'system': 'EMS', 'process_id': 'setup-p',
+                     'version': 1, 'definition': workflow._seed(),
                      'jobs': {'db-j': {'inputs': {'target': 'sample-db'}, 'status': 'failed'}}}
+        self.target = {'kind': 'case', 'case_id': 'case-a', 'node_id': 'db-j', 'revision': 7}
+        self.browser = {'ok': True, **self.target}
+        self.events = AsyncMock(side_effect=lambda event: deepcopy(self.browser)
+                                if 'selection(chatId)' in event['data']['code'] else {'ok': True})
+        self.context = {'__user__': self.user, '__metadata__': self.metadata, '__event_call__': self.events}
         self.state = {'ok': True, 'case': self.case, 'can_manage': False,
                       'draft': {'private': 'not part of a runtime response'},
                       'cases': [{'id': 'unrelated-case'}]}
@@ -41,65 +48,71 @@ class WorkflowToolTests(unittest.IsolatedAsyncioTestCase):
         self.addCleanup(self.patch.stop)
 
     async def test_view_reads_manual_panel_state_without_mutating_or_leaking_draft(self):
-        result = await self.tool.ees_workflow_view(__user__=self.user, __metadata__=self.metadata)
+        result = await self.tool.ees_workflow_view(**self.context)
         self.assertEqual(result['case']['jobs']['db-j']['inputs']['target'], 'sample-db')
         self.assertNotIn('draft', result)
         self.assertNotIn('cases', result)
-        self.backend.get_state.assert_awaited_once_with(self.user, chat_id='chat-a')
+        self.backend.get_state.assert_awaited_once_with(self.user, case_id='case-a')
+        self.assertEqual(result['target'], self.target)
+        self.assertEqual(self.events.await_count, 1)
+        self.assertNotIn('ensureChat', self.events.await_args.args[0]['data']['code'])
         self.backend.handle_action.assert_not_awaited()
 
     async def test_action_uses_server_metadata_current_case_and_explicit_revision(self):
-        events = AsyncMock(return_value={'ok': True})
-        result = await self.tool.ees_workflow_action('run', expected_revision=7,
-            __user__=self.user, __metadata__=self.metadata, __event_call__=events)
+        result = await self.tool.ees_workflow_action('run', expected_revision=7, target=self.target,
+            request_id='case-run:1', **self.context)
         self.assertTrue(result['ok'])
         self.backend.handle_action.assert_awaited_once_with(self.user, {
             'action': 'run', 'chat_id': 'chat-a', 'case_id': 'case-a', 'node_id': 'db-j',
-            'payload': {}, 'expected_revision': 7})
-        self.assertEqual(events.await_count, 2)
-        self.assertIn('ensureChat', events.await_args_list[0].args[0]['data']['code'])
-        self.assertIn('ees-work-changed', events.await_args_list[1].args[0]['data']['code'])
+            'payload': {}, 'expected_revision': 7, 'request_id': 'case-run:1'})
+        self.assertEqual(self.events.await_count, 2)
+        self.assertIn('selection(chatId)', self.events.await_args_list[0].args[0]['data']['code'])
+        self.assertIn('ees-work-changed', self.events.await_args_list[1].args[0]['data']['code'])
 
     async def test_conflict_does_not_notify_as_success_or_retry(self):
         failure = {'ok': False, 'error': {'code': 'revision_conflict', 'message': 'refresh'}}
         self.backend.handle_action.return_value = failure
-        events = AsyncMock(return_value={'ok': True})
-        result = await self.tool.ees_workflow_action('run', expected_revision=6,
-            __user__=self.user, __metadata__=self.metadata, __event_call__=events)
-        self.assertEqual(result, failure)
+        result = await self.tool.ees_workflow_action('run', expected_revision=7, target=self.target,
+            request_id='case-conflict:1', **self.context)
+        self.assertFalse(result['ok'])
+        self.assertEqual(result['error'], failure['error'])
         self.assertEqual(self.backend.handle_action.await_count, 1)
-        self.assertEqual(events.await_count, 1)
+        self.assertEqual(self.events.await_count, 1)
 
     async def test_completed_case_exposes_selection_only_and_blocks_result_mutations(self):
+        completed = {'ok': False, 'error': {'code': 'case_completed', 'message': '새 실행을 시작해 주세요.'}}
+        self.backend.handle_action.return_value = completed
         for status in ('passed', 'completed', 'success', 'skipped'):
             self.case['status'] = status
-            view = await self.tool.ees_workflow_view(__user__=self.user, __metadata__=self.metadata)
+            view = await self.tool.ees_workflow_view(**self.context)
             self.assertEqual(view['available_actions'], ['select'])
             self.assertIn('새 실행', view['message'])
             for action, payload in (('run', {}), ('run', {'document': 'replacement'}),
                                     ('run', {'confirm': True}), ('update_inputs', {'inputs': {'db': 'other'}})):
                 result = await self.tool.ees_workflow_action(action, payload, expected_revision=7,
-                    __user__=self.user, __metadata__=self.metadata)
+                    target=self.target, request_id='completed-check:1', **self.context)
                 self.assertEqual(result['error']['code'], 'case_completed')
-        self.backend.handle_action.assert_not_awaited()
+        self.assertEqual(self.backend.handle_action.await_count, 16)
+        self.backend.handle_action.reset_mock()
+        self.backend.handle_action.return_value = self.state
         self.case['status'] = 'in_progress'
-        result = await self.tool.ees_workflow_action('run', expected_revision=7,
-            __user__=self.user, __metadata__=self.metadata)
+        result = await self.tool.ees_workflow_action('run', expected_revision=7, target=self.target,
+            request_id='in-progress:1', **self.context)
         self.assertTrue(result['ok'])
         self.backend.handle_action.assert_awaited_once()
 
     async def test_missing_chat_and_unknown_action_never_execute(self):
-        result = await self.tool.ees_workflow_action('run', __user__=self.user)
+        result = await self.tool.ees_workflow_action('run', target=self.target, request_id='missing-chat:1', __user__=self.user)
         self.assertEqual(result['error']['code'], 'chat_required')
         result = await self.tool.ees_workflow_action('shell', __metadata__=self.metadata)
         self.assertEqual(result['error']['code'], 'unsupported_action')
         self.backend.handle_action.assert_not_awaited()
 
     async def test_draft_is_explicit_and_admin_only(self):
-        result = await self.tool.ees_workflow_view(True, __user__=self.user, __metadata__=self.metadata)
+        result = await self.tool.ees_workflow_view(True, **self.context)
         self.assertEqual(result['error']['code'], 'admin_required')
         self.state['can_manage'] = True
-        result = await self.tool.ees_workflow_view(True, __user__=self.user, __metadata__=self.metadata)
+        result = await self.tool.ees_workflow_view(True, **self.context)
         self.assertEqual(result['draft'], self.state['draft'])
 
     async def test_process_detail_reports_legacy_server_without_breaking_navigation(self):
@@ -124,19 +137,67 @@ class WorkflowToolTests(unittest.IsolatedAsyncioTestCase):
         self.backend.handle_action.assert_not_awaited()
 
     async def test_browser_failure_does_not_reexecute_or_erase_recorded_result(self):
-        events = AsyncMock(side_effect=RuntimeError('connection lost'))
+        events = AsyncMock(side_effect=[deepcopy(self.browser), RuntimeError('connection lost')])
         result = await self.tool.ees_workflow_action('run', expected_revision=7,
-            __user__=self.user, __metadata__=self.metadata, __event_call__=events)
+            target=self.target, request_id='notify-lost:1', __user__=self.user, __metadata__=self.metadata, __event_call__=events)
         self.assertTrue(result['ok'])
         self.assertEqual(result['panel_notification']['code'], 'browser_unconfirmed')
         self.assertEqual(self.backend.handle_action.await_count, 1)
 
-    async def test_failed_pending_binding_cannot_create_a_different_case(self):
+    async def test_unconfirmed_selection_cannot_create_a_different_case(self):
         self.state['case'] = None
-        events = AsyncMock(return_value={'ok': False, 'code': 'bind_failed'})
-        result = await self.tool.ees_workflow_action('create',
+        events = AsyncMock(return_value={'ok': False, 'code': 'selection_unconfirmed'})
+        result = await self.tool.ees_workflow_action('create', {'site_id': 'us-a', 'system': 'EMS', 'process_id': 'setup-p'},
             __user__=self.user, __metadata__=self.metadata, __event_call__=events)
-        self.assertEqual(result['error']['code'], 'binding_unconfirmed')
+        self.assertEqual(result['error']['code'], 'selection_unconfirmed')
+        self.backend.handle_action.assert_not_awaited()
+
+    async def test_selection_contract_requires_upgrade_without_falling_back_to_chat(self):
+        calls = []
+
+        async def legacy_get_state(user, chat_id='', case_id='', process_id=''):
+            calls.append((user, chat_id, case_id, process_id))
+            return self.state
+
+        self.backend.get_state = legacy_get_state
+        selection = {'site_id': 'us-a', 'system': 'EMS', 'process_id': 'setup-p', 'node_id': 'db-j', 'version': 1}
+        self.browser = {'ok': True, 'kind': 'published', 'selection': selection}
+        result = await self.tool.ees_workflow_view(**self.context)
+        self.assertEqual(result['error']['code'], 'program_upgrade_required')
+        self.assertEqual(calls, [])
+        result = await self.tool.ees_workflow_action('update_inputs', {'inputs': {'db': '합성 대상'}},
+            target={'kind': 'published', 'selection': selection}, request_id='legacy-first-write', **self.context)
+        self.assertEqual(result['error']['code'], 'program_upgrade_required')
+        self.assertEqual(calls, [])
+        self.backend.handle_action.assert_not_awaited()
+
+    async def test_case_identity_node_and_revision_are_pinned_before_mutation(self):
+        for changes in ({'case_id': 'other-case'}, {'node_id': 'ap-j'}, {'kind': 'history'}):
+            with self.subTest(changes=changes):
+                self.browser = {'ok': True, **self.target, **changes}
+                result = await self.tool.ees_workflow_action('run', expected_revision=7,
+                    target=self.target, request_id='changed-target:1', **self.context)
+                self.assertIn(result['error']['code'], {'selection_changed', 'history_read_only'})
+        self.browser = {'ok': True, **self.target, 'revision': 999}
+        # Browser revision is advisory; the service supplies the current revision.
+        result = await self.tool.ees_workflow_view(**self.context)
+        self.assertEqual(result['target']['revision'], 7)
+        stale = await self.tool.ees_workflow_action('run', expected_revision=6,
+            target=self.target, request_id='stale-revision:1', **self.context)
+        self.assertEqual(stale['error']['code'], 'revision_conflict')
+        self.backend.handle_action.assert_not_awaited()
+
+    async def test_missing_target_and_invalid_first_write_request_id_never_execute(self):
+        result = await self.tool.ees_workflow_action('run', expected_revision=7, **self.context)
+        self.assertEqual(result['error']['code'], 'target_required')
+        selection = {'site_id': 'us-a', 'system': 'EMS', 'process_id': 'setup-p', 'node_id': 'db-j', 'version': 1}
+        self.browser = {'ok': True, 'kind': 'published', 'selection': selection}
+        self.state.update(case=None, selection=selection)
+        for request_id, code in (('', 'request_id_required'), ('has spaces', 'invalid_request_id'),
+                                 ('x' * 129, 'invalid_request_id'), ({}, 'invalid_request_id')):
+            result = await self.tool.ees_workflow_action('update_inputs', {'inputs': {'db': '합성 대상'}},
+                target={'kind': 'published', 'selection': selection}, request_id=request_id, **self.context)
+            self.assertEqual(result['error']['code'], code)
         self.backend.handle_action.assert_not_awaited()
 
     async def test_display_only_calls_fixed_ui_code_and_checks_admin_role(self):
@@ -230,22 +291,44 @@ class WorkflowToolIntegrationTests(unittest.IsolatedAsyncioTestCase):
             AsyncMock(side_effect=lambda key: deepcopy(self.chats.get(key))),
             AsyncMock(side_effect=lambda user: deepcopy(self.assets)))
         self.user = self.users['alice']
-        self.events = AsyncMock(return_value={'ok': True})
+        self.browser = {'ok': True, 'kind': 'none'}
+        self.action_number = 0
+        self.events = AsyncMock(side_effect=self.browser_event)
         self.context = {'__user__': self.user, '__metadata__': {'chat_id': 'chat-a'},
                         '__event_call__': self.events}
         backend = types.ModuleType('open_webui.ees_workflow')
         backend.get_state = self.service.get_state
         backend.handle_action = self.service.handle_action
+        self.backend = backend
         patched = patch.dict(sys.modules, {'open_webui': types.ModuleType('open_webui'),
                                           'open_webui.ees_workflow': backend})
         patched.start()
         self.addCleanup(patched.stop)
         self.tool = module.Tools()
 
+    async def browser_event(self, event):
+        code = event['data']['code']
+        if 'selection(chatId)' in code:
+            return deepcopy(self.browser)
+        return {'ok': True}
+
+    def choose_case(self, case, node_id=None, kind='case'):
+        target = {'kind': kind, 'case_id': case['id'], 'node_id': node_id or case['selected_id'],
+                  'revision': case['revision']}
+        self.browser = {'ok': True, **target}
+        return target
+
+    async def choose_published(self, node_id='scope-j', **changes):
+        state = await self.service.get_state(self.user)
+        selection = {'site_id': 'us-a', 'system': 'EMS', 'process_id': 'setup-p', 'node_id': node_id,
+                     'version': state['catalog']['version'], **changes}
+        self.browser = {'ok': True, 'kind': 'published', 'selection': selection}
+        return {'kind': 'published', 'selection': deepcopy(selection)}
+
     def stored_rows(self):
         with self.service._db() as db:
-            return ([tuple(row) for row in db.execute('SELECT * FROM catalog')],
-                    [tuple(row) for row in db.execute('SELECT * FROM cases ORDER BY id')])
+            return tuple([tuple(row) for row in db.execute(f'SELECT * FROM {table} ORDER BY rowid')]
+                         for table in ('catalog', 'cases', 'action_requests'))
 
     async def publish(self, definition):
         admin = self.users['admin']
@@ -263,11 +346,253 @@ class WorkflowToolIntegrationTests(unittest.IsolatedAsyncioTestCase):
         result = await self.tool.ees_workflow_action('create',
             {'site_id': 'us-a', 'system': 'EMS', 'process_id': 'setup-p', **payload}, **self.context)
         self.assertTrue(result['ok'], result)
+        self.choose_case(result['case'])
         return result['case']
 
     async def act(self, case, action, node_id, payload=None):
+        target = self.choose_case(case, node_id)
+        self.action_number += 1
         return await self.tool.ees_workflow_action(action, payload,
-            node_id=node_id, expected_revision=case['revision'], **self.context)
+            node_id=node_id, expected_revision=case['revision'], target=target,
+            request_id=f'test-action:{self.action_number}', **self.context)
+
+    async def test_default_view_reads_published_case_and_history_without_any_storage_change(self):
+        current = await self.service.handle_action(self.user, {'action': 'create', 'chat_id': 'chat-a'})
+        pending = await self.service.handle_action(self.user, {'action': 'create', 'payload': {'site_id': 'hu-a'}})
+        self.assertTrue(current['ok'], current)
+        self.assertTrue(pending['ok'], pending)
+        published_target = await self.choose_published('db-j', site_id='hu-a', system='FDC')
+        before = self.stored_rows()
+        published = await self.tool.ees_workflow_view(**self.context)
+        self.assertTrue(published['ok'], published)
+        self.assertIsNone(published['case'], 'A displayed definition must not adopt the unrelated chat-bound case.')
+        self.assertEqual(published['target'], published_target)
+        self.assertEqual(published['workflow']['source'], 'published')
+        self.assertEqual(self.stored_rows(), before)
+        for kind in ('case', 'history'):
+            target = self.choose_case(pending['case'], 'db-j', kind)
+            read = await self.tool.ees_workflow_view(**self.context)
+            self.assertTrue(read['ok'], read)
+            self.assertEqual(read['case']['id'], pending['case']['id'])
+            self.assertEqual(read['case']['chat_id'], '')
+            self.assertEqual(read['target'], target)
+            if kind == 'history':
+                self.assertTrue(read['read_only'])
+                self.assertEqual(read['available_actions'], [])
+            self.assertEqual(self.stored_rows(), before)
+        for call in self.events.await_args_list:
+            self.assertIn('selection(chatId)', call.args[0]['data']['code'])
+            self.assertNotIn('ensureChat', call.args[0]['data']['code'])
+
+    async def test_missing_or_unconfirmed_selection_never_uses_chat_case_as_fallback(self):
+        await self.create()
+        before = self.stored_rows()
+        for response, code in (({'ok': True, 'kind': 'none'}, 'selection_required'),
+                               ({'ok': False, 'code': 'browser_unconfirmed'}, 'selection_unconfirmed')):
+            self.browser = response
+            result = await self.tool.ees_workflow_view(**self.context)
+            self.assertEqual(result['error']['code'], code)
+            self.assertNotIn('case', result)
+            self.assertEqual(self.stored_rows(), before)
+
+    async def test_first_input_write_and_published_to_case_replay_save_once(self):
+        target = await self.choose_published('db-j')
+        read = await self.tool.ees_workflow_view(**self.context)
+        self.assertTrue(read['ok'], read)
+        self.assertEqual(read['target'], target)
+        payload = {'inputs': {'db': '합성 승인 진단 대상'}}
+        first = await self.tool.ees_workflow_action('update_inputs', payload,
+            target=read['target'], request_id='first-input:1', **self.context)
+        self.assertTrue(first['ok'], first)
+        case = first['case']
+        self.assertEqual(case['selected_id'], 'db-j')
+        self.assertEqual(case['jobs']['db-j']['inputs'], payload['inputs'])
+        self.assertEqual(case['jobs']['db-j']['attempt'], 0)
+        self.assertEqual(case['chat_id'], 'chat-a')
+        self.assertEqual(len((await self.service.get_state(self.user))['cases']), 1)
+        stored = self.stored_rows()
+        for browser_target in (target, self.choose_case(case, 'db-j')):
+            self.browser = {'ok': True, **browser_target}
+            replay = await self.tool.ees_workflow_action('update_inputs', payload,
+                target=target, request_id='first-input:1', **self.context)
+            self.assertTrue(replay['ok'], replay)
+            self.assertEqual(replay['case']['id'], case['id'])
+            self.assertEqual(replay['case']['revision'], case['revision'])
+            self.assertEqual(self.stored_rows(), stored)
+        conflict = await self.tool.ees_workflow_action('update_inputs', {'inputs': {'db': '다른 합성 대상'}},
+            target=target, request_id='first-input:1', **self.context)
+        self.assertEqual(conflict['error']['code'], 'request_conflict')
+        self.assertEqual(self.stored_rows(), stored)
+        self.choose_case(case, 'ap-j')
+        wrong_node = await self.tool.ees_workflow_action('update_inputs', payload,
+            target=target, request_id='first-input:1', **self.context)
+        self.assertEqual(wrong_node['error']['code'], 'selection_changed')
+        self.assertEqual(self.stored_rows(), stored)
+
+    async def test_first_run_notification_failure_and_replay_do_not_duplicate_confirmation(self):
+        target = await self.choose_published('scope-j')
+
+        async def lose_notification(event):
+            if 'selection(chatId)' in event['data']['code']:
+                return deepcopy(self.browser)
+            raise RuntimeError('synthetic disconnected browser')
+
+        self.events.side_effect = lose_notification
+        first = await self.tool.ees_workflow_action('run', {'confirm': True},
+            target=target, request_id='first-confirm:1', **self.context)
+        self.assertTrue(first['ok'], first)
+        self.assertEqual(first['panel_notification']['code'], 'browser_unconfirmed')
+        case = first['case']
+        self.assertEqual(case['jobs']['scope-j']['attempt'], 1)
+        self.assertEqual(case['jobs']['scope-j']['history'][0]['kind'], 'human_confirmation')
+        stored = self.stored_rows()
+        self.events.side_effect = self.browser_event
+        self.choose_case(case, 'scope-j')
+        replay = await self.tool.ees_workflow_action('run', {'confirm': True},
+            target=target, request_id='first-confirm:1', **self.context)
+        self.assertTrue(replay['ok'], replay)
+        self.assertEqual(replay['case']['jobs']['scope-j']['attempt'], 1)
+        self.assertEqual(len(replay['case']['jobs']['scope-j']['history']), 1)
+        self.assertEqual(self.stored_rows(), stored)
+
+    async def test_first_run_failure_retains_created_case_and_replays_original_failure(self):
+        target = await self.choose_published('db-j')
+        first = await self.tool.ees_workflow_action('run', target=target,
+            request_id='first-blocked:1', **self.context)
+        self.assertFalse(first['ok'])
+        self.assertEqual(first['error']['code'], 'prerequisite_required')
+        self.assertIn('case', first, 'A failed first action must identify the retained case for recovery.')
+        case = first['case']
+        self.assertEqual(case['selected_id'], 'db-j')
+        self.assertEqual(case['jobs']['db-j']['attempt'], 0)
+        self.assertEqual(len((await self.service.get_state(self.user))['cases']), 1)
+        before = self.stored_rows()
+        self.choose_case(case, 'db-j')
+        retry = await self.tool.ees_workflow_action('run', target=target,
+            request_id='first-blocked:1', **self.context)
+        self.assertFalse(retry['ok'])
+        self.assertEqual(retry['error']['code'], 'prerequisite_required')
+        self.assertEqual(retry['case']['id'], case['id'])
+        self.assertEqual(self.stored_rows(), before)
+
+    async def test_existing_case_replay_keeps_original_revision_without_rerunning(self):
+        case = await self.create()
+        target = self.choose_case(case, 'scope-j')
+        result = await self.tool.ees_workflow_action('run', {'confirm': True}, expected_revision=case['revision'],
+            target=target, request_id='existing-confirm:1', **self.context)
+        self.assertTrue(result['ok'], result)
+        self.choose_case(result['case'], 'scope-j')
+        stored = self.stored_rows()
+        replay = await self.tool.ees_workflow_action('run', {'confirm': True}, expected_revision=case['revision'],
+            target=target, request_id='existing-confirm:1', **self.context)
+        self.assertTrue(replay['ok'], replay)
+        self.assertEqual(replay['case']['jobs']['scope-j']['attempt'], 1)
+        self.assertEqual(self.stored_rows(), stored)
+
+    async def test_changed_published_scope_or_version_cannot_redirect_a_prepared_write(self):
+        target = await self.choose_published('db-j')
+        before = self.stored_rows()
+        for changes in ({'site_id': 'hu-a'}, {'system': 'FDC'}, {'node_id': 'ap-j'},
+                        {'version': target['selection']['version'] + 1},
+                        {'process_id': 'ops-p', 'node_id': 'ops-j'}):
+            with self.subTest(changes=changes):
+                self.browser = {'ok': True, 'kind': 'published', 'selection': {**target['selection'], **changes}}
+                blocked = await self.tool.ees_workflow_action('update_inputs', {'inputs': {'db': '합성 대상'}},
+                    target=target, request_id='pinned-input:1', **self.context)
+                self.assertEqual(blocked['error']['code'], 'selection_changed')
+                self.assertEqual(self.stored_rows(), before)
+        self.browser = {'ok': True, **target}
+        definition = workflow._seed()
+        definition['nodes']['db-j']['rule'] = '게시 후 달라진 합성 검증 기준'
+        await self.publish(definition)
+        before = self.stored_rows()
+        for call in ('view', 'write'):
+            result = (await self.tool.ees_workflow_view(**self.context) if call == 'view' else
+                await self.tool.ees_workflow_action('update_inputs', {'inputs': {'db': '합성 대상'}},
+                    target=target, request_id='pinned-input:1', **self.context))
+            self.assertEqual(result['error']['code'], 'published_version_conflict')
+            self.assertEqual(self.stored_rows(), before)
+
+    async def test_history_target_cannot_save_or_execute_in_current_chat(self):
+        case = await self.create()
+        target = self.choose_case(case, 'scope-j', 'history')
+        before = self.stored_rows()
+        for action, payload in (('run', {'confirm': True}), ('update_inputs', {'inputs': {'site': '변경'}}),
+                                ('select', {})):
+            result = await self.tool.ees_workflow_action(action, payload,
+                target=target, expected_revision=case['revision'], request_id='history-write:1', **self.context)
+            self.assertEqual(result['error']['code'], 'history_read_only')
+            self.assertEqual(self.stored_rows(), before)
+
+    async def test_explicit_node_override_cannot_redirect_a_pinned_input_or_run(self):
+        target = await self.choose_published('scope-j')
+        before = self.stored_rows()
+        for action, payload in (('update_inputs', {'inputs': {'site': '합성 범위'}}), ('run', {'confirm': True})):
+            result = await self.tool.ees_workflow_action(action, payload, node_id='install-j',
+                target=target, request_id=f'published-override:{action}', **self.context)
+            self.assertFalse(result['ok'], result.get('result_target'))
+            self.assertEqual(result['error']['code'], 'selection_changed')
+            self.assertEqual(self.stored_rows(), before)
+        case = await self.create()
+        target = self.choose_case(case, 'scope-j')
+        before = self.stored_rows()
+        for action, payload in (('update_inputs', {'inputs': {'site': '합성 범위'}}), ('run', {'confirm': True})):
+            result = await self.tool.ees_workflow_action(action, payload, node_id='install-j',
+                target=target, expected_revision=case['revision'], request_id=f'override:{action}', **self.context)
+            self.assertFalse(result['ok'], result.get('result_target'))
+            self.assertEqual(result['error']['code'], 'selection_changed')
+            self.assertEqual(self.stored_rows(), before)
+        # Selection is a navigation intent and may name a child in this case.
+        selected = await self.tool.ees_workflow_action('select', node_id='db-j',
+            target=target, expected_revision=case['revision'], **self.context)
+        self.assertTrue(selected['ok'], selected)
+        self.assertEqual(selected['case']['selected_id'], 'db-j')
+        self.assertEqual(selected['case']['jobs'], case['jobs'])
+
+    async def test_completed_case_blocks_new_writes_but_returns_saved_completion_on_replay(self):
+        case = await self.create()
+        for node_id, payload in (('scope-j', {'confirm': True}), ('infra-j', {}), ('install-j', {'confirm': True}),
+                                 ('db-j', {}), ('ap-j', {}), ('ap-j', {})):
+            result = await self.act(case, 'run', node_id, payload)
+            self.assertTrue(result['ok'], result)
+            case = result['case']
+        target = self.choose_case(case, 'interface-j')
+        completed = await self.tool.ees_workflow_action('run', expected_revision=case['revision'],
+            target=target, request_id='complete:1', **self.context)
+        self.assertTrue(completed['ok'], completed)
+        self.assertEqual(completed['case']['status'], 'passed')
+        current_target = self.choose_case(completed['case'], 'interface-j')
+        before = self.stored_rows()
+        replay = await self.tool.ees_workflow_action('run', expected_revision=case['revision'],
+            target=target, request_id='complete:1', **self.context)
+        self.assertTrue(replay['ok'], replay)
+        self.assertEqual(replay['case']['jobs']['interface-j']['attempt'], 1)
+        self.assertEqual(self.stored_rows(), before)
+        for action, payload in (('run', {}), ('update_inputs', {'inputs': {'interface': '다른 합성 대상'}})):
+            denied = await self.tool.ees_workflow_action(action, payload,
+                expected_revision=current_target['revision'], target=current_target,
+                request_id=f'completed-new:{action}', **self.context)
+            self.assertEqual(denied['error']['code'], 'case_completed')
+            self.assertEqual(self.stored_rows(), before)
+
+    async def test_parent_continue_does_not_retry_failure_or_bulk_confirm_people(self):
+        case = await self.create()
+        for node_id, payload in (('scope-j', {'confirm': True}), ('infra-j', {}), ('install-j', {'confirm': True}),
+                                 ('ap-j', {})):
+            result = await self.act(case, 'run', node_id, payload)
+            self.assertTrue(result['ok'], result)
+            case = result['case']
+        self.assertEqual(case['jobs']['ap-j']['status'], 'failed')
+        result = await self.act(case, 'run', 'install-t')
+        self.assertTrue(result['ok'], result)
+        self.assertEqual(result['case']['jobs']['ap-j']['attempt'], 1)
+        self.assertEqual(result['case']['jobs']['ap-j']['status'], 'failed')
+        self.assertEqual(result['case']['jobs']['db-j']['status'], 'passed')
+        self.assertEqual(result['case']['jobs']['install-j']['attempt'], 1)
+        stored = self.stored_rows()
+        denied = await self.act(result['case'], 'run', 'install-t', {'retry_failed': True})
+        self.assertEqual(denied['error']['code'], 'retry_job_required')
+        self.assertEqual(self.stored_rows(), stored)
 
     async def test_discovery_does_not_create_bind_or_change_pending_and_current_cases(self):
         before = self.stored_rows()
@@ -387,7 +712,7 @@ class WorkflowToolIntegrationTests(unittest.IsolatedAsyncioTestCase):
             blocked = await self.act(case, 'run', node, payload)
             self.assertEqual(blocked['error']['code'], code)
             self.assertEqual(self.stored_rows(), before)
-            self.assertEqual(self.events.await_count, 1)  # Binding check; no success notification.
+            self.assertEqual(self.events.await_count, 1)  # Selection read; no success notification.
         for node, payload in (('scope-j', {'confirm': True}), ('infra-j', {}),
                               ('install-j', {'confirm': True})):
             result = await self.act(case, 'run', node, payload)

@@ -56,12 +56,12 @@ class Handler(BaseHTTPRequestHandler):
         pass
 server = HTTPServer((sys.argv[1], int(sys.argv[2])), Handler)
 server.timeout = .1
-Path('started.txt').write_text('ready')
+Path('started.txt').write_text('ready', encoding='utf-8')
 deadline = time.monotonic() + float(os.environ.get('EES_TEST_LIFETIME', '12'))
 while running and time.monotonic() < deadline:
     server.handle_request()
 server.server_close()
-Path('graceful.txt').write_text('stopped')
+Path('graceful.txt').write_text('stopped', encoding='utf-8')
 '''
 
 
@@ -69,7 +69,7 @@ class DeployProcessTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.console_allocated = False
-        if sys.platform.startswith('linux') and int(Path('/proc/self/stat').read_text().split()[0]) != os.getpid():
+        if sys.platform.startswith('linux') and int(Path('/proc/self/stat').read_text(encoding='utf-8').split()[0]) != os.getpid():
             raise unittest.SkipTest('The mounted /proc uses a different PID namespace; real lifecycle runs in Windows/Linux CI.')
         if os.name == 'nt':
             import ctypes
@@ -122,7 +122,7 @@ class DeployProcessTests(unittest.TestCase):
         self.assertTrue(manager.verify_identity(identity))
         self.assertFalse(manager.port_is_free('127.0.0.1', self.port))
         manager.stop_server(identity, timeout=3)
-        self.assertEqual((self.root / 'graceful.txt').read_text(), 'stopped')
+        self.assertEqual((self.root / 'graceful.txt').read_text(encoding='utf-8'), 'stopped')
         self.assertFalse(manager.verify_identity(identity))
         self.assertTrue(manager.port_is_free('127.0.0.1', self.port))
         manager.stop_server(identity)  # Already stopped is harmless.
@@ -138,7 +138,7 @@ class DeployProcessTests(unittest.TestCase):
         completed = subprocess.run([sys.executable, '-c', code, str(MODULE), json.dumps(identity)],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=8, **flags)
         self.assertEqual(completed.returncode, 0, completed.stderr.decode(errors='replace'))
-        self.assertEqual((self.root / 'graceful.txt').read_text(), 'stopped')
+        self.assertEqual((self.root / 'graceful.txt').read_text(encoding='utf-8'), 'stopped')
 
     def test_venv_redirector_or_symlink_preserves_environment_and_graceful_stop(self):
         environment = self.root / 'tiny-venv'
@@ -154,20 +154,20 @@ class DeployProcessTests(unittest.TestCase):
         runtime_probe = (
             "import json,os,sys; from pathlib import Path; "
             "Path('python-runtime.json').write_text(json.dumps({"
-            "'prefix':sys.prefix,'executable':sys.executable,'pid':os.getpid()}))\n"
+            "'prefix':sys.prefix,'executable':sys.executable,'pid':os.getpid()}), encoding='utf-8')\n"
         )
         with patch.object(manager, 'SERVER_CODE', runtime_probe + FAKE_SERVER):
             self.identity = manager.start_server(executable, self.root, dict(os.environ),
                                                  '127.0.0.1', self.port, self.root / 'logs')
         manager.wait_healthy(self.identity, timeout=5)
-        runtime = json.loads((self.root / 'python-runtime.json').read_text())
+        runtime = json.loads((self.root / 'python-runtime.json').read_text(encoding='utf-8'))
         self.assertEqual(Path(runtime['prefix']).resolve(), environment.resolve())
         self.assertEqual(Path(runtime['executable']).absolute(), executable.absolute())
         if os.name == 'nt':
             # CPython's venv redirector owns the group and waits for this Python child.
             self.assertNotEqual(runtime['pid'], self.identity['pid'])
         manager.stop_server(self.identity, timeout=3)
-        self.assertEqual((self.root / 'graceful.txt').read_text(), 'stopped')
+        self.assertEqual((self.root / 'graceful.txt').read_text(encoding='utf-8'), 'stopped')
         self.assertFalse(manager.verify_identity(self.identity))
         self.assertTrue(manager.port_is_free('127.0.0.1', self.port))
 
@@ -208,7 +208,7 @@ class DeployProcessTests(unittest.TestCase):
         with patch.dict(os.environ, {'HTTP_PROXY': 'http://127.0.0.1:1', 'NO_PROXY': ''}):
             with self.assertRaisesRegex(manager.ProcessError, 'health timed out'):
                 manager.wait_healthy(identity, timeout=.8)
-        paths = (self.root / 'requests.txt').read_text().splitlines()
+        paths = (self.root / 'requests.txt').read_text(encoding='utf-8').splitlines()
         self.assertGreater(len(paths), 0)  # Direct request succeeded despite an unusable proxy.
         self.assertEqual(set(paths), {'/health'})
 
@@ -991,7 +991,7 @@ if kernel.GetConsoleProcessList(processes, 1) != 0 or ctypes.get_last_error() !=
     raise SystemExit(82)
 marker = Path(sys.argv[1])
 pending = marker.with_suffix('.tmp')
-pending.write_text('detached')
+pending.write_text('detached', encoding='utf-8')
 pending.replace(marker)
 sys.stdin.buffer.read(1)
 '''
@@ -1024,7 +1024,7 @@ sys.stdin.buffer.read(1)
             while not ready.exists() and target.poll() is None and time.monotonic() < deadline:
                 time.sleep(.01)
             self.assertTrue(ready.exists(), f'fixture readiness missing; exit_code={target.poll()}')
-            self.assertEqual(ready.read_text(), 'detached')
+            self.assertEqual(ready.read_text(encoding='utf-8'), 'detached')
             self.assertIsNone(target.poll(), 'fixture exited before the helper request')
             identity = manager._windows_identity(target.pid)
             self.assertIsNotNone(identity)
@@ -1128,7 +1128,7 @@ def serve(*, host, port):
 
     def run_child(self):
         return subprocess.run(self.command(), cwd=self.cwd, env=self.env, capture_output=True,
-                              text=True, timeout=15)
+                              text=True, encoding="utf-8", timeout=15)
 
     def assert_rejected_without_app_import(self):
         result = self.run_child()
@@ -1171,7 +1171,7 @@ def serve(*, host, port):
         self.assertEqual(selected[7:], [str(self.program), self.version, self.info.name, self.frontend_name])
 
     def test_legacy_selected_version_launches_after_wrapper_update(self):
-        for legacy, namespace in (('0.11.3+ees.1', '_ees1'), ('0.11.3+ees.2', '_ees2'), ('0.11.3+ees.3', '_ees3'), ('0.11.3+ees.4', '_ees4'), ('0.11.3+ees.5', '_ees5'), ('0.11.3+ees.6', '_ees6'), ('0.11.3+ees.7', '_ees7'), ('0.11.3+ees.8', '_ees8')):
+        for legacy, namespace in (('0.11.3+ees.1', '_ees1'), ('0.11.3+ees.2', '_ees2'), ('0.11.3+ees.3', '_ees3'), ('0.11.3+ees.4', '_ees4'), ('0.11.3+ees.5', '_ees5'), ('0.11.3+ees.6', '_ees6'), ('0.11.3+ees.7', '_ees7'), ('0.11.3+ees.8', '_ees8'), ('0.11.3+ees.9', '_ees9')):
             with self.subTest(version=legacy):
                 self.setUp()
                 legacy_info = self.program / f'open_webui-{legacy}.dist-info'
@@ -1181,19 +1181,19 @@ def serve(*, host, port):
                 (frontend / self.frontend_name).rename(frontend / namespace)
                 (frontend / namespace / 'version.json').write_text(json.dumps({'version': legacy}), encoding='utf-8')
                 result = subprocess.run(self.command(version=legacy), cwd=self.cwd, env=self.env,
-                                        capture_output=True, text=True, timeout=15)
+                                        capture_output=True, text=True, encoding="utf-8", timeout=15)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(json.loads((self.cwd / 'observed.json').read_text(encoding='utf-8'))['version'], legacy)
 
     def test_unsupported_and_mixed_release_arguments_refuse_app_import(self):
-        for version in ('0.11.3+ees.10', [], '0.11.3'):
+        for version in ('0.11.3+ees.11', [], '0.11.3'):
             with self.subTest(version=version), self.assertRaises(manager.ProcessError):
                 self.command(version=version)
-        for index, value in ((8, '0.11.3+ees.10'), (9, 'open_webui-0.11.3+ees.1.dist-info'), (10, '_ees1')):
+        for index, value in ((8, '0.11.3+ees.11'), (9, 'open_webui-0.11.3+ees.1.dist-info'), (10, '_ees1')):
             command = self.command()
             command[index] = value
             with self.subTest(index=index):
-                result = subprocess.run(command, cwd=self.cwd, env=self.env, capture_output=True, text=True, timeout=15)
+                result = subprocess.run(command, cwd=self.cwd, env=self.env, capture_output=True, text=True, encoding="utf-8", timeout=15)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn('no fallback was started', result.stderr)
                 self.assertFalse((self.cwd / 'imported.txt').exists())
@@ -1219,7 +1219,7 @@ def serve(*, host, port):
         original_package = original_root / 'open_webui'
         original_package.mkdir(parents=True)
         (original_package / '__init__.py').write_text(
-            "from pathlib import Path\nPath('original-imported.txt').write_text('unexpected')\n", encoding='utf-8')
+            "from pathlib import Path\nPath('original-imported.txt').write_text('unexpected', encoding='utf-8')\n", encoding='utf-8')
         original_info = original_root / 'open_webui-0.11.3.dist-info'
         original_info.mkdir()
         (original_info / 'METADATA').write_text(
@@ -1235,7 +1235,7 @@ def serve(*, host, port):
                     command[4] = ('import sys\nsys.path.append(' + repr(str(original_root)) + ')\n'
                                   + command[4])
                     result = subprocess.run(command, cwd=self.cwd, env=self.env, capture_output=True,
-                                            text=True, timeout=15)
+                                            text=True, encoding="utf-8", timeout=15)
                     self.assertNotEqual(result.returncode, 0)
                     self.assertIn('no fallback was started', result.stderr)
                     self.assertFalse((self.cwd / 'original-imported.txt').exists())

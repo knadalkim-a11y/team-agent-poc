@@ -3,15 +3,18 @@
 This module runs inside the existing Open WebUI process. It never executes
 arbitrary code, SQL, a business API, or a model. Example checks are explicitly
 labelled simulations; an external tool reference without an adapter is blocked.
-The separate SQLite file only holds workflow definitions and user-owned cases.
+The separate SQLite file holds workflow definitions, user-owned cases and
+additive request receipts that prevent repeated writes after a lost response.
 """
 
 from contextlib import contextmanager
 from copy import deepcopy
 from datetime import datetime, timezone
+import hashlib
 import inspect
 import json
 from pathlib import Path
+import re
 import sqlite3
 from uuid import uuid4
 
@@ -59,6 +62,11 @@ class WorkflowService:
             db.execute("CREATE TABLE IF NOT EXISTS cases (id TEXT PRIMARY KEY, owner TEXT NOT NULL, "
                        "chat_id TEXT, data TEXT NOT NULL)")
             db.execute("CREATE UNIQUE INDEX IF NOT EXISTS case_chat ON cases(owner,chat_id) WHERE chat_id IS NOT NULL")
+            # Additive receipts: older programs keep reading catalog/cases and
+            # ignore this table. No saved definition, case or user asset migrates.
+            db.execute("CREATE TABLE IF NOT EXISTS action_requests (owner TEXT NOT NULL, request_id TEXT NOT NULL, "
+                       "fingerprint TEXT NOT NULL, case_id TEXT NOT NULL, outcome TEXT NOT NULL, "
+                       "PRIMARY KEY(owner,request_id))")
             seed = _dump(_seed())
             db.execute("INSERT OR IGNORE INTO catalog VALUES(1,?,?,0,NULL)", (seed, seed))
 
@@ -185,17 +193,45 @@ class WorkflowService:
         state["cases"] = accessible
         return state
 
-    async def get_state(self, user, chat_id="", case_id="", process_id=""):
+    @staticmethod
+    def _selection(published, value):
+        required = {"site_id", "system", "process_id", "node_id", "version"}
+        if (not isinstance(value, dict) or set(value) != required
+                or type(value.get("version")) is not int
+                or any(not isinstance(value.get(key), str) or not value[key] or len(value[key]) > 200
+                       for key in required - {"version"})):
+            raise WorkflowError("invalid_selection", "조회할 공장·시스템·업무와 게시 버전을 확인해 주세요.")
+        if value["version"] != published["version"]:
+            raise WorkflowError("published_version_conflict", "게시 절차가 변경되었습니다. 최신 절차를 확인한 뒤 진행해 주세요.")
+        nodes = published["nodes"]
+        node, process = nodes.get(value["node_id"]), nodes.get(value["process_id"])
+        if (value["site_id"] not in published["sites"] or value["system"] not in SYSTEMS
+                or not process or process["type"] != "p" or not node
+                or _ancestors(nodes, node["id"])[0]["id"] != process["id"]):
+            raise WorkflowError("invalid_selection", "선택한 공장·시스템·업무의 소속을 확인해 주세요.")
+        context = {"definition": published, "site": published["sites"][value["site_id"]],
+                   "system": value["system"]}
+        return dict(value), _applicable(context, node["id"])
+
+    async def get_state(self, user, chat_id="", case_id="", process_id="", selection=None):
         try:
             current = await self._user(user)
             if (not isinstance(case_id, str) or len(case_id) > 200
                     or not isinstance(process_id, str) or len(process_id) > 200
-                    or (case_id and process_id)):
+                    or (case_id and process_id) or (selection is not None and (case_id or process_id))):
                 raise WorkflowError("invalid_request", "진행 건 식별 정보를 확인해 주세요.")
             await self._chat(current, chat_id)
             assets = await self._assets(current)
             with self._db() as db:
-                state = self._state(db, current, case_id, chat_id, assets, process_id)
+                if selection is not None:
+                    published = self._catalog(db)[0]
+                    selected, applicable = self._selection(published, selection)
+                    # Browsing does not adopt the unrelated case bound to this
+                    # chat, create one, or manufacture execution results.
+                    state = self._state(db, current, assets=assets, process_id=selected["process_id"])
+                    state.update(selection=selected, selection_applicable=applicable, read_only=True)
+                else:
+                    state = self._state(db, current, case_id, chat_id, assets, process_id)
             if state["case"]:
                 await self._chat(current, state["case"]["chat_id"])
             return await self._visible_cases(current, state)
@@ -346,6 +382,220 @@ class WorkflowService:
         return {"node_id": node_id, "status": job["status"], "simulation": True,
                 "message": "예시 점검 결과를 저장했습니다. 실제 DB·AP에는 접근하지 않았습니다."}
 
+    @staticmethod
+    def _receipt(db, owner, request_id):
+        return db.execute("SELECT * FROM action_requests WHERE owner=? AND request_id=?",
+                          (owner, request_id)).fetchone()
+
+    def _first_write(self, db, current, body, assets):
+        scope = body["scope"]
+        if (not isinstance(scope, dict) or set(scope) != {"site_id", "system", "process_id", "version"}
+                or not body.get("node_id")):
+            raise WorkflowError("invalid_selection", "처음 반영할 공장·시스템·업무와 게시 버전을 확인해 주세요.")
+        published = self._catalog(db)[0]
+        selection, applicable = self._selection(published, {**scope, "node_id": body["node_id"]})
+        if not applicable:
+            raise WorkflowError("not_applicable", "현장 조건에 따라 제외된 작업입니다.")
+        if type(body.get("expected_revision")) is not int or body["expected_revision"] not in (-1, 0):
+            raise WorkflowError("revision_conflict", "최초 반영할 업무 상태를 다시 확인해 주세요.")
+        existing = []
+        for row in db.execute("SELECT data FROM cases WHERE owner=?", (_value(current, "id"),)):
+            case = json.loads(row["data"])
+            if (case["site"]["id"] == selection["site_id"] and case["system"] == selection["system"]
+                    and case["process_id"] == selection["process_id"]):
+                existing.append(case["id"])
+        if existing:
+            # Linked-chat access filtering happens before returning this state.
+            # Do not disclose a count or description of inaccessible candidates.
+            state = self._state(db, current, assets=assets)
+            state["cases"] = [item for item in state["cases"] if item["id"] in existing]
+            state.update(ok=False, error={"code": "case_selection_required",
+                "message": "진행 대상을 확인해 주세요. 새 실행이 필요하면 명시적으로 요청해 주세요."})
+            return state
+        chat_id = body.get("chat_id", "")
+        if self._case(db, _value(current, "id"), "", chat_id):
+            raise WorkflowError("chat_already_bound", "이 대화에는 다른 업무가 연결되어 있습니다. 대상 대화를 확인해 주세요.")
+        case = self._new_case(published, scope, chat_id, assets)
+        case["selected_id"] = selection["node_id"]
+        self._save_case(db, current, case, new=True)
+        action_body = dict(body, case_id=case["id"], expected_revision=0)
+        try:
+            return self._dispatch(db, current, action_body, assets)
+        except WorkflowError as error:
+            # Preserve the exact created case for recovery, without presenting
+            # a failed action as success or silently creating another case.
+            state = self._state(db, current, case["id"], chat_id, assets)
+            state.update(ok=False, error={"code": error.code, "message": error.message})
+            return state
+
+    async def _protected_action(self, current, body, assets):
+        request_id, scope = body.get("request_id"), body.get("scope")
+        if request_id is not None and (not isinstance(request_id, str)
+                or re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", request_id) is None):
+            raise WorkflowError("invalid_request_id", "업무 요청 식별자를 확인해 주세요.")
+        if scope is not None and (body["action"] not in {"update_inputs", "run"}
+                or body.get("case_id") or not request_id):
+            raise WorkflowError("invalid_request", "최초 입력·실행에는 확정 대상과 요청 식별자가 필요합니다.")
+        if body["action"] in {"save_draft", "validate_draft", "publish"} and _value(current, "role") != "admin":
+            raise WorkflowError("admin_required", "업무 절차 관리는 관리자만 사용할 수 있습니다.")
+        owner = _value(current, "id")
+        identity = {key: body.get(key, default) for key, default in (
+            ("action", ""), ("case_id", ""), ("chat_id", ""), ("node_id", ""),
+            ("expected_revision", None), ("payload", {}), ("scope", None))}
+        fingerprint = hashlib.sha256(json.dumps(identity, ensure_ascii=False, sort_keys=True,
+                                                separators=(",", ":")).encode("utf-8")).hexdigest()
+        if request_id:
+            with self._db() as db:
+                prior = self._receipt(db, owner, request_id)
+                if prior:
+                    if prior["fingerprint"] != fingerprint:
+                        raise WorkflowError("request_conflict", "같은 요청 식별자가 다른 내용에 사용되었습니다. 원래 요청 결과를 확인해 주세요.")
+                    saved = self._case(db, owner, prior["case_id"]) if prior["case_id"] else None
+            if prior and saved:
+                await self._chat(current, saved["chat_id"])
+        with self._db(write=True) as db:
+            receipt = self._receipt(db, owner, request_id) if request_id else None
+            if receipt:
+                if receipt["fingerprint"] != fingerprint:
+                    raise WorkflowError("request_conflict", "같은 요청 식별자가 다른 내용에 사용되었습니다. 원래 요청 결과를 확인해 주세요.")
+                # Never run again after a lost response. Return current allowed
+                # state separately from the original action outcome/revision.
+                state = self._state(db, current, case_id=receipt["case_id"], assets=assets)
+                outcome = json.loads(receipt["outcome"])
+                state.update({key: value for key, value in outcome.items() if key != "revision"})
+                state.update(request_id=request_id, replayed=True, request_outcome_revision=outcome["revision"])
+                return state
+            state = self._first_write(db, current, body, assets) if scope is not None else self._dispatch(db, current, body, assets)
+            if request_id and (state.get("case") or state.get("ok")):
+                case = state.get("case")
+                outcome = {key: state[key] for key in ("ok", "error", "result") if key in state}
+                outcome["revision"] = case["revision"] if case else state.get("draft_revision")
+                db.execute("INSERT INTO action_requests VALUES(?,?,?,?,?)",
+                           (owner, request_id, fingerprint, case["id"] if case else "", _dump(outcome)))
+                state.update(request_id=request_id, replayed=False, request_outcome_revision=outcome["revision"])
+            return state
+
+    def _dispatch(self, db, current, body, assets):
+        """Existing actions run once inside the caller's workflow transaction."""
+        action, payload = body["action"], body.get("payload", {})
+        chat_id, case_id = body.get("chat_id", ""), body.get("case_id", "")
+        result = None
+        if action in {"save_draft", "validate_draft", "publish"}:
+            if _value(current, "role") != "admin":
+                raise WorkflowError("admin_required", "업무 절차 관리는 관리자만 사용할 수 있습니다.")
+            published, draft, revision, validated = self._catalog(db)
+            self._revision(body, revision)
+            if action == "save_draft":
+                definition = payload.get("definition")
+                if not isinstance(definition, dict) or len(_dump(definition).encode("utf-8")) > MAX_DOCUMENT_BYTES:
+                    raise WorkflowError("invalid_definition", "저장할 업무 절차를 확인해 주세요.")
+                # Drafts may be structurally incomplete while editing;
+                # validation/publishing is the strict executable gate.
+                definition = deepcopy(definition)
+                for key in ("available_tools", "available_skills", "assets_available"):
+                    definition.pop(key, None)
+                # Keep a reference to existing skills, never a copied
+                # private body whose grants could later change.
+                skills = definition.get("skills", {})
+                if isinstance(skills, dict):
+                    for skill in skills.values():
+                        if isinstance(skill, dict) and skill.get("source") == "open_webui":
+                            skill["body"] = ""
+                shape_errors = _draft_shape_errors(definition)
+                if shape_errors:
+                    raise WorkflowError("invalid_definition", shape_errors[0])
+                definition["version"] = published["version"] + 1
+                db.execute("UPDATE catalog SET draft=?,revision=?,validated=NULL WHERE id=1", (_dump(definition), revision + 1))
+            else:
+                errors = validate_definition(draft)
+                if errors:
+                    return {"ok": False, "error": {"code": "invalid_definition", "message": errors[0], "details": errors}}
+                if action == "validate_draft":
+                    db.execute("UPDATE catalog SET validated=? WHERE id=1", (revision,))
+                    result = {"valid": True, "revision": revision, "message": "구조·참조·입력 연결을 확인했습니다. 실제 업무 실행 검증은 별도입니다."}
+                else:
+                    if validated != revision:
+                        raise WorkflowError("validation_required", "저장한 최신 초안을 검증한 뒤 게시해 주세요.")
+                    draft["version"] = published["version"] + 1
+                    db.execute("UPDATE catalog SET published=?,draft=?,revision=?,validated=NULL WHERE id=1",
+                               (_dump(draft), _dump(draft), revision + 1))
+                    result = {"version": draft["version"], "message": "게시했습니다. 새 진행 건부터 적용됩니다."}
+        elif action == "create":
+            if self._case(db, _value(current, "id"), "", chat_id):
+                raise WorkflowError("chat_already_bound", "이 대화에는 이미 진행 중인 업무가 연결되어 있습니다.")
+            published = self._catalog(db)[0]
+            if "version" in payload and (type(payload["version"]) is not int or payload["version"] != published["version"]):
+                raise WorkflowError("published_version_conflict", "게시 절차가 변경되었습니다. 최신 절차를 확인한 뒤 진행해 주세요.")
+            case = self._new_case(published, payload, chat_id, assets)
+            self._save_case(db, current, case, new=True)
+            case_id = case["id"]
+        else:
+            case = self._case(db, _value(current, "id"), case_id, chat_id)
+            if not case:
+                raise WorkflowError("case_required", "진행할 업무를 먼저 선택해 주세요.")
+            case_id = case["id"]
+            self._revision(body, case["revision"])
+            if action in {"update_inputs", "run"} and _finished(case, case["process_id"]):
+                raise WorkflowError("case_completed", "완료된 실행의 결과는 변경할 수 없습니다. 새 실행을 시작해 주세요.")
+            if action == "bind":
+                if not chat_id:
+                    raise WorkflowError("chat_required", "저장된 대화가 생긴 뒤 연결해 주세요.")
+                bound = self._case(db, _value(current, "id"), "", chat_id)
+                if bound and bound["id"] != case_id:
+                    raise WorkflowError("chat_already_bound", "이 대화에는 다른 진행 건이 연결되어 있습니다.")
+                if case["chat_id"] and case["chat_id"] != chat_id:
+                    raise WorkflowError("chat_mismatch", "기존 대화와 진행 건의 연결을 유지해 주세요.")
+                case["chat_id"] = chat_id
+            else:
+                node = self._node(case, body.get("node_id", ""))
+                if action == "select":
+                    case["selected_id"] = node["id"]
+                elif action == "update_inputs":
+                    values = payload.get("inputs")
+                    if node["type"] != "j" or not isinstance(values, dict) or any(
+                            key not in INPUTS or not isinstance(value, str) or len(value) > 500 for key, value in values.items()):
+                        raise WorkflowError("invalid_inputs", "잡의 공개 점검 대상만 입력해 주세요. 인증정보는 입력하지 않습니다.")
+                    if any(case["jobs"][node["id"]]["inputs"].get(key) != value for key, value in values.items()):
+                        self._invalidate(case, node["id"])
+                        case["jobs"][node["id"]]["inputs"].update(values)
+                elif node["type"] == "j":
+                    result = self._run_job(case, node, payload, assets)
+                else:
+                    # Parent execution advances available automatic
+                    # jobs; a bulk action never confirms human checks.
+                    if "retry_failed" in payload and type(payload["retry_failed"]) is not bool:
+                        raise WorkflowError("invalid_request", "실패한 잡의 재시도 범위를 확인해 주세요.")
+                    pending = _leaves(case["definition"]["nodes"], node["id"])
+                    executed = []
+                    while pending:
+                        ready = [job_id for job_id in pending if _applicable(case, job_id)
+                                 and not _missing(case, job_id) and case["jobs"][job_id]["status"] != "passed"
+                                 and (payload.get("retry_failed", True) or case["jobs"][job_id]["status"] != "failed")
+                                 and case["definition"]["nodes"][job_id]["mode"] == "tool"]
+                        if not ready:
+                            break
+                        for job_id in ready:
+                            try:
+                                executed.append(self._run_job(case, case["definition"]["nodes"][job_id], {}, assets))
+                            except WorkflowError as error:
+                                if error.code not in {"input_required", "skill_unavailable", "prerequisite_required"}:
+                                    raise
+                                # A blocked sibling must not discard
+                                # evidence already produced by others.
+                                case["jobs"][job_id]["status"] = "blocked"
+                                case["jobs"][job_id]["blocked_reason"] = error.message
+                                executed.append({"node_id": job_id, "status": "blocked",
+                                                 "code": error.code, "message": error.message})
+                            pending.remove(job_id)
+                    if not executed:
+                        raise WorkflowError("no_ready_jobs", "먼저 담당자 확인과 선행 작업을 완료해 주세요.")
+                    result = {"jobs": executed, "simulation": True, "message": "요청한 예시 점검의 결과와 대기 사유를 기록했습니다."}
+            self._save_case(db, current, case)
+        state = self._state(db, current, case_id, chat_id, assets)
+        if result is not None:
+            state["result"] = result
+        return state
+
     async def handle_action(self, user, body):
         try:
             current = await self._user(user)
@@ -367,118 +617,10 @@ class WorkflowService:
                     existing = self._case(db, _value(current, "id"), case_id, chat_id)
                 if existing:
                     await self._chat(current, existing["chat_id"])
-            with self._db(write=True) as db:
-                result = None
-                if action in {"save_draft", "validate_draft", "publish"}:
-                    if _value(current, "role") != "admin":
-                        raise WorkflowError("admin_required", "업무 절차 관리는 관리자만 사용할 수 있습니다.")
-                    published, draft, revision, validated = self._catalog(db)
-                    self._revision(body, revision)
-                    if action == "save_draft":
-                        definition = payload.get("definition")
-                        if not isinstance(definition, dict) or len(_dump(definition).encode("utf-8")) > MAX_DOCUMENT_BYTES:
-                            raise WorkflowError("invalid_definition", "저장할 업무 절차를 확인해 주세요.")
-                        # Drafts may be structurally incomplete while editing;
-                        # validation/publishing is the strict executable gate.
-                        definition = deepcopy(definition)
-                        for key in ("available_tools", "available_skills", "assets_available"):
-                            definition.pop(key, None)
-                        # Keep a reference to existing skills, never a copied
-                        # private body whose grants could later change.
-                        skills = definition.get("skills", {})
-                        if isinstance(skills, dict):
-                            for skill in skills.values():
-                                if isinstance(skill, dict) and skill.get("source") == "open_webui":
-                                    skill["body"] = ""
-                        shape_errors = _draft_shape_errors(definition)
-                        if shape_errors:
-                            raise WorkflowError("invalid_definition", shape_errors[0])
-                        definition["version"] = published["version"] + 1
-                        db.execute("UPDATE catalog SET draft=?,revision=?,validated=NULL WHERE id=1", (_dump(definition), revision + 1))
-                    else:
-                        errors = validate_definition(draft)
-                        if errors:
-                            return {"ok": False, "error": {"code": "invalid_definition", "message": errors[0], "details": errors}}
-                        if action == "validate_draft":
-                            db.execute("UPDATE catalog SET validated=? WHERE id=1", (revision,))
-                            result = {"valid": True, "revision": revision, "message": "구조·참조·입력 연결을 확인했습니다. 실제 업무 실행 검증은 별도입니다."}
-                        else:
-                            if validated != revision:
-                                raise WorkflowError("validation_required", "저장한 최신 초안을 검증한 뒤 게시해 주세요.")
-                            draft["version"] = published["version"] + 1
-                            db.execute("UPDATE catalog SET published=?,draft=?,revision=?,validated=NULL WHERE id=1",
-                                       (_dump(draft), _dump(draft), revision + 1))
-                            result = {"version": draft["version"], "message": "게시했습니다. 새 진행 건부터 적용됩니다."}
-                elif action == "create":
-                    if self._case(db, _value(current, "id"), "", chat_id):
-                        raise WorkflowError("chat_already_bound", "이 대화에는 이미 진행 중인 업무가 연결되어 있습니다.")
-                    published = self._catalog(db)[0]
-                    case = self._new_case(published, payload, chat_id, assets)
-                    self._save_case(db, current, case, new=True)
-                    case_id = case["id"]
-                else:
-                    case = self._case(db, _value(current, "id"), case_id, chat_id)
-                    if not case:
-                        raise WorkflowError("case_required", "진행할 업무를 먼저 선택해 주세요.")
-                    case_id = case["id"]
-                    self._revision(body, case["revision"])
-                    if action in {"update_inputs", "run"} and _finished(case, case["process_id"]):
-                        raise WorkflowError("case_completed", "완료된 실행의 결과는 변경할 수 없습니다. 새 실행을 시작해 주세요.")
-                    if action == "bind":
-                        if not chat_id:
-                            raise WorkflowError("chat_required", "저장된 대화가 생긴 뒤 연결해 주세요.")
-                        bound = self._case(db, _value(current, "id"), "", chat_id)
-                        if bound and bound["id"] != case_id:
-                            raise WorkflowError("chat_already_bound", "이 대화에는 다른 진행 건이 연결되어 있습니다.")
-                        if case["chat_id"] and case["chat_id"] != chat_id:
-                            raise WorkflowError("chat_mismatch", "기존 대화와 진행 건의 연결을 유지해 주세요.")
-                        case["chat_id"] = chat_id
-                    else:
-                        node = self._node(case, body.get("node_id", ""))
-                        if action == "select":
-                            case["selected_id"] = node["id"]
-                        elif action == "update_inputs":
-                            values = payload.get("inputs")
-                            if node["type"] != "j" or not isinstance(values, dict) or any(
-                                    key not in INPUTS or not isinstance(value, str) or len(value) > 500 for key, value in values.items()):
-                                raise WorkflowError("invalid_inputs", "잡의 공개 점검 대상만 입력해 주세요. 인증정보는 입력하지 않습니다.")
-                            if any(case["jobs"][node["id"]]["inputs"].get(key) != value for key, value in values.items()):
-                                self._invalidate(case, node["id"])
-                                case["jobs"][node["id"]]["inputs"].update(values)
-                        elif node["type"] == "j":
-                            result = self._run_job(case, node, payload, assets)
-                        else:
-                            # Parent execution advances available automatic
-                            # jobs; a bulk action never confirms human checks.
-                            pending = _leaves(case["definition"]["nodes"], node["id"])
-                            executed = []
-                            while pending:
-                                ready = [job_id for job_id in pending if _applicable(case, job_id)
-                                         and not _missing(case, job_id) and case["jobs"][job_id]["status"] != "passed"
-                                         and case["definition"]["nodes"][job_id]["mode"] == "tool"]
-                                if not ready:
-                                    break
-                                for job_id in ready:
-                                    try:
-                                        executed.append(self._run_job(case, case["definition"]["nodes"][job_id], {}, assets))
-                                    except WorkflowError as error:
-                                        if error.code not in {"input_required", "skill_unavailable", "prerequisite_required"}:
-                                            raise
-                                        # A blocked sibling must not discard
-                                        # evidence already produced by others.
-                                        case["jobs"][job_id]["status"] = "blocked"
-                                        case["jobs"][job_id]["blocked_reason"] = error.message
-                                        executed.append({"node_id": job_id, "status": "blocked",
-                                                         "code": error.code, "message": error.message})
-                                    pending.remove(job_id)
-                            if not executed:
-                                raise WorkflowError("no_ready_jobs", "먼저 담당자 확인과 선행 작업을 완료해 주세요.")
-                            result = {"jobs": executed, "simulation": True, "message": "요청한 예시 점검의 결과와 대기 사유를 기록했습니다."}
-                    self._save_case(db, current, case)
-                state = self._state(db, current, case_id, chat_id, assets)
-                if result is not None:
-                    state["result"] = result
-            return await self._visible_cases(current, state)
+            state = await self._protected_action(current, body, assets)
+            if state.get("case"):
+                await self._chat(current, state["case"]["chat_id"])
+            return await self._visible_cases(current, state) if "cases" in state else state
         except WorkflowError as error:
             return {"ok": False, "error": {"code": error.code, "message": error.message}}
         except sqlite3.Error:
@@ -520,8 +662,8 @@ async def _registered_assets(user):
     }
 
 
-async def get_state(user, chat_id="", case_id="", process_id=""):
-    return await _production_service().get_state(user, chat_id, case_id, process_id)
+async def get_state(user, chat_id="", case_id="", process_id="", selection=None):
+    return await _production_service().get_state(user, chat_id, case_id, process_id, selection)
 
 
 async def handle_action(user, body):
@@ -535,12 +677,18 @@ def install(app, verified_user):
     def response(value):
         code = value.get("error", {}).get("code")
         status = 200 if value.get("ok") else 401 if code == "unauthorized" else 403 if code in {
-            "chat_forbidden", "admin_required"} else 409 if code in {"revision_conflict", "chat_already_bound", "chat_mismatch"} else 400
+            "chat_forbidden", "admin_required"} else 409 if code in {
+                "revision_conflict", "chat_already_bound", "chat_mismatch", "published_version_conflict",
+                "request_conflict", "case_selection_required", "case_completed"} else 400
         return JSONResponse(value, status_code=status, headers={"Cache-Control": "no-store"})
 
     @app.get("/api/ees-work/state", include_in_schema=False)
-    async def state_route(chat_id: str = "", case_id: str = "", user=Depends(verified_user)):
-        return response(await get_state(user, chat_id, case_id))
+    async def state_route(chat_id: str = "", case_id: str = "", process_id: str = "", selection: str = "", user=Depends(verified_user)):
+        try:
+            parsed = json.loads(selection) if selection else None
+        except (ValueError, RecursionError):
+            return response({"ok": False, "error": {"code": "invalid_selection", "message": "조회할 업무 선택을 확인해 주세요."}})
+        return response(await get_state(user, chat_id, case_id, process_id, parsed))
 
     @app.post("/api/ees-work/action", include_in_schema=False)
     async def action_route(body: dict = Body(...), user=Depends(verified_user)):

@@ -1,17 +1,18 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-16
+갱신일: 2026-09-17
 
 현재 작업·다음 작업·미해결·실제 적용 원본을 관리합니다. 이슈·검증 근거는 [평가 기록 찾아보기](../evals/scenarios.md#evidence-index), 환경은 [versions](../versions.md), 완료된 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
 ## 현재 작업과 다음 작업
 
-- 이번 작업: 설계→독립 검토→구현을 마친 업무 패널·Workspace [PR #52](https://github.com/knadalkim-a11y/team-agent-poc/pull/52)를 사용자 후속 진행 요청에 따라 병합·고정 원본 시험 적용 단계로 진행함. P/T/J 역할 구분과 기존 Native 디자인 통합의 로컬 계약/조립/표시 검사는 77 PASS·3 SKIP이며, 이번 적용 경로 검사는 추가 30 PASS·1 SKIP임. [적용 안내](03-openwebui-native-agent.md#ees-work-panel-trial-20260916), [설계·검토·시험 근거](../evals/scenarios.md#workspace-native-design-20260915). 사내 GLM 5.3의 사용자 UI 설정과 기존 자산을 유지하며 새 원본의 실제 설치·화면 확인은 아직 미수신임.
-- Git 원본: 업무 패널·Workspace 시험 대상은 [PR #52](https://github.com/knadalkim-a11y/team-agent-poc/pull/52)의 최종 병합 커밋이며 전달한 40자리 SHA로 고정함. 앞선 리팩토링·업무 탐색·자산 보호는 [PR #48](https://github.com/knadalkim-a11y/team-agent-poc/pull/48), ZIP 자동 준비는 [PR #49](https://github.com/knadalkim-a11y/team-agent-poc/pull/49)에 반영됨. 마지막 사내 확인 원본은 여전히 `87f3f2922a4ab830bcee1022ed7045e624a36777`이며 Git 병합·안내 전달만으로 설치 원본을 갱신하지 않음.
+- 이번 작업: 09-16의 `설계까지만 진행` 뒤 사용자가 `구현배포도 진행하자`와 이어서 진행을 승인해 [업무 패널·대화 통합 설계](mockups/ees-work/TASK.md#work-panel-chat-design-20260916)를 ees.10 / Agent Pack v0.2.11에 구현·검토함. P는 직속 T 표, T는 직속 J 표, J는 입력·결과·근거를 중심으로 정리하고, 게시 절차의 읽기 전용 선택·첫 저장/실행·중복 요청 복구와 대화의 대상 고정·초안 충돌 보호를 연결함. 기존 Workspace 디자인·GLM 5.3 설정·사용자 자산을 보존함. [당시 설계 검토](../evals/scenarios.md#work-panel-chat-review-20260916)와 [이번 구현·검사 근거](../evals/scenarios.md#work-panel-chat-implementation-20260917)를 구분함.
+- 앞선 준비: 업무 패널·Workspace [PR #52](https://github.com/knadalkim-a11y/team-agent-poc/pull/52)는 병합·고정 원본 시험 적용 안내까지 준비됨. 당시 제품 검사는 77 PASS·3 SKIP, 적용 경로 검사는 추가 30 PASS·1 SKIP이며 이번 설계의 시험 결과로 합산하지 않음. [기존 적용 안내](03-openwebui-native-agent.md#ees-work-panel-trial-20260916), [당시 근거](../evals/scenarios.md#workspace-native-design-20260915). 사내 GLM 5.3 설정과 기존 자산을 유지하며 해당 원본의 실제 설치·화면 확인은 여전히 미수신임.
+- Git 원본: 구현·검사 원본은 [PR #54](https://github.com/knadalkim-a11y/team-agent-poc/pull/54)에 게시함. 코드 커밋 `cb48636887d144b0436e86e34f3669941ff3d64f`의 tree를 검증한 로컬과 대조했고, 배포 안내는 이 PR의 최종 병합 40자리 SHA를 사용함. 이번 구현은 [PR #52](https://github.com/knadalkim-a11y/team-agent-poc/pull/52)가 반영된 main `7bdd2ce93dc47ffb58b732f35662ad8e849c7215`에서 이어감. 별도 Draft [PR #53](https://github.com/knadalkim-a11y/team-agent-poc/pull/53)의 `docs/ptj-contract-runtime-poc-20260916`은 후속 Runtime/Figma 설계로 보존하며 이번 제품 구현·시험 배포의 원본으로 채택하거나 함께 병합하지 않음. 검토·배포 목적이 달라 이번 변경은 별도 PR로 관리함. 마지막 사내 확인 원본은 여전히 `87f3f2922a4ab830bcee1022ed7045e624a36777`이며 Git 병합·안내 전달만으로 설치 원본을 갱신하지 않음.
 - 최근 UI 확인: 09-15 앞선 ees.8의 공장·시스템 선택 박스, 프로세스 직계 태스크 펼침, 글꼴·설명 행 정리, 대화·작성 중 초안 유지 네 항목 정상 보고는 보존함. 이번 ees.9 설치 후 화면·기존 대화 확인은 아직 미보고이며 앞선 수락을 새 화면 결과로 바꾸지 않음. [앞선 수락](../evals/scenarios.md#sidebar-refinement-20260914).
 - 최근 운영 확인: 09-15 `stop → backup → apply`, `upgrade result=ok changed=true wrapper_changed=false version=0.11.3+ees.9 running=true` 보고. 정상 완료의 실행 순서상 검증 백업과 기동 health도 통과한 것으로 판단함. 새 다운로드와 원본 캐시 재사용 중 어느 경로였는지는 출력에서 구분되지 않음. 유휴 안정성과 이전 rename 접근 거부의 근본원인은 이번 성공으로 확정하지 않음. [이번 적용](../evals/scenarios.md#work-ui-refactor-20260915), [이전 복구](../evals/scenarios.md#ees7-apply-recovery-20260914), [수신 보호](../evals/scenarios.md#accept64-guard-20260914).
 - 최근 제품 변경: 같은 원본의 `apply_demo result=ok changed=3 stage=complete code=- next=new_chat` 보고. 관리 목록 내 적용·쓰기 후 확인 성공이며 개별 변경 대상 3개를 추측하지 않음. 기존 v0.2.9/ees.8 수락과 과거 자산 충돌은 [앞선 기록](../evals/scenarios.md#sidebar-refinement-20260914), [정렬 충돌 이력](../evals/scenarios.md#specialists-editor-format-20260914)에 보존함.
-- 다음 작업 하나: 사용자가 고정 원본 `Update → Upgrade -TrialCommit` 블록을 실행한 뒤 마지막 결과와 Ctrl+F5 후 패널/Workspace·기존 대화/초안·과거 근거 확인을 한 번에 받음. Upgrade가 마지막 ApplyDemo도 호출하므로 별도 반복하지 않음. 실패 시 마지막 실패 요약으로 다음 판단을 하며 정상 배포본의 과거 재시도 성공을 도구 미노출 원인 해결로 바꾸지 않음.
+- 다음 작업 하나: [PR #54](https://github.com/knadalkim-a11y/team-agent-poc/pull/54)의 최종 병합 원본으로 [ees.10 고정 원본 시험 적용](03-openwebui-native-agent.md#ees-work-panel-trial-20260917) 결과와 기존 대화·P/T/J·입력 초안 유지 여부를 확인함. 실제 Windows 설치·Native 화면·사내 GLM 확인은 코드 검사와 분리하며, 이미 안내한 PR #52의 적용 결과가 나중에 도착하면 당시 원본의 별도 근거로 기록함.
 - 최신 사내 확인: 09-15 래퍼/프로그램 `87f3f2922a4a`의 ees.9 기동과 같은 자산 원본의 변경 3건 성공에 이어, 메인 채팅의 업무 요청 재시도 정상 동작을 사용자가 보고함. 첫 Knowledge 전용 응답과 일반 Upgrade의 CI 실패를 보존하며 재시도 성공을 원인 해결로 해석하지 않음. [실패·성공·한계](../evals/scenarios.md#work-ui-refactor-20260915).
 
 ## 2026년 9월 개발·검사 방침
@@ -62,7 +63,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | ees.8 사이드바 UI 사내 확인 완료, 공장 1개·시스템 1개·프로세스 1개·2~3명 공동 작업 단위 선택 | [참여·개인 대화 분리·동시 변경·이어가기 UX](mockups/ees-work/TASK.md#shared-pilot-first)를 구체화. 일정·종합 현황판은 별도 후속 범위 제안 |
+| 4. 관리자 워크플로 | ees.9 적용·채팅 업무 재시도 정상 보고, ees.10 P/T/J 패널·대화 계약 로컬 검증 완료 | 이번 개인 진행 흐름의 원본 게시·시험 적용을 마무리한 뒤 [참여·개인 대화 분리·동시 변경·이어가기 UX](mockups/ees-work/TASK.md#shared-pilot-first)를 구체화. 일정·종합 현황판은 별도 후속 범위 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -79,6 +80,8 @@
 - 현재 사내 모델은 [GLM 5.3 UI 반영 보고](../versions.md#사내-모델-운용-기준)를 따르며 작은 Tool·짧은 절차·일반 JSON을 유지함. 과거 GLM 5.2 결과를 새 모델의 검증으로 바꾸지 않고 다음 관련 사용에서 대표 업무·실패/금지 요청을 비교함. 화면·답변에 이모지를 쓰지 않음. 기존 Hermes·팀원 작성물은 보존하며 서비스화·서버 이전·별도 Router/A2A/자동 동기화·공통 UI 프레임워크는 실제 필요에 따라 후속으로 다룸. [공통 자산 관리 경계](../README.md#원본과-배포본).
 
 ## 최근 점검
+
+2026-09-17: P/T/J 표시·첫 쓰기·현재 선택 조회·대화 액션·초안 보호·ees.10/v0.2.11 전달 경로의 로컬 검사·독립 검토를 마침. 관련 검사는 398 PASS·12 SKIP이며 별도 Native 브라우저 클래스는 실행 0개·1 SKIP임. 최초 실패·수정과 명령별 결과는 [이번 평가 기록](../evals/scenarios.md#work-panel-chat-implementation-20260917)에 보존함. 실제 wheel·Windows/PowerShell·Native 브라우저·사내 모델 검증과 새 설치는 미실행이며 아래 09-16 검사를 새 코드 결과로 재사용하지 않음.
 
 2026-09-16: 최신 main·PR #52의 지침/원본을 재확인하고 같은 ees.9의 다른 source_commit 갱신·묶음 검증·Stop→Backup→Apply→Start·자동 자산 확인·직전 프로그램 Restore 범위를 코드로 대조함. 고정 원본 적용/묶음 로컬 검사는 30 PASS·1 SKIP(PowerShell 부재). 앞선 패널 77 PASS·3 SKIP과 새 실제 브라우저/Windows/사내 모델 미실행을 구분하며 원격 검사는 사용자 한시 방침대로 생략함. 사건별 결과와 최초 실패는 [기존 평가 기록](../evals/scenarios.md#workspace-native-design-20260915)에 보존함.
 

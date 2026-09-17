@@ -58,18 +58,18 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missin
         app + "version.json": json.dumps({"version": version}).encode(),
         app + "immutable/chunks/test.js": b"const title = 'EES Work';\n",
     }
-    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9"}:
+    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10"}:
         members.update({app + name: b"synthetic checked theme asset\n" for name in branding.THEME_FILES})
     if version == "0.11.3+ees.5":
         members.update({name: b"synthetic checked work asset\n" for name in branding.LEGACY_WORK_FILES})
-    if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9"}:
-        if version == "0.11.3+ees.9":
+    if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10"}:
+        if version in {"0.11.3+ees.9", "0.11.3+ees.10"}:
             work_files = branding.WORK_FILES
         else:
             work_files = PRE_SPLIT_WORK_FILES
         members.update({app + name[len(branding.TARGET_APP):] if name.startswith(branding.TARGET_APP) else name:
                         b"synthetic checked work asset\n" for name in work_files})
-    if version == "0.11.3+ees.9":
+    if version in {"0.11.3+ees.9", "0.11.3+ees.10"}:
         members.update({name: b"# synthetic checked asset guard\n" for name in branding.ASSET_GUARD_FILES})
     members.update(extra or {})
     members.update(replacement or {})
@@ -474,7 +474,7 @@ class CustomizationTests(unittest.TestCase):
         self.assertFalse(self.restore()["changed"])
 
     def test_previous_theme_versions_pending_can_resume_and_restore(self):
-        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8"):
+        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9"):
             with self.subTest(version=version):
                 legacy = self.install_legacy_program(version=version)
                 self.interrupt_promotion()
@@ -489,11 +489,11 @@ class CustomizationTests(unittest.TestCase):
                 shutil.rmtree(self.program)
 
     def test_previous_theme_versions_checkonly_apply_and_restore_preserve_runtime(self):
-        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8"):
+        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9"):
             with self.subTest(version=version):
                 previous = self.install_legacy_program(version=version)
                 for name in ("ees_workflow_definition.py", "ees_workflow_view.py", "workflow_policy.json"):
-                    self.assertFalse((self.program / "open_webui" / name).exists())
+                    self.assertEqual((self.program / "open_webui" / name).exists(), version == "0.11.3+ees.9")
                 before = self.tree()
                 self.assertEqual(custom.inspect_bundle(self.config, self.bundle, COMMIT, self.env)["webui_version"],
                                  branding.VERSION)
@@ -531,7 +531,7 @@ class CustomizationTests(unittest.TestCase):
                 self.assertEqual(before, self.tree())
                 self.assertEqual(self.events, [])
 
-    def test_asset_guard_missing_from_ees9_stops_before_changes(self):
+    def test_asset_guard_missing_from_current_program_stops_before_changes(self):
         for name in branding.ASSET_GUARD_FILES:
             with self.subTest(name=name):
                 self.write_bundle(make_wheel(missing=(name,)))
@@ -541,7 +541,7 @@ class CustomizationTests(unittest.TestCase):
                 self.assertEqual(before, self.tree())
                 self.assertEqual(self.events, [])
 
-    def test_installed_ees9_requires_guard_but_ees8_backup_does_not(self):
+    def test_installed_current_program_requires_guard_but_ees8_backup_does_not(self):
         previous = self.install_legacy_program(version="0.11.3+ees.8")
         for name in branding.ASSET_GUARD_FILES:
             self.assertFalse((self.program / name).exists())

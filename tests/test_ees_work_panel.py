@@ -168,23 +168,29 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
                 self.assertIn(node["rule"], html.text)
                 self.assertIn(node["description"], html.text)
                 self.assertIn("예시", html.text)
-                button = self.run_button(html, node_id)
                 if node["type"] != "j":
-                    self.assertIn("하위 예시 점검 실행", button.text)
+                    self.assertFalse(html.find("button", **{"data-action": "run"}))
+                    self.assertIn("다음 업무 열기", html.text)
                     self.assertFalse(html.find("form"))
                     selected = {item.attrs["data-node-id"] for item in html.find(**{"data-action": "select"})}
                     self.assertTrue(set(node["children"]) <= selected)
                 else:
+                    self.run_button(html, node_id)
                     form = html.find("form", id="ees-work-inputs")[0]
                     self.assertEqual([field.attrs["name"] for field in form.find("input")], ["db"])
                     self.assertTrue(form.find("button", id="ees-work-inputs-save", type="submit"))
                     self.assertEqual(form.find("input")[0].attrs["value"], case["site"]["db"])
+        case = await self.ready(case)
         process, _ = self.render(case, "setup-p")
         task, _ = self.render(case, "install-t")
+        self.assertEqual(self.run_button(process, "setup-p").text, "계속 진행")
+        self.assertEqual(self.run_button(task, "install-t").text, "계속 진행")
         self.assertIn("태스크", " ".join(item.text for item in process.find("h3")))
         self.assertIn("잡", " ".join(item.text for item in task.find("h3")))
         manual, _ = self.render(case, "scope-j")
-        self.assertIn("확인 완료", self.run_button(manual, "scope-j").text)
+        self.assertFalse(manual.find("button", **{"data-action": "run"}))
+        pending, _ = self.render(await self.create(), "scope-j")
+        self.assertEqual(self.run_button(pending, "scope-j").text, "확인 완료")
         self.assertFalse(manual.find("textarea"), "Manual confirmation has no persisted free-form note contract.")
 
     async def test_preview_preserves_goals_and_criteria_without_fabricated_results(self):
@@ -195,7 +201,12 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
                 node = definition["nodes"][node_id]
                 self.assertIn(node["rule"], html.text)
                 self.assertIn(node["description"], html.text)
-                self.assert_no_mutation(html)
+                if node["type"] == "j":
+                    self.assertTrue(html.find("form", id="ees-work-inputs"))
+                    self.assertTrue(html.find("button", **{"data-action": "run"}))
+                else:
+                    self.assertFalse(html.find("form"))
+                self.assertNotIn("이 공장에서 시작", html.text)
                 self.assertFalse(html.find(**{"data-status": "passed"}))
                 self.assertFalse(html.find(**{"data-work-section": "history"}))
 
@@ -349,6 +360,226 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn(restricted["jobs"]["db-j"]["blocked_reason"], html.text)
         self.assertNotIn("권한 내에서만 제공하는 합성 본문", html.text)
         self.assertTrue(all("선행 작업 대기" not in badge.text for badge in html.find(**{"data-status": "blocked"})))
+
+    async def test_direct_child_table_counts_and_parent_failure_navigation(self):
+        case = await self.ready(await self.create())
+        process, _ = self.render(case, "setup-p")
+        progress = self.section(process, "progress")
+        counter = progress.find("strong", **{"data-work-total": None})[0]
+        self.assertEqual((counter.attrs["data-work-done"], counter.attrs["data-work-total"]), ("2", "4"))
+        self.assertIn("태스크", progress.text)
+        table = process.find("table")[0]
+        selected = {element.attrs["data-node-id"] for element in table.find("button", **{"data-action": "select"})}
+        self.assertEqual(selected, set(case["definition"]["nodes"]["setup-p"]["children"]))
+        case = await self.step(case, "run", "ap-j")
+        process, _ = self.render(case, "setup-p")
+        task, _ = self.render(case, "install-t")
+        primary = process.find("button", **{"data-action": "select", "data-node-id": "install-t"})
+        self.assertTrue(any(item.text == "문제 확인" for item in primary))
+        self.assertTrue(any(item.text == "문제 확인" for item in task.find("button", **{"data-node-id": "ap-j"})))
+        # Failed AP needs deliberate retry; independent DB remains available.
+        self.assertEqual(self.run_button(process, "setup-p").text, "가능한 점검 진행")
+        self.assertEqual(self.run_button(task, "install-t").text, "가능한 점검 진행")
+        self.assertFalse(process.find("button", **{"data-node-id": "ap-j"}))
+        hu = await self.ready(await self.create(site_id="hu-a", system="FDC"))
+        process, _ = self.render(hu, "setup-p")
+        counter = self.section(process, "progress").find("strong", **{"data-work-total": None})[0]
+        self.assertEqual(counter.attrs["data-work-total"], "3")
+        self.assertIn("적용 제외 1개", self.section(process, "progress").text)
+
+    async def test_job_guidance_is_business_content_and_evidence_is_folded(self):
+        definition = workflow._seed()
+        definition["nodes"]["ap-j"]["instructions"] = "점검 전 담당자에게 대상 서버를 확인하세요."
+        definition["skills"]["setup"]["body"] = "PRIVATE_SKILL_SOURCE_MUST_NOT_APPEAR"
+        await self.publish(definition)
+        case = await self.ready(await self.create())
+        case = await self.step(case, "run", "ap-j")
+        html, source = self.render(case, "ap-j")
+        self.assertIn(definition["nodes"]["ap-j"]["instructions"], html.text)
+        self.assertNotIn("PRIVATE_SKILL_SOURCE_MUST_NOT_APPEAR", html.text)
+        self.assertNotIn("적용 지침과 스킬", html.text)
+        current = self.section(html, "current-result")
+        details = current.find("details")
+        self.assertTrue(details)
+        self.assertTrue(all("open" not in detail.attrs for detail in details))
+        self.assertIn("수행 내역", details[0].text)
+        self.assertLess(source.index('data-work-section="current-result"'), source.index('id="ees-work-inputs"'))
+        self.assertIn(case["jobs"]["ap-j"]["history"][0]["checks"][2]["detail"], current.text)
+
+    async def test_preview_scope_controls_forms_and_multiple_case_boundary(self):
+        definition = workflow._seed()
+        for blocked in (False, True):
+            html, _ = self.render(None, "db-j", definition=definition, site=definition["sites"]["us-a"],
+                                  system="EMS", previewBlocked=blocked)
+            self.assertIn(definition["sites"]["us-a"]["name"], html.text)
+            form = html.find("form", id="ees-work-inputs")[0]
+            self.assertEqual(form.attrs["data-node-id"], "db-j")
+            self.assertEqual(form.find("input", name="db")[0].attrs["value"], definition["sites"]["us-a"]["db"])
+            save = form.find("button", type="submit")[0]
+            self.assertEqual("disabled" in save.attrs, blocked)
+            self.assertFalse(html.find(**{"data-status": "passed"}))
+        excluded, _ = self.render(None, "interface-j", definition=definition,
+                                  site=definition["sites"]["hu-a"], system="FDC")
+        self.assertIn("적용 제외", excluded.text)
+        self.assertFalse(excluded.find("form"))
+        self.assertFalse(excluded.find("button", **{"data-action": "run"}))
+
+    def evaluate_drafts(self, script):
+        runner = """
+const fs = require('node:fs'), vm = require('node:vm');
+const input = JSON.parse(fs.readFileSync(0, 'utf8')), scope = {};
+vm.createContext(scope);
+vm.runInContext(fs.readFileSync(input.source, 'utf8'), scope, {timeout: 2000});
+const value = vm.runInContext(input.script, scope, {timeout: 2000});
+process.stdout.write(JSON.stringify(value));
+"""
+        result = subprocess.run([shutil.which("node"), "-e", runner],
+                                input=json.dumps({"source": str(VIEW), "script": script}),
+                                capture_output=True, encoding="utf-8", timeout=10, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return json.loads(result.stdout)
+
+    def test_input_drafts_follow_target_and_revision_without_mutating_saved_state(self):
+        result = self.evaluate_drafts("""(() => {
+const drafts = createWorkInputDrafts();
+const a = {key:'case-a/job-a',caseId:'case-a',nodeId:'job-a',version:1};
+const b = {key:'case-a/job-b',caseId:'case-a',nodeId:'job-b',version:1};
+const saved = {inputs:{ap:'saved AP'},document:'saved draft'};
+const before = JSON.stringify(saved);
+drafts.edit(a,saved,{inputs:{ap:'typed AP'},document:'typed draft'},4);
+const selected = drafts.read(b,{inputs:{ap:'other AP'},document:''},5);
+const restored = drafts.read(a,saved,6);
+const changed = drafts.read(a,{inputs:{ap:'new server AP'},document:'saved draft'},7);
+drafts.rebase(a,{inputs:{ap:'new server AP'},document:'saved draft'},7);
+const rebased = drafts.read(a,{inputs:{ap:'new server AP'},document:'saved draft'},8);
+const savedResponse = drafts.read(a,{inputs:{ap:'typed AP'},document:'typed draft'},9);
+return {selected,restored,changed,rebased,savedResponse,unchanged:before===JSON.stringify(saved)};
+})()""")
+        self.assertTrue(result["unchanged"])
+        self.assertFalse(result["selected"]["inputsChanged"])
+        self.assertEqual(result["restored"]["inputs"]["ap"], "typed AP")
+        self.assertEqual(result["restored"]["document"], "typed draft")
+        self.assertEqual(result["restored"]["revision"], 6)
+        self.assertFalse(result["restored"]["conflict"])
+        self.assertTrue(result["changed"]["conflict"])
+        self.assertEqual(result["changed"]["inputs"]["ap"], "typed AP")
+        self.assertFalse(result["rebased"]["conflict"])
+        self.assertEqual(result["rebased"]["revision"], 8)
+        self.assertFalse(result["savedResponse"]["inputsChanged"])
+        self.assertFalse(result["savedResponse"]["documentChanged"])
+
+    def test_first_write_adopts_preview_draft_and_catalog_change_requires_review(self):
+        result = self.evaluate_drafts("""(() => {
+const drafts = createWorkInputDrafts();
+const preview = {key:'preview/job-a',caseId:'',nodeId:'job-a',version:1};
+const created = {key:'new-case/job-a',caseId:'new-case',nodeId:'job-a',version:1};
+const saved = {inputs:{ap:'initial AP'},document:''};
+drafts.edit(preview,saved,{inputs:{ap:'preview AP'}},-1);
+const changedDefinition = drafts.read({...preview,version:2},saved,-1);
+drafts.adopt(preview,created);
+const afterCreate = drafts.read(created,saved,1);
+drafts.clear();
+const afterReset = drafts.read(created,saved,1);
+return {changedDefinition,afterCreate,afterReset};
+})()""")
+        self.assertTrue(result["changedDefinition"]["conflict"])
+        self.assertEqual(result["afterCreate"]["caseId"], "new-case")
+        self.assertEqual(result["afterCreate"]["inputs"]["ap"], "preview AP")
+        self.assertTrue(result["afterCreate"]["inputsChanged"])
+        self.assertFalse(result["afterReset"]["inputsChanged"])
+
+    def test_reviewing_new_preview_version_releases_conflict_without_losing_text(self):
+        result = self.evaluate_drafts("""(() => {
+const drafts=createWorkInputDrafts(),scope={key:'preview/j',caseId:'',nodeId:'j',version:1};
+const saved={inputs:{ap:'old AP'},document:'saved'},newScope={...scope,version:2};
+const latest={inputs:{ap:'new AP'},document:'saved'};
+drafts.edit(scope,saved,{inputs:{ap:'my AP'},document:'my draft'},-1);
+const before=drafts.read(newScope,latest,-1);
+drafts.rebase(newScope,latest,-1);
+return {before,after:drafts.read(newScope,latest,-1)};
+})()""")
+        self.assertTrue(result["before"]["conflict"])
+        self.assertFalse(result["after"]["conflict"])
+        self.assertEqual(result["after"]["definitionVersion"], 2)
+        self.assertEqual(result["after"]["inputs"]["ap"], "my AP")
+        self.assertEqual(result["after"]["document"], "my draft")
+
+    def test_first_save_keeps_sibling_preview_drafts_in_the_same_exact_scope(self):
+        result = self.evaluate_drafts("""(() => {
+const drafts=createWorkInputDrafts(),saved={inputs:{ap:'saved'},document:''};
+const make=(nodeId,changes={})=>{const scope={caseId:'',siteId:'site-a',system:'EMS',processId:'p',nodeId,version:1,...changes};scope.key=JSON.stringify([scope.caseId,scope.siteId,scope.system,scope.processId,scope.nodeId]);return scope;};
+const original=[make('a'),make('b'),make('c',{version:2}),make('d',{siteId:'site-b'}),make('e',{caseId:'existing'})];
+original.forEach(scope=>drafts.edit(scope,saved,{inputs:{ap:'typed '+scope.nodeId}},-1));
+drafts.adoptPreview(original[1],'created');
+return original.map(scope=>({original:drafts.read(scope,saved,-1),created:drafts.read(make(scope.nodeId,{...scope,caseId:'created'}),saved,1)}));
+})()""")
+        for index, node in enumerate(("a", "b")):
+            self.assertFalse(result[index]["original"]["inputsChanged"])
+            self.assertEqual(result[index]["created"]["inputs"]["ap"], "typed " + node)
+        for index in (2, 3, 4):
+            self.assertTrue(result[index]["original"]["inputsChanged"])
+            self.assertFalse(result[index]["created"]["inputsChanged"])
+
+    def test_typing_reverting_and_parent_first_write_keep_live_drafts(self):
+        # Minimal DOM-shaped objects exercise production event/capture logic.
+        # This is deliberately not a browser rendering or accessibility test.
+        result = self.evaluate_drafts("""(() => {
+const input={name:'ap',value:'A',defaultValue:'A'},text={value:'D',defaultValue:'D'};
+const inputs={querySelectorAll:()=>[input]},documentForm={querySelector:()=>text};
+const note={hidden:true},next={dataset:{workSavedNext:'saved next'},textContent:'saved next'};
+const run={dataset:{workBaseUnavailable:'false'},disabled:false},content={innerHTML:'',contains:()=>false};
+const tabs={innerHTML:''},host={dataset:{},setAttribute(){},querySelector(selector){return ({'#ees-work-inputs':inputs,'#ees-work-document':documentForm,'#ees-work-content':content,'#ees-work-tabs':tabs,'[data-work-dirty]':note,'[data-work-next]':next,'[data-work-draft-sensitive]':run})[selector] || null;},querySelectorAll:()=>[run]};
+const divider={dataset:{},setAttribute(){}};
+globalThis.document={querySelector:()=>null,createElement:tag=>tag==='aside'?host:divider};
+globalThis.window={};
+input.closest=text.closest=selector=>selector==='[data-ees-work]'?host:selector==='#ees-work-inputs,#ees-work-document'?inputs:null;
+const site={id:'site-a',country:'US',name:'A',line:'1',ap:'A'},definition={version:1,sites:{'site-a':site},tools:{ap:{input:'ap',adapter:'mock'}},nodes:{p:{id:'p',name:'P',type:'p',children:['t']},t:{id:'t',name:'T',type:'t',parent:'p',children:['j']},j:{id:'j',name:'J',type:'j',parent:'t',mode:'draft',tools:['ap'],children:[]}}};
+const current={id:'case-a',version:1,revision:1,site,system:'EMS',process_id:'p',status:'in_progress',definition,jobs:{j:{status:'review',document:'D',inputs:{ap:'A'},history:[]}},node_states:{j:{status:'review'}}};
+const snapshot={state:{case:current,catalog:definition,cases:[]},selectedCaseId:'case-a',selectedId:'j',processId:'p',browsingSite:'site-a',browsingSystem:'EMS',category:'setup',runView:'current',chatRoute:true,busy:false};
+const view=createWorkView({callbacks:{registerPanel(){}}});view.renderPanel(snapshot);
+const record=()=>({draft:view.readJobEdits('j'),notice:!note.hidden,disabled:run.disabled,next:next.textContent});
+input.value='B';view.handleEvent({type:'input',target:input});const typed=record();
+view.setBusy(false);const observerKeptDisabled=run.disabled;
+input.value='A';view.handleEvent({type:'input',target:input});const reverted=record();
+text.value='E';view.handleEvent({type:'input',target:text});const documentTyped=record();
+text.value='D';view.handleEvent({type:'input',target:text});const documentReverted=record();
+run.dataset.workBaseUnavailable='true';input.value='B';view.handleEvent({type:'input',target:input});input.value='A';view.handleEvent({type:'input',target:input});
+const blockedStillDisabled=run.disabled;
+const preview={...snapshot,state:{case:null,catalog:definition,cases:[]},selectedCaseId:''};
+view.renderPanel(preview);input.value='parent draft';view.handleEvent({type:'input',target:input});
+view.renderPanel({...preview,selectedId:'p'});view.adoptPreviewDraft('created','p');
+view.renderPanel({...snapshot,state:{case:{...current,id:'created'},catalog:definition,cases:[]},selectedCaseId:'created'});
+const parentAdopted=content.innerHTML.includes('value="parent draft"');
+return {typed,reverted,documentTyped,documentReverted,observerKeptDisabled,blockedStillDisabled,parentAdopted};
+})()""")
+        self.assertEqual(result["typed"]["draft"]["inputs"]["ap"], "B")
+        self.assertTrue(result["typed"]["notice"])
+        self.assertTrue(result["typed"]["disabled"])
+        self.assertTrue(result["observerKeptDisabled"])
+        self.assertFalse(result["reverted"]["draft"]["inputsChanged"])
+        self.assertEqual(result["reverted"]["draft"]["inputs"]["ap"], "A")
+        self.assertFalse(result["reverted"]["notice"])
+        self.assertFalse(result["reverted"]["disabled"])
+        self.assertEqual(result["reverted"]["next"], "saved next")
+        self.assertTrue(result["documentTyped"]["draft"]["documentChanged"])
+        self.assertTrue(result["documentTyped"]["disabled"])
+        self.assertFalse(result["documentReverted"]["draft"]["documentChanged"])
+        self.assertFalse(result["documentReverted"]["disabled"])
+        self.assertTrue(result["blockedStillDisabled"])
+        self.assertTrue(result["parentAdopted"])
+
+    async def test_dirty_render_exposes_live_status_and_preserves_server_block(self):
+        case = await self.ready(await self.create())
+        for dirty in (False, True):
+            html, _ = self.render(case, "ap-j", draft={"inputsChanged": dirty})
+            note = html.find("p", **{"data-work-dirty": None})[0]
+            self.assertEqual("hidden" in note.attrs, not dirty)
+            run = self.run_button(html, "ap-j")
+            self.assertEqual("disabled" in run.attrs, dirty)
+            self.assertEqual(run.attrs["data-work-base-unavailable"], "false")
+        blocked, _ = self.render(None, "ap-j", definition=workflow._seed(),
+                                 site=workflow._seed()["sites"]["us-a"], system="EMS")
+        self.assertEqual(self.run_button(blocked, "ap-j").attrs["data-work-base-unavailable"], "true")
 
     async def test_completed_current_keeps_child_navigation_history_expands_all_evidence(self):
         definition = workflow._seed()
