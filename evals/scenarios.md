@@ -23,6 +23,7 @@
 | 업무 패널·메인 대화 후속 설계 | [09-16 설계 전용 범위·현재 계약 대조·검토 보완](#work-panel-chat-review-20260916) |
 | 업무 패널·대화 구현과 ees.10 시험 적용 | [09-17 첫 쓰기·대상 고정·초안 보존·검사 경계](#work-panel-chat-implementation-20260917) |
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
+| Windows Upgrade 종료 뒤 `port_bind` 10048 | [09-18 단발 포트 검사 결함·제한 재확인·Start 단독 복구와 남은 Windows 확인](#windows-port-bind-10048-20260918) |
 | ees.7 적용 실패와 직전 버전 복구 | [09-14 rename 접근 거부, Restore·Start 성공, 새 화면 미확인](#ees7-apply-recovery-20260914) |
 | Windows 폴더 변경 대기·수동 진행 | [제한적 rename 재시도·경로 보호·기존 Resume 연결](#windows-program-rename-20260914) |
 | ees_specialists 자산 관리 필드 충돌 | [0.2.6 공식 자동 정렬본 인식·ees.7 실행 확인·ApplyDemo 재개](#specialists-editor-format-20260914) |
@@ -2173,6 +2174,18 @@ GHES의 허용 저장소 한 곳에서 PR 목록·본문·원문을 읽습니다
 - 브라우저·CI 경계: 로컬 Chrome 실행파일이 없어 실제 렌더는 skip. Linux CI의 기본 Chrome을 명시적으로 요구하고 실제 빌드 wheel의 CSS/폰트·기존 패널 style을 사용하는 최소 native DOM fixture를 밝은/어두운/좁은 화면에서 렌더해 계산된 폰트·색·간격·가로 넘침·코드/KaTeX 보존·Shadow cascade를 검사함. 명시한 Chrome이 없으면 실패하며 전체 WebUI 로그인/스트리밍 통합·사내 실제 화면 확인과 구분함. PR/main CI와 프로그램 산출물 완료를 확인한 후 적용 명령을 전달함.
 
 직전 STATUS 최근 점검 보존(계획·업무 패널 수용): 2026-09-10: 수정 ApplyDemo·계획/오른쪽 패널 확인 안내 후 사용자 정상 보고를 수신해 이번 적용 단위를 완료로 기록함. 안내 원본과 실제 SHA의 직접 대조, 일반 정상 보고와 분석 정확성·개별 WO 동작 전수 확인을 구분함. 상태·기존 평가 기록만 갱신하고 문서/diff를 점검하며 실행 코드·추가 사내 시험·재배포는 진행하지 않음. [확인 범위](#plan-work-panel-accepted).
+
+<a id="windows-port-bind-10048-20260918"></a>
+
+## 2026-09-18 Windows Upgrade 종료 뒤 port bind 10048
+
+- **관측:** ees.10 시험 Upgrade에서 `changed=false`, wrapper `0d46b8e1dcf8`, stage `port_check`, `operation=port_bind`, `errno/winerror=10048`, `ees_deploy_process.py:171`이 보고됐다. 직후 Status는 기존 프로그램 `7bdd2ce93dc4`, `running=false`, TCP/owners 없음이었다. 이후 사용자는 Restore 없이 기존 `Start`만 실행해 서비스를 정상 복구했다고 보고했다. 최종 실행 SHA·health 수치는 새로 받지 않았고, 복구 성공을 새 ees.10 설치 성공으로 해석하지 않는다.
+- **확인된 결함과 미확정 원인:** 당시 main의 `port_is_free(..., raise_on_error=True)`는 Stop 뒤 bind를 한 번만 시도해 Windows `10048`이면 Apply 전에 즉시 중단했다. 이 단발 검사로 일시적인 주소 사용 상태도 배포 중단으로 확정되는 코드 결함은 재현했다. 당시 소켓/TCP 상태가 없어 TIME_WAIT, 다른 프로세스, 보안 제품 등 **Windows가 10048을 낸 근본 원인 자체는 확정하지 않는다.**
+- **수정:** Windows의 operational bind에서만 10048을 0.25초 간격으로, 총 10초·최대 40회 추가 확인한다. 각 실패 소켓은 대기 전에 닫고 Windows에 `SO_REUSEADDR`를 추가하지 않는다. Boolean 상태 관측은 단발 그대로이며, 10013/10049·socket 생성/종료 오류·다른 플랫폼 오류는 즉시 실패한다. 계속 점유되면 새 프로세스를 실행하거나 다른 프로세스를 종료하지 않고 실패한다.
+- **검토 보완:** 첫 초안은 bind 실패와 같은 context manager의 close 실패가 겹칠 때 close 오류를 retryable bind로 오인할 수 있었다. bind/close 코드 조합 3개 subcase를 실패로 재현한 뒤, bind 오류는 **소켓 종료까지 정상일 때만** 재확인 대상으로 보관하고 close/probe 오류는 즉시 실패하도록 수정했다.
+- **검증:** 초안의 관련 포트 시험 20 PASS와 기존 계약 45개 선택 PASS 기록을 보존한다. 후속 최종 포트 시험 파일은 Linux/Python 3.13.5에서 `python -B -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_deploy_port.py -v`로 **23 PASS·0 SKIP**. 실제 로컬 모의 자식의 시작→health→정상 종료→같은 포트 재시작 2회와 합성 사용자 파일 보존을 포함한다. 운영 코드에서 `port_is_free` 외 AST는 바꾸지 않았다. 이 결과는 Windows Winsock/Python 3.11·실제 Open WebUI Upgrade 전체를 실행한 것이 아니다.
+- **운영 경계:** 복구된 정상 서버에서 장애 재현을 위해 Stop/Restore를 반복하지 않는다. 같은 증상에서 프로그램 적용 전 실패가 확인되고 Status가 기존 프로그램을 정상 선택한 채 `running=false`이며 미완료 적용이 없다면, [운영 가이드](../docs/03-openwebui-native-agent.md#ees-update-failure-causes)에 따라 Start 한 번으로 기존 서비스를 복구할 수 있다. 수정본 배포는 PR #55를 병합한 **최종 main 40자리 SHA**의 고정 원본 시험 적용을 사용하고, 성공한 Upgrade가 ApplyDemo까지 실행하므로 별도 ApplyDemo를 반복하지 않는다.
+- **게시·남은 확인:** 수정은 [PR #55](https://github.com/knadalkim-a11y/team-agent-poc/pull/55)에 게시했다. 9월 원격 CI 생략 방침 때문에 새 Actions를 실행하지 않았고, 실제 Windows/PowerShell·사내 재배포 결과는 별도 확인 항목이다. 병합 자체를 사내 적용 성공으로 기록하지 않는다.
 
 <a id="ees-update-failure-causes"></a>
 
