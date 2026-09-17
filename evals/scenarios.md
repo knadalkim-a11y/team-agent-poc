@@ -70,6 +70,7 @@ Linux/Python 3.12에서 관련 Python 검사는 `python -X warn_default_encoding
 - release 시험 최초 실패: `test_ees_deploy_process.py`의 `/proc/self/stat` 기본 인코딩이 strict 모드에서 class setup을 중단함. 시험만 고친 뒤 production `_identity`의 같은 누락이 `EncodingWarning`을 불확실한 신원으로 처리해 lifecycle 검사 6 ERROR/1 FAIL을 냄. 두 경로의 UTF-8을 명시하고 신원·종료 보호를 완화하지 않음. 기존 시험의 일회용 `--without-pip` 환경 생성 사례가 첫 전체 실행에 포함됐으며 후속 반복에서는 제외함. 새 의존성·브라우저 설치나 원격 CI는 수행하지 않음.
 - 최종 문서·조립 확인: `python scripts/check_docs.py` → `files=30 links=1132 errors=0 review_candidates=0`, `git diff --check`, production launcher 조립본 113,370 bytes의 `node --check` 통과. 문서 편집 통합 중 새 적용 안내 anchor가 아직 저장되지 않아 missing_anchor 5건, 뒤이어 7건이 발생했고 해당 절이 포함된 최종본으로 해소함. 오류를 숨기기 위해 링크·검사를 제거하지 않음.
 - 현재 한계: 공식 upstream wheel/Native Chrome과 Windows/PowerShell이 없어 해당 실제 경로는 미실행 또는 명시적 SKIP. 합성 wheel과 기존 공개 인터페이스 검사로 실제 새 화면·사내 GLM 5.3 호출 품질·운영 연동·사용성·공동 작업을 통과 처리하지 않음. DB/AP는 계속 모의 점검이고 실제 외부 실행 어댑터·공유 소유권은 별도 후속 범위임. 09-30까지의 원격 CI 생략은 커밋마다 `[skip ci]`로 유지함.
+- 원격 게시: [PR #54](https://github.com/knadalkim-a11y/team-agent-poc/pull/54), 코드 원본 `cb48636887d144b0436e86e34f3669941ff3d64f`, tree `2fef5b4b5e3b73365487f3e6f82c3d51a3a1a41b`를 확인함. GitHub에 쓴 모든 blob과 최종 tree가 검사한 로컬 원본과 같음. 뒤따른 현재 상태·본 증거의 게시 링크 갱신은 문서만 변경하며 제품·시험 코드는 동일함. 사내 안내에는 PR의 최종 병합 SHA를 사용하고 병합 결과는 PR 기록으로 확인함.
 - 마지막 사내 확인은 계속 `87f3f2922a4ab830bcee1022ed7045e624a36777` / ees.9 / Pack 0.2.10임. 이번 게시/병합/적용 안내와 실제 설치·기동·화면 확인은 구분한다. 사용자는 적용 후 결과와 필요한 화면 확인만 1~2줄로 전달하며 전체 로그·사진·파일을 요구하지 않는다.
 
 <a id="work-panel-chat-review-20260916"></a>
