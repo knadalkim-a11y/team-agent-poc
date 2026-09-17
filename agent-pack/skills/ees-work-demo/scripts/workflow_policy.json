@@ -1,0 +1,7 @@
+{
+  "id": "common",
+  "name": "공통 실행 지침",
+  "type": "instruction",
+  "body": "운영 DB에 직접 접근하지 않습니다. 승인된 진단 API·Query Broker를 사용합니다. 실행 결과와 근거를 기록하고 미수행을 성공으로 처리하지 않습니다.",
+  "locked": true
+}

@@ -1,0 +1,620 @@
+"""Saved synthetic workflow states rendered by the production panel helpers.
+
+Uses the actual SQLite service and Node without a browser, live business system,
+model, or Open WebUI user database. HTML parsing checks content/action boundaries;
+these checks do not establish visual layout or browser interaction correctness.
+"""
+
+from copy import deepcopy
+from html.parser import HTMLParser
+import importlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+from types import ModuleType
+import unittest
+from unittest.mock import AsyncMock, patch
+
+
+ROOT = Path(__file__).resolve().parents[1]
+VIEW = ROOT / "branding/ees/ui/ees-work-view.js"
+PACKAGE = ModuleType("ees_work_panel_test_subject")
+PACKAGE.__path__ = [str(ROOT / "agent-pack/skills/ees-work-demo/scripts")]
+with patch.dict(sys.modules, {PACKAGE.__name__: PACKAGE}):
+    workflow = importlib.import_module(f"{PACKAGE.__name__}.ees_workflow")
+
+
+class Element:
+    def __init__(self, tag="root", attrs=()):
+        self.tag, self.attrs, self.children = tag, dict(attrs), []
+
+    @property
+    def text(self):
+        return "".join(child.text if isinstance(child, Element) else child for child in self.children)
+
+    def find(self, tag=None, **attrs):
+        result = []
+        for child in self.children:
+            if isinstance(child, Element):
+                if (tag is None or child.tag == tag) and all(
+                        key in child.attrs and (value is None or child.attrs[key] == value)
+                        for key, value in attrs.items()):
+                    result.append(child)
+                result.extend(child.find(tag, **attrs))
+        return result
+
+
+class PanelHTML(HTMLParser):
+    def __init__(self, source):
+        super().__init__(convert_charrefs=True)
+        self.root = Element()
+        self.stack = [self.root]
+        self.feed(source)
+        self.close()
+
+    def handle_starttag(self, tag, attrs):
+        node = Element(tag, attrs)
+        self.stack[-1].children.append(node)
+        if tag not in {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}:
+            self.stack.append(node)
+
+    def handle_endtag(self, tag):
+        for index in range(len(self.stack) - 1, 0, -1):
+            if self.stack[index].tag == tag:
+                del self.stack[index:]
+                return
+
+    def handle_data(self, data):
+        self.stack[-1].children.append(data)
+
+
+NODE_RENDER = """
+const fs = require('node:fs'), vm = require('node:vm');
+const input = JSON.parse(fs.readFileSync(0, 'utf8'));
+const scope = {input};
+vm.createContext(scope);
+vm.runInContext(fs.readFileSync(input.source, 'utf8'), scope, {timeout: 2000});
+const before = JSON.stringify(input);
+const html = vm.runInContext(`workPanelNodeHTML(input.case,
+  input.options.definition.nodes[input.node], input.options)`, scope, {timeout: 2000});
+process.stdout.write(JSON.stringify({html, unchanged: JSON.stringify(input) === before}));
+"""
+
+
+@unittest.skipUnless(shutil.which("node"), "Node is required for production panel rendering.")
+class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.users = {"alice": {"id": "alice", "role": "user"}, "admin": {"id": "admin", "role": "admin"}}
+        self.alice, self.admin = self.users["alice"], self.users["admin"]
+        self.service = workflow.WorkflowService(
+            Path(temporary.name) / "ees-work.sqlite3",
+            AsyncMock(side_effect=lambda key: deepcopy(self.users.get(key))),
+            AsyncMock(return_value=None),
+        )
+
+    async def create(self, **payload):
+        result = await self.service.handle_action(self.alice, {"action": "create", "payload": payload})
+        self.assertTrue(result["ok"], result)
+        return result["case"]
+
+    async def step(self, case, action, node_id="", payload=None):
+        result = await self.service.handle_action(self.alice, {
+            "action": action, "case_id": case["id"], "node_id": node_id,
+            "expected_revision": case["revision"], "payload": payload or {},
+        })
+        self.assertTrue(result["ok"], result)
+        return result["case"]
+
+    async def ready(self, case):
+        for node_id, payload in (("scope-j", {"confirm": True}), ("infra-j", {}), ("install-j", {"confirm": True})):
+            case = await self.step(case, "run", node_id, payload)
+        return case
+
+    async def publish(self, definition):
+        state = await self.service.get_state(self.admin)
+        result = await self.service.handle_action(self.admin, {
+            "action": "save_draft", "expected_revision": state["draft_revision"],
+            "payload": {"definition": definition},
+        })
+        self.assertTrue(result["ok"], result)
+        revision = result["draft_revision"]
+        for action in ("validate_draft", "publish"):
+            result = await self.service.handle_action(self.admin, {"action": action, "expected_revision": revision})
+            self.assertTrue(result["ok"], result)
+
+    def render(self, case, node_id, **options):
+        options = {"definition": case["definition"] if case else workflow._seed(), "readOnly": False,
+                   "history": False, **options}
+        result = subprocess.run(
+            [shutil.which("node"), "-e", NODE_RENDER],
+            input=json.dumps({"source": str(VIEW), "case": case, "node": node_id, "options": options}, ensure_ascii=False),
+            capture_output=True, encoding="utf-8", timeout=10, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rendered = json.loads(result.stdout)
+        self.assertTrue(rendered["unchanged"], "Rendering must not mutate saved state or procedure definitions.")
+        return PanelHTML(rendered["html"]).root, rendered["html"]
+
+    def section(self, html, name):
+        matches = html.find(**{"data-work-section": name})
+        self.assertEqual(len(matches), 1, f"Expected one {name} section")
+        return matches[0]
+
+    def run_button(self, html, node_id):
+        buttons = html.find("button", id="ees-work-run", **{"data-action": "run", "data-node-id": node_id})
+        self.assertEqual(len(buttons), 1)
+        self.assertIn("data-mutation", buttons[0].attrs)
+        return buttons[0]
+
+    def assert_no_mutation(self, html):
+        self.assertFalse(html.find(**{"data-mutation": None}))
+        self.assertFalse(html.find("form"))
+        self.assertFalse(html.find("input"))
+        self.assertFalse(html.find("textarea"))
+        self.assertFalse(html.find(**{"data-action": "run"}))
+
+    async def test_layers_preserve_distinct_purpose_parent_run_and_job_form_contracts(self):
+        case = await self.create()
+        for node_id in ("setup-p", "install-t", "db-j"):
+            with self.subTest(node=node_id):
+                html, _ = self.render(case, node_id)
+                node = case["definition"]["nodes"][node_id]
+                self.assertIn(node["name"], html.text)
+                self.assertIn(node["rule"], html.text)
+                self.assertIn(node["description"], html.text)
+                self.assertIn("예시", html.text)
+                if node["type"] != "j":
+                    self.assertFalse(html.find("button", **{"data-action": "run"}))
+                    self.assertIn("다음 업무 열기", html.text)
+                    self.assertFalse(html.find("form"))
+                    selected = {item.attrs["data-node-id"] for item in html.find(**{"data-action": "select"})}
+                    self.assertTrue(set(node["children"]) <= selected)
+                else:
+                    self.run_button(html, node_id)
+                    form = html.find("form", id="ees-work-inputs")[0]
+                    self.assertEqual([field.attrs["name"] for field in form.find("input")], ["db"])
+                    self.assertTrue(form.find("button", id="ees-work-inputs-save", type="submit"))
+                    self.assertEqual(form.find("input")[0].attrs["value"], case["site"]["db"])
+        case = await self.ready(case)
+        process, _ = self.render(case, "setup-p")
+        task, _ = self.render(case, "install-t")
+        self.assertEqual(self.run_button(process, "setup-p").text, "계속 진행")
+        self.assertEqual(self.run_button(task, "install-t").text, "계속 진행")
+        self.assertIn("태스크", " ".join(item.text for item in process.find("h3")))
+        self.assertIn("잡", " ".join(item.text for item in task.find("h3")))
+        manual, _ = self.render(case, "scope-j")
+        self.assertFalse(manual.find("button", **{"data-action": "run"}))
+        pending, _ = self.render(await self.create(), "scope-j")
+        self.assertEqual(self.run_button(pending, "scope-j").text, "확인 완료")
+        self.assertFalse(manual.find("textarea"), "Manual confirmation has no persisted free-form note contract.")
+
+    async def test_preview_preserves_goals_and_criteria_without_fabricated_results(self):
+        definition = (await self.service.get_state(self.alice))["catalog"]
+        for node_id in ("setup-p", "install-t", "db-j"):
+            with self.subTest(node=node_id):
+                html, _ = self.render(None, node_id, definition=definition)
+                node = definition["nodes"][node_id]
+                self.assertIn(node["rule"], html.text)
+                self.assertIn(node["description"], html.text)
+                if node["type"] == "j":
+                    self.assertTrue(html.find("form", id="ees-work-inputs"))
+                    self.assertTrue(html.find("button", **{"data-action": "run"}))
+                else:
+                    self.assertFalse(html.find("form"))
+                self.assertNotIn("이 공장에서 시작", html.text)
+                self.assertFalse(html.find(**{"data-status": "passed"}))
+                self.assertFalse(html.find(**{"data-work-section": "history"}))
+
+    async def test_human_confirmation_uses_saved_time_and_inputs_not_case_update_time(self):
+        case = await self.create()
+        target = '공장 <합성> & "범위 확인"'
+        case = await self.step(case, "update_inputs", "scope-j", {"inputs": {"site": target}})
+        confirmed_at = "2026-09-15T10:15:00.000+00:00"
+        changed_at = "2026-09-15T11:30:00.000+00:00"
+        with patch.object(workflow, "_now", return_value=confirmed_at):
+            case = await self.step(case, "run", "scope-j", {"confirm": True})
+        with patch.object(workflow, "_now", return_value=changed_at):
+            case = await self.step(case, "select", "scope-j")
+        self.assertEqual(case["updated_at"], changed_at)
+        html, source = self.render(case, "scope-j")
+        current = self.section(html, "current-result")
+        self.assertRegex(current.text, "사람|담당자")
+        self.assertIn(confirmed_at, current.text)
+        self.assertNotIn(changed_at, current.text)
+        self.assertIn(target, current.text)
+        self.assertNotIn("<합성>", source, "Saved text must be escaped before HTML rendering.")
+        self.assertIn(case["jobs"]["scope-j"]["history"][-1]["detail"], current.text)
+
+    async def test_failed_check_skips_are_unperformed_and_retry_preserves_failure_history(self):
+        case = await self.ready(await self.create())
+        case = await self.step(case, "run", "ap-j")
+        first = deepcopy(case["jobs"]["ap-j"]["history"][0])
+        self.assertEqual([check["status"] for check in first["checks"]], ["passed", "passed", "failed", "skipped"])
+        html, source = self.render(case, "ap-j")
+        current = self.section(html, "current-result")
+        self.assertLess(source.index('data-work-section="current-result"'), source.index('id="ees-work-inputs"'))
+        self.assertTrue(current.find(**{"data-status": "failed"}))
+        skipped = current.find(**{"data-status": "skipped"})
+        self.assertTrue(skipped)
+        self.assertTrue(all("미수행" in item.text and "적용 제외" not in item.text for item in skipped))
+        self.assertIn(first["checks"][2]["detail"], current.text)
+        self.assertIn(first["checks"][2]["input"], current.text)
+        self.assertRegex(self.run_button(html, "ap-j").text, "다시|재시도")
+        case = await self.step(case, "run", "ap-j")
+        html, _ = self.render(case, "ap-j")
+        current, history = self.section(html, "current-result"), self.section(html, "history")
+        self.assertFalse(current.find(**{"data-status": "failed"}))
+        self.assertFalse(current.find(**{"data-status": "skipped"}))
+        self.assertTrue(history.find(**{"data-status": "failed"}))
+        self.assertIn(first["at"], history.text)
+        self.assertIn(first["checks"][2]["input"], history.text)
+
+    async def test_input_change_and_dependency_rerun_keep_success_only_in_history(self):
+        definition = workflow._seed()
+        definition["nodes"]["handoff-j"] = {**deepcopy(definition["nodes"]["scope-j"]),
+            "id": "handoff-j", "name": "최종 인계 확인", "parent": "interface-t", "deps": ["interface-j"]}
+        definition["nodes"]["interface-t"]["children"].append("handoff-j")
+        await self.publish(definition)
+        case = await self.ready(await self.create())
+        for node_id in ("db-j", "ap-j", "ap-j", "interface-j"):
+            case = await self.step(case, "run", node_id)
+        before = deepcopy(case)
+        case = await self.step(case, "update_inputs", "db-j", {"inputs": {"db": "다른 합성 진단 대상"}})
+        for node_id in ("db-j", "interface-j"):
+            with self.subTest(invalidation="input", node=node_id):
+                self.assertEqual(case["jobs"][node_id]["history"], before["jobs"][node_id]["history"])
+                html, _ = self.render(case, node_id)
+                self.assertFalse(self.section(html, "current-result").find(**{"data-status": "passed"}))
+                self.assertTrue(self.section(html, "history").find(**{"data-status": "passed"}))
+        for node_id in ("db-j", "interface-j"):
+            case = await self.step(case, "run", node_id)
+        case = await self.step(case, "run", "db-j")
+        self.assertEqual(case["jobs"]["interface-j"]["status"], "pending")
+        html, _ = self.render(case, "interface-j")
+        self.assertFalse(self.section(html, "current-result").find(**{"data-status": "passed"}))
+        self.assertTrue(self.section(html, "history").find(**{"data-status": "passed"}))
+
+    async def test_draft_edit_invalidates_old_confirmation_and_preserves_document_contract(self):
+        definition = workflow._seed()
+        definition["nodes"]["scope-j"]["mode"] = "draft"
+        await self.publish(definition)
+        case = await self.create()
+        old, new = "검토한 초안 <합성 A>", "변경한 초안 <합성 B>"
+        case = await self.step(case, "run", "scope-j", {"document": old})
+        case = await self.step(case, "run", "scope-j", {"confirm": True})
+        html, _ = self.render(case, "scope-j")
+        self.assertIn(old, self.section(html, "current-result").text)
+        case = await self.step(case, "run", "scope-j", {"document": new})
+        html, _ = self.render(case, "scope-j")
+        form = html.find("form", id="ees-work-document")[0]
+        self.assertEqual(form.find("textarea", name="document")[0].text, new)
+        self.assertTrue(form.find("button", type="submit", **{"data-mutation": None}))
+        self.assertIn("검토 완료", self.run_button(html, "scope-j").text)
+        self.assertFalse(self.section(html, "current-result").find(**{"data-status": "passed"}))
+        self.assertIn(old, self.section(html, "history").text)
+
+    async def test_excluded_zero_total_is_not_shown_as_all_passed(self):
+        case = await self.create(site_id="hu-a", system="FDC")
+        self.assertEqual(case["node_states"]["interface-t"]["progress"], {"done": 0, "total": 0})
+        for node_id in ("interface-t", "interface-j"):
+            with self.subTest(node=node_id):
+                html, _ = self.render(case, node_id)
+                self.assertIn("적용 제외", html.text)
+                self.assertFalse(html.find(**{"data-status": "passed"}))
+                self.assertNotIn("전체 통과", html.text)
+                self.assertNotIn("100%", html.text)
+                for control in html.find("button", **{"data-action": "run"}):
+                    self.assertIn("disabled", control.attrs)
+
+    async def test_parent_counts_are_unfinished_applicable_composition_not_ready_queue(self):
+        definition = workflow._seed()
+        definition["tools"]["health"].update(source="open_webui", reference="synthetic-health", adapter="unavailable")
+        await self.publish(definition)
+        case = await self.create(site_id="hu-a", system="FDC")
+        for progressed, expected in ((False, {"simulation": 2, "human": 2, "unavailable": 1}),
+                                     (True, {"simulation": 1, "human": 0, "unavailable": 1})):
+            if progressed:
+                case = await self.ready(case)
+            html, _ = self.render(case, "setup-p")
+            actual = {item.attrs["data-work-count"]: int(item.text) for item in html.find(**{"data-work-count": None})}
+            self.assertEqual(actual, expected)
+            self.assertIn("이번 실행 예정 수가 아닙니다", html.text)
+        self.assertEqual(case["node_states"]["interface-j"]["status"], "skipped")
+
+    async def test_input_unavailable_and_skill_blocks_explain_actual_progress_condition(self):
+        case = await self.ready(await self.create())
+        case = await self.step(case, "update_inputs", "db-j", {"inputs": {"db": ""}})
+        case = await self.step(case, "run", "install-t")
+        self.assertEqual(case["node_states"]["db-j"]["missing"], [])
+        html, _ = self.render(case, "db-j")
+        self.assertIn(case["jobs"]["db-j"]["blocked_reason"], html.text)
+        self.assertTrue(all("선행 작업 대기" not in badge.text for badge in html.find(**{"data-status": "blocked"})))
+
+        definition = workflow._seed()
+        definition["tools"]["health"].update(source="open_webui", reference="synthetic-health", adapter="unavailable")
+        await self.publish(definition)
+        unavailable = await self.ready(await self.create())
+        unavailable = await self.step(unavailable, "run", "ap-j")
+        html, _ = self.render(unavailable, "ap-j")
+        self.assertIn("실제 실행 연결이 없어 수행하지 않았습니다", html.text)
+        self.assertTrue(all("선행 작업 대기" not in badge.text for badge in html.find(**{"data-status": "blocked"})))
+
+        definition = workflow._seed()
+        definition["skills"]["private-read"] = {"id": "private-read", "name": "합성 읽기 지침", "type": "skill",
+            "source": "open_webui", "reference": "private-read", "body": ""}
+        definition["nodes"]["db-j"]["skills"] = ["private-read"]
+        await self.publish(definition)
+        assets = {"tools": [], "skills": [{"id": "private-read", "name": "합성 읽기 지침"}],
+                  "skill_bodies": {"private-read": "권한 내에서만 제공하는 합성 본문"}, "skill_versions": {"private-read": 1}}
+        self.service.asset_lookup = AsyncMock(return_value=assets)
+        restricted = await self.ready(await self.create())
+        self.service.asset_lookup = AsyncMock(return_value={"tools": [], "skills": [], "skill_bodies": {}})
+        restricted = await self.step(restricted, "run", "install-t")
+        restricted = await self.step(restricted, "select", "db-j")
+        html, _ = self.render(restricted, "db-j")
+        self.assertIn(restricted["jobs"]["db-j"]["blocked_reason"], html.text)
+        self.assertNotIn("권한 내에서만 제공하는 합성 본문", html.text)
+        self.assertTrue(all("선행 작업 대기" not in badge.text for badge in html.find(**{"data-status": "blocked"})))
+
+    async def test_direct_child_table_counts_and_parent_failure_navigation(self):
+        case = await self.ready(await self.create())
+        process, _ = self.render(case, "setup-p")
+        progress = self.section(process, "progress")
+        counter = progress.find("strong", **{"data-work-total": None})[0]
+        self.assertEqual((counter.attrs["data-work-done"], counter.attrs["data-work-total"]), ("2", "4"))
+        self.assertIn("태스크", progress.text)
+        table = process.find("table")[0]
+        selected = {element.attrs["data-node-id"] for element in table.find("button", **{"data-action": "select"})}
+        self.assertEqual(selected, set(case["definition"]["nodes"]["setup-p"]["children"]))
+        case = await self.step(case, "run", "ap-j")
+        process, _ = self.render(case, "setup-p")
+        task, _ = self.render(case, "install-t")
+        primary = process.find("button", **{"data-action": "select", "data-node-id": "install-t"})
+        self.assertTrue(any(item.text == "문제 확인" for item in primary))
+        self.assertTrue(any(item.text == "문제 확인" for item in task.find("button", **{"data-node-id": "ap-j"})))
+        # Failed AP needs deliberate retry; independent DB remains available.
+        self.assertEqual(self.run_button(process, "setup-p").text, "가능한 점검 진행")
+        self.assertEqual(self.run_button(task, "install-t").text, "가능한 점검 진행")
+        self.assertFalse(process.find("button", **{"data-node-id": "ap-j"}))
+        hu = await self.ready(await self.create(site_id="hu-a", system="FDC"))
+        process, _ = self.render(hu, "setup-p")
+        counter = self.section(process, "progress").find("strong", **{"data-work-total": None})[0]
+        self.assertEqual(counter.attrs["data-work-total"], "3")
+        self.assertIn("적용 제외 1개", self.section(process, "progress").text)
+
+    async def test_job_guidance_is_business_content_and_evidence_is_folded(self):
+        definition = workflow._seed()
+        definition["nodes"]["ap-j"]["instructions"] = "점검 전 담당자에게 대상 서버를 확인하세요."
+        definition["skills"]["setup"]["body"] = "PRIVATE_SKILL_SOURCE_MUST_NOT_APPEAR"
+        await self.publish(definition)
+        case = await self.ready(await self.create())
+        case = await self.step(case, "run", "ap-j")
+        html, source = self.render(case, "ap-j")
+        self.assertIn(definition["nodes"]["ap-j"]["instructions"], html.text)
+        self.assertNotIn("PRIVATE_SKILL_SOURCE_MUST_NOT_APPEAR", html.text)
+        self.assertNotIn("적용 지침과 스킬", html.text)
+        current = self.section(html, "current-result")
+        details = current.find("details")
+        self.assertTrue(details)
+        self.assertTrue(all("open" not in detail.attrs for detail in details))
+        self.assertIn("수행 내역", details[0].text)
+        self.assertLess(source.index('data-work-section="current-result"'), source.index('id="ees-work-inputs"'))
+        self.assertIn(case["jobs"]["ap-j"]["history"][0]["checks"][2]["detail"], current.text)
+
+    async def test_preview_scope_controls_forms_and_multiple_case_boundary(self):
+        definition = workflow._seed()
+        for blocked in (False, True):
+            html, _ = self.render(None, "db-j", definition=definition, site=definition["sites"]["us-a"],
+                                  system="EMS", previewBlocked=blocked)
+            self.assertIn(definition["sites"]["us-a"]["name"], html.text)
+            form = html.find("form", id="ees-work-inputs")[0]
+            self.assertEqual(form.attrs["data-node-id"], "db-j")
+            self.assertEqual(form.find("input", name="db")[0].attrs["value"], definition["sites"]["us-a"]["db"])
+            save = form.find("button", type="submit")[0]
+            self.assertEqual("disabled" in save.attrs, blocked)
+            self.assertFalse(html.find(**{"data-status": "passed"}))
+        excluded, _ = self.render(None, "interface-j", definition=definition,
+                                  site=definition["sites"]["hu-a"], system="FDC")
+        self.assertIn("적용 제외", excluded.text)
+        self.assertFalse(excluded.find("form"))
+        self.assertFalse(excluded.find("button", **{"data-action": "run"}))
+
+    def evaluate_drafts(self, script):
+        runner = """
+const fs = require('node:fs'), vm = require('node:vm');
+const input = JSON.parse(fs.readFileSync(0, 'utf8')), scope = {};
+vm.createContext(scope);
+vm.runInContext(fs.readFileSync(input.source, 'utf8'), scope, {timeout: 2000});
+const value = vm.runInContext(input.script, scope, {timeout: 2000});
+process.stdout.write(JSON.stringify(value));
+"""
+        result = subprocess.run([shutil.which("node"), "-e", runner],
+                                input=json.dumps({"source": str(VIEW), "script": script}),
+                                capture_output=True, encoding="utf-8", timeout=10, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return json.loads(result.stdout)
+
+    def test_input_drafts_follow_target_and_revision_without_mutating_saved_state(self):
+        result = self.evaluate_drafts("""(() => {
+const drafts = createWorkInputDrafts();
+const a = {key:'case-a/job-a',caseId:'case-a',nodeId:'job-a',version:1};
+const b = {key:'case-a/job-b',caseId:'case-a',nodeId:'job-b',version:1};
+const saved = {inputs:{ap:'saved AP'},document:'saved draft'};
+const before = JSON.stringify(saved);
+drafts.edit(a,saved,{inputs:{ap:'typed AP'},document:'typed draft'},4);
+const selected = drafts.read(b,{inputs:{ap:'other AP'},document:''},5);
+const restored = drafts.read(a,saved,6);
+const changed = drafts.read(a,{inputs:{ap:'new server AP'},document:'saved draft'},7);
+drafts.rebase(a,{inputs:{ap:'new server AP'},document:'saved draft'},7);
+const rebased = drafts.read(a,{inputs:{ap:'new server AP'},document:'saved draft'},8);
+const savedResponse = drafts.read(a,{inputs:{ap:'typed AP'},document:'typed draft'},9);
+return {selected,restored,changed,rebased,savedResponse,unchanged:before===JSON.stringify(saved)};
+})()""")
+        self.assertTrue(result["unchanged"])
+        self.assertFalse(result["selected"]["inputsChanged"])
+        self.assertEqual(result["restored"]["inputs"]["ap"], "typed AP")
+        self.assertEqual(result["restored"]["document"], "typed draft")
+        self.assertEqual(result["restored"]["revision"], 6)
+        self.assertFalse(result["restored"]["conflict"])
+        self.assertTrue(result["changed"]["conflict"])
+        self.assertEqual(result["changed"]["inputs"]["ap"], "typed AP")
+        self.assertFalse(result["rebased"]["conflict"])
+        self.assertEqual(result["rebased"]["revision"], 8)
+        self.assertFalse(result["savedResponse"]["inputsChanged"])
+        self.assertFalse(result["savedResponse"]["documentChanged"])
+
+    def test_first_write_adopts_preview_draft_and_catalog_change_requires_review(self):
+        result = self.evaluate_drafts("""(() => {
+const drafts = createWorkInputDrafts();
+const preview = {key:'preview/job-a',caseId:'',nodeId:'job-a',version:1};
+const created = {key:'new-case/job-a',caseId:'new-case',nodeId:'job-a',version:1};
+const saved = {inputs:{ap:'initial AP'},document:''};
+drafts.edit(preview,saved,{inputs:{ap:'preview AP'}},-1);
+const changedDefinition = drafts.read({...preview,version:2},saved,-1);
+drafts.adopt(preview,created);
+const afterCreate = drafts.read(created,saved,1);
+drafts.clear();
+const afterReset = drafts.read(created,saved,1);
+return {changedDefinition,afterCreate,afterReset};
+})()""")
+        self.assertTrue(result["changedDefinition"]["conflict"])
+        self.assertEqual(result["afterCreate"]["caseId"], "new-case")
+        self.assertEqual(result["afterCreate"]["inputs"]["ap"], "preview AP")
+        self.assertTrue(result["afterCreate"]["inputsChanged"])
+        self.assertFalse(result["afterReset"]["inputsChanged"])
+
+    def test_reviewing_new_preview_version_releases_conflict_without_losing_text(self):
+        result = self.evaluate_drafts("""(() => {
+const drafts=createWorkInputDrafts(),scope={key:'preview/j',caseId:'',nodeId:'j',version:1};
+const saved={inputs:{ap:'old AP'},document:'saved'},newScope={...scope,version:2};
+const latest={inputs:{ap:'new AP'},document:'saved'};
+drafts.edit(scope,saved,{inputs:{ap:'my AP'},document:'my draft'},-1);
+const before=drafts.read(newScope,latest,-1);
+drafts.rebase(newScope,latest,-1);
+return {before,after:drafts.read(newScope,latest,-1)};
+})()""")
+        self.assertTrue(result["before"]["conflict"])
+        self.assertFalse(result["after"]["conflict"])
+        self.assertEqual(result["after"]["definitionVersion"], 2)
+        self.assertEqual(result["after"]["inputs"]["ap"], "my AP")
+        self.assertEqual(result["after"]["document"], "my draft")
+
+    def test_first_save_keeps_sibling_preview_drafts_in_the_same_exact_scope(self):
+        result = self.evaluate_drafts("""(() => {
+const drafts=createWorkInputDrafts(),saved={inputs:{ap:'saved'},document:''};
+const make=(nodeId,changes={})=>{const scope={caseId:'',siteId:'site-a',system:'EMS',processId:'p',nodeId,version:1,...changes};scope.key=JSON.stringify([scope.caseId,scope.siteId,scope.system,scope.processId,scope.nodeId]);return scope;};
+const original=[make('a'),make('b'),make('c',{version:2}),make('d',{siteId:'site-b'}),make('e',{caseId:'existing'})];
+original.forEach(scope=>drafts.edit(scope,saved,{inputs:{ap:'typed '+scope.nodeId}},-1));
+drafts.adoptPreview(original[1],'created');
+return original.map(scope=>({original:drafts.read(scope,saved,-1),created:drafts.read(make(scope.nodeId,{...scope,caseId:'created'}),saved,1)}));
+})()""")
+        for index, node in enumerate(("a", "b")):
+            self.assertFalse(result[index]["original"]["inputsChanged"])
+            self.assertEqual(result[index]["created"]["inputs"]["ap"], "typed " + node)
+        for index in (2, 3, 4):
+            self.assertTrue(result[index]["original"]["inputsChanged"])
+            self.assertFalse(result[index]["created"]["inputsChanged"])
+
+    def test_typing_reverting_and_parent_first_write_keep_live_drafts(self):
+        # Minimal DOM-shaped objects exercise production event/capture logic.
+        # This is deliberately not a browser rendering or accessibility test.
+        result = self.evaluate_drafts("""(() => {
+const input={name:'ap',value:'A',defaultValue:'A'},text={value:'D',defaultValue:'D'};
+const inputs={querySelectorAll:()=>[input]},documentForm={querySelector:()=>text};
+const note={hidden:true},next={dataset:{workSavedNext:'saved next'},textContent:'saved next'};
+const run={dataset:{workBaseUnavailable:'false'},disabled:false},content={innerHTML:'',contains:()=>false};
+const tabs={innerHTML:''},host={dataset:{},setAttribute(){},querySelector(selector){return ({'#ees-work-inputs':inputs,'#ees-work-document':documentForm,'#ees-work-content':content,'#ees-work-tabs':tabs,'[data-work-dirty]':note,'[data-work-next]':next,'[data-work-draft-sensitive]':run})[selector] || null;},querySelectorAll:()=>[run]};
+const divider={dataset:{},setAttribute(){}};
+globalThis.document={querySelector:()=>null,createElement:tag=>tag==='aside'?host:divider};
+globalThis.window={};
+input.closest=text.closest=selector=>selector==='[data-ees-work]'?host:selector==='#ees-work-inputs,#ees-work-document'?inputs:null;
+const site={id:'site-a',country:'US',name:'A',line:'1',ap:'A'},definition={version:1,sites:{'site-a':site},tools:{ap:{input:'ap',adapter:'mock'}},nodes:{p:{id:'p',name:'P',type:'p',children:['t']},t:{id:'t',name:'T',type:'t',parent:'p',children:['j']},j:{id:'j',name:'J',type:'j',parent:'t',mode:'draft',tools:['ap'],children:[]}}};
+const current={id:'case-a',version:1,revision:1,site,system:'EMS',process_id:'p',status:'in_progress',definition,jobs:{j:{status:'review',document:'D',inputs:{ap:'A'},history:[]}},node_states:{j:{status:'review'}}};
+const snapshot={state:{case:current,catalog:definition,cases:[]},selectedCaseId:'case-a',selectedId:'j',processId:'p',browsingSite:'site-a',browsingSystem:'EMS',category:'setup',runView:'current',chatRoute:true,busy:false};
+const view=createWorkView({callbacks:{registerPanel(){}}});view.renderPanel(snapshot);
+const record=()=>({draft:view.readJobEdits('j'),notice:!note.hidden,disabled:run.disabled,next:next.textContent});
+input.value='B';view.handleEvent({type:'input',target:input});const typed=record();
+view.setBusy(false);const observerKeptDisabled=run.disabled;
+input.value='A';view.handleEvent({type:'input',target:input});const reverted=record();
+text.value='E';view.handleEvent({type:'input',target:text});const documentTyped=record();
+text.value='D';view.handleEvent({type:'input',target:text});const documentReverted=record();
+run.dataset.workBaseUnavailable='true';input.value='B';view.handleEvent({type:'input',target:input});input.value='A';view.handleEvent({type:'input',target:input});
+const blockedStillDisabled=run.disabled;
+const preview={...snapshot,state:{case:null,catalog:definition,cases:[]},selectedCaseId:''};
+view.renderPanel(preview);input.value='parent draft';view.handleEvent({type:'input',target:input});
+view.renderPanel({...preview,selectedId:'p'});view.adoptPreviewDraft('created','p');
+view.renderPanel({...snapshot,state:{case:{...current,id:'created'},catalog:definition,cases:[]},selectedCaseId:'created'});
+const parentAdopted=content.innerHTML.includes('value="parent draft"');
+return {typed,reverted,documentTyped,documentReverted,observerKeptDisabled,blockedStillDisabled,parentAdopted};
+})()""")
+        self.assertEqual(result["typed"]["draft"]["inputs"]["ap"], "B")
+        self.assertTrue(result["typed"]["notice"])
+        self.assertTrue(result["typed"]["disabled"])
+        self.assertTrue(result["observerKeptDisabled"])
+        self.assertFalse(result["reverted"]["draft"]["inputsChanged"])
+        self.assertEqual(result["reverted"]["draft"]["inputs"]["ap"], "A")
+        self.assertFalse(result["reverted"]["notice"])
+        self.assertFalse(result["reverted"]["disabled"])
+        self.assertEqual(result["reverted"]["next"], "saved next")
+        self.assertTrue(result["documentTyped"]["draft"]["documentChanged"])
+        self.assertTrue(result["documentTyped"]["disabled"])
+        self.assertFalse(result["documentReverted"]["draft"]["documentChanged"])
+        self.assertFalse(result["documentReverted"]["disabled"])
+        self.assertTrue(result["blockedStillDisabled"])
+        self.assertTrue(result["parentAdopted"])
+
+    async def test_dirty_render_exposes_live_status_and_preserves_server_block(self):
+        case = await self.ready(await self.create())
+        for dirty in (False, True):
+            html, _ = self.render(case, "ap-j", draft={"inputsChanged": dirty})
+            note = html.find("p", **{"data-work-dirty": None})[0]
+            self.assertEqual("hidden" in note.attrs, not dirty)
+            run = self.run_button(html, "ap-j")
+            self.assertEqual("disabled" in run.attrs, dirty)
+            self.assertEqual(run.attrs["data-work-base-unavailable"], "false")
+        blocked, _ = self.render(None, "ap-j", definition=workflow._seed(),
+                                 site=workflow._seed()["sites"]["us-a"], system="EMS")
+        self.assertEqual(self.run_button(blocked, "ap-j").attrs["data-work-base-unavailable"], "true")
+
+    async def test_completed_current_keeps_child_navigation_history_expands_all_evidence(self):
+        definition = workflow._seed()
+        definition["nodes"]["scope-j"]["mode"] = "draft"
+        await self.publish(definition)
+        case = await self.create()
+        document = "승인한 합성 셋업 초안"
+        case = await self.step(case, "run", "scope-j", {"document": document})
+        case = await self.ready(case)
+        for node_id in ("db-j", "ap-j", "ap-j", "interface-j"):
+            case = await self.step(case, "run", node_id)
+        self.assertEqual(case["status"], "passed")
+        for node_id in ("setup-p", "install-t"):
+            with self.subTest(node=node_id):
+                html, _ = self.render(case, node_id, readOnly=True)
+                self.assert_no_mutation(html)
+                selected = {item.attrs["data-node-id"] for item in html.find(**{"data-action": "select"})}
+                self.assertTrue(set(case["definition"]["nodes"][node_id]["children"]) <= selected)
+        current, _ = self.render(case, "scope-j", readOnly=True)
+        self.assert_no_mutation(current)
+        self.assertIn(document, current.text)
+        html, _ = self.render(case, "setup-p", history=True)
+        self.assert_no_mutation(html)
+        self.assertFalse(html.find(**{"data-action": "select"}))
+        self.assertTrue(html.find("details"))
+        self.assertIn(document, html.text)
+        for node_id, job in case["jobs"].items():
+            self.assertIn(case["definition"]["nodes"][node_id]["rule"], html.text)
+            for record in job["history"]:
+                self.assertIn(record["at"], html.text)
+                for check in record["checks"]:
+                    self.assertIn(check["input"], html.text)
+                    self.assertIn(check["detail"], html.text)
+        self.assertTrue(all("미수행" in item.text for item in html.find(**{"data-status": "skipped"})))
+
+
+if __name__ == "__main__":
+    unittest.main()
