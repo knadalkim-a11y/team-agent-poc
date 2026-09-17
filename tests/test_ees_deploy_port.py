@@ -1,12 +1,16 @@
 """Bounded port checks only: synthetic Winsock errors and real local sockets.
 
-No Open WebUI, application data, process signalling, or external service is used.
+No Open WebUI, real application data, or external service is used. The Linux
+lifecycle test signals only its own bounded fake child through the real manager.
 Synthetic Windows branches do not establish real Winsock/TIME_WAIT behavior.
 """
 
 import errno
 import importlib.util
 import socket
+import os
+import sys
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
@@ -182,6 +186,36 @@ class PortRetryTests(unittest.TestCase):
         self.assertEqual(caught.exception.operation, 'port_probe')
         self.assertEqual(self.sleeps, [])
 
+    def test_close_error_after_failed_bind_is_not_retried(self):
+        for bind_code, close_code in ((10048, 10048), (10013, 10048), (10048, 10013)):
+            with self.subTest(bind_code=bind_code, close_code=close_code):
+                self.effects = [windows_error(bind_code)]
+                self.exit_error = windows_error(close_code)
+                self.sleeps.clear()
+                self.sockets.clear()
+                with self.assertRaises(process.ProcessError) as caught:
+                    process.port_is_free('127.0.0.1', 8080, raise_on_error=True)
+                self.assertEqual(caught.exception.operation, 'port_probe')
+                self.assertEqual(caught.exception.winerror, close_code)
+                self.assertEqual(self.sleeps, [])
+                self.assertEqual(len(self.sockets), 1)
+                self.assertIsNone(caught.exception.timeout_seconds)
+
+    def test_close_error_after_successful_retry_is_not_hidden(self):
+        self.effects = [windows_error(), None]
+        original_sleep = self.clock.sleep
+
+        def after_wait(duration):
+            original_sleep(duration)
+            self.exit_error = windows_error()
+
+        self.clock.sleep = after_wait
+        with self.assertRaises(process.ProcessError) as caught:
+            process.port_is_free('127.0.0.1', 8080, raise_on_error=True)
+        self.assertEqual(caught.exception.operation, 'port_probe')
+        self.assertEqual(self.sleeps, [.25])
+        self.assertEqual(len(self.sockets), 2)
+
     def test_invalid_input_does_not_open_socket(self):
         for host, port in [('localhost', 8080), ('127.0.0.1', True), ('127.0.0.1', 0), ('fe80::1%1', 8080)]:
             with self.subTest(host=host, port=port), self.assertRaises(process.ProcessError):
@@ -230,6 +264,58 @@ class RealPortTests(unittest.TestCase):
             probe.bind(('127.0.0.1', 0))
             port = probe.getsockname()[1]
         self.assertTrue(process.port_is_free('127.0.0.1', port, raise_on_error=True))
+
+
+@unittest.skipUnless(sys.platform.startswith('linux'), 'Local lifecycle uses Linux; Windows remains a separate gate.')
+class LocalLifecycleTests(unittest.TestCase):
+    def test_owned_fake_child_stops_and_reuses_port(self):
+        if int(Path('/proc/self/stat').read_text(encoding='utf-8').split()[0]) != os.getpid():
+            self.skipTest('The mounted /proc uses a different PID namespace.')
+        server_code = '''
+import json, signal, sys, time
+from http.server import HTTPServer, BaseHTTPRequestHandler
+running = True
+def stop(*_):
+    global running
+    running = False
+signal.signal(signal.SIGINT, stop)
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        body = json.dumps({'status': True}).encode('utf-8')
+        self.send_response(200)
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+    def log_message(self, *_):
+        pass
+server = HTTPServer((sys.argv[1], int(sys.argv[2])), Handler)
+server.timeout = .1
+end = time.monotonic() + 10
+try:
+    while running and time.monotonic() < end:
+        server.handle_request()
+finally:
+    server.server_close()
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sentinel = root / 'synthetic-user-skill.txt'
+            sentinel.write_text('synthetic retained asset', encoding='utf-8')
+            with socket.socket() as probe:
+                probe.bind(('127.0.0.1', 0))
+                port = probe.getsockname()[1]
+            with patch.object(process, 'SERVER_CODE', server_code):
+                for _ in range(2):
+                    identity = process.start_server(sys.executable, root, dict(os.environ),
+                                                    '127.0.0.1', port, root / 'logs')
+                    try:
+                        process.wait_healthy(identity, timeout=5)
+                        self.assertFalse(process.port_is_free('127.0.0.1', port))
+                    finally:
+                        process.stop_server(identity, timeout=3)
+                    self.assertFalse(process.verify_identity(identity))
+                    self.assertTrue(process.port_is_free('127.0.0.1', port, raise_on_error=True))
+            self.assertEqual(sentinel.read_text(encoding='utf-8'), 'synthetic retained asset')
 
 
 if __name__ == '__main__':
