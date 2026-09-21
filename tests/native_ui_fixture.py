@@ -59,6 +59,13 @@ class NativeUIServer(ThreadingHTTPServer):
         self.workflow = None
         self.tool_call = None
         self.completions = []
+        self.authoring_requests = []
+        self.authoring_answer = '현재 업무의 목적과 완료 조건을 확인한 뒤 안내를 작성하세요.'
+        self.authoring_status = 200
+        self.authoring_sse = False
+        self.authoring_hold = threading.Event()
+        self.authoring_hold.set()
+        self.authoring_started = threading.Event()
         self.tool_results = []
         self.stream_hold = threading.Event()
         self.stream_hold.set()
@@ -136,6 +143,7 @@ class NativeUIServer(ThreadingHTTPServer):
             self.errors.append(repr(error))
 
     def server_close(self):
+        self.authoring_hold.set()
         self.stream_hold.set()
         self.action_response_hold.set()
         self.completion_response_hold.set()
@@ -278,6 +286,18 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                     self.server.action_response_hold.wait(timeout=8)
                 return self.send_content(result)
             if path == "/api/chat/completions":
+                if body.get('stream') is False and 'user_message' not in body:
+                    self.server.authoring_requests.append(body)
+                    self.server.authoring_started.set()
+                    answer = self.server.authoring_answer
+                    status = self.server.authoring_status
+                    self.server.authoring_hold.wait(timeout=12)
+                    if self.server.authoring_sse:
+                        chunks = [json.dumps({'choices': [{'delta': {'content': part}}]}, ensure_ascii=False)
+                                  for part in (answer[:len(answer)//2], answer[len(answer)//2:])]
+                        return self.send_content(''.join('data: ' + item + '\n\n' for item in chunks)
+                                                 + 'data: [DONE]\n\n', 'text/event-stream', status=status)
+                    return self.send_content({'choices': [{'message': {'role': 'assistant', 'content': answer}}]}, status=status)
                 self.server.completions.append(body)
                 reply_body = dict(body)
                 reply_body["chat_id"] = body.get("chat_id") or "fixture-new-chat"

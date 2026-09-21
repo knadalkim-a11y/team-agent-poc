@@ -242,7 +242,7 @@ class Tools:
         History and completed results cannot receive new inputs or execution.
 
         :param action: create, select, update_inputs, run, save_draft, validate_draft, or publish. UI and this tool share the same service. Parent runs only continue unfinished non-failed jobs; explicitly retry a failed individual job instead.
-        :param payload: create: explicit site_id, system, process_id, optional title. update_inputs: inputs object with only requested fields. save_draft: full definition read with include_draft. run tool mode: empty. Manual completion: {confirm:true} ONLY after the user explicitly states they checked/completed the job. Draft save: {document:actual_draft_text} ONLY on an apply/save request; this stores a review draft, not a successful check. Draft completion: {confirm:true} ONLY after explicit review confirmation. Never infer confirmation, retry consent or publish approval from a broad automation request.
+        :param payload: create: explicit site_id, system, process_id, optional title. update_inputs: inputs object with only requested fields. save_draft: full definition read with include_draft. run tool mode: empty. Manual/draft completion requires the user's confirmation button in the Work Panel; this AI Tool cannot confirm on their behalf. Draft save: {document:actual_draft_text} ONLY on an apply/save request; this stores a review draft, not a successful check. Never infer retry consent or publish approval from a broad automation request.
         :param node_id: Exact target process/task/job from the verified definition; empty uses target's node. Never invent IDs. Selection may point to another node in that same case.
         :param expected_revision: Copy target.revision for case actions, draft_revision for procedure admin actions. For a published first write or explicit create use -1. Preserve the original revision on same-request replay; reread on conflict.
         :param target: Exact target object returned by the latest view, retained with the proposed draft. Required for select/update_inputs/run. Published target includes site_id/system/process_id/node_id/version under selection. Case target includes kind/case_id/node_id/revision. A history target is never writable. Do not rebuild it from guesses or swap it to another screen target.
@@ -324,6 +324,8 @@ class Tools:
                         body["case_id"] = target["case_id"]
                 definition = state.get("workflow", {}).get("definition") or case.get("definition", {})
                 node = definition.get("nodes", {}).get(effective_node, {})
+                if action == "run" and node.get("type") == "j" and node.get("mode") in {"manual", "draft"} and payload.get("confirm") is True:
+                    return _error("human_confirmation_required", "업무 패널에서 내용을 직접 확인한 뒤 확인 완료 또는 검토 완료 버튼을 눌러 주세요. AI가 대신 완료할 수 없습니다.")
                 if action == "run" and node.get("type") in {"p", "t"}:
                     if payload.get("retry_failed") is True:
                         return _error("retry_job_required", "실패한 잡의 결과를 확인하고 해당 잡에서 재시도를 요청해 주세요.")

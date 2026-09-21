@@ -53,7 +53,7 @@
     selectPanel:screen=>window.__eesWorkPanelV1?.select(chatId(),screen,{open:true})
   }});
   const designer = createWorkDesigner({callbacks:{
-    save_draft:()=>editAction('save_draft'),validate_draft:()=>editAction('validate_draft'),publish:()=>editAction('publish')
+    save_draft:()=>editAction('save_draft'),validate_draft:()=>editAction('validate_draft'),publish:()=>editAction('publish'),authoringModels,authoringReply
   }});
   function snapshot() {
     return {state,category,browsingSystem,browsingSite,browseNodeId,browseActive,runView,historyCase,errorMessage,busy,
@@ -78,6 +78,42 @@
     let result;try{result=await response.json();}catch(_){throw new Error('업무 정보를 가져오지 못했습니다. 배포 상태를 확인해 주세요.');}
     if (!response.ok || result.ok === false) {const failure=new Error(result.error?.message || result.detail?.message || '업무 정보를 가져오지 못했습니다. 로그인과 배포 상태를 확인해 주세요.');failure.result=result;throw failure;}
     return result;
+  }
+  async function authoringModels() {
+    const headers={Accept:'application/json',Authorization:'Bearer '+token()},options={credentials:'same-origin',cache:'no-store',headers};
+    const [response,settings]=await Promise.all([fetch('/api/models',options),fetch('/api/v1/users/user/settings',options).then(r=>r.ok?r.json():{}).catch(()=>({}))]);
+    if(!response.ok)throw new Error('models_unavailable');
+    const result=await response.json();
+    return {models:(result.data || []).filter(model=>typeof model.id==='string'&&model.id&&!model.direct&&model.type!=='embedding').map(model=>({id:model.id,name:model.name || model.id})),preferred:Array.isArray(settings.ui?.models)?settings.ui.models:[]};
+  }
+  async function authoringReply({model,messages,signal}) {
+    const controller=new AbortController(),abort=()=>controller.abort();signal.addEventListener('abort',abort,{once:true});
+    const timeout=setTimeout(abort,90000),auth=token();
+    try {
+      if(signal.aborted||!state?.can_manage)throw new Error('작성 요청을 중단했습니다. 현재 초안은 그대로입니다.');
+      // Use the existing authenticated model path without chat creation or tool resolution.
+      // The pinned middleware explicitly treats tools: [] as opting out of builtins.
+      const response=await fetch('/api/chat/completions',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json',Authorization:'Bearer '+auth},signal:controller.signal,body:JSON.stringify({model,messages,stream:false,tools:[],tool_ids:[],features:{}})});
+      if(!response.ok)throw new Error('답변을 받지 못했습니다. 기존 모델 연결과 권한을 확인해 주세요.');
+      let text='';
+      if((response.headers.get('content-type') || '').includes('text/event-stream')){
+        const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='',complete=false;
+        while(true){const {done,value}=await reader.read();buffer=(buffer+decoder.decode(value || new Uint8Array(),{stream:!done})).replace(/\r\n/g,'\n');let end;
+          while((end=buffer.indexOf('\n\n'))>=0){const frame=buffer.slice(0,end);buffer=buffer.slice(end+2);const data=frame.split('\n').filter(line=>line.startsWith('data:')).map(line=>line.slice(5).trimStart()).join('\n');if(!data)continue;if(data==='[DONE]'){complete=true;continue;}const chunk=JSON.parse(data);if(chunk.error)throw new Error('모델 응답이 중단됐습니다. 현재 초안은 그대로입니다.');const choice=chunk.choices?.[0];if(choice?.delta?.tool_calls||choice?.message?.tool_calls)throw new Error('도구 실행 응답은 이 작성 영역에서 사용할 수 없습니다.');text+=choice?.delta?.content || choice?.message?.content || '';if(choice?.finish_reason)complete=true;}
+          if(text.length+buffer.length>48000)throw new Error('답변이 너무 깁니다. 수정할 안내를 나누어 요청해 주세요.');
+          if(done)break;
+        }
+        if(!complete)throw new Error('모델 응답이 끝나기 전에 연결이 종료됐습니다. 초안은 그대로입니다.');
+      }else{
+        const result=await response.json(),message=result.choices?.[0]?.message;
+        if(message?.tool_calls?.length)throw new Error('도구 실행 응답은 이 작성 영역에서 사용할 수 없습니다.');
+        text=message?.content;
+      }
+      if(auth!==token()||signal.aborted)throw new Error('작성 요청을 중단했습니다. 현재 초안은 그대로입니다.');
+      if(typeof text!=='string'||!text.trim()||text.length>48000)throw new Error('답변을 읽지 못했습니다. 현재 초안은 그대로입니다.');
+      return text;
+    }catch(error){if(controller.signal.aborted)throw new Error(signal.aborted?'작성을 중단했습니다.':'응답 대기 시간이 지났습니다. 현재 초안은 그대로입니다.');throw error;}
+    finally{clearTimeout(timeout);signal.removeEventListener('abort',abort);}
   }
   function accept(result) {
     const previousCase=state?.case?.id,firstForRoute=acceptedRoute!==location.pathname+location.search;state = result;acceptedRoute=location.pathname+location.search;
@@ -108,7 +144,8 @@
     busy = true; errorMessage = ''; setBusy();
     const at = generation, scopeEpoch=navigationRequest, active=selectedCase(), cid = active?.id || '', auth = token(), route = location.pathname + location.search;
     const isAdmin = ['save_draft','validate_draft','publish'].includes(actionName);
-    const body = {action:actionName,chat_id:chatId(),case_id:cid,node_id:nodeId,payload,expected_revision:isAdmin ? designer.readDraft().revision : (active?.revision || 0),...override};
+    const submittedDraft=isAdmin?designer.readDraft():null;
+    const body = {action:actionName,chat_id:chatId(),case_id:cid,node_id:nodeId,payload,expected_revision:isAdmin ? submittedDraft.revision : (active?.revision || 0),...override};
     const firstWrite=['update_inputs','run'].includes(actionName)&&!body.case_id;
     if(firstWrite)body.scope={site_id:browsingSite,system:browsingSystem,process_id:processId(),version:previewVersion || state.catalog.version};
     if(['create','update_inputs','run'].includes(actionName)){
@@ -120,7 +157,7 @@
     try {
       const result = await api('action', body);
       if (at !== generation || scopeEpoch !== navigationRequest || auth !== token() || route !== location.pathname + location.search || !available()) return null;
-      if (isAdmin && actionName !== 'validate_draft') designer.markSaved();
+      if (isAdmin && actionName !== 'validate_draft') designer.markSaved(submittedDraft.definition,result.draft_revision);
       if ((actionName === 'create'||firstWrite) && !result.case?.chat_id) pendingId = result.case?.id || '';
       if(firstWrite&&result.case)view.adoptPreviewDraft(result.case.id,nodeId);
       accept(result); return result;
@@ -130,7 +167,7 @@
       // Keep that exact case and the user's draft instead of creating another.
       const saved=error.result;
       if(firstWrite&&saved?.case&&saved.catalog){if(!saved.case.chat_id)pendingId=saved.case.id;view.adoptPreviewDraft(saved.case.id,nodeId);accept({...saved,ok:true});}
-      else if(['case_selection_required','revision_conflict'].includes(saved?.error?.code)){await refresh();if(at===generation&&scopeEpoch===navigationRequest&&auth===token()&&route===location.pathname+location.search){errorMessage=error.message;render();}}
+      else if(['case_selection_required','revision_conflict'].includes(saved?.error?.code)){await refresh();if(at===generation&&scopeEpoch===navigationRequest&&auth===token()&&route===location.pathname+location.search){errorMessage=error.message;render();if(saved.error.code==='revision_conflict')workUI.dialog({title:'저장된 업무가 먼저 변경되었습니다',html:'<p>오래된 화면의 요청으로 기존 기록을 덮어쓰지 않았습니다.</p><p>개인 대화와 작성 중인 초안은 그대로 유지했습니다. 최신 상태와 비교해 이어가세요.</p>',confirmLabel:'최신 상태 보기'}).then(accepted=>{if(accepted&&at===generation&&auth===token())refresh();});}}
       else render();
     } return null;}
     finally {busy = false; setBusy();if(scopeEpoch!==navigationRequest&&available()&&auth===token())refresh();}
@@ -288,6 +325,7 @@
       if(!canWriteEdits(id))return;
       const edits=view.readJobEdits(id);
       if(edits.inputsChanged||edits.documentChanged){errorMessage='작성한 입력이나 초안을 먼저 반영한 뒤 진행해 주세요.';renderPanel();return;}
+      if(['manual','draft'].includes(n.mode)&&!confirm(`${n.name || '선택한 업무'}\n${n.rule || '등록된 완료 조건을 직접 확인해 주세요.'}\n\n직접 확인한 내용으로 완료를 기록할까요?`))return;
     }
     await action('run',n.type!=='j'?{retry_failed:false}:n.mode==='manual'||n.mode==='draft'?{confirm:true}:{},id);
   }
@@ -295,7 +333,7 @@
     const draft=designer.readDraft();
     if(name==='save_draft'){await action(name,{definition:draft.definition});return;}
     if(draft.dirty){errorMessage='변경한 초안을 먼저 저장해 주세요.';renderDesigner();return;}
-    if(name==='publish'&&!confirm('이 초안을 게시할까요? 새 진행 건부터 적용되며 기존 진행 건의 절차와 결과는 유지됩니다.'))return;
+    if(name==='publish'&&!await designer.confirmPublish())return;
     await action(name);
   }
   function render() {renderView();renderDesigner();}

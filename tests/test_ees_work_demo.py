@@ -147,19 +147,19 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
     def text(self, selector):
         return self.read(selector, "innerText") or ""
 
-    def click(self, selector, confirm=False):
+    def click(self, selector, confirm=None):
         point = self.browser.evaluate("(() => {const e=[...document.querySelectorAll("
             + json.dumps(selector) + ")].find(e=>e.getClientRects().length);if(!e)return null;"
             + "e.scrollIntoView({block:'center',inline:'nearest'});const r=e.getBoundingClientRect();"
             + "const x=r.x+r.width/2,y=r.y+r.height/2;return {x,y,disabled:!!e.disabled,"
-            + "hit:e.contains(document.elementFromPoint(x,y))};})()")
+            + "hit:e.contains(document.elementFromPoint(x,y)),workDialog:e.hasAttribute('data-work-confirm')};})()")
         self.assertIsNotNone(point, "Visible control missing: " + selector)
         self.assertFalse(point["disabled"], "Control disabled: " + selector)
         self.assertTrue(point["hit"], "Control is covered: " + selector)
         for event_type in ("mousePressed", "mouseReleased"):
             params = {"type": event_type, "x": point["x"], "y": point["y"],
                 "button": "left", "buttons": 1 if event_type == "mousePressed" else 0, "clickCount": 1}
-            if confirm and event_type == "mouseReleased":
+            if confirm is not None and event_type == "mouseReleased" and not point['workDialog']:
                 # Chrome holds the input reply while a native confirm is open.
                 # Handle its real dialog event, without replacing window.confirm.
                 self.browser.counter += 1
@@ -171,10 +171,13 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     event = self.browser.receive(deadline)
                     self.browser.events.append(event)
                     if event.get("method") == "Page.javascriptDialogOpening":
-                        self.browser.call("Page.handleJavaScriptDialog", {"accept": True})
+                        self.browser.call("Page.handleJavaScriptDialog", {"accept": confirm})
                         break
             else:
                 self.browser.call("Input.dispatchMouseEvent", params)
+        if confirm is not None and point['workDialog']:
+            self.wait("document.querySelector('#ees-work-dialog')?.open")
+            self.click('#ees-work-dialog [data-dialog-confirm]' if confirm else '#ees-work-dialog [data-dialog-close]')
 
     def key(self, key, code, modifiers=0):
         for event_type in ("keyDown", "keyUp"):
@@ -285,8 +288,10 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
 
     def run_job(self, node_id, status="passed"):
         self.choose(node_id)
-        before = self.current()["case"]["revision"]
-        self.click("#ees-work-run")
+        case = self.current()["case"]
+        before = case["revision"]
+        human = case["definition"]["nodes"][node_id]["mode"] in ("manual", "draft")
+        self.click("#ees-work-run", confirm=True if human else None)
         self.wait("!document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
         result = self.current()["case"]
         self.assertGreater(result["revision"], before)
@@ -344,6 +349,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertNotIn("P 프로세스", self.text("#ees-work-entry"))
         self.assertNotIn("T 태스크", self.text("#ees-work-entry"))
         self.assertNotIn("J 잡", self.text("#ees-work-entry"))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-entry .ew-type')"))
         if self.read(expand("setup-p"), "getAttribute('aria-expanded')") == "false":
             self.click(expand("setup-p"))
         self.assertEqual(set(visible_ids()), {"setup-p", *nodes["setup-p"]["children"]})
@@ -366,7 +372,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(self.text("#ees-work-content h2"), nodes["scope-j"]["name"])
         # An action response also passes through accept(); it must update the
         # result without reopening the ancestor the user deliberately closed.
-        self.click("#ees-work-run")
+        self.click("#ees-work-run", confirm=True)
         self.wait("!document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
         self.assertEqual(self.current()["case"]["jobs"]["scope-j"]["status"], "passed")
         self.assertNotIn("scope-j", visible_ids())
@@ -546,6 +552,18 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertIsNotNone(self.read('input[type="file"]'))
 
     def test_panel_and_ai_tool_run_same_persisted_case_with_retry_history(self):
+        def assert_record_visible(selector, record):
+            rendered = self.text(selector)
+            self.assertIn("모의 점검", rendered)
+            self.assertIn(record["at"], rendered)
+            for check in record["checks"]:
+                for field in ("name", "detail", "input", "at"):
+                    self.assertIn(check[field], rendered)
+            statuses = self.browser.evaluate("Array.from(document.querySelectorAll("
+                + json.dumps(selector + " .ew-check [data-status]")
+                + "), element => element.dataset.status)")
+            self.assertEqual(statuses, [check["status"] for check in record["checks"]])
+
         self.create_case()
         self.run_job("scope-j")
         self.run_job("infra-j")
@@ -560,13 +578,33 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.wait("document.querySelector('#chat-container')?.innerText.includes('실제 대화 입력이 전달되었습니다.')")
         self.assertEqual(len(self.server.tool_results), 1)
         self.assertTrue(self.server.tool_results[0]["ok"], self.server.tool_results)
-        self.assertEqual(self.current()["case"]["jobs"]["db-j"]["status"], "passed")
-        self.wait("document.querySelector('#ees-work-content [data-work-section=current-result]')?.innerText.includes('모의 점검을 완료했습니다.')")
+        db_job = self.current()["case"]["jobs"]["db-j"]
+        self.assertEqual(db_job["status"], "passed")
+        self.wait("document.querySelector('#ees-work-content .ew-work-current-title')?.innerText === '점검 결과가 저장되었습니다.'")
+        evidence = '#ees-work-content [data-work-section="current-result"] details'
+        self.click(evidence + " > summary")
+        self.assertTrue(self.read('#ees-work-dialog', "open"))
+        self.assertIn("fixture-db-target", self.text('#ees-work-dialog'))
+        assert_record_visible('#ees-work-dialog', db_job["history"][-1])
+        self.click('#ees-work-dialog [data-dialog-close]')
         self.run_job("ap-j", "failed")
-        self.assertEqual([x["status"] for x in self.current()["case"]["jobs"]["ap-j"]["checks"]],
+        failed_job = self.current()["case"]["jobs"]["ap-j"]
+        self.assertEqual([x["status"] for x in failed_job["checks"]],
                          ["passed", "passed", "failed", "skipped"])
         self.run_job("ap-j")
-        self.assertTrue(self.current()["case"]["jobs"]["ap-j"]["history"])
+        retried_job = self.current()["case"]["jobs"]["ap-j"]
+        self.assertEqual(len(retried_job["history"]), 2)
+        self.assertEqual(retried_job["history"][0], failed_job["history"][-1])
+        self.assertEqual(retried_job["history"][-1]["status"], "passed")
+        previous = '#ees-work-content [data-work-section="history"]'
+        self.click(previous + " > summary")
+        previous = '#ees-work-dialog'
+        self.assertTrue(self.read(previous, "open"))
+        self.click(previous + " .ew-history-attempt > summary")
+        self.assertTrue(self.read(previous + " .ew-history-attempt", "open"))
+        self.assertIn("1차 · 실패", self.text(previous))
+        assert_record_visible(previous + " .ew-history-attempt", failed_job["history"][-1])
+        self.click('#ees-work-dialog [data-dialog-close]')
         self.run_job("interface-j")
         case_id = self.current()["case"]["id"]
         self.navigate("/c/other-chat")
@@ -577,6 +615,230 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(self.current()["case"]["id"], case_id)
         self.assertEqual(self.current()["case"]["jobs"]["db-j"]["status"], "passed")
 
+    def test_cancelled_human_confirmation_keeps_saved_state(self):
+        self.create_case()
+        self.choose('scope-j')
+        before = self.current()['case']
+        self.click('#ees-work-run', confirm=False)
+        self.assertEqual(self.current()['case'], before)
+        self.assertIn('담당자의 확인이 필요합니다.', self.text('#ees-work-content'))
+        self.run_job('scope-j')
+        self.assertIn('담당자 확인이 완료됐습니다.', self.text('#ees-work-content'))
+
+    def test_workspace_ai_authoring_keeps_changes_local_and_targeted(self):
+        self.create_case()
+        before = self.current()
+        self.navigate('/workspace/models?ees=workflow')
+        self.wait("!!document.querySelector('#ees-work-designer')")
+        self.assertIsNotNone(self.read('#ees-work-authoring'))
+        self.assertIn('AI에게 물어보기', self.text('#ees-work-authoring'))
+        self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
+        self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
+        writes = self.server.requests.count(('POST', '/api/ees-work/action'))
+        self.fill('#ees-work-authoring-input', '이 업무를 설명해 줘')
+        self.click('#ees-work-authoring-form button[type=submit]')
+        self.wait("document.querySelector('#ees-work-authoring')?.innerText.includes('현재 업무의 목적과 완료 조건')")
+        self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), before['draft']['nodes']['db-j'].get('instructions', ''))
+        replacement = '1. 승인된 점검 대상을 확인합니다.\n2. 점검 결과를 검토합니다.'
+        self.server.authoring_answer = json.dumps({'answer': '확인 순서를 나눴습니다.', 'instructions': replacement})
+        self.fill('#ees-work-authoring-input', '수행 안내만 쉬운 두 단계로 바꿔 줘')
+        self.click('#ees-work-authoring [data-action=ai_edit]')
+        self.wait("document.querySelector('#ees-work-node-form [name=instructions]')?.value === " + json.dumps(replacement))
+        self.assertIn('저장하지 않은 변경', self.text('.ew-designer-status'))
+        self.assertEqual(self.server.requests.count(('POST', '/api/ees-work/action')), writes)
+        self.assertEqual(self.current()['draft'], before['draft'])
+        request = self.server.authoring_requests[-1]
+        self.assertEqual(request['model'], 'fixture-model')
+        self.assertEqual(request['tools'], [])
+        self.assertEqual(request['tool_ids'], [])
+        self.assertNotIn('chat_id', request)
+        self.assertNotIn('parent_id', request)
+        self.assertIn('DB 연결 확인', request['messages'][0]['content'])
+        self.assertEqual(set(self.server.chats), {'existing-chat', 'other-chat'})
+        self.fill('#ees-work-authoring-input', '아직 보내지 않은 질문')
+        self.click('#ees-work-designer [data-action=edit_node][data-node-id=ap-j]')
+        self.assertNotIn('확인 순서를 나눴습니다.', self.text('#ees-work-authoring'))
+        self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
+        self.assertEqual(self.read('#ees-work-authoring-input', 'value'), '아직 보내지 않은 질문')
+        self.assertIn('확인 순서를 나눴습니다.', self.text('#ees-work-authoring'))
+        self.click('#ees-work-authoring [data-action=ai_undo]')
+        self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), before['draft']['nodes']['db-j'].get('instructions', ''))
+        self.server.authoring_sse = True  # A model preset may force streaming.
+        self.fill('#ees-work-authoring-input', '다시 안내를 수정해 줘')
+        self.click('#ees-work-authoring [data-action=ai_edit]')
+        self.wait("document.querySelector('#ees-work-node-form [name=instructions]')?.value === " + json.dumps(replacement))
+        self.click('#ees-work-node-form .ew-designer-advanced > summary')
+        self.wait("document.querySelector('#ees-work-dialog')?.open")
+        self.assertIn('기존 스킬', self.text('#ees-work-dialog'))
+        self.click('#ees-work-dialog [data-dialog-close]')
+        self.assertFalse(self.read('.ew-designer-advanced', 'open'))
+        self.click('#ees-work-designer [data-action=save_draft]')
+        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('초안 1')")
+        saved = self.current()
+        expected = json.loads(json.dumps(before['draft']))
+        expected['version'] = before['catalog']['version'] + 1
+        expected['nodes']['db-j']['instructions'] = replacement
+        self.assertEqual(saved['draft'], expected)
+        self.assertEqual(saved['case']['definition'], before['case']['definition'])
+        self.assertEqual(saved['catalog'], before['catalog'])
+        self.click('#ees-work-designer [data-action=validate_draft]')
+        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('게시 전 확인 완료')")
+        self.click('#ees-work-designer [data-action=publish]', confirm=False)
+        self.assertEqual(self.current()['catalog']['version'], before['catalog']['version'])
+        self.click('#ees-work-designer [data-action=publish]', confirm=True)
+        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('게시 v2')")
+        self.assertEqual(self.current()['catalog']['nodes']['db-j']['instructions'], replacement)
+        self.assertEqual(self.current()['case']['definition'], before['case']['definition'])
+        self.assertEqual(self.current()['case']['jobs'], before['case']['jobs'])
+        self.screenshot('ees-workspace-ai-published')
+
+    def test_workspace_ai_delayed_reply_does_not_overwrite_typing_or_another_target(self):
+        self.navigate('/workspace/models?ees=workflow')
+        self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
+        self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
+        self.wait("document.querySelector('#ees-work-designer [data-action=edit_node][aria-current=step]')?.dataset.nodeId === 'db-j'")
+        self.server.authoring_answer = json.dumps({'answer': 'AI 응답', 'instructions': '늦게 도착한 안내'})
+        for change in ('typing', 'selection'):
+            with self.subTest(change=change):
+                self.server.authoring_started.clear()
+                self.server.authoring_hold.clear()
+                self.fill('#ees-work-authoring-input', '안내를 수정해 줘')
+                self.click('#ees-work-authoring [data-action=ai_edit]')
+                self.assertTrue(self.server.authoring_started.wait(timeout=3))
+                self.assertIn('DB 연결 확인', self.server.authoring_requests[-1]['messages'][0]['content'])
+                if change == 'typing':
+                    self.fill('#ees-work-node-form [name=instructions]', '응답 중 직접 작성한 안내')
+                else:
+                    self.click('#ees-work-designer [data-action=edit_node][data-node-id=ap-j]')
+                    self.wait("document.querySelector('#ees-work-designer [data-action=edit_node][aria-current=step]')?.dataset.nodeId === 'ap-j'")
+                    self.assertNotIn('AI 응답', self.text('#ees-work-authoring'))
+                    # Return before the reply: matching the final node ID alone
+                    # must not treat a changed selection as an unchanged request.
+                    self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
+                self.server.authoring_hold.set()
+                self.wait("!document.querySelector('#ees-work-authoring [data-action=ai_cancel]')")
+                self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), '응답 중 직접 작성한 안내')
+                self.assertIn('적용하지 않았습니다', self.text('#ees-work-authoring'))
+
+    def test_workspace_ai_rejects_unexpected_edits_and_preserves_request_on_failure(self):
+        self.navigate('/workspace/models?ees=workflow')
+        self.wait("!!document.querySelector('#ees-work-designer')")
+        self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
+        self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
+        original = self.read('#ees-work-node-form [name=instructions]', 'value')
+        for answer, status in [('잘못된 JSON', 200),
+                               (json.dumps({'answer': '완료', 'instructions': '바꾸면 안 됨', 'tools': []}), 200),
+                               ('서버 오류', 503)]:
+            with self.subTest(status=status, answer=answer):
+                self.server.authoring_answer, self.server.authoring_status = answer, status
+                self.fill('#ees-work-authoring-input', '안내만 바꿔 줘')
+                self.click('#ees-work-authoring [data-action=ai_edit]')
+                self.wait("!!document.querySelector('#ees-work-authoring [role=alert]') && !document.querySelector('#ees-work-authoring [data-action=ai_cancel]')")
+                self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), original)
+                self.assertEqual(self.read('#ees-work-authoring-input', 'value'), '안내만 바꿔 줘')
+        self.assertEqual(self.server.requests.count(('POST', '/api/ees-work/action')), 0)
+
+    def test_work_evidence_dialog_preserves_current_selection(self):
+        self.create_case()
+        self.run_job('scope-j')
+        before = self.current()['case']
+        self.click('#ees-work-content [data-work-section=current-result] details > summary')
+        self.assertTrue(self.read('#ees-work-dialog', 'open'))
+        self.assertIn('담당자 확인', self.text('#ees-work-dialog'))
+        self.key('Escape', 27)
+        self.wait("!document.querySelector('#ees-work-dialog')")
+        self.assertIsNone(self.read('#ees-work-dialog'))
+        self.assertEqual(self.current()['case'], before)
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('#ees-work-content summary[data-work-overlay]')"))
+        self.click('#ees-work-content [data-action=work_records]')
+        self.assertIn('담당자 확인', self.text('#ees-work-dialog'))
+        self.assertNotIn('기존 대화 기록', self.text('#ees-work-dialog'))
+        self.screenshot('ees-work-evidence-dialog')
+        self.click('#ees-work-dialog [data-dialog-close]')
+        self.click('#ees-work-content [data-action=work_summary]')
+        self.assertIn('신규 공장 횡전개', self.text('#ees-work-dialog'))
+        self.assertEqual(self.current()['case'], before)
+        self.click('#ees-work-dialog [data-dialog-close]')
+
+    def test_workspace_ai_cancel_and_account_change_preserve_saved_assets(self):
+        before = self.current()
+        self.navigate('/workspace/models?ees=workflow')
+        self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
+        self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
+        self.server.authoring_answer = json.dumps({'answer': '늦은 응답', 'instructions': '적용하면 안 되는 안내'})
+        for changed_input in ('', '중단하기 전에 새로 작성한 질문'):
+            with self.subTest(changed_input=changed_input):
+                self.server.authoring_started.clear()
+                self.server.authoring_hold.clear()
+                self.fill('#ees-work-authoring-input', '중단할 작성 요청')
+                self.click('#ees-work-authoring [data-action=ai_edit]')
+                self.assertTrue(self.server.authoring_started.wait(timeout=3))
+                if changed_input:
+                    self.fill('#ees-work-authoring-input', changed_input)
+                self.click('#ees-work-authoring [data-action=ai_cancel]')
+                self.wait("!document.querySelector('#ees-work-authoring [data-action=ai_cancel]')")
+                self.assertEqual(self.read('#ees-work-authoring-input', 'value'), changed_input or '중단할 작성 요청')
+                self.server.authoring_hold.set()
+                self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), '')
+        self.server.authoring_started.clear()
+        self.server.authoring_hold.clear()
+        self.click('#ees-work-authoring [data-action=ai_edit]')
+        self.assertTrue(self.server.authoring_started.wait(timeout=3))
+        self.browser.evaluate("localStorage.setItem('token','fixture-second-session');window.dispatchEvent(new Event('storage'))")
+        self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model' && !document.querySelector('#ees-work-authoring [data-action=ai_cancel]') && document.querySelector('#ees-work-authoring-input')?.value === ''")
+        self.server.authoring_hold.set()
+        self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
+        self.assertNotIn('중단할 작성 요청', self.text('#ees-work-authoring'))
+        self.assertNotIn('늦은 응답', self.text('#ees-work-authoring'))
+        self.assertEqual(self.current()['draft'], before['draft'])
+        self.assertEqual(self.current()['catalog'], before['catalog'])
+        self.assertEqual(self.server.requests.count(('POST', '/api/ees-work/action')), 0)
+
+    def test_revision_conflict_dialog_keeps_unsaved_input_and_new_server_result(self):
+        self.create_case()
+        self.choose('db-j')
+        before = self.current()['case']
+        self.fill('#ees-work-inputs input[name=db]', '직접 작성 중인 대상')
+        remote = asyncio.run(self.server.workflow.handle_action(self.server.user, {
+            'action': 'update_inputs', 'chat_id': 'existing-chat', 'case_id': before['id'],
+            'node_id': 'db-j', 'expected_revision': before['revision'],
+            'payload': {'inputs': {'db': '먼저 저장된 다른 대상'}}}))
+        self.assertTrue(remote['ok'], remote)
+        self.click('#ees-work-inputs-save')
+        self.wait("document.querySelector('#ees-work-dialog')?.open")
+        self.assertIn('먼저 변경되었습니다', self.text('#ees-work-dialog'))
+        self.assertEqual(self.read('#ees-work-inputs input[name=db]', 'value'), '직접 작성 중인 대상')
+        self.assertEqual(self.current()['case']['jobs'], remote['case']['jobs'])
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("!document.querySelector('#ees-work-dialog')")
+        self.assertEqual(self.read('#ees-work-inputs input[name=db]', 'value'), '직접 작성 중인 대상')
+        self.assertEqual(self.current()['case']['jobs'], remote['case']['jobs'])
+
+    def test_workspace_authoring_and_dialog_layout_and_keyboard(self):
+        self.navigate('/workspace/models?ees=workflow')
+        self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
+        self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
+        for width, height in ((1920, 1080), (900, 900), (600, 900)):
+            for theme in ('light', 'dark'):
+                with self.subTest(width=width, theme=theme):
+                    self.browser.call('Emulation.setDeviceMetricsOverride', {
+                        'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
+                    self.browser.evaluate("document.documentElement.classList.toggle('dark'," + str(theme == 'dark').lower() + ")")
+                    self.browser.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+                    self.assertLessEqual(self.browser.evaluate('document.documentElement.scrollWidth'), width + 1)
+                    self.assertLessEqual(self.browser.evaluate("document.querySelector('#ees-work-authoring').scrollWidth-document.querySelector('#ees-work-authoring').clientWidth"), 1)
+                    self.screenshot('ees-workspace-authoring-' + theme + '-' + str(width))
+                    self.click('#ees-work-node-form .ew-designer-advanced > summary')
+                    self.wait("document.querySelector('#ees-work-dialog')?.open")
+                    self.key('Tab', 9)
+                    self.assertTrue(self.browser.evaluate("!!document.activeElement?.closest('#ees-work-dialog')"))
+                    self.assertLessEqual(self.browser.evaluate("document.querySelector('#ees-work-dialog').getBoundingClientRect().right"), width)
+                    self.screenshot('ees-workspace-advanced-' + theme + '-' + str(width))
+                    self.key('Escape', 27)
+                    self.wait("!document.querySelector('#ees-work-dialog')")
+                    self.assertTrue(self.browser.evaluate("document.activeElement?.matches('summary[data-work-advanced]')"))
+                    self.assertFalse(self.read('.ew-designer-advanced', 'open'))
+
     def test_existing_workspace_editor_publication_and_user_denial(self):
         self.create_case()
         original_version = self.current()["case"]["version"]
@@ -586,11 +848,16 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.click("#ees-work-workspace-tab")
         self.wait("!!document.querySelector('#ees-work-designer')")
         self.assertIsNotNone(self.read('#workspace-container'))
+        self.assertIn("업무 수행 안내", self.text("#ees-work-designer"))
+        self.assertIn("완료 조건", self.text("#ees-work-designer"))
+        self.assertIn("고급 설정", self.text("#ees-work-designer"))
+        self.assertNotIn("프로세스 편집", self.text("#ees-work-designer"))
+        self.assertNotIn("태스크 추가", self.text("#ees-work-designer"))
+        self.assertNotIn("잡 추가", self.text("#ees-work-designer"))
         self.click('#ees-work-designer [data-action="edit_node"][data-node-id="db-j"]')
         writes_before = self.server.requests.count(("POST", "/api/ees-work/action"))
         self.fill('#ees-work-node-form input[name="name"]', "DB 연결 확인 개정")
-        self.click('#ees-work-node-form button[type="submit"]')
-        # Applying the form changes only the local editor draft. The designer
+        # Typing changes only the local editor draft, without a form submit. The designer
         # may detach during ordinary SPA navigation, but must retain that draft
         # and its dirty state until the explicit server save.
         for route in ("models", "knowledge"):
@@ -614,7 +881,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertNotIn("저장하지 않은 변경", self.text(".ew-designer-status"))
         self.assertEqual(self.current()["draft"]["nodes"]["db-j"]["name"], "DB 연결 확인 개정")
         self.click('#ees-work-designer [data-action="validate_draft"]')
-        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('검증 완료')")
+        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('게시 전 확인 완료')")
         self.click('#ees-work-designer [data-action="publish"]', confirm=True)
         self.wait("document.querySelector('.ew-designer-status')?.innerText.includes("
                   + json.dumps("게시 v" + str(original_version + 1)) + ")")
@@ -814,7 +1081,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.server.delay_next_action = True
         self.server.action_response_hold.clear()
         before = self.browser.evaluate("performance.getEntriesByType('resource').filter(e=>e.name.endsWith('/api/ees-work/action')).length")
-        self.click("#ees-work-run")
+        self.click("#ees-work-run", confirm=True)
         self.assertTrue(self.server.action_response_started.wait(timeout=2))
         self.click('a[href="/c/other-chat"]')
         self.wait("location.pathname === '/c/other-chat' && !document.querySelector('#ees-work-context')"
@@ -842,7 +1109,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.server.delay_next_action = True
         self.server.action_response_hold.clear()
         before = self.browser.evaluate("performance.getEntriesByType('resource').filter(e=>e.name.endsWith('/api/ees-work/action')).length")
-        self.click("#ees-work-run")
+        self.click("#ees-work-run", confirm=True)
         self.assertTrue(self.server.action_response_started.wait(timeout=2))
         original_url = self.browser.evaluate("location.pathname+location.search")
         # This fixed display RPC is the same one available to the registered

@@ -2,6 +2,17 @@
 
 완료된 변경·중요 결정과 날짜별 관찰을 기록합니다. 다음 작업과 최신 배포 상태는 [STATUS](docs/STATUS.md), 시험별 현재 판정은 [평가표](evals/scenarios.md)가 원본입니다. 과거 실패 기록을 현재 장애나 재실행 지시로 해석하지 않습니다.
 
+## 2026-09-21
+
+- 같은 PR #57에서 Workspace의 업무별 AI 작성 영역을 기존 인증·모델 API로 연결함. 질문/안내 수정·되돌리기·중단을 구분하고 수행 안내만 미저장 초안에 반영하며 지연 응답·업무 이동·직접 편집·계정 변경 시 새 입력과 기존 자산을 보존함. 근거/검토 자료/업무 기록/진행 요약·고급 설정·게시·revision 충돌을 기존 UI의 대화상자로 보완하고 Esc·Tab·초점 복귀를 실제 브라우저에서 검사함. 추가 프레임워크·서버·DB는 없음. [설계 대조·실패와 최종 검사](evals/scenarios.md#simplified-work-ux-implementation-20260921).
+- 불완전한 시험 wheel이 관측되어 빌더가 닫힌 ZIP의 파일 목록·CRC를 확인한 뒤에만 wheel/manifest를 내보내도록 보완함. 잘린 ZIP의 배포물 공개 차단을 재현·회귀 검사했으며 관측된 파일 불완전성의 근본 원인을 재빌드 성공만으로 단정하지 않음.
+
+- 사용자 요청으로 Work의 개발 검증 환경을 저장소 `.venv` 한 곳과 시험 브라우저 하나로 준비하고 기존 CI 의존성 목록을 재사용함. 공식 wheel 검사의 subprocess 인코딩 누락을 수정하고 Native 브라우저 시험에서 실제 근거·실패 후 이력 열람을 보강함. 새 제품 프레임워크·회사 PC 환경 변경은 없으며 [최초 실패와 환경 준비 후 검증](evals/scenarios.md#simplified-work-ux-implementation-20260921)을 보존함.
+
+- Work에서 PR #57의 동작을 재현해 초안 검토 완료 표시, 완료된 하위 업무의 전체 진행 복귀, 사람 확인 버튼의 취소와 AI Tool의 대리 완료 거절을 보완함. Workspace는 입력 즉시 미저장 상태를 표시하고 재조회·업무 이동·자기 저장 응답 중 새 입력 및 접힌 연결을 보존함. 실제 조립한 Work 자산의 내용 해시로 같은 ees.10 버전의 캐시 URL을 구분함. 서비스/DB/권한 계약과 Pack `0.2.12`는 유지하며 [실제 로컬 검사·실패·미실행 경계](evals/scenarios.md#simplified-work-ux-implementation-20260921)를 기록함. 아래 초기 구현 당시 검사 한계와 구분함.
+- Figma의 단순 UX 기준을 기존 Native EES Work view/designer/CSS에 제한적으로 구현함. Runtime에서 P/T/J 기술 badge를 숨기고 업무명·현재 상태·완료 조건·근거·읽기 전용 이력·다음 행동 하나를 우선하며, 사람 확인은 실제 확인 완료 액션으로만 기록하고 미연결 Tool은 `실행 연결 필요`로 표시함. 실패 부모는 `문제 확인` 하나만 제시하고 적용 제외는 현재 상태에 직접 표시함. Workspace는 업무 이름/목적/안내/완료 조건을 먼저 보여주고 기술 연결을 고급 설정으로 접되 초안 저장·게시와 기존 진행 건의 게시 snapshot 계약을 유지함. [구현·검증 경계](evals/scenarios.md#simplified-work-ux-implementation-20260921).
+- 새 서버·프레임워크·저장 계층을 추가하지 않았고 launcher/server 계약과 사용자 대화·Skill·Tool·모델·권한·기존 이력은 변경하지 않음. 기존 관리 EES Prompt에는 선택 업무를 `목적 → 현재 상태 → 다음 행동`으로 설명하는 최소 지침만 추가하고 Agent Pack을 `0.2.12`로 갱신함. V8의 실제 렌더 함수 합성 검증은 수행했으나 checkout 기반 unittest/check_docs, 실제 브라우저/Windows/Open WebUI/사내 LLM은 미실행이며 원격 CI는 9월 생략 방침을 유지함. 초기 계획은 PR 검토 후 현재 개인 PC Dogfooding이었으며, 이번 Work 재개는 PR 갱신까지만 수행함.
+
 ## 2026-09-18
 
 - ees.10 시험 Upgrade가 기존 서버 Stop 뒤 `port_check / port_bind / WinError 10048`에서 `changed=false`로 중단된 사건을 분석함. 당시 `port_is_free`의 단발 Windows bind가 일시적인 10048도 즉시 배포 실패로 확정하던 결함을 재현하고, Windows operational bind의 10048만 0.25초 간격·10초 예산·최대 40회 재확인하도록 보완함. 포트 공유·다른 프로세스 종료·자동 Restore는 추가하지 않고 지속 점유·다른 오류는 계속 실패시킴. 사용자는 Restore 없이 기존 Start 한 번으로 서비스를 정상 복구했다고 보고했으며 이를 새 프로그램 적용 성공이나 TIME_WAIT 원인 확정으로 해석하지 않음. [증거와 한계](evals/scenarios.md#windows-port-bind-10048-20260918).

@@ -366,6 +366,23 @@ class BrandingBuildTests(unittest.TestCase):
         self.assertEqual(first["source"]["sha256"], self.source_hash)
         self.assertEqual(first["wheel"]["sha256"], builder.sha256_file(self.root / "first" / builder.WHEEL_FILENAME))
 
+    def test_same_version_ui_change_updates_only_its_content_cache_key(self):
+        self.build("before")
+        source = self.ui / "ees-work-designer.js"
+        source.write_text(source.read_text(encoding="utf-8") + "\n// revised designer\n", encoding="utf-8")
+        self.build("after")
+        with (ZipFile(self.root / "before" / builder.WHEEL_FILENAME) as before,
+              ZipFile(self.root / "after" / builder.WHEEL_FILENAME) as after):
+            indexes = [archive.read("open_webui/frontend/index.html") for archive in (before, after)]
+            for filename in ("ees-work-launcher.css", "ees-work-panel.js", "ees-work-launcher.js"):
+                digests = [hashlib.sha256(archive.read(builder.TARGET_APP + filename)).hexdigest()
+                           for archive in (before, after)]
+                for index, digest in zip(indexes, digests):
+                    self.assertIn(("/_ees10/" + filename + "?v=" + digest).encode("ascii"), index)
+                self.assertEqual(digests[0] == digests[1], filename != "ees-work-launcher.js")
+            self.assertEqual(before.read(builder.TARGET_INFO + "METADATA"),
+                             after.read(builder.TARGET_INFO + "METADATA"))
+
     def test_packaged_workflow_and_managed_tool_share_public_contract(self):
         # Workflow files are actual shipped sources even when the surrounding
         # upstream wheel is a disposable fixture. This is not a native UI test.
@@ -459,7 +476,9 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
             self.assertNotIn(b"/_app/", built.read("open_webui/frontend/index.html"))
             index = built.read("open_webui/frontend/index.html")
             self.assertEqual(index.count(builder.THEME_LINK), 1)
-            self.assertEqual(index.count(builder.WORK_LINK), 1)
+            for filename in ("ees-work-launcher.css", "ees-work-panel.js", "ees-work-launcher.js"):
+                digest = hashlib.sha256(built.read(builder.TARGET_APP + filename)).hexdigest()
+                self.assertIn(("/_ees10/" + filename + "?v=" + digest).encode("ascii"), index)
             main = built.read("open_webui/main.py")
             self.assertLess(main.index(b"install_ees_work_demo(app, get_verified_user)"), main.index(b"app.mount"))
             for relative, target in builder.WORK_ASSETS.items():
@@ -561,6 +580,22 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
         self.wheel.write_bytes(self.wheel.read_bytes() + b"changed")
         with self.assertRaisesRegex(ValueError, "pinned official"):
             self.build()
+
+    def test_incomplete_archive_is_rejected_before_manifest_publication(self):
+        class IncompleteArchive(ZipFile):
+            def __exit__(archive, *args):
+                writing = archive.mode == 'w'
+                result = super().__exit__(*args)
+                if writing:
+                    with open(archive.filename, 'r+b') as output:
+                        output.truncate(100)
+                return result
+
+        with mock.patch.object(builder, 'ZipFile', IncompleteArchive):
+            with self.assertRaisesRegex(ValueError, 'archive'):
+                self.build('incomplete')
+        self.assertFalse((self.root / 'incomplete' / builder.WHEEL_FILENAME).exists())
+        self.assertFalse((self.root / 'incomplete' / 'manifest.json').exists())
         self.assertFalse((self.root / "release").exists())
 
     def test_work_name_migrates_registered_brand_names_and_preserves_custom_name(self):
@@ -778,7 +813,7 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
 })().catch(error=>{console.error(error);process.exitCode=1;});
 '''
         result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
-                                text=True, timeout=10)
+                                text=True, encoding="utf-8", timeout=10)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.strip(), "pinned_native_bridges=pass")
 

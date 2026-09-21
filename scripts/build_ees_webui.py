@@ -16,7 +16,7 @@ import os
 from pathlib import Path
 import re
 import tempfile
-from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
+from zipfile import ZIP_DEFLATED, BadZipFile, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
@@ -521,6 +521,15 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
     with ZipFile(wheel) as source:
         replacements = prepare_replacements(source, asset_dir)
         additions = prepare_additions(source, ui_dir)
+        # Trial revisions can share a program version. Address each Work asset
+        # by its actual bytes without changing supported Restore namespaces.
+        index_name = "open_webui/frontend/index.html"
+        for filename in ("ees-work-launcher.css", "ees-work-panel.js", "ees-work-launcher.js"):
+            path = TARGET_APP + filename
+            url = ("/" + path.removeprefix("open_webui/frontend/")).encode("ascii")
+            digest = hashlib.sha256(additions[path]).hexdigest().encode("ascii")
+            replacements[index_name] = _one_replace(
+                replacements[index_name], url + b'"', url + b'?v=' + digest + b'"', index_name)
         entries = sorted(source.infolist(), key=lambda entry: target_name(entry.filename))
         output_dir.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix=".ees-build-", dir=output_dir) as temporary:
@@ -546,6 +555,15 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
                 csv_text = io.StringIO(newline="")
                 csv.writer(csv_text, lineterminator="\n").writerows(record)
                 destination.writestr(zip_entry(record_name), csv_text.getvalue().encode(), compresslevel=6)
+
+            # A digest alone can describe an incomplete file. Verify the closed
+            # archive before publishing either the wheel or its manifest.
+            try:
+                with ZipFile(built) as verified:
+                    if sorted(verified.namelist()) != sorted(row[0] for row in record) or verified.testzip() is not None:
+                        raise ValueError("Built archive is incomplete or corrupt.")
+            except BadZipFile as error:
+                raise ValueError("Built archive is incomplete or corrupt.") from error
 
             manifest = {
                 "schema_version": 1,

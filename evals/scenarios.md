@@ -22,6 +22,7 @@
 | 업무 패널 목표 설계·Workspace 디자인 통합 | [설계→독립 검토→구현, 기존 화면·실행 경계·검증 한계](#workspace-native-design-20260915) |
 | 업무 패널·메인 대화 후속 설계 | [09-16 설계 전용 범위·현재 계약 대조·검토 보완](#work-panel-chat-review-20260916) |
 | 업무 패널·대화 구현과 ees.10 시험 적용 | [09-17 첫 쓰기·대상 고정·초안 보존·검사 경계](#work-panel-chat-implementation-20260917) |
+| Figma 단순 UX 1차 구현 | [09-21 업무명 중심 Runtime·단순 Work Panel·Workspace 편집 UX와 검증 한계](#simplified-work-ux-implementation-20260921) |
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
 | Windows Upgrade 종료 뒤 `port_bind` 10048 | [09-18 단발 포트 검사 결함·제한 재확인·Start 단독 복구와 남은 Windows 확인](#windows-port-bind-10048-20260918) |
 | ees.7 적용 실패와 직전 버전 복구 | [09-14 rename 접근 거부, Restore·Start 성공, 새 화면 미확인](#ees7-apply-recovery-20260914) |
@@ -40,6 +41,206 @@
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="simplified-work-ux-implementation-20260921"></a>
+
+## 2026-09-21 Figma 단순 UX 1차 구현
+
+### Work 재개 검사와 보완 (2026-09-21)
+
+- 시작 main `1ddf2dba9e46c63bc20309387efa37e858970dbc`, PR #57 head `d71bf3a5728b427471a87747a960764d9c41e0d0`, 열린 PR #53/#57을 재확인함. 기존 로컬 변경은 건드리지 않고 인증된 GitHub 연결로 확보한 141개 파일의 Git blob 및 전체 tree/commit을 검증한 별도 checkout에서 같은 브랜치를 이어감. 직접 `git ls-remote/clone`은 인증 입력 부재로 실패했으며 이전 환경의 DNS 오류와 구분함.
+- 환경: Linux / Python 3.12.14 / Node 24.19.0. 최초 관련 검사 `python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_work_panel tests.test_ees_work_controller tests.test_ees_workflow tests.test_ees_workflow_tool tests.test_ees_demo_assets -v`: 165개 중 164 PASS, FastAPI/httpx route 1 SKIP. `python scripts/check_docs.py`: files=30 links=1139 errors=0 review_candidates=0. `git diff --check`: PASS.
+- 최초 전체 `python -m unittest discover -s tests -v`: 1029개, errors=1, skipped=54. `test_ees_asset_guard`가 FastAPI 부재로 import 실패함. 임시 시험 경로에 의존성을 준비하려던 pip 실행은 자동 승인 검토가 사용자의 설치 금지와 충돌한다고 거절함. 설치 재시도·환경 정책 우회는 하지 않음.
+- 수정 전 실패: 완료된 draft 업무의 현재 상태가 여전히 `초안 검토가 필요합니다.`로 표시됨. 모델이 넣은 `confirm:true`만으로 manual/draft 완료가 서비스로 전달되며, UI에는 취소할 확인 단계가 없음. 세 회귀 메서드 실행에서 5개 failure(서브케이스·부수 assertion 포함)를 확인함. 기존 문자열/부분 JS PASS로 이 동작들을 보장할 수 없음을 확인함.
+- 최소 보완 설계·자체 검토: 기존 패널에서 검토 완료/미완료를 구분하고, manual/draft 완료는 사용자 UI 확인으로만 허용함. AI Tool은 자료·초안 저장/자동 점검을 유지하되 사람 확인 payload를 거절하고 패널로 안내함. Workspace는 기존 editor/form을 유지하며 입력 이벤트에서 즉시 초안을 포착해 재렌더·선택 이동·저장 응답 중 새 입력 유실을 막음. 서비스·DB 형식·권한·게시 snapshot은 변경하지 않음. 정적 Work 자산은 실제 내용 해시로 캐시 URL을 구분하는 최소 빌더 변경을 검토함.
+
+#### 추가 재현·수정·보장 범위
+
+- Workspace의 미저장 안내 입력/checkbox 변경이 새 조회 뒤 사라지고 자기 저장 응답 중 추가 입력도 유실되는 문제를 Node에서 재현함. 접힌 form을 읽을 때 disabled 공통 정책이 FormData에서 빠지는 경계도 확인해 기존 참조를 보존함. 최초 4개 메서드 실패 뒤 checkbox fixture를 실제 unchecked처럼 값 제거로 바로잡았으며 최종 4개 모두 PASS. 별도로 깨끗한 초안에서 타이핑 직후 미저장 표시가 갱신되지 않는 1 FAIL을 재현해, form을 재생성하지 않고 상태 텍스트만 갱신함. 자기 저장 응답은 새 revision으로 이동하되 응답 전에 추가한 편집은 남기며 타인의 revision 충돌 기준은 완화하지 않음.
+- 완료된 하위 업무에 다음 행동이 없던 1 FAIL을 재현해 `전체 진행 보기` 한 개를 제공함. 현재 읽기 전용 완료 화면은 탐색을 허용하고 과거 이력은 선택 변경 없이 읽도록 검사함. 초안 검토 완료/검토 대기, 실패→재시도, 적용 제외, 입력 변경 후 과거 성공의 이력 보존을 실제 SQLite 서비스와 production 패널 함수로 확인함.
+- AI Tool의 manual/draft `confirm:true`는 `human_confirmation_required`로 거절하며 첫 쓰기에서도 진행 건·receipt·완료 이력을 만들지 않음. UI는 완료 조건을 보여주는 확인창에서 사용자가 수락해야 쓰고 취소하면 쓰지 않음. 이는 관리 Workflow Tool과 정상 UI 경로의 동작 보장이다. Prompt의 최신 근거 조회·목적/상태/다음 행동 설명 준수, 사용자가 현실에서 내용을 실제 점검했는지, 임의 외부 클라이언트의 행위까지 API가 증명한다는 뜻은 아니다. 인증된 직접 API의 `confirm:true`와 revision 계약은 그대로이며 새로운 인증/권한 체계를 추가하지 않음.
+- 같은 대화의 선택 이동은 controller에서 대화 경로·입력/첨부 snapshot·공장/시스템/절차/버전을 보존하고 composer를 덮지 않는 것을 실행함. 실제 메시지 DOM과 Native 편집기·첨부의 브라우저 통합은 아래 SKIP이다. 모델·도구 응답·메시지를 합성 DOM 성공만으로 사내 검증 처리하지 않음.
+- 변경 전 묶음의 Work URL에 내용 해시가 없어 캐시 회귀 assertion이 실패함. 빌더가 조립 완료된 세 자산(CSS/panel/launcher)의 SHA-256 query를 넣도록 보완하고, 같은 ees.10 안에서 designer만 바꿔 두 번 실제 묶었을 때 launcher URL만 바뀌며 변경 없는 자산 키/프로그램 버전은 유지되는 것을 확인함. Pack 0.2.12 관리 목록·ApplyDemo 보존·합성 사용자 UI 추가 필드/valves·묶음 무결성·같은 버전 다른 source commit·직전 프로그램 Restore 검사를 실행함. 실제 wheel의 저장 DB 역호환 및 실제 Windows ApplyDemo/Restore 성공은 주장하지 않음. 사용자 대화·Skill·Tool·모델·권한·DB/키를 실환경에서 변경하지 않음.
+
+#### Figma 대조
+
+`figma-design-to-code` 지침에 따라 [기준 파일](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=150-300)의 다음 **17개 전부**에서 design context와 screenshot을 읽었으며 원본은 수정하지 않음. 접근 불가 노드는 없었다. 소스/생성 HTML의 업무 의미를 대조했으며 실행 브라우저의 픽셀·배치·키보드 조작 검증은 미실행이다.
+
+| Figma 노드 | 대조 결과와 구현 경계 |
+|---|---|
+| `150:300` | 대화에서 이해·패널에서 수행·Workspace에서 수정하는 역할과 업무명 탐색 대조. 시작 개요 전체를 제품의 별도 페이지로 복제하지 않음 |
+| `147:252`, `147:434`, `148:180`, `148:330` | 진행 1/2·사람 확인 대기/완료·2/2 완료와 다음 이동 대조. 완료 표시와 상위 진행 주 행동을 보완함 |
+| `147:610`, `149:233`, `149:325`, `149:414` | 변경 없음/미저장/초안 저장/게시와 기존 건의 고정 버전 대조. 즉시 미저장 표시·편집 보존을 보완함. **전용 우측 AI 작성 패널은 현재 코드에 없고 기존 메인 Chat을 사용함**. 동일한 Workspace 화면을 구현했다고 판정하지 않음 |
+| `150:182`, `150:197`, `150:210` | 확인 자료·DB 모의 결과·읽기 전용 이력 대조. 근거/이력은 기존 패널의 접힌 영역으로 제공하며 별도 overlay의 동일한 배치·조작은 미검증. 개인 대화는 공유 이력으로 노출하지 않음 |
+| `150:223`, `150:236` | 상위 진행 요약과 완료 반영 대조. 자동 모의 점검/사람 확인/미연결 범위를 구분함 |
+| `150:249`, `150:262`, `150:281` | 고급 설정 보존·게시 수락/취소·오래된 revision 쓰기 거절과 개인 초안 보존 대조. 게시/사람 확인은 기존 Native 확인창을 사용함. 공동 Runtime·다중 참여자 충돌 UI는 미구현이며 현재 소유자별 API revision 경계와 구분함 |
+
+#### 첫 Work 환경의 실제 로컬 검증 (의존성 준비 전)
+
+관련 모듈을 처음 직접 지정할 때 `test_ees_work_demo`가 `native_ui_fixture`를 찾지 못해 **314 tests / 1 ERROR / 8 SKIP**이었다. 원인은 이 fixture의 기존 `tests` import 경로였으며 코드를 우회하지 않고 `PYTHONPATH=tests`로 수정해 아래 명령을 다시 실행함. 처음 전체 검사에서 확인한 FastAPI 부재는 최종 전체에서도 그대로 실패했다.
+
+```bash
+PYTHONPATH=tests python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_work_panel tests.test_ees_work_controller tests.test_ees_work_designer tests.test_ees_workflow tests.test_ees_workflow_tool tests.test_ees_demo_assets tests.test_ees_branding_build tests.test_demo_bundle tests.test_ees_apply_demo tests.test_ees_trial_bundle tests.test_ees_trial_upgrade tests.test_ees_webui_customization tests.test_ees_work_routes tests.test_ees_work_demo -v
+python -m unittest discover -s tests -v
+node tests/test_ees_cooperation_panel.cjs
+node tests/test_wo_demo_state.cjs
+python scripts/check_docs.py
+git diff --check
+```
+
+| 이번 실행 범위 | 결과 |
+|---|---|
+| panel / controller / designer | 20 / 10 / 4 PASS |
+| workflow / workflow_tool / demo_assets | 43 PASS·1 SKIP / 34 PASS / 61 PASS |
+| branding_build / demo_bundle / apply_demo | 22 PASS·2 SKIP / 8 PASS / 28 PASS |
+| trial_bundle / trial_upgrade / webui_customization | 14 PASS / 16 PASS·1 SKIP / 54 PASS·3 SKIP |
+| work_routes / Native work_demo | 각각 class 전체 1 SKIP, 해당 클래스의 실제 시험 실행 0개 |
+| 위 관련 명령 합계 | **314 PASS, 메서드 7 SKIP + 클래스 2 SKIP**. unittest 요약 `Ran 321 tests`, `OK (skipped=9)`, 18.338초 |
+| 전체 discover | **986 PASS, 1 ERROR, 메서드 51 SKIP + 클래스 3 SKIP**. `Ran 1038 tests`, `FAILED (errors=1, skipped=54)`, 36.715초. 유일한 ERROR는 `test_ees_asset_guard`의 `No module named 'fastapi'` |
+| 실제 Node production 상태 동작 | cooperation 14 그룹 PASS, WO 12 그룹 PASS. 합성 DOM이며 실제 렌더 시험 아님 |
+| 실제 launcher 조립본 구문 | `builder.assemble_work_launcher()`의 115,970 bytes에 `node --check ../verified-ees-work-launcher.js` PASS. 별도 실제 브라우저 검증으로 세지 않음 |
+| 필수 문서·diff | `python scripts/check_docs.py`: `DOCS OK`, files=30 links=1126 errors=0 review_candidates=0. `git diff --check`: PASS |
+
+중복 실행의 PASS를 합산하지 않는다. SKIP은 FastAPI/httpx, 공식 현재/직전 wheel, Chrome, Windows/PowerShell 등 없는 실행 조건에 따른 것이며 이번 동작 검증으로 대체하지 않는다. 관련 인코딩 경고는 오류로 처리했고 전역 UTF-8 모드로 누락을 숨기지 않았다. 전체 시험의 오류를 없애려고 새 skip/stub를 넣지 않았다.
+
+**당시 종료 판단:** PR #57은 Draft를 유지했다. 자동 승인 검토가 시험용 FastAPI/httpx 설치 시도를 사용자의 설치 금지와 충돌한다고 거절했고, route/asset-guard 및 실제 Native 브라우저 게이트를 완료하지 못했다. 아래 후속 승인·실행으로 이 의존성 차단을 해소했으며 당시 실패 기록은 보존한다. Figma 전용 Workspace AI 작성열·별도 overlay 구성의 차이도 남아 전체 UX 동일 구현으로 선언하지 않는다. Windows/Open WebUI/사내 LLM/실사용자·실제 외부 업무 연결은 미실행이다. 병합·제품 설치·배포·회사 DNS/프록시/서비스 설정 변경·PR #53 채택·원격 CI 수동 실행은 수행하지 않는다. 이 작업의 커밋에는 `[skip ci]`를 넣고 10월 재개 시 저장소의 한시 방침 종료 규칙을 확인한다.
+
+#### Work 검증 환경 복원 (2026-09-21 추가 승인 후)
+
+사용자가 “이전환경처럼 가능하게 다시 준비”를 요청한 뒤 같은 PR의 `d006c38f44cc00240732b9bb78338a78809ca4bc`에서 이어서 준비했다. FastAPI는 새 제품 프레임워크 도입이 아니라 기존 API 시험의 의존성이다. 이전 Python 3.11 전용 시험 환경과 달리 첫 Work 검사는 기본 Python 3.12.14에 의존성이 없었다. 남아 있던 과거 checkout의 `.venv`도 Python 실행 파일이 없어 재사용할 수 없었으며 다른 checkout·자료를 삭제하지 않았다. 실제 외부 다운로드 성공을 확인했으므로 이전 DNS 실패를 현재 Work 제약으로 간주하지 않았다.
+
+- 저장소 `.venv` 한 곳에 Python 3.11.16과 기존 CI `Install fixed test dependencies`의 고정 패키지를 준비했다. `uv python install 3.11.16`, `uv venv --seed --python 3.11.16 .venv`, `uv pip install --python .venv/bin/python`에 해당 고정 목록을 사용했다. `uv`는 시험 환경에서 0.12.7이며 기존 Node 24.19.0을 재사용했다. `.venv/bin/python -m pip check`: PASS. 새 requirements·서버·DB·브라우저 프레임워크는 추가하지 않았다.
+- `.venv/bin/python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3`으로 공식 wheel만 확보하고 앱은 설치하지 않았다. `.venv/bin/python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding`: PASS. 원본 SHA-256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`, 조립 ees.10 wheel SHA-256 `a21b7d62ee5a0cb5ec113a1eff49b2e1965a4dc88dc85de44571899e77cd1c1c`. Pack 0.2.12와 제품 코드는 변경하지 않았다.
+- 공식 full Chrome 153.0.8010.52는 14개 모두 화면 진입 전에 실패했다. stderr의 `process_singleton_posix.cc / socket() failed: Operation not permitted (1)`과 독립 AF_UNIX probe의 EPERM을 확인했다. 권한 상승 probe는 플랫폼의 `sandbox_approval:false` 정책으로 거절됐으며 권한·보안·DNS·프록시를 변경하지 않았다. 이후 [공식 Headless Chrome Shell](https://developer.chrome.com/docs/automation-and-testing/headless)을 기본 권한의 기존 ChromePipe로 실행해 정상 기동했다. 별도 배포되는 headless 구현이므로 full Chrome과 같은 실행 환경으로 주장하지 않는다.
+- 현재 브라우저는 공식 `chrome-headless-shell` 153.0.8010.52 하나이며 다운로드 ZIP SHA-256은 `944dc1eae654637fed4d57650198774f9c43b45f34e48febb84f43c541b5de76`이다. 이 세션에서 받은 사용 불가 full Chrome과 중복 ZIP은 제거했다. 기존 시험 harness·실제 wheel의 Svelte/Tiptap·업무 서비스·임시 SQLite를 사용했으며 인증/LLM 응답은 fixture다. 회사 Open WebUI·사내 LLM의 실제 실행으로 확대하지 않는다.
+
+먼저 드러난 실패와 보완:
+
+1. API/native/wheel 관련 6개 모듈 strict encoding 실행: **160개 중 157 PASS, 1 ERROR, 2 SKIP**(98.614초). 공식 wheel 검사가 새로 실행되면서 `test_ees_branding_build.py`의 Node subprocess `text=True`에 encoding이 빠진 `EncodingWarning`을 발견했다. `encoding="utf-8"` 명시 후 해당 모듈 **24 PASS / 0 SKIP**(24.824초).
+2. Headless Shell의 Native 화면 시험: **14개 중 13 PASS, 1 FAIL**(67.301초). 실패는 이전 결과 문구를 기대한 assertion이었다. 현재 요약을 확인하고 실제 '근거 보기'를 열어 저장된 점검의 이름·설명·대상·시각·상태를 대조하도록 보완했다. AP 실패→재시도 뒤 이전 record 불변과 '실행 이력 → 1차 실패'의 실제 열람도 확인한다. 해당 케이스 strict encoding 재검증 **1 PASS / 0 SKIP**(4.429초). 문자열 검사로 브라우저 동작을 대체하거나 검사를 약화시키지 않았다.
+
+환경 준비 후 최종 검사는 저장소 루트에서 다음 환경 변수를 지정했다. 환경은 계속 재사용하며 시험마다 다시 설치하지 않는다.
+
+```bash
+export PATH="$PWD/.venv/bin:$PATH"
+export PYTHONPATH=tests
+export EES_REQUIRE_WORK_ROUTES=1 EES_REQUIRE_ASSET_GUARD=1 EES_REQUIRE_ASSET_NATIVE=1
+export EES_RUN_REAL_UV_TEST=1 EES_RUN_REAL_NLTK_TEST=1
+export EES_TEST_UPSTREAM_WHEEL="$PWD/dist/upstream/open_webui-0.11.3-py3-none-any.whl"
+export EES_TEST_BRANDING_DIR="$PWD/dist/branding"
+export EES_TEST_CHROME="$PWD/dist/tools/headless-shell-153.0.8010.52/chrome-headless-shell-linux64/chrome-headless-shell"
+export EES_TEST_SCREENSHOT_DIR="$PWD/dist/ees-work-screenshots"
+python -m unittest discover -s tests -v
+python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_work_panel tests.test_ees_work_controller tests.test_ees_work_designer tests.test_ees_workflow tests.test_ees_workflow_tool tests.test_ees_demo_assets -v
+python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_branding_build.py -v
+python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_work_demo.EESWorkNativeBrowserTests.test_panel_and_ai_tool_run_same_persisted_case_with_retry_history -v
+python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_chat_theme.py -v
+node tests/test_ees_cooperation_panel.cjs
+node tests/test_wo_demo_state.cjs
+python scripts/check_docs.py
+git diff --check
+```
+
+| 이번 실제 실행 | 결과 |
+|---|---|
+| 전체 discover | **1,056 PASS / 0 FAIL / 0 ERROR / 16 SKIP**, `Ran 1072 tests`, 184.937초 |
+| panel/controller/designer/workflow/workflow_tool/demo_assets strict encoding | **173 PASS / 0 SKIP**, 12.468초 |
+| 전체 실행에 포함된 routes / asset_guard / asset_native / branding_build | 각각 **3 / 16 / 26 / 24 PASS**, class SKIP 없음 |
+| 전체 실행에 포함된 Native work_demo / chat_theme | **14 / 2 PASS**, 실제 Headless Chrome Shell 실행. 별도 theme strict encoding 2 PASS도 확인 |
+| 전체 실행에 포함된 webui_customization | **55 PASS / 2 SKIP**. 실제 현재 wheel 적용·프로그램 복원 검사와 합성 ApplyDemo/사용자 자산 보존 포함 |
+| opt-in uv / NLTK | 각각 실제 시험 PASS. uv는 임시 synthetic wheel·자동 정리되는 시험용 경로를 사용하며 제품 앱 설치가 아님 |
+| Node cooperation / WO 상태 시험 | **14 / 12 그룹 PASS**. 이 둘은 합성 DOM 검사이며 위 브라우저 검사와 구분 |
+| 의존성 / 문서 / diff | `python -m pip check` PASS. `python scripts/check_docs.py`, `git diff --check` PASS |
+
+중복 실행을 합산하지 않았다. 남은 16 SKIP은 Windows/PowerShell 전용 15개와 **직전 실제 배포 ees.7/ees.8 wheel 미확보의 역호환 1개**이며 FastAPI·현재 wheel·브라우저 부재로 건너뛴 시험은 없다. 전체 원문 로그는 무시 경로 `dist/validation-20260921/full-prepared.log`, 최초 API/wheel·full Chrome·Headless Shell 실패와 수정 후 로그도 같은 경로에 보존했다. 현재 Workspace·대화/Work Panel의 실제 스크린샷을 열어 확인했다. Figma 17개 원본 대조 범위는 위 표를 유지하며 이번 실행을 전용 AI 작성열·별도 overlay의 동일 구현 또는 전체 픽셀 일치로 확대하지 않는다.
+
+**환경 복원 직후 판단:** 검증 환경 복원은 완료했고 FastAPI/API/native 브라우저 의존성은 현재 차단 사유가 아니다. PR #57은 남은 Figma Workspace 전용 AI 작성열·별도 overlay 구성 차이로 Draft를 유지한다. 실제 Windows·회사 Open WebUI/LLM·사용자 수락은 미실행이다. 환경의 반복 생성 대신 AGENTS/versions에 기존 환경 재사용·CI 목록 단일 관리 기준을 반영했고, 새로 실행된 시험의 인코딩 누락과 결과/이력 열람 검사를 보완했다. 이번 추가 변경은 시험·문서뿐이며 제품/Pack/DB/사용자 자산은 바꾸지 않았다. main 직접 push·병합·제품 설치·사내 배포·원격 CI 실행은 하지 않았다.
+
+#### 배포 직전 UX 보완과 재검증 (2026-09-21 후속 요청)
+
+사용자의 “배포 전까지 다 진행” 후속 요청으로 남은 구현·로컬 검증·같은 PR 갱신과 Ready/병합을 진행한다. 사내 설치·배포는 실행하지 않는다. 시작 시 main `1ddf2dba9e46c63bc20309387efa37e858970dbc`, PR #57 head `b032816dfe69a45172413263509d79491dcddad4`, Draft·열린 PR #53/#57과 로컬 변경을 확인했다. 이전 변경과 AGENTS·STATUS·README 지도·재개 댓글 `5754566108`의 근거를 유지하며 PR #53을 구현 원본으로 쓰지 않는다. 기존 `.venv`·Node·공식 wheel·Headless Chrome Shell을 재사용하고 의존성 재설치나 별도 환경은 추가하지 않았다.
+
+**차이 분석 → 최소 설계·검토:** Figma 지정 17개를 다시 design context/screenshot으로 읽었다. 남은 차이는 Workspace 우측 작성 대화와 자료/설정/게시/충돌 overlay였다. 기존 controller의 인증된 모델 API 호출, designer의 메모리 초안, view의 공통 native dialog를 재사용하기로 설계했다. 설명/안내 수정/저장/게시의 책임을 나누고 응답 중 편집·선택 변경과 개인 대화 보존 조건을 먼저 검토했다. 새 서버·DB·프레임워크·공유 Runtime·새 모델 등록은 범위 밖이다.
+
+- Workspace의 **물어보기**는 설명만 하고 **안내 수정**은 선택한 업무의 수행 안내만 미저장 초안에 반영한다. 허용 JSON 키·문자열·길이를 검사하고 완료 조건·방식·연결과 전체 나머지 정의를 보존한다. 되돌리기는 AI 반영 후 수동 편집을 덮지 않으며 실제 저장/검증/게시를 따로 선택한다. 질문/미전송 입력은 업무별 메모리에 유지하고 운영 대화나 절차 정의에 저장하지 않는다.
+- 기존 `/api/models`와 사용자 설정에서 접근 가능한 모델을 읽고 `/api/chat/completions`를 인증된 요청으로 호출한다. `tools:[]`, `tool_ids:[]`와 chat/parent ID 없는 요청을 사용하며 새 대화·업무 액션을 생성하지 않는다. 고정 공식 0.11.3의 main/middleware에서 모델 접근 검사와 명시적 빈 tools 목록의 built-in 해제 경로를 확인했다. 모델 preset이 streaming을 강제하는 경우의 SSE도 처리한다. fixture는 JSON/SSE·실패·부정 JSON·초과 키·중단·계정 변경을 검증했으며 실제 사내 모델/필터 실행을 대신하지 않는다.
+- 지연 응답은 요청 당시 정의·초안 revision·선택 이동 횟수와 인증 수명을 확인한다. 다른 업무로 갔다가 응답 전에 돌아와도 자동 반영하지 않는다. 중단/오류 때 요청을 복원하되 새로 입력한 질문을 보존한다. 계정 변경은 메모리 작성 기록과 대기 요청을 정리한다.
+- 검토 자료·저장된 점검 근거·실패 후 이전 이력·업무 기록·전체 진행 요약은 선택과 저장 상태를 바꾸지 않는 창으로 연다. 등록 안내/입력을 실제 외부 문서 비교 결과로 표시하지 않는다. 고급 설정은 현재 연결을 읽고 기존 편집 영역으로 진입하며, 게시 창은 변경 업무·새 버전·기존 진행 건 보존을 안내한다. 실제 revision 충돌은 서버 변경과 미저장 입력을 모두 보존한다. Esc·Tab/초점 복귀·취소·1920/900/600 폭·밝은/어두운 화면을 실제 브라우저에서 검사했다.
+- 사람 확인은 앞선 UI 명시적 확인/취소와 AI Tool 거절을 유지한다. Prompt의 설명 지침, 정상 UI/Tool 경로의 보장, 인증된 직접 API의 boolean/revision 계약 및 현실 업무를 실제 수행했는지는 계속 구분한다. 기존 대화·사용자 자산·게시 snapshot·Pack 0.2.12·프로그램 ees.10을 유지한다.
+
+**먼저 드러난 실패와 수정:** 로그는 같은 무시 경로 `dist/validation-20260921/finish-*.log`에 보존하며 아래 요약을 Git에 남긴다.
+
+1. 누락 화면의 첫 실제 브라우저 검사 2 FAIL(5.804초): 작성 영역/별도 창 없음. 구현 후 controller 경계 단위시험 34개 중 33 PASS·1 FAIL(6.486초)은 새 `workUI.dialog`를 제공하지 않은 stub였다. 경계 stub을 갱신한 재실행 34 PASS(15.136초); 실제 창 검사는 별도 브라우저에서 수행했다.
+2. 기존 출력 경로 빌드는 `Output already exists`로 거절되어 기존 산출물을 덮지 않았다. 별도 시험 출력에서 생성 완료로 보고된 wheel은 38,936,383 bytes·SHA-256 `8b91fb4367a580a7c0d3293f52886aa6b04b161c01e5b1c7ce93c998abbf70ff`이나 ZIP 중앙/종료 레코드가 없어 브라우저 6개가 모두 준비 단계 `BadZipFile` ERROR였다. 동일 원본의 재빌드는 5,911개 항목·CRC PASS였다. **파일이 불완전했던 근본 원인은 미확정**이며 재빌드 성공을 원인 해결로 기록하지 않는다. 해시만으로 정상 archive를 보장하지 못하는 빌더 경계를 확인해, 닫힌 ZIP의 목록/CRC를 검증한 뒤 wheel·manifest를 공개하도록 수정했다. 잘린 archive 주입 회귀는 수정 전 1 FAIL → 수정 후 1 PASS이고 최종 실제 묶음에서도 검증했다. 실패 후보는 배포하지 않았다.
+3. 유효한 묶음의 6개 브라우저 검사: 3 PASS·3 FAIL(25.721초). 단순 선택/폼 포착 때 생략된 시스템 설정을 추가하는 결함과 Esc 닫기 결함을 수정했다. 나머지는 기존 접힘 영역의 `open`을 검사하던 시험을 새 창의 실제 근거/저장 record 대조로 갱신했다.
+4. 후속 8개 메서드에서 3개 메서드 실패(서브케이스 포함 8 failure, 41.570초). 서버의 기존 초안 version 증가를 기대값에 반영하되 전체 정의의 나머지 내용 보존 비교는 유지했다. Tab의 창 밖 이동과 그 뒤 가려진 제어 부수 실패를 확인해 창 안 키보드 순환을 보완했다. 이후 3개 재검사 2 PASS·1 FAIL(9.926초)로 응답 전 업무 왕복의 늦은 덮어쓰기를 재현했다. 마지막 ID만 비교하던 경계를 선택 이동 횟수·전체 정의 비교로 수정하고 왕복을 응답 전에 강제하는 회귀로 검증했다.
+
+**이번 Figma 대조 범위:** 지정 **17/17**의 context/screenshot 접근 성공, 원본 수정 0개. 아래는 앞선 초기 구현 표 이후의 갱신이며 원본과 픽셀 동일하다는 판정은 아니다.
+
+| 노드 | 최종 구현/검사 범위 |
+|---|---|
+| `150:300` | 역할/진입 지도 대조. 별도 시작 소개 페이지를 새로 만들지 않음 |
+| `147:252`, `147:434`, `148:180`, `148:330` | 업무명·진행/검토 대기/완료·상위 진행·다음 행동. 기존 Native 대화/패널·상태 자동 시험과 실제 브라우저 동작 |
+| `147:610`, `149:233`, `149:325`, `149:414` | 우측 AI 작성, 질문과 수정, 미저장/저장/게시, 되돌리기·기존 건 v1 유지. 기존 WebUI 서체/테마와 좁은 폭 대응 |
+| `150:182`, `150:197`, `150:210` | 검토 자료·저장 DB 모의 근거·업무/실행 기록을 읽기 전용 창으로 제공. 기존 record의 대상·시각·점검/실패와 개인 대화 비노출 |
+| `150:223`, `150:236` | 진행 요약 창과 완료 후 집계. 기존 업무 선택/입력/결과 유지 |
+| `150:249`, `150:262`, `150:281` | 고급 설정 확인→기존 편집, 게시 수락/취소, 실제 revision 충돌→최신 조회·초안 유지. 공동 참여자 Runtime은 이번 범위 밖 |
+
+**재현 명령:** 저장소 루트에서 앞선 환경 변수와 `.venv`를 재사용하며, 이번 소스 묶음은 `EES_TEST_BRANDING_DIR="$PWD/dist/branding-finish-reviewed"`, 스크린샷은 `EES_TEST_SCREENSHOT_DIR="$PWD/dist/validation-20260921/finish-screenshots"`이다.
+
+```bash
+python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding-finish-reviewed
+python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_work_panel tests.test_ees_work_controller tests.test_ees_work_designer tests.test_ees_workflow tests.test_ees_workflow_tool tests.test_ees_demo_assets tests.test_ees_branding_build tests.test_demo_bundle tests.test_ees_apply_demo tests.test_ees_trial_bundle tests.test_ees_trial_upgrade tests.test_ees_webui_customization tests.test_ees_work_routes tests.test_ees_work_demo tests.test_ees_chat_theme -v
+python -m unittest discover -s tests -v
+node tests/test_ees_cooperation_panel.cjs
+node tests/test_wo_demo_state.cjs
+python scripts/check_docs.py
+git diff --check
+```
+
+- 관련 strict encoding: **345 PASS / 0 FAIL / 3 SKIP**, `Ran 348 tests`, 149.094초. Native 브라우저 **21 PASS**, theme **2 PASS**, 실제 wheel 빌더 **25 PASS**, route **3 PASS** 포함. SKIP 3개는 Windows 전용 2개와 직전 ees.7/ees.8 배포 wheel 미확보 1개다. 전체 명령과 중복 합산하지 않는다.
+- 최종 실제 ees.10 wheel: SHA-256 `ccbfe48e092fe9c3cf4a518b9c7be95964c5ec699d133b345308c99912d26c09`. 기존 공식 원본의 고정 해시와 새 Work 자산 캐시/RECORD·보존 검사 사용. 실제 회사 프로그램에 설치한 파일이 아니다.
+- Node cooperation/WO 직접 실행 PASS. 제품 JS 상태 검사와 실제 브라우저 검사를 구분한다.
+
+- 전체 `python -m unittest discover -s tests -v`: **1,064 PASS / 0 FAIL / 0 ERROR / 16 SKIP**, `Ran 1080 tests`, 208.756초. `finish-full.log`에 실제 실행을 기록했다. SKIP은 Windows/PowerShell 전용 15개와 직전 ees.7/ees.8 배포 wheel 역호환 1개다. FastAPI/API·asset_guard/native·현재 wheel·실제 브라우저는 실행했으며 uv/NLTK opt-in 시험도 PASS다.
+- `python scripts/check_docs.py`: PASS, 오류/검토 후보 0. `git diff --check`: PASS. 이번 변경은 13개 파일이며 Git 원격 게시 때 로컬 검사 tree와 생성 tree를 대조한다. 정확한 head와 병합 원본은 같은 [PR #57](https://github.com/knadalkim-a11y/team-agent-poc/pull/57)에 기록한다.
+
+**종료 판단:** 이번 단순 UX의 남은 작성열·대화상자 구현과 Work에서 가능한 로컬 검증은 완료했다. 같은 PR을 Ready로 전환해 사용자 후속 요청의 병합까지 진행하고 사내 배포는 실행하지 않는다. 실제 Windows/PowerShell·회사 Open WebUI/사내 LLM·실사용자 수락은 미실행이며 제한 시험 적용 뒤 확인할 범위다. full Chrome과 Headless Shell의 차이, 이전 배포 wheel 역호환 미실행, 최초 불완전 ZIP의 원인 미확정은 보존한다. 프로그램 묶음의 공개 전 무결성 검사를 추가했으며 정상 회사 서버의 재진단·새 환경 준비를 요구하지 않는다. 원격 CI는 수동 실행하지 않고 이번 개발/병합 커밋에 `[skip ci]`를 넣으며 10월 재개 규칙은 STATUS를 따른다.
+
+### 재개 전 STATUS의 날짜별 점검 기록 보존
+
+아래는 09-21 Work 재개 전에 STATUS에 누적되어 있던 당시 기록이다. 당시의 미수신·다음 작업 표현은 현재 지시가 아니다. 09-21 사용자는 main `1ddf2dba9e46c63bc20309387efa37e858970dbc`의 적용 정상과 `running=true`를 보고했으며 이번 UX 브랜치는 미적용이다. 오래된 중복 다음 작업은 STATUS에서 정리했고, 과거 적용·복구 사건은 각 기존 평가 절과 아래 기록으로 보존한다.
+
+<details>
+<summary>2026-09-16~18 당시 점검</summary>
+
+2026-09-18 병합 확인: PR #55를 squash merge해 코드 병합 SHA `b85bf344cd6f6e6ced89d282e06e5cc8bd879bc2`를 확인함. 최종 main diff는 의도한 7개 파일만 변경하고 기존 파일 삭제 0건이며, 문서 tree 생성 중 발견한 중간 대량 삭제 diff는 병합 전에 교정하고 squash로 main 이력에서 제외함. 이 STATUS 후속은 Git 병합 상태만 바로잡는 문서 변경이며 제품 코드·사내 서버는 변경하지 않음. 실제 Windows·사내 적용은 다음 고정 SHA 시험 적용에서 별도 확인함.
+
+2026-09-18 후속: 사용자의 Start 단독 복구 보고를 반영하고 같은 PR #55를 보완함. bind/close 동시 오류의 3개 subcase가 초안에서 실패하는 것을 확인한 뒤 수정함. 전체 포트 시험 파일을 `python -B -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_deploy_port.py -v`로 실행해 23 PASS·0 SKIP. 이 중 Linux 실제 모의 자식의 시작→health→정상 종료→같은 포트 재시작 1개를 포함하며 Windows 실환경·전체 Upgrade 통합은 아님. 운영 코드의 나머지 AST 불변·기준 Git blob 일치·`git diff --check`를 확인함. 사건 근거를 evals, 운영 대응을 가이드, 완료 변경을 CHANGELOG에 통합함. 실제 Windows·사내 재배포는 미실행이며 앞선 45개 선택 시험을 이번 결과로 재합산하지 않음.
+
+2026-09-18: 포트 검사 원본·기존 시험·이 STATUS의 Git blob을 대조한 부분 checkout에서 일시적 `10048` 주입 시 기존 171행 실패를 재현함. 수정 후 신규 포트 시험 20 PASS, 기존 시험 파일의 `ProcessContracts`·`WindowsIdentityContracts`·`StopFailureContracts`·`ExplicitTerminationContracts` 45 PASS. Python 3.13.5/Linux에서 `-X warn_default_encoding -W error::EncodingWarning`으로 실행함. 45개는 관련 클래스 AST를 선택 로딩했으며 무관한 builder import·나머지 시험은 실행하지 않음. 실제 Windows/Winsock·전체 운영 통합·문서 검사·사내 적용은 미실행. shell Git은 GitHub DNS 조회 실패였고 connector 파일 조회·게시와 구분함. 영구 평가 기록/가이드/CHANGELOG 통합은 위 다음 작업에 남기며 기존 과거 증거를 삭제하거나 재판정하지 않음.
+
+2026-09-17: P/T/J 표시·첫 쓰기·현재 선택 조회·대화 액션·초안 보호·ees.10/v0.2.11 전달 경로의 로컬 검사·독립 검토를 마침. 관련 검사는 398 PASS·12 SKIP이며 별도 Native 브라우저 클래스는 실행 0개·1 SKIP임. 최초 실패·수정과 명령별 결과는 [이번 평가 기록](#work-panel-chat-implementation-20260917)에 보존함. 실제 wheel·Windows/PowerShell·Native 브라우저·사내 모델 검증과 새 설치는 미실행이며 아래 09-16 검사를 새 코드 결과로 재사용하지 않음.
+
+2026-09-16: 최신 main·PR #52의 지침/원본을 재확인하고 같은 ees.9의 다른 source_commit 갱신·묶음 검증·Stop→Backup→Apply→Start·자동 자산 확인·직전 프로그램 Restore 범위를 코드로 대조함. 고정 원본 적용/묶음 로컬 검사는 30 PASS·1 SKIP(PowerShell 부재). 앞선 패널 77 PASS·3 SKIP과 새 실제 브라우저/Windows/사내 모델 미실행을 구분하며 원격 검사는 사용자 한시 방침대로 생략함. 사건별 결과와 최초 실패는 [기존 평가 기록](#workspace-native-design-20260915)에 보존함.
+
+
+</details>
+
+### 앞선 채팅 환경의 초기 구현·증거
+
+- **기준과 범위:** 사용자 요청에 따라 Figma 작업 자체는 다른 세션의 기준 화면을 그대로 사용하고, 이 작업에서는 저장소 구현을 담당함. 시작 main은 `1ddf2dba9e46c63bc20309387efa37e858970dbc`, 구현 브랜치는 `feat/ees-work-simplified-ux-20260918`이며 시작 시 main과 동일(ahead/behind 0)이었다. Draft PR #53은 오래된 Runtime/Figma 문서 전용 원본이고 현재 main과 충돌 상태여서 이번 제품 구현 원본으로 사용하거나 병합하지 않음.
+- **Figma 기준:** file `XK2wTos6sEuxSHhIj7cqg6`, 시작 `150:300`, Runtime `147:252`, `147:434`, `148:180`, `148:330`, Workspace `147:610`, `149:233`, `149:325`, `149:414`. 구현 시 `figma-design-to-code` 지침을 읽고 해당 node의 design context/metadata를 확인했으며 Figma 파일 자체는 수정하지 않음.
+- **Runtime 구현:** 기존 `ees-work-view.js` 책임을 유지하면서 일반 사용자 트리의 P/T/J badge를 숨기고 업무명 중심 탐색으로 단순화함. 패널은 즉시 상위 업무 복귀, 현장/시스템/라인 범위, 현재 상태, 완료 조건, 접힌 근거, 읽기 전용 실행 이력, 다음 할 일과 **한 개의 주 행동**을 우선함. 실패한 하위 업무가 있으면 부모 패널은 `문제 확인` 하나만 보여주며 독립 점검용 두 번째 버튼을 함께 내지 않는다. 적용 제외 업무는 현재 범위에서 제외됐고 실행 대상이 아니라는 상태를 직접 표시함. 부모 화면은 `확인할 업무`와 업무 진행으로 표현하고 완료된 자동 점검은 `최근 결과 유효`, 사람 확인은 `담당자 확인 완료`로 표시함.
+- **사람 확인·미연결 경계:** manual J의 미완료 상태는 `담당자의 확인이 필요합니다.`와 실제 `확인 완료` 버튼을 유지하고 `AI의 자료 정리만으로 완료 처리하지 않습니다.`를 명시함. 실제 실행 adapter가 없는 Tool은 `실행 연결이 필요합니다.`와 `실행 연결 전에는 수행된 것으로 기록하지 않습니다.`를 표시하며 수행 성공처럼 보이지 않게 함. 저장된 결과·checks·시각·이전 실패 이력은 삭제하거나 새 요약값으로 대체하지 않음.
+- **Chat 계약 보존:** `ees-work-launcher.js`와 `test_ees_work_controller.py`는 main과 byte-identical임을 blob으로 확인함. 따라서 같은 채팅에서 업무 선택만 갱신하고 첫 대화/다른 대화의 selection을 격리하는 기존 controller 계약을 이번 변경에서 새로 구현하거나 우회하지 않음.
+- **Chat 설명 UX:** 실제 EES 배포 Prompt인 `ees-orchestration-demo.md`의 기존 Workflow 조회·대상 고정·사람 확인 규칙을 유지하면서, 사용자가 선택 업무를 모르거나 현재/다음 행동을 묻는 경우 최신 `ees_workflow_view` 근거로 **목적 → 현재 상태 → 다음 행동** 순서로 설명하도록 한 문장을 보강함. 미연결은 `실행 연결 필요`, 사람 확인은 실제 사용자 확인 필요로 설명하고 미실행·미확인을 완료처럼 표현하지 않는다. 관리 자산 변경을 추적하기 위해 `agent-pack/ees-demo.json` 버전을 `0.2.12`로 올리고 real-manifest 회귀 기대값과 Prompt 핵심 문구 검사를 추가함.
+- **Workspace 구현:** `ees-work-designer.js`의 기존 form/action 구조를 유지하고 화면 문구를 업무 중심으로 정리함. `업무 이름`, `업무 목적`, `업무 수행 안내`, `완료 조건`을 먼저 보이고 시스템·선행 작업·Skill·Tool 연결은 `고급 설정` 아래에 둠. `초안 저장`, `게시 전 확인`, `게시`를 구분하고 `기존 진행 건은 게시 당시 버전을 유지합니다.`를 노출함. 실제 form field 이름과 action은 변경하지 않음.
+- **과설계 검토:** 새 UI 서버·프레임워크·디자인 시스템·Runtime 저장 계층을 추가하지 않고 기존 view/designer/CSS에서만 해결함. 멀티유저 공유 Runtime, Workflow/Skill/Tool Builder, Skill 자동 생성, Tool 개발 요청 시스템, 별도 DB 서버, 새 배포 플랫폼, 사내 Git 이전·새 서버 배포는 범위 밖임.
+- **직접 검증:** 변경된 실제 production JS를 V8에서 구문 검사하고 `workPanelNodeHTML`을 합성 P/T/J 상태로 실행해 업무명 트리, explicit human confirmation, 미연결 Tool, 완료 근거, 읽기 전용 이력, parent row summary, 정확한 scope, preview의 가짜 PASS 부재를 확인함. 후속 리뷰에서는 실패 부모에 `문제 확인` 버튼 하나만 남고 run 버튼이 없는 것, 적용 제외 업무의 현재 상태/이유가 직접 표시되는 것도 다시 실행해 확인함. `workflowEditor`도 실제 함수로 실행해 업무 중심 label, 닫힌 고급 설정, 기존 Tool 미연결 문구, snapshot 안내와 저장 field 이름 `name/description/parent/condition/enabled/mode/rule/instructions/systems/deps/skills/binding:health` 보존을 확인함. Prompt의 `목적 → 현재 상태 → 다음 행동`과 기존 명시적 사람 확인 규칙, manifest `0.2.12`도 직접 대조함. 구현 중 완료 행 요약과 Workspace의 옛 검증 문구, 남은 사용자 노출 `잡` 용어, 부모의 두 번째 행동을 자체 리뷰에서 추가 보완함.
+- **시험 코드:** `test_ees_work_panel.py`의 표시 계약을 새 현재상태/근거/사람확인·단일 주 행동·적용 제외 문구로 갱신했고 `test_ees_work_demo.py`에는 runtime P/T/J badge 미노출과 Workspace 업무 중심 문구·고급 설정 확인을 추가함. `test_ees_demo_assets.py`에는 Pack `0.2.12`와 Chat 핵심 문구 검사를 추가함. launcher/controller 시험 원본은 변경하지 않음.
+- **미실행:** 현재 실행 환경의 GitHub raw/clone DNS 차단으로 저장소 checkout을 확보하지 못해 `python -m unittest ...`, `python scripts/check_docs.py`, 실제 Node test runner를 실행하지 못함. Chrome/Open WebUI/Windows/사내 GLM 5.3도 미실행이다. PR diff는 GitHub에서 추가 행 trailing whitespace와 conflict marker를 별도 검사했지만 이를 전체 `git diff --check` PASS로 바꾸지 않는다. 2026-09-30까지 사용자 방침에 따라 원격 CI도 실행하지 않고 각 커밋에 `[skip ci]`를 유지함. V8 직접 실행 결과를 위 미실행 검사들의 PASS로 바꾸지 않음.
+- **적용 경계:** 사용자는 기존 main `1ddf2dba9e46c63bc20309387efa37e858970dbc`를 개인 PC에 성공 적용해 `status result=ok / program=customized / running=true`와 화면 정상 여부를 보고함. 이번 UX 구현 브랜치는 아직 병합·설치하지 않았으며, PR 검토 뒤 병합하면 **현재 개인 PC Dogfooding**만 먼저 수행한다. 큰 문제 수정 전에는 새 서버 이전·사내 Git 이전을 시작하지 않음.
 
 <a id="work-panel-chat-implementation-20260917"></a>
 

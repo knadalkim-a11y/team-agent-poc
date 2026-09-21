@@ -30,7 +30,9 @@ const makeCase = (revision = 1) => ({
 });
 const result = (run = null) => ({ok: true, case: run, cases: run ? [run] : [], catalog: copy(catalog)});
 async function setup(options = {}) {
-  const events = {}, frames = [], requests = [], renders = [], adoptions = [];
+  const events = {}, frames = [], requests = [], renders = [], adoptions = [], confirmations = [], restores = [];
+  const nativeDraft = {prompt: '미저장 업무 질문', files: [{id: 'attachment-1'}]};
+  let confirmed = true;
   let state = options.state || result(), callbacks, resets = 0, actionHandler;
   let edits = {nodeId: 'j1', inputsChanged: false, documentChanged: false, conflict: false};
   const location = {pathname: '/', search: '?ees_site=f1&ees_system=EMS&ees_process=p1&ees_node=j1&ees_version=4'};
@@ -48,7 +50,8 @@ async function setup(options = {}) {
   const designer = new Proxy({handleEvent: () => ({handled: false})}, {get: (target, key) => target[key] || (() => {})});
   const window = {
     addEventListener: on, removeEventListener: () => {}, crypto: {randomUUID: () => 'request-' + requests.length},
-    __eesNativeDraftV1: {ready: () => true, read: () => null, restore: async () => true, flush: () => {}}
+    __eesNativeDraftV1: {ready: () => true, read: () => copy(nativeDraft),
+      restore: async value => {restores.push(value); return true;}, flush: () => {}}
   };
   const document = {
     querySelector: selector => selector === '#sidebar-new-chat-button' ? {} : null,
@@ -58,10 +61,11 @@ async function setup(options = {}) {
   const storage = new Map([['token', 'test-user']]);
   const localStorage = {getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key)};
   const context = {
+    confirm: message => {confirmations.push(message); return confirmed;},
     window, document, location, localStorage, sessionStorage: localStorage,
     URLSearchParams, setTimeout, clearTimeout, requestAnimationFrame: fn => frames.push(fn),
     MutationObserver: class {observe() {}},
-    workUI: {categories: {setup: '구축'}, finished: run => run.status === 'done', lineage: (id, data) => {
+    workUI: {dialog: async () => false, categories: {setup: '구축'}, finished: run => run.status === 'done', lineage: (id, data) => {
       const chain = []; while (id && data?.nodes[id]) {chain.unshift(data.nodes[id]); id = data.nodes[id].parent;} return chain;
     }},
     createWorkView: options => {callbacks = options.callbacks; return view;},
@@ -80,7 +84,9 @@ async function setup(options = {}) {
   }
   await settle();
   return {
-    api: window.__eesNativeWorkV1, callbacks, requests, renders, adoptions,
+    api: window.__eesNativeWorkV1, callbacks, requests, renders, adoptions, confirmations,
+    nativeDraft, restores, location,
+    setConfirmed: value => {confirmed = value;},
     posts: () => requests.filter(request => request.body).map(request => request.body),
     latest: () => renders.at(-1), resets: () => resets,
     setState: value => {state = value;}, setAction: fn => {actionHandler = fn;},
@@ -105,6 +111,14 @@ const scenarios = {
     h.api.finishChatCreation(ticket, 'chat-1'); h.route('/c/chat-1'); await h.settle();
     const original = copy(h.api.selection('chat-1'));
     assert.equal(original.kind, 'published');
+    const draftBefore = copy(h.nativeDraft), restoresBefore = h.restores.length;
+    await h.callbacks.selectWork('j2');
+    assert.equal(h.location.pathname, '/c/chat-1');
+    assert.deepEqual(h.nativeDraft, draftBefore, 'Same-chat selection preserves native text and files');
+    assert.equal(h.restores.length, restoresBefore, 'Same-chat selection must not replace the native composer');
+    assert.deepEqual(copy(h.api.selection('chat-1')).selection,
+      {...original.selection, node_id: 'j2'}, 'Factory, system, process, and version remain scoped to the conversation');
+    await h.callbacks.selectWork('j1');
     h.route('/c/unrelated-chat'); await h.settle();
     assert.deepEqual(copy(h.api.selection('unrelated-chat')), {ok: true, kind: 'none'},
       'A completed first-chat preview capture must not leak selection into another chat');
@@ -187,6 +201,12 @@ const scenarios = {
     await h.callbacks.runJob('p1'); assert.deepEqual(h.posts()[0].payload, {retry_failed: false});
     h.setEdits({nodeId: 'j2'}); await h.callbacks.runJob('j2');
     assert.deepEqual(h.posts()[1].payload, {confirm: true}); assert.equal(h.posts()[1].node_id, 'j2');
+  },
+  async manual_confirmation_can_be_cancelled_without_a_write() {
+    const h = await setup(); h.setEdits({nodeId: 'j2'}); h.setConfirmed(false);
+    await h.callbacks.runJob('j2');
+    assert.equal(h.confirmations.length, 1);
+    assert.equal(h.posts().length, 0);
   }
 };
 scenarios[input.scenario]().then(() => process.stdout.write('ok\n')).catch(error => {console.error(error); process.exitCode = 1;});
@@ -230,3 +250,6 @@ class WorkControllerTests(unittest.TestCase):
 
     def test_parent_run_skips_failed_jobs_and_manual_run_is_explicit(self):
         self.check_scenario("parent_run_skips_failed_jobs_and_manual_run_is_explicit")
+
+    def test_manual_confirmation_can_be_cancelled_without_a_write(self):
+        self.check_scenario("manual_confirmation_can_be_cancelled_without_a_write")

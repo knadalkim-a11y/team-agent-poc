@@ -92,7 +92,13 @@ Windows 접속 수락 오류용 [선택 실행 파일](scripts/serve_openwebui_w
 
 ## 독립 자동 시험 환경
 
-Confluence Tool 시험은 Python 표준 라이브러리와 Pydantic 2를 사용합니다. 저장 암호화 검사와 그 합성 시험에는 `cryptography`도 필요합니다. 재현용 독립 환경의 버전 예시는 Pydantic 2.13.4·cryptography 46.0.0이며, Open WebUI 자체의 의존 버전을 이 값으로 강제하지 않습니다. 실제 실행한 OS·Python·라이브러리 버전은 [날짜별 시험 증거](evals/confluence-offline.md)에 기록합니다.
+Work 개발 검증은 먼저 기존 시험 환경의 실행 가능 여부와 필요한 의존성을 확인합니다. 기존 환경을 재사용할 수 없고 준비가 승인된 경우 저장소의 `.venv` 한 곳을 사용하며, 기능·PR마다 별도 환경을 늘리지 않습니다. 확인된 환경은 이후 검사에서도 그대로 사용하며, 같은 요청에서 이미 허용한 준비를 다시 승인받거나 매번 재설치하지 않습니다. 기준은 Python 3.11이며 고정 의존성의 관리 원본은 [EES delivery workflow](.github/workflows/ees-delivery.yml)의 `Install fixed test dependencies` 단계입니다. 이 목록을 별도 요구사항 파일에 복제하거나 시험 때문에 운영 Open WebUI의 의존 버전을 변경하지 않습니다.
+
+- Node는 기존 실행 파일을 재사용합니다.
+- 공식 Open WebUI wheel은 앱으로 설치하지 않고 `dist/upstream`의 고정 원본 자료와 `dist/branding`의 현재 소스 시험용 묶음으로 사용합니다. 빌더의 원본 해시 검증을 유지합니다.
+- Chrome은 기존 실행 파일을 우선 사용합니다. 없고 준비가 승인된 경우에만 시험용 실행 파일 하나를 `dist/tools`에 준비합니다. 이번 Work 환경에서는 공식 `chrome-headless-shell` 153.0.8010.52를 사용하며, `EES_TEST_CHROME`은 `dist/tools/headless-shell-153.0.8010.52/chrome-headless-shell-linux64/chrome-headless-shell`의 절대 경로로 지정합니다. 이 실행 환경과 full Chrome 실행 결과는 구분합니다. 이 시험 자료는 새 제품 프레임워크·상시 서버·회사 PC 실행 환경이 아닙니다.
+
+이 기준은 임의 설치·삭제 승인이 아닙니다. 이전 환경과 checkout은 용도·로컬 변경을 확인하지 않고 지우지 않습니다. 의존성 누락으로 실행되지 않은 시험은 환경 준비 실패로 기록하고 제품 결함으로 단정하지 않습니다. 기존 PASS·SKIP을 이번 실행 결과로 재사용하지 않으며, 실제 OS·Python·라이브러리 버전과 명령·결과·미실행 범위는 [해당 평가 기록](evals/scenarios.md#evidence-index)에 남깁니다.
 
 ## 변경 규칙
 
