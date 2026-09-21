@@ -105,7 +105,7 @@ function createWorkDesigner({callbacks}) {
     else if(actionName==='add_child'||actionName==='add_process') {
       const type=actionName==='add_process'?'p':n.type==='p'?'t':'j',id='custom-'+type+'-'+Date.now().toString(36);
       const cat=actionName==='add_process'?category:n.category;
-      editor.nodes[id]={id,type,name:'새 '+levels[type],parent:type==='p'?null:n.id,children:[],category:cat,description:'',condition:'all',mode:'manual',tools:[],bindings:{},skills:[],instructions:'',deps:[],rule:'담당자 확인',enabled:true};
+      editor.nodes[id]={id,type,name:'새 '+({p:'업무',t:'하위 업무',j:'확인/실행 업무'})[type],parent:type==='p'?null:n.id,children:[],category:cat,description:'',condition:'all',mode:'manual',tools:[],bindings:{},skills:[],instructions:'',deps:[],rule:'담당자 확인',enabled:true};
       if(type==='p')editor.roots[cat].push(id);else n.children.push(id);editorId=id;editorDirty=true;
     }else if(actionName==='delete_node') {
       if(!confirm('이 단계와 하위 단계를 초안에서 삭제할까요? 진행 중인 업무에는 영향이 없습니다.'))return;
