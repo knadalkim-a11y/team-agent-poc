@@ -273,3 +273,14 @@
 /* The portal makes the native fading navbar background opaque. Keep that
    background within the toolbar so it cannot paint over the context text. */
 #chat-container nav:has(~ #ees-work-context) #navbar-bg-gradient-to-b {bottom:0!important;}
+
+/* Simplified Work UX: business names lead, while technical configuration stays secondary. */
+#ees-work-entry .ew-tree-row > button:has(> .ew-tree-status){display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:8px;row-gap:2px;}
+#ees-work-entry .ew-tree-row > button:has(> .ew-tree-status) > .ew-tree-label{grid-column:1;grid-row:1;}
+#ees-work-entry .ew-tree-row > button > .ew-tree-status{grid-column:2;grid-row:1;align-self:center;}
+#ees-work-panel .ew-work-current-title{font-size:var(--text-base,1rem);font-weight:500;line-height:1.6;}
+#ees-work-panel .ew-work-next-hint{display:block;margin-top:8px;color:var(--ew-muted);font-size:var(--text-xs,.75rem);line-height:1.5;}
+#ees-work-designer .ew-editor-kind{margin:2px 0 0;color:var(--ew-muted);font-size:var(--text-xs,.75rem);font-weight:400;}
+#ees-work-designer .ew-designer-advanced{margin:20px 0 14px;border-top:1px solid var(--ew-line);border-bottom:1px solid var(--ew-line);padding:2px 0 10px;}
+#ees-work-designer .ew-designer-advanced>summary{padding:10px 0;color:var(--ew-muted);font-size:var(--text-sm,.875rem);font-weight:500;cursor:pointer;}
+#ees-work-designer .ew-preservation{margin:12px 0;color:var(--ew-muted);font-size:var(--text-xs,.75rem);line-height:1.6;}

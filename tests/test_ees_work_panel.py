@@ -167,7 +167,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
                 self.assertIn(node["name"], html.text)
                 self.assertIn(node["rule"], html.text)
                 self.assertIn(node["description"], html.text)
-                self.assertIn("예시", html.text)
+                self.assertNotIn("예시 업무", html.text)
                 if node["type"] != "j":
                     self.assertFalse(html.find("button", **{"data-action": "run"}))
                     self.assertIn("다음 업무 열기", html.text)
@@ -185,12 +185,14 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         task, _ = self.render(case, "install-t")
         self.assertEqual(self.run_button(process, "setup-p").text, "계속 진행")
         self.assertEqual(self.run_button(task, "install-t").text, "계속 진행")
-        self.assertIn("태스크", " ".join(item.text for item in process.find("h3")))
-        self.assertIn("잡", " ".join(item.text for item in task.find("h3")))
+        self.assertIn("확인할 업무", " ".join(item.text for item in process.find("h3")))
+        self.assertIn("확인할 업무", " ".join(item.text for item in task.find("h3")))
         manual, _ = self.render(case, "scope-j")
         self.assertFalse(manual.find("button", **{"data-action": "run"}))
         pending, _ = self.render(await self.create(), "scope-j")
         self.assertEqual(self.run_button(pending, "scope-j").text, "확인 완료")
+        self.assertIn("담당자의 확인이 필요합니다.", pending.text)
+        self.assertIn("AI의 자료 정리만으로 완료 처리하지 않습니다.", pending.text)
         self.assertFalse(manual.find("textarea"), "Manual confirmation has no persisted free-form note contract.")
 
     async def test_preview_preserves_goals_and_criteria_without_fabricated_results(self):
@@ -367,7 +369,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         progress = self.section(process, "progress")
         counter = progress.find("strong", **{"data-work-total": None})[0]
         self.assertEqual((counter.attrs["data-work-done"], counter.attrs["data-work-total"]), ("2", "4"))
-        self.assertIn("태스크", progress.text)
+        self.assertIn("업무 진행", progress.text)
         table = process.find("table")[0]
         selected = {element.attrs["data-node-id"] for element in table.find("button", **{"data-action": "select"})}
         self.assertEqual(selected, set(case["definition"]["nodes"]["setup-p"]["children"]))
@@ -402,7 +404,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         details = current.find("details")
         self.assertTrue(details)
         self.assertTrue(all("open" not in detail.attrs for detail in details))
-        self.assertIn("수행 내역", details[0].text)
+        self.assertIn("근거 보기", details[0].text)
         self.assertLess(source.index('data-work-section="current-result"'), source.index('id="ees-work-inputs"'))
         self.assertIn(case["jobs"]["ap-j"]["history"][0]["checks"][2]["detail"], current.text)
 
