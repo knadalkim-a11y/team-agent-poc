@@ -16,7 +16,7 @@ import os
 from pathlib import Path
 import re
 import tempfile
-from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
+from zipfile import ZIP_DEFLATED, BadZipFile, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
@@ -555,6 +555,15 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
                 csv_text = io.StringIO(newline="")
                 csv.writer(csv_text, lineterminator="\n").writerows(record)
                 destination.writestr(zip_entry(record_name), csv_text.getvalue().encode(), compresslevel=6)
+
+            # A digest alone can describe an incomplete file. Verify the closed
+            # archive before publishing either the wheel or its manifest.
+            try:
+                with ZipFile(built) as verified:
+                    if sorted(verified.namelist()) != sorted(row[0] for row in record) or verified.testzip() is not None:
+                        raise ValueError("Built archive is incomplete or corrupt.")
+            except BadZipFile as error:
+                raise ValueError("Built archive is incomplete or corrupt.") from error
 
             manifest = {
                 "schema_version": 1,

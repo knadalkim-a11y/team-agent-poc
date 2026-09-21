@@ -284,3 +284,43 @@
 #ees-work-designer .ew-designer-advanced{margin:20px 0 14px;border-top:1px solid var(--ew-line);border-bottom:1px solid var(--ew-line);padding:2px 0 10px;}
 #ees-work-designer .ew-designer-advanced>summary{padding:10px 0;color:var(--ew-muted);font-size:var(--text-sm,.875rem);font-weight:500;cursor:pointer;}
 #ees-work-designer .ew-preservation{margin:12px 0;color:var(--ew-muted);font-size:var(--text-xs,.75rem);line-height:1.6;}
+
+/* Procedure authoring uses the existing model and editor; only its conversation
+   occupies the right column. Narrow screens keep both surfaces in normal flow. */
+#ees-work-designer .ew-authoring-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(290px,30%);gap:24px;align-items:start;}
+#ees-work-designer .ew-editor-layout{grid-template-columns:200px minmax(0,1fr);gap:20px;min-width:0;}
+#ees-work-authoring{position:sticky;top:12px;border-left:1px solid var(--ew-line);padding:16px 0 0 24px;min-width:0;display:flex;flex-direction:column;max-height:calc(100dvh - 140px);}
+#ees-work-authoring h2{font-size:var(--text-lg,1.125rem);margin-bottom:12px;}
+#ees-work-authoring>.ew-muted{font-size:var(--text-xs,.75rem);}
+#ees-work-authoring .ew-authoring-messages{flex:1;min-height:150px;overflow:auto;overscroll-behavior:contain;margin:20px 0;}
+#ees-work-authoring .ew-authoring-message{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 18px;line-height:1.65;}
+#ees-work-authoring .ew-authoring-message[data-role=user]{background:var(--ew-soft);padding:12px 14px;border-radius:12px;}
+#ees-work-authoring .ew-authoring-message[data-role=notice],#ees-work-authoring .ew-authoring-marker{font-size:var(--text-xs,.75rem);color:var(--ew-muted);}
+#ees-work-authoring .ew-authoring-marker{margin-bottom:12px;}
+#ees-work-authoring form{margin-top:auto;}
+#ees-work-authoring form>label{font-weight:400;font-size:var(--text-xs,.75rem);}
+#ees-work-authoring form .ew-actions{margin:10px 0;justify-content:flex-end;}
+#ees-work-authoring form .ew-muted{font-size:var(--text-xs,.75rem);line-height:1.6;}
+#ees-work-authoring .ew-authoring-model{margin-top:14px;color:var(--ew-muted);font-size:var(--text-xs,.75rem);}
+#ees-work-authoring .ew-authoring-model>summary{cursor:pointer;}
+#ees-work-panel .ew-work-read-links{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 18px;}
+#ees-work-panel .ew-work-read-links button{border:0;padding:0;font-size:var(--text-xs,.75rem);color:var(--ew-muted);text-decoration:underline;text-underline-offset:3px;}
+[data-ees-work] summary[data-work-overlay]{cursor:pointer;}
+#ees-work-dialog{position:fixed;inset:0;margin:auto;width:min(640px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto;border:0;border-radius:14px;padding:28px;background:var(--ew-bg);color:var(--ew-ink);box-shadow:0 20px 80px #0003;}
+#ees-work-dialog::backdrop{background:#0006;}
+#ees-work-dialog>h2{font-size:var(--text-2xl,1.5rem);line-height:1.4;}
+#ees-work-dialog .ew-dialog-note{margin:18px 0;font-size:var(--text-xs,.75rem);}
+#ees-work-dialog .ew-dialog-body{border-top:1px solid var(--ew-line);padding-top:20px;margin-top:20px;overflow-wrap:anywhere;}
+#ees-work-dialog .ew-dialog-body p{margin-bottom:14px;white-space:pre-wrap;}
+#ees-work-dialog footer{margin-top:24px;}
+#ees-work-dialog footer button{min-width:120px;}
+#ees-work-dialog details{border-block:1px solid var(--ew-line);padding:12px 0;margin:12px 0;}
+#ees-work-dialog summary{cursor:pointer;}
+#ees-work-dialog pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;}
+#ees-work-dialog .ew-check,#ees-work-dialog .ew-record-group{padding:14px 0;border-bottom:1px solid var(--ew-line);}
+#ees-work-dialog .ew-check .ew-heading,#ees-work-dialog .ew-record-group h3{margin-bottom:10px;}
+#ees-work-dialog .ew-work-criterion,#ees-work-dialog .ew-work-progress,#ees-work-dialog .ew-work-next{margin:16px 0;}
+#ees-work-dialog table{width:100%;border-collapse:collapse;font-size:var(--text-sm,.875rem);}
+#ees-work-dialog td,#ees-work-dialog th{padding:10px 4px;border-bottom:1px solid var(--ew-line);text-align:left;}
+@media(max-width:1100px){#ees-work-designer .ew-authoring-layout{display:block}#ees-work-authoring{position:static;border-left:0;border-top:1px solid var(--ew-line);padding:20px 0;margin-top:24px;max-height:none}#ees-work-authoring .ew-authoring-messages{max-height:360px}#ees-work-designer .ew-editor-layout{grid-template-columns:180px minmax(0,1fr);}}
+@media(max-width:760px){#ees-work-designer .ew-editor-layout{display:block}#ees-work-dialog{padding:20px}#ees-work-dialog>h2{font-size:var(--text-xl,1.25rem);}}

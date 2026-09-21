@@ -580,6 +580,22 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
         self.wheel.write_bytes(self.wheel.read_bytes() + b"changed")
         with self.assertRaisesRegex(ValueError, "pinned official"):
             self.build()
+
+    def test_incomplete_archive_is_rejected_before_manifest_publication(self):
+        class IncompleteArchive(ZipFile):
+            def __exit__(archive, *args):
+                writing = archive.mode == 'w'
+                result = super().__exit__(*args)
+                if writing:
+                    with open(archive.filename, 'r+b') as output:
+                        output.truncate(100)
+                return result
+
+        with mock.patch.object(builder, 'ZipFile', IncompleteArchive):
+            with self.assertRaisesRegex(ValueError, 'archive'):
+                self.build('incomplete')
+        self.assertFalse((self.root / 'incomplete' / builder.WHEEL_FILENAME).exists())
+        self.assertFalse((self.root / 'incomplete' / 'manifest.json').exists())
         self.assertFalse((self.root / "release").exists())
 
     def test_work_name_migrates_registered_brand_names_and_preserves_custom_name(self):

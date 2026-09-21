@@ -6,10 +6,10 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** 기존 [PR #57](https://github.com/knadalkim-a11y/team-agent-poc/pull/57), `feat/ees-work-simplified-ux-20260918`에서 단순 UX를 보완·로컬 검증함. 업무명 탐색과 상태·근거·다음 행동 하나를 유지하며, 사람 확인의 AI 대리 완료 차단/사용자 취소, 완료 상태·상위 진행 복귀, Workspace 입력·고급 설정·저장 응답 중 편집 보존, 같은 프로그램 버전의 Work 자산 캐시 구분을 보완함. Pack `0.2.12`, 프로그램 `0.11.3+ees.10`, 기존 서비스·저장 형식·게시 snapshot·사용자 자산은 유지함.
-- **검증 환경:** 사용자의 후속 준비 승인으로 저장소 `.venv` 하나에 Python 3.11.16·기존 CI 고정 의존성을 준비하고 Node를 재사용함. 전체 시험 1,056 PASS·0 FAIL·16 SKIP, 관련 UX 인코딩 경고 검사 173 PASS, 실제 Native 화면 14개·theme 2개 PASS. FastAPI/API·공식 wheel·브라우저 부재는 현재 차단 항목이 아님. 남은 SKIP은 Windows/PowerShell 전용 15개와 이전 배포 wheel 역호환 1개임. 시험용 공식 Headless Chrome Shell 하나를 유지함. full Chrome은 Work의 AF_UNIX 권한 제한으로 기동 실패했으며 같은 환경으로 간주하지 않음. 회사 PC 환경은 변경하지 않음. [명령별 결과·실패 보존·Figma 차이·보장 범위](../evals/scenarios.md#simplified-work-ux-implementation-20260921).
-- **최근 적용:** 사용자 보고상 main `1ddf2dba9e46c63bc20309387efa37e858970dbc` 적용 정상, `status result=ok / program=customized / running=true`. 이번 PR은 미병합·미설치·미배포이며 PR #53은 구현 원본·선행 병합 대상으로 쓰지 않음.
-- **다음 작업 하나:** 같은 PR에서 남은 Figma Workspace 전용 AI 작성열·별도 overlay 구성과 현재 구현의 차이를 보완·검토한 뒤 Ready 여부를 판정한다. 이 구현 차이가 남아 Draft를 유지하며 환경 재설치를 다음 작업으로 요구하지 않는다. Figma 지정 17개는 design context/screenshot으로 읽었고, 실제 브라우저에서도 현재 Workspace·대화/패널 화면과 근거/이력 열람을 확인했다. 원본과 동일한 전체 화면 구현으로 선언하지 않는다. Windows/PowerShell·사내 Open WebUI/LLM·실사용자 확인은 미실행이며 Work 검사를 회사 PC로 떠넘기지 않는다. 이번 범위는 개발 검증 환경 준비·구현 보완·로컬 검증·같은 PR 갱신이고 제품 설치·병합·사내 배포·새 서버·공유 Runtime·사내 Git 이전은 제외한다.
+- **현재 작업:** 기존 [PR #57](https://github.com/knadalkim-a11y/team-agent-poc/pull/57), `feat/ees-work-simplified-ux-20260918`에서 남은 Workspace AI 작성·자료/설정/게시/충돌 대화상자를 보완하고 배포 직전 구현·로컬 검증을 완료함. 기존 인증·모델 API를 재사용하며 안내만 미저장 초안에 반영하고 저장·게시·실행은 구분함. 선택 이동/왕복·지연 응답·수동 편집·중단·계정 변경의 입력 보존과 키보드 동작을 보완함. Pack `0.2.12`, 프로그램 `0.11.3+ees.10`, 기존 서비스·저장 형식·게시 snapshot·사용자 자산은 유지함.
+- **검증 환경과 근거:** 기존 저장소 `.venv` 하나의 Python 3.11.16·CI 고정 의존성, Node 24.19.0과 공식 Headless Chrome Shell 하나를 재사용함. 전체 시험 1,064 PASS·0 FAIL·16 SKIP, 관련 strict encoding 시험 345 PASS·0 FAIL·3 SKIP. 관련 검사에 실제 Native 화면 21개·theme 2개를 포함함. Figma 지정 17개 전체의 design context/screenshot을 대조하고 원본은 수정하지 않음. 환경 재설치·새 서버·DB·프레임워크는 추가하지 않음. [정확한 명령·최초 실패·전체 검사·Figma 대조·보장 범위](../evals/scenarios.md#simplified-work-ux-implementation-20260921).
+- **최근 적용:** 사용자 보고상 main `1ddf2dba9e46c63bc20309387efa37e858970dbc` 적용 정상, `status result=ok / program=customized / running=true`. PR #57의 단순 UX는 아직 사내 미설치·미배포임. PR #53은 구현 원본·선행 병합 대상으로 쓰지 않음.
+- **다음 작업 하나:** 사용자의 후속 “배포 전까지” 요청에 따라 같은 PR의 Ready/병합 후 확정한 main 40자리 원본으로 사내 제한 시험 적용·UI/UX 확인을 진행한다. 원본은 PR #57의 최종 merge commit을 사용하며 Git 반영을 사내 적용 성공으로 기록하지 않는다. 이 턴에서는 사내 설치·배포를 실행하지 않는다. 이후 실제 적용 시 기존 Upgrade TrialCommit의 Backup·프로그램/자산 보존·Restore 경계를 사용하고 AI 안내 수정→초안 저장/게시 구분, Runtime 상태/근거/대화 유지의 소수 항목을 함께 확인한다. 실제 Windows/PowerShell·회사 Open WebUI/사내 LLM·실사용자 수락은 미실행이며 이를 Work 브라우저 성공으로 대체하지 않는다. 공유 Runtime·사내 Git 이전은 범위 밖이다.
 
 ## 2026년 9월 개발·검사 방침
 
@@ -26,7 +26,7 @@
 | 대상 | 마지막 확인과 적용 원본 | 남은 한계·근거 |
 |---|---|---|
 | EES Work 업무 UI | 09-15 ees.9 설치 완료, 메인 채팅 업무 요청 재시도 정상 보고, 앞선 ees.8 UI 수락 유지 | 도구 호출 원문·단계별 실행·화면 반영·기존 대화 접근은 이번 보고에서 별도 확인하지 않음. [이번 배포·사용 보고](../evals/scenarios.md#work-ui-refactor-20260915), [앞선 UI 수락](../evals/scenarios.md#sidebar-refinement-20260914) |
-| EES 프로그램 | 09-21 사용자 보고: 고정 원본 `1ddf2dba9e46c63bc20309387efa37e858970dbc`, `status result=ok`, `program=customized`, `running=true`; 적용 화면도 정상 | 프로그램 적용 성공과 이번 미병합 UX 브랜치는 구분. 버전 문자열·개별 UI 항목 전수 확인은 이번 보고에서 따로 받지 않음 |
+| EES 프로그램 | 09-21 사용자 보고: 고정 원본 `1ddf2dba9e46c63bc20309387efa37e858970dbc`, `status result=ok`, `program=customized`, `running=true`; 적용 화면도 정상 | 프로그램 적용 성공과 이번 미배포 UX 변경은 구분. 버전 문자열·개별 UI 항목 전수 확인은 이번 보고에서 따로 받지 않음 |
 | 운영 래퍼 | 09-21 고정 원본 `1ddf2dba9e46c63bc20309387efa37e858970dbc` 적용 뒤 `status result=ok`, `running=true` 사용자 보고 | 10048 재발 방지 수정이 포함된 main 적용 성공. 실제 장애 재현 시험이나 장시간 안정성 검증으로 확대하지 않음 |
 | 분석·업무 패널 자산 | 09-15 `87f3f2922a4a` / Agent Pack v0.2.10 ApplyDemo 성공, 변경 3건, 메인 채팅 업무 요청 재시도 정상 보고 | 개별 변경 항목·분석 기능·업무 전체 실행의 확인으로 확대하지 않음. [이번 적용·사용](../evals/scenarios.md#work-ui-refactor-20260915) |
 | 대표 시작 질문 | 09-15 `87f3f2922a4a`의 v0.2.10 관리 목록을 포함한 ApplyDemo 성공 | 질문의 실제 표시 여부는 미확인. 변경 3건을 특정 질문 변경으로 단정하지 않음. [이번 적용](../evals/scenarios.md#work-ui-refactor-20260915), [이전 접속 실패](../evals/scenarios.md#connector-demo-starters) |
@@ -59,7 +59,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | main `1ddf2dba9e46c63bc20309387efa37e858970dbc` 적용 정상 보고, 단순 UX PR #57 보완·검증 중 | PR #57의 미실행 검증과 UX 차이를 확인한 뒤 [참여·개인 대화 분리·동시 변경·이어가기 UX](mockups/ees-work/TASK.md#shared-pilot-first)를 구체화. 일정·종합 현황판은 별도 후속 범위 |
+| 4. 관리자 워크플로 | main `1ddf2dba9e46c63bc20309387efa37e858970dbc` 적용 정상 보고, 단순 UX PR #57 구현·로컬 검증 완료 | 제한 시험 적용의 UI/UX를 확인한 뒤 [참여·개인 대화 분리·동시 변경·이어가기 UX](mockups/ees-work/TASK.md#shared-pilot-first)를 구체화. 일정·종합 현황판은 별도 후속 범위 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 

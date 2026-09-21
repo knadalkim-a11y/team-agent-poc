@@ -154,7 +154,58 @@ git diff --check
 
 중복 실행을 합산하지 않았다. 남은 16 SKIP은 Windows/PowerShell 전용 15개와 **직전 실제 배포 ees.7/ees.8 wheel 미확보의 역호환 1개**이며 FastAPI·현재 wheel·브라우저 부재로 건너뛴 시험은 없다. 전체 원문 로그는 무시 경로 `dist/validation-20260921/full-prepared.log`, 최초 API/wheel·full Chrome·Headless Shell 실패와 수정 후 로그도 같은 경로에 보존했다. 현재 Workspace·대화/Work Panel의 실제 스크린샷을 열어 확인했다. Figma 17개 원본 대조 범위는 위 표를 유지하며 이번 실행을 전용 AI 작성열·별도 overlay의 동일 구현 또는 전체 픽셀 일치로 확대하지 않는다.
 
-**현재 판단:** 검증 환경 복원은 완료했고 FastAPI/API/native 브라우저 의존성은 현재 차단 사유가 아니다. PR #57은 남은 Figma Workspace 전용 AI 작성열·별도 overlay 구성 차이로 Draft를 유지한다. 실제 Windows·회사 Open WebUI/LLM·사용자 수락은 미실행이다. 환경의 반복 생성 대신 AGENTS/versions에 기존 환경 재사용·CI 목록 단일 관리 기준을 반영했고, 새로 실행된 시험의 인코딩 누락과 결과/이력 열람 검사를 보완했다. 이번 추가 변경은 시험·문서뿐이며 제품/Pack/DB/사용자 자산은 바꾸지 않았다. main 직접 push·병합·제품 설치·사내 배포·원격 CI 실행은 하지 않았다.
+**환경 복원 직후 판단:** 검증 환경 복원은 완료했고 FastAPI/API/native 브라우저 의존성은 현재 차단 사유가 아니다. PR #57은 남은 Figma Workspace 전용 AI 작성열·별도 overlay 구성 차이로 Draft를 유지한다. 실제 Windows·회사 Open WebUI/LLM·사용자 수락은 미실행이다. 환경의 반복 생성 대신 AGENTS/versions에 기존 환경 재사용·CI 목록 단일 관리 기준을 반영했고, 새로 실행된 시험의 인코딩 누락과 결과/이력 열람 검사를 보완했다. 이번 추가 변경은 시험·문서뿐이며 제품/Pack/DB/사용자 자산은 바꾸지 않았다. main 직접 push·병합·제품 설치·사내 배포·원격 CI 실행은 하지 않았다.
+
+#### 배포 직전 UX 보완과 재검증 (2026-09-21 후속 요청)
+
+사용자의 “배포 전까지 다 진행” 후속 요청으로 남은 구현·로컬 검증·같은 PR 갱신과 Ready/병합을 진행한다. 사내 설치·배포는 실행하지 않는다. 시작 시 main `1ddf2dba9e46c63bc20309387efa37e858970dbc`, PR #57 head `b032816dfe69a45172413263509d79491dcddad4`, Draft·열린 PR #53/#57과 로컬 변경을 확인했다. 이전 변경과 AGENTS·STATUS·README 지도·재개 댓글 `5754566108`의 근거를 유지하며 PR #53을 구현 원본으로 쓰지 않는다. 기존 `.venv`·Node·공식 wheel·Headless Chrome Shell을 재사용하고 의존성 재설치나 별도 환경은 추가하지 않았다.
+
+**차이 분석 → 최소 설계·검토:** Figma 지정 17개를 다시 design context/screenshot으로 읽었다. 남은 차이는 Workspace 우측 작성 대화와 자료/설정/게시/충돌 overlay였다. 기존 controller의 인증된 모델 API 호출, designer의 메모리 초안, view의 공통 native dialog를 재사용하기로 설계했다. 설명/안내 수정/저장/게시의 책임을 나누고 응답 중 편집·선택 변경과 개인 대화 보존 조건을 먼저 검토했다. 새 서버·DB·프레임워크·공유 Runtime·새 모델 등록은 범위 밖이다.
+
+- Workspace의 **물어보기**는 설명만 하고 **안내 수정**은 선택한 업무의 수행 안내만 미저장 초안에 반영한다. 허용 JSON 키·문자열·길이를 검사하고 완료 조건·방식·연결과 전체 나머지 정의를 보존한다. 되돌리기는 AI 반영 후 수동 편집을 덮지 않으며 실제 저장/검증/게시를 따로 선택한다. 질문/미전송 입력은 업무별 메모리에 유지하고 운영 대화나 절차 정의에 저장하지 않는다.
+- 기존 `/api/models`와 사용자 설정에서 접근 가능한 모델을 읽고 `/api/chat/completions`를 인증된 요청으로 호출한다. `tools:[]`, `tool_ids:[]`와 chat/parent ID 없는 요청을 사용하며 새 대화·업무 액션을 생성하지 않는다. 고정 공식 0.11.3의 main/middleware에서 모델 접근 검사와 명시적 빈 tools 목록의 built-in 해제 경로를 확인했다. 모델 preset이 streaming을 강제하는 경우의 SSE도 처리한다. fixture는 JSON/SSE·실패·부정 JSON·초과 키·중단·계정 변경을 검증했으며 실제 사내 모델/필터 실행을 대신하지 않는다.
+- 지연 응답은 요청 당시 정의·초안 revision·선택 이동 횟수와 인증 수명을 확인한다. 다른 업무로 갔다가 응답 전에 돌아와도 자동 반영하지 않는다. 중단/오류 때 요청을 복원하되 새로 입력한 질문을 보존한다. 계정 변경은 메모리 작성 기록과 대기 요청을 정리한다.
+- 검토 자료·저장된 점검 근거·실패 후 이전 이력·업무 기록·전체 진행 요약은 선택과 저장 상태를 바꾸지 않는 창으로 연다. 등록 안내/입력을 실제 외부 문서 비교 결과로 표시하지 않는다. 고급 설정은 현재 연결을 읽고 기존 편집 영역으로 진입하며, 게시 창은 변경 업무·새 버전·기존 진행 건 보존을 안내한다. 실제 revision 충돌은 서버 변경과 미저장 입력을 모두 보존한다. Esc·Tab/초점 복귀·취소·1920/900/600 폭·밝은/어두운 화면을 실제 브라우저에서 검사했다.
+- 사람 확인은 앞선 UI 명시적 확인/취소와 AI Tool 거절을 유지한다. Prompt의 설명 지침, 정상 UI/Tool 경로의 보장, 인증된 직접 API의 boolean/revision 계약 및 현실 업무를 실제 수행했는지는 계속 구분한다. 기존 대화·사용자 자산·게시 snapshot·Pack 0.2.12·프로그램 ees.10을 유지한다.
+
+**먼저 드러난 실패와 수정:** 로그는 같은 무시 경로 `dist/validation-20260921/finish-*.log`에 보존하며 아래 요약을 Git에 남긴다.
+
+1. 누락 화면의 첫 실제 브라우저 검사 2 FAIL(5.804초): 작성 영역/별도 창 없음. 구현 후 controller 경계 단위시험 34개 중 33 PASS·1 FAIL(6.486초)은 새 `workUI.dialog`를 제공하지 않은 stub였다. 경계 stub을 갱신한 재실행 34 PASS(15.136초); 실제 창 검사는 별도 브라우저에서 수행했다.
+2. 기존 출력 경로 빌드는 `Output already exists`로 거절되어 기존 산출물을 덮지 않았다. 별도 시험 출력에서 생성 완료로 보고된 wheel은 38,936,383 bytes·SHA-256 `8b91fb4367a580a7c0d3293f52886aa6b04b161c01e5b1c7ce93c998abbf70ff`이나 ZIP 중앙/종료 레코드가 없어 브라우저 6개가 모두 준비 단계 `BadZipFile` ERROR였다. 동일 원본의 재빌드는 5,911개 항목·CRC PASS였다. **파일이 불완전했던 근본 원인은 미확정**이며 재빌드 성공을 원인 해결로 기록하지 않는다. 해시만으로 정상 archive를 보장하지 못하는 빌더 경계를 확인해, 닫힌 ZIP의 목록/CRC를 검증한 뒤 wheel·manifest를 공개하도록 수정했다. 잘린 archive 주입 회귀는 수정 전 1 FAIL → 수정 후 1 PASS이고 최종 실제 묶음에서도 검증했다. 실패 후보는 배포하지 않았다.
+3. 유효한 묶음의 6개 브라우저 검사: 3 PASS·3 FAIL(25.721초). 단순 선택/폼 포착 때 생략된 시스템 설정을 추가하는 결함과 Esc 닫기 결함을 수정했다. 나머지는 기존 접힘 영역의 `open`을 검사하던 시험을 새 창의 실제 근거/저장 record 대조로 갱신했다.
+4. 후속 8개 메서드에서 3개 메서드 실패(서브케이스 포함 8 failure, 41.570초). 서버의 기존 초안 version 증가를 기대값에 반영하되 전체 정의의 나머지 내용 보존 비교는 유지했다. Tab의 창 밖 이동과 그 뒤 가려진 제어 부수 실패를 확인해 창 안 키보드 순환을 보완했다. 이후 3개 재검사 2 PASS·1 FAIL(9.926초)로 응답 전 업무 왕복의 늦은 덮어쓰기를 재현했다. 마지막 ID만 비교하던 경계를 선택 이동 횟수·전체 정의 비교로 수정하고 왕복을 응답 전에 강제하는 회귀로 검증했다.
+
+**이번 Figma 대조 범위:** 지정 **17/17**의 context/screenshot 접근 성공, 원본 수정 0개. 아래는 앞선 초기 구현 표 이후의 갱신이며 원본과 픽셀 동일하다는 판정은 아니다.
+
+| 노드 | 최종 구현/검사 범위 |
+|---|---|
+| `150:300` | 역할/진입 지도 대조. 별도 시작 소개 페이지를 새로 만들지 않음 |
+| `147:252`, `147:434`, `148:180`, `148:330` | 업무명·진행/검토 대기/완료·상위 진행·다음 행동. 기존 Native 대화/패널·상태 자동 시험과 실제 브라우저 동작 |
+| `147:610`, `149:233`, `149:325`, `149:414` | 우측 AI 작성, 질문과 수정, 미저장/저장/게시, 되돌리기·기존 건 v1 유지. 기존 WebUI 서체/테마와 좁은 폭 대응 |
+| `150:182`, `150:197`, `150:210` | 검토 자료·저장 DB 모의 근거·업무/실행 기록을 읽기 전용 창으로 제공. 기존 record의 대상·시각·점검/실패와 개인 대화 비노출 |
+| `150:223`, `150:236` | 진행 요약 창과 완료 후 집계. 기존 업무 선택/입력/결과 유지 |
+| `150:249`, `150:262`, `150:281` | 고급 설정 확인→기존 편집, 게시 수락/취소, 실제 revision 충돌→최신 조회·초안 유지. 공동 참여자 Runtime은 이번 범위 밖 |
+
+**재현 명령:** 저장소 루트에서 앞선 환경 변수와 `.venv`를 재사용하며, 이번 소스 묶음은 `EES_TEST_BRANDING_DIR="$PWD/dist/branding-finish-reviewed"`, 스크린샷은 `EES_TEST_SCREENSHOT_DIR="$PWD/dist/validation-20260921/finish-screenshots"`이다.
+
+```bash
+python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding-finish-reviewed
+python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_work_panel tests.test_ees_work_controller tests.test_ees_work_designer tests.test_ees_workflow tests.test_ees_workflow_tool tests.test_ees_demo_assets tests.test_ees_branding_build tests.test_demo_bundle tests.test_ees_apply_demo tests.test_ees_trial_bundle tests.test_ees_trial_upgrade tests.test_ees_webui_customization tests.test_ees_work_routes tests.test_ees_work_demo tests.test_ees_chat_theme -v
+python -m unittest discover -s tests -v
+node tests/test_ees_cooperation_panel.cjs
+node tests/test_wo_demo_state.cjs
+python scripts/check_docs.py
+git diff --check
+```
+
+- 관련 strict encoding: **345 PASS / 0 FAIL / 3 SKIP**, `Ran 348 tests`, 149.094초. Native 브라우저 **21 PASS**, theme **2 PASS**, 실제 wheel 빌더 **25 PASS**, route **3 PASS** 포함. SKIP 3개는 Windows 전용 2개와 직전 ees.7/ees.8 배포 wheel 미확보 1개다. 전체 명령과 중복 합산하지 않는다.
+- 최종 실제 ees.10 wheel: SHA-256 `ccbfe48e092fe9c3cf4a518b9c7be95964c5ec699d133b345308c99912d26c09`. 기존 공식 원본의 고정 해시와 새 Work 자산 캐시/RECORD·보존 검사 사용. 실제 회사 프로그램에 설치한 파일이 아니다.
+- Node cooperation/WO 직접 실행 PASS. 제품 JS 상태 검사와 실제 브라우저 검사를 구분한다.
+
+- 전체 `python -m unittest discover -s tests -v`: **1,064 PASS / 0 FAIL / 0 ERROR / 16 SKIP**, `Ran 1080 tests`, 208.756초. `finish-full.log`에 실제 실행을 기록했다. SKIP은 Windows/PowerShell 전용 15개와 직전 ees.7/ees.8 배포 wheel 역호환 1개다. FastAPI/API·asset_guard/native·현재 wheel·실제 브라우저는 실행했으며 uv/NLTK opt-in 시험도 PASS다.
+- `python scripts/check_docs.py`: PASS, 오류/검토 후보 0. `git diff --check`: PASS. 이번 변경은 13개 파일이며 Git 원격 게시 때 로컬 검사 tree와 생성 tree를 대조한다. 정확한 head와 병합 원본은 같은 [PR #57](https://github.com/knadalkim-a11y/team-agent-poc/pull/57)에 기록한다.
+
+**종료 판단:** 이번 단순 UX의 남은 작성열·대화상자 구현과 Work에서 가능한 로컬 검증은 완료했다. 같은 PR을 Ready로 전환해 사용자 후속 요청의 병합까지 진행하고 사내 배포는 실행하지 않는다. 실제 Windows/PowerShell·회사 Open WebUI/사내 LLM·실사용자 수락은 미실행이며 제한 시험 적용 뒤 확인할 범위다. full Chrome과 Headless Shell의 차이, 이전 배포 wheel 역호환 미실행, 최초 불완전 ZIP의 원인 미확정은 보존한다. 프로그램 묶음의 공개 전 무결성 검사를 추가했으며 정상 회사 서버의 재진단·새 환경 준비를 요구하지 않는다. 원격 CI는 수동 실행하지 않고 이번 개발/병합 커밋에 `[skip ci]`를 넣으며 10월 재개 규칙은 STATUS를 따른다.
 
 ### 재개 전 STATUS의 날짜별 점검 기록 보존
 

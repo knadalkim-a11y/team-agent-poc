@@ -11,6 +11,23 @@ const workUI = (() => {
   const finished = c => ['passed','completed','success','skipped'].includes(c?.status);
   function siteLabel(site) {return [site?.country,site?.name || site?.factory].filter(Boolean).join(' · ');}
   const lineage = (id, data) => {const result = [], seen = new Set(); while (id && data?.nodes[id] && !seen.has(id)) {seen.add(id); result.unshift(data.nodes[id]); id = data.nodes[id].parent;} return result;};
+  let activeDialog=null;
+  function closeDialog() {activeDialog?.close();}
+  function dialog({title,html,confirmLabel='',note=''}) {
+    closeDialog();
+    const previous=document.activeElement,element=document.createElement('dialog');
+    element.id='ees-work-dialog';element.dataset.eesWork='';element.setAttribute('aria-labelledby','ees-work-dialog-title');
+    element.innerHTML=`<h2 id="ees-work-dialog-title">${esc(title)}</h2>${note?`<p class="ew-muted ew-dialog-note">${esc(note)}</p>`:''}<div class="ew-dialog-body">${html}</div><footer class="ew-actions">${confirmLabel?`<button type="button" class="ew-primary" data-dialog-confirm>${esc(confirmLabel)}</button>`:''}<button type="button" data-dialog-close>${confirmLabel?'취소':'닫기'}</button></footer>`;
+    document.body.append(element);activeDialog=element;
+    return new Promise(resolve=>{
+      let accepted=false;
+      element.querySelector('[data-dialog-confirm]')?.addEventListener('click',()=>{accepted=true;element.close();});
+      element.querySelector('[data-dialog-close]').addEventListener('click',()=>element.close());
+      element.addEventListener('click',event=>{if(event.target===element){const r=element.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)element.close();}});
+      element.addEventListener('close',()=>{element.remove();if(activeDialog===element){activeDialog=null;if(previous?.isConnected)previous.focus({preventScroll:true});}resolve(accepted);},{once:true});
+      element.showModal();element.querySelector('[data-dialog-close]').focus();
+    });
+  }
   function treeHTML(data, ids, options = {}, depth = 0) {
     const {editing = false, selectedId = '', collapsed = new Set(), expanded = new Map(), statuses: nodeStatuses = {}, summaries = {}, expansionKey = '', run = null} = options;
     return (ids || []).map(id=>{
@@ -22,7 +39,7 @@ const workUI = (() => {
       return `<div class="ew-tree-row" style="--depth:${depth}">${children.length?button(open?'⌄':'›','expand',`data-node-id="${esc(id)}" data-expansion-key="${esc(expansionKey)}" data-case-id="${esc(run?.id || '')}" class="ew-expand" aria-label="${esc(n.name)} ${open?'접기':'펼치기'}" aria-expanded="${open}"`):'<span class="ew-expand" aria-hidden="true"></span>'}<button type="button" data-action="${editing?'edit_node':'select'}" data-node-id="${esc(id)}" data-process-id="${esc(lineage(id,data)[0]?.id || id)}" aria-current="${active?'step':'false'}"><span class="ew-tree-label">${esc(n.name)}${!editing&&children.length?`<small class="ew-tree-meta">${ns?`<span class="ew-tree-status" data-status="${esc(itemStatus)}">${failed?'확인 필요 '+failed:esc(statuses[itemStatus])}</span> · `:''}${esc(summary)}</small>${n.type==='p'&&run?`<small class="ew-tree-meta">${esc(run.created_at?.slice(0,10) || '기존 실행')} · v${esc(run.version)}</small>`:''}`:''}</span>${!editing&&!children.length?`<span class="ew-tree-status" data-status="${esc(itemStatus)}">${esc(statuses[itemStatus])}</span>`:''}</button></div>${children.length&&open?treeHTML(data,children,options,depth+1):''}`;
     }).join('');
   }
-  return Object.freeze({$, esc, clone, categories, levels, statuses, badge, button, finished, siteLabel, lineage, treeHTML});
+  return Object.freeze({$, esc, clone, categories, levels, statuses, badge, button, finished, siteLabel, lineage, treeHTML,dialog,closeDialog});
 })();
 
 /* One saved record supplies both the summary and its folded evidence. */
@@ -74,7 +91,7 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
   const parent=path.length>1?path[path.length-2]:null;
   const breadcrumb='<nav class="ew-work-path" aria-label="업무 위치">'+(parent?(history?'<span>‹  '+esc(parent.name)+'</span>':selectButton(parent,'‹  '+parent.name)):'<span>전체 업무</span>')+'</nav>';
   const scopeText=[site?.name || site?.factory || site?.country,system,site?.line].filter(Boolean).join(' · ');
-  const header=breadcrumb+'<div class="ew-heading ew-work-heading"><h2 class="ew-title">'+esc(n.name)+'</h2>'+badge(nodeState(n))+'</div><p class="ew-work-scope">'+esc(scopeText)+(preview?' · 시작 전':'')+'</p>';
+  const header=breadcrumb+'<div class="ew-heading ew-work-heading"><h2 class="ew-title">'+esc(n.name)+'</h2>'+badge(nodeState(n))+'</div><p class="ew-work-scope">'+esc(scopeText)+(preview?' · 시작 전':'')+'</p>'+(!history?'<div class="ew-work-read-links">'+button('전체 진행 요약','work_summary')+(c?button('업무 기록 보기','work_records'):'')+'</div>':'');
   const criterion='<div class="ew-work-criterion"><span>완료 조건</span><p>'+esc(n.rule || '등록된 완료 조건을 확인해 주세요.')+'</p></div>';
   // Node instructions are business-facing work guidance; configuration lists
   // and Skill/prompt source bodies belong in Workspace, not this surface.
@@ -126,7 +143,7 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
   const failure=latest?.checks?.find(check=>['failed','blocked'].includes(check.status));
   const currentText=!applies(n)?'이 업무는 현재 범위에서 적용 제외입니다.':preview?'아직 시작하지 않은 업무입니다.':latest&&nodeState(n)==='passed'&&['manual','draft'].includes(n.mode)?(n.mode==='draft'?'초안 검토가 완료됐습니다.':'담당자 확인이 완료됐습니다.'):unavailable(n)?'실행 연결이 필요합니다.':nodeState(n)==='failed'?'점검 결과를 확인해 주세요.':nodeState(n)==='blocked'?reasonFor(n):n.mode==='manual'?'담당자의 확인이 필요합니다.':n.mode==='draft'?'초안 검토가 필요합니다.':latest?(failure?.detail || failure?.message || latest.detail || '점검 결과가 저장되었습니다.'):records.length?'현재 조건의 유효한 결과가 없습니다. 재점검이 필요합니다.':'아직 수행한 결과가 없습니다.';
   const currentMeta=!applies(n)?'현재 공장·시스템 조건에서는 실행 대상이 아닙니다.':preview?'업무를 이해한 뒤 필요한 입력이나 확인을 진행하세요.':latest?esc((latest.at || latest.completed_at || '실행 시각 미기록')+' · '+recordKind(latest)):unavailable(n)?'실행 연결 전에는 수행된 것으로 기록하지 않습니다.':n.mode==='manual'?'아직 확인 완료 기록이 없습니다.':n.mode==='draft'?(job.document?'저장된 초안을 직접 검토해 주세요.':'검토할 초안이 아직 없습니다.'):(records.length?'이전 결과는 실행 이력에 보존됩니다.':'미수행');
-  const result='<section class="ew-work-result" data-work-section="current-result"><h3>현재 상태</h3><p class="ew-work-current-title">'+esc(currentText)+'</p><p class="ew-muted">'+currentMeta+'</p>'+(latest?'<details class="ew-work-detail"><summary>근거 보기'+(failure?' · 확인 필요':'')+'</summary>'+recordHTML(latest)+'</details>':'')+'</section>';
+  const result='<section class="ew-work-result" data-work-section="current-result"><h3>현재 상태</h3><p class="ew-work-current-title">'+esc(currentText)+'</p><p class="ew-muted">'+currentMeta+'</p>'+(latest?'<details class="ew-work-detail"><summary data-work-overlay="'+esc(n.name)+' 결과">근거 보기'+(failure?' · 확인 필요':'')+'</summary>'+recordHTML(latest)+'</details>':'')+'</section>';
   const inputs={...valuesFor(n),...(draft?.inputs || {})},fields=fieldsFor(n),document=draft?.document ?? job.document ?? '';
   const nodeId=' data-node-id="'+esc(n.id)+'"',changed=Boolean(draft?.inputsChanged||draft?.documentChanged),conflict=Boolean(draft?.conflict);
   const unavailableNow=previewBlocked||!applies(n)||missingFor(n).length||unavailable(n)||conflict;
@@ -137,7 +154,8 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
   const dirtyHTML=formHTML?'<p class="ew-work-dirty" data-work-dirty role="status"'+(changed?'':' hidden')+'>작성 중인 값이 있습니다. 반영한 뒤 점검하세요.</p>':'';
   const editable=nodeState(n)==='passed'&&formHTML?'<details class="ew-work-edit"><summary>입력 변경</summary>'+formHTML+'</details>':formHTML;
   const saved=locked?'<details class="ew-work-detail"><summary>저장된 입력과 초안</summary>'+dataHTML(valuesFor(n),job.document)+'</details>':'';
-  const old=previous.length?'<details class="ew-history" data-work-section="history"><summary>실행 이력 '+previous.length+'건 · 읽기 전용</summary>'+[...previous].reverse().map(record=>'<details class="ew-history-attempt"><summary>'+esc(record.attempt || '?')+'차 · '+esc(statuses[record.status] || record.status)+' · '+esc(record.at || record.completed_at || '시각 미기록')+'</summary>'+recordHTML(record)+'</details>').join('')+'</details>':'';
+  const old=previous.length?'<details class="ew-history" data-work-section="history"><summary data-work-overlay="'+esc(n.name)+' 실행 이력">실행 이력 '+previous.length+'건 · 읽기 전용</summary>'+[...previous].reverse().map(record=>'<details class="ew-history-attempt"><summary>'+esc(record.attempt || '?')+'차 · '+esc(statuses[record.status] || record.status)+' · '+esc(record.at || record.completed_at || '시각 미기록')+'</summary>'+recordHTML(record)+'</details>').join('')+'</details>':'';
+  const review=['manual','draft'].includes(n.mode)?'<details class="ew-work-detail"><summary data-work-overlay="'+esc(n.name)+' 검토 자료">검토 자료 보기</summary><p>'+esc(n.description || '등록된 업무 목적을 확인해 주세요.')+'</p>'+guidanceHTML+criterion+dataHTML(valuesFor(n),job.document)+'<p class="ew-muted">등록된 안내와 저장된 자료입니다. 실제 외부 시스템의 설정 차이를 조회한 결과는 아닙니다.</p></details>':'';
   const planned=!latest&&(n.tools || []).length?'<details class="ew-work-detail"><summary>예정된 점검</summary><ol>'+(n.tools || []).map((id,index)=>'<li>'+esc(tools[id]?.name || '점검 '+(index+1))+'</li>').join('')+'</ol></details>':'';
   const next=locked?'저장된 결과와 근거를 확인할 수 있습니다.':changed?'작성 중인 값이 있습니다. 입력을 반영한 뒤 점검하세요.':reasonFor(n);
   const nextHint=!locked&&n.mode==='manual'?'AI의 자료 정리만으로 완료 처리하지 않습니다.':unavailable(n)?'실행 연결 전에는 수행된 것으로 기록하지 않습니다.':'';
@@ -145,7 +163,7 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
   const baseUnavailable=Boolean(unavailableNow||(n.mode==='draft'&&!job.document));
   if(!locked&&nodeState(n)!=='passed'&&applies(n))action=runButton(n.mode==='manual'?'확인 완료':n.mode==='draft'?'검토 완료':job.attempt?'다시 점검':'점검 실행',baseUnavailable||changed,true,'data-work-draft-sensitive data-work-base-unavailable="'+baseUnavailable+'"');
   else if(!history&&n.parent)action=selectButton(nodes[n.parent],'상위 업무 보기',true);
-  return header+(n.description?'<p class="ew-work-goal">'+esc(n.description)+'</p>':'')+(preview?previewActions:'')+result+conflictHTML+editable+dirtyHTML+criterion+depsHTML+guidanceHTML+saved+planned+old+'<div class="ew-work-next"><span>다음 할 일</span><p data-work-next data-work-saved-next="'+esc(locked?'저장된 결과와 근거를 확인할 수 있습니다.':reasonFor(n))+'">'+esc(next)+'</p>'+(nextHint?'<small class="ew-work-next-hint">'+esc(nextHint)+'</small>':'')+'</div>'+(action?'<div class="ew-work-actions">'+action+'</div>':'');
+  return header+(n.description?'<p class="ew-work-goal">'+esc(n.description)+'</p>':'')+(preview?previewActions:'')+result+review+conflictHTML+editable+dirtyHTML+criterion+depsHTML+guidanceHTML+saved+planned+old+'<div class="ew-work-next"><span>다음 할 일</span><p data-work-next data-work-saved-next="'+esc(locked?'저장된 결과와 근거를 확인할 수 있습니다.':reasonFor(n))+'">'+esc(next)+'</p>'+(nextHint?'<small class="ew-work-next-hint">'+esc(nextHint)+'</small>':'')+'</div>'+(action?'<div class="ew-work-actions">'+action+'</div>':'');
 }
 
 /* Session-only drafts never update a server snapshot or completed evidence. */
@@ -450,6 +468,13 @@ function createWorkView({callbacks}) {
     if(event.type==='focusin'){if(scopePicker&&!target.closest?.('#ees-work-scope-popover, .ew-scope-pickers'))closeScopePicker();return unhandled;}
     if(event.type==='keyup')return ['Enter',' ','Spacebar'].includes(event.key)&&target.closest?.('#ees-work-entry [data-action=scope_toggle], #ees-work-scope-popover [data-action=scope_choose]')?handled(true):unhandled;
     if(event.type==='keydown'){
+      const dialog=$('#ees-work-dialog');
+      if(dialog?.open&&event.key==='Escape'){workUI.closeDialog();return handled(true);}
+      if(dialog?.open&&event.key==='Tab'){
+        const controls=Array.from(dialog.querySelectorAll('button,input,textarea,select,a[href],summary,[tabindex]')).filter(el=>!el.disabled&&el.tabIndex>=0&&el.getClientRects().length),index=controls.indexOf(document.activeElement);
+        const next=index<0?(event.shiftKey?controls.length-1:0):(index+(event.shiftKey?-1:1)+controls.length)%controls.length;
+        (controls[next] || dialog).focus();return handled(true);
+      }
       if(event.currentTarget===document){if(event.key==='Escape'&&navOpen){navOpen=false;renderNavigator();sidebar();}return unhandled;}
       if(target.closest?.('#ees-work-resizer')&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){width=event.key==='Home'?360:event.key==='End'?760:width+(event.key==='ArrowLeft'?24:-24);sizePanel();return handled(true);}
       const trigger=target.closest?.('#ees-work-entry [data-action=scope_toggle]'),popup=$('#ees-work-scope-popover'),inPicker=scopePicker&&popup?.contains(target);
@@ -481,6 +506,11 @@ function createWorkView({callbacks}) {
       return handled(true);
     }
     if(event.type!=='click')return unhandled;
+    const summary=target.closest?.('summary[data-work-overlay]');
+    if(summary&&inside){
+      const html=Array.from(summary.parentElement.children).filter(el=>el!==summary).map(el=>el.outerHTML).join('');
+      workUI.dialog({title:summary.dataset.workOverlay,html,note:'읽기 전용 · 저장된 업무 자료'});return handled(true);
+    }
     const categoryButton=target.closest?.('[data-work-category]');
     if(categoryButton?.closest('#ees-work-entry')){
       const wanted=categoryButton.dataset.workCategory;
@@ -508,6 +538,13 @@ function createWorkView({callbacks}) {
     else if(action==='history_case')callbacks.showHistory(buttonTarget.dataset.caseId);
     else if(action==='select')callbacks.selectWork(buttonTarget.dataset.nodeId,buttonTarget.dataset.processId);
     else if(action==='run')callbacks.runJob(buttonTarget.dataset.nodeId);
+    else if(action==='work_summary'||action==='work_records'){
+      captureJobEdits();const c=selectedCase(),data=definition(),root=data.nodes[lineage(selectedId())[0]?.id];
+      if(!root)return handled();
+      const note=c?`게시된 절차 v${c.version} · 현재 진행 건의 저장 상태`:'게시된 절차 · 시작 전';
+      const html=action==='work_summary'?workPanelNodeHTML(c,root,{definition:data,readOnly:true,history:true,site:c?.site || state.catalog.sites[browsingSite],system:browsingSystem}):Object.entries(c?.jobs || {}).filter(([,job])=>job.history?.length).map(([id,job])=>`<section class="ew-record-group"><h3>${esc(data.nodes[id]?.name || id)}</h3>${job.history.map(record=>`<p>${esc(record.at)} · ${record.kind==='human_confirmation'?'담당자 확인':'모의 점검'} · ${esc(statuses[record.status] || record.status)} · ${esc(record.attempt)}차</p>`).join('')}</section>`).join('') || '<p>저장된 업무 기록이 없습니다.</p>';
+      workUI.dialog({title:action==='work_summary'?root.name:'업무 기록',html,note});
+    }
     else if(action==='discard_job_edits'||action==='rebase_job_edits'){const context=editContext(buttonTarget.dataset.nodeId);if(context){if(action==='discard_job_edits')jobDrafts.discard(context.scope);else jobDrafts.rebase(context.scope,context.saved,context.revision);renderedEditContext=null;renderPanel();}}
     else return unhandled;
     return handled();
@@ -516,7 +553,7 @@ function createWorkView({callbacks}) {
   function prepare(value) {readSnapshot(value);sidebar();updateScopeReadiness();}
   function sync(value) {prepare(value);if(state&&snapshot.browseActive&&chatRoute()){if(!$('#ees-work-context'))renderContext();callbacks.registerPanel();}positionNav();}
   function updateLayout() {positionNav();sizePanel();}
-  function detach() {closeScopePicker();closeHost();$('#ees-work-context')?.remove();}
+  function detach() {workUI.closeDialog();closeScopePicker();closeHost();$('#ees-work-context')?.remove();}
   function reset() {
     detach();treeExpansions.clear();jobDrafts.clear();renderedEditContext=null;snapshot={};state=null;serverSource=null;historySource=null;historyCase=null;navOpen=false;busy=false;width=520;panelInfo=null;drag=null;
     host=null;divider=null;

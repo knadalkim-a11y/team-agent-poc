@@ -65,7 +65,7 @@ async function setup(options = {}) {
     window, document, location, localStorage, sessionStorage: localStorage,
     URLSearchParams, setTimeout, clearTimeout, requestAnimationFrame: fn => frames.push(fn),
     MutationObserver: class {observe() {}},
-    workUI: {categories: {setup: '구축'}, finished: run => run.status === 'done', lineage: (id, data) => {
+    workUI: {dialog: async () => false, categories: {setup: '구축'}, finished: run => run.status === 'done', lineage: (id, data) => {
       const chain = []; while (id && data?.nodes[id]) {chain.unshift(data.nodes[id]); id = data.nodes[id].parent;} return chain;
     }},
     createWorkView: options => {callbacks = options.callbacks; return view;},
