@@ -797,7 +797,7 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
 })().catch(error=>{console.error(error);process.exitCode=1;});
 '''
         result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
-                                text=True, timeout=10)
+                                text=True, encoding="utf-8", timeout=10)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.strip(), "pinned_native_bridges=pass")
 

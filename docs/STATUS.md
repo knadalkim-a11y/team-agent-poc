@@ -7,15 +7,15 @@
 ## 현재 작업과 다음 작업
 
 - **현재 작업:** 기존 [PR #57](https://github.com/knadalkim-a11y/team-agent-poc/pull/57), `feat/ees-work-simplified-ux-20260918`에서 단순 UX를 보완·로컬 검증함. 업무명 탐색과 상태·근거·다음 행동 하나를 유지하며, 사람 확인의 AI 대리 완료 차단/사용자 취소, 완료 상태·상위 진행 복귀, Workspace 입력·고급 설정·저장 응답 중 편집 보존, 같은 프로그램 버전의 Work 자산 캐시 구분을 보완함. Pack `0.2.12`, 프로그램 `0.11.3+ees.10`, 기존 서비스·저장 형식·게시 snapshot·사용자 자산은 유지함.
-- **검증과 차단:** Work의 실제 Python/Node로 관련 시험과 전체 시험을 실행함. 전체 시험은 FastAPI 의존성 부재로 실패했고, 시험 의존성 설치 시도는 자동 승인 검토가 사용자 설치 금지와 충돌한다고 거절함. 공식 wheel/Chrome·Windows/PowerShell·사내 LLM·실사용자 검증도 미실행이며 Draft를 유지함. 지정 Figma 17개 노드의 design context/screenshot을 읽어 대조했으나 실제 화면 일치나 전체 합의 UX 완료를 선언하지 않음. [명령별 결과·Figma 차이·보장 범위](../evals/scenarios.md#simplified-work-ux-implementation-20260921).
+- **검증 환경:** 사용자의 후속 준비 승인으로 저장소 `.venv` 하나에 Python 3.11.16·기존 CI 고정 의존성을 준비하고 Node를 재사용함. 전체 시험 1,056 PASS·0 FAIL·16 SKIP, 관련 UX 인코딩 경고 검사 173 PASS, 실제 Native 화면 14개·theme 2개 PASS. FastAPI/API·공식 wheel·브라우저 부재는 현재 차단 항목이 아님. 남은 SKIP은 Windows/PowerShell 전용 15개와 이전 배포 wheel 역호환 1개임. 시험용 공식 Headless Chrome Shell 하나를 유지함. full Chrome은 Work의 AF_UNIX 권한 제한으로 기동 실패했으며 같은 환경으로 간주하지 않음. 회사 PC 환경은 변경하지 않음. [명령별 결과·실패 보존·Figma 차이·보장 범위](../evals/scenarios.md#simplified-work-ux-implementation-20260921).
 - **최근 적용:** 사용자 보고상 main `1ddf2dba9e46c63bc20309387efa37e858970dbc` 적용 정상, `status result=ok / program=customized / running=true`. 이번 PR은 미병합·미설치·미배포이며 PR #53은 구현 원본·선행 병합 대상으로 쓰지 않음.
-- **다음 작업 하나:** 승인된 개발 검증 환경에서 누락 의존성·공식 wheel/Chrome을 확보해 이 PR의 route/asset-guard·Native 브라우저 게이트와 남은 Figma 차이를 확인하고 Ready 여부를 판정한다. Work에서 실행한 검사를 회사 PC에 다시 떠넘기지 않는다. 이번 종료 범위는 구현·로컬 검증·동일 PR 갱신이며 병합·설치·사내 배포·새 서버·공유 Runtime·사내 Git 이전은 포함하지 않는다.
+- **다음 작업 하나:** 같은 PR에서 남은 Figma Workspace 전용 AI 작성열·별도 overlay 구성과 현재 구현의 차이를 보완·검토한 뒤 Ready 여부를 판정한다. 이 구현 차이가 남아 Draft를 유지하며 환경 재설치를 다음 작업으로 요구하지 않는다. Figma 지정 17개는 design context/screenshot으로 읽었고, 실제 브라우저에서도 현재 Workspace·대화/패널 화면과 근거/이력 열람을 확인했다. 원본과 동일한 전체 화면 구현으로 선언하지 않는다. Windows/PowerShell·사내 Open WebUI/LLM·실사용자 확인은 미실행이며 Work 검사를 회사 PC로 떠넘기지 않는다. 이번 범위는 개발 검증 환경 준비·구현 보완·로컬 검증·같은 PR 갱신이고 제품 설치·병합·사내 배포·새 서버·공유 Runtime·사내 Git 이전은 제외한다.
 
 ## 2026년 9월 개발·검사 방침
 
 사용자 선택으로 **2026-09-30까지 이 작업의 GitHub 원격 검사를 생략**한다. 이 저장소에 게시하는 개발·문서 커밋 메시지마다 `[skip ci]`를 넣어 기존 `push`/`pull_request` 자동 검사를 생략하며 수동 실행·재실행은 요청하지 않는다. PR 본문에만 적거나 이전 커밋의 표시가 이후 커밋에도 적용된다고 가정하지 않는다. 이는 작업 커밋별 생략이며 계정 전체 Actions를 비활성화한 것이 아니다.
 
-코드 작성·Git 반영·변경 범위의 로컬 검토/시험과 문서 검사는 계속한다. **후속 사용자 합의로 원격 검사 생략을 9월 전체 배포 금지로 확대하지 않고, 로컬 검증 후 변경별로 제한된 시험 적용을 준비한다.** 검토한 정확한 원본·배포물 해시·자료 보존·기존 프로그램 복원 수단을 확보하고 적용 뒤 기동·기존 대화·업무 저장·변경 화면을 필요한 소수 항목으로 확인한다. 사내 사용자 자료의 백업과 프로그램 Restore를 구분한다. Windows·Native 브라우저 미실행은 그대로 남기고 실제 사내 적용 전후 결과를 별도로 기록한다. 기본 Upgrade/ApplyDemo의 CI 확인은 유지한다. 후속 사용자가 배포 진행과 수동 ZIP 단계 자동화를 요청해 공개 TrialCommit 경로·Backup·자동 묶음 준비를 연결했으며, 검토한 원본의 병합과 실제 사내 적용 성공은 각각 확인한다. 자체 실행기·Linux 가상환경 설치·브라우저 시험 이식·결제 설정 변경은 추가하지 않는다.
+코드 작성·Git 반영·변경 범위의 로컬 검토/시험과 문서 검사는 계속한다. **후속 사용자 합의로 원격 검사 생략을 9월 전체 배포 금지로 확대하지 않고, 로컬 검증 후 변경별로 제한된 시험 적용을 준비한다.** 검토한 정확한 원본·배포물 해시·자료 보존·기존 프로그램 복원 수단을 확보하고 적용 뒤 기동·기존 대화·업무 저장·변경 화면을 필요한 소수 항목으로 확인한다. 사내 사용자 자료의 백업과 프로그램 Restore를 구분한다. Windows·사내 실환경의 미실행은 남기고, Work Native 브라우저 검사와 실제 사내 적용 전후 결과를 구분한다. 기본 Upgrade/ApplyDemo의 CI 확인은 유지한다. 후속 사용자가 배포 진행과 수동 ZIP 단계 자동화를 요청해 공개 TrialCommit 경로·Backup·자동 묶음 준비를 연결했으며, 검토한 원본의 병합과 실제 사내 적용 성공은 각각 확인한다. 상시 실행기·별도 브라우저 시험 프레임워크·결제 설정 변경은 추가하지 않는다. 09-21 후속 승인으로 Work의 저장소 검증 환경 한 곳을 준비했으며 회사 PC의 제품 설치·운영 환경과 구분한다.
 
 **2026-10-01 이후 처음 작업을 재개할 때** 이 한시 생략을 종료하고 무료분 복구 상태와 최종 변경 범위를 확인한다. 마지막 코드에 대해 표시 없는 새 커밋 또는 기존 수동 실행으로 필요한 원격 검사를 수행한다. 10월 1일 예약 실행을 만든 것은 아니며 과거 생략된 검사가 자동으로 재개되지 않는다. 사용자 변경 지시가 있으면 해당 지시를 우선한다. [근거·재개 조건](../evals/scenarios.md#work-ui-refactor-20260915).
 
@@ -77,4 +77,4 @@
 
 ## 최근 점검
 
-2026-09-21 Work: 최신 main/PR head·열린 PR·로컬 변경·양쪽 AGENTS/STATUS·README·재개 댓글을 확인하고 기존 PR #57에서 재현 실패→최소 수정→재검증을 수행함. 실제 Python/Node의 동작 시험, 프로그램/Pack/ApplyDemo/Restore 합성 보존 검사, 문서 검사와 diff 검사를 실행함. 전체 시험의 의존성 실패와 SKIP을 PASS로 바꾸지 않았으며, 실제 브라우저·Windows·사내 모델 결과와 분리함. [최종 명령·건수·차단·과거 기록](../evals/scenarios.md#simplified-work-ux-implementation-20260921).
+2026-09-21 Work: 최신 main/PR head·열린 PR·로컬 변경·양쪽 AGENTS/STATUS·README·재개 댓글을 확인하고 기존 PR #57에서 재현 실패→최소 수정→재검증을 수행함. 실제 Python/Node의 동작 시험, 프로그램/Pack/ApplyDemo/Restore 합성 보존 검사, 문서 검사와 diff 검사를 실행함. 사용자 후속 승인으로 단일 검증 환경을 준비해 전체 1,056 PASS·16 SKIP, 실제 Native 브라우저 14개·theme 2개 PASS를 확인함. 최초 의존성·full Chrome 기동·시험 assertion 실패를 보존하고 수정 후 결과와 구분함. Windows·사내 Open WebUI/LLM은 미실행임. [최종 명령·건수·차단·과거 기록](../evals/scenarios.md#simplified-work-ux-implementation-20260921).

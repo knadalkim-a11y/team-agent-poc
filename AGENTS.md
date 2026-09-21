@@ -89,7 +89,7 @@ python scripts/check_docs.py
 python -m unittest discover -s tests -v
 ```
 
-문서 점검은 Python 표준 라이브러리만 사용합니다. 전체 테스트 환경에는 Pydantic 2와 암호화 검사 시험용 `cryptography`가 필요합니다. 테스트 때문에 설치된 Open WebUI 의존성을 임의 변경하지 않습니다. 대상 버전은 [versions.md](versions.md), 독립 시험 환경은 [Confluence 가이드](docs/04-confluence-read-tool.md)를 확인합니다.
+문서 점검은 Python 표준 라이브러리만 사용합니다. 전체 시험은 API·암호화·native 자산 검사 등에 필요한 의존성을 포함하므로 [독립 자동 시험 환경](versions.md#독립-자동-시험-환경)에 따라 기존 실행 가능한 환경을 먼저 확인하고, 필요한 준비는 현재 요청의 승인 범위에서 저장소당 `.venv` 한 곳으로 한정합니다. 확인된 환경의 재사용에 재설치나 별도 승인을 요구하지 않습니다. Python 3.11과 고정 의존성의 관리 원본은 [EES delivery workflow](.github/workflows/ees-delivery.yml)의 `Install fixed test dependencies` 단계이며 버전 목록을 별도 복제하지 않습니다. 시험 준비를 회사 PC의 Open WebUI·Hermes 환경 변경으로 확대하지 않고, 누락 의존성·미실행과 제품 결함을 구분합니다.
 
 - 문서만 변경해도 `python scripts/check_docs.py`와 `git diff --check`를 실행합니다. 코드 변경은 관련 자동 테스트도 실행합니다.
 - 문서 점검 오류는 해결한 뒤 완료 처리합니다. 경고는 검토 후보일 뿐이며, 유지·연결 보완·후속 확인 중 무엇으로 처리했는지 짧게 보고합니다. 오류를 숨기기 위해 링크나 증거를 제거하지 않습니다.

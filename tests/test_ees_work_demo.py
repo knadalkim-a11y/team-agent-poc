@@ -549,6 +549,18 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertIsNotNone(self.read('input[type="file"]'))
 
     def test_panel_and_ai_tool_run_same_persisted_case_with_retry_history(self):
+        def assert_record_visible(selector, record):
+            rendered = self.text(selector)
+            self.assertIn("모의 점검", rendered)
+            self.assertIn(record["at"], rendered)
+            for check in record["checks"]:
+                for field in ("name", "detail", "input", "at"):
+                    self.assertIn(check[field], rendered)
+            statuses = self.browser.evaluate("Array.from(document.querySelectorAll("
+                + json.dumps(selector + " .ew-check [data-status]")
+                + "), element => element.dataset.status)")
+            self.assertEqual(statuses, [check["status"] for check in record["checks"]])
+
         self.create_case()
         self.run_job("scope-j")
         self.run_job("infra-j")
@@ -563,13 +575,30 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.wait("document.querySelector('#chat-container')?.innerText.includes('실제 대화 입력이 전달되었습니다.')")
         self.assertEqual(len(self.server.tool_results), 1)
         self.assertTrue(self.server.tool_results[0]["ok"], self.server.tool_results)
-        self.assertEqual(self.current()["case"]["jobs"]["db-j"]["status"], "passed")
-        self.wait("document.querySelector('#ees-work-content [data-work-section=current-result]')?.innerText.includes('모의 점검을 완료했습니다.')")
+        db_job = self.current()["case"]["jobs"]["db-j"]
+        self.assertEqual(db_job["status"], "passed")
+        self.wait("document.querySelector('#ees-work-content .ew-work-current-title')?.innerText === '점검 결과가 저장되었습니다.'")
+        evidence = '#ees-work-content [data-work-section="current-result"] details'
+        self.click(evidence + " > summary")
+        self.assertTrue(self.read(evidence, "open"))
+        self.assertIn("fixture-db-target", self.text(evidence))
+        assert_record_visible(evidence, db_job["history"][-1])
         self.run_job("ap-j", "failed")
-        self.assertEqual([x["status"] for x in self.current()["case"]["jobs"]["ap-j"]["checks"]],
+        failed_job = self.current()["case"]["jobs"]["ap-j"]
+        self.assertEqual([x["status"] for x in failed_job["checks"]],
                          ["passed", "passed", "failed", "skipped"])
         self.run_job("ap-j")
-        self.assertTrue(self.current()["case"]["jobs"]["ap-j"]["history"])
+        retried_job = self.current()["case"]["jobs"]["ap-j"]
+        self.assertEqual(len(retried_job["history"]), 2)
+        self.assertEqual(retried_job["history"][0], failed_job["history"][-1])
+        self.assertEqual(retried_job["history"][-1]["status"], "passed")
+        previous = '#ees-work-content [data-work-section="history"]'
+        self.click(previous + " > summary")
+        self.assertTrue(self.read(previous, "open"))
+        self.click(previous + " .ew-history-attempt > summary")
+        self.assertTrue(self.read(previous + " .ew-history-attempt", "open"))
+        self.assertIn("1차 · 실패", self.text(previous))
+        assert_record_visible(previous + " .ew-history-attempt", failed_job["history"][-1])
         self.run_job("interface-j")
         case_id = self.current()["case"]["id"]
         self.navigate("/c/other-chat")

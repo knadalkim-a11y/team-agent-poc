@@ -75,7 +75,7 @@
 | `150:223`, `150:236` | 상위 진행 요약과 완료 반영 대조. 자동 모의 점검/사람 확인/미연결 범위를 구분함 |
 | `150:249`, `150:262`, `150:281` | 고급 설정 보존·게시 수락/취소·오래된 revision 쓰기 거절과 개인 초안 보존 대조. 게시/사람 확인은 기존 Native 확인창을 사용함. 공동 Runtime·다중 참여자 충돌 UI는 미구현이며 현재 소유자별 API revision 경계와 구분함 |
 
-#### 최종 실제 로컬 검증
+#### 첫 Work 환경의 실제 로컬 검증 (의존성 준비 전)
 
 관련 모듈을 처음 직접 지정할 때 `test_ees_work_demo`가 `native_ui_fixture`를 찾지 못해 **314 tests / 1 ERROR / 8 SKIP**이었다. 원인은 이 fixture의 기존 `tests` import 경로였으며 코드를 우회하지 않고 `PYTHONPATH=tests`로 수정해 아래 명령을 다시 실행함. 처음 전체 검사에서 확인한 FastAPI 부재는 최종 전체에서도 그대로 실패했다.
 
@@ -103,7 +103,58 @@ git diff --check
 
 중복 실행의 PASS를 합산하지 않는다. SKIP은 FastAPI/httpx, 공식 현재/직전 wheel, Chrome, Windows/PowerShell 등 없는 실행 조건에 따른 것이며 이번 동작 검증으로 대체하지 않는다. 관련 인코딩 경고는 오류로 처리했고 전역 UTF-8 모드로 누락을 숨기지 않았다. 전체 시험의 오류를 없애려고 새 skip/stub를 넣지 않았다.
 
-**종료 판단:** PR #57은 Draft를 유지한다. 자동 승인 검토가 시험용 FastAPI/httpx 설치 시도를 사용자의 설치 금지와 충돌한다고 거절했고, route/asset-guard 및 실제 Native 브라우저 게이트를 완료하지 못했다. 승인된 개발 환경의 의존성·공식 wheel/Chrome 확보가 다음 확인 조건이며 Work에서 가능한 검사는 이미 수행했다. Figma 전용 Workspace AI 작성열·별도 overlay 구성의 차이도 남아 전체 UX 동일 구현으로 선언하지 않는다. Windows/Open WebUI/사내 LLM/실사용자·실제 외부 업무 연결은 미실행이다. 병합·설치·배포·회사 DNS/프록시/서비스 설정 변경·PR #53 채택·원격 CI 수동 실행은 수행하지 않는다. 이 작업의 커밋에는 `[skip ci]`를 넣고 10월 재개 시 저장소의 한시 방침 종료 규칙을 확인한다.
+**당시 종료 판단:** PR #57은 Draft를 유지했다. 자동 승인 검토가 시험용 FastAPI/httpx 설치 시도를 사용자의 설치 금지와 충돌한다고 거절했고, route/asset-guard 및 실제 Native 브라우저 게이트를 완료하지 못했다. 아래 후속 승인·실행으로 이 의존성 차단을 해소했으며 당시 실패 기록은 보존한다. Figma 전용 Workspace AI 작성열·별도 overlay 구성의 차이도 남아 전체 UX 동일 구현으로 선언하지 않는다. Windows/Open WebUI/사내 LLM/실사용자·실제 외부 업무 연결은 미실행이다. 병합·제품 설치·배포·회사 DNS/프록시/서비스 설정 변경·PR #53 채택·원격 CI 수동 실행은 수행하지 않는다. 이 작업의 커밋에는 `[skip ci]`를 넣고 10월 재개 시 저장소의 한시 방침 종료 규칙을 확인한다.
+
+#### Work 검증 환경 복원 (2026-09-21 추가 승인 후)
+
+사용자가 “이전환경처럼 가능하게 다시 준비”를 요청한 뒤 같은 PR의 `d006c38f44cc00240732b9bb78338a78809ca4bc`에서 이어서 준비했다. FastAPI는 새 제품 프레임워크 도입이 아니라 기존 API 시험의 의존성이다. 이전 Python 3.11 전용 시험 환경과 달리 첫 Work 검사는 기본 Python 3.12.14에 의존성이 없었다. 남아 있던 과거 checkout의 `.venv`도 Python 실행 파일이 없어 재사용할 수 없었으며 다른 checkout·자료를 삭제하지 않았다. 실제 외부 다운로드 성공을 확인했으므로 이전 DNS 실패를 현재 Work 제약으로 간주하지 않았다.
+
+- 저장소 `.venv` 한 곳에 Python 3.11.16과 기존 CI `Install fixed test dependencies`의 고정 패키지를 준비했다. `uv python install 3.11.16`, `uv venv --seed --python 3.11.16 .venv`, `uv pip install --python .venv/bin/python`에 해당 고정 목록을 사용했다. `uv`는 시험 환경에서 0.12.7이며 기존 Node 24.19.0을 재사용했다. `.venv/bin/python -m pip check`: PASS. 새 requirements·서버·DB·브라우저 프레임워크는 추가하지 않았다.
+- `.venv/bin/python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3`으로 공식 wheel만 확보하고 앱은 설치하지 않았다. `.venv/bin/python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding`: PASS. 원본 SHA-256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`, 조립 ees.10 wheel SHA-256 `a21b7d62ee5a0cb5ec113a1eff49b2e1965a4dc88dc85de44571899e77cd1c1c`. Pack 0.2.12와 제품 코드는 변경하지 않았다.
+- 공식 full Chrome 153.0.8010.52는 14개 모두 화면 진입 전에 실패했다. stderr의 `process_singleton_posix.cc / socket() failed: Operation not permitted (1)`과 독립 AF_UNIX probe의 EPERM을 확인했다. 권한 상승 probe는 플랫폼의 `sandbox_approval:false` 정책으로 거절됐으며 권한·보안·DNS·프록시를 변경하지 않았다. 이후 [공식 Headless Chrome Shell](https://developer.chrome.com/docs/automation-and-testing/headless)을 기본 권한의 기존 ChromePipe로 실행해 정상 기동했다. 별도 배포되는 headless 구현이므로 full Chrome과 같은 실행 환경으로 주장하지 않는다.
+- 현재 브라우저는 공식 `chrome-headless-shell` 153.0.8010.52 하나이며 다운로드 ZIP SHA-256은 `944dc1eae654637fed4d57650198774f9c43b45f34e48febb84f43c541b5de76`이다. 이 세션에서 받은 사용 불가 full Chrome과 중복 ZIP은 제거했다. 기존 시험 harness·실제 wheel의 Svelte/Tiptap·업무 서비스·임시 SQLite를 사용했으며 인증/LLM 응답은 fixture다. 회사 Open WebUI·사내 LLM의 실제 실행으로 확대하지 않는다.
+
+먼저 드러난 실패와 보완:
+
+1. API/native/wheel 관련 6개 모듈 strict encoding 실행: **160개 중 157 PASS, 1 ERROR, 2 SKIP**(98.614초). 공식 wheel 검사가 새로 실행되면서 `test_ees_branding_build.py`의 Node subprocess `text=True`에 encoding이 빠진 `EncodingWarning`을 발견했다. `encoding="utf-8"` 명시 후 해당 모듈 **24 PASS / 0 SKIP**(24.824초).
+2. Headless Shell의 Native 화면 시험: **14개 중 13 PASS, 1 FAIL**(67.301초). 실패는 이전 결과 문구를 기대한 assertion이었다. 현재 요약을 확인하고 실제 '근거 보기'를 열어 저장된 점검의 이름·설명·대상·시각·상태를 대조하도록 보완했다. AP 실패→재시도 뒤 이전 record 불변과 '실행 이력 → 1차 실패'의 실제 열람도 확인한다. 해당 케이스 strict encoding 재검증 **1 PASS / 0 SKIP**(4.429초). 문자열 검사로 브라우저 동작을 대체하거나 검사를 약화시키지 않았다.
+
+환경 준비 후 최종 검사는 저장소 루트에서 다음 환경 변수를 지정했다. 환경은 계속 재사용하며 시험마다 다시 설치하지 않는다.
+
+```bash
+export PATH="$PWD/.venv/bin:$PATH"
+export PYTHONPATH=tests
+export EES_REQUIRE_WORK_ROUTES=1 EES_REQUIRE_ASSET_GUARD=1 EES_REQUIRE_ASSET_NATIVE=1
+export EES_RUN_REAL_UV_TEST=1 EES_RUN_REAL_NLTK_TEST=1
+export EES_TEST_UPSTREAM_WHEEL="$PWD/dist/upstream/open_webui-0.11.3-py3-none-any.whl"
+export EES_TEST_BRANDING_DIR="$PWD/dist/branding"
+export EES_TEST_CHROME="$PWD/dist/tools/headless-shell-153.0.8010.52/chrome-headless-shell-linux64/chrome-headless-shell"
+export EES_TEST_SCREENSHOT_DIR="$PWD/dist/ees-work-screenshots"
+python -m unittest discover -s tests -v
+python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_work_panel tests.test_ees_work_controller tests.test_ees_work_designer tests.test_ees_workflow tests.test_ees_workflow_tool tests.test_ees_demo_assets -v
+python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_branding_build.py -v
+python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_work_demo.EESWorkNativeBrowserTests.test_panel_and_ai_tool_run_same_persisted_case_with_retry_history -v
+python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_chat_theme.py -v
+node tests/test_ees_cooperation_panel.cjs
+node tests/test_wo_demo_state.cjs
+python scripts/check_docs.py
+git diff --check
+```
+
+| 이번 실제 실행 | 결과 |
+|---|---|
+| 전체 discover | **1,056 PASS / 0 FAIL / 0 ERROR / 16 SKIP**, `Ran 1072 tests`, 184.937초 |
+| panel/controller/designer/workflow/workflow_tool/demo_assets strict encoding | **173 PASS / 0 SKIP**, 12.468초 |
+| 전체 실행에 포함된 routes / asset_guard / asset_native / branding_build | 각각 **3 / 16 / 26 / 24 PASS**, class SKIP 없음 |
+| 전체 실행에 포함된 Native work_demo / chat_theme | **14 / 2 PASS**, 실제 Headless Chrome Shell 실행. 별도 theme strict encoding 2 PASS도 확인 |
+| 전체 실행에 포함된 webui_customization | **55 PASS / 2 SKIP**. 실제 현재 wheel 적용·프로그램 복원 검사와 합성 ApplyDemo/사용자 자산 보존 포함 |
+| opt-in uv / NLTK | 각각 실제 시험 PASS. uv는 임시 synthetic wheel·자동 정리되는 시험용 경로를 사용하며 제품 앱 설치가 아님 |
+| Node cooperation / WO 상태 시험 | **14 / 12 그룹 PASS**. 이 둘은 합성 DOM 검사이며 위 브라우저 검사와 구분 |
+| 의존성 / 문서 / diff | `python -m pip check` PASS. `python scripts/check_docs.py`, `git diff --check` PASS |
+
+중복 실행을 합산하지 않았다. 남은 16 SKIP은 Windows/PowerShell 전용 15개와 **직전 실제 배포 ees.7/ees.8 wheel 미확보의 역호환 1개**이며 FastAPI·현재 wheel·브라우저 부재로 건너뛴 시험은 없다. 전체 원문 로그는 무시 경로 `dist/validation-20260921/full-prepared.log`, 최초 API/wheel·full Chrome·Headless Shell 실패와 수정 후 로그도 같은 경로에 보존했다. 현재 Workspace·대화/Work Panel의 실제 스크린샷을 열어 확인했다. Figma 17개 원본 대조 범위는 위 표를 유지하며 이번 실행을 전용 AI 작성열·별도 overlay의 동일 구현 또는 전체 픽셀 일치로 확대하지 않는다.
+
+**현재 판단:** 검증 환경 복원은 완료했고 FastAPI/API/native 브라우저 의존성은 현재 차단 사유가 아니다. PR #57은 남은 Figma Workspace 전용 AI 작성열·별도 overlay 구성 차이로 Draft를 유지한다. 실제 Windows·회사 Open WebUI/LLM·사용자 수락은 미실행이다. 환경의 반복 생성 대신 AGENTS/versions에 기존 환경 재사용·CI 목록 단일 관리 기준을 반영했고, 새로 실행된 시험의 인코딩 누락과 결과/이력 열람 검사를 보완했다. 이번 추가 변경은 시험·문서뿐이며 제품/Pack/DB/사용자 자산은 바꾸지 않았다. main 직접 push·병합·제품 설치·사내 배포·원격 CI 실행은 하지 않았다.
 
 ### 재개 전 STATUS의 날짜별 점검 기록 보존
 
