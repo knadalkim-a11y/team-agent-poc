@@ -24,6 +24,8 @@
 
 새 브랜딩 배포물은 **0.11.3+ees.10**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 STATUS의 실제 적용 기록으로 구분합니다. ees.1~ees.10의 시작·직전 Restore를 지원하며 새 Apply에는 ees.10 프로그램 ZIP을 사용합니다. 새 정적 자산은 `/_ees10/`에 넣어 ees.9 브라우저 캐시와 분리하고, 공장/시스템 선택·직계 펼침·글꼴·기존 대화 동작을 유지합니다.
 
+09-21 통합 UX 베타도 프로그램 `0.11.3+ees.10`·Agent Pack `0.2.12`를 유지합니다. 같은 버전의 변경을 구분하는 원본은 **정확한 커밋·wheel/ZIP SHA-256·내용 해시가 붙은 Work 자산 URL**입니다. ApplyDemo는 버전명만 비교하지 않고 관리 내용/기록을 대조해 바뀐 Workflow Tool만 갱신합니다. 이번 파생 진행 집계는 저장 형식을 추가하지 않으며 기존 snapshot/이력과 직전 프로그램 Restore 경계를 유지합니다. [새 검증·미지원·실환경 경계](evals/scenarios.md#integrated-work-beta-20260921), [베타 적용 준비](docs/03-openwebui-native-agent.md#ees-integrated-beta-20260921).
+
 ees.9는 [조건부 자산 적용](docs/03-openwebui-native-agent.md#conditional-assets)을 추가합니다. 단일 프로세스·등록 DATA_DIR의 로컬 SQLite에서 ApplyDemo와 native 저장 경로를 함께 보호하며 DB 형식·키·사용자 자료는 바꾸지 않습니다. Agent Pack v0.2.10은 지정 전문가 Tool의 ees.9 버전 호환을 추가하고 기존 ID를 유지합니다. 새 ApplyDemo는 보호 API가 없는 이전 프로그램에서 쓰기 전에 중단하므로 처음에는 Update → Upgrade → ApplyDemo 순서입니다. 프로그램 Restore는 사용자 자산을 되돌리지 않으며 구프로그램에서는 새 ApplyDemo가 다시 중단합니다. 기본 적용은 병합·CI·프로그램 산출물 확인 뒤 수행합니다. 2026년 9월에는 [고정 원본 시험 적용](docs/03-openwebui-native-agent.md#ees-wrapper-trial)의 `Upgrade -TrialCommit`으로 ZIP 준비·백업·프로그램/지정 자산 적용을 연결하며 데이터 Backup·프로그램 Restore를 구분합니다. 기존 ZIP Apply도 지원합니다. 실제 적용 상태는 [STATUS](docs/STATUS.md)를 따릅니다.
 
 ees.9에서 추가한 [R1 업무 서버·정책 분리](evals/scenarios.md#workflow-refactor-20260915)를 유지합니다. 형제 Python 모듈 두 개와 공통 정책 JSON을 프로그램에 함께 넣고 공개 모듈·완성 예시 정의를 유지합니다. ees.6~ees.8 백업에는 새 파일을 요구하지 않으며 ees.9 백업은 당시 분리 모듈과 자산 보호 파일을 계속 검증합니다. R1 자체의 Agent Pack 버전은 v0.2.10이었습니다.

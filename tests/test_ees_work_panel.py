@@ -154,7 +154,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
     def assert_no_mutation(self, html):
         self.assertFalse(html.find(**{"data-mutation": None}))
         self.assertFalse(html.find("form"))
-        self.assertFalse(html.find("input"))
+        self.assertFalse([field for field in html.find("input") if field.attrs.get("type") != "search"])
         self.assertFalse(html.find("textarea"))
         self.assertFalse(html.find(**{"data-action": "run"}))
 
@@ -170,7 +170,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
                 self.assertNotIn("예시 업무", html.text)
                 if node["type"] != "j":
                     self.assertFalse(html.find("button", **{"data-action": "run"}))
-                    self.assertIn("다음 업무 열기", html.text)
+                    self.assertIn("다음 단계 열기" if node["type"] == "p" else "다음 작업 열기", html.text)
                     self.assertFalse(html.find("form"))
                     selected = {item.attrs["data-node-id"] for item in html.find(**{"data-action": "select"})}
                     self.assertTrue(set(node["children"]) <= selected)
@@ -183,10 +183,10 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         case = await self.ready(case)
         process, _ = self.render(case, "setup-p")
         task, _ = self.render(case, "install-t")
-        self.assertEqual(self.run_button(process, "setup-p").text, "계속 진행")
-        self.assertEqual(self.run_button(task, "install-t").text, "계속 진행")
-        self.assertIn("확인할 업무", " ".join(item.text for item in process.find("h3")))
-        self.assertIn("확인할 업무", " ".join(item.text for item in task.find("h3")))
+        self.assertEqual(self.run_button(process, "setup-p").text, "가능한 모의 점검 진행")
+        self.assertEqual(self.run_button(task, "install-t").text, "가능한 모의 점검 진행")
+        self.assertIn("단계별 진행", " ".join(item.text for item in process.find("h3")))
+        self.assertIn("작업 목록", " ".join(item.text for item in task.find("h3")))
         manual, _ = self.render(case, "scope-j")
         self.assertFalse(manual.find("button", **{"data-action": "run"}))
         pending, _ = self.render(await self.create(), "scope-j")
@@ -374,6 +374,10 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.service.asset_lookup = AsyncMock(return_value=assets)
         restricted = await self.ready(await self.create())
         self.service.asset_lookup = AsyncMock(return_value={"tools": [], "skills": [], "skill_bodies": {}})
+        restricted = (await self.service.get_state(self.alice, case_id=restricted["id"]))["case"]
+        unavailable_html, _ = self.render(restricted, "db-j")
+        self.assertIn("필수 스킬", unavailable_html.text)
+        self.assertIn("disabled", self.run_button(unavailable_html, "db-j").attrs)
         restricted = await self.step(restricted, "run", "install-t")
         restricted = await self.step(restricted, "select", "db-j")
         html, _ = self.render(restricted, "db-j")
@@ -381,13 +385,33 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("권한 내에서만 제공하는 합성 본문", html.text)
         self.assertTrue(all("선행 작업 대기" not in badge.text for badge in html.find(**{"data-status": "blocked"})))
 
+    async def test_preview_ignores_prerequisite_stage_with_all_jobs_excluded(self):
+        definition = workflow._seed()
+        definition["nodes"]["db-j"]["deps"] = ["interface-t"]
+        html, _ = self.render(None, "db-j", definition=definition, site=definition["sites"]["hu-a"], system="FDC")
+        self.assertNotIn("disabled", self.run_button(html, "db-j").attrs)
+
+    async def test_unconnected_attempt_is_not_presented_as_a_simulated_execution(self):
+        definition = workflow._seed()
+        for tool_id in definition["nodes"]["db-j"]["tools"]:
+            definition["tools"][tool_id].update(source="open_webui", adapter="unavailable", reference="synthetic-unconnected")
+        await self.publish(definition)
+        case = await self.ready(await self.create())
+        case = await self.step(case, "run", "db-j")
+        self.assertEqual(case["jobs"]["db-j"]["history"][-1]["kind"], "execution_blocked")
+        html, _ = self.render(case, "db-j")
+        current = self.section(html, "current-result")
+        self.assertIn("미수행 · 실행 연결 필요", current.text)
+        self.assertNotIn("모의 점검", current.text)
+        self.assertIn("disabled", self.run_button(html, "db-j").attrs)
+
     async def test_direct_child_table_counts_and_parent_failure_navigation(self):
         case = await self.ready(await self.create())
         process, _ = self.render(case, "setup-p")
         progress = self.section(process, "progress")
-        counter = progress.find("strong", **{"data-work-total": None})[0]
+        counter = progress.find(**{"data-work-total": None})[0]
         self.assertEqual((counter.attrs["data-work-done"], counter.attrs["data-work-total"]), ("2", "4"))
-        self.assertIn("업무 진행", progress.text)
+        self.assertIn("단계 완료", progress.text)
         table = process.find("table")[0]
         selected = {element.attrs["data-node-id"] for element in table.find("button", **{"data-action": "select"})}
         self.assertEqual(selected, set(case["definition"]["nodes"]["setup-p"]["children"]))
@@ -395,18 +419,59 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         process, _ = self.render(case, "setup-p")
         task, _ = self.render(case, "install-t")
         primary = process.find("button", **{"data-action": "select", "data-node-id": "install-t"})
-        self.assertTrue(any(item.text == "문제 확인" for item in primary))
-        self.assertTrue(any(item.text == "문제 확인" for item in task.find("button", **{"data-node-id": "ap-j"})))
-        # Failed AP gets one primary next action. Independent DB remains available
-        # by opening its work row; the parent panel does not present a second action.
-        self.assertFalse(process.find("button", **{"data-action": "run"}))
-        self.assertFalse(task.find("button", **{"data-action": "run"}))
-        self.assertFalse(process.find("button", **{"data-node-id": "ap-j"}))
+        self.assertTrue(any(item.text == "문제 있는 단계 보기" for item in primary))
+        self.assertTrue(any(item.text == "문제 있는 작업 보기" for item in task.find("button", **{"data-node-id": "ap-j"})))
+        # Failed AP is opened for explicit retry; independent DB remains eligible
+        # for the separate scope action, which must not retry AP automatically.
+        self.run_button(process, "setup-p")
+        self.run_button(task, "install-t")
+        self.assertTrue(process.find("button", **{"data-node-id": "ap-j"}))
         hu = await self.ready(await self.create(site_id="hu-a", system="FDC"))
         process, _ = self.render(hu, "setup-p")
-        counter = self.section(process, "progress").find("strong", **{"data-work-total": None})[0]
+        counter = self.section(process, "progress").find(**{"data-work-total": None})[0]
         self.assertEqual(counter.attrs["data-work-total"], "3")
         self.assertIn("적용 제외 1개", self.section(process, "progress").text)
+
+    async def test_integrated_metrics_count_leaf_jobs_and_do_not_count_human_wait_as_problem(self):
+        case = await self.ready(await self.create())
+        case = await self.step(case, "run", "ap-j")
+        html, _ = self.render(case, "setup-p")
+        metrics = {item.attrs["data-work-metric"]: item.text
+                   for item in html.find(**{"data-work-metric": None})}
+        self.assertIn("3 / 6", metrics["jobs"])
+        self.assertIn("2 / 4", metrics["stages"])
+        self.assertIn("1", metrics["attention"])
+        self.assertIn("3", metrics["incomplete"])
+        self.assertEqual(self.run_button(html, "setup-p").text, "가능한 모의 점검 진행")
+
+    async def test_large_job_list_search_filter_and_pages_preserve_original_targets(self):
+        case = await self.create()
+        nodes = case["definition"]["nodes"]
+        nodes["install-t"]["children"] = []
+        for index in range(63):
+            job_id = f"search-job-{index}"
+            nodes[job_id] = {**deepcopy(nodes["db-j"]), "id": job_id,
+                             "name": f"합성 작업 {index:02}", "parent": "install-t", "deps": []}
+            nodes["install-t"]["children"].append(job_id)
+            case["jobs"][job_id] = {"inputs": {"db": "합성 대상"}, "history": []}
+            case["node_states"][job_id] = {"status": "passed" if index < 30 else "failed" if index < 33 else "pending",
+                                            "applicable": index != 62, "missing": []}
+        first, _ = self.render(case, "install-t")
+        rows = first.find("tr", **{"data-work-job": None})
+        self.assertEqual(len(rows), 25)
+        self.assertEqual(rows[0].attrs["data-work-job"], "search-job-0")
+        second, _ = self.render(case, "install-t", listView={"page": 1})
+        self.assertEqual(second.find("tr", **{"data-work-job": None})[0].attrs["data-work-job"], "search-job-25")
+        selected, _ = self.render(case, "install-t", listView={"query": "작업 3", "filter": "attention"})
+        filtered = selected.find("tr", **{"data-work-job": None})
+        self.assertEqual([row.attrs["data-work-job"] for row in filtered], [f"search-job-{i}" for i in range(30, 33)])
+        for row in filtered:
+            self.assertEqual(row.find("button", **{"data-action": "select"})[0].attrs["data-node-id"], row.attrs["data-work-job"])
+        excluded, _ = self.render(case, "install-t", listView={"filter": "excluded"})
+        self.assertEqual([row.attrs["data-work-job"] for row in excluded.find("tr", **{"data-work-job": None})], ["search-job-62"])
+        empty, _ = self.render(case, "install-t", listView={"query": "<script>"})
+        self.assertFalse(empty.find("tr", **{"data-work-job": None}))
+        self.assertIn("일치하는 작업이 없습니다", empty.text)
 
     async def test_job_guidance_is_business_content_and_evidence_is_folded(self):
         definition = workflow._seed()
@@ -490,6 +555,33 @@ return {selected,restored,changed,rebased,savedResponse,unchanged:before===JSON.
         self.assertEqual(result["rebased"]["revision"], 8)
         self.assertFalse(result["savedResponse"]["inputsChanged"])
         self.assertFalse(result["savedResponse"]["documentChanged"])
+
+    def test_large_sidebar_limits_rows_but_keeps_selected_job_and_full_list_target(self):
+        rendered = self.evaluate_drafts("""(() => {
+const children=Array.from({length:80},(_,i)=>'job-'+i);
+const nodes={p:{id:'p',type:'p',name:'합성 워크플로우',children:['t']},
+  t:{id:'t',type:'t',name:'합성 단계',parent:'p',children}};
+children.forEach(id=>nodes[id]={id,type:'j',name:id,parent:'t',children:[]});
+const before=JSON.stringify(nodes);
+return {html:workUI.treeHTML({nodes},['p'],{selectedId:'job-79',expanded:new Map([['p',true],['t',true]])}),editor:workUI.treeHTML({nodes},['p'],{editing:true,selectedId:'job-79'}),unchanged:before===JSON.stringify(nodes)};
+})()""")
+        self.assertTrue(rendered["unchanged"])
+        html = PanelHTML(rendered["html"]).root
+        selected = html.find("button", **{"data-action": "select", "data-node-id": "job-79"})
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(selected[0].attrs["aria-current"], "step")
+        jobs = [item for item in html.find("button", **{"data-action": "select"})
+                if item.attrs["data-node-id"].startswith("job-")]
+        self.assertEqual(len(jobs), 26)
+        complete = [item for item in html.find("button", **{"data-node-id": "t"})
+                    if item.text == "전체 80개 작업 찾기"]
+        self.assertEqual(len(complete), 1)
+        self.assertEqual(complete[0].attrs["data-process-id"], "p")
+        editor = PanelHTML(rendered["editor"]).root
+        selected_editor = editor.find("button", **{"data-action": "edit_node", "data-node-id": "job-79"})
+        self.assertEqual(len(selected_editor), 1)
+        self.assertEqual(selected_editor[0].attrs["aria-current"], "step")
+        self.assertEqual(len(editor.find("button", **{"data-action": "edit_node"})), 29)
 
     def test_first_write_adopts_preview_draft_and_catalog_change_requires_review(self):
         result = self.evaluate_drafts("""(() => {

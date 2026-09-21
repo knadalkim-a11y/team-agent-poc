@@ -350,6 +350,102 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(american["node_states"]["infra-j"]["applicable"])
         self.assertFalse(american["node_states"]["ap-j"]["applicable"])
 
+    async def test_management_metrics_separate_waiting_review_problems_and_ready_jobs(self):
+        definition = workflow._seed()
+        definition["nodes"]["scope-j"]["mode"] = "draft"
+        await self.publish(definition)
+        case = await self.create(site_id="hu-a")
+        summary = case["node_states"]["setup-p"]
+        self.assertEqual(summary["progress"], {"done": 0, "total": 5})
+        self.assertEqual((summary["attention_count"], summary["waiting_count"], summary["ready_count"]), (0, 4, 0))
+        self.assertEqual((summary["excluded_count"], summary["next_node_id"]), (1, "scope-j"))
+        case = await self.step(case, "run", "scope-j", {"document": "담당자가 검토할 실제 초안"})
+        self.assertEqual(case["node_states"]["setup-p"]["review_count"], 1)
+        self.assertFalse(case["node_states"]["scope-j"]["attention"])
+        case = await self.ready(case)
+        summary = case["node_states"]["setup-p"]
+        self.assertEqual((summary["incomplete_count"], summary["ready_count"], summary["next_node_id"]), (2, 2, "db-j"))
+        case = await self.step(case, "update_inputs", "db-j", {"inputs": {"db": ""}})
+        db = case["node_states"]["db-j"]
+        self.assertEqual((db["status"], db["block_reason"], db["attention"], db["ready_for_run"]),
+                         ("blocked", "input_required", True, False))
+        case = await self.step(case, "run", "ap-j")
+        summary = case["node_states"]["install-t"]
+        self.assertEqual((summary["attention_count"], summary["failed_count"], summary["ready_count"]), (2, 1, 0))
+        history = deepcopy(case["jobs"]["ap-j"]["history"])
+        case = await self.step(case, "update_inputs", "ap-j", {"inputs": {"ap": "수정한 공개 대상"}})
+        self.assertEqual(case["jobs"]["ap-j"]["history"], history)
+        self.assertEqual((case["node_states"]["install-t"]["attention_count"],
+                          case["node_states"]["install-t"]["ready_count"]), (1, 1))
+
+    async def test_management_readiness_checks_connection_and_current_skill_access_without_writing(self):
+        definition = workflow._seed()
+        definition["tools"]["network"].update(source="open_webui", reference="private-tool", adapter="unavailable")
+        definition["skills"]["private"] = {"id": "private", "name": "승인 절차", "type": "skill",
+                                             "body": "", "source": "open_webui", "reference": "private-skill"}
+        definition["nodes"]["db-j"]["skills"].append("private")
+        assets = {"tools": [{"id": "private-tool", "name": "승인 조회"}], "skills": [],
+                  "skill_bodies": {"private-skill": "고정 절차"}, "skill_versions": {"private-skill": 3},
+                  "available": True}
+        self.service.asset_lookup = AsyncMock(side_effect=lambda user: deepcopy(assets))
+        await self.publish(definition)
+        case = await self.ready(await self.create())
+        self.assertEqual(case["node_states"]["ap-j"]["block_reason"], "connection_required")
+        self.assertFalse(case["node_states"]["ap-j"]["ready_for_run"])
+        self.assertTrue(case["node_states"]["db-j"]["ready_for_run"])
+        with self.service._db() as db:
+            before = db.execute("SELECT data FROM cases WHERE id=?", (case["id"],)).fetchone()[0]
+        assets["skill_bodies"].clear()
+        read = (await self.service.get_state(self.alice, case_id=case["id"]))["case"]
+        self.assertEqual(read["node_states"]["db-j"]["block_reason"], "skill_unavailable")
+        self.assertFalse(read["node_states"]["db-j"]["ready_for_run"])
+        self.assertEqual(read["node_states"]["install-t"]["attention_count"], 2)
+        self.assertEqual(read["jobs"], case["jobs"])
+        with self.service._db() as db:
+            self.assertEqual(db.execute("SELECT data FROM cases WHERE id=?", (case["id"],)).fetchone()[0], before)
+        # The same current-access guard applies to the actual bulk operation.
+        blocked = await self.step(read, "run", "install-t", {"retry_failed": False})
+        self.assertEqual(blocked["jobs"]["db-j"]["status"], "blocked")
+        self.assertEqual(blocked["jobs"]["db-j"]["attempt"], 0)
+        assets["skill_bodies"]["private-skill"] = "현재 접근 가능한 내용"
+        restored = (await self.service.get_state(self.alice, case_id=case["id"]))["case"]
+        self.assertTrue(restored["node_states"]["db-j"]["ready_for_run"])
+        resumed = await self.step(restored, "run", "install-t", {"retry_failed": False})
+        self.assertEqual(resumed["jobs"]["db-j"]["status"], "passed")
+
+    async def test_management_counts_use_all_descendant_jobs_and_exclude_inapplicable(self):
+        definition = workflow._seed()
+        for index in range(120):
+            node_id = f"many-{index}"
+            definition["nodes"][node_id] = {**deepcopy(definition["nodes"]["db-j"]),
+                "id": node_id, "name": f"합성 작업 {index}", "deps": [],
+                "condition": "interface" if index % 3 == 0 else "all"}
+            definition["nodes"]["install-t"]["children"].append(node_id)
+        await self.publish(definition)
+        case = await self.create(site_id="hu-a")
+        metrics = case["node_states"]["install-t"]
+        self.assertEqual(metrics["progress"], {"done": 0, "total": 83})
+        self.assertEqual((metrics["excluded_count"], metrics["ready_count"]), (40, 80))
+        case = await self.step(case, "run", "many-1")
+        self.assertEqual(case["node_states"]["install-t"]["progress"], {"done": 1, "total": 83})
+        self.assertEqual(case["node_states"]["setup-p"]["progress"], {"done": 1, "total": 85})
+        self.assertEqual(case["node_states"]["setup-p"]["incomplete_count"], 84)
+
+    async def test_unconnected_job_does_not_claim_a_simulation_ran(self):
+        definition = workflow._seed()
+        definition["tools"]["network"].update(source="open_webui", reference="native-read", adapter="unavailable")
+        await self.publish(definition)
+        case = await self.create(process_id="ops-p")
+        result = await self.act(case, "run", "ops-j")
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["result"]["status"], "blocked")
+        self.assertFalse(result["result"]["simulation"])
+        self.assertIn("실행 연결", result["result"]["message"])
+        history = result["case"]["jobs"]["ops-j"]["history"][-1]
+        self.assertEqual(history["kind"], "execution_blocked")
+        self.assertFalse(history["simulation"])
+        self.assertEqual([check["status"] for check in history["checks"]], ["blocked", "skipped", "skipped"])
+
     async def test_publish_requires_current_validation_and_freezes_existing_case(self):
         old = await self.create()
         state = await self.service.get_state(self.admin)

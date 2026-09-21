@@ -1259,6 +1259,22 @@ Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `resul
 
 <a id="ees-wrapper-trial"></a>
 
+<a id="ees-integrated-beta-20260921"></a>
+
+#### 09-21 통합 UX 베타의 적용 준비와 복원 경계
+
+PR #57을 병합한 main `8d294bca8d4a36f157ebfbd651f3b2e023d3fba5`는 이전 단순 UX다. 그 뒤의 통합 UX 베타는 별도 후속 PR에서 검증하며 **PR 게시·배포 ZIP 생성·사내 설치·기동·화면 확인을 각각 구분**한다. 최신 후보 원본과 실제 검사는 [이번 평가 기록](../evals/scenarios.md#integrated-work-beta-20260921), 사내 적용 보고는 [STATUS](STATUS.md)가 원본이다.
+
+새 묶음은 검증한 깨끗한 커밋의 기존 빌더로 만들고 `manifest.json`의 `source_commit`, `source_dirty=false`, 파일별 SHA-256과 wheel 해시를 대조한다. 프로그램은 `0.11.3+ees.10`, Pack은 `0.2.12` 계약을 유지하며 변경 Work JS/CSS URL은 내용 해시로 캐시를 구분한다. 새 DB·인증 저장소·회사 PC 개발환경은 없다. 기존 사용자 대화·자산·UserValves와 진행 건 snapshot을 보존하며 ApplyDemo는 지정 관리 자산만 조건부 갱신한다.
+
+**적용 전 조건:** 이 후속 PR의 병합과 제한 베타 적용에 대한 승인을 확인하고 최종 main 원본을 확정한다. 미병합 PR head는 아래 `TrialCommit`에 넣지 않는다. 기존 스크립트가 clean main·HEAD·origin/main 일치를 검사한다. 병합 후 원본 SHA가 바뀌면 최종 main의 코드가 검증본과 같은지 확인하고 그 원본으로 묶음·해시를 다시 확정한다. 보호 조건을 우회하거나 임의로 기존 배포 SHA를 재사용하지 않는다.
+
+조건 충족 뒤에는 아래 기존 **Update → Upgrade -TrialCommit** 블록 하나를 사용한다. Upgrade가 기존 등록 Python·캐시를 재사용해 준비/사전 확인 → Stop → Backup → Apply → Start → 같은 원본 ApplyDemo를 처리한다. 회사 PC에 새 `.venv`를 만들거나 ApplyDemo를 따로 반복하지 않는다. 10월 재개라면 먼저 STATUS의 한시 CI 방침 종료 조건을 확인한다.
+
+적용 후 Ctrl+F5로 갱신하고 [대표 베타 흐름](07-team-quickstart.md#통합-ux-베타에서-확인할-흐름)을 확인한다. 마지막 EES 결과와 `기존 대화=정상/문제, 업무 화면=정상/문제` 정도만 전달한다. LLM 답변 품질·실제 인증·Windows 기동은 Work 합성 브라우저 검사로 통과 처리하지 않는다.
+
+**복원:** 정상 적용 뒤 직전 프로그램으로 돌아가려면 기존 [Stop → Restore → Start](#ees-wrapper-restore) 안내를 사용한다. Apply/Restore 자체가 중단된 경우에는 그 안내의 미완료 상태 전용 Restore 절차를 따른다. `Restore`는 직전 프로그램만 되돌리고 현재 DB·대화·업무 이력·ApplyDemo 변경·개인 인증은 되돌리지 않는다. `Backup`의 DATA_DIR·키·설정 보관과 프로그램 Restore는 별개다. 백업 DB를 평소 원복 수단으로 덮어쓰지 않으며 실패하면 stage/code에서 멈추고 Upgrade/Start를 반복하지 않는다.
+
 #### 2026년 9월 고정 원본 시험 적용
 
 사용자 결정으로 9월에는 GitHub 원격 검사를 생략하고 변경별 로컬 검증을 마친 원본을 시험 적용합니다. **`Upgrade -TrialCommit <검토한 40자리 원본 SHA>`**는 필요한 프로그램 묶음 준비부터 백업·적용·기동·지정 자산 반영까지 연결합니다. ZIP을 브라우저에서 내려받거나 저장 경로를 입력할 필요가 없습니다. 인자 없는 기본 `Upgrade`·`ApplyDemo`는 성공한 main CI를 확인하는 기존 동작을 유지하며 CI 실패 시 시험 경로로 자동 전환하지 않습니다.
@@ -1457,6 +1473,8 @@ Start의 `stage=health_check` 시간 초과는 지정한 시간 안에 정상 �
 Resume은 정상 작업 잠금과 서버 종료·포트 검사를 유지합니다. 저장된 pending=apply/promote와 같은 ZIP/commit, 이전 선택 기록, program 전체 해시/metadata, 직전 보관본을 확인하고 staging이 없을 때만 완료 기록을 남깁니다. 새 작업 소유자를 먼저 기록하며 완료 저장 실패 시 미완료 상태를 보존합니다. 별도 경로 입력·시험 복사본 채택·파일 이동/추출·남은 잠금 회수·자동 Restore/Start/재시도는 추가하지 않습니다. Resume 실패 시 Start도 실행되지 않으며 기존 명시적 Restore는 유지합니다. `-Resume -CheckOnly`는 같은 완료 조건의 읽기 검증이고 서버를 종료하거나 완료 기록을 쓰지 않습니다.
 
 사내 결과는 **Apply/Resume와 Start 결과 한 줄, 이름/아이콘·기존 대화·대표 조회 확인 한 줄**만 전달합니다. 실패하면 마지막 EES 줄의 action/result/stage와 표시된 오류 코드만 전달하며, 수동 이름 변경 실패는 그 사실 한 줄이면 됩니다. Start의 health 시간 초과 뒤에는 Start/uvx를 반복하지 않고 위의 지연 기동 안내를 따릅니다. Resume 성공은 프로그램 적용 기록 완료이며 실제 사내 성공은 Start/화면 확인과 구분합니다. [구현·검증 및 사내 결과](../evals/scenarios.md#ees-wrapper-manual-resume).
+
+<a id="ees-wrapper-restore"></a>
 
 **직전 프로그램으로 되돌릴 때만** 아래 별도 블록을 사용합니다. 최초 Apply의 직전 상태는 원래 Open WebUI이며, 복원 완료 뒤 같은 Restore를 반복해도 변경하지 않습니다. 보관본·잠금·미완료 기록이 일치하지 않으면 멈추고, 임의 잠금 삭제·프로세스 강제 종료·DB 복구를 하지 않습니다. Start 실패 뒤 Restore가 자동 실행되는 구조는 아닙니다.
 

@@ -144,11 +144,18 @@ class Tools:
                                 case_id: str = "", include_navigation: bool = False,
                                 process_id: str = "",
                                 __user__=None, __metadata__=None, __event_call__=None) -> dict:
-        """Read the screen's latest selected process/task/job, factory, inputs,
+        """Read the screen's latest selected workflow/stage/job, factory, inputs,
         tools, effective instructions and execution results. Call this BEFORE
         answering a workflow question or modifying/running its job; manual panel
         edits may have changed it. General conversation/document search needs no
-        workflow call. For a new work goal, discover candidates with
+        workflow call. Explain the selected node's purpose, current evidence,
+        and one next action. Use case.node_states descendant-job counts and
+        next_node_id: progress excludes inapplicable jobs, attention excludes
+        ordinary prerequisite waiting, ready_for_run excludes failed retries
+        and human confirmation. Describe pending/review/blocked as unfinished;
+        never infer success from a saved input or missing execution connection.
+        Use 워크플로우/단계/작업 in user-facing text, keeping internal IDs.
+        For a new work goal, discover candidates with
         include_navigation=True, then read process_id before creating anything.
         Discovery/details are read-only and need no sidebar selection. Ask only
         missing scope/inputs, explain the plan, then use the existing actions.
@@ -285,7 +292,7 @@ class Tools:
             if action == "create":
                 keys = ("site_id", "system", "process_id")
                 if any(not isinstance(payload.get(key), str) or not payload[key] for key in keys):
-                    return _error("scope_required", "새 실행의 공장·시스템·프로세스를 명확히 지정해 주세요.")
+                    return _error("scope_required", "새 실행의 공장·시스템·워크플로우를 명확히 지정해 주세요.")
                 if current["kind"] == "case" or (current["kind"] == "published" and any(
                         payload[key] != current["selection"][key] for key in keys)):
                     return _error("selection_changed", "현재 화면과 새 실행 대상이 다릅니다. 대상을 다시 확인해 주세요.")
@@ -328,7 +335,7 @@ class Tools:
                     return _error("human_confirmation_required", "업무 패널에서 내용을 직접 확인한 뒤 확인 완료 또는 검토 완료 버튼을 눌러 주세요. AI가 대신 완료할 수 없습니다.")
                 if action == "run" and node.get("type") in {"p", "t"}:
                     if payload.get("retry_failed") is True:
-                        return _error("retry_job_required", "실패한 잡의 결과를 확인하고 해당 잡에서 재시도를 요청해 주세요.")
+                        return _error("retry_job_required", "실패한 작업의 결과를 확인하고 해당 작업에서 재시도를 요청해 주세요.")
                     payload["retry_failed"] = False
         if not state.get("ok"):
             return state
@@ -377,7 +384,7 @@ class Tools:
         catalog = state.get("catalog", {})
         if (("site_id" in options and options["site_id"] not in catalog.get("sites", {}))
                 or ("process_id" in options and catalog.get("nodes", {}).get(options["process_id"], {}).get("type") != "p")):
-            return _error("invalid_display", "등록된 공장과 프로세스를 선택해 주세요.")
+            return _error("invalid_display", "등록된 공장과 워크플로우를 선택해 주세요.")
         execution = None
         for key in ("case_id", "history_case_id"):
             if key in options:

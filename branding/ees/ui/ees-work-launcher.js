@@ -15,6 +15,7 @@
   let creationSerial=0;
   let visibleDraftKey='general', draftTarget=null, draftTimer=null, draftSerial=0;
   let errorMessage = '', activeRegistration = null;
+  let personalSettingsOpened=false;
   const token = () => {try {return localStorage.getItem('token') || '';} catch (_) {return '';}};
   const chatId = () => {const m = location.pathname.match(/^\/c\/([^/]+)\/?$/); return m ? decodeURIComponent(m[1]) : '';};
   const chatRoute = () => location.pathname === '/' || /^\/c\/[^/]+\/?$/.test(location.pathname);
@@ -338,6 +339,7 @@
   }
   function render() {renderView();renderDesigner();}
   function cleanup() {
+    personalSettingsOpened=false;$('#ees-personal-settings-guide')?.remove();
     generation++;request++;state=null;acceptedRoute='';pendingId='';pendingSubmitted=false;browseActive=false;previewVersion=0;scopeSelections.clear();chosenCases.clear();draftSnapshots.clear();creationTickets.clear();createdChats.clear();previewChats.clear();actionRequests.clear();draftSerial++;draftTarget=null;clearTimeout(draftTimer);resetHistory();errorMessage='';
     if(activeRegistration!==null)window.__eesWorkPanelV1?.unregister(activeRegistration,'workflow');activeRegistration=null;
     view.reset();designer.reset();
@@ -347,6 +349,7 @@
     const auth=token();
     if(!available()){if(state||$('#ees-work-entry'))cleanup();lastRoute='';identity=auth;return;}
     if(identity!==auth){cleanup();window.__eesWorkPanelV1?.destroy();identity=auth;lastRoute='';}
+    openPersonalSettings();
     if(!window.__eesWorkPanelV1)window.__eesStartWorkPanelV1?.();
     view.prepare(snapshot());designer.prepare(snapshot());
     const path=location.pathname+location.search;
@@ -367,6 +370,21 @@
       state=null;view.prepare(snapshot());designer.prepare(snapshot());refresh();return;
     }
     view.sync(snapshot());designer.sync(snapshot());
+  }
+  function openPersonalSettings() {
+    if(new URLSearchParams(location.search).get('ees')!=='tool-settings'||!chatRoute()){
+      personalSettingsOpened=false;$('#ees-personal-settings-guide')?.remove();return;
+    }
+    if(personalSettingsOpened||!window.__eesNativeDraftV1?.ready()||!$('#chat-input.ProseMirror'))return;
+    // This is the pinned Native button, including its native permission check.
+    // Opening Controls does not select a Tool, read a key or write UserValves.
+    const control=$('nav button[aria-label="Controls"]');if(!control)return;
+    personalSettingsOpened=true;
+    const pane=$('#controls-container'),bounds=pane?.getBoundingClientRect();
+    if(!bounds||bounds.width<40||bounds.height<40)control.click();
+    const guide=document.createElement('p');guide.id='ees-personal-settings-guide';guide.setAttribute('role','status');
+    guide.textContent='개인 도구 설정: Controls의 Valves(밸브)에서 도구를 선택하세요. 권한과 도구에 따라 설정 항목이 다릅니다. 업무 초안은 원래 탭에 보존됩니다.';
+    const host=$('#controls-container') || control.closest('nav');host?.prepend(guide);
   }
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(sync);}}
   function publishedSelection() {return {site_id:browsingSite,system:browsingSystem,process_id:processId(),node_id:selectedId(),version:previewVersion || state?.catalog.version};}

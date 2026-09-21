@@ -201,6 +201,23 @@
 @media(max-width:420px) {#ees-work-panel #ees-work-content{padding:15px 14px 22px}#ees-work-panel .ew-work-list th,#ees-work-panel .ew-work-list td{padding:10px 4px}#ees-work-panel .ew-work-list th:nth-child(2),#ees-work-panel .ew-work-list td:nth-child(2){width:60px}#ees-work-panel .ew-work-list th:last-child,#ees-work-panel .ew-work-list td:last-child{width:73px}#ees-work-panel .ew-work-list td[colspan]{width:auto}#ees-work-panel .ew-work-form input,#ees-work-panel .ew-work-form textarea{font-size:16px}}
 /* Workspace already provides the page gutters and scrolling. Match its native
    detail forms without inheriting the chat/panel's branded accent palette. */
+#ees-work-panel .ew-work-level {font-size:var(--text-xs,.75rem);color:var(--ew-muted);margin-bottom:7px;}
+#ees-work-panel .ew-work-progress > .ew-work-metrics {display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin:20px 0;align-items:stretch;}
+#ees-work-panel .ew-work-metrics > div {min-width:0;padding:12px;border-radius:8px;background:var(--ew-soft);}
+#ees-work-panel .ew-work-metrics > div > span {display:block;font-size:var(--text-xs,.75rem);color:var(--ew-muted);}
+#ees-work-panel .ew-work-metrics strong {display:block;margin-top:5px;font-size:var(--text-lg,1.125rem);font-weight:500;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+#ees-work-panel .ew-work-search {display:block;margin:10px 0;font-size:var(--text-xs,.75rem);color:var(--ew-muted);}
+#ees-work-panel .ew-work-search input {margin-top:5px;}
+#ees-work-panel .ew-work-filters {display:flex;flex-wrap:wrap;gap:5px;margin:10px 0;}
+#ees-work-panel .ew-work-filters button {padding:5px 8px;font-size:var(--text-xs,.75rem);}
+#ees-work-panel .ew-work-filters button[aria-pressed=true] {background:var(--ew-tint);border-color:var(--ew-ink);color:var(--ew-ink);}
+#ees-work-panel .ew-work-pagination {display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:var(--text-xs,.75rem);color:var(--ew-muted);}
+#ees-work-panel .ew-work-pagination > span {flex:1;}
+#ees-work-panel .ew-work-pagination button {padding:4px 8px;font-size:inherit;}
+#ees-work-panel .ew-work-job-finder {margin-top:22px;}
+#ees-work-panel .ew-work-check-summary {display:grid;gap:8px;margin:12px 0;}
+#ees-work-panel .ew-work-check-summary > div {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--ew-line);font-size:var(--text-sm,.875rem);}
+#ees-personal-settings-guide {margin:12px;padding:12px;border:1px solid var(--color-gray-300,#d4d4d4);border-radius:8px;font-size:.8125rem;line-height:1.6;overflow-wrap:anywhere;}
 #ees-work-designer {--ew-bg:var(--color-white,#fff);--ew-soft:var(--color-gray-50,#fafafa);--ew-ink:var(--color-gray-900,#171717);--ew-muted:var(--color-gray-500,#737373);--ew-line:var(--color-gray-200,#e5e5e5);--ew-blue:var(--color-gray-900,#171717);--ew-tint:var(--color-gray-100,#f5f5f5);width:100%;min-width:0;margin:0;padding:0 0 32px;font-family:inherit;background:transparent;}
 .dark #ees-work-designer {--ew-bg:var(--color-gray-900,#171717);--ew-soft:var(--color-gray-850,#262626);--ew-ink:var(--color-gray-100,#f5f5f5);--ew-muted:var(--color-gray-400,#a3a3a3);--ew-line:var(--color-gray-800,#404040);--ew-blue:var(--color-gray-100,#f5f5f5);--ew-tint:var(--color-gray-800,#404040);}
 /* The added Workspace tab borrows native layout/type classes, but gets its own
@@ -322,5 +339,23 @@
 #ees-work-dialog .ew-work-criterion,#ees-work-dialog .ew-work-progress,#ees-work-dialog .ew-work-next{margin:16px 0;}
 #ees-work-dialog table{width:100%;border-collapse:collapse;font-size:var(--text-sm,.875rem);}
 #ees-work-dialog td,#ees-work-dialog th{padding:10px 4px;border-bottom:1px solid var(--ew-line);text-align:left;}
+#ees-work-designer .ew-editor-breadcrumb {display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:var(--text-xs,.75rem);color:var(--ew-muted);margin:0 0 12px;}
+#ees-work-designer .ew-editor-breadcrumb button {padding:2px 4px;font-size:inherit;color:inherit;}
+#ees-work-designer .ew-editor-children {margin:20px 0;padding-top:16px;border-top:1px solid var(--ew-line);}
+#ees-work-designer .ew-editor-child-filters {display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;}
+#ees-work-designer .ew-editor-child-filters label {flex:1;min-width:130px;}
+#ees-work-designer .ew-editor-child-filters input {flex:1;min-width:130px;}
+#ees-work-designer .ew-editor-child-filters select {width:auto;max-width:100%;}
+#ees-work-designer .ew-editor-child-list {display:grid;gap:4px;}
+#ees-work-designer .ew-editor-child {display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ew-line);font-size:var(--text-sm,.875rem);min-width:0;}
+#ees-work-designer .ew-editor-child > span:first-child {flex:1;min-width:0;overflow-wrap:anywhere;}
+#ees-work-designer .ew-editor-child small {font-size:var(--text-xs,.75rem);color:var(--ew-muted);}
+#ees-work-designer .ew-editor-child button {flex:none;}
+#ees-work-designer .ew-editor-pagination {display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:var(--text-xs,.75rem);color:var(--ew-muted);}
+#ees-work-designer .ew-editor-pagination > span {flex:1;}
+#ees-work-designer .ew-editor-connections .ew-tool {min-width:0;}
+#ees-work-designer .ew-authoring-comparison {margin-top:12px;padding:12px;background:var(--ew-soft);border-radius:8px;}
+#ees-work-designer .ew-authoring-comparison p {white-space:pre-wrap;overflow-wrap:anywhere;font-size:var(--text-xs,.75rem);}
+#ees-work-designer .ew-authoring-comparison h3 {font-size:var(--text-xs,.75rem);color:var(--ew-muted);margin:8px 0 4px;}
 @media(max-width:1100px){#ees-work-designer .ew-authoring-layout{display:block}#ees-work-authoring{position:static;border-left:0;border-top:1px solid var(--ew-line);padding:20px 0;margin-top:24px;max-height:none}#ees-work-authoring .ew-authoring-messages{max-height:360px}#ees-work-designer .ew-editor-layout{grid-template-columns:180px minmax(0,1fr);}}
 @media(max-width:760px){#ees-work-designer .ew-editor-layout{display:block}#ees-work-dialog{padding:20px}#ees-work-dialog>h2{font-size:var(--text-xl,1.25rem);}}
