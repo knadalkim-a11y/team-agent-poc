@@ -4,8 +4,8 @@
 
 ## 2026-09-21
 
-- Figma의 단순 UX 기준을 기존 Native EES Work view/designer/CSS에 제한적으로 구현함. Runtime에서 P/T/J 기술 badge를 숨기고 업무명·현재 상태·완료 조건·근거·읽기 전용 이력·다음 행동을 우선하며, 사람 확인은 실제 확인 완료 액션으로만 기록하고 미연결 Tool은 `실행 연결 필요`로 표시함. Workspace는 업무 이름/목적/안내/완료 조건을 먼저 보여주고 기술 연결을 고급 설정으로 접되 초안 저장·게시와 기존 진행 건의 게시 snapshot 계약을 유지함. [구현·검증 경계](evals/scenarios.md#simplified-work-ux-implementation-20260921).
-- 새 서버·프레임워크·저장 계층을 추가하지 않았고 launcher/server 계약과 사용자 대화·Skill·Tool·모델·권한·기존 이력은 변경하지 않음. V8의 실제 렌더 함수 합성 검증은 수행했으나 checkout 기반 unittest/check_docs, 실제 브라우저/Windows/Open WebUI/사내 LLM은 미실행이며 원격 CI는 9월 생략 방침을 유지함. 이번 변경은 PR 검토 후 현재 개인 PC Dogfooding을 거쳐야 하며 새 서버 이전은 후속 단계임.
+- Figma의 단순 UX 기준을 기존 Native EES Work view/designer/CSS에 제한적으로 구현함. Runtime에서 P/T/J 기술 badge를 숨기고 업무명·현재 상태·완료 조건·근거·읽기 전용 이력·다음 행동 하나를 우선하며, 사람 확인은 실제 확인 완료 액션으로만 기록하고 미연결 Tool은 `실행 연결 필요`로 표시함. 실패 부모는 `문제 확인` 하나만 제시하고 적용 제외는 현재 상태에 직접 표시함. Workspace는 업무 이름/목적/안내/완료 조건을 먼저 보여주고 기술 연결을 고급 설정으로 접되 초안 저장·게시와 기존 진행 건의 게시 snapshot 계약을 유지함. [구현·검증 경계](evals/scenarios.md#simplified-work-ux-implementation-20260921).
+- 새 서버·프레임워크·저장 계층을 추가하지 않았고 launcher/server 계약과 사용자 대화·Skill·Tool·모델·권한·기존 이력은 변경하지 않음. 기존 관리 EES Prompt에는 선택 업무를 `목적 → 현재 상태 → 다음 행동`으로 설명하는 최소 지침만 추가하고 Agent Pack을 `0.2.12`로 갱신함. V8의 실제 렌더 함수 합성 검증은 수행했으나 checkout 기반 unittest/check_docs, 실제 브라우저/Windows/Open WebUI/사내 LLM은 미실행이며 원격 CI는 9월 생략 방침을 유지함. 이번 변경은 PR 검토 후 현재 개인 PC Dogfooding을 거쳐야 하며 새 서버 이전은 후속 단계임.
 
 ## 2026-09-18
 
