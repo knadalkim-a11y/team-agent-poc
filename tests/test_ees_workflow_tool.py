@@ -398,6 +398,11 @@ class WorkflowToolIntegrationTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(read['case']['id'], pending['case']['id'])
             self.assertEqual(read['case']['chat_id'], '')
             self.assertEqual(read['target'], target)
+            panel = await self.service.get_state(self.user, case_id=pending['case']['id'])
+            self.assertEqual(read['case']['node_states'], panel['case']['node_states'])
+            management = read['case']['node_states']['setup-p']
+            self.assertEqual((management['attention_count'], management['waiting_count'],
+                              management['next_node_id']), (0, 4, 'scope-j'))
             if kind == 'history':
                 self.assertTrue(read['read_only'])
                 self.assertEqual(read['available_actions'], [])

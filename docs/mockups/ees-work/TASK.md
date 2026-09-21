@@ -4,7 +4,19 @@
 
 저장소: knadalkim-a11y/team-agent-poc
 
-입력: 최신 화면 참고자료는 [승인한 사이드바 개선 목업](ees-sidebar-refinement.html)이며, 이전 [공장별 업무 트리 목업](ees-factory-workspace.html)과 [최초 세부 편집 예시](ees-demo-workspace.html)는 보존한다. 목업 이후 확정한 [공장·시스템 공동 작업 목표](#ees-work-shared-target)는 아래 기록을 우선한다. ZIP 첨부 없이 저장소에서 읽는다. 목업은 대화 내 표시용 HTML fragment이며 실제 제품은 기존 WebUI 컴포넌트·테마·AI 대화를 사용한다.
+입력: 최신 기준은 [09-21 통합 UX 첫 베타](#integrated-work-beta-20260921)다. 이전 화면 참고자료는 [승인한 사이드바 개선 목업](ees-sidebar-refinement.html)이며, 이전 [공장별 업무 트리 목업](ees-factory-workspace.html)과 [최초 세부 편집 예시](ees-demo-workspace.html)는 보존한다. 목업 이후 확정한 [공장·시스템 공동 작업 목표](#ees-work-shared-target)는 아래 기록을 우선한다. ZIP 첨부 없이 저장소에서 읽는다. 목업은 대화 내 표시용 HTML fragment이며 실제 제품은 기존 WebUI 컴포넌트·테마·AI 대화를 사용한다.
+
+<a id="integrated-work-beta-20260921"></a>
+
+## 통합 UX 첫 베타 · 2026-09-21
+
+이번 구현 기준은 Figma `XK2wTos6sEuxSHhIj7cqg6`의 **223:131 통합 UX · 업무·작성·연결 09.21**, 검토 시작 **241:416**이다. 이전 182/188/193 검토안과 PR #57의 단순 UX를 최신 통합안으로 간주하지 않는다. 기존 아래 설계·증거는 당시 기준으로 보존한다.
+
+- 워크플로우(P)는 단계와 모든 적용 작업의 진행·문제를 관리하고, 단계(T)는 작업 목록의 검색/상태 필터/페이지 탐색과 다음 행동을 제공한다. 완료 수는 실제 적용 J를 기준으로 계산하며 적용 제외와 선행 대기를 문제/완료에 섞지 않는다.
+- 작업(J)은 입력 반영·모의 점검·사람의 명시적 확인·결과/재시도를 구분한다. Native 대화와 패널은 기존 대상·revision·권한·실행 경로를 공유하고 선택 이동/패널 닫기에서 대화·미저장 입력·결과를 보존한다.
+- Workspace는 같은 계층의 구성/입력/도구/스킬/안내를 편집하고, AI 수정은 미저장 안내에만 반영한다. 초안 저장·확인·전체 초안 게시를 구분하며 기존 진행 건은 시작 시 고정본을 유지한다.
+- 연결 화면은 접근 가능한 기존 Tool/Skill 참조와 원래 설정 진입만 제공한다. Valves/UserValves·주소·키를 복제하지 않는다. 도구 등록과 업무 실행 연결·개인 인증 검증은 별개다. 미지원 다중 대상·일정·공유 권한은 후속으로 남긴다.
+- 첫 베타의 완료 조건은 새 변경의 자동/Native 화면 검증, 사용자 자산·snapshot·이력 보존, 후속 PR과 정확한 원본의 묶음/적용/Restore 안내다. 병합·사내 적용은 별도 승인과 결과 확인을 필요로 한다. [이번 대조·검증 근거](../../../evals/scenarios.md#integrated-work-beta-20260921).
 
 <a id="work-panel-chat-design-20260916"></a>
 

@@ -25,7 +25,7 @@ from .ees_workflow_definition import (
     _dump, _seed, _ancestors, _leaves, _dependencies,
     _draft_shape_errors, validate_definition,
 )
-from .ees_workflow_view import _applicable, _finished, _missing, _view, _workflow
+from .ees_workflow_view import _applicable, _finished, _missing, _inputs, _view, _workflow
 
 _service = None
 
@@ -130,9 +130,10 @@ class WorkflowService:
     def _state(self, db, user, case_id="", chat_id="", assets=None, process_id=""):
         published, draft, revision, validated = self._catalog(db)
         case = self._case(db, _value(user, "id"), case_id, chat_id)
+        assets = assets or {"tools": [], "skills": [], "available": True}
         cases = []
         for row in db.execute("SELECT data FROM cases WHERE owner=? ORDER BY rowid DESC", (_value(user, "id"),)):
-            item = _view(json.loads(row["data"]))
+            item = _view(json.loads(row["data"]), assets)
             summary = {key: item[key] for key in ("id", "chat_id", "site", "system", "process_id",
                                                  "process_name", "category", "selected_id", "revision", "version",
                                                  "status", "progress", "created_at", "updated_at", "node_states")}
@@ -141,12 +142,11 @@ class WorkflowService:
                 for node_id, node in item["definition"]["nodes"].items()
             }
             cases.append(summary)
-        assets = assets or {"tools": [], "skills": [], "available": True}
         for definition in (published, draft):
             definition["available_tools"] = assets["tools"]
             definition["available_skills"] = assets["skills"]
             definition["assets_available"] = assets.get("available", True)
-        case_view = _view(case)
+        case_view = _view(case, assets)
         if case_view:
             bodies = assets.get("skill_bodies", {})
             snapshots = case.get("_skill_snapshots", {})
@@ -168,7 +168,7 @@ class WorkflowService:
         if process_id:
             process = published["nodes"].get(process_id)
             if not process or process.get("type") != "p" or process.get("parent") is not None:
-                raise WorkflowError("process_not_found", "게시된 업무 절차의 프로세스를 선택해 주세요.")
+                raise WorkflowError("process_not_found", "게시된 업무 절차의 워크플로우를 선택해 주세요.")
             result["workflow"] = _workflow(published, process_id, assets)
         elif case_id and case:
             result["workflow"] = _workflow(case["definition"], case["process_id"], assets,
@@ -260,15 +260,15 @@ class WorkflowService:
     def _new_case(published, payload, chat_id, assets):
         site_id, system, process_id = payload.get("site_id", "us-a"), payload.get("system", "EMS"), payload.get("process_id", "setup-p")
         if not all(isinstance(value, str) for value in (site_id, system, process_id)):
-            raise WorkflowError("invalid_case", "대상 현장·시스템·프로세스 식별값을 확인해 주세요.")
+            raise WorkflowError("invalid_case", "대상 현장·시스템·워크플로우 식별값을 확인해 주세요.")
         process = published["nodes"].get(process_id)
         if site_id not in published["sites"] or system not in SYSTEMS or not process or process["type"] != "p":
-            raise WorkflowError("invalid_case", "대상 현장·시스템·프로세스를 확인해 주세요.")
+            raise WorkflowError("invalid_case", "대상 현장·시스템·워크플로우를 확인해 주세요.")
         case = {"id": str(uuid4()), "chat_id": chat_id, "site": deepcopy(published["sites"][site_id]),
                 "system": system, "process_id": process_id, "selected_id": process_id,
                 "version": published["version"], "revision": 0, "definition": deepcopy(published), "jobs": {}}
         if not _applicable(case, process_id):
-            raise WorkflowError("not_applicable", "이 현장·시스템에는 해당 프로세스가 적용되지 않습니다.")
+            raise WorkflowError("not_applicable", "이 현장·시스템에는 해당 워크플로우가 적용되지 않습니다.")
         # A case contains only its process. Other processes cannot affect its
         # progress or be accidentally executed through a forged node ID.
         included = {node_id for node_id in published["nodes"] if _ancestors(published["nodes"], node_id)[0]["id"] == process_id}
@@ -312,11 +312,7 @@ class WorkflowService:
 
     @staticmethod
     def _inputs(case, job):
-        site = case["site"]
-        values = {"db": site["db"], "ap": site["ap"], "site": f"{site['country']} · {site['name']} · {site['line']}",
-                  "interface": f"{case['system']} · {site['name']} 시스템 간 연계 · 예시" if site["interface"] else ""}
-        values.update(job["inputs"])
-        return values
+        return _inputs(case, job)
 
     def _run_job(self, case, node, payload, assets):
         node_id = node["id"]
@@ -377,10 +373,14 @@ class WorkflowService:
                                    "simulation": tool.get("adapter") == "mock" and tool.get("source") != "open_webui",
                                    "input": values[node["bindings"].get(tool_id, tool["input"])], "at": _now()})
         job["status"] = "blocked" if blocked else "failed" if stopped else "passed"
+        simulated = any(check["simulation"] and check["status"] in {"passed", "failed"}
+                        for check in job["checks"])
         job["history"].append({"attempt": job["attempt"], "status": job["status"], "checks": deepcopy(job["checks"]),
-                                "inputs": values, "at": _now(), "kind": "simulation", "simulation": True})
-        return {"node_id": node_id, "status": job["status"], "simulation": True,
-                "message": "예시 점검 결과를 저장했습니다. 실제 DB·AP에는 접근하지 않았습니다."}
+                                "inputs": values, "at": _now(),
+                                "kind": "simulation" if simulated else "execution_blocked", "simulation": simulated})
+        return {"node_id": node_id, "status": job["status"], "simulation": simulated,
+                "message": ("실행 연결이 필요합니다. 미수행 항목과 대기 사유를 저장했습니다." if blocked
+                            else "예시 점검 결과를 저장했습니다. 실제 DB·AP에는 접근하지 않았습니다.")}
 
     @staticmethod
     def _receipt(db, owner, request_id):
@@ -554,7 +554,7 @@ class WorkflowService:
                     values = payload.get("inputs")
                     if node["type"] != "j" or not isinstance(values, dict) or any(
                             key not in INPUTS or not isinstance(value, str) or len(value) > 500 for key, value in values.items()):
-                        raise WorkflowError("invalid_inputs", "잡의 공개 점검 대상만 입력해 주세요. 인증정보는 입력하지 않습니다.")
+                        raise WorkflowError("invalid_inputs", "작업의 공개 점검 대상만 입력해 주세요. 인증정보는 입력하지 않습니다.")
                     if any(case["jobs"][node["id"]]["inputs"].get(key) != value for key, value in values.items()):
                         self._invalidate(case, node["id"])
                         case["jobs"][node["id"]]["inputs"].update(values)
@@ -564,7 +564,7 @@ class WorkflowService:
                     # Parent execution advances available automatic
                     # jobs; a bulk action never confirms human checks.
                     if "retry_failed" in payload and type(payload["retry_failed"]) is not bool:
-                        raise WorkflowError("invalid_request", "실패한 잡의 재시도 범위를 확인해 주세요.")
+                        raise WorkflowError("invalid_request", "실패한 작업의 재시도 범위를 확인해 주세요.")
                     pending = _leaves(case["definition"]["nodes"], node["id"])
                     executed = []
                     while pending:
@@ -589,7 +589,8 @@ class WorkflowService:
                             pending.remove(job_id)
                     if not executed:
                         raise WorkflowError("no_ready_jobs", "먼저 담당자 확인과 선행 작업을 완료해 주세요.")
-                    result = {"jobs": executed, "simulation": True, "message": "요청한 예시 점검의 결과와 대기 사유를 기록했습니다."}
+                    result = {"jobs": executed, "simulation": any(job.get("simulation", False) for job in executed),
+                              "message": "요청한 작업의 수행 결과와 대기 사유를 기록했습니다."}
             self._save_case(db, current, case)
         state = self._state(db, current, case_id, chat_id, assets)
         if result is not None:

@@ -22,6 +22,7 @@
 | 업무 패널 목표 설계·Workspace 디자인 통합 | [설계→독립 검토→구현, 기존 화면·실행 경계·검증 한계](#workspace-native-design-20260915) |
 | 업무 패널·메인 대화 후속 설계 | [09-16 설계 전용 범위·현재 계약 대조·검토 보완](#work-panel-chat-review-20260916) |
 | 업무 패널·대화 구현과 ees.10 시험 적용 | [09-17 첫 쓰기·대상 고정·초안 보존·검사 경계](#work-panel-chat-implementation-20260917) |
+| 통합 UX 제한 베타 | [09-21 관리·대량 작업 탐색·작성·기존 설정 연결과 새 검증](#integrated-work-beta-20260921) |
 | Figma 단순 UX 1차 구현 | [09-21 업무명 중심 Runtime·단순 Work Panel·Workspace 편집 UX와 검증 한계](#simplified-work-ux-implementation-20260921) |
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
 | Windows Upgrade 종료 뒤 `port_bind` 10048 | [09-18 단발 포트 검사 결함·제한 재확인·Start 단독 복구와 남은 Windows 확인](#windows-port-bind-10048-20260918) |
@@ -41,6 +42,54 @@
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="integrated-work-beta-20260921"></a>
+
+## 2026-09-21 통합 Work UX 제한 베타
+
+**시작 원본:** 최신 원격 main `8d294bca8d4a36f157ebfbd651f3b2e023d3fba5`와 로컬 바이트가 일치함. PR #57은 병합된 단순 UX이며 이번 통합안 구현/배포 증거가 아니다. 열린 PR은 Draft #53만 있고 구현 원본으로 사용하지 않음. 로컬 변경 없이 `feat/ees-work-integrated-beta-20260921`에서 후속 작업을 시작함. 양쪽 AGENTS/STATUS·README 지도를 읽고 기존 Python 3.11.16/Node 24.19.0 실행을 직접 확인함. 사내 마지막 사용자 적용 보고는 `1ddf2dba9e46c63bc20309387efa37e858970dbc`, `running=true`이며 새 원본 적용 보고는 없음.
+
+**차이 분석 → 최소 설계 검토:** 통합 Figma의 Runtime은 P/T 관리·정확한 하위 작업 집계·문제와 선행 대기 구분·대량 J 검색/필터/페이지가 필요하다. Workspace는 P/T 구성 관리와 J 도구/스킬·AI 안내 변경 비교·저장/게시 경계를 보완한다. 내부 P/T/J·기존 사용자 소유 진행 건·고정 게시 절차·실행 API를 유지하고 사용자 명칭은 워크플로우/단계/작업으로 통일한다. 서버 파생 집계와 UI 표시를 함께 검토하며 별도 저장 형식·실행기·인증 저장소는 추가하지 않는다. 관련 검사 범위는 backend 상태/Tool 권한, panel/designer/controller, 실제 Native 화면, 프로그램/자산 묶음·캐시·ApplyDemo/Restore 보존이다.
+
+**연결 계약 검토:** 접근 허용된 등록 Tool/Skill 목록은 재사용할 수 있으나 업무 실행기는 외부 Tool을 직접 호출하지 않는다. 공통 Valves는 기존 Workspace Tools, UserValves는 Native 대화의 도구별 설정 또는 Controls의 Valves에서 관리한다. 개인 Tool server Integrations를 UserValves로 잘못 연결하지 않는다. DB/AP/API 다중 대상 조회 계약은 없으므로 목업의 가상 연결·인증 성공·예시 날짜/120개 작업을 운영 자료로 복사하지 않는다. 일정 엔진·공유 권한 확대는 후속 범위다.
+
+**최초 관측/실패와 후속:** 새 backend 집계 회귀 3건은 최초 실행에서 `attention_count`/`block_reason`/`ready_count` 누락으로 ERROR를 재현함. 외부 Tool이 전부 차단돼도 기존 `_run_job`이 `simulation=True`와 “예시 점검 결과 저장”을 기록하는 오표시도 발견함. Figma screenshot URL 직접 다운로드는 502 한 건·30초 timeout 세 건이 발생했으므로 같은 도구의 inline screenshot 응답으로 전환해 실제 이미지를 대조함. 이는 Figma 내용 미조회나 제품 장애가 아니다. 수정 후 검사 결과는 아래 최종 검증에 구분한다.
+
+**Figma 대조 범위:** file `XK2wTos6sEuxSHhIj7cqg6`, page `223:131`의 25개 화면/대화상자를 design context와 포함 screenshot으로 실제 읽었다. 시작 `241:416`; Runtime `223:145/290/447/574`; Workspace `224:152`, `226:305/433`, `231:403/546/687`; 연결 `226:561`, `231:266`; 닫기/재열기 `232:440`, `236:416/570/736`; 도구/대상/스킬/개인/공통/대화/게시 창 `233:380/402/422/442/455/468/488`, AP 대상 `243:416`. 원본은 수정하지 않았다. 기존 EES 테마·Native 대화를 유지하면서 관리·편집 역할을 반영했으며 예시 일정·120개·가상 연결 목록·다중 대상 선택은 구현 완료로 표시하지 않는다. 원본의 새 연결 저장/인증 상태 조회 계약은 없는 상태로 구분한다.
+
+**독립 검토·수정 증거:** Runtime 검색/25행 회귀 2건 최초 FAIL 뒤 구현 PASS. 기존 라벨/읽기 전용 필터 계약에 관한 6 FAIL·1 ERROR는 새 계약에 맞춰 검사 기준을 수정했다. Skill 권한 철회 안내 누락과 전체 제외 선행 단계의 불필요 차단을 실제 renderer에서 각각 FAIL로 재현해 수정했다(앞선 잘못된 get_state 인자의 시험 ERROR는 제품 결함과 구분). Workspace는 adapter 누락/사용 중지/mock처럼 보이는 Native 참조가 시연 4건으로 표시되는 FAIL(기대 1건)을 재현해 backend와 같은 실행 가능 조건으로 수정했다. Node 단계 최종 panel/controller/designer 44 PASS, backend/Tool 82 PASS, demo_assets 61 PASS. 같은 Pack `0.2.12`의 실제 이전 관리 Tool→새 내용 적용 1건/재적용 0건, 사용자 Skill·모델·Valves 보존과 사용자 편집 충돌 시 쓰기 중단도 합성 자료로 확인했다.
+
+**Native 최초 실행:** 실제 공식 Svelte/Tiptap UI·Headless Chrome Shell로 26건 중 23 PASS/3 FAIL, ERROR/SKIP 없음(110.613초). 105개 작업 집계/검색/필터/페이지 및 기존 저장/게시 snapshot은 PASS. Workspace 시험은 현재 필터와 sidebar 25개 제한으로 숨은 104번을 직접 누르는 검사 경로가 잘못됐다. 개인 설정은 Native 화면 초기화 경합을 의심했으나 새 탭이 기본 800×600이고 검사가 desktop 전용 Controls selector를 기다리는 조건도 확인해 구분한다. 기존 글꼴 시험은 reload 후 Native 준비 대기로 실패했고 동일 원본의 제한된 재현에서는 PASS하여 원인은 미확정이다. 원문 로그는 `dist/validation-integrated-20260921/native.log`; 이 최초 실패는 후속 PASS로 지우지 않는다. 화면 대조 중 작업 목록 table에 기존 표 스타일이 연결되지 않은 점도 발견해 보완 대상으로 기록한다.
+
+**재검증 구분:** v3 Native+theme는 25 PASS/1 FAIL(97.393초)이며 남은 실패는 모델/선택 화면 준비 전에 링크 좌표를 검사한 시험이었다. 정확한 모델·작업 준비와 새 탭 viewport를 확인한 개인 설정 집중 검사는 1 PASS(4.505초). Controls 초기화 경합을 확정 제품 원인으로 기록하지 않는다. 제품은 기존 Native 준비를 확인한 뒤 설정 버튼을 누르도록 보수적으로 보완하고, 실제 표 스타일 누락을 기존 표 클래스 재사용으로 수정했다. 최종 전체 실행에서는 이 집중 검사를 포함해 다시 확인한다.
+
+**실행 명령과 환경:** 아래는 이번 Work 저장소 루트의 기존 `.venv`, Node 24.19.0, 공식 wheel과 Headless Chrome Shell을 사용했다. 설치·사내 설정 변경 명령이 아니다.
+
+```bash
+export PATH="$PWD/.venv/bin:$PATH"
+export PYTHONPATH=tests
+export EES_REQUIRE_WORK_ROUTES=1 EES_REQUIRE_ASSET_GUARD=1 EES_REQUIRE_ASSET_NATIVE=1
+export EES_RUN_REAL_UV_TEST=1 EES_RUN_REAL_NLTK_TEST=1
+export EES_TEST_UPSTREAM_WHEEL="$PWD/dist/upstream/open_webui-0.11.3-py3-none-any.whl"
+export EES_TEST_BRANDING_DIR="$PWD/dist/branding-integrated-beta-final"
+export EES_TEST_CHROME="$PWD/dist/tools/headless-shell-153.0.8010.52/chrome-headless-shell-linux64/chrome-headless-shell"
+export EES_TEST_SCREENSHOT_DIR="$PWD/dist/validation-integrated-20260921/screenshots-final"
+python scripts/build_ees_webui.py --wheel "$EES_TEST_UPSTREAM_WHEEL" --output-dir dist/branding-integrated-beta-final
+python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_work_panel tests.test_ees_work_controller tests.test_ees_work_designer tests.test_ees_workflow tests.test_ees_workflow_tool tests.test_ees_demo_assets tests.test_ees_branding_build tests.test_demo_bundle tests.test_ees_apply_demo tests.test_ees_trial_bundle tests.test_ees_trial_upgrade tests.test_ees_webui_customization tests.test_ees_work_routes -v
+python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_work_demo tests.test_ees_chat_theme -v
+python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_webui_customization.RealBrandingWheelTests -v
+python -m unittest discover -s tests -v
+node tests/test_ees_cooperation_panel.cjs
+node tests/test_wo_demo_state.cjs
+python scripts/check_docs.py
+git diff --check
+```
+
+빌더는 기존 출력 덮어쓰기를 거절하므로 재실행 때는 새 빈 출력 위치를 사용한다. 초기 strict 관련 검사 339건은 335 PASS/4 SKIP(51.601초): Windows/PowerShell 2건·당시 출력 위치 미지정 현재 wheel 1건·이전 shipped wheel 미제공 1건. 최종 wheel 지정 후 실제 배포 파일/metadata 검사는 1 PASS, 이전 wheel 역호환 검사는 1 SKIP(33.137초)으로 미지정 검사를 실제 동작 검사로 대체했다. 표/설정 진입 수정 후 strict panel/controller 35 PASS(9.459초). Node 두 묶음 PASS, 문서 검사는 errors=0/review_candidates=0, diff 검사 PASS. 최종 `python -m unittest discover -s tests -v`: **1,097건 = 1,081 PASS / 0 FAIL / 16 SKIP, 253.027초**. 실제 Native 24개와 theme 2개가 모두 PASS이며 앞선 개인 설정/Workspace/글꼴 실패 항목도 이 전체 실행에서 PASS했다. SKIP은 Windows/PowerShell 15건과 이전 shipped wheel 역호환 1건이며, 현재 wheel 검사는 실제 실행했다. 로그 `dist/validation-integrated-20260921/full.log`, 화면 `screenshots-final/`. 성공 재실행을 첫 글꼴 준비 timeout의 확정 원인 해결로 확대하지 않는다. 새 탭 화면 캡처가 폰트 로드 전에 찍힌 것을 확인해 시험의 screenshot 직전에 Noto Sans KR/document.fonts.ready 대기만 추가했다. 최종 strict 개인 설정 검사 1 PASS(4.663초), 한글 표시·간격·겹침을 실제 이미지로 재확인했다. 제품 코드/wheel은 동일하다.
+
+**검증한 프로그램:** 공식 Open WebUI `0.11.3` 원본 SHA-256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`. 최종 변경 프로그램 `0.11.3+ees.10` wheel SHA-256 `cdf18b6ce9007fecc4aa7cc3d3cba88f0d79b7d8a2a3c1e9636b770ea8ce609d`. 중간 wheel 두 개는 최종 전달 원본이 아니다. 후속 PR의 최종 깨끗한 commit으로 `build_demo_bundle.py`를 실행하고 ZIP/manifest의 원본·dirty=false·파일별 해시·CRC를 대조하며 정확한 commit과 ZIP 해시는 PR 전달 본문에 남긴다. 아직 main 병합/사내 설치·기동·화면 확인은 하지 않았다.
+
+**실환경 경계:** 기존 Work 단일 `.venv`와 공식 Headless Chrome Shell을 재사용한다. 실제 Windows/PowerShell·사내 Open WebUI/LLM·테스터 수락은 이 환경에서 실행하지 않았으며 합성 서버/브라우저 결과로 대체하지 않는다. 원격 CI는 9월 한시 방침으로 실행하지 않는다. 후속 변경의 병합·사내 설치 승인으로 PR #57의 과거 승인을 확대하지 않는다.
 
 <a id="simplified-work-ux-implementation-20260921"></a>
 

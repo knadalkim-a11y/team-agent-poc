@@ -6,10 +6,11 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** 기존 [PR #57](https://github.com/knadalkim-a11y/team-agent-poc/pull/57), `feat/ees-work-simplified-ux-20260918`에서 남은 Workspace AI 작성·자료/설정/게시/충돌 대화상자를 보완하고 배포 직전 구현·로컬 검증을 완료함. 기존 인증·모델 API를 재사용하며 안내만 미저장 초안에 반영하고 저장·게시·실행은 구분함. 선택 이동/왕복·지연 응답·수동 편집·중단·계정 변경의 입력 보존과 키보드 동작을 보완함. Pack `0.2.12`, 프로그램 `0.11.3+ees.10`, 기존 서비스·저장 형식·게시 snapshot·사용자 자산은 유지함.
-- **검증 환경과 근거:** 기존 저장소 `.venv` 하나의 Python 3.11.16·CI 고정 의존성, Node 24.19.0과 공식 Headless Chrome Shell 하나를 재사용함. 전체 시험 1,064 PASS·0 FAIL·16 SKIP, 관련 strict encoding 시험 345 PASS·0 FAIL·3 SKIP. 관련 검사에 실제 Native 화면 21개·theme 2개를 포함함. Figma 지정 17개 전체의 design context/screenshot을 대조하고 원본은 수정하지 않음. 환경 재설치·새 서버·DB·프레임워크는 추가하지 않음. [정확한 명령·최초 실패·전체 검사·Figma 대조·보장 범위](../evals/scenarios.md#simplified-work-ux-implementation-20260921).
-- **최근 적용:** 사용자 보고상 main `1ddf2dba9e46c63bc20309387efa37e858970dbc` 적용 정상, `status result=ok / program=customized / running=true`. PR #57의 단순 UX는 아직 사내 미설치·미배포임. PR #53은 구현 원본·선행 병합 대상으로 쓰지 않음.
-- **다음 작업 하나:** 사용자의 후속 “배포 전까지” 요청에 따라 같은 PR의 Ready/병합 후 확정한 main 40자리 원본으로 사내 제한 시험 적용·UI/UX 확인을 진행한다. 원본은 PR #57의 최종 merge commit을 사용하며 Git 반영을 사내 적용 성공으로 기록하지 않는다. 이 턴에서는 사내 설치·배포를 실행하지 않는다. 이후 실제 적용 시 기존 Upgrade TrialCommit의 Backup·프로그램/자산 보존·Restore 경계를 사용하고 AI 안내 수정→초안 저장/게시 구분, Runtime 상태/근거/대화 유지의 소수 항목을 함께 확인한다. 실제 Windows/PowerShell·회사 Open WebUI/사내 LLM·실사용자 수락은 미실행이며 이를 Work 브라우저 성공으로 대체하지 않는다. 공유 Runtime·사내 Git 이전은 범위 밖이다.
+- **현재 작업:** PR #57 병합 main `8d294bca8d4a36f157ebfbd651f3b2e023d3fba5`에서 후속 통합 UX 베타 구현·로컬 검증을 완료했다. [PR #58](https://github.com/knadalkim-a11y/team-agent-poc/pull/58)의 병합은 09-21 사용자 “병합까지해줘” 요청으로 승인되었다. Figma 223:131/241:416 기준의 워크플로우·단계 관리, 대량 작업 검색/필터, 입력/실행/확인 구분, Workspace 구성/AI 수정/저장/게시, 기존 도구·개인 설정 진입을 보완했다. PR #53과 과거 검토안은 구현 원본으로 쓰지 않는다.
+- **현재 지원 경계:** 사용자 소유 진행 건과 기존 게시 snapshot·이력·Native 대화/도구/스킬을 유지한다. 외부 Tool 직접 실행·다중 DB/AP 대상 계약은 미지원이며 “실행 연결 필요”로 표시한다. 일정 엔진·설정 상속·공유 권한 확대·새 인증 저장소는 추가하지 않는다. 프로그램 `0.11.3+ees.10`·Pack `0.2.12`를 유지하고 내용 해시로 변경 자산 캐시를 구분한다.
+- **검증·배포 원본:** 새 원본 전체 1,081 PASS/0 FAIL/16 SKIP(Windows/PowerShell 15·이전 wheel 1), 실제 Native 24개·theme 2개 PASS. 변경 범위 strict 인코딩 검사와 Node 묶음·문서·diff 검사도 실행했다. Figma 지정 화면과 관련 창 25개의 design context/screenshot을 대조했다. 관련 검사·최초 실패·Figma 범위는 [통합 베타 평가 기록](../evals/scenarios.md#integrated-work-beta-20260921)에 기록한다. 기존 단일 `.venv`와 시험 브라우저를 재사용하며 과거 PR #57의 PASS를 이번 결과로 재사용하지 않는다.
+- **최근 적용:** 사용자 보고상 main `1ddf2dba9e46c63bc20309387efa37e858970dbc` 적용 정상, `status result=ok / program=customized / running=true`. 이후 PR #57은 Git 병합 완료지만 그 원본의 사내 적용 보고는 없다. 이번 통합 UX는 사내 미설치·미배포다.
+- **다음 작업 하나:** 승인된 PR #58 병합 후 확정한 main 원본과 배포물 해시로 사내 제한 베타 적용·UI/UX 확인을 준비한다. 확정 SHA·묶음 해시는 PR #58에 기록하고 [기존 Upgrade TrialCommit 적용·Restore 안내](03-openwebui-native-agent.md#ees-integrated-beta-20260921)를 사용한다. 이번 승인은 Git 병합까지이며 사내 설치·기동·화면 확인의 완료를 뜻하지 않는다. 실제 Windows·사내 Open WebUI/LLM·테스터 수락은 미확인이다.
 
 ## 2026년 9월 개발·검사 방침
 
@@ -59,7 +60,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | main `1ddf2dba9e46c63bc20309387efa37e858970dbc` 적용 정상 보고, 단순 UX PR #57 구현·로컬 검증 완료 | 제한 시험 적용의 UI/UX를 확인한 뒤 [참여·개인 대화 분리·동시 변경·이어가기 UX](mockups/ees-work/TASK.md#shared-pilot-first)를 구체화. 일정·종합 현황판은 별도 후속 범위 |
+| 4. 관리자 워크플로 | main `1ddf2dba9e46c63bc20309387efa37e858970dbc` 적용 정상 보고, PR #57 병합 뒤 통합 UX 베타 준비 | 통합 베타의 제한 시험 적용과 사용자 피드백을 확인한 뒤 [참여·개인 대화 분리·동시 변경·이어가기 UX](mockups/ees-work/TASK.md#shared-pilot-first)를 구체화. 일정·종합 현황판은 별도 후속 범위 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -77,4 +78,4 @@
 
 ## 최근 점검
 
-2026-09-21 Work: 최신 main/PR head·열린 PR·로컬 변경·양쪽 AGENTS/STATUS·README·재개 댓글을 확인하고 기존 PR #57에서 재현 실패→최소 수정→재검증을 수행함. 실제 Python/Node의 동작 시험, 프로그램/Pack/ApplyDemo/Restore 합성 보존 검사, 문서 검사와 diff 검사를 실행함. 사용자 후속 승인으로 단일 검증 환경을 준비해 전체 1,056 PASS·16 SKIP, 실제 Native 브라우저 14개·theme 2개 PASS를 확인함. 최초 의존성·full Chrome 기동·시험 assertion 실패를 보존하고 수정 후 결과와 구분함. Windows·사내 Open WebUI/LLM은 미실행임. [최종 명령·건수·차단·과거 기록](../evals/scenarios.md#simplified-work-ux-implementation-20260921).
+2026-09-21 Work: PR #58 병합 승인 후 최신 main·열린 PR·로컬 변경과 해당 AGENTS/STATUS를 다시 확인했다. 검증한 구현 원본 `81fad6f720b843408ba4aaf04c397f9fe1b5f65b`은 그대로 유지하고 이번에는 승인 범위와 다음 적용 원본의 확인 경로만 정리한다. 구현 단계의 전체 1,081 PASS·16 SKIP, Native/theme 26개 PASS, 최초 실패와 Figma 대조 범위는 [기존 평가 기록](../evals/scenarios.md#integrated-work-beta-20260921)에 보존한다. 이번 병합 준비를 새 사내 검증 결과로 기록하지 않으며 별도 서버·DB·프레임워크나 회사 PC 환경 변경은 없다.

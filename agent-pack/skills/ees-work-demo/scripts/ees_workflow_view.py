@@ -85,18 +85,60 @@ def _missing(case, node_id):
             if not _finished(case, dep)]
 
 
-def _view(case):
+def _inputs(case, job):
+    """Use the same effective public inputs for execution and readiness."""
+    site = case["site"]
+    values = {"db": site["db"], "ap": site["ap"], "site": f"{site['country']} · {site['name']} · {site['line']}",
+              "interface": f"{case['system']} · {site['name']} 시스템 간 연계 · 예시" if site["interface"] else ""}
+    values.update(job["inputs"])
+    return values
+
+
+def _job_readiness(case, node_id, assets):
+    node, job = case["definition"]["nodes"][node_id], case["jobs"][node_id]
+    applicable = _applicable(case, node_id)
+    missing = _missing(case, node_id)
+    active = applicable and job["status"] != "passed"
+    reason = ""
+    if active:
+        skills = [case["definition"]["skills"][skill_id]
+                  for ancestor in _ancestors(case["definition"]["nodes"], node_id)
+                  for skill_id in ancestor["skills"]]
+        tools = [case["definition"]["tools"][tool_id] for tool_id in node["tools"]]
+        values = _inputs(case, job)
+        if any(skill.get("source") == "open_webui" and (
+                skill["reference"] not in assets.get("skill_bodies", {})
+                or skill["reference"] not in case.get("_skill_snapshots", {})) for skill in skills):
+            reason = "skill_unavailable"
+        elif node["mode"] == "tool" and any(tool.get("adapter") != "mock"
+                or tool.get("source") == "open_webui" or not tool.get("enabled", True) for tool in tools):
+            reason = "connection_required"
+        elif node["mode"] == "tool" and any(not str(values.get(
+                node["bindings"].get(tool["id"], tool["input"]), "")).strip() for tool in tools):
+            reason = "input_required"
+        elif missing:
+            reason = "prerequisite_required"
+    attention = active and (job["status"] in {"failed", "blocked"} or reason not in ("", "prerequisite_required"))
+    return {"attention": attention, "block_reason": reason,
+            "ready_for_run": bool(active and node["mode"] == "tool" and not missing and not reason
+                                  and job["status"] not in {"failed", "running"})}
+
+
+def _view(case, assets=None):
     """Derive displayed parent state without persisting a second truth."""
     if case is None:
         return None
     case = deepcopy(case)
-    case.pop("_skill_snapshots", None)
     nodes = case["definition"]["nodes"]
+    readiness = {node_id: _job_readiness(case, node_id, assets or {}) for node_id in case["jobs"]}
+    case.pop("_skill_snapshots", None)
     node_states = {}
     for node_id in nodes:
         leaves = _leaves(nodes, node_id)
         relevant = [leaf for leaf in leaves if _applicable(case, leaf)]
-        statuses = [case["jobs"][leaf]["status"] for leaf in relevant]
+        statuses = ["blocked" if case["jobs"][leaf]["status"] == "pending"
+                    and readiness[leaf]["block_reason"] not in ("", "prerequisite_required")
+                    else case["jobs"][leaf]["status"] for leaf in relevant]
         done = sum(status == "passed" for status in statuses)
         missing = _missing(case, node_id)
         if not relevant:
@@ -119,7 +161,19 @@ def _view(case):
         node_states[node_id] = {"status": status, "applicable": _applicable(case, node_id),
                                 "missing": missing, "progress": {"done": done, "total": len(relevant)},
                                 "failed_count": statuses.count("failed"),
-                                "excluded_count": len(leaves) - len(relevant)}
+                                "excluded_count": len(leaves) - len(relevant),
+                                "incomplete_count": len(relevant) - done,
+                                "review_count": statuses.count("review"),
+                                "blocked_count": sum(case["jobs"][leaf]["status"] == "blocked"
+                                                     or bool(readiness[leaf]["block_reason"]) for leaf in relevant),
+                                "attention_count": sum(readiness[leaf]["attention"] for leaf in relevant),
+                                "ready_count": sum(readiness[leaf]["ready_for_run"] for leaf in relevant),
+                                "waiting_count": sum(readiness[leaf]["block_reason"] == "prerequisite_required" for leaf in relevant)}
+        unfinished = [leaf for leaf in relevant if case["jobs"][leaf]["status"] != "passed"]
+        next_jobs = [leaf for leaf in unfinished if not _missing(case, leaf)] or unfinished
+        node_states[node_id]["next_node_id"] = next_jobs[0] if next_jobs else ""
+        if nodes[node_id]["type"] == "j":
+            node_states[node_id].update(readiness[node_id])
     case["node_states"] = node_states
     case["status"] = node_states[case["process_id"]]["status"]
     case["progress"] = node_states[case["process_id"]]["progress"]

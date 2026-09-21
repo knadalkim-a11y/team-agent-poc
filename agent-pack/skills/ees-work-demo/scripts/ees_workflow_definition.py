@@ -138,7 +138,7 @@ def validate_definition(definition):
         for node_id in ids:
             node = nodes.get(node_id, {})
             if node.get("type") != "p" or node.get("parent") is not None or node.get("category") != category:
-                reject(f"{node_id}: 최상위 프로세스 연결을 확인해 주세요.")
+                reject(f"{node_id}: 최상위 워크플로우 연결을 확인해 주세요.")
     if errors:
         return list(dict.fromkeys(errors))
     for tool in tools.values():
@@ -198,7 +198,7 @@ def validate_definition(definition):
               or node_id not in parent.get("children", [])):
             reject(f"{node_id}: 상위 단계 연결을 확인해 주세요.")
         if node["type"] == "j" and node["children"]:
-            reject(f"{node_id}: 잡에는 하위 단계를 추가할 수 없습니다.")
+            reject(f"{node_id}: 작업에는 하위 단계를 추가할 수 없습니다.")
         if node["type"] != "j" and not node["children"]:
             reject(f"{node_id}: 하나 이상의 하위 작업이 필요합니다.")
         for child in node["children"]:
@@ -225,7 +225,7 @@ def validate_definition(definition):
         deps = _dependencies(nodes, node_id)
         for dep in deps:
             if _ancestors(nodes, dep)[0]["id"] != ancestors[0]["id"]:
-                reject(f"{node_id}: 다른 프로세스의 진행 결과를 선행 조건으로 사용할 수 없습니다.")
+                reject(f"{node_id}: 다른 워크플로우의 진행 결과를 선행 조건으로 사용할 수 없습니다.")
         if node["type"] == "j":
             graph[node_id] = {leaf for dep in deps for leaf in _leaves(nodes, dep)}
     visited, active = set(), set()
