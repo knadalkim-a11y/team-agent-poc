@@ -621,7 +621,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertNotIn("저장하지 않은 변경", self.text(".ew-designer-status"))
         self.assertEqual(self.current()["draft"]["nodes"]["db-j"]["name"], "DB 연결 확인 개정")
         self.click('#ees-work-designer [data-action="validate_draft"]')
-        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('검증 완료')")
+        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('게시 전 확인 완료')")
         self.click('#ees-work-designer [data-action="publish"]', confirm=True)
         self.wait("document.querySelector('.ew-designer-status')?.innerText.includes("
                   + json.dumps("게시 v" + str(original_version + 1)) + ")")
