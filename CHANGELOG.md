@@ -2,6 +2,11 @@
 
 완료된 변경·중요 결정과 날짜별 관찰을 기록합니다. 다음 작업과 최신 배포 상태는 [STATUS](docs/STATUS.md), 시험별 현재 판정은 [평가표](evals/scenarios.md)가 원본입니다. 과거 실패 기록을 현재 장애나 재실행 지시로 해석하지 않습니다.
 
+## 2026-09-21
+
+- Figma의 단순 UX 기준을 기존 Native EES Work view/designer/CSS에 제한적으로 구현함. Runtime에서 P/T/J 기술 badge를 숨기고 업무명·현재 상태·완료 조건·근거·읽기 전용 이력·다음 행동을 우선하며, 사람 확인은 실제 확인 완료 액션으로만 기록하고 미연결 Tool은 `실행 연결 필요`로 표시함. Workspace는 업무 이름/목적/안내/완료 조건을 먼저 보여주고 기술 연결을 고급 설정으로 접되 초안 저장·게시와 기존 진행 건의 게시 snapshot 계약을 유지함. [구현·검증 경계](evals/scenarios.md#simplified-work-ux-implementation-20260921).
+- 새 서버·프레임워크·저장 계층을 추가하지 않았고 launcher/server 계약과 사용자 대화·Skill·Tool·모델·권한·기존 이력은 변경하지 않음. V8의 실제 렌더 함수 합성 검증은 수행했으나 checkout 기반 unittest/check_docs, 실제 브라우저/Windows/Open WebUI/사내 LLM은 미실행이며 원격 CI는 9월 생략 방침을 유지함. 이번 변경은 PR 검토 후 현재 개인 PC Dogfooding을 거쳐야 하며 새 서버 이전은 후속 단계임.
+
 ## 2026-09-18
 
 - ees.10 시험 Upgrade가 기존 서버 Stop 뒤 `port_check / port_bind / WinError 10048`에서 `changed=false`로 중단된 사건을 분석함. 당시 `port_is_free`의 단발 Windows bind가 일시적인 10048도 즉시 배포 실패로 확정하던 결함을 재현하고, Windows operational bind의 10048만 0.25초 간격·10초 예산·최대 40회 재확인하도록 보완함. 포트 공유·다른 프로세스 종료·자동 Restore는 추가하지 않고 지속 점유·다른 오류는 계속 실패시킴. 사용자는 Restore 없이 기존 Start 한 번으로 서비스를 정상 복구했다고 보고했으며 이를 새 프로그램 적용 성공이나 TIME_WAIT 원인 확정으로 해석하지 않음. [증거와 한계](evals/scenarios.md#windows-port-bind-10048-20260918).

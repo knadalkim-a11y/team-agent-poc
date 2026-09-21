@@ -22,6 +22,7 @@
 | 업무 패널 목표 설계·Workspace 디자인 통합 | [설계→독립 검토→구현, 기존 화면·실행 경계·검증 한계](#workspace-native-design-20260915) |
 | 업무 패널·메인 대화 후속 설계 | [09-16 설계 전용 범위·현재 계약 대조·검토 보완](#work-panel-chat-review-20260916) |
 | 업무 패널·대화 구현과 ees.10 시험 적용 | [09-17 첫 쓰기·대상 고정·초안 보존·검사 경계](#work-panel-chat-implementation-20260917) |
+| Figma 단순 UX 1차 구현 | [09-21 업무명 중심 Runtime·단순 Work Panel·Workspace 편집 UX와 검증 한계](#simplified-work-ux-implementation-20260921) |
 | 업데이트·패치 반복 실패 | [원인별 구분, 확정 결함, 사내 래퍼 갱신, 종료 로그 해석과 조사 종결](#ees-update-failure-causes) |
 | Windows Upgrade 종료 뒤 `port_bind` 10048 | [09-18 단발 포트 검사 결함·제한 재확인·Start 단독 복구와 남은 Windows 확인](#windows-port-bind-10048-20260918) |
 | ees.7 적용 실패와 직전 버전 복구 | [09-14 rename 접근 거부, Restore·Start 성공, 새 화면 미확인](#ees7-apply-recovery-20260914) |
@@ -40,6 +41,22 @@
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="simplified-work-ux-implementation-20260921"></a>
+
+## 2026-09-21 Figma 단순 UX 1차 구현
+
+- **기준과 범위:** 사용자 요청에 따라 Figma 작업 자체는 다른 세션의 기준 화면을 그대로 사용하고, 이 작업에서는 저장소 구현을 담당함. 시작 main은 `1ddf2dba9e46c63bc20309387efa37e858970dbc`, 구현 브랜치는 `feat/ees-work-simplified-ux-20260918`이며 시작 시 main과 동일(ahead/behind 0)이었다. Draft PR #53은 오래된 Runtime/Figma 문서 전용 원본이고 현재 main과 충돌 상태여서 이번 제품 구현 원본으로 사용하거나 병합하지 않음.
+- **Figma 기준:** file `XK2wTos6sEuxSHhIj7cqg6`, 시작 `150:300`, Runtime `147:252`, `147:434`, `148:180`, `148:330`, Workspace `147:610`, `149:233`, `149:325`, `149:414`. 구현 시 `figma-design-to-code` 지침을 읽고 해당 node의 design context/metadata를 확인했으며 Figma 파일 자체는 수정하지 않음.
+- **Runtime 구현:** 기존 `ees-work-view.js` 책임을 유지하면서 일반 사용자 트리의 P/T/J badge를 숨기고 업무명 중심 탐색으로 단순화함. 패널은 즉시 상위 업무 복귀, 현장/시스템/라인 범위, 현재 상태, 완료 조건, 접힌 근거, 읽기 전용 실행 이력, 다음 할 일과 한 개의 주 행동을 우선함. 부모 화면은 `확인할 업무`와 업무 진행으로 표현하고 완료된 자동 점검은 `최근 결과 유효`, 사람 확인은 `담당자 확인 완료`로 표시함.
+- **사람 확인·미연결 경계:** manual J의 미완료 상태는 `담당자의 확인이 필요합니다.`와 실제 `확인 완료` 버튼을 유지하고 `AI의 자료 정리만으로 완료 처리하지 않습니다.`를 명시함. 실제 실행 adapter가 없는 Tool은 `실행 연결이 필요합니다.`와 `실행 연결 전에는 수행된 것으로 기록하지 않습니다.`를 표시하며 수행 성공처럼 보이지 않게 함. 저장된 결과·checks·시각·이전 실패 이력은 삭제하거나 새 요약값으로 대체하지 않음.
+- **Chat 계약 보존:** `ees-work-launcher.js`와 `test_ees_work_controller.py`는 main과 byte-identical임을 blob으로 확인함. 따라서 같은 채팅에서 업무 선택만 갱신하고 첫 대화/다른 대화의 selection을 격리하는 기존 controller 계약을 이번 변경에서 새로 구현하거나 우회하지 않음.
+- **Workspace 구현:** `ees-work-designer.js`의 기존 form/action 구조를 유지하고 화면 문구를 업무 중심으로 정리함. `업무 이름`, `업무 목적`, `업무 수행 안내`, `완료 조건`을 먼저 보이고 시스템·선행 작업·Skill·Tool 연결은 `고급 설정` 아래에 둠. `초안 저장`, `게시 전 확인`, `게시`를 구분하고 `기존 진행 건은 게시 당시 버전을 유지합니다.`를 노출함. 실제 form field 이름과 action은 변경하지 않음.
+- **과설계 검토:** 새 UI 서버·프레임워크·디자인 시스템·Runtime 저장 계층을 추가하지 않고 기존 view/designer/CSS에서만 해결함. 멀티유저 공유 Runtime, Workflow/Skill/Tool Builder, Skill 자동 생성, Tool 개발 요청 시스템, 별도 DB 서버, 새 배포 플랫폼, 사내 Git 이전·새 서버 배포는 범위 밖임.
+- **직접 검증:** 변경된 실제 production JS를 V8에서 구문 검사하고 `workPanelNodeHTML`을 합성 P/T/J 상태로 실행해 업무명 트리, explicit human confirmation, 미연결 Tool, 완료 근거, 읽기 전용 이력, parent row summary, 정확한 scope, preview의 가짜 PASS 부재를 확인함. `workflowEditor`도 실제 함수로 실행해 업무 중심 label, 닫힌 고급 설정, 기존 Tool 미연결 문구, snapshot 안내와 저장 field 이름 `name/description/parent/condition/enabled/mode/rule/instructions/systems/deps/skills/binding:health` 보존을 확인함. 구현 중 완료 행 요약과 Workspace의 옛 검증 문구, 남은 사용자 노출 `잡` 용어를 자체 리뷰에서 추가 보완함.
+- **시험 코드:** `test_ees_work_panel.py`의 표시 계약을 새 현재상태/근거/사람확인 문구로 갱신했고 `test_ees_work_demo.py`에는 runtime P/T/J badge 미노출과 Workspace 업무 중심 문구·고급 설정 확인을 추가함. launcher/controller 시험 원본은 변경하지 않음.
+- **미실행:** 현재 실행 환경의 GitHub raw/clone DNS 차단으로 저장소 checkout을 확보하지 못해 `python -m unittest ...`, `python scripts/check_docs.py`, 실제 Node test runner, 전체 `git diff --check`를 실행하지 못함. Chrome/Open WebUI/Windows/사내 GLM 5.3도 미실행이다. 2026-09-30까지 사용자 방침에 따라 원격 CI도 실행하지 않고 각 커밋에 `[skip ci]`를 유지함. V8 직접 실행 결과를 위 미실행 검사들의 PASS로 바꾸지 않음.
+- **적용 경계:** 사용자는 기존 main `1ddf2dba9e46c63bc20309387efa37e858970dbc`를 개인 PC에 성공 적용해 `status result=ok / program=customized / running=true`와 화면 정상 여부를 보고함. 이번 UX 구현 브랜치는 아직 병합·설치하지 않았으며, PR 검토 뒤 병합하면 **현재 개인 PC Dogfooding**만 먼저 수행한다. 큰 문제 수정 전에는 새 서버 이전·사내 Git 이전을 시작하지 않음.
 
 <a id="work-panel-chat-implementation-20260917"></a>
 

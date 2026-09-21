@@ -1,11 +1,15 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-18
+갱신일: 2026-09-21
 
 현재 작업·다음 작업·미해결·실제 적용 원본을 관리합니다. 이슈·검증 근거는 [평가 기록 찾아보기](../evals/scenarios.md#evidence-index), 환경은 [versions](../versions.md), 완료된 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
 ## 현재 작업과 다음 작업
 
+- **현재 UX 구현:** Figma 기준 `150:300`과 Runtime `147:252/147:434/148:180/148:330`, Workspace `147:610/149:233/149:325/149:414`을 현재 main `1ddf2dba9e46c63bc20309387efa37e858970dbc`의 기존 Native EES Work 구조에 제한적으로 반영함. 구현 브랜치 `feat/ees-work-simplified-ux-20260918`에서 일반 사용자 트리의 P/T/J 표시를 숨기고 업무명 중심 탐색, 패널의 현재 상태·완료 조건·근거·읽기 전용 이력·다음 행동, 사람 확인의 명시적 완료, 미연결 Tool의 `실행 연결 필요`, Workspace의 업무 중심 문구·고급 설정 접기를 구현함. 서버/저장 계약과 `ees-work-launcher.js`는 변경하지 않아 기존 대화 대상 전환·revision·권한·진행 건 snapshot 계약을 유지함. [이번 구현 기록](../evals/scenarios.md#simplified-work-ux-implementation-20260921).
+- **검증 경계:** 변경 JS는 V8 구문 검사와 실제 `workPanelNodeHTML`·`workflowEditor` 함수의 합성 계약 실행을 통과함. 사람 확인 버튼/AI 대리 완료 금지, 미연결 실행 정직 표시, 기존 근거·이력, 업무명 탐색, Workspace form field 이름·draft/publish snapshot 문구를 직접 확인함. 다만 현재 실행 환경에서 GitHub raw/clone DNS가 차단되어 저장소 checkout 기반 `test_ees_work_panel.py`, `test_ees_work_demo.py`, 전체 unittest와 `scripts/check_docs.py`는 **미실행**이며 실제 Chrome/Open WebUI/Windows/사내 LLM도 미실행임. 9월 원격 CI 생략 방침은 그대로 유지함.
+- **최근 사내 적용:** 사용자가 `1ddf2dba9e46c63bc20309387efa37e858970dbc` 고정 원본 Upgrade 뒤 `status result=ok / program=customized / running=true`를 보고했고 실제 적용도 정상으로 확인함. 이를 이번 미병합 UX 구현의 적용 결과로 확대하지 않음.
+- **다음 작업 하나:** 이번 UX 구현 PR을 별도 리뷰하고, 미실행 검증 한계를 수용할지 판단한 뒤 병합한다. 병합하면 그 최종 main SHA로 **현재 개인 PC에만** 고정 원본 시험 설치해 Dogfooding하고, 큰 문제를 수정한 뒤에만 새 서버 이전을 검토한다. 사내 Git 이전·새 서버 셋업은 아직 시작하지 않음.
 - 이번 장애 수정: 사용자가 배포 실패 뒤 복구 진행을 보고하고 원인 분석·수정을 요청함. main `0d46b8e1dcf8e9961e05cfc1a42f4768d2241311`의 공통 `port_is_free`에서 Windows bind `10048` 단발 실패를 재현하고, 10048만 0.25초 간격·10초 예산·최대 40회 재확인하도록 [PR #55](https://github.com/knadalkim-a11y/team-agent-poc/pull/55)에 보완함. 지속 점유는 실패로 유지하고 주소 공유·프로세스 종료·자동 복구를 추가하지 않음. 후속 검토에서 bind 실패 뒤 close 오류를 retryable bind로 오인하던 초안 경계도 3개 subcase 실패로 확인·수정함. 사건·수정·검증은 [평가 기록](../evals/scenarios.md#windows-port-bind-10048-20260918)에 통합하며 Git 병합과 사내 적용을 구분함.
 - 관측과 한계: ees.10 Upgrade의 `changed=false`, `port_check`(입력은 `prot_check`), `operation=port_bind`, `errno/winerror=10048`, `ees_deploy_process.py:171`을 코드와 대조함. 직후 Status의 기존 프로그램 `7bdd2ce93dc4`, `running=false`, TCP/owners 없음과 이후 복구 진행 보고를 구분함. 실패는 Stop 뒤 프로그램 Apply 전의 단발 bind 검사 경로와 일치함. 후속 사용자 보고에서 Restore 없이 안내 1번의 Start만 실행해 정상 서비스로 복구한 것을 확인함. 당시 소켓 상태가 없어 TIME_WAIT·특정 점유 프로세스를 확정하지 않으며 최종 실행 SHA·health 수치는 새로 수신하지 않음.
 - 다음 작업 하나: [PR #55](https://github.com/knadalkim-a11y/team-agent-poc/pull/55)의 포트 수정 병합을 포함한 **최신 main의 40자리 SHA**로 [ees.10 고정 원본 시험 적용](03-openwebui-native-agent.md#ees-work-panel-trial-20260917)을 한 번 수행하고 기존 대화·P/T/J·입력 초안 유지 여부를 확인함. 9월 원격 CI 생략 방침과 실제 Windows 미실행 한계는 유지하며, 복구된 정상 서버에서 장애 재현을 위해 Stop/Restore를 반복하지 않음.
@@ -33,8 +37,8 @@
 | 대상 | 마지막 확인과 적용 원본 | 남은 한계·근거 |
 |---|---|---|
 | EES Work 업무 UI | 09-15 ees.9 설치 완료, 메인 채팅 업무 요청 재시도 정상 보고, 앞선 ees.8 UI 수락 유지 | 도구 호출 원문·단계별 실행·화면 반영·기존 대화 접근은 이번 보고에서 별도 확인하지 않음. [이번 배포·사용 보고](../evals/scenarios.md#work-ui-refactor-20260915), [앞선 UI 수락](../evals/scenarios.md#sidebar-refinement-20260914) |
-| EES 프로그램 | 09-17 장애 직후 Status `7bdd2ce93dc4`, `running=false`; 이후 Restore 없이 Start만으로 정상 서비스 복구 보고 | 최종 실행 SHA·health 수치는 미수신. 09-15 `87f3f2922a4a` / ees.9 기동 성공은 [당시 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 보존. 새 ees.10 설치 성공으로 해석하지 않음 |
-| 운영 래퍼 | 09-18 포트 수정 [PR #55](https://github.com/knadalkim-a11y/team-agent-poc/pull/55) squash 병합 `b85bf344cd6f6e6ced89d282e06e5cc8bd879bc2`; 사내는 09-17 실패 뒤 기존 프로그램 Start 단독 복구 상태 | Git 수정 병합과 사내 적용은 구분하며 새 수정본 Upgrade는 아직 미실행. 09-15 시험 Upgrade/ApplyDemo 성공은 [당시 기록](../evals/scenarios.md#work-ui-refactor-20260915)에 보존 |
+| EES 프로그램 | 09-21 사용자 보고: 고정 원본 `1ddf2dba9e46c63bc20309387efa37e858970dbc`, `status result=ok`, `program=customized`, `running=true`; 적용 화면도 정상 | 프로그램 적용 성공과 이번 미병합 UX 브랜치는 구분. 버전 문자열·개별 UI 항목 전수 확인은 이번 보고에서 따로 받지 않음 |
+| 운영 래퍼 | 09-21 고정 원본 `1ddf2dba9e46c63bc20309387efa37e858970dbc` 적용 뒤 `status result=ok`, `running=true` 사용자 보고 | 10048 재발 방지 수정이 포함된 main 적용 성공. 실제 장애 재현 시험이나 장시간 안정성 검증으로 확대하지 않음 |
 | 분석·업무 패널 자산 | 09-15 `87f3f2922a4a` / Agent Pack v0.2.10 ApplyDemo 성공, 변경 3건, 메인 채팅 업무 요청 재시도 정상 보고 | 개별 변경 항목·분석 기능·업무 전체 실행의 확인으로 확대하지 않음. [이번 적용·사용](../evals/scenarios.md#work-ui-refactor-20260915) |
 | 대표 시작 질문 | 09-15 `87f3f2922a4a`의 v0.2.10 관리 목록을 포함한 ApplyDemo 성공 | 질문의 실제 표시 여부는 미확인. 변경 3건을 특정 질문 변경으로 단정하지 않음. [이번 적용](../evals/scenarios.md#work-ui-refactor-20260915), [이전 접속 실패](../evals/scenarios.md#connector-demo-starters) |
 | WO 목업 | v0.1.6 안내 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc` 뒤 크기 조절 정상 보고; Git은 v0.1.8 통합 패널 원본 | 실제 EMS 미연결. 이후 패널 적용 보고와 개별 등록 바이트 검증을 구분. [목업 이력](../evals/scenarios.md#wo-mockup) |
