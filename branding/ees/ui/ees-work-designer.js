@@ -7,6 +7,7 @@ function createWorkDesigner({callbacks}) {
   const editorCollapsed=new Set();
   const adminRoute=()=>Boolean(route.admin);
   const alertHTML=()=>errorMessage?`<p class="ew-error" role="alert">${esc(errorMessage)}</p>`:'';
+  const draftStatus=()=>`게시 v${state.catalog.version} · 초안 ${editorRevision} · ${editorDirty?'저장하지 않은 변경':'저장된 초안'} · ${state.validated_revision===editorRevision&&!editorDirty?'게시 전 확인 완료':'게시 전 확인 필요'}`;
   function treeHTML(data,ids) {return workUI.treeHTML(data,ids,{editing:true,selectedId:editorId,collapsed:editorCollapsed,expansionKey:JSON.stringify([route.site,route.system,'',data?.version || state?.catalog?.version])});}
   function setBusy(value=busy) {busy=value;designer?.querySelectorAll('button[data-mutation]').forEach(el=>{el.disabled=busy||el.dataset.unavailable==='true';});}
   function acceptServer(result) {
@@ -51,7 +52,7 @@ function createWorkDesigner({callbacks}) {
       for (const child of container.children) {hiddenWorkspace.push([child,child.hidden]);child.hidden=true;}
       designer=document.createElement('section');designer.id='ees-work-designer';designer.dataset.eesWork='';container.append(designer);workspaceTab();hideWorkspaceContent();
     }
-    designer.innerHTML=`<header class="ew-designer-toolbar"><div class="ew-designer-heading"><h1>업무 절차</h1><div class="ew-designer-status">게시 v${esc(state.catalog.version)} · 초안 ${esc(editorRevision)}${editorDirty?' · 저장하지 않은 변경':''} · ${state.validated_revision===editorRevision&&!editorDirty?'게시 전 확인 완료':'게시 전 확인 필요'}</div></div><div class="ew-actions">${button('초안 저장','save_draft','data-mutation')}${button('게시 전 확인','validate_draft','data-mutation')}${button('게시','publish','data-mutation class="ew-primary"')}</div></header>
+    designer.innerHTML=`<header class="ew-designer-toolbar"><div class="ew-designer-heading"><h1>업무 절차</h1><div class="ew-designer-status" role="status">${esc(draftStatus())}</div></div><div class="ew-actions">${button('초안 저장','save_draft','data-mutation')}${button('게시 전 확인','validate_draft','data-mutation')}${button('게시','publish','data-mutation class="ew-primary"')}</div></header>
       <p class="ew-designer-description ew-muted">업무 이름·안내·완료 조건을 중심으로 편집합니다. 초안 저장은 운영 중인 업무에 영향을 주지 않으며, 게시한 변경은 새 진행 건부터 적용됩니다.</p>${alertHTML()}
       <nav class="ew-editor-tabs" aria-label="업무 절차 설정">${[['workflow','업무 절차'],['tools','도구'],['skills','스킬'],['sites','공장 조건']].map(([id,label])=>button(label,'editor_tab',`data-tab="${id}" aria-selected="${editorTab===id}"`)).join('')}</nav>${editorTab==='workflow'?workflowEditor():assetEditor()}`;
     setBusy();
@@ -74,7 +75,9 @@ function createWorkDesigner({callbacks}) {
     const form=$('#ees-work-node-form'); if (!form || !editor?.nodes[editorId])return;
     const values=new FormData(form), n=editor.nodes[editorId], before=JSON.stringify(n), oldParent=n.parent, oldCategory=n.category;
     for(const key of ['name','description','condition','mode','rule','instructions']) if(values.has(key))n[key]=String(values.get(key));
-    n.enabled=values.has('enabled');n.systems=values.getAll('systems');n.deps=values.getAll('deps');n.skills=values.getAll('skills');n.bindings=n.bindings||{};
+    n.enabled=values.has('enabled');n.systems=values.getAll('systems');n.deps=values.getAll('deps');
+    // Disabled common-policy controls are omitted from FormData.
+    n.skills=Array.from(new Set([...(n.skills || []).filter(id=>id==='common'),...values.getAll('skills')]));n.bindings=n.bindings||{};
     for(const id of n.tools||[])n.bindings[id]=String(values.get('binding:'+id)||'site');
     if(n.type==='p') {
       n.category=String(values.get('category'));
@@ -97,7 +100,7 @@ function createWorkDesigner({callbacks}) {
       if(JSON.stringify(asset)!==before)editorDirty=true;
     });
   }
-  function captureEditor(){captureNode();captureAssets();}
+  function captureEditor(){captureNode();captureAssets();const status=$('#ees-work-designer .ew-designer-status');if(status)status.textContent=draftStatus();}
   function localEdit(actionName,target) {
     captureEditor();const n=editor.nodes[editorId];
     if(actionName==='edit_node')editorId=target.dataset.nodeId;
@@ -126,17 +129,24 @@ function createWorkDesigner({callbacks}) {
   }
 
   function readDraft() {captureEditor();return {definition:editor?clone(editor):null,revision:editorRevision,dirty:editorDirty};}
-  function markSaved() {editorDirty=false;}
+  function markSaved(submitted,revision) {
+    captureEditor();
+    editorDirty=JSON.stringify(editor)!==JSON.stringify(submitted);
+    // An acknowledged own save advances the base even if typing continued.
+    // Unrelated refreshes still retain the old base for conflict detection.
+    if(Number.isSafeInteger(revision))editorRevision=revision;
+  }
   function render(value) {if(value)readSnapshot(value);renderDesigner();}
   function prepare(value) {readSnapshot(value);workspaceTab();}
   function sync(value) {prepare(value);if(adminRoute()&&state){if(!designer?.isConnected)renderDesigner();else hideWorkspaceContent();}}
   function handleEvent(event) {
     const target=event.target;if(!target.closest?.('#ees-work-designer'))return {handled:false,preventDefault:false};
     const handled=preventDefault=>({handled:true,preventDefault:Boolean(preventDefault)});
-    if(event.type==='input'){editorDirty=true;return handled();}
+    if(event.type==='input'){captureEditor();return handled();}
     if(event.type==='change'){
       const form=target.closest('.ew-asset-form');
       if(form&&target.name==='reference'){const item=(state.catalog['available_'+form.dataset.kind]||[]).find(item=>item.id===target.value),name=form.querySelector('[name=name]');if(item&&['기존 도구','새 스킬'].includes(name.value))name.value=item.name;}
+      captureEditor();
       return handled();
     }
     if(event.type==='submit'){if(target.id==='ees-work-node-form'||target.classList.contains('ew-asset-form')){captureEditor();renderDesigner();return handled(true);}return handled(false);}

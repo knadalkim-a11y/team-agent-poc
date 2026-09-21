@@ -147,7 +147,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
     def text(self, selector):
         return self.read(selector, "innerText") or ""
 
-    def click(self, selector, confirm=False):
+    def click(self, selector, confirm=None):
         point = self.browser.evaluate("(() => {const e=[...document.querySelectorAll("
             + json.dumps(selector) + ")].find(e=>e.getClientRects().length);if(!e)return null;"
             + "e.scrollIntoView({block:'center',inline:'nearest'});const r=e.getBoundingClientRect();"
@@ -159,7 +159,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         for event_type in ("mousePressed", "mouseReleased"):
             params = {"type": event_type, "x": point["x"], "y": point["y"],
                 "button": "left", "buttons": 1 if event_type == "mousePressed" else 0, "clickCount": 1}
-            if confirm and event_type == "mouseReleased":
+            if confirm is not None and event_type == "mouseReleased":
                 # Chrome holds the input reply while a native confirm is open.
                 # Handle its real dialog event, without replacing window.confirm.
                 self.browser.counter += 1
@@ -171,7 +171,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     event = self.browser.receive(deadline)
                     self.browser.events.append(event)
                     if event.get("method") == "Page.javascriptDialogOpening":
-                        self.browser.call("Page.handleJavaScriptDialog", {"accept": True})
+                        self.browser.call("Page.handleJavaScriptDialog", {"accept": confirm})
                         break
             else:
                 self.browser.call("Input.dispatchMouseEvent", params)
@@ -285,8 +285,10 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
 
     def run_job(self, node_id, status="passed"):
         self.choose(node_id)
-        before = self.current()["case"]["revision"]
-        self.click("#ees-work-run")
+        case = self.current()["case"]
+        before = case["revision"]
+        human = case["definition"]["nodes"][node_id]["mode"] in ("manual", "draft")
+        self.click("#ees-work-run", confirm=True if human else None)
         self.wait("!document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
         result = self.current()["case"]
         self.assertGreater(result["revision"], before)
@@ -367,7 +369,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(self.text("#ees-work-content h2"), nodes["scope-j"]["name"])
         # An action response also passes through accept(); it must update the
         # result without reopening the ancestor the user deliberately closed.
-        self.click("#ees-work-run")
+        self.click("#ees-work-run", confirm=True)
         self.wait("!document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
         self.assertEqual(self.current()["case"]["jobs"]["scope-j"]["status"], "passed")
         self.assertNotIn("scope-j", visible_ids())
@@ -578,6 +580,16 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(self.current()["case"]["id"], case_id)
         self.assertEqual(self.current()["case"]["jobs"]["db-j"]["status"], "passed")
 
+    def test_cancelled_human_confirmation_keeps_saved_state(self):
+        self.create_case()
+        self.choose('scope-j')
+        before = self.current()['case']
+        self.click('#ees-work-run', confirm=False)
+        self.assertEqual(self.current()['case'], before)
+        self.assertIn('담당자의 확인이 필요합니다.', self.text('#ees-work-content'))
+        self.run_job('scope-j')
+        self.assertIn('담당자 확인이 완료됐습니다.', self.text('#ees-work-content'))
+
     def test_existing_workspace_editor_publication_and_user_denial(self):
         self.create_case()
         original_version = self.current()["case"]["version"]
@@ -596,8 +608,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.click('#ees-work-designer [data-action="edit_node"][data-node-id="db-j"]')
         writes_before = self.server.requests.count(("POST", "/api/ees-work/action"))
         self.fill('#ees-work-node-form input[name="name"]', "DB 연결 확인 개정")
-        self.click('#ees-work-node-form button[type="submit"]')
-        # Applying the form changes only the local editor draft. The designer
+        # Typing changes only the local editor draft, without a form submit. The designer
         # may detach during ordinary SPA navigation, but must retain that draft
         # and its dirty state until the explicit server save.
         for route in ("models", "knowledge"):
@@ -821,7 +832,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.server.delay_next_action = True
         self.server.action_response_hold.clear()
         before = self.browser.evaluate("performance.getEntriesByType('resource').filter(e=>e.name.endsWith('/api/ees-work/action')).length")
-        self.click("#ees-work-run")
+        self.click("#ees-work-run", confirm=True)
         self.assertTrue(self.server.action_response_started.wait(timeout=2))
         self.click('a[href="/c/other-chat"]')
         self.wait("location.pathname === '/c/other-chat' && !document.querySelector('#ees-work-context')"
@@ -849,7 +860,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.server.delay_next_action = True
         self.server.action_response_hold.clear()
         before = self.browser.evaluate("performance.getEntriesByType('resource').filter(e=>e.name.endsWith('/api/ees-work/action')).length")
-        self.click("#ees-work-run")
+        self.click("#ees-work-run", confirm=True)
         self.assertTrue(self.server.action_response_started.wait(timeout=2))
         original_url = self.browser.evaluate("location.pathname+location.search")
         # This fixed display RPC is the same one available to the registered

@@ -195,6 +195,22 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("AI의 자료 정리만으로 완료 처리하지 않습니다.", pending.text)
         self.assertFalse(manual.find("textarea"), "Manual confirmation has no persisted free-form note contract.")
 
+    async def test_completed_task_has_one_next_action_to_process_without_mutation(self):
+        case = await self.ready(await self.create())
+        for node_id in ("db-j", "ap-j", "ap-j"):
+            case = await self.step(case, "run", node_id)
+        self.assertEqual(case["node_states"]["install-t"]["status"], "passed")
+        for read_only in (False, True):
+            html, _ = self.render(case, "install-t", readOnly=read_only)
+            primary = [button for button in html.find("button")
+                       if "ew-primary" in button.attrs.get("class", "").split()]
+            self.assertEqual(len(primary), 1)
+            self.assertEqual(primary[0].text, "전체 진행 보기")
+            self.assertEqual(primary[0].attrs["data-node-id"], "setup-p")
+            self.assert_no_mutation(html)
+        history, _ = self.render(case, "install-t", history=True)
+        self.assertFalse(history.find(**{"data-action": "select"}))
+
     async def test_preview_preserves_goals_and_criteria_without_fabricated_results(self):
         definition = (await self.service.get_state(self.alice))["catalog"]
         for node_id in ("setup-p", "install-t", "db-j"):
@@ -291,6 +307,8 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         case = await self.step(case, "run", "scope-j", {"confirm": True})
         html, _ = self.render(case, "scope-j")
         self.assertIn(old, self.section(html, "current-result").text)
+        self.assertIn("초안 검토가 완료됐습니다.", self.section(html, "current-result").text)
+        self.assertNotIn("검토가 필요", self.section(html, "current-result").text)
         case = await self.step(case, "run", "scope-j", {"document": new})
         html, _ = self.render(case, "scope-j")
         form = html.find("form", id="ees-work-document")[0]

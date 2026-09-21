@@ -521,6 +521,15 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
     with ZipFile(wheel) as source:
         replacements = prepare_replacements(source, asset_dir)
         additions = prepare_additions(source, ui_dir)
+        # Trial revisions can share a program version. Address each Work asset
+        # by its actual bytes without changing supported Restore namespaces.
+        index_name = "open_webui/frontend/index.html"
+        for filename in ("ees-work-launcher.css", "ees-work-panel.js", "ees-work-launcher.js"):
+            path = TARGET_APP + filename
+            url = ("/" + path.removeprefix("open_webui/frontend/")).encode("ascii")
+            digest = hashlib.sha256(additions[path]).hexdigest().encode("ascii")
+            replacements[index_name] = _one_replace(
+                replacements[index_name], url + b'"', url + b'?v=' + digest + b'"', index_name)
         entries = sorted(source.infolist(), key=lambda entry: target_name(entry.filename))
         output_dir.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix=".ees-build-", dir=output_dir) as temporary:

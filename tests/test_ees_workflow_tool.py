@@ -108,6 +108,16 @@ class WorkflowToolTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result['error']['code'], 'unsupported_action')
         self.backend.handle_action.assert_not_awaited()
 
+    async def test_ai_cannot_confirm_manual_or_draft_jobs_with_a_boolean(self):
+        for mode in ('manual', 'draft'):
+            with self.subTest(mode=mode):
+                self.case['definition']['nodes']['db-j']['mode'] = mode
+                result = await self.tool.ees_workflow_action('run', {'confirm': True},
+                    expected_revision=7, target=self.target, request_id='ai-confirm:1', **self.context)
+                self.assertFalse(result['ok'], 'Model-provided confirm is not a human UI action.')
+                self.assertEqual(result['error']['code'], 'human_confirmation_required')
+        self.backend.handle_action.assert_not_awaited()
+
     async def test_draft_is_explicit_and_admin_only(self):
         result = await self.tool.ees_workflow_view(True, **self.context)
         self.assertEqual(result['error']['code'], 'admin_required')
@@ -349,6 +359,18 @@ class WorkflowToolIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.choose_case(result['case'])
         return result['case']
 
+    async def confirm_in_panel(self, case, node_id):
+        """Synthetic authenticated UI action, never an AI confirmation."""
+        return await self.service.handle_action(self.user, {
+            'action': 'run', 'case_id': case['id'], 'node_id': node_id,
+            'chat_id': 'chat-a', 'expected_revision': case['revision'],
+            'payload': {'confirm': True}})
+
+    async def automatic_first_job(self):
+        definition = workflow._seed()
+        definition['nodes']['scope-j'].update(mode='tool', tools=['infra'], bindings={'infra': 'site'})
+        await self.publish(definition)
+
     async def act(self, case, action, node_id, payload=None):
         target = self.choose_case(case, node_id)
         self.action_number += 1
@@ -429,7 +451,8 @@ class WorkflowToolIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(wrong_node['error']['code'], 'selection_changed')
         self.assertEqual(self.stored_rows(), stored)
 
-    async def test_first_run_notification_failure_and_replay_do_not_duplicate_confirmation(self):
+    async def test_first_run_notification_failure_and_replay_do_not_duplicate_result(self):
+        await self.automatic_first_job()
         target = await self.choose_published('scope-j')
 
         async def lose_notification(event):
@@ -438,17 +461,17 @@ class WorkflowToolIntegrationTests(unittest.IsolatedAsyncioTestCase):
             raise RuntimeError('synthetic disconnected browser')
 
         self.events.side_effect = lose_notification
-        first = await self.tool.ees_workflow_action('run', {'confirm': True},
+        first = await self.tool.ees_workflow_action('run', {},
             target=target, request_id='first-confirm:1', **self.context)
         self.assertTrue(first['ok'], first)
         self.assertEqual(first['panel_notification']['code'], 'browser_unconfirmed')
         case = first['case']
         self.assertEqual(case['jobs']['scope-j']['attempt'], 1)
-        self.assertEqual(case['jobs']['scope-j']['history'][0]['kind'], 'human_confirmation')
+        self.assertEqual(case['jobs']['scope-j']['history'][0]['kind'], 'simulation')
         stored = self.stored_rows()
         self.events.side_effect = self.browser_event
         self.choose_case(case, 'scope-j')
-        replay = await self.tool.ees_workflow_action('run', {'confirm': True},
+        replay = await self.tool.ees_workflow_action('run', {},
             target=target, request_id='first-confirm:1', **self.context)
         self.assertTrue(replay['ok'], replay)
         self.assertEqual(replay['case']['jobs']['scope-j']['attempt'], 1)
@@ -475,15 +498,40 @@ class WorkflowToolIntegrationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(retry['case']['id'], case['id'])
         self.assertEqual(self.stored_rows(), before)
 
+    async def test_ai_confirmation_cannot_create_or_complete_work_and_draft_save_still_works(self):
+        target = await self.choose_published('scope-j')
+        before = self.stored_rows()
+        denied = await self.tool.ees_workflow_action('run', {'confirm': True},
+            target=target, request_id='no-human:1', **self.context)
+        self.assertEqual(denied['error']['code'], 'human_confirmation_required')
+        self.assertEqual(self.stored_rows(), before, 'No case or receipt may be created for AI confirmation.')
+        definition = workflow._seed()
+        definition['nodes']['scope-j']['mode'] = 'draft'
+        await self.publish(definition)
+        target = await self.choose_published('scope-j')
+        saved = await self.tool.ees_workflow_action('run', {'document': '검토 전 자료'},
+            target=target, request_id='draft-only:1', **self.context)
+        self.assertTrue(saved['ok'], saved)
+        case = saved['case']
+        self.assertEqual(case['jobs']['scope-j']['status'], 'review')
+        before = self.stored_rows()
+        denied = await self.act(case, 'run', 'scope-j', {'confirm': True})
+        self.assertEqual(denied['error']['code'], 'human_confirmation_required')
+        self.assertEqual(self.stored_rows(), before)
+        confirmed = await self.confirm_in_panel(case, 'scope-j')
+        self.assertTrue(confirmed['ok'], confirmed)
+        self.assertEqual(confirmed['case']['jobs']['scope-j']['history'][0]['document'], '검토 전 자료')
+
     async def test_existing_case_replay_keeps_original_revision_without_rerunning(self):
+        await self.automatic_first_job()
         case = await self.create()
         target = self.choose_case(case, 'scope-j')
-        result = await self.tool.ees_workflow_action('run', {'confirm': True}, expected_revision=case['revision'],
+        result = await self.tool.ees_workflow_action('run', {}, expected_revision=case['revision'],
             target=target, request_id='existing-confirm:1', **self.context)
         self.assertTrue(result['ok'], result)
         self.choose_case(result['case'], 'scope-j')
         stored = self.stored_rows()
-        replay = await self.tool.ees_workflow_action('run', {'confirm': True}, expected_revision=case['revision'],
+        replay = await self.tool.ees_workflow_action('run', {}, expected_revision=case['revision'],
             target=target, request_id='existing-confirm:1', **self.context)
         self.assertTrue(replay['ok'], replay)
         self.assertEqual(replay['case']['jobs']['scope-j']['attempt'], 1)
@@ -553,7 +601,8 @@ class WorkflowToolIntegrationTests(unittest.IsolatedAsyncioTestCase):
         case = await self.create()
         for node_id, payload in (('scope-j', {'confirm': True}), ('infra-j', {}), ('install-j', {'confirm': True}),
                                  ('db-j', {}), ('ap-j', {}), ('ap-j', {})):
-            result = await self.act(case, 'run', node_id, payload)
+            result = (await self.confirm_in_panel(case, node_id) if payload.get('confirm') is True
+                      else await self.act(case, 'run', node_id, payload))
             self.assertTrue(result['ok'], result)
             case = result['case']
         target = self.choose_case(case, 'interface-j')
@@ -579,7 +628,8 @@ class WorkflowToolIntegrationTests(unittest.IsolatedAsyncioTestCase):
         case = await self.create()
         for node_id, payload in (('scope-j', {'confirm': True}), ('infra-j', {}), ('install-j', {'confirm': True}),
                                  ('ap-j', {})):
-            result = await self.act(case, 'run', node_id, payload)
+            result = (await self.confirm_in_panel(case, node_id) if payload.get('confirm') is True
+                      else await self.act(case, 'run', node_id, payload))
             self.assertTrue(result['ok'], result)
             case = result['case']
         self.assertEqual(case['jobs']['ap-j']['status'], 'failed')
@@ -715,7 +765,8 @@ class WorkflowToolIntegrationTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(self.events.await_count, 1)  # Selection read; no success notification.
         for node, payload in (('scope-j', {'confirm': True}), ('infra-j', {}),
                               ('install-j', {'confirm': True})):
-            result = await self.act(case, 'run', node, payload)
+            result = (await self.confirm_in_panel(case, node) if payload.get('confirm') is True
+                      else await self.act(case, 'run', node, payload))
             self.assertTrue(result['ok'], result)
             case = result['case']
         self.assertEqual(case['jobs']['scope-j']['history'][0]['kind'], 'human_confirmation')

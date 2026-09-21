@@ -96,7 +96,7 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
     const progress='<div class="ew-work-progress" data-work-section="progress"><div><span>'+unit+' 진행</span><strong data-work-done="'+count.done+'" data-work-total="'+count.total+'">'+(preview?'시작 전 · ':'')+count.done+' / '+count.total+' 완료</strong></div>'+(!preview&&count.total?'<progress aria-label="'+unit+' 완료 수" value="'+count.done+'" max="'+count.total+'"></progress>':'')+(count.excluded?'<p class="ew-muted">적용 제외 '+count.excluded+'개</p>':'')+(!count.total?'<p class="ew-muted">'+(children.length?'이 범위는 적용 제외입니다.':'등록된 하위 업무가 없습니다.')+'</p>':'')+'</div>';
     const rows=children.map(child=>{
       const childState=c?.node_states?.[child.id] || {},childStatus=nodeState(child);
-      const detail=child.type==='j'?(childStatus==='passed'?(child.mode==='manual'?'담당자 확인 완료':unavailable(child)?'실행 연결 필요':'최근 결과 유효'):reasonFor(child)):descendants(child).some(j=>nodeState(j)==='failed')?'실패한 점검 확인 필요':childStatus==='blocked'?'진행 조건 확인 필요':'';
+      const detail=child.type==='j'?(childStatus==='passed'?(['manual','draft'].includes(child.mode)?'담당자 확인 완료':unavailable(child)?'실행 연결 필요':'최근 결과 유효'):reasonFor(child)):descendants(child).some(j=>nodeState(j)==='failed')?'실패한 점검 확인 필요':childStatus==='blocked'?'진행 조건 확인 필요':'';
       const jobCount=childState.progress || {done:0,total:descendants(child).filter(applies).length};
       const link=history?'<details class="ew-history-node"><summary>'+esc(child.name)+'</summary>'+workPanelNodeHTML(c,child,{definition,readOnly:true,history:true})+'</details>':selectButton(child);
       if(history)return '<tr><td colspan="3">'+link+'</td></tr>';
@@ -110,6 +110,9 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
       else if(ready.length){primary=runButton('계속 진행',previewBlocked);nextText='선행 조건을 충족하는 모의 점검을 진행합니다. 사람 확인은 별도로 남습니다.';}
       else{primary=direct?selectButton(direct,'다음 업무 열기',true):'';nextText=reasonFor(next);}
     }else if(locked)nextText=count.total?'완료 결과와 근거를 확인할 수 있습니다.':'적용 대상 업무가 없습니다.';
+    if(!history&&parent&&nodeState(n)==='passed'){
+      primary=selectButton(parent,'전체 진행 보기',true);nextText='이 업무를 마쳤습니다. 전체 진행에서 다음 업무를 확인하세요.';
+    }
     const execution=!locked&&remaining.length?'<details class="ew-work-execution" data-work-section="execution-scope"><summary>진행 범위 자세히</summary><p>모의 점검 <span data-work-count="simulation">'+counts.simulation+'</span>개 · 사람 확인/검토 <span data-work-count="human">'+counts.human+'</span>개 · 실행 연결 필요 <span data-work-count="unavailable">'+counts.unavailable+'</span>개</p><p class="ew-muted">적용 대상 미완료 업무의 구성입니다. 이번 실행 예정 수가 아닙니다. 실행 시 입력·권한·연결을 다시 확인하며 사람 확인의 후속은 대기합니다. 독립적인 다른 점검은 진행할 수 있습니다.</p></details>':'';
     return header+(n.description?'<p class="ew-work-goal">'+esc(n.description)+'</p>':'')+(preview?previewActions:'')+progress+(n.type==='t'?criterion+depsHTML:'')+table+(n.type==='p'?criterion:'')+guidanceHTML+execution+(nextText?'<div class="ew-work-next"><span>다음 할 일</span><p>'+esc(nextText)+'</p></div>':'')+(primary?'<div class="ew-work-actions">'+primary+'</div>':'');
   }
@@ -121,7 +124,7 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
   const latest=!preview&&applies(n)&&!['pending','review'].includes(job.status)&&last&&last.status===job.status&&last.attempt===job.attempt&&(n.mode!=='tool'||checks.length)?last:null;
   const previous=latest?records.slice(0,-1):records;
   const failure=latest?.checks?.find(check=>['failed','blocked'].includes(check.status));
-  const currentText=!applies(n)?'이 업무는 현재 범위에서 적용 제외입니다.':preview?'아직 시작하지 않은 업무입니다.':latest&&n.mode==='manual'?'담당자 확인이 완료됐습니다.':unavailable(n)?'실행 연결이 필요합니다.':nodeState(n)==='failed'?'점검 결과를 확인해 주세요.':nodeState(n)==='blocked'?reasonFor(n):n.mode==='manual'?'담당자의 확인이 필요합니다.':n.mode==='draft'?'초안 검토가 필요합니다.':latest?(failure?.detail || failure?.message || latest.detail || '점검 결과가 저장되었습니다.'):records.length?'현재 조건의 유효한 결과가 없습니다. 재점검이 필요합니다.':'아직 수행한 결과가 없습니다.';
+  const currentText=!applies(n)?'이 업무는 현재 범위에서 적용 제외입니다.':preview?'아직 시작하지 않은 업무입니다.':latest&&nodeState(n)==='passed'&&['manual','draft'].includes(n.mode)?(n.mode==='draft'?'초안 검토가 완료됐습니다.':'담당자 확인이 완료됐습니다.'):unavailable(n)?'실행 연결이 필요합니다.':nodeState(n)==='failed'?'점검 결과를 확인해 주세요.':nodeState(n)==='blocked'?reasonFor(n):n.mode==='manual'?'담당자의 확인이 필요합니다.':n.mode==='draft'?'초안 검토가 필요합니다.':latest?(failure?.detail || failure?.message || latest.detail || '점검 결과가 저장되었습니다.'):records.length?'현재 조건의 유효한 결과가 없습니다. 재점검이 필요합니다.':'아직 수행한 결과가 없습니다.';
   const currentMeta=!applies(n)?'현재 공장·시스템 조건에서는 실행 대상이 아닙니다.':preview?'업무를 이해한 뒤 필요한 입력이나 확인을 진행하세요.':latest?esc((latest.at || latest.completed_at || '실행 시각 미기록')+' · '+recordKind(latest)):unavailable(n)?'실행 연결 전에는 수행된 것으로 기록하지 않습니다.':n.mode==='manual'?'아직 확인 완료 기록이 없습니다.':n.mode==='draft'?(job.document?'저장된 초안을 직접 검토해 주세요.':'검토할 초안이 아직 없습니다.'):(records.length?'이전 결과는 실행 이력에 보존됩니다.':'미수행');
   const result='<section class="ew-work-result" data-work-section="current-result"><h3>현재 상태</h3><p class="ew-work-current-title">'+esc(currentText)+'</p><p class="ew-muted">'+currentMeta+'</p>'+(latest?'<details class="ew-work-detail"><summary>근거 보기'+(failure?' · 확인 필요':'')+'</summary>'+recordHTML(latest)+'</details>':'')+'</section>';
   const inputs={...valuesFor(n),...(draft?.inputs || {})},fields=fieldsFor(n),document=draft?.document ?? job.document ?? '';

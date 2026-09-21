@@ -108,7 +108,8 @@
     busy = true; errorMessage = ''; setBusy();
     const at = generation, scopeEpoch=navigationRequest, active=selectedCase(), cid = active?.id || '', auth = token(), route = location.pathname + location.search;
     const isAdmin = ['save_draft','validate_draft','publish'].includes(actionName);
-    const body = {action:actionName,chat_id:chatId(),case_id:cid,node_id:nodeId,payload,expected_revision:isAdmin ? designer.readDraft().revision : (active?.revision || 0),...override};
+    const submittedDraft=isAdmin?designer.readDraft():null;
+    const body = {action:actionName,chat_id:chatId(),case_id:cid,node_id:nodeId,payload,expected_revision:isAdmin ? submittedDraft.revision : (active?.revision || 0),...override};
     const firstWrite=['update_inputs','run'].includes(actionName)&&!body.case_id;
     if(firstWrite)body.scope={site_id:browsingSite,system:browsingSystem,process_id:processId(),version:previewVersion || state.catalog.version};
     if(['create','update_inputs','run'].includes(actionName)){
@@ -120,7 +121,7 @@
     try {
       const result = await api('action', body);
       if (at !== generation || scopeEpoch !== navigationRequest || auth !== token() || route !== location.pathname + location.search || !available()) return null;
-      if (isAdmin && actionName !== 'validate_draft') designer.markSaved();
+      if (isAdmin && actionName !== 'validate_draft') designer.markSaved(submittedDraft.definition,result.draft_revision);
       if ((actionName === 'create'||firstWrite) && !result.case?.chat_id) pendingId = result.case?.id || '';
       if(firstWrite&&result.case)view.adoptPreviewDraft(result.case.id,nodeId);
       accept(result); return result;
@@ -288,6 +289,7 @@
       if(!canWriteEdits(id))return;
       const edits=view.readJobEdits(id);
       if(edits.inputsChanged||edits.documentChanged){errorMessage='작성한 입력이나 초안을 먼저 반영한 뒤 진행해 주세요.';renderPanel();return;}
+      if(['manual','draft'].includes(n.mode)&&!confirm(`${n.name || '선택한 업무'}\n${n.rule || '등록된 완료 조건을 직접 확인해 주세요.'}\n\n직접 확인한 내용으로 완료를 기록할까요?`))return;
     }
     await action('run',n.type!=='j'?{retry_failed:false}:n.mode==='manual'||n.mode==='draft'?{confirm:true}:{},id);
   }
