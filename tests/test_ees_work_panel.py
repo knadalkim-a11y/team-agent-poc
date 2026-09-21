@@ -379,9 +379,10 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         primary = process.find("button", **{"data-action": "select", "data-node-id": "install-t"})
         self.assertTrue(any(item.text == "문제 확인" for item in primary))
         self.assertTrue(any(item.text == "문제 확인" for item in task.find("button", **{"data-node-id": "ap-j"})))
-        # Failed AP needs deliberate retry; independent DB remains available.
-        self.assertEqual(self.run_button(process, "setup-p").text, "가능한 점검 진행")
-        self.assertEqual(self.run_button(task, "install-t").text, "가능한 점검 진행")
+        # Failed AP gets one primary next action. Independent DB remains available
+        # by opening its work row; the parent panel does not present a second action.
+        self.assertFalse(process.find("button", **{"data-action": "run"}))
+        self.assertFalse(task.find("button", **{"data-action": "run"}))
         self.assertFalse(process.find("button", **{"data-node-id": "ap-j"}))
         hu = await self.ready(await self.create(site_id="hu-a", system="FDC"))
         process, _ = self.render(hu, "setup-p")
@@ -423,6 +424,8 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         excluded, _ = self.render(None, "interface-j", definition=definition,
                                   site=definition["sites"]["hu-a"], system="FDC")
         self.assertIn("적용 제외", excluded.text)
+        self.assertIn("이 업무는 현재 범위에서 적용 제외입니다.", excluded.text)
+        self.assertIn("현재 공장·시스템 조건에서는 실행 대상이 아닙니다.", excluded.text)
         self.assertFalse(excluded.find("form"))
         self.assertFalse(excluded.find("button", **{"data-action": "run"}))
 
