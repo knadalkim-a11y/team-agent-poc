@@ -6,11 +6,11 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** PR #57 병합 main `8d294bca8d4a36f157ebfbd651f3b2e023d3fba5`에서 `feat/ees-work-integrated-beta-20260921` 후속 통합 UX 베타 구현·로컬 검증을 완료했다. Figma 223:131/241:416 기준의 워크플로우·단계 관리, 대량 작업 검색/필터, 입력/실행/확인 구분, Workspace 구성/AI 수정/저장/게시, 기존 도구·개인 설정 진입을 보완한다. PR #53과 과거 검토안은 구현 원본으로 쓰지 않는다.
+- **현재 작업:** PR #57 병합 main `8d294bca8d4a36f157ebfbd651f3b2e023d3fba5`에서 후속 통합 UX 베타 구현·로컬 검증을 완료했다. [PR #58](https://github.com/knadalkim-a11y/team-agent-poc/pull/58)의 병합은 09-21 사용자 “병합까지해줘” 요청으로 승인되었다. Figma 223:131/241:416 기준의 워크플로우·단계 관리, 대량 작업 검색/필터, 입력/실행/확인 구분, Workspace 구성/AI 수정/저장/게시, 기존 도구·개인 설정 진입을 보완했다. PR #53과 과거 검토안은 구현 원본으로 쓰지 않는다.
 - **현재 지원 경계:** 사용자 소유 진행 건과 기존 게시 snapshot·이력·Native 대화/도구/스킬을 유지한다. 외부 Tool 직접 실행·다중 DB/AP 대상 계약은 미지원이며 “실행 연결 필요”로 표시한다. 일정 엔진·설정 상속·공유 권한 확대·새 인증 저장소는 추가하지 않는다. 프로그램 `0.11.3+ees.10`·Pack `0.2.12`를 유지하고 내용 해시로 변경 자산 캐시를 구분한다.
 - **검증·배포 원본:** 새 원본 전체 1,081 PASS/0 FAIL/16 SKIP(Windows/PowerShell 15·이전 wheel 1), 실제 Native 24개·theme 2개 PASS. 변경 범위 strict 인코딩 검사와 Node 묶음·문서·diff 검사도 실행했다. Figma 지정 화면과 관련 창 25개의 design context/screenshot을 대조했다. 관련 검사·최초 실패·Figma 범위는 [통합 베타 평가 기록](../evals/scenarios.md#integrated-work-beta-20260921)에 기록한다. 기존 단일 `.venv`와 시험 브라우저를 재사용하며 과거 PR #57의 PASS를 이번 결과로 재사용하지 않는다.
 - **최근 적용:** 사용자 보고상 main `1ddf2dba9e46c63bc20309387efa37e858970dbc` 적용 정상, `status result=ok / program=customized / running=true`. 이후 PR #57은 Git 병합 완료지만 그 원본의 사내 적용 보고는 없다. 이번 통합 UX는 사내 미설치·미배포다.
-- **다음 작업 하나:** 후속 PR과 검증한 후보 묶음을 검토한 뒤 이번 변경의 병합·제한 베타 적용 승인을 확인한다. 승인 후 최종 main 원본/해시를 확정하고 [기존 Upgrade TrialCommit 적용·Restore 안내](03-openwebui-native-agent.md#ees-integrated-beta-20260921)를 사용한다. 과거 #57 승인을 후속 변경에 확대하지 않는다. 실제 Windows·사내 Open WebUI/LLM·테스터 수락은 미확인이다.
+- **다음 작업 하나:** 승인된 PR #58 병합 후 확정한 main 원본과 배포물 해시로 사내 제한 베타 적용·UI/UX 확인을 준비한다. 확정 SHA·묶음 해시는 PR #58에 기록하고 [기존 Upgrade TrialCommit 적용·Restore 안내](03-openwebui-native-agent.md#ees-integrated-beta-20260921)를 사용한다. 이번 승인은 Git 병합까지이며 사내 설치·기동·화면 확인의 완료를 뜻하지 않는다. 실제 Windows·사내 Open WebUI/LLM·테스터 수락은 미확인이다.
 
 ## 2026년 9월 개발·검사 방침
 
@@ -78,4 +78,4 @@
 
 ## 최근 점검
 
-2026-09-21 Work: 최신 main·열린 PR·로컬 변경과 해당 AGENTS/STATUS를 확인하고 통합 Figma의 design context/screenshot을 실제 대조했다. Runtime/Workspace/연결 계약을 나누어 최소 변경 설계를 검토했으며, 미연결 실행의 모의 결과 오표시·접근 불가 Skill 안내·기존 Tool adapter 오표시를 재현하고 수정했다. 전체 1,081 PASS·16 SKIP과 Native/theme 26개 PASS를 확인했다. 새 검증 결과는 [명령·실패·미실행 경계](../evals/scenarios.md#integrated-work-beta-20260921)에 누적한다. 별도 서버·DB·프레임워크나 회사 PC 환경 변경은 없다.
+2026-09-21 Work: PR #58 병합 승인 후 최신 main·열린 PR·로컬 변경과 해당 AGENTS/STATUS를 다시 확인했다. 검증한 구현 원본 `81fad6f720b843408ba4aaf04c397f9fe1b5f65b`은 그대로 유지하고 이번에는 승인 범위와 다음 적용 원본의 확인 경로만 정리한다. 구현 단계의 전체 1,081 PASS·16 SKIP, Native/theme 26개 PASS, 최초 실패와 Figma 대조 범위는 [기존 평가 기록](../evals/scenarios.md#integrated-work-beta-20260921)에 보존한다. 이번 병합 준비를 새 사내 검증 결과로 기록하지 않으며 별도 서버·DB·프레임워크나 회사 PC 환경 변경은 없다.
