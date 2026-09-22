@@ -357,7 +357,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                 .map(n=>n<=.04045?n/12.92:((n+.055)/1.055)**2.4)
                 .reduce((sum,n,i)=>sum+n*[.2126,.7152,.0722][i],0);
             const a=luminance(fg),b=luminance(bg);
-            return {color:s.color,background:s.backgroundColor,contrast:(Math.max(a,b)+.05)/(Math.min(a,b)+.05),
+            return {color:s.color,background:s.backgroundColor,backgroundRGB:bg,foregroundRGB:fg,
+                contrast:(Math.max(a,b)+.05)/(Math.min(a,b)+.05),
                 fontSize:parseFloat(s.fontSize),fontWeight:parseFloat(s.fontWeight),
                 x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,
                 outline:s.outlineStyle,outlineWidth:parseFloat(s.outlineWidth),outlineOffset:parseFloat(s.outlineOffset),
@@ -379,6 +380,68 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             destination.mkdir(parents=True, exist_ok=True)
             (destination / (name + ".json")).write_text(
                 json.dumps(values, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    def assert_preserved_styles(self, name, selectors):
+        """Compare real Native styles with an optional same-fixture before run.
+
+        Geometry is intentionally excluded: the sidebar may grow when a long
+        job wraps, but its scoped palette must not recolor other product areas.
+        """
+        # Native controls animate theme colors. Wait for their finite CSS
+        # transitions so before/after captures compare the applied end style.
+        self.browser.evaluate("""Promise.all(document.getAnimations()
+            .filter(a=>a.effect?.getTiming().iterations!==Infinity)
+            .map(a=>a.finished.catch(()=>{})))""")
+        values = self.browser.evaluate("""(selectors=>Object.fromEntries(
+            Object.entries(selectors).map(([name,selector])=>{
+                const e=document.querySelector(selector);if(!e)return [name,null];
+                const s=getComputedStyle(e),properties=['color','backgroundColor','borderTopColor',
+                    'borderTopWidth','borderRadius','fontFamily','fontSize','fontWeight','lineHeight',
+                    'paddingTop','paddingRight','paddingBottom','paddingLeft','boxShadow'];
+                return [name,Object.fromEntries(properties.map(key=>[key,s[key]]))];
+            })))""" + "(" + json.dumps(selectors) + ")")
+        self.assertTrue(all(value is not None for value in values.values()), values)
+        self.save_visual_measurements(name, values)
+        baseline = os.environ.get("EES_TEST_STYLE_BASELINE_DIR")
+        if baseline:
+            expected = json.loads((Path(baseline) / (name + ".json")).read_text(encoding="utf-8"))
+            self.assertEqual(values, expected, "Sidebar styling changed an unrelated product area: " + name)
+
+    def test_sidebar_scoped_styles_preserve_right_workspace_and_native_controls(self):
+        self.seed_case("existing-chat")
+        self.navigate("/c/existing-chat")
+        self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
+        for width, height in ((1920, 1080), (900, 900)):
+            for theme in ("light", "dark"):
+                self.browser.call("Emulation.setDeviceMetricsOverride", {
+                    "width": width, "height": height, "deviceScaleFactor": 1, "mobile": False})
+                self.browser.evaluate("document.documentElement.classList.toggle('dark'," + str(theme == "dark").lower() + ")")
+                for kind, node in (("p", "setup-p"), ("t", "install-t"), ("j", "db-j")):
+                    self.choose(node)
+                    self.hover()
+                    selectors = {"panel": "#ees-work-panel", "title": "#ees-work-content h2",
+                                 "site": "#ees-work-site-trigger", "system": "#ees-work-system-trigger",
+                                 "nativeModel": "#model-selector-model-button", "chat": "#chat-input"}
+                    if kind == "j":
+                        selectors.update(run="#ees-work-run", save="#ees-work-inputs-save",
+                                         input='#ees-work-inputs input[name="db"]')
+                    self.assert_preserved_styles("unaffected-" + kind + "-" + theme + "-" + str(width), selectors)
+                    self.screenshot("sidebar-comparison-" + kind + "-" + theme + "-" + str(width))
+        self.navigate('/workspace/models?ees=workflow')
+        self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
+        self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
+        for width, height in ((1920, 1080), (600, 900)):
+            for theme in ("light", "dark"):
+                self.browser.call("Emulation.setDeviceMetricsOverride", {
+                    "width": width, "height": height, "deviceScaleFactor": 1, "mobile": False})
+                self.browser.evaluate("document.documentElement.classList.toggle('dark'," + str(theme == "dark").lower() + ")")
+                self.hover()
+                self.assert_preserved_styles("unaffected-workspace-" + theme + "-" + str(width), {
+                    "editorTitle": "#ees-work-node-form h2", "aiTitle": "#ees-work-authoring h2",
+                    "selected": '#ees-work-designer [data-action=edit_node][aria-current=step]',
+                    "input": "#ees-work-node-form input[name=name]", "aiInput": "#ees-work-authoring-input",
+                    "apply": "#ees-work-node-form > button[type=submit]", "model": "#ees-work-authoring-model"})
+                self.screenshot("sidebar-comparison-workspace-" + theme + "-" + str(width))
 
     def seed_large_case(self):
         """Publish synthetic volume through the same save/validate/create service.
@@ -998,10 +1061,21 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     self.wait("document.querySelector('#ees-work-content h2')?.textContent === '대량 작업 검증'")
                     self.hover()
                     selection_styles["p"] = self.visual_style('.ew-workflow-summary > button')
+                    if theme == "light":
+                        self.assertEqual(selection_styles["p"]["background"], "rgb(220, 235, 247)")
+                        self.assertEqual(selection_styles["p"]["color"], "rgb(55, 101, 139)")
                     self.assertEqual(self.browser.evaluate(
                         "document.querySelectorAll('#ees-work-entry button[aria-current=step]').length"), 1)
                     self.assertGreaterEqual(self.visual_style('.ew-workflow-summary .ew-step-meta')["contrast"], 4.5)
                     self.screenshot("ees-hierarchy-p-" + theme + "-" + str(width))
+                    self.hover('.ew-workflow-summary > button')
+                    self.assertEqual(self.visual_style('.ew-workflow-summary > button')["background"],
+                                     selection_styles["p"]["background"])
+                    self.hover('.ew-step-button')
+                    self.assertNotEqual(self.visual_style('.ew-step-button')["backgroundRGB"],
+                                        selection_styles["p"]["backgroundRGB"])
+                    self.assertEqual(self.visual_style('.ew-workflow-summary > button')["background"],
+                                     selection_styles["p"]["background"])
                     self.choose("bulk-t")
                     self.browser.evaluate("document.querySelector('.ew-workflow-summary > button').focus()")
                     # CDP needs the Enter character to produce the browser's
@@ -1018,6 +1092,9 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     self.choose("bulk-t")
                     self.hover()
                     selection_styles["t"] = self.visual_style('.ew-step-button[aria-current=step]')
+                    stage = self.visual_style('.ew-step[data-expanded=true]')
+                    self.assertGreaterEqual(selection_styles["t"]["x"] - stage["x"], 8)
+                    self.assertGreaterEqual(stage["right"] - selection_styles["t"]["right"], 8)
                     self.assertEqual(self.browser.evaluate(
                         "document.querySelectorAll('#ees-work-entry button[aria-current=step]').length"), 1)
                     self.assertGreaterEqual(self.visual_style('.ew-step-button[aria-current=step] strong')["contrast"], 4.5)
@@ -1025,6 +1102,14 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     self.assertGreaterEqual(self.visual_style('.ew-step-button[aria-current=step] .ew-work-state')["contrast"], 4.5)
                     self.assertNotEqual(selection_styles["t"]["background"], self.visual_style('.ew-step-jobs')["background"])
                     self.screenshot("ees-hierarchy-t-" + theme + "-" + str(width))
+                    self.hover('.ew-step-button[aria-current=step]')
+                    self.assertEqual(self.visual_style('.ew-step-button[aria-current=step]')["background"],
+                                     selection_styles["t"]["background"])
+                    self.hover('.ew-workflow-summary > button')
+                    self.assertNotEqual(self.visual_style('.ew-workflow-summary > button')["backgroundRGB"],
+                                        selection_styles["t"]["backgroundRGB"])
+                    self.assertEqual(self.visual_style('.ew-step-button[aria-current=step]')["background"],
+                                     selection_styles["t"]["background"])
                     self.choose("bulk-052-j")
                     self.hover()
                     measured = self.browser.evaluate("""(()=>{
@@ -1040,6 +1125,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                         const boxes=['.ew-work-result','.ew-work-next','.ew-work-criterion'].map(selector=>{
                             const e=document.querySelector('#ees-work-panel '+selector);return e?getComputedStyle(e).borderTopWidth:null;});
                         return {blue:color(css.getPropertyValue('--ees-blue')), ewBlue:color(css.getPropertyValue('--ew-blue')),
+                            paper:color(css.getPropertyValue('--ees-paper')),
                             primary:b.backgroundColor,border:b.borderTopWidth,
                             tint:color(css.getPropertyValue('--ees-tint')),selected:s.backgroundColor,
                             stateSize:parseFloat(getComputedStyle(status).fontSize),
@@ -1051,17 +1137,23 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                             sidebarRight:document.querySelector('#ees-work-entry').getBoundingClientRect().right,
                             boxes,width:innerWidth,scroll:document.documentElement.scrollWidth};})()""")
                     self.assertEqual(measured["ewBlue"], measured["blue"])
+                    if theme == "light":
+                        self.assertEqual(measured["tint"], "rgb(238, 245, 250)")
+                        self.assertEqual(measured["paper"], "rgb(255, 255, 255)")
                     self.assertEqual(measured["primary"], measured["blue"])
                     self.assertNotEqual(measured["activeNumber"], measured["blue"],
                                         "Expanded parent number must not compete with the selected job")
                     self.assertTrue(measured["nextBeforeInput"])
                     self.assertAlmostEqual(measured["actionWidth"], measured["formWidth"], delta=1)
                     self.assertEqual(measured["border"], "0px")
-                    self.assertEqual(measured["selected"], measured["blue"])
-                    self.assertEqual({value["background"] for value in selection_styles.values()}, {measured["blue"]})
+                    self.assertEqual(measured["selected"], measured["tint"])
+                    self.assertEqual(selection_styles["t"]["background"], measured["tint"])
+                    self.assertNotEqual(selection_styles["p"]["background"], measured["tint"])
+                    self.assertNotEqual(selection_styles["p"]["background"], measured["blue"])
+                    self.assertNotEqual(selection_styles["p"]["background"], measured["paper"])
                     self.assertTrue(all(border == "0px" for border in measured["boxes"]))
                     self.assertGreaterEqual(measured["stateSize"], 13)
-                    self.assertGreaterEqual(measured["buttonHeight"], 36)
+                    self.assertGreaterEqual(measured["buttonHeight"], 42)
                     self.assertLessEqual(measured["rowRight"], measured["sidebarRight"] + 1)
                     self.assertLessEqual(measured["scroll"], measured["width"] + 1)
                     selected_selector = '.ew-step-job[aria-current=step]'
@@ -1071,12 +1163,35 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     selection_styles["parent"] = self.visual_style('.ew-step[data-expanded=true]')
                     selection_styles["parentHeader"] = self.visual_style('.ew-step[data-expanded=true] > .ew-step-button')
                     selection_styles["parentMeta"] = self.visual_style('.ew-step[data-expanded=true] .ew-step-meta')
+                    self.assertLessEqual(selection_styles["jobName"]["right"], selection_styles["status"]["x"])
+                    for key in ("jobName", "status"):
+                        self.assertGreaterEqual(selection_styles[key]["y"], selection_styles["j"]["y"])
+                        self.assertLessEqual(selection_styles[key]["bottom"], selection_styles["j"]["bottom"])
+                    self.assertGreater(selection_styles["j"]["height"], 42,
+                                       "The long Korean job name must grow instead of being clipped")
+                    selection_styles["dividers"] = self.browser.evaluate("""(()=>{
+                        const widths=s=>[...document.querySelectorAll(s)].map(e=>parseFloat(getComputedStyle(e).borderTopWidth));
+                        return {jobs:widths('.ew-step-jobs > li'),all:widths('.ew-step-all,.ew-step-all > button')};})()""")
+                    self.assertEqual(selection_styles["dividers"], {"jobs": [0, 1, 1, 1, 1], "all": [0, 0]})
+                    selection_styles["category"] = self.visual_style('.ew-category[aria-pressed=true]')
+                    selection_styles["categories"] = self.visual_style('.ew-category-tabs')
+                    self.assertEqual(selection_styles["jobName"]["color"], measured["blue"])
+                    for key in ("parent", "parentHeader", "category", "categories"):
+                        self.assertEqual(selection_styles[key]["background"], measured["paper"], (key, selection_styles[key]))
+                    underline = self.browser.evaluate("""(()=>{
+                        const e=document.querySelector('.ew-category[aria-pressed=true]'),s=getComputedStyle(e,'::after');
+                        return {color:s.backgroundColor,width:parseFloat(s.width),height:parseFloat(s.height),
+                            tabWidth:e.getBoundingClientRect().width};})()""")
+                    self.assertEqual(underline["color"], measured["blue"])
+                    self.assertGreaterEqual(underline["height"], 2)
+                    self.assertLess(underline["width"], underline["tabWidth"])
+                    selection_styles["underline"] = underline
                     for key in ("jobName", "status"):
                         self.assertGreaterEqual(selection_styles[key]["contrast"], 4.5, (key, selection_styles[key]))
                     self.assertGreaterEqual(selection_styles["parentMeta"]["contrast"], 4.5)
                     self.assertGreaterEqual(selection_styles["j"]["x"] - selection_styles["parent"]["x"], 8)
                     self.assertGreaterEqual(selection_styles["parent"]["right"] - selection_styles["j"]["right"], 8)
-                    self.assertNotEqual(selection_styles["parentHeader"]["background"], measured["blue"])
+                    self.assertEqual(selection_styles["parentHeader"]["background"], measured["paper"])
                     self.assertEqual(self.browser.evaluate(
                         "document.querySelectorAll('#ees-work-entry button[aria-current=step]').length"), 1)
                     self.screenshot("ees-hierarchy-j-" + theme + "-" + str(width))
@@ -1098,11 +1213,14 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     other = '.ew-step-job:not([aria-current=step])'
                     self.hover(other)
                     selection_styles["otherHover"] = self.visual_style(other)
-                    self.assertNotEqual(selection_styles["otherHover"]["background"], measured["blue"])
-                    self.assertEqual(self.visual_style(selected_selector)["background"], measured["blue"])
+                    paper = selection_styles["parentHeader"]["backgroundRGB"]
+                    distance = lambda rgb: sum((a - b) ** 2 for a, b in zip(rgb, paper))
+                    self.assertLess(distance(selection_styles["otherHover"]["backgroundRGB"]),
+                                    distance(selection_styles["j"]["backgroundRGB"]))
+                    self.assertEqual(self.visual_style(selected_selector)["background"], measured["tint"])
                     self.screenshot("ees-hierarchy-other-hover-" + theme + "-" + str(width))
                     self.hover(selected_selector)
-                    self.assertEqual(self.visual_style(selected_selector)["background"], measured["blue"])
+                    self.assertEqual(self.visual_style(selected_selector)["background"], measured["tint"])
                     self.hover()
                     self.browser.evaluate("document.querySelector('.ew-step-button').focus()")
                     self.key("Tab", 9)
@@ -1110,7 +1228,11 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     self.assertNotEqual(selection_styles["otherFocus"]["node"], "bulk-052-j")
                     self.assertTrue(selection_styles["otherFocus"]["focusVisible"])
                     self.assertGreaterEqual(selection_styles["otherFocus"]["outlineWidth"], 2)
-                    self.assertEqual(self.visual_style(selected_selector)["background"], measured["blue"])
+                    bounds = self.read('#ees-work-entry', 'getBoundingClientRect().toJSON()')
+                    ring = selection_styles["otherFocus"]["outlineWidth"] + selection_styles["otherFocus"]["outlineOffset"]
+                    self.assertGreaterEqual(selection_styles["otherFocus"]["x"] - ring, bounds["left"])
+                    self.assertLessEqual(selection_styles["otherFocus"]["right"] + ring, bounds["right"])
+                    self.assertEqual(self.visual_style(selected_selector)["background"], measured["tint"])
                     self.screenshot("ees-hierarchy-other-focus-" + theme + "-" + str(width))
                     self.save_visual_measurements("ees-hierarchy-" + theme + "-" + str(width), selection_styles)
                     self.browser.evaluate("document.querySelector('.ew-step-job[aria-current=step]').focus()")
@@ -1172,6 +1294,46 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.wait("document.querySelector('.ew-step-job[aria-current=step] .ew-work-state')?.dataset.status === 'input_required'")
         check_status("db-j", "input_required", "status-chat")
         self.save_visual_measurements("ees-hierarchy-statuses", measurements)
+
+    def test_sidebar_internal_job_dividers_follow_visible_rows_without_outer_box(self):
+        self.seed_case("existing-chat")
+        self.navigate("/c/existing-chat")
+        self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
+        measurements = {}
+        for node_id, count in (("prep-t", 1), ("install-t", 3)):
+            self.choose(node_id)
+            for theme in ("light", "dark"):
+                self.browser.evaluate("document.documentElement.classList.toggle('dark'," + str(theme == "dark").lower() + ")")
+                self.hover()
+                rows = self.browser.evaluate("""(()=>{
+                    const step=document.querySelector('.ew-step[data-expanded=true]'),
+                        list=step.querySelector('.ew-step-jobs'),bounds=list.getBoundingClientRect();
+                    const borders=e=>{const s=getComputedStyle(e);return ['Top','Right','Bottom','Left']
+                        .map(side=>parseFloat(s['border'+side+'Width']));};
+                    return {listBorders:borders(list),stepBorders:borders(step),
+                        collapsed:[...document.querySelectorAll('.ew-step[data-expanded=false]')]
+                            .map(e=>({jobs:e.querySelectorAll('.ew-step-job').length,borders:borders(e)})),
+                        rows:[...list.children].map(e=>({borders:borders(e),color:getComputedStyle(e).borderTopColor,
+                            x:e.getBoundingClientRect().x,right:e.getBoundingClientRect().right,
+                            listX:bounds.x,listRight:bounds.right,buttonBorders:borders(e.querySelector('button')),
+                            height:e.querySelector('button').getBoundingClientRect().height}))};})()""")
+                self.assertEqual(len(rows["rows"]), count)
+                self.assertEqual(rows["listBorders"], [0, 0, 0, 0])
+                self.assertEqual(rows["stepBorders"], [0, 0, 0, 0])
+                self.assertTrue(rows["collapsed"])
+                for collapsed in rows["collapsed"]:
+                    self.assertEqual(collapsed, {"jobs": 0, "borders": [0, 0, 0, 0]})
+                for index, row in enumerate(rows["rows"]):
+                    self.assertEqual(row["borders"], [int(index > 0), 0, 0, 0])
+                    self.assertEqual(row["buttonBorders"], [0, 0, 0, 0])
+                    self.assertGreaterEqual(row["height"], 42)
+                    self.assertGreaterEqual(row["x"], row["listX"])
+                    self.assertLessEqual(row["right"], row["listRight"])
+                    if theme == "light" and index:
+                        self.assertEqual(row["color"], "rgb(228, 233, 239)")
+                measurements[node_id + "-" + theme] = rows
+                self.screenshot("sidebar-dividers-" + node_id + "-" + theme)
+        self.save_visual_measurements("sidebar-internal-dividers", measurements)
 
     def test_cancelled_human_confirmation_keeps_saved_state(self):
         self.create_case()
