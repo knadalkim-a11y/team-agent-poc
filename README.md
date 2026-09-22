@@ -22,7 +22,7 @@
 - **개발을 이어갈 GPT**: [AGENTS.md](AGENTS.md) → [현재 상태](docs/STATUS.md) → 해당 기능 파일과 테스트.
 - **설치·운영할 사람**: [환경 기준](versions.md)을 읽고, 최초 설치는 [설치·기동](docs/01-openwebui-install.md), 기존 EES 환경의 업데이트는 [래퍼 운영](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)에서 시작합니다.
 - **팀원 안내 초안**: [EES Work 시작 안내](docs/07-team-quickstart.md) — 팀 시연용 준비본. 실제 전달 상태는 STATUS에서 확인.
-- **EES Work 기존 UI 통합**: [09-21 통합 UX 첫 베타](docs/mockups/ees-work/TASK.md#integrated-work-beta-20260921) · [베타 적용/복원](docs/03-openwebui-native-agent.md#ees-integrated-beta-20260921) → [업무 패널·대화 통합 설계와 구현 계약](docs/mockups/ees-work/TASK.md#work-panel-chat-design-20260916) → [승인한 사이드바 개선 목업](docs/mockups/ees-work/ees-sidebar-refinement.html) → [최초 목업 참고 원본](docs/mockups/ees-work/ees-demo-workspace.html). 기존 사이드바에서 공장·시스템별 P/T/J를 탐색하고 P는 T 관리, T는 J 관리, J는 입력·수행·결과를 담당합니다. 메인 대화는 같은 업무의 설명·작성·명령에 연결하며 설정은 기존 Workspace에서 관리합니다. 외형은 기존 WebUI를 따릅니다. 최종 목표는 [공장 → 시스템 → 업무의 공동 진행과 개인 채팅·권한 분리](docs/mockups/ees-work/TASK.md#ees-work-shared-target)이며, 현재 사용자별 진행 건과 후속 공유 설계를 구분합니다. 설계·구현·배포 상태는 STATUS에서, [업무 사용·합성 점검 범위](docs/03-openwebui-native-agent.md#ees-work-demo)와 [새 패널 시험 적용](docs/03-openwebui-native-agent.md#ees-work-panel-trial-20260917)은 사용 가이드에서 확인합니다.
+- **EES Work 기존 UI 통합**: [09-22 단계별 진행·무테](docs/mockups/ees-work/TASK.md#step-progress-ux-20260922) · [베타 적용/복원](docs/03-openwebui-native-agent.md#ees-step-progress-20260922) → [업무 패널·대화 통합 설계와 구현 계약](docs/mockups/ees-work/TASK.md#work-panel-chat-design-20260916) → [승인한 사이드바 개선 목업](docs/mockups/ees-work/ees-sidebar-refinement.html) → [최초 목업 참고 원본](docs/mockups/ees-work/ees-demo-workspace.html). Runtime 단계별 진행표에서 공장·시스템별 워크플로우/단계/작업을 선택하고 P는 T 관리, T는 J 관리, J는 입력·수행·결과를 담당합니다. 메인 대화는 같은 업무의 설명·작성·명령에 연결하며 설정은 기존 Workspace에서 관리합니다. EES 색상·서체와 기존 Native 대화·Workspace 편집 기능을 유지합니다. 최종 목표는 [공장 → 시스템 → 업무의 공동 진행과 개인 채팅·권한 분리](docs/mockups/ees-work/TASK.md#ees-work-shared-target)이며, 현재 사용자별 진행 건과 후속 공유 설계를 구분합니다. 설계·구현·배포 상태는 STATUS에서, [업무 사용·합성 점검 범위](docs/03-openwebui-native-agent.md#ees-work-demo)와 [새 패널 시험 적용](docs/03-openwebui-native-agent.md#ees-work-panel-trial-20260917)은 사용 가이드에서 확인합니다.
 - **준비·배포·검증 여부 확인**: [STATUS](docs/STATUS.md)의 요약과 연결된 [평가표](evals/scenarios.md)를 확인합니다. README에는 진행 상태를 복제하지 않습니다.
 
 매번 시작 문구를 입력하는 대신 아래의 일회성 프로젝트 지침을 사용합니다. 현재 상태는 대화 기억이 아니라 저장소에서 확인합니다.
@@ -104,7 +104,7 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 | 변경할 책임 | 원본 |
 |---|---|
 | 서버 요청·대화 연결·개인 초안·응답 순서 | [ees-work-launcher.js](branding/ees/ui/ees-work-launcher.js) |
-| 공장 선택·트리·업무 패널 표시·크기 | [ees-work-view.js](branding/ees/ui/ees-work-view.js) |
+| 공장 선택·단계별 진행·업무 패널 표시·크기 | [ees-work-view.js](branding/ees/ui/ees-work-view.js) |
 | 관리자 절차 편집·미저장 초안·Workspace 복원 | [ees-work-designer.js](branding/ees/ui/ees-work-designer.js) |
 | 소스 조립·wheel 파일 목록·해시 | [build_ees_webui.py](scripts/build_ees_webui.py) |
 
