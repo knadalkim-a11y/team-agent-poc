@@ -30,27 +30,34 @@ const makeCase = (revision = 1) => ({
 });
 const result = (run = null) => ({ok: true, case: run, cases: run ? [run] : [], catalog: copy(catalog)});
 async function setup(options = {}) {
-  const events = {}, frames = [], requests = [], renders = [], adoptions = [], confirmations = [], restores = [];
+  const events = {}, frames = [], requests = [], renders = [], adoptions = [], confirmations = [], restores = [], viewEvents = [], readiness = [];
+  const timers = new Map(); let nextTimer = 0;
   const nativeDraft = {prompt: '미저장 업무 질문', files: [{id: 'attachment-1'}]};
-  let confirmed = true;
+  let confirmed = true, nativeReady = options.nativeReady !== false;
   let state = options.state || result(), callbacks, resets = 0, actionHandler;
   let edits = {nodeId: 'j1', inputsChanged: false, documentChanged: false, conflict: false};
   const location = {pathname: '/', search: '?ees_site=f1&ees_system=EMS&ees_process=p1&ees_node=j1&ees_version=4'};
   function setRoute(url) { const parsed = new URL(url, 'https://example.test'); location.pathname = parsed.pathname; location.search = parsed.search; }
   if (options.route) setRoute(options.route);
   const on = (name, fn) => { (events[name] ||= []).push(fn); };
-  const fire = name => (events[name] || []).forEach(fn => fn({type: name}));
+  const fire = (name, details = {}) => {
+    const event = {type: name, target: {}, preventDefault() {this.defaultPrevented = true;},
+      stopImmediatePropagation() {this.propagationStopped = true;}, ...details};
+    (events[name] || []).forEach(fn => fn(event)); return event;
+  };
   const capture = snapshot => renders.push(snapshot);
   const view = new Proxy({
     render: capture, renderNavigator: capture, renderPanel: capture,
+    prepare: () => readiness.push(callbacks.scopeReady()), sync: () => readiness.push(callbacks.scopeReady()),
+    updateScopeReadiness: () => readiness.push(callbacks.scopeReady()),
     readJobEdits: () => edits,
     adoptPreviewDraft: (caseId, nodeId) => adoptions.push([caseId, nodeId]),
-    reset: () => { resets++; }, handleEvent: () => ({handled: false})
+    reset: () => { resets++; }, handleEvent: event => {viewEvents.push(event); return {handled: false};}
   }, {get: (target, key) => target[key] || (() => {})});
   const designer = new Proxy({handleEvent: () => ({handled: false})}, {get: (target, key) => target[key] || (() => {})});
   const window = {
     addEventListener: on, removeEventListener: () => {}, crypto: {randomUUID: () => 'request-' + requests.length},
-    __eesNativeDraftV1: {ready: () => true, read: () => copy(nativeDraft),
+    __eesNativeDraftV1: {ready: () => nativeReady, read: () => copy(nativeDraft),
       restore: async value => {restores.push(value); return true;}, flush: () => {}}
   };
   const document = {
@@ -63,7 +70,10 @@ async function setup(options = {}) {
   const context = {
     confirm: message => {confirmations.push(message); return confirmed;},
     window, document, location, localStorage, sessionStorage: localStorage,
-    URLSearchParams, setTimeout, clearTimeout, requestAnimationFrame: fn => frames.push(fn),
+    URLSearchParams,
+    setTimeout: options.fakeTimers ? ((fn,delay) => {timers.set(++nextTimer,{fn,delay});return nextTimer;}) : setTimeout,
+    clearTimeout: options.fakeTimers ? (id => timers.delete(id)) : clearTimeout,
+    requestAnimationFrame: fn => frames.push(fn),
     MutationObserver: class {observe() {}},
     workUI: {dialog: async () => false, categories: {setup: '구축'}, finished: run => run.status === 'done', lineage: (id, data) => {
       const chain = []; while (id && data?.nodes[id]) {chain.unshift(data.nodes[id]); id = data.nodes[id].parent;} return chain;
@@ -85,7 +95,10 @@ async function setup(options = {}) {
   await settle();
   return {
     api: window.__eesNativeWorkV1, callbacks, requests, renders, adoptions, confirmations,
-    nativeDraft, restores, location,
+    nativeDraft, restores, location, fire, viewEvents, readiness,
+    setNativeReady: value => {nativeReady = value;},
+    pendingTimers: () => [...timers.values()].map(timer => timer.delay),
+    fireTimer: async () => {const [id,timer] = [...timers.entries()][0];timers.delete(id);timer.fn();await settle();},
     setConfirmed: value => {confirmed = value;},
     posts: () => requests.filter(request => request.body).map(request => request.body),
     latest: () => renders.at(-1), resets: () => resets,
@@ -95,6 +108,31 @@ async function setup(options = {}) {
   };
 }
 const scenarios = {
+  async native_draft_completion_updates_controls_without_dom_mutation() {
+    const h = await setup({nativeReady: false, fakeTimers: true});
+    assert.equal(h.readiness.at(-1), false);
+    const beforeRequests = h.requests.length, beforeDraft = copy(h.nativeDraft);
+    assert.deepEqual(h.pendingTimers(), [50], 'Only one route readiness check is pending');
+    await h.fireTimer();
+    assert.deepEqual(h.pendingTimers(), [50]); assert.equal(h.readiness.at(-1), false);
+    h.setNativeReady(true);
+    assert.equal(h.readiness.at(-1), false, 'Store-only readiness changes leave the last rendered controls pending');
+    await h.fireTimer();
+    assert.equal(h.readiness.at(-1), true, 'Native readiness must update controls without a DOM mutation');
+    assert.deepEqual(h.pendingTimers(), [], 'Ready editors do not keep polling');
+    assert.equal(h.requests.length, beforeRequests, 'Readiness refresh does not fetch or write workflow state');
+    assert.deepEqual(h.nativeDraft, beforeDraft);
+    assert.equal(h.restores.length, 0);
+  },
+  async native_readiness_wait_cancels_when_leaving_chat_or_logging_out() {
+    for (const route of ['/workspace/models', '/auth']) {
+      const h = await setup({nativeReady: false, fakeTimers: true});
+      assert.deepEqual(h.pendingTimers(), [50]);
+      h.route(route); await h.settle();
+      assert.deepEqual(h.pendingTimers(), [], 'Navigation and cleanup must cancel the old readiness wait');
+      assert.equal(h.posts().length, 0);
+    }
+  },
   async first_chat_is_read_only() {
     const h = await setup();
     const ticket = h.api.beginChatCreation(); assert.ok(ticket);
@@ -187,6 +225,21 @@ const scenarios = {
     assert.equal(h.latest().selectedId, 'j2'); assert.equal(h.api.selection('').selection.version, 5);
     assert.equal(h.posts().length, 0);
   },
+  async next_job_navigation_preserves_case_and_never_runs() {
+    const current = makeCase(3); current.chat_id = 'chat-1';
+    current.jobs = {j1: {status: 'passed', inputs: {asset: 'A'}, history: [{attempt: 1, status: 'failed'}, {attempt: 2, status: 'passed'}]}};
+    const h = await setup({state: result(current), route: '/c/chat-1'});
+    const draftBefore = copy(h.nativeDraft), jobBefore = copy(current.jobs.j1);
+    h.setAction(body => result({...current, selected_id: body.node_id, revision: current.revision + 1}));
+    await h.callbacks.selectWork('j2');
+    assert.deepEqual(h.posts().map(body => body.action), ['select'],
+      'Opening the next task only selects it; it neither runs nor confirms it');
+    assert.equal(h.posts()[0].case_id, current.id); assert.equal(h.posts()[0].chat_id, 'chat-1');
+    assert.equal(h.latest().selectedId, 'j2'); assert.equal(h.location.pathname, '/c/chat-1');
+    assert.deepEqual(h.latest().state.case.jobs.j1, jobBefore, 'Results and the failed attempt remain visible');
+    assert.deepEqual(h.nativeDraft, draftBefore, 'Conversation text and attachments are preserved');
+    assert.equal(h.confirmations.length, 0);
+  },
   async dirty_and_conflicting_jobs_cannot_run() {
     const h = await setup();
     h.setEdits({nodeId: 'j1', inputsChanged: true}); await h.callbacks.runJob('j1');
@@ -207,6 +260,66 @@ const scenarios = {
     await h.callbacks.runJob('j2');
     assert.equal(h.confirmations.length, 1);
     assert.equal(h.posts().length, 0);
+  },
+  async repeated_save_activation_does_not_become_execution() {
+    const h = await setup(); let complete;
+    h.setAction(() => new Promise(resolve => {complete = resolve;}));
+    const writing = h.callbacks.saveInputs({asset: 'A'}, 'j1');
+    await h.callbacks.runJob('j1', {detail: 2});
+    complete(result(makeCase(2))); await writing;
+    h.setAction(() => result(makeCase(3)));
+    await h.callbacks.runJob('j1', {detail: 2});
+    assert.deepEqual(h.posts().map(body => body.action), ['update_inputs'],
+      'The continuation of a save double click must not execute after the response renders');
+    await h.callbacks.runJob('j1', {detail: 1});
+    assert.deepEqual(h.posts().map(body => body.action), ['update_inputs', 'run']);
+    assert.equal(h.posts()[1].node_id, 'j1'); assert.equal(h.posts()[1].case_id, 'case-1');
+  },
+  async held_enter_cannot_escape_saved_form_after_render() {
+    const h = await setup();
+    const inputTarget = {closest: selector => selector.includes('#ees-work-inputs') ? {} : null};
+    const first = h.fire('keydown', {key: 'Enter', repeat: false, target: inputTarget});
+    assert.equal(first.defaultPrevented, undefined, 'Initial Enter keeps normal form submission');
+    const before = h.viewEvents.length;
+    const repeated = h.fire('keydown', {key: 'Enter', repeat: true, target: {}});
+    assert.equal(repeated.defaultPrevented, true);
+    assert.equal(repeated.propagationStopped, true,
+      'A key held during a render must not fall through to the native chat composer');
+    assert.equal(h.viewEvents.length, before, 'Repeated activation cannot reach a new run control');
+    h.fire('keyup', {key: 'Enter'});
+    assert.equal(h.fire('keydown', {key: 'Enter', repeat: true}).defaultPrevented, undefined,
+      'Releasing the work key restores unrelated native key handling');
+    h.fire('keydown', {key: 'Enter', repeat: false, target: inputTarget}); h.fire('blur');
+    assert.equal(h.fire('keydown', {key: 'Enter', repeat: true}).defaultPrevented, undefined,
+      'Leaving the browser clears a potentially missed keyup');
+    assert.equal(h.posts().length, 0);
+  },
+  async held_space_on_mutation_control_stays_blocked_until_release() {
+    for (const key of [' ', 'Spacebar']) {
+      const h = await setup(), beforeDraft = copy(h.nativeDraft);
+      const saveTarget = {closest: selector => selector === '#ees-work-panel button[data-mutation]' ? {} : null};
+      const first = h.fire('keydown', {key, repeat: false, target: saveTarget});
+      assert.equal(first.defaultPrevented, undefined,
+        'Initial Space retains the normal button keyup activation');
+      const beforeEvents = h.viewEvents.length;
+      for (const target of [saveTarget, {}]) {
+        const repeated = h.fire('keydown', {key, repeat: true, target});
+        assert.equal(repeated.defaultPrevented, true);
+        assert.equal(repeated.propagationStopped, true,
+          'Held Space cannot reach another control or the native composer after focus is lost');
+      }
+      assert.equal(h.viewEvents.length, beforeEvents);
+      const released = h.fire('keyup', {key, target: saveTarget});
+      assert.equal(released.defaultPrevented, undefined,
+        'Releasing Space must not suppress the intended save button activation');
+      assert.equal(h.fire('keydown', {key, repeat: true}).defaultPrevented, undefined,
+        'Releasing the work key restores unrelated native Space handling');
+      h.fire('keydown', {key, repeat: false, target: saveTarget}); h.fire('blur');
+      assert.equal(h.fire('keydown', {key, repeat: true}).defaultPrevented, undefined,
+        'Leaving the browser clears a missed Space keyup');
+      assert.equal(h.posts().length, 0);
+      assert.deepEqual(h.nativeDraft, beforeDraft);
+    }
   }
 };
 scenarios[input.scenario]().then(() => process.stdout.write('ok\n')).catch(error => {console.error(error); process.exitCode = 1;});
@@ -227,6 +340,12 @@ class WorkControllerTests(unittest.TestCase):
     def test_first_chat_is_read_only(self):
         self.check_scenario("first_chat_is_read_only")
 
+    def test_native_draft_completion_updates_controls_without_dom_mutation(self):
+        self.check_scenario("native_draft_completion_updates_controls_without_dom_mutation")
+
+    def test_native_readiness_wait_cancels_when_leaving_chat_or_logging_out(self):
+        self.check_scenario("native_readiness_wait_cancels_when_leaving_chat_or_logging_out")
+
     def test_captured_preview_stays_with_its_chat(self):
         self.check_scenario("captured_preview_stays_with_its_chat")
 
@@ -245,6 +364,9 @@ class WorkControllerTests(unittest.TestCase):
     def test_preview_reselection_survives_refresh_and_version_change(self):
         self.check_scenario("preview_reselection_survives_refresh_and_version_change")
 
+    def test_next_job_navigation_preserves_case_and_never_runs(self):
+        self.check_scenario("next_job_navigation_preserves_case_and_never_runs")
+
     def test_dirty_and_conflicting_jobs_cannot_run(self):
         self.check_scenario("dirty_and_conflicting_jobs_cannot_run")
 
@@ -253,3 +375,12 @@ class WorkControllerTests(unittest.TestCase):
 
     def test_manual_confirmation_can_be_cancelled_without_a_write(self):
         self.check_scenario("manual_confirmation_can_be_cancelled_without_a_write")
+
+    def test_repeated_save_activation_does_not_become_execution(self):
+        self.check_scenario("repeated_save_activation_does_not_become_execution")
+
+    def test_held_enter_cannot_escape_saved_form_after_render(self):
+        self.check_scenario("held_enter_cannot_escape_saved_form_after_render")
+
+    def test_held_space_on_mutation_control_stays_blocked_until_release(self):
+        self.check_scenario("held_space_on_mutation_control_stays_blocked_until_release")

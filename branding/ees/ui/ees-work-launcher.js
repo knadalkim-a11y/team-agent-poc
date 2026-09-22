@@ -11,11 +11,13 @@
   let desiredCase = '', desiredNode = '', reopenPanel = false, navigationTarget = '';
   const scopeSelections = new Map(), chosenCases = new Map(), draftSnapshots = new Map(), creationTickets = new Map(), createdChats = new Map();
   const previewChats = new Map(), actionRequests = new Map();
+  const heldWorkKeys = new Set();
   let actionSerial=0;
   let creationSerial=0;
   let visibleDraftKey='general', draftTarget=null, draftTimer=null, draftSerial=0;
   let errorMessage = '', activeRegistration = null;
   let personalSettingsOpened=false;
+  let scopeReadinessTimer=null;
   const token = () => {try {return localStorage.getItem('token') || '';} catch (_) {return '';}};
   const chatId = () => {const m = location.pathname.match(/^\/c\/([^/]+)\/?$/); return m ? decodeURIComponent(m[1]) : '';};
   const chatRoute = () => location.pathname === '/' || /^\/c\/[^/]+\/?$/.test(location.pathname);
@@ -68,7 +70,16 @@
   function renderPanel() {view.renderPanel(snapshot());}
   function renderDesigner() {designer.render(snapshot());}
   function setBusy() {view.setBusy(busy);designer.setBusy(busy);}
-  function updateScopeReadiness() {view.updateScopeReadiness();}
+  function clearScopeReadinessWait() {clearTimeout(scopeReadinessTimer);scopeReadinessTimer=null;}
+  function updateScopeReadiness() {
+    view.updateScopeReadiness();clearScopeReadinessWait();
+    const route=location.pathname+location.search;
+    if(!state||!chatRoute()||acceptedRoute!==route||lastRoute!==route||window.__eesNativeDraftV1?.ready())return;
+    // Native draft stores can finish loading without another DOM mutation.
+    // Recheck only this pending route, stopping as soon as its editor is ready.
+    const at=generation,auth=token();
+    scopeReadinessTimer=setTimeout(()=>{scopeReadinessTimer=null;if(at===generation&&auth===token()&&route===location.pathname+location.search&&available())schedule();},50);
+  }
   function openPanel() {view.prepare(snapshot());view.openPanel();}
   function revealSelection(id,data,run,includeSelf=false) {view.revealSelection(id,data,run,includeSelf,{site:browsingSite,system:browsingSystem});}
   async function api(path, body) {
@@ -320,7 +331,9 @@
   }
   async function saveInputs(inputs,id=selectedId()) {if(!canWriteEdits(id))return null;return action('update_inputs',{inputs},id);}
   async function saveDocument(document,id=selectedId()) {if(!canWriteEdits(id))return null;return action('run',{document},id);}
-  async function runJob(id) {
+  async function runJob(id,activation=null) {
+    // A second click in the save gesture is not a separate execution intent.
+    if(activation?.detail>1)return;
     const n=node(id);if(!n)return;
     if(n.type==='j'){
       if(!canWriteEdits(id))return;
@@ -337,8 +350,9 @@
     if(name==='publish'&&!await designer.confirmPublish())return;
     await action(name);
   }
-  function render() {renderView();renderDesigner();}
+  function render() {renderView();renderDesigner();updateScopeReadiness();}
   function cleanup() {
+    clearScopeReadinessWait();
     personalSettingsOpened=false;$('#ees-personal-settings-guide')?.remove();
     generation++;request++;state=null;acceptedRoute='';pendingId='';pendingSubmitted=false;browseActive=false;previewVersion=0;scopeSelections.clear();chosenCases.clear();draftSnapshots.clear();creationTickets.clear();createdChats.clear();previewChats.clear();actionRequests.clear();draftSerial++;draftTarget=null;clearTimeout(draftTimer);resetHistory();errorMessage='';
     if(activeRegistration!==null)window.__eesWorkPanelV1?.unregister(activeRegistration,'workflow');activeRegistration=null;
@@ -354,6 +368,7 @@
     view.prepare(snapshot());designer.prepare(snapshot());
     const path=location.pathname+location.search;
     if(lastRoute!==path){
+      clearScopeReadinessWait();
       view.closeScopePicker();const previous=lastRoute;lastRoute=path;generation++;request++;resetHistory();
       // A first completion can arrive after another factory was previewed on
       // the root route. Its server-issued chat still belongs to the captured
@@ -369,7 +384,7 @@
       if(!pendingId)pendingSubmitted=false;
       state=null;view.prepare(snapshot());designer.prepare(snapshot());refresh();return;
     }
-    view.sync(snapshot());designer.sync(snapshot());
+    view.sync(snapshot());designer.sync(snapshot());updateScopeReadiness();
   }
   function openPersonalSettings() {
     if(new URLSearchParams(location.search).get('ees')!=='tool-settings'||!chatRoute()){
@@ -412,6 +427,16 @@
   }
   // The controller is the only owner of global listeners and route observation.
   function handleEvent(event) {
+    if(event.type==='keyup')heldWorkKeys.delete(event.key);
+    if(event.type==='keydown'&&['Enter',' ','Spacebar'].includes(event.key)){
+      const target=event.target;
+      const workControl=target.closest?.('#ees-work-panel button[data-mutation]') ||
+        event.key==='Enter'&&target.closest?.('#ees-work-inputs');
+      // A render can remove the focused save control while Enter is held.
+      // Keep consuming its repeats until release, including when focus is body.
+      if(event.repeat&&(workControl||heldWorkKeys.has(event.key))){event.preventDefault();event.stopImmediatePropagation();return;}
+      if(workControl)heldWorkKeys.add(event.key);
+    }
     const result=designer.handleEvent(event);
     const outcome=result.handled?result:view.handleEvent(event);
     if(outcome.preventDefault)event.preventDefault();
@@ -425,6 +450,7 @@
   document.addEventListener('pointerdown',handleEvent,true);document.addEventListener('scroll',handleEvent,true);
   // Picker activation is captured before the native global composer keys.
   window.addEventListener('keydown',handleEvent,true);window.addEventListener('keyup',handleEvent,true);
+  window.addEventListener('blur',()=>heldWorkKeys.clear());
   document.addEventListener('keydown',handleEvent);
   window.addEventListener('ees-work-changed',async event=>{const detail=event.detail||{};if(detail.chat_id!==undefined&&detail.chat_id!==chatId())return;const at=generation;await refresh();if(at===generation&&detail.open_requested)openPanel();});
   window.addEventListener('popstate',schedule);window.navigation?.addEventListener('navigatesuccess',schedule);

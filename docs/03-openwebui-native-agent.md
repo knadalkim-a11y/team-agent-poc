@@ -1259,6 +1259,55 @@ Apply 실패 후에는 내려받은 ZIP과 그 로컬 경로를 결과의 `resul
 
 <a id="ees-wrapper-trial"></a>
 
+<a id="ees-step-progress-20260922"></a>
+
+#### 09-22 단계별 진행 UX 후속 변경
+
+PR #58 병합 원본 `6b58beb3dbad778459ffd492f75dac99ab518dd0`은 사용자 보고로 Upgrade·기동(`running=true`)·ApplyDemo(`changed=2`) 성공을 확인했다. 이 보고는 [09-22 단계별 진행 수정안](mockups/ees-work/TASK.md#step-progress-ux-20260922)의 설치·UI 수락을 뜻하지 않는다. 후속 변경의 원본·검증·접근 제한은 [새 평가 기록](../evals/scenarios.md#step-progress-ux-20260922)과 [STATUS](STATUS.md)를 따른다.
+
+새 후보는 검증한 정확한 커밋에서 만든 wheel/ZIP을 사용한다. 같은 ees.10/Pack 0.2.12라도 JS/CSS 내용과 cache URL 해시를 직접 대조하며 이전 #58 ZIP을 새 변경에 재사용하지 않는다. 후보가 미병합이거나 최신 원격/Figma 대조가 미확인인 동안 이를 사내 적용 가능한 main으로 안내하지 않는다. 이 후속 변경의 병합·적용 승인 후 최종 main과 검증 코드의 일치를 확인하고 그 커밋의 새 묶음/해시를 확정한다.
+
+**실행 전 조건:** 이 09-22 후속 변경은 현재 미병합이며 병합·사내 적용 승인이 없다. 아래 적용 블록은 지금 실행하지 않는다. 해당 변경의 병합과 제한 적용에 대한 사용자의 명시적 승인 후, 검증본과 일치하는 최종 main의 전체 40자리 SHA와 배포물 해시를 확정한다. 미병합 PR head나 이전 배포 SHA를 대신 넣지 않는다. 10월 이후 재개라면 먼저 [한시 CI 방침 종료 조건](STATUS.md#2026년-9월-개발검사-방침)을 확인한다.
+
+승인 후 아래 블록 하나를 기존 Windows PowerShell에서 실행한다. 기존 clone이 `%USERPROFILE%\team-agent-poc`에 있고 등록 Python·실행 설정·캐시가 유지된 상태를 전제한다. clone 위치가 다르면 `$eesRepo`만 실제 기존 경로로 바꾸고 새 clone·환경을 만들지 않는다. 기존 래퍼가 canonical origin·clean main을 검사하고 아래 블록이 HEAD·origin/main·승인한 SHA의 일치를 다시 확인한다. `checkout_changed` 등 원본 불일치는 적용 전 중단이며 reset/force로 맞추지 않는다. Update → Upgrade가 준비/검사 → Stop → Backup → Apply → Start → 같은 원본 ApplyDemo를 수행하므로 별도 ApplyDemo를 추가하지 않는다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesCommit = Read-Host '승인 후 확정한 최종 main의 40자리 SHA'
+    if ($eesCommit -cnotmatch '\A[0-9a-f]{40}\z') {
+        throw '확정한 전체 SHA가 필요합니다.'
+    }
+    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $eesManager = Join-Path $eesRepo 'scripts\manage-ees.ps1'
+    & $eesManager -Action Update
+    $eesHead = & git -C $eesRepo rev-parse HEAD
+    if ($LASTEXITCODE -ne 0) { throw 'HEAD 조회 실패' }
+    $eesMain = & git -C $eesRepo rev-parse origin/main
+    if ($LASTEXITCODE -ne 0) { throw 'origin/main 조회 실패' }
+    if ($eesHead -cne $eesCommit -or $eesMain -cne $eesCommit) {
+        throw '검토 원본과 다릅니다. 적용하지 않고 중단합니다.'
+    }
+    & $eesManager -Action Upgrade -TrialCommit $eesCommit -Summary
+}
+```
+
+**정상 적용 후 직전 프로그램으로 복원할 때만** 아래 블록을 사용한다. 같은 기존 clone 경로를 사용하고 실패하면 그 단계에서 중단한다. Restore는 프로그램만 되돌리며 DB·대화·업무 결과·개인 인증·ApplyDemo 자산 변경은 되돌리지 않는다. Backup의 자료 보관과 프로그램 Restore는 별개이며 백업 DB를 평소 원복 수단으로 덮어쓰지 않는다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesManager = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1'
+    & $eesManager -Action Stop -Summary
+    & $eesManager -Action Restore -Summary
+    & $eesManager -Action Start -HealthTimeout 120 -Summary
+}
+```
+
+Apply/Restore 자체가 중단되어 미완료 기록이 남았다면 위 일반 복원 블록을 사용하지 않고 [기존 프로그램 Restore의 미완료 상태 경로](#ees-wrapper-restore)를 따른다. 잠금 삭제·임의 폴더 이동·자동 원복·반복 Upgrade/Start를 하지 않는다. 실패 시 마지막 `stage/code/next` 요약으로 중단 지점을 판단한다.
+
+적용 후 새로고침하고 왼쪽 단계 선택/작업명+상태, 입력 반영 후 별도 실행/다음 작업 이동, 기존 대화·결과·작성 초안 보존을 확인한다. 화면/원문 로그 반출 대신 마지막 요약과 `탐색=정상/문제, 수행=정상/문제, 보존=정상/문제` 한 줄이면 된다. Figma 대조나 Work에서 가능한 Native 검사를 사내 PC로 넘기지 않는다.
+
 <a id="ees-integrated-beta-20260921"></a>
 
 #### 09-21 통합 UX 베타의 적용 준비와 복원 경계
