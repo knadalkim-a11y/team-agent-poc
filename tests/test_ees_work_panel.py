@@ -78,7 +78,8 @@ const scope = {input};
 vm.createContext(scope);
 vm.runInContext(fs.readFileSync(input.source, 'utf8'), scope, {timeout: 2000});
 const before = JSON.stringify(input);
-const html = vm.runInContext(`workPanelNodeHTML(input.case,
+const renderer = input.detail ? 'workExecutionDetailHTML' : 'workPanelNodeHTML';
+const html = vm.runInContext(`${renderer}(input.case,
   input.options.definition.nodes[input.node], input.options)`, scope, {timeout: 2000});
 process.stdout.write(JSON.stringify({html, unchanged: JSON.stringify(input) === before}));
 """
@@ -127,18 +128,233 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
             result = await self.service.handle_action(self.admin, {"action": action, "expected_revision": revision})
             self.assertTrue(result["ok"], result)
 
-    def render(self, case, node_id, **options):
+    def render(self, case, node_id, *, detail=False, **options):
         options = {"definition": case["definition"] if case else workflow._seed(), "readOnly": False,
                    "history": False, **options}
         result = subprocess.run(
             [shutil.which("node"), "-e", NODE_RENDER],
-            input=json.dumps({"source": str(VIEW), "case": case, "node": node_id, "options": options}, ensure_ascii=False),
+            input=json.dumps({"source": str(VIEW), "case": case, "node": node_id,
+                              "options": options, "detail": detail}, ensure_ascii=False),
             capture_output=True, encoding="utf-8", timeout=10, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         rendered = json.loads(result.stdout)
         self.assertTrue(rendered["unchanged"], "Rendering must not mutate saved state or procedure definitions.")
         return PanelHTML(rendered["html"]).root, rendered["html"]
+
+    def detail_content(self, html, tab):
+        content = html.find(**{"data-work-detail-content": tab})
+        self.assertEqual(len(content), 1, f"Expected one selected {tab} detail body")
+        return content[0]
+
+    async def test_execution_details_use_each_saved_attempt_and_effective_call_input(self):
+        case = await self.ready(await self.create())
+        first_target, retry_target = "FIRST-AP <public> & target", "SECOND-AP public target"
+        case = await self.step(case, "update_inputs", "ap-j", {"inputs": {"ap": first_target}})
+        case = await self.step(case, "run", "ap-j")
+        first = deepcopy(case["jobs"]["ap-j"]["history"][0])
+        case = await self.step(case, "update_inputs", "ap-j", {"inputs": {"ap": retry_target}})
+        case = await self.step(case, "run", "ap-j")
+        self.assertEqual(case["jobs"]["ap-j"]["history"][0], first)
+        self.assertEqual(first["status"], "failed")
+        self.assertEqual(case["jobs"]["ap-j"]["history"][1]["status"], "passed")
+        for attempt, expected, excluded in ((0, first_target, retry_target), (1, retry_target, first_target)):
+            with self.subTest(attempt=attempt):
+                html, source = self.render(case, "ap-j", detail=True, tab="input", attemptIndex=attempt, callIndex=2)
+                content = self.detail_content(html, "input")
+                self.assertIn(expected, content.text)
+                self.assertNotIn(excluded, content.text)
+                self.assertNotIn("<public>", source, "Saved input must be HTML escaped.")
+                self.assert_no_mutation(html)
+        failed, _ = self.render(case, "ap-j", detail=True, tab="output", attemptIndex=0, callIndex=2)
+        output = self.detail_content(failed, "output")
+        self.assertIn(first["checks"][2]["detail"], output.text)
+        self.assertIn("실패", failed.text)
+        self.assertIn("모의", failed.text)
+        self.assertIn("형식", output.text)
+        self.assertRegex(output.text, "미확인|미기록|검사하지")
+        self.assertNotIn("형식 적합", output.text)
+
+    async def test_synthetic_repeated_call_records_are_selected_by_index_not_tool_id(self):
+        # Definition validation does not permit duplicate tool IDs. This tests
+        # display compatibility only, not a new runtime repeated-call feature.
+        case = await self.ready(await self.create())
+        case = await self.step(case, "run", "db-j")
+        record = case["jobs"]["db-j"]["history"][0]
+        record["checks"] = [
+            {"id": "gateway", "name": "동일 도구", "status": "passed", "simulation": True,
+             "input": "call-A actual target", "detail": "call-A recorded result", "at": "2026-09-22T01:00:00Z"},
+            {"id": "gateway", "name": "동일 도구", "status": "failed", "simulation": True,
+             "input": "call-B actual target", "detail": "call-B recorded failure", "at": "2026-09-22T01:00:01Z"},
+        ]
+        record["status"] = "failed"
+        for index in (0, 1):
+            for tab, field in (("input", "input"), ("output", "detail")):
+                with self.subTest(index=index, tab=tab):
+                    html, _ = self.render(case, "db-j", detail=True, tab=tab, attemptIndex=0, callIndex=index)
+                    body = self.detail_content(html, tab)
+                    self.assertIn(record["checks"][index][field], body.text)
+                    self.assertNotIn(record["checks"][1 - index][field], body.text)
+                    self.assert_no_mutation(html)
+
+    async def test_unperformed_call_has_no_claimed_transmitted_input(self):
+        case = await self.ready(await self.create())
+        case = await self.step(case, "run", "ap-j")
+        self.assertEqual(case["jobs"]["ap-j"]["history"][0]["checks"][3]["status"], "skipped")
+        skipped, _ = self.render(case, "ap-j", detail=True, tab="input", attemptIndex=0, callIndex=3)
+        self.assertIn("미수행", skipped.text)
+        self.assertRegex(self.detail_content(skipped, "input").text, "전달.*없|수행하지|미수행")
+        definition = workflow._seed()
+        for tool_id in definition["nodes"]["db-j"]["tools"]:
+            definition["tools"][tool_id].update(source="open_webui", adapter="unavailable", reference="synthetic-disconnected")
+        await self.publish(definition)
+        disconnected = await self.ready(await self.create())
+        disconnected = await self.step(disconnected, "run", "db-j")
+        html, _ = self.render(disconnected, "db-j", detail=True, tab="output", attemptIndex=0, callIndex=0)
+        self.assertIn("미수행", html.text)
+        self.assertIn("실행 연결", html.text)
+        self.assertNotIn("정상 반환됨", html.text)
+        self.assertNotIn("정상 반환 · 성공", html.text)
+        self.assert_no_mutation(html)
+
+    async def test_missing_legacy_call_values_do_not_fall_back_to_current_form_or_definition(self):
+        case = await self.ready(await self.create())
+        case = await self.step(case, "run", "db-j")
+        record = case["jobs"]["db-j"]["history"][0]
+        record["checks"] = [{"id": "gateway", "name": "과거 점검", "status": "passed"}]
+        case["jobs"]["db-j"]["inputs"]["db"] = "CURRENT-FORM-MUST-NOT-BE-HISTORICAL-INPUT"
+        case["definition"]["tools"]["gateway"]["version"] = "UNRECORDED-TOOL-VERSION"
+        for tab in ("input", "output"):
+            with self.subTest(tab=tab):
+                html, _ = self.render(case, "db-j", detail=True, tab=tab, attemptIndex=0, callIndex=0)
+                body = self.detail_content(html, tab)
+                self.assertIn("미기록", body.text)
+                self.assertNotIn("CURRENT-FORM-MUST-NOT-BE-HISTORICAL-INPUT", body.text)
+                self.assertNotIn("UNRECORDED-TOOL-VERSION", body.text)
+                self.assertNotIn("형식 적합", body.text)
+        case["jobs"]["db-j"]["history"] = []
+        missing, _ = self.render(case, "db-j", detail=True, tab="history")
+        self.assertRegex(missing.text, "기록.*없|미기록")
+        self.assertNotIn("조회 실패", missing.text)
+        self.assertNotIn("권한 제한", missing.text)
+        self.assert_no_mutation(missing)
+
+    async def test_configuration_uses_frozen_case_and_does_not_claim_instruction_compliance(self):
+        definition = workflow._seed()
+        definition["nodes"]["db-j"]["description"] = "FROZEN-J business purpose"
+        definition["tools"]["gateway"]["purpose"] = "FROZEN-TOOL role"
+        await self.publish(definition)
+        case = await self.ready(await self.create())
+        latest = deepcopy(definition)
+        latest["nodes"]["db-j"]["description"] = "LATEST-PUBLISHED must remain separate"
+        latest["tools"]["gateway"]["purpose"] = "LATEST-TOOL must remain separate"
+        await self.publish(latest)
+        current = (await self.service.get_state(self.alice, case_id=case["id"]))["case"]
+        html, _ = self.render(current, "db-j", detail=True, tab="config")
+        self.assertIn("FROZEN-TOOL role", html.text)
+        self.assertNotIn("LATEST-TOOL must remain separate", html.text)
+        self.assertNotIn("LATEST-PUBLISHED must remain separate", html.text)
+        self.assertIn(str(case["version"]), html.text)
+        self.assertNotIn("지침 준수 완료", html.text)
+        self.assert_no_mutation(html)
+
+    async def test_detail_lookup_failure_and_restricted_access_never_show_stale_records(self):
+        case = await self.ready(await self.create())
+        case = await self.step(case, "update_inputs", "db-j", {"inputs": {"db": "STALE-INPUT-REQUIRES-AUTHORIZED-READ"}})
+        case = await self.step(case, "run", "db-j")
+        for kind, text in (("failed", "조회 실패"), ("restricted", "접근 제한")):
+            for tab in ("config", "history", "input", "output"):
+                with self.subTest(kind=kind, tab=tab):
+                    html, source = self.render(case, "db-j", detail=True, tab=tab,
+                                               lookupError={"kind": kind, "message": "확인할 수 없는 <합성> 상태"})
+                    self.assertIn(text, html.text)
+                    self.assertTrue(html.find(**{"data-record-state": kind}))
+                    self.assertNotIn("STALE-INPUT-REQUIRES-AUTHORIZED-READ", html.text)
+                    self.assertNotIn("예시 응답: 정상입니다", html.text)
+                    self.assertNotIn("<합성>", source)
+                    self.assert_no_mutation(html)
+
+    async def test_configuration_never_exposes_unavailable_external_skill_body(self):
+        definition = workflow._seed()
+        definition["skills"]["restricted"] = {
+            "id": "restricted", "name": "비공개 합성 스킬", "type": "skill", "source": "open_webui",
+            "reference": "private-skill", "body": "PRIVATE-BODY-MUST-NOT-BE-RENDERED",
+        }
+        definition["nodes"]["db-j"]["skills"] = ["restricted"]
+        case = await self.create()
+        case["definition"] = definition
+        case["context"]["skills"] = []
+        html, _ = self.render(case, "db-j", detail=True, tab="config")
+        self.assertIn("비공개 합성 스킬", html.text)
+        self.assertIn("현재 계정 사용 불가", html.text)
+        self.assertNotIn("PRIVATE-BODY-MUST-NOT-BE-RENDERED", html.text)
+        self.assertNotIn("assets_available", definition,
+                         "A frozen case definition does not contain the current catalog lookup flag.")
+        unavailable, _ = self.render(case, "db-j", detail=True, tab="config", assetsAvailable=False)
+        self.assertIn("조회 실패", unavailable.text)
+        self.assertNotIn("현재 계정 사용 불가", unavailable.text)
+        self.assertNotIn("PRIVATE-BODY-MUST-NOT-BE-RENDERED", unavailable.text)
+
+    def test_preview_configuration_uses_current_accessible_skill_list_without_exposing_body(self):
+        for via_option in (False, True):
+            for accessible in (False, True):
+                with self.subTest(via_option=via_option, accessible=accessible):
+                    definition = workflow._seed()
+                    definition["skills"]["external"] = {
+                        "id": "external", "name": "외부 합성 스킬", "type": "skill", "source": "open_webui",
+                        "reference": "registered-skill", "body": "EXTERNAL-PREVIEW-BODY-NOT-PUBLIC",
+                    }
+                    definition["nodes"]["db-j"]["skills"] = ["external"]
+                    available = [{"id": "registered-skill", "name": "현재 사용 가능한 스킬"}] if accessible else []
+                    options = {"availableSkills": available} if via_option else {}
+                    if not via_option:
+                        definition["available_skills"] = available
+                    html, _ = self.render(None, "db-j", definition=definition, detail=True, tab="config", **options)
+                    external = [item for item in html.find("article") if "외부 합성 스킬" in item.text]
+                    self.assertEqual(len(external), 1)
+                    self.assertIn("등록됨" if accessible else "현재 계정 사용 불가", external[0].text)
+                    if accessible:
+                        self.assertNotIn("현재 계정 사용 불가", external[0].text)
+                    self.assertNotIn("EXTERNAL-PREVIEW-BODY-NOT-PUBLIC", html.text)
+                    self.assertNotIn("snapshot_updated_at", html.text)
+
+    async def test_registered_conditions_and_recorded_failures_have_separate_open_controls(self):
+        case = await self.ready(await self.create())
+        case = await self.step(case, "run", "ap-j")
+        html, _ = self.render(case, "install-t")
+        for node_id in ("db-j", "ap-j"):
+            with self.subTest(node=node_id):
+                rows = html.find("tr", **{"data-work-job": node_id})
+                self.assertEqual(len(rows), 1)
+                open_job = rows[0].find("button", **{"data-action": "select", "data-node-id": node_id})
+                condition = rows[0].find("button", **{"data-action": "job_condition", "data-node-id": node_id})
+                self.assertEqual(len(open_job), 1)
+                self.assertEqual(len(condition), 1)
+                self.assertFalse(open_job[0].find("button"))
+                self.assertFalse(condition[0].find("button"))
+                self.assertIn("aria-expanded", condition[0].attrs)
+        expanded, _ = self.render(case, "install-t", listView={"expanded": ["db-j", "ap-j"]})
+        for node_id in ("db-j", "ap-j"):
+            facts = expanded.find("tr", **{"data-work-condition": node_id})
+            self.assertEqual(len(facts), 1)
+            deps = workflow._dependencies(case["definition"]["nodes"], node_id)
+            for prerequisite in deps:
+                links = facts[0].find("button", **{"data-action": "select", "data-node-id": prerequisite})
+                self.assertEqual(len(links), 1)
+                self.assertIn(case["definition"]["nodes"][prerequisite]["rule"], facts[0].text)
+        ap_facts = expanded.find("tr", **{"data-work-condition": "ap-j"})[0]
+        self.assertIn(case["jobs"]["ap-j"]["checks"][2]["detail"], ap_facts.text)
+        unconstrained = deepcopy(case)
+        for ancestor in workflow._ancestors(unconstrained["definition"]["nodes"], "db-j"):
+            ancestor["deps"] = []
+            ancestor["condition"] = "all"
+        ordinary, _ = self.render(unconstrained, "install-t")
+        self.assertFalse(ordinary.find("button", **{"data-action": "job_condition", "data-node-id": "db-j"}))
+        for node_id in ("setup-p", "install-t", "ap-j"):
+            surface, _ = self.render(case, node_id)
+            self.assertNotIn("지금 할 일", surface.text)
+            self.assertNotIn("다음 할 일", surface.text)
+            self.assertFalse(surface.find(**{"class": "ew-work-next"}))
 
     def section(self, html, name):
         matches = html.find(**{"data-work-section": name})
@@ -170,7 +386,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
                 self.assertNotIn("예시 업무", html.text)
                 if node["type"] != "j":
                     self.assertFalse(html.find("button", **{"data-action": "run"}))
-                    self.assertIn("다음 작업 열기", html.text)
+                    self.assertNotIn("다음 작업 열기", html.text)
                     self.assertFalse(html.find("form"))
                     selected = {item.attrs["data-node-id"] for item in html.find(**{"data-action": "select"})}
                     self.assertTrue(set(node["children"]) <= selected)
@@ -183,8 +399,8 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         case = await self.ready(case)
         process, _ = self.render(case, "setup-p")
         task, _ = self.render(case, "install-t")
-        self.assertEqual(self.run_button(process, "setup-p").text, "가능한 모의 점검 진행")
-        self.assertEqual(self.run_button(task, "install-t").text, "가능한 모의 점검 진행")
+        self.assertEqual(self.run_button(process, "setup-p").text, "범위 모의 점검 실행")
+        self.assertEqual(self.run_button(task, "install-t").text, "범위 모의 점검 실행")
         self.assertIn("단계별 진행", " ".join(item.text for item in process.find("h3")))
         self.assertIn("작업 목록", " ".join(item.text for item in task.find("h3")))
         manual, _ = self.render(case, "scope-j")
@@ -192,10 +408,10 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         pending, _ = self.render(await self.create(), "scope-j")
         self.assertEqual(self.run_button(pending, "scope-j").text, "확인 완료")
         self.assertIn("담당자의 확인이 필요합니다.", pending.text)
-        self.assertIn("AI의 자료 정리만으로 완료 처리하지 않습니다.", pending.text)
+        self.assertIn("사람 확인", pending.text)
         self.assertFalse(manual.find("textarea"), "Manual confirmation has no persisted free-form note contract.")
 
-    async def test_completed_task_has_one_next_action_to_process_without_mutation(self):
+    async def test_completed_task_preserves_parent_navigation_without_recommendation_or_mutation(self):
         case = await self.ready(await self.create())
         for node_id in ("db-j", "ap-j", "ap-j"):
             case = await self.step(case, "run", node_id)
@@ -204,9 +420,11 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
             html, _ = self.render(case, "install-t", readOnly=read_only)
             primary = [button for button in html.find("button")
                        if "ew-primary" in button.attrs.get("class", "").split()]
-            self.assertEqual(len(primary), 1)
-            self.assertEqual(primary[0].text, "전체 진행 보기")
-            self.assertEqual(primary[0].attrs["data-node-id"], "setup-p")
+            self.assertFalse(primary)
+            parent = html.find("button", **{"data-action": "select", "data-node-id": "setup-p"})
+            self.assertEqual(len(parent), 1)
+            self.assertIn(case["definition"]["nodes"]["setup-p"]["name"], parent[0].text)
+            self.assertNotIn("다음 할 일", html.text)
             self.assert_no_mutation(html)
         history, _ = self.render(case, "install-t", history=True)
         self.assertFalse(history.find(**{"data-action": "select"}))
@@ -244,9 +462,11 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertRegex(current.text, "사람|담당자")
         self.assertIn(confirmed_at, current.text)
         self.assertNotIn(changed_at, current.text)
-        self.assertIn(target, current.text)
+        detail, detail_source = self.render(case, "scope-j", detail=True, tab="input", attemptIndex=0)
+        self.assertIn(target, detail.text)
         self.assertNotIn("<합성>", source, "Saved text must be escaped before HTML rendering.")
-        self.assertIn(case["jobs"]["scope-j"]["history"][-1]["detail"], current.text)
+        self.assertNotIn("<합성>", detail_source)
+        self.assertRegex(detail.text, "담당자|사람 확인")
 
     async def test_failed_check_skips_are_unperformed_and_retry_preserves_failure_history(self):
         case = await self.ready(await self.create())
@@ -261,17 +481,19 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(skipped)
         self.assertTrue(all("미수행" in item.text and "적용 제외" not in item.text for item in skipped))
         self.assertIn(first["checks"][2]["detail"], current.text)
-        self.assertIn(first["checks"][2]["input"], current.text)
+        detail, _ = self.render(case, "ap-j", detail=True, tab="input", attemptIndex=0, callIndex=2)
+        self.assertIn(first["checks"][2]["input"], self.detail_content(detail, "input").text)
         self.assertRegex(self.run_button(html, "ap-j").text, "다시|재시도")
-        self.assertIn("실패 이력은 유지되며 재시도 결과를 완료 조건에 따라 판정", html.text)
         case = await self.step(case, "run", "ap-j")
         html, _ = self.render(case, "ap-j")
-        current, history = self.section(html, "current-result"), self.section(html, "history")
+        current = self.section(html, "current-result")
+        history, _ = self.render(case, "ap-j", detail=True, tab="history", attemptIndex=0)
         self.assertFalse(current.find(**{"data-status": "failed"}))
         self.assertFalse(current.find(**{"data-status": "skipped"}))
         self.assertTrue(history.find(**{"data-status": "failed"}))
         self.assertIn(first["at"], history.text)
-        self.assertIn(first["checks"][2]["input"], history.text)
+        old_input, _ = self.render(case, "ap-j", detail=True, tab="input", attemptIndex=0, callIndex=2)
+        self.assertIn(first["checks"][2]["input"], self.detail_content(old_input, "input").text)
 
     async def test_input_change_and_dependency_rerun_keep_success_only_in_history(self):
         definition = workflow._seed()
@@ -289,14 +511,16 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(case["jobs"][node_id]["history"], before["jobs"][node_id]["history"])
                 html, _ = self.render(case, node_id)
                 self.assertFalse(self.section(html, "current-result").find(**{"data-status": "passed"}))
-                self.assertTrue(self.section(html, "history").find(**{"data-status": "passed"}))
+                history, _ = self.render(case, node_id, detail=True, tab="history")
+                self.assertTrue(history.find(**{"data-status": "passed"}))
         for node_id in ("db-j", "interface-j"):
             case = await self.step(case, "run", node_id)
         case = await self.step(case, "run", "db-j")
         self.assertEqual(case["jobs"]["interface-j"]["status"], "pending")
         html, _ = self.render(case, "interface-j")
         self.assertFalse(self.section(html, "current-result").find(**{"data-status": "passed"}))
-        self.assertTrue(self.section(html, "history").find(**{"data-status": "passed"}))
+        history, _ = self.render(case, "interface-j", detail=True, tab="history")
+        self.assertTrue(history.find(**{"data-status": "passed"}))
 
     async def test_draft_edit_invalidates_old_confirmation_and_preserves_document_contract(self):
         definition = workflow._seed()
@@ -307,7 +531,8 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         case = await self.step(case, "run", "scope-j", {"document": old})
         case = await self.step(case, "run", "scope-j", {"confirm": True})
         html, _ = self.render(case, "scope-j")
-        self.assertIn(old, self.section(html, "current-result").text)
+        confirmed, _ = self.render(case, "scope-j", detail=True, tab="input", attemptIndex=0)
+        self.assertIn(old, confirmed.text)
         self.assertIn("초안 검토가 완료됐습니다.", self.section(html, "current-result").text)
         self.assertNotIn("검토가 필요", self.section(html, "current-result").text)
         case = await self.step(case, "run", "scope-j", {"document": new})
@@ -317,7 +542,9 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(form.find("button", type="submit", **{"data-mutation": None}))
         self.assertIn("검토 완료", self.run_button(html, "scope-j").text)
         self.assertFalse(self.section(html, "current-result").find(**{"data-status": "passed"}))
-        self.assertIn(old, self.section(html, "history").text)
+        previous, _ = self.render(case, "scope-j", detail=True, tab="input", attemptIndex=0)
+        self.assertIn(old, previous.text)
+        self.assertNotIn(new, self.detail_content(previous, "input").text)
 
     async def test_excluded_zero_total_is_not_shown_as_all_passed(self):
         case = await self.create(site_id="hu-a", system="FDC")
@@ -362,7 +589,8 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         unavailable = await self.ready(await self.create())
         unavailable = await self.step(unavailable, "run", "ap-j")
         html, _ = self.render(unavailable, "ap-j")
-        self.assertIn("실제 실행 연결이 없어 수행하지 않았습니다", html.text)
+        detail, _ = self.render(unavailable, "ap-j", detail=True, tab="output", attemptIndex=0, callIndex=2)
+        self.assertIn("실제 실행 연결이 없어 수행하지 않았습니다", detail.text)
         self.assertTrue(all("선행 작업 대기" not in badge.text for badge in html.find(**{"data-status": "blocked"})))
 
         definition = workflow._seed()
@@ -419,9 +647,13 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         case = await self.step(case, "run", "ap-j")
         process, _ = self.render(case, "setup-p")
         task, _ = self.render(case, "install-t")
-        primary = process.find("button", **{"data-action": "select", "data-node-id": "ap-j"})
-        self.assertTrue(any(item.text == "문제 있는 작업 보기" and "ew-primary" in item.attrs.get("class", "") for item in primary))
-        self.assertTrue(any(item.text == "문제 있는 작업 보기" for item in task.find("button", **{"data-node-id": "ap-j"})))
+        distribution = process.find(**{"data-work-distribution": "install-t"})
+        self.assertEqual(len(distribution), 1)
+        self.assertIn("실패 1", distribution[0].text)
+        self.assertNotIn("문제 있는 작업 보기", process.text)
+        task_job = task.find("button", **{"data-action": "select", "data-node-id": "ap-j"})
+        self.assertEqual(len(task_job), 1)
+        self.assertEqual(task_job[0].text, case["definition"]["nodes"]["ap-j"]["name"])
         # Failed AP is opened for explicit retry; independent DB remains eligible
         # for the separate scope action, which must not retry AP automatically.
         self.run_button(process, "setup-p")
@@ -443,7 +675,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("2 / 4", metrics["stages"])
         self.assertIn("1", metrics["attention"])
         self.assertIn("3", metrics["incomplete"])
-        self.assertEqual(self.run_button(html, "setup-p").text, "가능한 모의 점검 진행")
+        self.assertEqual(self.run_button(html, "setup-p").text, "범위 모의 점검 실행")
 
     async def test_large_job_list_search_filter_and_pages_preserve_original_targets(self):
         case = await self.create()
@@ -476,7 +708,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(empty.find("tr", **{"data-work-job": None}))
         self.assertIn("일치하는 작업이 없습니다", empty.text)
 
-    async def test_job_guidance_is_business_content_and_evidence_is_folded(self):
+    async def test_job_guidance_is_business_content_and_evidence_opens_read_only_detail(self):
         definition = workflow._seed()
         definition["nodes"]["ap-j"]["instructions"] = "점검 전 담당자에게 대상 서버를 확인하세요."
         definition["skills"]["setup"]["body"] = "PRIVATE_SKILL_SOURCE_MUST_NOT_APPEAR"
@@ -488,10 +720,10 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("PRIVATE_SKILL_SOURCE_MUST_NOT_APPEAR", html.text)
         self.assertNotIn("적용 지침과 스킬", html.text)
         current = self.section(html, "current-result")
-        details = current.find("details")
-        self.assertTrue(details)
-        self.assertTrue(all("open" not in detail.attrs for detail in details))
-        self.assertIn("근거 보기", details[0].text)
+        details = current.find("button", **{"data-action": "work_detail", "data-detail-tab": "output"})
+        self.assertEqual(len(details), 1)
+        self.assertNotIn("data-mutation", details[0].attrs)
+        self.assertEqual(details[0].attrs["data-node-id"], "ap-j")
         self.assertLess(source.index('data-work-section="current-result"'), source.index('id="ees-work-inputs"'))
         self.assertIn(case["jobs"]["ap-j"]["history"][0]["checks"][2]["detail"], current.text)
 
@@ -690,16 +922,16 @@ return {blank,ready,excluded,html,connection,waiting};
                     self.assertIn("필수 스킬을 현재 계정으로 사용할 수 없습니다", job.text)
                     self.assertTrue(job.find(**{"data-status": "skill_unavailable"}))
 
-    async def test_completed_job_opens_next_available_job_without_execution(self):
+    async def test_completed_job_preserves_parent_access_without_recommending_next_job(self):
         case = await self.ready(await self.create())
         before = deepcopy(case["jobs"]["ap-j"])
         case = await self.step(case, "run", "db-j")
         html, _ = self.render(case, "db-j")
-        next_stage = html.find(**{"data-work-stage": "next"})[0]
-        next_button = next_stage.find("button")[0]
-        self.assertEqual(next_button.attrs["data-action"], "select")
-        self.assertEqual(next_button.attrs["data-node-id"], "ap-j")
-        self.assertNotIn("data-mutation", next_button.attrs)
+        parent = html.find("button", **{"data-action": "select", "data-node-id": "install-t"})
+        self.assertEqual(len(parent), 1)
+        self.assertNotIn("data-mutation", parent[0].attrs)
+        self.assertFalse(html.find(**{"data-work-stage": "next"}))
+        self.assertNotIn("다음 작업", html.text)
         self.assertFalse(html.find("button", **{"data-action": "run"}))
         self.assertEqual(case["jobs"]["ap-j"], before)
 

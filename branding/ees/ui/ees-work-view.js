@@ -160,18 +160,18 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
   const reasonFor=item=>{
     const saved=c?.jobs?.[item.id] || {},s=nodeState(item),missing=missingFor(item);
     if(s==='skipped')return '현장 조건에 따라 적용 제외';
-    if(s==='passed')return '완료 기록을 확인할 수 있습니다.';
+    if(s==='passed')return '완료 기록 있음';
     if(saved.blocked_reason)return saved.blocked_reason;
     if(skillUnavailable(item))return '필수 스킬을 현재 계정으로 사용할 수 없습니다. 권한·사용 여부를 확인하세요.';
     if(missing.length)return '선행 작업 확인: '+missing.map(nameOf).join(', ');
     if(unavailable(item))return '업무 실행 연결이 없어 점검할 수 없습니다.';
     const values=valuesFor(item),missingInputs=fieldsFor(item).filter(key=>!String(values[key] ?? '').trim());
     if(missingInputs.length)return '입력 필요: '+missingInputs.map(key=>labels[key]).join(', ');
-    if(item.mode==='manual')return '업무 내용을 직접 확인한 뒤 완료를 기록하세요.';
-    if(item.mode==='draft')return saved.document?'저장한 초안을 검토한 뒤 완료를 기록하세요.':'초안을 작성해 반영한 뒤 내용을 검토하세요.';
-    if(s==='failed')return '실패한 점검을 확인한 뒤 다시 점검하세요.';
+    if(item.mode==='manual')return '담당자 확인 필요';
+    if(item.mode==='draft')return saved.document?'저장된 초안 · 검토 필요':'검토할 초안 미등록';
+    if(s==='failed')return (saved.checks || []).filter(check=>check.status==='failed').map(check=>check.detail || check.message).filter(Boolean).join(' · ') || '실패 사유 미기록';
     if(s==='blocked')return '입력·연결·접근 권한과 선행 작업을 확인하세요.';
-    return '점검 대상을 확인한 뒤 진행하세요.';
+    return '등록된 조건 충족 시 모의 점검 가능';
   };
   const selectButton=(item,text,primary=false)=>button(text || item.name,'select','data-node-id="'+esc(item.id)+'" class="'+(primary?'ew-primary ':'')+'ew-work-link"');
   const runButton=(text,disabled=false,primary=true,attrs='')=>button(text,'run','id="ees-work-run" data-node-id="'+esc(n.id)+'" class="'+(primary?'ew-primary':'')+'" data-mutation '+attrs+(disabled?' disabled data-unavailable="true"':''));
@@ -185,7 +185,7 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
   // and Skill/prompt source bodies belong in Workspace, not this surface.
   const guidance=path.filter(item=>String(item.instructions || '').trim()).map(item=>'<p>'+esc(item.instructions)+'</p>').join('');
   const guidanceHTML=guidance?'<details class="ew-work-guidance"><summary>업무 안내</summary>'+guidance+'</details>':'';
-  const deps=prerequisites(n),depsHTML=deps.length?'<div class="ew-work-prerequisites"><span>선행 작업</span>'+deps.map(id=>'<span>'+esc(nameOf(id))+(preview?'':' · '+esc(statuses[c.node_states?.[id]?.status] || '확인 필요'))+'</span>').join('')+'</div>':'';
+  const deps=prerequisites(n),depsHTML=deps.length?'<div class="ew-work-prerequisites"><span>선행 작업</span>'+deps.map(id=>nodes[id]?(history?'<span>'+esc(nameOf(id))+'</span>':selectButton(nodes[id],nameOf(id)))+'<span>'+esc(preview?'시작 전':statuses[c.node_states?.[id]?.status] || '확인 필요')+'</span>':'<span>선행 작업 미기록</span>').join('')+'</div>':'';
   const leafJobs=descendants(n),eligibleJobs=leafJobs.filter(applies);
   const missingInputsFor=item=>fieldsFor(item).filter(key=>!String(valuesFor(item)[key] ?? '').trim());
   const attentionFor=item=>{
@@ -213,9 +213,28 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
     const counts={simulation:0,human:0,unavailable:0};remaining.forEach(item=>counts[item.mode!=='tool'?'human':unavailable(item)?'unavailable':'simulation']++);
     const metric=(key,label,value)=>'<div data-work-metric="'+key+'"><span>'+label+'</span><strong>'+value+'</strong></div>';
     const progress='<div class="ew-work-progress" data-work-section="progress"><div class="ew-work-metrics">'+(n.type==='p'?metric('stages','단계 완료','<span data-work-done="'+count.done+'" data-work-total="'+count.total+'">'+count.done+' / '+count.total+'</span>'):'')+metric('jobs','작업 완료','<span'+(n.type==='t'?' data-work-done="'+jobs.done+'" data-work-total="'+jobs.total+'"':'')+'>'+jobs.done+' / '+jobs.total+'</span>')+metric('incomplete','미완료',remaining.length+'개 작업')+metric('attention','미완료 중 조치 필요',problems.length+'개 작업')+'</div>'+(!preview&&jobs.total?'<progress aria-label="작업 완료 수" value="'+jobs.done+'" max="'+jobs.total+'"></progress>':'')+(jobs.excluded?'<p class="ew-muted">적용 제외 '+jobs.excluded+'개 작업'+(n.type==='p'&&count.excluded?' · '+count.excluded+'개 단계':'')+'</p>':'')+(!jobs.total?'<p class="ew-muted">'+(children.length?'이 범위는 적용 제외입니다.':'등록된 하위 작업이 없습니다.')+'</p>':'')+'</div>';
+    const conditionsFor=child=>{
+      const saved=c?.jobs?.[child.id] || {},facts=[];
+      for(const item of lineage(child.id,definition)){
+        if(item.condition&&item.condition!=='all')facts.push('<p>적용 조건 · '+esc(item.condition)+'</p>');
+        if(item.enabled===false)facts.push('<p>사용 중지된 작업</p>');
+      }
+      for(const id of prerequisites(child)){
+        const dep=nodes[id];
+        facts.push('<div class="ew-work-dependency">'+(dep?selectButton(dep,dep.name):'<span>선행 작업 미기록</span>')+'<p>'+esc(dep?.rule || '충족 조건 미기록')+'</p><small>'+esc(preview?'시작 전':statuses[c.node_states?.[id]?.status] || '상태 미기록')+'</small></div>');
+      }
+      if(saved.blocked_reason)facts.push('<p>'+esc(saved.blocked_reason)+'</p>');
+      for(const check of saved.checks || [])if(['failed','blocked','skipped'].includes(check.status))facts.push('<p>'+esc(check.name || '점검')+' · '+esc(check.detail || check.message || '사유 미기록')+'</p>');
+      if(nodeState(child)==='failed'&&!(saved.checks || []).some(check=>check.status==='failed'))facts.push('<p>실패 사유 미기록</p>');
+      const missing=missingInputsFor(child);if(missing.length)facts.push('<p>필수 입력 · '+esc(missing.map(key=>labels[key]).join(', '))+'</p>');
+      if(skillUnavailable(child))facts.push('<p>필수 스킬을 현재 계정으로 사용할 수 없습니다.</p>');
+      if(unavailable(child))facts.push('<p>실행 연결 필요 · 실제 호출 미수행</p>');
+      return facts.join('');
+    };
     const jobRow=child=>{
-      const childStatus=nodeState(child),detail=childStatus==='passed'?(['manual','draft'].includes(child.mode)?'담당자 확인 완료':'최근 결과 유효'):reasonFor(child);
-      return '<tr data-work-job="'+esc(child.id)+'"'+(attentionFor(child)?' class="ew-work-problem"':'')+'><td>'+selectButton(child)+'<small class="ew-work-row-note">'+esc(detail)+'</small></td><td>'+esc(modeLabel(child))+'</td><td>'+badge(childStatus)+'</td></tr>';
+      const shown=navigationStateFor(child),facts=conditionsFor(child),open=Boolean(listView.expanded?.includes(child.id)&&facts),conditionId='ees-work-condition-'+child.id;
+      const toggle=facts?button(open?'⌃':'⌄','job_condition','data-node-id="'+esc(child.id)+'" aria-label="'+esc(child.name)+' 조건·사유 '+(open?'접기':'펼치기')+'" aria-expanded="'+open+'" aria-controls="'+esc(conditionId)+'" class="ew-work-condition-toggle"'):'';
+      return '<tr data-work-job="'+esc(child.id)+'"'+(attentionFor(child)?' class="ew-work-problem"':'')+'><td>'+selectButton(child)+'</td><td>'+esc(modeLabel(child))+'</td><td><span class="ew-badge" data-status="'+esc(shown.key)+'">'+esc(shown.label)+'</span></td><td>'+toggle+'</td></tr>'+(open?'<tr data-work-condition="'+esc(child.id)+'"><td colspan="4" id="'+esc(conditionId)+'">'+facts+'</td></tr>':'');
     };
     const query=String(listView.query || ''),needle=query.trim().toLocaleLowerCase(),filter=['all','attention','incomplete','completed','excluded'].includes(listView.filter)?listView.filter:'all';
     const matches={all:()=>true,attention:attentionFor,incomplete:item=>applies(item)&&nodeState(item)!=='passed',completed:item=>applies(item)&&nodeState(item)==='passed',excluded:item=>!applies(item)};
@@ -223,26 +242,18 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
     const pageSize=25,page=Math.min(Math.max(0,Number.isFinite(listView.page)?Math.floor(listView.page):0),Math.max(0,Math.ceil(matching.length/pageSize)-1)),offset=page*pageSize;
     const filters=[['all','전체'],['attention','조치 필요'],['incomplete','미완료'],['completed','완료'],['excluded','적용 제외']];
     const pages=matching.length>pageSize?button('이전','job_page','data-page="'+Math.max(0,page-1)+'"'+(!page?' disabled':''))+button('다음','job_page','data-page="'+(page+1)+'"'+(offset+pageSize>=matching.length?' disabled':'')):'';
-    const browser='<section class="ew-work-browser ew-work-list" data-work-section="job-list"><h3>작업 목록</h3><label class="ew-work-search">작업 이름 검색<input id="ees-work-job-search" type="search" value="'+esc(query)+'" autocomplete="off"></label><div class="ew-work-filters" aria-label="작업 상태 필터">'+filters.map(([key,label])=>button(label+' '+leafJobs.filter(matches[key]).length,'job_filter','data-filter="'+key+'" aria-pressed="'+(key===filter)+'"')).join('')+'</div><table><thead><tr><th scope="col">작업</th><th scope="col">수행 방식</th><th scope="col">상태</th></tr></thead><tbody>'+matching.slice(offset,offset+pageSize).map(jobRow).join('')+'</tbody></table>'+(!matching.length?'<p class="ew-muted" role="status">일치하는 작업이 없습니다.</p>':'')+'<div class="ew-work-pagination"><span role="status">'+(matching.length?offset+1:0)+'–'+Math.min(offset+pageSize,matching.length)+' / '+matching.length+'개 작업</span>'+pages+'</div></section>';
+    const browser='<section class="ew-work-browser ew-work-list" data-work-section="job-list"><h3>작업 목록</h3><label class="ew-work-search">작업 이름 검색<input id="ees-work-job-search" type="search" value="'+esc(query)+'" autocomplete="off"></label><div class="ew-work-filters" aria-label="작업 상태 필터">'+filters.map(([key,label])=>button(label+' '+leafJobs.filter(matches[key]).length,'job_filter','data-filter="'+key+'" aria-pressed="'+(key===filter)+'"')).join('')+'</div><table class="ew-work-job-table"><thead><tr><th scope="col">작업</th><th scope="col">수행 방식</th><th scope="col">상태</th><th scope="col">조건·사유</th></tr></thead><tbody>'+matching.slice(offset,offset+pageSize).map(jobRow).join('')+'</tbody></table>'+(!matching.length?'<p class="ew-muted" role="status">일치하는 작업이 없습니다.</p>':'')+'<div class="ew-work-pagination"><span role="status">'+(matching.length?offset+1:0)+'–'+Math.min(offset+pageSize,matching.length)+' / '+matching.length+'개 작업</span>'+pages+'</div></section>';
     const rows=children.map(child=>{
       const childStatus=nodeState(child),childJobs=jobProgress(child),childProblems=descendants(child).filter(attentionFor).length;
       if(history)return '<tr><td colspan="3"><details class="ew-history-node"><summary>'+esc(child.name)+'</summary>'+workPanelNodeHTML(c,child,{definition,readOnly:true,history:true})+'</details></td></tr>';
-      return '<tr'+(childProblems?' class="ew-work-problem"':'')+'><td>'+selectButton(child)+(childProblems?'<small class="ew-work-row-note">조치 필요 '+childProblems+'개 작업</small>':'')+'</td><td>'+childJobs.done+' / '+childJobs.total+(childJobs.excluded?'<small>제외 '+childJobs.excluded+'</small>':'')+'</td><td>'+badge(childStatus)+'</td></tr>';
+      const distribution=new Map();for(const job of descendants(child).filter(applies)){const state=navigationStateFor(job);if(!['passed','ready','unstarted'].includes(state.key))distribution.set(state.label,(distribution.get(state.label)||0)+1);}
+      const breakdown=childProblems&&distribution.size?'<small data-work-distribution="'+esc(child.id)+'">'+[...distribution].map(([label,count])=>esc(label)+' '+count).join(' · ')+'</small>':'';
+      return '<tr'+(childProblems?' class="ew-work-problem"':'')+'><td>'+selectButton(child)+(child.description?'<small>'+esc(child.description)+'</small>':'')+breakdown+'</td><td>'+childJobs.done+' / '+childJobs.total+(childJobs.excluded?'<small>적용 제외 '+childJobs.excluded+'</small>':'')+'</td><td>'+badge(childStatus)+'</td></tr>';
     }).join('');
     const table=history||n.type==='p'?'<section class="ew-work-list"><h3>'+unit+'별 진행</h3><table><thead><tr><th scope="col">'+unit+'</th><th scope="col">작업 완료</th><th scope="col">상태</th></tr></thead><tbody>'+rows+'</tbody></table></section>':'';
-    let primary='',secondary='',nextText='';
-    if(!locked&&next){
-      if(problems.length){primary=selectButton(next,'문제 있는 작업 보기',true);nextText=next.name+' · '+reasonFor(next);}
-      else if(ready.length){primary=runButton('가능한 모의 점검 진행',previewBlocked);nextText='이 '+(n.type==='p'?'워크플로우':'단계')+' 범위의 모의 점검을 진행합니다. 사람 확인과 실패 재시도는 별도입니다.';}
-      else{primary=selectButton(next,'다음 작업 열기',true);nextText=next.name+' · '+reasonFor(next);}
-      if(problems.length&&ready.length)secondary=runButton('가능한 모의 점검 진행',previewBlocked,false);
-    }else if(locked)nextText=jobs.total?'완료 결과와 근거를 확인할 수 있습니다.':'적용 대상 작업이 없습니다.';
-    if(!history&&parent&&nodeState(n)==='passed'){
-      primary=selectButton(parent,'전체 진행 보기',true);nextText='이 단계를 마쳤습니다. 전체 진행에서 다음 작업을 확인하세요.';
-    }
     const execution=!locked&&remaining.length?'<details class="ew-work-execution" data-work-section="execution-scope"><summary>진행 범위 자세히</summary><p>모의 점검 <span data-work-count="simulation">'+counts.simulation+'</span>개 · 사람 확인/검토 <span data-work-count="human">'+counts.human+'</span>개 · 실행 연결 필요 <span data-work-count="unavailable">'+counts.unavailable+'</span>개</p><p class="ew-muted">적용 대상 미완료 작업의 구성입니다. 이번 실행 예정 수가 아닙니다. 선행 점검이 완료되면 범위 안의 다음 점검도 이어집니다. 실행 시 입력·권한·연결을 다시 확인하며 진행할 수 없으면 차단 이유를 기록합니다. 실패 재시도와 사람 확인은 별도입니다.</p></details>':'';
-    const actionHTML=(nextText?'<div class="ew-work-next"><span>다음 할 일</span><p>'+esc(nextText)+'</p></div>':'')+(!locked&&remaining.length?'<p class="ew-work-ready" data-work-ready="'+ready.length+'">현재 점검 가능 '+ready.length+'개 · '+esc(n.name)+' 범위</p>'+(ready.length?'<p class="ew-muted">선행 점검이 완료되면 범위 안의 다음 점검도 이어집니다. 실행 시 조건·권한을 다시 확인합니다.</p>':''):'')+(primary?'<div class="ew-work-actions">'+primary+secondary+'</div>':'');
-    return header+(n.description?'<p class="ew-work-goal">'+esc(n.description)+'</p>':'')+(preview?previewActions:'')+criterion+progress+actionHTML+depsHTML+table+(!history?(n.type==='p'?'<details class="ew-work-job-finder"'+(query||filter!=='all'?' open':'')+'><summary>전체 작업 찾아보기</summary>'+browser+'</details>':browser):'')+guidanceHTML+execution;
+    const actionHTML=!locked&&remaining.length?'<section class="ew-work-scope-action"><p class="ew-work-ready" data-work-ready="'+ready.length+'">현재 점검 가능 '+ready.length+'개 · '+esc(n.name)+' 범위</p>'+(ready.length?'<div class="ew-work-actions">'+runButton('범위 모의 점검 실행',previewBlocked)+'</div>':'')+'<p class="ew-work-scope-boundary">사람 확인·실패 재시도는 별도입니다. 미연결 작업은 호출 없이 차단 사유를 기록합니다.<br>현재 점검 가능 수는 최종 처리 수가 아닙니다.</p></section>':'';
+    return header+(n.description?'<p class="ew-work-goal">'+esc(n.description)+'</p>':'')+(preview?previewActions:'')+criterion+progress+depsHTML+table+(!history?(n.type==='p'?'<details class="ew-work-job-finder"'+(query||filter!=='all'?' open':'')+'><summary>전체 작업 찾아보기</summary>'+browser+'</details>':browser):'')+actionHTML+guidanceHTML+execution;
   }
   const dataHTML=(values,document)=>Object.entries(values || {}).filter(([key])=>Object.hasOwn(labels,key)).map(([key,value])=>'<p><strong>'+esc(labels[key])+'</strong> · '+esc(value)+'</p>').join('')+(document?'<p><strong>저장된 초안</strong></p><pre>'+esc(document)+'</pre>':'');
   const checksHTML=checks=>(checks || []).map((check,index)=>'<div class="ew-check"><div class="ew-heading"><strong>'+esc(check.name || tools[check.id || check.tool_id || check.tool]?.name || '점검 '+(index+1))+'</strong>'+(check.status==='skipped'?'<span class="ew-badge" data-status="skipped">미수행</span>':badge(check.status))+'</div><p>'+esc(check.message || check.detail || check.summary || '')+'</p>'+(check.input!==undefined?'<p>점검 대상 · '+esc(check.input)+'</p>':'')+(check.at?'<p>확인 시각 · '+esc(check.at)+'</p>':'')+'</div>').join('');
@@ -252,10 +263,10 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
   const latest=!preview&&applies(n)&&!['pending','review'].includes(job.status)&&last&&last.status===job.status&&last.attempt===job.attempt&&(n.mode!=='tool'||checks.length)?last:null;
   const previous=latest?records.slice(0,-1):records;
   const failure=latest?.checks?.find(check=>['failed','blocked'].includes(check.status));
-  const currentText=!applies(n)?'이 업무는 현재 범위에서 적용 제외입니다.':preview?'아직 시작하지 않은 업무입니다.':latest&&nodeState(n)==='passed'&&['manual','draft'].includes(n.mode)?(n.mode==='draft'?'초안 검토가 완료됐습니다.':'담당자 확인이 완료됐습니다.'):unavailable(n)?'실행 연결이 필요합니다.':nodeState(n)==='failed'?'점검 결과를 확인해 주세요.':nodeState(n)==='blocked'?reasonFor(n):n.mode==='manual'?'담당자의 확인이 필요합니다.':n.mode==='draft'?'초안 검토가 필요합니다.':latest?(failure?.detail || failure?.message || latest.detail || '점검 결과가 저장되었습니다.'):records.length?'현재 조건의 유효한 결과가 없습니다. 재점검이 필요합니다.':'아직 수행한 결과가 없습니다.';
-  const currentMeta=!applies(n)?'현재 공장·시스템 조건에서는 실행 대상이 아닙니다.':preview?'업무를 이해한 뒤 필요한 입력이나 확인을 진행하세요.':latest?esc((latest.at || latest.completed_at || '실행 시각 미기록')+' · '+recordKind(latest)):unavailable(n)?'실행 연결 전에는 수행된 것으로 기록하지 않습니다.':n.mode==='manual'?'아직 확인 완료 기록이 없습니다.':n.mode==='draft'?(job.document?'저장된 초안을 직접 검토해 주세요.':'검토할 초안이 아직 없습니다.'):(records.length?'이전 결과는 실행 이력에 보존됩니다.':'미수행');
+  const currentText=!applies(n)?'이 업무는 현재 범위에서 적용 제외입니다.':preview?'아직 시작하지 않은 업무입니다.':latest&&nodeState(n)==='passed'&&['manual','draft'].includes(n.mode)?(n.mode==='draft'?'초안 검토가 완료됐습니다.':'담당자 확인이 완료됐습니다.'):unavailable(n)?'실행 연결이 필요합니다.':nodeState(n)==='failed'?(failure?.detail || failure?.message || '실패 사유 미기록'):nodeState(n)==='blocked'?reasonFor(n):n.mode==='manual'?'담당자의 확인이 필요합니다.':n.mode==='draft'?'초안 검토가 필요합니다.':latest?(failure?.detail || failure?.message || latest.detail || '점검 결과가 저장되었습니다.'):records.length?'현재 조건의 유효한 결과가 없습니다. 재점검이 필요합니다.':'아직 수행한 결과가 없습니다.';
+  const currentMeta=!applies(n)?'현재 공장·시스템 조건에서는 실행 대상이 아닙니다.':preview?'미수행 · 아직 실행 기록이 없습니다.':latest?esc((latest.at || latest.completed_at || '실행 시각 미기록')+' · '+recordKind(latest)):unavailable(n)?'실행 연결 전에는 수행된 것으로 기록하지 않습니다.':n.mode==='manual'?'아직 확인 완료 기록이 없습니다.':n.mode==='draft'?(job.document?'저장된 초안을 직접 검토해 주세요.':'검토할 초안이 아직 없습니다.'):(records.length?'이전 결과는 실행 이력에 보존됩니다.':'미수행');
   const checkSummary=latest&&checks.length?'<div class="ew-work-check-summary" aria-label="수행 결과">'+checks.map((check,index)=>'<div><span>'+esc(check.name || tools[check.id || check.tool_id || check.tool]?.name || '점검 '+(index+1))+'</span>'+(check.status==='skipped'?'<span class="ew-badge" data-status="skipped">미수행</span>':badge(check.status))+'</div>').join('')+'</div>':'';
-  const result='<section class="ew-work-result" data-work-section="current-result"><h3>현재 상태</h3><p class="ew-work-current-title">'+esc(currentText)+'</p><p class="ew-muted">'+currentMeta+'</p>'+checkSummary+(latest?'<details class="ew-work-detail"><summary data-work-overlay="'+esc(n.name)+' 결과">근거 보기'+(failure?' · 확인 필요':'')+'</summary>'+recordHTML(latest)+'</details>':'')+'</section>';
+  const result='<section class="ew-work-result" data-work-section="current-result"><h3>현재 상태</h3><p class="ew-work-current-title">'+esc(currentText)+'</p><p class="ew-muted">'+currentMeta+'</p>'+checkSummary+(latest?(history?recordHTML(latest):button('수행 상세 보기','work_detail','data-detail-tab="output" data-node-id="'+esc(n.id)+'"')):'')+'</section>';
   const inputs={...valuesFor(n),...(draft?.inputs || {})},fields=fieldsFor(n),document=draft?.document ?? job.document ?? '';
   const nodeId=' data-node-id="'+esc(n.id)+'"',changed=Boolean(draft?.inputsChanged||draft?.documentChanged),conflict=Boolean(draft?.conflict);
   const unavailableNow=previewBlocked||!applies(n)||missingFor(n).length||missingInputsFor(n).length||unavailable(n)||skillUnavailable(n)||conflict;
@@ -269,18 +280,70 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
   const old=previous.length?'<details class="ew-history" data-work-section="history"><summary data-work-overlay="'+esc(n.name)+' 실행 이력">실행 이력 '+previous.length+'건 · 읽기 전용</summary>'+[...previous].reverse().map(record=>'<details class="ew-history-attempt"><summary>'+esc(record.attempt || '?')+'차 · '+esc(statuses[record.status] || record.status)+' · '+esc(record.at || record.completed_at || '시각 미기록')+'</summary>'+recordHTML(record)+'</details>').join('')+'</details>':'';
   const review=['manual','draft'].includes(n.mode)?'<details class="ew-work-detail"><summary data-work-overlay="'+esc(n.name)+' 검토 자료">검토 자료 보기</summary><p>'+esc(n.description || '등록된 업무 목적을 확인해 주세요.')+'</p>'+guidanceHTML+criterion+dataHTML(valuesFor(n),job.document)+'<p class="ew-muted">등록된 안내와 저장된 자료입니다. 실제 외부 시스템의 설정 차이를 조회한 결과는 아닙니다.</p></details>':'';
   const planned=!latest&&(n.tools || []).length?'<details class="ew-work-detail"><summary>예정된 점검</summary><ol>'+(n.tools || []).map((id,index)=>'<li>'+esc(tools[id]?.name || '점검 '+(index+1))+'</li>').join('')+'</ol></details>':'';
-  const nextJob=!history&&nodeState(n)==='passed'?descendants(path[0]).find(item=>item.id!==n.id&&applies(item)&&!['passed','failed','running'].includes(nodeState(item))&&!missingFor(item).length&&!attentionFor(item)&&(readyFor(item)||['manual','draft'].includes(item.mode))):null;
-  const next=changed?'작성 중인 값이 있습니다. 입력을 반영한 뒤 점검하세요.':nextJob?'다음 작업: '+nextJob.name:locked?'저장된 결과와 근거를 확인할 수 있습니다.':reasonFor(n);
-  const nextHint=!locked&&n.mode==='manual'?'AI의 자료 정리만으로 완료 처리하지 않습니다.':unavailable(n)?'실행 연결 전에는 수행된 것으로 기록하지 않습니다.':nodeState(n)==='failed'?'실패 이력은 유지되며 재시도 결과를 완료 조건에 따라 판정합니다.':'';
-  const nextHTML='<div class="ew-work-next"><span>다음 할 일</span><p data-work-next data-work-saved-next="'+esc(next)+'">'+esc(next)+'</p>'+(nextHint?'<small class="ew-work-next-hint">'+esc(nextHint)+'</small>':'')+'</div>';
   let action='';
   const baseUnavailable=Boolean(unavailableNow||(n.mode==='draft'&&!job.document));
   if(!locked&&nodeState(n)!=='passed'&&applies(n))action=runButton(n.mode==='manual'?'확인 완료':n.mode==='draft'?'검토 완료':job.attempt?'다시 모의 점검':'모의 점검 실행',baseUnavailable||changed,true,'data-work-draft-sensitive data-work-base-unavailable="'+baseUnavailable+'"');
-  const nextAction=nextJob?selectButton(nextJob,'다음 작업 열기',true):!history&&n.parent&&nodeState(n)==='passed'?selectButton(nodes[n.parent],'상위 단계 보기',true):'';
   const execution=action?'<section class="ew-work-execute" data-work-stage="execute"><h3>'+(['manual','draft'].includes(n.mode)?'사람 확인':'점검 실행')+'</h3><div class="ew-work-actions">'+action+'</div></section>':'';
   const inputStage=conflictHTML+editable+dirtyHTML;
-  const content=latest?result+nextHTML+inputStage+execution:nextHTML+inputStage+execution+result;
-  return header+(n.description?'<p class="ew-work-goal">'+esc(n.description)+'</p>':'')+(preview?previewActions:'')+criterion+content+(nextAction?'<div class="ew-work-actions" data-work-stage="next">'+nextAction+'</div>':'')+old+review+depsHTML+guidanceHTML+saved+planned;
+  const target='<section class="ew-work-target" data-work-section="target"><h3>수행 대상</h3><p>'+esc(scopeText || '대상 미기록')+'</p><small>현재 업무 범위 · 읽기 전용</small></section>';
+  const detailLinks=!history?'<nav class="ew-work-detail-links" aria-label="수행 자료">'+button('사용 구성','work_detail','data-detail-tab="config" data-node-id="'+esc(n.id)+'"')+button('실행 이력 '+records.length+'건','work_detail','data-detail-tab="history" data-node-id="'+esc(n.id)+'"')+'</nav>':'';
+  const blockers=skillUnavailable(n)?'<p class="ew-notice" role="status">필수 스킬을 현재 계정으로 사용할 수 없습니다.</p>':'';
+  const content=target+blockers+(latest?result+inputStage+execution:inputStage+execution+result)+detailLinks;
+  return header+(n.description?'<p class="ew-work-goal">'+esc(n.description)+'</p>':'')+(preview?previewActions:'')+criterion+content+(history?old:'')+review+depsHTML+guidanceHTML+saved+planned;
+}
+
+/* Read-only, allowlisted facts from the applied definition and one saved attempt.
+ * No current form values, raw snapshot map or latest draft are evidence sources. */
+function workExecutionDetailHTML(c,n,{definition=c?.definition,tab='config',attemptIndex=null,callIndex=0,lookupError=null,assetsAvailable=definition?.assets_available,availableSkills=definition?.available_skills || []}={}) {
+  const {esc,button,lineage}=workUI,job=c?.jobs?.[n.id] || {},records=job.history || [];
+  const tabs=[['config','사용 구성'],['history','실행 이력'],['input','전달 입력'],['output','반환 출력']];
+  if(!tabs.some(([key])=>key===tab))tab='config';
+  const nav='<nav class="ew-detail-tabs" aria-label="수행 상세">'+tabs.map(([key,label])=>button(label,'detail_tab','data-detail-tab="'+key+'" aria-pressed="'+(key===tab)+'"')).join('')+'</nav>';
+  const section=body=>nav+'<section data-work-detail-content="'+tab+'">'+body+'</section>';
+  const fact=(label,value)=>'<div class="ew-detail-fact"><dt>'+esc(label)+'</dt><dd>'+esc(value ?? '미기록')+'</dd></div>';
+  const text=value=>typeof value==='string'?value:JSON.stringify(value);
+  const resultLabel=status=>({passed:'업무 통과',failed:'업무 실패',blocked:'업무 미완료 · 실행 차단',skipped:'미수행',pending:'미수행',review:'검토 필요'}[status] || '업무 판정 미기록');
+  if(lookupError)return section('<p role="alert" data-record-state="'+(lookupError.kind==='restricted'?'restricted':'failed')+'">'+(lookupError.kind==='restricted'?'접근 제한':'조회 실패')+' · '+esc(lookupError.message)+'</p><p>현재 조회가 완료되지 않아 이전 저장 자료를 표시하지 않습니다.</p>');
+  const version=c?.version ?? definition?.version;
+  const provenance='<p class="ew-detail-provenance">'+(c?'진행 건에 고정된 절차':'시작 전 게시 절차')+(version!==undefined?' v'+esc(version):' · 버전 미기록')+' · '+esc(n.name)+'</p>';
+  if(tab==='config'){
+    const path=lineage(n.id,definition),tools=definition?.tools || {},skills=definition?.skills || {};
+    const skillIds=[...new Set(['common',...path.flatMap(item=>item.skills || [])])];
+    const toolHTML=(n.tools || []).map(id=>{
+      const tool=tools[id];if(!tool)return '<p>도구 구성 미기록 · '+esc(id)+'</p>';
+      return '<article class="ew-detail-config"><h3>'+esc(tool.name || id)+'</h3><dl>'+fact('식별자',id)+fact('역할',tool.purpose || tool.type)+fact('개별 도구 버전',tool.version ?? '미기록')+fact('실행 연결',tool.adapter==='mock'&&tool.source!=='open_webui'?'모의 점검':'실행 연결 필요')+fact('입력 정의',n.bindings?.[id] || tool.input)+fact('업무 판정 기준',tool.success || '미등록')+fact('출력 형식 정의','미기록')+(tool.reference?fact('등록 연결 참조',tool.reference):'')+'</dl></article>';
+    }).join('') || '<p>등록된 도구 없음 · '+esc(n.mode==='manual'?'사람 확인':n.mode==='draft'?'초안 검토':'미등록')+'</p>';
+    const skillHTML=skillIds.filter(id=>skills[id]).map(id=>{
+      const configured=skills[id],allowed=c?.context?.skills?.find(item=>item.id===id || item.reference&&item.reference===configured.reference),external=configured.source==='open_webui';
+      const info=allowed || configured;
+      const accessible=c?allowed?.available:availableSkills.some(item=>item.id===configured.reference);
+      const availability=external&&assetsAvailable===false?'조회 실패':external&&!accessible?'현재 계정 사용 불가':'등록됨';
+      return '<article class="ew-detail-config"><h3>'+esc(configured.name || id)+'</h3><dl>'+fact('식별자',id)+fact('역할',configured.purpose || configured.type || '업무 스킬')+fact('상태',availability)+fact('고정본 수정 시각',allowed?.snapshot_updated_at ?? '미기록')+'</dl>'+(!external&&info.body?'<details><summary>등록된 업무 지침</summary><pre>'+esc(info.body)+'</pre></details>':'')+'</article>';
+    }).join('');
+    const instructions=path.filter(item=>item.instructions).map(item=>'<article class="ew-detail-config"><h3>'+esc(item.name)+'</h3><p>'+esc(item.instructions)+'</p></article>').join('') || '<p>등록된 업무 지침 없음</p>';
+    return section(provenance+'<p>설정된 구성입니다. 실제 호출·전달·준수 완료를 뜻하지 않습니다.</p><h2>도구</h2>'+toolHTML+'<h2>스킬</h2>'+skillHTML+'<h2>업무 지침</h2>'+instructions+'<p class="ew-muted">실제 지침 전달·준수 판정은 미기록입니다.</p>');
+  }
+  if(!records.length)return section(provenance+'<p data-record-state="'+(job.attempt?'unrecorded':'not-executed')+'">'+(job.attempt?'실행 상세 미기록':'미수행 · 실행 기록 없음')+'</p><p>현재 입력이나 설정으로 과거 호출을 채우지 않습니다.</p>');
+  const requested=attemptIndex===null?records.length-1:Number(attemptIndex),index=Number.isInteger(requested)&&requested>=0&&requested<records.length?requested:records.length-1;
+  const record=records[index],calls=record.checks || [],selected=Math.min(Math.max(0,Number.isInteger(Number(callIndex))?Number(callIndex):0),Math.max(0,calls.length-1)),check=calls[selected];
+  const choices='<nav class="ew-detail-attempts" aria-label="실행 선택">'+records.map((item,i)=>button((item.attempt ?? '?')+'차 · '+resultLabel(item.status)+' · '+(item.at || '시각 미기록'),'detail_attempt','data-attempt-index="'+i+'" aria-pressed="'+(i===index)+'"')).reverse().join('')+'</nav>';
+  const summary='<div class="ew-detail-outcome" data-attempt-index="'+index+'"><strong data-status="'+esc(record.status)+'">'+esc(resultLabel(record.status))+'</strong><p>'+esc((record.attempt ?? '?')+'차 · '+(record.at || '실행 시각 미기록'))+'</p><p>'+esc(record.kind==='human_confirmation'?'담당자의 명시적 확인 기록':record.kind==='simulation'||record.simulation?'모의 점검 기록 · 외부 업무 시스템 미호출':'저장된 실행 기록')+'</p></div>';
+  const callsHTML=calls.length>1?'<nav class="ew-detail-calls" aria-label="호출 선택">'+calls.map((item,i)=>button((i+1)+'. '+(item.name || item.id || '이름 미기록')+' · '+(item.at || '시각 미기록'),'detail_call','data-call-index="'+i+'" aria-pressed="'+(i===selected)+'"')).join('')+'</nav>':'';
+  let body='';
+  if(tab==='history')body='<p>이 진행 건의 고정 절차를 적용합니다. 호출별 버전 스냅샷은 미기록입니다.</p>'+(record.detail?'<p>'+esc(record.detail)+'</p>':'')+calls.map((item,i)=>'<article class="ew-check"><h3>'+esc((i+1)+'. '+(item.name || item.id || '점검'))+'</h3><p>'+esc(['blocked','skipped'].includes(item.status)?'미수행':item.status==='passed'?'점검 통과':item.status==='failed'?'점검 실패':'상태 미기록')+'</p><p>'+esc(item.detail || '결과 미기록')+'</p>'+button('입출력 보기','detail_call','data-call-index="'+i+'" data-detail-tab="output"')+'</article>').join('')+(record.kind==='human_confirmation'?'<p>사람 확인 기록이며 도구 호출은 없습니다.</p>'+(record.document?'<h3>확인한 초안</h3><pre>'+esc(record.document)+'</pre>':''):!calls.length?'<p>호출 상세 미기록</p>':'');
+  else if(!check){
+    body='<p data-record-state="'+(record.kind==='human_confirmation'?'not-executed':'unrecorded')+'">'+(record.kind==='human_confirmation'?'사람 확인 · 도구 호출 없음':'호출 상세 미기록')+'</p>';
+    if(record.kind==='human_confirmation'&&tab==='input')body+='<h3>확인 당시 저장 자료</h3><dl>'+Object.entries(record.inputs || {}).filter(([key])=>['db','ap','site','interface'].includes(key)).map(([key,value])=>fact(key,value)).join('')+'</dl>'+(record.document?'<h3>확인한 초안</h3><pre>'+esc(record.document)+'</pre>':'')+'<p>도구에 전달된 입력을 뜻하지 않습니다.</p>';
+  }
+  else {
+    const notCalled=['blocked','skipped'].includes(check.status),simulated=check.simulation===true;
+    const callFacts='<dl>'+fact('호출 순서',selected+1)+fact('도구',check.name || check.id)+fact('기록된 도구 식별자',check.id ?? '미기록')+fact('호출 고유 ID','미기록')+fact('기록 시각',check.at ?? '미기록')+fact('개별 도구 버전','미기록')+'</dl>';
+    const invocation=notCalled?'미수행':simulated?'모의 점검 수행':'호출 상태 미기록';
+    body='<h3>'+esc(check.name || check.id || '호출 상세')+'</h3>'+callFacts+'<p>호출 상태 · '+invocation+'</p>'+(notCalled?'<p>'+esc(check.detail || '미수행 사유 미기록')+'</p>':'');
+    if(tab==='input')body+=(notCalled?'<p data-record-state="not-executed">전달 입력 없음 · 미수행</p>':Object.hasOwn(check,'input')?'<h3>'+ (simulated?'실제 모의 점검 입력':'기록된 전달 입력')+'</h3><pre data-call-input>'+esc(text(check.input))+'</pre>':'<p data-record-state="unrecorded">전달 입력 미기록</p>')+'<p>입력 출처·이전 출력 연결 기록 · 미기록</p>';
+    else body+=(notCalled?'':'<p>도구 정상 반환 여부 · 미기록</p>')+'<p data-format-check>출력 형식 확인 · 미확인 (검사 기록 없음)</p>'+(notCalled?'<p data-record-state="not-executed">반환 출력 없음 · 미수행</p>':simulated?'<h3>기록된 모의 점검 결과</h3><p data-call-verdict>'+esc(check.status==='passed'?'점검 통과':check.status==='failed'?'점검 실패':'판정 미기록')+'</p><pre data-call-output>'+esc(check.detail || '반환 내용 미기록')+'</pre>':'<p data-record-state="unrecorded">반환 출력 미기록</p>')+'<p>외부 도구 원시 응답 · '+(simulated||notCalled?'미호출':'미기록')+'</p>';
+  }
+  return nav+provenance+choices+callsHTML+'<section data-work-detail-content="'+tab+'">'+summary+body+'</section>';
 }
 
 /* Session-only drafts never update a server snapshot or completed evidence. */
@@ -323,7 +386,8 @@ function createWorkView({callbacks}) {
   let navOpen = true, scopePicker = '', host = null, divider = null, panelOpen = false, width = 520, panelInfo = null, drag = null, styledColumn = null;
   // Expansion belongs to the factory scope and the retained case version.
   const treeExpansions = new Map(),jobDrafts=createWorkInputDrafts(),jobLists=new Map(),stepSummaries=createWorkStepSummaries(),selectedSteps=new Map();
-  let renderedEditContext=null,renderedPanelTarget='';
+  let renderedEditContext=null,renderedPanelTarget='',pendingReturn=null,detailContext=null;
+  const panelPositions=new Map(),navigationTrail=[];
   const chatId = () => snapshot.chatId || '';
   const chatRoute = () => Boolean(snapshot.chatRoute);
   const currentCase = () => state?.case;
@@ -562,7 +626,9 @@ function createWorkView({callbacks}) {
     if (!chatRoute() || !state || !selectedId()) {closeHost(); return;} ensureHost();
     const content=$('#ees-work-content',host),focused=content.contains(document.activeElement)?document.activeElement:null;
     const panelTarget=JSON.stringify([browsingSite,browsingSystem,selectedCase()?.id || '',definition()?.version,runView,historyCase?.id || '',selectedId()]);
-    const retainedScroll=panelTarget===renderedPanelTarget?content.scrollTop || 0:0;
+    if(renderedPanelTarget)panelPositions.set(renderedPanelTarget,content.scrollTop || 0);
+    const returning=pendingReturn?.to===selectedId()?pendingReturn:null;
+    const retainedScroll=panelTarget===renderedPanelTarget?content.scrollTop || 0:returning?panelPositions.get(panelTarget)||0:0;
     const focusState=focused?{id:focused.id,name:focused.name,node:focused.dataset.nodeId,action:focused.dataset.action,start:focused.selectionStart,end:focused.selectionEnd}:null;
     const oldNode=renderedEditContext?.scope.nodeId;
     if(runView==='history' || !selectedCase()) {
@@ -574,6 +640,8 @@ function createWorkView({callbacks}) {
       renderedEditContext=done?null:editContext(n.id);
       content.innerHTML=runTabs()+alertHTML()+closed+workPanelNodeHTML(c,n,{readOnly:done,draft:draftFor(renderedEditContext),listView:jobListState()})+(done&&n.type==='p'?button('새 실행','start_case','class="ew-primary" data-mutation'):'')+'<p class="ew-footnote">연결 점검은 모의 결과이며 실제 업무 시스템을 호출하지 않습니다.</p>';
     }
+const back=navigationTrail[navigationTrail.length-1];
+    if(back&&back.to===selectedId()&&back.scope===navigationScope())content.insertAdjacentHTML('afterbegin',button('‹ '+nameOf(back.from)+'로 돌아가기','panel_back','class="ew-work-return"'));
     if(focusState&&oldNode===renderedEditContext?.scope.nodeId){
       const replacement=Array.from(content.querySelectorAll('input,textarea,button')).find(el=>focusState.id?el.id===focusState.id:focusState.name?el.name===focusState.name:el.dataset.action===focusState.action&&el.dataset.nodeId===focusState.node);
       replacement?.focus({preventScroll:true});if(replacement?.setSelectionRange&&typeof focusState.start==='number')replacement.setSelectionRange(focusState.start,focusState.end);
@@ -583,6 +651,22 @@ function createWorkView({callbacks}) {
     // Read a newly selected task from its heading. Refreshes of that same
     // task keep the user's position while inputs/results are updated.
     content.scrollTop=retainedScroll;
+    if(returning){const control=Array.from(content.querySelectorAll('[data-action]')).find(el=>el.dataset.action===returning.action&&el.dataset.nodeId===returning.focusNode);control?.focus({preventScroll:true});pendingReturn=null;}
+    if(detailContext){if(detailContext.scope!==navigationScope())workUI.closeDialog();else renderDetail();}
+  }
+  function navigationScope(){return JSON.stringify([selectedCase()?.id || '',browsingSite,browsingSystem,definition()?.version,runView]);}
+  function renderDetail(){
+    const dialog=$('#ees-work-dialog'),context=detailContext,data=definition(),n=data?.nodes?.[context?.nodeId];
+    if(!dialog||!context||!n)return;
+    const body=dialog.querySelector('.ew-dialog-body'),focused=document.activeElement?.closest?.('[data-action]');
+    const previous=focused?{action:focused.dataset.action,tab:focused.dataset.detailTab,attempt:focused.dataset.attemptIndex,call:focused.dataset.callIndex}:null;
+    body.innerHTML=workExecutionDetailHTML(selectedCase(),n,{definition:data,...context,lookupError:snapshot.recordLookupError,assetsAvailable:state?.catalog?.assets_available,availableSkills:state?.catalog?.available_skills});
+    if(previous)Array.from(body.querySelectorAll('[data-action]')).find(el=>el.dataset.action===previous.action&&el.dataset.detailTab===previous.tab&&el.dataset.attemptIndex===previous.attempt&&el.dataset.callIndex===previous.call)?.focus({preventScroll:true});
+  }
+  function openDetail(id,tab){
+    captureJobEdits();const data=definition(),n=data?.nodes?.[id];if(!n)return;
+    const context={nodeId:id,tab,attemptIndex:null,callIndex:0,scope:navigationScope()};detailContext=context;
+    workUI.dialog({title:n.name+' · 수행 상세',html:workExecutionDetailHTML(selectedCase(),n,{definition:data,...context,lookupError:snapshot.recordLookupError,assetsAvailable:state?.catalog?.assets_available,availableSkills:state?.catalog?.available_skills}),note:'읽기 전용 · 적용 구성과 저장된 실행 기록'}).then(()=>{if(detailContext===context)detailContext=null;});
   }
 
   function panelRegistration() {
@@ -684,7 +768,25 @@ function createWorkView({callbacks}) {
     else if(action==='start_case')callbacks.startCase();
     else if(action==='current_view'||action==='history_view')callbacks.showHistoryView(action==='history_view');
     else if(action==='history_case')callbacks.showHistory(buttonTarget.dataset.caseId);
-    else if(action==='select')callbacks.selectWork(buttonTarget.dataset.nodeId,buttonTarget.dataset.processId);
+    else if(action==='select'){
+      if(buttonTarget.closest('#ees-work-content')&&selectedId()!==buttonTarget.dataset.nodeId)navigationTrail.push({scope:navigationScope(),from:selectedId(),to:buttonTarget.dataset.nodeId,action:'select',focusNode:buttonTarget.dataset.nodeId});
+      else if(buttonTarget.closest('#ees-work-entry'))navigationTrail.length=0;
+      callbacks.selectWork(buttonTarget.dataset.nodeId,buttonTarget.dataset.processId);
+    }
+    else if(action==='panel_back'){
+      const entry=navigationTrail.pop();if(entry&&entry.scope===navigationScope()&&entry.to===selectedId()){pendingReturn={...entry,to:entry.from};callbacks.selectWork(entry.from);}
+    }
+    else if(action==='job_condition'){
+      const expanded=new Set(jobListState().expanded || []),id=buttonTarget.dataset.nodeId;
+      if(expanded.has(id))expanded.delete(id);else expanded.add(id);updateJobList({expanded:[...expanded]});
+    }
+    else if(action==='work_detail')openDetail(buttonTarget.dataset.nodeId,buttonTarget.dataset.detailTab || 'config');
+    else if(['detail_tab','detail_attempt','detail_call'].includes(action)&&detailContext){
+      if(action==='detail_tab')detailContext.tab=buttonTarget.dataset.detailTab;
+      if(action==='detail_attempt'){detailContext.attemptIndex=Number(buttonTarget.dataset.attemptIndex);detailContext.callIndex=0;}
+      if(action==='detail_call'){detailContext.callIndex=Number(buttonTarget.dataset.callIndex);if(buttonTarget.dataset.detailTab)detailContext.tab=buttonTarget.dataset.detailTab;}
+      renderDetail();
+    }
     else if(action==='job_filter')updateJobList({filter:buttonTarget.dataset.filter,page:0});
     else if(action==='job_page')updateJobList({page:Number(buttonTarget.dataset.page)});
     else if(action==='run')callbacks.runJob(buttonTarget.dataset.nodeId,event);
@@ -705,7 +807,7 @@ function createWorkView({callbacks}) {
   function updateLayout() {positionNav();sizePanel();}
   function detach() {workUI.closeDialog();closeScopePicker();closeHost();$('#ees-work-context')?.remove();}
   function reset() {
-    detach();treeExpansions.clear();jobDrafts.clear();jobLists.clear();stepSummaries.clear();selectedSteps.clear();renderedEditContext=null;renderedPanelTarget='';snapshot={};state=null;serverSource=null;historySource=null;historyCase=null;navOpen=false;busy=false;width=520;panelInfo=null;drag=null;
+    detach();panelPositions.clear();navigationTrail.length=0;pendingReturn=null;detailContext=null;treeExpansions.clear();jobDrafts.clear();jobLists.clear();stepSummaries.clear();selectedSteps.clear();renderedEditContext=null;renderedPanelTarget='';snapshot={};state=null;serverSource=null;historySource=null;historyCase=null;navOpen=false;busy=false;width=520;panelInfo=null;drag=null;
     host=null;divider=null;
     ['ees-work-entry','ees-work-admin-link','ees-work-navigator'].forEach(id=>document.getElementById(id)?.remove());
   }

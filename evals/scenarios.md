@@ -12,6 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| 오른쪽 업무·수행 상세 후속 | [기존 기록 연결·조건 탐색·새 Native 검증·접근 차단 경계](#right-panel-20260922) |
 | AI 개발 구조·사내 UI 작성 자산 보존 | [관리 경계·기존 보호·동시 편집 한계와 합성 검증](#ai-runtime-preservation-20260915) |
 | 제한적 리팩토링 설계·독립 검토 | [설계 범위·검토 보완·구현 전 검증 경계](#refactoring-design-review-20260915) |
 | R0 자산 동시 편집 보호 | [ees.9 조건부 저장·실제 wheel 검사·배포 경계](#conditional-assets-20260915) |
@@ -2928,3 +2929,108 @@ BRANCH-20260911 fix/wo-editor-formatted-source 3f275aa913ae64ecac6c19d4a4ad56bff
 BRANCH-20260911 fix/wrapper-error-evidence 234f8d56b90d74e3d6f77d14772f9a4ca63226a1 16
 BRANCH-20260911 refactor/remove-prototype-rich-ui 61568f119f6b2bec03e29adaa24b207d00585a2e 18
 ```
+
+<a id="right-panel-20260922"></a>
+
+## 09-22 오른쪽 업무 내용·수행 상세 후속
+
+### 원본·승인·실제 접근
+
+사용자 첨부 `EES_Work_Right_Panel_Implementation_20260922.md`를 읽고 이전 작업을 보존했다. 로컬 main은 `b1c47643c7a5ab4fd85c50a000db3f92ceda82b2`, 왼쪽 PR [#61](https://github.com/knadalkim-a11y/team-agent-poc/pull/61)의 보존 원본은 `0e9e17556be7c5f251105350f288544a9afe59ea`(전체 tree `9b80cb59a01be641c84395b5d889bc6f728e4f50`)다. 기존 sidebar 작업본 `b13f04c6733bb0589bf12d11991b4aa4f28a69fa`와 tree가 같고 작업 트리는 깨끗했다. main과 #61의 AGENTS 파일 SHA256은 모두 `c9e9962cb99b31b16c25b9fedccc0fa59f3ba2cbd473215108c8cd88cc28feb3`임을 로컬에서 확인했다. 이전 폴더·왼쪽 검증 자료·미병합 ZIP을 그대로 두고 #61 exact head에서 별도 `feat/ees-work-right-panel-20260922` worktree를 만들었다. 오른쪽 변경은 #61에 섞지 않는다. 공개 가능해지면 #61을 base로 하는 별도 Draft에서 오른쪽 diff만 검토하고, #61 병합 후 main 기준 차이를 확인한다. 이 의존성은 왼쪽을 보존하면서 독립 검토하려는 것이며 병합을 선행 강행하지 않는다.
+
+새 GitHub main/PR 조회와 전용 PR 조회가 `HTTP 400: Invalid MCP request metadata`로 실패했다. Figma design-to-code 스킬을 적용한 `get_design_context`와 별도 `get_screenshot`의 `368:192` 호출도 같은 오류다. 과거 실패를 가정한 것이 아니라 이번 실제 결과이며 최신 원격 상태·Figma 디자인 바이트를 얻지 못했다. `GIT_TERMINAL_PROMPT=0 timeout 15 git ls-remote origin refs/heads/main refs/heads/feat/ees-work-sidebar-final-20260922 refs/heads/feat/ees-work-right-panel-20260922`도 exit124/응답 없음이다. 키·DNS·프록시·서비스 설정은 변경하지 않았다.
+
+이전 #59의 상세 Upgrade/ApplyDemo 성공과 #60 안내 뒤 사용자 확인은 이전 적용 이력이다. #61은 마지막 실제 조회 당시 Ready/open/미병합이었지만 이번 현재 원격 조회로 재확인한 값은 아니다. 이번 오른쪽의 병합·사내 적용 승인은 없으며 실행하지 않는다. Figma 대조와 원격 게시가 해소되기 전 Ready·배포 승인본으로 취급하지 않는다.
+
+### 기존 필드 대응과 구현
+
+- P/T: 실제 정의의 목적·범위·완료 기준과 기존 J 상태 집계, 직접 단계/적용 J 완료 수를 구분한다. 단계별 설명·문제 상태 분포를 표시하고 추천 카드는 제거한다. 기존 범위 실행은 `범위 모의 점검 실행`으로 표시한다.
+- T: 25개 페이지·전체 검색/상태 필터를 유지한다. 작업명과 조건 화살표가 독립 동작이며 실제 deps/condition/실패 checks.detail/blocked_reason/필수 입력·접근 상태가 있을 때 펼친다. 선행 작업을 열고 명시적 돌아가기로 검색·필터·페이지·스크롤·포커스·유효 펼침과 미전송 입력을 복원한다. 일반 왼쪽 선택의 새 항목 스크롤 초기화는 유지한다.
+- J: 현재 업무 범위는 읽기 전용 대상이다. 기존 tool input/binding이 요구하는 db/ap/site/interface 입력만 편집하고 새 대상 목록·인증 저장소는 만들지 않는다. 입력 반영/실행/사람 확인/재시도의 서버 계약과 rapid input 보호는 그대로다. 수행 결과·사용 구성·실행 이력/호출 상세를 연결한다.
+- 구성은 `case.definition/version` 고정본 또는 시작 전 게시 정의를 사용한다. 현재 편집 draft로 과거 구성을 덮지 않는다. 현재 접근 목록과 실제 자산 조회 실패를 별도 표시한다. 외부 스킬 비공개 body나 `_skill_snapshots`를 상세에 공개하지 않는다.
+- 기록은 `jobs[J].history[시도 인덱스].checks[호출 인덱스]`의 `input/status/detail/at/id/name/simulation`을 선택한다. 실제 모의 실행 직전 effective input 기록을 쓰며 폼·현재 inputs로 대체하지 않는다. 여러 서로 다른 도구와 재시도는 실제 실행 검증, 동일 도구 반복은 렌더러 합성 기록 검사다(정의의 중복 tool 등록은 기존 계약상 미지원).
+- 업무 통과/실패, 도구 정상 반환 여부, 출력 형식 확인을 구분한다. 모의 결과 detail은 모의 결과로 표시하며 외부 원시 응답이라고 표시하지 않는다. blocked/skipped에는 전달 입력/반환 출력 없음·미수행과 실제 저장 사유를 표시한다. 사람 확인의 입력/초안은 확인 당시 저장 자료이며 도구 전달값이 아니다.
+- 실제 raw response·형식 검사·입력 출처·이전 출력 연결·호출 고유 ID·개별 도구 당시 버전·지침 전달/준수 판정은 기존 계약에 없어 미기록/미확인이다. 이를 저장/API 제공하려면 별도 계약·호환·민감값 보호 판단이 필요하다. 이번에는 새 기록 수집·DB/API·권한 변경 없이 대표 모의 경로를 완성한다. 기존 임의 문자열 입력이 비밀값을 자동 차단한다고 주장하지 않는다.
+
+### 새 검사·최초 실패와 보완
+
+기존 단일 Python3.11.16 `.venv`, Node24.19, Chrome153과 공식 upstream0.11.3 wheel을 재사용했다. 별도 HTML이 아니라 실제 Native Svelte/Tiptap·테스트 사용자/모델과 실제 workflow SQLite/API를 사용한다. 합성 실행은 사내 LLM/Windows 설치 확인이 아니다. 모든 Python 시험은 `-X warn_default_encoding -W error::EncodingWarning`이며 전역 UTF-8 모드로 누락을 숨기지 않는다.
+
+증거는 `dist/validation-right-panel-20260922/`의 새 raw log/PNG/computed-style JSON이다. 이전 sidebar 자료는 수정 전 기준에만 사용하고 새 오른쪽 통과 수로 재사용하지 않는다.
+
+- 수정 전 Native 캡처 첫 명령은 `PYTHONPATH=tests`로 scripts import가 안 되어 미기동 실패. `PYTHONPATH=.:tests`로 고친 동일 환경에서 1 PASS/5.000초, P/T/J 1920/900 light/dark 및 Workspace1920/600의 PNG16/style16 확보(`before-native.log`, `before-native-v2.log`).
+- 상세 함수 구현 전 새 panel 6 methods는 1 PASS/5 FAIL(12 subtest failures). panel v1 전체39는30 PASS/9 FAIL: 과거 읽기 전용 deps의 이동 버튼, 사람 확인 당시 자료, 과거 상태, 미수행 사유와 필수스킬 차단 설명 누락을 발견해 보완했다. panel v2는40 PASS/1 FAIL/총41; 남은 시험은 새 선택 UI에서 이전 실패 시도를 명시하지 않은 fixture 기대였고 `attemptIndex=0` 보완 후 해당1 PASS. 최초 로그를 보존했다.
+- controller 새 오류 필드 검사2건은 수정 전 FAIL. 조회 실패/실제403 접근 제한을 전달하고 입력 검증 오류와 분리한 뒤 전체20 PASS; 비JSON/JSON null403 경계 보완의 집중2 PASS는 중복이다. 최초 과거83f4 `.venv` 경로 부재는 exit127/시험 미기동으로 분리한다.
+- 관련 통합 v2: panel41/controller20/designer9/workflow48/workflow_tool34/routes3, **155 PASS/0 FAIL/0 SKIP**,11.122초(`related-final.log`, 명령/집계 JSON). 이후 독립 리뷰 보완은 별도 재검으로 구분한다.
+- 독립 리뷰에서 현재 조회403 뒤 탭 전환의 오류 해제와 시작 전/현재 자산 조회 신호의 구성 오표시를 추가 발견했다. config 접근 회귀2 methods는 수정 전2 FAIL(3 subtest failures)로 재현한 뒤 presentation 옵션으로 실제 catalog 접근 신호를 연결했다. 서버 계약 변경이 아니다.
+- Native v1 focused는 동시 source 수정으로 wheel exact-assembly preflight가 4건을 거부해 제품 실행 증거가 아니다. v2 focused9는7 PASS/2 FAIL/29.646초: 사람 확인 표현 기대를 새 사실 문구로 수정했으며, 조건 복귀 시험 말미의 후속 bulk052 선택 누락은 단독 재현되지 않았다. 조건 펼침·검색/필터/페이지·scroll/focus 복귀 자체는 첫 실행에서도 통과했다. 준비 대기 보완과 최종 전체 결과를 아래에 구분한다. 중간 v3 집중3 PASS/7.737초를 전체 통과로 합산하지 않는다.
+- Native 수정 전후 정확한 스타일 비교 v2는1 PASS/5.017초: 왼쪽 분류/P/T·선택기·Native 모델/입력과 Workspace1920/600 스타일이 같았다(`preservation-v2.log`, `after-v2/`). 최종 스타일과 전체 시험은 후속 결과를 따른다.
+- 전달 v2는172건166 PASS/2 ERROR/4 SKIP. 기존 전달151건은148 PASS/3 SKIP, 추가 release21건은18 PASS/2 ERROR/1 SKIP다. ERROR는 기존 시험 fixture의 `read_text` 인코딩 미명시 2곳을 strict 모드로 발견한 것이며 제품 실행 예외가 아니다. 최초 raw log를 보존하고 fixture에 UTF-8을 명시한다. SKIP은 PowerShell/Windows lock/이전 ees7·8 wheel 부재 경계다.
+
+### Figma·배포·남은 범위
+
+요청 대상은 P/T `368:192 / 364:175 / 364:367 / 366:217 / 366:447`, J `335:523 / 339:140 / 339:312 / 339:485 / 347:152`, 상세 `357:160 / 347:323 / 347:494 / 347:665 / 347:836 / 347:1007`이다. 이번 Figma 조회가 차단되어 모든 대상의 실물 대조는 미완료이며 간격·구획·최종 색/폰트 차이를 확정하지 못했다. 최신 첨부의 명시 요건과 실제 제품 경계를 우선 구현했으며 예전 313번 왼쪽 대조를 오른쪽의 증거로 사용하지 않는다.
+
+최종 검증 원본으로 미병합 후보를 준비한다. 프로그램0.11.3+ees.10/Pack0.2.12와 기존 ApplyDemo/Restore 경계를 유지한다. 정확한 원본·ZIP/wheel hash·포함 파일은 최종 산출물 manifest와 전달 검증에 기록하고, 미게시 commit을 Upgrade-TrialCommit으로 적용하라고 안내하지 않는다. 원격 게시·Figma 대조·별도 변경 승인·최종 main과 검증 tree 확인 후 기존 Update→Upgrade-TrialCommit 흐름을 사용한다. Restore는 프로그램 복원이며 DB/업무 이력/개인 인증/관리 자산을 과거로 되돌리는 기능이 아니다.
+
+
+### 최종 로컬 검증 결과와 실제 명령
+
+- 독립 리뷰 보완 뒤 관련 통합 **157 PASS/0 FAIL/0 SKIP**,11.763초(`related-final-v3.log`): panel42/controller21/designer9/workflow48/workflow_tool34/routes3. v2의155와 중복 합산하지 않는다. 조회403→history/current 탭 전환 회귀는 먼저1 FAIL로 재현한 뒤 보완했다. config 접근2건도 먼저 실패를 기록한 뒤2 PASS로 확인했다.
+- Native 전체 v3는 **36 PASS/1 FAIL/0 SKIP**,135.266초/37건(`native-final-v3.log`). 단 하나의 실패는 입력 시험 마지막의 제거된 오른쪽 “다음 작업” 링크 기대였다. 이 실패 전 더블클릭·Enter/Space 길게 누르기에서 입력만 반영됨, history/attempt/대화 미전송 보존과 명시적 run 성공은 통과했다. 마지막 탐색을 보존된 왼쪽 AP 작업 선택으로 보완한 해당 시험은 **1 PASS**,3.035초(`native-input-final-v3.log`). 이를 전체37 PASS로 보고하지 않는다. 과거 초기 선택 클릭 누락은 이번 전체에서 재현되지 않았으며 과거 원인 해결로 단정하지 않는다.
+- v2 전체는 독립 리뷰 보완 때문에 중단(exit130/최종집계없음)했고, v3 첫 시작은 빌드 완료 전에 manifest를 읽어 0tests/2 setUpClass ERROR였다. 빌드 성공 후 위 v3 전체를 실행했다. 각각 `native-final-v2.log`, `native-v3-before-build-complete.log`에 보존하며 제품 FAIL과 구분한다.
+- 전체 후 실제 입력 상세 PNG에서 한글 tofu가 확인됐다. `pre`의 Native monospace가 번들 한글 글꼴을 쓰지 않은 결함이며 CDP 실제 glyph-font 검사로 먼저 **1 FAIL**/2.369초를 재현했다(`detail-font-v3.log`). `#ees-work-dialog [data-work-detail-content] pre`만 EES 글꼴로 연결했다. **최종 v4 wheel**에서 관련 실제 Native 상세2건 **2 PASS**/8.534초: 시도/호출별 입력·출력·불변 게시 구성, 한글 실제 Noto Sans KR glyph, light/dark1920/900·키보드·scroll된 입력/출력을 확인했다(`detail-final-v4.log`, PNG/font JSON). root도 수정 전후 화면을 직접 확인했다.
+- 최종 v4의 왼쪽/Native/Workspace 스타일 비교 **1 PASS**,6.172초(`preservation-v4.log`, `after-v4/`). PR61 기준과 분류/P/T·선택기·모델/대화 및 Workspace1920/600의 computed style이 같다. 중간v2/v3 스타일 검사와 합산하지 않는다. v4 이후 전체Native를 다시 실행하지 않았으며 CSS 한글 범위와 관련2건·보존1건을 재검했다.
+- 전달 시험의 초기166 PASS/2 ERROR/4 SKIP에서 인코딩 fixture만 수정한 최종 해당2건 **2 PASS**/0.010초(`delivery-fixture-focused-v2.log`). 마지막 write_text 누락을 추가로 발견한 집중 결과4 PASS/1 ERROR도 보존했다. 전체172 재실행은 하지 않았다. SKIP4는 Windows lock, ees7/8 shipped wheel, PowerShell, legacy tiny-wheel UV 실설치 opt-in 미설정이다. 마지막은 Python/uv 부재가 아니다.
+- `python -X warn_default_encoding -W error::EncodingWarning scripts/check_docs.py`:30files/1188links/0errors/0review. `node --check` 두 변경 JS와 `git diff --check` 통과. 문서 끝 빈 줄1건은 diff검사에서 발견해 제거했다. 일반 전체 `python -m unittest discover -s tests -v`는 범위 밖 플랫폼/기능까지 확대하지 않아 미실행이다.
+- 최종 wheel `open_webui-0.11.3+ees.10-py3-none-any.whl`의 SHA256은 `570141f1275e89ae46772b2b1ad6a9d7389119cc43128c12864b8617d50d501d`,151878810bytes다. v3 Native 전체 및 v4 상세/보존 범위를 위처럼 구분한다. 최종 ZIP은 이 동일 wheel을 포함하고 깨끗한 최종 commit과 manifest/RECORD/cache/실제 포함 JS를 검증한다.
+
+명령의 `P`는 기존 단일 `/workspace/scratch/76d476ba0843/team-agent-poc-sidebar/.venv/bin/python`이며 새 환경이 아니다. Native 전용 실행에는 `PYTHONPATH=.:tests`, `EES_TEST_UPSTREAM_WHEEL=../team-agent-poc-sidebar/dist/upstream/open_webui-0.11.3-py3-none-any.whl`, `EES_TEST_CHROME=../team-agent-poc-sidebar/dist/tools/headless-shell-153.0.8010.52/chrome-headless-shell-linux64/chrome-headless-shell`, 결과별 `EES_TEST_SCREENSHOT_DIR`를 사용했다.
+
+```bash
+PYTHONPATH=.:tests "$P" -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_panel test_ees_work_controller test_ees_work_designer test_ees_workflow test_ees_workflow_tool test_ees_work_routes -v
+EES_TEST_BRANDING_DIR=dist/branding-right-v3 "$P" -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_demo.EESWorkNativeBrowserTests test_ees_chat_theme.ChatThemeBrowserTests -v
+EES_TEST_BRANDING_DIR=dist/branding-right-v3 "$P" -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_demo.EESWorkNativeBrowserTests.test_input_save_double_click_and_held_enter_never_run_or_send_chat -v
+EES_TEST_BRANDING_DIR=dist/branding-right-v4 "$P" -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_demo.EESWorkNativeBrowserTests.test_right_recorded_attempt_calls_and_inputs_do_not_mix_after_retry_or_publish test_ees_work_demo.EESWorkNativeBrowserTests.test_right_panels_and_details_keyboard_light_dark_narrow -v
+EES_TEST_BRANDING_DIR=dist/branding-right-v4 EES_TEST_STYLE_BASELINE_DIR=dist/validation-right-panel-20260922/before "$P" -X warn_default_encoding -W error::EncodingWarning dist/validation-right-panel-20260922/capture_native_preservation.py
+EES_TEST_BRANDING_DIR=dist/branding-right-v2 "$P" -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_branding_build test_demo_bundle test_ees_webui_customization test_ees_trial_bundle test_ees_trial_upgrade test_ees_apply_demo test_ees_demo_assets.ApplyAssetsTests.test_real_manifest_sources_pass_preflight test_ees_demo_assets.ApplyAssetsTests.test_unknown_assets_and_supported_links_remain_available_after_update test_ees_deploy_release -v
+PYTHONPATH=tests "$P" -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_deploy_release.ReleaseTests.test_prepare_uses_exact_offline_inventory_and_preserves_source test_ees_deploy_release.ReleaseTests.test_prepared_fingerprint_and_inventory_are_revalidated -v
+python -X warn_default_encoding -W error::EncodingWarning scripts/check_docs.py
+node --check branding/ees/ui/ees-work-view.js
+node --check branding/ees/ui/ees-work-launcher.js
+git diff --check
+```
+
+대표 사용자 검수는 P의 직접 단계/작업 수와 문제 분포 → T 전체/검색/조건 화살표 → 선행 J 이동·돌아가기 → J 입력 반영(실행 없음) → 명시적 모의 실행/사람 확인 → 실패·재시도 → 같은 시도/호출의 저장 입출력이다. 기존 대화/작성 입력/과거 결과/왼쪽 선택·Workspace 게시 snapshot을 함께 확인한다. 미연결은 실행 연결 필요/미수행, 사람 확인은 실제 명시적 승인, 형식 검사는 미확인으로 보여야 한다. 사내 실환경의 실제 LLM·Windows 설치·기동·화면은 이번 Work 검증에 포함되지 않는다.
+
+### 같은 날 병합 요청 후 원격 복구·Figma 대조
+
+사용자가 “병합하고 배포스크립트 가이드도 해줘”라고 명시 승인했다. GitHub/Figma 플러그인 새 호출은 정상이며 위 초기 HTTP400과 git 인증 실패 기록은 당시 실패로 보존한다. 새 main은 `b1c47643c7a5ab4fd85c50a000db3f92ceda82b2`, 관련 열린 PR은 Ready #61과 별도 Draft #53뿐이며 오른쪽 중복 PR은 없었다. main과 #61 exact head의 AGENTS/STATUS를 실제 조회했다. AGENTS Git blob은 `03ba9059a8e0808a824255e97fa79b81dbce65dd`로 위 파일 SHA256과 다른 종류의 값이다.
+
+#61 head `0e9e17556be7c5f251105350f288544a9afe59ea`와 mergeable/clean·왼쪽 전용8파일을 다시 확인하고 expected head를 지정해 병합했다. main `cfe5e4d36ca902c8706aed4d07f0cd87ffa16a78`의 전체 tree `9b80cb59a01be641c84395b5d889bc6f728e4f50`가 검증본과 같다. 오른쪽은 별도 후속 PR에서 main 기준 차이만 게시한다. #53은 사용하지 않았다. 커밋/병합에 `[skip ci]`를 넣고 원격 CI는 수동 실행하지 않았다.
+
+Figma design-to-code 스킬로 지정16노드 모두 context와 별도 screenshot을 실제 조회했다. P/T `368:192 / 364:175 / 364:367 / 366:217 / 366:447`, J `335:523 / 339:140 / 339:312 / 339:485 / 347:152`, 상세 `357:160 / 347:323 / 347:494 / 347:665 / 347:836 / 347:1007`이다. 실제 Native v3/v4 이미지·코드와 대조해 P/T의 범위 실행이 목록보다 앞서고 조건 화살표가 상태 아래로 내려가 목록 높이가 커지는 차이를 발견했다. 오른쪽만 4열 조건·사유 및 펼침 colspan4로 정리하고 범위 실행을 목록 뒤로 옮겼다. 사람 확인/실패 재시도 별도, 미연결 호출 없음과 차단 사유 기록, 현재 가능 수≠최종 처리 수를 접힘 밖에 표시했다. 실제 범위 점검이 미연결을 차단 기록할 수 있으므로 목업의 ‘미연결 제외’를 그대로 복제하지 않았다.
+
+J/상세의 의도된 차이: 목업 인라인 대신 기존 읽기 전용 dialog, 예시 수치 대신 고정 정의/실제 모의 checks, 기록에 없는 형식 통과·개별 버전·입력 출처는 미확인/미기록이다. 기록 수집·권한/저장 계약 확대 없이 구현했으며 이 차이를 미완료 외부 실행으로 채우지 않는다. Figma 원본을 수정하지 않았다. screenshot 자산 URL의 직접 파일 다운로드는 Site Unavailable HTML을 반환했지만 context 내장 이미지 및 별도 inline screenshot은 정상 확인했으며 다운로드 실패 파일을 PNG로 쓰지 않았다.
+
+ZIP은 Apply가 검증하는 내부 프로그램 묶음이다. 기존 Upgrade-TrialCommit은 정확한 병합 main에서 이를 자동 생성하므로 Work 첨부 ZIP 수동 다운로드는 필요 없다. 공식 upstream wheel 캐시만 재사용하고 변경 소스의 EES wheel/ZIP은 다시 만든다. 후보 ZIP은 사전 패키징 확인과 원본 보존용으로 한정한다. `31d90bb0643155714329cc5ac9e200d978dc0bf3`의 이전 후보 SHA256 `38c7cdb20fd191e64325f01e050a5505005b149d8bdad37c2eb9da474855c342`를 최종 main 묶음 해시로 안내하지 않는다. Restore는 프로그램만 복원하며 DB·이력·개인 인증·관리 자산/ApplyDemo 변경은 되돌리지 않는다. 실제 사내 설치·기동·화면 확인은 아직 수신하지 않았다.
+
+
+### Figma 보완 후 v5 재검증
+
+- P/T 보완 후 strict panel **42 PASS/0 FAIL/0 SKIP**,8.503초(실제 도구 출력으로 확인); 같은 renderer의4열/colspan/실행 순서/경계 노출 구조 점검은 고유 시험 수에 합산하지 않는다.
+- 새 v5 wheel의 Native 변경 범위4건 첫 실행은 **3 PASS/1 FAIL/0 SKIP**,13.690초(`native-pt-final-v5.log`). 새 조건 키보드 시험이 CDP Enter의 `text='\r'`를 빠뜨려 button activation이 발생하지 않은 시험 입력 오류다. 제품 코드는 바꾸지 않고 기존 키보드 시험과 같은 문자 전달로 고친 조건1건은 **1 PASS**,4.362초(`native-condition-final-v5.log`). 이를 전체4건 재실행4 PASS로 보고하지 않는다. 실제105개 작업과102개 미완료 목록에서 실패 사유·선행 조건 펼침/독립 선택·복귀 스크롤/포커스/미반영 입력·대화 초안을 검사했다. 기존 전체 v3의36 PASS/1 FAIL와도 합산하지 않는다.
+- 같은 v5의 PR61 기준 왼쪽·Native 대화/모델·Workspace1920/600 스타일 보존 **1 PASS**,5.123초(`preservation-v5.log`, `after-v5/`). root는 실제 T 기본 light1920, 실패 펼침 dark900, 선행 조건 light1920 PNG를 열어 Figma364:367/366:217/366:447와 대조했다. 과거 이미지 생성만으로 새 변경의 검증을 대신하지 않았다.
+- v5 wheel SHA256 `bd6963aca85ca248cefade2fb3a8c9e595b0fa61f0254850578dca3a9d313711`,151879009bytes. 프로그램0.11.3+ees.10/Pack0.2.12와 backend/저장/권한 계약은 그대로다. 재빌드는 기존 단일 환경·고정 upstream wheel을 재사용했으며 원격 CI/Windows/PowerShell/사내LLM/전체discover는 새로 실행하지 않았다.
+
+명령은 앞 절의 동일 `P`, `PYTHONPATH=.:tests`, upstream/Chrome 환경을 사용하고 `EES_TEST_BRANDING_DIR=dist/branding-right-v5`로 지정했다.
+
+```bash
+"$P" -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_work_panel -v
+"$P" -X warn_default_encoding -W error::EncodingWarning scripts/build_ees_webui.py --wheel ../team-agent-poc-sidebar/dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding-right-v5
+"$P" -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_demo.EESWorkNativeBrowserTests.test_right_panels_and_details_keyboard_light_dark_narrow test_ees_work_demo.EESWorkNativeBrowserTests.test_right_stage_condition_navigation_restores_list_page_scroll_and_edits test_ees_work_demo.EESWorkNativeBrowserTests.test_management_scope_run_excludes_human_retry_and_marks_unconnected_unperformed test_ees_work_demo.EESWorkNativeBrowserTests.test_integrated_large_job_browser_counts_filters_pages_and_selection -v
+"$P" -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_demo.EESWorkNativeBrowserTests.test_right_stage_condition_navigation_restores_list_page_scroll_and_edits -v
+EES_TEST_STYLE_BASELINE_DIR=dist/validation-right-panel-20260922/before "$P" -X warn_default_encoding -W error::EncodingWarning dist/validation-right-panel-20260922/capture_native_preservation.py
+```
+
+최종 문서 검사는 strict `scripts/check_docs.py` 32files/1191links/0errors/0review이며 두 JS `node --check`와 `git diff --check`도 통과했다.
