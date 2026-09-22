@@ -186,10 +186,13 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             self.wait("document.querySelector('#ees-work-dialog')?.open")
             self.click('#ees-work-dialog [data-dialog-confirm]' if confirm else '#ees-work-dialog [data-dialog-close]')
 
-    def key(self, key, code, modifiers=0):
+    def key(self, key, code, modifiers=0, text=None):
         for event_type in ("keyDown", "keyUp"):
-            self.browser.call("Input.dispatchKeyEvent", {"type": event_type, "key": key, "code": key,
-                "windowsVirtualKeyCode": code, "nativeVirtualKeyCode": code, "modifiers": modifiers})
+            params = {"type": event_type, "key": key, "code": key,
+                "windowsVirtualKeyCode": code, "nativeVirtualKeyCode": code, "modifiers": modifiers}
+            if text is not None and event_type == "keyDown":
+                params["text"] = text
+            self.browser.call("Input.dispatchKeyEvent", params)
 
     def fill(self, selector, value):
         self.click(selector)
@@ -338,6 +341,45 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             data = self.browser.call("Page.captureScreenshot", {"format": "png", "captureBeyondViewport": False})["data"]
             (directory / (name + ".png")).write_bytes(base64.b64decode(data))
 
+    def visual_style(self, selector):
+        """Measure the actual cascade, composited background and text contrast."""
+        return self.browser.evaluate("""(selector=>{
+            const e=document.querySelector(selector),s=getComputedStyle(e),r=e.getBoundingClientRect();
+            const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+            canvas.width=canvas.height=1;
+            const rgba=value=>{ctx.clearRect(0,0,1,1);ctx.fillStyle=value;ctx.fillRect(0,0,1,1);
+                return [...ctx.getImageData(0,0,1,1).data].map((n,i)=>i===3?n/255:n)};
+            const over=(a,b)=>a.slice(0,3).map((v,i)=>v*a[3]+b[i]*(1-a[3]));
+            let bg=[255,255,255];
+            const parents=[];for(let p=e;p;p=p.parentElement)parents.unshift(p);
+            parents.forEach(p=>bg=over(rgba(getComputedStyle(p).backgroundColor),bg));
+            const fg=over(rgba(s.color),bg),luminance=c=>c.map(n=>n/255)
+                .map(n=>n<=.04045?n/12.92:((n+.055)/1.055)**2.4)
+                .reduce((sum,n,i)=>sum+n*[.2126,.7152,.0722][i],0);
+            const a=luminance(fg),b=luminance(bg);
+            return {color:s.color,background:s.backgroundColor,contrast:(Math.max(a,b)+.05)/(Math.min(a,b)+.05),
+                fontSize:parseFloat(s.fontSize),fontWeight:parseFloat(s.fontWeight),
+                x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,
+                outline:s.outlineStyle,outlineWidth:parseFloat(s.outlineWidth),outlineOffset:parseFloat(s.outlineOffset),
+                focusVisible:e.matches(':focus-visible'),node:e.dataset.nodeId};
+        })(""" + json.dumps(selector) + ")")
+
+    def hover(self, selector=None):
+        point = self.browser.evaluate("""(selector=>{
+            if(!selector)return {x:innerWidth-5,y:5};
+            const e=document.querySelector(selector);e.scrollIntoView({block:'nearest'});
+            const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};
+        })(""" + json.dumps(selector) + ")")
+        self.browser.call("Input.dispatchMouseEvent", {"type": "mouseMoved", **point})
+
+    def save_visual_measurements(self, name, values):
+        directory = os.environ.get("EES_TEST_SCREENSHOT_DIR")
+        if directory:
+            destination = Path(directory)
+            destination.mkdir(parents=True, exist_ok=True)
+            (destination / (name + ".json")).write_text(
+                json.dumps(values, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
     def seed_large_case(self):
         """Publish synthetic volume through the same save/validate/create service.
 
@@ -422,7 +464,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                 &&button.children[1].matches('.ew-work-state')&&button.children[1].textContent.trim())"""))
         self.choose("scope-j")
         self.assertEqual(self.read('#ees-work-tree .ew-step[data-step-id="prep-t"]',
-                                   "dataset.selected"), "true")
+                                   "dataset.expanded"), "true")
         self.assertEqual(self.read('#ees-work-tree .ew-step-job[data-node-id="scope-j"]',
                                    "getAttribute('aria-current')"), "step")
         before = self.current()["case"]
@@ -931,6 +973,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
         self.choose("bulk-052-j")
         self.fill('#ees-work-inputs input[name="db"]', "입력 반영을 확인할 대상")
+        self.fill('#chat-input', "선택 중에도 보존할 미전송 대화")
         self.browser.evaluate("""(async()=>{
             await Promise.all([document.fonts.load('400 14px "EES Inter"','EES 0123'),
                 document.fonts.load('400 14px "EES Noto Sans KR"','공장 업무')]);
@@ -942,6 +985,48 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                         "width": width, "height": height, "deviceScaleFactor": 1, "mobile": False})
                     self.browser.evaluate("document.documentElement.classList.toggle('dark'," + str(theme == "dark").lower() + ")")
                     self.browser.evaluate("new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))")
+                    selection_styles = {}
+                    self.choose("bulk-t")
+                    self.assertTrue(self.browser.evaluate("""(()=>{
+                        const summary=document.querySelector('.ew-workflow-summary'),buttons=summary.querySelectorAll('button');
+                        return buttons.length===1&&buttons[0].contains(summary.querySelector('.ew-step-meta'))
+                            &&buttons[0].textContent.includes('2 / 104 작업 완료');})()"""))
+                    # Click the count, then activate the same summary with the
+                    # keyboard. Both must select P without creating/running work.
+                    before = self.current()["case"]
+                    self.click('.ew-workflow-summary .ew-step-meta')
+                    self.wait("document.querySelector('#ees-work-content h2')?.textContent === '대량 작업 검증'")
+                    self.hover()
+                    selection_styles["p"] = self.visual_style('.ew-workflow-summary > button')
+                    self.assertEqual(self.browser.evaluate(
+                        "document.querySelectorAll('#ees-work-entry button[aria-current=step]').length"), 1)
+                    self.assertGreaterEqual(self.visual_style('.ew-workflow-summary .ew-step-meta')["contrast"], 4.5)
+                    self.screenshot("ees-hierarchy-p-" + theme + "-" + str(width))
+                    self.choose("bulk-t")
+                    self.browser.evaluate("document.querySelector('.ew-workflow-summary > button').focus()")
+                    # CDP needs the Enter character to produce the browser's
+                    # native button activation, in addition to keydown/keyup.
+                    self.key("Enter", 13, text="\r")
+                    self.wait("document.querySelector('#ees-work-content h2')?.textContent === '대량 작업 검증'")
+                    self.assertEqual(self.current()["case"]["jobs"], before["jobs"])
+                    self.choose("bulk-t")
+                    self.browser.evaluate("document.querySelector('.ew-workflow-summary > button').focus()")
+                    self.key(" ", 32)
+                    self.wait("document.querySelector('#ees-work-content h2')?.textContent === '대량 작업 검증'")
+                    self.assertEqual(self.text('#chat-input'), "선택 중에도 보존할 미전송 대화")
+                    self.assertEqual(self.server.completions, [])
+                    self.choose("bulk-t")
+                    self.hover()
+                    selection_styles["t"] = self.visual_style('.ew-step-button[aria-current=step]')
+                    self.assertEqual(self.browser.evaluate(
+                        "document.querySelectorAll('#ees-work-entry button[aria-current=step]').length"), 1)
+                    self.assertGreaterEqual(self.visual_style('.ew-step-button[aria-current=step] strong')["contrast"], 4.5)
+                    self.assertGreaterEqual(self.visual_style('.ew-step-button[aria-current=step] .ew-step-meta')["contrast"], 4.5)
+                    self.assertGreaterEqual(self.visual_style('.ew-step-button[aria-current=step] .ew-work-state')["contrast"], 4.5)
+                    self.assertNotEqual(selection_styles["t"]["background"], self.visual_style('.ew-step-jobs')["background"])
+                    self.screenshot("ees-hierarchy-t-" + theme + "-" + str(width))
+                    self.choose("bulk-052-j")
+                    self.hover()
                     measured = self.browser.evaluate("""(()=>{
                         const root=document.querySelector('#ees-work-panel'), css=getComputedStyle(root);
                         const color=value=>{const e=document.createElement('span');e.style.color=value;
@@ -949,7 +1034,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                         const button=document.querySelector('#ees-work-inputs-save'), b=getComputedStyle(button);
                         const selected=document.querySelector('.ew-step-job[aria-current=step]'), s=getComputedStyle(selected);
                         const status=selected.querySelector('.ew-work-state');
-                        const number=document.querySelector('.ew-step[data-selected=true] .ew-step-number');
+                        const number=document.querySelector('.ew-step[data-expanded=true] .ew-step-number');
                         const next=document.querySelector('#ees-work-panel .ew-work-next');
                         const form=document.querySelector('#ees-work-inputs');
                         const boxes=['.ew-work-result','.ew-work-next','.ew-work-criterion'].map(selector=>{
@@ -967,16 +1052,67 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                             boxes,width:innerWidth,scroll:document.documentElement.scrollWidth};})()""")
                     self.assertEqual(measured["ewBlue"], measured["blue"])
                     self.assertEqual(measured["primary"], measured["blue"])
-                    self.assertEqual(measured["activeNumber"], measured["blue"])
+                    self.assertNotEqual(measured["activeNumber"], measured["blue"],
+                                        "Expanded parent number must not compete with the selected job")
                     self.assertTrue(measured["nextBeforeInput"])
                     self.assertAlmostEqual(measured["actionWidth"], measured["formWidth"], delta=1)
                     self.assertEqual(measured["border"], "0px")
-                    self.assertEqual(measured["selected"], measured["tint"])
+                    self.assertEqual(measured["selected"], measured["blue"])
+                    self.assertEqual({value["background"] for value in selection_styles.values()}, {measured["blue"]})
                     self.assertTrue(all(border == "0px" for border in measured["boxes"]))
                     self.assertGreaterEqual(measured["stateSize"], 13)
                     self.assertGreaterEqual(measured["buttonHeight"], 36)
                     self.assertLessEqual(measured["rowRight"], measured["sidebarRight"] + 1)
                     self.assertLessEqual(measured["scroll"], measured["width"] + 1)
+                    selected_selector = '.ew-step-job[aria-current=step]'
+                    selection_styles["j"] = self.visual_style(selected_selector)
+                    selection_styles["jobName"] = self.visual_style(selected_selector + ' .ew-step-job-name')
+                    selection_styles["status"] = self.visual_style(selected_selector + ' .ew-work-state')
+                    selection_styles["parent"] = self.visual_style('.ew-step[data-expanded=true]')
+                    selection_styles["parentHeader"] = self.visual_style('.ew-step[data-expanded=true] > .ew-step-button')
+                    selection_styles["parentMeta"] = self.visual_style('.ew-step[data-expanded=true] .ew-step-meta')
+                    for key in ("jobName", "status"):
+                        self.assertGreaterEqual(selection_styles[key]["contrast"], 4.5, (key, selection_styles[key]))
+                    self.assertGreaterEqual(selection_styles["parentMeta"]["contrast"], 4.5)
+                    self.assertGreaterEqual(selection_styles["j"]["x"] - selection_styles["parent"]["x"], 8)
+                    self.assertGreaterEqual(selection_styles["parent"]["right"] - selection_styles["j"]["right"], 8)
+                    self.assertNotEqual(selection_styles["parentHeader"]["background"], measured["blue"])
+                    self.assertEqual(self.browser.evaluate(
+                        "document.querySelectorAll('#ees-work-entry button[aria-current=step]').length"), 1)
+                    self.screenshot("ees-hierarchy-j-" + theme + "-" + str(width))
+                    self.hover('.ew-step-button')
+                    for key, selector in (("parentMetaHover", ".ew-step-button .ew-step-meta"),
+                                          ("parentStatusHover", ".ew-step-button .ew-work-state")):
+                        selection_styles[key] = self.visual_style(selector)
+                        self.assertGreaterEqual(selection_styles[key]["contrast"], 4.5, (key, selection_styles[key]))
+                    self.hover('.ew-step-job[data-node-id="bulk-003-j"]')
+                    selection_styles["warningHover"] = self.visual_style('.ew-step-job[data-node-id="bulk-003-j"] .ew-work-state')
+                    self.assertGreaterEqual(selection_styles["warningHover"]["contrast"], 4.5)
+                    selection_styles["connectionWordRects"] = self.browser.evaluate("""(()=>{
+                        const text=document.querySelector('.ew-step-job[data-node-id="bulk-005-j"] .ew-work-state').firstChild;
+                        const start=text.textContent.indexOf('필요'),range=document.createRange();
+                        range.setStart(text,start);range.setEnd(text,start+2);
+                        return [...range.getClientRects()].map(r=>({x:r.x,y:r.y,width:r.width,height:r.height}));})()""")
+                    self.assertEqual(len(selection_styles["connectionWordRects"]), 1,
+                                     "A wrapped connection status must keep 필요 on one line")
+                    other = '.ew-step-job:not([aria-current=step])'
+                    self.hover(other)
+                    selection_styles["otherHover"] = self.visual_style(other)
+                    self.assertNotEqual(selection_styles["otherHover"]["background"], measured["blue"])
+                    self.assertEqual(self.visual_style(selected_selector)["background"], measured["blue"])
+                    self.screenshot("ees-hierarchy-other-hover-" + theme + "-" + str(width))
+                    self.hover(selected_selector)
+                    self.assertEqual(self.visual_style(selected_selector)["background"], measured["blue"])
+                    self.hover()
+                    self.browser.evaluate("document.querySelector('.ew-step-button').focus()")
+                    self.key("Tab", 9)
+                    selection_styles["otherFocus"] = self.visual_style('.ew-step-job:focus')
+                    self.assertNotEqual(selection_styles["otherFocus"]["node"], "bulk-052-j")
+                    self.assertTrue(selection_styles["otherFocus"]["focusVisible"])
+                    self.assertGreaterEqual(selection_styles["otherFocus"]["outlineWidth"], 2)
+                    self.assertEqual(self.visual_style(selected_selector)["background"], measured["blue"])
+                    self.screenshot("ees-hierarchy-other-focus-" + theme + "-" + str(width))
+                    self.save_visual_measurements("ees-hierarchy-" + theme + "-" + str(width), selection_styles)
                     self.browser.evaluate("document.querySelector('.ew-step-job[aria-current=step]').focus()")
                     self.key("Tab", 9, modifiers=8)
                     self.key("Tab", 9)
@@ -999,6 +1135,43 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.key("ArrowRight", 39)
         self.assertAlmostEqual(self.read('#ees-work-panel', 'getBoundingClientRect().width'), before, delta=1)
         self.assertEqual(self.read('#ees-work-inputs input[name="db"]', 'value'), "입력 반영을 확인할 대상")
+
+    def test_selected_business_statuses_remain_readable_in_both_themes(self):
+        self.seed_large_case()
+        self.navigate("/c/existing-chat")
+        self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
+        measurements = {}
+
+        def check_status(node_id, status, chat_id="existing-chat"):
+            self.choose(node_id, chat_id=chat_id)
+            selector = '.ew-step-job[aria-current=step] .ew-work-state'
+            self.assertEqual(self.read(selector, "dataset.status"), status)
+            for theme in ("light", "dark"):
+                self.browser.evaluate("document.documentElement.classList.toggle('dark'," + str(theme == "dark").lower() + ")")
+                self.hover()
+                style = self.visual_style(selector)
+                self.assertGreaterEqual(style["fontSize"], 13)
+                self.assertGreaterEqual(style["contrast"], 4.5, (status, theme, style))
+                self.assertNotEqual(style["background"], self.visual_style('.ew-step-job[aria-current=step]')["background"])
+                measurements[status + "-" + theme] = style
+                self.screenshot("ees-hierarchy-status-" + status + "-" + theme)
+
+        check_status("bulk-000-j", "passed")
+        check_status("bulk-002-j", "failed")
+        check_status("bulk-003-j", "review")
+        case = self.seed_case("status-chat")
+        self.navigate("/c/status-chat")
+        self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
+        check_status("db-j", "waiting", "status-chat")
+        case = self.current("status-chat")["case"]
+        changed = asyncio.run(self.server.workflow.handle_action(self.server.user, {
+            "action": "update_inputs", "chat_id": "status-chat", "case_id": case["id"],
+            "expected_revision": case["revision"], "node_id": "db-j", "payload": {"inputs": {"db": ""}}}))
+        self.assertTrue(changed["ok"], changed)
+        self.browser.evaluate("window.__eesNativeWorkV1.refresh()")
+        self.wait("document.querySelector('.ew-step-job[aria-current=step] .ew-work-state')?.dataset.status === 'input_required'")
+        check_status("db-j", "input_required", "status-chat")
+        self.save_visual_measurements("ees-hierarchy-statuses", measurements)
 
     def test_cancelled_human_confirmation_keeps_saved_state(self):
         self.create_case()
@@ -1215,6 +1388,19 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     self.browser.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
                     self.assertLessEqual(self.browser.evaluate('document.documentElement.scrollWidth'), width + 1)
                     self.assertLessEqual(self.browser.evaluate("document.querySelector('#ees-work-authoring').scrollWidth-document.querySelector('#ees-work-authoring').clientWidth"), 1)
+                    styles = {key: self.visual_style(selector) for key, selector in {
+                        "editorTitle": "#ees-work-node-form h2", "aiTitle": "#ees-work-authoring h2",
+                        "input": "#ees-work-node-form input[name=name]", "aiInput": "#ees-work-authoring-input",
+                        "apply": "#ees-work-node-form > button[type=submit]",
+                    }.items()}
+                    self.assertGreater(styles["editorTitle"]["fontSize"], styles["aiTitle"]["fontSize"])
+                    self.assertGreaterEqual(styles["editorTitle"]["fontWeight"], styles["aiTitle"]["fontWeight"])
+                    for key, style in styles.items():
+                        self.assertGreaterEqual(style["contrast"], 4.5, (key, theme, width, style))
+                    self.save_visual_measurements('ees-hierarchy-workspace-' + theme + '-' + str(width), styles)
+                    self.browser.evaluate("document.querySelector('#ees-work-node-form').scrollIntoView({block:'start'})")
+                    self.hover()
+                    self.screenshot('ees-hierarchy-workspace-' + theme + '-' + str(width))
                     self.screenshot('ees-workspace-authoring-' + theme + '-' + str(width))
                     self.click('#ees-work-node-form .ew-designer-advanced > summary')
                     self.wait("document.querySelector('#ees-work-dialog')?.open")
@@ -1480,7 +1666,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.attach_file()
         self.fill("#chat-input", "미국 EMS에서 작성 중인 내용")
         selected_stage = '#ees-work-tree .ew-step[data-step-id="install-t"]'
-        self.assertEqual(self.read(selected_stage, "dataset.selected"), "true")
+        self.assertEqual(self.read(selected_stage, "dataset.expanded"), "true")
         self.select_scope("site", "hu-a")
         self.wait("location.pathname === '/c/other-chat'"
                   + " && document.querySelector('#ees-work-site-trigger')?.value === 'hu-a'"
@@ -1498,7 +1684,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                   + " && document.querySelector('#chat-input')?.innerText === '미국 EMS에서 작성 중인 내용'")
         self.assert_draft_stays("미국 EMS에서 작성 중인 내용")
         self.assertEqual(self.current()["case"]["jobs"]["db-j"]["status"], "pending")
-        self.assertEqual(self.read(selected_stage, "dataset.selected"), "true")
+        self.assertEqual(self.read(selected_stage, "dataset.expanded"), "true")
         self.assertIn("미국", self.text("#ees-work-context"))
         self.assertIn("attachment.txt", self.text("#chat-container"))
         self.select_scope("system", "APC")
@@ -1513,7 +1699,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.wait("location.pathname === '/c/existing-chat'"
                   + " && document.querySelector('#chat-input')?.innerText === '미국 EMS에서 작성 중인 내용'")
         self.assert_draft_stays("미국 EMS에서 작성 중인 내용")
-        self.assertEqual(self.read(selected_stage, "dataset.selected"), "true")
+        self.assertEqual(self.read(selected_stage, "dataset.expanded"), "true")
         self.assertIn("attachment.txt", self.text("#chat-container"))
         self.choose("db-j")
         current = self.current()["case"]
