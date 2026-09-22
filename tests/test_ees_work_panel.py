@@ -609,12 +609,15 @@ return {html,unchanged:before===JSON.stringify(nodes)};
         html = PanelHTML(result["html"]).root
         stages = html.find("li", **{"data-step-id": None})
         self.assertEqual([item.attrs["data-step-id"] for item in stages], ["t1", "t2"])
-        self.assertEqual([item.attrs["data-selected"] for item in stages], ["false", "true"])
+        self.assertEqual([item.attrs["data-expanded"] for item in stages], ["false", "true"])
+        self.assertFalse(any("data-selected" in item.attrs for item in stages))
         self.assertIn("1 / 1 완료", stages[0].text)
         self.assertIn("80 / 105 완료", stages[1].text)
         jobs = html.find("button", **{"class": "ew-step-job"})
         self.assertEqual(len(jobs), 5)
         self.assertEqual(jobs[-1].attrs["aria-current"], "step")
+        self.assertEqual(len(html.find("button", **{"aria-current": "step"})), 1,
+                         "Expanded ancestors must not also become the selected item")
         self.assertEqual(jobs[-1].text, "작업 j104완료")
         self.assertFalse(html.find("button", **{"data-node-id": "hidden-j"}))
         self.assertTrue(any(item.text == "전체 105개 작업 보기" and item.attrs["data-node-id"] == "t2"
