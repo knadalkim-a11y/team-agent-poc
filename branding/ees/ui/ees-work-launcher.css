@@ -71,11 +71,16 @@
 
 /* Runtime shows categories, one workflow, and its ordered stages. Only the
    active stage expands its compact job list; the editor keeps its own tree. */
-#ees-work-entry .ew-category-tabs {display:flex;gap:4px;margin:0 2px 16px;padding:3px;border-radius:10px;background:var(--ew-soft);}
-#ees-work-entry .ew-category-tabs .ew-category {flex:1;min-width:0;padding:7px 3px;background:transparent;text-align:center;font-size:.8125rem;color:var(--ew-ink);white-space:normal;overflow-wrap:anywhere;}
-#ees-work-entry .ew-category-tabs .ew-category[aria-pressed=true] {background:var(--ew-tint);color:var(--ew-blue);font-weight:600;}
+#ees-work-entry {--ew-selection-workflow-soft:#dcebf7;--ew-navigation-hover:color-mix(in srgb,var(--ew-tint) 50%,var(--ew-bg));}
+.dark #ees-work-entry {--ew-selection-workflow-soft:color-mix(in srgb,var(--ew-blue) 22%,var(--ew-bg));}
+#ees-work-entry .ew-category-tabs {display:flex;gap:4px;margin:0 2px 16px;padding:3px;border-radius:10px;background:var(--ew-bg);}
+#ees-work-entry .ew-category-tabs .ew-category {flex:1;min-width:0;padding:7px 4px 5px;background:var(--ew-bg);text-align:center;font-size:.875rem;color:var(--ew-ink);white-space:normal;overflow-wrap:anywhere;}
+#ees-work-entry .ew-category-tabs .ew-category::after {content:"";display:block;width:32px;max-width:100%;height:2px;margin:5px auto 0;border-radius:1px;background:transparent;}
+#ees-work-entry .ew-category-tabs .ew-category:hover {color:var(--ew-blue);}
+#ees-work-entry .ew-category-tabs .ew-category[aria-pressed=true] {color:var(--ew-blue);font-weight:600;}
+#ees-work-entry .ew-category-tabs .ew-category[aria-pressed=true]::after {background:var(--ew-blue);}
 #ees-work-entry .ew-workflow-summary {margin:0 2px 12px;}
-#ees-work-entry .ew-workflow-summary > button {display:block;width:100%;padding:12px;border-radius:10px;text-align:left;background:var(--ew-bg);color:var(--ew-ink);font-size:.9375rem;font-weight:600;line-height:1.5;overflow-wrap:anywhere;word-break:keep-all;}
+#ees-work-entry .ew-workflow-summary > button {display:block;width:100%;padding:12px;border-radius:10px;text-align:left;background:var(--ew-bg);color:var(--ew-ink);font-size:1rem;font-weight:600;line-height:1.5;overflow-wrap:anywhere;word-break:keep-all;}
 #ees-work-entry .ew-workflow-name {display:block;}
 #ees-work-entry .ew-workflow-picker {margin:8px 2px 14px;}
 #ees-work-entry .ew-workflow-picker > summary {padding:6px 8px;font-size:.8125rem;}
@@ -83,17 +88,17 @@
 #ees-work-entry .ew-workflow-option[aria-pressed=true] {background:var(--ew-tint);color:var(--ew-blue);}
 #ees-work-entry .ew-step-progress {margin:8px 0 12px;}
 #ees-work-entry .ew-steps,#ees-work-entry .ew-step-jobs {list-style:none;padding:0;margin:0;}
-#ees-work-entry .ew-step {margin:5px 0;min-width:0;}
-#ees-work-entry .ew-step[data-expanded=true] {border-radius:10px;background:var(--ew-bg);padding-bottom:1px;}
-#ees-work-entry .ew-step-button {display:grid;grid-template-columns:25px minmax(0,1fr) auto;gap:8px;align-items:start;width:100%;padding:10px 8px;background:color-mix(in srgb,var(--ew-blue) 9%,var(--ew-soft));text-align:left;}
-#ees-work-entry .ew-step-number {display:flex;align-items:center;justify-content:center;min-height:25px;border-radius:50%;background:var(--ew-bg);color:var(--ew-blue);font-size:.8125rem;font-weight:600;font-variant-numeric:tabular-nums;}
+#ees-work-entry .ew-step {margin:10px 0;min-width:0;padding:8px 0;border-radius:10px;background:var(--ew-bg);}
+#ees-work-entry .ew-step-button {display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:8px;align-items:start;width:calc(100% - 16px);margin:0 8px;padding:6px 8px;background:var(--ew-bg);text-align:left;}
+#ees-work-entry .ew-step-number {display:flex;align-items:center;justify-content:center;min-height:26px;border-radius:50%;background:var(--ew-tint);color:var(--ew-blue);font-size:.8125rem;font-weight:600;font-variant-numeric:tabular-nums;}
 #ees-work-entry .ew-step-label {min-width:0;}
-#ees-work-entry .ew-step-label > strong {display:block;font-size:.875rem;font-weight:600;line-height:1.6;overflow-wrap:anywhere;word-break:keep-all;}
+#ees-work-entry .ew-step-label > strong {display:block;font-size:.9375rem;font-weight:600;line-height:1.6;overflow-wrap:anywhere;word-break:keep-all;}
 #ees-work-entry .ew-step-meta {display:block;margin-top:4px;color:var(--ew-muted);font-size:.8125rem;font-weight:400;line-height:1.5;overflow-wrap:anywhere;font-variant-numeric:tabular-nums;}
-#ees-work-entry .ew-step-button .ew-step-meta {color:var(--ew-ink);}
 #ees-work-entry .ew-step-jobs {margin:8px 10px 8px 22px;}
-#ees-work-entry .ew-step-jobs > li {margin:3px 0;}
-#ees-work-entry .ew-step-job {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start;width:100%;min-height:40px;padding:9px 8px;background:transparent;text-align:left;}
+#ees-work-entry .ew-step-jobs > li {margin:0;}
+/* Internal job boundaries only: no frame or divider next to the all-jobs link. */
+#ees-work-entry .ew-step-jobs > li + li {margin-top:2px;padding-top:2px;border-top:1px solid var(--ew-line);}
+#ees-work-entry .ew-step-job {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start;width:100%;min-height:42px;padding:8px 10px;background:var(--ew-bg);text-align:left;}
 #ees-work-entry .ew-step-job-name {min-width:0;font-size:.875rem;line-height:1.6;overflow-wrap:anywhere;word-break:keep-all;}
 #ees-work-entry .ew-step-job[aria-current=step] .ew-step-job-name {font-weight:600;}
 #ees-work-entry .ew-step-all {margin:5px 10px 10px 22px;}
@@ -105,8 +110,9 @@
 #ees-work-entry .ew-work-state:is([data-status=input_required],[data-status=confirmation],[data-status=review],[data-status=blocked],[data-status=connection_required],[data-status=skill_unavailable]) {color:var(--ew-warning);}
 /* Expanded ancestors are context, never selection. Keep hover and keyboard
    focus independent; the current P/T/J owns one continuous selected surface. */
-#ees-work-entry :is(.ew-workflow-summary > button,.ew-step-button,.ew-step-job):hover {background:color-mix(in srgb,var(--ew-blue) 14%,var(--ew-bg));}
-#ees-work-entry :is(.ew-workflow-summary > button,.ew-step-button,.ew-step-job)[aria-current=step] {background:var(--ew-blue);color:var(--ew-bg);}
+#ees-work-entry :is(.ew-workflow-summary > button,.ew-step-button,.ew-step-job):hover {background:var(--ew-navigation-hover);}
+#ees-work-entry :is(.ew-workflow-summary > button,.ew-step-button,.ew-step-job)[aria-current=step] {background:var(--ew-tint);color:var(--ew-blue);}
+#ees-work-entry .ew-workflow-summary > button[aria-current=step] {background:var(--ew-selection-workflow-soft);}
 #ees-work-entry :is(.ew-workflow-summary > button,.ew-step-button)[aria-current=step] .ew-step-meta {color:inherit;}
 #ees-work-entry .ew-step-button[aria-current=step] .ew-step-number {background:var(--ew-bg);color:var(--ew-blue);}
 [data-ees-work] .ew-badge:is([data-status=input_required],[data-status=confirmation],[data-status=review],[data-status=waiting_confirmation],[data-status=connection_required],[data-status=skill_unavailable]) {color:var(--ew-warning);background:color-mix(in srgb,var(--ew-warning) 10%,var(--ew-bg));}

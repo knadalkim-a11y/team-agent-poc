@@ -120,6 +120,55 @@ git diff --check
 
 **최종 확인 범위:** 실제 Native의 P/T/J 탐색·105개 작업 전체 검색/필터/페이지, 제외·대기·실패·권한·미연결, 입력 반영/별도 실행/명시적 사람 확인/결과/재시도/다음 이동, 같은 대화·미저장 입력·이력 보존, Workspace AI/수동 입력·저장/게시·기존 snapshot, 개인 설정 진입과 사용자 자산 보존을 이번 원본으로 실행했다. 실제 v4의 긴 한글 입력 화면·실패 결과·완료/다음 작업 화면과 앞선 동일 CSS의 밝음/어두움·좁은 화면·Workspace를 직접 열어 확인했으며 geometry/computed style 검사를 함께 사용했다. 최초 실패/관측과 최종 집중 PASS를 분리했다. 최종 문서 검사는 30파일/1,159링크, 오류 0/검토 후보 0이고 diff/Node syntax PASS다. 실제 Windows 잠금·PowerShell·구버전 wheel 역호환 gate 3 SKIP, 사내 Open WebUI 설치/LLM/UI 수락·새 Figma 전 노드 실물 대조는 미확인이다. 앱 전송/CLI 인증 제한으로 최신 원격 확인·push/후속 PR을 완료하지 못했으며 병합·사내 적용은 실행하지 않았다. 회사 PC는 확인된 `6b58beb3dbad` 적용 상태를 유지한다.
 
+<a id="sidebar-final-20260922"></a>
+
+### 09-22 확정 왼쪽 워크플로우 패널
+
+**원본과 적용 보고:** 시작 시 GitHub 플러그인으로 최신 main `b1c47643c7a5ab4fd85c50a000db3f92ceda82b2`와 PR [#60](https://github.com/knadalkim-a11y/team-agent-poc/pull/60)의 병합을 실제 조회했다. 전체 tree `04a5c5adbb0ed5c186417c924fc4893d263e69f9`는 검증 head `f1d7d85e0033d026badcfdb925ecddc07a5a4b4f`와 같다. 열린 PR은 별도 Draft #53뿐이며 이번 작업에 사용하지 않았다. 앞선 main 적용 안내 뒤 이번 요청의 사용자 “응 확인했어”는 직전 안내에 대한 간단한 확인 보고로 기록한다. 개별 Upgrade/기동/ApplyDemo 값이나 실제 사내 서버 SHA를 재조회한 증거는 아니다. 이번 새 CSS 변경의 병합·사내 적용 승인은 아직 없다.
+
+**복원과 환경:** 이전 hierarchy 작업 폴더·`.venv`·원문 로그/스크린샷은 현재 scratch에 없다. 남은 `team-agent-poc-candidate`는 그대로 보존하고 tracked 파일 모두를 원격 blob과 대조해 10개 다른 파일을 원격 원문으로 복원했다. 새 `team-agent-poc-sidebar`는 전체 tree와 서명 main commit SHA를 검증한 뒤 해당 main을 shallow 경계로 `feat/ees-work-sidebar-final-20260922`에서 시작했다. 강제 초기화/reset/force/main 직접 push는 없다. CLI `GIT_TERMINAL_PROMPT=0 timeout 15 git ls-remote origin refs/heads/main`은 HTTPS username 부재(exit128)로 실패해 GitHub 플러그인을 사용한다. 회사 PC의 인증·프록시·서비스 설정은 변경하지 않았다.
+
+기존 캐시도 없어 저장소 CI 고정 구성으로 단일 `.venv`를 복원했다. Python 3.11.16/Node 24.19.0/HeadlessChrome 153.0.8010.52이며 upstream wheel SHA-256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`, Chrome ZIP `944dc1eae654637fed4d57650198774f9c43b45f34e48febb84f43c541b5de76`를 직접 검사했다. 최초 `uv venv --seed`는 setuptools 조회 HTTP502로 실패했다. 생성된 환경에 내장 ensurepip를 사용하고 기존 고정 의존성만 설치해 pip check와 ChromePipe 기동을 확인했다. 보존 후보의 loose wheel은 잘린 `BadZipFile`이므로 사용하지 않았고 기존 ZIP은 CRC 정상이다. 비교용 wheel은 정확한 main에서 새로 빌드했으며 이전 검증 wheel `7249404020250a011ab7c05442ab2cb1ba90ef098ed0c84225f96d93c4ae481b`와 해시가 같다.
+
+**기준·구현·대조:** 첨부 `EES_Work_Sidebar_Final_Implementation_20260922.md`를 우선하고 2026-09-22 Figma skill/design context의 비교판 `313:680`과 P/T/J `313:132 / 313:319 / 313:515` 이미지 및 별도 screenshot을 실제 조회했다(페이지 `313:131`, fileKey `XK2wTos6sEuxSHhIj7cqg6`). 원본은 읽기 전용이다. 왼쪽의 흰색 분류/단계/펼친 목록, 선택 분류의 32×2px 밑줄, P 이름+완료 수 전체 `#dcebf7`, T/J 선택 행 `#eef5fa`, 선택 이름 `#37658b`, J 내부 1px `#e4e9ef` 선을 적용했다. 실제 선택 P/T/J 하나만 강조하고 hover는 tint/paper 절반 혼합, focus-visible은 별도 2px 외곽선이다. 어두운 테마는 기존 paper/tint/blue/line과 왼쪽 P 전용 혼합색을 쓴다. 전역 색/공통 버튼 규칙은 그대로다.
+
+제품 수정은 `ees-work-launcher.css`의 `#ees-work-entry`에만 있다. T 제목의 좌우 8px, 기존 J 좌우 22/10px(매우 좁은 창 왼쪽18px), 최소42px·자동 높이를 유지한다. 선은 J 전용 목록의 인접 항목 사이에만 있고 첫 위/마지막 아래/전체 보기 링크에는 없다. JS/서버/권한/저장 계약/Agent Pack 변경과 업무 수치 하드코딩은 없다. 오른쪽·Workspace 재설계는 승인 밖이며 기존 동작·입력·대화·결과·이력·사용자 자산을 보존한다. Figma와 의도된 차이는 Native 사이드바 실제 폭, 실제 업무명/집계, 기존 J 들여쓰기, 읽기 쉬운 기존 글자 굵기/상태 크기, 어두운 테마의 의미별 색이다. 전체 화면의 오른쪽 예시·일정은 구현하지 않는다.
+
+**새 실행과 최초 실패:** 새 원본 증거는 `dist/validation-sidebar-final-20260922/`에 둔다. 정확한 main의 Native 수정 전 화면은 `before/`, 같은 자료의 오른쪽/Workspace/Native 스타일 기준은 `outside-before/`다. 최초 집중 v1은 4개 중 2 PASS/2 FAIL이었다. 새 구분선 시험이 같은 대화에 두 번째 진행 건을 만들다 기존 `chat_already_bound` 보호에 막혔다. 5개 J 경계는 기존 105개 fixture 검사로 옮기고 별도 시험은 0개 표시/1개/3개를 확인하도록 고쳤다. 저장 계약을 완화하지 않았다. 범위 밖 스타일 비교는 dark 전환 도중 Native 모델 선택기의 중간 색을 읽어 실패했다. finite CSS animation 완료 뒤 실제 스타일을 비교하도록 시험만 보완하고 영향받는 비교 기준을 다시 취득했다. 제품 CSS는 v1 이후 변경하지 않았다. 재검증의 실제 판정은 아래에 기록한다.
+
+**전달물 관련 새 검사:** strict Python 151개 중 148 PASS/0 FAIL/3 SKIP, 40.500초였다. branding25/bundle8/Apply·Restore55/Trial bundle14/Trial Upgrade16/ApplyDemo28/실제 manifest 및 사용자 자산 보존2 PASS다. SKIP은 실제 Windows 디렉터리 잠금·이전 ees.7/8 wheel·PowerShell 부재다. 완결된 프로세스 종료 출력은 151개 집계와 마지막 두 시험을 포함했으나 이후 로그 파일 조회에서는 말미가 누락되어 원인을 확정하지 않았다. 실제 종료 출력은 `delivery-related-v1-completion.txt`, 분류·명령은 `delivery-related-v1-summary.json`에 별도로 보존한다. 불완전 파일을 완전 로그로 간주하거나 같은 시험을 반복하지 않았다.
+
+새 wheel SHA-256은 `304c519cfdb118238d089a35bc8cf75023c2c2034871216938b3f868c2e65436`이다. 이전 검증본과 5,911개 항목을 비교해 CSS/index/RECORD 3개만 바뀌고 나머지 5,908개는 바이트 동일했다. 최초 scratch 감사는 CSS 기대 경로에 `_ees10`을 빠뜨려 실패했고 실제 builder의 경로 상수를 쓰도록 감사만 고친 뒤 통과했다(`wheel-comparison-v2.json`). 프로그램0.11.3+ees.10/Pack0.2.12·JS·실행 계약은 같다. 최종 clean 커밋에서 기존 묶음 빌더로 새 ZIP을 만들며 정확한 SHA/hash/포함 파일은 해당 PR과 묶음 manifest에 기록한다. 미병합 후보를 적용 가능한 main으로 안내하지 않는다.
+
+**관련 UI 회귀:** strict panel/controller/designer 58 PASS/0 FAIL/0 SKIP, 7.048초(`related-ui.log`). 전달148 PASS/3 SKIP와 모듈이 겹치지 않아 관련 Python 고유 합계는206 PASS/0 FAIL/3 SKIP다.
+
+**최종 Native 판정:** 공식 Native Svelte/Tiptap 자산·합성 사용자/모델·실제 workflow SQLite/API를 사용했다. 수정 전 기존 시각 시험 1 PASS(8.855초), 외부 스타일 기준 첫 취득 1 PASS(6.530초), 전환 완료 대기를 추가한 기준 재취득 1 PASS(5.000초)였다. 집중 v2의 영향받는 3개는 3 PASS/0 FAIL/0 SKIP(15.835초). 최종 전체는 Work31+theme2 **33 PASS/0 FAIL/0 SKIP, 103.310초**(`native-final.log`)다. 집중 검사는 전체와 중복이므로 고유 합계에 더하지 않는다. 이전 입력 선택 실패가 있었던 double-click/held Enter/Space 시험도 이번 전체 실행에서 통과했지만 과거 최초 클릭 유실의 원인은 여전히 미확정이다.
+
+같은 자료의 P/T/J 1920/900 light/dark에서 마우스를 치운 선택·다른 hover·Tab/Enter/Space·닫기/재열기·초안·scroll/resize를 검사했다. 완료/실패/입력 필요/확인 대기·실행 연결 필요 상태를 유지했고 105개 전체 탐색, 요약 밖 선택 유지, 적용104개/완료2개/문제2개/적용 제외1개를 확인했다. 입력 반영과 실행 분리, 명시적 사람 확인/취소·실패/재시도·이력, Workspace 수동/AI 작성·초안 저장/게시·진행 snapshot 경계를 기존 시험으로 확인했다. 오른쪽 입력/실행 버튼/제목·Workspace 1920/600 편집/AI 영역·Native 모델 선택기/공장/시스템 선택기의 최종 computed style은 같은 기준과 일치했다. 전후 screenshot 생성만으로 판정하지 않고 실제 제품 입력·API·최종 스타일과 Figma 왼쪽을 직접 대조했다.
+
+실제 텍스트/바탕 대비는 light P5.084:1, T/J5.616:1; dark P5.332:1, T/J6.511:1이다. 기본 T 완료 수는 light4.937:1/dark7.877:1이며 상태 의미별 색은 별도 paper 배경에서 유지된다. T 선택의 양쪽 8px, J22/10px, 기본42px·긴 한글 행150.34px의 확장·이름/상태 비겹침·포커스 외곽선 가시성을 확인했다. 0개 표시/1개/3개/5개 J에서 각각0/0/2/4 내부 선만 확인했다. 0개는 접힌 T의 표시 경계이며 저장 계약에서 금지한 빈 T를 허용하도록 바꾸지 않았다.
+
+최종 명령(저장소 루트, 기존 고정 구성):
+
+```bash
+export PYTHONPATH=tests
+export EES_TEST_UPSTREAM_WHEEL="$PWD/dist/upstream/open_webui-0.11.3-py3-none-any.whl"
+export EES_TEST_CHROME="$PWD/dist/tools/headless-shell-153.0.8010.52/chrome-headless-shell-linux64/chrome-headless-shell"
+export EES_TEST_BRANDING_DIR="$PWD/dist/branding-sidebar-v1"
+export EES_TEST_SCREENSHOT_DIR="$PWD/dist/validation-sidebar-final-20260922/native-final"
+export EES_TEST_STYLE_BASELINE_DIR="$PWD/dist/validation-sidebar-final-20260922/outside-before-v2"
+.venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_demo test_ees_chat_theme -v
+.venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_panel test_ees_work_controller test_ees_work_designer -v
+.venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_branding_build test_demo_bundle test_ees_webui_customization test_ees_trial_bundle test_ees_trial_upgrade test_ees_apply_demo test_ees_demo_assets.ApplyAssetsTests.test_real_manifest_sources_pass_preflight test_ees_demo_assets.ApplyAssetsTests.test_unknown_assets_and_supported_links_remain_available_after_update -v
+node --check branding/ees/ui/ees-work-view.js
+node --check branding/ees/ui/ees-work-launcher.js
+node --check branding/ees/ui/ees-work-designer.js
+.venv/bin/python scripts/check_docs.py
+git diff --check
+```
+
+문서 초안의 첫 check_docs는 새 eval anchor 작성 전 링크3건을 보고했고, 해당 기록 연결 후 오류0/검토후보0으로 통과했다. 변경 없는 전체 discover/Windows 설치/사내 LLM/장시간 실사용은 이번에 반복하지 않았다. 이전 전체 strict의 범위 밖 EncodingWarning27 ERROR를 해결됐다고 주장하지 않는다. 원격 CI 수동 실행은 없으며 모든 새 커밋은 `[skip ci]`를 사용한다. 실제 규칙·권한·저장 계약을 바꿔야 하는 새 공백은 발견하지 않았다.
+
 <a id="visual-hierarchy-20260922"></a>
 
 ### 09-22 설치 수락 이후 시각 계층 후속

@@ -6,12 +6,12 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** PR #59 이후 사용자 첨부 기준의 [시각 계층 후속 보완](mockups/ees-work/TASK.md#visual-hierarchy-20260922)을 `feat/ees-work-visual-hierarchy-20260922`에서 완료했다. GitHub 최신 main `c4c6ab8d1df3e50a7e25fc8f47e969eb1360a4f1`과 보존 후보의 모든 tracked blob/tree 일치를 확인해 새 작업 폴더를 복구했다. 별도 Draft #53은 사용하지 않았다. Figma P/T/J·Workspace 구조를 새로 조회하고 첨부의 시각 기준을 우선했다. [새 전후 대조·검증](../evals/scenarios.md#visual-hierarchy-20260922).
-- **반영 범위:** P 이름/완료 수 전체를 한 클릭 단위로 통합하고 T 펼침과 실제 선택을 분리했다. P/T/J 중 하나의 강한 선택, 단계 제목의 약한 청회색 바탕, J 양쪽 여백, 독립 hover/포커스·읽을 수 있는 상태 배지, 오른쪽 제목/수치/결과 및 Workspace 편집 제목 우선순위를 보완했다. 기존 단계별 진행·작업명+상태·무테·P/T 관리·입력/실행 분리·Native 대화·Workspace 편집/AI/저장/게시·snapshot·이력과 자산은 보존한다.
-- **현재 지원 경계:** 업무 규칙·권한·저장 계약·controller·Native chunk·backend는 변경하지 않았다. 외부 Tool 직접 실행·다중 DB/AP 대상은 여전히 미지원이며 “실행 연결 필요”로 표시한다. 일정·설정 상속·공유 권한 확대·새 인증 저장소는 추가하지 않는다. 프로그램 `0.11.3+ees.10`·Pack `0.2.12`를 유지하고 실제 JS/CSS 해시로 캐시를 구분한다.
-- **이번 검증:** 관련 strict Python 206 PASS/0 FAIL/3 SKIP, Native 전체 v2 31 PASS/0 FAIL/0 SKIP다. 마지막 상태 문구 줄바꿈 한 선언(v3) 후 영향받는 Native 2개는 별도로 2 PASS이며 전체와 합산하지 않는다. 실제 선택/hover/focus·상태 대비, 1920/900 light/dark, Workspace600, 105개 탐색·닫기/재열기·입력/결과·저장/게시/snapshot을 검사했다. 최초 Enter fixture 실패·대비 미달·보완은 새 평가에 보존한다. 전체 discover는 범위 밖 backend/배포 코드가 바뀌지 않아 이번에 반복하지 않았고 이전 strict EncodingWarning 27 ERROR가 해결됐다고 주장하지 않는다.
-- **최근 적용:** 사용자 보고상 PR #59 main `c4c6ab8d1df3`은 Upgrade `ok / changed=true / version=0.11.3+ees.10 / running=true`, 같은 원본 ApplyDemo `ok / changed=0 / next=new_chat`, 이어서 정상 수행 확인이다. 이 사내 보고를 이번 시각 계층 변경의 설치·화면 확인으로 확대하지 않는다.
-- **다음 작업 하나:** 새 후속 PR·검증 원본 후보를 검토하고 이번 변경에 대한 병합/사내 적용 승인 후에만 최종 main과 검증 tree 일치·묶음 원본을 확정한다. Git CLI 인증은 없어 정상 동작하는 GitHub 플러그인으로 동일 tree를 게시한다. 원격 CI·병합·사내 설치는 실행하지 않는다. 이전 #59 승인을 확대하지 않고 기존 [Update → Upgrade-TrialCommit·프로그램 Restore 안내](03-openwebui-native-agent.md#ees-step-progress-20260922)를 사용한다. 회사 PC에 개발환경·별도 ApplyDemo를 요구하지 않는다.
+- **현재 작업:** PR [#60](https://github.com/knadalkim-a11y/team-agent-poc/pull/60) 병합 main `b1c47643c7a5ab4fd85c50a000db3f92ceda82b2`에서 [확정 왼쪽 패널](mockups/ees-work/TASK.md#sidebar-final-20260922)을 `feat/ees-work-sidebar-final-20260922`에서 구현·검증했다. 최신 원격 main·관련 열린 PR을 조회했고 같은 후속 PR은 없었다. 보존된 후보는 그대로 두고 원격 전체 blob/tree와 서명 commit을 검증해 복원했다. 별도 Draft #53은 사용하지 않았다.
+- **반영 범위:** 흰색 분류/단계/펼친 목록, 분류 밑줄, P 요약 전체의 연청색 선택, T/J 한 행의 더 옅은 선택, J 사이에만 얇은 구분선이다. 펼친 부모와 실제 선택을 분리하고 기본/hover/선택/키보드 포커스/업무 상태를 유지한다. 제품 수정은 `#ees-work-entry`의 CSS에 한정하며 오른쪽·Workspace·실행 버튼은 새로 설계하지 않는다.
+- **현재 지원 경계:** 단계별 진행·작업명+상태·P/T 관리·대량 작업 탐색·Native 대화·입력/실행 분리·Workspace 편집/AI/저장/게시·snapshot·이력과 자산을 유지한다. JS/controller/Native chunk/backend·업무 규칙·권한·저장 계약·개인 인증 저장은 변경하지 않는다. 외부 Tool 직접 실행·다중 DB/AP·일정·공유 확대는 계속 미지원이다. 프로그램 `0.11.3+ees.10`·Pack `0.2.12`를 유지하고 변경 CSS의 실제 해시로 캐시를 구분한다.
+- **이번 검증:** 실제 Figma 비교판 `313:680`과 P/T/J `313:132 / 313:319 / 313:515`를 대조했다. 최종 Native 전체33 PASS/0 FAIL/0 SKIP로 선택/hover/키보드·light/dark·1920/900·Workspace600·105개 탐색·입력/이력·snapshot과 범위 밖 최종 스타일 보존을 확인했다. 관련 Python206 PASS/0 FAIL/3 SKIP(panel/controller/designer58+전달148 PASS)이며 집중 검사를 전체 고유 수에 합산하지 않는다. 새 명령·최초 실패·보완·미실행은 [이번 평가](../evals/scenarios.md#sidebar-final-20260922)에 기록한다. Windows/사내 LLM 새 실행으로 확대하지 않는다.
+- **최근 적용:** PR #60은 앞선 Work 승인에 따라 위 main으로 병합됐으며 검증 head와 전체 tree가 같았다. 그 main의 Update → Upgrade-TrialCommit 안내 뒤 사용자가 이번 요청에서 “응 확인했어”라고 답했다. 이는 직전 적용 안내에 대한 간단한 확인 보고이며 개별 Upgrade/ApplyDemo 필드·실제 서버 SHA를 새로 조회한 결과는 아니다. 상세 값이 있는 앞선 PR #59 `c4c6ab8d1df3`의 Upgrade/기동/ApplyDemo 성공은 [이전 평가](../evals/scenarios.md#visual-hierarchy-20260922)에 보존한다.
+- **다음 작업 하나:** 이번 왼쪽 변경의 후속 PR·배포 후보를 검토한다. 이번 변경에 대한 병합·사내 적용 승인은 아직 없으며 #60 승인을 확대하지 않는다. 승인 후에만 최종 main과 검증 tree 일치·묶음 해시를 확정하고 기존 [Update → Upgrade-TrialCommit·프로그램 Restore 안내](03-openwebui-native-agent.md#ees-step-progress-20260922)를 사용한다. 회사 PC에 개발환경·별도 ApplyDemo를 요구하지 않는다.
 
 ## 2026년 9월 개발·검사 방침
 
@@ -27,10 +27,10 @@
 
 | 대상 | 마지막 확인과 적용 원본 | 남은 한계·근거 |
 |---|---|---|
-| EES Work 업무 UI | 09-15 ees.9 설치 완료, 메인 채팅 업무 요청 재시도 정상 보고, 앞선 ees.8 UI 수락 유지 | 도구 호출 원문·단계별 실행·화면 반영·기존 대화 접근은 이번 보고에서 별도 확인하지 않음. [이번 배포·사용 보고](../evals/scenarios.md#work-ui-refactor-20260915), [앞선 UI 수락](../evals/scenarios.md#sidebar-refinement-20260914) |
-| EES 프로그램 | 09-21 `6b58beb3dbad` / `0.11.3+ees.10`, Upgrade `result=ok`, `changed=true`, `stage=complete`, `running=true` 사용자 보고 | 이번 통합 UX 원본의 적용·기동 성공. 실제 UI 수락·장시간 안정성은 미확인. [실패와 이번 성공](../evals/scenarios.md#integrated-work-beta-20260921) |
-| 운영 래퍼 | 09-21 사용자 조회의 local/origin_main과 Upgrade wrapper는 `6b58beb3dbad`, `wrapper_changed=false` | 이번 Upgrade 중 래퍼 변경 없음. 최초 TrialCommit 불일치의 구체 원인은 미확정. [조회·성공 경계](../evals/scenarios.md#integrated-work-beta-20260921) |
-| 분석·업무 패널 자산 | 09-21 `6b58beb3dbad` / 원본 Agent Pack v0.2.12, ApplyDemo `result=ok`, `changed=2`, `stage=complete` 사용자 보고 | 같은 원본 관리 자산 반영 성공. 2건의 ID·유형과 개별 기능 동작은 요약만으로 특정하지 않음. [이번 반영](../evals/scenarios.md#integrated-work-beta-20260921) |
+| EES Work 업무 UI | 09-22 PR #60 main `b1c47643c7a5`의 적용 안내 뒤 사용자 “응 확인했어” 보고 | 직전 안내에 대한 확인이며 이번 연청색 왼쪽 후속 변경의 적용은 아님. [확인 경계](../evals/scenarios.md#sidebar-final-20260922) |
+| EES 프로그램 | PR #59 `c4c6ab8d1df3` / `0.11.3+ees.10` Upgrade `ok / changed=true / running=true` 상세 보고. 이후 PR #60 적용 안내 후 간단한 확인 | #60 개별 Upgrade 필드·실제 서버 SHA 재조회는 미실행. [상세 보고](../evals/scenarios.md#visual-hierarchy-20260922), [후속 확인](../evals/scenarios.md#sidebar-final-20260922) |
+| 운영 래퍼 | PR #59 Upgrade의 wrapper/commit `c4c6ab8d1df3`, `wrapper_changed=false`. PR #60은 main `b1c47643c7a5`로 Update → TrialCommit 안내 | #60 실제 wrapper 필드 재수신 없음. 최초 원본 불일치 원인은 미확정이며 [이전 조회·성공](../evals/scenarios.md#integrated-work-beta-20260921) 보존 |
+| 분석·업무 패널 자산 | PR #59 `c4c6ab8d1df3` / Pack0.2.12 ApplyDemo `ok / changed=0 / next=new_chat` 사용자 보고 | #60도 Pack·관리 자산 바이트는 같으나 실제 ApplyDemo 필드 새 수신 없음. [보고](../evals/scenarios.md#visual-hierarchy-20260922) |
 | 대표 시작 질문 | 09-15 `87f3f2922a4a`의 v0.2.10 관리 목록을 포함한 ApplyDemo 성공 | 질문의 실제 표시 여부는 미확인. 변경 3건을 특정 질문 변경으로 단정하지 않음. [이번 적용](../evals/scenarios.md#work-ui-refactor-20260915), [이전 접속 실패](../evals/scenarios.md#connector-demo-starters) |
 | WO 목업 | v0.1.6 안내 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc` 뒤 크기 조절 정상 보고; Git은 v0.1.8 통합 패널 원본 | 실제 EMS 미연결. 이후 패널 적용 보고와 개별 등록 바이트 검증을 구분. [목업 이력](../evals/scenarios.md#wo-mockup) |
 | 기본 Assistant·기존 조회 | 이름·로고·기존 대화·평소 Confluence/Jira/GitHub 조회 정상, 초기 Rich UI 제거·변경 Prompt 반영 완료 보고 | Tool별 최신 등록 코드·SHA·새 일반 답변/원문 직접 대조 미실행. [반영 보고](../evals/scenarios.md#plain-output-applied-report), [이전 자산별 SHA](../evals/scenarios.md#status-history-20260911) |
@@ -61,7 +61,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | PR #58 `6b58beb3dbad` 적용·기동 성공 보고 이후, [09-22 단계별 진행 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922) 후속 구현·Figma 대조·새 Native 검증 완료 | 후속 PR/후보 검토와 이번 변경의 병합·적용 승인 대기. 공동 작업·일정·종합 현황판은 별도 후속 범위 |
+| 4. 관리자 워크플로 | PR #60 병합·안내 후 사용자 확인을 바탕으로 [확정 왼쪽 패널](mockups/ees-work/TASK.md#sidebar-final-20260922) 후속 구현 | 이번 후속 PR/후보 검토와 변경별 병합·적용 승인. 공동 작업·일정·오른쪽 신규 디자인은 별도 범위 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -71,7 +71,7 @@
 
 ## 재개와 환경 유지
 
-- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work는 [09-22 최종 구현 합의](mockups/ees-work/TASK.md#step-progress-ux-20260922)와 연결한 최신 목업을 읽습니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
+- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work는 [09-22 단계별 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922)를 보존하며 왼쪽 표현은 [확정 패널](mockups/ees-work/TASK.md#sidebar-final-20260922)과 313번 Figma를 우선합니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
