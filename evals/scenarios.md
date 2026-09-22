@@ -171,6 +171,8 @@ git diff --check
 
 **확인 범위·전달:** 동일 Native 제품 wheel·합성 사용자/모델·실제 workflow SQLite/API에서 P/T/J 선택/대량105개 탐색·적용104개 중2개 완료/문제2개/적용 제외1개, 입력/실행/명시적 사람 확인/실패·재시도, 닫기/재열기·초안·결과·scroll·focus·resize, Workspace AI/수동 작성/저장/게시와 기존 snapshot 보존을 확인했다. Figma와 의도된 차이는 진한 선택, 약한 상위 맥락, 삭제한 왼쪽 제목/J 안내문, 실제 데이터와 반응형 폭이다. 새 업무 규칙/권한/저장 계약 공백을 추가하지 않았다. 최종 v3 wheel을 검증 커밋의 clean source로 새 후보에 묶고 해당 PR·ZIP manifest에 정확한 source SHA/전체 hash/포함 파일을 기록한다. 이전 ZIP이나 #59 설치를 새 UI의 설치로 간주하지 않으며 승인 전 후보로만 제공한다. 적용/복원은 [기존 단일 블록](../docs/03-openwebui-native-agent.md#ees-step-progress-20260922)을 유지한다.
 
+**배포 후보 검증:** 최종 v3 wheel SHA-256은 `7249404020250a011ab7c05442ab2cb1ba90ef098ed0c84225f96d93c4ae481b`다. 이전 설치 검증 wheel과 5,911개 항목을 비교해 launcher JS/CSS, index cache URL, RECORD 4개만 바뀌고 나머지 5,907개는 바이트 동일했다. 최초 묶음 검사 스크립트는 분리한 게시 후보 worktree 아래에 시험 wheel도 있다고 잘못 참조해 `FileNotFoundError`로 중단했다(`final-delivery-audit.log`). 실제 시험 원본인 `TESTED` 경로를 사용하도록 scratch 검사만 수정해 CRC/42개 manifest 파일 크기·hash/39개 Git 원본/전체 wheel RECORD/조립 JS·CSS/cache URL/clean source와 시험 wheel 일치가 모두 통과했다(`final-delivery-audit-v2.json`). 제품·배포 스크립트 오류가 아니며 기존 후보를 덮어쓰지 않는다. 이 기록 커밋 이후 같은 검증 wheel로 최종 SHA의 새 묶음을 생성하고 검사를 다시 적용한다. 최종 ZIP 이름·source SHA·전체 hash는 후속 PR과 해당 manifest를 기준으로 한다.
+
 <a id="step-progress-resume-20260922"></a>
 
 ### 09-22 플러그인 복구 후 기존 구현 재개
