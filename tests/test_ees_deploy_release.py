@@ -360,7 +360,7 @@ class ReleaseTests(unittest.TestCase):
             result = self.prepare(env=environment)
         self.assertEqual(result["state"], "prepared")
         self.assertTrue((self.target / "release.json").is_file())
-        self.assertEqual((self.target / "dependencies.txt").read_text(), "example==1.0\n")
+        self.assertEqual((self.target / "dependencies.txt").read_text(encoding="utf-8"), "example==1.0\n")
         self.assertEqual(self.source_python.read_bytes(), b"existing interpreter placeholder")
         self.assertEqual(len(commands), 3)
         for command, kwargs in commands:
@@ -423,9 +423,9 @@ class ReleaseTests(unittest.TestCase):
         with mock.patch.object(release, "probe_python", side_effect=[self.baseline(), self.baseline(True)]):
             self.assertEqual(release.validate_prepared(self.target, COMMIT, self.source_python)["source_commit"], COMMIT)
         metadata = self.target / "release.json"
-        data = json.loads(metadata.read_text())
+        data = json.loads(metadata.read_text(encoding="utf-8"))
         data["target_python"] = str(self.source_python)
-        metadata.write_text(json.dumps(data))
+        metadata.write_text(json.dumps(data), encoding="utf-8")
         with self.assertRaisesRegex(release.ReleaseError, "metadata"):
             release.validate_prepared(self.target, COMMIT, self.source_python)
 

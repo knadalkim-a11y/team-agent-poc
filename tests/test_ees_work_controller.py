@@ -29,12 +29,13 @@ const makeCase = (revision = 1) => ({
   definition: copy(catalog), tree_nodes: copy(catalog.nodes), status: 'ready'
 });
 const result = (run = null) => ({ok: true, case: run, cases: run ? [run] : [], catalog: copy(catalog)});
+const http = (value, status = 200) => ({ok: status >= 200 && status < 300, status, json: async () => copy(value)});
 async function setup(options = {}) {
   const events = {}, frames = [], requests = [], renders = [], adoptions = [], confirmations = [], restores = [], viewEvents = [], readiness = [];
   const timers = new Map(); let nextTimer = 0;
   const nativeDraft = {prompt: '미저장 업무 질문', files: [{id: 'attachment-1'}]};
   let confirmed = true, nativeReady = options.nativeReady !== false;
-  let state = options.state || result(), callbacks, resets = 0, actionHandler;
+  let state = options.state || result(), callbacks, resets = 0, actionHandler, getHandler;
   let edits = {nodeId: 'j1', inputsChanged: false, documentChanged: false, conflict: false};
   const location = {pathname: '/', search: '?ees_site=f1&ees_system=EMS&ees_process=p1&ees_node=j1&ees_version=4'};
   function setRoute(url) { const parsed = new URL(url, 'https://example.test'); location.pathname = parsed.pathname; location.search = parsed.search; }
@@ -83,8 +84,9 @@ async function setup(options = {}) {
     fetch: async (url, options) => {
       const body = options.body ? JSON.parse(options.body) : null;
       requests.push({url, body});
+      if (!body && getHandler) return getHandler(url);
       const answer = body && actionHandler ? await actionHandler(body) : state;
-      return {ok: answer.ok !== false, json: async () => copy(answer)};
+      return http(answer, answer.ok === false ? 400 : 200);
     }
   };
   vm.createContext(context);
@@ -102,12 +104,110 @@ async function setup(options = {}) {
     setConfirmed: value => {confirmed = value;},
     posts: () => requests.filter(request => request.body).map(request => request.body),
     latest: () => renders.at(-1), resets: () => resets,
-    setState: value => {state = value;}, setAction: fn => {actionHandler = fn;},
+    setState: value => {state = value;}, setAction: fn => {actionHandler = fn;}, setGet: fn => {getHandler = fn;},
+    setToken: value => storage.set('token', value),
     setEdits: value => {edits = value;}, edits: () => edits,
     route: url => {setRoute(url); fire('popstate');}, settle
   };
 }
 const scenarios = {
+  async record_lookup_distinguishes_http_permissions_failures_and_missing_case() {
+    const h = await setup();
+    const cases = [
+      [403, {detail: 'Forbidden'}, 'restricted'],
+      [403, null, 'restricted'],
+      [400, {ok: false, error: {code: 'chat_forbidden', message: '접근할 수 없습니다.'}}, 'restricted'],
+      [400, {ok: false, error: {code: 'admin_required', message: '관리자 권한이 필요합니다.'}}, 'restricted'],
+      [400, {ok: false, error: {code: 'case_not_found', message: '접근 가능한 진행 건을 찾지 못했습니다.'}}, 'failed'],
+      [401, {detail: 'Not authenticated'}, 'failed'],
+      [500, {detail: {code: 'state_unavailable', message: '조회 실패'}}, 'failed']
+    ];
+    for (const [status, value, kind] of cases) {
+      h.setGet(() => http(value, status)); await h.api.refresh();
+      assert.equal(h.latest().recordLookupError?.kind, kind, 'Classify actual HTTP status or explicit permission code, never an ambiguous missing record');
+      assert.ok(h.latest().recordLookupError.message);
+    }
+    h.setGet(() => ({ok: false, status: 403, json: async () => {throw new SyntaxError('non-json');}}));
+    await h.api.refresh(); assert.equal(h.latest().recordLookupError.kind, 'restricted', 'HTTP 403 remains known even when its body is not JSON');
+    h.setGet(() => {throw new Error('network interrupted');});
+    await h.api.refresh(); assert.equal(h.latest().recordLookupError.kind, 'failed');
+    assert.match(h.latest().errorMessage, /network interrupted/, 'Keep the existing operational error presentation');
+    h.setGet(() => http(result())); await h.api.refresh();
+    assert.equal(h.latest().recordLookupError, null);
+    assert.equal(h.latest().errorMessage, '');
+  },
+  async action_validation_is_not_a_record_lookup_failure() {
+    const h = await setup();
+    for (const code of ['invalid_inputs', 'chat_forbidden']) {
+      h.setAction(() => ({ok: false, error: {code, message: '요청을 확인해 주세요.'}}));
+      await h.callbacks.saveInputs({asset: 'A'}, 'j1');
+      assert.equal(h.latest().recordLookupError, null, 'A write failure cannot claim the stored records were unreadable');
+      assert.match(h.latest().errorMessage, /요청을 확인/);
+    }
+  },
+  async history_lookup_error_clears_only_with_current_success_or_scope_reset() {
+    const current = makeCase(), old = {...makeCase(), id: 'case-old', status: 'done'};
+    const state = {...result(current), cases: [current, old]}, h = await setup({state});
+    h.setGet(() => http({detail: 'Forbidden'}, 403));
+    assert.equal((await h.callbacks.showHistory(old.id)).ok, false);
+    assert.equal(h.latest().recordLookupError.kind, 'restricted');
+    assert.equal(h.latest().historyCase, null);
+    h.setGet(() => http(state)); await h.api.refresh();
+    assert.equal(h.latest().recordLookupError.kind, 'restricted', 'Refreshing current state does not prove a failed historical case readable');
+    h.setGet(() => http(result(old)));
+    assert.equal((await h.callbacks.showHistory(old.id)).ok, true);
+    assert.equal(h.latest().recordLookupError, null);
+    assert.equal(h.latest().historyCase.id, old.id);
+    assert.equal(h.latest().errorMessage, '');
+    h.setGet(() => {throw new Error('history unavailable');});
+    await h.callbacks.showHistory(old.id);
+    assert.equal(h.latest().recordLookupError.kind, 'failed');
+    h.callbacks.showHistoryView(false);
+    assert.equal(h.latest().recordLookupError, null);
+    assert.equal(h.latest().historyCase, null);
+    assert.equal(h.latest().runView, 'current');
+  },
+  async current_record_failure_survives_history_tabs_and_another_case_read() {
+    const current = makeCase(), old = {...makeCase(), id: 'case-old', status: 'done'};
+    const state = {...result(current), cases: [current, old]}, h = await setup({state});
+    h.setGet(() => http({detail: 'Forbidden'}, 403)); await h.api.refresh();
+    assert.equal(h.latest().recordLookupError.kind, 'restricted');
+    h.callbacks.showHistoryView(true);
+    assert.equal(h.latest().recordLookupError?.kind, 'restricted', 'Opening history cannot bless cached current records after a failed refresh');
+    h.callbacks.showHistoryView(false);
+    assert.equal(h.latest().recordLookupError?.kind, 'restricted', 'Tab toggles do not revalidate the current case');
+    h.setGet(() => http(result(old))); await h.callbacks.showHistory(old.id);
+    assert.equal(h.latest().recordLookupError, null, 'A successfully read historical case can show its own records');
+    h.callbacks.showHistoryView(false);
+    assert.equal(h.latest().recordLookupError?.kind, 'restricted', 'Reading a different case cannot clear the current case restriction');
+    h.setGet(() => http(state)); await h.api.refresh();
+    assert.equal(h.latest().recordLookupError, null, 'A successful current refresh restores current records');
+  },
+  async stale_lookup_failures_do_not_cross_identity_route_or_scope() {
+    for (const change of ['token', 'route', 'scope']) {
+      const h = await setup(); let rejectRead;
+      h.setGet(() => new Promise((resolve, reject) => {rejectRead = reject;}));
+      const reading = h.api.refresh();
+      if (change === 'token') h.setToken('another-user');
+      else if (change === 'route') h.route('/c/another-chat');
+      else await h.callbacks.selectWork('j2');
+      rejectRead(new Error('old state read failed')); await reading;
+      assert.equal(h.latest().recordLookupError, null, 'A stale ' + change + ' failure cannot replace current lookup state');
+      assert.doesNotMatch(h.latest().errorMessage, /old state/);
+    }
+    for (const change of ['token', 'route', 'scope']) {
+      const current = makeCase(), old = {...makeCase(), id: 'case-old', status: 'done'};
+      const h = await setup({state: {...result(current), cases: [current, old]}}); let rejectRead;
+      h.setGet(() => new Promise((resolve, reject) => {rejectRead = reject;}));
+      const reading = h.callbacks.showHistory(old.id);
+      if (change === 'token') h.setToken('another-user');
+      else if (change === 'route') h.route('/c/another-chat');
+      else h.callbacks.showHistoryView(false);
+      rejectRead(new Error('old history read failed')); await reading;
+      assert.equal(h.latest().recordLookupError, null);
+      assert.doesNotMatch(h.latest().errorMessage, /old history/);
+    }
+  },
   async native_draft_completion_updates_controls_without_dom_mutation() {
     const h = await setup({nativeReady: false, fakeTimers: true});
     assert.equal(h.readiness.at(-1), false);
@@ -339,6 +439,21 @@ class WorkControllerTests(unittest.TestCase):
 
     def test_first_chat_is_read_only(self):
         self.check_scenario("first_chat_is_read_only")
+
+    def test_record_lookup_distinguishes_http_permissions_failures_and_missing_case(self):
+        self.check_scenario("record_lookup_distinguishes_http_permissions_failures_and_missing_case")
+
+    def test_action_validation_is_not_a_record_lookup_failure(self):
+        self.check_scenario("action_validation_is_not_a_record_lookup_failure")
+
+    def test_history_lookup_error_clears_only_with_current_success_or_scope_reset(self):
+        self.check_scenario("history_lookup_error_clears_only_with_current_success_or_scope_reset")
+
+    def test_current_record_failure_survives_history_tabs_and_another_case_read(self):
+        self.check_scenario("current_record_failure_survives_history_tabs_and_another_case_read")
+
+    def test_stale_lookup_failures_do_not_cross_identity_route_or_scope(self):
+        self.check_scenario("stale_lookup_failures_do_not_cross_identity_route_or_scope")
 
     def test_native_draft_completion_updates_controls_without_dom_mutation(self):
         self.check_scenario("native_draft_completion_updates_controls_without_dom_mutation")

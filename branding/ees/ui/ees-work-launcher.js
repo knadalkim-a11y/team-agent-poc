@@ -15,7 +15,7 @@
   let actionSerial=0;
   let creationSerial=0;
   let visibleDraftKey='general', draftTarget=null, draftTimer=null, draftSerial=0;
-  let errorMessage = '', activeRegistration = null;
+  let errorMessage = '', recordLookupError = null, historyLookupError = null, activeRegistration = null;
   let personalSettingsOpened=false;
   let scopeReadinessTimer=null;
   const token = () => {try {return localStorage.getItem('token') || '';} catch (_) {return '';}};
@@ -59,7 +59,10 @@
     save_draft:()=>editAction('save_draft'),validate_draft:()=>editAction('validate_draft'),publish:()=>editAction('publish'),authoringModels,authoringReply
   }});
   function snapshot() {
-    return {state,category,browsingSystem,browsingSite,browseNodeId,browseActive,runView,historyCase,errorMessage,busy,
+    // Each successful read only validates its own current or historical case.
+    // Opening a tab must never turn a failed current read into fresh evidence.
+    const lookupError=runView==='history'?(historyCase?historyLookupError:historyLookupError || recordLookupError):recordLookupError;
+    return {state,category,browsingSystem,browsingSite,browseNodeId,browseActive,runView,historyCase,errorMessage,recordLookupError:lookupError,busy,
       chatId:chatId(),chatRoute:chatRoute(),adminRoute:adminRoute(),acceptedRoute,
       selectedCaseId:selectedCase()?.id || '',selectedId:selectedId(),processId:processId(),
       roots:Object.fromEntries(Object.keys(categories).map(group=>[group,visibleRoots(group)])),
@@ -87,9 +90,15 @@
     const access = token(); if (access) headers.Authorization = 'Bearer ' + access;
     if (body) headers['Content-Type'] = 'application/json';
     const response = await fetch('/api/ees-work/' + path, {method:body ? 'POST' : 'GET',credentials:'same-origin',cache:'no-store',headers,...(body ? {body:JSON.stringify(body)} : {})});
-    let result;try{result=await response.json();}catch(_){throw new Error('업무 정보를 가져오지 못했습니다. 배포 상태를 확인해 주세요.');}
-    if (!response.ok || result.ok === false) {const failure=new Error(result.error?.message || result.detail?.message || '업무 정보를 가져오지 못했습니다. 로그인과 배포 상태를 확인해 주세요.');failure.result=result;throw failure;}
+    let result;try{result=await response.json();}catch(_){const failure=new Error('업무 정보를 가져오지 못했습니다. 배포 상태를 확인해 주세요.');failure.status=response.status;throw failure;}
+    if (!response.ok || result?.ok === false) {const failure=new Error(result?.error?.message || result?.detail?.message || '업무 정보를 가져오지 못했습니다. 로그인과 배포 상태를 확인해 주세요.');failure.result=result;failure.status=response.status;failure.code=result?.error?.code || result?.detail?.code;throw failure;}
     return result;
+  }
+  function lookupFailure(error) {
+    // Only read callers use this state. A rejected action is not evidence that
+    // stored records are absent or unreadable; ambiguous not-found stays failed.
+    const restricted=error.status===403 || ['chat_forbidden','admin_required'].includes(error.code);
+    return {kind:restricted?'restricted':'failed',message:restricted?'이 기록에 접근할 권한이 없습니다.':'기록을 조회하지 못했습니다. 다시 조회해 주세요.'};
   }
   async function authoringModels() {
     const headers={Accept:'application/json',Authorization:'Bearer '+token()},options={credentials:'same-origin',cache:'no-store',headers};
@@ -128,7 +137,7 @@
     finally{clearTimeout(timeout);signal.removeEventListener('abort',abort);}
   }
   function accept(result) {
-    const previousCase=state?.case?.id,firstForRoute=acceptedRoute!==location.pathname+location.search;state = result;acceptedRoute=location.pathname+location.search;
+    const previousCase=state?.case?.id,firstForRoute=acceptedRoute!==location.pathname+location.search;state = result;recordLookupError=null;acceptedRoute=location.pathname+location.search;
     if(state.case){browseActive=true;if(chatId())previewChats.delete(chatId());}
     if(state.case&&state.case.id!==previousCase){browsingSite=state.case.site.id;browsingSystem=state.case.system;category=state.case.definition.nodes[state.case.process_id]?.category || 'setup';browseNodeId=state.case.selected_id;newCase=false;chosenCases.set(caseKey(state.case.process_id),state.case.id);}
     if(!state.case){const params=new URLSearchParams(location.search),saved=previewChats.get(chatId());if(saved&&saved.auth===token()){browseActive=true;browsingSite=saved.selection.site_id;browsingSystem=saved.selection.system;browseNodeId=saved.selection.node_id;previewVersion=saved.selection.version;category=state.catalog.nodes[saved.selection.process_id]?.category || category;}else if(params.has('ees_site')&&(firstForRoute||!browseActive)){browseActive=true;browsingSite=params.get('ees_site');browsingSystem=params.get('ees_system') || browsingSystem;browseNodeId=params.get('ees_node') || params.get('ees_process') || browseNodeId;const version=Number(params.get('ees_version'));if(Number.isSafeInteger(version)&&version>0)previewVersion=version;category=state.catalog.nodes[lineage(browseNodeId,state.catalog)[0]?.id]?.category || category;}if(!previewVersion)previewVersion=state.catalog.version;}
@@ -149,7 +158,7 @@
     const at = generation, scopeEpoch=navigationRequest, serial = ++request, id = chatId(), auth = token(), route = location.pathname + location.search;
     const query = new URLSearchParams({chat_id:id}); if (!id && pendingId) query.set('case_id', pendingId);
     try {const result = await api('state?' + query); if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = ''; accept(result);}
-    catch (error) {if (at !== generation || scopeEpoch !== navigationRequest || serial !== request) return; errorMessage = error.message; render();}
+    catch (error) {if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = error.message; recordLookupError=lookupFailure(error); render();}
   }
   async function action(actionName, payload = {}, nodeId = '', override = {}) {
     if (busy || !state) return null;
@@ -195,9 +204,9 @@
   }
   async function showHistory(id) {
     if(!scopeCases(processId()).some(c=>c.id===id))return {ok:false};
-    const serial=++historyRequest,at=generation,key=caseKey(processId()),auth=token();runView='history';historyCase=null;
-    try{const result=await api('state?'+new URLSearchParams({case_id:id}));if(serial!==historyRequest||at!==generation||key!==caseKey(processId())||auth!==token())return {ok:false};historyCase=result.case;renderPanel();openPanel();return {ok:true};}
-    catch(error){if(serial===historyRequest&&at===generation){errorMessage=error.message;renderPanel();}return {ok:false};}
+    const serial=++historyRequest,at=generation,scopeEpoch=navigationRequest,key=caseKey(processId()),auth=token(),route=location.pathname+location.search;runView='history';historyCase=null;
+    try{const result=await api('state?'+new URLSearchParams({case_id:id}));if(serial!==historyRequest||at!==generation||scopeEpoch!==navigationRequest||key!==caseKey(processId())||auth!==token()||route!==location.pathname+location.search||!available())return {ok:false};historyCase=result.case;historyLookupError=null;errorMessage='';renderPanel();openPanel();return {ok:true};}
+    catch(error){if(serial===historyRequest&&at===generation&&scopeEpoch===navigationRequest&&key===caseKey(processId())&&auth===token()&&route===location.pathname+location.search&&available()){errorMessage=error.message;historyLookupError=lookupFailure(error);renderPanel();}return {ok:false};}
   }
   function stashDraft() {
     const bridge=window.__eesNativeDraftV1,snapshot=bridge?.read();
@@ -269,7 +278,7 @@
       finally{binding=null;}
     })();return binding;
   }
-  function resetHistory() {runView='current';historyCase=null;historyRequest++;}
+  function resetHistory() {runView='current';historyCase=null;historyRequest++;historyLookupError=null;}
   function previewRoute(id) {const values={ees_site:browsingSite,ees_system:browsingSystem,ees_process:id,ees_version:previewVersion || state?.catalog.version};if(browseNodeId&&browseNodeId!==id&&lineage(browseNodeId,state?.catalog)[0]?.id===id)values.ees_node=browseNodeId;return '/?'+new URLSearchParams(values);}
   async function openCase(c,id='') {
     if(!c)return {ok:false};
@@ -354,7 +363,7 @@
   function cleanup() {
     clearScopeReadinessWait();
     personalSettingsOpened=false;$('#ees-personal-settings-guide')?.remove();
-    generation++;request++;state=null;acceptedRoute='';pendingId='';pendingSubmitted=false;browseActive=false;previewVersion=0;scopeSelections.clear();chosenCases.clear();draftSnapshots.clear();creationTickets.clear();createdChats.clear();previewChats.clear();actionRequests.clear();draftSerial++;draftTarget=null;clearTimeout(draftTimer);resetHistory();errorMessage='';
+    generation++;request++;state=null;acceptedRoute='';pendingId='';pendingSubmitted=false;browseActive=false;previewVersion=0;scopeSelections.clear();chosenCases.clear();draftSnapshots.clear();creationTickets.clear();createdChats.clear();previewChats.clear();actionRequests.clear();draftSerial++;draftTarget=null;clearTimeout(draftTimer);resetHistory();errorMessage='';recordLookupError=null;
     if(activeRegistration!==null)window.__eesWorkPanelV1?.unregister(activeRegistration,'workflow');activeRegistration=null;
     view.reset();designer.reset();
   }
@@ -382,7 +391,7 @@
       // A captured published selection has no pending case to bind. Its
       // one-time route transition must not keep unrelated chats in this scope.
       if(!pendingId)pendingSubmitted=false;
-      state=null;view.prepare(snapshot());designer.prepare(snapshot());refresh();return;
+      state=null;recordLookupError=null;view.prepare(snapshot());designer.prepare(snapshot());refresh();return;
     }
     view.sync(snapshot());designer.sync(snapshot());updateScopeReadiness();
   }

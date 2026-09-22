@@ -6,12 +6,13 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** PR [#60](https://github.com/knadalkim-a11y/team-agent-poc/pull/60) 병합 main `b1c47643c7a5ab4fd85c50a000db3f92ceda82b2`에서 [확정 왼쪽 패널](mockups/ees-work/TASK.md#sidebar-final-20260922)을 `feat/ees-work-sidebar-final-20260922`에서 구현·검증했다. 최신 원격 main·관련 열린 PR을 조회했고 같은 후속 PR은 없었다. 보존된 후보는 그대로 두고 원격 전체 blob/tree와 서명 commit을 검증해 복원했다. 별도 Draft #53은 사용하지 않았다.
-- **반영 범위:** 흰색 분류/단계/펼친 목록, 분류 밑줄, P 요약 전체의 연청색 선택, T/J 한 행의 더 옅은 선택, J 사이에만 얇은 구분선이다. 펼친 부모와 실제 선택을 분리하고 기본/hover/선택/키보드 포커스/업무 상태를 유지한다. 제품 수정은 `#ees-work-entry`의 CSS에 한정하며 오른쪽·Workspace·실행 버튼은 새로 설계하지 않는다.
-- **현재 지원 경계:** 단계별 진행·작업명+상태·P/T 관리·대량 작업 탐색·Native 대화·입력/실행 분리·Workspace 편집/AI/저장/게시·snapshot·이력과 자산을 유지한다. JS/controller/Native chunk/backend·업무 규칙·권한·저장 계약·개인 인증 저장은 변경하지 않는다. 외부 Tool 직접 실행·다중 DB/AP·일정·공유 확대는 계속 미지원이다. 프로그램 `0.11.3+ees.10`·Pack `0.2.12`를 유지하고 변경 CSS의 실제 해시로 캐시를 구분한다.
-- **이번 검증:** 실제 Figma 비교판 `313:680`과 P/T/J `313:132 / 313:319 / 313:515`를 대조했다. 최종 Native 전체33 PASS/0 FAIL/0 SKIP로 선택/hover/키보드·light/dark·1920/900·Workspace600·105개 탐색·입력/이력·snapshot과 범위 밖 최종 스타일 보존을 확인했다. 관련 Python206 PASS/0 FAIL/3 SKIP(panel/controller/designer58+전달148 PASS)이며 집중 검사를 전체 고유 수에 합산하지 않는다. 새 명령·최초 실패·보완·미실행은 [이번 평가](../evals/scenarios.md#sidebar-final-20260922)에 기록한다. Windows/사내 LLM 새 실행으로 확대하지 않는다.
-- **최근 적용:** PR #60은 앞선 Work 승인에 따라 위 main으로 병합됐으며 검증 head와 전체 tree가 같았다. 그 main의 Update → Upgrade-TrialCommit 안내 뒤 사용자가 이번 요청에서 “응 확인했어”라고 답했다. 이는 직전 적용 안내에 대한 간단한 확인 보고이며 개별 Upgrade/ApplyDemo 필드·실제 서버 SHA를 새로 조회한 결과는 아니다. 상세 값이 있는 앞선 PR #59 `c4c6ab8d1df3`의 Upgrade/기동/ApplyDemo 성공은 [이전 평가](../evals/scenarios.md#visual-hierarchy-20260922)에 보존한다.
-- **다음 작업 하나:** 이번 왼쪽 변경의 후속 PR·배포 후보를 검토한다. 이번 변경에 대한 병합·사내 적용 승인은 아직 없으며 #60 승인을 확대하지 않는다. 승인 후에만 최종 main과 검증 tree 일치·묶음 해시를 확정하고 기존 [Update → Upgrade-TrialCommit·프로그램 Restore 안내](03-openwebui-native-agent.md#ees-step-progress-20260922)를 사용한다. 회사 PC에 개발환경·별도 ApplyDemo를 요구하지 않는다.
+- **현재 작업:** 사용자 “병합하고 배포스크립트 가이드도 해줘” 승인에 따라 왼쪽 PR [#61](https://github.com/knadalkim-a11y/team-agent-poc/pull/61)을 main `cfe5e4d36ca902c8706aed4d07f0cd87ffa16a78`에 병합했다. 검증 head `0e9e17556be7c5f251105350f288544a9afe59ea`와 전체 tree가 같다. [오른쪽 업무·수행 상세](mockups/ees-work/TASK.md#right-panel-20260922)는 별도 `feat/ees-work-right-panel-20260922` 후속 PR로 게시·병합하며 #61의 왼쪽 전용 diff와 섞지 않는다. 이전 로컬 `31d90bb0643155714329cc5ac9e200d978dc0bf3`와 시험 자료를 보존했다.
+- **조회·디자인:** 같은 날 새 GitHub/Figma 호출이 정상화되어 main·관련 PR·AGENTS/STATUS와 지정 오른쪽 16개 노드의 design context/screenshot을 실조회했다. 이전 HTTP400 실패는 [평가 기록](../evals/scenarios.md#right-panel-20260922)에 보존한다. P/T의 목록 뒤 범위 실행 배치·별도 조건 열·항상 보이는 실행 경계를 보완했고, J/상세는 실제 기록과 목업을 직접 대조했다. Figma 원본과 회사 환경 설정은 바꾸지 않았다.
+- **구현 범위:** P 단계별 내용/문제 분포, T 조건·실패 사유 펼침/선행 이동·복귀 보존, J 수행 대상·입력/실행/결과와 사용 구성·시도/호출별 저장된 모의 입출력 상세다. 오른쪽 추천 카드는 제거했다. 고정된 진행 건 구성·기존 입력/결과/초안·history와 왼쪽 확정 스타일·Workspace를 보존한다.
+- **지원 한계:** 외부 raw 응답/형식 검사/호출별 버전·출처·지침 준수 기록은 없어 미기록/미확인으로 표시한다. 미수행·조회 실패·접근 제한을 구분한다. backend·DB/API·권한·업무 규칙·개인 인증·범용 실행기를 추가하지 않는다. 상세는 기존 읽기 전용 dialog를 재사용하며 모의 결과를 외부 실제 성공으로 바꾸지 않는다.
+- **검증·배포 상태:** 기존 오른쪽 통합157 PASS, Native 전체36 PASS/1 FAIL 뒤 해당1 PASS, 상세 한글 보완 뒤 관련2 PASS/스타일 보존1 PASS를 각각 보존한다. 전달166 PASS/2 ERROR/4 SKIP 뒤 fixture 해당2 PASS도 전체 재실행으로 합산하지 않는다. 이번 Figma 보완 이후의 정확한 명령·새 Native/패키징 결과는 [평가 기록](../evals/scenarios.md#right-panel-20260922)을 따른다. 프로그램0.11.3+ees.10/Pack0.2.12를 유지한다.
+- **최근 적용:** #59 `c4c6ab8d1df3`의 Upgrade/기동/ApplyDemo 성공, #60 main 안내 뒤 사용자 “응 확인했어” 보고를 이전 적용으로 보존한다. 이번 #61/오른쪽 병합 요청은 확인했지만 사내 설치·기동·화면 결과는 아직 수신하지 않았다.
+- **다음 작업 하나:** 오른쪽 후속 PR 병합 시 최종 main 전체 SHA와 검증 tree 일치를 확인해 [기존 Update → Upgrade -TrialCommit 안내](03-openwebui-native-agent.md#ees-right-panel-20260922)를 제공한다. 사용자 수동 ZIP 다운로드·새 개발환경·별도 ApplyDemo는 필요 없다. Upgrade가 정확한 원본의 ZIP을 자동 준비·검증하고 프로그램 백업·적용·기동·동일 원본 ApplyDemo를 수행한다. Work 후보 ZIP은 사전 패키징 검증/보존용이며 중간 후보마다 다운로드할 필요가 없다.
 
 ## 2026년 9월 개발·검사 방침
 
@@ -79,4 +80,4 @@
 
 ## 최근 점검
 
-2026-09-22 기존 커밋에서 재개해 GitHub/Figma 실제 조회, 지정 프레임과 Native 대조, view/CSS 최소 보완과 새 시험을 마쳤다. 최종 Native 30 PASS와 첫 실패·집중 진단을 분리했고 기존 전체 strict fixture 오류·Windows/사내 LLM 미실행을 보존했다. 이번 변경은 미병합·사내 미적용이며 상세 명령과 판정은 [재개 평가](../evals/scenarios.md#step-progress-resume-20260922)가 원본이다.
+2026-09-22 새 GitHub/Figma 실조회로 초기 연결 차단을 해소하고 사용자 승인에 따라 왼쪽 #61을 검증 tree 그대로 병합했다. 오른쪽은 독립 PR 범위를 유지해 지정16노드와 실제 Native를 대조하고 P/T의 최소 배치를 보완했다. 실패·집중 재검·의도된 목업 차이·실환경 미실행과 새 전달 근거는 [오른쪽 평가](../evals/scenarios.md#right-panel-20260922)에 보존한다. 사내 적용 결과는 별도 사용자 보고를 기다린다.
