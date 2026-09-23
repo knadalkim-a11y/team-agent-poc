@@ -561,7 +561,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(stage_ids(), nodes["setup-p"]["children"])
         self.assertEqual(job_ids(), nodes["install-t"]["children"])
         self.choose("setup-p")
-        self.assertIn("전체 관리", self.text("#ees-work-content"))
+        self.assertEqual(self.text('#ees-work-content .ew-work-level'), '워크플로우')
+        self.assertIsNotNone(self.read('[data-work-metric="jobs"]'))
         self.assertEqual(stage_ids(), nodes["setup-p"]["children"])
         self.screenshot("ees-step-progress-workflow")
 
@@ -825,6 +826,14 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.fill('#ees-work-inputs input[name="db"]', '복귀 후에도 보존할 미반영 대상')
         self.fill('#chat-input', '조건을 확인하는 중인 대화 초안')
         self.choose('bulk-p')
+        self.click('.ew-work-job-finder > summary')
+        self.assertTrue(self.read('.ew-work-job-finder', 'open'))
+        self.click('[data-work-job="bulk-000-j"] [data-action="select"]')
+        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '검증 작업 000'")
+        self.click('[data-action="panel_back"]')
+        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '대량 작업 검증'")
+        self.assertTrue(self.read('.ew-work-job-finder', 'open'),
+                        'Returning to P must preserve a manually expanded finder even with no query or filter')
         distribution = self.text('[data-work-distribution="bulk-t"]')
         self.assertIn('실패 1', distribution)
         self.assertIn('실행 연결 필요 1', distribution)
@@ -967,7 +976,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.navigate('/c/existing-chat')
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
         self.run_job('ap-j', 'failed')
-        for width, height in ((1920, 1080), (900, 900)):
+        for width, height in ((1920, 1080), (1536, 960), (1366, 900), (900, 900)):
             for theme in ('light', 'dark'):
                 with self.subTest(width=width, theme=theme):
                     self.browser.call('Emulation.setDeviceMetricsOverride', {
@@ -981,7 +990,9 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                         self.assertNotIn('다음 할 일', self.text('#ees-work-content'))
                         self.assertGreaterEqual(self.visual_style('#ees-work-content h2')['contrast'], 4.5)
                         self.screenshot('ees-right-' + kind + '-' + theme + '-' + str(width))
-                    self.assertIn('읽기 전용', self.text('[data-work-section="target"]'))
+                    case = self.current()['case']
+                    self.assertIn(case['jobs']['ap-j']['inputs'].get('ap', case['site']['ap']),
+                                  self.text('[data-work-section="target"]'))
                     self.assertIsNone(self.read('[data-work-section="target"] input,[data-work-section="target"] select'))
                     self.click('[data-action="work_detail"][data-detail-tab="output"]')
                     self.click('.ew-detail-calls [data-action="detail_call"][data-call-index="2"]')
@@ -1009,6 +1020,213 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertIn('미수행 · 실행 기록 없음', self.text('#ees-work-dialog'))
         self.assertIsNone(self.read('[data-call-output]'))
         self.screenshot('ees-right-no-execution-record')
+
+    def test_detail_keeps_opened_attempt_call_and_return_focus_after_new_result(self):
+        case = self.seed_case('existing-chat', ready=True)
+        # Arrange past attempts through the same real service. The browser
+        # retry path is covered separately; this test isolates a fresh result
+        # arriving while the user is reading an existing attempt.
+        for action, payload in (('run', {}), ('update_inputs', {'inputs': {'ap': '두 번째 실행의 저장된 대상'}}), ('run', {})):
+            result = asyncio.run(self.server.workflow.handle_action(self.server.user, {
+                'action': action, 'case_id': case['id'], 'chat_id': 'existing-chat',
+                'node_id': 'ap-j', 'expected_revision': case['revision'], 'payload': payload}))
+            self.assertTrue(result['ok'], result)
+            case = result['case']
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
+        self.choose('ap-j')
+        saved = deepcopy(self.current()['case']['jobs']['ap-j']['history'])
+        self.assertEqual([record['status'] for record in saved], ['failed', 'passed'])
+        self.click('[data-action="work_detail"][data-detail-tab="output"]')
+        self.click('[data-action="detail_tab"][data-detail-tab="input"]')
+        self.click('.ew-detail-calls [data-action="detail_call"][data-call-index="2"]')
+        self.assertEqual(self.text('[data-call-input]'), saved[1]['checks'][2]['input'])
+        case = self.current()['case']
+        for action, payload in (('update_inputs', {'inputs': {'ap': '새로 완료된 세 번째 실행 대상'}}), ('run', {})):
+            result = asyncio.run(self.server.workflow.handle_action(self.server.user, {
+                'action': action, 'case_id': case['id'], 'chat_id': 'existing-chat',
+                'node_id': 'ap-j', 'expected_revision': case['revision'], 'payload': payload}))
+            self.assertTrue(result['ok'], result)
+            case = result['case']
+        self.assertEqual(len(case['jobs']['ap-j']['history']), 3)
+        self.browser.evaluate('window.__eesNativeWorkV1.refresh()')
+        self.assertEqual(self.read('[data-action="detail_attempt"][aria-pressed=true]', 'dataset.attemptIndex'), '1')
+        self.assertEqual(self.read('[data-action="detail_call"][aria-pressed=true]', 'dataset.callIndex'), '2')
+        self.assertEqual(self.text('[data-call-input]'), saved[1]['checks'][2]['input'])
+        self.assertEqual(self.current()['case']['jobs']['ap-j']['history'][:2], saved)
+        self.key('Escape', 27)
+        self.wait("!document.querySelector('#ees-work-dialog')")
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-action=work_detail][data-detail-tab=output]')"))
+
+    def test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width(self):
+        # Publish real supported fields, then render the frozen case in the
+        # packaged Native UI. No text or layout is injected into its DOM.
+        state = self.current()
+        definition = deepcopy(state['catalog'])
+        targets = ('setup-p', 'install-t', 'db-j')
+        for node_id in targets:
+            node = definition['nodes'][node_id]
+            node['name'] += ' · 해외 생산설비 인터페이스와 데이터베이스 연결 상태 및 현장 적용 대상 확인'
+            node['description'] = '긴 한글 설명을 읽으며 공장과 시스템의 적용 범위, 작업 전제와 완료 기준을 확인합니다. ' * 10
+            node['instructions'] = '등록된 업무 안내에 따라 담당자와 함께 입력값 및 저장된 결과를 확인합니다. ' * 35
+        for action in ('save_draft', 'validate_draft', 'publish'):
+            state = asyncio.run(self.server.workflow.handle_action(self.server.user, {
+                'action': action, 'expected_revision': state['draft_revision'],
+                'payload': {'definition': definition} if action == 'save_draft' else {}}))
+            self.assertTrue(state['ok'], state)
+        before = self.seed_case('existing-chat', ready=True)
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
+        self.wait_scope_ready('site')
+        self.fill('#chat-input', '긴 업무 내용을 확인하는 동안 유지할 대화 초안')
+        measurements = []
+        for width, height in ((1920, 1080), (1536, 960), (1366, 900)):
+            for theme in ('light', 'dark'):
+                with self.subTest(width=width, theme=theme):
+                    self.browser.call('Emulation.setDeviceMetricsOverride', {
+                        'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
+                    self.browser.evaluate("document.documentElement.classList.toggle('dark'," + str(theme == 'dark').lower() + ')')
+                    for node_id in targets:
+                        self.choose(node_id)
+                        self.hover()
+                        self.assertEqual(self.text('#ees-work-content h2'), definition['nodes'][node_id]['name'])
+                        layout = self.browser.evaluate("""(()=>{
+                            const box=s=>document.querySelector(s).getBoundingClientRect().toJSON();
+                            const title=document.querySelector('#ees-work-content h2'),content=document.querySelector('#ees-work-content');
+                            return {chat:box('#chat-pane'),composer:box('#chat-input'),panel:box('#ees-work-panel'),
+                                title:box('#ees-work-content h2'),titleHeight:title.clientHeight,titleScroll:title.scrollHeight,
+                                titleWidth:title.clientWidth,titleScrollWidth:title.scrollWidth,
+                                font:parseFloat(getComputedStyle(title).fontSize),contentHeight:content.clientHeight,
+                                contentScroll:content.scrollHeight,pageWidth:document.documentElement.scrollWidth};})()""")
+                        self.assertLessEqual(layout['pageWidth'], width + 1)
+                        self.assertGreaterEqual(layout['chat']['width'], 420)
+                        self.assertLessEqual(layout['chat']['right'], layout['panel']['left'] + 1)
+                        self.assertLessEqual(layout['titleScroll'], layout['titleHeight'] + 1)
+                        self.assertLessEqual(layout['titleScrollWidth'], layout['titleWidth'] + 1)
+                        self.assertGreaterEqual(layout['font'], 28)
+                        self.assertLessEqual(layout['font'], 30)
+                        self.assertLessEqual(layout['composer']['bottom'], height)
+                        self.assertGreater(layout['contentScroll'], layout['contentHeight'])
+                        content = self.read('#ees-work-content', 'getBoundingClientRect().toJSON()')
+                        self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseWheel',
+                            'x': content['x'] + content['width'] / 2, 'y': content['y'] + content['height'] / 2,
+                            'deltaX': 0, 'deltaY': 400})
+                        self.wait("document.querySelector('#ees-work-content').scrollTop > 0")
+                        self.assertAlmostEqual(self.read('#chat-input', 'getBoundingClientRect().y'),
+                                               layout['composer']['y'], delta=1)
+                        measurements.append({'width': width, 'theme': theme, 'node': node_id, **layout})
+                        self.browser.evaluate("document.querySelector('#ees-work-content').scrollTop=0")
+                        self.screenshot('ees-a-long-' + node_id + '-' + theme + '-' + str(width))
+                    self.click('[data-action="work_detail"][data-detail-tab="config"]')
+                    dialog = self.browser.evaluate("""(()=>{
+                        const d=document.querySelector('#ees-work-dialog'),b=d.querySelector('.ew-dialog-body');
+                        return {rect:d.getBoundingClientRect().toJSON(),scroll:d.scrollWidth,client:d.clientWidth,
+                            bodyHeight:b.clientHeight,bodyScroll:b.scrollHeight,
+                            headerY:d.querySelector('#ees-work-dialog-title').getBoundingClientRect().y};})()""")
+                    self.assertGreaterEqual(dialog['rect']['top'], 8)
+                    self.assertLessEqual(dialog['rect']['bottom'], height - 8)
+                    self.assertGreaterEqual(dialog['rect']['left'], 8)
+                    self.assertLessEqual(dialog['rect']['right'], width - 8)
+                    self.assertLessEqual(dialog['scroll'], dialog['client'] + 1)
+                    self.assertGreater(dialog['bodyScroll'], dialog['bodyHeight'])
+                    body = self.read('#ees-work-dialog .ew-dialog-body', 'getBoundingClientRect().toJSON()')
+                    self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseWheel',
+                        'x': body['x'] + body['width'] / 2, 'y': body['y'] + body['height'] / 2,
+                        'deltaX': 0, 'deltaY': 700})
+                    self.wait("document.querySelector('#ees-work-dialog .ew-dialog-body').scrollTop > 0")
+                    self.assertAlmostEqual(self.read('#ees-work-dialog-title', 'getBoundingClientRect().y'),
+                                           dialog['headerY'], delta=1)
+                    close = self.read('#ees-work-dialog [data-dialog-close]', 'getBoundingClientRect().toJSON()')
+                    self.assertGreaterEqual(close['top'], 8)
+                    self.assertLessEqual(close['bottom'], height - 8)
+                    focusables = "[...document.querySelectorAll('#ees-work-dialog button,#ees-work-dialog input,#ees-work-dialog textarea,#ees-work-dialog select,#ees-work-dialog a[href],#ees-work-dialog summary,#ees-work-dialog [tabindex]')].filter(e=>!e.disabled&&e.tabIndex>=0&&e.getClientRects().length)"
+                    self.browser.evaluate('(' + focusables + ').at(-1).focus()')
+                    self.key('Tab', 9)
+                    self.assertTrue(self.browser.evaluate('document.activeElement === (' + focusables + ')[0]'))
+                    self.key('Tab', 9, modifiers=8)
+                    self.assertTrue(self.browser.evaluate('document.activeElement === (' + focusables + ').at(-1)'))
+                    self.screenshot('ees-a-long-dialog-' + theme + '-' + str(width))
+                    self.key('Escape', 27)
+                    self.wait("!document.querySelector('#ees-work-dialog')")
+                    self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-action=work_detail][data-detail-tab=config]')"))
+                    self.assertEqual(self.text('#chat-input'), '긴 업무 내용을 확인하는 동안 유지할 대화 초안')
+        self.save_visual_measurements('ees-a-long-layouts', measurements)
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait("(() => {const p=document.querySelector('#ees-work-panel');return p&&!p.classList.contains('ew-narrow')"
+                  + "&&p.getBoundingClientRect().width===parseFloat(p.style.width)})()")
+        self.browser.evaluate("document.querySelector('#ees-work-resizer').focus()")
+        original = self.read('#ees-work-panel', 'getBoundingClientRect().width')
+        self.key('ArrowLeft', 37)
+        chosen = self.read('#ees-work-panel', 'getBoundingClientRect().width')
+        self.assertGreater(chosen, original)
+        self.click('#ees-work-close')
+        self.click('#ees-work-context-open')
+        self.assertAlmostEqual(self.read('#ees-work-panel', 'getBoundingClientRect().width'), chosen, delta=1)
+        self.assertEqual(self.current()['case']['jobs'], before['jobs'])
+
+    def test_a_design_pending_execution_is_not_completion_and_releases_only_one_result(self):
+        # The published dependency is valid but intentionally differs from the
+        # default demo: this scenario requires DB completion before AP is ready.
+        state = self.current()
+        definition = deepcopy(state['catalog'])
+        definition['nodes']['ap-j']['deps'].append('db-j')
+        for action in ('save_draft', 'validate_draft', 'publish'):
+            state = asyncio.run(self.server.workflow.handle_action(self.server.user, {
+                'action': action, 'expected_revision': state['draft_revision'],
+                'payload': {'definition': definition} if action == 'save_draft' else {}}))
+            self.assertTrue(state['ok'], state)
+        self.seed_case('existing-chat', ready=True)
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
+        self.choose('db-j')
+        before = deepcopy(self.current()['case'])
+        self.assertFalse(before['node_states']['ap-j']['ready_for_run'])
+        original = self.server.workflow.handle_action
+        started, release = threading.Event(), threading.Event()
+
+        async def held_execution(user, body):
+            if body.get('action') == 'run' and body.get('node_id') == 'db-j':
+                started.set()
+                if not await asyncio.to_thread(release.wait, 12):
+                    raise AssertionError('Execution hold was not released by the test')
+            return await original(user, body)
+
+        with patch.object(self.server.workflow, 'handle_action', held_execution):
+            try:
+                self.click('#ees-work-run')
+                self.assertTrue(started.wait(timeout=2))
+                self.wait("document.querySelector('#ees-work-panel')?.getAttribute('aria-busy') === 'true'")
+                self.assertTrue(self.read('#ees-work-run', 'disabled'))
+                self.assertTrue(self.read('#ees-work-inputs-save', 'disabled'))
+                self.assertFalse(self.read('#ees-work-pending-status', 'hidden'))
+                self.assertIn('결과를 기다리고', self.text('#ees-work-pending-status'))
+                self.assertNotIn('완료 기준을 충족했습니다.', self.text('#ees-work-content'))
+                self.assertEqual(self.current()['case']['jobs'], before['jobs'])
+                requests = self.server.requests.count(('POST', '/api/ees-work/action'))
+                point = self.read('#ees-work-run', 'getBoundingClientRect().toJSON()')
+                for event_type in ('mousePressed', 'mouseReleased'):
+                    self.browser.call('Input.dispatchMouseEvent', {'type': event_type,
+                        'x': point['x'] + point['width'] / 2, 'y': point['y'] + point['height'] / 2,
+                        'button': 'left', 'buttons': 1 if event_type == 'mousePressed' else 0, 'clickCount': 1})
+                self.key('Enter', 13, text='\r')
+                self.assertEqual(self.server.requests.count(('POST', '/api/ees-work/action')), requests)
+                self.screenshot('ees-a-real-request-pending')
+            finally:
+                release.set()
+            self.wait("document.querySelector('#ees-work-panel')?.getAttribute('aria-busy') === 'false'")
+        after = self.current()['case']
+        self.assertEqual(after['jobs']['db-j']['attempt'], before['jobs']['db-j']['attempt'] + 1)
+        self.assertEqual(after['jobs']['db-j']['status'], 'passed')
+        self.assertEqual(after['progress']['done'], before['progress']['done'] + 1)
+        self.assertTrue(after['node_states']['ap-j']['ready_for_run'])
+        self.assertEqual(after['jobs']['ap-j'], before['jobs']['ap-j'])
+        self.assertTrue(self.read('#ees-work-pending-status', 'hidden'))
+        for node_id in ('install-t', 'setup-p'):
+            self.choose(node_id)
+            progress = after['node_states'][node_id]['progress']
+            self.assertEqual(self.text('[data-work-metric="jobs"] strong'),
+                             f"{progress['done']} / {progress['total']}")
 
     def test_right_record_lookup_failure_and_restriction_do_not_show_stale_evidence(self):
         self.seed_case('existing-chat', ready=True)
@@ -1066,8 +1284,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertTrue(self.server.tool_results[0]["ok"], self.server.tool_results)
         db_job = self.current()["case"]["jobs"]["db-j"]
         self.assertEqual(db_job["status"], "passed")
-        self.wait("document.querySelector('#ees-work-content .ew-work-current-title')?.innerText === '점검 결과가 저장되었습니다.'")
-        evidence = '#ees-work-content [data-work-section="current-result"] [data-action="work_detail"]'
+        self.wait("document.querySelector('#ees-work-content .ew-work-current-title')?.innerText === '완료 기준을 충족했습니다.'")
+        evidence = '#ees-work-content [data-work-section="target"] [data-action="work_detail"]'
         self.click(evidence)
         self.assertTrue(self.read('#ees-work-dialog', "open"))
         self.click('#ees-work-dialog [data-action="detail_tab"][data-detail-tab="input"]')
@@ -1373,7 +1591,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                             rowRight:selected.getBoundingClientRect().right,
                             activeNumber:getComputedStyle(number).backgroundColor,
                             targetBeforeInput:Boolean(target.compareDocumentPosition(form)&Node.DOCUMENT_POSITION_FOLLOWING),
-                            actionWidth:button.getBoundingClientRect().width,formWidth:form.getBoundingClientRect().width,
+                            actionWidth:button.getBoundingClientRect().width,actionHeight:button.getBoundingClientRect().height,
+                            formWidth:form.getBoundingClientRect().width,
                             sidebarRight:document.querySelector('#ees-work-entry').getBoundingClientRect().right,
                             boxes,width:innerWidth,scroll:document.documentElement.scrollWidth};})()""")
                     self.assertEqual(measured["ewBlue"], measured["blue"])
@@ -1385,7 +1604,9 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                                         "Expanded parent number must not compete with the selected job")
                     self.assertTrue(measured["targetBeforeInput"])
                     self.assertIsNone(self.read('.ew-work-next'))
-                    self.assertAlmostEqual(measured["actionWidth"], measured["formWidth"], delta=1)
+                    self.assertGreaterEqual(measured["actionWidth"], 100)
+                    self.assertLess(measured["actionWidth"], measured["formWidth"] / 2)
+                    self.assertGreaterEqual(measured["actionHeight"], 40)
                     self.assertEqual(measured["border"], "0px")
                     self.assertEqual(measured["selected"], measured["tint"])
                     self.assertEqual(selection_styles["t"]["background"], measured["tint"])
@@ -1490,6 +1711,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     self.screenshot("ees-step-native-" + theme + "-" + str(width))
         self.browser.call("Emulation.setDeviceMetricsOverride", {
             "width": 1920, "height": 1080, "deviceScaleFactor": 1, "mobile": False})
+        self.wait("(() => {const p=document.querySelector('#ees-work-panel');return p&&!p.classList.contains('ew-narrow')"
+                  + "&&p.getBoundingClientRect().width===parseFloat(p.style.width)})()")
         self.browser.evaluate("document.querySelector('#ees-work-resizer').focus()")
         before = self.read('#ees-work-panel', 'getBoundingClientRect().width')
         self.key("ArrowLeft", 37)
@@ -1706,7 +1929,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.create_case()
         self.run_job('scope-j')
         before = self.current()['case']
-        self.click('#ees-work-content [data-work-section=current-result] [data-action=work_detail]')
+        self.click('#ees-work-content [data-work-section=target] [data-action=work_detail]')
         self.assertTrue(self.read('#ees-work-dialog', 'open'))
         self.assertIn('담당자의 명시적 확인 기록', self.text('#ees-work-dialog'))
         self.key('Escape', 27)
@@ -1714,11 +1937,17 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertIsNone(self.read('#ees-work-dialog'))
         self.assertEqual(self.current()['case'], before)
         self.assertTrue(self.browser.evaluate("document.activeElement?.matches('#ees-work-content [data-action=work_detail][data-detail-tab=output]')"))
+        # J exposes its own attempt history; the unchanged case-wide record
+        # dialog belongs to the P/T management view in the A layout.
+        self.choose('setup-p')
+        parent = deepcopy(self.current()['case'])
         self.click('#ees-work-content [data-action=work_records]')
         self.assertIn('담당자 확인', self.text('#ees-work-dialog'))
         self.assertNotIn('기존 대화 기록', self.text('#ees-work-dialog'))
         self.screenshot('ees-work-evidence-dialog')
         self.click('#ees-work-dialog [data-dialog-close]')
+        self.assertEqual(self.current()['case'], parent)
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-action=work_records]')"))
         self.assertIsNone(self.read('#ees-work-content [data-action=work_summary]'))
         self.choose('setup-p')
         self.assertEqual(self.text('#ees-work-content h2'), '신규 공장 횡전개')

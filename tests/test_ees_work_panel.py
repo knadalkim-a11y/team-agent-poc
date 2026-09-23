@@ -239,6 +239,31 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("권한 제한", missing.text)
         self.assert_no_mutation(missing)
 
+    async def test_recorded_empty_result_is_distinct_from_missing_output(self):
+        case = await self.ready(await self.create())
+        case = await self.step(case, "run", "db-j")
+        check = case["jobs"]["db-j"]["history"][0]["checks"][0]
+        # Older saved records may contain an explicitly empty detail. Rendering
+        # must distinguish that value from a property never recorded at all.
+        check["detail"] = ""
+        case["jobs"]["db-j"]["checks"][0]["detail"] = ""
+        empty, _ = self.render(case, "db-j", detail=True, tab="output", callIndex=0)
+        body = self.detail_content(empty, "output")
+        self.assertRegex(body.text, "빈 결과|반환 내용 없음")
+        self.assertNotIn("반환 내용 미기록", body.text)
+        self.assertIn("미확인", body.text)
+        self.assert_no_mutation(empty)
+        current, _ = self.render(case, "db-j")
+        self.assertRegex(self.section(current, "current-result").text, "빈 결과|반환 내용 없음")
+        history, _ = self.render(case, "db-j", detail=True, tab="history")
+        self.assertRegex(self.detail_content(history, "history").text, "빈 결과|반환 내용 없음")
+        del check["detail"]
+        absent, _ = self.render(case, "db-j", detail=True, tab="output", callIndex=0)
+        body = self.detail_content(absent, "output")
+        self.assertIn("반환 내용 미기록", body.text)
+        self.assertNotIn("빈 결과", body.text)
+        self.assert_no_mutation(absent)
+
     async def test_configuration_uses_frozen_case_and_does_not_claim_instruction_compliance(self):
         definition = workflow._seed()
         definition["nodes"]["db-j"]["description"] = "FROZEN-J business purpose"
@@ -720,7 +745,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("PRIVATE_SKILL_SOURCE_MUST_NOT_APPEAR", html.text)
         self.assertNotIn("적용 지침과 스킬", html.text)
         current = self.section(html, "current-result")
-        details = current.find("button", **{"data-action": "work_detail", "data-detail-tab": "output"})
+        details = self.section(html, "target").find("button", **{"data-action": "work_detail", "data-detail-tab": "output"})
         self.assertEqual(len(details), 1)
         self.assertNotIn("data-mutation", details[0].attrs)
         self.assertEqual(details[0].attrs["data-node-id"], "ap-j")
@@ -1009,8 +1034,8 @@ return original.map(scope=>({original:drafts.read(scope,saved,-1),created:drafts
 const input={name:'ap',value:'A',defaultValue:'A'},text={value:'D',defaultValue:'D'};
 const inputs={querySelectorAll:()=>[input]},documentForm={querySelector:()=>text};
 const note={hidden:true},next={dataset:{workSavedNext:'saved next'},textContent:'saved next'};
-const run={dataset:{workBaseUnavailable:'false'},disabled:false},content={innerHTML:'',contains:()=>false};
-const tabs={innerHTML:''},host={dataset:{},setAttribute(){},querySelector(selector){return ({'#ees-work-inputs':inputs,'#ees-work-document':documentForm,'#ees-work-content':content,'#ees-work-tabs':tabs,'[data-work-dirty]':note,'[data-work-next]':next,'[data-work-draft-sensitive]':run})[selector] || null;},querySelectorAll:()=>[run]};
+const run={dataset:{workBaseUnavailable:'false'},disabled:false},content={innerHTML:'',contains:()=>false,querySelectorAll:()=>[]};
+const tabs={innerHTML:''},host={dataset:{},setAttribute(){},querySelector(selector){return ({'#ees-work-inputs':inputs,'#ees-work-document':documentForm,'#ees-work-content':content,'#ees-work-tabs':tabs,'[data-work-dirty]':note,'[data-work-next]':next,'[data-work-draft-sensitive]':run})[selector] || null;},querySelectorAll:selector=>selector==='button[data-mutation]'?[run]:[]};
 const divider={dataset:{},setAttribute(){}};
 globalThis.document={querySelector:()=>null,createElement:tag=>tag==='aside'?host:divider};
 globalThis.window={};
@@ -1052,7 +1077,7 @@ return {typed,reverted,documentTyped,documentReverted,observerKeptDisabled,block
 
     def test_panel_scroll_resets_for_new_target_but_survives_same_job_refresh(self):
         result = self.evaluate_drafts("""(() => {
-const content={innerHTML:'',scrollTop:0,contains:()=>false},tabs={innerHTML:''};
+const content={innerHTML:'',scrollTop:0,contains:()=>false,querySelectorAll:()=>[]},tabs={innerHTML:''};
 const host={dataset:{},setAttribute(){},querySelector:selector=>({'#ees-work-content':content,'#ees-work-tabs':tabs}[selector] || null),querySelectorAll:()=>[]};
 globalThis.document={querySelector:()=>null,createElement:tag=>tag==='aside'?host:{dataset:{},setAttribute(){}}};globalThis.window={};
 const site={id:'a',name:'공장'},definition={version:1,sites:{a:site},tools:{},nodes:{p:{id:'p',type:'p',name:'절차',children:['t']},t:{id:'t',parent:'p',type:'t',name:'단계',children:['j']},j:{id:'j',parent:'t',type:'j',name:'작업',mode:'manual'}}};

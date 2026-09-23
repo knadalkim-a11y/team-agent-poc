@@ -1,18 +1,17 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-22
+갱신일: 2026-09-23
 
 현재 작업·다음 작업·미해결·실제 적용 원본을 관리합니다. 이슈·검증 근거는 [평가 기록 찾아보기](../evals/scenarios.md#evidence-index), 환경은 [versions](../versions.md), 완료된 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** 사용자 “병합하고 배포스크립트 가이드도 해줘” 승인에 따라 왼쪽 PR [#61](https://github.com/knadalkim-a11y/team-agent-poc/pull/61)을 main `cfe5e4d36ca902c8706aed4d07f0cd87ffa16a78`에 병합했다. 검증 head `0e9e17556be7c5f251105350f288544a9afe59ea`와 전체 tree가 같다. [오른쪽 업무·수행 상세](mockups/ees-work/TASK.md#right-panel-20260922)는 별도 `feat/ees-work-right-panel-20260922` 후속 PR로 게시·병합하며 #61의 왼쪽 전용 diff와 섞지 않는다. 이전 로컬 `31d90bb0643155714329cc5ac9e200d978dc0bf3`와 시험 자료를 보존했다.
-- **조회·디자인:** 같은 날 새 GitHub/Figma 호출이 정상화되어 main·관련 PR·AGENTS/STATUS와 지정 오른쪽 16개 노드의 design context/screenshot을 실조회했다. 이전 HTTP400 실패는 [평가 기록](../evals/scenarios.md#right-panel-20260922)에 보존한다. P/T의 목록 뒤 범위 실행 배치·별도 조건 열·항상 보이는 실행 경계를 보완했고, J/상세는 실제 기록과 목업을 직접 대조했다. Figma 원본과 회사 환경 설정은 바꾸지 않았다.
-- **구현 범위:** P 단계별 내용/문제 분포, T 조건·실패 사유 펼침/선행 이동·복귀 보존, J 수행 대상·입력/실행/결과와 사용 구성·시도/호출별 저장된 모의 입출력 상세다. 오른쪽 추천 카드는 제거했다. 고정된 진행 건 구성·기존 입력/결과/초안·history와 왼쪽 확정 스타일·Workspace를 보존한다.
-- **지원 한계:** 외부 raw 응답/형식 검사/호출별 버전·출처·지침 준수 기록은 없어 미기록/미확인으로 표시한다. 미수행·조회 실패·접근 제한을 구분한다. backend·DB/API·권한·업무 규칙·개인 인증·범용 실행기를 추가하지 않는다. 상세는 기존 읽기 전용 dialog를 재사용하며 모의 결과를 외부 실제 성공으로 바꾸지 않는다.
-- **검증·배포 상태:** 기존 오른쪽 통합157 PASS, Native 전체36 PASS/1 FAIL 뒤 해당1 PASS, 상세 한글 보완 뒤 관련2 PASS/스타일 보존1 PASS를 각각 보존한다. 전달166 PASS/2 ERROR/4 SKIP 뒤 fixture 해당2 PASS도 전체 재실행으로 합산하지 않는다. 이번 Figma 보완 이후의 정확한 명령·새 Native/패키징 결과는 [평가 기록](../evals/scenarios.md#right-panel-20260922)을 따른다. 프로그램0.11.3+ees.10/Pack0.2.12를 유지한다.
-- **최근 적용:** #59 `c4c6ab8d1df3`의 Upgrade/기동/ApplyDemo 성공, #60 main 안내 뒤 사용자 “응 확인했어” 보고를 이전 적용으로 보존한다. 이번 #61/오른쪽 병합 요청은 확인했지만 사내 설치·기동·화면 결과는 아직 수신하지 않았다.
-- **다음 작업 하나:** 오른쪽 후속 PR 병합 시 최종 main 전체 SHA와 검증 tree 일치를 확인해 [기존 Update → Upgrade -TrialCommit 안내](03-openwebui-native-agent.md#ees-right-panel-20260922)를 제공한다. 사용자 수동 ZIP 다운로드·새 개발환경·별도 ApplyDemo는 필요 없다. Upgrade가 정확한 원본의 ZIP을 자동 준비·검증하고 프로그램 백업·적용·기동·동일 원본 ApplyDemo를 수행한다. Work 후보 ZIP은 사전 패키징 검증/보존용이며 중간 후보마다 다운로드할 필요가 없다.
+- **현재 작업:** 첨부 A안 인계에 따라 [상태·실행 상세 UI](mockups/ees-work/TASK.md#a-design-20260923)를 기존 EES Work에 구현하고 로컬 제품 수락 검사를 완료했다. 시작 최신 main은 `e5b799ed22d193341fa23e1269e4d7083d0766f7`이며 왼쪽 [#61](https://github.com/knadalkim-a11y/team-agent-poc/pull/61)과 오른쪽 [#62](https://github.com/knadalkim-a11y/team-agent-poc/pull/62)는 이미 병합됐다. 이번 `feat/ees-work-a-design-20260923`은 두 구현을 보존한 후속이며 열린 설계 전용 Draft #53은 변경하지 않는다.
+- **조회·표현 기준:** Figma 페이지 `478:131`·검토 보드 `498:363`, 여섯 상태 P/T/J 18개와 상세/예외 Dialog를 실제 읽었다. 연속 작업면·집계/제목 위계·입력/결과·대화상자 표현을 기존 view/CSS에 적용한다. Figma 원본·로고·Native 전역/Workspace 스타일과 기존 대화는 유지한다. 정적 Figma 검수와 제품 검사는 분리한다.
+- **지원 경계:** 입력 반영/실행/완료 판정, 현재 가능 수/최종 처리 수, 고정 절차/실제 제공 기록, 미기록/빈 결과/조회 실패/접근 제한/미수행을 구분한다. 기존 서버·DB/API·권한·사용자 자산/개인 설정·진행 snapshot을 보존하며 새 실행기나 합성 수치 하드코딩은 없다.
+- **검증 상태:** A-01~A-11은 실제 Native UI·합성 서비스/자산 범위에서 통과했다. Native 전체40건은 최초36 PASS/3 FAIL/1 ERROR였고 시험 준비/기대 보정 뒤 해당4 PASS, 마지막 긴 한글1 PASS로 확인했다. 이를 clean 전체40 PASS로 합산하지 않는다. 관련 계약115·자산43·패키징/UI55·renderer43과 전후 캡처를 각각 기록했다. 정확한 명령·최초 실패·검증 원본·미실행은 [평가 원본](../evals/scenarios.md#a-design-20260923)을 따른다. 프로그램0.11.3+ees.10/Pack0.2.12를 유지하며 Python3.11·Windows·사내 LLM/인증·실제 DB/AP는 미실행이다.
+- **최근 적용:** #59 `c4c6ab8d1df3`의 Upgrade/기동/ApplyDemo 성공과 #60 적용 안내 뒤 사용자 확인을 보존한다. #61/#62 병합과 이번 A안은 사내 설치·기동·화면 수락 보고가 아직 없다. 구현 요청을 새 병합·배포 승인으로 확대하지 않는다.
+- **다음 작업 하나:** 이번 A안 후속 PR의 정확한 head와 위 제품 수락 근거를 검토한다. 기존 #53이나 병합된 #61/#62의 검사/승인으로 대체하지 않는다. 새 병합·사내 적용은 별도 요청 범위이며 사용자 수동 다운로드용 후보 ZIP은 만들지 않았다.
 
 ## 2026년 9월 개발·검사 방침
 
@@ -62,7 +61,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | PR #60 병합·안내 후 사용자 확인을 바탕으로 [확정 왼쪽 패널](mockups/ees-work/TASK.md#sidebar-final-20260922) 후속 구현 | 이번 후속 PR/후보 검토와 변경별 병합·적용 승인. 공동 작업·일정·오른쪽 신규 디자인은 별도 범위 |
+| 4. 관리자 워크플로 | #61/#62 병합 구현을 보존한 [A안 상태·실행 상세](mockups/ees-work/TASK.md#a-design-20260923) 구현·로컬 제품 수락 완료 | 이번 후속 PR의 정확한 원본·A-01~A-11 근거 검토. 공동 작업·일정·새 병합/사내 적용은 별도 범위 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -72,7 +71,7 @@
 
 ## 재개와 환경 유지
 
-- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work는 [09-22 단계별 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922)를 보존하며 왼쪽 표현은 [확정 패널](mockups/ees-work/TASK.md#sidebar-final-20260922)과 313번 Figma를 우선합니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
+- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work는 [09-23 A안](mockups/ees-work/TASK.md#a-design-20260923)과 Figma 478:131/498:363을 최신 표현 기준으로 사용하고 [09-22 단계별 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922)·[확정 왼쪽](mockups/ees-work/TASK.md#sidebar-final-20260922)·[오른쪽 기록 계약](mockups/ees-work/TASK.md#right-panel-20260922)을 보존합니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
