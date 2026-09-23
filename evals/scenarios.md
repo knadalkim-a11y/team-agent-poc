@@ -126,6 +126,18 @@ export EES_TEST_BRANDING_DIR="$PWD/dist/branding-a-v2"
 
 **미실행·범위 밖:** 사내 Windows/PowerShell 설치·기동·실제 LLM·개인 인증/SSO·운영 데이터·실제 DB/AP 연결은 미실행이다. Figma 합성 72/120·25/48·#2/#3·시간/버전은 제품 상수가 아니며 실제 fixture의 정의와 기록으로 판정한다. 9월 원격 CI 생략을 유지하고 이번 요청으로 병합·배포하지 않는다. 새 배포 ZIP은 만들지 않으며 실제 제품 검증에 필요한 wheel과 기존 기록만 관리한다.
 
+### 후속 병합 승인과 배포 준비
+
+2026-09-23 사용자가 #63 병합과 이전 방식의 배포 가이드를 요청했다. 병합 준비 시 원격 main은 여전히 `e5b799ed22d193341fa23e1269e4d7083d0766f7`, PR head는 `c6197877468376f40df2e9a9d5b9a3978bf26766`, tree는 `81d9da9dc66f9394c406711342d8bc16c56442e4`였다. 변경 10개 blob이 앞선 검증본과 일치하고 mergeable/clean, 새 리뷰·미해결 리뷰 스레드 없음으로 확인했다. 이전 scratch checkout은 남아 있지 않아 원격의 142개 파일을 별도 문서 검사용 위치로 받아 모든 blob과 tree를 대조했다. 기존 제품 테스트를 반복하지 않았다.
+
+이 후속에서는 STATUS·사용 가이드·이 평가 기록만 갱신한다. 실제 제품·시험·배포 스크립트·설정·사용자 자산 원본은 변경하지 않는다. strict `python -X warn_default_encoding -W error::EncodingWarning scripts/check_docs.py`를 실제 실행해 **문서 30개·링크 1201개·오류 0·검토후보 0**, `git diff --check` PASS를 확인했다. 새 제품 검사는 반복하지 않았고 PowerShell 실행 환경은 이 Work에 없어 구문/사내 실행 통과로 확대하지 않는다. 최종 병합 여부·정확한 main SHA는 [PR #63](https://github.com/knadalkim-a11y/team-agent-poc/pull/63)과 배포 안내를 따른다. 위 최초 구현의 병합/배포 미실행은 당시 상태이며 이 후속 승인과 구분한다.
+
+`manage-ees.ps1`·기존 Trial Upgrade 경로를 독립 읽기 검토했다. 복사 블록은 승인한 SHA를 한 변수에 고정하고 Update 뒤 HEAD·origin/main과 대조한 후 Upgrade -TrialCommit을 실행한다. canonical origin·clean main·작업 잠금·백업·관리 자산 충돌 보호를 유지한다. 내부 ZIP 준비와 같은 원본 ApplyDemo가 자동으로 이어지므로 수동 후보 ZIP이나 별도 ApplyDemo는 추가하지 않는다. 실패 시 stage/code/next에서 중단하고 자동 재시도·강제 checkout·자동 Restore를 붙이지 않는다. 프로그램 Restore와 DB/사용자 자산 복원은 별개다.
+
+이번 PowerShell 블록의 사내 실행·기동·실제 사용자 화면 결과는 미실행/미수신이다. 성공 보고는 Upgrade/ApplyDemo 요약과 `업무·상세·보존=정상/문제` 두 줄로 한정한다. 기존 9월 방침에 따라 후속 문서·병합 커밋에도 `[skip ci]`를 사용하며 원격 CI를 요청하지 않는다.
+
+직전 STATUS 최근 점검 보존: 2026-09-22 새 GitHub/Figma 실조회로 초기 연결 차단을 해소하고 사용자 승인에 따라 왼쪽 #61을 검증 tree 그대로 병합했다. 오른쪽은 독립 PR 범위를 유지해 지정16노드와 실제 Native를 대조하고 P/T의 최소 배치를 보완했다. 실패·집중 재검·의도된 목업 차이·실환경 미실행과 새 전달 근거는 [오른쪽 평가](../evals/scenarios.md#right-panel-20260922)에 보존한다. 사내 적용 결과는 별도 사용자 보고를 기다린다.
+
 <a id="step-progress-ux-20260922"></a>
 
 ## 2026-09-22 단계별 진행·무테 UX
