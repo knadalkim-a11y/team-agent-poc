@@ -1,6 +1,6 @@
 # 버전 및 환경 기준
 
-문서 갱신일: 2026-09-17. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
+문서 갱신일: 2026-09-24. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
 
 ## Open WebUI 대상 환경
 
@@ -22,7 +22,11 @@
 
 현재 프로그램 운영은 Windows의 등록된 Python 3.11·Open WebUI 0.11.3·로컬 SQLite/Chroma 구성을 대상으로 합니다. [단순 래퍼 방식](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)은 기존 Python·호환 의존성을 재사용하며 프로그램 파일만 관리합니다. uv 0.12.7로 별도 환경과 전체 의존성을 준비하던 이전 절차는 중단했습니다. Windows/Linux CI의 합성 검증과 사내 실제 적용 결과는 구분합니다.
 
-새 브랜딩 배포물은 **0.11.3+ees.10**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 STATUS의 실제 적용 기록으로 구분합니다. ees.1~ees.10의 시작·직전 Restore를 지원하며 새 Apply에는 ees.10 프로그램 ZIP을 사용합니다. 새 정적 자산은 `/_ees10/`에 넣어 ees.9 브라우저 캐시와 분리하고, 공장/시스템 선택·글꼴·기존 대화를 유지하며 Runtime 탐색은 현재 UX 합의를 따릅니다.
+시스템 담당자 기능의 새 준비본은 **0.11.3+ees.11**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)을 따르며 사내 설치 버전은 STATUS의 실제 적용 기록으로 구분합니다. 정적 자산은 `/_ees11/`에 넣고 새 작성 모듈을 실제 wheel에 포함합니다. ees.9/ees.10의 필수 파일 목록은 당시 계약으로 고정해 과거 Restore에 새 모듈을 요구하지 않습니다. ees.11 적용/직전 복원 지원의 실제 검증 범위는 [SA-25·설치 산출물](evals/scenarios.md#system-authoring-20260924)을 따릅니다.
+
+09-24의 [시스템 담당자/P별 작성](docs/mockups/ees-work/TASK.md#system-authoring-20260924)은 기존 `ees-work.sqlite3`에 필요한 관리/초안/검사/감사 메타데이터를 추가합니다. Native 회원 DB·키·그룹 명단은 복제하지 않습니다. 기존 전체 초안 원문과 revision을 먼저 보존하며 게시본 mirror·과거 프로그램 fallback 초안·기존 진행 snapshot의 호환 범위를 구분합니다. 프로그램 Restore는 사용자 데이터나 그룹 변경을 되돌리지 않습니다. 새 authoring 프로토콜과 구형 전체 작성 API의 의도된 차이는 [운영 가이드](docs/03-openwebui-native-agent.md#system-authoring-20260924)에 기록합니다.
+
+Agent Pack은 **0.2.13**, Specialists Tool은 **0.2.4**입니다. 기존 전문가 Tool의 정확한 프로그램 allowlist에 ees.11을 추가하는 호환 변경이며 새로운 외부 실행·자산 ACL·Valves/UserValves 변경은 없습니다. 실제 사내 ApplyDemo는 수행하지 않았습니다. 아래 ees.10/Pack0.2.12 기록은 당시 기준으로 보존합니다.
 
 09-22 단계별 진행 수정도 프로그램 `0.11.3+ees.10`·Pack `0.2.12`를 유지하며 새 JS/CSS 바이트와 내용 해시로 이전 #58 묶음과 구분합니다. Python/Node/브라우저/공식 wheel은 기존 검증 환경을 재사용하고 제품 의존성·DB·사용자 인증 저장 형식을 바꾸지 않습니다. [새 원본의 실제 검증·미확인 범위](evals/scenarios.md#step-progress-ux-20260922)를 따릅니다.
 
@@ -99,8 +103,9 @@ Windows 접속 수락 오류용 [선택 실행 파일](scripts/serve_openwebui_w
 Work 개발 검증은 먼저 기존 시험 환경의 실행 가능 여부와 필요한 의존성을 확인합니다. 기존 환경을 재사용할 수 없고 준비가 승인된 경우 저장소의 `.venv` 한 곳을 사용하며, 기능·PR마다 별도 환경을 늘리지 않습니다. 확인된 환경은 이후 검사에서도 그대로 사용하며, 같은 요청에서 이미 허용한 준비를 다시 승인받거나 매번 재설치하지 않습니다. 기준은 Python 3.11이며 고정 의존성의 관리 원본은 [EES delivery workflow](.github/workflows/ees-delivery.yml)의 `Install fixed test dependencies` 단계입니다. 이 목록을 별도 요구사항 파일에 복제하거나 시험 때문에 운영 Open WebUI의 의존 버전을 변경하지 않습니다.
 
 - Node는 기존 실행 파일을 재사용합니다.
-- 공식 Open WebUI wheel은 앱으로 설치하지 않고 `dist/upstream`의 고정 원본 자료와 `dist/branding`의 현재 소스 시험용 묶음으로 사용합니다. 빌더의 원본 해시 검증을 유지합니다.
-- Chrome은 기존 실행 파일을 우선 사용합니다. 없고 준비가 승인된 경우에만 시험용 실행 파일 하나를 `dist/tools`에 준비합니다. 이번 Work 환경에서는 공식 `chrome-headless-shell` 153.0.8010.52를 사용하며, `EES_TEST_CHROME`은 `dist/tools/headless-shell-153.0.8010.52/chrome-headless-shell-linux64/chrome-headless-shell`의 절대 경로로 지정합니다. 이 실행 환경과 full Chrome 실행 결과는 구분합니다. 이 시험 자료는 새 제품 프레임워크·상시 서버·회사 PC 실행 환경이 아닙니다.
+- 공식 Open WebUI wheel은 회사의 운영 앱으로 설치하지 않고 `dist/upstream`의 고정 원본 자료와 `dist/branding`의 현재 소스 시험용 묶음으로 사용합니다. 빌더의 원본 해시 검증을 유지합니다.
+- Chrome은 기존 실행 파일을 우선 사용합니다. 없고 준비가 승인된 경우에만 시험용 실행 파일 하나를 `dist/tools`에 준비합니다. 이번 Work 환경에서는 공식 `chrome-headless-shell` 153.0.8010.52를 사용하며, `EES_TEST_CHROME`은 `dist/tools/chrome-headless-shell-linux64/chrome-headless-shell`의 절대 경로로 지정합니다. 이 실행 환경과 full Chrome 실행 결과는 구분합니다. 이 시험 자료는 새 제품 프레임워크·상시 서버·회사 PC 실행 환경이 아닙니다.
+- 09-24 Native 회원 재사용 검사는 조립된 UI와 고정 wheel의 실제 인증/회원/그룹 router·임시 DB를 연결합니다. 기존 관리자가 있는 합성 데이터에서 시작하며 가입을 role/group 응답 fixture로 대체하지 않습니다. 필요한 시험 의존성은 기존 `.venv`와 고정 환경에서 준비하고 실제 목록/준비 실패·구성별 token 한계는 [NU 평가](evals/scenarios.md#system-authoring-20260924)에 남깁니다. 이 검사는 사내 회원 DB를 복사/초기화하거나 회사 의존성을 재설치하는 절차가 아닙니다.
 
 이 기준은 임의 설치·삭제 승인이 아닙니다. 이전 환경과 checkout은 용도·로컬 변경을 확인하지 않고 지우지 않습니다. 의존성 누락으로 실행되지 않은 시험은 환경 준비 실패로 기록하고 제품 결함으로 단정하지 않습니다. 기존 PASS·SKIP을 이번 실행 결과로 재사용하지 않으며, 실제 OS·Python·라이브러리 버전과 명령·결과·미실행 범위는 [해당 평가 기록](evals/scenarios.md#evidence-index)에 남깁니다.
 

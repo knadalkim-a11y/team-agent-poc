@@ -22,6 +22,7 @@
 - **개발을 이어갈 GPT**: [AGENTS.md](AGENTS.md) → [현재 상태](docs/STATUS.md) → 해당 기능 파일과 테스트.
 - **설치·운영할 사람**: [환경 기준](versions.md)을 읽고, 최초 설치는 [설치·기동](docs/01-openwebui-install.md), 기존 EES 환경의 업데이트는 [래퍼 운영](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)에서 시작합니다.
 - **팀원 안내 초안**: [EES Work 시작 안내](docs/07-team-quickstart.md) — 팀 시연용 준비본. 실제 전달 상태는 STATUS에서 확인.
+- **시스템 담당자 작성·게시**: [v1.1 권한/보존 계약](docs/mockups/ees-work/TASK.md#system-authoring-20260924) → [가입·첫 이용·P 작성 안내](docs/07-team-quickstart.md#system-authoring-20260924) · [관리자 운영/복원/세션 경계](docs/03-openwebui-native-agent.md#system-authoring-20260924) · [SA/NU·사내 OP 평가](evals/scenarios.md#system-authoring-20260924). Native 개인 계정/그룹을 사용하고 담당 시스템의 선택 P만 저장·검사·게시합니다. 기존 업무 이용/실행/개인 자료 권한은 별도이며 A안 화면을 재사용합니다.
 - **EES Work 기존 UI 통합**: [09-23 A안 상태·실행 상세](docs/mockups/ees-work/TASK.md#a-design-20260923) · [제품 수락 A-01~A-11](evals/scenarios.md#a-design-20260923) → [09-22 왼쪽 워크플로우 확정 디자인](docs/mockups/ees-work/TASK.md#sidebar-final-20260922) · [오른쪽 업무·수행 상세 후속](docs/mockups/ees-work/TASK.md#right-panel-20260922) · [상세 기록의 범위와 적용/복원](docs/03-openwebui-native-agent.md#ees-right-panel-20260922) → [단계별 진행·무테](docs/mockups/ees-work/TASK.md#step-progress-ux-20260922) → [업무 패널·대화 통합 설계와 구현 계약](docs/mockups/ees-work/TASK.md#work-panel-chat-design-20260916). 왼쪽의 흰색 분류·단계, 연청색 단일 선택과 작업 사이의 얇은 구분선을 유지하며 워크플로우/단계/작업을 선택합니다. 오른쪽 P는 단계별 내용·진행·문제 분포, T는 전체 작업과 등록 조건/사유, J는 입력·수행·결과와 사용 구성/실행별 상세를 담당합니다. 상세는 고정 정의와 저장된 모의 기록을 연결하고 미기록·미수행·조회 실패·권한 제한을 구분합니다. 메인 대화는 같은 업무의 설명·작성·명령에 연결하며 설정은 기존 Workspace에서 관리합니다. EES 색상·서체, Native 대화와 Workspace 편집·저장·게시 계약을 유지합니다. 최종 목표는 [공장 → 시스템 → 업무의 공동 진행과 개인 채팅·권한 분리](docs/mockups/ees-work/TASK.md#ees-work-shared-target)이며, 현재 사용자별 진행 건과 후속 공유 설계를 구분합니다. 실제 구현·검증·배포 상태는 STATUS, [업무 사용·합성 점검 범위](docs/03-openwebui-native-agent.md#ees-work-demo)는 사용 가이드에서 확인합니다. [앞선 시각 계층 보완](docs/mockups/ees-work/TASK.md#visual-hierarchy-20260922)과 [이전 목업](docs/mockups/ees-work/ees-demo-workspace.html)은 당시 기준으로 보존합니다.
 - **준비·배포·검증 여부 확인**: [STATUS](docs/STATUS.md)의 요약과 연결된 [평가표](evals/scenarios.md)를 확인합니다. README에는 진행 상태를 복제하지 않습니다.
 
@@ -92,6 +93,7 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 | 변경할 책임 | 원본 |
 |---|---|
 | 저장·권한·업무 액션·API | [ees_workflow.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow.py) |
+| 시스템 담당 인가·P별 초안/게시·legacy 보존·감사 | [ees_workflow_authoring.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_authoring.py) |
 | 정의 읽기·참조/입력/게시 검증 | [ees_workflow_definition.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_definition.py) |
 | 진행률·선행 대기·표시 상태 계산 | [ees_workflow_view.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_view.py) |
 | 공통 실행 정책 | [workflow_policy.json](agent-pack/skills/ees-work-demo/scripts/workflow_policy.json) |
@@ -105,10 +107,10 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 |---|---|
 | 서버 요청·대화 연결·개인 초안·응답 순서 | [ees-work-launcher.js](branding/ees/ui/ees-work-launcher.js) |
 | 공장 선택·단계별 진행·업무 패널·조건 탐색/복귀·읽기 전용 수행 상세·크기 | [ees-work-view.js](branding/ees/ui/ees-work-view.js) |
-| 관리자 절차 편집·미저장 초안·Workspace 복원 | [ees-work-designer.js](branding/ees/ui/ees-work-designer.js) |
+| 시스템/P별 절차 편집·미저장 초안·권한 상태·Native 셸 복원 | [ees-work-designer.js](branding/ees/ui/ees-work-designer.js) |
 | 소스 조립·wheel 파일 목록·해시 | [build_ees_webui.py](scripts/build_ees_webui.py) |
 
-factory는 배포 JS 내부에만 존재하고 기존 UI/Tool 연결과 저장 형식은 유지합니다. 화면 분리와 이전 프로그램 복원 검증의 실제 범위는 [R2/R3 기록](evals/scenarios.md#work-ui-refactor-20260915)을 따릅니다.
+factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 유지합니다. ees.11의 P별 작성 프로토콜·추가 메타데이터와 기존 전체 초안 호환은 [별도 계약](docs/mockups/ees-work/TASK.md#system-authoring-20260924)을 따릅니다. 화면 분리와 이전 프로그램 복원 검증의 실제 범위는 [R2/R3 기록](evals/scenarios.md#work-ui-refactor-20260915)을 따릅니다.
 
 ### 원본과 배포본
 
@@ -123,7 +125,7 @@ factory는 배포 JS 내부에만 존재하고 기존 UI/Tool 연결과 저장 �
 | 공통 배포 Skill 절차 | `agent-pack/skills/*/SKILL.md` | Workspace Skills |
 | Git 관리 공통 실행 코드 | 해당 Skill의 `scripts/` | 지정 Workspace Tools에 해당 배포 절차로 반영 |
 | 교차 분석 시연 구성 | `agent-pack/ees-demo.json` | ApplyDemo로 전문 모델·Tool·EES 관리 구역과 시작 질문 연결 |
-| EES Work 업무 절차·진행 건 | 업무 절차는 관리자 워크스페이스, 진행 건은 사용자 업무 화면 | 기존 DATA_DIR의 `ees-work.sqlite3`; 대화·버전·현장별 실행 결과 보존. [관리·실행 경계](docs/03-openwebui-native-agent.md#ees-work-demo) |
+| EES Work 업무 절차·진행 건 | 업무 절차는 관리자/담당자의 업무 절차 작성기, 진행 건은 기존 사용자 업무 화면 | 기존 DATA_DIR의 `ees-work.sqlite3`; 대화·버전·현장별 실행 결과 보존. [관리·실행 경계](docs/03-openwebui-native-agent.md#ees-work-demo) |
 | 합성 지식 | `agent-pack/knowledge/` | Workspace Knowledge |
 | 팀원 개인·공유 프롬프트·Skill·Tool·모델 | 승인된 실행 환경의 WebUI | 등록 ID·내용·연결·권한·개인 설정 보존; 내부 백업 대상 |
 | 실제 PAT·DB·대화 | 승인된 실행 환경 | Git에 저장하지 않음 |

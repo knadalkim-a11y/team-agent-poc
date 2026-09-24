@@ -341,16 +341,8 @@ class WorkflowToolIntegrationTests(unittest.IsolatedAsyncioTestCase):
                          for table in ('catalog', 'cases', 'action_requests'))
 
     async def publish(self, definition):
-        admin = self.users['admin']
-        state = await self.service.get_state(admin)
-        saved = await self.service.handle_action(admin, {
-            'action': 'save_draft', 'expected_revision': state['draft_revision'],
-            'payload': {'definition': definition}})
-        self.assertTrue(saved['ok'], saved)
-        for action in ('validate_draft', 'publish'):
-            result = await self.service.handle_action(admin, {
-                'action': action, 'expected_revision': saved['draft_revision']})
-            self.assertTrue(result['ok'], result)
+        from workflow_fixture import publish_fixture_definition
+        publish_fixture_definition(self.service, definition)
 
     async def create(self, **payload):
         result = await self.tool.ees_workflow_action('create',

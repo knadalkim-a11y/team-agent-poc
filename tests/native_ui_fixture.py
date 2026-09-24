@@ -168,6 +168,15 @@ class NativeUIHandler(BaseHTTPRequestHandler):
         except (BrokenPipeError, ConnectionResetError):
             pass
 
+    def send_workflow(self, value):
+        code = value.get("error", {}).get("code")
+        status = 200 if value.get("ok") else 401 if code == "unauthorized" else 403 if code in {
+            "workflow_manage_forbidden", "chat_forbidden", "admin_required"} else 409 if code in {
+            "draft_revision_conflict", "workflow_baseline_changed", "validation_required", "request_conflict",
+            "authoring_upgrade_required"} else 404 if code == "process_not_found" else 503 if code in {
+            "authoring_unavailable", "authoring_authorization_unavailable"} else 400
+        return self.send_content(value, status=status)
+
     def do_GET(self):
         parsed = urlsplit(self.path)
         path, query = parsed.path, parse_qs(parsed.query)
@@ -214,6 +223,12 @@ class NativeUIHandler(BaseHTTPRequestHandler):
             if path in {"/api/v1/models/list", "/api/v1/knowledge/list", "/api/v1/tools/list",
                         "/api/v1/knowledge/search", "/api/v1/prompts/list", "/api/v1/skills/list"}:
                 return self.send_content({"items": [], "total": 0})
+            if path == "/api/ees-work/authoring/capabilities" and self.server.workflow:
+                return self.send_workflow(asyncio.run(self.server.workflow.authoring_capabilities(self.server.user)))
+            if path == "/api/ees-work/authoring" and self.server.workflow:
+                return self.send_workflow(asyncio.run(self.server.workflow.get_authoring(self.server.user,
+                    system_id=query.get("system_id", [""])[0], process_id=query.get("process_id", [""])[0],
+                    legacy_id=int(query["legacy_id"][0]) if "legacy_id" in query else None)))
             if path == "/api/ees-work/state" and self.server.workflow:
                 selection = query.get("selection", [""])[0]
                 response = asyncio.run(self.server.workflow.get_state(self.server.user,
@@ -278,6 +293,8 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                     "filename": "attachment.txt", "meta": {"name": "attachment.txt", "content_type": "text/plain", "size": 12},
                     "data": {"status": "completed"}, "created_at": 1})
             body = json.loads(raw or b"{}")
+            if path == "/api/ees-work/authoring/action" and self.server.workflow:
+                return self.send_workflow(asyncio.run(self.server.workflow.authoring_action(self.server.user, body)))
             if path == "/api/ees-work/action" and self.server.workflow:
                 result = asyncio.run(self.server.workflow.handle_action(self.server.user, body))
                 if self.server.delay_next_action:
