@@ -56,9 +56,34 @@
 
 **검증 구성:** 기존 관리자와 합성 신규 계정으로 실제 Native 가입→pending→관리자 user 승인→첫 질문/게시 업무→그룹 지정→Workspace 관리 권한 0인 담당자의 새 P 작성/게시→다른 일반 사용자 이용→타 시스템 변경 거절→담당 회수까지 연결했다. 별도 회원/인증/그룹 구성원 API·DB·토큰을 만들거나 응답의 role/group을 admin으로 위조해 수락하지 않는다. 서버/저장 검사는 같은 P 충돌·서로 다른 P 게시·원자성·권한 회수/영수증·legacy 초안/Restore 경계를 추가한다. 코드/서비스·실제 Native·사내 확인을 구분하며 초기 실패와 재검을 이 절에 남긴다.
 
-**개발 검증 결론:** 아래 SA/NU의 명시된 범위에서 구현·로컬 수락 검사를 마쳤다. 서버 authoring24·프런트 합성 DOM/state24·최종 실제 Native 회원/계정전환6건과 자산/Restore/기존 회귀는 서로 다른 근거로 연결한다. Linux·Python3.12.14·Node24.19.0·Chrome headless shell153.0.8010.52·고정 upstream0.11.3·최종 ees.11 v7을 사용했다. Windows/지원 Python3.11·사내 모델/직원 사용·remote CI·OP-01~04는 미실행/미확인이고, 모든 token 즉시 무효화를 지원한다고 판정하지 않는다. 새 Figma 검수나 사내 공개 완료도 아니다.
+**초기 개발 검증과 후속 범위:** 아래 SA/NU의 명시된 범위에서 초기 구현·로컬 수락 검사를 마쳤고 PR #64 리뷰 후속 결과를 별도로 추가한다. 서버 authoring24·프런트 합성 DOM/state24·최종 실제 Native 회원/계정전환6건과 자산/Restore/기존 회귀는 서로 다른 근거로 연결한다. Linux·Python3.12.14·Node24.19.0·Chrome headless shell153.0.8010.52·고정 upstream0.11.3·초기 최종 ees.11 v7을 사용했으며 병합 전 후속 원본은 아래 v8이다. Windows/지원 Python3.11·사내 모델/직원 사용·remote CI·OP-01~04는 미실행/미확인이고, 모든 token 즉시 무효화를 지원한다고 판정하지 않는다. 새 Figma 검수나 사내 공개 완료도 아니다.
 
 최종 회원 검사는 `EES_REQUIRE_AUTHORING_NATIVE=1`, `EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl`, `EES_TEST_BRANDING_DIR=dist/branding-sa-v7`, `EES_TEST_CHROME`에 기존 Chrome 절대 경로를 지정해 `.venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_authoring_native.py -v`로 실행했다. 계정 전환은 같은 원본/환경에서 `test_ees_work_authoring_account_switch.py`를 지정했다. 개별 임시 path와 버전별 실패 로그는 아래에 보존한다.
+
+### PR #64 병합 요청과 리뷰 후속
+
+초기 구현은 [PR #64](https://github.com/knadalkim-a11y/team-agent-poc/pull/64)의 `77d6b5436b558adf2825a35ba5e03120ba2f9d4a`로 게시했고 사용자가 병합·사내 배포 가이드를 요청했다. 병합 전 최신 리뷰에서 P2 두 경계를 확인해 같은 PR에서 보완한다. 이전 PASS는 당시 범위로 보존하며 새 경계의 검사 결과를 대신하지 않는다. Draft #53과 사내 계정/설정은 변경하지 않는다.
+
+- Restore한 ees.10에서 기존 P를 변경하거나 제거해 게시한 뒤 ees.11로 재업그레이드하면 P별 게시 비교 기준이 달라 작성이 계속 차단될 수 있다. 관리자 `reconcile_publication`은 `process.publication_reconciliation`의 현재 게시 fingerprint와 draft/owner revision을 대조해 기준만 명시적으로 채택한다. 초안 원문·owner·과거 게시 이력·타 P·진행/legacy snapshot은 보존하고 draft revision 증가·기존 검사 무효화 뒤 재검사/게시를 별도로 수행한다. 삭제된 P의 빈 게시 기준도 채택하지만 과거 게시 이력이 있으므로 미게시 삭제를 허용하지 않는다.
+- 관리 요청 초기 조회 뒤 자산 ACL·버전·본문이 달라질 수 있으므로 `authoring_action` 공통 경로의 마지막 현재 계정/그룹 확인 뒤 자산을 재조회하고 이후 await 없이 EES transaction에 진입한다. 접근 불가 기존 참조의 초안 보존 정책은 유지하며 검사/게시 시 접근·내용을 재확인한다. Native/EES DB 간 분산 원자성을 보장하지 않는다.
+
+자산 경합의 최초 재현은 **1 method의 6개 subtest FAIL**, 0.148초(`dist/validation-sa-review/asset-race-initial.log`)다. 실제 WorkflowService의 두 번째 그룹 조회 경계에서 합성 자산 조회값을 바꿨는데 이전 snapshot으로 검사가 승인되거나 게시됐다. validate의 접근 회수/조회 불가, publish의 접근 회수/Tool 버전/Skill 버전/본문 변경을 각각 확인했다. 실제 Native DB/Auth의 경합 검사는 아니며 수정 후 재검은 별도로 기록한다.
+
+Restore 경계의 최초 재현은 **2 method의 raw failure 3**, 2.674초(`reconciliation-initial.log`)다. 실제 이전 ees.10 wheel(SHA256 `ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd`)의 서비스로 같은 DB에서 P 변경/삭제를 게시한 뒤 새 서비스의 검사는 `baseline_changed`, 복구 요청은 `invalid_action`이었다.
+
+수정 후 focused **4 PASS**, 3.929초(`review-regressions-first-retest.log`)를 확인하고 비관리자 metadata·no-op 검사 유지·draft/owner CAS 검사를 보강한 최종 **4 PASS**, 3.928초(`dist/validation-sa-review/review-regressions-final.log`)다. 세 Restore 검사는 명시적 관리자 복구 후 raw 초안/진행·타 P/공통 자료 보존과 재검/재게시, 오래된 관측값·draft/owner revision 거절·감사 실패 rollback·영수증 재인가·삭제 P404·구게시의 타 P node ID 이동 보호를 확인한다. 남은 한 method는 자산 경합의 위 6조건이다. 실제 ees.10 모듈과 같은 DB를 쓴 새 소스 서비스 검사이며 Native UI나 새 프로그램 전체 Apply/Restore의 재검은 아니다. 기존 24건과 중복 합산하지 않는다.
+
+```bash
+EES_REQUIRE_LEGACY_WORKFLOW=1 EES_TEST_LEGACY_WORKFLOW_WHEEL=dist/restore-ees10/open_webui-0.11.3+ees.10-py3-none-any.whl .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_authoring.py -k reconciliation -k asset_changes_during_final_authorization -v
+```
+
+프런트 합성 DOM/state는 기존24+복구4의 **28 PASS**, 0.745초(`dist/validation-sa/authoring-ui-reconcile.log`)다. strict Python discover wrapper **1 PASS**, 0.985초(`authoring-ui-reconcile-strict.log`)는 같은28건의 재사용이다. 관리자 선택지·현재 게시/저장 초안 비교·fingerprint/revision 전달·dirty 상태 POST0·삭제 뒤 과거 게시 이력 표시를 검사했다. 실제 Native 화면과 새 wheel 확인은 다음 결과로 구분한다. 병합·배포 안내 승인과 실제 사내 Apply/Start·업무 DB 복원 성공은 별개다.
+
+후속 v8 wheel SHA256은 `27f6a1c37264d4f205bedb6635c9eaae8a36a5d023d36d1dd595e34728c8b8d3`·151,900,946바이트다. 현재 WORK_ASSETS·조립 JS/CSS/bootstrap **13항목 byte-exact 일치**를 확인했다(`dist/validation-sa-review/wheel-v8-source.json`). 바뀐 자산 조회 경로의 실제 `NativeAuthoringAssetReadTests`만 strict 재검해 **2 PASS**, 9.379초(`native-assets-retest.log`)다. 기존26 전체 자산 검사는 반복하지 않았으며 v7 증거는 초기 원본의 당시 범위로 보존한다.
+
+v8의 실제 Native 관리자 화면 신규 검사 `test_admin_restored_publication_reconcile_preserves_draft_ui`는 최초 **1 PASS**, 15.463초(strict encoding, `dist/validation-sa/native-restore-reconcile-v8.log`)다. 임시 catalog fixture로 changed/removed 상태를 준비한 뒤 실제 Native 로그인·조립 UI로 현재 게시/저장 초안 비교 → 취소 시 불변 → 명시적 기준 채택 시 초안 본문/owner 보존·revision+1·검사 해제·자동 게시 없음 → UI 재검사/게시 재개를 확인했다. dirty 상태에서는 입력 보존·안내·POST0·DB 불변이다. 두 dialog PNG도 직접 대조했다(`dist/validation-sa/restore-reconcile-v8/`). 실제 ees.10 old writer는 앞의 서비스 검사 근거이며 이 UI fixture와 구분한다. 이전 Native5+계정전환1은 반복하지 않았다.
+
+**병합 전 후속 결론:** 두 P2 경계를 재현·보완하고 관련 서비스4·프런트28·실제 Native 자산2·관리자 UI1과 v8 패키지 원본을 확인했다. 독립 검토의 추가 blocker는 없었다. 사용자가 승인한 PR #64 병합과 최종 main SHA의 기존 배포 안내를 진행하며, 실제 사내 적용·OP-01~04·Windows/업무 DB 복원 결과는 미확인으로 남긴다.
 
 ### 준비·초기 검사와 관측
 
@@ -109,7 +134,7 @@ SA-27의 같은 v7 레이아웃 검사에 긴 한글 작업명과 12줄 안내�
 
 **가입 닫힘의 실제 화면:** Native 관리자 설정 API로 합성 서비스의 `ENABLE_SIGNUP=false`를 적용하고 실제 `/auth` 화면에서 가입 버튼이 없으며 직접 signup 요청은 403임을 확인했다. 독립 **1 PASS**, 5.245초(`dist/validation-sa/native-closed-ui.log`)다. 회사 가입 정책을 바꾸거나 대표 가입→승인→게시 흐름을 대신한 검사는 아니다.
 
-**최종 제품 원본 대조:** v7 SHA256 `6239216c26e6acfe34e35ef4c58c4276de999c963a7cb552b2f3eca487b50cf6`·151,899,772바이트에 대해 WORK_ASSETS·조립 launcher JS·CSS·bootstrap **13개 항목이 현재 소스와 byte-exact 일치**했다(`dist/validation-sa/final-wheel-source-check.json`). 최종 재조회 main은 여전히 `a443d30`이고 열린 PR은 기존 Draft #53(head `3aadd727`)뿐이며 이를 변경하지 않았다. 산출물 확인과 원격 게시/병합·사내 설치는 별개다.
+**초기 최종 제품 원본 대조:** v7 SHA256 `6239216c26e6acfe34e35ef4c58c4276de999c963a7cb552b2f3eca487b50cf6`·151,899,772바이트에 대해 WORK_ASSETS·조립 launcher JS·CSS·bootstrap **13개 항목이 현재 소스와 byte-exact 일치**했다(`dist/validation-sa/final-wheel-source-check.json`). 최종 재조회 main은 여전히 `a443d30`이고 열린 PR은 기존 Draft #53(head `3aadd727`)뿐이며 이를 변경하지 않았다. 산출물 확인과 원격 게시/병합·사내 설치는 별개다.
 
 **실제 Native 신규 회원 대표 흐름:** v17 **1 PASS**, 58.419초(`dist/validation-sa/native-browser-v17.log`)를 확인했다. 기존 관리자가 있는 실제 Native 가입 UI→pending→관리자 UI의 user 승인→A의 공통 모델 질문/기존 게시 J 사람 확인→Native 그룹 UI 지정과 EES 연결→A의 role=user·Workspace 관리권한 0에서 새 P/T/J 작성/저장/검사/게시→별도로 가입·승인한 B의 A안 새 J 완료까지 연결했다. APC/COMMON 작성 요청은 403이다. Native 그룹 UI로 A를 제거한 뒤 열린 작성기의 미저장 글은 보존/잠금 상태이고 유효한 저장·검사·게시 API 요청은 404 `process_not_found`, 일반 runtime은 200이었다. Native UI로 A를 pending 제한하자 기존 token의 보호 요청은 401이며 B의 이용은 유지됐다.
 
@@ -154,17 +179,17 @@ SA-27의 같은 v7 레이아웃 검사에 긴 한글 작업명과 12줄 안내�
 | SA-15 | 같은 P 동시 저장 충돌·최신 서버본/미저장 글 구분 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
 | SA-16 | 같은/다른 시스템의 서로 다른 P 동시 게시 보존 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
 | SA-17 | 오래된 catalog 기준에서 최신본에 선택 P만 병합 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
-| SA-18 | 초안·참조·정책·소유권 변화 후 검사 무효화 | 서비스/API24건과 실제 Native ACL 회수·초안 참조 보존/게시 차단 추가2건 PASS; 실제 사용자 흐름은 NU 별도 |
+| SA-18 | 초안·참조·정책·소유권 변화 후 검사 무효화 | 초기 서비스/API24·Native ACL 추가2건과 PR #64 후속의 최종 인가 중 자산 변경6조건 PASS; Native/EES 분산 원자성 미지원 |
 | SA-19 | 검증/DB/감사 실패의 게시 원자성 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
 | SA-20 | 단일 관리/적용 시스템·공통/미지정 관리자 전용 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
 | SA-21 | 기존 P 명시적 위임/이관·새 ID 복사·진행 snapshot 보존 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
 | SA-22 | 게시 P 사용 중지·하위 삭제·미게시 삭제 경계 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
 | SA-23 | 기존 전체 초안 원문/revision 보존·선택 P만 가져오기 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
 | SA-24 | legacy 전체 쓰기 차단·runtime API/구형 탭 경계 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
-| SA-25 | 이전 프로그램 Restore·fallback 초안·재업그레이드 보존 | exact ees.10 동일 DB fallback/재업그레이드와 실제 ees.10→11 프로그램 Apply/Restore·파일/data/key/interpreter 보존 PASS; Windows/사내 미실행 |
+| SA-25 | 이전 프로그램 Restore·fallback 초안·재업그레이드 보존 | 초기 exact ees.10 동일 DB/프로그램 Apply·Restore 보존과 PR #64 후속 changed/removed P의 명시적 기준 재확인·초안 보존/재게시 PASS; v8 Native 관리자 비교/명시채택/게시 재개 PASS·Windows/사내 미실행 |
 | SA-26 | 계정/시스템 전환·늦은 응답·다른 탭 초안/capability 격리 | 같은 실제 Native profile 두 탭 A→B 로그인·지연 GET/AI·초안/capability/AI 문맥 격리1건 PASS; 시스템/P 전환은 DOM/state24 |
 | SA-27 | A안 큰/작은 창·긴 한글·키보드/초점·충돌/회수·DOM 복원 | 실제 패키지 frontend v6/v7의 작성기 1920/900/600 light/dark·긴 한글 실제 입력/키보드·초점·Native DOM 복원 PASS; 충돌 안내는 DOM/state24, 회수/Tab8회·Escape 원점 복귀는 실제 Native 대표 흐름으로 확인. 이전 A안 전체 재검은 아님 |
-| SA-28 | 감사 actor/대상/revision·비밀 비포함·실제 wheel 포함 | 서비스 감사/본문 비포함·실제 설치 capabilities PASS; 최종 v7 wheel의 현재 소스 13항목 byte-exact 일치 PASS |
+| SA-28 | 감사 actor/대상/revision·비밀 비포함·실제 wheel 포함 | 서비스 감사/본문 비포함·실제 설치 capabilities PASS; 초기 v7과 PR #64 후속 v8 wheel의 해당 소스 13항목 byte-exact 일치 PASS |
 
 ### NU Native 재사용·첫 이용 수락
 
@@ -192,7 +217,7 @@ Native 비밀번호 변경/관리자 재설정/로그아웃/역할 변경/그룹
 | OP-03 | Windows/등록 Python 설치·기동·재기동·Native 데이터/첨부/키/EES DB의 백업·복원 | 사내 미확인. 기존 배포/복구 경로 재사용, 프로그램 Restore와 사용자 데이터 복원 분리 |
 | OP-04 | 실제 일반 사용자 질문/업무·담당 작성/게시·자산/개인 인증·예상 동시 이용 | 사내 미확인. 합성 모델·개발 검사를 사내 모델/직원 사용성/부하 PASS로 확대하지 않음 |
 
-사내 가입 설정·실제 계정/그룹·인증·DB/키는 이번 작업에서 변경하지 않는다. 원격 CI는 현재 9월 생략 방침을 유지하되 로컬 검사는 수행한다. main 직접 push·병합·사내 배포는 범위 밖이다. 사내 공개 준비를 완료했다고 표시하려면 남은 OP 확인과 실제 지원 복원 범위가 별도로 충족되어야 한다. 상세 로그/사진/비밀값 반출을 요구하지 않고 [운영 가이드](../docs/03-openwebui-native-agent.md#system-authoring-20260924)의 1~2줄 결과만 받는다.
+사내 가입 설정·실제 계정/그룹·인증·DB/키는 이번 작업에서 변경하지 않는다. 원격 CI는 현재 9월 생략 방침을 유지하되 로컬 검사는 수행한다. 초기 구현은 main 직접 push·병합·사내 배포를 하지 않았다. 후속 사용자 요청으로 PR #64 병합·사내 배포 가이드는 승인됐으며 실제 사내 실행은 별도 미확인이다. 사내 공개 준비를 완료했다고 표시하려면 남은 OP 확인과 실제 지원 복원 범위가 별도로 충족되어야 한다. 상세 로그/사진/비밀값 반출을 요구하지 않고 [운영 가이드](../docs/03-openwebui-native-agent.md#system-authoring-20260924)의 1~2줄 결과만 받는다.
 
 <a id="a-design-20260923"></a>
 

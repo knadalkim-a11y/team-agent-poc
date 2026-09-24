@@ -8,6 +8,7 @@ is a separate gate. Restore coverage requires the captured supported old module.
 import asyncio
 from copy import deepcopy
 import importlib
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -549,12 +550,235 @@ class SystemAuthoringTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
             self.assert_denied(await self.action("ems-a", "save_draft", process, payload={"workflow": document}))
             self.assertEqual(self.business_rows(), before)
 
+    async def test_sa18_asset_changes_during_final_authorization_cannot_use_an_earlier_snapshot(self):
+        scenarios = (("validate_draft", "revoke"), ("validate_draft", "unavailable"),
+                     ("publish", "revoke"), ("publish", "tool_version"),
+                     ("publish", "skill_version"), ("publish", "skill_body"))
+        for action, change in scenarios:
+            with self.subTest(action=action, change=change):
+                self.assets = {"tools": [{"id": "native-tool", "name": "등록 도구"}],
+                    "skills": [{"id": "native-skill", "name": "등록 스킬"}],
+                    "tool_versions": {"native-tool": 1}, "skill_versions": {"native-skill": 1},
+                    "skill_bodies": {"native-skill": "현재 승인 본문"}, "available": True}
+                process = await self.create(name="최종 참조 검사 " + action + " " + change)
+                document = deepcopy(process["workflow"])
+                document["tools"]["new-tool"] = {"id": "new-tool", "name": "기존 도구 연결", "source": "open_webui",
+                    "reference": "native-tool", "adapter": "unavailable", "input": "db", "enabled": True}
+                document["skills"]["new-skill"] = {"id": "new-skill", "name": "기존 스킬 연결", "type": "skill",
+                    "source": "open_webui", "reference": "native-skill", "body": ""}
+                job = next(node for node in document["nodes"].values() if node["type"] == "j")
+                job.update(mode="tool", tools=["new-tool"], skills=["new-skill"], bindings={"new-tool": "db"})
+                process = await self.save("ems-a", process, document)
+                if action == "publish":
+                    checked = await self.action("ems-a", "validate_draft", process)
+                    self.assertTrue(checked["ok"], checked)
+                    process = checked["process"]
+                before = self.business_rows()
+                authorization_reads = 0
+                original_lookup = self.service.group_lookup
+
+                async def change_after_initial_asset_read(user_id):
+                    nonlocal authorization_reads
+                    authorization_reads += 1
+                    groups = await original_lookup(user_id)
+                    if authorization_reads == 2:
+                        if change == "revoke":
+                            self.assets["tools"] = []
+                            self.assets["skills"] = []
+                        elif change == "unavailable":
+                            self.assets["available"] = False
+                        elif change == "tool_version":
+                            self.assets["tool_versions"]["native-tool"] = 2
+                        elif change == "skill_version":
+                            self.assets["skill_versions"]["native-skill"] = 2
+                        else:
+                            self.assets["skill_bodies"]["native-skill"] = "검사 이후 수정된 본문"
+                    return groups
+
+                with patch.object(self.service, "group_lookup", change_after_initial_asset_read):
+                    result = await self.action("ems-a", action, process)
+                self.assertGreaterEqual(authorization_reads, 2, "The race must occur at the final authorization boundary")
+                self.assert_denied(result, "reference_unavailable", "validation_required")
+                self.assertEqual(self.business_rows(), before, "No validation, publication, or receipt may commit with stale assets")
+
 
 class AuthoringRestoreTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
     async def old_action(self, service, body, actor="admin"):
         result = await service.handle_action(self.principal(actor), body)
         self.assertTrue(result["ok"], result)
         return result
+
+    async def old_publish_change(self, old, process, *, remove=False, description="이전 프로그램에서 새로 게시한 내용", mutate=None):
+        """Sequentially run the real supported old writer, then re-upgrade."""
+        legacy = old.WorkflowService(self.database, self.user_lookup, lambda _: None, lambda _: deepcopy(self.assets))
+        state = await legacy.get_state(self.principal("admin"))
+        definition = deepcopy(state["draft"])
+        if mutate:
+            mutate(definition)
+        elif remove:
+            for node_id in process["workflow"]["nodes"]:
+                definition["nodes"].pop(node_id)
+            for roots in definition["roots"].values():
+                if process["process_id"] in roots:
+                    roots.remove(process["process_id"])
+        else:
+            definition["nodes"][process["process_id"]]["description"] = description
+        saved = await self.old_action(legacy, {"action": "save_draft", "expected_revision": state["draft_revision"],
+            "payload": {"definition": definition}})
+        await self.old_action(legacy, {"action": "validate_draft", "expected_revision": saved["draft_revision"]})
+        await self.old_action(legacy, {"action": "publish", "expected_revision": saved["draft_revision"]})
+        self.service = self.new_service()
+
+    @staticmethod
+    def observed_publication(process):
+        published = process["published_workflow"]
+        return "" if published is None else hashlib.sha256(json.dumps(
+            published, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+    async def test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication(self):
+        old = load_legacy_workflow(self)
+        for removed in (False, True):
+            with self.subTest(removed=removed):
+                process = await self.publish("ems-a", await self.create(name="Restore 조정 대상 " + str(removed)))
+                other = await self.publish("ems-b", await self.create(name="변경하지 않을 별도 절차 " + str(removed)))
+                created = await self.service.handle_action(self.principal("ordinary"), {"action": "create", "payload": {
+                    "process_id": process["process_id"], "site_id": "us-a", "system": "EMS"}})
+                self.assertTrue(created["ok"], created)
+                draft = deepcopy(process["workflow"])
+                draft["nodes"][process["process_id"]]["description"] = "신형에서 따로 보존한 미게시 초안"
+                process = await self.save("ems-a", process, draft)
+                with sqlite3.connect(self.database) as db:
+                    draft_bytes = db.execute("SELECT draft FROM process_management WHERE process_id=?", (process["process_id"],)).fetchone()[0]
+                    other_row = db.execute("SELECT * FROM process_management WHERE process_id=?", (other["process_id"],)).fetchone()
+                    case_rows = db.execute("SELECT * FROM cases ORDER BY id").fetchall()
+                await self.old_publish_change(old, process, remove=removed)
+                current = (await self.read("admin", process))["process"]
+                self.assertEqual(current["workflow"], draft)
+                ordinary_editor = (await self.read("ems-a", process))["process"]
+                self.assertFalse(ordinary_editor["publication_reconciliation"]["can_reconcile"])
+                self.assert_denied(await self.read("apc", process), "process_not_found")
+                self.assert_denied(await self.action("ems-a", "validate_draft", current), "workflow_baseline_changed")
+                catalog_before = self.catalog()
+                observed = self.observed_publication(current)
+                payload = {"expected_published_fingerprint": observed}
+                self.assert_denied(await self.action("ems-a", "reconcile_publication", current, payload=payload))
+                request = self.body("reconcile_publication", current, payload=payload)
+                result = await self.service.authoring_action(self.principal("admin"), request)
+                self.assertTrue(result["ok"], result)
+                reconciled = result["process"]
+                metadata = current["publication_reconciliation"]
+                self.assertTrue(metadata["required"])
+                self.assertTrue(metadata["can_reconcile"])
+                self.assertEqual(metadata["state"], "removed" if removed else "changed")
+                self.assertEqual(metadata["current_published_fingerprint"], observed)
+                self.assertEqual(reconciled["base_process_fingerprint"], observed)
+                self.assertFalse(reconciled["publication_reconciliation"]["required"])
+                self.assertIsNone(reconciled["validated_revision"])
+                self.assertEqual(reconciled["draft_revision"], current["draft_revision"] + 1)
+                self.assertEqual(reconciled["owner_revision"], current["owner_revision"])
+                self.assertEqual(reconciled["published_version"], current["published_version"])
+                self.assertEqual(self.catalog(), catalog_before, "Reconciliation does not publish")
+                with sqlite3.connect(self.database) as db:
+                    self.assertEqual(db.execute("SELECT draft FROM process_management WHERE process_id=?", (process["process_id"],)).fetchone()[0], draft_bytes)
+                    self.assertEqual(db.execute("SELECT * FROM process_management WHERE process_id=?", (other["process_id"],)).fetchone(), other_row)
+                    self.assertEqual(db.execute("SELECT * FROM cases ORDER BY id").fetchall(), case_rows)
+                audit = next(item for item in self.audit_rows() if item["request_id"] == request["request_id"])
+                self.assertEqual((audit["actor"], audit["action"], audit["process_id"]), ("admin", "reconcile_publication", process["process_id"]))
+                self.assertEqual((audit["before_revision"], audit["after_revision"]), (current["draft_revision"], reconciled["draft_revision"]))
+                self.assertEqual((audit["before_hash"], audit["after_hash"]), (current["base_process_fingerprint"], observed))
+                before_replay = self.business_rows(), self.audit_rows()
+                replay = await self.service.authoring_action(self.principal("admin"), request)
+                self.assertTrue(replay["ok"] and replay["replayed"], replay)
+                self.assertEqual((self.business_rows(), self.audit_rows()), before_replay)
+                if removed:
+                    self.assertEqual(reconciled["publication_reconciliation"]["state"], "removed")
+                    self.assert_denied(await self.action("admin", "delete", reconciled), "published_process_requires_disable")
+                checked = await self.action("ems-a", "validate_draft", reconciled)
+                self.assertTrue(checked["ok"], checked)
+                with sqlite3.connect(self.database) as db:
+                    validated_row = db.execute("SELECT * FROM process_management WHERE process_id=?", (process["process_id"],)).fetchone()
+                noop = await self.action("admin", "reconcile_publication", checked["process"], payload=payload)
+                self.assertTrue(noop["ok"], noop)
+                self.assertEqual(noop["process"], checked["process"], "A new request for the same baseline preserves validation")
+                with sqlite3.connect(self.database) as db:
+                    self.assertEqual(db.execute("SELECT * FROM process_management WHERE process_id=?", (process["process_id"],)).fetchone(), validated_row)
+                published_result = await self.action("ems-a", "publish", noop["process"])
+                self.assertTrue(published_result["ok"], published_result)
+                resumed = published_result["process"]
+                published = json.loads(self.catalog()[0])
+                prior = json.loads(catalog_before[0])
+                self.assertEqual(resumed["workflow"], draft)
+                self.assertEqual(published["nodes"][process["process_id"]]["description"], "신형에서 따로 보존한 미게시 초안")
+                for key in ("tools", "skills", "sites", "systems"):
+                    self.assertEqual(published[key], prior[key], key)
+                self.assertEqual({key: value for key, value in published["nodes"].items() if key not in draft["nodes"]},
+                                 {key: value for key, value in prior["nodes"].items() if key not in draft["nodes"]})
+                with sqlite3.connect(self.database) as db:
+                    self.assertEqual(db.execute("SELECT * FROM cases ORDER BY id").fetchall(), case_rows)
+
+    async def test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit(self):
+        old = load_legacy_workflow(self)
+        deleted = await self.create(name="삭제한 미게시 절차")
+        self.assertTrue((await self.action("ems-a", "delete", deleted))["ok"])
+        self.assert_denied(await self.action("admin", "reconcile_publication", deleted,
+            payload={"expected_published_fingerprint": ""}), "process_not_found")
+        process = await self.publish("ems-a", await self.create(name="게시본 CAS 조정 검사"))
+        await self.old_publish_change(old, process, description="관리자가 확인한 이전 게시 변경")
+        observed = (await self.read("admin", process))["process"]
+        stale_body = self.body("reconcile_publication", observed,
+            payload={"expected_published_fingerprint": self.observed_publication(observed)})
+        await self.old_publish_change(old, process, description="확인 이후에 또 변경된 게시본")
+        before = self.business_rows()
+        self.assert_denied(await self.service.authoring_action(self.principal("admin"), stale_body), "workflow_baseline_changed")
+        self.assertEqual(self.business_rows(), before)
+        current = (await self.read("admin", process))["process"]
+        request = self.body("reconcile_publication", current,
+            payload={"expected_published_fingerprint": self.observed_publication(current)})
+        for field in ("expected_draft_revision", "expected_owner_revision"):
+            stale_revision = self.body("reconcile_publication", current,
+                payload=request["payload"], **{field: current[field.removeprefix("expected_")] + 1})
+            self.assert_denied(await self.service.authoring_action(self.principal("admin"), stale_revision),
+                               "draft_revision_conflict", "workflow_baseline_changed")
+            self.assertEqual(self.business_rows(), before)
+        with sqlite3.connect(self.database) as db:
+            db.execute("CREATE TRIGGER deny_reconciliation_audit BEFORE INSERT ON authoring_audit BEGIN SELECT RAISE(ABORT,'synthetic audit failure'); END")
+        audit_before = self.audit_rows()
+        self.assert_denied(await self.service.authoring_action(self.principal("admin"), request), "authoring_unavailable")
+        self.assertEqual(self.business_rows(), before)
+        self.assertEqual(self.audit_rows(), audit_before)
+        with sqlite3.connect(self.database) as db:
+            db.execute("DROP TRIGGER deny_reconciliation_audit")
+        reconciled = await self.service.authoring_action(self.principal("admin"), request)
+        self.assertTrue(reconciled["ok"], reconciled)
+        protected = self.business_rows()
+        self.users["admin"]["role"] = "user"
+        self.assert_denied(await self.service.authoring_action(self.principal("admin"), request))
+        self.assertEqual(self.business_rows(), protected, "Receipt replay must reauthorize the reconciler")
+
+    async def test_sa25_reconciliation_cannot_overwrite_node_moved_to_another_process_by_restore(self):
+        old = load_legacy_workflow(self)
+        first = await self.create(name="원래 작업 소유 절차")
+        first_task = next(node["id"] for node in first["workflow"]["nodes"].values() if node["type"] == "t")
+        added = await self.action("ems-a", "add_node", first, payload={"parent_id": first_task, "name": "유지할 두 번째 작업"})
+        self.assertTrue(added["ok"], added)
+        first = await self.publish("ems-a", added["process"])
+        second = await self.publish("ems-a", await self.create(name="구형 프로그램에서 작업을 받은 절차"))
+        second_task = next(node["id"] for node in second["workflow"]["nodes"].values() if node["type"] == "t")
+        moved = first["workflow"]["nodes"][first_task]["children"][0]
+        def move_job(definition):
+            definition["nodes"][first_task]["children"].remove(moved)
+            definition["nodes"][second_task]["children"].append(moved)
+            definition["nodes"][moved]["parent"] = second_task
+        await self.old_publish_change(old, first, mutate=move_job)
+        current = (await self.read("admin", first))["process"]
+        reconciled = await self.action("admin", "reconcile_publication", current,
+            payload={"expected_published_fingerprint": self.observed_publication(current)})
+        self.assertTrue(reconciled["ok"], reconciled)
+        protected = self.business_rows()
+        self.assert_denied(await self.action("ems-a", "validate_draft", reconciled["process"]), "invalid_workflow_scope")
+        self.assert_denied(await self.action("ems-a", "publish", reconciled["process"]))
+        self.assertEqual(self.business_rows(), protected)
+        self.assertEqual(json.loads(self.catalog()[0])["nodes"][moved]["parent"], second_task)
 
     async def test_sa23_exact_legacy_archive_and_explicit_partial_import(self):
         old = load_legacy_workflow(self)

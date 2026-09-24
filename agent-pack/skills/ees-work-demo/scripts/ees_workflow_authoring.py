@@ -204,9 +204,16 @@ class AuthoringMixin:
             workflow = json.loads(selected["draft"])
             validation = json.loads(selected["validation"]) if selected["validation"] else None
             valid = validation is not None and validation == self._validation_token(db, selected, workflow, published, assets)
+            current_fingerprint = self._published_hash(db, published, selected["process_id"])
+            baseline_changed = current_fingerprint != selected["base_fingerprint"]
+            publication_state = ("changed" if baseline_changed else "unchanged") if current_fingerprint else (
+                "removed" if selected["published_version"] is not None else "unpublished")
             result["process"] = {**self._metadata(selected), "workflow": workflow,
                 "base_process_fingerprint": selected["base_fingerprint"], "draft_hash": _hash(workflow),
                 "published_workflow": self._published_workflow(db, published, selected["process_id"]),
+                "publication_reconciliation": {"required": baseline_changed,
+                    "current_published_fingerprint": current_fingerprint, "state": publication_state,
+                    "catalog_version": published["version"], "can_reconcile": capabilities["is_admin"] and baseline_changed},
                 "validated_revision": selected["draft_revision"] if valid else None, "validation": validation if valid else None}
         if capabilities["is_admin"]:
             groups = native_groups or []
@@ -282,6 +289,8 @@ class AuthoringMixin:
         merged = deepcopy(published)
         process_id = workflow["process_id"]
         old = self._published_workflow(db, published, process_id)
+        if set(workflow["nodes"]) & (set(published["nodes"]) - set(old["nodes"] if old else {})):
+            _fail("invalid_workflow_scope", "다른 게시 절차가 사용하는 항목은 덮어쓸 수 없습니다.")
         for kind in ("tools", "skills"):
             for item_id in set(workflow[kind]) | set(old[kind] if old else {}):
                 if published[kind].get(item_id) != workflow[kind].get(item_id) and any(
@@ -464,8 +473,8 @@ class AuthoringMixin:
         db.execute("INSERT INTO authoring_audit(actor,action,process_id,system_id,before_revision,after_revision,owner_revision,before_hash,after_hash,outcome,request_id,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
                    (actor, action, process_id, system_id, before["draft_revision"] if before else mapping_before["revision"] if mapping_before else None,
                     after["draft_revision"] if after else mapping_after["revision"] if mapping_after else None, after["owner_revision"] if after else None,
-                    _hash(json.loads(before["draft"])) if before else _hash(mapping_before) if mapping_before else None,
-                    _hash(json.loads(after["draft"])) if after else _hash(mapping_after) if mapping_after else None,
+                    (before["base_fingerprint"] if action == "reconcile_publication" else _hash(json.loads(before["draft"]))) if before else _hash(mapping_before) if mapping_before else None,
+                    (after["base_fingerprint"] if action == "reconcile_publication" else _hash(json.loads(after["draft"]))) if after else _hash(mapping_after) if mapping_after else None,
                     outcome, request_id, _now()))
 
     def _write_publication(self, db, row, merged, workflow, actor):
@@ -489,7 +498,7 @@ class AuthoringMixin:
             if set(body) - allowed:
                 _fail("invalid_request", "작성 요청에는 권한 주장이나 전체 절차를 포함할 수 없습니다.")
             action = body.get("action")
-            actions = {"create", "save_draft", "validate_draft", "publish", "disable", "delete", "copy", "set_system_group", "transfer_owner", "import_legacy", "add_node"}
+            actions = {"create", "save_draft", "validate_draft", "publish", "disable", "delete", "copy", "set_system_group", "transfer_owner", "import_legacy", "add_node", "reconcile_publication"}
             if not isinstance(action, str) or action not in actions:
                 _fail("invalid_action", "지원하는 절차 관리 동작을 선택해 주세요.")
             request_id = body.get("request_id")
@@ -498,19 +507,21 @@ class AuthoringMixin:
             process_id, system_id, payload = body.get("process_id", ""), body.get("system_id", ""), body.get("payload", {})
             if not isinstance(process_id, str) or len(process_id) > 160 or not isinstance(system_id, str) or not isinstance(payload, dict):
                 _fail("invalid_request", "절차와 입력값을 확인해 주세요.")
-            payload_fields = {"create": {"name", "category"}, "copy": {"source_process_id", "name"}, "save_draft": {"workflow"}, "validate_draft": set(), "publish": set(), "disable": set(), "delete": set(), "set_system_group": {"group_id", "active"}, "transfer_owner": {"owner_system"}, "import_legacy": {"snapshot_id", "source_process_id"}, "add_node": {"parent_id", "name"}}
+            payload_fields = {"create": {"name", "category"}, "copy": {"source_process_id", "name"}, "save_draft": {"workflow"}, "validate_draft": set(), "publish": set(), "disable": set(), "delete": set(), "set_system_group": {"group_id", "active"}, "transfer_owner": {"owner_system"}, "import_legacy": {"snapshot_id", "source_process_id"}, "add_node": {"parent_id", "name"}, "reconcile_publication": {"expected_published_fingerprint"}}
             if set(payload) - payload_fields[action]:
                 _fail("invalid_workflow_scope", "선택한 절차의 허용된 편집 내용만 요청해 주세요.")
             audit_target = (action, process_id if IDENTIFIER.fullmatch(process_id or "") else "", system_id if system_id in (*SYSTEMS, "COMMON", "UNASSIGNED") else "", request_id)
-            assets = await self._assets(current)
             native = await self._native_groups() if capabilities["is_admin"] else None
-            # Re-read immediately before the local write transaction. Native and
-            # EES databases are separate; already committed writes are not revoked.
+            # Fetch assets after the last authorization await, so ACL/version/body
+            # changes during group lookup cannot reuse an earlier asset snapshot.
+            # There is no await between this fetch and the local write transaction.
+            # Native/EES databases are separate; this is not distributed atomicity.
             current, capabilities, group_ids = await self._authorizer(current)
+            assets = await self._assets(current)
             actor = capabilities["actor_id"]
             fingerprint = _hash(body)
             with self._db(write=True) as db:
-                if action in {"set_system_group", "transfer_owner", "import_legacy"} and not capabilities["is_admin"]:
+                if action in {"set_system_group", "transfer_owner", "import_legacy", "reconcile_publication"} and not capabilities["is_admin"]:
                     _fail("workflow_manage_forbidden", "이 관리 설정은 전체 관리자만 변경할 수 있습니다.")
                 row = None
                 if action in {"create", "copy", "set_system_group"}:
@@ -641,6 +652,20 @@ class AuthoringMixin:
                                 _fail("unsafe_owner_transfer", "게시본과 초안이 대상 시스템 전용이 아닙니다. 적용 범위를 유지하거나 새 절차로 복사해 주세요.")
                     db.execute("UPDATE process_management SET owner_system=?,owner_revision=owner_revision+1,validation=NULL,updated_by=?,updated_at=? WHERE process_id=?", (owner, actor, _now(), process_id))
                     system_id = owner
+                elif action == "reconcile_publication":
+                    expected = payload.get("expected_published_fingerprint")
+                    if not isinstance(expected, str) or (expected and re.fullmatch(r"[0-9a-f]{64}", expected) is None):
+                        _fail("invalid_request", "확인한 현재 게시본을 지정해 주세요.")
+                    current_fingerprint = self._published_hash(db, published, process_id)
+                    if expected != current_fingerprint:
+                        _fail("workflow_baseline_changed", "확인하는 동안 게시본이 변경되었습니다. 다시 비교해 주세요.")
+                    changed = current_fingerprint != row["base_fingerprint"]
+                    if changed:
+                        # Deliberately retain the exact saved draft TEXT, owner,
+                        # and publication history, even if Restore removed the P.
+                        db.execute("UPDATE process_management SET base_fingerprint=?,draft_revision=draft_revision+1,validation=NULL,updated_by=?,updated_at=? WHERE process_id=?",
+                                   (current_fingerprint, actor, _now(), process_id))
+                    outcome = {"reconciled": changed, "message": "저장한 초안을 유지하고 현재 게시본을 기준으로 채택했습니다. 다시 검사한 뒤 별도로 게시해 주세요." if changed else "현재 게시본 기준이 유지됩니다."}
                 elif action in {"save_draft", "add_node"}:
                     incoming = payload.get("workflow")
                     if action == "add_node":

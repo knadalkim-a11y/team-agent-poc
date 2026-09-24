@@ -7,6 +7,7 @@ outside this fixture; session limitations are explicit assertions below.
 """
 
 import json
+from copy import deepcopy
 import os
 from pathlib import Path
 import shutil
@@ -333,6 +334,123 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
             "name": "Closed browser signup", "email": "closed.browser@example.test", "password": "Fixture-closed-only-42!"})
         self.assertEqual(denied.status_code, 403, denied.text)
         self.screenshot("nu-closed-native-signup")
+
+    def test_admin_restored_publication_reconcile_preserves_draft_ui(self):
+        """A changed/removed publication needs explicit, non-publishing adoption.
+
+        The temporary catalog arrangement isolates this Native UI gate. The
+        separate AuthoringRestoreTests execute the actual supported ees.10
+        writer; this test does not present fixture writes as an old UI Restore.
+        """
+        from workflow_fixture import publish_fixture_definition
+
+        def action(name, process=None, payload=None):
+            body = {"action": name, "system_id": "EMS", "request_id": str(uuid4()), "payload": payload or {}}
+            if process:
+                body.update(process_id=process["process_id"], expected_draft_revision=process["draft_revision"],
+                            expected_owner_revision=process["owner_revision"])
+            result = self.api("POST", "/api/ees-work/authoring/action", body, self.admin["token"])
+            self.assertEqual(result.status_code, 200, result.text)
+            return result.json()["process"]
+
+        def catalog():
+            with self.fixture.workflow._db() as db:
+                return db.execute("SELECT published FROM catalog WHERE id=1").fetchone()[0]
+
+        process = action("create", payload={"name": "복원 후 기준 확인 합성 절차", "category": "ops"})
+        process = action("publish", action("validate_draft", process))
+        process_id = process["process_id"]
+        path = "/api/ees-work/authoring?system_id=EMS&process_id=" + process_id
+        draft = deepcopy(process["workflow"])
+        draft["nodes"][process_id]["instructions"] = "복원 전 저장한 담당자의 미게시 원문"
+        process = action("save_draft", process, {"workflow": draft})
+        self.login_ui("administrator@example.test", "Fixture-admin-only-42!")
+
+        for changed_state in ("changed", "removed"):
+            with self.subTest(publication=changed_state):
+                published = json.loads(catalog())
+                if changed_state == "changed":
+                    published["nodes"][process_id]["name"] = "이전 프로그램에서 바뀐 게시 절차"
+                    published["nodes"][process_id]["instructions"] = "현재 게시본에만 있는 복원 중 안내"
+                else:
+                    for node_id in draft["nodes"]:
+                        published["nodes"].pop(node_id)
+                    for roots in published["roots"].values():
+                        roots[:] = [node_id for node_id in roots if node_id != process_id]
+                publish_fixture_definition(self.fixture.workflow, published)
+                previous = self.fixture.workflow
+                reloaded = type(previous)(previous.database, previous.user_lookup, previous.chat_lookup,
+                    previous.asset_lookup, group_lookup=previous.group_lookup, group_list_lookup=previous.group_list_lookup)
+                self.fixture.workflow = self.fixture.backend._service = self.server.workflow = reloaded
+                process = self.api("GET", path, token=self.admin["token"]).json()["process"]
+                self.assertEqual(process["publication_reconciliation"]["state"], changed_state)
+                self.assertTrue(process["publication_reconciliation"]["required"])
+                self.assertTrue(process["publication_reconciliation"]["can_reconcile"])
+                before_publication, before_draft = catalog(), deepcopy(process["workflow"])
+                before_revision = process["draft_revision"]
+                self.navigate("/?ees=workflow")
+                self.wait("document.querySelector('#ees-work-manage-system:not(:disabled)')?.value === 'EMS'")
+                self.select_native("#ees-work-manage-process", process_id)
+                self.wait("document.querySelector('#ees-work-node-form [name=instructions]')?.value === '복원 전 저장한 담당자의 미게시 원문'")
+                self.click('#ees-work-designer [data-action=process_actions]')
+                self.wait("document.querySelector('#ees-work-dialog')?.open")
+                self.click('#ees-work-dialog details > summary')
+                self.assertIn("복원 전 저장한 담당자의 미게시 원문", self.text("#ees-work-dialog"))
+                self.assertIn("현재 게시본 없음" if changed_state == "removed" else "현재 게시본에만 있는 복원 중 안내", self.text("#ees-work-dialog"))
+                self.select_native('#ees-work-dialog select[name=action]', 'reconcile_publication')
+                self.click('#ees-work-dialog [data-dialog-close]')
+                self.wait("!document.querySelector('#ees-work-dialog')")
+                self.assertEqual(catalog(), before_publication)
+                self.assertEqual(self.api("GET", path, token=self.admin["token"]).json()["process"], process)
+
+                if changed_state == "changed":
+                    dirty_text = "기준 확인보다 먼저 보존해야 하는 현재 미저장 입력"
+                    self.fill('#ees-work-node-form [name=instructions]', dirty_text)
+                    write_count = self.server.requests.count(("POST", "/api/ees-work/authoring/action"))
+                    self.click('#ees-work-designer [data-action=process_actions]')
+                    self.wait("document.querySelector('#ees-work-dialog')?.open")
+                    self.select_native('#ees-work-dialog select[name=action]', 'reconcile_publication')
+                    self.click('#ees-work-dialog [data-dialog-confirm]')
+                    self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('변경한 초안을 먼저 저장해 주세요.')")
+                    self.assertEqual(self.server.requests.count(("POST", "/api/ees-work/authoring/action")), write_count)
+                    self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), dirty_text)
+                    self.assertEqual(catalog(), before_publication)
+                    self.assertEqual(self.api("GET", path, token=self.admin["token"]).json()["process"], process)
+                    # Explicitly discard this local-only probe through the
+                    # existing P switch dialog, without rewriting its saved draft.
+                    self.click('#ees-work-manage-process')
+                    self.key("Home", 36)
+                    self.key("Enter", 13)
+                    self.key("Tab", 9)
+                    self.wait("document.querySelector('#ees-work-dialog')?.open")
+                    self.click('#ees-work-dialog input[name=choice][value=discard]')
+                    self.click('#ees-work-dialog [data-dialog-confirm]')
+                    self.wait("document.querySelector('#ees-work-manage-process')?.value === '' && !document.querySelector('#ees-work-dialog')")
+                    self.select_native('#ees-work-manage-process', process_id)
+                    self.wait("document.querySelector('#ees-work-node-form [name=instructions]')?.value === '복원 전 저장한 담당자의 미게시 원문'")
+
+                self.click('#ees-work-designer [data-action=process_actions]')
+                self.wait("document.querySelector('#ees-work-dialog')?.open")
+                self.select_native('#ees-work-dialog select[name=action]', 'reconcile_publication')
+                self.screenshot("sa-restore-" + changed_state + "-explicit-baseline-dialog")
+                self.click('#ees-work-dialog [data-dialog-confirm]')
+                self.eventually(lambda: self.api("GET", path, token=self.admin["token"]).json()["process"]["draft_revision"] == before_revision + 1)
+                adopted = self.api("GET", path, token=self.admin["token"]).json()["process"]
+                self.assertEqual(adopted["workflow"], before_draft)
+                self.assertEqual(adopted["owner_revision"], process["owner_revision"])
+                self.assertFalse(adopted["publication_reconciliation"]["required"])
+                self.assertIsNone(adopted["validated_revision"])
+                self.assertEqual(catalog(), before_publication, "Adopting a baseline must not publish")
+                self.wait("!document.querySelector('#ees-work-dialog') && document.querySelector('#ees-work-designer [data-action=publish]')?.disabled")
+                self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), "복원 전 저장한 담당자의 미게시 원문")
+                self.click('#ees-work-designer [data-action=validate_draft]')
+                self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('게시 전 확인 완료')")
+                self.click('#ees-work-designer [data-action=publish]', confirm=True)
+                self.eventually(lambda: self.api("GET", path, token=self.admin["token"]).json()["process"]["published_workflow"] == before_draft)
+                process = self.api("GET", path, token=self.admin["token"]).json()["process"]
+                self.assertEqual(process["workflow"], before_draft)
+                self.assertFalse(process["publication_reconciliation"]["required"])
+                self.screenshot("sa-restore-" + changed_state + "-republished")
 
     def test_native_new_signup_and_approval_ui(self):
         account = self.signup_ui()

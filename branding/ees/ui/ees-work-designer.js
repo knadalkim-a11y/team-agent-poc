@@ -21,7 +21,7 @@ function createWorkDesigner({callbacks}) {
   const cacheKey=(system=managedSystem,process=managedProcess)=>JSON.stringify([capability?.actor_id || '',system,process]);
   const newId=()=>'new-'+crypto.randomUUID();
   const alertHTML=()=>errorMessage?`<p class="ew-error" role="alert">${esc(errorMessage)}</p>`:'';
-  const draftStatus=()=>`관리: ${processMeta?.owner_system || managedSystem} · ${processMeta?.published_version?'게시 v'+processMeta.published_version:'미게시'} · 저장 초안 r${editorRevision} · ${editorDirty?'저장하지 않은 변경':'저장된 초안'} · ${state.validated_revision===editorRevision&&!editorDirty?'게시 전 확인 완료':'게시 전 확인 필요'}`;
+  const draftStatus=()=>`관리: ${processMeta?.owner_system || managedSystem} · ${processMeta?.published_version?(processMeta.publication_reconciliation?.state==='removed'?'현재 게시본 없음 · 마지막 게시 v':'게시 v')+processMeta.published_version:'미게시'} · 저장 초안 r${editorRevision} · ${editorDirty?'저장하지 않은 변경':'저장된 초안'} · ${state.validated_revision===editorRevision&&!editorDirty?'게시 전 확인 완료':'게시 전 확인 필요'}`;
   function treeHTML(data,ids) {return workUI.treeHTML(data,ids,{editing:true,selectedId:editorId,collapsed:editorCollapsed,expansionKey:JSON.stringify([route.site,route.system,'',data?.version || state?.catalog?.version])});}
   function setBusy(value=writeBusy) {busy=Boolean(value||writeBusy);designer?.querySelectorAll('button[data-mutation]').forEach(el=>{el.disabled=busy||!canAuthor()||el.dataset.unavailable==='true'||(el.dataset.action==='publish'&&(editorDirty||state?.validated_revision!==editorRevision));});}
   function acceptServer(result) {serverSource=result;}
@@ -119,9 +119,11 @@ function createWorkDesigner({callbacks}) {
     const focused=designer.contains?.(document.activeElement)&&renderedEditorId===editorId?document.activeElement:null;
     const focus=focused?{id:focused.id,name:focused.name,start:focused.selectionStart,end:focused.selectionEnd}:null;
     const advanced=renderedEditorId===editorId&&Boolean($('#ees-work-node-form .ew-designer-advanced')?.open);
+    const reconciliation=processMeta?.publication_reconciliation;
+    const publicationNotice=reconciliation?.required?'<p class="ew-notice" role="status">'+(reconciliation.state==='removed'?'현재 게시본이 없습니다.':'현재 게시본이 저장 초안의 비교 기준과 달라졌습니다.')+' 초안은 보존했습니다. '+(reconciliation.can_reconcile?'워크플로우 관리에서 현재 게시본과 비교한 뒤 기준을 다시 확인해 주세요.':'관리자에게 현재 게시본 기준 확인을 요청해 주세요.')+'</p>':'';
     designer.innerHTML=managementHTML()+`<header class="ew-designer-toolbar" ${editor?'':'hidden'}><div class="ew-designer-heading"><h1>업무 절차</h1><div class="ew-designer-status" role="status">${editor?esc(draftStatus()):''}</div></div><div class="ew-actions">${button('초안 저장','save_draft','data-mutation')}${button('게시 전 확인','validate_draft','data-mutation')}${button('게시','publish','data-mutation data-work-confirm class="ew-primary"')}</div></header>
       <p class="ew-designer-description ew-muted">저장·검사·게시 대상: <strong>${esc(editor?.nodes?.[managedProcess]?.name || '워크플로우를 선택하세요')}</strong>. 선택한 워크플로우와 그 하위 단계·작업만 반영합니다. 게시한 변경은 새 진행 건부터 적용되며 기존 진행 건의 절차·결과·이력은 유지됩니다.</p>${alertHTML()}${authorizationError?'<p class="ew-error" role="alert">'+esc(authorizationError)+'</p>':''}${editorDirty&&processMeta?.draft_revision!==editorRevision?'<div class="ew-notice" role="alert">다른 담당자가 먼저 저장했습니다. 내 변경은 유지했습니다. '+button('최신 저장본 비교','compare_draft')+'</div>':''}
-      <nav class="ew-editor-tabs" aria-label="업무 절차 설정">${[['workflow','워크플로우'],['tools','도구 연결'],['skills','스킬 연결']].map(([id,label])=>button(label,'editor_tab',`data-tab="${id}" aria-selected="${editorTab===id}"`)).join('')}</nav>${editorTab==='settings'?settingsHTML():!editor?'<p class="ew-notice">'+(authoringLoading?'절차를 읽고 있습니다.':'관리 시스템과 워크플로우를 선택하거나 새로 추가하세요.')+'</p>':editorTab==='workflow'?'<div class="ew-authoring-layout">'+workflowEditor()+authoringHTML()+'</div>':assetEditor()}`;
+      ${publicationNotice}<nav class="ew-editor-tabs" aria-label="업무 절차 설정">${[['workflow','워크플로우'],['tools','도구 연결'],['skills','스킬 연결']].map(([id,label])=>button(label,'editor_tab',`data-tab="${id}" aria-selected="${editorTab===id}"`)).join('')}</nav>${editorTab==='settings'?settingsHTML():!editor?'<p class="ew-notice">'+(authoringLoading?'절차를 읽고 있습니다.':'관리 시스템과 워크플로우를 선택하거나 새로 추가하세요.')+'</p>':editorTab==='workflow'?'<div class="ew-authoring-layout">'+workflowEditor()+authoringHTML()+'</div>':assetEditor()}`;
     renderedEditorId=editorId;
     if(advanced&&$('#ees-work-node-form .ew-designer-advanced'))$('#ees-work-node-form .ew-designer-advanced').open=true;
     if(focus){const replacement=Array.from(designer.querySelectorAll('input,textarea,select')).find(el=>focus.id?el.id===focus.id:el.name===focus.name);replacement?.focus({preventScroll:true});if(replacement?.setSelectionRange&&typeof focus.start==='number')replacement.setSelectionRange(focus.start,focus.end);}
@@ -161,7 +163,8 @@ function createWorkDesigner({callbacks}) {
   }
   async function authorAction(action,payload={},extra={}){
     if(writeBusy||!canAuthor())return null;captureEditor();
-    if(['validate_draft','publish','disable','delete','transfer_owner','import_legacy'].includes(action)&&editorDirty){errorMessage='변경한 초안을 먼저 저장해 주세요.';renderDesigner();return null;}
+    if(action==='reconcile_publication'&&!capability?.is_admin)return null;
+    if(['validate_draft','publish','disable','delete','transfer_owner','import_legacy','reconcile_publication'].includes(action)&&editorDirty){errorMessage='변경한 초안을 먼저 저장해 주세요.';renderDesigner();return null;}
     if(action==='publish'&&!await confirmPublish())return null;
     const submitted=editor?clone(editor):null,key=cacheKey(),epoch=authoringEpoch,serial=loadSerial,operation=++writeSerial;
     const body={action,system_id:managedSystem,process_id:managedProcess,expected_draft_revision:editorRevision,expected_owner_revision:processMeta?.owner_revision || 0,payload:action==='save_draft'?{workflow:workflowPayload()}:payload,...extra};
@@ -171,6 +174,7 @@ function createWorkDesigner({callbacks}) {
     try{const result=await callbacks.authoringWrite(body);if(!result||key!==cacheKey()||epoch!==authoringEpoch||serial!==loadSerial)return null;
       if(action==='save_draft'&&submitted){captureEditor();const mapped=remapEditor(editor,result.id_map || {}),saved=remapEditor(submitted,result.id_map || {});editor=mapped;for(const kind of ['tools','skills'])localAssetIds[kind]=new Set([...localAssetIds[kind]].map(id=>result.id_map?.[id] || id));editorId=result.id_map?.[editorId] || editorId;for(const [conversationKey,session] of [...conversations]){const boundary=conversationKey.lastIndexOf('/'),mappedId=result.id_map?.[conversationKey.slice(boundary+1)];if(mappedId){conversations.delete(conversationKey);conversations.set(conversationKey.slice(0,boundary+1)+mappedId,session);}}editorDirty=JSON.stringify(mapped)!==JSON.stringify(saved);editorRevision=result.process?.draft_revision ?? editorRevision;draftCache.set(key,{editor:clone(editor),localAssets:{tools:[...localAssetIds.tools],skills:[...localAssetIds.skills]},revision:editorRevision,dirty:editorDirty,editorId,editorTab,collapsed:[...editorCollapsed],browsers:[...childBrowsers]});}
       if(action==='delete'){draftCache.delete(key);editor=null;managedProcess='';}
+      if(action==='reconcile_publication'){captureEditor();editorRevision=result.process?.draft_revision ?? editorRevision;}
       if(result.processes)acceptAuthoring(result,{discard:['create','copy','import_legacy'].includes(action)});
       else await loadWorkflow(managedSystem,result.process_id || managedProcess);
       if(action==='validate_draft'&&result.process?.validation?.errors?.length)errorMessage=result.process.validation.errors.join(' · ');
@@ -212,11 +216,19 @@ function createWorkDesigner({callbacks}) {
     }catch(error){if(epoch===authoringEpoch){errorMessage=error.message;renderDesigner();}}
   }
   async function processActions(){
-    const published=processMeta.published_workflow,publishedRoot=published?.nodes?.[managedProcess],draftRoot=editor.nodes[managedProcess];
-    const publishedScope=publishedRoot?(publishedRoot.systems || editor.systems).join(' · '):'미게시';
-    const changed=Object.keys(editor.nodes).filter(id=>JSON.stringify(editor.nodes[id])!==JSON.stringify(published?.nodes?.[id])).length;
-    const values=await formDialog('워크플로우 관리',`<p>${esc(editor.nodes[managedProcess].name)} · 관리 ${esc(processMeta.owner_system)}</p><p>현재 게시본의 적용 시스템: ${esc(publishedScope)}</p><p>저장 초안의 적용 시스템: ${esc((draftRoot.systems || editor.systems).join(' · '))} · 게시본과 다른 구성 ${changed}개</p><details><summary>게시본·저장 초안 비교</summary><h3>현재 게시본</h3><pre>${esc(JSON.stringify(published?.nodes || {},null,2))}</pre><h3>저장 초안</h3><pre>${esc(JSON.stringify(editor.nodes,null,2))}</pre></details><label>처리<select name="action"><option value="${processMeta.published_version?'disable':'delete'}">${processMeta.published_version?'게시 워크플로우 사용 중지':'미게시 워크플로우 삭제'}</option>${capability.is_admin?'<option value="transfer_owner">관리 시스템 지정·이관</option>':''}</select></label>${capability.is_admin?'<label>이관할 관리 시스템<select name="owner_system">'+(capability.managed_systems || []).map(id=>'<option>'+esc(id)+'</option>').join('')+'</select></label>':''}<p>기존 진행 건과 이력은 유지합니다. 이관은 현재 게시본·저장 초안의 적용 범위가 안전한 경우만 허용됩니다.</p>`,'확인');
-    if(values)await authorAction(values.action,values.action==='transfer_owner'?{owner_system:values.owner_system}:{});
+    captureEditor();
+    const published=processMeta.published_workflow,publishedRoot=published?.nodes?.[managedProcess],draft=processMeta.workflow,draftRoot=draft.nodes[managedProcess];
+    const reconciliation=processMeta.publication_reconciliation,canReconcile=Boolean(capability.is_admin&&reconciliation?.can_reconcile);
+    const snapshot={key:cacheKey(),epoch:authoringEpoch,revision:processMeta.draft_revision,owner:processMeta.owner_revision,fingerprint:reconciliation?.current_published_fingerprint};
+    const publishedScope=publishedRoot?(publishedRoot.systems || editor.systems).join(' · '):'현재 게시본 없음';
+    const changed=[...new Set([...Object.keys(draft.nodes),...Object.keys(published?.nodes || {})])].filter(id=>JSON.stringify(draft.nodes[id])!==JSON.stringify(published?.nodes?.[id])).length;
+    const explanation=canReconcile?'<p>현재 게시본 기준으로 다시 확인하면 저장 초안의 내용은 그대로 보존하고 비교 기준만 채택합니다. 게시 전 확인을 다시 해야 하며 자동으로 게시하지 않습니다.</p>':'';
+    const values=await formDialog('워크플로우 관리',`<p>${esc(draftRoot.name)} · 관리 ${esc(processMeta.owner_system)} · 저장 초안 r${snapshot.revision}</p><p>현재 게시본의 적용 시스템: ${esc(publishedScope)}</p><p>저장 초안의 적용 시스템: ${esc((draftRoot.systems || editor.systems).join(' · '))} · 게시본과 다른 구성 ${changed}개</p><details><summary>게시본·저장 초안 비교</summary><h3>현재 게시본</h3>${published?'<pre>'+esc(JSON.stringify(published,null,2))+'</pre>':'<p>현재 게시본 없음</p>'}<h3>저장 초안</h3><pre>${esc(JSON.stringify(draft,null,2))}</pre></details>${explanation}<label>처리<select name="action"><option value="${processMeta.published_version?'disable':'delete'}">${processMeta.published_version?'게시 워크플로우 사용 중지':'미게시 워크플로우 삭제'}</option>${capability.is_admin?'<option value="transfer_owner">관리 시스템 지정·이관</option>':''}${canReconcile?'<option value="reconcile_publication">현재 게시본 기준으로 다시 확인</option>':''}</select></label>${capability.is_admin?'<label>이관할 관리 시스템<select name="owner_system">'+(capability.managed_systems || []).map(id=>'<option>'+esc(id)+'</option>').join('')+'</select></label>':''}<p>기존 진행 건과 이력은 유지합니다. 이관은 현재 게시본·저장 초안의 적용 범위가 안전한 경우만 허용됩니다.</p>`,'확인');
+    if(!values||snapshot.key!==cacheKey()||snapshot.epoch!==authoringEpoch)return;
+    if(values.action==='reconcile_publication'){
+      if(!canReconcile)return;
+      await authorAction(values.action,{expected_published_fingerprint:snapshot.fingerprint},{expected_draft_revision:snapshot.revision,expected_owner_revision:snapshot.owner});
+    }else await authorAction(values.action,values.action==='transfer_owner'?{owner_system:values.owner_system}:{});
   }
 
   function authoringHTML() {
