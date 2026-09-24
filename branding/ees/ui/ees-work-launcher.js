@@ -20,8 +20,9 @@
   let scopeReadinessTimer=null;
   const token = () => {try {return localStorage.getItem('token') || '';} catch (_) {return '';}};
   const chatId = () => {const m = location.pathname.match(/^\/c\/([^/]+)\/?$/); return m ? decodeURIComponent(m[1]) : '';};
-  const chatRoute = () => location.pathname === '/' || /^\/c\/[^/]+\/?$/.test(location.pathname);
-  const adminRoute = () => location.pathname.startsWith('/workspace') && new URLSearchParams(location.search).get('ees') === 'workflow';
+  const authoringRoute = () => (location.pathname==='/'||location.pathname.startsWith('/workspace')) && new URLSearchParams(location.search).get('ees')==='workflow';
+  const chatRoute = () => !authoringRoute()&&(location.pathname === '/' || /^\/c\/[^/]+\/?$/.test(location.pathname));
+  const adminRoute = authoringRoute;
   const available = () => !/^\/(auth|logout)(\/|$)/.test(location.pathname) && Boolean($('#sidebar-new-chat-button'));
   const currentCase = () => state?.case;
   const selectedCase = () => !newCase && currentCase()?.site?.id === browsingSite && currentCase()?.system === browsingSystem ? currentCase() : null;
@@ -56,7 +57,7 @@
     selectPanel:screen=>window.__eesWorkPanelV1?.select(chatId(),screen,{open:true})
   }});
   const designer = createWorkDesigner({callbacks:{
-    save_draft:()=>editAction('save_draft'),validate_draft:()=>editAction('validate_draft'),publish:()=>editAction('publish'),authoringModels,authoringReply
+    authoringModels,authoringReply,authoringRead:path=>authoringAPI(path),authoringWrite:body=>authoringAPI('authoring/action',body)
   }});
   function snapshot() {
     // Each successful read only validates its own current or historical case.
@@ -94,6 +95,11 @@
     if (!response.ok || result?.ok === false) {const failure=new Error(result?.error?.message || result?.detail?.message || '업무 정보를 가져오지 못했습니다. 로그인과 배포 상태를 확인해 주세요.');failure.result=result;failure.status=response.status;failure.code=result?.error?.code || result?.detail?.code;throw failure;}
     return result;
   }
+  async function authoringAPI(path,body){
+    const auth=token(),at=generation,route=location.pathname+location.search;
+    try{const result=await api(path,body);if(auth!==token()||at!==generation||route!==location.pathname+location.search||!available())return null;return result;}
+    catch(error){if(auth!==token()||at!==generation||route!==location.pathname+location.search||!available())return null;throw error;}
+  }
   function lookupFailure(error) {
     // Only read callers use this state. A rejected action is not evidence that
     // stored records are absent or unreadable; ambiguous not-found stays failed.
@@ -111,7 +117,7 @@
     const controller=new AbortController(),abort=()=>controller.abort();signal.addEventListener('abort',abort,{once:true});
     const timeout=setTimeout(abort,90000),auth=token();
     try {
-      if(signal.aborted||!state?.can_manage)throw new Error('작성 요청을 중단했습니다. 현재 초안은 그대로입니다.');
+      if(signal.aborted||!designer.canAuthor()||!authoringRoute())throw new Error('작성 요청을 중단했습니다. 현재 초안은 그대로입니다.');
       // Use the existing authenticated model path without chat creation or tool resolution.
       // The pinned middleware explicitly treats tools: [] as opting out of builtins.
       const response=await fetch('/api/chat/completions',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json',Authorization:'Bearer '+auth},signal:controller.signal,body:JSON.stringify({model,messages,stream:false,tools:[],tool_ids:[],features:{}})});
@@ -157,7 +163,7 @@
     if (!available()) return;
     const at = generation, scopeEpoch=navigationRequest, serial = ++request, id = chatId(), auth = token(), route = location.pathname + location.search;
     const query = new URLSearchParams({chat_id:id}); if (!id && pendingId) query.set('case_id', pendingId);
-    try {const result = await api('state?' + query); if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = ''; accept(result);}
+    try {const result = await api('state?' + query); if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = ''; accept(result);await designer.refreshAuthoring();}
     catch (error) {if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = error.message; recordLookupError=lookupFailure(error); render();}
   }
   async function action(actionName, payload = {}, nodeId = '', override = {}) {
@@ -242,7 +248,7 @@
 
   let binding = null;
   async function ensureChat(id) {
-    if(typeof id!=='string'||!id||!available())return {ok:false};
+    if(typeof id!=='string'||!id||!available()||!chatRoute())return {ok:false};
     if(location.pathname==='/' && pendingId) {
       // A tool from an older chat may arrive while a new case is being prepared.
       // Only the real SPA route identifies which chat owns this submission.
@@ -413,7 +419,7 @@
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(sync);}}
   function publishedSelection() {return {site_id:browsingSite,system:browsingSystem,process_id:processId(),node_id:selectedId(),version:previewVersion || state?.catalog.version};}
   function selection(id) {
-    if(typeof id!=='string'||id!==chatId()||!available())return {ok:false,code:'selection_unconfirmed'};
+    if(typeof id!=='string'||id!==chatId()||!available()||!chatRoute())return {ok:false,code:'selection_unconfirmed'};
     // The native first-message hook captures a preview before its new chat
     // route exists. Reading that capture never creates or binds a work case.
     if(!state||acceptedRoute!==location.pathname+location.search){const saved=previewChats.get(id);if(saved?.auth===token())return {ok:true,kind:'published',selection:{...saved.selection}};const created=createdChats.get(id);if(created?.auth===token()&&created.caseId)return {ok:true,kind:'case',case_id:created.caseId,node_id:created.nodeId,revision:created.revision};return {ok:false,code:'selection_unconfirmed'};}
@@ -422,6 +428,7 @@
     const c=selectedCase();return c?{ok:true,kind:'case',case_id:c.id,node_id:selectedId(),revision:c.revision}:{ok:true,kind:'published',selection:publishedSelection()};
   }
   function beginChatCreation() {
+    if(!chatRoute())return '';
     if(location.pathname!=='/'||!available()||!browseActive||!state)return null;
     const c=selectedCase();if(c&&c.id!==pendingId)return null;
     const ticket=String(++creationSerial);creationTickets.set(ticket,{caseId:c?pendingId:'',nodeId:c?.selected_id,revision:c?.revision,selection:c?null:publishedSelection(),auth:token(),route:location.pathname+location.search});return ticket;
@@ -477,7 +484,7 @@
     if('node_id' in options&&typeof options.node_id!=='string')return {ok:false};
     if(options.node_id&&!node(options.node_id)&&!state.catalog.nodes[options.node_id])return {ok:false};
     if(options.node_id&&options.process_id&&lineage(options.node_id,state.catalog)[0]?.id!==options.process_id)return {ok:false};
-    if(options.workspace){if(!state.can_manage)return {ok:false};navigate('/workspace/models?ees=workflow');return {ok:true};}
+    if(options.workspace){if(!designer.canAuthor())return {ok:false};navigate('/?ees=workflow');return {ok:true};}
     if(options.history_case_id)return showHistory(options.history_case_id);
     if(options.case_id){const c=state.cases.find(c=>c.id===options.case_id);if(!c)return {ok:false};browsingSite=c.site.id;browsingSystem=c.system;return openCase(c);}
     if('category' in options)category=options.category;

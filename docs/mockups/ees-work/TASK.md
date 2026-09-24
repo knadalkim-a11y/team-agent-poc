@@ -4,7 +4,56 @@
 
 저장소: knadalkim-a11y/team-agent-poc
 
-입력: 최신 화면 기준은 [09-23 A안 상태·실행 상세](#a-design-20260923)이다. [09-22 왼쪽 워크플로우 확정 디자인](#sidebar-final-20260922)과 [오른쪽 업무·수행·결과](#right-panel-20260922)의 탐색·기록 계약을 보존한다. [앞선 시각 계층 후속](#visual-hierarchy-20260922)과 [단계별 진행·무테 합의](#step-progress-ux-20260922)의 기존 실행·권한·저장 계약과 Workspace 구현은 보존한다. [09-21 통합 UX 첫 베타](#integrated-work-beta-20260921)는 당시 기준으로 보존한다. 이전 화면 참고자료는 [사이드바 개선 목업](ees-sidebar-refinement.html)이며, 이전 [공장별 업무 트리 목업](ees-factory-workspace.html)과 [최초 세부 편집 예시](ees-demo-workspace.html)는 보존한다. 목업 이후 확정한 [공장·시스템 공동 작업 목표](#ees-work-shared-target)는 아래 기록을 우선한다. ZIP 첨부 없이 저장소에서 읽는다. HTML 목업은 대화 내 표시용 참고자료이며 실제 제품은 기존 WebUI 컴포넌트·테마·AI 대화를 사용한다.
+입력: 신규 작성 권한은 [09-24 시스템 담당자·P별 작성/게시](#system-authoring-20260924), 화면 표현 기준은 [09-23 A안 상태·실행 상세](#a-design-20260923)이다. [09-22 왼쪽 워크플로우 확정 디자인](#sidebar-final-20260922)과 [오른쪽 업무·수행·결과](#right-panel-20260922)의 탐색·기록 계약을 보존한다. [앞선 시각 계층 후속](#visual-hierarchy-20260922)과 [단계별 진행·무테 합의](#step-progress-ux-20260922)의 기존 실행·권한·저장 계약과 Workspace 구현은 보존한다. [09-21 통합 UX 첫 베타](#integrated-work-beta-20260921)는 당시 기준으로 보존한다. 이전 화면 참고자료는 [사이드바 개선 목업](ees-sidebar-refinement.html)이며, 이전 [공장별 업무 트리 목업](ees-factory-workspace.html)과 [최초 세부 편집 예시](ees-demo-workspace.html)는 보존한다. 목업 이후 확정한 [공장·시스템 공동 작업 목표](#ees-work-shared-target)는 아래 기록을 우선한다. ZIP 첨부 없이 저장소에서 읽는다. HTML 목업은 대화 내 표시용 참고자료이며 실제 제품은 기존 WebUI 컴포넌트·테마·AI 대화를 사용한다.
+
+<a id="system-authoring-20260924"></a>
+
+## 시스템 담당자의 P별 작성·게시 · 2026-09-24
+
+첨부 `EES_Work_System_Authoring_Design_Handoff_20260924_v1.1.md`를 구현 기준으로 삼는다. 1.0의 시스템별 권한·P별 저장/게시·보존 계약에 Native 회원 기능 재사용과 첫 이용 검수를 추가한 단일 기준이다. A안 #63 병합 main `a443d30c6694df0e1cbe082a0b99aa5f2d566917`에서 이어가며 [A안 표현](#a-design-20260923)을 다시 구현하지 않는다. 설계 Draft #53은 변경하지 않는다. 이번 범위는 구현·합성 환경 검증·문서·후속 PR이며 main 병합·사내 배포·실제 계정/그룹 변경은 아니다. 실제 결과는 [SA-01~28·NU-01~08 평가](../../../evals/scenarios.md#system-authoring-20260924), 운영/첫 이용은 [Native 가이드](../../03-openwebui-native-agent.md#system-authoring-20260924)·[팀 안내](../../07-team-quickstart.md#system-authoring-20260924)에서 관리한다.
+
+### 관리·이용 권한의 분리
+
+| 권한 단위 | 원본과 허용 범위 |
+|---|---|
+| 계정·역할·그룹 소속 | 기존 Native 가입/로그인/사용자/그룹 관리. 개인 계정 `user` 유지, 관리자 신원 확인 뒤 `pending → user` 승인 |
+| 시스템 담당자 | Native group ID와 EES system-group 연결. EMS/APC/FDC/EGIS/EPT별 활성 그룹 하나, 같은 그룹의 중복 시스템 연결 없음 |
+| 저장·검사·게시·충돌 | 선택한 P 하나와 하위 T/J. 같은 시스템의 다른 작성자 P도 관리 가능하며 다른 P의 미게시 변경은 제외 |
+| 관리 시스템 | 서버 `owner_system`/`owner_revision`. 시스템 하나 또는 관리자 전용 `COMMON`/`UNASSIGNED`. node 적용 범위/URL/작성자 이름으로 권한 추론 금지 |
+| 업무 이용·자산 접근 | 기존 진행 건 소유권·Native ACL·개인 인증·실행 정책 유지. 담당 권한은 다른 사람의 대화/진행 조회나 실제 외부 실행 권한이 아님 |
+
+전용 담당 그룹에는 Native Workspace 모델/도구/지식/프롬프트/스킬 관리 권한이나 자산 ACL을 추가하지 않는다. 가입·일반 이용 승인·담당 지정은 독립이며 기본 가입 그룹을 담당 그룹으로 자동 연결하지 않는다. EES는 별도 담당자 명단·회원 DB·비밀번호·JWT·이메일 재설정·SSO/Redis 체계를 만들지 않는다. 실제 회사의 기본 권한이나 다른 그룹 설정은 수정하지 않는다.
+
+### 작성과 서버 보호 계약
+
+- 현재 계정/역할과 Native 그룹 소속을 보호 요청마다 조회한다. 이름 변경은 ID가 같으면 유지하고 삭제/동일 이름 재생성/연결 해제/계정 pending·삭제는 허용 근거가 아니다. 그룹 조회 실패는 관리 요청을 차단하며 캐시로 허용하지 않는다. 그룹 제거 완료 뒤 다음 요청은 재로그인 없이 거절한다. Native/EES DB 간 분산 트랜잭션이나 이미 커밋한 작업의 소급 취소는 약속하지 않는다.
+- 담당 P는 관리 시스템=적용 시스템 하나다. 공통/미지정 P와 소유권 지정/이관, 시스템-그룹 연결은 관리자 전용이다. 기존 P의 적용 시스템으로 소유권을 자동 추론하지 않는다. 다중 시스템 P는 그대로 관리자 관리하거나 새 ID와 내부 참조로 시스템 전용 복사본을 만든다. 이관은 owner revision을 증가시키고 검사 승인을 무효화하며 기존 진행 snapshot을 바꾸지 않는다.
+- 한 요청에 P 하나의 subtree와 그 P 전용 참조만 받는다. 다른 P의 node/roots, 공통 정책·공장 목록·공유 자산 정의, 소유자/role 위조·교차 P 의존·ID 충돌·순환·크기 초과는 저장부터 차단한다. 미완성 초안 허용과 권한/구조 보호는 구분한다. 접근 불가 기존 참조는 불투명 ID로 보존하되 필요한 참조를 확인할 수 없는 새 게시는 거절한다.
+- 동일 P의 draft/owner revision과 게시 기준을 확인해 오래된 저장을 충돌로 거절한다. 검사 기록은 정확한 저장 초안 hash/revision, 소유권, 해당 P 게시본과 참조/정책에 결합한다. 게시 때 권한/자산 접근을 다시 확인하고 미저장 브라우저 값은 섞지 않는다. 검사 통과는 실제 업무 실행 성공이 아니다.
+- 최신 `catalog.published` 안에 선택한 P만 원자적으로 병합한다. 다른 P의 동시 게시/미게시 초안은 보존하고 무관한 catalog 변경만으로 충돌시키지 않는다. catalog/version·초안 기준·감사 저장이 부분 성공하면 안 된다. 중복 게시는 한 번만 반영하며 중복 응답 재생도 현재 인가를 거친다.
+- Native Tool/Skill은 허용된 기존 자산의 참조다. 자산 코드/본문/인증값을 P 초안에 복제하거나 참조만으로 외부 실행 어댑터를 만들지 않는다. 새 P는 기존 사람 확인·초안 검토·모의 점검을 사용한다. 게시 P 사용 중지는 새 시작을 제한하고 기존 진행/이력은 유지한다.
+
+### 구현 인터페이스
+
+| 경로/항목 | 실제 구현 계약 |
+|---|---|
+| `GET /api/ees-work/authoring/capabilities` | `is_admin`, `managed_systems`, `can_author`, `actor_id`, `protocol:1`. 기존 runtime의 `can_manage`는 admin 의미를 유지 |
+| `GET /api/ees-work/authoring?system_id=…&process_id=…` | 인가된 P 목록/초안/검사 상태/참조만 조회. legacy 보존본 조회는 관리자 경로 |
+| `POST /api/ees-work/authoring/action` | P `create/copy/add_node/save_draft/validate_draft/publish/disable/delete`와 관리자 `set_system_group/transfer_owner/import_legacy`. 관리용 envelope이며 runtime `scope`와 분리 |
+| 기존 runtime 전체 작성 액션 | 관리자라도 `authoring_upgrade_required`(409)로 거절. 기존 runtime `state/action`·공개 `open_webui.ees_workflow`·진행 입력/실행 계약 유지 |
+| P 저장 메타데이터 | 서버 `owner_system/owner_revision`, `draft_revision`, 해당 P의 `published_version`. 입력 중 새 T/J 임시 식별자는 저장 시 서버 발급 ID로 확정 |
+
+Native 현재 사용자와 비동기 `Groups.get_groups_by_member_id`를 매 요청/쓰기 직전에 읽는다. 실제 처리 코드는 같은 기능 폴더의 `ees_workflow_authoring.py`에 두고 기존 WorkflowService로 연결한다. 테이블은 기존 업무 SQLite에 추가하며 별도 회원 DB를 만들지 않는다. API가 구현된 사실과 인가/보존/Native 수락 통과는 구분해 평가표에 기록한다.
+
+### 기존 셸의 작성기와 자료 보존
+
+모델·도구 등 Native Workspace 관리 권한이 모두 없는 일반 담당자도 기존 앱 셸 안에서 **업무 절차**에 진입·새로고침·복귀할 수 있어야 한다. 기준 canonical 진입은 `/?ees=workflow`이며 기존 Workspace 탭/관리자 URL은 같은 작성기의 호환 경로다. 실제 구현 URL은 가이드와 시험을 함께 맞춘다. Native Workspace 가드를 우회하거나 별도 HTML/서버/로그인 화면을 만들지 않는다. 관리 진입은 runtime의 업무 생성/대화 연결·기존 `scope`와 분리한다.
+
+툴바는 대상 P 이름·관리 시스템·저장 초안/해당 P 게시 버전·미저장 상태를 표시한다. 담당 시스템/P 이동은 유지/저장 후 이동/명시적 버리기를 구분하고 자동 저장·게시하지 않는다. 동일 사용자 세션의 미저장 글은 충돌/권한 회수에도 보존하되 저장 불가를 표시한다. 계정 전환/로그아웃에서는 초안·capability·늦은 응답과 AI 문맥을 정리한다. 수동 작성은 모델 연결 없이 가능해야 한다. A안 패널과 Native 대화/Workspace DOM·접근성은 보존한다.
+
+기존 전체 `draft/published/revision/validated`는 정확한 읽기 전용 보존본을 먼저 만들고 초기 전환으로 published/cases를 바꾸지 않는다. P별 초안만 활성 편집 원본이며 과거 전체 초안의 P 가져오기는 관리자 명시적 검토로 한다. `catalog.draft`는 게시본 호환 mirror다. 오래된 전체 저장/게시 요청은 관리자라도 갱신 필요로 거절하고 기존 runtime API/공개 모듈은 유지한다.
+
+프로그램 Restore는 새 초안·Native 그룹·사용자 자료를 되돌리지 않는다. 이전 프로그램은 담당자 기능을 지원하지 않으며 admin-only 경계를 유지한다. 재업그레이드 때 fallback 중 작성한 전체 초안을 추가 보존하고 새/이전 프로그램이 같은 DB에 동시에 쓰지 않게 한다. 실제 지원 복원본 검사가 없으면 사내 데이터 변화의 배포 준비 완료로 표시하지 않는다. 감사에는 actor·대상·revision/hash·요청/시각·결과만 남기고 본문/자격증명은 제외한다. Native 구성원 변경의 운영 감사 보존은 별도 확인하며 이벤트 호출만으로 영속 로그를 보장하지 않는다.
 
 <a id="a-design-20260923"></a>
 

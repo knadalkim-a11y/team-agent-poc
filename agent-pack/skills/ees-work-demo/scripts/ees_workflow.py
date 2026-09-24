@@ -26,14 +26,9 @@ from .ees_workflow_definition import (
     _draft_shape_errors, validate_definition,
 )
 from .ees_workflow_view import _applicable, _finished, _missing, _inputs, _view, _workflow
+from .ees_workflow_authoring import AuthoringMixin, WorkflowError
 
 _service = None
-
-
-class WorkflowError(Exception):
-    def __init__(self, code, message):
-        self.code, self.message = code, message
-        super().__init__(message)
 
 
 def _value(obj, name, default=None):
@@ -48,13 +43,14 @@ def _now():
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
 
 
-class WorkflowService:
+class WorkflowService(AuthoringMixin):
     """The injected lookups use the same current user and chat store as WebUI."""
 
-    def __init__(self, database, user_lookup, chat_lookup, asset_lookup=None):
+    def __init__(self, database, user_lookup, chat_lookup, asset_lookup=None, group_lookup=None, group_list_lookup=None):
         self.database = Path(database)
         self.user_lookup, self.chat_lookup = user_lookup, chat_lookup
         self.asset_lookup = asset_lookup
+        self.group_lookup, self.group_list_lookup = group_lookup, group_list_lookup
         self.database.parent.mkdir(parents=True, exist_ok=True)
         with self._db() as db:
             db.execute("CREATE TABLE IF NOT EXISTS catalog (id INTEGER PRIMARY KEY CHECK(id=1), "
@@ -69,6 +65,7 @@ class WorkflowService:
                        "PRIMARY KEY(owner,request_id))")
             seed = _dump(_seed())
             db.execute("INSERT OR IGNORE INTO catalog VALUES(1,?,?,0,NULL)", (seed, seed))
+            self._init_authoring(db)
 
     @contextmanager
     def _db(self, write=False):
@@ -429,6 +426,8 @@ class WorkflowService:
             return state
 
     async def _protected_action(self, current, body, assets):
+        if body.get("action") in {"save_draft", "validate_draft", "publish"}:
+            raise WorkflowError("authoring_upgrade_required", "작성 화면을 새로 열어 주세요. 전체 절차는 덮어쓰지 않았습니다.")
         request_id, scope = body.get("request_id"), body.get("scope")
         if request_id is not None and (not isinstance(request_id, str)
                 or re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", request_id) is None):
@@ -436,8 +435,6 @@ class WorkflowService:
         if scope is not None and (body["action"] not in {"update_inputs", "run"}
                 or body.get("case_id") or not request_id):
             raise WorkflowError("invalid_request", "최초 입력·실행에는 확정 대상과 요청 식별자가 필요합니다.")
-        if body["action"] in {"save_draft", "validate_draft", "publish"} and _value(current, "role") != "admin":
-            raise WorkflowError("admin_required", "업무 절차 관리는 관리자만 사용할 수 있습니다.")
         owner = _value(current, "id")
         identity = {key: body.get(key, default) for key, default in (
             ("action", ""), ("case_id", ""), ("chat_id", ""), ("node_id", ""),
@@ -481,45 +478,7 @@ class WorkflowService:
         chat_id, case_id = body.get("chat_id", ""), body.get("case_id", "")
         result = None
         if action in {"save_draft", "validate_draft", "publish"}:
-            if _value(current, "role") != "admin":
-                raise WorkflowError("admin_required", "업무 절차 관리는 관리자만 사용할 수 있습니다.")
-            published, draft, revision, validated = self._catalog(db)
-            self._revision(body, revision)
-            if action == "save_draft":
-                definition = payload.get("definition")
-                if not isinstance(definition, dict) or len(_dump(definition).encode("utf-8")) > MAX_DOCUMENT_BYTES:
-                    raise WorkflowError("invalid_definition", "저장할 업무 절차를 확인해 주세요.")
-                # Drafts may be structurally incomplete while editing;
-                # validation/publishing is the strict executable gate.
-                definition = deepcopy(definition)
-                for key in ("available_tools", "available_skills", "assets_available"):
-                    definition.pop(key, None)
-                # Keep a reference to existing skills, never a copied
-                # private body whose grants could later change.
-                skills = definition.get("skills", {})
-                if isinstance(skills, dict):
-                    for skill in skills.values():
-                        if isinstance(skill, dict) and skill.get("source") == "open_webui":
-                            skill["body"] = ""
-                shape_errors = _draft_shape_errors(definition)
-                if shape_errors:
-                    raise WorkflowError("invalid_definition", shape_errors[0])
-                definition["version"] = published["version"] + 1
-                db.execute("UPDATE catalog SET draft=?,revision=?,validated=NULL WHERE id=1", (_dump(definition), revision + 1))
-            else:
-                errors = validate_definition(draft)
-                if errors:
-                    return {"ok": False, "error": {"code": "invalid_definition", "message": errors[0], "details": errors}}
-                if action == "validate_draft":
-                    db.execute("UPDATE catalog SET validated=? WHERE id=1", (revision,))
-                    result = {"valid": True, "revision": revision, "message": "구조·참조·입력 연결을 확인했습니다. 실제 업무 실행 검증은 별도입니다."}
-                else:
-                    if validated != revision:
-                        raise WorkflowError("validation_required", "저장한 최신 초안을 검증한 뒤 게시해 주세요.")
-                    draft["version"] = published["version"] + 1
-                    db.execute("UPDATE catalog SET published=?,draft=?,revision=?,validated=NULL WHERE id=1",
-                               (_dump(draft), _dump(draft), revision + 1))
-                    result = {"version": draft["version"], "message": "게시했습니다. 새 진행 건부터 적용됩니다."}
+            raise WorkflowError("authoring_upgrade_required", "작성 화면을 새로 열어 주세요. 전체 절차는 덮어쓰지 않았습니다.")
         elif action == "create":
             if self._case(db, _value(current, "id"), "", chat_id):
                 raise WorkflowError("chat_already_bound", "이 대화에는 이미 진행 중인 업무가 연결되어 있습니다.")
@@ -634,9 +593,11 @@ def _production_service():
         from open_webui.env import DATA_DIR
         from open_webui.models.chats import Chats
         from open_webui.models.users import Users
+        from open_webui.models.groups import Groups
 
         _service = WorkflowService(Path(DATA_DIR) / "ees-work.sqlite3", Users.get_user_by_id,
-                                   Chats.get_chat_by_id, _registered_assets)
+                                   Chats.get_chat_by_id, _registered_assets,
+                                   Groups.get_groups_by_member_id, lambda: Groups.get_groups({}))
     return _service
 
 
@@ -656,6 +617,7 @@ async def _registered_assets(user):
     registered_skills = await Skills.get_skills(user_id=user_id)
     return {
         "tools": [{"id": tool.id, "name": tool.name} for tool in registered_tools],
+        "tool_versions": {tool.id: _value(tool, "updated_at") for tool in registered_tools},
         "skills": [{"id": skill.id, "name": skill.name} for skill in registered_skills if skill.is_active],
         "skill_bodies": {skill.id: skill.content for skill in registered_skills if skill.is_active},
         "skill_versions": {skill.id: skill.updated_at for skill in registered_skills if skill.is_active},
@@ -678,9 +640,11 @@ def install(app, verified_user):
     def response(value):
         code = value.get("error", {}).get("code")
         status = 200 if value.get("ok") else 401 if code == "unauthorized" else 403 if code in {
-            "chat_forbidden", "admin_required"} else 409 if code in {
+            "chat_forbidden", "admin_required", "workflow_manage_forbidden"} else 409 if code in {
                 "revision_conflict", "chat_already_bound", "chat_mismatch", "published_version_conflict",
-                "request_conflict", "case_selection_required", "case_completed"} else 400
+                "request_conflict", "case_selection_required", "case_completed", "authoring_upgrade_required",
+                "draft_revision_conflict", "workflow_baseline_changed", "validation_required"} else 404 if code == "process_not_found" else 503 if code in {
+                    "authoring_authorization_unavailable", "authoring_unavailable"} else 400
         return JSONResponse(value, status_code=status, headers={"Cache-Control": "no-store"})
 
     @app.get("/api/ees-work/state", include_in_schema=False)
@@ -694,3 +658,16 @@ def install(app, verified_user):
     @app.post("/api/ees-work/action", include_in_schema=False)
     async def action_route(body: dict = Body(...), user=Depends(verified_user)):
         return response(await handle_action(user, body))
+
+
+    @app.get("/api/ees-work/authoring/capabilities", include_in_schema=False)
+    async def authoring_capabilities_route(user=Depends(verified_user)):
+        return response(await _production_service().authoring_capabilities(user))
+
+    @app.get("/api/ees-work/authoring", include_in_schema=False)
+    async def authoring_state_route(system_id: str = "", process_id: str = "", legacy_id: int | None = None, user=Depends(verified_user)):
+        return response(await _production_service().get_authoring(user, system_id, process_id, legacy_id))
+
+    @app.post("/api/ees-work/authoring/action", include_in_schema=False)
+    async def authoring_action_route(body: dict = Body(...), user=Depends(verified_user)):
+        return response(await _production_service().authoring_action(user, body))

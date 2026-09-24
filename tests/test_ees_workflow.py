@@ -18,14 +18,16 @@ from types import ModuleType, SimpleNamespace
 import unittest
 from unittest.mock import AsyncMock, patch
 
+from workflow_fixture import publish_fixture_definition, load_legacy_workflow
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "agent-pack/skills/ees-work-demo/scripts/ees_workflow.py"
 PACKAGE = ModuleType("ees_workflow_test_subject")
 PACKAGE.__path__ = [str(SOURCE.parent)]
 # Use real relative imports without taking over the production module names.
-with patch.dict(sys.modules, {PACKAGE.__name__: PACKAGE}):
-    workflow = importlib.import_module(f"{PACKAGE.__name__}.ees_workflow")
+sys.modules[PACKAGE.__name__] = PACKAGE
+workflow = importlib.import_module(f"{PACKAGE.__name__}.ees_workflow")
 
 
 class WorkflowTests(unittest.IsolatedAsyncioTestCase):
@@ -66,17 +68,10 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         return await self.step(case, "run", "install-j", {"confirm": True})
 
     async def publish(self, definition):
-        state = await self.service.get_state(self.admin)
-        result = await self.service.handle_action(self.admin, {
-            "action": "save_draft", "expected_revision": state["draft_revision"],
-            "payload": {"definition": definition},
-        })
-        self.assertTrue(result["ok"], result)
-        revision = result["draft_revision"]
-        for action in ("validate_draft", "publish"):
-            result = await self.service.handle_action(self.admin, {"action": action, "expected_revision": revision})
-            self.assertTrue(result["ok"], result)
-        return result
+        # Runtime behavior uses an already published fixture. Actual scoped
+        # authoring validation/permissions are exercised in its dedicated suite.
+        publish_fixture_definition(self.service, definition)
+        return await self.service.get_state(self.admin)
 
     async def test_initial_catalog_has_no_fabricated_progress_or_chat(self):
         result = await self.service.get_state(self.alice)
@@ -201,7 +196,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(result["error"]["code"], "case_not_found")
         forged = {"id": "alice", "role": "admin"}
         result = await self.service.handle_action(forged, {"action": "publish", "expected_revision": 0})
-        self.assertEqual(result["error"]["code"], "admin_required")
+        self.assertEqual(result["error"]["code"], "authoring_upgrade_required")
         self.users["admin"]["role"] = "user"
         self.assertFalse((await self.service.get_state({"id": "admin", "role": "admin"}))["can_manage"])
         self.users.pop("alice")
@@ -446,37 +441,33 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(history["simulation"])
         self.assertEqual([check["status"] for check in history["checks"]], ["blocked", "skipped", "skipped"])
 
-    async def test_publish_requires_current_validation_and_freezes_existing_case(self):
+    async def test_new_published_fixture_freezes_existing_case(self):
         old = await self.create()
         state = await self.service.get_state(self.admin)
         definition = state["draft"]
         definition["nodes"]["db-j"]["name"] = "새 DB 검증"
         definition["sites"]["us-a"]["line"] = "검증 3라인"
-        saved = await self.service.handle_action(self.admin, {"action": "save_draft", "expected_revision": 0,
-                                                            "payload": {"definition": definition}})
-        rev = saved["draft_revision"]
-        failure = await self.service.handle_action(self.admin, {"action": "publish", "expected_revision": rev})
-        self.assertEqual(failure["error"]["code"], "validation_required")
-        for action in ("validate_draft", "publish"):
-            result = await self.service.handle_action(self.admin, {"action": action, "expected_revision": rev})
-            self.assertTrue(result["ok"], result)
+        await self.publish(definition)
         updated = await self.create()
         self.assertEqual(updated["version"], old["version"] + 1)
         self.assertEqual(updated["site"]["line"], "검증 3라인")
         self.assertEqual(updated["definition"]["nodes"]["db-j"]["name"], "새 DB 검증")
         self.assertEqual((await self.service.get_state(self.alice, case_id=old["id"]))["case"], old)
-        stale = await self.service.handle_action(self.admin, {"action": "publish", "expected_revision": rev})
-        self.assertEqual(stale["error"]["code"], "revision_conflict")
 
     async def test_incomplete_draft_can_save_but_cannot_execute_or_publish(self):
-        definition = workflow._seed()
-        definition["nodes"]["db-j"]["deps"] = ["unfinished-job"]
-        saved = await self.service.handle_action(self.admin, {"action": "save_draft", "expected_revision": 0,
-                                                            "payload": {"definition": definition}})
-        self.assertTrue(saved["ok"])
+        process = (await self.service.get_authoring(self.admin, "UNASSIGNED", "setup-p"))["process"]
+        definition = deepcopy(process["workflow"])
+        definition["nodes"]["db-j"].update(mode="tool", tools=[], bindings={})
+        def request(action, current, payload=None):
+            return {"action": action, "system_id": "UNASSIGNED", "process_id": "setup-p",
+                    "expected_draft_revision": current["draft_revision"], "expected_owner_revision": current["owner_revision"],
+                    "request_id": "incomplete-" + action, "payload": payload or {}}
+        saved = await self.service.authoring_action(self.admin, request("save_draft", process, {"workflow": definition}))
+        self.assertTrue(saved["ok"], saved)
         for action in ("validate_draft", "publish"):
-            result = await self.service.handle_action(self.admin, {"action": action, "expected_revision": 1})
-            self.assertEqual(result["error"]["code"], "invalid_definition")
+            result = await self.service.authoring_action(self.admin, request(action, saved["process"]))
+            self.assertFalse(result["ok"], result)
+            self.assertIn(result["error"]["code"], ("invalid_definition", "validation_required"))
         self.assertEqual((await self.create())["version"], 1)
 
     async def test_malformed_action_create_and_unreadable_draft_are_rejected(self):
@@ -491,7 +482,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
             definition["skills"]["connection"].update(source="open_webui", reference=reference)
             result = await self.service.handle_action(self.admin, {"action": "save_draft", "expected_revision": 0,
                                                                   "payload": {"definition": definition}})
-            self.assertEqual(result["error"]["code"], "invalid_definition")
+            self.assertEqual(result["error"]["code"], "authoring_upgrade_required")
         self.assertEqual((await self.service.get_state(self.admin))["draft_revision"], 0)
 
     async def test_external_tool_reference_is_blocked_and_never_executed_as_mock(self):
@@ -958,6 +949,7 @@ class WorkflowPreservationTests(unittest.IsolatedAsyncioTestCase):
         return service, users, assets
 
     async def test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads(self):
+        legacy_backend = load_legacy_workflow(self)
         expected = {
             False: "ef84ba0edf12ffcca0301d094b78c8aaacf094446c5e78a17213afd989339c53",
             True: "594baae511862a4d50c337e102e20e83dd9d9b635ee9f6c68b6cdc6c1085aff6",
@@ -965,7 +957,7 @@ class WorkflowPreservationTests(unittest.IsolatedAsyncioTestCase):
         for validated in (False, True):
             with self.subTest(validated=validated), tempfile.TemporaryDirectory() as directory:
                 database = Path(directory) / "ees-work.sqlite3"
-                before_service, users, assets = await self.prepare(workflow, database, validated)
+                before_service, users, assets = await self.prepare(legacy_backend, database, validated)
                 before = self.rows(database)
                 # The receipt table is additive. Keep the historical digest of
                 # every original schema/row byte rather than accepting rewrites.
@@ -980,13 +972,20 @@ class WorkflowPreservationTests(unittest.IsolatedAsyncioTestCase):
                 current_assets = deepcopy(assets)
                 restarted = workflow.WorkflowService(database, users.get, lambda _: None,
                                                        lambda _: deepcopy(assets))
-                self.assertEqual(self.rows(database), before, "Startup must not rewrite stored rows")
+                after_migration = self.rows(database)
+                self.assertEqual(after_migration["cases"], before["cases"], "Startup must not rewrite cases")
+                self.assertEqual(after_migration["catalog"][0][1], before["catalog"][0][1], "Published bytes stay unchanged")
+                with closing(sqlite3.connect(database)) as db:
+                    archived = db.execute("SELECT published,draft,revision,validated FROM authoring_legacy").fetchall()
+                self.assertIn(tuple(before["catalog"][0][1:]), archived,
+                              "Exact whole draft and validation survive in the read-only legacy archive")
                 with patch.object(workflow, "_service", restarted):
                     state = await workflow.get_state(users["alice"], case_id="preserved-case")
                     admin = await workflow.get_state(users["admin"])
                 self.assertEqual(state, prior_state)
-                self.assertEqual(admin, prior_admin)
-                self.assertEqual(admin["validated_revision"], 3 if validated else None)
+                self.assertEqual(admin["catalog"], prior_admin["catalog"])
+                self.assertEqual(admin["draft"], admin["catalog"])
+                self.assertIsNone(admin["validated_revision"])
                 self.assertEqual(admin["draft_revision"], 3)
                 self.assertEqual(state["case"]["definition"]["skills"]["common"]["body"],
                                  "진행 건 시작 당시 공통 정책")
@@ -995,7 +994,7 @@ class WorkflowPreservationTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(state["case"]["jobs"]["ap-j"]["history"][0]["status"], "blocked")
                 self.assertEqual(state["catalog"]["available_tools"], assets["tools"])
                 self.assertEqual(assets, current_assets, "Existing registries are read, never re-registered")
-                self.assertEqual(self.rows(database), before, "Reads must not migrate stored definitions or snapshots")
+                self.assertEqual(self.rows(database), after_migration, "Reads must not rewrite definitions or snapshots")
 
 
 try:
@@ -1041,7 +1040,8 @@ class WorkflowRouteTests(unittest.TestCase):
         self.assertEqual(actual.json()["case"]["id"], case["id"])
         denied = self.client.post("/api/ees-work/action", headers=headers,
                                  json={"action": "publish", "expected_revision": 0, "role": "admin"})
-        self.assertEqual(denied.status_code, 403)
+        self.assertEqual(denied.status_code, 409)
+        self.assertEqual(denied.json()["error"]["code"], "authoring_upgrade_required")
         stale = self.client.post("/api/ees-work/action", headers=headers,
                                 json={"action": "select", "case_id": case["id"], "node_id": "db-j", "expected_revision": 99})
         self.assertEqual(stale.status_code, 409)

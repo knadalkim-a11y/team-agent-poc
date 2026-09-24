@@ -39,6 +39,11 @@ on:
       - 'tests/test_ees_work_demo.py'
       - 'tests/test_ees_work_routes.py'
       - 'tests/test_ees_workflow*.py'
+      - 'tests/test_ees_work_authoring*.py'
+      - 'tests/test_ees_work_authoring_ui.cjs'
+      - 'tests/test_ees_work_designer.py'
+      - 'tests/native_auth_fixture.py'
+      - 'tests/workflow_fixture.py'
       - 'tests/native_ui_fixture.py'
       - 'tests/test_demo_bundle.py'
       - 'docs/**'
@@ -69,13 +74,14 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.11'
       - run: python -m unittest discover -s tests -p test_ees_branding_build.py -v
       - run: python -m unittest discover -s tests -p test_demo_bundle.py -v
       - name: Install fixed test dependencies
-        run: python -m pip install uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5
+        run: python -m pip install uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
       - name: Verify authenticated demo file routes without user data
         env:
           EES_REQUIRE_WORK_ROUTES: '1'
@@ -86,8 +92,8 @@ jobs:
         run: python -m unittest discover -s tests -p test_jira_read.py -v
       - name: Verify GitHub read and plain results
         run: python -m unittest discover -s tests -p test_github_tool.py -v
-      - name: Verify shared workflow service and real chat Tool
-        run: python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p "test_ees_workflow*.py" -v
+      - name: Verify scoped editor state and response isolation
+        run: python -m unittest discover -s tests -p test_ees_work_designer.py -v
       - name: Verify WO demo Tool
         run: python -m unittest discover -s tests -p test_wo_demo_tool.py -v
       - name: Verify WO demo local form state
@@ -116,6 +122,31 @@ jobs:
           python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
       - name: Build the real program fixture without installing it
         run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
+      - name: Prepare the fixed pre-authoring program for Restore validation
+        run: |
+          git archive --format=tar --output=dist/legacy-source.tar a443d30c6694df0e1cbe082a0b99aa5f2d566917
+          python -c "import tarfile; tarfile.open('dist/legacy-source.tar').extractall('dist/legacy-source', filter='data')"
+          python dist/legacy-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/legacy-branding
+      - name: Verify shared workflow service and real chat Tool
+        env:
+          EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
+          EES_REQUIRE_LEGACY_WORKFLOW: '1'
+        run: python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p "test_ees_workflow*.py" -v
+      - name: Verify scoped authoring and the actual previous program
+        env:
+          EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
+          EES_REQUIRE_LEGACY_WORKFLOW: '1'
+        run: python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_authoring.py -v
+      - name: Verify Native signup, approval, scoped authoring and account recovery
+        if: runner.os == 'Linux'
+        env:
+          EES_TEST_CHROME: google-chrome
+          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+          EES_TEST_BRANDING_DIR: dist/branding
+          EES_REQUIRE_AUTHORING_NATIVE: '1'
+        run: |
+          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_authoring_native.py -v
+          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_authoring_account_switch.py -v
       - name: Require guarded asset writes
         env:
           EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
@@ -161,6 +192,8 @@ jobs:
       - name: Verify program-only Apply and Restore
         env:
           EES_TEST_BRANDING_DIR: dist/branding
+          EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
+          EES_REQUIRE_LEGACY_WORKFLOW: '1'
         run: python -m unittest discover -s tests -p test_ees_webui_customization.py -v
       - name: Parse the Windows PowerShell entry point
         if: runner.os == 'Windows'

@@ -514,3 +514,21 @@
   #ees-work-panel .ew-work-result {padding:18px;}
   #ees-work-panel .ew-work-target-row,#ees-work-panel .ew-work-criterion {grid-template-columns:76px minmax(0,1fr);gap:12px;}
 }
+
+/* The same procedure editor can occupy the Native application shell without
+   granting Native Workspace access. Only its own scope/permission controls change. */
+#ees-work-authoring-link {display:block;margin:4px 8px;padding:9px 12px;border-radius:8px;color:var(--ew-ink);background:var(--ew-bg);font-size:14px;text-decoration:none;}
+#ees-work-authoring-link:hover {background:var(--ew-tint);}
+#ees-work-designer:has(.ew-authoring-scope) {min-width:0;max-width:100%;height:100%;overflow:auto;overscroll-behavior:contain;padding:24px;}
+#ees-work-designer .ew-authoring-scope {margin-bottom:24px;}
+#ees-work-designer .ew-authoring-scope > h1 {font-size:24px;font-weight:600;margin-bottom:8px;}
+#ees-work-designer .ew-authoring-scope .ew-actions {align-items:flex-end;gap:12px;}
+#ees-work-designer .ew-authoring-scope label {margin:12px 0 0;min-width:160px;max-width:100%;}
+#ees-work-designer .ew-authoring-scope select {min-width:160px;max-width:320px;}
+#ees-work-designer .ew-authoring-scope button {min-height:38px;background:var(--ew-soft);}
+#ees-work-designer .ew-system-settings {margin-top:24px;max-width:960px;}
+#ees-work-designer .ew-system-settings > h2 {font-size:18px;margin:24px 0 12px;}
+#ees-work-designer .ew-system-group {display:flex;gap:16px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--ew-line);padding:12px 0;}
+#ees-work-designer .ew-system-group label {min-width:160px;}
+#ees-work-designer .ew-system-group button {background:var(--ew-soft);}
+@media(max-width:760px){#ees-work-designer:has(.ew-authoring-scope){padding:16px}#ees-work-designer .ew-authoring-scope label{flex:1}#ees-work-designer .ew-authoring-scope select{width:100%}}

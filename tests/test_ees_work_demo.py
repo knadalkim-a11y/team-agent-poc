@@ -26,6 +26,7 @@ from urllib.parse import urlsplit
 
 from native_ui_fixture import NativeUIServer, chat_record
 from test_ees_chat_theme import ChromePipe
+from workflow_fixture import publish_fixture_definition
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "agent-pack/skills/ees-work-demo/scripts"
@@ -131,6 +132,54 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
 
     def current(self, chat_id="existing-chat"):
         return asyncio.run(self.server.workflow.get_state(self.server.user, chat_id=chat_id))
+
+    def authoring_current(self, process_id="setup-p"):
+        result = asyncio.run(self.server.workflow.get_authoring(self.server.user, process_id=process_id))
+        self.assertTrue(result["ok"], result)
+        return result
+
+    def choose_native_option(self, selector, value):
+        # Capability and the selected P arrive separately. Use the actual
+        # control's settled enabled/hit-test boundary before one trusted click.
+        ready = self.browser.evaluate("""(async()=>{
+            await Promise.all([document.fonts.load('400 14px "EES Inter"','EES 0123'),
+                document.fonts.load('400 14px "EES Noto Sans KR"','공장 업무')]);
+            await document.fonts.ready;
+            return await new Promise(resolve=>{let previous=null,stable=0;const end=performance.now()+9000;
+                const check=()=>{const e=document.querySelector(SELECTOR);if(e)e.scrollIntoView({block:'center'});
+                    const r=e?.getBoundingClientRect(),hit=r&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));
+                    stable=e&&!e.disabled&&hit&&e===previous?stable+1:0;previous=e;
+                    if(stable>=8)return resolve(true);if(performance.now()>end)return resolve(false);requestAnimationFrame(check);};check();});
+        })()""".replace('SELECTOR', json.dumps(selector)))
+        self.assertTrue(ready, 'Authoring selector never became visible and ready: ' + selector)
+        index = self.browser.evaluate("[...document.querySelector(" + json.dumps(selector)
+            + ").options].findIndex(option=>option.value===" + json.dumps(value) + ")")
+        self.assertGreaterEqual(index, 0, (selector, value))
+        self.click(selector)
+        self.key("Home", 36)
+        for _ in range(index):
+            self.key("ArrowDown", 40)
+        self.key("Enter", 13)
+        self.wait("document.querySelector(" + json.dumps(selector) + ")?.value === " + json.dumps(value))
+
+    def select_authoring_process(self, process_id="setup-p"):
+        self.wait("!!document.querySelector('#ees-work-manage-system') && !document.querySelector('#ees-work-manage-system').disabled")
+        if self.read('#ees-work-manage-system', 'value') != 'UNASSIGNED':
+            self.choose_native_option('#ees-work-manage-system', 'UNASSIGNED')
+        self.wait("!!document.querySelector(" + json.dumps('#ees-work-manage-process option[value="' + process_id + '"]') + ")")
+        if self.read('#ees-work-manage-process', 'value') != process_id:
+            self.choose_native_option('#ees-work-manage-process', process_id)
+        self.wait("!!document.querySelector('#ees-work-node-form') && !!document.querySelector('#ees-work-authoring')")
+
+    def open_authoring(self, process_id="setup-p", path="/?ees=workflow"):
+        self.navigate(path)
+        self.select_authoring_process(process_id)
+
+    def publish_runtime_fixture(self, definition):
+        """Arrange runtime data, not evidence of passing the authoring API."""
+        publish_fixture_definition(self.server.workflow, definition)
+        with self.server.workflow._db(write=True) as db:
+            self.server.workflow._init_authoring(db)
 
     def navigate(self, path):
         self.browser.call("Page.navigate", {"url": self.server.url + path})
@@ -439,7 +488,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                                          input='#ees-work-inputs input[name="db"]')
                     self.assert_preserved_styles("unaffected-" + kind + "-" + theme + "-" + str(width), selectors)
                     self.screenshot("sidebar-comparison-" + kind + "-" + theme + "-" + str(width))
-        self.navigate('/workspace/models?ees=workflow')
+        self.open_authoring()
         self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
         self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
         for width, height in ((1920, 1080), (600, 900)):
@@ -456,7 +505,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                 self.screenshot("sidebar-comparison-workspace-" + theme + "-" + str(width))
 
     def seed_large_case(self, conditioned=False):
-        """Publish synthetic volume through the same save/validate/create service.
+        """Arrange synthetic volume; execute it through the real runtime service.
 
         Counts and evidence come from real actions. Nothing here adds sample
         jobs, dates or success results to the production seed or browser DOM.
@@ -490,11 +539,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                 node.update(mode="tool", tools=[tool["id"]], bindings={tool["id"]: "db"})
             nodes[node_id] = node
             stage["children"].append(node_id)
-        for action in ("save_draft", "validate_draft", "publish"):
-            state = asyncio.run(self.server.workflow.handle_action(self.server.user, {
-                "action": action, "expected_revision": state["draft_revision"],
-                "payload": {"definition": definition} if action == "save_draft" else {}}))
-            self.assertTrue(state["ok"], state)
+        self.publish_runtime_fixture(definition)
         state = asyncio.run(self.server.workflow.handle_action(self.server.user, {
             "action": "create", "chat_id": "existing-chat",
             "payload": {"site_id": "us-a", "system": "EMS", "process_id": "bulk-p"}}))
@@ -936,11 +981,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         state = self.current()
         definition = deepcopy(state['catalog'])
         definition['tools']['health']['name'] = '새 게시본만의 다른 도구 이름'
-        for action in ('save_draft', 'validate_draft', 'publish'):
-            state = asyncio.run(self.server.workflow.handle_action(self.server.user, {
-                'action': action, 'expected_revision': state['draft_revision'],
-                'payload': {'definition': definition} if action == 'save_draft' else {}}))
-            self.assertTrue(state['ok'], state)
+        self.publish_runtime_fixture(definition)
         self.click('[data-action="work_detail"][data-detail-tab="config"]')
         self.assertIn('진행 건에 고정된 절차 v' + str(case['version']), self.text('#ees-work-dialog'))
         self.assertNotIn('새 게시본만의 다른 도구 이름', self.text('#ees-work-dialog'))
@@ -1069,11 +1110,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             node['name'] += ' · 해외 생산설비 인터페이스와 데이터베이스 연결 상태 및 현장 적용 대상 확인'
             node['description'] = '긴 한글 설명을 읽으며 공장과 시스템의 적용 범위, 작업 전제와 완료 기준을 확인합니다. ' * 10
             node['instructions'] = '등록된 업무 안내에 따라 담당자와 함께 입력값 및 저장된 결과를 확인합니다. ' * 35
-        for action in ('save_draft', 'validate_draft', 'publish'):
-            state = asyncio.run(self.server.workflow.handle_action(self.server.user, {
-                'action': action, 'expected_revision': state['draft_revision'],
-                'payload': {'definition': definition} if action == 'save_draft' else {}}))
-            self.assertTrue(state['ok'], state)
+        self.publish_runtime_fixture(definition)
         before = self.seed_case('existing-chat', ready=True)
         self.navigate('/c/existing-chat')
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
@@ -1171,11 +1208,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         state = self.current()
         definition = deepcopy(state['catalog'])
         definition['nodes']['ap-j']['deps'].append('db-j')
-        for action in ('save_draft', 'validate_draft', 'publish'):
-            state = asyncio.run(self.server.workflow.handle_action(self.server.user, {
-                'action': action, 'expected_revision': state['draft_revision'],
-                'payload': {'definition': definition} if action == 'save_draft' else {}}))
-            self.assertTrue(state['ok'], state)
+        self.publish_runtime_fixture(definition)
         self.seed_case('existing-chat', ready=True)
         self.navigate('/c/existing-chat')
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
@@ -1462,11 +1495,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         nodes["private-j"] = dict(deepcopy(nodes["db-j"]), id="private-j", name="권한이 필요한 점검",
                                   parent="private-t", skills=[], deps=[])
         definition["roots"]["setup"].append("private-p")
-        for action in ("save_draft", "validate_draft", "publish"):
-            state = asyncio.run(self.server.workflow.handle_action(self.server.user, {
-                "action": action, "expected_revision": state["draft_revision"],
-                "payload": {"definition": definition} if action == "save_draft" else {}}))
-            self.assertTrue(state["ok"], state)
+        self.publish_runtime_fixture(definition)
         assets["skill_bodies"].clear()
         self.navigate("/c/existing-chat")
         self.wait("!!document.querySelector('#ees-work-entry [data-node-id=private-p]')"
@@ -1812,17 +1841,18 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
     def test_workspace_ai_authoring_keeps_changes_local_and_targeted(self):
         self.create_case()
         before = self.current()
-        self.navigate('/workspace/models?ees=workflow')
+        before_authoring = self.authoring_current()["process"]["workflow"]
+        self.open_authoring()
         self.wait("!!document.querySelector('#ees-work-designer')")
         self.assertIsNotNone(self.read('#ees-work-authoring'))
         self.assertIn('AI에게 물어보기', self.text('#ees-work-authoring'))
         self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
         self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
-        writes = self.server.requests.count(('POST', '/api/ees-work/action'))
+        writes = self.server.requests.count(('POST', '/api/ees-work/authoring/action'))
         self.fill('#ees-work-authoring-input', '이 업무를 설명해 줘')
         self.click('#ees-work-authoring-form button[type=submit]')
         self.wait("document.querySelector('#ees-work-authoring')?.innerText.includes('현재 업무의 목적과 완료 조건')")
-        self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), before['draft']['nodes']['db-j'].get('instructions', ''))
+        self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), before_authoring['nodes']['db-j'].get('instructions', ''))
         replacement = '1. 승인된 점검 대상을 확인합니다.\n2. 점검 결과를 검토합니다.'
         self.server.authoring_answer = json.dumps({'answer': '확인 순서를 나눴습니다.', 'instructions': replacement})
         self.fill('#ees-work-authoring-input', '수행 안내만 쉬운 두 단계로 바꿔 줘')
@@ -1832,8 +1862,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.click('.ew-authoring-comparison > summary')
         self.assertIn('수정 전', self.text('.ew-authoring-comparison'))
         self.assertIn(replacement, self.text('.ew-authoring-comparison'))
-        self.assertEqual(self.server.requests.count(('POST', '/api/ees-work/action')), writes)
-        self.assertEqual(self.current()['draft'], before['draft'])
+        self.assertEqual(self.server.requests.count(('POST', '/api/ees-work/authoring/action')), writes)
+        self.assertEqual(self.authoring_current()['process']['workflow'], before_authoring)
         request = self.server.authoring_requests[-1]
         self.assertEqual(request['model'], 'fixture-model')
         self.assertEqual(request['tools'], [])
@@ -1849,7 +1879,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(self.read('#ees-work-authoring-input', 'value'), '아직 보내지 않은 질문')
         self.assertIn('확인 순서를 나눴습니다.', self.text('#ees-work-authoring'))
         self.click('#ees-work-authoring [data-action=ai_undo]')
-        self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), before['draft']['nodes']['db-j'].get('instructions', ''))
+        self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), before_authoring['nodes']['db-j'].get('instructions', ''))
         self.server.authoring_sse = True  # A model preset may force streaming.
         self.fill('#ees-work-authoring-input', '다시 안내를 수정해 줘')
         self.click('#ees-work-authoring [data-action=ai_edit]')
@@ -1860,12 +1890,11 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.click('#ees-work-dialog [data-dialog-close]')
         self.assertFalse(self.read('.ew-designer-advanced', 'open'))
         self.click('#ees-work-designer [data-action=save_draft]')
-        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('초안 1')")
+        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('초안 r1')")
         saved = self.current()
-        expected = json.loads(json.dumps(before['draft']))
-        expected['version'] = before['catalog']['version'] + 1
+        expected = deepcopy(before_authoring)
         expected['nodes']['db-j']['instructions'] = replacement
-        self.assertEqual(saved['draft'], expected)
+        self.assertEqual(self.authoring_current()['process']['workflow'], expected)
         self.assertEqual(saved['case']['definition'], before['case']['definition'])
         self.assertEqual(saved['catalog'], before['catalog'])
         self.click('#ees-work-designer [data-action=validate_draft]')
@@ -1880,7 +1909,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.screenshot('ees-workspace-ai-published')
 
     def test_workspace_ai_delayed_reply_does_not_overwrite_typing_or_another_target(self):
-        self.navigate('/workspace/models?ees=workflow')
+        self.open_authoring()
         self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
         self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
         self.wait("document.querySelector('#ees-work-designer [data-action=edit_node][aria-current=step]')?.dataset.nodeId === 'db-j'")
@@ -1908,7 +1937,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                 self.assertIn('적용하지 않았습니다', self.text('#ees-work-authoring'))
 
     def test_workspace_ai_rejects_unexpected_edits_and_preserves_request_on_failure(self):
-        self.navigate('/workspace/models?ees=workflow')
+        self.open_authoring()
         self.wait("!!document.querySelector('#ees-work-designer')")
         self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
         self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
@@ -1923,7 +1952,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                 self.wait("!!document.querySelector('#ees-work-authoring [role=alert]') && !document.querySelector('#ees-work-authoring [data-action=ai_cancel]')")
                 self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), original)
                 self.assertEqual(self.read('#ees-work-authoring-input', 'value'), '안내만 바꿔 줘')
-        self.assertEqual(self.server.requests.count(('POST', '/api/ees-work/action')), 0)
+        self.assertEqual(self.server.requests.count(('POST', '/api/ees-work/authoring/action')), 0)
 
     def test_work_evidence_dialog_preserves_current_selection(self):
         self.create_case()
@@ -1955,7 +1984,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
 
     def test_workspace_ai_cancel_and_account_change_preserve_saved_assets(self):
         before = self.current()
-        self.navigate('/workspace/models?ees=workflow')
+        before_authoring = self.authoring_current()["process"]["workflow"]
+        self.open_authoring()
         self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
         self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
         self.server.authoring_answer = json.dumps({'answer': '늦은 응답', 'instructions': '적용하면 안 되는 안내'})
@@ -1978,14 +2008,16 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.click('#ees-work-authoring [data-action=ai_edit]')
         self.assertTrue(self.server.authoring_started.wait(timeout=3))
         self.browser.evaluate("localStorage.setItem('token','fixture-second-session');window.dispatchEvent(new Event('storage'))")
-        self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model' && !document.querySelector('#ees-work-authoring [data-action=ai_cancel]') && document.querySelector('#ees-work-authoring-input')?.value === ''")
+        self.wait("!document.querySelector('#ees-work-authoring [data-action=ai_cancel]')")
+        self.select_authoring_process()
+        self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model' && document.querySelector('#ees-work-authoring-input')?.value === ''")
         self.server.authoring_hold.set()
         self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
         self.assertNotIn('중단할 작성 요청', self.text('#ees-work-authoring'))
         self.assertNotIn('늦은 응답', self.text('#ees-work-authoring'))
-        self.assertEqual(self.current()['draft'], before['draft'])
+        self.assertEqual(self.authoring_current()['process']['workflow'], before_authoring)
         self.assertEqual(self.current()['catalog'], before['catalog'])
-        self.assertEqual(self.server.requests.count(('POST', '/api/ees-work/action')), 0)
+        self.assertEqual(self.server.requests.count(('POST', '/api/ees-work/authoring/action')), 0)
 
     def test_revision_conflict_dialog_keeps_unsaved_input_and_new_server_result(self):
         self.create_case()
@@ -2008,9 +2040,15 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(self.current()['case']['jobs'], remote['case']['jobs'])
 
     def test_workspace_authoring_and_dialog_layout_and_keyboard(self):
-        self.navigate('/workspace/models?ees=workflow')
+        self.open_authoring()
         self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
         self.click('#ees-work-designer [data-action=edit_node][data-node-id=db-j]')
+        long_name = '해외 생산설비 인터페이스와 데이터베이스 연결 상태 및 현장 적용 대상과 담당자의 완료 기준을 함께 확인하는 업무'
+        long_instructions = '신규 담당자도 따라 할 수 있도록 승인된 대상과 점검 순서, 실패 시 확인할 내용을 차례대로 기록합니다.\n' * 12
+        self.fill('#ees-work-node-form [name="name"]', long_name)
+        self.fill('#ees-work-node-form [name="instructions"]', long_instructions)
+        self.click('#ees-work-node-form > button[type="submit"]')
+        self.wait("document.querySelector('#ees-work-node-form h2')?.textContent === " + json.dumps(long_name))
         for width, height in ((1920, 1080), (900, 900), (600, 900)):
             for theme in ('light', 'dark'):
                 with self.subTest(width=width, theme=theme):
@@ -2018,6 +2056,10 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                         'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
                     self.browser.evaluate("document.documentElement.classList.toggle('dark'," + str(theme == 'dark').lower() + ")")
                     self.browser.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+                    # The dedicated view must retain Native's responsive
+                    # sidebar width constraint even though the chat is hidden.
+                    self.assertEqual(self.browser.evaluate("getComputedStyle(document.querySelector('#ees-work-designer')).maxWidth"),
+                                     self.browser.evaluate("getComputedStyle(document.querySelector('#chat-container')).maxWidth"))
                     self.assertLessEqual(self.browser.evaluate('document.documentElement.scrollWidth'), width + 1)
                     self.assertLessEqual(self.browser.evaluate("document.querySelector('#ees-work-authoring').scrollWidth-document.querySelector('#ees-work-authoring').clientWidth"), 1)
                     styles = {key: self.visual_style(selector) for key, selector in {
@@ -2052,8 +2094,9 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.wait("location.pathname === '/workspace/models'"
                   + " && document.querySelector('#ees-work-workspace-tab')?.getClientRects().length > 0")
         self.click("#ees-work-workspace-tab")
-        self.wait("!!document.querySelector('#ees-work-designer')")
-        self.assertIsNotNone(self.read('#workspace-container'))
+        self.select_authoring_process()
+        self.assertEqual(self.browser.evaluate("location.pathname+location.search"), "/?ees=workflow")
+        self.assertIsNotNone(self.read('#chat-container'))
         self.assertIn("수행 안내", self.text("#ees-work-designer"))
         self.assertIn("완료 조건", self.text("#ees-work-designer"))
         self.assertIn("고급 설정", self.text("#ees-work-designer"))
@@ -2061,13 +2104,16 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertNotIn("태스크 추가", self.text("#ees-work-designer"))
         self.assertNotIn("잡 추가", self.text("#ees-work-designer"))
         self.click('#ees-work-designer [data-action="edit_node"][data-node-id="db-j"]')
-        writes_before = self.server.requests.count(("POST", "/api/ees-work/action"))
+        writes_before = self.server.requests.count(("POST", "/api/ees-work/authoring/action"))
         self.fill('#ees-work-node-form input[name="name"]', "DB 연결 확인 개정")
         # Typing changes only the local editor draft, without a form submit. The designer
         # may detach during ordinary SPA navigation, but must retain that draft
         # and its dirty state until the explicit server save.
         for route in ("models", "knowledge"):
-            self.click('nav a[href="/workspace/' + route + '"]')
+            self.click('#sidebar a[href^="/workspace"]')
+            self.wait("location.pathname === '/workspace/models' && !location.search")
+            if route != 'models':
+                self.click('nav a[href="/workspace/' + route + '"]')
             self.wait("location.pathname === " + json.dumps("/workspace/" + route)
                       + " && !location.search && !document.querySelector('#ees-work-designer')"
                       + " && !document.querySelector('.ees-work-native-hidden')")
@@ -2075,17 +2121,17 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             self.wait("document.querySelector('#ees-work-node-form input[name=name]')?.value === 'DB 연결 확인 개정'"
                       + " && document.querySelector('.ew-designer-status')?.innerText.includes('저장하지 않은 변경')")
             self.assertEqual(self.browser.evaluate(
-                "document.querySelectorAll('#ees-work-workspace-tab').length"), 1)
+                "document.querySelectorAll('#ees-work-authoring-link').length"), 1)
         self.browser.evaluate("window.__eesNativeWorkV1.refresh()")
         self.assertEqual(self.read('#ees-work-node-form input[name="name"]', "value"), "DB 연결 확인 개정")
         self.assertIn("저장하지 않은 변경", self.text(".ew-designer-status"))
-        self.assertEqual(self.server.requests.count(("POST", "/api/ees-work/action")), writes_before)
+        self.assertEqual(self.server.requests.count(("POST", "/api/ees-work/authoring/action")), writes_before)
         self.assertEqual(self.current()["catalog"]["nodes"]["db-j"]["name"], "DB 연결 확인")
         self.click('#ees-work-designer [data-action="save_draft"]')
-        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('초안 1')")
-        self.assertEqual(self.server.requests.count(("POST", "/api/ees-work/action")), writes_before + 1)
+        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('초안 r1')")
+        self.assertEqual(self.server.requests.count(("POST", "/api/ees-work/authoring/action")), writes_before + 1)
         self.assertNotIn("저장하지 않은 변경", self.text(".ew-designer-status"))
-        self.assertEqual(self.current()["draft"]["nodes"]["db-j"]["name"], "DB 연결 확인 개정")
+        self.assertEqual(self.authoring_current()['process']['workflow']["nodes"]["db-j"]["name"], "DB 연결 확인 개정")
         self.click('#ees-work-designer [data-action="validate_draft"]')
         self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('게시 전 확인 완료')")
         self.click('#ees-work-designer [data-action="publish"]', confirm=True)
@@ -2094,21 +2140,21 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(self.current()["case"]["version"], original_version)
         self.assertEqual(self.current()["case"]["definition"]["nodes"]["db-j"]["name"], "DB 연결 확인")
         self.screenshot("ees-native-workspace")
-        self.click('nav a[href="/workspace/models"]')
+        self.click('#sidebar a[href^="/workspace"]')
         self.wait("location.pathname === '/workspace/models' && !location.search"
                   + " && !document.querySelector('#ees-work-designer') && !document.querySelector('.ees-work-native-hidden')")
         self.server.user["role"] = "user"
         self.navigate("/c/existing-chat")
         self.wait("!!document.querySelector('#ees-work-entry')")
-        self.navigate("/workspace/models?ees=workflow")
-        self.wait("document.readyState === 'complete'")
-        self.assertIsNone(self.read("#ees-work-designer"))
+        self.navigate("/?ees=workflow")
+        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('권한')")
+        self.assertIsNone(self.read("#ees-work-node-form"))
         self.assertIsNone(self.read("#ees-work-workspace-tab"))
         self.assertFalse(self.current()["can_manage"])
 
     def test_integrated_workspace_hierarchy_search_preserves_local_edits_and_old_case(self):
         original = self.seed_large_case()
-        self.navigate('/workspace/models?ees=workflow')
+        self.open_authoring('bulk-p')
         # Mounting precedes the asynchronous model-list render and font layout.
         # Wait for those existing ready boundaries before measuring a trusted
         # pointer target; do not retry a missed click or weaken child counts.
@@ -2155,20 +2201,21 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(self.read('#ees-work-node-form [name="instructions"]', 'value'), '게시 전까지 보존할 직접 작성 안내')
         self.assertEqual(self.read('#ees-work-authoring-input', 'value'), '아직 보내지 않은 작성 질문')
         self.click('#ees-work-designer [data-action="save_draft"]')
-        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('초안 3')")
-        self.assertEqual(self.current()['draft']['nodes']['bulk-104-j']['instructions'], '게시 전까지 보존할 직접 작성 안내')
+        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('초안 r1')")
+        self.assertEqual(self.authoring_current('bulk-p')['process']['workflow']['nodes']['bulk-104-j']['instructions'], '게시 전까지 보존할 직접 작성 안내')
         self.assertEqual(self.current()['case']['definition'], original['definition'])
         self.assertEqual(self.current()['case']['jobs'], original['jobs'])
         self.screenshot('ees-integrated-workspace-hierarchy')
 
     def test_personal_settings_uses_native_controls_and_keeps_workspace_draft(self):
-        self.navigate('/workspace/models?ees=workflow')
+        self.open_authoring()
         self.wait("document.querySelector('#ees-work-authoring-model')?.value === 'fixture-model'")
         self.click('#ees-work-designer [data-action="edit_node"][data-node-id="db-j"]')
         self.wait("document.querySelector('#ees-work-node-form h2')?.textContent === 'DB 연결 확인'")
         self.fill('#ees-work-node-form [name="instructions"]', '개인 설정을 열어도 보존할 미저장 안내')
         self.fill('#ees-work-authoring-input', '개인 설정에서 돌아온 뒤 보낼 질문')
         before = self.current()
+        before_authoring = self.authoring_current()["process"]["workflow"]
         request_start = len(self.server.requests)
         original_session = self.browser.session
         selector = '#ees-work-node-form a[href="/?ees=tool-settings"]'
@@ -2213,9 +2260,9 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             self.browser.call('Target.closeTarget', {'targetId': settings_target})
         self.assertEqual(self.read('#ees-work-node-form [name="instructions"]', 'value'), '개인 설정을 열어도 보존할 미저장 안내')
         self.assertEqual(self.read('#ees-work-authoring-input', 'value'), '개인 설정에서 돌아온 뒤 보낼 질문')
-        self.assertEqual(self.current()['draft'], before['draft'])
+        self.assertEqual(self.authoring_current()['process']['workflow'], before_authoring)
         writes = [path for method, path in self.server.requests[request_start:] if method == 'POST'
-                  and (path == '/api/ees-work/action' or path == '/api/v1/users/user/settings/update'
+                  and (path in {'/api/ees-work/action', '/api/ees-work/authoring/action'} or path == '/api/v1/users/user/settings/update'
                        or path.startswith('/api/v1/tools/'))]
         self.assertEqual(writes, [], 'Opening native settings cannot write a draft, credentials or user preferences')
 
@@ -2225,10 +2272,23 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         for path in ("models", "knowledge", "prompts", "workflow", "models"):
             if path == "workflow":
                 self.click("#ees-work-workspace-tab")
-                self.wait("!!document.querySelector('#ees-work-designer')")
+                self.select_authoring_process()
+                self.assertEqual(self.browser.evaluate("location.pathname+location.search"), "/?ees=workflow")
+                stable = self.browser.evaluate("""new Promise(resolve=>{
+                    const entry=document.querySelector('#ees-work-authoring-link');let frames=0,missing=0;
+                    const tick=()=>{if(!entry.isConnected||document.querySelector('#ees-work-authoring-link')!==entry)missing++;
+                        if(++frames<32){requestAnimationFrame(tick);return;}resolve({missing,count:document.querySelectorAll('#ees-work-authoring-link').length});};requestAnimationFrame(tick);
+                })""")
+                self.assertEqual(stable, {"missing": 0, "count": 1})
+                self.assertEqual(self.browser.evaluate("getComputedStyle(document.querySelector('#ees-work-node-form input[name=name]')).fontFamily"), chat_font)
+                continue
             elif not self.browser.evaluate("location.pathname === " + json.dumps("/workspace/" + path)
                                            + " && !location.search"):
-                self.click('nav a[href="/workspace/' + path + '"]')
+                if self.browser.evaluate("location.pathname === '/'"):
+                    self.click('#sidebar a[href^="/workspace"]')
+                    self.wait("location.pathname === '/workspace/models' && !location.search")
+                if path != 'models':
+                    self.click('nav a[href="/workspace/' + path + '"]')
             self.wait("!!document.querySelector('#ees-work-workspace-tab')"
                       + " && !!document.querySelector('#workspace-container')")
             # The old restoreWorkspace/MutationObserver loop detached and

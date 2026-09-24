@@ -117,16 +117,8 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         return case
 
     async def publish(self, definition):
-        state = await self.service.get_state(self.admin)
-        result = await self.service.handle_action(self.admin, {
-            "action": "save_draft", "expected_revision": state["draft_revision"],
-            "payload": {"definition": definition},
-        })
-        self.assertTrue(result["ok"], result)
-        revision = result["draft_revision"]
-        for action in ("validate_draft", "publish"):
-            result = await self.service.handle_action(self.admin, {"action": action, "expected_revision": revision})
-            self.assertTrue(result["ok"], result)
+        from workflow_fixture import publish_fixture_definition
+        publish_fixture_definition(self.service, definition)
 
     def render(self, case, node_id, *, detail=False, **options):
         options = {"definition": case["definition"] if case else workflow._seed(), "readOnly": False,

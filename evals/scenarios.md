@@ -12,6 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| 시스템 담당자의 P별 작성·게시와 첫 이용 | [SA-01~28·NU-01~08·Native 재사용·세션 한계·사내 OP 확인](#system-authoring-20260924) |
 | A안 상태·실행 상세 구현 | [Figma 실조회와 제품 수락 A-01~A-11·실패/검증/미실행 구분](#a-design-20260923) |
 | 오른쪽 업무·수행 상세 후속 | [기존 기록 연결·조건 탐색·새 Native 검증·접근 차단 경계](#right-panel-20260922) |
 | AI 개발 구조·사내 UI 작성 자산 보존 | [관리 경계·기존 보호·동시 편집 한계와 합성 검증](#ai-runtime-preservation-20260915) |
@@ -46,6 +47,152 @@
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="system-authoring-20260924"></a>
+
+## 2026-09-24 시스템 담당자 작성·게시와 Native 첫 이용
+
+**시작·범위:** 설계 인계 v1.1과 [기능 계약](../docs/mockups/ees-work/TASK.md#system-authoring-20260924)을 적용한다. 시작 main/로컬 HEAD는 A안 #63 병합본 `a443d30c6694df0e1cbe082a0b99aa5f2d566917`, 작업 branch는 `feat/ees-system-authoring-20260924`이며 시작 시 로컬 변경은 없었다. main의 AGENTS/STATUS와 기존 원본을 읽었다. 설계 Draft #53은 변경하지 않는다. A안 기존 제품 검사는 그 범위의 과거 증거로 보존하고 이번 서버 인가·P별 저장/게시·Native 첫 이용 PASS로 합산하지 않는다. 새 Figma 검수를 수행한 것으로 기록하지 않는다.
+
+**검증 구성:** 기존 관리자와 합성 신규 계정으로 실제 Native 가입→pending→관리자 user 승인→첫 질문/게시 업무→그룹 지정→Workspace 관리 권한 0인 담당자의 새 P 작성/게시→다른 일반 사용자 이용→타 시스템 변경 거절→담당 회수까지 연결했다. 별도 회원/인증/그룹 구성원 API·DB·토큰을 만들거나 응답의 role/group을 admin으로 위조해 수락하지 않는다. 서버/저장 검사는 같은 P 충돌·서로 다른 P 게시·원자성·권한 회수/영수증·legacy 초안/Restore 경계를 추가한다. 코드/서비스·실제 Native·사내 확인을 구분하며 초기 실패와 재검을 이 절에 남긴다.
+
+**개발 검증 결론:** 아래 SA/NU의 명시된 범위에서 구현·로컬 수락 검사를 마쳤다. 서버 authoring24·프런트 합성 DOM/state24·최종 실제 Native 회원/계정전환6건과 자산/Restore/기존 회귀는 서로 다른 근거로 연결한다. Linux·Python3.12.14·Node24.19.0·Chrome headless shell153.0.8010.52·고정 upstream0.11.3·최종 ees.11 v7을 사용했다. Windows/지원 Python3.11·사내 모델/직원 사용·remote CI·OP-01~04는 미실행/미확인이고, 모든 token 즉시 무효화를 지원한다고 판정하지 않는다. 새 Figma 검수나 사내 공개 완료도 아니다.
+
+최종 회원 검사는 `EES_REQUIRE_AUTHORING_NATIVE=1`, `EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl`, `EES_TEST_BRANDING_DIR=dist/branding-sa-v7`, `EES_TEST_CHROME`에 기존 Chrome 절대 경로를 지정해 `.venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_authoring_native.py -v`로 실행했다. 계정 전환은 같은 원본/환경에서 `test_ees_work_authoring_account_switch.py`를 지정했다. 개별 임시 path와 버전별 실패 로그는 아래에 보존한다.
+
+### 준비·초기 검사와 관측
+
+- 기존 Native API의 첫 합성 검사 **2 PASS**, 8.908초(`dist/validation-sa/native-auth-first.log`). 기존 관리자 아래 실제 가입에서 role/admin/부서/시스템 주장으로 승격되지 않고 pending·무담당이며 자기 역할 변경이 거절됐다. 가입을 닫으면 직접 signup은 403이다. 당시 API 검사만으로 실제 가입 UI 전체 흐름 통과를 뜻하지 않는다.
+- 실제 Native `/auths/update/password`는 틀린 현재 비밀번호 400, 정상 변경 뒤 옛 비밀번호 로그인 400/새 비밀번호 200이다. 관리자 `/users/{id}/update` 재설정 뒤에도 옛 비밀번호 400/새 비밀번호 200을 확인했다. **`app.state.redis=None`인 검사 구성에서는 두 번째 기존 JWT가 변경·재설정·signout 뒤에도 200**이었다. 고정 Native revoke 경고와 일치하는 관측이며 즉시 무효화 성공이 아니다. UI·다른 token 저장 구성·사내 설정은 별도 미확인이다.
+- 기존 자산 관련 strict 검사 **61 PASS**, 3.368초. 최초 프로그램 customization은 **57건 중 54 PASS/3 SKIP**, 5.217초(`/tmp/sa-custom-initial.log`). SKIP은 실제 Windows directory sharing lock 없음, 현재 실제 wheel 미제공, 현재/이전 shipped wheel 미제공의 세 gate다. 후속 wheel/Restore 결과와 구분한다.
+- Specialists 첫 실제 upstream 검사는 **34건 중 33 PASS/1 ERROR**였다. ees.11을 지원 allowlist에 추가했는데 미지원 버전 fixture에도 같은 ees.11이 남아 ModuleNotFoundError가 발생했다. 미래 미지원 값을 ees.12로 바꾸고 동일 34건 재검 **34 PASS**, 1.301초다. 제품 인증/자산 경계를 완화하지 않았다. launch 첫 65건의 버전 기대 subtest 4개 실패/2 SKIP도 같은 fixture 경계였으며 아래에 해당 재검을 구분한다.
+- main `a443d30`에서 이전 ees.10 wheel을 재빌드한 SHA256 `ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd`는 A안 최종과 일치한다. 이는 후속 Restore 검사의 이전 원본 준비이며 Restore 자체 PASS가 아니다.
+- Native 회원 시험에 필요한 고정 의존성은 기존 CI의 `Install fixed test dependencies` 원본에 추가했다. 기존 `.venv`를 사용하며 별도 제품 요구사항/인증 서비스를 만들지 않는다. 정확한 목록은 해당 workflow가 원본이고 회사 환경에는 설치하지 않았다.
+
+**기존 경로 관련 추가 회귀:** workflow Tool strict **34 PASS**, 0.937초와 ApplyDemo **28 PASS**, 4.692초를 확인했다. launch의 미래 미지원 버전 fixture 보정 후 **65건 중 63 PASS/2 SKIP**, 16.711초다. 남은 SKIP은 실제 Windows native identity/console IPC 환경이다. panel 최초 **43건 중 33 PASS/10 FAIL**, 30.425초는 runtime 시험 준비가 새 프로토콜에서 금지한 구형 전체 writer를 호출해 발생했다. 시험 전용 초기 published 자료 준비를 분리한 재검은 **43 PASS**, 37.745초이며 실제 legacy 차단은 유지했다. 이 검사들을 새 SA/NU 기능 전체 통과로 표시하지 않는다.
+
+**작성 서비스·API와 구버전 읽기 검사:** `tests/test_ees_work_authoring.py` 확장 첫 실행은 **22 PASS/0 FAIL/0 SKIP**, 4.330초(`authoring-expanded-first.log`)다. 실제 SQLite와 실제 업무 서비스를 사용하고 사용자/그룹/자산 조회·HTTP 인증 주체는 합성 fixture이므로 Native 회원/ACL 통과로 확대하지 않는다. 첫 준비는 lazy import용 시험 package 경로 오류로 **17 ERROR**, 0.118초(`authoring-initial.log`)였다. 이를 수정한 후 **17건 중 16 PASS/1 ERROR**, 0.740초(`authoring-rerun1.log`); 거절 응답을 확인하기 전에 `case`를 읽은 시험 KeyError를 바로잡고 22건으로 확장했다. 실패를 삭제하거나 초기 전체를 PASS로 합산하지 않는다.
+
+같은 P 동시 저장의 한 승자/충돌, 같은 EMS 두 P와 APC P의 동시 게시/공통 자료 보존, SQL 감사 저장 실패와 합성 결과 검증 실패의 rollback을 실제 DB에서 검사했다. SA-23은 기존 전체 draft/published TEXT·revision/validated의 정확한 보존과 선택 P만 가져오기를 확인했다. SA-25는 위 exact ees.10 wheel의 실제 서비스로 같은 DB를 순차 읽고 쓰며 새 P 메타·이전/새 진행 건·fallback 중 작성한 전체 초안의 재업그레이드 보존을 확인했다. 새/구 프로그램 동시 실행이나 실제 Windows 프로그램 교체를 확인한 것은 아니며 물리 Apply/Restore 게이트는 별도다.
+
+```bash
+EES_REQUIRE_LEGACY_WORKFLOW=1 EES_TEST_LEGACY_WORKFLOW_WHEEL=dist/restore-ees10/open_webui-0.11.3+ees.10-py3-none-any.whl .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_authoring.py -v
+```
+
+**설치 모듈 패키징 검사:** builder 첫 **25건 중 23 PASS/2 FAIL**는 실제 새 wheel에 authoring 모듈이 포함됐는데 시험 probe의 추출 목록에 그 파일이 빠진 준비 오류였다. 추출 목록을 갱신하고 wheel에서 추출한 실제 설치 모듈의 capabilities 호출까지 확인한 재검은 **25 PASS**, 38.630초다. 프로그램 Apply/Restore gate는 ees.10→ees.11의 interpreter/data/key 불변과 옛 프로그램 파일 해시 대조를 추가했으며 새 최종 wheel로 실행한 결과를 별도로 기록한다.
+
+**서비스 최종 확장과 runtime 분리:** authoring은 추가 그룹 연결 감사/legacy 영수증·구형 게시의 공유 참조 보호를 포함해 중간 **23 PASS**, 3.675초(`authoring-expanded-final1.log`), **23 PASS**, 4.015초(`authoring-final.log`)를 거쳐 최종 **24 PASS/0 FAIL/0 SKIP**, 5.252초(`authoring-final-v2.log`)다. 구형 프로그램이 게시해 여러 P가 참조하게 된 연결도 한 P를 통해 수정할 수 없음을 같은 exact ees.10 서비스로 확인했다. 22·23·24 실행 수는 누적 고유 시험 수로 더하지 않는다.
+
+기존 workflow+routes 최초 묶음은 **51건, failure 6/error 1**, 2.034초(`backend-regression-first.log`)였다. 새 프로토콜에서 차단하는 전체 writer를 runtime 자료 준비에 쓰던 부분과 과거 전체 초안 기대를 분리했다. 기존 runtime **48 PASS**, 2.885초(`workflow-adapted-first.log`), 변경 없는 routes **3 PASS**, 0.170초(`static-routes-final.log`)로 재검했다. 시험 수가 감소한 것이 아니라 48+3을 별도 실행했다. 옛 publish 시험은 `test_new_published_fixture_freezes_existing_case`로 이름/준비를 바꾸고 기존 진행 snapshot assertion을 유지했으며 실제 작성 권한/검사/게시 보호는 새 authoring suite에 추가했다. SA-14의 초안 검토·외부 도구 미연결·다중 점검 실패/건너뜀/재시도·사람 확인 경계는 이 runtime 회귀를 연결한다.
+
+**UI 검토와 최초 실행 실패:** 독립 소스 검토에서 Native 참조 메타데이터 형식 불일치, 권한 회수 후 편집/AI 차단 누락, 접근 불가 공유 참조 재분류, 읽기 전용 AI 되돌리기의 네 경계를 찾아 수정 확인했다. 이는 실제 Native 화면 수락과 별개다. 이후 UI 집중 harness **13건 중 12 PASS/1 FAIL**에서 미저장 글을 명시적으로 버리고 이동해도 옛 DOM 캡처가 그 글을 다시 캐시에 넣는 제품 결함을 재현했다. 19건 확장의 **17 PASS/2 FAIL**은 이 결함과 늦은 모델 목록 응답 뒤 loading이 끝나지 않는 별도 결함이다. 버리기 뒤 저장본 DOM을 먼저 반영하고 모델 응답 상태 정리를 보완한 **19 PASS** 뒤, 기존 편집·게시 보호·canonical 폭 상태 회귀까지 추가해 중간 **22 PASS/0 FAIL/0 SKIP**, 0.745초다. Python discover wrapper도 당시 **1 PASS**, 1.443초였지만 같은 22개 harness 재사용이므로 별도 제품 검사 수로 더하지 않는다. 실제 Native 레이아웃/회원 수락과는 별개다. v4 중간 wheel SHA256 `79d6072a774f88fe536d007b6f945b4b4cd90018f305ce3a2b58af7904e40041`은 이 후속 수정 전 원본이며 최종 원본으로 안내하지 않는다.
+
+**실제 설치 프로그램·Native 자산:** v4 wheel과 소스가 일치한 시점의 실제 Native 자산 gate는 **26 PASS**, 85.321초(`/tmp/sa-asset-native-final.log`)다. 실제 프로그램 customization은 **58건 중 55 PASS/1 ERROR/2 SKIP**, 73.665초였다. 이전 ees.10 준비 fixture가 앱 파일만 설치하는 기존 방식과 달리 상위 패키징 파일까지 풀어 이전 RECORD 검증에서 거절됐다. 제품 검증을 완화하지 않고 당시 앱 파일 subset과 derived RECORD를 정확히 준비한 후 실패한 한 gate만 재검해 **1 PASS**, 43.411초(`/tmp/sa-custom-restore-retest.log`)다. 이를 clean 58건 일괄 PASS로 바꾸지 않는다.
+
+이 gate는 실제 ees.10→ees.11 프로그램 파일 Apply/Restore와 복원 후 **전체 이전 프로그램 파일 해시·기존 data/key/interpreter 불변**을 확인한다. 별도 old ees.7/8 선택 gate와 실제 Windows lock은 **2 SKIP**으로 남는다. 동일 DB 서비스의 fallback 작성/재업그레이드는 앞의 SA-25 검사이며 Windows/사내 적용과는 다르다. 후속 UI 한 줄 수정은 위 설치·자산 검사 이후 원본이므로 최종 패키지와 그 확인은 별도로 기록한다.
+
+**Native 진입 화면의 후속 수정:** 실제 canonical 작성 화면에서 Native sidebar 245px가 작성기 왼쪽을 덮는 결함을 확인했다. Native chat의 실제 computed max-width에 작성기를 맞추는 방식으로 보완했다. 이 수정의 v6 wheel SHA256은 `0e75184cbfa06eae0f354721fafcde5d2e4699c7b6a09d052f75c18939e23957`이며 이후 Native 실제 기하 검사는 아래에 따로 기록한다. 생성 성공이나 DOM harness의 폭 상태 검사만으로 실제 화면 재검 PASS를 선언하지 않는다.
+
+**담당 작성과 실제 Native 자산 ACL의 연결:** `NativeAuthoringAssetReadTests` 추가 **2 PASS**, 8.169초(`authoring-native-assets-first.log`) 뒤 그룹 연결 전후 해시 확인을 보강해 **2 PASS**, 7.588초(`authoring-native-assets-final.log`)다. 기존 26건의 중복 재실행이 아니다. 고정 Native Tools/Skills/AccessGrants 테이블·권한 필터와 실제 `_registered_assets`/작성 API를 연결해 public 참조의 저장/검사/게시, private 참조 비노출/거절, 실제 ACL 회수 후 불투명 초안 참조 보존과 게시 차단을 확인했다. Workspace models/tools/skills 권한은 false, Native Tool 생성은 401이다.
+
+그룹 mapping/작성 전후 Native DB의 모든 논리 row hash가 같아 Tool 코드·Skill 본문·Valves·ACL·owner가 유지됐다. 주변 사용자/그룹/인증 주체는 합성 fixture이며 settings/role 불변은 그 객체 hash 검사다. 이를 실제 Native 회원 DB의 UserValves 저장이나 NU 로그인 PASS로 확대하지 않는다. 실행은 `EES_REQUIRE_ASSET_NATIVE=1 EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl .venv/bin/python -m unittest discover -s tests -p test_ees_asset_native.py -k NativeAuthoringAssetReadTests -v`이며 제품 코드는 바뀌지 않았다.
+
+**늦은 AI 응답의 보호 안내:** v6 Native 회귀 묶음 **7건 중 6 PASS/1 FAIL**, 63.823초(`old-native-v6-first.log`)에서 같은 P의 노드를 옮겼다 돌아온 사이 AI 응답이 도착하면 기존 입력은 보존했으나 보호 안내가 누락됐다. 23번째 focused 검사로 재현하고 안내를 보완했다. 당시 DOM/state harness **23 PASS**, 0.617초와 wrapper **1 PASS**, 0.894초를 확인했다. 모델 0개/모델 조회 실패에도 수동 편집·P 저장이 가능한 검사를 추가한 최종 **프런트 합성 DOM/state 24 PASS/0 FAIL/0 SKIP**, 0.684초(`dist/validation-sa/authoring-ui-contracts-final.log`, `node --test tests/test_ees_work_authoring_ui.cjs`)이며 Python discover wrapper **1 PASS**, 0.941초(`authoring-ui-python-discover.log`)는 같은 24건의 중복 실행이다. 서버 authoring24건과는 다른 suite다. 이 수정의 실제 Native 재검은 아래 v7의 해당 검사로 확인한다.
+
+**기존 Native 회귀와 v7 확인:** 최초 v4 기존 Native 묶음은 **4건 중 0 PASS/3 FAIL/1 ERROR**, 19.193초(`old-native-v4-first.log`)였다. canonical 작성기가 sidebar에 가린 한 건은 제품 결함, 두 건은 초기 select 재렌더 중 disabled 준비 상태에서 조작한 시험 문제, 한 건은 변경 중인 소스와 wheel 불일치에 대한 정상 보호 오류다. v6의 선정 7건 중 성공 6건을 유지하고, 늦은 AI 안내와 레이아웃을 v7에서 재검해 **2 PASS**, 19.452초(`old-native-v7-focused.log`)다. 선정 7개 회귀가 보완됐으며 9개 고유 시험이나 clean7 일괄 재검으로 표시하지 않는다. 이 묶음은 실제 패키지 frontend와 기존 합성 API fixture의 회귀로, 실제 Native 회원 저장/인증 NU 흐름과 다르다.
+
+v7 wheel SHA256은 `6239216c26e6acfe34e35ef4c58c4276de999c963a7cb552b2f3eca487b50cf6`(151,899,772바이트)다. v6 대비 늦은 AI 응답의 안내 한 곳만 보완했고 backend/패키징 코드는 동일하다. 실제 v7의 1920×1080/900×900/600×900·light/dark에서 한글 작성기/Native 글꼴·4.5 이상 대비·수평 넘침 없음·sidebar 열림/닫힘과 chat 동일 max-width를 확인했다. 고급 dialog의 Tab 가둠/Escape·원래 summary 초점 복귀도 검사했다. v6 성공 회귀는 canonical 작성기→Native 모델/지식 SPA 복귀·숨김 DOM 해제·미저장 글 보존·탭 32프레임 탈착 없음, 실제 Tiptap 입력/스트림과 업무 공존, 개인 설정 왕복의 미저장 업무/AI 질문 보존·자산 설정 쓰기 0을 포함한다. 신규 회원 대표 흐름은 아래의 같은 v7 검사를 별도 근거로 사용한다.
+
+SA-27의 같은 v7 레이아웃 검사에 긴 한글 작업명과 12줄 안내를 실제 폼에 입력·로컬 반영한 조건을 보강해 **1 PASS**, 10.576초(`old-native-v7-long.log`)를 확인했다. 위 1920/900/600의 양 테마·글꼴/대비/overflow/max-width·Dialog Tab/Escape/초점을 같은 내용으로 대조했으며 이미 선정한 레이아웃 한 건의 강화 재검이다. `dist/validation-sa/old-native-v7-long/ees-workspace-authoring-{theme}-{width}.png`와 advanced dialog 캡처를 남겼다. 실제 PNG의 light1920 긴 제목/트리 줄바꿈·sidebar 비겹침과 dark600 advanced dialog의 내용/버튼/가시 초점·하단 영역을 직접 열어 대조했다. 고유 시험 수에 더하거나 새 Figma 검수로 표시하지 않는다.
+
+**Native 인증 API 추가 수락:** 기존 가입/비밀번호 2건과 pending 보호 1건을 함께 재검해 **3 PASS**, 11.508초(`dist/validation-sa/native-auth-final-rerun.log`)다. 세 번째 검사의 초기 실패는 연결 요청에 필수 request_id를 빠뜨려 400이 반환된 시험 계약 오류였으며 필요한 값을 넣어 재검했다. 실수로 담당 그룹에 넣은 pending 계정도 authoring capability/조회/쓰기와 runtime 쓰기는 401/403이다. Native `user` 승인 후에는 같은 JWT로 관리 가능하고 다시 pending으로 역할 제한하면 기존 JWT의 EES 상태 요청이 401/403이다. 비밀번호 변경 후 JWT가 유지되는 앞의 구성 한계와 달리 역할은 보호 요청에서 재조회한다. 이 API 결과와 아래 대표 UI 전체 흐름 결과를 구분한다.
+
+**가입 닫힘의 실제 화면:** Native 관리자 설정 API로 합성 서비스의 `ENABLE_SIGNUP=false`를 적용하고 실제 `/auth` 화면에서 가입 버튼이 없으며 직접 signup 요청은 403임을 확인했다. 독립 **1 PASS**, 5.245초(`dist/validation-sa/native-closed-ui.log`)다. 회사 가입 정책을 바꾸거나 대표 가입→승인→게시 흐름을 대신한 검사는 아니다.
+
+**최종 제품 원본 대조:** v7 SHA256 `6239216c26e6acfe34e35ef4c58c4276de999c963a7cb552b2f3eca487b50cf6`·151,899,772바이트에 대해 WORK_ASSETS·조립 launcher JS·CSS·bootstrap **13개 항목이 현재 소스와 byte-exact 일치**했다(`dist/validation-sa/final-wheel-source-check.json`). 최종 재조회 main은 여전히 `a443d30`이고 열린 PR은 기존 Draft #53(head `3aadd727`)뿐이며 이를 변경하지 않았다. 산출물 확인과 원격 게시/병합·사내 설치는 별개다.
+
+**실제 Native 신규 회원 대표 흐름:** v17 **1 PASS**, 58.419초(`dist/validation-sa/native-browser-v17.log`)를 확인했다. 기존 관리자가 있는 실제 Native 가입 UI→pending→관리자 UI의 user 승인→A의 공통 모델 질문/기존 게시 J 사람 확인→Native 그룹 UI 지정과 EES 연결→A의 role=user·Workspace 관리권한 0에서 새 P/T/J 작성/저장/검사/게시→별도로 가입·승인한 B의 A안 새 J 완료까지 연결했다. APC/COMMON 작성 요청은 403이다. Native 그룹 UI로 A를 제거한 뒤 열린 작성기의 미저장 글은 보존/잠금 상태이고 유효한 저장·검사·게시 API 요청은 404 `process_not_found`, 일반 runtime은 200이었다. Native UI로 A를 pending 제한하자 기존 token의 보호 요청은 401이며 B의 이용은 유지됐다.
+
+같은 Native/EES 데이터로 ASGI 앱·DB 엔진·WorkflowService·HTTP listener를 재초기화하고 B를 재로그인해 역할·그룹·초안·게시·진행 보존을 확인했다. 계정/키 재생성은 없다. 실제 가입/인증/회원/그룹 router/model과 고정 제품 frontend를 사용했으며 모델 응답·chat 저장/전송은 합성 transport다. 실제 LLM·Native 전체 production startup·Windows 프로세스 재기동을 통과한 것은 아니다. 기존 A 진행 snapshot 불변·B의 실제 새 안내·재기동 뒤 시스템-그룹 연결 보존 assertion을 더한 최종 strict 검사는 **5 PASS/0 FAIL/0 SKIP**, 75.960초(`dist/validation-sa/native-authoring-final.log`)다. 실제 Native API3·가입 닫힘 UI1·대표 전체 UI1의 합계이며 앞선 단독 실행과 중복 합산하지 않는다.
+
+**같은 브라우저의 계정 전환과 늦은 응답:** v7 `test_ees_work_authoring_account_switch.py`의 첫 실행 보고는 **1 PASS**, 20.091초다. 같은 로그를 보강 재검이 갱신한 현재 `dist/validation-sa/account-switch-v7.log`는 **1 PASS**, 19.562초이며 아래 최종 strict 재검도 같은 한 건이다. 같은 Chrome profile의 두 탭에서 Native UI로 A 로그아웃→B 로그인을 수행하고, 인증을 마친 뒤 대기시킨 A의 작성 GET·AI 응답을 B 편집 중 반환했다. B의 미저장 글 유지·이전 A 탭의 B 전환·A 글/질문/응답 비노출·B 후속 AI 문맥 격리·두 P의 저장 revision 불변을 확인했다. 실제 조립 Native와 Auths/Users/Groups/JWT/ACL을 사용하며 임시 계정/P의 초기 API 준비·모델 답변·HTTP 지연은 합성이다. 전체 Native chat DB·개인 UserValves의 교차 계정 조회를 이 한 건으로 증명하지 않는다. 프런트 합성24건과 별도이며 JSON/PNG는 `dist/validation-sa/account-switch-v7/`에 남겼다.
+
+같은 계정 전환 한 건에 실제 Native Users/settings API의 A/B private 값 분리를 추가한 최종 strict 재검은 **1 PASS**, 18.710초(`account-switch-v7-strict.log`)다. B 로그인 뒤 두 탭의 설정 API는 B 값만 반환했고 input/textarea 값에도 A의 글·질문·응답이 없었다. 합성 chatstore에 A/B 소유 자료를 두고 실제 Native JWT 주체로 B 목록/상세200·A 상세403과 Native DOM의 A 제목 비노출을 확인했다. 설정 dialog UI·실제 Native chat DB 전체 경로는 미실행이다. 최종 Native 회원5건과 이 계정 전환1건은 **고유 6건**이며 중간 재검을 더하지 않는다.
+
+**대표 Native UI 초기 실패 보존:** `native-browser-first.log`(v1)부터 `native-browser-v16.log`까지 **16회 불통과** 후 v17 대표1건과 최종 strict5건이 통과했다. 아래는 준비/조작/기대값을 보완한 경계이며 별도로 발견한 sidebar 겹침·늦은 AI 안내 제품 결함과 혼합하지 않는다. 각 원본 로그는 `dist/validation-sa/`에 보존한다.
+
+| 당시 실행 | 관측·보완 |
+|---|---|
+| v1 | 1 ERROR, 변경 중 소스와 stale wheel 보호로 UI 시작 전 중단 |
+| v2~v6 | 각각 1 FAIL. 가입/대기 한국어 locator·실제 users의 lazy ChannelMember 의존 준비·사용자 행 profile 버튼 오선택·offcanvas 계정 메뉴 조작 보완 |
+| v7 | raw failure 2. 로그아웃 full navigation의 JS context 소멸과 같은 원인의 실패 screenshot 수집 |
+| v8~v13 | 각각 1 FAIL. 그룹 낙관적 체크 뒤 실제 DB commit, 작성기 초기 load, 합성 첫 chat readiness, 접힌 Native sidebar, mapping 저장 후 탭/목록 reload, capability 뒤 시스템 목록의 준비 상태를 각각 기다리도록 보완 |
+| v14 | 1 FAIL. select Home/Down의 중간 change가 빈 P를 로드하던 시험 조작 보완 |
+| v15 | 1 FAIL. B 합성 chatstream/newchat 경합과 fixture의 끝없는 pagination을 완료 기록 재조회·page2 empty로 보완 |
+| v16 | 1 FAIL. 접힌 절차·근거 안 수행 안내를 기본 visible text로 요구하던 기대를 실제 펼침 경로로 보완 |
+
+### SA 제품 수락
+
+아래는 실행한 범위별 판정이다. 서비스의 합성 권한 원본·실제 Native 인증/회원·제품 frontend·사내 미실행을 구분하며 UI 표시만으로 서버 인가 통과로 바꾸지 않는다.
+
+| ID | 확인 조건 | 결과·근거 |
+|---|---|---|
+| SA-01 | user 역할·EMS 그룹·가입/승인과 담당 지정 분리 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-02 | 동일 시스템 공동 관리·EMS/FDC 겸임·APC 거절 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-03 | 그룹 ID 기준·이름 변경·삭제/재생성·연결 해제 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-04 | pending/삭제/권한 원본 조회 실패 차단 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-05 | 무담당/범위 밖 API 직접 호출·관리자 설정 위조 거절 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-06 | URL/body/role/owner/AI 생성값 위조 거절 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-07 | 타 시스템 미게시 목록·초안·오류·AI 문맥 비노출 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-08 | 단일 P subtree·공통 정책/자산/roots·ID/순환 경계 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-09 | 열린 화면에서 담당 회수·다음 요청 재인가·미저장 글 보존 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-10 | 중복 게시 1회·회수 후 영수증 재생 인가 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-11 | 일반 담당자·Native Workspace 권한 0 진입/새로고침/복귀 | 실제 Native 가입/승인 A의 user·Workspace0 canonical 작성/게시·새로고침 PASS; 기존 SPA 복귀는 v6/v7 회귀 |
+| SA-12 | Native 자산 ACL·코드·Valves/UserValves·역할 보존 | 실제 Native 자산 ACL/코드/본문/Valves/owner 비변경 추가2건 PASS; 사용자 settings/role은 합성 fixture. 실제 회원/개인 설정 흐름은 NU 별도 |
+| SA-13 | 새 P/T/J 작성·저장·검사·게시→다른 일반 사용자 A안 이용 | 실제 Native A(user·Workspace0)의 새 P/T/J 저장·검사·게시→별도 가입/승인 B의 A안 J 완료 PASS |
+| SA-14 | 사람 확인·초안 검토·모의 점검과 외부 미연결 구분 | 실제 Native 신규 J 사람 확인·서비스와 runtime48의 초안 검토/모의/미연결/실패/재시도 경계 PASS; 실제 외부 실행 미지원 유지 |
+| SA-15 | 같은 P 동시 저장 충돌·최신 서버본/미저장 글 구분 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-16 | 같은/다른 시스템의 서로 다른 P 동시 게시 보존 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-17 | 오래된 catalog 기준에서 최신본에 선택 P만 병합 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-18 | 초안·참조·정책·소유권 변화 후 검사 무효화 | 서비스/API24건과 실제 Native ACL 회수·초안 참조 보존/게시 차단 추가2건 PASS; 실제 사용자 흐름은 NU 별도 |
+| SA-19 | 검증/DB/감사 실패의 게시 원자성 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-20 | 단일 관리/적용 시스템·공통/미지정 관리자 전용 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-21 | 기존 P 명시적 위임/이관·새 ID 복사·진행 snapshot 보존 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-22 | 게시 P 사용 중지·하위 삭제·미게시 삭제 경계 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-23 | 기존 전체 초안 원문/revision 보존·선택 P만 가져오기 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-24 | legacy 전체 쓰기 차단·runtime API/구형 탭 경계 | 서비스/API24건의 해당 경계 PASS(합성 권한 원본); 실제 Native 회원 연결은 아래 NU로 별도 판정 |
+| SA-25 | 이전 프로그램 Restore·fallback 초안·재업그레이드 보존 | exact ees.10 동일 DB fallback/재업그레이드와 실제 ees.10→11 프로그램 Apply/Restore·파일/data/key/interpreter 보존 PASS; Windows/사내 미실행 |
+| SA-26 | 계정/시스템 전환·늦은 응답·다른 탭 초안/capability 격리 | 같은 실제 Native profile 두 탭 A→B 로그인·지연 GET/AI·초안/capability/AI 문맥 격리1건 PASS; 시스템/P 전환은 DOM/state24 |
+| SA-27 | A안 큰/작은 창·긴 한글·키보드/초점·충돌/회수·DOM 복원 | 실제 패키지 frontend v6/v7의 작성기 1920/900/600 light/dark·긴 한글 실제 입력/키보드·초점·Native DOM 복원 PASS; 충돌 안내는 DOM/state24, 회수/Tab8회·Escape 원점 복귀는 실제 Native 대표 흐름으로 확인. 이전 A안 전체 재검은 아님 |
+| SA-28 | 감사 actor/대상/revision·비밀 비포함·실제 wheel 포함 | 서비스 감사/본문 비포함·실제 설치 capabilities PASS; 최종 v7 wheel의 현재 소스 13항목 byte-exact 일치 PASS |
+
+### NU Native 재사용·첫 이용 수락
+
+대표 가입 흐름은 기존 관리자가 있는 전용 시험 데이터에서 실제 Native UI/API와 인증/회원/그룹 저장을 사용한다. 미리 삽입한 user만으로 신규 가입 검사를 대체하지 않는다. 같은 실행이 SA와 NU를 만족하면 근거를 공유하고 중복 실행 수로 합산하지 않는다.
+
+| ID | 확인 조건 | 결과·근거 |
+|---|---|---|
+| NU-01 | 실제 Native 가입 활성/비활성·기존 관리자·pending/무담당 신규 가입 | Native API3건·가입 닫힘 실제 UI1건·기존 관리자 아래 A/B 신규 가입→pending/승인 UI PASS |
+| NU-02 | pending의 EES 보호 요청 차단·잘못 준 그룹/프로필 변조 거절 | 최종 Native5건의 잘못된 그룹/pending API 보호·가입 역할 변조 거절과 대표 UI PASS |
+| NU-03 | Native user 승인·첫 질문·게시 업무 첫 입력/확인·무담당 유지 | 실제 Native 관리자 승인→담당 지정 전 공통 모델 질문/기존 게시 J 사람 확인 PASS. 모델 응답·chat 저장은 합성 |
+| NU-04 | Native 그룹 지정→Workspace0 작성/게시→다른 사용자 이용·APC/공통 거절 | 실제 Native 그룹 UI→A user·Workspace0 새 P/T/J 작성/게시→B 사용 PASS; APC/COMMON403 |
+| NU-05 | 로그아웃/다른 계정·늦은 응답·초안/대화/개인 설정/capability 격리 | 같은 profile 두 탭 작성/AI/capability·실제 Users/settings API 분리 PASS. 대화는 실제 JWT+합성 chatstore/Native DOM 검사; 설정 dialog·전체 Native chat DB 미실행 |
+| NU-06 | Native 비밀번호 변경/관리자 재설정·오류·새 로그인·기존 token 구성별 한계 | 실제 Native API의 틀린 현재 비밀번호 거절·변경/관리자 재설정·새 로그인 PASS. Redis 없는 기존 JWT 유지 관측; 비밀번호 UI/다른 구성 미실행 |
+| NU-07 | 같은 데이터/키로 서비스 재기동·계정/그룹/연결/초안/게시/진행 유지 | 같은 DB의 ASGI/엔진/업무서비스/HTTP 재초기화·재로그인 보존 PASS. Native 전체 production startup·Windows 재기동 미실행 |
+| NU-08 | 담당 회수 후 관리 거절/일반 이용 유지·Native 역할 제한 후 보호 요청 거절 | Native 그룹 UI 회수→관리404/일반runtime200·미저장 글 보존, Native pending 제한→기존 token401·B 정상 PASS |
+
+### 세션·운영 확인 경계
+
+Native 비밀번호 변경/관리자 재설정/로그아웃/역할 변경/그룹 제거의 효과는 별도로 확인한다. 기존 token의 모든 기기 즉시 무효화를 UI 로그아웃만으로 보장하지 않는다. 검사한 소프트웨어·token 검증/저장 구성·재로그인 결과와 미지원 동작을 기록한다. 새 Redis/SSO/토큰 폐기 시스템이나 인증 보호 완화는 이번 보완이 아니다. Native 구성원 변경 이벤트와 실제 운영 감사 로그 보존도 구분한다.
+
+| ID | 사내 공개 전 확인 | 현재 판정과 준비 |
+|---|---|---|
+| OP-01 | 기존 관리자·가입 허용/닫힘·pending 기본 역할·자동 담당 배정 없음·신원 확인/승인 담당 | 사내 미확인. 기존 Native 메뉴/절차를 가이드로 준비하며 실제 설정/계정은 변경하지 않음 |
+| OP-02 | 자격증명 접속 경로의 HTTPS 등 승인된 보호·분실 복구·이전 로그인 처리 | 사내 미확인. 합성 구성의 결과/한계와 구분, 인증서 검증 해제·키 재생성·새 인증 인프라 없음 |
+| OP-03 | Windows/등록 Python 설치·기동·재기동·Native 데이터/첨부/키/EES DB의 백업·복원 | 사내 미확인. 기존 배포/복구 경로 재사용, 프로그램 Restore와 사용자 데이터 복원 분리 |
+| OP-04 | 실제 일반 사용자 질문/업무·담당 작성/게시·자산/개인 인증·예상 동시 이용 | 사내 미확인. 합성 모델·개발 검사를 사내 모델/직원 사용성/부하 PASS로 확대하지 않음 |
+
+사내 가입 설정·실제 계정/그룹·인증·DB/키는 이번 작업에서 변경하지 않는다. 원격 CI는 현재 9월 생략 방침을 유지하되 로컬 검사는 수행한다. main 직접 push·병합·사내 배포는 범위 밖이다. 사내 공개 준비를 완료했다고 표시하려면 남은 OP 확인과 실제 지원 복원 범위가 별도로 충족되어야 한다. 상세 로그/사진/비밀값 반출을 요구하지 않고 [운영 가이드](../docs/03-openwebui-native-agent.md#system-authoring-20260924)의 1~2줄 결과만 받는다.
 
 <a id="a-design-20260923"></a>
 

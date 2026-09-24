@@ -11,14 +11,18 @@ from __future__ import annotations
 
 import asyncio
 from copy import deepcopy
+import hashlib
+import importlib
 import importlib.util
 import json
 import os
 from pathlib import Path
+import sqlite3
 import sys
 import types
 import unittest
 from unittest.mock import patch
+from zipfile import ZipFile
 
 
 WHEEL = os.environ.get("EES_TEST_UPSTREAM_WHEEL")
@@ -423,6 +427,179 @@ class NativeAssetsSharedSessionTests(NativeAssetCases, unittest.IsolatedAsyncioT
 @unittest.skipUnless(WHEEL or REQUIRED, "real pinned-wheel native integration environment not requested")
 class NativeAssetsIndependentSessionTests(NativeAssetCases, unittest.IsolatedAsyncioTestCase):
     sharing = False
+
+
+@unittest.skipUnless(WHEEL or REQUIRED, "real pinned-wheel native integration environment not requested")
+class NativeAuthoringAssetReadTests(unittest.IsolatedAsyncioTestCase):
+    """Real Native asset tables/ACL + shipped authoring, synthetic user/groups.
+
+    This extends the asset integration fixture, not the Native sign-in fixture.
+    Tools, Skills, AccessGrants, permission checks and registry reads execute
+    pinned upstream code; account/group lookups are explicitly synthetic.
+    """
+
+    async def asyncSetUp(self):
+        if not WHEEL or not Path(WHEEL).is_file():
+            self.fail("The required native asset gate needs EES_TEST_UPSTREAM_WHEEL")
+        from ees_asset_native_fixture import NativeAssetFixture
+        self.fixture = NativeAssetFixture(WHEEL)
+        self.addAsyncCleanup(self.fixture.close)
+        await self.fixture.start()
+        fixture = self.fixture
+        self.skills = fixture.load("open_webui.models.skills")
+        async with fixture.engine.begin() as connection:
+            await connection.run_sync(fixture.Base.metadata.create_all)
+        for scope in ("public", "private"):
+            tool_id, skill_id = "authoring_" + scope + "_tool", "authoring_" + scope + "_skill"
+            response = await fixture.create_tool(tool_id, owner="owner")
+            self.assertEqual(response.status_code, 200, response.text)
+            skill = await self.skills.Skills.insert_new_skill("owner", self.skills.SkillForm(
+                id=skill_id, name="합성 " + scope + " 스킬", content="NATIVE-" + scope.upper() + "-SKILL-BODY",
+                access_grants=[]))
+            self.assertIsNotNone(skill)
+            await fixture.tools.Tools.update_tool_valves_by_id(tool_id, {"label": "기존 연결 설정 " + scope})
+        for kind in ("tool", "skill"):
+            await fixture.acl.AccessGrants.grant_access(kind, "authoring_public_" + kind, "user", "*", "read")
+        # The permission object is also used by the fixture's Config.get path.
+        # Native has_permission and the actual create route enforce these zeros.
+        fixture.app.state.config.USER_PERMISSIONS["workspace"].update(
+            {key: False for key in ("tools", "tools_import", "models", "skills", "knowledge", "prompts")})
+        fixture.users["reader"].settings = {"tools": {"valves": {"authoring_public_tool": {
+            "synthetic_personal_value": "retain-existing-user-settings"}}}}
+
+        # Materialize exactly the same production-builder additions used by
+        # this fixture's patched wheel, including JSON read relative to modules.
+        with ZipFile(WHEEL) as archive:
+            additions = fixture.builder.prepare_additions(archive, fixture.builder.UI_DIR)
+        package = fixture.directory / "authoring-module"
+        package.mkdir()
+        for name, content in additions.items():
+            if name.startswith("open_webui/ees_workflow") and name.endswith(".py") or name in (
+                    "open_webui/workflow_seed.json", "open_webui/workflow_policy.json"):
+                (package / Path(name).name).write_bytes(content)
+                if name.endswith(".py"):
+                    self.assertEqual(content, fixture.members[name])
+        sys.modules["open_webui"].__path__.append(str(package))
+        self.backend = importlib.import_module("open_webui.ees_workflow")
+
+        async def current_user(key):
+            return fixture.users.get(key)
+
+        async def groups(key):
+            return [{"id": "synthetic-ems-group", "name": "EMS 담당"}] if key == "reader" else []
+
+        self.service = self.backend.WorkflowService(fixture.directory / "ees-work.sqlite3", current_user,
+            lambda _: None, self.backend._registered_assets, group_lookup=groups,
+            group_list_lookup=lambda: [{"id": "synthetic-ems-group", "name": "EMS 담당"}])
+        self.backend._service = self.service
+        self.backend.install(fixture.app, fixture.auth.get_verified_user)
+        self.request_id = 0
+        before_group_mapping = self.native_digest()
+        linked = await self.action("set_system_group", user="admin", system_id="EMS", expected_mapping_revision=0,
+            payload={"group_id": "synthetic-ems-group", "active": True})
+        self.assertTrue(linked["ok"], linked)
+        self.assertEqual(self.native_digest(), before_group_mapping, "EES group mapping must not mutate Native assets or users")
+
+    async def action(self, action, process=None, *, user="reader", **extra):
+        self.request_id += 1
+        body = {"action": action, "request_id": "native-assets-" + str(self.request_id), "payload": {}}
+        if process:
+            body.update(system_id=process["owner_system"], process_id=process["process_id"],
+                        expected_draft_revision=process["draft_revision"], expected_owner_revision=process["owner_revision"])
+        body.update(extra)
+        response = await self.fixture.request("POST", "/api/ees-work/authoring/action", user=user, payload=body)
+        self.assertEqual(response.headers["cache-control"], "no-store")
+        return response.json()
+
+    async def create_with_public_references(self):
+        created = await self.action("create", system_id="EMS", payload={"name": "등록 자산 읽기 경계 점검", "category": "ops"})
+        self.assertTrue(created["ok"], created)
+        process = created["process"]
+        document = deepcopy(process["workflow"])
+        document["tools"]["new-native-tool"] = {"id": "new-native-tool", "name": "공개 도구 참조",
+            "source": "open_webui", "reference": "authoring_public_tool", "adapter": "unavailable", "input": "db", "enabled": True}
+        document["skills"]["new-native-skill"] = {"id": "new-native-skill", "name": "공개 스킬 참조", "type": "skill",
+            "source": "open_webui", "reference": "authoring_public_skill", "body": ""}
+        job = next(node for node in document["nodes"].values() if node["type"] == "j")
+        job.update(mode="tool", tools=["new-native-tool"], skills=["new-native-skill"], bindings={"new-native-tool": "db"})
+        saved = await self.action("save_draft", process, payload={"workflow": document})
+        self.assertTrue(saved["ok"], saved)
+        checked = await self.action("validate_draft", saved["process"])
+        self.assertTrue(checked["ok"], checked)
+        published = await self.action("publish", checked["process"])
+        self.assertTrue(published["ok"], published)
+        return published["process"]
+
+    def native_digest(self):
+        """Hash all logical Native rows, including source, valves, ACL and owners."""
+        with sqlite3.connect(self.fixture.directory / "webui.db") as db:
+            names = [row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
+            rows = {name: sorted(db.execute('SELECT * FROM "' + name.replace('"', '""') + '"').fetchall(), key=repr)
+                    for name in names if not name.startswith("sqlite_")}
+        serialized = json.dumps({"rows": rows, "users": {key: value.model_dump() for key, value in self.fixture.users.items()}},
+                                ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        return hashlib.sha256(serialized.encode()).hexdigest()
+
+    async def test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets(self):
+        fixture = self.fixture
+        before = self.native_digest()
+        reader = fixture.users["reader"]
+        self.assertEqual(reader.role, "user")
+        permissions = await sys.modules["open_webui.models.config"].Config.get("user.permissions")
+        for permission in ("workspace.tools", "workspace.models", "workspace.skills"):
+            self.assertFalse(await sys.modules["open_webui.utils.access_control"].has_permission(reader.id, permission, permissions))
+        self.assertEqual((await fixture.create_tool("must_not_be_created", owner="reader")).status_code, 401)
+        with patch.object(fixture.plugin, "load_tool_module_by_id", side_effect=AssertionError("Authoring must not load Native tool code")):
+            assets = await self.backend._registered_assets(reader)
+            self.assertEqual({item["id"] for item in assets["tools"]}, {"authoring_public_tool"})
+            self.assertEqual({item["id"] for item in assets["skills"]}, {"authoring_public_skill"})
+            self.assertEqual(assets["skill_bodies"], {"authoring_public_skill": "NATIVE-PUBLIC-SKILL-BODY"})
+            process = await self.create_with_public_references()
+            selected = await fixture.request("GET", "/api/ees-work/authoring?system_id=EMS&process_id=" + process["process_id"], user="reader")
+            self.assertEqual(selected.status_code, 200, selected.text)
+            for secret in ("authoring_private_tool", "authoring_private_skill", "NATIVE-PRIVATE-SKILL-BODY", "NATIVE-PUBLIC-SKILL-BODY"):
+                self.assertNotIn(secret, selected.text)
+            for kind in ("tools", "skills"):
+                document = deepcopy(process["workflow"])
+                reference = next(iter(document[kind].values()))
+                reference["reference"] = "authoring_private_" + ("tool" if kind == "tools" else "skill")
+                refused = await self.action("save_draft", process, payload={"workflow": document})
+                self.assertFalse(refused["ok"], refused)
+                self.assertEqual(refused["error"]["code"], "reference_unavailable")
+                self.assertNotIn("NATIVE-PRIVATE-SKILL-BODY", json.dumps(refused))
+        self.assertEqual(self.native_digest(), before)
+        self.assertEqual(reader.role, "user")
+
+    async def test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication(self):
+        before = self.native_digest()
+        process = await self.create_with_public_references()
+        self.assertEqual(self.native_digest(), before)
+        for kind in ("tool", "skill"):
+            changed = await self.fixture.acl.AccessGrants.revoke_access(kind, "authoring_public_" + kind, "user", "*", "read")
+            self.assertTrue(changed)
+        after_authorized_revoke = self.native_digest()
+        self.assertNotEqual(after_authorized_revoke, before)
+        assets = await self.backend._registered_assets(self.fixture.users["reader"])
+        self.assertEqual(assets["tools"], [])
+        self.assertEqual(assets["skills"], [])
+        selected = await self.fixture.request("GET", "/api/ees-work/authoring?system_id=EMS&process_id=" + process["process_id"], user="reader")
+        self.assertEqual(selected.status_code, 200, selected.text)
+        current = selected.json()["process"]
+        self.assertEqual(current["workflow"], process["workflow"], "Existing reference IDs remain in the saved draft")
+        self.assertIsNone(current["validated_revision"])
+        self.assertEqual(selected.json()["references"]["available_tools"], [])
+        self.assertEqual(selected.json()["references"]["available_skills"], [])
+        self.assertNotIn("NATIVE-PUBLIC-SKILL-BODY", selected.text)
+        document = deepcopy(current["workflow"])
+        document["nodes"][current["process_id"]]["description"] = "권한 회복 전 작업 메모 보존"
+        saved = await self.action("save_draft", current, payload={"workflow": document})
+        self.assertTrue(saved["ok"], saved)
+        for action in ("validate_draft", "publish"):
+            refused = await self.action(action, saved["process"])
+            self.assertFalse(refused["ok"], refused)
+            self.assertIn(refused["error"]["code"], ("reference_unavailable", "validation_required"))
+        self.assertEqual(self.native_digest(), after_authorized_revoke)
+        self.assertEqual(self.fixture.users["reader"].role, "user")
 
 
 if __name__ == "__main__":
