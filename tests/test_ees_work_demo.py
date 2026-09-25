@@ -2582,6 +2582,82 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(state["case"]["chat_id"], "")
         self.assertEqual(self.server.completions[0]["user_message"]["content"], "미국 공장의 셋업 범위를 설명해줘")
 
+    def test_durable_runtime_panel_plan_real_service_and_browser_return(self):
+        """Actual Native UI + durable service/DB; business bridge response is synthetic."""
+        definition = deepcopy(self.current()["catalog"])
+        # This fixture tests one independent real-contract J; legacy manual
+        # records are deliberately not eligible durable dependency evidence.
+        for item in definition["nodes"].values():
+            item["deps"] = []
+        reference = {"tool_id": "synthetic-existing-native", "function": "get_page", "revision": 1,
+                     "content_hash": "a" * 64, "schema_hash": "b" * 64, "config_hash": "c" * 64,
+                     "environment": "browser-synthetic"}
+        definition["nodes"]["setup-p"]["execution_inputs"] = {"type": "object", "properties": {
+            "page_id": {"type": "string", "maxLength": 30, "title": "문서 번호"}},
+            "required": ["page_id"], "additionalProperties": False}
+        definition["nodes"]["db-j"]["execution"] = {"protocol": 1, "kind": "fixed", "calls": [
+            {"id": "read-page", "reference": reference, "arguments": {"page_id": {"source": "input", "key": "page_id"}}}],
+            "completion": {"validator": "all_complete_v1", "version": 1}, "limits": {
+                "timeout_seconds": 30, "max_tool_calls": 1, "max_model_calls": 0, "max_retries": 0},
+            "evidence": [], "skill_refs": []}
+        calls = []
+        class SyntheticBridge:
+            async def check(self, user, ref):
+                return {"reference": ref, "executable": True}
+            async def invoke(self, user, ref, arguments, context):
+                calls.append((user["id"], deepcopy(arguments)))
+                return {"version": "ees-native-result-v1", "status": "succeeded", "transport": "succeeded",
+                        "completeness": "complete", "data": {"page": {"page_id": "42", "content": "합성 설치 문서"}},
+                        "evidence": [{"kind": "confluence_page", "id": "42"}], "provenance": ref}
+        self.server.workflow.execution.bridge = SyntheticBridge()
+        self.publish_runtime_fixture(definition)
+        case = self.seed_case("existing-chat")
+        self.navigate("/c/existing-chat")
+        self.wait("!!document.querySelector('#ees-work-context')")
+        self.choose("db-j")
+        self.assertIn("실행 계획 확인", self.text("#ees-work-run"))
+        self.click("#ees-work-run")
+        self.wait("document.querySelector('#ees-work-dialog')?.open")
+        self.fill('#ees-runtime-input-form [name="page_id"]', "42")
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("document.querySelector('[data-runtime-record]')?.dataset.runtimeRecord === 'queued'")
+        self.assertEqual(calls, [])
+        state = asyncio.run(self.server.workflow.execution_state(self.server.user, case_id=case["id"]))
+        run_id = state["run"]["id"]
+        if getattr(self, 'poll_same_page', False):
+            self.fill('#chat-input', '실행 중에도 보존할 대화 초안')
+        else:
+            self.click('#ees-work-close')
+            self.browser.navigate('about:blank')
+        async def complete():
+            for _ in range(8):
+                if not await self.server.workflow.execution.process_once():
+                    break
+        asyncio.run(complete())
+        completed = asyncio.run(self.server.workflow.execution_state(self.server.user, run_id=run_id))
+        self.assertEqual(completed["run"]["status"], "succeeded", completed)
+        self.assertEqual(calls, [(self.server.user["id"], {"page_id": "42"})])
+        if getattr(self, 'poll_same_page', False):
+            self.wait("document.querySelector('[data-runtime-record]')?.dataset.runtimeRecord === 'succeeded'")
+            self.wait("document.querySelector('.ew-work-identity [data-status]')?.dataset.status === 'passed'")
+            self.assertIn('1 / 6 작업 완료', self.text('#ees-work-entry'))
+            self.assertEqual(self.text('#chat-input'), '실행 중에도 보존할 대화 초안')
+            self.assertEqual(self.current()['case']['selected_id'], 'db-j')
+            self.screenshot('runtime-native-same-page-projection')
+            return
+        self.navigate("/c/existing-chat")
+        self.wait("!!document.querySelector('#ees-work-context')")
+        self.choose("db-j")
+        self.wait("document.querySelector('[data-runtime-record]')?.dataset.runtimeRecord === 'succeeded'")
+        self.assertIn("Windows 설치 완료를 의미하지 않습니다", self.text("#ees-work-content"))
+        self.assertIn("실제 호출·반환 기록 1건", self.text("#ees-work-content"))
+        self.assertNotIn("모의 점검 실행", self.text("#ees-work-content"))
+        self.screenshot("runtime-native-panel-return")
+
+    def test_durable_runtime_poll_updates_left_progress_and_job_header_without_navigation(self):
+        self.poll_same_page = True
+        self.test_durable_runtime_panel_plan_real_service_and_browser_return()
+
 
 if __name__ == "__main__":
     unittest.main()

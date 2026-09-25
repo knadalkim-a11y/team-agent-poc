@@ -42,6 +42,10 @@ PRE_AUTHORING_WORK_FILES = PRE_SPLIT_WORK_FILES + (
     "open_webui/workflow_policy.json",
 )
 
+PRE_EXECUTION_WORK_FILES = PRE_AUTHORING_WORK_FILES + (
+    "open_webui/ees_workflow_authoring.py",
+)
+
 
 def digest(content):
     return hashlib.sha256(content).hexdigest()
@@ -63,20 +67,22 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missin
         app + "version.json": json.dumps({"version": version}).encode(),
         app + "immutable/chunks/test.js": b"const title = 'EES Work';\n",
     }
-    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11"}:
+    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12"}:
         members.update({app + name: b"synthetic checked theme asset\n" for name in branding.THEME_FILES})
     if version == "0.11.3+ees.5":
         members.update({name: b"synthetic checked work asset\n" for name in branding.LEGACY_WORK_FILES})
-    if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11"}:
-        if version == "0.11.3+ees.11":
+    if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12"}:
+        if version == "0.11.3+ees.12":
             work_files = branding.WORK_FILES
+        elif version == "0.11.3+ees.11":
+            work_files = PRE_EXECUTION_WORK_FILES
         elif version in {"0.11.3+ees.9", "0.11.3+ees.10"}:
             work_files = PRE_AUTHORING_WORK_FILES
         else:
             work_files = PRE_SPLIT_WORK_FILES
         members.update({app + name[len(branding.TARGET_APP):] if name.startswith(branding.TARGET_APP) else name:
                         b"synthetic checked work asset\n" for name in work_files})
-    if version in {"0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11"}:
+    if version in {"0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12"}:
         members.update({name: b"# synthetic checked asset guard\n" for name in branding.ASSET_GUARD_FILES})
     members.update(extra or {})
     members.update(replacement or {})
@@ -449,18 +455,30 @@ class CustomizationTests(unittest.TestCase):
         self.assertFalse(any(path.name in {"venv", "dependencies.txt", "releases"} for path in (self.root / "state").iterdir()))
 
     def test_real_ees10_to_authoring_apply_restore_preserves_program_and_data(self):
+        self._real_previous_apply_restore(
+            "EES_TEST_LEGACY_WORKFLOW_WHEEL", "EES_REQUIRE_LEGACY_WORKFLOW",
+            "0.11.3+ees.10", "a443d30c6694df0e1cbe082a0b99aa5f2d566917",
+            "ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd")
+
+    def test_real_ees11_to_execution_apply_restore_preserves_program_and_data(self):
+        self._real_previous_apply_restore(
+            "EES_TEST_PREVIOUS_WORKFLOW_WHEEL", "EES_REQUIRE_PREVIOUS_WORKFLOW",
+            "0.11.3+ees.11", "991cdb1d80ae07471fb50594831d74fe602b1ef7",
+            "27f6a1c37264d4f205bedb6635c9eaae8a36a5d023d36d1dd595e34728c8b8d3")
+
+    def _real_previous_apply_restore(self, previous_env, required_env, version, commit, wheel_hash):
         current_dir = os.environ.get("EES_TEST_BRANDING_DIR")
-        previous_file = os.environ.get("EES_TEST_LEGACY_WORKFLOW_WHEEL")
+        previous_file = os.environ.get(previous_env)
         if not current_dir or not previous_file:
-            if os.environ.get("EES_REQUIRE_LEGACY_WORKFLOW") == "1":
+            if os.environ.get(required_env) == "1":
                 self.fail("Actual program Restore needs current and fixed previous wheels")
-            self.skipTest("Supply current and fixed ees.10 wheels for program Restore")
+            self.skipTest("Supply current and fixed " + version + " wheels for program Restore")
         old = Path(previous_file).read_bytes()
-        self.assertEqual(digest(old), "ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd")
+        self.assertEqual(digest(old), wheel_hash)
         with zipfile.ZipFile(io.BytesIO(old)) as wheel:
-            old_record_name = "open_webui-0.11.3+ees.10.dist-info/RECORD"
+            old_record_name = "open_webui-" + version + ".dist-info/RECORD"
             rows = custom._record_rows(wheel.read(old_record_name),
-                                       allow_packaging=True, version="0.11.3+ees.10")
+                                       allow_packaging=True, version=version)
             # Reproduce the existing app-only installation inventory: packaging
             # readmes/requirements are never part of the selected program.
             rows = {name: row for name, row in rows.items() if name not in custom.PACKAGING_FILES}
@@ -474,8 +492,8 @@ class CustomizationTests(unittest.TestCase):
             writer.writerow([old_record_name, "", ""])
             old_record = output.getvalue().encode("utf-8")
             (self.program / old_record_name).write_bytes(old_record)
-            old_selection = {"source_commit": "a443d30c6694df0e1cbe082a0b99aa5f2d566917",
-                "wheel_sha256": digest(old), "webui_version": "0.11.3+ees.10",
+            old_selection = {"source_commit": commit,
+                "wheel_sha256": digest(old), "webui_version": version,
                 "record_sha256": digest(old_record)}
         self.registry.update(schema_version=2, customization={
             "active": old_selection, "previous": {"active": None}, "pending": None})
@@ -496,10 +514,15 @@ class CustomizationTests(unittest.TestCase):
             self.assertTrue(self.apply()["changed"])
         custom.validate_program(self.program, selected)
         self.assertTrue((self.program / "open_webui/ees_workflow_authoring.py").is_file())
+        for name in ("execution", "native", "contract", "examples", "model"):
+            self.assertTrue((self.program / ("open_webui/ees_workflow_" + name + ".py")).is_file())
         self.assertEqual(self.restore()["source_commit"], old_selection["source_commit"])
         custom.validate_program(self.program, old_selection)
         self.assertEqual(program_hashes(), before)
-        self.assertFalse((self.program / "open_webui/ees_workflow_authoring.py").exists())
+        self.assertEqual((self.program / "open_webui/ees_workflow_authoring.py").exists(),
+                         version == "0.11.3+ees.11")
+        for name in ("execution", "native", "contract", "examples", "model"):
+            self.assertFalse((self.program / ("open_webui/ees_workflow_" + name + ".py")).exists())
         for path, value in preserved.items():
             self.assertEqual(path.read_bytes(), value)
 
@@ -536,7 +559,7 @@ class CustomizationTests(unittest.TestCase):
         self.assertFalse(self.restore()["changed"])
 
     def test_previous_theme_versions_pending_can_resume_and_restore(self):
-        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10"):
+        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11"):
             with self.subTest(version=version):
                 legacy = self.install_legacy_program(version=version)
                 self.interrupt_promotion()
@@ -551,12 +574,12 @@ class CustomizationTests(unittest.TestCase):
                 shutil.rmtree(self.program)
 
     def test_previous_theme_versions_checkonly_apply_and_restore_preserve_runtime(self):
-        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10"):
+        for version in ("0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11"):
             with self.subTest(version=version):
                 previous = self.install_legacy_program(version=version)
                 for name in ("ees_workflow_definition.py", "ees_workflow_view.py", "workflow_policy.json"):
-                    self.assertEqual((self.program / "open_webui" / name).exists(), version in {"0.11.3+ees.9", "0.11.3+ees.10"})
-                self.assertFalse((self.program / "open_webui/ees_workflow_authoring.py").exists())
+                    self.assertEqual((self.program / "open_webui" / name).exists(), version in {"0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11"})
+                self.assertEqual((self.program / "open_webui/ees_workflow_authoring.py").exists(), version == "0.11.3+ees.11")
                 before = self.tree()
                 self.assertEqual(custom.inspect_bundle(self.config, self.bundle, COMMIT, self.env)["webui_version"],
                                  branding.VERSION)

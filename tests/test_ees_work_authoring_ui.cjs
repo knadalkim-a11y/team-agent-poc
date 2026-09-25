@@ -122,3 +122,56 @@ test('publication reconciliation sends the exact compared revision and fingerpri
 test('typing during acknowledged publication reconciliation is retained on the new draft revision',async()=>{
   const h=await reconciliationHarness(),pending=deferred();h.writeOverride=()=>pending.promise;h.dialogs.push({action:'reconcile_publication'});h.click('process_actions');await flush();h.change('instructions','기준 확인 중 새 글');const result=h.envelope('EMS','p');result.process.draft_revision=2;result.process.publication_reconciliation.required=false;result.process.publication_reconciliation.can_reconcile=false;pending.resolve(result);await flush();assert.equal(h.draft().definition.nodes.p.instructions,'기준 확인 중 새 글');assert.equal(h.draft().revision,2);assert.equal(h.draft().dirty,true);
 });
+
+test('runtime picker reuses exact Native function metadata and generates bounded public inputs locally',async()=>{
+ const h=await harness().init();h.click('edit_node',{nodeId:'p-j'});h.dialogs.push({kind:'fixed'});h.click('runtime_config');await flush();
+ const reference={tool_id:'native-tool',function:'get_page',revision:2,content_hash:'a'.repeat(64),schema_hash:'b'.repeat(64),config_hash:'c'.repeat(64),environment:'fixture'};
+ h.readOverride=route=>route.startsWith('execution/capability?')?{ok:true,capability:{functions:[{name:'get_page',reference,schema:{type:'object',properties:{page_id:{type:'string'}},required:['page_id']},state:'allowed',executable:true}]}}:undefined;
+ h.dialogs.push({tool_id:'native-tool'},{function:'get_page'});h.click('runtime_add');await flush();
+ const definition=h.draft().definition,call=definition.nodes['p-j'].execution.calls[0];assert.deepEqual(call.reference,reference);assert.deepEqual(call.arguments,{page_id:{source:'input',key:'page_id'}});assert.equal(definition.nodes.p.execution_inputs.properties.page_id.maxLength,2000);assert.deepEqual(definition.nodes.p.execution_inputs.required,['page_id']);assert.equal(h.writes.length,0);assert.equal(Object.values(definition.tools).some(tool=>tool.content),false);
+});
+test('late Native function metadata cannot modify another workflow after selection changes',async()=>{
+ const h=await harness().init();h.click('edit_node',{nodeId:'p-j'});h.dialogs.push({kind:'fixed'});h.click('runtime_config');await flush();const pending=deferred();h.readOverride=route=>route.startsWith('execution/capability?')?pending.promise:undefined;
+ h.dialogs.push({tool_id:'native-tool'});h.click('runtime_add');await flush();h.dialogs.push({choice:'keep'});await h.open('q');pending.resolve({ok:true,capability:{functions:[]}});await flush();assert.equal(h.draft().definition.nodes['q-j'].execution,undefined);assert.equal(h.writes.length,0);
+});
+test('ordinary author sees review metadata but cannot approve Native automation',async()=>{
+ const h=await harness().init(),reference={tool_id:'native-tool',function:'get_page',revision:2,content_hash:'a'.repeat(64),schema_hash:'b'.repeat(64),config_hash:'c'.repeat(64),environment:'fixture'};
+ h.processes.get('p').workflow.nodes['p-j'].execution={kind:'fixed',calls:[{id:'call',reference,arguments:{}}]};await h.open('p');h.click('edit_node',{nodeId:'p-j'});h.readOverride=route=>route.startsWith('execution/capability?')?{ok:true,capability:{reference,registered:true,state:'unverified',schema:{type:'object'},executable:false}}:undefined;
+ h.dialogs.push({});h.click('runtime_review',{callId:'call'});await flush();assert.equal(h.dialogHistory.at(-1).title,'기능 사용 상태');assert.doesNotMatch(h.dialogHistory.at(-1).html,/name="action"|name="evidence"/);assert.equal(h.writes.length,0);
+});
+
+test('fresh Native calls omit optional arguments and result binding removes only generated orphan start inputs',async()=>{
+ const h=await harness().init(),base={tool_id:'native-tool',revision:2,content_hash:'a'.repeat(64),schema_hash:'b'.repeat(64),config_hash:'c'.repeat(64),environment:'fixture'};
+ h.processes.get('p').workflow.nodes.p.execution_inputs={type:'object',properties:{manual:{type:'string',maxLength:20}},required:['manual'],additionalProperties:false};await h.open('p');h.click('edit_node',{nodeId:'p-j'});h.dialogs.push({kind:'fixed'});h.click('runtime_config');await flush();
+ const functions=[{name:'search_pages',reference:{...base,function:'search_pages'},schema:{properties:{query:{type:'string'},space_key:{type:'string',default:''},limit:{type:'integer',default:5}},required:['query']},executable:true},{name:'get_page',reference:{...base,function:'get_page'},schema:{properties:{page_id:{type:'string'}},required:['page_id']},executable:true}];
+ h.readOverride=route=>{if(!route.startsWith('execution/capability?'))return;const name=new URL('http://fixture/'+route).searchParams.get('function');return {ok:true,capability:name?functions.find(item=>item.name===name):{functions}};};
+ for(const name of ['search_pages','get_page']){h.dialogs.push({tool_id:'native-tool'},{function:name});h.click('runtime_add');await flush();}
+ let def=h.draft().definition;assert.deepEqual(Object.keys(def.nodes['p-j'].execution.calls[0].arguments),['query']);assert.equal(def.nodes.p.execution_inputs.properties.limit,undefined);assert.equal(def.nodes.p.execution_inputs.properties.space_key,undefined);
+ const second=def.nodes['p-j'].execution.calls[1];h.dialogs.push({'source:page_id':'result','result:page_id':'0','path:page_id':'data.results.0.page_id'});h.click('runtime_bind',{callId:second.id});await flush();def=h.draft().definition;
+ assert.equal(def.nodes.p.execution_inputs.properties.page_id,undefined);assert.deepEqual(def.nodes.p.execution_inputs.required,['manual','query']);assert.deepEqual(def.nodes.p.execution_inputs.properties.manual,{type:'string',maxLength:20});assert.equal(def.nodes['p-j'].execution.calls[1].arguments.page_id.source,'result');
+});
+test('author can defer candidate selection without removing its required completion binding or other start inputs',async()=>{
+ const h=await harness().init();h.processes.get('p').workflow.nodes.p.execution_inputs={type:'object',properties:{query:{type:'string',maxLength:100},page_id:{type:'string',maxLength:30}},required:['query','page_id'],additionalProperties:false};h.processes.get('p').workflow.nodes['p-j'].execution={kind:'human',completion:{input_key:'page_id'},calls:[]};await h.open('p');
+ h.dialogs.push({title:'선택한 문서 번호'});h.click('runtime_input_edit',{inputKey:'page_id'});await flush();const def=h.draft().definition;assert.deepEqual(def.nodes.p.execution_inputs.required,['query']);assert.equal(def.nodes['p-j'].execution.completion.input_key,'page_id');assert.equal(def.nodes.p.execution_inputs.properties.page_id.type,'string');assert.equal(h.writes.length,0);
+});
+
+test('typing during ID assignment preserves text and remaps every saved execution dependency for the next save',async()=>{
+ const h=harness(),flow=h.processes.get('p').workflow,template=copy(flow.nodes['p-j']),reference={tool_id:'native-tool',function:'get_page',revision:2,content_hash:'a'.repeat(64),schema_hash:'b'.repeat(64),config_hash:'c'.repeat(64),environment:'fixture'};
+ const resultRef={job_id:'new-source',call_id:'read',path:['data','version']},choices={job_id:'new-source',call_id:'read',path:['data','results'],value_path:['page_id']};
+ flow.nodes['p-t'].children=['new-source','new-target','summary','choice'];delete flow.nodes['p-j'];
+ for(const id of flow.nodes['p-t'].children)flow.nodes[id]={...copy(template),id,deps:id==='new-source'?[]:['new-source']};
+ flow.nodes['new-source'].execution={kind:'fixed',calls:[{id:'read',reference:copy(reference),arguments:{}}]};
+ flow.nodes['new-target'].execution={kind:'fixed',calls:[{id:'detail',reference:copy(reference),arguments:{version:{source:'result',...copy(resultRef)},page_id:{source:'input',key:'page_id',selection:copy(choices)}}}]};
+ flow.nodes.summary.execution={kind:'ai',model_id:'model-a',calls:[],evidence:[{job_id:'new-source',call_id:'read'}],completion:{required_claims:[copy(resultRef)]}};
+ flow.nodes.choice.execution={kind:'human',calls:[],completion:{input_key:'page_id',choices:copy(choices)}};
+ await h.init();h.change('instructions','저장한 안내');
+ const pending=deferred();h.writeOverride=()=>pending.promise;h.click('save_draft');await flush();h.change('instructions','저장 응답 중 계속 쓴 안내');
+ const response=h.envelope('EMS','p');response.id_map={'new-source':'saved-source','new-target':'saved-target'};response.process.draft_revision=2;
+ response.process.workflow=JSON.parse(JSON.stringify(h.writes[0].payload.workflow).replaceAll('new-source','saved-source').replaceAll('new-target','saved-target'));
+ pending.resolve(response);await flush();const draft=h.draft();assert.equal(draft.dirty,true);assert.equal(draft.revision,2);assert.equal(draft.definition.nodes.p.instructions,'저장 응답 중 계속 쓴 안내');
+ h.writeOverride=async()=>{throw new Error('fixture stops after collecting next save');};h.click('save_draft');await flush();const nodes=h.writes[1].payload.workflow.nodes;
+ assert.equal(nodes['new-target'],undefined);assert.deepEqual(nodes['saved-target'].deps,['saved-source']);
+ assert.equal(nodes['saved-target'].execution.calls[0].arguments.version.job_id,'saved-source');assert.equal(nodes['saved-target'].execution.calls[0].arguments.page_id.selection.job_id,'saved-source');
+ assert.equal(nodes.summary.execution.evidence[0].job_id,'saved-source');assert.equal(nodes.summary.execution.completion.required_claims[0].job_id,'saved-source');assert.equal(nodes.choice.execution.completion.choices.job_id,'saved-source');
+ assert.deepEqual(nodes['saved-target'].execution.calls[0].reference,reference);assert.equal(nodes.p.instructions,'저장 응답 중 계속 쓴 안내');
+});

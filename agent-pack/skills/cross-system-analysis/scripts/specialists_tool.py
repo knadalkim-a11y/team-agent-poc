@@ -1,7 +1,7 @@
 """
 title: EES Specialists
 description: Consult EMS, APC and FDC demo Assistants with the current user's access.
-version: 0.2.4
+version: 0.2.5
 required_open_webui_version: 0.11.3
 ees_demo_pack: ees-demo-v1
 """
@@ -27,7 +27,7 @@ MAX_CONSULTATIONS = 4
 MAX_DATA_CALLS = 3
 MAX_QUESTION_CHARS = 5000
 MAX_ANALYSIS_CHARS = 16000
-SUPPORTED_WEBUI_VERSIONS = {"0.11.3", "0.11.3+ees.1", "0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11"}
+SUPPORTED_WEBUI_VERSIONS = {"0.11.3", "0.11.3+ees.1", "0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12"}
 PANEL_SCRIPT = ""  # ApplyDemo embeds the reviewed, fixed cooperation panel script.
 PANEL_SEND_TIMEOUT = 0.25
 

@@ -4,7 +4,33 @@
 
 저장소: knadalkim-a11y/team-agent-poc
 
-입력: 신규 작성 권한은 [09-24 시스템 담당자·P별 작성/게시](#system-authoring-20260924), 화면 표현 기준은 [09-23 A안 상태·실행 상세](#a-design-20260923)이다. [09-22 왼쪽 워크플로우 확정 디자인](#sidebar-final-20260922)과 [오른쪽 업무·수행·결과](#right-panel-20260922)의 탐색·기록 계약을 보존한다. [앞선 시각 계층 후속](#visual-hierarchy-20260922)과 [단계별 진행·무테 합의](#step-progress-ux-20260922)의 기존 실행·권한·저장 계약과 Workspace 구현은 보존한다. [09-21 통합 UX 첫 베타](#integrated-work-beta-20260921)는 당시 기준으로 보존한다. 이전 화면 참고자료는 [사이드바 개선 목업](ees-sidebar-refinement.html)이며, 이전 [공장별 업무 트리 목업](ees-factory-workspace.html)과 [최초 세부 편집 예시](ees-demo-workspace.html)는 보존한다. 목업 이후 확정한 [공장·시스템 공동 작업 목표](#ees-work-shared-target)는 아래 기록을 우선한다. ZIP 첨부 없이 저장소에서 읽는다. HTML 목업은 대화 내 표시용 참고자료이며 실제 제품은 기존 WebUI 컴포넌트·테마·AI 대화를 사용한다.
+입력: 현재 실행 계약은 [09-25 공통 Native 도구·P/T 실행](#shared-native-runtime-20260925), 신규 작성 권한은 [09-24 시스템 담당자·P별 작성/게시](#system-authoring-20260924), 화면 표현 기준은 [09-23 A안 상태·실행 상세](#a-design-20260923)이다. [09-22 왼쪽 워크플로우 확정 디자인](#sidebar-final-20260922)과 [오른쪽 업무·수행·결과](#right-panel-20260922)의 탐색·기록 계약을 보존한다. [앞선 시각 계층 후속](#visual-hierarchy-20260922)과 [단계별 진행·무테 합의](#step-progress-ux-20260922)의 기존 실행·권한·저장 계약과 Workspace 구현은 보존한다. [09-21 통합 UX 첫 베타](#integrated-work-beta-20260921)는 당시 기준으로 보존한다. 이전 화면 참고자료는 [사이드바 개선 목업](ees-sidebar-refinement.html)이며, 이전 [공장별 업무 트리 목업](ees-factory-workspace.html)과 [최초 세부 편집 예시](ees-demo-workspace.html)는 보존한다. 목업 이후 확정한 [공장·시스템 공동 작업 목표](#ees-work-shared-target)는 아래 기록을 우선한다. ZIP 첨부 없이 저장소에서 읽는다. HTML 목업은 대화 내 표시용 참고자료이며 실제 제품은 기존 WebUI 컴포넌트·테마·AI 대화를 사용한다.
+
+<a id="shared-native-runtime-20260925"></a>
+
+## 공통 Native 도구 재사용과 P/T 실행 · 2026-09-25
+
+첨부 `EES_Work_Shared_Tools_Runtime_Design_Handoff_20260925_v1.0.md` 14절을 이번 구현 범위로 삼는다. 시작 main은 #64 병합본 `991cdb1d80ae07471fb50594831d74fe602b1ef7`이며 별도 기능 PR은 없고 Draft #53은 그대로 보존한다. A안·Native 회원/그룹·시스템 담당 권한·P별 저장/검사/게시·기존 사용자 자산과 진행 기록을 유지한다. 이번 승인은 구현·Work 검증·문서·커밋/push/PR까지이며 main 직접 push/병합·사내 배포·실제 계정/도구 등록·실서버 변경은 제외한다.
+
+### 실행 계약
+
+- **원본 하나:** 기존 Native Tool ID의 코드·저장된 함수 schema·ACL·Valves/UserValves를 재사용한다. 별도 코드/인증/PAT 저장소·동적 설치·범용 코드 실행기를 만들지 않는다. J의 `execution`에는 승인된 함수와 내용/schema/비밀 아닌 설정/환경 hash·revision, 공개 입력 연결, 완료 validator와 호출 한도만 둔다. 조회·작성 중에는 코드를 import하지 않는다.
+- **검토 후 호출:** 기존 관리자만 검토 근거를 붙여 기능을 승인/중지한다. 미검증·불일치·삭제·조회 실패는 실행 불가다. 현재 사용자/그룹/도구 권한·승인 hash·필수 개인 설정을 호출 직전 재검사하며 사용자별 새 Native 도구 객체를 사용한다. 내부 예약 인자는 서버가 주입하고 업무 입력은 이를 덮지 못한다.
+- **하나의 서비스:** `execution/plan`, `execution/action`, `execution/state`를 기존 앱에 추가한다. 채팅 `ees_execution_plan/action/state`와 패널은 같은 서비스를 사용한다. 계획은 조회이고 명시적 start가 실행을 접수한다. 단일 앱 lifespan worker와 기존 SQLite의 짧은 transaction/claim/lease가 실행을 이어가며 외부 I/O 동안 쓰기 transaction을 유지하지 않는다.
+- **결과와 완료 분리:** 호출 결과·근거·완전성·오류, J 업무 validator, P/T 최종 validator를 따로 기록한다. 고정 J는 모델 0회, AI J는 현재 허용 모델 1회 이하의 구조화 근거 정리, 사람 J는 직접 확인이다. 공통 정책과 해당 P/T/J의 고정 지침·현재 허용된 Skill·선언한 근거만 모델에 준다. 검색 결과의 명령은 지침이 아니다.
+- **유실·재기동:** 요청 식별자/계획 hash/revision·겹친 실행 차단과 영속 호출 의도로 중복 호출을 막는다. 브라우저 종료는 서버 실행을 종료하지 않는다. lease 소실·시간 초과·중단 뒤 미확정 호출은 UNKNOWN으로 남기고 성공/자동 재시도로 바꾸지 않는다. pause/cancel은 다음 호출 경계에 적용하며 이미 시작한 외부 작업의 취소를 보장하지 않는다. 권한·입력 대기는 조치 후 명시적 재개, 실제 사람 확인은 패널에서 기록한다.
+- **범위 제한:** 계획 유효기간 10분, 실행/근거 재사용 범위 30분과 J별 제한을 둔다. 대상 입력 변경은 새 진행 건을 요구하고 성공한 이전 결과를 새 입력과 섞지 않는다. 예제의 자동 재시도는 0회이며 명시된 재시도/총 호출 한도 안의 `rate_limited`만 최대 1회 다시 시도한다. 나머지 실패·불명확한 호출을 조용히 반복하지 않는다. 결과를 다시 노출하거나 AI/후속 입력으로 재사용할 때 원천 권한을 다시 검사한다.
+
+### 10.1의 두 워크플로우
+
+| 예제 | 등록 도구와 실행 | 완료 범위 |
+|---|---|---|
+| A 운영 현황 확인 | T1 Jira `jira_dashboard` → GitHub `github_list_pull_requests` → Confluence `get_page`; T2 선언한 저장 근거의 AI 정리 | T1 단독은 모델 0회. P 실행은 T1 뒤 T2. Jira 집계·PR 페이지 상태·문서 제목/버전의 실제 값과 부분 범위를 검증. CI/리뷰 승인·전체 자료 조사를 추정하지 않음 |
+| B 설치 문서 사전 확인 | 같은 Confluence ID의 `search_pages` → 후보 선택 대기 → `get_page` | 확인된 검색 결과의 실제 page_id만 연결. 모호한 후보는 임의 선택하지 않음. 문서 읽기 완료이며 Windows 설치 완료가 아님 |
+
+`ees_workflow_examples.py`의 factory는 승인 참조와 모델 ID를 받아 정의를 만든다. 운영 ID를 추측하거나 도구/P를 자동 등록·게시하지 않는다. 기존 P별 작성 API로 초안을 저장·검사·게시하며 새 J 편집기는 기존 도구의 허용 함수를 선택한다. Windows 셋업은 추후 같은 입력/검증/근거/승인/재개 계약에 연결하고 이번 여섯 읽기 함수 범위를 쓰기나 Shell로 확장하지 않는다.
+
+제품/복원 경계는 [운영 가이드](../../03-openwebui-native-agent.md#shared-native-runtime-20260925), 시험별 판정·초기 실패는 [TR-01~24](../../../evals/scenarios.md#shared-native-runtime-20260925)가 원본이다.
 
 <a id="system-authoring-20260924"></a>
 

@@ -14,6 +14,7 @@ import re
 import sqlite3
 from uuid import uuid4
 
+from .ees_workflow_contract import validate_execution, remap_execution
 from .ees_workflow_definition import (
     CATEGORIES, SYSTEMS, INPUTS, IDENTIFIER, MAX_DOCUMENT_BYTES, _dump,
     _ancestors, _leaves, _dependencies, _policy, validate_definition,
@@ -328,7 +329,34 @@ class AuthoringMixin:
         return {"process_id": row["process_id"], "draft_revision": row["draft_revision"], "draft_hash": _hash(workflow),
                 "owner_revision": row["owner_revision"], "base_process_fingerprint": self._published_hash(db, published, row["process_id"]),
                 "references_hash": _hash({"definitions": definitions, "policy": _policy(), "catalog_policy": published["skills"].get("common"), "sites": published["sites"], "systems": published["systems"]}),
+                "execution_references_hash": _hash(self._execution_reference_state(workflow, assets)),
                 "availability_hash": _hash(availability), "native_references_hash": _hash({"versions": native_versions, "skill_hashes": skill_hashes})}
+
+    @staticmethod
+    def _execution_reference_state(workflow, assets):
+        capabilities = assets.get("execution_capabilities", [])
+        state = []
+        for node in workflow["nodes"].values():
+            execution = node.get("execution", {})
+            for call in execution.get("calls", []):
+                reference = call["reference"]
+                match = next((item for item in capabilities if item.get("reference") == reference), None)
+                state.append({"reference": reference, "state": match.get("state") if match else "unavailable",
+                              "schema": match.get("schema") if match else None})
+            for ref in execution.get("skill_refs", []):
+                body = assets.get("skill_bodies", {}).get(ref["skill_id"])
+                accessible = ref["skill_id"] in {item["id"] for item in assets.get("skills", [])}
+                state.append({"skill_id": ref["skill_id"], "content_hash": _hash(body) if body is not None and accessible else None,
+                              "expected_hash": ref["content_hash"]})
+        return state
+
+    def _validate_execution_publication(self, workflow, assets):
+        for reference in self._execution_reference_state(workflow, assets):
+            if "skill_id" in reference:
+                if reference["content_hash"] != reference["expected_hash"]:
+                    _fail("skill_revalidation_required", "필수 스킬의 접근 권한이나 내용이 변경되었습니다. 다시 확인해 주세요.")
+            elif reference["state"] != "allowed":
+                _fail("native_revalidation_required", "자동 실행 기능의 정확한 버전 승인이 필요합니다. 초안은 보존했습니다.")
 
     def _validate_for_publication(self, db, row, workflow, published, assets):
         if self._published_hash(db, published, row["process_id"]) != row["base_fingerprint"]:
@@ -341,6 +369,7 @@ class AuthoringMixin:
                     _fail("reference_unavailable", "삭제되거나 사용할 수 없는 참조가 있습니다. 초안은 보존했습니다.")
                 if item.get("source") == "open_webui" and (not assets.get("available", True) or item.get("reference") not in accessible):
                     _fail("reference_unavailable", "현재 계정으로 필수 자산을 확인할 수 없어 게시하지 않았습니다.")
+        self._validate_execution_publication(workflow, assets)
         merged = self._merge_workflow(db, published, workflow)
         errors = validate_definition(merged)
         if errors:
@@ -385,6 +414,7 @@ class AuthoringMixin:
             if node.get("parent") is not None and not isinstance(node.get("parent"), str):
                 _fail("invalid_definition", "상위 단계를 확인해 주세요.")
             node["parent"] = id_map.get(node.get("parent"), node.get("parent"))
+            remap_execution(node, id_map)
         self._check_workflow_shape(db, row, workflow, old, published, assets)
         for kind in ("nodes", "tools", "skills"):
             for removed in set(old[kind]) - set(workflow[kind]):
@@ -397,7 +427,7 @@ class AuthoringMixin:
         root = nodes.get(process_id)
         if not root or root.get("type") != "p" or root.get("parent") is not None or root.get("category") not in CATEGORIES:
             _fail("invalid_workflow_scope", "선택한 최상위 워크플로우를 유지해 주세요.")
-        node_fields = {"id", "name", "type", "parent", "children", "description", "instructions", "rule", "condition", "mode", "tools", "skills", "bindings", "deps", "category", "enabled", "failOnce", "systems"}
+        node_fields = {"id", "name", "type", "parent", "children", "description", "instructions", "rule", "condition", "mode", "tools", "skills", "bindings", "deps", "category", "enabled", "failOnce", "systems", "execution", "execution_inputs", "execution_final"}
         for node_id, node in nodes.items():
             if set(node) - node_fields or node.get("type") not in ("p", "t", "j") or (node.get("type") == "p" and node_id != process_id):
                 _fail("invalid_workflow_scope", "절차의 편집 가능한 항목만 저장해 주세요.")
@@ -427,6 +457,11 @@ class AuthoringMixin:
                 _fail("invalid_workflow_scope", "다른 워크플로우와 교차 연결할 수 없습니다.")
             if not isinstance(node.get("bindings"), dict) or any(key not in node["tools"] or value not in INPUTS for key, value in node["bindings"].items()):
                 _fail("invalid_definition", "공개 입력 항목의 연결을 확인해 주세요.")
+        execution_definition = {**published, "nodes": {**published["nodes"], **nodes}}
+        for node in nodes.values():
+            errors = validate_execution(node, execution_definition)
+            if errors:
+                _fail("invalid_execution_contract", errors[0])
         # P/T/J types make the containment graph acyclic. Prerequisite cycles are
         # also refused at save time, including inherited self dependencies.
         graph = {key: {leaf for dep in _dependencies(nodes, key) for leaf in _leaves(nodes, dep)} for key, node in nodes.items() if node["type"] == "j"}
@@ -596,6 +631,8 @@ class AuthoringMixin:
                             node["bindings"] = {id_map.get(key, key): value for key, value in node["bindings"].items()}
                             if system_id in SYSTEMS:
                                 node["systems"] = [system_id]
+                        for copied_node in workflow["nodes"].values():
+                            remap_execution(copied_node, id_map)
                         workflow["nodes"][process_id]["name"] = name
                     else:
                         process_id = self._fresh_id(db, "", "nodes")

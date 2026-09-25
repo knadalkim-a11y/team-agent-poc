@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 import re
 
+from .ees_workflow_contract import validate_execution
+
 
 CATEGORIES = ("setup", "ops", "incident")
 SYSTEMS = ("EMS", "APC", "FDC", "EGIS", "EPT")
@@ -207,11 +209,13 @@ def validate_definition(definition):
         for field, available in (("tools", tools), ("skills", skills), ("deps", nodes)):
             if any(item not in available for item in node[field]):
                 reject(f"{node_id}: 삭제되거나 없는 {field} 참조가 있습니다.")
-        if node["type"] == "j" and node["mode"] == "tool" and not node["tools"]:
+        if node["type"] == "j" and node["mode"] == "tool" and not node["tools"] and "execution" not in node:
             reject(f"{node_id}: 실행할 도구를 연결해 주세요.")
         for tool_id in node["tools"]:
             if tool_id in tools and node["bindings"].get(tool_id, tools[tool_id].get("input")) != tools[tool_id].get("input"):
                 reject(f"{node_id}: 도구가 요구하는 입력 종류와 연결이 다릅니다.")
+    for node in nodes.values():
+        errors.extend(validate_execution(node, definition))
     if errors:
         return list(dict.fromkeys(errors))
     # The P/T/J parent types prevent structural cycles; expanding inherited

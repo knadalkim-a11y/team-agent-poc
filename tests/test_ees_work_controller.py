@@ -90,6 +90,13 @@ async function setup(options = {}) {
     }
   };
   vm.createContext(context);
+  // The shipped launcher and view share this pure scope predicate. Keep the
+  // HTTP/DOM boundary fixture, but load the real helper rather than a stub.
+  const viewSource = fs.readFileSync(input.view, 'utf8');
+  const helperStart = viewSource.indexOf('function workHasExecution(');
+  const helperEnd = viewSource.indexOf('function workExecutionInputsHTML(', helperStart);
+  assert.ok(helperStart >= 0 && helperEnd > helperStart, 'Runtime scope helper must be packaged with the view');
+  vm.runInContext(viewSource.slice(helperStart, helperEnd), context, {timeout: 2000});
   vm.runInContext(fs.readFileSync(input.source, 'utf8'), context, {timeout: 2000});
   async function settle() {
     for (let i = 0; i < 8; i++) {while (frames.length) frames.shift()(); await new Promise(resolve => setImmediate(resolve));}
@@ -431,7 +438,7 @@ class WorkControllerTests(unittest.TestCase):
     def check_scenario(self, scenario):
         result = subprocess.run(
             [shutil.which("node"), "-e", NODE_CONTROLLER],
-            input=json.dumps({"source": str(CONTROLLER), "scenario": scenario}),
+            input=json.dumps({"source": str(CONTROLLER), "view": str(CONTROLLER.with_name("ees-work-view.js")), "scenario": scenario}),
             capture_output=True, encoding="utf-8", timeout=10, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)

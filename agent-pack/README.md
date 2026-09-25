@@ -25,6 +25,8 @@ Jira는 작은 고정 조회 흐름으로 시작하며 별도 Skill을 추가하
 
 GitHub도 별도 Skill 없이 조건부 Prompt·작은 함수 설명과 기존 채팅 표로 시작합니다. [GitHub 안내](../docs/06-github-read-tool.md)에 따라 도구를 등록하고 새 개인 입력칸의 저장을 확인합니다. PR 목록·본문만 읽으며 GitHub.com의 개발용 연결과 사내 GHES 연결은 별개입니다.
 
+이미 등록된 세 도구는 [공통 실행 계약](../docs/mockups/ees-work/TASK.md#shared-native-runtime-20260925)에서도 같은 Native ID·원본·ACL·Valves/UserValves를 사용합니다. J에는 승인된 함수/버전 참조와 입력·완료 조건만 연결합니다. Workflow Tool 0.4.0의 `ees_execution_plan/action/state`와 업무 패널은 ees.12의 같은 서비스를 사용하며 별도 업무용 도구를 등록하지 않습니다. 예제 정의는 프로그램에 포함되지만 기존 P를 자동 교체하거나 게시하지 않습니다. Pack0.2.14는 이 채팅 계약·관리 Prompt와 ees.12 호환을 반영하며 실제 ApplyDemo는 별도 승인 범위입니다.
+
 대화 시작 예시와 팀원용 안내는 **팀 시연용 준비본**이며 실제 UI 저장·전달은 STATUS에서 확인합니다. Assistant의 역할 범위를 고정하지 않습니다. 대화 시작 예시는 기존 모델의 화면용 메타데이터입니다. 새 Skill·Tool이나 모델 전체 가져오기 파일이 아니며 System Prompt를 교체하지 않습니다. 질문 버튼은 클릭 즉시 전송될 수 있으므로 실제로 보낼 수 있는 문장으로 작성하고 부족한 대상은 대화에서 확인합니다. [팀원용 시작 안내](../docs/07-team-quickstart.md)는 사용자가 읽는 문서이고 개발·평가 이력을 포함하지 않습니다.
 
 ## 변경 절차

@@ -52,7 +52,7 @@ class CachedWheelRecoveryTests(unittest.TestCase):
             "state_root": str(self.root), "releases_dir": str(self.root / "releases"),
             "source_python": str(self.root / "source-python.exe"), "uv_exe": str(self.root / "uv.exe"),
         }
-        self.config_path.write_text(json.dumps(self.config))
+        self.config_path.write_text(json.dumps(self.config), encoding="utf-8")
         self.registry = {
             "schema_version": 1, "phase": "idle", "previous": None,
             "current": {"kind": "original", "source_commit": None, "python": self.config["source_python"]},
@@ -69,7 +69,7 @@ class CachedWheelRecoveryTests(unittest.TestCase):
         self.target = self.root / "releases" / COMMIT
         (self.target / "bundle").mkdir(parents=True)
         self.manifest = {"source_commit": COMMIT, "source_dirty": False, "schema_version": 1}
-        (self.target / "bundle" / "manifest.json").write_text(json.dumps(self.manifest))
+        (self.target / "bundle" / "manifest.json").write_text(json.dumps(self.manifest), encoding="utf-8")
         (self.target / "prepare.log").write_bytes(b"Original antlr no usable wheels failure\n")
         self.bundle = self.root / ("EES-demo-" + COMMIT[:12] + ".zip")
         self.bundle.write_bytes(b"Selected artifact checked by existing validator")
@@ -108,7 +108,7 @@ class CachedWheelRecoveryTests(unittest.TestCase):
         self.assertEqual(env, self.env)
         self.assertEqual((wheelhouse / FILENAME).read_bytes(), self.cached.read_bytes())
         target.mkdir()
-        (target / "release.json").write_text(json.dumps(self.metadata))
+        (target / "release.json").write_text(json.dumps(self.metadata), encoding="utf-8")
         return self.metadata
 
     def recover(self):
@@ -217,10 +217,10 @@ class CachedWheelRecoveryTests(unittest.TestCase):
 
     def test_manifest_mismatch_and_wrong_source_inventory_preserve_candidate(self):
         manifest_path = self.target / "bundle" / "manifest.json"
-        manifest_path.write_text(json.dumps(dict(self.manifest, source_commit="b" * 40)))
+        manifest_path.write_text(json.dumps(dict(self.manifest, source_commit="b" * 40)), encoding="utf-8")
         with self.assertRaisesRegex(recovery.releases.ReleaseError, "manifest differs"):
             self.recover()
-        manifest_path.write_text(json.dumps(self.manifest))
+        manifest_path.write_text(json.dumps(self.manifest), encoding="utf-8")
         self.mocks["probe"].return_value = {"packages": {"antlr4-python3-runtime": "4.13.2"}}
         with self.assertRaisesRegex(recovery.releases.ReleaseError, "source runtime"):
             self.recover()

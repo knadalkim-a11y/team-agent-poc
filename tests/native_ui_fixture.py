@@ -223,6 +223,10 @@ class NativeUIHandler(BaseHTTPRequestHandler):
             if path in {"/api/v1/models/list", "/api/v1/knowledge/list", "/api/v1/tools/list",
                         "/api/v1/knowledge/search", "/api/v1/prompts/list", "/api/v1/skills/list"}:
                 return self.send_content({"items": [], "total": 0})
+            if path == "/api/ees-work/execution/state" and self.server.workflow:
+                return self.send_workflow(asyncio.run(self.server.workflow.execution_state(self.server.user,
+                    case_id=query.get("case_id", [""])[0], run_id=query.get("run_id", [""])[0],
+                    chat_id=query.get("chat_id", [""])[0])))
             if path == "/api/ees-work/authoring/capabilities" and self.server.workflow:
                 return self.send_workflow(asyncio.run(self.server.workflow.authoring_capabilities(self.server.user)))
             if path == "/api/ees-work/authoring" and self.server.workflow:
@@ -293,6 +297,10 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                     "filename": "attachment.txt", "meta": {"name": "attachment.txt", "content_type": "text/plain", "size": 12},
                     "data": {"status": "completed"}, "created_at": 1})
             body = json.loads(raw or b"{}")
+            if path == "/api/ees-work/execution/plan" and self.server.workflow:
+                return self.send_workflow(asyncio.run(self.server.workflow.execution_plan(self.server.user, body)))
+            if path == "/api/ees-work/execution/action" and self.server.workflow:
+                return self.send_workflow(asyncio.run(self.server.workflow.execution_action(self.server.user, body)))
             if path == "/api/ees-work/authoring/action" and self.server.workflow:
                 return self.send_workflow(asyncio.run(self.server.workflow.authoring_action(self.server.user, body)))
             if path == "/api/ees-work/action" and self.server.workflow:
