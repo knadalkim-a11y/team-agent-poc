@@ -12,6 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| 공통 Native 도구와 P/T 지속 실행 | [TR-01~24·두 읽기 사례·실제 Native/합성 경계·재시작·미실행](#shared-native-runtime-20260925) |
 | 시스템 담당자의 P별 작성·게시와 첫 이용 | [SA-01~28·NU-01~08·Native 재사용·세션 한계·사내 OP 확인](#system-authoring-20260924) |
 | A안 상태·실행 상세 구현 | [Figma 실조회와 제품 수락 A-01~A-11·실패/검증/미실행 구분](#a-design-20260923) |
 | 오른쪽 업무·수행 상세 후속 | [기존 기록 연결·조건 탐색·새 Native 검증·접근 차단 경계](#right-panel-20260922) |
@@ -47,6 +48,107 @@
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="shared-native-runtime-20260925"></a>
+
+## 2026-09-25 공통 Native 도구 재사용과 P/T 지속 실행
+
+**범위와 시작점:** 사용자 첨부 `EES_Work_Shared_Tools_Runtime_Design_Handoff_20260925_v1.0.md`의 14절과 TR-01~24를 기준으로 1차 읽기 자동화를 구현한다. 시작 main/HEAD는 `991cdb1d80ae07471fb50594831d74fe602b1ef7`, 작업 브랜치는 `feat/shared-native-runtime-20260925`다. 기존 A안·Native 회원/개인 설정·시스템 담당자·P별 게시와 이전 기록을 보존한다. Draft #53을 병합하거나 적층하지 않는다. 이번 요청은 커밋·push·PR까지이며 main 직접 push/병합·사내 배포·실제 계정/도구 등록·실서버 변경은 범위 밖이다.
+
+**시험 환경:** Linux 6.18.44/glibc 2.39, 기존 단일 `.venv`의 Python 3.11.16, Node 24.19.0, Chrome headless shell 153.0.8010.52와 고정 공식 Open WebUI 0.11.3 wheel을 사용한다. 회사의 Python/Windows/Native 데이터에는 접근하지 않는다. 같은 항목의 중간 실패·집중 재검·최종 suite를 고유 시험 수로 중복 합산하지 않는다. 9월 원격 CI 생략 지침은 유지하며 아래 결과는 로컬 실행이다.
+
+### 실제 실행한 계층과 합성 경계
+
+| 구분 | 실제 실행한 원본 | 합성 또는 미실행 |
+|---|---|---|
+| **N: Native 읽기 연결** | [Native 검사](../tests/test_ees_workflow_native.py), [fixture](../tests/ees_workflow_native_fixture.py): 고정 wheel의 Users/Groups/Tools/AccessGrants·암호화 UserValves 저장·loader·예약 인자 binder, 임시 Native SQLite, 기존 세 읽기 Tool의 여섯 공개 함수 | 계정/키/endpoint/HTTP 응답은 합성. specs는 실제 함수 시그니처로 준비하며 Native LangChain schema 생성기까지 검사한 것은 아님. 실제 사내 PAT/자료 사용 없음 |
+| **E: 두 완주 사례** | [Native 사례 검사](../tests/test_ees_workflow_examples_native.py): 실제 Native 등록/ACL/개인 설정·기존 함수·EES P별 작성/게시·실행/검증·SQLite 기록 | 외부 HTTP와 모델 metadata/transport는 합성. AI 어댑터는 실제 코드. 사례 A/B의 전체 production Native 앱 또는 사내 모델 품질 검사가 아님 |
+| **D: 지속 실행** | [실행 검사](../tests/test_ees_workflow_execution.py): 실제 WorkflowService/SQLite·claim/lease·이벤트·결과 저장, 실제 OS 자식 프로세스 종료/새 프로세스 기동, 이전 ees.11 서비스 원본 읽기/쓰기 차단 | Native bridge/모델/사용자 조회는 합성. 느린 호출·ACL 회수·시간 초과는 통제된 입력. 전체 Native production startup 및 Windows 서비스 재기동 아님 |
+| **C: 계약·게시** | [계약 검사](../tests/test_ees_workflow_contract.py): 입력/결과 연결·완료 검증기·두 구성 예제·실제 P별 저장/검사/게시 서비스 | 자산/계정 조회는 합성. 의미 판단의 보장은 등록된 구조·업무 필드·저장 근거 일치이며 독립적인 외부 사실 검증이 아님 |
+| **M: 모델 호출 경계** | [모델 검사](../tests/test_ees_workflow_model.py)와 [Native payload 검사](../tests/test_ees_workflow_model_native.py): 실제 AI 어댑터, 후자는 SHA가 고정된 wheel의 generator/OpenAI route/payload 변환 함수 본문 | 모델 row/ACL 결정/연결/HTTP는 합성. Native 모델 ACL 저장 전체나 실제 GLM 응답을 검사한 것은 아님. Ollama는 실제 변환 함수의 상한을 검사하며 실제 Ollama 서버는 미실행 |
+| **U: 채팅·화면** | [채팅 검사](../tests/test_ees_execution_tool.py), [화면 상태 검사](../tests/test_ees_execution_ui.cjs), [기존 제품 브라우저 검사](../tests/test_ees_work_demo.py): 공통 facade·실제 조립 frontend·Chrome, 실제 업무 서비스와 임시 SQLite | Node 검사는 합성 DOM/state. Chrome은 고정 Native frontend와 격리된 API fixture이며 새 실행 bridge/모델·주변 채팅 전송은 합성. 전체 Native backend 기동 검사와 구분 |
+| **P: 패키지·복원** | [빌더 검사](../tests/test_ees_branding_build.py), [프로그램 검사](../tests/test_ees_webui_customization.py): 실제 wheel 파일/RECORD·프로그램 Apply/Restore·기존 data/key/Python 보존 | Linux 임시 설치에서 검사. Windows 파일 잠금/서비스·사내 데이터 복원·실서버 변경은 미실행 |
+
+### TR-01~24 수락 범위
+
+표의 PASS는 **명시한 개발 환경/경로에 한정**한다. 사내 읽기 또는 Windows 자동 설치 PASS로 바꾸지 않는다. 실제 Native 호출 검사와 합성 durable/화면 검사를 하나의 전체 production 실행으로 합치지 않는다.
+
+| ID | 판정·실제 근거 | 보장하지 않는 범위/남은 조건 |
+|---|---|---|
+| TR-01 | N `same_registration_two_jobs_two_users_and_native_chat`, E 사례 A/B: 같은 Native ID·함수·content hash 재사용, API 구현/개인 PAT 복제 없음 | 사내 등록 ID 연결은 미실행 |
+| TR-02 | N의 일반 Native `get_tools`와 실행 bridge 대조, U의 headless `plan/action/state`·같은 요청 영수증 전달 | 실제 일반 채팅의 LLM 도구 선택 품질·production 전체 채팅 경로 미실행 |
+| TR-03 | N의 두 사용자 개인 PAT 동시 호출·그룹/ACL 회수·pending 전환, D의 실행 소유자/조회 차단 | 합성 계정의 실제 Native 저장 경로이며 실제 직원 계정 변경 없음 |
+| TR-04 | N의 private/미허용 함수·예약 인자·URL/headers/role/owner 거절, C 공개 입력 계약: loader 호출 전 차단 | 임의 플러그인 샌드박스 제공을 뜻하지 않음 |
+| TR-05 | N의 code/schema/config/environment/Native 버전 변경과 loader 경합 거절; C의 검사 후 승인 변경 시 게시 거절·초안 보존; D의 스킬 본문/hash 변경 시 dispatch 0 | Native 도구 변경은 실제 임시 DB, 스킬 변경은 합성 자산 조회. 서로 다른 환경의 증거를 구분 |
+| TR-06 | N 목록·준비/승인 시 loader/HTTP 0, requirements·개인 연결 부재 import 전 차단, 관리자 외 승인 거절 | 실행 중 설치를 허용하지 않으며 사내 도구 등록도 하지 않음 |
+| TR-07 | D/E의 P·T1·T2·J 범위: T1은 모델 0, T2 선행 미완료는 범위 밖 dispatch 0, J 단독 실행; U 조회는 실행 요청 없음 | 범위 밖 선행을 자동 수행하지 않음; 안전한 병렬 실행은 1차 지원 아님 |
+| TR-08 | C 타입/식별자/배열·객체/예약 키/변환/저장 결과 연결, D/E 실제 후보 선택·입력 보완, 바인딩된 입력 변경 거절 | 기존 입력을 바꾸려면 새 진행 건/계획 필요. 일반 코드/템플릿 실행 없음 |
+| TR-09 | D/E 고정 작업 모델 0·요약 1회, M 현재 사용자 모델 ACL·스킬/지침/선행 자료 범위·비밀 비전달·토큰 상한 | 1차 AI는 저장 근거 선택/요약이다. 모델 주도 도구 loop·실제 GLM 품질·속도는 미실행 |
+| TR-10 | N 정규화·C 검증기·E 잘린 문서: empty/partial/truncated/unknown 분리. 검증된 한 페이지 조회의 업무 완료와 전체 자료 완전성 분리 | Jira 부분 실패·GitHub 다음 페이지 불명·잘린 본문을 전체 조회 완료로 승격하지 않음 |
+| TR-11 | C/E 가짜 건수·CI·다른 근거·자유 문장·필수 업무 필드 없는 요약 거절, J와 P/T 최종 조건 별도 검사 | 요약은 원문에 있는 관찰값의 검증이며 문서 주장 자체의 외부 진실성 판정은 아님 |
+| TR-12 | U Chrome에서 패널 닫기·`about:blank` 이동 중 서버 수행, 재접속에 동일 run/저장 결과 확인; D 요청 반환 뒤 큐 처리 | Chrome 검사의 실제 업무 서비스+합성 bridge 조건. 브라우저 프로세스 강제 종료/production 앱 전체 수락과 구분 |
+| TR-13 | D `real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown`: 새 OS 프로세스가 같은 DB 큐 수행, dispatch 중 kill 후 lease 복구 UNKNOWN·중복 호출 0 | 단순 객체 재생성이 아님. 실제 Native 앱 전체와 Windows 서비스 재시작은 미실행 |
+| TR-14 | D 느린 호출 대기 중 별도 SQLite 쓰기 성공·두 worker의 단일 claim; 결과 UPDATE 후 합성 OperationalError에서 실제 DB transaction rollback→lease UNKNOWN·반복 호출 0 | 외부 HTTP는 합성 지연. SQLite 자체 손상·실서버 DB 장애를 재현한 것은 아님 |
+| TR-15 | D 동일 request ID 재생/다른 내용 거절·동일 case 실행 중첩 거절·같은 DB 두 worker 단일 dispatch; U 불명확 응답의 동일 영수증 재시도 | 두 worker 경합은 동일 시험 프로세스의 두 runtime. 다수 OS app 프로세스 동시 부하 검사는 미실행 |
+| TR-16 | D timeout·late result·lease 만료·진행 중 cancel: 원시도만 보존, UNKNOWN에서 무조건 resume 거절, 후속 dispatch 없음 | 원격 요청/스레드 취소 성공·외부 exactly-once 보장 아님 |
+| TR-17 | D 호출 전 권한 거절/Native 인증 실패의 명시적 재개와 이전 실패 시도 보존, `rate_limited`만 선언된 예산에서 자동 재시도 최대 1회·지연, 성공 결과 재호출 없음 | 권한/인증은 자동 재시도 0. 분류 불명 오류·1차 읽기 외 변경 작업의 자동 재시도는 미지원 |
+| TR-18 | D I/O 중 pause→결과 보존/다음 호출 중지→resume, cancel UNKNOWN, B 입력 보완 revision/hash 갱신 | 실행 전 입력 변경과 실행 후 외부 원상복구는 별개. 취소가 원상복구를 뜻하지 않음 |
+| TR-19 | N 승인 revision/정확한 fingerprint·관리자·사용 중지·개인 Native 추가 승인 설정 거절; D exact plan hash/계획 만료 거절; U AI의 사람 확인 액션 거절 | 브라우저 종속 추가 승인은 미지원으로 차단한다. Windows 변경 승인 실행은 미구현 |
+| TR-20 | N PAT/UserValves 격리·오류/문자열/URL/헤더 비밀 제거, M scoped prompt·tool call/extra key 거절, C/E 비신뢰 본문·위조 근거 거절 | 실제 사내 비밀/문서는 시험에 사용하지 않음. 모델 보안성 전체 인증 아님 |
+| TR-21 | C P별 저장/게시·참조 ID 재매핑·승인 변경 거절; D snapshot·입력 변경/오래된 근거 재사용 차단·실제 이전 ees.11 writer 거절; P 실제 Apply/Restore | 이전 프로그램은 새 protocol case 실행을 할 수 없다. 프로그램 Restore는 업무 DB/원격 효과의 rollback이 아님 |
+| TR-22 | E 사례 A: T1의 Jira/GitHub/Confluence 실제 코드 호출→실제 EES DB 저장→P의 저장 근거 AI 요약/검증·완료 상태 투영 | HTTP·모델 응답 합성. U의 실제 패널 수락은 별도 단일 J 사례이며 A 전체 UI/사내 완주는 미실행 |
+| TR-23 | E 사례 B: 같은 Confluence ID로 검색→모호 후보 대기→확인한 ID만 선택→본문 조회, 검색 성공 재호출 없음; 미등록 ID 거절 기록 보존 | 잘못 제출한 기존 입력을 몰래 고치지 않으며 새 진행 건으로 다시 확인. Windows 설치 수행 아님 |
+| TR-24 | P 실제 wheel/모듈/조립 자산·프로그램/자료 보존, U 기존 A안 긴 한글·1920/1536/1366 양 테마·키보드/dialog/폭 보존과 늦은 응답 격리 | 새 runtime 계정 전환/늦은 응답은 Node 상태 검사. 실제 Native 계정 전환은 이전 [SA/NU 근거](#system-authoring-20260924)를 재사용하며 새 runtime 전용 Chrome 전체 계정 전환은 미실행 |
+
+### 실행 명령과 확인된 결과
+
+새 시험은 다음 원본으로 재현한다. Native 검사는 `EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl`, 제품 frontend 검사는 실행한 `EES_TEST_BRANDING_DIR`·`EES_TEST_CHROME`을 함께 지정한다. 경로가 필요한 gate의 skip을 PASS로 세지 않는다.
+
+```bash
+.venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_workflow_contract.py -v
+.venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_workflow_execution.py -v
+EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_workflow_native.py -v
+EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_workflow_examples_native.py -v
+.venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p 'test_ees_workflow_model*.py' -v
+.venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_execution_tool.py -v
+node --test tests/test_ees_execution_ui.cjs
+node --test tests/test_ees_work_authoring_ui.cjs
+```
+
+- Native 읽기 **8 PASS**. 버전 fingerprint·잘림·비밀 문자열의 후속 집중 3건도 PASS이며 같은 8건의 보강 재검이다. 실제 세 등록본의 여섯 함수·실제 Native 임시 DB/UserValves 암호화를 사용했다.
+- 모델 어댑터 단위 **7 PASS**, 고정 Native generator/route/payload **5 PASS**. 후자 최초 과도한 `max_output_tokens`가 일반 Chat Completions로 전달되는 **1 FAIL**을 확인했고 지원 불가 설정의 선제 거절 후 **5 PASS**다. Responses 변환과 Ollama `num_predict` 상한, Native preset system 억제·ACL 우회 없음도 검사했다.
+- 계약은 필수 업무 필드·선행 binding·명시적 사람 확인 보강 후 **17 PASS**. 지속 실행은 최종 집중 **23 PASS**(약 8.5초)이며 실제 OS 프로세스·같은 DB·이전 ees.11 writer·FastAPI 수명주기에서 HTTP 접수 뒤 worker 계속 실행을 포함한다. 추가 실제 Native 승인 route에서 inspect/disable/approve HTTP 200과 저장 revision 증가를 확인했고 P 실행 뒤 하위 T 최종 상태도 검사했다. Native 완주 예제는 **5 PASS**(198.8초), 필수 관찰값 보강 후 A 집중 1건 PASS(17.3초). 이 재검을 6개 고유 예제로 더하지 않는다. 최종 strict 예제 전체 **5 PASS**(92.2초), 새 P에서 세 Native 조회와 모델까지 이어지는 A 집중 재검도 **PASS**(27.383초)다. 모델은 필수 경로 prompt 전달 보완 후 **12 PASS**(1.087초)로 재검했다. 광역 회귀는 아래에 별도로 기록한다.
+- 신규 채팅 **7 PASS**, 신규 화면 Node **6 PASS**, 기존 작성 화면 Node **28 PASS** 뒤 Native 기능 선택기의 정확한 참조·schema·늦은 P 변경 응답·일반 작성자 승인 불가 3건을 추가한 **31 PASS**. Node를 호출하는 Python wrapper를 별도 고유 제품 시험으로 더하지 않는다.
+- 실제 Chrome 신규 지속 실행 1건과 기존 A안 긴 한글/키보드/독립 스크롤/사용자 폭 1건을 최종 UI v5에서 **2 PASS**(13.012초)로 재검했다. 조립 wheel frontend를 사용하되 backend는 현재 업무 서비스 소스와 격리된 합성 surroundings다. 마지막 보완은 계획의 유효시각/함수 범위 표시와 과거 실행의 읽기 전용 기록·다른 case snapshot 격리이며 CSS는 변경하지 않았다. `dist/runtime-ui-screens-final/runtime-native-panel-return.png`도 직접 확인했다.
+- 초기 패키지 **23 PASS/2 SKIP**, 고정 upstream 실제 audit **2 PASS**(25.540초), bundle **8 PASS**, 초기 synthetic customization **54 PASS/5 SKIP**. 실제 ees.10/ees.11→ees.12 Apply/Restore·purelib **3 PASS**(66.937초), launcher **10 PASS**, ApplyDemo **28 PASS**, Specialists/Pack 집중 **2 PASS**. 초기 SKIP 중 실제 wheel 조건은 후속 3건에서 검사했으며 Windows/선택 구버전 등의 나머지 skip은 그대로 남긴다.
+
+복원 비교 원본은 이전 main ees.11 SHA256 `27f6a1c37264d4f205bedb6635c9eaae8a36a5d023d36d1dd595e34728c8b8d3`, 이전 ees.10 SHA256 `ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd`다. 이전 원본을 보존해 순차 비교했고 새/구 프로그램을 같은 DB에 동시에 운영하지 않았다. 위 Chrome 수락의 `dist/branding-runtime-ui-v5/open_webui-0.11.3+ees.12-py3-none-any.whl` SHA256은 `56afe3fbf390d1ad2335cec968d2e492fb0f9498928ce6bbea6c286c3f61c656`이며 frontend 소스와 byte-exact 일치를 확인했다. 이 UI 검사용 빌드를 최종 게시 원본이나 사내 적용 해시로 안내하지 않는다. 최종 검증 wheel은 `dist/branding-runtime-final/open_webui-0.11.3+ees.12-py3-none-any.whl`, SHA256 `125b669e9e84e9e5352a3f1c8602e6ce8f86ef1e4957eb4c3fcd650a9ff7406c`, 151,946,593 bytes다. 실제 runtime/정적 자산/bootstrap/guard 21항목과 현재 소스의 byte-exact 일치를 검사 전후 확인했다. 개발 소스 검증용 산출물이며 사내 적용/릴리스 게시 해시로 대체하지 않는다.
+
+**최종 파일별 회귀:** 49개 Python 파일에서 고유 1,244건 중 **1,228 PASS / 16 SKIP / FAIL·ERROR 0**이다. 최초 49파일 결과에 수정 후 14파일의 235건(233 PASS/Windows 2 SKIP)을 파일별로 대체했으며 재검을 더하지 않았다. 최종 Native 브라우저는 **39/39 PASS**(181.095초), Native 회원/작성 browser·API **6 PASS**, 계정 전환 **1 PASS**를 포함한다. 최종 wheel의 실제 ees.10/11 Apply→Restore/설치 구조 **3 PASS**(72.463초)는 기존 coverage 재검이므로 합계에 다시 더하지 않는다. SKIP은 Windows 전용 10, PowerShell 미설치 5, ees.7/8 전용 과거 복원 산출물 부재 1이다. ees.10/11 실제 복원 gate는 실행했다.
+
+실행 중 사용한 임시 driver는 `.venv/bin/python dist/run_regression_files.py`와 수정 후 `dist/run_final_regressions.py`이며 결과 원본은 `dist/runtime-consolidated-final.json`이다. 각 파일을 새 Python subprocess에서 strict encoding `unittest` discover로 실행했다(일반 최대 3개 병렬, 브라우저 순차, 파일별 420초 상한). 영속 재현 명령은 위 환경변수에 `EES_TEST_BRANDING_DIR=dist/branding-runtime-final`과 이전 ees.10 wheel 경로, 기존 workflow의 Native require/실제 uv·NLTK opt-in을 지정한 뒤 `.venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_FILE.py -v`를 각 파일에 실행하는 방식이다. 단일 프로세스 전체 discover PASS는 아니다. 문서 검사 **60파일/2,501링크/오류·검토 후보 0**, `git diff --check` PASS다.
+
+최종 Chrome 명령은 `PYTHONPATH=.:tests`, 위 upstream·`EES_TEST_BRANDING_DIR=dist/branding-runtime-ui-v5`·Chrome 절대 경로를 설정하고 `.venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_demo.EESWorkNativeBrowserTests.test_durable_runtime_panel_plan_real_service_and_browser_return test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width -v`로 실행했다.
+
+### 최초 실패·독립 검토·수정 경계
+
+1. **시험 준비:** Native fixture의 문자열 annotation 처리와 암호문 형식 기대 오류를 수정했다. 모델 payload fixture의 `collections` 누락도 시험 준비 오류다. Chrome 실행 권한/시험 메서드 배치, 예제 scope의 version 누락·지원하지 않는 category, 새 durable 의존성에 legacy 사람 확인 결과를 사용하는 fixture도 수정했다. 마지막은 실제 서비스가 `waiting_dependency`로 차단한 정상 결과이며 제품 완료 기준을 느슨하게 만들지 않았다.
+2. **패키지 시험 준비:** 미래 미지원 버전 fixture가 새 지원값 ees.12로 남은 오류 1건과 focused 명령의 class 오타 1건을 각각 ees.13·정확한 class로 수정한 후 관련 2건 PASS. 회사 설치 환경에서 발생한 장애가 아니다.
+3. **실제 구현 보완:** Native 버전 fingerprint 검사, 잘못된 `truncated` 응답의 성공 승격 방지, cookie/따옴표 비밀 문자열 제거를 보완했다. 모델 호출은 unpinned Native preset prompt·pipeline/browser session 인증을 차단하고 최종 token 상한을 고정했다. 기능별 해당 N/M 회귀를 연결한다.
+4. **독립 runtime/계약 검토:** UNKNOWN을 완료로 진행시키는 분기, 입력을 바꾼 새 계획이 옛 성공 결과를 재사용하는 분기, ACL 회수 후 저장 근거 노출/AI·다음 도구 재전달, 호출 전 거절 후 재개 불가, P/T 최종 조건 누락·검증된 한 페이지와 실제 누락의 혼동을 발견했다. 현재 source ACL·스킬·입력 불변·명시적 재개·완료 검증을 보완해 D 23건과 C 17건에서 재검했다. source ACL 회수의 직접 시험은 AI 전달 0이며 fixed 결과 binding은 같은 검사 경로를 사용한다. 요약이 `data.ok=true`만으로 통과하는 문제는 사례 A의 필수 Jira 집계·PR 페이지 범위·문서 제목/revision 관찰값 계약으로 보완했고 C의 위조/필수필드 검사를 추가했다.
+5. **재검 준비의 구분:** durable의 초기 인증 재개 fixture가 서로 다른 run에서 같은 request ID를 사용해 `request_conflict`로 정상 거절됐다. ID에 run을 포함하도록 fixture를 수정했다. 필수 요약 필드 계약을 강화하는 동시 작업 중 합성 모델 fixture가 예전 경로를 반환해 5건이 UNKNOWN으로 멈췄으며 새 exact 경로로 시험 입력을 맞췄다. 제품 검증기를 완화하지 않고 마지막 D 23 PASS로 확인했다.
+
+6. **광역 회귀의 최초 결과:** 단일 Python 프로세스 전체 discover는 약 315번째 기존 DemoData 시험에서 2분 이상 정체되어 중단(exit 130)했다. 같은 시험 단독은 0.023초에 PASS했고 실제 I/O 없는 함수라 fixture/async teardown 상호작용 가능성은 있으나 원인은 확정하지 않았다. 이 실행을 전체 PASS로 기록하지 않는다. 제품/CI를 바꾸지 않고 각 `test_*.py`를 새 Python subprocess로 실행해 격리·timeout·파일별 결과를 확보했다.
+7. **파일별 첫 회귀와 수정:** 49파일 최초 합계 1,244건은 1,153 PASS/7 FAIL/68 ERROR/16 SKIP이었다. 7 FAIL은 launcher 단독 VM에 실제 view helper `workHasExecution` 로딩이 빠져 상태/이력 조회가 실패한 fixture 문제로, 실제 함수를 로드한 뒤 기존 조건 그대로 21/21 PASS다. 기존 Workflow Tool도 34/34 PASS로 재검했다. 25 ERROR는 기존 배포 accept/report/recover fixture의 text 인코딩 누락이며 `encoding="utf-8"`만 명시한 뒤 78건 중 76 PASS/Windows 2 SKIP이다. 나머지 43 ERROR는 변경 중 빌드한 v2의 launcher source 불일치 검사로, 최종 wheel을 새로 조립한 뒤 관련 Native 브라우저 세 파일 46건을 전부 재검해 PASS했다. 의미 검증/보호 조건을 완화하지 않았다.
+8. **최종 서비스 검토:** 관리자 승인 저장은 성공했는데 HTTP 응답에 `ok`가 없어 400으로 표시되는 경계를 보완하고 실제 Native 승인 route를 검사했다. P 성공 뒤 하위 T 최종 조건 투영 누락도 수정해 저장 상태와 화면 판정을 맞췄다. 모델 결과 형식 오류는 이미 호출한 시도이므로 UNKNOWN으로 유지하며 호출 전 인가 거절로 바꾸지 않는다.
+
+9. **향후 원격 검사 연결:** 기존 `.github/workflows/ees-delivery.yml`의 경로 trigger와 시험 단계에 새 실행 Tool/UI·고정 Native wheel·Native 필수 플래그, 정확한 ees.11 이전 원본/복원 gate를 연결했다. YAML·명령 경로·단계 순서만 정적 검사했으며 원격 CI는 실행하지 않았다. 기존 check job 10분 제한은 유지했고 추가 Native 사례/이전 wheel 빌드의 원격 소요시간은 미확인이다. 9월 `[skip ci]` 방침과 10월 재개 조건을 바꾸지 않는다.
+
+### 완료선과 미실행
+
+이번 결과는 명시한 범위의 **공통 읽기 자동 실행 구현/개발 검증**이다. 사내 실제 Confluence/Jira/GHE 등록본·승인·개인 연결·API·GLM 품질/속도, Native 전체 production 앱 기동, Windows 서비스/프로세스·실제 계정 전환/자료 복원은 별도 미실행이다. [기존 SA/NU](#system-authoring-20260924)와 A안의 유효한 회귀 근거는 보존하지만 다른 실행 환경의 새 PASS로 바꾸지 않는다.
+
+Windows 신규 서버 셋업은 같은 Native 기능 참조·승인·입출력·검증·영속 실행 계약의 후속 목표다. 실제 변경 기능·사내 승인 원격 경로·대상 ID/자원 잠금·작업 상태 조회/중복 방지·후조건·재기동 증거가 필요하며 **W-01~05 전부 미실행**이다. 읽기 연결 성공을 Windows 설치/셋업 완료로 표시하거나 수동 체크리스트 완료로 대체하지 않는다.
 
 <a id="system-authoring-20260924"></a>
 

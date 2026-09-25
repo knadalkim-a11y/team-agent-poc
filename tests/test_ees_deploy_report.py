@@ -177,12 +177,12 @@ class FailedStartupReportTests(unittest.TestCase):
 
     def test_existing_operation_lock_returns_busy_without_reading_logs(self):
         lock = self.root / "deployment.lock"
-        lock.write_text("synthetic-private")
+        lock.write_text("synthetic-private", encoding="utf-8")
         with patch.object(REPORT, "_created_at", side_effect=AssertionError("log read")):
             self.assertEqual(self.collect(), {"status": "busy", "reason": "deployment_in_progress"})
             self.recorded_failure()
             self.assertEqual(self.collect(), {"status": "busy", "reason": "deployment_in_progress"})
-        self.assertEqual(lock.read_text(), "synthetic-private")
+        self.assertEqual(lock.read_text(encoding="utf-8"), "synthetic-private")
 
     def test_tied_candidates_or_later_logs_are_ambiguous(self):
         tied = self.log("c", self.created[self.candidate])
@@ -240,7 +240,7 @@ class FailedStartupReportTests(unittest.TestCase):
         text += 'Traceback (most recent call last):\n'
         text += ''.join(f'  File "<frozen importlib._bootstrap>", line {n}, in _find_spec\n' for n in range(25))
         text += 'KeyboardInterrupt\n'
-        self.candidate.write_text(text)
+        self.candidate.write_text(text, encoding="utf-8")
         result = self.collect()
         self.assertEqual(result["tracebacks_seen"], 2)
         self.assertEqual(result["error_types"], ["ValueError", "KeyboardInterrupt"])
@@ -256,7 +256,7 @@ class FailedStartupReportTests(unittest.TestCase):
         frames = ''.join(f'  File "<frozen importlib._bootstrap>", line {n}, in _find_spec\n' for n in range(25))
         self.candidate.write_text(
             'Traceback (most recent call last):\n' + frames + 'ImportError: private\n'
-            'Traceback (most recent call last):\n' + frames + 'KeyboardInterrupt\n')
+            'Traceback (most recent call last):\n' + frames + 'KeyboardInterrupt\n', encoding="utf-8")
         result = self.collect()
         self.assertEqual(len(result["first_error_frames"]) + len(result["frames"]), 20)
         self.assertEqual(result["first_error_frames_omitted"], 15)
@@ -271,7 +271,7 @@ class FailedStartupReportTests(unittest.TestCase):
             '  File "C:/Lib/site-packages/sqlalchemy/engine/base.py", line 2, in connect\n'
             'OperationalError: SYNTHETIC_SECRET\n'
             'Traceback (most recent call last):\n'
-            '  File "C:/Lib/asyncio/runners.py", line 3, in run\nSystemExit: 1\n')
+            '  File "C:/Lib/asyncio/runners.py", line 3, in run\nSystemExit: 1\n', encoding="utf-8")
         result = self.collect()
         self.assertEqual(result["first_error_type"], "OperationalError")
         self.assertEqual(result["first_error_frames"], ["sqlalchemy/engine/base.py:2:connect"])
@@ -281,7 +281,7 @@ class FailedStartupReportTests(unittest.TestCase):
 
     def test_interrupt_only_does_not_claim_an_earlier_error(self):
         self.candidate.write_text('Traceback (most recent call last):\n'
-                                  '  File "<frozen importlib._bootstrap>", line 1, in _find_spec\nKeyboardInterrupt\n')
+                                  '  File "<frozen importlib._bootstrap>", line 1, in _find_spec\nKeyboardInterrupt\n', encoding="utf-8")
         result = self.collect()
         self.assertIsNone(result["first_error_type"])
         self.assertEqual(result["first_error_frames"], [])
@@ -291,7 +291,7 @@ class FailedStartupReportTests(unittest.TestCase):
         self.candidate.write_text(
             '  File "C:/Users/private/venv/Lib/site-packages/torch/tests/example.py", line 15\n'
             '    SYNTHETIC_PRIVATE_SOURCE = (\n'
-            'SyntaxError: private source message\n')
+            'SyntaxError: private source message\n', encoding="utf-8")
         result = self.collect()
         self.assertEqual(result["frames"], ["torch/tests/example.py:15:<syntax>"])
         self.assertEqual(result["error_types"], ["SyntaxError"])
@@ -305,7 +305,7 @@ class FailedStartupReportTests(unittest.TestCase):
             '  File "C:/Lib/site-packages/torch/tests/example.py", line 15\n'
             '    SYNTHETIC_PRIVATE_SOURCE = (\nSyntaxError: private\n'
             'Traceback (most recent call last):\n'
-            '  File "<frozen importlib._bootstrap>", line 5, in _find_spec\nKeyboardInterrupt\n')
+            '  File "<frozen importlib._bootstrap>", line 5, in _find_spec\nKeyboardInterrupt\n', encoding="utf-8")
         result = self.collect()
         self.assertEqual(result["first_error_frames"], ["torch/tests/example.py:15:<syntax>"])
         self.assertEqual(result["first_error_type"], "SyntaxError")
@@ -507,12 +507,12 @@ class RecoveryIncidentReportTests(unittest.TestCase):
         other_log.write_bytes(b"another incident\n")
         other = deepcopy(self.request)
         other["registry"]["process"]["log_file"] = str(other_log)
-        (self.root / ("stop-recovery-" + "d" * 32 + ".json")).write_text(json.dumps(other))
+        (self.root / ("stop-recovery-" + "d" * 32 + ".json")).write_text(json.dumps(other), encoding="utf-8")
         self.assertEqual(self.inspect(), {"status": "ambiguous", "reason": "multiple_recorded_stop_logs"})
 
     def test_active_log_and_busy_deployment_are_not_read(self):
         self.registry["process"]["log_file"] = str(self.old_log)
-        self.registry_path.write_text(json.dumps(self.registry))
+        self.registry_path.write_text(json.dumps(self.registry), encoding="utf-8")
         self.assertEqual(self.inspect()["reason"], "recorded_log_is_active")
         (self.root / "deployment.lock").write_bytes(b"busy")
         with patch.object(REPORT, "_recovery_json", side_effect=AssertionError("evidence read")):
@@ -527,7 +527,7 @@ class RecoveryIncidentReportTests(unittest.TestCase):
             self.request["failure"]["result"][key] = original
         self.save_request()
         self.registry["customization"]["pending"] = {"action": "apply"}
-        self.registry_path.write_text(json.dumps(self.registry))
+        self.registry_path.write_text(json.dumps(self.registry), encoding="utf-8")
         self.assertEqual(self.inspect()["reason"], "deployment_not_idle")
 
     def test_outside_relative_and_nonstandard_recorded_logs_are_rejected(self):
@@ -574,7 +574,7 @@ class RecoveryIncidentReportTests(unittest.TestCase):
         config_path.write_bytes(payload)
         completed = subprocess.run([sys.executable, "-I", "-B", str(SCRIPTS / "ees_deploy_report.py"),
                                     "--inspect-recovery", "--config", str(config_path)],
-                                   capture_output=True, text=True, timeout=10)
+                                   capture_output=True, text=True, timeout=10, encoding="utf-8")
         self.assertEqual(completed.returncode, 1)
         self.assertEqual(len(completed.stdout.splitlines()), 1)
         self.assertIn("code=evidence_unavailable", completed.stdout)

@@ -1,7 +1,7 @@
 """
 title: EES Workflow
 description: 기존 대화와 업무 패널이 공유하는 공장별 업무 진행 및 절차 관리
-version: 0.3.0
+version: 0.4.0
 required_open_webui_version: 0.11.3
 ees_demo_pack: ees-demo-v1
 """
@@ -117,8 +117,14 @@ def _compact(state):
     if not state.get("ok"):
         return state
     case = state.get("case")
+    definition = state.get("workflow", {}).get("definition") or (case or {}).get("definition", {})
+    runtime = any(node.get("execution") for node in definition.get("nodes", {}).values())
     result = {"ok": True, "can_manage": state.get("can_manage", False), "case": case,
-              "simulation": True, "message": "DB/AP 점검은 모의 실행입니다. 실제 운영 시스템의 결과가 아닙니다."}
+              "simulation": not runtime, "message": (
+                  "실제 실행은 ees_execution_plan/action/state의 저장된 호출·검증 결과로 확인합니다. 미수행·대기·UNKNOWN은 완료가 아닙니다."
+                  if runtime else "DB/AP 점검은 모의 실행입니다. 실제 운영 시스템의 결과가 아닙니다.")}
+    if runtime:
+        result["execution_actions"] = ["ees_execution_plan", "ees_execution_action", "ees_execution_state"]
     if case:
         # Snapshot definitions contain the effective instructions, mappings and
         # field constraints. Keep those; never copy unrelated users/drafts.
@@ -140,6 +146,98 @@ def _compact(state):
 
 
 class Tools:
+    async def ees_execution_plan(self, node_id: str, case_id: str = "", scope: dict = None,
+                                 inputs: dict = None, __user__=None, __metadata__=None) -> dict:
+        """Read a server-validated P/T/J execution plan after discovering exact IDs
+        with ees_workflow_view. This never dispatches tools. Use case_id for a
+        frozen run, or scope={site_id,system,process_id,version} for published work.
+        Explain scope, missing public inputs, limits and authorization expiry.
+        Do not request tokens, user IDs, headers, URLs or private connection data.
+        Reuse the returned id/hash only for the user's requested execution.
+        No browser callback is needed; closing the panel does not cancel a run.
+
+        :param node_id: Exact published/frozen P, T or J ID from workflow discovery.
+        :param case_id: Exact existing case ID; mutually exclusive with scope.
+        :param scope: Published site_id, system, process_id and exact version.
+        :param inputs: Public typed business input values only; omitted values may wait.
+        """
+        if (not isinstance(node_id, str) or not node_id or len(node_id) > 200
+                or not isinstance(case_id, str) or len(case_id) > 200
+                or (scope is not None and not isinstance(scope, dict))
+                or (inputs is not None and not isinstance(inputs, dict)) or bool(case_id) == bool(scope)):
+            return _error("invalid_request", "조회한 업무 대상과 공개 입력을 확인해 주세요.")
+        try:
+            from open_webui.ees_workflow import execution_plan
+        except ImportError:
+            return _error("program_upgrade_required", "자동 실행 기능을 포함한 프로그램 업데이트가 필요합니다.")
+        return await execution_plan(__user__, {"node_id": node_id, "case_id": case_id,
+            **({"scope": scope} if scope else {}), "chat_id": _chat(__metadata__) or "", "inputs": inputs or {}})
+
+    async def ees_execution_action(self, action: str, request_id: str, plan_id: str = "",
+                                   plan_hash: str = "", run_id: str = "", expected_revision: int = -1,
+                                   inputs: dict = None, __user__=None) -> dict:
+        """Execute or control the same durable service used by the work panel.
+        start requires the exact plan id/hash from ees_execution_plan and explicit
+        user intent to run. Use one request_id for identical retries after a lost
+        response. Read state before changing an ambiguous result. A new user
+        operation uses a new ID. pause prevents future dispatch; cancel does not
+        claim an already dispatched request was cancelled. inputs only saves the
+        user's public values; then resume with the NEW revision from the result.
+        Never automatically resume failed/unknown/authorization waiting runs.
+        Human confirmation is only through the work panel, never AI consent.
+        A successful request/queued status is NOT workflow completion. Check the
+        stored calls, validation, partial/empty scope and business verdict.
+
+        :param action: start, pause, cancel, resume or inputs.
+        :param request_id: Stable 1-128 ASCII letters/digits/dot/underscore/colon/hyphen for this intent.
+        :param plan_id: Exact plan id for start only.
+        :param plan_hash: Exact plan hash for start only.
+        :param run_id: Exact stored run id for controls.
+        :param expected_revision: Current run revision from state for controls.
+        :param inputs: Public inputs object for inputs action only.
+        """
+        if action not in {"start", "pause", "cancel", "resume", "inputs"}:
+            return _error("unsupported_action", "지원되는 실행 동작을 선택해 주세요. 사람 확인은 업무 패널에서 진행합니다.")
+        if not isinstance(request_id, str) or not re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", request_id):
+            return _error("request_id_required", "같은 실행 요청을 구분할 식별자가 필요합니다.")
+        if (any(not isinstance(value, str) or len(value) > 256 for value in (plan_id, plan_hash, run_id))
+                or type(expected_revision) is not int or (inputs is not None and not isinstance(inputs, dict))):
+            return _error("invalid_request", "실행 대상과 입력 형식을 확인해 주세요.")
+        if action == "start":
+            if not plan_id or not plan_hash or run_id or inputs is not None:
+                return _error("plan_required", "조회한 실행 계획의 식별자와 검증값이 필요합니다.")
+            body = {"action": action, "plan_id": plan_id, "plan_hash": plan_hash, "request_id": request_id}
+        else:
+            if not run_id or expected_revision < 0 or plan_id or plan_hash or (inputs is not None and action != "inputs"):
+                return _error("run_required", "현재 실행 기록과 기준 상태를 조회해 주세요.")
+            body = {"action": action, "run_id": run_id, "expected_revision": expected_revision, "request_id": request_id}
+            if action == "inputs":
+                body["inputs"] = inputs or {}
+        try:
+            from open_webui.ees_workflow import execution_action
+        except ImportError:
+            return _error("program_upgrade_required", "자동 실행 기능을 포함한 프로그램 업데이트가 필요합니다.")
+        return await execution_action(__user__, body)
+
+    async def ees_execution_state(self, run_id: str = "", case_id: str = "",
+                                  __user__=None, __metadata__=None) -> dict:
+        """Read durable execution evidence without dispatch or browser callbacks.
+        Inspect returned run status, calls, arguments, input sources, normalized
+        results and validation. Unknown, partial, waiting, failed or unrecorded
+        are never success. Native invocation can still use synthetic HTTP/model
+        fixtures in development; do not claim in-house or Windows setup success.
+
+        :param run_id: Exact execution ID, if known.
+        :param case_id: Exact case ID to inspect its saved execution history.
+        """
+        if any(not isinstance(value, str) or len(value) > 200 for value in (run_id, case_id)):
+            return _error("invalid_request", "실행 기록 식별자를 확인해 주세요.")
+        try:
+            from open_webui.ees_workflow import execution_state
+        except ImportError:
+            return _error("program_upgrade_required", "자동 실행 기능을 포함한 프로그램 업데이트가 필요합니다.")
+        return await execution_state(__user__, run_id=run_id, case_id=case_id, chat_id=_chat(__metadata__) or "")
+
     async def ees_workflow_view(self, include_draft: bool = False,
                                 case_id: str = "", include_navigation: bool = False,
                                 process_id: str = "",
@@ -331,6 +429,19 @@ class Tools:
                         body["case_id"] = target["case_id"]
                 definition = state.get("workflow", {}).get("definition") or case.get("definition", {})
                 node = definition.get("nodes", {}).get(effective_node, {})
+                descendants = [effective_node]
+                runtime_target = False
+                seen = set()
+                while descendants:
+                    selected_id = descendants.pop()
+                    if selected_id in seen:
+                        continue
+                    seen.add(selected_id)
+                    selected_node = definition.get("nodes", {}).get(selected_id, {})
+                    runtime_target = runtime_target or bool(selected_node.get("execution"))
+                    descendants.extend(selected_node.get("children", []))
+                if action == "run" and runtime_target:
+                    return _error("execution_plan_required", "이 업무는 자동 실행 계약을 사용합니다. ees_execution_plan으로 범위·입력을 확인하고 ees_execution_action으로 같은 서버 실행을 요청해 주세요.")
                 if action == "run" and node.get("type") == "j" and node.get("mode") in {"manual", "draft"} and payload.get("confirm") is True:
                     return _error("human_confirmation_required", "업무 패널에서 내용을 직접 확인한 뒤 확인 완료 또는 검토 완료 버튼을 눌러 주세요. AI가 대신 완료할 수 없습니다.")
                 if action == "run" and node.get("type") in {"p", "t"}:

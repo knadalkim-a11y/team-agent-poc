@@ -122,3 +122,20 @@ test('publication reconciliation sends the exact compared revision and fingerpri
 test('typing during acknowledged publication reconciliation is retained on the new draft revision',async()=>{
   const h=await reconciliationHarness(),pending=deferred();h.writeOverride=()=>pending.promise;h.dialogs.push({action:'reconcile_publication'});h.click('process_actions');await flush();h.change('instructions','기준 확인 중 새 글');const result=h.envelope('EMS','p');result.process.draft_revision=2;result.process.publication_reconciliation.required=false;result.process.publication_reconciliation.can_reconcile=false;pending.resolve(result);await flush();assert.equal(h.draft().definition.nodes.p.instructions,'기준 확인 중 새 글');assert.equal(h.draft().revision,2);assert.equal(h.draft().dirty,true);
 });
+
+test('runtime picker reuses exact Native function metadata and generates bounded public inputs locally',async()=>{
+ const h=await harness().init();h.click('edit_node',{nodeId:'p-j'});h.dialogs.push({kind:'fixed'});h.click('runtime_config');await flush();
+ const reference={tool_id:'native-tool',function:'get_page',revision:2,content_hash:'a'.repeat(64),schema_hash:'b'.repeat(64),config_hash:'c'.repeat(64),environment:'fixture'};
+ h.readOverride=route=>route.startsWith('execution/capability?')?{ok:true,capability:{functions:[{name:'get_page',reference,schema:{type:'object',properties:{page_id:{type:'string'}},required:['page_id']},state:'allowed',executable:true}]}}:undefined;
+ h.dialogs.push({tool_id:'native-tool'},{function:'get_page'});h.click('runtime_add');await flush();
+ const definition=h.draft().definition,call=definition.nodes['p-j'].execution.calls[0];assert.deepEqual(call.reference,reference);assert.deepEqual(call.arguments,{page_id:{source:'input',key:'page_id'}});assert.equal(definition.nodes.p.execution_inputs.properties.page_id.maxLength,2000);assert.deepEqual(definition.nodes.p.execution_inputs.required,['page_id']);assert.equal(h.writes.length,0);assert.equal(Object.values(definition.tools).some(tool=>tool.content),false);
+});
+test('late Native function metadata cannot modify another workflow after selection changes',async()=>{
+ const h=await harness().init();h.click('edit_node',{nodeId:'p-j'});h.dialogs.push({kind:'fixed'});h.click('runtime_config');await flush();const pending=deferred();h.readOverride=route=>route.startsWith('execution/capability?')?pending.promise:undefined;
+ h.dialogs.push({tool_id:'native-tool'});h.click('runtime_add');await flush();h.dialogs.push({choice:'keep'});await h.open('q');pending.resolve({ok:true,capability:{functions:[]}});await flush();assert.equal(h.draft().definition.nodes['q-j'].execution,undefined);assert.equal(h.writes.length,0);
+});
+test('ordinary author sees review metadata but cannot approve Native automation',async()=>{
+ const h=await harness().init(),reference={tool_id:'native-tool',function:'get_page',revision:2,content_hash:'a'.repeat(64),schema_hash:'b'.repeat(64),config_hash:'c'.repeat(64),environment:'fixture'};
+ h.processes.get('p').workflow.nodes['p-j'].execution={kind:'fixed',calls:[{id:'call',reference,arguments:{}}]};await h.open('p');h.click('edit_node',{nodeId:'p-j'});h.readOverride=route=>route.startsWith('execution/capability?')?{ok:true,capability:{reference,registered:true,state:'unverified',schema:{type:'object'},executable:false}}:undefined;
+ h.dialogs.push({});h.click('runtime_review',{callId:'call'});await flush();assert.equal(h.dialogHistory.at(-1).title,'기능 사용 상태');assert.doesNotMatch(h.dialogHistory.at(-1).html,/name="action"|name="evidence"/);assert.equal(h.writes.length,0);
+});

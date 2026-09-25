@@ -1296,6 +1296,34 @@ Backup은 DATA_DIR의 `ees-work.sqlite3`를 포함해 파일별 해시로 보관
 
 적용 뒤 Ctrl+F5로 갱신하고 기존 대화·진행/이력 유지, 관리자 **업무 절차 → 시스템 담당 설정**과 기존 보존 초안 조회, 기존 일반 이용을 확인한다. 배포 블록에서 그룹 연결·구성원 변경·실제 P 게시를 함께 하지 않는다. 결과는 `upgrade=ok, running=true, version=0.11.3+ees.11, apply_demo=ok`와 `대화/업무/초안보존=정상 또는 문제` 두 줄이면 된다.
 
+<a id="shared-native-runtime-20260925"></a>
+
+#### 공통 Native 도구와 영속 실행 — ees.12 준비본
+
+기존 Confluence/Jira/GitHub 등록본 하나를 일반 대화와 업무 실행에서 함께 사용한다. J는 등록 ID·함수·검증한 hash/revision과 공개 입력/결과/완료 조건을 참조한다. 사내 등록본 코드나 개인 PAT를 EES DB로 복제하지 않고 기존 Native ACL·관리자 Valves·개인 UserValves를 매 호출에 사용한다. 기존 도구 ID·코드·개인 설정·그룹·시스템 담당 권한·사용자 자산을 자동 갱신하지 않는다. 설계 원본과 두 예제는 [09-25 TASK](mockups/ees-work/TASK.md#shared-native-runtime-20260925)를 따른다.
+
+**승인과 작성:** 기존 J 편집기에서 실행 유형·기존 함수·입력 연결·완료 조건을 지정한다. 관리자 검토 영역은 저장 metadata의 내용/schema/비밀 아닌 설정/현재 Native 환경 hash·revision과 승인 상태를 보여 준다. 검토 근거 위치를 입력한 기존 Native 관리자만 승인/중지한다. 승인이 도구 코드를 sandbox로 만드는 것은 아니므로 검토한 등록본만 허용한다. 호출 직전 hash를 확인한 snapshot을 Native loader에 전달한다. P 작성 권한은 도구 실행 권한·관리자 승인 권한이 아니다. 새 코드/의존성 설치·공용 PAT·브라우저 확인이 필요한 Native ask 모드는 지원하지 않는다.
+
+첫 함수는 `search_pages`, `get_page`, `jira_dashboard`, `jira_get_issue`, `github_list_pull_requests`, `github_get_pull_request`이며 정규화기 `ees.native.read.v1`을 사용한다. 변경·삭제·ACL/그룹 회수·개인 설정 미입력/복호화 실패·승인 중지·schema/설정/환경 변경은 다음 호출을 차단한다. 기반 Native 버전은 고정 0.11.3이며 래퍼 버전 변화도 승인 환경 재확인을 요구한다. 사내 코드가 Git과 다르면 원본을 보존한 채 현재 metadata와 검토 근거로 승인하며 이름만 같다고 자동 허용하지 않는다.
+
+| 공개 경로 | 역할 |
+|---|---|
+| `POST /api/ees-work/execution/plan` | case_id 또는 정확한 게시 scope, node_id, chat_id, inputs로 현재 계약 검토 |
+| `POST /api/ees-work/execution/action` | exact plan_id/plan_hash/request_id의 start; 최신 run revision의 pause/cancel/resume/inputs/confirm |
+| `GET /api/ees-work/execution/state` | 소유권·현재 자료 권한을 적용한 runs/run·호출·검증·이력 |
+| `GET /api/ees-work/execution/capability` | 도구/함수 metadata와 현재 계정의 실행 가능 사유 |
+| `POST /api/ees-work/execution/capability/action` | 관리자만 근거·revision으로 approve/disable |
+
+채팅 Tool 0.4.0의 `ees_execution_plan/action/state`와 패널은 같은 서비스를 사용한다. 채팅 실행에 브라우저 callback이 필요하지 않고 사람 확인의 대리 기록은 차단한다. 기존 모의 `ees_workflow_action`과 새 계약을 섞지 않는다. 조회/계획은 실행이 아니며 start 접수 뒤 기존 앱 lifespan worker가 처리한다. 같은 로컬 `ees-work.sqlite3`를 사용하고 별도 실행기/서버를 설치하지 않는다.
+
+**복구와 기록:** 계획은 10분, 실행/근거 재사용은 30분과 J별 timeout/호출 상한을 둔다. 예제의 자동 재시도는 0회다. 명시된 재시도/총 호출 한도 안의 `rate_limited`만 최대 1회 다시 시도한다. 권한/입력 대기는 조치 후 명시적으로 재개하고 실패 기록을 남긴다. 재개는 최대 8회·원래 만료 범위 안이며 계획 hash/호출 예산을 기록한다. 중복 요청 영수증·worker lease·attempt·호출 전 의도를 저장한다. 브라우저 종료는 서버 실행을 종료하지 않는다. 프로세스 종료/timeout 뒤 dispatch 결과를 확정할 수 없으면 UNKNOWN으로 보존하고 자동 재호출하지 않는다. 늦은 attempt는 현재 결과를 덮지 못한다. 일시정지/중단은 다음 호출 경계에 적용되며 이미 수행한 외부 요청을 되돌리지 않는다. 다른 입력/오래된 결과는 새 진행 건으로 처리한다.
+
+transport·J validator·P/T 최종 판정을 구분하며 한 페이지·부분/빈/잘린 결과를 전체 성공으로 바꾸지 않는다. AI는 선언한 저장 근거·필수 관찰값·제한을 한 번 구조화하고 validator가 경로/값/근거를 검사한다. 공통/해당 P/T/J 지침과 현재 허용 Skill만 사용하고 모델 preset의 별도 system prompt·전체 catalog·다른 업무 지침을 섞지 않는다. 현재 접근 가능한 Native 등록 모델 중 일반 서버 OpenAI/Ollama 경로를 지원하며 pipeline/arena/브라우저 세션 의존 모델은 차단한다. 사내 GLM 품질은 미검증이다. free-form 추론·숨은 reasoning·raw 예외·비밀값을 기록하지 않는다.
+
+**저장과 Restore:** 프로그램 `0.11.3+ees.12`·`/_ees12/`, Pack0.2.14/Specialists0.2.5/Workflow0.4.0 준비본이다. 기존 DB에 승인·계획·run·call·event·중복 요청 테이블을 추가하고 Native DB를 복제하지 않는다. 기존 일반/모의 진행은 유지한다. 새 실행은 cases에 표시 결과를 연결하며 추가 trigger로 구프로그램의 모의/수동 writer가 새 계약 완료 상태를 덮지 못하게 한다. ees.11로 Restore하면 새 실행은 지원하지 않고 새 기록 읽기만 가능하다. 기존 모의 업무의 호환과 새 실행 미지원은 별개다. ees.10/11 필수 파일 목록을 동결하고 새 모듈 제거·DB/키/Python 보존을 프로그램 Apply/Restore로 검사한다. Restore는 DB·개인 설정·승인·Native 자산을 되돌리지 않는다.
+
+이번 범위는 개발 구현/검증·PR까지다. 사내 설치·실제 승인·팀 공개·Windows 셋업 완료를 뜻하지 않는다. 실제 Native 임시 DB/loader/binder, 합성 HTTP·모델, compiled frontend/Chrome, 사내/Windows 미실행은 [TR 평가](../evals/scenarios.md#shared-native-runtime-20260925)에서 구분한다. 이번 요청에서 사내 설치 명령을 실행하지 않는다.
+
 <a id="ees-right-panel-20260922"></a>
 
 #### 09-22 오른쪽 업무 패널·수행 상세 후속

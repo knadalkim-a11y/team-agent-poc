@@ -39,6 +39,8 @@ on:
       - 'tests/test_ees_work_demo.py'
       - 'tests/test_ees_work_routes.py'
       - 'tests/test_ees_workflow*.py'
+      - 'tests/ees_workflow_native_fixture.py'
+      - 'tests/test_ees_execution*'
       - 'tests/test_ees_work_authoring*.py'
       - 'tests/test_ees_work_authoring_ui.cjs'
       - 'tests/test_ees_work_designer.py'
@@ -127,11 +129,23 @@ jobs:
           git archive --format=tar --output=dist/legacy-source.tar a443d30c6694df0e1cbe082a0b99aa5f2d566917
           python -c "import tarfile; tarfile.open('dist/legacy-source.tar').extractall('dist/legacy-source', filter='data')"
           python dist/legacy-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/legacy-branding
+      - name: Prepare the fixed pre-execution program for Restore and writer-guard validation
+        run: |
+          git archive --format=tar --output=dist/previous-source.tar 991cdb1d80ae07471fb50594831d74fe602b1ef7
+          python -c "import tarfile; tarfile.open('dist/previous-source.tar').extractall('dist/previous-source', filter='data')"
+          python dist/previous-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/previous-branding
       - name: Verify shared workflow service and real chat Tool
         env:
+          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+          EES_REQUIRE_ASSET_NATIVE: '1'
+          EES_REQUIRE_MODEL_NATIVE: '1'
           EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
           EES_REQUIRE_LEGACY_WORKFLOW: '1'
         run: python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p "test_ees_workflow*.py" -v
+      - name: Verify durable chat controls and execution panel state
+        run: |
+          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_execution_tool.py -v
+          node tests/test_ees_execution_ui.cjs
       - name: Verify scoped authoring and the actual previous program
         env:
           EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
@@ -194,6 +208,8 @@ jobs:
           EES_TEST_BRANDING_DIR: dist/branding
           EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
           EES_REQUIRE_LEGACY_WORKFLOW: '1'
+          EES_TEST_PREVIOUS_WORKFLOW_WHEEL: dist/previous-branding/open_webui-0.11.3+ees.11-py3-none-any.whl
+          EES_REQUIRE_PREVIOUS_WORKFLOW: '1'
         run: python -m unittest discover -s tests -p test_ees_webui_customization.py -v
       - name: Parse the Windows PowerShell entry point
         if: runner.os == 'Windows'

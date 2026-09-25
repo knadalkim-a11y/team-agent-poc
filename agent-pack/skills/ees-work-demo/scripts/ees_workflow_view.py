@@ -76,6 +76,10 @@ def _applicable(case, node_id):
 
 
 def _finished(case, node_id):
+    node = case["definition"]["nodes"][node_id]
+    if node.get("execution_final") and case.get("execution_run_id"):
+        if case.get("execution_final_validations", {}).get(node_id, {}).get("status") != "succeeded":
+            return False
     return all(not _applicable(case, leaf) or case["jobs"][leaf]["status"] == "passed"
                for leaf in _leaves(case["definition"]["nodes"], node_id))
 
@@ -110,6 +114,8 @@ def _job_readiness(case, node_id, assets):
                 skill["reference"] not in assets.get("skill_bodies", {})
                 or skill["reference"] not in case.get("_skill_snapshots", {})) for skill in skills):
             reason = "skill_unavailable"
+        elif node.get("execution"):
+            reason = "execution_plan_required" if not job.get("execution_run_id") else ""
         elif node["mode"] == "tool" and any(tool.get("adapter") != "mock"
                 or tool.get("source") == "open_webui" or not tool.get("enabled", True) for tool in tools):
             reason = "connection_required"
@@ -144,7 +150,9 @@ def _view(case, assets=None):
         if not relevant:
             status = "skipped"
         elif done == len(relevant):
-            status = "passed"
+            final = case.get("execution_final_validations", {}).get(node_id)
+            status = ("passed" if not nodes[node_id].get("execution_final") or (final and final.get("status") == "succeeded")
+                      else "blocked")
         elif "failed" in statuses:
             status = "failed"
         elif "review" in statuses:
@@ -188,6 +196,6 @@ def _view(case, assets=None):
         "breadcrumb": [{"id": node["id"], "name": node["name"], "type": node["type"]} for node in selected],
         "skills": [deepcopy(case["definition"]["skills"][key]) for key in skill_ids],
         "instructions": [node.get("instructions", "") for node in selected if node.get("instructions")],
-        "simulation": True,
+        "simulation": not any(node.get("execution") for node in nodes.values()),
     }
     return case

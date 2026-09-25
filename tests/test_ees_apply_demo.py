@@ -42,7 +42,7 @@ class Handler(BaseHTTPRequestHandler):
         status = 404 if self.path == "/api/missing" else 500 if self.path == "/api/fail" else 200
         if self.path.startswith(demo.assets.ASSET_API + "/"):
             status = getattr(self.server, "asset_status", 503)
-        payload = ({"version": "0.11.3+ees.9"} if self.path == "/api/version"
+        payload = ({"version": "0.11.3+ees.12"} if self.path == "/api/version"
                    else {"role": "admin"} if self.path == "/api/v1/auths/"
                    else {"id": "existing", "base_model_id": "base", "params": {"system": "user text"}, "write_access": True}
                    if self.path == "/api/v1/models/model?id=existing"

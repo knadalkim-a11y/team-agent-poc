@@ -1065,7 +1065,7 @@ class ApplyAssetsTests(unittest.TestCase):
 
     def test_real_manifest_sources_pass_preflight(self):
         manifest = assets.load_manifest(MODULE.parents[1])
-        self.assertEqual("0.2.13", manifest["version"])
+        self.assertEqual("0.2.14", manifest["version"])
         self.assertIn("목적 → 현재 상태 → 다음 행동", manifest["ees"]["prompt"])
         self.assertIn("실행 연결 필요", manifest["ees"]["prompt"])
         suggestions = json.loads((MODULE.parents[1] / "agent-pack/ees-prompt-suggestions.json").read_text(encoding="utf-8"))

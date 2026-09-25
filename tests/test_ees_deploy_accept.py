@@ -281,7 +281,7 @@ class LaunchWiringTests(unittest.TestCase):
                     [], 0, b'EES accept_check=compatible\r\n', b'')):
                 self.assertEqual(processes.check_accept_runtime('selected-python', folder), 'compatible')
             for text in ('', 'EES accept_check=compatible\n', 'prefix EES accept_guard=win64_retry loop=proactor\n'):
-                marker.write_text(text)
+                marker.write_text(text, encoding="utf-8")
                 with self.assertRaises(processes.ProcessError):
                     processes.accept_guard_status({'log_file': str(marker)})
             marker.write_bytes(b'EES accept_guard=win64_retry loop=proactor\r\n')

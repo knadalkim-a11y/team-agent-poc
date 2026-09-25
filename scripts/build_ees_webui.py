@@ -20,15 +20,15 @@ from zipfile import ZIP_DEFLATED, BadZipFile, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
-VERSION = "0.11.3+ees.11"
-PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6", "0.11.3+ees.7": "_ees7", "0.11.3+ees.8": "_ees8", "0.11.3+ees.9": "_ees9", "0.11.3+ees.10": "_ees10", "0.11.3+ees.11": "_ees11"}
+VERSION = "0.11.3+ees.12"
+PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6", "0.11.3+ees.7": "_ees7", "0.11.3+ees.8": "_ees8", "0.11.3+ees.9": "_ees9", "0.11.3+ees.10": "_ees10", "0.11.3+ees.11": "_ees11", "0.11.3+ees.12": "_ees12"}
 SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
 SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
 WHEEL_FILENAME = f"open_webui-{VERSION}-py3-none-any.whl"
 SOURCE_INFO = f"open_webui-{UPSTREAM_VERSION}.dist-info/"
 TARGET_INFO = f"open_webui-{VERSION}.dist-info/"
 SOURCE_APP = "open_webui/frontend/_app/"
-TARGET_APP = "open_webui/frontend/_ees11/"
+TARGET_APP = "open_webui/frontend/_ees12/"
 ASSET_DIR = Path(__file__).resolve().parents[1] / "branding" / "ees" / "assets"
 UI_DIR = ASSET_DIR.parent / "ui"
 ASSET_NAMES = (
@@ -56,6 +56,12 @@ WORK_ASSETS.update({"scripts/ees_workflow_definition.py": "open_webui/ees_workfl
 # Freeze the shipped ees.9/ees.10 inventory before adding authoring modules.
 WORK_FILES_V9 = (WORK_BOOTSTRAP_TARGET,) + tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
 WORK_ASSETS.update({"scripts/ees_workflow_authoring.py": "open_webui/ees_workflow_authoring.py"})
+# Keep ees.11's shipped inventory independent of the new execution runtime.
+WORK_FILES_V11 = (WORK_BOOTSTRAP_TARGET,) + tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
+WORK_ASSETS.update({"scripts/" + name: "open_webui/" + name for name in (
+    "ees_workflow_execution.py", "ees_workflow_native.py", "ees_workflow_contract.py",
+    "ees_workflow_examples.py", "ees_workflow_model.py",
+)})
 WORK_FILES = (WORK_BOOTSTRAP_TARGET,) + tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
@@ -66,10 +72,10 @@ FONT_SOURCES = {
                                 "2d2267a83d089cb1a517a4f901676d05d283346e650d1b1845d601cbd696a98e"),
 }
 THEME_FILES = ("chat-theme.css", "fonts/LICENSE.txt") + tuple("fonts/" + name for name in FONT_SOURCES)
-THEME_LINK = b'<link rel="stylesheet" href="/_ees11/chat-theme.css" crossorigin="use-credentials" />'
-WORK_LINK = (b'<link rel="stylesheet" href="/_ees11/ees-work-launcher.css" />'
-             b'<script defer src="/_ees11/ees-work-panel.js"></script>'
-             b'<script defer src="/_ees11/ees-work-launcher.js"></script>')
+THEME_LINK = b'<link rel="stylesheet" href="/_ees12/chat-theme.css" crossorigin="use-credentials" />'
+WORK_LINK = (b'<link rel="stylesheet" href="/_ees12/ees-work-launcher.css" />'
+             b'<script defer src="/_ees12/ees-work-panel.js"></script>'
+             b'<script defer src="/_ees12/ees-work-launcher.js"></script>')
 
 # The pinned Chat component already owns draft serialization, editor updates,
 # file/tool selections and debounced native sessionStorage writes. Expose only
@@ -142,7 +148,7 @@ PATCHES = {
     )],
     "open_webui/frontend/index.html": [
         (b"<title>Open WebUI</title>", b"<title>EES Work</title>", 1),
-        (b"/_app/", b"/_ees11/", 49),
+        (b"/_app/", b"/_ees12/", 49),
         (b"</head>", THEME_LINK + WORK_LINK + b"\n\t</head>", 1),
     ],
     SOURCE_APP + "immutable/chunks/CHq18Uto.js": [
@@ -155,8 +161,8 @@ PATCHES = {
         (b" / Open WebUI`", b" / EES Work`", 2),
     ],
     SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
-        (b"/_app/version.json", b"/_ees11/version.json", 1),
-        (b'an="0.11.3"', b'an="0.11.3+ees.11"', 1),
+        (b"/_app/version.json", b"/_ees12/version.json", 1),
+        (b'an="0.11.3"', b'an="0.11.3+ees.12"', 1),
     ],
     SOURCE_APP + "immutable/chunks/zKJlHFgk.js": [
         # Loading may turn its spinner off before native cached drafts finish
@@ -198,10 +204,10 @@ PATCHES = {
          b'window.history.replaceState(r(Ae).state,"",`/c/${Ot.chat_id}`)', 1),
     ],
     SOURCE_APP + "version.json": [
-        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.11"}', 1),
+        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.12"}', 1),
     ],
     SOURCE_INFO + "METADATA": [
-        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.11\n", 1),
+        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.12\n", 1),
     ],
 }
 

@@ -1,8 +1,8 @@
 """Persistent workflow state shared by the native work panel and the AI Tool.
 
-This module runs inside the existing Open WebUI process. It never executes
-arbitrary code, SQL, a business API, or a model. Example checks are explicitly
-labelled simulations; an external tool reference without an adapter is blocked.
+This public facade preserves legacy simulations and delegates versioned Native
+execution to the durable execution module. Arbitrary code/SQL is never accepted;
+only approved Native function references are dispatched for the current user.
 The separate SQLite file holds workflow definitions, user-owned cases and
 additive request receipts that prevent repeated writes after a lost response.
 """
@@ -27,6 +27,7 @@ from .ees_workflow_definition import (
 )
 from .ees_workflow_view import _applicable, _finished, _missing, _inputs, _view, _workflow
 from .ees_workflow_authoring import AuthoringMixin, WorkflowError
+from .ees_workflow_execution import ExecutionRuntime, init_execution
 
 _service = None
 
@@ -46,7 +47,7 @@ def _now():
 class WorkflowService(AuthoringMixin):
     """The injected lookups use the same current user and chat store as WebUI."""
 
-    def __init__(self, database, user_lookup, chat_lookup, asset_lookup=None, group_lookup=None, group_list_lookup=None):
+    def __init__(self, database, user_lookup, chat_lookup, asset_lookup=None, group_lookup=None, group_list_lookup=None, *, native_bridge=None, model_executor=None):
         self.database = Path(database)
         self.user_lookup, self.chat_lookup = user_lookup, chat_lookup
         self.asset_lookup = asset_lookup
@@ -66,6 +67,8 @@ class WorkflowService(AuthoringMixin):
             seed = _dump(_seed())
             db.execute("INSERT OR IGNORE INTO catalog VALUES(1,?,?,0,NULL)", (seed, seed))
             self._init_authoring(db)
+            init_execution(db)
+        self.execution = ExecutionRuntime(self, native_bridge, model_executor)
 
     @contextmanager
     def _db(self, write=False):
@@ -102,7 +105,17 @@ class WorkflowService(AuthoringMixin):
         if self.asset_lookup is None:
             return {"tools": [], "skills": [], "available": True}
         try:
-            return await _resolve(self.asset_lookup(user))
+            assets = await _resolve(self.asset_lookup(user))
+            if "execution_capabilities" not in assets:
+                try:
+                    if self.asset_lookup is _registered_assets or self.execution.bridge is not None:
+                        self.execution.configure()
+                    if self.execution.bridge is not None and hasattr(self.execution.bridge, "capabilities"):
+                        assets["execution_capabilities"] = await self.execution.bridge.capabilities(user)
+                except Exception:
+                    assets["execution_capabilities"] = []
+                    assets["execution_metadata_available"] = False
+            return assets
         except Exception:
             # Availability failure must not bypass access filtering or expose
             # raw registry errors to the browser/model.
@@ -188,6 +201,8 @@ class WorkflowService(AuthoringMixin):
                 raise
             accessible.append(case)
         state["cases"] = accessible
+        if state.get("case"):
+            await self.execution.redact_case(user, state["case"])
         return state
 
     @staticmethod
@@ -244,6 +259,8 @@ class WorkflowService(AuthoringMixin):
 
     @staticmethod
     def _save_case(db, user, case, new=False):
+        if any(node.get("execution") for node in case["definition"]["nodes"].values()):
+            case["_execution_write_nonce"] = str(uuid4())
         case["updated_at"] = _now()
         if new:
             case["created_at"] = case["updated_at"]
@@ -507,6 +524,8 @@ class WorkflowService(AuthoringMixin):
                 case["chat_id"] = chat_id
             else:
                 node = self._node(case, body.get("node_id", ""))
+                if self.execution.blocks_legacy(db, case, node["id"], action):
+                    raise WorkflowError("execution_service_required", "자동 실행은 실행 계획과 공통 실행 서비스를 통해 진행해 주세요.")
                 if action == "select":
                     case["selected_id"] = node["id"]
                 elif action == "update_inputs":
@@ -586,6 +605,15 @@ class WorkflowService(AuthoringMixin):
         except sqlite3.Error:
             return {"ok": False, "error": {"code": "state_unavailable", "message": "업무 상태를 저장하지 못했습니다. 최신 상태를 확인한 뒤 다시 시도해 주세요."}}
 
+    async def execution_plan(self, user, body):
+        return await self.execution.plan(user, body)
+
+    async def execution_action(self, user, body):
+        return await self.execution.action(user, body)
+
+    async def execution_state(self, user, case_id="", run_id="", chat_id=""):
+        return await self.execution.state(user, case_id, run_id, chat_id)
+
 
 def _production_service():
     global _service
@@ -633,6 +661,18 @@ async def handle_action(user, body):
     return await _production_service().handle_action(user, body)
 
 
+async def execution_plan(user, body):
+    return await _production_service().execution_plan(user, body)
+
+
+async def execution_action(user, body):
+    return await _production_service().execution_action(user, body)
+
+
+async def execution_state(user, case_id="", run_id="", chat_id=""):
+    return await _production_service().execution_state(user, case_id, run_id, chat_id)
+
+
 def install(app, verified_user):
     from fastapi import Body, Depends
     from fastapi.responses import JSONResponse
@@ -643,6 +683,7 @@ def install(app, verified_user):
             "chat_forbidden", "admin_required", "workflow_manage_forbidden"} else 409 if code in {
                 "revision_conflict", "chat_already_bound", "chat_mismatch", "published_version_conflict",
                 "request_conflict", "case_selection_required", "case_completed", "authoring_upgrade_required",
+                "execution_overlap", "execution_service_required", "result_confirmation_required", "run_completed",
                 "draft_revision_conflict", "workflow_baseline_changed", "validation_required"} else 404 if code == "process_not_found" else 503 if code in {
                     "authoring_authorization_unavailable", "authoring_unavailable"} else 400
         return JSONResponse(value, status_code=status, headers={"Cache-Control": "no-store"})
@@ -671,3 +712,54 @@ def install(app, verified_user):
     @app.post("/api/ees-work/authoring/action", include_in_schema=False)
     async def authoring_action_route(body: dict = Body(...), user=Depends(verified_user)):
         return response(await _production_service().authoring_action(user, body))
+
+    @app.post("/api/ees-work/execution/plan", include_in_schema=False)
+    async def execution_plan_route(body: dict = Body(...), user=Depends(verified_user)):
+        return response(await execution_plan(user, body))
+
+    @app.post("/api/ees-work/execution/action", include_in_schema=False)
+    async def execution_action_route(body: dict = Body(...), user=Depends(verified_user)):
+        return response(await execution_action(user, body))
+
+    @app.get("/api/ees-work/execution/state", include_in_schema=False)
+    async def execution_state_route(case_id: str = "", run_id: str = "", chat_id: str = "", user=Depends(verified_user)):
+        return response(await execution_state(user, case_id, run_id, chat_id))
+
+    @app.get("/api/ees-work/execution/capability", include_in_schema=False)
+    async def execution_capability_route(tool_id: str = "", function: str = "", user=Depends(verified_user)):
+        try:
+            service = _production_service()
+            current = await service._user(user)
+            service.execution.configure(app)
+            return response({"ok": True, "capability": await service.execution.bridge.inspect(current, tool_id, function)})
+        except WorkflowError as error:
+            return response({"ok": False, "error": {"code": error.code, "message": error.message}})
+
+    @app.post("/api/ees-work/execution/capability/action", include_in_schema=False)
+    async def execution_capability_action_route(body: dict = Body(...), user=Depends(verified_user)):
+        try:
+            service = _production_service()
+            current = await service._user(user)
+            service.execution.configure(app)
+            approved = await service.execution.bridge.approval_action(current, body)
+            return response({"ok": True, "capability": approved})
+        except WorkflowError as error:
+            return response({"ok": False, "error": {"code": error.code, "message": error.message}})
+
+    # WebUI owns an async lifespan; startup event handlers alone are ignored by
+    # FastAPI when a lifespan is supplied. Wrap and preserve the original one.
+    from contextlib import asynccontextmanager
+    original_lifespan = app.router.lifespan_context
+
+    @asynccontextmanager
+    async def execution_lifespan(application):
+        async with original_lifespan(application) as state:
+            service = _production_service()
+            service.execution.configure(application)
+            service.execution.start()
+            try:
+                yield state
+            finally:
+                await service.execution.stop()
+
+    app.router.lifespan_context = execution_lifespan

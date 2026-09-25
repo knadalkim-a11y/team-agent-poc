@@ -29,7 +29,7 @@ EXCLUDED_PARTS = frozenset({
 SENSITIVE_NAME = re.compile(r"(^|[._-])(env|key|secret|credentials?|tokens?|pat)([._-]|$)", re.I)
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 # Accepted output contract of build_ees_webui.py; update together on a version change.
-BRANDING_VERSION = "0.11.3+ees.11"
+BRANDING_VERSION = "0.11.3+ees.12"
 BRANDING_UPSTREAM = "0.11.3"
 BRANDING_SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
 

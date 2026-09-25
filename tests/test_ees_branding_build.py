@@ -45,7 +45,10 @@ package = types.ModuleType("open_webui")
 package.__path__ = [str(root / "open_webui")]
 sys.modules["open_webui"] = package
 workflow = importlib.import_module("open_webui.ees_workflow")
-for name in ("ees_workflow", "ees_workflow_definition", "ees_workflow_view", "ees_workflow_authoring"):
+for name in ("ees_workflow", "ees_workflow_definition", "ees_workflow_view", "ees_workflow_authoring",
+             "ees_workflow_execution", "ees_workflow_native", "ees_workflow_contract",
+             "ees_workflow_examples", "ees_workflow_model"):
+    importlib.import_module("open_webui." + name)
     assert Path(sys.modules["open_webui." + name].__file__).parent == root / "open_webui"
 seed = workflow._dump(workflow._seed()).encode("utf-8")
 assert len(seed) == 11651
@@ -105,6 +108,8 @@ print("installed_workflow_contract=pass")
         root = Path(temporary)
         with ZipFile(wheel) as archive:
             for name in ("ees_workflow.py", "ees_workflow_definition.py", "ees_workflow_view.py", "ees_workflow_authoring.py",
+                         "ees_workflow_execution.py", "ees_workflow_native.py", "ees_workflow_contract.py",
+                         "ees_workflow_examples.py", "ees_workflow_model.py",
                          "workflow_seed.json", "workflow_policy.json"):
                 target = root / "open_webui" / name
                 target.parent.mkdir(exist_ok=True)
@@ -380,7 +385,7 @@ class BrandingBuildTests(unittest.TestCase):
                 digests = [hashlib.sha256(archive.read(builder.TARGET_APP + filename)).hexdigest()
                            for archive in (before, after)]
                 for index, digest in zip(indexes, digests):
-                    self.assertIn(("/_ees11/" + filename + "?v=" + digest).encode("ascii"), index)
+                    self.assertIn(("/_ees12/" + filename + "?v=" + digest).encode("ascii"), index)
                 self.assertEqual(digests[0] == digests[1], filename != "ees-work-launcher.js")
             self.assertEqual(before.read(builder.TARGET_INFO + "METADATA"),
                              after.read(builder.TARGET_INFO + "METADATA"))
@@ -471,7 +476,7 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
                     self.assertEqual(built.read(target), original, name)
             self.assertEqual(built.read(builder.TARGET_INFO + "licenses/LICENSE"), LICENSE)
             self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.11\n"))
+                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.12\n"))
             self.assertEqual(built.read("open_webui/env.py").count(NOTICE), 2)
             self.assertNotIn(b"WEBUI_NAME +=", built.read("open_webui/env.py"))
             self.assertIn(b"EES Work", built.read("open_webui/frontend/index.html"))
@@ -480,7 +485,7 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
             self.assertEqual(index.count(builder.THEME_LINK), 1)
             for filename in ("ees-work-launcher.css", "ees-work-panel.js", "ees-work-launcher.js"):
                 digest = hashlib.sha256(built.read(builder.TARGET_APP + filename)).hexdigest()
-                self.assertIn(("/_ees11/" + filename + "?v=" + digest).encode("ascii"), index)
+                self.assertIn(("/_ees12/" + filename + "?v=" + digest).encode("ascii"), index)
             main = built.read("open_webui/main.py")
             self.assertLess(main.index(b"install_ees_work_demo(app, get_verified_user)"), main.index(b"app.mount"))
             for relative, target in builder.WORK_ASSETS.items():
@@ -497,7 +502,7 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
             for name, (origin, _) in builder.FONT_SOURCES.items():
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/" + name), self.members[origin])
             runtime = built.read(builder.TARGET_APP + "immutable/chunks/DKj2ZiCb.js")
-            self.assertIn(b"/_ees11/version.json", runtime)
+            self.assertIn(b"/_ees12/version.json", runtime)
             chat = built.read(builder.TARGET_APP + "immutable/chunks/zKJlHFgk.js")
             self.assertIn(builder.NATIVE_DRAFT_HOOK, chat)
             self.assertIn(b'if(window.__eesNativeDraftV1===eesNativeDraftApi)delete window.__eesNativeDraftV1;', chat)
@@ -836,7 +841,7 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
                         self.assertEqual(built.read(target), source.read(name), name)
                 metadata = source.read(builder.SOURCE_INFO + "METADATA")
                 self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.11\n"))
+                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.12\n"))
                 for filename, (origin, expected) in builder.FONT_SOURCES.items():
                     copied = built.read(builder.TARGET_APP + "fonts/" + filename)
                     self.assertEqual(copied, source.read(origin))

@@ -18,6 +18,8 @@
   let errorMessage = '', recordLookupError = null, historyLookupError = null, activeRegistration = null;
   let personalSettingsOpened=false;
   let scopeReadinessTimer=null;
+  let execution=null,executionError='',executionTimer=null,executionSerial=0,historyExecution=null;
+  const executionStarts=new Map();
   const token = () => {try {return localStorage.getItem('token') || '';} catch (_) {return '';}};
   const chatId = () => {const m = location.pathname.match(/^\/c\/([^/]+)\/?$/); return m ? decodeURIComponent(m[1]) : '';};
   const authoringRoute = () => (location.pathname==='/'||location.pathname.startsWith('/workspace')) && new URLSearchParams(location.search).get('ees')==='workflow';
@@ -49,7 +51,7 @@
   }
   function rememberScope() {if(browsingSite)scopeSelections.set(scopeKey(),{category,nodeId:selectedId()});}
   const scopeReady = () => Boolean(state&&acceptedRoute===location.pathname+location.search&&lastRoute===acceptedRoute&&(!chatRoute()||window.__eesNativeDraftV1?.ready()));
-  const view = createWorkView({callbacks:{scopeReady,registerPanel,selectWork,switchScope,startCase,showHistory,saveInputs,saveDocument,runJob,
+  const view = createWorkView({callbacks:{scopeReady,registerPanel,selectWork,switchScope,startCase,showHistory,saveInputs,saveDocument,runJob,executionRefresh:refreshExecution,executionControl,
     openCase:id=>openCase(state?.cases.find(c=>c.id===id)),
     selectCategory:async wanted=>{category=wanted;const first=visibleRoots(category)[0];if(first)await selectWork(first);else renderNavigator();},
     showHistoryView:show=>{resetHistory();runView=show?'history':'current';renderPanel();},
@@ -57,14 +59,14 @@
     selectPanel:screen=>window.__eesWorkPanelV1?.select(chatId(),screen,{open:true})
   }});
   const designer = createWorkDesigner({callbacks:{
-    authoringModels,authoringReply,authoringRead:path=>authoringAPI(path),authoringWrite:body=>authoringAPI('authoring/action',body)
+    authoringModels,authoringReply,authoringRead:path=>authoringAPI(path),authoringWrite:(body,path='authoring/action')=>authoringAPI(path,body)
   }});
   function snapshot() {
     // Each successful read only validates its own current or historical case.
     // Opening a tab must never turn a failed current read into fresh evidence.
     const lookupError=runView==='history'?(historyCase?historyLookupError:historyLookupError || recordLookupError):recordLookupError;
     return {state,category,browsingSystem,browsingSite,browseNodeId,browseActive,runView,historyCase,errorMessage,recordLookupError:lookupError,busy,
-      chatId:chatId(),chatRoute:chatRoute(),adminRoute:adminRoute(),acceptedRoute,
+      chatId:chatId(),chatRoute:chatRoute(),adminRoute:adminRoute(),acceptedRoute,execution:execution?.run?.case_id===selectedCase()?.id?execution:null,executionError:selectedCase()?executionError:'',historyExecution,
       selectedCaseId:selectedCase()?.id || '',selectedId:selectedId(),processId:processId(),
       roots:Object.fromEntries(Object.keys(categories).map(group=>[group,visibleRoots(group)])),
       chosenCases:Object.fromEntries(Object.keys(categories).flatMap(group=>visibleRoots(group).map(id=>[id,chosenCase(id)?.id || ''])))};
@@ -163,7 +165,7 @@
     if (!available()) return;
     const at = generation, scopeEpoch=navigationRequest, serial = ++request, id = chatId(), auth = token(), route = location.pathname + location.search;
     const query = new URLSearchParams({chat_id:id}); if (!id && pendingId) query.set('case_id', pendingId);
-    try {const result = await api('state?' + query); if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = ''; accept(result);await designer.refreshAuthoring();}
+    try {const result = await api('state?' + query); if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = ''; accept(result);await refreshExecution();await designer.refreshAuthoring();}
     catch (error) {if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = error.message; recordLookupError=lookupFailure(error); render();}
   }
   async function action(actionName, payload = {}, nodeId = '', override = {}) {
@@ -210,8 +212,10 @@
   }
   async function showHistory(id) {
     if(!scopeCases(processId()).some(c=>c.id===id))return {ok:false};
-    const serial=++historyRequest,at=generation,scopeEpoch=navigationRequest,key=caseKey(processId()),auth=token(),route=location.pathname+location.search;runView='history';historyCase=null;
-    try{const result=await api('state?'+new URLSearchParams({case_id:id}));if(serial!==historyRequest||at!==generation||scopeEpoch!==navigationRequest||key!==caseKey(processId())||auth!==token()||route!==location.pathname+location.search||!available())return {ok:false};historyCase=result.case;historyLookupError=null;errorMessage='';renderPanel();openPanel();return {ok:true};}
+    const serial=++historyRequest,at=generation,scopeEpoch=navigationRequest,key=caseKey(processId()),auth=token(),route=location.pathname+location.search;runView='history';historyCase=null;historyExecution=null;
+    try{const result=await api('state?'+new URLSearchParams({case_id:id}));if(serial!==historyRequest||at!==generation||scopeEpoch!==navigationRequest||key!==caseKey(processId())||auth!==token()||route!==location.pathname+location.search||!available())return {ok:false};historyCase=result.case;historyLookupError=null;errorMessage='';renderPanel();openPanel();
+      if(workHasExecution(result.case.definition,result.case.process_id)){const saved=await api('execution/state?'+new URLSearchParams({case_id:id}));if(serial!==historyRequest||at!==generation||scopeEpoch!==navigationRequest||key!==caseKey(processId())||auth!==token()||route!==location.pathname+location.search||!available())return {ok:false};historyExecution=saved;renderPanel();}
+      return {ok:true};}
     catch(error){if(serial===historyRequest&&at===generation&&scopeEpoch===navigationRequest&&key===caseKey(processId())&&auth===token()&&route===location.pathname+location.search&&available()){errorMessage=error.message;historyLookupError=lookupFailure(error);renderPanel();}return {ok:false};}
   }
   function stashDraft() {
@@ -284,7 +288,7 @@
       finally{binding=null;}
     })();return binding;
   }
-  function resetHistory() {runView='current';historyCase=null;historyRequest++;historyLookupError=null;}
+  function resetHistory() {runView='current';historyCase=null;historyExecution=null;historyRequest++;historyLookupError=null;}
   function previewRoute(id) {const values={ees_site:browsingSite,ees_system:browsingSystem,ees_process:id,ees_version:previewVersion || state?.catalog.version};if(browseNodeId&&browseNodeId!==id&&lineage(browseNodeId,state?.catalog)[0]?.id===id)values.ees_node=browseNodeId;return '/?'+new URLSearchParams(values);}
   async function openCase(c,id='') {
     if(!c)return {ok:false};
@@ -346,10 +350,73 @@
   }
   async function saveInputs(inputs,id=selectedId()) {if(!canWriteEdits(id))return null;return action('update_inputs',{inputs},id);}
   async function saveDocument(document,id=selectedId()) {if(!canWriteEdits(id))return null;return action('run',{document},id);}
+  async function executionForm(schema,values,title,extra='') {
+    let submitted=null;
+    const html='<form id="ees-runtime-input-form">'+workExecutionInputsHTML(schema,values)+'</form>'+extra;
+    const promise=workUI.dialog({title,html,confirmLabel:'확인'}),dialog=document.querySelector('#ees-work-dialog'),form=dialog?.querySelector('form');
+    dialog?.querySelector('[data-dialog-confirm]')?.addEventListener('click',event=>{
+      try {if(!form.reportValidity()){event.stopImmediatePropagation();return;}submitted=workExecutionInputsRead(form,schema);}
+      catch(error){event.stopImmediatePropagation();let note=dialog.querySelector('[data-input-error]');if(!note){note=document.createElement('p');note.dataset.inputError='';note.setAttribute('role','alert');form.append(note);}note.textContent='입력 형식을 확인해 주세요. '+error.message;}
+    },true);
+    dialog?.querySelectorAll('[data-candidate-id]').forEach(button=>button.addEventListener('click',()=>{const input=form.elements.namedItem(button.dataset.inputKey || 'page_id');if(input){input.value=button.dataset.candidateId;input.focus();}}));
+    return await promise?submitted:null;
+  }
+  function executionRequestId(body) {
+    const key='execution:'+JSON.stringify(body);if(!actionRequests.has(key))actionRequests.set(key,window.crypto?.randomUUID?.() || 'runtime-'+Date.now().toString(36)+'-'+(++actionSerial));return actionRequests.get(key);
+  }
+  async function refreshExecution() {
+    clearTimeout(executionTimer);executionTimer=null;
+    if(!available()||!state||!selectedCase()||!workHasExecution(definition(),processId())){execution=null;executionError='';return;}
+    const at=generation,epoch=navigationRequest,auth=token(),route=location.pathname+location.search,cid=selectedCase().id,serial=++executionSerial;
+    const current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&serial===executionSerial&&cid===selectedCase()?.id&&available();
+    try {const result=await api('execution/state?'+new URLSearchParams({case_id:cid,chat_id:chatId()}));if(!current())return;execution=result;executionError='';renderPanel();
+      if(result.runs?.some(run=>['queued','running'].includes(run.status))||['queued','running'].includes(result.run?.status))executionTimer=setTimeout(()=>{executionTimer=null;if(current())refreshExecution();},1800);
+    }catch(error){if(current()){executionError=error.message;renderPanel();}}
+  }
+  async function startExecution(id) {
+    if(busy)return;const at=generation,epoch=navigationRequest,auth=token(),route=location.pathname+location.search;
+    const current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&available();
+    busy=true;errorMessage='';setBusy();
+    try {
+      const c=selectedCase(),body={node_id:id,chat_id:chatId(),inputs:{},...(c?{case_id:c.id}:{scope:{site_id:browsingSite,system:browsingSystem,process_id:processId(),version:previewVersion || state.catalog.version}})};
+      let response=await api('execution/plan',body);if(!current())return;
+      const plan=response.plan,limits=plan.limits?.duration_seconds?'<p>허용 실행 시간 '+Math.ceil(plan.limits.duration_seconds/60)+'분</p>':'';
+      const scope='<ul>'+plan.jobs.map(jobId=>{const job=node(jobId);return '<li>'+workUI.esc(job?.name || jobId)+' · '+workUI.esc(job?.execution?.kind==='ai'?'근거 요약':job?.execution?.kind==='human'?'사람 확인':(job?.execution?.calls || []).map(call=>call.reference.function).join(', '))+'</li>';}).join('')+'</ul>';
+      const expiry=typeof plan.expires_at==='number'?new Date(plan.expires_at*1000).toLocaleString():plan.expires_at || '미기록';
+      const inputs=await executionForm(plan.input_schema || {},plan.inputs || {},node(id).name+' · 실행 계획','<p>대상 작업 '+plan.jobs.length+'개 · 승인 유효 시각 '+workUI.esc(expiry)+'</p>'+scope+limits+'<p>개인 연결은 기존 도구 설정을 사용합니다. 계정·키는 입력하지 마세요.</p>');
+      if(!current()||inputs===null)return;
+      const intent=JSON.stringify({...body,inputs});let start=executionStarts.get(intent);
+      if(!start){response=await api('execution/plan',{...body,inputs});if(!current())return;const accepted=response.plan;start={action:'start',plan_id:accepted.id,plan_hash:accepted.hash};start.request_id=executionRequestId(start);executionStarts.set(intent,start);}
+      const result=await api('execution/action',start);if(!current())return;executionStarts.delete(intent);
+      execution={ok:true,run:result.run,runs:[result.run]};executionError='';
+      if(result.run?.case_id){if(!chatId())pendingId=result.run.case_id;await refresh();}
+      else renderPanel();
+    }catch(error){if(current()){errorMessage=error.message;renderPanel();}}
+    finally {busy=false;setBusy();}
+  }
+  async function executionControl(data) {
+    if(busy)return;const run=execution?.run;if(!run||run.id!==data.runId||String(run.revision)!==data.revision)return refreshExecution();
+    const at=generation,epoch=navigationRequest,auth=token(),route=location.pathname+location.search,current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&available();
+    let action=data.runtimeAction,inputs;
+    if(action==='inputs'){
+      const candidates=(run.calls || []).flatMap(call=>call.result?.data?.results || []);
+      const choices=candidates.filter(item=>item.page_id || item.id).map(item=>'<p><button type="button" data-candidate-id="'+workUI.esc(item.page_id || item.id)+'">'+workUI.esc(item.title || item.name || item.page_id || item.id)+' · '+workUI.esc(item.page_id || item.id)+'</button></p>').join('');
+      inputs=await executionForm(run.input_schema || {},run.inputs || {},'실행 입력 확인',candidates.length?'<details open><summary>조회된 후보 · 선택해 주세요</summary>'+choices+'<pre>'+workUI.esc(JSON.stringify(candidates,null,2))+'</pre></details>':'');
+      if(inputs===null||!current())return;
+    }
+    if(action==='confirm'&&!await workUI.dialog({title:'내용을 직접 확인하셨나요?',html:'<p>'+workUI.esc(node(data.jobId)?.rule || '등록된 완료 조건을 직접 확인해 주세요.')+'</p>',confirmLabel:'확인 완료'}))return;
+    if(action==='cancel'&&!await workUI.dialog({title:'이 실행을 취소할까요?',html:'<p>다음 호출을 중지합니다. 이미 보낸 요청의 결과가 취소되었다고 판단하지 않습니다.</p>',confirmLabel:'실행 취소'}))return;
+    if(!current())return;busy=true;setBusy();
+    const body={action,run_id:run.id,expected_revision:run.revision,...(inputs?{inputs}:{}),...(data.jobId?{job_id:data.jobId}:{})};body.request_id=executionRequestId(body);
+    try{const result=await api('execution/action',body);if(!current())return;execution={ok:true,run:result.run,runs:[result.run]};executionError='';await refresh();}
+    catch(error){if(current()){errorMessage=error.message;await refreshExecution();renderPanel();}}
+    finally{busy=false;setBusy();}
+  }
   async function runJob(id,activation=null) {
     // A second click in the save gesture is not a separate execution intent.
     if(activation?.detail>1)return;
     const n=node(id);if(!n)return;
+    if(workHasExecution(definition(),id)){await startExecution(id);return;}
     if(n.type==='j'){
       if(!canWriteEdits(id))return;
       const edits=view.readJobEdits(id);
@@ -367,7 +434,7 @@
   }
   function render() {renderView();renderDesigner();updateScopeReadiness();}
   function cleanup() {
-    clearScopeReadinessWait();
+    clearScopeReadinessWait();clearTimeout(executionTimer);executionTimer=null;execution=null;executionError='';executionSerial++;executionStarts.clear();
     personalSettingsOpened=false;$('#ees-personal-settings-guide')?.remove();
     generation++;request++;state=null;acceptedRoute='';pendingId='';pendingSubmitted=false;browseActive=false;previewVersion=0;scopeSelections.clear();chosenCases.clear();draftSnapshots.clear();creationTickets.clear();createdChats.clear();previewChats.clear();actionRequests.clear();draftSerial++;draftTarget=null;clearTimeout(draftTimer);resetHistory();errorMessage='';recordLookupError=null;
     if(activeRegistration!==null)window.__eesWorkPanelV1?.unregister(activeRegistration,'workflow');activeRegistration=null;
@@ -383,7 +450,7 @@
     view.prepare(snapshot());designer.prepare(snapshot());
     const path=location.pathname+location.search;
     if(lastRoute!==path){
-      clearScopeReadinessWait();
+      clearScopeReadinessWait();clearTimeout(executionTimer);executionTimer=null;execution=null;executionError='';executionSerial++;
       view.closeScopePicker();const previous=lastRoute;lastRoute=path;generation++;request++;resetHistory();
       // A first completion can arrive after another factory was previewed on
       // the root route. Its server-issued chat still belongs to the captured
