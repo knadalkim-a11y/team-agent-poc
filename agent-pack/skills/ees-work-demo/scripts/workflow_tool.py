@@ -175,7 +175,7 @@ class Tools:
 
     async def ees_execution_action(self, action: str, request_id: str, plan_id: str = "",
                                    plan_hash: str = "", run_id: str = "", expected_revision: int = -1,
-                                   inputs: dict = None, __user__=None) -> dict:
+                                   inputs: dict = None, __user__=None, __metadata__=None) -> dict:
         """Execute or control the same durable service used by the work panel.
         start requires the exact plan id/hash from ees_execution_plan and explicit
         user intent to run. Use one request_id for identical retries after a lost
@@ -213,6 +213,11 @@ class Tools:
             body = {"action": action, "run_id": run_id, "expected_revision": expected_revision, "request_id": request_id}
             if action == "inputs":
                 body["inputs"] = inputs or {}
+        chat_id = _chat(__metadata__)
+        if not chat_id:
+            return _error("chat_required", "기존 대화의 실행 요청에서 진행해 주세요.")
+        # Native injects this context; the model cannot select another chat.
+        body["chat_id"] = chat_id
         try:
             from open_webui.ees_workflow import execution_action
         except ImportError:

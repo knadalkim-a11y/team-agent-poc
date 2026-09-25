@@ -36,3 +36,25 @@ test('lost start response retries the identical accepted plan and receipt',async
  const s={busy:false,generation:1,navigationRequest:1,token:()=> 'a',location:{pathname:'/c/a',search:''},available:()=>true,setBusy:()=>{},errorMessage:'',renderPanel:()=>{},selectedCase:()=>({id:'case'}),chatId:()=> 'chat',node:()=>({name:'작업'}),executionForm:async()=>({page_id:'42'}),executionStarts:new Map(),executionRequestId:body=>'stable-'+body.plan_id,execution:null,executionError:'',refresh:async()=>{},workUI:{esc:value=>String(value)},api:async(path,body)=>{if(path==='execution/plan'){plans++;return {plan:{id:'plan'+plans,hash:'hash'+plans,jobs:['j'],input_schema:{},inputs:{}}};}sent.push(JSON.parse(JSON.stringify(body)));starts++;if(starts===1)throw new Error('lost response');return {ok:true,run:{id:'run',case_id:'case'}};}};
  vm.createContext(s);vm.runInContext(fn,s);await s.startExecution('j');assert.match(s.errorMessage,/lost response/);assert.equal(s.executionStarts.size,1);await s.startExecution('j');assert.deepEqual(sent[0],sent[1]);assert.equal(starts,2);assert.equal(s.executionStarts.size,0);
 });
+
+test('definitive start rejection and late successful response retire the cached intent',async()=>{
+ const launcher=fs.readFileSync(path.join(root,'branding/ees/ui/ees-work-launcher.js'),'utf8'),from=launcher.indexOf('  async function startExecution('),to=launcher.indexOf('  async function executionControl(',from),fn=launcher.slice(from,to);
+ for(const scenario of ['expired','late-success']){
+  let plans=0,starts=0;const sent=[],s={busy:false,generation:1,navigationRequest:1,token:()=> 'a',location:{pathname:'/c/a',search:''},available:()=>true,setBusy:()=>{},errorMessage:'',renderPanel:()=>{},selectedCase:()=>({id:'case'}),chatId:()=> 'chat',node:()=>({name:'작업'}),executionForm:async()=>({page_id:'42'}),executionStarts:new Map(),executionRequestId:body=>'stable-'+body.plan_id,execution:null,executionError:'',refresh:async()=>{},workUI:{esc:value=>String(value)},api:async(path,body)=>{
+   if(path==='execution/plan'){plans++;return {plan:{id:'plan'+plans,hash:'hash'+plans,jobs:['j'],input_schema:{},inputs:{}}};}
+   starts++;sent.push({...body});if(starts===1&&scenario==='expired')throw Object.assign(new Error('plan expired'),{result:{ok:false,error:{code:'plan_expired'}},status:400});if(starts===1&&scenario==='late-success')s.navigationRequest++;return {ok:true,run:{id:'run',case_id:'case'}};
+  }};vm.createContext(s);vm.runInContext(fn,s);await s.startExecution('j');assert.equal(s.executionStarts.size,0);await s.startExecution('j');assert.notEqual(sent[0].plan_id,sent[1].plan_id);assert.equal(sent[0].chat_id,'chat');assert.equal(s.executionStarts.size,0);
+ }
+});
+test('runtime P and T summaries count fixed and AI work separately from legacy simulation',()=>{
+ const c=subject(),n=(id,type,parent,children=[])=>({id,name:id,type,parent,children,mode:'tool',tools:[],skills:[],deps:[],enabled:true});
+ c.definition={nodes:{p:n('p','p',null,['t']),t:n('t','t','p',['fixed','ai','legacy']),fixed:{...n('fixed','j','t'),execution:{kind:'fixed'}},ai:{...n('ai','j','t'),execution:{kind:'ai'}},legacy:{...n('legacy','j','t'),tools:['mock']}},tools:{mock:{adapter:'mock',input:'site'}},skills:{},sites:{},roots:{setup:['p']}};
+ for(const id of ['p','t']){c.id=id;const html=vm.runInContext('workPanelNodeHTML(null,definition.nodes[id],{definition})',c);assert.match(html,/data-work-count="fixed">1</);assert.match(html,/data-work-count="ai">1</);assert.match(html,/data-work-count="simulation">1</);}
+});
+test('runtime polling adopts the matching case projection and ignores a changed selection during its read',async()=>{
+ const launcher=fs.readFileSync(path.join(root,'branding/ees/ui/ees-work-launcher.js'),'utf8'),start=launcher.indexOf('  async function refreshExecution() {'),end=launcher.indexOf('  async function startExecution(',start),fn=launcher.slice(start,end);
+ for(const change of [false,true]){
+  const currentCase={id:'case',revision:1,jobs:{j:{status:'pending'}}},s={busy:false,executionTimer:null,executionSerial:0,execution:{run:{id:'r',revision:1}},executionError:'',available:()=>true,state:{case:currentCase},selectedCase:()=>s.state.case,workHasExecution:()=>true,definition:()=>({}),processId:()=> 'p',generation:1,navigationRequest:1,token:()=> 'a',location:{pathname:'/c/a',search:''},chatId:()=> 'a',renderPanel:()=>{},accept:value=>{s.state=value;s.accepted++},accepted:0,clearTimeout,setTimeout,URLSearchParams,api:async(path)=>{if(path.startsWith('execution/'))return {ok:true,run:{id:'r',revision:2,status:'succeeded'}};if(change)s.navigationRequest++;return {ok:true,case:{id:'case',revision:2,jobs:{j:{status:'passed'}}}};}};
+  vm.createContext(s);vm.runInContext(fn,s);await s.refreshExecution();assert.equal(s.accepted,change?0:1);assert.equal(s.state.case.jobs.j.status,change?'pending':'passed');
+ }
+});

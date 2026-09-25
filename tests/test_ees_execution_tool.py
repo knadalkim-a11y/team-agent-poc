@@ -32,9 +32,9 @@ class ExecutionChatToolTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_start_replay_forwards_exact_same_receipt_and_no_browser(self):
         for _ in range(2):
-            await self.tool.ees_execution_action('start', 'request:one', plan_id='plan', plan_hash='hash', __user__=self.user)
+            await self.tool.ees_execution_action('start', 'request:one', plan_id='plan', plan_hash='hash', __user__=self.user, __metadata__={'chat_id': 'chat-a'})
         self.assertEqual(self.backend.execution_action.await_args_list[0], self.backend.execution_action.await_args_list[1])
-        self.assertEqual(self.backend.execution_action.await_args.args[1], {'action': 'start', 'request_id': 'request:one', 'plan_id': 'plan', 'plan_hash': 'hash'})
+        self.assertEqual(self.backend.execution_action.await_args.args[1], {'action': 'start', 'request_id': 'request:one', 'plan_id': 'plan', 'plan_hash': 'hash', 'chat_id': 'chat-a'})
 
     async def test_human_confirmation_cannot_be_fabricated_by_chat(self):
         result = await self.tool.ees_execution_action('confirm', 'confirm', run_id='run', expected_revision=2, __user__=self.user)
@@ -44,11 +44,23 @@ class ExecutionChatToolTests(unittest.IsolatedAsyncioTestCase):
     async def test_control_and_input_are_distinct_revision_bound_requests(self):
         for action in ('pause', 'cancel', 'resume', 'inputs'):
             result = await self.tool.ees_execution_action(action, action, run_id='run', expected_revision=3,
-                inputs={'page_id': '42'} if action == 'inputs' else None, __user__=self.user)
+                inputs={'page_id': '42'} if action == 'inputs' else None, __user__=self.user, __metadata__={'chat_id': 'chat-a'})
             self.assertTrue(result['ok'])
             body = self.backend.execution_action.await_args.args[1]
             self.assertEqual(body['expected_revision'], 3)
+            self.assertEqual(body['chat_id'], 'chat-a')
             self.assertEqual('inputs' in body, action == 'inputs')
+
+
+    async def test_mutations_require_native_chat_metadata_and_forward_current_chat(self):
+        missing = await self.tool.ees_execution_action('start', 'one', plan_id='plan', plan_hash='hash', __user__=self.user)
+        self.assertEqual(missing['error']['code'], 'chat_required')
+        self.backend.execution_action.assert_not_awaited()
+        for action in ('start', 'pause', 'cancel', 'resume', 'inputs'):
+            kwargs = {'plan_id': 'plan', 'plan_hash': 'hash'} if action == 'start' else {'run_id': 'run', 'expected_revision': 3}
+            await self.tool.ees_execution_action(action, action, **kwargs, __user__=self.user,
+                __metadata__={'chat_id': 'chat-b'})
+            self.assertEqual(self.backend.execution_action.await_args.args[1]['chat_id'], 'chat-b')
 
     async def test_state_read_cannot_start_or_retry_execution(self):
         self.backend.execution_state.return_value = {'ok': True, 'run': {'status': 'unknown', 'calls': [{'status': 'unknown'}]}}

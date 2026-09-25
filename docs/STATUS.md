@@ -6,12 +6,12 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** [공통 Native 도구 재사용·P/T 영속 실행](mockups/ees-work/TASK.md#shared-native-runtime-20260925)의 1차 구현과 Work 검증을 진행했다. 시작 최신 main은 PR #64 병합본 `991cdb1d80ae07471fb50594831d74fe602b1ef7`이며 당시 Work 로컬 변경과 같은 기능의 열린 PR은 없었다. `feat/shared-native-runtime-20260925`에서 진행하며 기존 설계 Draft #53은 변경·적층하지 않는다.
+- **현재 작업:** [공통 Native 도구 재사용·P/T 영속 실행](mockups/ees-work/TASK.md#shared-native-runtime-20260925)의 1차 구현을 [PR #65](https://github.com/knadalkim-a11y/team-agent-poc/pull/65)로 게시했다. 같은 날 사용자가 검토 후 병합과 배포 준비를 요청해 같은 PR에서 검토 보완·관련 재검을 진행한다. 시작 main은 PR #64 병합본 `991cdb1d80ae07471fb50594831d74fe602b1ef7`, 최초 PR head는 `e338b7ee00b738ed0f1ad8c8daefec408e4c262a`다. 기존 설계 Draft #53은 변경·적층하지 않는다.
 - **기능 계약:** 기존 Native 등록본·ACL·개인 설정을 재사용하고 J는 승인 함수/버전·입력·완료 기준을 연결한다. 채팅과 기존 A안 패널의 P/T/J가 같은 영속 서비스를 사용한다. 실제 호출·검증·기록, 입력/권한 대기와 재개, 브라우저 종료·프로세스 재기동·중복/실패/UNKNOWN을 구분한다. 기존 회원·시스템 담당자·P별 게시·사용자 자산과 과거 모의 업무를 보존한다.
 - **보존·버전:** 프로그램 `0.11.3+ees.12`·`/_ees12/`, Pack0.2.14/Specialists0.2.5/Workflow0.4.0이다. Native DB/키/도구를 복제하지 않고 기존 업무 SQLite에 승인·실행 metadata를 추가한다. 과거 ees.10/11 파일/Restore 계약과 새 진행의 구프로그램 쓰기 차단을 구분한다. 프로그램 Restore는 DB·자산·그룹 변경의 복원이 아니다.
-- **검증 상태:** [TR-01~24](../evals/scenarios.md#shared-native-runtime-20260925)에 실제 Native 임시 DB/loader/binder·암호화 개인 설정, 합성 HTTP/모델, 실제 패키지 frontend/Chrome와 독립 API/저장 서비스의 범위를 기록한다. 두 예제의 P/단계 실행·결과 연결/근거 검증을 확인했고 최종 파일별 회귀는 1,228 PASS/16 SKIP/실패·오류 0이다. Native 브라우저 39건과 실제 이전 프로그램 복원, 최종 wheel/소스 21항목 일치를 확인했다. 초기 실패와 단일 프로세스 전체 시험 정체·파일별 재검 결과는 평가 원본에 보존한다. 전체 Native 앱 기동·실제 사내 API/모델·Windows 셋업과 사용자 수락은 미실행이다.
-- **사내 상태:** #64 main 병합은 확인했지만 새 사내 설치 결과는 수신하지 않았다. 기존 #59/#60 적용 보고를 유지한다. 이번 요청은 구현·커밋/push/PR까지이며 main 직접 push/병합·사내 배포·실제 계정/도구 등록·실서버 변경은 수행하지 않는다. OP-01~04와 접속/복구/실사용 확인도 완료로 바꾸지 않는다.
-- **다음 작업 하나:** 같은 기능 PR의 검토를 이어간다. Windows 셋업 자동화는 같은 계약의 후속 목표이며 현재 설치 문서 검색/본문 읽기를 셋업 완료로 보고하지 않는다. 사내 실행은 별도 승인 범위로 유지하고 이번 작업에서 배포를 시작하지 않는다.
+- **검증 상태:** [TR-01~24](../evals/scenarios.md#shared-native-runtime-20260925)에 실제 Native 임시 DB/loader/binder·암호화 개인 설정, 합성 HTTP/모델, 실제 패키지 frontend/Chrome와 독립 API/저장 서비스의 범위를 기록한다. 최초 PR 원본의 파일별 회귀 1,228 PASS/16 SKIP/실패·오류 0과 실제 이전 프로그램 복원 증거를 보존한다. [병합 전 검토](../evals/scenarios.md#shared-native-runtime-review-20260925)에서 UNKNOWN 우회·전이 근거 ACL·대화/승인 경합·모델 범위/상한·화면 상태를 보완했고 수정 관련 runtime32·Native9·Tool8/기존34·Node43·조립 Native 선별 검사를 확인한다. 중간/최종 원본·실패 후 재검을 구분하며 전체 광역 시험을 다시 통과했다고 합산하지 않는다. 전체 Native 앱 기동·실제 사내 API/모델·Windows 셋업과 사용자 수락은 미실행이다.
+- **사내 상태:** 새 사내 설치 결과는 수신하지 않았다. 기존 #59/#60 적용 보고를 유지한다. 후속 요청으로 #65의 검토 후 병합·정확한 병합 main의 배포 준비까지 승인됐으며, main 직접 push·실제 사내 배포·계정/도구 등록·실서버 변경은 수행하지 않는다. OP-01~04와 접속/복구/실사용 확인도 완료로 바꾸지 않는다.
+- **다음 작업 하나:** #65의 검증 원본을 병합하고 같은 tree의 깨끗한 main에서 wheel/ZIP·manifest를 확인해 [기존 Update → Upgrade -TrialCommit](03-openwebui-native-agent.md#shared-native-runtime-20260925) 적용 안내를 확정한다. 정확한 병합 SHA·배포물 해시는 #65의 병합 결과/준비 기록에서 확인한다. Windows 셋업 자동화는 같은 계약의 후속 목표이며 설치 문서 검색/본문 읽기를 셋업 완료로 보고하지 않는다.
 
 ## 2026년 9월 개발·검사 방침
 

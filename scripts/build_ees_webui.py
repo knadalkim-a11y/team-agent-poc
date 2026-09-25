@@ -351,6 +351,30 @@ def _guard_local_tool_loading(text, filename):
     return text + "\nEES_ASSET_LOCAL_TOOL_GUARD = 1\n"
 
 
+def _guard_headless_model_parameters(text, filename):
+    """Validate the exact preset read by either pinned provider route.
+
+    Adapter preflight cannot freeze a preset across Native's later DB read.
+    Recheck synchronously at parameter application for server-marked EES calls;
+    ordinary Native chat settings and public request bodies remain unchanged.
+    """
+    nodes = [node for node in ast.parse(text).body
+             if isinstance(node, ast.AsyncFunctionDef) and node.name == "generate_chat_completion"]
+    if len(nodes) != 1:
+        raise ValueError(f"Native model route differs: {filename}")
+    node = nodes[0]
+    lines = text.splitlines(keepends=True)
+    body = "".join(lines[node.lineno - 1:node.end_lineno])
+    before = "        params = model_info.params.model_dump()\n"
+    after = ("        if getattr(request.state, 'ees_workflow_headless', False):\n"
+             "            from open_webui.ees_workflow_model import _headless_parameters\n"
+             "            params, _ = _headless_parameters(model_info, request_limits=True)\n"
+             "        else:\n" + "    " + before)
+    body = _one_replace(body, before, after, filename)
+    lines[node.lineno - 1:node.end_lineno] = [body]
+    return "".join(lines)
+
+
 def prepare_asset_guard_replacements(source, replacements):
     for filename, expected_hash in ASSET_GUARD_SOURCE_HASHES.items():
         raw = source.read(filename)
@@ -367,6 +391,8 @@ def prepare_asset_guard_replacements(source, replacements):
             text += "\nEES_ASSET_CACHE_COMMIT_ORDER = 1\n"
         if filename == "open_webui/utils/tools.py":
             text = _guard_local_tool_loading(text, filename)
+        if filename in {"open_webui/routers/openai.py", "open_webui/routers/ollama.py"}:
+            text = _guard_headless_model_parameters(text, filename)
         if filename == "open_webui/main.py":
             node, = [n for n in ast.parse(text).body if isinstance(n, ast.AsyncFunctionDef) and n.name == "lifespan"]
             lines = text.splitlines(keepends=True)

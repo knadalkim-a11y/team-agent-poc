@@ -417,6 +417,12 @@ class NativeBridge:
                 _fail("native_version_changed")
         elif reference.get("function") not in FUNCTIONS or not isinstance(reference.get("tool_id"), str):
             _fail("native_reference_invalid")
+        # Native account roles may change during the awaited metadata reads.
+        # Tool ownership/read ACL does not imply automatic-execution approval
+        # authority. Recheck immediately before the non-awaiting write block.
+        current = await self.service._user(user)
+        if _get(current, "role") != "admin":
+            _fail("admin_required", "자동 실행 허용은 기존 전체 관리자만 변경할 수 있습니다.")
         with self.service._db(write=True) as db:
             row = db.execute("SELECT revision FROM native_approvals WHERE tool_id=? AND function=?", (reference["tool_id"], reference["function"])).fetchone()
             if (row["revision"] if row else 0) != expected:

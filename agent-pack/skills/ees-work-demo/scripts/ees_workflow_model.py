@@ -8,6 +8,7 @@ The contract validator, not model prose, decides whether the summary is valid.
 from copy import deepcopy
 import inspect
 import json
+import math
 from types import SimpleNamespace
 
 from .ees_workflow_authoring import WorkflowError
@@ -56,6 +57,91 @@ async def _resolve(value):
     return await value if inspect.isawaitable(value) else value
 
 
+# Native applies model.params *after* this adapter builds its request. Unknown
+# custom fields can therefore add provider conversation IDs, hosted prompts,
+# alternate model/endpoint selection or nested payloads. A headless job accepts
+# only these bounded generation controls; the ordinary chat preset is unchanged.
+_NUMERIC_PARAMETERS = {
+    "temperature", "top_p", "min_p", "frequency_penalty", "presence_penalty",
+    "repeat_penalty", "repetition_penalty", "mirostat_eta", "mirostat_tau",
+    "length_penalty",
+}
+_INTEGER_PARAMETERS = {
+    "seed", "max_tokens", "max_completion_tokens", "max_output_tokens", "top_k",
+    "min_tokens", "num_predict", "num_ctx", "num_batch", "num_keep", "repeat_last_n",
+    "mirostat", "num_gpu", "num_thread",
+}
+_BOOLEAN_PARAMETERS = {"use_mmap", "use_mlock", "ignore_eos", "skip_special_tokens"}
+# The pinned Native routes remove these fields before applying provider params.
+# In particular, top-level system is popped and bypass_system_prompt=True below
+# prevents its injection. Custom params are merged AFTER Native removal, so this
+# exemption must never apply to entries inside custom_params.
+_NATIVE_ONLY_PARAMETERS = {
+    "system", "stream_response", "stream_delta_chunk_size", "function_calling",
+    "reasoning_tags", "compact_token_threshold", "note_id", "tool_approval_mode",
+}
+
+
+def _headless_parameters(info, *, request_limits=False):
+    params = _value(info, "params", {}) or {}
+    params = params.model_dump() if hasattr(params, "model_dump") else params
+    if not isinstance(params, dict):
+        raise WorkflowError("headless_model_unsupported", "현재 모델 설정은 지속 실행의 독립된 근거 범위를 지원하지 않습니다.")
+    # Validation must not mutate the shared preset or Native's stored settings.
+    params = deepcopy(params)
+    custom = params.get("custom_params") or {}
+    if not isinstance(custom, dict):
+        raise WorkflowError("headless_model_unsupported", "현재 모델의 추가 설정은 지속 실행을 지원하지 않습니다.")
+    for values, native_only in ((params, True), (custom, False)):
+        for key, raw in values.items():
+            if native_only and (key == "custom_params" or key in _NATIVE_ONLY_PARAMETERS):
+                continue
+            value = raw
+            # Mirror the pinned Native JSON coercion for custom values only.
+            if not native_only and isinstance(value, str):
+                try:
+                    value = json.loads(value)
+                except (ValueError, TypeError, RecursionError):
+                    pass
+            if value is None:
+                continue  # Pinned parameter application never forwards None.
+            valid = False
+            if key in _NUMERIC_PARAMETERS:
+                valid = type(value) in (int, float) and abs(value) <= 1_000_000 and math.isfinite(value)
+            elif key in _INTEGER_PARAMETERS:
+                valid = type(value) is int and -(2**31) <= value <= 2**31 - 1
+            elif key in _BOOLEAN_PARAMETERS:
+                valid = type(value) is bool
+            elif key == "stop":
+                valid = isinstance(value, list) and len(value) <= 16 and all(isinstance(item, str) and len(item) <= 256 for item in value)
+            elif key == "reasoning_effort":
+                valid = value in ("none", "minimal", "low", "medium", "high", "xhigh")
+            elif key == "think":
+                valid = type(value) is bool or value in ("low", "medium", "high")
+            elif key == "logit_bias":
+                valid = (isinstance(value, dict) and len(value) <= 256 and all(
+                    isinstance(token, str) and token.isdecimal() and len(token) <= 12
+                    and type(weight) in (int, float) and -100 <= weight <= 100 and math.isfinite(weight)
+                    for token, weight in value.items()))
+            elif key == "reasoning":
+                valid = (isinstance(value, dict) and set(value) <= {"effort", "summary"}
+                         and value.get("effort", "medium") in ("none", "minimal", "low", "medium", "high", "xhigh")
+                         and value.get("summary", "auto") in ("auto", "concise", "detailed"))
+            elif key == "chat_template_kwargs":
+                valid = (isinstance(value, dict) and set(value) <= {"enable_thinking"}
+                         and all(type(item) is bool for item in value.values()))
+            if not valid:
+                raise WorkflowError("headless_model_unsupported", "현재 모델의 추가 문맥·요청 설정은 지속 실행을 지원하지 않습니다. 기본 생성 설정을 사용하는 모델을 선택해 주세요.")
+    if request_limits:
+        # The adapter already supplies max_tokens/max_completion_tokens. Native
+        # translates those to the Responses cap. A preset added after preflight
+        # must not inject a second provider-specific cap into Chat Completions
+        # or Ollama; strip it from this request copy only, never the preset.
+        params.pop("max_output_tokens", None)
+        custom.pop("max_output_tokens", None)
+    return params, custom
+
+
 class NativeModelAdapter:
     def __init__(self, service, app=None):
         self.service, self.app = service, app
@@ -86,6 +172,7 @@ class NativeModelAdapter:
         if (any(model.get(key) for key in ("pipe", "arena", "direct", "pipeline"))
                 or model.get("owned_by") in {"arena", "pipeline"}):
             raise WorkflowError("headless_model_unsupported", "이 모델은 현재 백그라운드 요약 실행을 지원하지 않습니다.")
+        params, custom = _headless_parameters(info)
         if model.get("owned_by") != "ollama":
             base_id = _value(info, "base_model_id") or model_id
             provider = getattr(self.app.state, "OPENAI_MODELS", {}).get(base_id)
@@ -97,9 +184,6 @@ class NativeModelAdapter:
                     raise ValueError("browser_auth")
             except Exception:
                 raise WorkflowError("headless_model_unsupported", "브라우저 세션에 의존하는 모델은 지속 실행에 사용할 수 없습니다.") from None
-            params = _value(info, "params", {}) or {}
-            params = params.model_dump() if hasattr(params, "model_dump") else params
-            custom = params.get("custom_params", {}) if isinstance(params, dict) else {}
             if connection.get("api_type") != "responses" and (
                     "max_output_tokens" in params or isinstance(custom, dict) and "max_output_tokens" in custom):
                 raise WorkflowError("headless_model_unsupported", "현재 모델의 출력 한도 설정은 지속 실행 경로와 호환되지 않습니다.")
@@ -130,6 +214,9 @@ class NativeModelAdapter:
                                    "raw_path": b"/api/chat/completions", "query_string": b"",
                                    "headers": [], "app": self.app, "state": {}})
         request.state.internal = True
+        # Pinned Native routes validate their freshly-read preset at the actual
+        # parameter application boundary as well; form data cannot set this.
+        request.state.ees_workflow_headless = True
         metadata = {"user_id": _value(current, "id"), "chat_id": "", "session_id": None,
                     "internal": True, "tool_ids": [], "skill_ids": [], "filter_ids": [],
                     "files": [], "features": {}, "ees_run_id": context.get("run_id")}
@@ -161,6 +248,10 @@ class NativeModelAdapter:
             data = json.loads(content)
             if not isinstance(data, dict) or set(data) != {"claims", "limitations"}:
                 raise ValueError("shape")
+        except WorkflowError:
+            # Includes a preset changed after preflight and rejected at the
+            # pinned Native parameter application boundary.
+            raise
         except Exception:
             # Never persist raw model responses, exception text or reasoning.
             raise WorkflowError("model_result_invalid", "모델 결과를 검증할 수 없습니다. 완료로 기록하지 않았습니다.") from None

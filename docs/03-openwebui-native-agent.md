@@ -1298,7 +1298,7 @@ Backup은 DATA_DIR의 `ees-work.sqlite3`를 포함해 파일별 해시로 보관
 
 <a id="shared-native-runtime-20260925"></a>
 
-#### 공통 Native 도구와 영속 실행 — ees.12 준비본
+#### 공통 Native 도구와 영속 실행 — ees.12
 
 기존 Confluence/Jira/GitHub 등록본 하나를 일반 대화와 업무 실행에서 함께 사용한다. J는 등록 ID·함수·검증한 hash/revision과 공개 입력/결과/완료 조건을 참조한다. 사내 등록본 코드나 개인 PAT를 EES DB로 복제하지 않고 기존 Native ACL·관리자 Valves·개인 UserValves를 매 호출에 사용한다. 기존 도구 ID·코드·개인 설정·그룹·시스템 담당 권한·사용자 자산을 자동 갱신하지 않는다. 설계 원본과 두 예제는 [09-25 TASK](mockups/ees-work/TASK.md#shared-native-runtime-20260925)를 따른다.
 
@@ -1322,7 +1322,11 @@ transport·J validator·P/T 최종 판정을 구분하며 한 페이지·부분/
 
 **저장과 Restore:** 프로그램 `0.11.3+ees.12`·`/_ees12/`, Pack0.2.14/Specialists0.2.5/Workflow0.4.0 준비본이다. 기존 DB에 승인·계획·run·call·event·중복 요청 테이블을 추가하고 Native DB를 복제하지 않는다. 기존 일반/모의 진행은 유지한다. 새 실행은 cases에 표시 결과를 연결하며 추가 trigger로 구프로그램의 모의/수동 writer가 새 계약 완료 상태를 덮지 못하게 한다. ees.11로 Restore하면 새 실행은 지원하지 않고 새 기록 읽기만 가능하다. 기존 모의 업무의 호환과 새 실행 미지원은 별개다. ees.10/11 필수 파일 목록을 동결하고 새 모듈 제거·DB/키/Python 보존을 프로그램 Apply/Restore로 검사한다. Restore는 DB·개인 설정·승인·Native 자산을 되돌리지 않는다.
 
-이번 범위는 개발 구현/검증·PR까지다. 사내 설치·실제 승인·팀 공개·Windows 셋업 완료를 뜻하지 않는다. 실제 Native 임시 DB/loader/binder, 합성 HTTP·모델, compiled frontend/Chrome, 사내/Windows 미실행은 [TR 평가](../evals/scenarios.md#shared-native-runtime-20260925)에서 구분한다. 이번 요청에서 사내 설치 명령을 실행하지 않는다.
+후속 사용자 요청으로 [PR #65](https://github.com/knadalkim-a11y/team-agent-poc/pull/65)의 검토 후 병합·배포 준비를 진행한다. 실제 Native 임시 DB/loader/binder, 합성 HTTP·모델, compiled frontend/Chrome, 사내/Windows 미실행은 [TR 평가](../evals/scenarios.md#shared-native-runtime-20260925)에서 구분한다. 사내 설치·실제 승인·팀 공개·Windows 셋업 완료를 뜻하지 않으며 이번 작업에서 실서버 설치 명령을 실행하지 않는다.
+
+**#65 적용 준비:** 검토 보완을 포함한 최종 병합 main의 전체 40자리 SHA와 깨끗한 원본의 ZIP `source_commit`·`source_dirty=false`·파일별 해시를 대조한다. 검토 중 dirty wheel이나 최초 PR head를 적용 SHA로 사용하지 않는다. [기존 Update → Upgrade -TrialCommit](#ees-wrapper-trial)이 등록 Python·clone·주소·DATA_DIR·키·프록시·공식 wheel 캐시를 재사용해 준비/검사 → Stop → Backup → Apply → Start → 같은 SHA의 조건부 ApplyDemo를 수행한다. 별도 ZIP 다운로드·Init·새 가상환경·API 키 발급·추가 ApplyDemo는 필요 없다. 기존 별도 `-Config`를 사용했다면 두 호출에 같은 값을 유지한다. SHA/로컬 변경 불일치나 `managed_field_conflict`는 강제로 덮지 않고 중단한다.
+
+준비한 적용 블록은 기존 clone 폴더에서 `Update`와 `Upgrade -TrialCommit '<확정한 병합 SHA>' -Summary`를 순서대로 실행하는 것이다. 실제 실행 후 Ctrl+F5와 기존 대화·업무 저장·Native 개인 연결 보존을 대표 항목으로 확인하고 마지막 요약 및 정상/문제 1~2줄만 전달한다. 설치가 기존 도구를 자동 승인하거나 예제 P를 자동 게시하지 않는다. 실제 등록본 승인·P의 연결/게시와 사내 호출 수락은 따로 확인한다. 정상 적용 뒤 복원은 [Stop → Restore → Start](#ees-wrapper-restore), Apply/Restore 자체가 중단됐다면 같은 절의 미완료 상태 경로를 따른다. 프로그램 복원은 DB·진행 이력·개인 설정·ApplyDemo 변경의 복원이 아니다.
 
 <a id="ees-right-panel-20260922"></a>
 

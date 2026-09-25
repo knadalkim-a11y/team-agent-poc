@@ -2,7 +2,7 @@
 function createWorkDesigner({callbacks}) {
   const {$, esc, clone, categories, levels, button, lineage} = workUI;
   let serverSource=null,capability=null,authoring=null,processMeta=null,managedSystem='',managedProcess='',authorizationError='',authoringLoading=false,writeBusy=false,loadSerial=0,writeSerial=0;
-  const draftCache=new Map(),requestIds=new Map();
+  const draftCache=new Map(),requestIds=new Map(),generatedRuntimeInputs=new Map();
   let localAssetIds={tools:new Set(),skills:new Set()};
   let authoringLink=null;
   let state=null,category='setup',errorMessage='',busy=false,route={};
@@ -158,6 +158,13 @@ function createWorkDesigner({callbacks}) {
   function remapEditor(source,map){
     const result=clone(source),id=value=>map?.[value] || value;
     for(const kind of ['nodes','tools','skills'])result[kind]=Object.fromEntries(Object.entries(result[kind] || {}).map(([key,item])=>{item.id=id(item.id);if(kind==='nodes'){if(item.parent)item.parent=id(item.parent);for(const list of ['children','deps','tools','skills'])if(item[list])item[list]=item[list].map(id);if(item.bindings)item.bindings=Object.fromEntries(Object.entries(item.bindings).map(([key,value])=>[id(key),value]));}return [id(key),item];}));
+    for(const node of Object.values(result.nodes || {})){
+      const execution=node.execution || {},remap=ref=>{if(ref?.job_id)ref.job_id=id(ref.job_id);};
+      for(const call of execution.calls || [])for(const binding of Object.values(call.arguments || {})){remap(binding);remap(binding.selection);}
+      for(const ref of execution.evidence || [])remap(ref);
+      for(const ref of execution.completion?.required_claims || [])remap(ref);
+      remap(execution.completion?.choices);
+    }
     for(const group of Object.keys(result.roots || {}))result.roots[group]=result.roots[group].map(id);
     return result;
   }
@@ -339,6 +346,23 @@ function createWorkDesigner({callbacks}) {
     if(type==='object'){field.properties=Object.fromEntries(Object.entries(schema.properties || {}).map(([key,value])=>[key,publicField(value)]));field.required=schema.required || [];field.additionalProperties=false;}
     return field;
   }
+  const generatedInputKey=(root,key)=>JSON.stringify([capability?.actor_id,managedSystem,managedProcess,root.id,key]);
+  function addRuntimeInput(root,key,schema,required=false){
+    root.execution_inputs ||= {type:'object',properties:{},required:[],additionalProperties:false};
+    if(Object.hasOwn(root.execution_inputs.properties,key))return;
+    const field=publicField(schema);root.execution_inputs.properties[key]=field;
+    if(required)root.execution_inputs.required.push(key);
+    generatedRuntimeInputs.set(generatedInputKey(root,key),JSON.stringify(field));
+  }
+  function cleanGeneratedInputs(root){
+    const nodes=Object.values(editor.nodes).filter(item=>lineage(item.id,editor)[0]?.id===root.id);
+    for(const [key,field] of Object.entries(root.execution_inputs?.properties || {})){
+      const marker=generatedInputKey(root,key);
+      if(generatedRuntimeInputs.get(marker)!==JSON.stringify(field))continue;
+      const used=nodes.some(item=>item.execution?.completion?.input_key===key||(item.execution?.calls || []).some(call=>Object.values(call.arguments || {}).some(binding=>binding.source==='input'&&binding.key===key)));
+      if(!used){delete root.execution_inputs.properties[key];root.execution_inputs.required=(root.execution_inputs.required || []).filter(item=>item!==key);generatedRuntimeInputs.delete(marker);}
+    }
+  }
   function runtimeEditor(n){
     const execution=n.execution;
     return '<fieldset class="ew-editor-connections"><legend>자동 수행 연결</legend><p>기존 등록 기능을 참조합니다. 코드·연결 설정·개인 인증은 복사하지 않습니다.</p>'+(execution?'<p>'+esc({fixed:'고정 기능 실행',ai:'AI 요약',human:'사람 선택'}[execution.kind])+'</p>'+((execution.calls || []).map(call=>'<div class="ew-tool-editor"><span>'+esc(call.reference.function)+'<small>'+esc(call.reference.tool_id)+' · r'+esc(call.reference.revision)+'</small></span>'+button('입력 연결','runtime_bind','data-call-id="'+esc(call.id)+'"')+button('사용 상태·검토','runtime_review','data-call-id="'+esc(call.id)+'"')+button('삭제','runtime_remove','data-call-id="'+esc(call.id)+'"')+'</div>').join(''))+'<p class="ew-muted">등록됨과 자동 실행 허용, 현재 사용자 실행 가능 여부는 다릅니다. 실행 전 현재 값으로 검사합니다.</p>':'<p class="ew-muted">자동 수행 연결을 추가하면 기존 모의 점검 대신 검증된 기능을 사용합니다.</p>')+'<div class="ew-actions">'+button(execution?'수행 방식·완료 기준':'자동 수행 연결','runtime_config')+(execution?.kind==='fixed'?button('등록 기능 추가','runtime_add'):'')+'</div></fieldset>';
@@ -372,9 +396,10 @@ function createWorkDesigner({callbacks}) {
       const fn=functions.find(item=>item.name===picked?.function);if(!fn||epoch!==authoringEpoch||editorId!==id||!canAuthor())return;
       const root=runtimeRoot(n);root.execution_inputs ||= {type:'object',properties:{},required:[],additionalProperties:false};root.execution_final ||= {validator:'all_required_v1',version:1,require_complete:true};
       const args={};for(const [key,field] of Object.entries(fn.schema?.properties || {})){
-        if(key.startsWith('__'))continue;
-        if(!root.execution_inputs.properties[key])root.execution_inputs.properties[key]=publicField(field);
-        if(fn.schema.required?.includes(key)&&!root.execution_inputs.required.includes(key))root.execution_inputs.required.push(key);
+        // Omit optional parameters so the original Native callable supplies
+        // its own defaults. Explicit optional bindings can be added below.
+        if(key.startsWith('__')||!fn.schema.required?.includes(key))continue;
+        addRuntimeInput(root,key,field,true);
         args[key]={source:'input',key};
       }
       n.execution.calls.push({id:'call-'+crypto.randomUUID(),reference:clone(fn.reference),arguments:args});editorDirty=true;
@@ -383,14 +408,35 @@ function createWorkDesigner({callbacks}) {
   }
   async function runtimeBindings(callId){
     captureEditor();const id=editorId,n=editor.nodes[id],epoch=authoringEpoch,call=n.execution?.calls.find(item=>item.id===callId);if(!call)return;
-    const root=runtimeRoot(n),properties=root.execution_inputs?.properties || {},prior=Object.values(editor.nodes).flatMap(job=>(job.execution?.calls || []).filter(item=>item.id!==callId).map(item=>({job,call:item})));
-    const html=Object.entries(call.arguments).map(([key,binding])=>'<fieldset><legend>'+esc(key)+'</legend><label>값의 출처<select name="source:'+esc(key)+'">'+[['input','업무 입력'],['constant','고정 값'],['result','앞 호출 결과']].map(([value,label])=>'<option value="'+value+'" '+(value===binding.source?'selected':'')+'>'+label+'</option>').join('')+'</select></label><label>업무 입력<select name="input:'+esc(key)+'">'+Object.entries(properties).map(([name,field])=>'<option value="'+esc(name)+'" '+(binding.key===name?'selected':'')+'>'+esc(field.title || name)+'</option>').join('')+'</select></label><label>고정 값<input name="constant:'+esc(key)+'" value="'+esc(binding.source==='constant'?typeof binding.value==='string'?binding.value:JSON.stringify(binding.value):'')+'"></label><label>앞 호출<select name="result:'+esc(key)+'">'+prior.map(({job,call:item},index)=>'<option value="'+index+'" '+(binding.job_id===job.id&&binding.call_id===item.id?'selected':'')+'>'+esc(job.name+' · '+item.reference.function)+'</option>').join('')+'</select></label><label>결과 항목 경로<input name="path:'+esc(key)+'" value="'+esc((binding.path || []).join('.'))+'" placeholder="data.results.0.page_id"></label></fieldset>').join('');
-    const values=await formDialog('공개 입력 연결',html);if(!values||epoch!==authoringEpoch||editorId!==id||!canAuthor())return;
-    const args={};for(const key of Object.keys(call.arguments)){
-      const source=values['source:'+key];if(source==='input')args[key]={source,key:values['input:'+key]};
-      else if(source==='constant'){const raw=values['constant:'+key],type=properties[key]?.type;let value=raw;try{if(type&&type!=='string')value=JSON.parse(raw);}catch(_){errorMessage=key+' 고정 값의 형식을 확인해 주세요.';renderDesigner();return;}args[key]={source,value};}
-      else {const previous=prior[Number(values['result:'+key])],parts=values['path:'+key].split('.').filter(Boolean);if(!previous||!parts.length){errorMessage='앞 호출과 결과 항목을 선택해 주세요.';renderDesigner();return;}args[key]={source:'result',job_id:previous.job.id,call_id:previous.call.id,path:parts.map(part=>/^\d+$/.test(part)?Number(part):part)};}
-    }call.arguments=args;editorDirty=true;renderDesigner();
+    try{
+      const response=await callbacks.authoringRead('execution/capability?'+new URLSearchParams({tool_id:call.reference.tool_id,function:call.reference.function}));
+      if(!response||epoch!==authoringEpoch||editorId!==id||!canAuthor())return;
+      const metadata=response.capability || response;
+      if(metadata.reference?.schema_hash!==call.reference.schema_hash){errorMessage='등록된 입력 정의가 변경되었습니다. 기능 버전을 먼저 확인해 주세요.';renderDesigner();return;}
+      const root=runtimeRoot(n),properties=root.execution_inputs?.properties || {},fields=metadata.schema?.properties || {},required=new Set(metadata.schema?.required || []),prior=Object.values(editor.nodes).flatMap(job=>(job.execution?.calls || []).filter(item=>item.id!==callId).map(item=>({job,call:item})));
+      const html=Object.entries(fields).filter(([key])=>!key.startsWith('__')).map(([key,field])=>{
+        const binding=call.arguments[key] || {source:'default'},options=required.has(key)?[]:[['default','기존 도구 기본값']];options.push(['input','업무 입력'],['constant','고정 값'],['result','앞 호출 결과']);
+        const inputFields={...properties,...(!Object.hasOwn(properties,key)?{[key]:field}:{})};
+        return '<fieldset><legend>'+esc(key)+(required.has(key)?' · 호출 필수':' · 선택')+'</legend><label>값의 출처<select name="source:'+esc(key)+'">'+options.map(([value,label])=>'<option value="'+value+'" '+(value===binding.source?'selected':'')+'>'+label+'</option>').join('')+'</select></label><label>업무 입력<select name="input:'+esc(key)+'">'+Object.entries(inputFields).map(([name,item])=>'<option value="'+esc(name)+'" '+((binding.key || key)===name?'selected':'')+'>'+esc(item.title || name)+'</option>').join('')+'</select></label><label>고정 값<input name="constant:'+esc(key)+'" value="'+esc(binding.source==='constant'?typeof binding.value==='string'?binding.value:JSON.stringify(binding.value):'')+'"></label><label>앞 호출<select name="result:'+esc(key)+'">'+prior.map(({job,call:item},index)=>'<option value="'+index+'" '+(binding.job_id===job.id&&binding.call_id===item.id?'selected':'')+'>'+esc(job.name+' · '+item.reference.function)+'</option>').join('')+'</select></label><label>결과 항목 경로<input name="path:'+esc(key)+'" value="'+esc((binding.path || []).join('.'))+'" placeholder="data.results.0.page_id"></label></fieldset>';
+      }).join('');
+      const values=await formDialog('공개 입력 연결',html);if(!values||epoch!==authoringEpoch||editorId!==id||!canAuthor())return;
+      const args={},newInputs=[];for(const [key,field] of Object.entries(fields)){
+        if(key.startsWith('__'))continue;const source=values['source:'+key];
+        if(source==='default'&&!required.has(key))continue;
+        if(source==='input'){const inputKey=values['input:'+key];args[key]={source,key:inputKey};if(inputKey===key)newInputs.push([key,field]);}
+        else if(source==='constant'){const raw=values['constant:'+key];let value=raw;try{if(field.type&&field.type!=='string')value=JSON.parse(raw);}catch(_){errorMessage=key+' 고정 값의 형식을 확인해 주세요.';renderDesigner();return;}args[key]={source,value};}
+        else if(source==='result'){const previous=prior[Number(values['result:'+key])],parts=(values['path:'+key] || '').split('.').filter(Boolean);if(!previous||!parts.length){errorMessage='앞 호출과 결과 항목을 선택해 주세요.';renderDesigner();return;}args[key]={source:'result',job_id:previous.job.id,call_id:previous.call.id,path:parts.map(part=>/^\d+$/.test(part)?Number(part):part)};}
+        else {errorMessage=key+' 입력 출처를 선택해 주세요.';renderDesigner();return;}
+      }
+      newInputs.forEach(([key,field])=>addRuntimeInput(root,key,field,true));call.arguments=args;cleanGeneratedInputs(root);editorDirty=true;renderDesigner();
+    }catch(error){if(epoch===authoringEpoch){errorMessage=error.message;renderDesigner();}}
+  }
+  async function editPublicInput(key){
+    captureEditor();const id=editorId,n=editor.nodes[id],epoch=authoringEpoch,field=n.execution_inputs?.properties?.[key];if(n.type!=='p'||!field)return;
+    const values=await formDialog('업무 입력의 시작 조건','<label>표시 이름<input name="title" value="'+esc(field.title || key)+'"></label><label><input type="checkbox" name="required" '+(n.execution_inputs.required?.includes(key)?'checked':'')+'>실행 시작 전에 필수</label><p>나중에 조회한 후보에서 선택하거나 앞 작업 결과로 채울 값은 시작 필수를 해제하세요. 해당 작업은 값이 준비될 때까지 기다립니다.</p>');
+    if(!values||epoch!==authoringEpoch||editorId!==id||!canAuthor())return;
+    field.title=values.title || key;n.execution_inputs.required=(n.execution_inputs.required || []).filter(item=>item!==key);if(values.required)n.execution_inputs.required.push(key);
+    generatedRuntimeInputs.delete(generatedInputKey(n,key));editorDirty=true;renderDesigner();
   }
   async function reviewRuntime(callId){
     captureEditor();const id=editorId,epoch=authoringEpoch,call=editor.nodes[id]?.execution?.calls.find(item=>item.id===callId);if(!call)return;
@@ -434,7 +480,7 @@ function createWorkDesigner({callbacks}) {
     for(const id of n.systems || [])if(!systems.includes(id))systems.push(id);
     const ownerScoped=!['COMMON','UNASSIGNED'].includes(processMeta?.owner_system);
     if(ownerScoped)systems.splice(0,systems.length,processMeta.owner_system);
-    return `<div class="ew-editor-layout"><aside><div class="ew-heading"><h3>워크플로우</h3>${button('워크플로우 추가','add_process')}</div>${Object.entries(categories).map(([id,label])=>`<h4>${label}</h4>${treeHTML(editor,editor.roots[id])}`).join('')}</aside><form id="ees-work-node-form" class="ew-node-editor"><nav class="ew-editor-breadcrumb" aria-label="편집 대상">${trail.slice(0,-1).map(item=>button(item.name,'edit_node',`data-node-id="${esc(item.id)}"`)).join('<span>/</span>')}<span>${esc(kindName[n.type])} 편집</span></nav><div class="ew-heading"><div><h2>${esc(n.name)}</h2><p class="ew-editor-kind">${esc(kindName[n.type])}${n.type==='p'?' · '+counts.t+'개 단계 · '+counts.j+'개 작업':n.type==='t'?' · '+counts.j+'개 작업':''}</p></div><div class="ew-actions">${button('위로','move_up')}${button('아래로','move_down')}${button(n.type==='p'?'워크플로우 관리':'삭제',n.type==='p'?'process_actions':'delete_node')}</div></div><label>${esc(kindName[n.type])} 이름<input name="name" value="${esc(n.name)}" maxlength="160" required></label><label>목적<textarea name="description" rows="2">${esc(n.description || '')}</textarea></label><label>완료 조건<textarea name="rule" rows="2">${esc(n.rule || '')}</textarea></label>${n.type==='p'?'<fieldset><legend>실행에 필요한 공개 입력</legend>'+Object.entries(n.execution_inputs?.properties || {}).map(([key,field])=>'<p>'+esc(field.title || key)+' · '+esc(field.type)+(n.execution_inputs.required?.includes(key)?' · 필수':'')+'</p>').join('')+button('입력 추가','runtime_input')+'</fieldset>':''}${n.type!=='j'?'<p class="ew-muted">완료 상태는 적용 대상 작업의 실제 결과와 필수 사람 확인으로 집계합니다. 이 문구를 바꿔도 진행 건이 완료되지는 않습니다.</p>':''}<label>수행 안내<textarea name="instructions" rows="4">${esc(n.instructions || '')}</textarea></label>${n.type==='j'?`<label>수행 방식<select name="mode">${Object.entries(modeName).map(([id,label])=>`<option value="${id}" ${n.mode===id?'selected':''}>${label}</option>`).join('')}</select></label>${connectionsEditor(n)}`:childrenEditor(n)}<details class="ew-designer-advanced"><summary data-work-advanced>고급 설정 · 순서·적용 조건·연결</summary>${n.type==='p'?`<label>워크플로우 분류<select name="category">${Object.entries(categories).map(([id,name])=>`<option value="${id}" ${n.category===id?'selected':''}>${name}</option>`).join('')}</select></label>`:`<label>상위 ${n.type==='t'?'워크플로우':'단계'}<select name="parent">${parents.map(p=>`<option value="${esc(p.id)}" ${p.id===n.parent?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label>`}<div class="ew-form-grid"><label>적용 조건<select name="condition">${conditions.map(([id,label])=>`<option value="${esc(id)}" ${n.condition===id?'selected':''}>${esc(label)}</option>`).join('')}</select></label><label class="ew-checkbox"><input type="checkbox" name="enabled" ${n.enabled!==false?'checked':''}>이 ${esc(kindName[n.type])} 사용</label></div><fieldset><legend>적용 시스템</legend>${systems.map(system=>`<label class="ew-checkbox"><input type="checkbox" name="systems" value="${esc(system)}" ${ownerScoped?'disabled':''} ${(!n.systems||n.systems.includes(system))?'checked':''}>${esc(system)}</label>`).join('')}</fieldset><fieldset><legend>선행 조건</legend><div class="ew-option-grid">${Object.values(editor.nodes).filter(x=>x.id!==n.id&&lineage(x.id,editor)[0]?.id===lineage(n.id,editor)[0]?.id&&!lineage(x.id,editor).some(a=>a.id===n.id)&&!lineage(n.id,editor).some(a=>a.id===x.id)).map(x=>`<label class="ew-checkbox"><input type="checkbox" name="deps" value="${esc(x.id)}" ${(n.deps||[]).includes(x.id)?'checked':''}>${esc(x.name)}</label>`).join('')}</div></fieldset>${n.type!=='j'?connectionsEditor(n):''}</details><button type="submit">변경 내용 적용</button><p class="ew-preservation">초안 변경은 게시 후 새 진행 건부터 적용됩니다. 기존 진행 건은 게시 당시 버전을 유지합니다. 일정 기능은 아직 지원하지 않습니다.</p></form></div>`;
+    return `<div class="ew-editor-layout"><aside><div class="ew-heading"><h3>워크플로우</h3>${button('워크플로우 추가','add_process')}</div>${Object.entries(categories).map(([id,label])=>`<h4>${label}</h4>${treeHTML(editor,editor.roots[id])}`).join('')}</aside><form id="ees-work-node-form" class="ew-node-editor"><nav class="ew-editor-breadcrumb" aria-label="편집 대상">${trail.slice(0,-1).map(item=>button(item.name,'edit_node',`data-node-id="${esc(item.id)}"`)).join('<span>/</span>')}<span>${esc(kindName[n.type])} 편집</span></nav><div class="ew-heading"><div><h2>${esc(n.name)}</h2><p class="ew-editor-kind">${esc(kindName[n.type])}${n.type==='p'?' · '+counts.t+'개 단계 · '+counts.j+'개 작업':n.type==='t'?' · '+counts.j+'개 작업':''}</p></div><div class="ew-actions">${button('위로','move_up')}${button('아래로','move_down')}${button(n.type==='p'?'워크플로우 관리':'삭제',n.type==='p'?'process_actions':'delete_node')}</div></div><label>${esc(kindName[n.type])} 이름<input name="name" value="${esc(n.name)}" maxlength="160" required></label><label>목적<textarea name="description" rows="2">${esc(n.description || '')}</textarea></label><label>완료 조건<textarea name="rule" rows="2">${esc(n.rule || '')}</textarea></label>${n.type==='p'?'<fieldset><legend>실행에 필요한 공개 입력</legend>'+Object.entries(n.execution_inputs?.properties || {}).map(([key,field])=>'<p>'+esc(field.title || key)+' · '+esc(field.type)+(n.execution_inputs.required?.includes(key)?' · 시작 필수':' · 이후 보완 가능')+button('입력 설정','runtime_input_edit','data-input-key="'+esc(key)+'"')+'</p>').join('')+button('입력 추가','runtime_input')+'</fieldset>':''}${n.type!=='j'?'<p class="ew-muted">완료 상태는 적용 대상 작업의 실제 결과와 필수 사람 확인으로 집계합니다. 이 문구를 바꿔도 진행 건이 완료되지는 않습니다.</p>':''}<label>수행 안내<textarea name="instructions" rows="4">${esc(n.instructions || '')}</textarea></label>${n.type==='j'?`<label>수행 방식<select name="mode">${Object.entries(modeName).map(([id,label])=>`<option value="${id}" ${n.mode===id?'selected':''}>${label}</option>`).join('')}</select></label>${connectionsEditor(n)}`:childrenEditor(n)}<details class="ew-designer-advanced"><summary data-work-advanced>고급 설정 · 순서·적용 조건·연결</summary>${n.type==='p'?`<label>워크플로우 분류<select name="category">${Object.entries(categories).map(([id,name])=>`<option value="${id}" ${n.category===id?'selected':''}>${name}</option>`).join('')}</select></label>`:`<label>상위 ${n.type==='t'?'워크플로우':'단계'}<select name="parent">${parents.map(p=>`<option value="${esc(p.id)}" ${p.id===n.parent?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label>`}<div class="ew-form-grid"><label>적용 조건<select name="condition">${conditions.map(([id,label])=>`<option value="${esc(id)}" ${n.condition===id?'selected':''}>${esc(label)}</option>`).join('')}</select></label><label class="ew-checkbox"><input type="checkbox" name="enabled" ${n.enabled!==false?'checked':''}>이 ${esc(kindName[n.type])} 사용</label></div><fieldset><legend>적용 시스템</legend>${systems.map(system=>`<label class="ew-checkbox"><input type="checkbox" name="systems" value="${esc(system)}" ${ownerScoped?'disabled':''} ${(!n.systems||n.systems.includes(system))?'checked':''}>${esc(system)}</label>`).join('')}</fieldset><fieldset><legend>선행 조건</legend><div class="ew-option-grid">${Object.values(editor.nodes).filter(x=>x.id!==n.id&&lineage(x.id,editor)[0]?.id===lineage(n.id,editor)[0]?.id&&!lineage(x.id,editor).some(a=>a.id===n.id)&&!lineage(n.id,editor).some(a=>a.id===x.id)).map(x=>`<label class="ew-checkbox"><input type="checkbox" name="deps" value="${esc(x.id)}" ${(n.deps||[]).includes(x.id)?'checked':''}>${esc(x.name)}</label>`).join('')}</div></fieldset>${n.type!=='j'?connectionsEditor(n):''}</details><button type="submit">변경 내용 적용</button><p class="ew-preservation">초안 변경은 게시 후 새 진행 건부터 적용됩니다. 기존 진행 건은 게시 당시 버전을 유지합니다. 일정 기능은 아직 지원하지 않습니다.</p></form></div>`;
   }
   function registeredOptions(kind,selected) {
     const items=state?.catalog?.['available_'+kind] || [], found=items.some(item=>item.id===selected);
@@ -557,10 +603,11 @@ function createWorkDesigner({callbacks}) {
     else if(canAuthor()&&action==='runtime_review')reviewRuntime(buttonTarget.dataset.callId);
     else if(canAuthor()&&action==='runtime_bind')runtimeBindings(buttonTarget.dataset.callId);
     else if(canAuthor()&&action==='runtime_input')addPublicInput();
-    else if(canAuthor()&&action==='runtime_remove'){captureEditor();const n=editor.nodes[editorId];n.execution.calls=n.execution.calls.filter(call=>call.id!==buttonTarget.dataset.callId);editorDirty=true;renderDesigner();}
+    else if(canAuthor()&&action==='runtime_input_edit')editPublicInput(buttonTarget.dataset.inputKey);
+    else if(canAuthor()&&action==='runtime_remove'){captureEditor();const n=editor.nodes[editorId];n.execution.calls=n.execution.calls.filter(call=>call.id!==buttonTarget.dataset.callId);cleanGeneratedInputs(runtimeRoot(n));editorDirty=true;renderDesigner();}
     else if(canAuthor())localEdit(action,buttonTarget);
     return handled(false);
   }
-  function reset() {authoringEpoch++;loadSerial++;writeSerial++;draftCache.clear();requestIds.clear();localAssetIds={tools:new Set(),skills:new Set()};capability=null;authoring=null;processMeta=null;managedSystem='';managedProcess='';authorizationError='';writeBusy=false;authoringLoading=false;conversations.forEach(session=>session.controller?.abort());conversations.clear();models=[];modelId='';modelsLoading=false;modelsLoaded=false;modelError='';renderedEditorId='';restoreWorkspace(true);state=null;serverSource=null;editor=null;editorId='';editorRevision=0;editorDirty=false;editorTab='workflow';editorCollapsed.clear();childBrowsers.clear();category='setup';errorMessage='';busy=false;route={};}
+  function reset() {authoringEpoch++;loadSerial++;writeSerial++;draftCache.clear();requestIds.clear();generatedRuntimeInputs.clear();localAssetIds={tools:new Set(),skills:new Set()};capability=null;authoring=null;processMeta=null;managedSystem='';managedProcess='';authorizationError='';writeBusy=false;authoringLoading=false;conversations.forEach(session=>session.controller?.abort());conversations.clear();models=[];modelId='';modelsLoading=false;modelsLoaded=false;modelError='';renderedEditorId='';restoreWorkspace(true);state=null;serverSource=null;editor=null;editorId='';editorRevision=0;editorDirty=false;editorTab='workflow';editorCollapsed.clear();childBrowsers.clear();category='setup';errorMessage='';busy=false;route={};}
   return Object.freeze({refreshAuthoring,canAuthor,acceptServer,readDraft,markSaved,confirmPublish,render,prepare,sync,setBusy,restoreWorkspace,reset,handleEvent});
 }

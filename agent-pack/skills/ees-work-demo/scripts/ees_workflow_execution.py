@@ -176,27 +176,44 @@ class ExecutionRuntime:
             for call in node["execution"].get("calls", []):
                 await self.bridge.check(user, call["reference"])
 
-    async def _source_access(self, user, case, node):
-        """Stored facts remain subject to current source access when reused."""
-        refs = list(node["execution"].get("evidence", []))
-        for call in node["execution"].get("calls", []):
-            for binding in call.get("arguments", {}).values():
-                if binding.get("source") == "result":
-                    refs.append(binding)
-                if binding.get("selection"):
-                    refs.append(binding["selection"])
-        for ref in refs:
-            source = case["definition"]["nodes"].get(ref["job_id"])
-            if not source or not source.get("execution"):
-                raise WorkflowError("result_unavailable", "선행 실행 근거를 확인해 주세요.")
-            await self._skills(user, case, source["id"])
-            call = next((item for item in source["execution"].get("calls", []) if item["id"] == ref["call_id"]), None)
-            if call:
-                await self.bridge.check(user, call["reference"])
-            elif source["execution"]["kind"] == "ai":
-                await self._source_access(user, case, source)
-            else:
-                raise WorkflowError("result_unavailable", "허용된 선행 호출을 확인해 주세요.")
+    async def _source_access(self, user, case, node, visiting=None, checked=None):
+        """Recheck every source behind a stored value, including human choices."""
+        visiting, checked = (set() if visiting is None else visiting), (set() if checked is None else checked)
+        node_id = node["id"]
+        if node_id in visiting:
+            raise WorkflowError("result_reference_cycle", "저장 근거의 순환 연결을 확인해 주세요.")
+        if node_id in checked:
+            return
+        visiting.add(node_id)
+        try:
+            refs = list(node["execution"].get("evidence", []))
+            choices = node["execution"].get("completion", {}).get("choices")
+            if choices:
+                refs.append(choices)
+            for call in node["execution"].get("calls", []):
+                for binding in call.get("arguments", {}).values():
+                    if binding.get("source") == "result":
+                        refs.append(binding)
+                    if binding.get("selection"):
+                        refs.append(binding["selection"])
+            for ref in refs:
+                source = case["definition"]["nodes"].get(ref["job_id"])
+                if not source or not source.get("execution"):
+                    raise WorkflowError("result_unavailable", "선행 실행 근거를 확인해 주세요.")
+                await self._skills(user, case, source["id"])
+                call = next((item for item in source["execution"].get("calls", []) if item["id"] == ref["call_id"]), None)
+                if call:
+                    await self.bridge.check(user, call["reference"])
+                elif source["execution"]["kind"] != "ai" or ref["call_id"] != "summary":
+                    raise WorkflowError("result_unavailable", "허용된 선행 호출을 확인해 주세요.")
+                # Earlier calls in this same J are validated by the contract;
+                # their bindings are already in refs. Every cross-J source,
+                # whether fixed, AI or human, must also recheck its ancestors.
+                if source["id"] != node_id:
+                    await self._source_access(user, case, source, visiting, checked)
+            checked.add(node_id)
+        finally:
+            visiting.remove(node_id)
 
     @staticmethod
     def _inputs(schema, values):
@@ -277,8 +294,8 @@ class ExecutionRuntime:
         db.execute("UPDATE execution_runs SET status=?,data=?" + (",worker=NULL,lease=NULL" if release else "") + " WHERE id=?",
                    (run["status"], _dump(run), run["id"]))
         case = self.service._case(db, run["owner"], run["case_id"])
-        changed = case.get("execution_status") != run["status"]
-        case["execution_status"] = run["status"]
+        changed = case.get("execution_status") != run["status"] or case.get("execution_node_id") != run["node_id"]
+        case["execution_status"], case["execution_node_id"] = run["status"], run["node_id"]
         for job_id, item in run["jobs"].items():
             projected = ("passed" if item["status"] == "succeeded" else "running" if item["status"] == "running"
                          else "pending" if item["status"] == "pending" else "failed" if item["status"] == "failed" else "blocked")
@@ -286,9 +303,12 @@ class ExecutionRuntime:
             if job["status"] != projected:
                 job["status"] = projected
                 changed = True
-            reason = item.get("reason", "")
+            reason = item.get("reason", "") if projected in {"blocked", "failed"} else ""
             if reason and job.get("blocked_reason") != reason:
                 job["blocked_reason"] = reason
+                changed = True
+            elif not reason and "blocked_reason" in job:
+                job.pop("blocked_reason")
                 changed = True
         if changed:
             self.service._save_case(db, {"id": run["owner"]}, case)
@@ -370,7 +390,10 @@ class ExecutionRuntime:
         plan = json.loads(row["data"])
         if plan["hash"] != body.get("plan_hash") or plan["expires_at"] < time.time():
             raise WorkflowError("plan_expired", "실행 계획이 만료되거나 변경되었습니다. 다시 확인해 주세요.")
-        _, case = await self._access(user, plan["case_id"], plan["case_snapshot"]["chat_id"])
+        planned_chat, current_chat = plan["case_snapshot"]["chat_id"], body.get("chat_id", "")
+        if current_chat and planned_chat and current_chat != planned_chat:
+            raise WorkflowError("chat_mismatch", "이 실행 계획을 요청한 대화에서 계속해 주세요.")
+        _, case = await self._access(user, plan["case_id"], current_chat or planned_chat)
         case = case or deepcopy(plan["case_snapshot"])
         if _hash(case) != _hash(plan["case_snapshot"]):
             raise WorkflowError("revision_conflict", "진행 건이 변경되었습니다. 새 계획을 확인해 주세요.")
@@ -382,6 +405,8 @@ class ExecutionRuntime:
                     raise WorkflowError("request_conflict", "같은 요청 식별자가 다른 내용에 사용되었습니다.")
                 return self._public_run(db, self._load_run(db, owner, receipt["run_id"])[1])
             if plan["case_id"]:
+                for previous in db.execute("SELECT data FROM execution_runs WHERE case_id=?", (case["id"],)).fetchall():
+                    self._require_resolved(db, json.loads(previous["data"]))
                 self._fresh_results(db, case["id"])
                 latest = self.service._case(db, owner, plan["case_id"])
                 if _hash(latest) != _hash(case):
@@ -408,17 +433,32 @@ class ExecutionRuntime:
                                        "checks": [], "validation": valid}
             case["execution_inputs"] = deepcopy(run["inputs"])
             case["execution_run_id"] = run["id"]
+            case["execution_status"], case["execution_node_id"] = run["status"], run["node_id"]
             self.service._save_case(db, user, case)
             db.execute("INSERT INTO execution_runs VALUES(?,?,?,?,NULL,NULL,?)", (run["id"], owner, case["id"], run["status"], _dump(run)))
             db.execute("INSERT INTO execution_requests VALUES(?,?,?,?)", (owner, body["request_id"], fingerprint, run["id"]))
             self._event(db, run, "accepted", {"plan_hash": plan["hash"]})
             return self._public_run(db, run)
 
+    @staticmethod
+    def _require_resolved(db, run):
+        """UI status changes never reconcile an uncertain call or validation."""
+        uncertain = (run["status"] == "unknown"
+            or (run.get("final_validation") or {}).get("status") == "unknown"
+            or any(job["status"] == "unknown" or (job.get("validation") or {}).get("status") == "unknown"
+                   for job in run["jobs"].values())
+            or db.execute("SELECT 1 FROM execution_calls WHERE run_id=? AND state='unknown' LIMIT 1", (run["id"],)).fetchone())
+        if uncertain:
+            raise WorkflowError("result_confirmation_required", "이전 호출과 판정의 결과 확인이 필요합니다. 기록을 변경하거나 재실행하지 않았습니다.")
+
     async def _control(self, user, body, fingerprint):
         owner = _value(user, "id")
         with self.service._db() as db:
             _, run = self._load_run(db, owner, body.get("run_id"))
         _, case = await self._access(user, run["case_id"], body.get("chat_id", ""))
+        with self.service._db() as db:
+            _, run = self._load_run(db, owner, body.get("run_id"))
+            self._require_resolved(db, run)
         action = body.get("action")
         if action not in {"pause", "cancel", "resume", "inputs", "confirm"}:
             raise WorkflowError("invalid_action", "실행의 지원 동작을 선택해 주세요.")
@@ -432,6 +472,7 @@ class ExecutionRuntime:
                 return self._public_run(db, self._load_run(db, owner, receipt["run_id"])[1])
             row, run = self._load_run(db, owner, body.get("run_id"))
             self.service._revision(body, run["revision"])
+            self._require_resolved(db, run)
             if run["status"] in TERMINAL:
                 raise WorkflowError("run_completed", "종료된 실행 기록은 변경하지 않습니다.")
             inflight = db.execute("SELECT id FROM execution_calls WHERE run_id=? AND state='running'", (run["id"],)).fetchone()
@@ -455,6 +496,7 @@ class ExecutionRuntime:
                 for job in run["jobs"].values():
                     if job["status"] in {"waiting_input", "waiting_authorization", "waiting_dependency"}:
                         job["status"] = "pending"
+                        job.pop("reason", None)
             elif action == "inputs":
                 if inflight or run["status"] in {"queued", "running", "unknown"}:
                     raise WorkflowError("pause_required", "실행을 멈춘 뒤 필요한 입력을 보완해 주세요.")
@@ -514,6 +556,17 @@ class ExecutionRuntime:
             if not row:
                 return None
             run = json.loads(row["data"])
+            try:
+                self._require_resolved(db, run)
+            except WorkflowError as error:
+                # A prior program may already have queued an unsafe resume.
+                # Recovery still cannot turn unknown evidence into permission.
+                run["status"], run["reason"] = "unknown", error.code
+                for call in db.execute("SELECT job_id FROM execution_calls WHERE run_id=? AND state='unknown'", (run["id"],)):
+                    run["jobs"][call["job_id"]].update(status="unknown", reason=error.code)
+                self._save(db, run, release=True)
+                self._event(db, run, "recovered", {"reason": error.code})
+                return None
             if run["deadline"] < time.time():
                 run["status"], run["reason"] = "failed", "execution_expired"
                 self._save(db, run, release=True)

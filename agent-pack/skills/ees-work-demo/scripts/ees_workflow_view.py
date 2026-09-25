@@ -115,7 +115,17 @@ def _job_readiness(case, node_id, assets):
                 or skill["reference"] not in case.get("_skill_snapshots", {})) for skill in skills):
             reason = "skill_unavailable"
         elif node.get("execution"):
-            reason = "execution_plan_required" if not job.get("execution_run_id") else ""
+            scope = case.get("execution_node_id")
+            accepted = bool(case.get("execution_run_id")
+                            and case.get("execution_status") in {"queued", "running", "paused", "waiting_input", "waiting_authorization", "waiting_dependency", "unknown"}
+                            and scope in case["definition"]["nodes"]
+                            and node_id in _leaves(case["definition"]["nodes"], scope))
+            if job["status"] in {"blocked", "failed"} and job.get("blocked_reason"):
+                reason = job["blocked_reason"]
+            elif missing:
+                reason = "prerequisite_required"
+            elif not accepted and not job.get("execution_run_id"):
+                reason = "execution_plan_required"
         elif node["mode"] == "tool" and any(tool.get("adapter") != "mock"
                 or tool.get("source") == "open_webui" or not tool.get("enabled", True) for tool in tools):
             reason = "connection_required"

@@ -53,9 +53,41 @@
 
 ## 2026-09-25 공통 Native 도구 재사용과 P/T 지속 실행
 
-**범위와 시작점:** 사용자 첨부 `EES_Work_Shared_Tools_Runtime_Design_Handoff_20260925_v1.0.md`의 14절과 TR-01~24를 기준으로 1차 읽기 자동화를 구현한다. 시작 main/HEAD는 `991cdb1d80ae07471fb50594831d74fe602b1ef7`, 작업 브랜치는 `feat/shared-native-runtime-20260925`다. 기존 A안·Native 회원/개인 설정·시스템 담당자·P별 게시와 이전 기록을 보존한다. Draft #53을 병합하거나 적층하지 않는다. 이번 요청은 커밋·push·PR까지이며 main 직접 push/병합·사내 배포·실제 계정/도구 등록·실서버 변경은 범위 밖이다.
+**범위와 시작점:** 사용자 첨부 `EES_Work_Shared_Tools_Runtime_Design_Handoff_20260925_v1.0.md`의 14절과 TR-01~24를 기준으로 1차 읽기 자동화를 구현한다. 시작 main/HEAD는 `991cdb1d80ae07471fb50594831d74fe602b1ef7`, 작업 브랜치는 `feat/shared-native-runtime-20260925`다. 기존 A안·Native 회원/개인 설정·시스템 담당자·P별 게시와 이전 기록을 보존한다. Draft #53을 병합하거나 적층하지 않는다. 최초 요청은 커밋·push·PR까지였으며 같은 날 후속 요청으로 검토 후 병합·배포 준비가 추가 승인됐다. main 직접 push·사내 배포·실제 계정/도구 등록·실서버 변경은 여전히 범위 밖이다.
 
 **시험 환경:** Linux 6.18.44/glibc 2.39, 기존 단일 `.venv`의 Python 3.11.16, Node 24.19.0, Chrome headless shell 153.0.8010.52와 고정 공식 Open WebUI 0.11.3 wheel을 사용한다. 회사의 Python/Windows/Native 데이터에는 접근하지 않는다. 같은 항목의 중간 실패·집중 재검·최종 suite를 고유 시험 수로 중복 합산하지 않는다. 9월 원격 CI 생략 지침은 유지하며 아래 결과는 로컬 실행이다.
+
+<a id="shared-native-runtime-review-20260925"></a>
+
+### PR #65 병합 전 검토와 배포 준비
+
+사용자 후속 요청 “검토 하고 그 이후에 병합하고 배포준비도해”에 따라 기존 [PR #65](https://github.com/knadalkim-a11y/team-agent-poc/pull/65)를 재사용한다. 최초 검토 head는 `e338b7ee00b738ed0f1ad8c8daefec408e4c262a`, 당시 main은 위 #64 원본, Work tracked 변경은 없었다. Draft #53은 open/draft·head `3aadd7279276914fb790fdb496ceb37b223ec737`로 보존한다. GitHub 원격 Actions는 실행/재시작하지 않았으며 개발·병합 커밋에 `[skip ci]`를 유지한다. 자동 PR 코드 리뷰의 7개 지적과 독립 검토를 아래 관련 경계에 연결했다.
+
+| 재현한 경계 | 수정·재발 방지 | 시험/범위 |
+|---|---|---|
+| UNKNOWN → pause → resume으로 원래 불명 호출 재전송, cancel로 기록 상태 변경 | 트랜잭션 안 run/call/J/최종 판정의 불명 근거를 재검사. 모든 제어·새 start 및 과거 프로그램이 이미 queued로 만든 기록의 worker 재접수 차단 | D 회귀·독립 재현: 실제 호출 1회/UNKNOWN 원시도 유지. 원격 exactly-once 보장은 아님 |
+| 사람 선택의 `completion.choices`와 다단계 fixed 결과가 원본 ACL을 빠뜨림 | 모든 선언 결과/선택/근거를 종류와 무관하게 재귀 확인, 순환 방어와 같은 J의 앞선 호출 허용 | D: plan/confirm/dispatch 이전 현재 권한 거절, 독립 3개 집중 검사 PASS |
+| 같은 사용자 다른 채팅에서 실행 변경 가능 | Native 주입 metadata의 현재 chat_id 필수·서비스 전달, 패널 start/control에도 현재 대화 전달 | 실행 Tool 8 PASS, 서비스 chat mismatch 거절 |
+| 입력 대기 후 재개/완료해도 과거 blocked_reason, 접수 직후 plan 필요 표시, T1 실행이 범위 밖 T2에도 수락 표시될 위험 | 성공/재개 사유 제거, 수락 node 범위를 저장·투영, 이전 완료 결과의 run ID 보존 | D: T1/T2 정확 범위·이전 결과 유지 |
+| 확정된 거절/다른 화면으로 이동한 뒤 성공 응답에도 start 캐시가 남음 | 확정 응답에서 UI 유효성 검사 전에 receipt 제거, 응답 유실만 같은 request ID 재사용 | Node 실행 9 PASS에 거절 후 새 계획·늦은 성공·기존 응답 유실 포함 |
+| Native 실행도 모의 호출로 집계, polling 후 왼쪽/헤더의 상태가 오래 남음 | 실행 계약별 집계, run revision 변경 시 같은 case projection 갱신. 대화·계정·선택·쓰기 경계와 미저장 값 보존 | Node 및 최종 조립 Chrome 검사로 구분 |
+| Native 선택 인자의 빈 binding, 이전 자동 필수 입력의 잔존, 저장 중 새 노드 참조의 임시 ID 잔존 | 미연결 선택 인자는 Native 기본값 사용, 변경 없는 자동 입력만 참조 소멸 시 제거. 사용자 필드 보존·명시적 필수 설정·결과/선택/근거/완료 ref ID 재매핑 | 작성 Node 34 PASS, 저장 중 계속 입력→다음 저장 참조/본문 보존 |
+| 관리자 검사 뒤 metadata await 중 역할 회수 후에도 승인 저장 | 저장 직전 Native 계정/관리자 역할 재조회, 최종 검사와 write 사이 await 없음 | N 9 PASS(16.435초): 실제 Native Users DB의 approve/disable 두 경합에서 revision/감사 불변, 독립 재현 `admin_required` |
+| Native custom_params가 scoped messages 뒤 다른 대화 ID/hosted prompt/provider 요청을 추가, 사전 검사 뒤 preset 재조회 경합 | 안전한 생성 파라미터만 허용하고 불명·문맥/모델/연결 override를 차단. 서버 전용 headless request state로 표시한 요청만 고정 Native OpenAI/Ollama의 실제 파라미터 적용 직전 다시 검사. 일반 채팅·공유 preset은 변경하지 않음 | M 11 PASS: 실제 고정 Native route/변환 본문, 사전 검사 후 preset 변경의 unsafe 거절과 safe sampling 허용/3000 상한. 공개 JSON flag로 우회 불가. 모델 HTTP는 합성 |
+
+**집중 검증:** D 최초 확장 30건은 수정 전 10 assertion 실패/1 error를 보존했다(`/tmp/runtime-review-before.log`). 수정 후 **32 PASS**(7.54초), 기존 workflow **49건 중 48 PASS/1 기존 SKIP**, 신규 실행 Tool **8 PASS**, 기존 Tool **34 PASS**, controller **21 PASS**, Node 실행/작성 **43 PASS**(9+34)다. Node Python wrapper나 같은 독립 재현을 합계에 중복 가산하지 않는다. 앞의 최초 49파일/1,228 PASS 기록은 최초 PR 원본의 광역 검증이며 이 리뷰 수정본을 전체 재검했다고 바꾸지 않는다.
+
+모델 설정 허용 범위는 유한한 scalar 생성/토큰 설정, 길이를 제한한 stop/logit_bias, reasoning effort/summary와 `chat_template_kwargs.enable_thinking`뿐이다. preset의 일반 Native 전용 필드와 기존 system prompt 우회는 고정 route 계약에 맞춰 유지하고 custom_params 안의 동명 필드는 허용하지 않는다. builder의 route 패치는 정확한 upstream hash와 유일한 함수/교체 위치를 검사한다. 실제 upstream 포함 builder **25 PASS**(27.341초), `EncodingWarning` 오류 처리와 diff 검사를 통과했다.
+
+**조립 패키지 관련 선별 검사:** 리뷰 중간 wheel SHA256 `9372872428c777ef7c874d54b93eef817498de750ce4e4def88fe7dbf7ce256c`(151,950,643bytes)의 소스 **21항목**, 실제 패치된 OpenAI/Ollama route **2항목** byte-exact/compile 확인 뒤 Python **34 PASS**(controller21/실제 Native 회원·게시6/계정전환1/compiled frontend Chrome6), Node **43 PASS**, 별도 provider 경계 **1 PASS**, 실패·오류·skip 0이었다(`dist/runtime-review-results/summary.json`). Chrome6은 신규 같은 화면 polling→왼쪽 진행·J 헤더·대화 초안 보존, 브라우저 종료 후 복귀, A안 미완료 표시, panel/chat 동일 case, 관리 범위 실행, 작성 권한을 포함한다. 모델 cap 후속 수정 전 wheel이므로 최종 배포 hash로 사용하지 않는다. 최종 모델/빌더 재검은 해당 변경에 한정하고 byte-exact인 UI 검사를 불필요하게 다시 합산하지 않는다.
+
+**최종 모델 cap 경합:** 독립 검토가 사전 검사 뒤 custom `max_output_tokens=999999`를 추가해 Chat Completions에 `max_tokens=3000`과 큰 별도 상한이 함께 전송됨을 정확한 Native route·합성 HTTP에서 재현했다. Responses 경로는 이미3000이었다. 적용 직전 검증한 요청 전용 복사본에서 top/custom의 별도 `max_output_tokens`를 제거하고, EES가 고정한 요청 상한만 Native 변환에 전달하도록 보완했다. 저장 preset·일반 채팅은 그대로이며 Responses는 고정 상한에서3000을 만든다. 확대 시험의 최초 관측 위치는 파라미터가 빈 dict면 Native가 적용 함수를 호출하지 않는 조건을 빠뜨렸으므로 안전한 temperature를 넣어 실제 경계를 관측하도록 fixture를 수정했다. 구현의 한도/검증 조건을 완화한 것은 아니다.
+
+최종 모델 **12 PASS**(0.267초)·기존 exact Native outbound **5 PASS**(0.479초)·실제 upstream/synthetic builder **25 PASS**(26.751초), 모두 strict encoding으로 재검했다. 독립 full outbound 4경로(top/custom-string × Chat/Responses)도 요청 상한3000·preset 불변을 확인했다. 독립 UI polling/remap 집중2건과 runtime/native 검토에도 남은 병합 blocker가 없었다. 최종 문서 검사는 **60파일/2,506링크/오류·검토 후보0**, diff 검사 PASS다. 원격 CI·실제 모델 HTTP·Windows·사내 설치는 미실행이다.
+
+**배포 경로 검토:** 기존 `Update → Upgrade -TrialCommit`의 canonical origin·clean main·HEAD/origin/main/검토 SHA 일치, Stop 이전 wheel/ZIP 검사, Stop→검증 Backup→Apply→Start health120→동일 SHA 조건부 ApplyDemo 순서를 확인했다. `Update`에는 `-Summary`를 붙이지 않는다. 기존 등록 Python·작업 위치·주소·DATA_DIR·키·Git 프록시를 재사용하고 수동 ZIP/새 환경/PAT를 요구하지 않는다. `managed_field_conflict`를 강제 덮지 않는다. 정상 설치 뒤 프로그램 Restore와 중단된 Apply/Restore의 전용 복구를 구분하며 DB·이력·개인 설정·관리 자산을 원복으로 보고하지 않는다. 실제 Windows/사내 실행·새 도구 승인/게시/등록은 수행하지 않는다.
+
+최종 병합 시 검증 head와 merge tree 일치를 다시 확인하고 깨끗한 exact main으로 wheel/ZIP을 새로 만든다. manifest의 `source_commit`·`source_dirty=false`·전 파일 SHA256과 실제 wheel source 일치를 확인한 **정확한 병합 SHA/최종 해시는 #65의 배포 준비 기록**에 연결한다. 아래의 최초 구현 검증 wheel `125b669e…`는 이번 리뷰 수정본의 배포 해시가 아니다. 파일 안에 자기 자신이 포함되는 최종 commit SHA를 미리 쓰지 않는다.
 
 ### 실제 실행한 계층과 합성 경계
 

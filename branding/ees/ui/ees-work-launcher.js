@@ -369,8 +369,15 @@
     if(!available()||!state||!selectedCase()||!workHasExecution(definition(),processId())){execution=null;executionError='';return;}
     const at=generation,epoch=navigationRequest,auth=token(),route=location.pathname+location.search,cid=selectedCase().id,serial=++executionSerial;
     const current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&serial===executionSerial&&cid===selectedCase()?.id&&available();
-    try {const result=await api('execution/state?'+new URLSearchParams({case_id:cid,chat_id:chatId()}));if(!current())return;execution=result;executionError='';renderPanel();
-      if(result.runs?.some(run=>['queued','running'].includes(run.status))||['queued','running'].includes(result.run?.status))executionTimer=setTimeout(()=>{executionTimer=null;if(current())refreshExecution();},1800);
+    try {const result=await api('execution/state?'+new URLSearchParams({case_id:cid,chat_id:chatId()}));if(!current())return;
+      const changed=result.run?.id!==execution?.run?.id||result.run?.revision!==execution?.run?.revision;
+      if(changed&&!busy){const projected=await api('state?'+new URLSearchParams({case_id:cid,chat_id:chatId()}));if(!current())return;
+        // The view captures unsaved inputs before replacing its server snapshot.
+        // A newer selection/write must never be replaced by this polling read.
+        if(projected.case?.id===cid&&projected.case.revision>=(selectedCase()?.revision || 0)){execution=result;executionError='';accept(projected);}
+      }
+      if(!changed||!busy){execution=result;executionError='';renderPanel();}
+      if(busy||result.runs?.some(run=>['queued','running'].includes(run.status))||['queued','running'].includes(result.run?.status))executionTimer=setTimeout(()=>{executionTimer=null;if(current())refreshExecution();},1800);
     }catch(error){if(current()){executionError=error.message;renderPanel();}}
   }
   async function startExecution(id) {
@@ -386,8 +393,10 @@
       const inputs=await executionForm(plan.input_schema || {},plan.inputs || {},node(id).name+' · 실행 계획','<p>대상 작업 '+plan.jobs.length+'개 · 승인 유효 시각 '+workUI.esc(expiry)+'</p>'+scope+limits+'<p>개인 연결은 기존 도구 설정을 사용합니다. 계정·키는 입력하지 마세요.</p>');
       if(!current()||inputs===null)return;
       const intent=JSON.stringify({...body,inputs});let start=executionStarts.get(intent);
-      if(!start){response=await api('execution/plan',{...body,inputs});if(!current())return;const accepted=response.plan;start={action:'start',plan_id:accepted.id,plan_hash:accepted.hash};start.request_id=executionRequestId(start);executionStarts.set(intent,start);}
-      const result=await api('execution/action',start);if(!current())return;executionStarts.delete(intent);
+      if(!start){response=await api('execution/plan',{...body,inputs});if(!current())return;const accepted=response.plan;start={action:'start',plan_id:accepted.id,plan_hash:accepted.hash,chat_id:chatId()};start.request_id=executionRequestId(start);executionStarts.set(intent,start);}
+      let result;try{result=await api('execution/action',start);executionStarts.delete(intent);}
+      catch(error){if(error.result?.ok===false||(error.status>=400&&error.status<500))executionStarts.delete(intent);throw error;}
+      if(!current())return;
       execution={ok:true,run:result.run,runs:[result.run]};executionError='';
       if(result.run?.case_id){if(!chatId())pendingId=result.run.case_id;await refresh();}
       else renderPanel();
@@ -407,7 +416,7 @@
     if(action==='confirm'&&!await workUI.dialog({title:'내용을 직접 확인하셨나요?',html:'<p>'+workUI.esc(node(data.jobId)?.rule || '등록된 완료 조건을 직접 확인해 주세요.')+'</p>',confirmLabel:'확인 완료'}))return;
     if(action==='cancel'&&!await workUI.dialog({title:'이 실행을 취소할까요?',html:'<p>다음 호출을 중지합니다. 이미 보낸 요청의 결과가 취소되었다고 판단하지 않습니다.</p>',confirmLabel:'실행 취소'}))return;
     if(!current())return;busy=true;setBusy();
-    const body={action,run_id:run.id,expected_revision:run.revision,...(inputs?{inputs}:{}),...(data.jobId?{job_id:data.jobId}:{})};body.request_id=executionRequestId(body);
+    const body={action,run_id:run.id,expected_revision:run.revision,chat_id:chatId(),...(inputs?{inputs}:{}),...(data.jobId?{job_id:data.jobId}:{})};body.request_id=executionRequestId(body);
     try{const result=await api('execution/action',body);if(!current())return;execution={ok:true,run:result.run,runs:[result.run]};executionError='';await refresh();}
     catch(error){if(current()){errorMessage=error.message;await refreshExecution();renderPanel();}}
     finally{busy=false;setBusy();}

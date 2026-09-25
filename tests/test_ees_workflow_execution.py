@@ -363,6 +363,173 @@ class ExecutionTests(unittest.IsolatedAsyncioTestCase):
         stale = await self.service.execution_plan(USER, {"case_id": run["case_id"], "node_id": self.p})
         self.assertEqual(stale["error"]["code"], "stale_results")
 
+    async def test_unknown_rejects_every_mutation_and_preserves_unresolved_attempt(self):
+        self.bridge.results["jira_dashboard"] = envelope(status="unknown")
+        run = await self.drain(await self.start(await self.plan("new-operations-jira-j")))
+        before = deepcopy(run)
+        for action in ("pause", "cancel", "resume", "inputs", "confirm"):
+            with self.subTest(action=action):
+                result = await self.control(run, action, inputs={} if action == "inputs" else None)
+                self.assertFalse(result["ok"], result)
+                self.assertEqual(result["error"]["code"], "result_confirmation_required")
+                self.assertEqual(await self.state(run), before)
+        self.assertEqual(len(self.bridge.calls), 1)
+
+    async def test_old_paused_or_cancelled_unknown_cannot_resume_or_start_new_run(self):
+        self.bridge.results["jira_dashboard"] = envelope(status="unknown")
+        run = await self.drain(await self.start(await self.plan("new-operations-jira-j")))
+        # Simulate a persisted state made by the old pause/cancel bug. The
+        # original unresolved call remains the authority, not the UI status.
+        with self.service._db(write=True) as db:
+            _, stored = self.runtime._load_run(db, USER["id"], run["id"])
+            stored["status"] = "paused"
+            stored["jobs"]["new-operations-jira-j"]["status"] = "pending"
+            self.runtime._save(db, stored, release=True)
+        run = await self.state(run)
+        blocked = await self.control(run, "resume")
+        self.assertEqual(blocked.get("error", {}).get("code"), "result_confirmation_required", blocked)
+        with self.service._db(write=True) as db:
+            _, stored = self.runtime._load_run(db, USER["id"], run["id"])
+            stored["status"] = "cancelled"
+            self.runtime._save(db, stored, release=True)
+        plan = await self.plan("new-operations-jira-j", case_id=run["case_id"])
+        restart = await self.service.execution_action(USER, {"action": "start", "plan_id": plan["id"], "plan_hash": plan["hash"], "request_id": "old-unknown-restart"})
+        self.assertEqual(restart.get("error", {}).get("code"), "result_confirmation_required", restart)
+        with self.service._db(write=True) as db:
+            _, stored = self.runtime._load_run(db, USER["id"], run["id"])
+            stored["status"] = "queued"
+            self.runtime._save(db, stored, release=True)
+        self.assertFalse(await self.runtime.process_once())
+        self.assertEqual((await self.state(run))["status"], "unknown")
+        self.assertEqual(len(self.bridge.calls), 1)
+
+    async def test_accepted_scope_and_waiting_state_are_projected_without_plan_block(self):
+        run = await self.start()
+        case = (await self.service.get_state(USER, case_id=run["case_id"]))["case"]
+        self.assertEqual(case["execution_status"], "queued")
+        self.assertTrue(all(item["block_reason"] != "execution_plan_required" for key, item in case["node_states"].items() if case["definition"]["nodes"][key]["type"] == "j"))
+        self.assertEqual(case["node_states"]["new-operations-jira-j"]["status"], "pending")
+        self.bridge.allowed = False
+        run = await self.drain(run)
+        case = (await self.service.get_state(USER, case_id=run["case_id"]))["case"]
+        self.assertEqual(run["status"], "waiting_authorization")
+        self.assertEqual(case["jobs"]["new-operations-jira-j"]["blocked_reason"], "native_access_denied")
+        self.assertEqual(case["node_states"]["new-operations-jira-j"]["block_reason"], "native_access_denied")
+
+    async def test_accepted_t_scope_does_not_make_other_jobs_active(self):
+        run = await self.start(await self.plan("new-operations-read-t"))
+        case = (await self.service.get_state(USER, case_id=run["case_id"]))["case"]
+        self.assertEqual(case["execution_node_id"], "new-operations-read-t")
+        self.assertEqual(case["node_states"]["new-operations-summary-j"]["block_reason"], "prerequisite_required")
+        run = await self.drain(run)
+        case = (await self.service.get_state(USER, case_id=run["case_id"]))["case"]
+        self.assertEqual(case["node_states"]["new-operations-summary-j"]["block_reason"], "execution_plan_required")
+        self.assertNotIn("execution_run_id", case["jobs"]["new-operations-summary-j"])
+        self.assertTrue(all(case["jobs"][key]["status"] == "passed" for key in ("new-operations-jira-j", "new-operations-pr-j", "new-operations-page-j")))
+        next_run = await self.start(await self.plan("new-operations-summary-t", case_id=run["case_id"]), "summary-scope")
+        case = (await self.service.get_state(USER, case_id=run["case_id"]))["case"]
+        self.assertEqual(case["execution_node_id"], "new-operations-summary-t")
+        self.assertEqual(case["node_states"]["new-operations-summary-j"]["block_reason"], "")
+        self.assertEqual(case["jobs"]["new-operations-jira-j"]["execution_run_id"], run["id"])
+        self.assertNotEqual(case["jobs"]["new-operations-jira-j"]["execution_run_id"], next_run["id"])
+
+    async def test_source_access_cycle_guard_preserves_valid_same_job_bindings(self):
+        plan = await self.plan()
+        with self.service._db() as db:
+            saved = json.loads(db.execute("SELECT data FROM execution_plans WHERE id=?", (plan["id"],)).fetchone()[0])["case_snapshot"]
+        node = saved["definition"]["nodes"]["new-operations-jira-j"]
+        first = node["execution"]["calls"][0]
+        second = deepcopy(first)
+        second["id"] = "second"
+        second["arguments"]["project_key"] = {"source": "result", "job_id": node["id"], "call_id": first["id"], "path": ["data", "project_key"]}
+        node["execution"]["calls"].append(second)
+        await self.runtime._source_access(USER, saved, node)
+        first["arguments"]["project_key"] = {"source": "result", "job_id": "new-operations-pr-j", "call_id": "pull_requests", "path": ["data", "project_key"]}
+        other = saved["definition"]["nodes"]["new-operations-pr-j"]
+        other["execution"]["calls"][0]["arguments"]["state"] = {"source": "result", "job_id": node["id"], "call_id": first["id"], "path": ["data", "lifecycle"]}
+        with self.assertRaises(workflow.WorkflowError) as raised:
+            await self.runtime._source_access(USER, saved, node)
+        self.assertEqual(raised.exception.code, "result_reference_cycle")
+        self.assertEqual(self.bridge.calls, [])
+
+    async def test_resume_and_success_clear_stale_blocked_reason(self):
+        p = publish(self.service, examples.installation_docs_workflow(REFERENCES))
+        self.bridge.results["search_pages"] = envelope({"results": [{"page_id": "41"}, {"page_id": "42"}]})
+        run = await self.drain(await self.start(await self.plan(p=p, inputs={"query": "install", "space_key": "TEAM"})))
+        case = (await self.service.get_state(USER, case_id=run["case_id"]))["case"]
+        self.assertEqual(case["jobs"]["new-documents-page-j"]["blocked_reason"], "input_required")
+        filled = await self.control(run, "inputs", inputs={"page_id": "42"})
+        resumed = await self.control(filled["run"], "resume")
+        case = (await self.service.get_state(USER, case_id=run["case_id"]))["case"]
+        self.assertNotIn("blocked_reason", case["jobs"]["new-documents-page-j"])
+        completed = await self.drain(resumed["run"])
+        self.assertEqual(completed["status"], "succeeded")
+        case = (await self.service.get_state(USER, case_id=run["case_id"]))["case"]
+        self.assertTrue(all("blocked_reason" not in job for job in case["jobs"].values()))
+
+    async def test_human_completion_choices_rechecks_source_acl_for_plan_and_confirm(self):
+        fragment = examples.installation_docs_workflow(REFERENCES)
+        human = fragment["nodes"]["new-documents-page-j"]
+        human["execution"] = {"protocol": 1, "kind": "human", "calls": [],
+            "completion": {"validator": "selection_v1", "version": 1, "input_key": "page_id", "choices": {
+                "job_id": "new-documents-search-j", "call_id": "search", "path": ["data", "results"], "value_path": ["page_id"]}},
+            "limits": {"timeout_seconds": 30, "max_tool_calls": 0, "max_model_calls": 0, "max_retries": 0}}
+        p = publish(self.service, fragment)
+        self.bridge.results["search_pages"] = envelope({"results": [{"page_id": "42"}]})
+        run = await self.drain(await self.start(await self.plan(p=p, node_id="new-documents-search-j", inputs={"query": "install", "space_key": "TEAM", "page_id": "42"})))
+        human_plan = await self.plan(p=p, node_id="new-documents-page-j", inputs={}, case_id=run["case_id"])
+        self.bridge.allowed = False
+        denied_plan = await self.service.execution_plan(USER, {"case_id": run["case_id"], "node_id": "new-documents-page-j"})
+        self.assertEqual(denied_plan.get("error", {}).get("code"), "native_access_denied", denied_plan)
+        self.bridge.allowed = True
+        human_run = await self.start(human_plan, "human-choice")
+        human_run = await self.drain(human_run)
+        self.assertEqual(human_run["status"], "waiting_input")
+        self.bridge.allowed = False
+        denied = await self.control(human_run, "confirm", job_id="new-documents-page-j")
+        self.assertEqual(denied.get("error", {}).get("code"), "native_access_denied", denied)
+        with self.service._db() as db:
+            persisted = self.service._case(db, USER["id"], run["case_id"])
+        self.assertNotEqual(persisted["jobs"]["new-documents-page-j"]["status"], "passed")
+
+    async def test_transitive_fixed_result_source_acl_is_checked_before_dispatch(self):
+        with self.service._db(write=True) as db:
+            catalog = self.service._catalog(db)[0]
+            catalog["nodes"]["new-operations-pr-j"]["execution"]["calls"][0]["arguments"]["state"] = {
+                "source": "result", "job_id": "new-operations-jira-j", "call_id": "dashboard", "path": ["data", "lifecycle"]}
+            catalog["nodes"]["new-operations-page-j"]["execution"]["calls"][0]["arguments"]["page_id"] = {
+                "source": "result", "job_id": "new-operations-pr-j", "call_id": "pull_requests", "path": ["data", "page_id"]}
+            db.execute("UPDATE catalog SET published=?", (workflow._dump(catalog),))
+        self.bridge.results.update(jira_dashboard=envelope({"lifecycle": "open"}), github_list_pull_requests=envelope({"page_id": "42"}))
+        run = await self.start()
+        for _ in range(4):
+            await self.runtime.process_once()
+        self.assertEqual(len(self.bridge.calls), 2)
+        original_check = self.bridge.check
+        async def revoked_source(user, reference):
+            if reference["function"] == "jira_dashboard":
+                raise workflow.WorkflowError("native_access_denied", "source revoked")
+            return await original_check(user, reference)
+        self.bridge.check = revoked_source
+        run = await self.drain(run)
+        self.assertEqual(run["status"], "waiting_authorization", run)
+        self.assertEqual(len(self.bridge.calls), 2)
+        self.assertEqual(len(self.model.calls), 0)
+
+    async def test_start_requires_the_current_chat_to_match_original_plan(self):
+        with self.service._db() as db:
+            version = self.service._catalog(db)[0]["version"]
+        planned = await self.service.execution_plan(USER, {"scope": {"site_id": "us-a", "system": "EMS", "process_id": self.p, "version": version}, "node_id": self.p, "chat_id": "chat-one", "inputs": self.inputs})
+        plan = planned["plan"]
+        body = {"action": "start", "plan_id": plan["id"], "plan_hash": plan["hash"], "request_id": "cross-chat", "chat_id": "chat-two"}
+        rejected = await self.service.execution_action(USER, body)
+        self.assertEqual(rejected.get("error", {}).get("code"), "chat_mismatch", rejected)
+        body.update(chat_id="chat-one", request_id="same-chat")
+        accepted = await self.service.execution_action(USER, body)
+        self.assertTrue(accepted["ok"], accepted)
+        controlled = await self.control(accepted["run"], "pause", chat_id="chat-two")
+        self.assertEqual(controlled.get("error", {}).get("code"), "chat_mismatch", controlled)
+
     async def test_only_classified_rate_limit_retries_once_within_declared_budget(self):
         with self.service._db(write=True) as db:
             catalog = self.service._catalog(db)[0]

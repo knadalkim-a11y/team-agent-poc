@@ -2624,8 +2624,11 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(calls, [])
         state = asyncio.run(self.server.workflow.execution_state(self.server.user, case_id=case["id"]))
         run_id = state["run"]["id"]
-        self.click('#ees-work-close')
-        self.browser.navigate('about:blank')
+        if getattr(self, 'poll_same_page', False):
+            self.fill('#chat-input', '실행 중에도 보존할 대화 초안')
+        else:
+            self.click('#ees-work-close')
+            self.browser.navigate('about:blank')
         async def complete():
             for _ in range(8):
                 if not await self.server.workflow.execution.process_once():
@@ -2634,6 +2637,14 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         completed = asyncio.run(self.server.workflow.execution_state(self.server.user, run_id=run_id))
         self.assertEqual(completed["run"]["status"], "succeeded", completed)
         self.assertEqual(calls, [(self.server.user["id"], {"page_id": "42"})])
+        if getattr(self, 'poll_same_page', False):
+            self.wait("document.querySelector('[data-runtime-record]')?.dataset.runtimeRecord === 'succeeded'")
+            self.wait("document.querySelector('.ew-work-identity [data-status]')?.dataset.status === 'passed'")
+            self.assertIn('1 / 6 작업 완료', self.text('#ees-work-entry'))
+            self.assertEqual(self.text('#chat-input'), '실행 중에도 보존할 대화 초안')
+            self.assertEqual(self.current()['case']['selected_id'], 'db-j')
+            self.screenshot('runtime-native-same-page-projection')
+            return
         self.navigate("/c/existing-chat")
         self.wait("!!document.querySelector('#ees-work-context')")
         self.choose("db-j")
@@ -2642,6 +2653,10 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertIn("실제 호출·반환 기록 1건", self.text("#ees-work-content"))
         self.assertNotIn("모의 점검 실행", self.text("#ees-work-content"))
         self.screenshot("runtime-native-panel-return")
+
+    def test_durable_runtime_poll_updates_left_progress_and_job_header_without_navigation(self):
+        self.poll_same_page = True
+        self.test_durable_runtime_panel_plan_real_service_and_browser_return()
 
 
 if __name__ == "__main__":

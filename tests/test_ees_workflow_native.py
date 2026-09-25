@@ -161,6 +161,42 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.http_calls, [])
         await self.assert_code("native_disabled", self.bridge.check(self.reader, refs["get_page"]))
 
+    async def test_approval_and_disable_recheck_revoked_admin_before_write(self):
+        await self.fixture.register_read_tool("confluence")
+        users = self.fixture.native_users.Users
+        original_lookup = self.fixture.service.user_lookup
+        for action in ("approve", "disable"):
+            with self.subTest(action=action):
+                await users.update_user_by_id("admin", {"role": "admin"})
+                reference = (await self.bridge.inspect(self.admin, "fixture_confluence", "get_page"))["reference"]
+                with self.fixture.service._db() as db:
+                    before = ([dict(row) for row in db.execute("SELECT * FROM native_approvals ORDER BY tool_id,function")],
+                              [dict(row) for row in db.execute("SELECT * FROM native_approval_events ORDER BY id")])
+                lookups = 0
+
+                async def revoke_after_initial_lookup(identifier):
+                    nonlocal lookups
+                    current = await original_lookup(identifier)
+                    lookups += 1
+                    if lookups == 1:
+                        # Native persisted role changes while the operation is
+                        # awaiting I/O. Ownership still gives this actor tool
+                        # read access, so the tool ACL cannot enforce admin.
+                        await users.update_user_by_id(identifier, {"role": "user"})
+                    return current
+
+                with patch.object(self.fixture.service, "user_lookup", side_effect=revoke_after_initial_lookup), \
+                        patch.object(self.fixture.plugin, "load_tool_module_by_id", side_effect=AssertionError("approval must not import")):
+                    await self.assert_code("admin_required", self.bridge.approval_action(self.admin, {
+                        "action": action, "reference": reference, "evidence": "fixture role-revocation review",
+                    }))
+                self.assertGreaterEqual(lookups, 2)
+                self.assertEqual((await users.get_user_by_id("admin")).role, "user")
+                with self.fixture.service._db() as db:
+                    after = ([dict(row) for row in db.execute("SELECT * FROM native_approvals ORDER BY tool_id,function")],
+                             [dict(row) for row in db.execute("SELECT * FROM native_approval_events ORDER BY id")])
+                self.assertEqual(after, before, "A revoked administrator must not alter revision or audit rows")
+
     async def test_injected_function_reserved_headers_url_subject_rejected_before_loader(self):
         refs = await self.fixture.register_read_tool("confluence")
         with patch.object(self.fixture.plugin, "load_tool_module_by_id", side_effect=AssertionError("invalid input must not load")):

@@ -154,6 +154,12 @@ def guard_fixture_members():
         for method in methods:
             source += indent + "async def " + method + "(self=None, db=None):\n" + indent + "    return None\n"
         members[filename] = source.encode()
+    for provider in ("openai", "ollama"):
+        members["open_webui/routers/" + provider + ".py"] += (
+            b"async def generate_chat_completion(request, form_data=None, user=None):\n"
+            b"    model_info = await Models.get_model_by_id(form_data['model'])\n"
+            b"    if model_info:\n        params = model_info.params.model_dump()\n"
+            b"        return apply_model_params(params, form_data)\n")
     members["open_webui/routers/models.py"] = b"router = APIRouter()\n"
     members["open_webui/routers/tools.py"] = b"router = APIRouter()\n"
     for function, key, nest in (("create_new_tools", "form_data.id", True), ("update_tools_by_id", "id", False)):
