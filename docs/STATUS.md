@@ -6,7 +6,7 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** [C안 1단계](mockups/ees-work/TASK.md#c-design-phase1-20260928)를 `feat/ees-c-phase1-20260928`에서 구현하고 1단계 범위의 검증을 마쳤다. 최신 main은 [PR #65](https://github.com/knadalkim-a11y/team-agent-poc/pull/65) 병합본 `e995fe16e4835f2d1799c95f3d6d1b74ce381389`다. #65는 이미 병합됐고 해당 PR의 배포 준비 기록을 기준으로 삼는다. 기존 설계 Draft #53은 변경하지 않는다.
+- **현재 작업:** [C안 1단계](mockups/ees-work/TASK.md#c-design-phase1-20260928)를 `feat/ees-c-phase1-20260928`에서 구현하고 1단계 범위의 검증 뒤 [같은 Draft PR #66](https://github.com/knadalkim-a11y/team-agent-poc/pull/66)에서 완료 버튼의 명시적 상위 복귀를 보완했다. inline/dock의 T 목록·스크롤·초점, T→P, 사이드바 직접 진입과 닫기/재열기의 실패 재현·수정·동일 조건 재검을 [후속 평가](../evals/scenarios.md#c-design-completed-return-20260928)에 기록했다. 최신 main은 [PR #65](https://github.com/knadalkim-a11y/team-agent-poc/pull/65) 병합본 `e995fe16e4835f2d1799c95f3d6d1b74ce381389`다. #65는 이미 병합됐고 해당 PR의 배포 준비 기록을 기준으로 삼는다. 기존 설계 Draft #53은 변경하지 않는다.
 - **이번 범위:** 공통 패널 비율·여백·글자 위계·제목/상태·입력 저장과 실행 구분·보조 상세·독립 스크롤을 C안으로 정돈한다. 대표 흐름은 기존 AP 모의 점검의 저장→실패→재시도→완료와 상세/이력이며 같은 태스크의 DB 표시를 함께 비교한다. 모든 J/P/T 예외 반영은 2단계, 통합 회귀와 PR 마무리는 3단계로 분리하고 별도 사용자 지시 뒤 이어간다.
 - **보존·버전:** #65의 Native 실행 계획/입력/영속 runtime, 시스템 담당자·P별 게시, Native 대화/Workspace·사용자 자산·기존 저장/권한을 유지한다. 현재 ees.12·Pack0.2.14와 실행 계약은 그대로 두며 업무 이름별 분기·새 실행기·가짜 타이머를 추가하지 않는다. 프로그램 Restore와 DB/자산 복원은 별개다.
 - **검증 상태:** [C안 실조회와 1단계 제품 검사](../evals/scenarios.md#c-design-phase1-20260928)를 구분해 기록한다. Figma 9개 상태/역할 조회는 제품 PASS가 아니다. 최종 v5에서 실제 조립 frontend+서비스의 대표 흐름/관련 회귀와 공식 전체 앱의 Native 가입/대화·동일 데이터 재기동/입력/결과 보존을 구분해 확인했다. 긴 제목 상태 잘림·action 영역·스크롤 회귀의 실패/수정/재검과 의도된 Figma 차이는 평가 원본에 남긴다. 이전 A안·[TR-01~24와 병합 전 보완](../evals/scenarios.md#shared-native-runtime-review-20260925) 증거는 당시 범위로 보존한다.
@@ -79,4 +79,4 @@
 
 ## 최근 점검
 
-2026-09-28 최신 main `e995fe16`과 #65 병합·기존 Draft #53, 현재 Work 원본·AGENTS/STATUS를 확인했다. 별도 외부 원본의 Windows 작업 52경로는 보존하고 이번 작업은 정확한 main의 깨끗한 checkout에서 시작했다. 이전 STATUS의 #65 병합 대기는 실제 원격 상태에 맞게 바로잡았으며 새 사내 성공 보고를 추가하지 않았다. C안 Figma 읽기·조립 frontend fixture·공식 전체 앱의 최종 v5 검사를 구분해 완료했고, 범위·실패/재검·미실행은 [1단계 평가](../evals/scenarios.md#c-design-phase1-20260928)에 기록했다.
+2026-09-28 최신 main `e995fe16`과 #65 병합·기존 Draft #53, 현재 Work 원본·AGENTS/STATUS를 확인했다. 별도 외부 원본의 Windows 작업 52경로는 보존하고 이번 작업은 정확한 main의 깨끗한 checkout에서 시작했다. 이전 STATUS의 #65 병합 대기는 실제 원격 상태에 맞게 바로잡았으며 새 사내 성공 보고를 추가하지 않았다. PR #66 head `ffa15e70`에서 완료 CTA의 누락 검증을 재현하고 기존 복귀/위치 맵을 재사용해 수정했다. 조립 frontend의 신규3건·panel44건·공식 전체 앱의 복귀 전용 검사 PASS를 [후속 평가](../evals/scenarios.md#c-design-completed-return-20260928)에 기록했다. 앞선 상단 경로 PASS를 완료 CTA PASS로 확대하지 않으며 2·3단계, 병합·배포는 수행하지 않았다.

@@ -5,6 +5,7 @@ and external/model transports use the existing temporary Native UI fixture;
 these tests do not claim full Open WebUI startup or company acceptance.
 """
 from copy import deepcopy
+import asyncio
 import json
 import unittest
 
@@ -60,6 +61,188 @@ class CPhaseOneNativeTests(unittest.TestCase):
         self.assertLessEqual(bounds['badge']['right'], bounds['slot']['right'])
         self.assertTrue(bounds['hit'], bounds)
         return bounds
+
+    def seed_return_case(self, long_body=False):
+        """Arrange volume through the existing definition/service contracts.
+
+        Forty real manual confirmations make a non-default completed filter
+        span two pages. No production state or rendered DOM is fabricated.
+        """
+        definition = deepcopy(self.current()['catalog'])
+        nodes = definition['nodes']
+        nodes['return-p'] = dict(deepcopy(nodes['setup-p']), id='return-p',
+            name='복귀 검증 업무', children=['return-t'], skills=[])
+        nodes['return-t'] = dict(deepcopy(nodes['prep-t']), id='return-t',
+            name='복귀 검증 단계', parent='return-p', children=[])
+        definition['roots']['setup'].append('return-p')
+        for number in range(60):
+            node_id = f'return-{number:03d}-j'
+            nodes[node_id] = dict(deepcopy(nodes['scope-j']), id=node_id,
+                name=f'복귀 검증 작업 {number:03d}', parent='return-t',
+                deps=['return-000-j'] if number == 30 else [])
+            nodes['return-t']['children'].append(node_id)
+        if long_body:
+            nodes['return-030-j']['rule'] = '현장 담당자가 적용 범위와 확인 자료를 검토했습니다. ' * 16
+        self.publish_runtime_fixture(definition)
+        state = asyncio.run(self.server.workflow.handle_action(self.server.user, {
+            'action': 'create', 'chat_id': 'existing-chat',
+            'payload': {'site_id': 'us-a', 'system': 'EMS', 'process_id': 'return-p'}}))
+        self.assertTrue(state['ok'], state)
+        for number in range(40):
+            case = state['case']
+            state = asyncio.run(self.server.workflow.handle_action(self.server.user, {
+                'action': 'run', 'chat_id': 'existing-chat', 'case_id': case['id'],
+                'expected_revision': case['revision'], 'node_id': f'return-{number:03d}-j',
+                'payload': {'confirm': True}}))
+            self.assertTrue(state['ok'], state)
+        self.assertEqual(state['case']['progress'], {'done': 40, 'total': 60})
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
+        self.wait_scope_ready('site')
+        return state['case']
+
+    def return_list_snapshot(self):
+        return self.browser.evaluate("""(()=>{const body=document.querySelector('#ees-work-content'),
+            active=document.activeElement,rect=active?.getBoundingClientRect(),clip=body.getBoundingClientRect();
+            return {query:body.querySelector('#ees-work-job-search')?.value,
+                filter:body.querySelector('[data-action=job_filter][aria-pressed=true]')?.dataset.filter,
+                page:body.querySelector('.ew-work-pagination')?.innerText,
+                expanded:[...body.querySelectorAll('[data-action=job_condition][aria-expanded=true]')].map(e=>e.dataset.nodeId),
+                rows:[...body.querySelectorAll('[data-work-job]')].map(e=>e.dataset.workJob),
+                scroll:body.scrollTop,focus:{tag:document.activeElement?.tagName,id:document.activeElement?.id,
+                    action:document.activeElement?.dataset.action,node:document.activeElement?.dataset.nodeId,
+                    rect:rect?.toJSON(),visible:!!rect&&rect.top>=clip.top&&rect.bottom<=clip.bottom,
+                    hit:!!rect&&active.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2))},
+                back:document.querySelector('#ees-work-parent')?.innerText};})()""")
+
+    def assert_return_list(self, before, focus_selector):
+        after = self.return_list_snapshot()
+        for key in ('query', 'filter', 'page', 'expanded', 'rows'):
+            self.assertEqual(after[key], before[key], key)
+        self.assertAlmostEqual(after['scroll'], before['scroll'], delta=2)
+        self.assertTrue(self.browser.evaluate('document.activeElement?.matches(' + json.dumps(focus_selector) + ')'), after)
+        self.assertTrue(after['focus']['visible'] and after['focus']['hit'], after['focus'])
+        return after
+
+    def completion_return_scenario(self, dock):
+        before_case = self.seed_return_case(long_body=dock)
+        width, height = (1366, 768) if dock else (1920, 1080)
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
+        kind = 'dock' if dock else 'inline'
+        self.choose('return-p')
+        p_to_t = '#ees-work-content [data-action=select][data-node-id="return-t"]'
+        self.click(p_to_t)
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 단계'")
+        self.fill('#ees-work-job-search', '복귀 검증 작업')
+        self.click('[data-action=job_filter][data-filter=completed]')
+        self.click('[data-action=job_page][data-page="1"]')
+        self.click('[data-action=job_condition][data-node-id="return-030-j"]')
+        row = '[data-work-job="return-030-j"] [data-action=select][data-node-id="return-030-j"]'
+        self.browser.evaluate('document.querySelector(' + json.dumps(row) + ').scrollIntoView({block:"center"})')
+        before = self.return_list_snapshot()
+        self.assertIn('26–40 / 40개 작업', before['page'])
+        self.assertGreater(before['scroll'], 100)
+        self.screenshot('c-return-' + kind + '-t-before')
+        self.click(row)
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 작업 030' && !document.querySelector('#ees-work-panel').matches('[aria-busy=true]')")
+        # Reopen preserves the completed J and the existing T→J entry.
+        self.click('#ees-work-close')
+        self.click('#ees-work-context-open')
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 작업 030'")
+        # Deliberately select the completion-area CTA by its public text and
+        # physical region, never the header path or a particular action token.
+        cta = '.ew-work-action-region .ew-primary'
+        self.assertEqual(self.text(cta), '단계로 돌아가기')
+        self.wait("document.querySelector('#ees-work-panel')?.dataset.scrollActions === " + json.dumps(str(dock).lower()))
+        self.assertEqual(self.browser.evaluate("!!document.querySelector('.ew-work-action-region .ew-primary')?.closest('#ees-work-action-dock')"), dock)
+        self.screenshot('c-return-' + kind + '-completed-button')
+        self.click(cta)
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 단계' && !document.querySelector('#ees-work-panel').matches('[aria-busy=true]')")
+        after = self.return_list_snapshot()
+        self.screenshot('c-return-' + kind + '-t-after')
+        self.save_visual_measurements('c-return-' + kind + '-evidence', {
+            'viewport': [width, height], 'completion_button_placement': kind,
+            'before': before, 'after': after,
+            'boundary': 'Packaged Native UI, real WorkflowService/SQLite; synthetic Native login/chat and test catalog.'})
+        self.assert_return_list(before, row)
+        self.assertIn('복귀 검증 업무로 돌아가기', after['back'])
+        self.assertNotIn('복귀 검증 작업 030로 돌아가기', after['back'])
+        self.click('#ees-work-close')
+        self.click('#ees-work-context-open')
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 단계'")
+        reopened = self.return_list_snapshot()
+        for key in ('query', 'filter', 'page', 'expanded', 'rows', 'scroll', 'back'):
+            self.assertEqual(reopened[key], after[key], 'T close/reopen: ' + key)
+        self.click('#ees-work-parent [data-action=panel_back]')
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 업무'")
+        self.assertTrue(self.browser.evaluate('document.activeElement?.matches(' + json.dumps(p_to_t) + ')'))
+
+        # Existing panel_back uses the same origin row and keeps list state.
+        self.click(p_to_t)
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 단계'")
+        self.browser.evaluate('document.querySelector(' + json.dumps(row) + ').scrollIntoView({block:"center"})')
+        back_before = self.return_list_snapshot()
+        self.click(row)
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 작업 030'")
+        self.click('#ees-work-parent [data-action=panel_back]')
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 단계'")
+        self.assert_return_list(back_before, row)
+
+        # Direct sidebar entry must not invent a J→T back entry, even when
+        # a previous list visit exists in this same panel session.
+        self.choose('return-t')
+        sidebar_job = '#ees-work-entry [data-action=select][data-node-id="return-030-j"]'
+        self.assertTrue(self.read(sidebar_job, 'getClientRects().length'))
+        self.click(sidebar_job)
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 작업 030'")
+        self.click(cta)
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 단계'")
+        self.assertIsNone(self.read('#ees-work-parent [data-action=panel_back]'))
+        parent = '#ees-work-parent [data-action=select][data-node-id="return-p"]'
+        self.click(parent)
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 업무'")
+        self.assertEqual(self.current()['case']['jobs'], before_case['jobs'])
+        self.assertEqual(self.server.completions, [])
+        self.save_visual_measurements('c-return-' + kind + '-evidence', {
+            'viewport': [width, height], 'completion_button_placement': kind,
+            'before': before, 'after': after,
+            'verified': ['completion CTA restores search/filter/page/expanded rows/scroll/focus',
+                'J and T close/reopen', 'T to P trail and focus', 'existing panel_back',
+                'sidebar direct J uses parent without false back entry', 'saved jobs unchanged'],
+            'boundary': 'Packaged Native UI, real WorkflowService/SQLite; synthetic Native login/chat and test catalog.'})
+
+    def test_completed_return_inline_restores_task_list_and_parent_navigation(self):
+        self.completion_return_scenario(dock=False)
+
+    def test_completed_return_dock_restores_task_list_and_parent_navigation(self):
+        self.completion_return_scenario(dock=True)
+
+    def test_completed_return_preserves_incomplete_filter_when_finished_row_disappears(self):
+        self.seed_return_case()
+        self.choose('return-t')
+        self.fill('#ees-work-job-search', '복귀 검증 작업')
+        self.click('[data-action=job_filter][data-filter=incomplete]')
+        for number, remaining in ((40, 19), (55, 18)):
+            with self.subTest(finished_row=number):
+                node_id = f'return-{number:03d}-j'
+                row = '[data-work-job="' + node_id + '"] [data-action=select]'
+                self.click(row)
+                self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 작업 " + f'{number:03d}' + "'")
+                self.click('#ees-work-run', confirm=True)
+                self.wait("document.querySelector('.ew-work-action-region .ew-primary')?.textContent === '단계로 돌아가기' && !document.querySelector('#ees-work-panel').matches('[aria-busy=true]')")
+                self.assertEqual(self.current()['case']['jobs'][node_id]['status'], 'passed')
+                self.click('.ew-work-action-region .ew-primary')
+                self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 단계'")
+                after = self.return_list_snapshot()
+                self.save_visual_measurements('c-return-filtered-out-' + str(number) + '-evidence', after)
+                self.screenshot('c-return-filtered-out-' + str(number) + '-focus')
+                self.assertEqual(after['query'], '복귀 검증 작업')
+                self.assertEqual(after['filter'], 'incomplete')
+                self.assertNotIn(node_id, after['rows'])
+                self.assertIn(f'1–{remaining} / {remaining}개 작업', after['page'])
+                self.assertTrue(self.browser.evaluate("document.activeElement?.matches('#ees-work-job-search, [data-action=job_filter][aria-pressed=true], [data-work-job] [data-action=select]')"), after)
+                self.assertTrue(after['focus']['visible'] and after['focus']['hit'], after['focus'])
 
     def test_existing_ap_save_reload_fail_retry_evidence_and_return(self):
         case = self.ready_case()

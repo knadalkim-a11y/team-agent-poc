@@ -944,8 +944,8 @@ return {blank,ready,excluded,html,connection,waiting};
         before = deepcopy(case["jobs"]["ap-j"])
         case = await self.step(case, "run", "db-j")
         html, _ = self.render(case, "db-j")
-        parent = html.find("button", **{"data-action": "select", "data-node-id": "install-t"})
-        self.assertTrue(parent)
+        parent = html.find("button", **{"data-action": "panel_parent", "data-node-id": "install-t"})
+        self.assertEqual(len(parent), 1)
         self.assertEqual(sum("ew-primary" in item.attrs.get("class", "") for item in parent), 1)
         self.assertIn("단계로 돌아가기", " ".join(item.text for item in parent))
         self.assertTrue(all("data-mutation" not in item.attrs for item in parent))
@@ -1072,7 +1072,7 @@ return {typed,reverted,documentTyped,documentReverted,observerKeptDisabled,block
     def test_panel_scroll_resets_for_new_target_but_survives_same_job_refresh(self):
         result = self.evaluate_drafts("""(() => {
 const content={innerHTML:'',scrollTop:0,contains:()=>false,querySelectorAll:()=>[]},tabs={innerHTML:''};
-const host={dataset:{},contains:()=>false,setAttribute(){},querySelector:selector=>({'#ees-work-content':content,'#ees-work-tabs':tabs}[selector] || null),querySelectorAll:()=>[]};
+const host={isConnected:true,dataset:{},contains:()=>false,setAttribute(){},querySelector:selector=>({'#ees-work-content':content,'#ees-work-tabs':tabs}[selector] || null),querySelectorAll:()=>[]};
 globalThis.document={querySelector:()=>null,createElement:tag=>tag==='aside'?host:{dataset:{},setAttribute(){}}};globalThis.window={};
 const site={id:'a',name:'공장'},definition={version:1,sites:{a:site},tools:{},nodes:{p:{id:'p',type:'p',name:'절차',children:['t']},t:{id:'t',parent:'p',type:'t',name:'단계',children:['j']},j:{id:'j',parent:'t',type:'j',name:'작업',mode:'manual'}}};
 const current={id:'first',version:1,revision:1,site,system:'EMS',process_id:'p',status:'in_progress',definition,jobs:{j:{status:'pending',inputs:{},history:[]}},node_states:{j:{status:'pending'}}};
@@ -1085,6 +1085,60 @@ view.renderPanel({...snapshot,selectedId:'j',selectedCaseId:'second',state:{...s
 return {selectedJob,refreshedJob,retainedJob,changedCase};
 })()""")
         self.assertEqual(result, {"selectedJob": 0, "refreshedJob": 240, "retainedJob": 240, "changedCase": 0})
+
+    def test_completed_return_restores_task_list_and_keeps_process_return_in_both_placements(self):
+        result = self.evaluate_drafts(r"""(() => {
+return ['inline','dock'].map(placement=>{
+  let focusedNode=null;
+  const content={innerHTML:'',scrollTop:0,contains:()=>false,
+    insertAdjacentHTML(position,html){this.innerHTML=html+this.innerHTML;},
+    querySelectorAll(selector){
+      if(selector!=='[data-action]')return [];
+      return [...this.innerHTML.matchAll(/<button\b([^>]*)>/g)].map(match=>{
+        const dataset={action:match[1].match(/data-action="([^"]+)"/)?.[1],nodeId:match[1].match(/data-node-id="([^"]+)"/)?.[1]};
+        return {dataset,focus(){focusedNode=dataset.nodeId;}};
+      });
+    }};
+  const tabs={innerHTML:''},host={isConnected:true,dataset:{},style:{},classList:{toggle(){}},contains:()=>false,setAttribute(){},
+    remove(){this.isConnected=false;content.scrollTop=0;},
+    querySelector:selector=>({'#ees-work-content':content,'#ees-work-tabs':tabs}[selector] || null),querySelectorAll:()=>[]};
+  const row={getBoundingClientRect:()=>({width:1920}),append(){host.isConnected=true;}},column={parentElement:row,classList:{add(){},remove(){}}},anchor={parentElement:column};
+  globalThis.document={querySelector:selector=>selector==='#chat-container #chat-pane'?anchor:null,createElement:tag=>tag==='aside'?host:{dataset:{},setAttribute(){},remove(){}}};globalThis.window={innerWidth:1920};
+  const site={id:'a',name:'공장'},jobs=Array.from({length:40},(_,i)=>'j'+i);
+  const definition={version:1,sites:{a:site},tools:{},nodes:{p:{id:'p',type:'p',name:'절차',children:['t']},t:{id:'t',parent:'p',type:'t',name:'단계',children:jobs}}};
+  jobs.forEach(id=>{definition.nodes[id]={id,parent:'t',type:'j',name:'작업 '+id,mode:'manual',deps:id==='j30'?['j0']:[]};});
+  const current={id:'first',version:1,revision:1,site,system:'EMS',process_id:'p',status:'in_progress',definition,
+    jobs:Object.fromEntries(jobs.map(id=>[id,{status:'passed',attempt:1,inputs:{},history:[{kind:'human_confirmation',status:'passed',attempt:1,checks:[]}]}])),
+    node_states:Object.fromEntries(jobs.map(id=>[id,{status:'passed'}]))};
+  let snapshot={state:{case:current,catalog:definition,cases:[]},selectedCaseId:'first',selectedId:'p',processId:'p',browsingSite:'a',browsingSystem:'EMS',category:'setup',runView:'current',chatRoute:true,busy:false};
+  const view=createWorkView({callbacks:{registerPanel(){},selectWork(id){snapshot={...snapshot,selectedId:id};view.renderPanel(snapshot);}}});
+  function click(dataset,location='inline'){
+    const target={dataset,closest(selector){return selector==='[data-action]'?this:selector==='[data-ees-work]'?host:selector==='#ees-work-content'&&location==='inline'?content:selector==='#ees-work-entry'&&location==='sidebar'?host:null;}};
+    view.handleEvent({type:'click',target});
+  }
+  const listHTML=()=>content.innerHTML.match(/<section class="ew-work-browser[\s\S]*?<\/section>/)?.[0];
+  const returnLabel=()=>content.innerHTML.match(/data-action="panel_back"[^>]*>([^<]+)/)?.[1] || null;
+  view.renderPanel(snapshot);content.scrollTop=180;click({action:'select',nodeId:'t'});
+  view.handleEvent({type:'input',target:{id:'ees-work-job-search',value:'작업'}});
+  click({action:'job_filter',filter:'completed'});click({action:'job_page',page:'1'});click({action:'job_condition',nodeId:'j30'});
+  content.scrollTop=440;const before=listHTML();click({action:'select',nodeId:'j30'});
+  const actionTag=content.innerHTML.match(/<button([^>]*)>단계로 돌아가기<\/button>/)[1];
+  click({action:actionTag.match(/data-action="([^"]+)"/)[1],nodeId:'t'},placement);
+  const returned={id:snapshot.selectedId,scroll:content.scrollTop,focusedNode,listPreserved:listHTML()===before,back:returnLabel()};
+  view.closeHost();view.renderPanel(snapshot);view.panelRegistration().open();
+  const reopened={scroll:content.scrollTop,listPreserved:listHTML()===before};
+  click({action:'panel_back'},'header');
+  return {placement,returned,reopened,ancestor:{id:snapshot.selectedId,scroll:content.scrollTop,focusedNode}};
+});
+})()""")
+        for case in result:
+            with self.subTest(placement=case["placement"]):
+                self.assertEqual(case["returned"], {
+                    "id": "t", "scroll": 440, "focusedNode": "j30",
+                    "listPreserved": True, "back": "‹ 절차로 돌아가기",
+                })
+                self.assertEqual(case["ancestor"], {"id": "p", "scroll": 180, "focusedNode": "t"})
+                self.assertEqual(case["reopened"], {"scroll": 440, "listPreserved": True})
 
     async def test_dirty_render_exposes_live_status_and_preserves_server_block(self):
         case = await self.ready(await self.create())

@@ -9,6 +9,8 @@ product's declared legacy simulation. No live model/business API is configured.
 Example: python tests/ees_work_c_phase1_app.py --wheel <candidate.whl>
   --baseline-wheel <official.whl> --chrome <chrome> --output <evidence-directory>
 Only new temporary data is used. Reports and screenshots exclude auth tokens.
+Use --navigation-only for the completed-J return regression on the real app;
+the AP result is prepared through its existing simulation API, not revalidated.
 """
 
 import argparse
@@ -35,6 +37,7 @@ def main():
     parser.add_argument('--baseline-wheel', type=Path)
     parser.add_argument('--chrome', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--navigation-only', action='store_true')
     args = parser.parse_args()
     ROOT = Path(__file__).resolve().parents[1]
     OUT = args.output.resolve()
@@ -142,7 +145,8 @@ def main():
             response = client.get('/api/v1/chats/' + chat_id, headers=headers)
             response.raise_for_status()
             assert response.json()['chat']['title'] == 'C단계 실제 Native 저장 확인'
-            record('Program upgrade preserved real Native identity/chat', same_identity=True, same_chat=True)
+            record('Program upgrade preserved real Native identity/chat' if args.baseline_wheel else
+                   'Real Native session reconnected to its temporary chat', same_identity=True, same_chat=True)
 
             def current():
                 response = client.get('/api/ees-work/state', params={'chat_id': chat_id}, headers=headers)
@@ -167,6 +171,16 @@ def main():
                     state = action({'action': 'run', 'chat_id': chat_id, 'case_id': case['id'], 'expected_revision': case['revision'], 'node_id': node_id, 'payload': {'confirm': True}})
                     assert state['case']['jobs'][node_id]['status'] == 'passed', state['case']['jobs'][node_id]
             record('Real EES case create/prerequisites', case_id=state['case']['id'], native_chat_bound=state['case']['chat_id'] == chat_id)
+            if args.navigation_only:
+                # Prepare only the existing declared simulation, through the
+                # unmodified EES API. This is not live AP/tool execution.
+                for _ in range(2):
+                    case = state['case']
+                    state = action({'action': 'run', 'chat_id': chat_id, 'case_id': case['id'],
+                                    'expected_revision': case['revision'], 'node_id': 'ap-j',
+                                    'payload': {'confirm': True}})
+                assert state['case']['jobs']['ap-j']['status'] == 'passed'
+                record('Navigation fixture prepared with existing AP simulation', status='passed')
 
             sys.path.insert(0, str(ROOT))
             sys.path.insert(0, str(ROOT / 'tests'))
@@ -194,6 +208,92 @@ def main():
             def shot(name):
                 (OUT / (LABEL + '-' + name + '.png')).write_bytes(base64.b64decode(browser.call('Page.captureScreenshot', {'format': 'png'})['data']))
 
+            def navigation_check():
+                row = '#ees-work-content [data-work-job="ap-j"] [data-action="select"]'
+                completion = '.ew-work-action-region button[data-node-id="install-t"]'
+
+                def selected(title):
+                    wait('document.querySelector("#ees-work-panel .ew-title")?.textContent === ' +
+                         json.dumps(title) + ' && !document.querySelector("#ees-work-panel")?.matches("[aria-busy=true]")')
+
+                def list_state():
+                    return browser.evaluate('''(()=>{const body=document.querySelector('#ees-work-content');
+                      return {query:body.querySelector('#ees-work-job-search')?.value,
+                        filter:body.querySelector('[data-action=job_filter][aria-pressed=true]')?.dataset.filter,
+                        page:body.querySelector('.ew-work-pagination')?.innerText,
+                        expanded:!!body.querySelector('[data-work-condition="ap-j"]'),
+                        scroll:body.scrollTop,
+                        focusNode:document.activeElement?.dataset.nodeId ?? null,
+                        focusAction:document.activeElement?.dataset.action ?? null};})()''')
+
+                # Both sizes use the exact same saved AP result. No CSS or
+                # DOM placement overrides force the action into either slot.
+                for width, height, expected_layout in ((1920, 1440, 'inline'), (1366, 768, 'dock')):
+                    browser.call('Emulation.setDeviceMetricsOverride', {
+                        'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
+                    selected('신규 공장 횡전개')
+                    click('#ees-work-content .ew-work-list [data-action="select"][data-node-id="install-t"]')
+                    selected('시스템 설치')
+                    click('#ees-work-job-search')
+                    browser.call('Input.dispatchKeyEvent', {'type': 'keyDown', 'key': 'a', 'code': 'KeyA',
+                                                           'modifiers': 2, 'windowsVirtualKeyCode': 65})
+                    browser.call('Input.dispatchKeyEvent', {'type': 'keyUp', 'key': 'a', 'code': 'KeyA',
+                                                           'modifiers': 2, 'windowsVirtualKeyCode': 65})
+                    browser.call('Input.insertText', {'text': 'AP'})
+                    wait('document.querySelector("#ees-work-job-search")?.value === "AP"')
+                    click('#ees-work-content [data-action="job_filter"][data-filter="completed"]')
+                    if not browser.evaluate('!!document.querySelector("#ees-work-content [data-work-condition=ap-j]")'):
+                        click('#ees-work-content [data-action="job_condition"][data-node-id="ap-j"]')
+                    # Position the real row before capture. click() uses the
+                    # same center positioning, so the saved departure offset
+                    # is precisely the offset checked on return.
+                    browser.evaluate('document.querySelector(' + json.dumps(row) + ').scrollIntoView({block:"center"})')
+                    before = list_state()
+                    assert before['query'] == 'AP' and before['filter'] == 'completed' and before['expanded'], before
+                    click(row)
+                    selected('AP 연결 확인')
+                    wait('!!document.querySelector(' + json.dumps(completion) + ')')
+                    layout = browser.evaluate('document.querySelector(' + json.dumps(completion) + ').closest("#ees-work-action-dock") ? "dock" : "inline"')
+                    assert layout == expected_layout, {'expected': expected_layout, 'actual': layout}
+                    assert browser.evaluate('document.querySelector(' + json.dumps(completion) + ').textContent') == '단계로 돌아가기'
+                    shot('return-' + expected_layout + '-completed')
+                    click(completion)  # The completed-area CTA, never the top path.
+                    selected('시스템 설치')
+                    after = list_state()
+                    parent = browser.evaluate('document.querySelector("#ees-work-parent")?.innerText')
+                    record('Completed CTA observed ' + expected_layout,
+                           viewport=[width, height], before=before, after=after, parent=parent)
+                    for key in ('query', 'filter', 'page', 'expanded'):
+                        assert after[key] == before[key], (key, before, after)
+                    assert abs(after['scroll'] - before['scroll']) <= 2, (before, after)
+                    assert after['focusNode'] == 'ap-j' and after['focusAction'] == 'select', after
+                    assert '신규 공장 횡전개' in parent and 'AP 연결 확인' not in parent, parent
+                    shot('return-' + expected_layout + '-restored-t')
+                    record('Completed CTA real app return ' + expected_layout,
+                           viewport=[width, height], before=before, after=after, parent=parent)
+                    click('#ees-work-parent [data-action="panel_back"]')
+                    selected('신규 공장 횡전개')
+                    assert browser.evaluate('document.activeElement?.dataset.nodeId') == 'install-t'
+                    record('T to P preserved ' + expected_layout, focus='install-t')
+
+                # Sidebar entry deliberately has no originating T row/trail.
+                click('#ees-work-tree [data-action="select"][data-node-id="install-t"]')
+                selected('시스템 설치')
+                click('#ees-work-tree [data-action="select"][data-node-id="ap-j"]')
+                selected('AP 연결 확인')
+                click(completion)
+                selected('시스템 설치')
+                parent = browser.evaluate('document.querySelector("#ees-work-parent")?.innerText')
+                assert '신규 공장 횡전개' in parent and 'AP 연결 확인' not in parent, parent
+                click('#ees-work-close')
+                wait('!document.querySelector("#ees-work-panel")?.getClientRects().length')
+                click('#ees-work-context-open')
+                selected('시스템 설치')
+                assert '신규 공장 횡전개' in browser.evaluate('document.querySelector("#ees-work-parent")?.innerText')
+                assert current()['case']['jobs']['ap-j']['status'] == 'passed'
+                shot('return-sidebar-reopened-t')
+                record('Sidebar direct return and close/reopen', parent='신규 공장 횡전개', saved_result='passed')
+
             wait('!!document.querySelector("#ees-work-entry") && !!document.querySelector("#chat-input.ProseMirror")')
             # Dismiss only the real first-run release-note dialog if present.
             browser.evaluate('[...document.querySelectorAll("button")].find(e=>/Okay, Let.s Go!|좋아요, 시작/.test(e.textContent))?.click()')
@@ -209,6 +309,15 @@ def main():
             wait('document.querySelector("#ees-work-panel .ew-title")?.textContent === "신규 공장 횡전개" && !document.querySelector("#ees-work-panel")?.matches("[aria-busy=true]")')
             shot('p-management')
             record('Real browser P management', title='신규 공장 횡전개', panel_level=browser.evaluate('document.querySelector("#ees-work-panel").dataset.workLevel'))
+            if args.navigation_only:
+                navigation_check()
+                errors = [{'url': e['params']['response']['url'], 'status': e['params']['response']['status']}
+                          for e in browser.events if e.get('method') == 'Network.responseReceived'
+                          and e['params']['response']['status'] >= 400]
+                record('Browser API responses', errors=errors)
+                assert not errors, errors
+                report['ok'] = True
+                return
             click('#ees-work-tree [data-action="select"][data-node-id="install-t"]')
             wait('document.querySelector("#ees-work-panel .ew-title")?.textContent === "시스템 설치"')
             shot('t-management')

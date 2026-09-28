@@ -296,7 +296,7 @@ function workPanelNodeHTML(c,n,{definition=c?.definition,readOnly=false,history=
   let action='';
   const baseUnavailable=Boolean(unavailableNow||(n.mode==='draft'&&!job.document));
   if(!locked&&nodeState(n)!=='passed'&&applies(n))action=runButton(n.mode==='manual'?'확인 완료':n.mode==='draft'?'검토 완료':job.attempt?'다시 모의 점검':'모의 점검 실행',baseUnavailable||changed,!inputHTML||(savedInputs&&!changed),'data-work-draft-sensitive data-work-base-unavailable="'+baseUnavailable+'"');
-  const returnAction=completed&&parent&&!history?selectButton(parent,parent.type==='t'?'단계로 돌아가기':'상위 업무로 돌아가기',true):'';
+  const returnAction=completed&&parent&&!history?button(parent.type==='t'?'단계로 돌아가기':'상위 업무로 돌아가기','panel_parent','data-node-id="'+esc(parent.id)+'" class="ew-primary ew-work-link"'):'';
   const actionNote=changed?'작성 중인 입력을 저장한 뒤 점검하세요.':completed?'이 작업의 완료 기록을 저장했습니다. 상위 업무의 진행 상태를 확인하세요.':!savedInputs&&fields.length?'현재 대상 값을 확인하고 입력 저장 또는 모의 점검을 진행하세요.':job.attempt&&n.mode==='tool'?'이전 이력은 보존되며 재시도 결과를 완료 조건에 따라 판정합니다.':n.mode==='tool'?'저장된 입력으로 모의 점검합니다. 실제 업무 시스템을 호출하지 않습니다.':'확인한 내용만 완료로 기록합니다.';
   const execution=action||inputSave||documentSave||returnAction?'<section class="ew-work-execute ew-work-action-region" data-work-stage="execute" aria-label="입력 저장과 실행"><div class="ew-work-actions">'+inputSave+documentSave+action+returnAction+'</div><p class="ew-work-action-note" data-work-next data-work-saved-next="'+esc(actionNote)+'">'+esc(actionNote)+'</p></section>':'';
   const inputStage=conflictHTML+editable+dirtyHTML;
@@ -679,8 +679,17 @@ function createWorkView({callbacks}) {
     layoutActions();
     divider.setAttribute('aria-valuenow',String(Math.round(width)));divider.setAttribute('aria-valuemin','340');divider.setAttribute('aria-valuemax',String(Math.round(maximum)));
   }
-  function openHost() {const layout = chatLayout(); if (!layout || !state || !selectedId()) return; ensureHost(); panelOpen = true; styledColumn=layout.column;styledColumn.classList.add('ees-work-chat-column');layout.row.append(divider,host); sizePanel();}
-  function closeHost() {captureJobEdits();panelOpen = false; drag=null;if(divider)delete divider.dataset.pointer;host?.remove(); divider?.remove();styledColumn?.classList.remove('ees-work-chat-column');styledColumn=null;}
+  function openHost() {
+    const layout = chatLayout(); if (!layout || !state || !selectedId()) return; ensureHost();
+    const reopening=!host.isConnected;
+    panelOpen = true; styledColumn=layout.column;styledColumn.classList.add('ees-work-chat-column');layout.row.append(divider,host); sizePanel();
+    if(reopening&&renderedPanelTarget)host.querySelector('#ees-work-content').scrollTop=panelPositions.get(renderedPanelTarget)||0;
+  }
+  function closeHost() {
+    captureJobEdits();
+    if(host?.isConnected&&renderedPanelTarget)panelPositions.set(renderedPanelTarget,host.querySelector('#ees-work-content').scrollTop||0);
+    panelOpen = false; drag=null;if(divider)delete divider.dataset.pointer;host?.remove(); divider?.remove();styledColumn?.classList.remove('ees-work-chat-column');styledColumn=null;
+  }
   function renderTabs() {
     if (!host) return; const tabs = $('#ees-work-tabs',host), screens = panelInfo?.screens || window.__eesWorkPanelV1?.list?.(chatId()) || [{key:'workflow',label:'업무 진행'}];
     const html = screens.map(screen => button(screen.label,'panel_tab',`data-screen="${esc(screen.key)}" aria-selected="${screen.key==='workflow'}"`)).join('');
@@ -714,9 +723,9 @@ function createWorkView({callbacks}) {
     if (!chatRoute() || !state || !selectedId()) {closeHost(); return;} ensureHost();
     const content=$('#ees-work-content',host),focused=host.contains(document.activeElement)?document.activeElement:null;
     const panelTarget=JSON.stringify([browsingSite,browsingSystem,selectedCase()?.id || '',definition()?.version,runView,historyCase?.id || '',selectedId()]);
-    if(renderedPanelTarget)panelPositions.set(renderedPanelTarget,content.scrollTop || 0);
+    if(renderedPanelTarget&&host.isConnected)panelPositions.set(renderedPanelTarget,content.scrollTop || 0);
     const returning=pendingReturn?.to===selectedId()?pendingReturn:null;
-    const retainedScroll=panelTarget===renderedPanelTarget?content.scrollTop || 0:returning?panelPositions.get(panelTarget)||0:0;
+    const retainedScroll=panelTarget===renderedPanelTarget?(host.isConnected?content.scrollTop || 0:panelPositions.get(panelTarget)||0):returning?panelPositions.get(panelTarget)||0:0;
     const focusState=focused?{id:focused.id,name:focused.name,node:focused.dataset.nodeId,action:focused.dataset.action,runtimeAction:focused.dataset.runtimeAction,runId:focused.dataset.runId,start:focused.selectionStart,end:focused.selectionEnd}:null;
     const oldNode=renderedEditContext?.scope.nodeId;
     host.querySelector('#ees-work-action-dock')?.replaceChildren();actionLayoutKey='';
@@ -757,10 +766,29 @@ function createWorkView({callbacks}) {
     // task keep the user's position while inputs/results are updated.
     layoutActions();
     content.scrollTop=retainedScroll;
-    if(returning){const control=Array.from(content.querySelectorAll('[data-action]')).find(el=>el.dataset.action===returning.action&&el.dataset.nodeId===returning.focusNode);control?.focus({preventScroll:true});pendingReturn=null;}
+    // Detached scroll containers report zero; retain their position until open.
+    panelPositions.set(panelTarget,retainedScroll);
+    if(returning){
+      // Completing a job may remove its row from the retained list filter.
+      const origin=Array.from(content.querySelectorAll('[data-action]')).find(el=>el.dataset.action===returning.action&&el.dataset.nodeId===returning.focusNode);
+      const control=origin || content.querySelector('.ew-work-filters [aria-pressed="true"]') || content.querySelector('#ees-work-job-search');
+      control?.focus({preventScroll:true});
+      if(!origin)control?.scrollIntoView({block:'nearest',inline:'nearest'});
+      pendingReturn=null;
+    }
     if(detailContext){if(detailContext.scope!==navigationScope())workUI.closeDialog();else renderDetail();}
   }
   function navigationScope(){return JSON.stringify([selectedCase()?.id || '',browsingSite,browsingSystem,definition()?.version,runView]);}
+  function returnPanel(parentId=null){
+    const entry=navigationTrail[navigationTrail.length-1];
+    if(entry&&entry.scope===navigationScope()&&entry.to===selectedId()&&(!parentId||entry.from===parentId)){
+      navigationTrail.pop();pendingReturn={...entry,to:entry.from};callbacks.selectWork(entry.from);
+    }else if(parentId){
+      // Direct sidebar entry has no parent-list visit to restore. Do not
+      // turn an explicit parent return into a new J→T history entry.
+      navigationTrail.length=0;pendingReturn=null;callbacks.selectWork(parentId);
+    }
+  }
   function renderDetail(){
     const dialog=$('#ees-work-dialog'),context=detailContext,data=definition(),n=data?.nodes?.[context?.nodeId];
     if(!dialog||!context||!n)return;
@@ -888,8 +916,10 @@ function createWorkView({callbacks}) {
       else if(buttonTarget.closest('#ees-work-entry'))navigationTrail.length=0;
       callbacks.selectWork(buttonTarget.dataset.nodeId,buttonTarget.dataset.processId);
     }
-    else if(action==='panel_back'){
-      const entry=navigationTrail.pop();if(entry&&entry.scope===navigationScope()&&entry.to===selectedId()){pendingReturn={...entry,to:entry.from};callbacks.selectWork(entry.from);}
+    else if(action==='panel_back')returnPanel();
+    else if(action==='panel_parent'){
+      const parentId=node(selectedId())?.parent;
+      if(parentId&&parentId===buttonTarget.dataset.nodeId&&node(parentId))returnPanel(parentId);
     }
     else if(action==='job_condition'){
       const expanded=new Set(jobListState().expanded || []),id=buttonTarget.dataset.nodeId;

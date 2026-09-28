@@ -118,10 +118,47 @@ PYTHONPATH=tests EES_TEST_BRANDING_DIR=dist/c-phase1/build-v5 EES_TEST_SCREENSHO
 | C1-02 | AP 입력 저장·재접속 후 case/입력 보존·실행 횟수 불변 | fixture AP와 v5 전체 Native 앱의 직접 저장/reload PASS; attempt0·동일 case/chat 보존 |
 | C1-03 | 실제 요청 대기·첫 실패·명시적 재시도 성공·과거 실패 이력 보존 | fixture의 실제 서비스 대기/중복 방지와 v5 전체 앱 실패→재실행·첫 실패 이력 보존 PASS |
 | C1-04 | 결과/완료 조건·선택한 시도/호출 I/O 일치·입력 변경 후 현재 완료 무효화 | v4 경계2건과 v5 전체 앱의 저장된 과거 I/O 조회 PASS. lookup 실패/접근 제한 후 stale 자료 숨김 포함 |
-| C1-05 | T 복귀/닫기/재열기의 선택·초안·스크롤·초점·조절 폭과 같은 태스크 DB 표시 | v4 same-J 스크롤/공장 이력·초안과 v5 layout·전체 앱 복귀 PASS. DB 표시를 Native312px 조절로 비교 |
+| C1-05 | T 복귀/닫기/재열기의 선택·초안·스크롤·초점·조절 폭과 같은 태스크 DB 표시 | 당시 상단 경로·same-J·닫기/재열기 검사는 PASS였으나 완료 영역 CTA의 T 목록 복원은 미검증이었다. 아래 [PR #66 보완](#c-design-completed-return-20260928)에서 실패 재현·수정·동일 조건 재검 완료 |
 | C1-06 | 기존 Native 계획/입력·접수/완료·재접속/polling과 사용자 자산/권한 보존 범위 | #65 fixed 계획/접수·실제 서비스 worker/재접속 선별1건 PASS(v2). polling/자산 권한 전체는 이번 미실행·이전 유효 근거 유지; 서버/권한 코드 변경 없음 |
 
 **판정과 미실행:** 1단계의 위 명시된 범위는 확인했다. Figma/이미지 대조, 조립 frontend+서비스 fixture, 공식 전체 Native 앱의 임시 데이터 검사는 각각 다른 근거다. 실제 외부 API/모델 호출·사내 계정/자료·전체 권한/동시 이용을 확인한 것으로 확대하지 않는다. 2단계 전체 J/P/T·예외, 3단계 통합 회귀/PR 마무리, main 병합·배포와 사내 수락은 이번 1단계 완료로 합산하지 않는다. 09-30까지 원격 CI 생략 방침을 유지하며 Windows·사내 OP 확인은 별도 미실행이다.
+
+<a id="c-design-completed-return-20260928"></a>
+
+### PR #66 완료 영역의 단계 복귀 보완 · 2026-09-28
+
+**원본과 범위:** [같은 Draft PR #66](https://github.com/knadalkim-a11y/team-agent-poc/pull/66)의 head `ffa15e70d7cdba88034ced63365d9e375f57543b`와 main `e995fe16`을 다시 확인했다. 자동 정리된 Work checkout은 원격 Git 원본·tree/blob 해시를 대조해 복원했고 별도 Windows 작업 52경로는 보존했다. Figma 완료 화면 `584:1098`과 완료 영역 버튼 `584:1335`를 09-28 읽기 조회해 명칭·위치를 확인했다. 시각 재설계·Figma 원본 변경·2차 확대·병합·배포는 하지 않는다. 이전 1차 AP 브라우저 시험은 `.ew-work-path`의 상단 경로를 클릭했으므로 완료 CTA 검증을 대신하지 못했다.
+
+**원인과 조치:** 완료 CTA가 일반 `select`였기 때문에 inline에서는 J→T를 새 이동으로 추가하고 dock에서는 본문 이동 분기를 건너뛰었다. 양쪽 모두 `pendingReturn`을 설정하지 않아 T 목록의 스크롤/원래 행 초점을 복원하지 못했다. `panel_parent`로 실제 상위 노드를 검증하고 기존 `panel_back`과 복귀 처리를 공유한다. 유효한 T→J 이력만 소비해 P→T는 유지하고, 사이드바 직접 진입에는 가짜 J 복귀 이력을 만들지 않는다. 목록·disclosure·위치의 기존 메모리 상태를 재사용하며 서버·저장 계약·권한·실행기는 변경하지 않는다.
+
+관련 재검에서 패널 detach 후 `scrollTop=0`이 기존 위치를 덮는 T 닫기/재열기 결함도 재현했다. 닫기 전에 저장하고 detached 렌더가 0으로 덮지 않게 하며 재부착 시에만 복원했다. 완료로 원래 행이 필터에서 사라지면 선택된 필터/검색으로 초점을 옮기고 최소한으로 화면에 보이게 한다. 원래 행이 남는 경우에는 위치·행 초점을 그대로 복원한다.
+
+| 실행 원본·조건 | 관측과 판정 |
+|---|---|
+| 이전 head, 완료 영역 버튼 직접 클릭 | 신규 3건 **FAIL, 10.076초**. inline 1920×1080 스크롤440→0, dock 1366×768은583→0. 검색/완료 필터/2페이지/펼침 자체는 남았으나 BODY 초점·잘못된 J 복귀 이력 발생 |
+| 첫 수정 wheel `aa80bc6a…` | 3건 중 **1 PASS/2 FAIL, 10.140초**. 원래 CTA 복귀는 해결됐으나 후속 T 닫기/재열기에서 위치 소실 발견 |
+| 같은 미완료 필터의 깊은 055행 완료·소실 | **1 FAIL, 3.316초**. 선택 필터가 초점을 받았지만 y=-312.72로 화면 밖. 첫 040행 PASS를 깊은 행의 가시 초점 PASS로 확대하지 않음 |
+| 최종 wheel `c12d6f9e…`, 같은 3건 | **3 PASS, 11.019초**. inline440→440/dock583→583, 원래030행 초점·가시성/hit 보존. 055행 대체 초점 y=112.28·가시성/hit 정상 |
+
+브라우저는 실제 조립 Native frontend/Chrome와 WorkflowService/SQLite를 사용한다. 60개 합성 J 중 40개를 기존 사람 확인 서비스로 완료해 검색·비기본 완료 필터·26–40페이지·조건 펼침을 검사했다. 완료 CTA의 실제 inline/dock 배치를 확인하고 직접 클릭했으며 T→P와 초점, 기존 `panel_back`, J/T 닫기·재열기, 이전 방문 뒤 사이드바 직접 J 진입, 업무 기록 불변도 최종 3건 안에서 끝까지 확인했다. Native 로그인·대화 전송은 이 검사에서 기존 합성 fixture이며 아래 전체 앱과 구분한다.
+
+**실제 전체 앱 별도 검사:** 공식 Native CLI·실제 가입/로그인/대화/EES API·임시 SQLite에서 `--navigation-only` **PASS(exit0)**. 기존 AP 모의 결과를 API로 준비하고 같은 완료 기록을 사용했다. inline 1920×1440은 자연스럽게 본문에 배치됐으며 T 검색 AP/완료 필터/펼침·초점과 원래 스크롤0을 보존했다. dock 1366×768은306→306과 같은 상태/초점을 보존했다. 둘 다 T→P와 원래 T 행 초점, 사이드바 직접 진입·닫기/재열기·완료 기록 보존을 확인했고 관측 HTTP 오류는0이다. 기본 T의 페이지는1–1/1이며 비기본 페이지 검증은 위 60J fixture 근거다. HTTP/auth/model stub은 사용하지 않았고 실제 외부 AP/모델은 호출하지 않았다.
+
+전체 앱 준비에서 누락된 upstream `azure.identity`/`fpdf` 의존성, 설치 완료 전 실행 경합, AP 본문이1920×1080에서 자연스럽게 dock인 데 대한 잘못된 inline 가정, 두 번째 검색의 Ctrl+A 키 코드 누락(APAP)을 각각 환경/시험 조작 실패로 보존했다. 이전 실제 앱은 잘못된 AP 상위 링크와 BODY 초점이 관측됐으나 진단 필드 누락으로 `KeyError` 종료됐으므로 clean 제품 assertion FAIL로 바꾸지 않는다. 화면 높이/키 입력/진단 필드를 보완한 최종 실행이 위 PASS다. 단일 `.venv` Python3.11.16의 최초46패키지 버전은 유지했고 GPU·모델을 설치/다운로드하지 않았다. 사내 환경은 변경하지 않았다.
+
+**관련 단위·산출물 확인:** 최초 신규 VM fixture는 완료 기록이 없어 CTA가 생성되지 않았고 준비를 바로잡은 뒤 inline/dock 두 조건의 실제 회귀를 재현했다. 제품 보완 후 기존43+신규1인 panel **44 PASS, 9.031초**이며 detach→닫힌 동안 갱신→재열기를 포함한다. 반복 실행을 고유 시험 수에 합산하지 않는다. 최종 제품 JS SHA256은 `050927cc2e242d86022d489ba5c2f182f37a3cb360430572e1e495f7d3352ac7`, wheel은 `c12d6f9e8d0f9c2325ed7a8cff5cefe29317ba5425ea6353b4eb3a2cd11af45a`다. 관련20자산의 source/wheel byte 일치와 JS 구문을 확인했다.
+
+로그/화면/JSON은 Work의 `dist/c-return/` 아래 `browser-before.log`, `browser-before/c-return-before-compact.json`, `browser-after.log`, `browser-deep-before.log`, `browser-final.log`, `browser-final/`, `fullapp/final-navigation-run.log`, `fullapp/final-navigation/`와 `dist/return-fix/panel-final.log`에 있다. 큰 원본 BODY 진단은 보존하되 검토용 증거는 초점의 tag/id/action/node와 좌표만 제공한다. 최종 실제 앱 완료 화면과 복원 목록 PNG를 직접 확인했다.
+
+```bash
+# EES_TEST_CHROME은 기존 Chrome153, EES_TEST_UPSTREAM_WHEEL은 고정 공식0.11.3 wheel 경로다.
+PYTHONPATH=tests EES_TEST_BRANDING_DIR=dist/c-return/final EES_TEST_SCREENSHOT_DIR=dist/c-return/browser-final .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -v test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_completed_return_inline_restores_task_list_and_parent_navigation test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_completed_return_dock_restores_task_list_and_parent_navigation test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_completed_return_preserves_incomplete_filter_when_finished_row_disappears
+.venv/bin/python tests/ees_work_c_phase1_app.py --navigation-only --wheel dist/c-return/final/open_webui-0.11.3+ees.12-py3-none-any.whl --chrome "$EES_TEST_CHROME" --output dist/c-return/fullapp/final-navigation
+```
+
+**문서 검사:** 처음에는 전체 앱 import 진단용 upstream 추출본의 1MiB 초과 CHANGELOG가 저장소 아래 남아 `document_too_large`로 실패했다. 진단용 추출본을 저장소 밖 작업 디렉터리로 옮겨 보존한 뒤 **30파일·1,287링크·오류0·검토 후보0**으로 통과했다. 저장소 문서나 증거를 삭제하지 않았으며 `git diff --check`도 PASS다.
+
+**미실행:** 이번 복귀 변경과 무관한 1차 전체 수락/런타임·인증·게시·권한 광역 검사는 반복하지 않았다. 외부 API/모델·Windows·사내 실사용, 2차 모든 J/P/T·예외 확대와 3차 통합 회귀는 미실행이다. `[skip ci]`와 09-30까지 원격 CI 생략 지침을 유지한다.
 
 <a id="shared-native-runtime-20260925"></a>
 
