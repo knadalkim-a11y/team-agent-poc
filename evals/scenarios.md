@@ -12,6 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| C안 공통 외형과 대표 J 1단계 | [C안 실조회·대표 AP 저장/실패/재시도·#65 보존과 미실행](#c-design-phase1-20260928) |
 | 공통 Native 도구와 P/T 지속 실행 | [TR-01~24·두 읽기 사례·실제 Native/합성 경계·재시작·미실행](#shared-native-runtime-20260925) |
 | 시스템 담당자의 P별 작성·게시와 첫 이용 | [SA-01~28·NU-01~08·Native 재사용·세션 한계·사내 OP 확인](#system-authoring-20260924) |
 | A안 상태·실행 상세 구현 | [Figma 실조회와 제품 수락 A-01~A-11·실패/검증/미실행 구분](#a-design-20260923) |
@@ -48,6 +49,79 @@
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="c-design-phase1-20260928"></a>
+
+## 2026-09-28 C안 1단계: 공통 외형과 대표 J
+
+**시작·보존:** 최신 원격 main과 로컬 시작 HEAD는 #65 병합본 `e995fe16e4835f2d1799c95f3d6d1b74ce381389`다. 같은 PR의 병합/배포 준비는 완료된 기록으로 보존하며 새 사내 적용 보고는 없다. 기존 Draft #53은 그대로 두고 `feat/ees-c-phase1-20260928`의 깨끗한 원본에서 시작했다. 별도 외부 원본의 Windows 작업 52경로는 덮어쓰거나 이 브랜치에 섞지 않았다. AGENTS/STATUS·관련 코드/기존 검사 결과를 읽었고 완료된 A안/#65 광역 검사를 반복하는 범위로 확대하지 않는다.
+
+**Figma 읽기:** 파일 `XK2wTos6sEuxSHhIj7cqg6`, 페이지 `582:131` **정제안 · EES Work 09.28**, 보드 `603:963` 오른쪽 C안과 [TASK의 9개 노드](../docs/mockups/ees-work/TASK.md#c-design-phase1-20260928)를 대조한다. `2026-09-28T07:51:57Z~07:52:15Z`에 design context 9개, 초기 screenshot9개·1920 추가3개·metadata4개를 조회했고 기록 시점은 `07:55:24Z`다. 근거는 Work의 `c-design-evidence/c-design-review.json`·각 노드 render이며 Figma 원본 수정은 없다. Prototype 조작/키보드, SVG 원본 크기 검증, 별도 dark/responsive Figma 노드는 미검수다. 정적 asset 다운로드의 차단과 세부 한계는 조회 기록대로 남기며 모든 asset 원본이 일치한다고 선언하지 않는다. 이 조회를 제품 PASS로 표시하지 않는다.
+
+**1단계 완료 조건:** 공통 패널 비율/여백/글자·제목/상태·입력 저장과 실행 분리·보조 상세·독립 스크롤을 실제 제품에 적용하고 기존 `ap-j` 모의 점검의 저장→실패→명시적 재시도→완료/이력을 끝까지 확인한다. 같은 태스크의 DB 표시를 대조하고 #65 Native 계획/입력/runtime은 관련 smoke로 보존을 확인한다. 업무 이름 분기·새 executor·가짜 타이머는 추가하지 않는다. P/T 참조 조회나 공통 CSS 영향만으로 전체 J/P/T/예외 수락을 선언하지 않는다.
+
+**구현과 의도된 차이:** 제품 변경은 `ees-work-view.js`와 `ees-work-launcher.css` 두 UI 파일이다. 서버·인증·저장·실행 controller를 바꾸지 않고 ees.12/Pack0.2.14를 유지한다. 입력은 **입력 저장**, 실행/재시도는 **모의 점검 실행/다시 모의 점검**으로 분리하고 최신 결과가 있으면 **입력 변경**을 접어 결과를 우선한다. 본문이 길 때 같은 실행 영역을 패널 하단으로 옮겨 한 번만 표시하며 짧으면 본문 안에 둔다. 완료 뒤 기존 부모 선택은 **단계로 돌아가기**, 조건 판정은 실제 **충족/미충족**이다. **더 보기**의 현재 작업/실행 이력과 기존 읽기 전용 자료 dialog를 재사용한다. 공장 기본 입력으로 이미 실행 가능한 기존 서비스 조건을 임의의 저장 필수 gate로 바꾸지 않는다.
+
+Native sidebar는 기본245px와 기존 사용자 설정을 보존한다. Figma1920 대조는 실제 Native 조절로312px를 만들어 비교하며 강제 CSS312px로 내부 크기 조절 상태를 바꾸지 않는다. 오른쪽 기본840px는 실제 가용 폭과 사용자 조절에 맞춘다. 실제 작업6개·DB3/AP4 점검과 실제 시도/결과를 쓰며 Figma120개·점검2개·시도#2/#3을 상수로 넣지 않는다.
+
+**계약/패키징 회귀:** 아래 로그는 `dist/c-phase1/checks/`에 있다. 실패 후 집중 재검을 clean 전체 재실행으로 합산하지 않는다.
+
+| 실행 | 관측·수정과 결과 |
+|---|---|
+| panel v1 | 43건 중38 PASS/4 FAIL/1 ERROR, 7.931초(`panel-v1.log`). 이동한 단일 action 영역의 외부 form 조회와 최소 DOM mock 기대를 보완 |
+| panel v2 | 43건 중42 PASS/1 FAIL, 7.649초(`panel-v2.log`). mock classList 보완 뒤 해당1건 PASS0.091초(`panel-focus-retest.log`) |
+| panel v3 / 부모 복귀 | 43건 중42 PASS/1 FAIL, 8.805초(`panel-v3.log`). 새 명시적 부모 복귀 버튼의 옛 개수 기대를 비변경/primary1개로 맞춤. 명령 치환이 적용되지 않은 중간22건은1 FAIL1.499초, 수정 후 부모1+controller21은22 PASS1.678초(`panel-return-controller-v3-final.log`) |
+| controller / 실행 Node | 초기 controller21 PASS1.257초와 실행 Node9 PASS27.992ms. v3 실행 Node9 PASS38.812ms(`execution-ui-v3.log`); 같은 시험의 중복 고유 수로 더하지 않음 |
+| v4 스크롤 계약 | 관련 panel1 PASS0.078초(`panel-scroll-v4.log`); 실제 브라우저 보존은 별도 |
+| builder | 공식 wheel을 사용한25 PASS18.551초(`builder-v3.log`). 새 제품 전체 앱 기동/사내 실행 성공을 뜻하지 않음 |
+
+**조립 frontend+실제 서비스의 브라우저 검사:** 변경 전 AP 대표 기준은 **1 PASS3.580초**(`dist/c-phase1/baseline-ap-v4.log`)다. 그 전 case 입력 준비 오류1 ERROR1.960초·selector 기대1 FAIL3.034초와 helper class의 의도하지 않은 광역 discovery 중단을 보존한다. 중단한 실행의 전체 수를 추정하거나 완료된 광역 검사로 표시하지 않는다. 이 환경은 실제 제품 frontend/Chrome·WorkflowService/SQLite를 사용하지만 Native 인증·chat HTTP는 합성 fixture다.
+
+C v2 첫 묶음은 **3건 중2 PASS/1 FAIL8.069초**(`browser-v2.log`)다. AP 대표와 #65 실행 smoke는 통과했고 layout은 Native resize 위치를 toolbar가 가린 시험 조작 실패였다. 실제 hit target으로 고친 뒤 transition 중278.9px를 판정한 재검1 FAIL2.060초를 거쳐 settled width 대기로 **1 PASS4.897초**(`browser-v2-layout-retest2.log`)다. 1920×1080/1536×960/1366×768과 Native312px 조절·DB 대상 `테스트 DB-A · 예시`·긴 P/T/J·dialog를 검사하며 이 준비 오류들을 제품 결함으로 표시하지 않는다.
+
+별도의 v2 제품 화면 확인에서 하단 sticky 실행 영역이 본문 끝을 지나 viewport에서 사라지는 결함을 발견했다. 같은 물리 action 영역을 overflow 때만 패널 footer로 옮기고 버튼을 복제하지 않는 v3 보완을 했다. v3 브라우저는 **5건 중3 PASS/2 FAIL14.828초**(`browser-v3.log`): AP·double-click/held-Enter·사람 확인 취소는 통과했고, layout의 CDP keypress 시험 경로와 같은 J 갱신 뒤 scrollTop18→2의 실제 회귀를 구분했다. 후자는 임시 dock 배치 때 스크롤 상한이 줄어든 상태에서 복원한 문제로 v4에서 배치 뒤 복원하도록 수정했다. 두 실패의 v4 재검은 **2 PASS8.647초**(`browser-v4-retest.log`)다. 실제 요청 대기와 공장별 이력의 추가 관련 재검 **2 PASS6.732초**(`browser-v4-history.log`)도 확인했다. 앞선 전체 실패를 clean 전체 PASS로 바꾸거나 같은 시험을 고유 수에 더하지 않는다.
+
+**전체 Native 앱 검증의 별도 경로:** 공식 Open WebUI 전체 앱/CLI·임시 DATA_DIR·합성 계정으로 baseline 기동·Native 인증/대화·재기동 보존을 확인했고 v2의 AP 실패/재시도·P/T/닫기·재열기까지 실제 Native HTTP로 확인했다. 이는 위 HTTP fixture와 다르지만 실제 외부 LLM/AP를 호출하지 않았다. 준비 중 누락 의존성(authlib/chromadb/black), raw uvicorn 진입의 packaged frontend404, PYTHONPATH/FROM_INIT_PY·Chrome/locale 조작 문제를 환경/하네스 실패로 보존한다. 영구 재현 도구 `tests/ees_work_c_phase1_app.py`의 최종 결과는 아래에 분리하며 인증 전체 정책/사내 수락으로 확대하지 않는다.
+
+전체 앱은 같은 저장소 `.venv`의 Python3.11.16을 사용한다. 기존 CI45개 패키지를 유지하고 공식 wheel1개·앱 기동용 지원 패키지146개를 추가한 현재192개 distribution을 `dist/c-phase1/fullapp/environment-packages.json`에 기록했다. 설치 로그는 `install-{launch,api,retrieval,utils}-deps.log`이며 회사 환경을 설치/수정한 것이 아니다. OFFLINE_MODE/HF_HUB_OFFLINE과 외부 모델 API 비활성 구성을 사용하고 GPU/torch/Whisper 등 모델을 내려받지 않았다. baseline/custom 프로그램만 각각 추출하고 같은 Python으로 공식 CLI를 실행하며 시험 DATA_DIR·SQLite·키·포트는 임시로 격리한다.
+
+**제품 시각 검토:** 독립 v2 이미지 대조의 7개 finding(완료 복귀/문구, 조건 판정 강조, 실제 예정 점검 행, 결과 제목/자료 버튼, 단계 간격, J행 전용 상태점, 입력 테두리)을 v3에 반영했다. `2026-09-28T08:19:21Z` 최종 독립 검토는 v3 DB1920/실패/완료와 v4 긴 본문1366 PNG를 실제 열어 위 항목 해소와 가로 넘침/실행 영역 가림 없음을 확인했다. 원본은 Work의 `c-design-evidence/c-product-final-independent-review.json`이며 각 PNG hash를 기록했다. 독립 검토자가 키보드/권한/저장을 직접 실행한 결과는 아니다.
+
+v3/v4 검토 당시 남은 비차단 차이는 실패 조건 바탕의 기존 soft `#f5f7fa`와 실패 badge의 red tint였으며, v5에서 Figma attention `#f9f8f5` 기준으로 보완해 재검했다. Native 브랜드/대화/입력창·사용자 sidebar 폭, 실제 입력 schema/점검 수·같은 실행 요소의 overflow footer 배치는 의도된 차이다. 픽셀 완전 일치나 2단계 전체 상태 검수 완료로 선언하지 않는다.
+
+v4에서 완료 뒤 입력 변경의 현재 완료 무효화/이전2개 이력 보존과 조회 실패·접근 제한 뒤 stale 자료 숨김은 **2 PASS6.430초**(`browser-v4-boundaries.log`)로 추가 확인했다. dark 대비/초점을 보강한 layout 재검은 **1 PASS5.653초**(`browser-v4-final-layout.log`)였으나 이후 독립 시각 검토에서 최대160자 J 제목이 status badge를 헤더 상한 밖으로 미는 실제 결함을 발견했다. 기존 PASS가 이 clipping 경계까지 확인한 것은 아니다. 제목/상태 행을 보완한 v5 CSS와 실제 badge clipping bounds 검사는 **1 PASS5.885초**(`browser-v5-final-layout.log`)다. 340px 패널의 상위 경로72px/본문245px에서 상태32px의 가시성과 hit test를 확인했다. 1920/1536/1366의 패널 폭840/648/563px·대화827/635/550px, 독립 스크롤·단일 action의 상/중/하 위치·light/dark 대비4.5 이상·Native 글꼴/초점도 검사했다. v4의 초기 PASS와 뒤늦게 발견한 시각 결함을 지우지 않는다.
+
+**v4 중간 원본과 재현 명령:** 제품 wheel SHA256은 `a967e61ecc86d93cde8399916e89151d7055d5b34a23fd4a6a6f1f6fd887c466`다. 공식 wheel은 기존 외부 캐시의 고정 `open_webui-0.11.3-py3-none-any.whl`을 `EES_TEST_UPSTREAM_WHEEL`로 지정해 재사용했다. 아래는 해당 관련 검사의 실행 명령이며 builder는 실행 당시 v3 묶음이다.
+
+```bash
+.venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_panel.py -v
+PYTHONPATH=.:tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_panel.WorkPanelTests.test_completed_job_preserves_parent_access_without_recommending_next_job test_ees_work_controller -v
+PYTHONPATH=.:tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_panel.WorkPanelTests.test_panel_scroll_resets_for_new_target_but_survives_same_job_refresh -v
+node tests/test_ees_execution_ui.cjs
+EES_TEST_BRANDING_DIR=dist/c-phase1/build-v3 .venv/bin/python -m unittest discover -s tests -p test_ees_branding_build.py -v
+```
+
+**최종 v5 제품 검사:** wheel SHA256은 `feaf4d954128d013c804959f84e2aa1e25f7332c9a07a2a4bb64dfd485088ebf`다. 최종 문서 검사는60파일·2,557링크·오류0·검토 후보0, `git diff --check`도 PASS다. 조립 frontend+서비스 fixture의 선별 회귀는 신규 AP/layout/#65 실행3건과 기존 double-click/사람 취소/management/요청 대기/공장 이력/조회 실패6건의 **고유9건**을 확인했다. 한 번의9건 전체 실행이 아니라 위 버전별 선별 결과이며 v5 CSS만 보완한 뒤 layout1건을 재검했다. 이전 business 검사는 관련 코드가 바뀌지 않은 범위로 재사용한다. Native polling/자산 권한 전체 회귀는 이번에 다시 실행하지 않았다.
+
+최종 전체 앱 gate는 **PASS(exit0)**다(`dist/c-phase1/fullapp/v5-check.log`, `v5/fullapp-result.json`). 공식 upstream wheel SHA256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`에서 실제 Native 첫 가입(합성 admin)·chat 생성을 한 뒤 같은 임시 DB/키로 v5 제품을 기동했다. 실제 signin과 같은 identity/chat 보존, EES case/선행3작업의 API 준비, Chrome P/T/AP → 직접 입력 저장 → Page.reload/패널 재열기에서 case/chat/입력·attempt0 보존 → AP 첫 실패/명시적 재실행 완료 → 첫 실패 이력/입출력 → 닫기/복귀를 확인했다. 관측한 브라우저 API 오류는0이며 1920/1366×768 PNG도 직접 확인했다. 별도의 전체 검사 경과시간은 측정하지 않았다. HTTP/auth/model stub은 없고 외부 모델/API를 비활성화했으며 AP는 제품에 선언된 모의 점검이다. 가입 승인·모든 권한·실제 외부 실행까지 새로 통과한 것은 아니다.
+
+브라우저 최종 실행은 기존 Chrome 경로를 `EES_TEST_CHROME`에 지정한 다음 아래 명령을 사용했다. v2/v3/v4도 같은 환경에서 해당 build와 method를 선별했다. baseline AP 로그는 당시 검사 소스의 결과이며 현재 C안 assertion을 과거 wheel에 그대로 적용하지 않는다. 전체 앱 CLI는 공식 wheel/Chrome의 기존 환경 변수를 재사용한다.
+
+```bash
+PYTHONPATH=tests EES_TEST_BRANDING_DIR=dist/c-phase1/build-v5 EES_TEST_SCREENSHOT_DIR=dist/c-phase1/browser-v5-final .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -v test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_three_sizes_long_forms_fixed_header_and_dialog_focus
+.venv/bin/python tests/ees_work_c_phase1_app.py --wheel dist/c-phase1/build-v5/open_webui-0.11.3+ees.12-py3-none-any.whl --baseline-wheel "$EES_TEST_UPSTREAM_WHEEL" --chrome "$EES_TEST_CHROME" --output dist/c-phase1/fullapp/v5
+```
+
+| ID | 1단계 제품 확인 | 현재 결과 |
+|---|---|---|
+| C1-01 | 공통 가용 폭·제목/상태·글자/여백·긴 한글/작은 창/테마·독립 스크롤 | v5 layout PASS. 160자/340px 상태 clipping·최종 가시성 포함, 의도된 Native/token 차이는 위에 명시 |
+| C1-02 | AP 입력 저장·재접속 후 case/입력 보존·실행 횟수 불변 | fixture AP와 v5 전체 Native 앱의 직접 저장/reload PASS; attempt0·동일 case/chat 보존 |
+| C1-03 | 실제 요청 대기·첫 실패·명시적 재시도 성공·과거 실패 이력 보존 | fixture의 실제 서비스 대기/중복 방지와 v5 전체 앱 실패→재실행·첫 실패 이력 보존 PASS |
+| C1-04 | 결과/완료 조건·선택한 시도/호출 I/O 일치·입력 변경 후 현재 완료 무효화 | v4 경계2건과 v5 전체 앱의 저장된 과거 I/O 조회 PASS. lookup 실패/접근 제한 후 stale 자료 숨김 포함 |
+| C1-05 | T 복귀/닫기/재열기의 선택·초안·스크롤·초점·조절 폭과 같은 태스크 DB 표시 | v4 same-J 스크롤/공장 이력·초안과 v5 layout·전체 앱 복귀 PASS. DB 표시를 Native312px 조절로 비교 |
+| C1-06 | 기존 Native 계획/입력·접수/완료·재접속/polling과 사용자 자산/권한 보존 범위 | #65 fixed 계획/접수·실제 서비스 worker/재접속 선별1건 PASS(v2). polling/자산 권한 전체는 이번 미실행·이전 유효 근거 유지; 서버/권한 코드 변경 없음 |
+
+**판정과 미실행:** 1단계의 위 명시된 범위는 확인했다. Figma/이미지 대조, 조립 frontend+서비스 fixture, 공식 전체 Native 앱의 임시 데이터 검사는 각각 다른 근거다. 실제 외부 API/모델 호출·사내 계정/자료·전체 권한/동시 이용을 확인한 것으로 확대하지 않는다. 2단계 전체 J/P/T·예외, 3단계 통합 회귀/PR 마무리, main 병합·배포와 사내 수락은 이번 1단계 완료로 합산하지 않는다. 09-30까지 원격 CI 생략 방침을 유지하며 Windows·사내 OP 확인은 별도 미실행이다.
 
 <a id="shared-native-runtime-20260925"></a>
 

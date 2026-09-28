@@ -411,7 +411,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
                     self.run_button(html, node_id)
                     form = html.find("form", id="ees-work-inputs")[0]
                     self.assertEqual([field.attrs["name"] for field in form.find("input")], ["db"])
-                    self.assertTrue(form.find("button", id="ees-work-inputs-save", type="submit"))
+                    self.assertTrue(html.find("button", id="ees-work-inputs-save", type="submit", form=form.attrs["id"]))
                     self.assertEqual(form.find("input")[0].attrs["value"], case["site"]["db"])
         case = await self.ready(case)
         process, _ = self.render(case, "setup-p")
@@ -556,7 +556,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         html, _ = self.render(case, "scope-j")
         form = html.find("form", id="ees-work-document")[0]
         self.assertEqual(form.find("textarea", name="document")[0].text, new)
-        self.assertTrue(form.find("button", type="submit", **{"data-mutation": None}))
+        self.assertTrue(html.find("button", type="submit", form=form.attrs["id"], **{"data-mutation": None}))
         self.assertIn("검토 완료", self.run_button(html, "scope-j").text)
         self.assertFalse(self.section(html, "current-result").find(**{"data-status": "passed"}))
         previous, _ = self.render(case, "scope-j", detail=True, tab="input", attemptIndex=0)
@@ -753,7 +753,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
             form = html.find("form", id="ees-work-inputs")[0]
             self.assertEqual(form.attrs["data-node-id"], "db-j")
             self.assertEqual(form.find("input", name="db")[0].attrs["value"], definition["sites"]["us-a"]["db"])
-            save = form.find("button", type="submit")[0]
+            save = html.find("button", type="submit", form=form.attrs["id"])[0]
             self.assertEqual("disabled" in save.attrs, blocked)
             self.assertFalse(html.find(**{"data-status": "passed"}))
         excluded, _ = self.render(None, "interface-j", definition=definition,
@@ -945,8 +945,10 @@ return {blank,ready,excluded,html,connection,waiting};
         case = await self.step(case, "run", "db-j")
         html, _ = self.render(case, "db-j")
         parent = html.find("button", **{"data-action": "select", "data-node-id": "install-t"})
-        self.assertEqual(len(parent), 1)
-        self.assertNotIn("data-mutation", parent[0].attrs)
+        self.assertTrue(parent)
+        self.assertEqual(sum("ew-primary" in item.attrs.get("class", "") for item in parent), 1)
+        self.assertIn("단계로 돌아가기", " ".join(item.text for item in parent))
+        self.assertTrue(all("data-mutation" not in item.attrs for item in parent))
         self.assertFalse(html.find(**{"data-work-stage": "next"}))
         self.assertNotIn("다음 작업", html.text)
         self.assertFalse(html.find("button", **{"data-action": "run"}))
@@ -1026,8 +1028,8 @@ return original.map(scope=>({original:drafts.read(scope,saved,-1),created:drafts
 const input={name:'ap',value:'A',defaultValue:'A'},text={value:'D',defaultValue:'D'};
 const inputs={querySelectorAll:()=>[input]},documentForm={querySelector:()=>text};
 const note={hidden:true},next={dataset:{workSavedNext:'saved next'},textContent:'saved next'};
-const run={dataset:{workBaseUnavailable:'false'},disabled:false},content={innerHTML:'',contains:()=>false,querySelectorAll:()=>[]};
-const tabs={innerHTML:''},host={dataset:{},setAttribute(){},querySelector(selector){return ({'#ees-work-inputs':inputs,'#ees-work-document':documentForm,'#ees-work-content':content,'#ees-work-tabs':tabs,'[data-work-dirty]':note,'[data-work-next]':next,'[data-work-draft-sensitive]':run})[selector] || null;},querySelectorAll:selector=>selector==='button[data-mutation]'?[run]:[]};
+const run={dataset:{workBaseUnavailable:'false'},classList:{toggle(){}},disabled:false},content={innerHTML:'',contains:()=>false,querySelectorAll:()=>[]};
+const tabs={innerHTML:''},host={dataset:{},contains:()=>false,setAttribute(){},querySelector(selector){return ({'#ees-work-inputs':inputs,'#ees-work-document':documentForm,'#ees-work-content':content,'#ees-work-tabs':tabs,'[data-work-dirty]':note,'[data-work-next]':next,'[data-work-draft-sensitive]':run})[selector] || null;},querySelectorAll:selector=>selector==='button[data-mutation]'?[run]:[]};
 const divider={dataset:{},setAttribute(){}};
 globalThis.document={querySelector:()=>null,createElement:tag=>tag==='aside'?host:divider};
 globalThis.window={};
@@ -1070,7 +1072,7 @@ return {typed,reverted,documentTyped,documentReverted,observerKeptDisabled,block
     def test_panel_scroll_resets_for_new_target_but_survives_same_job_refresh(self):
         result = self.evaluate_drafts("""(() => {
 const content={innerHTML:'',scrollTop:0,contains:()=>false,querySelectorAll:()=>[]},tabs={innerHTML:''};
-const host={dataset:{},setAttribute(){},querySelector:selector=>({'#ees-work-content':content,'#ees-work-tabs':tabs}[selector] || null),querySelectorAll:()=>[]};
+const host={dataset:{},contains:()=>false,setAttribute(){},querySelector:selector=>({'#ees-work-content':content,'#ees-work-tabs':tabs}[selector] || null),querySelectorAll:()=>[]};
 globalThis.document={querySelector:()=>null,createElement:tag=>tag==='aside'?host:{dataset:{},setAttribute(){}}};globalThis.window={};
 const site={id:'a',name:'공장'},definition={version:1,sites:{a:site},tools:{},nodes:{p:{id:'p',type:'p',name:'절차',children:['t']},t:{id:'t',parent:'p',type:'t',name:'단계',children:['j']},j:{id:'j',parent:'t',type:'j',name:'작업',mode:'manual'}}};
 const current={id:'first',version:1,revision:1,site,system:'EMS',process_id:'p',status:'in_progress',definition,jobs:{j:{status:'pending',inputs:{},history:[]}},node_states:{j:{status:'pending'}}};

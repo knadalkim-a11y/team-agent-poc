@@ -310,7 +310,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                 self.click('[data-action="job_filter"][data-filter="all"]')
                 control = '#ees-work-content [data-work-job="' + node_id + '"] [data-action="select"]'
         self.click(control)
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === "
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === "
                   + json.dumps(selected["name"])
                   + " && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
 
@@ -339,7 +339,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         saved = asyncio.run(self.server.workflow.get_state(self.server.user, case_id=created["id"]))["case"]
         self.assertTrue(all(job["attempt"] == 0 for job in saved["jobs"].values()))
         self.choose("setup-p", chat_id=chat_id)
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '신규 공장 횡전개'"
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '신규 공장 횡전개'"
                   + " && !document.querySelector('#ees-work-case-start')"
                   + " && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
         if chat_id:
@@ -480,7 +480,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                 for kind, node in (("p", "setup-p"), ("t", "install-t"), ("j", "db-j")):
                     self.choose(node)
                     self.hover()
-                    selectors = {"panel": "#ees-work-panel", "title": "#ees-work-content h2",
+                    selectors = {"panel": "#ees-work-panel", "title": "#ees-work-panel .ew-title",
                                  "site": "#ees-work-site-trigger", "system": "#ees-work-system-trigger",
                                  "nativeModel": "#model-selector-model-button", "chat": "#chat-input"}
                     if kind == "j":
@@ -699,7 +699,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                         const rect=s=>visible(s).getBoundingClientRect().toJSON();
                         return {fonts:[font('#chat-input'),font('#chat-container .chat-assistant .markdown-prose > p'),
                             font('a#sidebar-new-chat-button'),font('#ees-work-site-trigger'),font('#ees-work-system-trigger'),
-                            font('#ees-work-tree [data-action=select]'),font('#ees-work-content h2')],
+                            font('#ees-work-tree [data-action=select]'),font('#ees-work-panel .ew-title')],
                             code:font('#chat-container .chat-assistant code'),
                             site:rect('#ees-work-site-trigger'),system:rect('#ees-work-system-trigger'),
                             sidebar:visible('#ees-work-entry').closest('[role=navigation]').getBoundingClientRect().toJSON(),
@@ -801,7 +801,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertIn('1–1 / 1개 작업', self.text('.ew-work-pagination'))
         self.assertIsNone(self.read('[data-action="job_page"]'), "One page does not need disabled pagination")
         self.click('[data-work-job="bulk-104-j"] [data-action="select"]')
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '검증 작업 104'")
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '검증 작업 104'")
         self.assertEqual(self.current()['case']['selected_id'], 'bulk-104-j')
         sidebar_jobs = lambda: self.browser.evaluate(
             "[...document.querySelectorAll('#ees-work-tree .ew-step-job')].map(e=>e.dataset.nodeId)")
@@ -815,13 +815,13 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(self.read('#ees-work-job-search', 'value'), '작업 104')
         self.fill('#ees-work-job-search', '작업 000')
         self.click('[data-work-job="bulk-000-j"] [data-action="select"]')
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '검증 작업 000'")
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '검증 작업 000'")
         self.assertIn('담당자 확인이 완료됐습니다.', self.text('#ees-work-content'))
         self.assertIn('bulk-000-j', sidebar_jobs())
         self.choose('bulk-t')
         self.fill('#ees-work-job-search', '작업 052')
         self.click('[data-work-job="bulk-052-j"] [data-action="select"]')
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent.includes('검증 작업 052')")
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent.includes('검증 작업 052')")
         self.assertIn('bulk-052-j', sidebar_jobs())
         self.assertEqual(sidebar_jobs(), sorted(sidebar_jobs()), 'Summary preserves definition order')
         self.fill('#ees-work-inputs input[name="db"]', '중간 작업의 미반영 입력')
@@ -837,7 +837,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             self.click('[data-action="job_page"][data-page="' + str(page) + '"]')
         self.assertIn('101–105 / 105개 작업', self.text('.ew-work-pagination'))
         self.click('[data-work-job="bulk-104-j"] [data-action="select"]')
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '검증 작업 104'")
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '검증 작업 104'")
         self.choose('bulk-052-j')
         self.assertEqual(self.read('#ees-work-inputs input[name="db"]', 'value'), '중간 작업의 미반영 입력')
         self.assertEqual(self.text('#chat-input'), '대량 작업 탐색 중인 대화 초안')
@@ -874,9 +874,9 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.click('.ew-work-job-finder > summary')
         self.assertTrue(self.read('.ew-work-job-finder', 'open'))
         self.click('[data-work-job="bulk-000-j"] [data-action="select"]')
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '검증 작업 000'")
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '검증 작업 000'")
         self.click('[data-action="panel_back"]')
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '대량 작업 검증'")
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '대량 작업 검증'")
         self.assertTrue(self.read('.ew-work-job-finder', 'open'),
                         'Returning to P must preserve a manually expanded finder even with no query or filter')
         distribution = self.text('[data-work-distribution="bulk-t"]')
@@ -884,7 +884,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertIn('실행 연결 필요 1', distribution)
         self.assertEqual(self.text('[data-work-metric="attention"] strong'), '2개 작업')
         self.click('#ees-work-content [data-action="select"][data-node-id="bulk-t"]')
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '대량 검증 단계'"
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '대량 검증 단계'"
                   + " && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
 
         def capture_expanded_condition(kind, selector):
@@ -937,11 +937,11 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         scroll = self.read('#ees-work-content', 'scrollTop')
         self.assertGreater(scroll, 0)
         self.click(dependency)
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '검증 작업 000'"
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '검증 작업 000'"
                   + " && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
         self.assertEqual(self.read('#ees-work-content', 'scrollTop'), 0)
         self.click('[data-action="panel_back"]')
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '대량 검증 단계'"
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '대량 검증 단계'"
                   + " && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
         self.assertEqual(self.read('#ees-work-job-search', 'value'), '검증 작업')
         self.assertEqual(self.read('[data-action="job_filter"][data-filter="incomplete"]', 'getAttribute("aria-pressed")'), 'true')
@@ -952,10 +952,10 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.hover()
         self.screenshot('ees-right-t-condition-return-preserved')
         self.click('[data-work-job="bulk-030-j"] [data-action="select"]')
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '검증 작업 030'"
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '검증 작업 030'"
                   + " && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
         self.click('[data-action="panel_back"]')
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '대량 검증 단계'"
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '대량 검증 단계'"
                   + " && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
         self.assertEqual(self.read(toggle, 'getAttribute("aria-expanded")'), 'true')
         self.choose('bulk-052-j')
@@ -1029,7 +1029,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                         self.assertIsNone(self.read('.ew-work-next'))
                         self.assertNotIn('지금 할 일', self.text('#ees-work-content'))
                         self.assertNotIn('다음 할 일', self.text('#ees-work-content'))
-                        self.assertGreaterEqual(self.visual_style('#ees-work-content h2')['contrast'], 4.5)
+                        self.assertGreaterEqual(self.visual_style('#ees-work-panel .ew-title')['contrast'], 4.5)
                         self.screenshot('ees-right-' + kind + '-' + theme + '-' + str(width))
                     case = self.current()['case']
                     self.assertIn(case['jobs']['ap-j']['inputs'].get('ap', case['site']['ap']),
@@ -1126,12 +1126,12 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     for node_id in targets:
                         self.choose(node_id)
                         self.hover()
-                        self.assertEqual(self.text('#ees-work-content h2'), definition['nodes'][node_id]['name'])
+                        self.assertEqual(self.text('#ees-work-panel .ew-title'), definition['nodes'][node_id]['name'])
                         layout = self.browser.evaluate("""(()=>{
                             const box=s=>document.querySelector(s).getBoundingClientRect().toJSON();
-                            const title=document.querySelector('#ees-work-content h2'),content=document.querySelector('#ees-work-content');
+                            const title=document.querySelector('#ees-work-panel .ew-title'),content=document.querySelector('#ees-work-content');
                             return {chat:box('#chat-pane'),composer:box('#chat-input'),panel:box('#ees-work-panel'),
-                                title:box('#ees-work-content h2'),titleHeight:title.clientHeight,titleScroll:title.scrollHeight,
+                                title:box('#ees-work-panel .ew-title'),titleHeight:title.clientHeight,titleScroll:title.scrollHeight,
                                 titleWidth:title.clientWidth,titleScrollWidth:title.scrollWidth,
                                 font:parseFloat(getComputedStyle(title).fontSize),contentHeight:content.clientHeight,
                                 contentScroll:content.scrollHeight,pageWidth:document.documentElement.scrollWidth};})()""")
@@ -1281,7 +1281,11 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     self.assertIsNone(self.read('[data-call-output]'))
                     self.assertIsNone(self.read('.ew-detail-outcome'))
                     self.key('Escape', 27)
+                    if not self.read('.ew-panel-menu', 'open'):
+                        self.click('.ew-panel-menu > summary')
                     self.click('#ees-work-run-view [data-action="history_view"]')
+                    if not self.read('.ew-panel-menu', 'open'):
+                        self.click('.ew-panel-menu > summary')
                     self.click('#ees-work-run-view [data-action="current_view"]')
                     self.click('[data-action="work_detail"][data-detail-tab="output"]')
                     self.assertEqual(self.read('[data-record-state]', 'dataset.recordState'), expected,
@@ -1425,7 +1429,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         next_job = '#ees-work-tree [data-action="select"][data-node-id="ap-j"]'
         self.assertIsNotNone(self.read(next_job))
         self.click(next_job)
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === 'AP 연결 확인'")
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === 'AP 연결 확인'")
         self.assertEqual(self.current()["case"]["jobs"]["ap-j"]["attempt"], 0)
         self.assertEqual(self.current()["case"]["jobs"]["db-j"], after)
 
@@ -1545,7 +1549,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     # keyboard. Both must select P without creating/running work.
                     before = self.current()["case"]
                     self.click('.ew-workflow-summary .ew-step-meta')
-                    self.wait("document.querySelector('#ees-work-content h2')?.textContent === '대량 작업 검증'")
+                    self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '대량 작업 검증'")
                     self.hover()
                     selection_styles["p"] = self.visual_style('.ew-workflow-summary > button')
                     if theme == "light":
@@ -1568,12 +1572,12 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     # CDP needs the Enter character to produce the browser's
                     # native button activation, in addition to keydown/keyup.
                     self.key("Enter", 13, text="\r")
-                    self.wait("document.querySelector('#ees-work-content h2')?.textContent === '대량 작업 검증'")
+                    self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '대량 작업 검증'")
                     self.assertEqual(self.current()["case"]["jobs"], before["jobs"])
                     self.choose("bulk-t")
                     self.browser.evaluate("document.querySelector('.ew-workflow-summary > button').focus()")
                     self.key(" ", 32)
-                    self.wait("document.querySelector('#ees-work-content h2')?.textContent === '대량 작업 검증'")
+                    self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '대량 작업 검증'")
                     self.assertEqual(self.text('#chat-input'), "선택 중에도 보존할 미전송 대화")
                     self.assertEqual(self.server.completions, [])
                     self.choose("bulk-t")
@@ -1979,7 +1983,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-action=work_records]')"))
         self.assertIsNone(self.read('#ees-work-content [data-action=work_summary]'))
         self.choose('setup-p')
-        self.assertEqual(self.text('#ees-work-content h2'), '신규 공장 횡전개')
+        self.assertEqual(self.text('#ees-work-panel .ew-title'), '신규 공장 횡전개')
         self.assertEqual(self.current()['case']['jobs'], before['jobs'])
 
     def test_workspace_ai_cancel_and_account_change_preserve_saved_assets(self):
@@ -2397,6 +2401,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         current = self.current()["case"]
         tree = self.text("#ees-work-tree")
         post_count = self.server.requests.count(("POST", "/api/ees-work/action"))
+        if not self.read('.ew-panel-menu', 'open'):
+            self.click('.ew-panel-menu > summary')
         self.click('#ees-work-run-view [data-action="history_view"]')
         history_selector = '[data-action="history_case"][data-case-id="' + past["id"] + '"]'
         self.wait("!!document.querySelector(" + json.dumps(history_selector) + ")")
@@ -2409,8 +2415,10 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(self.server.requests.count(("POST", "/api/ees-work/action")), post_count)
         self.assertIsNone(self.read("#ees-work-run"))
         self.screenshot("ees-native-factory-history-1920")
+        if not self.read('.ew-panel-menu', 'open'):
+            self.click('.ew-panel-menu > summary')
         self.click('#ees-work-run-view [data-action="current_view"]')
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === 'DB 연결 확인'")
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === 'DB 연결 확인'")
         self.assertEqual(self.current()["case"], current)
         self.select_scope("site", "hu-a")
         self.wait("location.pathname === '/c/other-chat'"
@@ -2495,7 +2503,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         result = self.browser.evaluate("window.__eesNativeWorkV1.display('',{case_id:"
                                        + json.dumps(second["id"]) + "})")
         self.assertTrue(result["ok"], result)
-        self.wait("document.querySelector('#ees-work-content h2')?.textContent === '신규 공장 횡전개'"
+        self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '신규 공장 횡전개'"
                   + " && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
         self.assertEqual(self.browser.evaluate("location.pathname+location.search"), original_url)
         self.fill("#chat-input", "두 번째 실행의 별도 초안")
@@ -2504,7 +2512,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.wait("performance.getEntriesByType('resource').filter(e=>e.name.endsWith('/api/ees-work/action')).length > " + str(before))
         self.assertEqual(self.text("#chat-input"), "두 번째 실행의 별도 초안")
         self.assertEqual(self.text("#ees-work-tree"), current_tree)
-        self.assertEqual(self.text("#ees-work-content h2"), "신규 공장 횡전개")
+        self.assertEqual(self.text("#ees-work-panel .ew-title"), "신규 공장 횡전개")
         first_state = asyncio.run(self.server.workflow.get_state(self.server.user, case_id=first["id"]))
         second_state = asyncio.run(self.server.workflow.get_state(self.server.user, case_id=second["id"]))
         self.assertEqual(first_state["case"]["jobs"]["scope-j"]["status"], "passed")
