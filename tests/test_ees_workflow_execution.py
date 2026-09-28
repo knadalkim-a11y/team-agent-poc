@@ -209,6 +209,77 @@ class ExecutionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([call["function"] for call in self.bridge.calls], ["search_pages", "get_page"])
         self.assertEqual(self.bridge.calls[-1]["arguments"]["page_id"], "42")
 
+    async def test_candidate_input_restore_keeps_dispatched_snapshot_and_rejects_stale_control(self):
+        """Current public inputs and the earlier call snapshot remain distinct."""
+        p = publish(self.service, examples.installation_docs_workflow(REFERENCES))
+        self.bridge.results["search_pages"] = envelope({"results": [{"page_id": "41"}, {"page_id": "42"}]})
+        run = await self.drain(await self.start(await self.plan(p=p, inputs={"query": "install", "space_key": "TEAM"})))
+        self.assertEqual(run["status"], "waiting_input")
+        search_call = deepcopy(run["calls"][0])
+        filled = await self.control(run, "inputs", inputs={"page_id": "42"})
+        self.assertTrue(filled["ok"], filled)
+        self.assertEqual(filled["run"]["calls"], [search_call])
+        self.assertNotIn("page_id", search_call["arguments"])
+        stale = await self.control(run, "resume")
+        self.assertEqual(stale.get("error", {}).get("code"), "revision_conflict", stale)
+        self.assertEqual(await self.state(run), filled["run"])
+
+        restored = build_service(self.database, self.bridge, self.model)
+        self.addAsyncCleanup(restored.execution.stop)
+        current = (await restored.execution_state(USER, run_id=run["id"]))["run"]
+        self.assertEqual(current, filled["run"])
+        case = (await restored.get_state(USER, case_id=run["case_id"]))["case"]
+        self.assertEqual(case["execution_inputs"]["page_id"], "42")
+        resumed = await restored.execution_action(USER, {"action": "resume", "run_id": current["id"],
+            "expected_revision": current["revision"], "request_id": "restored-candidate-resume"})
+        self.assertTrue(resumed["ok"], resumed)
+        self.service, self.runtime = restored, restored.execution
+        completed = await self.drain(resumed["run"])
+        self.assertEqual(completed["status"], "succeeded", completed)
+        self.assertEqual(completed["calls"][0], search_call)
+        self.assertEqual(completed["calls"][1]["arguments"]["page_id"], "42")
+        self.assertEqual([call["function"] for call in self.bridge.calls], ["search_pages", "get_page"])
+        changed = await restored.execution_plan(USER, {"case_id": run["case_id"], "node_id": p,
+            "inputs": {"page_id": "41"}})
+        self.assertEqual(changed.get("error", {}).get("code"), "input_change_requires_new_plan", changed)
+        self.assertEqual((await restored.execution_state(USER, run_id=run["id"]))["run"], completed)
+
+    async def test_human_confirmation_restores_without_fake_calls_and_requires_explicit_resume(self):
+        fragment = examples.installation_docs_workflow(REFERENCES)
+        human_id = "new-documents-page-j"
+        fragment["nodes"][human_id]["execution"] = {"protocol": 1, "kind": "human", "calls": [],
+            "completion": {"validator": "selection_v1", "version": 1, "input_key": "page_id", "choices": {
+                "job_id": "new-documents-search-j", "call_id": "search", "path": ["data", "results"], "value_path": ["page_id"]}},
+            "limits": {"timeout_seconds": 30, "max_tool_calls": 0, "max_model_calls": 0, "max_retries": 0}}
+        p = publish(self.service, fragment)
+        self.bridge.results["search_pages"] = envelope({"results": [{"page_id": "42"}]})
+        run = await self.drain(await self.start(await self.plan(p=p,
+            inputs={"query": "install", "space_key": "TEAM", "page_id": "42"})))
+        self.assertEqual(run["status"], "waiting_input")
+        self.assertEqual(run["jobs"][human_id]["reason"], "human_confirmation_required")
+        restored = build_service(self.database, self.bridge, self.model)
+        self.addAsyncCleanup(restored.execution.stop)
+        self.service, self.runtime = restored, restored.execution
+        self.assertEqual(await self.state(run), run)
+        confirmed = await self.control(run, "confirm", job_id=human_id)
+        self.assertTrue(confirmed["ok"], confirmed)
+        self.assertEqual(confirmed["run"]["status"], "paused")
+        self.assertFalse(await self.runtime.process_once(), "Human confirmation must not silently resume the scope")
+        self.assertEqual([call["function"] for call in self.bridge.calls], ["search_pages"])
+        self.assertEqual(self.model.calls, [])
+        case = (await restored.get_state(USER, case_id=run["case_id"]))["case"]
+        event = case["jobs"][human_id]["history"][0]
+        self.assertEqual(event["kind"], "human_confirmation")
+        self.assertEqual(event["checks"], [])
+        self.assertEqual(case["jobs"][human_id]["status"], "passed")
+        resumed = await self.control(confirmed["run"], "resume")
+        self.assertTrue(resumed["ok"], resumed)
+        completed = await self.drain(resumed["run"])
+        self.assertEqual(completed["status"], "succeeded", completed)
+        self.assertEqual(len(completed["calls"]), 1)
+        self.assertEqual([call["function"] for call in self.bridge.calls], ["search_pages"])
+        self.assertEqual((await restored.get_state(USER, case_id=run["case_id"]))["case"]["jobs"][human_id]["history"], [event])
+
     async def test_unknown_result_does_not_advance(self):
         self.bridge.results["jira_dashboard"] = envelope(status="unknown")
         run = await self.drain(await self.start())

@@ -566,10 +566,10 @@
 #ees-work-panel .ew-work-form {margin:0 0 24px;}
 #ees-work-panel .ew-work-form > h3,#ees-work-panel .ew-work-target > h3 {font-size:18px;line-height:28px;font-weight:600;margin:0 0 16px;}
 #ees-work-panel .ew-work-form label {font-size:14px;line-height:22px;margin:16px 0 0;gap:8px;}
-#ees-work-panel .ew-work-form :is(input,textarea) {border:1px solid var(--ew-muted);background:var(--ew-bg);border-radius:10px;padding:14px 16px;font-size:16px;line-height:26px;}
+#ees-work-panel .ew-work-form :is(input,textarea,select) {border:1px solid var(--ew-muted);background:var(--ew-bg);border-radius:10px;padding:14px 16px;font-size:16px;line-height:26px;}
 #ees-work-panel .ew-work-form input {height:56px;}
 #ees-work-panel .ew-work-form .ew-muted {font-size:13px;line-height:22px;margin-top:10px;}
-#ees-work-panel .ew-work-execute.ew-work-action-region {margin:0 0 24px;padding:0 0 24px;background:var(--ew-bg);border-bottom:1px solid var(--ew-line);}
+#ees-work-panel .ew-work-action-region {margin:0 0 24px;padding:0 0 24px;background:var(--ew-bg);border-bottom:1px solid var(--ew-line);}
 #ees-work-panel .ew-work-action-region .ew-work-actions {gap:12px;margin:0;}
 #ees-work-panel .ew-work-action-region .ew-work-actions > button {flex:0 1 auto;min-width:148px;max-width:100%;min-height:48px;padding:12px 20px;border-radius:10px;font-size:14px;line-height:24px;}
 #ees-work-panel .ew-work-action-region button:disabled {opacity:1;color:var(--ew-muted);background:var(--ew-soft);}
@@ -595,6 +595,12 @@
 #ees-work-panel .ew-work-detail-links {gap:12px;padding:0;margin:24px 0 0;border:0;}
 #ees-work-panel .ew-work-detail-links > button,#ees-work-panel .ew-work-procedure {flex:0 1 auto;min-width:148px;max-width:100%;font-size:13px;}
 #ees-work-panel .ew-work-detail-links > button,#ees-work-panel .ew-work-procedure > summary {padding:8px 32px;border:0;border-radius:4px;color:var(--ew-blue);background:transparent;text-align:center;}
+#ees-work-panel .ew-work-runtime-detail {flex:0 1 auto;max-width:100%;margin:0;}
+#ees-work-panel .ew-work-runtime-detail > summary {padding:8px 20px;color:var(--ew-blue);font-size:13px;line-height:22px;text-align:center;}
+#ees-work-panel :is(.ew-work-runtime-boundary,.ew-work-observations) {margin-block:16px;overflow-wrap:anywhere;}
+#ees-work-panel .ew-badge[data-status=succeeded] {color:var(--ew-good);background:var(--ew-good-bg,var(--ew-tint));}
+#ees-work-panel .ew-badge:is([data-status=waiting_input],[data-status=waiting_authorization],[data-status=waiting_dependency],[data-status=unknown]) {color:var(--ew-warning,var(--ew-ink));background:var(--ew-attention);}
+#ees-work-panel .ew-badge:is([data-status=queued],[data-status=paused],[data-status=cancelled]) {color:var(--ew-muted);background:var(--ew-soft);}
 #ees-work-entry .ew-step {margin:8px 0;padding:0;}
 #ees-work-entry .ew-step-label > strong {font-size:14px;font-weight:500;line-height:24px;}
 #ees-work-entry .ew-step-meta {font-size:13px;line-height:22px;margin-top:0;}

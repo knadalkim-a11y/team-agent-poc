@@ -12,6 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| C안 기존 유형·P/T·예외 2단계 | [대응표·실제 Native/제품·권한/기록·실패와 재검](#c-design-phase2-20260929) |
 | C안 공통 외형과 대표 J 1단계 | [C안 실조회·대표 AP 저장/실패/재시도·#65 보존과 미실행](#c-design-phase1-20260928) |
 | 공통 Native 도구와 P/T 지속 실행 | [TR-01~24·두 읽기 사례·실제 Native/합성 경계·재시작·미실행](#shared-native-runtime-20260925) |
 | 시스템 담당자의 P별 작성·게시와 첫 이용 | [SA-01~28·NU-01~08·Native 재사용·세션 한계·사내 OP 확인](#system-authoring-20260924) |
@@ -49,6 +50,51 @@
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="c-design-phase2-20260929"></a>
+
+## C안 기존 유형·P/T·예외 확대 · 2026-09-29
+
+**원본·범위:** [같은 Draft PR #66](https://github.com/knadalkim-a11y/team-agent-poc/pull/66)의 시작 head/로컬 `022cf239b038877efbc75dff7c6dd87f82317f51`, main `e995fe16e4835f2d1799c95f3d6d1b74ce381389`를 재조회했다. 로컬은 깨끗했고 두 대상 AGENTS는 같았다. main STATUS의 #65 병합 대기는 과거 안내로 판별해 반복하지 않았다. [TASK의 사전 대응표·완료 조건](../docs/mockups/ees-work/TASK.md#c-design-phase2-20260929)을 검토한 뒤 같은 view/CSS/controller를 수정했다. 기존 1단계·완료 복귀·공통 실행 및 backend 저장/API/인가 코드는 유지한다. Draft #53·별도 Windows 작업·실계정/자산·운영 DB/키에 쓰지 않았다.
+
+**디자인 검수:** 09-29 07:52~07:57 KST(09-28 22:52~22:57 UTC)에 Figma 파일 `XK2wTos6sEuxSHhIj7cqg6`의 비교 `603:963` 오른쪽 C안, J `582:132`, `584:169/405/634/869/1098`, P `586:555`, T `586:958/1397`의 context·속성·반환 렌더를 직접 읽었다. 원본 수정 없음. 08:04~08:06 KST에는 v2 제품 PNG 4개를 대조했다. Native에도 결과/기준→현재 입력→단일 행동→보조 상세를 적용하고 P/T 목록·집계·선택/조건 및 기존 복귀를 재사용한다. Figma의 예시 열 폭·고정 집계·타이머를 복제하지 않는다. Native 계획 입력은 기존 dialog의 명시적 시작, 대기 입력은 반영 후 명시 재개다. 340px의 긴 제목은 기존 36dvh 제목 스크롤, 본문·dock과 독립이다. Figma의 여섯 상태 밖 대기·미연결·제외·부분/취소/UNKNOWN·조회 실패도 보존한다. 이 검토를 제품 기능 PASS로 합산하지 않는다.
+
+**환경·합성 경계:** Linux, 기존 단일 `.venv`의 Python 3.11.16, Node v24.19.0, 공식 Chrome headless-shell 153.0.8010.52. 정리된 환경에서 Python 대상 실행 파일과 이전 디렉터리의 wheel/Chrome가 없어 같은 버전을 복구했다. 보존된 187개 의존성은 기존 검사 inventory와 전부 일치했다. 공식 wheel SHA-256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`을 확인했다. 새 인증/저장소/실행기를 만들지 않았다. 조립 Native frontend/Chrome 시험은 실제 EES HTTP 서비스·임시 SQLite와 합성 로그인/채팅·HTTP/모델 bridge를 사용한다. Native 예제 검사는 공식 로더·Users/Groups/ACL/Valves·SQLite·게시/실행이 실제이며 HTTP/모델 전송과 metadata만 합성이다. 전체 앱 CLI 검사는 별도로 기록한다. 사내 API/모델 품질·실계정·운영 DB·Windows 시험으로 확대하지 않는다.
+
+### 유형·상태별 판정
+
+| ID | 대응표 범위 | 현재 근거·판정 |
+|---|---|---|
+| C2-01 | legacy 모의·기본값·입력 저장·미연결·제외·선행 | 서비스 선별 PASS. 실제 브라우저 v2에서 빈 입력/동시 보호·미연결·제외·선행 및 범위 모의 실행 PASS. 기존 AP 저장/복원/실패/재시도 증거는 1단계 그대로 보존 |
+| C2-02 | legacy 사람 확인·초안 검토 | v2 실제 버튼의 확인 취소→확인, 가짜 입력 저장 없음, 초안 반영→검토 완료 PASS |
+| C2-03 | Native 고정 조회·T→P·AI | 실제 Native 예제/서비스 PASS. v6 실제 브라우저 고정 3회/모델 0회 T→P 근거 재사용/AI 1회, 실제 running 중 이동/닫기·재열기, 근거명/항목/값 6개 PASS |
+| C2-04 | 후보 선택/입력 대기→반영→재개 | v2 브라우저 PASS: 현재 page_id 저장·명시 재개, search call snapshot 불변·후속 get_page 인자, 상세 비교. 서비스 stale revision/재접속 신규 검사 PASS |
+| C2-05 | Native 사람 확인 | v2 브라우저 PASS: 확인→paused→명시 재개, 도구/모델 가짜 호출 없음. 실제 서비스/재접속 검사 PASS |
+| C2-06 | queued/running/paused/failed/cancelled/UNKNOWN·부분 결과 | v2 실제 중지/재개·취소/UNKNOWN·부분 J 판정과 P 전체 완료 구분 PASS. v5 실패 후 명시 새 계획/실행과 과거 실패 run/call 보존 PASS |
+| C2-07 | 승인·권한/선행 대기·미기록·조회 실패·접근 제한 | 서비스/Node PASS. v2에서 권한 대기→재개·두 조회 오류와 가시 재조회 회복 PASS. v5 동일 조건에서 열린 상세 즉시 제거(open=false/visible=false/retainedMarker=false)와 두 조회 실패→가시 재조회 복구 PASS |
+| C2-08 | P/T 집계·검색/필터/페이지·조건·범위 | 기존 서비스/패널 PASS. 하위 T 성공을 P 완료로 잘못 표시하거나 계획을 숨기던 중간 구현을 수정. 혼합 범위는 서비스가 허용하는 개별 J/T로 안내하며 전체 Native 계획을 만들지 않음 |
+| C2-09 | inline/dock 복귀·목록/스크롤/초점·닫기/재열기 | `panel_parent/returnPanel` 보존. v5 완료 복귀 3건 PASS(9.803초): 두 배치의 검색/필터/페이지/펼침/스크롤/초점, T→P, 직접 진입·panel_back·닫기/재열기·완료 행 소실 |
+| C2-10 | 3개 크기·긴 입력·좁은 패널·다크/키보드 | v2 1920×1080·1536×960·1366×768의 실제 계획/접수/취소와 340px·다크·Tab/Enter PASS. v5에서 긴 제목의 실제 휠 스크롤과 본문 가용 높이도 추가 PASS |
+| C2-11 | 현재 권한·동시 변경·기록/입력 보존 | 서비스 45건 및 controller/renderer PASS. v5 혼합 범위의 자식 경로 유지·Native 활성 중 legacy 입력 작성 보존/저장·실행 제한·취소 후 기존 저장/실행 복원 PASS. 광역 가입/작성/Restore 검사를 이번 PASS로 다시 합산하지 않음 |
+
+### 실패·수정·동일 조건 재검
+
+1. **원본 재현:** 격리한 동일 head와 공식 baseline wheel `c12d6f9e8d0f9c2325ed7a8cff5cefe29317ba5425ea6353b4eb3a2cd11af45a`에서 Native T 접수 후 C 행동 영역 0개(2.240초 FAIL), UNKNOWN에 불필요한 제어 2개(2.002초 FAIL)를 실제 브라우저로 확인했다. 공통 렌더/한 행동 영역과 서비스에 맞는 UNKNOWN 변경 차단을 구현했다.
+2. **독립 검토:** 하위 T 완료 후 미완료 P의 계획/상태, 대상과 다른 최신 run 선택, 일반/실행 조회 오류의 stale 결과, 열린 상세의 권한 철회, 실패한 조회를 다시 읽지 않는 재조회 경로를 보완했다. 실제 renderer 7개와 현재/실행/이력 재조회 3개 probe PASS. P/T 행도 실제 Native 상태/사유를 보존한다. 혼합 범위·활성 Native 중 legacy 쓰기 제한, 완료 P 조회 실패의 단일 행동도 기존 서버 허용 범위에 맞췄다.
+3. **v2 제품:** wheel `adc8417dfa2b0a31155b092cf27e4bf9508553255ee7beea3e4e35b0c4be1c01`의 10건은 8 PASS/2 FAIL(29.452초). 한 건은 reload 직후 이전 DOM을 준비 상태로 판단한 시험 대기 오류다. 다른 건은 권한 회수 후 닫히는 상세 dialog의 복사 내용이 close event 제거 전에 남은 관측이다. 당시 open/visible는 수집하지 않아 화면에 계속 보였다고 단정하지 않는다. 무효화 시 본문을 동기적으로 비우고 닫도록 수정했으며 재검은 open/visible/marker를 함께 검사한다. 부분 관찰 J의 충족을 전체 범위 완료로 오해하지 않도록 문구도 수정했다.
+4. **준비/시험 오류 분리:** 첫 baseline 호출의 cwd 불일치, 소스 수정과 중간 패키지 검사 시작 경합의 9개 오류, 수정 뒤 v2 permission 재호출 1개 오류는 source/wheel byte guard가 차단했다. 제품 PASS/FAIL로 바꾸지 않는다. 이후 담당자별 생산 소스를 동결하고 root의 정확한 패키지 확인 뒤만 재개한다. 전체 앱 첫 시험에서 infra J를 다른 T의 행으로 찾은 선택자 오류는 실제 부모 단계로 이동하도록 수정했다. 독립 Node probe의 예약어 변수 SyntaxError도 시험 코드 오류로 분리한다.
+
+**로컬 검사:** strict UTF-8으로 서비스 선별 33(신규 2 포함) + public schema/validator 6 + 실제 Native 예제/현재 ACL 6 = 고유 **45 PASS**, panel **44 PASS**(v5 8.094초), controller **21 PASS**(1.280초), 최종 renderer/controller Node **22 PASS**(v6 51.646ms). service backend 변경 없음. 상세와 재조회 보완의 probe 10건은 위 검사와 구분한 독립 검토 근거다. v5 선별 5건 PASS(16.378초)·완료 P 조회 실패 1건 PASS(2.544초), v6 고정/AI 실제 running/표시 재검 1건 PASS(3.753초)를 v2의 영향 없는 증거와 연결하면 2단계 브라우저 고유 **12건 PASS**다. 유효한 v2 6건·v5 5건·v6 1건의 마지막 판정을 사용하며 반복 실행을 중복 합산하지 않는다. 완료 복귀 3건은 별도다.
+
+**최종 화면 후속:** v5 AI 완료 PNG에서 숫자/boolean만 표시되고 관찰 항목이 빠진 문제를 직접 확인했다. 업무 이름 분기 없이 저장된 source job 이름·path 항목·typed 값·한계를 함께 표시했다. v6 Node의 0/false/미지 항목/HTML escape/권한 회수와 동일 AI 브라우저 6개 관찰값 재검 PASS. 실행 중 이동은 합성 외부 응답을 잠시 보류한 실제 worker의 running을 HTTP로 확인한 뒤 이동·닫기/재열기에서도 같은 run ID/상태를 유지하고 완료했다. Figma 타이머로 실행을 만들지 않았다.
+
+**공식 전체 앱:** v5 `tests/ees_work_c_phase1_app.py --phase2` PASS. 실제 Native CLI 기동·가입/대화 생성 뒤 프로그램 변경에도 같은 identity/chat, 실제 브라우저 사람 확인 취소(시도 0)→확인, 별도 저장 없이 기존 기본값으로 infra 모의 실행, T 범위의 DB passed/AP failed·사람 확인 재수행 없음·P 4/6 미완료를 확인했다. API 오류 0. Native 인증/채팅을 가짜 서버로 대체하지 않았고 임시 DB만 사용했다. v6은 AI 관찰 표시만 바뀌어 이 유효한 v5 전체 앱 증거를 재사용한다. 새 버전 사내 배포·실사용 수락은 아니다.
+
+**최종 패키지:** ees.12 유지, v6 SHA-256 `7617ebe0e6ae4f09d01dcc4b542dee9f43fdce42ae10f4a47b80176c172ba427`. launcher/CSS와 backend 등 builder 추가 자산 23개의 검사 원본 바이트 일치(차이 0)를 확인했다. 실제 명령·선정 시험·실패/재검 로그·JSON·PNG는 Work의 `dist/c-phase2/`와 검토용 첨부에 보존한다. `tests/test_ees_work_c_phase2_native.py`를 기존 Linux CI 경로에 연결하되, 09-30까지의 방침에 따라 이 커밋도 `[skip ci]`이며 원격 dispatch/재실행은 하지 않는다.
+
+**최종 구조 검사:** `check_docs.py`는 files=32, links=1291, errors=0, review_candidates=0. `git diff --check`, 두 JS 구문 검사, 변경 Python 시험 파일 compile PASS. 새 사용자 화면이나 서비스의 완료 판정을 문서 검사로 대체하지 않았다.
+
+**남은 경계:** 3단계 통합 광역 회귀·최종 수락, 실제 사내 API/모델·Windows·OP-01~04·사용자 수락·병합/배포는 미실행이다. 기존 가입/그룹·P별 게시·Restore 등 유효한 검사는 그 당시 증거를 재사용하며 이번에 다시 모두 실행했다고 표시하지 않는다.
 
 <a id="c-design-phase1-20260928"></a>
 

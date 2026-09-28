@@ -38,6 +38,7 @@ on:
       - 'tests/test_ees_chat_theme.py'
       - 'tests/test_ees_work_demo.py'
       - 'tests/test_ees_work_c_phase1_native.py'
+      - 'tests/test_ees_work_c_phase2_native.py'
       - 'tests/test_ees_work_routes.py'
       - 'tests/test_ees_workflow*.py'
       - 'tests/ees_workflow_native_fixture.py'
@@ -188,6 +189,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p test_ees_work_demo.py -v
           python -m unittest discover -s tests -p test_ees_work_c_phase1_native.py -v
+          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_c_phase2_native.py -v
       - name: Keep EES Work browser evidence
         if: always() && runner.os == 'Linux'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

@@ -4,7 +4,32 @@
 
 저장소: knadalkim-a11y/team-agent-poc
 
-입력: 현재 실행 계약은 [09-25 공통 Native 도구·P/T 실행](#shared-native-runtime-20260925), 신규 작성 권한은 [09-24 시스템 담당자·P별 작성/게시](#system-authoring-20260924), 현재 화면 변경은 [09-28 C안 1단계](#c-design-phase1-20260928)이며 [09-23 A안 상태·실행 상세](#a-design-20260923)는 기존 구현 근거로 보존한다. [09-22 왼쪽 워크플로우 확정 디자인](#sidebar-final-20260922)과 [오른쪽 업무·수행·결과](#right-panel-20260922)의 탐색·기록 계약을 보존한다. [앞선 시각 계층 후속](#visual-hierarchy-20260922)과 [단계별 진행·무테 합의](#step-progress-ux-20260922)의 기존 실행·권한·저장 계약과 Workspace 구현은 보존한다. [09-21 통합 UX 첫 베타](#integrated-work-beta-20260921)는 당시 기준으로 보존한다. 이전 화면 참고자료는 [사이드바 개선 목업](ees-sidebar-refinement.html)이며, 이전 [공장별 업무 트리 목업](ees-factory-workspace.html)과 [최초 세부 편집 예시](ees-demo-workspace.html)는 보존한다. 목업 이후 확정한 [공장·시스템 공동 작업 목표](#ees-work-shared-target)는 아래 기록을 우선한다. ZIP 첨부 없이 저장소에서 읽는다. HTML 목업은 대화 내 표시용 참고자료이며 실제 제품은 기존 WebUI 컴포넌트·테마·AI 대화를 사용한다.
+입력: 현재 실행 계약은 [09-25 공통 Native 도구·P/T 실행](#shared-native-runtime-20260925), 신규 작성 권한은 [09-24 시스템 담당자·P별 작성/게시](#system-authoring-20260924), 현재 화면 변경은 [09-29 C안 2단계](#c-design-phase2-20260929)이며 [09-23 A안 상태·실행 상세](#a-design-20260923)는 기존 구현 근거로 보존한다. [09-22 왼쪽 워크플로우 확정 디자인](#sidebar-final-20260922)과 [오른쪽 업무·수행·결과](#right-panel-20260922)의 탐색·기록 계약을 보존한다. [앞선 시각 계층 후속](#visual-hierarchy-20260922)과 [단계별 진행·무테 합의](#step-progress-ux-20260922)의 기존 실행·권한·저장 계약과 Workspace 구현은 보존한다. [09-21 통합 UX 첫 베타](#integrated-work-beta-20260921)는 당시 기준으로 보존한다. 이전 화면 참고자료는 [사이드바 개선 목업](ees-sidebar-refinement.html)이며, 이전 [공장별 업무 트리 목업](ees-factory-workspace.html)과 [최초 세부 편집 예시](ees-demo-workspace.html)는 보존한다. 목업 이후 확정한 [공장·시스템 공동 작업 목표](#ees-work-shared-target)는 아래 기록을 우선한다. ZIP 첨부 없이 저장소에서 읽는다. HTML 목업은 대화 내 표시용 참고자료이며 실제 제품은 기존 WebUI 컴포넌트·테마·AI 대화를 사용한다.
+
+<a id="c-design-phase2-20260929"></a>
+
+## C안 기존 유형·P/T·예외 확대 · 2단계 · 2026-09-29
+
+PR #66의 `022cf239b038877efbc75dff7c6dd87f82317f51`에서 이어간다. 시작 시 원격 main `e995fe16e4835f2d1799c95f3d6d1b74ce381389`·Draft #66 head와 깨끗한 로컬을 대조했다. main STATUS의 #65 병합 대기 표현은 과거 기록이며 이미 끝난 병합/배포 준비를 반복하지 않는다. 1단계 공통 패널과 `panel_parent`/`returnPanel`을 보존하고 같은 view/CSS/controller의 차이를 구현한다. Draft #53, 별도 Windows 작업, Native 대화/폭·회원/그룹·Workspace·자산·저장소/키·P별 게시·과거 진행/실행은 변경하지 않는다.
+
+**직접 확인한 시각 기준:** 09-29 07:52~07:57 KST(09-28 22:52~22:57 UTC)에 같은 Figma 파일의 비교 `603:963`과 아래 J 6개/P·T 3개 노드의 속성·반환 렌더를 다시 읽었다. 가로/세로 여백 32/24, 섹션 간격 24, 제목 30/42·결과 22/34, 상태 묶음·선택된 필터·보조 상세·단일 행동 영역과 독립 스크롤을 기준으로 삼는다. 원본 수정은 없으며 예시 고정 열 폭·집계·타이머는 제품 계약이 아니다. Native 공개 입력은 기존 계획 dialog에서 검토 후 시작하고 대기 중 보완은 별도 반영/재개로 처리하는 의도된 차이가 있다.
+
+### 변경 전 대응표와 완료 조건
+
+| 유형/상태 | 화면·행동 | 기존 서비스/저장 계약 | 이번 시험 |
+|---|---|---|---|
+| legacy 모의 tool / 미연결 | 공개 입력, 저장과 점검 분리, 결과·기준·이력; 미연결 사유 | `action/update_inputs`, `action/run`; 기본값 실행 허용, 변경 시 과거 결과 보존 | 저장/복원·기본값·실패/재시도·현재 입력과 실행 snapshot |
+| legacy manual / draft | 입력 없는 확인은 가짜 저장 없음; 초안 반영과 검토 완료 분리 | 기존 명시 confirm / document→review→confirm | 사람 확인 취소·완료, 초안 변경/동시 수정 |
+| Native fixed / ai / human | 공통 C 제목·상태·입력/결과·단일 행동 영역; 보조 상세 | `execution/plan` 조회→명시 `start`; 공개 schema renderer/validator; 고정 0회·AI 한도·사람 직접 확인 | 실제 서비스 고정 조회·AI·사람 확인, 호출과 업무 완료 구분 |
+| Native 입력 대기/후보 선택 | 현재 실행 입력 확인→반영→명시 이어가기 | `execution/action(inputs/resume)`; legacy 입력 저장과 합치지 않음 | 후보 선택·재접속·실행 당시 arguments 보존·stale revision |
+| P/T 및 혼합 범위 | 실제 집계·검색/필터/페이지·선행 사유·범위 계획; Native/모의 구분 | 기존 범위/최종 validator; 호출 성공만으로 P/T 완료 안 함 | T/P 범위 실행·부분 결과·목록/스크롤/초점·완료 행 소실 |
+| queued/running/paused/failed/cancelled | 실제 사유·상태에 맞는 시작/중지/재개/취소 | 기존 worker와 revision; 중지/취소는 다음 호출 경계 | 실행 중 이동·재접속·재개·취소 및 실제 버튼 |
+| waiting_input/authorization/dependency, UNKNOWN | 조건·다음 행동 표시; UNKNOWN 변경/자동 재실행 금지 | 호출 직전 현재 권한·참조/승인 재검, 미확정 호출 보호 | 권한 회수·승인 변경·UNKNOWN·동시 실행/수정 |
+| 제외/미기록/빈·부분 결과/조회 실패/접근 제한 | 서로 구분하고 과거 민감 자료를 대신 노출하지 않음 | 기존 projection·complete/partial/empty/truncated/unknown·조회 redaction | 관련 renderer+실제 서비스/브라우저 재현 |
+
+구현 전 검토에서 Native J의 옛 조기 렌더 경로, P/T의 공통 행동 영역 누락, UNKNOWN에서 서버가 거절하는 취소 버튼 표시를 확인했다. C안 공통 렌더에 연결하고 서버가 허용하는 행동만 제공한다. 별도 실행기·입력 schema·저장소, 업무 이름별 분기, Figma의 타이머/합성 결과는 추가하지 않는다. Native 실행 계획 입력은 명시적 시작으로 접수하며, 대기 중 입력 반영과 재개를 분리한다.
+
+완료 조건은 위 모든 유형의 대응표 판정, 수정 영향 상태의 직접 재현·동일 조건 재검, 실제 제품 세 크기/긴 내용/좁은 패널/다크/키보드에서 행동·저장·호출·표시 확인이다. 영향받은 권한·동시 변경·기록 보존은 이번에 검사한다. 전체 광역 통합 회귀·최종 수락은 3단계이며 병합/배포·실서버 작업은 수행하지 않는다. Figma 조회/속성·렌더 대조와 제품 동작 검증, 합성 외부 응답과 실제 사내 검증을 분리해 [2단계 평가](../../../evals/scenarios.md#c-design-phase2-20260929)에 기록한다.
 
 <a id="c-design-phase1-20260928"></a>
 

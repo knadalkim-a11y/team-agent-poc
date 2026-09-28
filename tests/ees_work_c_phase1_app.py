@@ -11,6 +11,7 @@ Example: python tests/ees_work_c_phase1_app.py --wheel <candidate.whl>
 Only new temporary data is used. Reports and screenshots exclude auth tokens.
 Use --navigation-only for the completed-J return regression on the real app;
 the AP result is prepared through its existing simulation API, not revalidated.
+Use --phase2 for actual browser manual/default-input and P/T scope actions.
 """
 
 import argparse
@@ -38,6 +39,7 @@ def main():
     parser.add_argument('--chrome', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--navigation-only', action='store_true')
+    parser.add_argument('--phase2', action='store_true')
     args = parser.parse_args()
     ROOT = Path(__file__).resolve().parents[1]
     OUT = args.output.resolve()
@@ -165,7 +167,7 @@ def main():
             state = current()
             if not state.get('case'):
                 state = action({'action': 'create', 'chat_id': chat_id, 'payload': {'site_id': 'us-a', 'system': 'EMS', 'process_id': 'setup-p'}})
-            for node_id in ('scope-j', 'infra-j', 'install-j'):
+            for node_id in (() if args.phase2 else ('scope-j', 'infra-j', 'install-j')):
                 if state['case']['jobs'][node_id]['status'] != 'passed':
                     case = state['case']
                     state = action({'action': 'run', 'chat_id': chat_id, 'case_id': case['id'], 'expected_revision': case['revision'], 'node_id': node_id, 'payload': {'confirm': True}})
@@ -196,14 +198,30 @@ def main():
                 result = browser.evaluate('new Promise(resolve=>{const end=performance.now()+' + str(timeout) + ';function check(){if(' + expression + ')return resolve(true);if(performance.now()>end)return resolve(false);setTimeout(check,80)}check()})')
                 assert result, expression + '\n' + browser.evaluate('document.body.innerText.slice(0,2200)')
 
-            def click(selector):
+            def click(selector, confirm=None):
                 wait('!!document.querySelector(' + json.dumps(selector) + ')')
                 stable = browser.evaluate('(async()=>{await document.fonts.ready;return await new Promise(resolve=>{let same=0,last="";const end=performance.now()+9000;function check(){const e=document.querySelector(' + json.dumps(selector) + ');e?.scrollIntoView({block:"center"});const r=e?.getBoundingClientRect();const p=r&&[r.x,r.y,r.width,r.height].join();same=p===last&&r.width>0&&r.height>0&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))?same+1:0;last=p;if(same>=8)return resolve(true);if(performance.now()>end)return resolve(false);requestAnimationFrame(check)}check()})})()')
                 assert stable, 'Control is not visible/stable: ' + selector
                 point = browser.evaluate('(()=>{const e=document.querySelector(' + json.dumps(selector) + ');if(!e)throw Error("Missing control");e.scrollIntoView({block:"center"});const r=e.getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2,hit:e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}})()')
                 assert point['hit'], (selector, point)
                 for kind in ('mousePressed', 'mouseReleased'):
-                    browser.call('Input.dispatchMouseEvent', {'type': kind, 'x': point['x'], 'y': point['y'], 'button': 'left', 'clickCount': 1})
+                    params = {'type': kind, 'x': point['x'], 'y': point['y'], 'button': 'left', 'clickCount': 1}
+                    if confirm is not None and kind == 'mouseReleased':
+                        # The original legacy confirmation uses Chrome's real
+                        # blocking dialog. Do not replace window.confirm.
+                        browser.counter += 1
+                        request = {'id': browser.counter, 'sessionId': browser.session,
+                                   'method': 'Input.dispatchMouseEvent', 'params': params}
+                        os.write(browser.request_write, json.dumps(request).encode() + b'\0')
+                        deadline = time.monotonic() + 8
+                        while True:
+                            event = browser.receive(deadline)
+                            browser.events.append(event)
+                            if event.get('method') == 'Page.javascriptDialogOpening':
+                                browser.call('Page.handleJavaScriptDialog', {'accept': confirm})
+                                break
+                    else:
+                        browser.call('Input.dispatchMouseEvent', params)
 
             def shot(name):
                 (OUT / (LABEL + '-' + name + '.png')).write_bytes(base64.b64decode(browser.call('Page.captureScreenshot', {'format': 'png'})['data']))
@@ -309,6 +327,70 @@ def main():
             wait('document.querySelector("#ees-work-panel .ew-title")?.textContent === "신규 공장 횡전개" && !document.querySelector("#ees-work-panel")?.matches("[aria-busy=true]")')
             shot('p-management')
             record('Real browser P management', title='신규 공장 횡전개', panel_level=browser.evaluate('document.querySelector("#ees-work-panel").dataset.workLevel'))
+            if args.phase2:
+                def selected(title):
+                    wait('document.querySelector("#ees-work-panel .ew-title")?.textContent === ' + json.dumps(title)
+                         + ' && !document.querySelector("#ees-work-panel")?.matches("[aria-busy=true]")')
+
+                def single_action():
+                    count = browser.evaluate('document.querySelectorAll("#ees-work-panel .ew-work-action-region").length')
+                    assert count == 1, count
+
+                click('#ees-work-content [data-action="select"][data-node-id="prep-t"]')
+                selected('사전준비')
+                click('#ees-work-content [data-work-job="scope-j"] [data-action="select"]')
+                selected('셋업 범위 확인')
+                single_action()
+                assert not browser.evaluate('!!document.querySelector("#ees-work-inputs-save")')
+                click('#ees-work-run', confirm=False)
+                assert current()['case']['jobs']['scope-j']['attempt'] == 0
+                click('#ees-work-run', confirm=True)
+                wait('document.querySelector(".ew-work-action-region [data-action=panel_parent]")')
+                assert current()['case']['jobs']['scope-j']['status'] == 'passed'
+                shot('phase2-manual-completed')
+                click('.ew-work-action-region [data-action="panel_parent"]')
+                selected('사전준비')
+                record('Phase2 manual real browser confirmation', cancelled_attempt=0, confirmed='passed', fake_input=False)
+                click('#ees-work-tree [data-action="select"][data-node-id="infra-t"]')
+                selected('AP, DB 인프라 준비')
+                click('#ees-work-content [data-work-job="infra-j"] [data-action="select"]')
+                selected('인프라 준비 확인')
+                single_action()
+                assert current()['case']['jobs']['infra-j']['inputs'] == {}
+                assert not browser.evaluate('document.querySelector("#ees-work-run").disabled')
+                click('#ees-work-run')  # Existing defaults remain executable without a save prerequisite.
+                wait('document.querySelector(".ew-work-action-region [data-action=panel_parent]")')
+                infra = current()['case']['jobs']['infra-j']
+                assert infra['status'] == 'passed' and infra['attempt'] == 1
+                assert infra['history'][-1]['simulation'] is True
+                record('Phase2 default-input simulation', passed=True, persisted_inputs=infra['inputs'], external_calls=0)
+                click('#ees-work-tree [data-action="select"][data-node-id="install-t"]')
+                selected('시스템 설치')
+                click('#ees-work-content [data-work-job="install-j"] [data-action="select"]')
+                selected('설치·설정 확인')
+                click('#ees-work-run', confirm=True)
+                wait('document.querySelector(".ew-work-action-region [data-action=panel_parent]")')
+                click('.ew-work-action-region [data-action="panel_parent"]')
+                selected('시스템 설치')
+                single_action()
+                assert browser.evaluate('document.querySelector("#ees-work-run").textContent') == '범위 모의 점검 실행'
+                click('#ees-work-run')
+                wait('!document.querySelector("#ees-work-panel").matches("[aria-busy=true]") && document.querySelector("#ees-work-content").innerText.includes("실패")')
+                case = current()['case']
+                assert case['jobs']['db-j']['status'] == 'passed'
+                assert case['jobs']['ap-j']['status'] == 'failed'
+                assert case['jobs']['scope-j']['attempt'] == 1 and case['jobs']['install-j']['attempt'] == 1
+                assert case['status'] != 'passed'
+                shot('phase2-t-scope-partial')
+                record('Phase2 real T scope simulation', db='passed', ap='failed', manual_not_replayed=True,
+                       process_not_complete=True, progress=case['progress'])
+                errors = [{'url': e['params']['response']['url'], 'status': e['params']['response']['status']}
+                          for e in browser.events if e.get('method') == 'Network.responseReceived'
+                          and e['params']['response']['status'] >= 400]
+                assert not errors, errors
+                record('Browser API responses', errors=errors)
+                report['ok'] = True
+                return
             if args.navigation_only:
                 navigation_check()
                 errors = [{'url': e['params']['response']['url'], 'status': e['params']['response']['status']}

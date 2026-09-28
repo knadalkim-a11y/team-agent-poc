@@ -9,7 +9,7 @@ function subject(){const context={window:{},document:{querySelector:()=>null},Se
 test('durable run renders UNKNOWN and actual evidence without inventing a completion',()=>{
  const c=subject();c.execution={run:{id:'run',status:'unknown',revision:4,jobs:{j:{status:'unknown',kind:'fixed',checks:[{status:'unknown'}]}},calls:[{job_id:'j',id:'call',status:'unknown',reference:{function:'get_page',revision:2},arguments:{page_id:'42'},result:{complete:false,data:{title:'<script>bad</script>'}}}]}};c.options={nodeId:'j',definition:{nodes:{j:{name:'문서 확인',type:'j'}}}};
  const html=vm.runInContext('workExecutionRuntimeHTML(execution,options)',c);
- assert.match(html,/결과 미확정/);assert.match(html,/완료가 아닙니다/);assert.match(html,/&lt;script&gt;/);assert.doesNotMatch(html,/<script>/);assert.match(html,/data-runtime-action="cancel"/);assert.match(html,/정규화 결과/);assert.doesNotMatch(html,/모의 점검 수행/);
+ assert.match(html,/결과 미확정/);assert.match(html,/완료가 아닙니다/);assert.match(html,/&lt;script&gt;/);assert.doesNotMatch(html,/<script>/);assert.doesNotMatch(html,/data-runtime-action=/);assert.match(html,/정규화 결과/);assert.match(html,/자동 재실행하지 않습니다/);assert.doesNotMatch(html,/모의 점검 수행/);
 });
 test('read failure never renders a false empty history or exposes stale evidence',()=>{
  const c=subject();c.execution={run:{id:'stale-private',status:'succeeded'}};c.options={error:'기록 접근 권한을 확인할 수 없습니다.'};
@@ -57,4 +57,97 @@ test('runtime polling adopts the matching case projection and ignores a changed 
   const currentCase={id:'case',revision:1,jobs:{j:{status:'pending'}}},s={busy:false,executionTimer:null,executionSerial:0,execution:{run:{id:'r',revision:1}},executionError:'',available:()=>true,state:{case:currentCase},selectedCase:()=>s.state.case,workHasExecution:()=>true,definition:()=>({}),processId:()=> 'p',generation:1,navigationRequest:1,token:()=> 'a',location:{pathname:'/c/a',search:''},chatId:()=> 'a',renderPanel:()=>{},accept:value=>{s.state=value;s.accepted++},accepted:0,clearTimeout,setTimeout,URLSearchParams,api:async(path)=>{if(path.startsWith('execution/'))return {ok:true,run:{id:'r',revision:2,status:'succeeded'}};if(change)s.navigationRequest++;return {ok:true,case:{id:'case',revision:2,jobs:{j:{status:'passed'}}}};}};
   vm.createContext(s);vm.runInContext(fn,s);await s.refreshExecution();assert.equal(s.accepted,change?0:1);assert.equal(s.state.case.jobs.j.status,change?'pending':'passed');
  }
+});
+
+function runtimeFixture(){
+ const node=(id,type,parent,children=[])=>({id,type,parent,children,name:id+' 업무',rule:id+'의 등록 완료 조건',mode:'tool',tools:[],skills:[],deps:[],enabled:true});
+ const definition={nodes:{p:node('p','p',null,['t','t2']),t:node('t','t','p',['j']),t2:node('t2','t','p',['ai']),j:{...node('j','j','t'),execution:{kind:'fixed'}},ai:{...node('ai','j','t2'),execution:{kind:'ai'}}},tools:{},skills:{},sites:{},roots:{setup:['p']}};
+ definition.nodes.p.execution_inputs={properties:{query:{type:'string',title:'조회 대상'}},required:['query']};
+ const run={id:'run-j',node_id:'j',revision:3,status:'waiting_input',reason:'input_required',inputs:{query:'현재 값'},input_schema:definition.nodes.p.execution_inputs,jobs:{j:{kind:'fixed',status:'waiting_input',reason:'input_required'}},calls:[]};
+ const c={id:'case',status:'in_progress',site:{name:'합성 공장'},system:'EMS',definition,jobs:{j:{inputs:{},history:[]},ai:{inputs:{},history:[]}},node_states:{p:{status:'in_progress'},t:{status:'blocked'},t2:{status:'pending'},j:{status:'blocked',block_reason:'input_required',attention:true},ai:{status:'pending'}}};
+ return {definition,run,c};
+}
+test('every run state offers only supported mutations in one C action region',()=>{
+ const mutations={queued:['pause','cancel'],running:['pause','cancel'],waiting_input:['inputs','resume','cancel'],waiting_authorization:['inputs','resume','cancel'],waiting_dependency:['inputs','resume','cancel'],paused:['inputs','resume','cancel'],unknown:[],succeeded:[],failed:[],cancelled:[]};
+ for(const [status,expected] of Object.entries(mutations)){
+  const context=subject(),{definition,run,c}=runtimeFixture();run.status=status;run.jobs.j.status=status;run.reason=status==='unknown'?'timeout':'';context.execution={run};context.options={nodeId:'j',definition,case:c,planButton:'<button data-action="run">계획 확인</button>'};
+  const html=vm.runInContext('workExecutionRuntimeHTML(execution,options)',context),actual=[...html.matchAll(/data-runtime-action="([^"]+)"/g)].map(match=>match[1]);
+  assert.deepEqual(actual,expected,status);assert.ok((html.match(/ew-work-action-region/g)||[]).length<=1,status);
+  if(status==='succeeded')assert.match(html,/data-action="panel_parent" data-node-id="t"/);
+  if(status==='unknown')assert.doesNotMatch(html,/data-action="run"|data-action="panel_parent"/);
+  context.options.readOnly=true;assert.doesNotMatch(vm.runInContext('workExecutionRuntimeHTML(execution,options)',context),/data-runtime-action=/,status+' read only');
+ }
+});
+test('Native preview preserves typed input contract and no-schema work has no fake save',()=>{
+ const context=subject(),{definition,c}=runtimeFixture();context.definition=definition;context.c=c;
+ const preview=vm.runInContext('workPanelNodeHTML(null,definition.nodes.j,{definition})',context);
+ assert.match(preview,/data-status="execution_plan_required"/);assert.match(preview,/data-runtime-record="unrecorded"/);assert.match(preview,/data-work-section="runtime-inputs"/);assert.match(preview,/data-action="run"/);assert.doesNotMatch(preview,/ees-work-inputs|입력 저장|실행 연결 필요/);
+ delete definition.nodes.p.execution_inputs;
+ const empty=vm.runInContext('workPanelNodeHTML(null,definition.nodes.j,{definition})',context);assert.doesNotMatch(empty,/data-work-section="runtime-inputs"|<form|입력 저장/);
+ context.execution={run:{id:'human',revision:1,status:'waiting_input',jobs:{j:{kind:'human',status:'waiting_input',reason:'human_confirmation_required'}},calls:[]}};context.options={nodeId:'j',definition};
+ const human=vm.runInContext('workExecutionRuntimeHTML(execution,options)',context);assert.match(human,/data-runtime-action="confirm"/);assert.doesNotMatch(human,/data-runtime-action="inputs"|data-runtime-action="resume"/);
+});
+test('Native current input and call snapshot stay distinct and escaped in the detail',()=>{
+ const context=subject(),{definition,run,c}=runtimeFixture();run.calls=[{job_id:'j',id:'c1',status:'succeeded',arguments:{query:'호출 당시 <값>'},result:{completeness:'partial',data:{title:'실제 반환'}}}];context.execution={run};context.options={nodeId:'j',definition,case:c};
+ const html=vm.runInContext('workExecutionRuntimeHTML(execution,options)',context);assert.match(html,/현재 실행 입력/);assert.match(html,/현재 값/);assert.match(html,/호출 당시 snapshot/);assert.match(html,/호출 당시 &lt;값&gt;/);assert.match(html,/일부 범위 결과/);assert.match(html,/data-runtime-run="run-j"/);assert.doesNotMatch(html,/data-work-criterion-status="passed"/);
+});
+test('call completeness and job validators remain separate for complete empty partial truncated and unknown results',()=>{
+ for(const completeness of ['complete','empty','partial','truncated','unknown']){
+  const context=subject(),{definition,run,c}=runtimeFixture(),verified=['complete','empty'].includes(completeness);run.status=verified?'succeeded':'unknown';run.jobs.j={kind:'fixed',status:run.status,validation:{status:run.status,scope_complete:verified},reason:verified?'verified_complete':'observed_limited'};run.calls=[{job_id:'j',status:'succeeded',result:{completeness,data:{value:'실제 반환'}}}];context.execution={run};context.options={nodeId:'j',definition,case:c};
+  const html=vm.runInContext('workExecutionRuntimeHTML(execution,options)',context);assert.equal(html.includes('data-work-criterion-status="passed"'),verified,completeness);assert.match(html,new RegExp(completeness));if(!verified)assert.doesNotMatch(html,/data-runtime-action=/,completeness);
+ }
+ const context=subject(),{definition,run,c}=runtimeFixture();run.status='succeeded';run.jobs.j={kind:'fixed',status:'succeeded',validation:{status:'succeeded',scope_complete:false},reason:'observed_limited'};context.execution={run};context.options={nodeId:'j',definition,case:c};
+ const bounded=vm.runInContext('workExecutionRuntimeHTML(execution,options)',context);assert.match(bounded,/data-work-criterion-status="passed"/);assert.match(bounded,/전체 범위 완료와 구분/);
+});
+test('selected job uses its matching run and never displays an unrelated newer result',()=>{
+ const context=subject(),{definition,run}=runtimeFixture(),other={id:'new-ai',status:'succeeded',jobs:{ai:{kind:'ai',status:'succeeded',result:'다른 결과'}}};context.definition=definition;context.execution={run:other,runs:[other,run]};
+ assert.equal(vm.runInContext('workExecutionForNode(execution,"j",definition).run.id',context),'run-j');assert.equal(vm.runInContext('workExecutionForNode(execution,"t2",definition).run.id',context),'new-ai');
+ context.execution={run:other,runs:[other]};assert.equal(vm.runInContext('workExecutionForNode(execution,"j",definition)',context),null);
+});
+test('a succeeded child run leaves parent completion pending and its scope plan available',()=>{
+ const context=subject(),{definition,run,c}=runtimeFixture();run.status='succeeded';run.node_id='t';run.jobs.j={kind:'fixed',status:'succeeded',validation:{status:'succeeded',scope_complete:true}};run.final_validation={status:'succeeded',scope_complete:true};c.node_states.j.status='passed';c.node_states.t.status='passed';context.c=c;context.execution={run};
+ const html=vm.runInContext('workPanelNodeHTML(c,c.definition.nodes.p,{execution})',context);assert.match(html,/data-action="run"/);assert.match(html,/ew-work-current-title" role="status">진행 중/);assert.match(html,/아직 판정하지 않음/);assert.doesNotMatch(html,/ew-work-current-title" role="status">완료/);
+});
+test('mixed P/T lists keep kinds separate and explain why there is no combined runtime plan',()=>{
+ const context=subject(),{definition}=runtimeFixture();definition.nodes.legacy={id:'legacy',type:'j',parent:'t',children:[],name:'모의',mode:'tool',tools:['mock'],skills:[],deps:[]};definition.nodes.t.children.push('legacy');definition.tools.mock={adapter:'mock',input:'site'};context.definition=definition;
+ const html=vm.runInContext('workPanelNodeHTML(null,definition.nodes.t,{definition})',context);assert.match(html,/data-runtime-mixed-scope/);assert.match(html,/전체를 한 실행으로 진행할 수 없습니다/);assert.match(html,/data-work-count="fixed">1</);assert.match(html,/data-work-count="simulation">1</);assert.doesNotMatch(html,/data-action="run"/);assert.match(html,/data-action="select" data-node-id="legacy"/);
+ definition.nodes.j.enabled=false;const excluded=vm.runInContext('workPanelNodeHTML(null,definition.nodes.t,{definition})',context);assert.match(excluded,/data-runtime-mixed-scope/);assert.doesNotMatch(excluded,/data-action="run"/);
+});
+test('active Native execution preserves but blocks legacy input writes and run until terminal',()=>{
+ const context=subject(),{definition,run,c}=runtimeFixture();definition.nodes.legacy={id:'legacy',type:'j',parent:'t',children:[],name:'모의',mode:'tool',tools:['mock'],skills:[],deps:[]};definition.tools.mock={adapter:'mock',input:'site'};definition.nodes.t.children.push('legacy');c.jobs.legacy={inputs:{site:'저장된 대상'},history:[]};c.node_states.legacy={status:'pending',ready_for_run:true};context.c=c;context.execution={run};
+ for(const status of ['running','paused','waiting_input','unknown']){run.status=status;const html=vm.runInContext('workPanelNodeHTML(c,c.definition.nodes.legacy,{execution,draft:{inputs:{site:"보존할 작성 값"},inputsChanged:true}})',context);assert.match(html,/보존할 작성 값/);assert.match(html,/id="ees-work-inputs-save"[^>]*disabled/);assert.match(html,/data-action="run"[^>]*disabled/);assert.match(html,/연결 실행이 종료되기 전/);}
+ run.status='cancelled';const restored=vm.runInContext('workPanelNodeHTML(c,c.definition.nodes.legacy,{execution})',context);assert.doesNotMatch(restored,/data-action="run"[^>]*disabled/);
+});
+test('P/T rows preserve Native unknown and waiting reasons instead of legacy generic labels',()=>{
+ const context=subject(),{definition,run,c}=runtimeFixture();run.status='unknown';run.jobs.j={kind:'fixed',status:'unknown',reason:'timeout'};context.c=c;context.execution={run};
+ const html=vm.runInContext('workPanelNodeHTML(c,c.definition.nodes.t,{execution,listView:{expanded:["j"]}})',context);assert.match(html,/data-status="unknown">결과 미확정/);assert.match(html,/요청의 결과를 확정하지 못했습니다/);assert.doesNotMatch(html,/<p>timeout<\/p>/);
+});
+test('redacted runtime evidence stays hidden even if an older response still contains raw values',()=>{
+ const context=subject(),{definition,run}=runtimeFixture();run.evidence_available=false;run.status='succeeded';run.jobs.j={kind:'fixed',status:'succeeded',result:{claims:[{value:'PRIVATE_MARKER'}]},validation:{status:'succeeded',output:'PRIVATE_MARKER'}};run.calls=[{job_id:'j',status:'succeeded',arguments:{secret:'PRIVATE_MARKER'},result:{data:'PRIVATE_MARKER'},evidence_available:false}];context.execution={run};context.options={nodeId:'j',definition};
+ const html=vm.runInContext('workExecutionRuntimeHTML(execution,options)',context);assert.match(html,/근거 접근 제한/);assert.doesNotMatch(html,/PRIVATE_MARKER|data-runtime-action=/);
+});
+test('control targets the selected older run and refreshes stale or unreadable evidence before mutation',async()=>{
+ const launcher=fs.readFileSync(path.join(root,'branding/ees/ui/ees-work-launcher.js'),'utf8'),start=launcher.indexOf('  async function executionControl('),end=launcher.indexOf('  async function runJob(',start),fn=launcher.slice(start,end);
+ for(const scenario of ['older','revision','execution-error','record-error']){
+  const old={id:'old',revision:3,status:'paused'},latest={id:'latest',revision:8,status:'running'},sent=[],s={busy:false,recordLookupError:scenario==='record-error'?{message:'failed'}:null,executionError:scenario==='execution-error'?'failed':'',execution:{run:latest,runs:[latest,old]},generation:1,navigationRequest:1,token:()=> 'auth',location:{pathname:'/c/x',search:''},available:()=>true,chatId:()=> 'x',setBusy:()=>{},renderPanel:()=>{},executionRequestId:()=> 'receipt',refresh:async()=>{s.refreshes++},refreshExecution:async()=>{s.refreshes++},refreshes:0,api:async(path,body)=>{sent.push(body);return {ok:true,run:old}}};
+  vm.createContext(s);vm.runInContext(fn,s);await s.executionControl({runId:'old',revision:scenario==='revision'?'2':'3',runtimeAction:'resume'});
+  assert.equal(sent.length,scenario==='older'?1:0,scenario);assert.equal(s.refreshes,1,scenario);if(sent.length){assert.equal(sent[0].run_id,'old');assert.equal(sent[0].expected_revision,3);}
+ }
+});
+test('retry rereads the failed current state even at unchanged revision and isolates history reads',async()=>{
+ const launcher=fs.readFileSync(path.join(root,'branding/ees/ui/ees-work-launcher.js'),'utf8'),start=launcher.indexOf('  function retryExecutionRead() {'),end=launcher.indexOf('  async function refreshExecution()',start),fn=launcher.slice(start,end);
+ for(const [runView,recordLookupError,historyCase,expected] of [['current',{message:'read failed'},null,'state'],['current',null,null,'execution'],['history',{message:'read failed'},{id:'old-case'},'history:old-case']]){
+  const called=[],context={runView,recordLookupError,historyCase,refresh:()=>called.push('state'),refreshExecution:()=>called.push('execution'),showHistory:id=>called.push('history:'+id)};vm.createContext(context);vm.runInContext(fn,context);await context.retryExecutionRead();assert.deepEqual(called,[expected]);
+ }
+});
+
+test('AI observations retain source and field context, typed values and limitations',()=>{
+ const c=subject();c.definition={nodes:{j:{id:'j',type:'j',name:'근거 정리'},source:{id:'source',type:'j',name:'원본 <자료>'}}};
+ c.execution={run:{id:'r',node_id:'j',status:'succeeded',jobs:{j:{kind:'ai',status:'succeeded',validation:{status:'succeeded'},result:{claims:[{source:{job_id:'source'},path:['data','pagination','has_next'],value:false},{source:{job_id:'source'},path:['data','summary','total'],value:0},{source:{job_id:'source'},path:['data','unfamiliar'],value:'<script>'}],limitations:['저장된 한 페이지 범위'],notice:'관찰값'}}},calls:[]}};
+ const html=vm.runInContext('workExecutionRuntimeHTML(execution,{nodeId:"j",definition,readOnly:true})',c);
+ assert.equal((html.match(/data-runtime-observation/g)||[]).length,3);
+ assert.match(html,/원본 &lt;자료&gt;/);assert.match(html,/페이지 \/ 다음 페이지/);assert.match(html,/>아니요<\/p>/);assert.match(html,/집계 \/ 전체/);assert.match(html,/>0<\/p>/);assert.match(html,/unfamiliar/);assert.match(html,/&lt;script&gt;/);assert.match(html,/결과의 한계/);assert.match(html,/저장된 한 페이지 범위/);assert.doesNotMatch(html,/<script>/);
+ c.execution.run.evidence_available=false;
+ const hidden=vm.runInContext('workExecutionRuntimeHTML(execution,{nodeId:"j",definition,readOnly:true})',c);
+ assert.doesNotMatch(hidden,/data-runtime-observation|원본 &lt;자료&gt;|저장된 한 페이지 범위/);
 });
