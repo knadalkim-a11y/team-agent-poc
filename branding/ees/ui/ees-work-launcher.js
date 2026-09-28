@@ -346,10 +346,16 @@
     const edits=view.readJobEdits(id);
     if(edits.conflict){errorMessage='저장된 내용이 변경되었습니다. 작성 중인 값과 최신 내용을 확인해 주세요.';renderPanel();return false;}
     if(edits.nodeId&&edits.nodeId!==id){errorMessage='입력을 작성한 업무를 다시 선택해 주세요.';renderPanel();return false;}
+    if(workLegacyExecutionLocked(execution,selectedCase()?.id)){errorMessage='연결 실행이 종료되기 전에는 입력·초안을 반영하거나 이 작업을 완료할 수 없습니다. 작성 중인 내용은 이 화면에 보존됩니다.';renderPanel();return false;}
     return true;
   }
   async function saveInputs(inputs,id=selectedId()) {if(!canWriteEdits(id))return null;return action('update_inputs',{inputs},id);}
-  async function saveDocument(document,id=selectedId()) {if(!canWriteEdits(id))return null;return action('run',{document},id);}
+  async function saveDocument(document,id=selectedId()) {
+    if(!canWriteEdits(id))return null;
+    const saved=selectedCase()?.node_states?.[id];
+    if(saved?.applicable===false||saved?.status==='skipped'||saved?.missing?.length||saved?.block_reason==='skill_unavailable'){errorMessage='초안을 반영하려면 작업의 적용 조건·선행 작업·필수 스킬 권한을 확인해 주세요. 작성 중인 내용은 이 화면에 보존됩니다.';renderPanel();return null;}
+    return action('run',{document},id);
+  }
   async function executionForm(schema,values,title,extra='',confirmLabel='확인') {
     let submitted=null;
     const html='<form id="ees-runtime-input-form">'+workExecutionInputsHTML(schema,values)+'</form>'+extra;

@@ -240,6 +240,9 @@ class CPhaseTwoNativeTests(unittest.TestCase):
         self.assertEqual(self.read('#ees-runtime-input-form [name=page_id]', 'value'), '42')
         self.screenshot('c-phase2-candidate-picker')
         self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("!document.querySelector('#ees-work-dialog')?.open && "
+                  "[...document.querySelectorAll('[data-work-section=runtime-inputs] .ew-work-target-row p')]"
+                  ".some(e=>e.textContent==='42')")
         self.settle()
         saved = self.run_state()
         self.assertEqual(saved['inputs']['page_id'], '42')
@@ -635,6 +638,306 @@ class CPhaseTwoNativeTests(unittest.TestCase):
         self.refresh_runtime('succeeded')
         self.assertIsNotNone(self.read('[data-action=start_case]'))
         self.evidence('completed-process-recovered', single_retry=True)
+
+    def open_past_case(self, case_id):
+        if not self.read('.ew-panel-menu', 'open'):
+            self.click('.ew-panel-menu > summary')
+        self.click('#ees-work-run-view [data-action="history_view"]')
+        selector = '[data-action="history_case"][data-case-id=' + json.dumps(case_id) + ']'
+        self.wait('!!document.querySelector(' + json.dumps(selector) + ')')
+        self.click(selector)
+        self.wait("document.querySelector('#ees-work-content')?.innerText.includes('읽기 전용')")
+        if self.read('.ew-panel-menu', 'open'):
+            self.click('.ew-panel-menu > summary')
+        self.settle()
+
+    def arrange_history_run(self, result_status='succeeded', partial=False, historical_failed_final=False):
+        fragment = runtime.examples.operations_workflow(runtime.REFERENCES, 'fixture-model')
+        fragment['nodes']['new-operations-read-t']['rule'] = '저장 당시 T 완료 기준 · 자료 3종의 검증'
+        fragment['nodes']['new-operations-jira-j']['rule'] = '저장 당시 J 완료 기준 · 조회 응답 검증'
+        self.ready(fragment)
+        created = asyncio.run(self.server.workflow.handle_action(self.server.user, {
+            'action': 'create', 'payload': {'site_id': 'us-a', 'system': 'EMS',
+                'process_id': fragment['process_id']}}))
+        self.assertTrue(created['ok'], created)
+        past_id = created['case']['id']
+        self.bridge.results['jira_dashboard'] = runtime.envelope(
+            status=result_status, completeness='partial' if partial else 'complete')
+        if partial:
+            self.bridge.results['jira_dashboard']['scope'] = 'single_page'
+        plan = asyncio.run(self.server.workflow.execution_plan(self.server.user, {
+            'case_id': past_id, 'node_id': 'new-operations-read-t',
+            'inputs': {'project_key': 'HISTORY', 'repository': 'team/saved', 'ops_page_id': '42'}}))
+        self.assertTrue(plan['ok'], plan)
+        started = asyncio.run(self.server.workflow.execution_action(self.server.user, {
+            'action': 'start', 'plan_id': plan['plan']['id'], 'plan_hash': plan['plan']['hash'],
+            'request_id': 'history-review-' + result_status}))
+        self.assertTrue(started['ok'], started)
+        self.drain()
+        saved = asyncio.run(self.server.workflow.execution_state(self.server.user, case_id=past_id))['run']
+        if historical_failed_final:
+            # Current workers stop at a failed call before final validation.
+            # Exercise compatibility with an already stored final failure,
+            # explicitly arranging that historical record in this temp DB.
+            # This is not evidence that today's scheduler emits this record.
+            with self.server.workflow._db(write=True) as db:
+                row = db.execute('SELECT data FROM execution_runs WHERE id=?', (saved['id'],)).fetchone()
+                record = json.loads(row['data'])
+                record['final_validation'] = {'status': 'failed', 'validator': 'all_required_v1',
+                    'version': 1, 'reason': 'required_jobs_incomplete', 'scope_complete': False,
+                    'evidence': [], 'output': {}}
+                db.execute('UPDATE execution_runs SET data=? WHERE id=?',
+                           (json.dumps(record, ensure_ascii=False), saved['id']))
+            saved = asyncio.run(self.server.workflow.execution_state(self.server.user, case_id=past_id))['run']
+        past = asyncio.run(self.server.workflow.get_state(self.server.user, case_id=past_id))['case']
+        # The current catalog changes after this case was saved. Historical
+        # rule/title must still come from the case's pinned definition.
+        definition = deepcopy(self.current()['catalog'])
+        definition['nodes']['new-operations-read-t']['rule'] = '현재 게시 기준 · 과거와 다름'
+        definition['nodes']['new-operations-jira-j']['rule'] = '현재 게시 J 기준 · 과거와 다름'
+        self.publish_runtime_fixture(definition)
+        self.browser.evaluate("window.dispatchEvent(new CustomEvent('ees-work-changed',{detail:{chat_id:'existing-chat'}}))")
+        self.choose('new-operations-p')
+        self.open_past_case(past_id)
+        self.wait("!!document.querySelector('[data-runtime-record]')")
+        self.browser.evaluate("document.querySelector('[data-runtime-record]').scrollIntoView({block:'start'})")
+        return saved, past
+
+    def check_history_final(self, status):
+        saved, past = self.arrange_history_run(status, historical_failed_final=status == 'failed')
+        runtime_selector = '#ees-work-content [data-runtime-record]'
+        displayed = self.browser.evaluate("(()=>{const e=document.querySelector(" + json.dumps(runtime_selector) + ");"
+            "return {record:e?.dataset.runtimeRecord,criterion:e?.querySelector('[data-work-criterion-status]')?.dataset.workCriterionStatus,"
+            "text:e?.innerText,mutations:document.querySelectorAll('#ees-work-content [data-mutation]').length,"
+            "parentJobs:document.querySelector('#ees-work-content [data-work-metric=jobs]')?.innerText,"
+            "parentStages:document.querySelector('#ees-work-content [data-work-metric=stages]')?.innerText};})()")
+        before = deepcopy(self.current()['case'])
+        self.save_visual_measurements('c-phase2-review-history-' + status, {
+            'boundary': 'Actual packaged Native frontend; more -> execution history -> past case; real service/SQLite with synthetic HTTP results',
+            'historical_failed_final_fixture': status == 'failed',
+            'failed_final_boundary': 'Persisted compatibility fixture only; current worker call failure has no final_validation' if status == 'failed' else None,
+            'saved_run': saved, 'saved_case': past, 'current_case': before, 'displayed': displayed})
+        self.screenshot('c-phase2-review-history-' + status)
+        self.assertEqual(saved['status'], status)
+        self.assertEqual(displayed['record'], status)
+        validation = saved['final_validation']
+        expected = 'passed' if validation['status'] == 'succeeded' else 'failed'
+        self.assertEqual(displayed['criterion'], expected, displayed)
+        self.assertIn('저장 당시 T 완료 기준', displayed['text'])
+        self.assertNotIn('현재 게시 기준', displayed['text'])
+        self.assertEqual(displayed['mutations'], 0)
+        self.assertIsNone(self.read('#ees-work-content [data-action=panel_parent]'))
+        self.assertNotEqual(past['status'], 'passed', 'Succeeded child T must not complete its parent P')
+        self.assertEqual(past['progress']['done'], 3 if status == 'succeeded' else 0)
+        if status == 'succeeded':
+            self.assertIn('3 / 4', displayed['parentJobs'])
+            self.assertIn('1 / 2', displayed['parentStages'])
+        self.click('#ees-work-content .ew-work-runtime-detail [data-work-overlay]')
+        self.wait("document.querySelector('#ees-work-dialog')?.open")
+        self.assertIn(json.dumps(validation, ensure_ascii=False, indent=2), self.text('#ees-work-dialog'))
+        self.screenshot('c-phase2-review-history-' + status + '-saved-detail')
+        self.key('Escape', 27)
+        self.assertEqual(self.current()['case'], before, 'History must not mutate the current case')
+
+    def test_past_native_success_uses_saved_target_definition_and_final_validation(self):
+        self.check_history_final('succeeded')
+
+    def test_past_native_failure_uses_saved_final_validation(self):
+        self.check_history_final('failed')
+
+    def test_past_failed_scope_without_final_validation_remains_unjudged(self):
+        saved, past = self.arrange_history_run('failed')
+        self.assertNotIn('final_validation', saved)
+        self.assertEqual(saved['status'], 'failed')
+        self.assertEqual(self.read('#ees-work-content [data-runtime-record] [data-work-criterion-status]',
+                                   'dataset.workCriterionStatus'), 'pending')
+        self.assertIn('아직 판정하지 않음', self.text('#ees-work-content [data-runtime-record]'))
+        self.assertEqual(past['progress']['done'], 0)
+        self.screenshot('c-phase2-review-history-unrecorded-final')
+        self.save_visual_measurements('c-phase2-review-history-unrecorded-final', {'saved_run': saved, 'saved_case': past})
+
+    def test_past_native_partial_unknown_and_access_restriction_keep_record_meanings(self):
+        saved, past = self.arrange_history_run(partial=True)
+        self.assertEqual(saved['status'], 'succeeded')
+        self.assertIn('일부 범위 결과', self.text('#ees-work-content [data-runtime-record]'))
+        self.assertNotEqual(self.read('#ees-work-content [data-runtime-record] [data-work-criterion-status]',
+                                      'dataset.workCriterionStatus'), 'passed')
+        self.assertNotEqual(past['status'], 'passed')
+        self.screenshot('c-phase2-review-history-partial')
+        async def denied(*args, **kwargs):
+            raise self.backend.WorkflowError('native_access_denied', '합성 과거 기록 권한 회수')
+        self.bridge.check = denied
+        self.open_past_case(past['id'])
+        self.wait("document.querySelector('#ees-work-content')?.innerText.includes('현재 권한으로 결과 근거를 볼 수 없습니다')")
+        self.assertIsNone(self.read('#ees-work-content [data-runtime-action]'))
+        self.click('#ees-work-content .ew-work-runtime-detail [data-work-overlay]')
+        self.wait("document.querySelector('#ees-work-dialog')?.open")
+        self.assertNotIn('운영 문서', self.text('#ees-work-dialog'))
+        self.assertIn('현재 권한으로', self.text('#ees-work-dialog'))
+        redacted = asyncio.run(self.server.workflow.execution_state(self.server.user, case_id=past['id']))['run']
+        self.assertFalse(redacted['evidence_available'])
+        self.screenshot('c-phase2-review-history-access-restricted')
+        self.save_visual_measurements('c-phase2-review-history-partial-access', {
+            'saved_run': saved, 'redacted_run': redacted, 'parent_status': past['status']})
+
+    def test_past_native_unknown_has_no_completed_validation_or_mutation(self):
+        saved, past = self.arrange_history_run('unknown')
+        self.assertEqual(saved['status'], 'unknown')
+        self.assertIn('미확정', self.text('#ees-work-content [data-runtime-record]'))
+        self.assertNotEqual(self.read('#ees-work-content [data-runtime-record] [data-work-criterion-status]',
+                                      'dataset.workCriterionStatus'), 'passed')
+        self.assertIsNone(self.read('#ees-work-content [data-runtime-action]'))
+        self.assertEqual(past['progress']['done'], 0)
+        self.screenshot('c-phase2-review-history-unknown')
+        self.save_visual_measurements('c-phase2-review-history-unknown', {'saved_run': saved, 'saved_case': past})
+
+    def check_legacy_draft_native_lock(self, state, require_prerequisite=False):
+        fragment = runtime.examples.installation_docs_workflow(runtime.REFERENCES)
+        legacy = deepcopy(self.current()['catalog']['nodes']['install-j'])
+        legacy.update(id='mixed-draft-j', name='기존 검토 초안', parent='new-documents-t', deps=[], mode='draft')
+        fragment['nodes'][legacy['id']] = legacy
+        fragment['nodes']['new-documents-t']['children'].append(legacy['id'])
+        if require_prerequisite:
+            prerequisite = deepcopy(self.current()['catalog']['nodes']['scope-j'])
+            prerequisite.update(id='mixed-review-j', name='초안 반영의 선행 확인', parent='new-documents-t', deps=[])
+            fragment['nodes'][prerequisite['id']] = prerequisite
+            fragment['nodes']['new-documents-t']['children'].append(prerequisite['id'])
+            legacy['deps'] = [prerequisite['id']]
+        self.ready(fragment)
+        target = 'new-documents-page-j' if state == 'waiting_input' else 'new-documents-search-j'
+        if state == 'waiting_input':
+            self.bridge.results['search_pages'] = runtime.envelope({'results': [
+                {'page_id': '41', 'title': '합성 후보 A'}, {'page_id': '42', 'title': '합성 후보 B'}]})
+            self.start('new-documents-search-j', {'query': '설치', 'space_key': 'TEAM'})
+            self.assertEqual(self.drain()['status'], 'succeeded')
+            self.refresh_runtime('succeeded')
+        self.start(target, {'query': '설치', 'space_key': 'TEAM'})
+        release, started, thread = threading.Event(), threading.Event(), None
+        original_invoke = self.bridge.invoke
+        try:
+            if state == 'running':
+                async def held(*args, **kwargs):
+                    started.set()
+                    if not await asyncio.to_thread(release.wait, 20):
+                        raise RuntimeError('Draft browser did not release the synthetic response')
+                    return await original_invoke(*args, **kwargs)
+                self.bridge.invoke = held
+                thread = threading.Thread(target=self.drain, daemon=True)
+                thread.start()
+                self.assertTrue(started.wait(5))
+            elif state == 'paused':
+                self.control('pause')
+            elif state == 'waiting_authorization':
+                async def denied(*args, **kwargs):
+                    raise self.backend.WorkflowError('native_access_denied', '합성 현재 권한 대기')
+                self.bridge.check = denied
+                self.drain()
+            elif state == 'unknown':
+                self.bridge.results['search_pages'] = runtime.envelope(status='unknown')
+                self.drain()
+            elif state == 'waiting_input':
+                self.drain()
+            self.refresh_runtime(state)
+            self.choose(legacy['id'])
+            value = 'Native ' + state + ' 동안 작성한 초안 · 임시 보존'
+            self.fill('#ees-work-document textarea', value)
+            before = deepcopy(self.current()['case']['jobs'][legacy['id']])
+            before_count = self.server.requests.count(('POST', '/api/ees-work/action'))
+            selector = 'button[form="ees-work-document"]'
+            # Actual pointer and keyboard events. A disabled control must not
+            # dispatch, and Enter in a textarea remains an edit, not a save.
+            point = self.browser.evaluate("(()=>{const e=document.querySelector(" + json.dumps(selector) + ");"
+                "e.scrollIntoView({block:'center'});const r=e.getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2,disabled:e.disabled};})()")
+            for event in ('mousePressed', 'mouseReleased'):
+                self.browser.call('Input.dispatchMouseEvent', {'type': event, 'x': point['x'], 'y': point['y'],
+                    'button': 'left', 'buttons': 1 if event == 'mousePressed' else 0, 'clickCount': 1})
+            self.settle()
+            self.browser.evaluate('document.querySelector(' + json.dumps(selector) + ').focus()')
+            self.key('Enter', 13, text='\r')
+            self.settle()
+            self.browser.evaluate("document.querySelector('#ees-work-document textarea').focus()")
+            self.key('End', 35, modifiers=2)
+            self.key('Enter', 13, text='\r')
+            edited = self.read('#ees-work-document textarea', 'value')
+            # A submitted form can also come from browser accessibility or
+            # requestSubmit; it must hit the same client guard, not the server.
+            self.browser.evaluate("document.querySelector('#ees-work-document').requestSubmit()")
+            self.settle()
+            after = deepcopy(self.current()['case']['jobs'][legacy['id']])
+            dispatched = self.server.requests.count(('POST', '/api/ees-work/action')) - before_count
+            note = self.text('[data-work-next]')
+            self.click('#ees-work-close')
+            self.click('#ees-work-context-open')
+            retained = self.read('#ees-work-document textarea', 'value')
+            label = state + ('-prerequisite' if require_prerequisite else '')
+            self.save_visual_measurements('c-phase2-review-draft-' + label, {
+                'boundary': 'Real UI pointer/keyboard/requestSubmit and public service; temporary SQLite; external result synthetic',
+                'run': self.run_state(), 'button': point, 'note': note, 'before': before, 'after': after,
+                'action_posts': dispatched, 'edited': edited, 'retained_after_reopen': retained})
+            self.screenshot('c-phase2-review-draft-' + label)
+            self.assertTrue(point['disabled'], 'Active Native runtime must disable legacy draft reflection')
+            self.assertEqual(dispatched, 0, 'Blocked submit should not send a known-rejected legacy action')
+            self.assertEqual(after, before, 'Blocked edits cannot alter saved draft, attempts, completion or history')
+            self.assertEqual(retained, edited)
+            self.assertIn('연결 실행', note)
+        finally:
+            release.set()
+            if thread:
+                thread.join(timeout=5)
+                self.assertFalse(thread.is_alive())
+            self.bridge.invoke = original_invoke
+        if state == 'unknown':
+            self.assertEqual(self.run_state()['status'], 'unknown')
+            return
+        if state != 'running':
+            self.choose(target)
+            self.control('cancel', confirm=True)
+            self.wait("document.querySelector('[data-runtime-record]')?.dataset.runtimeRecord === 'cancelled'")
+        else:
+            self.choose(target)
+            self.refresh_runtime('succeeded')
+        self.choose(legacy['id'])
+        self.assertEqual(self.read('#ees-work-document textarea', 'value'), edited)
+        if require_prerequisite:
+            self.assertTrue(self.read('button[form="ees-work-document"]', 'disabled'))
+            posts = self.server.requests.count(('POST', '/api/ees-work/action'))
+            self.browser.evaluate("document.querySelector('#ees-work-document').requestSubmit()")
+            self.settle()
+            self.assertEqual(self.server.requests.count(('POST', '/api/ees-work/action')), posts)
+            self.assertEqual(self.current()['case']['jobs'][legacy['id']], before)
+            self.screenshot('c-phase2-review-draft-terminal-prerequisite-blocked')
+            self.choose(prerequisite['id'])
+            self.click('#ees-work-run', confirm=True)
+            self.settle()
+            self.choose(legacy['id'])
+        self.assertFalse(self.read('button[form="ees-work-document"]', 'disabled'))
+        self.browser.evaluate("document.querySelector('button[form=\"ees-work-document\"]').focus()")
+        self.key('Enter', 13, text='\r')
+        self.settle()
+        reflected = self.current()['case']['jobs'][legacy['id']]
+        self.assertEqual(reflected['document'], edited)
+        self.assertNotEqual(reflected['status'], 'passed', 'Reflecting a draft is not human completion')
+        self.screenshot('c-phase2-review-draft-' + label + '-unlocked')
+        self.save_visual_measurements('c-phase2-review-draft-' + label + '-unlocked', {
+            'run': self.run_state(), 'reflected': reflected, 'retained_input': edited})
+
+    def test_legacy_draft_blocked_while_native_running(self):
+        self.check_legacy_draft_native_lock('running')
+
+    def test_legacy_draft_blocked_while_native_paused(self):
+        self.check_legacy_draft_native_lock('paused')
+
+    def test_legacy_draft_blocked_while_native_waiting_input(self):
+        self.check_legacy_draft_native_lock('waiting_input')
+
+    def test_legacy_draft_blocked_while_native_waiting_authorization(self):
+        self.check_legacy_draft_native_lock('waiting_authorization')
+
+    def test_legacy_draft_blocked_while_native_unknown(self):
+        self.check_legacy_draft_native_lock('unknown')
+
+    def test_legacy_draft_cancelled_native_still_requires_legacy_prerequisite(self):
+        self.check_legacy_draft_native_lock('paused', require_prerequisite=True)
 
 
 if __name__ == '__main__':

@@ -12,7 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
-| C안 기존 유형·P/T·예외 2단계 | [대응표·실제 Native/제품·권한/기록·실패와 재검](#c-design-phase2-20260929) |
+| C안 기존 유형·P/T·예외 2단계 | [대응표·실제 Native/제품·권한/기록·실패와 재검](#c-design-phase2-20260929), [과거 판정·초안 반영 보완](#c-design-phase2-review-20260929) |
 | C안 공통 외형과 대표 J 1단계 | [C안 실조회·대표 AP 저장/실패/재시도·#65 보존과 미실행](#c-design-phase1-20260928) |
 | 공통 Native 도구와 P/T 지속 실행 | [TR-01~24·두 읽기 사례·실제 Native/합성 경계·재시작·미실행](#shared-native-runtime-20260925) |
 | 시스템 담당자의 P별 작성·게시와 첫 이용 | [SA-01~28·NU-01~08·Native 재사용·세션 한계·사내 OP 확인](#system-authoring-20260924) |
@@ -95,6 +95,37 @@
 **최종 구조 검사:** `check_docs.py`는 files=32, links=1291, errors=0, review_candidates=0. `git diff --check`, 두 JS 구문 검사, 변경 Python 시험 파일 compile PASS. 새 사용자 화면이나 서비스의 완료 판정을 문서 검사로 대체하지 않았다.
 
 **남은 경계:** 3단계 통합 광역 회귀·최종 수락, 실제 사내 API/모델·Windows·OP-01~04·사용자 수락·병합/배포는 미실행이다. 기존 가입/그룹·P별 게시·Restore 등 유효한 검사는 그 당시 증거를 재사용하며 이번에 다시 모두 실행했다고 표시하지 않는다.
+
+<a id="c-design-phase2-review-20260929"></a>
+
+### PR #66 2단계 검토 보완 · 과거 판정·Native 활성 중 초안 반영
+
+**시작·보존:** 09-29 08:45 KST 시작 기록(`2026-09-28T23:45:32.467Z`, `start-context.json`)에서 원격/로컬 head `a9fdeae9c626138ad2b384bc52e1f64eb116bdb8`·깨끗한 checkout, main `e995fe16e4835f2d1799c95f3d6d1b74ce381389`, Draft #53 `3aadd7279276914fb790fdb496ceb37b223ec737`와 AGENTS/STATUS를 확인했다. 같은 Draft #66의 두 누락만 [사전 범위·완료 조건](../docs/mockups/ees-work/TASK.md#c-design-phase2-review-20260929)에 따라 수정했다. 완료 복귀·기존 2단계 검사와 backend/저장/인가 계약은 보존한다. Figma 같은 파일 `584:1098`의 context/반환 화면에서 완료 결과·기준·행동 묶음을 읽기 전용으로 대조했다. 레이아웃/CSS/자산 수정이나 원본 쓰기는 없으며 Figma 조회를 제품 검사로 합산하지 않는다.
+
+**실패 재현:** baseline 제품 브라우저 `before.log`의 3건(8.124초)에서 저장된 T 최종 판정 succeeded가 화면 pending으로 표시되고, paused 중 legacy 초안 반영 버튼이 활성인 두 결함을 확인했다. 실제 클릭·Enter·`requestSubmit()`가 알려진 거절 POST 3회를 보냈으나 서버는 모두 거절해 저장 내용/완료 기록은 변하지 않았고 편집 글도 남았다. 별도 `before-historical-final.log`(2.200초)는 임시 SQLite에 명시적으로 구성한 과거 failed 최종 판정도 pending으로 표시하는 결함을 확인했다.
+
+**시험 준비 실패 구분:** 최초 `before-preparation.log`의 새 test 부재는 detached baseline import 준비 오류다. 위 첫 3건의 나머지 1건은 failed 실행에 `final_validation`이 있다고 가정한 KeyError이며, J 판정으로 바꾼 `before-failed-j.log`(2.239초)도 실제 저장값이 없어 TypeError가 났다. 현재 worker는 호출 실패에서 중단해 그 실패에 final/J validation을 만들지 않고, 최종 evaluator의 현재 결과는 succeeded/unknown이다. 시험을 **실제 worker 실패·최종 판정 미기록**과 **저장된 failed 최종 판정의 호환 fixture**로 분리했다. 후자의 API/제품 UI 경로는 실제지만 현 worker가 그 기록을 생성했다는 증거는 아니다.
+
+| 확인 대상 | 수정·보존 계약 | 실제 제품 브라우저 재검 · PASS |
+|---|---|---|
+| 과거 Native 판정 | `run.node_id`, 과거 진행의 고정 definition/case, `readOnly/history`를 전달하고 저장 당시 대상 이름을 표시 | **더 보기 → 실행 이력 → 과거 진행 건**에서 성공/실패 저장 JSON·완료 기준·상세 일치. 현재 게시 기준으로 바뀌지 않음, T 성공으로 P 완료 생성 없음, 현재 진행 건 불변 |
+| 미기록·부분·UNKNOWN·접근 제한 | 기존 renderer/projection의 판정과 redaction을 유지 | 실제 failed의 최종 판정 없음은 pending, 저장된 `status=succeeded/scope_complete=false/source_scope_limited`는 전체 충족 아님, UNKNOWN 변경 없음, 권한 회수 뒤 근거 미노출 |
+| legacy draft와 Native 병행 | 동일 진행 건의 succeeded/failed/cancelled 외 상태를 서버와 같은 기준으로 잠금. 버튼·폼·controller가 공유하고 textarea 편집은 허용 | running/paused/waiting_input/waiting_authorization/UNKNOWN에서 클릭·Enter·폼 제출 POST 0, 저장/시도/완료/이력 불변, 닫기·재열기 글 보존 |
+| Native 종료 이후 | 기존 적용 대상·선행·Skill·충돌/읽기 전용 조건 유지 | 정상 종료/취소 후 조건 충족 시 키보드 반영 복원. 선행 미완료는 계속 차단하고 확인 뒤에만 반영; 초안 반영을 검토 완료로 기록하지 않음 |
+
+**재검 환경·결과:** 기존 Python 3.11.16 단일 `.venv`·Chrome 153.0.8010.52·공식 Native frontend와 실제 EES 서비스/임시 SQLite 경로를 재사용한다. 외부 HTTP/모델 결과와 로그인/채팅 fixture는 합성이다. 이번은 공식 전체 앱 CLI/사내 인증 실험을 새로 실행한 결과가 아니다. 최종 v2 제품 브라우저는 신규 11건과 기존 현재 입력/snapshot·조회 실패 회귀 2건, 고유 **13 PASS**다. 저장된 성공/실패 판정을 실제 이력 경로와 상세에서 대조했고 다섯 비종료 상태의 초안 제출은 POST 0·저장/완료 불변·작성 글 보존을 확인했다. UNKNOWN은 계속 잠겼으며 나머지 상태는 종료/취소 후 기존 조건 충족 시 키보드 반영을 확인했다. 선행 미충족은 종료 뒤에도 차단하고 별도 사람 확인 후에만 반영했다.
+
+**v2 시험 준비·재검:** `browser-final-v2.log`는 13건 49.448초, 고유 9 PASS/4 실패 사례였다(부분/접근 제한의 teardown 실패가 중복 집계되어 unittest 표시는 failures=3/errors=2). 별도로 import한 서비스의 `WorkflowError`를 fixture가 잡지 못한 부분/권한 시험은 실제 backend 예외 형식으로 맞췄다. 입력 대기 시험의 선행 연결 제거/선택 참조 불일치는 기존 선행과 실제 검색을 복원했다. 기존 후보 입력 검사는 비동기 저장 완료 전에 API를 읽은 오류였으며 당시 PNG에는 이미 42가 보여, dialog 종료·저장 표시를 기다리도록 고쳤다. `browser-retest-v2.log` 6건 23.075초는 5 PASS/1 fixture 실패였다. 나머지는 후보가 하나면 기존 계약상 자동 선택되는 조건이어서 후보 2개로 대기를 구성했고 `browser-input-wait-retest-v2.log` 1건 2.740초 PASS로 확인했다. 최종 v2 제품 코드는 이 과정에서 바뀌지 않았다. 성공/실패 이력 PNG를 위한 반복 2건은 고유 13건에 다시 더하지 않는다. 시험별 최종 근거는 `browser-review-results.json`에 연결한다.
+
+**독립 검토 보완:** 중간 수정의 대상 이름이 상위 P 선택 맥락을 가리키는 경우를 발견해 실제 `run.node_id`의 저장 이름으로 맞췄다. 읽기 전용 하단에서 존재하지 않는 제어를 안내하던 문구도 제거했다. 상위 화면과 실제 실행 대상의 구분을 Node 회귀에 포함했다.
+
+**관련 로컬 검사:** 서비스 선별 5 PASS(`service-first.log` 1건 0.028초, `service-related.log` 4건 0.262초): 기존 overlap/legacy 차단, T→P 완료 구분, 현재 ACL redaction, UNKNOWN 모든 변경 차단, 현재 입력/호출 snapshot·stale revision 보존. Node renderer/controller 25 PASS(156.145ms, 기존 22+신규 3), controller 21 PASS. panel 첫 묶음의 34 PASS/10 ERROR는 `workflow_fixture` import 경로 준비 오류로 제품 assertion 실패가 아니며 `PYTHONPATH=tests`로 바로잡은 panel 44 PASS(8.543초)로 구분한다. 실행하지 않은 이전 광역 검사를 새 PASS에 합산하지 않는다.
+
+**패키지·복귀 회귀:** ees.12 최종 v2 wheel SHA-256 `93ec7ae57698791d57f267e180f542cb3fc1e5cbece09191c1ce49a81f37a7a6`의 추가 자산 23개와 원본 바이트 일치(차이 0)를 확인했다. 완료 복귀 3건은 v1에서 9.814초 PASS이며 v2의 변경은 과거 읽기 전용 대상 이름/문구뿐이므로 유효한 관련 결과를 재사용한다. 복귀 검사는 로그만 새로 남았고 새 복귀 PNG를 생성했다고 표시하지 않는다.
+
+**문서 검사:** `check_docs.py` files=32, links=1296, errors=0, review_candidates=0 및 `git diff --check` PASS. 화면/서비스의 검증 결과와 구분한다.
+
+**재발 방지·남은 범위:** 과거 기록의 대상/정의/읽기 전용을 하나의 호출에서 연결하고 legacy 잠금을 버튼 외 submit/controller에도 적용했다. 기존 서비스 보호는 완화하지 않았다. 상세 증거는 `dist/c-phase2-review/`의 최초 실패·재검 로그/JSON/PNG와 검토용 첨부에 보존한다. 3단계 확대·통합 최종 수락, Windows·실제 사내/외부 API·모델 품질·비개발자 수락·병합·배포는 미실행이다. 09-30 한시 방침대로 커밋에 `[skip ci]`를 사용하며 원격 dispatch/재실행은 하지 않는다.
 
 <a id="c-design-phase1-20260928"></a>
 

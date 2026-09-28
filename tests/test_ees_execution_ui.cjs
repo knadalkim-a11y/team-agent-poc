@@ -63,7 +63,7 @@ function runtimeFixture(){
  const node=(id,type,parent,children=[])=>({id,type,parent,children,name:id+' 업무',rule:id+'의 등록 완료 조건',mode:'tool',tools:[],skills:[],deps:[],enabled:true});
  const definition={nodes:{p:node('p','p',null,['t','t2']),t:node('t','t','p',['j']),t2:node('t2','t','p',['ai']),j:{...node('j','j','t'),execution:{kind:'fixed'}},ai:{...node('ai','j','t2'),execution:{kind:'ai'}}},tools:{},skills:{},sites:{},roots:{setup:['p']}};
  definition.nodes.p.execution_inputs={properties:{query:{type:'string',title:'조회 대상'}},required:['query']};
- const run={id:'run-j',node_id:'j',revision:3,status:'waiting_input',reason:'input_required',inputs:{query:'현재 값'},input_schema:definition.nodes.p.execution_inputs,jobs:{j:{kind:'fixed',status:'waiting_input',reason:'input_required'}},calls:[]};
+ const run={id:'run-j',case_id:'case',node_id:'j',revision:3,status:'waiting_input',reason:'input_required',inputs:{query:'현재 값'},input_schema:definition.nodes.p.execution_inputs,jobs:{j:{kind:'fixed',status:'waiting_input',reason:'input_required'}},calls:[]};
  const c={id:'case',status:'in_progress',site:{name:'합성 공장'},system:'EMS',definition,jobs:{j:{inputs:{},history:[]},ai:{inputs:{},history:[]}},node_states:{p:{status:'in_progress'},t:{status:'blocked'},t2:{status:'pending'},j:{status:'blocked',block_reason:'input_required',attention:true},ai:{status:'pending'}}};
  return {definition,run,c};
 }
@@ -150,4 +150,56 @@ test('AI observations retain source and field context, typed values and limitati
  c.execution.run.evidence_available=false;
  const hidden=vm.runInContext('workExecutionRuntimeHTML(execution,{nodeId:"j",definition,readOnly:true})',c);
  assert.doesNotMatch(hidden,/data-runtime-observation|원본 &lt;자료&gt;|저장된 한 페이지 범위/);
+});
+
+
+test('historical target validators retain saved scope and read-only evidence boundaries',()=>{
+ const context=subject(),{definition,run,c}=runtimeFixture();
+ definition.nodes.t.rule='이전 정의의 단계 완료 조건';run.node_id='t';run.jobs.j={kind:'fixed',status:'succeeded',validation:{status:'succeeded'}};run.calls=[{job_id:'j',status:'succeeded',arguments:{query:'실행 당시 값'},result:{completeness:'partial',data:'저장된 일부 근거'}}];c.node_states.p.status='in_progress';
+ context.execution={run};context.options={nodeId:run.node_id,definition,case:c,readOnly:true,history:true};
+ for(const status of ['succeeded','failed','unknown']){
+  run.status=status;run.final_validation=status==='unknown'?null:{status,scope_complete:status==='succeeded'};
+  const html=vm.runInContext('workExecutionRuntimeHTML(execution,options)',context);
+  assert.match(html,/이전 정의의 단계 완료 조건/);assert.match(html,/실행 대상 · t 업무/);assert.match(html,/일부 범위 결과/);assert.match(html,/실행 당시 값/);
+  assert.match(html,new RegExp('data-work-criterion-status="'+(status==='succeeded'?'passed':status==='failed'?'failed':'pending')+'"'));
+  assert.doesNotMatch(html,/data-mutation|data-action="panel_parent"|data-action="execution_refresh"/);
+ }
+ run.status='succeeded';run.final_validation={status:'succeeded',scope_complete:true};context.options.nodeId='p';
+ const parent=vm.runInContext('workExecutionRuntimeHTML(execution,options)',context);assert.match(parent,/아직 판정하지 않음/);assert.match(parent,/실행 대상 · t 업무/);assert.doesNotMatch(parent,/data-work-criterion-status="passed"|실행 대상 · p 업무|아래 제어/);
+ context.options.nodeId='t';run.evidence_available=false;
+ const restricted=vm.runInContext('workExecutionRuntimeHTML(execution,options)',context);assert.match(restricted,/근거 접근 제한/);assert.doesNotMatch(restricted,/실행 당시 값|저장된 일부 근거/);
+ run.evidence_available=true;run.final_validation=null;
+ assert.match(vm.runInContext('workExecutionRuntimeHTML(execution,options)',context),/아직 판정하지 않음/);
+});
+
+test('legacy draft actions match same-case active runs while text remains editable and terminal prerequisites remain enforced',()=>{
+ const context=subject(),{definition,run,c}=runtimeFixture();definition.nodes.draft={id:'draft',type:'j',parent:'t2',children:[],name:'검토 초안',mode:'draft',tools:[],skills:[],deps:[]};definition.nodes.t2.children.push('draft');c.jobs.draft={document:'저장된 초안',inputs:{},history:[]};c.node_states.draft={status:'review',missing:[]};context.c=c;context.execution={run};
+ const render=()=>vm.runInContext('workPanelNodeHTML(c,c.definition.nodes.draft,{execution,draft:{document:"보존할 미반영 초안",documentChanged:true}})',context);
+ for(const status of ['queued','running','paused','waiting_input','waiting_authorization','waiting_dependency','unknown']){
+  run.status=status;const html=render();assert.match(html,/<textarea[^>]*>보존할 미반영 초안<\/textarea>/,status);assert.match(html,/<form id="ees-work-document"[^>]*data-work-save-blocked="true"/,status);assert.match(html,/<button[^>]*form="ees-work-document"[^>]* disabled/,status);assert.match(html,/data-work-edit-locked="true"/,status);assert.match(html,/작성 중인 내용은 이 화면에 보존/,status);
+ }
+ for(const status of ['succeeded','failed','cancelled']){run.status=status;assert.doesNotMatch(render(),/<button[^>]*form="ees-work-document"[^>]* disabled/,status);}
+ run.status='running';run.case_id='another-case';assert.doesNotMatch(render(),/<button[^>]*form="ees-work-document"[^>]* disabled/);
+ run.case_id=c.id;context.execution={run:{...run,id:'new-terminal',status:'failed'},runs:[run]};assert.match(render(),/<button[^>]*form="ees-work-document"[^>]* disabled/);
+ context.execution={run:{...run,status:'cancelled'}};
+ for(const saved of [{status:'blocked',missing:['j']},{status:'blocked',missing:[],block_reason:'skill_unavailable'}]){c.node_states.draft=saved;assert.match(render(),/<button[^>]*form="ees-work-document"[^>]* disabled/);}
+ c.node_states.draft={status:'review',missing:[]};
+ assert.doesNotMatch(render(),/<button[^>]*form="ees-work-document"[^>]* disabled/);
+ const conflict=vm.runInContext('workPanelNodeHTML(c,c.definition.nodes.draft,{execution,draft:{document:"보존할 미반영 초안",documentChanged:true,conflict:true}})',context);assert.match(conflict,/<button[^>]*form="ees-work-document"[^>]* disabled/);
+});
+
+test('legacy save submission rejects active Native and unmet document prerequisites without writes or draft loss',async()=>{
+ const launcher=fs.readFileSync(path.join(root,'branding/ees/ui/ees-work-launcher.js'),'utf8'),start=launcher.indexOf('  function canWriteEdits('),end=launcher.indexOf('  async function executionForm(',start),fn=launcher.slice(start,end);
+ const context=subject(),draft={nodeId:'draft',document:'작성 중인 초안\n내용 보존',documentChanged:true},saved={id:'case',node_states:{draft:{status:'review',missing:[]}}},sent=[];
+ Object.assign(context,{view:{readJobEdits:()=>draft},selectedCase:()=>saved,selectedId:()=> 'draft',errorMessage:'',renderPanel:()=>{},action:async(...args)=>sent.push(args),execution:{run:{id:'r',case_id:'case',status:'running'}}});vm.runInContext(fn,context);
+ const before=JSON.stringify(draft);
+ for(const status of ['queued','running','paused','waiting_input','waiting_authorization','waiting_dependency','unknown']){
+  context.execution.run.status=status;await context.saveDocument(draft.document,'draft');await context.saveInputs({site:'작성 중인 값'},'draft');assert.equal(sent.length,0,status);assert.equal(JSON.stringify(draft),before,status);assert.match(context.errorMessage,/연결 실행이 종료되기 전/);
+ }
+ context.execution.run.status='cancelled';
+ for(const state of [{applicable:false},{status:'skipped'},{missing:['j']},{block_reason:'skill_unavailable'}]){saved.node_states.draft=state;await context.saveDocument(draft.document,'draft');assert.equal(sent.length,0);assert.equal(JSON.stringify(draft),before);}
+ saved.node_states.draft={status:'review',missing:[]};
+ for(const status of ['succeeded','failed','cancelled']){context.execution.run.status=status;await context.saveDocument(draft.document,'draft');}
+ assert.deepEqual(sent.map(args=>JSON.parse(JSON.stringify(args))),Array.from({length:3},()=>['run',{document:draft.document},'draft']));assert.equal(JSON.stringify(draft),before);
+ context.execution.run={id:'other',case_id:'another-case',status:'running'};await context.saveDocument(draft.document,'draft');assert.equal(sent.length,4);
 });
