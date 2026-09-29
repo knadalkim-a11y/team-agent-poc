@@ -24,6 +24,8 @@
 
 09-25 공통 Native 도구·영속 실행 준비본은 **0.11.3+ees.12**이며 기반 프로그램·의존성 요구는 0.11.3을 유지합니다. 원본 wheel SHA-256은 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`로 고정합니다. 정적 자산 `/_ees12/`와 실행/Native bridge/계약/예제/모델 모듈 다섯 개를 함께 포함합니다. 기존 `ees-work.sqlite3`에 실행 metadata만 추가하고 Native 계정/도구/개인 설정 원본은 유지합니다. ees.9/10/11 필수 파일 목록은 당시 계약으로 동결하며 새 계약의 진행은 구프로그램에서 읽기만 지원하고 모의 writer의 변경을 차단합니다. [TR 검증·정확한 산출물](evals/scenarios.md#shared-native-runtime-20260925), [승인/복구 경계](docs/03-openwebui-native-agent.md#shared-native-runtime-20260925)를 따릅니다. 사내 버전은 STATUS의 마지막 적용 기록과 구분합니다.
 
+09-29 [C안 전체 시각 보완](evals/scenarios.md#c-visual-match-20260929)도 ees.12/Pack0.2.14를 유지하며 API·DB·Native 실행 승인 환경은 바꾸지 않습니다. 변경된 Native 모듈 그래프는 `/_ees12/immutable-c<내용해시>/`, chat-theme와 Work 진입 자산은 실제 바이트 query hash로 캐시를 구분합니다. 같은 버전 이름만으로 기존 wheel과 같다고 판단하지 않으며 원본 commit·manifest·전체 payload/RECORD·SHA256을 확인합니다. 현재 후속은 Draft 검토 범위이며 사용자 시각 확인 전 병합/재배포하지 않습니다.
+
 09-24 시스템 담당자 준비본은 **0.11.3+ees.11**·`/_ees11/`이었습니다. 당시 적용/직전 복원 검증은 [SA-25·설치 산출물](evals/scenarios.md#system-authoring-20260924)에 보존합니다. [빌드·전달 방식](docs/03-openwebui-native-agent.md#release-delivery)은 그대로 유지합니다.
 
 09-24의 [시스템 담당자/P별 작성](docs/mockups/ees-work/TASK.md#system-authoring-20260924)은 기존 `ees-work.sqlite3`에 필요한 관리/초안/검사/감사 메타데이터를 추가합니다. Native 회원 DB·키·그룹 명단은 복제하지 않습니다. 기존 전체 초안 원문과 revision을 먼저 보존하며 게시본 mirror·과거 프로그램 fallback 초안·기존 진행 snapshot의 호환 범위를 구분합니다. 프로그램 Restore는 사용자 데이터나 그룹 변경을 되돌리지 않습니다. 새 authoring 프로토콜과 구형 전체 작성 API의 의도된 차이는 [운영 가이드](docs/03-openwebui-native-agent.md#system-authoring-20260924)에 기록합니다.

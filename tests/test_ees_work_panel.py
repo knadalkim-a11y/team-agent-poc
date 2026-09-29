@@ -419,7 +419,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.run_button(process, "setup-p").text, "범위 모의 점검 실행")
         self.assertEqual(self.run_button(task, "install-t").text, "범위 모의 점검 실행")
         self.assertIn("단계별 진행", " ".join(item.text for item in process.find("h3")))
-        self.assertIn("작업 목록", " ".join(item.text for item in task.find("h3")))
+        self.assertIn("작업 현황", " ".join(item.text for item in task.find("h3")))
         manual, _ = self.render(case, "scope-j")
         self.assertFalse(manual.find("button", **{"data-action": "run"}))
         pending, _ = self.render(await self.create(), "scope-j")
@@ -477,8 +477,10 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         html, source = self.render(case, "scope-j")
         current = self.section(html, "current-result")
         self.assertRegex(current.text, "사람|담당자")
-        self.assertIn(confirmed_at, current.text)
-        self.assertNotIn(changed_at, current.text)
+        saved_time = self.section(html, "target").find("time")[0]
+        self.assertEqual(saved_time.attrs["datetime"], confirmed_at)
+        self.assertEqual(saved_time.attrs["title"], confirmed_at)
+        self.assertNotIn(changed_at, source)
         detail, detail_source = self.render(case, "scope-j", detail=True, tab="input", attemptIndex=0)
         self.assertIn(target, detail.text)
         self.assertNotIn("<합성>", source, "Saved text must be escaped before HTML rendering.")
@@ -647,7 +649,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(case["jobs"]["db-j"]["history"][-1]["kind"], "execution_blocked")
         html, _ = self.render(case, "db-j")
         current = self.section(html, "current-result")
-        self.assertIn("미수행 · 실행 연결 필요", current.text)
+        self.assertIn("미수행 · 실행 연결 필요", self.section(html, "target").text)
         self.assertNotIn("모의 점검", current.text)
         self.assertIn("disabled", self.run_button(html, "db-j").attrs)
 
@@ -708,11 +710,11 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
                                             "applicable": index != 62, "missing": []}
         first, _ = self.render(case, "install-t")
         rows = first.find("tr", **{"data-work-job": None})
-        self.assertEqual(len(rows), 25)
+        self.assertEqual(len(rows), 6)
         self.assertEqual(len(first.find("button", **{"data-action": "job_page"})), 2)
         self.assertEqual(rows[0].attrs["data-work-job"], "search-job-0")
         second, _ = self.render(case, "install-t", listView={"page": 1})
-        self.assertEqual(second.find("tr", **{"data-work-job": None})[0].attrs["data-work-job"], "search-job-25")
+        self.assertEqual(second.find("tr", **{"data-work-job": None})[0].attrs["data-work-job"], "search-job-6")
         selected, _ = self.render(case, "install-t", listView={"query": "작업 3", "filter": "attention"})
         filtered = selected.find("tr", **{"data-work-job": None})
         self.assertEqual([row.attrs["data-work-job"] for row in filtered], [f"search-job-{i}" for i in range(30, 33)])
@@ -835,11 +837,11 @@ const selected=summaries.choose('case-a/t',jobs,'j50',states);
 const other=summaries.choose('case-b/t',jobs,'j90',states);
 return {initial,refreshed,selected,other};
 })()""")
-        self.assertEqual(result["initial"], ["j70", "j71", "j72", "j80", "j104"])
+        self.assertEqual(result["initial"], ["j104", "j0", "j1", "j2"])
         self.assertEqual(result["refreshed"], result["initial"])
-        self.assertEqual(len(result["selected"]), 5)
+        self.assertEqual(len(result["selected"]), 4)
         self.assertIn("j50", result["selected"])
-        self.assertEqual(result["selected"], sorted(result["selected"], key=lambda value: int(value[1:])))
+        self.assertEqual(result["selected"][:3], result["initial"][:3])
         self.assertIn("j90", result["other"])
 
     def test_runtime_step_list_has_all_stages_only_selected_jobs_and_no_left_guidance(self):
@@ -860,8 +862,8 @@ return {html,unchanged:before===JSON.stringify(nodes)};
         self.assertEqual([item.attrs["data-step-id"] for item in stages], ["t1", "t2"])
         self.assertEqual([item.attrs["data-expanded"] for item in stages], ["false", "true"])
         self.assertFalse(any("data-selected" in item.attrs for item in stages))
-        self.assertIn("1 / 1 완료", stages[0].text)
-        self.assertIn("80 / 105 완료", stages[1].text)
+        self.assertIn("1 / 1 작업 완료", stages[0].text)
+        self.assertIn("80 / 105 작업 완료", stages[1].text)
         jobs = html.find("button", **{"class": "ew-step-job"})
         self.assertEqual(len(jobs), 5)
         self.assertEqual(jobs[-1].attrs["aria-current"], "step")
@@ -893,6 +895,37 @@ return cases.map(([wanted,saved])=>({wanted,...workNavigationState(data,{id:'j',
         parents = self.evaluate_drafts("""[0,1].map(attention_count=>workNavigationState({nodes:{}},{id:'t',type:'t'}, {node_states:{t:{status:'blocked',missing:['before'],attention_count}}}))""")
         self.assertEqual([item["key"] for item in parents], ["waiting", "blocked"])
 
+    def test_active_parent_progress_preserves_leaf_failure_and_special_states(self):
+        result = self.evaluate_drafts("""(() => {
+const states=[
+ {status:'failed',progress:{done:25,total:48},failed_count:1,attention_count:5},
+ {status:'blocked',progress:{done:0,total:4},attention_count:2},
+ {status:'blocked',progress:{done:0,total:4},missing:['before'],attention_count:0},
+ {status:'failed',progress:{done:0,total:4},failed_count:1,attention_count:1},
+ ...['passed','skipped','unstarted','running','unknown','paused','cancelled','connection_required'].map(status=>({status,progress:{done:2,total:4},attention_count:1}))];
+return states.map(saved=>{const run={status:saved.status,node_states:{t:saved,j:saved}},before=JSON.stringify(run);
+return {parent:workNavigationState({nodes:{}},{id:'t',type:'t'},run),leaf:workNavigationState({nodes:{}},{id:'j',type:'j'},run),unchanged:before===JSON.stringify(run)};});
+})()""")
+        self.assertEqual([item["parent"]["key"] for item in result],
+                         ["in_progress", "blocked", "waiting", "in_progress", "passed", "skipped", "unstarted", "running", "unknown", "paused", "cancelled", "connection_required"])
+        self.assertEqual(result[0]["leaf"]["key"], "failed")
+        self.assertTrue(all(item["unchanged"] for item in result))
+
+    def test_sidebar_summary_shows_completed_direct_prerequisite_without_reordering_workflow(self):
+        result = self.evaluate_drafts("""(() => {
+const jobs=[{id:'current',deps:['finished','external']},{id:'failed'},{id:'waiting'},{id:'review'},{id:'finished'},{id:'other'}];
+const states={finished:{status:'passed'},failed:{status:'failed'},current:{status:'blocked'}};
+const before=JSON.stringify(jobs),summaries=createWorkStepSummaries();
+const initial=summaries.choose('case/t',jobs,'current',states);
+states.current.status='passed';const refreshed=summaries.choose('case/t',jobs,'current',states);
+const selected=summaries.choose('case/t',jobs,'other',states);
+return {initial,refreshed,selected,unchanged:before===JSON.stringify(jobs)};
+})()""")
+        self.assertEqual(result["initial"], ["finished", "current", "failed", "waiting"])
+        self.assertEqual(result["refreshed"], result["initial"])
+        self.assertEqual(result["selected"], ["finished", "current", "failed", "other"])
+        self.assertTrue(result["unchanged"])
+
     def test_preview_navigation_uses_effective_scope_input_connection_and_dependencies(self):
         result = self.evaluate_drafts("""(() => {
 const p={id:'p',type:'p',children:['t']},t={id:'t',type:'t',parent:'p',children:['j']},j={id:'j',type:'j',parent:'t',mode:'tool',tools:['db'],deps:[]};
@@ -908,7 +941,7 @@ return {blank,ready,excluded,html,connection,waiting};
 })()""")
         self.assertEqual([result[key]["key"] for key in ("blank", "ready", "excluded", "connection", "waiting")],
                          ["input_required", "ready", "skipped", "connection_required", "waiting"])
-        self.assertIn("0 / 0 완료 · 제외 1", PanelHTML(result["html"]).root.text)
+        self.assertIn("0 / 0 작업 완료 · 제외 1", PanelHTML(result["html"]).root.text)
 
     def test_preview_external_skill_permission_matches_navigation_counts_and_job_action(self):
         definition = {
@@ -951,7 +984,11 @@ return {blank,ready,excluded,html,connection,waiting};
         self.assertTrue(all("data-mutation" not in item.attrs for item in parent))
         self.assertFalse(html.find(**{"data-work-stage": "next"}))
         self.assertNotIn("다음 작업", html.text)
-        self.assertFalse(html.find("button", **{"data-action": "run"}))
+        retry = html.find("button", **{"data-action": "run"})
+        self.assertEqual(len(retry), 1)
+        self.assertEqual(retry[0].text, "다시 모의 점검")
+        self.assertEqual(retry[0].attrs["data-work-retry-complete"], "true")
+        self.assertNotIn("ew-primary", retry[0].attrs.get("class", ""))
         self.assertEqual(case["jobs"]["ap-j"], before)
 
     async def test_parent_ready_snapshot_is_not_promised_as_total_executed_count(self):
@@ -1086,9 +1123,9 @@ return {selectedJob,refreshedJob,retainedJob,changedCase};
 })()""")
         self.assertEqual(result, {"selectedJob": 0, "refreshedJob": 240, "retainedJob": 240, "changedCase": 0})
 
-    def test_completed_return_restores_task_list_and_keeps_process_return_in_both_placements(self):
+    def test_completed_return_restores_task_list_and_keeps_process_return_inline(self):
         result = self.evaluate_drafts(r"""(() => {
-return ['inline','dock'].map(placement=>{
+return ['inline'].map(placement=>{
   let focusedNode=null;
   const content={innerHTML:'',scrollTop:0,contains:()=>false,
     insertAdjacentHTML(position,html){this.innerHTML=html+this.innerHTML;},
@@ -1102,7 +1139,7 @@ return ['inline','dock'].map(placement=>{
   const tabs={innerHTML:''},host={isConnected:true,dataset:{},style:{},classList:{toggle(){}},contains:()=>false,setAttribute(){},
     remove(){this.isConnected=false;content.scrollTop=0;},
     querySelector:selector=>({'#ees-work-content':content,'#ees-work-tabs':tabs}[selector] || null),querySelectorAll:()=>[]};
-  const row={getBoundingClientRect:()=>({width:1920}),append(){host.isConnected=true;}},column={parentElement:row,classList:{add(){},remove(){}}},anchor={parentElement:column};
+  const row={getBoundingClientRect:()=>({width:1920}),append(){host.isConnected=true;}},column={parentElement:row,insertBefore(){},classList:{add(){},remove(){}}},anchor={parentElement:column};
   globalThis.document={querySelector:selector=>selector==='#chat-container #chat-pane'?anchor:null,createElement:tag=>tag==='aside'?host:{dataset:{},setAttribute(){},remove(){}}};globalThis.window={innerWidth:1920};
   const site={id:'a',name:'공장'},jobs=Array.from({length:40},(_,i)=>'j'+i);
   const definition={version:1,sites:{a:site},tools:{},nodes:{p:{id:'p',type:'p',name:'절차',children:['t']},t:{id:'t',parent:'p',type:'t',name:'단계',children:jobs}}};
@@ -1117,10 +1154,10 @@ return ['inline','dock'].map(placement=>{
     view.handleEvent({type:'click',target});
   }
   const listHTML=()=>content.innerHTML.match(/<section class="ew-work-browser[\s\S]*?<\/section>/)?.[0];
-  const returnLabel=()=>content.innerHTML.match(/data-action="panel_back"[^>]*>([^<]+)/)?.[1] || null;
+  const returnLabel=()=>{const match=content.innerHTML.match(/data-action="panel_back"([^>]*)>([^<]+)/);return match?{label:match[2],accessible:match[1].match(/aria-label="([^"]+)"/)?.[1]}:null;};
   view.renderPanel(snapshot);content.scrollTop=180;click({action:'select',nodeId:'t'});
   view.handleEvent({type:'input',target:{id:'ees-work-job-search',value:'작업'}});
-  click({action:'job_filter',filter:'completed'});click({action:'job_page',page:'1'});click({action:'job_condition',nodeId:'j30'});
+  click({action:'job_filter',filter:'completed'});click({action:'job_page',page:'5'});click({action:'job_condition',nodeId:'j30'});
   content.scrollTop=440;const before=listHTML();click({action:'select',nodeId:'j30'});
   const actionTag=content.innerHTML.match(/<button([^>]*)>단계로 돌아가기<\/button>/)[1];
   click({action:actionTag.match(/data-action="([^"]+)"/)[1],nodeId:'t'},placement);
@@ -1135,7 +1172,7 @@ return ['inline','dock'].map(placement=>{
             with self.subTest(placement=case["placement"]):
                 self.assertEqual(case["returned"], {
                     "id": "t", "scroll": 440, "focusedNode": "j30",
-                    "listPreserved": True, "back": "‹ 절차로 돌아가기",
+                    "listPreserved": True, "back": {"label": "‹  절차", "accessible": "‹ 절차로 돌아가기"},
                 })
                 self.assertEqual(case["ancestor"], {"id": "p", "scroll": 180, "focusedNode": "t"})
                 self.assertEqual(case["reopened"], {"scroll": 440, "listPreserved": True})

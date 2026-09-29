@@ -55,7 +55,10 @@ async function setup(options = {}) {
     adoptPreviewDraft: (caseId, nodeId) => adoptions.push([caseId, nodeId]),
     reset: () => { resets++; }, handleEvent: event => {viewEvents.push(event); return {handled: false};}
   }, {get: (target, key) => target[key] || (() => {})});
-  const designer = new Proxy({handleEvent: () => ({handled: false})}, {get: (target, key) => target[key] || (() => {})});
+  const authoringRequests = [];
+  const designer = new Proxy({handleEvent: () => ({handled: false}), openProcess: async (...args) => {
+    authoringRequests.push(args);return options.authoringResult === true;
+  }}, {get: (target, key) => target[key] || (() => {})});
   const window = {
     addEventListener: on, removeEventListener: () => {}, crypto: {randomUUID: () => 'request-' + requests.length},
     __eesNativeDraftV1: {ready: () => nativeReady, read: () => copy(nativeDraft),
@@ -103,7 +106,7 @@ async function setup(options = {}) {
   }
   await settle();
   return {
-    api: window.__eesNativeWorkV1, callbacks, requests, renders, adoptions, confirmations,
+    api: window.__eesNativeWorkV1, callbacks, requests, renders, adoptions, confirmations, authoringRequests,
     nativeDraft, restores, location, fire, viewEvents, readiness,
     setNativeReady: value => {nativeReady = value;},
     pendingTimers: () => [...timers.values()].map(timer => timer.delay),
@@ -118,6 +121,17 @@ async function setup(options = {}) {
   };
 }
 const scenarios = {
+  async runtime_authoring_entry_uses_process_identity_and_navigates_only_after_authorization() {
+    for (const allowed of [true,false]) {
+      const h = await setup({authoringResult:allowed});
+      const initial = h.location.search;
+      assert.equal(await h.callbacks.openAuthoring('p1','EMS'),allowed);
+      assert.deepEqual(h.authoringRequests,[['p1']]);
+      assert.equal(h.location.search,allowed?'?ees=workflow':initial);
+      assert.equal(h.posts().length,0);
+      assert.equal(h.nativeDraft.prompt,'미저장 업무 질문');
+    }
+  },
   async record_lookup_distinguishes_http_permissions_failures_and_missing_case() {
     const h = await setup();
     const cases = [
@@ -446,6 +460,9 @@ class WorkControllerTests(unittest.TestCase):
 
     def test_first_chat_is_read_only(self):
         self.check_scenario("first_chat_is_read_only")
+
+    def test_runtime_authoring_entry_uses_process_identity_and_navigates_only_after_authorization(self):
+        self.check_scenario("runtime_authoring_entry_uses_process_identity_and_navigates_only_after_authorization")
 
     def test_record_lookup_distinguishes_http_permissions_failures_and_missing_case(self):
         self.check_scenario("record_lookup_distinguishes_http_permissions_failures_and_missing_case")

@@ -52,6 +52,14 @@
   function rememberScope() {if(browsingSite)scopeSelections.set(scopeKey(),{category,nodeId:selectedId()});}
   const scopeReady = () => Boolean(state&&acceptedRoute===location.pathname+location.search&&lastRoute===acceptedRoute&&(!chatRoute()||window.__eesNativeDraftV1?.ready()));
   const view = createWorkView({callbacks:{scopeReady,registerPanel,selectWork,switchScope,startCase,showHistory,saveInputs,saveDocument,runJob,executionRefresh:retryExecutionRead,executionControl,
+    canAuthor:()=>designer.canAuthor(),
+    openAuthoring:async process=>{
+      if(busy||runView==='history'||!state?.catalog?.nodes?.[process])return false;
+      const at=generation,auth=token(),route=location.pathname+location.search;
+      if(!await designer.openProcess(process))return false;
+      if(at!==generation||auth!==token()||route!==location.pathname+location.search)return false;
+      stashDraft();navigate('/?ees=workflow');return true;
+    },
     openCase:id=>openCase(state?.cases.find(c=>c.id===id)),
     selectCategory:async wanted=>{category=wanted;const first=visibleRoots(category)[0];if(first)await selectWork(first);else renderNavigator();},
     showHistoryView:show=>{resetHistory();runView=show?'history':'current';renderPanel();},

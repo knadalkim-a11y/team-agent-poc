@@ -338,7 +338,7 @@ class ChatThemeBrowserTests(unittest.TestCase):
         # Use actual upstream global/chat/markdown/KaTeX styles. The theme is the
         # last initial index.html link; lazy chat styles may arrive afterward.
         css = sorted(path for path in cls.assets if path.endswith(".css")
-                     and "/immutable/assets/" in path
+                     and re.search(r"/immutable(?:-c[0-9a-f]{16})?/assets/", path)
                      and Path(path).name.startswith(("0.", "Chat.", "Messages.", "katex.")))
         if len(css) != 4:
             raise AssertionError("The pinned upstream style fixture selection changed.")

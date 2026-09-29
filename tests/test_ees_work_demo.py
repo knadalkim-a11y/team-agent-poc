@@ -93,7 +93,10 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             "localStorage.setItem('version','0.11.3');"})
         self.navigate("/c/existing-chat")
         self.wait("!!document.querySelector('#chat-input.ProseMirror') && !!document.querySelector('#ees-work-entry')")
-        self.click('button[aria-label="사이드바 열기"]')
+        # C's unset preference starts expanded; historical/saved closed states
+        # still use the real Native opener. Never force the store or DOM width.
+        if not self.browser.evaluate("document.querySelector('#sidebar')?.getBoundingClientRect().width > 200"):
+            self.click('button[aria-label="사이드바 열기"]')
         self.wait("document.querySelector('#sidebar')?.getBoundingClientRect().width > 200")
 
     def tearDown(self):
@@ -1459,8 +1462,10 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertFalse(blocked["history"][-1]["simulation"])
         self.assertTrue(all(check["status"] in {"blocked", "skipped"} for check in blocked["checks"]))
         self.assertEqual(after["progress"], {"done": 3, "total": 104})
-        self.assertEqual(self.text('[data-work-metric="jobs"] strong'), "3 / 104")
-        self.assertEqual(self.text('[data-work-metric="attention"] strong'), "2개 작업")
+        # Numeric/unit spans can wrap on a narrow panel; the saved quantities
+        # and their visible labels must remain exact independently of wrapping.
+        self.assertEqual(''.join(self.text('[data-work-metric="jobs"] strong').split()), "3/104")
+        self.assertEqual(''.join(self.text('[data-work-metric="attention"] strong').split()), "2개작업")
         def scroll_panel():
             bounds = self.read('#ees-work-content', 'getBoundingClientRect().toJSON()')
             self.browser.call('Input.dispatchMouseEvent', {"type": "mouseWheel",
@@ -1472,7 +1477,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(self.read('#ees-work-content', 'scrollTop'), 0,
                          'Choosing another job must show its title and current action from the top')
         self.assertIn("실행 이력 1건", self.text("#ees-work-content"))
-        self.assertIn("완료 조건", self.text("#ees-work-content"))
+        self.assertIn("완료 기준", self.text("#ees-work-content"))
         self.screenshot("ees-step-job-failed-retry")
         scroll_panel()
         same_job_scroll = self.read('#ees-work-content', 'scrollTop')

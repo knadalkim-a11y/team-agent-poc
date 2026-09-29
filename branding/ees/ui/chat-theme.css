@@ -295,3 +295,350 @@ body:has(#chat-container) #sidebar-chat-item:hover {
   /* Keep the native editor from zooming the viewport while the keyboard opens. */
   #chat-container #chat-input { font-size: 1rem; }
 }
+
+/* C full application contract, Figma 582:132 / 584:169 / 586:958.
+ * These selectors style the actual Native sidebar, messages and editor.
+ * The native stores still own width, menus, uploads and all submit actions.
+ * The mockup-only 32px notice is absent from the product coordinates. */
+body:has(#ees-work-entry) {
+  --ees-font: "EES Noto Sans KR", "EES Inter", "Segoe UI", sans-serif;
+  /* Native menus/dialogs portal into body outside #chat-container. */
+  font-family: var(--ees-font);
+}
+body:has(#ees-work-entry) #sidebar[data-ees-native-sidebar],
+body:has(#ees-work-entry) #sidebar[data-ees-native-sidebar] > div,
+body:has(#ees-work-entry) #sidebar[data-ees-native-sidebar] .sidebar,
+body:has(#ees-work-entry) #sidebar[data-ees-native-sidebar] .sidebar-bg-gradient-to-b {
+  background-color: var(--ees-paper);
+  color: var(--ees-ink);
+}
+body:has(#ees-work-entry) #sidebar[data-ees-native-sidebar] > div {
+  border-right: 1px solid var(--ees-line);
+  container-type: inline-size;
+}
+body:has(#ees-work-entry) #sidebar[data-ees-native-sidebar] > div > .sidebar:first-child {
+  height: 64px;
+  min-height: 64px;
+  padding: 24px 16px 0 28px;
+  gap: 12px;
+  margin: 0;
+  align-items: center;
+  justify-content: start;
+}
+body:has(#ees-work-entry) #sidebar[data-ees-native-sidebar] > div > .sidebar:first-child > * { margin-inline: 0; }
+body:has(#ees-work-entry) #sidebar[data-ees-native-sidebar] > div > .sidebar:first-child > a:first-child {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 8px;
+  background: var(--ees-blue) url("./brand-layers.svg") center / 24px no-repeat;
+}
+/* The image is decorative: its native link remains the new-chat control and
+ * retains the existing handler. The source Figma vector is the brand glyph. */
+body:has(#ees-work-entry) #sidebar[data-ees-native-sidebar] .sidebar-new-chat-icon {
+  opacity: 0;
+  width: 36px;
+  height: 36px;
+}
+body:has(#ees-work-entry) #sidebar-webui-name {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--ees-ink);
+  white-space: nowrap;
+}
+body:has(#ees-work-entry) #sidebar[data-ees-native-sidebar] > div > .sidebar:first-child > a:has(#sidebar-webui-name) {
+  padding: 0;
+  margin: 0;
+}
+body:has(#ees-work-entry) #sidebar[data-ees-native-sidebar] > div > div:has(> [data-ees-native-navigation]) {
+  padding: 12px 16px 0;
+  margin: 0;
+}
+[data-ees-native-navigation] {
+  display: grid;
+  grid-template-columns: 122px minmax(0, 1fr);
+  column-gap: 4px;
+  row-gap: 12px;
+  padding: 0;
+}
+[data-ees-native-navigation] > div:has(> :is(#sidebar-new-chat-button,#sidebar-search-button)) {
+  padding: 0;
+  min-width: 0;
+  height: 44px;
+  align-items: center;
+}
+[data-ees-native-navigation] > div:has(> #sidebar-search-button) { max-width: 145px; }
+[data-ees-native-navigation] :is(#sidebar-new-chat-button,#sidebar-search-button) {
+  position: relative;
+  height: 40px;
+  padding: 10px 16px;
+  gap: 8px;
+  margin: 0;
+  border-radius: 8px;
+  color: var(--ees-ink);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 22px;
+  justify-content: center;
+  white-space: nowrap;
+}
+/* Figma's label + 16px glyph is centered as one group. Native's flex-1
+ * label otherwise consumes the free width and pins that group to the left. */
+[data-ees-native-navigation] :is(#sidebar-new-chat-button,#sidebar-search-button) > div:nth-child(2) { flex: none; }
+[data-ees-native-navigation] :is(#sidebar-new-chat-button,#sidebar-search-button) > div:nth-child(2) > div { font-size: inherit; line-height: inherit; }
+[data-ees-native-navigation] :is(#sidebar-new-chat-button,#sidebar-search-button) > .hover-reveal {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--ees-paper);
+  z-index: 60;
+}
+[data-ees-native-navigation] #sidebar-new-chat-button { background: var(--ees-soft); }
+[data-ees-native-navigation] #sidebar-new-chat-button > div:first-child {
+  background: url("./navigation-plus.svg") center / 16px no-repeat;
+}
+[data-ees-native-navigation] #sidebar-new-chat-button > div:first-child > svg { opacity: 0; }
+[data-ees-native-navigation] #sidebar-search-button { background: transparent; }
+[data-ees-native-navigation] #sidebar-search-button > div:first-child {
+  background: url("./navigation-search.svg") center / 16px no-repeat;
+}
+[data-ees-native-navigation] #sidebar-search-button > div:first-child > svg { opacity: 0; }
+[data-ees-native-navigation] :is(#sidebar-new-chat-button,#sidebar-search-button) > * {
+  margin: 0;
+  transform: none;
+}
+[data-ees-native-navigation] #pinned-menu-items-list,
+[data-ees-native-navigation] #ees-work-authoring-link,
+[data-ees-native-navigation] #ees-work-entry { grid-column: 1 / -1; }
+@container (max-width: 290px) {
+  [data-ees-native-navigation] { grid-template-columns: minmax(0, 1fr); row-gap: 8px; }
+  [data-ees-native-navigation] > div:has(> #sidebar-search-button) { max-width: none; }
+}
+
+#chat-container:has(#ees-work-context) { position: relative; }
+#chat-container:has(#ees-work-context) [data-ees-native-toolbar] {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  left: auto;
+  width: auto;
+  max-width: min(40%, 260px);
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  z-index: 30;
+}
+#chat-container:has(#ees-work-context) [data-ees-native-toolbar] > div:first-child { padding: 0; }
+#chat-container:has(#ees-work-context) [data-ees-native-toolbar] #navbar-bg-gradient-to-b { background: transparent; }
+#chat-container:has(#ees-work-context) [data-ees-native-toolbar] .truncate {
+  max-width: 96px;
+  font-size: 12px;
+  line-height: 22px;
+  color: var(--ees-muted);
+}
+#chat-container:has(#ees-work-context) #messages-container .message-listitem {
+  padding-inline: 40px;
+  margin-bottom: 28px;
+}
+#chat-container:has(#ees-work-context) #messages-container .pt-18 { padding-top: 0; }
+#chat-container:has(#ees-work-context) #messages-container .message-listitem:first-child { padding-top: 0; }
+#chat-container:has(#ees-work-context) .chat-assistant .markdown-prose {
+  font-size: 1rem !important;
+  line-height: 1.6875;
+}
+/* C's prose hierarchy applies to direct body paragraphs only. Lists, code,
+ * tables, blockquotes and nested rich content retain their own semantics. */
+#chat-container:has(#ees-work-context) .chat-assistant .markdown-prose > p {
+  font-size: 16px;
+  line-height: 27px;
+  color: var(--ees-ink);
+  margin-block: 0 16px;
+}
+#chat-container:has(#ees-work-context) .chat-assistant .markdown-prose > p ~ p {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--ees-muted);
+}
+#chat-container:has(#ees-work-context) .chat-assistant .markdown-prose > p:last-child { margin-bottom: 0; }
+#chat-container:has(#ees-work-context) .chat-user .markdown-prose > p {
+  font-size: 15px;
+  line-height: 26px;
+}
+#chat-container:has(#ees-work-context) .chat-user .markdown-prose {
+  font-size: .9375rem !important;
+  line-height: 1.733333;
+}
+#chat-container:has(#ees-work-context) .chat-user .justify-end > div.rounded-3xl.bg-gray-50 > .whitespace-pre-wrap {
+  font-size: 15px;
+  line-height: 26px;
+}
+#chat-container:has(#ees-work-context) .chat-user .justify-end > div.rounded-3xl.bg-gray-50 {
+  background: var(--ees-tint);
+  border-radius: 14px;
+  padding: 12px 18px;
+  min-width: min(356px, 90%);
+}
+/* Native user-message actions occupy the existing inter-message gap instead
+ * of adding a second empty row. Their original visibility and handlers remain;
+ * keyboard focus also reveals controls that Native reveals on hover. */
+#chat-container:has(#ees-work-context) .chat-user { position: relative; }
+#chat-container:has(#ees-work-context) .chat-user .justify-end.pb-1 { padding-bottom: 0; }
+#chat-container:has(#ees-work-context) .chat-user > .flex.justify-end.text-gray-600 {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  max-width: 100%;
+  z-index: 2;
+}
+#chat-container:has(#ees-work-context) .user-message:focus-within .hover-reveal { opacity: 1; }
+#chat-container:has(#ees-work-context) #response-message-model-name {
+  min-height: 28px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--ees-blue);
+}
+#chat-container:has(#ees-work-context) .assistant-message-profile-image {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--ees-side);
+}
+#chat-container:has(#ees-work-context) .assistant-message-profile-image[src$="/assistant-layers.svg"] { padding: 5px; }
+#chat-container:has(#ees-work-context) [id^="message-"]:has(> div:first-child .assistant-message-profile-image) {
+  display: block;
+  position: relative;
+}
+#chat-container:has(#ees-work-context) [id^="message-"] > div:first-child:has(.assistant-message-profile-image) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  margin: 0;
+}
+#chat-container:has(#ees-work-context) [id^="message-"]:has(.assistant-message-profile-image) > .flex-auto {
+  width: 100%;
+  padding-left: 0;
+}
+#chat-container:has(#ees-work-context) [id^="message-"] > .flex-auto > div:first-child:has(#response-message-model-name) {
+  min-height: 28px;
+  padding-left: 38px;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+#chat-container:has(#ees-work-context) #chat-pane [class~="max-w-[58rem]"]:has(#message-input-container) {
+  max-width: 100%;
+  padding-inline: 40px;
+  margin-bottom: 28px;
+}
+#chat-container:has(#ees-work-context) #chat-pane > div:has(#message-input-container) { padding-bottom: 0; }
+/* Upstream's empty footer spacer has no control or content. A configured
+ * license/footer remains visible and retains the native markup. */
+#chat-container:has(#ees-work-context) form:has(> #message-input-container) > .mb-0\.5:empty { display: none; }
+#chat-container:has(#ees-work-context) #message-input-container {
+  border: 1px solid var(--ees-muted);
+  border-radius: 14px;
+  padding: 20px 20px 16px;
+  gap: 20px;
+}
+#chat-container:has(#ees-work-context) #message-input-container > .relative { padding-inline: 0; }
+#chat-container:has(#ees-work-context) #chat-input-container { padding: 0; }
+#chat-container:has(#ees-work-context) #chat-input {
+  min-height: 28px;
+  font-size: 1rem;
+  line-height: 1.75;
+  margin: 0;
+  padding: 0;
+}
+#chat-container:has(#ees-work-context) #chat-input > :first-child { margin-top: 0; }
+#chat-container:has(#ees-work-context) #chat-input > :last-child { margin-bottom: 0; }
+#chat-container:has(#ees-work-context) #message-input-container > [dir=ltr] {
+  min-height: 44px;
+  margin: 0;
+  gap: 18px;
+  align-items: center;
+}
+#chat-container:has(#ees-work-context) #message-input-container > [dir=ltr] > div { margin: 0; align-self: center; }
+/* Labels decorate the real Native menu triggers and selected-count buttons.
+ * The two item counts remain Native state; no mock tools/skills or proxy menus. */
+#chat-container:has(#ees-work-context) :is(#input-menu-button,#integration-menu-button) {
+  width: auto;
+  min-width: 30px;
+  height: 32px;
+  padding: 5px 2px;
+  gap: 6px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--ees-muted);
+}
+#chat-container:has(#ees-work-context) #input-menu-button > svg { width: 16px; height: 16px; }
+#chat-container:has(#ees-work-context) #input-menu-button::after { content: "첨부"; white-space: nowrap; }
+#chat-container:has(#ees-work-context) #integration-menu-button::after { content: "도구·스킬"; white-space: nowrap; }
+#chat-container:has(#ees-work-context) #integration-menu-button > svg { width: 14px; height: 14px; }
+#chat-container:has(#ees-work-context) #message-input-container [aria-label="Available Tools"]::before { content: "도구"; }
+#chat-container:has(#ees-work-context) #message-input-container [aria-label="Available Skills"]::before { content: "스킬"; }
+#chat-container:has(#ees-work-context) #message-input-container :is([aria-label="Available Tools"],[aria-label="Available Skills"]) {
+  font-size: 13px;
+  line-height: 22px;
+  gap: 4px;
+  white-space: nowrap;
+}
+#chat-container:has(#ees-work-context) #message-input-container :is([aria-label="Available Tools"],[aria-label="Available Skills"]) > span { font-size: inherit; }
+#chat-container:has(#ees-work-context) #message-input-container :is([aria-label="Available Tools"],[aria-label="Available Skills"]) > svg { display: none; }
+#chat-container:has(#ees-work-context) #send-message-button {
+  width: 76px;
+  height: 44px;
+  flex: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--ees-blue);
+  color: var(--ees-paper);
+  font-size: 13px;
+  line-height: 22px;
+  font-weight: 500;
+}
+#chat-container:has(#ees-work-context) #send-message-button:disabled { opacity: .5; }
+#chat-container:has(#ees-work-context) #send-message-button::after { content: "보내기"; }
+#chat-container:has(#ees-work-context) #send-message-button > svg { display: none; }
+#chat-container:has(#ees-work-context) #send-message-button:disabled > svg.animate-spin { display: inline-block; }
+.ees-native-voice-menu { position: relative; align-self: center; }
+.ees-native-voice-menu > summary {
+  list-style: none;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: var(--ees-muted);
+  font-size: 12px;
+  line-height: 22px;
+  white-space: nowrap;
+}
+.ees-native-voice-menu > summary::-webkit-details-marker { display: none; }
+.ees-native-voice-menu > summary:focus-visible { outline: 2px solid var(--ees-blue); outline-offset: 2px; }
+.ees-native-voice-menu > div {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  padding: 12px;
+  border: 1px solid var(--ees-line);
+  border-radius: 10px;
+  background: var(--ees-paper);
+  box-shadow: 0 8px 28px #0002;
+  z-index: 40;
+}
+
+@media (max-width: 900px) {
+  #chat-container:has(#ees-work-context) [data-ees-native-toolbar] { top: 22px; right: 24px; }
+  #chat-container:has(#ees-work-context) #messages-container .message-listitem,
+  #chat-container:has(#ees-work-context) #chat-pane [class~="max-w-[58rem]"]:has(#message-input-container) { padding-inline: 24px; }
+}
+@media (max-width: 600px) {
+  #chat-container:has(#ees-work-context) #message-input-container { padding: 14px 12px 12px; gap: 12px; }
+  #chat-container:has(#ees-work-context) #message-input-container > [dir=ltr] { flex-wrap: wrap; gap: 8px; }
+  #chat-container:has(#ees-work-context) #messages-container .message-listitem,
+  #chat-container:has(#ees-work-context) #chat-pane [class~="max-w-[58rem]"]:has(#message-input-container) { padding-inline: 16px; }
+}

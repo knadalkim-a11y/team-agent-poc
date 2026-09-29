@@ -78,6 +78,15 @@ class SyntheticProvider:
                 return self.answer({'error': 'Unexpected synthetic route'}, 404)
 
             def do_POST(self):
+                if urlsplit(self.path).path == '/v1/embeddings' and getattr(owner, 'allow_embeddings', False):
+                    body = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+                    inputs = body.get('input', [])
+                    if isinstance(inputs, str):
+                        inputs = [inputs]
+                    owner.calls.append({'path': '/v1/embeddings', 'count': len(inputs), 'synthetic': True})
+                    return self.answer({'object': 'list', 'model': body.get('model'), 'data': [
+                        {'object': 'embedding', 'index': index, 'embedding': [1.0, 0.5, 0.25]}
+                        for index in range(len(inputs))], 'usage': {'prompt_tokens': 1, 'total_tokens': 1}})
                 if urlsplit(self.path).path != '/v1/chat/completions':
                     return self.answer({'error': 'Unexpected synthetic route'}, 404)
                 body = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
@@ -101,7 +110,7 @@ class SyntheticProvider:
                     owner.models.append({'kind': 'workflow', 'claims': len(claims), 'tools': body.get('tools', []),
                                          'sources': len(context['evidence_sources'])})
                 else:
-                    content = '합성 모델 응답: 실제 Native 대화 서비스 연결을 확인했습니다.'
+                    content = getattr(owner, 'native_content', '합성 모델 응답: 실제 Native 대화 서비스 연결을 확인했습니다.')
                     owner.models.append({'kind': 'native_chat', 'tools': body.get('tools', []),
                                          'stream': bool(body.get('stream')), 'user_text': user_text})
                 if body.get('stream'):

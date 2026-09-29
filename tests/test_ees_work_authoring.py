@@ -393,6 +393,12 @@ class SystemAuthoringTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
         self.assertTrue(admin["ok"], admin)
         self.assertEqual(admin["process"]["owner_system"], "UNASSIGNED")
         before = self.business_rows()
+        resolved = await self.service.get_authoring(self.principal("admin"), process_id="setup-p")
+        self.assertTrue(resolved["ok"], resolved)
+        self.assertEqual(resolved["system_id"], "UNASSIGNED")
+        self.assertEqual(resolved["process"], admin["process"])
+        self.assert_denied(await self.service.get_authoring(self.principal("ems-a"), process_id="setup-p"))
+        self.assertEqual(self.business_rows(), before, "Owner lookup is read-only and still checks process authorization")
         self.assert_denied(await self.action("admin", "transfer_owner", admin["process"], payload={"owner_system": "EMS"}))
         self.assertEqual(self.business_rows(), before, "Assigning an existing multi-system P cannot silently narrow its scope")
 
