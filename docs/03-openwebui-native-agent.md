@@ -1328,6 +1328,63 @@ transport·J validator·P/T 최종 판정을 구분하며 한 페이지·부분/
 
 준비한 적용 블록은 기존 clone 폴더에서 `Update`와 `Upgrade -TrialCommit '<확정한 병합 SHA>' -Summary`를 순서대로 실행하는 것이다. 실제 실행 후 Ctrl+F5와 기존 대화·업무 저장·Native 개인 연결 보존을 대표 항목으로 확인하고 마지막 요약 및 정상/문제 1~2줄만 전달한다. 설치가 기존 도구를 자동 승인하거나 예제 P를 자동 게시하지 않는다. 실제 등록본 승인·P의 연결/게시와 사내 호출 수락은 따로 확인한다. 정상 적용 뒤 복원은 [Stop → Restore → Start](#ees-wrapper-restore), Apply/Restore 자체가 중단됐다면 같은 절의 미완료 상태 경로를 따른다. 프로그램 복원은 DB·진행 이력·개인 설정·ApplyDemo 변경의 복원이 아니다.
 
+<a id="c-design-trial-20260929"></a>
+
+#### C안 PR #66 — 09-29 사내 시험 적용 준비
+
+이번 후속 승인은 남은 Native composer 보내기 클릭 검증·관련 보완, 조건 충족 후 #66 병합과 정확한 병합본의 배포 준비까지다. [3차 검증·병합/배포물 근거](../evals/scenarios.md#c-design-phase3-20260929)와 [현재 상태](STATUS.md)를 먼저 확인한다. 아래 절차는 회사 PC에서 사용자가 실행하며 **병합 완료·배포 준비·사내 적용 성공을 별도로 기록**한다. 검토용 Result JSON/Evidence ZIP은 프로그램 배포물이 아니다.
+
+**먼저 현재 상태 한 줄:** 마지막 사내 보고만으로 현재 설치 원본을 확정할 수 없으므로 기존 clone·등록 설정에서 아래 읽기 명령을 한 번 실행한다. 경로가 다르면 기존 clone 경로를 유지하고 별도 `-Config`를 사용했다면 아래 모든 호출에 같은 값을 유지한다. `commit/program/running`과 실패 시 짧은 오류만 전달하며 전체 로그·파일·화면 사진은 반출하지 않는다. `Status result=ok`는 health나 화면 수락을 뜻하지 않는다. `incomplete/invalid`·실패·예상하지 않은 원본이면 적용을 진행하지 않고 이 한 줄로 다음 경로를 판단한다.
+
+```powershell
+& (Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1') -Action Status -Summary
+```
+
+**ApplyDemo 판단:** #65 병합 원본 `e995fe16e4835f2d1799c95f3d6d1b74ce381389`에서 C안까지 지정 Agent Pack과 자산 적용 코드는 바뀌지 않았다. #65/Pack0.2.14 적용이 확인된 환경에 C안 UI만 반영하기 위해 사용자 자산을 초기화·재등록하지 않는다. 이전 ees.10/Pack0.2.12 등에서 올라오는 환경에는 앞선 ees.12/Pack0.2.14의 지정 공통 자산 변경이 포함되므로 현재 상태와 이전 적용 기록을 구분한다. Status는 Pack의 실제 등록 바이트를 조회하지 않으며 버전 이름만으로 자산 일치를 확정하지 않는다.
+
+기존 `Upgrade -TrialCommit`은 프로그램 적용 후 **항상 같은 원본의 ApplyDemo를 호출**한다. 변경이 없는 관리 항목은 API 쓰기 없이 확인하고, 변경이 있는 지정 관리 필드만 기존 보호 경로로 갱신한다. 사용자 전체 Tool/Skill/Prompt·개인 설정·권한을 일괄 동기화하는 기능이 아니다. 로컬 적용 journal은 갱신될 수 있으며 `managed_field_conflict`·`concurrent_edit`·기존 ID 충돌이면 강제로 덮지 않고 멈춘다. 따라서 이 경로를 ApplyDemo 생략으로 안내하지 않으며 성공 후 별도 ApplyDemo도 반복하지 않는다.
+
+**상태 확인 후 정확한 병합본 적용:** 아래 블록에는 PR #66의 실제 merged 상태와 배포물 검증을 확인한 기록의 **최종 병합 main 전체 40자리 SHA**만 입력한다. 이 문서의 과거 SHA나 미병합 검토 head를 입력하지 않는다. 기록에 병합 SHA/배포 준비 완료가 없거나 필수 검사에 차단이 남아 있으면 실행하지 않는다. 10월 이후라면 먼저 [한시 원격 검사 생략의 종료 조건](STATUS.md#2026년-9월-개발검사-방침)을 확인한다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesCommit = Read-Host 'PR #66 병합/배포 준비 기록의 최종 40자리 SHA'
+    if ($eesCommit -cnotmatch '\A[0-9a-f]{40}\z') { throw '확정한 전체 SHA가 필요합니다.' }
+    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $eesManager = Join-Path $eesRepo 'scripts\manage-ees.ps1'
+    & $eesManager -Action Update
+    $eesHead = & git -C $eesRepo rev-parse HEAD
+    if ($LASTEXITCODE -ne 0) { throw 'HEAD 조회 실패' }
+    $eesMain = & git -C $eesRepo rev-parse origin/main
+    if ($LASTEXITCODE -ne 0) { throw 'origin/main 조회 실패' }
+    if ($eesHead -cne $eesCommit -or $eesMain -cne $eesCommit) {
+        throw '검토 원본과 다릅니다. 적용하지 않고 중단합니다.'
+    }
+    & $eesManager -Action Upgrade -TrialCommit $eesCommit -Summary
+}
+```
+
+Update에는 `-Summary`를 붙이지 않는다. 기존 wrapper가 실패 시 예외로 중단하며 clean main·canonical origin·HEAD/origin/main·고정 SHA·사용자 변경 보호를 검사한다. 원본·공식 wheel·묶음 hash/RECORD·호환성·현재 프로그램 검사를 **Stop 전에** 마치고 Stop → 검증 Backup → Apply → Start/최대120초 health → 같은 원본 ApplyDemo 순서로 진행한다. 기존 Python·DATA_DIR·DB·키·접속 주소·프록시를 유지하며 새 환경·전체 의존성 설치·새 계정/키는 준비 조건이 아니다. 정확히 같은 원본이 이미 설치되고 파일·프로세스·health가 확인되면 프로그램 준비/재시작을 생략하지만 지정 자산 확인은 이어진다.
+
+Backup은 서버 종료와 잠금 아래 기존 DATA_DIR 전체(업무 DB 포함)·키·설정을 사내에 보관하고 파일 hash·복사 DB·원본 불변을 확인한다. 실패하면 적용을 시작하지 않는다. 실패 후에는 마지막 `stage/code/next`에서 멈추며 Upgrade/Start·강제 reset·잠금 삭제·폴더 이동을 반복하지 않는다. health 시간 초과만으로 서버 종료나 적용 성공을 가정하지 않는다. 프로그램 성공 후 ApplyDemo가 실패하면 프로그램 성공과 자산 실패를 구분하며 자동 Restore하지 않는다.
+
+**정상 적용 뒤 직전 프로그램으로 돌아갈 때만:** 아래 기존 Restore 경로를 한 번 사용한다. 기존 프로그램/보관본·잠금·프로세스를 검사하고 실패 시 다음 단계로 넘어가지 않는다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesManager = Join-Path $env:USERPROFILE 'team-agent-poc\scripts\manage-ees.ps1'
+    & $eesManager -Action Stop -Summary
+    & $eesManager -Action Restore -Summary
+    & $eesManager -Action Start -HealthTimeout 120 -Summary
+}
+```
+
+Apply/Restore 자체가 중단되어 미완료 기록이 남았다면 위 일반 복원 블록을 사용하지 않고 [미완료 상태의 Restore 전용 절차](#ees-wrapper-restore)를 따른다. 프로그램 Restore는 현재 DB·대화·업무 이력·승인·개인 설정·ApplyDemo 자산 변경을 되돌리지 않는다. 데이터 백업과 프로그램 복원은 별개이며 백업 DB로 현재 자료를 덮어쓰는 자동 절차는 없다. ees.11 등 이전 프로그램에서는 새 Native 실행이 지원되지 않는 [호환 범위](#shared-native-runtime-20260925)도 유지한다.
+
+**적용 후 대표 확인:** Ctrl+F5로 갱신하고 기존 대화에서 업무패널을 연 채 한 번 보내기→응답→새로고침 보존, C안 J의 입력/결과·단일 행동 표시, 실제 필요한 업무 입력 한 번 저장과 기존 이력 읽기를 함께 확인한다. 새 등록/승인/게시나 운영 DB 실행을 확인용으로 만들지 않는다. 기존 이력이 없으면 그 항목만 미확인으로 남긴다. 외부에는 `upgrade=ok/failed, commit=<12자리>, running=true/false, apply_demo=ok/failed`와 `보내기/대화보존=정상/문제, C안=정상/문제, 저장/이력=정상/미확인/문제` **1~2줄만** 전달한다. 실패 시 마지막 EES 실패 요약 한 줄이면 되며 실제 결과를 받기 전에는 사내 성공으로 기록하지 않는다.
+
 <a id="ees-right-panel-20260922"></a>
 
 #### 09-22 오른쪽 업무 패널·수행 상세 후속

@@ -16,6 +16,7 @@ Use --phase2 for actual browser manual/default-input and P/T scope actions.
 Use --phase3 for the integrated Native gate. Only external HTTP/model responses
 come from a loopback synthetic provider; Native auth/chat, tools, ACL, approval,
 publication, execution and persistence remain the packaged product.
+Use --composer-only for the focused real Native send-button/reload gate.
 """
 
 import argparse
@@ -45,6 +46,7 @@ def main():
     parser.add_argument('--navigation-only', action='store_true')
     parser.add_argument('--phase2', action='store_true')
     parser.add_argument('--phase3', action='store_true')
+    parser.add_argument('--composer-only', action='store_true')
     args = parser.parse_args()
     ROOT = Path(__file__).resolve().parents[1]
     OUT = args.output.resolve()
@@ -72,12 +74,15 @@ def main():
         OPENAI_API_KEY='', OLLAMA_API_KEY='', OPENAI_API_BASE_URL='http://127.0.0.1:1/v1',
         OLLAMA_BASE_URL='http://127.0.0.1:1', WEBUI_ADMIN_EMAIL='', WEBUI_ADMIN_PASSWORD='')
     provider = None
-    if args.phase3:
+    if args.phase3 or args.composer_only:
         from ees_work_c_phase3_fullapp import SyntheticProvider
         provider = SyntheticProvider()
         environment.update(ENABLE_OPENAI_API='true', OPENAI_API_BASE_URL=provider.base + '/v1',
                            OPENAI_API_BASE_URLS=provider.base + '/v1', OPENAI_API_KEY='synthetic-local-only',
                            OPENAI_API_KEYS='synthetic-local-only', ENABLE_VALVE_ENCRYPTION='true')
+    if args.composer_only:
+        environment.update(DEFAULT_MODELS='c3-synthetic-model', ENABLE_TITLE_GENERATION='false',
+                           ENABLE_TAGS_GENERATION='false', ENABLE_FOLLOW_UP_GENERATION='false')
     (work/'data').mkdir(mode=0o700)
 
     def unpack(wheel, name):
@@ -126,7 +131,7 @@ def main():
     report['programs'] = {label: {'file': path.name, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
                           for label, path in [('candidate', args.wheel), *([('baseline', args.baseline_wheel)] if args.baseline_wheel else [])]}
     report['startup'] = ('Official Open WebUI CLI, one Python environment, new temporary DATA_DIR, '
-                         + ('loopback synthetic external HTTP/OpenAI responses' if args.phase3 else 'model/provider access disabled'))
+                         + ('loopback synthetic external HTTP/OpenAI responses' if provider else 'model/provider access disabled'))
     with (OUT/'baseline-server.log').open('w', encoding='utf-8') as baseline_log:
         server = launch(baseline, baseline_log)
         try:
@@ -180,7 +185,7 @@ def main():
             state = current()
             if not state.get('case'):
                 state = action({'action': 'create', 'chat_id': chat_id, 'payload': {'site_id': 'us-a', 'system': 'EMS', 'process_id': 'setup-p'}})
-            for node_id in (() if args.phase2 else ('scope-j', 'infra-j', 'install-j')):
+            for node_id in (() if args.phase2 or args.composer_only else ('scope-j', 'infra-j', 'install-j')):
                 if state['case']['jobs'][node_id]['status'] != 'passed':
                     case = state['case']
                     state = action({'action': 'run', 'chat_id': chat_id, 'case_id': case['id'], 'expected_revision': case['revision'], 'node_id': node_id, 'payload': {'confirm': True}})
@@ -238,6 +243,15 @@ def main():
 
             def shot(name):
                 (OUT / (LABEL + '-' + name + '.png')).write_bytes(base64.b64decode(browser.call('Page.captureScreenshot', {'format': 'png'})['data']))
+
+            if args.composer_only:
+                from ees_work_c_phase3_fullapp import composer_gate
+                report['scope'] = 'Real Native composer button with work panel; real auth/chat/EES/temporary DB; only external model is loopback synthesis'
+                composer_gate(out=OUT, client=client, headers=headers, browser=browser,
+                              base=BASE, chat_id=chat_id, provider=provider,
+                              click=click, wait=wait, shot=shot, record=record)
+                report['ok'] = True
+                return
 
             def navigation_check():
                 row = '#ees-work-content [data-work-job="ap-j"] [data-action="select"]'

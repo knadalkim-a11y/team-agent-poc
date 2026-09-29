@@ -6,12 +6,12 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** [같은 Draft PR #66](https://github.com/knadalkim-a11y/team-agent-poc/pull/66)의 [C안 3차 개발환경 검수](mockups/ees-work/TASK.md#c-design-phase3-20260929)를 통과했다. 시작 원격/로컬 `7d9f2caaa7ef39522fd5fa3f69af732e5fcebeeb`·깨끗한 checkout 및 두 AGENTS/STATUS를 확인했고 1·2단계와 완료 복귀/과거 판정/초안 차단 보완을 보존했다. 최신 main은 #65 병합본 `e995fe16e4835f2d1799c95f3d6d1b74ce381389`이며 Draft #53·별도 Windows 작업은 혼합하지 않았다.
-- **이번 수정:** legacy 검토 자료가 조회 실패 뒤 열린 상세와 본문에 남는 결함을 재현·수정했다. 실패한 현재/과거 자료를 즉시 숨기고, 성공한 재조회 뒤 기록과 작성 중인 글을 복원한다. 과거 조회 대상·늦은 응답을 분리하며 서버 저장/인가/실행 계약은 변경하지 않는다.
-- **검증 상태:** [3차 평가](../evals/scenarios.md#c-design-phase3-20260929)에 최초 실패·준비 오류·최종 재검을 구분했다. 동일 최종 wheel에서 제품 브라우저 fixture41, 서비스/실제 Native API45, 실제 계정 브라우저1, Node25·panel44·controller21 PASS. 공식 CLI 전체 앱도 실제 Native 인증·대화 API/재표시·P 게시·EES/임시 DB로 필수 경로와 프로그램 Restore/재적용·강제 재기동 UNKNOWN을 통과했다. 외부 HTTP/모델 응답은 합성이다. Native composer 보내기 클릭은 미실행이며 실제 completion·대화 저장 API와 구분한다. Figma 시각 검토를 제품 시험으로 합산하지 않았다.
-- **보존·버전:** #65의 Native 공통 실행·영속 runtime, 시스템 담당자·P별 게시, Native 대화/Workspace·회원/그룹·사용자 자산·저장/권한을 유지한다. ees.12·Pack0.2.14와 실행 계약은 그대로며 프로그램 Restore와 DB/자산 복원은 별개다.
-- **사내 상태:** 새 사내 설치 결과는 수신하지 않았다. 기존 #59/#60 적용 보고를 유지하고 이번 합성 환경의 제품 검사를 사내 실사용 수락으로 바꾸지 않는다. Windows·사내 API/모델·OP-01~04는 미확인이다. 병합·배포·실제 계정/도구 등록은 수행하지 않는다.
-- **다음 작업 하나:** 3차 개발환경 검수 증거와 제품 차이를 사용자에게 검토받는다. 같은 Draft PR #66을 유지하며 병합·배포·Draft 해제·사내/Windows·실 API/모델·실제 사용자 수락은 별도 지시/결과가 필요하다.
+- **현재 작업:** [PR #66](https://github.com/knadalkim-a11y/team-agent-poc/pull/66)의 C안 1·2·3차와 보완을 보존하고 [남은 Native 보내기 gate](../evals/scenarios.md#c-design-composer-merge-20260929)를 통과했다. 시작 원격/로컬 head `a49350e31dcbbc4d1687293a0ccd8dcf0b541989`, main `e995fe16e4835f2d1799c95f3d6d1b74ce381389`와 깨끗한 checkout·두 AGENTS/STATUS·기존 dist/검사 증거를 확인했다. Draft #53·별도 Windows 작업은 혼합하지 않았다.
+- **검증·변경:** 공식 앱·실제 Native 인증/대화·임시 DB에서 업무패널을 열고 입력/보내기3회, 기존 메시지 보존·새 대화 연결·요청당1회·응답 표시·저장/새로고침을 확인했다. 외부 모델만 loopback 합성이다. 준비 실패3건과 최종 통과를 구분했고 제품 결함/제품 코드 변경은 없다. 변경은 전용 시험과 관련 문서이며 앞선 광역 검사는 제품 불변 근거로 재사용한다.
+- **승인·Git 상태:** 이번 사용자가 gate 통과 후 Draft 해제·#66 병합과 정확한 병합본 배포 준비를 승인했다. 기존 미승인 문구는 당시 경계다. 관련 검사·문서·원격 검증 head를 확인해 같은 PR로 반영하고, 실제 merged/병합 SHA/main 및 배포물 최종 hash는 [PR #66 병합/준비 기록](https://github.com/knadalkim-a11y/team-agent-poc/pull/66)으로 대조한다. main 직접 push·보호 우회·원격 CI 재실행은 하지 않는다.
+- **배포 준비·보존:** 최종 wheel SHA256 `d35bc2bb4adc789cc93752b49550a47446461f1e54ba0015a3952e6af78ca254`의 전체 제품5916개/RECORD5917행·manifest/CRC를 확인했다. 병합 제품이 같을 때 재사용하고 정확한 깨끗한 병합 원본으로 새 bundle을 만든다. ees.12·Pack0.2.14, #65 Native 공통 실행, 회원/권한·P게시·대화/Workspace·DB/키·사용자 자산을 보존한다. 프로그램 Restore는 DB/자산 rollback이 아니다.
+- **사내 상태:** 새 설치 결과는 수신하지 않았다. 기존 #59/#60 보고를 유지하며 현재 설치 SHA와 Pack 실제 등록 바이트는 미확인이다. [사내 시험 적용·복구 안내](03-openwebui-native-agent.md#c-design-trial-20260929)에 따라 회사 PC 작업은 사용자가 수행한다. 병합 완료·배포 준비·사내 적용 성공을 각각 구분하고 Windows·실 API/모델·OP/사용자 수락은 미실행으로 남긴다.
+- **다음 작업 하나:** 병합/배포 준비 기록을 확인한 뒤 사용자의 기존 `Status -Summary` 결과 한 줄로 현재 원본과 상태를 확인하고 적용 경로를 확정한다. 원문 로그·파일·스크린샷 반출을 요구하지 않는다.
 
 ## 2026년 9월 개발·검사 방침
 
@@ -61,7 +61,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | #65 병합·C안 1·2단계/보완 보존, [PR #66 3차 개발환경 검수 통과](mockups/ees-work/TASK.md#c-design-phase3-20260929) | Draft 유지. 병합/배포는 별도 지시; 사내/Windows·실 API/모델·사용자 수락·OP·공동 진행/일정 미실행 |
+| 4. 관리자 워크플로 | #65 병합·C안 1·2단계/보완 보존, [PR #66 3차 개발환경 검수 통과](mockups/ees-work/TASK.md#c-design-phase3-20260929) | 남은 보내기 gate PASS·병합/준비 승인; 실제 Git/배포물은 #66 기록, 사내 적용은 Status 결과 후 사용자 실행 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -79,4 +79,4 @@
 
 ## 최근 점검
 
-2026-09-29 PR #66 head `7d9f2caa`·main `e995fe16`와 로컬/AGENTS/STATUS를 확인하고 3차 통합 회귀를 수행했다. 조회 실패 때 남던 legacy 자료를 숨기고 성공 재조회 복원을 같은 조건에서 확인했다. 최종 wheel SHA256 `d35bc2bb4adc789cc93752b49550a47446461f1e54ba0015a3952e6af78ca254`의 포함 자산23개/원본 바이트가 일치한다. 실제 Native 전체 앱과 fixture/서비스를 구분한 최종 PASS, 초기 오류·재사용·미실행은 [3차 평가](../evals/scenarios.md#c-design-phase3-20260929)에 있다. 검토용 PNG/JSON/로그 ZIP은 프로그램 배포물과 별개다. 병합·배포·Draft 해제·새 사내 검증은 하지 않았다.
+2026-09-29 실제 Native 보내기 클릭의 마지막 gate를 같은 최종 제품에서 통과했다. 기존 대화2회·새 대화1회, 요청/작업/모델 호출 각각1회, 응답/저장/새로고침·이전 기록 보존·대상 연결을 확인했다. 제품 코드는 불변이며 전체 wheel 바이트/RECORD/CRC·원본/manifest를 대조했다. 준비 실패·독립 검토 보완·재사용·미실행은 [후속 평가](../evals/scenarios.md#c-design-composer-merge-20260929), 실제 병합/main/최종 bundle hash는 [PR #66](https://github.com/knadalkim-a11y/team-agent-poc/pull/66)에 연결한다. 회사 PC 적용·새 사내 성공은 수행/수신하지 않았다.

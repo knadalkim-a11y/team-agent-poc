@@ -102,7 +102,23 @@ class SyntheticProvider:
                                          'sources': len(context['evidence_sources'])})
                 else:
                     content = '합성 모델 응답: 실제 Native 대화 서비스 연결을 확인했습니다.'
-                    owner.models.append({'kind': 'native_chat', 'tools': body.get('tools', [])})
+                    owner.models.append({'kind': 'native_chat', 'tools': body.get('tools', []),
+                                         'stream': bool(body.get('stream')), 'user_text': user_text})
+                if body.get('stream'):
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'text/event-stream')
+                    self.send_header('Cache-Control', 'no-cache')
+                    self.end_headers()
+                    identifier = 'synthetic-' + uuid4().hex
+                    for delta, reason in (({'role': 'assistant', 'content': content}, None), ({}, 'stop')):
+                        chunk = {'id': identifier, 'object': 'chat.completion.chunk',
+                                 'created': int(time.time()), 'model': body['model'],
+                                 'choices': [{'index': 0, 'delta': delta, 'finish_reason': reason}]}
+                        self.wfile.write(('data: ' + json.dumps(chunk, ensure_ascii=False) + '\n\n').encode('utf-8'))
+                        self.wfile.flush()
+                    self.wfile.write(b'data: [DONE]\n\n')
+                    self.wfile.flush()
+                    return
                 self.answer({'id': 'synthetic-' + uuid4().hex, 'object': 'chat.completion',
                     'created': int(time.time()), 'model': body['model'], 'choices': [
                     {'index': 0, 'message': {'role': 'assistant', 'content': content}, 'finish_reason': 'stop'}],
@@ -129,6 +145,190 @@ class SyntheticProvider:
         self.server.shutdown()
         self.server.server_close()
         self.thread.join(timeout=3)
+
+
+def composer_gate(*, out, client, headers, browser, base, chat_id, provider,
+                  click, wait, shot, record):
+    """Physical Native composer input/send; API use is setup or read-only evidence.
+
+    No completion endpoint or chat-message save is called by this test. Native
+    frontend owns those requests. Temporary user preferences disable background
+    title/tag/follow-up generation to count only the three intentional sends.
+    """
+    def api(path, body=None, **params):
+        response = client.request('POST' if body is not None else 'GET', path,
+                                  headers=headers, json=body, params=params or None)
+        response.raise_for_status()
+        value = response.json()
+        assert not isinstance(value, dict) or value.get('ok') is not False, value
+        return value
+
+    api('/api/v1/users/user/settings/update', {'ui': {'language': 'ko-KR',
+         'showChangelog': False, 'models': ['c3-synthetic-model']}})
+    api('/api/v1/models/create', {'id': 'c3-synthetic-model', 'name': 'C3 합성 모델',
+                                 'meta': {}, 'params': {}, 'access_grants': []})
+    assert any(model['id'] == 'c3-synthetic-model' for model in api('/api/models')['data'])
+    existing_case = api('/api/ees-work/state', chat_id=chat_id)['case']
+    initial_chat = api('/api/v1/chats/' + chat_id)['chat']
+    assert initial_chat['history']['messages'] == {}
+    evidence = {'boundary': 'Official Native CLI/auth/chat/composer/EES/temporary DB; loopback model response synthesis only',
+                'program_test': 'physical CDP Input dispatch; no direct completion or injected message save',
+                'cases': []}
+
+    def navigate(path=None):
+        browser.events.clear()
+        browser.call('Page.navigate', {'url': base + path}) if path else browser.call('Page.reload')
+        deadline = time.monotonic() + 20
+        while not any(event.get('method') == 'Page.loadEventFired' for event in browser.events):
+            browser.events.append(browser.receive(deadline))
+        wait('!!document.querySelector("#chat-input.ProseMirror") && !!document.querySelector("#ees-work-entry")')
+
+    def open_process():
+        if browser.evaluate('document.querySelector("#sidebar").getBoundingClientRect().width < 200'):
+            click('button[aria-label="사이드바 열기"],button[aria-label="Open sidebar"]')
+        click('[data-work-category="setup"]')
+        selector = '#ees-work-entry [data-action="select"][data-node-id="setup-p"]'
+        wait('!!document.querySelector(' + json.dumps(selector) + ')')
+        if browser.evaluate('!!document.querySelector(' + json.dumps(selector) + ')?.closest("details:not([open])")'):
+            click('#ees-work-entry .ew-workflow-picker > summary')
+        click(selector)
+        wait('document.querySelector("#ees-work-panel .ew-title")?.textContent === "신규 공장 횡전개" && !document.querySelector("#ees-work-panel")?.matches("[aria-busy=true]")')
+
+    def snapshot(identifier):
+        chat = api('/api/v1/chats/' + identifier)['chat']
+        return chat, api('/api/ees-work/state', chat_id=identifier)['case']
+
+    def send_and_verify(label, question, expected_case, expected_chat=None, prior_questions=()):
+        assert browser.evaluate('!!document.querySelector("#ees-work-panel")?.getClientRects().length')
+        prior_history = snapshot(expected_chat)[0]['history'] if expected_chat else {'messages': {}}
+        reply_visible = '(document.querySelector("#chat-container")?.innerText || "").split("합성 모델 응답: 실제 Native 대화 서비스 연결을 확인했습니다.").length - 1 === ' + str(len(prior_questions) + 1)
+        # Capture trusted browser events without modifying application handlers.
+        browser.evaluate('''window.c3ComposerEvents=[];
+          document.addEventListener('input',e=>{if(e.target.closest?.('#chat-input'))window.c3ComposerEvents.push({type:e.type,trusted:e.isTrusted})},true);
+          document.addEventListener('click',e=>{if(e.target.closest?.('#send-message-button'))window.c3ComposerEvents.push({type:e.type,trusted:e.isTrusted})},true);''')
+        click('#chat-input')
+        browser.call('Input.insertText', {'text': question})
+        wait('document.querySelector("#chat-input")?.innerText === ' + json.dumps(question))
+        wait('!!document.querySelector("#send-message-button") && !document.querySelector("#send-message-button").disabled')
+        before = len(provider.models)
+        browser.events.clear()
+        click('#send-message-button')
+        wait('location.pathname.startsWith("/c/") && !!document.querySelector("#chat-container") && document.querySelector("#chat-container").innerText.includes(' + json.dumps(question) + ')')
+        wait(reply_visible)
+        wait('document.querySelector("#ees-work-context")?.innerText.includes("이 대화에 연결됨")')
+        identifier = browser.evaluate('location.pathname.split("/c/")[1]')
+        assert not expected_chat or identifier == expected_chat, (identifier, expected_chat)
+        assert expected_chat or identifier != chat_id
+        deadline = time.monotonic() + 10
+        while True:
+            saved, case = snapshot(identifier)
+            messages = list(saved['history']['messages'].values())
+            expected_count = (len(prior_questions) + 1) * 2
+            if len(messages) == expected_count and all(m.get('done') for m in messages if m['role'] == 'assistant'):
+                break
+            assert time.monotonic() < deadline, saved
+            time.sleep(.1)
+        assert [m['content'] for m in messages if m['role'] == 'user'] == [*prior_questions, question], messages
+        assert [m['content'] for m in messages if m['role'] == 'assistant'] == ['합성 모델 응답: 실제 Native 대화 서비스 연결을 확인했습니다.'] * (len(prior_questions) + 1), messages
+        for identifier_before, old_message in prior_history['messages'].items():
+            new_message = saved['history']['messages'][identifier_before]
+            assert {key: value for key, value in old_message.items() if key != 'childrenIds'} == {
+                key: value for key, value in new_message.items() if key != 'childrenIds'}, 'Existing message fields changed'
+        assert case['id'] == expected_case and case['chat_id'] == identifier, case
+        assert len(provider.models) == before + 1, provider.models[before:]
+        assert provider.models[-1]['user_text'] == question and provider.models[-1]['stream'] is True
+        events = browser.evaluate('window.c3ComposerEvents')
+        assert sum(item['type'] == 'click' for item in events) == 1 and all(item['trusted'] for item in events), events
+        assert any(item['type'] == 'input' for item in events), events
+        requests = [event['params'] for event in browser.events if event.get('method') == 'Network.requestWillBeSent']
+        completions = [req for req in requests if urlsplit(req['request']['url']).path == '/api/chat/completions']
+        assert len(completions) == 1, len(completions)
+        completion_body = json.loads(completions[0]['request']['postData'])
+        if expected_chat:
+            assert completion_body['chat_id'] == identifier
+        else:
+            assert not completion_body.get('chat_id'), 'First send must not target the previous chat'
+        assert completion_body['user_message']['content'] == question
+        question_id = completion_body['user_message']['id']
+        assert saved['history']['messages'][question_id]['content'] == question
+        completion_response = json.loads(browser.call('Network.getResponseBody', {
+            'requestId': completions[0]['requestId']})['body'])
+        assert completion_response['chat_id'] == identifier and completion_response['status'] is True
+        assert len(completion_response['task_ids']) == 1, completion_response
+        errors = [{'path': urlsplit(event['params']['response']['url']).path,
+                   'status': event['params']['response']['status']} for event in browser.events
+                  if event.get('method') == 'Network.responseReceived' and event['params']['response']['status'] >= 400]
+        assert not errors, errors
+        shot('composer-' + label + '-response')
+        navigate()
+        wait('document.querySelector("#chat-container")?.innerText.includes(' + json.dumps(question) + ') && document.querySelector("#chat-container")?.innerText.includes("합성 모델 응답")')
+        wait(reply_visible)
+        open_process()
+        reloaded, restored = snapshot(identifier)
+        assert reloaded['history'] == saved['history']
+        assert restored['id'] == case['id'] and restored['chat_id'] == identifier
+        assert len(provider.models) == before + 1, 'Reload must not submit again'
+        shot('composer-' + label + '-reload')
+        result = {'kind': label, 'chat_id': identifier, 'case_id': case['id'],
+                  'trusted_input_and_single_click': events, 'completion_requests': 1,
+                  'external_model_calls': 1, 'saved_messages': len(messages),
+                  'request_response_visible': True, 'same_history_after_reload': True,
+                  'rendered_responses': len(prior_questions) + 1,
+                  'previous_message_fields_preserved': True,
+                  'case_bound_to_expected_chat': True, 'site_id': case['site']['id'], 'api_errors': errors}
+        result['request_response_saved_message_correlation'] = {
+            'request_chat_id': completion_body.get('chat_id'), 'response_chat_id': completion_response['chat_id'],
+            'saved_user_message_id': question_id, 'single_native_task': True}
+        evidence['cases'].append(result)
+        record('Native composer ' + label + ' send/save/reload', **result)
+        return identifier, saved, restored
+
+    try:
+        navigate('/c/' + chat_id)
+        open_process()
+        first_question = '기존 대화 보내기 경로를 확인해줘'
+        send_and_verify('initial', first_question, existing_case['id'], chat_id)
+        _, existing_saved, existing_after = send_and_verify('existing', '저장된 대화에서 두 번째 보내기를 확인해줘',
+                                                            existing_case['id'], chat_id, (first_question,))
+        click('a#sidebar-new-chat-button')
+        wait('location.pathname === "/" && !!document.querySelector("#chat-input.ProseMirror")')
+        # Selecting the same active factory/process intentionally resumes its
+        # previous chat. Select a distinct factory through the visible picker
+        # so this test explicitly starts new work rather than that resume path.
+        wait('!!document.querySelector("#ees-work-site-trigger") && !document.querySelector("#ees-work-site-trigger").disabled')
+        click('#ees-work-site-trigger')
+        click('#ees-work-scope-popover [data-action="scope_choose"][data-picker="site"][data-value="hu-a"]')
+        wait('location.pathname === "/" && document.querySelector("#ees-work-site-trigger")?.value === "hu-a" && !document.querySelector("#ees-work-scope-popover")')
+        open_process()
+        # First product input-save creates the pending work case, exactly as in
+        # the established new-chat workflow. It does not submit a chat message.
+        click('#ees-work-tree [data-action="select"][data-node-id="install-t"]')
+        click('#ees-work-content [data-work-job="db-j"] [data-action="select"]')
+        wait('!!document.querySelector("#ees-work-inputs-save") && !document.querySelector("#ees-work-panel")?.matches("[aria-busy=true]")')
+        click('#ees-work-inputs-save')
+        wait('document.querySelector("#ees-work-context")?.innerText.includes("첫 메시지") && !document.querySelector("#ees-work-panel")?.matches("[aria-busy=true]")')
+        pending = [case for case in api('/api/ees-work/state', chat_id='')['cases'] if not case['chat_id']]
+        assert len(pending) == 1 and pending[0]['id'] != existing_case['id'], pending
+        new_id, new_saved, new_after = send_and_verify('new', '새 대화 보내기 경로를 확인해줘', pending[0]['id'])
+        cases = api('/api/ees-work/state', chat_id=new_id)['cases']
+        assert sum(case['id'] == pending[0]['id'] for case in cases) == 1
+        assert not [case for case in cases if not case['chat_id']], cases
+        assert {chat['id'] for chat in api('/api/v1/chats/', page=1)} == {chat_id, new_id}, 'Duplicate new Native chat'
+        assert snapshot(chat_id)[0]['history'] == existing_saved['history']
+        assert snapshot(chat_id)[1]['id'] == existing_after['id']
+        assert snapshot(chat_id)[1]['jobs'] == existing_after['jobs']
+        navigate('/c/' + chat_id)
+        open_process()
+        wait('document.querySelector("#chat-container")?.innerText.includes("기존 대화 보내기 경로를 확인해줘")')
+        assert not browser.evaluate('document.querySelector("#chat-container")?.innerText.includes("새 대화 보내기 경로를 확인해줘")')
+        assert len(provider.models) == 3
+        evidence['cross_chat_isolation'] = {'existing_history_unchanged': True,
+                                            'new_case_migrated_once': True,
+                                            'pending_cases_remaining': 0, 'total_model_calls': 3}
+        evidence['ok'] = True
+        record('Native composer chat isolation and no duplicate submit', **evidence['cross_chat_isolation'])
+    finally:
+        (out/'composer-result.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2), encoding='utf-8')
 
 
 def integrated_gate(*, root, out, work, client, headers, browser, base, chat_id,
