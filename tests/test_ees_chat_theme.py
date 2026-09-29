@@ -338,7 +338,7 @@ class ChatThemeBrowserTests(unittest.TestCase):
         # Use actual upstream global/chat/markdown/KaTeX styles. The theme is the
         # last initial index.html link; lazy chat styles may arrive afterward.
         css = sorted(path for path in cls.assets if path.endswith(".css")
-                     and "/immutable/assets/" in path
+                     and re.search(r"/immutable(?:-c[0-9a-f]{16})?/assets/", path)
                      and Path(path).name.startswith(("0.", "Chat.", "Messages.", "katex.")))
         if len(css) != 4:
             raise AssertionError("The pinned upstream style fixture selection changed.")
@@ -348,6 +348,17 @@ class ChatThemeBrowserTests(unittest.TestCase):
         for mode in ("light", "dark"):
             cls.assets["/" + mode + ".html"] = fixture.replace("__MODE__", mode).encode()
         cls.assets["/c/browser-check"] = interaction_fixture(fixture).replace("__MODE__", "light").encode()
+        # CSS/HTML disabled-semantics boundary only, not a replacement for the
+        # official Native composer interaction gate. These are its real submit
+        # attributes; the stylesheet comes exclusively from the tested wheel.
+        cls.assets["/c-send.html"] = ("<!doctype html><html><head>" + links +
+            '</head><body><section id="ees-work-entry" hidden></section>'
+            '<main id="chat-container"><div id="ees-work-context"></div>'
+            '<form id="send-contract"><button id="send-message-button" type="submit" disabled '
+            'class="text-white bg-gray-200 dark:text-gray-900 dark:bg-gray-700 disabled transition rounded-full p-[0.3125rem] self-center"></button>'
+            '</form></main><script>window.eesSendFixtureSubmits=0;'
+            'document.getElementById("send-contract").addEventListener("submit",event=>{'
+            'event.preventDefault();window.eesSendFixtureSubmits++;});</script></body></html>').encode()
         handler = functools.partial(FixtureHandler, assets=cls.assets)
         cls.server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
         cls.addClassCleanup(cls.server.server_close)
@@ -509,6 +520,26 @@ class ChatThemeBrowserTests(unittest.TestCase):
                 self.assertTrue(any(e["type"] == "pointerdown" for e in result["events"]), result)
                 self.assertEqual([e["key"] for e in result["events"] if e["type"] == "keydown"], ["Tab", "ArrowLeft"], result)
                 self.assertTrue(all(e["trusted"] for e in result["events"]), result)
+            finally:
+                browser.close()
+
+    def test_c_disabled_submit_keeps_reference_fill_and_disabled_semantics(self):
+        with tempfile.TemporaryDirectory(prefix="ees-disabled-send-chrome-") as profile:
+            browser = ChromePipe(self.chrome, profile)
+            try:
+                browser.navigate(f"http://127.0.0.1:{self.server.server_port}/c-send.html")
+                measured = browser.evaluate("""(() => {const button=document.getElementById('send-message-button'),s=getComputedStyle(button),r=button.getBoundingClientRect();return {disabled:button.disabled,matchesDisabled:button.matches(':disabled'),opacity:s.opacity,background:s.backgroundColor,cursor:s.cursor,radius:s.borderRadius,width:r.width,height:r.height,x:r.x+r.width/2,y:r.y+r.height/2};})()""")
+                self.assertTrue(measured["disabled"], measured)
+                self.assertTrue(measured["matchesDisabled"], measured)
+                self.assertEqual(measured["background"], "rgb(55, 101, 139)", measured)
+                self.assertEqual(measured["opacity"], "1", measured)
+                self.assertEqual(measured["cursor"], "not-allowed", measured)
+                self.assertEqual((measured["width"], measured["height"], measured["radius"]), (76, 44, "10px"), measured)
+                for event_type in ("mousePressed", "mouseReleased"):
+                    browser.call("Input.dispatchMouseEvent", {"type": event_type,
+                        "x": measured["x"], "y": measured["y"], "button": "left",
+                        "buttons": 1 if event_type == "mousePressed" else 0, "clickCount": 1})
+                self.assertEqual(browser.evaluate("window.eesSendFixtureSubmits"), 0)
             finally:
                 browser.close()
 

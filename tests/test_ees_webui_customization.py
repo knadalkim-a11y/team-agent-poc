@@ -466,6 +466,12 @@ class CustomizationTests(unittest.TestCase):
             "0.11.3+ees.11", "991cdb1d80ae07471fb50594831d74fe602b1ef7",
             "27f6a1c37264d4f205bedb6635c9eaae8a36a5d023d36d1dd595e34728c8b8d3")
 
+    def test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory(self):
+        self._real_previous_apply_restore(
+            "EES_TEST_PREVIOUS_C_WHEEL", "EES_REQUIRE_PREVIOUS_C",
+            "0.11.3+ees.12", "8027aaf2e654778f052a966e5a49feed0fc54f69",
+            "d35bc2bb4adc789cc93752b49550a47446461f1e54ba0015a3952e6af78ca254")
+
     def _real_previous_apply_restore(self, previous_env, required_env, version, commit, wheel_hash):
         current_dir = os.environ.get("EES_TEST_BRANDING_DIR")
         previous_file = os.environ.get(previous_env)
@@ -513,6 +519,10 @@ class CustomizationTests(unittest.TestCase):
         with mock.patch.object(custom, "_load_bundle", return_value=(selected, current)):
             self.assertTrue(self.apply()["changed"])
         custom.validate_program(self.program, selected)
+        if version == "0.11.3+ees.12":
+            self.assertTrue((self.program / branding.TARGET_APP / "brand-layers.svg").is_file())
+            self.assertFalse((self.program / branding.TARGET_APP / "immutable").exists())
+            self.assertTrue(any((self.program / branding.TARGET_APP).glob("immutable-c*")))
         self.assertTrue((self.program / "open_webui/ees_workflow_authoring.py").is_file())
         for name in ("execution", "native", "contract", "examples", "model"):
             self.assertTrue((self.program / ("open_webui/ees_workflow_" + name + ".py")).is_file())
@@ -520,9 +530,13 @@ class CustomizationTests(unittest.TestCase):
         custom.validate_program(self.program, old_selection)
         self.assertEqual(program_hashes(), before)
         self.assertEqual((self.program / "open_webui/ees_workflow_authoring.py").exists(),
-                         version == "0.11.3+ees.11")
+                         version in {"0.11.3+ees.11", "0.11.3+ees.12"})
         for name in ("execution", "native", "contract", "examples", "model"):
-            self.assertFalse((self.program / ("open_webui/ees_workflow_" + name + ".py")).exists())
+            self.assertEqual((self.program / ("open_webui/ees_workflow_" + name + ".py")).exists(),
+                             version == "0.11.3+ees.12")
+        if version == "0.11.3+ees.12":
+            self.assertFalse((self.program / branding.TARGET_APP / "brand-layers.svg").exists())
+            self.assertTrue((self.program / branding.TARGET_APP / "immutable").is_dir())
         for path, value in preserved.items():
             self.assertEqual(path.read_bytes(), value)
 

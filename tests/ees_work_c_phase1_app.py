@@ -3,8 +3,8 @@
 Run with the repository's one Python test environment plus the full-app
 dependencies required for startup. Both phases execute the official CLI and real temporary
 Native databases. Chrome uses the packaged frontend and real HTTP endpoints.
-Authentication is always real. Phase3 explicitly uses loopback synthetic
-external HTTP/model responses; other flags have no model/provider configured.
+Authentication is always real. Phase3/composer/visual modes use loopback
+synthetic external HTTP/model responses; the other modes have no provider.
 AP business results remain the product's declared legacy simulation.
 
 Example: python tests/ees_work_c_phase1_app.py --wheel <candidate.whl>
@@ -17,6 +17,9 @@ Use --phase3 for the integrated Native gate. Only external HTTP/model responses
 come from a loopback synthetic provider; Native auth/chat, tools, ACL, approval,
 publication, execution and persistence remain the packaged product.
 Use --composer-only for the focused real Native send-button/reload gate.
+Use --visual-match-only for full-app C-view captures and measured geometry.
+Add --visual-interactions for changed-surface Native/workflow interaction gates;
+only external embedding vectors are synthetic during the real file-upload gate.
 """
 
 import argparse
@@ -47,10 +50,22 @@ def main():
     parser.add_argument('--phase2', action='store_true')
     parser.add_argument('--phase3', action='store_true')
     parser.add_argument('--composer-only', action='store_true')
+    parser.add_argument('--visual-match-only', action='store_true')
+    parser.add_argument('--visual-interactions', action='store_true')
+    parser.add_argument('--visual-file-only', action='store_true')
+    parser.add_argument('--visual-layout-check', action='store_true')
+    parser.add_argument('--visual-authoring-only', action='store_true')
+    parser.add_argument('--visual-detail-check', action='store_true')
+    parser.add_argument('--source-root', type=Path)
+    parser.add_argument('--upstream-wheel', type=Path)
     args = parser.parse_args()
     ROOT = Path(__file__).resolve().parents[1]
     OUT = args.output.resolve()
     OUT.mkdir(parents=True, exist_ok=True)
+    if args.visual_match_only:
+        from ees_work_c_visual_fullapp import audit_visual_source
+        assert args.upstream_wheel, '--visual-match-only requires --upstream-wheel for source-byte verification'
+        visual_source_audit = audit_visual_source(args.source_root or ROOT, args.upstream_wheel, args.wheel, OUT)
     LABEL = 'fullapp'
     with socket.socket() as listener:
         listener.bind(('127.0.0.1', 0))
@@ -74,15 +89,20 @@ def main():
         OPENAI_API_KEY='', OLLAMA_API_KEY='', OPENAI_API_BASE_URL='http://127.0.0.1:1/v1',
         OLLAMA_BASE_URL='http://127.0.0.1:1', WEBUI_ADMIN_EMAIL='', WEBUI_ADMIN_PASSWORD='')
     provider = None
-    if args.phase3 or args.composer_only:
+    if args.phase3 or args.composer_only or args.visual_match_only:
         from ees_work_c_phase3_fullapp import SyntheticProvider
         provider = SyntheticProvider()
         environment.update(ENABLE_OPENAI_API='true', OPENAI_API_BASE_URL=provider.base + '/v1',
                            OPENAI_API_BASE_URLS=provider.base + '/v1', OPENAI_API_KEY='synthetic-local-only',
                            OPENAI_API_KEYS='synthetic-local-only', ENABLE_VALVE_ENCRYPTION='true')
-    if args.composer_only:
+    if args.composer_only or args.visual_match_only:
         environment.update(DEFAULT_MODELS='c3-synthetic-model', ENABLE_TITLE_GENERATION='false',
                            ENABLE_TAGS_GENERATION='false', ENABLE_FOLLOW_UP_GENERATION='false')
+    if args.visual_interactions or args.visual_file_only:
+        assert args.visual_match_only, 'Visual interaction options require --visual-match-only'
+        provider.allow_embeddings = True
+        environment.update(RAG_OPENAI_API_BASE_URL=provider.base + '/v1',
+                           RAG_OPENAI_API_KEY='synthetic-local-only', RAG_EMBEDDING_MODEL='synthetic-embedding')
     (work/'data').mkdir(mode=0o700)
 
     def unpack(wheel, name):
@@ -124,6 +144,11 @@ def main():
             process.kill()
             process.wait(timeout=5)
     report = {'scope': 'Full packaged Native/EES app with real Native auth/chat and EES SQLite APIs; legacy AP simulation, no live provider', 'steps': []}
+    if args.visual_match_only:
+        report['visual_source_audit'] = visual_source_audit
+        report['visual_harness_sha256'] = {name: hashlib.sha256((ROOT/'tests'/name).read_bytes()).hexdigest()
+            for name in ('ees_work_c_phase1_app.py', 'ees_work_c_phase3_fullapp.py',
+                         'ees_work_c_visual_fullapp.py', 'ees_work_c_visual_interactions.py')}
     def record(name, **result):
         report['steps'].append({'name': name, **result})
         print(name, result, flush=True)
@@ -183,14 +208,15 @@ def main():
                 return state
 
             state = current()
-            if not state.get('case'):
+            if not state.get('case') and not args.visual_match_only:
                 state = action({'action': 'create', 'chat_id': chat_id, 'payload': {'site_id': 'us-a', 'system': 'EMS', 'process_id': 'setup-p'}})
-            for node_id in (() if args.phase2 or args.composer_only else ('scope-j', 'infra-j', 'install-j')):
+            for node_id in (() if args.phase2 or args.composer_only or args.visual_match_only else ('scope-j', 'infra-j', 'install-j')):
                 if state['case']['jobs'][node_id]['status'] != 'passed':
                     case = state['case']
                     state = action({'action': 'run', 'chat_id': chat_id, 'case_id': case['id'], 'expected_revision': case['revision'], 'node_id': node_id, 'payload': {'confirm': True}})
                     assert state['case']['jobs'][node_id]['status'] == 'passed', state['case']['jobs'][node_id]
-            record('Real EES case create/prerequisites', case_id=state['case']['id'], native_chat_bound=state['case']['chat_id'] == chat_id)
+            if state.get('case'):
+                record('Real EES case create/prerequisites', case_id=state['case']['id'], native_chat_bound=state['case']['chat_id'] == chat_id)
             if args.navigation_only:
                 # Prepare only the existing declared simulation, through the
                 # unmodified EES API. This is not live AP/tool execution.
@@ -243,6 +269,23 @@ def main():
 
             def shot(name):
                 (OUT / (LABEL + '-' + name + '.png')).write_bytes(base64.b64decode(browser.call('Page.captureScreenshot', {'format': 'png'})['data']))
+
+            if args.visual_match_only:
+                from ees_work_c_visual_fullapp import authoring_only_gate, visual_gate
+                report['scope'] = 'Official packaged Native app, real authentication/chat and synthetic workflow records in temporary DB; no fixture app or CSS overrides'
+                if args.visual_authoring_only:
+                    authoring_only_gate(out=OUT, client=client, headers=headers, browser=browser,
+                                        base=BASE, chat_id=chat_id, click=click, wait=wait,
+                                        shot=shot, record=record)
+                    report['ok'] = True
+                    return
+                visual_gate(out=OUT, client=client, headers=headers, browser=browser,
+                            base=BASE, chat_id=chat_id, provider=provider,
+                            click=click, wait=wait, shot=shot, record=record,
+                            interactions=args.visual_interactions, file_only=args.visual_file_only,
+                            layout_check=args.visual_layout_check, detail_check=args.visual_detail_check)
+                report['ok'] = True
+                return
 
             if args.composer_only:
                 from ees_work_c_phase3_fullapp import composer_gate
@@ -526,6 +569,7 @@ def main():
             try:
                 shot('failure')
                 (OUT / (LABEL + '-failure-dom.txt')).write_text(browser.evaluate('document.body.innerText'), encoding='utf-8')
+                report['failure_font_state'] = browser.evaluate('({status:document.fonts.status,faces:[...document.fonts].filter(f=>f.status!=="unloaded").map(f=>({family:f.family,status:f.status,weight:f.weight}))})')
             except Exception:
                 pass
         raise

@@ -539,6 +539,10 @@ class CPhaseTwoNativeTests(unittest.TestCase):
     def test_legacy_scope_unconnected_excluded_and_empty_saved_input(self):
         # The already-supported scope contract is directly affected by moving
         # its action region. Reuse its meaningful service/history assertions.
+        # C's compact six-row view fits a tall screen. Use the requested short
+        # viewport so the existing independent-scroll assertions remain real.
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1366, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
         native.EESWorkNativeBrowserTests.test_management_scope_run_excludes_human_retry_and_marks_unconnected_unperformed(self)
         self.action_layout('legacy-unconnected')
         self.assertTrue(self.read('#ees-work-run', 'disabled'))

@@ -160,7 +160,26 @@ def guard_fixture_members():
             b"    model_info = await Models.get_model_by_id(form_data['model'])\n"
             b"    if model_info:\n        params = model_info.params.model_dump()\n"
             b"        return apply_model_params(params, form_data)\n")
-    members["open_webui/routers/models.py"] = b"router = APIRouter()\n"
+    # Keep both reviewed program-owned fallback branches and the custom-image
+    # branch distinct, as in the official model-image route. No user metadata
+    # is rewritten by this fixture or by the guarded branding replacements.
+    members["open_webui/routers/models.py"] = b"""router = APIRouter()
+async def get_model_image(image_url=None, media_type=None):
+    if image_url:
+        if image_url.startswith('data:'):
+            if media_type not in PROFILE_IMAGE_ALLOWED_MIME_TYPES:
+                return RedirectResponse(
+                    url='/static/favicon.png',
+                    status_code=status.HTTP_302_FOUND,
+                )
+        elif image_url.startswith('/static/'):
+            safe_static = image_url
+            return RedirectResponse(url=safe_static, status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(
+        url='/static/favicon.png',
+        status_code=status.HTTP_302_FOUND,
+    )
+"""
     members["open_webui/routers/tools.py"] = b"router = APIRouter()\n"
     for function, key, nest in (("create_new_tools", "form_data.id", True), ("update_tools_by_id", "id", False)):
         source = "async def " + function + "(request, form_data, id=None):\n"
@@ -210,6 +229,9 @@ def fixture_members():
         app + "immutable/chunks/CHq18Uto.js": b'const ca="Open WebUI",other="Open WebUI documentation";',
         app + "immutable/nodes/0.CvnwnD8l.js": b'new Notification(`${title} / Open WebUI`);' * 3,
         app + "immutable/nodes/26.Ck8JdNW5.js": b'document.title=`${channel} / Open WebUI`;' * 2,
+        app + "immutable/nodes/2.Db9ODmx4.js": b';'.join(
+            before for before, _, count in builder.PATCHES[app + "immutable/nodes/2.Db9ODmx4.js"]
+            for _ in range(count)),
         app + "immutable/chunks/DKj2ZiCb.js": b'const an="0.11.3";fetch(`${base}/_app/version.json`);',
         app + "immutable/chunks/zKJlHFgk.js": b';'.join(
             before for before, _, _ in builder.PATCHES[app + "immutable/chunks/zKJlHFgk.js"]),
@@ -380,10 +402,11 @@ class BrandingBuildTests(unittest.TestCase):
         self.assertEqual(first["wheel"]["sha256"], builder.sha256_file(self.root / "first" / builder.WHEEL_FILENAME))
 
     def test_same_version_ui_change_updates_only_its_content_cache_key(self):
-        self.build("before")
+        first = self.build("before")
         source = self.ui / "ees-work-designer.js"
         source.write_text(source.read_text(encoding="utf-8") + "\n// revised designer\n", encoding="utf-8")
-        self.build("after")
+        second = self.build("after")
+        self.assertEqual(first["relocated_frontend"], second["relocated_frontend"])
         with (ZipFile(self.root / "before" / builder.WHEEL_FILENAME) as before,
               ZipFile(self.root / "after" / builder.WHEEL_FILENAME) as after):
             indexes = [archive.read("open_webui/frontend/index.html") for archive in (before, after)]
@@ -395,6 +418,53 @@ class BrandingBuildTests(unittest.TestCase):
                 self.assertEqual(digests[0] == digests[1], filename != "ees-work-launcher.js")
             self.assertEqual(before.read(builder.TARGET_INFO + "METADATA"),
                              after.read(builder.TARGET_INFO + "METADATA"))
+
+    def test_native_chunk_change_readdresses_entire_cyclic_graph_without_version_change(self):
+        prefix = builder.SOURCE_APP + "immutable/"
+        self.members[prefix + "chunks/cycle-a.js"] = b'import "./cycle-b.js"; export const a = 1;'
+        self.members[prefix + "chunks/cycle-b.js"] = b'import "./cycle-a.js"; export const b = 2;'
+        self.write_fixture()
+        first = self.build("before")
+        self.members[prefix + "chunks/cycle-a.js"] += b"\n// revised Native chunk\n"
+        self.write_fixture()
+        second = self.build("after")
+        old_dir = first["relocated_frontend"]["immutable_directory"]
+        new_dir = second["relocated_frontend"]["immutable_directory"]
+        self.assertNotEqual(old_dir, new_dir)
+        self.assertEqual(first["version"], second["version"])
+        with (ZipFile(self.root / "before" / builder.WHEEL_FILENAME) as before,
+              ZipFile(self.root / "after" / builder.WHEEL_FILENAME) as after):
+            for archive, directory in ((before, old_dir), (after, new_dir)):
+                index = archive.read("open_webui/frontend/index.html")
+                url = ("/_ees12/" + directory + "/").encode("ascii")
+                self.assertEqual(index.count(url), 49)
+                self.assertNotIn(b"/_ees12/immutable/", index)
+                self.assertFalse(any(name.startswith(builder.TARGET_APP + "immutable/")
+                                     for name in archive.namelist()))
+                self.assertEqual(archive.read(builder.TARGET_APP + directory + "/chunks/cycle-b.js"),
+                                 b'import "./cycle-a.js"; export const b = 2;')
+            self.assertEqual(before.read(builder.TARGET_INFO + "METADATA"),
+                             after.read(builder.TARGET_INFO + "METADATA"))
+            self.assertEqual(before.read(builder.TARGET_APP + "version.json"),
+                             after.read(builder.TARGET_APP + "version.json"))
+            self.assertFalse(any(name.startswith(builder.TARGET_APP + old_dir + "/")
+                                 for name in after.namelist()))
+        assert_record(self, self.root / "after" / builder.WHEEL_FILENAME)
+
+    def test_theme_content_change_gets_new_url_without_readdressing_native_modules(self):
+        first = self.build("before")
+        source = self.ui / "chat-theme.css"
+        source.write_bytes(source.read_bytes() + b"\n/* revised shell */\n")
+        second = self.build("after")
+        self.assertEqual(first["relocated_frontend"], second["relocated_frontend"])
+        digests = []
+        for directory in ("before", "after"):
+            with ZipFile(self.root / directory / builder.WHEEL_FILENAME) as archive:
+                digest = hashlib.sha256(archive.read(builder.TARGET_APP + "chat-theme.css")).hexdigest()
+                digests.append(digest)
+                self.assertIn(("/_ees12/chat-theme.css?v=" + digest).encode("ascii"),
+                              archive.read("open_webui/frontend/index.html"))
+        self.assertNotEqual(*digests)
 
     def test_packaged_workflow_and_managed_tool_share_public_contract(self):
         # Workflow files are actual shipped sources even when the surrounding
@@ -473,11 +543,14 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
 
     def test_only_reviewed_content_changes_and_frontend_cache_namespace_moves(self):
         manifest = self.build()
+        immutable_dir = manifest["relocated_frontend"]["immutable_directory"]
         with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
             self.assertFalse(any(name.startswith(builder.SOURCE_APP) for name in built.namelist()))
-            self.assertEqual(len(built.namelist()), len(self.members) + (len(builder.THEME_FILES) + len(builder.WORK_FILES) + len(builder.ASSET_GUARD_FILES)))
+            self.assertEqual(len(built.namelist()), len(self.members) + len(builder.UI_FILES)
+                             + len(builder.FONT_SOURCES) + len(builder.WORK_ASSETS)
+                             + len(builder.ASSET_GUARD_FILES) + 1)
             for name, original in self.members.items():
-                target = builder.target_name(name)
+                target = builder.target_name(name, immutable_dir)
                 if target not in manifest["changed_files"]:
                     self.assertEqual(built.read(target), original, name)
             self.assertEqual(built.read(builder.TARGET_INFO + "licenses/LICENSE"), LICENSE)
@@ -488,7 +561,9 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
             self.assertIn(b"EES Work", built.read("open_webui/frontend/index.html"))
             self.assertNotIn(b"/_app/", built.read("open_webui/frontend/index.html"))
             index = built.read("open_webui/frontend/index.html")
-            self.assertEqual(index.count(builder.THEME_LINK), 1)
+            theme_url = ("/_ees12/chat-theme.css?v=" + hashlib.sha256(
+                built.read(builder.TARGET_APP + "chat-theme.css")).hexdigest()).encode("ascii")
+            self.assertEqual(index.count(theme_url), 1)
             for filename in ("ees-work-launcher.css", "ees-work-panel.js", "ees-work-launcher.js"):
                 digest = hashlib.sha256(built.read(builder.TARGET_APP + filename)).hexdigest()
                 self.assertIn(("/_ees12/" + filename + "?v=" + digest).encode("ascii"), index)
@@ -497,8 +572,8 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
             for relative, target in builder.WORK_ASSETS.items():
                 self.assertEqual(built.read(target), (builder.WORK_DIR / relative).read_bytes())
                 self.assertFalse(target.startswith("open_webui/frontend/"))
-            self.assertLess(index.index(b"/static/custom.css"), index.index(builder.THEME_LINK))
-            self.assertLess(index.index(builder.THEME_LINK), index.index(b"</head>"))
+            self.assertLess(index.index(b"/static/custom.css"), index.index(theme_url))
+            self.assertLess(index.index(theme_url), index.index(b"</head>"))
             for name, relative in builder.UI_FILES.items():
                 expected = (builder.assemble_work_launcher(self.ui) if name == "ees-work-launcher.js"
                             else (self.ui / name).read_bytes())
@@ -507,9 +582,9 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
             self.assertNotIn(builder.TARGET_APP + "ees-work-designer.js", built.namelist())
             for name, (origin, _) in builder.FONT_SOURCES.items():
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/" + name), self.members[origin])
-            runtime = built.read(builder.TARGET_APP + "immutable/chunks/DKj2ZiCb.js")
+            runtime = built.read(builder.TARGET_APP + immutable_dir + "/chunks/DKj2ZiCb.js")
             self.assertIn(b"/_ees12/version.json", runtime)
-            chat = built.read(builder.TARGET_APP + "immutable/chunks/zKJlHFgk.js")
+            chat = built.read(builder.TARGET_APP + immutable_dir + "/chunks/zKJlHFgk.js")
             self.assertIn(builder.NATIVE_DRAFT_HOOK, chat)
             self.assertIn(b'if(window.__eesNativeDraftV1===eesNativeDraftApi)delete window.__eesNativeDraftV1;', chat)
             self.assertEqual(json.loads(built.read(builder.TARGET_APP + "version.json"))["version"], builder.VERSION)
@@ -726,15 +801,16 @@ const qi = async serialized => {
                 path.unlink()
 
     def test_incomplete_theme_changed_font_and_target_collision_fail_before_writing(self):
-        cases = (("css", "EES UI asset"), ("license", "EES UI asset"),
+        cases = (("css", "EES UI asset"), ("license", "EES UI asset"), ("brand", "EES UI asset"),
                  ("font", "font hash differs"), ("missing-font", "Missing pinned upstream font"),
                  ("collision", "already contains an EES UI target"))
         for mode, error in cases:
             with self.subTest(mode=mode):
                 self.setUp()
                 origin = next(iter(builder.FONT_SOURCES.values()))[0]
-                if mode in {"css", "license"}:
-                    (self.ui / ("chat-theme.css" if mode == "css" else "font-licenses.txt")).unlink()
+                if mode in {"css", "license", "brand"}:
+                    names = {"css": "chat-theme.css", "license": "font-licenses.txt", "brand": "brand-layers.svg"}
+                    (self.ui / names[mode]).unlink()
                 elif mode == "font":
                     self.members[origin] += b"changed"
                 elif mode == "missing-font":
@@ -837,12 +913,14 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
             built_path = Path(temporary) / builder.WHEEL_FILENAME
             assert_record(self, built_path)
             with ZipFile(source_path) as source, ZipFile(built_path) as built:
-                self.assertEqual(len(source.namelist()) + (len(builder.THEME_FILES) + len(builder.WORK_FILES) + len(builder.ASSET_GUARD_FILES)), len(built.namelist()))
+                self.assertEqual(len(source.namelist()) + len(builder.UI_FILES) + len(builder.FONT_SOURCES)
+                                 + len(builder.WORK_ASSETS) + len(builder.ASSET_GUARD_FILES) + 1,
+                                 len(built.namelist()))
                 assert_asset_guard_patches(self, built)
                 self.assertEqual(built.read(builder.ASSET_GUARD_FILES[0]), builder.ASSET_GUARD_SOURCE.read_bytes())
                 changed = set(manifest["changed_files"])
                 for name in source.namelist():
-                    target = builder.target_name(name)
+                    target = builder.target_name(name, manifest["relocated_frontend"]["immutable_directory"])
                     if target not in changed:
                         self.assertEqual(built.read(target), source.read(name), name)
                 metadata = source.read(builder.SOURCE_INFO + "METADATA")

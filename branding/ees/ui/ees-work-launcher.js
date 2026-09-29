@@ -52,6 +52,14 @@
   function rememberScope() {if(browsingSite)scopeSelections.set(scopeKey(),{category,nodeId:selectedId()});}
   const scopeReady = () => Boolean(state&&acceptedRoute===location.pathname+location.search&&lastRoute===acceptedRoute&&(!chatRoute()||window.__eesNativeDraftV1?.ready()));
   const view = createWorkView({callbacks:{scopeReady,registerPanel,selectWork,switchScope,startCase,showHistory,saveInputs,saveDocument,runJob,executionRefresh:retryExecutionRead,executionControl,
+    canAuthor:()=>designer.canAuthor(),
+    openAuthoring:async process=>{
+      if(busy||runView==='history'||!state?.catalog?.nodes?.[process])return false;
+      const at=generation,auth=token(),route=location.pathname+location.search;
+      if(!await designer.openProcess(process))return false;
+      if(at!==generation||auth!==token()||route!==location.pathname+location.search)return false;
+      stashDraft();navigate('/?ees=workflow');return true;
+    },
     openCase:id=>openCase(state?.cases.find(c=>c.id===id)),
     selectCategory:async wanted=>{category=wanted;const first=visibleRoots(category)[0];if(first)await selectWork(first);else renderNavigator();},
     showHistoryView:show=>{resetHistory();runView=show?'history':'current';renderPanel();},
@@ -164,9 +172,17 @@
   async function refresh() {
     if (!available()) return;
     const at = generation, scopeEpoch=navigationRequest, serial = ++request, id = chatId(), auth = token(), route = location.pathname + location.search;
+    const current=()=>at===generation&&scopeEpoch===navigationRequest&&serial===request&&auth===token()&&route===location.pathname+location.search&&available();
     const query = new URLSearchParams({chat_id:id}); if (!id && pendingId) query.set('case_id', pendingId);
-    try {const result = await api('state?' + query); if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = ''; accept(result);await refreshExecution();await designer.refreshAuthoring();}
-    catch (error) {if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = error.message; recordLookupError=lookupFailure(error);if(runView==='history'&&historyCase)historyLookupError=historyLookupError || recordLookupError;render();}
+    try {const result = await api('state?' + query);if(!current())return;errorMessage='';accept(result);await refreshExecution();
+      if(!current())return;
+      const shownState=state,couldAuthor=designer.canAuthor();
+      await designer.refreshAuthoring();
+      // The initial panel can precede the capability response. Reuse its
+      // draft/focus-preserving render only when that same view's access changes.
+      if(current()&&state===shownState&&couldAuthor!==designer.canAuthor())renderPanel();
+    }
+    catch (error) {if(!current())return;errorMessage=error.message;recordLookupError=lookupFailure(error);if(runView==='history'&&historyCase)historyLookupError=historyLookupError || recordLookupError;render();}
   }
   async function action(actionName, payload = {}, nodeId = '', override = {}) {
     if (busy || !state) return null;

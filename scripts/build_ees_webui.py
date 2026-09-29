@@ -35,7 +35,7 @@ ASSET_NAMES = (
     "favicon.svg", "favicon.png", "favicon-96x96.png", "favicon.ico",
     "apple-touch-icon.png", "logo.png", "splash.png", "splash-dark.png",
 )
-UI_FILES = {"chat-theme.css": "chat-theme.css", "font-licenses.txt": "fonts/LICENSE.txt",
+UI_FILES = {"chat-theme.css": "chat-theme.css", "brand-layers.svg": "brand-layers.svg", "assistant-layers.svg": "assistant-layers.svg", "assistant-default.svg": "assistant-default.svg", "navigation-plus.svg": "navigation-plus.svg", "navigation-search.svg": "navigation-search.svg", "work-search.svg": "work-search.svg", "work-condition-collapsed.svg": "work-condition-collapsed.svg", "work-condition-expanded.svg": "work-condition-expanded.svg", "font-licenses.txt": "fonts/LICENSE.txt",
             "ees-work-launcher.js": "ees-work-launcher.js", "ees-work-launcher.css": "ees-work-launcher.css"}
 WORK_LAUNCHER_SOURCES = ("ees-work-view.js", "ees-work-designer.js", "ees-work-launcher.js")
 WORK_DIR = ASSET_DIR.parents[2] / "agent-pack" / "skills" / "ees-work-demo"
@@ -132,6 +132,12 @@ NATIVE_DRAFT_HOOK = (
 # Every replacement is pinned to one reviewed upstream file and occurrence count.
 # Upstream comments, attribution strings, documentation, and source maps remain.
 PATCHES = {
+    # Only the program-owned fallback changes. Native custom model images keep
+    # their existing validation, authorization, forwarding and safe-static paths.
+    "open_webui/routers/models.py": [(
+        b"url='/static/favicon.png'",
+        b"url='/_ees12/assistant-default.svg'", 2,
+    )],
     "open_webui/main.py": [(
         b"if os.path.exists(FRONTEND_BUILD_DIR):",
         b"from open_webui.ees_work_demo import install as install_ees_work_demo\n"
@@ -160,11 +166,51 @@ PATCHES = {
     SOURCE_APP + "immutable/nodes/26.Ck8JdNW5.js": [
         (b" / Open WebUI`", b" / EES Work`", 2),
     ],
+    SOURCE_APP + "immutable/nodes/2.Db9ODmx4.js": [
+        # C's initial layout is 312px wide and expanded. The native store,
+        # resize limits, persistence and explicit saved closed state still own
+        # subsequent layout; no existing user width is migrated or overwritten.
+        (b'const _t=Number(localStorage.getItem("sidebarWidth"));',
+         b'const eesSavedSidebarWidth=localStorage.getItem("sidebarWidth");'
+         b'const _t=eesSavedSidebarWidth===null?312:Number(eesSavedSidebarWidth);', 1),
+        (b'$a.set(R()?!1:localStorage.sidebar==="true")',
+         b'$a.set(R()?!1:localStorage.getItem("sidebar")===null?!0:localStorage.sidebar==="true")', 1),
+        # Keep the current locale's translations; only the Korean C labels
+        # differ from the upstream new-chat/search wording.
+        (b'c().t("New Chat")',
+         'c().language?.startsWith("ko")?"새 대화":c().t("New Chat")'.encode("utf-8"), 4),
+        (b'c().t("Search")',
+         'c().language?.startsWith("ko")?"대화 검색":c().t("Search")'.encode("utf-8"), 4),
+        # Attribute hooks change no Svelte child traversal or native handlers.
+        (b'<div role="navigation">', b'<div role="navigation" data-ees-native-sidebar>', 1),
+        (b'<div class="pb-1"><div class="px-1 flex justify-center text-gray-700 dark:text-gray-300"><a id="sidebar-new-chat-button"',
+         b'<div class="pb-1" data-ees-native-navigation><div class="px-1 flex justify-center text-gray-700 dark:text-gray-300"><a id="sidebar-new-chat-button"', 1),
+    ],
     SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
         (b"/_app/version.json", b"/_ees12/version.json", 1),
         (b'an="0.11.3"', b'an="0.11.3+ees.12"', 1),
     ],
     SOURCE_APP + "immutable/chunks/zKJlHFgk.js": [
+        (b'<nav><div><div id="navbar-bg-gradient-to-b">',
+         b'<nav data-ees-native-toolbar><div><div id="navbar-bg-gradient-to-b">', 1),
+        # Preserve an explicitly supplied native editor placeholder. C changes
+        # the Korean product default, not editor contents or draft persistence.
+        (b'Ln()?Ln():n().t("Send a Message")',
+         'Ln()?Ln():n().language?.startsWith("ko")?"업무를 물어보거나, 필요한 작업을 요청하세요":n().t("Send a Message")'.encode("utf-8"), 1),
+        # Reuse both existing Native factories. The empty editor keeps its real
+        # disabled submit button; voice mode stays reachable in a disclosure.
+        # Native permission tests, click handlers and upload guards are intact.
+        (b'jb=F("<!> <!>",1),Kb=',
+         b'jb=F("<!> <!>",1),eesNativeVoiceControls=F(\'<details class="ees-native-voice-menu"><summary> </summary><div><!></div></details> <!>\',1),Kb=', 1),
+        (b'})?Te(ie):Te(ue,-1)})',
+         b'})?Te(eesAnchor=>{'
+         b'const eesFragment=eesNativeVoiceControls(),eesVoice=wt(eesFragment);'
+         b'const eesSummary=eesVoice.querySelector("summary"),eesVoiceBody=eesVoice.querySelector("div");'
+         b'eesSummary.textContent=n().t("Voice mode");'
+         b'ie(eesVoiceBody.firstChild);ue(eesFragment.lastChild);f(eesVoiceBody);f(eesVoice);f(eesFragment);'
+         b'eesVoice.addEventListener("keydown",event=>{if(event.key==="Escape"&&eesVoice.open){event.stopPropagation();eesVoice.open=!1;eesSummary.focus();}});'
+         b'S(eesAnchor,eesFragment);'
+         b'}):Te(ue,-1)})', 1),
         # Loading may turn its spinner off before native cached drafts finish
         # restoring. Count all overlapping native draft loads in Chat's scope;
         # workflow restoration waits until each completes and route IDs match.
@@ -423,12 +469,37 @@ def sha256_file(path):
     return digest.hexdigest()
 
 
-def target_name(name):
+def target_name(name, immutable_dir="immutable"):
     if name.startswith(SOURCE_INFO):
         return TARGET_INFO + name[len(SOURCE_INFO):]
     if name.startswith(SOURCE_APP):
-        return TARGET_APP + name[len(SOURCE_APP):]
+        relative = name[len(SOURCE_APP):]
+        if relative.startswith("immutable/"):
+            relative = immutable_dir + "/" + relative[len("immutable/"):]
+        return TARGET_APP + relative
     return name
+
+
+def immutable_revision(source, replacements):
+    """Address the complete pinned module graph by its patched bytes.
+
+    All runtime module/asset references stay relative within this tree. Hashing
+    before directory relocation avoids a self-referential hash and gives every
+    importer in a cyclic dependency graph the same fresh cache namespace.
+    Program version/approval identity and historical Restore roots stay intact.
+    """
+    digest = hashlib.sha256()
+    prefix = SOURCE_APP + "immutable/"
+    for name in sorted(name for name in source.namelist() if name.startswith(prefix)):
+        relative = name[len(prefix):].encode("utf-8")
+        content = replacements.get(name)
+        if content is None:
+            content = source.read(name)
+        digest.update(len(relative).to_bytes(8, "big"))
+        digest.update(relative)
+        digest.update(len(content).to_bytes(8, "big"))
+        digest.update(content)
+    return digest.hexdigest()
 
 
 def prepare_replacements(source, asset_dir):
@@ -556,16 +627,24 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
     with ZipFile(wheel) as source:
         replacements = prepare_replacements(source, asset_dir)
         additions = prepare_additions(source, ui_dir)
+        immutable_hash = immutable_revision(source, replacements)
+        immutable_dir = "immutable-c" + immutable_hash[:16]
+        renamed = lambda name: target_name(name, immutable_dir)
         # Trial revisions can share a program version. Address each Work asset
         # by its actual bytes without changing supported Restore namespaces.
         index_name = "open_webui/frontend/index.html"
-        for filename in ("ees-work-launcher.css", "ees-work-panel.js", "ees-work-launcher.js"):
+        old_immutable = ("/" + TARGET_APP.removeprefix("open_webui/frontend/") + "immutable/").encode("ascii")
+        new_immutable = ("/" + TARGET_APP.removeprefix("open_webui/frontend/") + immutable_dir + "/").encode("ascii")
+        if replacements[index_name].count(old_immutable) != 49:
+            raise ValueError("Pinned immutable entry references differ from the 49 reviewed links.")
+        replacements[index_name] = replacements[index_name].replace(old_immutable, new_immutable)
+        for filename in ("chat-theme.css", "ees-work-launcher.css", "ees-work-panel.js", "ees-work-launcher.js"):
             path = TARGET_APP + filename
             url = ("/" + path.removeprefix("open_webui/frontend/")).encode("ascii")
             digest = hashlib.sha256(additions[path]).hexdigest().encode("ascii")
             replacements[index_name] = _one_replace(
                 replacements[index_name], url + b'"', url + b'?v=' + digest + b'"', index_name)
-        entries = sorted(source.infolist(), key=lambda entry: target_name(entry.filename))
+        entries = sorted(source.infolist(), key=lambda entry: renamed(entry.filename))
         output_dir.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix=".ees-build-", dir=output_dir) as temporary:
             built = Path(temporary) / WHEEL_FILENAME
@@ -574,7 +653,7 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
                 for entry in entries:
                     if entry.filename == SOURCE_INFO + "RECORD":
                         continue
-                    name = target_name(entry.filename)
+                    name = renamed(entry.filename)
                     content = replacements.get(entry.filename)
                     if content is None:
                         content = source.read(entry)
@@ -606,9 +685,11 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
                 "version": VERSION,
                 "source": {"filename": SOURCE_FILENAME, "sha256": SOURCE_SHA256},
                 "wheel": {"filename": WHEEL_FILENAME, "sha256": sha256_file(built), "size": built.stat().st_size},
-                "changed_files": sorted([target_name(name) for name in replacements] + list(additions) + [record_name]),
+                "changed_files": sorted([renamed(name) for name in replacements] + list(additions) + [record_name]),
                 "relocated_frontend": {
                     "from": SOURCE_APP, "to": TARGET_APP,
+                    "immutable_directory": immutable_dir,
+                    "immutable_sha256": immutable_hash,
                     "file_count": sum(entry.filename.startswith(SOURCE_APP) for entry in entries),
                 },
             }

@@ -12,6 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| C안 전체 화면 시각 일치 보완 | [같은 조건 PNG·좌표/style·과거 판정 정정·기능 회귀](#c-visual-match-20260929) |
 | C안 3단계 통합 검수 | [실제 Native 앱·통합 회귀·보존·최종 판정](#c-design-phase3-20260929) |
 | C안 기존 유형·P/T·예외 2단계 | [대응표·실제 Native/제품·권한/기록·실패와 재검](#c-design-phase2-20260929), [과거 판정·초안 반영 보완](#c-design-phase2-review-20260929) |
 | C안 공통 외형과 대표 J 1단계 | [C안 실조회·대표 AP 저장/실패/재시도·#65 보존과 미실행](#c-design-phase1-20260928) |
@@ -51,6 +52,12 @@
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="c-visual-match-20260929"></a>
+
+## C안 전체 화면 시각 일치 보완 · 2026-09-29
+
+[Figma 유일 기준·공식 앱 비교·구현/재검·남은 차이](c-design-phase3-20260929.md#c-visual-match-20260929). 과거 기능 PASS와 이번 시각 수락은 별도다. #66 재개·병합/재배포가 아닌 최신 main 기반 Draft PR 범위다.
 
 <a id="c-design-phase3-20260929"></a>
 

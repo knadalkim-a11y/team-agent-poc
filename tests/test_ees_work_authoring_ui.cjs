@@ -53,6 +53,23 @@ function harness() {
   return h;
 }
 
+test('runtime edit resolves the saved process owner without claiming its applicable system',async()=>{
+  const h=await harness().init();h.change('instructions','이전 담당 초안 보존');
+  h.cap.is_admin=true;h.cap.managed_systems=['EMS','FDC','UNASSIGNED'];
+  const process={process_id:'shared-p',name:'공유 절차',owner_system:'UNASSIGNED',owner_revision:1,draft_revision:1,published_version:1,enabled:true,workflow:workflow('shared-p'),validated_revision:1};
+  h.processes.set(process.process_id,process);
+  h.readOverride=route=>{if(route==='authoring/capabilities')return;const query=new URL('http://local/'+route).searchParams;if(query.get('process_id')!==process.process_id)return;assert.equal(query.get('system_id'),'');return h.envelope('UNASSIGNED',process.process_id);};
+  assert.equal(await h.designer.openProcess(process.process_id),true);
+  assert.ok(h.draft().definition.nodes[process.process_id]);assert.match(h.markup,/관리: UNASSIGNED/);assert.equal(h.writes.length,0);
+  await h.designer.openProcess('p');assert.equal(h.draft().definition.nodes.p.instructions,'이전 담당 초안 보존');
+});
+test('runtime edit denial cannot expose a draft or perform authoring writes',async()=>{
+  const h=await harness().init();h.change('instructions','회수 전 초안');h.denied=true;
+  assert.equal(await h.designer.openProcess('q'),false);assert.equal(h.designer.canAuthor(),false);
+  assert.equal(h.draft().definition.nodes.p.instructions,'회수 전 초안');assert.equal(h.draft().definition.nodes.q,undefined);assert.equal(h.writes.length,0);
+  h.cap.can_author=false;const count=h.reads.length;assert.equal(await h.designer.openProcess('q'),false);
+  assert.deepEqual(h.reads.slice(count),['authoring/capabilities']);
+});
 test('dirty P/system navigation keeps, saves, or discards only the selected P',async()=>{
   const h=await harness().init();h.change('instructions','P 보존할 글');h.dialogs.push({choice:'keep'});await h.open('q');assert.equal(h.draft().definition.nodes.q.instructions,'원래 안내');await h.open('p');assert.equal(h.draft().definition.nodes.p.instructions,'P 보존할 글');
   h.dialogs.push({choice:'save'});await h.open('q');assert.equal(h.writes.length,1);assert.equal(h.writes[0].process_id,'p');assert.equal(h.writes[0].payload.workflow.nodes.p.instructions,'P 보존할 글');

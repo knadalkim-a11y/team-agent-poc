@@ -113,7 +113,8 @@ class CPhaseOneNativeTests(unittest.TestCase):
                     action:document.activeElement?.dataset.action,node:document.activeElement?.dataset.nodeId,
                     rect:rect?.toJSON(),visible:!!rect&&rect.top>=clip.top&&rect.bottom<=clip.bottom,
                     hit:!!rect&&active.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2))},
-                back:document.querySelector('#ees-work-parent')?.innerText};})()""")
+                back:document.querySelector('#ees-work-parent')?.innerText,
+                backLabel:document.querySelector('#ees-work-parent [data-action=panel_back]')?.getAttribute('aria-label')};})()""")
 
     def assert_return_list(self, before, focus_selector):
         after = self.return_list_snapshot()
@@ -129,20 +130,22 @@ class CPhaseOneNativeTests(unittest.TestCase):
         width, height = (1366, 768) if dock else (1920, 1080)
         self.browser.call('Emulation.setDeviceMetricsOverride', {
             'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
-        kind = 'dock' if dock else 'inline'
+        kind = 'long-adjacent' if dock else 'inline'
         self.choose('return-p')
         p_to_t = '#ees-work-content [data-action=select][data-node-id="return-t"]'
         self.click(p_to_t)
         self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 단계'")
         self.fill('#ees-work-job-search', '복귀 검증 작업')
         self.click('[data-action=job_filter][data-filter=completed]')
-        self.click('[data-action=job_page][data-page="1"]')
+        # Six visible rows match C's list density. Reach a later page through
+        # the actual pagination controls, retaining the non-default page gate.
+        for page in range(1, 6):
+            self.click('[data-action=job_page][data-page="' + str(page) + '"]')
         self.click('[data-action=job_condition][data-node-id="return-030-j"]')
         row = '[data-work-job="return-030-j"] [data-action=select][data-node-id="return-030-j"]'
         self.browser.evaluate('document.querySelector(' + json.dumps(row) + ').scrollIntoView({block:"center"})')
         before = self.return_list_snapshot()
-        self.assertIn('26–40 / 40개 작업', before['page'])
-        self.assertGreater(before['scroll'], 100)
+        self.assertIn('31–36 / 40개 작업', before['page'])
         self.screenshot('c-return-' + kind + '-t-before')
         self.click(row)
         self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 작업 030' && !document.querySelector('#ees-work-panel').matches('[aria-busy=true]')")
@@ -154,8 +157,9 @@ class CPhaseOneNativeTests(unittest.TestCase):
         # physical region, never the header path or a particular action token.
         cta = '.ew-work-action-region .ew-primary'
         self.assertEqual(self.text(cta), '단계로 돌아가기')
-        self.wait("document.querySelector('#ees-work-panel')?.dataset.scrollActions === " + json.dumps(str(dock).lower()))
-        self.assertEqual(self.browser.evaluate("!!document.querySelector('.ew-work-action-region .ew-primary')?.closest('#ees-work-action-dock')"), dock)
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('#ees-work-panel .ew-work-action-region').length"), 1)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-work-action-region .ew-primary')?.closest('#ees-work-action-dock')"))
+        self.assertTrue(self.browser.evaluate("document.querySelector('.ew-work-action-region')?.previousElementSibling?.matches('[data-work-section=current-result]')"))
         self.screenshot('c-return-' + kind + '-completed-button')
         self.click(cta)
         self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 단계' && !document.querySelector('#ees-work-panel').matches('[aria-busy=true]')")
@@ -166,13 +170,14 @@ class CPhaseOneNativeTests(unittest.TestCase):
             'before': before, 'after': after,
             'boundary': 'Packaged Native UI, real WorkflowService/SQLite; synthetic Native login/chat and test catalog.'})
         self.assert_return_list(before, row)
-        self.assertIn('복귀 검증 업무로 돌아가기', after['back'])
-        self.assertNotIn('복귀 검증 작업 030로 돌아가기', after['back'])
+        self.assertIn('복귀 검증 업무', after['back'])
+        self.assertIn('복귀 검증 업무로 돌아가기', after['backLabel'])
+        self.assertNotIn('복귀 검증 작업 030로 돌아가기', after['backLabel'])
         self.click('#ees-work-close')
         self.click('#ees-work-context-open')
         self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 단계'")
         reopened = self.return_list_snapshot()
-        for key in ('query', 'filter', 'page', 'expanded', 'rows', 'scroll', 'back'):
+        for key in ('query', 'filter', 'page', 'expanded', 'rows', 'scroll', 'back', 'backLabel'):
             self.assertEqual(reopened[key], after[key], 'T close/reopen: ' + key)
         self.click('#ees-work-parent [data-action=panel_back]')
         self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 업무'")
@@ -227,6 +232,10 @@ class CPhaseOneNativeTests(unittest.TestCase):
             with self.subTest(finished_row=number):
                 node_id = f'return-{number:03d}-j'
                 row = '[data-work-job="' + node_id + '"] [data-action=select]'
+                while not self.read(row):
+                    next_page = self.browser.evaluate("[...document.querySelectorAll('[data-action=job_page]')].find(e=>e.textContent==='다음'&&!e.disabled)?.dataset.page")
+                    self.assertIsNotNone(next_page, 'Expected incomplete job must remain reachable')
+                    self.click('[data-action=job_page][data-page="' + next_page + '"]')
                 self.click(row)
                 self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === '복귀 검증 작업 " + f'{number:03d}' + "'")
                 self.click('#ees-work-run', confirm=True)
@@ -240,7 +249,7 @@ class CPhaseOneNativeTests(unittest.TestCase):
                 self.assertEqual(after['query'], '복귀 검증 작업')
                 self.assertEqual(after['filter'], 'incomplete')
                 self.assertNotIn(node_id, after['rows'])
-                self.assertIn(f'1–{remaining} / {remaining}개 작업', after['page'])
+                self.assertIn(f'/ {remaining}개 작업', after['page'])
                 self.assertTrue(self.browser.evaluate("document.activeElement?.matches('#ees-work-job-search, [data-action=job_filter][aria-pressed=true], [data-work-job] [data-action=select]')"), after)
                 self.assertTrue(after['focus']['visible'] and after['focus']['hit'], after['focus'])
 
@@ -397,7 +406,7 @@ class CPhaseOneNativeTests(unittest.TestCase):
             self.assertTrue(self.browser.evaluate("document.querySelector('#ees-work-inputs-save').form === document.querySelector('#ees-work-inputs')"))
             self.assertTrue(self.read('#ees-work-inputs-save', 'disabled'))
             self.assertFalse(self.read('#ees-work-run', 'disabled'))
-            for selector in ('#ees-work-panel .ew-title', '.ew-work-action-note', '.ew-work-current-title'):
+            for selector in ('#ees-work-panel .ew-title', '.ew-work-action-note', '.ew-work-result h3'):
                 style = self.visual_style(selector)
                 self.assertGreaterEqual(style['contrast'], 4.5, (selector, style))
                 layout.setdefault('styles', {})[selector] = style
@@ -442,9 +451,9 @@ class CPhaseOneNativeTests(unittest.TestCase):
             self.assert_job_status_visible()
             self.fill('#ees-work-inputs input[name=db]', '합성 장문 DB 대상 ' * 14 + str(width))
             self.assertTrue(self.read('#ees-work-run', 'disabled'))
-            # A docked footer follows the body's read-only links in natural
-            # DOM tab order. Reach it with real Tab presses, without tabindex
-            # overrides or programmatically focusing the save control.
+            # C keeps one action adjacent to its input, including long text.
+            # Reach it with real Tab presses, without tabindex overrides or
+            # programmatically focusing the save control.
             for _ in range(12):
                 if self.browser.evaluate("document.activeElement?.id === 'ees-work-inputs-save'"):
                     break
@@ -477,10 +486,17 @@ class CPhaseOneNativeTests(unittest.TestCase):
                         buttons:['#ees-work-inputs-save','#ees-work-run'].map(s=>{const e=document.querySelector(s),r=e.getBoundingClientRect();
                             return {top:r.top,bottom:r.bottom,hit:e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)),bodyBottom:body.bottom}})};})()""")
                 self.assertEqual(actions['count'], 1)
-                for button in actions['buttons']:
-                    self.assertGreaterEqual(button['top'], button['bodyBottom'])
-                    self.assertLessEqual(button['bottom'], height - 8)
-                    self.assertTrue(button['hit'])
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-action-dock .ew-work-action-region')"))
+                self.assertTrue(self.browser.evaluate("document.querySelector('.ew-work-action-region')?.previousElementSibling?.matches('#ees-work-inputs, [data-work-dirty], .ew-work-input-edit, .ew-work-edit')"))
+            # An action may scroll with a long body. Keyboard navigation must
+            # bring the same enabled control into view without a duplicate.
+            self.click('#ees-work-inputs input[name=db]')
+            for _ in range(12):
+                if self.browser.evaluate("document.activeElement?.id === 'ees-work-run'"):
+                    break
+                self.key('Tab', 9)
+            self.assertTrue(self.browser.evaluate("document.activeElement?.id === 'ees-work-run'"))
+            self.assertTrue(self.browser.evaluate("(()=>{const e=document.activeElement,r=e.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})()"))
             self.screenshot('c-phase1-long-job-scroll-' + str(width))
             trigger = '[data-action=work_detail][data-detail-tab=config]'
             self.click(trigger)

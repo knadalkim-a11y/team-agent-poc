@@ -74,6 +74,16 @@ function createWorkDesigner({callbacks}) {
     if(adminRoute()&&cap.can_author){const systems=cap.managed_systems || [];if(managedProcess&&!cap.is_admin&&!systems.includes(processMeta?.owner_system)){authorizationError='이 워크플로우의 관리 권한이 회수되었습니다. 작성 중인 글은 현재 로그인 세션에 보존했습니다.';cancelAuthoring();renderDesigner();return;}const chosen=systems.includes(managedSystem)?managedSystem:systems[0];if(chosen)await loadWorkflow(chosen,chosen===managedSystem?managedProcess:'');}
     else if(adminRoute())renderDesigner();
   }
+  async function openProcess(process) {
+    // The runtime button opens the current published procedure's existing
+    // authoring route. It never edits the case's historical snapshot.
+    const cap=await refreshCapability();
+    if(!cap?.can_author)return false;
+    // Runtime applicability (for example EMS) is not authoring ownership
+    // (COMMON or UNASSIGNED are valid owners). The existing process lookup
+    // resolves and authorizes its saved owner before returning any draft.
+    return loadWorkflow('',process);
+  }
   function hideWorkspaceContent() {
     const container=designer?.parentElement;if(!container||!adminRoute())return;
     // The Native main shell uses display:contents; its chat owns the sidebar
@@ -95,7 +105,10 @@ function createWorkDesigner({callbacks}) {
     if(!capability?.can_author||authorizationError){workspaceLink?.remove();workspaceLink=null;authoringLink?.remove();authoringLink=null;return;}
     const anchor=$('#sidebar-search-button');
     if(anchor&&!authoringLink){authoringLink=document.createElement('a');authoringLink.id='ees-work-authoring-link';authoringLink.dataset.eesWork='';authoringLink.href='/?ees=workflow';authoringLink.textContent='업무 절차';}
-    if(authoringLink&&anchor&&!authoringLink.isConnected)anchor.parentElement.insertAdjacentElement('afterend',authoringLink);
+    // Keep the Native chat controls together. The current procedure editor
+    // remains available after the workflow navigator and from Workspace.
+    const entry=$('#ees-work-entry'),placement=entry || anchor?.parentElement;
+    if(authoringLink&&placement&&placement.nextElementSibling!==authoringLink)placement.insertAdjacentElement('afterend',authoringLink);
     const container=$('#workspace-container'),original=container?.parentElement.querySelector('nav a[href="/workspace/models"]');
     if(!original)return;
     if(!workspaceLink){workspaceLink=document.createElement('a');workspaceLink.id='ees-work-workspace-tab';workspaceLink.href='/?ees=workflow';workspaceLink.textContent='업무 절차';}
@@ -609,5 +622,5 @@ function createWorkDesigner({callbacks}) {
     return handled(false);
   }
   function reset() {authoringEpoch++;loadSerial++;writeSerial++;draftCache.clear();requestIds.clear();generatedRuntimeInputs.clear();localAssetIds={tools:new Set(),skills:new Set()};capability=null;authoring=null;processMeta=null;managedSystem='';managedProcess='';authorizationError='';writeBusy=false;authoringLoading=false;conversations.forEach(session=>session.controller?.abort());conversations.clear();models=[];modelId='';modelsLoading=false;modelsLoaded=false;modelError='';renderedEditorId='';restoreWorkspace(true);state=null;serverSource=null;editor=null;editorId='';editorRevision=0;editorDirty=false;editorTab='workflow';editorCollapsed.clear();childBrowsers.clear();category='setup';errorMessage='';busy=false;route={};}
-  return Object.freeze({refreshAuthoring,canAuthor,acceptServer,readDraft,markSaved,confirmPublish,render,prepare,sync,setBusy,restoreWorkspace,reset,handleEvent});
+  return Object.freeze({refreshAuthoring,openProcess,canAuthor,acceptServer,readDraft,markSaved,confirmPublish,render,prepare,sync,setBusy,restoreWorkspace,reset,handleEvent});
 }
