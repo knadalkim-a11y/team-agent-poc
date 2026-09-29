@@ -51,7 +51,7 @@
   }
   function rememberScope() {if(browsingSite)scopeSelections.set(scopeKey(),{category,nodeId:selectedId()});}
   const scopeReady = () => Boolean(state&&acceptedRoute===location.pathname+location.search&&lastRoute===acceptedRoute&&(!chatRoute()||window.__eesNativeDraftV1?.ready()));
-  const view = createWorkView({callbacks:{scopeReady,registerPanel,selectWork,switchScope,startCase,showHistory,saveInputs,saveDocument,runJob,executionRefresh:refreshExecution,executionControl,
+  const view = createWorkView({callbacks:{scopeReady,registerPanel,selectWork,switchScope,startCase,showHistory,saveInputs,saveDocument,runJob,executionRefresh:retryExecutionRead,executionControl,
     openCase:id=>openCase(state?.cases.find(c=>c.id===id)),
     selectCategory:async wanted=>{category=wanted;const first=visibleRoots(category)[0];if(first)await selectWork(first);else renderNavigator();},
     showHistoryView:show=>{resetHistory();runView=show?'history':'current';renderPanel();},
@@ -166,7 +166,7 @@
     const at = generation, scopeEpoch=navigationRequest, serial = ++request, id = chatId(), auth = token(), route = location.pathname + location.search;
     const query = new URLSearchParams({chat_id:id}); if (!id && pendingId) query.set('case_id', pendingId);
     try {const result = await api('state?' + query); if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = ''; accept(result);await refreshExecution();await designer.refreshAuthoring();}
-    catch (error) {if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = error.message; recordLookupError=lookupFailure(error); render();}
+    catch (error) {if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = error.message; recordLookupError=lookupFailure(error);if(runView==='history'&&historyCase)historyLookupError=historyLookupError || recordLookupError;render();}
   }
   async function action(actionName, payload = {}, nodeId = '', override = {}) {
     if (busy || !state) return null;
@@ -216,7 +216,7 @@
     try{const result=await api('state?'+new URLSearchParams({case_id:id}));if(serial!==historyRequest||at!==generation||scopeEpoch!==navigationRequest||key!==caseKey(processId())||auth!==token()||route!==location.pathname+location.search||!available())return {ok:false};historyCase=result.case;historyLookupError=null;errorMessage='';renderPanel();openPanel();
       if(workHasExecution(result.case.definition,result.case.process_id)){const saved=await api('execution/state?'+new URLSearchParams({case_id:id}));if(serial!==historyRequest||at!==generation||scopeEpoch!==navigationRequest||key!==caseKey(processId())||auth!==token()||route!==location.pathname+location.search||!available())return {ok:false};historyExecution=saved;renderPanel();}
       return {ok:true};}
-    catch(error){if(serial===historyRequest&&at===generation&&scopeEpoch===navigationRequest&&key===caseKey(processId())&&auth===token()&&route===location.pathname+location.search&&available()){errorMessage=error.message;historyLookupError=lookupFailure(error);renderPanel();}return {ok:false};}
+    catch(error){if(serial===historyRequest&&at===generation&&scopeEpoch===navigationRequest&&key===caseKey(processId())&&auth===token()&&route===location.pathname+location.search&&available()){errorMessage=error.message;historyLookupError={...lookupFailure(error),caseId:id};renderPanel();}return {ok:false};}
   }
   function stashDraft() {
     const bridge=window.__eesNativeDraftV1,snapshot=bridge?.read();
@@ -346,14 +346,20 @@
     const edits=view.readJobEdits(id);
     if(edits.conflict){errorMessage='저장된 내용이 변경되었습니다. 작성 중인 값과 최신 내용을 확인해 주세요.';renderPanel();return false;}
     if(edits.nodeId&&edits.nodeId!==id){errorMessage='입력을 작성한 업무를 다시 선택해 주세요.';renderPanel();return false;}
+    if(workLegacyExecutionLocked(execution,selectedCase()?.id)){errorMessage='연결 실행이 종료되기 전에는 입력·초안을 반영하거나 이 작업을 완료할 수 없습니다. 작성 중인 내용은 이 화면에 보존됩니다.';renderPanel();return false;}
     return true;
   }
   async function saveInputs(inputs,id=selectedId()) {if(!canWriteEdits(id))return null;return action('update_inputs',{inputs},id);}
-  async function saveDocument(document,id=selectedId()) {if(!canWriteEdits(id))return null;return action('run',{document},id);}
-  async function executionForm(schema,values,title,extra='') {
+  async function saveDocument(document,id=selectedId()) {
+    if(!canWriteEdits(id))return null;
+    const saved=selectedCase()?.node_states?.[id];
+    if(saved?.applicable===false||saved?.status==='skipped'||saved?.missing?.length||saved?.block_reason==='skill_unavailable'){errorMessage='초안을 반영하려면 작업의 적용 조건·선행 작업·필수 스킬 권한을 확인해 주세요. 작성 중인 내용은 이 화면에 보존됩니다.';renderPanel();return null;}
+    return action('run',{document},id);
+  }
+  async function executionForm(schema,values,title,extra='',confirmLabel='확인') {
     let submitted=null;
     const html='<form id="ees-runtime-input-form">'+workExecutionInputsHTML(schema,values)+'</form>'+extra;
-    const promise=workUI.dialog({title,html,confirmLabel:'확인'}),dialog=document.querySelector('#ees-work-dialog'),form=dialog?.querySelector('form');
+    const promise=workUI.dialog({title,html,confirmLabel}),dialog=document.querySelector('#ees-work-dialog'),form=dialog?.querySelector('form');
     dialog?.querySelector('[data-dialog-confirm]')?.addEventListener('click',event=>{
       try {if(!form.reportValidity()){event.stopImmediatePropagation();return;}submitted=workExecutionInputsRead(form,schema);}
       catch(error){event.stopImmediatePropagation();let note=dialog.querySelector('[data-input-error]');if(!note){note=document.createElement('p');note.dataset.inputError='';note.setAttribute('role','alert');form.append(note);}note.textContent='입력 형식을 확인해 주세요. '+error.message;}
@@ -363,6 +369,13 @@
   }
   function executionRequestId(body) {
     const key='execution:'+JSON.stringify(body);if(!actionRequests.has(key))actionRequests.set(key,window.crypto?.randomUUID?.() || 'runtime-'+Date.now().toString(36)+'-'+(++actionSerial));return actionRequests.get(key);
+  }
+  function retryExecutionRead() {
+    const pastId=runView==='history'?(historyCase?.id || historyLookupError?.caseId):null;
+    // Each case must pass its own lookup; a past success never clears a
+    // failed current read, and a current success cannot revive stale history.
+    if(pastId)return showHistory(pastId);
+    return recordLookupError?refresh():refreshExecution();
   }
   async function refreshExecution() {
     clearTimeout(executionTimer);executionTimer=null;
@@ -390,7 +403,7 @@
       const plan=response.plan,limits=plan.limits?.duration_seconds?'<p>허용 실행 시간 '+Math.ceil(plan.limits.duration_seconds/60)+'분</p>':'';
       const scope='<ul>'+plan.jobs.map(jobId=>{const job=node(jobId);return '<li>'+workUI.esc(job?.name || jobId)+' · '+workUI.esc(job?.execution?.kind==='ai'?'근거 요약':job?.execution?.kind==='human'?'사람 확인':(job?.execution?.calls || []).map(call=>call.reference.function).join(', '))+'</li>';}).join('')+'</ul>';
       const expiry=typeof plan.expires_at==='number'?new Date(plan.expires_at*1000).toLocaleString():plan.expires_at || '미기록';
-      const inputs=await executionForm(plan.input_schema || {},plan.inputs || {},node(id).name+' · 실행 계획','<p>대상 작업 '+plan.jobs.length+'개 · 승인 유효 시각 '+workUI.esc(expiry)+'</p>'+scope+limits+'<p>개인 연결은 기존 도구 설정을 사용합니다. 계정·키는 입력하지 마세요.</p>');
+      const inputs=await executionForm(plan.input_schema || {},plan.inputs || {},node(id).name+' · 실행 계획','<p>대상 작업 '+plan.jobs.length+'개 · 승인 유효 시각 '+workUI.esc(expiry)+'</p>'+scope+limits+'<p>계획 확인만으로 실행되지 않습니다. 실행 시작을 선택하면 위 범위와 입력으로 접수합니다.</p><p>개인 연결은 기존 도구 설정을 사용합니다. 계정·키는 입력하지 마세요.</p>','실행 시작');
       if(!current()||inputs===null)return;
       const intent=JSON.stringify({...body,inputs});let start=executionStarts.get(intent);
       if(!start){response=await api('execution/plan',{...body,inputs});if(!current())return;const accepted=response.plan;start={action:'start',plan_id:accepted.id,plan_hash:accepted.hash,chat_id:chatId()};start.request_id=executionRequestId(start);executionStarts.set(intent,start);}
@@ -404,13 +417,18 @@
     finally {busy=false;setBusy();}
   }
   async function executionControl(data) {
-    if(busy)return;const run=execution?.run;if(!run||run.id!==data.runId||String(run.revision)!==data.revision)return refreshExecution();
+    if(busy)return;
+    // A selected J/T may belong to an earlier, disjoint run in the same case.
+    // Use the displayed run receipt, never the latest unrelated run.
+    const run=[execution?.run,...(execution?.runs || [])].find(item=>item?.id===data.runId);
+    if(recordLookupError)return refresh();
+    if(executionError||!run||String(run.revision)!==data.revision)return refreshExecution();
     const at=generation,epoch=navigationRequest,auth=token(),route=location.pathname+location.search,current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&available();
     let action=data.runtimeAction,inputs;
     if(action==='inputs'){
       const candidates=(run.calls || []).flatMap(call=>call.result?.data?.results || []);
       const choices=candidates.filter(item=>item.page_id || item.id).map(item=>'<p><button type="button" data-candidate-id="'+workUI.esc(item.page_id || item.id)+'">'+workUI.esc(item.title || item.name || item.page_id || item.id)+' · '+workUI.esc(item.page_id || item.id)+'</button></p>').join('');
-      inputs=await executionForm(run.input_schema || {},run.inputs || {},'실행 입력 확인',candidates.length?'<details open><summary>조회된 후보 · 선택해 주세요</summary>'+choices+'<pre>'+workUI.esc(JSON.stringify(candidates,null,2))+'</pre></details>':'');
+      inputs=await executionForm(run.input_schema || {},run.inputs || {},'실행 입력 확인','<p>입력을 반영한 뒤 이어가기를 선택해야 다음 호출이 진행됩니다. 이미 실행한 호출의 입력·결과는 변경되지 않습니다.</p>'+(candidates.length?'<details open><summary>조회된 후보 · 선택해 주세요</summary>'+choices+'<pre>'+workUI.esc(JSON.stringify(candidates,null,2))+'</pre></details>':''),'입력 반영');
       if(inputs===null||!current())return;
     }
     if(action==='confirm'&&!await workUI.dialog({title:'내용을 직접 확인하셨나요?',html:'<p>'+workUI.esc(node(data.jobId)?.rule || '등록된 완료 조건을 직접 확인해 주세요.')+'</p>',confirmLabel:'확인 완료'}))return;

@@ -1,17 +1,17 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-25
+갱신일: 2026-09-29
 
 현재 작업·다음 작업·미해결·실제 적용 원본을 관리합니다. 이슈·검증 근거는 [평가 기록 찾아보기](../evals/scenarios.md#evidence-index), 환경은 [versions](../versions.md), 완료된 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** [공통 Native 도구 재사용·P/T 영속 실행](mockups/ees-work/TASK.md#shared-native-runtime-20260925)의 1차 구현을 [PR #65](https://github.com/knadalkim-a11y/team-agent-poc/pull/65)로 게시했다. 같은 날 사용자가 검토 후 병합과 배포 준비를 요청해 같은 PR에서 검토 보완·관련 재검을 진행한다. 시작 main은 PR #64 병합본 `991cdb1d80ae07471fb50594831d74fe602b1ef7`, 최초 PR head는 `e338b7ee00b738ed0f1ad8c8daefec408e4c262a`다. 기존 설계 Draft #53은 변경·적층하지 않는다.
-- **기능 계약:** 기존 Native 등록본·ACL·개인 설정을 재사용하고 J는 승인 함수/버전·입력·완료 기준을 연결한다. 채팅과 기존 A안 패널의 P/T/J가 같은 영속 서비스를 사용한다. 실제 호출·검증·기록, 입력/권한 대기와 재개, 브라우저 종료·프로세스 재기동·중복/실패/UNKNOWN을 구분한다. 기존 회원·시스템 담당자·P별 게시·사용자 자산과 과거 모의 업무를 보존한다.
-- **보존·버전:** 프로그램 `0.11.3+ees.12`·`/_ees12/`, Pack0.2.14/Specialists0.2.5/Workflow0.4.0이다. Native DB/키/도구를 복제하지 않고 기존 업무 SQLite에 승인·실행 metadata를 추가한다. 과거 ees.10/11 파일/Restore 계약과 새 진행의 구프로그램 쓰기 차단을 구분한다. 프로그램 Restore는 DB·자산·그룹 변경의 복원이 아니다.
-- **검증 상태:** [TR-01~24](../evals/scenarios.md#shared-native-runtime-20260925)에 실제 Native 임시 DB/loader/binder·암호화 개인 설정, 합성 HTTP/모델, 실제 패키지 frontend/Chrome와 독립 API/저장 서비스의 범위를 기록한다. 최초 PR 원본의 파일별 회귀 1,228 PASS/16 SKIP/실패·오류 0과 실제 이전 프로그램 복원 증거를 보존한다. [병합 전 검토](../evals/scenarios.md#shared-native-runtime-review-20260925)에서 UNKNOWN 우회·전이 근거 ACL·대화/승인 경합·모델 범위/상한·화면 상태를 보완했고 수정 관련 runtime32·Native9·Tool8/기존34·Node43·조립 Native 선별 검사를 확인한다. 중간/최종 원본·실패 후 재검을 구분하며 전체 광역 시험을 다시 통과했다고 합산하지 않는다. 전체 Native 앱 기동·실제 사내 API/모델·Windows 셋업과 사용자 수락은 미실행이다.
-- **사내 상태:** 새 사내 설치 결과는 수신하지 않았다. 기존 #59/#60 적용 보고를 유지한다. 후속 요청으로 #65의 검토 후 병합·정확한 병합 main의 배포 준비까지 승인됐으며, main 직접 push·실제 사내 배포·계정/도구 등록·실서버 변경은 수행하지 않는다. OP-01~04와 접속/복구/실사용 확인도 완료로 바꾸지 않는다.
-- **다음 작업 하나:** #65의 검증 원본을 병합하고 같은 tree의 깨끗한 main에서 wheel/ZIP·manifest를 확인해 [기존 Update → Upgrade -TrialCommit](03-openwebui-native-agent.md#shared-native-runtime-20260925) 적용 안내를 확정한다. 정확한 병합 SHA·배포물 해시는 #65의 병합 결과/준비 기록에서 확인한다. Windows 셋업 자동화는 같은 계약의 후속 목표이며 설치 문서 검색/본문 읽기를 셋업 완료로 보고하지 않는다.
+- **현재 작업:** [PR #66](https://github.com/knadalkim-a11y/team-agent-poc/pull/66)의 C안 1·2·3차와 보완을 보존하고 [남은 Native 보내기 gate](../evals/scenarios.md#c-design-composer-merge-20260929)를 통과했다. 시작 원격/로컬 head `a49350e31dcbbc4d1687293a0ccd8dcf0b541989`, main `e995fe16e4835f2d1799c95f3d6d1b74ce381389`와 깨끗한 checkout·두 AGENTS/STATUS·기존 dist/검사 증거를 확인했다. Draft #53·별도 Windows 작업은 혼합하지 않았다.
+- **검증·변경:** 공식 앱·실제 Native 인증/대화·임시 DB에서 업무패널을 열고 입력/보내기3회, 기존 메시지 보존·새 대화 연결·요청당1회·응답 표시·저장/새로고침을 확인했다. 외부 모델만 loopback 합성이다. 준비 실패3건과 최종 통과를 구분했고 제품 결함/제품 코드 변경은 없다. 변경은 전용 시험과 관련 문서이며 앞선 광역 검사는 제품 불변 근거로 재사용한다.
+- **승인·Git 상태:** 이번 사용자가 gate 통과 후 Draft 해제·#66 병합과 정확한 병합본 배포 준비를 승인했다. 기존 미승인 문구는 당시 경계다. 관련 검사·문서·원격 검증 head를 확인해 같은 PR로 반영하고, 실제 merged/병합 SHA/main 및 배포물 최종 hash는 [PR #66 병합/준비 기록](https://github.com/knadalkim-a11y/team-agent-poc/pull/66)으로 대조한다. main 직접 push·보호 우회·원격 CI 재실행은 하지 않는다.
+- **배포 준비·보존:** 최종 wheel SHA256 `d35bc2bb4adc789cc93752b49550a47446461f1e54ba0015a3952e6af78ca254`의 전체 제품5916개/RECORD5917행·manifest/CRC를 확인했다. 병합 제품이 같을 때 재사용하고 정확한 깨끗한 병합 원본으로 새 bundle을 만든다. ees.12·Pack0.2.14, #65 Native 공통 실행, 회원/권한·P게시·대화/Workspace·DB/키·사용자 자산을 보존한다. 프로그램 Restore는 DB/자산 rollback이 아니다.
+- **사내 상태:** 새 설치 결과는 수신하지 않았다. 기존 #59/#60 보고를 유지하며 현재 설치 SHA와 Pack 실제 등록 바이트는 미확인이다. [사내 시험 적용·복구 안내](03-openwebui-native-agent.md#c-design-trial-20260929)에 따라 회사 PC 작업은 사용자가 수행한다. 병합 완료·배포 준비·사내 적용 성공을 각각 구분하고 Windows·실 API/모델·OP/사용자 수락은 미실행으로 남긴다.
+- **다음 작업 하나:** 병합/배포 준비 기록을 확인한 뒤 사용자의 기존 `Status -Summary` 결과 한 줄로 현재 원본과 상태를 확인하고 적용 경로를 확정한다. 원문 로그·파일·스크린샷 반출을 요구하지 않는다.
 
 ## 2026년 9월 개발·검사 방침
 
@@ -61,7 +61,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | #63 A안·#64 시스템 담당/P별 게시 보존, [공통 Native 도구와 P/T 영속 실행](mockups/ees-work/TASK.md#shared-native-runtime-20260925) 1차 구현/Work 검증 | 같은 PR 검토. 사내/Windows·OP 미실행, 공동 진행·일정·실제 계정 변경은 별도 범위 |
+| 4. 관리자 워크플로 | #65 병합·C안 1·2단계/보완 보존, [PR #66 3차 개발환경 검수 통과](mockups/ees-work/TASK.md#c-design-phase3-20260929) | 남은 보내기 gate PASS·병합/준비 승인; 실제 Git/배포물은 #66 기록, 사내 적용은 Status 결과 후 사용자 실행 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -71,7 +71,7 @@
 
 ## 재개와 환경 유지
 
-- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work는 [09-23 A안](mockups/ees-work/TASK.md#a-design-20260923)과 Figma 478:131/498:363을 최신 표현 기준으로 사용하고 [09-22 단계별 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922)·[확정 왼쪽](mockups/ees-work/TASK.md#sidebar-final-20260922)·[오른쪽 기록 계약](mockups/ees-work/TASK.md#right-panel-20260922)을 보존합니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
+- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work의 현재 표현은 [09-29 C안 2단계](mockups/ees-work/TASK.md#c-design-phase2-20260929)와 [검토 보완](mockups/ees-work/TASK.md#c-design-phase2-review-20260929)을 보존하고 [3차 개발환경 검수](mockups/ees-work/TASK.md#c-design-phase3-20260929)를 완료했다. 완료된 1·2단계·보완·3차 검사를 미완료로 보아 반복하지 않는다. [09-23 A안](mockups/ees-work/TASK.md#a-design-20260923)·Figma 478:131/498:363은 기존 구현 근거로 보존하고 [09-22 단계별 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922)·[확정 왼쪽](mockups/ees-work/TASK.md#sidebar-final-20260922)·[오른쪽 기록 계약](mockups/ees-work/TASK.md#right-panel-20260922)을 보존합니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
@@ -79,4 +79,4 @@
 
 ## 최근 점검
 
-2026-09-25 첨부 v1.0의 14절을 기준으로 최신 main·관련 PR·Work 로컬 상태·AGENTS/STATUS를 먼저 확인했다. 시작 main #64의 서명 커밋과 전체 Git tree/blob 일치를 확인해 작업 기준을 확보했고 원격 CI는 9월 방침에 따라 실행하지 않는다. 실제 Native 등록 도구 여섯 함수·현재 개인 권한/설정·승인 변경·같은 P/T 실행 서비스·영속 재기동/중복·AI 근거 검증·기존 A안/작성 권한/Restore를 관련 범위에서 검사했다. 결과 재사용 전 현재 권한 검사, 대상 입력 변경, 모델 token 상한, 부분 완료, 승인 endpoint와 P/T 집계 경계를 보완했다. 자세한 초기 실패·수정/재검·미실행은 [TR 평가](../evals/scenarios.md#shared-native-runtime-20260925)를 따른다. 실제 서버나 사용자 자료는 변경하지 않았다.
+2026-09-29 실제 Native 보내기 클릭의 마지막 gate를 같은 최종 제품에서 통과했다. 기존 대화2회·새 대화1회, 요청/작업/모델 호출 각각1회, 응답/저장/새로고침·이전 기록 보존·대상 연결을 확인했다. 제품 코드는 불변이며 전체 wheel 바이트/RECORD/CRC·원본/manifest를 대조했다. 준비 실패·독립 검토 보완·재사용·미실행은 [후속 평가](../evals/scenarios.md#c-design-composer-merge-20260929), 실제 병합/main/최종 bundle hash는 [PR #66](https://github.com/knadalkim-a11y/team-agent-poc/pull/66)에 연결한다. 회사 PC 적용·새 사내 성공은 수행/수신하지 않았다.
