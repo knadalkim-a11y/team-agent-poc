@@ -602,7 +602,9 @@ body:has(#ees-work-entry) #sidebar[data-ees-native-sidebar] > div > div:has(> [d
   line-height: 22px;
   font-weight: 500;
 }
-#chat-container:has(#ees-work-context) #send-message-button:disabled { opacity: .5; }
+/* C uses the same filled surface for the empty Native composer. The actual
+   disabled attribute still prevents submission and exposes its disabled state. */
+#chat-container:has(#ees-work-context) #send-message-button:disabled { opacity: 1; cursor: not-allowed; }
 #chat-container:has(#ees-work-context) #send-message-button::after { content: "보내기"; }
 #chat-container:has(#ees-work-context) #send-message-button > svg { display: none; }
 #chat-container:has(#ees-work-context) #send-message-button:disabled > svg.animate-spin { display: inline-block; }

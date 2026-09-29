@@ -493,6 +493,8 @@
 #ees-work-dialog.ew-readonly-dialog .ew-detail-outcome > strong[data-status=passed] {color:var(--ew-good);}
 #ees-work-dialog.ew-readonly-dialog .ew-detail-outcome > strong[data-status=failed] {color:var(--ew-error);}
 #ees-work-dialog.ew-readonly-dialog [data-work-detail-content] pre {background:var(--ew-soft);border-radius:8px;padding:16px;font-size:14px;line-height:1.7;}
+#ees-work-dialog.ew-execution-dialog::backdrop {background:#202c3e;}
+#ees-work-dialog.ew-execution-dialog .ew-detail-call-view :is(h2,h3,p) {margin:0;}
 #ees-work-dialog.ew-execution-dialog .ew-dialog-header {gap:16px;height:68px;padding:16px 32px 12px;border:0;}
 #ees-work-dialog.ew-execution-dialog .ew-dialog-header .ew-detail-back {flex:1;min-width:0;padding:7px 0;color:var(--ew-blue);font-size:14px;line-height:22px;text-align:left;}
 #ees-work-dialog.ew-execution-dialog .ew-dialog-header [data-dialog-close] {width:48px;height:40px;padding:9px 0;font-size:13px;line-height:22px;}
@@ -506,7 +508,7 @@
 #ees-work-dialog.ew-execution-dialog .ew-detail-invocation h3 {font-size:18px;line-height:26px;font-weight:500;}
 #ees-work-dialog.ew-execution-dialog .ew-detail-invocation p {font-size:14px;line-height:22px;color:var(--ew-muted);}
 #ees-work-dialog.ew-execution-dialog .ew-detail-io-tabs {padding:4px;gap:4px;border:0;border-radius:10px;background:var(--ew-soft);flex-wrap:nowrap;}
-#ees-work-dialog.ew-execution-dialog .ew-detail-io-tabs > button {flex:1;min-width:0;height:40px;padding:8px 12px;text-align:center;border-radius:8px;color:var(--ew-blue);font-size:14px;line-height:22px;}
+#ees-work-dialog.ew-execution-dialog .ew-detail-io-tabs > button {flex:1;min-width:0;height:40px;padding:8px 12px;text-align:center;border-radius:8px;color:var(--ew-blue);font-size:14px;line-height:22px;font-weight:500;}
 #ees-work-dialog.ew-execution-dialog .ew-detail-io-tabs > button[aria-pressed=true] {background:var(--ew-bg);box-shadow:none;}
 #ees-work-dialog.ew-execution-dialog .ew-detail-fields {display:flex;flex-direction:column;gap:10px;}
 #ees-work-dialog.ew-execution-dialog .ew-detail-fields h3,#ees-work-dialog.ew-execution-dialog .ew-detail-verdict h3,#ees-work-dialog.ew-execution-dialog .ew-detail-record-config h3 {font-size:14px;line-height:22px;font-weight:500;}
@@ -712,6 +714,29 @@
 #ees-work-panel .ew-work-metrics [data-work-metric=attention] strong {color:var(--ew-warning);}
 #ees-work-panel .ew-work-metrics .ew-work-attention-detail {font-size:12px;line-height:20px;font-weight:500;color:var(--ew-muted);margin:0;}
 #ees-work-panel .ew-work-metrics progress {display:block;width:100%;height:3px;margin:0;}
+/* C P uses its own stage columns; the task browser retains its four-column table. */
+#ees-work-panel .ew-work-list.ew-work-stage-list > h3 {margin-bottom:12px;}
+#ees-work-panel .ew-work-list .ew-work-stage-table {display:table;border-collapse:separate;border-spacing:0;}
+#ees-work-panel .ew-work-stage-table :is(thead,tbody) {display:block;}
+#ees-work-panel .ew-work-stage-table tr {display:grid;align-items:center;}
+#ees-work-panel .ew-work-stage-table thead tr {grid-template-columns:minmax(0,1fr) 82px 62px;gap:16px;min-height:28px;padding-bottom:6px;align-items:start;}
+#ees-work-panel .ew-work-stage-table tbody tr {grid-template-columns:minmax(0,1fr) 70px 64px;gap:12px;padding:12px 0;}
+#ees-work-panel .ew-work-stage-table tbody tr + tr {border-top:1px solid var(--ew-line);}
+#ees-work-panel .ew-work-stage-table :is(th,td) {display:block;min-width:0;width:auto;padding:0;border:0;}
+#ees-work-panel .ew-work-stage-table th {font-size:12px;font-weight:500;line-height:18px;}
+#ees-work-panel .ew-work-stage-table th:first-child {line-height:22px;}
+#ees-work-panel .ew-work-stage-table th:nth-child(2) {font-size:12px;}
+#ees-work-panel .ew-work-stage-table :is(th,td):nth-child(2),#ees-work-panel .ew-work-stage-table :is(th,td):last-child {width:auto;text-align:right;}
+#ees-work-panel .ew-work-stage-table td:nth-child(2) {font-size:14px;font-weight:400;line-height:22px;color:var(--ew-ink);}
+#ees-work-panel .ew-work-stage-table td:first-child {display:flex;flex-direction:column;gap:4px;}
+#ees-work-panel .ew-work-stage-table td > .ew-work-link {padding:0;color:var(--ew-ink);font-size:15px;font-weight:500;line-height:24px;}
+#ees-work-panel .ew-work-stage-table td small {margin:0;font-size:13px;font-weight:500;line-height:22px;}
+#ees-work-panel .ew-work-stage-table [data-work-distribution] {display:flex;flex-wrap:wrap;gap:0 12px;line-height:20px;}
+#ees-work-panel .ew-work-stage-table [data-work-distribution] [data-status=input_required] {color:var(--ew-warning);}
+#ees-work-panel .ew-work-stage-table [data-work-distribution] [data-status=failed] {color:var(--ew-error);}
+#ees-work-panel .ew-work-stage-table .ew-badge {padding:0;font-size:13px;font-weight:500;line-height:20px;}
+#ees-work-panel[data-work-level=management] .ew-work-stage-list + .ew-work-criterion {grid-template-columns:112px minmax(0,1fr);}
+#ees-work-panel .ew-work-stage-list + .ew-work-criterion > span {font-weight:500;line-height:22px;color:var(--ew-ink);}
 #ees-work-panel .ew-work-job-toolbar {display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin:10px 0;}
 #ees-work-panel .ew-work-job-toolbar .ew-work-search {display:flex;flex-direction:row;align-items:center;flex:0 1 208px;gap:8px;min-width:160px;height:44px;margin:0;padding:10px 14px;border:1px solid var(--ew-line);border-radius:8px;}
 #ees-work-panel .ew-work-search img {flex:none;}

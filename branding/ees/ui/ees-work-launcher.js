@@ -172,9 +172,17 @@
   async function refresh() {
     if (!available()) return;
     const at = generation, scopeEpoch=navigationRequest, serial = ++request, id = chatId(), auth = token(), route = location.pathname + location.search;
+    const current=()=>at===generation&&scopeEpoch===navigationRequest&&serial===request&&auth===token()&&route===location.pathname+location.search&&available();
     const query = new URLSearchParams({chat_id:id}); if (!id && pendingId) query.set('case_id', pendingId);
-    try {const result = await api('state?' + query); if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = ''; accept(result);await refreshExecution();await designer.refreshAuthoring();}
-    catch (error) {if (at !== generation || scopeEpoch !== navigationRequest || serial !== request || auth !== token() || route !== location.pathname + location.search || !available()) return; errorMessage = error.message; recordLookupError=lookupFailure(error);if(runView==='history'&&historyCase)historyLookupError=historyLookupError || recordLookupError;render();}
+    try {const result = await api('state?' + query);if(!current())return;errorMessage='';accept(result);await refreshExecution();
+      if(!current())return;
+      const shownState=state,couldAuthor=designer.canAuthor();
+      await designer.refreshAuthoring();
+      // The initial panel can precede the capability response. Reuse its
+      // draft/focus-preserving render only when that same view's access changes.
+      if(current()&&state===shownState&&couldAuthor!==designer.canAuthor())renderPanel();
+    }
+    catch (error) {if(!current())return;errorMessage=error.message;recordLookupError=lookupFailure(error);if(runView==='history'&&historyCase)historyLookupError=historyLookupError || recordLookupError;render();}
   }
   async function action(actionName, payload = {}, nodeId = '', override = {}) {
     if (busy || !state) return null;

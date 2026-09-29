@@ -8,6 +8,53 @@ import json
 import time
 
 
+def p_impact_gate(*, browser, click, wait, shot, capture, api):
+    """One final P-only dark/small-screen check through ordinary preferences."""
+    click('.ew-workflow-summary [data-action="select"][data-node-id="setup-p"]')
+    wait('document.querySelector("#ees-work-panel .ew-title")?.textContent === "신규 공장 횡전개"')
+    api('/api/v1/users/user/settings/update', {'ui': {'language': 'ko-KR', 'theme': 'dark',
+        'showChangelog': False, 'models': ['c3-synthetic-model']}})
+    browser.evaluate('localStorage.setItem("theme","dark")')
+    browser.events.clear()
+    browser.call('Page.reload')
+    deadline = time.monotonic() + 15
+    while not any(event.get('method') == 'Page.loadEventFired' for event in browser.events):
+        browser.events.append(browser.receive(deadline))
+    wait('!!document.querySelector("#chat-input.ProseMirror") && document.documentElement.classList.contains("dark")')
+    if not browser.evaluate('!!document.querySelector("#ees-work-panel")?.getClientRects().length'):
+        click('#ees-work-context-open')
+    browser.call('Emulation.setDeviceMetricsOverride', {'width': 1366, 'height': 768,
+                 'deviceScaleFactor': 1, 'mobile': False})
+    wait('!!document.querySelector(".ew-work-stage-table") && !!document.querySelector(".ew-work-scope-action button")')
+    click('#ees-work-panel .ew-title')
+    found = False
+    for _ in range(100):
+        if browser.evaluate('document.activeElement?.matches(".ew-work-scope-action button")'):
+            found = True
+            break
+        for kind in ('keyDown', 'keyUp'):
+            browser.call('Input.dispatchKeyEvent', {'type': kind, 'key': 'Tab', 'code': 'Tab', 'windowsVirtualKeyCode': 9})
+    assert found, 'P action not reached through actual Tab'
+    result = browser.evaluate('''(()=>{const e=document.activeElement,r=e.getBoundingClientRect(),
+      content=document.querySelector('#ees-work-content'),c=content.getBoundingClientRect(),
+      table=document.querySelector('.ew-work-stage-table'),t=table.getBoundingClientRect(),s=getComputedStyle(table);
+      return {viewport:[innerWidth,innerHeight],dark:document.documentElement.classList.contains('dark'),
+        title:document.querySelector('#ees-work-panel .ew-title').textContent,
+        actionCount:document.querySelectorAll('.ew-work-action-region').length,action:r.toJSON(),disabled:e.disabled,
+        actionVisible:r.x>=0&&r.right<=innerWidth&&r.y>=0&&r.bottom<=innerHeight,
+        documentWidth:document.documentElement.scrollWidth,contentClient:content.clientWidth,contentScroll:content.scrollWidth,
+        stageTable:t.toJSON(),tableWithinContent:t.x>=c.x&&t.right<=c.right+1,
+        tableColor:s.color,tableBackground:s.backgroundColor,tableFontSize:s.fontSize,
+        composerClient:document.querySelector('#message-input-container').clientWidth,
+        composerScroll:document.querySelector('#message-input-container').scrollWidth};})()''')
+    assert result['dark'] and result['actionCount'] == 1 and result['actionVisible'] and not result['disabled'], result
+    assert result['documentWidth'] <= 1367 and result['contentScroll'] <= result['contentClient'] + 1, result
+    assert result['tableWithinContent'] and result['composerScroll'] <= result['composerClient'] + 1, result
+    shot('visual-p-dark-keyboard-1366')
+    capture('p-dark-1366', None, [(1366, 768, 'responsive')])
+    return {'ok': True, **result, 'boundary': 'Actual existing theme preference/reload and keyboard focus; no repeated P execution'}
+
+
 def layout_gate(*, browser, click, wait, shot, capture):
     """Only the final footer/spacing delta: real Tab focus and small viewports."""
     results = []

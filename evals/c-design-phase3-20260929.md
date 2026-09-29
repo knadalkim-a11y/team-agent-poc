@@ -33,6 +33,7 @@
 - C6 긴 입력 검사의 최초 실행은 더 이상 표시하지 않는 옛 current-title selector의 computed style 조회에서 중단됐다. 현재 표시되는 결과 heading으로 같은 대비 검사를 옮겼다. 같은 wheel의3개 해상도·긴 업무/입력·단일 행동·Tab/Enter·독립 스크롤·상세/초점·좁은 폭/다크 재검1건이4.742초에 PASS했다. C6 source snapshot의 제품 파일은 유지하고 시험 파일만 갱신했다.
 - 최종 독립 검토에서 상위 P/T의 `attention_count`만으로 진행 중을 표시하면 아직 실행하지 않은 입력/연결 대기까지 진행 중으로 보이는 조건을 찾았다. 실제 완료 수 또는 실패 시도 수가 있을 때만 상위 진행 표시를 허용하고 조치 수만 있는 blocked는 보존하도록 좁혔다. `case.status`는 P의 집계 상태이지 Native worker의 활성 상태가 아니므로 서로 바꾸어 해석하지 않는다. leaf 판정·실제 수치·Native 추가 상태·저장 데이터 불변을 해당 renderer 회귀에 연결한다.
 - C7 실제 절차 편집 클릭에서 적용 시스템 EMS를 작성 관리 주체로 넘겨403이 발생했다. 같은 임시 앱의 게시 P는 UNASSIGNED 소유였고 기존 backend는 저장 owner와 nonempty system_id가 다르면 정상 차단했다. 진입을 지원되는 `process_id` 조회로 바꾸어 서버가 실제 owner를 찾고 기존 권한을 확인하게 했다. cap/route/auth/generation 보호·초안 cache·게시 경로는 유지한다. 시험도 실제 존재하지 않는 editor-form selector 대신 기존 node-form을 확인하도록 보완했으며 owner403 제품 결함과 selector 준비 오류를 구분한다. UI36/controller22 및 기존 owner 해석/비관리자 거부/DB 불변 service1을 확인하고 같은 버튼의 공식 앱 재검을 연결한다. 독립 service 명령의 PYTHONPATH 누락 오류는 별도 로그로 보존했다.
+- C8 최소 진입은 릴리스 노트 모달의 사용자 설정 누락, 처음 권한 확인 뒤 이미 열린 패널의 편집 버튼 갱신 누락, 뒤의 Workspace 대기식 따옴표 오류를 각각 구분했다. 같은 실제 T 선택 뒤 편집→setup-p/owner UNASSIGNED→계정 메뉴/Workspace 도달·작성 POST0은 `candidate8-authoring-confirmed`에서 PASS했다. 첫 권한 조회 뒤 버튼이 숨은 채 남는 제품 조건은 별도 보완했다. canAuthor 전후 변화에만 기존 state/request/route/auth/generation/available 조건을 재확인하고 초안·초점 보존 renderPanel로 갱신한다. 새 회귀의 수정 전 실패와 수정 후 controller23 PASS를 보존하고 최종 공식 앱에서 T 재선택 없이 첫 패널부터 확인한다.
 - C7 시작과 재개 명령에서 Chrome DevTools용 실제 실행 파일을 찾지 못한 준비 실패는 원래 결과 파일에 남겼다. 기존 정상 Chrome의 절대경로를 확인해 사용하며 제품·패키지 결함으로 해석하거나 실패를 PASS에 합산하지 않는다.
 - 최종 숫자/단위 baseline6px 보완 도중 `3 / 6`의 읽기 텍스트 공백이 사라져 renderer46 중2 FAIL이 발생했다. formatter의 공백을 복구했다. 뒤의46 재검은 상위 복귀 링크의 짧아진 표시명에 대한 옛 기대1건이 실패해 visible 이름과 기존 aria 전체 의미를 함께 검사하도록 갱신했고 이 실패 전체 로그는 별도로 보존했다. 담당자가 같은 로그 경로로 재실행해 최초 전체 로그가 덮인 증거 보존 실패가 있으며 원본 전체가 남아 있다고 주장하지 않는다. root가 이미 읽은 실패 일부만 `panel-unit-c7-spacing-failure-observed.txt`에 관측 사본으로 보존했고 이후 재검은 고유 파일명으로 기록한다. 다른 후보의 실패 PNG/JSON/로그는 유지한다.
 - 문서 점검 첫 실행은 ignored dist 안의 부분 source snapshot까지 탐색해 그 안의 README 상대 링크30건을 실패로 보고했다. 원본 검사를 완화하지 않고 Git 추적 파일+새 파일 전체를 새 깨끗한 경로로 복사해 검사했다. 중간 검사31문서/1314링크·오류0/경고0이며 최종 원본에서 다시 확인한다.
@@ -43,8 +44,8 @@
 |---|---|
 | 실제 Native 보내기 C5 | 기존 대화2회/새 대화1회, 매번 실제 입력·보내기 클릭. 요청/작업/외부 loopback 모델 각각1회, 기존 메시지2→4·새 대화2, 응답·저장·새로고침·공장/진행 건 분리·과거 필드 보존 PASS. 뒤의 CSS/SVG 보완은 Native 전송/저장 patch를 바꾸지 않아 이 근거 재사용 |
 | 영향 fixture10건 | C3의9 PASS + C5의범위 예외1 PASS. 완료 복귀/목록/필터/초점3, 조회 실패 자료 숨김2, 실제 실행 입력 대기/명시 재개1, 상세 중 권한 회수1, 부분/실패 완료 금지1, 초안/사람 확인 분리1, 미연결/제외/빈 입력1. 최종 C7의 표/복귀 표시 영향3건은 다시 PASS했고 C3의 같은3건을 중복 합산하지 않음 |
-| 긴 내용·접근 | 기존 suite의3개 해상도·긴 이름/설명/입력·single action·Tab/Enter·상세/초점·좁은 폭/다크1 PASS. C6에 이어 최종 C7에서 위 완료 복귀3건과 함께4/4 PASS, 15.887초. 공식 앱 장문 메시지/실제 입력/설정은 별도 결과 |
-| 원본 unit·Native patch | 최종 panel46(8.492초)/controller21, builder25, pinned 공식 wheel2, 최종 C7 일반 Native theme2(1.582초) PASS. renderer는 기존 primary Python3.12.14/Node, 공식 앱·실제 패키지 브라우저는 기존 .venv Python3.11.16/Chrome153을 사용했다. 최초 builder25의 model router fixture가 새 기본 avatar fallback을 포함하지 않아 실패한 뒤 실제 상위 원본 fixture를 보완함. 최종 asset 추가 영향은 최종 package audit으로 확인 |
+| 긴 내용·접근 | 기존 suite의3개 해상도·긴 이름/설명/입력·single action·Tab/Enter·상세/초점·좁은 폭/다크1 PASS. C6/C7(4/4 PASS, 15.887초)에 이어 C9에서4/4 PASS(14.651초), 최종 P 배치/CSS 변경 뒤 C10에서도 같은4/4 PASS(16.381초). 공식 앱 장문 메시지/실제 입력/설정은 별도 결과 |
+| 원본 unit·Native patch | panel46 C7(8.492초), P 보완 후 C10(9.219초)/controller23, authoring UI36/service1, builder25, pinned 공식 wheel2, C7 일반 Native theme2(1.582초), C10 disabled-send 의미/실색/클릭 차단을 포함한 theme3(1.894초) PASS. renderer는 기존 primary Python3.12.14/Node, 공식 앱·실제 패키지 브라우저는 기존 .venv Python3.11.16/Chrome153을 사용했다. 최초 builder25의 model router fixture가 새 기본 avatar fallback을 포함하지 않아 실패한 뒤 실제 상위 원본 fixture를 보완함. 최종 asset 추가 영향은 최종 package audit으로 확인 |
 | 프로그램 Restore C5 | 실제 이전 #66 ees.12→C5→Restore1 PASS. 이전 프로그램 전체 파일 hash와 합성 DB/키·Python 바이트 동일. 일반 customization54 PASS/선택 실행6 SKIP와 물리 Restore1을 구분. 이후 CSS/SVG만 바뀌며 래퍼·과거 THEME_FILES·저장 계약 불변을 최종 감사로 연결해 재사용 |
 
 공식 앱 검사는 실제 Native 계정·대화·파일 저장과 EES 공개 API·임시 DB를 사용한다. 외부 OpenAI 응답/embedding과 HTTP만 loopback 합성이다. UI 행동은 실제 좌표 클릭/키보드·파일 선택으로 확인하며 API로 메시지를 주입하지 않는다. fixture 브라우저는 실제 제품 패키지/EES 서비스이지만 Native shell·채팅 인증은 합성이므로 공식 앱과 구분한다. 광역 backend/권한/worker 검사는 해당 원본이 변하지 않은 #65/#66의 근거를 유지하며 새로 전부 실행했다고 쓰지 않는다.
@@ -59,7 +60,15 @@
 - **제품 결함:** 현재 조회 시스템 EMS를 실제 절차 소유 시스템으로 넘겨 UNASSIGNED 소유 절차의 편집 진입이403이었다. launcher/designer가 process ID만 기존 authoring 조회에 전달하고 서버 `_authorize_process`가 실제 소유/권한을 해결하게 수정했다. 서버·API·권한 판정을 변경하지 않았다. 잘못된 시험 form selector도 실제 `#ees-work-node-form`으로 수정하고 반환 owner를 검사한다. authoring UI36/controller22/실제 SQLite SA20 1건 PASS(`authoring-owner-*-c8.log`).
 - 직접 Git transport는 자격증명 비대화형 입력 불가로 읽기에 실패했다. 연결된 GitHub 플러그인으로만 원격 게시/재확인을 진행한다. 자격증명 추출·대체 인증·보호 우회는 하지 않는다.
 
-### 최종 고정 원본과 판정
+**최종 시각 판정·패키지·Git:** 최종 동일 조건 재검 결과와 미수락 차이, 원본/패키지 hash, 문서/diff·Draft head는 아래에 기록한다. 기능 PASS·스크린샷 생성과 전체 시각 수락은 별개다.
+
+**시각 중간 검증 패키지 C7:** `open_webui-0.11.3+ees.12-py3-none-any.whl`, 152,030,655 bytes, SHA256 `5cddcfd22ec0cf676faa3527c600a43fb981c5b6205a54d934ecbc64d4e424ee`. 해당 source snapshot88파일, 변환된 전체 payload5,924파일·RECORD5,925행·추가31개·manifest·공식 원본·namespace·49 entry URL·4개 캐시 URL·CRC가 일치했다. C5 대비 프로그램 래퍼/Agent Pack 보호 원본과 과거 필수 inventory 변경0이므로 실제 이전 ees.12 Restore PASS를 재사용한다. 새 회사 설치용 묶음을 만든 것이 아니며 이 wheel/증거 ZIP을 사내 재배포 승인으로 해석하지 않는다.
+
+### PR #67 최초 게시 기록 보존
+
+게시 직전 원격 재확인에서 같은 브랜치의 Draft #67 head `e55f9a4ce8c8719947142bc1600b16cb504b5e75`를 확인했다. 원격 AGENTS/STATUS·전체 tree와22개 차이의 blob hash를 읽어 대조했다. 아래는 그 head의 **당시** 검사/실패 기록이며 C9~C11의 추가 P·상세·초기 작성 경합 검수를 대신하지 않는다. 해당 기록은 이 후속 실행에서 새로 수행한 것으로 집계하지 않는다. 원격의 SVG EOF 보정을 유지하고 기능·원본 변경은 이 후속 검증과 통합하여 같은 Draft를 갱신한다.
+
+#### 최초 게시 당시 고정 원본과 판정
 
 **제품 원본:** 1920×1080 원본과 별도1920×1048 렌더17개 지점을 실제 앱에서 재검했다(`final-app/visual-result.json`, `fullapp-result.json`, `final-app.log`). 기준3화면의 전체/앱 나란히·50%겹침·항목별 원본/제품 geometry/style을 함께 육안 대조했다. 기준 띠32px만 제외하며 browser chrome·이미지 확대축소·마스크·시험 CSS는 없다. 실제 프로그램은 `0.11.3+ees.12`, wheel SHA256 `6b65b1812c210e28abad8a4fe90261d380729922fb9ec0141db2497055526161`이다. 88개 고정 제품 입력이 최종 checkout과 같고5,924개 제품 member·RECORD5,925행·CRC·manifest·cache namespace 모두 통과했다. builder는 원본/패키지 바이트를 검증하며 아직 병합/배포용 ZIP을 만들지 않았다.
 
@@ -87,6 +96,40 @@
 **제공 자료:** `EES_Work_C_Visual_Evidence_20260929.zip`에 최종 제품 원본 PNG,3화면 전체/앱 비교·겹침,9개 Figma 원본·변수/metrics/자산 출처, 항목별 geometry/style·위 판정, 핵심 로그·실패 근거·원본/패키지 manifest·해시를 함께 제공한다. 사내 자료는 포함하지 않으며 검증용 합성 자료뿐이다. 문서31개/링크1320개 오류0·검토후보0, 변경 Python AST/Node 구문 및 staged/working diff 검사를 통과했다. Git 게시 결과는 같은 원본을 가리키는 Draft PR에서 확인한다.
 
 **검증 패키지 C7:** `open_webui-0.11.3+ees.12-py3-none-any.whl`, 152,030,655 bytes, SHA256 `5cddcfd22ec0cf676faa3527c600a43fb981c5b6205a54d934ecbc64d4e424ee`. 최종 source snapshot88파일, 변환된 전체 payload5,924파일·RECORD5,925행·추가31개·manifest·공식 원본·namespace·49 entry URL·4개 캐시 URL·CRC가 일치했다. C5 대비 프로그램 래퍼/Agent Pack 보호 원본과 과거 필수 inventory 변경0이므로 실제 이전 ees.12 Restore PASS를 재사용한다. 새 회사 설치용 묶음을 만든 것이 아니며 이 wheel/증거 ZIP을 사내 재배포 승인으로 해석하지 않는다.
+
+
+### 최종 시각 보완의 추가 확인
+
+C9 공식 앱의17개 렌더 기록과 실제 Native 보내기1회,1536×960/1366×768/1048×768 T 단일 행동의 실제 Tab 접근·가로 넘침 없음, 현재 P 작성 진입과 계정/Workspace 접근을 PASS했다. 별도 최초 패널에서 T/J 재선택 없이 편집→실제 owner UNASSIGNED의 setup-p→Native 계정/Workspace를 확인했고 작성 POST는0회였다. `candidate9/`, `candidate9-first-authoring/`, `native-final-evidence-index.json`에 원문을 보존한다. 17은 렌더 기록 수이며 단위시험17건이 아니다.
+
+C9 wheel SHA256 `e4ef9c947fa46ca91eb631eb1860bebe5b6f542f87a10b7e04c1ae6e7c63b6f2`(152,030,899 bytes), source snapshot SHA256 `0ca21127fcb820c8f00e96389817a5c5bee5c7c4001c2031ffd16ad5bdd45105`의88개 원본과 전체 payload5,924/RECORD5,925·manifest·namespace·49 entry URL·4 cache URL·CRC는 일치했다. 이는 C9의 유효 중간 근거이며 뒤의 보완 패키지로 바꾸어 표기하지 않는다.
+
+추가 P 원본의 독립 비교에서 요약 높이111→162.5px, 전체 폭 진척 막대, 옛 단계표 typography/간격, 행동 y868→989.984의 제품 차이를 확인했다. 실제 완료 수 아래에 해당 비율 막대를 두고 P 단계 표의 원본 열/글자/간격·완료 조건을 적용하며 기존 전체 작업 검색과 미완료 수는 단일 행동 뒤에서 계속 접근하게 했다. 수치와 실행 계약은 그대로다. 빈 Native 보내기의 실제 disabled는 유지하고 opacity0.5→1, cursor not-allowed로 C안 색을 적용했다. 두 변경 모두 수정 전 실패 로그를 보존했다(`p-layout-c9-before-fix.log`, `send-fill-c10-before-fix.log`).
+
+| 남은 시각 항목 | 이유·판정과 검토 대안 |
+|---|---|
+| 제목/브랜드 글자 폭 | 지정 font/size/weight/line-height와 요소 배치는 대조했지만 브랜드+2px, J/T+3px, P+5px의 폭 차이가 남음. 임의 글자 압축·잘라내기로 가리지 않았고 미수락으로 남김 |
+| 실제 J 기록·입력 | 지원 schema는 text 입력이며 원본은 select 표현. 기존 승인 Tool 체크명/설명이 길어 완료 행동/기록이18px 내려감. 기존 schema/자료를 위조하지 않으며 별도 지원 사례로 같은 내용량 구성 가능 여부 또는 원본 표현의 조정은 사용자 검토 대상 |
+| 실제 자료/상태 | 기존 site line, 추가 상태·집계·기록/시각은 원본 예시와 다름. P 조치/점검 가능 수는6/5 대신 실제8/2. 고정 값 삽입이나 DB/자산 덮기로 맞추지 않음 |
+| P/T 진척·단위 원본 충돌 | T 원본 fill43.486%가 표시25/48=52.083%와 다르고 P 원본 fill121.400px도 표시72/120=60%와 다름. 실제 UA shadow fill은 T126.203px/P145.391px이며 실제 비율 유지. C09 전체30Bold와 C07/C08 단위16Regular가 서로 달라 공통 숫자/단위 규칙을 사용하되 원본 충돌을 미수락으로 남김 |
+| Native 추가 기능·경계 안내 | 실제 모델/도구/음성·응답 행동·계정/Workspace/권한 접근을 유지한 가시 차이. T 범위 계약 설명도 실제 두 줄과 원본 한 줄이 다름. 기능을 없애지 않는 기존 메뉴 안 배치나 의미가 같은 짧은 설명의 후속 검토가 대안이며 승인된 차이로 제외하지 않음 |
+| DB 실행 중·실패·재시도 | 현재 승인 legacy mock은 동기 응답이며 DB 원본과 같은 상태를 지원 인터페이스로 재현하지 못함. AP의 선언 실패는 별도 C 규칙 확장이고 DB 세 원본의 시각 PASS를 대신하지 않음 |
+
+**C10 공식 앱 재검 PASS:** 동일6상태의 원본/앱 정렬12 PNG, 실제 AP 선언 실패 확장2 PNG, notice 없는 실제 상세587:4886 원본1 PNG,1366×768 P 다크 확장1 PNG 등16개 렌더를 새 패키지에서 생성했다. 실제 빈 보내기는 disabled=true·1개·opacity1·#37658b이고 실제 클릭 뒤 Native 제출0회였다. P 다크의 실제 Tab은 단일 활성 행동에 도달했으며 단계표/본문/document/composer 가로 넘침이 없었다. P 단계 목록 y377/h415, 단계표 y417/h375, 완료 조건 y816·행동 y868로 원본 배치를 다시 확인했다. P 진척은 실제 UA shadow box의 track242.328×3/fill145.391×3(72/120)를 측정했다. 상세는 실제 첫 저장 기록·현재 시각이며 원본의 #3/고정 시각을 주입하지 않았다. `candidate10/fullapp-result.json`·`visual-result.json`은 ok=true다. C9의 최초 작성 진입과 T3크기 키보드, C7첨부/저장, C5기존·새대화3회는 영향 원본이 불변이라 재사용하며 C10에서 새 실행했다고 세지 않는다.
+
+**보존된 제품 후보 C10:** `open_webui-0.11.3+ees.12-py3-none-any.whl`, 152,031,399 bytes, SHA256 `cd04655dc6add2ae941188d73a257b1bbb47b604026db6b0092b73aca0fad31f`. source snapshot SHA256 `13ea0afc6ec30ee921c1fa5d7e25ffacb9163bdb36ce6f3fc9c71b01c436f47c`, builder SHA256 `3afa6f1371f5815c555434ab3bec011b146027e1e88c64fe1af66565ef0cee7a`. C9 대비 제품 변경은 view/launcher CSS/chat-theme3개이며 현재88개 원본=동결본, 전체5,924 payload/5,925 RECORD·31 additions·manifest/공식 원본·49 entry/4 cache URL·CRC 모두 일치했다. C5 보호 원본/과거 Restore inventory 변경0으로 물리 Restore 근거를 재사용한다. `candidate10-package-audit.json`과 최종 Git 원본 연결 감사는 첨부 증거의 관리 원본이다. wheel은 시각 검토용이며 배포 승인이 아니다.
+
+**마지막 상세 보완·C11:** C10의 실제 상세 비교는 외곽만 같고 기존 공통 h2/h3/p margin으로 제목+22px·탭+96px, tab weight400, backdrop alpha0.18 차이가 있었다. 기존 C10 computed JSON에 같은18개 회귀 assertion을 적용해9 FAIL을 보존했다(새 UI 실행 아님). 실행 상세에 한정한 margin0·tab500·#202c3e backdrop으로 수정했다. C11 공식 앱의 같은16개 렌더 및 상세18/18 assertion PASS: title y156/h40, identity y156/h100, invocation y276/h78, tab y378/h40/500, dialog520,80,880,920. 저장된 실제 기록과 반환 필드는 바꾸지 않았다. 실제 빈 보내기 클릭 제출0·P1366 다크 단일 행동과 넘침 없음도 다시 PASS했다. 상세 변경 영향의3크기/긴 내용/상세 초점 회귀1건을 별도 재검하고 C10의 나머지 완료 복귀3건을 재사용한다.
+
+C11 렌더에 사용한 wheel은 `open_webui-0.11.3+ees.12-py3-none-any.whl`, **152,031,415 bytes**, SHA256 **`fc741dcedf6b894090c85c782e8c76b924aa8c9b6adedefb0ab68a4880b58e08`**이다. source snapshot SHA256 `814bc867b91f44dd0513aeea9e1a76c96ee912757a1ab56d5ff45a23be1e96b4`; C10과 제품 차이는 launcher CSS 하나이며 현재88개 원본/동결본·전체5,924 payload/5,925 RECORD·manifest/공식원본/namespace/URL/CRC가 일치했다. C5 보호 원본·과거 inventory는 불변이다. `candidate11-package-audit.json`과 증거 색인·원본/비교 PNG에 해당 실행을 연결한다.
+
+**원격 보존 뒤 최종 게시 패키지 C12:** Draft #67의 정확한 부모 `e55f9a4ce8c8719947142bc1600b16cb504b5e75` 위로 후속 변경을 연결했다. 현재 원본은 C11과 비교해 SVG8개만 다르며 원격의 Figma 원본 EOF 보정을 그대로 보존한다. 7개 SVG는 닫는 태그 뒤 LF 차이뿐이고 기본 avatar는 중첩 SVG의 같은 LF 차이뿐이다. 바깥/중첩 XML 구조·모든 속성/경로가 같고, 전체 wheel도 SVG8개·RECORD 외 모든 member 바이트가 같다. C11의16개 원본 PNG/기능 검사와7세트 비교를 이 경계에서 재사용하며 C12 UI를 새로 실행한 것으로 표시하지 않는다.
+
+최종 wheel **`c5687ca97f0cd041c14b932fdb6110cb99a353de0effade52608ec0546337dc8`**, **152,031,411 bytes**; source snapshot **`ba680e2a60c600122cf0cf6c2b383a5aa149ed8b7872c822201da80145950c87`**. 현재88개 원본/동결본·전체 payload/RECORD·manifest/namespace/CRC 일치는 `candidate12-package-audit.json`, XML/전체 바이트 비교는 `candidate12-render-reuse-proof.json`, 최종 Git commit 원본 연결은 `candidate12-git-source-audit.json`에 기록한다. 버전명은 동일 ees.12이며 이 검토 결과는 재배포 승인이 아니다.
+
+**마무리 gate:** Git 추적 파일과 이번 새 파일 전체를 포함한 깨끗한 원본 export에서 문서 검사·`git diff --check`를 수행했다. 문서31개·링크1321개·오류0·검토후보0이다. 부분 dist snapshot의 상대 링크 오류는 원본 검사로 대체한 이유와 초기 실패를 위에 보존한다. 검증 제품88개와 최종 Git 원본·wheel의 일치는 별도 감사에 연결하며 커밋/push 뒤 원격 head·Draft=true와 main 불변을 다시 확인한다. 커밋별 `[skip ci]`, 원격 dispatch/재실행 없음, Windows/사내 설치·실 API/모델 품질·사용자 시각 수락 미실행이다.
+
+전체 시각 일치와 사용자 수락은 **미완료**다. 측정한 영역의 일치·관련 기능 PASS·스크린샷 생성 성공을 전체 수락으로 확대하지 않는다. 원본 없는 작은 화면/다크·추가 상태는 C 규칙의 확장으로 구분한다. 최종 원본 PNG·원본 전체/앱 영역 나란히·50%겹침·요소 좌표/computed style·항목별 판정과 핵심 로그를 첨부 증거로 제공하며 증거 ZIP은 설치 프로그램이 아니다.
 
 <a id="c-design-phase3-20260929"></a>
 

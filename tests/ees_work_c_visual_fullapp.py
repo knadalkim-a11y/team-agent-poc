@@ -23,6 +23,38 @@ ANSWER = ('연결 확인은 대상에 접근할 수 있는지, 응답 확인은 
           '현재 화면은 모의 점검 예시여서 실제 DB에 접속하지 않습니다.')
 
 
+def assert_detail_geometry(geometry):
+    """Regression for the observed inherited margins in the real output dialog."""
+    targets = geometry['targets']
+    title = next(item for item in geometry['detailElements']
+                 if item['tag'] == 'H2' and item['text'].startswith('실행 #'))
+    tabs = [item for item in geometry['detailElements']
+            if item['tag'] == 'BUTTON' and item['text'] in ('전달 입력', '반환 출력')]
+    checks = []
+    def expect(name, actual, expected):
+        matched = abs(actual-expected) <= 0.25 if isinstance(expected, (int, float)) else actual == expected
+        checks.append({'name': name, 'actual': actual, 'expected': expected, 'ok': matched})
+    for key, values in {
+        'detailDialog': {'x': 520, 'y': 80, 'width': 880, 'height': 920},
+        'detailIdentity': {'y': 156, 'height': 100},
+        'detailInvocation': {'y': 276, 'height': 78},
+    }.items():
+        for field, expected in values.items():
+            expect(key + '.' + field, targets[key]['rect'][field], expected)
+    expect('detailTitle.y', title['rect']['y'], 156)
+    expect('detailTitle.height', title['rect']['height'], 40)
+    expect('detailTabs.count', len(tabs), 2)
+    for tab in tabs:
+        expect(tab['text'] + '.y', tab['rect']['y'], 378)
+        expect(tab['text'] + '.height', tab['rect']['height'], 40)
+        expect(tab['text'] + '.fontWeight', tab['fontWeight'], '500')
+    expect('backdrop.background', geometry['detailBackdrop']['background'], 'rgb(32, 44, 62)')
+    result = {'ok': all(item['ok'] for item in checks), 'checks': checks,
+              'boundary': 'Actual 1920x1080 output dialog geometry; record content remains real and is not substituted'}
+    assert result['ok'], json.dumps(result, ensure_ascii=False)
+    return result
+
+
 def audit_visual_source(source_root, upstream_wheel, wheel, out):
     """Compare packaged EES assets to the explicitly named immutable source.
 
@@ -76,16 +108,14 @@ def authoring_only_gate(*, out, client, headers, browser, base, chat_id, click, 
     if not browser.evaluate('!!document.querySelector("#ees-work-panel")?.getClientRects().length'):
         click('#ees-work-context-open')
     wait('!!document.querySelector("#ees-work-authoring-link")')
-    click('#ees-work-tree [data-action="select"][data-node-id="install-t"]')
-    wait('document.querySelector("#ees-work-panel .ew-title")?.textContent === "시스템 설치"')
     result = authoring_gate(browser=browser, click=click, wait=wait, shot=shot)
-    result['setup_boundary'] = 'Original published setup-p; temporary real EMS case; no procedure edits, no repeated visual or composer suite'
+    result['setup_boundary'] = 'Original published setup-p; temporary real EMS case; first panel without reselecting a T/J; no procedure edits or repeated visual/composer suite'
     (out/'authoring-result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     record('Actual current process authoring and Native Workspace entry', **result)
 
 
 def visual_gate(*, out, client, headers, browser, base, chat_id, provider, click, wait, shot, record,
-                interactions=False, file_only=False, layout_check=False):
+                interactions=False, file_only=False, layout_check=False, detail_check=False):
     def api(path, body=None, **params):
         response = client.request('POST' if body is not None else 'GET', path,
                                   headers=headers, json=body, params=params or None)
@@ -206,11 +236,45 @@ def visual_gate(*, out, client, headers, browser, base, chat_id, provider, click
                     'existing_tools_reused': ['gateway', 'db-read'],
                     'reference_difference': 'Two legacy check names/purposes and the existing site line are retained; authoring cannot redefine mock tools or mutate the global site catalog'}}
 
-    def capture(label, reference, sizes=None):
+    def progress_shadow():
+        """Read the browser's real progress track/fill, not a ratio-derived box."""
+        try:
+            browser.call('DOM.enable')
+            browser.call('CSS.enable')
+            tree = browser.call('DOM.getDocument', {'depth': -1, 'pierce': True})['root']
+        except AssertionError as error:
+            return [{'observation_error': str(error), 'boundary': 'No retry or ratio-derived fill estimate'}]
+        results = []
+        def visit(node, progress=None):
+            attrs = dict(zip(node.get('attributes', [])[::2], node.get('attributes', [])[1::2]))
+            if node.get('nodeName') == 'PROGRESS':
+                progress = {'attributes': attrs, 'parts': []}
+                results.append(progress)
+            if progress is not None and node.get('nodeType') == 1:
+                part = {'node': node.get('nodeName'), 'attributes': attrs}
+                try:
+                    model = browser.call('DOM.getBoxModel', {'nodeId': node['nodeId']})['model']
+                    part['borderQuad'] = model['border']
+                    xs, ys = model['border'][::2], model['border'][1::2]
+                    part['rect'] = {'x': min(xs), 'y': min(ys), 'width': max(xs)-min(xs), 'height': max(ys)-min(ys)}
+                    part['width'], part['height'] = model['width'], model['height']
+                    computed = browser.call('CSS.getComputedStyleForNode', {'nodeId': node['nodeId']})['computedStyle']
+                    part['style'] = {item['name']: item['value'] for item in computed
+                        if item['name'] in ('background-color', 'color', 'opacity', 'width', 'height', 'border-radius', 'appearance')}
+                except AssertionError as error:
+                    part['observation_error'] = str(error)
+                progress['parts'].append(part)
+            for child in node.get('children', []) + node.get('shadowRoots', []):
+                visit(child, progress)
+        visit(tree)
+        return results
+
+    def capture(label, reference, sizes=None, detail=False):
         wait('!document.querySelector("#ees-work-panel")?.matches("[aria-busy=true]")')
-        point = browser.evaluate('(()=>{const r=document.querySelector("#ees-work-content").getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+Math.min(r.height/2,100)};})()')
+        scroll_selector = '#ees-work-dialog .ew-dialog-body' if detail else '#ees-work-content'
+        point = browser.evaluate('(()=>{const r=document.querySelector(' + json.dumps(scroll_selector) + ').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+Math.min(r.height/2,100)};})()')
         browser.call('Input.dispatchMouseEvent', dict(type='mouseWheel', deltaX=0, deltaY=-10000, **point))
-        wait('document.querySelector("#ees-work-content").scrollTop === 0')
+        wait('document.querySelector(' + json.dumps(scroll_selector) + ').scrollTop === 0')
         browser.call('Input.dispatchMouseEvent', {'type': 'mouseMoved', 'x': 1050, 'y': 20})
         browser.evaluate('document.fonts.ready')
         for width, height, suffix in (sizes or ((1920, 1080, 'viewport-original'), (1920, 1048, 'app-aligned'))):
@@ -240,6 +304,9 @@ def visual_gate(*, out, client, headers, browser, base, chat_id, provider, click
                 assistantLead:'.chat-assistant .markdown-prose > p:first-of-type',assistantDetail:'.chat-assistant .markdown-prose > p:nth-of-type(2)',
                 criterion:'.ew-work-criterion',scopeAction:'.ew-work-scope-action',scopeRunButton:'.ew-work-scope-action .ew-work-actions button',
                 scopeReady:'.ew-work-ready',scopeBoundary:'.ew-work-scope-boundary',progressRegion:'.ew-work-progress',
+                stageList:'.ew-work-stage-list',stageTable:'.ew-work-stage-table',progressBar:'.ew-work-progress progress',
+                nativeSend:'#send-message-button',detailDialog:'#ees-work-dialog',detailHeader:'#ees-work-dialog .ew-dialog-header',
+                detailBody:'#ees-work-dialog .ew-dialog-body',detailIdentity:'.ew-detail-identity',detailInvocation:'.ew-detail-invocation',
                 pagination:'.ew-work-pagination',newChatIcon:'[data-ees-native-navigation] #sidebar-new-chat-button > div:first-child',
                 newChatLabel:'[data-ees-native-navigation] #sidebar-new-chat-button > div:nth-child(2) > div',
                 searchNavIcon:'[data-ees-native-navigation] #sidebar-search-button svg',searchNavLabel:'[data-ees-native-navigation] #sidebar-search-button > div'};
@@ -250,6 +317,7 @@ def visual_gate(*, out, client, headers, browser, base, chat_id, provider, click
                   fontFamily:s.fontFamily,fontSize:s.fontSize,lineHeight:s.lineHeight,fontWeight:s.fontWeight,
                   padding:s.padding,margin:s.margin,gap:s.gap,color:s.color,background:s.backgroundColor,
                   border:s.border,borderRadius:s.borderRadius,overflowX:s.overflowX,overflowY:s.overflowY,
+                  opacity:s.opacity,filter:s.filter,disabled:e.disabled ?? null,
                   ariaLabel:e.getAttribute('aria-label'),title:e.getAttribute('title'),
                   visible:!!e.getClientRects().length};};
               const ancestors=e=>{const result=[];for(let depth=0;e&&depth<8;e=e.parentElement,depth++)result.push(measure(e));return result;};
@@ -265,19 +333,41 @@ def visual_gate(*, out, client, headers, browser, base, chat_id, provider, click
                 ancestors:Object.fromEntries(['#chat-container','#chat-pane','#ees-work-context','#chat-input','#chat-input-container','#message-input-container','[data-ees-native-toolbar]'].map(v=>[v,ancestors(document.querySelector(v))])),
                 controls:[...document.querySelectorAll('#ees-work-panel button,#ees-work-panel input,#ees-work-entry button,#chat-container button')].filter(e=>e.getClientRects().length).map(measure),
                 metricDetails:[...document.querySelectorAll('.ew-work-progress,.ew-work-metrics > [data-work-metric],.ew-work-metrics > [data-work-metric] > span,.ew-work-metrics > [data-work-metric] > strong,.ew-work-metrics strong > span,.ew-work-metrics strong small,.ew-work-attention-detail,.ew-work-job-table thead,.ew-work-job-table tr,.ew-work-pagination,.ew-work-scope-action')].map(measure),
+                stageDetails:[...document.querySelectorAll('.ew-work-stage-table,.ew-work-stage-table thead,.ew-work-stage-table tr,.ew-work-stage-table td,.ew-work-stage-table button')].map(measure),
+                detailElements:[...document.querySelectorAll('#ees-work-dialog header,#ees-work-dialog h2,#ees-work-dialog h3,#ees-work-dialog .ew-dialog-body,#ees-work-dialog [data-work-detail-content],#ees-work-dialog button')].map(measure),
+                detailBackdrop:document.querySelector('#ees-work-dialog')?.open?{background:getComputedStyle(document.querySelector('#ees-work-dialog'),'::backdrop').backgroundColor}:null,
                 sections:[...document.querySelectorAll('#ees-work-panel h2,#ees-work-panel h3,#ees-work-panel .ew-section,#ees-work-panel .ew-work-result')].map(measure)};
             })()''')
+            geometry['progressShadow'] = progress_shadow()
             geometry.update(reference_node=reference, alignment={'kind': suffix,
-                'reference_app_origin': {'x': 0, 'y': 32}, 'product_app_origin': {'x': 0, 'y': 0},
+                'reference_app_origin': {'x': 0, 'y': 0 if detail else 32}, 'product_app_origin': {'x': 0, 'y': 0},
                 'pixel_scale': 1, 'css_or_dom_overrides': False,
                 'note': 'Separate actual viewport rendering; no image crop, scaling or mask'})
             (out/(name + '.json')).write_text(json.dumps(geometry, ensure_ascii=False, indent=2), encoding='utf-8')
             shot(name)
             evidence['captures'].append({'name': name, 'reference_node': reference, 'viewport': geometry['viewport']})
+            if detail:
+                evidence['detail_geometry'] = assert_detail_geometry(geometry)
         browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080,
                      'deviceScaleFactor': 1, 'mobile': False})
 
     try:
+        if detail_check:
+            wait('document.querySelector("#send-message-button")?.disabled && document.querySelector("#chat-input")?.innerText.trim() === ""')
+            browser.events.clear()
+            before_models = len(provider.models)
+            point = browser.evaluate('(()=>{const e=document.querySelector("#send-message-button"),r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2,width:r.width,height:r.height};})()')
+            assert point['width'] > 0 and point['height'] > 0, point
+            for kind in ('mousePressed', 'mouseReleased'):
+                browser.call('Input.dispatchMouseEvent', {'type': kind, 'x': point['x'], 'y': point['y'], 'button': 'left', 'clickCount': 1})
+            browser.evaluate('new Promise(resolve=>setTimeout(resolve,500))')
+            sends = [event for event in browser.events if event.get('method') == 'Network.requestWillBeSent'
+                     and event['params']['request'].get('method') == 'POST'
+                     and event['params']['request'].get('url') == base + '/api/chat/completions']
+            assert not sends and len(provider.models) == before_models
+            disabled = browser.evaluate('(()=>{const e=document.querySelector("#send-message-button"),s=getComputedStyle(e);return {count:document.querySelectorAll("#send-message-button").length,disabled:e.disabled,opacity:s.opacity,background:s.backgroundColor,color:s.color};})()')
+            assert disabled['count'] == 1 and disabled['disabled'] and disabled['opacity'] == '1', disabled
+            evidence['empty_send'] = {**disabled, 'native_submit_requests_after_actual_click': 0}
         click('#ees-work-inputs input[name="db"]')
         for kind in ('keyDown', 'keyUp'):
             browser.call('Input.dispatchKeyEvent', {'type': kind, 'key': 'a', 'code': 'KeyA',
@@ -285,7 +375,7 @@ def visual_gate(*, out, client, headers, browser, base, chat_id, provider, click
         browser.call('Input.insertText', {'text': '테스트 DB-A · 예시'})
         click('#ees-work-panel .ew-title')
         capture('j-input-before', '582:132')
-        if interactions or layout_check:
+        if interactions or layout_check or detail_check:
             click('.ew-workflow-summary [data-action="select"][data-node-id="setup-p"]')
             wait('document.querySelector("#ees-work-panel .ew-title")?.textContent === "신규 공장 횡전개"')
             capture('p-management', '586:555')
@@ -297,16 +387,24 @@ def visual_gate(*, out, client, headers, browser, base, chat_id, provider, click
         wait('document.querySelector("#ees-work-panel .ew-title")?.textContent === "DB 연결 확인"')
         click('#ees-work-inputs-save')
         wait('!document.querySelector("#ees-work-panel")?.matches("[aria-busy=true]")')
-        if interactions or layout_check:
+        if interactions or layout_check or detail_check:
             capture('j-input-saved', '584:169')
         click('#ees-work-run')
         wait('document.querySelector("#ees-work-panel").innerText.includes("완료") && !document.querySelector("#ees-work-panel").matches("[aria-busy=true]")')
         assert current()['case']['jobs']['db-j']['status'] == 'passed'
         capture('j-complete', '584:1098')
+        if detail_check:
+            click('[data-action="work_detail"][data-detail-tab="output"]')
+            wait('!!document.querySelector("#ees-work-dialog")?.open && !!document.querySelector("[data-work-detail-content=output]")')
+            capture('detail-output', '587:4886', [(1920, 1080, 'viewport-original')], detail=True)
+            evidence['detail_content_boundary'] = 'Actual saved first simulation record/current time/approved legacy tool names; reference record #3/fixed time/tool wording are not injected'
+            for kind in ('keyDown', 'keyUp'):
+                browser.call('Input.dispatchKeyEvent', {'type': kind, 'key': 'Escape', 'code': 'Escape', 'windowsVirtualKeyCode': 27})
+            wait('!document.querySelector("#ees-work-dialog")?.open')
         click('.ew-work-action-region [data-action="panel_parent"]')
         wait('document.querySelector("#ees-work-panel .ew-title")?.textContent === "시스템 설치"')
         capture('t-after-completion', '586:1397')
-        if interactions or layout_check:
+        if interactions or layout_check or detail_check:
             click('#ees-work-content [data-work-job="' + mapping['new-service'] + '"] [data-action="select"]')
             wait('document.querySelector("#ees-work-panel .ew-title")?.textContent === "서비스 상태 확인"')
             capture('j-declared-simulation-failed', None)
@@ -323,6 +421,9 @@ def visual_gate(*, out, client, headers, browser, base, chat_id, provider, click
             from ees_work_c_visual_interactions import authoring_gate, layout_gate
             evidence['layout_check'] = layout_gate(browser=browser, click=click, wait=wait, shot=shot, capture=capture)
             evidence['authoring_entry'] = authoring_gate(browser=browser, click=click, wait=wait, shot=shot)
+        if detail_check:
+            from ees_work_c_visual_interactions import p_impact_gate
+            evidence['p_impact'] = p_impact_gate(browser=browser, click=click, wait=wait, shot=shot, capture=capture, api=api)
         evidence['ok'] = True
         record('Official Native C visual captures', count=len(evidence['captures']),
                native_composer_sends=1 + int(interactions) + int(interactions or file_only),

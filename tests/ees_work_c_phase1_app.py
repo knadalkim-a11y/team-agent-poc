@@ -55,6 +55,7 @@ def main():
     parser.add_argument('--visual-file-only', action='store_true')
     parser.add_argument('--visual-layout-check', action='store_true')
     parser.add_argument('--visual-authoring-only', action='store_true')
+    parser.add_argument('--visual-detail-check', action='store_true')
     parser.add_argument('--source-root', type=Path)
     parser.add_argument('--upstream-wheel', type=Path)
     args = parser.parse_args()
@@ -282,7 +283,7 @@ def main():
                             base=BASE, chat_id=chat_id, provider=provider,
                             click=click, wait=wait, shot=shot, record=record,
                             interactions=args.visual_interactions, file_only=args.visual_file_only,
-                            layout_check=args.visual_layout_check)
+                            layout_check=args.visual_layout_check, detail_check=args.visual_detail_check)
                 report['ok'] = True
                 return
 

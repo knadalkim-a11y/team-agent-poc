@@ -418,7 +418,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         task, _ = self.render(case, "install-t")
         self.assertEqual(self.run_button(process, "setup-p").text, "범위 모의 점검 실행")
         self.assertEqual(self.run_button(task, "install-t").text, "범위 모의 점검 실행")
-        self.assertIn("단계별 진행", " ".join(item.text for item in process.find("h3")))
+        self.assertIn("단계별 수행·진행", " ".join(item.text for item in process.find("h3")))
         self.assertIn("작업 현황", " ".join(item.text for item in task.find("h3")))
         manual, _ = self.render(case, "scope-j")
         self.assertFalse(manual.find("button", **{"data-action": "run"}))
@@ -660,6 +660,15 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         counter = progress.find(**{"data-work-total": None})[0]
         self.assertEqual((counter.attrs["data-work-done"], counter.attrs["data-work-total"]), ("2", "4"))
         self.assertIn("단계 완료", progress.text)
+        jobs_metric = progress.find(**{"data-work-metric": "jobs"})[0]
+        self.assertEqual(len(jobs_metric.find("progress")), 1)
+        self.assertEqual(len(progress.find("progress")), 1)
+        self.assertEqual(jobs_metric.find("progress")[0].attrs["max"],
+                         str(case["node_states"]["setup-p"]["progress"]["total"]))
+        self.assertEqual(len(process.find(**{"data-work-metric": "incomplete"})), 1)
+        sections = [child.attrs.get("class", "") for child in process.children if isinstance(child, Element)]
+        self.assertLess(next(i for i, classes in enumerate(sections) if "ew-work-scope-action" in classes),
+                        next(i for i, classes in enumerate(sections) if "ew-work-job-finder" in classes))
         table = process.find("table")[0]
         selected = {element.attrs["data-node-id"] for element in table.find("button", **{"data-action": "select"})}
         self.assertEqual(selected, set(case["definition"]["nodes"]["setup-p"]["children"]))
