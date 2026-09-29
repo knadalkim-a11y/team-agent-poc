@@ -800,7 +800,12 @@ function createWorkView({callbacks}) {
     const focusState=focused?{id:focused.id,name:focused.name,node:focused.dataset.nodeId,action:focused.dataset.action,runtimeAction:focused.dataset.runtimeAction,runId:focused.dataset.runId,start:focused.selectionStart,end:focused.selectionEnd}:null;
     const oldNode=renderedEditContext?.scope.nodeId;
     host.querySelector('#ees-work-action-dock')?.replaceChildren();actionLayoutKey='';
-    if(runView==='history' || !selectedCase()) {
+    if(snapshot.recordLookupError){
+      // Retained snapshots are not fresh evidence after a failed case read.
+      // captureJobEdits above keeps local edits for a successful revalidation.
+      renderedEditContext=null;
+      content.innerHTML=runTabs()+alertHTML()+workExecutionRuntimeHTML(null,{error:snapshot.recordLookupError.message});
+    }else if(runView==='history' || !selectedCase()) {
       if(runView==='history')renderedEditContext=null;
       content.innerHTML=runTabs()+alertHTML()+(runView==='history'?historyHTML():previewHTML());
     }else{
@@ -809,7 +814,7 @@ function createWorkView({callbacks}) {
       renderedEditContext=done?null:editContext(n.id);
       content.innerHTML=runTabs()+alertHTML()+closed+workPanelNodeHTML(c,n,{readOnly:done,draft:draftFor(renderedEditContext),listView:jobListState(),execution:snapshot.execution,executionError:snapshot.recordLookupError?.message || snapshot.executionError})+(done&&n.type==='p'&&!snapshot.recordLookupError&&!snapshot.executionError?'<section class="ew-work-execute ew-work-action-region"><div class="ew-work-actions">'+button('새 실행','start_case','class="ew-primary" data-mutation')+'</div></section>':'')+(workHasExecution(c.definition,n.id)?'':'<p class="ew-footnote">연결 점검은 모의 결과이며 실제 업무 시스템을 호출하지 않습니다.</p>');
     }
-    if(runView==='history'&&historyCase&&workHasExecution(historyCase.definition,historyCase.process_id))content.insertAdjacentHTML('beforeend',snapshot.recordLookupError?workExecutionRuntimeHTML(null,{error:snapshot.recordLookupError.message}):(snapshot.historyExecution?.runs || []).map(run=>workExecutionRuntimeHTML({run},{nodeId:run.node_id,definition:historyCase.definition,case:historyCase,readOnly:true,history:true})).join(''));
+    if(runView==='history'&&historyCase&&!snapshot.recordLookupError&&workHasExecution(historyCase.definition,historyCase.process_id))content.insertAdjacentHTML('beforeend',(snapshot.historyExecution?.runs || []).map(run=>workExecutionRuntimeHTML({run},{nodeId:run.node_id,definition:historyCase.definition,case:historyCase,readOnly:true,history:true})).join(''));
     if(runView==='current'&&!snapshot.executionError&&!snapshot.recordLookupError&&snapshot.execution?.runs?.length>1){
       const relevant=snapshot.execution.runs.filter(run=>workExecutionForNode({run},selectedId(),definition())),current=workExecutionForNode(snapshot.execution,selectedId(),definition())?.run;
       const previous=relevant.filter(run=>run.id!==current?.id);
@@ -850,7 +855,7 @@ function createWorkView({callbacks}) {
       if(!origin)control?.scrollIntoView({block:'nearest',inline:'nearest'});
       pendingReturn=null;
     }
-    if(detailContext){if(detailContext.scope!==navigationScope())workUI.closeDialog();else renderDetail();}
+    if(detailContext){if(detailContext.scope!==navigationScope()){$('#ees-work-dialog .ew-dialog-body')?.replaceChildren();workUI.closeDialog();}else renderDetail();}
     if(runtimeDetailContext){
       const source=runView==='history'?snapshot.historyExecution:snapshot.execution,runs=[source?.run,...(source?.runs || [])].filter(Boolean);
       const available=runtimeDetailContext.runIds.every(id=>{const run=runs.find(item=>item.id===id);return run&&run.evidence_available!==false&&!(run.calls || []).some(call=>call.evidence_available===false);});
@@ -861,7 +866,7 @@ function createWorkView({callbacks}) {
       }
     }
   }
-  function navigationScope(){return JSON.stringify([selectedCase()?.id || '',browsingSite,browsingSystem,definition()?.version,runView]);}
+  function navigationScope(){return JSON.stringify([selectedCase()?.id || '',browsingSite,browsingSystem,definition()?.version,runView,historyCase?.id || '']);}
   function returnPanel(parentId=null){
     const entry=navigationTrail[navigationTrail.length-1];
     if(entry&&entry.scope===navigationScope()&&entry.to===selectedId()&&(!parentId||entry.from===parentId)){
@@ -972,7 +977,7 @@ function createWorkView({callbacks}) {
     if(summary&&inside){
       const html=Array.from(summary.parentElement.children).filter(el=>el!==summary).map(el=>el.outerHTML).join('');
       const records=[...(summary.parentElement.matches('[data-runtime-run]')?[summary.parentElement]:[]),...summary.parentElement.querySelectorAll('[data-runtime-run]')];
-      const context=records.length?{scope:navigationScope(),runIds:records.map(item=>item.dataset.runtimeRun)}:null;runtimeDetailContext=context;
+      const context={scope:navigationScope(),runIds:records.map(item=>item.dataset.runtimeRun)};runtimeDetailContext=context;
       workUI.dialog({title:summary.dataset.workOverlay,html,note:'읽기 전용 · 저장된 업무 자료',readOnlyDetail:true,restoreFocus:panelFocusRestorer(summary)}).then(()=>{if(runtimeDetailContext===context)runtimeDetailContext=null;});return handled(true);
     }
     const categoryButton=target.closest?.('[data-work-category]');
@@ -1031,7 +1036,8 @@ function createWorkView({callbacks}) {
       if(!root)return handled();
       const note=c?`게시된 절차 v${c.version} · 현재 진행 건의 저장 상태`:'게시된 절차 · 시작 전';
       const html=action==='work_summary'?workPanelNodeHTML(c,root,{definition:data,readOnly:true,history:true,site:c?.site || state.catalog.sites[browsingSite],system:browsingSystem}):Object.entries(c?.jobs || {}).filter(([,job])=>job.history?.length).map(([id,job])=>`<section class="ew-record-group"><h3>${esc(data.nodes[id]?.name || id)}</h3>${job.history.map(record=>`<p>${esc(record.at)} · ${record.kind==='human_confirmation'?'담당자 확인':record.kind==='execution_blocked'?'미수행 · 실행 연결 필요':record.kind==='simulation'||record.simulation?'모의 점검':'저장된 기록'} · ${esc(statuses[record.status] || record.status)} · ${esc(record.attempt)}차</p>`).join('')}</section>`).join('') || '<p>저장된 업무 기록이 없습니다.</p>';
-      workUI.dialog({title:action==='work_summary'?root.name:'업무 기록',html,note,readOnlyDetail:true,restoreFocus:panelFocusRestorer(buttonTarget)});
+      const context={scope:navigationScope(),runIds:[]};runtimeDetailContext=context;
+      workUI.dialog({title:action==='work_summary'?root.name:'업무 기록',html,note,readOnlyDetail:true,restoreFocus:panelFocusRestorer(buttonTarget)}).then(()=>{if(runtimeDetailContext===context)runtimeDetailContext=null;});
     }
     else if(action==='discard_job_edits'||action==='rebase_job_edits'){const context=editContext(buttonTarget.dataset.nodeId);if(context){if(action==='discard_job_edits')jobDrafts.discard(context.scope);else jobDrafts.rebase(context.scope,context.saved,context.revision);renderedEditContext=null;renderPanel();}}
     else return unhandled;

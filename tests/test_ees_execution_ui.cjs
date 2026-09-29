@@ -134,10 +134,10 @@ test('control targets the selected older run and refreshes stale or unreadable e
   assert.equal(sent.length,scenario==='older'?1:0,scenario);assert.equal(s.refreshes,1,scenario);if(sent.length){assert.equal(sent[0].run_id,'old');assert.equal(sent[0].expected_revision,3);}
  }
 });
-test('retry rereads the failed current state even at unchanged revision and isolates history reads',async()=>{
+test('retry rereads each failed case independently, including an initial historical lookup failure',async()=>{
  const launcher=fs.readFileSync(path.join(root,'branding/ees/ui/ees-work-launcher.js'),'utf8'),start=launcher.indexOf('  function retryExecutionRead() {'),end=launcher.indexOf('  async function refreshExecution()',start),fn=launcher.slice(start,end);
- for(const [runView,recordLookupError,historyCase,expected] of [['current',{message:'read failed'},null,'state'],['current',null,null,'execution'],['history',{message:'read failed'},{id:'old-case'},'history:old-case']]){
-  const called=[],context={runView,recordLookupError,historyCase,refresh:()=>called.push('state'),refreshExecution:()=>called.push('execution'),showHistory:id=>called.push('history:'+id)};vm.createContext(context);vm.runInContext(fn,context);await context.retryExecutionRead();assert.deepEqual(called,[expected]);
+ for(const [runView,recordLookupError,historyCase,historyLookupError,expected] of [['current',{message:'read failed'},null,null,'state'],['current',null,null,null,'execution'],['history',{message:'current read failed'},{id:'old-case'},null,'history:old-case'],['history',null,null,{caseId:'initially-failed-case'},'history:initially-failed-case']]){
+  const called=[],context={runView,recordLookupError,historyCase,historyLookupError,refresh:()=>called.push('state'),refreshExecution:()=>called.push('execution'),showHistory:id=>called.push('history:'+id)};vm.createContext(context);vm.runInContext(fn,context);await context.retryExecutionRead();assert.deepEqual(called,[expected]);assert.equal(context.recordLookupError,recordLookupError,'An unrelated successful lookup must not clear current failure');
  }
 });
 

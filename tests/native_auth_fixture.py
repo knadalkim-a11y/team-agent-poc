@@ -252,6 +252,16 @@ class NativeAuthFixture:
         return await self.request("POST", "/api/v1/auths/admin/config", token=admin_token, payload=settings)
 
     async def close_async(self):
+        # Native auth schedules last-active writes outside the request task.
+        # Drain this fixture's private loop before disposing its DB/closing it;
+        # otherwise a successful API assertion can leave a pending SQL task.
+        current = asyncio.current_task()
+        tasks = [task for task in asyncio.all_tasks() if task is not current]
+        if tasks:
+            _, pending = await asyncio.wait(tasks, timeout=2)
+            for task in pending:
+                task.cancel()
+            await asyncio.wait_for(asyncio.gather(*tasks, return_exceptions=True), timeout=2)
         if self.engine:
             await self.engine.dispose()
 

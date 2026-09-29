@@ -293,11 +293,13 @@ class CPhaseTwoNativeTests(unittest.TestCase):
         self.assertIsNone(self.read('#ees-work-inputs-save'))
         self.action_layout('human-confirmation')
         self.control('confirm', confirm=True)
+        self.wait("!document.querySelector('#ees-work-dialog')?.open && ['paused','succeeded'].includes(document.querySelector('[data-runtime-record]')?.dataset.runtimeRecord)")
         confirmed = self.run_state()
         self.assertEqual(confirmed['jobs']['new-documents-page-j']['status'], 'succeeded')
         self.assertEqual(len(self.bridge.calls), 1)
         self.assertEqual(self.model.calls, [])
         if confirmed['status'] != 'succeeded':
+            self.wait("!document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]') && document.querySelector('[data-runtime-action=resume]')?.disabled === false")
             self.control('resume')
             confirmed = self.drain()
         self.assertEqual(confirmed['status'], 'succeeded', confirmed)

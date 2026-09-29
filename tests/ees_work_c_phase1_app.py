@@ -2,9 +2,10 @@
 
 Run with the repository's one Python test environment plus the full-app
 dependencies required for startup. Both phases execute the official CLI and real temporary
-Native databases. Chrome uses the packaged frontend and real HTTP endpoints;
-there is no HTTP, authentication, or model stub. AP business results remain the
-product's declared legacy simulation. No live model/business API is configured.
+Native databases. Chrome uses the packaged frontend and real HTTP endpoints.
+Authentication is always real. Phase3 explicitly uses loopback synthetic
+external HTTP/model responses; other flags have no model/provider configured.
+AP business results remain the product's declared legacy simulation.
 
 Example: python tests/ees_work_c_phase1_app.py --wheel <candidate.whl>
   --baseline-wheel <official.whl> --chrome <chrome> --output <evidence-directory>
@@ -12,6 +13,9 @@ Only new temporary data is used. Reports and screenshots exclude auth tokens.
 Use --navigation-only for the completed-J return regression on the real app;
 the AP result is prepared through its existing simulation API, not revalidated.
 Use --phase2 for actual browser manual/default-input and P/T scope actions.
+Use --phase3 for the integrated Native gate. Only external HTTP/model responses
+come from a loopback synthetic provider; Native auth/chat, tools, ACL, approval,
+publication, execution and persistence remain the packaged product.
 """
 
 import argparse
@@ -40,6 +44,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--navigation-only', action='store_true')
     parser.add_argument('--phase2', action='store_true')
+    parser.add_argument('--phase3', action='store_true')
     args = parser.parse_args()
     ROOT = Path(__file__).resolve().parents[1]
     OUT = args.output.resolve()
@@ -66,6 +71,13 @@ def main():
         ENABLE_PIP_INSTALL_FRONTMATTER_REQUIREMENTS='false', ENABLE_OTEL='false',
         OPENAI_API_KEY='', OLLAMA_API_KEY='', OPENAI_API_BASE_URL='http://127.0.0.1:1/v1',
         OLLAMA_BASE_URL='http://127.0.0.1:1', WEBUI_ADMIN_EMAIL='', WEBUI_ADMIN_PASSWORD='')
+    provider = None
+    if args.phase3:
+        from ees_work_c_phase3_fullapp import SyntheticProvider
+        provider = SyntheticProvider()
+        environment.update(ENABLE_OPENAI_API='true', OPENAI_API_BASE_URL=provider.base + '/v1',
+                           OPENAI_API_BASE_URLS=provider.base + '/v1', OPENAI_API_KEY='synthetic-local-only',
+                           OPENAI_API_KEYS='synthetic-local-only', ENABLE_VALVE_ENCRYPTION='true')
     (work/'data').mkdir(mode=0o700)
 
     def unpack(wheel, name):
@@ -113,7 +125,8 @@ def main():
 
     report['programs'] = {label: {'file': path.name, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
                           for label, path in [('candidate', args.wheel), *([('baseline', args.baseline_wheel)] if args.baseline_wheel else [])]}
-    report['startup'] = 'Official Open WebUI CLI, one Python environment, new temporary DATA_DIR, model/provider access disabled'
+    report['startup'] = ('Official Open WebUI CLI, one Python environment, new temporary DATA_DIR, '
+                         + ('loopback synthetic external HTTP/OpenAI responses' if args.phase3 else 'model/provider access disabled'))
     with (OUT/'baseline-server.log').open('w', encoding='utf-8') as baseline_log:
         server = launch(baseline, baseline_log)
         try:
@@ -472,6 +485,23 @@ def main():
             browser.call('Emulation.setDeviceMetricsOverride', {'width': 1366, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
             wait('document.querySelector("#ees-work-panel")?.getClientRects().length > 0')
             shot('j-1366')
+            if args.phase3:
+                from ees_work_c_phase3_fullapp import integrated_gate
+
+                def restart(target=program, abrupt=False):
+                    nonlocal server
+                    if abrupt:
+                        server.kill()
+                        server.wait(timeout=5)
+                    else:
+                        stop(server)
+                    server = launch(target, log)
+                    ready(client, server)
+
+                integrated_gate(root=ROOT, out=OUT, work=work, client=client, headers=headers,
+                    browser=browser, base=BASE, chat_id=chat_id, session=session, provider=provider,
+                    click=click, wait=wait, shot=shot, record=record, restart=restart,
+                    navigation_check=navigation_check, baseline=baseline, candidate=program)
             errors = [{'url': e['params']['response']['url'], 'status': e['params']['response']['status']} for e in browser.events if e.get('method') == 'Network.responseReceived' and e['params']['response']['status'] >= 400]
             record('Browser API responses', errors=errors)
             assert not errors, errors
@@ -490,6 +520,9 @@ def main():
             browser.close()
         stop(server)
         log.close()
+        if provider:
+            report['synthetic_provider'] = provider.evidence()
+            provider.close()
         (OUT / (LABEL + '-result.json')).write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
 
         temporary.cleanup()

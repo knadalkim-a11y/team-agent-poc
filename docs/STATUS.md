@@ -6,12 +6,12 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** [같은 Draft PR #66](https://github.com/knadalkim-a11y/team-agent-poc/pull/66)의 [C안 2단계 검토 보완](mockups/ees-work/TASK.md#c-design-phase2-review-20260929) 두 건을 구현·검증했다. 시작 원격/로컬 head `a9fdeae9c626138ad2b384bc52e1f64eb116bdb8`와 깨끗한 checkout을 재확인했으며 1단계·완료 복귀·2단계 구현을 보존한다. 최신 main은 #65 병합본 `e995fe16e4835f2d1799c95f3d6d1b74ce381389`이며 Draft #53·별도 Windows 작업은 혼합하지 않는다.
-- **이번 범위:** 과거 Native 실행에 실제 대상·저장 당시 정의·읽기 전용 맥락을 연결한다. 같은 진행 건의 활성 Native 실행 중 legacy 초안 반영은 버튼/키보드·폼·controller에서 서버와 같은 조건으로 차단하고 작성 글을 보존한다. 종료 뒤에도 기존 실행 조건이 맞을 때만 반영하며 새 실행기·저장 형식이나 서버 차단 완화는 없다.
-- **검증 상태:** [후속 평가](../evals/scenarios.md#c-design-phase2-review-20260929)에 최초 제품 실패·시험 fixture 오류·동일 조건 재검을 구분했다. 실제 **더 보기 → 실행 이력 → 과거 진행 건**과 Native 5상태의 초안 입력/제출, 현재 입력/snapshot·조회 실패 회귀를 포함해 제품 브라우저 고유 13건 PASS다. 서비스 5·Node 25·panel 44·controller 21·완료 복귀 3건 PASS를 연결한다. Figma 읽기와 제품 검증, 현재 worker의 판정 미기록 실패와 저장된 실패 판정 호환 fixture는 별개다. 이전 [2단계 평가](../evals/scenarios.md#c-design-phase2-20260929)의 유효한 광역 결과는 반복 합산하지 않는다.
+- **현재 작업:** [같은 Draft PR #66](https://github.com/knadalkim-a11y/team-agent-poc/pull/66)의 [C안 3차 개발환경 검수](mockups/ees-work/TASK.md#c-design-phase3-20260929)를 통과했다. 시작 원격/로컬 `7d9f2caaa7ef39522fd5fa3f69af732e5fcebeeb`·깨끗한 checkout 및 두 AGENTS/STATUS를 확인했고 1·2단계와 완료 복귀/과거 판정/초안 차단 보완을 보존했다. 최신 main은 #65 병합본 `e995fe16e4835f2d1799c95f3d6d1b74ce381389`이며 Draft #53·별도 Windows 작업은 혼합하지 않았다.
+- **이번 수정:** legacy 검토 자료가 조회 실패 뒤 열린 상세와 본문에 남는 결함을 재현·수정했다. 실패한 현재/과거 자료를 즉시 숨기고, 성공한 재조회 뒤 기록과 작성 중인 글을 복원한다. 과거 조회 대상·늦은 응답을 분리하며 서버 저장/인가/실행 계약은 변경하지 않는다.
+- **검증 상태:** [3차 평가](../evals/scenarios.md#c-design-phase3-20260929)에 최초 실패·준비 오류·최종 재검을 구분했다. 동일 최종 wheel에서 제품 브라우저 fixture41, 서비스/실제 Native API45, 실제 계정 브라우저1, Node25·panel44·controller21 PASS. 공식 CLI 전체 앱도 실제 Native 인증·대화 API/재표시·P 게시·EES/임시 DB로 필수 경로와 프로그램 Restore/재적용·강제 재기동 UNKNOWN을 통과했다. 외부 HTTP/모델 응답은 합성이다. Native composer 보내기 클릭은 미실행이며 실제 completion·대화 저장 API와 구분한다. Figma 시각 검토를 제품 시험으로 합산하지 않았다.
 - **보존·버전:** #65의 Native 공통 실행·영속 runtime, 시스템 담당자·P별 게시, Native 대화/Workspace·회원/그룹·사용자 자산·저장/권한을 유지한다. ees.12·Pack0.2.14와 실행 계약은 그대로며 프로그램 Restore와 DB/자산 복원은 별개다.
 - **사내 상태:** 새 사내 설치 결과는 수신하지 않았다. 기존 #59/#60 적용 보고를 유지하고 이번 합성 환경의 제품 검사를 사내 실사용 수락으로 바꾸지 않는다. Windows·사내 API/모델·OP-01~04는 미확인이다. 병합·배포·실제 계정/도구 등록은 수행하지 않는다.
-- **다음 작업 하나:** 두 보완의 제품 화면·저장 JSON·실패 후 재검을 검토하고 3단계 통합 회귀·최종 수락에 대한 별도 지시를 기다린다. 같은 Draft PR #66을 유지한다.
+- **다음 작업 하나:** 3차 개발환경 검수 증거와 제품 차이를 사용자에게 검토받는다. 같은 Draft PR #66을 유지하며 병합·배포·Draft 해제·사내/Windows·실 API/모델·실제 사용자 수락은 별도 지시/결과가 필요하다.
 
 ## 2026년 9월 개발·검사 방침
 
@@ -61,7 +61,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | #65 병합·배포 준비와 C안 1·2단계 구현/검증 보존, [PR #66 2단계 검토 보완](mockups/ees-work/TASK.md#c-design-phase2-review-20260929) | 3단계 통합 회귀·최종 수락/PR 마무리는 별도 지시. 사내/Windows·OP·공동 진행/일정 미실행 |
+| 4. 관리자 워크플로 | #65 병합·C안 1·2단계/보완 보존, [PR #66 3차 개발환경 검수 통과](mockups/ees-work/TASK.md#c-design-phase3-20260929) | Draft 유지. 병합/배포는 별도 지시; 사내/Windows·실 API/모델·사용자 수락·OP·공동 진행/일정 미실행 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -71,7 +71,7 @@
 
 ## 재개와 환경 유지
 
-- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work의 현재 표현 변경은 [09-29 C안 2단계](mockups/ees-work/TASK.md#c-design-phase2-20260929)와 [검토 보완](mockups/ees-work/TASK.md#c-design-phase2-review-20260929)을 따른다. 완료된 1단계·완료 복귀·2단계 검사를 미완료로 보아 반복하지 않는다. [09-23 A안](mockups/ees-work/TASK.md#a-design-20260923)·Figma 478:131/498:363은 기존 구현 근거로 보존하고 [09-22 단계별 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922)·[확정 왼쪽](mockups/ees-work/TASK.md#sidebar-final-20260922)·[오른쪽 기록 계약](mockups/ees-work/TASK.md#right-panel-20260922)을 보존합니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
+- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work의 현재 표현은 [09-29 C안 2단계](mockups/ees-work/TASK.md#c-design-phase2-20260929)와 [검토 보완](mockups/ees-work/TASK.md#c-design-phase2-review-20260929)을 보존하고 [3차 개발환경 검수](mockups/ees-work/TASK.md#c-design-phase3-20260929)를 완료했다. 완료된 1·2단계·보완·3차 검사를 미완료로 보아 반복하지 않는다. [09-23 A안](mockups/ees-work/TASK.md#a-design-20260923)·Figma 478:131/498:363은 기존 구현 근거로 보존하고 [09-22 단계별 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922)·[확정 왼쪽](mockups/ees-work/TASK.md#sidebar-final-20260922)·[오른쪽 기록 계약](mockups/ees-work/TASK.md#right-panel-20260922)을 보존합니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
@@ -79,4 +79,4 @@
 
 ## 최근 점검
 
-2026-09-29 PR #66 head `a9fdeae9`·main `e995fe16`·Draft #53·로컬/AGENTS/STATUS를 다시 확인했다. 과거 Native 판정의 대상 누락과 Native 활성 중 legacy 초안 반영 경로를 실제 제품에서 재현해 수정했다. 최종 제품 브라우저 고유 13건, 기존 완료 복귀 3건과 관련 서비스/화면 검사를 통과했으며 실패·준비 오류·재검·합성 경계를 [후속 평가](../evals/scenarios.md#c-design-phase2-review-20260929)에 남겼다. C안 1·2단계를 미완료로 오인하던 실행 계획/재개/최근 점검의 과거 표현도 맞췄다. 3단계·병합·배포·새 사내 검증은 수행하지 않았다.
+2026-09-29 PR #66 head `7d9f2caa`·main `e995fe16`와 로컬/AGENTS/STATUS를 확인하고 3차 통합 회귀를 수행했다. 조회 실패 때 남던 legacy 자료를 숨기고 성공 재조회 복원을 같은 조건에서 확인했다. 최종 wheel SHA256 `d35bc2bb4adc789cc93752b49550a47446461f1e54ba0015a3952e6af78ca254`의 포함 자산23개/원본 바이트가 일치한다. 실제 Native 전체 앱과 fixture/서비스를 구분한 최종 PASS, 초기 오류·재사용·미실행은 [3차 평가](../evals/scenarios.md#c-design-phase3-20260929)에 있다. 검토용 PNG/JSON/로그 ZIP은 프로그램 배포물과 별개다. 병합·배포·Draft 해제·새 사내 검증은 하지 않았다.

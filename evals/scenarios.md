@@ -12,6 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| C안 3단계 통합 검수 | [실제 Native 앱·통합 회귀·보존·최종 판정](#c-design-phase3-20260929) |
 | C안 기존 유형·P/T·예외 2단계 | [대응표·실제 Native/제품·권한/기록·실패와 재검](#c-design-phase2-20260929), [과거 판정·초안 반영 보완](#c-design-phase2-review-20260929) |
 | C안 공통 외형과 대표 J 1단계 | [C안 실조회·대표 AP 저장/실패/재시도·#65 보존과 미실행](#c-design-phase1-20260928) |
 | 공통 Native 도구와 P/T 지속 실행 | [TR-01~24·두 읽기 사례·실제 Native/합성 경계·재시작·미실행](#shared-native-runtime-20260925) |
@@ -50,6 +51,42 @@
 | EES Work 목업 포털 통합 | [ees.5 구현·검사·사내 배포 구분](#ees-work-demo-integration-20260914) |
 | EES Work 통합 목업 원본 | [레포 경로 인계·원본 일치·미배포 구분](#ees-work-mockup-reference-20260914) |
 | 문서·브랜치 정리 | [2026-09-11 점검·처리·남은 범위](#repository-maintenance-20260911) |
+
+<a id="c-design-phase3-20260929"></a>
+
+## C안 통합 회귀·개발환경 검수 · 2026-09-29
+
+**원본·범위:** 같은 Draft #66의 원격/로컬 `7d9f2caaa7ef39522fd5fa3f69af732e5fcebeeb`와 main `e995fe16e4835f2d1799c95f3d6d1b74ce381389`, 두 AGENTS/STATUS·깨끗한 checkout을 재확인했다. main의 과거 #65 병합 대기는 반복하지 않았다. [필수 경로·합격/중단 조건](../docs/mockups/ees-work/TASK.md#c-design-phase3-20260929)을 먼저 정했다. 1·2단계/세 보완과 #65를 보존하고 아래 조회 실패 보호만 수정한다. CSS·backend·인증/저장/실행기·버전 ees.12/Pack0.2.14는 그대로다. #53·Windows 작업·실계정/운영 DB는 건드리지 않는다.
+
+**환경·경계:** 기존 단일 `.venv` Python3.11.16/187개 의존성, Node24.19.0, Chrome153.0.8010.52, 공식 Open WebUI0.11.3 wheel(`8436f9bb…fa547`)을 재사용했다. 실제 CLI 앱은 실제 Native 가입/로그인/대화·Tool/Valves/승인·모델 adapter·P 게시·EES HTTP·임시 SQLite를 사용한다. 이 앱의 외부 HTTP/OpenAI 응답만 loopback 합성이다. 별도 브라우저 fixture는 실제 패키지 frontend/EES 서비스/임시 DB이며 Native 인증/채팅·외부 전송이 합성이다. 실제 Native 계정 전환 브라우저와 실제 Users/Groups/ACL/자산 검사는 따로 집계한다.
+
+**Figma·제품 차이:** 00:52~00:55 UTC(09:52~09:55 KST)에 지정 파일/페이지의 비교603:963과 J6/P1/T2, 총10개 context/렌더 및 원본1920×1080 PNG4개를 읽었다. 원본 쓰기 없음. 동일1920 제품을 직접 대조하고 1536×960/1366×768·긴/좁은/다크는 반응형 행동으로 확인한다(해당 크기·다크 Figma 원본은 없음). 제목30/42·결과22/34·여백32/24·선택 표현·단일 행동·독립 스크롤을 기준으로 한다. Native 계획 dialog, 기본값 실행 허용, 현재 입력/호출 snapshot, 여섯 예시 밖 실제 대기/부분/UNKNOWN 등은 의도된 차이다. 고정 집계·4초 타이머·가짜 결과를 넣지 않았다. Figma asset host 과거 차단은 반복하지 않고 지원 inline 렌더를 사용했다. SVG 원본 전체 바이트 대조는 미실행이며 아래 패키지 자산 바이트 검사와 다르다. 개발자 자체 사용성 검토를 사내 사용자 수락으로 표시하지 않는다.
+
+### 결함과 시험 준비 오류
+
+- **제품 재현:** baseline 실제 legacy 초안 저장→검토 자료 열기→조회 실패에서 오류 안내 뒤 dialog_open/자료 잔존/본문 자료 잔존이 모두 true였다. 현재/과거의 실패한 조회는 공통 본문을 숨기고 모든 보조 자료 창의 복사 내용을 즉시 비운다. 미저장 글은 기존 draft map에 남겨 성공 재조회 뒤 복원하며 저장 DB는 바꾸지 않는다. 과거 건 ID도 창의 대상에 포함하고 최초 과거 조회 실패의 재조회 대상을 보존한다.
+- **중간 제품 회귀:** v2의 controller65 중64PASS/1FAIL은 current 실패를 별도 성공한 historical 조회에도 적용한 과도한 guard였다. 각 건의 조회 성공은 독립적으로 인정하되 실패 당시 열린 과거 자료는 그 건을 다시 읽기 전까지 숨기는 조건으로 좁혔다. 같은 단독 검사 및 v3 controller21/panel44 전체 PASS로 닫았다.
+- **준비 오류:** 첫 privacy 모듈이 import된 suite까지25개를 실행한 선택 오류, 과거 진행 chat 재사용/펼침·비동기 대기 오류를 분리했다. v2 브라우저41은36PASS/고유5FAIL(서브검사 포함6실패): 접힌 상세 미열기, 사람 확인 busy 전 재개, 이미 열린 메뉴 toggle, 숨긴 본문 버튼을 찾는 옛 기대, 과거 내부 이력 미펼침이었다. 실제 클릭·대기·재조회 경로를 수정하고 같은 조건으로 재검한다. 강제 DOM 열기/JS 클릭으로 우회하지 않았다.
+- **전체 앱 준비:** Valves timeout 상한, 이미 연결된 chat 재사용, Native release note 설정, 게시 id_map, 선택 완료 전 클릭을 시험에서 수정했다. 실제 worker의 `encryption_required`는 임시 환경의 Native 암호화 flag 누락을 정상 차단한 결과다. 기존 임시 WEBUI_SECRET_KEY와 ENABLE_VALVE_ENCRYPTION을 사용하며 서버 보호를 완화하지 않는다. Native 계정 fixture의 import 준비 오류와 teardown 잔여 task 경고도 별도 로그로 남긴다. 실패/중간 버전을 최종 PASS에 합산하지 않는다.
+
+### 최종 유효 판정
+
+**3차 개발환경 검수 통과.** 최종 동일 제품 wheel SHA256 `d35bc2bb4adc789cc93752b49550a47446461f1e54ba0015a3952e6af78ca254`, 포함 자산23개와 원본 바이트 일치/불일치0. 최종 code freeze145개를 보존했다. 후반 변경은 전체 앱 시험 준비와 fixture 종료 정리뿐이며 영향 검사만 재실행했다.
+
+| 최종 근거 | 판정 |
+|---|---|
+| 실제 CLI/Native 앱 | PASS, 26개 기록 지점(단위시험26건 아님). 가입/승인·두 사용자·실제 대화 API/2메시지 저장/브라우저 재표시, legacy 저장/복원/실패/재시도, Native 고정3호출·AI1·후보 입력/명시 재개·사람 확인/재기동·이력/복귀 |
+| 제품 브라우저 fixture | 41/41 PASS, skip0, 125.040초. 완료 CTA inline/dock·T 목록/초점/T→P·직접 진입/재열기, 과거 판정, 활성5상태 초안 차단, 두 탭 충돌/늦은 응답, 크기3종·긴/좁은/다크·키보드 |
+| 서비스/실제 Native API·자산 | 45 PASS + 실제 Native 계정 전환 브라우저1 PASS. 권한 회수/게시 충돌·snapshot·사용자 자산/키 보존·UNKNOWN. teardown 수정 영향3+1 재검도 PASS, 잔여 task 진단0 |
+| 화면/controller | Node25·panel44·controller21 PASS. 문서·구문·UTF-8·diff 검사 PASS |
+
+전체 앱의 P는 호출 성공/4개 J 완료여도 저장 `scope_complete=false/source_scope_limited`라 과거 화면의 전체 기준 미충족을 유지한다. 실제 worker 실패는 final_validation 미기록→미판정, 사람 J는 저장 succeeded→화면 통과다. 이는 호환 실패판정 fixture와 별개다. 실제 완료 버튼·과거 메뉴·초안 차단을 다시 조작했다. 강제 종료 후 같은 run/call UNKNOWN·외부 호출1회 유지/자동 재실행0을 확인했다. 직전 패키지 Restore/재적용 뒤 Native 응답8개·대화2메시지·개인 Valves/키·실행이 같았다.
+
+준비 오류의 추가 원인은 부분 범위를 전체 통과로 기대한 시험, 최초 관리자 생성 후 가입 비활성 설정, 타인 case의 기존 `400/case_not_found`를403으로 기대한 시험이었다. 임시 가입 설정은 검사 뒤 원복했고 타인 chat401/case400에서 자료가 없음을 확인했다. 최종 완주본만 집계하며 초기9회 중단 기록은 첨부 JSON에 보존한다. 실제 Native composer 보내기 버튼은 미실행(실제 completion·chat 저장 API와 브라우저 표시/재접속 검증), fixture 채팅 클릭과 구분한다.
+
+**보존·재사용:** 기존 ees.10/11 wheel이 이 작업 위치에 없어 과거 버전 writer/물리 Restore를 새로 실행한 것으로 표시하지 않는다. 해당 backend/builder는 불변이므로 [#65의 TR21 및 물리 Apply/Restore 3건](#shared-native-runtime-20260925)과 [SA25 legacy fallback](#system-authoring-20260924)을 당시 버전의 유효 근거로 재사용한다. Native protocol에 구형 writer를 허용한다는 뜻이 아니다. 이번 실제 앱의 직전7d9f 패키지↔최종 패키지 교체는 같은 임시 DB/키/자산의 프로그램 호환 검사이며 DB rollback이 아니다.
+
+**미실행·제외:** Windows·사내 설치/실서버·실 API/모델 품질·OP-01~04·비개발자 실제 사용자 수락은 미실행이다. 병합·배포·Draft 해제는 승인 범위 밖이며 하지 않는다. 09-30까지 지침대로 커밋은 `[skip ci]`, 원격 dispatch/재실행 없음. 검토용 PNG·핵심 JSON/로그·증거 ZIP은 Work 결과에 첨부하고 프로그램 wheel과 구분한다.
 
 <a id="c-design-phase2-20260929"></a>
 

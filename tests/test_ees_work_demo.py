@@ -1287,12 +1287,14 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                     if not self.read('.ew-panel-menu', 'open'):
                         self.click('.ew-panel-menu > summary')
                     self.click('#ees-work-run-view [data-action="current_view"]')
-                    self.click('[data-action="work_detail"][data-detail-tab="output"]')
-                    self.assertEqual(self.read('[data-record-state]', 'dataset.recordState'), expected,
-                                     'Changing display tabs cannot restore evidence after a failed read')
+                    self.assertIsNone(self.read('[data-action="work_detail"][data-detail-tab="output"]'),
+                                      'Changing display tabs cannot restore the failed case evidence')
+                    self.assertIsNotNone(self.read('[data-action="execution_refresh"]'))
                     self.assertIsNone(self.read('[data-call-output]'))
                     self.screenshot('ees-right-record-' + expected)
-                self.browser.evaluate("window.dispatchEvent(new CustomEvent('ees-work-changed',{detail:{chat_id:'existing-chat'}}))")
+                self.click('[data-action="execution_refresh"]')
+                self.wait("!!document.querySelector('[data-action=work_detail][data-detail-tab=output]')")
+                self.click('[data-action="work_detail"][data-detail-tab="output"]')
                 self.wait("!!document.querySelector('#ees-work-dialog [data-call-output]')")
         self.assertEqual(self.current()['case']['jobs'], before['jobs'])
 
@@ -2658,7 +2660,11 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.choose("db-j")
         self.wait("document.querySelector('[data-runtime-record]')?.dataset.runtimeRecord === 'succeeded'")
         self.assertIn("Windows 설치 완료를 의미하지 않습니다", self.text("#ees-work-content"))
-        self.assertIn("실제 호출·반환 기록 1건", self.text("#ees-work-content"))
+        self.click('.ew-work-runtime-detail > summary[data-work-overlay]')
+        self.wait("document.querySelector('#ees-work-dialog')?.open")
+        self.assertIn("실제 호출·반환 기록 1건", self.text("#ees-work-dialog"))
+        self.assertIn('합성 설치 문서', self.text('#ees-work-dialog'))
+        self.key('Escape', 27)
         self.assertNotIn("모의 점검 실행", self.text("#ees-work-content"))
         self.screenshot("runtime-native-panel-return")
 
