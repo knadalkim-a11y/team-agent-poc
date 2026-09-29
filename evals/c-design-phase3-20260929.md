@@ -131,6 +131,16 @@ C11 렌더에 사용한 wheel은 `open_webui-0.11.3+ees.12-py3-none-any.whl`, **
 
 전체 시각 일치와 사용자 수락은 **미완료**다. 측정한 영역의 일치·관련 기능 PASS·스크린샷 생성 성공을 전체 수락으로 확대하지 않는다. 원본 없는 작은 화면/다크·추가 상태는 C 규칙의 확장으로 구분한다. 최종 원본 PNG·원본 전체/앱 영역 나란히·50%겹침·요소 좌표/computed style·항목별 판정과 핵심 로그를 첨부 증거로 제공하며 증거 ZIP은 설치 프로그램이 아니다.
 
+### 사용자 승인 뒤 #67 병합·사내 시험 적용 준비 · 2026-09-29
+
+사용자가 사내 적용 뒤 직접 확인하겠다고 요청했다. 기존 TrialCommit은 canonical clean main·HEAD·origin/main 일치를 요구하고 수동 Apply도 main 반영 뒤 사용하는 절차이므로, 앞서 별도 승인으로 둔 Draft 해제·병합을 확인했다. 사용자의 명시적 승인 뒤 최신 #67 head `9d7f3fc67a6a20eb4d3f10647afaf4ddea13afdf`와 main `8027aaf2e654778f052a966e5a49feed0fc54f69`를 재조회했다. 충돌 없음·리뷰/댓글 없음, main protected=false, head check/Actions run0을 확인했다. 09-30까지 원격 CI 생략은 PASS가 아니며 모든 후속 커밋/병합 메시지에도 `[skip ci]`를 사용한다.
+
+최신 C12 wheel `c5687ca97f0cd041c14b932fdb6110cb99a353de0effade52608ec0546337dc8`/152,031,411 bytes와 동결 원본88개를 현재 Git blob과 다시 대조해 불일치0이었다. 이 후속은 승인·적용 안내 기록만 바꾸며 제품 코드는 변경하지 않는다. 병합 tree의 제품 원본이 같은지 확인한 뒤 기존 기능/시각 근거와 wheel을 재사용한다. 최종 깨끗한 병합 원본에서 기존 묶음 빌더로 ZIP의 `source_commit`·`source_dirty=false`·전체 파일 hash를 확인하며 실제 merged/main SHA와 준비 결과는 [같은 PR #67의 병합/배포 준비 기록](https://github.com/knadalkim-a11y/team-agent-poc/pull/67)에 연결한다.
+
+회사 PC에서는 검증한 최종 main SHA의 기존 Update → Upgrade -TrialCommit 한 블록을 사용한다. 준비 검사 뒤 Stop → Backup → Apply → Start/최대120초 health → 같은 원본 ApplyDemo가 진행되며 별도 ZIP 다운로드·새 환경·자산 재등록·ApplyDemo 반복은 필요 없다. 앞 단계 실패 시 중단하고 `stage/code/next` 요약만 확인한다. 정상 적용 뒤 프로그램 Restore는 현재 DB·대화·업무 이력·사용자 자산의 되돌리기가 아니다. 상세 절차는 [기존 적용/복구 안내](../docs/03-openwebui-native-agent.md#c-design-trial-20260929)를 재사용하되 #66의 과거 SHA 대신 #67의 실제 병합 SHA를 쓴다.
+
+이번 승인은 전체 시각 일치 PASS나 사내 적용 성공을 뜻하지 않는다. J 입력 전/완료, P/T 목록/검색, 상세/닫기와 실제 Native 보내기·기존 대화/저장/이력을 사용자가 확인하고 마지막 적용 요약과 정상/문제 1~2줄만 전달한다. 사내 화면·파일 반출은 요구하지 않으며 Windows·실제 모델/API·사내 적용·시각 수락은 결과 수신 전까지 미실행/미완료다. 기존 실패와 미수락 차이는 위 기록 그대로 유지한다.
+
 <a id="c-design-phase3-20260929"></a>
 
 ## C안 통합 회귀·개발환경 검수 · 2026-09-29
