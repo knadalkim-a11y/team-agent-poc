@@ -1,0 +1,211 @@
+{
+  "scope": "Post-review affected source suites only; not full re-run and no Native/browser/official-wheel validation",
+  "head": "b0515d594da36112919a14c814a95e2b5900035e",
+  "start_utc": "2026-09-30T07:18:15Z",
+  "end_utc": "2026-09-30T07:19:36.437268+00:00",
+  "python": "3.12.14",
+  "node": "24.19.0",
+  "affected_batch_counts": {
+    "run": 239,
+    "pass": 234,
+    "skip": 5,
+    "fail": 0
+  },
+  "affected_suites": [
+    {
+      "suite": "test_ees_work_panel",
+      "run": 47,
+      "pass": 47,
+      "skip": 0,
+      "fail": 0
+    },
+    {
+      "suite": "test_ees_work_v4",
+      "run": 7,
+      "pass": 7,
+      "skip": 0,
+      "fail": 0
+    },
+    {
+      "suite": "test_ees_work_controller",
+      "run": 27,
+      "pass": 27,
+      "skip": 0,
+      "fail": 0
+    },
+    {
+      "suite": "test_ees_workflow",
+      "run": 54,
+      "pass": 53,
+      "skip": 1,
+      "fail": 0
+    },
+    {
+      "suite": "test_ees_workflow_execution",
+      "run": 37,
+      "pass": 35,
+      "skip": 2,
+      "fail": 0
+    },
+    {
+      "suite": "test_ees_workflow_tool",
+      "run": 39,
+      "pass": 39,
+      "skip": 0,
+      "fail": 0
+    },
+    {
+      "suite": "test_ees_branding_build",
+      "run": 28,
+      "pass": 26,
+      "skip": 2,
+      "fail": 0
+    }
+  ],
+  "node_affected": {
+    "execution_ui": {
+      "run": 25,
+      "pass": 25
+    },
+    "v4_drafts": {
+      "run": 10,
+      "pass": 10
+    }
+  },
+  "base": {
+    "run": 303,
+    "pass": 290,
+    "skip": 13
+  },
+  "latest_unique_count_by_suite_replacement": {
+    "run": 316,
+    "pass": 303,
+    "skip": 13,
+    "fail": 0
+  },
+  "latest_unique_suites": [
+    {
+      "suite": "test_ees_work_panel",
+      "run": 47,
+      "pass": 47,
+      "skip": 0,
+      "fail": 0
+    },
+    {
+      "suite": "test_ees_work_v4",
+      "run": 7,
+      "pass": 7,
+      "skip": 0,
+      "fail": 0
+    },
+    {
+      "suite": "test_ees_work_controller",
+      "run": 27,
+      "pass": 27,
+      "skip": 0,
+      "fail": 0
+    },
+    {
+      "suite": "test_ees_workflow",
+      "run": 54,
+      "pass": 53,
+      "skip": 1,
+      "fail": 0
+    },
+    {
+      "suite": "test_ees_workflow_execution",
+      "run": 37,
+      "pass": 35,
+      "skip": 2,
+      "fail": 0
+    },
+    {
+      "suite": "test_ees_workflow_contract",
+      "run": 17,
+      "pass": 17,
+      "skip": 0,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_workflow_tool",
+      "run": 39,
+      "pass": 39,
+      "skip": 0,
+      "fail": 0
+    },
+    {
+      "suite": "test_ees_execution_tool",
+      "run": 8,
+      "pass": 8,
+      "skip": 0,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_work_designer",
+      "run": 1,
+      "pass": 1,
+      "skip": 0,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_work_authoring",
+      "run": 28,
+      "pass": 22,
+      "skip": 6,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_workflow_model",
+      "run": 12,
+      "pass": 10,
+      "skip": 2,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_work_routes",
+      "run": 3,
+      "pass": 3,
+      "skip": 0,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_branding_build",
+      "run": 28,
+      "pass": 26,
+      "skip": 2,
+      "fail": 0
+    },
+    {
+      "suite": "test_demo_bundle",
+      "run": 8,
+      "pass": 8,
+      "skip": 0,
+      "returncode": 0
+    }
+  ],
+  "latest_node_by_suite_replacement": {
+    "test_pass": 71,
+    "test_fail": 0,
+    "cooperation_pass_groups": 14
+  },
+  "last_guard_correction": {
+    "file": "branding/ees/ui/ees-work-launcher.js",
+    "detail": "Final guard freeze notice arrived during batch. Start/end hash comparison shows launcher bytes were already identical; no source/test files changed during batch. Controller27 additionally rechecked after notice with source+assembled JS syntax PASS.",
+    "controller_result": [
+      "----------------------------------------------------------------------",
+      "Ran 27 tests in 1.748s",
+      "",
+      "OK"
+    ]
+  },
+  "changed_after_last_guard_retest": [],
+  "limitations": [
+    "No CPython3.11 executable",
+    "No pinned official wheel",
+    "No Chrome/Chromium executable",
+    "No Native/Figma rendered app comparison",
+    "No Windows/in-house model or deployment validation"
+  ],
+  "note": "Latest unique totals replace earlier affected suite rows. They are not a single full run and do not add repeated cases.",
+  "source_or_test_hash_changes_during_batch": {}
+}

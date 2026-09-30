@@ -1,0 +1,906 @@
+{
+  "date": "2026-09-30",
+  "kind": "source-only Figma context and PDF comparison",
+  "actual_native_browser_executed": false,
+  "visual_pass": false,
+  "sources": [
+    "Figma 747:559 high-fidelity context",
+    "Figma 751:612 high-fidelity context",
+    "Figma Button v4 746:647",
+    "EES Work UI 구현 인계서 v4.pdf pages 5-8"
+  ],
+  "corrections": [
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel #ees-work-parent .ew-work-path",
+      "before": {
+        "font-size": "12px",
+        "line-height": "18px"
+      },
+      "chosen": {
+        "font-size": "14px",
+        "line-height": "22px"
+      },
+      "figma_nodes": [
+        "751:686",
+        "749:587"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel #ees-work-parent :is(button,.ew-work-path span)",
+      "before": {
+        "font-size": "12px",
+        "line-height": "18px"
+      },
+      "chosen": {
+        "font-size": "14px",
+        "line-height": "22px"
+      },
+      "figma_nodes": [
+        "751:686",
+        "751:882"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel :is(#ees-work-authoring-open,#ees-work-close)",
+      "before": {
+        "font-size": "12px",
+        "line-height": "18px",
+        "color": "var(--ees-brand-text)"
+      },
+      "chosen": {
+        "font-size": "14px",
+        "line-height": "22px",
+        "color": "var(--ees-text-secondary)"
+      },
+      "figma_nodes": [
+        "749:598",
+        "751:891"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-list-title",
+      "before": {
+        "gap": "24px"
+      },
+      "chosen": {
+        "gap": "16px"
+      },
+      "figma_nodes": [
+        "768:670"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-progress",
+      "before": {
+        "gap": "12px"
+      },
+      "chosen": {
+        "gap": "10px"
+      },
+      "figma_nodes": [
+        "768:673"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-list-meta",
+      "before": {
+        "gap": "6px 12px",
+        "margin": "10px 0 20px",
+        "color": "var(--ees-text-tertiary)"
+      },
+      "chosen": {
+        "gap": "6px 10px",
+        "margin": "6px 0 20px",
+        "color": "var(--ees-text-secondary)"
+      },
+      "figma_nodes": [
+        "768:668",
+        "768:679"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-toolbar select",
+      "before": {
+        "font-size": "12px",
+        "line-height": "18px",
+        "padding": "5px 25px 5px 10px"
+      },
+      "chosen": {
+        "font-size": "14px",
+        "line-height": "22px",
+        "padding": "4px 25px 4px 10px"
+      },
+      "figma_nodes": [
+        "768:695",
+        "776:724"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-job-row td:last-child button",
+      "before": {
+        "font-size": "12px",
+        "line-height": "18px"
+      },
+      "chosen": {
+        "font-size": "14px",
+        "line-height": "22px"
+      },
+      "figma_nodes": [
+        "746:647"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-group-row button",
+      "before": {
+        "font-size": "12px",
+        "line-height": "16px"
+      },
+      "chosen": {
+        "font-size": "14px",
+        "line-height": "22px"
+      },
+      "figma_nodes": [
+        "776:749"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-detail-main > .ew-work-return",
+      "before": {
+        "font-size": "12px",
+        "line-height": "18px",
+        "color": "var(--ees-brand-text)",
+        "margin": "0 0 20px"
+      },
+      "chosen": {
+        "font-size": "14px",
+        "line-height": "22px",
+        "color": "var(--ees-text-secondary)",
+        "margin": "0 0 28px"
+      },
+      "figma_nodes": [
+        "751:899",
+        "751:894"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-detail-heading",
+      "before": {
+        "margin": "0 0 20px"
+      },
+      "chosen": {
+        "margin": "0 0 28px"
+      },
+      "figma_nodes": [
+        "751:894",
+        "751:900"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-job-meta",
+      "before": {
+        "gap": "8px",
+        "color": "var(--ees-text-tertiary)"
+      },
+      "chosen": {
+        "gap": "10px",
+        "color": "var(--ees-text-secondary)"
+      },
+      "figma_nodes": [
+        "751:908"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-id",
+      "before": {
+        "padding": "2px 6px"
+      },
+      "chosen": {
+        "padding": "1px 6px"
+      },
+      "figma_nodes": [
+        "768:7218"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-steps",
+      "before": {
+        "margin": "0 0 24px"
+      },
+      "chosen": {
+        "margin": "0 0 28px"
+      },
+      "figma_nodes": [
+        "751:894",
+        "751:914"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-steps > li > span",
+      "before": {
+        "font-size": "11px",
+        "font-family": "var(--ees-font-mono)",
+        "font-weight": "(unset)"
+      },
+      "chosen": {
+        "font-size": "12px",
+        "font-family": "var(--ees-font-sans)",
+        "font-weight": "500"
+      },
+      "figma_nodes": [
+        "751:917",
+        "751:923"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-work-form",
+      "before": {
+        "gap": "16px"
+      },
+      "chosen": {
+        "gap": "14px"
+      },
+      "figma_nodes": [
+        "751:931"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-work-form > .ew-section-heading",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "margin-bottom": "0"
+      },
+      "figma_nodes": [
+        "751:931",
+        "751:932"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-work-form .ew-input-field-name",
+      "before": {
+        "padding": "7px 0",
+        "font-weight": "(unset)"
+      },
+      "chosen": {
+        "padding": "8px 0",
+        "font-weight": "500"
+      },
+      "figma_nodes": [
+        "751:938"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-ai-note",
+      "before": {
+        "gap": "6px"
+      },
+      "chosen": {
+        "gap": "8px"
+      },
+      "figma_nodes": [
+        "751:949"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-ai-note button",
+      "before": {
+        "min-height": "0",
+        "padding": "0",
+        "font-size": "12px",
+        "line-height": "18px"
+      },
+      "chosen": {
+        "min-height": "34px",
+        "padding": "5px 6px",
+        "font-size": "14px",
+        "line-height": "22px"
+      },
+      "figma_nodes": [
+        "746:647"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-ai-label",
+      "before": {
+        "font-size": "11px",
+        "font-weight": "(unset)"
+      },
+      "chosen": {
+        "font-size": "12px",
+        "font-weight": "500"
+      },
+      "figma_nodes": [
+        "751:951"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-info",
+      "before": {
+        "padding": "24px 20px"
+      },
+      "chosen": {
+        "padding": "20px"
+      },
+      "figma_nodes": [
+        "751:998"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-info > h3",
+      "before": {
+        "margin": "0 0 16px"
+      },
+      "chosen": {
+        "margin": "0 0 14px"
+      },
+      "figma_nodes": [
+        "751:998",
+        "751:999"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-info dl > div",
+      "before": {
+        "padding": "0 0 20px",
+        "align-items": "(unset)"
+      },
+      "chosen": {
+        "padding": "0 0 14px",
+        "align-items": "center"
+      },
+      "figma_nodes": [
+        "751:998",
+        "751:1004"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-info dd",
+      "before": {
+        "font-size": "(unset)",
+        "line-height": "(unset)"
+      },
+      "chosen": {
+        "font-size": "14px",
+        "line-height": "22px"
+      },
+      "figma_nodes": [
+        "751:1003",
+        "751:1008",
+        "751:1011",
+        "751:1020"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-info dl > div:nth-child(2) dd",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "font-size": "12px",
+        "line-height": "18px"
+      },
+      "figma_nodes": [
+        "776:7175"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-info dl > div:nth-child(6)",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "align-items": "start"
+      },
+      "figma_nodes": [
+        "776:7179"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-info .ew-v4-status",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "font-size": "14px",
+        "line-height": "22px"
+      },
+      "figma_nodes": [
+        "751:1003"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-info details",
+      "before": {
+        "margin-top": "4px",
+        "padding-top": "16px"
+      },
+      "chosen": {
+        "margin-top": "0",
+        "padding-top": "14px"
+      },
+      "figma_nodes": [
+        "751:998",
+        "751:1023",
+        "751:1024"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-info summary",
+      "before": {
+        "font-size": "12px",
+        "line-height": "18px",
+        "color": "var(--ees-text-tertiary)"
+      },
+      "chosen": {
+        "font-size": "14px",
+        "line-height": "22px",
+        "color": "var(--ees-text-secondary)"
+      },
+      "figma_nodes": [
+        "751:1027"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-info summary > span",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "font-size": "12px",
+        "line-height": "18px",
+        "color": "var(--ees-text-tertiary)"
+      },
+      "figma_nodes": [
+        "751:1029"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel #ees-work-action-dock",
+      "before": {
+        "padding": "14px 40px 14px 32px"
+      },
+      "chosen": {
+        "padding": "12px 40px 12px 32px"
+      },
+      "figma_nodes": [
+        "751:990"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-work-action-region .ew-work-actions",
+      "before": {
+        "gap": "8px"
+      },
+      "chosen": {
+        "gap": "10px"
+      },
+      "figma_nodes": [
+        "751:990"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-detail-heading .ew-v4-status",
+      "before": {
+        "gap": "(unset)",
+        "padding": "3px 6px"
+      },
+      "chosen": {
+        "gap": "6px",
+        "padding": "2px 8px 2px 6px"
+      },
+      "figma_nodes": [
+        "751:903"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-detail-heading .ew-work-heading",
+      "before": {
+        "gap": "10px",
+        "align-items": "center"
+      },
+      "chosen": {
+        "gap": "12px",
+        "align-items": "center"
+      },
+      "figma_nodes": [
+        "751:901"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-back",
+      "before": {
+        "margin": "0 0 20px"
+      },
+      "chosen": {
+        "margin": "0 0 28px"
+      },
+      "figma_nodes": [
+        "751:894"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-back > button",
+      "before": {
+        "font-size": "12px",
+        "line-height": "18px",
+        "color": "var(--ees-brand-text)"
+      },
+      "chosen": {
+        "font-size": "14px",
+        "line-height": "22px",
+        "color": "var(--ees-text-secondary)"
+      },
+      "figma_nodes": [
+        "751:899"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-checks > table",
+      "before": {
+        "margin": "12px 0 8px"
+      },
+      "chosen": {
+        "margin": "8px 0"
+      },
+      "figma_nodes": [
+        "751:958"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-checks :is(th,td)",
+      "before": {
+        "height": "(unset)",
+        "padding": "10px 0",
+        "font-size": "12px",
+        "line-height": "18px",
+        "color": "(unset)"
+      },
+      "chosen": {
+        "height": "44px",
+        "padding": "10px 0",
+        "font-size": "14px",
+        "line-height": "22px",
+        "color": "var(--ees-text-secondary)"
+      },
+      "figma_nodes": [
+        "751:968",
+        "751:969",
+        "751:971"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-checks th",
+      "before": {
+        "color": "var(--ees-text-tertiary)",
+        "font-weight": "500"
+      },
+      "chosen": {
+        "color": "var(--ees-text-primary)",
+        "font-weight": "500"
+      },
+      "figma_nodes": [
+        "751:969"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-checks thead th",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "height": "32px",
+        "min-height": "32px",
+        "padding": "7px 0",
+        "font-size": "12px",
+        "line-height": "16px",
+        "color": "var(--ees-text-tertiary)"
+      },
+      "figma_nodes": [
+        "751:961",
+        "751:962"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-checks > p:last-child",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "font-size": "12px",
+        "line-height": "18px",
+        "color": "var(--ees-text-secondary)"
+      },
+      "figma_nodes": [
+        "751:986"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] #ees-work-panel .ew-v4-records > p",
+      "before": {
+        "margin-top": "12px",
+        "font-size": "12px",
+        "line-height": "18px"
+      },
+      "chosen": {
+        "margin-top": "8px",
+        "font-size": "14px",
+        "line-height": "22px"
+      },
+      "figma_nodes": [
+        "751:987",
+        "751:989"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/ees-work-launcher.css",
+      "selector": "body[data-ees-v4] .ew-v4-avatar",
+      "before": {
+        "font-size": "10px",
+        "line-height": "(unset)",
+        "font-weight": "(unset)"
+      },
+      "chosen": {
+        "font-size": "12px",
+        "line-height": "16px",
+        "font-weight": "500"
+      },
+      "figma_nodes": [
+        "751:1007"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #ees-work-context .ew-v4-assistant-header button",
+      "before": {
+        "width": "28px",
+        "height": "28px",
+        "min-height": "28px",
+        "padding": "6px"
+      },
+      "chosen": {
+        "width": "30px",
+        "height": "30px",
+        "min-height": "30px",
+        "padding": "7px"
+      },
+      "figma_nodes": [
+        "751:825",
+        "751:827"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #ees-work-context .ew-v4-reference-tag",
+      "before": {
+        "color": "var(--ees-text-secondary)"
+      },
+      "chosen": {
+        "color": "var(--ees-text-strong)"
+      },
+      "figma_nodes": [
+        "768:7111"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #ees-v4-suggestions",
+      "before": {
+        "padding": "20px 20px 0"
+      },
+      "chosen": {
+        "padding": "24px 20px 0"
+      },
+      "figma_nodes": [
+        "749:6985"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #ees-v4-suggestions > p",
+      "before": {
+        "margin": "0 0 24px"
+      },
+      "chosen": {
+        "margin": "0 0 12px"
+      },
+      "figma_nodes": [
+        "749:6985"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #ees-v4-suggestions > span",
+      "before": {
+        "margin-bottom": "8px"
+      },
+      "chosen": {
+        "margin-bottom": "12px"
+      },
+      "figma_nodes": [
+        "749:6985"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #ees-v4-suggestions button",
+      "before": {
+        "font-size": "12px",
+        "line-height": "18px",
+        "color": "var(--ees-text-secondary)",
+        "gap": "8px",
+        "padding": "10px 12px"
+      },
+      "chosen": {
+        "font-size": "14px",
+        "line-height": "22px",
+        "color": "var(--ees-text-primary)",
+        "gap": "10px",
+        "padding": "10px 10px 10px 12px"
+      },
+      "figma_nodes": [
+        "768:7082",
+        "768:7085"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #chat-container #messages-container .message-listitem:first-child",
+      "before": {
+        "padding-top": "20px"
+      },
+      "chosen": {
+        "padding-top": "24px"
+      },
+      "figma_nodes": [
+        "751:834"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #chat-container .chat-user .justify-end > div.rounded-3xl.bg-gray-50",
+      "before": {
+        "padding": "10px 12px"
+      },
+      "chosen": {
+        "padding": "8px 12px"
+      },
+      "figma_nodes": [
+        "751:7267"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #chat-container .ees-action-record",
+      "before": {
+        "padding": "10px 12px"
+      },
+      "chosen": {
+        "padding": "10px 12px 6px"
+      },
+      "figma_nodes": [
+        "751:7272"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #chat-container .ees-action-record > h4",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "margin": "0",
+        "font-size": "12px",
+        "line-height": "16px",
+        "font-weight": "500",
+        "color": "var(--ees-text-strong)"
+      },
+      "figma_nodes": [
+        "751:7273"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #chat-container .ees-action-record > p",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "margin": "3px 0 0",
+        "font-size": "12px",
+        "line-height": "18px",
+        "font-weight": "400",
+        "color": "var(--ees-text-secondary)"
+      },
+      "figma_nodes": [
+        "751:7274"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #chat-container .ees-action-record > p:nth-of-type(3)",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "color": "var(--ees-status-attention)"
+      },
+      "figma_nodes": [
+        "751:7275"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #chat-container .ees-action-record > button",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "min-height": "34px",
+        "margin-top": "5px",
+        "padding": "5px 6px 5px 0",
+        "border": "0",
+        "border-radius": "6px",
+        "background": "transparent",
+        "font-size": "14px",
+        "line-height": "22px",
+        "font-weight": "500",
+        "color": "var(--ees-brand-text)"
+      },
+      "figma_nodes": [
+        "751:7276",
+        "751:7277"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #chat-container .ees-action-record > button:hover:not(:disabled)",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "background": "var(--ees-surface-hover)"
+      },
+      "figma_nodes": [
+        "746:647",
+        "PDF page 6 hover supplement"
+      ]
+    },
+    {
+      "file": "branding/ees/ui/chat-theme.css",
+      "selector": "body[data-ees-v4] #chat-container .ees-action-record > button:disabled",
+      "before": "unscoped Native inheritance",
+      "chosen": {
+        "color": "var(--ees-text-tertiary)",
+        "cursor": "not-allowed"
+      },
+      "figma_nodes": [
+        "PDF page 6 disabled supplement"
+      ]
+    }
+  ],
+  "limitations": [
+    "No browser, computed geometry, visual, contrast or IME acceptance claimed.",
+    "1920 source geometry corrected; dynamic schema and existing Native layout require product rendering.",
+    "Root resizer visibility/hidden/opacity changes preserved."
+  ]
+}

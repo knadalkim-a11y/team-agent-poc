@@ -47,9 +47,25 @@ async def _selection(event_call, chat_id):
     return {"ok": True, "target": target}
 
 
+async def _message_reference(event_call, chat_id, metadata):
+    """A message keeps its submitted reference when the screen later moves."""
+    message = metadata.get("user_message") if isinstance(metadata, dict) else None
+    meta = message.get("meta") if isinstance(message, dict) else None
+    if isinstance(meta, dict) and "ees_work_reference" in meta:
+        target = meta["ees_work_reference"]
+        if not _valid_target(target, allow_none=True):
+            return _error("selection_unconfirmed", "이 메시지의 참고 대상을 확인하지 못했습니다.")
+        return {"ok": True, "target": target}
+    return await _selection(event_call, chat_id)
+
+
 def _valid_target(target, allow_none=False):
     if not isinstance(target, dict):
         return False
+    if "draft_version" in target:
+        if type(target["draft_version"]) is not int or target["draft_version"] < 0:
+            return False
+        target = {key: value for key, value in target.items() if key != "draft_version"}
     kind = target.get("kind")
     if kind == "none":
         return allow_none and set(target) == {"kind"}
@@ -247,7 +263,7 @@ class Tools:
                                 case_id: str = "", include_navigation: bool = False,
                                 process_id: str = "",
                                 __user__=None, __metadata__=None, __event_call__=None) -> dict:
-        """Read the screen's latest selected workflow/stage/job, factory, inputs,
+        """Read this message's submitted workflow/stage/job reference, inputs,
         tools, effective instructions and execution results. Call this BEFORE
         answering a workflow question or modifying/running its job; manual panel
         edits may have changed it. General conversation/document search needs no
@@ -262,8 +278,11 @@ class Tools:
         include_navigation=True, then read process_id before creating anything.
         Discovery/details are read-only and need no sidebar selection. Ask only
         missing scope/inputs, explain the plan, then use the existing actions.
-        Default reads obtain a read-only browser selection and verify it on the
-        service. They NEVER create/bind/select a case. Published selections use
+        Default reads retain Native user_message.meta.ees_work_reference when
+        present, even if the screen later moves. General messages with no
+        reference do not inherit an old target. Older clients obtain a read-only
+        browser selection. The service verifies access; these reads NEVER
+        create/bind/select a case. Published selections use
         the published workflow; case/history selections use the frozen case.
         Keep the returned target with any proposed input/document draft. Pass
         that exact target on a later explicit apply/run request; do not retarget
@@ -301,7 +320,7 @@ class Tools:
         else:
             if not _supports(get_state, "selection"):
                 return _error("program_upgrade_required", "업무 선택 조회를 지원하는 EES Work 프로그램 업데이트가 필요합니다.")
-            selection = await _selection(__event_call__, chat_id)
+            selection = await _message_reference(__event_call__, chat_id, __metadata__)
             if not selection.get("ok"):
                 return selection
             target = selection["target"]
@@ -333,6 +352,75 @@ class Tools:
             result["draft"] = state.get("draft")
             result["catalog"] = state.get("catalog")
         return result
+
+    async def ees_workflow_input_draft(self, inputs: dict, source: str, target: dict,
+                                       proposal_id: str, document: str = None,
+                                       __user__=None, __metadata__=None, __event_call__=None) -> dict:
+        """Fill only the selected job's UNSAVED input draft after the user asks.
+
+        Read ees_workflow_view and permitted source tools first. Keep its exact
+        target and use a stable proposal_id for this same proposal. Cite source
+        names/links actually consulted in source; do not invent evidence. This
+        never saves inputs, creates a case, starts a check or approves anything.
+        A changed target or stored revision requires a new read. Report 입력함
+        only if the real UI returns action_record.status=applied. The result is
+        the Native conversation's ActionRecord; a failed UI acknowledgement is
+        unconfirmed, never permission to save or execute instead.
+
+        :param inputs: Only registered public input fields and typed values.
+        :param source: Short actual source/assumption explanation, at most 500 characters.
+        :param target: Exact target from ees_workflow_view; history is read-only.
+        :param proposal_id: Stable unique ASCII request identifier for this proposal.
+        :param document: Optional unsaved review document for a draft-mode job only.
+        """
+        if (not isinstance(inputs, dict) or not isinstance(source, str) or not source.strip() or len(source) > 500
+                or not isinstance(proposal_id, str) or not re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", proposal_id)
+                or not _valid_target(target) or target.get("kind") == "history"
+                or (document is not None and not isinstance(document, str))):
+            return _error("invalid_draft", "초안의 대상·공개 입력·근거를 확인해 주세요.")
+        chat_id = _chat(__metadata__)
+        if not chat_id:
+            return _error("chat_required", "기존 대화에서 입력 도움을 요청해 주세요.")
+        selected = await _selection(__event_call__, chat_id)
+        if not selected.get("ok"):
+            return selected
+        # Only the browser's guarded receipt path may accept a changed local
+        # draft version after an acknowledgement was lost. Identity and server
+        # revision must still match; no new proposal may overwrite newer edits.
+        current_target = selected["target"]
+        if ({key: value for key, value in current_target.items() if key != "draft_version"}
+                != {key: value for key, value in target.items() if key != "draft_version"}):
+            return _error("selection_changed", "입력 도움을 요청한 작업과 현재 화면이 다릅니다. 원래 작업을 다시 확인해 주세요.")
+        try:
+            from open_webui.ees_workflow import validate_input_draft
+        except ImportError:
+            return _error("program_upgrade_required", "입력 초안을 지원하는 EES Work 업데이트가 필요합니다.")
+        body = {"chat_id": chat_id, "target": target, "inputs": inputs,
+                **({"document": document} if document is not None else {})}
+        validated = await validate_input_draft(__user__, body)
+        if not validated.get("ok"):
+            return validated
+        message_id = __metadata__.get("message_id", "") if isinstance(__metadata__, dict) else ""
+        proposal = {"proposalId": proposal_id, "messageId": message_id, "target": target, "inputs": validated["inputs"], "source": source.strip(),
+                    **({"document": validated["document"]} if "document" in validated else {})}
+        result = await _browser(__event_call__, chat_id,
+            "const proposal = " + json.dumps(proposal, ensure_ascii=True) + ";\n"
+            "return window.__eesNativeWorkV1?.applyInputDraft ? await window.__eesNativeWorkV1.applyInputDraft(chatId,proposal) : {ok:false,code:'ui_unavailable'};")
+        if not result.get("ok") or result.get("action_record", {}).get("status") != "applied":
+            return _error(result.get("code", "draft_unconfirmed"), "업무 화면의 초안 반영을 확인하지 못했습니다. 저장·점검은 수행하지 않았습니다.")
+        recorded = False
+        try:
+            from open_webui.ees_workflow import record_input_draft
+            recorded = bool((await record_input_draft(__user__, chat_id, message_id, target, result["action_record"])).get("ok"))
+            if recorded:
+                await _browser(__event_call__, chat_id,
+                    "return window.__eesNativeWorkV1?.refreshActionRecords ? await window.__eesNativeWorkV1.refreshActionRecords(chatId) : {ok:false,code:'ui_unavailable'};")
+        except Exception:
+            # A failed conversation status append never repeats or undoes the
+            # actual local input. The real Tool output still carries its receipt.
+            pass
+        return {"ok": True, "action_record": result["action_record"], "conversation_recorded": recorded,
+                "persisted": False, "executed": False}
 
     async def ees_workflow_action(self, action: str, payload: dict = None,
                                   node_id: str = "", expected_revision: int = -1,

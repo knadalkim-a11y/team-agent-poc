@@ -1,0 +1,193 @@
+{
+  "scope": "Local source/unit/integration fixtures only, not Native browser or official wheel",
+  "head": "b0515d594da36112919a14c814a95e2b5900035e",
+  "start_utc": "2026-09-30T06:57:33Z",
+  "end_utc": "2026-09-30T06:58:22.609534+00:00",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "node": "v24.19.0",
+  "python_totals": {
+    "run": 303,
+    "pass": 290,
+    "skip": 13,
+    "fail": 0
+  },
+  "python_suites": [
+    {
+      "suite": "test_ees_work_panel",
+      "run": 46,
+      "pass": 46,
+      "skip": 0,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_work_v4",
+      "run": 6,
+      "pass": 6,
+      "skip": 0,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_work_controller",
+      "run": 24,
+      "pass": 24,
+      "skip": 0,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_workflow",
+      "run": 50,
+      "pass": 49,
+      "skip": 1,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_workflow_execution",
+      "run": 36,
+      "pass": 34,
+      "skip": 2,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_workflow_contract",
+      "run": 17,
+      "pass": 17,
+      "skip": 0,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_workflow_tool",
+      "run": 37,
+      "pass": 37,
+      "skip": 0,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_execution_tool",
+      "run": 8,
+      "pass": 8,
+      "skip": 0,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_work_designer",
+      "run": 1,
+      "pass": 1,
+      "skip": 0,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_work_authoring",
+      "run": 28,
+      "pass": 22,
+      "skip": 6,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_workflow_model",
+      "run": 12,
+      "pass": 10,
+      "skip": 2,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_work_routes",
+      "run": 3,
+      "pass": 3,
+      "skip": 0,
+      "returncode": 0
+    },
+    {
+      "suite": "test_ees_branding_build",
+      "run": 27,
+      "pass": 25,
+      "skip": 2,
+      "returncode": 0
+    },
+    {
+      "suite": "test_demo_bundle",
+      "run": 8,
+      "pass": 8,
+      "skip": 0,
+      "returncode": 0
+    }
+  ],
+  "node_totals": {
+    "test_pass": 70,
+    "test_fail": 0,
+    "cooperation_pass_groups": 14
+  },
+  "source_or_test_hash_changes_during_batch": [],
+  "skips": [
+    {
+      "suite": "test_ees_workflow",
+      "detail": "test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads (test_ees_workflow.WorkflowPreservationTests.test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads) ... skipped 'EES_TEST_LEGACY_WORKFLOW_WHEEL must identify the supported ees.10 wheel. Required in the release gate.'"
+    },
+    {
+      "suite": "test_ees_workflow_execution",
+      "detail": "test_protocol_writer_guard_rejects_actual_previous_program (test_ees_workflow_execution.ExecutionTests.test_protocol_writer_guard_rejects_actual_previous_program) ... skipped 'pinned previous main source fixture unavailable'"
+    },
+    {
+      "suite": "test_ees_workflow_execution",
+      "detail": "test_real_native_approval_disable_endpoints_return_success_after_commit (test_ees_workflow_execution.NativeCapabilityRouteTests.test_real_native_approval_disable_endpoints_return_success_after_commit) ... skipped 'pinned Native wheel unavailable'"
+    },
+    {
+      "suite": "test_ees_work_authoring",
+      "detail": "test_sa23_exact_legacy_archive_and_explicit_partial_import (test_ees_work_authoring.AuthoringRestoreTests.test_sa23_exact_legacy_archive_and_explicit_partial_import) ... skipped 'EES_TEST_LEGACY_WORKFLOW_WHEEL must identify the supported ees.10 wheel. Required in the release gate.'"
+    },
+    {
+      "suite": "test_ees_work_authoring",
+      "detail": "test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication) ... skipped 'EES_TEST_LEGACY_WORKFLOW_WHEEL must identify the supported ees.10 wheel. Required in the release gate.'"
+    },
+    {
+      "suite": "test_ees_work_authoring",
+      "detail": "test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process) ... skipped 'EES_TEST_LEGACY_WORKFLOW_WHEEL must identify the supported ees.10 wheel. Required in the release gate.'"
+    },
+    {
+      "suite": "test_ees_work_authoring",
+      "detail": "test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state) ... skipped 'EES_TEST_LEGACY_WORKFLOW_WHEEL must identify the supported ees.10 wheel. Required in the release gate.'"
+    },
+    {
+      "suite": "test_ees_work_authoring",
+      "detail": "test_sa25_reconciliation_cannot_overwrite_node_moved_to_another_process_by_restore (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_reconciliation_cannot_overwrite_node_moved_to_another_process_by_restore) ... skipped 'EES_TEST_LEGACY_WORKFLOW_WHEEL must identify the supported ees.10 wheel. Required in the release gate.'"
+    },
+    {
+      "suite": "test_ees_work_authoring",
+      "detail": "test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit) ... skipped 'EES_TEST_LEGACY_WORKFLOW_WHEEL must identify the supported ees.10 wheel. Required in the release gate.'"
+    },
+    {
+      "suite": "test_ees_workflow_model",
+      "detail": "test_exact_native_parameter_transforms_cannot_add_hidden_context (test_ees_workflow_model.ModelTests.test_exact_native_parameter_transforms_cannot_add_hidden_context) ... skipped 'Pinned Native wheel unavailable'"
+    },
+    {
+      "suite": "test_ees_workflow_model",
+      "detail": "test_pinned_provider_routes_reject_preset_change_at_parameter_application (test_ees_workflow_model.ModelTests.test_pinned_provider_routes_reject_preset_change_at_parameter_application) ... skipped 'Pinned Native wheel unavailable'"
+    },
+    {
+      "suite": "test_ees_branding_build",
+      "detail": "test_native_chat_bridges_preserve_approval_and_bind_only_successful_main_creation (test_ees_branding_build.OfficialWheelTests.test_native_chat_bridges_preserve_approval_and_bind_only_successful_main_creation) ... skipped 'Set EES_TEST_UPSTREAM_WHEEL for the offline official wheel audit.'"
+    },
+    {
+      "suite": "test_ees_branding_build",
+      "detail": "test_real_pinned_wheel_patches_records_and_unrelated_content (test_ees_branding_build.OfficialWheelTests.test_real_pinned_wheel_patches_records_and_unrelated_content) ... skipped 'Set EES_TEST_UPSTREAM_WHEEL for the offline official wheel audit.'"
+    }
+  ],
+  "syntax": {
+    "node_check": [
+      "branding/ees/ui/ees-work-view.js",
+      "branding/ees/ui/ees-work-launcher.js"
+    ],
+    "python_ast": [
+      "scripts/build_ees_webui.py",
+      "agent-pack/skills/ees-work-demo/scripts/ees_workflow.py",
+      "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py"
+    ],
+    "result": "PASS"
+  },
+  "limitations": [
+    "No CPython3.11 executable",
+    "No pinned official wheel",
+    "No Chrome/Chromium executable",
+    "No Native/Figma rendered app comparison",
+    "No Windows/in-house model or deployment validation"
+  ]
+}

@@ -1,0 +1,11 @@
+test_ai_receipt_is_draft_scoped_and_escaped (test_ees_work_v4.V4RenderingTests.test_ai_receipt_is_draft_scoped_and_escaped) ... ok
+test_list_real_groups_single_recommendation_and_waiting_expansion (test_ees_work_v4.V4RenderingTests.test_list_real_groups_single_recommendation_and_waiting_expansion) ... ok
+test_native_schema_fields_and_save_are_not_an_execution (test_ees_work_v4.V4RenderingTests.test_native_schema_fields_and_save_are_not_an_execution) ... ok
+test_search_and_group_state_are_applied_without_mutating_records (test_ees_work_v4.V4RenderingTests.test_search_and_group_state_are_applied_without_mutating_records) ... ok
+test_simulation_does_not_increase_actual_completion (test_ees_work_v4.V4RenderingTests.test_simulation_does_not_increase_actual_completion) ... ok
+test_unknown_only_refreshes_and_failed_lookup_hides_saved_data (test_ees_work_v4.V4RenderingTests.test_unknown_only_refreshes_and_failed_lookup_hides_saved_data) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.695s
+
+OK

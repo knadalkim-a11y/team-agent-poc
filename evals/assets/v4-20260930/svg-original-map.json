@@ -1,0 +1,293 @@
+[
+  {
+    "constant": "imgIconPanelRight",
+    "file": "a9175.svg",
+    "nodeId": "773:7042",
+    "source": "figma-B-context.txt",
+    "name": "Icon/panel-right",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconChevronDown",
+    "file": "92ec5.svg",
+    "nodeId": "751:946",
+    "source": "figma-B-context.txt",
+    "name": "Icon/chevron-down",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconListChecks",
+    "file": "4df0d.svg",
+    "nodeId": "773:7053",
+    "source": "figma-B-context.txt",
+    "name": "Icon/list-checks",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconCompass",
+    "file": "2e769.svg",
+    "nodeId": "773:7058",
+    "source": "figma-B-context.txt",
+    "name": "Icon/compass",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconHistory",
+    "file": "c325d.svg",
+    "nodeId": "751:887",
+    "source": "figma-B-context.txt",
+    "name": "Icon/history",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconMessage",
+    "file": "093d6.svg",
+    "nodeId": "773:7066",
+    "source": "figma-B-context.txt",
+    "name": "Icon/message",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconChevronDown1",
+    "file": "ead50.svg",
+    "nodeId": "773:7108",
+    "source": "figma-B-context.txt",
+    "name": "Icon/chevron-down",
+    "width": 14,
+    "height": 14
+  },
+  {
+    "constant": "imgIconPackage",
+    "file": "f6bbc.svg",
+    "nodeId": "773:7075",
+    "source": "figma-B-context.txt",
+    "name": "Icon/package",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconActivity",
+    "file": "126c7.svg",
+    "nodeId": "773:7100",
+    "source": "figma-B-context.txt",
+    "name": "Icon/activity",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconChevronRight",
+    "file": "69549.svg",
+    "nodeId": "751:1025",
+    "source": "figma-B-context.txt",
+    "name": "Icon/chevron-right",
+    "width": 14,
+    "height": 14
+  },
+  {
+    "constant": "imgIconTriangleAlert",
+    "file": "4fb09.svg",
+    "nodeId": "773:7109",
+    "source": "figma-B-context.txt",
+    "name": "Icon/triangle-alert",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgEllipse",
+    "file": "07d31.svg",
+    "nodeId": "773:7111",
+    "source": "figma-B-context.txt",
+    "name": "Ellipse",
+    "width": 6,
+    "height": 6
+  },
+  {
+    "constant": "imgIconSettings",
+    "file": "88026.svg",
+    "nodeId": "773:7124",
+    "source": "figma-B-context.txt",
+    "name": "Icon/settings",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconFileText",
+    "file": "730b1.svg",
+    "nodeId": "749:593",
+    "source": "figma-A-context.txt",
+    "name": "Icon/file-text",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconMore",
+    "file": "a953c.svg",
+    "nodeId": "751:696",
+    "source": "figma-B-context.txt",
+    "name": "Icon/more",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconSearch",
+    "file": "b8bc6.svg",
+    "nodeId": "768:689",
+    "source": "figma-A-context.txt",
+    "name": "Icon/search",
+    "width": 14,
+    "height": 14
+  },
+  {
+    "constant": "imgIconChevronDown2",
+    "file": "e1049.svg",
+    "nodeId": "776:725",
+    "source": "figma-A-context.txt",
+    "name": "Icon/chevron-down",
+    "width": 14,
+    "height": 14
+  },
+  {
+    "constant": "imgIconPlus",
+    "file": "721d7.svg",
+    "nodeId": "751:826",
+    "source": "figma-B-context.txt",
+    "name": "Icon/plus",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconPanelRight1",
+    "file": "7bb4a.svg",
+    "nodeId": "751:828",
+    "source": "figma-B-context.txt",
+    "name": "Icon/panel-right",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconFileText",
+    "file": "522b5.svg",
+    "nodeId": "768:7106",
+    "source": "figma-B-context.txt",
+    "name": "Icon/file-text",
+    "width": 12,
+    "height": 12
+  },
+  {
+    "constant": "imgIconX",
+    "file": "87d9b.svg",
+    "nodeId": "768:7112",
+    "source": "figma-B-context.txt",
+    "name": "Icon/x",
+    "width": 12,
+    "height": 12
+  },
+  {
+    "constant": "imgIconMessage1",
+    "file": "cf77a.svg",
+    "nodeId": "768:7095",
+    "source": "figma-A-context.txt",
+    "name": "Icon/message",
+    "width": 14,
+    "height": 14
+  },
+  {
+    "constant": "imgIconPaperclip",
+    "file": "ea639.svg",
+    "nodeId": "751:850",
+    "source": "figma-B-context.txt",
+    "name": "Icon/paperclip",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconChevronDown2",
+    "file": "34f85.svg",
+    "nodeId": "768:7118",
+    "source": "figma-B-context.txt",
+    "name": "Icon/chevron-down",
+    "width": 12,
+    "height": 12
+  },
+  {
+    "constant": "imgIconArrowUp",
+    "file": "bddb4.svg",
+    "nodeId": "751:854",
+    "source": "figma-B-context.txt",
+    "name": "Icon/arrow-up",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "constant": "imgIconArrowLeft",
+    "file": "eb94a.svg",
+    "nodeId": "751:896",
+    "source": "figma-B-context.txt",
+    "name": "Icon/arrow-left",
+    "width": 14,
+    "height": 14
+  },
+  {
+    "constant": "imgEllipse1",
+    "file": "e1472.svg",
+    "nodeId": "751:991",
+    "source": "figma-B-context.txt",
+    "name": "Ellipse",
+    "width": 6,
+    "height": 6
+  },
+  {
+    "file": "9c63b.svg",
+    "nodeId": "746:619",
+    "constant": "imgStateAction",
+    "name": "State=Action",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "file": "44a96.svg",
+    "nodeId": "746:623",
+    "constant": "imgStateFailed",
+    "name": "State=Failed",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "file": "49833.svg",
+    "nodeId": "746:627",
+    "constant": "imgStateRunning",
+    "name": "State=Running",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "file": "40ef1.svg",
+    "nodeId": "746:630",
+    "constant": "imgStateWaiting",
+    "name": "State=Waiting",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "file": "d553d.svg",
+    "nodeId": "746:634",
+    "constant": "imgStateDone",
+    "name": "State=Done",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "file": "d448c.svg",
+    "nodeId": "746:639",
+    "constant": "imgStateUnknown",
+    "name": "State=Unknown",
+    "width": 16,
+    "height": 16
+  }
+]

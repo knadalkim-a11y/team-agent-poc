@@ -31,7 +31,7 @@ const makeCase = (revision = 1) => ({
 const result = (run = null) => ({ok: true, case: run, cases: run ? [run] : [], catalog: copy(catalog)});
 const http = (value, status = 200) => ({ok: status >= 200 && status < 300, status, json: async () => copy(value)});
 async function setup(options = {}) {
-  const events = {}, frames = [], requests = [], renders = [], adoptions = [], confirmations = [], restores = [], viewEvents = [], readiness = [];
+  const events = {}, frames = [], requests = [], renders = [], adoptions = [], confirmations = [], restores = [], viewEvents = [], readiness = [], nativeEvents=[];
   const timers = new Map(); let nextTimer = 0;
   const nativeDraft = {prompt: '미저장 업무 질문', files: [{id: 'attachment-1'}]};
   let confirmed = true, nativeReady = options.nativeReady !== false;
@@ -65,19 +65,33 @@ async function setup(options = {}) {
   }, {get: (target, key) => target[key] || (() => {})});
   const window = {
     addEventListener: on, removeEventListener: () => {}, crypto: {randomUUID: () => 'request-' + requests.length},
+    dispatchEvent: event => {nativeEvents.push(event);return fire(event.type,event);},
     __eesNativeDraftV1: {ready: () => nativeReady, read: () => copy(nativeDraft),
+      workMessageIds: () => options.nativeMessageIds || [],
       restore: async value => {restores.push(value); return true;}, flush: () => {}}
   };
+  class NativeElement {
+    constructor(tag) {this.tagName=tag;this.children=[];this.events={};this.textContent='';this.attributes={};}
+    set innerHTML(value) {throw new Error('Receipt text must never be parsed as HTML');}
+    setAttribute(name,value) {this.attributes[name]=value;}
+    append(child) {child.parentNode=this;this.children.push(child);}
+    remove() {if(this.parentNode)this.parentNode.children=this.parentNode.children.filter(child=>child!==this);this.parentNode=null;}
+    addEventListener(name,fn) {this.events[name]=fn;}
+    async click() {if(this.disabled)return;if(this.href){setRoute(this.href);fire('popstate');}else await this.events.click?.({preventDefault(){},stopPropagation(){}});}
+  }
+  const nativeMessageHosts=new Map((options.nativeMessageIds || []).map(id=>[id,new NativeElement('div')]));
   const document = {
     querySelector: selector => selector === '#sidebar-new-chat-button' ? {} : null,
+    getElementById: id => nativeMessageHosts.has(id.replace(/^message-/,'')) ? {querySelector: selector => selector === '#response-content-container' ? nativeMessageHosts.get(id.replace(/^message-/,'')) : null} : null,
     addEventListener: () => {}, documentElement: {}, body: {append: () => {}},
-    createElement: () => ({click() {setRoute(this.href); fire('popstate');}, remove() {}})
+    createElement: tag => new NativeElement(tag)
   };
   const storage = new Map([['token', 'test-user']]);
   const localStorage = {getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key)};
   const context = {
     confirm: message => {confirmations.push(message); return confirmed;},
     window, document, location, localStorage, sessionStorage: localStorage,
+    CustomEvent: class {constructor(type,options){this.type=type;this.detail=options.detail;}},
     URLSearchParams,
     setTimeout: options.fakeTimers ? ((fn,delay) => {timers.set(++nextTimer,{fn,delay});return nextTimer;}) : setTimeout,
     clearTimeout: options.fakeTimers ? (id => timers.delete(id)) : clearTimeout,
@@ -110,8 +124,8 @@ async function setup(options = {}) {
   }
   await settle();
   return {
-    api: window.__eesNativeWorkV1, callbacks, requests, renders, adoptions, confirmations, authoringRequests, panelAuthorizations,
-    nativeDraft, restores, location, fire, viewEvents, readiness,
+    api: window.__eesNativeWorkV1, view, callbacks, requests, renders, adoptions, confirmations, authoringRequests, panelAuthorizations,
+    nativeDraft, restores, location, fire, viewEvents, readiness,nativeMessageHosts,nativeEvents,
     setNativeReady: value => {nativeReady = value;},
     setAuthoringRefresh: fn => {authoringRefresh = fn;},
     pendingTimers: () => [...timers.values()].map(timer => timer.delay),
@@ -126,6 +140,100 @@ async function setup(options = {}) {
   };
 }
 const scenarios = {
+  async v4_late_undo_receipt_cannot_update_a_new_chat() {
+    for(const fails of [false,true]){
+      const current=makeCase();current.chat_id='chat-1';
+      const h=await setup({route:'/c/chat-1',state:result(current)});
+      let version=1,finish;
+      h.view.draftVersion=()=>version;h.view.applyAIDraft=()=>{version++;return {ok:true,fields:['db']};};
+      h.view.undoAIDraft=()=>{version++;return {ok:true};};
+      h.setAction(async body=>({ok:true,inputs:body.inputs}));
+      const target=copy(h.api.selection('chat-1'));delete target.ok;
+      await h.api.applyInputDraft('chat-1',{proposalId:'old-draft',messageId:'old-assistant',target,inputs:{db:'value'},source:'사용자 제공'});
+      h.setAction(body=>body.proposal_id?new Promise((resolve,reject)=>{finish=()=>fails?reject(new Error('late failure')):resolve({ok:true});}):{ok:true,inputs:{}});
+      const pending=h.api.undoInputDraft('old-draft');await h.settle();
+      h.setState(result({...current,id:'case-2',chat_id:'chat-2'}));h.route('/c/chat-2');await h.settle();
+      const shown=h.latest(),renderCount=h.renders.length;finish();await pending;
+      assert.equal(h.renders.length,renderCount,'Old undo status must not repaint a new chat');
+      assert.equal(h.latest().errorMessage,shown.errorMessage);assert.equal(h.nativeEvents.length,0,'Old receipt cannot emit under the new chat id');
+      assert.ok(h.posts().filter(body=>body.proposal_id).every(body=>body.chat_id==='chat-1'));
+    }
+  },
+  async v4_action_record_uses_persisted_native_message_and_guarded_undo() {
+    const current=makeCase();current.chat_id='chat-1';
+    const h=await setup({route:'/c/chat-1',state:result(current),nativeMessageIds:['assistant-1']});
+    let draftVersion=1,undos=0,records=[];
+    h.view.draftVersion=()=>draftVersion;
+    h.view.applyAIDraft=()=>{draftVersion++;return {ok:true,fields:['db']};};
+    h.view.undoAIDraft=()=>{undos++;draftVersion++;return {ok:true};};
+    h.setAction(async body=>{if(body.proposal_id)records[0].action_record.status='undone';return {ok:true,inputs:body.inputs};});
+    h.setGet(url=>http(url.includes('input-draft/records')?{ok:true,records}:result(current)));
+    const target=copy(h.api.selection('chat-1'));delete target.ok;
+    const source='<img src=x onerror=alert(1)> 사용자가 준 값';
+    const applied=await h.api.applyInputDraft('chat-1',{proposalId:'draft-card',messageId:'assistant-1',target,inputs:{db:'public-target'},source});
+    const host=h.nativeMessageHosts.get('assistant-1');
+    assert.equal(host.children.length,0,'A local acknowledgement alone never invents a persisted Native card');
+    records=[{message_id:'assistant-1',action_record:copy(applied.action_record),target},{message_id:'absent-message',action_record:copy(applied.action_record),target}];
+    await h.api.refreshActionRecords('chat-1');
+    assert.equal(host.children.length,1,'Only a real current assistant message receives a card');
+    let card=host.children[0],button=card.children.find(child=>child.tagName==='button');
+    assert.equal(card.children[2].textContent,'입력 근거: '+source,'Source is literal textContent, never executable HTML');
+    assert.equal(button.disabled,false);assert.equal(h.posts().filter(body=>body.action).length,0);
+    await button.click();
+    assert.equal(undos,1);assert.equal(records[0].action_record.status,'undone');
+    card=host.children[0];button=card.children.find(child=>child.tagName==='button');
+    assert.equal(card.children[0].textContent,'입력 초안을 되돌렸습니다');assert.equal(button.disabled,true);
+    const draft=copy(h.edits());h.setGet(()=>{throw new Error('receipt read unavailable');});
+    await h.api.refreshActionRecords('chat-1');assert.equal(host.children.length,0);assert.deepEqual(h.edits(),draft,'Failed receipt read hides old details without deleting drafts');
+  },
+  async v4_action_record_reload_disables_undo_and_discards_stale_or_foreign_reads() {
+    const current=makeCase();current.chat_id='chat-1';
+    const h=await setup({route:'/c/chat-1',state:result(current),nativeMessageIds:['assistant-1']});
+    const receipt={id:'past',status:'applied',fields:['db'],source:'당시 사용자 입력',persisted:false,executed:false};
+    const answer={ok:true,records:[{message_id:'assistant-1',action_record:receipt}]};
+    h.setGet(()=>http(answer));await h.api.refreshActionRecords('chat-1');
+    const host=h.nativeMessageHosts.get('assistant-1'),button=host.children[0].children.find(child=>child.tagName==='button');
+    assert.equal(button.disabled,true,'Reload reads history but cannot reconstruct an undo baseline');
+    await button.click();assert.equal(h.posts().length,0);
+    let finish;h.setGet(()=>new Promise(resolve=>{finish=()=>resolve(http(answer));}));
+    const pending=h.api.refreshActionRecords('chat-1');h.route('/auth');await h.settle();finish();await pending;
+    assert.equal(host.children.length,0,'A late authenticated receipt must not reappear after logout');
+    assert.equal((await h.api.refreshActionRecords('another-chat')).ok,false);
+  },
+  async v4_message_reference_and_draft_race_are_independent_of_current_navigation() {
+    const current=makeCase();current.chat_id='chat-1';
+    const h=await setup({route:'/c/chat-1',state:result(current)});
+    let draftVersion=1,applied=0;
+    h.view.draftVersion=()=>draftVersion;
+    h.view.applyAIDraft=()=>{applied++;draftVersion++;return {ok:true,changed_fields:['db']};};
+    const target=copy(h.api.selection('chat-1'));delete target.ok;
+    const frozen=copy(h.api.captureReference('chat-1','assistant-1',{id:'user-1'}));
+    h.callbacks.toggleReference();
+    assert.deepEqual(copy(h.api.captureReference('chat-1','assistant-1',{id:'user-1'})),frozen,'An old message keeps its original reference');
+    assert.deepEqual(copy(h.api.captureReference('chat-1','assistant-2',{id:'user-2'})),{kind:'none'},'Only the next message becomes general');
+    assert.deepEqual(copy(h.api.captureReference('chat-1','assistant-3',{id:'reloaded',meta:{ees_work_reference:frozen}})),frozen,'Native persisted meta is preserved');
+    let finish;
+    h.setAction(body=>new Promise(resolve=>{finish=()=>resolve({ok:true,inputs:body.inputs});}));
+    const proposal={proposalId:'draft-1',target,inputs:{db:'public-target'},source:'사용자가 제공한 대상'};
+    const pending=h.api.applyInputDraft('chat-1',proposal);await h.settle();
+    h.setEdits({...h.edits(),inputs:{db:'user-edit'}});draftVersion++;
+    finish();const stale=await pending;
+    assert.equal(stale.ok,false);assert.equal(applied,0,'A later user edit cannot be overwritten by the delayed validation');
+    assert.ok(h.posts().every(body=>!body.action),'Draft validation never saves or executes');
+    h.setAction(async body=>({ok:true,inputs:body.inputs}));
+    const latest=copy(h.api.selection('chat-1'));delete latest.ok;
+    const retryProposal={...proposal,proposalId:'draft-2',target:latest};
+    const fresh=await h.api.applyInputDraft('chat-1',retryProposal);
+    assert.equal(fresh.ok,true);assert.equal(applied,1);assert.equal(fresh.action_record.persisted,false);
+    const retry=await h.api.applyInputDraft('chat-1',retryProposal);
+    assert.equal(retry.ok,true);assert.equal(retry.replayed,true);assert.equal(applied,1,'Lost acknowledgement retry only returns its verified receipt');
+    h.setAction(async ()=>({ok:false,error:{code:'skill_unavailable',message:'revoked'}}));
+    const denied=await h.api.applyInputDraft('chat-1',retryProposal);
+    assert.equal(denied.ok,false);assert.equal(denied.code,'skill_unavailable','Cached receipt requires a fresh current access check');
+    h.setAction(async body=>({ok:true,inputs:body.inputs}));draftVersion++;
+    const edited=await h.api.applyInputDraft('chat-1',retryProposal);
+    assert.equal(edited.ok,false);assert.equal(applied,1,'A manual edit cannot be overwritten or acknowledged as the old draft');
+  },
   async delayed_authoring_capability_refreshes_current_panel_and_rejects_stale_updates() {
     let resolve;
     const h = await setup({authoringRefresh: () => new Promise(done => {resolve = done;})});
@@ -480,6 +588,18 @@ scenarios[input.scenario]().then(() => process.stdout.write('ok\n')).catch(error
 
 @unittest.skipUnless(shutil.which("node"), "Node is required for controller boundary regressions.")
 class WorkControllerTests(unittest.TestCase):
+    def test_v4_late_undo_receipt_cannot_update_a_new_chat(self):
+        self.check_scenario('v4_late_undo_receipt_cannot_update_a_new_chat')
+
+    def test_v4_action_record_uses_persisted_native_message_and_guarded_undo(self):
+        self.check_scenario('v4_action_record_uses_persisted_native_message_and_guarded_undo')
+
+    def test_v4_action_record_reload_disables_undo_and_discards_stale_or_foreign_reads(self):
+        self.check_scenario('v4_action_record_reload_disables_undo_and_discards_stale_or_foreign_reads')
+
+    def test_v4_message_reference_and_draft_race_are_independent_of_current_navigation(self):
+        self.check_scenario('v4_message_reference_and_draft_race_are_independent_of_current_navigation')
+
     def check_scenario(self, scenario):
         result = subprocess.run(
             [shutil.which("node"), "-e", NODE_CONTROLLER],

@@ -1,0 +1,44 @@
+const assetPathPrefix = "https://www.figma.com/api/mcp/asset/29204d04-1b8d-40fd-9bf9-003a83b34cb4";
+const imgStateAction = `${assetPathPrefix}/9c63b.svg`;
+const imgStateFailed = `${assetPathPrefix}/44a96.svg`;
+const imgStateRunning = `${assetPathPrefix}/49833.svg`;
+const imgStateWaiting = `${assetPathPrefix}/40ef1.svg`;
+const imgStateDone = `${assetPathPrefix}/d553d.svg`;
+const imgStateUnknown = `${assetPathPrefix}/d448c.svg`;
+
+type StatusGlyphV4Props = {
+  className?: string;
+  state?: "Action" | "Failed" | "Running" | "Waiting" | "Done" | "Unknown";
+};
+
+export default function StatusGlyphV4({ className, state = "Action" }: StatusGlyphV4Props) {
+  const isDone = state === "Done";
+  const isFailed = state === "Failed";
+  const isRunning = state === "Running";
+  const isUnknown = state === "Unknown";
+  const isWaiting = state === "Waiting";
+  return (
+    <div className={className || "relative size-[16px]"} id={isUnknown ? "node-746_639" : isDone ? "node-746_634" : isWaiting ? "node-746_630" : isRunning ? "node-746_627" : isFailed ? "node-746_623" : "node-746_619"}>
+      <img alt="" className="absolute block inset-0 max-w-none size-full" src={isUnknown ? imgStateUnknown : isDone ? imgStateDone : isWaiting ? imgStateWaiting : isRunning ? imgStateRunning : isFailed ? imgStateFailed : imgStateAction} />
+    </div>
+  );
+}
+
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Status glyph v4
+**Node ID:** 746:640
+
+16px 상태 기호. Action=사람 조치 필요(황갈), Running=실행 중(EES 파랑), Failed=실패, Done=완료, Waiting=대기·미실행, Unknown=판정 미확인. 항상 상태 문구와 함께.
+
+Images and SVGs will be stored as constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.

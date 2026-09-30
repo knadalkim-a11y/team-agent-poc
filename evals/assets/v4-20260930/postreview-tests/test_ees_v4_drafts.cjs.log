@@ -1,0 +1,70 @@
+TAP version 13
+# Subtest: manual malformed JSON after AI input blocks undo without losing the raw draft
+ok 1 - manual malformed JSON after AI input blocks undo without losing the raw draft
+  ---
+  duration_ms: 6.559015
+  type: 'test'
+  ...
+# Subtest: clearing an optional runtime field removes its typed value and marks the draft dirty
+ok 2 - clearing an optional runtime field removes its typed value and marks the draft dirty
+  ---
+  duration_ms: 1.439459
+  type: 'test'
+  ...
+# Subtest: an independent concurrent input edit cannot be silently overwritten by a full draft replacement
+ok 3 - an independent concurrent input edit cannot be silently overwritten by a full draft replacement
+  ---
+  duration_ms: 0.986527
+  type: 'test'
+  ...
+# Subtest: AI undo restores the previous draft including an explicitly cleared optional field
+ok 4 - AI undo restores the previous draft including an explicitly cleared optional field
+  ---
+  duration_ms: 2.237612
+  type: 'test'
+  ...
+# Subtest: a proposal captured before user input is rejected without changing that input
+ok 5 - a proposal captured before user input is rejected without changing that input
+  ---
+  duration_ms: 1.166057
+  type: 'test'
+  ...
+# Subtest: late AI proposals cannot cross selected job or permission/read-error boundaries
+ok 6 - late AI proposals cannot cross selected job or permission/read-error boundaries
+  ---
+  duration_ms: 3.283739
+  type: 'test'
+  ...
+# Subtest: AI undo after a server save/version change is rejected and preserves saved input
+ok 7 - AI undo after a server save/version change is rejected and preserves saved input
+  ---
+  duration_ms: 1.06191
+  type: 'test'
+  ...
+# Subtest: preview adoption keeps malformed raw input when the first case is created elsewhere
+ok 8 - preview adoption keeps malformed raw input when the first case is created elsewhere
+  ---
+  duration_ms: 1.354061
+  type: 'test'
+  ...
+# Subtest: document-captured keyboard events reach the Assistant resizer control
+ok 9 - document-captured keyboard events reach the Assistant resizer control
+  ---
+  duration_ms: 2.555441
+  type: 'test'
+  ...
+# Subtest: explicit discard clears malformed local input without changing saved values
+ok 10 - explicit discard clears malformed local input without changing saved values
+  ---
+  duration_ms: 2.801276
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 33.805401

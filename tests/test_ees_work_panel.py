@@ -345,7 +345,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(len(rows), 1)
                 open_job = rows[0].find("button", **{"data-action": "select", "data-node-id": node_id})
                 condition = rows[0].find("button", **{"data-action": "job_condition", "data-node-id": node_id})
-                self.assertEqual(len(open_job), 1)
+                self.assertEqual(len(open_job), 2, "V4 has a job-name link and a separate row action.")
                 self.assertEqual(len(condition), 1)
                 self.assertFalse(open_job[0].find("button"))
                 self.assertFalse(condition[0].find("button"))
@@ -395,7 +395,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         case = await self.create()
         for node_id in ("setup-p", "install-t", "db-j"):
             with self.subTest(node=node_id):
-                html, _ = self.render(case, node_id)
+                html, _ = self.render(case, node_id, listView={"moreWaiting": True, "groups": {"done": True, "simulation": True}})
                 node = case["definition"]["nodes"][node_id]
                 self.assertIn(node["name"], html.text)
                 self.assertIn(node["rule"], html.text)
@@ -419,7 +419,8 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.run_button(process, "setup-p").text, "범위 모의 점검 실행")
         self.assertEqual(self.run_button(task, "install-t").text, "범위 모의 점검 실행")
         self.assertIn("단계별 수행·진행", " ".join(item.text for item in process.find("h3")))
-        self.assertIn("작업 현황", " ".join(item.text for item in task.find("h3")))
+        self.assertIn("시스템 설치", " ".join(item.text for item in task.find("h2")))
+        self.assertTrue(task.find("table", **{"class": "ew-work-job-table ew-v4-task-table"}))
         manual, _ = self.render(case, "scope-j")
         self.assertFalse(manual.find("button", **{"data-action": "run"}))
         pending, _ = self.render(await self.create(), "scope-j")
@@ -658,7 +659,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         process, _ = self.render(case, "setup-p")
         progress = self.section(process, "progress")
         counter = progress.find(**{"data-work-total": None})[0]
-        self.assertEqual((counter.attrs["data-work-done"], counter.attrs["data-work-total"]), ("2", "4"))
+        self.assertEqual((counter.attrs["data-work-done"], counter.attrs["data-work-total"]), ("1", "4"))
         self.assertIn("단계 완료", progress.text)
         jobs_metric = progress.find(**{"data-work-metric": "jobs"})[0]
         self.assertEqual(len(jobs_metric.find("progress")), 1)
@@ -680,7 +681,7 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("실패 1", distribution[0].text)
         self.assertNotIn("문제 있는 작업 보기", process.text)
         task_job = task.find("button", **{"data-action": "select", "data-node-id": "ap-j"})
-        self.assertEqual(len(task_job), 1)
+        self.assertEqual(len(task_job), 2, "Job name and 결과 보기 both open the same existing task.")
         self.assertEqual(task_job[0].text, case["definition"]["nodes"]["ap-j"]["name"])
         # Failed AP is opened for explicit retry; independent DB remains eligible
         # for the separate scope action, which must not retry AP automatically.
@@ -699,10 +700,11 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
         html, _ = self.render(case, "setup-p")
         metrics = {item.attrs["data-work-metric"]: item.text
                    for item in html.find(**{"data-work-metric": None})}
-        self.assertIn("3 / 6", metrics["jobs"])
-        self.assertIn("2 / 4", metrics["stages"])
+        self.assertIn("2 / 6", metrics["jobs"])
+        self.assertIn("모의 통과 · 실제 미확인1개 작업", metrics["simulation"])
+        self.assertIn("1 / 4", metrics["stages"])
         self.assertIn("1", metrics["attention"])
-        self.assertIn("3", metrics["incomplete"])
+        self.assertIn("4", metrics["incomplete"])
         self.assertEqual(self.run_button(html, "setup-p").text, "범위 모의 점검 실행")
 
     async def test_large_job_list_search_filter_and_pages_preserve_original_targets(self):
@@ -719,18 +721,18 @@ class WorkPanelTests(unittest.IsolatedAsyncioTestCase):
                                             "applicable": index != 62, "missing": []}
         first, _ = self.render(case, "install-t")
         rows = first.find("tr", **{"data-work-job": None})
-        self.assertEqual(len(rows), 6)
-        self.assertEqual(len(first.find("button", **{"data-action": "job_page"})), 2)
-        self.assertEqual(rows[0].attrs["data-work-job"], "search-job-0")
-        second, _ = self.render(case, "install-t", listView={"page": 1})
-        self.assertEqual(second.find("tr", **{"data-work-job": None})[0].attrs["data-work-job"], "search-job-6")
+        self.assertEqual(len(rows), 32, "V4 shows all todo rows; simulation and excluded groups start collapsed.")
+        self.assertFalse(first.find("button", **{"data-action": "job_page"}))
+        self.assertEqual(rows[0].attrs["data-work-job"], "search-job-30")
+        second, _ = self.render(case, "install-t", listView={"groups": {"simulation": True, "excluded": True}})
+        self.assertEqual(len(second.find("tr", **{"data-work-job": None})), 63)
         selected, _ = self.render(case, "install-t", listView={"query": "작업 3", "filter": "attention"})
         filtered = selected.find("tr", **{"data-work-job": None})
         self.assertEqual([row.attrs["data-work-job"] for row in filtered], [f"search-job-{i}" for i in range(30, 33)])
         self.assertFalse(selected.find("button", **{"data-action": "job_page"}))
         for row in filtered:
             self.assertEqual(row.find("button", **{"data-action": "select"})[0].attrs["data-node-id"], row.attrs["data-work-job"])
-        excluded, _ = self.render(case, "install-t", listView={"filter": "excluded"})
+        excluded, _ = self.render(case, "install-t", listView={"filter": "excluded", "groups": {"excluded": True}})
         self.assertEqual([row.attrs["data-work-job"] for row in excluded.find("tr", **{"data-work-job": None})], ["search-job-62"])
         empty, _ = self.render(case, "install-t", listView={"query": "<script>"})
         self.assertFalse(empty.find("tr", **{"data-work-job": None}))
@@ -987,7 +989,7 @@ return {blank,ready,excluded,html,connection,waiting};
         case = await self.step(case, "run", "db-j")
         html, _ = self.render(case, "db-j")
         parent = html.find("button", **{"data-action": "panel_parent", "data-node-id": "install-t"})
-        self.assertEqual(len(parent), 1)
+        self.assertEqual(len(parent), 2, "V4 preserves the top list return and result footer return.")
         self.assertEqual(sum("ew-primary" in item.attrs.get("class", "") for item in parent), 1)
         self.assertIn("단계로 돌아가기", " ".join(item.text for item in parent))
         self.assertTrue(all("data-mutation" not in item.attrs for item in parent))
@@ -1074,10 +1076,10 @@ return original.map(scope=>({original:drafts.read(scope,saved,-1),created:drafts
 const input={name:'ap',value:'A',defaultValue:'A'},text={value:'D',defaultValue:'D'};
 const inputs={querySelectorAll:()=>[input]},documentForm={querySelector:()=>text};
 const note={hidden:true},next={dataset:{workSavedNext:'saved next'},textContent:'saved next'};
-const run={dataset:{workBaseUnavailable:'false'},classList:{toggle(){}},disabled:false},content={innerHTML:'',contains:()=>false,querySelectorAll:()=>[]};
+const run={dataset:{workBaseUnavailable:'false'},classList:{toggle(){}},disabled:false},content={innerHTML:'',contains:()=>false,querySelector:()=>null,querySelectorAll:()=>[]};
 const tabs={innerHTML:''},host={dataset:{},contains:()=>false,setAttribute(){},querySelector(selector){return ({'#ees-work-inputs':inputs,'#ees-work-document':documentForm,'#ees-work-content':content,'#ees-work-tabs':tabs,'[data-work-dirty]':note,'[data-work-next]':next,'[data-work-draft-sensitive]':run})[selector] || null;},querySelectorAll:selector=>selector==='button[data-mutation]'?[run]:[]};
 const divider={dataset:{},setAttribute(){}};
-globalThis.document={querySelector:()=>null,createElement:tag=>tag==='aside'?host:divider};
+globalThis.document={querySelector:()=>null,createElement:tag=>tag==='main'?host:divider};
 globalThis.window={};
 input.closest=text.closest=selector=>selector==='[data-ees-work]'?host:selector==='#ees-work-inputs,#ees-work-document'?inputs:null;
 const site={id:'site-a',country:'US',name:'A',line:'1',ap:'A'},definition={version:1,sites:{'site-a':site},tools:{ap:{input:'ap',adapter:'mock'}},nodes:{p:{id:'p',name:'P',type:'p',children:['t']},t:{id:'t',name:'T',type:'t',parent:'p',children:['j']},j:{id:'j',name:'J',type:'j',parent:'t',mode:'draft',tools:['ap'],children:[]}}};
@@ -1117,9 +1119,9 @@ return {typed,reverted,documentTyped,documentReverted,observerKeptDisabled,block
 
     def test_panel_scroll_resets_for_new_target_but_survives_same_job_refresh(self):
         result = self.evaluate_drafts("""(() => {
-const content={innerHTML:'',scrollTop:0,contains:()=>false,querySelectorAll:()=>[]},tabs={innerHTML:''};
+const content={innerHTML:'',scrollTop:0,contains:()=>false,querySelector:()=>null,querySelectorAll:()=>[]},tabs={innerHTML:''};
 const host={isConnected:true,dataset:{},contains:()=>false,setAttribute(){},querySelector:selector=>({'#ees-work-content':content,'#ees-work-tabs':tabs}[selector] || null),querySelectorAll:()=>[]};
-globalThis.document={querySelector:()=>null,createElement:tag=>tag==='aside'?host:{dataset:{},setAttribute(){}}};globalThis.window={};
+globalThis.document={querySelector:()=>null,createElement:tag=>tag==='main'?host:{dataset:{},setAttribute(){}}};globalThis.window={};
 const site={id:'a',name:'공장'},definition={version:1,sites:{a:site},tools:{},nodes:{p:{id:'p',type:'p',name:'절차',children:['t']},t:{id:'t',parent:'p',type:'t',name:'단계',children:['j']},j:{id:'j',parent:'t',type:'j',name:'작업',mode:'manual'}}};
 const current={id:'first',version:1,revision:1,site,system:'EMS',process_id:'p',status:'in_progress',definition,jobs:{j:{status:'pending',inputs:{},history:[]}},node_states:{j:{status:'pending'}}};
 const snapshot={state:{case:current,catalog:definition,cases:[]},selectedCaseId:'first',selectedId:'t',processId:'p',browsingSite:'a',browsingSystem:'EMS',category:'setup',runView:'current',chatRoute:true,busy:false};
@@ -1136,7 +1138,7 @@ return {selectedJob,refreshedJob,retainedJob,changedCase};
         result = self.evaluate_drafts(r"""(() => {
 return ['inline'].map(placement=>{
   let focusedNode=null;
-  const content={innerHTML:'',scrollTop:0,contains:()=>false,
+  const content={innerHTML:'',scrollTop:0,contains:()=>false,querySelector:()=>null,
     insertAdjacentHTML(position,html){this.innerHTML=html+this.innerHTML;},
     querySelectorAll(selector){
       if(selector!=='[data-action]')return [];
@@ -1148,8 +1150,8 @@ return ['inline'].map(placement=>{
   const tabs={innerHTML:''},host={isConnected:true,dataset:{},style:{},classList:{toggle(){}},contains:()=>false,setAttribute(){},
     remove(){this.isConnected=false;content.scrollTop=0;},
     querySelector:selector=>({'#ees-work-content':content,'#ees-work-tabs':tabs}[selector] || null),querySelectorAll:()=>[]};
-  const row={getBoundingClientRect:()=>({width:1920}),append(){host.isConnected=true;}},column={parentElement:row,insertBefore(){},classList:{add(){},remove(){}}},anchor={parentElement:column};
-  globalThis.document={querySelector:selector=>selector==='#chat-container #chat-pane'?anchor:null,createElement:tag=>tag==='aside'?host:{dataset:{},setAttribute(){},remove(){}}};globalThis.window={innerWidth:1920};
+  const row={getBoundingClientRect:()=>({width:1920}),append(){host.isConnected=true;},insertBefore(){host.isConnected=true;}},column={parentElement:row,style:{setProperty(){}},insertBefore(){},classList:{add(){},remove(){}}},anchor={parentElement:column};
+  globalThis.document={body:{dataset:{}},querySelector:selector=>selector==='#chat-container #chat-pane'?anchor:null,createElement:tag=>tag==='main'?host:{dataset:{},setAttribute(){},remove(){},after(){}}};globalThis.window={innerWidth:1920};
   const site={id:'a',name:'공장'},jobs=Array.from({length:40},(_,i)=>'j'+i);
   const definition={version:1,sites:{a:site},tools:{},nodes:{p:{id:'p',type:'p',name:'절차',children:['t']},t:{id:'t',parent:'p',type:'t',name:'단계',children:jobs}}};
   jobs.forEach(id=>{definition.nodes[id]={id,parent:'t',type:'j',name:'작업 '+id,mode:'manual',deps:id==='j30'?['j0']:[]};});
@@ -1166,7 +1168,7 @@ return ['inline'].map(placement=>{
   const returnLabel=()=>{const match=content.innerHTML.match(/data-action="panel_back"([^>]*)>([^<]+)/);return match?{label:match[2],accessible:match[1].match(/aria-label="([^"]+)"/)?.[1]}:null;};
   view.renderPanel(snapshot);content.scrollTop=180;click({action:'select',nodeId:'t'});
   view.handleEvent({type:'input',target:{id:'ees-work-job-search',value:'작업'}});
-  click({action:'job_filter',filter:'completed'});click({action:'job_page',page:'5'});click({action:'job_condition',nodeId:'j30'});
+  click({action:'job_filter',filter:'completed'});click({action:'job_group',group:'done'});click({action:'job_condition',nodeId:'j30'});
   content.scrollTop=440;const before=listHTML();click({action:'select',nodeId:'j30'});
   const actionTag=content.innerHTML.match(/<button([^>]*)>단계로 돌아가기<\/button>/)[1];
   click({action:actionTag.match(/data-action="([^"]+)"/)[1],nodeId:'t'},placement);
@@ -1185,6 +1187,68 @@ return ['inline'].map(placement=>{
                 })
                 self.assertEqual(case["ancestor"], {"id": "p", "scroll": 180, "focusedNode": "t"})
                 self.assertEqual(case["reopened"], {"scroll": 440, "listPreserved": True})
+
+    def test_new_completion_return_announces_next_work_and_preserves_list_controls(self):
+        result = self.evaluate_drafts(r"""(() => {
+return [false,true].map(simulation=>{
+  let focusedNode=null,scrolledNode=null,notices=[];
+  const control=(dataset)=>({dataset,focus(){focusedNode=dataset.nodeId || 'search';},scrollIntoView(){scrolledNode=dataset.nodeId || 'search';}});
+  const parse=attrs=>({action:attrs.match(/data-action="([^"]+)"/)?.[1],nodeId:attrs.match(/data-node-id="([^"]+)"/)?.[1]});
+  const content={innerHTML:'',scrollTop:0,contains:()=>false,
+    insertAdjacentHTML(position,html){this.innerHTML=html+this.innerHTML;},
+    querySelector(selector){
+      if(selector==='.ew-v4-list'&&this.innerHTML.includes('ew-v4-list"'))return {prepend(value){notices.push(value.innerHTML);}};
+      if(selector==='[data-group=todo] [data-action=select]'){
+        const row=this.innerHTML.match(/<tr\b([^>]*data-group="todo"[^>]*)>/);
+        return row?control(parse(row[1])):null;
+      }
+      if(selector==='#ees-work-job-search'&&this.innerHTML.includes('id="ees-work-job-search"'))return control({});
+      return null;
+    },
+    querySelectorAll(selector){return selector==='[data-action]'?[...this.innerHTML.matchAll(/<(?:button|tr)\b([^>]*)>/g)].map(item=>control(parse(item[1]))):[];}};
+  const tabs={innerHTML:''},host={isConnected:true,dataset:{},contains:()=>false,setAttribute(){},querySelector:selector=>({'#ees-work-content':content,'#ees-work-tabs':tabs}[selector] || null),querySelectorAll:()=>[]};
+  globalThis.document={querySelector:()=>null,createElement:tag=>tag==='main'?host:{dataset:{},setAttribute(){},innerHTML:''}};globalThis.window={};
+  const site={id:'a',name:'공장',db:'public-db'},ids=['j0','j1','previous','waiting','other'];
+  const definition={version:1,sites:{a:site},tools:{mock:{id:'mock',name:'모의 연결',adapter:'mock',input:'db'}},nodes:{p:{id:'p',type:'p',name:'절차',children:['t']},t:{id:'t',parent:'p',type:'t',name:'단계',children:ids}}};
+  ids.forEach(id=>{definition.nodes[id]={id,parent:'t',type:'j',name:id==='other'?'별도 항목':'업무 '+id,mode:'manual',deps:id==='waiting'?['j1']:[]};});
+  if(simulation)Object.assign(definition.nodes.j0,{mode:'tool',tools:['mock'],bindings:{mock:'db'}});
+  const current={id:'first',version:1,revision:1,site,system:'EMS',process_id:'p',status:'in_progress',definition,
+    jobs:Object.fromEntries(ids.map(id=>[id,{status:id==='previous'?'passed':'pending',attempt:id==='previous'?1:0,inputs:{},history:id==='previous'?[{kind:'human_confirmation',status:'passed',attempt:1,checks:[]}]:[]} ])),
+    node_states:Object.fromEntries(ids.map(id=>[id,{status:id==='previous'?'passed':'pending',...(id==='waiting'?{missing:['j1']}: {})}]))};
+  let snapshot={state:{case:current,catalog:definition,cases:[]},selectedCaseId:'first',selectedId:'t',processId:'p',browsingSite:'a',browsingSystem:'EMS',category:'setup',runView:'current',chatRoute:true,busy:false};
+  const view=createWorkView({callbacks:{registerPanel(){},selectWork(id){snapshot={...snapshot,selectedId:id};view.renderPanel(snapshot);}}});
+  function click(dataset){const target={dataset,closest(selector){return selector==='[data-action]'?this:selector==='[data-ees-work]'?host:selector==='#ees-work-content'?content:null;}};view.handleEvent({type:'click',target});}
+  const change=(id,value,type='change')=>view.handleEvent({type,target:{id,value}});
+  const retainedControls=()=>({query:content.innerHTML.match(/id="ees-work-job-search"[^>]*value="([^"]*)"/)?.[1],
+    filter:/data-filter="all" aria-pressed="true"/.test(content.innerHTML),
+    assignee:/value="unassigned" selected/.test(content.innerHTML),sort:/value="procedure" selected/.test(content.innerHTML),
+    waitingClosed:/data-group="waiting" aria-expanded="false"/.test(content.innerHTML),doneOpen:/data-group="done" aria-expanded="true"/.test(content.innerHTML)});
+  view.renderPanel(snapshot);change('ees-work-job-search','업무','input');change('ees-v4-assignee-filter','unassigned');change('ees-v4-sort','procedure');
+  click({action:'job_filter',filter:'all'});click({action:'job_group',group:'waiting'});click({action:'job_group',group:'done'});
+  const before=retainedControls();content.scrollTop=330;click({action:'select',nodeId:'j0'});
+  const completed=JSON.parse(JSON.stringify(current));completed.revision=2;completed.jobs.j0={status:'passed',attempt:1,inputs:{},history:[{kind:simulation?'simulation':'human_confirmation',simulation,status:'passed',attempt:1,checks:[]}]};completed.node_states.j0={status:'passed'};
+  snapshot={...snapshot,state:{...snapshot.state,case:completed}};view.renderPanel(snapshot);click({action:'panel_parent',nodeId:'t'});
+  return {simulation,before,after:retainedControls(),notices,focusedNode,scrolledNode,scroll:content.scrollTop,
+    realCompleted:Number(content.innerHTML.match(/aria-label="실제 작업 완료 수" value="([0-9]+)"/)?.[1]),selectedId:snapshot.selectedId};
+});
+})()""")
+        for scenario in result:
+            with self.subTest(simulation=scenario["simulation"]):
+                self.assertEqual(scenario["selectedId"], "t")
+                self.assertEqual(scenario["before"], scenario["after"])
+                self.assertEqual(scenario["after"], {"query": "업무", "filter": True,
+                    "assignee": True, "sort": True, "waitingClosed": True, "doneOpen": True})
+                self.assertEqual(scenario["focusedNode"], "j1")
+                self.assertEqual(scenario["scrolledNode"], "j1")
+                self.assertEqual(scenario["scroll"], 330)
+                if scenario["simulation"]:
+                    self.assertEqual(scenario["notices"], [])
+                    self.assertEqual(scenario["realCompleted"], 1)
+                else:
+                    self.assertEqual(len(scenario["notices"]), 1)
+                    self.assertIn("업무 j0이 완료로 이동했습니다", scenario["notices"][0])
+                    self.assertIn('data-node-id="j0"', scenario["notices"][0])
+                    self.assertEqual(scenario["realCompleted"], 2)
 
     async def test_dirty_render_exposes_live_status_and_preserves_server_block(self):
         case = await self.ready(await self.create())
@@ -1212,7 +1276,7 @@ return ['inline'].map(placement=>{
         self.assertEqual(case["status"], "passed")
         for node_id in ("setup-p", "install-t"):
             with self.subTest(node=node_id):
-                html, _ = self.render(case, node_id, readOnly=True)
+                html, _ = self.render(case, node_id, readOnly=True, listView={"groups": {"done": True, "simulation": True}})
                 self.assert_no_mutation(html)
                 selected = {item.attrs["data-node-id"] for item in html.find(**{"data-action": "select"})}
                 self.assertTrue(set(case["definition"]["nodes"][node_id]["children"]) <= selected)

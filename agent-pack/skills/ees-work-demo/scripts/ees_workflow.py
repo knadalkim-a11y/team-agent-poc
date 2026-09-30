@@ -28,6 +28,7 @@ from .ees_workflow_definition import (
 from .ees_workflow_view import _applicable, _finished, _missing, _inputs, _view, _workflow
 from .ees_workflow_authoring import AuthoringMixin, WorkflowError
 from .ees_workflow_execution import ExecutionRuntime, init_execution
+from .ees_workflow_contract import validate_inputs
 
 _service = None
 
@@ -251,6 +252,89 @@ class WorkflowService(AuthoringMixin):
             return {"ok": False, "error": {"code": error.code, "message": error.message}}
         except sqlite3.Error:
             return {"ok": False, "error": {"code": "state_unavailable", "message": "업무 상태를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."}}
+
+    async def validate_input_draft(self, user, body):
+        """Validate a session-only proposal without writing inputs or planning a run.
+
+        The UI and Native Tool use this same access/schema check. A successful
+        result is permission to offer a local draft, never a save/run receipt.
+        """
+        try:
+            if not isinstance(body, dict) or set(body) - {"chat_id", "target", "inputs", "document"}:
+                raise WorkflowError("invalid_request", "초안의 대상과 공개 입력을 확인해 주세요.")
+            target = body.get("target")
+            if not isinstance(target, dict) or target.get("kind") not in {"case", "published"}:
+                raise WorkflowError("history_read_only", "현재 작업에서만 입력 초안을 작성할 수 있습니다.")
+            original_target = deepcopy(target)
+            if "draft_version" in target:
+                if type(target["draft_version"]) is not int or target["draft_version"] < 0:
+                    raise WorkflowError("invalid_selection", "입력 초안의 버전을 확인해 주세요.")
+                target = {key: value for key, value in target.items() if key != "draft_version"}
+            current = await self._user(user)
+            await self._chat(current, body.get("chat_id", ""))
+            assets = await self._assets(current)
+            if assets.get("available") is False:
+                raise WorkflowError("assets_unavailable", "현재 자료 접근을 확인하지 못했습니다. 다시 조회해 주세요.")
+            with self._db() as db:
+                if target["kind"] == "published":
+                    if set(target) != {"kind", "selection"}:
+                        raise WorkflowError("invalid_selection", "초안을 작성할 대상을 다시 확인해 주세요.")
+                    definition = self._catalog(db)[0]
+                    selection, applicable = self._selection(definition, target.get("selection"))
+                    node_id, process_id = selection["node_id"], selection["process_id"]
+                    case = None
+                else:
+                    if (set(target) != {"kind", "case_id", "node_id", "revision"}
+                            or type(target.get("revision")) is not int
+                            or any(not isinstance(target.get(key), str) or not target[key]
+                                   or len(target[key]) > 200 for key in ("case_id", "node_id"))):
+                        raise WorkflowError("invalid_selection", "초안을 작성할 대상을 다시 확인해 주세요.")
+                    case = self._case(db, _value(current, "id"), target["case_id"])
+                    if not case:
+                        raise WorkflowError("case_required", "접근할 수 있는 진행 건을 다시 확인해 주세요.")
+                    self._revision({"expected_revision": target["revision"]}, case["revision"])
+                    if _finished(case, case["process_id"]):
+                        raise WorkflowError("case_completed", "완료된 진행 건은 읽기 전용입니다.")
+                    node_id, process_id = target["node_id"], case["process_id"]
+                    self._node(case, node_id)
+                    definition, applicable = case["definition"], _applicable(case, node_id)
+                node = definition["nodes"].get(node_id, {})
+                if (node.get("type") != "j" or not applicable
+                        or _ancestors(definition["nodes"], node_id)[0]["id"] != process_id):
+                    raise WorkflowError("invalid_selection", "적용 가능한 작업을 선택한 뒤 초안을 작성해 주세요.")
+                inputs = body.get("inputs", {})
+                if not isinstance(inputs, dict):
+                    raise WorkflowError("invalid_inputs", "공개 입력 형식을 확인해 주세요.")
+                if node.get("execution"):
+                    schema = definition["nodes"][process_id].get("execution_inputs", {})
+                    if validate_inputs(schema, inputs, partial=True):
+                        raise WorkflowError("invalid_inputs", "등록된 입력 형식에 맞는 공개 값만 작성해 주세요.")
+                else:
+                    fields = {node.get("bindings", {}).get(key) or definition.get("tools", {}).get(key, {}).get("input")
+                              for key in node.get("tools", [])} & set(INPUTS)
+                    if any(key not in fields or not isinstance(value, str) or len(value) > 500
+                           for key, value in inputs.items()):
+                        raise WorkflowError("invalid_inputs", "이 작업에 등록된 공개 입력만 작성해 주세요.")
+                if "document" in body and (node.get("mode") != "draft" or not isinstance(body["document"], str)
+                        or len(body["document"].encode("utf-8")) > MAX_DOCUMENT_BYTES):
+                    raise WorkflowError("invalid_document", "검토 초안 형식과 길이를 확인해 주세요.")
+            if case:
+                await self._chat(current, case.get("chat_id", ""))
+            # Reuse the execution contract's ancestor and explicit skill-ref
+            # checks without creating a case, plan or dispatch. A published
+            # preview has no frozen case snapshot yet; its permitted current
+            # bodies are the read-only baseline for this validation.
+            skill_case = case or {"definition": definition, "_skill_snapshots": {
+                ref: {"body": body, "updated_at": assets.get("skill_versions", {}).get(ref)}
+                for ref, body in assets.get("skill_bodies", {}).items()}}
+            await self.execution._skills(current, skill_case, node_id)
+            return {"ok": True, "target": original_target, "inputs": deepcopy(inputs),
+                    **({"document": body["document"]} if "document" in body else {}),
+                    "persisted": False, "executed": False}
+        except WorkflowError as error:
+            return {"ok": False, "error": {"code": error.code, "message": error.message}}
+        except sqlite3.Error:
+            return {"ok": False, "error": {"code": "state_unavailable", "message": "입력 초안을 확인하지 못했습니다. 다시 조회해 주세요."}}
 
     @staticmethod
     def _revision(body, expected):
@@ -524,16 +608,33 @@ class WorkflowService(AuthoringMixin):
                 case["chat_id"] = chat_id
             else:
                 node = self._node(case, body.get("node_id", ""))
-                if self.execution.blocks_legacy(db, case, node["id"], action):
+                runtime_input_save = action == "update_inputs" and node.get("execution") and node["type"] == "j"
+                active_execution = db.execute("SELECT id FROM execution_runs WHERE case_id=? AND status NOT IN ('succeeded','failed','cancelled')", (case["id"],)).fetchone()
+                if active_execution and runtime_input_save:
+                    raise WorkflowError("execution_service_required", "진행 중인 실행 입력은 실행 화면에서 확인해 주세요. 초안은 보존됩니다.")
+                if not runtime_input_save and self.execution.blocks_legacy(db, case, node["id"], action):
                     raise WorkflowError("execution_service_required", "자동 실행은 실행 계획과 공통 실행 서비스를 통해 진행해 주세요.")
                 if action == "select":
                     case["selected_id"] = node["id"]
                 elif action == "update_inputs":
                     values = payload.get("inputs")
-                    if node["type"] != "j" or not isinstance(values, dict) or any(
+                    if runtime_input_save:
+                        if _ancestors(case["definition"]["nodes"], node["id"])[0]["id"] != case["process_id"]:
+                            raise WorkflowError("invalid_selection", "현재 진행 건의 작업을 선택해 주세요.")
+                        schema = case["definition"]["nodes"][case["process_id"]].get("execution_inputs", {})
+                        previous = case.get("execution_inputs", {})
+                        values = self.execution._inputs(schema, values)
+                        has_run = db.execute("SELECT id FROM execution_runs WHERE case_id=? LIMIT 1", (case["id"],)).fetchone()
+                        if has_run and any(key in previous and previous[key] != value for key, value in values.items()):
+                            raise WorkflowError("input_change_requires_new_plan", "이미 실행한 대상 입력은 새 진행 건에서 변경해 주세요.")
+                        replacement = values if payload.get("replace_inputs") is True else {**previous, **values}
+                        if has_run and replacement != previous:
+                            raise WorkflowError("input_change_requires_new_plan", "이미 실행한 대상 입력은 새 진행 건에서 변경해 주세요.")
+                        case["execution_inputs"] = self.execution._inputs(schema, replacement)
+                    elif node["type"] != "j" or not isinstance(values, dict) or any(
                             key not in INPUTS or not isinstance(value, str) or len(value) > 500 for key, value in values.items()):
                         raise WorkflowError("invalid_inputs", "작업의 공개 점검 대상만 입력해 주세요. 인증정보는 입력하지 않습니다.")
-                    if any(case["jobs"][node["id"]]["inputs"].get(key) != value for key, value in values.items()):
+                    elif any(case["jobs"][node["id"]]["inputs"].get(key) != value for key, value in values.items()):
                         self._invalidate(case, node["id"])
                         case["jobs"][node["id"]]["inputs"].update(values)
                 elif node["type"] == "j":
@@ -661,6 +762,209 @@ async def handle_action(user, body):
     return await _production_service().handle_action(user, body)
 
 
+async def validate_input_draft(user, body):
+    return await _production_service().validate_input_draft(user, body)
+
+
+def _input_draft_receipt(target, receipt):
+    """Accept only the small public receipt shape, never arbitrary message data."""
+    if not isinstance(target, dict) or not isinstance(receipt, dict):
+        return None
+    cleaned_target = {key: value for key, value in target.items() if key != "draft_version"}
+    if "draft_version" in target and (type(target["draft_version"]) is not int or target["draft_version"] < 0):
+        return None
+    kind = target.get("kind")
+    if kind == "case":
+        if (set(cleaned_target) != {"kind", "case_id", "node_id", "revision"}
+                or type(target.get("revision")) is not int or target["revision"] < 0
+                or any(not isinstance(target.get(key), str) or not target[key] or len(target[key]) > 200
+                       for key in ("case_id", "node_id"))):
+            return None
+        node_id, case_id = target["node_id"], target["case_id"]
+    elif kind == "published":
+        selection = target.get("selection")
+        if (set(cleaned_target) != {"kind", "selection"} or not isinstance(selection, dict)
+                or set(selection) != {"site_id", "system", "process_id", "node_id", "version"}
+                or type(selection.get("version")) is not int or selection["version"] < 1
+                or any(not isinstance(selection.get(key), str) or not selection[key] or len(selection[key]) > 200
+                       for key in ("site_id", "system", "process_id", "node_id"))):
+            return None
+        node_id, case_id = selection["node_id"], ""
+    else:
+        return None
+    fields, source, proposal_id = receipt.get("fields"), receipt.get("source"), receipt.get("id")
+    if (not isinstance(proposal_id, str) or re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", proposal_id) is None
+            or receipt.get("status") not in {"applied", "undone"}
+            or receipt.get("persisted") is not False or receipt.get("executed") is not False
+            or not isinstance(source, str) or not source.strip() or len(source) > 500
+            or not isinstance(fields, list) or not fields or len(fields) > 64
+            or any(not isinstance(field, str) or not field or len(field) > 200 for field in fields)
+            or receipt.get("node_id", node_id) != node_id or receipt.get("case_id", case_id) != case_id):
+        return None
+    return {"target": deepcopy(target), "action_record": {
+        "id": proposal_id, "status": receipt["status"], "node_id": node_id, "case_id": case_id,
+        "fields": list(dict.fromkeys(fields)), "source": source, "persisted": False, "executed": False}}
+
+
+async def _input_draft_record_access(service, current, target):
+    """Historical receipts keep their original revision; recheck current access."""
+    with service._db() as db:
+        if target["kind"] == "case":
+            case = service._case(db, _value(current, "id"), target["case_id"])
+            definition, node_id, process_id = case["definition"], target["node_id"], case["process_id"]
+        else:
+            definition = service._catalog(db)[0]
+            selection = target["selection"]
+            node_id, process_id = selection["node_id"], selection["process_id"]
+            if selection["site_id"] not in definition["sites"] or selection["system"] not in SYSTEMS:
+                raise WorkflowError("invalid_selection", "과거 입력의 현재 접근 범위를 확인하지 못했습니다.")
+            case = None
+        node = definition["nodes"].get(node_id)
+        if not node or node.get("type") != "j" or _ancestors(definition["nodes"], node_id)[0]["id"] != process_id:
+            raise WorkflowError("invalid_selection", "과거 입력의 현재 작업 접근을 확인하지 못했습니다.")
+    if case:
+        await service._chat(current, case.get("chat_id", ""))
+    assets = await service._assets(current)
+    if assets.get("available") is False:
+        raise WorkflowError("assets_unavailable", "현재 자료 접근을 확인하지 못했습니다.")
+    references = {skill.get("reference") for ancestor in _ancestors(definition["nodes"], node_id)
+                  for key in ancestor.get("skills", [])
+                  for skill in [definition.get("skills", {}).get(key, {})]
+                  if skill.get("source") == "open_webui"}
+    references.update(item.get("skill_id") for item in node.get("execution", {}).get("skill_refs", []))
+    # This is historical chat evidence, not permission to execute a frozen plan.
+    # Current access is required; a still-readable Skill edit does not erase history.
+    bodies = assets.get("skill_bodies", {})
+    if any(not isinstance(ref, str) or ref not in bodies for ref in references):
+        raise WorkflowError("skill_unavailable", "현재 작업 자료 접근 권한을 확인하지 못했습니다.")
+
+
+async def input_draft_records(user, chat_id):
+    """Read actual Native message status history; this creates no receipt store."""
+    try:
+        from open_webui.models.chats import Chats
+        service = _production_service()
+        current = await service._user(user)
+        if not isinstance(chat_id, str) or not chat_id or len(chat_id) > 200:
+            raise WorkflowError("invalid_chat", "입력 기록을 조회할 대화를 확인해 주세요.")
+        await service._chat(current, chat_id)
+        chat = await Chats.get_chat_by_id(chat_id)
+        if not chat or _value(chat, "user_id") != _value(current, "id"):
+            raise WorkflowError("chat_forbidden", "본인의 대화 기록만 조회할 수 있습니다.")
+        assets = await service._assets(current)
+        if assets.get("available") is False:
+            raise WorkflowError("assets_unavailable", "현재 자료 접근을 확인하지 못했습니다.")
+        messages = _value(chat, "chat", {}).get("history", {}).get("messages", {})
+        if not isinstance(messages, dict):
+            raise WorkflowError("records_unavailable", "저장된 입력 기록을 확인하지 못했습니다.")
+        records, permitted = [], {}
+        for message_id, message in messages.items():
+            if (not isinstance(message_id, str) or not message_id or len(message_id) > 200
+                    or not isinstance(message, dict) or message.get("role") != "assistant"
+                    or not isinstance(message.get("statusHistory", []), list)):
+                continue
+            seen = set()
+            for status in reversed(message.get("statusHistory", [])):
+                if not isinstance(status, dict):
+                    continue
+                receipt = status.get("ees_work_action")
+                proposal_id = receipt.get("id") if isinstance(receipt, dict) else None
+                if not isinstance(proposal_id, str) or proposal_id in seen:
+                    continue
+                seen.add(proposal_id)
+                record = _input_draft_receipt(status.get("ees_work_target"), receipt)
+                if not record:
+                    continue
+                identity = _dump({key: value for key, value in record["target"].items() if key != "draft_version"})
+                if identity not in permitted:
+                    try:
+                        await _input_draft_record_access(service, current, record["target"])
+                        permitted[identity] = True
+                    except WorkflowError:
+                        permitted[identity] = False
+                if permitted[identity]:
+                    records.append({"message_id": message_id, **record})
+        return {"ok": True, "records": records}
+    except WorkflowError as error:
+        return {"ok": False, "error": {"code": error.code, "message": error.message}}
+    except Exception:
+        return {"ok": False, "error": {"code": "records_unavailable", "message": "저장된 입력 기록을 조회하지 못했습니다."}}
+
+
+async def record_input_draft(user, chat_id, message_id, target, receipt):
+    """Internal Native Tool receipt; keep it in the existing message status log."""
+    from open_webui.models.chats import Chats
+    from open_webui.socket.main import get_event_emitter
+    service = _production_service()
+    current = await service._user(user)
+    await service._chat(current, chat_id)
+    record = _input_draft_receipt(target, receipt)
+    if not record:
+        return {"ok": False, "code": "invalid_receipt"}
+    target, receipt = record["target"], record["action_record"]
+    chat = await Chats.get_chat_by_id(chat_id)
+    if not chat or _value(chat, "user_id") != _value(current, "id"):
+        return {"ok": False, "code": "message_unavailable"}
+    messages = _value(chat, "chat", {}).get("history", {}).get("messages", {})
+    if not isinstance(message_id, str) or messages.get(message_id, {}).get("role") != "assistant":
+        return {"ok": False, "code": "message_unavailable"}
+    for status in reversed(messages[message_id].get("statusHistory", [])):
+        previous = _input_draft_receipt(status.get("ees_work_target"), status.get("ees_work_action")) if isinstance(status, dict) else None
+        if previous and previous["action_record"]["id"] == receipt["id"]:
+            if previous == record:
+                return {"ok": True, "replayed": True}
+            break
+    description = "AI 입력 초안을 반영했습니다. 저장·점검은 수행하지 않았습니다." if receipt["status"] == "applied" else "AI 입력 직전의 초안으로 되돌렸습니다. 저장·실행 기록은 유지합니다."
+    fields = ", ".join(str(field) for field in receipt.get("fields", []))
+    description += " 변경 항목: " + fields + ". 입력 근거: " + str(receipt.get("source", ""))
+    if receipt["status"] == "applied":
+        description += ". 되돌리기는 업무 화면의 AI 입력 안내에서 선택할 수 있습니다."
+    data = {"description": description, "done": True, "ees_work_action": deepcopy(receipt), "ees_work_target": deepcopy(target)}
+    emitter = await get_event_emitter({"user_id": _value(current, "id"), "chat_id": chat_id, "message_id": message_id})
+    if not emitter:
+        return {"ok": False, "code": "message_unavailable"}
+    await emitter({"type": "status", "data": data})
+    # Socket delivery is not proof of persisted Native status history.
+    persisted = await Chats.get_chat_by_id(chat_id)
+    if not persisted or _value(persisted, "user_id") != _value(current, "id"):
+        return {"ok": False, "code": "message_unavailable"}
+    message = _value(persisted, "chat", {}).get("history", {}).get("messages", {}).get(message_id, {})
+    if message.get("role") == "assistant":
+        for status in reversed(message.get("statusHistory", [])):
+            saved = _input_draft_receipt(status.get("ees_work_target"), status.get("ees_work_action")) if isinstance(status, dict) else None
+            if saved and saved["action_record"]["id"] == receipt["id"]:
+                return {"ok": saved == record, **({} if saved == record else {"code": "record_unconfirmed"})}
+    return {"ok": False, "code": "record_unconfirmed"}
+
+
+async def record_input_draft_undo(user, body):
+    """Only report undo of an actual Tool-produced receipt in this chat."""
+    if (not isinstance(body, dict) or set(body) != {"chat_id", "message_id", "proposal_id", "target"}
+            or any(not isinstance(body.get(key), str) or not body[key] or len(body[key]) > 200
+                   for key in ("chat_id", "message_id", "proposal_id"))):
+        return {"ok": False, "error": {"code": "invalid_request", "message": "되돌릴 입력 기록을 확인해 주세요."}}
+    checked = await validate_input_draft(user, {"chat_id": body["chat_id"], "target": body["target"], "inputs": {}})
+    if not checked.get("ok"):
+        return checked
+    from open_webui.models.chats import Chats
+    chat = await Chats.get_chat_by_id(body["chat_id"])
+    message = _value(chat, "chat", {}).get("history", {}).get("messages", {}).get(body["message_id"], {})
+    for status in reversed(message.get("statusHistory", [])):
+        receipt = status.get("ees_work_action", {})
+        if receipt.get("id") != body["proposal_id"]:
+            continue
+        original = {key: value for key, value in status.get("ees_work_target", {}).items() if key != "draft_version"}
+        target = {key: value for key, value in body["target"].items() if key != "draft_version"}
+        if original != target:
+            break
+        if receipt.get("status") == "undone":
+            return {"ok": True, "replayed": True}
+        if receipt.get("status") == "applied":
+            return await record_input_draft(user, body["chat_id"], body["message_id"], body["target"], {**receipt, "status": "undone"})
+        break
+    return {"ok": False, "error": {"code": "receipt_unavailable", "message": "이 대화의 실제 입력 반영 기록을 확인하지 못했습니다."}}
+
+
 async def execution_plan(user, body):
     return await _production_service().execution_plan(user, body)
 
@@ -699,6 +1003,18 @@ def install(app, verified_user):
     @app.post("/api/ees-work/action", include_in_schema=False)
     async def action_route(body: dict = Body(...), user=Depends(verified_user)):
         return response(await handle_action(user, body))
+
+    @app.post("/api/ees-work/input-draft/validate", include_in_schema=False)
+    async def input_draft_route(body: dict = Body(...), user=Depends(verified_user)):
+        return response(await validate_input_draft(user, body))
+
+    @app.post("/api/ees-work/input-draft/undo-record", include_in_schema=False)
+    async def input_draft_undo_route(body: dict = Body(...), user=Depends(verified_user)):
+        return response(await record_input_draft_undo(user, body))
+
+    @app.get("/api/ees-work/input-draft/records", include_in_schema=False)
+    async def input_draft_records_route(chat_id: str = "", user=Depends(verified_user)):
+        return response(await input_draft_records(user, chat_id))
 
 
     @app.get("/api/ees-work/authoring/capabilities", include_in_schema=False)

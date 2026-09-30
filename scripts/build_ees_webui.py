@@ -37,6 +37,14 @@ ASSET_NAMES = (
 )
 UI_FILES = {"chat-theme.css": "chat-theme.css", "brand-layers.svg": "brand-layers.svg", "assistant-layers.svg": "assistant-layers.svg", "assistant-default.svg": "assistant-default.svg", "navigation-plus.svg": "navigation-plus.svg", "navigation-search.svg": "navigation-search.svg", "work-search.svg": "work-search.svg", "work-condition-collapsed.svg": "work-condition-collapsed.svg", "work-condition-expanded.svg": "work-condition-expanded.svg", "font-licenses.txt": "fonts/LICENSE.txt",
             "ees-work-launcher.js": "ees-work-launcher.js", "ees-work-launcher.css": "ees-work-launcher.css"}
+V4_ICON_FILES = tuple("v4/" + name for name in (
+    "07d31.svg", "093d6.svg", "126c7.svg", "2e769.svg", "34f85.svg", "40ef1.svg", "44a96.svg",
+    "49833.svg", "4df0d.svg", "4fb09.svg", "522b5.svg", "69549.svg", "721d7.svg", "730b1.svg",
+    "7bb4a.svg", "87d9b.svg", "88026.svg", "92ec5.svg", "9c63b.svg", "a9175.svg", "a953c.svg",
+    "b8bc6.svg", "bddb4.svg", "c325d.svg", "cf77a.svg", "d448c.svg", "d553d.svg", "e1049.svg",
+    "e1472.svg", "ea639.svg", "ead50.svg", "eb94a.svg", "f6bbc.svg",
+))
+UI_FILES.update({name: name for name in V4_ICON_FILES})
 WORK_LAUNCHER_SOURCES = ("ees-work-view.js", "ees-work-designer.js", "ees-work-launcher.js")
 WORK_DIR = ASSET_DIR.parents[2] / "agent-pack" / "skills" / "ees-work-demo"
 WORK_ASSETS = {"scripts/ees_work_demo.py": "open_webui/ees_work_demo.py",
@@ -119,6 +127,8 @@ NATIVE_DRAFT_HOOK = (
     b'return expected!==null&&(G()||"")===expected&&(d()||"")===expected;},'
     b'read:()=>{if(!eesNativeDraftApi.ready())return null;'
     b'const snapshot={...us()};delete snapshot.toolApprovalMode;return snapshot;},'
+    b'hasPendingContent:()=>!eesNativeDraftApi.ready()||Boolean((r(Qr)||"").trim()||(r(mr)||[]).length),'
+    b'workMessageIds:()=>eesNativeDraftApi.ready()?Object.values(r(Ae)?.messages||{}).filter(message=>message?.role==="assistant"&&typeof message.id==="string").map(message=>message.id):[],'
     b'flush:()=>{const snapshot=eesNativeDraftApi.read();return snapshot?Ps(snapshot,Fr(),!1):!1;},'
     b'restore:async serialized=>{if(!eesNativeDraftApi.ready()||typeof serialized!=="string")return!1;'
     b'let snapshot;try{snapshot=JSON.parse(serialized);'
@@ -172,7 +182,7 @@ PATCHES = {
         # subsequent layout; no existing user width is migrated or overwritten.
         (b'const _t=Number(localStorage.getItem("sidebarWidth"));',
          b'const eesSavedSidebarWidth=localStorage.getItem("sidebarWidth");'
-         b'const _t=eesSavedSidebarWidth===null?312:Number(eesSavedSidebarWidth);', 1),
+         b'const _t=eesSavedSidebarWidth===null?(window.innerWidth<1536?224:256):Number(eesSavedSidebarWidth);', 1),
         (b'$a.set(R()?!1:localStorage.sidebar==="true")',
          b'$a.set(R()?!1:localStorage.getItem("sidebar")===null?!0:localStorage.sidebar==="true")', 1),
         # Keep the current locale's translations; only the Korean C labels
@@ -248,6 +258,10 @@ PATCHES = {
         (NATIVE_COMPLETION_CREATE_END,
          b'!g()&&!j()&&(' + NATIVE_COMPLETION_NOTIFY +
          b'window.history.replaceState(r(Ae).state,"",`/c/${Ot.chat_id}`)', 1),
+        # The existing Native message meta column persists this per-message
+        # reference. It is captured once, never inferred from a later screen.
+        (b'user_message:Ve,...Ne?{regeneration_prompt:Ne}',
+         b'user_message:Ve?{...Ve,meta:{...(Ve.meta||{}),ees_work_reference:(!j()&&!g()?window.__eesNativeWorkV1?.captureReference?.(ue||"",ie,Ve):null)||{kind:"none"}}}:Ve,...Ne?{regeneration_prompt:Ne}', 1),
     ],
     SOURCE_APP + "version.json": [
         (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.12"}', 1),
@@ -581,7 +595,15 @@ def assemble_work_launcher(ui_dir=UI_DIR):
                 rb"\bfunction\s+" + factory.encode("ascii") + rb"\s*\(", content)):
             raise ValueError(f"EES Work launcher factory/order differs: {filename}")
         parts.append(content)
-    return b"(() => {\n'use strict';\n" + b"\n;\n".join(parts) + b"\n})();\n"
+    assembled = b"(() => {\n'use strict';\n" + b"\n;\n".join(parts) + b"\n})();\n"
+    for relative in V4_ICON_FILES:
+        path = Path(ui_dir) / relative
+        if path.is_symlink() or not path.is_file() or not path.stat().st_size:
+            raise ValueError(f"Missing, empty, or linked EES v4 icon: {relative}")
+        name = path.name.encode("ascii")
+        hashed = name + b"?v=" + hashlib.sha256(path.read_bytes()).hexdigest().encode("ascii")
+        assembled = assembled.replace(b'"' + name + b'"', b'"' + hashed + b'"')
+    return assembled
 
 
 def prepare_additions(source, ui_dir, work_dir=WORK_DIR):
@@ -592,6 +614,12 @@ def prepare_additions(source, ui_dir, work_dir=WORK_DIR):
             raise ValueError(f"Missing, empty, or linked EES UI asset: {filename}")
         additions[TARGET_APP + relative] = (assemble_work_launcher(ui_dir)
             if filename == "ees-work-launcher.js" else path.read_bytes())
+    for relative in V4_ICON_FILES:
+        url = ("/_ees12/" + relative).encode("ascii")
+        digest = hashlib.sha256(additions[TARGET_APP + relative]).hexdigest().encode("ascii")
+        for filename in ("chat-theme.css", "ees-work-launcher.css"):
+            for source_url in (url, ("./" + relative).encode("ascii")):
+                additions[TARGET_APP + filename] = additions[TARGET_APP + filename].replace(source_url, source_url + b"?v=" + digest)
     for relative, target in WORK_ASSETS.items():
         path = Path(work_dir) / relative
         if path.is_symlink() or not path.is_file() or not path.stat().st_size:

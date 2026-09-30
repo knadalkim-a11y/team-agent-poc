@@ -1,5 +1,29 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="v4-ui-20260930"></a>
+
+## 4차 UI · Native 업무 수행과 Assistant 재배치 · 2026-09-30
+
+**현재 작업 기준:** 사용자 첨부 인계서 **v1.1**이 v1.0을 대체한다. 최신 확인 main은 `b0515d594da36112919a14c814a95e2b5900035e`(#67 병합)이며 `feat/ees-ui-v4-20260930`에서 기존 기능을 보존해 구현한다. #66/#67의 당시 결과와 아래 C안 기록은 과거 증거다. 이번 시각 기준은 [Figma 4차 A](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=747-559) / [4차 B](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=751-612), 페이지 `726:131`, v4 변수·텍스트 스타일·Button/Status와 `Icon/*`이다. 이전 A/C 외형을 현재 기준으로 재사용하지 않는다. Draft #53은 혼합하지 않는다.
+
+**승인 범위:** 최초 요청은 실제 제품 원본의 구현·관련 검사·관리 문서·커밋/push·같은 작업의 Draft PR까지였고 병합·Draft 해제·사내 배포/서버를 제외했다. 09-30 사용자의 시험 배포 요청과 `응 진행해` 후속 승인으로 #68 Draft 해제·main 병합·기존 TrialCommit 시험 적용 진행을 허용했다. 승인 전 검토 head는 `f72b53aef76cc9c25dc5d264ad47c21aa4a24a43`, 제품 원본은 `6c4111a9afbaadda78256c8276b41cbb875673db`이며 후속 승인을 기록하는 변경은 문서에 한정한다. PR #68의 `merge_commit_sha`를 원격 확인해 최종 적용 원본을 안내한다. Figma/PDF 원본 수정은 계속 제외한다. 실제 작업일 09-30의 STATUS에 따라 개발/문서 커밋에 `[skip ci]`를 붙이고 원격 Actions를 실행하지 않는다. 정확한 종료 head/PR은 [STATUS](../../STATUS.md), 시험별 판정은 [V4 평가](../../../evals/v4-ui-20260930.md)를 관리 원본으로 사용한다.
+
+**자료 확인 경계:** 첨부 [v1.1 원문 보존본](../../../evals/assets/v4-20260930/EES_Work_UI_V4_Implementation_Handoff_20260930_v1.1.md), Figma A/B context·변수·기준 이미지와 PDF 13쪽 추출문을 확인했다. ZIP/PDF 원본 바이트의 내려받기는 502로 실패해 내용물·해시·원본 PDF 렌더를 검증하지 못했다. 원본을 수정하지 않았으며, 보존된 PNG는 **Figma 기준 이미지**다. 실제 제품 스크린샷 또는 제품 시각 PASS가 아니다.
+
+| 새 UI / 필요한 연결 | 재사용 원본·변경 범위 | 반드시 확인할 조건 |
+|---|---|---|
+| 왼쪽 탐색 / 중앙 목록·상세 / 오른쪽 실제 Assistant | `ees-work-view.js`, 기존 launcher와 두 CSS. Native DOM과 대화 저장·입력·첨부 경로를 유지하고 배치 변경 | 실제 Native에서 목록→상세→저장/실행→결과→목록, Assistant 입력 도움; 새 채팅·독립 실행기 금지 |
+| 상태별 작업표·추천·복귀 | 기존 definition children/deps, case/node/job 상태, 현재 실행 기록과 view 상태 | 실제 데이터만 집계; 할 일/진행 중/대기/완료, 대기2개+더 보기·완료 접힘, 후보1개, 초점·스크롤·초안 유지 |
+| 모든 지원 J의 입력·행동·판정 | 기존 legacy `update_inputs/run`, Native `execution/plan/start/action`, schema renderer/validator | 초안/저장값/호출 snapshot 분리, 기존 승인·기본값 실행·UNKNOWN 보호, 모의와 실제 완료 구분 |
+| AI 초안·근거·되돌리기 | 기존 workflow Tool/Native event call, 사용자·대화/메시지·target 확인, 기존 입력 초안 map과 메시지 statusHistory의 ActionRecord | 실제 반영 성공 전 입력함 표시 금지, 저장/실행0, 이후 사용자 수정 보존, 당시 참고와 다음 참고 분리. 실제 Native 카드·되돌리기 검수 미실행 |
+| P/T·관리·자산 | 기존 범위 실행·최종 validator·Workspace/작성/게시·회원/그룹·개인 도구/설정 | 미설계를 삭제 사유로 삼지 않음; 이전 진행/기록/자산은 그대로 사용 |
+
+H-01~H-06을 [평가의 적용표](../../../evals/v4-ui-20260930.md#handoff-rules)에 기록한다. 1920 원안의 중앙 내부 정보 칸300과 본문 하단 행동 바를 유지한다. H-03에 따라 저장과 점검 시작을 분리한다. Native 첫 실행 전의 공개 입력 저장은 기존 case 저장 경로에서만 처리하고, 이미 시작한 실행의 입력은 기존 입력 확인/재개로 보완한다. 저장과 승인·명시 실행을 임의 결합하지 않는다.
+
+**진행과 수락:** 원본 코드의 재구성과 순수 렌더/서비스/컨트롤러 검사는 수행했으나, 이 세션에 고정 upstream wheel과 브라우저가 없어 **실제 Native A/B 대조·대표 왕복·실제 Assistant 입력 도움은 차단/미실행**이다. 제품 연결 코드의 존재·합성 테스트 성공을 전체 구현 검수 완료로 표시하지 않는다. 기존 Native 보내기·첨부·IME·반응형·다크·사용자 자산 실제 왕복·사내 결과도 새 PASS가 아니다. V4-01~15의 원문 기준과 남은 항목은 [평가표](../../../evals/v4-ui-20260930.md#v4-acceptance)에 유지한다. 최초 마감은 Draft였으며 후속 승인에 따른 Draft 해제·병합과 사용자 시험 적용을 제품 검수 완료로 해석하지 않는다. 다음에는 원격 최종 main SHA로 기존 자동 Backup·ApplyDemo 경로를 안내하고 사용자에게 기동·기존 대화·저장/복귀·입력 도움/Undo의 최소 결과만 확인한다.
+
+남은 제품 선택은 추천의 담당/검색 필터 적용 범위, 부분 결과 전용 표현, 담당·일정 공동 데이터 모델, 반응형·다크와 실행 이후 전용 디자인이다. 임시 구현과 기존 동작 보존을 최종 디자인 승인으로 바꾸지 않는다. 사용자에게 사내 원문 로그·파일 반출이나 대신 제품 검수를 요청해 이번 미실행을 PASS로 대체하지 않는다.
+
 <a id="c-visual-match-20260929"></a>
 
 ## C안 전체 화면 시각 일치 보완 · 2026-09-29
@@ -37,7 +61,7 @@
 
 저장소: knadalkim-a11y/team-agent-poc
 
-입력: 현재 실행 계약은 [09-25 공통 Native 도구·P/T 실행](#shared-native-runtime-20260925), 신규 작성 권한은 [09-24 시스템 담당자·P별 작성/게시](#system-authoring-20260924), 현재 화면 변경은 [09-29 C안 전체 화면 시각 보완](#c-visual-match-20260929)이며 [C안 2단계](#c-design-phase2-20260929)는 기능·상태 계약 근거이며 [09-23 A안 상태·실행 상세](#a-design-20260923)는 기존 구현 근거로 보존한다. [09-22 왼쪽 워크플로우 확정 디자인](#sidebar-final-20260922)과 [오른쪽 업무·수행·결과](#right-panel-20260922)의 탐색·기록 계약을 보존한다. [앞선 시각 계층 후속](#visual-hierarchy-20260922)과 [단계별 진행·무테 합의](#step-progress-ux-20260922)의 기존 실행·권한·저장 계약과 Workspace 구현은 보존한다. [09-21 통합 UX 첫 베타](#integrated-work-beta-20260921)는 당시 기준으로 보존한다. 이전 화면 참고자료는 [사이드바 개선 목업](ees-sidebar-refinement.html)이며, 이전 [공장별 업무 트리 목업](ees-factory-workspace.html)과 [최초 세부 편집 예시](ees-demo-workspace.html)는 보존한다. 목업 이후 확정한 [공장·시스템 공동 작업 목표](#ees-work-shared-target)는 아래 기록을 우선한다. ZIP 첨부 없이 저장소에서 읽는다. HTML 목업은 대화 내 표시용 참고자료이며 실제 제품은 기존 WebUI 컴포넌트·테마·AI 대화를 사용한다.
+입력: 현재 실행 계약은 [09-25 공통 Native 도구·P/T 실행](#shared-native-runtime-20260925), 신규 작성 권한은 [09-24 시스템 담당자·P별 작성/게시](#system-authoring-20260924), 현재 화면 변경은 [09-30 4차 UI](#v4-ui-20260930)이며 [09-29 C안 전체 화면 시각 보완](#c-visual-match-20260929)은 과거 시각 구현 근거다. [C안 2단계](#c-design-phase2-20260929)는 기능·상태 계약 근거이며 [09-23 A안 상태·실행 상세](#a-design-20260923)는 기존 구현 근거로 보존한다. [09-22 왼쪽 워크플로우 확정 디자인](#sidebar-final-20260922)과 [오른쪽 업무·수행·결과](#right-panel-20260922)의 탐색·기록 계약을 보존한다. [앞선 시각 계층 후속](#visual-hierarchy-20260922)과 [단계별 진행·무테 합의](#step-progress-ux-20260922)의 기존 실행·권한·저장 계약과 Workspace 구현은 보존한다. [09-21 통합 UX 첫 베타](#integrated-work-beta-20260921)는 당시 기준으로 보존한다. 이전 화면 참고자료는 [사이드바 개선 목업](ees-sidebar-refinement.html)이며, 이전 [공장별 업무 트리 목업](ees-factory-workspace.html)과 [최초 세부 편집 예시](ees-demo-workspace.html)는 보존한다. 목업 이후 확정한 [공장·시스템 공동 작업 목표](#ees-work-shared-target)는 아래 기록을 우선한다. ZIP 첨부 없이 저장소에서 읽는다. HTML 목업은 대화 내 표시용 참고자료이며 실제 제품은 기존 WebUI 컴포넌트·테마·AI 대화를 사용한다.
 
 <a id="c-design-phase3-20260929"></a>
 

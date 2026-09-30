@@ -1,0 +1,984 @@
+const assetPathPrefix = "https://www.figma.com/api/mcp/asset/76f065c0-6eaa-4dd8-90f3-422dc90c35a7";
+const imgStateAction = `${assetPathPrefix}/9c63b.svg`;
+const imgStateFailed = `${assetPathPrefix}/44a96.svg`;
+const imgStateRunning = `${assetPathPrefix}/49833.svg`;
+const imgStateWaiting = `${assetPathPrefix}/40ef1.svg`;
+const imgStateDone = `${assetPathPrefix}/d553d.svg`;
+const imgIconPanelRight = `${assetPathPrefix}/a9175.svg`;
+const imgIconChevronDown = `${assetPathPrefix}/92ec5.svg`;
+const imgIconListChecks = `${assetPathPrefix}/4df0d.svg`;
+const imgIconCompass = `${assetPathPrefix}/2e769.svg`;
+const imgIconHistory = `${assetPathPrefix}/c325d.svg`;
+const imgIconMessage = `${assetPathPrefix}/093d6.svg`;
+const imgIconChevronDown1 = `${assetPathPrefix}/ead50.svg`;
+const imgIconPackage = `${assetPathPrefix}/f6bbc.svg`;
+const imgIconActivity = `${assetPathPrefix}/126c7.svg`;
+const imgIconChevronRight = `${assetPathPrefix}/69549.svg`;
+const imgIconTriangleAlert = `${assetPathPrefix}/4fb09.svg`;
+const imgEllipse = `${assetPathPrefix}/07d31.svg`;
+const imgIconSettings = `${assetPathPrefix}/88026.svg`;
+const imgIconFileText = `${assetPathPrefix}/730b1.svg`;
+const imgIconMore = `${assetPathPrefix}/a953c.svg`;
+const imgIconSearch = `${assetPathPrefix}/b8bc6.svg`;
+const imgIconChevronDown2 = `${assetPathPrefix}/e1049.svg`;
+const imgIconPlus = `${assetPathPrefix}/721d7.svg`;
+const imgIconPanelRight1 = `${assetPathPrefix}/7bb4a.svg`;
+const imgIconFileText1 = `${assetPathPrefix}/522b5.svg`;
+const imgIconX = `${assetPathPrefix}/87d9b.svg`;
+const imgIconMessage1 = `${assetPathPrefix}/cf77a.svg`;
+const imgIconPaperclip = `${assetPathPrefix}/ea639.svg`;
+const imgIconChevronDown3 = `${assetPathPrefix}/34f85.svg`;
+const imgIconArrowUp = `${assetPathPrefix}/bddb4.svg`;
+
+type StatusGlyphV4Props = {
+  className?: string;
+  state?: "Action" | "Failed" | "Running" | "Waiting" | "Done";
+};
+
+function StatusGlyphV4({ className, state = "Action" }: StatusGlyphV4Props) {
+  const isDone = state === "Done";
+  const isFailed = state === "Failed";
+  const isRunning = state === "Running";
+  const isWaiting = state === "Waiting";
+  return (
+    <div className={className || "relative size-[16px]"} id={isDone ? "node-746_634" : isWaiting ? "node-746_630" : isRunning ? "node-746_627" : isFailed ? "node-746_623" : "node-746_619"}>
+      <img alt="" className="absolute block inset-0 max-w-none size-full" src={isDone ? imgStateDone : isWaiting ? imgStateWaiting : isRunning ? imgStateRunning : isFailed ? imgStateFailed : imgStateAction} />
+    </div>
+  );
+}
+
+type ButtonV4Props = {
+  className?: string;
+  label?: string;
+  style?: "Text";
+};
+
+function ButtonV4({ className, label = "버튼", style = "Text" }: ButtonV4Props) {
+  return (
+    <div className={className || "content-stretch flex h-[34px] items-center justify-center px-[6px] relative rounded-[6px]"} data-node-id="746:645">
+      <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-brand-text,#2f5f98)] tracking-[-0.042px] whitespace-nowrap" data-node-id="746:646">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+export default function Component4A() {
+  return (
+    <div className="bg-[var(--ees-surface-default,white)] content-stretch flex items-start relative size-full" data-node-id="747:559" data-name="4차 · A · 작업 목록 / 시스템 설치">
+      <div className="bg-[var(--ees-surface-sidebar,#fafafa)] border-[var(--ees-line-divider,#e6e6e9)] border-r border-solid content-stretch flex flex-col h-full items-start overflow-clip relative shrink-0 w-[256px]" data-node-id="747:560" data-name="Sidebar">
+        <div className="content-stretch flex gap-[8px] h-[48px] items-center overflow-clip pl-[16px] pr-[12px] relative shrink-0 w-full" data-node-id="747:561" data-name="Product">
+          <div className="bg-[var(--ees-brand-solid,#2f5f98)] content-stretch flex items-center justify-center overflow-clip relative rounded-[6px] shrink-0 size-[22px]" data-node-id="747:562" data-name="Frame">
+            <p className="[word-break:break-word] font-['Inter:Semi_Bold'] font-semibold leading-[16px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-inverse,white)] whitespace-nowrap" data-node-id="747:563">
+              E
+            </p>
+          </div>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[20px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.07px] whitespace-nowrap" data-node-id="747:564">
+            EES Work
+          </p>
+          <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="747:565" data-name="Flex" />
+          <div className="relative shrink-0 size-[16px]" data-node-id="747:566" data-name="Icon/panel-right">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconPanelRight} />
+          </div>
+        </div>
+        <div className="content-stretch flex flex-col items-start overflow-clip pb-[6px] pt-[2px] px-[8px] relative shrink-0 w-full" data-node-id="747:569" data-name="Workspace">
+          <div className="content-stretch flex gap-[10px] items-center overflow-clip px-[8px] py-[6px] relative rounded-[8px] shrink-0 w-full" data-node-id="767:669" data-name="Workspace switcher">
+            <div className="bg-[var(--ees-surface-muted,#ececef)] content-stretch flex items-center justify-center overflow-clip relative rounded-[6px] shrink-0 size-[28px]" data-node-id="767:670" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-strong,#3f4147)] whitespace-nowrap" data-node-id="767:671">
+                천안
+              </p>
+            </div>
+            <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip relative whitespace-nowrap" data-node-id="767:672" data-name="Frame">
+              <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px]" data-node-id="767:673">
+                천안 공장
+              </p>
+              <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)]" data-node-id="767:674">
+                EMS
+              </p>
+            </div>
+            <div className="relative shrink-0 size-[16px]" data-node-id="767:675" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown} />
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex flex-col gap-px items-start overflow-clip pb-[8px] pt-[4px] px-[8px] relative shrink-0 w-full" data-node-id="747:576" data-name="Nav">
+          <div className="content-stretch flex gap-[10px] items-center overflow-clip px-[8px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="747:577" data-name="Nav / 내 업무">
+            <div className="relative shrink-0 size-[16px]" data-node-id="747:578" data-name="Icon/list-checks">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconListChecks} />
+            </div>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="747:583">
+              내 업무
+            </p>
+            <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="747:584" data-name="Flex" />
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="747:585">
+              3
+            </p>
+          </div>
+          <div className="content-stretch flex gap-[10px] items-center overflow-clip px-[8px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="747:586" data-name="Nav / 워크플로우 찾기">
+            <div className="relative shrink-0 size-[16px]" data-node-id="747:587" data-name="Icon/compass">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconCompass} />
+            </div>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="747:590">
+              워크플로우 찾기
+            </p>
+            <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="747:591" data-name="Flex" />
+          </div>
+          <div className="content-stretch flex gap-[10px] items-center overflow-clip px-[8px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="747:592" data-name="Nav / 실행 기록">
+            <div className="relative shrink-0 size-[16px]" data-node-id="747:593" data-name="Icon/history">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconHistory} />
+            </div>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="747:597">
+              실행 기록
+            </p>
+            <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="747:598" data-name="Flex" />
+          </div>
+          <div className="content-stretch flex gap-[10px] items-center overflow-clip px-[8px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="747:599" data-name="Nav / 대화 기록">
+            <div className="relative shrink-0 size-[16px]" data-node-id="747:600" data-name="Icon/message">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconMessage} />
+            </div>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="747:602">
+              대화 기록
+            </p>
+            <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="747:603" data-name="Flex" />
+          </div>
+        </div>
+        <div className="bg-[var(--ees-line-divider,#e6e6e9)] h-px relative shrink-0 w-full" data-node-id="747:604" data-name="Divider" />
+        <div className="content-stretch flex items-start overflow-clip pb-[6px] pt-[14px] px-[16px] relative shrink-0 w-full" data-node-id="747:605" data-name="Frame">
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="747:606">
+            업무
+          </p>
+        </div>
+        <div className="content-stretch flex flex-col gap-px items-start overflow-clip px-[8px] relative shrink-0 w-full" data-node-id="747:607" data-name="Tree">
+          <div className="content-stretch flex gap-[8px] items-center overflow-clip pl-[6px] pr-[8px] py-[7px] relative rounded-[6px] shrink-0 w-full" data-node-id="773:746" data-name="Category / 셋업">
+            <div className="relative shrink-0 size-[14px]" data-node-id="773:747" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown1} />
+            </div>
+            <div className="relative shrink-0 size-[16px]" data-node-id="773:749" data-name="Icon/package">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconPackage} />
+            </div>
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] min-w-px overflow-hidden relative text-[14px] text-[color:var(--ees-text-primary,#1f2023)] text-ellipsis tracking-[-0.042px] whitespace-nowrap" data-node-id="773:753">
+              셋업
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="773:754">
+              1
+            </p>
+          </div>
+          <div className="content-stretch flex gap-[6px] items-center overflow-clip pl-[28px] pr-[8px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="773:755" data-name="Workflow / 신규 공장 횡전개">
+            <div className="relative shrink-0 size-[14px]" data-node-id="773:756" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown1} />
+            </div>
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] min-w-px overflow-hidden relative text-[14px] text-[color:var(--ees-text-strong,#3f4147)] text-ellipsis tracking-[-0.042px] whitespace-nowrap" data-node-id="773:758">
+              신규 공장 횡전개
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="773:759">
+              73/120
+            </p>
+          </div>
+          <div className="content-stretch flex gap-[8px] items-center overflow-clip pl-[48px] pr-[8px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="773:760" data-name="Stage / 1 사전 준비">
+            <StatusGlyphV4 className="relative shrink-0 size-[16px]" state="Done" />
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px overflow-hidden relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] text-ellipsis tracking-[-0.042px] whitespace-nowrap" data-node-id="773:764">
+              1 사전 준비
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="773:765">
+              18/18
+            </p>
+          </div>
+          <div className="content-stretch flex gap-[8px] items-center overflow-clip pl-[48px] pr-[8px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="773:766" data-name="Stage / 2 AP·DB 인프라 준비">
+            <StatusGlyphV4 className="relative shrink-0 size-[16px]" />
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px overflow-hidden relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] text-ellipsis tracking-[-0.042px] whitespace-nowrap" data-node-id="773:770">
+              2 AP·DB 인프라 준비
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="773:771">
+              21/24
+            </p>
+          </div>
+          <div className="bg-[var(--ees-surface-selected,#eef3f9)] content-stretch flex gap-[8px] items-center overflow-clip pl-[48px] pr-[8px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="773:772" data-name="Stage / 3 시스템 설치">
+            <StatusGlyphV4 className="relative shrink-0 size-[16px]" />
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] min-w-px overflow-hidden relative text-[14px] text-[color:var(--ees-brand-text,#2f5f98)] text-ellipsis tracking-[-0.042px] whitespace-nowrap" data-node-id="773:776">
+              3 시스템 설치
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-brand-text,#2f5f98)] whitespace-nowrap" data-node-id="773:777">
+              25/48
+            </p>
+          </div>
+          <div className="content-stretch flex gap-[8px] items-center overflow-clip pl-[48px] pr-[8px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="773:778" data-name="Stage / 4 인터페이스 확인">
+            <StatusGlyphV4 className="relative shrink-0 size-[16px]" state="Waiting" />
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px overflow-hidden relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] text-ellipsis tracking-[-0.042px] whitespace-nowrap" data-node-id="773:781">
+              4 인터페이스 확인
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="773:782">
+              8/30
+            </p>
+          </div>
+          <div className="content-stretch flex gap-[8px] items-center overflow-clip pl-[6px] pr-[8px] py-[7px] relative rounded-[6px] shrink-0 w-full" data-node-id="773:783" data-name="Category / 운영">
+            <div className="relative shrink-0 size-[14px]" data-node-id="773:784" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown1} />
+            </div>
+            <div className="relative shrink-0 size-[16px]" data-node-id="773:786" data-name="Icon/activity">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconActivity} />
+            </div>
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] min-w-px overflow-hidden relative text-[14px] text-[color:var(--ees-text-primary,#1f2023)] text-ellipsis tracking-[-0.042px] whitespace-nowrap" data-node-id="773:788">
+              운영
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="773:789">
+              1
+            </p>
+          </div>
+          <div className="content-stretch flex gap-[6px] items-center overflow-clip pl-[28px] pr-[8px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="773:790" data-name="Workflow / AP 서버 정기 점검">
+            <div className="relative shrink-0 size-[14px]" data-node-id="773:791" data-name="Icon/chevron-right">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronRight} />
+            </div>
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px overflow-hidden relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] text-ellipsis tracking-[-0.042px] whitespace-nowrap" data-node-id="773:793">
+              AP 서버 정기 점검
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="773:794">
+              3/10
+            </p>
+          </div>
+          <div className="content-stretch flex gap-[8px] items-center overflow-clip pl-[6px] pr-[8px] py-[7px] relative rounded-[6px] shrink-0 w-full" data-node-id="773:795" data-name="Category / 장애대응">
+            <div className="relative shrink-0 size-[14px]" data-node-id="773:796" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown1} />
+            </div>
+            <div className="relative shrink-0 size-[16px]" data-node-id="773:798" data-name="Icon/triangle-alert">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconTriangleAlert} />
+            </div>
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] min-w-px overflow-hidden relative text-[14px] text-[color:var(--ees-text-primary,#1f2023)] text-ellipsis tracking-[-0.042px] whitespace-nowrap" data-node-id="773:802">
+              장애대응
+            </p>
+            <div className="relative shrink-0 size-[6px]" data-node-id="773:803" data-name="Ellipse">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgEllipse} />
+            </div>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="773:804">
+              1
+            </p>
+          </div>
+          <div className="content-stretch flex gap-[6px] items-center overflow-clip pl-[28px] pr-[8px] py-[6px] relative rounded-[6px] shrink-0 w-full" data-node-id="773:805" data-name="Workflow / 라인 3 알람 누락 확인">
+            <div className="relative shrink-0 size-[14px]" data-node-id="773:806" data-name="Icon/chevron-right">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronRight} />
+            </div>
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px overflow-hidden relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] text-ellipsis tracking-[-0.042px] whitespace-nowrap" data-node-id="773:808">
+              라인 3 알람 누락 확인
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="773:809">
+              1/6
+            </p>
+          </div>
+        </div>
+        <div className="flex-[1_0_0] min-h-px relative w-px" data-node-id="747:653" data-name="Flex" />
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-solid border-t content-stretch flex gap-[10px] items-center overflow-clip pl-[16px] pr-[12px] py-[10px] relative shrink-0 w-full" data-node-id="747:654" data-name="Account">
+          <div className="bg-[var(--ees-surface-muted,#ececef)] content-stretch flex items-center justify-center overflow-clip relative rounded-[12px] shrink-0 size-[24px]" data-node-id="747:655" data-name="Frame">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="747:656">
+              김
+            </p>
+          </div>
+          <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col items-start min-w-px overflow-clip relative whitespace-nowrap" data-node-id="747:657" data-name="Frame">
+            <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px]" data-node-id="747:658">
+              김도윤
+            </p>
+            <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)]" data-node-id="747:659">
+              EMS 운영
+            </p>
+          </div>
+          <div className="relative shrink-0 size-[16px]" data-node-id="747:660" data-name="Icon/settings">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconSettings} />
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex flex-[1_0_0] flex-col h-full items-start min-w-px overflow-clip relative" data-node-id="749:584" data-name="Main">
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[8px] h-[48px] items-center overflow-clip pl-[32px] pr-[12px] relative shrink-0 w-full" data-node-id="749:585" data-name="Top bar">
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-tertiary,#6f717a)] tracking-[-0.042px] whitespace-nowrap" data-node-id="749:586">
+            셋업
+          </p>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-icon-faint,#a3a5ac)] tracking-[-0.042px] whitespace-nowrap" data-node-id="749:587">
+            /
+          </p>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-tertiary,#6f717a)] tracking-[-0.042px] whitespace-nowrap" data-node-id="749:588">
+            신규 공장 횡전개
+          </p>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-icon-faint,#a3a5ac)] tracking-[-0.042px] whitespace-nowrap" data-node-id="749:589">
+            /
+          </p>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="749:590">
+            시스템 설치
+          </p>
+          <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="749:591" data-name="Flex" />
+          <div className="content-stretch flex gap-[6px] items-center overflow-clip px-[8px] py-[6px] relative rounded-[6px] shrink-0" data-node-id="749:592" data-name="Procedure">
+            <div className="relative shrink-0 size-[16px]" data-node-id="749:593" data-name="Icon/file-text">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconFileText} />
+            </div>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="749:598">
+              절차 보기
+            </p>
+          </div>
+          <div className="content-stretch flex items-center justify-center overflow-clip relative rounded-[6px] shrink-0 size-[32px]" data-node-id="749:599" data-name="Frame">
+            <div className="relative shrink-0 size-[16px]" data-node-id="749:600" data-name="Icon/more">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconMore} />
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex flex-col gap-[6px] items-start overflow-clip pb-[20px] pt-[28px] px-[32px] relative shrink-0 w-full" data-node-id="768:668" data-name="Page header">
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="768:669">
+            단계 3 / 4
+          </p>
+          <div className="content-stretch flex gap-[16px] items-center overflow-clip relative shrink-0 w-full" data-node-id="768:670" data-name="Frame">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[32px] relative shrink-0 text-[24px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.36px] whitespace-nowrap" data-node-id="768:671">
+              시스템 설치
+            </p>
+            <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="768:672" data-name="Flex" />
+            <div className="content-stretch flex gap-[10px] items-center overflow-clip relative shrink-0" data-node-id="768:673" data-name="Progress">
+              <div className="bg-[var(--ees-surface-muted,#ececef)] h-[4px] overflow-clip relative rounded-[2px] shrink-0 w-[160px]" data-node-id="768:674" data-name="Track">
+                <div className="absolute bg-[var(--ees-brand-solid,#2f5f98)] h-[4px] left-0 rounded-[2px] top-0 w-[83px]" data-node-id="768:675" data-name="Rectangle" />
+              </div>
+              <div className="[word-break:break-word] content-stretch flex gap-[4px] items-center leading-[18px] overflow-clip relative shrink-0 whitespace-nowrap" data-node-id="768:676" data-name="Frame">
+                <p className="font-['Inter:Medium'] font-medium not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-primary,#1f2023)]" data-node-id="768:677">
+                  25
+                </p>
+                <p className="font-['Noto_Sans_KR:Regular'] font-normal relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="768:678">
+                  / 48 완료
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="[word-break:break-word] content-stretch flex font-['Noto_Sans_KR:Regular'] font-normal gap-[10px] items-center leading-[18px] overflow-clip relative shrink-0 text-[12px] whitespace-nowrap" data-node-id="768:679" data-name="Frame">
+            <p className="relative shrink-0 text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="768:680">
+              설치 상태와 DB·AP 연결을 확인하는 단계
+            </p>
+            <p className="relative shrink-0 text-[color:var(--ees-icon-faint,#a3a5ac)]" data-node-id="768:681">
+              ·
+            </p>
+            <p className="relative shrink-0 text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="768:682">
+              일정 10.20 – 11.30
+            </p>
+            <p className="relative shrink-0 text-[color:var(--ees-icon-faint,#a3a5ac)]" data-node-id="768:683">
+              ·
+            </p>
+            <p className="relative shrink-0 text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="768:684">
+              담당 4명
+            </p>
+            <p className="relative shrink-0 text-[color:var(--ees-icon-faint,#a3a5ac)]" data-node-id="768:685">
+              ·
+            </p>
+            <p className="relative shrink-0 text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="768:686">
+              절차 v3
+            </p>
+          </div>
+        </div>
+        <div className="content-stretch flex gap-[8px] items-center overflow-clip pb-[12px] px-[32px] relative shrink-0 w-full" data-node-id="768:687" data-name="Toolbar">
+          <div className="border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex gap-[6px] h-[32px] items-center overflow-clip px-[10px] relative rounded-[6px] shrink-0 w-[260px]" data-node-id="768:688" data-name="Search">
+            <div className="relative shrink-0 size-[14px]" data-node-id="768:689" data-name="Icon/search">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconSearch} />
+            </div>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-tertiary,#6f717a)] tracking-[-0.042px] whitespace-nowrap" data-node-id="768:692">
+              작업 이름으로 검색
+            </p>
+          </div>
+          <div className="border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex gap-[6px] h-[32px] items-center overflow-clip pl-[10px] pr-[8px] relative rounded-[6px] shrink-0" data-node-id="768:693" data-name="Filter / 담당">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="768:694">
+              담당
+            </p>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="768:695">
+              전체
+            </p>
+            <div className="relative shrink-0 size-[14px]" data-node-id="768:696" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown2} />
+            </div>
+          </div>
+          <div className="border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex gap-[6px] h-[32px] items-center overflow-clip pl-[10px] pr-[8px] relative rounded-[6px] shrink-0" data-node-id="776:722" data-name="Sort">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:723">
+              정렬
+            </p>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:724">
+              권장 순서
+            </p>
+            <div className="relative shrink-0 size-[14px]" data-node-id="776:725" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown2} />
+            </div>
+          </div>
+          <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="768:698" data-name="Flex" />
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="768:699">
+            48개 작업
+          </p>
+        </div>
+        <div className="content-stretch flex flex-col items-start overflow-clip pb-[24px] px-[32px] relative shrink-0 w-full" data-node-id="776:727" data-name="Table">
+          <div className="bg-[var(--ees-surface-sidebar,#fafafa)] border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid border-t content-stretch flex h-[34px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="776:728" data-name="Header row">
+            <div className="h-full relative shrink-0 w-[28px]" data-node-id="776:729" data-name="Frame" />
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[52px]" data-node-id="776:731" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:730">
+                순서
+              </p>
+            </div>
+            <div className="content-stretch flex flex-[1_0_0] h-full items-center min-w-px overflow-clip relative" data-node-id="776:733" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:732">
+                작업
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[108px]" data-node-id="776:735" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:734">
+                수행 방식
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:737" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:736">
+                담당
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:739" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:738">
+                후속 작업
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[140px]" data-node-id="776:741" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:740">
+                최근 실행
+              </p>
+            </div>
+            <div className="h-full relative shrink-0 w-[88px]" data-node-id="776:742" data-name="Frame" />
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[8px] h-[40px] items-center overflow-clip pl-[8px] pr-[12px] relative shrink-0 w-full" data-node-id="776:743" data-name="Group / 할 일">
+            <div className="relative shrink-0 size-[14px]" data-node-id="776:744" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown1} />
+            </div>
+            <StatusGlyphV4 className="relative shrink-0 size-[16px]" />
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:749">
+              할 일
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:750">
+              4
+            </p>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex h-[56px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="776:751" data-name="Row / DB 연결 확인">
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[28px]" data-node-id="776:755" data-name="Frame">
+              <StatusGlyphV4 className="relative shrink-0 size-[16px]" />
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[52px]" data-node-id="776:757" data-name="Frame">
+              <p className="[word-break:break-word] font-['Inter:Regular'] font-normal leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:756">
+                3.02
+              </p>
+            </div>
+            <div className="content-stretch flex flex-[1_0_0] h-full items-center min-w-px overflow-clip relative" data-node-id="776:764" data-name="Frame">
+              <div className="content-stretch flex flex-col gap-px items-start overflow-clip relative shrink-0" data-node-id="776:758" data-name="Frame">
+                <div className="content-stretch flex gap-[8px] items-center overflow-clip relative shrink-0" data-node-id="776:759" data-name="Frame">
+                  <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:760">
+                    DB 연결 확인
+                  </p>
+                  <div className="bg-[var(--ees-surface-selected,#eef3f9)] content-stretch flex items-start overflow-clip px-[6px] py-px relative rounded-[4px] shrink-0" data-node-id="776:761" data-name="Recommended">
+                    <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-brand-text,#2f5f98)] whitespace-nowrap" data-node-id="776:762">
+                      먼저
+                    </p>
+                  </div>
+                </div>
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:763">
+                  점검 대상을 입력해야 합니다
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[108px]" data-node-id="776:766" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:765">
+                자동 점검
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[8px] h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:770" data-name="Frame">
+              <div className="bg-[var(--ees-surface-muted,#ececef)] content-stretch flex items-center justify-center overflow-clip relative rounded-[10px] shrink-0 size-[20px]" data-node-id="776:767" data-name="Frame">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:768">
+                  김
+                </p>
+              </div>
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:769">
+                김도윤
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:774" data-name="Frame">
+              <div className="[word-break:break-word] content-stretch flex gap-[4px] items-center overflow-clip relative shrink-0 whitespace-nowrap" data-node-id="776:771" data-name="Frame">
+                <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px]" data-node-id="776:772">
+                  3개
+                </p>
+                <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)]" data-node-id="776:773">
+                  대기 중
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[140px]" data-node-id="776:776" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-icon-faint,#a3a5ac)] whitespace-nowrap" data-node-id="776:775">
+                —
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center justify-end overflow-clip relative shrink-0 w-[88px]" data-node-id="776:779" data-name="Frame">
+              <ButtonV4 className="content-stretch flex h-[34px] items-center justify-center px-[6px] relative rounded-[6px] shrink-0" label="입력" />
+            </div>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex h-[56px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="776:780" data-name="Row / 서비스 상태 확인">
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[28px]" data-node-id="776:784" data-name="Frame">
+              <StatusGlyphV4 className="relative shrink-0 size-[16px]" state="Failed" />
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[52px]" data-node-id="776:786" data-name="Frame">
+              <p className="[word-break:break-word] font-['Inter:Regular'] font-normal leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:785">
+                3.03
+              </p>
+            </div>
+            <div className="content-stretch flex flex-[1_0_0] h-full items-center min-w-px overflow-clip relative" data-node-id="776:791" data-name="Frame">
+              <div className="content-stretch flex flex-col gap-px items-start overflow-clip relative shrink-0" data-node-id="776:787" data-name="Frame">
+                <div className="content-stretch flex items-center overflow-clip relative shrink-0" data-node-id="776:788" data-name="Frame">
+                  <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:789">
+                    서비스 상태 확인
+                  </p>
+                </div>
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-status-danger,#bf3a2b)] whitespace-nowrap" data-node-id="776:790">
+                  응답 확인 실패 · HTTP 503
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[108px]" data-node-id="776:793" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:792">
+                자동 점검
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[8px] h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:797" data-name="Frame">
+              <div className="bg-[var(--ees-surface-muted,#ececef)] content-stretch flex items-center justify-center overflow-clip relative rounded-[10px] shrink-0 size-[20px]" data-node-id="776:794" data-name="Frame">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:795">
+                  김
+                </p>
+              </div>
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:796">
+                김도윤
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:801" data-name="Frame">
+              <div className="[word-break:break-word] content-stretch flex gap-[4px] items-center overflow-clip relative shrink-0 whitespace-nowrap" data-node-id="776:798" data-name="Frame">
+                <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px]" data-node-id="776:799">
+                  1개
+                </p>
+                <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)]" data-node-id="776:800">
+                  대기 중
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[140px]" data-node-id="776:803" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:802">
+                09:43 · 2회 시도
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center justify-end overflow-clip relative shrink-0 w-[88px]" data-node-id="776:806" data-name="Frame">
+              <ButtonV4 className="content-stretch flex h-[34px] items-center justify-center px-[6px] relative rounded-[6px] shrink-0" label="결과 보기" />
+            </div>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex h-[56px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="776:807" data-name="Row / 인터페이스 설정 검토">
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[28px]" data-node-id="776:811" data-name="Frame">
+              <StatusGlyphV4 className="relative shrink-0 size-[16px]" />
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[52px]" data-node-id="776:813" data-name="Frame">
+              <p className="[word-break:break-word] font-['Inter:Regular'] font-normal leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:812">
+                3.05
+              </p>
+            </div>
+            <div className="content-stretch flex flex-[1_0_0] h-full items-center min-w-px overflow-clip relative" data-node-id="776:818" data-name="Frame">
+              <div className="content-stretch flex flex-col gap-px items-start overflow-clip relative shrink-0" data-node-id="776:814" data-name="Frame">
+                <div className="content-stretch flex items-center overflow-clip relative shrink-0" data-node-id="776:815" data-name="Frame">
+                  <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:816">
+                    인터페이스 설정 검토
+                  </p>
+                </div>
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:817">
+                  AI가 작성한 초안을 검토해야 합니다
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[108px]" data-node-id="776:820" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:819">
+                사람 검토
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[8px] h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:824" data-name="Frame">
+              <div className="bg-[var(--ees-surface-muted,#ececef)] content-stretch flex items-center justify-center overflow-clip relative rounded-[10px] shrink-0 size-[20px]" data-node-id="776:821" data-name="Frame">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:822">
+                  박
+                </p>
+              </div>
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:823">
+                박서연
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:826" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-icon-faint,#a3a5ac)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:825">
+                —
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[140px]" data-node-id="776:828" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:827">
+                09.29 초안
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center justify-end overflow-clip relative shrink-0 w-[88px]" data-node-id="776:831" data-name="Frame">
+              <ButtonV4 className="content-stretch flex h-[34px] items-center justify-center px-[6px] relative rounded-[6px] shrink-0" label="검토" />
+            </div>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex h-[56px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="776:832" data-name="Row / 설비 매핑 확인">
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[28px]" data-node-id="776:836" data-name="Frame">
+              <StatusGlyphV4 className="relative shrink-0 size-[16px]" />
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[52px]" data-node-id="776:838" data-name="Frame">
+              <p className="[word-break:break-word] font-['Inter:Regular'] font-normal leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:837">
+                3.06
+              </p>
+            </div>
+            <div className="content-stretch flex flex-[1_0_0] h-full items-center min-w-px overflow-clip relative" data-node-id="776:843" data-name="Frame">
+              <div className="content-stretch flex flex-col gap-px items-start overflow-clip relative shrink-0" data-node-id="776:839" data-name="Frame">
+                <div className="content-stretch flex items-center overflow-clip relative shrink-0" data-node-id="776:840" data-name="Frame">
+                  <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:841">
+                    설비 매핑 확인
+                  </p>
+                </div>
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:842">
+                  매핑을 확인한 뒤 완료로 표시합니다
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[108px]" data-node-id="776:845" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:844">
+                사람 확인
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[8px] h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:849" data-name="Frame">
+              <div className="bg-[var(--ees-surface-muted,#ececef)] content-stretch flex items-center justify-center overflow-clip relative rounded-[10px] shrink-0 size-[20px]" data-node-id="776:846" data-name="Frame">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:847">
+                  이
+                </p>
+              </div>
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:848">
+                이준호
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:851" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-icon-faint,#a3a5ac)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:850">
+                —
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[140px]" data-node-id="776:853" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-icon-faint,#a3a5ac)] whitespace-nowrap" data-node-id="776:852">
+                —
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center justify-end overflow-clip relative shrink-0 w-[88px]" data-node-id="776:856" data-name="Frame">
+              <ButtonV4 className="content-stretch flex h-[34px] items-center justify-center px-[6px] relative rounded-[6px] shrink-0" label="확인" />
+            </div>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[8px] h-[40px] items-center overflow-clip pl-[8px] pr-[12px] relative shrink-0 w-full" data-node-id="776:857" data-name="Group / 진행 중">
+            <div className="relative shrink-0 size-[14px]" data-node-id="776:858" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown1} />
+            </div>
+            <StatusGlyphV4 className="relative shrink-0 size-[16px]" state="Running" />
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:863">
+              진행 중
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:864">
+              1
+            </p>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex h-[56px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="776:865" data-name="Row / 로그 수집 설정">
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[28px]" data-node-id="776:869" data-name="Frame">
+              <StatusGlyphV4 className="relative shrink-0 size-[16px]" state="Running" />
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[52px]" data-node-id="776:871" data-name="Frame">
+              <p className="[word-break:break-word] font-['Inter:Regular'] font-normal leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:870">
+                3.04
+              </p>
+            </div>
+            <div className="content-stretch flex flex-[1_0_0] h-full items-center min-w-px overflow-clip relative" data-node-id="776:876" data-name="Frame">
+              <div className="content-stretch flex flex-col gap-px items-start overflow-clip relative shrink-0" data-node-id="776:872" data-name="Frame">
+                <div className="content-stretch flex items-center overflow-clip relative shrink-0" data-node-id="776:873" data-name="Frame">
+                  <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:874">
+                    로그 수집 설정
+                  </p>
+                </div>
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:875">
+                  자동 점검 실행 중
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[108px]" data-node-id="776:878" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:877">
+                자동 점검
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[8px] h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:882" data-name="Frame">
+              <div className="bg-[var(--ees-surface-muted,#ececef)] content-stretch flex items-center justify-center overflow-clip relative rounded-[10px] shrink-0 size-[20px]" data-node-id="776:879" data-name="Frame">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:880">
+                  김
+                </p>
+              </div>
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:881">
+                김도윤
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:884" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-icon-faint,#a3a5ac)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:883">
+                —
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[140px]" data-node-id="776:886" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:885">
+                09:51 시작
+              </p>
+            </div>
+            <div className="h-full relative shrink-0 w-[88px]" data-node-id="776:887" data-name="Frame" />
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[8px] h-[40px] items-center overflow-clip pl-[8px] pr-[12px] relative shrink-0 w-full" data-node-id="776:888" data-name="Group / 대기">
+            <div className="relative shrink-0 size-[14px]" data-node-id="776:889" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown1} />
+            </div>
+            <StatusGlyphV4 className="relative shrink-0 size-[16px]" state="Waiting" />
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:893">
+              대기
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:894">
+              18
+            </p>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex h-[56px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="776:895" data-name="Row / AP 연결 확인">
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[28px]" data-node-id="776:898" data-name="Frame">
+              <StatusGlyphV4 className="relative shrink-0 size-[16px]" state="Waiting" />
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[52px]" data-node-id="776:900" data-name="Frame">
+              <p className="[word-break:break-word] font-['Inter:Regular'] font-normal leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:899">
+                3.07
+              </p>
+            </div>
+            <div className="content-stretch flex flex-[1_0_0] h-full items-center min-w-px overflow-clip relative" data-node-id="776:905" data-name="Frame">
+              <div className="content-stretch flex flex-col gap-px items-start overflow-clip relative shrink-0" data-node-id="776:901" data-name="Frame">
+                <div className="content-stretch flex items-center overflow-clip relative shrink-0" data-node-id="776:902" data-name="Frame">
+                  <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:903">
+                    AP 연결 확인
+                  </p>
+                </div>
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:904">
+                  선행 작업 대기 · DB 연결 확인
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[108px]" data-node-id="776:907" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:906">
+                자동 점검
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[8px] h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:911" data-name="Frame">
+              <div className="bg-[var(--ees-surface-muted,#ececef)] content-stretch flex items-center justify-center overflow-clip relative rounded-[10px] shrink-0 size-[20px]" data-node-id="776:908" data-name="Frame">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:909">
+                  김
+                </p>
+              </div>
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:910">
+                김도윤
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:913" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-icon-faint,#a3a5ac)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:912">
+                —
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[140px]" data-node-id="776:915" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-icon-faint,#a3a5ac)] whitespace-nowrap" data-node-id="776:914">
+                —
+              </p>
+            </div>
+            <div className="h-full relative shrink-0 w-[88px]" data-node-id="776:916" data-name="Frame" />
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex h-[56px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="776:917" data-name="Row / 데이터 적재 확인">
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[28px]" data-node-id="776:920" data-name="Frame">
+              <StatusGlyphV4 className="relative shrink-0 size-[16px]" state="Waiting" />
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[52px]" data-node-id="776:922" data-name="Frame">
+              <p className="[word-break:break-word] font-['Inter:Regular'] font-normal leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:921">
+                3.08
+              </p>
+            </div>
+            <div className="content-stretch flex flex-[1_0_0] h-full items-center min-w-px overflow-clip relative" data-node-id="776:927" data-name="Frame">
+              <div className="content-stretch flex flex-col gap-px items-start overflow-clip relative shrink-0" data-node-id="776:923" data-name="Frame">
+                <div className="content-stretch flex items-center overflow-clip relative shrink-0" data-node-id="776:924" data-name="Frame">
+                  <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:925">
+                    데이터 적재 확인
+                  </p>
+                </div>
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:926">
+                  선행 작업 대기 · DB 연결 확인
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[108px]" data-node-id="776:929" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:928">
+                자동 점검
+              </p>
+            </div>
+            <div className="content-stretch flex gap-[8px] h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:933" data-name="Frame">
+              <div className="bg-[var(--ees-surface-muted,#ececef)] content-stretch flex items-center justify-center overflow-clip relative rounded-[10px] shrink-0 size-[20px]" data-node-id="776:930" data-name="Frame">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="776:931">
+                  이
+                </p>
+              </div>
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:932">
+                이준호
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[124px]" data-node-id="776:935" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-icon-faint,#a3a5ac)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:934">
+                —
+              </p>
+            </div>
+            <div className="content-stretch flex h-full items-center overflow-clip relative shrink-0 w-[140px]" data-node-id="776:937" data-name="Frame">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-icon-faint,#a3a5ac)] whitespace-nowrap" data-node-id="776:936">
+                —
+              </p>
+            </div>
+            <div className="h-full relative shrink-0 w-[88px]" data-node-id="776:938" data-name="Frame" />
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex h-[40px] items-center overflow-clip pl-[80px] pr-[12px] relative shrink-0 w-full" data-node-id="776:939" data-name="More">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-brand-text,#2f5f98)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:940">
+              16개 더 보기
+            </p>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[8px] h-[40px] items-center overflow-clip pl-[8px] pr-[12px] relative shrink-0 w-full" data-node-id="776:941" data-name="Group / 완료">
+            <div className="relative shrink-0 size-[14px]" data-node-id="776:942" data-name="Icon/chevron-right">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronRight} />
+            </div>
+            <StatusGlyphV4 className="relative shrink-0 size-[16px]" state="Done" />
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="776:947">
+              완료
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="776:948">
+              25
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-l border-solid content-stretch flex flex-col h-full items-start overflow-clip relative shrink-0 w-[360px]" data-node-id="749:6968" data-name="Assistant">
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[6px] h-[48px] items-center overflow-clip pl-[20px] pr-[10px] relative shrink-0 w-full" data-node-id="749:6969" data-name="Header">
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[20px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.07px] whitespace-nowrap" data-node-id="749:6970">
+            EES Assistant
+          </p>
+          <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="749:6971" data-name="Flex" />
+          <div className="content-stretch flex items-center justify-center overflow-clip relative rounded-[6px] shrink-0 size-[30px]" data-node-id="749:6972" data-name="IconButton / plus">
+            <div className="relative shrink-0 size-[16px]" data-node-id="749:6973" data-name="Icon/plus">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconPlus} />
+            </div>
+          </div>
+          <div className="content-stretch flex items-center justify-center overflow-clip relative rounded-[6px] shrink-0 size-[30px]" data-node-id="749:6976" data-name="IconButton / panel-right">
+            <div className="relative shrink-0 size-[16px]" data-node-id="749:6977" data-name="Icon/panel-right">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconPanelRight1} />
+            </div>
+          </div>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[6px] items-center overflow-clip pl-[20px] pr-[16px] py-[10px] relative shrink-0 w-full" data-node-id="749:6980" data-name="Reference">
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="768:7067">
+            참고
+          </p>
+          <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex gap-[4px] items-center overflow-clip pl-[6px] pr-[4px] py-[2px] relative rounded-[4px] shrink-0" data-node-id="768:7068" data-name="Reference tag">
+            <div className="relative shrink-0 size-[12px]" data-node-id="768:7069" data-name="Icon/file-text">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconFileText1} />
+            </div>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-strong,#3f4147)] whitespace-nowrap" data-node-id="768:7074">
+              시스템 설치
+            </p>
+            <div className="relative shrink-0 size-[12px]" data-node-id="768:7075" data-name="Icon/x">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconX} />
+            </div>
+          </div>
+          <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="768:7078" data-name="Flex" />
+        </div>
+        <div className="content-stretch flex flex-[1_0_0] flex-col gap-[12px] items-start min-h-px overflow-clip pb-[16px] pt-[24px] px-[20px] relative w-full" data-node-id="749:6985" data-name="Thread">
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] w-[min-content]" data-node-id="768:7079">
+            이 화면의 단계와 작업을 참고해 답변합니다. 업무와 관계없는 질문도 할 수 있습니다.
+          </p>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="768:7080">
+            추천 질문
+          </p>
+          <div className="border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[8px] shrink-0 w-full" data-node-id="768:7081" data-name="Suggested">
+            <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[10px] items-center overflow-clip pl-[12px] pr-[10px] py-[10px] relative shrink-0 w-full" data-node-id="768:7082" data-name="Suggestion">
+              <div className="relative shrink-0 size-[14px]" data-node-id="768:7083" data-name="Icon/message">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconMessage1} />
+              </div>
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px]" data-node-id="768:7085">
+                이 단계에서 먼저 할 일은?
+              </p>
+              <div className="relative shrink-0 size-[14px]" data-node-id="768:7086" data-name="Icon/chevron-right">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronRight} />
+              </div>
+            </div>
+            <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[10px] items-center overflow-clip pl-[12px] pr-[10px] py-[10px] relative shrink-0 w-full" data-node-id="768:7088" data-name="Suggestion">
+              <div className="relative shrink-0 size-[14px]" data-node-id="768:7089" data-name="Icon/message">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconMessage1} />
+              </div>
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px]" data-node-id="768:7091">
+                서비스 상태 확인이 실패한 이유는?
+              </p>
+              <div className="relative shrink-0 size-[14px]" data-node-id="768:7092" data-name="Icon/chevron-right">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronRight} />
+              </div>
+            </div>
+            <div className="content-stretch flex gap-[10px] items-center overflow-clip pl-[12px] pr-[10px] py-[10px] relative shrink-0 w-full" data-node-id="768:7094" data-name="Suggestion">
+              <div className="relative shrink-0 size-[14px]" data-node-id="768:7095" data-name="Icon/message">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconMessage1} />
+              </div>
+              <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px]" data-node-id="768:7097">
+                DB 연결 확인은 어떻게 하나요?
+              </p>
+              <div className="relative shrink-0 size-[14px]" data-node-id="768:7098" data-name="Icon/chevron-right">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronRight} />
+              </div>
+            </div>
+          </div>
+          <div className="flex-[1_0_0] min-h-px relative w-px" data-node-id="749:6995" data-name="Flex" />
+        </div>
+        <div className="content-stretch flex flex-col gap-[8px] items-start overflow-clip pb-[14px] px-[16px] relative shrink-0 w-full" data-node-id="749:6996" data-name="Composer">
+          <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex flex-col gap-[14px] items-start overflow-clip pb-[8px] pl-[12px] pr-[8px] pt-[12px] relative rounded-[8px] shrink-0 w-full" data-node-id="749:6997" data-name="Input">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-tertiary,#6f717a)] tracking-[-0.042px] w-full" data-node-id="749:6998">
+              메시지 입력
+            </p>
+            <div className="content-stretch flex gap-[6px] items-center overflow-clip relative shrink-0 w-full" data-node-id="749:6999" data-name="Frame">
+              <div className="content-stretch flex items-center justify-center overflow-clip relative rounded-[6px] shrink-0 size-[30px]" data-node-id="749:7000" data-name="IconButton / paperclip">
+                <div className="relative shrink-0 size-[16px]" data-node-id="749:7001" data-name="Icon/paperclip">
+                  <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconPaperclip} />
+                </div>
+              </div>
+              <div className="content-stretch flex gap-[4px] items-center overflow-clip pl-[8px] pr-[6px] py-[4px] relative rounded-[6px] shrink-0" data-node-id="768:7100" data-name="Tools">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="768:7101">
+                  도구 2
+                </p>
+                <div className="relative shrink-0 size-[12px]" data-node-id="768:7102" data-name="Icon/chevron-down">
+                  <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown3} />
+                </div>
+              </div>
+              <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="749:7004" data-name="Flex" />
+              <div className="bg-[var(--ees-surface-muted,#ececef)] content-stretch flex items-center justify-center overflow-clip relative rounded-[6px] shrink-0 size-[30px]" data-node-id="749:7005" data-name="Send">
+                <div className="relative shrink-0 size-[16px]" data-node-id="749:7006" data-name="Icon/arrow-up">
+                  <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconArrowUp} />
+                </div>
+              </div>
+            </div>
+          </div>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="749:7009">
+            Enter 전송 · Shift+Enter 줄바꿈
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: EES v4/Section: Font(family: "Noto Sans KR", style: Bold, size: 14, weight: 700, lineHeight: 20, letterSpacing: -0.5), EES v4/Label: Font(family: "Noto Sans KR", style: Medium, size: 12, weight: 500, lineHeight: 16, letterSpacing: 0), EES v4/Body Medium: Font(family: "Noto Sans KR", style: Medium, size: 14, weight: 500, lineHeight: 22, letterSpacing: -0.30000001192092896), EES v4/Meta: Font(family: "Noto Sans KR", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), EES v4/Body: Font(family: "Noto Sans KR", style: Regular, size: 14, weight: 400, lineHeight: 22, letterSpacing: -0.30000001192092896), EES v4/Number: Font(family: "Inter", style: Medium, size: 13, weight: 500, lineHeight: 18, letterSpacing: 0), EES v4/Title L: Font(family: "Noto Sans KR", style: Bold, size: 24, weight: 700, lineHeight: 32, letterSpacing: -1.5), EES v4/Mono: Font(family: "Inter", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Status glyph v4
+**Node ID:** 746:640
+
+16px 상태 기호. Action=사람 조치 필요(황갈), Running=실행 중(EES 파랑), Failed=실패, Done=완료, Waiting=대기·미실행, Unknown=판정 미확인. 항상 상태 문구와 함께.
+
+## Button v4
+**Node ID:** 746:647
+
+높이 34, 반경 6. 영역당 Primary 하나. Text는 표 안의 행동과 보조 링크.
+Images and SVGs will be stored as constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.
