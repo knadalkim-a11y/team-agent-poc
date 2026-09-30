@@ -58,6 +58,84 @@ class WorkflowToolTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn('ensureChat', self.events.await_args.args[0]['data']['code'])
         self.backend.handle_action.assert_not_awaited()
 
+    async def test_v4_message_reference_is_frozen_and_none_is_general_conversation(self):
+        metadata = {**self.metadata, 'user_message': {'meta': {'ees_work_reference': self.target}}}
+        self.browser = {'ok': True, 'kind': 'none'}
+        result = await self.tool.ees_workflow_view(**{**self.context, '__metadata__': metadata})
+        self.assertTrue(result['ok'], result)
+        self.assertEqual(result['target'], self.target)
+        self.events.assert_not_awaited()
+        metadata['user_message']['meta']['ees_work_reference'] = {'kind': 'none'}
+        result = await self.tool.ees_workflow_view(**{**self.context, '__metadata__': metadata})
+        self.assertEqual(result['error']['code'], 'selection_required')
+        self.backend.handle_action.assert_not_awaited()
+
+    async def test_v4_proposal_records_only_real_ui_applied_draft_and_never_saves(self):
+        self.backend.validate_input_draft = AsyncMock(return_value={'ok': True, 'inputs': {'db': 'public-target'}})
+        record = {'id': 'proposal-1', 'status': 'applied', 'fields': ['db'], 'persisted': False, 'executed': False}
+        self.events.side_effect = lambda event: deepcopy(self.browser) if 'selection(chatId)' in event['data']['code'] else {'ok': True, 'action_record': record}
+        result = await self.tool.ees_workflow_input_draft({'db': 'public-target'}, '사용자가 제공한 공개 대상', self.target,
+            'proposal-1', **self.context)
+        self.assertTrue(result['ok'], result)
+        self.assertEqual(result['action_record'], record)
+        self.backend.validate_input_draft.assert_awaited_once()
+        self.backend.handle_action.assert_not_awaited()
+        self.events.side_effect = lambda event: deepcopy(self.browser) if 'selection(chatId)' in event['data']['code'] else {'ok': False, 'code': 'draft_changed'}
+        result = await self.tool.ees_workflow_input_draft({'db': 'public-target'}, '사용자 입력', self.target,
+            'proposal-2', **self.context)
+        self.assertEqual(result['error']['code'], 'draft_changed')
+        self.backend.handle_action.assert_not_awaited()
+
+    async def test_v4_late_proposal_reaches_only_guarded_receipt_path_without_saving(self):
+        self.backend.validate_input_draft = AsyncMock(return_value={'ok': True, 'inputs': {'db': 'public-target'}})
+        self.browser = {**self.browser, 'draft_version': 2}
+        self.events.side_effect = lambda event: deepcopy(self.browser) if 'selection(chatId)' in event['data']['code'] else {'ok': False, 'code': 'draft_changed'}
+        result = await self.tool.ees_workflow_input_draft({'db': 'public-target'}, '사용자 입력',
+            {**self.target, 'draft_version': 1}, 'proposal-1', **self.context)
+        self.assertEqual(result['error']['code'], 'draft_changed')
+        self.backend.validate_input_draft.assert_awaited_once()
+        self.backend.handle_action.assert_not_awaited()
+
+    async def test_v4_action_card_refresh_requires_confirmed_native_status_persistence(self):
+        self.backend.validate_input_draft = AsyncMock(return_value={'ok': True, 'inputs': {'db': 'public-target'}})
+        self.backend.record_input_draft = AsyncMock(return_value={'ok': False})
+        record = {'id': 'proposal-card', 'status': 'applied', 'fields': ['db'], 'source': '사용자 제공', 'persisted': False, 'executed': False}
+        self.events.side_effect = lambda event: deepcopy(self.browser) if 'selection(chatId)' in event['data']['code'] else {'ok': True, 'action_record': record}
+        result = await self.tool.ees_workflow_input_draft({'db': 'public-target'}, '사용자 제공', self.target, 'proposal-card', **self.context)
+        self.assertTrue(result['ok'])
+        self.assertFalse(result['conversation_recorded'])
+        self.assertFalse(any('refreshActionRecords' in call.args[0]['data']['code'] for call in self.events.await_args_list))
+        self.backend.record_input_draft.return_value = {'ok': True}
+        self.events.reset_mock()
+        result = await self.tool.ees_workflow_input_draft({'db': 'public-target'}, '사용자 제공', self.target, 'proposal-card', **self.context)
+        self.assertTrue(result['conversation_recorded'])
+        self.assertEqual(sum('refreshActionRecords' in call.args[0]['data']['code'] for call in self.events.await_args_list), 1)
+        self.backend.handle_action.assert_not_awaited()
+
+    async def test_v4_lost_ack_retries_original_target_through_cached_receipt(self):
+        target = {**self.target, 'draft_version': 0}
+        self.browser = {'ok': True, **target}
+        self.backend.validate_input_draft = AsyncMock(return_value={'ok': True, 'inputs': {'db': 'public-target'}})
+        applied = 0
+        record = {'id': 'same-proposal', 'status': 'applied', 'fields': ['db'], 'persisted': False, 'executed': False}
+        def event_result(event):
+            nonlocal applied
+            if 'selection(chatId)' in event['data']['code']:
+                return deepcopy(self.browser)
+            if not applied:
+                applied += 1
+                self.browser['draft_version'] = 1
+                return {'ok': False, 'code': 'browser_unconfirmed'}
+            return {'ok': True, 'replayed': True, 'action_record': record}
+        self.events.side_effect = event_result
+        first = await self.tool.ees_workflow_input_draft({'db': 'public-target'}, '사용자 입력', target, 'same-proposal', **self.context)
+        self.assertFalse(first['ok'])
+        replay = await self.tool.ees_workflow_input_draft({'db': 'public-target'}, '사용자 입력', target, 'same-proposal', **self.context)
+        self.assertTrue(replay['ok'], replay)
+        self.assertEqual(applied, 1)
+        self.assertEqual(self.backend.validate_input_draft.await_count, 2)
+        self.backend.handle_action.assert_not_awaited()
+
     async def test_action_uses_server_metadata_current_case_and_explicit_revision(self):
         result = await self.tool.ees_workflow_action('run', expected_revision=7, target=self.target,
             request_id='case-run:1', **self.context)

@@ -1,0 +1,142 @@
+[
+  {
+    "suite": "test_ees_work_panel",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "-X",
+      "warn_default_encoding",
+      "-W",
+      "error::EncodingWarning",
+      "-c",
+      "import sys,unittest;sys.path.append('/workspace/scratch/c3e7c21cff14/team-agent-poc/.venv/lib/python3.11/site-packages');unittest.main(module=None,argv=['unittest','discover','-s','tests','-p','test_ees_work_panel.py','-v'])"
+    ],
+    "returncode": 0,
+    "seconds": 9.443,
+    "summary": [
+      "----------------------------------------------------------------------",
+      "Ran 47 tests in 9.360s",
+      "",
+      "OK"
+    ]
+  },
+  {
+    "suite": "test_ees_work_v4",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "-X",
+      "warn_default_encoding",
+      "-W",
+      "error::EncodingWarning",
+      "-c",
+      "import sys,unittest;sys.path.append('/workspace/scratch/c3e7c21cff14/team-agent-poc/.venv/lib/python3.11/site-packages');unittest.main(module=None,argv=['unittest','discover','-s','tests','-p','test_ees_work_v4.py','-v'])"
+    ],
+    "returncode": 0,
+    "seconds": 0.88,
+    "summary": [
+      "----------------------------------------------------------------------",
+      "Ran 7 tests in 0.827s",
+      "",
+      "OK"
+    ]
+  },
+  {
+    "suite": "test_ees_work_controller",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "-X",
+      "warn_default_encoding",
+      "-W",
+      "error::EncodingWarning",
+      "-c",
+      "import sys,unittest;sys.path.append('/workspace/scratch/c3e7c21cff14/team-agent-poc/.venv/lib/python3.11/site-packages');unittest.main(module=None,argv=['unittest','discover','-s','tests','-p','test_ees_work_controller.py','-v'])"
+    ],
+    "returncode": 0,
+    "seconds": 1.843,
+    "summary": [
+      "----------------------------------------------------------------------",
+      "Ran 27 tests in 1.797s",
+      "",
+      "OK"
+    ]
+  },
+  {
+    "suite": "test_ees_workflow",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "-X",
+      "warn_default_encoding",
+      "-W",
+      "error::EncodingWarning",
+      "-c",
+      "import sys,unittest;sys.path.append('/workspace/scratch/c3e7c21cff14/team-agent-poc/.venv/lib/python3.11/site-packages');unittest.main(module=None,argv=['unittest','discover','-s','tests','-p','test_ees_workflow.py','-v'])"
+    ],
+    "returncode": 0,
+    "seconds": 1.336,
+    "summary": [
+      "----------------------------------------------------------------------",
+      "Ran 54 tests in 1.045s",
+      "",
+      "OK (skipped=1)"
+    ]
+  },
+  {
+    "suite": "test_ees_workflow_execution",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "-X",
+      "warn_default_encoding",
+      "-W",
+      "error::EncodingWarning",
+      "-c",
+      "import sys,unittest;sys.path.append('/workspace/scratch/c3e7c21cff14/team-agent-poc/.venv/lib/python3.11/site-packages');unittest.main(module=None,argv=['unittest','discover','-s','tests','-p','test_ees_workflow_execution.py','-v'])"
+    ],
+    "returncode": 0,
+    "seconds": 5.23,
+    "summary": [
+      "----------------------------------------------------------------------",
+      "Ran 37 tests in 5.099s",
+      "",
+      "OK (skipped=2)"
+    ]
+  },
+  {
+    "suite": "test_ees_workflow_tool",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "-X",
+      "warn_default_encoding",
+      "-W",
+      "error::EncodingWarning",
+      "-c",
+      "import sys,unittest;sys.path.append('/workspace/scratch/c3e7c21cff14/team-agent-poc/.venv/lib/python3.11/site-packages');unittest.main(module=None,argv=['unittest','discover','-s','tests','-p','test_ees_workflow_tool.py','-v'])"
+    ],
+    "returncode": 0,
+    "seconds": 0.597,
+    "summary": [
+      "----------------------------------------------------------------------",
+      "Ran 39 tests in 0.509s",
+      "",
+      "OK"
+    ]
+  },
+  {
+    "suite": "test_ees_branding_build",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "-X",
+      "warn_default_encoding",
+      "-W",
+      "error::EncodingWarning",
+      "-c",
+      "import sys,unittest;sys.path.append('/workspace/scratch/c3e7c21cff14/team-agent-poc/.venv/lib/python3.11/site-packages');unittest.main(module=None,argv=['unittest','discover','-s','tests','-p','test_ees_branding_build.py','-v'])"
+    ],
+    "returncode": 0,
+    "seconds": 1.047,
+    "summary": [
+      "----------------------------------------------------------------------",
+      "Ran 28 tests in 0.966s",
+      "",
+      "OK (skipped=2)"
+    ]
+  }
+]

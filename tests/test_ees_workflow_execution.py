@@ -143,6 +143,72 @@ class ExecutionTests(unittest.IsolatedAsyncioTestCase):
     async def control(self, run, action, **values):
         return await self.service.execution_action(USER, {"action": action, "run_id": run["id"], "expected_revision": run["revision"], "request_id": f"{action}-{run['id']}-{run['revision']}", **values})
 
+    async def test_v4_runtime_input_save_is_cas_persisted_and_dispatches_no_call(self):
+        created = await self.service.handle_action(USER, {"action": "create", "payload": {
+            "site_id": "us-a", "system": "EMS", "process_id": self.p}})
+        self.assertTrue(created["ok"], created)
+        case = created["case"]
+        job = next(key for key, node in case["definition"]["nodes"].items()
+                   if node.get("execution", {}).get("kind") == "fixed")
+        body = {"action": "update_inputs", "case_id": case["id"], "node_id": job,
+                "expected_revision": case["revision"], "payload": {"inputs": self.inputs, "replace_inputs": True},
+                "request_id": "v4-save-1"}
+        saved = await self.service.handle_action(USER, body)
+        self.assertTrue(saved["ok"], saved)
+        self.assertEqual(saved["case"]["execution_inputs"], self.inputs)
+        self.assertEqual(self.bridge.calls, [])
+        with self.service._db() as db:
+            self.assertEqual(db.execute("SELECT count(*) FROM execution_plans").fetchone()[0], 0)
+            self.assertEqual(db.execute("SELECT count(*) FROM execution_runs").fetchone()[0], 0)
+        restarted = build_service(self.database, self.bridge, self.model)
+        restored = await restarted.get_state(USER, case_id=case["id"])
+        self.assertEqual(restored["case"]["execution_inputs"], self.inputs)
+        stale = await self.service.handle_action(USER, {**body, "request_id": "v4-save-stale"})
+        self.assertEqual(stale["error"]["code"], "revision_conflict")
+        bad = await self.service.handle_action(USER, {**body, "expected_revision": saved["case"]["revision"],
+            "payload": {"inputs": {"project_key": 3}}, "request_id": "v4-save-bad"})
+        self.assertEqual(bad["error"]["code"], "invalid_inputs")
+        cleared = await self.service.handle_action(USER, {**body, "expected_revision": saved["case"]["revision"],
+            "payload": {"inputs": {"project_key": "TEST"}, "replace_inputs": True}, "request_id": "v4-save-clear"})
+        self.assertTrue(cleared["ok"], cleared)
+        self.assertEqual(cleared["case"]["execution_inputs"], {"project_key": "TEST"})
+        self.assertEqual(self.bridge.calls, [])
+
+    async def test_v4_draft_checks_explicit_execution_skill_references_without_a_plan(self):
+        assets = {"tools": [], "skills": [{"id": "native-skill"}], "skill_bodies": {"native-skill": "current policy"},
+                  "skill_versions": {"native-skill": 1}, "available": True}
+        self.service.asset_lookup = lambda user: deepcopy(assets)
+        with self.service._db(write=True) as db:
+            catalog = self.service._catalog(db)[0]
+            catalog["nodes"]["new-operations-jira-j"]["execution"]["skill_refs"] = [{"skill_id": "native-skill", "content_hash": execution._hash("current policy")}]
+            db.execute("UPDATE catalog SET published=?", (workflow._dump(catalog),))
+        target = {"kind": "published", "selection": {"site_id": "us-a", "system": "EMS", "process_id": self.p,
+                  "node_id": "new-operations-jira-j", "version": catalog["version"]}}
+        before = self.database.read_bytes()
+        accepted = await self.service.validate_input_draft(USER, {"target": target, "inputs": self.inputs})
+        self.assertTrue(accepted["ok"], accepted)
+        assets["skill_bodies"].clear()
+        denied = await self.service.validate_input_draft(USER, {"target": target, "inputs": self.inputs})
+        self.assertEqual(denied["error"]["code"], "skill_changed")
+        self.assertEqual(self.database.read_bytes(), before)
+        self.assertEqual(self.bridge.calls, [])
+
+    async def test_v4_runtime_save_cannot_overwrite_active_or_unknown_execution_inputs(self):
+        run = await self.start()
+        case = (await self.service.get_state(USER, case_id=run["case_id"]))["case"]
+        job = run["jobs_order"][0] if "jobs_order" in run else next(iter(run["jobs"]))
+        for status in ("queued", "unknown"):
+            with self.service._db(write=True) as db:
+                row = db.execute("SELECT data FROM execution_runs WHERE id=?", (run["id"],)).fetchone()
+                stored = json.loads(row[0]); stored["status"] = status
+                db.execute("UPDATE execution_runs SET status=?,data=? WHERE id=?", (status, json.dumps(stored), run["id"]))
+            rejected = await self.service.handle_action(USER, {"action": "update_inputs", "case_id": case["id"],
+                "node_id": job, "expected_revision": case["revision"], "payload": {"inputs": {"project_key": "OTHER"}}})
+            self.assertEqual(rejected["error"]["code"], "execution_service_required")
+        self.assertEqual(self.bridge.calls, [])
+        current = await self.state(run)
+        self.assertEqual(current["inputs"], self.inputs)
+
     async def test_plan_is_metadata_only_start_receipt_and_real_projection(self):
         plan = await self.plan()
         self.assertEqual(self.bridge.calls, [])

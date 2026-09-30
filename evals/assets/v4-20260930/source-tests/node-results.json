@@ -1,0 +1,76 @@
+[
+  {
+    "suite": "test_ees_execution_ui.cjs",
+    "command": [
+      "node",
+      "--test-reporter=tap",
+      "tests/test_ees_execution_ui.cjs"
+    ],
+    "returncode": 0,
+    "seconds": 0.155,
+    "summary": [
+      "# tests 25",
+      "# pass 25",
+      "# fail 0",
+      "# skipped 0"
+    ]
+  },
+  {
+    "suite": "test_ees_work_authoring_ui.cjs",
+    "command": [
+      "node",
+      "--test-reporter=tap",
+      "tests/test_ees_work_authoring_ui.cjs"
+    ],
+    "returncode": 0,
+    "seconds": 0.278,
+    "summary": [
+      "# tests 36",
+      "# pass 36",
+      "# fail 0",
+      "# skipped 0"
+    ]
+  },
+  {
+    "suite": "test_ees_cooperation_panel.cjs",
+    "command": [
+      "node",
+      "--test-reporter=tap",
+      "tests/test_ees_cooperation_panel.cjs"
+    ],
+    "returncode": 0,
+    "seconds": 0.695,
+    "summary": [
+      "PASS actual selected cards, parallel batch, mounted once, stale snapshots and identity protection",
+      "PASS preserved selection/focus/scroll, safe exact text, zero records, partial/truncated replies and followup",
+      "PASS actual comparison metrics, null is not zero, denominators/missing evidence and expanded evidence retention",
+      "PASS readable exact reply blocks, safe formatting, reply-first detail, collapsed questions/queries and retained disclosure focus",
+      "PASS per-message and per-chat isolation, delayed old events, selected history, route-return stale state",
+      "PASS intentional collapse, WO mutual exclusion without draft mutation, native navbar/layout remount and settled observers",
+      "PASS width boundaries, pointer cleanup, narrow explicit focus/Escape, theme, logout/pagehide cleanup and unsupported layout",
+      "PASS registered plan, actual step state, summary-first tabs, recorded reasons/judgment/limits, exact charts, filtered evidence and old-plan rejection",
+      "PASS real analysis + real WO execute payloads, one launcher/three screens, manual draft/review retention and min-width/closed-route restoration",
+      "PASS dynamic workflow tabs in cached WO and current analysis, four screens/one panel, draft preservation and unregister",
+      "PASS program bootstrap adds workflow switching to cached analysis tabs",
+      "PASS pending new-chat workflow, bind/unregister lifecycle, cross-chat isolation and logout cleanup",
+      "PASS fixed bootstrap factory restarts after SPA login with no previous session state or duplicate listeners",
+      "PASS actual ApplyDemo compiled Python sender → execute payload → production panel"
+    ]
+  },
+  {
+    "suite": "test_ees_v4_drafts.cjs",
+    "command": [
+      "node",
+      "--test-reporter=tap",
+      "tests/test_ees_v4_drafts.cjs"
+    ],
+    "returncode": 0,
+    "seconds": 0.093,
+    "summary": [
+      "# tests 9",
+      "# pass 9",
+      "# fail 0",
+      "# skipped 0"
+    ]
+  }
+]

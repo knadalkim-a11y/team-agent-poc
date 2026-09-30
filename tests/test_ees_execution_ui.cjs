@@ -9,7 +9,7 @@ function subject(){const context={window:{},document:{querySelector:()=>null},Se
 test('durable run renders UNKNOWN and actual evidence without inventing a completion',()=>{
  const c=subject();c.execution={run:{id:'run',status:'unknown',revision:4,jobs:{j:{status:'unknown',kind:'fixed',checks:[{status:'unknown'}]}},calls:[{job_id:'j',id:'call',status:'unknown',reference:{function:'get_page',revision:2},arguments:{page_id:'42'},result:{complete:false,data:{title:'<script>bad</script>'}}}]}};c.options={nodeId:'j',definition:{nodes:{j:{name:'문서 확인',type:'j'}}}};
  const html=vm.runInContext('workExecutionRuntimeHTML(execution,options)',c);
- assert.match(html,/결과 미확정/);assert.match(html,/완료가 아닙니다/);assert.match(html,/&lt;script&gt;/);assert.doesNotMatch(html,/<script>/);assert.doesNotMatch(html,/data-runtime-action=/);assert.match(html,/정규화 결과/);assert.match(html,/자동 재실행하지 않습니다/);assert.doesNotMatch(html,/모의 점검 수행/);
+ assert.match(html,/판정 미확인/);assert.match(html,/완료가 아닙니다/);assert.match(html,/&lt;script&gt;/);assert.doesNotMatch(html,/<script>/);assert.doesNotMatch(html,/data-runtime-action=/);assert.match(html,/정규화 결과/);assert.match(html,/자동 재실행하지 않습니다/);assert.doesNotMatch(html,/모의 점검 수행/);
 });
 test('read failure never renders a false empty history or exposes stale evidence',()=>{
  const c=subject();c.execution={run:{id:'stale-private',status:'succeeded'}};c.options={error:'기록 접근 권한을 확인할 수 없습니다.'};
@@ -81,7 +81,7 @@ test('every run state offers only supported mutations in one C action region',()
 test('Native preview preserves typed input contract and no-schema work has no fake save',()=>{
  const context=subject(),{definition,c}=runtimeFixture();context.definition=definition;context.c=c;
  const preview=vm.runInContext('workPanelNodeHTML(null,definition.nodes.j,{definition})',context);
- assert.match(preview,/data-status="execution_plan_required"/);assert.match(preview,/data-runtime-record="unrecorded"/);assert.match(preview,/data-work-section="runtime-inputs"/);assert.match(preview,/data-action="run"/);assert.doesNotMatch(preview,/ees-work-inputs|입력 저장|실행 연결 필요/);
+ assert.match(preview,/data-status="execution_plan_required"/);assert.match(preview,/data-runtime-record="unrecorded"/);assert.match(preview,/data-work-section="runtime-inputs"/);assert.match(preview,/data-action="run"/);assert.match(preview,/id="ees-work-inputs"[^>]*data-runtime-inputs/);assert.match(preview,/name="query"[^>]*data-execution-input/);assert.match(preview,/id="ees-work-inputs-save"[^>]*type="submit"/);assert.doesNotMatch(preview,/저장하고 점검|실행 연결 필요/);
  delete definition.nodes.p.execution_inputs;
  const empty=vm.runInContext('workPanelNodeHTML(null,definition.nodes.j,{definition})',context);assert.doesNotMatch(empty,/data-work-section="runtime-inputs"|<form|입력 저장/);
  context.execution={run:{id:'human',revision:1,status:'waiting_input',jobs:{j:{kind:'human',status:'waiting_input',reason:'human_confirmation_required'}},calls:[]}};context.options={nodeId:'j',definition};
@@ -120,7 +120,7 @@ test('active Native execution preserves but blocks legacy input writes and run u
 });
 test('P/T rows preserve Native unknown and waiting reasons instead of legacy generic labels',()=>{
  const context=subject(),{definition,run,c}=runtimeFixture();run.status='unknown';run.jobs.j={kind:'fixed',status:'unknown',reason:'timeout'};context.c=c;context.execution={run};
- const html=vm.runInContext('workPanelNodeHTML(c,c.definition.nodes.t,{execution,listView:{expanded:["j"]}})',context);assert.match(html,/data-status="unknown">결과 미확정/);assert.match(html,/요청의 결과를 확정하지 못했습니다/);assert.doesNotMatch(html,/<p>timeout<\/p>/);
+ const html=vm.runInContext('workPanelNodeHTML(c,c.definition.nodes.t,{execution,listView:{expanded:["j"]}})',context);assert.match(html,/data-status="unknown">판정 미확인/);assert.match(html,/요청의 결과를 확정하지 못했습니다/);assert.doesNotMatch(html,/<p>timeout<\/p>/);
 });
 test('redacted runtime evidence stays hidden even if an older response still contains raw values',()=>{
  const context=subject(),{definition,run}=runtimeFixture();run.evidence_available=false;run.status='succeeded';run.jobs.j={kind:'fixed',status:'succeeded',result:{claims:[{value:'PRIVATE_MARKER'}]},validation:{status:'succeeded',output:'PRIVATE_MARKER'}};run.calls=[{job_id:'j',status:'succeeded',arguments:{secret:'PRIVATE_MARKER'},result:{data:'PRIVATE_MARKER'},evidence_available:false}];context.execution={run};context.options={nodeId:'j',definition};

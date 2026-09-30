@@ -87,6 +87,164 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(all(job["attempt"] == 0 for job in case["jobs"].values()))
         self.assertEqual(case["chat_id"], "")
 
+    async def test_v4_input_proposal_checks_scope_schema_and_access_without_writes(self):
+        case = await self.create()
+        target = {"kind": "case", "case_id": case["id"], "node_id": "db-j", "revision": case["revision"], "draft_version": 3}
+        body = {"chat_id": "chat-a", "target": target, "inputs": {"db": "approved-public-target"}}
+        before = self.database.read_bytes()
+        result = await self.service.validate_input_draft(self.alice, body)
+        self.assertTrue(result["ok"], result)
+        self.assertFalse(result["persisted"])
+        self.assertFalse(result["executed"])
+        self.assertEqual(self.database.read_bytes(), before)
+        for patch in ({"inputs": {"password": "not-allowed"}}, {"inputs": {"db": 3}},
+                      {"target": {**target, "revision": target["revision"] + 1}},
+                      {"target": {**target, "kind": "history"}},
+                      {"chat_id": "chat-b"}):
+            rejected = await self.service.validate_input_draft(self.alice, {**body, **patch})
+            self.assertFalse(rejected["ok"], rejected)
+        self.assertEqual(self.database.read_bytes(), before)
+        foreign = await self.service.validate_input_draft(self.users["bob"], {**body, "chat_id": "chat-b"})
+        self.assertFalse(foreign["ok"], foreign)
+
+    async def test_v4_native_undo_status_requires_actual_same_message_receipt(self):
+        case = await self.create()
+        target = {"kind": "case", "case_id": case["id"], "node_id": "db-j", "revision": case["revision"]}
+        message = {"role": "assistant", "statusHistory": []}
+        chat = {"user_id": "alice", "chat": {"history": {"messages": {"message-a": message}}}}
+        chats = ModuleType("open_webui.models.chats")
+        chats.Chats = SimpleNamespace(get_chat_by_id=AsyncMock(return_value=chat))
+        socket = ModuleType("open_webui.socket.main")
+        async def emit(event):
+            message["statusHistory"].append(deepcopy(event["data"]))
+        socket.get_event_emitter = AsyncMock(return_value=emit)
+        body = {"chat_id": "chat-a", "message_id": "message-a", "proposal_id": "proposal-a", "target": target}
+        receipt = {"id": "proposal-a", "status": "applied", "fields": ["db"], "source": "사용자 제공 대상", "persisted": False, "executed": False}
+        with patch.object(workflow, "_production_service", return_value=self.service), patch.dict(sys.modules, {
+                "open_webui.models.chats": chats, "open_webui.socket.main": socket}):
+            missing = await workflow.record_input_draft_undo(self.alice, body)
+            self.assertEqual(missing["error"]["code"], "receipt_unavailable")
+            applied = await workflow.record_input_draft(self.alice, "chat-a", "message-a", target, receipt)
+            self.assertTrue(applied["ok"], applied)
+            forbidden = await workflow.record_input_draft_undo(self.users["bob"], body)
+            self.assertFalse(forbidden["ok"])
+            forged = await workflow.record_input_draft_undo(self.alice, {**body, "description": "forged completion"})
+            self.assertFalse(forged["ok"])
+            undone = await workflow.record_input_draft_undo(self.alice, body)
+            self.assertTrue(undone["ok"], undone)
+            self.assertEqual([item["ees_work_action"]["status"] for item in message["statusHistory"]], ["applied", "undone"])
+            replay = await workflow.record_input_draft_undo(self.alice, body)
+            self.assertTrue(replay["replayed"])
+            self.assertEqual(len(message["statusHistory"]), 2)
+
+    async def test_v4_input_draft_rechecks_inherited_skill_permission_for_case_and_preview(self):
+        assets = {"tools": [], "skills": [{"id": "native-policy"}], "skill_bodies": {"native-policy": "approved policy"},
+                  "skill_versions": {"native-policy": 1}, "available": True}
+        self.service.asset_lookup = AsyncMock(side_effect=lambda user: deepcopy(assets))
+        definition = workflow._seed()
+        definition["skills"]["parent-policy"] = {"id": "parent-policy", "source": "open_webui", "reference": "native-policy", "body": ""}
+        definition["nodes"]["setup-p"]["skills"].append("parent-policy")
+        await self.publish(definition)
+        case = await self.create()
+        targets = [{"kind": "case", "case_id": case["id"], "node_id": "db-j", "revision": case["revision"]},
+                   {"kind": "published", "selection": {"site_id": "us-a", "system": "EMS", "process_id": "setup-p", "node_id": "db-j", "version": case["version"]}}]
+        for target in targets:
+            accepted = await self.service.validate_input_draft(self.alice, {"target": target, "inputs": {"db": "public"}})
+            self.assertTrue(accepted["ok"], accepted)
+        before = self.database.read_bytes()
+        assets["skill_bodies"].clear()
+        for target in targets:
+            denied = await self.service.validate_input_draft(self.alice, {"target": target, "inputs": {"db": "public"}})
+            self.assertEqual(denied["error"]["code"], "skill_unavailable")
+        self.assertEqual(self.database.read_bytes(), before)
+
+    async def test_v4_action_record_confirms_persisted_native_status_not_socket_delivery(self):
+        case = await self.create()
+        target = {"kind": "case", "case_id": case["id"], "node_id": "db-j", "revision": case["revision"]}
+        receipt = {"id": "proposal-a", "status": "applied", "fields": ["db"], "source": "허용된 자료", "persisted": False, "executed": False}
+        chat = {"user_id": "alice", "chat": {"history": {"messages": {"message-a": {"role": "assistant", "statusHistory": []}}}}}
+        chats = ModuleType("open_webui.models.chats")
+        chats.Chats = SimpleNamespace(get_chat_by_id=AsyncMock(side_effect=lambda _: deepcopy(chat)))
+        socket = ModuleType("open_webui.socket.main")
+        emitter = AsyncMock()
+        socket.get_event_emitter = AsyncMock(return_value=emitter)
+        with patch.object(workflow, "_production_service", return_value=self.service), patch.dict(sys.modules, {
+                "open_webui.models.chats": chats, "open_webui.socket.main": socket}):
+            missing = await workflow.record_input_draft(self.alice, "chat-a", "message-a", target, receipt)
+            self.assertEqual(missing, {"ok": False, "code": "record_unconfirmed"})
+            self.assertEqual(chats.Chats.get_chat_by_id.await_count, 2)
+            malformed = await workflow.record_input_draft(self.alice, "chat-a", "message-a", target, {**receipt, "executed": True})
+            self.assertEqual(malformed["code"], "invalid_receipt")
+            self.assertEqual(emitter.await_count, 1)
+
+    async def test_v4_action_records_read_only_owned_assistant_latest_sanitized_history(self):
+        case = await self.create()
+        target = {"kind": "case", "case_id": case["id"], "node_id": "db-j", "revision": case["revision"], "draft_version": 0}
+        receipt = {"id": "proposal-a", "status": "applied", "fields": ["db"], "source": "<source>&허용된 자료", "persisted": False, "executed": False, "private_extra": "never return"}
+        status = {"ees_work_action": receipt, "ees_work_target": target, "description": "raw description must not be copied"}
+        statuses = [status, {**status, "ees_work_action": {**receipt, "status": "undone"}},
+                    {**status, "ees_work_action": {**receipt, "id": "malformed", "executed": True}}]
+        chat = {"user_id": "alice", "chat": {"history": {"messages": {
+            "message-a": {"role": "assistant", "statusHistory": statuses},
+            "user-message": {"role": "user", "statusHistory": [status]}}}}}
+        chats = ModuleType("open_webui.models.chats")
+        chats.Chats = SimpleNamespace(get_chat_by_id=AsyncMock(side_effect=lambda _: deepcopy(chat)))
+        # A historical receipt remains readable after selection/revision change
+        # and completion; reading it must not become a draft mutation request.
+        with self.service._db(write=True) as db:
+            stored = self.service._case(db, "alice", case["id"])
+            stored["revision"] += 5
+            for job in stored["jobs"].values():
+                job["status"] = "passed"
+            db.execute("UPDATE cases SET data=? WHERE id=?", (workflow._dump(stored), case["id"]))
+        before = self.database.read_bytes()
+        with patch.object(workflow, "_production_service", return_value=self.service), patch.dict(sys.modules, {"open_webui.models.chats": chats}):
+            result = await workflow.input_draft_records(self.alice, "chat-a")
+            self.assertTrue(result["ok"], result)
+            self.assertEqual(len(result["records"]), 1)
+            record = result["records"][0]
+            self.assertEqual(record["message_id"], "message-a")
+            self.assertEqual(record["target"], target)
+            self.assertEqual(record["action_record"], {key: receipt[key] for key in ("id", "fields", "source", "persisted", "executed")} | {
+                "status": "undone", "node_id": "db-j", "case_id": case["id"]})
+            self.assertNotIn("private_extra", json.dumps(result))
+            self.assertNotIn("description", json.dumps(result))
+            foreign = await workflow.input_draft_records(self.users["bob"], "chat-a")
+            self.assertEqual(foreign["error"]["code"], "chat_forbidden")
+            chat["user_id"] = "bob"
+            changed_owner = await workflow.input_draft_records(self.alice, "chat-a")
+            self.assertEqual(changed_owner["error"]["code"], "chat_forbidden")
+        self.assertEqual(self.database.read_bytes(), before)
+
+    async def test_v4_action_record_read_hides_revoked_inherited_skill_and_fails_closed(self):
+        assets = {"tools": [], "skills": [{"id": "native-policy"}], "skill_bodies": {"native-policy": "approved policy"},
+                  "skill_versions": {"native-policy": 1}, "available": True}
+        self.service.asset_lookup = AsyncMock(side_effect=lambda _: deepcopy(assets))
+        definition = workflow._seed()
+        definition["skills"]["parent-policy"] = {"id": "parent-policy", "source": "open_webui", "reference": "native-policy", "body": ""}
+        definition["nodes"]["setup-p"]["skills"].append("parent-policy")
+        await self.publish(definition)
+        case = await self.create()
+        target = {"kind": "case", "case_id": case["id"], "node_id": "db-j", "revision": case["revision"]}
+        status = {"ees_work_target": target, "ees_work_action": {"id": "proposal-a", "status": "applied", "fields": ["db"], "source": "previously permitted source", "persisted": False, "executed": False}}
+        chat = {"user_id": "alice", "chat": {"history": {"messages": {"message-a": {"role": "assistant", "statusHistory": [status]}}}}}
+        chats = ModuleType("open_webui.models.chats")
+        chats.Chats = SimpleNamespace(get_chat_by_id=AsyncMock(return_value=chat))
+        with patch.object(workflow, "_production_service", return_value=self.service), patch.dict(sys.modules, {"open_webui.models.chats": chats}):
+            allowed = await workflow.input_draft_records(self.alice, "chat-a")
+            self.assertEqual(len(allowed["records"]), 1)
+            assets["skill_bodies"]["native-policy"] = "updated permitted policy"
+            assets["skill_versions"]["native-policy"] = 2
+            still_readable = await workflow.input_draft_records(self.alice, "chat-a")
+            self.assertEqual(len(still_readable["records"]), 1, "Historical receipts do not require the old Skill content to remain current")
+            assets["skill_bodies"].clear()
+            denied = await workflow.input_draft_records(self.alice, "chat-a")
+            self.assertEqual(denied, {"ok": True, "records": []})
+            assets["available"] = False
+            unavailable = await workflow.input_draft_records(self.alice, "chat-a")
+            self.assertFalse(unavailable["ok"])
+            self.assertNotIn("records", unavailable)
+
     async def test_pending_case_binds_after_chat_creation_and_survives_restart(self):
         case = await self.create()
         case = await self.step(case, "bind", chat_id="chat-a")
@@ -1029,8 +1187,16 @@ class WorkflowRouteTests(unittest.TestCase):
 
     def test_routes_use_verified_identity_and_no_store(self):
         self.assertEqual(self.client.get("/api/ees-work/state").status_code, 401)
+        self.assertEqual(self.client.get("/api/ees-work/input-draft/records?chat_id=chat-a").status_code, 401)
         self.assertEqual(self.client.post("/api/ees-work/action", json={"action": "create"}).status_code, 401)
         headers = {"x-test-user": "alice"}
+        chats = ModuleType("open_webui.models.chats")
+        chats.Chats = SimpleNamespace(get_chat_by_id=AsyncMock(return_value={"user_id": "alice", "chat": {"history": {"messages": {}}}}))
+        with patch.dict(sys.modules, {"open_webui.models.chats": chats}):
+            records = self.client.get("/api/ees-work/input-draft/records?chat_id=chat-a", headers=headers)
+            self.assertEqual(records.status_code, 200)
+            self.assertEqual(records.headers["cache-control"], "no-store")
+            self.assertEqual(records.json(), {"ok": True, "records": []})
         created = self.client.post("/api/ees-work/action", headers=headers, json={"action": "create", "chat_id": "chat-a",
                                                                                   "user": {"id": "admin", "role": "admin"}})
         self.assertEqual(created.status_code, 200)

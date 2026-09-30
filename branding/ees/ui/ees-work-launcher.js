@@ -20,6 +20,10 @@
   let scopeReadinessTimer=null;
   let execution=null,executionError='',executionTimer=null,executionSerial=0,historyExecution=null;
   const executionStarts=new Map();
+  const inputDraftReceipts=new Map(), messageReferences=new Map();
+  const actionRecordCards=new Map();
+  let actionRecords=[],actionRecordChat='',actionRecordSerial=0;
+  let referenceEnabled=true,suggestionPending=false;
   const token = () => {try {return localStorage.getItem('token') || '';} catch (_) {return '';}};
   const chatId = () => {const m = location.pathname.match(/^\/c\/([^/]+)\/?$/); return m ? decodeURIComponent(m[1]) : '';};
   const authoringRoute = () => (location.pathname==='/'||location.pathname.startsWith('/workspace')) && new URLSearchParams(location.search).get('ees')==='workflow';
@@ -51,7 +55,7 @@
   }
   function rememberScope() {if(browsingSite)scopeSelections.set(scopeKey(),{category,nodeId:selectedId()});}
   const scopeReady = () => Boolean(state&&acceptedRoute===location.pathname+location.search&&lastRoute===acceptedRoute&&(!chatRoute()||window.__eesNativeDraftV1?.ready()));
-  const view = createWorkView({callbacks:{scopeReady,registerPanel,selectWork,switchScope,startCase,showHistory,saveInputs,saveDocument,runJob,executionRefresh:retryExecutionRead,executionControl,
+  const view = createWorkView({callbacks:{scopeReady,registerPanel,selectWork,switchScope,startCase,showHistory,saveInputs,saveDocument,runJob,executionRefresh:retryExecutionRead,executionControl,undoAIDraft,toggleReference,suggest:sendSuggestion,
     canAuthor:()=>designer.canAuthor(),
     openAuthoring:async process=>{
       if(busy||runView==='history'||!state?.catalog?.nodes?.[process])return false;
@@ -73,7 +77,7 @@
     // Each successful read only validates its own current or historical case.
     // Opening a tab must never turn a failed current read into fresh evidence.
     const lookupError=runView==='history'?(historyCase?historyLookupError:historyLookupError || recordLookupError):recordLookupError;
-    return {state,category,browsingSystem,browsingSite,browseNodeId,browseActive,runView,historyCase,errorMessage,recordLookupError:lookupError,busy,
+    return {state,category,browsingSystem,browsingSite,browseNodeId,browseActive,runView,historyCase,errorMessage,recordLookupError:lookupError,busy,referenceEnabled,reference:referenceEnabled?referenceTarget():{kind:'none'},
       chatId:chatId(),chatRoute:chatRoute(),adminRoute:adminRoute(),acceptedRoute,execution:execution?.run?.case_id===selectedCase()?.id?execution:null,executionError:selectedCase()?executionError:'',historyExecution,
       selectedCaseId:selectedCase()?.id || '',selectedId:selectedId(),processId:processId(),
       roots:Object.fromEntries(Object.keys(categories).map(group=>[group,visibleRoots(group)])),
@@ -166,6 +170,7 @@
     render();
     if(!draftTarget)visibleDraftKey=chatId()?'chat/'+chatId():pendingId?'case/'+pendingId:browseActive?'scope/'+scopeKey()+'/'+processId():'general';
     restoreDraft();
+    refreshActionRecords(chatId());
     if(desiredNode && state.case?.id===desiredCase && state.case.chat_id===chatId()) {const wanted=desiredNode;desiredNode='';desiredCase='';reopenPanel=false;action('select',{},wanted).then(result=>{if(result)openPanel();});}
     else if(reopenPanel && chatRoute()){reopenPanel=false;openPanel();}
   }
@@ -182,7 +187,7 @@
       // draft/focus-preserving render only when that same view's access changes.
       if(current()&&state===shownState&&couldAuthor!==designer.canAuthor())renderPanel();
     }
-    catch (error) {if(!current())return;errorMessage=error.message;recordLookupError=lookupFailure(error);if(runView==='history'&&historyCase)historyLookupError=historyLookupError || recordLookupError;render();}
+    catch (error) {if(!current())return;clearActionRecords();errorMessage=error.message;recordLookupError=lookupFailure(error);if(runView==='history'&&historyCase)historyLookupError=historyLookupError || recordLookupError;render();}
   }
   async function action(actionName, payload = {}, nodeId = '', override = {}) {
     if (busy || !state) return null;
@@ -365,7 +370,121 @@
     if(workLegacyExecutionLocked(execution,selectedCase()?.id)){errorMessage='연결 실행이 종료되기 전에는 입력·초안을 반영하거나 이 작업을 완료할 수 없습니다. 작성 중인 내용은 이 화면에 보존됩니다.';renderPanel();return false;}
     return true;
   }
-  async function saveInputs(inputs,id=selectedId()) {if(!canWriteEdits(id))return null;return action('update_inputs',{inputs},id);}
+  async function saveInputs(inputs,id=selectedId()) {if(!canWriteEdits(id))return null;return action('update_inputs',{inputs,...(node(id)?.execution?{replace_inputs:true}:{})},id);}
+  const sameValue=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+  function referenceTarget() {const value=selection(chatId());return value.ok?Object.fromEntries(Object.entries(value).filter(([key])=>key!=='ok')):{kind:'none'};}
+  function toggleReference(){referenceEnabled=!referenceEnabled;renderView();return {ok:true,enabled:referenceEnabled};}
+  function captureReference(id,messageId,userMessage) {
+    if(!chatRoute()||!available()||typeof messageId!=='string')return {kind:'none'};
+    const key=userMessage?.id || messageId,existing=userMessage?.meta?.ees_work_reference;
+    if(existing&&typeof existing==='object')return JSON.parse(JSON.stringify(existing));
+    if(!messageReferences.has(key))messageReferences.set(key,referenceEnabled?referenceTarget():{kind:'none'});
+    return JSON.parse(JSON.stringify(messageReferences.get(key)));
+  }
+  async function sendSuggestion(question) {
+    const bridge=window.__eesNativeDraftV1;
+    if(suggestionPending||typeof question!=='string'||!question.trim()||!scopeReady()||!bridge?.hasPendingContent)return false;
+    if(bridge.hasPendingContent()){errorMessage='작성 중인 글이나 첨부가 있습니다. 먼저 보내거나 직접 정리한 뒤 추천 질문을 선택해 주세요.';renderPanel();return false;}
+    const before=bridge.read(),at=generation,epoch=navigationRequest,auth=token(),route=location.pathname+location.search;
+    if(!before)return false;suggestionPending=true;
+    try {
+      const restored=await bridge.restore(JSON.stringify({...before,prompt:question}));
+      if(!restored||at!==generation||epoch!==navigationRequest||auth!==token()||route!==location.pathname+location.search)return false;
+      const send=$('#send-message-button');
+      if(!send||send.disabled){errorMessage='질문을 입력했습니다. 현재 대화의 보내기 조건을 확인해 주세요.';renderPanel();return false;}
+      send.click();return true;
+    }finally{suggestionPending=false;}
+  }
+  async function applyInputDraft(id,proposal) {
+    if(id!==chatId()||!scopeReady()||busy||runView==='history'||recordLookupError||!proposal||typeof proposal!=='object')return {ok:false,code:'draft_unavailable'};
+    if(typeof proposal.proposalId!=='string'||!/^[A-Za-z0-9._:-]{1,128}$/.test(proposal.proposalId)||typeof proposal.source!=='string'||!proposal.source.trim()||proposal.source.length>500)return {ok:false,code:'invalid_draft'};
+    const target=referenceTarget(),nodeId=target.kind==='published'?target.selection.node_id:target.node_id;
+    const key=token()+'/'+id+'/'+proposal.proposalId,fingerprint=JSON.stringify(proposal),receipt=inputDraftReceipts.get(key);
+    if(receipt){
+      if(receipt.fingerprint!==fingerprint)return {ok:false,code:'proposal_conflict'};
+      if(receipt.action_record.status!=='applied'||!sameValue(target,receipt.target)||JSON.stringify(view.readJobEdits(nodeId))!==receipt.afterDraft)return {ok:false,code:'draft_changed'};
+      const at=generation,epoch=navigationRequest,auth=token();
+      try {
+        await api('input-draft/validate',{chat_id:id,target,inputs:proposal.inputs,...(Object.hasOwn(proposal,'document')?{document:proposal.document}:{})});
+        if(at!==generation||epoch!==navigationRequest||auth!==token()||recordLookupError||!available()||!sameValue(target,referenceTarget())||JSON.stringify(view.readJobEdits(nodeId))!==receipt.afterDraft)return {ok:false,code:'draft_changed'};
+        return {ok:true,replayed:true,action_record:receipt.action_record};
+      }catch(error){return {ok:false,code:error.code || 'draft_unconfirmed'};}
+    }
+    if(!sameValue(target,proposal.target)||!nodeId||node(nodeId)?.type!=='j')return {ok:false,code:'selection_changed'};
+    const at=generation,epoch=navigationRequest,auth=token(),route=location.pathname+location.search,before=JSON.stringify(view.readJobEdits(nodeId));
+    const current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&sameValue(target,referenceTarget())&&!recordLookupError&&available();
+    try {
+      const checked=await api('input-draft/validate',{chat_id:id,target,inputs:proposal.inputs,...(Object.hasOwn(proposal,'document')?{document:proposal.document}:{})});
+      if(!current()||before!==JSON.stringify(view.readJobEdits(nodeId)))return {ok:false,code:'draft_changed'};
+      const applied=view.applyAIDraft({proposalId:proposal.proposalId,nodeId,caseId:target.case_id || '',revision:target.revision ?? -1,expectedDraftVersion:target.draft_version,inputs:checked.inputs,...(Object.hasOwn(checked,'document')?{document:checked.document}:{}),source:proposal.source});
+      if(!applied?.ok)return applied || {ok:false,code:'draft_unconfirmed'};
+      const action_record={id:proposal.proposalId,status:'applied',node_id:nodeId,case_id:target.case_id || '',fields:applied.fields || applied.changed_fields || Object.keys(checked.inputs),source:proposal.source,persisted:false,executed:false};
+      inputDraftReceipts.set(key,{fingerprint,target:referenceTarget(),afterDraft:JSON.stringify(view.readJobEdits(nodeId)),messageId:proposal.messageId,action_record});renderPanel();return {ok:true,action_record};
+    }catch(error){return {ok:false,code:error.code || 'draft_unconfirmed'};}
+  }
+  async function undoAIDraft(proposalId) {
+    const key=token()+'/'+chatId()+'/'+proposalId,receipt=inputDraftReceipts.get(key);
+    if(!receipt||receipt.action_record.status!=='applied'||busy||recordLookupError||!scopeReady()||runView==='history')return {ok:false,code:'undo_unavailable'};
+    const target=referenceTarget(),at=generation,epoch=navigationRequest,auth=token(),id=chatId(),route=location.pathname+location.search;
+    const current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&id===chatId()&&available()&&scopeReady()&&!recordLookupError;
+    if(!sameValue(target,receipt.target))return {ok:false,code:'selection_changed'};
+    try {
+      await api('input-draft/validate',{chat_id:chatId(),target,inputs:{}});
+      if(!current()||!sameValue(target,referenceTarget()))return {ok:false,code:'selection_changed'};
+      const result=view.undoAIDraft({proposalId,nodeId:receipt.action_record.node_id,caseId:target.case_id || '',revision:target.revision ?? -1});
+      if(!result?.ok){errorMessage='이후 입력이나 저장값이 변경되어 AI 입력을 되돌릴 수 없습니다. 현재 초안은 보존됩니다.';renderPanel();return result || {ok:false,code:'undo_unavailable'};}
+      receipt.action_record={...receipt.action_record,status:'undone'};
+      try {await api('input-draft/undo-record',{chat_id:id,message_id:receipt.messageId || '',proposal_id:proposalId,target});if(current())await refreshActionRecords(id);}
+      catch(error){if(current())errorMessage='업무 초안은 되돌렸지만 대화의 작업 기록 갱신은 확인하지 못했습니다.';}
+      if(!current())return {ok:true,action_record:receipt.action_record};
+      window.dispatchEvent(new CustomEvent('ees-work-draft-action',{detail:{chat_id:id,action_record:receipt.action_record}}));
+      renderPanel();syncActionRecords();return {ok:true,action_record:receipt.action_record};
+    }catch(error){if(current()){errorMessage='현재 작업의 접근 권한을 확인하지 못해 되돌리지 않았습니다. 다시 조회해 주세요.';renderPanel();}return {ok:false,code:error.code || 'undo_unavailable'};}
+  }
+  function clearActionRecordCards(){for(const {element} of actionRecordCards.values())element.remove();actionRecordCards.clear();}
+  function clearActionRecords(){actionRecordSerial++;actionRecords=[];actionRecordChat='';clearActionRecordCards();}
+  async function refreshActionRecords(id) {
+    if(id!==chatId())return {ok:false,code:'records_changed'};
+    if(!id||!chatRoute()||!available()||recordLookupError){clearActionRecords();return {ok:false,code:'records_unavailable'};}
+    const at=generation,auth=token(),route=location.pathname+location.search,serial=++actionRecordSerial;
+    actionRecords=[];actionRecordChat='';clearActionRecordCards();
+    const current=()=>at===generation&&auth===token()&&route===location.pathname+location.search&&serial===actionRecordSerial&&id===chatId()&&available()&&!recordLookupError;
+    try {
+      const result=await api('input-draft/records?'+new URLSearchParams({chat_id:id}));
+      if(!current())return {ok:false,code:'records_changed'};
+      actionRecords=Array.isArray(result.records)?result.records:[];actionRecordChat=id;syncActionRecords();return {ok:true};
+    }catch(error){if(current())clearActionRecords();return {ok:false,code:error.code || 'records_unavailable'};}
+  }
+  function canUndoActionRecord(record) {
+    const receipt=inputDraftReceipts.get(token()+'/'+chatId()+'/'+record.action_record.id);
+    return Boolean(receipt&&receipt.messageId===record.message_id&&receipt.action_record.status==='applied'&&record.action_record.status==='applied'&&
+      !busy&&!recordLookupError&&!executionError&&!workLegacyExecutionLocked(execution,selectedCase()?.id)&&runView!=='history'&&scopeReady()&&sameValue(referenceTarget(),receipt.target)&&
+      JSON.stringify(view.readJobEdits(receipt.action_record.node_id))===receipt.afterDraft);
+  }
+  function syncActionRecords() {
+    // The receipt is read from the existing owned Native chat. This appends a
+    // decoration to a real assistant message; it never creates a chat bubble.
+    if(!scopeReady()||recordLookupError||!chatRoute()||actionRecordChat!==chatId()){clearActionRecordCards();return;}
+    const nativeIds=new Set(window.__eesNativeDraftV1?.workMessageIds?.() || []),wanted=new Set();
+    for(const record of actionRecords){
+      const receipt=record?.action_record;
+      if(!nativeIds.has(record?.message_id)||!receipt||!['applied','undone'].includes(receipt.status)||typeof receipt.id!=='string'||typeof receipt.source!=='string'||!Array.isArray(receipt.fields)||receipt.persisted!==false||receipt.executed!==false)continue;
+      const message=document.getElementById('message-'+record.message_id),host=message?.querySelector('#response-content-container');if(!host)continue;
+      const key=record.message_id+'/'+receipt.id,canUndo=canUndoActionRecord(record),signature=JSON.stringify([receipt,canUndo]);wanted.add(key);
+      const existing=actionRecordCards.get(key);if(existing?.signature===signature&&existing.element.parentNode===host)continue;
+      existing?.element.remove();
+      const card=document.createElement('section');card.className='ees-action-record';card.setAttribute('aria-label','Assistant 입력 변경 기록');
+      const add=(tag,text)=>{const element=document.createElement(tag);element.textContent=text;card.append(element);return element;};
+      add('h4',receipt.status==='undone'?'입력 초안을 되돌렸습니다':'입력 초안에 반영했습니다');
+      add('p','변경 항목: '+receipt.fields.join(', '));add('p','입력 근거: '+receipt.source);
+      add('p','이 AI 반영 당시 저장·점검은 수행하지 않았습니다.');
+      const undo=add('button',receipt.status==='undone'?'되돌림 완료':'되돌리기');undo.type='button';undo.disabled=!canUndo;
+      undo.addEventListener('click',async event=>{event.preventDefault();event.stopPropagation();undo.disabled=true;await undoAIDraft(receipt.id);syncActionRecords();});
+      if(receipt.status==='applied'&&!canUndo)add('p','현재 초안이 달라졌거나 다시 열린 대화에서는 되돌릴 수 없습니다.');
+      host.append(card);actionRecordCards.set(key,{element:card,signature});
+    }
+    for(const [key,{element}] of actionRecordCards)if(!wanted.has(key)){element.remove();actionRecordCards.delete(key);}
+  }
   async function saveDocument(document,id=selectedId()) {
     if(!canWriteEdits(id))return null;
     const saved=selectedCase()?.node_states?.[id];
@@ -414,7 +533,9 @@
     const current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&available();
     busy=true;errorMessage='';setBusy();
     try {
-      const c=selectedCase(),body={node_id:id,chat_id:chatId(),inputs:{},...(c?{case_id:c.id}:{scope:{site_id:browsingSite,system:browsingSystem,process_id:processId(),version:previewVersion || state.catalog.version}})};
+      const c=selectedCase(),edits=node(id)?.type==='j'?view.readJobEdits(id):null;
+      if(edits?.conflict)throw new Error('저장된 내용과 작성 중인 입력을 확인한 뒤 실행 계획을 여세요.');
+      const body={node_id:id,chat_id:chatId(),inputs:edits?.inputs || {},...(c?{case_id:c.id}:{scope:{site_id:browsingSite,system:browsingSystem,process_id:processId(),version:previewVersion || state.catalog.version}})};
       let response=await api('execution/plan',body);if(!current())return;
       const plan=response.plan,limits=plan.limits?.duration_seconds?'<p>허용 실행 시간 '+Math.ceil(plan.limits.duration_seconds/60)+'분</p>':'';
       const scope='<ul>'+plan.jobs.map(jobId=>{const job=node(jobId);return '<li>'+workUI.esc(job?.name || jobId)+' · '+workUI.esc(job?.execution?.kind==='ai'?'근거 요약':job?.execution?.kind==='human'?'사람 확인':(job?.execution?.calls || []).map(call=>call.reference.function).join(', '))+'</li>';}).join('')+'</ul>';
@@ -477,9 +598,11 @@
   }
   function render() {renderView();renderDesigner();updateScopeReadiness();}
   function cleanup() {
+    clearActionRecords();
     clearScopeReadinessWait();clearTimeout(executionTimer);executionTimer=null;execution=null;executionError='';executionSerial++;executionStarts.clear();
     personalSettingsOpened=false;$('#ees-personal-settings-guide')?.remove();
     generation++;request++;state=null;acceptedRoute='';pendingId='';pendingSubmitted=false;browseActive=false;previewVersion=0;scopeSelections.clear();chosenCases.clear();draftSnapshots.clear();creationTickets.clear();createdChats.clear();previewChats.clear();actionRequests.clear();draftSerial++;draftTarget=null;clearTimeout(draftTimer);resetHistory();errorMessage='';recordLookupError=null;
+    inputDraftReceipts.clear();messageReferences.clear();referenceEnabled=true;suggestionPending=false;
     if(activeRegistration!==null)window.__eesWorkPanelV1?.unregister(activeRegistration,'workflow');activeRegistration=null;
     view.reset();designer.reset();
   }
@@ -493,6 +616,7 @@
     view.prepare(snapshot());designer.prepare(snapshot());
     const path=location.pathname+location.search;
     if(lastRoute!==path){
+      clearActionRecords();
       clearScopeReadinessWait();clearTimeout(executionTimer);executionTimer=null;execution=null;executionError='';executionSerial++;
       view.closeScopePicker();const previous=lastRoute;lastRoute=path;generation++;request++;resetHistory();
       // A first completion can arrive after another factory was previewed on
@@ -509,7 +633,7 @@
       if(!pendingId)pendingSubmitted=false;
       state=null;recordLookupError=null;view.prepare(snapshot());designer.prepare(snapshot());refresh();return;
     }
-    view.sync(snapshot());designer.sync(snapshot());updateScopeReadiness();
+    view.sync(snapshot());designer.sync(snapshot());updateScopeReadiness();syncActionRecords();
   }
   function openPersonalSettings() {
     if(new URLSearchParams(location.search).get('ees')!=='tool-settings'||!chatRoute()){
@@ -535,7 +659,8 @@
     if(!state||acceptedRoute!==location.pathname+location.search){const saved=previewChats.get(id);if(saved?.auth===token())return {ok:true,kind:'published',selection:{...saved.selection}};const created=createdChats.get(id);if(created?.auth===token()&&created.caseId)return {ok:true,kind:'case',case_id:created.caseId,node_id:created.nodeId,revision:created.revision};return {ok:false,code:'selection_unconfirmed'};}
     if(runView==='history')return historyCase?{ok:true,kind:'history',case_id:historyCase.id,node_id:historyCase.process_id,revision:historyCase.revision}:{ok:false,code:'selection_required'};
     if(!browseActive||!selectedId())return {ok:true,kind:'none'};
-    const c=selectedCase();return c?{ok:true,kind:'case',case_id:c.id,node_id:selectedId(),revision:c.revision}:{ok:true,kind:'published',selection:publishedSelection()};
+    const c=selectedCase(),draftVersion=view.draftVersion?.(selectedId()),draft=Number.isSafeInteger(draftVersion)?{draft_version:draftVersion}:{};
+    return c?{ok:true,kind:'case',case_id:c.id,node_id:selectedId(),revision:c.revision,...draft}:{ok:true,kind:'published',selection:publishedSelection(),...draft};
   }
   function beginChatCreation() {
     if(!chatRoute())return '';
@@ -565,6 +690,7 @@
     }
     const result=designer.handleEvent(event);
     const outcome=result.handled?result:view.handleEvent(event);
+    if(['input','change','submit','click'].includes(event.type))schedule();
     if(outcome.preventDefault)event.preventDefault();
     if(outcome.handled){
       if(event.type==='keydown'||event.type==='keyup')event.stopImmediatePropagation();
@@ -583,7 +709,7 @@
   window.addEventListener('storage',schedule);window.addEventListener('resize',handleEvent);
   const observer=new MutationObserver(schedule);observer.observe(document.documentElement,{childList:true,subtree:true});
   window.__eesNativeWork= true;
-  window.__eesNativeWorkV1={ensureChat,beginChatCreation,finishChatCreation,selection,refresh,open:openPanel,display:async(id,options)=>{
+  window.__eesNativeWorkV1={ensureChat,beginChatCreation,finishChatCreation,selection,captureReference,applyInputDraft,undoInputDraft:undoAIDraft,refreshActionRecords,refresh,open:openPanel,display:async(id,options)=>{
     if(typeof id!=='string'||id!==chatId()||!available()||!state||!options||typeof options!=='object'||Array.isArray(options))return {ok:false};
     if(Object.keys(options).some(key=>!['panel_open','navigator_open','pinned','category','system','site_id','process_id','node_id','case_id','history_open','history_case_id','workspace'].includes(key)))return {ok:false};
     if(['panel_open','navigator_open','pinned','workspace','history_open'].some(key=>key in options&&typeof options[key]!=='boolean'))return {ok:false};

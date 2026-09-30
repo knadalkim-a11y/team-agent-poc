@@ -364,6 +364,7 @@ class BrandingBuildTests(unittest.TestCase):
         self.ui = self.root / "ui"
         self.ui.mkdir()
         for name in builder.UI_FILES:
+            (self.ui / name).parent.mkdir(parents=True, exist_ok=True)
             (self.ui / name).write_bytes(b"reviewed UI asset " + name.encode())
         for name, content in {
             "ees-work-view.js": b"function createWorkView() { return 'view'; }\n",
@@ -418,6 +419,28 @@ class BrandingBuildTests(unittest.TestCase):
                 self.assertEqual(digests[0] == digests[1], filename != "ees-work-launcher.js")
             self.assertEqual(before.read(builder.TARGET_INFO + "METADATA"),
                              after.read(builder.TARGET_INFO + "METADATA"))
+
+    def test_v4_icon_hash_updates_dynamic_map_and_relative_and_absolute_css_urls(self):
+        relative = builder.V4_ICON_FILES[0]
+        name = Path(relative).name
+        (self.ui / "ees-work-view.js").write_text('function createWorkView() { return "' + name + '"; }\n', encoding="utf-8")
+        (self.ui / "ees-work-launcher.css").write_text('.relative{background:url("./' + relative + '")} .absolute{background:url("/_ees12/' + relative + '")}', encoding="utf-8")
+        hashes = []
+        for directory in ("icon-before", "icon-after"):
+            if directory == "icon-after":
+                with (self.ui / relative).open("ab") as icon:
+                    icon.write(b" changed icon")
+            digest = hashlib.sha256((self.ui / relative).read_bytes()).hexdigest()
+            hashes.append(digest)
+            self.build(directory)
+            with ZipFile(self.root / directory / builder.WHEEL_FILENAME) as archive:
+                source = archive.read(builder.TARGET_APP + "ees-work-launcher.js")
+                css = archive.read(builder.TARGET_APP + "ees-work-launcher.css")
+                self.assertIn((name + "?v=" + digest).encode(), source)
+                self.assertIn(("./" + relative + "?v=" + digest).encode(), css)
+                self.assertIn(("/_ees12/" + relative + "?v=" + digest).encode(), css)
+                self.assertNotIn(b"?v=" + digest.encode() + b"?v=", css)
+        self.assertNotEqual(*hashes)
 
     def test_native_chunk_change_readdresses_entire_cyclic_graph_without_version_change(self):
         prefix = builder.SOURCE_APP + "immutable/"
@@ -712,6 +735,7 @@ const assert = require('node:assert/strict');
 let current = {prompt:'original', selectedToolIds:['existing'], toolApprovalMode:'ask'};
 let approvalCalls = 0, imported = [], persisted = [], _r = null;
 const window = {location:{pathname:'/'}}, ce = false, le = {}, r = value => value;
+const Ae = {messages:{u:{id:'native-user',role:'user'},a:{id:'native-assistant',role:'assistant'}}};
 const j = () => false, g = () => false, Fr = () => 'native-chat',G=()=>'',d=()=>'';
 const us = () => current;
 const Ps = async (draft, chatId, debounce) => persisted.push({draft, chatId, debounce});
@@ -734,7 +758,9 @@ const qi = async serialized => {
   assert.equal(hook.ready(),false);
   finishFirst();await first;assert.equal(hook.ready(),false);
   finishSecond();await second;assert.equal(hook.ready(),true);
+  assert.deepEqual(hook.workMessageIds(),['native-assistant']);
   window.location.pathname='/c/other';assert.equal(hook.ready(),false);
+  assert.deepEqual(hook.workMessageIds(),[],'A loading or foreign route cannot expose old message IDs');
   window.location.pathname='/';
   const draft = hook.read();
   assert.equal(Object.hasOwn(draft, 'toolApprovalMode'), false);

@@ -1,0 +1,200 @@
+[
+  {
+    "file": "branding/ees/ui/v4/07d31.svg",
+    "source_sha256": "10ce6302eadf709da3d74b1c43e8414ab78a6fe9315db24543995459e6666796",
+    "product_sha256": "52ea499d1b3413d70580318e1dbe278db920a3648b2c5d32f97efd844f4396f7",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/093d6.svg",
+    "source_sha256": "3e8f262ecca2d75a983b2bbb551169ebfabb6f32057220034848dbf2c2cf2763",
+    "product_sha256": "8361bccbb63ac176dff05a6e95f48a933510dde3d107eba85caca91770a2dbe1",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/126c7.svg",
+    "source_sha256": "93f9adfe7df057dd3dc55a53104d7f271f952b8cd0b65533d6d91e608e084c6f",
+    "product_sha256": "d53b2cbca4d02c981eaecaf98b51c7b87753a2cb2ce7ebfbf7c21ec0fc5c2f49",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/2e769.svg",
+    "source_sha256": "671bd29015a2175fd48b752e373406dfc987dbfe7cde6be8c3946cd1329df905",
+    "product_sha256": "2b8d5f09936bec466b75df147474b2889e67a61b93355f8c7ca5963f6d425a92",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/34f85.svg",
+    "source_sha256": "4c934fb0648ebad0c2ae468bfd478210907b108ffeb59a0ece8e585e5c8bccef",
+    "product_sha256": "694be1438dfb9e27d86ba6b75bc9a29ad9b34190ad00737ace8dc90ab70f9fd1",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/40ef1.svg",
+    "source_sha256": "08870abe38ab7acfeec647bda3f72cffb4c005689432af6379666935c3854f34",
+    "product_sha256": "3e3d7298e0c8add61358d056210f4e915eca77bec85fd9805b8e47a10d973d4a",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/44a96.svg",
+    "source_sha256": "c6bfe969306137bbf4b24504f695aa88c990490ad7b9572d028f059a572b9187",
+    "product_sha256": "439986f9e4babbd6f239cb95605ed99ae5c23c2aba52eecac1c70c371f419777",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/49833.svg",
+    "source_sha256": "94d333992d6b767a9e2a173d072e6e0921c229bc4be46ba1f3082051c0f98a70",
+    "product_sha256": "43b3ffd7949f3c422d6b1d90eb06a4ec911d991c8d795e30a83bd4080bb79211",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/4df0d.svg",
+    "source_sha256": "d7fba841ceace72a8469aca5075ac8809b4934801688af94375555fa94eb7494",
+    "product_sha256": "f6d725b0be1e836a203f37833e7bfa8ca88adf1bdcd9097aa13ee8ed3f3479bc",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/4fb09.svg",
+    "source_sha256": "9fdf35e7c318bce48773d9c97ad9fed1e5a4a6209ab3ed7fabaa62ec3646764e",
+    "product_sha256": "9d0e79ea7a8fa25b889076c2587125f7c0bcaee42cfedaf53ece337dab12a896",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/522b5.svg",
+    "source_sha256": "311b15360b4959b7a25147b25033d51ef5826c2183ed89b405544936dae7a242",
+    "product_sha256": "4c159d103bb4056dc23e490a4df2215aad1dd04c5b40d4b609dc08ef1390618a",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/69549.svg",
+    "source_sha256": "868c6de30d6c582e6e01c492f158643ad0166f4e644c2949a0441134fecd7849",
+    "product_sha256": "ec6a1bf9d4a7b42a6132dc1cb46894ea9ce459404e7a09f3bba0692cfe611f02",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/721d7.svg",
+    "source_sha256": "e2905e68b40e500f0a73ff1868f331f1593ae72bdb43c65ee2c8272cd4697688",
+    "product_sha256": "e53a557c2da7221c25b3b3b03a02de9b6bc8cd749576e3c86fc7b087cd72dccb",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/730b1.svg",
+    "source_sha256": "ed407b95cb771403186c3ca4d87c30a9d92bd315a81e8736d11bb567f901dad1",
+    "product_sha256": "9aff2f5504d2306299057c8d20c93e8516c381ffbc54bf56785a18041a4fdd13",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/7bb4a.svg",
+    "source_sha256": "97cac54f082c7b34cf7441601d1c9890815cff5ff5c3f9ec3a430495774a2648",
+    "product_sha256": "a5f08771fd6364324d8240540d6f832b0901c4e98bc73fef4e94c79f3f415a0f",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/87d9b.svg",
+    "source_sha256": "d0fa6d58f7b24fc551754406d8fab277120ba0ed200d8d5b6c14b8c53255f639",
+    "product_sha256": "2299be067a20dcaa368710ee2a458e77082fe33f16a7e7577c0edc7c23c00e9c",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/88026.svg",
+    "source_sha256": "f716fa5d7eeed9eeab7985bf4f5228118a7361956499f5df0e9e3f62fde4eb4a",
+    "product_sha256": "2c864bd486bce0280e6f438406aba558b8fca54fb05cabb3e2f399640d440994",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/92ec5.svg",
+    "source_sha256": "2b0c107e836be4d7f716a8ab600e311d78f5fda9425d01a40fa8ef3dac355ed2",
+    "product_sha256": "f992ff0ccd4462f36d676341380a8a44ac60242de3fbe88fcc4bc312ef647bc0",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/9c63b.svg",
+    "source_sha256": "05e10a7e3bf786d135a5e2e200d8732f34b3fcabbdc0847743e2d8aa7b63ba3d",
+    "product_sha256": "cbcfacca41b8975f3d52d9228cef00c3329dbb717a75d5ab144e023bf0ad2cc2",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/a9175.svg",
+    "source_sha256": "64690ce19907f2b499782293d669051dfc3fc0c30704ac98c9573ab3d2c34a20",
+    "product_sha256": "e3ee0c6e295ef8b8f7e651a03aa7773d560d233e66701c5a368501125801238f",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/a953c.svg",
+    "source_sha256": "85fee1f8da0985d73fff5ac0e7c9c52f6197055565e9cb92a84d10f38839da02",
+    "product_sha256": "2179f5640dcc4d0281e94ba5f230ade86fab7866ef20ab335a2aa86c1a1864e7",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/b8bc6.svg",
+    "source_sha256": "ff27320b751358fa75a825c07950b5d01e02499eccce1cfbc30dedff04e543b6",
+    "product_sha256": "5da15cd3bb27c09604f344f097b67fffda2b8ecc250b802bbec7787d23c7b15b",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/bddb4.svg",
+    "source_sha256": "fc55969e7209f990725857d237200d0009a4b49c754167e057bb8687ee981dd4",
+    "product_sha256": "b55026cc631d21767e15fa2f4a78b4fa22f5cea807fdfdfc2835b9aa0166cfed",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/c325d.svg",
+    "source_sha256": "cb30b6284ed1a0bb0adffcab27e4ef96e1ecc9769e59c85b07f6b797f2831933",
+    "product_sha256": "77f45eed9813d86e265461795ebf8e8949f7366f29be36f9e76a1b9ce0700739",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/cf77a.svg",
+    "source_sha256": "723aca0a1c047a90116d0833a1c38e2cee6bc71dfc954dea2e89a555551d9b50",
+    "product_sha256": "26ed924a23145c4f3c8b68b638ca171fedde82d9d83cec021b3bb1772332d2ca",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/d448c.svg",
+    "source_sha256": "db2b241e542467e9a5502804572be8d0c68777284f1930353ac530f61627ffa9",
+    "product_sha256": "7e6392c79150f9ea21cd625ca0ed3b0658f0696fd097afde421c0b4fb257da1d",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/d553d.svg",
+    "source_sha256": "58af46245e126b3d248fef4e44161f5099e247ad0317fed10da6fdc4be49dd2f",
+    "product_sha256": "d25dd7d39213345981e68598eefd95a70cafbb9549d49f854a1e2d73d99b8cbe",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/e1049.svg",
+    "source_sha256": "1092d7836af9e0be765a9aebc3725ef7733a2121d6d81e92f69e4f05d245f4bf",
+    "product_sha256": "dbc4e674c1e26acc0fece7ad74510d9f2e5916c2e3342f7b20ad0f71cde2274a",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/e1472.svg",
+    "source_sha256": "90eec598907056757cac3fd57732a89bf4d3ef18a75902a767759919b772cbdd",
+    "product_sha256": "99fe7cd0eb478540ce51802409390e0f8238e10f1ff6de501ae364be5d60cb5f",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/ea639.svg",
+    "source_sha256": "f54a9e326f7d1341e6482859dc6da371fbff0c6e053adc34621e4396f71be86f",
+    "product_sha256": "3dc3ba3d4799c5e28a3c2273a0eba98f306f0438ae43cf78ef18366c8dc1e184",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/ead50.svg",
+    "source_sha256": "aeb222a446cbeb3183b454c1aa66ff6fd4b4775007c8de7cf154be437a62714f",
+    "product_sha256": "e01163f5e0c4d1af06e80d4a5a4e1dec7cbef28d1c6777221477bcb6ed9278e8",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/eb94a.svg",
+    "source_sha256": "5f31d11eb331add545b7f40efab5cf1f624c8380e56cac104024c4891e29f01a",
+    "product_sha256": "157914196f301f18bad29e31c105488879e937d597a672c71110ba7e2d04c10b",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  },
+  {
+    "file": "branding/ees/ui/v4/f6bbc.svg",
+    "source_sha256": "dce7c9d617a02625ff92286cca90870fa6318cea895afe9b33b71674a2be9d9b",
+    "product_sha256": "b2a9190a251866678dec4e60fcca8a9e29db9b3e838234e3316654c62083fc3d",
+    "transformation": "Only trailing blank lines removed; SVG XML identical"
+  }
+]
