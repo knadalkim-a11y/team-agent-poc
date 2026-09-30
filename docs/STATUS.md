@@ -1,22 +1,28 @@
 # 현재 작업 상태
 
-갱신일: 2026-09-30
+갱신일: 2026-10-01
 
 현재 작업·다음 작업·미해결·실제 적용 원본을 관리합니다. 이슈·검증 근거는 [평가 기록 찾아보기](../evals/scenarios.md#evidence-index), 환경은 [versions](../versions.md), 완료된 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** [EES Work 4차 UI](mockups/ees-work/TASK.md#v4-ui-20260930)의 사내 화면 파손 후속 수정. 09-30 사용자가 조사 뒤 “수정해줘”로 구현을 요청해 같은 [PR #69](https://github.com/knadalkim-a11y/team-agent-poc/pull/69), `fix/ees-v4-native-layout-20260930`에서 스타일 생명주기·Native 빈 대화·검색/경로·스크롤·폭 조합을 보완했다. 기준 main은 `713ed5e4e5dce7e99866c1dbe0db31ef5be94af3`이며 사내 설치 SHA·개별 기능 정상은 미확인이다. [조사](../evals/v4-ui-20260930.md#v4-ui-breakage-investigation)와 [수정·검사 경계](../evals/v4-ui-20260930.md#v4-ui-breakage-fix)를 구분한다.
+- **현재 작업:** #69 병합 main `3a51f9d2bc604e768a59a522d6f34a34c2cb05d3` 재배포 중 종료 대기 실패 조사. 10-01 사용자 보고는 `changed=false, stage=process_stop, code=stop_timeout, operation=process_wait, seconds=32.25, timeout=30`이다. 종료 요청 후 기다리던 단계에서 멈춰 이번 시도의 Backup/Apply/Start/ApplyDemo는 미진입이며 새 수정본 적용 성공이 아니다. 현재 등록 프로세스와 listener는 아직 미확인이다. [사건·판단·다음 확인](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001).
 - **Git 범위·후속 승인:** 시작 main은 `b0515d594da36112919a14c814a95e2b5900035e`(#67 병합)이며 같은 V4 PR이 없어 `feat/ees-ui-v4-20260930`과 [PR #68](https://github.com/knadalkim-a11y/team-agent-poc/pull/68)을 만들었다. Draft #53은 혼합하지 않는다. 검사한 제품 원본은 `6c4111a9afbaadda78256c8276b41cbb875673db`, 후속 승인 전 검토 head는 `f72b53aef76cc9c25dc5d264ad47c21aa4a24a43`다. 최초 요청은 병합·Draft 해제·사내 배포를 제외했으나, 09-30 사용자가 시험 배포를 요청하고 `응 진행해`로 #68 Draft 해제·main 병합·시험 적용 진행을 승인했다. 당시 승인 기록은 문서 변경이었고 #68은 main `713ed5e4e5dce7e99866c1dbe0db31ef5be94af3`에 병합됐다. 09-30 18:04 KST 사용자가 “병합 재배포까지 하자”로 #69의 Draft 해제·병합·기존 경로 재배포를 별도 승인했다. 검사한 제품 원본은 `05d25a5bdfe8fe22d0dbfe2859808e54c69d85f7`이며 후속 승인 기록은 문서만 갱신한다. 최종 적용 SHA는 원격 PR #69의 실제 merge_commit_sha와 main 일치로 확인한다. Figma/PDF 원본 변경은 계속 제외한다.
 - **구현 경계:** V4 상태별 목록·정보300px 상세·본문 하단 행동 바, 실제 schema 입력, Native 입력 도움의 초안/근거/되돌리기와 메시지 당시 참고를 연결했다. 저장과 실행·승인을 분리하며 모의 통과를 실제 완료로 집계하지 않는다. 기존 인증·대화·첨부·Workspace·P/T·관리·자산 저장 서비스를 재사용한다.
 - **판정 경계:** 기존 검사와 이번 변경 범위의 회귀는 [V4 검증 기록](../evals/v4-ui-20260930.md#v4-ui-breakage-fix)에 보존한다. Figma A/B·고정 Native 소스 대조와 자동 회귀를 실제 제품 화면 일치로 해석하지 않는다. 실제 backend 기동은 Python3.11 전용 의존성을 현재3.12에서 불러오지 못해 실패했고, 보조 프런트엔드 진단도 cloud browser의 loopback 접근 차단으로 렌더하지 못했다. 실제 Native A/B 대조·핵심 왕복·실제 모델 입력 도움은 **미실행**이며 과거 C안 PASS·합성 검사로 대체하지 않는다.
 - **보존·캐시:** 기존 사용자 패널 폭·닫힘·대화 설정을 초기화하지 않는다. 변경 자산은 기존 빌드의 내용 해시 경로로 구분한다. ees.12·Pack0.2.14를 새 배포물 동일성의 근거로 쓰지 않으며, 이번 작업에서 사용자 자산 재등록/일괄 동기화·DB/키·배포/Restore 계약 변경은 없다.
 - **남은 결정:** 부분 결과 전용 표현, 추천 범위·담당/일정 정책, 기존 결과/P/T/관리 전용 V4 디자인과 임시 반응형 수락은 미결정이다. 근거 있는 임시 선택·실제 미지원 필드는 [차이·미결정 표](../evals/v4-ui-20260930.md)에 명시한다.
-- **다음 작업 하나:** 승인된 #69의 원격 최종 병합 main SHA로 기존 `Update → Upgrade -TrialCommit -Summary`를 실행하고 사내 적용 결과를 확인한다. 준비/해시 검증 → Stop → Backup → Apply → Start → 같은 원본 ApplyDemo가 한 번 연결되며 별도 ApplyDemo를 반복하지 않는다. 사용자는 기동·기존 대화와 목록/상세 배치·저장/복귀의 최소 결과를 직접 타이핑 1~2줄로 전달한다. 실제 제품 A/B·전체 왕복·입력 도움·V4-01~15 수락과 사내 적용 성공은 별도 미확인으로 유지한다. [승인·확인 경계](../evals/v4-ui-20260930.md#v4-fix-redeploy-20260930).
+- **다음 작업 하나:** 기존 등록 manager의 읽기 전용 `Status -Summary`와 등록 포트 listener 유무를 한 번에 확인한다. Status는 실패 기록을 덮어쓰지 않는다. 현재 상태를 확인하기 전 같은 Upgrade/Stop 반복·HealthTimeout 확대·과거 c099 강제 복구 명령을 안내하지 않는다. wrapper SHA와 설치 프로그램 SHA를 구분하며 실제 재배포·UI 수락은 미완료다.
 
 이전 #67 C안 승인·시험 준비와 #66 적용에 대한 사용자 보고/정정은 [기존 평가](../evals/c-design-phase3-20260929.md#c-visual-match-20260929) 및 아래 적용 상태에 보존한다. 이번 V4의 권한은 과거 배포 승인이 아니라 위 09-30 후속 승인에 근거한다.
 
-## 2026년 9월 개발·검사 방침
+<a id="2026년-9월-개발검사-방침"></a>
+
+## 원격 검사 방침 · 10-01 재개 경계
+
+10-01 KST 첫 재개로 아래 9월 한시 생략 기간은 종료됐다. 이번 단계는 사내 실패 보고와 읽기 전용 상태 확인이며 제품/시험 코드를 바꾸지 않는다. 무료분 복구 상태는 아직 확인하지 못했고 마지막 제품 코드의 필요한 원격 검사는 재개 완료로 기록하지 않는다. 새 커밋에 9월 `[skip ci]`를 자동 재사용하지 않으며 다음 코드/배포 판단 전에 잔여량과 원격 검사 결과를 확인한다.
+
+### 9월 당시 방침과 종료 조건
 
 사용자 선택으로 **2026-09-30까지 이 작업의 GitHub 원격 검사를 생략**한다. 이 저장소에 게시하는 개발·문서 커밋 메시지마다 `[skip ci]`를 넣어 기존 `push`/`pull_request` 자동 검사를 생략하며 수동 실행·재실행은 요청하지 않는다. PR 본문에만 적거나 이전 커밋의 표시가 이후 커밋에도 적용된다고 가정하지 않는다. 이는 작업 커밋별 생략이며 계정 전체 Actions를 비활성화한 것이 아니다.
 
@@ -30,7 +36,7 @@
 
 | 대상 | 마지막 확인과 적용 원본 | 남은 한계·근거 |
 |---|---|---|
-| EES Work 업무 UI | 09-30 #68 시험 적용 안내 후 사용자가 사내에서 UI가 전반적으로 깨졌다고 보고 | 적용·화면 접근에 대한 사용자 관찰이며 정확한 설치 SHA/등록 바이트·기능 정상은 미확인. [V4 결함 조사](../evals/v4-ui-20260930.md#v4-ui-breakage-investigation)로 전환; 과거 #66/#67 관찰은 기존 평가에 보존 |
+| EES Work 업무 UI | #68 적용 뒤 파손 보고. #69 병합 후 10-01 재배포는 Stop timeout으로 Apply 미진입 | 최초 파손과 이번 종료 실패는 서로 다른 단계다. 정확한 설치 SHA/등록 바이트·현재 가동·새 UI 정상은 미확인. [V4 결함 조사](../evals/v4-ui-20260930.md#v4-ui-breakage-investigation)로 전환; 과거 #66/#67 관찰은 기존 평가에 보존 |
 | EES 프로그램 | 적용 전 Status `e5b799ed22d1`, customized/running=true. #66 `8027aaf2e654` 적용 안내 뒤 Upgrade ok/running=true 보고 | 스크립트 완료에 대한 보고이며 적용 후 정확한 SHA·등록 바이트 재조회는 미실행 |
 | 운영 래퍼 | PR #59 Upgrade의 wrapper/commit `c4c6ab8d1df3`, `wrapper_changed=false`. PR #60은 main `b1c47643c7a5`로 Update → TrialCommit 안내 | #60 실제 wrapper 필드 재수신 없음. 최초 원본 불일치 원인은 미확정이며 [이전 조회·성공](../evals/scenarios.md#integrated-work-beta-20260921) 보존 |
 | 분석·업무 패널 자산 | #66 적용 안내 뒤 ApplyDemo ok 사용자 보고 | changed·등록 바이트·실제 UI 재사용 검사 미수신. 이번 시각 보완 때문에 사용자 자산을 재등록/일괄 동기화하지 않음 |
@@ -82,4 +88,4 @@
 
 ## 최근 점검
 
-2026-09-30 18:04 KST 병합·재배포 요청 후 PR #69 head `05d25a5b`와 main `713ed5e4`·clean worktree·검사 원본 해시 일치·mergeable/clean을 확인했다. Python110 PASS/2 SKIP와 Node39 PASS는 변경 없는 제품 원본의 유효 결과로 유지한다. 원격 check-run/status 항목0은 9월 생략 방침이며 성공한 CI가 아니다. 이번 후속 변경은 승인·재배포 확인 경계를 기록한 문서뿐이다. [수정 검사](../evals/v4-ui-20260930.md#v4-ui-breakage-fix), [승인·적용 경계](../evals/v4-ui-20260930.md#v4-fix-redeploy-20260930).
+2026-10-01 main/로컬 `3a51f9d2` 일치·clean과 열린 PR은 무관한 Draft53뿐임을 확인했다. `process_wait/stop_timeout`은 Windows helper 성공 반환 뒤 동일 프로세스의 30초 종료 대기이며32.25초는 helper/신원 확인을 포함한 전체 시간이다. 711행은 오류 재전달 위치로 특정 Windows API 결함이나 DB 손상을 뜻하지 않는다. 기존 실패 보존·읽기 전용 Status와 포트 확인 경로를 검토했다. 아직 코드 결함/현재 가동 상태/원인 확인은 없으며 제품을 변경하거나 재시도하지 않았다. [새 사건 기록](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001).
