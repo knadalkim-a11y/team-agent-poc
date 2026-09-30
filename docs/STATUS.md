@@ -6,13 +6,13 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** #69 수정본 `3a51f9d2bc604e768a59a522d6f34a34c2cb05d3` 재배포의 `process_stop/stop_timeout` 후 복구 준비. 사용자 Status는 설치본 `713ed5e4e5dc`, customized/running=true이고 등록 포트 listener는 false다. 프로세스는 남았지만 접속 서비스가 정상인 상태가 아니며 이번 Backup/Apply/Start/ApplyDemo는 미진입이다. 같은 [PR #70](https://github.com/knadalkim-a11y/team-agent-poc/pull/70)에서 기존 명시적 단일 서버 복구에 검증 백업을 추가했다. [사건·상태·복구와 검사 경계](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001).
+- **현재 작업:** #69 수정본3a51의 종료 실패 복구 중 08:40 사용자 `recover_stop/configuration/retained_bundle_mismatch, changed=false, terminated=false, backup=unverified` 보고. #70은 main `0e88af6189812b50760e06737dde5663b3ab2a28`에 병합됐으나 실제 복구는 ZIP 경로 확인에서 멈췄다. Trial의 `trial-build-*` 경로를 `upgrade-*` 전용 복구가 거부하는 누락을 수정하며 새 브랜치 `fix/trial-stop-recovery-20261001`에서 생성·실패 저장·복구 연결을 검증한다. [새 실패·확정 결함·재개 경계](../evals/v4-ui-20260930.md#v4-retained-bundle-20261001).
 - **Git 범위·후속 승인:** 시작 main은 `b0515d594da36112919a14c814a95e2b5900035e`(#67 병합)이며 같은 V4 PR이 없어 `feat/ees-ui-v4-20260930`과 [PR #68](https://github.com/knadalkim-a11y/team-agent-poc/pull/68)을 만들었다. Draft #53은 혼합하지 않는다. 검사한 제품 원본은 `6c4111a9afbaadda78256c8276b41cbb875673db`, 후속 승인 전 검토 head는 `f72b53aef76cc9c25dc5d264ad47c21aa4a24a43`다. 최초 요청은 병합·Draft 해제·사내 배포를 제외했으나, 09-30 사용자가 시험 배포를 요청하고 `응 진행해`로 #68 Draft 해제·main 병합·시험 적용 진행을 승인했다. 당시 승인 기록은 문서 변경이었고 #68은 main `713ed5e4e5dce7e99866c1dbe0db31ef5be94af3`에 병합됐다. 09-30 18:04 KST 사용자가 “병합 재배포까지 하자”로 #69의 Draft 해제·병합·기존 경로 재배포를 별도 승인했다. 검사한 제품 원본은 `05d25a5bdfe8fe22d0dbfe2859808e54c69d85f7`이며 후속 승인 기록은 문서만 갱신한다. 최종 적용 SHA는 원격 PR #69의 실제 merge_commit_sha와 main 일치로 확인한다. Figma/PDF 원본 변경은 계속 제외한다.
 - **구현 경계:** V4 상태별 목록·정보300px 상세·본문 하단 행동 바, 실제 schema 입력, Native 입력 도움의 초안/근거/되돌리기와 메시지 당시 참고를 연결했다. 저장과 실행·승인을 분리하며 모의 통과를 실제 완료로 집계하지 않는다. 기존 인증·대화·첨부·Workspace·P/T·관리·자산 저장 서비스를 재사용한다.
 - **판정 경계:** 기존 검사와 이번 변경 범위의 회귀는 [V4 검증 기록](../evals/v4-ui-20260930.md#v4-ui-breakage-fix)에 보존한다. Figma A/B·고정 Native 소스 대조와 자동 회귀를 실제 제품 화면 일치로 해석하지 않는다. 실제 backend 기동은 Python3.11 전용 의존성을 현재3.12에서 불러오지 못해 실패했고, 보조 프런트엔드 진단도 cloud browser의 loopback 접근 차단으로 렌더하지 못했다. 실제 Native A/B 대조·핵심 왕복·실제 모델 입력 도움은 **미실행**이며 과거 C안 PASS·합성 검사로 대체하지 않는다.
 - **보존·캐시:** 기존 사용자 패널 폭·닫힘·대화 설정을 초기화하지 않는다. 변경 자산은 기존 빌드의 내용 해시 경로로 구분한다. ees.12·Pack0.2.14를 새 배포물 동일성의 근거로 쓰지 않는다. 10-01 복구에는 종료 완료 뒤 기존 검증 백업을 연결하며 DB/키 재생성·복원·사용자 자산 재등록/일괄 동기화는 없다. 설치본713→보관 수정본3a51 사이 agent-pack 변경이 없어 이번 복구에서 ApplyDemo를 반복하지 않는다.
 - **남은 결정:** 부분 결과 전용 표현, 추천 범위·담당/일정 정책, 기존 결과/P/T/관리 전용 V4 디자인과 임시 반응형 수락은 미결정이다. 근거 있는 임시 선택·실제 미지원 필드는 [차이·미결정 표](../evals/v4-ui-20260930.md)에 명시한다.
-- **다음 작업 하나:** 현재 병합·재배포 지시에 따라 백업 보완을 검토·검증한 뒤 기존 실패와 registry를 보존하고, 응답하지 않는 등록 서버 한 개를 신원 재확인 후 명시 종료→검증 백업→보관3a51 ZIP 적용→기동/health로 한 번 복구한다. 원격 검사·실제 Windows/사내 미실행을 구분한다. [복구 절차](03-openwebui-native-agent.md#v4-stop-recovery-20261001). 같은 Upgrade/Stop 반복·과거 c099 명령·자동 Restore를 사용하지 않으며 실제 복구와 UI 수락은 사용자 결과 전까지 미완료다.
+- **다음 작업 하나:** 경로 수정을 검증·병합한 뒤 현재 복구 실패를 보존하고, 이미 저장한 정확한3a51 Trial Stop 요청이 유일할 때 그 원본으로 명시적 복구를 재개한다. 새 요청 생성·ZIP 이동·기존 블록 그대로 반복은 하지 않는다. 검증된 한 서버 종료→검증 백업→보관3a51 적용→기동/health는 그대로이며 실제 복구·화면 수락은 미확인이다. [복구 절차](03-openwebui-native-agent.md#v4-stop-recovery-20261001).
 
 이전 #67 C안 승인·시험 준비와 #66 적용에 대한 사용자 보고/정정은 [기존 평가](../evals/c-design-phase3-20260929.md#c-visual-match-20260929) 및 아래 적용 상태에 보존한다. 이번 V4의 권한은 과거 배포 승인이 아니라 위 09-30 후속 승인에 근거한다.
 
@@ -38,7 +38,7 @@
 |---|---|---|
 | EES Work 업무 UI | #68 적용 뒤 파손 보고. #69 병합 후 10-01 재배포는 Stop timeout으로 Apply 미진입 | 설치본은713, 수정본3a51은 미적용. 최초 UI 파손과 이번 종료 실패는 다른 단계이며 실제 새 UI 정상은 미확인. [V4 결함 조사](../evals/v4-ui-20260930.md#v4-ui-breakage-investigation) |
 | EES 프로그램 | 10-01 Status `713ed5e4e5dc`, customized/running=true, 등록 포트 listener=false | 등록 신원 존재와 설치 원본 보고이며 health 성공이 아니다. HTTP/새 UI·복구 성공은 미확인 |
-| 운영 래퍼 | 10-01 실패 요약 wrapper `3a51f9d2c60`, wrapper_changed=false | 설치 프로그램713과 구분. 복구 백업 보완 래퍼의 실제 Update는 아직 미실행. [이번 종료 실패](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001); [이전 이력](../evals/scenarios.md#integrated-work-beta-20260921) 보존 |
+| 운영 래퍼 | #70 main `0e88af6189812` 고정 블록 뒤 recover_stop 경로 오류 보고 | 안내 순서상 Update·SHA 확인 통과와 부합하지만 새 UI 적용은 아니다. 경로 보완 래퍼의 실제 실행은 미확인. [이번 종료 실패](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001); [이전 이력](../evals/scenarios.md#integrated-work-beta-20260921) 보존 |
 | 분석·업무 패널 자산 | #66 적용 안내 뒤 ApplyDemo ok 사용자 보고 | changed·등록 바이트·실제 UI 재사용 검사 미수신. 이번 시각 보완 때문에 사용자 자산을 재등록/일괄 동기화하지 않음 |
 | 대표 시작 질문 | 09-15 `87f3f2922a4a`의 v0.2.10 관리 목록을 포함한 ApplyDemo 성공 | 질문의 실제 표시 여부는 미확인. 변경 3건을 특정 질문 변경으로 단정하지 않음. [이번 적용](../evals/scenarios.md#work-ui-refactor-20260915), [이전 접속 실패](../evals/scenarios.md#connector-demo-starters) |
 | WO 목업 | v0.1.6 안내 원본 `ba396da8d1d0abcb4e17494e8d9b37c5add514fc` 뒤 크기 조절 정상 보고; Git은 v0.1.8 통합 패널 원본 | 실제 EMS 미연결. 이후 패널 적용 보고와 개별 등록 바이트 검증을 구분. [목업 이력](../evals/scenarios.md#wo-mockup) |
@@ -70,7 +70,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | #68 파손 뒤 #69 수정 병합, 종료 실패 후 [복구 PR #70](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001) | 승인된 재배포의 종료 실패 복구. 실제 사내 결과·Native 왕복·A/B와 V4-01~15 수락 확인은 남음 |
+| 4. 관리자 워크플로 | #68 파손 뒤 #69 수정 병합, 종료·보관 ZIP 경로 실패 후 [복구 수정](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001) | 승인된 재배포의 종료 실패 복구. 실제 사내 결과·Native 왕복·A/B와 V4-01~15 수락 확인은 남음 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -80,7 +80,7 @@
 
 ## 재개와 환경 유지
 
-- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work의 현재 작업은 [4차 UI 후속 수정](../evals/v4-ui-20260930.md#v4-ui-breakage-fix)이며 #69 병합3a51의 종료 실패와 후속 복구 PR #70의 최신 head·병합 여부·검사 경계를 먼저 확인한다. 설치본713·등록 프로세스 잔류·listener 부재 보고 뒤의 실제 복구 결과부터 확인하며 과거 Status 확인을 반복하지 않는다. PR #68은 main에 병합됐고 사용자가 사내 화면 파손을 보고했다. 이번 권한은 09-30 18:04의 #69 후속 승인에 근거하며 완료한 수정/검사를 반복하지 않는다. #67까지의 C안은 병합된 기반이며 종료된 시각 작업을 재개하지 않는다. 기존 [09-29 C안 2단계](mockups/ees-work/TASK.md#c-design-phase2-20260929)와 [검토 보완](mockups/ees-work/TASK.md#c-design-phase2-review-20260929)을 보존하고 [3차 개발환경 검수](mockups/ees-work/TASK.md#c-design-phase3-20260929)를 완료했다. 완료된 1·2단계·보완·3차 검사를 미완료로 보아 반복하지 않는다. [09-23 A안](mockups/ees-work/TASK.md#a-design-20260923)·Figma 478:131/498:363은 기존 구현 근거로 보존하고 [09-22 단계별 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922)·[확정 왼쪽](mockups/ees-work/TASK.md#sidebar-final-20260922)·[오른쪽 기록 계약](mockups/ees-work/TASK.md#right-panel-20260922)을 보존합니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
+- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work의 현재 작업은 [4차 UI 후속 수정](../evals/v4-ui-20260930.md#v4-ui-breakage-fix)이며 #69 병합3a51의 종료 실패와 PR #70 병합 뒤의 retained_bundle_mismatch 후속 수정·최신 main/열린 PR을 먼저 확인한다. 설치본713·등록 프로세스 잔류·listener 부재 보고 뒤의 실제 복구 결과부터 확인하며 과거 Status 확인을 반복하지 않는다. PR #68은 main에 병합됐고 사용자가 사내 화면 파손을 보고했다. 이번 권한은 09-30 18:04의 #69 후속 승인에 근거하며 완료한 수정/검사를 반복하지 않는다. #67까지의 C안은 병합된 기반이며 종료된 시각 작업을 재개하지 않는다. 기존 [09-29 C안 2단계](mockups/ees-work/TASK.md#c-design-phase2-20260929)와 [검토 보완](mockups/ees-work/TASK.md#c-design-phase2-review-20260929)을 보존하고 [3차 개발환경 검수](mockups/ees-work/TASK.md#c-design-phase3-20260929)를 완료했다. 완료된 1·2단계·보완·3차 검사를 미완료로 보아 반복하지 않는다. [09-23 A안](mockups/ees-work/TASK.md#a-design-20260923)·Figma 478:131/498:363은 기존 구현 근거로 보존하고 [09-22 단계별 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922)·[확정 왼쪽](mockups/ees-work/TASK.md#sidebar-final-20260922)·[오른쪽 기록 계약](mockups/ees-work/TASK.md#right-panel-20260922)을 보존합니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
@@ -88,4 +88,4 @@
 
 ## 최근 점검
 
-2026-10-01 사용자 Status로713 설치본의 등록 프로세스 잔류·listener 부재를 확인했다. 기존 명시적 복구 경로에 Apply 전 백업 누락을 발견해 기존 backup_state·기록 계약을 연결했다. 종료 지연의 근본 원인은 미확정이며 백업 보완을 원인 수정으로 표현하지 않는다. 같은 PR70에서 합성 회귀·문서·명령을 검토하고 실제 Windows·사내 실행·V4 수락과 구분한다. [새 사건 기록과 검사 결과](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001).
+2026-10-01 08:40 사용자 복구 실패는 종료/백업 전이다. 최신 main0e88·로컬 clean·관련 미병합 PR 없음(무관한Draft53만)을 확인하고, 실제 Trial 보관 폴더와 복구 허용 조건의 불일치를 재현했다. 앞선 검수에서 생산자/소비자 연결을 놓친 사실을 보존하며 최소 경로 수정·교차 회귀와 기존 요청 재사용 명령을 검토한다. 원격 CI·Windows·사내 복구·V4 제품 수락은 별도이며 [새 검사와 남은 항목](../evals/v4-ui-20260930.md#v4-retained-bundle-20261001)에 기록한다.

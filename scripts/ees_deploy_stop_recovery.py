@@ -55,8 +55,14 @@ def validate_failure(config, request, commit):
     bundle = manager.states._regular(Path(bundle))
     root = Path(config["state_root"]).resolve()
     manager.states._safe(bundle.parent)
+    # Local trial Upgrade retains its prepared ZIP under trial-build- rather
+    # than the release downloader's upgrade- directory. Require its saved
+    # source marker before accepting that additional producer-owned location.
+    allowed_parent = (bundle.parent.name.startswith("upgrade-")
+                      or (result.get("source_verification") == "local_trial"
+                          and bundle.parent.name.startswith("trial-build-")))
     if (bundle.resolve().parent.parent != root
-            or not bundle.parent.name.startswith("upgrade-")
+            or not allowed_parent
             or bundle.name != "EES-demo-" + commit[:12] + ".zip"):
         raise RecoveryError("retained_bundle_mismatch")
     return bundle

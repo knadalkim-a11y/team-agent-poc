@@ -13,6 +13,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from scripts import ees_trial_upgrade as trial
+from scripts import ees_deploy_stop_recovery as recovery
 
 
 HEAD = "a" * 40
@@ -226,6 +227,33 @@ class TrialUpgradeTests(unittest.TestCase):
                     self.assertTrue(self.bundle.exists())
                 finally:
                     self.mock[failing].side_effect = original
+
+    def test_saved_trial_stop_failure_is_consumable_by_explicit_recovery(self):
+        original_registry = copy.deepcopy(self.registry)
+
+        def failed_stop(config, registry, *, progress):
+            progress["stage"] = "process_stop"
+            raise trial.manager.processes.ProcessError(
+                "synthetic stop timeout", operation="process_wait", reason="stop_timeout",
+                elapsed_seconds=32.25, timeout_seconds=30)
+
+        self.mock["stop"].side_effect = failed_stop
+        self.assertEqual(self.run_main(), 1)
+        for name in ("backup", "apply", "start", "demo", "cleanup"):
+            self.mock[name].assert_not_called()
+        saved = json.loads((self.root / "last-operation.json").read_bytes())
+        self.assertEqual(saved["action"], "upgrade")
+        self.assertTrue(saved["failed"])
+        self.assertEqual(saved["result"]["source_verification"], "local_trial")
+        self.assertEqual(saved["result"]["process"]["reason"], "stop_timeout")
+        self.assertFalse(saved["result"]["backup_verified"])
+        request_path = self.root / ("stop-recovery-" + "c" * 32 + ".json")
+        request_path.write_text(json.dumps({"failure": saved, "registry": original_registry}),
+                                encoding="utf-8-sig")
+        request = recovery.read_request(self.config, request_path)
+        self.assertEqual(recovery.validate_failure(self.config, request, HEAD), self.bundle)
+        self.assertEqual(request["registry"], original_registry)
+        self.assertEqual(self.bundle.read_bytes(), b"synthetic exact reviewed bundle")
 
     def test_backup_record_failure_stops_before_apply_and_retains_bundle(self):
         self.mock["record"].side_effect = OSError("synthetic backup record failure")

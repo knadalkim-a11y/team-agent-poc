@@ -14,6 +14,7 @@ from unittest.mock import Mock, patch
 from urllib.error import HTTPError
 
 from scripts import ees_trial_bundle as bundles
+from scripts import ees_deploy_stop_recovery as recovery
 
 
 WHEEL = b"synthetic pinned upstream wheel"
@@ -208,6 +209,11 @@ class SourceTests(unittest.TestCase):
         self.assertFalse(self.built_source.exists())
         self.assertEqual(bundle.parent.parent, self.state)
         self.assertNotIn(str(self.built_source), self.git("worktree", "list", "--porcelain"))
+        failure = {"failure": {"action": "upgrade", "failed": True, "result": {
+            "stage": "process_stop", "changed": False, "wrapper_commit": self.commit,
+            "source_verification": "local_trial", "process": {"error_type": "process"},
+            "bundle": str(bundle)}}}
+        self.assertEqual(recovery.validate_failure(self.config, failure, self.commit), bundle)
 
     def test_build_failure_cleans_created_worktree_and_temporary_output(self):
         with patch.object(bundles, "_build", side_effect=bundles.TrialBundleError("trial_build_failed")):

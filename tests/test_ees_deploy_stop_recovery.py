@@ -145,6 +145,38 @@ class RequestTests(RequestFixture):
         with self.assertRaisesRegex(recovery.RecoveryError, "retained_bundle_missing"):
             recovery.validate_failure(self.config, self.request, HEAD)
 
+    def test_trial_bundle_requires_saved_local_trial_source_marker(self):
+        trial_bundle = self.root / "trial-build-example" / self.bundle.name
+        trial_bundle.parent.mkdir()
+        trial_bundle.write_bytes(self.bundle.read_bytes())
+        result = self.request["failure"]["result"]
+        result["bundle"] = str(trial_bundle)
+        for marker in (None, "release", "local_trial ", True):
+            with self.subTest(marker=marker):
+                result["source_verification"] = marker
+                with self.assertRaisesRegex(recovery.RecoveryError, "retained_bundle_mismatch"):
+                    recovery.validate_failure(self.config, self.request, HEAD)
+        result["source_verification"] = "local_trial"
+        self.assertEqual(recovery.validate_failure(self.config, self.request, HEAD), trial_bundle)
+        # Release ZIPs remain valid for the historical recovery contract.
+        result["bundle"] = str(self.bundle)
+        self.assertEqual(recovery.validate_failure(self.config, self.request, HEAD), self.bundle)
+
+    def test_trial_marker_does_not_relax_retained_bundle_location_or_commit(self):
+        candidates = (self.root / "trial-build-example" / ("EES-demo-" + OLDER[:12] + ".zip"),
+                      self.root / "trial-build-example" / "nested" / self.bundle.name,
+                      self.root / "elsewhere" / "trial-build-example" / self.bundle.name,
+                      self.root / "trial-build" / self.bundle.name)
+        result = self.request["failure"]["result"]
+        result["source_verification"] = "local_trial"
+        for candidate in candidates:
+            with self.subTest(candidate=candidate):
+                candidate.parent.mkdir(parents=True, exist_ok=True)
+                candidate.write_bytes(b"synthetic unrelated file")
+                result["bundle"] = str(candidate)
+                with self.assertRaisesRegex(recovery.RecoveryError, "retained_bundle_mismatch"):
+                    recovery.validate_failure(self.config, self.request, HEAD)
+
 
 class RecoveryFlowTests(RequestFixture):
     def setUp(self):
@@ -254,6 +286,26 @@ class RecoveryFlowTests(RequestFixture):
         self.assertTrue(self.progress["backup_verified"])
         self.assertNotIn("last_backup", result)
         self.assertNotIn("private-backup", json.dumps(result))
+        self.assert_preserved()
+
+    def test_local_trial_uses_the_same_inspection_termination_backup_and_apply_flow(self):
+        trial_bundle = self.root / "trial-build-example" / self.bundle.name
+        trial_bundle.parent.mkdir()
+        trial_bundle.write_bytes(self.bundle.read_bytes())
+        self.bundle = trial_bundle
+        self.request["failure"]["result"].update(bundle=str(trial_bundle),
+                                                  source_verification="local_trial")
+        self.write_request()
+        self.protected[self.path] = self.path.read_bytes()
+        self.protected[trial_bundle] = trial_bundle.read_bytes()
+        result = self.run_recovery()
+        self.assertEqual(self.mock["inspect"].call_args.args[1], trial_bundle)
+        self.assertEqual(self.mock["apply"].call_args.args[2], trial_bundle)
+        self.assertEqual(self.events, ["environment", "preflight", "port", "inspect", "port",
+                                      "terminate", "stopped", "stop_recovered_by_operator",
+                                      "backup", "data_backup_verified", "apply",
+                                      "start", "stop_recovery_applied_by_operator"])
+        self.assertTrue(result["backup_verified"])
         self.assert_preserved()
 
     def test_changed_registry_before_preflight_never_terminates(self):
