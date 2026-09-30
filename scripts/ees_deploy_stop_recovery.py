@@ -100,6 +100,14 @@ def recover(config, args, progress):
         registry["process"] = None
         progress["stage"] = "stop_record"
         manager.record(config, registry, "stop_recovered_by_operator")
+        # Keep the same data/key/settings protection as the ordinary trial
+        # Upgrade. A completed termination does not authorize skipping backup.
+        progress["stage"] = "backup"
+        saved = manager.states.backup_state(config)
+        registry["last_backup"] = saved
+        progress["stage"] = "backup_record"
+        manager.record(config, registry, "data_backup_verified")
+        progress["backup_verified"] = True
         progress["stage"] = "apply"
         progress["changed"] = None
         manager.customization.apply(config, registry, bundle, commit, env, manager.record, owner)
@@ -108,6 +116,7 @@ def recover(config, args, progress):
                                health_timeout=args.health_timeout, progress=progress)
         manager.record(config, registry, "stop_recovery_applied_by_operator")
         return {"stage": "complete", "changed": True, "started": True,
+                "backup_verified": True,
                 "terminated": progress["terminated"], **manager.program_result(registry)}
 
 
@@ -122,8 +131,10 @@ def report(args, result, failed=False):
     detail = manager.safe_failure_detail(result.get("process"))
     diagnostics = (f" operation={word(detail['operation'])} errno={detail['errno']}"
                    f" winerror={detail['winerror']}" if failed else "")
+    backup = "verified" if result.get("backup_verified") is True else "unverified"
     print(f"EES action=recover_stop result={'failed' if failed else 'ok'} "
           f"changed={flag(result.get('changed'))} terminated={flag(result.get('terminated'))} "
+          f"backup={backup} "
           f"commit={commit} stage={word(result.get('stage'))} "
           f"running={flag(result.get('started'))} code={word(result.get('code'))}" + diagnostics
           + (" report=unavailable" if not saved else ""))
@@ -137,7 +148,8 @@ def main(argv=None):
     parser.add_argument("--terminate-recorded-process", action="store_true")
     parser.add_argument("--health-timeout", type=manager.health_timeout_arg, default=120)
     args = parser.parse_args(argv)
-    progress = {"stage": "configuration", "changed": False, "terminated": False}
+    progress = {"stage": "configuration", "changed": False, "terminated": False,
+                "backup_verified": False}
     try:
         config = manager.states.load_config(args.config)
         result = recover(config, args, progress)

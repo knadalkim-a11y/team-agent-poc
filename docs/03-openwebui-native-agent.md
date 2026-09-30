@@ -1108,6 +1108,20 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 성공 기준은 마지막 `EES action=recover_stop result=ok ... running=true`와 Ctrl+F5 후 폭·드래그 표시 확인입니다. 외부에는 마지막 결과와 화면 확인 여부만 1~2줄로 전달합니다. 실패하면 블록을 반복하거나 요청 파일·잠금을 지우지 않고 마지막 `stage/code/operation/errno/winerror`로 이어갑니다. 종료가 성공하고 Apply/Start가 실패한 상태도 별도로 남기며 자동 Restore·다른 서버 시작을 하지 않습니다. 이번 복구 준비와 실제 사내 실행 성공·원인 해결은 구분합니다.
 
+<a id="v4-stop-recovery-20261001"></a>
+
+#### 10-01 V4 재배포 종료 실패 복구
+
+이번 사용자 Status는 `commit=713ed5e4e5dc, program=customized, running=true`이고 등록 포트 listener는 false다. running은 등록 프로세스의 신원 확인이지 접속 정상 판정이 아니다. UI 수정본 `3a51f9d2bc604e768a59a522d6f34a34c2cb05d3`는 아직 적용되지 않았다. 현재 병합·재배포 요청에 따른 한 번 복구이며 위 09-10 c099 명령·승인을 재사용하지 않는다. [사건·검증·원격 검사 한계](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001).
+
+같은 PR70에서 복구 helper에 기존 검증 백업을 추가한다. 일반 Stop/Upgrade는 강제 종료하지 않는다. 명시 복구는 실패/registry·프로그램·환경·보관 ZIP·빈 포트를 검사하고, 등록 PID/실행 파일/생성 시각과 단일 부모·자식 관계를 다시 확인해 실제 EES 서버 한 개만 강제 종료한다. 앱의 미완료 정리 작업은 중단될 수 있다. 종료 완료 뒤 DB/WAL·자료·키·설정 백업과 기록이 모두 성공해야 보관 ZIP Apply→Start/health로 이어진다. 불일치나 실패는 그 단계에서 중단하며 자동 Restore·재설치·다른 프로세스 종료를 하지 않는다.
+
+실행 블록은 사내 등록 계정·기존 경로에서 다음 순서를 유지한다. **Update 전에** last-operation.json의 `action=upgrade`, `failed=true`, `stage=process_stop`, `changed=false`, `wrapper_commit=3a51…`, `process.reason=stop_timeout`, `process.operation=process_wait`를 확인하고 failure와 deployment.json을 UTF-8 `stop-recovery-<GUID32>.json`으로 보존한다. 이후 기존 manager의 `Update -Config`를 실행하고 병합 완료로 확인한 **새 복구 래퍼의 전체 SHA**와 HEAD·origin/main을 대조한다. Git 호출별 종료 코드를 확인하고 불일치하면 복구를 실행하지 않는다. 설치 프로그램과 래퍼 SHA를 혼동하지 않는다.
+
+새 래퍼의 `ees_deploy_stop_recovery.py`는 등록된 source_python으로 `--config`, 보존한 `--request`, `--commit 3a51f9d2bc604e768a59a522d6f34a34c2cb05d3`, `--terminate-recorded-process`, `--health-timeout 120`을 받아 실행한다. 이 명시 플래그는 앞서 설명한 단일 서버 강제 종료에 대한 실행이다. 실패/로그/ZIP/요청 파일은 사내에 유지하고 외부로 보내지 않는다. CLI 종료 코드가0이 아니면 블록을 중단하고 재실행하지 않는다.
+
+713→3a51의 agent-pack 및 자산 적용 코드에는 변경이 없어 이 프로그램 복구에서 ApplyDemo를 반복하지 않는다. 기존 사내 자산 등록 정상까지 확인했다는 뜻은 아니다. 성공 기준은 `action=recover_stop result=ok backup=verified commit=3a51f9d2bc60 running=true`이며, 이어 기존 페이지를 새로고침해 목록/상세 배치·Assistant·기존 대화와 저장 후 목록 복귀를 확인한다. 기존 실행을 단순 배포 확인 때문에 새로 시작하지 않는다. 사용자는 마지막 결과와 화면 확인만1~2줄로 전달한다. 실패 시 stage/code/backup/terminated로 다음 조치를 정하며 종료 원인 해결·UI 정상·사내 완료를 대신 주장하지 않는다.
+
 <a id="ees-work-demo"></a>
 
 #### EES Work 기존 UI 통합·적용·사용
