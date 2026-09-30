@@ -702,17 +702,17 @@ body[data-ees-v4] #ees-work-entry :is(.ew-v4-category,.ew-v4-process,.ew-v4-task
 body[data-ees-v4] #ees-work-entry .ew-v4-alert-dot {display:inline-block;width:6px;height:6px;flex:none;border-radius:50%;background:var(--ees-status-danger);}
 
 /* Central product shell: the 48px bar is shared by list and detail. */
-body[data-ees-v4] #ees-work-panel {position:relative;flex:1 1 0%;width:auto!important;min-width:0;height:100%;border:0;border-radius:0;box-shadow:none;background:var(--ees-surface-default);overflow:hidden;z-index:10;}
-body[data-ees-v4] #ees-work-resizer {display:flex;}
-body[data-ees-v4] #ees-work-resizer[hidden] {display:none;}
-body[data-ees-v4] #ees-work-resizer > span {opacity:0;}
-body[data-ees-v4] #ees-work-resizer:is(:hover,:focus-visible,[data-pointer]) > span {opacity:1;}
+body[data-ees-v4][data-ees-work-open=true] #ees-work-panel {position:relative;flex:1 1 0%;width:auto!important;min-width:0;height:100%;border:0;border-radius:0;box-shadow:none;background:var(--ees-surface-default);overflow:hidden;z-index:10;}
+body[data-ees-v4][data-ees-work-open=true] #ees-work-resizer {display:flex;}
+body[data-ees-v4][data-ees-work-open=true] #ees-work-resizer[hidden] {display:none;}
+body[data-ees-v4][data-ees-work-open=true] #ees-work-resizer > span {opacity:0;}
+body[data-ees-v4][data-ees-work-open=true] #ees-work-resizer:is(:hover,:focus-visible,[data-pointer]) > span {opacity:1;}
 body[data-ees-v4] #ees-work-panel > header {position:relative;flex:none;min-height:48px;padding:0 12px 0 32px;border-bottom:1px solid var(--ees-line-divider);background:var(--ees-surface-default);z-index:5;}
 body[data-ees-v4] #ees-work-panel .ew-panel-toolbar {display:flex;align-items:center;gap:8px;height:47px;min-height:47px;margin:0;}
 body[data-ees-v4] #ees-work-parent {flex:1;min-width:0;max-height:44px;overflow:auto;}
-body[data-ees-v4] #ees-work-panel #ees-work-parent .ew-work-path {display:flex;align-items:center;flex-wrap:nowrap;gap:6px;margin:0;font-size:14px;line-height:22px;color:var(--ees-text-tertiary);white-space:nowrap;}
-body[data-ees-v4] #ees-work-panel #ees-work-parent :is(button,.ew-work-path span) {min-height:0;margin:0;padding:0;border:0;border-radius:0;font-size:14px;line-height:22px;font-weight:400;white-space:nowrap;text-align:left;}
-body[data-ees-v4] #ees-work-panel #ees-work-parent .ew-work-path > :last-child {font-weight:500;color:var(--ees-text-strong);}
+body[data-ees-v4] #ees-work-panel #ees-work-parent .ew-v4-breadcrumb {display:flex;align-items:center;flex-wrap:nowrap;gap:6px;margin:0;font-size:14px;line-height:22px;color:var(--ees-text-tertiary);white-space:nowrap;}
+body[data-ees-v4] #ees-work-panel #ees-work-parent :is(button,.ew-v4-breadcrumb span) {min-height:0;margin:0;padding:0;border:0;border-radius:0;font-size:14px;line-height:22px;font-weight:400;white-space:nowrap;text-align:left;}
+body[data-ees-v4] #ees-work-panel #ees-work-parent .ew-v4-breadcrumb > :last-child {font-weight:500;color:var(--ees-text-strong);}
 body[data-ees-v4] #ees-work-panel :is(#ees-work-authoring-open,#ees-work-close) {flex:none;min-height:34px;padding:5px 6px;background:transparent;font-size:14px;line-height:22px;color:var(--ees-text-secondary);}
 body[data-ees-v4] #ees-work-panel .ew-panel-menu {position:relative;flex:none;margin:0;}
 body[data-ees-v4] #ees-work-panel .ew-panel-menu > summary {display:flex;align-items:center;justify-content:center;min-height:34px;list-style:none;cursor:pointer;padding:5px 6px;border-radius:6px;}
@@ -740,7 +740,7 @@ body[data-ees-v4] #ees-work-panel progress::-moz-progress-bar {background:var(--
 body[data-ees-v4] #ees-work-panel .ew-v4-list-meta {display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:6px 0 20px;font-size:12px;line-height:18px;color:var(--ees-text-secondary);}
 body[data-ees-v4] #ees-work-panel .ew-v4-toolbar {display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 12px;}
 body[data-ees-v4] #ees-work-panel .ew-v4-toolbar label {margin:0;}
-body[data-ees-v4] #ees-work-panel .ew-v4-toolbar .ew-work-search {display:flex;align-items:center;gap:8px;flex:0 1 260px;height:32px;min-width:160px;margin:0;padding:5px 10px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);}
+body[data-ees-v4] #ees-work-panel .ew-v4-toolbar .ew-work-search {display:flex;flex-direction:row;align-items:center;gap:8px;flex:0 1 260px;height:32px;min-width:160px;margin:0;padding:5px 10px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);}
 body[data-ees-v4] #ees-work-panel #ees-work-job-search {min-height:0;height:20px;width:100%;margin:0;padding:0;border:0;outline:0;box-shadow:none;background:transparent;font-size:12px;line-height:18px;}
 body[data-ees-v4] #ees-work-panel .ew-v4-toolbar .ew-work-search:focus-within {outline:1.5px solid var(--ees-brand-text);outline-offset:1px;box-shadow:var(--ees-focus-ring);}
 body[data-ees-v4] #ees-work-panel .ew-v4-toolbar select {width:auto;max-width:100%;height:32px;min-height:32px;padding:4px 25px 4px 10px;font-size:14px;line-height:22px;}
@@ -852,15 +852,15 @@ body[data-ees-v4] #ees-work-panel .ew-v4-runtime button {min-width:0;}
 @media (min-width:1280px) and (max-width:1535px) {
   body[data-ees-v4] {--ees-v4-assistant-width:320px;}
 }
-@media (max-width:1535px) {
-  body[data-ees-v4] #ees-work-panel .ew-v4-detail-main {padding-right:24px;}
-  body[data-ees-v4] #ees-work-panel .ew-work-form label {grid-template-columns:minmax(0,1fr);gap:6px;}
-  body[data-ees-v4] #ees-work-panel .ew-work-form label > :is(input,select,textarea,small,.ew-muted,.ew-v4-field-note) {grid-column:1;}
-  body[data-ees-v4] #ees-work-panel .ew-work-form .ew-input-field-name {padding:0;}
-  body[data-ees-v4] #ees-work-panel .ew-v4-ai-note {margin-left:0;}
-  body[data-ees-v4] #ees-work-panel .ew-work-check-summary > div {grid-template-columns:minmax(80px,1fr) minmax(0,2fr);gap:6px 12px;}
-  body[data-ees-v4] #ees-work-panel .ew-work-check-summary > div > .ew-badge {grid-column:2;}
-}
+/* Compact follows the measured central surface, not just the viewport: saved
+ * sidebar/Assistant widths can also leave less room on a desktop display. */
+body[data-ees-v4] #ees-work-panel[data-compact=true] .ew-v4-detail-main {padding-right:24px;}
+body[data-ees-v4] #ees-work-panel[data-compact=true] .ew-work-form label {grid-template-columns:minmax(0,1fr);gap:6px;}
+body[data-ees-v4] #ees-work-panel[data-compact=true] .ew-work-form label > :is(input,select,textarea,small,.ew-muted,.ew-v4-field-note) {grid-column:1;}
+body[data-ees-v4] #ees-work-panel[data-compact=true] .ew-work-form .ew-input-field-name {padding:0;}
+body[data-ees-v4] #ees-work-panel[data-compact=true] .ew-v4-ai-note {margin-left:0;}
+body[data-ees-v4] #ees-work-panel[data-compact=true] .ew-work-check-summary > div {grid-template-columns:minmax(80px,1fr) minmax(0,2fr);gap:6px 12px;}
+body[data-ees-v4] #ees-work-panel[data-compact=true] .ew-work-check-summary > div > .ew-badge {grid-column:2;}
 @media (max-width:1100px) {
   body[data-ees-v4] {--ees-v4-info-width:240px;}
   body[data-ees-v4] #ees-work-panel .ew-v4-info {padding-inline:16px;}
@@ -928,17 +928,13 @@ body[data-ees-v4] #ees-work-entry .ew-v4-task:focus-visible,body[data-ees-v4] #e
 body[data-ees-v4] #ees-work-entry .ew-v4-task:focus-visible > span:not(.ew-visually-hidden),body[data-ees-v4] #ees-work-entry .ew-v4-process > button:focus-visible > span {white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;}
 body[data-ees-v4] #ees-work-panel .ew-v4-mode-row {display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;font-size:14px;line-height:22px;}
 body[data-ees-v4] #ees-work-panel .ew-v4-mode-row > p {margin:0;color:var(--ees-text-secondary);}
-@media (max-width:1535px) {
-  body[data-ees-v4] #ees-work-panel .ew-v4-mode-row {grid-template-columns:minmax(0,1fr);gap:6px;}
-}
+body[data-ees-v4] #ees-work-panel[data-compact=true] .ew-v4-mode-row {grid-template-columns:minmax(0,1fr);gap:6px;}
 /* Light-only Figma asset colours keep the original SVG bytes. The existing
  * dark preference needs readable non-text glyph contrast as well as text. */
 html.dark body[data-ees-v4] .ew-v4-icon {filter:brightness(1.5);}
 body[data-ees-v4] #ees-work-panel .ew-v4-input-control {grid-column:2;min-width:0;width:100%;max-width:440px;}
 body[data-ees-v4] #ees-work-panel .ew-v4-input-control > small {display:block;margin-top:6px;color:var(--ees-text-tertiary);font-size:12px;line-height:18px;}
-@media (max-width:1535px) {
-  body[data-ees-v4] #ees-work-panel .ew-v4-input-control {grid-column:1;}
-}
+body[data-ees-v4] #ees-work-panel[data-compact=true] .ew-v4-input-control {grid-column:1;}
 
 body[data-ees-v4] #ees-work-panel .ew-work-form > .ew-section-heading {margin-bottom:0;}
 

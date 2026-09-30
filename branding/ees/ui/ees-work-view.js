@@ -665,7 +665,7 @@ function createWorkView({callbacks}) {
   let renderedEditContext=null,renderedPanelTarget='',pendingReturn=null,detailContext=null,runtimeDetailContext=null,actionLayoutKey='';
   const panelPositions=new Map(),panelDisclosures=new Map(),navigationTrail=[];
   const aiReceipts=new Map(),runtimeRawInputs=new Map(),runtimeInputErrors=new Map(),draftVersions=new Map();
-  let assistantOpen=true,historyNavOpen=false;
+  let assistantOpen=true,historyNavOpen=false,layoutObserver=null,observedRow=null;
   const chatId = () => snapshot.chatId || '';
   const chatRoute = () => Boolean(snapshot.chatRoute);
   const currentCase = () => state?.case;
@@ -827,6 +827,8 @@ function createWorkView({callbacks}) {
   }
   function sidebar() {
     const anchor=$('#sidebar-search-button');if(!anchor)return;
+    // The V4 sidebar exists independently of the central work panel.
+    document.body.dataset.eesV4='';
     let entry=$('#ees-work-entry');
     if(!entry){entry=document.createElement('section');entry.id='ees-work-entry';entry.dataset.eesWork='';entry.setAttribute('aria-label','공장별 업무');anchor.parentElement.insertAdjacentElement('afterend',entry);renderNavigator();}
     // The native Workspace entry is the single management entrance.
@@ -933,7 +935,7 @@ function createWorkView({callbacks}) {
   }
   function renderContext() {
     const c=selectedCase(),layout=chatLayout();let strip=$('#ees-work-context');
-    if(!layout||!state||!selectedId()){strip?.remove();return;}
+    if(!panelOpen||!host?.isConnected||!layout||!state||!selectedId()){strip?.remove();$('#ees-v4-suggestions')?.remove();return;}
     if(!strip){strip=document.createElement('div');strip.id='ees-work-context';strip.dataset.eesWork='';layout.column.insertBefore(strip,layout.anchor);}
     const target=snapshot.reference,current=target?.kind==='history'?historyCase?.definition?.nodes?.[target.node_id]:node(target?.node_id || selectedId()),reference=snapshot.referenceEnabled!==false&&target?.kind!=='none';
     const referenceLabel=target?.kind==='history'?`${current?.name || '이전 실행'} · ${runLabel(historyCase)}`:current?.name || '현재 업무';
@@ -968,28 +970,61 @@ function createWorkView({callbacks}) {
     host.dataset.scrollActions='false';
   }
 
+  function panelScrollSurface() {
+    const content=host?.querySelector('#ees-work-content'),detail=content?.querySelector('.ew-v4-detail-main');
+    if(!detail)return content;
+    // The small-screen CSS scrolls the whole detail; the desktop main column
+    // scrolls independently of its information pane and dock.
+    const overflow=window.getComputedStyle?.(detail)?.overflowY;
+    return overflow==='visible'?content.querySelector('.ew-v4-detail') || content:detail;
+  }
+  function readPanelPosition() {
+    const surface=panelScrollSurface(),table=host?.querySelector('.ew-v4-table-scroll');
+    return {top:surface?.scrollTop || 0,left:surface?.scrollLeft || 0,tableLeft:table?.scrollLeft || 0};
+  }
+  function rememberPanelPosition() {
+    if(host?.isConnected&&renderedPanelTarget)panelPositions.set(renderedPanelTarget,readPanelPosition());
+  }
+  function restorePanelPosition(position) {
+    const surface=panelScrollSurface(),table=host?.querySelector('.ew-v4-table-scroll');
+    if(surface){surface.scrollTop=position?.top || 0;surface.scrollLeft=position?.left || 0;}
+    if(table)table.scrollLeft=position?.tableLeft || 0;
+  }
   function sizePanel() {
     if(!host||!panelOpen)return;const layout=chatLayout();if(!layout)return;
-    const overlay=window.innerWidth<1280;
+    const available=Math.max(0,layout.row.getBoundingClientRect().width),desired=preferredWidth ?? (window.innerWidth<1536?320:360);
+    // Temporary responsive guard: keep the 300px information pane and at least
+    // 400px of central work space. Never rewrite Native sidebar preferences or
+    // the Assistant width chosen by the user to accommodate a smaller window.
+    const overlay=window.innerWidth<1280||available-desired<700;
+    document.body.dataset.eesWorkOpen='true';
     document.body.dataset.eesAssistantOpen=String(assistantOpen);
+    document.body.dataset.eesAssistantOverlay=String(overlay);
     host.classList.toggle('ew-narrow',window.innerWidth<900);
-    host.style.width='';host.style.flexBasis='';host.dataset.compact=String(layout.row.getBoundingClientRect().width<1200);
-    layout.column.style.setProperty('--ees-v4-assistant-width',(preferredWidth ?? (window.innerWidth<1536?320:360))+'px');
-    width=preferredWidth ?? (window.innerWidth<1536?320:360);
+    host.style.width='';host.style.flexBasis='';host.dataset.compact=String(available-(assistantOpen&&!overlay?desired:0)<1000);
+    width=overlay?Math.min(desired,available || window.innerWidth):desired;
+    layout.column.style.setProperty('--ees-v4-assistant-width',width+'px');
     if(divider){divider.hidden=overlay||!assistantOpen;divider.setAttribute('aria-valuenow',String(Math.round(width)));divider.setAttribute('aria-valuemin','280');divider.setAttribute('aria-valuemax','600');}
     layoutActions();
   }
 
+  function observeLayout(row) {
+    if(observedRow===row||!window.ResizeObserver)return;
+    layoutObserver?.disconnect();
+    layoutObserver=new window.ResizeObserver(()=>{if(panelOpen&&host?.isConnected)sizePanel();});
+    observedRow=row;layoutObserver.observe(row);
+  }
   function openHost() {
     const layout = chatLayout(); if (!layout || !state || !selectedId()) return; ensureHost();
     const reopening=!host.isConnected;
-    panelOpen = true; styledColumn=layout.column;styledColumn.classList.add('ees-work-chat-column');document.body.dataset.eesV4='';layout.row.insertBefore(host,layout.column);layout.row.insertBefore(divider,layout.column);sizePanel();renderContext();
-    if(reopening&&renderedPanelTarget)host.querySelector('#ees-work-content').scrollTop=panelPositions.get(renderedPanelTarget)||0;
+    panelOpen = true; styledColumn=layout.column;styledColumn.classList.add('ees-work-chat-column');document.body.dataset.eesV4='';layout.row.insertBefore(host,layout.column);layout.row.insertBefore(divider,layout.column);sizePanel();observeLayout(layout.row);renderContext();
+    if(reopening&&renderedPanelTarget)restorePanelPosition(panelPositions.get(renderedPanelTarget));
   }
   function closeHost() {
-    captureJobEdits();
-    if(host?.isConnected&&renderedPanelTarget)panelPositions.set(renderedPanelTarget,host.querySelector('#ees-work-content').scrollTop||0);
-    panelOpen = false; drag=null;if(divider)delete divider.dataset.pointer;host?.remove(); divider?.remove();styledColumn?.classList.remove('ees-work-chat-column');styledColumn=null;delete document.body.dataset.eesV4;delete document.body.dataset.eesAssistantOpen;renderContext();
+    captureJobEdits();rememberPanelPosition();
+    panelOpen = false; layoutObserver?.disconnect();observedRow=null;drag=null;if(divider)delete divider.dataset.pointer;host?.remove(); divider?.remove();styledColumn?.classList.remove('ees-work-chat-column');styledColumn?.style.removeProperty?.('--ees-v4-assistant-width');styledColumn=null;
+    delete document.body.dataset.eesWorkOpen;delete document.body.dataset.eesAssistantOpen;delete document.body.dataset.eesAssistantOverlay;
+    $('#ees-work-context')?.remove();$('#ees-v4-suggestions')?.remove();
   }
   function renderTabs() {
     if (!host) return; const tabs = $('#ees-work-tabs',host), screens = panelInfo?.screens || window.__eesWorkPanelV1?.list?.(chatId()) || [{key:'workflow',label:'업무 진행'}];
@@ -1025,9 +1060,9 @@ function createWorkView({callbacks}) {
     const content=$('#ees-work-content',host),focused=host.contains(document.activeElement)?document.activeElement:null;
     const authoring=host.querySelector('#ees-work-authoring-open');if(authoring)authoring.hidden=runView!=='current'||!callbacks.canAuthor?.()||!state?.catalog?.nodes?.[processId()];
     const panelTarget=JSON.stringify([browsingSite,browsingSystem,selectedCase()?.id || '',definition()?.version,runView,historyCase?.id || '',selectedId()]);
-    if(renderedPanelTarget&&host.isConnected)panelPositions.set(renderedPanelTarget,content.scrollTop || 0);
+    rememberPanelPosition();
     const returning=pendingReturn?.to===selectedId()?pendingReturn:null;
-    const retainedScroll=panelTarget===renderedPanelTarget?(host.isConnected?content.scrollTop || 0:panelPositions.get(panelTarget)||0):returning?panelPositions.get(panelTarget)||0:0;
+    const retainedScroll=panelPositions.get(panelTarget) || {top:0,left:0,tableLeft:0};
     const focusState=focused?{id:focused.id,name:focused.name,node:focused.dataset.nodeId,action:focused.dataset.action,runtimeAction:focused.dataset.runtimeAction,runId:focused.dataset.runId,start:focused.selectionStart,end:focused.selectionEnd}:null;
     const oldNode=renderedEditContext?.scope.nodeId;
     host.querySelector('#ees-work-action-dock')?.replaceChildren();actionLayoutKey='';
@@ -1083,10 +1118,10 @@ function createWorkView({callbacks}) {
     }
     renderedPanelTarget=panelTarget;
     renderTabs();callbacks.registerPanel();setBusy();
-    // Read a newly selected task from its heading. Refreshes of that same
-    // task keep the user's position while inputs/results are updated.
+    // Unvisited targets start at the heading. A refresh or return restores
+    // that target's actual scroll surface while inputs/results are updated.
     layoutActions();
-    content.scrollTop=retainedScroll;
+    restorePanelPosition(retainedScroll);
     // Detached scroll containers report zero; retain their position until open.
     panelPositions.set(panelTarget,retainedScroll);
     if(returning){
@@ -1165,14 +1200,14 @@ function createWorkView({callbacks}) {
   function handleEvent(event) {
     const unhandled={handled:false,preventDefault:false},handled=(preventDefault=false)=>({handled:true,preventDefault});
     const target=event.target,inside=target.closest?.('[data-ees-work]');
-    if(event.type==='scroll'){positionNav();return unhandled;}
+    if(event.type==='scroll'){if(host?.contains(target))rememberPanelPosition();positionNav();return unhandled;}
     if(event.type==='resize'){updateLayout();return unhandled;}
     if(event.type==='pointerdown'){
       if(scopePicker&&!target.closest?.('#ees-work-scope-popover, .ew-scope-pickers'))closeScopePicker();
       if(target.closest?.('#ees-work-resizer')&&event.button===0){divider.dataset.pointer='';drag={id:event.pointerId,start:event.clientX,width:styledColumn.getBoundingClientRect().width};divider.setPointerCapture(event.pointerId);return handled(true);}
       return unhandled;
     }
-    if(event.type==='pointermove'&&drag?.id===event.pointerId){preferredWidth=Math.max(280,Math.min(600,drag.width+drag.start-event.clientX));sizePanel();preferredWidth=width;return handled();}
+    if(event.type==='pointermove'&&drag?.id===event.pointerId){preferredWidth=Math.max(280,Math.min(600,drag.width+drag.start-event.clientX));sizePanel();return handled();}
     if(['pointerup','pointercancel','lostpointercapture'].includes(event.type)&&drag?.id===event.pointerId){drag=null;if(divider)delete divider.dataset.pointer;return handled();}
     if(event.type==='focusin'){if(scopePicker&&!target.closest?.('#ees-work-scope-popover, .ew-scope-pickers'))closeScopePicker();return unhandled;}
     if(event.type==='keyup')return ['Enter',' ','Spacebar'].includes(event.key)&&target.closest?.('#ees-work-entry [data-action=scope_toggle], #ees-work-scope-popover [data-action=scope_choose]')?handled(true):unhandled;
@@ -1186,7 +1221,7 @@ function createWorkView({callbacks}) {
         (controls[next] || dialog).focus();return handled(true);
       }
       if(event.key==='Escape'&&target.closest?.('.ew-panel-menu')){const menu=target.closest('.ew-panel-menu');menu.open=false;menu.querySelector('summary')?.focus();return handled(true);}
-      if(target.closest?.('#ees-work-resizer')&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){preferredWidth=event.key==='Home'?280:event.key==='End'?600:Math.max(280,Math.min(600,width+(event.key==='ArrowLeft'?24:-24)));sizePanel();preferredWidth=width;return handled(true);}
+      if(target.closest?.('#ees-work-resizer')&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){preferredWidth=event.key==='Home'?280:event.key==='End'?600:Math.max(280,Math.min(600,width+(event.key==='ArrowLeft'?24:-24)));sizePanel();return handled(true);}
       const trigger=target.closest?.('#ees-work-entry [data-action=scope_toggle]'),popup=$('#ees-work-scope-popover'),inPicker=scopePicker&&popup?.contains(target);
       if(trigger||inPicker){
         const activate=['Enter',' ','Spacebar'].includes(event.key);
@@ -1313,12 +1348,13 @@ function createWorkView({callbacks}) {
   function render(value) {readSnapshot(value);sidebar();renderNavigator();renderContext();renderPanel();}
   function prepare(value) {readSnapshot(value);sidebar();updateScopeReadiness();}
   function sync(value) {prepare(value);if(state&&snapshot.browseActive&&chatRoute()){renderContext();callbacks.registerPanel();}positionNav();}
-  function updateLayout() {positionNav();sizePanel();}
+  function updateLayout() {positionNav();sizePanel();if(panelOpen&&renderedPanelTarget)restorePanelPosition(panelPositions.get(renderedPanelTarget));}
   function detach() {workUI.closeDialog();closeScopePicker();closeHost();$('#ees-work-context')?.remove();$('#ees-v4-suggestions')?.remove();delete document.body.dataset.eesNativeHistory;}
   function reset() {
     detach();panelPositions.clear();panelDisclosures.clear();navigationTrail.length=0;pendingReturn=null;detailContext=null;runtimeDetailContext=null;treeExpansions.clear();jobDrafts.clear();aiReceipts.clear();runtimeRawInputs.clear();runtimeInputErrors.clear();draftVersions.clear();jobLists.clear();stepSummaries.clear();selectedSteps.clear();renderedEditContext=null;renderedPanelTarget='';snapshot={};state=null;serverSource=null;historySource=null;historyCase=null;navOpen=false;busy=false;width=0;preferredWidth=null;panelInfo=null;drag=null;
     host=null;divider=null;
     ['ees-work-entry','ees-work-admin-link','ees-work-navigator'].forEach(id=>document.getElementById(id)?.remove());
+    delete document.body.dataset.eesV4;
   }
   return Object.freeze({render,prepare,sync,renderNavigator:value=>{readSnapshot(value);renderNavigator();},renderPanel:value=>{readSnapshot(value);renderPanel();},setBusy,openPanel,closeHost,reset,readJobEdits,draftVersion,applyAIDraft,undoAIDraft,adoptPreviewDraft,handleEvent,updateLayout,panelRegistration,revealSelection,closeScopePicker,detach,setNavigatorOpen:value=>{navOpen=Boolean(value);},updateScopeReadiness});
 }
