@@ -1114,11 +1114,15 @@ CA 선택은 health timeout 뒤에도 보존되고 이후 일반 Start·프로�
 
 이번 사용자 Status는 `commit=713ed5e4e5dc, program=customized, running=true`이고 등록 포트 listener는 false다. running은 등록 프로세스의 신원 확인이지 접속 정상 판정이 아니다. UI 수정본 `3a51f9d2bc604e768a59a522d6f34a34c2cb05d3`는 아직 적용되지 않았다. 현재 병합·재배포 요청에 따른 한 번 복구이며 위 09-10 c099 명령·승인을 재사용하지 않는다. [사건·검증·원격 검사 한계](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001).
 
-같은 PR70에서 복구 helper에 기존 검증 백업을 추가한다. 일반 Stop/Upgrade는 강제 종료하지 않는다. 명시 복구는 실패/registry·프로그램·환경·보관 ZIP·빈 포트를 검사하고, 등록 PID/실행 파일/생성 시각과 단일 부모·자식 관계를 다시 확인해 실제 EES 서버 한 개만 강제 종료한다. 앱의 미완료 정리 작업은 중단될 수 있다. 종료 완료 뒤 DB/WAL·자료·키·설정 백업과 기록이 모두 성공해야 보관 ZIP Apply→Start/health로 이어진다. 불일치나 실패는 그 단계에서 중단하며 자동 Restore·재설치·다른 프로세스 종료를 하지 않는다.
+PR70에서 복구 helper에 기존 검증 백업을 추가했다. 이후 첫 복구는 `configuration/retained_bundle_mismatch, changed=false, terminated=false, backup=unverified`로 종료·백업 전에 멈췄다. 시험 배포가 생성하는 `trial-build-*` 보관 경로를 기존 `upgrade-*` 전용 복구가 받지 못한 결함이며 다음 수정은 원래 실패의 `source_verification=local_trial`과 이 경로를 함께 확인한다. 상태 루트 직계 위치·정규 파일·파일명/commit·ZIP 내부 무결성과 기존 프로그램·환경·registry 검사는 유지한다. 파일을 옮기거나 실패 기록의 경로를 바꾸어 통과시키지 않는다.
+
+일반 Stop/Upgrade는 강제 종료하지 않는다. 명시 복구는 실패/registry·프로그램·환경·보관 ZIP·빈 포트를 검사하고, 등록 PID/실행 파일/생성 시각과 단일 부모·자식 관계를 다시 확인해 실제 EES 서버 한 개만 강제 종료한다. 앱의 미완료 정리 작업은 중단될 수 있다. 종료 완료 뒤 DB/WAL·자료·키·설정 백업과 기록이 모두 성공해야 보관 ZIP Apply→Start/health로 이어진다. 불일치나 실패는 그 단계에서 중단하며 자동 Restore·재설치·다른 프로세스 종료를 하지 않는다.
 
 실행 블록은 사내 등록 계정·기존 경로에서 다음 순서를 유지한다. **Update 전에** last-operation.json의 `action=upgrade`, `failed=true`, `stage=process_stop`, `changed=false`, `wrapper_commit=3a51…`, `process.reason=stop_timeout`, `process.operation=process_wait`를 확인하고 failure와 deployment.json을 UTF-8 `stop-recovery-<GUID32>.json`으로 보존한다. 이후 기존 manager의 `Update -Config`를 실행하고 병합 완료로 확인한 **새 복구 래퍼의 전체 SHA**와 HEAD·origin/main을 대조한다. Git 호출별 종료 코드를 확인하고 불일치하면 복구를 실행하지 않는다. 설치 프로그램과 래퍼 SHA를 혼동하지 않는다.
 
 새 래퍼의 `ees_deploy_stop_recovery.py`는 등록된 source_python으로 `--config`, 보존한 `--request`, `--commit 3a51f9d2bc604e768a59a522d6f34a34c2cb05d3`, `--terminate-recorded-process`, `--health-timeout 120`을 받아 실행한다. 이 명시 플래그는 앞서 설명한 단일 서버 강제 종료에 대한 실행이다. 실패/로그/ZIP/요청 파일은 사내에 유지하고 외부로 보내지 않는다. CLI 종료 코드가0이 아니면 블록을 중단하고 재실행하지 않는다.
+
+**retained_bundle_mismatch 보고 뒤의 재개:** 이전 블록을 그대로 반복하지 않는다. 최신 last-operation/last-failure는 recover_stop 오류로 바뀌었지만 원래 upgrade 실패와 registry는 먼저 작성한 `stop-recovery-<GUID32>.json`에 남아 있다. 보존 요청 중 정확한3a51의 local_trial/process_stop/changed=false/process_wait/stop_timeout 기록이 **한 개일 때만** 그 요청을 재사용한다. 최신 오류도 Update 전에 별도 사내 파일로 보존한다. 선택된 요청의 failure/registry·ZIP은 수정/재캡처하지 않는다. 새로운 수정 래퍼의 병합 SHA를 확인한 뒤 기존 요청으로 복구하며 잠금 아래 현재 registry가 달라졌거나 포트가 회복됐으면 종료 전에 멈춘다. 후보0개/여러 개·손상된 요청은 임의로 최신 항목을 고르지 않고 중단한다.
 
 713→3a51의 agent-pack 및 자산 적용 코드에는 변경이 없어 이 프로그램 복구에서 ApplyDemo를 반복하지 않는다. 기존 사내 자산 등록 정상까지 확인했다는 뜻은 아니다. 성공 기준은 `action=recover_stop result=ok backup=verified commit=3a51f9d2bc60 running=true`이며, 이어 기존 페이지를 새로고침해 목록/상세 배치·Assistant·기존 대화와 저장 후 목록 복귀를 확인한다. 기존 실행을 단순 배포 확인 때문에 새로 시작하지 않는다. 사용자는 마지막 결과와 화면 확인만1~2줄로 전달한다. 실패 시 stage/code/backup/terminated로 다음 조치를 정하며 종료 원인 해결·UI 정상·사내 완료를 대신 주장하지 않는다.
 
