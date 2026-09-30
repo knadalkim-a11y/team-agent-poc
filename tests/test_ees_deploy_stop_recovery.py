@@ -149,10 +149,17 @@ class RequestTests(RequestFixture):
 class RecoveryFlowTests(RequestFixture):
     def setUp(self):
         super().setUp()
+        self.previous_backup = {"backup_id": "previous-verified-backup"}
+        self.registry["last_backup"] = copy.deepcopy(self.previous_backup)
+        self.request["registry"] = copy.deepcopy(self.registry)
+        self.write_request()
         self.args = argparse.Namespace(config=self.root / "config.json", request=self.path,
                                        commit=HEAD, terminate_recorded_process=True, health_timeout=120)
-        self.progress = {"stage": "configuration", "changed": False, "terminated": False}
+        self.progress = {"stage": "configuration", "changed": False, "terminated": False,
+                         "backup_verified": False}
         self.events = []
+        self.backup = {"backup_id": "synthetic-backup", "path": str(self.root / "private-backup"),
+                       "files": 4, "manifest_sha256": "d" * 64, "database_check": "ok"}
         self.preflight = recovery.upgrade.preflight
         self.protected = {self.root / "webui.db": b"synthetic existing DB",
                           self.root / "secret.key": SECRET.encode(),
@@ -176,6 +183,8 @@ class RecoveryFlowTests(RequestFixture):
         def apply(config, registry, bundle, commit, env, record, owner):
             self.events.append("apply")
             self.assertIsNone(registry["process"])
+            self.assertEqual(registry["last_backup"], self.backup)
+            self.assertEqual(self.registry["last_backup"], self.backup)
             self.assertEqual(bundle, self.bundle)
             self.assertEqual(commit, HEAD)
             registry["customization"]["active"] = {"source_commit": HEAD}
@@ -197,6 +206,8 @@ class RecoveryFlowTests(RequestFixture):
             "terminate": patch.object(recovery.targets, "terminate_server_target", side_effect=event("terminate", True)),
             "stopped": patch.object(recovery.manager, "require_stopped", side_effect=event("stopped")),
             "record": patch.object(recovery.manager, "record", side_effect=record),
+            "backup": patch.object(recovery.manager.states, "backup_state",
+                                   side_effect=event("backup", self.backup)),
             "apply": patch.object(recovery.manager.customization, "apply", side_effect=apply),
             "start": patch.object(recovery.manager, "start_selected", side_effect=start),
             "stop": patch.object(recovery.manager, "stop_registered", side_effect=AssertionError("No graceful stop retry")),
@@ -216,7 +227,7 @@ class RecoveryFlowTests(RequestFixture):
         self.mock["network"].assert_not_called()
 
     def assert_not_terminated(self):
-        for name in ("terminate", "stopped", "record", "apply", "start"):
+        for name in ("terminate", "stopped", "record", "backup", "apply", "start"):
             self.mock[name].assert_not_called()
         self.assert_preserved()
 
@@ -230,13 +241,19 @@ class RecoveryFlowTests(RequestFixture):
     def test_success_checks_before_termination_then_stops_records_applies_starts(self):
         result = self.run_recovery()
         self.assertEqual(self.events, ["environment", "preflight", "port", "inspect", "port",
-                                      "terminate", "stopped", "stop_recovered_by_operator", "apply",
+                                      "terminate", "stopped", "stop_recovered_by_operator",
+                                      "backup", "data_backup_verified", "apply",
                                       "start", "stop_recovery_applied_by_operator"])
+        self.mock["backup"].assert_called_once_with(self.config)
         self.mock["terminate"].assert_called_once_with(self.request["registry"]["process"], "registered-python")
         self.assertEqual(result["source_commit"], HEAD)
         self.assertTrue(result["changed"])
         self.assertTrue(result["started"])
         self.assertTrue(result["terminated"])
+        self.assertTrue(result["backup_verified"])
+        self.assertTrue(self.progress["backup_verified"])
+        self.assertNotIn("last_backup", result)
+        self.assertNotIn("private-backup", json.dumps(result))
         self.assert_preserved()
 
     def test_changed_registry_before_preflight_never_terminates(self):
@@ -318,7 +335,7 @@ class RecoveryFlowTests(RequestFixture):
         self.mock["terminate"].side_effect = recovery.manager.processes.ProcessError("synthetic error")
         with self.assertRaises(recovery.manager.processes.ProcessError):
             self.run_recovery()
-        for name in ("stopped", "record", "apply", "start"):
+        for name in ("stopped", "record", "backup", "apply", "start"):
             self.mock[name].assert_not_called()
         self.assertEqual(self.registry, self.request["registry"])
         self.assertFalse(self.progress["terminated"])
@@ -329,7 +346,7 @@ class RecoveryFlowTests(RequestFixture):
         with self.assertRaisesRegex(RuntimeError, "still running"):
             self.run_recovery()
         self.assertTrue(self.progress["terminated"])
-        for name in ("record", "apply", "start"):
+        for name in ("record", "backup", "apply", "start"):
             self.mock[name].assert_not_called()
         self.assertEqual(self.registry, self.request["registry"])
         self.assert_preserved()
@@ -339,6 +356,61 @@ class RecoveryFlowTests(RequestFixture):
         with self.assertRaises(OSError):
             self.run_recovery()
         self.assertEqual(self.progress["stage"], "stop_record")
+        self.mock["backup"].assert_not_called()
+        self.mock["apply"].assert_not_called()
+        self.mock["start"].assert_not_called()
+        self.assert_preserved()
+
+    def test_backup_failure_reports_stopped_unchanged_and_blocks_apply_and_start(self):
+        self.mock["backup"].side_effect = recovery.manager.states.StateError("synthetic backup failure")
+        output = io.StringIO()
+        with patch.object(recovery.manager.states, "load_config", return_value=self.config), \
+             patch.object(recovery.manager, "save_operation", return_value=True) as save, \
+             redirect_stdout(output):
+            code = recovery.main(["--config", str(self.args.config), "--request", str(self.path),
+                                  "--commit", HEAD, "--terminate-recorded-process"])
+        self.assertEqual(code, 1)
+        result = save.call_args.args[1]
+        self.assertEqual(result["stage"], "backup")
+        self.assertTrue(result["terminated"])
+        self.assertFalse(result["changed"])
+        self.assertFalse(result["backup_verified"])
+        self.assertTrue(save.call_args.kwargs["failed"])
+        self.assertIn("backup=unverified", output.getvalue())
+        self.assertIn("terminated=true", output.getvalue())
+        self.assertIn("changed=false", output.getvalue())
+        self.assertIsNone(self.registry["process"])
+        self.assertEqual(self.registry["last_backup"], self.previous_backup)
+        self.mock["apply"].assert_not_called()
+        self.mock["start"].assert_not_called()
+        self.assert_preserved()
+
+    def test_backup_record_failure_never_reports_verified_or_changes_program(self):
+        original = self.mock["record"].side_effect
+        def fail_backup_record(config, registry, name):
+            if name == "data_backup_verified":
+                self.assertEqual(registry["last_backup"], self.backup)
+                raise OSError("synthetic backup record failure")
+            return original(config, registry, name)
+        self.mock["record"].side_effect = fail_backup_record
+        output = io.StringIO()
+        with patch.object(recovery.manager.states, "load_config", return_value=self.config), \
+             patch.object(recovery.manager, "save_operation", return_value=True) as save, \
+             redirect_stdout(output):
+            code = recovery.main(["--config", str(self.args.config), "--request", str(self.path),
+                                  "--commit", HEAD, "--terminate-recorded-process"])
+        self.assertEqual(code, 1)
+        result = save.call_args.args[1]
+        self.assertEqual(result["stage"], "backup_record")
+        self.assertTrue(result["terminated"])
+        self.assertFalse(result["changed"])
+        self.assertFalse(result["backup_verified"])
+        self.assertTrue(save.call_args.kwargs["failed"])
+        self.assertIn("backup=unverified", output.getvalue())
+        self.assertNotIn("private-backup", output.getvalue())
+        self.assertIsNone(self.registry["process"])
+        self.assertEqual(self.registry["last_backup"], self.previous_backup)
+        self.mock["backup"].assert_called_once_with(self.config)
         self.mock["apply"].assert_not_called()
         self.mock["start"].assert_not_called()
         self.assert_preserved()
@@ -349,6 +421,8 @@ class RecoveryFlowTests(RequestFixture):
             self.run_recovery()
         self.assertEqual(self.progress["stage"], "apply")
         self.assertIsNone(self.progress["changed"])
+        self.assertTrue(self.progress["backup_verified"])
+        self.assertEqual(self.registry["last_backup"], self.backup)
         self.mock["start"].assert_not_called()
         self.assertIsNone(self.registry["process"])
         self.assert_preserved()
@@ -366,7 +440,8 @@ class RecoveryFlowTests(RequestFixture):
             self.run_recovery()
         self.assertTrue(self.progress["changed"])
         self.assertEqual(self.progress["stage"], "health_check")
-        self.assertEqual(self.mock["record"].call_count, 1)
+        self.assertTrue(self.progress["backup_verified"])
+        self.assertEqual(self.mock["record"].call_count, 2)
         self.mock["terminate"].assert_called_once()
         self.assert_preserved()
 
@@ -375,12 +450,26 @@ class RecoveryFlowTests(RequestFixture):
         with self.assertRaisesRegex(recovery.RecoveryError, "deployment_changed"):
             self.run_recovery()
         self.mock["terminate"].assert_called_once()
+        self.mock["backup"].assert_called_once_with(self.config)
         self.mock["apply"].assert_called_once()
         self.mock["start"].assert_called_once()
         self.assert_preserved()
 
 
 class ReportTests(unittest.TestCase):
+    def test_report_requires_a_true_backup_result_and_preserves_it_on_failure(self):
+        for failed in (False, True):
+            for verified in (True, False, None, "true", 1):
+                with self.subTest(failed=failed, verified=verified):
+                    output = io.StringIO()
+                    result = {"stage": "complete" if not failed else "health_check",
+                              "backup_verified": verified}
+                    with patch.object(recovery.manager, "save_operation", return_value=True), \
+                         redirect_stdout(output):
+                        recovery.report(argparse.Namespace(config=Path("config.json")), result, failed)
+                    expected = "verified" if verified is True else "unverified"
+                    self.assertIn("backup=" + expected, output.getvalue())
+
     def test_confirmed_termination_survives_later_process_failure(self):
         default_error = recovery.manager.processes.ProcessError("synthetic start failure")
         self.assertIsNone(default_error.terminated)
@@ -391,7 +480,8 @@ class ReportTests(unittest.TestCase):
                     "synthetic later process failure", terminated=False)):
                 with self.subTest(stage=stage, error_terminated=error.terminated):
                     def fail(config, args, progress):
-                        progress.update(stage=stage, terminated=True, changed=stage == "health_check")
+                        progress.update(stage=stage, terminated=True, changed=stage == "health_check",
+                                        backup_verified=stage == "health_check")
                         raise error
                     output = io.StringIO()
                     with patch.object(recovery.manager.states, "load_config", return_value={}), \
@@ -405,6 +495,9 @@ class ReportTests(unittest.TestCase):
                     self.assertIn("stage=" + stage, output.getvalue())
                     self.assertIs(save.call_args.args[1]["terminated"], True)
                     self.assertEqual(save.call_args.args[1]["changed"], stage == "health_check")
+                    self.assertEqual(save.call_args.args[1]["backup_verified"], stage == "health_check")
+                    expected_backup = "verified" if stage == "health_check" else "unverified"
+                    self.assertIn("backup=" + expected_backup, output.getvalue())
 
     def test_main_preserves_numeric_error_diagnostic_without_private_text(self):
         error = recovery.manager.processes.ProcessError(SECRET + " C:\\private\\path")
