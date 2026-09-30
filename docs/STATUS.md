@@ -6,13 +6,13 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** [EES Work 4차 UI](mockups/ees-work/TASK.md#v4-ui-20260930)의 사내 화면 파손 조사. 09-30 사용자가 #68 시험 적용 안내 후 화면이 전반적으로 깨졌다고 보고했다. 최신 main·병합 원본은 `713ed5e4e5dce7e99866c1dbe0db31ef5be94af3`이고 실제 사내 설치 SHA·개별 기능 성공은 재조회하지 않았다. 사용자의 “일단 다른거 확인부터” 요청에 따라 제품 코드 수정·재배포에 앞서 Figma A/B와 Native 구조·스타일 적용을 조사했다. [발견 사항과 미확인 범위](../evals/v4-ui-20260930.md#v4-ui-breakage-investigation).
-- **Git 범위·후속 승인:** 시작 main은 `b0515d594da36112919a14c814a95e2b5900035e`(#67 병합)이며 같은 V4 PR이 없어 `feat/ees-ui-v4-20260930`과 [PR #68](https://github.com/knadalkim-a11y/team-agent-poc/pull/68)을 만들었다. Draft #53은 혼합하지 않는다. 검사한 제품 원본은 `6c4111a9afbaadda78256c8276b41cbb875673db`, 후속 승인 전 검토 head는 `f72b53aef76cc9c25dc5d264ad47c21aa4a24a43`다. 최초 요청은 병합·Draft 해제·사내 배포를 제외했으나, 09-30 사용자가 시험 배포를 요청하고 `응 진행해`로 #68 Draft 해제·main 병합·시험 적용 진행을 승인했다. 승인 기록 갱신은 문서만 변경하며 제품 코드는 유지한다. 실제 병합 여부와 `merge_commit_sha`는 원격 PR #68에서 확인해 안내한다. Figma/PDF 원본 변경은 계속 제외한다.
+- **현재 작업:** [EES Work 4차 UI](mockups/ees-work/TASK.md#v4-ui-20260930)의 사내 화면 파손 후속 수정. 09-30 사용자가 조사 뒤 “수정해줘”로 구현을 요청해 같은 [Draft PR #69](https://github.com/knadalkim-a11y/team-agent-poc/pull/69), `fix/ees-v4-native-layout-20260930`에서 스타일 생명주기·Native 빈 대화·검색/경로·스크롤·폭 조합을 보완했다. 기준 main은 `713ed5e4e5dce7e99866c1dbe0db31ef5be94af3`이며 사내 설치 SHA·개별 기능 정상은 미확인이다. [조사](../evals/v4-ui-20260930.md#v4-ui-breakage-investigation)와 [수정·검사 경계](../evals/v4-ui-20260930.md#v4-ui-breakage-fix)를 구분한다.
+- **Git 범위·후속 승인:** 시작 main은 `b0515d594da36112919a14c814a95e2b5900035e`(#67 병합)이며 같은 V4 PR이 없어 `feat/ees-ui-v4-20260930`과 [PR #68](https://github.com/knadalkim-a11y/team-agent-poc/pull/68)을 만들었다. Draft #53은 혼합하지 않는다. 검사한 제품 원본은 `6c4111a9afbaadda78256c8276b41cbb875673db`, 후속 승인 전 검토 head는 `f72b53aef76cc9c25dc5d264ad47c21aa4a24a43`다. 최초 요청은 병합·Draft 해제·사내 배포를 제외했으나, 09-30 사용자가 시험 배포를 요청하고 `응 진행해`로 #68 Draft 해제·main 병합·시험 적용 진행을 승인했다. 당시 승인 기록은 문서 변경이었고 #68은 main `713ed5e4e5dce7e99866c1dbe0db31ef5be94af3`에 병합됐다. 이번 #69는 별도의 후속 수정 요청으로 진행하며 과거 배포 승인을 새 수정본에 확대하지 않는다. Figma/PDF 원본 변경은 계속 제외한다.
 - **구현 경계:** V4 상태별 목록·정보300px 상세·본문 하단 행동 바, 실제 schema 입력, Native 입력 도움의 초안/근거/되돌리기와 메시지 당시 참고를 연결했다. 저장과 실행·승인을 분리하며 모의 통과를 실제 완료로 집계하지 않는다. 기존 인증·대화·첨부·Workspace·P/T·관리·자산 저장 서비스를 재사용한다.
-- **판정 경계:** 코드와 관련 자동 회귀 결과는 [V4 검증 기록](../evals/v4-ui-20260930.md)을 따른다. 최신 고유 Python303 PASS/13 SKIP, Node71 PASS·협업14그룹 PASS이며 변경 suite별 집중 재검을 반영한 수치다. 기준 Figma A/B 스크린샷 확보와 소스 대조는 수행했지만 이번 실제 Native 제품 A/B 대조·목록→상세→저장/실행→결과→복귀·Assistant 실제 모델 입력 도움은 **미실행**이다. 고정 공식 wheel과 브라우저 실행 파일이 없어 제품 검증을 완료할 수 없었다. 별도 HTML·상태 주입으로 대체하지 않았다. 과거 C안의 Native PASS를 V4 PASS로 옮기지 않는다.
+- **판정 경계:** 기존 검사와 이번 변경 범위의 회귀는 [V4 검증 기록](../evals/v4-ui-20260930.md#v4-ui-breakage-fix)에 보존한다. Figma A/B·고정 Native 소스 대조와 자동 회귀를 실제 제품 화면 일치로 해석하지 않는다. 실제 backend 기동은 Python3.11 전용 의존성을 현재3.12에서 불러오지 못해 실패했고, 보조 프런트엔드 진단도 cloud browser의 loopback 접근 차단으로 렌더하지 못했다. 실제 Native A/B 대조·핵심 왕복·실제 모델 입력 도움은 **미실행**이며 과거 C안 PASS·합성 검사로 대체하지 않는다.
 - **보존·캐시:** 기존 사용자 패널 폭·닫힘·대화 설정을 초기화하지 않는다. 변경 자산은 기존 빌드의 내용 해시 경로로 구분한다. ees.12·Pack0.2.14를 새 배포물 동일성의 근거로 쓰지 않으며, 이번 작업에서 사용자 자산 재등록/일괄 동기화·DB/키·배포/Restore 계약 변경은 없다.
 - **남은 결정:** 부분 결과 전용 표현, 추천 범위·담당/일정 정책, 기존 결과/P/T/관리 전용 V4 디자인과 임시 반응형 수락은 미결정이다. 근거 있는 임시 선택·실제 미지원 필드는 [차이·미결정 표](../evals/v4-ui-20260930.md)에 명시한다.
-- **다음 작업 하나:** 조사에서 확인한 스타일 활성화/해제·Native 빈 대화 배치·검색창/경로 스타일·상세 스크롤 결함을 우선 보완하고 실제 제품에서 재검한다. 이번 조사에서는 제품 코드를 바꾸거나 새 배포를 안내하지 않았다. 실제 Native A/B 비교·입력 도움·V4-01~15 전체 수락은 미완료이며, 기존 코드 검사 PASS를 사내 화면 정상으로 해석하지 않는다.
+- **다음 작업 하나:** PR #69 수정본을 실제 Native가 실행되는 환경에서 A/B·초기/닫기/재열기·빈/기존 대화·저장/결과/복귀로 재검한다. 이번 변경은 Draft 유지이며 #68의 과거 병합·배포 승인을 새 수정본에 확대하지 않는다. 실제 제품 검증·V4-01~15 수락·#69 병합/재배포는 미완료다.
 
 이전 #67 C안 승인·시험 준비와 #66 적용에 대한 사용자 보고/정정은 [기존 평가](../evals/c-design-phase3-20260929.md#c-visual-match-20260929) 및 아래 적용 상태에 보존한다. 이번 V4의 권한은 과거 배포 승인이 아니라 위 09-30 후속 승인에 근거한다.
 
@@ -64,7 +64,7 @@
 | 1. 쉬운 Chat UI | 이름·로고·스트리밍·폭/조절 표시 정상 보고 | 새 제안 확인, 비개발자 사용성, 관리자 팀 공지 |
 | 2. 문서 시스템 | Confluence·Jira·GitHub 읽기·변경 Prompt 반영 보고 | 실제 업무 조회·후속 해석·새 일반 답변/원문 확인 |
 | 3. 관리자 공통 정책 | 합성 지침·정책 답변 Skill 저장 보고 | 실제 공통 원칙·상세 절차·권한/Tool 제한·변경 반영 |
-| 4. 관리자 워크플로 | #65~#67 병합·유효 검사 보존. [4차 UI 구현](mockups/ees-work/TASK.md#v4-ui-20260930), 09-30 #68 병합·시험 적용 후속 승인 | 원격 merge SHA 확인→사용자 TrialCommit 적용→최소 결과 확인. 실제 Native 왕복·A/B 대조와 V4-01~15 전체 수락은 미완료 |
+| 4. 관리자 워크플로 | #68 병합 뒤 사용자 V4 파손 보고, [Draft #69 후속 수정](../evals/v4-ui-20260930.md#v4-ui-breakage-fix) | 수정본의 실제 Native 왕복·A/B 대조. V4-01~15 전체 수락·새 병합/재배포는 미완료 |
 | 5. 레거시 연동 | 실제 업무 API·DB 미연결 | 승인된 API/Query Broker의 작은 읽기 기능 하나 |
 | 6. 레거시 간접 UI | 같은 폼에서 직접 입력·AI 작성/수정의 WO 합성 시연 | 시연 피드백 → 운영 목업 → 실제 EMS 연결 |
 
@@ -74,7 +74,7 @@
 
 ## 재개와 환경 유지
 
-- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work의 현재 작업은 [4차 UI](mockups/ees-work/TASK.md#v4-ui-20260930)이며 후속 승인된 PR #68의 원격 병합 상태·최종 main과 [V4 검사 경계](../evals/v4-ui-20260930.md)를 먼저 확인한다. 병합이 확인되면 종료한 Draft 구현을 다시 시작하지 않고 사용자 시험 적용 결과와 남은 검증을 이어간다. #67까지의 C안은 병합된 기반이며 종료된 시각 작업을 재개하지 않는다. 기존 [09-29 C안 2단계](mockups/ees-work/TASK.md#c-design-phase2-20260929)와 [검토 보완](mockups/ees-work/TASK.md#c-design-phase2-review-20260929)을 보존하고 [3차 개발환경 검수](mockups/ees-work/TASK.md#c-design-phase3-20260929)를 완료했다. 완료된 1·2단계·보완·3차 검사를 미완료로 보아 반복하지 않는다. [09-23 A안](mockups/ees-work/TASK.md#a-design-20260923)·Figma 478:131/498:363은 기존 구현 근거로 보존하고 [09-22 단계별 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922)·[확정 왼쪽](mockups/ees-work/TASK.md#sidebar-final-20260922)·[오른쪽 기록 계약](mockups/ees-work/TASK.md#right-panel-20260922)을 보존합니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
+- 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work의 현재 작업은 [4차 UI 후속 수정](../evals/v4-ui-20260930.md#v4-ui-breakage-fix)이며 같은 Draft PR #69의 최신 head·main·검사 경계를 먼저 확인한다. PR #68은 main에 병합됐고 사용자가 사내 화면 파손을 보고했다. 종료한 초기 구현을 반복하거나 #68의 과거 승인을 #69 병합·배포로 확대하지 않는다. #67까지의 C안은 병합된 기반이며 종료된 시각 작업을 재개하지 않는다. 기존 [09-29 C안 2단계](mockups/ees-work/TASK.md#c-design-phase2-20260929)와 [검토 보완](mockups/ees-work/TASK.md#c-design-phase2-review-20260929)을 보존하고 [3차 개발환경 검수](mockups/ees-work/TASK.md#c-design-phase3-20260929)를 완료했다. 완료된 1·2단계·보완·3차 검사를 미완료로 보아 반복하지 않는다. [09-23 A안](mockups/ees-work/TASK.md#a-design-20260923)·Figma 478:131/498:363은 기존 구현 근거로 보존하고 [09-22 단계별 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922)·[확정 왼쪽](mockups/ees-work/TASK.md#sidebar-final-20260922)·[오른쪽 기록 계약](mockups/ees-work/TASK.md#right-panel-20260922)을 보존합니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).
 - 사내 결과 전달은 직접 타이핑 1~2줄만 가능함. 전체 로그·파일·사진을 요구하지 않으며 복사 블록은 각각 2,500자 이내. 기존 clone·Git 프록시 설정 완료 보고를 재사용하고 허용된 외부 호스트·기존 캐시만 전제함. 웹 프로젝트 지침의 저장소 참조 문구도 이미 설정한 것으로 유지함.
 - 등록된 `manage-ees.ps1`의 Python·작업 위치·주소·DATA_DIR·DB·키·계정을 유지함. 설치 예제의 loopback·기본 폴더로 현재 등록값을 덮지 않음. [등록 설정과 기록 위치](03-openwebui-native-agent.md#ees-local-state). 중단한 후보 환경 Diagnose/Deploy는 재개하지 않으며 과거 도구·실패·복구 증거는 보존함.
@@ -82,4 +82,4 @@
 
 ## 최근 점검
 
-2026-09-30 사용자 UI 파손 보고 뒤 main/PR68/열린 PR과 Figma V4 A/B를 재조회했다. 초기/닫힘의 V4 스타일 생명주기, Native 빈 대화 배치, 검색 label 방향, 경로 클래스, 상세 스크롤 대상 불일치를 소스로 확인했다. Native 가로 flex 삽입 위치와 자산/캐시 연결은 소스상 정상이며 sidebar marker 불일치 가설은 기각했다. 실제 사내 원인별 재현과 제품 브라우저 검증은 미실행이다. 이번 변경은 조사 기록뿐이다. [근거·수정 우선순위](../evals/v4-ui-20260930.md#v4-ui-breakage-investigation).
+2026-09-30 후속 요청으로 조사에서 확인한 여섯 결함과 Native toolbar의 누적 CSS 우선순위를 보완했다. 초기/열기/닫기·실제 스크롤 대상·폭 설정 보존 회귀와 builder의 속성 추가/원본 drift 차단을 검사했다. 실제 제품 렌더·사내 재검은 차단/미실행이며, 새 배포 성공이나 목업 일치로 보고하지 않는다. [수정·명령·결과·남은 항목](../evals/v4-ui-20260930.md#v4-ui-breakage-fix).

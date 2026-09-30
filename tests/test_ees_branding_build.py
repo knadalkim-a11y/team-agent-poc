@@ -15,6 +15,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -723,6 +724,55 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
                     exec(synthetic_env, namespace)
                     self.assertEqual(namespace["WEBUI_NAME"], expected)
                     self.assertEqual(dict(os.environ), environment)
+
+    def test_native_empty_layout_hooks_only_add_attributes_to_existing_factories(self):
+        name = builder.SOURCE_APP + "immutable/chunks/zKJlHFgk.js"
+        patches = [patch for patch in builder.PATCHES[name]
+                   if b"data-ees-native-empty-" in patch[1]]
+        expected = {
+            b"Z8": {b"frame"},
+            b"E8": {b"chat", b"main", b"content", b"composer"},
+            b"S8": {b"model", b"description"},
+            b"C8": {b"suggestions"},
+            b"k8": {b"folder"},
+        }
+        self.assertEqual(len(patches), len(expected))
+        for before, after, count in patches:
+            factory = before.split(b"=", 1)[0]
+            with self.subTest(factory=factory.decode()):
+                self.assertEqual(count, 1)
+                hooks = re.findall(rb" data-ees-native-empty-([a-z]+)", after)
+                self.assertEqual(set(hooks), expected[factory])
+                self.assertEqual(len(hooks), len(expected[factory]))
+                # Exact equality after stripping only static attributes proves
+                # nodes/comments/order and the compiled traversal stay intact.
+                self.assertEqual(re.sub(rb" data-ees-native-empty-[a-z]+", b"", after), before)
+                self.assertNotIn(b"landingPageMode", after)
+                self.assertNotIn(b"localStorage", after)
+        self.build()
+        manifest = json.loads((self.root / "release/manifest.json").read_text(encoding="utf-8"))
+        immutable_dir = manifest["relocated_frontend"]["immutable_directory"]
+        with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
+            chat = built.read(builder.TARGET_APP + immutable_dir + "/chunks/zKJlHFgk.js")
+        for before, after, _ in patches:
+            self.assertEqual(chat.count(after), 1)
+            self.assertNotIn(before, chat)
+
+    def test_native_empty_layout_template_drift_fails_before_output(self):
+        name = builder.SOURCE_APP + "immutable/chunks/zKJlHFgk.js"
+        original = self.members[name]
+        patches = [patch for patch in builder.PATCHES[name]
+                   if b"data-ees-native-empty-" in patch[1]]
+        for index, (before, _, _) in enumerate(patches):
+            for mode in ("missing", "duplicate"):
+                directory = f"native-layout-drift-{index}-{mode}"
+                with self.subTest(factory=before.split(b"=", 1)[0].decode(), mode=mode):
+                    self.members[name] = (original.replace(before, b"changed native factory")
+                                          if mode == "missing" else original + before)
+                    self.write_fixture()
+                    with self.assertRaisesRegex(ValueError, "Patch precondition failed"):
+                        self.build(directory)
+                    self.assertFalse((self.root / directory).exists())
 
     @unittest.skipUnless(shutil.which("node"), "Node is required for the native draft boundary probe.")
     def test_work_draft_hook_never_imports_or_persists_tool_approval_mode(self):

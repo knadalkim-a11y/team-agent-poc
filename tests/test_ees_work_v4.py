@@ -39,6 +39,15 @@ class Tags(HTMLParser):
 
 @unittest.skipUnless(shutil.which("node"), "Node is required")
 class V4RenderingTests(unittest.TestCase):
+    def test_layout_lifecycle_regressions(self):
+        # Include the production-view transition fixture in unittest discovery.
+        # Its synthetic geometry is not a Native visual acceptance result.
+        result = subprocess.run(
+            [shutil.which("node"), "--test", str(ROOT / "tests/test_ees_v4_layout.cjs")],
+            capture_output=True, text=True, encoding="utf-8", timeout=30,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def fixture(self):
         nodes = {
             "p": {"id": "p", "name": "실제 게시 절차", "type": "p", "parent": None, "children": ["t"]},

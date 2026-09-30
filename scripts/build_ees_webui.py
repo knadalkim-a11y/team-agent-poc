@@ -203,6 +203,19 @@ PATCHES = {
     SOURCE_APP + "immutable/chunks/zKJlHFgk.js": [
         (b'<nav><div><div id="navbar-bg-gradient-to-b">',
          b'<nav data-ees-native-toolbar><div><div id="navbar-bg-gradient-to-b">', 1),
+        # Mark the real empty-chat branch for scoped layout. Only attributes
+        # change: Svelte child traversal, model/folder controls, composer and
+        # prompt suggestions stay in their original Native factories.
+        (b'Z8=F(\'<div class="flex items-center h-full svelte-vhdo11"><!></div>\')',
+         b'Z8=F(\'<div data-ees-native-empty-frame class="flex items-center h-full svelte-vhdo11"><!></div>\')', 1),
+        (b'E8=F(\'<div class="m-auto w-full max-w-[58rem] px-1 @2xl:px-20 translate-y-6 py-24 text-center"><!> <div class="w-full text-3xl text-gray-800 dark:text-gray-100 text-center flex items-center gap-4"><div class="w-full flex flex-col justify-center items-center"><!> <div><!></div></div></div> <!></div>\')',
+         b'E8=F(\'<div data-ees-native-empty-chat class="m-auto w-full max-w-[58rem] px-1 @2xl:px-20 translate-y-6 py-24 text-center"><!> <div data-ees-native-empty-main class="w-full text-3xl text-gray-800 dark:text-gray-100 text-center flex items-center gap-4"><div data-ees-native-empty-content class="w-full flex flex-col justify-center items-center"><!> <div data-ees-native-empty-composer><!></div></div></div> <!></div>\')', 1),
+        (b'S8=F(\'<div class="flex flex-row justify-center gap-2.5 @sm:gap-3 w-fit px-5 max-w-xl"><div class="flex shrink-0 justify-center"><div class="flex -space-x-4 mb-0.5"></div></div> <div class=" text-2xl @sm:text-2xl line-clamp-1 flex items-center"><!></div></div> <div class="flex mt-1 mb-2"><div><!></div></div>\',1)',
+         b'S8=F(\'<div data-ees-native-empty-model class="flex flex-row justify-center gap-2.5 @sm:gap-3 w-fit px-5 max-w-xl"><div class="flex shrink-0 justify-center"><div class="flex -space-x-4 mb-0.5"></div></div> <div class=" text-2xl @sm:text-2xl line-clamp-1 flex items-center"><!></div></div> <div data-ees-native-empty-description class="flex mt-1 mb-2"><div><!></div></div>\',1)', 1),
+        (b'C8=F(\'<div class="mx-auto max-w-2xl mt-2"><div class="mx-5"><!></div></div>\')',
+         b'C8=F(\'<div data-ees-native-empty-suggestions class="mx-auto max-w-2xl mt-2"><div class="mx-5"><!></div></div>\')', 1),
+        (b'k8=F(\'<div class="mx-auto px-4 md:max-w-3xl md:px-6 min-h-62"><!></div>\')',
+         b'k8=F(\'<div data-ees-native-empty-folder class="mx-auto px-4 md:max-w-3xl md:px-6 min-h-62"><!></div>\')', 1),
         # Preserve an explicitly supplied native editor placeholder. C changes
         # the Korean product default, not editor contents or draft persistence.
         (b'Ln()?Ln():n().t("Send a Message")',

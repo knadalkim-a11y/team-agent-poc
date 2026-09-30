@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-30",
+  "base_head": "3c541822eb7717e046ada1b26a2cc7fce12fa285",
+  "scope": "Source regression only; Native visual and real backend flow not accepted",
+  "python": {
+    "run": 112,
+    "pass": 110,
+    "skip": 2,
+    "fail": 0
+  },
+  "node": {
+    "run": 39,
+    "pass": 39,
+    "skip": 0,
+    "fail": 0
+  },
+  "note": "The Python V4 suite includes one wrapper invoking the four Node layout tests. Do not sum Python and Node counts as unique coverage.",
+  "commands": [
+    {
+      "command": "python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p 'test_ees_branding_build.py' -q",
+      "exit_code": 0,
+      "summary": "sts in 1.171s\n\nOK (skipped=2)\n"
+    },
+    {
+      "command": "python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p 'test_ees_work_controller.py' -q",
+      "exit_code": 0,
+      "summary": "--\nRan 27 tests in 2.199s\n\nOK\n"
+    },
+    {
+      "command": "python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p 'test_ees_work_panel.py' -q",
+      "exit_code": 0,
+      "summary": "rs.py:100> took 0.173 seconds\n----------------------------------------------------------------------\nRan 47 tests in 10.135s\n\nOK\n"
+    },
+    {
+      "command": "python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p 'test_ees_work_v4.py' -q",
+      "exit_code": 0,
+      "summary": "---\nRan 8 tests in 1.248s\n\nOK\n"
+    },
+    {
+      "command": "node --test tests/test_ees_v4_layout.cjs tests/test_ees_v4_drafts.cjs tests/test_ees_execution_ui.cjs",
+      "exit_code": 0,
+      "summary": "scroll survive target refresh and return (8.399466ms)\n✔ actual available row width enables overlay without overwriting sidebar or Assistant preferences (4.032786ms)\n✔ default 1920 and 1366 widths preserve the three-column layout and Assistant closed state (2.618466ms)\nℹ tests 39\nℹ suites 0\nℹ pass 39\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 231.552057\n"
+    }
+  ],
+  "native": {
+    "official_wheel": "unavailable; two builder tests skipped",
+    "browser_theme": "one skipped; local Chrome unavailable",
+    "backend": "import failed: Python3.12 cannot load preserved CPython3.11 rpds extension",
+    "browser": "CUA local frontend diagnostic navigation blocked: net::ERR_BLOCKED_BY_CLIENT",
+    "visual_acceptance": "not executed",
+    "company": "not executed",
+    "remote_ci": "not executed per September skip policy"
+  },
+  "source_sha256": {
+    "branding/ees/ui/chat-theme.css": "ce65409064922f80c11bc6161fe54b50fdabe83cccdb747d6f080c0fd25110c7",
+    "branding/ees/ui/ees-work-launcher.css": "c48aae6c1ff0d5efd0b6f3be13eeec2bc15a665273bdeb622d82df0732e0598c",
+    "branding/ees/ui/ees-work-view.js": "9e68b3b2fdac6e1fdf0fa972689ef0ad3e1b0c570d1ea1851c50cab7659b3fa7",
+    "scripts/build_ees_webui.py": "b3387f050e6364983a2ff8e7ec67e3b581701dc7796c9ff1dcc47c77fbd327ae",
+    "tests/test_ees_branding_build.py": "01302a06011d4c46154f4398db27a803c3cb8955c9cb1c5b4c0f05500e43e72e",
+    "tests/test_ees_work_v4.py": "a96953b3fb82d6c704dcff995312ff3f85fdbc36217c1cdc10f775658b34dfb8",
+    "tests/test_ees_v4_layout.cjs": "5862400d0974888f56406ff77a5b99729dcd1edcd93913a56c3bedaa4b257879"
+  }
+}
