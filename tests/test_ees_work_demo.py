@@ -273,14 +273,15 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                   '[data-picker="' + kind + '"][data-value="' + value + '"]')
         self.wait('!!document.querySelector(' + json.dumps(option) + ')')
         self.click(option)
-        self.wait('document.querySelector(' + json.dumps(trigger) + ')?.value === ' + json.dumps(value)
+        self.wait('document.querySelector(' + json.dumps(trigger) + ')?.dataset.value === ' + json.dumps(value)
                   + " && !document.querySelector('#ees-work-scope-popover')")
 
     def open_category(self, category):
         selector = '[data-work-category="' + category + '"]'
-        if self.read(selector, "getAttribute('aria-pressed')") != "true":
+        if self.read(selector, "getAttribute('aria-expanded')") != "true":
             self.click(selector)
-        self.wait("!!document.querySelector('#ees-work-entry #ees-work-tree')")
+        self.wait('document.querySelector(' + json.dumps(selector) + ')?.getAttribute("aria-expanded") === "true"'
+                  + " && !!document.querySelector('#ees-work-entry .ew-v4-tree')")
 
     def assert_draft_stays(self, expected):
         # Catch a late native load/restore overwriting the already visible
@@ -300,18 +301,24 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         definition = state["case"]["definition"] if state["case"] else state["catalog"]
         selected = definition["nodes"][node_id]
         self.open_category(selected["category"])
-        container = '#ees-work-entry' if selected["type"] == "p" else '#ees-work-tree'
+        container = '#ees-work-content' if selected["type"] == "j" else '#ees-work-entry'
         control = container + ' [data-action="select"][data-node-id="' + node_id + '"]'
-        if selected["type"] == "p" and self.browser.evaluate(
-                "!!document.querySelector(" + json.dumps(control) + ")?.closest('details:not([open])')"):
-            self.click('#ees-work-entry .ew-workflow-picker > summary')
-            self.wait("document.querySelector('#ees-work-entry .ew-workflow-picker')?.open")
-        if selected["type"] == "j" and not self.read(control, "getClientRects().length"):
+        if selected["type"] == "t" and not self.read(control, "getClientRects().length"):
             self.choose(selected["parent"], chat_id=chat_id)
+            expansion = '#ees-work-entry [data-action="expand"][data-node-id="' + selected["parent"] + '"]'
+            if self.read(expansion, "getAttribute('aria-expanded')") != "true":
+                self.click(expansion)
+            self.wait('!!document.querySelector(' + json.dumps(control) + ')?.getClientRects().length')
+        if selected["type"] == "j":
+            # P also contains a collapsed job index. Open the actual parent T
+            # list before choosing its J, rather than hitting that hidden copy.
+            self.choose(selected["parent"], chat_id=chat_id)
+            control = '#ees-work-content [data-work-job="' + node_id + '"] button[data-action="select"]'
             if not self.read(control, "getClientRects().length"):
                 self.fill('#ees-work-job-search', selected["name"])
+                if not self.read('.ew-v4-filter-menu', 'open'):
+                    self.click('.ew-v4-filter-menu > summary')
                 self.click('[data-action="job_filter"][data-filter="all"]')
-                control = '#ees-work-content [data-work-job="' + node_id + '"] [data-action="select"]'
         self.click(control)
         self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === "
                   + json.dumps(selected["name"])

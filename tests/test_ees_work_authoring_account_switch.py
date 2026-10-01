@@ -19,6 +19,9 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
     setUpClass = classmethod(native.NativeAuthoringBrowserTests.setUpClass.__func__)
     setUp = native.NativeAuthoringBrowserTests.setUp
     tearDown = native.NativeAuthoringBrowserTests.tearDown
+    evidence_directory = native.NativeAuthoringBrowserTests.evidence_directory
+    screenshot = native.NativeAuthoringBrowserTests.screenshot
+    capture_failure_evidence = native.NativeAuthoringBrowserTests.capture_failure_evidence
     api = native.NativeAuthoringBrowserTests.api
     wait = native.NativeAuthoringBrowserTests.wait
     eventually = native.NativeAuthoringBrowserTests.eventually

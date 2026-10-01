@@ -6,6 +6,7 @@ authentication/approval/group routes and persistence are actual Open WebUI
 outside this fixture; session limitations are explicit assertions below.
 """
 
+import base64
 import json
 from copy import deepcopy
 import os
@@ -153,7 +154,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         cls.wheel_path = Path(directory) / manifest["wheel"]["filename"]
         # Reuse trusted-pointer/keyboard and bounded-wait helpers, not its
         # synthetic user setup or inherited test methods.
-        for name in ("read", "text", "click", "key", "fill", "screenshot", "navigate",
+        for name in ("read", "text", "click", "key", "fill", "navigate",
                      "select_scope", "wait_scope_ready", "open_category", "select_node", "choose"):
             if hasattr(EESWorkNativeBrowserTests, name):
                 setattr(cls, name, getattr(EESWorkNativeBrowserTests, name))
@@ -174,6 +175,9 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.addCleanup(self.server.shutdown)
         self.browser = ChromePipe(self.chrome, str(Path(self.temporary.name) / "chrome"))
         self.addCleanup(self.browser.close)
+        # unittest records setup/test/teardown failures before cleanups. Collect
+        # while this fixture's browser is still alive, even if setup failed.
+        self.addCleanup(self.capture_failure_evidence)
         self.browser.navigate("about:blank")
         self.browser.call("Runtime.enable")
         self.browser.call("Network.enable")
@@ -183,11 +187,58 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.wait("!!document.querySelector('#email')")
 
     def tearDown(self):
+        self.assertEqual(self.server.errors, [])
+
+    def evidence_directory(self):
+        # This is already uploaded by the existing Linux workflow. The account
+        # gate did not set EES_TEST_SCREENSHOT_DIR, so failures had no artifact.
+        directory = Path(os.environ.get("EES_TEST_SCREENSHOT_DIR", ROOT / "dist/ees-work-screenshots"))
+        directory.mkdir(parents=True, exist_ok=True)
+        return directory
+
+    def screenshot(self, name):
+        data = self.browser.call("Page.captureScreenshot", {
+            "format": "png", "captureBeyondViewport": False})["data"]
+        (self.evidence_directory() / (name + ".png")).write_bytes(base64.b64decode(data))
+
+    def capture_failure_evidence(self):
         result = getattr(self._outcome, "result", None)
         failures = list(getattr(result, "failures", ())) + list(getattr(result, "errors", ()))
-        if any(case is self for case, _ in failures):
-            self.screenshot(self._testMethodName + "-failure")
-        self.assertEqual(self.server.errors, [])
+        if getattr(self, "failure_evidence_captured", False) or not any(
+                case is self or getattr(case, "test_case", None) is self for case, _ in failures):
+            return
+        self.failure_evidence_captured = True
+        name = self._testMethodName + "-failure"
+        evidence = {"test": self.id(), "boundary": "Synthetic Native authentication fixture",
+                    "last_wait": getattr(self, "last_wait_expression", None),
+                    "requests": self.server.requests[-20:], "capture_errors": []}
+        try:
+            self.screenshot(name)
+        except Exception as error:
+            evidence["capture_errors"].append("screenshot:" + type(error).__name__)
+        try:
+            # Record an allowlisted DOM projection, never input values, cookies,
+            # storage, tokens, or the authenticated request/response bodies.
+            evidence["dom"] = self.browser.evaluate("""(()=>({
+                route:location.pathname+location.search,readyState:document.readyState,
+                nativeReady:window.__eesNativeDraftV1?.ready(),
+                controls:[...document.querySelectorAll('button,[role=button],#email,#name,#sidebar,#chat-input')]
+                  .slice(0,180).map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);
+                    return {tag:e.tagName,id:e.id,type:e.getAttribute('type'),role:e.getAttribute('role'),
+                      label:e.getAttribute('aria-label'),text:e.matches('button,[role=button]')?e.textContent.trim().slice(0,200):null,
+                      disabled:!!e.disabled,hidden:e.hidden,inert:e.inert,ariaHidden:e.getAttribute('aria-hidden'),
+                      dataValue:e.getAttribute('data-value'),display:s.display,visibility:s.visibility,
+                      rect:{x:r.x,y:r.y,width:r.width,height:r.height},
+                      pointerHit:e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))};})
+            }))()""")
+        except Exception as error:
+            evidence["capture_errors"].append("dom:" + type(error).__name__)
+        try:
+            (self.evidence_directory() / (name + ".json")).write_text(
+                json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        except Exception as error:
+            # Diagnostics must never replace the original test failure.
+            print("Native failure evidence unavailable: " + type(error).__name__)
 
     def api(self, method, path, payload=None, token=None):
         return self.fixture.run(self.fixture.request(method, path, payload=payload, token=token))
@@ -229,6 +280,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         from test_ees_chat_theme import ChromePipe
         browser = ChromePipe(self.chrome, str(Path(self.temporary.name) / name))
         self.addCleanup(browser.close)
+        self.addCleanup(self.capture_failure_evidence)
         browser.navigate("about:blank")
         browser.call("Runtime.enable")
         browser.call("Network.enable")
@@ -240,6 +292,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         return browser
 
     def wait(self, expression, timeout=9000):
+        self.last_wait_expression = expression
         # Native signout performs a full navigation, destroying the old JS
         # context. Do not keep a Promise running inside that dying context.
         deadline = time.monotonic() + timeout / 1000
@@ -263,13 +316,34 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
             + "});return {status:r.status,data:await r.json()};})()")
 
     def click_text(self, text, selector="button", exact=True):
+        # The auth fields can mount before the signup/config/i18n branch. Wait
+        # for the actual localized, enabled pointer target, not merely #email.
+        match = "e.textContent.trim()===" + json.dumps(text) if exact else "e.textContent.includes(" + json.dumps(text) + ")"
+        actionable = ("e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return " + match
+            + "&&!e.disabled&&r.width>0&&r.height>0&&s.visibility==='visible'"
+            + "&&r.x>=0&&r.y>=0&&r.right<=innerWidth&&r.bottom<=innerHeight"
+            + "&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}")
+        candidates = "[...document.querySelectorAll(" + json.dumps(selector) + ")]"
+        self.wait(candidates + ".some(" + actionable + ")")
         self.browser.evaluate("document.querySelectorAll('[data-native-test-target]').forEach(e=>e.removeAttribute('data-native-test-target'))")
-        found = self.browser.evaluate("(()=>{const e=[...document.querySelectorAll(" + json.dumps(selector)
-            + ")].find(e=>e.getClientRects().length&&"
-            + ("e.textContent.trim()===" if exact else "e.textContent.includes(") + json.dumps(text)
-            + ("" if exact else ")") + ");if(!e)return false;e.setAttribute('data-native-test-target','true');return true;})()")
+        found = self.browser.evaluate("(()=>{const e=" + candidates + ".find(" + actionable
+            + ");if(!e)return false;e.setAttribute('data-native-test-target','true');return true;})()")
         self.assertTrue(found, "Missing native control: " + text + "\n" + self.text("body"))
         self.click("[data-native-test-target]")
+
+    def open_sidebar(self):
+        # Native restores its own sidebar preference after navigation. A chat
+        # composer can be ready with the sidebar already open; do not toggle it.
+        opened = """(()=>{const e=document.querySelector('#sidebar'),r=e?.getBoundingClientRect();
+            return e?.getAttribute('aria-hidden')==='false'&&!e.inert&&r.width>200&&r.x>=0
+                &&r.right<=innerWidth&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+50));})()"""
+        opening = """[...document.querySelectorAll('button[aria-label="사이드바 열기"]')].some(e=>{
+            const r=e.getBoundingClientRect();return !e.disabled&&r.width>0&&r.height>0
+                &&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})"""
+        self.wait(opened + " || " + opening)
+        if not self.browser.evaluate(opened):
+            self.click('button[aria-label="사이드바 열기"]')
+        self.wait(opened)
 
     def login_ui(self, email, password):
         self.navigate("/auth")
@@ -483,8 +557,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.assertEqual(self.server.chats[self.first_chat]["user_id"], account.id)
         self.navigate("/c/" + self.first_chat)
         self.wait("!!document.querySelector('#chat-input')")
-        self.click('button[aria-label="사이드바 열기"]')
-        self.wait("document.querySelector('#sidebar')?.getBoundingClientRect().width > 200")
+        self.open_sidebar()
         self.select_scope("site", "us-a")
         self.select_scope("system", "EMS")
         self.choose("scope-j", chat_id=self.first_chat)
@@ -604,8 +677,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
             for message in self.server.chats.get(ordinary_chat, {}).get("chat", {}).get("history", {}).get("messages", {}).values()))
         self.navigate("/c/" + ordinary_chat)
         self.wait("!!document.querySelector('#chat-input') && document.body.innerText.includes('실제 대화 입력이 전달되었습니다.')")
-        self.click('button[aria-label="사이드바 열기"]')
-        self.wait("document.querySelector('#sidebar')?.getBoundingClientRect().width > 200")
+        self.open_sidebar()
         self.select_scope("site", "us-a")
         self.select_scope("system", "EMS")
         self.choose(process_id, chat_id=ordinary_chat)
