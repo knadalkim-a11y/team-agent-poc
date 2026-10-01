@@ -65,7 +65,7 @@ Step 0-A에서 확인한 Figma의 화면 배치·입력 선언·사람 목록 �
 
 직접 영향받는 helper 회귀·고정 패키지·앞서 막혔던 Native 업무/대화 통합 검사를 확인한다. 제품 수정이 필요하면 근거와 필요한 범위를 제출하고 해당 제품 변경은 멈춘다. 최종 결과·증거 파일 실체·CI 상태를 확인하여 같은 Draft PR에 반영하고 검토를 기다린다. 병합·Draft 해제·배포·Step 1 권한은 없다.
 
-현재 확인된 결과는 CSS31개 PASS, 실제 CI 한글28 glyph/읽을 수 있는 원본 캡처, Windows 고정 소스 CRLF 변환과 SQLite fixture 미닫힘의 원인 분리다. 원래 패키지 pin을 유지하고 시험용 LF archive/명시적 close를 보완했으며 로컬 관련31개 PASS다. 조건이 바뀐 최종 자동 Windows 결과는 위 평가/PR에서 head별로 구분한다. Native 통합은 로컬 고유12PASS/3FAIL/58미실행이며 **옛 A안 치수 기대, Native 입력 저장 경계, 과거 결과의 완료 집계**는 판정 완화 없이 남겼다. Step 0-B 기본 계약을 바꿀 근거 또는 Step 1 통과로 사용하지 않는다. 검토 담당은 이 세 관측의 기존 계약/제품 범위를 정하고 별도 Step 1 구현 계약을 전달해야 한다.
+현재 확인된 결과는 CSS31개 PASS, 실제 CI 한글28 glyph/읽을 수 있는 원본 캡처, Windows 고정 소스 CRLF 변환과 SQLite fixture 미닫힘의 원인 분리다. 원래 패키지 pin을 유지하고 시험용 LF archive/명시적 close를 보완했으며 로컬 관련31개 PASS다. `cddf0eb`의 자동 Windows 지정2개도 PASS이고 원래 pin/전체 source·member·RECORD·ZIP 일치를 확인했다. 전체 run은 후속 검사에서 cancelled이며 위 평가/PR에서 head별로 구분한다. Native 통합의 최초 로컬 고유12PASS/3FAIL/58미실행은 보존하며 직접 helper 후속까지 고유20개13PASS/7FAIL/53미실행이다. **옛 A안 치수 기대, Native 입력 저장 경계, 과거 결과의 완료 집계**는 판정 완화 없이 남겼다. Step 0-B 기본 계약을 바꿀 근거 또는 Step 1 통과로 사용하지 않는다. 검토 담당은 이 세 관측과 최종 CI의 미분류 실패·미완료 범위를 확인하고 별도 Step 1 구현 계약을 전달해야 한다. 최종 CI에서 같은 닫힌 패널/구 select-value 준비 로직이 남은 직접 호출부만 추가 보완했으며 제품/판정 변경으로 확대하지 않는다.
 
 <a id="restructure-step0a-20261001"></a>
 

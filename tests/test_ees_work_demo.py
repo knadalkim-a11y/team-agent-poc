@@ -856,6 +856,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
     def test_integrated_large_job_browser_counts_filters_pages_and_selection(self):
         saved = self.seed_large_case()
         self.navigate('/c/existing-chat')
+        self.open_work_panel()
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
         self.choose('bulk-p')
         self.assertEqual(self.text('[data-work-metric="stages"] strong'), '0 / 1')
@@ -1147,6 +1148,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             self.assertTrue(result['ok'], result)
             case = result['case']
         self.navigate('/c/existing-chat')
+        self.open_work_panel()
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
         self.choose('ap-j')
         saved = deepcopy(self.current()['case']['jobs']['ap-j']['history'])
@@ -1285,6 +1287,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.publish_runtime_fixture(definition)
         self.seed_case('existing-chat', ready=True)
         self.navigate('/c/existing-chat')
+        self.open_work_panel()
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
         self.choose('db-j')
         before = deepcopy(self.current()['case'])
@@ -1438,6 +1441,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
     def test_input_save_double_click_and_held_enter_never_run_or_send_chat(self):
         self.seed_case("existing-chat", ready=True)
         self.navigate("/c/existing-chat")
+        self.open_work_panel()
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
         # A context strip can mount before the native draft and scope controls
         # finish hydration. Begin the gesture at the existing ready boundary.
@@ -1604,6 +1608,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
     def test_borderless_step_styles_focus_and_long_name_in_native_light_dark_narrow(self):
         self.seed_large_case()
         self.navigate("/c/existing-chat")
+        self.open_work_panel()
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
         self.choose("bulk-052-j")
         self.fill('#ees-work-inputs input[name="db"]', "입력 반영을 확인할 대상")
@@ -2424,7 +2429,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             "type": "function_call", "id": "fixture-pending-call", "call_id": "fixture-pending-call",
             "name": "fixture_read", "arguments": "{}", "status": "requires_approval"}]
         self.navigate("/c/existing-chat")
-        self.wait("document.querySelector('#ees-work-site-trigger')?.value === 'us-a'"
+        self.wait_scope_ready("site")
+        self.wait("document.querySelector('#ees-work-site-trigger')?.dataset.value === 'us-a'"
                   + " && !!document.querySelector('#chat-input.ProseMirror')")
         self.choose("db-j")
         self.assertIn("existing-chat의 기존 질문", self.text("#chat-container"))
@@ -2445,7 +2451,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertEqual(self.read(selected_stage, "dataset.expanded"), "true")
         self.select_scope("site", "hu-a")
         self.wait("location.pathname === '/c/other-chat'"
-                  + " && document.querySelector('#ees-work-site-trigger')?.value === 'hu-a'"
+                  + " && document.querySelector('#ees-work-site-trigger')?.dataset.value === 'hu-a'"
                   + " && document.querySelector('#chat-container')?.innerText.includes('other-chat의 기존 대화')")
         self.assertNotIn("existing-chat의 기존 질문", self.text("#chat-container"))
         self.assertNotIn("미국 EMS에서 작성 중인 내용", self.text("#chat-input"))
@@ -2465,7 +2471,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertIn("attachment.txt", self.text("#chat-container"))
         self.select_scope("system", "APC")
         self.wait("location.pathname === '/c/apc-chat'"
-                  + " && document.querySelector('#ees-work-system-trigger')?.value === 'APC'"
+                  + " && document.querySelector('#ees-work-system-trigger')?.dataset.value === 'APC'"
                   + " && document.querySelector('#chat-container')?.innerText.includes('apc-chat의 기존 대화')")
         self.assertNotIn("미국 EMS에서 작성 중인 내용", self.text("#chat-input"))
         self.assertNotIn("attachment.txt", self.text("#chat-container"))
@@ -2701,6 +2707,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.publish_runtime_fixture(definition)
         case = self.seed_case("existing-chat")
         self.navigate("/c/existing-chat")
+        self.open_work_panel()
         self.wait("!!document.querySelector('#ees-work-context')")
         self.choose("db-j")
         self.assertIn("실행 계획 확인", self.text("#ees-work-run"))
@@ -2734,6 +2741,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
             self.screenshot('runtime-native-same-page-projection')
             return
         self.navigate("/c/existing-chat")
+        self.open_work_panel()
         self.wait("!!document.querySelector('#ees-work-context')")
         self.choose("db-j")
         self.wait("document.querySelector('[data-runtime-record]')?.dataset.runtimeRecord === 'succeeded'")

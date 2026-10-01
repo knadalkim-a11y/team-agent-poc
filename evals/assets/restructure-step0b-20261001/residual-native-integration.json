@@ -489,5 +489,494 @@
     "Windows browser result",
     "in-house model/tool/PAT/DB integration",
     "unknown failure resolution"
-  ]
+  ],
+  "ci_36830859677_helper_followup": {
+    "recorded_at_utc": "2026-10-01T07:53:27.240786+00:00",
+    "baseline_head": "cddf0eb",
+    "ci_run": 36830859677,
+    "ci_linux_conclusion": "cancelled",
+    "artifact_id": 11147134607,
+    "artifact_sha256": "b8bb9aae55efb81aa80784df8442b75a60cb92294bd51c566a66c154788b9a87",
+    "confirmed_source_observations": [
+      {
+        "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_pending_execution_is_not_completion_and_releases_only_one_result",
+        "artifact_member": "test_a_design_pending_execution_is_not_completion_and_releases_only_one_result-failure.json",
+        "sha256": "c2c76bdbb5a5ec09694dfb8fc29b4112424aca79c61595bf9bb145d6573b59d0",
+        "last_wait": "document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')",
+        "nativeReady": true,
+        "readyState": "complete",
+        "fontsStatus": "loaded",
+        "visibilityState": "visible",
+        "panel_toggle_expanded": "false",
+        "panel_toggle_pointer_hit": true,
+        "capture_errors": []
+      },
+      {
+        "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_borderless_step_styles_focus_and_long_name_in_native_light_dark_narrow",
+        "artifact_member": "test_borderless_step_styles_focus_and_long_name_in_native_light_dark_narrow-failure.json",
+        "sha256": "b85d55ef87536bc2cbba4f32e92a76fbfec48702f2d1a445c0d3f4dd826c1b7b",
+        "last_wait": "document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')",
+        "nativeReady": true,
+        "readyState": "complete",
+        "fontsStatus": "loaded",
+        "visibilityState": "visible",
+        "panel_toggle_expanded": "false",
+        "panel_toggle_pointer_hit": true,
+        "capture_errors": []
+      },
+      {
+        "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_detail_keeps_opened_attempt_call_and_return_focus_after_new_result",
+        "artifact_member": "test_detail_keeps_opened_attempt_call_and_return_focus_after_new_result-failure.json",
+        "sha256": "02144c4a02d93cf203b33376f4770b0dfa4ead284f2f7265e170b1a91af5e230",
+        "last_wait": "document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')",
+        "nativeReady": true,
+        "readyState": "complete",
+        "fontsStatus": "loaded",
+        "visibilityState": "visible",
+        "panel_toggle_expanded": "false",
+        "panel_toggle_pointer_hit": true,
+        "capture_errors": []
+      },
+      {
+        "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_durable_runtime_panel_plan_real_service_and_browser_return",
+        "artifact_member": "test_durable_runtime_panel_plan_real_service_and_browser_return-failure.json",
+        "sha256": "b334091e542290d9ff4a52960a0a145df68f55765df29c7ebe9f6e716a42a7a0",
+        "last_wait": "!!document.querySelector('#ees-work-context')",
+        "nativeReady": true,
+        "readyState": "complete",
+        "fontsStatus": "loaded",
+        "visibilityState": "visible",
+        "panel_toggle_expanded": "false",
+        "panel_toggle_pointer_hit": true,
+        "capture_errors": []
+      },
+      {
+        "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_durable_runtime_poll_updates_left_progress_and_job_header_without_navigation",
+        "artifact_member": "test_durable_runtime_poll_updates_left_progress_and_job_header_without_navigation-failure.json",
+        "sha256": "63603d7f5a4e6fbd4f4a42081b2746d905eedab391d4340fa3852d9c4e6c07e1",
+        "last_wait": "!!document.querySelector('#ees-work-context')",
+        "nativeReady": true,
+        "readyState": "complete",
+        "fontsStatus": "loaded",
+        "visibilityState": "visible",
+        "panel_toggle_expanded": "false",
+        "panel_toggle_pointer_hit": true,
+        "capture_errors": []
+      },
+      {
+        "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_factory_system_scope_restores_chat_drafts_and_history_never_replaces_current_work",
+        "artifact_member": "test_factory_system_scope_restores_chat_drafts_and_history_never_replaces_current_work-failure.json",
+        "sha256": "286241cc2a62b5ceaceec03d866ec570f4fe39a4a0f2654fa790a9839152262f",
+        "last_wait": "document.querySelector('#ees-work-site-trigger')?.value === 'us-a' && !!document.querySelector('#chat-input.ProseMirror')",
+        "nativeReady": true,
+        "readyState": "complete",
+        "fontsStatus": "loaded",
+        "visibilityState": "visible",
+        "panel_toggle_expanded": "false",
+        "panel_toggle_pointer_hit": true,
+        "capture_errors": []
+      },
+      {
+        "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_input_save_double_click_and_held_enter_never_run_or_send_chat",
+        "artifact_member": "test_input_save_double_click_and_held_enter_never_run_or_send_chat-failure.json",
+        "sha256": "c5e28a6f8c94bcb8e3ae1df4adef3d3f88aabdd6456f0a85d19903069b9815c5",
+        "last_wait": "document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')",
+        "nativeReady": true,
+        "readyState": "complete",
+        "fontsStatus": "loaded",
+        "visibilityState": "visible",
+        "panel_toggle_expanded": "false",
+        "panel_toggle_pointer_hit": true,
+        "capture_errors": []
+      },
+      {
+        "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_integrated_large_job_browser_counts_filters_pages_and_selection",
+        "artifact_member": "test_integrated_large_job_browser_counts_filters_pages_and_selection-failure.json",
+        "sha256": "2e7ce22e0096535ada490b83ddeb87a684a747151b6edd752003edbb5e97a6a5",
+        "last_wait": "document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')",
+        "nativeReady": true,
+        "readyState": "complete",
+        "fontsStatus": "loaded",
+        "visibilityState": "visible",
+        "panel_toggle_expanded": "false",
+        "panel_toggle_pointer_hit": true,
+        "capture_errors": []
+      }
+    ],
+    "test_only_changes": {
+      "file": "tests/test_ees_work_demo.py",
+      "diff": "11 additions, 3 deletions",
+      "detail": [
+        "Existing physical open_work_panel helper added at seven direct reload/reentry sites covering seven observed closed-panel tests (runtime poll shares the same test implementation).",
+        "Factory/system test uses existing wait_scope_ready and correct button dataset.value rather than obsolete .value; intended site/system values and later assertions preserved."
+      ],
+      "source_evidence": [
+        "branding/ees/ui/ees-work-view.js:renderContext requires panelOpen",
+        "branding/ees/ui/ees-work-view.js:855 renders site/system buttons with data-value",
+        "tests/test_ees_work_demo.py:select_scope already verifies dataset.value"
+      ],
+      "unchanged": [
+        "product",
+        "backend data",
+        "visual expectations",
+        "original business/permission/history assertions",
+        "async hold/release behavior",
+        "CI trigger or protection"
+      ]
+    },
+    "bounded_retest": {
+      "executed": 5,
+      "passed": 1,
+      "failed": 4,
+      "skipped": 0,
+      "repeated_without_changed_condition": false,
+      "method": "Each independent selected test runs once with unittest -f; each stops at its first new failure. No new branch repaired afterward.",
+      "runs": [
+        {
+          "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_input_save_double_click_and_held_enter_never_run_or_send_chat",
+          "command": [
+            ".venv/bin/python",
+            "-X",
+            "warn_default_encoding",
+            "-W",
+            "error::EncodingWarning",
+            "-m",
+            "unittest",
+            "-f",
+            "-v",
+            "test_ees_work_demo.EESWorkNativeBrowserTests.test_input_save_double_click_and_held_enter_never_run_or_send_chat"
+          ],
+          "environment": {
+            "PYTHONPATH": "tests",
+            "EES_TEST_CHROME": "/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell",
+            "EES_TEST_BRANDING_DIR": "dist/step0b/branding",
+            "EES_TEST_SCREENSHOT_DIR": "dist/step0b/residual-native-followup-1"
+          },
+          "exit_code": 1,
+          "wall_seconds": 3.003,
+          "evidence_directory": "dist/step0b/residual-native-followup-1",
+          "tests_run": 1,
+          "duration_seconds": 2.858,
+          "observation": {
+            "result": "FAIL",
+            "new_boundary": "Saved all double-click/held Enter/held Space inputs without running or sending chat; explicit run increments once. Then old #ees-work-tree AP row presence assertion fails.",
+            "line": 1512,
+            "assertion": "self.assertIsNotNone(self.read(next_job))",
+            "actual": "None",
+            "decision": "Keep original navigation assertion; no further selector/behavior change in this branch."
+          },
+          "log_sha256": "eecba9c8c54203d88f1124243b3ad894ed4d459b7df372fb6c12ed7f92817d10",
+          "evidence_files": [
+            {
+              "path": "dist/step0b/residual-native-followup-1/ees-step-input-saved-before-execution.png",
+              "bytes": 175911,
+              "sha256": "5e2fa7634cad9fcc5380982c1f70febdd1ec784a2f232fa4c8aa6bed760fc3fa"
+            },
+            {
+              "path": "dist/step0b/residual-native-followup-1/ees-step-job-completed-after-explicit-run.png",
+              "bytes": 202123,
+              "sha256": "edd8c76fd374d9750a35451da9a4b1dcbc69c914e64f7326663ad61551e54183"
+            },
+            {
+              "path": "dist/step0b/residual-native-followup-1/test_input_save_double_click_and_held_enter_never_run_or_send_chat-failure.json",
+              "bytes": 47123,
+              "sha256": "9f7b6cae2df59844b0ccad318f158c14ba9fae65844da490ad40646cdbab12b6"
+            },
+            {
+              "path": "dist/step0b/residual-native-followup-1/test_input_save_double_click_and_held_enter_never_run_or_send_chat-failure.png",
+              "bytes": 202123,
+              "sha256": "edd8c76fd374d9750a35451da9a4b1dcbc69c914e64f7326663ad61551e54183"
+            }
+          ],
+          "guard_progress_evidence": {
+            "last_wait": "!document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')",
+            "last_click": "#ees-work-run",
+            "nativeReady": true,
+            "panel_toggle_expanded": "true",
+            "capture_errors": [],
+            "interpretation": "Unchanged original readiness assertion passed before the new assertion failure shown in this run."
+          }
+        },
+        {
+          "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_detail_keeps_opened_attempt_call_and_return_focus_after_new_result",
+          "command": [
+            ".venv/bin/python",
+            "-X",
+            "warn_default_encoding",
+            "-W",
+            "error::EncodingWarning",
+            "-m",
+            "unittest",
+            "-f",
+            "-v",
+            "test_ees_work_demo.EESWorkNativeBrowserTests.test_detail_keeps_opened_attempt_call_and_return_focus_after_new_result"
+          ],
+          "environment": {
+            "PYTHONPATH": "tests",
+            "EES_TEST_CHROME": "/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell",
+            "EES_TEST_BRANDING_DIR": "dist/step0b/branding",
+            "EES_TEST_SCREENSHOT_DIR": "dist/step0b/residual-native-followup-2"
+          },
+          "exit_code": 0,
+          "wall_seconds": 2.42,
+          "evidence_directory": "dist/step0b/residual-native-followup-2",
+          "tests_run": 1,
+          "duration_seconds": 2.312,
+          "observation": {
+            "result": "PASS",
+            "verified": "Opened attempt/call selection and recorded input survive a newer execution result; dialog return focus preserved."
+          },
+          "log_sha256": "8ee78fa6387c0dc99706a6799d54eb2bb5099c0c8cbf44ed0db2f346820db933",
+          "evidence_files": [],
+          "guard_progress_evidence": {
+            "interpretation": "The complete unchanged detail/record/focus test passes after the existing panel-opening helper is called."
+          }
+        },
+        {
+          "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_pending_execution_is_not_completion_and_releases_only_one_result",
+          "command": [
+            ".venv/bin/python",
+            "-X",
+            "warn_default_encoding",
+            "-W",
+            "error::EncodingWarning",
+            "-m",
+            "unittest",
+            "-f",
+            "-v",
+            "test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_pending_execution_is_not_completion_and_releases_only_one_result"
+          ],
+          "environment": {
+            "PYTHONPATH": "tests",
+            "EES_TEST_CHROME": "/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell",
+            "EES_TEST_BRANDING_DIR": "dist/step0b/branding",
+            "EES_TEST_SCREENSHOT_DIR": "dist/step0b/residual-native-followup-3"
+          },
+          "exit_code": 1,
+          "wall_seconds": 2.593,
+          "evidence_directory": "dist/step0b/residual-native-followup-3",
+          "tests_run": 1,
+          "duration_seconds": 2.491,
+          "observation": {
+            "result": "FAIL",
+            "new_boundary": "Busy indicator, disabled run/save, unchanged pending records, duplicate pointer/Enter request rejection, single released result and dependency readiness checks pass; then old visible jobs metric returns empty text.",
+            "line": 1338,
+            "assertion": "jobs metric equals saved node progress",
+            "expected": "2 / 3",
+            "actual": "",
+            "decision": "Keep progress/assertion and async release semantics; investigate current projection separately."
+          },
+          "log_sha256": "bf3780785b82ca96a3fa9b01051fb90b7f8a5ae4555e2343251d94eba0574420",
+          "evidence_files": [
+            {
+              "path": "dist/step0b/residual-native-followup-3/ees-a-real-request-pending.png",
+              "bytes": 183923,
+              "sha256": "878ffad80920b2afa27cd3a2f0636136c8735721ffab2085b1fd8a8ac193bd05"
+            },
+            {
+              "path": "dist/step0b/residual-native-followup-3/test_a_design_pending_execution_is_not_completion_and_releases_only_one_result-failure.json",
+              "bytes": 49266,
+              "sha256": "99482139c44d59a8f3af23128db52158db389c6c59eb3ddf2520a2b2d356d3b0"
+            },
+            {
+              "path": "dist/step0b/residual-native-followup-3/test_a_design_pending_execution_is_not_completion_and_releases_only_one_result-failure.png",
+              "bytes": 128206,
+              "sha256": "c4a3fba4e7e3747dcaa2f55cc6646dc0206ef9d78c7eacd573ed3442166674d7"
+            }
+          ],
+          "guard_progress_evidence": {
+            "last_wait": "document.querySelector('#ees-work-panel .ew-title')?.textContent === \"\\uc2dc\\uc2a4\\ud15c \\uc124\\uce58\" && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')",
+            "last_click": "#ees-work-entry [data-action=\"select\"][data-node-id=\"install-t\"]",
+            "nativeReady": true,
+            "panel_toggle_expanded": "true",
+            "capture_errors": [],
+            "interpretation": "Unchanged original readiness assertion passed before the new assertion failure shown in this run."
+          }
+        },
+        {
+          "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_durable_runtime_panel_plan_real_service_and_browser_return",
+          "command": [
+            ".venv/bin/python",
+            "-X",
+            "warn_default_encoding",
+            "-W",
+            "error::EncodingWarning",
+            "-m",
+            "unittest",
+            "-f",
+            "-v",
+            "test_ees_work_demo.EESWorkNativeBrowserTests.test_durable_runtime_panel_plan_real_service_and_browser_return"
+          ],
+          "environment": {
+            "PYTHONPATH": "tests",
+            "EES_TEST_CHROME": "/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell",
+            "EES_TEST_BRANDING_DIR": "dist/step0b/branding",
+            "EES_TEST_SCREENSHOT_DIR": "dist/step0b/residual-native-followup-4"
+          },
+          "exit_code": 1,
+          "wall_seconds": 2.247,
+          "evidence_directory": "dist/step0b/residual-native-followup-4",
+          "tests_run": 1,
+          "duration_seconds": 2.133,
+          "observation": {
+            "result": "FAIL",
+            "new_boundary": "Initial connected panel guard now passes. The unchanged next assertion expects execution-plan wording but current button says 점검 시작.",
+            "line": 2713,
+            "expected": "실행 계획 확인",
+            "actual": "점검 시작",
+            "decision": "No plan/start semantics or expected label changed; later durable execution/reentry branch not reached."
+          },
+          "log_sha256": "0104c289bd40932255a7a499aa6fcce5a21c2579aa7ad8572004a3db77ef8c9a",
+          "evidence_files": [
+            {
+              "path": "dist/step0b/residual-native-followup-4/test_durable_runtime_panel_plan_real_service_and_browser_return-failure.json",
+              "bytes": 43413,
+              "sha256": "1f5ef61d1cdbe810ff4a61f6ac4c7ec0943e610999b7b95e3b183e29bb6fbe55"
+            },
+            {
+              "path": "dist/step0b/residual-native-followup-4/test_durable_runtime_panel_plan_real_service_and_browser_return-failure.png",
+              "bytes": 147340,
+              "sha256": "a6ac479cbac770732e4d8a410a20c51a56c8afbdb3137bb564872fd8d7d315ae"
+            }
+          ],
+          "guard_progress_evidence": {
+            "last_wait": "document.querySelector('#ees-work-panel .ew-title')?.textContent === \"DB \\uc5f0\\uacb0 \\ud655\\uc778\" && !document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')",
+            "last_click": "#ees-work-content [data-work-job=\"db-j\"] button[data-action=\"select\"]",
+            "nativeReady": true,
+            "panel_toggle_expanded": "true",
+            "capture_errors": [],
+            "interpretation": "Unchanged original readiness assertion passed before the new assertion failure shown in this run."
+          }
+        },
+        {
+          "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_factory_system_scope_restores_chat_drafts_and_history_never_replaces_current_work",
+          "command": [
+            ".venv/bin/python",
+            "-X",
+            "warn_default_encoding",
+            "-W",
+            "error::EncodingWarning",
+            "-m",
+            "unittest",
+            "-f",
+            "-v",
+            "test_ees_work_demo.EESWorkNativeBrowserTests.test_factory_system_scope_restores_chat_drafts_and_history_never_replaces_current_work"
+          ],
+          "environment": {
+            "PYTHONPATH": "tests",
+            "EES_TEST_CHROME": "/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell",
+            "EES_TEST_BRANDING_DIR": "dist/step0b/branding",
+            "EES_TEST_SCREENSHOT_DIR": "dist/step0b/residual-native-followup-5"
+          },
+          "exit_code": 1,
+          "wall_seconds": 2.532,
+          "evidence_directory": "dist/step0b/residual-native-followup-5",
+          "tests_run": 1,
+          "duration_seconds": 2.409,
+          "observation": {
+            "result": "FAIL",
+            "new_boundary": "Current site data-value guard, case selection, Native restore exclusion of legacy approval consent pass; the old sidebar stage selector then returns None.",
+            "line": 2451,
+            "expected": "dataset.expanded == true",
+            "actual": "None",
+            "decision": "Keep approval/draft/history/navigation assertions; later hu-a/APC checks were not reached."
+          },
+          "log_sha256": "4a877b51869ba52377d9250ba43c8e0e4cde8c4008fe696f2a74e991c882fb00",
+          "evidence_files": [
+            {
+              "path": "dist/step0b/residual-native-followup-5/test_factory_system_scope_restores_chat_drafts_and_history_never_replaces_current_work-failure.json",
+              "bytes": 49130,
+              "sha256": "8151b11f520ff4355b7621c185825b755ae32da1164f565cd0d555effbd97480"
+            },
+            {
+              "path": "dist/step0b/residual-native-followup-5/test_factory_system_scope_restores_chat_drafts_and_history_never_replaces_current_work-failure.png",
+              "bytes": 181267,
+              "sha256": "3115603a8e733f276fe56c2a5591c4e93d3a8b421b9066fe9eed10e55d80fb4d"
+            }
+          ],
+          "guard_progress_evidence": {
+            "last_wait": "document.querySelector('#chat-container')?.innerText.includes('attachment.txt')",
+            "last_click": "#chat-input",
+            "nativeReady": true,
+            "panel_toggle_expanded": "true",
+            "capture_errors": [],
+            "interpretation": "Unchanged original readiness assertion passed before the new assertion failure shown in this run."
+          }
+        }
+      ]
+    },
+    "not_retested_after_change": [
+      "test_borderless_step_styles_focus_and_long_name_in_native_light_dark_narrow",
+      "test_integrated_large_job_browser_counts_filters_pages_and_selection",
+      "test_durable_runtime_poll_updates_left_progress_and_job_header_without_navigation"
+    ],
+    "not_reached": [
+      "durable runtime execution and second browser reentry (earlier label assertion fails)",
+      "factory hu-a/APC transitions (old stage selector assertion fails)"
+    ],
+    "durable_failure_evidence": [
+      {
+        "path": "evals/assets/restructure-step0b-20261001/residual-native-followup-input-failure.json",
+        "bytes": 47123,
+        "sha256": "9f7b6cae2df59844b0ccad318f158c14ba9fae65844da490ad40646cdbab12b6",
+        "source": "dist/step0b/residual-native-followup-1/test_input_save_double_click_and_held_enter_never_run_or_send_chat-failure.json",
+        "capture_errors": []
+      },
+      {
+        "path": "evals/assets/restructure-step0b-20261001/residual-native-followup-input-failure.png",
+        "bytes": 202123,
+        "sha256": "edd8c76fd374d9750a35451da9a4b1dcbc69c914e64f7326663ad61551e54183",
+        "source": "dist/step0b/residual-native-followup-1/test_input_save_double_click_and_held_enter_never_run_or_send_chat-failure.png"
+      },
+      {
+        "path": "evals/assets/restructure-step0b-20261001/residual-native-followup-pending-failure.json",
+        "bytes": 49266,
+        "sha256": "99482139c44d59a8f3af23128db52158db389c6c59eb3ddf2520a2b2d356d3b0",
+        "source": "dist/step0b/residual-native-followup-3/test_a_design_pending_execution_is_not_completion_and_releases_only_one_result-failure.json",
+        "capture_errors": []
+      },
+      {
+        "path": "evals/assets/restructure-step0b-20261001/residual-native-followup-pending-failure.png",
+        "bytes": 128206,
+        "sha256": "c4a3fba4e7e3747dcaa2f55cc6646dc0206ef9d78c7eacd573ed3442166674d7",
+        "source": "dist/step0b/residual-native-followup-3/test_a_design_pending_execution_is_not_completion_and_releases_only_one_result-failure.png"
+      },
+      {
+        "path": "evals/assets/restructure-step0b-20261001/residual-native-followup-durable-failure.json",
+        "bytes": 43413,
+        "sha256": "1f5ef61d1cdbe810ff4a61f6ac4c7ec0943e610999b7b95e3b183e29bb6fbe55",
+        "source": "dist/step0b/residual-native-followup-4/test_durable_runtime_panel_plan_real_service_and_browser_return-failure.json",
+        "capture_errors": []
+      },
+      {
+        "path": "evals/assets/restructure-step0b-20261001/residual-native-followup-durable-failure.png",
+        "bytes": 147340,
+        "sha256": "a6ac479cbac770732e4d8a410a20c51a56c8afbdb3137bb564872fd8d7d315ae",
+        "source": "dist/step0b/residual-native-followup-4/test_durable_runtime_panel_plan_real_service_and_browser_return-failure.png"
+      },
+      {
+        "path": "evals/assets/restructure-step0b-20261001/residual-native-followup-factory-failure.json",
+        "bytes": 49130,
+        "sha256": "8151b11f520ff4355b7621c185825b755ae32da1164f565cd0d555effbd97480",
+        "source": "dist/step0b/residual-native-followup-5/test_factory_system_scope_restores_chat_drafts_and_history_never_replaces_current_work-failure.json",
+        "capture_errors": []
+      },
+      {
+        "path": "evals/assets/restructure-step0b-20261001/residual-native-followup-factory-failure.png",
+        "bytes": 181267,
+        "sha256": "3115603a8e733f276fe56c2a5591c4e93d3a8b421b9066fe9eed10e55d80fb4d",
+        "source": "dist/step0b/residual-native-followup-5/test_factory_system_scope_restores_chat_drafts_and_history_never_replaces_current_work-failure.png"
+      }
+    ],
+    "test_source_sha256": "3be62dcf0aaa61ff308ce6126a27aa54722282c74f27c2d1e2ac68bcf65c5a4f",
+    "earlier_record_preserved": "The original 13 run records and 12 PASS / 3 FAIL / 58 locally unexecuted observations remain historical, unchanged; this follow-up is not a replacement or full-suite pass.",
+    "cumulative_local_reference": {
+      "executed_unique": 20,
+      "latest_pass": 13,
+      "latest_fail": 7,
+      "locally_unexecuted": 53,
+      "overlap_with_prior_15": 0,
+      "scope": "Reference count across local runs only; remote CI failures/cancellation are recorded separately; prior 15-case block unchanged."
+    }
+  }
 }
