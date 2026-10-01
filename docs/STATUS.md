@@ -6,8 +6,8 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** EES Work 재구성 Step 0-A 조사·문서·검증 증거 정리. 제품/시험/배포/CI 코드 변경, 자산 삭제, 구현·병합·배포는 하지 않는다. 백엔드 최종 설계는 미확정이다. [실제 코드 대상표·Figma 대응·설계 쟁점·단계 조건](mockups/ees-work/TASK.md#restructure-step0a-20261001).
-- **Git 기준:** 조사 main `55832bad328cdfb91c1c284749f7959dd664176c`, 브랜치 `docs/ees-restructure-step0a-20261001`. 기존 clean 로컬 `docs/v4-recovery-report-20261001`과 미병합 Draft #72/#53은 별도 보존하며 적층하지 않았다. 재구성 동일 PR/브랜치가 없어 최신 main에서 분기했다.
+- **현재 작업:** EES Work 재구성 Step 0-A 조사·문서·검증 증거 반영 완료, [Draft PR #73](https://github.com/knadalkim-a11y/team-agent-poc/pull/73) 검토 대기. 제품/시험/배포/CI 코드 변경, 자산 삭제, 구현·병합·배포는 하지 않는다. 백엔드 최종 설계는 미확정이다. [실제 코드 대상표·Figma 대응·설계 쟁점·단계 조건](mockups/ees-work/TASK.md#restructure-step0a-20261001).
+- **Git 기준:** 조사 main `55832bad328cdfb91c1c284749f7959dd664176c`, 브랜치 `docs/ees-restructure-step0a-20261001`. 최초 원격 조사 head `e155b649658cd2cfd5d1a3b60206a5861b7dba3d`; 이후 마감도 문서만 변경하며 최종 head는 PR에서 확인한다. 기존 clean 로컬 `docs/v4-recovery-report-20261001`과 미병합 Draft #72/#53은 별도 보존하며 적층하지 않았다. 재구성 동일 PR/브랜치가 없어 최신 main에서 분기했다.
 - **확인 범위:** 현재 Figma832:131의 프레임6개·component3개를 전수 조회하고 화면6개를 대조했다. Native UI/저장·권한·실제 connector/LLM·등록/빌드/복구 코드를 조사했다. 사내 현재 DB/등록 자산/PAT/사용자 대화는 조회하지 않았다. [이번 증거](../evals/v4-ui-20260930.md#restructure-step0a-evidence-20261001).
 - **주요 제약:** demo 이름 폴더에 공통 서버와 패널 bootstrap이 있다. seed를 먼저 읽고 빈 목록을 거부하므로 파일 삭제만으로 빈 상태가 되지 않는다. 진행 건은 개인 소유이고 게시본은 전체 불변 이력 저장소가 아니며 업무 설정 공유 모델도 없다. background AI의 Native Model 등록 의존성도 프리셋 정리와 함께 검토해야 한다.
 - **제품 검증 차단:** Python3.12/Node24 환경에 공식 wheel·Python3.11/.venv·실제 앱 의존성·Chrome이 없다. 빌더는 wheel 없음, full-app 검사 진입은 httpx import에서 중단했다. 실제 Native 기동/렌더/왕복은 미실행이며 제품 결함 판정이 아니다. 요청 경계에 따라 환경 보완은 제안만 했다.
@@ -30,7 +30,7 @@
 
 **2026-10-01 이후 처음 작업을 재개할 때** 이 한시 생략을 종료하고 무료분 복구 상태와 최종 변경 범위를 확인한다. 마지막 코드에 대해 표시 없는 새 커밋 또는 기존 수동 실행으로 필요한 원격 검사를 수행한다. 10월 1일 예약 실행을 만든 것은 아니며 과거 생략된 검사가 자동으로 재개되지 않는다. 사용자 변경 지시가 있으면 해당 지시를 우선한다. [근거·재개 조건](../evals/scenarios.md#work-ui-refactor-20260915).
 
-10-01 Step0-A 원격 재조회에서 #72 CI는 runner가 배정된 뒤 Native 가입 UI 검사 실패로 끝난 것을 확인했다. 이전 main의 runner0 실패와 구분하며 [단계/로그 근거](../evals/v4-ui-20260930.md#restructure-step0a-evidence-20261001)를 따른다. 이번 브랜치 CI 결과는 Draft PR 생성 후 별도 기록한다.
+10-01 Step0-A 원격 재조회에서 #72 CI는 runner가 배정된 뒤 Native 가입 UI 검사 실패로 끝난 것을 확인했다. 이전 main의 runner0 실패와 구분하며 [단계/로그 근거](../evals/v4-ui-20260930.md#restructure-step0a-evidence-20261001)를 따른다. 이번 PR의 최초 조사 head CI도 같은 시험에서 실패했으나 가입 이후 사이드바 열기 버튼 탐색 실패로 위치가 다르다. 동일 원인으로 단정하지 않는다. [이번 run36816691190](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/36816691190)의 13:51 KST 관측은 Linux 실패·Windows 진행 중이다. 마감 문서 head의 자동 검사 상태는 PR에서 별도 확인하며 전체 CI PASS가 아니다.
 
 ## 마지막으로 확인된 적용 상태
 

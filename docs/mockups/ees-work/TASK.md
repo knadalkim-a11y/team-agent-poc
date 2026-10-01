@@ -33,6 +33,19 @@
 | ApplyDemo — 재등록 경로 폐기/교체, 보호 코드 재사용 검토 | `manage-ees.ps1:ApplyDemo` → `ees_apply_demo.py:main/apply` → `ees_demo_assets.py:load_manifest/apply_assets` → `ees_asset_guard.py` | 현재 manifest가 tool2/3·전문모델3개를 강제. 빈 JSON만으로 재등록 방지 불가. 공통 `ees_workflow` Tool 등록도 함께 묶여 있음. apply/asset guard/Native preservation 시험 영향 |
 | 빌드·설치·업데이트·복구 — 선별 재사용·목록 수정 | `build_ees_webui.py:WORK_ASSETS/WORK_FILES/LEGACY_WORK_FILES/WORK_FILES_V6/V9/V11`; `build_demo_bundle.py:included_source`; `ees_upgrade.py,ees_trial_upgrade.py,ees_webui_customization.py:restore` | bundle은 tracked agent-pack 원본을 포괄 포함. ZIP 포함과 API 등록을 구분. 이전 버전 복원 목록은 남겨야 함. 기존 stop/backup/health/복구 보호를 재구성 이유로 제거하지 않음. build/bundle/customization/upgrade/trial/deploy 검사 영향 |
 
+**핵심 행동의 실제 상태 변경:** 화면의 버튼/Tool 설명과 서버 동작을 구분하여 추적했다.
+
+| 행동 | 실제 진입 → 저장/상태 효과 |
+|---|---|
+| 입력 저장 | launcher.saveInputs → POST /api/ees-work/action(update_inputs) → case.execution_inputs 또는 legacy job.inputs, case revision/CAS·receipt. 실행하지 않으며 run 수락 후 기존 값 교체는 차단 |
+| 문서 초안 저장 | launcher.saveDocument → 같은 action(run, document) → _run_job의 document 저장 + **review** 상태. action 이름 run만 보고 실제 실행/완료로 판정하지 않음 |
+| 실행 계획/실행 | POST /execution/plan은 snapshot/hash/계획, /execution/action(start)는 요청·run 수락/영속화. worker가 실제 Native 호출 뒤 call 결과·validator·case history를 갱신. 수락/HTTP200은 완료가 아님 |
+| 사람 확인/완료 | legacy manual/draft는 명시 confirm(문서는 먼저 저장), runtime confirm은 human J·선행조건·입력 확인 후 판정. 사람 확인을 AI Tool에서 호출할 수 없게 제한한 기존 경계와 결과 불명 보호 유지 |
+| 절차 초안 저장 | POST /authoring/action(save_draft) → process_management.draft 저장·draft_revision 증가·validation 초기화 |
+| 게시 전 확인/게시 | validate_draft → 현재 초안/참조/권한의 validation token. publish → 최신 revision/owner/token 재검사·선택 P catalog 병합·version 증가·audit/receipt. 기존 case 정의는 그대로 |
+| AI 입력 제안 | workflow_tool.ees_workflow_input_draft → target/revision/schema/ACL 확인 → browser 미저장 입력만 반영, Native 메시지에 제안 receipt. persisted=false/executed=false |
+| 현재 연결의 불일치 | generic workflow Tool에는 save_draft/validate_draft/publish 설명이 남아 있지만 /action 서버는 authoring_upgrade_required로 거부. 실제 작성기는 위 /authoring/action 사용. 새 Figma의 전체 절차 AI 초안 생성도 현재 instructions-only 도움과 다름 |
+
 ### B. Git 정리와 사내 등록 자산 정리의 분리
 
 아래는 **저장소가 정의하거나 탐색하는 ID**다. 사내 현재 등록 목록·수정 여부·사용 건수는 조회하지 않았다.
