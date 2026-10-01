@@ -1,5 +1,131 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="restructure-step0a-20261001"></a>
+
+## EES Work 재구성 · Step 0-A 조사 · 2026-10-01
+
+**현재 기준과 범위:** 이 절은 10-01 사용자 요청과 실제 main·Figma 조회에 근거한다. 아래 09-30 V4와 이전 기록은 당시 기준·증거로 보존하며 새 구현 기준으로 우선하지 않는다. 이번 변경은 조사·최소 검증환경 확인·관리 문서·검증 증거·커밋/push·Draft PR뿐이다. 제품/시험/배포/CI 코드를 변경하지 않았고 삭제·구현·병합·배포·사내 데이터 변경을 하지 않았다. **백엔드 최종 설계는 미확정**이며 Step 0-B 검토 후 Step 1 계약을 받아야 한다.
+
+기준 main은 `55832bad328cdfb91c1c284749f7959dd664176c`. 기존 로컬은 clean인 `docs/v4-recovery-report-20261001` / `02fbfa502c728714b7437ceb0f7308ac0c9f7f58`; 그대로 두고 main 기반 새 worktree/브랜치 `docs/ees-restructure-step0a-20261001`을 만들었다. 원격 모든 branch와 열린 PR을 확인했으며 동일 재구성 작업은 없었다. 열린 Draft [#72](https://github.com/knadalkim-a11y/team-agent-poc/pull/72)(위 로컬 head, 복구 사용자 보고)와 [#53](https://github.com/knadalkim-a11y/team-agent-poc/pull/53)(`3aadd7279276914fb790fdb496ceb37b223ec737`, 과거 설계)의 AGENTS·STATUS를 읽었다. 둘 다 적층/변경/병합/종료하지 않았다. #72의 최신 복구 보고는 참조하되 새 사내 검사로 취급하지 않는다. 이 조사에 필요한 미병합 제품 코드 의존성은 발견하지 못했다.
+
+**충돌 적용 범위:** 기존 V4 외형 고정, 시연 워크플로우·전문 모델·등록 Skill의 보존/ApplyDemo 안내는 이번 재구성 방향으로 대체한다. 기본 상태는 기존 데모 콘텐츠 없이 시작한다. 그러나 계정·개인 대화·첨부·개인 PAT·기반 LLM 연결·사용자 작성 자산까지 삭제하는 승인은 아니다. 등록 Skill 콘텐츠 제거와 Skill 관리 기능, 모델 preset 제거와 LLM 접속, 절차 콘텐츠 제거와 절차 작성/실행 기능은 각각 분리한다. 폴더 이름이나 파일 길이로 일괄 폐기하지 않는다.
+
+### A. 실제 연결과 변경 대상
+
+아래 짧은 Python 파일명은 별도 표시가 없으면 `agent-pack/skills/ees-work-demo/scripts/` 아래다. 함수·행 번호는 조사 main의 근거 위치이며 시험명은 **후속 영향 범위**, 이번 실행 PASS가 아니다.
+
+| 영역 / 분류 | 실제 파일·함수·연결 | 직접 의존성·삭제 위험 / 영향받는 검사 |
+|---|---|---|
+| Native 기반 — 재사용 | `scripts/build_ees_webui.py:PATCHES,assemble_work_launcher(582)`가 고정 Open WebUI 0.11.3 wheel의 Native draft/message bridge·main 설치부를 패치. `ees_workflow.py:install(981),_production_service(719)` → 기존 Users/Groups/Chats/Tools 및 DATA_DIR | 별도 웹앱/인증 서버가 아님. Native 로그인·대화·첨부·저장·LLM 호출 보존. `test_ees_branding_build.py,test_ees_webui_customization.py,test_ees_work_routes.py` |
+| 화면 배치 — 수정·교체 | `branding/ees/ui/ees-work-view.js:openHost(1017),sizePanel(993)`, `ees-work-launcher.css`, `chat-theme.css` | 현재 중앙 업무/우측 대화의 DOM 장착·폭·overlay를 새 중앙 대화/우측 업무로 변경해야 함. 중복 CSS는 실제 selector 참조를 추적한 뒤 정리. V4/C안 외형 시험은 새 기준으로 교체, Native 입력/포커스 보호 회귀 유지 |
+| 대화/상태 controller — 선별 재사용·수정 | `ees-work-launcher.js:request,action(192),stashDraft/restoreDraft(242),ensureChat,selectWork/switchScope(325),captureReference(375)` → `/api/ees-work/state,action` | 사용자/route 세대, 늦은 응답, CAS·request_id, 미저장 입력/첨부 보호 재사용. 현재 선택을 case에 저장하는 제약은 공동화 계약에 따라 변경. `test_ees_work_controller.py,test_ees_v4_drafts.cjs,test_ees_execution_ui.cjs` |
+| 절차 작성기 — 화면 교체·서버 재사용 | `ees-work-designer.js:hideWorkspaceContent/renderDesigner(87),authorAction(184),requestAuthoring(269),confirmPublish(329)` → `GET /api/ees-work/authoring`, `POST /api/ees-work/authoring/action` | 현재 Native chat을 숨기고 메모리형 자체 AI 대화를 표시. 새 Native 대화+오른쪽 작성기 연결 필요. P별 저장/검사/게시·초안 cache·충돌 보호는 재사용. `test_ees_work_designer.py,test_ees_work_authoring_ui.cjs,test_ees_work_authoring_account_switch.py` |
+| 절차/진행/권한 API — 재사용·계약 수정 | `ees_workflow.py:WorkflowService,_case(129),_new_case(358),_save_case(345),handle_action/_dispatch(576)`; `ees_workflow_authoring.py:authoring_action(525)` | Native 사용자 확인 + `ees-work.sqlite3`. 실제 공통 서버이므로 demo 폴더 전체 삭제 금지. `test_ees_workflow.py,test_ees_work_authoring.py,test_ees_work_authoring_native.py` |
+| 공통 실행 — 재사용·필요 확장 | `ees_workflow_execution.py:plan(227),_start(384),process_once(620)` → NativeBridge/NativeModelAdapter → completion/final validator → case history; 기존 app lifespan worker | 영속 실행·호출/재시도·중복/UNKNOWN 보호 유지. 새 서버/범용 실행기를 기본 대안으로 만들 이유 없음. `test_ees_workflow_execution.py,test_ees_workflow_native.py,test_ees_workflow_contract.py` |
+| 초기 절차/예시 — 콘텐츠 삭제 + 코드 수정 후보 | `workflow_seed.json`; `ees_workflow_definition.py:_seed(25),_draft_shape_errors(49)`; `WorkflowService.__init__(68)`; `_new_case`, `ees_workflow_view.py:_inputs(92)` | 기존 DB에서도 seed를 먼저 읽으며 첫 DB에 insert. 빈 nodes/tools/skills/sites 거부·common 정책 Skill 강제·us-a/EMS/setup-p 및 db/ap 예시 fallback. seed 파일만 삭제하면 기동/첫 작성이 깨짐. 빈 catalog/선택/작성 계약을 함께 바꿔야 함. workflow/authoring/UI fixture·build 시험 영향 |
+| 모의 실행 — 신규 사용 제거 후보 | `ees_workflow.py:_run_job(412)`의 mock/failOnce 및 legacy P/T loop; `ees_workflow_view.py:_finished` | manual/draft 저장·사람 확인까지 함께 제거하면 안 됨. 과거 기록 열람/실행 중지 범위 결정 후 모의 실행 분기만 정리. `test_ees_workflow.py,test_ees_work_v4.py` |
+| 실제 연동 — 재사용 | `agent-pack/skills/{github-read,jira-read,confluence-read}/scripts/*_tool.py:Tools._context,_request`; `ees_workflow_native.py:NativeBridge._snapshot(288),approval_action,check(439),invoke(451)` | Native 등록 원본·ACL·개인 UserValves/PAT 재사용. 실제 함수 허용목록·등록 hash 승인·호출 직전 재확인 유지. connector/native/개인 격리 시험 영향 |
+| 기반 LLM — 재사용, preset 의존 수정 검토 | `ees_workflow_model.py:NativeModelAdapter.invoke(149)` → Native `generate_chat_completion`; designer의 `/api/models,/api/chat/completions` | 특정 전문 모델 ID는 필수 아님. 그러나 background adapter는 Native Model DB 행과 app.state.MODELS를 둘 다 요구. 모든 preset 제거 후 direct base ID 사용은 미지원 가능성이 있어 별도 계약/검증. `test_ees_workflow_model*.py` |
+| 전문 Assistant/합성 조회/WO — 삭제 후보 | `agent-pack/ees-demo.json`, `cross-system-analysis/scripts/specialists_tool.py,demo_data_tool.py`, 전문 prompt·`ees-orchestration-demo.md`, `ems-work-order/scripts/wo_demo_tool.py` | 실제 connector·공통 bootstrap와 구분. Git 제거는 사내 등록 삭제가 아님. `test_ees_demo_assets.py,test_ees_specialists_tool.py,test_ees_demo_data_tool.py,test_wo_demo*` |
+| 등록 Skill/지침 — 콘텐츠 정리, 관리 기능 재사용 | `structured-troubleshooting,policy-grounded-answer,confluence-read` SKILL 콘텐츠; `ees_workflow.py:_registered_assets(733)`의 Native Skills 조회 | Skill 이름은 사내 ID/무수정 증거가 아님. 실행 코드·서버 강제 정책·향후 관리 기능은 유지. 등록 Skill 권한/snapshot 표시·authoring 참조 시험 영향 |
+| 옛 독립 화면 — 삭제 후보 | `ees_work_demo.py:install`의 `/ees-work-demo/`, 같은 기능의 `ui/index.html,ees-work.js,ees-work.css` | builder WORK_ASSETS/PATCHES가 여전히 배포/설치. 실제 Native 업무 API와 별개. `test_ees_work_demo.py`, build/restore inventory 시험 영향 |
+| 패널 bootstrap — 선별 수정·교체 | `cross-system-analysis/ui/work-panel.js` → builder `WORK_BOOTSTRAP` → `/_ees12/ees-work-panel.js` | workflow registry와 분석/설비/WO demo adapter가 공존. 폴더째 삭제하면 실제 업무 패널도 끊김. `test_ees_cooperation_panel.cjs,test_ees_work_panel.py` |
+| ApplyDemo — 재등록 경로 폐기/교체, 보호 코드 재사용 검토 | `manage-ees.ps1:ApplyDemo` → `ees_apply_demo.py:main/apply` → `ees_demo_assets.py:load_manifest/apply_assets` → `ees_asset_guard.py` | 현재 manifest가 tool2/3·전문모델3개를 강제. 빈 JSON만으로 재등록 방지 불가. 공통 `ees_workflow` Tool 등록도 함께 묶여 있음. apply/asset guard/Native preservation 시험 영향 |
+| 빌드·설치·업데이트·복구 — 선별 재사용·목록 수정 | `build_ees_webui.py:WORK_ASSETS/WORK_FILES/LEGACY_WORK_FILES/WORK_FILES_V6/V9/V11`; `build_demo_bundle.py:included_source`; `ees_upgrade.py,ees_trial_upgrade.py,ees_webui_customization.py:restore` | bundle은 tracked agent-pack 원본을 포괄 포함. ZIP 포함과 API 등록을 구분. 이전 버전 복원 목록은 남겨야 함. 기존 stop/backup/health/복구 보호를 재구성 이유로 제거하지 않음. build/bundle/customization/upgrade/trial/deploy 검사 영향 |
+
+### B. Git 정리와 사내 등록 자산 정리의 분리
+
+아래는 **저장소가 정의하거나 탐색하는 ID**다. 사내 현재 등록 목록·수정 여부·사용 건수는 조회하지 않았다.
+
+| 종류 | 알려진 ID / 식별 방법 | 관리·참조와 사내 적용 전 확인 |
+|---|---|---|
+| manifest Tool | `ees_specialists,ees_demo_data,ees_workflow`; marker `ees-demo-v1` | 정확한 content/owner/ACL/UserValves/hash·연결 모델·진행/실행 참조 비교. `ees_workflow`는 공통 기능이라 앞의 두 시연 Tool과 같은 폐기 판단 금지 |
+| 전문 preset | `ees_demo_ems,ees_demo_apc,ees_demo_fdc` | toolIds=ees_demo_data, 기존 통합 Assistant의 base_model_id 복사. 과거 대화 model ID·변경/사용 여부 확인 |
+| 통합 Assistant / WO / 실제 connector | 통합 Assistant는 명시 ID 또는 이름 탐색, WO는 연결목록+marker/source hash, connector는 runtime discovery. 고정 사내 ID 없음 | 이름만으로 삭제/재등록 금지. 통합 preset의 관리 구역 밖 Prompt·toolIds·knowledge/skillIds·기반 모델 연결 분리 |
+| Native Skill | repo 이름 `structured-troubleshooting,policy-grounded-answer,confluence-read` | 수동 등록 가이드 대상. ApplyDemo는 Skill을 생성하지 않음. 실제 ID·내용 수정·공유·연결은 사내 inventory 대상 |
+| workflow nodes | `setup-p,prep-t,scope-j,infra-t,infra-j,install-t,install-j,db-j,ap-j,interface-t,interface-j,ops-p,ops-t,ops-j,incident-p,incident-t,incident-j,recovery-t,recovery-j` | catalog 내부 ID. Native 등록 Tool ID와 다름. 현재 초안/게시/진행 건의 같은 ID가 현장 수정본인지 비교 필요 |
+| 예시 tools/skills/sites | tools `gateway,db-target,db-read,network,process,health,smoke,infra,if-config,if-round,logs`(mock/example); skills `setup,connection,handoff`(+common 정책); sites `us-a,hu-a,kr-ca` | 예시 site를 실제 공장 master로 취급하지 않음. `workflow_policy.json`은 공통 강제 규칙의 근거여서 등록 콘텐츠와 분리 검토 |
+
+현재 ApplyDemo는 Tool content/marker/name, preset 관리 Prompt 구역·function_calling·지정 toolIds/시작 질문·전문 모델 name/memory·지정 valve를 관리한다. `_projection/_merge_model/_payload`와 CAS/journal은 unmanaged 내용·ACL·사용자 질문을 보존하고 관리 필드 충돌을 중단한다. journal(`demo-assets-<scope>/ees-demo-assets.json`)의 previous_value·desired·source_commit은 삭제 백업/복구 명령이 아니다.
+
+**재생성 지점:** 신규 catalog의 seed insert, ApplyDemo의 누락 Tool/preset create, 기존 수동 등록 가이드, bundle/wheel의 콘텐츠 포함이다. 조사한 Upgrade/TrialUpgrade는 프로그램 교체 후 `next=apply_demo`를 안내하지만 자체 자산 API 자동 호출은 확인되지 않았다. 후속 지침·단축 명령까지 추적하여 폐기 자산 재등록을 막아야 한다. 이전 프로그램으로 rollback하면 seed/ApplyDemo가 다시 살아나는 경계도 필요하다.
+
+**삭제 지원 격차:** 조건부 자산 API의 operation은 create/update, kind는 tool/model/valves다. 삭제 미리보기·정확한 ID/현재 hash/참조 확인·조건부 delete·삭제 receipt·개별 자산 복구는 미구현이다. 기존 보호 코드를 활용할 수 있지만 현재 기능처럼 보고하지 않는다. P의 disable과 미게시 P soft-delete는 Native 모델/Skill/Tool 삭제가 아니며, disable은 이미 만들어진 case의 snapshot 실행을 막지 않는다.
+
+**기록/복구 선택:** 과거 절차의 새 사용 중지, 기존 진행 건 실행 중지, 기록 읽기, 내보내기, 실제 삭제를 각각 결정해야 한다. 과거 실행 호환을 무조건 보장하지 않으며 기록도 자동 삭제하지 않는다. case snapshot이 있어도 현재 Tool/Skill ACL·가용성에 따라 읽기/실행이 막힐 수 있다. 모델 삭제 후 과거 Native 대화 열람/계속 답변은 실제 제품에서 별도 확인 대상이다. `manage_ees.backup`은 stopped/port 확인 후 DATA_DIR/설정/키를 hash 복사하지만 DB 검사 대상은 webui.db이고 ees-work.sqlite3 별도 integrity 검사는 확인되지 않았다. 프로그램 `restore`의 `data_changed=False`, switch의 `data_restored=False`는 등록 자산/DB를 되돌리지 않음을 뜻한다.
+
+### C. Step 0-B에 필요한 백엔드 사실·선택지
+
+| 항목 | 현재 지원·코드 근거 | 제약 / 다음 결정 |
+|---|---|---|
+| 정의·초안·게시 버전 | catalog published/draft/revision + `process_management`의 P별 draft_revision/base_fingerprint/validation/published_version. `authoring:_init_authoring(62),_write_publication(515),authoring_action(706–736)` | 저장·검사·게시는 분리. 버전은 catalog 전역 증가, 현재 JSON 덮어쓰기. 모든 미실행 게시본까지 불변 보관하는 버전 저장소는 아님. 절차별 버전 이력/보존 범위 결정 |
+| 반복 진행 건 | UUID case + process/site/system/version·정의/작업 snapshot. `workflow:_new_case(358)` | 반복 case 생성 가능. owner 개인 소유, UNIQUE(owner,chat_id)로 대화 하나에 case 하나. 공동 참여자·역할·명명·대화 연결 cardinality 결정 |
+| 개별 작업/시도/재실행 | case.jobs/history + execution_runs/calls/events; unique(run,job,call,attempt). `execution:init_execution(45),_job_result(755)` | 재실행은 새 plan/run, 실행 run 수락 뒤에는 호출 전이어도 기존 입력 변경은 새 case가 필요. 입력 대기의 누락값 보충과 기존 값 변경, 인증 대기 resume와 재실행/새 진행 건을 구분할 정책 필요 |
+| 업무 설정 vs 진행 건 입력 | P execution_inputs schema + case.execution_inputs/run.inputs; old site db/ap 기본값. `contract:validate_execution(223),resolve_arguments(343)` | 별도 업무 설정 저장소·변경이력 API·scope/우선순위 없음. Native global Valves와 개인 PAT는 업무 설정 공유 모델이 아님 |
+| 설정 공유 범위 | Native 개인 UserValves, 전역 Valves, authoring system_groups/owner_system, catalog sites | 개인/시스템/공장/절차 중 소유·조회·변경 권한·상속/덮어쓰기·다음 조회 적용을 결정. PAT는 Native 개인 설정에 유지 |
+| 입력 선언/도구 인자 | constant/input/result 참조 + 제한된 identity/strip/to_string/to_integer 변환, 실제 Native 함수 schema 재확인 | 선언 값의 업무 의미와 attachment/file/CR 도메인은 추가. 임의 코드·SQL·Shell·템플릿 실행기 불필요 |
+| 실행 snapshot | case 정의/site/version/접근 가능한 Skill 본문 복사; plan case_snapshot/hash; run schema/inputs; call 인자/input_sources/도구 hash/결과. `workflow:365–385,execution:259–270,705–719` | 설정 유효값·출처·적용 버전/사용자·결과의 보존/내보내기·보안 범위 결정. snapshot은 현재 권한을 대체하지 않음 |
+| 선행조건/상태/사람/완료 | dependencies/applicability, execution fixed/ai/human, observed/selection/grounded-summary 및 final validator, `_control confirm(512)` | 실행 성공과 업무 완료 분리 유지. worker는 ready J/call 하나씩 선택하며 독립 branch 표현이 같은 run 병렬 실행 보장을 뜻하지 않음. CR 목록 확정/승인 기준·부분 결과 정책 필요 |
+| AI 제안/초안 vs 실제 변경 | 입력 제안 persisted=false/executed=false; 별도 authoring save/validate/publish; human confirm은 AI Tool에서 제외 | 현재 `workflow_tool.py:ees_workflow_action(425),ees_execution_action(192)`은 create/update_inputs/run/start 가능. 새 패널 확정 규칙은 Tool 노출/API 계약까지 바꿔야 함. prompt만으로 강제 불가 |
+| 개인 대화 vs 공동 업무 | Native chat 소유 확인·case owner 조건; `case.selected_id`는 서버 case revision과 함께 저장. 작성기 자체 대화/미저장 cache는 메모리 | 공동 진행 건·개인 선택/초안·Native 사적 대화의 분리와 참여자 접근 모델 필요. owner WHERE 제거만으로 공동화 금지 |
+| 조회/작성/게시/실행 권한 | verified_user, 현재 계정/그룹 재조회, system authorizer, P owner, Native ACL·관리자 함수 승인·현재 개인 PAT | 게시 별도 역할 없음(작성과 같은 authorizer). 공장별 읽기/실행 ACL 미구현. Native 회원/그룹 재사용 범위와 서버 강제 정책 결정 |
+| 동시 수정/중복 요청 | SQLite BEGIN IMMEDIATE, case/P/owner/map CAS; actor+request_id/fingerprint receipt; 중복 동일 게시 version 증가 방지 | 좋은 재사용 기반. Native DB와 workflow DB의 분산 원자성은 보장 아님. stale conflict UI/재시도 계약 필요 |
+| 중복 실행/실패/부분/결과 불명 | plan TTL600/run TTL1800/lease30, 호출 전 영속 기록, overlap 차단, timeout/worker 소실/진행 중 cancel→UNKNOWN, 늦은 결과 별도 보존. `execution:_require_resolved(444),_late(826)` | UNKNOWN 조정 endpoint 없음. 새 실행까지 차단되므로 확인/해소 담당·증거·권한 필요. partial observed와 scope complete/final complete를 혼동하지 않음. 보존기간/정리 정책 미구현 |
+| 전환/복구 | additive table·legacy catalog snapshot·import/reconcile·protocol-1 write guard, 이전 case snapshot 보존 | 새 migration 미설계. 옛 프로그램 read 호환과 write/실행 호환을 구분. 이전 데모 중지·기록 읽기/내보내기·삭제 및 DB/자산 복구 계약 필요 |
+
+권장 검토 방향은 **기존 app·Native 인증/도구·SQLite 저장/실행 서비스를 우선 재사용하되 필요한 의미를 확장**하는 것이다. 현재 P draft/case/run에 version/settings 관계를 추가하는 안과 같은 DB 안에서 별도 version/settings 테이블을 두는 안을 비교할 수 있다. 공유/보존/권한 요구부터 결정하며 탭마다 테이블을 만들거나 새 framework/server/범용 runner를 전제하지 않는다. 구조 확정은 Step 0-B의 책임이다.
+
+실제 Native 호출 흐름은 `_registered_assets`의 사용자별 metadata → `NativeBridge._snapshot`의 ACL/code/spec/common Valves hash → 관리자 exact reference 승인 → 개인 UserValves → Native loader의 동일 코드 → 호출 직전 현재 권한/참조 재확인 → 실제 함수 → 비밀값 제거/결과 정규화다. 자동 실행 허용 함수는 Confluence `search_pages/get_page`, Jira `jira_dashboard/jira_get_issue`, GitHub `github_list_pull_requests/github_get_pull_request` 6개다. 일반 Chat의 check_access 함수와 구분한다. CR 조건 검색/필수 첨부 다운로드·파일 내용 검사/결과 송부/일정 계산은 이 allowlist만으로 지원되지 않는다.
+
+### D. 현재 Figma와 실제 기능 대응
+
+[기준 페이지](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=832-131)는 `EES Work · 대화 중심 정리안 10.01`. 2026-10-01 13:25–13:31 KST에 metadata·read-only page inventory/text·화면을 조회했다. 페이지 직계는 **프레임6 + icon component3**이며 알려진 6개 프레임 모두 동일 페이지에 존재한다. 추가 화면 프레임/이동은 이번 조회에서 발견하지 못했다. component는 `832:8905(factory),832:8910(server),834:8398(user)`. 모든 프레임 descendant의 prototype reactions는0이라 실제 클릭 전이 검증은 하지 않았다. Figma 서버 version/revision ID는 사용한 API 응답에 없으며 [PNG/해시 관측 증거](../../../evals/v4-ui-20260930.md#restructure-step0a-evidence-20261001)로 이번 조회본을 식별한다. 영구 고정본/최종 승인본이 아니다.
+
+분류: **기존 지원 / 화면·연결 수정 / API·데이터·실행 확장 / 규칙·디자인 결정**. 하나의 화면에 여러 분류가 가능하다.
+
+| 화면/행동/상태 | 코드 대응과 분류 | 확인된 결정 / 남은 경계 |
+|---|---|---|
+| [안내 832:132](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=832-132): 왼쪽 위치/탐색·중앙 대화·오른쪽 패널 | Native shell/controller 재사용, view/designer 장착 교체 — 화면·연결 수정 | 대화는 설명·작업 chip, 저장/실행/재점검/완료는 패널. 현재 chat Tool mutation과 충돌하므로 실행 권한 계약도 확장 필요 |
+| [A2 832:8953](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=832-8953): 공장/시스템 분리 선택·검색·담당/참여/권한 없음 | selectWork/switchScope 및 그룹 확인 기반 — 화면·연결 수정 + API 확장 | 위치 변경 시 트리 범위 변경·대화/작성 글 유지, 시스템 업무는 전체 공장에 표시, 실제 목록은 그룹 권한 기반은 이미 명시됨. 실제 공장 master/공장 업무 적용 범위·서버 ACL은 추가 결정 |
+| [A1 832:8219](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=832-8219): 진행 건 시작·내 업무/찾기/실행/대화 기록·트리 | create/state/history와 Native 대화 — 기존 지원 + 화면·연결 수정; 팀 범위/목록 API 확장 | 반복 case 기반 존재. 공동 업무·한 대화 여러 진행 건·추천/목록 정책은 별도. 예시 3건/0/8/날짜/이름을 기본 데이터로 넣지 않음 |
+| A1 현재 상태/실행 기록/작업 기준 | view workExecutionDetailHTML + 실행 state/history/rule — 화면·연결 수정 | 세 탭 의미와 실행 기록 읽기 전용은 결정됨. 현재 결과/부분/UNKNOWN 실제 상태를 연결해야 하며 미제공 결과 상세 화면을 임의 완성하지 않음 |
+| A1 업무 설정 수정/변경 기록, 이번 진행 건 값 수정 | 현재 case 입력 저장만 존재 — API·데이터 확장 | 업무 설정은 다음 실행에 재사용·변경 이력, 진행 건 값은 이번만, 다음 조회부터 새 설정·과거 실행 기록 불변은 결정됨. 공유 주체/범위/우선순위는 미정 |
+| A1 CR 목록 조회 → 목록 보정/확정 → 다음 작업 | runtime plan/start + Native Jira read + human confirm 기반 — 실행/도메인 확장 | 프로젝트·배포 상태·배포 기준 날짜가 조회 인자라는 의미, 조회 후 사람 확정 필요는 결정됨. 현재 Jira dashboard는 이 날짜/상태 조건 검색 기능이 아님. 목록 결과/보정 UI·필수 첨부·CR별 판정은 미제공 |
+| A1 일정 카드/공휴일 경고/일정 조정 화면 열기/이대로 진행 | 일정 기능 없음(view의 일정 미등록, designer 미지원) — API 확장 + 규칙·디자인 결정 | 격주 화요일(기준09.15), D-8/D-6/D-5/D+1/D+2 큰 순서 명시. 날짜 계산/휴일·Freeze 조정 책임/달력 원본·시간대·확정 저장은 미정. 대화의 이대로 진행 버튼과 패널만 처리 규칙 관계 확인 필요 |
+| [B1 835:323](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=835-323): 시스템별 절차 목록/새 절차/복사 제안/최근 편집 | authoring state/create/copy/관리 시스템 기반 — 기존 지원 + 화면·연결 수정 | 초안은 업무 화면에 미노출, 게시해야 다음 진행 건 적용은 결정됨. 숫자·예시 절차는 합성. 도구/스킬·지침 관리 진입의 상세 화면은 제공되지 않음 |
+| [B2 836:372](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=836-372): 절차 개요/단계·작업/초안 상태 | P/T/J 정의 및 authoring — 기존 지원 + 화면·연결 수정 | 구조/일정/판정규칙/게시기록 탭은 명시. immutable 게시기록과 일정·CR별 반복 모델은 데이터 확장 필요 |
+| B2/B3 초안 저장/게시 전 확인/게시 | designer.authorAction → authoring save_draft/validate_draft/publish → SQLite draft/token/catalog | 실제 지원(저장→revision+1·검사무효, 검사→token, 게시→현재 P 병합·version+1). Figma에는 게시 lifecycle 설명은 있으나 최종 게시 확인 화면은 미제공. 숨은 버튼 존재만으로 새 UX 완료 판정 금지 |
+| [B3 832:8468](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=832-8468): 작업 편집/수행방식/도구/사람확인/선행·다음 작업 | 기존 mode·deps·execution human/tool/model 및 validator — 화면 수정 + 계약 확장 | 조회 후 사람 목록 확정해야 완료는 이미 결정. CR/첨부 실제 완료 기준은 임시값 상태. 도구 실행 성공을 완료로 치환 금지 |
+| B3 사람이 정하는 값(형식·쓰이는 곳·저장 범위)/값 추가 | P input schema + J argument binding UI — API·데이터 확장 | 작성기는 값 칸 선언, 실제 값은 실행 담당자가 업무 패널에서 입력/저장, 빈 값은 첫 실행 때 물음. 현재 schema를 개인/공유 설정 구현으로 오인 금지 |
+| B2/B3 AI 초안/변경 보기/되돌리기/저장 전 | 현재 instructions 전용 authoringReply 및 input_draft 경계 — 화면·연결/제안 계약 확장 | 설명→전체 단계/작업/입력선언 초안 생성은 현재 instructions-only AI보다 넓음. AI 제안≠저장/게시; 사용자의 이후 수정과 현재 대상/revision 보호 필요 |
+
+**이미 정해진 것과 미정의 구분:** 공장·시스템 독립 선택/전체 공장의 시스템 업무/그룹 기반 목록/대화 유지, 초안→검사→게시→다음 진행 건, 업무 설정/진행 입력 분리, 실행 snapshot 불변, 사람 목록 확정은 재결정할 필요가 없다. 공장 업무와 시스템 업무의 정확한 적용/공유 범위, CR 조회 필드 매핑, 필수 첨부 목록과 CR별 판정 화면, 메일/Jira 댓글 등 송부 방식, D-5 이후 미승인 처리, 영업일/공휴일 조정 세칙은 남는다. 개발 설계서·개발자 테스트는 Figma가 **임시값**으로 표시한다.
+
+안내는 패널만 실제 처리한다고 하나 A1 대화에는 “진행 건을 만들었습니다”와 “이대로 진행”이 있다. 시작 의도에서 case 생성까지의 확정 경계와 해당 버튼이 단순 이동인지 실제 상태 변경인지 확인해야 한다. 이 상충을 해소하기 전 임의 자동 실행을 설계하지 않는다.
+
+### E. 실제 제품 검증환경과 다음 단계
+
+현재 Work는 Linux/Python3.12.14/Node24.19.0이며 조사 범위에 Python3.11·기존 .venv·공식 wheel·로컬 Chrome이 없었다. 실제 빌더는 원본 wheel 없음에서 exit1, full-app 검사 진입은 httpx import에서 exit1이다. 제품 기동·브라우저 렌더·왕복은 **미실행**이고 제품 결함으로 판정하지 않는다. Figma 화면 확인·정적 코드 조사·합성 DOM·실제 Native 제품·사내 확인을 구분한다. [날짜/명령/환경/오류와 최소 보완](../../../evals/v4-ui-20260930.md#restructure-step0a-evidence-20261001).
+
+최소 보완안은 저장소 한 곳의 Python3.11 검증 환경, 고정 원본 SHA의 Open WebUI0.11.3 wheel, 필요한 기존 의존성, Chrome1개를 확보하여 기존 full-app harness/ChromePipe를 쓰는 것이다. 기존 harness의 setup-p/ap-j/C안 가정은 새 빈 상태 계약에 맞게 후속 최소 수정해야 한다. 현재 단계에서 설치/환경 보완/시험 코드 수정/새 상시 서비스를 시작하지 않았다.
+
+### 단계별 완료 조건과 차단 항목
+
+| 단계 | 완료 조건 / 이번 조사에서 드러난 선행조건 |
+|---|---|
+| 0-A 이번 조사 | 최신 main·PR·지침·현재 Figma 전수 확인, 근거 있는 대상/기능/설계 쟁점표, 환경의 실제 실행/미실행 구분, 문서 검사·diff·커밋/push·Draft PR. 백엔드 확정/구현 없음 |
+| 0-B 검토 담당 | 위 사실 검토 후 procedure/version/case/job attempt/settings/snapshot/권한·공동업무/완료·UNKNOWN/전환의 최소 계약과 Step1 범위 확정. 조사 자료로 착수 가능, 제품 환경 차단은 설계 차단 아님 |
+| 1 빈 상태 | 구체 계약 후 데모 제거·재등록 방지·빈 catalog/첫 작성/기반 모델·실제 connector 보존 검사. 0-B 미확정, 실제 Native 검증환경, 기존 Native 가입 UI 검사 실패 미해결은 수락 차단 |
+| 2 화면 구조 | 착수 시 관련 Figma 변경 재조회. 실제 Native 중앙 대화·오른쪽 패널/작성기·위치 변경/초안·첨부·권한 왕복과 화면 대조 |
+| 3 절차 작성 | AI 제안/미저장·저장 초안·검사·게시/버전·동시 수정·그룹 권한의 서버/화면 증거 |
+| 4 진행·실행 | 진행 건/공유 설정·입력 mapping·snapshot·현재 개인 PAT/ACL 실제 도구 호출·사람 확인·부분/실패/UNKNOWN·재실행/기록 검증 |
+| 5 첫 업무 | 배포 산출물 점검의 확정된 CR 조건·첨부/판정·일정·송부 범위만 구현. 미정 업무정책을 기본값으로 발명하지 않음 |
+| 6 통합/배포 준비 | 실제 Native E2E·새 Figma 대조·합성 사용자 자산 보존·잔여 참조/재등록 경로·복구 범위·배포물 검증 |
+| 7 별도 승인 후 | 사내 현재 자산 inventory/사용자 변경·삭제 preview·백업/복구·정확한 삭제목록 승인 후 정리/배포/실환경 확인. 지금의 미확인은 Step7 실제 삭제를 차단 |
+
+각 구현 단계는 상세 설계→Work 구현/시험→검토 담당 검증→보완/통과 순서다. 통과는 병합·배포·사내 삭제 승인이 아니며 다음 단계 자동 시작을 허용하지 않는다. Figma 변경은 스타일/화면 행동/백엔드 계약으로 나누고 착수·검수 때 관련 화면을 재조회한다. 이번 최종 보고 후 검토를 기다린다.
+
+
 <a id="v4-ui-20260930"></a>
 
 ## 4차 UI · Native 업무 수행과 Assistant 재배치 · 2026-09-30
