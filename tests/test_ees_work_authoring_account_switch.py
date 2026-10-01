@@ -32,6 +32,21 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
     select_native = native.NativeAuthoringBrowserTests.select_native
     assert_user_workspace_zero = native.NativeAuthoringBrowserTests.assert_user_workspace_zero
 
+    def activate_tab(self, session):
+        # A CDP session chooses a protocol target; it does not activate the tab.
+        # Native visibility handling and EES's queued animation frame must run
+        # when the user returns, before checking that tab's account isolation.
+        self.browser.session = session
+        state = "({visibilityState:document.visibilityState,hasFocus:document.hasFocus()})"
+        before = self.browser.evaluate(state)
+        self.browser.call("Page.bringToFront")
+        self.wait("document.visibilityState === 'visible' && document.hasFocus()")
+        observations = getattr(self, "tab_activations", [])
+        observations.append({"before": before, "after": self.browser.evaluate(state)})
+        self.tab_activations = observations
+        (self.evidence_directory() / "sa26-native-tab-activation.json").write_text(
+            json.dumps(observations, indent=2) + "\n", encoding="utf-8")
+
     def authoring_content(self):
         # innerText omits textarea/input values: verify both rendered messages
         # and current editor buffers when checking account-private contents.
@@ -148,7 +163,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.screenshot("sa26-b-after-late-a-responses")
 
         # The former A tab must also be a B-scoped UI with no A draft/cache.
-        self.browser.session = old_session
+        self.activate_tab(old_session)
         self.wait("document.querySelector('#ees-work-manage-system:not(:disabled)')?.value === 'FDC'")
         self.assertEqual(self.browser_api("GET", "/api/v1/auths/")["data"]["id"], account_b["id"])
         self.select_native('#ees-work-manage-process', process_b["process_id"])
@@ -161,7 +176,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.screenshot("nu05-former-a-tab-now-b")
 
         # B's subsequent authoring request contains only B's current context.
-        self.browser.session = new_session
+        self.activate_tab(new_session)
         self.server.authoring_answer = "계정 B 안내에 대한 합성 응답"
         self.fill('#ees-work-authoring-input', '현재 B 절차에 대해 설명해 줘')
         self.click('#ees-work-authoring-form button[type=submit]')

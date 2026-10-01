@@ -221,6 +221,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
             # storage, tokens, or the authenticated request/response bodies.
             evidence["dom"] = self.browser.evaluate("""(()=>({
                 route:location.pathname+location.search,readyState:document.readyState,
+                visibilityState:document.visibilityState,hasFocus:document.hasFocus(),
                 nativeReady:window.__eesNativeDraftV1?.ready(),
                 controls:[...document.querySelectorAll('button,[role=button],#email,#name,#sidebar,#chat-input')]
                   .slice(0,180).map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);
