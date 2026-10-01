@@ -1,6 +1,6 @@
 # Team Agent POC
 
-현재 작업은 [EES Work 재구성 Step 0-A](docs/mockups/ees-work/TASK.md#restructure-step0a-20261001)다. 현재 Figma는 왼쪽 작업 위치·탐색, 중앙 Native 대화, 오른쪽 업무 패널/절차 작성기이며 디테일은 변경될 수 있다. 필요한 공통 기반을 선별 재사용하고 기본 데모 절차·전문 Assistant preset·등록 Skill 콘텐츠와 재등록 경로는 후속 단계에서 정리한다. 아래 실행 구조는 조사한 기존 구현이며 새 백엔드 최종 설계가 아니다. 계정·대화·첨부·개인 PAT·기반 LLM 접속·실제 GitHub/Jira/Confluence 도구는 구분해 보존한다.
+현재 작업은 [EES Work 재구성 Step 0-B 기본 계약·검증 준비](docs/mockups/ees-work/TASK.md#restructure-step0b-20261001)다. [Step 0-A 조사](docs/mockups/ees-work/TASK.md#restructure-step0a-20261001)를 근거로 사용하며 전체 DB/API 상세 설계와 공유 정책은 아직 미확정이다. 현재 Figma는 왼쪽 작업 위치·탐색, 중앙 Native 대화, 오른쪽 업무 패널/절차 작성기이며 디테일은 변경될 수 있다. 필요한 공통 기반을 선별 재사용하고 기본 데모 절차·전문 Assistant preset·등록 Skill 콘텐츠와 재등록 경로는 후속 단계에서 정리한다. 아래 실행 구조는 조사한 기존 구현이며 새 백엔드 최종 설계가 아니다. 계정·대화·첨부·개인 PAT·기반 LLM 접속·실제 GitHub/Jira/Confluence 도구는 구분해 보존한다.
 
 비개발자가 EES Work의 Chat UI에서 사내 문서와 업무 시스템을 활용하고, 관리자가 정한 공통 정책과 업무 처리 절차를 적용받는 플랫폼 POC입니다. 범용 대화·업무용 Prompt/Skill 공유를 유지하며 Open WebUI Native를 활용합니다. **공식 Open WebUI 패키지와 우리 프로젝트 래퍼** 두 구성으로 관리하며, 이 저장소는 사내 설정·Agent Pack과 Open WebUI 수정사항·빌드/적용 절차를 관리합니다. 기존 Python·호환 의존성을 재사용하고 데이터·키는 프로그램 변경과 분리합니다. [단순 유지보수 기준](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)과 실제 구현·적용 상태는 [STATUS](docs/STATUS.md)를 따릅니다.
 
