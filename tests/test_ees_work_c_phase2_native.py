@@ -56,6 +56,7 @@ class CPhaseTwoNativeTests(unittest.TestCase):
         self.assertTrue(result['ok'], result)
         self.case_id = result['case']['id']
         self.navigate('/c/existing-chat')
+        native.EESWorkNativeBrowserTests.open_work_panel(self)
         self.wait_scope_ready('site')
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
         return result['case']

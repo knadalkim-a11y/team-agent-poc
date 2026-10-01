@@ -1,0 +1,493 @@
+{
+  "recorded_at_utc": "2026-10-01T07:19:16.913688+00:00",
+  "boundary": "Linux Chrome Native fixture: packaged pinned Svelte/Tiptap UI, real EES WorkflowService/public fixture routes/temporary SQLite. Native auth/chat and external/model HTTP are synthetic. Prior full CLI product evidence is reused separately; this is not in-house execution or full Native CLI evidence.",
+  "environment": {
+    "python": "3.11.16",
+    "chrome": "153.0.8010.52",
+    "wheel": "dist/step0b/branding/open_webui-0.11.3+ees.12-py3-none-any.whl",
+    "wheel_sha256": "9dac33de8c93b722bf055ececdde77e68d85db953dc74ba9993bba70dfa8e57c",
+    "font_setup": "Existing ChromePipe profile-isolated fontconfig using hash-verified bundled Noto Sans KR; no global font cache modification"
+  },
+  "test_scope": {
+    "total_unique": 73,
+    "executed_unique": 15,
+    "latest_pass": 12,
+    "latest_fail": 3,
+    "unexecuted": 58,
+    "test_skip_added": false,
+    "latest_results": [
+      {
+        "id": "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_ap_save_reload_fail_retry_evidence_and_return",
+        "status": "PASS"
+      },
+      {
+        "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_completed_process_lookup_failure_offers_only_one_read_retry",
+        "status": "PASS"
+      },
+      {
+        "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_draft_blocked_while_native_paused",
+        "status": "FAIL"
+      },
+      {
+        "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_human_confirmation_no_tool_call_and_explicit_resume",
+        "status": "PASS"
+      },
+      {
+        "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_past_native_success_uses_saved_target_definition_and_final_validation",
+        "status": "FAIL"
+      },
+      {
+        "id": "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_late_past_execution_response_cannot_replace_current_case",
+        "status": "PASS"
+      },
+      {
+        "id": "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_same_account_two_tabs_keep_local_input_on_revision_conflict",
+        "status": "PASS"
+      },
+      {
+        "id": "test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_legacy_draft_review_overlay_hides_saved_document_after_lookup_failure",
+        "status": "PASS"
+      },
+      {
+        "id": "test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_legacy_history_overlay_hides_saved_inputs_after_access_restriction",
+        "status": "PASS"
+      },
+      {
+        "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width",
+        "status": "FAIL"
+      },
+      {
+        "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_panel_and_ai_tool_run_same_persisted_case_with_retry_history",
+        "status": "PASS"
+      },
+      {
+        "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_ai_authoring_keeps_changes_local_and_targeted",
+        "status": "PASS"
+      },
+      {
+        "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_ai_cancel_and_account_change_preserve_saved_assets",
+        "status": "PASS"
+      },
+      {
+        "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_ai_delayed_reply_does_not_overwrite_typing_or_another_target",
+        "status": "PASS"
+      },
+      {
+        "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_ai_rejects_unexpected_edits_and_preserves_request_on_failure",
+        "status": "PASS"
+      }
+    ],
+    "unexecuted_ids": [
+      "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_completed_return_dock_restores_task_list_and_parent_navigation",
+      "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_completed_return_inline_restores_task_list_and_parent_navigation",
+      "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_completed_return_preserves_incomplete_filter_when_finished_row_disappears",
+      "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_native_execution_plan_and_return_smoke",
+      "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_three_sizes_long_forms_fixed_header_and_dialog_focus",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_draft_blocked_while_native_running",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_draft_blocked_while_native_unknown",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_draft_blocked_while_native_waiting_authorization",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_draft_blocked_while_native_waiting_input",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_draft_cancelled_native_still_requires_legacy_prerequisite",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_manual_and_draft_keep_distinct_save_confirmation",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_prerequisite_wait_does_not_run",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_scope_unconnected_excluded_and_empty_saved_input",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_mixed_scope_keeps_child_paths_and_blocks_legacy_writes_during_native_run",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_candidate_input_wait_save_and_explicit_resume",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_fixed_scope_pause_reconnect_grounded_ai_and_c_actions",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_partial_and_failed_results_are_not_scope_completion",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_permission_wait_revocation_and_open_detail_lookup_failure",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_past_failed_scope_without_final_validation_remains_unjudged",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_past_native_failure_uses_saved_final_validation",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_past_native_partial_unknown_and_access_restriction_keep_record_meanings",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_past_native_unknown_has_no_completed_validation_or_mutation",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_three_sizes_long_native_inputs_dark_narrow_keyboard_and_cancel",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_unknown_has_no_mutation_or_automatic_repeat",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_pending_execution_is_not_completion_and_releases_only_one_result",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_borderless_step_styles_focus_and_long_name_in_native_light_dark_narrow",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_cancelled_human_confirmation_keeps_saved_state",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_delayed_action_cannot_replace_another_pending_case_at_the_same_url",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_delayed_action_response_cannot_replace_another_chat",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_detail_keeps_opened_attempt_call_and_return_focus_after_new_result",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_durable_runtime_panel_plan_real_service_and_browser_return",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_durable_runtime_poll_updates_left_progress_and_job_header_without_navigation",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_empty_enter_does_not_bind_a_pending_case_to_an_existing_chat",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_existing_workspace_editor_publication_and_user_denial",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_factory_system_scope_restores_chat_drafts_and_history_never_replaces_current_work",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_first_completion_binds_its_original_factory_after_another_pending_case_is_opened",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_input_save_double_click_and_held_enter_never_run_or_send_chat",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_integrated_large_job_browser_counts_filters_pages_and_selection",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_integrated_workspace_hierarchy_search_preserves_local_edits_and_old_case",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_management_scope_run_excludes_human_retry_and_marks_unconnected_unperformed",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_missing_skill_preview_uses_same_permission_state_in_steps_and_management",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_native_chat_sidebar_fonts_and_scope_layout_in_light_dark_and_narrow_view",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_new_chat_binds_pending_case_and_rejects_old_chat_callback",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_personal_settings_uses_native_controls_and_keeps_workspace_draft",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_real_tiptap_chat_stream_and_sidebar_panel_share_one_screen",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_revision_conflict_dialog_keeps_unsaved_input_and_new_server_result",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_right_panels_and_details_keyboard_light_dark_narrow",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_right_record_lookup_failure_and_restriction_do_not_show_stale_evidence",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_right_recorded_attempt_calls_and_inputs_do_not_mix_after_retry_or_publish",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_right_stage_condition_navigation_restores_list_page_scroll_and_edits",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_scope_picker_keyboard_and_outside_dismiss_preserve_current_work",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_selected_business_statuses_remain_readable_in_both_themes",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_sidebar_internal_job_dividers_follow_visible_rows_without_outer_box",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_sidebar_scoped_styles_preserve_right_workspace_and_native_controls",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_sidebar_step_progress_keeps_all_stages_and_only_selected_stage_jobs",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_work_evidence_dialog_preserves_current_selection",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_authoring_and_dialog_layout_and_keyboard",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_tab_uses_native_type_and_does_not_flicker_on_idle_or_route_change"
+    ]
+  },
+  "changes": [
+    "Failure cleanup collects PNG and allowlisted DOM/readiness before browser close, including setup/SubTest failures; no input values, cookies, storage or request bodies.",
+    "Normal screenshots wait for font readiness; failure cleanup captures without waiting so font stalls do not erase failure evidence.",
+    "Actual panel toggle before connected-context readiness after reload/revisit, including explicit C1/C2 helper users.",
+    "Current V4 breadcrumb replaces removed control; shared choose physically opens collapsed searched result groups and dismisses the filter menu.",
+    "Simulation success expectation explicitly retains actual business completion as unconfirmed; registered Tool/composer/database/history assertions unchanged."
+  ],
+  "unresolved_failures": [
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width",
+      "observed": "1920px viewport: chat width 359, old A-design assertion requires >=420; workflow panel at x256 width1304, chat on right.",
+      "source": "branding/ees/ui/ees-work-view.js sizePanel defaults to 360px assistant at >=1536; openHost inserts panel before chat; current V4 CSS title24 vs old test28-30.",
+      "decision": "Geometry assertions not relaxed. Current UI/old acceptance contract requires explicit review; product code unchanged."
+    },
+    {
+      "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_draft_blocked_while_native_paused",
+      "observed": "Visible enabled native-J input-save button exists; start() asserts absence with Native execution must not acquire a fake legacy save.",
+      "source": "branding/ees/ui/ees-work-view.js:296-305 explicitly renders native runtime public input form/save.",
+      "decision": "Storage boundary assertion retained. Do not declare this helper-only defect or change product without reviewing input persistence contract; dependent scenarios unexecuted."
+    },
+    {
+      "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_past_native_success_uses_saved_target_definition_and_final_validation",
+      "observed": "Historical success UI parentJobs is 작업 완료 / 0 / 4; old test expects 3 / 4.",
+      "decision": "No fix or root-cause claim from this observation alone. Saved result versus historical progress projection requires follow-up; no repeat run."
+    }
+  ],
+  "runs": [
+    {
+      "label": "initial",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-initial .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -f -v test_ees_work_demo test_ees_work_c_phase1_native test_ees_work_c_phase2_native test_ees_work_c_phase3_native test_ees_work_c_phase3_privacy",
+      "changed_condition_or_selection": "First failfast attempt after profile-isolated Korean font setup and failure collector. No old test assertions changed.",
+      "tests_run": 1,
+      "duration_seconds": 10.304,
+      "exit_code": 1,
+      "executed": [
+        {
+          "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width",
+          "status": "FAIL"
+        }
+      ],
+      "log_sha256": "655d99540742f16784a4300d0d14c46312ba203a5fe3186212965f9b9e5136fa"
+    },
+    {
+      "label": "open-panel",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-open-panel .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -f -v test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width",
+      "changed_condition_or_selection": "Real shipped panel-toggle click added before unchanged connected-chat context assertion.",
+      "tests_run": 1,
+      "duration_seconds": 2.119,
+      "exit_code": 1,
+      "executed": [
+        {
+          "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width",
+          "status": "FAIL"
+        }
+      ],
+      "log_sha256": "2bac46ee516905282ea5bd74c92e719d941bcc00b093f33e488c7f96d4839b2e"
+    },
+    {
+      "label": "functional",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-functional .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -f -v test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_same_account_two_tabs_keep_local_input_on_revision_conflict test_ees_work_demo.EESWorkNativeBrowserTests.test_panel_and_ai_tool_run_same_persisted_case_with_retry_history test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_human_confirmation_no_tool_call_and_explicit_resume test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_ap_save_reload_fail_retry_evidence_and_return",
+      "changed_condition_or_selection": "Different unexecuted functional tests; stops on original simulation-success copy mismatch.",
+      "tests_run": 2,
+      "duration_seconds": 15.186,
+      "exit_code": 1,
+      "executed": [
+        {
+          "id": "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_same_account_two_tabs_keep_local_input_on_revision_conflict",
+          "status": "PASS"
+        },
+        {
+          "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_panel_and_ai_tool_run_same_persisted_case_with_retry_history",
+          "status": "FAIL"
+        }
+      ],
+      "log_sha256": "ab45f01bb815238da94ad0b51b6ce33259d0c88c2175fb2debcbc74f976edcf0"
+    },
+    {
+      "label": "c2",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-c2 .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -f -v test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_human_confirmation_no_tool_call_and_explicit_resume test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_ap_save_reload_fail_retry_evidence_and_return",
+      "changed_condition_or_selection": "Separate C2 representative; confirms shared closed-panel readiness assumption.",
+      "tests_run": 1,
+      "duration_seconds": 11.368,
+      "exit_code": 1,
+      "executed": [
+        {
+          "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_human_confirmation_no_tool_call_and_explicit_resume",
+          "status": "FAIL"
+        }
+      ],
+      "log_sha256": "a2b115993a733f494546a3dcf37ca551db3b0c69b8f4d9d57265becd7cf687b1"
+    },
+    {
+      "label": "c1",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-c1 .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -f -v test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_ap_save_reload_fail_retry_evidence_and_return",
+      "changed_condition_or_selection": "Separate C1 representative; confirms shared closed-panel readiness assumption.",
+      "tests_run": 1,
+      "duration_seconds": 10.41,
+      "exit_code": 1,
+      "executed": [
+        {
+          "id": "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_ap_save_reload_fail_retry_evidence_and_return",
+          "status": "FAIL"
+        }
+      ],
+      "log_sha256": "cc5eedaf19ffdb10d3f0c41c9d2b438a9192435379942451319eee01bcf017cb"
+    },
+    {
+      "label": "simulation-copy",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-simulation-copy .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -f -v test_ees_work_demo.EESWorkNativeBrowserTests.test_panel_and_ai_tool_run_same_persisted_case_with_retry_history",
+      "changed_condition_or_selection": "Exact simulation-pass/business-unconfirmed expectation and false-completion rejection; original Tool/chat/storage assertions retained.",
+      "tests_run": 1,
+      "duration_seconds": 12.762,
+      "exit_code": 1,
+      "executed": [
+        {
+          "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_panel_and_ai_tool_run_same_persisted_case_with_retry_history",
+          "status": "FAIL"
+        }
+      ],
+      "log_sha256": "2ac804062f9b3b50d3a3cd962b8a5e350fe80a9753d2d480065804c739b27d74"
+    },
+    {
+      "label": "ready-fix",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-ready-fix .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -f -v test_ees_work_demo.EESWorkNativeBrowserTests.test_panel_and_ai_tool_run_same_persisted_case_with_retry_history test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_human_confirmation_no_tool_call_and_explicit_resume test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_ap_save_reload_fail_retry_evidence_and_return",
+      "changed_condition_or_selection": "Real panel-toggle in C1/C2 ready helpers and demo chat revisit; previous failed guards retained.",
+      "tests_run": 3,
+      "duration_seconds": 11.3,
+      "exit_code": 1,
+      "executed": [
+        {
+          "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_panel_and_ai_tool_run_same_persisted_case_with_retry_history",
+          "status": "PASS"
+        },
+        {
+          "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_human_confirmation_no_tool_call_and_explicit_resume",
+          "status": "PASS"
+        },
+        {
+          "id": "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_ap_save_reload_fail_retry_evidence_and_return",
+          "status": "FAIL"
+        }
+      ],
+      "log_sha256": "3ae2835f3875ab3f92bf259d3c23ae58eb691dd6531b010a61e164876af933a4"
+    },
+    {
+      "label": "c1-navigation",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-c1-navigation .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -f -v test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_ap_save_reload_fail_retry_evidence_and_return",
+      "changed_condition_or_selection": "Current visible V4 breadcrumb and shipped panel toggle replace removed navigation controls.",
+      "tests_run": 1,
+      "duration_seconds": 4.506,
+      "exit_code": 1,
+      "executed": [
+        {
+          "id": "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_ap_save_reload_fail_retry_evidence_and_return",
+          "status": "FAIL"
+        }
+      ],
+      "log_sha256": "c17434f073729b4d7a4af050bdf24781f8d900c9e1ea17f7717610d9600f0115"
+    },
+    {
+      "label": "group-fix",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-group-fix .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -f -v test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_ap_save_reload_fail_retry_evidence_and_return test_ees_work_demo.EESWorkNativeBrowserTests.test_panel_and_ai_tool_run_same_persisted_case_with_retry_history test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_human_confirmation_no_tool_call_and_explicit_resume test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_same_account_two_tabs_keep_local_input_on_revision_conflict",
+      "changed_condition_or_selection": "Shared choose opens collapsed result groups with trusted physical clicks and closes the filter menu; related four functional tests rerun.",
+      "tests_run": 4,
+      "duration_seconds": 16.106,
+      "exit_code": 0,
+      "executed": [
+        {
+          "id": "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_ap_save_reload_fail_retry_evidence_and_return",
+          "status": "PASS"
+        },
+        {
+          "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_panel_and_ai_tool_run_same_persisted_case_with_retry_history",
+          "status": "PASS"
+        },
+        {
+          "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_human_confirmation_no_tool_call_and_explicit_resume",
+          "status": "PASS"
+        },
+        {
+          "id": "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_same_account_two_tabs_keep_local_input_on_revision_conflict",
+          "status": "PASS"
+        }
+      ],
+      "log_sha256": "bdefd5e6f29da69ca4000e81019f1f95bc08ae10b9d821d89d2bf4e922f0ed65"
+    },
+    {
+      "label": "remaining",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-remaining .venv/bin/python -X warn_default_encoding -W error::EncodingWarning /workspace/scratch/1d6bc68344e4/step0b-native-remaining.py",
+      "changed_condition_or_selection": "Exclude exactly five completed test IDs; remaining 68 selected with failfast. No skip added to repository tests.",
+      "tests_run": 2,
+      "duration_seconds": 4.849,
+      "exit_code": 1,
+      "executed": [
+        {
+          "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_completed_process_lookup_failure_offers_only_one_read_retry",
+          "status": "PASS"
+        },
+        {
+          "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_draft_blocked_while_native_paused",
+          "status": "FAIL"
+        }
+      ],
+      "log_sha256": "f85407cb0a9b3202333c044891eacd520a575ae21f2217b8fee34479dbe0894a"
+    },
+    {
+      "label": "privacy",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-privacy .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -f -v test_ees_work_c_phase3_privacy",
+      "changed_condition_or_selection": "Two unexecuted independent privacy tests do not cross failed Native-J save-absence precondition.",
+      "tests_run": 2,
+      "duration_seconds": 4.893,
+      "exit_code": 0,
+      "executed": [
+        {
+          "id": "test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_legacy_draft_review_overlay_hides_saved_document_after_lookup_failure",
+          "status": "PASS"
+        },
+        {
+          "id": "test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_legacy_history_overlay_hides_saved_inputs_after_access_restriction",
+          "status": "PASS"
+        }
+      ],
+      "log_sha256": "aa358cdf98f3c36a9d8c58a95243c4a8a657e8ce7126acfb1b8472a935bfd28e"
+    },
+    {
+      "label": "ai-isolation",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-ai-isolation .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -f -v test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_late_past_execution_response_cannot_replace_current_case test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_ai_authoring_keeps_changes_local_and_targeted test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_ai_delayed_reply_does_not_overwrite_typing_or_another_target test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_ai_rejects_unexpected_edits_and_preserves_request_on_failure test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_ai_cancel_and_account_change_preserve_saved_assets",
+      "changed_condition_or_selection": "Five unexecuted independent late-history/AI isolation tests.",
+      "tests_run": 5,
+      "duration_seconds": 14.708,
+      "exit_code": 0,
+      "executed": [
+        {
+          "id": "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_late_past_execution_response_cannot_replace_current_case",
+          "status": "PASS"
+        },
+        {
+          "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_ai_authoring_keeps_changes_local_and_targeted",
+          "status": "PASS"
+        },
+        {
+          "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_ai_delayed_reply_does_not_overwrite_typing_or_another_target",
+          "status": "PASS"
+        },
+        {
+          "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_ai_rejects_unexpected_edits_and_preserves_request_on_failure",
+          "status": "PASS"
+        },
+        {
+          "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_workspace_ai_cancel_and_account_change_preserve_saved_assets",
+          "status": "PASS"
+        }
+      ],
+      "log_sha256": "a516c0ee8fd59adad2b3243d27120e94a5692a5d222546640c213494d5bde83b"
+    },
+    {
+      "label": "history",
+      "command": "PYTHONPATH=tests EES_TEST_CHROME=/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=dist/step0b/branding EES_TEST_SCREENSHOT_DIR=dist/step0b/residual-native-history .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -f -v test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_past_native_success_uses_saved_target_definition_and_final_validation test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_past_native_failure_uses_saved_final_validation test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_past_failed_scope_without_final_validation_remains_unjudged test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_past_native_partial_unknown_and_access_restriction_keep_record_meanings test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_past_native_unknown_has_no_completed_validation_or_mutation test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_manual_and_draft_keep_distinct_save_confirmation test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_legacy_prerequisite_wait_does_not_run",
+      "changed_condition_or_selection": "Started just before stop instruction; first new failure stops remaining six. No subsequent run or assertion change.",
+      "tests_run": 1,
+      "duration_seconds": 2.347,
+      "exit_code": 1,
+      "executed": [
+        {
+          "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_past_native_success_uses_saved_target_definition_and_final_validation",
+          "status": "FAIL"
+        }
+      ],
+      "log_sha256": "0e62ba0ea695131dbdddc90677731af94cc47f82e5e5df3cb65922927119e0e0"
+    }
+  ],
+  "selection_runner_preparation_error": {
+    "observed": "Scratch runner initially inserted tests but omitted repository root from sys.path; scripts import failed before browser/product execution.",
+    "result": "0 product tests executed; preserved import-error log/outcome separately; added repository root to scratch runner only, then performed remaining-selection run once.",
+    "log_sha256": "258b21203a75b0433b345076c392860518f3c99d1bf8459d62ffb87b34f2b9c0"
+  },
+  "remaining_selection": {
+    "excluded_completed": [
+      "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_existing_ap_save_reload_fail_retry_evidence_and_return",
+      "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_native_human_confirmation_no_tool_call_and_explicit_resume",
+      "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_same_account_two_tabs_keep_local_input_on_revision_conflict",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width",
+      "test_ees_work_demo.EESWorkNativeBrowserTests.test_panel_and_ai_tool_run_same_persisted_case_with_retry_history"
+    ],
+    "selected_count": 68,
+    "executor": "unittest.TextTestRunner(verbosity=2, failfast=True); no repository skip/CI trigger change"
+  },
+  "evidence_files": [
+    {
+      "path": "evals/assets/restructure-step0b-20261001/residual-native-two-tabs.json",
+      "source": "dist/step0b/residual-native-group-fix/c-phase3-two-tab-revision-conflict.json",
+      "bytes": 695,
+      "sha256": "9c6696fd9da419475eda6b1071b6bbf716f45433a32fc8214a603df789247d6c"
+    },
+    {
+      "path": "evals/assets/restructure-step0b-20261001/residual-native-two-tabs.png",
+      "source": "dist/step0b/residual-native-group-fix/c-phase3-two-tab-revision-conflict.png",
+      "bytes": 202774,
+      "sha256": "83e5d5e364c8b26c10c4c0fd2e1290d678bb38e9b87cad26a28b40d5f6639a68"
+    },
+    {
+      "path": "evals/assets/restructure-step0b-20261001/residual-native-geometry-failure.json",
+      "source": "dist/step0b/residual-native-open-panel/test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width-failure.json",
+      "bytes": 52466,
+      "sha256": "6dd2370cb2ce01814be066cf9eb3a4f699f7b2df55cd433fd1fd87110c771a0b"
+    },
+    {
+      "path": "evals/assets/restructure-step0b-20261001/residual-native-geometry-failure.png",
+      "source": "dist/step0b/residual-native-open-panel/test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width-failure.png",
+      "bytes": 235501,
+      "sha256": "bbba1d98bdbdfd327194888cacd13814deaba4189ae070ea5d28cc021afdd317"
+    },
+    {
+      "path": "evals/assets/restructure-step0b-20261001/residual-native-save-boundary-failure.json",
+      "source": "dist/step0b/residual-native-remaining/test_legacy_draft_blocked_while_native_paused-failure.json",
+      "bytes": 43553,
+      "sha256": "48da4846e1a07dab7f41378f0ce263a43a0c8ae787773b9858efce5688ae4200"
+    },
+    {
+      "path": "evals/assets/restructure-step0b-20261001/residual-native-save-boundary-failure.png",
+      "source": "dist/step0b/residual-native-remaining/test_legacy_draft_blocked_while_native_paused-failure.png",
+      "bytes": 154168,
+      "sha256": "95f8b455e1f16b579adba9d2fcb84292a3dc69bf7520a6633fcde053f136a0a3"
+    },
+    {
+      "path": "evals/assets/restructure-step0b-20261001/residual-native-history-progress-failure.json",
+      "source": "dist/step0b/residual-native-history/test_past_native_success_uses_saved_target_definition_and_final_validation-failure.json",
+      "bytes": 47867,
+      "sha256": "020dec400b6ced2dd619b307696005f9731098597e7711145d5c295a0aa4edee"
+    },
+    {
+      "path": "evals/assets/restructure-step0b-20261001/residual-native-history-progress-failure.png",
+      "source": "dist/step0b/residual-native-history/test_past_native_success_uses_saved_target_definition_and_final_validation-failure.png",
+      "bytes": 154846,
+      "sha256": "bc43818b214261ff03336fc70da711dc372cd2717a9afee280a559260ab96fb6"
+    }
+  ],
+  "source_sha256_at_close": {
+    "tests/test_ees_work_demo.py": "c9f3dc4aba59595a4faa6df7978e7086c1e10c0f73cbc24c6b58ec3de422a165",
+    "tests/test_ees_work_c_phase1_native.py": "97545a741515f0762d2a5e83ba22ed3b987768ed9ba737dd69db24b730bc504e",
+    "tests/test_ees_work_c_phase2_native.py": "486ec21e843a55802d7dd6e1f9b0abfb38933a00a52f11cf53867ac0f70d2547",
+    "tests/test_ees_work_c_phase3_native.py": "a12aa41ccbcef7280edff2a700ad02c2b5ac05c5c53ad212b903d5f106e7b9c5",
+    "tests/test_ees_work_c_phase3_privacy.py": "edf9e6ba277bc95ad5db93b3a6bfc7f053054c3fd575ec2c96dc6da8d2b0c343",
+    "tests/test_ees_chat_theme.py": "343fd91571eb6b3a81ad0b5d57a26ef3c07f6394c4208a633f9397fe42df1948"
+  },
+  "not_claimed": [
+    "73-test suite pass",
+    "new Figma UI acceptance",
+    "Windows browser result",
+    "in-house model/tool/PAT/DB integration",
+    "unknown failure resolution"
+  ]
+}

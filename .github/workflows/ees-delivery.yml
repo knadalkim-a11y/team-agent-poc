@@ -130,12 +130,12 @@ jobs:
         run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
       - name: Prepare the fixed pre-authoring program for Restore validation
         run: |
-          git archive --format=tar --output=dist/legacy-source.tar a443d30c6694df0e1cbe082a0b99aa5f2d566917
+          git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/legacy-source.tar a443d30c6694df0e1cbe082a0b99aa5f2d566917
           python -c "import tarfile; tarfile.open('dist/legacy-source.tar').extractall('dist/legacy-source', filter='data')"
           python dist/legacy-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/legacy-branding
       - name: Prepare the fixed pre-execution program for Restore and writer-guard validation
         run: |
-          git archive --format=tar --output=dist/previous-source.tar 991cdb1d80ae07471fb50594831d74fe602b1ef7
+          git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/previous-source.tar 991cdb1d80ae07471fb50594831d74fe602b1ef7
           python -c "import tarfile; tarfile.open('dist/previous-source.tar').extractall('dist/previous-source', filter='data')"
           python dist/previous-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/previous-branding
       - name: Diagnose the two Windows fixture failures independently

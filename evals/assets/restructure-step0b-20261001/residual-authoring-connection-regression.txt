@@ -1,0 +1,88 @@
+BEFORE: expected regression failure before fixture fix
+test_fixture_read_helpers_release_sqlite_connections (test_ees_work_authoring.SystemAuthoringTests.test_fixture_read_helpers_release_sqlite_connections) ... 
+  test_fixture_read_helpers_release_sqlite_connections (test_ees_work_authoring.SystemAuthoringTests.test_fixture_read_helpers_release_sqlite_connections) (helper='catalog') ... FAIL
+  test_fixture_read_helpers_release_sqlite_connections (test_ees_work_authoring.SystemAuthoringTests.test_fixture_read_helpers_release_sqlite_connections) (helper='business_rows') ... FAIL
+  test_fixture_read_helpers_release_sqlite_connections (test_ees_work_authoring.SystemAuthoringTests.test_fixture_read_helpers_release_sqlite_connections) (helper='audit_table') ... FAIL
+  test_fixture_read_helpers_release_sqlite_connections (test_ees_work_authoring.SystemAuthoringTests.test_fixture_read_helpers_release_sqlite_connections) (helper='audit_rows') ... FAIL
+
+======================================================================
+FAIL: test_fixture_read_helpers_release_sqlite_connections (test_ees_work_authoring.SystemAuthoringTests.test_fixture_read_helpers_release_sqlite_connections) (helper='catalog')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc/tests/test_ees_work_authoring.py", line 165, in test_fixture_read_helpers_release_sqlite_connections
+    with self.assertRaises(sqlite3.ProgrammingError):
+AssertionError: ProgrammingError not raised
+
+======================================================================
+FAIL: test_fixture_read_helpers_release_sqlite_connections (test_ees_work_authoring.SystemAuthoringTests.test_fixture_read_helpers_release_sqlite_connections) (helper='business_rows')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc/tests/test_ees_work_authoring.py", line 165, in test_fixture_read_helpers_release_sqlite_connections
+    with self.assertRaises(sqlite3.ProgrammingError):
+AssertionError: ProgrammingError not raised
+
+======================================================================
+FAIL: test_fixture_read_helpers_release_sqlite_connections (test_ees_work_authoring.SystemAuthoringTests.test_fixture_read_helpers_release_sqlite_connections) (helper='audit_table')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc/tests/test_ees_work_authoring.py", line 165, in test_fixture_read_helpers_release_sqlite_connections
+    with self.assertRaises(sqlite3.ProgrammingError):
+AssertionError: ProgrammingError not raised
+
+======================================================================
+FAIL: test_fixture_read_helpers_release_sqlite_connections (test_ees_work_authoring.SystemAuthoringTests.test_fixture_read_helpers_release_sqlite_connections) (helper='audit_rows')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc/tests/test_ees_work_authoring.py", line 165, in test_fixture_read_helpers_release_sqlite_connections
+    with self.assertRaises(sqlite3.ProgrammingError):
+AssertionError: ProgrammingError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.013s
+
+FAILED (failures=4)
+
+AFTER: original authorization and preservation checks retained
+test_sa23_exact_legacy_archive_and_explicit_partial_import (test_ees_work_authoring.AuthoringRestoreTests.test_sa23_exact_legacy_archive_and_explicit_partial_import) ... Executing <Task finished name='Task-2' coro=<AuthoringRestoreTests.test_sa23_exact_legacy_archive_and_explicit_partial_import() done, defined at /workspace/scratch/1d6bc68344e4/team-agent-poc/tests/test_ees_work_authoring.py:815> result=None created at /workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 0.221 seconds
+ok
+test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication) ... Executing <Task finished name='Task-7' coro=<AuthoringRestoreTests.test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication() done, defined at /workspace/scratch/1d6bc68344e4/team-agent-poc/tests/test_ees_work_authoring.py:670> result=None created at /workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 0.299 seconds
+ok
+test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process) ... Executing <Task finished name='Task-12' coro=<AuthoringRestoreTests.test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process() done, defined at /workspace/scratch/1d6bc68344e4/team-agent-poc/tests/test_ees_work_authoring.py:895> result=None created at /workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 0.236 seconds
+ok
+test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state) ... Executing <Task finished name='Task-17' coro=<AuthoringRestoreTests.test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state() done, defined at /workspace/scratch/1d6bc68344e4/team-agent-poc/tests/test_ees_work_authoring.py:856> result=None created at /workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 0.224 seconds
+ok
+test_sa25_reconciliation_cannot_overwrite_node_moved_to_another_process_by_restore (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_reconciliation_cannot_overwrite_node_moved_to_another_process_by_restore) ... Executing <Task finished name='Task-22' coro=<AuthoringRestoreTests.test_sa25_reconciliation_cannot_overwrite_node_moved_to_another_process_by_restore() done, defined at /workspace/scratch/1d6bc68344e4/team-agent-poc/tests/test_ees_work_authoring.py:790> result=None created at /workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 0.222 seconds
+ok
+test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit) ... Executing <Task finished name='Task-27' coro=<AuthoringRestoreTests.test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit() done, defined at /workspace/scratch/1d6bc68344e4/team-agent-poc/tests/test_ees_work_authoring.py:751> result=None created at /workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 0.220 seconds
+ok
+test_sa05_http_routes_use_verified_dependency_and_server_scope (test_ees_work_authoring.AuthoringRouteTests.test_sa05_http_routes_use_verified_dependency_and_server_scope) ... Executing <Task finished name='Task-32' coro=<AuthoringRouteTests.test_sa05_http_routes_use_verified_dependency_and_server_scope() done, defined at /workspace/scratch/1d6bc68344e4/team-agent-poc/tests/test_ees_work_authoring.py:943> result=None created at /workspace/scratch/1d6bc68344e4/team-agent-poc/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 0.286 seconds
+ok
+test_fixture_read_helpers_release_sqlite_connections (test_ees_work_authoring.SystemAuthoringTests.test_fixture_read_helpers_release_sqlite_connections) ... ok
+test_sa01_02_current_groups_grant_systems_without_changing_native_role (test_ees_work_authoring.SystemAuthoringTests.test_sa01_02_current_groups_grant_systems_without_changing_native_role) ... ok
+test_sa03_28_mapping_revision_audit_and_revoked_receipt_are_enforced (test_ees_work_authoring.SystemAuthoringTests.test_sa03_28_mapping_revision_audit_and_revoked_receipt_are_enforced) ... ok
+test_sa03_group_identity_rename_delete_and_same_name_replacement (test_ees_work_authoring.SystemAuthoringTests.test_sa03_group_identity_rename_delete_and_same_name_replacement) ... ok
+test_sa04_invalid_account_and_group_failure_fail_closed_only_for_authoring (test_ees_work_authoring.SystemAuthoringTests.test_sa04_invalid_account_and_group_failure_fail_closed_only_for_authoring) ... ok
+test_sa05_06_07_forged_authority_and_foreign_draft_never_cross_server_scope (test_ees_work_authoring.SystemAuthoringTests.test_sa05_06_07_forged_authority_and_foreign_draft_never_cross_server_scope) ... ok
+test_sa08_entire_payload_is_rejected_for_cross_process_and_shared_data_injection (test_ees_work_authoring.SystemAuthoringTests.test_sa08_entire_payload_is_rejected_for_cross_process_and_shared_data_injection) ... ok
+test_sa08_new_ids_are_server_issued_and_cycles_and_native_code_are_rejected (test_ees_work_authoring.SystemAuthoringTests.test_sa08_new_ids_are_server_issued_and_cycles_and_native_code_are_rejected) ... ok
+test_sa09_10_revocation_rechecks_reads_writes_and_receipt_replay (test_ees_work_authoring.SystemAuthoringTests.test_sa09_10_revocation_rechecks_reads_writes_and_receipt_replay) ... ok
+test_sa12_18_native_reference_revocation_and_content_change_require_revalidation (test_ees_work_authoring.SystemAuthoringTests.test_sa12_18_native_reference_revocation_and_content_change_require_revalidation) ... ok
+test_sa13_14_new_authoring_publishes_for_other_user_without_sharing_cases (test_ees_work_authoring.SystemAuthoringTests.test_sa13_14_new_authoring_publishes_for_other_user_without_sharing_cases) ... ok
+test_sa15_same_process_concurrent_saves_have_one_winner (test_ees_work_authoring.SystemAuthoringTests.test_sa15_same_process_concurrent_saves_have_one_winner) ... ok
+test_sa16_17_different_process_publications_merge_latest_catalog (test_ees_work_authoring.SystemAuthoringTests.test_sa16_17_different_process_publications_merge_latest_catalog) ... ok
+test_sa18_asset_changes_during_final_authorization_cannot_use_an_earlier_snapshot (test_ees_work_authoring.SystemAuthoringTests.test_sa18_asset_changes_during_final_authorization_cannot_use_an_earlier_snapshot) ... ok
+test_sa18_exact_validation_is_invalid_after_draft_or_owner_changes (test_ees_work_authoring.SystemAuthoringTests.test_sa18_exact_validation_is_invalid_after_draft_or_owner_changes) ... ok
+test_sa19_invalid_merged_document_does_not_partially_publish (test_ees_work_authoring.SystemAuthoringTests.test_sa19_invalid_merged_document_does_not_partially_publish) ... ok
+test_sa19_publish_and_audit_failure_roll_back_one_transaction (test_ees_work_authoring.SystemAuthoringTests.test_sa19_publish_and_audit_failure_roll_back_one_transaction) ... ok
+test_sa20_system_scope_and_unassigned_processes_cannot_be_self_assigned (test_ees_work_authoring.SystemAuthoringTests.test_sa20_system_scope_and_unassigned_processes_cannot_be_self_assigned) ... ok
+test_sa21_copy_uses_new_ids_and_keeps_source_and_frozen_case (test_ees_work_authoring.SystemAuthoringTests.test_sa21_copy_uses_new_ids_and_keeps_source_and_frozen_case) ... ok
+test_sa22_disable_prevents_new_cases_without_rewriting_existing_snapshots (test_ees_work_authoring.SystemAuthoringTests.test_sa22_disable_prevents_new_cases_without_rewriting_existing_snapshots) ... ok
+test_sa24_legacy_whole_catalog_writes_are_closed_even_to_admin (test_ees_work_authoring.SystemAuthoringTests.test_sa24_legacy_whole_catalog_writes_are_closed_even_to_admin) ... ok
+test_sa28_audit_uses_verified_actor_revisions_and_never_copies_document (test_ees_work_authoring.SystemAuthoringTests.test_sa28_audit_uses_verified_actor_revisions_and_never_copies_document) ... ok
+test_approval_change_between_validation_and_publish_preserves_draft (test_ees_workflow_contract.ContractAuthoringTests.test_approval_change_between_validation_and_publish_preserves_draft) ... ok
+test_p_save_publish_exact_approval_and_reference_remapping (test_ees_workflow_contract.ContractAuthoringTests.test_p_save_publish_exact_approval_and_reference_remapping) ... ok
+
+----------------------------------------------------------------------
+Ran 31 tests in 2.389s
+
+OK

@@ -332,6 +332,16 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                 if not self.read('.ew-v4-filter-menu', 'open'):
                     self.click('.ew-v4-filter-menu > summary')
                 self.click('[data-action="job_filter"][data-filter="all"]')
+                if self.read('.ew-v4-filter-menu', 'open'):
+                    self.click('.ew-v4-filter-menu > summary')
+                # Completed/simulated/excluded groups start collapsed in V4.
+                # Reveal the searched row with the same visible group controls.
+                groups = self.browser.evaluate("[...document.querySelectorAll('#ees-work-content [data-action=job_group][aria-expanded=false]')].map(e=>e.dataset.group)")
+                for group in groups:
+                    if self.read(control, "getClientRects().length"):
+                        break
+                    self.click('#ees-work-content [data-action=job_group][data-group="' + group + '"]')
+                self.wait('!!document.querySelector(' + json.dumps(control) + ')?.getClientRects().length')
         self.click(control)
         self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === "
                   + json.dumps(selected["name"])
@@ -1420,6 +1430,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.wait("!!document.querySelector('#chat-input') && !document.querySelector('#ees-work-context')")
         self.assertIsNone(self.current("other-chat")["case"])
         self.navigate("/c/existing-chat")
+        self.open_work_panel()
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
         self.assertEqual(self.current()["case"]["id"], case_id)
         self.assertEqual(self.current()["case"]["jobs"]["db-j"]["status"], "passed")

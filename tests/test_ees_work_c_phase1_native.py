@@ -42,6 +42,7 @@ class CPhaseOneNativeTests(unittest.TestCase):
     def ready_case(self):
         case = self.seed_case('existing-chat', ready=True)
         self.navigate('/c/existing-chat')
+        native.EESWorkNativeBrowserTests.open_work_panel(self)
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
         self.wait_scope_ready('site')
         return case
@@ -97,6 +98,7 @@ class CPhaseOneNativeTests(unittest.TestCase):
             self.assertTrue(state['ok'], state)
         self.assertEqual(state['case']['progress'], {'done': 40, 'total': 60})
         self.navigate('/c/existing-chat')
+        native.EESWorkNativeBrowserTests.open_work_panel(self)
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
         self.wait_scope_ready('site')
         return state['case']
@@ -328,7 +330,7 @@ class CPhaseOneNativeTests(unittest.TestCase):
         self.key('Escape', 27)
 
         parent_id = after['definition']['nodes']['ap-j']['parent']
-        self.click('.ew-work-path [data-action=select][data-node-id="' + parent_id + '"]')
+        self.click('.ew-v4-breadcrumb [data-action=select][data-node-id="' + parent_id + '"]')
         self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === "
                   + json.dumps(after['definition']['nodes'][parent_id]['name']))
         self.screenshot('c-phase1-t-return')
@@ -339,7 +341,7 @@ class CPhaseOneNativeTests(unittest.TestCase):
         self.screenshot('c-phase1-db-same-task-comparison')
         self.choose('ap-j')
         self.click('#ees-work-close')
-        self.click('#ees-work-context-open')
+        native.EESWorkNativeBrowserTests.open_work_panel(self)
         self.wait("document.querySelector('#ees-work-panel .ew-title')?.textContent === "
                   + json.dumps(after['definition']['nodes']['ap-j']['name']))
         self.assertEqual(self.current()['case']['jobs']['ap-j']['history'], records)

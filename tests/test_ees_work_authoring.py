@@ -6,6 +6,7 @@ is a separate gate. Restore coverage requires the captured supported old module.
 """
 
 import asyncio
+from contextlib import closing
 from copy import deepcopy
 import importlib
 import hashlib
@@ -118,31 +119,56 @@ class AuthoringFixture:
         self.assertNotIn("FOREIGN-UNPUBLISHED-TEXT", rendered)
 
     def catalog(self):
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db:
             row = db.execute("SELECT published,draft,revision,validated FROM catalog WHERE id=1").fetchone()
         return row
 
     def business_rows(self):
         """Audit rejection rows may grow; protected data must stay unchanged."""
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db:
             names = [row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
             return {name: sorted(db.execute('SELECT * FROM "' + name.replace('"', '""') + '"').fetchall(), key=repr)
                     for name in names if not any(word in name for word in ("audit", "sqlite_"))}
 
     def audit_table(self):
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db:
             tables = [row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%audit%'")]
         self.assertEqual(len(tables), 1, tables)
         return tables[0]
 
     def audit_rows(self):
         table = self.audit_table()
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db:
             db.row_factory = sqlite3.Row
             return [dict(row) for row in db.execute('SELECT * FROM "' + table + '" ORDER BY rowid')]
 
 
 class SystemAuthoringTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
+    async def test_fixture_read_helpers_release_sqlite_connections(self):
+        # sqlite3's transaction context does not close the connection. Holding
+        # each returned object makes leaks observable on Linux too, before a
+        # Windows TemporaryDirectory cleanup attempts to remove the open file.
+        original_connect = sqlite3.connect
+        for helper in (self.catalog, self.business_rows, self.audit_table, self.audit_rows):
+            connections = []
+
+            def tracked_connect(*args, **kwargs):
+                connection = original_connect(*args, **kwargs)
+                connections.append(connection)
+                return connection
+
+            with self.subTest(helper=helper.__name__):
+                try:
+                    with patch.object(sqlite3, "connect", side_effect=tracked_connect):
+                        helper()
+                    self.assertTrue(connections, "The real SQLite read must run")
+                    for connection in connections:
+                        with self.assertRaises(sqlite3.ProgrammingError):
+                            connection.execute("SELECT 1")
+                finally:
+                    for connection in connections:
+                        connection.close()
+
     async def test_sa01_02_current_groups_grant_systems_without_changing_native_role(self):
         for actor, expected in (("ordinary", []), ("ems-a", ["EMS"]), ("ems-b", ["EMS"]),
                                 ("dual", ["EMS", "FDC"]), ("apc", ["APC"])):
