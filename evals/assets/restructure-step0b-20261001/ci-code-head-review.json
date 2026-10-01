@@ -1,0 +1,170 @@
+{
+  "run_id": 36820853922,
+  "head_sha": "a7f2ae5af7572ad9cbd31437c7ff82d0dce581e9",
+  "jobs": [
+    {
+      "id": 110235905413,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "failure",
+      "important_steps": [
+        {
+          "name": "Verify shared workflow service and real chat Tool",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26
+        },
+        {
+          "name": "Verify Native signup, approval, scoped authoring and account recovery",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 29
+        },
+        {
+          "name": "Verify native Open WebUI workflow and real composer integration",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 33
+        },
+        {
+          "name": "Keep EES Work browser evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34
+        }
+      ]
+    },
+    {
+      "id": 110235905674,
+      "name": "Delivery checks (windows-2022)",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "important_steps": [
+        {
+          "name": "Verify shared workflow service and real chat Tool",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "number": 26
+        },
+        {
+          "name": "Verify Native signup, approval, scoped authoring and account recovery",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 29
+        },
+        {
+          "name": "Verify native Open WebUI workflow and real composer integration",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 33
+        },
+        {
+          "name": "Keep EES Work browser evidence",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 34
+        }
+      ]
+    },
+    {
+      "id": 110238392674,
+      "name": "Prepare delivery files",
+      "status": "completed",
+      "conclusion": "skipped",
+      "important_steps": []
+    }
+  ],
+  "linux": {
+    "native_authoring_tests": {
+      "count": 6,
+      "seconds": 57.546,
+      "status": "PASS"
+    },
+    "account_switch": {
+      "status": "FAIL",
+      "line": 152,
+      "stage": "former A tab after B login and late response validation",
+      "error": "FDC manage-system ready timeout; prior session target selected without actual tab activation",
+      "root_cause": "unconfirmed; failure log and cleanup screenshot have different observation moments"
+    },
+    "later_native_gate": "skipped"
+  },
+  "windows": {
+    "observed_failures": [
+      {
+        "time_utc": "05:44:36",
+        "name": "WorkflowPreservationTests.test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads",
+        "status": "FAIL",
+        "observed_wheel_sha256": "5941f77ae1d773026fe940cad58d8e9e72cb9a30a8280b61f91ddc6cc7246e2c",
+        "expected_sha256": "ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd"
+      },
+      {
+        "time_utc": "05:44:45",
+        "name": "ContractAuthoringTests.test_p_save_publish_exact_approval_and_reference_remapping",
+        "status": "ERROR",
+        "details": "Final error traceback unavailable; test coroutine logged result=None"
+      }
+    ],
+    "cancellation_utc": "05:49:55",
+    "current_test": "test_ees_workflow_execution.ExecutionTests.test_forged_model_claim_rejected",
+    "interrupted_path": "drain -> ExecutionRuntime.process_once -> asyncio.gather(heartbeat) -> _heartbeat; CancelledError then KeyboardInterrupt",
+    "cause_boundary": "Job roughly10min matches timeout-minutes10; API cancelled and logs operation canceled, no explicit timeout annotation. Do not relabel earlier FAIL/ERROR as cancellation-only."
+  },
+  "artifact": {
+    "id": 11143466459,
+    "name": "ees-work-browser-evidence",
+    "size_in_bytes": 1681124,
+    "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11143466459",
+    "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11143466459/zip",
+    "expired": false,
+    "created_at": "2026-10-01T05:45:05Z",
+    "expires_at": "2026-10-08T05:45:03Z",
+    "updated_at": "2026-10-01T05:45:05Z",
+    "digest": "sha256:d16ba33908de8e72612823d8d270d20c85efa714a6287d4ab1e0fe57e0ecd454",
+    "workflow_run": {
+      "id": 36820853922,
+      "repository_id": 1355435001,
+      "head_repository_id": 1355435001,
+      "head_branch": "docs/ees-restructure-step0a-20261001",
+      "head_sha": "a7f2ae5af7572ad9cbd31437c7ff82d0dce581e9"
+    }
+  },
+  "artifact_verified": {
+    "downloaded": true,
+    "byte_count": 1681124,
+    "zip_members": 16,
+    "sha256": "d16ba33908de8e72612823d8d270d20c85efa714a6287d4ab1e0fe57e0ecd454",
+    "rest_digest_match": true,
+    "failure_png_present": true,
+    "failure_json_present": true,
+    "capture_errors": [],
+    "dom": {
+      "route": "/?ees=workflow",
+      "readyState": "complete",
+      "nativeReady": true,
+      "controls_count": 46,
+      "requests_count": 20
+    },
+    "screenshot_viewed": true,
+    "screenshot_observation": "Former-A sidebar retained A synthetic name/chat title; authoring pane had no manageable system/empty editor at capture time.",
+    "members": [
+      "nu-closed-native-signup.png",
+      "sa-approved-first-chat.png",
+      "sa-native-approved-user.png",
+      "sa-ordinary-user-published-a-panel.png",
+      "sa-recalled-author-preserved-local-draft.png",
+      "sa-restore-changed-explicit-baseline-dialog.png",
+      "sa-restore-changed-republished.png",
+      "sa-restore-removed-explicit-baseline-dialog.png",
+      "sa-restore-removed-republished.png",
+      "sa-same-db-reinitialized-ordinary-user.png",
+      "sa-signup-pending.png",
+      "sa-user-authoring-entry.png",
+      "sa-user-published-procedure.png",
+      "sa26-b-after-late-a-responses.png",
+      "test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png"
+    ]
+  },
+  "actions": "Read-only; no rerun/cancel/CI/product edits"
+}

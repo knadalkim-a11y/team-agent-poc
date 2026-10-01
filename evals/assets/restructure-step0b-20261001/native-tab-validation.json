@@ -1,0 +1,19 @@
+{
+  "observed_at": "2026-10-01T05:49:21Z",
+  "scope": "Native fixture account-switch followup with real tab activation; CI failure root cause not confirmed",
+  "command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_authoring_account_switch -v",
+  "result": {
+    "tests": 1,
+    "seconds": 7.524,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "exit_code": 0
+  },
+  "observation": "Both before and after were visible/focused locally; hidden CI tab was not reproduced",
+  "log": "test_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 7.524s\n\nOK\n",
+  "test_sha256": {
+    "tests/test_ees_work_authoring_account_switch.py": "f539b4b49aed33cde1446cdab133559dcd511dcf9e0dbbebaca08ec6d939cbd2",
+    "tests/test_ees_work_authoring_native.py": "0cd831afdd64fa0d26f7878b579abaef8d1a77d3ab52bcf246208ee756dde15e"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "observed_date": "2026-10-01",
+  "commit": "a7f2ae5af7572ad9cbd31437c7ff82d0dce581e9",
+  "environment": {
+    "python": "3.11.16",
+    "chrome": "153.0.8010.52"
+  },
+  "command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_authoring_native test_ees_work_authoring_account_switch test_ees_work_demo.EESWorkNativeBrowserTests.test_cancelled_human_confirmation_keeps_saved_state -v",
+  "env": {
+    "PYTHONPATH": "tests",
+    "EES_REQUIRE_AUTHORING_NATIVE": "1",
+    "EES_TEST_BRANDING_DIR": "dist/step0b/branding",
+    "EES_TEST_UPSTREAM_WHEEL": "dist/upstream/open_webui-0.11.3-py3-none-any.whl",
+    "EES_TEST_CHROME": "dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell",
+    "EES_TEST_SCREENSHOT_DIR": "dist/ees-work-screenshots"
+  },
+  "result": {
+    "tests": 8,
+    "duration_seconds": 43.666,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "exit_code": 0
+  },
+  "boundary": "Real compiled Native frontend/Auth/Groups routes with temporary synthetic fixtures; full Native CLI product validation is separate composer-result.json",
+  "log": "test_native_password_change_reset_and_existing_token_without_redis (test_ees_work_authoring_native.NativeAccountAPITests.test_native_password_change_reset_and_existing_token_without_redis)\nNU-06: password changes block old credentials; token revocation needs Redis. ... Cannot revoke tokens for user dacb0b12-1385-4b8e-8fbf-53b502f61668: Redis is not configured, existing sessions stay valid until expiry.\nCannot revoke tokens for user dacb0b12-1385-4b8e-8fbf-53b502f61668: Redis is not configured, existing sessions stay valid until expiry.\nok\ntest_native_signup_pending_no_membership_and_closed_registration (test_ees_work_authoring_native.NativeAccountAPITests.test_native_signup_pending_no_membership_and_closed_registration)\nNU-01/02: actual signup ignores client role; closed API rejects. ... ok\ntest_pending_group_member_cannot_author_or_use_protected_runtime (test_ees_work_authoring_native.NativeAccountAPITests.test_pending_group_member_cannot_author_or_use_protected_runtime)\nNU-02/08: group membership never bypasses current Native approval. ... ok\ntest_admin_restored_publication_reconcile_preserves_draft_ui (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_admin_restored_publication_reconcile_preserves_draft_ui)\nA changed/removed publication needs explicit, non-publishing adoption. ... ok\ntest_closed_native_signup_ui_and_direct_api (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_closed_native_signup_ui_and_direct_api) ... ok\ntest_native_new_signup_and_approval_ui (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_new_signup_and_approval_ui) ... ok\ntest_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai) ... ok\ntest_cancelled_human_confirmation_keeps_saved_state (test_ees_work_demo.EESWorkNativeBrowserTests.test_cancelled_human_confirmation_keeps_saved_state) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 43.666s\n\nOK\n",
+  "test_sha256": {
+    "tests/test_ees_work_authoring_native.py": "031841a69008c4eb32750ff69e0292310297bd57dab075799590294047ee0b38",
+    "tests/test_ees_work_authoring_account_switch.py": "370dfc600f022f4d92ae762d984f684fb5428602cbb32f4be9b01089b7c9cf0d",
+    "tests/test_ees_work_demo.py": "922aa2cebe7b7a7b9fc65eecbeed6f54348b83378af1b355b459d85443362c62",
+    "tests/ees_work_c_phase3_fullapp.py": "da271febcb06d8af224f3723929374009a24198665e4fa72f4f807ac65e82949"
+  }
+}
