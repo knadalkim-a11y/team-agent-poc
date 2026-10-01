@@ -231,7 +231,7 @@ def main():
             sys.path.insert(0, str(ROOT))
             sys.path.insert(0, str(ROOT / 'tests'))
             from test_ees_chat_theme import ChromePipe
-            browser = ChromePipe(str(args.chrome.resolve()), str(work/'chrome'))
+            browser = ChromePipe(str(args.chrome.resolve()), str(work/'chrome'), font_wheel=args.wheel)
             browser.navigate('about:blank')
             browser.call('Runtime.enable')
             browser.call('Network.enable')

@@ -138,6 +138,24 @@ jobs:
           git archive --format=tar --output=dist/previous-source.tar 991cdb1d80ae07471fb50594831d74fe602b1ef7
           python -c "import tarfile; tarfile.open('dist/previous-source.tar').extractall('dist/previous-source', filter='data')"
           python dist/previous-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/previous-branding
+      - name: Diagnose the two Windows fixture failures independently
+        id: windows_residual
+        if: runner.os == 'Windows'
+        env:
+          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+          EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
+          EES_REQUIRE_LEGACY_WORKFLOW: '1'
+          EES_REQUIRE_ASSET_NATIVE: '1'
+          EES_REQUIRE_MODEL_NATIVE: '1'
+        run: python -X warn_default_encoding -W error::EncodingWarning tests/ees_workflow_windows_diagnostics.py --output dist/ees-windows-diagnostics --previous-wheel dist/previous-branding/open_webui-0.11.3+ees.11-py3-none-any.whl --previous-source dist/previous-source
+      - name: Keep the complete Windows fixture diagnostics
+        if: always() && runner.os == 'Windows' && steps.windows_residual.outcome != 'skipped'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ees-windows-fixture-diagnostics
+          path: dist/ees-windows-diagnostics
+          if-no-files-found: error
+          retention-days: 7
       - name: Verify shared workflow service and real chat Tool
         env:
           EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl

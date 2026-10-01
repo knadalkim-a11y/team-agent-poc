@@ -1,0 +1,10 @@
+{
+  "removed_own_temporary_profile_caches": [
+    "/var/cache/fontconfig/b1c49650fe15607483902f48e313d55a-le64.cache-11",
+    "/var/cache/fontconfig/26a4e508116171273383a32bb1c4ca0b-le64.cache-11",
+    "/var/cache/fontconfig/431e45806275439d519037081370c6f9-le64.cache-11",
+    "/var/cache/fontconfig/340919f8dbe07c88e73718cf9079c715-le64.cache-11"
+  ],
+  "cause": "system cachedir preceded profile cachedir",
+  "correction": "create and prepend profile cachedir before inherited config"
+}

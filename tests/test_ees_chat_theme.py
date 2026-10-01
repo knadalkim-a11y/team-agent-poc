@@ -6,6 +6,7 @@ EES_TEST_CHROME makes Chrome and EES_TEST_BRANDING_DIR mandatory in Linux CI.
 """
 
 import functools
+import hashlib
 import html
 from html.parser import HTMLParser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -23,12 +24,54 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 from urllib.parse import urlsplit
 from zipfile import ZipFile
+from xml.sax.saxutils import escape
 
 from scripts import build_ees_webui as branding
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def chrome_font_environment(profile, wheel=None):
+    """Give this Linux browser a Korean fallback without changing OS or CSS.
+
+    Native auth/pending screens intentionally keep the upstream font stack.
+    Minimal runners may have no Korean platform font, even after fonts.ready.
+    Reuse the already pinned wheel font through a profile-local fontconfig.
+    The caller owns the temporary profile and its font/cache cleanup.
+    """
+    environment = os.environ.copy()
+    if not sys.platform.startswith("linux"):
+        return environment
+    if wheel is None and (directory := environment.get("EES_TEST_BRANDING_DIR")):
+        directory = Path(directory)
+        manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+        wheel = directory / manifest["wheel"]["filename"]
+    if wheel is None:
+        return environment
+    member, expected_hash = branding.FONT_SOURCES["NotoSansKR-Variable.ttf"]
+    with ZipFile(wheel) as archive:
+        content = archive.read(member)
+    if hashlib.sha256(content).hexdigest() != expected_hash:
+        raise AssertionError("Pinned Native Korean fallback font hash mismatch")
+    profile = Path(profile).resolve()
+    directory = profile / "fixture-fonts"
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "NotoSansKR-Variable.ttf").write_bytes(content)
+    cache = profile / "fixture-font-cache"
+    cache.mkdir(exist_ok=True)
+    config = profile / "fixture-fonts.conf"
+    inherited = environment.get("FONTCONFIG_FILE", "/etc/fonts/fonts.conf")
+    config.write_text(
+        '<?xml version="1.0"?><!DOCTYPE fontconfig SYSTEM "fonts.dtd"><fontconfig>'
+        '<cachedir>' + escape(str(cache)) + '</cachedir>'
+        '<include ignore_missing="yes">' + escape(inherited) + '</include>'
+        '<dir>' + escape(str(directory)) + '</dir>'
+        '</fontconfig>\n', encoding="utf-8")
+    environment["FONTCONFIG_FILE"] = str(config)
+    return environment
 
 
 class ChromePipe:
@@ -38,7 +81,8 @@ class ChromePipe:
     dependency. Every response has a deadline; browser/profile cleanup is local.
     """
 
-    def __init__(self, chrome, profile):
+    def __init__(self, chrome, profile, *, font_wheel=None):
+        environment = chrome_font_environment(profile, font_wheel)
         request_read, self.request_write = os.pipe()
         self.response_read, response_write = os.pipe()
         self.errors = tempfile.TemporaryFile()
@@ -53,7 +97,7 @@ class ChromePipe:
             self.process = subprocess.Popen(
                 [sys.executable, "-c", launch, str(request_read), str(response_write)] + command,
                 pass_fds=(request_read, response_write), start_new_session=True,
-                stdout=subprocess.DEVNULL, stderr=self.errors)
+                stdout=subprocess.DEVNULL, stderr=self.errors, env=environment)
         finally:
             os.close(request_read)
             os.close(response_write)
@@ -308,6 +352,20 @@ MEASURE = """(() => {
 })()"""
 
 
+class ChromeFontEnvironmentTests(unittest.TestCase):
+    def test_changed_pinned_font_is_rejected_before_launch_or_profile_write(self):
+        before = os.environ.copy()
+        with tempfile.TemporaryDirectory(prefix="ees-font-integrity-") as temporary:
+            wheel = Path(temporary) / "changed.whl"
+            with ZipFile(wheel, "w") as archive:
+                archive.writestr(branding.FONT_SOURCES["NotoSansKR-Variable.ttf"][0], b"changed font bytes")
+            profile = Path(temporary) / "chrome"
+            with patch.object(sys, "platform", "linux"), self.assertRaisesRegex(AssertionError, "font hash mismatch"):
+                chrome_font_environment(profile, wheel)
+            self.assertFalse(profile.exists())
+        self.assertEqual(os.environ, before)
+
+
 class ChatThemeBrowserTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -330,7 +388,7 @@ class ChatThemeBrowserTests(unittest.TestCase):
         with ZipFile(directory / manifest["wheel"]["filename"]) as wheel:
             prefix = "open_webui/frontend/"
             for name in wheel.namelist():
-                if name.startswith(prefix) and name.endswith((".css", ".ttf", ".woff", ".woff2")):
+                if name.startswith(prefix) and name.endswith((".css", ".ttf", ".woff", ".woff2", "/v4/bddb4.svg")):
                     cls.assets["/" + name[len(prefix):]] = wheel.read(name)
         theme = "/" + branding.PROGRAM_FRONTENDS[branding.VERSION] + "/chat-theme.css"
         if theme not in cls.assets:
@@ -350,9 +408,13 @@ class ChatThemeBrowserTests(unittest.TestCase):
         cls.assets["/c/browser-check"] = interaction_fixture(fixture).replace("__MODE__", "light").encode()
         # CSS/HTML disabled-semantics boundary only, not a replacement for the
         # official Native composer interaction gate. These are its real submit
-        # attributes; the stylesheet comes exclusively from the tested wheel.
+        # attributes and V4 work-open context; styles/tokens come exclusively
+        # from the tested wheel. The old fixture omitted that context and
+        # asserted the superseded 76x44 blue composer button.
+        launcher = "/" + branding.PROGRAM_FRONTENDS[branding.VERSION] + "/ees-work-launcher.css"
         cls.assets["/c-send.html"] = ("<!doctype html><html><head>" + links +
-            '</head><body><section id="ees-work-entry" hidden></section>'
+            '<link rel="stylesheet" href="' + html.escape(launcher) + '">' +
+            '</head><body data-ees-v4="" data-ees-work-open="true"><section id="ees-work-entry" hidden></section>'
             '<main id="chat-container"><div id="ees-work-context"></div>'
             '<form id="send-contract"><button id="send-message-button" type="submit" disabled '
             'class="text-white bg-gray-200 dark:text-gray-900 dark:bg-gray-700 disabled transition rounded-full p-[0.3125rem] self-center"></button>'
@@ -528,13 +590,14 @@ class ChatThemeBrowserTests(unittest.TestCase):
             browser = ChromePipe(self.chrome, profile)
             try:
                 browser.navigate(f"http://127.0.0.1:{self.server.server_port}/c-send.html")
+                browser.evaluate("document.fonts.ready.then(() => true)")
                 measured = browser.evaluate("""(() => {const button=document.getElementById('send-message-button'),s=getComputedStyle(button),r=button.getBoundingClientRect();return {disabled:button.disabled,matchesDisabled:button.matches(':disabled'),opacity:s.opacity,background:s.backgroundColor,cursor:s.cursor,radius:s.borderRadius,width:r.width,height:r.height,x:r.x+r.width/2,y:r.y+r.height/2};})()""")
                 self.assertTrue(measured["disabled"], measured)
                 self.assertTrue(measured["matchesDisabled"], measured)
-                self.assertEqual(measured["background"], "rgb(55, 101, 139)", measured)
+                self.assertEqual(measured["background"], "rgb(236, 236, 239)", measured)
                 self.assertEqual(measured["opacity"], "1", measured)
                 self.assertEqual(measured["cursor"], "not-allowed", measured)
-                self.assertEqual((measured["width"], measured["height"], measured["radius"]), (76, 44, "10px"), measured)
+                self.assertEqual((measured["width"], measured["height"], measured["radius"]), (30, 30, "6px"), measured)
                 for event_type in ("mousePressed", "mouseReleased"):
                     browser.call("Input.dispatchMouseEvent", {"type": event_type,
                         "x": measured["x"], "y": measured["y"], "button": "left",

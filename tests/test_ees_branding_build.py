@@ -34,6 +34,59 @@ NOTICE = b"# LICENSE: Open WebUI branding is governed by the bundled license.\n"
 LICENSE = b"Synthetic license fixture; copyright and branding conditions must survive.\n"
 
 
+def assert_css_icon_cache_keys(test, original, built, icons):
+    """Audit only reviewed icon URLs; preserve every byte outside their values."""
+    # Parse URL boundaries independently of prepare_additions' byte replacement.
+    # icons comes from reviewed source files, never from the builder's additions.
+    pattern = rb'''url\(\s*(?P<quote>["']?)(?P<url>[^"'\s)]+)(?P=quote)\s*\)'''
+    original_urls = list(re.finditer(pattern, original))
+    built_urls = list(re.finditer(pattern, built))
+    test.assertEqual(len(built_urls), len(original_urls), "CSS URL inventory changed")
+    original_end = built_end = 0
+    seen = set()
+    for before, after in zip(original_urls, built_urls):
+        test.assertEqual(built[built_end:after.start("url")],
+                         original[original_end:before.start("url")],
+                         "CSS bytes outside URL values changed")
+        url = expected = before.group("url")
+        for relative, content in icons.items():
+            if url in (b"./" + relative.encode("ascii"), b"/_ees12/" + relative.encode("ascii")):
+                expected += b"?v=" + hashlib.sha256(content).hexdigest().encode("ascii")
+                seen.add(relative)
+                break
+        test.assertEqual(after.group("url"), expected, "CSS URL or icon digest differs")
+        original_end, built_end = before.end("url"), after.end("url")
+    test.assertEqual(built[built_end:], original[original_end:],
+                     "CSS trailing bytes changed")
+    test.assertEqual(seen, set(icons), "Reviewed icon reference missing from source CSS")
+
+
+class CssCacheIntegrityTests(unittest.TestCase):
+    def test_accepts_only_reviewed_relative_absolute_and_repeated_icon_urls(self):
+        icons = {"v4/721d7.svg": b"reviewed icon"}
+        original = (b'.a{background:url("./v4/721d7.svg")}\r\n'
+                    b".b{mask:url( '/_ees12/v4/721d7.svg' )}"
+                    b'.c{mask:url(./v4/721d7.svg)}'
+                    b'.font{src:url("./fonts/unchanged.ttf?v=keep")}\n/* keep */')
+        # A fixed fixture digest keeps the successful sample independent of the
+        # assertion helper and of the product's URL-rewriting implementation.
+        query = b"?v=dd6e48bbcd151debcfa953a8b9d4f7bdb32e6ab0552f57e761268f937a97393f"
+        built = original.replace(b"721d7.svg", b"721d7.svg" + query)
+        assert_css_icon_cache_keys(self, original, built, icons)
+        mutations = {
+            "wrong hash": built.replace(query, b"?v=" + b"0" * 64, 1),
+            "missing hash": built.replace(query, b"", 1),
+            "missing URL": built.replace(b'url("./v4/721d7.svg' + query + b'")', b"none", 1),
+            "duplicate query": built.replace(query, query + query, 1),
+            "unrelated query": built.replace(b"?v=keep", b"?v=changed"),
+            "unrelated bytes": built.replace(b"/* keep */", b"/* changed */"),
+            "URL punctuation": built.replace(b"url( '", b"url('", 1),
+        }
+        for label, corrupted in mutations.items():
+            with self.subTest(mutation=label), self.assertRaises(AssertionError):
+                assert_css_icon_cache_keys(self, original, corrupted, icons)
+
+
 def assert_workflow_package(test, wheel):
     """Resolve the actual emitted sibling imports/resources and native Tool API."""
     probe = r'''
@@ -441,6 +494,8 @@ class BrandingBuildTests(unittest.TestCase):
                 self.assertIn(("./" + relative + "?v=" + digest).encode(), css)
                 self.assertIn(("/_ees12/" + relative + "?v=" + digest).encode(), css)
                 self.assertNotIn(b"?v=" + digest.encode() + b"?v=", css)
+                assert_css_icon_cache_keys(self, (self.ui / "ees-work-launcher.css").read_bytes(),
+                                           css, {relative: (self.ui / relative).read_bytes()})
         self.assertNotEqual(*hashes)
 
     def test_native_chunk_change_readdresses_entire_cyclic_graph_without_version_change(self):
@@ -1006,8 +1061,17 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
                     copied = built.read(builder.TARGET_APP + "fonts/" + filename)
                     self.assertEqual(copied, source.read(origin))
                     self.assertEqual(hashlib.sha256(copied).hexdigest(), expected)
-                self.assertEqual(built.read(builder.TARGET_APP + "chat-theme.css"),
-                                 (builder.UI_DIR / "chat-theme.css").read_bytes())
+                # Independently reviewed CSS references, not the builder's icon
+                # list or prepared output. All other URLs and bytes must survive.
+                for filename, references in {
+                    "chat-theme.css": ("v4/721d7.svg", "v4/b8bc6.svg", "v4/ea639.svg", "v4/bddb4.svg"),
+                    "ees-work-launcher.css": ("v4/eb94a.svg", "v4/69549.svg"),
+                }.items():
+                    icons = {relative: (builder.UI_DIR / relative).read_bytes() for relative in references}
+                    for relative, content in icons.items():
+                        self.assertEqual(built.read(builder.TARGET_APP + relative), content)
+                    assert_css_icon_cache_keys(self, (builder.UI_DIR / filename).read_bytes(),
+                                               built.read(builder.TARGET_APP + filename), icons)
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/LICENSE.txt"),
                                  (builder.UI_DIR / "font-licenses.txt").read_bytes())
                 self.assertEqual(built.read(builder.TARGET_APP + "ees-work-launcher.js"),

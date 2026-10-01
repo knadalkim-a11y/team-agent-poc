@@ -1,0 +1,159 @@
+{
+  "body": "Skip to main content\n계정 활성화 대기\n WebUI 접속을 위해서는 관리자에게 연락에 연락하십시오\n현재 계정은 아직 활성화되지 않았습니다.\nWebUI에 접속하려면 관리자에게 문의하십시오. 관리자는 관리자 패널에서 사용자 상태를 관리할 수 있습니다.\n다시 확인\n로그아웃\n로그인되었습니다.\nEES Work",
+  "status": "loaded",
+  "readyState": "complete",
+  "visibility": "visible",
+  "faces": [
+    {
+      "family": "Inter",
+      "status": "loaded",
+      "weight": "normal"
+    },
+    {
+      "family": "Vazirmatn",
+      "status": "loaded",
+      "weight": "normal"
+    },
+    {
+      "family": "EES Inter",
+      "status": "unloaded",
+      "weight": "100 900"
+    },
+    {
+      "family": "EES Noto Sans KR",
+      "status": "unloaded",
+      "weight": "100 900"
+    }
+  ],
+  "elements": [
+    {
+      "tag": "DIV",
+      "className": "text-center dark:text-white text-2xl font-normal z-50",
+      "text": "계정 활성화 대기 WebUI 접속을 위해서는 관리자에게 연락에 연락하십시오",
+      "fontFamily": "-apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "fontSize": "24px",
+      "fontWeight": "400"
+    },
+    {
+      "tag": "DIV",
+      "className": " mt-4 text-center text-sm dark:text-gray-200 w-full",
+      "text": "현재 계정은 아직 활성화되지 않았습니다.\nWebUI에 접속하려면 관리자에게 문의하십시오. 관리자는 관리자 패널에서 사용자 상태를 관리할 수 있습니다.",
+      "fontFamily": "-apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "fontSize": "14px",
+      "fontWeight": "400"
+    },
+    {
+      "tag": "BUTTON",
+      "className": "relative z-20 flex px-5 py-2 rounded-full bg-white border border-gray-100 dark:border-none hover:bg-gray-100 text-gray-700 transition font-normal text-sm",
+      "text": "다시 확인",
+      "fontFamily": "-apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "fontSize": "14px",
+      "fontWeight": "400"
+    },
+    {
+      "tag": "BUTTON",
+      "className": "text-xs text-center w-full mt-2 text-gray-400 underline",
+      "text": "로그아웃",
+      "fontFamily": "-apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "fontSize": "12px",
+      "fontWeight": "400"
+    },
+    {
+      "tag": "DIV",
+      "className": "",
+      "text": "로그인되었습니다.",
+      "fontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Noto Sans\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "fontSize": "13px",
+      "fontWeight": "500"
+    }
+  ],
+  "glyph_nodes": [
+    {
+      "nodeName": "DIV",
+      "fonts": [
+        {
+          "familyName": "Noto Sans KR Thin",
+          "postScriptName": "NotoSansKR-Thin",
+          "isCustomFont": false,
+          "glyphCount": 28
+        },
+        {
+          "familyName": "Inter",
+          "postScriptName": "Inter-Regular",
+          "isCustomFont": true,
+          "glyphCount": 13
+        }
+      ]
+    },
+    {
+      "nodeName": "DIV",
+      "fonts": [
+        {
+          "familyName": "Noto Sans KR Thin",
+          "postScriptName": "NotoSansKR-Thin",
+          "isCustomFont": false,
+          "glyphCount": 59
+        },
+        {
+          "familyName": "Inter",
+          "postScriptName": "Inter-Regular",
+          "isCustomFont": true,
+          "glyphCount": 23
+        }
+      ]
+    },
+    {
+      "nodeName": "BUTTON",
+      "fonts": [
+        {
+          "familyName": "Noto Sans KR Thin",
+          "postScriptName": "NotoSansKR-Thin",
+          "isCustomFont": false,
+          "glyphCount": 4
+        },
+        {
+          "familyName": "Inter",
+          "postScriptName": "Inter-Regular",
+          "isCustomFont": true,
+          "glyphCount": 1
+        }
+      ]
+    },
+    {
+      "nodeName": "BUTTON",
+      "fonts": [
+        {
+          "familyName": "Noto Sans KR Thin",
+          "postScriptName": "NotoSansKR-Thin",
+          "isCustomFont": false,
+          "glyphCount": 4
+        }
+      ]
+    },
+    {
+      "nodeName": "DIV",
+      "fonts": [
+        {
+          "familyName": "DejaVu Sans",
+          "postScriptName": "DejaVuSans",
+          "isCustomFont": false,
+          "glyphCount": 1
+        },
+        {
+          "familyName": "Noto Sans KR Thin",
+          "postScriptName": "NotoSansKR-Thin",
+          "isCustomFont": false,
+          "glyphCount": 8
+        }
+      ]
+    }
+  ],
+  "font_requests": [
+    {
+      "url_path": "/assets/fonts/Inter-Variable.ttf"
+    },
+    {
+      "url_path": "/assets/fonts/Vazirmatn-Variable.ttf"
+    }
+  ]
+}

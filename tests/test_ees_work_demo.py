@@ -84,6 +84,9 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.addCleanup(self.server.shutdown)
         self.browser = ChromePipe(self.chrome, str(Path(self.temporary.name) / "chrome"))
         self.addCleanup(self.browser.close)
+        # Runs after setup/test/teardown failures are recorded, before Chrome
+        # closes. Explicit helper users in the C suites need no new aliases.
+        self.addCleanup(EESWorkNativeBrowserTests.capture_failure_evidence, self)
         self.browser.navigate("about:blank")
         self.browser.call("Runtime.enable")
         self.browser.call("Network.enable")
@@ -188,6 +191,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.browser.call("Page.navigate", {"url": self.server.url + path})
 
     def wait(self, expression, timeout=9000):
+        self.last_wait_expression = expression
         result = self.browser.evaluate("new Promise(resolve => { const end=performance.now()+" + str(timeout)
             + "; const check=()=>{if(" + expression + ")resolve(true);else if(performance.now()>end)resolve(false);"
             + "else setTimeout(check,25)};check()})")
@@ -207,6 +211,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         return self.read(selector, "innerText") or ""
 
     def click(self, selector, confirm=None):
+        self.last_click_selector = selector
         point = self.browser.evaluate("(() => {const e=[...document.querySelectorAll("
             + json.dumps(selector) + ")].find(e=>e.getClientRects().length);if(!e)return null;"
             + "e.scrollIntoView({block:'center',inline:'nearest'});const r=e.getBoundingClientRect();"
@@ -260,6 +265,14 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
                   + " && controls.dataset.readyRoute === location.pathname + location.search"
                   + " && trigger?.getClientRects().length > 0 && !trigger.disabled"
                   + " && window.__eesNativeDraftV1?.ready();})()")
+
+    def open_work_panel(self):
+        # Reload preserves the case but does not promise an open panel. Use the
+        # shipped toggle before requiring the panel's connected-chat context.
+        self.wait_scope_ready("site")
+        if not self.read('#ees-work-panel', 'isConnected'):
+            self.click('#ees-work-panel-toggle')
+        self.wait("!!document.querySelector('#ees-work-panel') && !document.querySelector('#ees-work-panel').matches('[aria-busy=true]')")
 
     def select_scope(self, kind, value):
         # Exercise the visible picker with trusted mouse input. The old native
@@ -397,8 +410,48 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         if directory:
             directory = Path(directory)
             directory.mkdir(parents=True, exist_ok=True)
+            self.browser.evaluate('document.fonts.ready.then(()=>true)')
             data = self.browser.call("Page.captureScreenshot", {"format": "png", "captureBeyondViewport": False})["data"]
             (directory / (name + ".png")).write_bytes(base64.b64decode(data))
+
+    def capture_failure_evidence(self):
+        result = getattr(self._outcome, "result", None)
+        failures = list(getattr(result, "failures", ())) + list(getattr(result, "errors", ()))
+        if not any(case is self or getattr(case, "test_case", None) is self for case, _ in failures):
+            return
+        directory = Path(os.environ.get("EES_TEST_SCREENSHOT_DIR", ROOT / "dist/ees-work-screenshots"))
+        evidence = {"test": self.id(), "boundary": "Packaged Native UI, real EES service and temporary SQLite; synthetic authentication/chat",
+                    "last_wait": getattr(self, "last_wait_expression", None),
+                    "last_click": getattr(self, "last_click_selector", None),
+                    "requests": self.server.requests[-20:], "capture_errors": []}
+        name = self._testMethodName + "-failure"
+        try:
+            directory.mkdir(parents=True, exist_ok=True)
+            # A font-loading failure must still leave the actual failure image.
+            data = self.browser.call("Page.captureScreenshot", {"format": "png", "captureBeyondViewport": False})["data"]
+            (directory / (name + ".png")).write_bytes(base64.b64decode(data))
+        except Exception as error:
+            evidence["capture_errors"].append("screenshot:" + type(error).__name__)
+        try:
+            # No input values, cookies, storage or authenticated bodies.
+            evidence["dom"] = self.browser.evaluate("""(()=>({route:location.pathname+location.search,
+                readyState:document.readyState,visibilityState:document.visibilityState,hasFocus:document.hasFocus(),
+                nativeReady:window.__eesNativeDraftV1?.ready(),fontsStatus:document.fonts.status,
+                controls:[...document.querySelectorAll('button,[role=button],summary,#sidebar,#chat-input,#ees-work-panel')]
+                  .slice(0,250).map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);
+                    return {tag:e.tagName,id:e.id,label:e.getAttribute('aria-label'),
+                      text:e.matches('button,[role=button],summary')?e.textContent.trim().slice(0,200):null,
+                      action:e.getAttribute('data-action'),node:e.getAttribute('data-node-id'),
+                      disabled:!!e.disabled,hidden:e.hidden,inert:e.inert,display:s.display,visibility:s.visibility,
+                      expanded:e.getAttribute('aria-expanded'),pressed:e.getAttribute('aria-pressed'),
+                      rect:{x:r.x,y:r.y,width:r.width,height:r.height},
+                      pointerHit:e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))};})}))()""")
+        except Exception as error:
+            evidence["capture_errors"].append("dom:" + type(error).__name__)
+        try:
+            (directory / (name + ".json")).write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        except Exception as error:
+            print("Native workflow failure evidence unavailable: " + type(error).__name__)
 
     def visual_style(self, selector):
         """Measure the actual cascade, composited background and text contrast."""
@@ -1123,6 +1176,7 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.publish_runtime_fixture(definition)
         before = self.seed_case('existing-chat', ready=True)
         self.navigate('/c/existing-chat')
+        self.open_work_panel()
         self.wait("document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')")
         self.wait_scope_ready('site')
         self.fill('#chat-input', '긴 업무 내용을 확인하는 동안 유지할 대화 초안')
@@ -1333,7 +1387,8 @@ class EESWorkNativeBrowserTests(unittest.TestCase):
         self.assertTrue(self.server.tool_results[0]["ok"], self.server.tool_results)
         db_job = self.current()["case"]["jobs"]["db-j"]
         self.assertEqual(db_job["status"], "passed")
-        self.wait("document.querySelector('#ees-work-content .ew-work-current-title')?.innerText === '완료 기준을 충족했습니다.'")
+        self.wait("document.querySelector('#ees-work-content .ew-work-current-title')?.innerText === '모의 점검을 통과했습니다. 실제 업무 완료는 확인하지 않았습니다.'")
+        self.assertNotIn("완료 기준을 충족했습니다.", self.text('#ees-work-content .ew-work-current-title'))
         evidence = '#ees-work-content [data-work-section="target"] [data-action="work_detail"]'
         self.click(evidence)
         self.assertTrue(self.read('#ees-work-dialog', "open"))

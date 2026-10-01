@@ -6,7 +6,7 @@
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** [Draft PR #73](https://github.com/knadalkim-a11y/team-agent-poc/pull/73)에서 Step 0-B 기본 계약·최소 검증환경·기존 Native UI 시험 보완을 반영했고 최종 자동 CI를 별도로 확인한다. 전체 CI 통과로 보고하지 않는다. [7개 기본 계약과 현 코드 충돌](mockups/ees-work/TASK.md#restructure-step0b-20261001)은 반영했으며 상세 DB/API·공유 정책·서버 확정 방식은 미확정이다. Step 0-A 조사 전체를 반복하지 않는다.
+- **현재 작업:** [Draft PR #73](https://github.com/knadalkim-a11y/team-agent-poc/pull/73)의 검토 head `d0b0aa338a47f73fac322bcb4426afc4381a68f6`에서 Step 0-B 잔여 CSS 시험·Windows 두 오류·한글 캡처를 보완한다. 기본 계약·환경·실제 Native 최소 왕복·Linux 가입/계정 전환은 검토 수용된 근거로 재사용한다. [이번 관측·검증](../evals/v4-ui-20260930.md#restructure-step0b-residual-20261001)에서 각 문제를 구분하며 전체 CI 통과로 보고하지 않는다. [7개 기본 계약](mockups/ees-work/TASK.md#restructure-step0b-20261001) 이후 상세 DB/API·공유 정책·서버 확정 방식은 계속 미확정이다.
 - **Git 기준:** main `55832bad328cdfb91c1c284749f7959dd664176c`, 검토/시작 head `d5b1df77dd5fe436a7d54b8b44a532e39b2dbed5`, branch `docs/ees-restructure-step0a-20261001`. 시작 시 원격/로컬 동일·clean, 검토 SHA 이후 변경0. 기본 설계 문서와 시험 도구 보완은 별도 커밋으로 구분한다. #72/#53·이전 checkout은 보존하고 적층하지 않는다.
 - **변경 경계:** 제품 코드·업무 저장 구조·Figma·데모 자산·사내 설정은 변경하지 않는다. 별도 서버/DB 엔진/브라우저 프레임워크를 추가하지 않는다. 환경·Native fixture·실제 제품·사내 연동 결과를 [이번 증거](../evals/v4-ui-20260930.md#restructure-step0b-evidence-20261001)에서 구분한다.
 - **검증 상태:** 저장소 단일 `.venv`(Python3.11.16)·공식 해시 wheel·Chrome153과 실제 제품 빌드를 준비했다. Native 가입/승인/권한·계정 전환·직접 영향 회귀8개 PASS(skip0), 실제 Native CLI/임시 DB에서 첫·기존·새 대화 물리 보내기3회·저장/리로드/격리 PASS. 모델은 loopback 합성이며 사내 호출 성공이 아니다. sidebar·V4 탐색 selector의 시험 결함을 보완했고 최초 CI 가입 탐색 실패의 정확한 원인은 미확정이다. [환경 재사용·명령·실패/최종 증거](../evals/v4-ui-20260930.md#restructure-step0b-evidence-20261001).

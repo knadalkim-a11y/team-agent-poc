@@ -1,0 +1,40 @@
+{
+  "recorded_at_utc": "2026-10-01T06:54:06.299664+00:00",
+  "platform": "Linux",
+  "python": "3.11.16",
+  "command": "EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_branding_build.py -v",
+  "exit_code": 0,
+  "tests_run": 31,
+  "duration_seconds": 21.159,
+  "skipped": 0,
+  "mutation_rejections": [
+    "wrong hash",
+    "missing hash",
+    "missing URL",
+    "duplicate query",
+    "unrelated query",
+    "unrelated bytes",
+    "URL punctuation"
+  ],
+  "preserved_checks": [
+    "pinned upstream wheel SHA256",
+    "RECORD digest and sizes",
+    "unrelated source members",
+    "pinned fonts",
+    "Native Chat bridge",
+    "packaged workflow public contract"
+  ],
+  "file_sha256": {
+    "tests/test_ees_branding_build.py": "a30104fc2561b28dde7e1ab36ccfbbc3cc95e923d28087bf8261414d9b5554d7",
+    "scripts/build_ees_webui.py": "b3387f050e6364983a2ff8e7ec67e3b581701dc7796c9ff1dcc47c77fbd327ae",
+    "branding/ees/ui/chat-theme.css": "ce65409064922f80c11bc6161fe54b50fdabe83cccdb747d6f080c0fd25110c7",
+    "branding/ees/ui/ees-work-launcher.css": "c48aae6c1ff0d5efd0b6f3be13eeec2bc15a665273bdeb622d82df0732e0598c",
+    "dist/upstream/open_webui-0.11.3-py3-none-any.whl": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
+  },
+  "log_sha256": "5583d01e3e7ca349fdf2c69282a1c9fcdb9cbec9f92602946a86a353c04ce564",
+  "not_tested": [
+    "Windows",
+    "real browser rendering",
+    "in-house data/services"
+  ]
+}

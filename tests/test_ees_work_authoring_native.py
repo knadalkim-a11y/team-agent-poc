@@ -196,7 +196,9 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         directory.mkdir(parents=True, exist_ok=True)
         return directory
 
-    def screenshot(self, name):
+    def screenshot(self, name, *, wait_for_fonts=True):
+        if wait_for_fonts:
+            self.browser.evaluate('document.fonts.ready.then(()=>true)')
         data = self.browser.call("Page.captureScreenshot", {
             "format": "png", "captureBeyondViewport": False})["data"]
         (self.evidence_directory() / (name + ".png")).write_bytes(base64.b64decode(data))
@@ -213,7 +215,8 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
                     "last_wait": getattr(self, "last_wait_expression", None),
                     "requests": self.server.requests[-20:], "capture_errors": []}
         try:
-            self.screenshot(name)
+            # Preserve the failure as observed even if a font request stalled.
+            self.screenshot(name, wait_for_fonts=False)
         except Exception as error:
             evidence["capture_errors"].append("screenshot:" + type(error).__name__)
         try:
@@ -531,6 +534,25 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         account = self.signup_ui()
         self.wait("document.body.innerText.includes('계정 활성화 대기')")
         self.assertIn(self.browser_api("GET", "/api/ees-work/state")["status"], {401, 403})
+        # A settled FontFaceSet does not prove that a runner can render Korean.
+        # Observe the visible Native heading's actual glyph font before capture.
+        self.browser.evaluate('document.fonts.ready.then(()=>true)')
+        selector = '.text-center.text-2xl'
+        measured = self.browser.evaluate("""(selector=>{const e=document.querySelector(selector),s=getComputedStyle(e);
+            return {readyState:document.readyState,fontStatus:document.fonts.status,
+                text:e.textContent,fontFamily:s.fontFamily,
+                koreanCharacters:(e.textContent.match(/[가-힣]/g)||[]).length};})(""" + json.dumps(selector) + ")")
+        self.browser.call('DOM.enable')
+        self.browser.call('CSS.enable')
+        document = self.browser.call('DOM.getDocument')
+        node = self.browser.call('DOM.querySelector', {'nodeId': document['root']['nodeId'], 'selector': selector})
+        measured['platformFonts'] = self.browser.call('CSS.getPlatformFontsForNode', {'nodeId': node['nodeId']})['fonts']
+        (self.evidence_directory() / 'sa-signup-pending-fonts.json').write_text(
+            json.dumps(measured, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.assertGreater(measured['koreanCharacters'], 0, measured)
+        self.assertGreaterEqual(sum(font['glyphCount'] for font in measured['platformFonts']
+                                    if font['familyName'] in {'Noto Sans KR', 'Noto Sans KR Thin'}),
+                                measured['koreanCharacters'], measured)
         self.screenshot("sa-signup-pending")
         self.click_text("로그아웃")
         self.login_ui("administrator@example.test", "Fixture-admin-only-42!")
