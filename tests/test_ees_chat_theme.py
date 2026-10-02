@@ -108,6 +108,7 @@ class ChromePipe:
                 "last_command": dict(self.last_command) if self.last_command else None,
                 "recent_responses": list(self.response_summary),
                 "stderr_tail": stderr.decode(errors="replace"), "first_failure": self.first_failure,
+                "browser_startup": getattr(self, "browser_startup", None),
                 "bootstrap_observation": getattr(self, "bootstrap_observation", None)}
 
     def record_failure(self, error):
@@ -278,18 +279,33 @@ class ChromePipe:
             raise
 
     def navigate(self, url):
-        # Confirm browser-level transport readiness before creating a renderer.
-        # Both commands share the original 15s target-creation budget: no retry.
-        deadline = time.monotonic() + 15
+        # Browser process readiness is separate from product/page commands.
+        # CI observed the same first reply at 15.35s with no retransmission.
+        # Startup gets one absolute 30s budget from construction (including font
+        # preparation); targets and all existing commands keep their 15s limit.
         try:
             if self.browser_version is None:
                 self.stage = "browser_handshake"
+                deadline = self.started_at + 30
+                if self.process.poll() is not None:
+                    raise AssertionError("Chrome exited before browser handshake.")
                 version = self.call("Browser.getVersion", timeout=deadline - time.monotonic())
-                if not all(isinstance(version.get(key), str) and version[key] for key in ("protocolVersion", "product")):
+                ready_at = time.monotonic()
+                if ready_at >= deadline:
+                    raise AssertionError("Chrome DevTools response timed out.")
+                if not isinstance(version, dict) or not all(
+                        isinstance(version.get(key), str) and version[key]
+                        for key in ("protocolVersion", "product")):
                     raise AssertionError("Chrome browser handshake did not return protocolVersion and product.")
                 self.browser_version = {key: version.get(key) for key in ("protocolVersion", "product", "revision", "jsVersion")}
+                self.browser_startup = {"budget_seconds": 30,
+                    "ready_elapsed_ms": (ready_at - self.started_at) * 1000,
+                    "product": self.browser_version["product"]}
+                # Successful Native fixture cases do not have a failure JSON.
+                # Keep their actual startup timing in the existing CI log too.
+                print("Chrome startup: " + json.dumps(self.browser_startup), file=sys.stderr, flush=True)
             self.stage = "create_target"
-            target = self.call("Target.createTarget", {"url": "about:blank"}, timeout=deadline - time.monotonic())["targetId"]
+            target = self.call("Target.createTarget", {"url": "about:blank"}, timeout=15)["targetId"]
         except (AssertionError, OSError) as error:
             self.record_failure(error)
             raise
@@ -355,24 +371,127 @@ class ChromePipeBootstrapTests(unittest.TestCase):
         self.assertEqual(json.loads(os.read(request_read, 4096).rstrip(b'\0'))["method"], "Browser.getVersion")
         self.assertNotIn("synthetic-secret", json.dumps(browser.diagnostics()))
 
-    def test_handshake_and_target_creation_share_original_budget_without_retry(self):
+    def test_one_startup_budget_accepts_delayed_reply_and_keeps_each_target_at_fifteen_seconds(self):
+        for preparation_seconds in (0, 8):
+            with self.subTest(preparation_seconds=preparation_seconds):
+                browser, _, response_write = self.pipe()
+                browser.started_at = 100.0
+                clock, commands = [100.0 + preparation_seconds], []
+                write = os.write
+                def respond(descriptor, payload):
+                    count = write(descriptor, payload)
+                    if descriptor == browser.request_write:
+                        request = json.loads(payload.rstrip(b'\0'))
+                        method = request['method']
+                        commands.append((method, browser.last_command['timeout_seconds']))
+                        result = {}
+                        if method == 'Browser.getVersion':
+                            clock[0] = 115.35
+                            result = {'protocolVersion': '1.3', 'product': 'Synthetic/1'}
+                        elif method == 'Target.createTarget': result = {'targetId': 'target'}
+                        elif method == 'Target.attachToTarget': result = {'sessionId': 'session'}
+                        elif method == 'Page.navigate':
+                            write(response_write, b'{"method":"Page.loadEventFired"}\0')
+                        write(response_write, json.dumps({'id': request['id'], 'result': result}).encode() + b'\0')
+                    return count
+                with patch.object(time, 'monotonic', side_effect=lambda: clock[0]), \
+                        patch.object(os, 'write', side_effect=respond), patch('builtins.print') as output:
+                    browser.navigate('about:blank')
+                    browser.navigate('about:blank')
+                    startup = browser.diagnostics()['browser_startup']
+                self.assertEqual([item for item in commands if item[0] == 'Browser.getVersion'],
+                                 [('Browser.getVersion', 30 - preparation_seconds)])
+                self.assertEqual([item for item in commands if item[0] == 'Target.createTarget'],
+                                 [('Target.createTarget', 15), ('Target.createTarget', 15)])
+                self.assertTrue(all(timeout == 15 for method, timeout in commands if method != 'Browser.getVersion'))
+                self.assertEqual(browser.stage, 'ready')
+                self.assertIsNone(browser.first_failure)
+                self.assertAlmostEqual(startup['ready_elapsed_ms'], 15350)
+                self.assertEqual(startup['budget_seconds'], 30)
+                output.assert_called_once()
+
+    def test_expired_startup_sends_nothing_and_cleanup_does_not_add_a_new_wait(self):
         browser, _, _ = self.pipe()
-        clock, calls = [10.0], []
-        def call(method, params=None, timeout=15):
-            calls.append((method, timeout))
-            if method == "Browser.getVersion":
-                clock[0] += 6
-                return {"protocolVersion": "1.3", "product": "Synthetic/1"}
-            if method == "Target.createTarget": return {"targetId": "target"}
-            if method == "Target.attachToTarget": return {"sessionId": "session"}
-            if method == "Page.navigate": browser.events.append({"method": "Page.loadEventFired"})
-            return {}
-        browser.call = call
-        with patch.object(time, "monotonic", side_effect=lambda: clock[0]):
-            browser.navigate("about:blank")
-        self.assertEqual(calls[:2], [("Browser.getVersion", 15.0), ("Target.createTarget", 9.0)])
-        self.assertEqual(browser.stage, "ready")
-        self.assertEqual(browser.browser_version["product"], "Synthetic/1")
+        browser.started_at = 100.0
+        with patch.object(time, 'monotonic', return_value=131.0), \
+                patch.object(os, 'write', side_effect=AssertionError('No request after startup cutoff')), \
+                self.assertRaisesRegex(AssertionError, 'budget exhausted'):
+            browser.navigate('about:blank')
+        self.assertEqual(browser.first_failure['stage'], 'browser_handshake')
+        self.assertIsNone(browser.browser_version)
+        self.assertIsNone(browser.target_id)
+        browser, _, _ = self.pipe()
+        browser.started_at = 100.0
+        clock = [100.0]
+        def exhausted_wait(readers, writers, errors, timeout):
+            self.assertEqual(timeout, 30.0)
+            clock[0] = 130.0
+            return [], [], []
+        with patch.object(time, 'monotonic', side_effect=lambda: clock[0]), \
+                patch.object(select, 'select', side_effect=exhausted_wait), self.assertRaisesRegex(AssertionError, 'timed out'):
+            browser.navigate('about:blank')
+        self.assertEqual(browser.first_failure['last_command']['timeout_seconds'], 30.0)
+        self.assertEqual(browser.counter, 1)
+        with patch.object(time, 'monotonic', side_effect=lambda: clock[0]), \
+                patch.object(browser, 'receive', side_effect=AssertionError('No extra observation wait')) as read:
+            browser.observe_failed_bootstrap()
+        read.assert_not_called()
+        self.assertEqual(browser.bootstrap_observation['status'], 'no_original_reply_before_cutoff')
+
+    def test_buffered_events_cannot_extend_startup_deadline_or_accept_a_late_reply(self):
+        browser, _, response_write = self.pipe()
+        browser.started_at = 100.0
+        clock = [100.0]
+        original_receive = browser.receive
+        calls = []
+        def receive(deadline):
+            calls.append(deadline)
+            if len(calls) == 1:
+                clock[0] = 129.9
+                os.write(response_write, b'{"method":"Unknown.event","params":{"private":"synthetic-secret"}}\0'
+                         b'{"id":1,"result":{"protocolVersion":"1.3","product":"Synthetic/1"}}\0')
+            else:
+                clock[0] = 130.1
+            return original_receive(deadline)
+        with patch.object(time, 'monotonic', side_effect=lambda: clock[0]), \
+                patch.object(browser, 'receive', side_effect=receive), self.assertRaisesRegex(AssertionError, 'timed out'):
+            browser.navigate('about:blank')
+        self.assertEqual(calls, [130.0, 130.0])
+        self.assertIsNone(browser.browser_version)
+        self.assertIsNone(browser.target_id)
+        self.assertEqual(browser.counter, 1)
+
+    def test_ready_browser_target_still_fails_at_fifteen_seconds_without_retry(self):
+        browser, request_read, _ = self.pipe()
+        browser.browser_version = {'protocolVersion': '1.3', 'product': 'Synthetic/1'}
+        with patch.object(select, 'select', return_value=([], [], [])), self.assertRaisesRegex(AssertionError, 'timed out'):
+            browser.navigate('about:blank')
+        request = json.loads(os.read(request_read, 4096).rstrip(b'\0'))
+        self.assertEqual(request['method'], 'Target.createTarget')
+        self.assertEqual(browser.first_failure['last_command']['timeout_seconds'], 15)
+        self.assertEqual(browser.first_failure['stage'], 'create_target')
+        self.assertEqual(browser.counter, 1)
+
+    def test_invalid_or_exited_startup_never_creates_a_target(self):
+        for mode in ('empty', 'missing_product', 'wrong_result_type', 'protocol_error', 'exited'):
+            with self.subTest(mode=mode):
+                browser, request_read, response_write = self.pipe()
+                results = {'empty': {}, 'missing_product': {'protocolVersion': '1.3'}, 'wrong_result_type': []}
+                if mode == 'exited':
+                    browser.process.poll = lambda: 9
+                else:
+                    response = ({'id': 1, 'error': {'code': -1, 'message': 'synthetic error'}}
+                                if mode == 'protocol_error' else {'id': 1, 'result': results[mode]})
+                    os.write(response_write, json.dumps(response).encode() + b'\0')
+                with self.assertRaises(AssertionError):
+                    browser.navigate('about:blank')
+                self.assertIsNone(browser.browser_version)
+                self.assertIsNone(browser.target_id)
+                self.assertEqual(browser.counter, 0 if mode == 'exited' else 1)
+                self.assertEqual(browser.first_failure['stage'], 'browser_handshake')
+                if mode != 'exited':
+                    request = json.loads(os.read(request_read, 4096).rstrip(b'\0'))
+                    self.assertEqual(request['method'], 'Browser.getVersion')
 
     def test_invalid_browser_handshake_fails_before_any_target_is_created(self):
         browser, _, _ = self.pipe()
