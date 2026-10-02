@@ -1,0 +1,318 @@
+{
+  "time": "2026-10-02T07:12:48.716679+00:00",
+  "scope": "Complete packaged Native app gate for the integrated work contract.\n\nOne temporary DATA_DIR and a loopback synthetic model are used. Native auth,\nchat/file storage, workflow APIs, worker and frontend are the built product.\nNo company credentials, DB or service is read. Physical CDP input drives UI;\nread-only DOM evaluation inspects readiness and results. Failure evidence is\ncaptured before browser shutdown. This is distinct from the Native fixtures.\nThis gate was reconstructed after workspace loss from the committed base and\nobserved failures. It is not claimed byte-identical to the lost c144 gate.\n",
+  "source_commit": "455bc06fb72bcc595bfc0b0c53824dd8e2616fed",
+  "source_dirty": true,
+  "wheel": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+  "wheel_sha256": "f3899eab7db84df3696ae17ee3f5352e92df788a09b49e611d3658f59169a866",
+  "gate_sha256": "31cbcb101dbe273fc515f28f4a930f14cd37bd89d3b2211a555bbcb40f1f2dee",
+  "execution": {
+    "python": "3.11.16",
+    "argv": [
+      "tests/ees_work_integrated_app.py",
+      "--wheel",
+      "dist/integrated/branding-16/open_webui-0.11.3+ees.13-py3-none-any.whl",
+      "--chrome",
+      "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell",
+      "--output",
+      "dist/recovery/native-product"
+    ],
+    "chrome": "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell",
+    "reconstructed_after_workspace_loss": true,
+    "prior_lost_gate_byte_identity_claimed": false
+  },
+  "steps": [
+    {
+      "name": "empty Native installation",
+      "workflows": 0,
+      "runs": 0
+    },
+    {
+      "name": "Native model availability",
+      "models": [
+        {
+          "id": "c3-synthetic-model",
+          "direct": null,
+          "owned_by": "openai"
+        },
+        {
+          "id": "arena-model",
+          "direct": null,
+          "owned_by": "arena"
+        }
+      ]
+    },
+    {
+      "name": "actual built Native render",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "name": "physical authoring save validate publish",
+      "workflow_id": "89db671f-b2b1-4c0a-ae76-880b616defb1",
+      "version": 1
+    },
+    {
+      "name": "run input save cancel confirmation and actual completion",
+      "run_id": "4fccdefe-d3eb-4759-a4cc-5748c3d61fae",
+      "attempts": 1,
+      "version": 1
+    },
+    {
+      "name": "Native physical send and storage reload",
+      "saved_messages": 2,
+      "chat_id": "8417f82d-d0f4-4758-8e32-61c52b1d881e",
+      "model_boundary": "loopback synthetic HTTP only"
+    },
+    {
+      "name": "Native attachment chooser upload process send reload",
+      "file_id": "65f15b76-75bf-49b9-a753-562f9cc33608",
+      "chat_id": "8417f82d-d0f4-4758-8e32-61c52b1d881e",
+      "model_boundary": "Only model response and embedding vectors are loopback synthesis"
+    },
+    {
+      "name": "Native and work restart persistence",
+      "chat_preserved": true,
+      "attempts_preserved": true
+    },
+    {
+      "name": "latest Figma isolated API fixtures",
+      "workflow_id": "2c9514f6-d40f-49ad-ade6-a0d297aa057e",
+      "native_tool_source_sha256": "d6bb9bee2a7919b994008393d48188cd43d1a26404b013f21bc6d56f3e95085c",
+      "business_completion": false,
+      "external_boundary": "Loopback synthetic Jira and model HTTP only"
+    }
+  ],
+  "status": "failed",
+  "failure": {
+    "type": "AssertionError",
+    "message": "Not clickable: [data-action=\"procedures\"]"
+  },
+  "browser_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 30625.963090002188,
+    "pid": 43,
+    "exit_code": null,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "HeadlessChrome/153.0.8010.52",
+      "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+      "jsVersion": "15.3.76.13"
+    },
+    "target_id": "042B000A5098410670461E7671B11342",
+    "session_attached": true,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 410,
+      "method": "Runtime.evaluate",
+      "session_attached": true,
+      "timeout_seconds": 15,
+      "elapsed_ms": 9005.333245000656,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "id": 407,
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "id": 408,
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.requestServedFromCache",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "id": 409,
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "id": 410,
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      }
+    ],
+    "stderr_tail": "[1002/161308.529076:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1002/161308.529186:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1002/161308.531261:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1002/161308.531322:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1002/161308.531335:ERROR:net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)\n[1002/161308.533030:ERROR:device/udev_linux/udev_watcher.cc:51] Failed to initialize a udev monitor.\n[1002/161308.537986:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 61: No such file or directory (2)\n[1002/161308.567556:WARNING:media/gpu/vaapi/vaapi_wrapper.cc:1660] drmGetDevices2() has not found any devices\n[1002/161308.571062:WARNING:sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.\n[1002/161308.619351:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1002/161308.619463:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1002/161308.619474:WARNING:device/bluetooth/dbus/bluez_dbus_manager.cc:209] Floss manager service not available, cannot set Floss enable/disable.\n[1002/161308.623977:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1002/161308.654887:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 86: No such file or directory (2)\n[1002/161308.709828:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1002/161308.710109:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 435.0253859993245,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    "bootstrap_observation": null
+  },
+  "browser_cleanup_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 30920.939834999444,
+    "pid": 43,
+    "exit_code": 0,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "HeadlessChrome/153.0.8010.52",
+      "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+      "jsVersion": "15.3.76.13"
+    },
+    "target_id": "042B000A5098410670461E7671B11342",
+    "session_attached": false,
+    "buffer_bytes": 143,
+    "last_command": {
+      "id": 417,
+      "method": "Browser.close",
+      "session_attached": false,
+      "timeout_seconds": 5,
+      "elapsed_ms": 1.0390179995738436,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.requestServedFromCache",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "id": 409,
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "id": 410,
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "id": 411,
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "id": 412,
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "id": 413,
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "id": 414,
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "id": 415,
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "id": 416,
+        "sessionId": "69016EB19358691D5D57F9DFA48087CA"
+      },
+      {
+        "id": 417
+      }
+    ],
+    "stderr_tail": "[1002/161308.529076:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1002/161308.529186:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1002/161308.531261:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1002/161308.531322:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1002/161308.531335:ERROR:net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)\n[1002/161308.533030:ERROR:device/udev_linux/udev_watcher.cc:51] Failed to initialize a udev monitor.\n[1002/161308.537986:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 61: No such file or directory (2)\n[1002/161308.567556:WARNING:media/gpu/vaapi/vaapi_wrapper.cc:1660] drmGetDevices2() has not found any devices\n[1002/161308.571062:WARNING:sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.\n[1002/161308.619351:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1002/161308.619463:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1002/161308.619474:WARNING:device/bluetooth/dbus/bluez_dbus_manager.cc:209] Floss manager service not available, cannot set Floss enable/disable.\n[1002/161308.623977:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1002/161308.654887:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 86: No such file or directory (2)\n[1002/161308.709828:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1002/161308.710109:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 435.0253859993245,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    "bootstrap_observation": null
+  }
+}

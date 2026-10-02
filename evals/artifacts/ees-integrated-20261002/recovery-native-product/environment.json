@@ -1,0 +1,40 @@
+{
+  "scope": "New actual Native run after workspace recovery; no company environment or credentials",
+  "execution_time": "2026-10-02T07:18:55.211774+00:00",
+  "python": "3.11.16",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "HeadlessChrome/153.0.8010.52",
+    "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+    "jsVersion": "15.3.76.13"
+  },
+  "command_argv": [
+    ".venv/bin/python",
+    "-X",
+    "warn_default_encoding",
+    "-W",
+    "error::EncodingWarning",
+    "tests/ees_work_integrated_app.py",
+    "--wheel",
+    "dist/integrated/branding-16/open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "--chrome",
+    "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell",
+    "--output",
+    "dist/recovery/native-product-mode-fix"
+  ],
+  "command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning tests/ees_work_integrated_app.py --wheel dist/integrated/branding-16/open_webui-0.11.3+ees.13-py3-none-any.whl --chrome /workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell --output dist/recovery/native-product-mode-fix",
+  "command_basis": "Script argv read from actual report; interpreter and strict EncodingWarning flags confirmed by root executor",
+  "working_directory": "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered",
+  "wheel": "dist/integrated/branding-16/open_webui-0.11.3+ees.13-py3-none-any.whl",
+  "wheel_sha256": "f3899eab7db84df3696ae17ee3f5352e92df788a09b49e611d3658f59169a866",
+  "gate_sha256": "a6a47422e01d86e63fa9986b610258e0895c7121488b6478d0796eeed708b068",
+  "process_exit_code": 0,
+  "process_exit_basis": "Actual root executor completion observation; stdout log is preserved separately",
+  "browser_exit_code": 0,
+  "data": "One temporary DATA_DIR/SQLite database with synthetic accounts and generated ephemeral secret; values and DB not copied.",
+  "external": "Loopback synthetic Jira/model/embedding HTTP only. Native permissions, tool registration, connector dispatch, chat/file/work storage and UI are real.",
+  "cleanup": "Gate finally closes browser and provider, stops Native subprocess and cleans temporary directory.",
+  "reuse_environment_inventory": "dist/recovery/environment.json",
+  "reconstructed_test": true,
+  "lost_evidence_recreated": false
+}

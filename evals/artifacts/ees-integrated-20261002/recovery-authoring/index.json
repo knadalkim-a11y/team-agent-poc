@@ -1,0 +1,176 @@
+{
+  "recorded_at": "2026-10-02T07:10:48.858025+00:00",
+  "recorded_head": "2770382fa29968abe0d469ac9f49988806fbacc3",
+  "status": "passed",
+  "recovery_boundary": [
+    "Prior unpushed test sources and prior session PNG/DOM/log artifacts were lost during workspace partial loss. Those old bytes were not recovered and are not represented by these new files.",
+    "The two test files were reconstructed from retained conversation source and patch text, with an explicit reconstruction header. Their hashes are new, and old PASS statements are not reused as this result.",
+    "Root recovered the final product tree from Git; this task changed no product source, deployment configuration or company environment."
+  ],
+  "environment": {
+    "python": "Python 3.11.16",
+    "node": "v24.19.0",
+    "chrome": "HeadlessChrome/153.0.8010.52",
+    "data": "Per-test temporary SQLite and synthetic Native account/session/chat; only external read responses replaced by synthetic transport",
+    "encoding": "-X warn_default_encoding -W error::EncodingWarning"
+  },
+  "wheel": {
+    "path": "dist/integrated/branding-16/open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "sha256": "f3899eab7db84df3696ae17ee3f5352e92df788a09b49e611d3658f59169a866",
+    "launcher_bundle_sha256": "30cf37c2e640f9a9765d22e7ba2515457ab0417b946aa318fcb072a7fad86e23"
+  },
+  "source_files": [
+    {
+      "path": "tests/test_ees_work_figma_authoring.py",
+      "sha256": "2a4e1c9d3af4761e6299050f4040728d142a999629ddad452b1c2b828cb11062"
+    },
+    {
+      "path": "tests/test_ees_work_figma_authoring_native.py",
+      "sha256": "9d9b45b29435a23dea10f65e501820ffc4d2777e9392eaa98d9f745eb71f82b1"
+    },
+    {
+      "path": "tests/test_ees_work_authoring_ui.cjs",
+      "sha256": "6bccddd152b46de290cc2941acb83e0eed09942deabee5bdd6333e4d5cb64888"
+    },
+    {
+      "path": "tests/ees_work_integrated_fixture.py",
+      "sha256": "f4c3aaa9bfb9170bd54a1c05b70a7626a122b860080033405b1a6dafde41518e"
+    },
+    {
+      "path": "tests/native_ui_fixture.py",
+      "sha256": "b3c860e2ebc135e28725e1c50590663c6b138fc7dd24c610f35b7e256a3c47c0"
+    },
+    {
+      "path": "tests/test_ees_chat_theme.py",
+      "sha256": "1daedb0549d542596377e860bf64665a22893306064751a8c5b8c72c74d01f4a"
+    },
+    {
+      "path": "branding/ees/ui/ees-work-designer.js",
+      "sha256": "d15e7b7a7481ac29879ec22e4c0ed7b8fce47ab9b9eecca089208f2b2842b1d7"
+    },
+    {
+      "path": "branding/ees/ui/ees-work-launcher.js",
+      "sha256": "c3db92657f866faabf8c0daff4ab214b8c533025eb0548d855787ba1a2024d39"
+    },
+    {
+      "path": "branding/ees/ui/ees-work-view.js",
+      "sha256": "b153f4b9acaa3bbb92ce9f2b85ec0e727cb3dbff63357684f32ca7a25263bc94"
+    },
+    {
+      "path": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_operations.py",
+      "sha256": "823f3b4f5ed19e202caf694774cd10098d6f3c61004972080a3f458ef3ddb1ce"
+    }
+  ],
+  "commands": [
+    {
+      "command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_figma_authoring.py -v",
+      "result": "8 passed",
+      "seconds": 0.882,
+      "log": "unit.txt"
+    },
+    {
+      "command": "EES_TEST_BRANDING_DIR=dist/integrated/branding-16 EES_TEST_CHROME=$PWD/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_SCREENSHOT_DIR=$PWD/evals/artifacts/ees-integrated-20261002/recovery-authoring/native .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_figma_authoring_native.py -v",
+      "result": "3 passed",
+      "seconds": 8.023,
+      "log": "native.txt"
+    }
+  ],
+  "verified": [
+    "Node: saved draft precedes published runtime definition; selected workflow ID rejects stale previous-workflow candidate; private dirty drafts and CAS/permission boundaries persist.",
+    "Node: preview is read-only and late edited/other-account response is ignored; explicit schedules do not seed Figma examples; delegation and retry/completion policy choices remain explicit.",
+    "Built Native browser: direct mouse transition preserves next-field focus without Tab workaround, stores both edited values and removes stale preview.",
+    "Built Native browser: schedule preview does not write revision or create reservations; save/publish creates v3 while old run stays on v2; lifecycle=false without delegation and true only after explicit user confirmation.",
+    "Built Native browser: missing retry deadline blocks publication; explicit count2/deadline30 is saved/published; separately preserved failed/succeeded attempts remain waiting_confirmation without human decision."
+  ],
+  "evidence": {
+    "png_count": 5,
+    "dom_count": 5,
+    "pngs_visually_reviewed": "All five newly generated original PNGs",
+    "visual_result": "Readable Korean, 14x14 loaded calendar icon, visible focus, scroll and stored values. Reservation details are collapsed in the final PNG; actual SQLite assertions and roundtrip JSON establish delegation state.",
+    "dom_collection": "Read-only success screenshot override captures actual panel HTML/text, fonts/ready state and focus; no product DOM mutation or forced success."
+  },
+  "safety_review": "Selected JSON/logs checked for credential/private-key/email patterns and non-loopback/non-SVG URL hosts; none found. PNGs contain only synthetic data. No screenshots edited.",
+  "reuse_boundaries": [
+    "Synthetic Node DOM tests are not product UI evidence.",
+    "Native fixture loads built product frontend and real repository workspace/operations service but synthesizes Native session and external read transport; actual full CLI authentication/company service success is not claimed.",
+    "Reuse only for the listed sources and exact build16 wheel. New source or environment changes require affected checks.",
+    "No tests were skipped, weakened, repeated solely for result recording or run against company data."
+  ],
+  "files": [
+    {
+      "path": "native/integrated-figma-b21-live-preview-dom.json",
+      "bytes": 21928,
+      "sha256": "3489f8d7310013119facc85466fb02fb09bf4616f9214fbd5ee03fdb39b68557"
+    },
+    {
+      "path": "native/integrated-figma-b21-live-preview.png",
+      "bytes": 149156,
+      "sha256": "c9347e33abd5142166e34415054d02318262c0787781984569be699d78fbd34e"
+    },
+    {
+      "path": "native/integrated-figma-b21-mouse-focus-saved-dom.json",
+      "bytes": 21216,
+      "sha256": "85971020018b55daa31335826e769d9bd08b9d832ceb3d0ab966573c84d01d63"
+    },
+    {
+      "path": "native/integrated-figma-b21-mouse-focus-saved.png",
+      "bytes": 140476,
+      "sha256": "cbeb5fca5f4a25874ce59d131429cf8b58c9f70ca145bb0e3f86b5e324dbdf8e"
+    },
+    {
+      "path": "native/integrated-figma-b21-published-reservation-dom.json",
+      "bytes": 22804,
+      "sha256": "9cb4b07fdc19f87b10b74abde0e41344930983649f900d6d21ebb79d4b821c68"
+    },
+    {
+      "path": "native/integrated-figma-b21-published-reservation.png",
+      "bytes": 146340,
+      "sha256": "33c1b081241cf468e654050ae1d2bcaccd3ad2b9658695942198b21f04bd1e3b"
+    },
+    {
+      "path": "native/integrated-figma-b21-roundtrip.json",
+      "bytes": 562,
+      "sha256": "a9de529828c185737f49304486a86e71e35e83c351996ab2878883c8b29b6203"
+    },
+    {
+      "path": "native/integrated-figma-read-retry-control-observation-dom.json",
+      "bytes": 22946,
+      "sha256": "8ed8c6a60e3e78ec11ce651276e881e627b10cc332978a7873637fd62a358f86"
+    },
+    {
+      "path": "native/integrated-figma-read-retry-control-observation.json",
+      "bytes": 10026,
+      "sha256": "60d9108671caafb44e1ffc31c37ea27dc0272cbc2bb1449f77601e39e47c6d42"
+    },
+    {
+      "path": "native/integrated-figma-read-retry-control-observation.png",
+      "bytes": 109358,
+      "sha256": "d9a0fd0cc17778700f98f6cac76cbf11f165221f8f8e9c7f8f7a0a08eaba1de5"
+    },
+    {
+      "path": "native/integrated-figma-read-retry-human-boundary-dom.json",
+      "bytes": 2854,
+      "sha256": "cfa77697040958e763127cf24efb74d20be47e88c97e01701b6076fc7d2ee10b"
+    },
+    {
+      "path": "native/integrated-figma-read-retry-human-boundary.png",
+      "bytes": 88685,
+      "sha256": "676645de0a05c73b1ca3d2d5fb4e8ba647242d6e11253a57845a1b1d235cc007"
+    },
+    {
+      "path": "native/integrated-figma-read-retry-roundtrip.json",
+      "bytes": 333,
+      "sha256": "2ef3e45a2958c4405a2a59e44123f81aedbf5f82a022af9e105ad97d866a102e"
+    },
+    {
+      "path": "native.txt",
+      "bytes": 1157,
+      "sha256": "e6a6b41d49c84a69ab9eef9f87ab003ab3be611180bec0a3eaad2bc20bc3cb05"
+    },
+    {
+      "path": "unit.txt",
+      "bytes": 1928,
+      "sha256": "340ccb7883811908ebf961a250f0752508ebbea54c3021701e2881e55d2d7d0b"
+    }
+  ]
+}

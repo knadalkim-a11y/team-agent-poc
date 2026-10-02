@@ -1,0 +1,8 @@
+test_apply_idempotence_first_restore_and_original_state_preserved (test_ees_webui_customization.CustomizationTests.test_apply_idempotence_first_restore_and_original_state_preserved) ... ok
+test_work_files_missing_from_otherwise_valid_record_stop_before_changes (test_ees_webui_customization.CustomizationTests.test_work_files_missing_from_otherwise_valid_record_stop_before_changes) ... ok
+test_ees12_inventory_is_frozen_and_frontend_namespaces_cannot_be_interchanged (test_ees_webui_customization.CustomizationTests.test_ees12_inventory_is_frozen_and_frontend_namespaces_cannot_be_interchanged) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.380s
+
+OK

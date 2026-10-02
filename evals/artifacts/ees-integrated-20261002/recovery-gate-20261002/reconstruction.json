@@ -1,0 +1,33 @@
+{
+  "time": "2026-10-02T07:12:06.824021+00:00",
+  "base_commit": "2770382fa29968abe0d469ac9f49988806fbacc3",
+  "scope": "Reconstructed test/collector only; no product edits or full CLI execution",
+  "reconstruction": "Committed base retained: existing eight checkpoints and exact synthetic attachment flow. New delta code rebuilt from observed contracts and retained partial source, not claimed byte-identical to lost c144.",
+  "rerun_condition": "Original uncommitted gate and 61-file successful run were lost with workspace. The prior 15 functional checkpoints had passed, but narrow Work PNG showed transient loading and A7 capture was busy. New gate source and strengthened Work restoration/busy/physical-scroll collection require one fresh product run.",
+  "changes": [
+    "New-document timeOrigin/URL/loader readiness and actual input focus guard",
+    "Pinned template-only Native retrieval ancillary classification; strict reference on main requests and unknown error",
+    "Actual Native Jira HTTP503 bounded retry and immutable failed/success/amendment attempts",
+    "Physical schedule preview/save and Native model selection; review purpose versus blocked actual delivery",
+    "Exact historical Native tool reference/projection/storage and restart",
+    "Wait for exact run/attempt and non-busy Work after reload; open actual history detail; verify readonly controls and physical wheel scrolling in narrow viewport",
+    "Capture Work busy, loading, reference, review readOnly/revision and scroll state alongside PNG"
+  ],
+  "files": [
+    {
+      "path": "tests/ees_work_integrated_app.py",
+      "sha256": "31cbcb101dbe273fc515f28f4a930f14cd37bd89d3b2211a555bbcb40f1f2dee"
+    },
+    {
+      "path": "tests/test_ees_chat_theme.py",
+      "sha256": "1daedb0549d542596377e860bf64665a22893306064751a8c5b8c72c74d01f4a"
+    }
+  ],
+  "checks": {
+    "helper_regressions": "5 PASS, helper-tests.log",
+    "syntax": "PASS",
+    "git_diff_check": "PASS",
+    "actual_product": "Not executed by this agent; root executes once after source freeze"
+  },
+  "prior_evidence": "Lost original screenshots/JSON are not reconstructed or relabeled as preserved. Retained conversation observations are not replacement raw evidence."
+}

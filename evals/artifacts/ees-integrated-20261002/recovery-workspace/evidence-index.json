@@ -1,0 +1,84 @@
+{
+  "recorded_at": "2026-10-02T07:10:45.750932+00:00",
+  "scope": "Reconstructed lost test coverage against the separately recovered canonical product; new source and fresh execution only. Original unpushed test/evidence bytes were unavailable.",
+  "environment": {
+    "python": "Python 3.11.16",
+    "workspace": "temporary synthetic SQLite and users",
+    "native": "pinned Open WebUI 0.11.3 fixture, actual loader/approval/ACL/managed connectors, synthetic HTTP503; no login/browser/company proof"
+  },
+  "results": {
+    "workspace_first": {
+      "passed": 11,
+      "failed": 1,
+      "errors": 5,
+      "skipped": 0,
+      "cause": "Recovered fixture referenced run.decisions instead of run.jobs[j].decisions, and updated an access grant without its actual access_id. No product change."
+    },
+    "workspace_recheck": {
+      "passed": 17,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.739,
+      "record": "workspace-recheck.json"
+    },
+    "native_first": {
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.923,
+      "record": "first-results.json"
+    }
+  },
+  "covered_boundaries": [
+    "schema1 to2 preservation, concurrent initialization, injected upgrade rollback, malformed column/PK/UNIQUE and missing v2 table rejection without repair",
+    "review draft exact-attempt and run/review CAS; append-only original/edited/confirmed text, ordinary review complete",
+    "current source revocation/other actor hides state/export and prevents receipt replay disclosure",
+    "changed list creates immutable new evidence and exact item decisions, unchanged list does not invent attempt",
+    "second decision SQLite failure rolls back amendment/first decision/run/job/receipt/audit atomically",
+    "invalid/stale list, partial completion and generic empty/all-excluded decide bypass rejected; selection can still be saved",
+    "explicit delivery preserves review decision but blocks completion, all_resolved successor and close",
+    "read retry type/count/deadline/managed-function publication validation preserves incomplete drafts",
+    "requester/reviewer/status capabilities reflect current separate roles",
+    "actual managed source hashes, actual HTTP503 confirmed failure, arbitrary raw flag ignored, explicitly approved modified source cannot forge confirmed retry classification"
+  ],
+  "source_sha256": {
+    "tests/test_ees_work_figma_contracts.py": "46eed1876f0ab0e08636933006e908df22ad3166c0d1f58c948bf5abc0f3b43a",
+    "tests/test_ees_workflow_native.py": "7021a80d417c62ff2a621b893797021bfca099c1b409d3b9b3beb5a840d3ad57",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py": "176d2a8d7008a5192efc9fe5e88bef2139634df2c2a00d13320e17fb6159594b",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py": "5cc89065e4afeabefe37c5e593c26fb9745bf4dc4e95f39b9aea1d225025bd33"
+  },
+  "product_source_unchanged_from_first_run": true,
+  "upstream": {
+    "path": "dist/upstream/open_webui-0.11.3-py3-none-any.whl",
+    "sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
+  },
+  "files": [
+    {
+      "path": "first-results.json",
+      "bytes": 1972,
+      "sha256": "9e58a2e9a038a31f2e7b823e6f8420d1674fcfeabec221920911b0e4919c5b81"
+    },
+    {
+      "path": "native-first.log",
+      "bytes": 2043,
+      "sha256": "0a64102077ee3e9621f0a18cf504e9e8ef5d5282321198f9ce99d183a48ddb70"
+    },
+    {
+      "path": "workspace-first.log",
+      "bytes": 14276,
+      "sha256": "5cf98a25a253406f348a4b134b7342381796474cd489c9b6dbc6292625aee8df"
+    },
+    {
+      "path": "workspace-recheck.json",
+      "bytes": 1039,
+      "sha256": "1a1b1f15a4239a2d5115e1caf8a3e5370080c0e231092a3aee254e7f1e75200d"
+    },
+    {
+      "path": "workspace-recheck.log",
+      "bytes": 3418,
+      "sha256": "e31be691c1b7af0286bd37185115dc40e4fd99032665d31b2b5fb8e89b36a6df"
+    }
+  ]
+}

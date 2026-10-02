@@ -149,5 +149,128 @@
     "xml_sha256": "c62a4a99481d661bb5922f03a43bf45b951292ca7267b8b2ea3209279e2a9cc4",
     "xml_changed": false,
     "comparison": "XML canvas content only, excluding generic tool guidance; all initial nodes/text/positions match"
+  },
+  "latest_27_frame_baseline": {
+    "page": "832:131",
+    "frames": 27,
+    "standalone_icons": 3,
+    "nodes": 3923,
+    "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+    "latest_related_recheck": "2026-10-02T06:32:42.573Z",
+    "additional_nodes": {
+      "B2-1": "938:784",
+      "A5": "940:795",
+      "A6": "942:891",
+      "A7": "943:968",
+      "S1": "944:1036",
+      "S2": "946:1065",
+      "C1": "948:1078"
+    },
+    "design_version_id": "not provided by tool",
+    "source_recovery": "Exact saved tool responses recovered after local workspace loss; original Figma not changed.",
+    "files": [
+      {
+        "path": "figma-27-frame-review/938-784-context.json",
+        "bytes": 23204,
+        "sha256": "360374cc56ee4b813aa05302e73457156efa6cd85bba934ecb511b8d3220b1bb"
+      },
+      {
+        "path": "figma-27-frame-review/938-784.png",
+        "bytes": 67996,
+        "sha256": "dd51edb8e0569c086643698f0566edb025d466cb14a6cca81a42974e435ec462"
+      },
+      {
+        "path": "figma-27-frame-review/940-795-context.json",
+        "bytes": 68012,
+        "sha256": "9bbdeaca78a51f4f2bc4f40cbca11f3c9f23e49b6e7d083e105e0740f7bab022"
+      },
+      {
+        "path": "figma-27-frame-review/940-795.png",
+        "bytes": 68157,
+        "sha256": "0f1e6b12cb43b68bef64cdfa772bc6fb5922600291f06bd55bd3c8c89b1dd87f"
+      },
+      {
+        "path": "figma-27-frame-review/942-891-context.json",
+        "bytes": 65028,
+        "sha256": "c9efa9ef3ec3af0a24cf4d90fbcdfbfafc7d3de588d84e0db1a4b8fb0803eb7b"
+      },
+      {
+        "path": "figma-27-frame-review/942-891.png",
+        "bytes": 67834,
+        "sha256": "4ca04ba2b2bba6b1df7fd4a7c2ea396b0fcc8b1e6f5e942c0df430e3e8048fef"
+      },
+      {
+        "path": "figma-27-frame-review/943-968-context.json",
+        "bytes": 57794,
+        "sha256": "b75063e49a2d2f5e7782298e6c25535bf9b74d2b470104d21e0ac2fefcf247fb"
+      },
+      {
+        "path": "figma-27-frame-review/943-968.png",
+        "bytes": 72884,
+        "sha256": "4345c0d2c534ee264f4c702280d0bbcd19244ec87d3af55745855f627b942ef3"
+      },
+      {
+        "path": "figma-27-frame-review/944-1036-context.json",
+        "bytes": 43068,
+        "sha256": "d3f93b7fc9ba1ab7b4f1065974fd2ef6198cc83685d796efe08aa78a0d3bfc17"
+      },
+      {
+        "path": "figma-27-frame-review/944-1036.png",
+        "bytes": 64479,
+        "sha256": "65ea53fd407150deb364cf82620a1fdc48b6142626fb9c4ed70494e72b5e62c5"
+      },
+      {
+        "path": "figma-27-frame-review/946-1065-context.json",
+        "bytes": 33576,
+        "sha256": "d2a356d3a79e7366541ca2ef9bed7af27c4f8a900a93277a7080d753b071907e"
+      },
+      {
+        "path": "figma-27-frame-review/946-1065.png",
+        "bytes": 108600,
+        "sha256": "7f0b07eb4bf8541bb6475a7eb21b84f1ec793aef5a660df0d69b26a994f980da"
+      },
+      {
+        "path": "figma-27-frame-review/948-1078-context.json",
+        "bytes": 50026,
+        "sha256": "7bd053b3e7733b30291ba5bc52dd3aef61454c5bbf706821aef860b605255bf1"
+      },
+      {
+        "path": "figma-27-frame-review/948-1078.png",
+        "bytes": 69682,
+        "sha256": "6d715c6d32942ee9c69de4c21181d9d77a84dfa406d6c82cc35e4d4496cd0899"
+      },
+      {
+        "path": "figma-27-frame-review/final-related-recheck.json",
+        "bytes": 347,
+        "sha256": "944eb0215117d42befe8a4af537f3348c5b0b6d4e60777f5e96e9aa676438ae9"
+      },
+      {
+        "path": "figma-27-frame-review/page-832-131.xml",
+        "bytes": 420120,
+        "sha256": "3d23de443c48658dfaa841a4ef865f6f5ba50e27d67fb29b862599ee7d98ad2f"
+      },
+      {
+        "path": "figma-27-frame-review/recovery-final-recheck.json",
+        "bytes": 364,
+        "sha256": "b3452ac08f0026ef4c84d2ed6149fbc68ecd7816e4e600e56029f5a0bea994bc"
+      }
+    ]
+  },
+  "recovery_final_related_recheck": {
+    "queried_at": "2026-10-02T07:25:04.866Z",
+    "comparisons": [
+      {
+        "id": "942:891",
+        "isError": false,
+        "text_equal_except_generated_asset_urls": true,
+        "render_bytes_equal": true
+      },
+      {
+        "id": "943:968",
+        "isError": false,
+        "text_equal_except_generated_asset_urls": true,
+        "render_bytes_equal": true
+      }
+    ]
   }
 }

@@ -1,0 +1,32 @@
+{
+  "status": "passed_after_fixture_error_code_correction",
+  "scope": "History5 + public tool10 + operations35 + delivery3 + branding33; 86 unique tests",
+  "first": {
+    "command": "EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_work_history_reference tests.test_ees_workflow_tool tests.test_ees_work_operations tests.test_ees_delivery_artifacts tests.test_ees_branding_build -v",
+    "result": "85 PASS / 1 FAIL, 26.776s",
+    "log": "first-targeted.log"
+  },
+  "followup": {
+    "command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_delivery_artifacts.DeliveryArtifactsTests.test_confirmed_list_reorder_exclusion_and_source_recheck_preserve_exact_binding -v",
+    "result": "1 PASS",
+    "log": "delivery-error-code-recheck.log"
+  },
+  "cause": "Reconstructed test expected item_not_selected; actual product excludes unselected items from the eligible result set and correctly returns item_not_found. Only expected typed error corrected; denial, exact selected binding and immutable prior attempts remain asserted.",
+  "boundaries": [
+    "Reconstructed new tests; pre-loss byte identity not claimed.",
+    "History5 uses real projection/public tool and synthetic currently-authorized workspace response; actual Native permissions/browser are separate.",
+    "Source unchanged product wheel f3899eab; fixed upstream tested, RECORD/cache URL/unrelated members retained."
+  ],
+  "files": [
+    {
+      "path": "first-targeted.log",
+      "bytes": 17665,
+      "sha256": "4b1175a984bf74049cd7ca2ceb2a0070ac01c377917b18f663ee5f9ec63aad13"
+    },
+    {
+      "path": "delivery-error-code-recheck.log",
+      "bytes": 323,
+      "sha256": "0c98970bd39a61ffc17d50045eed85b6970078eb91fa8547ea2e15847305e253"
+    }
+  ]
+}

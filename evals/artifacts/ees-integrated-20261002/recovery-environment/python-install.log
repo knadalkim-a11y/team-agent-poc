@@ -1,0 +1,5 @@
+Downloading cpython-3.11.16-linux-x86_64-gnu (download) (29.4MiB)
+ Downloaded cpython-3.11.16-linux-x86_64-gnu (download)
+Installed Python 3.11.16 in 33.83s
+ + cpython-3.11.16-linux-x86_64-gnu (python3.11)
+warning: `/root/.local/bin` is not on your PATH. To use installed Python executables, add the directory to your PATH.

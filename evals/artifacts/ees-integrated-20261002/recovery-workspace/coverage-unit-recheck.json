@@ -1,0 +1,12 @@
+{
+  "recorded_at": "2026-10-02T07:19:49.171279+00:00",
+  "command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_delivery_suite -v",
+  "exit_code": 0,
+  "log": "coverage-unit-recheck.log",
+  "log_sha256": "3f2c1c04ad453627d688c9d6fc16ae0eb74f5a0e1344efe9033a98609ca6d4f5",
+  "changed_condition": "New fixture now requires a directory masquerading as a .py file to fail with the pre-existing OSError from source parsing. Original 10PASS/1ERROR retained. Missing-file structured rejection and wildcard/old-ID guards unchanged.",
+  "source_sha256": {
+    "tests/ees_delivery_suite.py": "c9dc438af72a56056c7ea337fd5953fd517c73e6fb763c27d621bff7229ca638",
+    "tests/test_ees_delivery_suite.py": "a8f5e17f93349770763ef1c85ad4a36848ebfd0068cbfbb6d70719a9b2562f9c"
+  }
+}

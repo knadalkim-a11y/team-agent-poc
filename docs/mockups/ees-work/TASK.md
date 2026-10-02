@@ -1082,7 +1082,7 @@ Native 인증·사용자·그룹·대화·첨부 DB는 기존 원본이다. 업�
 
 | 실제 테이블/진입 | 저장 의미와 강제 조건 | 직접 검증 |
 |---|---|---|
-| `work_schema`, `work_definitions`, `work_versions` | schema1·초안 revision·불변 게시본, `(workflow_id,version)` 고유, 검사한 정확한 정의/자원 버전만 게시 | `test_ees_work_workspace.py` 초기화/동시 생성/부분 손상/게시/rollback |
+| `work_schema`, `work_definitions`, `work_versions` | schema2·초안 revision·불변 게시본, `(workflow_id,version)` 고유, 검사한 정확한 정의/자원 버전만 게시 | `test_ees_work_workspace.py` 초기화/동시 생성/부분 손상/게시/rollback |
 | `work_factories`, `work_access`, `work_settings` | Native ID 역할과 시스템/공장 범위, 반복 기본/공장 override. 공장 전용 입력은 기본·진행 입력으로 저장 금지 | 같은 파일 권한/설정/false·0·미지정/공장 담당 검사 |
 | `work_runs`, `work_jobs` | 대화와 독립된 회차·시작 버전·개별 상태·담당 claim. 현재 담당자의 명시적 해제만 허용 | 같은 파일 격리/공유 경합/claim·release/종료·취소 |
 | `work_attempts`, `work_decisions` | 입력/설정 출처·도구·모델·공장·근거·기한 snapshot, 끝난 attempt 불변·사람 판정 append-only | 재실행·의존 작업 재검토·과거 이력·현재 ACL 회수 |
@@ -1138,3 +1138,30 @@ Native 인증·사용자·그룹·대화·첨부 DB는 기존 원본이다. 업�
 위 공통 기능과 개발용 배포 산출물 점검 왕복은 코드·계약·Native 제품으로 연결했다. 구현 누락을 외부 미연결로 바꾸어 표시하지 않는다. 현재 실제 운영 실행을 막는 것은 제공되지 않은 EES 기능/인증/상태·효과 API 계약이며, 결과 송부 채널·미승인 CR·휴일 계산은 정책 결정 대상이다. 화면/저장/검토·명시적 차단·합성 전송 검사는 이와 별도로 구현했다. 실제 공장·Native 사용자/그룹의 역할 매핑과 등록 자산의 현재 ID/hash·사용자 수정·참조 목록은 사내 적용 전에 확인해야 한다.
 
 검증 중 확인한 제품 결함은 수정·재검했으며, 통합 CI에서 드러난 시험 준비/SQLite 종료/묶음 시간·Chrome 초기 진단 수집·Windows 자연 종료 관측 문제는 [원인·보완·실행 경계](../../../evals/v4-ui-20260930.md#integrated-work-evidence-20261002)에 남겼다. 마지막 HEAD의 필수 CI·실제 원본 PNG/DOM/report·배포 후보 식별은 [같은 Draft PR #73](https://github.com/knadalkim-a11y/team-agent-poc/pull/73)에서 확인한다. 최종 검토 뒤에도 디자인과 업무 정책의 변경을 허용하며, 실제 적용·사용자 자산 정리·운영 요청은 별도 승인 전까지 수행하지 않는다.
+
+
+### 2026-10-02 추가 7개 프레임 반영과 복구 후 검수
+
+후속 전체 페이지 조회에서 **27프레임·3개 아이콘·3923노드**를 확인했다. 앞의 20프레임은 당시 기준이며 다음 7개를 구현에 추가했다. [전체 페이지 metadata와 7개 context/원본 렌더](../../../evals/artifacts/ees-integrated-20261002/figma-27-frame-review/page-832-131.xml)는 도구 결과에 보존된 실제 바이트를 사용한다. 최종 관련 조회는 **2026-10-02 06:32:42 UTC**, 전체 metadata 동일·A6/A7 context는 생성 asset URL을 제외하고 동일·두 렌더 바이트 동일이다. [비교 결과](../../../evals/artifacts/ees-integrated-20261002/figma-27-frame-review/final-related-recheck.json). 도구가 별도 디자인 버전 ID를 제공하지 않아 조회 시점과 바이트를 기준으로 삼으며 향후 변경을 금지하지 않는다.
+
+| 프레임 | 구현과 실제 상태 변경 | 남는 경계 |
+|---|---|---|
+| B2-1 `938:784` | 공통 일정 편집·다음 2회 미리보기·게시된 버전/명시적 위임에 따른 예약 | 미리보기는 저장/예약/실행하지 않음. 개인 입력 날짜를 예약일로 자동 변경하지 않음 |
+| A5 `940:795` | 회차 이름·기준일·단계 기간의 snapshot 카드 | 휴일 미연결 경고, 날짜 임의 이동 없음. 기존 실행/내보내기/종료 controls 추가 표시 |
+| A6 `942:891` | 실제 조회 목록·포함/제외·수동 추가·원자적 목록 확정 | 조회와 사람 추가 출처/건수 분리. 빈 선택의 업무 완료 정책 미정은 해당 확정만 차단 |
+| A7 `943:968` | 검토문 자동 저장·CAS·사람 확인·불변 검토 이력 | 일반 검토와 송부 목적 분리. 송부 미연결은 본문 검토 후에도 미완료 |
+| S1 `944:1036` | 빈 상태·권한·실패/부분/불명·다시 조회 상태 | 성공처럼 합치지 않음. 제한 재조회는 명시적 게시 계약과 검증된 읽기 실패에만 허용 |
+| S2 `946:1065` | 정확한 당시 attempt/게시본/입력/결과·Native 개인 대화 참조 | 현재 ACL 재확인, 누락 시 현재 결과 대체 없음. 상세 결과는 읽기 전용 JSON 표시 차이 있음 |
+| C1 `948:1078` | 공통 색상·간격·글꼴·원본 SVG 토큰 | 새로운 업무별 화면 하드코딩 없음. 전체 프레임 픽셀 동일성은 주장하지 않음 |
+
+실제 구현은 `ees_workflow_workspace.py`, `ees_workflow_operations.py`, `ees_workflow_native.py`, 공개 `workflow_tool.py`와 공통 designer/launcher/view에 연결한다. 새 `work_review_revisions`는 append-only 검토문 revision과 사람 판정을 보존한다. `work_schema`1→2는 동일 SQLite transaction에서 수행하며 불완전 schema/손상/동시 초기화를 검증하고 실패 시 marker를 올리지 않는다. `confirm_list`는 목록 수정·새 attempt·각 판정·run revision·receipt를 원자적으로 기록한다. `save_review_draft`는 run/review revision·정확한 당시 결과·현재 권한·미완료 상태를 모두 검사한다.
+
+`read_retry={count:0..3,deadline_seconds:1..300}`는 명시적 게시 설정이며 없으면 추가 호출은 0회다. 전체 예산 안에서 각 시도의 현재 사용자·권한·도구 참조·입력·선행 근거를 확인한다. 검증된 현재 관리 원본의 확정 HTTP 오류만 재조회하고 unknown/partial/권한/인증/429·AI·변경 요청은 대상이 아니다. 사람의 별도 실행이 끼어들면 기존 자동 chain을 이어 덮지 않는다. 각 시도/결과는 보존한다.
+
+일반 검토 완료와 실제 송부 완료는 별개다. `completion.kind=delivery`는 검토문을 확정해도 채널 미연결 `delivery_unconfigured`를 유지하며 후속 `all_resolved`나 진행 건 종료로 우회하지 않는다. 미승인 CR·0개 선택의 완료 정책·휴일 공급자·송부 대상/채널·실제 EES API 계약은 계속 필요한 결정이다. 이들은 화면/저장/검토 구현 누락과 구분한다.
+
+제품 검수 중 확인한 초안 우선순위·일정 blur 후 포커스 소실·저장 acknowledgment 후 조기 잠금 해제·초기 선택 복원의 사용자 선택 덮어쓰기·기록 펼침 복원·수동 추가 건수와 누락 SVG10개는 제품 코드에서 수정했다. 87 SVG/101 Work 필수 파일을 같은 빌드·설치 inventory로 검사한다. 프로그램만 Restore해 schema2 데이터를 이전 schema1로 되돌린다고 가정하지 않으며 적용 전에 프로그램과 데이터 백업을 짝지어야 한다.
+
+중단 이후 작업 공간 일부가 사라져 06:54 UTC에 미커밋 시험·새 증거 원본을 읽을 수 없었다. 제품은 GitHub 보존 commit `2770382fa29968abe0d469ac9f49988806fbacc3`, tree `15976fe195deaec0cc89873eee4c159e91a847ed`로 정확히 복구했다. 도구에 남은 Figma 원본은 복구했으나 유실된 PNG/시험 원문을 동일 바이트로 재생성했다고 주장하지 않는다. 시험 재구성과 새 검수 결과·복구 불가 증거는 [날짜별 평가](../../../evals/v4-ui-20260930.md#integrated-recovery-20261002)에서 구분한다.
+
+복구 후 최종 제품 검수 뒤 **2026-10-02 07:25:04 UTC** A6/A7 context·렌더를 다시 조회했다. 생성 asset URL을 제외한 context와 렌더 바이트가 06:32 비교본과 동일했다. [최종 관련 화면 비교](../../../evals/artifacts/ees-integrated-20261002/figma-27-frame-review/recovery-final-recheck.json). 페이지 전체 조회 기준은 앞선 06:32이며 모든 페이지를 반복 조회한 것으로 표현하지 않는다.

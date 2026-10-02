@@ -1,0 +1,18 @@
+{
+  "scope": "built Native UI; synthetic Native session; real workspace and operations SQLite",
+  "geometry": {
+    "width": 14,
+    "height": 14,
+    "src": "http://127.0.0.1:34473/_ees13/v4/1fc4e.svg",
+    "loaded": true,
+    "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+    "overflow": true
+  },
+  "preview_saved_definition": false,
+  "saved_interval": 2,
+  "preserved_existing_version": 2,
+  "published_version": 3,
+  "undelegated_lifecycle_enabled": false,
+  "explicit_lifecycle_enabled": true,
+  "external_transport_calls": 0
+}

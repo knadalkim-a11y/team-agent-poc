@@ -1,0 +1,17 @@
+{
+  "recorded_at": "2026-10-02T07:09:46.697740+00:00",
+  "command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_figma_contracts -v",
+  "environment": {
+    "PYTHONPATH": ".:tests"
+  },
+  "exit_code": 0,
+  "elapsed_seconds": 0.968,
+  "changed_condition": "Only recovered fixture assumptions corrected: public decisions are per-job, and existing access grants require their actual access_id/revision. Added explicit ordinary-review completed assertion. Product unchanged.",
+  "initial_result": "11 pass, 1 failure, 5 errors; original logs and source hashes preserved in first-results.json",
+  "source_sha256": {
+    "tests/test_ees_work_figma_contracts.py": "46eed1876f0ab0e08636933006e908df22ad3166c0d1f58c948bf5abc0f3b43a",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py": "176d2a8d7008a5192efc9fe5e88bef2139634df2c2a00d13320e17fb6159594b"
+  },
+  "log": "workspace-recheck.log",
+  "log_sha256": "e31be691c1b7af0286bd37185115dc40e4fd99032665d31b2b5fb8e89b36a6df"
+}

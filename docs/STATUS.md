@@ -1,5 +1,17 @@
 # 현재 작업 상태
 
+
+## 2026-10-02 이어가기 · 27프레임 구현 및 작업 환경 복구
+
+- **현재 범위:** 통합 구현을 같은 Draft PR #73/`docs/ees-restructure-step0a-20261001`에서 계속한다. main `55832bad328cdfb91c1c284749f7959dd664176c`, 원격 PR head `659d3ac1bfb646e720aa87d9ec3b7de189ab0eb0`를 재확인했다. main push·병합·사내 적용/삭제는 수행하지 않는다.
+- **복구된 제품:** 추가 Figma 7개를 포함한 27프레임 대응 제품 commit `2770382fa29968abe0d469ac9f49988806fbacc3`/tree `15976fe195deaec0cc89873eee4c159e91a847ed`를 GitHub 객체에서 정확히 복구했다. 아직 PR ref에 게시되지 않은 제품 commit과 최종 검증된 HEAD를 구분한다.
+- **환경 사건:** 06:54 UTC에 로컬 `.git`·코드·미커밋 시험·docs/evals/dist 경로가 없어졌다. 이후 일부 기존 의존성 파일만 보였고 원인은 미확정이다. 기존 경로를 덮지 않고 별도 checkout으로 복구한다. 앞선 실행의 15개 checkpoint 통과 관측은 남기되 원본 화면 파일을 현재 제출 가능하다고 표시하지 않는다. 좁은 S2 화면 캡처는 당시 로딩 중이었으므로 시각 검수 보완 대상이다.
+- **디자인:** 전체27프레임·추가7개 실제 context/렌더를 복구했다. 06:32:42 UTC 최종 관련 A6/A7 재조회는 변경 없음. [화면/기능 대응과 계약](mockups/ees-work/TASK.md#integrated-work-20261002), [평가와 유실/복구 경계](../evals/v4-ui-20260930.md#integrated-recovery-20261002).
+- **새 검수 완료:** 실제 Native15checkpoint/종료0·좁은 화면 복원/실제 스크롤 PASS. Native 작성3/runtime5/현재 읽기2, Workspace17·일정18·UI96·작성8·역사/공개도구/Operations/배포업무/branding86개 및 installer/Restore4개를 새로 확인했다. 원래 실패·재구성 fixture 보완은 평가에 보존하며 겹치는 회귀 숫자를 합산하지 않는다. 정확한 전체 source의 새 CI는 게시 뒤 자동 실행 결과로 구분한다.
+- **게시와 적용 후보:** 제품/시험/검증 문서를 분리한 커밋으로 같은 Draft PR에 반영한다. 최종 HEAD·그 HEAD의 자동 CI/실제 업로드 파일·해시가 붙은 배포 후보의 최종 판정은 [PR73](https://github.com/knadalkim-a11y/team-agent-poc/pull/73)의 최신 본문/Checks가 원본이다. 이 문서 commit 시점에는 해당 CI가 아직 실행되기 전이며 앞선 통과를 최종 CI 성공으로 간주하지 않는다. 결과 기록만을 위한 동일 CI 수동 반복을 하지 않는다.
+
+아래 통합 구현/CI 상태는 작업 공간 손실 이전 원격 head에 남아 있는 당시 기록이다.
+
 갱신일: 2026-10-02
 
 현재 작업·다음 작업·미해결·실제 적용 원본을 관리합니다. 이슈·검증 근거는 [평가 기록 찾아보기](../evals/scenarios.md#evidence-index), 환경은 [versions](../versions.md), 완료된 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.

@@ -1941,3 +1941,23 @@ $setup = @{
 프로그램 장애 시 기존 `Restore`로 검증된 직전 프로그램을 복원하고 Start/health를 확인한다. ees.12 이하 필수 파일 목록은 당시 버전대로 동결되어 있다. 구프로그램으로 돌아가도 새 업무 DB·게시본·실행 시도가 자동 삭제되거나 역변환되지 않는다. 새 `work_*` 기록은 구프로그램의 편집 대상으로 공개하지 않는다. 자산 삭제/Native DB 변경/첨부 손실의 복구는 해당 데이터 백업과 별도 절차가 필요하다. 프로그램 Restore 성공을 데이터 복구 성공으로 보고하지 않는다.
 
 실제 EES 요청 기능/인증/상태·효과 API, 현재 담당/공장 권한, 결과 송부/미승인 CR 정책, 달력/휴일 정보는 실제 적용 전에 필요한 설정/결정이다. 미설정 기능은 사유를 표시하고 차단하며 운영 DB/서버 직접 조작이나 시험용 성공 응답으로 우회하지 않는다.
+
+
+### 2026-10-02 통합 후보의 적용·복구 경계
+
+최종 검토 후보는 동일 Draft PR #73의 정확한 source commit/tree와 wheel/manifest/ZIP SHA를 묶어 확인한다. 기존 `Apply`의 사전 검사·CI·원본/RECORD·필수 파일 검사는 유지하며 [기존 적용 절차](#ees-wrapper-apply)를 따른다. 파일명이 EES-demo인 기존 배포 묶음을 사용하더라도 폐기 데모를 재등록하지 않는다. 새 기본 설치는 빈 상태이며 필요한 Native 모델 연결·개인 PAT·실제 도구·계정/대화/첨부는 보존한다.
+
+공통 Work 저장소는 schema1→2로 append-only 검토문 이력을 추가한다. 이전 schema1 전용 프로그램은 schema2를 거부한다. **프로그램 Restore만으로 업무 DB·사용자 자산이 복구되거나 downgrade되지 않는다.** 실제 적용 전에 기존 프로그램과 동일 시점의 업무/Native 데이터·첨부·키/개인 설정 백업을 짝지어 보관하고, 되돌릴 때는 별도 승인된 데이터 복구 범위를 확인한다. 운영 DB를 공유하는 병렬 후보 앱을 만들지 않는다.
+
+동일 ees.13 문자열이라도 초기77 SVG 패키지와 현재87 SVG/101 Work 필수 파일 패키지는 설치 계약이 다르다. 현재 도구가 불완전 이전 묶음을 거부하면 파일을 주입하거나 RECORD/허용 해시를 다시 써서 통과시키지 않는다. 그 패키지에 맞는 정확한 원본 도구와 백업 조합을 확인한다. 고정 ees.12→현재의 프로그램 Apply/Resume/Restore 검사는 별도이며 실제 사내 설치본의 현재 상태를 추정하지 않는다.
+
+개발 검수 환경은 저장소 `.venv` Python3.11.16과 `dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell`을 재사용한다. 고정 패키지는 CI의199개 원본 inventory와 명시적 ftfy/wcwidth 보완 기준을 따른다. 실제 Native 검수 명령은 다음과 같다. 임시 DATA_DIR·합성 계정·loopback 모델/조회만 사용하며 harness가 서버·브라우저를 종료하고 임시 데이터를 정리한다. 고정 wheel과 소스가 맞는지 먼저 검사한다.
+
+```bash
+.venv/bin/python tests/ees_work_integrated_app.py \
+  --wheel dist/integrated/branding-16/open_webui-0.11.3+ees.13-py3-none-any.whl \
+  --chrome "$PWD/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell" \
+  --output dist/recovery/native-product
+```
+
+작업 환경 유실 후 이 명령을 실행할 때는 같은 결과 경로를 덮지 않고 새 이름을 사용한다. 복구 과정과 현재 환경은 [실행 기록](../evals/artifacts/ees-integrated-20261002/recovery-environment/environment.json)에 남겼다. 사내 모델·EES API·송부 성공을 합성 검수 결과로 대신하지 않는다.
