@@ -62,6 +62,46 @@ class DeliveryCoverageTests(unittest.TestCase):
         with patch.object(runner, "SUITES", {"services": ["test_old.py"]}):
             self.assertEqual(self.audit()["errors"], ["Expected exactly one suite: test_new.py"])
 
+    def test_case_partitions_assign_every_current_id_once_and_reject_overlap_or_unknown(self):
+        filename = "test_partition.py"
+        self.write_partition(filename)
+        self.data["modules"] = {}
+        real = "test_partition.Check.test_real"
+        partitions = {filename: {"services": None, "restore": [real]}}
+        with patch.object(runner, "CASE_PARTITIONS", partitions), patch.object(runner, "SUITES", {
+                "services": ["test_*.py"], "restore": [filename]}):
+            self.assertEqual(self.audit()["errors"], [])
+            self.assertEqual(runner.partition_ids(filename, "services"), {"test_partition.Check.test_general"})
+            self.assertEqual(runner.partition_ids(filename, "restore"), {real})
+            partitions[filename]["services"] = [real]
+            self.assertIn("Expected exactly one partition per test ID: " + filename, self.audit()["errors"])
+            partitions[filename]["services"] = None
+            partitions[filename]["restore"] = [real + "_removed"]
+            self.assertIn("Empty or unknown test partition: " + filename + ": restore", self.audit()["errors"])
+
+    def write_partition(self, filename):
+        (self.root / filename).write_text(
+            "import unittest\nclass Check(unittest.TestCase):\n"
+            "    def test_general(self): self.assertTrue(True)\n"
+            "    def test_real(self): self.assertTrue(True)\n", encoding="utf-8")
+
+    def test_partition_runtime_collection_is_exact_and_cannot_hide_missing_tests(self):
+        filename = "test_partition_runtime.py"
+        self.write_partition(filename)
+        real = "test_partition_runtime.Check.test_real"
+        partitions = {filename: {"services": None, "restore": [real]}}
+        result_file = self.root / "partition.json"
+        with patch.object(runner, "CASE_PARTITIONS", partitions), redirect_stderr(io.StringIO()):
+            self.assertEqual(runner.run_module(filename, result_file, "restore"), 0)
+            result = json.loads(result_file.read_text(encoding="utf-8"))
+            self.assertEqual(result["tests_run"], 1)
+            self.assertEqual(result["outcomes"], [{"id": real, "status": "passed"}])
+            partitions[filename]["restore"] = [real + "_missing"]
+            self.assertEqual(runner.run_module(filename, result_file, "restore"), 1)
+            result = json.loads(result_file.read_text(encoding="utf-8"))
+            self.assertEqual(result["status"], "failed")
+            self.assertIn("does not exactly match", result["error"])
+
     def test_skipped_evidence_is_incomplete_not_passed(self):
         (self.root / "test_skip.py").write_text(
             "import unittest\nclass Check(unittest.TestCase):\n"

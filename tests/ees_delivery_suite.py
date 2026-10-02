@@ -45,12 +45,28 @@ SUITES = {
         "test_ees_asset_guard.py", "test_ees_asset_native.py", "test_ees_branding_build.py",
         "test_demo_bundle.py", "test_ees_trial_*.py", "test_ees_delivery_suite.py",
         "test_check_docs.py", "test_openwebui_windows_launcher.py"],
+    "restore-ees10": ["test_ees_webui_customization.py"],
+    "restore-ees11": ["test_ees_webui_customization.py"],
+    "restore-ees12": ["test_ees_webui_customization.py"],
     "native-account": ["test_ees_work_authoring_native.py", "test_ees_work_authoring_account_switch.py",
         "test_ees_chat_theme.py"],
     "native-work": ["test_ees_work_demo.py"],
     "native-compose": ["test_ees_work_c_phase1_native.py", "test_ees_work_c_phase2_native.py"],
     "native-execution": ["test_ees_work_c_phase3_native.py", "test_ees_work_c_phase3_privacy.py"],
 }
+# Each real fixed-wheel Apply/Restore performs a full filesystem walk. On
+# Windows one ees.10 case takes 157 seconds; isolate these cases without
+# changing their assertions, artifact pins, or the overall required gate.
+CASE_PARTITIONS = {
+    "test_ees_webui_customization.py": {
+        "platform": None,  # Every remaining/currently added method stays here.
+        "restore-ees10": ["test_ees_webui_customization.CustomizationTests.test_real_ees10_to_authoring_apply_restore_preserves_program_and_data"],
+        "restore-ees11": ["test_ees_webui_customization.CustomizationTests.test_real_ees11_to_execution_apply_restore_preserves_program_and_data"],
+        "restore-ees12": ["test_ees_webui_customization.CustomizationTests.test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory"],
+    },
+}
+
+
 NODE_SCRIPTS = {
     "services": ["test_wo_demo_state.cjs", "test_ees_cooperation_panel.cjs", "test_ees_execution_ui.cjs",
                  "test_ees_work_authoring_ui.cjs", "test_ees_v4_layout.cjs", "test_ees_v4_drafts.cjs"],
@@ -70,6 +86,28 @@ def declared_ids(path):
             and method.name.startswith("test_")}
 
 
+def partition_ids(filename, suite):
+    """Complete disjoint assignment; no platform/runtime-dependent filtering."""
+    all_ids = declared_ids(TESTS / filename)
+    partitions = CASE_PARTITIONS.get(filename)
+    if not partitions:
+        return all_ids
+    if suite not in partitions:
+        raise ValueError("Unassigned module partition: " + filename + ": " + suite)
+    assigned = partitions[suite]
+    reserved = {item for ids in partitions.values() if ids is not None for item in ids}
+    return all_ids - reserved if assigned is None else set(assigned)
+
+
+def flatten_tests(suite):
+    for item in suite:
+        if isinstance(item, unittest.TestSuite):
+            yield from flatten_tests(item)
+        else:
+            yield item
+
+
+
 def audit():
     baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
     current = {identifier for path in TESTS.glob("test_*.py") for identifier in declared_ids(path)}
@@ -80,8 +118,22 @@ def audit():
     errors, changes = [], []
     replacements = baseline["replacements"]
     for filename in sorted(path.name for path in TESTS.glob("test_*.py")):
-        if len(assignments.get(filename, [])) != 1:
-            errors.append("Expected exactly one suite: " + filename)
+        partitions = CASE_PARTITIONS.get(filename)
+        if not partitions:
+            if len(assignments.get(filename, [])) != 1:
+                errors.append("Expected exactly one suite: " + filename)
+            continue
+        current_ids = declared_ids(TESTS / filename)
+        if set(assignments.get(filename, [])) != set(partitions):
+            errors.append("Partition suites differ from required module assignments: " + filename)
+        assigned_ids = []
+        for suite in partitions:
+            ids = partition_ids(filename, suite)
+            if not ids or not ids <= current_ids:
+                errors.append("Empty or unknown test partition: " + filename + ": " + suite)
+            assigned_ids.extend(ids)
+        if set(assigned_ids) != current_ids or len(assigned_ids) != len(set(assigned_ids)):
+            errors.append("Expected exactly one partition per test ID: " + filename)
     for filename, identifiers in baseline["modules"].items():
         for identifier in identifiers:
             if identifier in current:
@@ -122,7 +174,7 @@ def audit():
                 errors.append("Missing mapped JavaScript protection: " + filename + ": " + name)
     return {"baseline": baseline["source_commit"], "old_ids": sum(map(len, baseline["modules"].values())),
             "current_ids": len(current), "suites": {key: selected(key) for key in SUITES},
-            "classified_replacements": changes, "errors": errors}
+            "classified_replacements": changes, "case_partitions": {filename: {suite: sorted(partition_ids(filename, suite)) for suite in partitions} for filename, partitions in CASE_PARTITIONS.items() if (TESTS / filename).is_file()}, "errors": errors}
 
 
 class EvidenceResult(unittest.TextTestResult):
@@ -167,11 +219,24 @@ class EvidenceResult(unittest.TextTestResult):
                          self._exc_info_to_string(err, test))
 
 
-def run_module(filename, output):
+def run_module(filename, output, partition=None):
     started = time.monotonic()
     suite = unittest.TestLoader().discover(str(TESTS), pattern=filename)
+    selected_ids = None
+    if partition:
+        selected_ids = partition_ids(filename, partition)
+        collected = list(flatten_tests(suite))
+        found = [item for item in collected if item.id() in selected_ids]
+        found_ids = [item.id() for item in found]
+        if set(found_ids) != selected_ids or len(found_ids) != len(set(found_ids)) or not found:
+            report = {"module": filename, "partition": partition, "status": "failed",
+                      "error": "Runtime collection does not exactly match assigned test IDs",
+                      "expected": sorted(selected_ids), "collected": [item.id() for item in collected]}
+            output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+            return 1
+        suite = unittest.TestSuite(found)
     result = unittest.TextTestRunner(verbosity=2, resultclass=EvidenceResult).run(suite)
-    report = {"module": filename, "seconds": round(time.monotonic() - started, 3),
+    report = {"module": filename, "partition": partition, "selected_ids": sorted(selected_ids) if selected_ids else None, "seconds": round(time.monotonic() - started, 3),
               "tests_run": result.testsRun, "no_test_failures": result.wasSuccessful(),
               "status": "failed" if not result.wasSuccessful() else "incomplete" if result.skipped or not result.testsRun else "passed",
               "counts": {status: sum(item["status"] == status for item in result.outcomes)
@@ -185,6 +250,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--suite", choices=SUITES)
     parser.add_argument("--module")
+    parser.add_argument("--partition", choices=SUITES)
     parser.add_argument("--audit", action="store_true")
     parser.add_argument("--browser-evidence", type=Path)
     parser.add_argument("--output", type=Path, required=True)
@@ -201,7 +267,7 @@ def main():
         print("Actual browser evidence:", len(screenshots), "PNG files; valid:", valid)
         return int(not valid)
     if args.module:
-        return run_module(args.module, args.output / (Path(args.module).stem + ".json"))
+        return run_module(args.module, args.output / (Path(args.module).stem + ".json"), args.partition)
     if args.audit:
         report = audit()
         (args.output / "coverage.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -213,6 +279,8 @@ def main():
     for filename in selected(args.suite):
         command = [sys.executable, "-X", "warn_default_encoding", "-W", "error::EncodingWarning",
                    str(Path(__file__).resolve()), "--module", filename, "--output", str(args.output)]
+        if filename in CASE_PARTITIONS:
+            command.extend(["--partition", args.suite])
         completed = subprocess.run(command, cwd=ROOT, check=False)
         results.append({"module": filename, "exit_code": completed.returncode})
     for filename in NODE_SCRIPTS.get(args.suite, []):
