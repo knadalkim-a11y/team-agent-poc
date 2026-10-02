@@ -85,7 +85,7 @@ class IntegratedNativeCase(unittest.TestCase):
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
         self.addCleanup(self.server.shutdown)
         self.browser = ChromePipe(self.chrome, str(Path(self.temporary.name) / 'chrome'))
-        self.addCleanup(self.browser.close)
+        self.addCleanup(self.close_browser)
         self.addCleanup(self.capture_failure)
         self.browser.navigate('about:blank')
         self.browser.call('Runtime.enable'); self.browser.call('Network.enable')
@@ -237,6 +237,7 @@ class IntegratedNativeCase(unittest.TestCase):
         label = 'integrated-' + self._testMethodName + '-failure'
         directory = Path(os.environ.get('EES_TEST_SCREENSHOT_DIR', ROOT / 'dist/ees-work-screenshots'))
         directory.mkdir(parents=True, exist_ok=True)
+        self.failure_evidence_path = directory / (label + '.json')
         report = {'test': self.id(), 'last_wait': getattr(self, 'last_wait', None),
                   'last_click': getattr(self, 'last_click', None), 'capture_errors': []}
         # A bootstrap failure has no page session. Preserve the original local
@@ -258,3 +259,33 @@ class IntegratedNativeCase(unittest.TestCase):
         except Exception as error:
             report['capture_errors'].append('dom:' + type(error).__name__)
         (directory / (label + '.json')).write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+    def close_browser(self):
+        try:
+            self.browser.close()
+        finally:
+            # capture_failure runs first, including when setUp never obtained a
+            # page session. Keep its bytes untouched and save cleanup's passive
+            # observation/final state beside it instead of losing late replies.
+            path = getattr(self, 'failure_evidence_path', None)
+            if path and hasattr(self.browser, 'final_diagnostics'):
+                temporary = None
+                try:
+                    if path.exists():
+                        report = {'initial_evidence': path.name,
+                                  'browser_cleanup_diagnostics': self.browser.final_diagnostics}
+                        target = path.with_name(path.stem + '-cleanup.json')
+                        content = json.dumps(report, ensure_ascii=False, indent=2) + '\n'
+                        with tempfile.NamedTemporaryFile(dir=path.parent, prefix=target.name + '.', suffix='.tmp',
+                                mode='w', encoding='utf-8', delete=False) as stream:
+                            temporary = Path(stream.name)
+                            stream.write(content)
+                        os.replace(temporary, target)
+                except (OSError, ValueError, TypeError) as error:
+                    # Do not replace the original test/close exception with a
+                    # secondary collection error; expose the missing evidence.
+                    print('Native browser cleanup evidence save failed: ' + type(error).__name__, file=sys.stderr)
+                finally:
+                    if temporary:
+                        try: temporary.unlink(missing_ok=True)
+                        except OSError: pass

@@ -107,17 +107,92 @@ class ChromePipe:
                 "session_attached": bool(self.session), "buffer_bytes": len(self.buffer),
                 "last_command": dict(self.last_command) if self.last_command else None,
                 "recent_responses": list(self.response_summary),
-                "stderr_tail": stderr.decode(errors="replace"), "first_failure": self.first_failure}
+                "stderr_tail": stderr.decode(errors="replace"), "first_failure": self.first_failure,
+                "bootstrap_observation": getattr(self, "bootstrap_observation", None)}
 
     def record_failure(self, error):
         if self.first_failure is None:
             snapshot = self.diagnostics()
             snapshot.pop("first_failure")
             snapshot["error_type"] = type(error).__name__
+            snapshot["response_timeout"] = isinstance(error, AssertionError) and str(error) == "Chrome DevTools response timed out."
             self.first_failure = snapshot
+
+    def observe_failed_bootstrap(self):
+        """Observe the original timed-out reply without retrying or passing it.
+
+        Only the first browser handshake qualifies. The test has already failed;
+        this bounded cleanup observation never creates a target or resumes it.
+        No request is written until the normal Browser.close below this method.
+        """
+        failure = self.first_failure or {}
+        command = failure.get("last_command") or {}
+        if (getattr(self, "bootstrap_observation", None) is not None
+                or failure.get("stage") != "browser_handshake"
+                or not failure.get("response_timeout")
+                or command.get("method") != "Browser.getVersion"
+                or command.get("id") != 1 or command.get("completed") is not False
+                or failure.get("session_attached") or self.session):
+            return
+        observation = self.bootstrap_observation = {
+            "status": "observing", "request_id": 1, "launch_cutoff_seconds": 30,
+            "started_elapsed_ms": (time.monotonic() - self.started_at) * 1000,
+            "received_ids": [], "other_messages": 0}
+        deadline = self.started_at + 30
+        try:
+            while time.monotonic() < deadline:
+                if self.process.poll() is not None:
+                    observation["status"] = "process_exited"
+                    break
+                try:
+                    response = self.receive(deadline)
+                except AssertionError as error:
+                    if str(error) == "Chrome DevTools response timed out.":
+                        observation["status"] = "no_original_reply_before_cutoff"
+                    else:
+                        observation["status"] = "transport_closed"
+                    break
+                except (ValueError, UnicodeError):
+                    observation["status"] = "malformed_response"
+                    break
+                if not isinstance(response, dict):
+                    observation["status"] = "malformed_response"
+                    break
+                reply_id = response.get("id")
+                if isinstance(reply_id, int) and not isinstance(reply_id, bool):
+                    observation["received_ids"] = (observation["received_ids"] + [reply_id])[-20:]
+                if type(reply_id) is not int or reply_id != 1:
+                    observation["other_messages"] += 1
+                    continue
+                result = response.get("result")
+                if "error" in response:
+                    observation["status"] = "original_error_reply"
+                elif not isinstance(result, dict) or not all(
+                        isinstance(result.get(key), str) and result[key]
+                        for key in ("protocolVersion", "product")):
+                    observation["status"] = "malformed_original_reply"
+                else:
+                    observation["status"] = "late_valid_original_reply"
+                    observation["browser_version"] = {
+                        key: result[key][:200] for key in ("protocolVersion", "product")}
+                break
+            else:
+                observation["status"] = "no_original_reply_before_cutoff"
+        except OSError as error:
+            observation["status"] = "transport_error"
+            observation["errno"] = error.errno
+        finally:
+            observation["finished_elapsed_ms"] = (time.monotonic() - self.started_at) * 1000
+            observation["exit_code"] = self.process.poll()
 
     def close(self):
         try:
+            try:
+                self.observe_failed_bootstrap()
+            except Exception as error:
+                # The already-failed test must still close its owned browser if
+                # optional observation cannot inspect the process/transport.
+                self.bootstrap_observation = {"status": "observation_error", "error_type": type(error).__name__}
             # Let Chrome finish its profile writes before TemporaryDirectory
             # removes them. SIGTERM on the parent alone leaves writers behind.
             self.session = None
@@ -335,6 +410,112 @@ class ChromePipeBootstrapTests(unittest.TestCase):
         self.assertTrue(browser.errors.closed)
         self.assertEqual(browser.final_diagnostics["exit_code"], 0)
         self.assertIn("synthetic final diagnostic", browser.final_diagnostics["stderr_tail"])
+
+    def test_observation_error_does_not_prevent_owned_browser_cleanup(self):
+        browser, _, _ = self.pipe()
+        browser.process.poll = lambda: 0
+        with patch.object(browser, "observe_failed_bootstrap", side_effect=RuntimeError("synthetic observer fault")), \
+                patch.object(os, "close") as close, patch.object(os, "killpg") as kill:
+            browser.close()
+        kill.assert_called_once_with(123, signal.SIGKILL)
+        self.assertEqual([call.args[0] for call in close.call_args_list], [browser.request_write, browser.response_read])
+        self.assertTrue(browser.errors.closed)
+        self.assertEqual(browser.final_diagnostics["bootstrap_observation"],
+                         {"status": "observation_error", "error_type": "RuntimeError"})
+
+    def timed_out_bootstrap(self):
+        browser, _, response_write = self.pipe()
+        browser.stage = "browser_handshake"
+        with patch.object(select, "select", return_value=([], [], [])), self.assertRaisesRegex(AssertionError, "timed out"):
+            browser.call("Browser.getVersion", timeout=.01)
+        return browser, response_write
+
+    def test_passive_late_bootstrap_reply_keeps_original_failure_without_writing_or_resuming(self):
+        browser, response_write = self.timed_out_bootstrap()
+        original = json.dumps(browser.first_failure, sort_keys=True)
+        os.write(response_write, b'{"method":"Unknown.event","params":{"private":"synthetic-secret"}}\0'
+                 b'{"id":1,"result":{"protocolVersion":"1.3","product":"Synthetic/1","private":"synthetic-secret"}}\0')
+        with patch.object(os, "write", side_effect=AssertionError("Observer must not write a request")):
+            browser.observe_failed_bootstrap()
+        observation = browser.bootstrap_observation
+        self.assertEqual(observation["status"], "late_valid_original_reply")
+        self.assertEqual(observation["received_ids"], [1])
+        self.assertEqual(observation["other_messages"], 1)
+        self.assertEqual(observation["browser_version"], {"protocolVersion": "1.3", "product": "Synthetic/1"})
+        self.assertEqual(json.dumps(browser.first_failure, sort_keys=True), original)
+        self.assertNotIn("synthetic-secret", json.dumps(observation))
+        self.assertEqual(browser.counter, 1)
+        self.assertIsNone(browser.browser_version)
+        self.assertIsNone(browser.session)
+        self.assertEqual(browser.stage, "browser_handshake")
+
+    def test_passive_bootstrap_has_absolute_cutoff_and_distinguishes_terminal_results(self):
+        cases = (("expired", "no_original_reply_before_cutoff"), ("exited", "process_exited"),
+                 ("eof", "transport_closed"), ("malformed", "malformed_response"),
+                 ("no_reply", "no_original_reply_before_cutoff"))
+        for mode, expected in cases:
+            with self.subTest(mode=mode):
+                browser, _ = self.timed_out_bootstrap()
+                browser.started_at = 100.0
+                browser.process.poll = lambda: 7 if mode == "exited" else None
+                receive = lambda deadline: None
+                if mode == "eof":
+                    def receive(deadline): raise AssertionError("Chrome DevTools pipe closed: synthetic")
+                elif mode == "malformed":
+                    receive = lambda deadline: ["not a CDP object"]
+                elif mode == "no_reply":
+                    def receive(deadline): raise AssertionError("Chrome DevTools response timed out.")
+                with patch.object(time, "monotonic", return_value=131.0 if mode == "expired" else 116.0), \
+                        patch.object(browser, "receive", side_effect=receive) as read, \
+                        patch.object(os, "write", side_effect=AssertionError("No diagnostic request")):
+                    browser.observe_failed_bootstrap()
+                self.assertEqual(browser.bootstrap_observation["status"], expected)
+                self.assertEqual(browser.bootstrap_observation["launch_cutoff_seconds"], 30)
+                if mode in ("expired", "exited"):
+                    read.assert_not_called()
+                else:
+                    read.assert_called_once_with(130.0)
+
+    def test_passive_bootstrap_is_not_used_for_page_failures_or_repeated_cleanup(self):
+        browser, _ = self.timed_out_bootstrap()
+        browser.first_failure["stage"] = "ready"
+        browser.first_failure["last_command"].update(id=40, method="Runtime.evaluate")
+        with patch.object(browser, "receive", side_effect=AssertionError("Page failure must not observe startup")):
+            browser.observe_failed_bootstrap()
+        self.assertIsNone(getattr(browser, "bootstrap_observation", None))
+        browser, response_write = self.timed_out_bootstrap()
+        os.write(response_write, b'{"id":1,"result":{"protocolVersion":"1.3","product":"Synthetic/1"}}\0')
+        browser.observe_failed_bootstrap()
+        original = json.dumps(browser.bootstrap_observation, sort_keys=True)
+        with patch.object(browser, "receive", side_effect=AssertionError("Observe at most once")):
+            browser.observe_failed_bootstrap()
+        self.assertEqual(json.dumps(browser.bootstrap_observation, sort_keys=True), original)
+
+    def test_native_fixture_saves_final_diagnostics_without_rewriting_first_evidence(self):
+        from ees_work_integrated_fixture import IntegratedNativeCase
+        case = IntegratedNativeCase("runTest")
+        original = {"browser": {"first_failure": {"stage": "browser_handshake"}}, "page_capture": "unavailable_no_attached_session"}
+        final = {"exit_code": 0, "bootstrap_observation": {"status": "late_valid_original_reply"}}
+        closed = []
+        case.browser = SimpleNamespace(close=lambda: closed.append(True), final_diagnostics=final)
+        with tempfile.TemporaryDirectory(prefix="ees-final-bootstrap-evidence-") as directory:
+            case.failure_evidence_path = Path(directory) / "failure.json"
+            case.failure_evidence_path.write_text(json.dumps(original), encoding="utf-8")
+            before = case.failure_evidence_path.read_bytes()
+            case.close_browser()
+            report = json.loads((Path(directory) / "failure-cleanup.json").read_text(encoding="utf-8"))
+            self.assertEqual(case.failure_evidence_path.read_bytes(), before)
+            def failed_close(): raise RuntimeError("original close failure")
+            case.browser.close = failed_close
+            with patch.object(os, "replace", side_effect=OSError("synthetic evidence failure")), \
+                    patch("builtins.print") as output, self.assertRaisesRegex(RuntimeError, "original close failure"):
+                case.close_browser()
+            self.assertEqual(case.failure_evidence_path.read_bytes(), before)
+            self.assertEqual(list(Path(directory).glob("*.tmp")), [])
+            self.assertIn("OSError", output.call_args.args[0])
+        self.assertEqual(closed, [True])
+        self.assertEqual(report.pop("browser_cleanup_diagnostics"), final)
+        self.assertEqual(report, {"initial_evidence": "failure.json"})
 
     def test_bootstrap_failure_capture_saves_local_diagnostics_without_page_commands(self):
         from ees_work_integrated_fixture import IntegratedNativeCase
