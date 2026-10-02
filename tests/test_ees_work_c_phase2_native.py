@@ -52,9 +52,47 @@ class CPhaseTwoNativeTests(IntegratedNativeCase):
         self.assertTrue(self.read('[data-action="execute"]','disabled'))
         glyph='#ees-work-panel .ew-status:is([data-status=running],[data-status=in_progress]) > .ew-icon'
         self.wait('document.querySelector('+json.dumps(glyph)+')')
-        frames=self.browser.evaluate('new Promise(resolve=>{const e=document.querySelector('+json.dumps(glyph)+');const first=getComputedStyle(e).transform;requestAnimationFrame(()=>requestAnimationFrame(()=>resolve({first,second:getComputedStyle(e).transform,name:getComputedStyle(e).animationName})));})')
-        self.assertEqual(frames['name'],'ew-running');self.assertNotEqual(frames['first'],frames['second'])
-        self.screenshot('integrated-running-animation')
+        # Observe real frames after animation readiness, without changing DOM or
+        # animation state. A fixed pair of RAF callbacks can both see time zero.
+        frames=self.browser.evaluate('''new Promise(resolve=>{
+            const selector='''+json.dumps(glyph)+''',started=performance.now(),samples=[];
+            let node=null,animation=null,first=null,replacements=0,finished=false;
+            function finish(moved,reason,second=null){
+                if(finished)return;finished=true;clearTimeout(deadline);
+                resolve({moved,reason,elapsed_ms:performance.now()-started,replacements,first,second,samples});
+            }
+            const deadline=setTimeout(()=>finish(false,'animation_did_not_advance_before_deadline'),3000);
+            function observe(timestamp){
+                if(finished)return;
+                const e=document.querySelector(selector),style=e&&getComputedStyle(e),rect=e?.getBoundingClientRect();
+                const current=e?.getAnimations().find(value=>value.animationName==='ew-running'&&value.effect?.target===e);
+                const visible=Boolean(e?.isConnected&&rect?.width>0&&rect.height>0&&rect.bottom>0&&rect.right>0&&
+                    rect.top<innerHeight&&rect.left<innerWidth&&style.display!=='none'&&style.visibility==='visible'&&Number(style.opacity)>0);
+                if(e!==node||current!==animation){if(node)replacements++;node=e;animation=current;first=null;}
+                const sample={timestamp,connected:Boolean(e?.isConnected),visible,visibility:document.visibilityState,
+                    reduced_motion:matchMedia('(prefers-reduced-motion: reduce)').matches,
+                    name:style?.animationName,transform:style?.transform,pending:current?.pending,
+                    play_state:current?.playState,current_time:typeof current?.currentTime==='number'?current.currentTime:null,
+                    start_time:typeof current?.startTime==='number'?current.startTime:null,
+                    rect:rect&&{x:rect.x,y:rect.y,width:rect.width,height:rect.height}};
+                samples.push(sample);if(samples.length>180)samples.shift();
+                const ready=visible&&sample.visibility==='visible'&&!sample.reduced_motion&&sample.name==='ew-running'&&
+                    current?.playState==='running'&&!current.pending&&sample.current_time!==null;
+                if(!ready)first=null;
+                else if(!first)first=sample;
+                else if(timestamp>first.timestamp&&sample.current_time>first.current_time&&sample.transform!==first.transform){
+                    finish(true,'same_live_animation_advanced',sample);return;
+                }
+                requestAnimationFrame(observe);
+            }
+            requestAnimationFrame(observe);
+        })''')
+        directory=self.screenshot('integrated-running-animation')
+        (directory/'integrated-running-animation.json').write_text(json.dumps(frames,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        self.assertTrue(frames['moved'],json.dumps(frames,ensure_ascii=False))
+        self.assertEqual(frames['first']['name'],'ew-running');self.assertEqual(frames['second']['name'],'ew-running')
+        self.assertGreater(frames['second']['current_time'],frames['first']['current_time'])
+        self.assertNotEqual(frames['first']['transform'],frames['second']['transform'])
         self.browser.call('Emulation.setEmulatedMedia',{'features':[{'name':'prefers-reduced-motion','value':'reduce'}]})
         self.wait('getComputedStyle(document.querySelector('+json.dumps(glyph)+')).animationName === "none"')
         self.screenshot('integrated-running-reduced-motion')
