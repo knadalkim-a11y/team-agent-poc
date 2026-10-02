@@ -178,6 +178,72 @@ def next_slot(rule, after):
     fail("schedule_rule_invalid")
 
 
+def validate_schedule_definition(schedule, nodes):
+    """Validate persisted authoring values without creating a reservation."""
+    allowed = {"frequency", "interval", "timezone", "anchor", "weekday", "name_template", "stage_deadlines", "opening", "closing", "non_working_days", "catch_up"}
+    if not isinstance(schedule, dict) or not isinstance(nodes, dict) or set(schedule) - allowed:
+        fail("schedule_rule_invalid")
+    data = clean(deepcopy(schedule))
+    next_slot(data, 0)
+    zone = ZoneInfo(data["timezone"])
+    anchor = datetime.fromisoformat(data["anchor"])
+    if anchor.tzinfo is not None:
+        anchor = anchor.astimezone(zone)
+    if "weekday" in data and (data["frequency"] != "weekly" or type(data["weekday"]) is not int or data["weekday"] != anchor.weekday()):
+        fail("schedule_weekday_mismatch", "기준일과 반복 요일이 같아야 합니다.")
+    template = data.get("name_template", "")
+    if not isinstance(template, str) or len(template) > 160 or "{" in template.replace("{date}", "") or "}" in template.replace("{date}", ""):
+        fail("schedule_name_invalid", "회차 이름의 {date}는 일정 기준일입니다. 업무 입력 날짜와 자동 연결되지 않습니다.")
+    for key, supported in (("opening", "after_previous_closed"), ("closing", "after_last_stage"), ("non_working_days", "notify_no_shift"), ("catch_up", "miss")):
+        if key in data and data[key] != supported:
+            fail("schedule_rule_invalid")
+    deadlines = data.get("stage_deadlines", {})
+    if not isinstance(deadlines, dict) or len(deadlines) > 100:
+        fail("schedule_stage_deadlines_invalid")
+    for stage, rule in deadlines.items():
+        if stage not in nodes or not isinstance(nodes[stage], dict) or nodes[stage].get("type") != "t" or not isinstance(rule, dict) or set(rule) - {"offset_days", "end_offset_days"} or "offset_days" not in rule:
+            fail("schedule_stage_deadlines_invalid")
+        start, end = rule["offset_days"], rule.get("end_offset_days", rule["offset_days"])
+        if type(start) is not int or type(end) is not int or not -366 <= start <= end <= 366:
+            fail("schedule_stage_deadlines_invalid")
+    return data
+
+
+def validate_read_retry(job):
+    """A published, explicit extra-read budget; absence retains one call."""
+    policy = job.get("read_retry")
+    if policy is None:
+        return {"count": 0}
+    from .ees_workflow_native import FUNCTIONS
+    reference = job.get("tool_reference", job.get("execution", {}).get("reference", {}))
+    if (not isinstance(policy, dict) or set(policy) != {"count", "deadline_seconds"}
+            or type(policy.get("count")) is not int or not 0 <= policy["count"] <= 3
+            or type(policy.get("deadline_seconds")) is not int or not 1 <= policy["deadline_seconds"] <= 300
+            or job.get("mode") != "tool" or job.get("result_block") == "change_request"
+            or not isinstance(reference, dict) or reference.get("function") not in FUNCTIONS):
+        fail("read_retry_invalid", "조회 재시도는 검증된 읽기 작업에만 0~3회, 전체 1~300초로 설정해 주세요.")
+    return deepcopy(policy)
+
+
+def schedule_cycle(schedule, stamp):
+    """Calendar-date preview/snapshot; no holiday provider or date shifting."""
+    rule = schedule.get("rule", schedule)
+    local = datetime.fromtimestamp(stamp, ZoneInfo(rule["timezone"]))
+    date = local.date().isoformat()
+    template = rule.get("name_template", "")
+    name = template or date
+    name = name.replace("{date}", date)
+    warnings = [{"code": "holiday_calendar_unconfigured", "message": "공휴일 달력 미연결 · 기한은 자동으로 옮기지 않습니다."}]
+    deadlines = {}
+    for key, offsets in rule.get("stage_deadlines", {}).items():
+        start = local.date() + timedelta(days=offsets["offset_days"])
+        end = local.date() + timedelta(days=offsets.get("end_offset_days", offsets["offset_days"]))
+        deadlines[key] = {"start": start.isoformat(), "end": end.isoformat()}
+        if start.weekday() >= 5 or end.weekday() >= 5:
+            warnings.append({"code": "stage_deadline_weekend", "message": "단계 기한이 주말입니다. 담당자가 확인해 주세요. 날짜는 옮기지 않았습니다.", "stage_id": key, "start": start.isoformat(), "end": end.isoformat()})
+    return {"date": date, "scheduled_at": stamp, "name": name, "stage_deadlines": deadlines, "warnings": warnings, "timezone": rule["timezone"], "holidays_checked": False}
+
+
 def init_operations(db):
     required = {"work_tool_contracts", "work_operation_receipts", "work_operation_events", "work_external_requests", "work_request_intents", "work_schedules", "work_schedule_slots", "work_job_claims", "work_scope_runs"}
     existing = {row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
@@ -288,6 +354,8 @@ class OperationsRuntime:
             fail("command_invalid")
         actor, caps, groups = await self._actor(user)
         action = body.get("action")
+        if action == "schedule_preview":
+            return self._schedule_preview(actor, groups, body)
         if action == "execute_scope":
             return await self._scope_command(actor, groups, body)
         if action == "execute_job":
@@ -548,8 +616,8 @@ class OperationsRuntime:
         with self.service._db(write=True) as db:
             row = db.execute("SELECT data FROM work_external_requests WHERE id=?", (request_id,)).fetchone()
             request = json.loads(row[0])
-            if request["state"] == "effect_verified":
-                return  # A later stale poll cannot erase a verified receipt.
+            if request["state"] == "effect_verified" or (request["state"] == "failed" and request.get("reason") == "effect_criterion_not_met"):
+                return  # A later poll cannot rewrite a settled effect observation/attempt.
             request.update(clean(details))
             request["state"] = state
             request["revision"] += 1
@@ -558,7 +626,7 @@ class OperationsRuntime:
             if request.get("attempt_id") and state in {"effect_verified", "failed", "rejected"}:
                 attempt = db.execute("SELECT status FROM work_attempts WHERE id=?", (request["attempt_id"],)).fetchone()
                 if attempt and attempt[0] == "running":
-                    self.service._work_finish_attempt(db, request["attempt_id"], "succeeded" if state == "effect_verified" else "failed", {"status": "succeeded" if state == "effect_verified" else "failed", "completeness": "complete", "external_request_id": request_id, "reported_complete": request.get("reported_complete", False), "effect_verified": request.get("effect_verified", False), "effect_evidence": request.get("effect_evidence", [])})
+                    self.service._work_finish_attempt(db, request["attempt_id"], "succeeded" if state == "effect_verified" else "failed", {"status": "succeeded" if state == "effect_verified" else "failed", "completeness": "complete", "external_request_id": request_id, "reported_complete": request.get("reported_complete", False), "effect_verified": request.get("effect_verified", False), "effect_evidence": request.get("effect_evidence", []), "reason": request.get("reason", "")})
             if request.get("attempt_id") and state == "unknown":
                 db.execute("UPDATE work_jobs SET status='unknown',revision=revision+1,reason='EES 요청 결과 확인 필요' WHERE run_id=? AND job_id=? AND current_attempt=?", (request["run_id"], request["job_id"], request["attempt_id"]))
             self._event(db, request_id, "EES", "request_observed", {"state": state, "revision": request["revision"], "observation": clean(details), "correlation_id": request["correlation_id"]})
@@ -607,6 +675,10 @@ class OperationsRuntime:
                     observed = await self.connector.effect(actor, deepcopy(tool), deepcopy(request["effect_criterion"]), request["correlation_id"])
                     if isinstance(observed, dict) and observed.get("satisfied") is True and observed.get("evidence"):
                         self._observe(request["id"], "effect_verified", {"reported_complete": True, "effect_verified": True, "effect_evidence": clean(observed["evidence"])})
+                    elif isinstance(observed, dict) and observed.get("satisfied") is False and observed.get("evidence"):
+                        self._observe(request["id"], "failed", {"reported_complete": True, "effect_verified": False, "effect_evidence": clean(observed["evidence"]), "reason": "effect_criterion_not_met"})
+                    else:
+                        self._observe(request["id"], "unknown", {"reported_complete": True, "effect_verified": False, "reason": "effect_observation_unknown"})
         except asyncio.CancelledError:
             raise
         except WorkflowError:
@@ -615,6 +687,31 @@ class OperationsRuntime:
             self._observe(request["id"], "unknown", {"reason": "ees_status_unavailable"})
         with self.service._db() as db:
             return {"ok": True, "request": self._public_request(self._request(db, actor, groups, request["id"]))}
+
+    def _schedule_preview(self, actor, groups, body):
+        with self.service._db() as db:
+            row = self.service._work_definition(db, actor, groups, identifier(body.get("workflow_id")), manage=True)
+            definition = clean(body.get("definition", json.loads(row["draft"])))
+            if not isinstance(definition, dict) or definition.get("mode") != "periodic":
+                fail("periodic_workflow_required")
+            rule = validate_schedule_definition(definition.get("schedule", {}), definition.get("nodes", {}))
+        after = body.get("after", self.clock())
+        if isinstance(after, str):
+            try:
+                parsed = datetime.fromisoformat(after.replace("Z", "+00:00"))
+                if parsed.tzinfo is None:
+                    fail("schedule_preview_time_invalid")
+                after = parsed.timestamp()
+            except (ValueError, TypeError):
+                fail("schedule_preview_time_invalid")
+        if type(after) not in (int, float):
+            fail("schedule_preview_time_invalid")
+        clean(after)
+        preview = []
+        for _ in range(2):
+            after = next_slot(rule, after)
+            preview.append(schedule_cycle(rule, after))
+        return {"ok": True, "preview": preview, "warnings": preview[0]["warnings"], "activation": {"reservation_created": False, "requires_published_version": True, "requires_explicit_delegation": True}}
 
     async def _schedule_command(self, actor, groups, body):
         action = body["action"]
@@ -647,6 +744,14 @@ class OperationsRuntime:
                 definition_data = json.loads(version_row[0])
                 if definition_data.get("mode") != "periodic":
                     fail("periodic_workflow_required")
+            rule = validate_schedule_definition(rule, definition_data.get("nodes", {}))
+            if type(supplied.get("lifecycle_enabled", False)) is not bool:
+                fail("schedule_lifecycle_invalid")
+            lifecycle = supplied.get("lifecycle_enabled", False)
+            if lifecycle:
+                published_rule = validate_schedule_definition(definition_data.get("schedule", {}), definition_data.get("nodes", {}))
+                if rule != published_rule or not supplied.get("delegated") or not (published_rule.get("opening") or published_rule.get("closing")):
+                    fail("schedule_lifecycle_invalid", "자동 회차 관리는 선택한 게시본의 일정과 명시적 실행 위임이 필요합니다.")
             jobs = supplied.get("job_ids", [])
             if not isinstance(jobs, list) or len(jobs) > 100 or any(not isinstance(key, str) or key not in definition_data.get("nodes", {}) or definition_data["nodes"][key].get("type") != "j" for key in jobs) or len(set(jobs)) != len(jobs):
                 fail("schedule_jobs_invalid")
@@ -662,6 +767,7 @@ class OperationsRuntime:
             # Requests always need a fresh human intent. A schedule can create
             # the cycle and notify the person; it cannot confirm an EES change.
             data = {"id": key, "workflow_id": workflow_id, "version": version, "system_id": system, "factory_id": factory_id, "scope": digest({"system_id": system, "factory_id": factory_id}), "identity_user_id": value(actor, "id"), "delegated": supplied.get("delegated", False), "authorized_by": value(actor, "id"), "authorized_at": self.clock(), "rule": deepcopy(rule), "catch_up": "miss", "grace_seconds": grace, "inputs": clean(supplied.get("inputs", {})), "sharing": clean(supplied.get("sharing", {"group_ids": []})), "job_ids": jobs, "model_id": model_identity["id"] if model_identity else str(supplied.get("model_id", "")), "model_identity": model_identity, "model_reason": model_reason, "next_at": first, "enabled": True}
+            data["lifecycle_enabled"] = lifecycle
         else:
             key = identifier(body.get("schedule_id"))
             with self.service._db() as db:
@@ -708,14 +814,43 @@ class OperationsRuntime:
         now = self.clock()
         count = 0
         with self.service._db(write=True) as db:
-            rows = db.execute("SELECT * FROM work_schedules WHERE enabled=1 AND next_at<=? ORDER BY next_at,id LIMIT 100", (now,)).fetchall()
+            # Filter ineligible sequential reservations before the batch limit:
+            # 100 old open cycles must not starve an unrelated due reservation.
+            rows = db.execute("""WITH candidates AS (
+                SELECT s.*, l.id AS previous_slot, l.status AS previous_state,
+                    r.status AS previous_run_status,
+                    (COALESCE(json_extract(s.data,'$.lifecycle_enabled'),0)=1 AND
+                     COALESCE(json_extract(s.data,'$.rule.opening'),'')='after_previous_closed') AS sequential
+                FROM work_schedules s LEFT JOIN work_schedule_slots l ON l.id=(
+                    SELECT id FROM work_schedule_slots WHERE schedule_id=s.id ORDER BY scheduled_at DESC LIMIT 1)
+                LEFT JOIN work_runs r ON r.id=json_extract(l.data,'$.run_id') WHERE s.enabled=1)
+                SELECT * FROM candidates WHERE
+                    (next_at<=? OR (sequential AND previous_run_status='completed')) AND
+                    (NOT sequential OR previous_slot IS NULL OR previous_state='missed' OR previous_run_status='completed')
+                ORDER BY next_at,id LIMIT 100""", (now,)).fetchall()
             for row in rows:
                 schedule = json.loads(row["data"])
                 stamp = row["next_at"]
+                sequential = schedule.get("lifecycle_enabled") and schedule["rule"].get("opening") == "after_previous_closed"
+                early = False
+                if sequential:
+                    previous = db.execute("SELECT data FROM work_schedule_slots WHERE schedule_id=? ORDER BY scheduled_at DESC LIMIT 1", (row["id"],)).fetchone()
+                    if previous:
+                        previous = json.loads(previous[0])
+                        run = db.execute("SELECT status FROM work_runs WHERE id=?", (previous.get("run_id"),)).fetchone()
+                        # Only this opted-in reservation's immediately preceding
+                        # cycle controls opening. Unrelated/older runs do not.
+                        if run and run["status"] == "completed":
+                            stamp = max(stamp, next_slot(schedule["rule"], previous["scheduled_at"]))
+                            early = stamp > now
+                        elif previous["state"] != "missed":
+                            continue
+                        # A missed slot never opened a cycle. Keep recording
+                        # subsequent due slots; it cannot open a future one early.
                 # Bound one worker tick. A long outage is recorded in batches,
                 # never silently collapsed into a new normal/success marker.
                 for _ in range(100):
-                    if stamp > now:
+                    if stamp > now and not early:
                         break
                     key = digest({"workflow": row["workflow_id"], "scope": row["scope"], "at": stamp})
                     status = "missed" if now - stamp > schedule["grace_seconds"] else "queued"
@@ -725,9 +860,35 @@ class OperationsRuntime:
                     if inserted:
                         self._event(db, key, "EES Work", "schedule_materialized", {"state": status, "scheduled_at": stamp, "schedule_id": row["id"]})
                     stamp = next_slot(schedule["rule"], stamp)
+                    if sequential:
+                        break
                 schedule["next_at"] = stamp
                 db.execute("UPDATE work_schedules SET next_at=?,data=? WHERE id=?", (stamp, dump(schedule), row["id"]))
         return count
+
+    async def _close_cycles(self):
+        """Opted-in lifecycle uses the existing human/unknown completion guard."""
+        cursor = getattr(self, "_close_cursor", None)
+        with self.service._db() as db:
+            rows = db.execute("SELECT s.data AS schedule,l.data AS slot,l.id AS slot_id,l.scheduled_at,r.id AS run_id,r.revision FROM work_schedules s JOIN work_schedule_slots l ON l.schedule_id=s.id JOIN work_runs r ON r.id=json_extract(l.data,'$.run_id') WHERE s.enabled=1 AND json_extract(s.data,'$.lifecycle_enabled')=1 AND json_extract(s.data,'$.delegated')=1 AND json_extract(l.data,'$.schedule.rule.closing')='after_last_stage' AND r.status='open' AND json_extract(l.data,'$.schedule.lifecycle_enabled')=1 AND NOT EXISTS (SELECT 1 FROM work_jobs j WHERE j.run_id=r.id AND j.status NOT IN ('completed','excluded')) AND NOT EXISTS (SELECT 1 FROM work_external_requests e WHERE e.run_id=r.id AND e.state IN ('requested','accepted','running','reported_complete','unknown')) AND (? IS NULL OR (l.scheduled_at,l.id)>(?,?)) ORDER BY l.scheduled_at,l.id LIMIT 100", (cursor[0] if cursor else None, cursor[0] if cursor else 0, cursor[1] if cursor else '')).fetchall()
+        # Native permission failures cannot be filtered in SQL. Advance this
+        # bounded scanner too, then wrap; a revoked actor cannot starve others.
+        self._close_cursor = (rows[-1]['scheduled_at'], rows[-1]['slot_id']) if rows else None
+        for row in rows:
+            schedule, slot = json.loads(row["schedule"]), json.loads(row["slot"])
+            original = slot["schedule"]
+            if not schedule.get("lifecycle_enabled") or not schedule.get("delegated") or original["rule"].get("closing") != "after_last_stage":
+                continue
+            try:
+                actor, _, groups = await self._actor({"id": original["identity_user_id"]})
+                with self.service._db() as db:
+                    self._current_schedule(db, original)
+                    self.service._work_run(db, actor, groups, row["run_id"], write=True)
+                # The existing command checks every job, mandatory human
+                # confirmation and unresolved external request atomically.
+                await self.service.workspace_command(actor, {"action": "close_run", "run_id": row["run_id"], "expected_revision": row["revision"], "request_id": "cycle-close-" + digest([row["run_id"], row["revision"]])})
+            except WorkflowError:
+                continue
 
     def _claim_slot(self):
         now = self.clock()
@@ -916,6 +1077,7 @@ class OperationsRuntime:
         return True
 
     async def process_once(self):
+        await self._close_cycles()
         scope_worked = await self._process_scope()
         materialized = self._materialize()
         slot = self._claim_slot()
@@ -942,6 +1104,12 @@ class OperationsRuntime:
                 # always keep this cycle and its immutable published version.
                 with self.service._db(write=True) as db:
                     db.execute("UPDATE work_schedule_slots SET data=json_set(data,'$.run_id',?) WHERE id=? AND worker=?", (run_id, slot["id"], self.worker))
+                    if schedule.get("lifecycle_enabled"):
+                        row = db.execute("SELECT snapshot FROM work_runs WHERE id=?", (run_id,)).fetchone()
+                        snapshot = json.loads(row[0])
+                        if "cycle" not in snapshot:
+                            snapshot["cycle"] = {**schedule_cycle(schedule, slot["scheduled_at"]), "schedule_id": schedule["id"], "schedule_revision": schedule["revision"], "version": schedule["version"], "rule": deepcopy(schedule["rule"])}
+                            db.execute("UPDATE work_runs SET snapshot=? WHERE id=?", (dump(snapshot), run_id))
             states = deepcopy(slot.get("job_states", {}))
             pending_times = []
             for job_id in schedule["job_ids"]:
@@ -990,6 +1158,88 @@ class OperationsRuntime:
         return True
 
     async def execute(self, user, body, *, schedule_guard=None, scope_guard=None):
+        actor, _, groups = await self._actor(user)
+        with self.service._db() as db:
+            run = self.service._work_run(db, actor, groups, identifier(body.get("run_id")), write=True)
+            snapshot = self.service._work_snapshot(db, run, identifier(body.get("job_id")))
+            policy = validate_read_retry(snapshot["job"])
+            existing = self._receipt(db, actor, body)
+        if not policy["count"] or existing is not None:
+            # A repeated HTTP request/restart never restarts a retry budget.
+            # _execute_once still checks current access before reading receipts.
+            return await self._execute_once(actor, body, schedule_guard=schedule_guard, scope_guard=scope_guard)
+        started = time.monotonic()
+        deadline = started + policy["deadline_seconds"]
+        current_body, guard, outcome = body, None, None
+        for number in range(policy["count"] + 1):
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            context = {"root_request_id": body.get("request_id"), "number": number,
+                       "count": policy["count"], "deadline_seconds": policy["deadline_seconds"]}
+            try:
+                outcome = await asyncio.wait_for(self._execute_once(actor, current_body,
+                    schedule_guard=schedule_guard, scope_guard=scope_guard,
+                    retry_guard=guard, retry_context=context), timeout=remaining)
+            except TimeoutError:
+                # Cancellation records UNKNOWN in _execute_once's finally. No
+                # further read is allowed after a missing/timed-out response.
+                with self.service._db(write=True) as db:
+                    receipt = self._receipt(db, actor, current_body)
+                    if receipt is None:
+                        fail("read_retry_deadline", "조회 제한 시간 안에 실행 준비를 마치지 못했습니다.")
+                    attempt = db.execute("SELECT status,result FROM work_attempts WHERE id=?", (receipt["attempt"]["id"],)).fetchone()
+                    outcome = {"ok": False, "attempt": {"id": receipt["attempt"]["id"], "number": receipt["attempt"]["number"], "status": "unknown", "result": {"error": {"code": "read_retry_deadline"}}}}
+                    self._event(db, receipt["attempt"]["id"], actor, "read_retry_timeout", {"recorded_status": attempt["status"], "deadline_seconds": policy["deadline_seconds"]})
+                    db.execute("UPDATE work_operation_receipts SET outcome=? WHERE actor=? AND request_id=? AND payload_hash=?", (dump(outcome), value(actor, "id"), current_body["request_id"], digest(current_body)))
+            # Keep the original idempotency receipt tied to the latest recorded
+            # attempt, including an unknown timeout; every attempt stays intact.
+            with self.service._db(write=True) as db:
+                db.execute("UPDATE work_operation_receipts SET outcome=? WHERE actor=? AND request_id=? AND payload_hash=?", (dump(outcome), value(actor, "id"), body["request_id"], digest(body)))
+            attempt = outcome["attempt"]
+            result = attempt.get("result", {})
+            confirmed = (attempt["status"] == "failed" and result.get("status") == "failed"
+                         and result.get("transport") == "failed" and result.get("failure_confirmed") is True)
+            if not confirmed or number == policy["count"] or time.monotonic() >= deadline:
+                break
+            actor, _, groups = await self._actor(actor)
+            with self.service._db() as db:
+                run = self.service._work_run(db, actor, groups, run["id"], write=True)
+                current = self.service._work_snapshot(db, run, snapshot["job"]["id"])
+                # An amended input/setting/source starts a separate human
+                # execution request, never the old automatic retry chain.
+                if not self._retry_sources_match(db, run, current, attempt["snapshot"], attempt["id"]):
+                    break
+                # Already-defined business and scheduled grace deadlines also
+                # stop further retries without changing the first call policy.
+                due = current.get("deadline", {}).get("at")
+                if due and datetime.fromisoformat(due.replace("Z", "+00:00")).timestamp() <= self.clock():
+                    break
+                if schedule_guard is not None:
+                    slot = db.execute("SELECT scheduled_at FROM work_schedule_slots WHERE json_extract(data,'$.run_id')=? ORDER BY scheduled_at LIMIT 1", (run["id"],)).fetchone()
+                    if slot and self.clock() > self._job_due(slot[0], current["job"].get("trigger", {})) + schedule_guard["grace_seconds"]:
+                        break
+                guard = {"snapshot": deepcopy(attempt["snapshot"]), "attempt_id": attempt["id"]}
+                current_body = {**body, "expected_revision": run["revision"],
+                    "request_id": "read-retry-" + digest([value(actor, "id"), body["request_id"], number + 1])}
+        if outcome is None:
+            fail("read_retry_deadline", "조회 제한 시간 안에 실행 준비를 마치지 못했습니다.")
+        return outcome
+
+    def _retry_sources_match(self, db, run, current, prior, previous_attempt_id):
+        active = db.execute("SELECT current_attempt FROM work_jobs WHERE run_id=? AND job_id=?", (run["id"], current["job"]["id"])).fetchone()
+        if not active or active[0] != previous_attempt_id:
+            return False
+        def sources(snapshot):
+            # A run's revision increments for this attempt itself. Compare its
+            # actual input bytes; keep shared-setting revisions exact.
+            return {key: {field: value for field, value in source.items() if field != "revision" or source.get("scope") != "run"}
+                    for key, source in snapshot.get("settings_sources", {}).items()}
+        return (all(current.get(key) == prior.get(key) for key in ("definition", "job", "inputs", "deadline", "tool_reference", "factory", "condition_results", "version", "definition_hash"))
+                and sources(current) == sources(prior)
+                and self.service._work_sources_current(db, run, prior))
+
+    async def _execute_once(self, user, body, *, schedule_guard=None, scope_guard=None, retry_guard=None, retry_context=None):
         actor, caps, groups = await self._actor(user)
         self.configure()
         with self.service._db() as db:
@@ -1072,7 +1322,13 @@ class OperationsRuntime:
                 current_arguments, current_sources, _ = self._resolve_arguments(db, run, job, snapshot["inputs"])
                 if current_arguments != arguments or current_sources != argument_sources:
                     fail("result_source_changed")
+            if retry_guard is not None:
+                current = self.service._work_snapshot(db, run, job["id"])
+                if not self._retry_sources_match(db, run, current, retry_guard["snapshot"], retry_guard["attempt_id"]):
+                    fail("read_retry_source_changed", "입력이나 근거가 바뀌어 자동 재조회를 중단했습니다.")
             attempt = self.service._work_begin_attempt(db, actor, groups, run["id"], job["id"], body.get("expected_revision"), inputs=body.get("inputs"), options_snapshot=options_snapshot)
+            if retry_context is not None:
+                attempt["snapshot"]["read_retry"] = deepcopy(retry_context)
             attempt["snapshot"]["skills"] = skill_snapshots
             if kind == "tool":
                 attempt["snapshot"]["arguments"] = arguments

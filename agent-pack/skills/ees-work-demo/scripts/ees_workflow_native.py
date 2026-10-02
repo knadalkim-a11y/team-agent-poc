@@ -19,6 +19,13 @@ from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 from .ees_workflow_authoring import WorkflowError
 
 NORMALIZER = "ees.native.read.v1"
+# Reviewed GET connectors shipped by this repository. Approval of a modified
+# user tool does not attest to its transport-error semantics or allow retries.
+MANAGED_READ_SOURCE_HASHES = {
+    "jira": "d6bb9bee2a7919b994008393d48188cd43d1a26404b013f21bc6d56f3e95085c",
+    "github": "46808670d2346b9bbe6c8586487e4542164d5652869d4404233684bb06f2db09",
+    "confluence": "1820a07b67b630f041c0d4fa7dbdc9ba84186866309942f35fa6a74e91f31dde",
+}
 FUNCTIONS = {
     "search_pages": {"query": "string", "space_key": "string", "limit": "integer"},
     "get_page": {"page_id": "string"},
@@ -210,7 +217,7 @@ def _contract(envelope):
     return envelope
 
 
-def normalize_result(function, raw, reference, context, secrets=()):
+def normalize_result(function, raw, reference, context, secrets=(), *, trusted_read=False):
     provenance = {key: reference[key] for key in REFERENCE_KEYS}
     provenance.update({key: context[key] for key in ("run_id", "call_id", "job_id") if key in context})
     envelope = {"version": NORMALIZER, "status": "error", "transport": "error", "completeness": "unknown",
@@ -239,6 +246,8 @@ def normalize_result(function, raw, reference, context, secrets=()):
         envelope["error"] = {"code": code, "message": "등록 도구의 조회가 완료되지 않았습니다. 연결·권한과 실행 상세를 확인해 주세요."}
         # Do not persist arbitrary plugin exception/error strings.
         envelope["data"] = {"ok": False, "error": envelope["error"]}
+        if trusted_read is True and function in FUNCTIONS and code == "upstream_error":
+            envelope["failure_confirmed"] = True
         return _contract(envelope)
     envelope.update(status="success", transport="success", completeness="complete")
     if function == "search_pages":
@@ -629,10 +638,50 @@ class NativeBridge:
             raise
         except Exception:
             raw = {"ok": False, "error": {"code": "native_call_failed"}}
-        return normalize_result(reference["function"], raw, reference, context, (user_valves["PAT"],))
+        family = "jira" if reference["function"].startswith("jira_") else "github" if reference["function"].startswith("github_") else "confluence"
+        trusted_read = reference["function"] in FUNCTIONS and reference["content_hash"] == MANAGED_READ_SOURCE_HASHES[family]
+        return normalize_result(reference["function"], raw, reference, context, (user_valves["PAT"],), trusted_read=trusted_read)
 
 
 WORK_CHAT_FUNCTIONS = frozenset({"ees_workflow_view", "ees_workflow_propose", "ees_workflow_display"})
+
+
+def historical_work_projection(result, reference):
+    """Project one exact immutable attempt after workspace_state refreshed ACLs.
+
+    A missing/denied historical reference must never fall back to today's run,
+    settings or latest result. The UI's mutable run revision is only a hint.
+    """
+    def denied(code, message):
+        return {"ok": False, "error": {"code": code, "message": message}}
+    identifiers = ("workflow_id", "run_id", "job_id", "attempt_id")
+    if (reference.get("reference_kind") != "historical"
+            or any(not isinstance(reference.get(key), str) or not 0 < len(reference[key]) <= 200 for key in identifiers)
+            or any(type(reference.get(key)) is not int or reference[key] < 1 for key in ("version", "result_revision"))
+            or not isinstance(reference.get("context_id"), str) or not 0 < len(reference["context_id"]) <= 4096):
+        return denied("work_chat_context_invalid", "당시 실행 기록의 정확한 식별자를 확인해 주세요.")
+    if not result.get("ok"):
+        return result
+    run = result.get("run") or {}
+    if (run.get("id") != reference["run_id"] or run.get("workflow_id") != reference["workflow_id"]
+            or run.get("version") != reference["version"]):
+        return denied("historical_reference_unavailable", "당시 진행 건과 게시 버전을 찾지 못했습니다. 현재 결과로 대체하지 않습니다.")
+    attempt = next((item for item in run.get("attempts", []) if item.get("id") == reference["attempt_id"]), None)
+    if (not attempt or attempt.get("job_id") != reference["job_id"]
+            or attempt.get("number") != reference["result_revision"] or attempt.get("status") == "running"):
+        return denied("historical_reference_unavailable", "당시 실행 시도의 확정된 기록을 찾지 못했습니다. 현재 결과로 대체하지 않습니다.")
+    if attempt.get("evidence_access"):
+        return denied("evidence_access_required", "현재 계정의 당시 원본 접근 권한을 확인해 주세요.")
+    snapshot = attempt.get("snapshot") or {}
+    if snapshot.get("version") != reference["version"] or (snapshot.get("job") or {}).get("id") != reference["job_id"]:
+        return denied("historical_reference_unavailable", "당시 실행 snapshot을 확인하지 못했습니다.")
+    scoped = {key: reference[key] for key in (*identifiers, "version", "result_revision", "context_id")}
+    scoped.update(reference_kind="historical", read_only=True, created_at=attempt.get("created_at"))
+    decisions = [item for item in (run.get("jobs", {}).get(reference["job_id"], {}).get("decisions") or [])
+                 if item.get("attempt_id") == attempt["id"] and item.get("result_revision") == attempt["number"]]
+    return {"ok": True, "work_context": scoped, "historical": {
+        "workflow_id": run["workflow_id"], "run_id": run["id"], "job_id": reference["job_id"], "version": run["version"],
+        "attempt": deepcopy(attempt), "decisions": deepcopy(decisions)}}
 
 
 async def _chat_work_access(user, tool):
@@ -692,17 +741,27 @@ async def select_chat_work_tools(request, user, metadata, tool_ids, form_data):
                     _fail("work_chat_context_changed")
             else:
                 row = service._work_definition(db, actor, groups, reference.get("workflow_id"))
-            if type(reference.get("revision")) is not int or row["revision"] != reference["revision"]:
+            if reference.get("reference_kind") != "historical" and (type(reference.get("revision")) is not int or row["revision"] != reference["revision"]):
                 _fail("work_chat_context_changed")
         scoped = {key: reference.get(key, "") for key in ("workflow_id", "run_id", "job_id", "revision", "context_id")}
         if any(not isinstance(scoped[key], str) or len(scoped[key]) > (4096 if key == "context_id" else 200) for key in ("workflow_id", "run_id", "job_id", "context_id")):
             _fail("work_chat_context_invalid")
+        historical = reference.get("reference_kind") == "historical"
+        if historical:
+            state = await service.workspace_state(actor, workflow_id=scoped["workflow_id"], run_id=scoped["run_id"])
+            projection = historical_work_projection(state, reference)
+            if not projection.get("ok"):
+                detail = projection.get("error") or {}
+                _fail(detail.get("code", "historical_reference_unavailable"), detail.get("message"))
+            scoped.update(projection["work_context"])
         request.state.ees_work_tool_source_hash = source_hash
         request.state.ees_work_chat_status = "ready"
         metadata["ees_work_reference"] = {"kind": "workspace", **scoped}
         # Context is data, not executable instructions or credentials. Native
         # retains model selection, tool approval mode and actual dispatch.
-        context_message = {"role": "system", "content": "EES Work context (read-only reference): " + _json(scoped) + ". Use ees_workflow_view to read current authorized data. You may propose an unsaved draft; never claim saved, published, executed or approved. Human changes happen in the work panel."}
+        instructions = (". Use ees_workflow_view to read only this exact historical attempt with current source permission. Do not substitute current results, propose drafts, navigate to another work target, or save, publish, execute or approve anything."
+                        if historical else ". Use ees_workflow_view to read current authorized data. You may propose an unsaved draft; never claim saved, published, executed or approved. Human changes happen in the work panel.")
+        context_message = {"role": "system", "content": "EES Work context (read-only reference): " + _json(scoped) + instructions}
         form_data.setdefault("messages", []).append(context_message)
         return list(dict.fromkeys([*(tool_ids or []), "ees_workflow"]))
     except WorkflowError as error:

@@ -113,6 +113,12 @@ def definition_check(definition, complete=True):
     nodes = definition.get('nodes')
     if not isinstance(nodes, dict) or len(nodes) > 250:
         return errors + ['P/T/J 구조를 확인해 주세요.'], warnings
+    if complete and definition.get('mode') == 'periodic' and definition.get('schedule'):
+        from .ees_workflow_operations import validate_schedule_definition
+        try:
+            validate_schedule_definition(definition['schedule'], nodes)
+        except WorkflowError as error:
+            errors.append(error.message)
     field_ids, jobs = {}, []
     for key, node in nodes.items():
         if not _id(key) or not isinstance(node, dict) or node.get('id') != key or node.get('type') not in ('p', 't', 'j'):
@@ -150,6 +156,18 @@ def definition_check(definition, complete=True):
             errors.append(f'{key}: AI 제안과 항목 판정은 사람 확인이 필요합니다.')
         if not isinstance(node.get('human_confirmation', True), bool):
             errors.append(f'{key}: 사람 확인 조건을 확인해 주세요.')
+        if complete and 'read_retry' in node:
+            from .ees_workflow_operations import validate_read_retry
+            try:
+                validate_read_retry(node)
+            except WorkflowError as error:
+                errors.append(f'{key}: {error.message}')
+        if complete:
+            completion = node.get('completion', {})
+            if not isinstance(completion, dict) or completion.get('kind') not in (None, 'review', 'delivery'):
+                errors.append(f'{key}: 지원하는 완료 의미를 선택해 주세요.')
+            elif completion.get('kind') == 'delivery' and (node.get('mode') != 'ai' or node.get('result_block') != 'ai_review'):
+                errors.append(f'{key}: 송부 완료는 AI 결과 초안의 실제 송부 작업에만 사용할 수 있습니다.')
         if type(node.get('approval_count', 0)) is not int or node.get('approval_count', 0) not in (0, 1, 2):
             errors.append(f'{key}: 요청 승인 인원은 0, 1, 2명입니다.')
         deadline = node.get('deadline')
@@ -326,7 +344,7 @@ class WorkspaceMixin:
         # cannot silently reset to an empty database.
         db.execute('CREATE TABLE IF NOT EXISTS work_schema (id INTEGER PRIMARY KEY CHECK(id=1), version INTEGER NOT NULL)')
         marker = db.execute('SELECT version FROM work_schema WHERE id=1').fetchone()
-        if marker and marker['version'] != 1:
+        if marker and marker['version'] not in (1, 2):
             _fail('workspace_upgrade_required', '업무 저장소 버전을 확인해 주세요.')
         definitions = {
             'work_definitions': 'id TEXT PRIMARY KEY, system_id TEXT NOT NULL, draft TEXT NOT NULL, revision INTEGER NOT NULL, published_version INTEGER, validation TEXT, created_by TEXT NOT NULL, updated_at TEXT NOT NULL',
@@ -347,16 +365,27 @@ class WorkspaceMixin:
             present = {row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
             if not set(definitions) <= present:
                 _fail('workspace_corrupt', '업무 저장소 일부가 없습니다. 백업과 복구 상태를 확인해 주세요.')
+            if marker['version'] == 2 and 'work_review_revisions' not in present:
+                _fail('workspace_corrupt', '검토 본문 이력이 없습니다. 백업과 복구 상태를 확인해 주세요.')
         for name, columns in definitions.items():
             db.execute(f'CREATE TABLE IF NOT EXISTS {name} ({columns})')
-        db.execute('INSERT OR IGNORE INTO work_schema VALUES(1,1)')
+        # A reviewed draft is editable evidence, never an overwrite of the AI
+        # result. The surrounding initialization transaction upgrades v1 in place.
+        db.execute('CREATE TABLE IF NOT EXISTS work_review_revisions (attempt_id TEXT NOT NULL, revision INTEGER NOT NULL, text TEXT NOT NULL, actor_id TEXT NOT NULL, created_at TEXT NOT NULL, decision_id TEXT, PRIMARY KEY(attempt_id,revision), UNIQUE(decision_id))')
+        columns = [(item['name'], item['type'].upper(), item['notnull'], item['pk']) for item in db.execute('PRAGMA table_info(work_review_revisions)')]
+        expected = [('attempt_id', 'TEXT', 1, 1), ('revision', 'INTEGER', 1, 2), ('text', 'TEXT', 1, 0), ('actor_id', 'TEXT', 1, 0), ('created_at', 'TEXT', 1, 0), ('decision_id', 'TEXT', 0, 0)]
+        decision_unique = any(index['unique'] and not index['partial'] and [item['name'] for item in db.execute('SELECT name FROM pragma_index_info(?) ORDER BY seqno', (index['name'],))] == ['decision_id'] for index in db.execute('PRAGMA index_list(work_review_revisions)'))
+        if columns != expected or not decision_unique:
+            _fail('workspace_corrupt', '검토 본문 저장 구조가 완전하지 않습니다. 백업과 복구 상태를 확인해 주세요.')
+        db.execute('INSERT OR IGNORE INTO work_schema VALUES(1,2)')
+        db.execute('UPDATE work_schema SET version=2 WHERE id=1 AND version=1')
         db.execute('CREATE INDEX IF NOT EXISTS work_run_scope ON work_runs(system_id,factory_id,status)')
         db.execute('CREATE INDEX IF NOT EXISTS work_attempt_job ON work_attempts(run_id,job_id,number)')
         db.execute("CREATE TRIGGER IF NOT EXISTS work_attempt_finished_immutable BEFORE UPDATE ON work_attempts WHEN OLD.status <> 'running' BEGIN SELECT RAISE(ABORT,'immutable completed attempt'); END")
         db.execute("CREATE TRIGGER IF NOT EXISTS work_attempt_delete_immutable BEFORE DELETE ON work_attempts BEGIN SELECT RAISE(ABORT,'immutable attempt history'); END")
         # Published evidence and human decisions are append-only, including for
         # a later program version accidentally using an UPDATE.
-        for table in ('work_versions', 'work_decisions'):
+        for table in ('work_versions', 'work_decisions', 'work_review_revisions'):
             for action in ('UPDATE', 'DELETE'):
                 db.execute(f"CREATE TRIGGER IF NOT EXISTS {table}_{action.lower()}_immutable BEFORE {action} ON {table} BEGIN SELECT RAISE(ABORT,'immutable work evidence'); END")
 
@@ -516,6 +545,7 @@ class WorkspaceMixin:
         for dependency in self._work_prerequisite_jobs(definition, job_id):
             job = db.execute('SELECT * FROM work_jobs WHERE run_id=? AND job_id=?', (run_id, dependency)).fetchone()
             if not job: return False
+            if job['reason'] == 'delivery_unconfigured': return False
             if job['status'] == 'completed': continue
             if not resolved_policy or not job['current_attempt']: return False
             attempt = db.execute('SELECT * FROM work_attempts WHERE id=?', (job['current_attempt'],)).fetchone()
@@ -683,6 +713,18 @@ class WorkspaceMixin:
 
     def _work_run_view(self, db, actor, groups, row, evidence_access=None):
         value = dict(row)
+        value['can_write'], value['permission_reason'] = True, ''
+        try:
+            self._work_run(db, actor, groups, row['id'], write=True)
+        except WorkflowError as error:
+            value['can_write'], value['permission_reason'] = False, error.code
+        request_roles = {}
+        for role in ('requester', 'reviewer'):
+            try:
+                self._work_authorize_scope(db, actor, groups, row['system_id'], row['factory_id'], role)
+                request_roles[role] = True
+            except WorkflowError:
+                request_roles[role] = False
         value['sharing'] = json.loads(value['sharing']); value['inputs'] = json.loads(value['inputs'])
         snapshot = json.loads(value.pop('snapshot')); value.update(snapshot)
         jobs = {item['job_id']: dict(item) for item in db.execute('SELECT * FROM work_jobs WHERE run_id=?', (row['id'],))}
@@ -695,9 +737,30 @@ class WorkspaceMixin:
             if (item['snapshot']['job'].get('mode') != 'human' or self._work_evidence_references(item['snapshot'])) and (item['actor_id'] != _value(actor, 'id') or item['id'] not in (evidence_access or set())):
                 item['result'] = None; item['inputs'] = {}; item['snapshot'] = {'job': item['snapshot']['job']}
                 item['evidence_access'] = 'requires_current_source_access'
+            item['review_history'] = [] if item.get('evidence_access') else [dict(record) for record in db.execute('SELECT * FROM work_review_revisions WHERE attempt_id=? ORDER BY revision', (item['id'],))]
             attempts.append(item)
         for job in jobs.values():
             current = next((item for item in attempts if item['id'] == job['current_attempt']), None)
+            node = value['definition']['nodes'][job['job_id']]
+            job['can_execute'], job['permission_reason'] = value['can_write'], value['permission_reason']
+            assignee = node.get('assignee')
+            assigned = not assignee or assignee.get('id') in ({_value(actor, 'id')} if assignee.get('kind') == 'user' else groups)
+            if node.get('mode', 'human') == 'human' and not assigned:
+                job['can_execute'], job['permission_reason'] = False, 'assignee_required'
+            if job['claim_actor'] and job['claim_actor'] != _value(actor, 'id'):
+                job['can_execute'], job['permission_reason'] = False, 'task_claimed'
+            job['can_decide'] = bool(job['can_execute'] and assigned and (not current or not current.get('evidence_access')))
+            # Request preparation/approval/status lookup have distinct existing
+            # server roles; an approver need not be the current job claimant.
+            job['can_request'] = bool(value['can_write'] and request_roles['requester'])
+            job['can_review_request'] = bool(value['can_write'] and request_roles['reviewer'])
+            job['can_reconcile'] = request_roles['requester']
+            job['can_manage_settings'] = True
+            try:
+                self._work_authorize_scope(db, actor, groups, row['system_id'], row['factory_id'], 'manager')
+            except WorkflowError:
+                job['can_manage_settings'] = False
+            job['review_draft'] = deepcopy(current['review_history'][-1]) if current and current.get('review_history') else None
             job['result_revision'] = current['number'] if current else None
             effective = ({'inputs': current['inputs'], 'settings_sources': current.get('snapshot', {}).get('settings_sources', {}), 'deadline': current.get('snapshot', {}).get('deadline')} if row['status'] in TERMINAL and current else self._work_snapshot(db, row, job['job_id']))
             job['effective_inputs'] = effective['inputs']
@@ -746,6 +809,8 @@ class WorkspaceMixin:
                 continue
             definition = run['definition']
             for key, job in run['jobs'].items():
+                if not job.get('can_execute', True):
+                    continue
                 node = definition['nodes'][key]
                 if job['claim_actor'] and job['claim_actor'] != _value(actor, 'id'):
                     continue
@@ -1069,14 +1134,14 @@ class WorkspaceMixin:
                 if not target or _value(target, 'id') != body.get('principal_id') or _value(target, 'role') not in ('user', 'admin'):
                     _fail('native_user_required', '현재 승인된 Native 사용자 ID를 선택해 주세요.')
             evidence_access = await self._work_evidence_access(actor, groups, body.get('run_id', '')) if body.get('run_id') else set()
-            if action in ('decide', 'amend_items'):
+            if action in ('decide', 'amend_items', 'confirm_list', 'save_review_draft'):
                 with self._db() as db:
                     run = self._work_run(db, actor, groups, body.get('run_id'))
                     job = db.execute('SELECT current_attempt FROM work_jobs WHERE run_id=? AND job_id=?', (run['id'], body.get('job_id'))).fetchone()
                     attempt = db.execute('SELECT * FROM work_attempts WHERE id=?', (job['current_attempt'],)).fetchone() if job else None
                 if attempt:
                     await self._work_check_evidence(actor, dict(attempt))
-            options_snapshot = await self._work_resolve_job_options(actor, body.get('run_id'), body.get('job_id')) if action in ('human_confirm', 'amend_items') else {}
+            options_snapshot = await self._work_resolve_job_options(actor, body.get('run_id'), body.get('job_id')) if action in ('human_confirm', 'amend_items', 'confirm_list') else {}
             publication_errors = []
             publication_resources = {'skills': {}}
             if action in ('validate_workflow', 'publish_workflow'):
@@ -1296,7 +1361,7 @@ class WorkspaceMixin:
                 self.operations.enqueue_scope(db, actor, groups, key, expected_revision=1, request_id='emergency-' + key, emergency=True)
             run = self._work_run_view(db, actor, groups, self._work_run(db, actor, groups, key))
             return {'run_id': key, 'workflow_id': row['id'], 'revision': 1, 'run': run}
-        if action in ('save_inputs', 'claim_task', 'human_confirm', 'decide', 'close_run', 'cancel_run', 'link_chat', 'amend_items', 'release_task'):
+        if action in ('save_inputs', 'claim_task', 'human_confirm', 'decide', 'close_run', 'cancel_run', 'link_chat', 'amend_items', 'release_task', 'confirm_list', 'save_review_draft'):
             row = self._work_run(db, actor, groups, body.get('run_id'), write=True); _revision(body, row['revision'])
             if action == 'link_chat':
                 db.execute('INSERT OR IGNORE INTO work_chat_links VALUES(?,?,?,?)', (actor_id, body['chat_id'], row['id'], now))
@@ -1328,7 +1393,59 @@ class WorkspaceMixin:
                 if job['claim_actor'] and job['claim_actor'] != actor_id: _fail('task_claimed', '다른 담당자가 처리 중입니다.')
                 node = json.loads(row['snapshot'])['definition']['nodes'][job_id]; assignee = node.get('assignee')
                 if assignee and assignee.get('id') not in ({actor_id} if assignee.get('kind') == 'user' else groups): _fail('assignee_required', '배정된 담당자 또는 그룹만 처리할 수 있습니다.')
-                if action == 'release_task':
+                if action == 'save_review_draft':
+                    current = db.execute('SELECT * FROM work_attempts WHERE id=?', (job['current_attempt'],)).fetchone()
+                    if node.get('result_block') != 'ai_review' or not current or current['id'] != body.get('attempt_id') or current['number'] != body.get('result_revision'):
+                        _fail('result_revision_conflict', '편집할 현재 초안의 근거를 다시 확인해 주세요.')
+                    if current['actor_id'] != actor_id or current['id'] not in (evidence_access or set()):
+                        _fail('evidence_access_required', '본인 권한으로 생성한 초안과 현재 근거를 확인해 주세요.')
+                    if current['status'] not in ('succeeded', 'waiting_confirmation', 'partial'):
+                        _fail('result_unconfirmed', '편집할 초안이 아직 준비되지 않았습니다.')
+                    actual_snapshot = self._work_snapshot(db, row, job_id)
+                    saved_snapshot = json.loads(current['snapshot'])
+                    if json.loads(current['inputs']) != actual_snapshot['inputs'] or (saved_snapshot.get('deadline_source') or {}).get('value') != (actual_snapshot.get('deadline_source') or {}).get('value') or not self._work_sources_current(db, row, saved_snapshot):
+                        _fail('stale_result', '입력이나 선행 근거가 바뀌었습니다. 새 근거로 초안을 다시 생성해 주세요.')
+                    if db.execute('SELECT 1 FROM work_decisions WHERE attempt_id=?', (current['id'],)).fetchone():
+                        _fail('decision_conflict', '확정한 본문은 실행 기록으로 보존됩니다. 새 근거로 다시 실행해 주세요.')
+                    latest = db.execute('SELECT * FROM work_review_revisions WHERE attempt_id=? ORDER BY revision DESC LIMIT 1', (current['id'],)).fetchone()
+                    _revision({'expected_revision': body.get('review_revision')}, latest['revision'] if latest else 0)
+                    text = body.get('text')
+                    if not isinstance(text, str) or len(text) > 20000:
+                        _fail('invalid_review_draft', '검토 본문은 20,000자 이내의 글로 입력해 주세요.')
+                    db.execute('INSERT INTO work_review_revisions VALUES(?,?,?,?,?,NULL)', (current['id'], (latest['revision'] if latest else 0) + 1, text, actor_id, now))
+                elif action == 'confirm_list':
+                    current = db.execute('SELECT * FROM work_attempts WHERE id=?', (job['current_attempt'],)).fetchone()
+                    if node.get('result_block') != 'list_confirm' or not current or current['id'] != body.get('attempt_id') or current['number'] != body.get('result_revision'):
+                        _fail('result_revision_conflict', '확정할 현재 목록의 근거를 확인해 주세요.')
+                    if current['actor_id'] != actor_id or current['id'] not in (evidence_access or set()):
+                        _fail('evidence_access_required', '본인 권한으로 조회한 목록을 확인해 주세요.')
+                    if db.execute('SELECT 1 FROM work_decisions WHERE attempt_id=?', (current['id'],)).fetchone():
+                        _fail('decision_conflict', '이미 판정한 목록입니다. 새 근거로 다시 조회해 주세요.')
+                    items = deepcopy(body.get('items'))
+                    if not isinstance(items, list) or len(items) > 1000 or any(not isinstance(item, dict) or not _id(item.get('id')) or not isinstance(item.get('selected', True), bool) for item in items) or len({item['id'] for item in items}) != len(items):
+                        _fail('invalid_amendment', '중복 없는 목록과 포함 여부를 확인해 주세요.')
+                    for item in items:
+                        item['selected'] = item.get('selected', True)
+                        item['required'] = item['selected']
+                    if not any(item['selected'] for item in items):
+                        _fail('zero_selection_policy_required', '선택 항목이 없는 목록의 완료 정책이 정해지지 않았습니다. 확정을 보류합니다.')
+                    original = json.loads(current['result']) or {}
+                    previous = original.get('items', [])
+                    fields = ('id', 'title', 'name', 'selected', 'required', 'note')
+                    comparable = lambda item: {key: item.get(key, True if key in ('selected', 'required') else None) for key in fields}
+                    previous_by_id = {item['id']: item for item in previous if isinstance(item, dict) and 'id' in item}
+                    desired = [{**previous_by_id.get(item['id'], {}), **{key: item[key] for key in fields if key in item}} for item in items]
+                    if [comparable(item) for item in desired] != [comparable(item) for item in previous]:
+                        if not str(body.get('reason', '')).strip():
+                            _fail('reason_required', '목록을 바꾼 이유를 기록해 주세요.')
+                        self._workspace_mutation(db, actor, capabilities, groups, {**body, 'action': 'amend_items', 'items': items}, native_groups, publication_errors, publication_resources, options_snapshot, evidence_access)
+                        row = self._work_run(db, actor, groups, row['id'], write=True)
+                        job = db.execute('SELECT * FROM work_jobs WHERE run_id=? AND job_id=?', (row['id'], job_id)).fetchone()
+                        current = db.execute('SELECT * FROM work_attempts WHERE id=?', (job['current_attempt'],)).fetchone()
+                    for item in items:
+                        if item['selected']:
+                            self._work_decide(db, actor, row, job, node, {'result_revision': current['number'], 'item_id': item['id'], 'verdict': 'completed', 'note': str(body.get('reason', ''))})
+                elif action == 'release_task':
                     if job['claim_actor'] != actor_id:
                         _fail('claim_owner_required', '현재 담당자 본인만 맡은 작업을 내려놓을 수 있습니다.')
                     unresolved = db.execute("SELECT 1 FROM work_external_requests WHERE run_id=? AND job_id=? AND state IN ('requested','accepted','running','reported_complete','unknown') LIMIT 1", (row['id'], job_id)).fetchone()
@@ -1341,6 +1458,10 @@ class WorkspaceMixin:
                         _fail('result_revision_conflict', '수정할 현재 목록의 근거를 확인해 주세요.')
                     if current['actor_id'] != actor_id:
                         _fail('evidence_access_required', '본인 권한으로 조회한 목록을 수정해 주세요.')
+                    prior_snapshot = json.loads(current['snapshot'])
+                    effective_snapshot = self._work_snapshot(db, row, job_id)
+                    if json.loads(current['inputs']) != effective_snapshot['inputs'] or (prior_snapshot.get('deadline_source') or {}).get('value') != (effective_snapshot.get('deadline_source') or {}).get('value') or not self._work_sources_current(db, row, prior_snapshot):
+                        _fail('stale_result', '입력이나 선행 근거가 바뀌었습니다. 다시 조회한 목록을 확인해 주세요.')
                     items, reason = body.get('items'), body.get('reason', '')
                     if node.get('result_block') not in ('list_confirm', 'item_verdict', 'checklist') or not isinstance(items, list) or len(items) > 1000 or not isinstance(reason, str) or not reason.strip():
                         _fail('invalid_amendment', '수정할 목록과 변경 이유를 기록해 주세요.')
@@ -1356,6 +1477,12 @@ class WorkspaceMixin:
                             allowed['source'] = {'kind': 'human_added', 'actor_id': actor_id, 'created_at': now}
                         amended.append(allowed)
                     attempt = self._work_begin_attempt(db, actor, groups, row['id'], job_id, row['revision'], options_snapshot=options_snapshot)
+                    # Manual list edits retain the source/model evidence that
+                    # justified the original result, including future ACL checks.
+                    for field in ('source_references', 'evidence_attempt_ids', 'model', 'skills', 'argument_sources', 'arguments'):
+                        if field in prior_snapshot:
+                            attempt['snapshot'][field] = deepcopy(prior_snapshot[field])
+                    db.execute("UPDATE work_attempts SET snapshot=? WHERE id=? AND status='running'", (_dump(attempt['snapshot']), attempt['id']))
                     result = {**original, 'items': amended, 'amendment': {'previous_attempt': current['id'], 'reason': reason.strip(), 'actor_id': actor_id, 'added_ids': [item['id'] for item in items if item['id'] not in old_items], 'removed_ids': sorted(set(old_items) - {item['id'] for item in items})}}
                     if evidence_access is not None: evidence_access.add(attempt['id'])
                     self._work_finish_attempt(db, attempt['id'], 'partial' if current['status'] == 'partial' else 'waiting_confirmation', result)
@@ -1401,6 +1528,10 @@ class WorkspaceMixin:
         result = json.loads(attempt['result']) if attempt['result'] else {}
         items = result.get('items', []) if isinstance(result, dict) else []
         required = {str(item['id']) for item in items if isinstance(item, dict) and 'id' in item and item.get('required', True)}
+        if node.get('result_block') == 'list_confirm':
+            required = {str(item['id']) for item in items if isinstance(item, dict) and 'id' in item and item.get('required', True) and item.get('selected', True)}
+            if not required and verdict == 'completed':
+                _fail('zero_selection_policy_required', '선택 항목이 없는 목록의 완료 정책이 정해지지 않았습니다. 확정을 보류합니다.')
         if node.get('result_block') in ('checklist', 'list_confirm', 'item_verdict') and required:
             if item_id not in required: _fail('item_not_found', '현재 결과의 필수 항목을 선택해 주세요.')
         elif item_id != 'job': _fail('item_not_found', '현재 작업 결과를 확인해 주세요.')
@@ -1408,7 +1539,18 @@ class WorkspaceMixin:
         # earlier verdict; changing evidence requires another attempt.
         if db.execute('SELECT 1 FROM work_decisions WHERE run_id=? AND job_id=? AND item_id=? AND attempt_id=?', (run['id'], job['job_id'], item_id, attempt['id'])).fetchone():
             _fail('decision_conflict', '이 근거에 대한 판정이 이미 저장되었습니다.')
-        db.execute('INSERT INTO work_decisions VALUES(?,?,?,?,?,?,?,?,?,?)', (str(uuid4()), run['id'], job['job_id'], item_id, attempt['id'], attempt['number'], verdict, str(body.get('note', ''))[:4000], _value(actor, 'id'), _now()))
+        review = None
+        if node.get('result_block') == 'ai_review':
+            review = db.execute('SELECT * FROM work_review_revisions WHERE attempt_id=? ORDER BY revision DESC LIMIT 1', (attempt['id'],)).fetchone()
+            # A confirmation cannot silently include a later autosave from a
+            # second tab. With no edits, the original immutable result is used.
+            if review:
+                _revision({'expected_revision': body.get('review_revision')}, review['revision'])
+        decision_id, decided_at = str(uuid4()), _now()
+        db.execute('INSERT INTO work_decisions VALUES(?,?,?,?,?,?,?,?,?,?)', (decision_id, run['id'], job['job_id'], item_id, attempt['id'], attempt['number'], verdict, str(body.get('note', ''))[:4000], _value(actor, 'id'), decided_at))
+        if node.get('result_block') == 'ai_review':
+            text = review['text'] if review else next((result[key] for key in ('text', 'draft', 'summary') if isinstance(result.get(key), str)), '')
+            db.execute('INSERT INTO work_review_revisions VALUES(?,?,?,?,?,?)', (attempt['id'], (review['revision'] if review else 0) + 1, text, _value(actor, 'id'), decided_at, decision_id))
         decisions = list(db.execute('SELECT item_id,verdict FROM work_decisions WHERE run_id=? AND job_id=? AND attempt_id=?', (run['id'], job['job_id'], attempt['id'])))
         resolved = not required or required <= {item['item_id'] for item in decisions}
         state = 'waiting_confirmation'
@@ -1416,4 +1558,9 @@ class WorkspaceMixin:
             meanings = {item['verdict'] for item in decisions}
             state = 'completed' if meanings == {'completed'} else 'failed' if 'failed' in meanings else 'unknown' if 'unknown' in meanings else 'waiting_input'
             if attempt['status'] == 'partial' and state == 'completed': state = 'partial'
-        db.execute('UPDATE work_jobs SET status=?,revision=revision+1,claim_actor=? WHERE run_id=? AND job_id=?', (state, _value(actor, 'id'), run['id'], job['job_id']))
+        reason = job['reason']
+        if state == 'completed' and isinstance(node.get('completion'), dict) and node['completion'].get('kind') == 'delivery':
+            # Reviewing a draft is evidence of review, never evidence of send.
+            # No delivery adapter or channel policy is configured by this UI.
+            state, reason = 'blocked', 'delivery_unconfigured'
+        db.execute('UPDATE work_jobs SET status=?,reason=?,revision=revision+1,claim_actor=? WHERE run_id=? AND job_id=?', (state, reason, _value(actor, 'id'), run['id'], job['job_id']))

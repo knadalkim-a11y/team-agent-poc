@@ -29,12 +29,16 @@ def _reference(metadata):
     if value is None:
         message = metadata.get("user_message") or {}
         value = (message.get("meta") or {}).get("ees_work_reference") if isinstance(message, dict) else None
+    historical = isinstance(value, dict) and value.get("reference_kind") == "historical"
     if (not isinstance(value, dict) or value.get("kind") != "workspace"
             or not all(_identifier(value.get(key, "")) for key in ("workflow_id", "run_id", "job_id"))
             or not isinstance(value.get("context_id"), str) or not 0 < len(value["context_id"]) <= 4096
             or type(value.get("revision")) is not int or value["revision"] < 0):
-        return {}
-    return {key: value.get(key, "") for key in ("workflow_id", "run_id", "job_id", "revision", "context_id")}
+        return {"reference_kind": "historical", "invalid": True} if historical else {}
+    keys = ("workflow_id", "run_id", "job_id", "revision", "context_id")
+    if historical:
+        keys += ("reference_kind", "attempt_id", "version", "result_revision")
+    return {key: value.get(key, "") for key in keys}
 
 
 async def _browser(event_call, chat_id, method, payload):
@@ -71,11 +75,20 @@ class Tools:
         except ImportError:
             return _error("program_upgrade_required", "EES Work 프로그램 업데이트가 필요합니다.")
         reference = _reference(__metadata__)
-        if not any((workflow_id, run_id, system_id, factory_id)) and reference:
+        historical = reference.get("reference_kind") == "historical"
+        if historical and (reference.get("invalid") or any(value and value != reference.get(key) for key, value in (("workflow_id", workflow_id), ("run_id", run_id))) or system_id or factory_id):
+            return _error("historical_reference_unavailable", "선택한 당시 기록만 조회할 수 있습니다. 현재 자료로 대체하지 않습니다.")
+        if reference and (historical or not any((workflow_id, run_id, system_id, factory_id))):
             workflow_id, run_id = reference["workflow_id"], reference["run_id"]
         result = await workspace_state(__user__, workflow_id, run_id, system_id, factory_id)
         if not result.get("ok"):
             return result
+        if historical:
+            try:
+                from open_webui.ees_workflow_native import historical_work_projection
+            except ImportError:
+                return _error("program_upgrade_required", "과거 기록 조회를 위한 EES Work 프로그램 업데이트가 필요합니다.")
+            return historical_work_projection(result, reference)
         # Personal UI state, approvals/intents, credentials and private chat
         # bodies do not belong in model context. The service filters scope and
         # result evidence access before this narrower projection.
@@ -102,6 +115,8 @@ class Tools:
         :param job_id: Exact selected job identifier for an inputs proposal.
         :param inputs: Proposed declared input values for local review only; never credentials.
         """
+        if _reference(__metadata__).get("reference_kind") == "historical":
+            return _error("historical_read_only", "당시 기록에 대한 대화에서는 초안을 제안하거나 저장·실행하지 않습니다.")
         if proposal_kind == "inputs":
             if (not _identifier(workflow_id, False) or not _identifier(run_id, False) or not _identifier(job_id, False)
                     or not isinstance(context_id, str) or not 0 < len(context_id) <= 4096 or type(base_revision) is not int or base_revision < 0
@@ -159,6 +174,8 @@ class Tools:
         :param run_id: Authorized run identifier.
         :param job_id: Job identifier within that run.
         """
+        if _reference(__metadata__).get("reference_kind") == "historical":
+            return _error("historical_read_only", "당시 기록에 대한 대화에서는 현재 작업 위치를 변경하지 않습니다.")
         if not all(_identifier(value) for value in (workflow_id, run_id, job_id)):
             return _error("invalid_request", "화면 대상을 확인해 주세요.")
         state = await self.ees_workflow_view(workflow_id, run_id, __user__=__user__, __metadata__=__metadata__)

@@ -46,6 +46,10 @@ V4_ICON_FILES = tuple("v4/" + name for name in (
 ))
 V4_ICON_FILES += tuple("v4/" + name for name in ('40095.svg', 'f34f3.svg', 'c6340.svg', '7495b.svg', 'ed85e.svg', '08bf3.svg', '3b2d6.svg', 'fa106.svg', '1fc4e.svg', 'aee94.svg', 'cece5.svg', '8a225.svg', 'e8a37.svg', 'd1220.svg', 'f908d.svg', 'da025.svg', '7e98c.svg', 'ca02b.svg', 'd8f27.svg', 'cda5f.svg', '6611a.svg', '51602.svg', 'afcd5.svg', '0a1db.svg', '1f65b.svg', '2f929.svg', '7d31f.svg', '9d8d5.svg', '922a3.svg', '49c9b.svg', '31608.svg', 'f49d4.svg', '8fa06.svg', 'b8999.svg', 'd87d1.svg', '5f62e.svg', '1e4cf.svg', 'b944b.svg', '4723e.svg', 'ce467.svg', 'ae415.svg', '4d983.svg', '66cc7.svg',))
 V4_ICON_FILES += ("v4/8f8a1.svg",)
+V4_ICON_FILES += tuple("v4/" + name for name in (
+    "35b2e.svg", "a28e3.svg", "b22ad.svg", "f1e53.svg", "b456d.svg",
+    "52271.svg", "63982.svg", "6d84b.svg", "1c98e.svg", "478bf.svg",
+))
 UI_FILES.update({name: name for name in V4_ICON_FILES})
 WORK_LAUNCHER_SOURCES = ("ees-work-view.js", "ees-work-designer.js", "ees-work-launcher.js")
 WORK_DIR = ASSET_DIR.parents[2] / "agent-pack" / "skills" / "ees-work-demo"
@@ -84,6 +88,9 @@ WORK_ASSETS.update({"scripts/" + name: "open_webui/" + name for name in (
 # it is never a demo seed or an automatically registered user asset.
 WORK_ASSETS["scripts/workflow_tool.py"] = "open_webui/ees_workflow_tool.py"
 WORK_FILES = tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
+# Current UI references must be present even when a truncated archive has a
+# recomputed RECORD. Shipped prior-version inventories above stay unchanged.
+WORK_FILES += tuple(TARGET_APP + name for name in V4_ICON_FILES)
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {
