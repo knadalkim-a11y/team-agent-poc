@@ -239,6 +239,14 @@ class IntegratedNativeCase(unittest.TestCase):
         directory.mkdir(parents=True, exist_ok=True)
         report = {'test': self.id(), 'last_wait': getattr(self, 'last_wait', None),
                   'last_click': getattr(self, 'last_click', None), 'capture_errors': []}
+        # A bootstrap failure has no page session. Preserve the original local
+        # process/transport snapshot before cleanup instead of sending page CDP
+        # commands that only obscure it with further protocol failures.
+        report['browser'] = self.browser.diagnostics()
+        if not self.browser.session:
+            report['page_capture'] = 'unavailable_no_attached_session'
+            (directory / (label + '.json')).write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            return
         try:
             self.screenshot(label, wait_for_fonts=False)
         except Exception as error:

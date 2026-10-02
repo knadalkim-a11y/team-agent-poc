@@ -14,6 +14,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 from zipfile import ZipFile
@@ -72,6 +73,9 @@ class ChromePipe:
     """
 
     def __init__(self, chrome, profile, *, font_wheel=None):
+        self.started_at = time.monotonic()
+        self.stage, self.browser_version, self.target_id = "launch", None, None
+        self.last_command, self.first_failure, self.response_summary = None, None, []
         environment = chrome_font_environment(profile, font_wheel)
         request_read, self.request_write = os.pipe()
         self.response_read, response_write = os.pipe()
@@ -92,6 +96,25 @@ class ChromePipe:
             os.close(request_read)
             os.close(response_write)
         self.counter, self.buffer, self.events, self.session = 0, b"", [], None
+
+    def diagnostics(self):
+        """Read local process/pipe state without issuing another CDP command."""
+        size = os.fstat(self.errors.fileno()).st_size
+        stderr = os.pread(self.errors.fileno(), min(size, 8192), max(0, size - 8192))
+        return {"stage": self.stage, "elapsed_ms": (time.monotonic() - self.started_at) * 1000,
+                "pid": self.process.pid, "exit_code": self.process.poll(),
+                "browser_version": self.browser_version, "target_id": self.target_id,
+                "session_attached": bool(self.session), "buffer_bytes": len(self.buffer),
+                "last_command": dict(self.last_command) if self.last_command else None,
+                "recent_responses": list(self.response_summary),
+                "stderr_tail": stderr.decode(errors="replace"), "first_failure": self.first_failure}
+
+    def record_failure(self, error):
+        if self.first_failure is None:
+            snapshot = self.diagnostics()
+            snapshot.pop("first_failure")
+            snapshot["error_type"] = type(error).__name__
+            self.first_failure = snapshot
 
     def close(self):
         try:
@@ -137,8 +160,7 @@ class ChromePipe:
                 raise AssertionError("Chrome DevTools response timed out.")
             chunk = os.read(self.response_read, 65536)
             if not chunk:
-                self.errors.seek(0)
-                raise AssertionError("Chrome DevTools pipe closed: " + self.errors.read().decode(errors="replace")[-2000:])
+                raise AssertionError("Chrome DevTools pipe closed: " + self.diagnostics()["stderr_tail"][-2000:])
             self.buffer += chunk
         message, self.buffer = self.buffer.split(b"\0", 1)
         return json.loads(message)
@@ -148,29 +170,62 @@ class ChromePipe:
         request = {"id": self.counter, "method": method, "params": params or {}}
         if self.session:
             request["sessionId"] = self.session
-        payload = json.dumps(request).encode() + b"\0"
-        while payload:
-            payload = payload[os.write(self.request_write, payload):]
-        deadline = time.monotonic() + timeout
-        while True:
-            response = self.receive(deadline)
-            if response.get("id") == self.counter:
-                if "error" in response:
-                    raise AssertionError(f"{method}: {response['error']}")
-                return response.get("result", {})
-            self.events.append(response)
+        self.last_command = {"id": request["id"], "method": method,
+                             "session_attached": bool(self.session), "timeout_seconds": timeout}
+        started = time.monotonic()
+        try:
+            if timeout <= 0:
+                raise AssertionError("Chrome DevTools response budget exhausted before command.")
+            payload = json.dumps(request).encode() + b"\0"
+            while payload:
+                payload = payload[os.write(self.request_write, payload):]
+            deadline = started + timeout
+            while True:
+                response = self.receive(deadline)
+                self.response_summary.append({key: response[key] for key in ("id", "method", "sessionId") if key in response})
+                self.response_summary = self.response_summary[-20:]
+                if response.get("id") == request["id"]:
+                    if "error" in response:
+                        raise AssertionError(f"{method}: {response['error']}")
+                    self.last_command["elapsed_ms"] = (time.monotonic() - started) * 1000
+                    self.last_command["completed"] = True
+                    return response.get("result", {})
+                self.events.append(response)
+        except (AssertionError, OSError) as error:
+            self.last_command["elapsed_ms"] = (time.monotonic() - started) * 1000
+            self.last_command["completed"] = False
+            self.record_failure(error)
+            raise
 
     def navigate(self, url):
-        target = self.call("Target.createTarget", {"url": "about:blank"})["targetId"]
+        # Confirm browser-level transport readiness before creating a renderer.
+        # Both commands share the original 15s target-creation budget: no retry.
+        deadline = time.monotonic() + 15
+        try:
+            if self.browser_version is None:
+                self.stage = "browser_handshake"
+                version = self.call("Browser.getVersion", timeout=deadline - time.monotonic())
+                if not all(isinstance(version.get(key), str) and version[key] for key in ("protocolVersion", "product")):
+                    raise AssertionError("Chrome browser handshake did not return protocolVersion and product.")
+                self.browser_version = {key: version.get(key) for key in ("protocolVersion", "product", "revision", "jsVersion")}
+            self.stage = "create_target"
+            target = self.call("Target.createTarget", {"url": "about:blank"}, timeout=deadline - time.monotonic())["targetId"]
+        except (AssertionError, OSError) as error:
+            self.record_failure(error)
+            raise
+        self.target_id, self.stage = target, "attach_target"
         self.session = self.call("Target.attachToTarget", {"targetId": target, "flatten": True})["sessionId"]
+        self.stage = "page_setup"
         self.call("Page.enable")
         self.call("Emulation.setDeviceMetricsOverride", {
             "width": 1920, "height": 1080, "deviceScaleFactor": 1, "mobile": False})
         self.events.clear()
+        self.stage = "initial_navigation"
         self.call("Page.navigate", {"url": url})
         deadline = time.monotonic() + 15
         while not any(event.get("method") == "Page.loadEventFired" for event in self.events):
             self.events.append(self.receive(deadline))
+        self.stage = "ready"
 
     def evaluate(self, expression):
         result = self.call("Runtime.evaluate", {
@@ -192,6 +247,95 @@ class ChromeFontEnvironmentTests(unittest.TestCase):
                 chrome_font_environment(profile, wheel)
             self.assertFalse(profile.exists())
         self.assertEqual(os.environ, before)
+
+
+class ChromePipeBootstrapTests(unittest.TestCase):
+    def pipe(self):
+        browser = ChromePipe.__new__(ChromePipe)
+        browser.started_at = time.monotonic()
+        browser.stage, browser.browser_version, browser.target_id = "launch", None, None
+        browser.last_command, browser.first_failure, browser.response_summary = None, None, []
+        browser.counter, browser.buffer, browser.events, browser.session = 0, b"", [], None
+        request_read, browser.request_write = os.pipe()
+        browser.response_read, response_write = os.pipe()
+        for descriptor in (request_read, browser.request_write, browser.response_read, response_write):
+            self.addCleanup(os.close, descriptor)
+        browser.errors = tempfile.TemporaryFile()
+        self.addCleanup(browser.errors.close)
+        browser.process = SimpleNamespace(pid=123, poll=lambda: None)
+        return browser, request_read, response_write
+
+    def test_interleaved_pipe_event_does_not_replace_handshake_response_or_leak_params(self):
+        browser, request_read, response_write = self.pipe()
+        event = {"method": "Target.targetCreated", "params": {"private": "synthetic-secret"}}
+        reply = {"id": 1, "result": {"protocolVersion": "1.3", "product": "Synthetic/1"}}
+        os.write(response_write, (json.dumps(event) + '\0' + json.dumps(reply) + '\0').encode())
+        self.assertEqual(browser.call("Browser.getVersion"), reply["result"])
+        self.assertEqual(browser.events, [event])
+        self.assertEqual(json.loads(os.read(request_read, 4096).rstrip(b'\0'))["method"], "Browser.getVersion")
+        self.assertNotIn("synthetic-secret", json.dumps(browser.diagnostics()))
+
+    def test_handshake_and_target_creation_share_original_budget_without_retry(self):
+        browser, _, _ = self.pipe()
+        clock, calls = [10.0], []
+        def call(method, params=None, timeout=15):
+            calls.append((method, timeout))
+            if method == "Browser.getVersion":
+                clock[0] += 6
+                return {"protocolVersion": "1.3", "product": "Synthetic/1"}
+            if method == "Target.createTarget": return {"targetId": "target"}
+            if method == "Target.attachToTarget": return {"sessionId": "session"}
+            if method == "Page.navigate": browser.events.append({"method": "Page.loadEventFired"})
+            return {}
+        browser.call = call
+        with patch.object(time, "monotonic", side_effect=lambda: clock[0]):
+            browser.navigate("about:blank")
+        self.assertEqual(calls[:2], [("Browser.getVersion", 15.0), ("Target.createTarget", 9.0)])
+        self.assertEqual(browser.stage, "ready")
+        self.assertEqual(browser.browser_version["product"], "Synthetic/1")
+
+    def test_invalid_browser_handshake_fails_before_any_target_is_created(self):
+        browser, _, _ = self.pipe()
+        calls = []
+        browser.call = lambda method, **kwargs: calls.append(method) or {}
+        with self.assertRaisesRegex(AssertionError, "handshake"):
+            browser.navigate("about:blank")
+        self.assertEqual(calls, ["Browser.getVersion"])
+        self.assertEqual(browser.first_failure["stage"], "browser_handshake")
+        self.assertFalse(browser.first_failure["session_attached"])
+
+    def test_first_timeout_preserves_stderr_and_request_before_later_cleanup_response(self):
+        browser, _, response_write = self.pipe()
+        browser.stage = "create_target"
+        browser.errors.write(b"synthetic startup diagnostic\n"); browser.errors.flush()
+        original_offset = browser.errors.tell()
+        with patch.object(select, "select", return_value=([], [], [])), self.assertRaisesRegex(AssertionError, "timed out"):
+            browser.call("Target.createTarget", {"url": "about:blank"}, timeout=.01)
+        original = json.dumps(browser.first_failure, sort_keys=True)
+        os.write(response_write, b'{"id":2,"result":{}}\0')
+        browser.call("Browser.close")
+        self.assertEqual(json.dumps(browser.first_failure, sort_keys=True), original)
+        self.assertEqual(browser.first_failure["last_command"]["method"], "Target.createTarget")
+        self.assertFalse(browser.first_failure["last_command"]["completed"])
+        self.assertIn("synthetic startup diagnostic", browser.first_failure["stderr_tail"])
+        self.assertEqual(browser.errors.tell(), original_offset)
+
+    def test_bootstrap_failure_capture_saves_local_diagnostics_without_page_commands(self):
+        from ees_work_integrated_fixture import IntegratedNativeCase
+        browser, _, _ = self.pipe()
+        browser.stage = "browser_handshake"
+        browser.record_failure(AssertionError("synthetic bootstrap failure"))
+        case = IntegratedNativeCase("runTest")
+        case.browser = browser
+        case._outcome = SimpleNamespace(result=SimpleNamespace(failures=[(case, "failure")], errors=[]))
+        case.screenshot = lambda *args, **kwargs: self.fail("No page command before a session attaches")
+        with tempfile.TemporaryDirectory(prefix="ees-bootstrap-evidence-") as directory:
+            with patch.dict(os.environ, {"EES_TEST_SCREENSHOT_DIR": directory}):
+                case.capture_failure()
+            report = json.loads((Path(directory) / "integrated-runTest-failure.json").read_text(encoding="utf-8"))
+        self.assertEqual(report["page_capture"], "unavailable_no_attached_session")
+        self.assertEqual(report["browser"]["first_failure"]["stage"], "browser_handshake")
+        self.assertEqual(report["capture_errors"], [])
 
 
 if __name__ == "__main__":
