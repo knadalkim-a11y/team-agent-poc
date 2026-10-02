@@ -1560,6 +1560,9 @@ PR #57을 병합한 main `8d294bca8d4a36f157ebfbd651f3b2e023d3fba5`는 이전 �
 
 <a id="ees-wrapper-apply"></a>
 
+**ees.13 현재 적용은 [통합 적용·복구 안내](#integrated-work-install-20261002)를 우선한다.** 아래 공통 명령의 프로그램 Stop/Backup/Apply/Restore/Start 절차를 재사용하며, ees.11 설명과 ApplyDemo 후속 등록은 당시 이력이다. 새 후보에 ApplyDemo를 실행하지 않는다.
+
+
 #### 수동 ZIP 적용·확인 안내
 
 **검토한 구현본이 main에 반영된 뒤 사용합니다.** 기본 전달은 CI 산출물을 사용하고, 2026년 9월에는 [고정 원본 시험 적용](#ees-wrapper-trial)을 사용합니다. 현재 게시·검증 상태는 [STATUS](STATUS.md), 실제 사내 결과는 [구현 기록](../evals/scenarios.md#ees-wrapper-implementation)에서 구분합니다. 이미 등록한 운영 PowerShell과 `%USERPROFILE%\team-agent-poc` checkout을 사용하며 최초 Init·후보 Prepare·pandas 진단을 반복하지 않습니다. 기존 저장 설정과 Python이 있어야 하며 누락·불일치는 사전 확인에서 중단합니다.
@@ -1916,15 +1919,19 @@ $setup = @{
 
 ### 별도 사내 적용 승인 후 실행하는 절차
 
+새 설치는 [기본 설치 안내](01-openwebui-install.md)의 Python 3.11·고정 Open WebUI 0.11.3과 기존 래퍼 등록 경로를 사용한다. 신규 전용 DATA_DIR에 Native 최초 관리자와 필요한 모델/개인 도구 설정을 준비하고, 검토한 ees.13 후보를 아래 프로그램 절차로 적용한다. 절차·진행 건·전문 Assistant·등록 스킬·예시 공장 데이터가 없는 화면은 정상이다. 초기 모델이 없으면 AI 기능만 미설정으로 안내하며 사람 작업 작성/저장까지 막지 않는다. 기존 설치의 DB나 키를 신규 설치용으로 재사용하거나 재생성하지 않는다.
+
 현재 등록된 운영자 경로의 `Status`로 등록 Python·기동 신원·현재 프로그램을 확인한다. 후보 ZIP과 commit을 지정한 `Apply -CheckOnly`로 검증한다. 기존 [Apply/Restore 절차](#ees-wrapper-apply)를 따라 명시적 Stop → 자료 Backup → Apply → Start/health → Native 로그인·기존 대화·새 빈 상태/작성 기능을 확인한다. 확인되지 않은 Stop/Backup을 성공으로 간주하거나 서버를 병렬로 기동하지 않는다. `WEBUI_SECRET_KEY`와 실제 DATA_DIR를 새 값으로 재등록하지 않는다.
 
 `Update`는 래퍼 Git 원본 변경, `Apply`는 검증된 프로그램 바이트 변경이며 실제 자산 삭제와 다르다. 폐기한 `ApplyDemo`는 안내와 함께 종료한다. 업데이트가 전문 preset/스킬/시연 Tool을 되살리거나 예전 ApplyDemo를 성공 조건으로 요구하지 않도록 검증한다. 완료된 과거 사내 복구를 이 후보 준비 때문에 반복하지 않는다.
+
+중앙 대화에서 업무 조회·초안 제안을 쓰려면 관리자가 워크스페이스의 공장·접근 범위 화면에서 **Work 도구 설정 확인**으로 등록 상태를 확인한다. 표시된 제품 원본 해시·안전한 함수3개·허용할 실제 Native 사용자/그룹을 검토하고 등록 버튼으로 명시적으로 설정한다. 기존 `ees_workflow`가 같은 원본이면 권한/개인 설정을 유지하고, 다른 원본이면 덮어쓰지 않고 검토를 요구한다. 새 업무 도구의 조회 권한은 업무 데이터 접근 권한을 대신하지 않으며, AI에 저장·게시·실행·확정 함수는 제공하지 않는다. GitHub/Jira/Confluence는 기존 Native 도구와 개인 PAT를 그대로 관리한다.
 
 ### 자산 정리 미리보기와 데이터 복구
 
 실제 관리자는 기존 Native 토큰/개인 설정과 TLS 검증을 사용하는 `scripts/ees_demo_assets.py`의 `preview`, `apply`, `restore`를 사용한다. `--config`는 기존 등록 설정, `--kind`/`--id`는 확인한 관리 항목, `--baseline-sha256`은 과거 정상 등록/백업으로 확인한 전체 상태 지문이다. 단순히 현재 값을 읽어 정상 관리 원본으로 간주하지 않는다.
 
-`preview` 결과를 사내 비공개 `--plan` 파일에 저장하고 대상·참조·소유자·변경 여부를 검토한다. `apply`는 `--approve-plan-sha256`과 `--request-id`로 동일 계획을 명시하고 현재 지문을 다시 검증한다. 실제 삭제 전에 서버 비공개 백업을 작성한다. 출처 불명/사용자 수정/참조 존재/변경 충돌은 자동 삭제하지 않으며 임의 ID 목록을 확장하지 않는다. `restore`는 확인한 백업 지문으로 원래 ID를 복구하되 현재 다른 항목을 덮어쓰지 않는다. 계획·백업·PAT·등록 원문을 Git이나 외부 증거로 내보내지 않는다.
+`preview` 결과를 사내 비공개 `--plan` 파일에 저장하고 대상·참조·소유자·변경 여부를 검토한다. `apply`의 `--approve-plan-sha256`에는 preview가 출력한 `plan_sha256` 값을 사용한다. 이는 정규화한 계획의 지문이며, 계획 파일의 원시 바이트를 `Get-FileHash` 등으로 계산한 값과 다르다. apply 요청 ID는 `retire-<승인한 plan_sha256>`으로 자동 결정되고, 같은 계획을 반복 승인해도 같은 요청 ID를 사용한다. 현재 자산 지문을 다시 검증하고 실제 삭제 전에 서버 비공개 백업을 작성한다. 출처 불명/사용자 수정/참조 존재/변경 충돌은 자동 삭제하지 않으며 임의 ID 목록을 확장하지 않는다. `restore`에는 해당 apply 결과의 `request_id`를 `--request-id`로, 확인한 `backup_sha256`을 `--backup-sha256`으로 전달한다. 원래 ID를 복구하되 현재 다른 항목을 덮어쓰지 않는다. 계획·백업·PAT·등록 원문을 Git이나 외부 증거로 내보내지 않는다.
 
 기존 기반 모델의 시연 Prompt 관리 구역, 수동 WO/Skill 등 식별되지 않은 항목은 현재 자동 삭제 대상이 아니다. 사내 목록과 사용자 수정 여부를 별도로 확인하고 범위를 승인해야 한다.
 

@@ -1,0 +1,105 @@
+{
+  "recorded_at": "2026-10-02T01:57:41.961159+00:00",
+  "scope": "Real complete Native CLI app, temporary synthetic account/DB, loopback external model; no company data/services",
+  "product_wheel_sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3",
+  "product_source_local_commit": "f1e87a8",
+  "product_source_api_commit": "051f7facf5176edabd9dab0b886a4a4c2ad71ee3",
+  "identical_git_tree": "9fd0d55880b9020c5f3d71335382b4ab1c0bee61",
+  "reports": {
+    "fullapp-10": "passed",
+    "native-central10": "passed"
+  },
+  "files": [
+    {
+      "path": "fullapp-10/report.json",
+      "bytes": 2264,
+      "sha256": "fe424a5b948ac54d65abb7d023f6b6991b9dac68d1dfc8011f70ea20d730ccfb"
+    },
+    {
+      "path": "fullapp-10/a0-empty.png",
+      "bytes": 56442,
+      "sha256": "436d67725857e86597f6ce269aaa1d0a114014046141246deb43cb6d4652fd80"
+    },
+    {
+      "path": "fullapp-10/a0-empty.json",
+      "bytes": 29315,
+      "sha256": "264aac43841c7550cddb8e3a6f30b7d1c51934f45c9eb4abac1f026cb57e6de3"
+    },
+    {
+      "path": "fullapp-10/b2-published.png",
+      "bytes": 90267,
+      "sha256": "7c83813e84f6e30882f677ca769a1d6b06c8a427696418c78185628432c6dc31"
+    },
+    {
+      "path": "fullapp-10/b2-published.json",
+      "bytes": 40812,
+      "sha256": "951b7c8e726898fdcf59a92ba9b8d994405fa61907b4a3f7ae19e8ab72f4169f"
+    },
+    {
+      "path": "fullapp-10/native-attachment-restored.png",
+      "bytes": 111193,
+      "sha256": "40c3e64a8eb8e6e1c5a54e375351d59762b24e6e864153168754999d9b6c73f5"
+    },
+    {
+      "path": "fullapp-10/native-attachment-restored.json",
+      "bytes": 40659,
+      "sha256": "0e28515f166d2c6ed5acc7e6d3e909727238e86e90638c7f2cb28c8a9b25e71c"
+    },
+    {
+      "path": "fullapp-10/native-narrow.png",
+      "bytes": 99902,
+      "sha256": "27b35a334bd1119f325403a1dcfefd26b6e7a8a5264c41fa6acf2e468a8a17e6"
+    },
+    {
+      "path": "fullapp-10/native-narrow.json",
+      "bytes": 40654,
+      "sha256": "1483857e817d46aebb6c996e65cd8b5feb3036bef9274eea44fe787b1c50921a"
+    },
+    {
+      "path": "fullapp-10/publish-confirmation-cancel-focus.png",
+      "bytes": 107764,
+      "sha256": "282b7c34243998effac4b31c9ecfca4d94d7e2da793e8d8dccbccb4bb45622f6"
+    },
+    {
+      "path": "fullapp-10/publish-confirmation-cancel-focus.json",
+      "bytes": 39912,
+      "sha256": "2f5274b0c334105b30290360e3ca3a9b6dcfd635df3077cada33a5b99c92ae12"
+    },
+    {
+      "path": "native-central10/report.json",
+      "bytes": 23263,
+      "sha256": "5bc0f514b8493cca2a8860c8f6f93b6e3b344b45a26714b8f1926bd303b23edd"
+    },
+    {
+      "path": "native-central10/native-central-human-saved-draft.png",
+      "bytes": 135828,
+      "sha256": "5d2539bcd5c2784d03e93dfbcff9447fd6634591383e332db86f3b27c878c428"
+    },
+    {
+      "path": "native-central10/native-central-human-saved-draft.json",
+      "bytes": 46131,
+      "sha256": "d699dd3348b085c16e64991854ce4aafa9ce12bea0d5ce3846dfb76283b73122"
+    },
+    {
+      "path": "native-central10/input-proposal-human-saved-not-executed.png",
+      "bytes": 124451,
+      "sha256": "8377a41a57748cea442ee14d2e9c23418d262f456537a34bcbcd4271c8f6bd9a"
+    },
+    {
+      "path": "native-central10/input-proposal-human-saved-not-executed.json",
+      "bytes": 45658,
+      "sha256": "2624757a5d256f802a96fa35d3e0e95e30955aacd7cbd54752e19bda637da723"
+    },
+    {
+      "path": "native-central10/native-message-reference-exact-old-attempt.png",
+      "bytes": 135463,
+      "sha256": "23717be7afecf9c59432e6318db09beaab9b1d54e03411aa7885510d45cece79"
+    },
+    {
+      "path": "native-central10/native-message-reference-exact-old-attempt.json",
+      "bytes": 45838,
+      "sha256": "499f107f46673fa50a6477d63d2d661d4a16bdb18f0d4c652b31530f236f6d08"
+    }
+  ],
+  "boundary": "This product wheel matches the code tree; follow-up fixture/docs changes are separately identified. Git API publication preserves tree bytes while commit metadata/SHA differ."
+}

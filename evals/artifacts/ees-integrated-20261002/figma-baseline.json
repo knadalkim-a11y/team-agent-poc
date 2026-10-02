@@ -143,5 +143,11 @@
       ],
       "saved_at": "2026-10-02T01:04:39.635435+00:00"
     }
-  ]
+  ],
+  "final_metadata_review": {
+    "queried_at": "2026-10-02T01:35:24.498234+00:00",
+    "xml_sha256": "c62a4a99481d661bb5922f03a43bf45b951292ca7267b8b2ea3209279e2a9cc4",
+    "xml_changed": false,
+    "comparison": "XML canvas content only, excluding generic tool guidance; all initial nodes/text/positions match"
+  }
 }

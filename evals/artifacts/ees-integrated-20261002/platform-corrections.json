@@ -1,0 +1,66 @@
+{
+  "initial_results": "suite.json",
+  "initial_aggregate": "aggregate.json",
+  "product_wheel_unchanged": true,
+  "corrections": [
+    {
+      "scope": "tests only",
+      "cause": "Explicit UTF-8 missing in private synthetic backup fixture reads",
+      "files": [
+        "tests/test_ees_asset_native.py",
+        "tests/test_ees_demo_assets.py"
+      ],
+      "evidence": [
+        "../platform-06-native-fixed/test_ees_asset_native.json",
+        "../services-06-demo-assets-fixed/test_ees_demo_assets.json"
+      ]
+    },
+    {
+      "scope": "fixture only",
+      "cause": "Newly loaded exact emitted Native definition module had pseudo-archive __file__, so relative policy resource was unavailable",
+      "files": [
+        "tests/ees_asset_native_fixture.py"
+      ],
+      "action": "Materialize exact emitted modules and workflow_policy.json in isolated temporary fixture directory",
+      "evidence": [
+        "../platform-06-native-fixed/test_ees_asset_native.json"
+      ]
+    },
+    {
+      "scope": "fixture only",
+      "cause": "Unsupported-version case named ees.13 which is now supported, then downstream marker assertions observed that legitimate import",
+      "files": [
+        "tests/test_ees_deploy_process.py"
+      ],
+      "action": "Use independently unsupported unreviewed version and supported-but-mismatched ees.1 for the no-fallback argument case",
+      "evidence": [
+        "../platform-06-fixture-fixed.log"
+      ]
+    },
+    {
+      "scope": "missing local opt-in flags",
+      "cause": "Full local launch omitted CI EES_RUN_REAL_NLTK_TEST/EES_RUN_REAL_UV_TEST",
+      "action": "Run only these two tests with correct flags and fixed .venv uv; both pass",
+      "evidence": [
+        "../platform-06-real-dependencies.log"
+      ]
+    }
+  ],
+  "native_corrected_module": {
+    "tests": 44,
+    "passed": 44,
+    "failed": 0,
+    "skipped": 0
+  },
+  "remaining_unavailable_categories": [
+    "Windows/PowerShell-specific execution",
+    "mounted /proc PID namespace lifecycle tests",
+    "optional previous ees.7/8 artifact"
+  ],
+  "fixture_sha256": {
+    "tests/test_ees_asset_native.py": "31d027fd0a47ea3af591091a797dc7bef5605f27df0d616736c8aa8d95063cc9",
+    "tests/ees_asset_native_fixture.py": "52d82e4841b2339c19ba2ae1b78c2f568b64aa959657a11c33d5667894f19da7",
+    "tests/test_ees_demo_assets.py": "eabd47ddc4dd748c757730ae77c272695e90b3adfcafef5a200398e78a53828b",
+    "tests/test_ees_deploy_process.py": "c4924ae4a3a6ae4aff77d3a5cb2a019b588ef46d501ef7bd41139938fdd959d3"
+  }
+}

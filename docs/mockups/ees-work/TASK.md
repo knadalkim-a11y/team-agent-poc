@@ -1098,6 +1098,12 @@ Native 인증·사용자·그룹·대화·첨부 DB는 기존 원본이다. 업�
 
 선택지와 선행 목록 인자 연결은 선언한 Native 함수·인자·결과 경로만 허용한다. 확정 목록 ID를 받는 후속 작업은 실제 확정된 현재 source attempt/revision/선택 ID를 snapshot하고, 부분 조회·미확정 목록·다른 사용자 비공개 근거를 자동 재사용하지 않는다. 결과의 `all_resolved`는 AI 보고 초안에만 허용하며 CR 미확인/보완 필요를 승인으로 바꾸지 않는다.
 
+모든 선행 의존은 실행 당시 attempt·판정 ID·상태·입력 해시를 보존한다. 선행 작업이 다시 실행되거나 입력/판정이 바뀌면 진행 중인 후속 호출의 반환값도 이전 근거로 완료 처리하지 않는다. 실제 결과를 보존하고 재검토 필요로 남기며, 오래된 결과의 사람 확정도 거절한다. 서로 다른 절차/진행 건/시스템/공장을 섞은 명시적 조회는 `target_mismatch`로 거절한다. P/T에서 상속한 의존성 순환도 게시 검사 대상이다.
+
+`workspace/proposal`과 공개 `ees_workflow_propose`는 절차 또는 선택한 작업의 실행 입력 초안을 반환한다. 입력 제안은 선언된 run 범위 필드·현재 선택지·담당자·Native 원본 권한과 변경 전후 revision을 검사한다. 화면의 미리보기 반영은 개인 미저장 초안까지만 변경하며 별도 저장/실행이 필요하다. Native 메시지에는 업무 ID·게시 버전·실행 시도·결과 revision 참조만 보존한다. 과거 메시지 칩은 현재 권한으로 당시 시도를 읽으며 식별자가 없거나 다른 경우 현재 결과로 대체하지 않는다. 개인 대화 본문은 공동 기록에 복사하지 않는다.
+
+관리자의 공통 Work 대화 도구 설정은 `/api/v1/ees/assets/work-tool/`의 현재 상태/원본 해시 확인 뒤 명시적으로 수행한다. 패키지에 포함한 정확한 코드, Native 사용자/그룹 읽기 권한, 설치된 middleware 보호를 검사한다. 기존 동일 등록본은 권한/설정을 보존하고, 다른 코드·동시 프로그램 변경은 덮지 않는다. 모델이나 도구를 기본 콘텐츠로 자동 등록하는 초기화 경로가 아니다.
+
 기한은 날짜 입력·calendar-day offset·명시적 timezone의 제한된 schema로 계산한다. 계산 결과와 입력 revision은 실행 snapshot에 남긴다. business-day/공휴일 자료가 없으면 날짜를 임의 당기지 않고 확인 불가로 남긴다. 외부 효과 API·송부 채널·미승인 CR 포함/제외 정책도 자동 확정하지 않는다.
 
 ### 화면·기능·검사 대응
@@ -1112,10 +1118,17 @@ Native 인증·사용자·그룹·대화·첨부 DB는 기존 원본이다. 업�
 | A3 | 현재 결과의 CR별 AI 제안과 명시적 사람 판정·후속 재검토 | immutable attempts/decisions / delivery artifacts·workspace·UI |
 | A4 / A4-1 / A4-2 / R5 | 등록/검토된 요청·0/1/2 승인·취소 초기초점/Esc·수락·상태·효과, 결과 불명 재전송 금지 | operations intent/request + Native dialog / request contracts·Native |
 | B1 / B2 | 실제 절차 목록·검색·초안/게시·구조/일정/판정/게시 기록 | Workspace definitions/versions / authoring UI·Native authoring |
-| B3 / R3 / R4 | 공통8입력/8블록·Native 도구/스킬·정확한 인자/선택지·AI 편집 제안 | schema/options/proposal + designer / authoring47+workspace/model |
+| B3 / R3 / R4 | 공통8입력/8블록·Native 사용자/그룹 담당·도구/스킬·정확한 인자/선택지·AI 편집 제안 | schema/options/proposal + designer / authoring·workspace·model |
 | B4 / R2 | 기본 정의·공장 override/조건·복사·반수 경고·끊긴 참조 차단 | definition checker/settings / factory·publication tests |
-| B5 / R6 | 조회/요청 도구 초안·가이드·담당자 검토·정의 hash 변화 | Operations tool contract + Native inspect / authoring·operations |
+| B5 / R6 | 조회/요청 도구 초안·Native 입력 계약·명시적 출력 계약·가이드·담당자 검토·정의 hash 변화 | Operations tool contract + Native inspect / authoring·operations |
 | 안내/M0 | Native 실제 모델 이름/0·1·복수 접근, 사람/AI/EES Work/EES 주체 구분 | NativeModelAdapter·safe Work Tool / model·Native chat |
 | 별도 상세 프레임 없음 | Native 대화 기록·스킬 관리 진입, 관리자의 범위 설정·빈/오류/권한/충돌·내보내기 | 기존 Native route·공통 폼/토큰, 새 인증/스킬 복제 없음 |
 
 배포 산출물 점검은 운영 기본 데이터가 아니다. 시험에서 작성 API로 만든 절차를 게시하고 실제 loopback Jira HTTP로 여러 페이지 CR→확정 목록→필수 파일 이름/존재/접근→AI 제안→CR별 사람 판정→보완 재실행→보고 초안/검토/내보내기를 연결한다. 파일 내용 적정성 미검토를 승인으로 표현하지 않는다. 실제 회사 Jira/LLM/EES 성공으로 보고하지 않는다.
+
+
+### 최종 디자인 대조와 적용 차이
+
+2026-10-02 구현 검수에서 페이지 전체 metadata와 A1/B3 디자인 context·원본 렌더를 다시 조회했다. 도구의 공통 후행 안내문을 제외한 metadata가 착수본과 같고, 현재 노드·문구·좌표 변화는 관측되지 않았다. [조회 시점·정규화 비교 해시](../../../evals/artifacts/ees-integrated-20261002/figma-baseline.json)를 보존하며 다음 변경을 금지하는 버전 고정으로 사용하지 않는다.
+
+실제 제품은 공통3영역·토큰·SVG·상태/입력/결과 블록을 적용했다. 중앙 입력은 Native 대화의 실제 첨부·모델/음성 컨트롤과 폭 제약을 유지하므로 Figma 예시와 컨트롤 수·일부 간격이 다르다. 권한·동시 수정·도구 입력/출력 계약 등 예시에서 생략된 필드는 공통 편집 폼에 표시한다. 예시 사용자·공장·건수·성공 결과 대신 현재 권한의 실제 저장값과 빈 상태를 표시한다. 규칙 프레임은 별도 업무 화면을 하드코딩하지 않고 공통 동작으로 구현했다. 모든20개 화면의 픽셀 동일성 검사는 수행하지 않았으며 실제 제품 검수 범위와 원본 화면은 [검증 증거](../../../evals/v4-ui-20260930.md#integrated-work-evidence-20261002)로 구분한다.

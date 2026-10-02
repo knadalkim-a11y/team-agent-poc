@@ -1,0 +1,1017 @@
+{
+  "recorded_at": "2026-10-02T02:04:06.734205+00:00",
+  "scope": "Local Linux initial suite observations and bounded corrections, not a full successful final-head rerun",
+  "initial": {
+    "services-06": {
+      "modules": 23,
+      "tests_run": 393,
+      "outcome_counts": {
+        "passed": 390,
+        "failed": 0,
+        "error": 2,
+        "skipped": 1,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "note": "Subtests and setUpClass outcomes are separate records; do not sum outcome_counts as distinct test methods.",
+      "results": [
+        {
+          "module": "test_confluence_canary.py",
+          "tests_run": 34,
+          "status": "passed",
+          "counts": {
+            "passed": 34,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_confluence_canary.json",
+          "sha256": "46630b49b677bf95b0e6b86305933790796716a7fc855269d5281c5517f0ff3e",
+          "nonpassing": []
+        },
+        {
+          "module": "test_confluence_read.py",
+          "tests_run": 51,
+          "status": "passed",
+          "counts": {
+            "passed": 51,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_confluence_read.json",
+          "sha256": "15d11d42fd2071faac7da8e6901e913de85d02cfc86329e3d3d6cdd2148daee7",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_apply_demo.py",
+          "tests_run": 19,
+          "status": "passed",
+          "counts": {
+            "passed": 19,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_apply_demo.json",
+          "sha256": "3c4aa8a2b74ac1178ac7dabad54a0054d2bc207f2b3f3a53d8f0183d40f1cf8a",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_delivery_artifacts.py",
+          "tests_run": 3,
+          "status": "passed",
+          "counts": {
+            "passed": 3,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_delivery_artifacts.json",
+          "sha256": "781b1ec025114a2eebf4085ad11c475f8568c450df57ae201da02acb8d210792",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_demo_assets.py",
+          "tests_run": 6,
+          "status": "failed",
+          "counts": {
+            "passed": 4,
+            "failed": 0,
+            "error": 2,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_demo_assets.json",
+          "sha256": "616bc60a5c3a7c5cee0db1ff3f0df6de78fb571da476446195c5d1ac7987683c",
+          "nonpassing": [
+            {
+              "id": "test_ees_demo_assets.RetiredRegistrationTests.test_asset_journal_rejects_symlink_without_touching_target",
+              "status": "error",
+              "detail": "EncodingWarning: 'encoding' argument not specified"
+            },
+            {
+              "id": "test_ees_demo_assets.RetirementOperatorTests.test_preview_is_private_read_only_and_requires_exact_plan_approval",
+              "status": "error",
+              "detail": "EncodingWarning: 'encoding' argument not specified"
+            }
+          ]
+        },
+        {
+          "module": "test_ees_demo_data_tool.py",
+          "tests_run": 3,
+          "status": "passed",
+          "counts": {
+            "passed": 3,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_demo_data_tool.json",
+          "sha256": "305253793b231c39bdf91eff0fe3f38f01fc52b6dccc113c4e039cffee43368a",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_execution_tool.py",
+          "tests_run": 2,
+          "status": "passed",
+          "counts": {
+            "passed": 2,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_execution_tool.json",
+          "sha256": "649bbc1b16f139cbbf5844a2d2648f7e1e061f4bfa5ae69846ce6e683018f338",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_specialists_tool.py",
+          "tests_run": 3,
+          "status": "passed",
+          "counts": {
+            "passed": 3,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_specialists_tool.json",
+          "sha256": "c15e70fdbff844069194067078174ff27519f126522244bd16085c2649a5ab51",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_work_controller.py",
+          "tests_run": 1,
+          "status": "passed",
+          "counts": {
+            "passed": 1,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_work_controller.json",
+          "sha256": "372a9e9f1538b58bbf5540d79fd197f3eeaea961d651f685601a30066ef51b4f",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_work_designer.py",
+          "tests_run": 1,
+          "status": "passed",
+          "counts": {
+            "passed": 1,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_work_designer.json",
+          "sha256": "fda3ac941a85a05b154d2079f7cca1c796b91c939cf4e784f60de3690954ff40",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_work_operations.py",
+          "tests_run": 33,
+          "status": "passed",
+          "counts": {
+            "passed": 33,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_work_operations.json",
+          "sha256": "62ae227deebca7d489b8d985e1310db76750041a736b963b890aeaaece56ea30",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_work_panel.py",
+          "tests_run": 1,
+          "status": "passed",
+          "counts": {
+            "passed": 1,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_work_panel.json",
+          "sha256": "aae93cc01729c79f88c056c73d0c632be4c1d4ad940e1535ee41cff6c6ec61bf",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_work_routes.py",
+          "tests_run": 7,
+          "status": "passed",
+          "counts": {
+            "passed": 7,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_work_routes.json",
+          "sha256": "584c836f6a37c5ee1994f01fce384674d5c04b55d62dc18148a94e919ba0ffc7",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_work_v4.py",
+          "tests_run": 1,
+          "status": "passed",
+          "counts": {
+            "passed": 1,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_work_v4.json",
+          "sha256": "e73d6b427641720d0c9a6b1e6e6fe6e8b0576a9cac1ce8973b25ff3322b7170f",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_work_workspace.py",
+          "tests_run": 48,
+          "status": "passed",
+          "counts": {
+            "passed": 48,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_work_workspace.json",
+          "sha256": "7ad12fec2ae172af36bfa7fe4cf4ca4e1eb05a8c5e8277895692e7cd38660ab9",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_workflow.py",
+          "tests_run": 56,
+          "status": "incomplete",
+          "counts": {
+            "passed": 55,
+            "failed": 0,
+            "error": 0,
+            "skipped": 1,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_workflow.json",
+          "sha256": "eeaf78eb13ab5af16ac2dcde1e4bd196dc8e959cb2c23ee1c510cd0a427e1d29",
+          "nonpassing": [
+            {
+              "id": "test_ees_workflow.WorkflowPreservationTests.test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads",
+              "status": "skipped",
+              "detail": "EES_TEST_LEGACY_WORKFLOW_WHEEL must identify the supported ees.10 wheel. Required in the release gate."
+            }
+          ]
+        },
+        {
+          "module": "test_ees_workflow_contract.py",
+          "tests_run": 17,
+          "status": "passed",
+          "counts": {
+            "passed": 17,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_workflow_contract.json",
+          "sha256": "0ca2899826e3413550dcb2109b5fc84957f3ea0939fb1ea6c97733106ff8567f",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_workflow_model.py",
+          "tests_run": 16,
+          "status": "passed",
+          "counts": {
+            "passed": 16,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_workflow_model.json",
+          "sha256": "827eb3a236cb55cea602269298145a35d97f8a1c3ca55dde341daf96830933cf",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_workflow_tool.py",
+          "tests_run": 10,
+          "status": "passed",
+          "counts": {
+            "passed": 10,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_ees_workflow_tool.json",
+          "sha256": "a6bf05146d579a756989d69700c4c9ebabf8510bca3dec29d5a1d357e2269ee4",
+          "nonpassing": []
+        },
+        {
+          "module": "test_github_tool.py",
+          "tests_run": 34,
+          "status": "passed",
+          "counts": {
+            "passed": 34,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_github_tool.json",
+          "sha256": "44a9150b38a153ed025c9007afa082655d9a4f9c546b49654a58e6562e815d67",
+          "nonpassing": []
+        },
+        {
+          "module": "test_jira_read.py",
+          "tests_run": 25,
+          "status": "passed",
+          "counts": {
+            "passed": 25,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_jira_read.json",
+          "sha256": "144fbb9a0ab1cd30e10a97e83cbacb2270ce8a2e54f843c348e567189367b964",
+          "nonpassing": []
+        },
+        {
+          "module": "test_jira_work_contract.py",
+          "tests_run": 19,
+          "status": "passed",
+          "counts": {
+            "passed": 19,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_jira_work_contract.json",
+          "sha256": "48135d5869aae6914a9c12b5e4e38e33072fae3a571d7a887871b3470318d757",
+          "nonpassing": []
+        },
+        {
+          "module": "test_wo_demo_tool.py",
+          "tests_run": 3,
+          "status": "passed",
+          "counts": {
+            "passed": 3,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/services-06/test_wo_demo_tool.json",
+          "sha256": "4e43f77982ee3656036c21f2caa3173f298c4395d1548c95ccad4fb6315595f3",
+          "nonpassing": []
+        }
+      ]
+    },
+    "platform-06": {
+      "modules": 23,
+      "tests_run": 672,
+      "outcome_counts": {
+        "passed": 648,
+        "failed": 4,
+        "error": 4,
+        "skipped": 20,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "note": "Subtests and setUpClass outcomes are separate records; do not sum outcome_counts as distinct test methods.",
+      "results": [
+        {
+          "module": "test_check_docs.py",
+          "tests_run": 43,
+          "status": "passed",
+          "counts": {
+            "passed": 43,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_check_docs.json",
+          "sha256": "870d8293c5c40d9cc0763c7d1f1c2145d37f6380a12006ff2c77f21f30f231ba",
+          "nonpassing": []
+        },
+        {
+          "module": "test_demo_bundle.py",
+          "tests_run": 9,
+          "status": "passed",
+          "counts": {
+            "passed": 9,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_demo_bundle.json",
+          "sha256": "03505b41750994e74325bf518a47e0f39f8a6660403fb5d4329b2067dc6dd717",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_asset_guard.py",
+          "tests_run": 16,
+          "status": "passed",
+          "counts": {
+            "passed": 16,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_asset_guard.json",
+          "sha256": "97c88710065d0e2968610fed303cd5a15ca70596c42c7611918784e7591715e4",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_asset_native.py",
+          "tests_run": 44,
+          "status": "failed",
+          "counts": {
+            "passed": 40,
+            "failed": 0,
+            "error": 4,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_asset_native.json",
+          "sha256": "64bad06b97d9543a114a3f2bba8783ed96ebbaad32f766278e81b5eb48d549b9",
+          "nonpassing": [
+            {
+              "id": "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_retired_tool_reference_blocks_delete_and_restore_retains_valves_and_personal_settings",
+              "status": "error",
+              "detail": "EncodingWarning: 'encoding' argument not specified"
+            },
+            {
+              "id": "test_ees_asset_native.NativeAssetsSharedSessionTests.test_retired_tool_reference_blocks_delete_and_restore_retains_valves_and_personal_settings",
+              "status": "error",
+              "detail": "EncodingWarning: 'encoding' argument not specified"
+            },
+            {
+              "id": "test_ees_asset_native.NativeAuthoringAssetReadTests.test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication",
+              "status": "error",
+              "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/upstream/open_webui-0.11.3-py3-none-any.whl!/open_webui/workflow_policy.json'"
+            },
+            {
+              "id": "test_ees_asset_native.NativeAuthoringAssetReadTests.test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets",
+              "status": "error",
+              "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/workspace/scratch/1d6bc68344e4/team-agent-poc/dist/upstream/open_webui-0.11.3-py3-none-any.whl!/open_webui/workflow_policy.json'"
+            }
+          ]
+        },
+        {
+          "module": "test_ees_branding_build.py",
+          "tests_run": 31,
+          "status": "passed",
+          "counts": {
+            "passed": 31,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_branding_build.json",
+          "sha256": "3edfa6c521f5d7e1a7573b78c8c1b50de8975827c85afa20c34fba27a955ad49",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_delivery_suite.py",
+          "tests_run": 8,
+          "status": "passed",
+          "counts": {
+            "passed": 8,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_delivery_suite.json",
+          "sha256": "7149c748368d10b9a5331b85af05c3c5fdf55563442fcc8ec829f32a0ffcc85c",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_deploy_accept.py",
+          "tests_run": 20,
+          "status": "incomplete",
+          "counts": {
+            "passed": 18,
+            "failed": 0,
+            "error": 0,
+            "skipped": 2,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_deploy_accept.json",
+          "sha256": "04b9aa88ec7067cd104a9e27c2a18ef3e8de316ae26972fd9b1b7174d21e8ad5",
+          "nonpassing": [
+            {
+              "id": "test_ees_deploy_accept.WindowsIocpTests.test_real_accept_reset_then_new_client_and_subprocess",
+              "status": "skipped",
+              "detail": "Windows CPython 3.11 only"
+            },
+            {
+              "id": "test_ees_deploy_accept.WindowsIocpTests.test_real_completion_then_shutdown_during_retry_or_other_error",
+              "status": "skipped",
+              "detail": "Windows CPython 3.11 only"
+            }
+          ]
+        },
+        {
+          "module": "test_ees_deploy_imports.py",
+          "tests_run": 29,
+          "status": "incomplete",
+          "counts": {
+            "passed": 26,
+            "failed": 0,
+            "error": 0,
+            "skipped": 3,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_deploy_imports.json",
+          "sha256": "b938058ced9af01de9f3965370ec958579eeb18e34071faa00b08aa51bc023c3",
+          "nonpassing": [
+            {
+              "id": "test_ees_deploy_imports.ImportProbeTests.test_real_nltk_downloader_without_profile_reproduces_value_error",
+              "status": "skipped",
+              "detail": "Windows real NLTK profile regression"
+            },
+            {
+              "id": "test_ees_deploy_imports.ImportProbeTests.test_real_nltk_import_completes_with_profile_environment",
+              "status": "skipped",
+              "detail": "opt-in real NLTK dependency check"
+            },
+            {
+              "id": "test_ees_deploy_imports.ImportProbeTests.test_windows_venv_site_initialization_and_watchdog",
+              "status": "skipped",
+              "detail": "Windows Python 3.11 venv launcher"
+            }
+          ]
+        },
+        {
+          "module": "test_ees_deploy_port.py",
+          "tests_run": 23,
+          "status": "incomplete",
+          "counts": {
+            "passed": 22,
+            "failed": 0,
+            "error": 0,
+            "skipped": 1,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_deploy_port.json",
+          "sha256": "9c9417a195da729b4134a865fd15d1ea54f41aec6ff23198703111133665dee6",
+          "nonpassing": [
+            {
+              "id": "test_ees_deploy_port.LocalLifecycleTests.test_owned_fake_child_stops_and_reuses_port",
+              "status": "skipped",
+              "detail": "The mounted /proc uses a different PID namespace."
+            }
+          ]
+        },
+        {
+          "module": "test_ees_deploy_process.py",
+          "tests_run": 57,
+          "status": "failed",
+          "counts": {
+            "passed": 54,
+            "failed": 4,
+            "error": 0,
+            "skipped": 3,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_deploy_process.json",
+          "sha256": "c4cd7bb90ef89a63f07c413de6e474400ddfb53523663d3e782d3188ad39fbbd",
+          "nonpassing": [
+            {
+              "id": "test_ees_deploy_process.CustomizedLauncherTests.test_unsupported_and_mixed_release_arguments_refuse_app_import (version='0.11.3+ees.13')",
+              "status": "failed",
+              "detail": "AssertionError: ProcessError not raised"
+            },
+            {
+              "id": "test_ees_deploy_process.CustomizedLauncherTests.test_unsupported_and_mixed_release_arguments_refuse_app_import (index=8)",
+              "status": "failed",
+              "detail": "AssertionError: 0 == 0"
+            },
+            {
+              "id": "test_ees_deploy_process.CustomizedLauncherTests.test_unsupported_and_mixed_release_arguments_refuse_app_import (index=9)",
+              "status": "failed",
+              "detail": "AssertionError: True is not false"
+            },
+            {
+              "id": "test_ees_deploy_process.CustomizedLauncherTests.test_unsupported_and_mixed_release_arguments_refuse_app_import (index=10)",
+              "status": "failed",
+              "detail": "AssertionError: True is not false"
+            },
+            {
+              "id": "setUpClass (test_ees_deploy_process.DeployProcessTests)",
+              "status": "skipped",
+              "detail": "The mounted /proc uses a different PID namespace; real lifecycle runs in Windows/Linux CI."
+            },
+            {
+              "id": "test_ees_deploy_process.WindowsExplicitTerminationTests.test_disposable_child_identity_refusal_then_termination_preserves_other_child",
+              "status": "skipped",
+              "detail": "Real handle termination is Windows-only."
+            },
+            {
+              "id": "test_ees_deploy_process.WindowsStopHelperTests.test_console_attach_failure_survives_real_helper_stdout_and_parent_parsing",
+              "status": "skipped",
+              "detail": "Real console helper IPC is Windows-only."
+            }
+          ]
+        },
+        {
+          "module": "test_ees_deploy_recover.py",
+          "tests_run": 13,
+          "status": "passed",
+          "counts": {
+            "passed": 13,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_deploy_recover.json",
+          "sha256": "9f173f27449b1c0ec6c42b736d3822ec059fadc3529f18becca1ce4d09d0471c",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_deploy_release.py",
+          "tests_run": 21,
+          "status": "incomplete",
+          "counts": {
+            "passed": 20,
+            "failed": 0,
+            "error": 0,
+            "skipped": 1,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_deploy_release.json",
+          "sha256": "fbd48da926fd0f1bae48553ba529c6feb8848e088d4fc5d86e8aa12a100056c8",
+          "nonpassing": [
+            {
+              "id": "test_ees_deploy_release.ReleaseTests.test_real_uv_prepares_tiny_wheels_offline_without_application_import",
+              "status": "skipped",
+              "detail": "Opt-in real uv test requires Python 3.11 and installed uv."
+            }
+          ]
+        },
+        {
+          "module": "test_ees_deploy_report.py",
+          "tests_run": 45,
+          "status": "passed",
+          "counts": {
+            "passed": 45,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_deploy_report.json",
+          "sha256": "74de5a089e3e75cf032737b20f7e2b018d0e1acdbd8a631ed7ec36dbbaba3f7e",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_deploy_state.py",
+          "tests_run": 12,
+          "status": "incomplete",
+          "counts": {
+            "passed": 11,
+            "failed": 0,
+            "error": 0,
+            "skipped": 1,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_deploy_state.json",
+          "sha256": "02979993f7763badb2fda4f1dc4776dc926482e1afd9a59c3250d97941a7a2ca",
+          "nonpassing": [
+            {
+              "id": "test_ees_deploy_state.WindowsDpapiTests.test_current_user_dpapi_roundtrip",
+              "status": "skipped",
+              "detail": "Real CurrentUser DPAPI requires Windows"
+            }
+          ]
+        },
+        {
+          "module": "test_ees_deploy_stop_recovery.py",
+          "tests_run": 33,
+          "status": "incomplete",
+          "counts": {
+            "passed": 32,
+            "failed": 0,
+            "error": 0,
+            "skipped": 1,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_deploy_stop_recovery.json",
+          "sha256": "f20ce40ab31e8cf3987fd8c254ebd9ae645b4ca4b661aac37d2bcc664c68c27c",
+          "nonpassing": [
+            {
+              "id": "test_ees_deploy_stop_recovery.PowerShellCaptureTests.test_documented_capture_preserves_raw_json_in_windows_powershell_and_pwsh",
+              "status": "skipped",
+              "detail": "Recovery capture guide compatibility is Windows-only."
+            }
+          ]
+        },
+        {
+          "module": "test_ees_deploy_stop_target.py",
+          "tests_run": 16,
+          "status": "incomplete",
+          "counts": {
+            "passed": 15,
+            "failed": 0,
+            "error": 0,
+            "skipped": 1,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_deploy_stop_target.json",
+          "sha256": "378f413825371d12b8fcc0355bf2d6c19f0d978893a5fa7b78b2c85e2781f8a2",
+          "nonpassing": [
+            {
+              "id": "test_ees_deploy_stop_target.WindowsVenvTests.test_actual_venv_child_termination_releases_waiting_launcher",
+              "status": "skipped",
+              "detail": "Disposable CPython 3.11 Windows venv fixture"
+            }
+          ]
+        },
+        {
+          "module": "test_ees_trial_bundle.py",
+          "tests_run": 14,
+          "status": "passed",
+          "counts": {
+            "passed": 14,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_trial_bundle.json",
+          "sha256": "fe406a108a0f50fa7e63a1e4b754fc92c68100bd7199dbfc32ba80e3872d55ef",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_trial_upgrade.py",
+          "tests_run": 18,
+          "status": "incomplete",
+          "counts": {
+            "passed": 17,
+            "failed": 0,
+            "error": 0,
+            "skipped": 1,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_trial_upgrade.json",
+          "sha256": "9efa5f640411b9b9b0ea57861ecb834c51bdafbc166cd85d3d805fe59a760af3",
+          "nonpassing": [
+            {
+              "id": "test_ees_trial_upgrade.TrialPowerShellTests.test_public_trial_routes_and_invalid_options",
+              "status": "skipped",
+              "detail": "PowerShell is unavailable"
+            }
+          ]
+        },
+        {
+          "module": "test_ees_update_download.py",
+          "tests_run": 15,
+          "status": "passed",
+          "counts": {
+            "passed": 15,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_update_download.json",
+          "sha256": "5970654f650575166b1c7fd5a37458fd50454b75c85402ef8d9903982e3797bb",
+          "nonpassing": []
+        },
+        {
+          "module": "test_ees_upgrade.py",
+          "tests_run": 39,
+          "status": "incomplete",
+          "counts": {
+            "passed": 37,
+            "failed": 0,
+            "error": 0,
+            "skipped": 2,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_upgrade.json",
+          "sha256": "f0a5539da2c503e93ae84721fc6040d15329b880d1314b2b45e70f17e68b21e5",
+          "nonpassing": [
+            {
+              "id": "test_ees_upgrade.PowerShellUpgradeTests.test_adapter_runs_demo_with_saved_environment_and_separate_auth_options",
+              "status": "skipped",
+              "detail": "PowerShell adapter execution requires pwsh"
+            },
+            {
+              "id": "test_ees_upgrade.PowerShellUpgradeTests.test_adapter_runs_upgrade_entrypoint_and_forwards_only_upgrade_arguments",
+              "status": "skipped",
+              "detail": "PowerShell adapter execution requires pwsh"
+            }
+          ]
+        },
+        {
+          "module": "test_ees_webui_customization.py",
+          "tests_run": 61,
+          "status": "incomplete",
+          "counts": {
+            "passed": 59,
+            "failed": 0,
+            "error": 0,
+            "skipped": 2,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_ees_webui_customization.json",
+          "sha256": "7e38b2ec230960f7f2293f1a1943bbaf87206f29ee35efd7a7bbe2be70c4a11a",
+          "nonpassing": [
+            {
+              "id": "test_ees_webui_customization.ProgramRenameTests.test_real_windows_directory_lock_released_during_wait_then_promotes",
+              "status": "skipped",
+              "detail": "Requires an actual Windows directory sharing lock"
+            },
+            {
+              "id": "test_ees_webui_customization.RealBrandingWheelTests.test_saved_workflow_survives_real_upgrade_then_previous_program_restore",
+              "status": "skipped",
+              "detail": "Supply current and previous shipped wheels for the reverse-compatibility gate"
+            }
+          ]
+        },
+        {
+          "module": "test_manage_ees.py",
+          "tests_run": 95,
+          "status": "incomplete",
+          "counts": {
+            "passed": 93,
+            "failed": 0,
+            "error": 0,
+            "skipped": 2,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_manage_ees.json",
+          "sha256": "4691f05efc1548fb6c90429c3db85e62e5b88292e7ea4e4385f6c25803d0fd45",
+          "nonpassing": [
+            {
+              "id": "test_manage_ees.PowerShellResumeTests.test_adapter_forwards_resume_and_check_only_and_rejects_other_actions",
+              "status": "skipped",
+              "detail": "PowerShell adapter execution requires pwsh"
+            },
+            {
+              "id": "test_manage_ees.PowerShellResumeTests.test_documented_manual_apply_and_resume_blocks_parse_in_powershell",
+              "status": "skipped",
+              "detail": "PowerShell adapter execution requires pwsh"
+            }
+          ]
+        },
+        {
+          "module": "test_openwebui_windows_launcher.py",
+          "tests_run": 10,
+          "status": "passed",
+          "counts": {
+            "passed": 10,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "source": "dist/integrated/platform-06/test_openwebui_windows_launcher.json",
+          "sha256": "a74576c3143d67abae4ee8eb316303ec17287ea24352ce21484ed48d44b05cd9",
+          "nonpassing": []
+        }
+      ]
+    }
+  },
+  "corrected": [
+    {
+      "module": "test_ees_demo_assets.py",
+      "tests_run": 6,
+      "status": "passed",
+      "counts": {
+        "passed": 6,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "source": "dist/integrated/services-06-demo-assets-fixed/test_ees_demo_assets.json",
+      "sha256": "320a78ae7f17e4187634306fc5b7de57e2e165690e2e2fd700aad19c311d4231"
+    },
+    {
+      "module": "test_ees_asset_native.py",
+      "tests_run": 44,
+      "status": "passed",
+      "counts": {
+        "passed": 44,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "source": "dist/integrated/platform-06-native-fixed/test_ees_asset_native.json",
+      "sha256": "356f38547d7188f66690d0976faeeca34b6e2b01f16afbc6ce2c92455bd9f783"
+    },
+    {
+      "module": "test_ees_work_authoring_account_switch.py",
+      "tests_run": 1,
+      "status": "passed",
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "source": "dist/integrated/validation/native10-switch-fixture-fixed/test_ees_work_authoring_account_switch.json",
+      "sha256": "343edd5df6acd9dbdf5ebf22031b235540c5a2db727997270ed05cdabab14c91"
+    },
+    {
+      "source": "dist/integrated/platform-06-fixture-fixed.log",
+      "sha256": "36b75b97ce062c7d739ecb04ce15b84038f7e0784f068fe40247a584e8c4d548",
+      "tests_run": 5,
+      "status": "passed",
+      "boundary": "Focused correction/helper result; original failure is retained separately"
+    },
+    {
+      "source": "dist/integrated/platform-06-real-dependencies.log",
+      "sha256": "f722e8ae65d8d332b711f3ba8c5a3fd106d0925445ff3e3134bd87e547accc32",
+      "tests_run": 2,
+      "status": "passed",
+      "boundary": "Focused correction/helper result; original failure is retained separately"
+    },
+    {
+      "source": "dist/integrated/validation/native-ai10-fixture-fixed.log",
+      "sha256": "8ded639a73dbd069278f4611b6cdf3b31bd3b13f605db431637888815ead5c0c",
+      "tests_run": 1,
+      "status": "passed",
+      "boundary": "Focused correction/helper result; original failure is retained separately"
+    },
+    {
+      "source": "dist/integrated/validation/runner-final.log",
+      "sha256": "3fe39b97bae79911f2b868f73b55c62144459758b47f06065f59d8aedaed0016",
+      "tests_run": 8,
+      "status": "passed",
+      "boundary": "Focused correction/helper result; original failure is retained separately"
+    }
+  ]
+}

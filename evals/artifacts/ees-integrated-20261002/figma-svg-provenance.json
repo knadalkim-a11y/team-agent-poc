@@ -10,8 +10,10 @@
       "context": "A1.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "978f44056199f49aa50fe335f4d1eb4cc4c062aba9f2ba02ed23a05ef8add5d3",
-      "bytes": 570
+      "sha256": "568698ad20328df158f834393622702f379fb03fcd680407fdc2422ec00fd05b",
+      "bytes": 569,
+      "exported_sha256": "978f44056199f49aa50fe335f4d1eb4cc4c062aba9f2ba02ed23a05ef8add5d3",
+      "exported_bytes": 570
     },
     {
       "file": "f34f3.svg",
@@ -19,8 +21,10 @@
       "context": "A1.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "067d970f558b5eafa1cf212483648b6386e50973cb5495d6d1912a6d165bedfa",
-      "bytes": 907
+      "sha256": "0d03a0582887713bbd65f7c45e4d793d2d90251c1cd23544a31c5624eb6cf413",
+      "bytes": 906,
+      "exported_sha256": "067d970f558b5eafa1cf212483648b6386e50973cb5495d6d1912a6d165bedfa",
+      "exported_bytes": 907
     },
     {
       "file": "c6340.svg",
@@ -28,8 +32,10 @@
       "context": "A1.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "e1698295130869ed0a07569dc59bbebbe7885e5db07b51cac902398b6fd801d6",
-      "bytes": 452
+      "sha256": "53940b96046fa805f925284ed1ccc08cf582410613a7fde12b712409fdb8e0fa",
+      "bytes": 451,
+      "exported_sha256": "e1698295130869ed0a07569dc59bbebbe7885e5db07b51cac902398b6fd801d6",
+      "exported_bytes": 452
     },
     {
       "file": "7495b.svg",
@@ -37,8 +43,10 @@
       "context": "A1.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "654e75a9ea640947bbc588eb72ccc9ea29a99de213286ad6ffafad7be9af5f85",
-      "bytes": 447
+      "sha256": "addb3700e6ea0f024b48a534e9bf9bdb243b05c0c8ee0462d8e94254c922eb4e",
+      "bytes": 446,
+      "exported_sha256": "654e75a9ea640947bbc588eb72ccc9ea29a99de213286ad6ffafad7be9af5f85",
+      "exported_bytes": 447
     },
     {
       "file": "ed85e.svg",
@@ -46,8 +54,10 @@
       "context": "A1.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "d49a9049e20a984fc15ae16f9e1b6ed84443cf7486fdd7a517012c52fae8b142",
-      "bytes": 603
+      "sha256": "6726e2511676dd1da73dbf780797175c0ae5caf714f2f9383d94d16b2c9f4c3f",
+      "bytes": 602,
+      "exported_sha256": "d49a9049e20a984fc15ae16f9e1b6ed84443cf7486fdd7a517012c52fae8b142",
+      "exported_bytes": 603
     },
     {
       "file": "08bf3.svg",
@@ -55,8 +65,10 @@
       "context": "A1.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "d5270857f190e3f5fffe26187c78e37a33657d8bb9c73353f022dbf9655eb545",
-      "bytes": 907
+      "sha256": "76664d0ea86534856a1354a593998adaca5b785d0778eff87b8b6ab47021f2a9",
+      "bytes": 906,
+      "exported_sha256": "d5270857f190e3f5fffe26187c78e37a33657d8bb9c73353f022dbf9655eb545",
+      "exported_bytes": 907
     },
     {
       "file": "3b2d6.svg",
@@ -64,8 +76,10 @@
       "context": "A1.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "aca3be1034c8c700c087213636902913c76a670780f5a720a535e44a8c1a90bd",
-      "bytes": 500
+      "sha256": "3db5bdd8f820d9656c655f458caf5b44e62345a38c11f836359d65810d57fbf4",
+      "bytes": 499,
+      "exported_sha256": "aca3be1034c8c700c087213636902913c76a670780f5a720a535e44a8c1a90bd",
+      "exported_bytes": 500
     },
     {
       "file": "fa106.svg",
@@ -73,8 +87,10 @@
       "context": "A1.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "b2a3726f2ebdc2c2ced396930da3b73c471f0fa731664ee879f78c28bf7950f4",
-      "bytes": 862
+      "sha256": "2a673a730475db5071c62adc74ee0875a79576a1499489baf922036faeb0ab32",
+      "bytes": 861,
+      "exported_sha256": "b2a3726f2ebdc2c2ced396930da3b73c471f0fa731664ee879f78c28bf7950f4",
+      "exported_bytes": 862
     },
     {
       "file": "1fc4e.svg",
@@ -82,8 +98,10 @@
       "context": "A1.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "b801857c6d6b694d6c3be53fb71ca18abd42acff27f90ddedfb1e13da0bbe675",
-      "bytes": 607
+      "sha256": "4960d2193a41a8e94a2c4a1ba35b4af639a4186db780b1dc3c3685d5bc75b9bc",
+      "bytes": 606,
+      "exported_sha256": "b801857c6d6b694d6c3be53fb71ca18abd42acff27f90ddedfb1e13da0bbe675",
+      "exported_bytes": 607
     },
     {
       "file": "aee94.svg",
@@ -91,8 +109,10 @@
       "context": "A1.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "2a1ac7edd1ef71acfabd45dea181fc309b5127039cc07738791af911bc181135",
-      "bytes": 864
+      "sha256": "917de761ab58516fa240964e36404230858930db3e981b61c8cde02bc3eb2e21",
+      "bytes": 863,
+      "exported_sha256": "2a1ac7edd1ef71acfabd45dea181fc309b5127039cc07738791af911bc181135",
+      "exported_bytes": 864
     },
     {
       "file": "cece5.svg",
@@ -100,8 +120,10 @@
       "context": "A1.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "0c97fef1c524bf63ae0ff0016e9134ec56f897695e51b2c06ad1bf9db06525f9",
-      "bytes": 1250
+      "sha256": "bf7bcf8484fb6b88ce358c4e20ab599d073a1e0d2911eced2560a6fec7383aac",
+      "bytes": 1249,
+      "exported_sha256": "0c97fef1c524bf63ae0ff0016e9134ec56f897695e51b2c06ad1bf9db06525f9",
+      "exported_bytes": 1250
     },
     {
       "file": "8a225.svg",
@@ -109,8 +131,10 @@
       "context": "A1.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "077415f837cab6b7d43f5cb2d1734d0194efb062d6864071309ef9adf8bbbf08",
-      "bytes": 474
+      "sha256": "81e00b98fc3aded9cff7188b40a366e5946a85f2a8c832cbf931d22f9dbce383",
+      "bytes": 473,
+      "exported_sha256": "077415f837cab6b7d43f5cb2d1734d0194efb062d6864071309ef9adf8bbbf08",
+      "exported_bytes": 474
     },
     {
       "file": "e8a37.svg",
@@ -118,8 +142,10 @@
       "context": "B4.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "139b2c7267c9f66c23310a4fffa25b850296372aca08b0ddd81c3fedae4771c7",
-      "bytes": 923
+      "sha256": "71efdf68ff4688d436c394716fc3618c9ac077a3029b69c90e2e36a7a5fd31ea",
+      "bytes": 922,
+      "exported_sha256": "139b2c7267c9f66c23310a4fffa25b850296372aca08b0ddd81c3fedae4771c7",
+      "exported_bytes": 923
     },
     {
       "file": "d1220.svg",
@@ -127,8 +153,10 @@
       "context": "B4.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "e66f565ed15da92dbbd3e2e966a2b92c24c39fc443fcd422fdad236c5e365caa",
-      "bytes": 1098
+      "sha256": "b9812a1bdbce8f6ea13f3741faa6dd458c144b4964f371385f94aadacd5fa08c",
+      "bytes": 1097,
+      "exported_sha256": "e66f565ed15da92dbbd3e2e966a2b92c24c39fc443fcd422fdad236c5e365caa",
+      "exported_bytes": 1098
     },
     {
       "file": "f908d.svg",
@@ -136,8 +164,10 @@
       "context": "B4.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "3e11f8ac5d2c9c6d7b735fbcc4156fa591958d49eca539c01bf6d45ff138cd4b",
-      "bytes": 714
+      "sha256": "7e5e7eedc95ab8dbbd4ba9d53ae1d85b5c189cb950f47008399efd47b8b3a1bb",
+      "bytes": 713,
+      "exported_sha256": "3e11f8ac5d2c9c6d7b735fbcc4156fa591958d49eca539c01bf6d45ff138cd4b",
+      "exported_bytes": 714
     },
     {
       "file": "da025.svg",
@@ -145,8 +175,10 @@
       "context": "B4.context.txt",
       "width": 15,
       "height": 15,
-      "sha256": "f9b9d6a7e4a96186064de04db10bf2f52a982202aaa580ffa44f36c2c0f52880",
-      "bytes": 620
+      "sha256": "4f1f116f9249934261b2e7ad100eed6696196c98a63f9858d5725c59fbd4e057",
+      "bytes": 619,
+      "exported_sha256": "f9b9d6a7e4a96186064de04db10bf2f52a982202aaa580ffa44f36c2c0f52880",
+      "exported_bytes": 620
     },
     {
       "file": "7e98c.svg",
@@ -154,8 +186,10 @@
       "context": "B4.context.txt",
       "width": 15,
       "height": 15,
-      "sha256": "c7cc48464ed3961d000108047067fecea0c058b086d12ff6b2d236875894832b",
-      "bytes": 1100
+      "sha256": "5567fb956bdf91f8b6f3f6a49e076ab79f5b67c97448402bd376447c245b1052",
+      "bytes": 1099,
+      "exported_sha256": "c7cc48464ed3961d000108047067fecea0c058b086d12ff6b2d236875894832b",
+      "exported_bytes": 1100
     },
     {
       "file": "ca02b.svg",
@@ -163,8 +197,10 @@
       "context": "B4.context.txt",
       "width": 15,
       "height": 15,
-      "sha256": "16b90b3505ed6dfacda63131f124711168ffceaf3f4899be1a9af81969ffe4d6",
-      "bytes": 1100
+      "sha256": "5e6e74dca8e85d62069808733724077dd0bcfb993d4736501168de097e639ce1",
+      "bytes": 1099,
+      "exported_sha256": "16b90b3505ed6dfacda63131f124711168ffceaf3f4899be1a9af81969ffe4d6",
+      "exported_bytes": 1100
     },
     {
       "file": "d8f27.svg",
@@ -172,8 +208,10 @@
       "context": "B2.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "bd95e6d3d4473d2527e3c510ea7ee4eca9725b834c6f5e6a1fa8d957e5f32af1",
-      "bytes": 376
+      "sha256": "5fe30bb9f5b8c47e64761f2fa843c7f0244ff03781ca3e55b2af5f0beb666193",
+      "bytes": 375,
+      "exported_sha256": "bd95e6d3d4473d2527e3c510ea7ee4eca9725b834c6f5e6a1fa8d957e5f32af1",
+      "exported_bytes": 376
     },
     {
       "file": "cda5f.svg",
@@ -181,8 +219,10 @@
       "context": "B2.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "408d458ce49725329e6e33d6ce8c35abc4918b054402c0acc12f4da77673fb56",
-      "bytes": 569
+      "sha256": "ed4db6463c89e539e7089bf49fa27d749af4eb1e2a1003d7a40ffac6a76e53dc",
+      "bytes": 568,
+      "exported_sha256": "408d458ce49725329e6e33d6ce8c35abc4918b054402c0acc12f4da77673fb56",
+      "exported_bytes": 569
     },
     {
       "file": "6611a.svg",
@@ -190,8 +230,10 @@
       "context": "B2.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "7f4d3b47c1500a1a592a184f9a33a1d80c43600592a7795ed11d35073f1bd297",
-      "bytes": 771
+      "sha256": "520b7b3b1cfa65acdcdd3cee709b30e2f9fada1235cd355933e7a443c1260a05",
+      "bytes": 770,
+      "exported_sha256": "7f4d3b47c1500a1a592a184f9a33a1d80c43600592a7795ed11d35073f1bd297",
+      "exported_bytes": 771
     },
     {
       "file": "51602.svg",
@@ -199,8 +241,10 @@
       "context": "B2.context.txt",
       "width": 15,
       "height": 15,
-      "sha256": "95ea8e1ec3e0f4f41c900ec1fa0a4ac1c894408f79ecf1240b1a87451cd87dc3",
-      "bytes": 670
+      "sha256": "a62ea29e265374f1823a0f14ad2fc57fdc6079296bd42bb290f2ca428f0b145d",
+      "bytes": 669,
+      "exported_sha256": "95ea8e1ec3e0f4f41c900ec1fa0a4ac1c894408f79ecf1240b1a87451cd87dc3",
+      "exported_bytes": 670
     },
     {
       "file": "afcd5.svg",
@@ -208,8 +252,10 @@
       "context": "B2.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "ab8705c11a0aaf04344aba611db3435402b069073747e3f08bd4968dd8e094e0",
-      "bytes": 709
+      "sha256": "5456a7dbe5fe59081bd57d7f6a93430ca9f760eebeb252f3b98e12dabba8410d",
+      "bytes": 708,
+      "exported_sha256": "ab8705c11a0aaf04344aba611db3435402b069073747e3f08bd4968dd8e094e0",
+      "exported_bytes": 709
     },
     {
       "file": "0a1db.svg",
@@ -217,8 +263,10 @@
       "context": "B2.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "582d2cd5ae0cde15323c1b57b5e7addfe5e89abd43da0cd6dbcfb706e580592a",
-      "bytes": 729
+      "sha256": "62ff96008e8af10efc7a61b09ce6f2f2b6d4539ff2276dcb4b9fcc11c621770f",
+      "bytes": 728,
+      "exported_sha256": "582d2cd5ae0cde15323c1b57b5e7addfe5e89abd43da0cd6dbcfb706e580592a",
+      "exported_bytes": 729
     },
     {
       "file": "1f65b.svg",
@@ -226,8 +274,10 @@
       "context": "B1.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "29758a0386e39c472fa313675911091da4f8be1ee9e9058e1851ff54dd7f3731",
-      "bytes": 218
+      "sha256": "e8ea43e0893578760fd69a1cd177e06758d7b8674e8a1aa6d60ff60cfe01d84e",
+      "bytes": 217,
+      "exported_sha256": "29758a0386e39c472fa313675911091da4f8be1ee9e9058e1851ff54dd7f3731",
+      "exported_bytes": 218
     },
     {
       "file": "2f929.svg",
@@ -235,8 +285,10 @@
       "context": "B3.context.txt",
       "width": 11,
       "height": 11,
-      "sha256": "c4ddff40ae45a512f550f898dea73fd9895b4fb6f09e99656877a28c3c3adbd6",
-      "bytes": 242
+      "sha256": "1b235e9db27bf1ef1499f7b1f11d2ffdd3b9cd101480e57538c08da46bdd497c",
+      "bytes": 241,
+      "exported_sha256": "c4ddff40ae45a512f550f898dea73fd9895b4fb6f09e99656877a28c3c3adbd6",
+      "exported_bytes": 242
     },
     {
       "file": "7d31f.svg",
@@ -244,8 +296,10 @@
       "context": "B3.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "cc7f334b481c77917755cc7d73456a0204da94cec4c2e83abb3166238f1a68cb",
-      "bytes": 339
+      "sha256": "a70b5cae2fd0029fd696aa16bba9ef4df4ce73804b03c36fe2191d01ae4427ff",
+      "bytes": 338,
+      "exported_sha256": "cc7f334b481c77917755cc7d73456a0204da94cec4c2e83abb3166238f1a68cb",
+      "exported_bytes": 339
     },
     {
       "file": "9d8d5.svg",
@@ -253,8 +307,10 @@
       "context": "A2.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "0573225e6ee859609d98e491ccf4232d3c980931c85c06726f84d813f75584c0",
-      "bytes": 240
+      "sha256": "619c314b9ba90083de585a8024656094de48a705811325105feac46e2ca3535c",
+      "bytes": 239,
+      "exported_sha256": "0573225e6ee859609d98e491ccf4232d3c980931c85c06726f84d813f75584c0",
+      "exported_bytes": 240
     },
     {
       "file": "922a3.svg",
@@ -262,8 +318,10 @@
       "context": "A2.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "2a7bd38e3a305c5d25b129bd098259b841c4390bcad0b03f66dcbe2b56421d6d",
-      "bytes": 923
+      "sha256": "6f222705541d6badedda98e933f65f14c31eadb77a857ddfe40c0a191d174aba",
+      "bytes": 922,
+      "exported_sha256": "2a7bd38e3a305c5d25b129bd098259b841c4390bcad0b03f66dcbe2b56421d6d",
+      "exported_bytes": 923
     },
     {
       "file": "49c9b.svg",
@@ -271,8 +329,10 @@
       "context": "A4.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "49780fafd0bffdef4dc101495979a50f16ca3ead835ff07c001c57b91abd020c",
-      "bytes": 636
+      "sha256": "f2a006bec5580b31dac5d4aac4d24a834934dd04baf0dd99ca7e13e6974e6abb",
+      "bytes": 635,
+      "exported_sha256": "49780fafd0bffdef4dc101495979a50f16ca3ead835ff07c001c57b91abd020c",
+      "exported_bytes": 636
     },
     {
       "file": "31608.svg",
@@ -280,8 +340,10 @@
       "context": "A4.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "65234383ae16a364ccc6aa5700fc58faff4b94c4f482dfbd64f374e15d90be3d",
-      "bytes": 928
+      "sha256": "4ba24d29ee5052b8a8bc647858e2b4c46a1c0b150e3438aa06c372d3ea41e3cc",
+      "bytes": 927,
+      "exported_sha256": "65234383ae16a364ccc6aa5700fc58faff4b94c4f482dfbd64f374e15d90be3d",
+      "exported_bytes": 928
     },
     {
       "file": "f49d4.svg",
@@ -289,8 +351,10 @@
       "context": "A0.context.txt",
       "width": 12,
       "height": 12,
-      "sha256": "5087cedd772607c4654565ef1978afac1765193f71751678bf0fbb93d99a5e9e",
-      "bytes": 1053
+      "sha256": "59dbc460e66ccde8ea37012df16d33cd6844d066bb01ed1ef56798703d63b27f",
+      "bytes": 1052,
+      "exported_sha256": "5087cedd772607c4654565ef1978afac1765193f71751678bf0fbb93d99a5e9e",
+      "exported_bytes": 1053
     },
     {
       "file": "8fa06.svg",
@@ -298,8 +362,10 @@
       "context": "A0.context.txt",
       "width": 12,
       "height": 12,
-      "sha256": "6f2663091cc7029aec2cb8b8b2e671d52961ec3b34c5419c84726c0aceb046ad",
-      "bytes": 596
+      "sha256": "c311ea5f0d8cb825c56c4f5c5cfac69eb6caec22cca7f3fd913d77c557ed4bb5",
+      "bytes": 595,
+      "exported_sha256": "6f2663091cc7029aec2cb8b8b2e671d52961ec3b34c5419c84726c0aceb046ad",
+      "exported_bytes": 596
     },
     {
       "file": "b8999.svg",
@@ -307,8 +373,10 @@
       "context": "A0.context.txt",
       "width": 12,
       "height": 12,
-      "sha256": "b7fd42d27903f423111de51ab4939bc4838938eae2500140f9800d40928a2178",
-      "bytes": 247
+      "sha256": "a891c08b2d19fb2e947202088a9098f702e45680826bf8fdfd22176c5c715f5e",
+      "bytes": 246,
+      "exported_sha256": "b7fd42d27903f423111de51ab4939bc4838938eae2500140f9800d40928a2178",
+      "exported_bytes": 247
     },
     {
       "file": "d87d1.svg",
@@ -316,8 +384,10 @@
       "context": "A0.context.txt",
       "width": 12,
       "height": 12,
-      "sha256": "26e9b2f390696764183118c12e645755e5fcf91fcb3ba35a7ef8e896c877cc5c",
-      "bytes": 596
+      "sha256": "ed560fdf625a423ed638c8496320e0b9eadbaea35ddda837c3aec4ed19117f83",
+      "bytes": 595,
+      "exported_sha256": "26e9b2f390696764183118c12e645755e5fcf91fcb3ba35a7ef8e896c877cc5c",
+      "exported_bytes": 596
     },
     {
       "file": "5f62e.svg",
@@ -325,8 +395,10 @@
       "context": "A0.context.txt",
       "width": 12,
       "height": 12,
-      "sha256": "bc23de118d04d41572f7787d40fa2bd3b43df2625939a12647f87d1b3a207ddf",
-      "bytes": 1113
+      "sha256": "19a4beb251f955258e707a5ec287fb16a24ecb9dee12f2b4d4b21fcab50c7662",
+      "bytes": 1112,
+      "exported_sha256": "bc23de118d04d41572f7787d40fa2bd3b43df2625939a12647f87d1b3a207ddf",
+      "exported_bytes": 1113
     },
     {
       "file": "1e4cf.svg",
@@ -334,8 +406,10 @@
       "context": "B5.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "e114dc56aa174fd5180f959faff4ef9a630a3415393e26b665575d10ca5cd137",
-      "bytes": 929
+      "sha256": "0b6a6d93fee1affbbcdc7644d0b40196a4186177a9aae82110602e9f0f045566",
+      "bytes": 928,
+      "exported_sha256": "e114dc56aa174fd5180f959faff4ef9a630a3415393e26b665575d10ca5cd137",
+      "exported_bytes": 929
     },
     {
       "file": "b944b.svg",
@@ -343,8 +417,10 @@
       "context": "B5.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "0755f8d7098b50bfe7718688d527b49e7961cce4bae7ff161f316c580ed31aaa",
-      "bytes": 1095
+      "sha256": "5ff567159a58852b6e1596cf71b7a4024941b7d632f3dfca049b655fc6fdfc05",
+      "bytes": 1094,
+      "exported_sha256": "0755f8d7098b50bfe7718688d527b49e7961cce4bae7ff161f316c580ed31aaa",
+      "exported_bytes": 1095
     },
     {
       "file": "4723e.svg",
@@ -352,8 +428,10 @@
       "context": "B5.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "f58ab2338888fdc214a2349cc7c8932581156d9dd22953ecea12fbb617f8b44c",
-      "bytes": 584
+      "sha256": "a7472d322e10468f97b767a6f59dfc85310a1f034bc69fafb36d6a02a3209128",
+      "bytes": 583,
+      "exported_sha256": "f58ab2338888fdc214a2349cc7c8932581156d9dd22953ecea12fbb617f8b44c",
+      "exported_bytes": 584
     },
     {
       "file": "ce467.svg",
@@ -361,8 +439,10 @@
       "context": "A3.context.txt",
       "width": 14,
       "height": 14,
-      "sha256": "3c7655722e8a7e9d9feb5d5a931d4f22611a0b3c48a70cdf01b7e445adeafe48",
-      "bytes": 898
+      "sha256": "82d414ecafd0216287c414a3bf4b1ca939e11c9c112e99f15c39ef2dc7242821",
+      "bytes": 897,
+      "exported_sha256": "3c7655722e8a7e9d9feb5d5a931d4f22611a0b3c48a70cdf01b7e445adeafe48",
+      "exported_bytes": 898
     },
     {
       "file": "ae415.svg",
@@ -370,8 +450,10 @@
       "context": "A3.context.txt",
       "width": 12,
       "height": 12,
-      "sha256": "e35e9d470958e54f980dfb824aaa86eee21041a75242e0fbd2980c4b0806b88a",
-      "bytes": 587
+      "sha256": "e4c3c2b0d4aa6853b2d35fd82e9a783ed7c876880fe163742776b3c79c6e927f",
+      "bytes": 586,
+      "exported_sha256": "e35e9d470958e54f980dfb824aaa86eee21041a75242e0fbd2980c4b0806b88a",
+      "exported_bytes": 587
     },
     {
       "file": "4d983.svg",
@@ -379,8 +461,10 @@
       "context": "A3.context.txt",
       "width": 12,
       "height": 12,
-      "sha256": "f1562680923c1ce24443364344d42a487ed84b604a558205a18d9b038c35f0f1",
-      "bytes": 578
+      "sha256": "2ed8f1eb000bcfed5993a6aade19dd5acebcf5cc74adba147465ea418a1d06bd",
+      "bytes": 577,
+      "exported_sha256": "f1562680923c1ce24443364344d42a487ed84b604a558205a18d9b038c35f0f1",
+      "exported_bytes": 578
     },
     {
       "file": "66cc7.svg",
@@ -388,8 +472,10 @@
       "context": "A3.context.txt",
       "width": 12,
       "height": 12,
-      "sha256": "978ae701ee77c636b14881cad9fd469c0e1955a92c70daf0aef1344a56356f2d",
-      "bytes": 891
+      "sha256": "d087c5926dbae15aa3b6bd859c381e68721f996d5eab6d507b5cd97aee41e954",
+      "bytes": 890,
+      "exported_sha256": "978ae701ee77c636b14881cad9fd469c0e1955a92c70daf0aef1344a56356f2d",
+      "exported_bytes": 891
     },
     {
       "file": "8f8a1.svg",
@@ -397,9 +483,12 @@
       "context": "A1.context.txt",
       "width": 16,
       "height": 16,
-      "sha256": "72978a291b19426f6038b1e9b57a1287950347ad2c10ad71c621d15ac32143df",
-      "bytes": 569
+      "sha256": "97774eee1aa6e73b6d38276d300bbc9b4f92d0ad07d0752fa11195c295e8d354",
+      "bytes": 568,
+      "exported_sha256": "72978a291b19426f6038b1e9b57a1287950347ad2c10ad71c621d15ac32143df",
+      "exported_bytes": 569
     }
   ],
-  "note": "Asset URL requests returned SiteUnavailable HTML, not SVG; exported original nodes with read-only Figma exportAsync. Existing 33 retained SVG files are separately tracked by Git."
+  "note": "Asset URL requests returned SiteUnavailable HTML, not SVG; exported original nodes with read-only Figma exportAsync. Existing 33 retained SVG files are separately tracked by Git.",
+  "repository_normalization": "Only redundant trailing LF removed; SVG nodes, paths, dimensions, colors and internal bytes preserved. Export and deployed digests retained separately."
 }

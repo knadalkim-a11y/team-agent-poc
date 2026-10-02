@@ -1,0 +1,12 @@
+{
+  "same_profile": true,
+  "native_logout_signin_ui": true,
+  "actual_native_acl": true,
+  "delayed_authenticated_a_read_and_proposal": true,
+  "b_unsaved_draft_preserved": true,
+  "old_tab_a_private_state_cleared": true,
+  "b_model_context_excludes_a": true,
+  "native_settings_and_chat_ownership_separate": true,
+  "automatic_persistence": false,
+  "synthetic_boundary": "Only model transport/chat storage are synthetic; Native auth, users, membership, ACL and workspace storage are real."
+}
