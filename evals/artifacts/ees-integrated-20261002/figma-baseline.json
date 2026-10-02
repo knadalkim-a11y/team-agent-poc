@@ -1,0 +1,276 @@
+{
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "page": "832:131",
+  "frames": [
+    {
+      "name": "guide",
+      "node": "832:132"
+    },
+    {
+      "name": "A0",
+      "node": "919:7788",
+      "context_sha256": "c304b3b20520f4f9e6b7f7daaf7e9576c13c03b42ec21f0ef2257bc25ef35f64",
+      "saved_at": "2026-10-02T00:06:24.368300+00:00"
+    },
+    {
+      "name": "A1",
+      "node": "832:8219",
+      "context_sha256": "39711badbf46cedc4b0dda9702f5e9ee2758a26944536ccf91488f76bca3155b",
+      "saved_at": "2026-10-02T00:11:21.692450+00:00"
+    },
+    {
+      "name": "A2",
+      "node": "832:8953",
+      "context_sha256": "ee0149b71cb9c69fe62ba95b8fd2726c37a278160f56a64aca39082b66be4665",
+      "saved_at": "2026-10-02T00:11:22.184444+00:00"
+    },
+    {
+      "name": "A3",
+      "node": "875:8674",
+      "context_sha256": "80880769d969e455604ab693e7ff4e58bf1903e39bd4871d8d0905b5f2993510",
+      "saved_at": "2026-10-02T00:11:22.648438+00:00"
+    },
+    {
+      "name": "A4",
+      "node": "881:659",
+      "context_sha256": "12affe69ebecbdc239e43a277de20182cf50b4b2db8c5ada35eeb7ba7fad1e7d",
+      "saved_at": "2026-10-02T00:11:23.140431+00:00"
+    },
+    {
+      "name": "A4-1",
+      "node": "885:764",
+      "context_sha256": "66110d31887d00d945d0e1fb185c653ce0a453c06c235a91fcd8536c6bbbbf41",
+      "saved_at": "2026-10-02T00:11:23.640425+00:00"
+    },
+    {
+      "name": "A4-2",
+      "node": "888:758",
+      "context_sha256": "267cc983f60bb466ff07a0a159f9487f39428b69746fc5f435d9b1db6844a968",
+      "saved_at": "2026-10-02T00:11:24.132418+00:00"
+    },
+    {
+      "name": "B1",
+      "node": "835:323",
+      "context_sha256": "557d24057b4f8dc92e8ae15ad4ec89effb0b0df71c7b4da2bb75912828a2abaa",
+      "saved_at": "2026-10-02T00:12:07.231861+00:00"
+    },
+    {
+      "name": "B2",
+      "node": "836:372",
+      "context_sha256": "90bc9784543117c32afbca6389340b58a44612a1868bab2dd0b2b65c82af8581",
+      "saved_at": "2026-10-02T00:12:07.811853+00:00"
+    },
+    {
+      "name": "B3",
+      "node": "832:8468",
+      "context_sha256": "3bb7e0c52902dc0e8b903149593731c253add8d96b8cdcf64608375e2a1bad2d",
+      "saved_at": "2026-10-02T00:12:08.267847+00:00"
+    },
+    {
+      "name": "B4",
+      "node": "863:464",
+      "context_sha256": "a0c7ff199b76538d7bbb57b6ccdbe92a76727c6c7ffcc9165645c75a701f68ae",
+      "saved_at": "2026-10-02T00:12:08.743841+00:00"
+    },
+    {
+      "name": "B5",
+      "node": "920:728",
+      "context_sha256": "882a966c1d110b1a2eeb5687e72d651a623fead05d288e7fb1adc3cca6b7d59a",
+      "saved_at": "2026-10-02T00:12:09.199835+00:00"
+    },
+    {
+      "name": "R1",
+      "node": "859:8586"
+    },
+    {
+      "name": "R2",
+      "node": "864:8706"
+    },
+    {
+      "name": "R3",
+      "node": "875:536"
+    },
+    {
+      "name": "R4",
+      "node": "879:641"
+    },
+    {
+      "name": "R5",
+      "node": "888:8861"
+    },
+    {
+      "name": "R6",
+      "node": "922:785"
+    },
+    {
+      "name": "M0",
+      "node": "897:762"
+    }
+  ],
+  "additional_guide_node": "911:631",
+  "metadata_initial_sha256": "9350defb0b6190d43b6b2462963835839ea10101f58a2861954ebb54495cd843",
+  "metadata_review_sha256": "9350defb0b6190d43b6b2462963835839ea10101f58a2861954ebb54495cd843",
+  "metadata_review_saved_at": "2026-10-02T01:00:09.755325+00:00",
+  "metadata_changed": false,
+  "design_version": "not exposed by connected tool",
+  "permanently_frozen": false,
+  "render_review": [
+    {
+      "file": "figma-a0.png",
+      "node": "919:7788",
+      "sha256": "4d06c7c15b57e1a9bc3bf9e9ab83e6f5d0fee0870f86c6fbcfede2fc0f93ac3c",
+      "rendered_size": [
+        1400,
+        788
+      ],
+      "original_size": [
+        1920,
+        1080
+      ],
+      "saved_at": "2026-10-02T01:04:39.634540+00:00"
+    },
+    {
+      "file": "figma-b3.png",
+      "node": "832:8468",
+      "sha256": "eb5ac1b8b425ec3b430a7d98da023f5ddc712e0c0b4c75d89b1c485b1164df11",
+      "rendered_size": [
+        1400,
+        788
+      ],
+      "original_size": [
+        1920,
+        1080
+      ],
+      "saved_at": "2026-10-02T01:04:39.635435+00:00"
+    }
+  ],
+  "final_metadata_review": {
+    "queried_at": "2026-10-02T01:35:24.498234+00:00",
+    "xml_sha256": "c62a4a99481d661bb5922f03a43bf45b951292ca7267b8b2ea3209279e2a9cc4",
+    "xml_changed": false,
+    "comparison": "XML canvas content only, excluding generic tool guidance; all initial nodes/text/positions match"
+  },
+  "latest_27_frame_baseline": {
+    "page": "832:131",
+    "frames": 27,
+    "standalone_icons": 3,
+    "nodes": 3923,
+    "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+    "latest_related_recheck": "2026-10-02T06:32:42.573Z",
+    "additional_nodes": {
+      "B2-1": "938:784",
+      "A5": "940:795",
+      "A6": "942:891",
+      "A7": "943:968",
+      "S1": "944:1036",
+      "S2": "946:1065",
+      "C1": "948:1078"
+    },
+    "design_version_id": "not provided by tool",
+    "source_recovery": "Exact saved tool responses recovered after local workspace loss; original Figma not changed.",
+    "files": [
+      {
+        "path": "figma-27-frame-review/938-784-context.json",
+        "bytes": 23204,
+        "sha256": "360374cc56ee4b813aa05302e73457156efa6cd85bba934ecb511b8d3220b1bb"
+      },
+      {
+        "path": "figma-27-frame-review/938-784.png",
+        "bytes": 67996,
+        "sha256": "dd51edb8e0569c086643698f0566edb025d466cb14a6cca81a42974e435ec462"
+      },
+      {
+        "path": "figma-27-frame-review/940-795-context.json",
+        "bytes": 68012,
+        "sha256": "9bbdeaca78a51f4f2bc4f40cbca11f3c9f23e49b6e7d083e105e0740f7bab022"
+      },
+      {
+        "path": "figma-27-frame-review/940-795.png",
+        "bytes": 68157,
+        "sha256": "0f1e6b12cb43b68bef64cdfa772bc6fb5922600291f06bd55bd3c8c89b1dd87f"
+      },
+      {
+        "path": "figma-27-frame-review/942-891-context.json",
+        "bytes": 65028,
+        "sha256": "c9efa9ef3ec3af0a24cf4d90fbcdfbfafc7d3de588d84e0db1a4b8fb0803eb7b"
+      },
+      {
+        "path": "figma-27-frame-review/942-891.png",
+        "bytes": 67834,
+        "sha256": "4ca04ba2b2bba6b1df7fd4a7c2ea396b0fcc8b1e6f5e942c0df430e3e8048fef"
+      },
+      {
+        "path": "figma-27-frame-review/943-968-context.json",
+        "bytes": 57794,
+        "sha256": "b75063e49a2d2f5e7782298e6c25535bf9b74d2b470104d21e0ac2fefcf247fb"
+      },
+      {
+        "path": "figma-27-frame-review/943-968.png",
+        "bytes": 72884,
+        "sha256": "4345c0d2c534ee264f4c702280d0bbcd19244ec87d3af55745855f627b942ef3"
+      },
+      {
+        "path": "figma-27-frame-review/944-1036-context.json",
+        "bytes": 43068,
+        "sha256": "d3f93b7fc9ba1ab7b4f1065974fd2ef6198cc83685d796efe08aa78a0d3bfc17"
+      },
+      {
+        "path": "figma-27-frame-review/944-1036.png",
+        "bytes": 64479,
+        "sha256": "65ea53fd407150deb364cf82620a1fdc48b6142626fb9c4ed70494e72b5e62c5"
+      },
+      {
+        "path": "figma-27-frame-review/946-1065-context.json",
+        "bytes": 33576,
+        "sha256": "d2a356d3a79e7366541ca2ef9bed7af27c4f8a900a93277a7080d753b071907e"
+      },
+      {
+        "path": "figma-27-frame-review/946-1065.png",
+        "bytes": 108600,
+        "sha256": "7f0b07eb4bf8541bb6475a7eb21b84f1ec793aef5a660df0d69b26a994f980da"
+      },
+      {
+        "path": "figma-27-frame-review/948-1078-context.json",
+        "bytes": 50026,
+        "sha256": "7bd053b3e7733b30291ba5bc52dd3aef61454c5bbf706821aef860b605255bf1"
+      },
+      {
+        "path": "figma-27-frame-review/948-1078.png",
+        "bytes": 69682,
+        "sha256": "6d715c6d32942ee9c69de4c21181d9d77a84dfa406d6c82cc35e4d4496cd0899"
+      },
+      {
+        "path": "figma-27-frame-review/final-related-recheck.json",
+        "bytes": 347,
+        "sha256": "944eb0215117d42befe8a4af537f3348c5b0b6d4e60777f5e96e9aa676438ae9"
+      },
+      {
+        "path": "figma-27-frame-review/page-832-131.xml",
+        "bytes": 420120,
+        "sha256": "3d23de443c48658dfaa841a4ef865f6f5ba50e27d67fb29b862599ee7d98ad2f"
+      },
+      {
+        "path": "figma-27-frame-review/recovery-final-recheck.json",
+        "bytes": 364,
+        "sha256": "b3452ac08f0026ef4c84d2ed6149fbc68ecd7816e4e600e56029f5a0bea994bc"
+      }
+    ]
+  },
+  "recovery_final_related_recheck": {
+    "queried_at": "2026-10-02T07:25:04.866Z",
+    "comparisons": [
+      {
+        "id": "942:891",
+        "isError": false,
+        "text_equal_except_generated_asset_urls": true,
+        "render_bytes_equal": true
+      },
+      {
+        "id": "943:968",
+        "isError": false,
+        "text_equal_except_generated_asset_urls": true,
+        "render_bytes_equal": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+test_result_commit_failure_rolls_back_and_recovers_unknown (test_ees_workflow_execution.ExecutionTests.test_result_commit_failure_rolls_back_and_recovers_unknown) ... ok
+test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown (test_ees_workflow_execution.ExecutionTests.test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown) ... ok
+test_slow_io_does_not_hold_database_write_transaction_and_two_workers (test_ees_workflow_execution.ExecutionTests.test_slow_io_does_not_hold_database_write_transaction_and_two_workers) ... ok
+test_timeout_late_result_original_attempt_no_resume (test_ees_workflow_execution.ExecutionTests.test_timeout_late_result_original_attempt_no_resume) ... ok
+test_cancel_inflight_is_unknown_and_late_result_never_changes_state (test_ees_workflow_execution.ExecutionTests.test_cancel_inflight_is_unknown_and_late_result_never_changes_state) ... ok
+test_unknown_rejects_every_mutation_and_preserves_unresolved_attempt (test_ees_workflow_execution.ExecutionTests.test_unknown_rejects_every_mutation_and_preserves_unresolved_attempt) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 2.041s
+
+OK

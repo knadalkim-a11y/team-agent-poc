@@ -1,0 +1,11 @@
+{
+  "valid": false,
+  "screenshots": 0,
+  "files": [
+    {
+      "path": "report.json",
+      "bytes": 1416,
+      "sha256": "2ec0a4f4615b87fb0877b1baa27674b4efa72c937ca7e09615e6178d1059cdbc"
+    }
+  ]
+}

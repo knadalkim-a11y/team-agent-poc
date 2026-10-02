@@ -1,0 +1,10 @@
+test_complete_product_navigation_rejects_old_document_and_wrong_loader (test_ees_chat_theme.ChromePipeBootstrapTests.test_complete_product_navigation_rejects_old_document_and_wrong_loader) ... ok
+test_complete_product_typing_never_selects_page_after_input_loses_focus (test_ees_chat_theme.ChromePipeBootstrapTests.test_complete_product_typing_never_selects_page_after_input_loses_focus) ... ok
+test_historical_request_route_keeps_main_guards_and_only_accepts_exact_retrieval_template (test_ees_chat_theme.ChromePipeBootstrapTests.test_historical_request_route_keeps_main_guards_and_only_accepts_exact_retrieval_template) ... ok
+test_work_panel_wait_requires_loaded_exact_reference_and_visible_control (test_ees_chat_theme.ChromePipeBootstrapTests.test_work_panel_wait_requires_loaded_exact_reference_and_visible_control) ... ok
+test_complete_product_and_native_chat_preserve_first_failure_before_page_capture (test_ees_chat_theme.ChromePipeBootstrapTests.test_complete_product_and_native_chat_preserve_first_failure_before_page_capture) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.096s
+
+OK

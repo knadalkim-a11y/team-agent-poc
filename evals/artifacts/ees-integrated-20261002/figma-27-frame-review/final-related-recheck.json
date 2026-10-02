@@ -1,0 +1,16 @@
+{
+  "verified_at": "2026-10-02T06:32:42.573Z",
+  "metadata_equal": true,
+  "nodes": [
+    {
+      "node_id": "942:891",
+      "text_equal_except_generated_asset_urls": true,
+      "render_bytes_equal": true
+    },
+    {
+      "node_id": "943:968",
+      "text_equal_except_generated_asset_urls": true,
+      "render_bytes_equal": true
+    }
+  ]
+}

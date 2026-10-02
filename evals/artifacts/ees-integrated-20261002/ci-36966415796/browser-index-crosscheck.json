@@ -1,0 +1,37 @@
+[
+  {
+    "artifact_id": 11210271138,
+    "index": "dist/integrated/ci-36966415796/11210271138/ees-results/browser-evidence.json",
+    "verified_files": 11,
+    "pngs": 9,
+    "valid": true
+  },
+  {
+    "artifact_id": 11209633251,
+    "index": "dist/integrated/ci-36966415796/11209633251/ees-results/browser-evidence.json",
+    "verified_files": 5,
+    "pngs": 5,
+    "valid": true
+  },
+  {
+    "artifact_id": 11210241157,
+    "index": "dist/integrated/ci-36966415796/11210241157/ees-results/browser-evidence.json",
+    "verified_files": 12,
+    "pngs": 9,
+    "valid": true
+  },
+  {
+    "artifact_id": 11210490755,
+    "index": "dist/integrated/ci-36966415796/11210490755/ees-native-product-results/browser-evidence.json",
+    "verified_files": 43,
+    "pngs": 20,
+    "valid": true
+  },
+  {
+    "artifact_id": 11210266096,
+    "index": "dist/integrated/ci-36966415796/11210266096/ees-results/browser-evidence.json",
+    "verified_files": 7,
+    "pngs": 7,
+    "valid": true
+  }
+]

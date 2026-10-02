@@ -13,6 +13,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from scripts import ees_trial_upgrade as trial
+import ees_apply_demo as retired_demo
 from scripts import ees_deploy_stop_recovery as recovery
 
 
@@ -29,7 +30,7 @@ class TrialUpgradeTests(unittest.TestCase):
         self.config = {"state_root": str(self.root), "source_python": "registered-python", "cwd": "registered-cwd"}
         self.environment = {"DATA_DIR": "existing-data", "WEBUI_SECRET_KEY": "synthetic-preserved-key"}
         self.active = {"source_commit": OLDER, "wheel_sha256": "1" * 64,
-                       "record_sha256": "2" * 64, "webui_version": "0.11.3+ees.9"}
+                       "record_sha256": "2" * 64, "webui_version": "0.11.3+ees.13"}
         self.selected = dict(self.active, source_commit=HEAD, wheel_sha256="3" * 64)
         self.registry = {"schema_version": 2, "phase": "idle", "pending": None,
                          "current": {"kind": "original", "source_commit": None, "python": "registered-python"},
@@ -95,12 +96,6 @@ class TrialUpgradeTests(unittest.TestCase):
             registry["process"] = {"pid": 456, "executable": "registered-python"}
             progress["stage"] = "health_check"
 
-        def demo_main(arguments):
-            self.assertFalse(self.lock_held)
-            self.assertEqual(arguments, ["--config", str(self.root / "config.json"), "--trial-commit", HEAD])
-            self.events.append("demo")
-            return 0
-
         overrides = {
             "checkout": patch.object(trial, "trial_checkout", return_value=HEAD),
             "git": patch.object(trial.upgrade, "git", return_value=(0, "http://saved-proxy:8080")),
@@ -121,7 +116,7 @@ class TrialUpgradeTests(unittest.TestCase):
             "start": patch.object(trial.manager, "start_selected", side_effect=start),
             "identity": patch.object(trial.manager.processes, "verify_identity", return_value=True),
             "health": patch.object(trial.manager.processes, "wait_healthy"),
-            "demo": patch.object(trial.demo, "main", side_effect=demo_main),
+            "demo": patch.object(retired_demo, "main", side_effect=AssertionError("retired registration must never run")),
             "cleanup": patch.object(trial.bundles, "cleanup", side_effect=lambda *a: self.events.append("cleanup")),
             "ci": patch.object(trial.upgrade.downloads, "require_successful_head"),
             "github": patch.object(trial.upgrade, "github_client"),
@@ -142,19 +137,22 @@ class TrialUpgradeTests(unittest.TestCase):
         for name in ("stop", "stopped", "backup", "apply", "start", "demo"):
             self.mock[name].assert_not_called()
 
-    def test_entire_preparation_and_program_transaction_share_lock_then_demo_once(self):
+    def test_entire_preparation_and_program_transaction_share_lock_without_registration(self):
         self.assertEqual(self.run_main(), 0)
         self.assertEqual(self.events, ["lock", "prepare", "inspect", "stop", "require_stopped", "backup",
                                       "record:data_backup_verified", "apply", "start",
-                                      "record:trial_upgraded_by_operator", "unlock", "demo", "cleanup"])
+                                      "record:trial_upgraded_by_operator", "unlock", "cleanup"])
         self.mock["ci"].assert_not_called()
         self.mock["github"].assert_not_called()
-        self.mock["demo"].assert_called_once()
+        self.mock["demo"].assert_not_called()
         self.mock["cleanup"].assert_called_once_with(self.config, self.bundle)
         saved = json.loads((self.root / "last-operation.json").read_bytes())
         self.assertEqual(saved["result"]["source_commit"], HEAD)
         self.assertTrue(saved["result"]["backup_verified"])
         self.assertEqual(saved["result"]["source_verification"], "local_trial")
+        self.assertEqual(saved["result"]["asset_registration"], "not_applicable")
+        self.assertEqual(saved["result"]["asset_registration_reason"], "demo_registration_retired")
+        self.assertIn("registration=not_applicable reason=demo_registration_retired", self.output.getvalue())
         self.assertNotIn("synthetic-preserved-key", self.output.getvalue() + json.dumps(saved))
 
     def test_preparation_and_full_inspection_failure_never_stop_or_call_demo(self):
@@ -245,6 +243,8 @@ class TrialUpgradeTests(unittest.TestCase):
         self.assertEqual(saved["action"], "upgrade")
         self.assertTrue(saved["failed"])
         self.assertEqual(saved["result"]["source_verification"], "local_trial")
+        self.assertNotIn("asset_registration", saved["result"])
+        self.assertNotIn("registration=not_applicable", self.output.getvalue())
         self.assertEqual(saved["result"]["process"]["reason"], "stop_timeout")
         self.assertFalse(saved["result"]["backup_verified"])
         request_path = self.root / ("stop-recovery-" + "c" * 32 + ".json")
@@ -291,15 +291,15 @@ class TrialUpgradeTests(unittest.TestCase):
         self.assertTrue(failure["changed"])
         self.assertEqual((failure["stage"], failure["next"]), ("health_check", "check_status"))
 
-    def test_same_source_checks_program_health_then_assets_without_download_or_restart(self):
+    def test_same_source_checks_program_health_without_registration_download_or_restart(self):
         self.registry["customization"]["active"] = dict(self.active, source_commit=HEAD)
         self.assertEqual(self.run_main(), 0)
         for name in ("prepare", "inspect", "stop", "backup", "apply", "start", "cleanup"):
             self.mock[name].assert_not_called()
         self.mock["validate"].assert_called_once()
         self.mock["health"].assert_called_once_with(self.registry["process"], timeout=5)
-        self.mock["demo"].assert_called_once()
-        self.assertEqual(self.events, ["lock", "unlock", "demo"])
+        self.mock["demo"].assert_not_called()
+        self.assertEqual(self.events, ["lock", "unlock"])
 
     def test_same_source_dead_process_is_reported_without_restart_or_assets(self):
         self.registry["customization"]["active"] = dict(self.active, source_commit=HEAD)
@@ -316,21 +316,22 @@ class TrialUpgradeTests(unittest.TestCase):
         self.assertEqual(result["source_commit"], HEAD)
         self.assertTrue(result["changed"])
 
-    def test_partial_asset_failure_keeps_its_report_and_does_not_retry_or_cleanup(self):
-        def failed_demo(args):
-            self.assertFalse(self.lock_held)
-            trial.demo.report(self.root / "config.json", {"stage": "apply_assets", "code": "synthetic_conflict",
-                                                           "source_commit": HEAD, "next": "inspect_local_result"}, True)
-            return 1
-        self.mock["demo"].side_effect = failed_demo
-        self.assertEqual(self.run_main(), 1)
-        self.mock["demo"].assert_called_once()
-        self.mock["cleanup"].assert_not_called()
+    def test_retired_registration_is_not_a_stage_and_prior_failure_remains_evidence(self):
+        prior = {"action": "apply_demo", "failed": True,
+                 "result": {"stage": "apply_assets", "code": "synthetic_old_conflict"}}
+        path = self.root / "last-failure.json"
+        path.write_text(json.dumps(prior), encoding="utf-8")
+        before = path.read_bytes()
+        self.assertEqual(self.run_main(), 0)
+        self.mock["demo"].assert_not_called()
+        self.mock["cleanup"].assert_called_once_with(self.config, self.bundle)
         self.mock["start"].assert_called_once()
         saved = json.loads((self.root / "last-operation.json").read_bytes())
-        self.assertEqual(saved["action"], "apply_demo")
-        self.assertEqual(saved["result"]["code"], "synthetic_conflict")
-        self.assertTrue(self.bundle.exists())
+        self.assertEqual(saved["action"], "upgrade")
+        self.assertFalse(saved["failed"])
+        self.assertEqual(saved["result"]["asset_registration"], "not_applicable")
+        self.assertEqual(saved["result"]["asset_registration_reason"], "demo_registration_retired")
+        self.assertEqual(path.read_bytes(), before)
 
     def test_cli_rejects_empty_short_uppercase_and_extra_ci_options_before_loading_config(self):
         for value in ("", "a" * 39, "A" * 40, HEAD + "\n"):

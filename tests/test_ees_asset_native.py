@@ -10,6 +10,7 @@ tables/routers, rather than replacing persistence with a mock dictionary.
 from __future__ import annotations
 
 import asyncio
+from contextlib import closing
 from copy import deepcopy
 import hashlib
 import importlib
@@ -70,6 +71,14 @@ class NativeAssetCases:
         return {name: data[name] for name in (
             "id", "name", "base_model_id", "meta", "params", "access_grants", "is_active",
         )}
+
+    async def test_missing_native_chat_installation_marker_is_rejected(self):
+        middleware = sys.modules["open_webui.utils.middleware"]
+        self.fixture.guard.verify_asset_guard_installation()
+        with patch.object(middleware, "EES_WORK_NATIVE_CHAT_CONTEXT", 0):
+            with self.assertRaisesRegex(self.fixture.guard.AssetGuardError, "incomplete_installation"):
+                self.fixture.guard.verify_asset_guard_installation()
+        self.fixture.guard.verify_asset_guard_installation()
 
     async def test_native_ui_description_race_rejects_old_payload(self):
         before = await self.snapshot()
@@ -365,58 +374,222 @@ class NativeAssetCases:
             self.fixture.users["admin"], {"id": "fixture_model"},
         )
 
-    async def test_real_apply_client_and_shipped_manifest_are_idempotent_on_native_api(self):
+    async def retirement_preview(self, kind, identifier, baseline="0" * 64):
+        response = await self.fixture.request("POST", "/api/v1/ees/assets/retirement/preview",
+            payload={"kind": kind, "id": identifier, "baseline_sha256": baseline})
+        self.assertEqual(response.status_code, 200, response.text)
+        return response.json()
+
+    async def test_common_work_tool_explicit_registration_exact_source_and_grants(self):
+        status = await self.fixture.request("GET", "/api/v1/ees/assets/work-tool/status")
+        self.assertEqual(status.status_code, 200, status.text)
+        status = status.json()
+        self.assertEqual(status["state"], "missing")
+        self.assertIsNone(await self.fixture.tools.Tools.get_tool_by_id("ees_workflow"))
+        payload = {"source_sha256": status["source_sha256"], "expected_token": status["expected_token"],
+                   "confirmation": "register_readonly_work_tool", "access_grants": [
+                       {"principal_type": "user", "principal_id": "reader", "permission": "read"}]}
+        rejected = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup", payload={**payload, "source_sha256": "0" * 64})
+        self.assertEqual(rejected.status_code, 409)
+        rejected = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup", payload={**payload, "access_grants": [
+            {"principal_type": "user", "principal_id": "reader", "permission": "write"}]})
+        self.assertEqual(rejected.status_code, 422)
+        forbidden = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup", user="reader", payload=payload)
+        self.assertEqual(forbidden.status_code, 403)
+        self.assertIsNone(await self.fixture.tools.Tools.get_tool_by_id("ees_workflow"))
+        created = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup", payload=payload)
+        self.assertEqual(created.status_code, 200, created.text)
+        self.assertTrue(created.json()["changed"])
+        tool = await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")
+        self.assertEqual(tool.content.encode(), self.fixture.members["open_webui/ees_workflow_tool.py"])
+        self.assertEqual({entry["name"] for entry in tool.specs},
+                         {"ees_workflow_view", "ees_workflow_propose", "ees_workflow_display"})
+        seen = await self.fixture.request("GET", "/api/v1/tools/id/ees_workflow", user="reader")
+        self.assertEqual(seen.status_code, 200, seen.text)
+        denied = await self.fixture.request("GET", "/api/v1/tools/id/ees_workflow", user="owner")
+        self.assertEqual(denied.status_code, 401, denied.text)
+        before = tool.model_dump()
+        current = (await self.fixture.request("GET", "/api/v1/ees/assets/work-tool/status")).json()
+        replay = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup", payload={
+            **payload, "expected_token": current["expected_token"], "access_grants": []})
+        self.assertEqual(replay.status_code, 200, replay.text)
+        self.assertFalse(replay.json()["changed"])
+        self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump(), before)
+        self.assertIsNotNone(await self.fixture.tools.Tools.get_tool_by_id("fixture_tool"))
+
+    async def test_common_work_tool_program_change_after_confirmation_does_not_register(self):
+        status = (await self.fixture.request("GET", "/api/v1/ees/assets/work-tool/status")).json()
+        original = self.fixture.guard.work_tool_source()
+        changed = original[0] + "\n# synthetic concurrent program source change\n"
+        with patch.object(self.fixture.guard, "work_tool_source", side_effect=[
+                original, (changed, hashlib.sha256(changed.encode()).hexdigest())]):
+            result = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup", payload={
+                "source_sha256": status["source_sha256"], "expected_token": status["expected_token"],
+                "confirmation": "register_readonly_work_tool", "access_grants": []})
+        self.assertEqual(result.status_code, 409, result.text)
+        self.assertEqual(result.json()["detail"], "work_tool_program_changed")
+        self.assertIsNone(await self.fixture.tools.Tools.get_tool_by_id("ees_workflow"))
+
+    async def test_common_work_tool_existing_user_source_is_not_overwritten(self):
+        await self.fixture.create_tool("ees_workflow", owner="admin")
+        before = (await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump()
+        status = (await self.fixture.request("GET", "/api/v1/ees/assets/work-tool/status")).json()
+        self.assertEqual(status["state"], "blocked_existing")
+        result = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup", payload={
+            "source_sha256": status["source_sha256"], "expected_token": status["expected_token"],
+            "confirmation": "register_readonly_work_tool", "access_grants": []})
+        self.assertEqual(result.status_code, 409, result.text)
+        self.assertEqual(result.json()["detail"], "work_tool_existing_source_requires_review")
+        self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump(), before)
+
+    async def test_retirement_preview_delete_retry_restore_preserves_unrelated_native_assets(self):
+        # Create synthetic historical registration through the ordinary Native API,
+        # not the retired installer. No real user data is involved.
+        created = await self.fixture.request("POST", "/api/v1/models/create", payload={
+            "id": "ees_demo_ems", "name": "Synthetic former preset", "base_model_id": "upstream",
+            "params": {"system": "historical synthetic policy", "temperature": 0.2},
+            "meta": {"ees_demo_pack": "ees-demo-v1"}, "access_grants": []})
+        self.assertEqual(created.status_code, 200, created.text)
+        existing = (await self.fixture.models.Models.get_model_by_id("fixture_model")).model_dump()
+        before = await self.snapshot("model", "ees_demo_ems")
+        first = await self.retirement_preview("model", "ees_demo_ems")
+        self.assertFalse(first["eligible"])
+        self.assertIn("modified_or_unverified_asset", first["blocked_reasons"])
+        accepted = await self.retirement_preview("model", "ees_demo_ems", first["current_sha256"])
+        self.assertTrue(accepted["eligible"])
+        self.assertIsNotNone(await self.fixture.models.Models.get_model_by_id("ees_demo_ems"))
+        command = {"kind": "model", "id": "ees_demo_ems", "baseline_sha256": first["current_sha256"],
+                   "expected_token": accepted["expected_token"], "request_id": "synthetic-retire-001"}
+        for _ in range(2):
+            result = await self.fixture.request("POST", "/api/v1/ees/assets/retirement/apply", payload=command)
+            self.assertEqual(result.status_code, 200, result.text)
+            self.assertEqual(result.json()["status"], "retired")
+        self.assertIsNone(await self.fixture.models.Models.get_model_by_id("ees_demo_ems"))
+        receipt = result.json()
+        backup = self.fixture.directory / "ees-asset-retirement/synthetic-retire-001.json"
+        self.assertTrue(backup.is_file())
+        self.assertNotIn("historical synthetic policy", result.text)
+        changed = dict(command, baseline_sha256="a" * 64)
+        conflict = await self.fixture.request("POST", "/api/v1/ees/assets/retirement/apply", payload=changed)
+        self.assertEqual(conflict.status_code, 409)
+        restored = await self.fixture.request("POST", "/api/v1/ees/assets/retirement/restore", payload={
+            "request_id": command["request_id"], "backup_sha256": receipt["backup_sha256"]})
+        self.assertEqual(restored.status_code, 200, restored.text)
+        after = await self.snapshot("model", "ees_demo_ems")
+        self.assertEqual(self.fixture.guard._state("model", before["asset"]),
+                         self.fixture.guard._state("model", after["asset"]))
+        self.assertEqual((await self.fixture.models.Models.get_model_by_id("fixture_model")).model_dump(), existing)
+        # The old installer cannot resurrect or overwrite even after explicit restore.
+        rejected = await self.apply(after, self.model_payload(after, "resurrected"),
+                                    kind="model", identifier="ees_demo_ems")
+        self.assertEqual(rejected.status_code, 410)
+
+    async def test_retired_preset_remains_when_a_user_model_references_it(self):
+        created = await self.fixture.request("POST", "/api/v1/models/create", payload={
+            "id": "ees_demo_fdc", "name": "Historical synthetic preset", "base_model_id": "upstream",
+            "params": {}, "meta": {"ees_demo_pack": "ees-demo-v1"}, "access_grants": []})
+        self.assertEqual(created.status_code, 200, created.text)
+        baseline = await self.retirement_preview("model", "ees_demo_fdc")
+        bound = await self.fixture.request("POST", "/api/v1/models/create", payload={
+            "id": "private_user_model", "name": "Private synthetic user name", "base_model_id": "ees_demo_fdc",
+            "params": {"system": "Private synthetic user policy"}, "meta": {}, "access_grants": []})
+        self.assertEqual(bound.status_code, 200, bound.text)
+        before = (await self.fixture.models.Models.get_model_by_id("private_user_model")).model_dump()
+        preview = await self.retirement_preview("model", "ees_demo_fdc", baseline["current_sha256"])
+        self.assertFalse(preview["eligible"])
+        self.assertEqual(preview["model_reference_count"], 1)
+        self.assertIn("active_model_references", preview["blocked_reasons"])
+        self.assertNotIn("private_user_model", json.dumps(preview))
+        self.assertNotIn("Private synthetic", json.dumps(preview))
+        result = await self.fixture.request("POST", "/api/v1/ees/assets/retirement/apply", payload={
+            "kind": "model", "id": "ees_demo_fdc", "baseline_sha256": baseline["current_sha256"],
+            "expected_token": preview["expected_token"], "request_id": "synthetic-bound-001"})
+        self.assertEqual(result.status_code, 409, result.text)
+        self.assertIsNotNone(await self.fixture.models.Models.get_model_by_id("ees_demo_fdc"))
+        self.assertEqual((await self.fixture.models.Models.get_model_by_id("private_user_model")).model_dump(), before)
+        self.assertFalse((self.fixture.directory / "ees-asset-retirement/synthetic-bound-001.json").exists())
+
+    async def test_retired_tool_reference_blocks_delete_and_restore_retains_valves_and_personal_settings(self):
+        from ees_asset_native_fixture import TOOL_CONTENT
+        body = {"id": "ees_demo_data", "name": "Historical synthetic tool",
+                "content": '\"\"\"\nees_demo_pack: ees-demo-v1\n\"\"\"\n' + TOOL_CONTENT,
+                "meta": {"description": "historical"}, "access_grants": []}
+        created = await self.fixture.request("POST", "/api/v1/tools/create", payload=body)
+        self.assertEqual(created.status_code, 200, created.text)
+        valve = await self.fixture.request("POST", "/api/v1/tools/id/ees_demo_data/valves/update", payload={"label": "SYNTHETIC_LOCAL_SETTING"})
+        self.assertEqual(valve.status_code, 200, valve.text)
+        self.fixture.users["reader"].settings = {"tools": {"valves": {"ees_demo_data": {"personal": "SYNTHETIC_PERSONAL_VALUE"},
+                                                                    "jira_real": {"personal": "PRESERVE_REAL_CONNECTOR"}}}}
+        settings = deepcopy(self.fixture.users["reader"].settings)
+        model = await self.snapshot("model", "fixture_model")
+        bound = self.model_payload(model, "initial")
+        bound["meta"]["toolIds"] = ["ees_demo_data"]
+        self.assertEqual((await self.fixture.request("POST", "/api/v1/models/model/update", payload=bound)).status_code, 200)
+        first = await self.retirement_preview("tool", "ees_demo_data")
+        preview = await self.retirement_preview("tool", "ees_demo_data", first["current_sha256"])
+        self.assertIn("active_model_references", preview["blocked_reasons"])
+        self.assertEqual(preview["model_reference_count"], 1)
+        bound["meta"]["toolIds"] = []
+        self.assertEqual((await self.fixture.request("POST", "/api/v1/models/model/update", payload=bound)).status_code, 200)
+        preview = await self.retirement_preview("tool", "ees_demo_data", first["current_sha256"])
+        self.assertTrue(preview["eligible"], preview)
+        command = {"kind": "tool", "id": "ees_demo_data", "baseline_sha256": first["current_sha256"],
+                   "expected_token": preview["expected_token"], "request_id": "synthetic-tool-001"}
+        retired = await self.fixture.request("POST", "/api/v1/ees/assets/retirement/apply", payload=command)
+        self.assertEqual(retired.status_code, 200, retired.text)
+        restore = {"request_id": command["request_id"], "backup_sha256": retired.json()["backup_sha256"]}
+        for _ in range(2):
+            restored = await self.fixture.request("POST", "/api/v1/ees/assets/retirement/restore", payload=restore)
+            self.assertEqual(restored.status_code, 200, restored.text)
+        self.assertEqual(await self.fixture.tools.Tools.get_tool_valves_by_id("ees_demo_data"), {"label": "SYNTHETIC_LOCAL_SETTING"})
+        self.assertEqual(self.fixture.users["reader"].settings, settings)
+        tampered = self.fixture.directory / "ees-asset-retirement/synthetic-tool-001.json"
+        value = json.loads(tampered.read_text(encoding="utf-8"))
+        value["backup"]["asset"]["content"] += "# changed"
+        tampered.write_text(json.dumps(value), encoding="utf-8")
+        denied = await self.fixture.request("POST", "/api/v1/ees/assets/retirement/restore", payload=restore)
+        self.assertEqual(denied.status_code, 409)
+
+    async def test_retirement_rejects_current_edit_unknown_id_and_nonadmin(self):
+        await self.fixture.request("POST", "/api/v1/models/create", payload={
+            "id": "ees_demo_apc", "name": "Synthetic former preset", "base_model_id": "upstream",
+            "params": {"system": "baseline"}, "meta": {"ees_demo_pack": "ees-demo-v1"}, "access_grants": []})
+        baseline = await self.retirement_preview("model", "ees_demo_apc")
+        before = await self.snapshot("model", "ees_demo_apc")
+        changed = self.model_payload(before, "User modified content must survive")
+        edit = await self.fixture.request("POST", "/api/v1/models/model/update", payload=changed)
+        self.assertEqual(edit.status_code, 200)
+        result = await self.fixture.request("POST", "/api/v1/ees/assets/retirement/apply", payload={
+            "kind": "model", "id": "ees_demo_apc", "baseline_sha256": baseline["current_sha256"],
+            "expected_token": baseline["expected_token"], "request_id": "synthetic-conflict-001"})
+        self.assertEqual(result.status_code, 409)
+        self.assertEqual((await self.snapshot("model", "ees_demo_apc"))["asset"]["params"]["system"],
+                         "User modified content must survive")
+        unknown = await self.fixture.request("POST", "/api/v1/ees/assets/retirement/preview", payload={
+            "kind": "model", "id": "fixture_model", "baseline_sha256": "0" * 64})
+        self.assertEqual(unknown.status_code, 422)
+        denied = await self.fixture.request("POST", "/api/v1/ees/assets/retirement/preview", user="reader", payload={
+            "kind": "model", "id": "ees_demo_apc", "baseline_sha256": baseline["current_sha256"]})
+        self.assertEqual(denied.status_code, 403)
+
+    async def test_real_apply_client_and_shipped_manifest_never_recreate_retired_content(self):
         root = Path(__file__).resolve().parents[1]
         spec = importlib.util.spec_from_file_location("ees_native_client_contract", root / "scripts/ees_demo_assets.py")
         assets = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(assets)
-        loop = asyncio.get_running_loop()
-        fixture = self.fixture
-
-        class NativeClient:
-            def __init__(self):
-                self.writes = []
-
-            def request(self, method, path, body=None):
-                # Provider discovery has no bearing on native asset persistence.
-                if path == "/api/models":
-                    return {"data": [{"id": "upstream"}]}
-                response = asyncio.run_coroutine_threadsafe(
-                    fixture.request(method, path, payload=body), loop,
-                ).result(timeout=15)
-                if method == "GET" and response.status_code == 404:
-                    return None
-                if response.status_code >= 400:
-                    raise assets.DemoAssetsError(response.json().get("detail", "native_api_error"))
-                if path == assets.ASSET_API + "/apply":
-                    self.writes.append((body["kind"], body["id"]))
-                return response.json()
-
-        client = NativeClient()
-        manifest = assets.load_manifest(root)
-        state = fixture.directory / "deployment-journal"
-        before = await fixture.tools.Tools.get_tool_by_id("fixture_tool")
-        result = await asyncio.to_thread(
-            assets.apply_assets, client, root, state, "fixture_model", "a" * 40,
-        )
-        expected = len(manifest["tools"]) + sum(bool(item.get("managed_valves")) for item in manifest["tools"]) + len(manifest["models"]) + 1
-        self.assertEqual(result["result"], "ok")
-        self.assertEqual(result["changed"], expected)
-        self.assertEqual(len(client.writes), expected)
-        repeated = await asyncio.to_thread(
-            assets.apply_assets, client, root, state, "fixture_model", "a" * 40,
-        )
-        self.assertEqual(repeated["result"], "ok")
-        self.assertEqual(repeated["changed"], 0)
-        self.assertEqual(len(client.writes), expected)
-        journal = json.loads((state / assets.STATE_FILE).read_text(encoding="utf-8"))
-        self.assertTrue(all(row["status"] == "applied" for row in journal["assets"].values()))
-        for item in manifest["tools"]:
-            if item.get("managed_valves"):
-                valves = await fixture.tools.Tools.get_tool_valves_by_id(item["id"])
-                self.assertEqual(valves["ees_model_id"], "fixture_model")
-        after = await fixture.tools.Tools.get_tool_by_id("fixture_tool")
-        self.assertEqual(before.model_dump(), after.model_dump())
+        before_tool = await self.fixture.tools.Tools.get_tool_by_id("fixture_tool")
+        before_model = await self.fixture.models.Models.get_model_by_id("fixture_model")
+        class NoTransport:
+            def request(self, *args, **kwargs):
+                raise AssertionError("Retired registration must not contact the server")
+        for _ in range(2):
+            with self.assertRaisesRegex(assets.DemoAssetsError, "demo_registration_retired"):
+                await asyncio.to_thread(assets.apply_assets, NoTransport(), root,
+                    self.fixture.directory / "deployment-journal", "fixture_model", "a" * 40)
+        self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("fixture_tool")).model_dump(), before_tool.model_dump())
+        self.assertEqual((await self.fixture.models.Models.get_model_by_id("fixture_model")).model_dump(), before_model.model_dump())
+        for model_id in ("ees_demo_ems", "ees_demo_apc", "ees_demo_fdc"):
+            self.assertIsNone(await self.fixture.models.Models.get_model_by_id(model_id))
 
 
 @unittest.skipUnless(WHEEL or REQUIRED, "real pinned-wheel native integration environment not requested")
@@ -488,9 +661,13 @@ class NativeAuthoringAssetReadTests(unittest.IsolatedAsyncioTestCase):
         async def groups(key):
             return [{"id": "synthetic-ems-group", "name": "EMS 담당"}] if key == "reader" else []
 
-        self.service = self.backend.WorkflowService(fixture.directory / "ees-work.sqlite3", current_user,
+        from workflow_fixture import historical_facade
+        history = historical_facade("open_webui")
+        self.service = history.WorkflowService(fixture.directory / "ees-work.sqlite3", current_user,
             lambda _: None, self.backend._registered_assets, group_lookup=groups,
             group_list_lookup=lambda: [{"id": "synthetic-ems-group", "name": "EMS 담당"}])
+        from workflow_fixture import arrange_legacy_catalog
+        arrange_legacy_catalog(self.service)
         self.backend._service = self.service
         self.backend.install(fixture.app, fixture.auth.get_verified_user)
         self.request_id = 0
@@ -507,9 +684,9 @@ class NativeAuthoringAssetReadTests(unittest.IsolatedAsyncioTestCase):
             body.update(system_id=process["owner_system"], process_id=process["process_id"],
                         expected_draft_revision=process["draft_revision"], expected_owner_revision=process["owner_revision"])
         body.update(extra)
-        response = await self.fixture.request("POST", "/api/ees-work/authoring/action", user=user, payload=body)
-        self.assertEqual(response.headers["cache-control"], "no-store")
-        return response.json()
+        # Arrange/mutate an explicit historical definition through the retained
+        # internal service; the retired public mutation endpoint stays closed.
+        return await self.service.authoring_action(self.fixture.users[user], body)
 
     async def create_with_public_references(self):
         created = await self.action("create", system_id="EMS", payload={"name": "등록 자산 읽기 경계 점검", "category": "ops"})
@@ -532,7 +709,7 @@ class NativeAuthoringAssetReadTests(unittest.IsolatedAsyncioTestCase):
 
     def native_digest(self):
         """Hash all logical Native rows, including source, valves, ACL and owners."""
-        with sqlite3.connect(self.fixture.directory / "webui.db") as db:
+        with closing(sqlite3.connect(self.fixture.directory / "webui.db")) as db, db:
             names = [row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
             rows = {name: sorted(db.execute('SELECT * FROM "' + name.replace('"', '""') + '"').fetchall(), key=repr)
                     for name in names if not name.startswith("sqlite_")}
@@ -543,6 +720,9 @@ class NativeAuthoringAssetReadTests(unittest.IsolatedAsyncioTestCase):
     async def test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets(self):
         fixture = self.fixture
         before = self.native_digest()
+        blocked = await fixture.request("POST", "/api/ees-work/authoring/action", user="reader", payload={"action": "create"})
+        self.assertEqual(blocked.status_code, 409)
+        self.assertEqual(blocked.json()["error"]["code"], "legacy_execution_retired")
         reader = fixture.users["reader"]
         self.assertEqual(reader.role, "user")
         permissions = await sys.modules["open_webui.models.config"].Config.get("user.permissions")

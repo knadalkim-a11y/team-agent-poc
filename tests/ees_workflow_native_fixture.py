@@ -11,7 +11,7 @@ from pathlib import Path
 import sys
 import time
 import types
-from typing import get_type_hints
+from typing import get_type_hints, get_origin
 
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -50,12 +50,16 @@ class NativeReadFixture(NativeAssetFixture):
         sys.modules["open_webui"].__path__.append(str(package))
         self.native = importlib.import_module("open_webui.ees_workflow_native")
         self.workflow = importlib.import_module("open_webui.ees_workflow")
-        self.service = self.workflow.WorkflowService(self.directory / "ees-work.sqlite3", self.native_users.Users.get_user_by_id,
+        from workflow_fixture import historical_facade
+        history = historical_facade("open_webui")
+        self.service = history.WorkflowService(self.directory / "ees-work.sqlite3", self.native_users.Users.get_user_by_id,
                                                      lambda identifier: None)
+        from workflow_fixture import arrange_legacy_catalog
+        arrange_legacy_catalog(self.service)
         self.bridge = self.native.NativeBridge(self.service, self.app)
         return self
 
-    async def register_read_tool(self, family, *, identifier=None):
+    async def register_read_tool(self, family, *, identifier=None, extended=False):
         identifier = identifier or "fixture_" + family
         source = (ROOT / f"agent-pack/skills/{family}-read/scripts/{family}_tool.py").read_text(encoding="utf-8")
         # Use the actual loader for these six existing code functions. Stored
@@ -65,6 +69,8 @@ class NativeReadFixture(NativeAssetFixture):
         module, _ = await self.plugin.load_tool_module_by_id(identifier, content=source)
         funcs = {"confluence": ("search_pages", "get_page"), "jira": ("jira_dashboard", "jira_get_issue"),
                  "github": ("github_list_pull_requests", "github_get_pull_request")}[family]
+        if family == "jira" and extended:
+            funcs += ("jira_project_metadata", "jira_search_crs", "jira_issue_attachments", "jira_cr_attachments")
         specs = []
         for name in funcs:
             properties, required = {}, []
@@ -72,7 +78,8 @@ class NativeReadFixture(NativeAssetFixture):
             for parameter in inspect.signature(getattr(module, name)).parameters.values():
                 if parameter.name.startswith("__"):
                     continue
-                properties[parameter.name] = {"type": "integer" if hints.get(parameter.name) is int else "string"}
+                hint = hints.get(parameter.name)
+                properties[parameter.name] = ({"type": "array", "items": {"type": "string"}} if get_origin(hint) is list else {"type": "integer" if hint is int else "string"})
                 if parameter.default is inspect.Parameter.empty:
                     required.append(parameter.name)
                 else:

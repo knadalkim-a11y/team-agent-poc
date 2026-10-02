@@ -6,7 +6,6 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import ees_upgrade as upgrade
-import ees_apply_demo as demo
 import ees_trial_bundle as bundles
 
 manager = upgrade.manager
@@ -31,8 +30,8 @@ def deploy(config, commit, timeout, progress):
         upgrade.preflight(config, registry, env)
         active = registry.get("customization", {}).get("active")
         if active and active["source_commit"] == commit:
-            # A repeat of the exact applied source only needs program/health
-            # validation before the independently idempotent managed assets.
+            # A repeat of the exact applied source requires program/health
+            # validation. Retired demo registration is never a follow-up stage.
             progress["stage"] = "health_check"
             upgrade.healthy_noop(registry, timeout)
             return {"changed": False, "prepared": False, "started": True,
@@ -121,14 +120,14 @@ def main(argv=None):
         return 1
 
     result.update(wrapper_commit=args.trial_commit, wrapper_changed=False,
-                  source_verification="local_trial", next="apply_demo", stage="complete")
+                  source_verification="local_trial", next="review_empty_workspace", stage="complete",
+                  asset_registration="not_applicable", asset_registration_reason="demo_registration_retired")
     upgrade.report(args, result)
-    # Release the program lock before the existing asset command takes its own
-    # lock. Its report remains authoritative on partial asset failures.
-    code = demo.main(["--config", str(args.config), "--trial-commit", args.trial_commit])
-    if code == 0 and "bundle" in progress:
+    # Program validation and health are complete; there is no registration
+    # stage. The direct retired ApplyDemo command remains a blocked request.
+    if "bundle" in progress:
         bundles.cleanup(config, Path(progress["bundle"]))
-    return code
+    return 0
 
 
 if __name__ == "__main__":

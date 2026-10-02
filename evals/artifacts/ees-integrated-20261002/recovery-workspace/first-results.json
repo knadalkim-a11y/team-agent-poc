@@ -1,0 +1,36 @@
+{
+  "recorded_at": "2026-10-02T07:08:45.797039+00:00",
+  "scope": "Fresh recovery validation after original unpushed test/evidence loss; not a reproduction of lost file bytes or reuse of old PASS",
+  "source_sha256": {
+    "tests/test_ees_work_figma_contracts.py": "73f209e67ff9c04f619cd346e18c27da21092c99c1abb494c07e4e76221e090e",
+    "tests/test_ees_workflow_native.py": "7021a80d417c62ff2a621b893797021bfca099c1b409d3b9b3beb5a840d3ad57",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py": "176d2a8d7008a5192efc9fe5e88bef2139634df2c2a00d13320e17fb6159594b",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py": "5cc89065e4afeabefe37c5e593c26fb9745bf4dc4e95f39b9aea1d225025bd33"
+  },
+  "commands": [
+    {
+      "command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_figma_contracts -v",
+      "environment": {
+        "PYTHONPATH": ".:tests",
+        "EES_REQUIRE_ASSET_NATIVE": "1",
+        "EES_TEST_UPSTREAM_WHEEL": "dist/upstream/open_webui-0.11.3-py3-none-any.whl"
+      },
+      "exit_code": 1,
+      "elapsed_seconds": 0.598,
+      "log": "workspace-first.log",
+      "log_sha256": "5cf98a25a253406f348a4b134b7342381796474cd489c9b6dbc6292625aee8df"
+    },
+    {
+      "command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_workflow_native.NativeReadBridgeTests.test_normalizers_preserve_partial_empty_truncated_unknown_and_untrusted test_ees_workflow_native.NativeReadBridgeTests.test_confirmed_http_failure_requires_actual_managed_read_source -v",
+      "environment": {
+        "PYTHONPATH": ".:tests",
+        "EES_REQUIRE_ASSET_NATIVE": "1",
+        "EES_TEST_UPSTREAM_WHEEL": "dist/upstream/open_webui-0.11.3-py3-none-any.whl"
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 4.17,
+      "log": "native-first.log",
+      "log_sha256": "0a64102077ee3e9621f0a18cf504e9e8ef5d5282321198f9ce99d183a48ddb70"
+    }
+  ]
+}

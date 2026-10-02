@@ -1,0 +1,66 @@
+{
+  "recorded_utc": "2026-10-02T05:02:08.079189+00:00",
+  "run": 36966415796,
+  "head": "5556b573c8ab4430eb44b7e608fc6a8045e0e2bd",
+  "job": 110711366691,
+  "artifact": {
+    "id": 11210066587,
+    "name": "ees-results-contracts-windows-2022",
+    "bytes": 5974,
+    "sha256": "cbb8444fa31450270e2085a4886fddb2a4341721bad18fd3951c78cd9c7eccc6",
+    "counts": {
+      "passed": 82,
+      "failed": 2,
+      "error": 0,
+      "skipped": 0,
+      "expected-failure": 0,
+      "unexpected-success": 0
+    }
+  },
+  "original_failures": [
+    {
+      "id": "test_ees_workflow_execution.ExecutionTests.test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown",
+      "status": "failed",
+      "detail": "Traceback (most recent call last):\n  File \"C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\unittest\\async_case.py\", line 90, in _callTestMethod\n    if self._callMaybeAsync(method) is not None:\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\unittest\\async_case.py\", line 112, in _callMaybeAsync\n    return self._asyncioRunner.run(\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\base_events.py\", line 654, in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\n  File \"D:\\a\\team-agent-poc\\team-agent-poc\\tests\\test_ees_workflow_execution.py\", line 804, in test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown\n    self.assertEqual(result[\"status\"], \"succeeded\", result)\nAssertionError: 'unknown' != 'succeeded'\n- unknown\n+ succeeded\n : {'id': '2b928759-55f2-4280-a464-8a746c5c3a43', 'protocol': 1, 'case_id': 'a7bcd560-420b-44bc-9e1e-527dd6bdc878', 'node_id': 'new-operations-jira-j', 'plan_id': 'ed6d8653-3883-490a-a57a-3aae3b24c0e3', 'plan_hash': '9ef2d65ca7b8e4bb36ba7b50287bbe81bfe7c9cd06a5a888cb60850845e41478', 'inputs': {'project_key': 'TEST', 'repository': 'team/example', 'ops_page_id': '42'}, 'input_schema': {'type': 'object', 'properties': {'project_key': {'type': 'string', 'title': 'Jira 프로젝트 키', 'minLength': 1, 'maxLength': 64}, 'repository': {'type': 'string', 'title': 'GitHub 저장소', 'minLength': 1, 'maxLength': 201, 'format': 'repository'}, 'ops_page_id': {'type': 'string', 'title': '운영 기준 문서 ID', 'minLength': 1, 'maxLength': 30, 'format': 'page_id'}}, 'required': ['project_key', 'repository', 'ops_page_id'], 'additionalProperties': False}, 'missing_inputs': [], 'status': 'unknown', 'revision': 3, 'created_at': 1790916934.0212862, 'updated_at': 1790916934.4868894, 'deadline': 1790918734.0212862, 'reason': 'lease_expired', 'jobs': {'new-operations-jira-j': {'status': 'unknown', 'kind': 'fixed', 'checks': [], 'validation': None}}, 'calls': [{'id': '43ec2d7e-9e00-4c12-b08e-a1b43029cd66', 'run_id': '2b928759-55f2-4280-a464-8a746c5c3a43', 'job_id': 'new-operations-jira-j', 'call_id': 'dashboard', 'attempt': 1, 'job_attempt': 1, 'status': 'unknown', 'kind': 'fixed', 'reference': {'tool_id': 'jira_dashboard', 'function': 'jira_dashboard', 'revision': 1, 'content_hash': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'schema_hash': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'config_hash': 'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc', 'environment': 'dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd'}, 'arguments': {'project_key': 'TEST', 'start_at': 0}, 'arguments_hash': 'dce559837a67c59481f7d1d71f8859ed629a5a26ca9a30b34ffa4d4678489427', 'started_at': 1790916934.3615372, 'worker': '7ae93f3c-d276-4966-9cb5-91f849776fe4', 'generation': 0, 'input_sources': {'project_key': {'source': 'input', 'key': 'project_key'}, 'start_at': {'source': 'constant', 'value': 0}}, 'late_result': {'version': 1, 'status': 'succeeded', 'transport': 'succeeded', 'completeness': 'complete', 'data': {'count': 2, 'summary': {'total': 2, 'open': 2}, 'pagination': {'returned': 2, 'has_next': False}, 'page': {'title': '운영 문서', 'version': 2}}, 'evidence': [{'id': '42', 'url': 'http://fixture.invalid/42'}], 'provenance': {'simulation': True}}, 'late_at': 1790916934.3930566, 'ended_at': 1790916934.408706, 'reason': 'lease_expired'}], 'history': [{'sequence': 1, 'at': 1790916934.0212862, 'kind': 'accepted', 'status': 'queued', 'detail': {'plan_hash': '9ef2d65ca7b8e4bb36ba7b50287bbe81bfe7c9cd06a5a888cb60850845e41478'}}, {'sequence': 2, 'at': 1790916934.3615372, 'kind': 'dispatch', 'status': 'running', 'detail': {'job_id': 'new-operations-jira-j', 'call_id': 'dashboard', 'attempt': 1}}, {'sequence': 3, 'at': 1790916934.5025558, 'kind': 'recovered', 'status': 'unknown', 'detail': {'reason': 'lease_expired'}}]}\n"
+    },
+    {
+      "id": "test_ees_workflow_execution.ExecutionTests.test_result_commit_failure_rolls_back_and_recovers_unknown",
+      "status": "failed",
+      "detail": "Traceback (most recent call last):\n  File \"C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\unittest\\async_case.py\", line 90, in _callTestMethod\n    if self._callMaybeAsync(method) is not None:\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\unittest\\async_case.py\", line 112, in _callMaybeAsync\n    return self._asyncioRunner.run(\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\base_events.py\", line 654, in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\n  File \"D:\\a\\team-agent-poc\\team-agent-poc\\tests\\test_ees_workflow_execution.py\", line 720, in test_result_commit_failure_rolls_back_and_recovers_unknown\n    with self.assertRaises(sqlite3.OperationalError):\nAssertionError: OperationalError not raised\n"
+    }
+  ],
+  "confirmed_observation": "Windows fast subprocess result retained succeeded as late_result then recovered unknown / lease_expired. Its fixture used a 0.15-second live lease. Production LEASE_SECONDS is 30.",
+  "second_failure_hypothesis": "The 0.1-second lease in result-commit rollback test could expire before _event(call_recorded) and bypass injected OperationalError. Original CI did not capture the lease/event branch; identical root cause is not proven.",
+  "original_short_lease_intent": "Short leases plus sleeps made post-crash/post-rollback recovery quick. The first half instead requires a valid lease to prove successful child dispatch or reach actual injected commit failure; it must not race that precondition.",
+  "change": "Use unchanged default lease during real dispatch/commit. After injected call_recorded failure has rolled back and process_once finished heartbeat cleanup, expire only its known worker/run lease in fixture SQLite. After real child dispatch marker then kill/communicate confirms nonzero exit, expire only that dead worker/run lease. Production recovery still performs all state transitions.",
+  "preserved_or_strengthened": [
+    "real subprocess persists and completes queued work",
+    "real child kill and nonzero termination",
+    "exact call_recorded injection count one",
+    "rollback keeps call running and result absent",
+    "known worker ownership before targeted fixture expiry",
+    "unknown recovery and no resend",
+    "no changed production lease or service/CI timeout"
+  ],
+  "source": {
+    "path": "tests/test_ees_workflow_execution.py",
+    "sha256": "ac2586a667d94a085e3871e188ae0373f6329efa97a71ad1e9961f30c429461b"
+  },
+  "local_verification": {
+    "environment": "Existing repository .venv Python3.11.16 Linux; strict EncodingWarning errors",
+    "execution_count": 1,
+    "command": "PYTHONPATH=.:tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -v test_ees_workflow_execution.ExecutionTests.test_result_commit_failure_rolls_back_and_recovers_unknown test_ees_workflow_execution.ExecutionTests.test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown test_ees_workflow_execution.ExecutionTests.test_slow_io_does_not_hold_database_write_transaction_and_two_workers test_ees_workflow_execution.ExecutionTests.test_timeout_late_result_original_attempt_no_resume test_ees_workflow_execution.ExecutionTests.test_cancel_inflight_is_unknown_and_late_result_never_changes_state test_ees_workflow_execution.ExecutionTests.test_unknown_rejects_every_mutation_and_preserves_unresolved_attempt",
+    "passed": 6,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 2.041,
+    "exit_code": 0,
+    "log": {
+      "path": "evals/artifacts/ees-integrated-20261002/ci-36966415796/windows-lease-fixture-linux.log",
+      "bytes": 1198,
+      "sha256": "202db4ec0992e3642023ab33141f054ea89a8c9480e0321579f81648a7fa9914"
+    }
+  },
+  "boundary": "Local passing tests do not replace Windows verification. Original Windows failures remain failures. Next exact-head automatic CI must execute these unchanged semantic assertions on Windows."
+}

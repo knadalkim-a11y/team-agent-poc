@@ -1,0 +1,199 @@
+{
+  "changes": [
+    {
+      "time": 1116.300000000745,
+      "mode": "tool",
+      "read_retry_count": "0",
+      "status": "저장 초안 r4"
+    },
+    {
+      "time": 1227.199999999255,
+      "mode": "tool",
+      "read_retry_count": "2",
+      "status": "변경 있음 · 저장 안 됨"
+    },
+    {
+      "time": 1234.1000000014901,
+      "mode": "tool",
+      "read_retry_count": "2",
+      "status": "변경 있음 · 저장 안 됨"
+    }
+  ],
+  "fields": [
+    {
+      "name": "name",
+      "value": "합성 작업 0",
+      "disabled": false
+    },
+    {
+      "name": "description",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "instructions",
+      "value": "합성 자료로 저장·판정 경계를 검증합니다.",
+      "disabled": false
+    },
+    {
+      "name": "assignee",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "mode",
+      "value": "tool",
+      "disabled": false
+    },
+    {
+      "name": "result_block",
+      "value": "human_confirm",
+      "disabled": false
+    },
+    {
+      "name": "tool_contract_id",
+      "value": "__existing__",
+      "disabled": false
+    },
+    {
+      "name": "human_required",
+      "value": "on",
+      "disabled": false
+    },
+    {
+      "name": "deadline_notes",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "deadline_input",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "deadline_offset",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "deadline_timezone",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "deadline_calendar",
+      "value": "calendar",
+      "disabled": false
+    },
+    {
+      "name": "trigger_kind",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "trigger_offset",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "trigger_at",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "",
+      "disabled": false
+    },
+    {
+      "name": "",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "",
+      "disabled": false
+    },
+    {
+      "name": "completion_rule",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "",
+      "disabled": false
+    },
+    {
+      "name": "result_argument",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "result_job_id",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "",
+      "disabled": false
+    },
+    {
+      "name": "read_retry_count",
+      "value": "2",
+      "disabled": false
+    },
+    {
+      "name": "read_retry_deadline",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "",
+      "disabled": false
+    },
+    {
+      "name": "condition_kind",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "condition_field",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "condition_op",
+      "value": "eq",
+      "disabled": false
+    },
+    {
+      "name": "condition_value",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "condition_type",
+      "value": "text",
+      "disabled": false
+    },
+    {
+      "name": "",
+      "disabled": false
+    },
+    {
+      "name": "",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "",
+      "value": "",
+      "disabled": false
+    },
+    {
+      "name": "",
+      "value": "",
+      "disabled": false
+    }
+  ],
+  "html": "<form id=\"ew-author-node\"><div class=\"ew-author-fields\"><label>작업 이름<input name=\"name\" value=\"합성 작업 0\" required=\"\" maxlength=\"160\"></label><label>설명<textarea name=\"description\"></textarea></label><label>수행 안내<textarea name=\"instructions\">합성 자료로 저장·판정 경계를 검증합니다.</textarea></label><label>작업 담당자 · Native 사용자/그룹<select name=\"assignee\"><option value=\"\" selected=\"\">담당자 미지정</option><option value=\"user:fixture-admin\">Fixture Administrator</option></select></label><label>수행 방식<select name=\"mode\"><option value=\"human\">사람 확인</option><option value=\"tool\" selected=\"\">도구 실행</option><option value=\"ai\">AI 초안</option></select></label><label>결과 형태<select name=\"result_block\"><option value=\"values\">사람이 정하는 값</option><option value=\"schedule\">예약 안내</option><option value=\"checklist\">확인 항목</option><option value=\"list_confirm\">목록 확정</option><option value=\"item_verdict\">항목별 판정</option><option value=\"ai_review\">AI 초안 검토</option><option value=\"human_confirm\" selected=\"\">사람 확인</option><option value=\"change_request\">변경 요청</option></select></label><label>사용하는 도구<select name=\"tool_contract_id\"><option value=\"\">도구 없음</option><option value=\"__existing__\" selected=\"\">현재 연결 · 재검사 필요</option></select></label><label class=\"ew-author-inline\"><input type=\"checkbox\" name=\"human_required\" checked=\"\">실행 후 사람이 확인해야 완료</label><label>기한 설명<input name=\"deadline_notes\" value=\"\"></label><label>기한 계산의 날짜 입력<select name=\"deadline_input\"><option value=\"\" selected=\"\">계산 안 함</option></select></label><label>기준 날짜에서 일수<input name=\"deadline_offset\" value=\"\" type=\"number\" min=\"-3660\" max=\"3660\"></label><label>기한 계산 시간대<input name=\"deadline_timezone\" value=\"\" placeholder=\"예: Asia/Seoul\"></label><label>날짜 기준<select name=\"deadline_calendar\"><option value=\"calendar\" selected=\"\">달력 날짜</option><option value=\"business\">영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name=\"trigger_kind\"><option value=\"\" selected=\"\">선행 조건 충족 후</option><option value=\"offset\">회차 시작에서 지정 시간 후</option><option value=\"at\">지정한 시각</option></select></label><label>회차 시작 후 · 초<input name=\"trigger_offset\" value=\"\" type=\"number\" min=\"0\" max=\"31622400\"></label><label>예약 시각 · 시간대 포함<input name=\"trigger_at\" value=\"\" placeholder=\"ISO 날짜·시각과 시간대\"></label></div><fieldset><legend>사람이 정하는 값</legend><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan=\"5\">선언한 값이 없습니다.</td></tr></tbody></table><button type=\"button\" data-author-action=\"input_add\" class=\"ew-author-link\"><img class=\"ew-icon\" src=\"/_ees13/v4/7d31f.svg\" alt=\"\" aria-hidden=\"true\">값 추가</button></fieldset><fieldset><legend>결과와 완료</legend><label>완료 기준 설명<textarea name=\"completion_rule\"></textarea></label><h4>선행 작업</h4><p class=\"ew-author-muted\">다른 작업이 없습니다.</p></fieldset><fieldset><legend>확정 목록에서 도구 인자 연결</legend><p class=\"ew-author-muted\">완전 조회 후 사람이 확정한 현재 목록의 ID만 전달합니다. 목록을 다시 조회·수정하면 후속 근거를 재확인합니다.</p><label>목록을 받을 Native 인자<input name=\"result_argument\" value=\"\"></label><label>확정한 목록 작업<select name=\"result_job_id\"><option value=\"\" selected=\"\">연결 안 함</option></select></label></fieldset><fieldset><legend>읽기 실패 시 재조회</legend><div class=\"ew-author-fields\"><label>추가 재조회 횟수 · 0이면 사용 안 함<input name=\"read_retry_count\" value=\"0\" type=\"number\" min=\"0\" max=\"3\"></label><label>전체 조회·재조회 제한 · 초<input name=\"read_retry_deadline\" value=\"\" type=\"number\" min=\"1\" max=\"300\"></label></div><p class=\"ew-author-note\">허용된 읽기 기능의 명확한 실패만 첫 조회부터 지정한 시간과 추가 횟수 안에서 재조회합니다. 부분 결과·결과 불명·변경 요청은 자동 재실행하지 않으며 매번 현재 권한을 확인합니다. 각 시도와 기존 결과는 별도로 보존합니다.</p></fieldset><fieldset><legend>적용 조건</legend><p class=\"ew-author-muted\">속성이 없으면 확인 필요 상태로 남습니다.</p><div class=\"ew-author-fields\"><label>조건 종류<select name=\"condition_kind\"><option value=\"\" selected=\"\">모든 공장</option><option value=\"attribute\">공장 속성</option><option value=\"factory\">특정 공장</option></select></label><label>공장 속성 ID<input name=\"condition_field\" value=\"\"></label><label>비교<select name=\"condition_op\"><option value=\"eq\" selected=\"\">같음</option><option value=\"ne\">다름</option><option value=\"in\">목록에 포함</option><option value=\"not_in\">목록에 없음</option><option value=\"gt\">초과</option><option value=\"gte\">이상</option><option value=\"lt\">미만</option><option value=\"lte\">이하</option></select></label><label>비교 값<input name=\"condition_value\" value=\"\"></label><label>값 형식<select name=\"condition_type\"><option value=\"text\" selected=\"\">문자</option><option value=\"number\">숫자</option><option value=\"boolean\">예 / 아니오</option><option value=\"list\">목록 · JSON 배열</option></select></label></div></fieldset><fieldset><legend>스킬 · 지침 연결</legend><p class=\"ew-author-muted\">현재 Native 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p><p class=\"ew-author-muted\">사용 가능한 스킬이 없습니다. 기존 Native 스킬 관리에서 작성할 수 있습니다.</p></fieldset><div class=\"ew-author-inline\"><button type=\"button\" data-author-action=\"move_up\">위로</button><button type=\"button\" data-author-action=\"move_down\">아래로</button><button type=\"button\" data-author-action=\"delete_node\">삭제</button></div></form>"
+}

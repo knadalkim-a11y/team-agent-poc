@@ -34,72 +34,190 @@ NOTICE = b"# LICENSE: Open WebUI branding is governed by the bundled license.\n"
 LICENSE = b"Synthetic license fixture; copyright and branding conditions must survive.\n"
 
 
+def assert_css_icon_cache_keys(test, original, built, icons):
+    """Audit only reviewed icon URLs; preserve every byte outside their values."""
+    # Parse URL boundaries independently of prepare_additions' byte replacement.
+    # icons comes from reviewed source files, never from the builder's additions.
+    pattern = rb'''url\(\s*(?P<quote>["']?)(?P<url>[^"'\s)]+)(?P=quote)\s*\)'''
+    original_urls = list(re.finditer(pattern, original))
+    built_urls = list(re.finditer(pattern, built))
+    test.assertEqual(len(built_urls), len(original_urls), "CSS URL inventory changed")
+    original_end = built_end = 0
+    seen = set()
+    for before, after in zip(original_urls, built_urls):
+        test.assertEqual(built[built_end:after.start("url")],
+                         original[original_end:before.start("url")],
+                         "CSS bytes outside URL values changed")
+        url = expected = before.group("url")
+        for relative, content in icons.items():
+            if url in (b"./" + relative.encode("ascii"), b"/_ees13/" + relative.encode("ascii")):
+                expected += b"?v=" + hashlib.sha256(content).hexdigest().encode("ascii")
+                seen.add(relative)
+                break
+        test.assertEqual(after.group("url"), expected, "CSS URL or icon digest differs")
+        original_end, built_end = before.end("url"), after.end("url")
+    test.assertEqual(built[built_end:], original[original_end:],
+                     "CSS trailing bytes changed")
+    test.assertEqual(seen, set(icons), "Reviewed icon reference missing from source CSS")
+
+
+LAUNCHER_ASSEMBLY_PROBE = r"""
+const fs=require('node:fs');
+const stage = name => fs.writeSync(2, 'ees_probe=' + name + '\n');
+stage('launcher-node-entry version=' + process.version);
+const vm=require('node:vm'),assert=require('node:assert/strict');
+const scope={window:{}};vm.createContext(scope);
+stage('launcher-vm-entry');
+vm.runInContext(process.argv[1],scope,{timeout:1000});
+stage('launcher-vm-complete');
+assert.equal(JSON.stringify(scope.window.fixture),'["view","designer"]');
+assert.equal(scope.createWorkView,undefined);assert.equal(scope.createWorkDesigner,undefined);
+assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.createWorkDesigner,undefined);
+stage('launcher-assertions-complete');
+fs.writeSync(1, 'launcher_assembly_boundary=pass\n');
+"""
+
+
+def run_launcher_assembly_probe(node, source):
+    """Keep startup/VM/exit timeouts observable without retrying or hiding failure."""
+    # Windows CI 36956218460 exceeded communicate's deadline for the tiny
+    # synchronous fixture. That log had no entry evidence, so it cannot tell
+    # whether Node startup, the VM, or process/pipe completion stalled. Do not
+    # infer a launcher defect or a successful assertion from an absent marker.
+    try:
+        return subprocess.run([node, "-e", LAUNCHER_ASSEMBLY_PROBE, source.decode("utf-8")],
+                              capture_output=True, text=True, encoding="utf-8", timeout=10)
+    except subprocess.TimeoutExpired as error:
+        stderr = error.stderr or ""
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode("utf-8", errors="replace")
+        stages = [line for line in stderr.splitlines() if line.startswith("ees_probe=")]
+        raise AssertionError(
+            "Node launcher probe timed out after 10s; stderr stages: "
+            + (", ".join(stages) or "entry not observed")
+            + f"; fixture_bytes={len(source)}; fixture_sha256={hashlib.sha256(source).hexdigest()}"
+        ) from None
+
+
+class LauncherProbeDiagnosticsTests(unittest.TestCase):
+    def test_timeout_retains_observed_stages_and_never_reports_assertion_success(self):
+        source = b"synthetic fixture"
+        for stderr in (None, b"ees_probe=launcher-node-entry version=v-test\n"
+                       b"ees_probe=launcher-vm-entry\n"):
+            with self.subTest(stderr=stderr), mock.patch.object(subprocess, "run") as run:
+                run.side_effect = subprocess.TimeoutExpired(["node"], 10, stderr=stderr)
+                with self.assertRaises(AssertionError) as raised:
+                    run_launcher_assembly_probe("node", source)
+                message = str(raised.exception)
+                self.assertIn("timed out after 10s", message)
+                self.assertIn("fixture_sha256=" + hashlib.sha256(source).hexdigest(), message)
+                self.assertIn("launcher-vm-entry" if stderr else "entry not observed", message)
+                self.assertNotIn("launcher-assertions-complete", message)
+                self.assertEqual(run.call_count, 1)
+                self.assertEqual(run.call_args.kwargs["timeout"], 10)
+                self.assertEqual(run.call_args.args[0][-1], source.decode("utf-8"))
+
+
+class CssCacheIntegrityTests(unittest.TestCase):
+    def test_accepts_only_reviewed_relative_absolute_and_repeated_icon_urls(self):
+        icons = {"v4/721d7.svg": b"reviewed icon"}
+        original = (b'.a{background:url("./v4/721d7.svg")}\r\n'
+                    b".b{mask:url( '/_ees13/v4/721d7.svg' )}"
+                    b'.c{mask:url(./v4/721d7.svg)}'
+                    b'.font{src:url("./fonts/unchanged.ttf?v=keep")}\n/* keep */')
+        # A fixed fixture digest keeps the successful sample independent of the
+        # assertion helper and of the product's URL-rewriting implementation.
+        query = b"?v=dd6e48bbcd151debcfa953a8b9d4f7bdb32e6ab0552f57e761268f937a97393f"
+        built = original.replace(b"721d7.svg", b"721d7.svg" + query)
+        assert_css_icon_cache_keys(self, original, built, icons)
+        mutations = {
+            "wrong hash": built.replace(query, b"?v=" + b"0" * 64, 1),
+            "missing hash": built.replace(query, b"", 1),
+            "missing URL": built.replace(b'url("./v4/721d7.svg' + query + b'")', b"none", 1),
+            "duplicate query": built.replace(query, query + query, 1),
+            "unrelated query": built.replace(b"?v=keep", b"?v=changed"),
+            "unrelated bytes": built.replace(b"/* keep */", b"/* changed */"),
+            "URL punctuation": built.replace(b"url( '", b"url('", 1),
+        }
+        for label, corrupted in mutations.items():
+            with self.subTest(mutation=label), self.assertRaises(AssertionError):
+                assert_css_icon_cache_keys(self, original, corrupted, icons)
+
+
 def assert_workflow_package(test, wheel):
     """Resolve the actual emitted sibling imports/resources and native Tool API."""
     probe = r'''
-import asyncio, hashlib, importlib, importlib.util, json, sys, types
+import asyncio, importlib, importlib.util, sys, types
 from pathlib import Path
 root = Path(sys.argv[1])
-# The unchanged WebUI CLI initializer imports serving dependencies. Only that
-# parent initializer is isolated; workflow imports resolve real wheel files.
+# Only the unrelated CLI parent initializer is isolated. All workflow modules
+# and migrations below are extracted production-wheel bytes.
 package = types.ModuleType("open_webui")
 package.__path__ = [str(root / "open_webui")]
 sys.modules["open_webui"] = package
 workflow = importlib.import_module("open_webui.ees_workflow")
 for name in ("ees_workflow", "ees_workflow_definition", "ees_workflow_view", "ees_workflow_authoring",
              "ees_workflow_execution", "ees_workflow_native", "ees_workflow_contract",
-             "ees_workflow_examples", "ees_workflow_model"):
-    importlib.import_module("open_webui." + name)
-    assert Path(sys.modules["open_webui." + name].__file__).parent == root / "open_webui"
-seed = workflow._dump(workflow._seed()).encode("utf-8")
-assert len(seed) == 11651
-assert hashlib.sha256(seed).hexdigest() == "a68dda6dbcfa55184653816a0e4774ac7e4b60619cec962edbc26434e6200451"
-assert workflow.validate_definition(workflow._seed()) == []
-users = {key: {"id": key, "role": "user"} for key in ("alice", "bob")}
+             "ees_workflow_workspace", "ees_workflow_operations", "ees_workflow_model"):
+    module = importlib.import_module("open_webui." + name)
+    assert Path(module.__file__).parent == root / "open_webui"
+seed = workflow._seed()
+assert all(seed[key] == {} for key in ("nodes", "tools", "skills", "sites")), seed
+assert all(not values for values in seed["roots"].values())
+assert workflow.validate_definition(seed), "An empty catalog is not a publishable procedure"
+users = {key: {"id": key, "role": "admin" if key == "admin" else "user"} for key in ("admin", "alice", "bob")}
 chats = {"chat-a": {"id": "chat-a", "user_id": "alice"}}
-service = workflow.WorkflowService(root / "data" / "ees-work.sqlite3", users.get, chats.get)
+def new_service():
+    return workflow.WorkflowService(root / "data" / "ees-work.sqlite3", users.get, chats.get,
+                                    group_lookup=lambda _: [], group_list_lookup=lambda: [])
+service = new_service()
 workflow._service = service
 spec = importlib.util.spec_from_file_location("installed_workflow_tool", sys.argv[2])
 tool_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(tool_module)
 tool = tool_module.Tools()
-screen = {"kind": "published", "selection": {"site_id": "us-a", "system": "EMS",
-    "process_id": "setup-p", "node_id": "db-j", "version": 1}}
+assert not hasattr(tool, "ees_workflow_action"), "AI Tool cannot mutate shared work"
+events = []
 async def event(value):
-    if "__eesNativeWorkV1?.selection" in value["data"]["code"]:
-        return {"ok": True, **screen}
+    events.append(value)
     return {"ok": True, "notified": True}
 async def run():
-    args = {"__user__": users["alice"], "__metadata__": {"chat_id": "chat-a"}, "__event_call__": event}
-    capabilities = await service.authoring_capabilities(users["alice"])
-    assert capabilities["ok"] and not capabilities["can_author"]
-    published = await tool.ees_workflow_view(**args)
-    assert published["ok"] and published["case"] is None, published
-    assert not (await workflow.get_state(users["alice"], chat_id="chat-a"))["cases"]
-    write = {"target": published["target"], "request_id": "packaged-input-1",
-             "payload": {"inputs": {"db": "synthetic package target"}}}
-    created = await tool.ees_workflow_action("update_inputs", **write, **args)
+    args = {"__user__": users["alice"], "__metadata__": {"chat_id": "chat-a"}}
+    empty = await tool.ees_workflow_view(**args)
+    assert empty["ok"] and empty["workflows"] == [] and empty["runs"] == [], empty
+    assert not empty["capabilities"]["can_author"]
+    # This is an emitted-package persistence contract, not an HTTP approval
+    # test. Arrange explicit synthetic work through the internal service;
+    # the LLM-visible Tool only reads or offers a local review proposal.
+    grant = await service.workspace_command(users["admin"], {"action": "save_access", "request_id": "grant", "expected_revision": 0,
+        "principal_kind": "user", "principal_id": "alice", "system_id": "EMS", "factory_id": "*", "roles": ["manager", "participant"]})
+    assert grant["ok"], grant
+    created = await service.workspace_command(users["alice"], {"action": "create_workflow", "request_id": "create", "expected_revision": 0, "system_id": "EMS", "name": "Synthetic packaged contract"})
     assert created["ok"], created
-    before = created["case"]
-    replayed = await tool.ees_workflow_action("update_inputs", **write, **args)
-    assert replayed["ok"] and replayed["replayed"], replayed
-    assert replayed["case"] == before
-    screen.clear()
-    screen.update(kind="case", case_id=before["id"], node_id="db-j", revision=before["revision"])
-    seen = await tool.ees_workflow_view(**args)
-    selected = await tool.ees_workflow_action("select", node_id="ap-j", expected_revision=before["revision"], target=seen["target"], **args)
-    assert selected["ok"], selected
-    screen.update(node_id="ap-j", revision=selected["case"]["revision"])
-    seen = await tool.ees_workflow_view(**args)
-    assert seen["case"] == selected["case"]
-    assert seen["case"]["selected_id"] == "ap-j"
-    assert seen["case"]["revision"] == before["revision"] + 1
-    conflict = await tool.ees_workflow_action("select", node_id="db-j", expected_revision=before["revision"], target=seen["target"], **args)
-    assert conflict["error"]["code"] == "revision_conflict", conflict
-    forbidden = await workflow.get_state(users["bob"], case_id=before["id"])
-    assert forbidden["error"]["code"] == "case_not_found", forbidden
-    workflow._service = workflow.WorkflowService(service.database, users.get, chats.get)
-    assert (await workflow.get_state(users["alice"], chat_id="chat-a"))["case"] == seen["case"]
+    key = created["workflow_id"]
+    draft = created["workflow"]["draft"]
+    draft["name"] = "Persisted packaged contract"
+    command = {"action": "save_draft", "request_id": "save", "workflow_id": key, "expected_revision": 1, "definition": draft}
+    saved = await service.workspace_command(users["alice"], command)
+    assert saved["ok"], saved
+    assert await service.workspace_command(users["alice"], command) == saved
+    stale = await service.workspace_command(users["alice"], dict(command, request_id="stale"))
+    assert stale["error"]["code"] == "revision_conflict", stale
+    seen = await tool.ees_workflow_view(workflow_id=key, **args)
+    assert seen["workflow"]["draft"] == draft and seen["workflow"]["revision"] == 2, seen
+    assert "ui_state" not in seen and "access" not in seen
+    denied = await tool.ees_workflow_view(workflow_id=key, __user__=users["bob"])
+    assert not denied["ok"], denied
+    before = service.database.read_bytes()
+    proposal = await tool.ees_workflow_propose(key, 2, draft, "packaged-context", __event_call__=event, **args)
+    assert proposal["ok"] and proposal["saved"] is False and proposal["published"] is False, proposal
+    assert len(events) == 1 and "api?.propose" in events[0]["data"]["code"]
+    assert service.database.read_bytes() == before
+    workflow._service = new_service()
+    restored = await tool.ees_workflow_view(workflow_id=key, **args)
+    assert restored["workflow"] == seen["workflow"], restored
+    retired = await workflow.handle_action(users["alice"], {"action": "create_case"})
+    assert not retired["ok"] and retired["error"]["code"] == "legacy_execution_retired", retired
     assert not (root / ".webui_secret_key").exists()
     assert not (root / "data" / "webui.db").exists()
 asyncio.run(run())
@@ -108,16 +226,22 @@ print("installed_workflow_contract=pass")
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary)
         with ZipFile(wheel) as archive:
+            retired = {"open_webui/ees_work_demo.py", "open_webui/workflow_seed.json",
+                       "open_webui/ees_workflow_examples.py", "open_webui/frontend/_ees13/ees-work-panel.js"}
+            test.assertFalse(retired.intersection(archive.namelist()))
+            test.assertFalse(any(name.startswith("open_webui/ees_work_demo_ui/") for name in archive.namelist()))
+            test.assertEqual(archive.read("open_webui/ees_workflow_tool.py"),
+                             (builder.WORK_DIR / "scripts/workflow_tool.py").read_bytes())
             for name in ("ees_workflow.py", "ees_workflow_definition.py", "ees_workflow_view.py", "ees_workflow_authoring.py",
                          "ees_workflow_execution.py", "ees_workflow_native.py", "ees_workflow_contract.py",
-                         "ees_workflow_examples.py", "ees_workflow_model.py",
-                         "workflow_seed.json", "workflow_policy.json"):
+                         "ees_workflow_workspace.py", "ees_workflow_operations.py", "ees_workflow_model.py",
+                         "ees_workflow_tool.py", "workflow_policy.json"):
                 target = root / "open_webui" / name
                 target.parent.mkdir(exist_ok=True)
                 target.write_bytes(archive.read("open_webui/" + name))
         result = subprocess.run(
             [sys.executable, "-I", "-B", "-X", "warn_default_encoding", "-W", "error::EncodingWarning",
-             "-c", probe, str(root), str(builder.WORK_DIR / "scripts/workflow_tool.py")],
+             "-c", probe, str(root), str(root / "open_webui/ees_workflow_tool.py")],
             cwd=root, capture_output=True, text=True, encoding="utf-8", timeout=20)
         test.assertEqual(result.returncode, 0, result.stderr)
         test.assertEqual(result.stdout.strip(), "installed_workflow_contract=pass")
@@ -249,6 +373,16 @@ def fixture_members():
         "open_webui/static/custom.css": b"/* existing user style stays intact */\n",
         "open_webui/frontend/static/custom.css": b"/* original frontend style stays intact */\n",
     }
+    members["open_webui/utils/middleware.py"] = b"""async def process_chat_payload(request, form_data, user, metadata, model):
+    tool_ids = form_data.pop('tool_ids', None)
+    tools_dict = {}
+    if tool_ids:
+        if True:
+            tools_dict = await get_tools(request, tool_ids, user, {})
+            if mcp_tools_dict:
+                tools_dict.update(mcp_tools_dict)
+    return form_data, tools_dict
+"""
     members.update(guard_fixture_members())
     for prefix in ("open_webui/static/", "open_webui/frontend/static/"):
         for name in builder.ASSET_NAMES:
@@ -339,6 +473,12 @@ def assert_asset_guard_patches(test, built):
                         for child in remote_branch.orelse for node in ast.walk(child)))
     test.assertNotIn("tool_models = await Tools.get_tools_by_ids(tool_ids)", loader_text)
     test.assertIn("EES_ASSET_LOCAL_TOOL_GUARD = 1", loader_text)
+    test.assertIn("await check_chat_work_tool(request, user, tool)", loader_text)
+    middleware = built.read("open_webui/utils/middleware.py").decode()
+    ast.parse(middleware)
+    test.assertIn("EES_WORK_NATIVE_CHAT_CONTEXT = 1", middleware)
+    test.assertLess(middleware.index("await select_chat_work_tools"), middleware.index("await get_tools("))
+    test.assertGreater(middleware.index("wrap_chat_work_tools(request, user, tools_dict)"), middleware.index("await get_tools("))
     main = built.read("open_webui/main.py").decode()
     tree = ast.parse(main)
     life = next(node for node in tree.body if isinstance(node, ast.AsyncFunctionDef) and node.name == "lifespan")
@@ -403,6 +543,31 @@ class BrandingBuildTests(unittest.TestCase):
         self.assertEqual(first["source"]["sha256"], self.source_hash)
         self.assertEqual(first["wheel"]["sha256"], builder.sha256_file(self.root / "first" / builder.WHEEL_FILENAME))
 
+    def test_added_figma_icons_are_packaged_and_missing_source_fails_closed(self):
+        # Independent approved Figma inventory: do not derive the expectation
+        # from the builder list whose omission caused the original failure.
+        added = ('1c98e', '35b2e', '478bf', '52271', '63982',
+                 '6d84b', 'a28e3', 'b22ad', 'b456d', 'f1e53')
+        self.build('figma-icons')
+        with ZipFile(self.root / 'figma-icons' / builder.WHEEL_FILENAME) as archive:
+            for name in added:
+                relative = 'v4/' + name + '.svg'
+                self.assertIn(relative, builder.UI_FILES)
+                self.assertEqual(archive.read(builder.TARGET_APP + relative),
+                                 (self.ui / relative).read_bytes())
+        assert_record(self, self.root / 'figma-icons' / builder.WHEEL_FILENAME)
+        for name in added:
+            with self.subTest(icon=name):
+                source = self.ui / ('v4/' + name + '.svg')
+                original = source.read_bytes()
+                source.unlink()
+                try:
+                    with self.assertRaises(ValueError):
+                        self.build('missing-' + name)
+                    self.assertFalse((self.root / ('missing-' + name)).exists())
+                finally:
+                    source.write_bytes(original)
+
     def test_same_version_ui_change_updates_only_its_content_cache_key(self):
         first = self.build("before")
         source = self.ui / "ees-work-designer.js"
@@ -412,11 +577,11 @@ class BrandingBuildTests(unittest.TestCase):
         with (ZipFile(self.root / "before" / builder.WHEEL_FILENAME) as before,
               ZipFile(self.root / "after" / builder.WHEEL_FILENAME) as after):
             indexes = [archive.read("open_webui/frontend/index.html") for archive in (before, after)]
-            for filename in ("ees-work-launcher.css", "ees-work-panel.js", "ees-work-launcher.js"):
+            for filename in ("ees-work-launcher.css", "ees-work-launcher.js"):
                 digests = [hashlib.sha256(archive.read(builder.TARGET_APP + filename)).hexdigest()
                            for archive in (before, after)]
                 for index, digest in zip(indexes, digests):
-                    self.assertIn(("/_ees12/" + filename + "?v=" + digest).encode("ascii"), index)
+                    self.assertIn(("/_ees13/" + filename + "?v=" + digest).encode("ascii"), index)
                 self.assertEqual(digests[0] == digests[1], filename != "ees-work-launcher.js")
             self.assertEqual(before.read(builder.TARGET_INFO + "METADATA"),
                              after.read(builder.TARGET_INFO + "METADATA"))
@@ -425,7 +590,7 @@ class BrandingBuildTests(unittest.TestCase):
         relative = builder.V4_ICON_FILES[0]
         name = Path(relative).name
         (self.ui / "ees-work-view.js").write_text('function createWorkView() { return "' + name + '"; }\n', encoding="utf-8")
-        (self.ui / "ees-work-launcher.css").write_text('.relative{background:url("./' + relative + '")} .absolute{background:url("/_ees12/' + relative + '")}', encoding="utf-8")
+        (self.ui / "ees-work-launcher.css").write_text('.relative{background:url("./' + relative + '")} .absolute{background:url("/_ees13/' + relative + '")}', encoding="utf-8")
         hashes = []
         for directory in ("icon-before", "icon-after"):
             if directory == "icon-after":
@@ -439,8 +604,10 @@ class BrandingBuildTests(unittest.TestCase):
                 css = archive.read(builder.TARGET_APP + "ees-work-launcher.css")
                 self.assertIn((name + "?v=" + digest).encode(), source)
                 self.assertIn(("./" + relative + "?v=" + digest).encode(), css)
-                self.assertIn(("/_ees12/" + relative + "?v=" + digest).encode(), css)
+                self.assertIn(("/_ees13/" + relative + "?v=" + digest).encode(), css)
                 self.assertNotIn(b"?v=" + digest.encode() + b"?v=", css)
+                assert_css_icon_cache_keys(self, (self.ui / "ees-work-launcher.css").read_bytes(),
+                                           css, {relative: (self.ui / relative).read_bytes()})
         self.assertNotEqual(*hashes)
 
     def test_native_chunk_change_readdresses_entire_cyclic_graph_without_version_change(self):
@@ -460,9 +627,9 @@ class BrandingBuildTests(unittest.TestCase):
               ZipFile(self.root / "after" / builder.WHEEL_FILENAME) as after):
             for archive, directory in ((before, old_dir), (after, new_dir)):
                 index = archive.read("open_webui/frontend/index.html")
-                url = ("/_ees12/" + directory + "/").encode("ascii")
+                url = ("/_ees13/" + directory + "/").encode("ascii")
                 self.assertEqual(index.count(url), 49)
-                self.assertNotIn(b"/_ees12/immutable/", index)
+                self.assertNotIn(b"/_ees13/immutable/", index)
                 self.assertFalse(any(name.startswith(builder.TARGET_APP + "immutable/")
                                      for name in archive.namelist()))
                 self.assertEqual(archive.read(builder.TARGET_APP + directory + "/chunks/cycle-b.js"),
@@ -486,7 +653,7 @@ class BrandingBuildTests(unittest.TestCase):
             with ZipFile(self.root / directory / builder.WHEEL_FILENAME) as archive:
                 digest = hashlib.sha256(archive.read(builder.TARGET_APP + "chat-theme.css")).hexdigest()
                 digests.append(digest)
-                self.assertIn(("/_ees12/chat-theme.css?v=" + digest).encode("ascii"),
+                self.assertIn(("/_ees13/chat-theme.css?v=" + digest).encode("ascii"),
                               archive.read("open_webui/frontend/index.html"))
         self.assertNotEqual(*digests)
 
@@ -505,15 +672,10 @@ class BrandingBuildTests(unittest.TestCase):
             "ees-work-view.js", "ees-work-designer.js", "ees-work-launcher.js"))],
             [builder.TARGET_APP + "ees-work-launcher.js"])
         if shutil.which("node"):
-            probe = """const vm=require('node:vm'),assert=require('node:assert/strict');
-const scope={window:{}};vm.createContext(scope);vm.runInContext(process.argv[1],scope);
-assert.equal(JSON.stringify(scope.window.fixture),'["view","designer"]');
-assert.equal(scope.createWorkView,undefined);assert.equal(scope.createWorkDesigner,undefined);
-assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.createWorkDesigner,undefined);
-"""
-            result = subprocess.run([shutil.which("node"), "-e", probe, source.decode("utf-8")],
-                                    capture_output=True, text=True, encoding="utf-8", timeout=10)
+            result = run_launcher_assembly_probe(shutil.which("node"), source)
             self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.strip(), "launcher_assembly_boundary=pass")
+            self.assertIn("ees_probe=launcher-assertions-complete", result.stderr)
 
     def test_launcher_missing_empty_duplicate_and_swapped_units_fail_before_output(self):
         originals = {name: (self.ui / name).read_bytes() for name in builder.WORK_LAUNCHER_SOURCES}
@@ -572,27 +734,27 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
             self.assertFalse(any(name.startswith(builder.SOURCE_APP) for name in built.namelist()))
             self.assertEqual(len(built.namelist()), len(self.members) + len(builder.UI_FILES)
                              + len(builder.FONT_SOURCES) + len(builder.WORK_ASSETS)
-                             + len(builder.ASSET_GUARD_FILES) + 1)
+                             + len(builder.ASSET_GUARD_FILES))
             for name, original in self.members.items():
                 target = builder.target_name(name, immutable_dir)
                 if target not in manifest["changed_files"]:
                     self.assertEqual(built.read(target), original, name)
             self.assertEqual(built.read(builder.TARGET_INFO + "licenses/LICENSE"), LICENSE)
             self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.12\n"))
+                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.13\n"))
             self.assertEqual(built.read("open_webui/env.py").count(NOTICE), 2)
             self.assertNotIn(b"WEBUI_NAME +=", built.read("open_webui/env.py"))
             self.assertIn(b"EES Work", built.read("open_webui/frontend/index.html"))
             self.assertNotIn(b"/_app/", built.read("open_webui/frontend/index.html"))
             index = built.read("open_webui/frontend/index.html")
-            theme_url = ("/_ees12/chat-theme.css?v=" + hashlib.sha256(
+            theme_url = ("/_ees13/chat-theme.css?v=" + hashlib.sha256(
                 built.read(builder.TARGET_APP + "chat-theme.css")).hexdigest()).encode("ascii")
             self.assertEqual(index.count(theme_url), 1)
-            for filename in ("ees-work-launcher.css", "ees-work-panel.js", "ees-work-launcher.js"):
+            for filename in ("ees-work-launcher.css", "ees-work-launcher.js"):
                 digest = hashlib.sha256(built.read(builder.TARGET_APP + filename)).hexdigest()
-                self.assertIn(("/_ees12/" + filename + "?v=" + digest).encode("ascii"), index)
+                self.assertIn(("/_ees13/" + filename + "?v=" + digest).encode("ascii"), index)
             main = built.read("open_webui/main.py")
-            self.assertLess(main.index(b"install_ees_work_demo(app, get_verified_user)"), main.index(b"app.mount"))
+            self.assertLess(main.index(b"install_ees_workflow(app, get_verified_user)"), main.index(b"app.mount"))
             for relative, target in builder.WORK_ASSETS.items():
                 self.assertEqual(built.read(target), (builder.WORK_DIR / relative).read_bytes())
                 self.assertFalse(target.startswith("open_webui/frontend/"))
@@ -607,7 +769,7 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
             for name, (origin, _) in builder.FONT_SOURCES.items():
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/" + name), self.members[origin])
             runtime = built.read(builder.TARGET_APP + immutable_dir + "/chunks/DKj2ZiCb.js")
-            self.assertIn(b"/_ees12/version.json", runtime)
+            self.assertIn(b"/_ees13/version.json", runtime)
             chat = built.read(builder.TARGET_APP + immutable_dir + "/chunks/zKJlHFgk.js")
             self.assertIn(builder.NATIVE_DRAFT_HOOK, chat)
             self.assertIn(b'if(window.__eesNativeDraftV1===eesNativeDraftApi)delete window.__eesNativeDraftV1;', chat)
@@ -618,9 +780,9 @@ assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.cr
 
     def test_asset_guard_inventory_and_emitted_lifecycle_cache_order(self):
         self.assertEqual(GUARD_METHODS, builder.ASSET_GUARD_HOOKS)
-        self.assertEqual(set(GUARD_METHODS) | {"open_webui/main.py", "open_webui/routers/tools.py", "open_webui/routers/models.py", "open_webui/utils/tools.py"},
+        self.assertEqual(set(GUARD_METHODS) | {"open_webui/main.py", "open_webui/routers/tools.py", "open_webui/routers/models.py", "open_webui/utils/tools.py", "open_webui/utils/middleware.py"},
                          set(builder.ASSET_GUARD_SOURCE_HASHES))
-        self.assertEqual(15, len(builder.ASSET_GUARD_SOURCE_HASHES))
+        self.assertEqual(16, len(builder.ASSET_GUARD_SOURCE_HASHES))
         manifest = self.build()
         with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
             assert_asset_guard_patches(self, built)
@@ -990,7 +1152,7 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
             assert_record(self, built_path)
             with ZipFile(source_path) as source, ZipFile(built_path) as built:
                 self.assertEqual(len(source.namelist()) + len(builder.UI_FILES) + len(builder.FONT_SOURCES)
-                                 + len(builder.WORK_ASSETS) + len(builder.ASSET_GUARD_FILES) + 1,
+                                 + len(builder.WORK_ASSETS) + len(builder.ASSET_GUARD_FILES),
                                  len(built.namelist()))
                 assert_asset_guard_patches(self, built)
                 self.assertEqual(built.read(builder.ASSET_GUARD_FILES[0]), builder.ASSET_GUARD_SOURCE.read_bytes())
@@ -1001,13 +1163,25 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
                         self.assertEqual(built.read(target), source.read(name), name)
                 metadata = source.read(builder.SOURCE_INFO + "METADATA")
                 self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.12\n"))
+                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.13\n"))
                 for filename, (origin, expected) in builder.FONT_SOURCES.items():
                     copied = built.read(builder.TARGET_APP + "fonts/" + filename)
                     self.assertEqual(copied, source.read(origin))
                     self.assertEqual(hashlib.sha256(copied).hexdigest(), expected)
-                self.assertEqual(built.read(builder.TARGET_APP + "chat-theme.css"),
-                                 (builder.UI_DIR / "chat-theme.css").read_bytes())
+                # Independently reviewed CSS references, not the builder's icon
+                # list or prepared output. Current icons are DOM images; CSS has no
+                # icon URL references. Its font URLs and every byte must survive.
+                # The independent fixed/mutated URL fixtures above still verify
+                # allowed rewriting, wrong/missing hashes and unrelated drift.
+                for filename, references in {
+                    "chat-theme.css": (),
+                    "ees-work-launcher.css": (),
+                }.items():
+                    icons = {relative: (builder.UI_DIR / relative).read_bytes() for relative in references}
+                    for relative, content in icons.items():
+                        self.assertEqual(built.read(builder.TARGET_APP + relative), content)
+                    assert_css_icon_cache_keys(self, (builder.UI_DIR / filename).read_bytes(),
+                                               built.read(builder.TARGET_APP + filename), icons)
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/LICENSE.txt"),
                                  (builder.UI_DIR / "font-licenses.txt").read_bytes())
                 self.assertEqual(built.read(builder.TARGET_APP + "ees-work-launcher.js"),

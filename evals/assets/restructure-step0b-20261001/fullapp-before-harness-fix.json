@@ -1,0 +1,53 @@
+{
+  "scope": "Real Native composer button with work panel; real auth/chat/EES/temporary DB; only external model is loopback synthesis",
+  "steps": [
+    {
+      "name": "Real Native signup and chat creation",
+      "role": "admin",
+      "status": 200
+    },
+    {
+      "name": "Real Native session reconnected to its temporary chat",
+      "same_identity": true,
+      "same_chat": true
+    },
+    {
+      "name": "Real EES case create/prerequisites",
+      "case_id": "17ccf766-1cb6-4e39-a187-8568c40779e3",
+      "native_chat_bound": true
+    }
+  ],
+  "programs": {
+    "candidate": {
+      "file": "open_webui-0.11.3+ees.12-py3-none-any.whl",
+      "sha256": "9dac33de8c93b722bf055ececdde77e68d85db953dc74ba9993bba70dfa8e57c"
+    }
+  },
+  "startup": "Official Open WebUI CLI, one Python environment, new temporary DATA_DIR, loopback synthetic external HTTP/OpenAI responses",
+  "error": "!!document.querySelector(\"#ees-work-entry [data-action=\\\"select\\\"][data-node-id=\\\"setup-p\\\"]\")\nSkip to main content\nEES Work\n새 대화\nCtrl+Shift+O\n대화 검색\nCtrl+K\n공장\n공장 A\nEMS\n시스템 선택\n내 업무\n워크플로우 찾기\n실행 기록\n대화 기록\n\n업무\n\n셋업\n1\n운영\n0\n장애대응\n0\n업무 절차\n노트\n워크스페이스\n폴더\n채팅\n오늘\nC단계 실제 Native 저장 확인\nC단계 합성 관리자\nC단계 실제 Native 저장 확인\nC3 합성 모델\n\n\n\n\nC3 합성 모델\n음성 모드 사용\n제안\nShow me a code snippet\nof a website's sticky header\nOvercome procrastination\ngive me tips\nGive me ideas\nfor what to do with my kids' art\nTell me a fun fact\nabout the Roman Empire\nHelp me study\nvocabulary for a college entrance exam\nExplain options trading\nif I'm familiar with buying and selling stocks",
+  "failure_font_state": {
+    "status": "loaded",
+    "faces": [
+      {
+        "family": "Inter",
+        "status": "loaded",
+        "weight": "normal"
+      },
+      {
+        "family": "EES Inter",
+        "status": "loaded",
+        "weight": "100 900"
+      },
+      {
+        "family": "EES Noto Sans KR",
+        "status": "loaded",
+        "weight": "100 900"
+      }
+    ]
+  },
+  "synthetic_provider": {
+    "boundary": "Loopback synthetic HTTP/OpenAI responses only; no production API/model/PAT",
+    "http": [],
+    "model": []
+  }
+}

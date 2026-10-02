@@ -1,0 +1,25 @@
+test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets (test_ees_asset_native.NativeAuthoringAssetReadTests.test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets) ... ok
+test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication (test_ees_asset_native.NativeAuthoringAssetReadTests.test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 3.998s
+
+OK
+{
+  "date_utc": "2026-10-02T02:49:25.841987+00:00",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "python": "3.11.16 (main, Sep 24 2026, 17:56:40) [Clang 22.1.3 ]",
+  "tests": [
+    "NativeAuthoringAssetReadTests.test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets",
+    "NativeAuthoringAssetReadTests.test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication"
+  ],
+  "tests_run": 2,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "strict_default_encoding": true,
+  "native_digest_connections_kept_alive_until_after_cleanup": 10,
+  "open_native_digest_connections": 0,
+  "test_scope": "Pinned upstream real Native tables/ACL fixture and explicit historical authoring; not full product browser or company environment",
+  "windows_execution": "not run locally; next Windows CI required"
+}

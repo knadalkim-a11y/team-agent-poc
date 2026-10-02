@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import copy
 from contextlib import asynccontextmanager
 import hashlib
 import importlib.util
@@ -27,7 +28,7 @@ from zipfile import ZipFile
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
 import httpx
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, create_model
 from sqlalchemy import Column, String, types as sql_types
 from sqlalchemy.engine import Dialect
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -75,6 +76,7 @@ class NativeAssetFixture:
         path = path or name.replace(".", "/") + ".py"
         source = self.members[path]
         module = self.stub(name)
+        module.__package__ = name.rpartition(".")[0]
         module.__file__ = f"{self.wheel}!/{path}"
         self.loaded_sources[path] = hashlib.sha256(source).hexdigest()
         exec(compile(source, module.__file__, "exec"), module.__dict__)
@@ -128,7 +130,7 @@ class NativeAssetFixture:
             node for node in tree.body
             if (
                 isinstance(node, (ast.AsyncFunctionDef, ast.FunctionDef))
-                and (node.name in {"get_tools", "get_async_tool_function_and_apply_extra_params"} or node.name.startswith("_ees_"))
+                and (node.name in {"get_tools", "get_async_tool_function_and_apply_extra_params", "parse_description", "parse_docstring", "clean_properties", "get_functions_from_tool", "convert_function_to_pydantic_model", "clean_openai_tool_schema", "get_tool_specs"} or node.name.startswith("_ees_"))
             ) or (
                 isinstance(node, ast.Assign)
                 and any(isinstance(target, ast.Name) and target.id.startswith("EES_") for target in node.targets)
@@ -147,12 +149,38 @@ class NativeAssetFixture:
             "log": logging.getLogger("ees_native_fixture.binding"),
             "inspect": inspect, "get_type_hints": get_type_hints, "get_args": get_args,
             "re": re, "partial": partial, "update_wrapper": update_wrapper,
-            "Callable": Callable, "Awaitable": Awaitable,
+            "Callable": Callable, "Awaitable": Awaitable, "Any": Any,
+            "BaseModel": BaseModel, "Field": Field, "create_model": create_model, "copy": copy,
+            "convert_pydantic_model_to_openai_function_spec": self.schema_adapter,
         })
         module.__file__ = f"{self.wheel}!/{path}#binding-definitions"
         self.loaded_sources[path] = hashlib.sha256(self.members[path]).hexdigest()
         exec(compile(ast.Module(body=definitions, type_ignores=[]), module.__file__, "exec"), module.__dict__)
         self.binding = module
+
+    @staticmethod
+    def schema_adapter(model):
+        """Dependency-light schema adapter; Native introspection above is real.
+
+        This persistence fixture does not execute LangChain's schema converter.
+        The full product Native chat gate verifies its complete emitted specs.
+        """
+        schema = model.model_json_schema()
+        name = schema.pop("title")
+        description = schema.pop("description", "")
+        return {"name": name, "description": description, "parameters": schema}
+
+    def load_chat_installation_marker(self):
+        path = "open_webui/utils/middleware.py"
+        definitions = [node for node in ast.parse(self.members[path]).body
+                       if isinstance(node, ast.Assign) and any(
+                           isinstance(target, ast.Name) and target.id == "EES_WORK_NATIVE_CHAT_CONTEXT"
+                           for target in node.targets)]
+        if len(definitions) != 1:
+            raise AssertionError("Missing production middleware installation marker")
+        module = self.stub("open_webui.utils.middleware")
+        module.__file__ = f"{self.wheel}!/{path}#installation-marker-only"
+        exec(compile(ast.Module(body=definitions, type_ignores=[]), module.__file__, "exec"), module.__dict__)
 
     async def start(self):
         spec = importlib.util.spec_from_file_location(
@@ -307,6 +335,10 @@ class NativeAssetFixture:
 
         self.stub("open_webui.events", EVENTS=ErrorMessages(), publish_event=publish_event)
         self.guard = self.load("open_webui.ees_asset_guard")
+        # Materialize the exact shipped common Tool source beside the guard,
+        # as in the installed wheel. This fixture otherwise compiles ZIP bytes.
+        (self.directory / "ees_workflow_tool.py").write_bytes(self.members["open_webui/ees_workflow_tool.py"])
+        self.guard.__file__ = str(self.directory / "ees_asset_guard.py")
         self.acl = self.load("open_webui.models.access_grants")
         self.tools = self.load("open_webui.models.tools")
         self.models = self.load("open_webui.models.models")
@@ -322,13 +354,20 @@ class NativeAssetFixture:
         self.stub("open_webui.utils.access_control.files", has_access_to_file=file_access)
         self.stub("open_webui.utils.models", get_all_models=get_all_models)
         self.stub("open_webui.utils.chat_variables", get_chat_variables_schema=lambda value: None)
-        # Spec generation is outside the persistence contract; this fixture's
-        # one real executable tool exposes one fixed echo function.
-        self.stub("open_webui.utils.tools", get_tool_servers=get_all_models, get_tool_specs=lambda module: [{
-            "name": "echo", "description": "Synthetic echo",
-            "parameters": {"type": "object", "properties": {"value": {"type": "string"}}},
-        }])
+        # Actual pinned Native function discovery/Pydantic introspection, with
+        # the explicitly scoped schema adapter above (no model/provider IO).
+        self.stub("open_webui.utils.tools", get_tool_servers=get_all_models)
         self.load_tool_binding()
+        self.load_chat_installation_marker()
+        # Local get_tools now calls the real common Work source/ACL guard for
+        # the reserved ID; ordinary tools must continue through it unchanged.
+        for name in ("ees_workflow_contract", "ees_workflow_definition", "ees_workflow_authoring", "ees_workflow_native"):
+            member = "open_webui/" + name + ".py"
+            target = self.directory / (name + ".py")
+            target.write_bytes(self.members[member])
+            self.load("open_webui." + name).__file__ = str(target)
+        # The exact emitted definition reads policy relative to its module.
+        (self.directory / "workflow_policy.json").write_bytes(additions["open_webui/workflow_policy.json"])
         self.tool_router = self.load("open_webui.routers.tools")
         self.model_router = self.load("open_webui.routers.models")
         self.load_caller_definitions()

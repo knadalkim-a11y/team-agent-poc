@@ -1,0 +1,231 @@
+{
+  "observed_at": "2026-10-02T03:28:55.443967+00:00",
+  "base_head": "10e2c5621e852aa0a2061ed1697e8cfac4ce4a9f",
+  "source_dirty": true,
+  "cwd": "/workspace/scratch/1d6bc68344e4/team-agent-poc",
+  "scope": "Diagnostic preservation only in three test files. Product source, browser flags, original shared 15-second bootstrap budget, CI gates and success conditions are unchanged.",
+  "environment": {
+    "os": "Linux",
+    "kernel": "6.18.44",
+    "machine": "x86_64",
+    "python": "Python 3.11.16",
+    "chrome": {
+      "protocolVersion": "1.3",
+      "product": "HeadlessChrome/153.0.8010.52",
+      "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+      "jsVersion": "15.3.76.13"
+    },
+    "isolation": "Harness-owned temporary Native DATA_DIR, generated synthetic account and secret; actual Native authentication/chat/file/work storage and server, loopback synthetic model/embeddings only. No company credential or DB.",
+    "explicit_command_environment_overrides": {
+      "unit": "PYTHONPATH=tests",
+      "actual_product": null
+    }
+  },
+  "commands": [
+    {
+      "command": "PYTHONPATH=tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_chat_theme -v > dist/integrated/complete-bootstrap-helper-regression.log 2>&1",
+      "tests": 7,
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 0.109,
+      "executions": 1,
+      "condition": "Initial shared full-product failure collector and no-session guard, before final cleanup snapshot was added."
+    },
+    {
+      "command": "PYTHONPATH=tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_chat_theme -v > dist/integrated/complete-bootstrap-helper-final-regression.log 2>&1",
+      "tests": 8,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 0.099,
+      "executions": 1,
+      "condition": "Added final local cleanup snapshot and regression; original first-failure snapshot remains immutable."
+    },
+    {
+      "command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning tests/ees_work_integrated_app.py --wheel dist/integrated/branding-10/open_webui-0.11.3+ees.13-py3-none-any.whl --chrome dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell --output dist/integrated/fullapp-bootstrap-diagnostic > dist/integrated/fullapp-bootstrap-diagnostic.log 2>&1",
+      "exit_code": 0,
+      "status": "passed",
+      "executions": 1,
+      "recorded_steps": 8,
+      "screenshots": 12,
+      "condition": "Same packaged product with changed test collector retaining first/final browser diagnostics; one actual Native CLI execution with temporary DATA_DIR and loopback synthetic model."
+    }
+  ],
+  "wheel": {
+    "path": "dist/integrated/branding-10/open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "bytes": 152044704,
+    "sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3"
+  },
+  "test_sources": [
+    {
+      "path": "tests/ees_work_integrated_app.py",
+      "bytes": 25774,
+      "sha256": "c995d2cb568db3440cc716925e31d74da3e55599f4bdaadc2fed33db0870964d"
+    },
+    {
+      "path": "tests/ees_work_native_chat.py",
+      "bytes": 24936,
+      "sha256": "01f92095507f0b908ee45b4a72eb0370e92c5ed683ee84cd3841f0a7799aad3a"
+    },
+    {
+      "path": "tests/test_ees_chat_theme.py",
+      "bytes": 20610,
+      "sha256": "0f01cbd844729cf148dd9961cf996b637c1027ddb980e0f49f355a645c1266be"
+    }
+  ],
+  "regression_meaning": [
+    "A real Browser.getVersion reply and Target.createTarget share one existing 15-second budget without retry.",
+    "Complete ProductGate and its inherited NativeChatGate save the first diagnostic snapshot before any page CDP. Without an attached session no page command and no PNG is produced; with an attached session a later failed page capture cannot erase the first snapshot.",
+    "A delayed prior response consumed during ordinary cleanup is kept separately from the immutable first failure; final stderr/exit/response summary survives local handle closure.",
+    "No synthetic unit result is counted as actual browser or company integration success."
+  ],
+  "original_ci": {
+    "run": 36958974158,
+    "job": 110688486415,
+    "conclusion": "failure",
+    "artifact_id": 11207501537,
+    "artifact_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/36958974158/artifacts/11207501537",
+    "archive": {
+      "path": "/workspace/scratch/1d6bc68344e4/attachments/295c68aa-662c-4e37-afdd-09746ca25b97/complete-native-bootstrap-failure.zip",
+      "bytes": 1286,
+      "sha256": "3d04940983fd7cc23ec745106c3c07d7adb242b74befce6a9d210ef0f1db8625"
+    },
+    "job_log_snapshot": {
+      "path": "dist/integrated/ci-36958974158-product-original.log",
+      "bytes": 108366,
+      "sha256": "30f5a91db292387029c58287678c0aac92558460037bcd6200968ce308eb4145"
+    },
+    "first_snapshot": "Not retained by the old full-product collector; cannot recover Chrome stderr/process/first-response details from this artifact.",
+    "final_snapshot": "Not retained by the old collector. Later Runtime.evaluate -32601 reply establishes later browser-level response, not the timing or fate of the first Browser.getVersion reply.",
+    "observed": "First Browser.getVersion exceeded the existing 15-second bootstrap budget before a target/session/product page. Old page failure capture then issued Runtime.evaluate at browser scope and received -32601. Uploaded evidence correctly remained invalid with zero PNG.",
+    "cause_status": "Underlying initial Chrome delay or missing first response remains unconfirmed; no launch change is justified by available evidence.",
+    "preserved_files": [
+      {
+        "artifact_member": "ees-native-product/report.json",
+        "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/complete-product-original-ci-report.json",
+        "bytes": 1416,
+        "sha256": "2ec0a4f4615b87fb0877b1baa27674b4efa72c937ca7e09615e6178d1059cdbc"
+      },
+      {
+        "artifact_member": "ees-native-product-results/browser-evidence.json",
+        "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/complete-product-original-ci-evidence.json",
+        "bytes": 204,
+        "sha256": "2b460f5918d49794addac62b2aadd90910844609f339deed34166d7ebd1db3d9"
+      },
+      {
+        "source_path": "dist/integrated/ci-36958974158-product-original.log",
+        "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/complete-product-original-ci-excerpt.log",
+        "bytes": 3527,
+        "sha256": "b10d0dd5d27b081c100376d1479271f0b7a172a674417b522567c50830f15df5"
+      }
+    ]
+  },
+  "local_diagnostics": {
+    "first_failure": null,
+    "final_snapshot_path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/complete-product-report.json",
+    "final_exit_code": 0,
+    "final_close_completed": true,
+    "limitation": "The local pass verifies actual app behavior and diagnostic collector compatibility; it does not establish that the intermittent CI startup cause is resolved."
+  },
+  "files": [
+    {
+      "source_path": "dist/integrated/complete-bootstrap-helper-regression.log",
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/complete-product-helper-7.log",
+      "bytes": 1518,
+      "sha256": "ff3e7085219c414f922b3c9a40cdefc1c2fda118b47603f4be1c5d2727c8e7ca"
+    },
+    {
+      "source_path": "dist/integrated/complete-bootstrap-helper-final-regression.log",
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/complete-product-helper-8.log",
+      "bytes": 1714,
+      "sha256": "925518da4bba8b10b68655a42b74cbc8b3a4c906dc70841a5c1f6915163711a2"
+    },
+    {
+      "source_path": "dist/integrated/fullapp-bootstrap-diagnostic.log",
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/complete-product.log",
+      "bytes": 1105,
+      "sha256": "2a8ac104d8e42d84adc7394790c874002c67af90ece074eae37af5325bd38b64"
+    },
+    {
+      "source_path": "dist/integrated/fullapp-bootstrap-diagnostic/report.json",
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/complete-product-report.json",
+      "bytes": 7697,
+      "sha256": "c398fb8d38db7912b0ca8dc38f9b7f5de0c33babf5d073fc7c06d0faaa4698c6"
+    },
+    {
+      "source_path": "dist/integrated/fullapp-bootstrap-diagnostic/native-attachment-restored.png",
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/complete-product-attachment-restored.png",
+      "bytes": 111570,
+      "sha256": "0be0dcb7c08fcc6869e013640ca967e879a3c52582c30e73b649ec09f050067d"
+    }
+  ],
+  "screenshot_references": [
+    {
+      "path": "dist/integrated/fullapp-bootstrap-diagnostic/a0-empty.png",
+      "bytes": 56443,
+      "sha256": "88471ed45fcde8cbbf856ea66f0b12e039a18815f36fead0b144c7b4960c80c9"
+    },
+    {
+      "path": "dist/integrated/fullapp-bootstrap-diagnostic/a1-human-complete.png",
+      "bytes": 76234,
+      "sha256": "93a242e14deb47279725cad1b1bc22703724a7821c5a7bdef9f936d33da730df"
+    },
+    {
+      "path": "dist/integrated/fullapp-bootstrap-diagnostic/a1-input-saved-not-complete.png",
+      "bytes": 75279,
+      "sha256": "241396cf45bc79b120eae7f204f4b54707392e2d918c4b7c490b50366e653b40"
+    },
+    {
+      "path": "dist/integrated/fullapp-bootstrap-diagnostic/b2-published.png",
+      "bytes": 90267,
+      "sha256": "7c83813e84f6e30882f677ca769a1d6b06c8a427696418c78185628432c6dc31"
+    },
+    {
+      "path": "dist/integrated/fullapp-bootstrap-diagnostic/b3-saved-authoring.png",
+      "bytes": 88852,
+      "sha256": "19eee2b4d31f3e34a8eeaa38ce3898782b670d9325f61f54540442320b2bda79"
+    },
+    {
+      "path": "dist/integrated/fullapp-bootstrap-diagnostic/native-attachment-restored.png",
+      "bytes": 111570,
+      "sha256": "0be0dcb7c08fcc6869e013640ca967e879a3c52582c30e73b649ec09f050067d"
+    },
+    {
+      "path": "dist/integrated/fullapp-bootstrap-diagnostic/native-attachment-saved.png",
+      "bytes": 115200,
+      "sha256": "a221bbdab84c88d01c28419d953636a50a5699ffa9c5eed63c5734c810925608"
+    },
+    {
+      "path": "dist/integrated/fullapp-bootstrap-diagnostic/native-chat-saved.png",
+      "bytes": 94020,
+      "sha256": "d0ca8a5f5c8d3d12d4cebc5d8c358975cfe9ac32244936f2a3c223bf002aa9e5"
+    },
+    {
+      "path": "dist/integrated/fullapp-bootstrap-diagnostic/native-file-upload.png",
+      "bytes": 98496,
+      "sha256": "aeda5dc128a0a0508d630af728d482e493fd484589173200e3fc108414022727"
+    },
+    {
+      "path": "dist/integrated/fullapp-bootstrap-diagnostic/native-narrow.png",
+      "bytes": 99902,
+      "sha256": "27b35a334bd1119f325403a1dcfefd26b6e7a8a5264c41fa6acf2e468a8a17e6"
+    },
+    {
+      "path": "dist/integrated/fullapp-bootstrap-diagnostic/native-reduced-motion.png",
+      "bytes": 99885,
+      "sha256": "69a2e5a906af6baf2ba71f350c6f2edf5a4cdd5b50a0d338d3edb5828a0bf7bc"
+    },
+    {
+      "path": "dist/integrated/fullapp-bootstrap-diagnostic/publish-confirmation-cancel-focus.png",
+      "bytes": 107746,
+      "sha256": "e0ab2703600361db8bb9a48b046088215e5d62d74d856f3db971297de33c8cfc"
+    }
+  ],
+  "representative_screen": {
+    "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/complete-product-attachment-restored.png",
+    "inspection": "Actual screenshot inspected: readable Korean, restored Native conversation and uploaded attachment, right-panel human-completed work; no image modification."
+  },
+  "preservation": "Previous chrome-bootstrap evidence, prior CI failures, and all original dist screenshots remain intact. Only one representative PNG is copied; no evidence-only test rerun.",
+  "review": "Three-file diff reviewed. Diagnostic summaries omit CDP request params/auth bodies; supplied report stderr was inspected for secret markers. No-session failure keeps failed status and zero-PNG evidence invalid. No timeout increase, retry, skip, weakened assertion or product mutation."
+}

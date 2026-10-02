@@ -211,6 +211,25 @@ class UpgradeDeploymentTests(unittest.TestCase):
         self.assertTrue(self.progress["changed"])
         self.assertFalse((self.root / "upgrade-receipt.json").exists())
 
+    def test_current_program_upgrade_reports_retired_registration_without_calling_it(self):
+        import ees_apply_demo as retired_demo
+        self.selected["webui_version"] = "0.11.3+ees.13"
+        with patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                patch.object(upgrade, "github_client", return_value=self.client), \
+                patch.object(upgrade, "bootstrap", return_value=(None, HEAD, OLDER)), \
+                patch.object(retired_demo, "main", side_effect=AssertionError("retired registration invoked")) as assets, \
+                redirect_stdout(self.output):
+            self.assertEqual(upgrade.main(["--config", "synthetic.json"]), 0)
+        assets.assert_not_called()
+        saved = json.loads((self.root / "last-operation.json").read_bytes())
+        self.assertFalse(saved["failed"])
+        self.assertEqual(saved["result"]["version"], "0.11.3+ees.13")
+        self.assertEqual(saved["result"]["asset_registration"], "not_applicable")
+        self.assertEqual(saved["result"]["asset_registration_reason"], "demo_registration_retired")
+        self.mock["start"].assert_called_once()
+        self.assertTrue((self.root / "upgrade-receipt.json").is_file())
+        self.assertIn("registration=not_applicable reason=demo_registration_retired", self.output.getvalue())
+
     def test_main_apply_permission_error_retains_codes_and_actual_upgrade_frame(self):
         private = "synthetic-private-PAT-and-exception-path"
         error = PermissionError(13, private, private)

@@ -1,0 +1,623 @@
+{
+  "time": "2026-10-02T01:54:52.190579+00:00",
+  "scope": "Complete packaged Native app gate for the integrated work contract.\n\nOne temporary DATA_DIR and a loopback synthetic model are used. Native auth,\nchat/file storage, workflow APIs, worker and frontend are the built product.\nNo company credentials, DB or service is read. Physical CDP input drives UI;\nread-only DOM evaluation inspects readiness and results. Failure evidence is\ncaptured before browser shutdown. This is distinct from the Native fixtures.\n",
+  "source_commit": "f1e87a8fdb1425156b4434c38b90741fe3970aa8",
+  "source_dirty": true,
+  "wheel": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+  "wheel_sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3",
+  "steps": [
+    {
+      "name": "empty Native installation",
+      "workflows": 0,
+      "runs": 0
+    },
+    {
+      "name": "Native model availability",
+      "models": [
+        {
+          "id": "c3-synthetic-model",
+          "direct": null,
+          "owned_by": "openai"
+        },
+        {
+          "id": "arena-model",
+          "direct": null,
+          "owned_by": "arena"
+        }
+      ]
+    },
+    {
+      "name": "actual built Native render",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "name": "explicit packaged read-only Work tool registration",
+      "id": "ees_workflow",
+      "source_sha256": "74622ba69fe47340e7a497b320912871e547730d79e77d0eea77d64c681c61c8",
+      "private_native_grant": true,
+      "model_presets_created": false
+    },
+    {
+      "name": "actual Native authenticated socket join sent",
+      "credential_payload_recorded": false
+    },
+    {
+      "name": "physical central chat executes actual registered authorized read",
+      "workflow_id": "28e2654f-3dbe-46dc-bd3d-97e61badfe85",
+      "revision": 2,
+      "stored_work_unchanged": true
+    },
+    {
+      "name": "physical central proposal then separate apply and save",
+      "draft_revision": 3,
+      "published": false,
+      "runs": 0,
+      "chat_id": "c1bf60b1-22f0-49d6-a6c8-82ab637efbd2",
+      "native_tool_history_saved": true,
+      "model_boundary": "Loopback synthetic tool-call selection only; actual Native registered tool execution"
+    },
+    {
+      "name": "physical input suggestion preview apply then separate save",
+      "run_id": "b2b7d7a9-48e9-4613-a7d4-7d3d4c030222",
+      "proposal_count": 1,
+      "attempts": 0
+    },
+    {
+      "name": "physical immutable historical message reference after second attempt",
+      "message_id": "61a8d548-067c-4e4a-a50c-0f7902fcc3f6",
+      "attempt_id": "01a01a47-6d4b-41f5-81ae-1db8ebcde320",
+      "latest_attempts": 2,
+      "readonly": true
+    }
+  ],
+  "status": "passed",
+  "api_failures": [],
+  "native_messages": [
+    {
+      "id": "a0bab82c-a256-42ee-b12c-5960c2788125",
+      "role": "user",
+      "content": "중앙 대화 준비",
+      "done": null,
+      "meta": {
+        "ees_work_reference": {
+          "kind": "workspace",
+          "workflow_id": "28e2654f-3dbe-46dc-bd3d-97e61badfe85",
+          "run_id": "",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": null,
+          "workflow_revision": 2,
+          "revision": 2,
+          "context_id": "[4,true,\"/\",\"\",\"EMS\",\"\",\"28e2654f-3dbe-46dc-bd3d-97e61badfe85\",\"\",\"\"]"
+        }
+      }
+    },
+    {
+      "id": "fc42a560-7a77-4fd3-821b-022ca374372a",
+      "role": "assistant",
+      "content": "중앙 대화의 합성 연결 준비 완료",
+      "done": true,
+      "meta": null
+    },
+    {
+      "id": "84faec7c-0621-44a4-9127-e781aa0323d3",
+      "role": "user",
+      "content": "중앙 도구로 현재 절차를 조회해 줘",
+      "done": null,
+      "meta": {
+        "ees_work_reference": {
+          "kind": "workspace",
+          "workflow_id": "28e2654f-3dbe-46dc-bd3d-97e61badfe85",
+          "run_id": "",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": null,
+          "workflow_revision": 2,
+          "revision": 2,
+          "context_id": "[5,true,\"/c/c1bf60b1-22f0-49d6-a6c8-82ab637efbd2\",\"\",\"EMS\",\"\",\"28e2654f-3dbe-46dc-bd3d-97e61badfe85\",\"\",\"\"]"
+        }
+      }
+    },
+    {
+      "id": "20e53517-dff5-47eb-8de6-e4c7e54cb1e2",
+      "role": "assistant",
+      "content": "중앙 도구 조회 완료",
+      "done": true,
+      "meta": null
+    },
+    {
+      "id": "a894bb42-3406-4ab8-85b7-9cd7c1b431b9",
+      "role": "user",
+      "content": "설명을 보완한 초안을 제안해 줘. 저장하지 말고 검토하게 해 줘",
+      "done": null,
+      "meta": {
+        "ees_work_reference": {
+          "kind": "workspace",
+          "workflow_id": "28e2654f-3dbe-46dc-bd3d-97e61badfe85",
+          "run_id": "",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": null,
+          "workflow_revision": 2,
+          "revision": 2,
+          "context_id": "[5,true,\"/c/c1bf60b1-22f0-49d6-a6c8-82ab637efbd2\",\"\",\"EMS\",\"\",\"28e2654f-3dbe-46dc-bd3d-97e61badfe85\",\"\",\"\"]"
+        }
+      }
+    },
+    {
+      "id": "d656d9a8-f0bd-4e20-86a6-27599a120575",
+      "role": "assistant",
+      "content": "중앙 제안은 검토 전이며 저장하지 않았습니다",
+      "done": true,
+      "meta": null
+    },
+    {
+      "id": "61a8d548-067c-4e4a-a50c-0f7902fcc3f6",
+      "role": "user",
+      "content": "첫 번째 완료 근거를 대화에 남겨 줘",
+      "done": null,
+      "meta": {
+        "ees_work_reference": {
+          "kind": "workspace",
+          "workflow_id": "28e2654f-3dbe-46dc-bd3d-97e61badfe85",
+          "run_id": "b2b7d7a9-48e9-4613-a7d4-7d3d4c030222",
+          "job_id": "job-ec92353c-592e-464b-950b-26c8a537a721",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 5,
+          "attempt_id": "01a01a47-6d4b-41f5-81ae-1db8ebcde320",
+          "result_revision": 1,
+          "revision": 5,
+          "context_id": "[9,true,\"/c/c1bf60b1-22f0-49d6-a6c8-82ab637efbd2\",\"\",\"EMS\",\"\",\"28e2654f-3dbe-46dc-bd3d-97e61badfe85\",\"b2b7d7a9-48e9-4613-a7d4-7d3d4c030222\",\"job-ec92353c-592e-464b-950b-26c8a537a721\"]"
+        }
+      }
+    },
+    {
+      "id": "6194a9c5-1bc0-4534-9a95-90655c505fb3",
+      "role": "assistant",
+      "content": "첫 번째 완료 근거를 참조한 대화 응답",
+      "done": true,
+      "meta": null
+    }
+  ],
+  "model_boundary": {
+    "calls": [
+      {
+        "mode": "read",
+        "function": "ees_workflow_view",
+        "arguments": {
+          "workflow_id": "28e2654f-3dbe-46dc-bd3d-97e61badfe85"
+        }
+      },
+      {
+        "mode": "propose",
+        "function": "ees_workflow_propose",
+        "arguments": {
+          "workflow_id": "28e2654f-3dbe-46dc-bd3d-97e61badfe85",
+          "base_revision": 2,
+          "definition": {
+            "id": "28e2654f-3dbe-46dc-bd3d-97e61badfe85",
+            "name": "중앙 대화 제안 검증",
+            "system_id": "EMS",
+            "category": "ops",
+            "mode": "on_demand",
+            "nodes": {
+              "p-315b2491041c": {
+                "id": "p-315b2491041c",
+                "name": "중앙 대화 제안 검증",
+                "type": "p",
+                "parent": null,
+                "children": [
+                  "stage-ec16117e-ed5f-4ec7-90c2-6babfb0fccea"
+                ],
+                "deps": []
+              },
+              "stage-ec16117e-ed5f-4ec7-90c2-6babfb0fccea": {
+                "id": "stage-ec16117e-ed5f-4ec7-90c2-6babfb0fccea",
+                "type": "t",
+                "parent": "p-315b2491041c",
+                "name": "새 단계",
+                "description": "",
+                "instructions": "중앙 대화 제안 · 사람 반영 전",
+                "children": [],
+                "mode": "human",
+                "inputs": [],
+                "result_block": "human_confirm",
+                "deps": [],
+                "human_confirmation": true,
+                "completion": {
+                  "rule": ""
+                }
+              }
+            },
+            "description": "중앙 대화에서 제안한 미저장 설명"
+          },
+          "context_id": "[5,true,\"/c/c1bf60b1-22f0-49d6-a6c8-82ab637efbd2\",\"\",\"EMS\",\"\",\"28e2654f-3dbe-46dc-bd3d-97e61badfe85\",\"\",\"\"]"
+        }
+      }
+    ],
+    "models": [
+      {
+        "mode": "plain",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user"
+        ]
+      },
+      {
+        "mode": "read",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user"
+        ]
+      },
+      {
+        "mode": "read",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool"
+        ]
+      },
+      {
+        "mode": "propose",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user"
+        ]
+      },
+      {
+        "mode": "propose",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool"
+        ]
+      },
+      {
+        "mode": "plain",
+        "advertised_tool_names": [],
+        "stream": false,
+        "roles": [
+          "system",
+          "user"
+        ]
+      },
+      {
+        "mode": "plain",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user"
+        ]
+      }
+    ],
+    "tool_results": [
+      {
+        "role": "tool",
+        "tool_call_id": "call_120530db2d3644c490b6c8c6c9c98a23",
+        "content": "{\n  \"ok\": true,\n  \"workflows\": [\n    {\n      \"id\": \"28e2654f-3dbe-46dc-bd3d-97e61badfe85\",\n      \"system_id\": \"EMS\",\n      \"revision\": 2,\n      \"published_version\": null,\n      \"created_by\": \"aa432c25-3078-428b-a4d4-c051a17b9459\",\n      \"updated_at\": \"2026-10-02T01:55:06.604+00:00\",\n      \"draft\": {\n        \"id\": \"28e2654f-3dbe-46dc-bd3d-97e61badfe85\",\n        \"name\": \"중앙 대화 제안 검증\",\n        \"system_id\": \"EMS\",\n        \"category\": \"ops\",\n        \"mode\": \"on_demand\",\n        \"nodes\": {\n          \"p-315b2491041c\": {\n            \"id\": \"p-315b2491041c\",\n            \"name\": \"중앙 대화 제안 검증\",\n            \"type\": \"p\",\n            \"parent\": null,\n            \"children\": [\n              \"stage-ec16117e-ed5f-4ec7-90c2-6babfb0fccea\"\n            ],\n            \"deps\": []\n          },\n          \"stage-ec16117e-ed5f-4ec7-90c2-6babfb0fccea\": {\n            \"id\": \"stage-ec16117e-ed5f-4ec7-90c2-6babfb0fccea\",\n            \"type\": \"t\",\n            \"parent\": \"p-315b2491041c\",\n            \"name\": \"새 단계\",\n            \"description\": \"\",\n            \"instructions\": \"저장된 기준 안내\",\n            \"children\": [],\n            \"mode\": \"human\",\n            \"inputs\": [],\n            \"result_block\": \"human_confirm\",\n            \"deps\": [],\n            \"human_confirmation\": true,\n            \"completion\": {\n              \"rule\": \"\"\n            }\n          }\n        }\n      },\n      \"can_manage\": true,\n      \"validation\": null,\n      \"versions\": [],\n      \"published\": null,\n      \"name\": \"중앙 대화 제안 검증\",\n      \"mode\": \"on_demand\",\n      \"category\": \"ops\",\n      \"settings\": []\n    }\n  ],\n  \"workflow\": {\n    \"id\": \"28e2654f-3dbe-46dc-bd3d-97e61badfe85\",\n    \"system_id\": \"EMS\",\n    \"revision\": 2,\n    \"published_version\": null,\n    \"created_by\": \"aa432c25-3078-428b-a4d4-c051a17b9459\",\n    \"updated_at\": \"2026-10-02T01:55:06.604+00:00\",\n    \"draft\": {\n      \"id\": \"28e2654f-3dbe-46dc-bd3d-97e61badfe85\",\n      \"name\": \"중앙 대화 제안 검증\",\n      \"system_id\": \"EMS\",\n      \"category\": \"ops\",\n      \"mode\": \"on_demand\",\n      \"nodes\": {\n        \"p-315b2491041c\": {\n          \"id\": \"p-315b2491041c\",\n          \"name\": \"중앙 대화 제안 검증\",\n          \"type\": \"p\",\n          \"parent\": null,\n          \"children\": [\n            \"stage-ec16117e-ed5f-4ec7-90c2-6babfb0fccea\"\n          ],\n          \"deps\": []\n        },\n        \"stage-ec16117e-ed5f-4ec7-90c2-6babfb0fccea\": {\n          \"id\": \"stage-ec16117e-ed5f-4ec7-90c2-6babfb0fccea\",\n          \"type\": \"t\",\n          \"parent\": \"p-315b2491041c\",\n          \"name\": \"새 단계\",\n          \"description\": \"\",\n          \"instructions\": \"저장된 기준 안내\",\n          \"children\": [],\n          \"mode\": \"human\",\n          \"inputs\": [],\n          \"result_block\": \"human_confirm\",\n          \"deps\": [],\n          \"human_confirmation\": true,\n          \"completion\": {\n            \"rule\": \"\"\n          }\n        }\n      }\n    },\n    \"can_manage\": true,\n    \"validation\": null,\n    \"versions\": [],\n    \"published\": null,\n    \"name\": \"중앙 대화 제안 검증\",\n    \"mode\": \"on_demand\",\n    \"category\": \"ops\",\n    \"settings\": []\n  },\n  \"run\": null,\n  \"runs\": [],\n  \"my_work\": [],\n  \"capabilities\": {\n    \"actor_id\": \"aa432c25-3078-428b-a4d4-c051a17b9459\",\n    \"is_admin\": true,\n    \"managed_systems\": [\n      \"EMS\",\n      \"APC\",\n      \"FDC\",\n      \"EGIS\",\n      \"EPT\",\n      \"COMMON\"\n    ],\n    \"can_author\": true\n  },\n  \"work_context\": {\n    \"workflow_id\": \"28e2654f-3dbe-46dc-bd3d-97e61badfe85\",\n    \"run_id\": \"\",\n    \"job_id\": \"\",\n    \"revision\": 2,\n    \"context_id\": \"[5,true,\\\"/c/c1bf60b1-22f0-49d6-a6c8-82ab637efbd2\\\",\\\"\\\",\\\"EMS\\\",\\\"\\\",\\\"28e2654f-3dbe-46dc-bd3d-97e61badfe85\\\",\\\"\\\",\\\"\\\"]\"\n  }\n}"
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "call_6ebceb941e404e1c8202046b27d03663",
+        "content": "{\n  \"ok\": true,\n  \"proposal\": {\n    \"ok\": true,\n    \"preview\": true,\n    \"saved\": false\n  },\n  \"saved\": false,\n  \"published\": false,\n  \"message\": \"사용자가 편집 화면에서 제안을 검토하고 반영·저장해야 합니다.\"\n}"
+      }
+    ],
+    "input_proposals": [
+      {
+        "context": {
+          "context_id": "[9,true,\"/c/c1bf60b1-22f0-49d6-a6c8-82ab637efbd2\",\"\",\"EMS\",\"\",\"28e2654f-3dbe-46dc-bd3d-97e61badfe85\",\"b2b7d7a9-48e9-4613-a7d4-7d3d4c030222\",\"job-ec92353c-592e-464b-950b-26c8a537a721\"]",
+          "target_id": "job-ec92353c-592e-464b-950b-26c8a537a721",
+          "revision": 1,
+          "kind": "inputs"
+        },
+        "instruction": "개발용 자료 메모를 제안해 줘. 저장하지 마.",
+        "untrusted_source": {
+          "job": {
+            "id": "job-ec92353c-592e-464b-950b-26c8a537a721",
+            "name": "입력 제안과 과거 근거",
+            "instructions": ""
+          },
+          "fields": [
+            {
+              "id": "note",
+              "name": "자료 메모",
+              "type": "text",
+              "scope": "run",
+              "required": false,
+              "description": "",
+              "unit": "",
+              "options_source": "manual",
+              "options": [],
+              "depends_on": [],
+              "tool_argument": ""
+            }
+          ],
+          "current_inputs": {}
+        }
+      }
+    ],
+    "errors": []
+  }
+}

@@ -204,7 +204,7 @@ class WindowsVenvTests(unittest.TestCase):
             python = environment / 'Scripts' / 'python.exe'
             marker = root / 'runtime.json'
             code = ('import json,os,sys,time;from pathlib import Path;'
-                    'Path(sys.argv[1]+".tmp").write_text(json.dumps({"pid":os.getpid()}));'
+                    'Path(sys.argv[1]+".tmp").write_text(json.dumps({"pid":os.getpid()}),encoding="utf-8");'
                     'os.replace(sys.argv[1]+".tmp",sys.argv[1]);time.sleep(30)')
             child = subprocess.Popen([str(python), '-I', '-S', '-c', code, str(marker)],
                                      stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
@@ -216,7 +216,7 @@ class WindowsVenvTests(unittest.TestCase):
                 while not marker.exists() and time.monotonic() < deadline:
                     time.sleep(.05)
                 self.assertTrue(marker.exists())
-                actual_pid = json.loads(marker.read_text())['pid']
+                actual_pid = json.loads(marker.read_text(encoding='utf-8'))['pid']
                 self.assertNotEqual(actual_pid, child.pid)
                 parent = target.processes._identity(child.pid)
                 parent['group_id'] = child.pid

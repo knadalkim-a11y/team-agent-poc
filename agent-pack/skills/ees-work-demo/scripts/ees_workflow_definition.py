@@ -23,9 +23,9 @@ def _policy():
 
 
 def _seed():
-    definition = json.loads(Path(__file__).with_name("workflow_seed.json").read_text(encoding="utf-8"))
-    definition["skills"] = {"common": _policy(), **definition["skills"]}
-    return definition
+    """Only structural registries are defaults; demo content is never seeded."""
+    return {"version": 1, "nodes": {}, "tools": {}, "skills": {}, "sites": {},
+            "roots": {category: [] for category in CATEGORIES}, "systems": list(SYSTEMS)}
 
 
 def _ancestors(nodes, node_id):

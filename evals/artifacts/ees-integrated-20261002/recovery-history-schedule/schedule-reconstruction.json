@@ -1,0 +1,78 @@
+{
+  "recorded_at": "2026-10-02T07:17:21.528353+00:00",
+  "reconstruction": {
+    "reason": "The original uncommitted test_ees_work_figma_schedule.py was unavailable after workspace loss.",
+    "method": "New semantic tests reconstructed from the recovered frozen product contract and actual SQLite/public command behavior.",
+    "original_bytes_restored": false,
+    "original_test_count_claimed": false,
+    "product_modified": false
+  },
+  "head_at_recording": "455bc06fb72bcc595bfc0b0c53824dd8e2616fed",
+  "command": "PYTHONUTF8=1 PYTHONIOENCODING=utf-8:strict PYTHONPATH=.:tests .venv/bin/python -m unittest test_ees_work_figma_schedule -v",
+  "environment": {
+    "python": "Python 3.11.16",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "storage": "Per-test temporary SQLite only",
+    "external_boundary": "Synthetic Native identities and bridge/connector observations; no corporate services"
+  },
+  "attempts": [
+    {
+      "log": "schedule-first.log",
+      "sequence": 1,
+      "tests": 18,
+      "passed": 18,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.884,
+      "exit_code": 0
+    }
+  ],
+  "coverage": [
+    "Read-only unsaved schedule preview; current manage ACL; no reservation and no holiday date shifting",
+    "Lifecycle opt-in requires exact published rule and explicit personal delegation",
+    "Queued cycle pins version, schedule rule and dates across publication/restart",
+    "Human confirmation required before close and early opening of next cycle",
+    "Queued work rechecks current Native identity and delegation",
+    "100 blocked open cycles cannot starve an independent due reservation",
+    "Bounded close scanner advances past 100 revoked identities",
+    "Retry absence/count0 is one call; count3 permits at most four immutable attempts; idempotent receipt never resets budget",
+    "Retry success preserves failed evidence and waits for human decision",
+    "Unknown, partial, 401/authentication, 429/rate-limit and forged untrusted raw flags cannot trigger retry",
+    "Published retry schema bounds count0..3 and monotonic whole-chain deadline1..300; excludes AI/request/unlisted functions",
+    "Monotonic budget unaffected by backward wall-clock change; in-flight timeout records UNKNOWN and prevents resend",
+    "Human input changes, intervening manual attempt and current source revocation stop automatic retry",
+    "Explicit negative effect evidence is terminal failed and not overwritten by later success; unknown effect stays unresolved and prevents close"
+  ],
+  "limits": [
+    "Canonical source-hash enforcement and actual HTTP503 Native transport are tested separately by test_ees_workflow_native; these schedule tests use its real normalizer with explicitly synthetic trusted/untrusted bridge observations.",
+    "Adversarial scanner queue heads are synthetic rows copied from a real reservation/run inside the test temporary database; the eligible tail uses actual human_confirm and close_run gates.",
+    "Not a Native browser or real company integration success claim."
+  ],
+  "files": {
+    "tests/test_ees_work_figma_schedule.py": {
+      "sha256": "1c12a7130a472ee69ab98605c4e26ab4174081d6e8c4274617f161deacb895b5",
+      "bytes": 23386
+    },
+    "tests/test_ees_work_operations.py": {
+      "sha256": "e4d09f398eee98b17c4ebeff53fa67f2c283a4664a4a89e321dfdaf208772613",
+      "bytes": 49180
+    },
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_operations.py": {
+      "sha256": "823f3b4f5ed19e202caf694774cd10098d6f3c61004972080a3f458ef3ddb1ce",
+      "bytes": 116442
+    },
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py": {
+      "sha256": "5cc89065e4afeabefe37c5e593c26fb9745bf4dc4e95f39b9aea1d225025bd33",
+      "bytes": 50009
+    },
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py": {
+      "sha256": "176d2a8d7008a5192efc9fe5e88bef2139634df2c2a00d13320e17fb6159594b",
+      "bytes": 129753
+    }
+  },
+  "log_sha256": "474f805d16f8bc38adeb13095c95773e9c724c2e90a029ebfa6317dba0ca495c",
+  "checks": {
+    "git_diff_check": "passed"
+  }
+}

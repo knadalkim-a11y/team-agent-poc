@@ -47,6 +47,10 @@ PRE_EXECUTION_WORK_FILES = PRE_AUTHORING_WORK_FILES + (
 )
 
 
+PRE_INTEGRATED_WORK_FILES = PRE_EXECUTION_WORK_FILES + tuple(
+    "open_webui/ees_workflow_" + name + ".py" for name in ("execution", "native", "contract", "examples", "model"))
+
+
 def digest(content):
     return hashlib.sha256(content).hexdigest()
 
@@ -67,13 +71,15 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missin
         app + "version.json": json.dumps({"version": version}).encode(),
         app + "immutable/chunks/test.js": b"const title = 'EES Work';\n",
     }
-    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12"}:
+    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"}:
         members.update({app + name: b"synthetic checked theme asset\n" for name in branding.THEME_FILES})
     if version == "0.11.3+ees.5":
         members.update({name: b"synthetic checked work asset\n" for name in branding.LEGACY_WORK_FILES})
-    if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12"}:
-        if version == "0.11.3+ees.12":
+    if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"}:
+        if version == "0.11.3+ees.13":
             work_files = branding.WORK_FILES
+        elif version == "0.11.3+ees.12":
+            work_files = PRE_INTEGRATED_WORK_FILES
         elif version == "0.11.3+ees.11":
             work_files = PRE_EXECUTION_WORK_FILES
         elif version in {"0.11.3+ees.9", "0.11.3+ees.10"}:
@@ -82,7 +88,7 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missin
             work_files = PRE_SPLIT_WORK_FILES
         members.update({app + name[len(branding.TARGET_APP):] if name.startswith(branding.TARGET_APP) else name:
                         b"synthetic checked work asset\n" for name in work_files})
-    if version in {"0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12"}:
+    if version in {"0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"}:
         members.update({name: b"# synthetic checked asset guard\n" for name in branding.ASSET_GUARD_FILES})
     members.update(extra or {})
     members.update(replacement or {})
@@ -466,13 +472,35 @@ class CustomizationTests(unittest.TestCase):
             "0.11.3+ees.11", "991cdb1d80ae07471fb50594831d74fe602b1ef7",
             "27f6a1c37264d4f205bedb6635c9eaae8a36a5d023d36d1dd595e34728c8b8d3")
 
+    def test_ees12_inventory_is_frozen_and_frontend_namespaces_cannot_be_interchanged(self):
+        self.assertEqual(set(branding.WORK_FILES_V12), set(PRE_INTEGRATED_WORK_FILES))
+        previous = "0.11.3+ees.12"
+        previous_app = "open_webui/frontend/_ees12/"
+        new_app = "open_webui/frontend/_ees13/"
+        self.assertEqual(custom._version_paths(previous)[1], previous_app)
+        self.assertEqual(branding.TARGET_APP, new_app)
+        for version in (previous, branding.VERSION):
+            with zipfile.ZipFile(io.BytesIO(make_wheel(version=version))) as wheel:
+                rows = custom._record_rows(wheel.read("open_webui-" + version + ".dist-info/RECORD"), version=version)
+                namespace = previous_app if version == previous else new_app
+                other = new_app if version == previous else previous_app
+                self.assertTrue(any(name.startswith(namespace) for name in rows))
+                self.assertFalse(any(name.startswith(other) for name in rows))
+                self.assertEqual("open_webui/ees_workflow_examples.py" in rows, version == previous)
+                self.assertEqual("open_webui/ees_workflow_workspace.py" in rows, version == branding.VERSION)
+                missing = "open_webui/ees_workflow_examples.py" if version == previous else "open_webui/ees_workflow_workspace.py"
+            # Recomputed RECORD after omission must still fail required-inventory validation.
+            with zipfile.ZipFile(io.BytesIO(make_wheel(version=version, missing=(missing,)))) as broken:
+                with self.assertRaisesRegex(custom.CustomizationError, "complete app"):
+                    custom._record_rows(broken.read("open_webui-" + version + ".dist-info/RECORD"), version=version)
+
     def test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory(self):
         self._real_previous_apply_restore(
             "EES_TEST_PREVIOUS_C_WHEEL", "EES_REQUIRE_PREVIOUS_C",
             "0.11.3+ees.12", "8027aaf2e654778f052a966e5a49feed0fc54f69",
-            "d35bc2bb4adc789cc93752b49550a47446461f1e54ba0015a3952e6af78ca254")
+            "d35bc2bb4adc789cc93752b49550a47446461f1e54ba0015a3952e6af78ca254", exercise_resume=True)
 
-    def _real_previous_apply_restore(self, previous_env, required_env, version, commit, wheel_hash):
+    def _real_previous_apply_restore(self, previous_env, required_env, version, commit, wheel_hash, *, exercise_resume=False):
         current_dir = os.environ.get("EES_TEST_BRANDING_DIR")
         previous_file = os.environ.get(previous_env)
         if not current_dir or not previous_file:
@@ -517,26 +545,40 @@ class CustomizationTests(unittest.TestCase):
         # Only the pre-existing runtime dependency inspection is isolated.
         # Staging, fixed inventories, promotion and Restore use actual wheels.
         with mock.patch.object(custom, "_load_bundle", return_value=(selected, current)):
-            self.assertTrue(self.apply()["changed"])
+            if exercise_resume:
+                # Inject a promotion failure, not a claimed Windows lock. The
+                # entire staged candidate/old inventory is real, and explicit
+                # Resume still validates their RECORDs and exact transaction.
+                self.interrupt_promotion()
+                self.assertEqual(self.registry["customization"]["active"], old_selection)
+                self.assertEqual(self.registry["customization"]["pending"]["target"], selected)
+                self.assertTrue(self.resume()["changed"])
+                self.assertIsNone(self.registry["customization"]["pending"])
+            else:
+                self.assertTrue(self.apply()["changed"])
         custom.validate_program(self.program, selected)
         if version == "0.11.3+ees.12":
             self.assertTrue((self.program / branding.TARGET_APP / "brand-layers.svg").is_file())
             self.assertFalse((self.program / branding.TARGET_APP / "immutable").exists())
             self.assertTrue(any((self.program / branding.TARGET_APP).glob("immutable-c*")))
         self.assertTrue((self.program / "open_webui/ees_workflow_authoring.py").is_file())
-        for name in ("execution", "native", "contract", "examples", "model"):
+        for name in ("execution", "native", "contract", "model", "workspace", "operations"):
             self.assertTrue((self.program / ("open_webui/ees_workflow_" + name + ".py")).is_file())
+        self.assertFalse((self.program / "open_webui/ees_workflow_examples.py").exists())
+        self.assertFalse((self.program / "open_webui/workflow_seed.json").exists())
         self.assertEqual(self.restore()["source_commit"], old_selection["source_commit"])
         custom.validate_program(self.program, old_selection)
         self.assertEqual(program_hashes(), before)
         self.assertEqual((self.program / "open_webui/ees_workflow_authoring.py").exists(),
-                         version in {"0.11.3+ees.11", "0.11.3+ees.12"})
+                         version in {"0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"})
         for name in ("execution", "native", "contract", "examples", "model"):
             self.assertEqual((self.program / ("open_webui/ees_workflow_" + name + ".py")).exists(),
                              version == "0.11.3+ees.12")
         if version == "0.11.3+ees.12":
-            self.assertFalse((self.program / branding.TARGET_APP / "brand-layers.svg").exists())
-            self.assertTrue((self.program / branding.TARGET_APP / "immutable").is_dir())
+            old_app = custom._version_paths(version)[1]
+            self.assertFalse((self.program / branding.TARGET_APP).exists(), "Restore removes the new frontend namespace")
+            self.assertFalse((self.program / old_app / "brand-layers.svg").exists())
+            self.assertTrue((self.program / old_app / "immutable").is_dir())
         for path, value in preserved.items():
             self.assertEqual(path.read_bytes(), value)
 

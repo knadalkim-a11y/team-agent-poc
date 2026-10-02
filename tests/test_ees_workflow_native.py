@@ -1,13 +1,16 @@
 """TR-01..06/10/19/20: real pinned Native read bridge, synthetic HTTP only."""
 import asyncio
 from copy import deepcopy
+import hashlib
 import json
 import os
 from pathlib import Path
+from types import SimpleNamespace
 import sys
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 from urllib.parse import parse_qs, urlsplit
+from urllib.error import HTTPError
 
 from starlette.requests import Request
 
@@ -124,6 +127,81 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
             serialized = json.dumps([dict(row) for row in db.execute("SELECT * FROM native_approvals")])
             self.assertNotIn("synthetic-reader-pat", serialized)
 
+    async def test_jira_delivery_functions_real_native_loader_array_binding_and_pat(self):
+        refs = await self.fixture.register_read_tool("jira", extended=True)
+        calls = []
+        def transport(request, timeout=None):
+            calls.append((request.full_url, request.get_header("Authorization")))
+            path = urlsplit(request.full_url).path
+            if path == '/rest/api/2/myself': return Response({'name':'fixture','active':True})
+            if path == '/rest/api/2/project': return Response([{'key':'EESEMS','name':'Actual project'}])
+            if path.endswith('/statuses'): return Response([{'statuses':[{'id':'1','name':'Open'}]}])
+            if path == '/rest/api/2/field': return Response([{'id':'updated','name':'Updated','schema':{'type':'datetime'}}])
+            if path == '/rest/api/2/search': return Response({'startAt':0,'maxResults':30,'total':1,'issues':[issue]})
+            if path == '/rest/api/2/issue/EESEMS-1': return Response(issue)
+            if path == '/rest/api/2/attachment/21': return Response(attachment)
+            if path == '/secure/attachment/21/design.txt': return Response('x',headers={'Content-Type':'text/plain'})
+            raise AssertionError(path)
+        attachment={'id':'21','filename':'design.txt','size':1,'mimeType':'text/plain','content':'https://jira.invalid/secure/attachment/21/design.txt'}
+        issue=self.issue('safe-title'); issue['fields']['attachment']=[attachment]; issue['fields']['status']['id']='1'; issue['fields']['updated']='2026-10-02T00:00:00.000+0000'
+        with patch('urllib.request.OpenerDirector.open',side_effect=transport):
+            metadata=await self.call(refs['jira_project_metadata'],{'project_key':'EESEMS'})
+            listing=await self.call(refs['jira_search_crs'],{'project_key':'EESEMS','status_ids':['1'],'date_field':'updated','start_date':'2026-10-01','end_date':'2026-10-02'})
+            documents=await self.call(refs['jira_cr_attachments'],{'issue_keys':['EESEMS-1'],'required_filenames':['design.txt','test.txt']})
+        self.assertEqual(metadata['status'],'succeeded',metadata)
+        self.assertEqual(listing['status'],'succeeded',listing)
+        self.assertEqual(listing['items'][0]['id'],'EESEMS-1')
+        self.assertEqual(documents['status'],'succeeded',documents)
+        self.assertEqual([item['source_record']['state'] for item in documents['items']],['present_readable','missing'])
+        self.assertTrue(all(item['content_reviewed'] is False for item in documents['items']))
+        self.assertTrue(all(pat=='Bearer synthetic-reader-pat' for _,pat in calls))
+        await self.assert_code('native_input_invalid',self.call(refs['jira_cr_attachments'],{'issue_keys':['EESEMS-1',3],'required_filenames':['design.txt']}))
+
+    async def test_scoped_native_chat_registration_context_and_per_call_acl(self):
+        status = (await self.fixture.request('GET','/api/v1/ees/assets/work-tool/status')).json()
+        registered = await self.fixture.request('POST','/api/v1/ees/assets/work-tool/setup',payload={
+            'source_sha256':status['source_sha256'],'expected_token':status['expected_token'],
+            'confirmation':'register_readonly_work_tool','access_grants':[{'principal_type':'user','principal_id':'reader','permission':'read'}]})
+        self.assertEqual(registered.status_code,200,registered.text)
+        service=self.fixture.workflow.WorkflowService(self.fixture.directory/'chat-work.sqlite3',self.fixture.native_users.Users.get_user_by_id,lambda _:None)
+        created=await service.workspace_command(self.admin,{'action':'create_workflow','system_id':'EMS','name':'Chat scope','mode':'on_demand','expected_revision':0,'request_id':'chat-create'})
+        self.assertTrue(created['ok'],created)
+        reference={'kind':'workspace','workflow_id':created['workflow_id'],'run_id':'','job_id':'','revision':1,'context_id':'editor-context-1'}
+        metadata={'chat_id':'synthetic-chat','user_message':{'meta':{'ees_work_reference':reference}}}
+        chat_lookup=AsyncMock(return_value=SimpleNamespace(user_id='admin'))
+        request=Request({'type':'http','app':self.fixture.app,'headers':[],'state':{}})
+        body={'messages':[{'role':'user','content':'초안을 검토해 주세요.'}]}
+        with patch.object(self.native,'__file__',str(self.fixture.directory/'ees_workflow_native.py')), patch.object(self.fixture.workflow,'_production_service',return_value=service), patch.dict(sys.modules,{'open_webui.models.chats':SimpleNamespace(Chats=SimpleNamespace(get_chat_by_id=chat_lookup))}):
+            registered_tool=await self.fixture.tools.Tools.get_tool_by_id('ees_workflow')
+            self.assertEqual({item.get('name') for item in registered_tool.specs},self.native.WORK_CHAT_FUNCTIONS,registered_tool.specs)
+            await self.native._chat_work_access(self.admin,registered_tool)
+            selected=await self.native.select_chat_work_tools(request,self.admin,metadata,[],body)
+            self.assertEqual(selected,['ees_workflow'],request.state.ees_work_chat_status)
+            self.assertEqual(metadata['ees_work_reference']['kind'],'workspace')
+            self.assertIn('editor-context-1',body['messages'][-1]['content'])
+            reference['revision']=2
+            rejected=await self.native.select_chat_work_tools(Request({'type':'http','app':self.fixture.app,'headers':[],'state':{}}),self.admin,metadata,[],{'messages':[]})
+            self.assertEqual(rejected,[])
+            reference['revision']=1;chat_lookup.return_value=SimpleNamespace(user_id='reader')
+            denied=await self.native.select_chat_work_tools(Request({'type':'http','app':self.fixture.app,'headers':[],'state':{}}),self.admin,metadata,[],{'messages':[]})
+            self.assertEqual(denied,[])
+            original=AsyncMock(return_value={'ok':True})
+            unrelated=AsyncMock(return_value={'other':True})
+            tools=self.native.wrap_chat_work_tools(request,self.reader,{'ees_workflow_view':{'tool_id':'other','spec':{'name':'ees_workflow_view'},'callable':unrelated},'ees_workflow_ees_workflow_view':{'tool_id':'ees_workflow','spec':{'name':'ees_workflow_ees_workflow_view'},'callable':original}})
+            self.assertIs(tools['ees_workflow_view']['callable'],unrelated)
+            self.assertTrue((await tools['ees_workflow_ees_workflow_view']['callable']())['ok'])
+            await self.fixture.acl.AccessGrants.set_access_grants('tool','ees_workflow',[])
+            await self.assert_code('work_chat_access_denied',tools['ees_workflow_ees_workflow_view']['callable']())
+            self.assertEqual(original.await_count,1)
+            tool=await self.fixture.tools.Tools.get_tool_by_id('ees_workflow')
+            await self.fixture.tools.Tools.update_tool_by_id('ees_workflow',{'content':tool.content+'\n# changed by owner\n'})
+            changed=await self.fixture.tools.Tools.get_tool_by_id('ees_workflow')
+            bare=Request({'type':'http','app':self.fixture.app,'headers':[],'state':{}})
+            await self.assert_code('work_chat_tool_review_required',self.native.check_chat_work_tool(bare,self.admin,changed))
+            rejected=await self.native.select_chat_work_tools(bare,self.admin,metadata,['another','ees_workflow'],{'messages':[]})
+            self.assertEqual(rejected,['another'])
+            await self.assert_code('work_chat_tool_review_required',self.native.check_chat_work_tool(request,self.admin,changed))
+
     async def test_same_registration_two_jobs_two_users_and_native_chat(self):
         refs = await self.fixture.register_read_tool("confluence")
         loaded = []
@@ -148,6 +226,32 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual({pat for _, pat in self.http_calls}, {"Bearer synthetic-reader-pat", "Bearer synthetic-admin-pat"})
         self.assertNotIn("synthetic-admin-pat", json.dumps(reader))
         self.assertNotIn("synthetic-reader-pat", json.dumps(admin))
+
+    async def test_integrated_read_review_commits_existing_native_approval(self):
+        refs = await self.fixture.register_read_tool("confluence")
+        disabled = await self.bridge.approval_action(self.admin, {"action": "disable", "reference": refs["get_page"], "evidence": "synthetic review reset"})
+        current_service = self.fixture.workflow.WorkflowService(self.fixture.directory / "ees-work.sqlite3", self.fixture.native_users.Users.get_user_by_id, lambda key: None)
+        runtime = current_service.operations
+        runtime.bridge = self.native.NativeBridge(current_service, self.fixture.app)
+        saved = await runtime.command(self.admin, {"action": "tool_save", "request_id": "review-create", "expected_revision": 0,
+            "tool": {"system_id": "EMS", "kind": "read", "name": "기존 문서 조회", "reference": disabled["reference"], "guide_url": "https://guide.invalid/native-read"}})
+        key = saved["tool"]["id"]
+        submitted = await runtime.command(self.admin, {"action": "tool_submit", "request_id": "review-submit", "expected_revision": 1, "tool_contract_id": key})
+        approved = await runtime.command(self.admin, {"action": "tool_review", "request_id": "review-approve", "expected_revision": submitted["tool"]["revision"], "tool_contract_id": key, "decision": "approve", "evidence": "synthetic code/HTTP/ACL suite"})
+        self.assertEqual(approved["tool"]["state"], "approved")
+        self.assertEqual(approved["tool"]["reference"]["revision"], disabled["reference"]["revision"] + 1)
+        await self.bridge.check(self.reader, approved["tool"]["reference"])
+        self.assertEqual(self.http_calls, [])
+
+    async def test_registered_request_metadata_never_loads_code_and_obeys_acl(self):
+        await self.fixture.register_read_tool("confluence")
+        with patch.object(self.fixture.plugin, "load_tool_module_by_id", side_effect=AssertionError("metadata must not execute code")):
+            contract = await self.bridge.inspect_registered(self.reader, "fixture_confluence", "get_page")
+            self.assertFalse(contract["executable"])
+            self.assertEqual(contract["reason"], "ees_connector_unconfigured")
+            self.assertEqual(set(contract["schema"]["properties"]), {"page_id"})
+            await self.fixture.acl.AccessGrants.set_access_grants("tool", "fixture_confluence", [])
+            await self.assert_code("native_access_denied", self.bridge.inspect_registered(self.reader, "fixture_confluence", "get_page"))
 
     async def test_metadata_and_approval_do_not_load_or_call(self):
         refs = await self.fixture.register_read_tool("confluence")
@@ -239,7 +343,7 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
             await self.fixture.tools.Tools.update_tool_valves_by_id("fixture_confluence", config)
             with patch.dict(os.environ, {"EES_NATIVE_ENVIRONMENT": "different-environment"}):
                 await self.assert_code("native_revalidation_required", self.call(refs["get_page"], {"page_id": "123"}))
-            with patch.object(sys.modules["open_webui.env"], "VERSION", "0.11.3+ees.13"):
+            with patch.object(sys.modules["open_webui.env"], "VERSION", sys.modules["open_webui.env"].VERSION + ".changed"):
                 await self.assert_code("native_revalidation_required", self.call(refs["get_page"], {"page_id": "123"}))
             with patch.object(sys.modules["open_webui.env"], "VERSION", "0.12.0"):
                 await self.assert_code("native_version_unsupported", self.call(refs["get_page"], {"page_id": "123"}))
@@ -287,6 +391,20 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(malformed_truncated["status"], "failed")
         leaked = self.native.normalize_result("get_page", {"ok": False, "error": {"code": "failure", "message": "synthetic-secret"}}, ref, {}, ("synthetic-secret",))
         self.assertNotIn("synthetic-secret", json.dumps(leaked))
+        # Plugin-provided flags are not transport evidence. Only the bridge's
+        # canonical current managed-source path may certify a known HTTP error.
+        for code in ("upstream_error", "connection_failed", "native_call_failed", "tool_error", "unauthorized", "forbidden", "rate_limited"):
+            raw = {"ok": False, "failure_confirmed": True, "error": {"code": code}}
+            for trusted in (False, True):
+                with self.subTest(code=code, trusted=trusted):
+                    result = self.native.normalize_result("get_page", raw, ref, {}, trusted_read=trusted)
+                    self.assertEqual(result["status"], "failed")
+                    self.assertEqual(result["transport"], "failed")
+                    self.assertEqual(result["completeness"], "unknown")
+                    self.assertEqual(result.get("failure_confirmed", False), trusted and code == "upstream_error")
+                    self.assertNotIn("failure_confirmed", result["data"])
+        unlisted = self.native.normalize_result("unregistered_mutation", {"ok": False, "error": {"code": "upstream_error"}}, ref, {}, trusted_read=True)
+        self.assertNotIn("failure_confirmed", unlisted)
         text = {"body": "Authorization: Bearer other-credential Cookie=session-cookie PAT=private-token "
                         "https://user:password@example.invalid/path?access_token=query-secret&x=1",
                 "headers_in_text": 'Cookie: session=first-cookie; auth=second-cookie\nPAT="quoted secret" token="other secret"',
@@ -295,6 +413,35 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         for forbidden in ("other-credential", "session-cookie", "private-token", "user:password", "query-secret", "hidden", "first-cookie", "second-cookie", "quoted secret", "other secret"):
             self.assertNotIn(forbidden, safe)
         self.assertIn("retained", safe)
+
+    async def test_confirmed_http_failure_requires_actual_managed_read_source(self):
+        for family, expected in self.native.MANAGED_READ_SOURCE_HASHES.items():
+            source = (ROOT / f"agent-pack/skills/{family}-read/scripts/{family}_tool.py").read_text(encoding="utf-8")
+            self.assertEqual(hashlib.sha256(source.encode("utf-8")).hexdigest(), expected, family)
+        refs = await self.fixture.register_read_tool("confluence")
+        def unavailable(request, timeout=None):
+            raise HTTPError(request.full_url, 503, "Synthetic unavailable", {}, None)
+        with patch("urllib.request.OpenerDirector.open", side_effect=unavailable) as transport:
+            confirmed = await self.call(refs["get_page"], {"page_id": "123"})
+        self.assertEqual(transport.call_count, 1)
+        self.assertEqual(confirmed["status"], "failed")
+        self.assertEqual(confirmed["error"]["code"], "upstream_error")
+        self.assertEqual(confirmed["completeness"], "unknown")
+        self.assertIs(confirmed["failure_confirmed"], True)
+
+        # Approval alone may legitimately allow edited code, but cannot attest
+        # that its self-reported error represents a real HTTP response.
+        tool = await self.fixture.tools.Tools.get_tool_by_id("fixture_confluence")
+        changed = tool.content + '\nclass Tools(Tools):\n    async def get_page(self, page_id: str, __user__: dict = None) -> str:\n        return json.dumps({"ok": False, "failure_confirmed": True, "error": {"code": "upstream_error"}})\n'
+        await self.fixture.tools.Tools.update_tool_by_id("fixture_confluence", {"content": changed})
+        inspected = await self.bridge.inspect(self.admin, "fixture_confluence", "get_page")
+        approved = await self.bridge.approval_action(self.admin, {"action": "approve", "reference": inspected["reference"], "evidence": "synthetic-fixture: edited source remains untrusted for retries"})
+        with patch("urllib.request.OpenerDirector.open", side_effect=AssertionError("forged function does not make HTTP")):
+            forged = await self.call(approved["reference"], {"page_id": "123"})
+        self.assertEqual(forged["status"], "failed")
+        self.assertEqual(forged["error"]["code"], "upstream_error")
+        self.assertNotIn("failure_confirmed", forged)
+        self.assertNotIn("failure_confirmed", forged["data"])
 
 
 if __name__ == "__main__":

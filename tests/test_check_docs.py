@@ -249,11 +249,13 @@ class CheckDocsTests(unittest.TestCase):
 
     def test_resolved_directory_outside_root_is_skipped_synthetic_boundary(self):
         """Synthetic resolve boundary only; this is not a real Windows junction test."""
-        redirected = self.root / "junction-like"
         self.write("junction-like/bad.md", "[Must not scan](missing.md)\n")
+        # The checker normalizes its root before walking. Match that spelling
+        # too (Windows temp paths can contain a short-name alias).
+        redirected = (self.root / "junction-like").resolve()
         real_resolve = Path.resolve
         with tempfile.TemporaryDirectory(prefix="check-docs-resolved-outside-") as outside:
-            external = Path(outside)
+            external = Path(outside).resolve()
 
             def resolve_with_redirect(path, *args, **kwargs):
                 if path == redirected:

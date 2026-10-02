@@ -1,0 +1,9 @@
+{
+  "checked_at": "2026-10-01T05:37:33.462526+00:00",
+  "fullapp_result_ok": true,
+  "composer_result_ok": true,
+  "owned_live_processes": [],
+  "observed_log_port_checks": [],
+  "gate_teardown": "Existing finally closes ChromePipe, stops Native process, closes synthetic provider, then TemporaryDirectory.cleanup; process audit found no remaining composer Native app/browser",
+  "boundary": "Only composer-owned Native CLI/browser checked. Other team agents may run independent temporary tests."
+}

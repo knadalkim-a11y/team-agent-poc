@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-02T07:08:18.793996+00:00",
+  "reconstruction": "Original uncommitted test files and build12-16 evidence were lost with workspace contents. No source copy was available in this agent store. Tests were reconstructed from actual recorded full source reads and successive patches in this conversation. Byte identity with lost tests is not asserted.",
+  "new_validation": {
+    "command": "node --test tests/test_ees_work_figma_runtime_ui.cjs tests/test_ees_execution_ui.cjs tests/test_ees_v4_layout.cjs",
+    "passed": 96,
+    "failed": 0,
+    "skipped": 0,
+    "reconstructed_runtime": 24,
+    "existing_regression": 72,
+    "syntax": "Python py_compile + Node --check passed",
+    "diff_check": "passed"
+  },
+  "native_validation": "Not executed yet; restored Python/Chrome/wheel environment pending. No prior PASS or screenshot is presented as new evidence.",
+  "files": [
+    {
+      "path": "tests/test_ees_work_figma_runtime_native.py",
+      "sha256": "31710f6b634b0b84bd802ee053300d8d2ecc9680db255283b2093f286748dd78",
+      "bytes": 13649
+    },
+    {
+      "path": "tests/test_ees_work_figma_runtime_ui.cjs",
+      "sha256": "b3e720e09fbfcf5701691b5d25f7f5691345501cc86593f2e0ede19a3a79ebd5",
+      "bytes": 17936
+    },
+    {
+      "path": "branding/ees/ui/ees-work-view.js",
+      "sha256": "b153f4b9acaa3bbb92ce9f2b85ec0e727cb3dbff63357684f32ca7a25263bc94",
+      "bytes": 73026
+    },
+    {
+      "path": "branding/ees/ui/ees-work-launcher.js",
+      "sha256": "c3db92657f866faabf8c0daff4ab214b8c533025eb0548d855787ba1a2024d39",
+      "bytes": 59078
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/recovery-runtime/ui-tests.log",
+      "sha256": "418944628fcc4fc765e51a9987bd6c73e06b9b81b7423952f8eaffa5f3a9b0b9",
+      "bytes": 9530
+    }
+  ]
+}

@@ -57,6 +57,13 @@ class NativeUIServer(ThreadingHTTPServer):
         self.user = dict(USER)
         self.chats = {"existing-chat": chat_record(), "other-chat": chat_record("other-chat")}
         self.workflow = None
+        self.workspace_commands = []
+        self.workspace_queries = []
+        self.workspace_error = None
+        self.delay_next_workspace = False
+        self.workspace_response_started = threading.Event()
+        self.workspace_response_hold = threading.Event()
+        self.workspace_response_hold.set()
         self.tool_call = None
         self.completions = []
         self.authoring_requests = []
@@ -143,6 +150,7 @@ class NativeUIServer(ThreadingHTTPServer):
             self.errors.append(repr(error))
 
     def server_close(self):
+        self.workspace_response_hold.set()
         self.authoring_hold.set()
         self.stream_hold.set()
         self.action_response_hold.set()
@@ -216,13 +224,38 @@ class NativeUIHandler(BaseHTTPRequestHandler):
             if path == "/api/version/updates":
                 return self.send_content({"current": "0.11.3", "latest": "0.11.3"})
             if path == "/api/models":
-                return self.send_content({"data": MODELS})
+                return self.send_content({"data": getattr(self.server, "models", MODELS)})
             if path == "/api/v1/users/user/settings":
                 return self.send_content({"ui": {"models": ["fixture-model"], "showChangelog": False,
                                                  "version": "0.11.3", "autoFollowUps": False}})
             if path in {"/api/v1/models/list", "/api/v1/knowledge/list", "/api/v1/tools/list",
                         "/api/v1/knowledge/search", "/api/v1/prompts/list", "/api/v1/skills/list"}:
                 return self.send_content({"items": [], "total": 0})
+            if path == "/api/ees-work/workspace" and self.server.workflow:
+                self.server.workspace_queries.append(query)
+                result = asyncio.run(self.server.workflow.workspace_state(self.server.user,
+                    workflow_id=query.get("workflow_id", [""])[0], run_id=query.get("run_id", [""])[0],
+                    system_id=query.get("system_id", [""])[0], factory_id=query.get("factory_id", [""])[0]))
+                if self.server.delay_next_workspace:
+                    self.server.delay_next_workspace = False
+                    self.server.workspace_response_started.set()
+                    self.server.workspace_response_hold.wait(timeout=8)
+                if self.server.workspace_error:
+                    result = {"ok": False, "error": {"code": "workspace_unavailable", "message": self.server.workspace_error}}
+                return self.send_workflow(result)
+            if path == "/api/ees-work/legacy" and hasattr(self.server, 'workflow_legacy'):
+                return self.send_workflow(asyncio.run(self.server.workflow_legacy(self.server.user,
+                    case_id=query.get("case_id", [""])[0])))
+            if path == "/api/ees-work/export" and self.server.workflow:
+                return self.send_workflow(asyncio.run(self.server.workflow.workspace_export(self.server.user,
+                    query.get("run_id", [""])[0])))
+            if path == "/api/ees-work/resources" and self.server.workflow:
+                assets = asyncio.run(self.server.workflow._assets(self.server.user))
+                return self.send_workflow({"ok": True, "available": assets.get("available", False),
+                    "skills": [{"id": item["id"], "name": item["name"], "revision": assets.get("skill_versions", {}).get(item["id"])} for item in assets.get("skills", [])]})
+            if path == "/api/ees-work/operations" and self.server.workflow:
+                return self.send_workflow(asyncio.run(self.server.workflow.operations.state(self.server.user,
+                    system_id=query.get("system_id", [""])[0], run_id=query.get("run_id", [""])[0])))
             if path == "/api/ees-work/execution/state" and self.server.workflow:
                 return self.send_workflow(asyncio.run(self.server.workflow.execution_state(self.server.user,
                     case_id=query.get("case_id", [""])[0], run_id=query.get("run_id", [""])[0],
@@ -297,6 +330,25 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                     "filename": "attachment.txt", "meta": {"name": "attachment.txt", "content_type": "text/plain", "size": 12},
                     "data": {"status": "completed"}, "created_at": 1})
             body = json.loads(raw or b"{}")
+            if path == "/api/ees-work/operations" and self.server.workflow:
+                self.server.workspace_commands.append(body)
+                try:
+                    result = asyncio.run(self.server.workflow.operations.command(self.server.user, body))
+                except Exception as error:
+                    if not hasattr(error, 'code'):
+                        raise
+                    result = {'ok': False, 'error': {'code': error.code, 'message': error.message}}
+                return self.send_workflow(result)
+            if path == "/api/ees-work/workspace/options" and self.server.workflow:
+                return self.send_workflow(asyncio.run(self.server.workflow.input_options(self.server.user, body)))
+            if path == "/api/ees-work/workspace/command" and self.server.workflow:
+                self.server.workspace_commands.append(body)
+                result = asyncio.run(self.server.workflow.workspace_command(self.server.user, body))
+                if self.server.delay_next_action:
+                    self.server.delay_next_action = False
+                    self.server.action_response_started.set()
+                    self.server.action_response_hold.wait(timeout=8)
+                return self.send_workflow(result)
             if path == "/api/ees-work/execution/plan" and self.server.workflow:
                 return self.send_workflow(asyncio.run(self.server.workflow.execution_plan(self.server.user, body)))
             if path == "/api/ees-work/execution/action" and self.server.workflow:

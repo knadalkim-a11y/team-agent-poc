@@ -1,0 +1,157 @@
+{
+  "observed_at": "2026-10-02T01:57:18.304577+00:00",
+  "meaning": "Per-test successful local observations across the specified wheels; not a single exact-final-HEAD full suite. Final automatic CI must confirm all cases together. Prior failures remain in original logs.",
+  "passing_cases": {
+    "test_ees_chat_theme.ChromeFontEnvironmentTests.test_changed_pinned_font_is_rejected_before_launch_or_profile_write": {
+      "evidence": "dist/integrated/validation/native06-account/test_ees_chat_theme.json",
+      "build": "source-only pinned font integrity"
+    },
+    "test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai": {
+      "evidence": "dist/integrated/validation/native10-switch-fixture-fixed/test_ees_work_authoring_account_switch.json",
+      "build": "10"
+    },
+    "test_ees_work_authoring_native.NativeAccountAPITests.test_native_password_change_reset_and_existing_token_without_redis": {
+      "evidence": "dist/integrated/validation/native06-account/test_ees_work_authoring_native.json",
+      "build": "06"
+    },
+    "test_ees_work_authoring_native.NativeAccountAPITests.test_native_signup_pending_no_membership_and_closed_registration": {
+      "evidence": "dist/integrated/validation/native06-account/test_ees_work_authoring_native.json",
+      "build": "06"
+    },
+    "test_ees_work_authoring_native.NativeAccountAPITests.test_pending_group_member_cannot_author_or_use_protected_runtime": {
+      "evidence": "dist/integrated/validation/native06-account/test_ees_work_authoring_native.json",
+      "build": "06"
+    },
+    "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_closed_native_signup_ui_and_direct_api": {
+      "evidence": "dist/integrated/validation/native06-account/test_ees_work_authoring_native.json",
+      "build": "06"
+    },
+    "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft": {
+      "evidence": "dist/integrated/validation/native-ai10-fixture-fixed.log",
+      "build": "10"
+    },
+    "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_authoring_conflict_keeps_unsaved_draft_and_published_version": {
+      "evidence": "dist/integrated/validation/native-account07-focused.log",
+      "build": "07"
+    },
+    "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_new_signup_and_approval_ui": {
+      "evidence": "dist/integrated/validation/native-account07-focused.log",
+      "build": "07"
+    },
+    "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_closed_run_remains_readonly_and_uses_its_saved_completion": {
+      "evidence": "dist/integrated/validation/native-residual06.log",
+      "build": "06"
+    },
+    "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_eight_declared_native_input_types_survive_visible_save_and_reload": {
+      "evidence": "dist/integrated/validation/native05-compose/test_ees_work_c_phase1_native.json",
+      "build": "05"
+    },
+    "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_long_form_scrolling_keeps_heading_and_unsaved_values": {
+      "evidence": "dist/integrated/validation/native05-compose/test_ees_work_c_phase1_native.json",
+      "build": "05"
+    },
+    "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_retry_keeps_original_attempt_input_and_immutable_published_version": {
+      "evidence": "dist/integrated/validation/native05-compose/test_ees_work_c_phase1_native.json",
+      "build": "05"
+    },
+    "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_run_and_workflow_setting_forms_preserve_zero_false_and_empty": {
+      "evidence": "dist/integrated/validation/native05-compose/test_ees_work_c_phase1_native.json",
+      "build": "05"
+    },
+    "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_human_confirmation_never_calls_external_tool": {
+      "evidence": "dist/integrated/validation/native05-compose/test_ees_work_c_phase2_native.json",
+      "build": "05"
+    },
+    "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_partial_failed_unknown_stay_distinct_and_never_auto_retry": {
+      "evidence": "dist/integrated/validation/native05-compose/test_ees_work_c_phase2_native.json",
+      "build": "05"
+    },
+    "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_real_tool_call_snapshots_inputs_but_does_not_confirm_business_completion": {
+      "evidence": "dist/integrated/validation/native-tool07-focused.log",
+      "build": "07"
+    },
+    "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_required_input_blocks_before_any_transport_or_attempt": {
+      "evidence": "dist/integrated/validation/native05-compose/test_ees_work_c_phase2_native.json",
+      "build": "05"
+    },
+    "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_revoked_tool_access_blocks_a_new_attempt_before_transport": {
+      "evidence": "dist/integrated/validation/native05-compose/test_ees_work_c_phase2_native.json",
+      "build": "05"
+    },
+    "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_running_transport_is_visible_and_cannot_double_execute": {
+      "evidence": "dist/integrated/validation/native05-compose/test_ees_work_c_phase2_native.json",
+      "build": "05"
+    },
+    "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_delayed_input_write_keeps_exact_original_run_after_chat_change": {
+      "evidence": "dist/integrated/validation/native06-execution/test_ees_work_c_phase3_native.json",
+      "build": "06"
+    },
+    "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_delayed_workspace_read_cannot_replace_new_workflow": {
+      "evidence": "dist/integrated/validation/native06-execution/test_ees_work_c_phase3_native.json",
+      "build": "06"
+    },
+    "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_same_account_two_native_targets_keep_local_input_after_conflict": {
+      "evidence": "dist/integrated/validation/native06-execution/test_ees_work_c_phase3_native.json",
+      "build": "06"
+    },
+    "test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_failed_history_lookup_never_reveals_previous_attempt_or_input": {
+      "evidence": "dist/integrated/validation/native06-execution/test_ees_work_c_phase3_privacy.json",
+      "build": "06"
+    },
+    "test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_revoked_native_actor_scope_removes_open_result_and_author_controls": {
+      "evidence": "dist/integrated/validation/native06-execution/test_ees_work_c_phase3_privacy.json",
+      "build": "06"
+    },
+    "test_ees_work_demo.EESWorkNativeBrowserTests.test_empty_state_has_no_seed_run_or_fake_success": {
+      "evidence": "dist/integrated/validation/native05/test_ees_work_demo.json",
+      "build": "05"
+    },
+    "test_ees_work_demo.EESWorkNativeBrowserTests.test_enter_in_work_input_does_not_send_chat_or_run_job": {
+      "evidence": "dist/integrated/validation/native05/test_ees_work_demo.json",
+      "build": "05"
+    },
+    "test_ees_work_demo.EESWorkNativeBrowserTests.test_human_cancel_then_explicit_confirm_and_history": {
+      "evidence": "dist/integrated/validation/native-residual06.log",
+      "build": "06"
+    },
+    "test_ees_work_demo.EESWorkNativeBrowserTests.test_input_save_is_not_execute_and_repeat_click_is_single_write": {
+      "evidence": "dist/integrated/validation/native-residual06.log",
+      "build": "06"
+    },
+    "test_ees_work_demo.EESWorkNativeBrowserTests.test_lookup_failure_removes_previously_visible_private_evidence": {
+      "evidence": "dist/integrated/validation/native05/test_ees_work_demo.json",
+      "build": "05"
+    },
+    "test_ees_work_demo.EESWorkNativeBrowserTests.test_model_zero_one_multiple_use_native_source_without_demo_presets": {
+      "evidence": "dist/integrated/validation/native05/test_ees_work_demo.json",
+      "build": "05"
+    },
+    "test_ees_work_demo.EESWorkNativeBrowserTests.test_native_message_send_stream_and_work_panel_are_independent": {
+      "evidence": "dist/integrated/validation/native-residual06.log",
+      "build": "06"
+    },
+    "test_ees_work_demo.EESWorkNativeBrowserTests.test_native_three_regions_fonts_and_narrow_geometry": {
+      "evidence": "dist/integrated/validation/native05/test_ees_work_demo.json",
+      "build": "05"
+    },
+    "test_ees_work_demo.EESWorkNativeBrowserTests.test_navigation_preserves_local_input_and_does_not_change_business_revision": {
+      "evidence": "dist/integrated/validation/native05/test_ees_work_demo.json",
+      "build": "05"
+    },
+    "test_ees_work_demo.EESWorkNativeBrowserTests.test_scope_and_history_do_not_bind_or_replace_native_chat": {
+      "evidence": "dist/integrated/validation/native05/test_ees_work_demo.json",
+      "build": "05"
+    },
+    "test_ees_work_demo.EESWorkNativeBrowserTests.test_scope_dialog_escape_cancel_and_chat_draft_preservation": {
+      "evidence": "dist/integrated/validation/native-residual06.log",
+      "build": "06"
+    },
+    "test_ees_work_demo.EESWorkNativeBrowserTests.test_sidebar_close_restore_retains_chat_and_work_input": {
+      "evidence": "dist/integrated/validation/native05/test_ees_work_demo.json",
+      "build": "05"
+    }
+  },
+  "count": 37,
+  "actual_complete_app": "dist/integrated/native-central10/report.json",
+  "actual_complete_app_sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3"
+}

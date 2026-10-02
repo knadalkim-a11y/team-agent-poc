@@ -1,9 +1,8 @@
-"""Apply the small EES demo pack through the running WebUI's authenticated API.
+"""Refuse retired ApplyDemo and retain the fixed-origin Native API transport.
 
-Uses the registered Python and verified main checkout. An explicit trial commit
-can use a reviewed, clean main checkout without GitHub Actions verification.
-Never imports WebUI,
-opens its database, installs dependencies, or stops/restarts the server.
+The compatibility CLI stops before credentials, configuration, Git or API calls.
+Transport/private credential helpers serve explicit reviewed retirement; shared
+trial-source/report helpers remain used by the existing deployment wrapper.
 """
 
 import argparse
@@ -25,7 +24,6 @@ import ees_demo_assets as assets
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_RESPONSE = 8 * 1024 * 1024
-SUPPORTED = {"0.11.3", "0.11.3+ees.1", "0.11.3+ees.2", "0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12"}
 
 
 class DemoError(ValueError):
@@ -244,58 +242,9 @@ def trial_checkout(commit):
 
 
 def apply(config, args, commit, progress):
-    with upgrade.manager.locked(config, track_owner=True):
-        if getattr(args, "trial_commit", None) is not None:
-            progress["stage"] = "trial_source"
-            trial_checkout(commit)
-            progress["stage"] = "trial_program"
-            registry = upgrade.manager.read_registry(config)
-            upgrade.manager.require_idle(registry)
-            if registry.get("pending") or registry.get("launch_uncertain"):
-                raise DemoError("trial_program_incomplete")
-            active = registry.get("customization", {}).get("active")
-            if not active or active.get("source_commit") != commit:
-                raise DemoError("trial_program_mismatch")
-            upgrade.manager.selected_program(config, registry)
-        else:
-            upgrade.checkout(commit)
-        path, settings = connection(config, args)
-        progress["stage"] = "webui_version"
-        client = WebUIClient(settings["url"], ca_file=settings["ca_file"])
-        version = client.request("GET", "/api/version")
-        if not isinstance(version, dict) or version.get("version") not in SUPPORTED:
-            raise DemoError("unsupported_webui_version")
-        progress["stage"] = "webui_authentication"
-        token, fresh = load_token(config, settings["url"], args.reset_token)
-        client.token = token
-        user = client.request("GET", "/api/v1/auths/")
-        if not isinstance(user, dict) or user.get("role") != "admin":
-            raise DemoError("webui_administrator_required")
-        if fresh:
-            save_token(config, settings["url"], token)
-        progress["stage"] = "model_selection"
-        settings["ees_model_id"] = select_ees(client, settings["ees_model_id"])
-        existing = client.request("GET", "/api/v1/models/model?" + urlencode({"id": settings["ees_model_id"]}))
-        if (not isinstance(existing, dict) or existing.get("id") != settings["ees_model_id"]
-                or not existing.get("base_model_id") or not isinstance(existing.get("params"), dict)
-                or settings["ees_model_id"] in {"ees_demo_ems", "ees_demo_apc", "ees_demo_fdc"}):
-            raise DemoError("existing_writable_ees_required")
-        if existing.get("write_access") is not True:
-            raise DemoError("model_write_access_required")
-        # Remember authenticated, validated choices before the first asset write,
-        # so a partial first application can resume without repeating selection.
-        if path.exists() or path.is_symlink():
-            upgrade.manager.states._regular(path)
-        upgrade.manager.write_json(path, settings)
-        scope = hashlib.sha256((settings["url"] + "\n" + settings["ees_model_id"]).encode()).hexdigest()[:20]
-        state_dir = Path(config["state_root"]) / ("demo-assets-" + scope)
-        if state_dir.is_symlink():
-            raise DemoError("local_state_invalid")
-        state_dir.mkdir(mode=0o700, exist_ok=True)
-        progress["stage"] = "apply_assets"
-        result = assets.apply_assets(client, ROOT, state_dir, settings["ees_model_id"], commit)
-        progress["changed"] = result.get("changed", 0)
-        return dict(result, stage="complete", next="new_chat")
+    """Old operator entry points cannot recreate removed demo content."""
+    progress.update(stage="retired", changed=0)
+    raise DemoError("demo_registration_retired")
 
 
 def report(config_path, result, failed=False):
@@ -336,53 +285,10 @@ def main(argv=None):
     if args.trial_commit is not None and (not upgrade.HEX40.fullmatch(args.trial_commit)
                               or args.prepared_head or args.wrapper_before or args.reset_update_token):
         parser.error("Trial commit requires a full lowercase commit SHA and cannot use release-bootstrap options.")
-    progress = {"stage": "configuration", "changed": 0}
-    head = None
-    try:
-        config = upgrade.manager.states.load_config(args.config)
-        if args.trial_commit is not None:
-            progress["stage"] = "trial_source"
-            print("EES demo step=check_trial_source", flush=True)
-            head = trial_checkout(args.trial_commit)
-        else:
-            upgrade.checkout()
-            progress["stage"] = "release_authentication"
-            github = upgrade.github_client(config, args.reset_update_token)
-            options = []
-            for key in ("webui_url", "ees_model_id", "ca_file"):
-                if getattr(args, key):
-                    options.extend(["--" + key.replace("_", "-"), getattr(args, key)])
-            if args.reset_token:
-                options.append("--reset-token")
-            print("EES demo step=check_release", flush=True)
-            child, head, _ = upgrade.bootstrap(config, args, github, progress,
-                                               runner="ees_apply_demo.py", runner_options=options)
-            if child is not None:
-                return child
-        result = apply(config, args, head, progress)
-        if args.trial_commit is not None:
-            result["source_verification"] = "local_trial"
-    except (ValueError, RuntimeError, OSError, KeyError, TypeError, EOFError, KeyboardInterrupt) as error:
-        if progress.get("delegated"):
-            return 130
-        code = getattr(error, "code", None) or "operation_failed"
-        next_step = ("apply_trial_program" if progress["stage"] == "trial_program"
-                     else "upgrade" if code == "conditional_write_unavailable"
-                     else "reset_demo_token" if code in {"webui_authentication_failed", "webui_credentials_invalid"}
-                     else "setup_webui_api_key" if progress["stage"] == "webui_authentication"
-                     else "check_ci" if progress["stage"] == "ci_check"
-                     else "check_existing_ees" if progress["stage"] == "model_selection"
-                     else "inspect_local_result")
-        result = {"stage": progress["stage"], "code": code,
-                  "changed": getattr(error, "changed", progress.get("changed")),
-                  "pending": getattr(error, "pending", False),
-                  "source_commit": head, "asset": getattr(error, "asset", ""), "next": next_step}
-        if args.trial_commit is not None:
-            result["source_verification"] = "local_trial"
-        report(args.config, result, failed=True)
-        return 1
-    report(args.config, result)
-    return 0
+    # Refuse before configuration, credentials, GitHub, product or Native API reads.
+    print("EES action=apply_demo result=blocked changed=0 stage=retired "
+          "code=demo_registration_retired next=asset_retirement_preview")
+    return 1
 
 
 if __name__ == "__main__":

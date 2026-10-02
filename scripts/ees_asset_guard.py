@@ -291,7 +291,7 @@ def verify_asset_guard_installation() -> None:
 
     from open_webui.models import access_grants, models, tools
     from open_webui.routers import models as model_routes, tools as tool_routes
-    from open_webui.utils import tools as tool_loading
+    from open_webui.utils import tools as tool_loading, middleware
 
     tables = {"tools": tools.ToolsTable, "models": models.ModelsTable, "access_grants": access_grants.AccessGrantsTable}
     for name, table in tables.items():
@@ -306,6 +306,8 @@ def verify_asset_guard_installation() -> None:
     if getattr(tool_routes, "EES_ASSET_CACHE_COMMIT_ORDER", None) != 1:
         raise AssetGuardError("ees_asset_guard_incomplete_installation")
     if getattr(tool_loading, "EES_ASSET_LOCAL_TOOL_GUARD", None) != 1:
+        raise AssetGuardError("ees_asset_guard_incomplete_installation")
+    if getattr(middleware, "EES_WORK_NATIVE_CHAT_CONTEXT", None) != 1:
         raise AssetGuardError("ees_asset_guard_incomplete_installation")
     for module_name, methods in CALLER_HOOKS.items():
         module = import_module(module_name)
@@ -460,7 +462,9 @@ async def _snapshot(target: AssetTarget, user, session) -> dict:
     return result
 
 
-async def _apply(request: Request, form: AssetApply, user, session) -> dict:
+async def _apply(request: Request, form: AssetApply, user, session, *, restoring_retired=False) -> dict:
+    if form.id in RETIRED_ASSETS.get(form.kind, ()) and not restoring_retired:
+        raise HTTPException(410, "demo_registration_retired")
     before = await _snapshot(form, user, session)
     if not hmac.compare_digest(before["token"], form.expected_token):
         raise HTTPException(409, "concurrent_edit")
@@ -513,6 +517,266 @@ async def _apply(request: Request, form: AssetApply, user, session) -> dict:
         return after
 
 
+
+# Explicit asset retirement uses the same Native ACL/serialization lock as normal writes.
+# Nothing in this API is called automatically by installation, upgrade or startup.
+RETIRED_ASSETS = {
+    "tool": frozenset({"ees_specialists", "ees_demo_data"}),
+    "model": frozenset({"ees_demo_ems", "ees_demo_apc", "ees_demo_fdc"}),
+}
+
+
+class AssetRetirement(AssetTarget):
+    baseline_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class AssetRetire(AssetRetirement):
+    expected_token: str = Field(pattern=r"^[0-9a-f]{64}$")
+    request_id: str = Field(pattern=r"^[a-zA-Z0-9_-]{8,80}$")
+
+
+class AssetRestore(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    request_id: str = Field(pattern=r"^[a-zA-Z0-9_-]{8,80}$")
+    backup_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+def _retirement_hash(value):
+    return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True,
+        separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+
+
+def _retirement_path(request_id):
+    from open_webui.env import DATA_DIR
+
+    directory = ProcessLock._canonical(Path(DATA_DIR)) / "ees-asset-retirement"
+    ProcessLock._canonical(directory)
+    directory.mkdir(mode=0o700, exist_ok=True)
+    path = directory / (request_id + ".json")
+    ProcessLock._canonical(path)
+    if path.exists() and (not path.is_file() or path.stat().st_nlink != 1):
+        raise HTTPException(409, "unsafe_retirement_backup")
+    return path
+
+
+def _save_retirement(path, receipt):
+    import tempfile
+
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                prefix=".retirement-", delete=False) as stream:
+            temporary = Path(stream.name)
+            json.dump(receipt, stream, ensure_ascii=False, sort_keys=True, allow_nan=False)
+            stream.flush()
+            os.fsync(stream.fileno())
+        ProcessLock._canonical(path)
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def _read_retirement(path):
+    if path.stat().st_size > 16 * 1024 * 1024:
+        raise HTTPException(409, "invalid_retirement_backup")
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        if value["backup_sha256"] != _retirement_hash(value["backup"]):
+            raise ValueError
+        return value
+    except (ValueError, KeyError, TypeError):
+        raise HTTPException(409, "invalid_retirement_backup") from None
+
+
+async def _retirement_preview(form, user, session):
+    from open_webui.models.models import Models
+    from open_webui.routers import tools
+
+    if form.id not in RETIRED_ASSETS.get(form.kind, ()):
+        raise HTTPException(422, "asset_not_in_retirement_inventory")
+    before = await _snapshot(form, user, session)
+    asset = before["asset"]
+    valves = await tools.get_tools_valves_by_id(form.id, user=user, db=session) if asset and form.kind == "tool" else None
+    state = _state(form.kind, asset, valves)
+    digest = _retirement_hash(state)
+    references = []
+    for raw in await Models.get_all_models(db=session):
+        model = _dump(raw)
+        bound = (form.id in ((model.get("meta") or {}).get("toolIds") or [])
+                 if form.kind == "tool" else model.get("base_model_id") == form.id)
+        if bound:
+            # Counts are enough; don't expose another user's private model name/content.
+            references.append(model["id"])
+    reasons = []
+    if asset is None:
+        reasons.append("absent")
+    else:
+        if digest != form.baseline_sha256:
+            reasons.append("modified_or_unverified_asset")
+        if asset.get("user_id") != user.id:
+            reasons.append("owner_required_for_lossless_restore")
+        marker = (asset.get("meta") or {}).get("ees_demo_pack") if form.kind == "model" else (
+            (asset.get("meta") or {}).get("manifest") or {}).get("ees_demo_pack")
+        if marker != "ees-demo-v1":
+            reasons.append("management_marker_missing")
+        if references:
+            reasons.append("active_model_references")
+    public = {"kind": form.kind, "id": form.id, "exists": before["exists"],
+              "current_sha256": digest, "expected_token": before["token"],
+              "eligible": not reasons, "blocked_reasons": reasons,
+              "model_reference_count": len(references),
+              "history": "Chats, workflow runs, attempts and attachments are preserved. Retired tools may no longer execute historical work.",
+              "restore": "Explicit asset restore requires this private backup; program Restore does not restore assets or data."}
+    return public, {"kind": form.kind, "id": form.id, "asset": asset, "valves": valves}
+
+
+def _retirement_public(receipt):
+    return {key: receipt[key] for key in ("request_id", "kind", "id", "status", "backup_sha256")}
+
+
+async def _retire_asset(request, form, user, session):
+    path = _retirement_path(form.request_id)
+    fingerprint = _retirement_hash({"actor": user.id, "kind": form.kind, "id": form.id,
+                                    "baseline_sha256": form.baseline_sha256})
+    if path.exists():
+        receipt = _read_retirement(path)
+        if receipt.get("fingerprint") != fingerprint:
+            raise HTTPException(409, "retirement_request_conflict")
+        if receipt["status"] != "retired":
+            raise HTTPException(409, "retirement_requires_reconciliation")
+        current = await _snapshot(form, user, session)
+        if current["exists"]:
+            raise HTTPException(409, "retirement_target_recreated")
+        return _retirement_public(receipt)
+    preview, backup = await _retirement_preview(form, user, session)
+    if not hmac.compare_digest(preview["expected_token"], form.expected_token):
+        raise HTTPException(409, "concurrent_edit")
+    if not preview["eligible"]:
+        raise HTTPException(409, "retirement_preview_blocked")
+    receipt = {"schema": 1, "request_id": form.request_id, "kind": form.kind,
+               "id": form.id, "actor": user.id, "fingerprint": fingerprint,
+               "backup": backup, "backup_sha256": _retirement_hash(backup), "status": "pending"}
+    # Backup and intent reach disk before Native deletion; a crash stays uncertain.
+    _save_retirement(path, receipt)
+    from open_webui.routers import models, tools
+    if form.kind == "model":
+        result = await models.delete_model_by_id(request, models.ModelIdForm(id=form.id), user=user, db=session)
+    else:
+        result = await tools.delete_tools_by_id(request, form.id, user=user, db=session)
+    if result is not True:
+        raise HTTPException(500, "retirement_delete_incomplete")
+    receipt["status"] = "retired"
+    _save_retirement(path, receipt)
+    return _retirement_public(receipt)
+
+
+async def _restore_asset(request, form, user, session):
+    path = _retirement_path(form.request_id)
+    if not path.exists():
+        raise HTTPException(404, "retirement_backup_missing")
+    receipt = _read_retirement(path)
+    if receipt.get("actor") != user.id or not hmac.compare_digest(receipt["backup_sha256"], form.backup_sha256):
+        raise HTTPException(403, "retirement_backup_access_denied")
+    backup = receipt["backup"]
+    target = AssetTarget(kind=backup["kind"], id=backup["id"])
+    before = await _snapshot(target, user, session)
+    if receipt["status"] == "restored":
+        from open_webui.routers import tools
+        valves = await tools.get_tools_valves_by_id(target.id, user=user, db=session) if before["exists"] and target.kind == "tool" else None
+        if _state(target.kind, before["asset"], valves) != _state(target.kind, backup["asset"], backup["valves"]):
+            raise HTTPException(409, "restored_asset_changed")
+        return _retirement_public(receipt)
+    if receipt["status"] != "retired" or before["exists"]:
+        raise HTTPException(409, "retirement_restore_conflict")
+    raw = backup["asset"]
+    fields = ("id", "name", "base_model_id", "meta", "params", "is_active", "access_grants") if target.kind == "model" else (
+        "id", "name", "content", "meta", "access_grants")
+    payload = {key: raw.get(key) for key in fields}
+    receipt["status"] = "restore_pending"
+    _save_retirement(path, receipt)
+    after = await _apply(request, AssetApply(kind=target.kind, id=target.id, operation="create",
+        expected_token=before["token"], payload=payload), user, session, restoring_retired=True)
+    if target.kind == "tool" and backup["valves"] is not None:
+        await _apply(request, AssetApply(kind="valves", id=target.id, operation="update",
+            expected_token=after["valves_snapshot"]["token"], payload=backup["valves"]), user, session, restoring_retired=True)
+    receipt["status"] = "restored"
+    _save_retirement(path, receipt)
+    return _retirement_public(receipt)
+
+
+WORK_TOOL_ID = "ees_workflow"
+WORK_TOOL_FUNCTIONS = frozenset({"ees_workflow_view", "ees_workflow_propose", "ees_workflow_display"})
+
+
+def work_tool_source():
+    """Exact program-owned source, never a DB row or a generated Tool body."""
+    import ast
+
+    source = Path(__file__).with_name("ees_workflow_tool.py")
+    try:
+        if source.is_symlink() or not source.is_file() or source.stat().st_size > 128 * 1024:
+            raise ValueError
+        raw = source.read_bytes()
+        content = raw.decode("utf-8")
+        tree = ast.parse(content)
+        tool = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "Tools")
+        public = {node.name for node in tool.body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_")}
+        if public != WORK_TOOL_FUNCTIONS:
+            raise ValueError
+        return content, hashlib.sha256(raw).hexdigest()
+    except (OSError, UnicodeError, ValueError, SyntaxError, StopIteration):
+        raise HTTPException(503, "work_tool_source_unavailable") from None
+
+
+class WorkToolSetup(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_token: str = Field(pattern=r"^[a-f0-9]{64}$")
+    source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    confirmation: Literal["register_readonly_work_tool"]
+    access_grants: list[dict] = Field(default_factory=list, max_length=100)
+
+
+async def _work_tool_status(user, session):
+    source, digest = work_tool_source()
+    snapshot = await _snapshot(AssetTarget(kind="tool", id=WORK_TOOL_ID), user, session)
+    asset = snapshot["asset"]
+    state = "missing" if not snapshot["exists"] else "ready" if asset.get("content") == source else "blocked_existing"
+    return {"id": WORK_TOOL_ID, "state": state, "source_sha256": digest,
+            "expected_token": snapshot["token"], "functions": sorted(WORK_TOOL_FUNCTIONS),
+            "reason": "existing_source_differs_export_and_review_native_update" if state == "blocked_existing" else None,
+            "changed": False}, snapshot
+
+
+async def _setup_work_tool(request, form, user, session):
+    status, before = await _work_tool_status(user, session)
+    if form.source_sha256 != status["source_sha256"]:
+        raise HTTPException(409, "work_tool_program_changed")
+    if not hmac.compare_digest(form.expected_token, status["expected_token"]):
+        raise HTTPException(409, "concurrent_edit")
+    if status["state"] == "blocked_existing":
+        raise HTTPException(409, "work_tool_existing_source_requires_review")
+    if status["state"] == "ready":
+        # Repeating setup does not alter ownership, ACL or settings.
+        return status
+    for grant in form.access_grants:
+        if (set(grant) != {"principal_type", "principal_id", "permission"}
+                or grant["principal_type"] not in {"user", "group"}
+                or not isinstance(grant["principal_id"], str) or not 0 < len(grant["principal_id"]) <= 200
+                or grant["permission"] != "read"):
+            raise HTTPException(422, "work_tool_read_grants_required")
+    source, source_digest = work_tool_source()
+    if not hmac.compare_digest(source_digest, form.source_sha256):
+        raise HTTPException(409, "work_tool_program_changed")
+    after = await _apply(request, AssetApply(kind="tool", id=WORK_TOOL_ID, operation="create",
+        expected_token=before["token"], payload={"id": WORK_TOOL_ID, "name": "EES Work",
+            "content": source, "meta": {"description": "허용된 업무 조회와 초안 제안. 저장·게시·실행·확정은 업무 화면에서 수행합니다.",
+                                        "ees_work_source_sha256": status["source_sha256"]},
+            "access_grants": form.access_grants}), user, session)
+    if after["asset"].get("content") != source:
+        raise HTTPException(500, "work_tool_registration_unconfirmed")
+    return {**status, "state": "ready", "expected_token": after["token"], "changed": True}
+
 def create_asset_router() -> APIRouter:
     # Import lazily: native table modules import our decorators while the
     # native auth module itself imports those tables.
@@ -528,7 +792,20 @@ def create_asset_router() -> APIRouter:
             await _current_admin(user, session)
         if guard.closing:
             raise HTTPException(503, "conditional_write_unavailable")
-        return {"version": 1, "conditional_apply": True, "process_scope": "single"}
+        return {"version": 1, "conditional_apply": True, "process_scope": "single", "retirement": 1, "work_tool_setup": 1}
+
+    @router.get("/work-tool/status")
+    async def work_tool_status(user=Depends(get_admin_user)):
+        async with AsyncSessionLocal() as session:
+            current_user = await _current_admin(user, session)
+            status, _ = await _work_tool_status(current_user, session)
+            return status
+
+    @router.post("/work-tool/setup")
+    async def work_tool_setup(request: Request, form: WorkToolSetup, user=Depends(get_admin_user)):
+        async with AsyncSessionLocal() as session:
+            current_user = await _current_admin(user, session)
+            return await _setup_work_tool(request, form, current_user, session)
 
     @router.post("/snapshot")
     async def snapshot(form: AssetTarget, user=Depends(get_admin_user)):
@@ -541,5 +818,24 @@ def create_asset_router() -> APIRouter:
         async with AsyncSessionLocal() as session:
             current_user = await _current_admin(user, session)
             return await _apply(request, form, current_user, session)
+
+    @router.post("/retirement/preview")
+    async def retirement_preview(form: AssetRetirement, user=Depends(get_admin_user)):
+        async with AsyncSessionLocal() as session:
+            current_user = await _current_admin(user, session)
+            preview, _ = await _retirement_preview(form, current_user, session)
+            return preview
+
+    @router.post("/retirement/apply")
+    async def retirement_apply(request: Request, form: AssetRetire, user=Depends(get_admin_user)):
+        async with AsyncSessionLocal() as session:
+            current_user = await _current_admin(user, session)
+            return await _retire_asset(request, form, current_user, session)
+
+    @router.post("/retirement/restore")
+    async def retirement_restore(request: Request, form: AssetRestore, user=Depends(get_admin_user)):
+        async with AsyncSessionLocal() as session:
+            current_user = await _current_admin(user, session)
+            return await _restore_asset(request, form, current_user, session)
 
     return router

@@ -1,0 +1,23 @@
+[
+  {
+    "name": "upstream",
+    "url": "https://files.pythonhosted.org/packages/4c/e4/28abecd6b75fa6fa40ae181d2fa9f57593e26d13309c90531dee5b4acc28/open_webui-0.11.3-py3-none-any.whl",
+    "path": "dist/upstream/open_webui-0.11.3-py3-none-any.whl",
+    "sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+    "bytes": 146072797,
+    "downloaded_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+    "downloaded_at": "2026-10-02T07:04:25.034919+00:00",
+    "tls_verification": "default enabled"
+  },
+  {
+    "name": "chrome",
+    "url": "https://storage.googleapis.com/chrome-for-testing-public/153.0.8010.52/linux64/chrome-headless-shell-linux64.zip",
+    "path": "dist/recovery/chrome-headless-shell-linux64.zip",
+    "bytes": 119702187,
+    "downloaded_sha256": "944dc1eae654637fed4d57650198774f9c43b45f34e48febb84f43c541b5de76",
+    "downloaded_at": "2026-10-02T07:04:26.483025+00:00",
+    "tls_verification": "default enabled",
+    "executable": "dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell",
+    "executable_sha256": "0f2256d365ab3d82a2c79ce41f65a03dfd8d7eaa4d689a1b88bc22b6842b1f1e"
+  }
+]

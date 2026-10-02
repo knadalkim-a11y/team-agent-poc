@@ -20,15 +20,15 @@ from zipfile import ZIP_DEFLATED, BadZipFile, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
-VERSION = "0.11.3+ees.12"
-PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6", "0.11.3+ees.7": "_ees7", "0.11.3+ees.8": "_ees8", "0.11.3+ees.9": "_ees9", "0.11.3+ees.10": "_ees10", "0.11.3+ees.11": "_ees11", "0.11.3+ees.12": "_ees12"}
+VERSION = "0.11.3+ees.13"
+PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6", "0.11.3+ees.7": "_ees7", "0.11.3+ees.8": "_ees8", "0.11.3+ees.9": "_ees9", "0.11.3+ees.10": "_ees10", "0.11.3+ees.11": "_ees11", "0.11.3+ees.12": "_ees12", "0.11.3+ees.13": "_ees13"}
 SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
 SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
 WHEEL_FILENAME = f"open_webui-{VERSION}-py3-none-any.whl"
 SOURCE_INFO = f"open_webui-{UPSTREAM_VERSION}.dist-info/"
 TARGET_INFO = f"open_webui-{VERSION}.dist-info/"
 SOURCE_APP = "open_webui/frontend/_app/"
-TARGET_APP = "open_webui/frontend/_ees12/"
+TARGET_APP = "open_webui/frontend/_ees13/"
 ASSET_DIR = Path(__file__).resolve().parents[1] / "branding" / "ees" / "assets"
 UI_DIR = ASSET_DIR.parent / "ui"
 ASSET_NAMES = (
@@ -43,6 +43,12 @@ V4_ICON_FILES = tuple("v4/" + name for name in (
     "7bb4a.svg", "87d9b.svg", "88026.svg", "92ec5.svg", "9c63b.svg", "a9175.svg", "a953c.svg",
     "b8bc6.svg", "bddb4.svg", "c325d.svg", "cf77a.svg", "d448c.svg", "d553d.svg", "e1049.svg",
     "e1472.svg", "ea639.svg", "ead50.svg", "eb94a.svg", "f6bbc.svg",
+))
+V4_ICON_FILES += tuple("v4/" + name for name in ('40095.svg', 'f34f3.svg', 'c6340.svg', '7495b.svg', 'ed85e.svg', '08bf3.svg', '3b2d6.svg', 'fa106.svg', '1fc4e.svg', 'aee94.svg', 'cece5.svg', '8a225.svg', 'e8a37.svg', 'd1220.svg', 'f908d.svg', 'da025.svg', '7e98c.svg', 'ca02b.svg', 'd8f27.svg', 'cda5f.svg', '6611a.svg', '51602.svg', 'afcd5.svg', '0a1db.svg', '1f65b.svg', '2f929.svg', '7d31f.svg', '9d8d5.svg', '922a3.svg', '49c9b.svg', '31608.svg', 'f49d4.svg', '8fa06.svg', 'b8999.svg', 'd87d1.svg', '5f62e.svg', '1e4cf.svg', 'b944b.svg', '4723e.svg', 'ce467.svg', 'ae415.svg', '4d983.svg', '66cc7.svg',))
+V4_ICON_FILES += ("v4/8f8a1.svg",)
+V4_ICON_FILES += tuple("v4/" + name for name in (
+    "35b2e.svg", "a28e3.svg", "b22ad.svg", "f1e53.svg", "b456d.svg",
+    "52271.svg", "63982.svg", "6d84b.svg", "1c98e.svg", "478bf.svg",
 ))
 UI_FILES.update({name: name for name in V4_ICON_FILES})
 WORK_LAUNCHER_SOURCES = ("ees-work-view.js", "ees-work-designer.js", "ees-work-launcher.js")
@@ -70,7 +76,21 @@ WORK_ASSETS.update({"scripts/" + name: "open_webui/" + name for name in (
     "ees_workflow_execution.py", "ees_workflow_native.py", "ees_workflow_contract.py",
     "ees_workflow_examples.py", "ees_workflow_model.py",
 )})
-WORK_FILES = (WORK_BOOTSTRAP_TARGET,) + tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
+# Immutable previous inventory is required for program-only Restore.
+WORK_FILES_V12 = (WORK_BOOTSTRAP_TARGET,) + tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
+RETIRED_WORK_SOURCES = {"scripts/ees_work_demo.py", "scripts/workflow_seed.json", "scripts/ees_workflow_examples.py",
+                        "ui/index.html", "ui/ees-work.css", "ui/ees-work.js"}
+WORK_ASSETS = {source: target for source, target in WORK_ASSETS.items() if source not in RETIRED_WORK_SOURCES}
+WORK_ASSETS.update({"scripts/" + name: "open_webui/" + name for name in (
+    "ees_workflow_workspace.py", "ees_workflow_operations.py",
+)})
+# Common read/proposal Native Tool source is available for explicit admin setup;
+# it is never a demo seed or an automatically registered user asset.
+WORK_ASSETS["scripts/workflow_tool.py"] = "open_webui/ees_workflow_tool.py"
+WORK_FILES = tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in ("ees-work-launcher.js", "ees-work-launcher.css"))
+# Current UI references must be present even when a truncated archive has a
+# recomputed RECORD. Shipped prior-version inventories above stay unchanged.
+WORK_FILES += tuple(TARGET_APP + name for name in V4_ICON_FILES)
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {
@@ -80,10 +100,9 @@ FONT_SOURCES = {
                                 "2d2267a83d089cb1a517a4f901676d05d283346e650d1b1845d601cbd696a98e"),
 }
 THEME_FILES = ("chat-theme.css", "fonts/LICENSE.txt") + tuple("fonts/" + name for name in FONT_SOURCES)
-THEME_LINK = b'<link rel="stylesheet" href="/_ees12/chat-theme.css" crossorigin="use-credentials" />'
-WORK_LINK = (b'<link rel="stylesheet" href="/_ees12/ees-work-launcher.css" />'
-             b'<script defer src="/_ees12/ees-work-panel.js"></script>'
-             b'<script defer src="/_ees12/ees-work-launcher.js"></script>')
+THEME_LINK = b'<link rel="stylesheet" href="/_ees13/chat-theme.css" crossorigin="use-credentials" />'
+WORK_LINK = (b'<link rel="stylesheet" href="/_ees13/ees-work-launcher.css" />'
+             b'<script defer src="/_ees13/ees-work-launcher.js"></script>')
 
 # The pinned Chat component already owns draft serialization, editor updates,
 # file/tool selections and debounced native sessionStorage writes. Expose only
@@ -146,12 +165,10 @@ PATCHES = {
     # their existing validation, authorization, forwarding and safe-static paths.
     "open_webui/routers/models.py": [(
         b"url='/static/favicon.png'",
-        b"url='/_ees12/assistant-default.svg'", 2,
+        b"url='/_ees13/assistant-default.svg'", 2,
     )],
     "open_webui/main.py": [(
         b"if os.path.exists(FRONTEND_BUILD_DIR):",
-        b"from open_webui.ees_work_demo import install as install_ees_work_demo\n"
-        b"install_ees_work_demo(app, get_verified_user)\n"
         b"from open_webui.ees_workflow import install as install_ees_workflow\n"
         b"install_ees_workflow(app, get_verified_user)\n\n"
         b"if os.path.exists(FRONTEND_BUILD_DIR):", 1,
@@ -164,7 +181,7 @@ PATCHES = {
     )],
     "open_webui/frontend/index.html": [
         (b"<title>Open WebUI</title>", b"<title>EES Work</title>", 1),
-        (b"/_app/", b"/_ees12/", 49),
+        (b"/_app/", b"/_ees13/", 49),
         (b"</head>", THEME_LINK + WORK_LINK + b"\n\t</head>", 1),
     ],
     SOURCE_APP + "immutable/chunks/CHq18Uto.js": [
@@ -197,8 +214,8 @@ PATCHES = {
          b'<div class="pb-1" data-ees-native-navigation><div class="px-1 flex justify-center text-gray-700 dark:text-gray-300"><a id="sidebar-new-chat-button"', 1),
     ],
     SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
-        (b"/_app/version.json", b"/_ees12/version.json", 1),
-        (b'an="0.11.3"', b'an="0.11.3+ees.12"', 1),
+        (b"/_app/version.json", b"/_ees13/version.json", 1),
+        (b'an="0.11.3"', b'an="0.11.3+ees.13"', 1),
     ],
     SOURCE_APP + "immutable/chunks/zKJlHFgk.js": [
         (b'<nav><div><div id="navbar-bg-gradient-to-b">',
@@ -277,10 +294,10 @@ PATCHES = {
          b'user_message:Ve?{...Ve,meta:{...(Ve.meta||{}),ees_work_reference:(!j()&&!g()?window.__eesNativeWorkV1?.captureReference?.(ue||"",ie,Ve):null)||{kind:"none"}}}:Ve,...Ne?{regeneration_prompt:Ne}', 1),
     ],
     SOURCE_APP + "version.json": [
-        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.12"}', 1),
+        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.13"}', 1),
     ],
     SOURCE_INFO + "METADATA": [
-        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.12\n", 1),
+        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.13\n", 1),
     ],
 }
 
@@ -310,6 +327,7 @@ ASSET_GUARD_HOOKS = {
     "open_webui/utils/access_control/__init__.py": (None, ("has_base_model_access",)),
 }
 ASSET_GUARD_SOURCE_HASHES = {
+    "open_webui/utils/middleware.py": "3cdd77945d32f7df1461c24b729c0e37c3a5069712013b1619ce895d5957f0a4",
     "open_webui/utils/tools.py": 'fb9ac81cf7bb4dbc9eef06a0dc8a8fb2f7314cbf62f49a8cbc86dfe6020edd0e','open_webui/main.py': 'e5cbc9326266a7c0983061ecf8b792184f91e13a0e245c3e520549ec0a2978e1',
  'open_webui/models/access_grants.py': 'c034481518fa1cacf3fcba003c18692bbf8947395b8543a011ea7ab860b7e914',
  'open_webui/models/models.py': 'd07887f09d157062834798cb42f4fd6d2025fe3c39af1caeb2ad582d0b0e48ae',
@@ -411,6 +429,8 @@ def _guard_local_tool_loading(text, filename):
         "        async def ees_load_local_tool():\n"
         "            tool = await Tools.get_tool_by_id(tool_id)\n"
         "            if tool is None:\n                return False\n"
+        "            from open_webui.ees_workflow_native import check_chat_work_tool\n"
+        "            await check_chat_work_tool(request, user, tool)\n"
         "            user_group_ids = {group.id for group in await Groups.get_groups_by_member_id(user.id)}\n" +
         local + "\n            return True\n\n"
         "        if await ees_load_local_tool():\n            pass\n"
@@ -464,6 +484,15 @@ def prepare_asset_guard_replacements(source, replacements):
             text += "\nEES_ASSET_CACHE_COMMIT_ORDER = 1\n"
         if filename == "open_webui/utils/tools.py":
             text = _guard_local_tool_loading(text, filename)
+        if filename == "open_webui/utils/middleware.py":
+            text = _one_replace(text, "    tool_ids = form_data.pop('tool_ids', None)\n",
+                "    tool_ids = form_data.pop('tool_ids', None)\n"
+                "    from open_webui.ees_workflow_native import select_chat_work_tools, wrap_chat_work_tools\n"
+                "    tool_ids = await select_chat_work_tools(request, user, metadata, tool_ids, form_data)\n", filename)
+            text = _one_replace(text, "            if mcp_tools_dict:\n",
+                "            tools_dict = wrap_chat_work_tools(request, user, tools_dict)\n\n"
+                "            if mcp_tools_dict:\n", filename)
+            text += "\nEES_WORK_NATIVE_CHAT_CONTEXT = 1\n"
         if filename in {"open_webui/routers/openai.py", "open_webui/routers/ollama.py"}:
             text = _guard_headless_model_parameters(text, filename)
         if filename == "open_webui/main.py":
@@ -628,7 +657,7 @@ def prepare_additions(source, ui_dir, work_dir=WORK_DIR):
         additions[TARGET_APP + relative] = (assemble_work_launcher(ui_dir)
             if filename == "ees-work-launcher.js" else path.read_bytes())
     for relative in V4_ICON_FILES:
-        url = ("/_ees12/" + relative).encode("ascii")
+        url = ("/_ees13/" + relative).encode("ascii")
         digest = hashlib.sha256(additions[TARGET_APP + relative]).hexdigest().encode("ascii")
         for filename in ("chat-theme.css", "ees-work-launcher.css"):
             for source_url in (url, ("./" + relative).encode("ascii")):
@@ -641,9 +670,6 @@ def prepare_additions(source, ui_dir, work_dir=WORK_DIR):
     if ASSET_GUARD_SOURCE.is_symlink() or not ASSET_GUARD_SOURCE.is_file() or not ASSET_GUARD_SOURCE.stat().st_size:
         raise ValueError("Missing, empty, or linked asset guard runtime.")
     additions[ASSET_GUARD_FILES[0]] = ASSET_GUARD_SOURCE.read_bytes()
-    if WORK_BOOTSTRAP.is_symlink() or not WORK_BOOTSTRAP.is_file():
-        raise ValueError("Missing EES work panel bootstrap.")
-    additions[WORK_BOOTSTRAP_TARGET] = WORK_BOOTSTRAP.read_bytes()
     for filename, (origin, expected) in FONT_SOURCES.items():
         if origin not in source.namelist():
             raise ValueError(f"Missing pinned upstream font: {filename}")
@@ -679,7 +705,7 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
         if replacements[index_name].count(old_immutable) != 49:
             raise ValueError("Pinned immutable entry references differ from the 49 reviewed links.")
         replacements[index_name] = replacements[index_name].replace(old_immutable, new_immutable)
-        for filename in ("chat-theme.css", "ees-work-launcher.css", "ees-work-panel.js", "ees-work-launcher.js"):
+        for filename in ("chat-theme.css", "ees-work-launcher.css", "ees-work-launcher.js"):
             path = TARGET_APP + filename
             url = ("/" + path.removeprefix("open_webui/frontend/")).encode("ascii")
             digest = hashlib.sha256(additions[path]).hexdigest().encode("ascii")

@@ -1,0 +1,58 @@
+{
+  "date_utc": "2026-10-02T03:29:54.053291+00:00",
+  "ci_run": 36958974158,
+  "ci_head": "10e2c5621e852aa0a2061ed1697e8cfac4ce4a9f",
+  "failed_job": 110688486700,
+  "observation": {
+    "errors": [
+      "test_ees_deploy_process.DeployProcessTests.test_health_false_and_stop_timeout_do_not_force_kill",
+      "test_ees_deploy_process.DeployProcessTests.test_health_ignores_proxy_and_never_follows_redirects"
+    ],
+    "location": "test body natural-exit loop / cleanup natural-exit loop -> _windows_identity process_inspect",
+    "product_behavior": "Identity inspection failed and no signal was sent. The code checks the same Windows process handle for confirmed exit before refusing identity.",
+    "missing_evidence": "Original traceback/result JSON omitted ProcessError.operation/reason/winerror and owned Popen state."
+  },
+  "cause_status": {
+    "confirmed": "Test natural-exit observation reopened process identity every 100ms although start_server retained the exact owned Popen. The thrown ProcessError details were not emitted.",
+    "hypothesis": "An executable-query failure may occur during process exit before the Windows handle is signaled; actual Win32 numeric cause and precise transition were not captured.",
+    "not_claimed": "No Windows product defect or Win32 race root cause is confirmed; Linux unit success does not establish Windows resolution."
+  },
+  "change": {
+    "files": [
+      "tests/test_ees_deploy_process.py"
+    ],
+    "product_changes": false,
+    "ownership": "Capture the Popen from _CHILDREN immediately after start for the body, and before the stop request for cleanup. Missing/wrong child fails. _identity removes the registry entry only after that owned child poll reports exit.",
+    "natural_exit": "Keep health timeout, stop timeout and still-alive assertion. Wait on the captured owned Popen with existing 3s body/13s cleanup bounds. Require exit code 0, graceful marker stopped, and final verify_identity false. No kill, terminate, extra signal, timeout increase or ProcessError-to-success conversion.",
+    "diagnostics": "On identity errors, retain and re-raise the original exception with safe numeric metadata, known-child poll observation and synthetic started/graceful marker booleans. Cleanup stop errors are emitted before its existing natural-exit fallback.",
+    "regressions": [
+      "test_ees_deploy_process.LifecycleEvidenceTests.test_identity_failure_keeps_numeric_state_and_original_exception",
+      "test_ees_deploy_process.LifecycleEvidenceTests.test_owned_child_wait_is_exact_bounded_and_fails_closed"
+    ]
+  },
+  "local_validation": {
+    "command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_deploy_process.py -v",
+    "runs": 1,
+    "python": "3.11.16 (main, Sep 24 2026, 17:56:40) [Clang 22.1.3 ]",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "returncode": 0,
+    "unittest_tests_run": 59,
+    "passed_methods": 57,
+    "skipped_methods": 2,
+    "setUpClass_skips": 1,
+    "skip_details": [
+      "setUpClass (test_ees_deploy_process.DeployProcessTests) ... skipped 'The mounted /proc uses a different PID namespace; real lifecycle runs in Windows/Linux CI.'",
+      "test_disposable_child_identity_refusal_then_termination_preserves_other_child (test_ees_deploy_process.WindowsExplicitTerminationTests.test_disposable_child_identity_refusal_then_termination_preserves_other_child) ... skipped 'Real handle termination is Windows-only.'",
+      "test_console_attach_failure_survives_real_helper_stdout_and_parent_parsing (test_ees_deploy_process.WindowsStopHelperTests.test_console_attach_failure_survives_real_helper_stdout_and_parent_parsing) ... skipped 'Real console helper IPC is Windows-only.'"
+    ],
+    "new_regressions": "2 passed; timeout, nonzero exit, missing marker, missing child and wrong child remain failures; original identity exception is re-raised without signaling.",
+    "diff_check": "git diff --check -- tests/test_ees_deploy_process.py passed",
+    "log": "dist/integrated/ci-36958974158/process-fixture-local.log",
+    "log_sha256": "292e05ffaeb157c7c55ee9a47d1cfd5c9b895e4e15acb334dc5b332f8a47ab75"
+  },
+  "next_evidence": "Next automatic final Windows CI must exercise actual synthetic child lifecycle. If failure recurs, preserve numeric diagnostic notes and classify them before changing product behavior. No manual rerun or repeated full suite was performed.",
+  "source_sha256": {
+    "tests/test_ees_deploy_process.py": "4c83a0a5c049a60a20a671213eded87ac8977ac24046ccef4e21f2547ce1df25",
+    "scripts/ees_deploy_process.py": "d463dbb7de65da69569868789b6c91c9aba9f0a8e311ab9c1bedbed1963ba1e5"
+  }
+}

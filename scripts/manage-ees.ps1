@@ -1,6 +1,6 @@
 <#
 One operator entry point for the existing Windows EES instance.
-Settings and data stay outside Git. ApplyDemo manages only the declared demo assets.
+Settings and data stay outside Git. ApplyDemo is retired and cannot register demo assets.
 #>
 [CmdletBinding()]
 param(

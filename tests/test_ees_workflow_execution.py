@@ -18,7 +18,7 @@ from types import ModuleType
 import unittest
 from unittest.mock import patch
 
-from workflow_fixture import publish_fixture_definition
+from workflow_fixture import publish_fixture_definition, legacy_definition
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "agent-pack/skills/ees-work-demo/scripts"
@@ -26,8 +26,9 @@ PACKAGE = ModuleType("ees_execution_tests")
 PACKAGE.__path__ = [str(SOURCE)]
 sys.modules[PACKAGE.__name__] = PACKAGE
 workflow = importlib.import_module(PACKAGE.__name__ + ".ees_workflow")
+historical = __import__("workflow_fixture").historical_facade(PACKAGE.__name__)
 execution = importlib.import_module(PACKAGE.__name__ + ".ees_workflow_execution")
-examples = importlib.import_module(PACKAGE.__name__ + ".ees_workflow_examples")
+examples = __import__("workflow_fixture").load_workflow_examples(PACKAGE.__name__)
 USER = {"id": "alice", "role": "user"}
 REFERENCES = {function: {"tool_id": "confluence" if function in {"search_pages", "get_page"} else function,
     "function": function, "revision": 1, "content_hash": "a" * 64, "schema_hash": "b" * 64,
@@ -84,12 +85,12 @@ class Model:
 
 
 def build_service(database, bridge=None, model=None):
-    return workflow.WorkflowService(database, lambda key: {"id": key, "role": "user"},
+    return historical.WorkflowService(database, lambda key: {"id": key, "role": "user"},
         lambda key: {"id": key, "user_id": "alice"}, native_bridge=bridge or Bridge(), model_executor=model or Model())
 
 
 def publish(service, fragment):
-    definition = workflow._seed()
+    definition = legacy_definition()
     definition["nodes"].update(fragment["nodes"])
     definition["tools"].update(fragment.get("tools", {}))
     definition["skills"].update(fragment.get("skills", {}))
@@ -708,57 +709,69 @@ class ExecutionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.bridge.calls, [])
 
     async def test_result_commit_failure_rolls_back_and_recovers_unknown(self):
-        self.runtime.lease_seconds = .1
+        # Keep the real lease while reaching the injected commit failure. A
+        # 100 ms lease can expire first on Windows and bypass call_recorded.
         run = await self.start(await self.plan("new-operations-jira-j"))
         original_event = self.runtime._event
+        injected = []
         def fail_result_commit(db, state, kind, detail=None):
             if kind == "call_recorded":
+                injected.append(kind)
                 raise sqlite3.OperationalError("synthetic disk write failure")
             return original_event(db, state, kind, detail)
         with patch.object(self.runtime, "_event", side_effect=fail_result_commit):
             with self.assertRaises(sqlite3.OperationalError):
                 await self.runtime.process_once()
-        with self.service._db() as db:
-            call = db.execute("SELECT state FROM execution_calls WHERE run_id=?", (run["id"],)).fetchone()
+        self.assertEqual(injected, ["call_recorded"])
+        with self.service._db(write=True) as db:
+            call = db.execute("SELECT state,data FROM execution_calls WHERE run_id=?", (run["id"],)).fetchone()
             self.assertEqual(call["state"], "running")
-        await asyncio.sleep(.13)
+            self.assertNotIn("result", json.loads(call["data"]))
+            # process_once has finished its finally block and stopped its
+            # heartbeat. Expire only this abandoned lease, without a wall-clock
+            # race or changing the production recovery implementation.
+            row = db.execute("SELECT worker FROM execution_runs WHERE id=?", (run["id"],)).fetchone()
+            self.assertEqual(row["worker"], self.runtime.worker_id)
+            changed = db.execute("UPDATE execution_runs SET lease=? WHERE id=? AND worker=?",
+                                 (time.time() - 1, run["id"], self.runtime.worker_id))
+            self.assertEqual(changed.rowcount, 1)
         await self.runtime.process_once()
         recovered = await self.state(run)
         self.assertEqual(recovered["status"], "unknown")
         self.assertEqual(len(self.bridge.calls), 1)
         self.assertNotIn("result", recovered["calls"][0])
 
-    async def test_http_lifespan_worker_continues_after_acceptance_response(self):
+    async def test_http_lifespan_declines_retired_execution_and_never_creates_a_run(self):
         from fastapi import FastAPI
         from fastapi.testclient import TestClient
         app = FastAPI()
-        with patch.object(workflow, "_service", self.service):
+        current = workflow.WorkflowService(self.database, lambda key: USER, lambda key: None)
+        with patch.object(workflow, "_service", current):
             workflow.install(app, lambda: USER)
             with TestClient(app) as client:
                 with self.service._db() as db:
                     version = self.service._catalog(db)[0]["version"]
-                response = client.post("/api/ees-work/execution/plan", json={"scope": {"site_id": "us-a", "system": "EMS", "process_id": self.p, "version": version}, "node_id": "new-operations-jira-j", "inputs": self.inputs})
-                self.assertEqual(response.status_code, 200, response.text)
-                plan = response.json()["plan"]
-                accepted = client.post("/api/ees-work/execution/action", json={"action": "start", "plan_id": plan["id"], "plan_hash": plan["hash"], "request_id": "lifespan"})
-                self.assertEqual(accepted.status_code, 200, accepted.text)
-                run_id = accepted.json()["run"]["id"]
-                # No client polling drives execution. The server lifespan does.
-                for _ in range(30):
-                    await asyncio.sleep(.03)
-                    with self.service._db() as db:
-                        saved = json.loads(db.execute("SELECT data FROM execution_runs WHERE id=?", (run_id,)).fetchone()[0])
-                    if saved["status"] == "succeeded":
-                        break
-                self.assertEqual(saved["status"], "succeeded")
-                reconnected = client.get("/api/ees-work/execution/state", params={"run_id": run_id})
-                self.assertEqual(reconnected.json()["run"]["id"], run_id)
-                self.assertEqual(len(self.bridge.calls), 1)
+                    count = db.execute("SELECT count(*) FROM execution_runs").fetchone()[0]
+                for endpoint, body in (("plan", {"scope": {"site_id": "us-a", "system": "EMS", "process_id": self.p,
+                        "version": version}, "node_id": "new-operations-jira-j", "inputs": self.inputs}),
+                        ("action", {"action": "start", "plan_id": "historical", "plan_hash": "a" * 64, "request_id": "lifespan"})):
+                    response = client.post("/api/ees-work/execution/" + endpoint, json=body)
+                    self.assertEqual(response.status_code, 409, response.text)
+                    self.assertEqual(response.json()["error"]["code"], "legacy_execution_retired")
+                with self.service._db() as db:
+                    self.assertEqual(db.execute("SELECT count(*) FROM execution_runs").fetchone()[0], count)
+                self.assertEqual(self.bridge.calls, [])
 
     async def test_protocol_writer_guard_rejects_actual_previous_program(self):
-        previous = ROOT / "dist/previous-source/agent-pack/skills/ees-work-demo/scripts"
+        previous = Path(os.environ.get("EES_TEST_PREVIOUS_WORKFLOW_SOURCE", ROOT / "dist/previous-source")) / "agent-pack/skills/ees-work-demo/scripts"
         if not previous.exists():
+            if os.environ.get("EES_REQUIRE_PREVIOUS_WORKFLOW") == "1":
+                self.fail("The required prior-writer gate needs the fixed ees.11 source fixture")
             self.skipTest("pinned previous main source fixture unavailable")
+        import hashlib
+        self.assertEqual(hashlib.sha256((previous / "ees_workflow.py").read_bytes()).hexdigest(),
+                         "fe99c922e2debb65ad6f143ff807d71bd2bd04c3b259db4aee2eabfb7fa62ba9",
+                         "Previous writer must be the fixed 991cdb1d ees.11 source")
         package = ModuleType("ees_previous_execution_test")
         package.__path__ = [str(previous)]
         sys.modules[package.__name__] = package
@@ -784,7 +797,6 @@ from test_ees_workflow_execution import build_service,Bridge
 async def main():
     bridge=Bridge()
     service=build_service(sys.argv[1],bridge)
-    service.execution.lease_seconds=.15
     if sys.argv[2]=='slow':
         original=bridge.invoke
         async def slow(*args):
@@ -813,11 +825,24 @@ asyncio.run(main())
             self.assertTrue(marker.exists())
             process.kill()
             await asyncio.to_thread(process.communicate, timeout=5)
+            self.assertIsNotNone(process.returncode)
+            self.assertNotEqual(process.returncode, 0)
         finally:
             if process.poll() is None:
                 process.kill()
                 await asyncio.to_thread(process.communicate, timeout=5)
-        await asyncio.sleep(.2)
+        # The real child has exited after persisting a dispatch. Keep the
+        # production lease during live work, then expire just the dead worker's
+        # lease to test recovery without relying on a 150 ms timing window.
+        with self.service._db(write=True) as db:
+            row = db.execute("SELECT worker FROM execution_runs WHERE id=?", (next_run["id"],)).fetchone()
+            self.assertIsNotNone(row["worker"])
+            self.assertNotEqual(row["worker"], self.runtime.worker_id)
+            call = db.execute("SELECT state FROM execution_calls WHERE run_id=?", (next_run["id"],)).fetchone()
+            self.assertEqual(call["state"], "running")
+            changed = db.execute("UPDATE execution_runs SET lease=? WHERE id=? AND worker=?",
+                                 (time.time() - 1, next_run["id"], row["worker"]))
+            self.assertEqual(changed.rowcount, 1)
         await self.runtime.process_once()
         recovered = await self.state(next_run)
         self.assertEqual(recovered["status"], "unknown", recovered)

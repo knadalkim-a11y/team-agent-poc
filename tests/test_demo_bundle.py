@@ -117,6 +117,21 @@ class DemoBundleTests(unittest.TestCase):
                 self.assertEqual(manifest["source_commit"], self.git("rev-parse", "HEAD"))
                 self.assertEqual(contents["agent-pack/system-prompts/assistant.md"], content)
 
+    def test_retired_content_is_absent_but_native_connectors_and_common_runtime_survive(self):
+        for name in BUNDLE.RETIRED_CONTENT:
+            self.write(name, "RETIRED_SYNTHETIC_CONTENT")
+        kept = ["agent-pack/skills/confluence-read/scripts/confluence_tool.py",
+                "agent-pack/skills/github-read/scripts/github_tool.py",
+                "agent-pack/skills/jira-read/scripts/jira_tool.py",
+                "agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py"]
+        for name in kept:
+            self.write(name, "PRESERVED_COMMON_RUNTIME")
+        self.commit()
+        contents = self.contents(self.build())
+        self.assertFalse(set(contents) & BUNDLE.RETIRED_CONTENT)
+        for name in kept:
+            self.assertEqual(contents[name], b"PRESERVED_COMMON_RUNTIME")
+
     def test_existing_artifact_is_not_overwritten(self):
         artifact = self.build()
         before = artifact.read_bytes()
@@ -128,9 +143,9 @@ class DemoBundleTests(unittest.TestCase):
         branding = self.base / "branding"
         branding.mkdir()
         wheel = b"Synthetic wheel bytes; not an install test"
-        wheel_name = "open_webui-0.11.3+ees.12-py3-none-any.whl"
+        wheel_name = "open_webui-0.11.3+ees.13-py3-none-any.whl"
         (branding / wheel_name).write_bytes(wheel)
-        manifest = {"schema_version": 1, "upstream_version": "0.11.3", "version": "0.11.3+ees.12",
+        manifest = {"schema_version": 1, "upstream_version": "0.11.3", "version": "0.11.3+ees.13",
                     "source": {"filename": "open_webui-0.11.3-py3-none-any.whl",
                                "sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"},
                     "wheel": {"filename": wheel_name, "size": len(wheel),

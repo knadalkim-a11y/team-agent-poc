@@ -126,7 +126,7 @@ class JiraReadTests(unittest.TestCase):
     def test_public_inputs_cannot_supply_jql_url_or_pat(self):
         names = {name for name, value in inspect.getmembers(module.Tools, inspect.iscoroutinefunction)
                  if not name.startswith("_")}
-        self.assertEqual(names, {"jira_check_access", "jira_dashboard", "jira_get_issue"})
+        self.assertEqual(names, {"jira_check_access", "jira_dashboard", "jira_get_issue", "jira_project_metadata", "jira_search_crs", "jira_issue_attachments", "jira_cr_attachments"})
         for name in names:
             inputs = set(inspect.signature(getattr(module.Tools, name)).parameters)
             self.assertFalse(inputs & {"jql", "query", "url", "base_url", "pat", "token"})

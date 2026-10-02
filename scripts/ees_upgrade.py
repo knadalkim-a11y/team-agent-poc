@@ -314,6 +314,8 @@ def report(args, result, failed=False):
           f"version={version} stage={word(result.get('stage', 'complete'))} "
           f"running={flag(result.get('started'))} code={word(result.get('code'))} "
           f"next={word(result.get('next', 'refresh_browser'))}"
+          + (" registration=not_applicable reason=demo_registration_retired"
+             if result.get("asset_registration") == "not_applicable" else "")
           + (manager.failure_fields(result) if failed else "")
           + (" report=unavailable" if not saved else ""))
 
@@ -372,7 +374,9 @@ def main(argv=None):
         if child is not None:
             return child
         result = deploy(config, client, head, args.health_timeout, progress)
-        result.update(wrapper_commit=head, wrapper_changed=head != before)
+        result.update(wrapper_commit=head, wrapper_changed=head != before,
+                      asset_registration="not_applicable",
+                      asset_registration_reason="demo_registration_retired")
     except (ValueError, RuntimeError, OSError, KeyError, TypeError, EOFError, KeyboardInterrupt) as error:
         if progress.get("delegated"):
             return 130

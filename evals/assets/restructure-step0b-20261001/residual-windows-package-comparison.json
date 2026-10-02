@@ -1,0 +1,2730 @@
+{
+  "artifact_id": 11146945674,
+  "artifact_size": 3059280,
+  "artifact_sha256": "c060f5ae232559fdf3e52ae690436d531b97b3fc94ff183d480823fdd2fd27b8",
+  "wheels": {
+    "upstream": {
+      "members": 5894,
+      "same_name_order": true,
+      "payload_changes": [],
+      "changed_entry_count": 0,
+      "record_equal": true,
+      "linux_record_issues": [],
+      "windows_record_issues": [],
+      "linux_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+      "windows_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+      "zip_member_field_difference_counts": {},
+      "same_payload_compressed_stream_differences": [],
+      "same_payload_metadata_field_difference_counts": {},
+      "linux_record_sha256": "ebaff05d3c15394712abd7f1b464df01c14702480f7bb6464c42f7ead86e7b52",
+      "windows_record_sha256": "ebaff05d3c15394712abd7f1b464df01c14702480f7bb6464c42f7ead86e7b52"
+    },
+    "legacy": {
+      "members": 5911,
+      "same_name_order": true,
+      "payload_changes": [
+        {
+          "name": "open_webui/frontend/index.html",
+          "linux_sha256": "63529477fd957d0d3ee6ef1de60fd263eca512e9bd81fc04616886fbc1b1ae7b",
+          "windows_sha256": "40abb438e1b62004fbb98ad6878af5c53d819f9d9994fdab3f235d8bf890b117",
+          "linux_size": 11806,
+          "windows_size": 11806,
+          "fields": [
+            "sha256",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": false
+        },
+        {
+          "name": "open_webui/frontend/static/favicon.svg",
+          "linux_sha256": "05fe25025577eea8b73ff0560c1a89c5730d1011ec4e9e25886c8bf867f1e69c",
+          "windows_sha256": "6bc522504ed36b3e9cba6f4fc2725fc45e306c1877a7579713a73977c252224c",
+          "linux_size": 284,
+          "windows_size": 289,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/static/favicon.svg",
+          "linux_sha256": "05fe25025577eea8b73ff0560c1a89c5730d1011ec4e9e25886c8bf867f1e69c",
+          "windows_sha256": "6bc522504ed36b3e9cba6f4fc2725fc45e306c1877a7579713a73977c252224c",
+          "linux_size": 284,
+          "windows_size": 289,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_asset_guard.py",
+          "linux_sha256": "5d592291cb10bd8c0b1a6f56cf0c29c7c9641ef12fdd5b8faafab9fbfaf4763e",
+          "windows_sha256": "6a7ad49f60dbe92eb403e0490ee85d53b1af5a4b0d5f47c4f746dd93ac2e86f4",
+          "linux_size": 21395,
+          "windows_size": 21940,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_work_demo.py",
+          "linux_sha256": "8d225f81614400b4db7861a59cdd46707dd2cc9dcd619656e162a2fdad432f32",
+          "windows_sha256": "4a2f88675ef50890248bc30472fdee7160005b00f1e51513b1b30f1cd0b13fcd",
+          "linux_size": 1738,
+          "windows_size": 1783,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_work_demo_ui/ees-work.css",
+          "linux_sha256": "78efc4141f7b40359c9c7e73b88a2ed75adbc685356e98b3bb96fa6bbf2b6357",
+          "windows_sha256": "0842f7fb3178d59ce1a90287ea888f27d3443d59114ac7ad2db9e716e9e9222c",
+          "linux_size": 30489,
+          "windows_size": 30859,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_work_demo_ui/ees-work.js",
+          "linux_sha256": "c56796d36c15b5d48ec5d418dc178139f5f232d6948be2f7e3ca19ce9df3a716",
+          "windows_sha256": "d032a45583b980fda993f783e50766a4e8fec00cd390b9a7b8e9aff5cb485fb6",
+          "linux_size": 66901,
+          "windows_size": 67326,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_work_demo_ui/index.html",
+          "linux_sha256": "de41922cd4cc235160f36347f037414a2cff6c89de13ebd1381c1eaab485d1a0",
+          "windows_sha256": "6eaac4c3881d37e4451a52a06a1ff2fb881c9232e4becb3215374c8179a75283",
+          "linux_size": 5546,
+          "windows_size": 5570,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_workflow.py",
+          "linux_sha256": "cd076b8aa35c08a946c1289c9eabbcf7334483bdf3f75e610be9c317855957f2",
+          "windows_sha256": "3f5fad6d181d20a6ec3ad7533fedbdb17cdf248825887c8bcc07a40660604e5b",
+          "linux_size": 43415,
+          "windows_size": 44111,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_workflow_definition.py",
+          "linux_sha256": "0485d1dbfe2b0a34d5201925aed396bff3b4ac84be500b9a493df12decf3e94b",
+          "windows_sha256": "fb3fd979c672e44397d0e59733a071c0e65aeb880e7a4ecdf70da399e007433e",
+          "linux_size": 14091,
+          "windows_size": 14338,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_workflow_view.py",
+          "linux_sha256": "40fc329ecb8c3d8e6b841d1b0c9e0a3eadf6ae1b47d8bc5e9f53e1915f9fbf73",
+          "windows_sha256": "e8430591bcea7f8bc0eb0e6bf6661790f0f1891aae29e578ab71a813b8a7ae56",
+          "linux_size": 10497,
+          "windows_size": 10690,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/frontend/_ees10/chat-theme.css",
+          "linux_sha256": "3b06a7037a1b1d2a2e46611a0b702e743331d83e4bd1a68382cbd0a593e8510c",
+          "windows_sha256": "e444b4be0a3b18e84acb8954af9432d6be9145b17be31619928f0f5c5114ff89",
+          "linux_size": 10170,
+          "windows_size": 10467,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/frontend/_ees10/ees-work-launcher.css",
+          "linux_sha256": "a201a2ced381b6e592d20066f459daf7bd827ccb049ce5fee530e56a0c82ebf2",
+          "windows_sha256": "d7624f57f158fcc614c87cc739d36de805a08c34bbc40171c20c804a3677e91b",
+          "linux_size": 56420,
+          "windows_size": 56936,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/frontend/_ees10/ees-work-launcher.js",
+          "linux_sha256": "1b30886921d2d6d4fab827fe5e1acf9626fb621fa67df0cfc08744803299a3fc",
+          "windows_sha256": "185e7fab8124d199834aa58febb43d2e9c048f746365088758ced40e9b795501",
+          "linux_size": 187499,
+          "windows_size": 189118,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": false
+        },
+        {
+          "name": "open_webui/frontend/_ees10/ees-work-panel.js",
+          "linux_sha256": "0e5c475f74b13f56dc4b458136f890e9055ff5329e9ae48028c5513e6feed3c7",
+          "windows_sha256": "dc14d2c4abb0fc1a7f5c97645caea6c7482d67c1193ef0d4f50a187d9b682cae",
+          "linux_size": 10203,
+          "windows_size": 10351,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/frontend/_ees10/fonts/LICENSE.txt",
+          "linux_sha256": "9397f0ac9c8d1e186085d8d249ce8ea0f86e4f61c559beb342433b8032874e47",
+          "windows_sha256": "d3e06e8ab917d5f6b251055e00e3c696f075670f43efd30ec1351d782cdf774d",
+          "linux_size": 11131,
+          "windows_size": 11389,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/workflow_policy.json",
+          "linux_sha256": "dcaec7a509c904f679ce01558896f031117962ea8f1ce580c5210e2b35c55d66",
+          "windows_sha256": "bbe781bc743040b829267b4e00cfe6522363c0eecd4720d85357df87109fd846",
+          "linux_size": 306,
+          "windows_size": 313,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/workflow_seed.json",
+          "linux_sha256": "00585740a090acd03b2d9c432b70c699e4b8cc8670978fadbec7228a8ae887c6",
+          "windows_sha256": "a65a50741284365447d06685f5daa2764584aaa446eec455fe6f82a36d1ffb5b",
+          "linux_size": 16280,
+          "windows_size": 16926,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui-0.11.3+ees.10.dist-info/RECORD",
+          "linux_sha256": "996befd956f86ff7b1c36667bf2898838c5bee2ea1c9ea108836f416a0779763",
+          "windows_sha256": "a72c300bd549821452f18a78b4002570d894f2c2140763a866ef2c6c4df2f57c",
+          "linux_size": 656850,
+          "windows_size": 656850,
+          "fields": [
+            "sha256",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": false
+        }
+      ],
+      "changed_entry_count": 395,
+      "record_equal": false,
+      "linux_record_issues": [],
+      "windows_record_issues": [],
+      "linux_sha256": "ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd",
+      "windows_sha256": "5941f77ae1d773026fe940cad58d8e9e72cb9a30a8280b61f91ddc6cc7246e2c",
+      "zip_member_field_difference_counts": {
+        "sha256": 19,
+        "compressed_sha256": 19,
+        "compressed_size": 19,
+        "crc32": 19,
+        "local_header_hex": 19,
+        "header_offset": 394,
+        "size": 17
+      },
+      "same_payload_compressed_stream_differences": [],
+      "same_payload_metadata_field_difference_counts": {
+        "header_offset": 376
+      },
+      "linux_record_sha256": "996befd956f86ff7b1c36667bf2898838c5bee2ea1c9ea108836f416a0779763",
+      "windows_record_sha256": "a72c300bd549821452f18a78b4002570d894f2c2140763a866ef2c6c4df2f57c"
+    },
+    "previous": {
+      "members": 5912,
+      "same_name_order": true,
+      "payload_changes": [
+        {
+          "name": "open_webui/frontend/index.html",
+          "linux_sha256": "a301f991cf5c7e887ed6fa4433d527007e264f94ac71a0a1037bbfbe46329ab9",
+          "windows_sha256": "1c8acf3b565d0857331458e48ddcbfddf5c56af8d6074c833f840f9f79fd78cb",
+          "linux_size": 11806,
+          "windows_size": 11806,
+          "fields": [
+            "sha256",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": false
+        },
+        {
+          "name": "open_webui/frontend/static/favicon.svg",
+          "linux_sha256": "05fe25025577eea8b73ff0560c1a89c5730d1011ec4e9e25886c8bf867f1e69c",
+          "windows_sha256": "6bc522504ed36b3e9cba6f4fc2725fc45e306c1877a7579713a73977c252224c",
+          "linux_size": 284,
+          "windows_size": 289,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/static/favicon.svg",
+          "linux_sha256": "05fe25025577eea8b73ff0560c1a89c5730d1011ec4e9e25886c8bf867f1e69c",
+          "windows_sha256": "6bc522504ed36b3e9cba6f4fc2725fc45e306c1877a7579713a73977c252224c",
+          "linux_size": 284,
+          "windows_size": 289,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_asset_guard.py",
+          "linux_sha256": "5d592291cb10bd8c0b1a6f56cf0c29c7c9641ef12fdd5b8faafab9fbfaf4763e",
+          "windows_sha256": "6a7ad49f60dbe92eb403e0490ee85d53b1af5a4b0d5f47c4f746dd93ac2e86f4",
+          "linux_size": 21395,
+          "windows_size": 21940,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_work_demo.py",
+          "linux_sha256": "8d225f81614400b4db7861a59cdd46707dd2cc9dcd619656e162a2fdad432f32",
+          "windows_sha256": "4a2f88675ef50890248bc30472fdee7160005b00f1e51513b1b30f1cd0b13fcd",
+          "linux_size": 1738,
+          "windows_size": 1783,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_work_demo_ui/ees-work.css",
+          "linux_sha256": "78efc4141f7b40359c9c7e73b88a2ed75adbc685356e98b3bb96fa6bbf2b6357",
+          "windows_sha256": "0842f7fb3178d59ce1a90287ea888f27d3443d59114ac7ad2db9e716e9e9222c",
+          "linux_size": 30489,
+          "windows_size": 30859,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_work_demo_ui/ees-work.js",
+          "linux_sha256": "c56796d36c15b5d48ec5d418dc178139f5f232d6948be2f7e3ca19ce9df3a716",
+          "windows_sha256": "d032a45583b980fda993f783e50766a4e8fec00cd390b9a7b8e9aff5cb485fb6",
+          "linux_size": 66901,
+          "windows_size": 67326,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_work_demo_ui/index.html",
+          "linux_sha256": "de41922cd4cc235160f36347f037414a2cff6c89de13ebd1381c1eaab485d1a0",
+          "windows_sha256": "6eaac4c3881d37e4451a52a06a1ff2fb881c9232e4becb3215374c8179a75283",
+          "linux_size": 5546,
+          "windows_size": 5570,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_workflow.py",
+          "linux_sha256": "fe99c922e2debb65ad6f143ff807d71bd2bd04c3b259db4aee2eabfb7fa62ba9",
+          "windows_sha256": "34955e6b56d7cc3f0c899037f4a6fc964ca1ae16c9d26cac56c25dae4505a79b",
+          "linux_size": 42154,
+          "windows_size": 42827,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_workflow_authoring.py",
+          "linux_sha256": "fe117537f826fa1d239b0ae64fef08e448e42545bef7f7b7b97b7e8cc1586544",
+          "windows_sha256": "298146fcab799f28499b35e07b8bdd940d10af130ecb7149ef43079f73c02d8f",
+          "linux_size": 58076,
+          "windows_size": 58815,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_workflow_definition.py",
+          "linux_sha256": "0485d1dbfe2b0a34d5201925aed396bff3b4ac84be500b9a493df12decf3e94b",
+          "windows_sha256": "fb3fd979c672e44397d0e59733a071c0e65aeb880e7a4ecdf70da399e007433e",
+          "linux_size": 14091,
+          "windows_size": 14338,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/ees_workflow_view.py",
+          "linux_sha256": "40fc329ecb8c3d8e6b841d1b0c9e0a3eadf6ae1b47d8bc5e9f53e1915f9fbf73",
+          "windows_sha256": "e8430591bcea7f8bc0eb0e6bf6661790f0f1891aae29e578ab71a813b8a7ae56",
+          "linux_size": 10497,
+          "windows_size": 10690,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/frontend/_ees11/chat-theme.css",
+          "linux_sha256": "3b06a7037a1b1d2a2e46611a0b702e743331d83e4bd1a68382cbd0a593e8510c",
+          "windows_sha256": "e444b4be0a3b18e84acb8954af9432d6be9145b17be31619928f0f5c5114ff89",
+          "linux_size": 10170,
+          "windows_size": 10467,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/frontend/_ees11/ees-work-launcher.css",
+          "linux_sha256": "a093b212252be8284121c4a224458aaac8d0ac2fb91c65ea920e8e98944e6a1f",
+          "windows_sha256": "885b5eb61382838007c4b8d4cc7ca49c1788eba0331518df028663974cb541a3",
+          "linux_size": 58095,
+          "windows_size": 58629,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/frontend/_ees11/ees-work-launcher.js",
+          "linux_sha256": "b598d78ec438081620aed11732ad8e3849600a12122923d2c58b9f6a42d8f639",
+          "windows_sha256": "3358e58a1c56029b681fb5b88e46b0fb4524cfd7c56c7881a5e0728102c46268",
+          "linux_size": 213973,
+          "windows_size": 215790,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": false
+        },
+        {
+          "name": "open_webui/frontend/_ees11/ees-work-panel.js",
+          "linux_sha256": "0e5c475f74b13f56dc4b458136f890e9055ff5329e9ae48028c5513e6feed3c7",
+          "windows_sha256": "dc14d2c4abb0fc1a7f5c97645caea6c7482d67c1193ef0d4f50a187d9b682cae",
+          "linux_size": 10203,
+          "windows_size": 10351,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/frontend/_ees11/fonts/LICENSE.txt",
+          "linux_sha256": "9397f0ac9c8d1e186085d8d249ce8ea0f86e4f61c559beb342433b8032874e47",
+          "windows_sha256": "d3e06e8ab917d5f6b251055e00e3c696f075670f43efd30ec1351d782cdf774d",
+          "linux_size": 11131,
+          "windows_size": 11389,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/workflow_policy.json",
+          "linux_sha256": "dcaec7a509c904f679ce01558896f031117962ea8f1ce580c5210e2b35c55d66",
+          "windows_sha256": "bbe781bc743040b829267b4e00cfe6522363c0eecd4720d85357df87109fd846",
+          "linux_size": 306,
+          "windows_size": 313,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui/workflow_seed.json",
+          "linux_sha256": "00585740a090acd03b2d9c432b70c699e4b8cc8670978fadbec7228a8ae887c6",
+          "windows_sha256": "a65a50741284365447d06685f5daa2764584aaa446eec455fe6f82a36d1ffb5b",
+          "linux_size": 16280,
+          "windows_size": 16926,
+          "fields": [
+            "sha256",
+            "size",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "open_webui-0.11.3+ees.11.dist-info/RECORD",
+          "linux_sha256": "2bc864106b04fbb5bf36303ad0e6491a28f926b8f8a8251c2ab4b69ed7e19088",
+          "windows_sha256": "d4253a80b648ce1f84c1936f32f7ceb35c4fa4358a0571aadd17c7b9b8e64de0",
+          "linux_size": 656944,
+          "windows_size": 656944,
+          "fields": [
+            "sha256",
+            "compressed_sha256",
+            "compressed_size",
+            "crc32",
+            "header_offset",
+            "local_header_hex"
+          ],
+          "exact_lf_to_crlf_hash_match": false
+        }
+      ],
+      "changed_entry_count": 396,
+      "record_equal": false,
+      "linux_record_issues": [],
+      "windows_record_issues": [],
+      "linux_sha256": "27f6a1c37264d4f205bedb6635c9eaae8a36a5d023d36d1dd595e34728c8b8d3",
+      "windows_sha256": "6f2ace2d8baf2f01c7472bbecf146daec1b74c8fa0e6b83adeb916fe1d524ec3",
+      "zip_member_field_difference_counts": {
+        "sha256": 20,
+        "compressed_sha256": 20,
+        "compressed_size": 20,
+        "crc32": 20,
+        "local_header_hex": 20,
+        "header_offset": 395,
+        "size": 18
+      },
+      "same_payload_compressed_stream_differences": [],
+      "same_payload_metadata_field_difference_counts": {
+        "header_offset": 376
+      },
+      "linux_record_sha256": "2bc864106b04fbb5bf36303ad0e6491a28f926b8f8a8251c2ab4b69ed7e19088",
+      "windows_record_sha256": "d4253a80b648ce1f84c1936f32f7ceb35c4fa4358a0571aadd17c7b9b8e64de0"
+    }
+  },
+  "sources": {
+    "legacy": {
+      "source_commit": "a443d30c6694df0e1cbe082a0b99aa5f2d566917",
+      "total_files": 142,
+      "changes": [
+        {
+          "name": ".github/workflows/ees-delivery.yml",
+          "linux_size": 11102,
+          "windows_size": 11338,
+          "crlf_expected_size": 11338,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": ".gitignore",
+          "linux_size": 515,
+          "windows_size": 559,
+          "crlf_expected_size": 559,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "AGENTS.md",
+          "linux_size": 23802,
+          "windows_size": 23923,
+          "crlf_expected_size": 23923,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "CHANGELOG.md",
+          "linux_size": 79606,
+          "windows_size": 79992,
+          "crlf_expected_size": 79992,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "README.md",
+          "linux_size": 26701,
+          "windows_size": 26948,
+          "crlf_expected_size": 26948,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/README.md",
+          "linux_size": 7036,
+          "windows_size": 7091,
+          "crlf_expected_size": 7091,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/ees-demo.json",
+          "linux_size": 5051,
+          "windows_size": 5201,
+          "crlf_expected_size": 5201,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/ees-prompt-suggestions.json",
+          "linux_size": 1092,
+          "windows_size": 1115,
+          "crlf_expected_size": 1115,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/knowledge/poc-policy.md",
+          "linux_size": 1356,
+          "windows_size": 1388,
+          "crlf_expected_size": 1388,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/policies/common-policy.md",
+          "linux_size": 2163,
+          "windows_size": 2201,
+          "crlf_expected_size": 2201,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/confluence-read/SKILL.md",
+          "linux_size": 3272,
+          "windows_size": 3307,
+          "crlf_expected_size": 3307,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/confluence-read/scripts/confluence_tool.py",
+          "linux_size": 19326,
+          "windows_size": 19651,
+          "crlf_expected_size": 19651,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py",
+          "linux_size": 22720,
+          "windows_size": 23147,
+          "crlf_expected_size": 23147,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py",
+          "linux_size": 40152,
+          "windows_size": 40825,
+          "crlf_expected_size": 40825,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js",
+          "linux_size": 61680,
+          "windows_size": 62216,
+          "crlf_expected_size": 62216,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/cross-system-analysis/ui/work-panel.js",
+          "linux_size": 10203,
+          "windows_size": 10351,
+          "crlf_expected_size": 10351,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/ees_work_demo.py",
+          "linux_size": 1738,
+          "windows_size": 1783,
+          "crlf_expected_size": 1783,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/ees_workflow.py",
+          "linux_size": 43415,
+          "windows_size": 44111,
+          "crlf_expected_size": 44111,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_definition.py",
+          "linux_size": 14091,
+          "windows_size": 14338,
+          "crlf_expected_size": 14338,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_view.py",
+          "linux_size": 10497,
+          "windows_size": 10690,
+          "crlf_expected_size": 10690,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/workflow_policy.json",
+          "linux_size": 306,
+          "windows_size": 313,
+          "crlf_expected_size": 313,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/workflow_seed.json",
+          "linux_size": 16280,
+          "windows_size": 16926,
+          "crlf_expected_size": 16926,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py",
+          "linux_size": 30051,
+          "windows_size": 30466,
+          "crlf_expected_size": 30466,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/ui/ees-work.css",
+          "linux_size": 30489,
+          "windows_size": 30859,
+          "crlf_expected_size": 30859,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/ui/ees-work.js",
+          "linux_size": 66901,
+          "windows_size": 67326,
+          "crlf_expected_size": 67326,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/ui/index.html",
+          "linux_size": 5546,
+          "windows_size": 5570,
+          "crlf_expected_size": 5570,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ems-work-order/references/wo-mockup.html",
+          "linux_size": 24534,
+          "windows_size": 24827,
+          "crlf_expected_size": 24827,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py",
+          "linux_size": 54374,
+          "windows_size": 55141,
+          "crlf_expected_size": 55141,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/github-read/scripts/github_tool.py",
+          "linux_size": 25322,
+          "windows_size": 25740,
+          "crlf_expected_size": 25740,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/jira-read/scripts/jira_tool.py",
+          "linux_size": 24471,
+          "windows_size": 24858,
+          "crlf_expected_size": 24858,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/policy-grounded-answer/SKILL.md",
+          "linux_size": 1293,
+          "windows_size": 1320,
+          "crlf_expected_size": 1320,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/structured-troubleshooting/SKILL.md",
+          "linux_size": 1042,
+          "windows_size": 1069,
+          "crlf_expected_size": 1069,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/system-prompts/apc-demo-assistant.md",
+          "linux_size": 2682,
+          "windows_size": 2691,
+          "crlf_expected_size": 2691,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/system-prompts/ees-integrated-assistant.md",
+          "linux_size": 13577,
+          "windows_size": 13651,
+          "crlf_expected_size": 13651,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/system-prompts/ees-orchestration-demo.md",
+          "linux_size": 16345,
+          "windows_size": 16402,
+          "crlf_expected_size": 16402,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/system-prompts/ems-demo-assistant.md",
+          "linux_size": 2656,
+          "windows_size": 2665,
+          "crlf_expected_size": 2665,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/system-prompts/fdc-demo-assistant.md",
+          "linux_size": 2676,
+          "windows_size": 2685,
+          "crlf_expected_size": 2685,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/assets/favicon.svg",
+          "linux_size": 284,
+          "windows_size": 289,
+          "crlf_expected_size": 289,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/ui/chat-theme.css",
+          "linux_size": 10170,
+          "windows_size": 10467,
+          "crlf_expected_size": 10467,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/ui/ees-work-designer.js",
+          "linux_size": 42065,
+          "windows_size": 42348,
+          "crlf_expected_size": 42348,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/ui/ees-work-launcher.css",
+          "linux_size": 56420,
+          "windows_size": 56936,
+          "crlf_expected_size": 56936,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/ui/ees-work-launcher.js",
+          "linux_size": 42908,
+          "windows_size": 43403,
+          "crlf_expected_size": 43403,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/ui/ees-work-view.js",
+          "linux_size": 102490,
+          "windows_size": 103331,
+          "crlf_expected_size": 103331,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/ui/font-licenses.txt",
+          "linux_size": 11131,
+          "windows_size": 11389,
+          "crlf_expected_size": 11389,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "config/openwebui.env.example",
+          "linux_size": 688,
+          "windows_size": 702,
+          "crlf_expected_size": 702,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/01-openwebui-install.md",
+          "linux_size": 22208,
+          "windows_size": 22460,
+          "crlf_expected_size": 22460,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/02-vllm-direct-test.md",
+          "linux_size": 16023,
+          "windows_size": 16247,
+          "crlf_expected_size": 16247,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/03-hermes-integration.md",
+          "linux_size": 9677,
+          "windows_size": 9902,
+          "crlf_expected_size": 9902,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/03-openwebui-native-agent.md",
+          "linux_size": 245424,
+          "windows_size": 247177,
+          "crlf_expected_size": 247177,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/04-confluence-read-tool.md",
+          "linux_size": 45214,
+          "windows_size": 45588,
+          "crlf_expected_size": 45588,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/05-jira-read-tool.md",
+          "linux_size": 20762,
+          "windows_size": 20908,
+          "crlf_expected_size": 20908,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/06-github-read-tool.md",
+          "linux_size": 18433,
+          "windows_size": 18550,
+          "crlf_expected_size": 18550,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/07-team-quickstart.md",
+          "linux_size": 8617,
+          "windows_size": 8698,
+          "crlf_expected_size": 8698,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/STATUS.md",
+          "linux_size": 20393,
+          "windows_size": 20475,
+          "crlf_expected_size": 20475,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/mockups/ees-work/TASK.md",
+          "linux_size": 121059,
+          "windows_size": 121675,
+          "crlf_expected_size": 121675,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/mockups/ees-work/ees-demo-workspace.html",
+          "linux_size": 87747,
+          "windows_size": 87878,
+          "crlf_expected_size": 87878,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/mockups/ees-work/ees-factory-workspace.html",
+          "linux_size": 43411,
+          "windows_size": 43580,
+          "crlf_expected_size": 43580,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/mockups/ees-work/ees-sidebar-refinement.html",
+          "linux_size": 28928,
+          "windows_size": 29174,
+          "crlf_expected_size": 29174,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/troubleshooting.md",
+          "linux_size": 43216,
+          "windows_size": 43663,
+          "crlf_expected_size": 43663,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "evals/confluence-offline.md",
+          "linux_size": 63110,
+          "windows_size": 63462,
+          "crlf_expected_size": 63462,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "evals/github-offline.md",
+          "linux_size": 21192,
+          "windows_size": 21332,
+          "crlf_expected_size": 21332,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "evals/jira-offline.md",
+          "linux_size": 34551,
+          "windows_size": 34781,
+          "crlf_expected_size": 34781,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "evals/scenarios.md",
+          "linux_size": 920602,
+          "windows_size": 923730,
+          "crlf_expected_size": 923730,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/build_demo_bundle.py",
+          "linux_size": 8978,
+          "windows_size": 9182,
+          "crlf_expected_size": 9182,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/build_ees_webui.py",
+          "linux_size": 35411,
+          "windows_size": 36018,
+          "crlf_expected_size": 36018,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/check-jira-auth.ps1",
+          "linux_size": 3119,
+          "windows_size": 3183,
+          "crlf_expected_size": 3183,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/check_confluence_canary.py",
+          "linux_size": 6423,
+          "windows_size": 6574,
+          "crlf_expected_size": 6574,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/check_docs.py",
+          "linux_size": 12271,
+          "windows_size": 12552,
+          "crlf_expected_size": 12552,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_apply_demo.py",
+          "linux_size": 18180,
+          "windows_size": 18569,
+          "crlf_expected_size": 18569,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_asset_guard.py",
+          "linux_size": 21395,
+          "windows_size": 21940,
+          "crlf_expected_size": 21940,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_demo_assets.py",
+          "linux_size": 37665,
+          "windows_size": 38386,
+          "crlf_expected_size": 38386,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_accept.py",
+          "linux_size": 5606,
+          "windows_size": 5742,
+          "crlf_expected_size": 5742,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_imports.py",
+          "linux_size": 14053,
+          "windows_size": 14325,
+          "crlf_expected_size": 14325,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_process.py",
+          "linux_size": 36911,
+          "windows_size": 37642,
+          "crlf_expected_size": 37642,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_recover.py",
+          "linux_size": 9305,
+          "windows_size": 9487,
+          "crlf_expected_size": 9487,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_release.py",
+          "linux_size": 25114,
+          "windows_size": 25587,
+          "crlf_expected_size": 25587,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_report.py",
+          "linux_size": 23129,
+          "windows_size": 23585,
+          "crlf_expected_size": 23585,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_state.py",
+          "linux_size": 19473,
+          "windows_size": 19832,
+          "crlf_expected_size": 19832,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_stop_recovery.py",
+          "linux_size": 7809,
+          "windows_size": 7967,
+          "crlf_expected_size": 7967,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_stop_target.py",
+          "linux_size": 10001,
+          "windows_size": 10210,
+          "crlf_expected_size": 10210,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_trial_bundle.py",
+          "linux_size": 11576,
+          "windows_size": 11846,
+          "crlf_expected_size": 11846,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_trial_upgrade.py",
+          "linux_size": 6720,
+          "windows_size": 6855,
+          "crlf_expected_size": 6855,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_update_download.py",
+          "linux_size": 14248,
+          "windows_size": 14547,
+          "crlf_expected_size": 14547,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_upgrade.py",
+          "linux_size": 19323,
+          "windows_size": 19731,
+          "crlf_expected_size": 19731,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_webui_customization.py",
+          "linux_size": 29714,
+          "windows_size": 30293,
+          "crlf_expected_size": 30293,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/manage-ees.ps1",
+          "linux_size": 7937,
+          "windows_size": 8083,
+          "crlf_expected_size": 8083,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/manage_ees.py",
+          "linux_size": 55662,
+          "windows_size": 56661,
+          "crlf_expected_size": 56661,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/render_ees_brand_assets.py",
+          "linux_size": 1158,
+          "windows_size": 1195,
+          "crlf_expected_size": 1195,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/serve_openwebui_windows.py",
+          "linux_size": 4867,
+          "windows_size": 4971,
+          "crlf_expected_size": 4971,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/smoke-test.ps1",
+          "linux_size": 2355,
+          "windows_size": 2440,
+          "crlf_expected_size": 2440,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/start-openwebui.ps1",
+          "linux_size": 4745,
+          "windows_size": 4889,
+          "crlf_expected_size": 4889,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/ees_asset_native_fixture.py",
+          "linux_size": 17984,
+          "windows_size": 18363,
+          "crlf_expected_size": 18363,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/native_ui_fixture.py",
+          "linux_size": 19533,
+          "windows_size": 19873,
+          "crlf_expected_size": 19873,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_check_docs.py",
+          "linux_size": 15858,
+          "windows_size": 16215,
+          "crlf_expected_size": 16215,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_confluence_canary.py",
+          "linux_size": 22241,
+          "windows_size": 22669,
+          "crlf_expected_size": 22669,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_confluence_read.py",
+          "linux_size": 36299,
+          "windows_size": 37002,
+          "crlf_expected_size": 37002,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_demo_bundle.py",
+          "linux_size": 9803,
+          "windows_size": 9987,
+          "crlf_expected_size": 9987,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_apply_demo.py",
+          "linux_size": 27660,
+          "windows_size": 28129,
+          "crlf_expected_size": 28129,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_asset_guard.py",
+          "linux_size": 15079,
+          "windows_size": 15452,
+          "crlf_expected_size": 15452,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_asset_native.py",
+          "linux_size": 22440,
+          "windows_size": 22869,
+          "crlf_expected_size": 22869,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_branding_build.py",
+          "linux_size": 53070,
+          "windows_size": 53924,
+          "crlf_expected_size": 53924,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_chat_theme.py",
+          "linux_size": 30149,
+          "windows_size": 30666,
+          "crlf_expected_size": 30666,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_cooperation_panel.cjs",
+          "linux_size": 46499,
+          "windows_size": 46945,
+          "crlf_expected_size": 46945,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_demo_assets.py",
+          "linux_size": 72043,
+          "windows_size": 73309,
+          "crlf_expected_size": 73309,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_demo_data_tool.py",
+          "linux_size": 22188,
+          "windows_size": 22551,
+          "crlf_expected_size": 22551,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_accept.py",
+          "linux_size": 23152,
+          "windows_size": 23640,
+          "crlf_expected_size": 23640,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_imports.py",
+          "linux_size": 26292,
+          "windows_size": 26721,
+          "crlf_expected_size": 26721,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_port.py",
+          "linux_size": 14293,
+          "windows_size": 14615,
+          "crlf_expected_size": 14615,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_process.py",
+          "linux_size": 74028,
+          "windows_size": 75324,
+          "crlf_expected_size": 75324,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_recover.py",
+          "linux_size": 14472,
+          "windows_size": 14764,
+          "crlf_expected_size": 14764,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_release.py",
+          "linux_size": 26331,
+          "windows_size": 26788,
+          "crlf_expected_size": 26788,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_report.py",
+          "linux_size": 35362,
+          "windows_size": 35993,
+          "crlf_expected_size": 35993,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_state.py",
+          "linux_size": 14377,
+          "windows_size": 14631,
+          "crlf_expected_size": 14631,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_stop_recovery.py",
+          "linux_size": 28409,
+          "windows_size": 28928,
+          "crlf_expected_size": 28928,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_stop_target.py",
+          "linux_size": 13151,
+          "windows_size": 13396,
+          "crlf_expected_size": 13396,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_specialists_tool.py",
+          "linux_size": 60328,
+          "windows_size": 61377,
+          "crlf_expected_size": 61377,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_trial_bundle.py",
+          "linux_size": 12182,
+          "windows_size": 12429,
+          "crlf_expected_size": 12429,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_trial_upgrade.py",
+          "linux_size": 20002,
+          "windows_size": 20365,
+          "crlf_expected_size": 20365,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_update_download.py",
+          "linux_size": 13771,
+          "windows_size": 14045,
+          "crlf_expected_size": 14045,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_upgrade.py",
+          "linux_size": 50044,
+          "windows_size": 50910,
+          "crlf_expected_size": 50910,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_webui_customization.py",
+          "linux_size": 79544,
+          "windows_size": 80924,
+          "crlf_expected_size": 80924,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_controller.py",
+          "linux_size": 30676,
+          "windows_size": 31177,
+          "crlf_expected_size": 31177,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_demo.py",
+          "linux_size": 181696,
+          "windows_size": 184223,
+          "crlf_expected_size": 184223,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_designer.py",
+          "linux_size": 12024,
+          "windows_size": 12202,
+          "crlf_expected_size": 12202,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_panel.py",
+          "linux_size": 73647,
+          "windows_size": 74791,
+          "crlf_expected_size": 74791,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_routes.py",
+          "linux_size": 3815,
+          "windows_size": 3899,
+          "crlf_expected_size": 3899,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_workflow.py",
+          "linux_size": 66433,
+          "windows_size": 67484,
+          "crlf_expected_size": 67484,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_workflow_tool.py",
+          "linux_size": 50551,
+          "windows_size": 51371,
+          "crlf_expected_size": 51371,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_github_tool.py",
+          "linux_size": 31546,
+          "windows_size": 32135,
+          "crlf_expected_size": 32135,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_jira_read.py",
+          "linux_size": 23576,
+          "windows_size": 24032,
+          "crlf_expected_size": 24032,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_manage_ees.py",
+          "linux_size": 114808,
+          "windows_size": 116688,
+          "crlf_expected_size": 116688,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_openwebui_windows_launcher.py",
+          "linux_size": 11153,
+          "windows_size": 11391,
+          "crlf_expected_size": 11391,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_wo_demo_state.cjs",
+          "linux_size": 43377,
+          "windows_size": 43981,
+          "crlf_expected_size": 43981,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_wo_demo_tool.py",
+          "linux_size": 17595,
+          "windows_size": 17936,
+          "crlf_expected_size": 17936,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "versions.md",
+          "linux_size": 21851,
+          "windows_size": 21963,
+          "crlf_expected_size": 21963,
+          "exact_lf_to_crlf_hash_match": true
+        }
+      ]
+    },
+    "previous": {
+      "source_commit": "991cdb1d80ae07471fb50594831d74fe602b1ef7",
+      "total_files": 149,
+      "changes": [
+        {
+          "name": ".github/workflows/ees-delivery.yml",
+          "linux_size": 13374,
+          "windows_size": 13643,
+          "crlf_expected_size": 13643,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": ".gitignore",
+          "linux_size": 515,
+          "windows_size": 559,
+          "crlf_expected_size": 559,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "AGENTS.md",
+          "linux_size": 23802,
+          "windows_size": 23923,
+          "crlf_expected_size": 23923,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "CHANGELOG.md",
+          "linux_size": 81498,
+          "windows_size": 81891,
+          "crlf_expected_size": 81891,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "README.md",
+          "linux_size": 27701,
+          "windows_size": 27950,
+          "crlf_expected_size": 27950,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/README.md",
+          "linux_size": 7036,
+          "windows_size": 7091,
+          "crlf_expected_size": 7091,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/ees-demo.json",
+          "linux_size": 5051,
+          "windows_size": 5201,
+          "crlf_expected_size": 5201,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/ees-prompt-suggestions.json",
+          "linux_size": 1092,
+          "windows_size": 1115,
+          "crlf_expected_size": 1115,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/knowledge/poc-policy.md",
+          "linux_size": 1356,
+          "windows_size": 1388,
+          "crlf_expected_size": 1388,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/policies/common-policy.md",
+          "linux_size": 2163,
+          "windows_size": 2201,
+          "crlf_expected_size": 2201,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/confluence-read/SKILL.md",
+          "linux_size": 3272,
+          "windows_size": 3307,
+          "crlf_expected_size": 3307,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/confluence-read/scripts/confluence_tool.py",
+          "linux_size": 19326,
+          "windows_size": 19651,
+          "crlf_expected_size": 19651,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py",
+          "linux_size": 22720,
+          "windows_size": 23147,
+          "crlf_expected_size": 23147,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py",
+          "linux_size": 40169,
+          "windows_size": 40842,
+          "crlf_expected_size": 40842,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js",
+          "linux_size": 61680,
+          "windows_size": 62216,
+          "crlf_expected_size": 62216,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/cross-system-analysis/ui/work-panel.js",
+          "linux_size": 10203,
+          "windows_size": 10351,
+          "crlf_expected_size": 10351,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/ees_work_demo.py",
+          "linux_size": 1738,
+          "windows_size": 1783,
+          "crlf_expected_size": 1783,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/ees_workflow.py",
+          "linux_size": 42154,
+          "windows_size": 42827,
+          "crlf_expected_size": 42827,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_authoring.py",
+          "linux_size": 58076,
+          "windows_size": 58815,
+          "crlf_expected_size": 58815,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_definition.py",
+          "linux_size": 14091,
+          "windows_size": 14338,
+          "crlf_expected_size": 14338,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_view.py",
+          "linux_size": 10497,
+          "windows_size": 10690,
+          "crlf_expected_size": 10690,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/workflow_policy.json",
+          "linux_size": 306,
+          "windows_size": 313,
+          "crlf_expected_size": 313,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/workflow_seed.json",
+          "linux_size": 16280,
+          "windows_size": 16926,
+          "crlf_expected_size": 16926,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py",
+          "linux_size": 30051,
+          "windows_size": 30466,
+          "crlf_expected_size": 30466,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/ui/ees-work.css",
+          "linux_size": 30489,
+          "windows_size": 30859,
+          "crlf_expected_size": 30859,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/ui/ees-work.js",
+          "linux_size": 66901,
+          "windows_size": 67326,
+          "crlf_expected_size": 67326,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ees-work-demo/ui/index.html",
+          "linux_size": 5546,
+          "windows_size": 5570,
+          "crlf_expected_size": 5570,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ems-work-order/references/wo-mockup.html",
+          "linux_size": 24534,
+          "windows_size": 24827,
+          "crlf_expected_size": 24827,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py",
+          "linux_size": 54374,
+          "windows_size": 55141,
+          "crlf_expected_size": 55141,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/github-read/scripts/github_tool.py",
+          "linux_size": 25322,
+          "windows_size": 25740,
+          "crlf_expected_size": 25740,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/jira-read/scripts/jira_tool.py",
+          "linux_size": 24471,
+          "windows_size": 24858,
+          "crlf_expected_size": 24858,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/policy-grounded-answer/SKILL.md",
+          "linux_size": 1293,
+          "windows_size": 1320,
+          "crlf_expected_size": 1320,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/skills/structured-troubleshooting/SKILL.md",
+          "linux_size": 1042,
+          "windows_size": 1069,
+          "crlf_expected_size": 1069,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/system-prompts/apc-demo-assistant.md",
+          "linux_size": 2682,
+          "windows_size": 2691,
+          "crlf_expected_size": 2691,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/system-prompts/ees-integrated-assistant.md",
+          "linux_size": 13577,
+          "windows_size": 13651,
+          "crlf_expected_size": 13651,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/system-prompts/ees-orchestration-demo.md",
+          "linux_size": 16345,
+          "windows_size": 16402,
+          "crlf_expected_size": 16402,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/system-prompts/ems-demo-assistant.md",
+          "linux_size": 2656,
+          "windows_size": 2665,
+          "crlf_expected_size": 2665,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "agent-pack/system-prompts/fdc-demo-assistant.md",
+          "linux_size": 2676,
+          "windows_size": 2685,
+          "crlf_expected_size": 2685,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/assets/favicon.svg",
+          "linux_size": 284,
+          "windows_size": 289,
+          "crlf_expected_size": 289,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/ui/chat-theme.css",
+          "linux_size": 10170,
+          "windows_size": 10467,
+          "crlf_expected_size": 10467,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/ui/ees-work-designer.js",
+          "linux_size": 67952,
+          "windows_size": 68426,
+          "crlf_expected_size": 68426,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/ui/ees-work-launcher.css",
+          "linux_size": 58095,
+          "windows_size": 58629,
+          "crlf_expected_size": 58629,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/ui/ees-work-launcher.js",
+          "linux_size": 43495,
+          "windows_size": 43997,
+          "crlf_expected_size": 43997,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/ui/ees-work-view.js",
+          "linux_size": 102490,
+          "windows_size": 103331,
+          "crlf_expected_size": 103331,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "branding/ees/ui/font-licenses.txt",
+          "linux_size": 11131,
+          "windows_size": 11389,
+          "crlf_expected_size": 11389,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "config/openwebui.env.example",
+          "linux_size": 688,
+          "windows_size": 702,
+          "crlf_expected_size": 702,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/01-openwebui-install.md",
+          "linux_size": 22208,
+          "windows_size": 22460,
+          "crlf_expected_size": 22460,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/02-vllm-direct-test.md",
+          "linux_size": 16023,
+          "windows_size": 16247,
+          "crlf_expected_size": 16247,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/03-hermes-integration.md",
+          "linux_size": 9677,
+          "windows_size": 9902,
+          "crlf_expected_size": 9902,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/03-openwebui-native-agent.md",
+          "linux_size": 255866,
+          "windows_size": 257658,
+          "crlf_expected_size": 257658,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/04-confluence-read-tool.md",
+          "linux_size": 45214,
+          "windows_size": 45588,
+          "crlf_expected_size": 45588,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/05-jira-read-tool.md",
+          "linux_size": 20762,
+          "windows_size": 20908,
+          "crlf_expected_size": 20908,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/06-github-read-tool.md",
+          "linux_size": 18433,
+          "windows_size": 18550,
+          "crlf_expected_size": 18550,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/07-team-quickstart.md",
+          "linux_size": 12510,
+          "windows_size": 12613,
+          "crlf_expected_size": 12613,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/STATUS.md",
+          "linux_size": 21525,
+          "windows_size": 21607,
+          "crlf_expected_size": 21607,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/mockups/ees-work/TASK.md",
+          "linux_size": 130123,
+          "windows_size": 130788,
+          "crlf_expected_size": 130788,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/mockups/ees-work/ees-demo-workspace.html",
+          "linux_size": 87747,
+          "windows_size": 87878,
+          "crlf_expected_size": 87878,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/mockups/ees-work/ees-factory-workspace.html",
+          "linux_size": 43411,
+          "windows_size": 43580,
+          "crlf_expected_size": 43580,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/mockups/ees-work/ees-sidebar-refinement.html",
+          "linux_size": 28928,
+          "windows_size": 29174,
+          "crlf_expected_size": 29174,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "docs/troubleshooting.md",
+          "linux_size": 43216,
+          "windows_size": 43663,
+          "crlf_expected_size": 43663,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "evals/confluence-offline.md",
+          "linux_size": 63110,
+          "windows_size": 63462,
+          "crlf_expected_size": 63462,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "evals/github-offline.md",
+          "linux_size": 21192,
+          "windows_size": 21332,
+          "crlf_expected_size": 21332,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "evals/jira-offline.md",
+          "linux_size": 34551,
+          "windows_size": 34781,
+          "crlf_expected_size": 34781,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "evals/scenarios.md",
+          "linux_size": 961981,
+          "windows_size": 965281,
+          "crlf_expected_size": 965281,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/build_demo_bundle.py",
+          "linux_size": 8978,
+          "windows_size": 9182,
+          "crlf_expected_size": 9182,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/build_ees_webui.py",
+          "linux_size": 35773,
+          "windows_size": 36383,
+          "crlf_expected_size": 36383,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/check-jira-auth.ps1",
+          "linux_size": 3119,
+          "windows_size": 3183,
+          "crlf_expected_size": 3183,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/check_confluence_canary.py",
+          "linux_size": 6423,
+          "windows_size": 6574,
+          "crlf_expected_size": 6574,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/check_docs.py",
+          "linux_size": 12271,
+          "windows_size": 12552,
+          "crlf_expected_size": 12552,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_apply_demo.py",
+          "linux_size": 18197,
+          "windows_size": 18586,
+          "crlf_expected_size": 18586,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_asset_guard.py",
+          "linux_size": 21395,
+          "windows_size": 21940,
+          "crlf_expected_size": 21940,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_demo_assets.py",
+          "linux_size": 37665,
+          "windows_size": 38386,
+          "crlf_expected_size": 38386,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_accept.py",
+          "linux_size": 5606,
+          "windows_size": 5742,
+          "crlf_expected_size": 5742,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_imports.py",
+          "linux_size": 14053,
+          "windows_size": 14325,
+          "crlf_expected_size": 14325,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_process.py",
+          "linux_size": 36938,
+          "windows_size": 37669,
+          "crlf_expected_size": 37669,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_recover.py",
+          "linux_size": 9305,
+          "windows_size": 9487,
+          "crlf_expected_size": 9487,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_release.py",
+          "linux_size": 25114,
+          "windows_size": 25587,
+          "crlf_expected_size": 25587,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_report.py",
+          "linux_size": 23129,
+          "windows_size": 23585,
+          "crlf_expected_size": 23585,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_state.py",
+          "linux_size": 19473,
+          "windows_size": 19832,
+          "crlf_expected_size": 19832,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_stop_recovery.py",
+          "linux_size": 7809,
+          "windows_size": 7967,
+          "crlf_expected_size": 7967,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_deploy_stop_target.py",
+          "linux_size": 10001,
+          "windows_size": 10210,
+          "crlf_expected_size": 10210,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_trial_bundle.py",
+          "linux_size": 11576,
+          "windows_size": 11846,
+          "crlf_expected_size": 11846,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_trial_upgrade.py",
+          "linux_size": 6720,
+          "windows_size": 6855,
+          "crlf_expected_size": 6855,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_update_download.py",
+          "linux_size": 14248,
+          "windows_size": 14547,
+          "crlf_expected_size": 14547,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_upgrade.py",
+          "linux_size": 19323,
+          "windows_size": 19731,
+          "crlf_expected_size": 19731,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/ees_webui_customization.py",
+          "linux_size": 29869,
+          "windows_size": 30450,
+          "crlf_expected_size": 30450,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/manage-ees.ps1",
+          "linux_size": 7937,
+          "windows_size": 8083,
+          "crlf_expected_size": 8083,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/manage_ees.py",
+          "linux_size": 55662,
+          "windows_size": 56661,
+          "crlf_expected_size": 56661,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/render_ees_brand_assets.py",
+          "linux_size": 1158,
+          "windows_size": 1195,
+          "crlf_expected_size": 1195,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/serve_openwebui_windows.py",
+          "linux_size": 4867,
+          "windows_size": 4971,
+          "crlf_expected_size": 4971,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/smoke-test.ps1",
+          "linux_size": 2355,
+          "windows_size": 2440,
+          "crlf_expected_size": 2440,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "scripts/start-openwebui.ps1",
+          "linux_size": 4745,
+          "windows_size": 4889,
+          "crlf_expected_size": 4889,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/ees_asset_native_fixture.py",
+          "linux_size": 17984,
+          "windows_size": 18363,
+          "crlf_expected_size": 18363,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/native_auth_fixture.py",
+          "linux_size": 23798,
+          "windows_size": 24226,
+          "crlf_expected_size": 24226,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/native_ui_fixture.py",
+          "linux_size": 20961,
+          "windows_size": 21318,
+          "crlf_expected_size": 21318,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_check_docs.py",
+          "linux_size": 15858,
+          "windows_size": 16215,
+          "crlf_expected_size": 16215,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_confluence_canary.py",
+          "linux_size": 22241,
+          "windows_size": 22669,
+          "crlf_expected_size": 22669,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_confluence_read.py",
+          "linux_size": 36299,
+          "windows_size": 37002,
+          "crlf_expected_size": 37002,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_demo_bundle.py",
+          "linux_size": 9803,
+          "windows_size": 9987,
+          "crlf_expected_size": 9987,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_apply_demo.py",
+          "linux_size": 27660,
+          "windows_size": 28129,
+          "crlf_expected_size": 28129,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_asset_guard.py",
+          "linux_size": 15079,
+          "windows_size": 15452,
+          "crlf_expected_size": 15452,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_asset_native.py",
+          "linux_size": 34284,
+          "windows_size": 34890,
+          "crlf_expected_size": 34890,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_branding_build.py",
+          "linux_size": 53262,
+          "windows_size": 54118,
+          "crlf_expected_size": 54118,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_chat_theme.py",
+          "linux_size": 30149,
+          "windows_size": 30666,
+          "crlf_expected_size": 30666,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_cooperation_panel.cjs",
+          "linux_size": 46499,
+          "windows_size": 46945,
+          "crlf_expected_size": 46945,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_demo_assets.py",
+          "linux_size": 72043,
+          "windows_size": 73309,
+          "crlf_expected_size": 73309,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_demo_data_tool.py",
+          "linux_size": 22188,
+          "windows_size": 22551,
+          "crlf_expected_size": 22551,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_accept.py",
+          "linux_size": 23152,
+          "windows_size": 23640,
+          "crlf_expected_size": 23640,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_imports.py",
+          "linux_size": 26292,
+          "windows_size": 26721,
+          "crlf_expected_size": 26721,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_port.py",
+          "linux_size": 14293,
+          "windows_size": 14615,
+          "crlf_expected_size": 14615,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_process.py",
+          "linux_size": 74086,
+          "windows_size": 75382,
+          "crlf_expected_size": 75382,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_recover.py",
+          "linux_size": 14472,
+          "windows_size": 14764,
+          "crlf_expected_size": 14764,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_release.py",
+          "linux_size": 26331,
+          "windows_size": 26788,
+          "crlf_expected_size": 26788,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_report.py",
+          "linux_size": 35362,
+          "windows_size": 35993,
+          "crlf_expected_size": 35993,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_state.py",
+          "linux_size": 14377,
+          "windows_size": 14631,
+          "crlf_expected_size": 14631,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_stop_recovery.py",
+          "linux_size": 28409,
+          "windows_size": 28928,
+          "crlf_expected_size": 28928,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_deploy_stop_target.py",
+          "linux_size": 13151,
+          "windows_size": 13396,
+          "crlf_expected_size": 13396,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_specialists_tool.py",
+          "linux_size": 60345,
+          "windows_size": 61394,
+          "crlf_expected_size": 61394,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_trial_bundle.py",
+          "linux_size": 12182,
+          "windows_size": 12429,
+          "crlf_expected_size": 12429,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_trial_upgrade.py",
+          "linux_size": 20002,
+          "windows_size": 20365,
+          "crlf_expected_size": 20365,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_update_download.py",
+          "linux_size": 13771,
+          "windows_size": 14045,
+          "crlf_expected_size": 14045,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_upgrade.py",
+          "linux_size": 50044,
+          "windows_size": 50910,
+          "crlf_expected_size": 50910,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_webui_customization.py",
+          "linux_size": 83713,
+          "windows_size": 85156,
+          "crlf_expected_size": 85156,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_authoring.py",
+          "linux_size": 63351,
+          "windows_size": 64300,
+          "crlf_expected_size": 64300,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_authoring_account_switch.py",
+          "linux_size": 12369,
+          "windows_size": 12557,
+          "crlf_expected_size": 12557,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_authoring_native.py",
+          "linux_size": 46919,
+          "windows_size": 47615,
+          "crlf_expected_size": 47615,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_authoring_ui.cjs",
+          "linux_size": 29168,
+          "windows_size": 29292,
+          "crlf_expected_size": 29292,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_controller.py",
+          "linux_size": 30676,
+          "windows_size": 31177,
+          "crlf_expected_size": 31177,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_demo.py",
+          "linux_size": 186089,
+          "windows_size": 188676,
+          "crlf_expected_size": 188676,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_designer.py",
+          "linux_size": 856,
+          "windows_size": 877,
+          "crlf_expected_size": 877,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_panel.py",
+          "linux_size": 73197,
+          "windows_size": 74333,
+          "crlf_expected_size": 74333,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_work_routes.py",
+          "linux_size": 3815,
+          "windows_size": 3899,
+          "crlf_expected_size": 3899,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_workflow.py",
+          "linux_size": 66607,
+          "windows_size": 67658,
+          "crlf_expected_size": 67658,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_ees_workflow_tool.py",
+          "linux_size": 50105,
+          "windows_size": 50917,
+          "crlf_expected_size": 50917,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_github_tool.py",
+          "linux_size": 31546,
+          "windows_size": 32135,
+          "crlf_expected_size": 32135,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_jira_read.py",
+          "linux_size": 23576,
+          "windows_size": 24032,
+          "crlf_expected_size": 24032,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_manage_ees.py",
+          "linux_size": 114808,
+          "windows_size": 116688,
+          "crlf_expected_size": 116688,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_openwebui_windows_launcher.py",
+          "linux_size": 11153,
+          "windows_size": 11391,
+          "crlf_expected_size": 11391,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_wo_demo_state.cjs",
+          "linux_size": 43377,
+          "windows_size": 43981,
+          "crlf_expected_size": 43981,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/test_wo_demo_tool.py",
+          "linux_size": 17595,
+          "windows_size": 17936,
+          "crlf_expected_size": 17936,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "tests/workflow_fixture.py",
+          "linux_size": 3084,
+          "windows_size": 3150,
+          "crlf_expected_size": 3150,
+          "exact_lf_to_crlf_hash_match": true
+        },
+        {
+          "name": "versions.md",
+          "linux_size": 23616,
+          "windows_size": 23733,
+          "crlf_expected_size": 23733,
+          "exact_lf_to_crlf_hash_match": true
+        }
+      ]
+    }
+  },
+  "recorded_at_utc": "2026-10-01T07:23:41.364259+00:00",
+  "run_id": 36828753420,
+  "windows_job_id": 110260279420,
+  "head_sha": "07d392c7727e798dc48d036d9e579992fc3d2869",
+  "artifact_member_count": 10,
+  "inventory_files": {
+    "linux": {
+      "legacy-source-inventory.json": "7f81b6ea507a9b226604663a3bb90e96e38a5c0fd090fbf90ba0d1f4db388628",
+      "legacy-wheel-inventory.json": "1bc6321ecd455b56ca2eb4d79bc2d43fd0a731d512b5777c92b117b92c0e7b11",
+      "previous-source-inventory.json": "9b0e022e20aef0844fac4caed8bf511f33500c3b951c1356b4698283ce08118a",
+      "previous-wheel-inventory.json": "c9d8a7f2c41a0edc363c86d7b0daa04f8008387e4ea2b8ad41dc5ce8ab7c28f7",
+      "result.json": "b2f0ba7bba3c5dc2299315ed6f6d22fe29e10b9799432d00e76e4571894080d1",
+      "upstream-wheel-inventory.json": "1eb134187b5723330cf30c0c87a38a984bc010584f3826a09d1564868e463997"
+    },
+    "windows": {
+      "legacy-source-inventory.json": "7c277a6c39f351155e9c89ed62d6889698d9ac8dbe876f4a8dc5bfb4992f1d63",
+      "legacy-wheel-inventory.json": "5aa389238345ee4dd7af7fe58c62881acbd299396db34aa61ad86a1b180e7f7c",
+      "previous-source-inventory.json": "5ae369ff4db9fca47ed9238bce33e3210e2f5b1c11c68e9a1dfd6795778f40b8",
+      "previous-wheel-inventory.json": "936877dae257dbca4ce3e17794f4e55612fb159bd36d6cebbf8b183aa54af84f",
+      "result.json": "bc87c6aed24f7671585a00bdcca5cd832a55c500676a7614eb90660c69559e2a",
+      "upstream-wheel-inventory.json": "1eb134187b5723330cf30c0c87a38a984bc010584f3826a09d1564868e463997"
+    }
+  },
+  "linux_environment": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "python": "3.11.16 (main, Sep  1 2026, 14:18:37) [Clang 22.1.3 ]",
+    "zlib_compile": "1.3.2",
+    "zlib_runtime": "1.3.2"
+  },
+  "windows_environment": {
+    "platform": "Windows-10-10.0.20348-SP0",
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "zlib_compile": "1.3.1",
+    "zlib_runtime": "1.3.1"
+  },
+  "git_archive_autocrlf_reproduction": {
+    "command": "git -c core.autocrlf=true archive --format=tar --output=dist/step0b-residual/legacy-autocrlf-source.tar a443d30c6694df0e1cbe082a0b99aa5f2d566917",
+    "files": 142,
+    "matches_windows": true,
+    "mismatches": []
+  },
+  "classification": "Content differences from historical test-fixture source CRLF conversion; not packaging-only differences. All unchanged-payload compressed streams and metadata match except downstream archive offsets. No hash pin has been changed.",
+  "fix": "Use per-command git -c core.autocrlf=false -c core.eol=lf archive for the two historical fixtures. Keep original source commits, upstream SHA, and wheel hashes."
+}

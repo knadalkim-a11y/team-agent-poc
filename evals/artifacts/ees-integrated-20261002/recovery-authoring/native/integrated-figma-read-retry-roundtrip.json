@@ -1,0 +1,14 @@
+{
+  "scope": "built Native UI; synthetic Native session and read transport; real SQLite executor",
+  "explicit_policy": {
+    "count": 2,
+    "deadline_seconds": 30
+  },
+  "attempt_statuses": [
+    "failed",
+    "succeeded"
+  ],
+  "external_transport_calls": 2,
+  "business_status": "waiting_confirmation",
+  "human_decisions": []
+}

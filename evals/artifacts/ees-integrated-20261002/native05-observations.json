@@ -1,0 +1,82 @@
+{
+  "observed_at": "2026-10-02T01:33:38.763405+00:00",
+  "wheel": "dist/integrated/branding-05/open_webui-0.11.3+ees.13-py3-none-any.whl",
+  "wheel_sha256": "8b0c15f89e42c1dd73e5d37fa6ae221e44ec3da30f7fd7d9c77e95072277cd57",
+  "boundary": "Native built frontend + real EES SQLite; Native auth/chat/model responses synthetic except native-account and native-central actual CLI gates",
+  "results": {
+    "native-work": {
+      "tests": 12,
+      "passed": 8,
+      "failed": 4
+    },
+    "native-compose1": {
+      "tests": 5,
+      "passed": 4,
+      "failed": 1
+    },
+    "native-compose2": {
+      "tests": 6,
+      "passed": 5,
+      "failed": 1
+    },
+    "native-execution": "not run before product fixes",
+    "native-account": "failed fixture setup/readiness; exact results in native05-account/*.json; password/signup2 and pending-group1 passed after actual Native Tools table fixture correction; browser retries pending",
+    "native-central": "actual private Native registration/read/proposal event passed; human apply blocked by missing selected-node proposal UI"
+  },
+  "observations": [
+    {
+      "kind": "product_defect",
+      "description": "Acknowledged own save incorrectly marked a conflict and left save disabled",
+      "owner": "native_ui",
+      "next": "exact server-equal draft reconciliation then new built-product retry"
+    },
+    {
+      "kind": "product_defect",
+      "description": "Physical Escape retained native dialog; browser-standard dialog control probe showed helper dispatch closes normal dialog",
+      "owner": "native_ui",
+      "next": "explicit dialog keydown cancellation then new built-product retry"
+    },
+    {
+      "kind": "product_defect",
+      "description": "Native central proposal reached editor and showed pending notice, but selected-node view omitted AI review/apply controls",
+      "owner": "authoring_ui",
+      "next": "render pending AI controls across author views, explicit apply remains local until Save"
+    },
+    {
+      "kind": "test_defect",
+      "description": "Runner direct file execution omitted repository root from child sys.path",
+      "action": "Explicit ROOT added; initial failed log preserved; runner8 pass"
+    },
+    {
+      "kind": "fixture_defect",
+      "description": "Auth fixture stub Tools omitted actual current registered_capabilities get_tools path",
+      "action": "Load pinned Native valves + Tools model/table and existing ACL; no synthetic permission bypass"
+    },
+    {
+      "kind": "test_readiness",
+      "description": "Closed-run open needed asynchronous render wait, tool wait matched initial instructions, Tiptap empty DOM contained newline",
+      "action": "Wait actual visible job control, final status glyph, and trimmed empty textContent respectively"
+    },
+    {
+      "kind": "obsolete_test_dependency",
+      "description": "Old synthetic shadow-panel tests loaded deleted cooperation-panel source",
+      "action": "Three IDs explicitly mapped to actual Native geometry/focus/disabled-control cases; pinned font integrity and ChromePipe retained"
+    }
+  ],
+  "positive_observations": [
+    "Readable Korean screenshot at 1920,1440,1180; sidebar visible with saved Native chat",
+    "Eight declared input types preserve typed values during visible save and reload",
+    "Running real held transport emits one attempt/call; computed glyph transform changes across frames; actual reduced-motion disables animation",
+    "Partial,failed,unknown remain distinct and do not automatically retry",
+    "Readonly tool runtime cannot confirm human completion"
+  ],
+  "evidence": {
+    "native_pngs": 26,
+    "central_pngs": 3,
+    "inventory": [
+      "dist/integrated/validation/native05-evidence/browser-evidence.json",
+      "dist/integrated/validation/native-central05-evidence/browser-evidence.json"
+    ]
+  },
+  "retest_status": "pending next stable wheel; no same-condition repetition"
+}

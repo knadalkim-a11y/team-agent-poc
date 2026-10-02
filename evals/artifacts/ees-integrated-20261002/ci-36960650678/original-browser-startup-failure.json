@@ -1,0 +1,48 @@
+{
+  "test": "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_delayed_input_write_keeps_exact_original_run_after_chat_change",
+  "last_wait": null,
+  "last_click": null,
+  "capture_errors": [],
+  "browser": {
+    "stage": "browser_handshake",
+    "elapsed_ms": 15089.222141000007,
+    "pid": 2479,
+    "exit_code": null,
+    "browser_version": null,
+    "target_id": null,
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 1,
+      "method": "Browser.getVersion",
+      "session_attached": false,
+      "timeout_seconds": 14.999998277000003,
+      "elapsed_ms": 15015.088770999995,
+      "completed": false
+    },
+    "recent_responses": [],
+    "stderr_tail": "[2479:2505:1002/033515.966513:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2479:2505:1002/033517.417892:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2479:2505:1002/033518.232622:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n",
+    "first_failure": {
+      "stage": "browser_handshake",
+      "elapsed_ms": 15087.723209000003,
+      "pid": 2479,
+      "exit_code": null,
+      "browser_version": null,
+      "target_id": null,
+      "session_attached": false,
+      "buffer_bytes": 0,
+      "last_command": {
+        "id": 1,
+        "method": "Browser.getVersion",
+        "session_attached": false,
+        "timeout_seconds": 14.999998277000003,
+        "elapsed_ms": 15015.088770999995,
+        "completed": false
+      },
+      "recent_responses": [],
+      "stderr_tail": "[2479:2505:1002/033515.966513:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2479:2505:1002/033517.417892:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2479:2505:1002/033518.232622:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n",
+      "error_type": "AssertionError"
+    }
+  },
+  "page_capture": "unavailable_no_attached_session"
+}

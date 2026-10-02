@@ -1,0 +1,545 @@
+{
+  "run_id": 36954271808,
+  "head": "89d910ea56bb0e5ea095120bd380bb3e705e75b0",
+  "boundary": "Completed initial automatic run; no manual retry or cancellation. Local reproductions and partition audit do not count as Windows rerun PASS.",
+  "initial_failure_signals": {
+    "services-linux": {
+      "log": "dist/integrated/ci-36954271808-services-linux.log",
+      "signals": [
+        {
+          "line": 1904,
+          "text": "2026-10-02T02:11:19.0400906Z DOCS FAIL | files=115 links=5209 errors=15 review_candidates=0"
+        }
+      ],
+      "sha256": "de00169558d1efb5ae9f2d87bb3fd906f231a243c4bbf27cd8b60df67033b7be",
+      "bytes": 200624
+    },
+    "services-windows": {
+      "log": "dist/integrated/ci-36954271808-services-windows.log",
+      "signals": [
+        {
+          "line": 642,
+          "text": "2026-10-02T02:11:51.2644185Z FAIL: test_async_identity_receipt_and_evidence_contracts (test_ees_work_controller.IntegratedControllerTests.test_async_identity_receipt_and_evidence_contracts) (script='test_ees_execution_ui.cjs')"
+        },
+        {
+          "line": 733,
+          "text": "2026-10-02T02:11:51.2675632Z not ok 15 - late workspace reads are discarded after account change"
+        },
+        {
+          "line": 1621,
+          "text": "2026-10-02T02:12:07.5991292Z ERROR: test_calendar_timezones_month_end_and_dst_are_explicit (test_ees_work_operations.RuntimeTests.test_calendar_timezones_month_end_and_dst_are_explicit)"
+        },
+        {
+          "line": 1646,
+          "text": "2026-10-02T02:12:07.6008549Z ModuleNotFoundError: No module named 'tzdata'"
+        },
+        {
+          "line": 1677,
+          "text": "2026-10-02T02:12:07.6026075Z ERROR: test_daily_schedule_unique_across_two_workers_and_no_delegation_block (test_ees_work_operations.RuntimeTests.test_daily_schedule_unique_across_two_workers_and_no_delegation_block)"
+        },
+        {
+          "line": 1702,
+          "text": "2026-10-02T02:12:07.6039164Z ModuleNotFoundError: No module named 'tzdata'"
+        },
+        {
+          "line": 1745,
+          "text": "2026-10-02T02:12:07.6073966Z ERROR: test_delegated_schedule_actual_worker_pins_version_and_does_not_repeat (test_ees_work_operations.RuntimeTests.test_delegated_schedule_actual_worker_pins_version_and_does_not_repeat)"
+        },
+        {
+          "line": 1770,
+          "text": "2026-10-02T02:12:07.6088777Z ModuleNotFoundError: No module named 'tzdata'"
+        },
+        {
+          "line": 1812,
+          "text": "2026-10-02T02:12:07.6114236Z ERROR: test_future_job_time_and_same_cycle_restore (test_ees_work_operations.RuntimeTests.test_future_job_time_and_same_cycle_restore)"
+        },
+        {
+          "line": 1837,
+          "text": "2026-10-02T02:12:07.6128539Z ModuleNotFoundError: No module named 'tzdata'"
+        },
+        {
+          "line": 1879,
+          "text": "2026-10-02T02:12:07.6153707Z ERROR: test_private_schedule_not_visible_to_other_system_admin (test_ees_work_operations.RuntimeTests.test_private_schedule_not_visible_to_other_system_admin)"
+        },
+        {
+          "line": 1904,
+          "text": "2026-10-02T02:12:07.6168891Z ModuleNotFoundError: No module named 'tzdata'"
+        },
+        {
+          "line": 1946,
+          "text": "2026-10-02T02:12:07.6193336Z ERROR: test_queued_schedule_delegation_revocation_is_current (test_ees_work_operations.RuntimeTests.test_queued_schedule_delegation_revocation_is_current)"
+        },
+        {
+          "line": 1971,
+          "text": "2026-10-02T02:12:07.6205720Z ModuleNotFoundError: No module named 'tzdata'"
+        },
+        {
+          "line": 2014,
+          "text": "2026-10-02T02:12:07.6228207Z ERROR: test_scheduled_read_lease_loss_never_redispatches (test_ees_work_operations.RuntimeTests.test_scheduled_read_lease_loss_never_redispatches)"
+        },
+        {
+          "line": 2039,
+          "text": "2026-10-02T02:12:07.6237493Z ModuleNotFoundError: No module named 'tzdata'"
+        },
+        {
+          "line": 2081,
+          "text": "2026-10-02T02:12:07.6257393Z FAIL: test_schedule_identity_and_current_tool_revocation (test_ees_work_operations.RuntimeTests.test_schedule_identity_and_current_tool_revocation)"
+        },
+        {
+          "line": 2113,
+          "text": "2026-10-02T02:12:08.3902282Z FAIL: test_typed_draft_authoring_and_result_contracts (test_ees_work_panel.IntegratedPanelTests.test_typed_draft_authoring_and_result_contracts) (script='test_ees_execution_ui.cjs')"
+        },
+        {
+          "line": 2204,
+          "text": "2026-10-02T02:12:08.3932442Z not ok 15 - late workspace reads are discarded after account change"
+        },
+        {
+          "line": 3015,
+          "text": "2026-10-02T02:12:09.5075167Z FAIL: test_legacy_history_read_preserves_database_and_enforces_owner (test_ees_work_routes.WorkRouteTests.test_legacy_history_read_preserves_database_and_enforces_owner)"
+        },
+        {
+          "line": 3035,
+          "text": "2026-10-02T02:12:09.5086402Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 3045,
+          "text": "2026-10-02T02:12:09.9745200Z FAIL: test_native_mount_scroll_keyboard_and_result_contracts (test_ees_work_v4.IntegratedLayoutTests.test_native_mount_scroll_keyboard_and_result_contracts) (script='test_ees_execution_ui.cjs')"
+        },
+        {
+          "line": 3136,
+          "text": "2026-10-02T02:12:09.9771926Z not ok 15 - late workspace reads are discarded after account change"
+        },
+        {
+          "line": 4055,
+          "text": "2026-10-02T02:12:27.0591305Z FAIL: test_business_calendar_missing_does_not_invent_earlier_date (test_ees_work_workspace.WorkspaceTests.test_business_calendar_missing_does_not_invent_earlier_date)"
+        },
+        {
+          "line": 4078,
+          "text": "2026-10-02T02:12:27.0600774Z FAIL: test_cross_job_deadline_setting_invalidates_decision_and_downstream (test_ees_work_workspace.WorkspaceTests.test_cross_job_deadline_setting_invalidates_decision_and_downstream)"
+        },
+        {
+          "line": 4101,
+          "text": "2026-10-02T02:12:27.0609535Z FAIL: test_deadline_timezone_boundary_calendar_offset_and_attempt_snapshot (test_ees_work_workspace.WorkspaceTests.test_deadline_timezone_boundary_calendar_offset_and_attempt_snapshot)"
+        },
+        {
+          "line": 4130,
+          "text": "2026-10-02T02:12:27.1882752Z ERROR: test_ees_workflow (unittest.loader._FailedTest.test_ees_workflow)"
+        },
+        {
+          "line": 4144,
+          "text": "2026-10-02T02:12:27.1887932Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 4154,
+          "text": "2026-10-02T02:12:27.3150658Z ERROR: test_ees_workflow_contract (unittest.loader._FailedTest.test_ees_workflow_contract)"
+        },
+        {
+          "line": 4170,
+          "text": "2026-10-02T02:12:27.3162364Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 4404,
+          "text": "2026-10-02T02:13:18.6454291Z not ok 15 - late workspace reads are discarded after account change"
+        }
+      ],
+      "sha256": "c3cb1b036b1e4088c354ad29af4447da410898b57de60428a8c7e32a29f54ebb",
+      "bytes": 548353
+    },
+    "contracts-windows": {
+      "log": "dist/integrated/ci-36954271808-contracts-windows.log",
+      "signals": [
+        {
+          "line": 455,
+          "text": "2026-10-02T02:11:27.3143007Z ERROR: test_ees_work_authoring (unittest.loader._FailedTest.test_ees_work_authoring)"
+        },
+        {
+          "line": 469,
+          "text": "2026-10-02T02:11:27.3165689Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 488,
+          "text": "2026-10-02T02:11:38.6009698Z FAIL: test_a_t2_scope_waits_without_dispatching_outside_dependencies (test_ees_workflow_examples_native.NativeWorkflowExamplesTests.test_a_t2_scope_waits_without_dispatching_outside_dependencies)"
+        },
+        {
+          "line": 509,
+          "text": "2026-10-02T02:11:38.6028700Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 512,
+          "text": "2026-10-02T02:11:38.6031172Z FAIL: test_a_t_only_then_p_three_native_functions_and_grounded_summary (test_ees_workflow_examples_native.NativeWorkflowExamplesTests.test_a_t_only_then_p_three_native_functions_and_grounded_summary)"
+        },
+        {
+          "line": 533,
+          "text": "2026-10-02T02:11:38.6049797Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 536,
+          "text": "2026-10-02T02:11:38.6051836Z FAIL: test_b_same_confluence_search_candidate_wait_resume_and_body (test_ees_workflow_examples_native.NativeWorkflowExamplesTests.test_b_same_confluence_search_candidate_wait_resume_and_body)"
+        },
+        {
+          "line": 557,
+          "text": "2026-10-02T02:11:38.6067699Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 560,
+          "text": "2026-10-02T02:11:38.6068951Z FAIL: test_model_invented_counts_ci_and_foreign_evidence_never_complete (test_ees_workflow_examples_native.NativeWorkflowExamplesTests.test_model_invented_counts_ci_and_foreign_evidence_never_complete)"
+        },
+        {
+          "line": 581,
+          "text": "2026-10-02T02:11:38.6084351Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 584,
+          "text": "2026-10-02T02:11:38.6085520Z FAIL: test_truncated_document_stops_and_does_not_run_summary (test_ees_workflow_examples_native.NativeWorkflowExamplesTests.test_truncated_document_stops_and_does_not_run_summary)"
+        },
+        {
+          "line": 605,
+          "text": "2026-10-02T02:11:38.6127831Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 614,
+          "text": "2026-10-02T02:11:39.0161894Z ERROR: test_ees_workflow_execution (unittest.loader._FailedTest.test_ees_workflow_execution)"
+        },
+        {
+          "line": 628,
+          "text": "2026-10-02T02:11:39.0168923Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 676,
+          "text": "2026-10-02T02:12:07.9636365Z FAIL: test_approval_and_disable_recheck_revoked_admin_before_write (test_ees_workflow_native.NativeReadBridgeTests.test_approval_and_disable_recheck_revoked_admin_before_write)"
+        },
+        {
+          "line": 697,
+          "text": "2026-10-02T02:12:07.9647078Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 700,
+          "text": "2026-10-02T02:12:07.9648139Z FAIL: test_code_schema_config_environment_changes_and_loader_race (test_ees_workflow_native.NativeReadBridgeTests.test_code_schema_config_environment_changes_and_loader_race)"
+        },
+        {
+          "line": 721,
+          "text": "2026-10-02T02:12:07.9658657Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 724,
+          "text": "2026-10-02T02:12:07.9659690Z FAIL: test_current_acl_group_account_role_and_personal_approval (test_ees_workflow_native.NativeReadBridgeTests.test_current_acl_group_account_role_and_personal_approval)"
+        },
+        {
+          "line": 745,
+          "text": "2026-10-02T02:12:07.9669036Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 748,
+          "text": "2026-10-02T02:12:07.9670166Z FAIL: test_injected_function_reserved_headers_url_subject_rejected_before_loader (test_ees_workflow_native.NativeReadBridgeTests.test_injected_function_reserved_headers_url_subject_rejected_before_loader)"
+        },
+        {
+          "line": 769,
+          "text": "2026-10-02T02:12:07.9684502Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 772,
+          "text": "2026-10-02T02:12:07.9686437Z FAIL: test_integrated_read_review_commits_existing_native_approval (test_ees_workflow_native.NativeReadBridgeTests.test_integrated_read_review_commits_existing_native_approval)"
+        },
+        {
+          "line": 793,
+          "text": "2026-10-02T02:12:07.9701835Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 796,
+          "text": "2026-10-02T02:12:07.9702994Z FAIL: test_jira_delivery_functions_real_native_loader_array_binding_and_pat (test_ees_workflow_native.NativeReadBridgeTests.test_jira_delivery_functions_real_native_loader_array_binding_and_pat)"
+        },
+        {
+          "line": 817,
+          "text": "2026-10-02T02:12:07.9712660Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 820,
+          "text": "2026-10-02T02:12:07.9713753Z FAIL: test_metadata_and_approval_do_not_load_or_call (test_ees_workflow_native.NativeReadBridgeTests.test_metadata_and_approval_do_not_load_or_call)"
+        },
+        {
+          "line": 841,
+          "text": "2026-10-02T02:12:07.9722438Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 844,
+          "text": "2026-10-02T02:12:07.9723574Z FAIL: test_normalizers_preserve_partial_empty_truncated_unknown_and_untrusted (test_ees_workflow_native.NativeReadBridgeTests.test_normalizers_preserve_partial_empty_truncated_unknown_and_untrusted)"
+        },
+        {
+          "line": 865,
+          "text": "2026-10-02T02:12:07.9732985Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 868,
+          "text": "2026-10-02T02:12:07.9734071Z FAIL: test_registered_request_metadata_never_loads_code_and_obeys_acl (test_ees_workflow_native.NativeReadBridgeTests.test_registered_request_metadata_never_loads_code_and_obeys_acl)"
+        },
+        {
+          "line": 889,
+          "text": "2026-10-02T02:12:07.9742891Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 892,
+          "text": "2026-10-02T02:12:07.9744022Z FAIL: test_requirements_and_missing_personal_connection_block_before_import (test_ees_workflow_native.NativeReadBridgeTests.test_requirements_and_missing_personal_connection_block_before_import)"
+        },
+        {
+          "line": 913,
+          "text": "2026-10-02T02:12:07.9753413Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 916,
+          "text": "2026-10-02T02:12:07.9754449Z FAIL: test_same_registration_two_jobs_two_users_and_native_chat (test_ees_workflow_native.NativeReadBridgeTests.test_same_registration_two_jobs_two_users_and_native_chat)"
+        },
+        {
+          "line": 937,
+          "text": "2026-10-02T02:12:07.9763156Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 940,
+          "text": "2026-10-02T02:12:07.9764252Z FAIL: test_scoped_native_chat_registration_context_and_per_call_acl (test_ees_workflow_native.NativeReadBridgeTests.test_scoped_native_chat_registration_context_and_per_call_acl)"
+        },
+        {
+          "line": 961,
+          "text": "2026-10-02T02:12:07.9773429Z AssertionError: Historical writer fixture differs from b41e239"
+        },
+        {
+          "line": 964,
+          "text": "2026-10-02T02:12:07.9774504Z FAIL: test_three_existing_tools_six_functions_real_loader_valves_http (test_ees_workflow_native.NativeReadBridgeTests.test_three_existing_tools_six_functions_real_loader_valves_http)"
+        },
+        {
+          "line": 985,
+          "text": "2026-10-02T02:12:07.9783745Z AssertionError: Historical writer fixture differs from b41e239"
+        }
+      ],
+      "sha256": "112fd232a4ae8a773456c086841204c3e331ad1d17952e29cda849aebb5e379f",
+      "bytes": 111966
+    },
+    "platform-windows": {
+      "log": "dist/integrated/ci-36954271808-platform-windows.log",
+      "sha256": "802143747568304c191de1ebe65dac3dc3d9d4a382c635ebaa083a26b1bca0e9",
+      "bytes": 208878,
+      "signals": [
+        {
+          "line": 546,
+          "text": "2026-10-02T02:12:28.7512930Z FAIL: test_resolved_directory_outside_root_is_skipped_synthetic_boundary (test_check_docs.CheckDocsTests.test_resolved_directory_outside_root_is_skipped_synthetic_boundary)"
+        },
+        {
+          "line": 699,
+          "text": "2026-10-02T02:14:04.5288820Z FAIL: test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication (test_ees_asset_native.NativeAuthoringAssetReadTests.test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication)"
+        },
+        {
+          "line": 721,
+          "text": "2026-10-02T02:14:04.5305538Z FAIL: test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets (test_ees_asset_native.NativeAuthoringAssetReadTests.test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets)"
+        },
+        {
+          "line": 1122,
+          "text": "2026-10-02T02:15:28.3759136Z ERROR: test_actual_venv_child_termination_releases_waiting_launcher (test_ees_deploy_stop_target.WindowsVenvTests.test_actual_venv_child_termination_releases_waiting_launcher)"
+        },
+        {
+          "line": 1131,
+          "text": "2026-10-02T02:15:28.3769230Z EncodingWarning: 'encoding' argument not specified"
+        },
+        {
+          "line": 1275,
+          "text": "2026-10-02T02:18:47.8760227Z test_real_ees10_to_authoring_apply_restore_preserves_program_and_data (test_ees_webui_customization.CustomizationTests.test_real_ees10_to_authoring_apply_restore_preserves_program_and_data) ... ok"
+        },
+        {
+          "line": 1276,
+          "text": "2026-10-02T02:20:19.5848225Z test_real_ees11_to_execution_apply_restore_preserves_program_and_data (test_ees_webui_customization.CustomizationTests.test_real_ees11_to_execution_apply_restore_preserves_program_and_data) ... Traceback (most recent call last):"
+        },
+        {
+          "line": 1361,
+          "text": "2026-10-02T02:20:21.6255462Z ##[error]The operation was canceled."
+        }
+      ]
+    }
+  },
+  "corrections": [
+    {
+      "cause": "Historical source artifact omits .github; 15 broken targets after successful services",
+      "change": ".github/workflows/ees-delivery.yml exact fixture upload include-hidden-files:true",
+      "validation": "Same three fixed source archives, hidden omission reproduces15 and restored .github gives0 doc errors",
+      "evidence": "ci-36954271808-artifact-completeness.json"
+    },
+    {
+      "cause": "Windows checkout changes pinned historical Python LF bytes to CRLF before original SHA guards",
+      "change": ".gitattributes limits text eol=lf to two fixed legacy fixtures; original SHA checks retained",
+      "validation": "core.autocrlf=true reproduces changed SHA, explicit LF reproduces original byte hashes",
+      "evidence": "ci-36954271808-fixed-fixture-checkout.json"
+    },
+    {
+      "cause": "Windows minimum test dependencies lack standard zoneinfo tzdata fallback",
+      "change": "EES_FIXED_TEST_DEPENDENCIES adds tzdata==2026.4; no global/company installation",
+      "validation": "OS TZPATH empty, affected schedule/deadline 11 tests PASS",
+      "evidence": "ci-36954271808-tzdata-provenance.json"
+    },
+    {
+      "cause": "Node fixture injection assumes LF, so CRLF launcher yields undefined private test exports",
+      "change": "tests/ees_workspace_ui_fixture.cjs normalizes in-memory source and asserts unique injection markers/exports; tests/test_ees_execution_ui.cjs adds two cases",
+      "validation": "144 shared JS PASS; forced CRLF execution64 PASS; original62 retained",
+      "evidence": [
+        "native-ui-windows-fixture-regression.txt",
+        "native-ui-crlf-controller-regression.txt"
+      ]
+    },
+    {
+      "cause": "Synthetic resolve fixture compares unresolved temporary path with checker-normalized Windows path",
+      "change": "tests/test_check_docs.py resolves both fixture paths before patching Path.resolve; checker/product unchanged",
+      "validation": "Focused normalized/lexical boundary localPASS; actualWindowsnextCI",
+      "evidence": "windows-fixture-boundary-utf8-local.log"
+    },
+    {
+      "cause": "Windows-only subprocess fixture reads JSON marker without encoding under strict EncodingWarning",
+      "change": "tests/test_ees_deploy_stop_target.py writes and reads synthetic marker with UTF-8",
+      "validation": "Local related16PASS, actualWindowscase1SKIP; no claim of Windows runtime pass",
+      "evidence": "windows-fixture-boundary-utf8-local.log"
+    },
+    {
+      "cause": "Windows full filesystem Apply/Restore exceeded combined10min job; ees10 singlecase157seconds passed, ees11 interrupted",
+      "change": "Three existing exact test IDs run in required restore-ees10/11/12 Linux/Windows suites; other58 stay platform; no repeatedWindowsfixturebuild",
+      "validation": "Runner10PASS; audit1332 old /1183 current errors0; runtime collection61 assigned once, no missing/duplicate. No timeout or assertion change.",
+      "evidence": [
+        "ci-36954271808-partition-runner.log",
+        "ci-36954271808-customization-partitions.json"
+      ]
+    }
+  ],
+  "unmodified_guards": "No product source change, no skip/assertion removal, no original fixture hash change, no doc scope narrowing, no trigger or protection reduction. Added .gitattributes path dependency to existing PR triggers.",
+  "jobs": [
+    {
+      "id": 110673643892,
+      "name": "Prepare pinned program fixtures and test coverage",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110673969910,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110673969956,
+      "name": "native-compose (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110673969960,
+      "name": "platform (windows-2022)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 110673969973,
+      "name": "native-execution (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110673969983,
+      "name": "services (windows-2022)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 110673970011,
+      "name": "native-work (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110673970027,
+      "name": "contracts (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110673970035,
+      "name": "contracts (windows-2022)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 110673970096,
+      "name": "services (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 110673970117,
+      "name": "platform (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110673970370,
+      "name": "native-account (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110676423000,
+      "name": "Delivery checks (windows-2022)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 110676423037,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 110676450859,
+      "name": "Prepare delivery files",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "files": [
+    {
+      "path": "dist/integrated/ci-36954271808-artifact-completeness.json",
+      "bytes": 3944,
+      "sha256": "fd34e6838ac23f0841580d359b80cb4ccc65897a1e050ec58f11486948a3a668"
+    },
+    {
+      "path": "dist/integrated/ci-36954271808-fixed-fixture-checkout.json",
+      "bytes": 893,
+      "sha256": "9f4f996e6ecae250f891b3f7fc34b1103e1f731307ef084250e783e5d2efa6fe"
+    },
+    {
+      "path": "dist/integrated/ci-36954271808-tzdata-provenance.json",
+      "bytes": 2395,
+      "sha256": "acccfdadca9707240189dfd6ecf371b74fc9027ddc272502138075c3515ef41a"
+    },
+    {
+      "path": "dist/integrated/ci-36954271808-tzdata-focused.log",
+      "bytes": 1915,
+      "sha256": "74121bce2342380dfdd5bfb6f354fcc4f07367dd06ab51ddf21e2b11021addb0"
+    },
+    {
+      "path": "dist/integrated/ci-36954271808-customization-partitions.json",
+      "bytes": 8215,
+      "sha256": "5b44e14058b96730117c889776bdaf39ac32613a72a6edd7843c054d5ee7eca2"
+    },
+    {
+      "path": "dist/integrated/ci-36954271808-partition-runner.log",
+      "bytes": 1769,
+      "sha256": "e549c02ac4d1762b572067a9978b8b696dea25bb30f4e48ea5e2949c06333d21"
+    },
+    {
+      "path": "dist/integrated/native-ui-windows-fixture-regression.txt",
+      "bytes": 14152,
+      "sha256": "e252e6e9980ba85683b7e67902a3dbdf349d7fddf9c1fe558a2bc2a2ba11bf8e"
+    },
+    {
+      "path": "dist/integrated/native-ui-crlf-controller-regression.txt",
+      "bytes": 6261,
+      "sha256": "ba738e22aff454ddf6bca03654ed8a9fb651e26faab41ee99f6bb3c9c78579f1"
+    },
+    {
+      "path": "dist/integrated/windows-fixture-boundary-utf8-local.log",
+      "bytes": 3564,
+      "sha256": "b4edf62b43eaa20fed831214df24febffa544921d6e282646a60526ea99ecb2e"
+    }
+  ]
+}

@@ -1,0 +1,420 @@
+[
+  {
+    "artifact": {
+      "id": 11207906730,
+      "name": "ees-work-browser-evidence-native-work",
+      "size_in_bytes": 444995,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11207906730",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11207906730/zip",
+      "expired": false,
+      "created_at": "2026-10-02T03:35:53Z",
+      "expires_at": "2026-10-09T03:35:52Z",
+      "updated_at": "2026-10-02T03:35:53Z",
+      "digest": "sha256:51bd4841b8b38246a6fc433fd3d436329cfea8f48745e7f15efb42ed33bb8baa",
+      "workflow_run": {
+        "id": 36960650678,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "403b0685e26f13add0ff4354ba118788a0e95678"
+      }
+    },
+    "archive_sha256": "51bd4841b8b38246a6fc433fd3d436329cfea8f48745e7f15efb42ed33bb8baa",
+    "archive_bytes": 444995,
+    "png_count": 7,
+    "json_count": 3,
+    "members": [
+      {
+        "path": "ees-results/browser-evidence.json",
+        "bytes": 1225,
+        "sha256": "475dbfd1be1de90a8c9982101451107cac806edaf7a5bd62ecc2ed73b139fe46"
+      },
+      {
+        "path": "ees-results/suite.json",
+        "bytes": 123,
+        "sha256": "c249bf8ddd57ce81568411670a73bb0aff736be58e15e7084002ea807e6c93ae"
+      },
+      {
+        "path": "ees-results/test_ees_work_demo.json",
+        "bytes": 2230,
+        "sha256": "4c7a53a299e4179363e1b86aa86ff1877e5aef54a689303653191968a48267b3"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-empty-native.png",
+        "bytes": 61669,
+        "sha256": "6831dd9f77c016058f35fd9612b00ce507fce897e8fc0319bed2b064f5ac90e4"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-human-confirm-history.png",
+        "bytes": 84676,
+        "sha256": "82a13fe170c58945a08cedbfe62df2ef9feb28c92ce6496f438e7df62d5904b7"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-layout-1180.png",
+        "bytes": 56933,
+        "sha256": "87eb21492727c4f2fb5be1aa8d3cd98b09192705f18c407cfeffb01881d258cb"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-layout-1440.png",
+        "bytes": 59549,
+        "sha256": "a74c88ed74e3b2a05159698f7c4f5e21ebb004855cdec329ec1f2a330c6c92a8"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-layout-1920.png",
+        "bytes": 61672,
+        "sha256": "19cad137f6cffbb53dfffe20add96cb4fd66d4f975cdbe22822766b94ec0e336"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-native-chat-and-work.png",
+        "bytes": 83849,
+        "sha256": "126aae412c182c4ff68a91f8e0ce51694141e520b988cc22100bd1f68d4ab86c"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-saved-input-not-execution.png",
+        "bytes": 80128,
+        "sha256": "5dc3903f8758a93a548556545e09ee779fe9af509739beea2bd13a1998ea2d7c"
+      }
+    ],
+    "suites": [
+      {
+        "suite": "native-work",
+        "results": [
+          {
+            "module": "test_ees_work_demo.py",
+            "exit_code": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "artifact": {
+      "id": 11207772329,
+      "name": "ees-work-browser-evidence-native-compose",
+      "size_in_bytes": 778880,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11207772329",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11207772329/zip",
+      "expired": false,
+      "created_at": "2026-10-02T03:35:10Z",
+      "expires_at": "2026-10-09T03:35:09Z",
+      "updated_at": "2026-10-02T03:35:10Z",
+      "digest": "sha256:2a1985f49d9c86378fe9ec8c4a6f61534773812249c53a5c8bf074a110e3e72f",
+      "workflow_run": {
+        "id": 36960650678,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "403b0685e26f13add0ff4354ba118788a0e95678"
+      }
+    },
+    "archive_sha256": "2a1985f49d9c86378fe9ec8c4a6f61534773812249c53a5c8bf074a110e3e72f",
+    "archive_bytes": 778880,
+    "png_count": 10,
+    "json_count": 5,
+    "members": [
+      {
+        "path": "ees-results/suite.json",
+        "bytes": 223,
+        "sha256": "504dfd66ec1c9e439c628e7457943694d1a26258dda6c0a4d1b74edc516636a1"
+      },
+      {
+        "path": "ees-results/test_ees_work_c_phase1_native.json",
+        "bytes": 1197,
+        "sha256": "78887c95cfc3f50e602a7813e1eac0e27647b858989b15d18daf3a512d3ac6fd"
+      },
+      {
+        "path": "ees-results/browser-evidence.json",
+        "bytes": 1909,
+        "sha256": "95aefbd09ad47b920f419bd6f19f74b793a604e1fb795a8c2764488b801465b2"
+      },
+      {
+        "path": "ees-results/test_ees_work_c_phase2_native.json",
+        "bytes": 1344,
+        "sha256": "12b563d9b6e031c0347e26ba1abfa6d2d695b3c13fda913913cfebcc3bbe627f"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-closed-history.png",
+        "bytes": 72341,
+        "sha256": "dc4c98868c9c7650b4591f8903135c996f4664052b98654217c55c0601c80463"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-eight-native-input-types.png",
+        "bytes": 98351,
+        "sha256": "8fbcab17c06472c5923a9f1c41c560f80ee7409639a4f7104495dbc6b7b35883"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-immutable-attempts.png",
+        "bytes": 105133,
+        "sha256": "58bc9c25c95caed1fe2d37ad6b2b12b5509475e41642709b66a7f837b1847222"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-long-korean-form.png",
+        "bytes": 96859,
+        "sha256": "86932f30626ec5029c4669dab9bf37fce5ed04c622225c6245c6230ea845524a"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-native-tool-snapshot.png",
+        "bytes": 96874,
+        "sha256": "80930128cebddd59f5b628c9b5011779764ab91ec3dc316299ba890c58495ff6"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-result-failed.png",
+        "bytes": 74172,
+        "sha256": "1e4d12f97c1d2ec504fde43b1dec2d24776762ffcc99e66021f7ae01668aabf8"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-result-partial.png",
+        "bytes": 73477,
+        "sha256": "58cd1762f0fcd0371fc0041f38d8d9ba0fcfd91a3302dffb5850d44b6fb99007"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-result-unknown.png",
+        "bytes": 76352,
+        "sha256": "be8904aa75a13a969f34cf62f6f00cc44d552396738bd3d5e34cb498db519067"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-running-animation.json",
+        "bytes": 2209,
+        "sha256": "02929df6040498b35e3d2778722c111127e72c7ed3bf69ebb11ffba921ea86be"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-running-animation.png",
+        "bytes": 80915,
+        "sha256": "98448949d4236a347b696a91d2ab1cdca7139e89d0f42b2cb423b14632848bc9"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-running-reduced-motion.png",
+        "bytes": 80715,
+        "sha256": "c39a810c82353377f1237e4988b4a8f4fc088917ed7cd9fa2ffe3f2e138d8e5b"
+      }
+    ],
+    "suites": [
+      {
+        "suite": "native-compose",
+        "results": [
+          {
+            "module": "test_ees_work_c_phase1_native.py",
+            "exit_code": 0
+          },
+          {
+            "module": "test_ees_work_c_phase2_native.py",
+            "exit_code": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "artifact": {
+      "id": 11207434559,
+      "name": "ees-work-browser-evidence-native-account",
+      "size_in_bytes": 542268,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11207434559",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11207434559/zip",
+      "expired": false,
+      "created_at": "2026-10-02T03:35:43Z",
+      "expires_at": "2026-10-09T03:35:42Z",
+      "updated_at": "2026-10-02T03:35:43Z",
+      "digest": "sha256:ccee2d55b0a5881c848951e8db4647ee44fe89dd1a354c6c26fa6dce081d95c2",
+      "workflow_run": {
+        "id": 36960650678,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "403b0685e26f13add0ff4354ba118788a0e95678"
+      }
+    },
+    "archive_sha256": "ccee2d55b0a5881c848951e8db4647ee44fe89dd1a354c6c26fa6dce081d95c2",
+    "archive_bytes": 542268,
+    "png_count": 9,
+    "json_count": 7,
+    "members": [
+      {
+        "path": "ees-results/browser-evidence.json",
+        "bytes": 1899,
+        "sha256": "34891762a01f60944376a0ac171008b43792e2d076fac7969617c5375d9f3ab1"
+      },
+      {
+        "path": "ees-results/suite.json",
+        "bytes": 309,
+        "sha256": "e9ee2e6151e627e641ef3a5e7598ab08412bdb58c8746b116f0c750c80b264c9"
+      },
+      {
+        "path": "ees-results/test_ees_chat_theme.json",
+        "bytes": 1713,
+        "sha256": "eb3454037ae0b66c29b5eb6d9f29b849bc1d7a33bfd77bd270f329d52fd88b86"
+      },
+      {
+        "path": "ees-results/test_ees_work_authoring_account_switch.json",
+        "bytes": 548,
+        "sha256": "1ddc18a2c9608465bee590fb2d646aab5fee01bd6d883bf3f5db22f94ab09c95"
+      },
+      {
+        "path": "ees-results/test_ees_work_authoring_native.json",
+        "bytes": 1538,
+        "sha256": "6b2b1777840bd58e4134b62fc6c504d59ee6ea18d4291ba10b5d87f29450153c"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-native-ai-proposal-not-auto-save.png",
+        "bytes": 83035,
+        "sha256": "5341d0b8aeca4188c400e18c39b368ffb57e386b676a1cd3ed888f726d1ca1b7"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-native-authoring-conflict.png",
+        "bytes": 96232,
+        "sha256": "667324d67ea202896e3bd08f3aa08122bc0ab70caafcb9e0c53a286482c0ae5a"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-native-group-author-published.png",
+        "bytes": 104645,
+        "sha256": "e65112d397fda4ada01b55adc3b70e033636011cda520381c1f49a762644f56e"
+      },
+      {
+        "path": "ees-work-screenshots/nu-closed-native-signup.png",
+        "bytes": 17210,
+        "sha256": "6c9f4d2e4032f3e1208b164f2e99ed5d2a42eb415e625a374cbd48e3bcb804bf"
+      },
+      {
+        "path": "ees-work-screenshots/nu05-former-a-tab-now-b.png",
+        "bytes": 55008,
+        "sha256": "1d0d00e2e0083e379cd055ab45427138ced051854181d6ae1f5e6114b77e4bac"
+      },
+      {
+        "path": "ees-work-screenshots/sa-approved-first-chat.png",
+        "bytes": 72327,
+        "sha256": "f9bcd96550be785fc6b1ba39cb2af91f624a7e59906171bd6357c7150cc72413"
+      },
+      {
+        "path": "ees-work-screenshots/sa-signup-pending-fonts.json",
+        "bytes": 780,
+        "sha256": "52b1f39d35f35710df5bf3594ae27a35b7f72d2654549551ced5305ad9511422"
+      },
+      {
+        "path": "ees-work-screenshots/sa-native-approved-user.png",
+        "bytes": 49375,
+        "sha256": "076308b973a7cba08dbe524678ff3195f81e4892f7daa55fcfe8c35822494614"
+      },
+      {
+        "path": "ees-work-screenshots/sa-signup-pending.png",
+        "bytes": 39099,
+        "sha256": "251859a4fe45b8bc4fc10e44048d4fb9fe63aa3ce8f1544b2c7097eee86a64e4"
+      },
+      {
+        "path": "ees-work-screenshots/sa26-b-after-late-a-responses.png",
+        "bytes": 85235,
+        "sha256": "2098ec39a814dbdd20da29723cad150fc3521c8077f39dee40246fd9db8f19c9"
+      },
+      {
+        "path": "ees-work-screenshots/sa26-nu05-account-switch.json",
+        "bytes": 495,
+        "sha256": "265792d5fc3be715fe761fad2ed32a32beb675e8b77ba185206311c4c137ece6"
+      }
+    ],
+    "suites": [
+      {
+        "suite": "native-account",
+        "results": [
+          {
+            "module": "test_ees_chat_theme.py",
+            "exit_code": 0
+          },
+          {
+            "module": "test_ees_work_authoring_account_switch.py",
+            "exit_code": 0
+          },
+          {
+            "module": "test_ees_work_authoring_native.py",
+            "exit_code": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "artifact": {
+      "id": 11206884363,
+      "name": "ees-work-browser-evidence-native-execution",
+      "size_in_bytes": 262664,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11206884363",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11206884363/zip",
+      "expired": false,
+      "created_at": "2026-10-02T03:35:43Z",
+      "expires_at": "2026-10-09T03:35:42Z",
+      "updated_at": "2026-10-02T03:35:43Z",
+      "digest": "sha256:8237b7603fbfc210713a3dc2f77c15ba88759f3302807f3407610d561e5c1612",
+      "workflow_run": {
+        "id": 36960650678,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "403b0685e26f13add0ff4354ba118788a0e95678"
+      }
+    },
+    "archive_sha256": "8237b7603fbfc210713a3dc2f77c15ba88759f3302807f3407610d561e5c1612",
+    "archive_bytes": 262664,
+    "png_count": 4,
+    "json_count": 5,
+    "members": [
+      {
+        "path": "ees-results/browser-evidence.json",
+        "bytes": 973,
+        "sha256": "7b55e21c10613a86de07227114954d9a61cc8060e8d98f647275a6fe987a6c4d"
+      },
+      {
+        "path": "ees-results/suite.json",
+        "bytes": 226,
+        "sha256": "1e2f7d9f4367631f209c58130f2fc10d451a07a1ee79f1143567e97b86a878c4"
+      },
+      {
+        "path": "ees-results/test_ees_work_c_phase3_native.json",
+        "bytes": 1772,
+        "sha256": "903b8cb67c7d9481520a22d777cbf1f43f4ea52656621e46ceea88c2bb816c28"
+      },
+      {
+        "path": "ees-results/test_ees_work_c_phase3_privacy.json",
+        "bytes": 714,
+        "sha256": "8955fd19550f6cc92a15e7dd8c54010e0ed4402d49e1fcf2e986d1deb74ad468"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-current-scope-revoked.png",
+        "bytes": 58655,
+        "sha256": "f69be99d3aa7c8ab2a8df3f44b5ce445f4df82f22b99cf17fb2bdb40b09dcc37"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-history-failed-closed.png",
+        "bytes": 58574,
+        "sha256": "f47071964ac691e4843d88e74fe9966f761c7eed768080f7b50c3f2f1337911b"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-late-read-new-target.png",
+        "bytes": 85106,
+        "sha256": "32ef827f37202c450d316e583305f3a5a85d2d0d84313892812a776dd9f14194"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-test_delayed_input_write_keeps_exact_original_run_after_chat_change-failure.json",
+        "bytes": 2543,
+        "sha256": "2d52aee51a9f5829a4c7c496fc3584fb7a80d71692558b8bafbfc833b693a1a7"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-two-native-tabs-conflict.png",
+        "bytes": 85425,
+        "sha256": "b068615a8baec0a9cc04a1f3265215b10dd2bc5b1942c8469aa7a27a929146f1"
+      }
+    ],
+    "suites": [
+      {
+        "suite": "native-execution",
+        "results": [
+          {
+            "module": "test_ees_work_c_phase3_native.py",
+            "exit_code": 1
+          },
+          {
+            "module": "test_ees_work_c_phase3_privacy.py",
+            "exit_code": 0
+          }
+        ]
+      }
+    ]
+  }
+]

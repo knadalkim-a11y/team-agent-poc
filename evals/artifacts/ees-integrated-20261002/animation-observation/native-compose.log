@@ -1,0 +1,21 @@
+test_closed_run_remains_readonly_and_uses_its_saved_completion (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_closed_run_remains_readonly_and_uses_its_saved_completion) ... ok
+test_eight_declared_native_input_types_survive_visible_save_and_reload (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_eight_declared_native_input_types_survive_visible_save_and_reload) ... ok
+test_long_form_scrolling_keeps_heading_and_unsaved_values (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_long_form_scrolling_keeps_heading_and_unsaved_values) ... ok
+test_retry_keeps_original_attempt_input_and_immutable_published_version (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_retry_keeps_original_attempt_input_and_immutable_published_version) ... ok
+test_run_and_workflow_setting_forms_preserve_zero_false_and_empty (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_run_and_workflow_setting_forms_preserve_zero_false_and_empty) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 11.375s
+
+OK
+test_human_confirmation_never_calls_external_tool (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_human_confirmation_never_calls_external_tool) ... ok
+test_partial_failed_unknown_stay_distinct_and_never_auto_retry (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_partial_failed_unknown_stay_distinct_and_never_auto_retry) ... ok
+test_real_tool_call_snapshots_inputs_but_does_not_confirm_business_completion (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_real_tool_call_snapshots_inputs_but_does_not_confirm_business_completion) ... ok
+test_required_input_blocks_before_any_transport_or_attempt (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_required_input_blocks_before_any_transport_or_attempt) ... ok
+test_revoked_tool_access_blocks_a_new_attempt_before_transport (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_revoked_tool_access_blocks_a_new_attempt_before_transport) ... ok
+test_running_transport_is_visible_and_cannot_double_execute (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_running_transport_is_visible_and_cannot_double_execute) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 11.917s
+
+OK

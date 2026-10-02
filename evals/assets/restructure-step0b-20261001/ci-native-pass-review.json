@@ -1,0 +1,328 @@
+{
+  "observed_at_utc": "2026-10-01T06:05:16Z",
+  "repository": "knadalkim-a11y/team-agent-poc",
+  "run_id": 36821954696,
+  "head_sha": "89b7ae9200463409cf60e2d711d8baf0791dde69",
+  "run_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/36821954696",
+  "jobs": [
+    {
+      "id": 110239246082,
+      "name": "Delivery checks (windows-2022)",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "steps": [
+        {
+          "name": "Verify shared workflow service and real chat Tool",
+          "status": "completed",
+          "conclusion": "cancelled",
+          "number": 26
+        },
+        {
+          "name": "Verify durable chat controls and execution panel state",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 27
+        },
+        {
+          "name": "Verify scoped authoring and the actual previous program",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 28
+        },
+        {
+          "name": "Verify Native signup, approval, scoped authoring and account recovery",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 29
+        },
+        {
+          "name": "Require guarded asset writes",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 30
+        },
+        {
+          "name": "Require native asset writer integration",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 31
+        },
+        {
+          "name": "Verify patched native draft and chat creation against the pinned source",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 32
+        },
+        {
+          "name": "Verify native Open WebUI workflow and real composer integration",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 33
+        },
+        {
+          "name": "Keep EES Work browser evidence",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 34
+        },
+        {
+          "name": "Verify chat theme in the runner's Chrome",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 35
+        },
+        {
+          "name": "Verify specialist execution against the fixed WebUI source",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 36
+        },
+        {
+          "name": "Verify program-only Apply and Restore",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 37
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 38
+        },
+        {
+          "name": "Run python scripts/check_docs.py",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 39
+        },
+        {
+          "name": "Run git diff --check",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 40
+        }
+      ]
+    },
+    {
+      "id": 110239246250,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Verify shared workflow service and real chat Tool",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26
+        },
+        {
+          "name": "Verify durable chat controls and execution panel state",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27
+        },
+        {
+          "name": "Verify scoped authoring and the actual previous program",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28
+        },
+        {
+          "name": "Verify Native signup, approval, scoped authoring and account recovery",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29
+        },
+        {
+          "name": "Require guarded asset writes",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30
+        },
+        {
+          "name": "Require native asset writer integration",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31
+        },
+        {
+          "name": "Verify patched native draft and chat creation against the pinned source",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 32
+        },
+        {
+          "name": "Verify native Open WebUI workflow and real composer integration",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 33
+        },
+        {
+          "name": "Keep EES Work browser evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34
+        },
+        {
+          "name": "Verify chat theme in the runner's Chrome",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 35
+        },
+        {
+          "name": "Verify specialist execution against the fixed WebUI source",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 36
+        },
+        {
+          "name": "Verify program-only Apply and Restore",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 37
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 38
+        },
+        {
+          "name": "Run python scripts/check_docs.py",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 39
+        },
+        {
+          "name": "Run git diff --check",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 40
+        }
+      ]
+    },
+    {
+      "id": 110241828852,
+      "name": "Prepare delivery files",
+      "status": "completed",
+      "conclusion": "skipped",
+      "steps": []
+    }
+  ],
+  "linux": {
+    "job_id": 110239246250,
+    "conclusion": "failure",
+    "native_authoring": {
+      "tests": 6,
+      "seconds": 43.975,
+      "result": "PASS"
+    },
+    "account_switch": {
+      "tests": 1,
+      "seconds": 8.293,
+      "result": "PASS"
+    },
+    "step29": "success",
+    "subsequent_success": {
+      "step30_guarded_assets": "16 tests, 0.512s",
+      "step31_native_writer": "28 tests, 36.615s"
+    },
+    "failure": {
+      "step": 32,
+      "test": "OfficialWheelTests.test_real_pinned_wheel_patches_records_and_unrelated_content",
+      "source": "tests/test_ees_branding_build.py:1009",
+      "reason": "Built chat-theme.css asset URLs include builder-generated ?v=<digest> suffixes; assertion expects raw source CSS bytes.",
+      "tests": 30,
+      "seconds": 17.126,
+      "failures": 1,
+      "scope": "Existing branding/build assertion outside the authorized Native UI test/evidence patch; no product or CI modifications."
+    },
+    "skipped": [
+      33,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ],
+    "evidence_upload_step34": "success"
+  },
+  "windows": {
+    "job_id": 110239246082,
+    "conclusion": "cancelled",
+    "step26": "cancelled",
+    "preceding_fail": {
+      "at": "2026-10-01T05:58:01.108Z",
+      "test": "WorkflowPreservationTests.test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads",
+      "reason": "Legacy ees.10 complete-wheel SHA256 assertion mismatch.",
+      "actual": "5941f77ae1d773026fe940cad58d8e9e72cb9a30a8280b61f91ddc6cc7246e2c",
+      "expected": "ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd"
+    },
+    "preceding_error": {
+      "at": "2026-10-01T05:58:07.6334952Z",
+      "test": "ContractAuthoringTests.test_p_save_publish_exact_approval_and_reference_remapping",
+      "evidence": "ERROR emitted after coroutine result=None; final unittest error traceback was not emitted before cancellation, so precise cause remains unconfirmed."
+    },
+    "cancellation": {
+      "at": "2026-10-01T06:03:33.937Z",
+      "current_test": "NativeReadBridgeTests.test_three_existing_tools_six_functions_real_loader_valves_http",
+      "source": "tests/test_ees_workflow_native.py:108 -> call:92 -> ees_workflow_native.py:488 -> github_list_pull_requests:412 -> asyncio.to_thread/run_in_executor",
+      "exception": "asyncio.CancelledError followed by KeyboardInterrupt; operation canceled",
+      "caveat": "Cancellation occurred while this test was running, not proof it caused timeout; distinct from earlier run cancellation in forged_model test."
+    },
+    "skipped": "Steps27-40 (including Native29 and evidence34); no Windows Native pass claimed."
+  },
+  "artifact": {
+    "id": 11143288079,
+    "name": "ees-work-browser-evidence",
+    "size_in_bytes": 1754510,
+    "sha256": "6ffe9282ef3b011fd50a61dee0af970e6260d2a56abb82af6479da8974a1a515",
+    "digest_verified_against_rest": true,
+    "zip_path": "/workspace/scratch/1d6bc68344e4/attachments/94b8632b-15e7-4f3b-9746-8b743510355b/step0b-ci-36821954696-evidence.zip",
+    "members": [
+      "nu-closed-native-signup.png",
+      "nu05-former-a-tab-now-b.png",
+      "sa-approved-first-chat.png",
+      "sa-native-approved-user.png",
+      "sa-ordinary-user-published-a-panel.png",
+      "sa-recalled-author-preserved-local-draft.png",
+      "sa-restore-changed-explicit-baseline-dialog.png",
+      "sa-restore-changed-republished.png",
+      "sa-restore-removed-explicit-baseline-dialog.png",
+      "sa-restore-removed-republished.png",
+      "sa-same-db-reinitialized-ordinary-user.png",
+      "sa-signup-pending.png",
+      "sa-user-authoring-entry.png",
+      "sa-user-published-procedure.png",
+      "sa26-b-after-late-a-responses.png",
+      "sa26-native-tab-activation.json"
+    ],
+    "actual_zip_contents": "15 PNG + 1 activation JSON, no failure projection JSON because relevant tests passed.",
+    "tab_activation": [
+      {
+        "before": {
+          "visibilityState": "hidden",
+          "hasFocus": false
+        },
+        "after": {
+          "visibilityState": "visible",
+          "hasFocus": true
+        }
+      },
+      {
+        "before": {
+          "visibilityState": "hidden",
+          "hasFocus": false
+        },
+        "after": {
+          "visibilityState": "visible",
+          "hasFocus": true
+        }
+      }
+    ],
+    "activation_json_path": "/workspace/scratch/1d6bc68344e4/step0b-final-ci-evidence/sa26-native-tab-activation.json",
+    "caveat": "Current remote activation observed; does not retrospectively establish the prior CI failure's exclusive cause."
+  },
+  "mutations": "No workflow rerun/cancellation, code/CI edits or internal service queries performed by monitor."
+}
