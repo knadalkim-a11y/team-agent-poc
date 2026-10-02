@@ -48,6 +48,8 @@ on:
       - 'tests/test_ees_integrated*.py'
       - 'tests/test_ees_work_workspace.py'
       - 'tests/test_ees_work_operations.py'
+      - 'tests/test_ees_work_figma*'
+      - 'tests/test_ees_work_history_reference.py'
       - 'tests/ees_work_integrated*.py'
       - 'tests/ees_work_native_chat.py'
       - 'tests/ees_workspace_ui_fixture.cjs'

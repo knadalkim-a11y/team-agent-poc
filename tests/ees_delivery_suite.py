@@ -36,7 +36,9 @@ SUITES = {
         "test_ees_demo*.py", "test_ees_apply_demo.py", "test_ees_specialists_tool.py",
         "test_ees_execution_tool.py", "test_ees_workflow.py", "test_ees_workflow_contract.py",
         "test_ees_workflow_model.py", "test_ees_workflow_tool.py", "test_ees_integrated*.py",
-        "test_ees_work_workspace.py", "test_ees_work_operations.py", "test_ees_delivery_artifacts.py"],
+        "test_ees_work_workspace.py", "test_ees_work_operations.py", "test_ees_delivery_artifacts.py",
+        "test_ees_work_figma_authoring.py", "test_ees_work_figma_contracts.py",
+        "test_ees_work_figma_schedule.py", "test_ees_work_history_reference.py"],
     "contracts": ["test_ees_workflow_execution.py", "test_ees_workflow_native.py",
         "test_ees_workflow_model_native.py",
         "test_ees_work_authoring.py"],
@@ -53,7 +55,8 @@ SUITES = {
     "native-account": ["test_ees_work_authoring_native.py", "test_ees_work_authoring_account_switch.py",
         "test_ees_chat_theme.py"],
     "native-work": ["test_ees_work_demo.py"],
-    "native-compose": ["test_ees_work_c_phase1_native.py", "test_ees_work_c_phase2_native.py"],
+    "native-compose": ["test_ees_work_c_phase1_native.py", "test_ees_work_c_phase2_native.py",
+        "test_ees_work_figma_authoring_native.py", "test_ees_work_figma_runtime_native.py"],
     "native-execution": ["test_ees_work_c_phase3_native.py", "test_ees_work_c_phase3_privacy.py"],
 }
 # Each real fixed-wheel Apply/Restore performs a full filesystem walk. On
@@ -72,7 +75,8 @@ CASE_PARTITIONS = {
 
 NODE_SCRIPTS = {
     "services": ["test_wo_demo_state.cjs", "test_ees_cooperation_panel.cjs", "test_ees_execution_ui.cjs",
-                 "test_ees_work_authoring_ui.cjs", "test_ees_v4_layout.cjs", "test_ees_v4_drafts.cjs"],
+                 "test_ees_work_authoring_ui.cjs", "test_ees_v4_layout.cjs", "test_ees_v4_drafts.cjs",
+                 "test_ees_work_figma_runtime_ui.cjs"],
 }
 
 
@@ -119,6 +123,13 @@ def audit():
         for filename in selected(suite):
             assignments.setdefault(filename, []).append(suite)
     errors, changes = [], []
+    # selected() enumerates existing files, so a lost explicitly registered
+    # module must be rejected here rather than silently absent from the suite.
+    required_modules = {pattern for patterns in SUITES.values() for pattern in patterns
+                        if pattern.endswith('.py') and not any(mark in pattern for mark in '*?[')}
+    for filename in sorted(required_modules):
+        if not (TESTS / filename).is_file():
+            errors.append('Missing required Python test module: ' + filename)
     replacements = baseline["replacements"]
     for filename in sorted(path.name for path in TESTS.glob("test_*.py")):
         partitions = CASE_PARTITIONS.get(filename)

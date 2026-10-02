@@ -680,6 +680,165 @@ class ChromePipeBootstrapTests(unittest.TestCase):
                 self.assertEqual(report["browser_diagnostics"], snapshot)
                 self.assertEqual(list(gate.out.glob("*.png")), [])
 
+    def test_complete_product_navigation_rejects_old_document_and_wrong_loader(self):
+        from ees_work_integrated_app import ProductGate
+        gate = ProductGate.__new__(ProductGate)
+        gate.base = 'http://127.0.0.1:8123'
+        destination = gate.base + '/c/synthetic-chat'
+        snapshots = [
+            {'ready': 'complete', 'origin': 100, 'url': destination},
+            {'ready': 'complete', 'origin': 200, 'url': gate.base + '/'},
+            {'ready': 'loading', 'origin': 200, 'url': destination},
+            {'ready': 'complete', 'origin': 200, 'url': destination},
+        ]
+        values, calls, reads = iter([100] + snapshots), [], []
+        def evaluate(expression):
+            reads.append(expression)
+            return next(values)
+        def call(method, params=None):
+            calls.append((method, params))
+            if method == 'Page.navigate':
+                return {'loaderId': 'new-loader'}
+            self.assertEqual(method, 'Page.getFrameTree')
+            return {'frameTree': {'frame': {'loaderId': 'new-loader'}}}
+        gate.browser = SimpleNamespace(evaluate=evaluate, call=call)
+        with patch.object(time, 'sleep'):
+            gate.navigate('/c/synthetic-chat')
+        self.assertEqual(len(reads), 5)
+        self.assertEqual(calls, [('Page.navigate', {'url': destination}), ('Page.getFrameTree', None)])
+
+        for loader in (None, 'different-loader'):
+            with self.subTest(loader=loader):
+                values = iter([100, snapshots[-1]])
+                gate.browser.evaluate = lambda expression: next(values)
+                gate.browser.call = lambda method, params=None: (
+                    {'loaderId': 'new-loader'} if method == 'Page.navigate' and loader else
+                    {'frameTree': {'frame': {'loaderId': loader}}} if method == 'Page.getFrameTree' else {})
+                with self.assertRaises(AssertionError):
+                    gate.navigate('/c/synthetic-chat')
+
+        clock, reads, calls = [0.0], [], []
+        def stale_document(expression):
+            reads.append(expression)
+            return 100 if len(reads) == 1 else snapshots[0]
+        gate.browser.evaluate = stale_document
+        gate.browser.call = lambda method, params=None: calls.append(method) or {'loaderId': 'new-loader'}
+        with patch.object(time, 'monotonic', side_effect=lambda: clock[0]), \
+                patch.object(time, 'sleep', side_effect=lambda seconds: clock.__setitem__(0, clock[0] + 13)), \
+                self.assertRaises(AssertionError):
+            gate.navigate('/c/synthetic-chat')
+        self.assertEqual(calls, ['Page.navigate'])
+
+    def test_complete_product_typing_never_selects_page_after_input_loses_focus(self):
+        from ees_work_integrated_app import ProductGate
+        for focused in (False, True):
+            with self.subTest(focused=focused):
+                gate = ProductGate.__new__(ProductGate)
+                clicks, calls, reads = [], [], []
+                gate.click = lambda selector: clicks.append(selector)
+                gate.browser = SimpleNamespace(
+                    evaluate=lambda expression: reads.append(expression) or {'matches': focused},
+                    call=lambda method, params=None: calls.append((method, params)))
+                if focused:
+                    gate.type('#synthetic-input', '입력 값')
+                    self.assertEqual([method for method, params in calls], [
+                        'Input.dispatchKeyEvent', 'Input.dispatchKeyEvent', 'Input.insertText'])
+                    self.assertEqual([params['type'] for method, params in calls[:2]], ['keyDown', 'keyUp'])
+                    self.assertTrue(all(params['modifiers'] == 2 and params['key'] == 'a'
+                                        for method, params in calls[:2]))
+                    self.assertEqual(calls[-1][1], {'text': '입력 값'})
+                else:
+                    with self.assertRaisesRegex(AssertionError, 'Physical click did not focus the current input'):
+                        gate.type('#synthetic-input', '입력 값')
+                    self.assertEqual(calls, [])
+                self.assertEqual(clicks, ['#synthetic-input'])
+                self.assertEqual(len(reads), 1)
+
+    def test_work_panel_wait_requires_loaded_exact_reference_and_visible_control(self):
+        from ees_work_integrated_app import ProductGate
+        reference = {'workflow_id': 'workflow-one', 'run_id': 'run-one', 'attempt_id': 'attempt-one'}
+        ready = {'loaded': True, 'busy': False, 'loading': False, 'error': None,
+                 'reference': reference, 'selector_visible': True}
+        incomplete = [
+            {**ready, 'loaded': False}, {**ready, 'busy': True},
+            {**ready, 'loading': True}, {**ready, 'error': 'Synthetic panel failure'},
+            {**ready, 'selector_visible': False}, {**ready, 'reference': {}},
+            *[{**ready, 'reference': {**reference, key: 'other'}} for key in reference],
+        ]
+        arguments = dict(reference, selector='#synthetic-control')
+        gate = ProductGate.__new__(ProductGate)
+        values, observed = iter(incomplete + [ready]), []
+        def evaluate(expression):
+            observed.append(expression)
+            return next(values)
+        gate.browser = SimpleNamespace(evaluate=evaluate)
+        with patch.object(time, 'sleep'):
+            self.assertEqual(gate.wait_work_ready(**arguments), ready)
+        self.assertEqual(len(observed), len(incomplete) + 1)
+
+        for index, snapshot in enumerate(incomplete):
+            with self.subTest(incomplete=index):
+                clock = [0.0]
+                gate.browser.evaluate = lambda expression: snapshot
+                with patch.object(time, 'monotonic', side_effect=lambda: clock[0]), \
+                        patch.object(time, 'sleep', side_effect=lambda seconds: clock.__setitem__(0, clock[0] + 13)), \
+                        self.assertRaisesRegex(AssertionError, 'Work panel did not settle'):
+                    gate.wait_work_ready(**arguments)
+
+        # Omitting a reference constraint must not invent a selected run or
+        # attempt, but the actual loaded panel still has to be ready.
+        unselected = {**ready, 'reference': {}}
+        gate.browser.evaluate = lambda expression: unselected
+        self.assertEqual(gate.wait_work_ready(), unselected)
+
+    def test_historical_request_route_keeps_main_guards_and_only_accepts_exact_retrieval_template(self):
+        from ees_work_integrated_app import historical_request_route, WORK_REFERENCE_PREFIX
+        question = '이 당시 조회 시도의 프로젝트와 결과만 설명해 줘.'
+        template = 'Task: Generate retrieval queries.\nDate: {{CURRENT_DATE}}\nChat:\n{{MESSAGES:END:6}}\nReturn query JSON only.'
+        content = template.replace('{{CURRENT_DATE}}', '2026-10-02').replace(
+            '{{MESSAGES:END:6}}', 'USER: ' + question + '\nASSISTANT: synthetic previous answer')
+        query = {'messages': [{'role': 'user', 'content': content}], 'stream': False}
+        route = historical_request_route(query, question, template)
+        self.assertEqual(route['kind'], 'native_retrieval_query')
+        self.assertEqual(route['roles'], ['user'])
+        self.assertEqual(route['message_count'], 1)
+        self.assertFalse(route['exact_question'])
+        self.assertFalse(route['has_historical_reference'])
+        self.assertTrue(route['question_in_content'])
+        self.assertEqual(route['contents'][0]['sha256'],
+                         hashlib.sha256(json.dumps(content, ensure_ascii=False).encode()).hexdigest())
+
+        # Missing main reference stays in the strict main assertion path. It
+        # must never become an allowed background request merely for lacking it.
+        main_messages = [{'role': 'user', 'content': question}]
+        reference_message = {'role': 'system', 'content': WORK_REFERENCE_PREFIX + '{"read_only":true}'}
+        for messages in (main_messages, [reference_message] + main_messages,
+                         main_messages + [{'role': 'assistant', 'content': None},
+                                          {'role': 'tool', 'content': '{"ok":true}'}],
+                         [reference_message, {'role': 'user', 'content': content}]):
+            with self.subTest(messages=messages):
+                result = historical_request_route({'messages': messages, 'stream': False}, question, template)
+                self.assertEqual(result['kind'], 'historical_main')
+        self.assertFalse(historical_request_route({'messages': main_messages}, question, template)
+                         ['has_historical_reference'])
+
+        unknown = [
+            {'messages': [{'role': 'user', 'content': 'prefix\n' + content}], 'stream': False},
+            {'messages': [{'role': 'user', 'content': content + '\nsuffix'}], 'stream': False},
+            {'messages': [{'role': 'user', 'content': content.replace('2026-10-02', 'October 2')}], 'stream': False},
+            {'messages': [{'role': 'user', 'content': content.replace('query JSON only', 'plain text')}], 'stream': False},
+            {**query, 'stream': True},
+            {**query, 'stream': None},
+            {**query, 'tools': [{'type': 'function', 'function': {'name': 'synthetic-tool'}}]},
+            {**query, 'messages': [{'role': 'system', 'content': content}]},
+            {**query, 'messages': query['messages'] + [{'role': 'assistant', 'content': 'synthetic'}]},
+            {**query, 'messages': [{'role': 'user', 'content': [{'type': 'text', 'text': content}]}]},
+            {'messages': [], 'stream': False},
+        ]
+        for index, payload in enumerate(unknown):
+            with self.subTest(unknown=index):
+                self.assertEqual(historical_request_route(payload, question, template)['kind'], 'unknown')
+
 
 if __name__ == "__main__":
     unittest.main()

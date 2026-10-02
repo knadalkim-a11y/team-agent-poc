@@ -59,8 +59,25 @@ class DeliveryCoverageTests(unittest.TestCase):
 
     def test_new_unassigned_module_is_rejected(self):
         self.data["modules"] = {}
-        with patch.object(runner, "SUITES", {"services": ["test_old.py"]}):
+        with patch.object(runner, "SUITES", {"services": ["test_old*.py"]}):
             self.assertEqual(self.audit()["errors"], ["Expected exactly one suite: test_new.py"])
+
+    def test_missing_explicit_module_fails_even_without_baseline_ids(self):
+        self.data['modules'] = {}
+        filename = 'test_required.py'
+        required = self.root / filename
+        with patch.object(runner, 'SUITES', {'services': ['test_new.py', filename, 'test_optional*.py']}):
+            expected = ['Missing required Python test module: ' + filename]
+            self.assertEqual(self.audit()['errors'], expected)
+            required.mkdir()
+            # An unreadable module path already fails during source parsing;
+            # it must not be mistaken for a runnable module or a passing audit.
+            with self.assertRaises(OSError):
+                self.audit()
+            required.rmdir()
+            required.write_text('class Required:\n    def test_protection(self): pass\n', encoding='utf-8')
+            self.assertEqual(self.audit()['errors'], [])
+            self.assertIn(filename, runner.selected('services'))
 
     def test_case_partitions_assign_every_current_id_once_and_reject_overlap_or_unknown(self):
         filename = "test_partition.py"
