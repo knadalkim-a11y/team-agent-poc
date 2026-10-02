@@ -1,0 +1,611 @@
+{
+  "run_id": 36957905733,
+  "head_sha": "ba3a59af2b719983604042d3bcd31d4d373375cf",
+  "observed_at_utc": "2026-10-02T03:08:11.442124+00:00",
+  "scope": "16 Linux/Windows service, contract, native-contract, platform, program-install and ees10/11/12 restore jobs; Native browser and complete-product results recorded separately",
+  "verification": "18 ZIPs actually downloaded through GitHub connector; byte size and SHA256 match API digest; all members read and hashed; no tests rerun",
+  "count_semantics": "Python unittest execution outcomes, not unique coverage IDs. Existing OS-specific and optional historical cases remain skipped, not passed. Node subprocess contracts and separate Windows diagnostic probes excluded from Python counts.",
+  "jobs": [
+    {
+      "name": "contracts (ubuntu-24.04)",
+      "job_id": 110685231412,
+      "conclusion": "success",
+      "tests_run": 84,
+      "counts": {
+        "passed": 84,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 35.713,
+      "skipped": [],
+      "artifact_id": 11207215471,
+      "artifact_name": "ees-results-contracts-ubuntu-24.04",
+      "zip_bytes": 4311,
+      "zip_sha256": "73251b20aa39539d46723b9908f921aafd37650e4fe7d647f73415ee7f426de4",
+      "github_digest_matches": true,
+      "actual_member_count": 5
+    },
+    {
+      "name": "contracts (windows-2022)",
+      "job_id": 110685231449,
+      "conclusion": "success",
+      "tests_run": 84,
+      "counts": {
+        "passed": 84,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 101.281,
+      "skipped": [],
+      "artifact_id": 11206438868,
+      "artifact_name": "ees-results-contracts-windows-2022",
+      "zip_bytes": 4337,
+      "zip_sha256": "0418d3d578da47066b0536063b1ce9a5c9927eb8109606140ae1ad3d99ff9adf",
+      "github_digest_matches": true,
+      "actual_member_count": 5
+    },
+    {
+      "name": "native-contracts (ubuntu-24.04)",
+      "job_id": 110685231417,
+      "conclusion": "success",
+      "tests_run": 5,
+      "counts": {
+        "passed": 5,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 100.229,
+      "skipped": [],
+      "artifact_id": 11206632422,
+      "artifact_name": "ees-results-native-contracts-ubuntu-24.04",
+      "zip_bytes": 818,
+      "zip_sha256": "b8d5d51e5989b9f63d082cba9854bd718f6537a08b4248e386a23f31e4713cbb",
+      "github_digest_matches": true,
+      "actual_member_count": 2
+    },
+    {
+      "name": "native-contracts (windows-2022)",
+      "job_id": 110685231447,
+      "conclusion": "success",
+      "tests_run": 5,
+      "counts": {
+        "passed": 5,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 331.235,
+      "skipped": [],
+      "artifact_id": 11206578232,
+      "artifact_name": "ees-results-native-contracts-windows-2022",
+      "zip_bytes": 824,
+      "zip_sha256": "e19a1c01718791300ac56e2358d29f49ffe1a36aff10853d609cac249cd6f2cd",
+      "github_digest_matches": true,
+      "actual_member_count": 2
+    },
+    {
+      "name": "platform (ubuntu-24.04)",
+      "job_id": 110685231400,
+      "conclusion": "success",
+      "tests_run": 622,
+      "counts": {
+        "passed": 613,
+        "failed": 0,
+        "error": 0,
+        "skipped": 9,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 116.687,
+      "skipped": [
+        {
+          "id": "test_ees_deploy_accept.WindowsIocpTests.test_real_accept_reset_then_new_client_and_subprocess",
+          "status": "skipped",
+          "detail": "Windows CPython 3.11 only"
+        },
+        {
+          "id": "test_ees_deploy_accept.WindowsIocpTests.test_real_completion_then_shutdown_during_retry_or_other_error",
+          "status": "skipped",
+          "detail": "Windows CPython 3.11 only"
+        },
+        {
+          "id": "test_ees_deploy_imports.ImportProbeTests.test_real_nltk_downloader_without_profile_reproduces_value_error",
+          "status": "skipped",
+          "detail": "Windows real NLTK profile regression"
+        },
+        {
+          "id": "test_ees_deploy_imports.ImportProbeTests.test_windows_venv_site_initialization_and_watchdog",
+          "status": "skipped",
+          "detail": "Windows Python 3.11 venv launcher"
+        },
+        {
+          "id": "test_ees_deploy_process.WindowsExplicitTerminationTests.test_disposable_child_identity_refusal_then_termination_preserves_other_child",
+          "status": "skipped",
+          "detail": "Real handle termination is Windows-only."
+        },
+        {
+          "id": "test_ees_deploy_process.WindowsStopHelperTests.test_console_attach_failure_survives_real_helper_stdout_and_parent_parsing",
+          "status": "skipped",
+          "detail": "Real console helper IPC is Windows-only."
+        },
+        {
+          "id": "test_ees_deploy_state.WindowsDpapiTests.test_current_user_dpapi_roundtrip",
+          "status": "skipped",
+          "detail": "Real CurrentUser DPAPI requires Windows"
+        },
+        {
+          "id": "test_ees_deploy_stop_recovery.PowerShellCaptureTests.test_documented_capture_preserves_raw_json_in_windows_powershell_and_pwsh",
+          "status": "skipped",
+          "detail": "Recovery capture guide compatibility is Windows-only."
+        },
+        {
+          "id": "test_ees_deploy_stop_target.WindowsVenvTests.test_actual_venv_child_termination_releases_waiting_launcher",
+          "status": "skipped",
+          "detail": "Disposable CPython 3.11 Windows venv fixture"
+        }
+      ],
+      "artifact_id": 11206836065,
+      "artifact_name": "ees-results-platform-ubuntu-24.04",
+      "zip_bytes": 24481,
+      "zip_sha256": "049634195a49f27272d433178b59abcfa33b2ca657eccae725c112a70c4ab4cf",
+      "github_digest_matches": true,
+      "actual_member_count": 23
+    },
+    {
+      "name": "platform (windows-2022)",
+      "job_id": 110685231467,
+      "conclusion": "success",
+      "tests_run": 622,
+      "counts": {
+        "passed": 621,
+        "failed": 0,
+        "error": 0,
+        "skipped": 1,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 176.407,
+      "skipped": [
+        {
+          "id": "test_ees_deploy_port.LocalLifecycleTests.test_owned_fake_child_stops_and_reuses_port",
+          "status": "skipped",
+          "detail": "Local lifecycle uses Linux; Windows remains a separate gate."
+        }
+      ],
+      "artifact_id": 11206602795,
+      "artifact_name": "ees-results-platform-windows-2022",
+      "zip_bytes": 24333,
+      "zip_sha256": "bc50fb11a3053e16eff276f9702e987eefac73544fe2217badef20e31d9bfacc",
+      "github_digest_matches": true,
+      "actual_member_count": 23
+    },
+    {
+      "name": "program-install (ubuntu-24.04)",
+      "job_id": 110685231402,
+      "conclusion": "success",
+      "tests_run": 58,
+      "counts": {
+        "passed": 56,
+        "failed": 0,
+        "error": 0,
+        "skipped": 2,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 34.011,
+      "skipped": [
+        {
+          "id": "test_ees_webui_customization.ProgramRenameTests.test_real_windows_directory_lock_released_during_wait_then_promotes",
+          "status": "skipped",
+          "detail": "Requires an actual Windows directory sharing lock"
+        },
+        {
+          "id": "test_ees_webui_customization.RealBrandingWheelTests.test_saved_workflow_survives_real_upgrade_then_previous_program_restore",
+          "status": "skipped",
+          "detail": "Supply current and previous shipped wheels for the reverse-compatibility gate"
+        }
+      ],
+      "artifact_id": 11206577498,
+      "artifact_name": "ees-results-program-install-ubuntu-24.04",
+      "zip_bytes": 2520,
+      "zip_sha256": "9f7d66549ca6afde6716460632590af0bf4f44b7eb708854788078b52a96007d",
+      "github_digest_matches": true,
+      "actual_member_count": 2
+    },
+    {
+      "name": "program-install (windows-2022)",
+      "job_id": 110685231444,
+      "conclusion": "success",
+      "tests_run": 58,
+      "counts": {
+        "passed": 57,
+        "failed": 0,
+        "error": 0,
+        "skipped": 1,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 223.797,
+      "skipped": [
+        {
+          "id": "test_ees_webui_customization.RealBrandingWheelTests.test_saved_workflow_survives_real_upgrade_then_previous_program_restore",
+          "status": "skipped",
+          "detail": "Supply current and previous shipped wheels for the reverse-compatibility gate"
+        }
+      ],
+      "artifact_id": 11206379347,
+      "artifact_name": "ees-results-program-install-windows-2022",
+      "zip_bytes": 2502,
+      "zip_sha256": "35993e9a8313ddb7c12a489cb297d2849dc19d0bbd7cbb72fbf2715b5b45f6a9",
+      "github_digest_matches": true,
+      "actual_member_count": 2
+    },
+    {
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "job_id": 110685231497,
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 22.31,
+      "skipped": [],
+      "artifact_id": 11206319251,
+      "artifact_name": "ees-results-restore-ees10-ubuntu-24.04",
+      "zip_bytes": 673,
+      "zip_sha256": "367779c6ed713eb4bfde6492f0354664094dfcef43c3011ee9e5e436cea9f4d0",
+      "github_digest_matches": true,
+      "actual_member_count": 2
+    },
+    {
+      "name": "restore-ees10 (windows-2022)",
+      "job_id": 110685231510,
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 140.297,
+      "skipped": [],
+      "artifact_id": 11206379177,
+      "artifact_name": "ees-results-restore-ees10-windows-2022",
+      "zip_bytes": 684,
+      "zip_sha256": "caa3e117b1b9ea7853f85c4b2bbe7f169c7722fba1f2bfd2d2ab287e2e1fa14b",
+      "github_digest_matches": true,
+      "actual_member_count": 2
+    },
+    {
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "job_id": 110685231525,
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 20.957,
+      "skipped": [],
+      "artifact_id": 11207025717,
+      "artifact_name": "ees-results-restore-ees11-ubuntu-24.04",
+      "zip_bytes": 674,
+      "zip_sha256": "74f66cb676b78ddc67bc40313ec0bf7fda83596387020369d26dd89d73644db0",
+      "github_digest_matches": true,
+      "actual_member_count": 2
+    },
+    {
+      "name": "restore-ees11 (windows-2022)",
+      "job_id": 110685231498,
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 152.953,
+      "skipped": [],
+      "artifact_id": 11206806313,
+      "artifact_name": "ees-results-restore-ees11-windows-2022",
+      "zip_bytes": 682,
+      "zip_sha256": "ff814a1d7bcd3e8dbd5dd1a17de503827f73940950e2d009b383bbcfb0f1e2ee",
+      "github_digest_matches": true,
+      "actual_member_count": 2
+    },
+    {
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "job_id": 110685231874,
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 43.363,
+      "skipped": [],
+      "artifact_id": 11206781137,
+      "artifact_name": "ees-results-restore-ees12-ubuntu-24.04",
+      "zip_bytes": 679,
+      "zip_sha256": "cc8ef5310c2779ec1d3c58abf3bb0406cbffe4badef55e418b0c89fbac9b0929",
+      "github_digest_matches": true,
+      "actual_member_count": 2
+    },
+    {
+      "name": "restore-ees12 (windows-2022)",
+      "job_id": 110685231433,
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 158.547,
+      "skipped": [],
+      "artifact_id": 11207235706,
+      "artifact_name": "ees-results-restore-ees12-windows-2022",
+      "zip_bytes": 688,
+      "zip_sha256": "ef34ba0d9c3bab1e4590d71d241408d2eb669ee9ca30998dfb7402a995c98b62",
+      "github_digest_matches": true,
+      "actual_member_count": 2
+    },
+    {
+      "name": "services (ubuntu-24.04)",
+      "job_id": 110685231485,
+      "conclusion": "success",
+      "tests_run": 396,
+      "counts": {
+        "passed": 396,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 30.947,
+      "skipped": [],
+      "artifact_id": 11206552551,
+      "artifact_name": "ees-results-services-ubuntu-24.04",
+      "zip_bytes": 19165,
+      "zip_sha256": "07d5eacf536016d8a2bc41f38a2766ef4a094754e79f9a09e8cacf350ebddfe4",
+      "github_digest_matches": true,
+      "actual_member_count": 24
+    },
+    {
+      "name": "services (windows-2022)",
+      "job_id": 110685231432,
+      "conclusion": "success",
+      "tests_run": 396,
+      "counts": {
+        "passed": 396,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "module_seconds_sum": 132.892,
+      "skipped": [],
+      "artifact_id": 11206961857,
+      "artifact_name": "ees-results-services-windows-2022",
+      "zip_bytes": 19280,
+      "zip_sha256": "f715c3c7809b6468677a95d4d4ebb3a5e11982cbc28b0d95f0b05d9abc7f6c6b",
+      "github_digest_matches": true,
+      "actual_member_count": 24
+    }
+  ],
+  "supplemental_artifacts": [
+    {
+      "artifact_id": 11206862099,
+      "artifact_name": "ees-windows-fixture-diagnostics",
+      "zip_bytes": 3047449,
+      "zip_sha256": "0932bd3846fb2d1927023a1f2d3f405e940628f43eb2147ead63a34136a8e090",
+      "github_digest_matches": true,
+      "actual_member_count": 10,
+      "result_json_sha256": "462ec2f3be962786a8aa4b3e6df4842cf18e7e458412eae9099cd25098c6bfa3",
+      "tests": [
+        {
+          "id": "test_ees_workflow.WorkflowPreservationTests.test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads",
+          "returncode": 0,
+          "timed_out": false,
+          "skipped": false,
+          "seconds": 2.203
+        },
+        {
+          "id": "test_ees_workflow_contract.ContractAuthoringTests.test_p_save_publish_exact_approval_and_reference_remapping",
+          "returncode": 0,
+          "timed_out": false,
+          "skipped": false,
+          "seconds": 0.531
+        }
+      ],
+      "fixed_archive_and_source_evidence": {
+        "upstream": {
+          "file": "upstream-wheel-inventory.json",
+          "sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+          "matches_expected_archive": true,
+          "member_count": 5894,
+          "record_issues": [],
+          "duplicate_names": [],
+          "payload_inventory_sha256": "ab070de83319ba780f6fc33f77bbdd1721aa29509f67de744b3164d621a60872"
+        },
+        "legacy": {
+          "file": "legacy-wheel-inventory.json",
+          "sha256": "ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd",
+          "matches_expected_archive": true,
+          "member_count": 5911,
+          "record_issues": [],
+          "duplicate_names": [],
+          "payload_inventory_sha256": "99c0ad223fc940c6fc9c1d208a8919f8a8d5732bdc8400fbf2c08802bbf56c3c"
+        },
+        "previous": {
+          "file": "previous-wheel-inventory.json",
+          "sha256": "27f6a1c37264d4f205bedb6635c9eaae8a36a5d023d36d1dd595e34728c8b8d3",
+          "matches_expected_archive": true,
+          "member_count": 5912,
+          "record_issues": [],
+          "duplicate_names": [],
+          "payload_inventory_sha256": "529cc8e023e400fb89700e5e4f0a4e44c4e9a12bf1323ee6433bec53f6076c3d"
+        },
+        "legacy_source": {
+          "file": "legacy-source-inventory.json",
+          "commit": "a443d30c6694df0e1cbe082a0b99aa5f2d566917",
+          "issues": [],
+          "file_count": 142
+        },
+        "previous_source": {
+          "file": "previous-source-inventory.json",
+          "commit": "991cdb1d80ae07471fb50594831d74fe602b1ef7",
+          "issues": [],
+          "file_count": 149
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "artifact_id": 11206408552,
+      "artifact_name": "ees-delivery-coverage-a62d15bf82095f2ef70cc1bb23f8a86dabceb13a",
+      "zip_bytes": 19627,
+      "zip_sha256": "a4c2dddc88e65adc3f87c1b2425fe5325e9898218f0c751a3bc489cf82e526d6",
+      "github_digest_matches": true,
+      "actual_member_count": 1,
+      "coverage_json_sha256": "6d413e9e33e67fff4aeba7f5ef67b944d2fff2d4590a676af0e024e20741ac28",
+      "baseline": "b41e23917273e1d2d0ead1ddadfea75b2dda1e32",
+      "old_ids": 1332,
+      "current_ids": 1184,
+      "classified_replacements": 361,
+      "case_partition_counts": {
+        "test_ees_webui_customization.py": {
+          "program-install": 58,
+          "restore-ees10": 1,
+          "restore-ees11": 1,
+          "restore-ees12": 1
+        }
+      },
+      "errors": []
+    }
+  ],
+  "summary": {
+    "jobs_success": 16,
+    "jobs_failure": 0,
+    "jobs_cancelled": 0,
+    "jobs_unexecuted": 0,
+    "artifact_zips_verified": 18,
+    "counts_by_os": {
+      "ubuntu-24.04": {
+        "passed": 1157,
+        "skipped": 11
+      },
+      "windows-2022": {
+        "passed": 1166,
+        "skipped": 2
+      }
+    },
+    "unresolved_optional_skip": "Existing reverse-compatibility test requiring additional historical current/previous wheels skipped on both OS; ees10/11/12 required actual restore gates each passed on both OS."
+  },
+  "local_evidence": {
+    "directory": "dist/integrated/ci-36957905733",
+    "logs": [
+      {
+        "name": "110685231400.log",
+        "sha256": "eef0539a67ffbe8a73f2e784cd50c57ad6a9b3d09f19e8f1b119550d28b33002"
+      },
+      {
+        "name": "110685231402.log",
+        "sha256": "af1d048d3a40099d4b6e8cf1de57a1c48f84489b35f1c0e2e7c91d78d5004ee0"
+      },
+      {
+        "name": "110685231412.log",
+        "sha256": "6ef2193a8bd214c9d9d10af1ae1a7be7ed244405138bfb7eff31921ccad4b697"
+      },
+      {
+        "name": "110685231417.log",
+        "sha256": "e5fed0ef5e1210dc926af0953b166ee4539bf7546147aeb7a773165253c19a21"
+      },
+      {
+        "name": "110685231432.log",
+        "sha256": "42fb58d9e121bd62d590ac8868a3339b0b7e208647d2faefaead81c5571bef31"
+      },
+      {
+        "name": "110685231433.log",
+        "sha256": "101c5c8d4d7cb85e57e441dfbb26fb92d2b6790145c31a41e3bd9e0618249a26"
+      },
+      {
+        "name": "110685231444.log",
+        "sha256": "a6dd74304218428d2d00d408a99b5e7eba2b5482940b86f5dbfebd2f50d726b0"
+      },
+      {
+        "name": "110685231447.log",
+        "sha256": "7c312163d47469ff39b900399e875e92b6e79d691c16603beb0be61cffbe9fc4"
+      },
+      {
+        "name": "110685231449.log",
+        "sha256": "15ecf5b1e4d878345b05dad0874d53ba0131c3d8fe1f380edaa3e4a7f79e90e5"
+      },
+      {
+        "name": "110685231467.log",
+        "sha256": "1ae3960dc2c5de6ef2f75c3b4fcc6ecfd78a0b65268fbd1b4d8e3120bfcdf7a7"
+      },
+      {
+        "name": "110685231485.log",
+        "sha256": "287c857c9f387e6132cea7452edd335a7b3bae2fa5a2203868ff8e849426383b"
+      },
+      {
+        "name": "110685231497.log",
+        "sha256": "17003ae315628f4f5ec0989a66012e2375eab2aee066bb80e5893bbb335dff96"
+      },
+      {
+        "name": "110685231498.log",
+        "sha256": "a2669e11a6b84c70ce77f2c7a39760a6c167efc0f154f0e1ff067816153fb2d4"
+      },
+      {
+        "name": "110685231510.log",
+        "sha256": "5bc1ba002ed02342fcf65da181c2655b2242cd377b9e14fc0daa70b8162e1077"
+      },
+      {
+        "name": "110685231525.log",
+        "sha256": "9fc96220a0a74e85a9c13104b2daa233ffd2dba71f20286ea98e3b0665e1498c"
+      },
+      {
+        "name": "110685231874.log",
+        "sha256": "eca4e0024d5598b8e873e305d2c0e788b470a9d07e9210f6b58af428b72fd412"
+      }
+    ],
+    "member_inventory": "artifact-member-inventory.json"
+  }
+}
