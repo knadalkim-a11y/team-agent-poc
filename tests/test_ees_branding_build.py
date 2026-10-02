@@ -61,6 +61,63 @@ def assert_css_icon_cache_keys(test, original, built, icons):
     test.assertEqual(seen, set(icons), "Reviewed icon reference missing from source CSS")
 
 
+LAUNCHER_ASSEMBLY_PROBE = r"""
+const fs=require('node:fs');
+const stage = name => fs.writeSync(2, 'ees_probe=' + name + '\n');
+stage('launcher-node-entry version=' + process.version);
+const vm=require('node:vm'),assert=require('node:assert/strict');
+const scope={window:{}};vm.createContext(scope);
+stage('launcher-vm-entry');
+vm.runInContext(process.argv[1],scope,{timeout:1000});
+stage('launcher-vm-complete');
+assert.equal(JSON.stringify(scope.window.fixture),'["view","designer"]');
+assert.equal(scope.createWorkView,undefined);assert.equal(scope.createWorkDesigner,undefined);
+assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.createWorkDesigner,undefined);
+stage('launcher-assertions-complete');
+fs.writeSync(1, 'launcher_assembly_boundary=pass\n');
+"""
+
+
+def run_launcher_assembly_probe(node, source):
+    """Keep startup/VM/exit timeouts observable without retrying or hiding failure."""
+    # Windows CI 36956218460 exceeded communicate's deadline for the tiny
+    # synchronous fixture. That log had no entry evidence, so it cannot tell
+    # whether Node startup, the VM, or process/pipe completion stalled. Do not
+    # infer a launcher defect or a successful assertion from an absent marker.
+    try:
+        return subprocess.run([node, "-e", LAUNCHER_ASSEMBLY_PROBE, source.decode("utf-8")],
+                              capture_output=True, text=True, encoding="utf-8", timeout=10)
+    except subprocess.TimeoutExpired as error:
+        stderr = error.stderr or ""
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode("utf-8", errors="replace")
+        stages = [line for line in stderr.splitlines() if line.startswith("ees_probe=")]
+        raise AssertionError(
+            "Node launcher probe timed out after 10s; stderr stages: "
+            + (", ".join(stages) or "entry not observed")
+            + f"; fixture_bytes={len(source)}; fixture_sha256={hashlib.sha256(source).hexdigest()}"
+        ) from None
+
+
+class LauncherProbeDiagnosticsTests(unittest.TestCase):
+    def test_timeout_retains_observed_stages_and_never_reports_assertion_success(self):
+        source = b"synthetic fixture"
+        for stderr in (None, b"ees_probe=launcher-node-entry version=v-test\n"
+                       b"ees_probe=launcher-vm-entry\n"):
+            with self.subTest(stderr=stderr), mock.patch.object(subprocess, "run") as run:
+                run.side_effect = subprocess.TimeoutExpired(["node"], 10, stderr=stderr)
+                with self.assertRaises(AssertionError) as raised:
+                    run_launcher_assembly_probe("node", source)
+                message = str(raised.exception)
+                self.assertIn("timed out after 10s", message)
+                self.assertIn("fixture_sha256=" + hashlib.sha256(source).hexdigest(), message)
+                self.assertIn("launcher-vm-entry" if stderr else "entry not observed", message)
+                self.assertNotIn("launcher-assertions-complete", message)
+                self.assertEqual(run.call_count, 1)
+                self.assertEqual(run.call_args.kwargs["timeout"], 10)
+                self.assertEqual(run.call_args.args[0][-1], source.decode("utf-8"))
+
+
 class CssCacheIntegrityTests(unittest.TestCase):
     def test_accepts_only_reviewed_relative_absolute_and_repeated_icon_urls(self):
         icons = {"v4/721d7.svg": b"reviewed icon"}
@@ -590,15 +647,10 @@ class BrandingBuildTests(unittest.TestCase):
             "ees-work-view.js", "ees-work-designer.js", "ees-work-launcher.js"))],
             [builder.TARGET_APP + "ees-work-launcher.js"])
         if shutil.which("node"):
-            probe = """const vm=require('node:vm'),assert=require('node:assert/strict');
-const scope={window:{}};vm.createContext(scope);vm.runInContext(process.argv[1],scope);
-assert.equal(JSON.stringify(scope.window.fixture),'["view","designer"]');
-assert.equal(scope.createWorkView,undefined);assert.equal(scope.createWorkDesigner,undefined);
-assert.equal(scope.window.createWorkView,undefined);assert.equal(scope.window.createWorkDesigner,undefined);
-"""
-            result = subprocess.run([shutil.which("node"), "-e", probe, source.decode("utf-8")],
-                                    capture_output=True, text=True, encoding="utf-8", timeout=10)
+            result = run_launcher_assembly_probe(shutil.which("node"), source)
             self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.strip(), "launcher_assembly_boundary=pass")
+            self.assertIn("ees_probe=launcher-assertions-complete", result.stderr)
 
     def test_launcher_missing_empty_duplicate_and_swapped_units_fail_before_output(self):
         originals = {name: (self.ui / name).read_bytes() for name in builder.WORK_LAUNCHER_SOURCES}
