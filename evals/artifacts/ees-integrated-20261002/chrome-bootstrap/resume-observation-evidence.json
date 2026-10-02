@@ -1,0 +1,86 @@
+{
+  "recorded_utc": "2026-10-02T04:47:49.563413+00:00",
+  "base_head": "403b0685e26f13add0ff4354ba118788a0e95678",
+  "scope": "test-only diagnostic collection; original 15 second handshake failure remains failure",
+  "confirmed_collector_defect": "IntegratedNativeCase saved pre-close first failure but did not persist ChromePipe.final_diagnostics; ProductGate already persisted it.",
+  "change": "After first id=1 Browser.getVersion response timeout only, observe original pipe until ChromePipe construction + 30 seconds. No additional request, retry, target, UI continuation, or success conversion. Normal Browser.close follows; sidecar cleanup JSON preserves initial evidence bytes.",
+  "cutoff_origin": "ChromePipe.__init__ entry before font environment preparation; stricter than 30 seconds from subprocess launch.",
+  "late_reply_outcome": "Diagnostic only; browser_version, target, session, and original failure are not promoted or resumed.",
+  "environment": {
+    "python": "3.11.16",
+    "platform": "Linux",
+    "chrome": "Google Chrome for Testing 153.0.8010.52",
+    "branding": "dist/integrated/branding-10",
+    "new_installation": false
+  },
+  "source_sha256": {
+    "tests/test_ees_chat_theme.py": "6ab9bd8cf1d88eb7754bd7c077d739e46952e3a1af8cc22b31ec19884b0bca50",
+    "tests/ees_work_integrated_fixture.py": "f4c3aaa9bfb9170bd54a1c05b70a7626a122b860080033405b1a6dafde41518e"
+  },
+  "commands": [
+    {
+      "command": "PYTHONPATH=.:tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_chat_theme -v",
+      "passed": 13,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "seconds": 0.088,
+      "exit_code": 0
+    },
+    {
+      "command": "EES_TEST_CHROME=\"$PWD/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell\" EES_TEST_BRANDING_DIR=\"$PWD/dist/integrated/branding-10\" EES_TEST_UPSTREAM_WHEEL=\"$PWD/dist/upstream/open_webui-0.11.3-py3-none-any.whl\" EES_TEST_SCREENSHOT_DIR=\"$PWD/dist/integrated/resume-observation/native-screenshots\" EES_REQUIRE_AUTHORING_NATIVE=1 PYTHONPATH=.:tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_c_phase3_native test_ees_work_c_phase3_privacy -v",
+      "passed": 5,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "seconds": 12.953,
+      "exit_code": 0,
+      "execution_count": 1
+    }
+  ],
+  "logs": [
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/resume-helper-final.log",
+      "size": 2735,
+      "sha256": "1c15c76db571558abb377a7fe7e64bf2c8483847ae60c7711f54d4811a204c86"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/resume-native-execution.log",
+      "size": 1089,
+      "sha256": "5f612c0e558cb65257bfe3ddaf39895f2efb685e1895e93827a05f323449a8da"
+    }
+  ],
+  "actual_native_fixture_screenshots": [
+    {
+      "path": "dist/integrated/resume-observation/native-screenshots/integrated-current-scope-revoked.png",
+      "bytes": 59395,
+      "sha256": "d7e972152a86bd0c0847e72cea0af2f51a2f4a905f1d0cfbb873a4a29b2e7ae7"
+    },
+    {
+      "path": "dist/integrated/resume-observation/native-screenshots/integrated-history-failed-closed.png",
+      "bytes": 59332,
+      "sha256": "8ac89915ccb3479b301729b1a2feefaf538d0de22c05a6b1213e2971eee99e0b"
+    },
+    {
+      "path": "dist/integrated/resume-observation/native-screenshots/integrated-late-read-new-target.png",
+      "bytes": 83663,
+      "sha256": "61e782eb42c29c084594adb1dfb87565648c4d914f42e8b212c90c4df10a05d9"
+    },
+    {
+      "path": "dist/integrated/resume-observation/native-screenshots/integrated-late-write-original-target.png",
+      "bytes": 81422,
+      "sha256": "241cd784b3e6dc33575a1ea31a644816185502155def0b9d627b41fd5f2aa134"
+    },
+    {
+      "path": "dist/integrated/resume-observation/native-screenshots/integrated-two-native-tabs-conflict.png",
+      "bytes": 86693,
+      "sha256": "972a555f0eac5fa79507ef448d1e3f7afb905395131a85020c2af9f31917414b"
+    }
+  ],
+  "boundaries": [
+    "Native fixture uses actual pinned Svelte/Tiptap product assets and temporary real workflow service, with synthetic auth/model/connector fixture. It is separate from full Native product CLI verification.",
+    "Local Chrome153 success does not identify or fix prior CI Chrome154 initial reply delay.",
+    "No DBus, operating environment, product code, auth assertion, CI trigger, or timeout success condition changed."
+  ],
+  "next_ci_diagnostic": "One automatic CI execution of changed tests. Natural bootstrap failure retains failure and observes same original id1 without retransmission; success is recorded as success only for actual tests run and is not proof of root cause."
+}

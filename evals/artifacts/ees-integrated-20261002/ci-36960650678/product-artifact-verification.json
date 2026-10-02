@@ -1,0 +1,475 @@
+{
+  "artifact": {
+    "id": 11206799646,
+    "name": "ees-native-complete-product-b3af99c935a2c72eefb201f8296e1e22e053b255",
+    "size_in_bytes": 2159675,
+    "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11206799646",
+    "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11206799646/zip",
+    "expired": false,
+    "created_at": "2026-10-02T03:36:51Z",
+    "expires_at": "2026-10-09T03:36:49Z",
+    "updated_at": "2026-10-02T03:36:51Z",
+    "digest": "sha256:e04c419e51a7d2a29d23159d76c7adc99fbc6db4fa8eacb26f988e0e58565721",
+    "workflow_run": {
+      "id": 36960650678,
+      "repository_id": 1355435001,
+      "head_repository_id": 1355435001,
+      "head_branch": "docs/ees-restructure-step0a-20261001",
+      "head_sha": "403b0685e26f13add0ff4354ba118788a0e95678"
+    }
+  },
+  "archive_sha256": "e04c419e51a7d2a29d23159d76c7adc99fbc6db4fa8eacb26f988e0e58565721",
+  "archive_bytes": 2159675,
+  "png_count": 20,
+  "json_count": 23,
+  "members": [
+    {
+      "path": "ees-native-product/a0-empty.json",
+      "bytes": 36412,
+      "sha256": "91efc66f9afe8c5114ffca31f73e695b72abcabe7408fcd05808406ae04dba78"
+    },
+    {
+      "path": "ees-native-product/a0-empty.png",
+      "bytes": 55141,
+      "sha256": "24f8633d31ffdefc9b426fa72604467514e69b361800fba6dc86530f5ca7c4e2"
+    },
+    {
+      "path": "ees-native-product/a1-human-complete.json",
+      "bytes": 40889,
+      "sha256": "01c3ec2e5ddec4ce5102c400c9616699a851a62a1a8604edc763d17f23d92522"
+    },
+    {
+      "path": "ees-native-product/a1-human-complete.png",
+      "bytes": 73805,
+      "sha256": "dee574d43f650b7695d6e424a0bb5b442032584ff4ba566f06227320b7351856"
+    },
+    {
+      "path": "ees-native-product/a1-input-saved-not-complete.json",
+      "bytes": 40487,
+      "sha256": "114c32b1a8759fe8329e6378c4cae3e1cb6049f967bb00e7aca4c76c26b8c5e2"
+    },
+    {
+      "path": "ees-native-product/a1-input-saved-not-complete.png",
+      "bytes": 72766,
+      "sha256": "9222f6291ca7ffdf7e467e78034bd8528ab9ebab7672b8fa505f5ed47b56cf93"
+    },
+    {
+      "path": "ees-native-product/b2-published.json",
+      "bytes": 48083,
+      "sha256": "fedc078b8ebe33b8837c19b6234b535ca35054e3d8a1d7636bdab1fd4bf3a799"
+    },
+    {
+      "path": "ees-native-product/b2-published.png",
+      "bytes": 88510,
+      "sha256": "788cbb188cbfedfdc7b45701507b12afba041662777a0d0a4b6b5aac964347c5"
+    },
+    {
+      "path": "ees-native-product/b3-saved-authoring.json",
+      "bytes": 47352,
+      "sha256": "103de3426941d57ca9c5d43bc2d93ac4fb0b5288e82d56ee88f9a7bc5b8852bb"
+    },
+    {
+      "path": "ees-native-product/b3-saved-authoring.png",
+      "bytes": 87075,
+      "sha256": "f7de6f6f9c0be155954d68db00ef45dfda244cebd95abd6482aa3e1baec8d349"
+    },
+    {
+      "path": "ees-native-product/central-chat/a0-empty.json",
+      "bytes": 36564,
+      "sha256": "682b04dfb3df451d7139cf0b94a02323ff60d402858c7f765b87361df25ac2f4"
+    },
+    {
+      "path": "ees-native-product/central-chat/a0-empty.png",
+      "bytes": 55141,
+      "sha256": "24f8633d31ffdefc9b426fa72604467514e69b361800fba6dc86530f5ca7c4e2"
+    },
+    {
+      "path": "ees-native-product/central-chat/input-proposal-before-human.json",
+      "bytes": 51572,
+      "sha256": "377f69bb3fa30f75280771f191c0820c7e84f90ce47b81ba00993b1174ced90f"
+    },
+    {
+      "path": "ees-native-product/central-chat/input-proposal-before-human.png",
+      "bytes": 138852,
+      "sha256": "785aad3e8e262fd27967d4763f97df6efa3bd9bd59c9a6c611a4374cebc8b583"
+    },
+    {
+      "path": "ees-native-product/central-chat/input-proposal-human-saved-not-executed.json",
+      "bytes": 52961,
+      "sha256": "09689b6a7325b32bc7c505f845ce3eb6fe5be89818aa47475e2acafec9b850f1"
+    },
+    {
+      "path": "ees-native-product/central-chat/input-proposal-human-saved-not-executed.png",
+      "bytes": 126128,
+      "sha256": "703e3c3fa962c3d8ab20c683904900c22b4bfec2f781370ca2f3798beabac34a"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-human-applied-unsaved.json",
+      "bytes": 53299,
+      "sha256": "63803b98c0f83ee3c4c5dd039ba6d95795a1ebd58906d98383632a8c8c37723c"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-human-applied-unsaved.png",
+      "bytes": 139983,
+      "sha256": "1a49b5acef73f66f395e72f3d248927941dcbec470cd412359aa1e0cca515ecf"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-human-saved-draft.json",
+      "bytes": 53509,
+      "sha256": "9ce2ac19eae59dcb05315679cb06d5fda5935553f23f286001c8a37624c73b8a"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-human-saved-draft.png",
+      "bytes": 137157,
+      "sha256": "60567c8225d550bb8c32768cdadc0d9075f1891882f95c65afe137881c059b2d"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-proposal-before-human.json",
+      "bytes": 56268,
+      "sha256": "f9942d9053106ab90bb7129855752b24623eca31d28b33fb2a385f69a8d7cdb0"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-proposal-before-human.png",
+      "bytes": 138650,
+      "sha256": "6e45f3abb6149350ad79cebaa159f49c2c91168e2a64285a5bd727702acb6707"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-read-tool.json",
+      "bytes": 52305,
+      "sha256": "cd24c7014d5741698ae8f7b8b729d2eba7487bd586f7a42bd53f69deadd08bcb"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-read-tool.png",
+      "bytes": 112791,
+      "sha256": "51ff89ada88bbe2faaa99533a0e074ff9e91fceeeb31371adab815819bcb1ad7"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-message-reference-exact-old-attempt.json",
+      "bytes": 53074,
+      "sha256": "7b8915c29ec8af325bbe0b13c8205b5adf349d716ad67451cd16c9a1a478a293"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-message-reference-exact-old-attempt.png",
+      "bytes": 139964,
+      "sha256": "a699452181e097fd11604a26c5bcddac8d337e5db8529387c3035c38f46522aa"
+    },
+    {
+      "path": "ees-native-product/central-chat/report.json",
+      "bytes": 30338,
+      "sha256": "552daec559f8c300549b8943220bc8ea875eeaee915baa999a76226859fc0cbf"
+    },
+    {
+      "path": "ees-native-product/native-attachment-restored.json",
+      "bytes": 47992,
+      "sha256": "c4b60ed6e384829e2d2a1d864cec6384f5c4f0ba11d89ccdc3b162d3be09bd04"
+    },
+    {
+      "path": "ees-native-product/native-attachment-restored.png",
+      "bytes": 108720,
+      "sha256": "b649364684a99aa155914868ee98ec4c58c6724c8b1bbf9a40883405c62b98c9"
+    },
+    {
+      "path": "ees-native-product/native-attachment-saved.json",
+      "bytes": 48691,
+      "sha256": "14d9e36e0db0f1fc8b548a98573746e3d09de6cc437289e2fdfdfd4f34f4f00f"
+    },
+    {
+      "path": "ees-native-product/native-attachment-saved.png",
+      "bytes": 112380,
+      "sha256": "5670ea3305c904ec1612dff8b20bb0d2c1834c15af1011d96ec6d930a29eeb17"
+    },
+    {
+      "path": "ees-native-product/native-chat-saved.json",
+      "bytes": 50541,
+      "sha256": "cb383587c3ce2fc551f22511aa4c09e52fbc89d9a1e471f27d9c61465b033144"
+    },
+    {
+      "path": "ees-native-product/native-chat-saved.png",
+      "bytes": 91647,
+      "sha256": "e330dd3b0239e37b3458a72f1d847536a139072f4234500f9c7753d744d4b4e2"
+    },
+    {
+      "path": "ees-native-product/native-file-upload.json",
+      "bytes": 50609,
+      "sha256": "edccddfb35a4ed10d4798d05258c5b0a78e6b5a572fa95e7f8673dceefe99ccb"
+    },
+    {
+      "path": "ees-native-product/native-file-upload.png",
+      "bytes": 96328,
+      "sha256": "90b03947a968d8c2da9dee8dad0322a365cb5ef22d1ea56f16c0e9753a26052e"
+    },
+    {
+      "path": "ees-native-product/native-narrow.json",
+      "bytes": 47841,
+      "sha256": "3034bf79e313c06ffa9a70e47d0e82f49311542911c06b9d604fa45cc978488a"
+    },
+    {
+      "path": "ees-native-product/native-narrow.png",
+      "bytes": 96869,
+      "sha256": "0954e8d600bb57d9d317d36b24ce4169073b0fbd83b4bc64e4a4c9efd4d0c7f6"
+    },
+    {
+      "path": "ees-native-product/native-reduced-motion.json",
+      "bytes": 47628,
+      "sha256": "d62dad89010c9f246e79fc2e1b26cad1295100a398791ee7dc44cb389a55d9d3"
+    },
+    {
+      "path": "ees-native-product/native-reduced-motion.png",
+      "bytes": 96854,
+      "sha256": "964b3b0423d1b11451f905c3cddf9d881df10d4a33d7489970d4c2d1c3507c71"
+    },
+    {
+      "path": "ees-native-product/publish-confirmation-cancel-focus.json",
+      "bytes": 47048,
+      "sha256": "0c628bbf46d87a444ec944fafd6329737d2d405ba65973f8525800497c39780e"
+    },
+    {
+      "path": "ees-native-product/publish-confirmation-cancel-focus.png",
+      "bytes": 106925,
+      "sha256": "5a577016d4a5b26f3169f74ae754ab69d6ada432f60b3ce457dac21fe2be07fa"
+    },
+    {
+      "path": "ees-native-product/report.json",
+      "bytes": 9515,
+      "sha256": "d105ad9652ea1ddc3632b5046b4bbc896a87155e6bca1ead9dc22a4e46058aa7"
+    },
+    {
+      "path": "ees-native-product/synthetic-native-upload.txt",
+      "bytes": 79,
+      "sha256": "cfc3fdf55f3172a09b12635a125c1d6065974965a5c43521dcba3e5b328be4cc"
+    },
+    {
+      "path": "ees-native-product-results/browser-evidence.json",
+      "bytes": 7316,
+      "sha256": "71ccbb2c5d52792a24ba6a2f2f0790383d026e936dbc1617a76f02f851a3ed8f"
+    }
+  ],
+  "reports": [
+    {
+      "path": "11206799646/ees-native-product/report.json",
+      "status": "passed",
+      "steps": 8,
+      "source_commit": "b3af99c935a2c72eefb201f8296e1e22e053b255",
+      "wheel_sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3",
+      "browser_cleanup_diagnostics": {
+        "stage": "ready",
+        "elapsed_ms": 26329.31614200001,
+        "pid": 2555,
+        "exit_code": 0,
+        "browser_version": {
+          "protocolVersion": "1.3",
+          "product": "Chrome/154.0.8037.57",
+          "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+          "jsVersion": "15.4.80.11"
+        },
+        "target_id": "5EF11D4EA44AC19055CB4319597D3C25",
+        "session_attached": false,
+        "buffer_bytes": 0,
+        "last_command": {
+          "id": 298,
+          "method": "Browser.close",
+          "session_attached": false,
+          "timeout_seconds": 5,
+          "elapsed_ms": 0.6909619999930783,
+          "completed": true
+        },
+        "recent_responses": [
+          {
+            "method": "Network.webSocketFrameError",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.webSocketClosed",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.requestWillBeSent",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.loadingFailed",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.requestWillBeSent",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.loadingFailed",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.requestWillBeSent",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.loadingFailed",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.requestWillBeSent",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.loadingFailed",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.requestWillBeSent",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.loadingFailed",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.requestWillBeSent",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.loadingFailed",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.webSocketCreated",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.webSocketFrameError",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.webSocketClosed",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.requestWillBeSent",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "method": "Network.loadingFailed",
+            "sessionId": "A7EEF900E7EEC6AFEF63B5C145148C22"
+          },
+          {
+            "id": 298
+          }
+        ],
+        "stderr_tail": "[2555:2581:1002/033558.833849:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2555:2581:1002/033559.229830:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2555:2581:1002/033559.601352:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2555:2581:1002/033559.930346:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2555:2555:1002/033601.495457:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2555:2581:1002/033601.495553:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2555:2555:1002/033601.495595:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2555:2581:1002/033601.495647:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2555:2555:1002/033601.519720:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2555:2555:1002/033601.536773:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2555:2581:1002/033601.568248:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2555:2555:1002/033601.820688:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2555:2555:1002/033601.831901:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2555:2581:1002/033601.832281:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2555:2555:1002/033601.839195:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2555:2555:1002/033602.020494:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2555:2555:1002/033602.020576:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files\n[2555:2581:1002/033602.020609:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2555:2555:1002/033602.176029:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2555:2581:1002/033602.176101:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2555:2555:1002/033602.220341:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2555:2583:1002/033605.569035:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\nCreated TensorFlow Lite XNNPACK delegate for CPU.\n",
+        "first_failure": null
+      }
+    },
+    {
+      "path": "11206799646/ees-native-product/central-chat/report.json",
+      "status": "passed",
+      "steps": 9,
+      "source_commit": "b3af99c935a2c72eefb201f8296e1e22e053b255",
+      "wheel_sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3",
+      "browser_cleanup_diagnostics": {
+        "stage": "ready",
+        "elapsed_ms": 8961.379583999986,
+        "pid": 2889,
+        "exit_code": 0,
+        "browser_version": {
+          "protocolVersion": "1.3",
+          "product": "Chrome/154.0.8037.57",
+          "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+          "jsVersion": "15.4.80.11"
+        },
+        "target_id": "291B35DF9710D5684666C0E4375412E8",
+        "session_attached": false,
+        "buffer_bytes": 0,
+        "last_command": {
+          "id": 325,
+          "method": "Browser.close",
+          "session_attached": false,
+          "timeout_seconds": 5,
+          "elapsed_ms": 0.24777400000175476,
+          "completed": true
+        },
+        "recent_responses": [
+          {
+            "method": "Network.dataReceived",
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "method": "Network.loadingFinished",
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "method": "Network.requestWillBeSent",
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "method": "Network.requestWillBeSentExtraInfo",
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "method": "Network.responseReceivedExtraInfo",
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "method": "Network.responseReceived",
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "method": "Network.dataReceived",
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "method": "Network.loadingFinished",
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "id": 314,
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "id": 315,
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "id": 316,
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "id": 317,
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "id": 318,
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "id": 319,
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "id": 320,
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "id": 321,
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "id": 322,
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "id": 323,
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "id": 324,
+            "sessionId": "D574070D8EC7E7D36FBFD4C440DF29B0"
+          },
+          {
+            "id": 325
+          }
+        ],
+        "stderr_tail": "[2889:2910:1002/033634.288234:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2889:2910:1002/033634.289012:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2889:2910:1002/033634.344282:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2889:2910:1002/033634.379796:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2889:2889:1002/033634.453582:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2889:2889:1002/033634.453641:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2889:2889:1002/033634.454274:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2889:2889:1002/033634.455047:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2889:2910:1002/033634.455374:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2889:2910:1002/033634.455389:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2889:2910:1002/033634.455398:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2889:2889:1002/033634.485039:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2889:2889:1002/033634.485432:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2889:2910:1002/033634.485512:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2889:2889:1002/033634.485569:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2889:2889:1002/033634.529855:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files\n[2889:2889:1002/033634.535206:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2889:2910:1002/033634.540006:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2889:2889:1002/033634.582232:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2889:2910:1002/033634.584200:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2889:2889:1002/033634.611776:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2889:2889:1002/033634.657798:ERROR:mojo/public/cpp/bindings/lib/interface_endpoint_client.cc:748] Message 2 rejected by interface blink.mojom.Widget\n[2889:2913:1002/033637.815404:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\n",
+        "first_failure": null
+      }
+    }
+  ]
+}

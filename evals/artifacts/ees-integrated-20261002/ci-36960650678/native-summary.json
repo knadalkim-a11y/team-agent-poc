@@ -1,0 +1,108 @@
+{
+  "counts": {
+    "passed": 43,
+    "failed": 1,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "modules": [
+    {
+      "module": "test_ees_work_c_phase2_native.py",
+      "counts": {
+        "passed": 6,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "tests_run": 6
+    },
+    {
+      "module": "test_ees_work_c_phase1_native.py",
+      "counts": {
+        "passed": 5,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "tests_run": 5
+    },
+    {
+      "module": "test_ees_work_c_phase3_privacy.py",
+      "counts": {
+        "passed": 2,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "tests_run": 2
+    },
+    {
+      "module": "test_ees_work_c_phase3_native.py",
+      "counts": {
+        "passed": 2,
+        "failed": 1,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "tests_run": 3
+    },
+    {
+      "module": "test_ees_work_demo.py",
+      "counts": {
+        "passed": 12,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "tests_run": 12
+    },
+    {
+      "module": "test_ees_work_authoring_native.py",
+      "counts": {
+        "passed": 7,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "tests_run": 7
+    },
+    {
+      "module": "test_ees_chat_theme.py",
+      "counts": {
+        "passed": 8,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "tests_run": 8
+    },
+    {
+      "module": "test_ees_work_authoring_account_switch.py",
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "tests_run": 1
+    }
+  ]
+}

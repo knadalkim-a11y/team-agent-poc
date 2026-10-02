@@ -1,0 +1,32 @@
+[
+  {
+    "path": "11207772329/ees-results/browser-evidence.json",
+    "valid": true,
+    "screenshots": 10,
+    "verified_indexed_files": 11
+  },
+  {
+    "path": "11206799646/ees-native-product-results/browser-evidence.json",
+    "valid": true,
+    "screenshots": 20,
+    "verified_indexed_files": 43
+  },
+  {
+    "path": "11206884363/ees-results/browser-evidence.json",
+    "valid": true,
+    "screenshots": 4,
+    "verified_indexed_files": 5
+  },
+  {
+    "path": "11207906730/ees-results/browser-evidence.json",
+    "valid": true,
+    "screenshots": 7,
+    "verified_indexed_files": 7
+  },
+  {
+    "path": "11207434559/ees-results/browser-evidence.json",
+    "valid": true,
+    "screenshots": 9,
+    "verified_indexed_files": 11
+  }
+]

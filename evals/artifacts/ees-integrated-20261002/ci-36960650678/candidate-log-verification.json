@@ -1,0 +1,18 @@
+{
+  "source_commit": "403b0685e26f13add0ff4354ba118788a0e95678",
+  "files": [
+    {
+      "path": "EES-demo-403b0685e26f.zip",
+      "bytes": 153019148,
+      "sha256": "6bb1023f2372a53a69993503970f5ee516ec42b684d139df7d2a612556fd002d"
+    },
+    {
+      "path": "candidate-manifest.json",
+      "bytes": 13299,
+      "sha256": "3eb5046c049f11bf00377866c680a406030800927faaaf45f0660d456381cc25"
+    }
+  ],
+  "evidence_source": "Successful Complete Native product job110693658078 printed and verified exact inner candidate files; outer archive was not downloaded.",
+  "log_path": "dist/integrated/ci-36960650678/product.log",
+  "log_sha256": "4ddc5c4ec2b5848c1fb78d517c7b4589210ca28b5906b824648fb94355801597"
+}
