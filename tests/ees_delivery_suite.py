@@ -38,13 +38,15 @@ SUITES = {
         "test_ees_workflow_model.py", "test_ees_workflow_tool.py", "test_ees_integrated*.py",
         "test_ees_work_workspace.py", "test_ees_work_operations.py", "test_ees_delivery_artifacts.py"],
     "contracts": ["test_ees_workflow_execution.py", "test_ees_workflow_native.py",
-        "test_ees_workflow_model_native.py", "test_ees_workflow_examples_native.py",
+        "test_ees_workflow_model_native.py",
         "test_ees_work_authoring.py"],
     "platform": ["test_ees_deploy_*.py", "test_manage_ees.py", "test_ees_upgrade.py",
-        "test_ees_update_download.py", "test_ees_webui_customization.py",
+        "test_ees_update_download.py",
         "test_ees_asset_guard.py", "test_ees_asset_native.py", "test_ees_branding_build.py",
         "test_demo_bundle.py", "test_ees_trial_*.py", "test_ees_delivery_suite.py",
         "test_check_docs.py", "test_openwebui_windows_launcher.py"],
+    "program-install": ["test_ees_webui_customization.py"],
+    "native-contracts": ["test_ees_workflow_examples_native.py"],
     "restore-ees10": ["test_ees_webui_customization.py"],
     "restore-ees11": ["test_ees_webui_customization.py"],
     "restore-ees12": ["test_ees_webui_customization.py"],
@@ -57,9 +59,10 @@ SUITES = {
 # Each real fixed-wheel Apply/Restore performs a full filesystem walk. On
 # Windows one ees.10 case takes 157 seconds; isolate these cases without
 # changing their assertions, artifact pins, or the overall required gate.
+# The other 58 methods take 224 seconds on Windows and have their own job.
 CASE_PARTITIONS = {
     "test_ees_webui_customization.py": {
-        "platform": None,  # Every remaining/currently added method stays here.
+        "program-install": None,  # Every remaining/currently added method stays here.
         "restore-ees10": ["test_ees_webui_customization.CustomizationTests.test_real_ees10_to_authoring_apply_restore_preserves_program_and_data"],
         "restore-ees11": ["test_ees_webui_customization.CustomizationTests.test_real_ees11_to_execution_apply_restore_preserves_program_and_data"],
         "restore-ees12": ["test_ees_webui_customization.CustomizationTests.test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory"],
