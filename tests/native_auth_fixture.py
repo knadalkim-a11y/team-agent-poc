@@ -305,7 +305,8 @@ class NativeAuthUIServer(NativeUIServer):
         server = self
         class ProposalTransport:
             async def propose(self, actor, model_id, context, instruction):
-                current = await fixture.users.Users.get_user_by_id(actor["id"])
+                actor_id=actor.get("id") if isinstance(actor,dict) else actor.id
+                current = await fixture.users.Users.get_user_by_id(actor_id)
                 if (current is None or current.role == "pending" or model_id != "fixture-model"
                         or not await fixture.acl.AccessGrants.has_access(current.id, "model", model_id, "read")):
                     raise fixture.backend.WorkflowError("model_unavailable", "현재 모델 접근 권한이 없습니다.")
