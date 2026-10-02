@@ -1,0 +1,726 @@
+[
+  {
+    "artifact": {
+      "id": 11209633251,
+      "name": "ees-work-browser-evidence-native-execution",
+      "size_in_bytes": 335080,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11209633251",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11209633251/zip",
+      "expired": false,
+      "created_at": "2026-10-02T04:54:18Z",
+      "expires_at": "2026-10-09T04:54:18Z",
+      "updated_at": "2026-10-02T04:54:18Z",
+      "digest": "sha256:5ce02c8c4b068de81c6591f0047a765e2f8c9091a3d7402f95b09ebf5b56af40",
+      "workflow_run": {
+        "id": 36966415796,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "5556b573c8ab4430eb44b7e608fc6a8045e0e2bd"
+      }
+    },
+    "verified": true,
+    "members": [
+      {
+        "path": "ees-results/browser-evidence.json",
+        "bytes": 924,
+        "sha256": "faaaf121c9bbc7fc21eb2483c018c48047a7e0ba6dc17f062bc965d801aac95e"
+      },
+      {
+        "path": "ees-results/suite.json",
+        "bytes": 226,
+        "sha256": "36a2afdc1e0840c25a253460f910f6fa1e40bfeccbba492596eac4a76a9618a2"
+      },
+      {
+        "path": "ees-results/test_ees_work_c_phase3_native.json",
+        "bytes": 858,
+        "sha256": "9a80ba98ae1472361e278e34257d696e9a2307f775745ef6ded3fd4ddabea4fd"
+      },
+      {
+        "path": "ees-results/test_ees_work_c_phase3_privacy.json",
+        "bytes": 714,
+        "sha256": "e18556a24bc470d4d9ae3be7cab43139cdccb3f7c0cdd359fc7f8ca5768d12db"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-current-scope-revoked.png",
+        "bytes": 58681,
+        "sha256": "f22ba0d7a0428ec37ad3cc71079255c7f72d66e22f3fb1c97cc04c3da326c764"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-history-failed-closed.png",
+        "bytes": 58555,
+        "sha256": "3e9f6eaf80b7fb204c3e4a0b2477d2c3d75758e70cfd274949b5887961030a6a"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-late-read-new-target.png",
+        "bytes": 85494,
+        "sha256": "52de0b3dfa2339f62957e632ea7501f7bc9acb8c198e5b43d1563328f3bf5b66"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-late-write-original-target.png",
+        "bytes": 80113,
+        "sha256": "38616cfb2a279fa4f222febc64ba53a9e208756d584bdfb231fdaca1f8ce5fa5"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-two-native-tabs-conflict.png",
+        "bytes": 85425,
+        "sha256": "b068615a8baec0a9cc04a1f3265215b10dd2bc5b1942c8469aa7a27a929146f1"
+      }
+    ],
+    "counts": {
+      ".json": 4,
+      ".png": 5
+    },
+    "test_results": [
+      {
+        "module": "test_ees_work_c_phase3_privacy.py",
+        "partition": null,
+        "selected_ids": null,
+        "seconds": 4.664,
+        "tests_run": 2,
+        "no_test_failures": true,
+        "status": "passed",
+        "counts": {
+          "passed": 2,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        },
+        "outcomes": [
+          {
+            "id": "test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_failed_history_lookup_never_reveals_previous_attempt_or_input",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_revoked_native_actor_scope_removes_open_result_and_author_controls",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "module": "test_ees_work_c_phase3_native.py",
+        "partition": null,
+        "selected_ids": null,
+        "seconds": 13.883,
+        "tests_run": 3,
+        "no_test_failures": true,
+        "status": "passed",
+        "counts": {
+          "passed": 3,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        },
+        "outcomes": [
+          {
+            "id": "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_delayed_input_write_keeps_exact_original_run_after_chat_change",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_delayed_workspace_read_cannot_replace_new_workflow",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_same_account_two_native_targets_keep_local_input_after_conflict",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "artifact": {
+      "id": 11210271138,
+      "name": "ees-work-browser-evidence-native-account",
+      "size_in_bytes": 539429,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11210271138",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11210271138/zip",
+      "expired": false,
+      "created_at": "2026-10-02T04:54:48Z",
+      "expires_at": "2026-10-09T04:54:47Z",
+      "updated_at": "2026-10-02T04:54:48Z",
+      "digest": "sha256:fd54c5ab657ed195a0f0c878a8068db91aa8c64849d7bdcce48ef67a4082dcd5",
+      "workflow_run": {
+        "id": 36966415796,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "5556b573c8ab4430eb44b7e608fc6a8045e0e2bd"
+      }
+    },
+    "verified": true,
+    "members": [
+      {
+        "path": "ees-results/browser-evidence.json",
+        "bytes": 1899,
+        "sha256": "6eb28f57c149a1b4ee8d382b116a4634328cf587752a452cebf7f27ae2500acf"
+      },
+      {
+        "path": "ees-results/test_ees_chat_theme.json",
+        "bytes": 2580,
+        "sha256": "99317553ce6afc4c1566c7ce32550e877653fb42c34a29d7e3b1e2e09ec1d441"
+      },
+      {
+        "path": "ees-results/suite.json",
+        "bytes": 309,
+        "sha256": "e9ee2e6151e627e641ef3a5e7598ab08412bdb58c8746b116f0c750c80b264c9"
+      },
+      {
+        "path": "ees-results/test_ees_work_authoring_account_switch.json",
+        "bytes": 548,
+        "sha256": "c3b395cb737ca1712ae84946e181ae5f5ddc2a0d110d20475298834c64b2d8c9"
+      },
+      {
+        "path": "ees-results/test_ees_work_authoring_native.json",
+        "bytes": 1538,
+        "sha256": "a583dfa52684aeea47724266674210910574521d5fd4e69cccb8711f737c0096"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-native-ai-proposal-not-auto-save.png",
+        "bytes": 83034,
+        "sha256": "236fa18e003c668872e0209bad5d176fb32a678b4f501bc3f3eb96b3dc9267ba"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-native-authoring-conflict.png",
+        "bytes": 96229,
+        "sha256": "4a112844cc3bdee98b5e98f511cf06aff7505e0272db9a6dfce004ecd7c590ac"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-native-group-author-published.png",
+        "bytes": 101112,
+        "sha256": "b35a3e975b1a91300513e8e3dedda3bc1cb7a9ea25df5d65330e08866e07a65d"
+      },
+      {
+        "path": "ees-work-screenshots/nu-closed-native-signup.png",
+        "bytes": 17210,
+        "sha256": "6c9f4d2e4032f3e1208b164f2e99ed5d2a42eb415e625a374cbd48e3bcb804bf"
+      },
+      {
+        "path": "ees-work-screenshots/nu05-former-a-tab-now-b.png",
+        "bytes": 55655,
+        "sha256": "3c1d6a427e2b53b5b946a2e61cf777d7bb73923598ae4b8d28bf4470b4d3830e"
+      },
+      {
+        "path": "ees-work-screenshots/sa-approved-first-chat.png",
+        "bytes": 72327,
+        "sha256": "f9bcd96550be785fc6b1ba39cb2af91f624a7e59906171bd6357c7150cc72413"
+      },
+      {
+        "path": "ees-work-screenshots/sa-native-approved-user.png",
+        "bytes": 49395,
+        "sha256": "21e604b9fb860e385f19a802ff79c3b13750a1e76a912b3dbe89d106ded5d24e"
+      },
+      {
+        "path": "ees-work-screenshots/sa-signup-pending-fonts.json",
+        "bytes": 780,
+        "sha256": "52b1f39d35f35710df5bf3594ae27a35b7f72d2654549551ced5305ad9511422"
+      },
+      {
+        "path": "ees-work-screenshots/sa-signup-pending.png",
+        "bytes": 39126,
+        "sha256": "3d101c7f1588cd0975fd3c32c9f3dcdb89ef170e70f284d6c4126fae945a1fba"
+      },
+      {
+        "path": "ees-work-screenshots/sa26-b-after-late-a-responses.png",
+        "bytes": 85237,
+        "sha256": "728cfc0cb55d4433a3a2b488381ff5d71c1a864d7fd3d3bb5c49620194c9ac4b"
+      },
+      {
+        "path": "ees-work-screenshots/sa26-nu05-account-switch.json",
+        "bytes": 495,
+        "sha256": "265792d5fc3be715fe761fad2ed32a32beb675e8b77ba185206311c4c137ece6"
+      }
+    ],
+    "counts": {
+      ".json": 7,
+      ".png": 9
+    },
+    "test_results": [
+      {
+        "module": "test_ees_work_authoring_native.py",
+        "partition": null,
+        "selected_ids": null,
+        "seconds": 33.514,
+        "tests_run": 7,
+        "no_test_failures": true,
+        "status": "passed",
+        "counts": {
+          "passed": 7,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        },
+        "outcomes": [
+          {
+            "id": "test_ees_work_authoring_native.NativeAccountAPITests.test_native_password_change_reset_and_existing_token_without_redis",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_authoring_native.NativeAccountAPITests.test_native_signup_pending_no_membership_and_closed_registration",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_authoring_native.NativeAccountAPITests.test_pending_group_member_cannot_author_or_use_protected_runtime",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_closed_native_signup_ui_and_direct_api",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_authoring_conflict_keeps_unsaved_draft_and_published_version",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_new_signup_and_approval_ui",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "module": "test_ees_chat_theme.py",
+        "partition": null,
+        "selected_ids": null,
+        "seconds": 0.181,
+        "tests_run": 13,
+        "no_test_failures": true,
+        "status": "passed",
+        "counts": {
+          "passed": 13,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        },
+        "outcomes": [
+          {
+            "id": "test_ees_chat_theme.ChromeFontEnvironmentTests.test_changed_pinned_font_is_rejected_before_launch_or_profile_write",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_chat_theme.ChromePipeBootstrapTests.test_bootstrap_failure_capture_saves_local_diagnostics_without_page_commands",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_chat_theme.ChromePipeBootstrapTests.test_complete_product_and_native_chat_preserve_first_failure_before_page_capture",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_chat_theme.ChromePipeBootstrapTests.test_first_timeout_preserves_stderr_and_request_before_later_cleanup_response",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_chat_theme.ChromePipeBootstrapTests.test_handshake_and_target_creation_share_original_budget_without_retry",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_chat_theme.ChromePipeBootstrapTests.test_interleaved_pipe_event_does_not_replace_handshake_response_or_leak_params",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_chat_theme.ChromePipeBootstrapTests.test_invalid_browser_handshake_fails_before_any_target_is_created",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_chat_theme.ChromePipeBootstrapTests.test_native_fixture_saves_final_diagnostics_without_rewriting_first_evidence",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_chat_theme.ChromePipeBootstrapTests.test_normal_close_keeps_final_diagnostics_after_local_stderr_is_closed",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_chat_theme.ChromePipeBootstrapTests.test_observation_error_does_not_prevent_owned_browser_cleanup",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_chat_theme.ChromePipeBootstrapTests.test_passive_bootstrap_has_absolute_cutoff_and_distinguishes_terminal_results",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_chat_theme.ChromePipeBootstrapTests.test_passive_bootstrap_is_not_used_for_page_failures_or_repeated_cleanup",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_chat_theme.ChromePipeBootstrapTests.test_passive_late_bootstrap_reply_keeps_original_failure_without_writing_or_resuming",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "module": "test_ees_work_authoring_account_switch.py",
+        "partition": null,
+        "selected_ids": null,
+        "seconds": 10.319,
+        "tests_run": 1,
+        "no_test_failures": true,
+        "status": "passed",
+        "counts": {
+          "passed": 1,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        },
+        "outcomes": [
+          {
+            "id": "test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "artifact": {
+      "id": 11210266096,
+      "name": "ees-work-browser-evidence-native-work",
+      "size_in_bytes": 444488,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11210266096",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11210266096/zip",
+      "expired": false,
+      "created_at": "2026-10-02T04:54:46Z",
+      "expires_at": "2026-10-09T04:54:45Z",
+      "updated_at": "2026-10-02T04:54:46Z",
+      "digest": "sha256:763d3796fe2d7852515f49bef5264e1fc47524b287edccf8525dc5bd259a1da4",
+      "workflow_run": {
+        "id": 36966415796,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "5556b573c8ab4430eb44b7e608fc6a8045e0e2bd"
+      }
+    },
+    "verified": true,
+    "members": [
+      {
+        "path": "ees-results/browser-evidence.json",
+        "bytes": 1225,
+        "sha256": "2c09e7f186646ea7eee38770b0a8cfaa546bb901449e081ca4c3c6c9ddf28638"
+      },
+      {
+        "path": "ees-results/suite.json",
+        "bytes": 123,
+        "sha256": "c249bf8ddd57ce81568411670a73bb0aff736be58e15e7084002ea807e6c93ae"
+      },
+      {
+        "path": "ees-results/test_ees_work_demo.json",
+        "bytes": 2229,
+        "sha256": "7a0b93a7064ec46fa91cb226edb8ee105fc40b5f7a2970258e50e8ff63ba1d67"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-empty-native.png",
+        "bytes": 61647,
+        "sha256": "f4830840515735ebfe7a04e280f78643738f49caa3f5022b9c3f2a8ba56c84a1"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-human-confirm-history.png",
+        "bytes": 84254,
+        "sha256": "fe4559e00db9efb21e33c7d4e4d939d9fad61bde906febaeae8ae6cd891acdf3"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-layout-1180.png",
+        "bytes": 56933,
+        "sha256": "87eb21492727c4f2fb5be1aa8d3cd98b09192705f18c407cfeffb01881d258cb"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-layout-1440.png",
+        "bytes": 59549,
+        "sha256": "a74c88ed74e3b2a05159698f7c4f5e21ebb004855cdec329ec1f2a330c6c92a8"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-layout-1920.png",
+        "bytes": 61647,
+        "sha256": "f4830840515735ebfe7a04e280f78643738f49caa3f5022b9c3f2a8ba56c84a1"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-native-chat-and-work.png",
+        "bytes": 83849,
+        "sha256": "126aae412c182c4ff68a91f8e0ce51694141e520b988cc22100bd1f68d4ab86c"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-saved-input-not-execution.png",
+        "bytes": 80128,
+        "sha256": "5dc3903f8758a93a548556545e09ee779fe9af509739beea2bd13a1998ea2d7c"
+      }
+    ],
+    "counts": {
+      ".json": 3,
+      ".png": 7
+    },
+    "test_results": [
+      {
+        "module": "test_ees_work_demo.py",
+        "partition": null,
+        "selected_ids": null,
+        "seconds": 42.88,
+        "tests_run": 12,
+        "no_test_failures": true,
+        "status": "passed",
+        "counts": {
+          "passed": 12,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        },
+        "outcomes": [
+          {
+            "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_empty_state_has_no_seed_run_or_fake_success",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_enter_in_work_input_does_not_send_chat_or_run_job",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_human_cancel_then_explicit_confirm_and_history",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_input_save_is_not_execute_and_repeat_click_is_single_write",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_lookup_failure_removes_previously_visible_private_evidence",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_model_zero_one_multiple_use_native_source_without_demo_presets",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_native_message_send_stream_and_work_panel_are_independent",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_native_three_regions_fonts_and_narrow_geometry",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_navigation_preserves_local_input_and_does_not_change_business_revision",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_scope_and_history_do_not_bind_or_replace_native_chat",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_scope_dialog_escape_cancel_and_chat_draft_preservation",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_sidebar_close_restore_retains_chat_and_work_input",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "artifact": {
+      "id": 11210241157,
+      "name": "ees-work-browser-evidence-native-compose",
+      "size_in_bytes": 716267,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11210241157",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11210241157/zip",
+      "expired": false,
+      "created_at": "2026-10-02T04:55:07Z",
+      "expires_at": "2026-10-09T04:55:06Z",
+      "updated_at": "2026-10-02T04:55:07Z",
+      "digest": "sha256:7ebefbe6ebb359e7b2a761e7e48a4faba04f04c2234da865465a0c97a9c3a116",
+      "workflow_run": {
+        "id": 36966415796,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "5556b573c8ab4430eb44b7e608fc6a8045e0e2bd"
+      }
+    },
+    "verified": true,
+    "members": [
+      {
+        "path": "ees-results/browser-evidence.json",
+        "bytes": 2193,
+        "sha256": "f61e415c6e30aef864d833095e9962a4790832ad70ed53268857cd6e1cc21651"
+      },
+      {
+        "path": "ees-results/suite.json",
+        "bytes": 223,
+        "sha256": "94ced550ef50cf9de7712bf9af1fb444e330487bb8709e52994e997034a1f784"
+      },
+      {
+        "path": "ees-results/test_ees_work_c_phase1_native.json",
+        "bytes": 2111,
+        "sha256": "1db1e8a76ded3a1f37e9c4f90441eba2aced4825584008467e1ac7ad041188eb"
+      },
+      {
+        "path": "ees-results/test_ees_work_c_phase2_native.json",
+        "bytes": 1343,
+        "sha256": "154d906bacbd748ce8af6f56c844dc4fc8db572c84c52777b16fb9f923a4fdd3"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-eight-native-input-types.png",
+        "bytes": 98363,
+        "sha256": "51f86322679c3307b38237fd0ccd7e44318929436732590089383282aefe4d28"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-immutable-attempts.png",
+        "bytes": 104428,
+        "sha256": "aaf45f7f49f86e83448ff384d776d4bf59b950a85ee670ed112f14a7820c6b8f"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-long-korean-form.png",
+        "bytes": 96840,
+        "sha256": "9713abb5bf1ef76a17a09adfe7dd08096db4880118dd0febcb8e8ff995ad1433"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-native-tool-snapshot.png",
+        "bytes": 96932,
+        "sha256": "f94e84ec8193d45854ef4ca662eb1f22be164faa848d6d2f8ce4af621a4d0189"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-result-failed.png",
+        "bytes": 74119,
+        "sha256": "4ee9ad66ff1fb0acc3b8200de23a5e029512f7eb8a7d55dfa2ec5270f9471ed3"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-result-partial.png",
+        "bytes": 73517,
+        "sha256": "0dc9f2c123716d3b295c1161bd3c6dbf1e42dbb539d0f8c9b6996d942db74278"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-result-unknown.png",
+        "bytes": 76415,
+        "sha256": "cc75f10920e88cfc43e16948977829a4f0a1e043214035b7945d9d10577a8900"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-running-animation.json",
+        "bytes": 2217,
+        "sha256": "247042dc1e7fa115fa2556805a51cfdd76a1f0cc5b31de5c219f320f69c1f90e"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-running-animation.png",
+        "bytes": 80926,
+        "sha256": "27cd49807ab17be1353827757aa1d0e740d7d3a313bd1b8b80079291c6b24f62"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-running-reduced-motion.png",
+        "bytes": 80715,
+        "sha256": "c39a810c82353377f1237e4988b4a8f4fc088917ed7cd9fa2ffe3f2e138d8e5b"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-test_closed_run_remains_readonly_and_uses_its_saved_completion-failure-cleanup.json",
+        "bytes": 7880,
+        "sha256": "7e7fee9b59232525469682c675e7c7ac2ec7de18a0dcc214ad9ac51ba0f1e54f"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-test_closed_run_remains_readonly_and_uses_its_saved_completion-failure.json",
+        "bytes": 5632,
+        "sha256": "c3287a25a0ddf769928f457e3104ebbb028b320ef458767a1f6cd856f8644460"
+      }
+    ],
+    "counts": {
+      ".json": 7,
+      ".png": 9
+    },
+    "test_results": [
+      {
+        "module": "test_ees_work_c_phase2_native.py",
+        "partition": null,
+        "selected_ids": null,
+        "seconds": 16.48,
+        "tests_run": 6,
+        "no_test_failures": true,
+        "status": "passed",
+        "counts": {
+          "passed": 6,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        },
+        "outcomes": [
+          {
+            "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_human_confirmation_never_calls_external_tool",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_partial_failed_unknown_stay_distinct_and_never_auto_retry",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_real_tool_call_snapshots_inputs_but_does_not_confirm_business_completion",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_required_input_blocks_before_any_transport_or_attempt",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_revoked_tool_access_blocks_a_new_attempt_before_transport",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_running_transport_is_visible_and_cannot_double_execute",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "module": "test_ees_work_c_phase1_native.py",
+        "partition": null,
+        "selected_ids": null,
+        "seconds": 30.676,
+        "tests_run": 5,
+        "no_test_failures": false,
+        "status": "failed",
+        "counts": {
+          "passed": 4,
+          "failed": 1,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        },
+        "outcomes": [
+          {
+            "id": "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_closed_run_remains_readonly_and_uses_its_saved_completion",
+            "status": "failed",
+            "detail": "Traceback (most recent call last):\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_fixture.py\", line 90, in setUp\n    self.browser.navigate('about:blank')\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_chat_theme.py\", line 287, in navigate\n    version = self.call(\"Browser.getVersion\", timeout=deadline - time.monotonic())\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_chat_theme.py\", line 264, in call\n    response = self.receive(deadline)\n               ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_chat_theme.py\", line 240, in receive\n    raise AssertionError(\"Chrome DevTools response timed out.\")\nAssertionError: Chrome DevTools response timed out.\n"
+          },
+          {
+            "id": "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_eight_declared_native_input_types_survive_visible_save_and_reload",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_long_form_scrolling_keeps_heading_and_unsaved_values",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_retry_keeps_original_attempt_input_and_immutable_published_version",
+            "status": "passed"
+          },
+          {
+            "id": "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_run_and_workflow_setting_forms_preserve_zero_false_and_empty",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  }
+]

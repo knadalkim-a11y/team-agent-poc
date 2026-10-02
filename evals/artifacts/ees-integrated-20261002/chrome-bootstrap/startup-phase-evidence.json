@@ -1,0 +1,185 @@
+{
+  "recorded_utc": "2026-10-02T05:03:02.492564+00:00",
+  "base_head": "5556b573c8ab4430eb44b7e608fc6a8045e0e2bd",
+  "scope": "Test harness browser startup phase only; product, UI action assertions, authorization, CI triggers, and all existing command deadlines remain unchanged.",
+  "observed_ci": {
+    "run": 36966415796,
+    "artifact": 11210241157,
+    "test": "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_closed_run_remains_readonly_and_uses_its_saved_completion",
+    "original_failure": "id1 Browser.getVersion timed out at 15010.141915 ms, before target/page creation",
+    "passive_result": "The same process returned the same original id1 without retransmission at 15349.787956 ms from ChromePipe construction: protocolVersion 1.3, Chrome/154.0.8037.57. Browser.close id2 succeeded and process exit was 0. The CI test remains failed."
+  },
+  "confirmed_cause_scope": "The initial browser readiness reply exceeded the shared 15 second budget. This observation rules out a lost original request, dead process, and permanently broken pipe for this failure. The OS/Chrome cold-start delay cause is not established; DBus stderr is not treated as its cause.",
+  "new_startup_contract": {
+    "absolute_seconds_from_ChromePipe_constructor_entry": 30,
+    "includes_font_preparation": true,
+    "request": "One Browser.getVersion request; valid protocolVersion and product required before target creation.",
+    "post_reply_deadline_checked": true,
+    "target_and_existing_command_seconds": 15,
+    "retry_count": 0,
+    "fixed_sleep_added": false,
+    "subsequent_navigate_repeats_startup": false,
+    "passive_cleanup_additional_wait_after_30s": 0,
+    "success_diagnostics": "browser_startup.ready_elapsed_ms and one concise stderr JSON per browser"
+  },
+  "replaced_test_contract": "test_handshake_and_target_creation_share_original_budget_without_retry is replaced explicitly by separate bounded browser readiness and unchanged 15 second target/command regression checks.",
+  "environment": {
+    "python": "3.11.16",
+    "platform": "Linux",
+    "chrome": "HeadlessChrome/153.0.8010.52",
+    "branding": "dist/integrated/branding-10",
+    "new_installation": false
+  },
+  "source_sha256": {
+    "tests/test_ees_chat_theme.py": "362a8d281e67b3a98bbf89db659b3fe22e55af4c3426698ee6e61f57eaddbc10"
+  },
+  "executed_chrome_pipe_ast_sha256": "b1a9556838bc950291706274b345db4ba5ad9b97a03ca2479b219595c953f9bf",
+  "execution_source_note": "ChromePipe implementation was unchanged throughout the Native run. Its final unit regression additionally strengthened the no-response cutoff simulation after that Native run was started; Native tests were not repeated for a unit-test-only edit.",
+  "commands": [
+    {
+      "command": "PYTHONPATH=.:tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_chat_theme -v",
+      "passed": 17,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.102,
+      "exit_code": 0
+    },
+    {
+      "command": "EES_TEST_CHROME=\"$PWD/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell\" EES_TEST_BRANDING_DIR=\"$PWD/dist/integrated/branding-10\" EES_TEST_UPSTREAM_WHEEL=\"$PWD/dist/upstream/open_webui-0.11.3-py3-none-any.whl\" EES_TEST_SCREENSHOT_DIR=\"$PWD/dist/integrated/startup-phase/native-screenshots\" EES_REQUIRE_AUTHORING_NATIVE=1 PYTHONPATH=.:tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_c_phase1_native test_ees_work_c_phase2_native -v",
+      "passed": 11,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 23.065,
+      "exit_code": 0,
+      "execution_count": 1
+    }
+  ],
+  "native_startup_timings": [
+    {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 180.36091799876885,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 154.66743399883853,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 151.76477899876772,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 238.67363200042746,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 153.60605100067914,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 170.51015200195252,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 163.3302789996378,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 192.7529519998643,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 177.86013200020534,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 190.46454199997243,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 157.29485399788246,
+      "product": "HeadlessChrome/153.0.8010.52"
+    }
+  ],
+  "logs": [
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/startup-phase-helper.log",
+      "bytes": 3525,
+      "sha256": "77d75a31d522536bbf0bcb32f951dd52041cf8d6d31e41e4d41ffc6b990118d2"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/startup-phase-native-compose.log",
+      "bytes": 3506,
+      "sha256": "c6a873a7acd882c8dc1451c77cd6a9bbf3ef204e6075a36adb3bd31007b5ec61"
+    }
+  ],
+  "native_fixture_pngs": [
+    {
+      "path": "dist/integrated/startup-phase/native-screenshots/integrated-closed-history.png",
+      "bytes": 71799,
+      "sha256": "41e6ad5b7e8b91e053b45678c3ee02c41453a8114f664a371a06d355cff9f423"
+    },
+    {
+      "path": "dist/integrated/startup-phase/native-screenshots/integrated-eight-native-input-types.png",
+      "bytes": 99732,
+      "sha256": "97046e14db357a27e083a96ddb3b10f5d70212edae04c73d917370660682f211"
+    },
+    {
+      "path": "dist/integrated/startup-phase/native-screenshots/integrated-immutable-attempts.png",
+      "bytes": 102346,
+      "sha256": "47d39264d5349122a6003219449d901bb4f1e268d13b7de4b6ffa1dc56d675d4"
+    },
+    {
+      "path": "dist/integrated/startup-phase/native-screenshots/integrated-long-korean-form.png",
+      "bytes": 98723,
+      "sha256": "ed990604b13c38a9bb79f10a7d240c06642084c13b54499ec3e5a9a26a073e91"
+    },
+    {
+      "path": "dist/integrated/startup-phase/native-screenshots/integrated-native-tool-snapshot.png",
+      "bytes": 94031,
+      "sha256": "3e2b3ae01b36efac5e30558d3b01052624c7005d3a9af3cee5038cc2a402991a"
+    },
+    {
+      "path": "dist/integrated/startup-phase/native-screenshots/integrated-result-failed.png",
+      "bytes": 73597,
+      "sha256": "6f2b8d83b6de96af78a62983691d85647eaf353b0b5bc64da333c75c092a24f6"
+    },
+    {
+      "path": "dist/integrated/startup-phase/native-screenshots/integrated-result-partial.png",
+      "bytes": 73171,
+      "sha256": "c42a0f3f9168525b82a3a9e65deb63b26e7f26948da212f1b2419681fb4efeca"
+    },
+    {
+      "path": "dist/integrated/startup-phase/native-screenshots/integrated-result-unknown.png",
+      "bytes": 76101,
+      "sha256": "7fe2f2661a48ebd15bc0fda9162df2667cdf3e0e95a7ced4a1b39bc84fe3caf1"
+    },
+    {
+      "path": "dist/integrated/startup-phase/native-screenshots/integrated-running-animation.png",
+      "bytes": 82268,
+      "sha256": "e236235dcfc2abf7382cf2fb4d36fcd90178d1eaa93faf48554c401b8ccb33db"
+    },
+    {
+      "path": "dist/integrated/startup-phase/native-screenshots/integrated-running-reduced-motion.png",
+      "bytes": 82061,
+      "sha256": "2af89d72a377599d79ecb34ad3ae607c1e032076869b61d93321b8bb5b61d712"
+    }
+  ],
+  "boundaries": [
+    "These are actual pinned Svelte/Tiptap Native fixture checks with a temporary workflow service and synthetic auth/models; not another full Native CLI run or company integration.",
+    "Local Chrome153 passes verify compatibility, not final CI Chrome154 or the unobserved OS startup-delay cause."
+  ],
+  "next_validation": "One automatic CI run for this changed startup contract; preserve any fail/cancel/skip and require all original Native business checks."
+}

@@ -1,0 +1,27 @@
+test_closed_run_remains_readonly_and_uses_its_saved_completion (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_closed_run_remains_readonly_and_uses_its_saved_completion) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 180.36091799876885, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_eight_declared_native_input_types_survive_visible_save_and_reload (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_eight_declared_native_input_types_survive_visible_save_and_reload) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 154.66743399883853, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_long_form_scrolling_keeps_heading_and_unsaved_values (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_long_form_scrolling_keeps_heading_and_unsaved_values) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 151.76477899876772, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_retry_keeps_original_attempt_input_and_immutable_published_version (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_retry_keeps_original_attempt_input_and_immutable_published_version) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 238.67363200042746, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_run_and_workflow_setting_forms_preserve_zero_false_and_empty (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_run_and_workflow_setting_forms_preserve_zero_false_and_empty) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 153.60605100067914, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_human_confirmation_never_calls_external_tool (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_human_confirmation_never_calls_external_tool) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 170.51015200195252, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_partial_failed_unknown_stay_distinct_and_never_auto_retry (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_partial_failed_unknown_stay_distinct_and_never_auto_retry) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 163.3302789996378, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_real_tool_call_snapshots_inputs_but_does_not_confirm_business_completion (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_real_tool_call_snapshots_inputs_but_does_not_confirm_business_completion) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 192.7529519998643, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_required_input_blocks_before_any_transport_or_attempt (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_required_input_blocks_before_any_transport_or_attempt) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 177.86013200020534, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_revoked_tool_access_blocks_a_new_attempt_before_transport (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_revoked_tool_access_blocks_a_new_attempt_before_transport) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 190.46454199997243, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_running_transport_is_visible_and_cannot_double_execute (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_running_transport_is_visible_and_cannot_double_execute) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 157.29485399788246, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 23.065s
+
+OK
