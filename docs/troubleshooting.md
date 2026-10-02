@@ -318,7 +318,7 @@ Confluence `get_page`와 `query_knowledge_files`는 별도 경로입니다. 저�
 
 작은 POC의 최소 보완:
 
-1. A의 **Workspace → 모델 → EES 통합 Assistant 편집 → System Prompt**에서 기존 내용 끝에 [현재 POC의 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션만 추가하고 **저장 및 업데이트**합니다. 같은 섹션이 있으면 중복 추가하지 않습니다. 이번 부분 적용을 과거 Prompt·정책 개정 전체의 배포 완료로 기록하지 않습니다.
+1. A의 **Workspace → 모델 → EES 통합 Assistant 편집 → System Prompt**에서 기존 내용 끝에 [현재 POC의 자료 조회 경로](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로) 섹션만 추가하고 **저장 및 업데이트**합니다. 같은 섹션이 있으면 중복 추가하지 않습니다. 이번 부분 적용을 과거 Prompt·정책 개정 전체의 배포 완료로 기록하지 않습니다.
 2. 기존 Knowledge와 Skill 연결은 유지합니다. v0.11.3의 내장 도구 UI는 `Knowledge Base` 그룹을 제어하며, 전체 OFF 시 목록·파일명 검색·본문 읽기도 함께 제거됩니다. `query_knowledge_files`만 끄는 개별 UI 토글은 제공하지 않습니다. [도구 주입 조건](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/tools.py#L538-L643), [내장 도구 UI](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/BuiltinTools.svelte)
 3. 새 대화에서 기존 합성 공통 Confluence 문서의 ID로 조회·요약·링크를 요청합니다. 다른 새 대화에서는 `POC-POL-001에서 운영 DB 직접 조회가 허용되는지 문서 ID·버전·관련 절을 근거로 알려줘.`라고 질문합니다. 전자는 Confluence Tool, 후자는 필요한 목록/파일명 검색과 `view_knowledge_file`로 정상 답변하는지, 임베딩 검색 오류가 재발하는지 확인합니다. 이는 새 Prompt 부분 적용의 C04·P02 회귀 확인이며 완료된 권한·쓰기·injection 시험 전체를 반복하는 절차가 아닙니다.
 

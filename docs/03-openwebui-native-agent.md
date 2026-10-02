@@ -1,5 +1,7 @@
 # 03. Open WebUI Native 통합 Assistant
 
+현재 제품 기준은 [2026-10-02 통합 EES Work](#integrated-work-install-20261002)다. 아래 날짜별 시연·ApplyDemo·전문 Assistant·사전 Skill 구성은 당시 이력이다. 새 설치/업데이트에서 이 콘텐츠를 등록하지 않으며 옛 명령을 반복하지 않는다. 실제 도구/Native 관리/프로그램 적용과 복구 경로는 유지한다.
+
 > 문서 역할: Native Assistant 기준선 구성·확장 원칙
 >
 > 범위: 합성 정보만 사용하며, 실제 사내 정책·URL·모델 ID·업무 데이터는 등록하지 않는다.
@@ -10,7 +12,7 @@
 
 | 할 일 | 안내 |
 |---|---|
-| 시연 자산·첫 화면 제안 적용 | [ApplyDemo](#demo-assets-deployment)·[소개와 제안](#first-use-entry) |
+| 새 EES Work 후보·자산 정리 경계 | [통합 설치·복구](#integrated-work-install-20261002) |
 | 프로그램·래퍼 업데이트 | [Upgrade](#ees-wrapper-upgrade) |
 | 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
 | 실패 기록·등록 위치 확인 | [실패 판단](#ees-update-failure-causes)·[사내 기록](#ees-local-state) |
@@ -133,7 +135,7 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 
 ### WO 시연 목업
 
-사용자가 정한 순서는 **시연용 목업 → 시연 피드백 → 운영용 목업 → 실제 EMS 구현**입니다. 기존 Open WebUI 대화창과 우측 WO 패널의 초기 시연은 사내에서 동작한다는 사용자 보고를 받았습니다. v0.1.3의 업무 패널 열기/닫기와 기능 정상 동작도 사용자 보고로 확인했습니다. 이후 설비 조회 결과의 `panel.error.code=panel_error` 보고를 받았습니다. v0.1.5는 패널 실행 예외의 짧은 진단값과 첫 화면 생성 실패 후 재시도를 보완했으며, 갱신 안내 후 패널이 표시된다는 사용자 보고를 받았습니다. 실제 최초 예외 원인·장기 재발 여부는 아직 미확정입니다. 후속 v0.1.6은 크기 조절 바의 마우스 클릭·드래그 테두리를 숨기고 키보드 포커스 표시를 유지합니다. 실제 업무 항목·권한 세분화는 후속으로 둡니다. 첫 [단독 HTML 목업](../agent-pack/skills/ems-work-order/references/wo-mockup.html)은 화면 배치 참고로 보존하며, WebUI에는 기존 **EES WO Demo** Tool 한 개를 계속 사용합니다.
+사용자가 정한 순서는 **시연용 목업 → 시연 피드백 → 운영용 목업 → 실제 EMS 구현**입니다. 기존 Open WebUI 대화창과 우측 WO 패널의 초기 시연은 사내에서 동작한다는 사용자 보고를 받았습니다. v0.1.3의 업무 패널 열기/닫기와 기능 정상 동작도 사용자 보고로 확인했습니다. 이후 설비 조회 결과의 `panel.error.code=panel_error` 보고를 받았습니다. v0.1.5는 패널 실행 예외의 짧은 진단값과 첫 화면 생성 실패 후 재시도를 보완했으며, 갱신 안내 후 패널이 표시된다는 사용자 보고를 받았습니다. 실제 최초 예외 원인·장기 재발 여부는 아직 미확정입니다. 후속 v0.1.6은 크기 조절 바의 마우스 클릭·드래그 테두리를 숨기고 키보드 포커스 표시를 유지합니다. 실제 업무 항목·권한 세분화는 후속으로 둡니다. 첫 [단독 HTML 목업](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/skills/ems-work-order/references/wo-mockup.html)은 화면 배치 참고로 보존하며, WebUI에는 기존 **EES WO Demo** Tool 한 개를 계속 사용합니다.
 
 - 채팅으로 WO 작성을 요청하면 AI가 설비를 찾고 대화 내용을 바탕으로 **설비·작업 제목·작업 구분·우선순위·증상 및 요청 내용**을 채워 첫 초안을 보여줍니다. 후보가 여러 개일 때만 설비를 선택하게 합니다. 화면에서 설비를 직접 클릭한 경우에는 “선택한 설비로 초안을 작성해줘”라고 이어서 요청하며, 선택만으로 AI가 자동 호출되지는 않습니다.
 - 화면에서 직접 입력하거나 기존 채팅으로 AI에게 수정 요청을 할 수 있습니다. `wo_demo_view`가 현재 화면과 변경 번호를 읽고 `wo_demo_update`가 요청한 항목만 바꿉니다. 그사이 사용자 입력이 바뀌면 이전 변경 번호의 수정을 거부하고 최신 값을 다시 읽도록 합니다. AI가 만든 초안도 사람이 확인·수정한 뒤 최종 버튼으로 결정합니다.
@@ -144,11 +146,11 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 - 해당 대화에서 패널을 처음 연 뒤에는 채팅 오른쪽 위 **‘제어’ 옆의 업무 패널 아이콘**으로 AI 호출 없이 접고 펼칩니다. 마우스를 올리면 ‘업무 패널 열기/닫기’ 안내가 보입니다. 같은 브라우저 탭에서 다른 대화로 이동했다 돌아오면 그 대화의 검색 조건·선택 설비·WO 내용·확인/완료 상태·너비와 열림/닫힘 상태를 복원합니다. 처음 방문한 다른 대화에 이전 대화의 패널을 표시하지 않습니다.
 - 작성 내용은 현재 브라우저 탭의 메모리에만 있습니다. 새로고침·탭 종료·로그아웃에서는 초기화하며 영구 저장 기능은 아닙니다. 처음 패널을 열지 않은 대화에서는 제안 질문이나 설비 조회 요청으로 시작합니다. 일반 대화에서 사용하며 임시 대화·노트에는 붙이지 않습니다.
 
-구현은 [wo_demo_tool.py](../agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)의 고정된 화면 코드와 Open WebUI 0.11.3의 [공식 execute 이벤트](https://docs.openwebui.com/features/extensibility/plugin/development/events/#execute-works-with-both-__event_call__-and-__event_emitter__)를 사용합니다. 우측 패널을 붙이는 위치는 [0.11.3 Chat 화면 구조](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte)에 의존하며 공식 업무 패널 등록 API가 아닙니다. 모델이 실행할 JavaScript를 작성하지 않고 정해진 입력값만 전달합니다. 프런트엔드 재빌드·재설치·추가 서버·CDN은 필요하지 않습니다. 사외 검사와 실제 사내 WebUI·모델 동작 확인은 [검증 기록](../evals/scenarios.md#wo-mockup)에서 구분합니다.
+구현은 [wo_demo_tool.py](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)의 고정된 화면 코드와 Open WebUI 0.11.3의 [공식 execute 이벤트](https://docs.openwebui.com/features/extensibility/plugin/development/events/#execute-works-with-both-__event_call__-and-__event_emitter__)를 사용합니다. 우측 패널을 붙이는 위치는 [0.11.3 Chat 화면 구조](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte)에 의존하며 공식 업무 패널 등록 API가 아닙니다. 모델이 실행할 JavaScript를 작성하지 않고 정해진 입력값만 전달합니다. 프런트엔드 재빌드·재설치·추가 서버·CDN은 필요하지 않습니다. 사외 검사와 실제 사내 WebUI·모델 동작 확인은 [검증 기록](../evals/scenarios.md#wo-mockup)에서 구분합니다.
 
 **현재 기존 사용자 갱신:** PR #19는 main에 병합됐으며, 현재 v0.1.8은 [ApplyDemo](#demo-assets-deployment)가 이미 EES에 연결된 공식 v0.1.6/v0.1.7 등록본을 같은 ID로 갱신합니다. 시연 자산 v0.2.1부터는 고정 WebUI 편집기가 자동 정렬해 저장한 공식 등록본도 지원합니다. 아래 수동 복사를 반복하지 않습니다. 새 통합 업무 패널의 공통 코드는 ApplyDemo가 포함하며 초기 등록과 현장 수정 여부에 따라 지원되지 않는 원본이면 먼저 대조합니다. 마지막 사내 확인 버전과 결과는 [평가 기록](../evals/scenarios.md#wo-mockup)을 따릅니다.
 
-**처음 설치할 때만:** 최신 main의 [Tool 원본](../agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)을 EES WO Demo로 등록해 EES에 연결합니다. 같은 main의 [공통 Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)에서 `WO 시연 도구가 연결된 경우` 절을 기존 EES 지침 끝에 한 번 추가하고, [시작 질문 안내](#first-use-entry)를 따릅니다. 이어 ApplyDemo로 공통 패널 코드와 대표 시연 질문 세 개를 함께 반영합니다. 이미 등록된 사용자의 Tool을 삭제·재생성하지 않습니다.
+**처음 설치할 때만:** 최신 main의 [Tool 원본](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py)을 EES WO Demo로 등록해 EES에 연결합니다. 같은 main의 [공통 Prompt](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/system-prompts/ees-integrated-assistant.md)에서 `WO 시연 도구가 연결된 경우` 절을 기존 EES 지침 끝에 한 번 추가하고, [시작 질문 안내](#first-use-entry)를 따릅니다. 이어 ApplyDemo로 공통 패널 코드와 대표 시연 질문 세 개를 함께 반영합니다. 이미 등록된 사용자의 Tool을 삭제·재생성하지 않습니다.
 
 **아래는 2026-09-09 v0.1.6 수동 적용 이력입니다.** 당시에는 1·2번으로 기존 Tool 코드만 교체하고 WO 지침·제안 JSON은 변경하지 않아 3·4번을 반복하지 않았습니다. 현재 갱신 명령으로 사용하지 않습니다. 패널 오류가 재발한 경우에만 아래의 짧은 진단값을 확인합니다.
 
@@ -172,7 +174,7 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
    ```
 
 2. **이미 시연한 사용자:** Workspace → Tools의 기존 **EES WO Demo**를 편집해 코드 전체를 교체하고 `version: 0.1.6`를 확인해 저장합니다. 삭제·재생성하지 않으며 기존 모델 연결·설정은 보존합니다. **처음 설치하는 경우에만** 새 EES WO Demo를 만들고 사용 중인 EES 모델의 Tools에 추가합니다. 다른 Tool 선택은 유지하며 새 Skill은 등록하지 않습니다.
-3. 다음 블록으로 [공통 Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)의 **WO 시연 도구가 연결된 경우** 절을 복사합니다. **기존 사용자는 같은 제목의 이전 절만 교체**하고, 처음 설치하는 경우에만 현재 프롬프트 끝에 한 번 추가합니다. 이전 절을 중복 추가하거나 프롬프트 전체·사용자 추가 지침을 교체하지 않습니다.
+3. 다음 블록으로 [공통 Prompt](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/system-prompts/ees-integrated-assistant.md)의 **WO 시연 도구가 연결된 경우** 절을 복사합니다. **기존 사용자는 같은 제목의 이전 절만 교체**하고, 처음 설치하는 경우에만 현재 프롬프트 끝에 한 번 추가합니다. 이전 절을 중복 추가하거나 프롬프트 전체·사용자 추가 지침을 교체하지 않습니다.
 
    ```powershell
    & {
@@ -213,7 +215,7 @@ Open WebUI **0.11.3은 Assistant 연결과 각 자산의 사용 권한을 별도
 | EES Jira Read | [jira_tool.py](../agent-pack/skills/jira-read/scripts/jira_tool.py) |
 | EES GitHub Read | [github_tool.py](../agent-pack/skills/github-read/scripts/github_tool.py) |
 
-3. **Workspace → Models → 기존 EES 통합 Assistant**에서 [System Prompt 원본](../agent-pack/system-prompts/ees-integrated-assistant.md)의 변경된 공통 지침을 반영하고 저장·업데이트합니다. 별도로 추가한 사용자 지침은 보존하며 기존 모델·Skill·Knowledge 연결을 유지합니다. 이전 카드 중복 억제·화면 필터·질문 버튼 안내는 새 지침으로 바뀝니다.
+3. **Workspace → Models → 기존 EES 통합 Assistant**에서 [System Prompt 원본](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/system-prompts/ees-integrated-assistant.md)의 변경된 공통 지침을 반영하고 저장·업데이트합니다. 별도로 추가한 사용자 지침은 보존하며 기존 모델·Skill·Knowledge 연결을 유지합니다. 이전 카드 중복 억제·화면 필터·질문 버튼 안내는 새 지침으로 바뀝니다.
 4. 새 일반 대화에서 평소의 Confluence 검색·Jira 현황·GitHub PR 조회를 한 번씩 요청해 **카드 없이 일반 답변과 원문 링크가 나오는지** 확인합니다. 저장 완료와 조회/출력 결과를 1~2줄로 보고하며 전체 로그·파일·사진이나 이전 인증 전수 검사를 요구하지 않습니다.
 
 과거 대화에 저장된 카드는 당시 출력이므로 남을 수 있습니다. 이번 변경은 새 조회의 출력에 적용하며 기존 대화·DB를 지우거나 다시 작성하지 않습니다. Git 구현·검증과 사내 Tool/Prompt 반영·새 출력 확인은 [STATUS](STATUS.md)에 나누어 기록합니다.
@@ -423,7 +425,7 @@ EES가 시연 분석 계획을 먼저 등록하고 자동 실행합니다. **업
 
 화면 기록은 **현재 브라우저 탭의 메모리**에만 유지합니다. 같은 탭에서 대화를 이동했다 돌아올 때 확보한 기록을 다시 볼 수 있지만, 다른 대화를 보고 있는 동안 WebUI가 전달하지 않은 이벤트는 복원할 수 없습니다. 이때 미완료 기록의 최신 상태는 미확인으로 표시합니다. 새로고침·탭 종료 뒤 패널 기록의 복원은 이번 범위에 없습니다. 채팅의 기존 결과는 그대로 남습니다. 같은 사용자가 같은 대화를 여러 탭에서 열면 각 탭에 이벤트가 표시될 수 있습니다.
 
-구현은 [분석 화면](../agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js), [공통 버튼·화면 전환](../agent-pack/skills/cross-system-analysis/ui/work-panel.js)과 기존 Tool의 부모 대화 `execute` 이벤트를 사용합니다. 패널 배치는 고정 Open WebUI 0.11.3의 화면 구조에 의존하며 공식 패널 등록 API가 아닙니다. 화면 코드·스타일은 고정하고 질문·회신·조회 결과는 텍스트로 넣습니다. 하위 실행의 메모리·DB 격리, 현재 사용자 권한, 호출/조회 한도와 계산 정의는 유지합니다. [검증 범위와 한계](../evals/scenarios.md#cross-system-plan-work-panel).
+구현은 [분석 화면](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js), [공통 버튼·화면 전환](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/skills/cross-system-analysis/ui/work-panel.js)과 기존 Tool의 부모 대화 `execute` 이벤트를 사용합니다. 패널 배치는 고정 Open WebUI 0.11.3의 화면 구조에 의존하며 공식 패널 등록 API가 아닙니다. 화면 코드·스타일은 고정하고 질문·회신·조회 결과는 텍스트로 넣습니다. 하위 실행의 메모리·DB 격리, 현재 사용자 권한, 호출/조회 한도와 계산 정의는 유지합니다. [검증 범위와 한계](../evals/scenarios.md#cross-system-plan-work-panel).
 
 이 업데이트는 아래 `ApplyDemo`로 적용합니다. Tool 원본 파일만 UI에 복사하면 비어 있는 화면 코드 삽입 위치가 채워지지 않아 협업 패널이 포함되지 않습니다. 별도 프롬프트·도구 복사 작업은 필요하지 않습니다.
 
@@ -444,9 +446,9 @@ v0.1.3의 회신 중심 표현을 거쳐, 이번에는 사용자가 확인한 �
 | 업무 절차 Tool | `ees_workflow`: 현재 진행 건·공장별 탐색·실행 이력 조회와 UI와 같은 액션. [업무 프로그램 적용](#ees-work-demo) 후 기존 EES preset에 연결 |
 | 업무 패널 화면 | 공통 버튼과 분석 화면 코드를 두 Tool에 포함해 독립 실행 가능한 등록 소스로 구성. 별도 프런트엔드 빌드·서버 재시작 없음 |
 | 기존 EES WO Demo | EES에 이미 연결된 공식 v0.1.6/v0.1.7 또는 현재 Git 원본의 최초 수동 등록본만 같은 ID로 갱신. 고정 편집기의 검증된 자동 정렬본도 포함함. 이름·권한·설정과 기존 연결을 보존하며 새 WO 항목은 생성하지 않음. 지원 원본과 다른 현장 수정은 덮어쓰지 않고 적용 전 중단 |
-| 모델별 시작 질문 | [전문 지침과 EES 관리 구역](../agent-pack/system-prompts/ees-orchestration-demo.md), EMS/APC/FDC 지침을 모델 필드에 등록. 별도 Workspace Prompts·Skill 등록 없음 |
+| 모델별 시작 질문 | [전문 지침과 EES 관리 구역](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/system-prompts/ees-orchestration-demo.md), EMS/APC/FDC 지침을 모델 필드에 등록. 별도 Workspace Prompts·Skill 등록 없음 |
 
-실행 코드는 [전문 호출](../agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py)과 [합성 자료](../agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py), 운영 코드는 [ApplyDemo 진입점](../scripts/ees_apply_demo.py)과 [자산 병합](../scripts/ees_demo_assets.py)에 있습니다. 공유 자료의 도메인은 서버가 주입하는 `__metadata__.model_id`로 정하며 LLM이 제공한 모델 이름이나 Task Model의 `__model__`을 사용하지 않습니다. 전문 모델은 자기 자료만 조회하고 EES는 조건별 비교만 수행합니다. 모델 ID 검사는 기존 사용자·Tool 접근권한 검사를 대신하지 않습니다.
+실행 코드는 [전문 호출](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py)과 [합성 자료](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py), 운영 코드는 [ApplyDemo 진입점](../scripts/ees_apply_demo.py)과 [자산 병합](../scripts/ees_demo_assets.py)에 있습니다. 공유 자료의 도메인은 서버가 주입하는 `__metadata__.model_id`로 정하며 LLM이 제공한 모델 이름이나 Task Model의 `__model__`을 사용하지 않습니다. 전문 모델은 자기 자료만 조회하고 EES는 조건별 비교만 수행합니다. 모델 ID 검사는 기존 사용자·Tool 접근권한 검사를 대신하지 않습니다.
 
 **자산만 갱신할 때:** 프로그램이 이미 [현재 버전](../versions.md)이면, 기존 서버와 배포 환경 등록을 유지한 상태에서 변경의 main 반영·해당 CI 성공 뒤 아래 블록을 사용합니다. `Update`로 운영 스크립트의 보완을 받고 `ApplyDemo`로 지정 자산을 갱신합니다. **ees.9의 조건부 자산 적용을 처음 도입할 때는 아래 자산 전용 블록 대신 [Update → Upgrade → ApplyDemo](#conditional-assets)를 따릅니다.** 공장별 업무 기능을 처음 적용할 때도 [프로그램과 자산을 함께 갱신하는 순서](#ees-work-demo)를 사용합니다.
 
@@ -750,7 +752,7 @@ flowchart LR
 
 `Full Context`를 설정해도 Native에서 모델에 연결한 Knowledge 본문이 자동 주입된다고 가정하지 않습니다. [0.11.3 처리 코드](https://github.com/open-webui/open-webui/blob/v0.11.3/backend/open_webui/utils/middleware.py)는 모델 Knowledge 자동 주입과 Native 내장 조회 경로를 구분합니다. 실제 Knowledge 조회 Tool 호출과 답변 근거를 확인합니다.
 
-임베딩 검색이 아직 준비되지 않은 작은 합성 Knowledge는 [Prompt의 자료 조회 경로](../agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로)에 따라 목록·파일명 검색으로 파일 ID를 찾고 본문을 읽습니다. `query_knowledge_files`에서 임베딩 오류가 나면 [Native 지식 검색 진단](troubleshooting.md#native-knowledge-embedding)을 따릅니다. Knowledge 전체를 끄면 기존 정책 본문 조회도 영향을 받으므로 임베딩 오류 회피를 위해 일괄 비활성화하지 않습니다.
+임베딩 검색이 아직 준비되지 않은 작은 합성 Knowledge는 [Prompt의 자료 조회 경로](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/system-prompts/ees-integrated-assistant.md#현재-poc의-자료-조회-경로)에 따라 목록·파일명 검색으로 파일 ID를 찾고 본문을 읽습니다. `query_knowledge_files`에서 임베딩 오류가 나면 [Native 지식 검색 진단](troubleshooting.md#native-knowledge-embedding)을 따릅니다. Knowledge 전체를 끄면 기존 정책 본문 조회도 영향을 받으므로 임베딩 오류 회피를 위해 일괄 비활성화하지 않습니다.
 
 ## 3. Workspace Model 생성
 
@@ -800,7 +802,7 @@ Memory는 모델 편집 화면의 **Capabilities → Memory**와 **Builtin Tools
 
 ### 기존 Assistant의 팀 시연용 첫 화면 — 적용 준비
 
-사용자가 여섯 목표의 본격 구현 전에 팀원 시연을 위한 이름·로고·빠른 제안과 배포 방식을 먼저 준비하자고 요청했습니다. [이전 보류 결정](../evals/scenarios.md#onboarding-deferred)은 당시 이력으로 보존합니다. 현재 [제안 JSON](../agent-pack/ees-prompt-suggestions.json)은 **생산 손실 분석·점검 WO 초안 작성·Jira/GitHub/Confluence 업무 현황의 대표 질문 세 개**로 구성합니다. ApplyDemo는 이 파일을 직접 읽으며, 별도의 분석 질문 목록을 중복 관리하지 않습니다. 범용 Assistant의 역할·최종 기능 목록을 제한하지 않으며 준비·실제 UI 저장·팀원 시연 결과는 구분합니다.
+사용자가 여섯 목표의 본격 구현 전에 팀원 시연을 위한 이름·로고·빠른 제안과 배포 방식을 먼저 준비하자고 요청했습니다. [이전 보류 결정](../evals/scenarios.md#onboarding-deferred)은 당시 이력으로 보존합니다. 현재 [제안 JSON](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/ees-prompt-suggestions.json)은 **생산 손실 분석·점검 WO 초안 작성·Jira/GitHub/Confluence 업무 현황의 대표 질문 세 개**로 구성합니다. ApplyDemo는 이 파일을 직접 읽으며, 별도의 분석 질문 목록을 중복 관리하지 않습니다. 범용 Assistant의 역할·최종 기능 목록을 제한하지 않으며 준비·실제 UI 저장·팀원 시연 결과는 구분합니다.
 
 **v0.2.4 적용 뒤 제안이 그대로인 경우:** 이전 래퍼는 화면이 읽지 않는 `meta.suggestionPrompts`에 저장했습니다. v0.2.5는 실제 편집기·메인 화면이 사용하는 `meta.suggestion_prompts`를 갱신하고 기존 적용 기록과 관리 질문을 호환 처리합니다. 새 수정본의 main CI 성공 뒤 아래 ApplyDemo를 한 번 사용합니다. 이전 버전 반복 실행·서버 재시작·수동 모델/질문 삭제는 해결 절차가 아닙니다. [사용자 보고·원인·검증](../evals/scenarios.md#starter-ui-field-fix).
 
@@ -834,12 +836,12 @@ Set-Location "$env:USERPROFILE\team-agent-poc"
 궁금한 것을 묻고, 글을 쓰거나 업무 내용을 정리해 보세요. 연결된 문서와 이슈도 내 권한 안에서 찾아볼 수 있습니다.
 ```
 
-3. **프롬프트(Prompts) → 기본값(Default)을 눌러 사용자 정의(Custom) → 가져오기(Import)**에서 [ees-prompt-suggestions.json](../agent-pack/ees-prompt-suggestions.json)을 선택합니다. 사용자 정의 목록은 해당 EES 모델의 전역 기본 제안을 대체하므로 전역 영어 목록을 삭제할 필요가 없습니다. 새 설치의 사용자 정의 안에 남은 기본 예시·처음 전환할 때 생긴 빈 항목은 정리해 대표 시연 제안 세 개를 사용합니다. 별도로 작성한 사용자 질문은 보존합니다. 가져오기는 기존 목록에 **추가**하므로 같은 예시가 이미 있으면 반복하지 않습니다. 파일 전달이 어려우면 같은 JSON의 `title` 두 값을 **Title / Subtitle**, `content`를 **Content**에 입력해 항목을 추가할 수 있습니다.
+3. **프롬프트(Prompts) → 기본값(Default)을 눌러 사용자 정의(Custom) → 가져오기(Import)**에서 [ees-prompt-suggestions.json](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/ees-prompt-suggestions.json)을 선택합니다. 사용자 정의 목록은 해당 EES 모델의 전역 기본 제안을 대체하므로 전역 영어 목록을 삭제할 필요가 없습니다. 새 설치의 사용자 정의 안에 남은 기본 예시·처음 전환할 때 생긴 빈 항목은 정리해 대표 시연 제안 세 개를 사용합니다. 별도로 작성한 사용자 질문은 보존합니다. 가져오기는 기존 목록에 **추가**하므로 같은 예시가 이미 있으면 반복하지 않습니다. 파일 전달이 어려우면 같은 JSON의 `title` 두 값을 **Title / Subtitle**, `content`를 **Content**에 입력해 항목을 추가할 수 있습니다.
 4. 저장 및 업데이트 후 새로고침하고 **폴더 밖의 새 일반 대화**에서 Assistant를 선택합니다. 소개와 예시 질문을 확인합니다. 예시 순서는 달라질 수 있고 입력 상태에 따라 일부만 보일 수 있습니다.
 
 이 JSON은 Prompts 목록만 가져오는 형식입니다. 모델 전체 Import나 System Prompt 입력란에 넣지 않습니다. 일반 팀원이 이 설정을 반복할 필요는 없습니다. 소개 문구는 두 줄로 줄여 보일 수 있으며, 예시 질문은 개인 설정에 따라 클릭 즉시 전송되거나 입력창에 채워집니다. 토큰이나 미치환된 placeholder를 예시에 넣지 않습니다.
 
-모델 설명과 질문 메타데이터는 대화 지침을 바꾸지 않습니다. Jira/GitHub 조회 지침은 기존 [System Prompt의 해당 절](../agent-pack/system-prompts/ees-integrated-assistant.md)에 포함되며 UI 저장·실제 흐름 확인 범위는 [STATUS](STATUS.md)를 따릅니다. 실제 질문에서 조회 선택·범위 안내가 어긋날 때 해당 절의 누락 여부만 확인하며, 정상 동작 중인 지침을 첫 화면 변경 때문에 일괄 교체하지 않습니다.
+모델 설명과 질문 메타데이터는 대화 지침을 바꾸지 않습니다. Jira/GitHub 조회 지침은 기존 [System Prompt의 해당 절](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/system-prompts/ees-integrated-assistant.md)에 포함되며 UI 저장·실제 흐름 확인 범위는 [STATUS](STATUS.md)를 따릅니다. 실제 질문에서 조회 선택·범위 안내가 어긋날 때 해당 절의 누락 여부만 확인하며, 정상 동작 중인 지침을 첫 화면 변경 때문에 일괄 교체하지 않습니다.
 
 근거: [v0.11.3 ModelEditor](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/ModelEditor.svelte), [Prompts 편집·가져오기](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/workspace/Models/PromptSuggestions.svelte), [새 대화 화면](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Placeholder.svelte), [예시 선택 처리](https://github.com/open-webui/open-webui/blob/v0.11.3/src/lib/components/chat/Chat.svelte).
 
@@ -1897,3 +1899,37 @@ $setup = @{
 ## 다음 단계 Gate
 
 관리자 워크플로의 요구와 대표 흐름은 현재 계획에서 설계합니다. 기존 Native·Skill·작은 업무 Tool로 필요한 제어를 충족하기 어렵고 복잡한 병렬 분석, 장시간 상태 유지, 독립 검증 등이 요구될 때 Hermes 또는 외부 Agent를 비교합니다. 외부 엔진 선택을 업무 흐름 설계의 선행조건으로 두지 않으며 기존 Hermes 환경은 보존합니다.
+
+
+<a id="integrated-work-install-20261002"></a>
+
+## 2026-10-02 통합 EES Work 후보의 적용·복구 경계
+
+새 제품 버전은 `0.11.3+ees.13`, Native 기반은 고정 `0.11.3`과 Python 3.11이다. 후보의 정확한 source commit·wheel/ZIP/manifest 해시와 검증 상태는 [현재 평가](../evals/v4-ui-20260930.md#integrated-work-evidence-20261002)에 기록한다. 정식 배포 또는 사내 성공 선언이 아니다. 기존 설치 경로의 검증 호환을 위해 묶음 파일명은 `EES-demo-<source SHA>.zip`을 유지하지만 폐기 데모 콘텐츠는 포함하지 않는다.
+
+### 적용 전에 확인할 것
+
+- 검토한 후보와 실제 적용할 source commit·payload 해시가 같은지 확인한다. 진행 중 draft/미검증 후보를 운영용으로 사용하지 않는다.
+- Native DB·첨부·개인 설정·기존 `ees-work.sqlite3`·`WEBUI_SECRET_KEY`는 기존 위치와 값으로 보존한다. 프로그램 백업과 사용자 DB/첨부 백업을 구분한다.
+- ees.13은 같은 업무 DB에 필요한 `work_*` 테이블을 transaction 안에서 추가한다. 이전 catalog의 편집본/게시본·진행 기록과 Native DB는 초기화하지 않는다. 실패한 schema 준비는 되돌리며 손상된 DB를 빈 파일로 바꾸지 않는다.
+- 새 UI에서는 절차/설정/진행을 작성한다. 기존 시연은 실행 중지 상태로 기록 조회만 가능하다. 옛 자료를 새 실제 완료 결과로 변환하지 않는다.
+
+### 별도 사내 적용 승인 후 실행하는 절차
+
+현재 등록된 운영자 경로의 `Status`로 등록 Python·기동 신원·현재 프로그램을 확인한다. 후보 ZIP과 commit을 지정한 `Apply -CheckOnly`로 검증한다. 기존 [Apply/Restore 절차](#ees-wrapper-apply)를 따라 명시적 Stop → 자료 Backup → Apply → Start/health → Native 로그인·기존 대화·새 빈 상태/작성 기능을 확인한다. 확인되지 않은 Stop/Backup을 성공으로 간주하거나 서버를 병렬로 기동하지 않는다. `WEBUI_SECRET_KEY`와 실제 DATA_DIR를 새 값으로 재등록하지 않는다.
+
+`Update`는 래퍼 Git 원본 변경, `Apply`는 검증된 프로그램 바이트 변경이며 실제 자산 삭제와 다르다. 폐기한 `ApplyDemo`는 안내와 함께 종료한다. 업데이트가 전문 preset/스킬/시연 Tool을 되살리거나 예전 ApplyDemo를 성공 조건으로 요구하지 않도록 검증한다. 완료된 과거 사내 복구를 이 후보 준비 때문에 반복하지 않는다.
+
+### 자산 정리 미리보기와 데이터 복구
+
+실제 관리자는 기존 Native 토큰/개인 설정과 TLS 검증을 사용하는 `scripts/ees_demo_assets.py`의 `preview`, `apply`, `restore`를 사용한다. `--config`는 기존 등록 설정, `--kind`/`--id`는 확인한 관리 항목, `--baseline-sha256`은 과거 정상 등록/백업으로 확인한 전체 상태 지문이다. 단순히 현재 값을 읽어 정상 관리 원본으로 간주하지 않는다.
+
+`preview` 결과를 사내 비공개 `--plan` 파일에 저장하고 대상·참조·소유자·변경 여부를 검토한다. `apply`는 `--approve-plan-sha256`과 `--request-id`로 동일 계획을 명시하고 현재 지문을 다시 검증한다. 실제 삭제 전에 서버 비공개 백업을 작성한다. 출처 불명/사용자 수정/참조 존재/변경 충돌은 자동 삭제하지 않으며 임의 ID 목록을 확장하지 않는다. `restore`는 확인한 백업 지문으로 원래 ID를 복구하되 현재 다른 항목을 덮어쓰지 않는다. 계획·백업·PAT·등록 원문을 Git이나 외부 증거로 내보내지 않는다.
+
+기존 기반 모델의 시연 Prompt 관리 구역, 수동 WO/Skill 등 식별되지 않은 항목은 현재 자동 삭제 대상이 아니다. 사내 목록과 사용자 수정 여부를 별도로 확인하고 범위를 승인해야 한다.
+
+### 프로그램 복원과 호환
+
+프로그램 장애 시 기존 `Restore`로 검증된 직전 프로그램을 복원하고 Start/health를 확인한다. ees.12 이하 필수 파일 목록은 당시 버전대로 동결되어 있다. 구프로그램으로 돌아가도 새 업무 DB·게시본·실행 시도가 자동 삭제되거나 역변환되지 않는다. 새 `work_*` 기록은 구프로그램의 편집 대상으로 공개하지 않는다. 자산 삭제/Native DB 변경/첨부 손실의 복구는 해당 데이터 백업과 별도 절차가 필요하다. 프로그램 Restore 성공을 데이터 복구 성공으로 보고하지 않는다.
+
+실제 EES 요청 기능/인증/상태·효과 API, 현재 담당/공장 권한, 결과 송부/미승인 CR 정책, 달력/휴일 정보는 실제 적용 전에 필요한 설정/결정이다. 미설정 기능은 사유를 표시하고 차단하며 운영 DB/서버 직접 조작이나 시험용 성공 응답으로 우회하지 않는다.

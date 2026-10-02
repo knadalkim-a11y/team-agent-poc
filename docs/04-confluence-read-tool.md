@@ -357,7 +357,7 @@ v0.1.5부터 검색 API의 HTTP 400은 `invalid_query`로 반환하고, 검색�
 
 기존 `EES Confluence Read` 항목의 코드 전체를 검수한 커밋의 [confluence_tool.py](../agent-pack/skills/confluence-read/scripts/confluence_tool.py)로 교체합니다. 이름·ID·권한·관리자 설정·개인 PAT·기본 Space는 유지하고 기존 항목을 삭제하거나 새 Tool을 만들지 않습니다. Git 갱신과 사내 WebUI 반영은 별개이며 프로그램 Apply·서버 재시작·패키지 설치가 필요하지 않습니다.
 
-[System Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)의 조회 결과 안내도 이번 원본에 맞춥니다. 사용자 추가 지침은 보존합니다. 기존 Confluence Skill은 갱신 대상이 아닙니다. 조회 결과는 짧은 일반 답변·목록·표와 원문 링크로 안내하며 HTML 카드·입력 버튼·iframe을 생성하지 않습니다.
+[System Prompt](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/system-prompts/ees-integrated-assistant.md)의 조회 결과 안내도 이번 원본에 맞춥니다. 사용자 추가 지침은 보존합니다. 기존 Confluence Skill은 갱신 대상이 아닙니다. 조회 결과는 짧은 일반 답변·목록·표와 원문 링크로 안내하며 HTML 카드·입력 버튼·iframe을 생성하지 않습니다.
 
 검색은 제목·문서 ID·Space·버전·원문 URL과 검증된 검색어·조회 범위·시각을 반환합니다. 받은 건수는 전체 문서 수가 아니며 검색 결과에 본문은 없습니다. 같은 대화에서 `두 번째 문서 본문을 요약해줘`처럼 요청하면 실제 문서 ID로 본문을 조회합니다. 대상이 모호하면 제목/ID만 확인하고, 처음부터 요약 요청이면 필요한 본문까지 조회해 답합니다.
 

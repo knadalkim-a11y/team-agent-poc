@@ -1,21 +1,21 @@
 # 현재 작업 상태
 
-갱신일: 2026-10-01
+갱신일: 2026-10-02
 
 현재 작업·다음 작업·미해결·실제 적용 원본을 관리합니다. 이슈·검증 근거는 [평가 기록 찾아보기](../evals/scenarios.md#evidence-index), 환경은 [versions](../versions.md), 완료된 변경은 [CHANGELOG](../CHANGELOG.md)가 원본입니다.
 
 ## 현재 작업과 다음 작업
 
-- **현재 작업:** [Draft PR #73](https://github.com/knadalkim-a11y/team-agent-poc/pull/73)의 검토 head `d0b0aa338a47f73fac322bcb4426afc4381a68f6`에서 Step 0-B 잔여 CSS 시험·Windows 두 오류·한글 캡처를 보완한다. 기본 계약·환경·실제 Native 최소 왕복·Linux 가입/계정 전환은 검토 수용된 근거로 재사용한다. [이번 관측·검증](../evals/v4-ui-20260930.md#restructure-step0b-residual-20261001)에서 각 문제를 구분하며 전체 CI 통과로 보고하지 않는다. [7개 기본 계약](mockups/ees-work/TASK.md#restructure-step0b-20261001) 이후 상세 DB/API·공유 정책·서버 확정 방식은 계속 미확정이다.
-- **Git 기준:** main `55832bad328cdfb91c1c284749f7959dd664176c`, 이번 잔여 검증의 검토/시작 head `d0b0aa338a47f73fac322bcb4426afc4381a68f6`, branch `docs/ees-restructure-step0a-20261001`. 시작 시 검토 SHA 이후 원격 변경0·추적277파일의 blob 동일을 확인하고 끊어진 로컬 Git 연결만 복구했다. 이전 Step 0-B 시작 `d5b1df7`과 기본 계약/시험 보완의 구분 커밋은 보존한다. #72/#53은 적층하지 않는다.
-- **변경 경계:** 제품 코드·업무 저장 구조·Figma·데모 자산·사내 설정은 변경하지 않는다. 별도 서버/DB 엔진/브라우저 프레임워크를 추가하지 않는다. 환경·Native fixture·실제 제품·사내 연동 결과를 [이번 증거](../evals/v4-ui-20260930.md#restructure-step0b-evidence-20261001)에서 구분한다.
-- **검증 상태:** 저장소 단일 `.venv`(Python3.11.16)·공식 해시 wheel·Chrome153과 실제 제품 빌드를 준비했다. Native 가입/승인/권한·계정 전환·직접 영향 회귀8개 PASS(skip0), 실제 Native CLI/임시 DB에서 첫·기존·새 대화 물리 보내기3회·저장/리로드/격리 PASS. 모델은 loopback 합성이며 사내 호출 성공이 아니다. sidebar·V4 탐색 selector의 시험 결함을 보완했고 최초 CI 가입 탐색 실패의 정확한 원인은 미확정이다. [환경 재사용·명령·실패/최종 증거](../evals/v4-ui-20260930.md#restructure-step0b-evidence-20261001).
-- **잔여 검증:** CSS 독립 해시/바이트 검사31개 PASS, 실제 CI 가입/승인6개·계정 전환1개 PASS 및 한글 원본 PNG/Noto28 glyph 확인. Windows 고정 source의 CRLF 변환과 SQLite 연결 미닫힘을 보완해 최종 지정2개가 실제 Windows에서 PASS했고 원래 archive SHA·모든 source/member/RECORD/ZIP가 일치했다. 관련 로컬31개도 PASS다. Native 로컬 최초 고유12PASS/3FAIL/58미실행은 보존하고, 직접 호출부 보완 후 고유20개13PASS/7FAIL/53미실행을 따로 기록한다. 원격 부분 실행과 합산하지 않는다. [원인/가설/보완/재검·원본 증거](../evals/v4-ui-20260930.md#restructure-step0b-residual-20261001).
-- **원격 검사:** `cddf0eb`의 [완료 run36830859677](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/36830859677)은 cancelled, 전달물 skipped다. Windows 지정2개 PASS 뒤 shared suite에서 선행 FAIL/ERROR 없이10분 후 취소. Linux는 Native/CSS 등 PASS 뒤 demo 통합에서 성공4개·실패메서드12개 증거를 남기고 취소, 후속 C1/C2/C3는 원격 미실행이다. Windows artifact11147292820 실제10파일·Linux11147134607 실제44파일/실패12쌍의 digest와 한글 화면을 확인했다. 종료 후 발견한7개 닫힌 패널 대기·1개 구 select-value 기대의 직접 helper 누락만 보완했다. 추가 대표5개는 준비가드를 통과해1PASS/4FAIL이며 구 tree/집계/버튼 기대의 새 실패 지점에서 중단했다. 옛 A안 치수·Native 입력 저장 경계·과거 완료 집계 및 원격 나머지 미분류 실패는 유지한다. 후속 최종 helper 변경의 자동 결과는 [PR Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/73/checks)/본문에 정확한 head로 연결하며 기존 실패/취소를 덮어쓰지 않는다.
-- **사내 상태:** 미병합 [PR #72](https://github.com/knadalkim-a11y/team-agent-poc/pull/72)의 10-01 10:26 KST 사용자 복구·UI 일부 반영 보고가 최신 출처다. 완료한 복구/배포를 반복하지 않는다. 새 사내 접속·모델·PAT·DB·등록 목록 확인은 이번에 수행하지 않는다.
-- **다음 작업 하나:** 검토 담당이 이번 계약·검증과 남은 CI 차단을 검토하고 상세 설계·Step 1 구체 구현 계약을 전달하기를 기다린다. Step 1·자산 삭제·병합·Draft 해제·배포는 자동 시작하지 않는다.
+- **현재 작업:** [Draft PR #73](https://github.com/knadalkim-a11y/team-agent-poc/pull/73)에서 [2026-10-02 통합 계약](mockups/ees-work/TASK.md#integrated-work-20261002)에 따른 전체 구현·검수·배포 후보 준비를 연속 수행한다. 이전 Step별 중단/상세 설계 대기는 이번 지시로 대체됐다.
+- **Git 기준:** main `55832bad328cdfb91c1c284749f7959dd664176c`, 시작 head `b41e23917273e1d2d0ead1ddadfea75b2dda1e32`, branch `docs/ees-restructure-step0a-20261001`. 검토 SHA 이후 원격 변경0·착수 로컬 변경0을 확인했다. #72/#53은 혼합·병합·종료하지 않는다.
+- **구현 상태:** 기본 데모 제거/빈 상태/재등록 차단, 동일 Native 서버와 업무 SQLite의 초안·불변 게시본·진행·실행 시도·사람 판정·권한 매핑·예약·요청 확인, 새 공통 UI를 연결했다. 현재 실제 Native 브라우저 검수에서 발견한 결함과 독립 검토의 누락을 보완 중이다. 구현·합성 계약·실제 제품·사내 확인을 [평가 기록](../evals/v4-ui-20260930.md#integrated-work-evidence-20261002)에서 구분한다.
+- **현재 검증:** 저장소 Python3.11.16/고정 공식 wheel/Chrome153 환경을 복구했다. 실제 새 Native 앱은 빈 설치→절차 작성→저장→검사까지 확인했으며 게시 이후 종단간 완료는 아직 재검 중이다. 부분 통과를 최종 제품/CI 통과로 확대하지 않는다. 기존 CI run36833422478의 취소 이력은 보존한다.
+- **외부 경계:** 실제 EES 기능/인증/상태 조회, 결과 송부 채널, 미승인 CR 처리와 휴일 정보가 없다. 해당 행동은 사유를 표시하고 차단한다. 독립 기능의 구현 누락은 외부 미연결로 분류하지 않는다. Native 실제 도구·개인 설정·기반 모델과 사용자 자료는 보존한다.
+- **변경 금지 경계:** main 직접 push·PR 병합·Draft 해제·실제 사내 배포·실제 사용자 자산 삭제·운영 변경 요청은 수행하지 않는다. Figma 원본도 수정하지 않는다.
+- **사내 상태:** 별개 PR #72에 기록된 10-01 사용자 복구·UI 일부 반영 보고를 재사용하며 완료된 복구를 반복하지 않는다. 이번 실사내 접속/등록 목록 검사는 없다.
+- **다음 작업:** 실제 새 제품의 작성→게시→진행→판정→Native 대화 저장/복원과 배포/복구·CI 최종 게이트를 완료하고 같은 PR에 코드·증거·배포 후보를 묶는다. 중간 Step 승인을 기다리지 않는다.
 
-이전 V4 복구 이력과 Step 0-A 조사/당시 실패는 기존 평가에 보존한다. 과거 승인을 이번 사내 변경 승인으로 사용하지 않는다.
+착수 전 STATUS와 과거 실패는 [날짜가 있는 기존 평가](../evals/v4-ui-20260930.md#integrated-work-evidence-20261002)에 보존했다. 아래 9월/이전 적용 이력은 현재 작업 지시나 신규 사내 적용 성공이 아니다.
 
 <a id="2026년-9월-개발검사-방침"></a>
 
@@ -48,7 +48,9 @@
 | 기본 Assistant·기존 조회 | 이름·로고·기존 대화·평소 Confluence/Jira/GitHub 조회 정상, 초기 Rich UI 제거·변경 Prompt 반영 완료 보고 | Tool별 최신 등록 코드·SHA·새 일반 답변/원문 직접 대조 미실행. [반영 보고](../evals/scenarios.md#plain-output-applied-report), [이전 자산별 SHA](../evals/scenarios.md#status-history-20260911) |
 | 정책·Skill | 합성 정책·지침 저장 보고, P02 PASS·P03 일부 확인. Git/UI 등록 Skill 3개, 기존 2개의 사용 확인 | 실제 사내 정책·나머지 P 시험·confluence-read 실제 로딩 미확인. [기준](../evals/scenarios.md#instruction-revision) |
 
-## 남아 있는 이슈와 확인 범위
+## 이전 적용 이력의 이슈와 확인 범위
+
+아래는 통합 구현 착수 전 사내/기존 제품의 관측이다. 새 코드 구현·검증 여부는 위 현재 작업과 최신 평가를 따른다.
 
 - **9월 원격 검증 보류:** 사용자 Billing 화면에서 Actions 무료분 `2,000/2,000` 사용 및 현재 Actions 청구 대상 `$0`를 확인함. 사용자는 9월 원격 검사 생략·개발 계속을 선택함. 결제 실패로 단정하거나 예산 상향을 다음 작업으로 요구하지 않음. R1~R3의 Windows·브라우저 자동 검사는 미실행이며 이전 실패와 로컬 결과를 보존함. ees.9 사내 적용·기동·지정 자산 반영 성공은 이번 사용자 보고로 따로 확인함. [이번 무료분 확인·한시 방침](../evals/scenarios.md#work-ui-refactor-20260915), [앞선 관측](../evals/scenarios.md#workflow-refactor-20260915).
 
@@ -68,7 +70,7 @@
 
 ## 실행 계획
 
-현재 재구성 순서와 통과 조건은 [Step0-B 기본 계약·수락 보완](mockups/ees-work/TASK.md#restructure-step0b-20261001)과 그 안의 Step0-A 단계표를 따른다. 아래 목표별 표는 이전 진행 이력이며 Step1 실행 권한이 아니다.
+현재 순서와 완료 게이트는 [통합 구현 계약](mockups/ees-work/TASK.md#integrated-work-20261002)을 따른다. 아래 목표별 표는 이전 진행 이력이다.
 
 | 목표 | 현재 위치 | 후속 범위 |
 |---|---|---|
@@ -85,7 +87,7 @@
 
 ## 재개와 환경 유지
 
-현재 재개 대상은 위 Step 0-B와 PR #73이다. 아래 첫 항목의 V4 복구·재배포 설명은 당시 이력이며, 최신 사용자 보고로 완료된 사내 복구를 다시 수행하라는 지시가 아니다.
+현재 재개 대상은 위 통합 구현과 PR #73이다. 아래 첫 항목의 V4 복구·재배포 설명은 당시 이력이며, 최신 사용자 보고로 완료된 사내 복구를 다시 수행하라는 지시가 아니다.
 
 - 다음 세션은 그때의 원격 최신 main·관련 열린 PR·로컬 변경을 확인하고 AGENTS와 이 문서를 읽습니다. 과거 적용 SHA를 개발 head로 고정하지 않습니다. EES Work의 현재 작업은 [4차 UI 후속 수정](../evals/v4-ui-20260930.md#v4-ui-breakage-fix)이며 #69 병합3a51의 종료 실패와 PR #70 병합 뒤의 retained_bundle_mismatch 후속 수정·최신 main/열린 PR을 먼저 확인한다. 설치본713·등록 프로세스 잔류·listener 부재 보고 뒤의 실제 복구 결과부터 확인하며 과거 Status 확인을 반복하지 않는다. PR #68은 main에 병합됐고 사용자가 사내 화면 파손을 보고했다. 이번 권한은 09-30 18:04의 #69 후속 승인에 근거하며 완료한 수정/검사를 반복하지 않는다. #67까지의 C안은 병합된 기반이며 종료된 시각 작업을 재개하지 않는다. 기존 [09-29 C안 2단계](mockups/ees-work/TASK.md#c-design-phase2-20260929)와 [검토 보완](mockups/ees-work/TASK.md#c-design-phase2-review-20260929)을 보존하고 [3차 개발환경 검수](mockups/ees-work/TASK.md#c-design-phase3-20260929)를 완료했다. 완료된 1·2단계·보완·3차 검사를 미완료로 보아 반복하지 않는다. [09-23 A안](mockups/ees-work/TASK.md#a-design-20260923)·Figma 478:131/498:363은 기존 구현 근거로 보존하고 [09-22 단계별 UX](mockups/ees-work/TASK.md#step-progress-ux-20260922)·[확정 왼쪽](mockups/ees-work/TASK.md#sidebar-final-20260922)·[오른쪽 기록 계약](mockups/ees-work/TASK.md#right-panel-20260922)을 보존합니다. 기존 HTML·223번 통합안·공동 작업 장기안은 이번 단계별 진행 화면을 대체하지 않습니다. 새 ZIP이나 이전 대화 전체가 없어도 이 경로에서 이어갑니다. 별도 인계 파일은 만들지 않습니다. 수락 보호는 [적용 가이드](03-openwebui-native-agent.md#ees-accept64-guard)·[장애·검증 근거](../evals/scenarios.md#accept64-guard-20260914)를 보존하며 관련 변경이 있을 때만 해당 코드/시험을 읽습니다.
 - 브랜치 정리 완료: 사용자 `branch_cleanup=ok, deleted=32` 보고와 원격 조회로 대상 32개 삭제를 확인함. 정리 당시 남은 브랜치는 `main`과 미병합 커밋 3개가 있는 `fix/upgrade-apply-failure`였으며, 미병합 head `b088f3be029dae108d82d6feec003fbd55bf5245` 보존을 확인함. [고정 대상·완료 근거](../evals/scenarios.md#repository-maintenance-20260911).

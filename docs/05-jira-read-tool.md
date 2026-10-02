@@ -56,7 +56,7 @@ $jiraScript | Set-Content -Encoding UTF8 $jiraCheck
 2. 아래 관리자 설정에 계정 확인에 성공한 사내 기본 주소와 **정확한 프로젝트 키 목록**을 입력합니다. 현재 확인한 HTTP 환경은 `ALLOW_HTTP=true`로 설정하고 다른 값은 기본값을 유지합니다. 키 접두사나 와일드카드로 프로젝트를 자동 허용하지 않습니다.
 3. 기존 WebUI의 버전·키·DB·암호화 경로가 같다면 이미 확인한 저장·재시작 증거를 재사용합니다. 새 Jira 개인 PAT 필드는 가짜 값으로 마스킹과 해당 Tool의 개인 설정 한 건의 암호화 저장을 확인합니다. 아래 [Jira 전용 확인](#새-jira-개인-입력칸-저장-확인)을 사용하고 기본 Confluence 모드의 결과를 Jira 검증으로 간주하지 않습니다. 저장 경로나 키가 바뀌었다면 영향받는 검증만 추가합니다. [기존 저장 검증 원칙](04-confluence-read-tool.md#3-실제-pat보다-먼저-암호화-검증)
 4. 확인 후 각 사용자가 Jira 도구의 **개인 설정**에 본인 토큰을 입력합니다. 관리자 공통 설정·채팅·HTML에 넣지 않습니다. 기존 Confluence PAT 설정은 그대로 유지합니다.
-5. 승인된 사용자에게 도구 읽기 권한을 주고 `EES 통합 Assistant`의 Tools에 연결합니다. 기존 사용자 지침을 보존하면서 [기본 Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)의 Jira 조회 안내를 반영합니다. 공용 공개 전에는 새 도구의 접근 권한과 다른 사용자의 빈 개인 설정도 확인합니다.
+5. 승인된 사용자에게 도구 읽기 권한을 주고 `EES 통합 Assistant`의 Tools에 연결합니다. 기존 사용자 지침을 보존하면서 [기본 Prompt](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/system-prompts/ees-integrated-assistant.md)의 Jira 조회 안내를 반영합니다. 공용 공개 전에는 새 도구의 접근 권한과 다른 사용자의 빈 개인 설정도 확인합니다.
 6. 위 조건이 충족되면 `ENABLED=true`로 저장하고 평소 접근하는 프로젝트 하나의 현황을 요청합니다. 대시보드 조회에 사용자 인증 확인이 포함되므로 별도 연결 확인 질문을 직전에 반복하지 않습니다. 실패하면 오류 코드·메시지만 확인하며 토큰이나 응답 원문을 공유하지 않습니다.
 
 새 개인 설정은 새 채팅 → 통합 → 도구 → `EES Jira Read` 옆 밸브에서 엽니다. `PAT`에 Jira에서만 쓸 가짜 값 `EES-JIRA-CANARY-20260907-B92F6A`를 저장하고 다시 열어 마스킹을 확인합니다. 현재 사용자 환경에서는 이 등록·마스킹까지 완료 보고가 있으므로 반복하지 않습니다. 실제 토큰 입력 전 새 필드의 저장 확인만 진행하며 기존 Confluence canary·재시작·키 백업을 반복하지 않습니다.
@@ -128,7 +128,7 @@ uvx --offline --no-python-downloads --python 3.11 --from "open-webui==0.11.3" py
 
 2026-09-09 사용자 요청에 따라 초기에 기능 확인용으로 만든 Rich UI를 제거했습니다. 프로젝트 차트·로컬 필터·펼치기·질문 넣기 버튼을 제공하지 않으며, `jira_dashboard` 함수 이름과 조회 인자는 기존 연결 호환성을 위해 유지합니다. 향후 필요한 업무 화면을 하나씩 별도로 설계하고 검토합니다.
 
-기존 `EES Jira Read`의 코드 전체를 검수한 [jira_tool.py](../agent-pack/skills/jira-read/scripts/jira_tool.py)로 교체하고 `version: 0.1.6`을 확인합니다. 기존 도구 ID·관리자 Valves·개인 PAT·Assistant 연결을 유지하며 도구를 삭제하거나 재생성하지 않습니다. [공통 Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)의 카드/버튼 전제를 제거한 답변·Jira 조회 안내도 반영합니다. 기존 사내 지침을 보존하며 Git 갱신만으로 등록 코드/Prompt가 바뀌지는 않습니다.
+기존 `EES Jira Read`의 코드 전체를 검수한 [jira_tool.py](../agent-pack/skills/jira-read/scripts/jira_tool.py)로 교체하고 `version: 0.1.6`을 확인합니다. 기존 도구 ID·관리자 Valves·개인 PAT·Assistant 연결을 유지하며 도구를 삭제하거나 재생성하지 않습니다. [공통 Prompt](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/system-prompts/ees-integrated-assistant.md)의 카드/버튼 전제를 제거한 답변·Jira 조회 안내도 반영합니다. 기존 사내 지침을 보존하며 Git 갱신만으로 등록 코드/Prompt가 바뀌지는 않습니다.
 
 저장 뒤 새 대화에서 평소 쓰는 프로젝트 현황을 한 번 요청해 일반 답변·표·원문 링크가 나오고 시험용 카드가 없는지만 확인합니다. 이전 대화에 저장된 카드나 대화 데이터를 삭제하지 않습니다. 기존 인증·암호화·전체 집계/계정 격리 검사를 반복하지 않으며, Open WebUI 프로그램 Apply·서버 재시작도 필요하지 않습니다. [이번 변경 검증](../evals/jira-offline.md#rich-ui-removed), [실제 적용 상태](STATUS.md).
 

@@ -1,0 +1,147 @@
+{
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "page": "832:131",
+  "frames": [
+    {
+      "name": "guide",
+      "node": "832:132"
+    },
+    {
+      "name": "A0",
+      "node": "919:7788",
+      "context_sha256": "c304b3b20520f4f9e6b7f7daaf7e9576c13c03b42ec21f0ef2257bc25ef35f64",
+      "saved_at": "2026-10-02T00:06:24.368300+00:00"
+    },
+    {
+      "name": "A1",
+      "node": "832:8219",
+      "context_sha256": "39711badbf46cedc4b0dda9702f5e9ee2758a26944536ccf91488f76bca3155b",
+      "saved_at": "2026-10-02T00:11:21.692450+00:00"
+    },
+    {
+      "name": "A2",
+      "node": "832:8953",
+      "context_sha256": "ee0149b71cb9c69fe62ba95b8fd2726c37a278160f56a64aca39082b66be4665",
+      "saved_at": "2026-10-02T00:11:22.184444+00:00"
+    },
+    {
+      "name": "A3",
+      "node": "875:8674",
+      "context_sha256": "80880769d969e455604ab693e7ff4e58bf1903e39bd4871d8d0905b5f2993510",
+      "saved_at": "2026-10-02T00:11:22.648438+00:00"
+    },
+    {
+      "name": "A4",
+      "node": "881:659",
+      "context_sha256": "12affe69ebecbdc239e43a277de20182cf50b4b2db8c5ada35eeb7ba7fad1e7d",
+      "saved_at": "2026-10-02T00:11:23.140431+00:00"
+    },
+    {
+      "name": "A4-1",
+      "node": "885:764",
+      "context_sha256": "66110d31887d00d945d0e1fb185c653ce0a453c06c235a91fcd8536c6bbbbf41",
+      "saved_at": "2026-10-02T00:11:23.640425+00:00"
+    },
+    {
+      "name": "A4-2",
+      "node": "888:758",
+      "context_sha256": "267cc983f60bb466ff07a0a159f9487f39428b69746fc5f435d9b1db6844a968",
+      "saved_at": "2026-10-02T00:11:24.132418+00:00"
+    },
+    {
+      "name": "B1",
+      "node": "835:323",
+      "context_sha256": "557d24057b4f8dc92e8ae15ad4ec89effb0b0df71c7b4da2bb75912828a2abaa",
+      "saved_at": "2026-10-02T00:12:07.231861+00:00"
+    },
+    {
+      "name": "B2",
+      "node": "836:372",
+      "context_sha256": "90bc9784543117c32afbca6389340b58a44612a1868bab2dd0b2b65c82af8581",
+      "saved_at": "2026-10-02T00:12:07.811853+00:00"
+    },
+    {
+      "name": "B3",
+      "node": "832:8468",
+      "context_sha256": "3bb7e0c52902dc0e8b903149593731c253add8d96b8cdcf64608375e2a1bad2d",
+      "saved_at": "2026-10-02T00:12:08.267847+00:00"
+    },
+    {
+      "name": "B4",
+      "node": "863:464",
+      "context_sha256": "a0c7ff199b76538d7bbb57b6ccdbe92a76727c6c7ffcc9165645c75a701f68ae",
+      "saved_at": "2026-10-02T00:12:08.743841+00:00"
+    },
+    {
+      "name": "B5",
+      "node": "920:728",
+      "context_sha256": "882a966c1d110b1a2eeb5687e72d651a623fead05d288e7fb1adc3cca6b7d59a",
+      "saved_at": "2026-10-02T00:12:09.199835+00:00"
+    },
+    {
+      "name": "R1",
+      "node": "859:8586"
+    },
+    {
+      "name": "R2",
+      "node": "864:8706"
+    },
+    {
+      "name": "R3",
+      "node": "875:536"
+    },
+    {
+      "name": "R4",
+      "node": "879:641"
+    },
+    {
+      "name": "R5",
+      "node": "888:8861"
+    },
+    {
+      "name": "R6",
+      "node": "922:785"
+    },
+    {
+      "name": "M0",
+      "node": "897:762"
+    }
+  ],
+  "additional_guide_node": "911:631",
+  "metadata_initial_sha256": "9350defb0b6190d43b6b2462963835839ea10101f58a2861954ebb54495cd843",
+  "metadata_review_sha256": "9350defb0b6190d43b6b2462963835839ea10101f58a2861954ebb54495cd843",
+  "metadata_review_saved_at": "2026-10-02T01:00:09.755325+00:00",
+  "metadata_changed": false,
+  "design_version": "not exposed by connected tool",
+  "permanently_frozen": false,
+  "render_review": [
+    {
+      "file": "figma-a0.png",
+      "node": "919:7788",
+      "sha256": "4d06c7c15b57e1a9bc3bf9e9ab83e6f5d0fee0870f86c6fbcfede2fc0f93ac3c",
+      "rendered_size": [
+        1400,
+        788
+      ],
+      "original_size": [
+        1920,
+        1080
+      ],
+      "saved_at": "2026-10-02T01:04:39.634540+00:00"
+    },
+    {
+      "file": "figma-b3.png",
+      "node": "832:8468",
+      "sha256": "eb5ac1b8b425ec3b430a7d98da023f5ddc712e0c0b4c75d89b1c485b1164df11",
+      "rendered_size": [
+        1400,
+        788
+      ],
+      "original_size": [
+        1920,
+        1080
+      ],
+      "saved_at": "2026-10-02T01:04:39.635435+00:00"
+    }
+  ]
+}

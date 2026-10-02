@@ -1033,3 +1033,89 @@ controller → designer는 `acceptServer(result)`, `readDraft()`의 `{definition
 - 최초 HTML 원본은 87,747 bytes, SHA-256 `802a8943870e568e58f17976f2c478470b47a6a12b30b9caec486cf008687f67`이다. 당시 자료 식별값이며 현재 프로그램과 같은 바이트라고 주장하지 않는다.
 - 원본의 ChatGPT Lucide 초기화·독립 앱·모의 대화는 참고 구현이다. 실제 포털에서는 기존 인증·Native 채팅·도구·패널을 사용한다.
 - 원본 등록 당시 구문·모의 DOM 검사와 ees.5 브라우저 시연 검사는 과거 [참고 원본 기록](../../../evals/scenarios.md#ees-work-mockup-reference-20260914)·[배포 기록](../../../evals/scenarios.md#ees-work-demo-integration-20260914)에 보존한다. 현재 적용 방법은 [Native 가이드](../../03-openwebui-native-agent.md#ees-work-demo), 상태는 [STATUS](../../STATUS.md)가 원본이다.
+
+
+<a id="integrated-work-20261002"></a>
+
+## 2026-10-02 통합 구현 계약과 진행 기준
+
+사용자가 제공한 `EES_Work_Integrated_Work_Directive_20261002.md` 및 후속 변경 관리 지시를 구현 기준으로 수용한다. 이 절은 앞의 Step별 구현 중단/추가 설계 승인 대기를 대체한다. 과거 조사·실패·완료 기록은 당시 근거이며 삭제하지 않는다. 개발·통합 검증·자체 수정·커밋/push·동일 Draft PR #73·배포 후보 준비까지 진행하고, main push/병합/실제 사내 적용/실제 사용자 자산 삭제/운영 변경 요청은 수행하지 않는다.
+
+착수 Git: main `55832bad328cdfb91c1c284749f7959dd664176c`, PR #73 head `b41e23917273e1d2d0ead1ddadfea75b2dda1e32`, branch `docs/ees-restructure-step0a-20261001`. 검토 SHA 이후 변경 0, 로컬 변경 0. #72/#53은 별개 열린 Draft로 보존한다. 작업 공간의 이전 검증환경은 정리되어 없었으며 저장소 고정 환경을 같은 위치에 복구한다. 기존 조사·사내 복구는 반복하지 않는다.
+
+### 구현 서비스와 보호 조건
+
+| 의미 | 구현 위치/경계 | 완료 조건 |
+|---|---|---|
+| Native 인증·사용자·그룹·모델·대화·첨부 | 기존 Open WebUI, 개인 PAT/도구 설정 재사용 | 별도 인증/공용 PAT 없음, 계정·대화 격리 |
+| 절차 초안·게시본·공장 설정·진행 건 | 기존 업무 SQLite 안의 Workspace 서비스, `/api/ees-work/workspace` | 게시본/시도 불변, 예상 revision·요청 ID/내용 지문, 미지정과 빈 값 구분 |
+| 공유 범위·개인 화면 | Native ID 기반 명시적 시스템/공장 매핑 및 개인 화면 상태 | 그룹 이름 권한 추정 금지, 개인 대화 본문 공유 금지, 전체 공장도 ACL 적용 |
+| 실행·예약·요청 | 동일 서버 수명과 DB를 쓰는 Operations 서비스, `/api/ees-work/operations` | 슬롯/claim/lease 영속, 현재 권한 재검사, 결과 불명 변경 요청 재전송 금지 |
+| 사람 확정·EES 요청 | AI 도구와 분리된 인증 사용자 명령, 제한된 서버 intent | 0/1/2명 승인·최종 확인·내용/권한 변경 시 무효화, 완료 보고와 효과 확인 분리 |
+| AI 초안 | Native 허용 모델, 구조/대상/context/revision 검증 | 제안만 반영, 자동 저장·게시·실행 금지, 모델 0개 명시 |
+| UI | 기존 Native 대화 + 공통 탐색/업무/작성 패널 | 8입력/8블록, 내 업무 실제 건수, 키보드/스크롤/충돌/복원 |
+| 기존 데이터·폐기 자산 | 기존 기록 보존, 새 설치 빈 상태, 명시적 정리 계획 | 옛 실행 중지와 기록 열람 분리, ApplyDemo 재등록 차단, 프로그램 Restore와 데이터 복구 구분 |
+
+실제 EES 기능/인증/상태 조회 계약, 송부 채널, 미승인 CR 배포 정책 및 휴일 정보는 임의 생성하지 않는다. 화면·저장·검토·검증 가능한 서비스까지 구현하고 해당 외부 행동만 사유와 함께 차단한다. 외부 미연결·정책 미정·구현 누락을 구분한다. 기존 도구의 실제 Native 호출은 유지하며 합성 HTTP/모델 시험은 실제 사내 성공이 아니다.
+
+### 변경 가능한 Figma 비교 기준
+
+file `XK2wTos6sEuxSHhIj7cqg6`, page `832:131`, 2026-10-02 착수 조회. 페이지 metadata에서 최상위 20개 프레임을 확인했다. 페이지 자체 design context는 선택 레이어 필요 오류였으므로 개별 화면 context와 렌더를 조회한다. 이 제한은 화면 조회 성공으로 기록하지 않는다. 원본/노드 ID는 수정하지 않는다. 노드·렌더·context 해시와 화면→서비스→시험 대응은 이번 평가 근거에 기록한다. 버전 식별자를 제공하지 않는 도구의 조회 시점을 영구 디자인 버전으로 취급하지 않는다.
+
+| 영역 | 현재 노드 |
+|---|---|
+| 안내/관리 | `832:132`, `897:762` |
+| 내 업무/회차/위치/항목 판정 | A0 `919:7788`, A1 `832:8219`, A2 `832:8953`, A3 `875:8674` |
+| 변경 요청/확인/추적 | A4 `881:659`, A4-1 `885:764`, A4-2 `888:758` |
+| 절차 목록/개요/작업 편집/공장 차이/도구 | B1 `835:323`, B2 `836:372`, B3 `832:8468`, B4 `863:464`, B5 `920:728` |
+| 규칙 | R1 `859:8586`, R2 `864:8706`, R3 `875:536`, R4 `879:641`, R5 `888:8861`, R6 `922:785` |
+
+관련 화면을 구현·검수할 때 변경 여부를 다시 확인한다. 문구/스타일 변경은 영향 UI에, 입력/행동 변경은 API·저장·검증까지 반영한다. 새 업무·큰 정책 변경은 필요한 결정과 영향을 남기고 독립 작업을 계속한다. 예시 인명/공장/날짜/CR/성공 수치는 운영 기본 데이터가 아니다.
+
+### 통합 검증과 완료 게이트
+
+빈 설치/동시 초기화/재기동, 실제 Native 가입·승인·대화·첨부·격리, 절차 초안→검사→게시→진행, 입력/설정 snapshot·재실행·후속 재판정, 내 업무/예약 복구/복수 worker/권한 회수, 도구 검토/intent/요청 추적/효과, 고정 패키지·RECORD·기존 설치/프로그램 복구·자산 정리/데이터 복구를 각각 검증한다. 새 제품 코드의 실제 브라우저 검수는 이전 full-app smoke로 대체하지 않는다. 옛 데모 검사는 제거·재등록 방지로, 옛 UI 검사는 새 화면과 동일 보호 조건으로 대체하며 누락 ID를 명시한다. CI 분할은 모든 필수 job을 완료 게이트에 포함하고 실패/취소/미실행을 구분한다.
+
+### 물리 저장소와 API 구체화
+
+Native 인증·사용자·그룹·대화·첨부 DB는 기존 원본이다. 업무 데이터는 기존 DATA_DIR의 `ees-work.sqlite3` 안에서 확장한다. 별도 DB 엔진/서비스/범용 실행기를 추가하지 않는다. 초기화는 `BEGIN IMMEDIATE`의 같은 DB에서 수행하며, 기존 catalog/cases는 과거 기록으로 보존한다.
+
+| 실제 테이블/진입 | 저장 의미와 강제 조건 | 직접 검증 |
+|---|---|---|
+| `work_schema`, `work_definitions`, `work_versions` | schema1·초안 revision·불변 게시본, `(workflow_id,version)` 고유, 검사한 정확한 정의/자원 버전만 게시 | `test_ees_work_workspace.py` 초기화/동시 생성/부분 손상/게시/rollback |
+| `work_factories`, `work_access`, `work_settings` | Native ID 역할과 시스템/공장 범위, 반복 기본/공장 override. 공장 전용 입력은 기본·진행 입력으로 저장 금지 | 같은 파일 권한/설정/false·0·미지정/공장 담당 검사 |
+| `work_runs`, `work_jobs` | 대화와 독립된 회차·시작 버전·개별 상태·담당 claim. 현재 담당자의 명시적 해제만 허용 | 같은 파일 격리/공유 경합/claim·release/종료·취소 |
+| `work_attempts`, `work_decisions` | 입력/설정 출처·도구·모델·공장·근거·기한 snapshot, 끝난 attempt 불변·사람 판정 append-only | 재실행·의존 작업 재검토·과거 이력·현재 ACL 회수 |
+| `work_receipts`, `work_audit`, `work_ui`, `work_chat_links` | actor+request ID+payload hash 멱등·감사, 개인 화면/개인 대화 참조 | 중복·다른 payload·늦은 응답·계정/대화 분리 |
+| `work_tool_contracts`, `work_external_requests`, `work_request_intents`, `work_operation_events` | 검토된 Native 함수/hash·별도 요청 권한·제한된 intent·외부 요청과 효과 관측 | `test_ees_work_operations.py` 승인0/1/2·내용 변경·만료·권한 회수·결과 불명 |
+| `work_schedules`, `work_schedule_slots`, `work_scope_runs`, `work_job_claims`, `work_operation_receipts` | 동일 서버의 영속 일정/P·T 조정/lease, workflow+범위+예정 슬롯 고유 | 같은 파일 재기동·복수 worker·놓침·위임·선행/시각·비상 |
+| GET `/api/ees-work/workspace` | 현재 권한의 절차/진행/내 업무/개인 화면·관리자 매핑. 다른 사람 도구 근거와 권한 회수된 본인 근거는 본문 비공개 | HTTP route·Native 계정/작업 검사 |
+| POST `/workspace/command`, `/workspace/proposal`, `/workspace/options` | 변경 명령, 저장하지 않는 AI 제안, 실제 Native/공통 선택지 조회를 분리 | route/model/dynamic choice 계약·실제 Native UI |
+| GET/POST `/api/ees-work/operations` | 도구 검토·J 실행·동일 J의 P/T 조정·예약·요청/추적. 외부 connector 미설정은 typed 차단 | Operations + NativeBridge + 실제 HTTP |
+| GET `/api/ees-work/legacy`, `/api/ees-work/export` | 소유자·대화·현재 근거 접근을 검사하는 과거 읽기, 현재 권한의 진행 기록 내보내기. 개인 대화 링크/화면/intent 제외 | route·workspace export·브라우저 내려받기 |
+
+주요 일반 명령은 `create_workflow`, `copy_workflow`, `save_draft`, `validate_workflow`, `publish_workflow`, `save_factory`, `save_access`, `save_settings`, `start_run`, `save_inputs`, `claim_task`, `release_task`, `human_confirm`, `decide`, `amend_items`, `close_run`, `cancel_run`, `link_chat`, `save_ui`다. 일반 명령과 실행 서비스 모두 인증·현재 대상 권한·expected_revision·request ID/지문을 검사한다. AI 공개 도구는 조회/초안 제안/화면 안내 세 가지이며 변경 endpoint를 제공하지 않는다.
+
+선택지와 선행 목록 인자 연결은 선언한 Native 함수·인자·결과 경로만 허용한다. 확정 목록 ID를 받는 후속 작업은 실제 확정된 현재 source attempt/revision/선택 ID를 snapshot하고, 부분 조회·미확정 목록·다른 사용자 비공개 근거를 자동 재사용하지 않는다. 결과의 `all_resolved`는 AI 보고 초안에만 허용하며 CR 미확인/보완 필요를 승인으로 바꾸지 않는다.
+
+기한은 날짜 입력·calendar-day offset·명시적 timezone의 제한된 schema로 계산한다. 계산 결과와 입력 revision은 실행 snapshot에 남긴다. business-day/공휴일 자료가 없으면 날짜를 임의 당기지 않고 확인 불가로 남긴다. 외부 효과 API·송부 채널·미승인 CR 포함/제외 정책도 자동 확정하지 않는다.
+
+### 화면·기능·검사 대응
+
+아래는 구현 경로 대응이다. 단위/HTTP 계약 통과와 실제 Native 최종 통과는 [이번 평가](../../../evals/v4-ui-20260930.md#integrated-work-evidence-20261002)에서 별도로 판정한다. [Figma 비교 기준](../../../evals/artifacts/ees-integrated-20261002/figma-baseline.json)의 20프레임과 안내 `911:631`을 사용했고, A0/B3 재조회 metadata는 착수본과 동일했다. 원본 SVG44개를 읽기 전용으로 추출했고 기존33개를 유지했다. 디자인 원본은 수정하지 않았다.
+
+| 화면/규칙 | 연결된 공통 기능 | 서비스/검사 근거 |
+|---|---|---|
+| A0 / R6 | 실제 내 업무·배지·기한/장애 정렬·담당·복귀, 정상 자동 대기 제외 | Workspace MyWork·Operations actionable / workspace·execution UI·Native work |
+| A1 / R1 | 회차/게시 버전·업무 설정/이번 입력·P/T/J 실행·예약/놓침/기록 | Workspace/Operations / scheduler·scope·Native execution |
+| A2 | 허용 공장/시스템·전체 공장 범위, 대화/미전송 글·편집 초안 보존 | workspace scope/private UI + Native chat / account·compose |
+| A3 | 현재 결과의 CR별 AI 제안과 명시적 사람 판정·후속 재검토 | immutable attempts/decisions / delivery artifacts·workspace·UI |
+| A4 / A4-1 / A4-2 / R5 | 등록/검토된 요청·0/1/2 승인·취소 초기초점/Esc·수락·상태·효과, 결과 불명 재전송 금지 | operations intent/request + Native dialog / request contracts·Native |
+| B1 / B2 | 실제 절차 목록·검색·초안/게시·구조/일정/판정/게시 기록 | Workspace definitions/versions / authoring UI·Native authoring |
+| B3 / R3 / R4 | 공통8입력/8블록·Native 도구/스킬·정확한 인자/선택지·AI 편집 제안 | schema/options/proposal + designer / authoring47+workspace/model |
+| B4 / R2 | 기본 정의·공장 override/조건·복사·반수 경고·끊긴 참조 차단 | definition checker/settings / factory·publication tests |
+| B5 / R6 | 조회/요청 도구 초안·가이드·담당자 검토·정의 hash 변화 | Operations tool contract + Native inspect / authoring·operations |
+| 안내/M0 | Native 실제 모델 이름/0·1·복수 접근, 사람/AI/EES Work/EES 주체 구분 | NativeModelAdapter·safe Work Tool / model·Native chat |
+| 별도 상세 프레임 없음 | Native 대화 기록·스킬 관리 진입, 관리자의 범위 설정·빈/오류/권한/충돌·내보내기 | 기존 Native route·공통 폼/토큰, 새 인증/스킬 복제 없음 |
+
+배포 산출물 점검은 운영 기본 데이터가 아니다. 시험에서 작성 API로 만든 절차를 게시하고 실제 loopback Jira HTTP로 여러 페이지 CR→확정 목록→필수 파일 이름/존재/접근→AI 제안→CR별 사람 판정→보완 재실행→보고 초안/검토/내보내기를 연결한다. 파일 내용 적정성 미검토를 승인으로 표현하지 않는다. 실제 회사 Jira/LLM/EES 성공으로 보고하지 않는다.

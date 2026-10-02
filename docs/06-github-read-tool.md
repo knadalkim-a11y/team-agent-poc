@@ -32,7 +32,7 @@ PR 쓰기·병합·리뷰 제출·댓글·CI 실행·코드 파일·diff·일반
 2. 관리자 설정의 기본 주소와 승인된 저장소 한 곳을 입력합니다. Git 다운로드에 쓰는 사외 프록시를 내부 GitHub API 프록시로 자동 복제하지 않습니다.
 3. `EES 통합 Assistant`의 Tools에 추가하고 새 채팅 → 통합 → 도구 → `EES GitHub Read` 옆 개인 밸브에서 아래 가짜 PAT를 저장한 뒤 다시 열어 마스킹을 확인합니다. 실제 PAT는 아직 입력하지 않습니다.
 4. 다음 절에서 **새 GitHub 입력칸만** 저장 확인합니다. 기존 WebUI 버전·DB·키·암호화 경로의 저장/재시작 증거는 재사용합니다.
-5. 통과하면 가짜 값을 기존 실제 개인 PAT로 교체하고 `ENABLED=true`로 활성화합니다. [기본 Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)의 `GitHub 조회 기능이 연결된 경우` 절을 기존 사용자 지침을 보존해 추가합니다. 다른 절을 반복 재입력할 필요는 없습니다.
+5. 통과하면 가짜 값을 기존 실제 개인 PAT로 교체하고 `ENABLED=true`로 활성화합니다. [기본 Prompt](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/system-prompts/ees-integrated-assistant.md)의 `GitHub 조회 기능이 연결된 경우` 절을 기존 사용자 지침을 보존해 추가합니다. 다른 절을 반복 재입력할 필요는 없습니다.
 6. 위 예시로 PR 목록과 한 PR의 본문·원문을 확인합니다. 목록/상세 호출에 계정 확인이 포함되므로 직전에 별도 연결 확인 질문을 매번 추가하지 않습니다.
 
 | 관리자 설정 | 값·의미 |
@@ -97,7 +97,7 @@ uvx --offline --no-python-downloads --python 3.11 --from "open-webui==0.11.3" py
 
 Workspace → 도구에서 **기존 `EES GitHub Read` 항목을 편집**해 검수한 커밋의 [Python 코드](../agent-pack/skills/github-read/scripts/github_tool.py) 전체로 교체하고 저장합니다. 기존 Tool ID·관리자 설정·개인 PAT·Assistant 연결을 유지하며 항목을 삭제하거나 새로 만들지 않습니다. 개인 필드·저장·인증·전송 코드가 같으므로 이미 완료한 DB/재시작/인증 검사를 반복하지 않습니다. 서버 재시작이나 프로그램 Apply도 필요하지 않습니다.
 
-기존 [System Prompt](../agent-pack/system-prompts/ees-integrated-assistant.md)의 Rich UI 표시 지침도 현재 원본에 맞춰 갱신합니다. 사용자 추가 지침은 보존합니다. GitHub 결과는 일반 채팅의 간단한 목록·표·요약과 원문 링크로 답하고 카드·버튼이 표시된다고 안내하지 않습니다. 본문 속 HTML·외부 이미지 링크는 자료 문자열이며 별도 화면으로 실행하거나 추가 조회하지 않습니다.
+기존 [System Prompt](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/system-prompts/ees-integrated-assistant.md)의 Rich UI 표시 지침도 현재 원본에 맞춰 갱신합니다. 사용자 추가 지침은 보존합니다. GitHub 결과는 일반 채팅의 간단한 목록·표·요약과 원문 링크로 답하고 카드·버튼이 표시된다고 안내하지 않습니다. 본문 속 HTML·외부 이미지 링크는 자료 문자열이며 별도 화면으로 실행하거나 추가 조회하지 않습니다.
 
 새 채팅에서 평소 쓰던 PR 목록과 그중 한 PR의 본문 요약을 확인합니다. 본문 질문은 `두 번째 PR 본문 요약해줘` 또는 실제 PR 번호로 요청하고, 다음 목록도 채팅으로 요청합니다. Tool은 기존과 같은 원문 URL·실제 PR 번호·본문/잘림·조회 시각·페이지 메타데이터를 전달합니다. 확인된 `next_page`만 사용하며 마지막 페이지와 다음 위치 미확인을 구분합니다. 실패는 안전한 오류 안내로 답하고 빈 결과·빈 본문으로 바꾸지 않습니다.
 

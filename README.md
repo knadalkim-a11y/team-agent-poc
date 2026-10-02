@@ -1,6 +1,6 @@
 # Team Agent POC
 
-현재 작업은 [EES Work 재구성 Step 0-B 기본 계약·검증 준비](docs/mockups/ees-work/TASK.md#restructure-step0b-20261001)다. [Step 0-A 조사](docs/mockups/ees-work/TASK.md#restructure-step0a-20261001)를 근거로 사용하며 전체 DB/API 상세 설계와 공유 정책은 아직 미확정이다. 현재 Figma는 왼쪽 작업 위치·탐색, 중앙 Native 대화, 오른쪽 업무 패널/절차 작성기이며 디테일은 변경될 수 있다. 필요한 공통 기반을 선별 재사용하고 기본 데모 절차·전문 Assistant preset·등록 Skill 콘텐츠와 재등록 경로는 후속 단계에서 정리한다. 아래 실행 구조는 조사한 기존 구현이며 새 백엔드 최종 설계가 아니다. 계정·대화·첨부·개인 PAT·기반 LLM 접속·실제 GitHub/Jira/Confluence 도구는 구분해 보존한다.
+현재 작업은 [2026-10-02 EES Work 통합 구현](docs/mockups/ees-work/TASK.md#integrated-work-20261002)이다. 왼쪽 작업 위치·탐색, 가운데 Native 대화, 오른쪽 업무/작성 패널을 변경 가능한 Figma 기준으로 구현한다. 기존 Native 인증·대화·첨부·모델 연결과 GitHub/Jira/Confluence의 실제 도구·개인 설정을 재사용한다. 새 설치는 데모 절차·전문 Assistant preset·등록 Skill 콘텐츠 없이 시작하며 ApplyDemo 재등록은 중지된다. 과거 조사/실패와 실제 사내 적용 상태는 [STATUS](docs/STATUS.md) 및 연결된 평가에 보존한다. 새 프로그램 준비를 실제 사내 적용 완료로 해석하지 않는다.
 
 비개발자가 EES Work의 Chat UI에서 사내 문서와 업무 시스템을 활용하고, 관리자가 정한 공통 정책과 업무 처리 절차를 적용받는 플랫폼 POC입니다. 범용 대화·업무용 Prompt/Skill 공유를 유지하며 Open WebUI Native를 활용합니다. **공식 Open WebUI 패키지와 우리 프로젝트 래퍼** 두 구성으로 관리하며, 이 저장소는 사내 설정·Agent Pack과 Open WebUI 수정사항·빌드/적용 절차를 관리합니다. 기존 Python·호환 의존성을 재사용하고 데이터·키는 프로그램 변경과 분리합니다. [단순 유지보수 기준](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)과 실제 구현·적용 상태는 [STATUS](docs/STATUS.md)를 따릅니다.
 
@@ -72,22 +72,12 @@
 
 ## 실행 구조와 관리 원본
 
-현재 `EES 통합 Assistant`는 승인된 기반 LLM에 공통 지침·Skill·Knowledge·허용 Tool을 묶는 Open WebUI Workspace Model preset입니다. [교차 분석 시연](docs/03-openwebui-native-agent.md#cross-system-orchestration)은 EES가 EMS/APC/FDC 전문 Assistant를 선택하고 합성 근거를 대조·보완해 이슈·KPI 후보를 제안하는 구성입니다. 시연 자산과 일괄 적용 코드의 구현 준비본을 두며 사내 API 등록·실제 모델 분석과 구분합니다. EGIS/EPT 등 추가 시스템과 운영 DB 관계 조사는 후속 범위입니다.
+Native 대화와 업무 서비스는 같은 Open WebUI 프로세스에 있다. 업무 SQLite는 초안·불변 게시본·진행 건·실행 시도·사람 판정·예약·외부 요청을 구분한다. 사용자 화면 상태와 개인 대화는 공동 업무 상태와 분리한다. AI는 조회·제안·안내만 하고 저장·게시·실행·확정은 인증된 사용자 명령이 검증한다. 실제 EES 연결이 없는 요청은 명시적으로 차단하며 성공 응답을 합성하지 않는다.
 
-```mermaid
-flowchart TB
-    Git["Git Agent Pack 원본"] -->|"시연 ApplyDemo · 기존 자산 수동 등록"| Preset["Open WebUI Workspace Model"]
-    User["팀 사용자"] --> Chat["일반 Chat"]
-    Chat --> Preset
-    Preset --> Loop["Open WebUI Native 호출 루프"]
-    Loop --> Model["승인된 사내 LLM"]
-    Loop --> Tool["연결된 읽기 Tool"]
-```
-
-- `AGENTS.md`는 **코딩하는 GPT**의 지침이고, `agent-pack/`은 **담당자가 관리하는 공통 배포 자산**의 원본입니다.
-- Git의 Skill 지침과 Python Tool은 Open WebUI에서 서로 다른 항목으로 등록합니다. `ApplyDemo`는 [시연 목록](agent-pack/ees-demo.json)만 적용하며 폴더 전체나 사용자 작성물을 자동 등록하지 않습니다.
-- Git 커밋 완료는 WebUI 반영 완료가 아닙니다. 실제 적용한 원본 커밋과 검증 증거는 STATUS에서 추적합니다.
-- Skill·Prompt의 금지 지침은 보안 경계가 아닙니다. 실행 가능한 범위는 Tool 내부 검사·권한·자격증명·네트워크 구성에서 제한합니다.
+- `AGENTS.md`는 개발 지침이며, `agent-pack/`의 공통 코드·실제 읽기 도구는 배포 원본이다.
+- `skills`/`demo`라는 폴더 이름은 삭제 범위가 아니다. 기존 공통 서버 경로를 유지한다.
+- Skill 콘텐츠·Python Tool·Native 모델 연결은 다른 자산이다. 기본 등록 콘텐츠는 비어 있으며 현재 Native 관리 기능은 유지한다.
+- Git 반영·프로그램 Restore·사용자 자산 삭제/복구·실제 사내 검증은 각각 별도 결과다.
 
 AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs/mockups/ees-work/TASK.md#refactoring-design)의 파일별 책임·공개 연결·자료 보존·검증 기준을 따른다. 설계와 실제 구현/배포 상태는 구분한다.
 
@@ -95,16 +85,18 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 
 | 변경할 책임 | 원본 |
 |---|---|
-| 저장·권한·업무 액션·API | [ees_workflow.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow.py) |
+| 공개 인증 API·이전 기록 조회 | [ees_workflow.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow.py) |
+| 새 절차·게시 버전·진행 건·설정·판정·공유/개인 상태 | [ees_workflow_workspace.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py) |
+| 예약·실행 시도·도구 검토·서버 확인·EES 요청 추적 | [ees_workflow_operations.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_operations.py) |
 | 시스템 담당 인가·P별 초안/게시·legacy 보존·감사 | [ees_workflow_authoring.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_authoring.py) |
 | 정의 읽기·참조/입력/게시 검증 | [ees_workflow_definition.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_definition.py) |
 | 진행률·선행 대기·표시 상태 계산 | [ees_workflow_view.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_view.py) |
 | 영속 계획·실행·호출·중단/재개·worker | [ees_workflow_execution.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_execution.py) |
 | 기존 Native 등록본 승인·현재 권한·개인 설정·호출 | [ees_workflow_native.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py) |
-| 입력/결과 연결·완료 검증·두 재사용 예제 | [ees_workflow_contract.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_contract.py), [ees_workflow_examples.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_examples.py) |
+| 입력/결과 연결·완료 검증·두 재사용 예제 | [ees_workflow_contract.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_contract.py), [ees_workflow_examples.py](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/skills/ees-work-demo/scripts/ees_workflow_examples.py) |
 | 제한된 근거 정리와 Native 모델 호출 | [ees_workflow_model.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_model.py) |
 | 공통 실행 정책 | [workflow_policy.json](agent-pack/skills/ees-work-demo/scripts/workflow_policy.json) |
-| 참고 업무 절차·공장 예시 | [workflow_seed.json](agent-pack/skills/ees-work-demo/scripts/workflow_seed.json) |
+| 참고 업무 절차·공장 예시 | [workflow_seed.json](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/skills/ees-work-demo/scripts/workflow_seed.json) |
 
 정책과 예시의 분리는 현재 저장된 게시본·초안·진행 건을 재작성하지 않습니다. AI Tool의 [workflow_tool.py](agent-pack/skills/ees-work-demo/scripts/workflow_tool.py)와 UI는 같은 공개 서비스와 권한 판정을 사용합니다.
 
@@ -127,13 +119,13 @@ factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 
 
 | 대상 | 관리 원본 | WebUI 반영·보존 위치 |
 |---|---|---|
-| Assistant 기본 지시 | `agent-pack/system-prompts/` | Workspace Model의 System Prompt |
+| 모델 연결/허용 목록 | Native 관리자·사용자 설정 | 기반 모델 연결 유지; 전문 데모 preset을 기본 생성하지 않음 |
 | 업무 공통 정책 | `agent-pack/policies/` | 검토 후 Prompt·Tool 구성에 반영; 자동 적용 아님 |
-| 공통 배포 Skill 절차 | `agent-pack/skills/*/SKILL.md` | Workspace Skills |
+| 업무 Skill·지침 | Native Workspace Skills | 담당자가 명시적으로 관리; 사전 콘텐츠 등록 없음 |
 | Git 관리 공통 실행 코드 | 해당 Skill의 `scripts/` | 지정 Workspace Tools에 해당 배포 절차로 반영 |
-| 교차 분석 시연 구성 | `agent-pack/ees-demo.json` | ApplyDemo로 전문 모델·Tool·EES 관리 구역과 시작 질문 연결 |
+| 폐기 콘텐츠 관리 범위 | `agent-pack/ees-demo.json` | 빈 등록 목록과 역사 ID; ApplyDemo 중지, 별도 정리 미리보기/백업/승인 |
 | EES Work 업무 절차·진행 건 | 업무 절차는 관리자/담당자의 업무 절차 작성기, 진행 건은 기존 사용자 업무 화면 | 기존 DATA_DIR의 `ees-work.sqlite3`; 대화·버전·현장별 실행 결과 보존. [관리·실행 경계](docs/03-openwebui-native-agent.md#ees-work-demo) |
-| 합성 지식 | `agent-pack/knowledge/` | Workspace Knowledge |
+| 검증용 합성 콘텐츠 | `tests/fixtures/` | 시험용; 제품에 자동 등록하지 않음 |
 | 팀원 개인·공유 프롬프트·Skill·Tool·모델 | 승인된 실행 환경의 WebUI | 등록 ID·내용·연결·권한·개인 설정 보존; 내부 백업 대상 |
 | 실제 PAT·DB·대화 | 승인된 실행 환경 | Git에 저장하지 않음 |
 
