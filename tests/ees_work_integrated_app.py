@@ -158,14 +158,23 @@ if(performance.now()>end)return resolve(null);requestAnimationFrame(check)}check
 
     def capture(self, name):
         if not self.browser: return
+        # Persist the first transport failure before page CDP or shutdown can
+        # obscure it. The central Native-chat gate inherits this same collector.
+        details={'browser':self.browser.diagnostics()}
+        if not self.browser.session:
+            details['page_capture']='unavailable_no_attached_session'
+        (self.out/(name+'.json')).write_text(json.dumps(details,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        if name=='failure':
+            self.report['browser_diagnostics']=details['browser'];self.write_report()
+        if not self.browser.session:return
         self.browser.evaluate('(async()=>{await document.fonts.ready;await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));return true})()')
         png=self.browser.call('Page.captureScreenshot',{'format':'png','captureBeyondViewport':False})['data']
         (self.out/(name+'.png')).write_bytes(base64.b64decode(png))
-        details=self.browser.evaluate('''(()=>({path:location.pathname,ready:document.readyState,
+        details.update(self.browser.evaluate('''(()=>({path:location.pathname,ready:document.readyState,
 fonts:document.fonts.status,body_flags:{...document.body.dataset},viewport:[innerWidth,innerHeight],active:(()=>{const e=document.activeElement;return e?{tag:e.tagName,id:e.id,text:e.textContent?.slice(0,100),html:e.outerHTML.slice(0,1000)}:null})(),
 text:document.body.innerText.slice(0,16000),elements:[...document.querySelectorAll('#ees-work-entry,#ees-work-panel,#ees-work-designer,#chat-container,#chat-input,dialog')].map(e=>({id:e.id,tag:e.tagName,
 rect:(()=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}})(),
-font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow:getComputedStyle(e).overflow}))}))()''')
+font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow:getComputedStyle(e).overflow}))}))()'''))
         details['native_structure']=self.browser.evaluate("(()=>Object.fromEntries(['[data-ees-native-toolbar]','#message-input-container','#sidebar'].map(selector=>[selector,document.querySelector(selector)?.outerHTML.slice(0,20000)])))()")
         details['native_empty_headings']=self.browser.evaluate("[...document.querySelectorAll('#chat-container h1,#chat-container h2')].map(e=>({html:e.outerHTML,parent:e.parentElement?.outerHTML.slice(0,6000)}))")
         details['errors']=[{'method':event.get('method'),'details':event.get('params',{}).get('exceptionDetails',{}).get('exception',{}).get('description','')} for event in self.browser.events if event.get('method')=='Runtime.exceptionThrown']
@@ -201,7 +210,10 @@ font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow
         self.report['status']='passed'; self.write_report()
 
     def close(self):
-        if self.browser: self.browser.close()
+        if self.browser:
+            self.browser.close()
+            self.report['browser_cleanup_diagnostics']=self.browser.final_diagnostics
+            self.write_report()
         self.stop_server(); self.client.close(); self.provider.close(); self.tmp.cleanup()
 
 

@@ -149,9 +149,14 @@ class ChromePipe:
             except ProcessLookupError:
                 pass
         finally:
-            os.close(self.request_write)
-            os.close(self.response_read)
-            self.errors.close()
+            try:
+                # Normal cleanup may consume a delayed earlier response. Keep
+                # that final local snapshot without adding a diagnostic command.
+                self.final_diagnostics = self.diagnostics()
+            finally:
+                os.close(self.request_write)
+                os.close(self.response_read)
+                self.errors.close()
 
     def receive(self, deadline):
         while b"\0" not in self.buffer:
@@ -312,13 +317,24 @@ class ChromePipeBootstrapTests(unittest.TestCase):
         with patch.object(select, "select", return_value=([], [], [])), self.assertRaisesRegex(AssertionError, "timed out"):
             browser.call("Target.createTarget", {"url": "about:blank"}, timeout=.01)
         original = json.dumps(browser.first_failure, sort_keys=True)
-        os.write(response_write, b'{"id":2,"result":{}}\0')
+        os.write(response_write, b'{"id":1,"result":{"targetId":"late"}}\0{"id":2,"result":{}}\0')
         browser.call("Browser.close")
         self.assertEqual(json.dumps(browser.first_failure, sort_keys=True), original)
         self.assertEqual(browser.first_failure["last_command"]["method"], "Target.createTarget")
         self.assertFalse(browser.first_failure["last_command"]["completed"])
         self.assertIn("synthetic startup diagnostic", browser.first_failure["stderr_tail"])
         self.assertEqual(browser.errors.tell(), original_offset)
+        self.assertEqual([reply["id"] for reply in browser.diagnostics()["recent_responses"]], [1, 2])
+
+    def test_normal_close_keeps_final_diagnostics_after_local_stderr_is_closed(self):
+        browser, _, _ = self.pipe()
+        browser.process.poll = lambda: 0
+        browser.errors.write(b"synthetic final diagnostic\n");browser.errors.flush()
+        with patch.object(os, "close"), patch.object(os, "killpg"):
+            browser.close()
+        self.assertTrue(browser.errors.closed)
+        self.assertEqual(browser.final_diagnostics["exit_code"], 0)
+        self.assertIn("synthetic final diagnostic", browser.final_diagnostics["stderr_tail"])
 
     def test_bootstrap_failure_capture_saves_local_diagnostics_without_page_commands(self):
         from ees_work_integrated_fixture import IntegratedNativeCase
@@ -336,6 +352,33 @@ class ChromePipeBootstrapTests(unittest.TestCase):
         self.assertEqual(report["page_capture"], "unavailable_no_attached_session")
         self.assertEqual(report["browser"]["first_failure"]["stage"], "browser_handshake")
         self.assertEqual(report["capture_errors"], [])
+
+    def test_complete_product_and_native_chat_preserve_first_failure_before_page_capture(self):
+        from ees_work_integrated_app import ProductGate
+        from ees_work_native_chat import NativeChatGate
+        self.assertIs(NativeChatGate.capture, ProductGate.capture)
+        snapshot = {"stage": "browser_handshake", "first_failure": {
+            "last_command": {"method": "Browser.getVersion"}, "stderr_tail": "synthetic diagnostic"}}
+        for session in (None, "attached-session"):
+            with self.subTest(session=session), tempfile.TemporaryDirectory(prefix="ees-product-diagnostic-") as directory:
+                gate = ProductGate.__new__(ProductGate)
+                gate.out, gate.report = Path(directory), {"status": "failed"}
+                calls = []
+                def evaluate(expression):
+                    calls.append(expression)
+                    raise AssertionError("synthetic page capture failure")
+                gate.browser = SimpleNamespace(session=session, diagnostics=lambda: snapshot, evaluate=evaluate)
+                if session:
+                    with self.assertRaisesRegex(AssertionError, "page capture failure"):
+                        gate.capture("failure")
+                else:
+                    gate.capture("failure")
+                    self.assertEqual(calls, [])
+                details = json.loads((gate.out / "failure.json").read_text(encoding="utf-8"))
+                report = json.loads((gate.out / "report.json").read_text(encoding="utf-8"))
+                self.assertEqual(details["browser"], snapshot)
+                self.assertEqual(report["browser_diagnostics"], snapshot)
+                self.assertEqual(list(gate.out.glob("*.png")), [])
 
 
 if __name__ == "__main__":

@@ -308,14 +308,14 @@ def main():
         # Preserve the actual application error body before Chrome/temp DATA_DIR
         # shutdown, so a model mismatch is not guessed from an HTTP status.
         g.report['api_failures']=[]
-        if g.browser:
+        if g.browser and g.browser.session:
             try:
                 chat_id=g.browser.evaluate('location.pathname.startsWith("/c/") ? location.pathname.split("/").at(-1) : ""')
                 if chat_id:
                     record=g.api('/api/v1/chats/'+chat_id)['chat']
                     g.report['native_messages']=[{key:item.get(key) for key in ('id','role','content','done','meta')} for item in record.get('history',{}).get('messages',{}).values()]
             except Exception as error:g.report['native_message_capture_error']=type(error).__name__+': '+str(error)[:300]
-        if g.browser:
+        if g.browser and g.browser.session:
             for event in g.browser.events:
                 response=event.get('params',{}).get('response',{})
                 if event.get('method')!='Network.responseReceived' or '/api/ees-work/' not in response.get('url','') or response.get('status',0)<400:continue

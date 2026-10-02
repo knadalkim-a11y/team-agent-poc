@@ -65,6 +65,47 @@ Path('graceful.txt').write_text('stopped', encoding='utf-8')
 '''
 
 
+def _record_process_error(error, identity, root, phase):
+    """Keep numeric failure/state evidence without changing the failed operation."""
+    pid = identity.get('pid') if isinstance(identity, dict) else None
+    child = manager._CHILDREN.get(pid)
+    evidence = {
+        'phase': phase,
+        'operation': error.operation,
+        'reason': error.reason,
+        'errno': error.errno,
+        'winerror': error.winerror,
+        'elapsed_seconds': error.elapsed_seconds,
+        'timeout_seconds': error.timeout_seconds,
+        'error_exit_code': error.exit_code,
+        'known_spawned_child': child is not None,
+        'child_poll_after_failure': None,
+    }
+    if child is not None:
+        try:
+            evidence['child_poll_after_failure'] = child.poll()
+        except OSError as inspection_error:
+            evidence['child_poll_error'] = type(inspection_error).__name__
+    for name in ('started', 'graceful'):
+        try:
+            evidence[name + '_marker'] = (root / (name + '.txt')).is_file()
+        except OSError as inspection_error:
+            evidence[name + '_marker_error'] = type(inspection_error).__name__
+    note = 'EES synthetic lifecycle evidence: ' + json.dumps(evidence, sort_keys=True)
+    error.add_note(note)
+    # Cleanup may catch its stop failure before a later identity failure.
+    # Keep both observations in CI output; exception notes also reach result JSON.
+    print(note, file=sys.stderr)
+
+
+def _verify_synthetic_identity(identity, root, phase):
+    try:
+        return manager.verify_identity(identity)
+    except manager.ProcessError as error:
+        _record_process_error(error, identity, root, phase)
+        raise
+
+
 class DeployProcessTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -100,14 +141,25 @@ class DeployProcessTests(unittest.TestCase):
         self.addCleanup(self.cleanup_child)
 
     def cleanup_child(self):
-        if self.identity is not None and manager.verify_identity(self.identity):
+        if self.identity is not None and _verify_synthetic_identity(
+                self.identity, self.root, 'cleanup_before_stop'):
+            child = manager._CHILDREN.get(self.identity['pid'])
+            self.assertIsNotNone(child, 'The synthetic child must be owned before cleanup.')
             try:
                 manager.stop_server(self.identity, timeout=3)
-            except manager.ProcessError:
+            except manager.ProcessError as error:
+                _record_process_error(error, self.identity, self.root, 'cleanup_stop')
                 # The bounded fake child exits itself; tests never force-kill it.
-                deadline = time.monotonic() + 13
-                while manager.verify_identity(self.identity) and time.monotonic() < deadline:
-                    time.sleep(.1)
+                self.wait_for_child_exit(child, 13, 'cleanup_natural_exit')
+
+    def wait_for_child_exit(self, child, timeout, phase):
+        self.assertIsNotNone(child, 'A missing child is not proof of natural exit.')
+        self.assertEqual(child.pid, self.identity['pid'])
+        # Wait on the Popen captured before the stop request. Reopening a PID's
+        # executable every 100 ms is not the fake child's natural-exit contract.
+        self.assertEqual(child.wait(timeout=timeout), 0)
+        self.assertEqual((self.root / 'graceful.txt').read_text(encoding='utf-8'), 'stopped')
+        self.assertFalse(_verify_synthetic_identity(self.identity, self.root, phase))
 
     def start(self, **settings):
         env = {**os.environ, **settings}
@@ -214,22 +266,81 @@ class DeployProcessTests(unittest.TestCase):
 
     def test_health_false_and_stop_timeout_do_not_force_kill(self):
         identity = self.start(EES_TEST_UNHEALTHY='1', EES_TEST_IGNORE='1', EES_TEST_LIFETIME='2.5')
+        child = manager._CHILDREN.get(identity['pid'])
+        self.assertIsNotNone(child)
         self.wait_started()
         with self.assertRaisesRegex(manager.ProcessError, 'health timed out'):
             manager.wait_healthy(identity, timeout=.5)
         with self.assertRaisesRegex(manager.ProcessError, 'stop timed out'):
             manager.stop_server(identity, timeout=.15)
-        self.assertTrue(manager.verify_identity(identity))
-        deadline = time.monotonic() + 3
-        while manager.verify_identity(identity) and time.monotonic() < deadline:
-            time.sleep(.1)
-        self.assertFalse(manager.verify_identity(identity))
+        self.assertTrue(_verify_synthetic_identity(identity, self.root, 'after_stop_timeout'))
+        self.wait_for_child_exit(child, 3, 'natural_exit_final')
 
     def wait_started(self):
         deadline = time.monotonic() + 5
         while not (self.root / 'started.txt').exists() and time.monotonic() < deadline:
             time.sleep(.05)
         self.assertTrue((self.root / 'started.txt').exists())
+
+
+class LifecycleEvidenceTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.identity = {'pid': 123, 'executable': 'synthetic-private', 'created_at': '456'}
+        self.child = Mock(pid=123)
+        self.child.poll.return_value = None
+        self.child.wait.return_value = 0
+        self.probe = DeployProcessTests('test_health_false_and_stop_timeout_do_not_force_kill')
+        self.probe.root, self.probe.identity = self.root, self.identity
+
+    def test_identity_failure_keeps_numeric_state_and_original_exception(self):
+        cause = OSError()
+        cause.winerror = 299
+        error = manager.ProcessError('synthetic-private-error', cause=cause,
+                                     operation='process_inspect', reason='identity_unavailable')
+        (self.root / 'started.txt').write_text('ready', encoding='utf-8')
+        with patch.dict(manager._CHILDREN, {123: self.child}, clear=True), \
+                patch.object(manager, 'verify_identity', side_effect=error) as verify, \
+                patch('sys.stderr', new_callable=io.StringIO) as output:
+            with self.assertRaises(manager.ProcessError) as failure:
+                _verify_synthetic_identity(self.identity, self.root, 'natural_exit_final')
+        self.assertIs(failure.exception, error)
+        detail = json.loads(error.__notes__[0].split(': ', 1)[1])
+        self.assertEqual((detail['operation'], detail['reason'], detail['winerror']),
+                         ('process_inspect', 'identity_unavailable', 299))
+        self.assertTrue(detail['known_spawned_child'])
+        self.assertIsNone(detail['child_poll_after_failure'])
+        self.assertTrue(detail['started_marker'])
+        self.assertFalse(detail['graceful_marker'])
+        self.assertNotIn('synthetic-private', output.getvalue())
+        verify.assert_called_once_with(self.identity)
+        self.child.wait.assert_not_called()
+        self.child.kill.assert_not_called()
+        self.child.terminate.assert_not_called()
+
+    def test_owned_child_wait_is_exact_bounded_and_fails_closed(self):
+        (self.root / 'graceful.txt').write_text('stopped', encoding='utf-8')
+        with patch.object(manager, 'verify_identity', return_value=False) as verify:
+            self.probe.wait_for_child_exit(self.child, 3, 'natural_exit_final')
+        self.child.wait.assert_called_once_with(timeout=3)
+        verify.assert_called_once_with(self.identity)
+        (self.root / 'graceful.txt').unlink()
+        for result in ('timeout', 'exit', 'marker', 'missing_child', 'wrong_child'):
+            with self.subTest(result=result), patch.object(manager, 'verify_identity') as verify:
+                self.child.wait.side_effect = (subprocess.TimeoutExpired('synthetic', 3)
+                                               if result == 'timeout' else None)
+                self.child.wait.return_value = 7 if result == 'exit' else 0
+                self.child.pid = 999 if result == 'wrong_child' else 123
+                expected = (subprocess.TimeoutExpired if result == 'timeout' else
+                            FileNotFoundError if result == 'marker' else AssertionError)
+                with self.assertRaises(expected):
+                    self.probe.wait_for_child_exit(None if result == 'missing_child' else self.child,
+                                                   3, 'natural_exit_final')
+                verify.assert_not_called()
+        self.child.kill.assert_not_called()
+        self.child.terminate.assert_not_called()
 
 
 class ProcessContracts(unittest.TestCase):
