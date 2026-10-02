@@ -1,0 +1,12 @@
+test_changed_pinned_font_is_rejected_before_launch_or_profile_write (test_ees_chat_theme.ChromeFontEnvironmentTests.test_changed_pinned_font_is_rejected_before_launch_or_profile_write) ... ok
+test_bootstrap_failure_capture_saves_local_diagnostics_without_page_commands (test_ees_chat_theme.ChromePipeBootstrapTests.test_bootstrap_failure_capture_saves_local_diagnostics_without_page_commands) ... ok
+test_complete_product_and_native_chat_preserve_first_failure_before_page_capture (test_ees_chat_theme.ChromePipeBootstrapTests.test_complete_product_and_native_chat_preserve_first_failure_before_page_capture) ... ok
+test_first_timeout_preserves_stderr_and_request_before_later_cleanup_response (test_ees_chat_theme.ChromePipeBootstrapTests.test_first_timeout_preserves_stderr_and_request_before_later_cleanup_response) ... ok
+test_handshake_and_target_creation_share_original_budget_without_retry (test_ees_chat_theme.ChromePipeBootstrapTests.test_handshake_and_target_creation_share_original_budget_without_retry) ... ok
+test_interleaved_pipe_event_does_not_replace_handshake_response_or_leak_params (test_ees_chat_theme.ChromePipeBootstrapTests.test_interleaved_pipe_event_does_not_replace_handshake_response_or_leak_params) ... ok
+test_invalid_browser_handshake_fails_before_any_target_is_created (test_ees_chat_theme.ChromePipeBootstrapTests.test_invalid_browser_handshake_fails_before_any_target_is_created) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.109s
+
+OK

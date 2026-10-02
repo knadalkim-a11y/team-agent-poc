@@ -1,0 +1,8 @@
+{"name": "empty Native installation", "workflows": 0, "runs": 0}
+{"name": "Native model availability", "models": [{"id": "c3-synthetic-model", "direct": null, "owned_by": "openai"}, {"id": "arena-model", "direct": null, "owned_by": "arena"}]}
+{"name": "actual built Native render", "viewport": [1920, 1080]}
+{"name": "physical authoring save validate publish", "workflow_id": "d8356632-bedd-446b-a6a7-16766fa7399c", "version": 1}
+{"name": "run input save cancel confirmation and actual completion", "run_id": "781e05dd-6d6a-41b0-ba26-679cbf9b60d9", "attempts": 1, "version": 1}
+{"name": "Native physical send and storage reload", "saved_messages": 2, "chat_id": "05d380eb-46ee-4915-bd08-410fa9915fdc", "model_boundary": "loopback synthetic HTTP only"}
+{"name": "Native attachment chooser upload process send reload", "file_id": "eab10e67-fca1-4369-b317-a1a240c4c5db", "chat_id": "05d380eb-46ee-4915-bd08-410fa9915fdc", "model_boundary": "Only model response and embedding vectors are loopback synthesis"}
+{"name": "Native and work restart persistence", "chat_preserved": true, "attempts_preserved": true}
