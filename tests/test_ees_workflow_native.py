@@ -1,6 +1,7 @@
 """TR-01..06/10/19/20: real pinned Native read bridge, synthetic HTTP only."""
 import asyncio
 from copy import deepcopy
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -9,6 +10,7 @@ import sys
 import unittest
 from unittest.mock import patch, AsyncMock
 from urllib.parse import parse_qs, urlsplit
+from urllib.error import HTTPError
 
 from starlette.requests import Request
 
@@ -389,6 +391,20 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(malformed_truncated["status"], "failed")
         leaked = self.native.normalize_result("get_page", {"ok": False, "error": {"code": "failure", "message": "synthetic-secret"}}, ref, {}, ("synthetic-secret",))
         self.assertNotIn("synthetic-secret", json.dumps(leaked))
+        # Plugin-provided flags are not transport evidence. Only the bridge's
+        # canonical current managed-source path may certify a known HTTP error.
+        for code in ("upstream_error", "connection_failed", "native_call_failed", "tool_error", "unauthorized", "forbidden", "rate_limited"):
+            raw = {"ok": False, "failure_confirmed": True, "error": {"code": code}}
+            for trusted in (False, True):
+                with self.subTest(code=code, trusted=trusted):
+                    result = self.native.normalize_result("get_page", raw, ref, {}, trusted_read=trusted)
+                    self.assertEqual(result["status"], "failed")
+                    self.assertEqual(result["transport"], "failed")
+                    self.assertEqual(result["completeness"], "unknown")
+                    self.assertEqual(result.get("failure_confirmed", False), trusted and code == "upstream_error")
+                    self.assertNotIn("failure_confirmed", result["data"])
+        unlisted = self.native.normalize_result("unregistered_mutation", {"ok": False, "error": {"code": "upstream_error"}}, ref, {}, trusted_read=True)
+        self.assertNotIn("failure_confirmed", unlisted)
         text = {"body": "Authorization: Bearer other-credential Cookie=session-cookie PAT=private-token "
                         "https://user:password@example.invalid/path?access_token=query-secret&x=1",
                 "headers_in_text": 'Cookie: session=first-cookie; auth=second-cookie\nPAT="quoted secret" token="other secret"',
@@ -397,6 +413,35 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         for forbidden in ("other-credential", "session-cookie", "private-token", "user:password", "query-secret", "hidden", "first-cookie", "second-cookie", "quoted secret", "other secret"):
             self.assertNotIn(forbidden, safe)
         self.assertIn("retained", safe)
+
+    async def test_confirmed_http_failure_requires_actual_managed_read_source(self):
+        for family, expected in self.native.MANAGED_READ_SOURCE_HASHES.items():
+            source = (ROOT / f"agent-pack/skills/{family}-read/scripts/{family}_tool.py").read_text(encoding="utf-8")
+            self.assertEqual(hashlib.sha256(source.encode("utf-8")).hexdigest(), expected, family)
+        refs = await self.fixture.register_read_tool("confluence")
+        def unavailable(request, timeout=None):
+            raise HTTPError(request.full_url, 503, "Synthetic unavailable", {}, None)
+        with patch("urllib.request.OpenerDirector.open", side_effect=unavailable) as transport:
+            confirmed = await self.call(refs["get_page"], {"page_id": "123"})
+        self.assertEqual(transport.call_count, 1)
+        self.assertEqual(confirmed["status"], "failed")
+        self.assertEqual(confirmed["error"]["code"], "upstream_error")
+        self.assertEqual(confirmed["completeness"], "unknown")
+        self.assertIs(confirmed["failure_confirmed"], True)
+
+        # Approval alone may legitimately allow edited code, but cannot attest
+        # that its self-reported error represents a real HTTP response.
+        tool = await self.fixture.tools.Tools.get_tool_by_id("fixture_confluence")
+        changed = tool.content + '\nclass Tools(Tools):\n    async def get_page(self, page_id: str, __user__: dict = None) -> str:\n        return json.dumps({"ok": False, "failure_confirmed": True, "error": {"code": "upstream_error"}})\n'
+        await self.fixture.tools.Tools.update_tool_by_id("fixture_confluence", {"content": changed})
+        inspected = await self.bridge.inspect(self.admin, "fixture_confluence", "get_page")
+        approved = await self.bridge.approval_action(self.admin, {"action": "approve", "reference": inspected["reference"], "evidence": "synthetic-fixture: edited source remains untrusted for retries"})
+        with patch("urllib.request.OpenerDirector.open", side_effect=AssertionError("forged function does not make HTTP")):
+            forged = await self.call(approved["reference"], {"page_id": "123"})
+        self.assertEqual(forged["status"], "failed")
+        self.assertEqual(forged["error"]["code"], "upstream_error")
+        self.assertNotIn("failure_confirmed", forged)
+        self.assertNotIn("failure_confirmed", forged["data"])
 
 
 if __name__ == "__main__":

@@ -543,6 +543,31 @@ class BrandingBuildTests(unittest.TestCase):
         self.assertEqual(first["source"]["sha256"], self.source_hash)
         self.assertEqual(first["wheel"]["sha256"], builder.sha256_file(self.root / "first" / builder.WHEEL_FILENAME))
 
+    def test_added_figma_icons_are_packaged_and_missing_source_fails_closed(self):
+        # Independent approved Figma inventory: do not derive the expectation
+        # from the builder list whose omission caused the original failure.
+        added = ('1c98e', '35b2e', '478bf', '52271', '63982',
+                 '6d84b', 'a28e3', 'b22ad', 'b456d', 'f1e53')
+        self.build('figma-icons')
+        with ZipFile(self.root / 'figma-icons' / builder.WHEEL_FILENAME) as archive:
+            for name in added:
+                relative = 'v4/' + name + '.svg'
+                self.assertIn(relative, builder.UI_FILES)
+                self.assertEqual(archive.read(builder.TARGET_APP + relative),
+                                 (self.ui / relative).read_bytes())
+        assert_record(self, self.root / 'figma-icons' / builder.WHEEL_FILENAME)
+        for name in added:
+            with self.subTest(icon=name):
+                source = self.ui / ('v4/' + name + '.svg')
+                original = source.read_bytes()
+                source.unlink()
+                try:
+                    with self.assertRaises(ValueError):
+                        self.build('missing-' + name)
+                    self.assertFalse((self.root / ('missing-' + name)).exists())
+                finally:
+                    source.write_bytes(original)
+
     def test_same_version_ui_change_updates_only_its_content_cache_key(self):
         first = self.build("before")
         source = self.ui / "ees-work-designer.js"

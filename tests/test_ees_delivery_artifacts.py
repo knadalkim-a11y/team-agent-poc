@@ -79,6 +79,12 @@ class DeliveryArtifactsTests(unittest.IsolatedAsyncioTestCase):
         run = await self.state(); row = run['jobs'][job]
         attempt = next(item for item in run['attempts'] if item['id']==row['current_attempt'])
         for item in attempt['result'].get('items',[]) or [{'id':'job'}]:
+            if item.get('selected') is False:
+                current = await self.state()
+                denied = await self.service.workspace_command(self.user, self.body('decide',current['revision'],run_id=self.run_id,job_id=job,result_revision=row['result_revision'],item_id=item['id'],verdict=verdict,note=note))
+                self.assertFalse(denied['ok'], denied)
+                self.assertEqual(denied['error']['code'], 'item_not_found')
+                continue
             current = await self.state()
             await self.core('decide',current['revision'],run_id=self.run_id,job_id=job,result_revision=row['result_revision'],item_id=item['id'],verdict=verdict,note=note)
     async def author(self):

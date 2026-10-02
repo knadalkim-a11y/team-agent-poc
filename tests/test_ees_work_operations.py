@@ -45,7 +45,7 @@ class Bridge:
 
 
 class Connector:
-    def __init__(self): self.calls = []; self.lost = False; self.effect_ok = False
+    def __init__(self): self.calls = []; self.lost = False; self.effect_ok = None
     async def request(self, actor, tool, inputs, correlation):
         self.calls.append(correlation)
         if self.lost: raise TimeoutError('not persisted')
@@ -180,7 +180,7 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(workflow.WorkflowError):await self.runtime.command(self.user,body)
         self.assertEqual(len(connector.calls),1)
         result=await self.runtime.command(self.user,self.body('request_reconcile',result['request']['revision'],external_request_id=request['id']))
-        self.assertEqual(result['request']['state'],'reported_complete');self.assertFalse(result['request']['effect_verified'])
+        self.assertEqual(result['request']['state'],'unknown');self.assertEqual(result['request']['reason'],'effect_observation_unknown');self.assertFalse(result['request']['effect_verified'])
         connector.effect_ok=True
         result=await self.runtime.command(self.user,self.body('request_reconcile',result['request']['revision'],external_request_id=request['id']))
         self.assertEqual(result['request']['state'],'effect_verified');self.assertEqual(len(connector.calls),1)
