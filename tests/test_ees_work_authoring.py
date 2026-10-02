@@ -19,7 +19,7 @@ import tempfile
 from types import ModuleType
 import unittest
 from unittest.mock import patch
-from workflow_fixture import load_legacy_workflow
+from workflow_fixture import load_legacy_workflow, arrange_legacy_catalog
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +28,7 @@ PACKAGE = ModuleType("ees_authoring_test_subject")
 PACKAGE.__path__ = [str(SOURCE)]
 sys.modules[PACKAGE.__name__] = PACKAGE
 workflow = importlib.import_module(PACKAGE.__name__ + ".ees_workflow")
+historical = __import__("workflow_fixture").historical_facade(PACKAGE.__name__)
 
 
 class AuthoringFixture:
@@ -48,6 +49,7 @@ class AuthoringFixture:
         self.requests = 0
         self.chats = {"chat-ems": {"id": "chat-ems", "user_id": "ems-a"}}
         self.service = self.new_service()
+        arrange_legacy_catalog(self.service)
         for system, group in (("EMS", "g-ems"), ("APC", "g-apc"), ("FDC", "g-fdc")):
             result = await self.action("admin", "set_system_group", system_id=system,
                                        expected_mapping_revision=0, payload={"group_id": group, "active": True})
@@ -67,7 +69,7 @@ class AuthoringFixture:
         return list(deepcopy(self.groups).values())
 
     def new_service(self):
-        return workflow.WorkflowService(self.database, self.user_lookup,
+        return historical.WorkflowService(self.database, self.user_lookup,
             lambda key: deepcopy(self.chats.get(key)), lambda _: deepcopy(self.assets),
             group_lookup=self.group_lookup, group_list_lookup=self.group_list_lookup)
 
@@ -132,7 +134,7 @@ class AuthoringFixture:
 
     def audit_table(self):
         with closing(sqlite3.connect(self.database)) as db:
-            tables = [row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%audit%'")]
+            tables = [row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='authoring_audit'")]
         self.assertEqual(len(tables), 1, tables)
         return tables[0]
 
@@ -968,7 +970,9 @@ class AuthoringRouteTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
                                              headers={"x-test-user": "apc"})
                 self.assertEqual(forbidden.status_code, 404, forbidden.text)
                 forged = self.body("publish", process, user_id="admin", role="admin")
-                self.assertEqual((await client.post("/api/ees-work/authoring/action", headers=headers, json=forged)).status_code, 400)
+                retired = await client.post("/api/ees-work/authoring/action", headers=headers, json=forged)
+                self.assertEqual(retired.status_code, 409)
+                self.assertEqual(retired.json()["error"]["code"], "legacy_execution_retired")
                 stale = self.body("save_draft", process, expected_draft_revision=999, payload={"workflow": process["workflow"]})
                 self.assertEqual((await client.post("/api/ees-work/authoring/action", headers=headers, json=stale)).status_code, 409)
                 self.fail_groups = True

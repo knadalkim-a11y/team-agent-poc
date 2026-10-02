@@ -1191,10 +1191,10 @@ def serve(*, host, port):
                 self.assertEqual(json.loads((self.cwd / 'observed.json').read_text(encoding='utf-8'))['version'], legacy)
 
     def test_unsupported_and_mixed_release_arguments_refuse_app_import(self):
-        for version in ('0.11.3+ees.13', [], '0.11.3'):
+        for version in ('0.11.3+unreviewed.1', [], '0.11.3'):
             with self.subTest(version=version), self.assertRaises(manager.ProcessError):
                 self.command(version=version)
-        for index, value in ((8, '0.11.3+ees.13'), (9, 'open_webui-0.11.3+ees.1.dist-info'), (10, '_ees1')):
+        for index, value in ((8, '0.11.3+ees.1'), (9, 'open_webui-0.11.3+ees.1.dist-info'), (10, '_ees1')):
             command = self.command()
             command[index] = value
             with self.subTest(index=index):

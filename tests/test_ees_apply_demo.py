@@ -76,6 +76,31 @@ class WebUIHTTPTests(unittest.TestCase):
         self.server.asset_status = 503
         self.client = demo.WebUIClient(self.url, TOKEN, timeout=2)
 
+    def test_retired_apply_refuses_before_transport_credentials_git_or_server_control(self):
+        progress = {}
+        with (patch.object(demo, "load_token") as token,
+              patch.object(demo.upgrade, "checkout") as checkout,
+              patch.object(demo.upgrade.manager, "stop_registered") as stop,
+              patch.object(demo.assets, "apply_assets") as core):
+            with self.assertRaisesRegex(demo.DemoError, "demo_registration_retired"):
+                demo.apply({}, argparse.Namespace(), HEAD, progress)
+            token.assert_not_called()
+            checkout.assert_not_called()
+            stop.assert_not_called()
+            core.assert_not_called()
+        self.assertEqual(self.server.seen, [])
+        self.assertEqual(progress, {"stage": "retired", "changed": 0})
+
+    def test_retired_main_does_not_load_user_config_or_request_credentials(self):
+        output = io.StringIO()
+        with (patch.object(demo.upgrade.manager.states, "load_config") as config,
+              patch.object(demo, "load_token") as token, redirect_stdout(output)):
+            self.assertEqual(demo.main(["--config", "not-read.json"]), 1)
+            config.assert_not_called()
+            token.assert_not_called()
+        self.assertIn("demo_registration_retired", output.getvalue())
+        self.assertIn("changed=0", output.getvalue())
+
     def test_json_utf8_and_bearer_request(self):
         value = {"params": {"system": "기존 지침\n추가 지침"}, "id": "existing"}
         self.assertEqual(self.client.request("POST", "/api/echo", value), {"received": value})
@@ -114,85 +139,7 @@ class WebUIHTTPTests(unittest.TestCase):
             with self.assertRaisesRegex(demo.DemoError, "webui_url_invalid"):
                 demo.base_url(url)
 
-    def test_apply_uses_version_then_admin_then_core_without_server_control(self):
-        with tempfile.TemporaryDirectory() as directory:
-            config = {"host": "127.0.0.1", "port": self.server.server_port, "state_root": directory}
-            args = argparse.Namespace(webui_url=None, ees_model_id="existing", ca_file=None, reset_token=False)
-            progress = {}
-            with (patch.object(demo.upgrade.manager, "locked", return_value=nullcontext()),
-                  patch.object(demo.upgrade, "checkout"),
-                  patch.object(demo, "load_token", return_value=(TOKEN, False)),
-                  patch.object(demo.assets, "apply_assets", return_value={"changed": 8, "source_commit": HEAD}) as core,
-                  patch.object(demo.upgrade.manager, "stop_registered") as stop,
-                  patch.object(demo.upgrade.manager, "start_selected") as start):
-                result = demo.apply(config, args, HEAD, progress)
-            self.assertEqual(result["next"], "new_chat")
-            self.assertEqual([v[1] for v in self.server.seen], ["/api/version", "/api/v1/auths/", "/api/v1/models/model?id=existing"])
-            self.assertIsNone(self.server.seen[0][2])
-            self.assertEqual(core.call_args.args[3:], ("existing", HEAD))
-            saved = json.loads((Path(directory) / "demo-connection.json").read_text(encoding="utf-8"))
-            self.assertNotIn(TOKEN, json.dumps(saved))
-            stop.assert_not_called()
-            start.assert_not_called()
 
-    def test_first_application_failure_keeps_validated_connection(self):
-        with tempfile.TemporaryDirectory() as directory:
-            config = {"host": "127.0.0.1", "port": self.server.server_port, "state_root": directory}
-            args = argparse.Namespace(webui_url=None, ees_model_id="existing", ca_file=None, reset_token=False)
-            with (patch.object(demo.upgrade.manager, "locked", return_value=nullcontext()),
-                  patch.object(demo.upgrade, "checkout"),
-                  patch.object(demo, "load_token", return_value=(TOKEN, False)),
-                  patch.object(demo.assets, "apply_assets", side_effect=demo.DemoError("api_request_failed"))):
-                with self.assertRaises(demo.DemoError):
-                    demo.apply(config, args, HEAD, {})
-            saved = json.loads(Path(directory, "demo-connection.json").read_text(encoding="utf-8"))
-            self.assertEqual(saved["ees_model_id"], "existing")
-            self.assertEqual(saved["url"], self.url)
-
-
-class PromptFrontendContractTests(unittest.TestCase):
-    @unittest.skipUnless(shutil.which("node"), "Node is required to execute the upstream frontend expression")
-    def test_model_payload_changes_the_actual_frontend_suggestions(self):
-        manifest = demo.assets.load_manifest(Path(__file__).resolve().parents[1])
-        item = manifest["ees"]
-        expected, retired = item["suggestions"], item["retired_suggestions"]
-        current = {"id": "existing-ees", "name": "EES 통합 Assistant",
-                   "base_model_id": "synthetic-base", "params": {"system": ""},
-                   "meta": {"suggestion_prompts": retired, "suggestionPrompts": expected},
-                   "access_grants": [], "is_active": True}
-        previous = {"tool_ids": item["tool_ids"], "suggestions": expected}
-        updated = demo.assets._merge_model(current, item, True, previous)
-        # The return expression is copied verbatim from Open WebUI 0.11.3:
-        # https://github.com/open-webui/open-webui/blob/2a960a59fe1dbbd35282f0556b3666d81102e781/src/lib/components/chat/Placeholder.svelte#L283-L286
-        # Keep this consumer contract independent of the writer/state key. The
-        # API accepts unknown metadata, so payload echo tests missed this bug.
-        consumer = """
-const input = JSON.parse(require('node:fs').readFileSync(0, 'utf8'));
-function suggestions(meta) {
-    const atSelectedModel = null;
-    const models = [{info: {meta}}];
-    const selectedModelIdx = 0;
-    const $config = {default_prompt_suggestions: input.retired};
-    return atSelectedModel?.info?.meta?.suggestion_prompts ??
-        models[selectedModelIdx]?.info?.meta?.suggestion_prompts ??
-        $config?.default_prompt_suggestions ??
-        [];
-}
-process.stdout.write(JSON.stringify({
-    before: suggestions(input.before),
-    after: suggestions(input.after),
-    camelOnly: suggestions({suggestionPrompts: input.expected})
-}));
-"""
-        result = subprocess.run([shutil.which("node"), "-e", consumer],
-                                input=json.dumps({"before": current["meta"], "after": updated["meta"],
-                                                  "retired": retired, "expected": expected}),
-                                capture_output=True, text=True, encoding="utf-8", check=True, timeout=10)
-        visible = json.loads(result.stdout)
-        self.assertEqual(visible["before"], retired)
-        self.assertEqual(visible["camelOnly"], retired)
-        self.assertEqual(visible["after"], expected)
-        self.assertEqual(len(visible["after"]), 3)
 
 
 class OperatorTests(unittest.TestCase):
@@ -235,34 +182,7 @@ class OperatorTests(unittest.TestCase):
             _, value = demo.connection(config, argparse.Namespace(webui_url="https://example.invalid", ees_model_id=None, ca_file=None))
             self.assertIsNone(value["ees_model_id"])
 
-    def test_version_or_admin_failure_cannot_write_assets(self):
-        for responses, code in [([{"version": "9.0"}], "unsupported_webui_version"),
-                                ([{"version": "0.11.3"}, {"role": "user"}], "webui_administrator_required")]:
-            with tempfile.TemporaryDirectory() as directory:
-                config = {"state_root": directory, "host": "127.0.0.1", "port": 8080}
-                args = argparse.Namespace(webui_url=None, ees_model_id="existing", ca_file=None, reset_token=False)
-                client = Mock()
-                client.request.side_effect = responses
-                with (patch.object(demo.upgrade.manager, "locked", return_value=nullcontext()),
-                      patch.object(demo.upgrade, "checkout"),
-                      patch.object(demo, "WebUIClient", return_value=client),
-                      patch.object(demo, "load_token", return_value=(TOKEN, False)),
-                      patch.object(demo.assets, "apply_assets") as core):
-                    with self.assertRaisesRegex(demo.DemoError, code):
-                        demo.apply(config, args, HEAD, {})
-                core.assert_not_called()
 
-    def test_guard_unavailable_reports_program_upgrade_and_zero_changes(self):
-        output = io.StringIO()
-        with (patch.object(demo.upgrade.manager.states, "load_config", return_value={}),
-              patch.object(demo.upgrade, "checkout"), patch.object(demo.upgrade, "github_client"),
-              patch.object(demo.upgrade, "bootstrap", return_value=(None, HEAD, None)),
-              patch.object(demo, "apply", side_effect=demo.assets.DemoAssetsError("conditional_write_unavailable")),
-              patch.object(demo.upgrade.manager, "save_operation", return_value=True), redirect_stdout(output)):
-            self.assertEqual(1, demo.main(["--config", "synthetic.json"]))
-        self.assertIn("code=conditional_write_unavailable", output.getvalue())
-        self.assertIn("next=upgrade", output.getvalue())
-        self.assertIn("changed=0", output.getvalue())
 
     def test_error_report_contains_only_short_labels(self):
         output = io.StringIO()
@@ -309,51 +229,12 @@ class TrialSourceTests(unittest.TestCase):
                               text=True, encoding="utf-8", check=True, timeout=10).stdout.strip()
 
     def assert_trial_stops(self, code, commit=None):
-        with (patch.object(demo.upgrade.manager.states, "load_config", return_value={}),
-              patch.object(demo.upgrade, "github_client") as github,
-              patch.object(demo.upgrade, "bootstrap") as bootstrap,
-              patch.object(demo, "WebUIClient") as webui,
-              patch.object(demo, "report") as report, redirect_stdout(io.StringIO())):
-            self.assertEqual(1, demo.main(["--config", "synthetic.json", "--trial-commit", commit or self.head]))
-        self.assertEqual(report.call_args.args[1]["code"], code)
-        self.assertEqual(report.call_args.args[1]["stage"], "trial_source")
-        self.assertEqual(report.call_args.args[1]["source_verification"], "local_trial")
-        github.assert_not_called()
-        bootstrap.assert_not_called()
-        webui.assert_not_called()
+        # Shared canonical-source helper still protects deployment operations;
+        # retired ApplyDemo itself now refuses before inspecting any checkout.
+        with self.assertRaises((demo.DemoError, demo.upgrade.UpgradeError)) as caught:
+            demo.trial_checkout(commit or self.head)
+        self.assertEqual(caught.exception.code, code)
 
-    def test_trial_clean_main_uses_common_locked_asset_path_without_ci_or_git_update(self):
-        state_root = self.root / "state"
-        state_root.mkdir()
-        config = {"state_root": str(state_root), "host": "127.0.0.1", "port": 8080}
-        client = Mock()
-        client.request.side_effect = [{"version": "0.11.3+ees.9"}, {"role": "admin"},
-                                      {"id": "existing", "base_model_id": "base", "params": {}, "write_access": True}]
-        before = self.git("rev-parse", "HEAD")
-        with (patch.object(demo.upgrade.manager.states, "load_config", return_value=config),
-              patch.object(demo.upgrade.manager, "locked", return_value=nullcontext()) as locked,
-              patch.object(demo.upgrade, "github_client") as github,
-              patch.object(demo.upgrade, "bootstrap") as bootstrap,
-              patch.object(demo.upgrade, "git", wraps=demo.upgrade.git) as git,
-              patch.object(demo.upgrade.manager, "read_registry", return_value={"phase": "idle", "customization": {"active": {"source_commit": self.head}}}),
-              patch.object(demo.upgrade.manager, "selected_program", return_value=state_root / "program") as selected,
-              patch.object(demo, "WebUIClient", return_value=client),
-              patch.object(demo, "load_token", return_value=(TOKEN, False)),
-              patch.object(demo.assets, "apply_assets", return_value={"changed": 1, "source_commit": self.head}) as core,
-              patch.object(demo, "report") as report, redirect_stdout(io.StringIO())):
-            self.assertEqual(0, demo.main(["--config", "synthetic.json", "--trial-commit", self.head,
-                                           "--ees-model-id", "existing"]))
-        locked.assert_called_once_with(config, track_owner=True)
-        selected.assert_called_once()
-        core.assert_called_once()
-        self.assertEqual(core.call_args.args[3:], ("existing", self.head))
-        self.assertEqual(report.call_args.args[1]["source_verification"], "local_trial")
-        self.assertEqual(report.call_args.args[1]["stage"], "complete")
-        self.assertEqual(self.git("rev-parse", "HEAD"), before)
-        self.assertEqual(sum(call.args == ("rev-parse", "origin/main") for call in git.call_args_list), 2)
-        self.assertFalse(any(call.args[0] in {"fetch", "merge", "checkout", "reset"} for call in git.call_args_list))
-        github.assert_not_called()
-        bootstrap.assert_not_called()
 
     def test_trial_rejects_other_repository(self):
         self.git("remote", "set-url", "origin", "https://github.com/another/repo.git")
@@ -375,19 +256,6 @@ class TrialSourceTests(unittest.TestCase):
         self.git("commit", "-am", "local [skip ci]")
         self.assert_trial_stops("trial_main_mismatch", self.git("rev-parse", "HEAD"))
 
-    def test_trial_rechecks_fetched_identity_inside_existing_operation_lock(self):
-        self.git("commit", "--allow-empty", "-m", "second [skip ci]")
-        target = self.git("rev-parse", "HEAD")
-        self.git("update-ref", "refs/remotes/origin/main", target)
-
-        @contextmanager
-        def change_source_under_lock(*args, **kwargs):
-            self.git("update-ref", "refs/remotes/origin/main", self.head)
-            yield
-
-        with patch.object(demo.upgrade.manager, "locked", side_effect=change_source_under_lock) as locked:
-            self.assert_trial_stops("trial_main_mismatch", target)
-        locked.assert_called_once_with({}, track_owner=True)
 
     def test_trial_argument_rejects_abbreviation_and_release_bootstrap_mixing(self):
         for options in (["--trial-commit", self.head[:12]], ["--trial-commit", self.head.upper()],
@@ -400,69 +268,9 @@ class TrialSourceTests(unittest.TestCase):
                 self.assertEqual(raised.exception.code, 2)
                 load.assert_not_called()
 
-    def test_trial_refuses_old_or_missing_program_before_api_or_asset_writes(self):
-        for registry in ({"phase": "idle", "customization": {"active": None}},
-                         {"phase": "idle", "customization": {"active": {"source_commit": HEAD}}}):
-            with (self.subTest(registry=registry),
-                  patch.object(demo.upgrade.manager, "locked", return_value=nullcontext()),
-                  patch.object(demo.upgrade.manager, "read_registry", return_value=registry),
-                  patch.object(demo.upgrade.manager, "selected_program") as selected,
-                  patch.object(demo, "WebUIClient") as webui):
-                progress = {}
-                with self.assertRaisesRegex(demo.DemoError, "trial_program_mismatch"):
-                    demo.apply({}, argparse.Namespace(trial_commit=self.head), self.head, progress)
-                self.assertEqual(progress["stage"], "trial_program")
-            selected.assert_not_called()
-            webui.assert_not_called()
 
-    def test_trial_keeps_existing_program_validation_before_api_and_reports_repair_step(self):
-        with (patch.object(demo.upgrade.manager.states, "load_config", return_value={}),
-              patch.object(demo.upgrade.manager, "locked", return_value=nullcontext()),
-              patch.object(demo.upgrade.manager, "read_registry", return_value={"phase": "idle", "customization": {"active": {"source_commit": self.head}}}),
-              patch.object(demo.upgrade.manager, "selected_program", side_effect=demo.upgrade.manager.DeploymentError("incomplete program")),
-              patch.object(demo, "WebUIClient") as webui,
-              patch.object(demo, "report") as report, redirect_stdout(io.StringIO())):
-            self.assertEqual(1, demo.main(["--config", "synthetic.json", "--trial-commit", self.head]))
-        webui.assert_not_called()
-        self.assertEqual(report.call_args.args[1]["stage"], "trial_program")
-        self.assertEqual(report.call_args.args[1]["next"], "apply_trial_program")
 
-    def test_trial_refuses_incomplete_operation_or_uncertain_launch_before_api(self):
-        for status in ({"phase": "switching"}, {"phase": "recovery_required"},
-                       {"phase": "idle", "pending": {"source_commit": self.head}},
-                       {"phase": "idle", "launch_uncertain": True}):
-            registry = {"customization": {"active": {"source_commit": self.head}}, **status}
-            with (self.subTest(status=status),
-                  patch.object(demo.upgrade.manager.states, "load_config", return_value={}),
-                  patch.object(demo.upgrade.manager, "locked", return_value=nullcontext()),
-                  patch.object(demo.upgrade.manager, "read_registry", return_value=registry),
-                  patch.object(demo.upgrade.manager, "selected_program") as selected,
-                  patch.object(demo, "WebUIClient") as webui,
-                  patch.object(demo, "report") as report, redirect_stdout(io.StringIO())):
-                self.assertEqual(1, demo.main(["--config", "synthetic.json", "--trial-commit", self.head]))
-            selected.assert_not_called()
-            webui.assert_not_called()
-            self.assertEqual(report.call_args.args[1]["stage"], "trial_program")
-            self.assertEqual(report.call_args.args[1]["next"], "apply_trial_program")
 
-    def test_default_still_requires_ci_and_does_not_fall_back_to_trial(self):
-        def ci_failure(config, args, client, progress, **kwargs):
-            progress["stage"] = "ci_check"
-            raise demo.upgrade.UpgradeError("ci_not_successful")
-
-        with (patch.object(demo.upgrade.manager.states, "load_config", return_value={}),
-              patch.object(demo.upgrade, "github_client") as github,
-              patch.object(demo.upgrade, "bootstrap", side_effect=ci_failure) as bootstrap,
-              patch.object(demo, "trial_checkout") as trial,
-              patch.object(demo, "apply") as apply,
-              patch.object(demo, "report") as report, redirect_stdout(io.StringIO())):
-            self.assertEqual(1, demo.main(["--config", "synthetic.json"]))
-        github.assert_called_once()
-        bootstrap.assert_called_once()
-        trial.assert_not_called()
-        apply.assert_not_called()
-        self.assertEqual(report.call_args.args[1]["next"], "check_ci")
-        self.assertNotIn("source_verification", report.call_args.args[1])
 
 
 if __name__ == "__main__":

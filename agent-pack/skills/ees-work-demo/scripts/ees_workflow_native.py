@@ -24,13 +24,17 @@ FUNCTIONS = {
     "get_page": {"page_id": "string"},
     "jira_dashboard": {"project_key": "string", "start_at": "integer"},
     "jira_get_issue": {"issue_key": "string"},
+    "jira_project_metadata": {"project_key": "string"},
+    "jira_search_crs": {"project_key": "string", "status_ids": "array", "date_field": "string", "start_date": "string", "end_date": "string", "start_at": "integer"},
+    "jira_issue_attachments": {"issue_key": "string"},
+    "jira_cr_attachments": {"issue_keys": "array", "required_filenames": "array"},
     "github_list_pull_requests": {"repository": "string", "state": "string", "page": "integer"},
     "github_get_pull_request": {"repository": "string", "number": "integer"},
 }
 CONFIG_KEYS = {
     "ENABLED", "ALLOW_HTTP", "TIMEOUT_SECONDS", "MAX_RESULTS", "MAX_RESPONSE_BYTES",
     "USE_ENV_PROXY", "CA_BUNDLE_PATH", "CONFLUENCE_BASE_URL", "ALLOWED_SPACES",
-    "MAX_CONTENT_CHARS", "JIRA_BASE_URL", "ALLOWED_PROJECTS", "MAX_DESCRIPTION_CHARS",
+    "MAX_CONTENT_CHARS", "JIRA_BASE_URL", "ALLOWED_PROJECTS", "MAX_DESCRIPTION_CHARS", "MAX_CR_PAGES", "MAX_ATTACHMENTS",
     "GITHUB_BASE_URL", "ALLOWED_REPOSITORIES", "MAX_BODY_CHARS",
 }
 REFERENCE_KEYS = ("tool_id", "function", "revision", "content_hash", "schema_hash", "config_hash", "environment")
@@ -108,6 +112,12 @@ def public_schema(tool, function):
             value["type"] = "string"
         if value.get("type") != FUNCTIONS[function][key]:
             _fail("native_schema_invalid")
+        if value.get("type") == "array":
+            items = value.get("items", {})
+            if items.get("type") == "str":
+                items["type"] = "string"
+            if items.get("type") != "string":
+                _fail("native_schema_invalid")
     if set(schema["properties"]) != set(FUNCTIONS[function]) or any(key not in schema["properties"] for key in schema["required"]):
         _fail("native_schema_invalid")
     schema["type"] = "object"
@@ -126,7 +136,8 @@ def validate_arguments(function, schema, arguments):
     for key, value in arguments.items():
         kind = FUNCTIONS[function][key]
         if ((kind == "string" and (not isinstance(value, str) or len(value) > 1024 or re.search(r"[\x00-\x1f\x7f]", value)))
-                or (kind == "integer" and (type(value) is not int or not 0 <= value <= 2147483647))):
+                or (kind == "integer" and (type(value) is not int or not 0 <= value <= 2147483647))
+                or (kind == "array" and (not isinstance(value, list) or len(value) > 50 or any(not isinstance(item, str) or len(item) > 128 or re.search(r"[\x00-\x1f\x7f]", item) for item in value)))):
             _fail("native_input_invalid", "실행 입력의 자료형과 범위를 확인해 주세요.")
     if "query" in arguments and not 1 <= len(arguments["query"].strip()) <= 256:
         _fail("native_input_invalid")
@@ -221,7 +232,8 @@ def normalize_result(function, raw, reference, context, secrets=()):
         envelope["error"] = {"code": "native_result_invalid", "message": "도구 결과의 형식·크기를 확인할 수 없습니다."}
         return _contract(envelope)
     envelope["data"] = data
-    if data["ok"] is not True:
+    structured_partial = (function in {"jira_search_crs", "jira_cr_attachments"} and data.get("status") == "partial" and isinstance(data.get("issues"), list))
+    if data["ok"] is not True and not structured_partial:
         code = _get(data.get("error", {}), "code", "native_call_failed")
         code = code if isinstance(code, str) and re.fullmatch(r"[a-z_]{1,80}", code) else "native_call_failed"
         envelope["error"] = {"code": code, "message": "등록 도구의 조회가 완료되지 않았습니다. 연결·권한과 실행 상세를 확인해 주세요."}
@@ -253,6 +265,26 @@ def normalize_result(function, raw, reference, context, secrets=()):
             envelope["status"] = "empty" if not rows and data["summary"].get("total") == 0 else "success"
             # Counts may be complete while the issue list is one page.
             envelope["completeness"] = "page"
+    elif function == "jira_project_metadata":
+        if any(not isinstance(data.get(key), list) for key in ("projects", "statuses", "date_fields")):
+            envelope.update(status="error", completeness="unknown")
+        elif data.get("status", "complete") != "complete":
+            envelope.update(status="partial", completeness="partial")
+    elif function == "jira_search_crs":
+        listing = data.get("listing")
+        if not isinstance(data.get("issues"), list) or not isinstance(listing, dict) or type(listing.get("ok")) is not bool or type(listing.get("total")) is not int or type(listing.get("returned")) is not int:
+            envelope.update(status="error", completeness="unknown")
+        elif listing.get("ok") is not True or data.get("status") != "complete" or listing.get("next_start_at") is not None or listing.get("start_at", 0) != 0 or listing["returned"] != listing["total"]:
+            envelope.update(status="partial", completeness="partial")
+        elif not data["issues"]:
+            envelope.update(status="empty", completeness="empty")
+    elif function in {"jira_issue_attachments", "jira_cr_attachments"}:
+        if (function == "jira_issue_attachments" and not isinstance(data.get("issue"), dict)) or (function == "jira_cr_attachments" and not isinstance(data.get("issues"), list)) or not isinstance(data.get("attachments"), list) or data.get("content_reviewed") is not False:
+            envelope.update(status="error", completeness="unknown")
+        elif data.get("completeness") not in {"complete", "empty"}:
+            envelope.update(status="partial", completeness=data.get("completeness") if data.get("completeness") in {"partial", "unknown"} else "unknown")
+        elif not data["attachments"]:
+            envelope.update(status="empty", completeness="empty")
     detail = {"get_page": ("page", "content", "truncated"),
               "jira_get_issue": ("issue", "description", "description_truncated"),
               "github_get_pull_request": ("pull_request", "body", "body_truncated")}.get(function)
@@ -272,6 +304,26 @@ def normalize_result(function, raw, reference, context, secrets=()):
     for field, kind, key in (("page", "confluence_page", "page_id"), ("issue", "jira_issue", "key"), ("pull_request", "github_pull_request", "number")):
         if isinstance(data.get(field), dict):
             candidates.append((kind, data[field], key))
+    # Common business result blocks consume stable item IDs, not connector-
+    # specific page layouts. Keep the complete original envelope as evidence.
+    item_sources = {"jira_dashboard": ("issues", "key", "summary"),
+                    "jira_search_crs": ("issues", "key", "summary"),
+                    "jira_issue_attachments": ("attachments", "id", "filename"),
+                    "jira_cr_attachments": ("document_checks", "id", "filename"),
+                    "github_list_pull_requests": ("pull_requests", "number", "title"),
+                    "search_pages": ("results", "page_id", "title")}
+    if function in item_sources:
+        collection, id_key, label_key = item_sources[function]
+        envelope["items"] = [{"id": str(item[id_key]), "name": str(item.get(label_key) or item[id_key]),
+                               "label": str(item.get(label_key) or item[id_key]), "url": item.get("url", ""),
+                               "required": True, "source": {"tool_id": reference["tool_id"], "function": function,
+                               "item_id": str(item[id_key])}, "source_record": deepcopy(item),
+                               "evidence": [{"label": "첨부 존재·접근 확인" if function in {"jira_issue_attachments", "jira_cr_attachments"} else "원본 조회",
+                                             "status": "succeeded" if function not in {"jira_issue_attachments", "jira_cr_attachments"} or item.get("accessibility") == "readable" or item.get("state") == "present_readable" else "unknown",
+                                             **({"content_reviewed": False} if function in {"jira_issue_attachments", "jira_cr_attachments"} else {})}],
+                               **({"content_reviewed": False, "accessibility": item.get("accessibility", "unknown")}
+                                  if function in {"jira_issue_attachments", "jira_cr_attachments"} else {})}
+                              for item in rows(collection) if isinstance(item, dict) and isinstance(item.get(id_key), (str, int))]
     for kind, item, key in candidates[:100]:
         identifier, url = item.get(key), item.get("url")
         if isinstance(identifier, (str, int)) and isinstance(url, str):
@@ -370,6 +422,74 @@ class NativeBridge:
         return {"reference": reference, "schema": schema, "state": state, "registered": True,
                 "executable": state == "allowed" and not reason, "reason": reason, "normalizer": NORMALIZER}
 
+    async def inspect_registered(self, user, tool_id, function):
+        """Read a registered EES contract without loading or executing its code.
+
+        Arbitrary registered functions are reviewable metadata only. This does
+        not add them to the bounded read-function dispatcher or enable writes.
+        """
+        current = await self.service._user(user)
+        if not isinstance(tool_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,200}", tool_id):
+            _fail("native_tool_invalid")
+        if not isinstance(function, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,199}", function):
+            _fail("native_function_invalid")
+        from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL
+        from open_webui.env import ENABLE_PLUGINS
+        from open_webui.models.access_grants import AccessGrants
+        from open_webui.models.groups import Groups
+        from open_webui.models.tools import Tools
+        if not ENABLE_PLUGINS:
+            _fail("native_plugins_disabled")
+        tool = await Tools.get_tool_by_id(tool_id)
+        if tool is None:
+            _fail("native_tool_unavailable")
+        groups = {_get(group, "id") for group in await Groups.get_groups_by_member_id(_get(current, "id"))}
+        if (not (_get(current, "role") == "admin" and BYPASS_ADMIN_ACCESS_CONTROL)
+                and _get(tool, "user_id") != _get(current, "id")
+                and not await AccessGrants.has_access(user_id=_get(current, "id"), resource_type="tool", resource_id=tool_id,
+                    permission="read", user_group_ids=groups)):
+            _fail("native_access_denied")
+        specs = [spec for spec in _get(tool, "specs", []) if isinstance(spec, dict) and spec.get("name") == function]
+        if len(specs) != 1:
+            _fail("native_function_missing")
+        schema = deepcopy(specs[0].get("parameters", {}))
+        if schema.get("type", "object") != "object" or not isinstance(schema.get("properties", {}), dict):
+            _fail("native_schema_invalid")
+        # Native private injection parameters are not user inputs.
+        schema["properties"] = {key: val for key, val in schema.get("properties", {}).items() if not key.startswith("__")}
+        schema["required"] = [key for key in schema.get("required", []) if not key.startswith("__")]
+        content = _get(tool, "content")
+        if not isinstance(content, str) or not content:
+            _fail("native_tool_unavailable")
+        reference = {"tool_id": tool_id, "function": function, "content_hash": _hash(content),
+                     "schema_hash": _hash(schema), "revision": _get(tool, "updated_at", 0)}
+        return {"reference": reference, "schema": schema, "registered": True,
+                "name": _get(tool, "name", tool_id), "executable": False,
+                "reason": "ees_connector_unconfigured"}
+
+    async def registered_capabilities(self, user):
+        from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL
+        from open_webui.env import ENABLE_PLUGINS
+        from open_webui.models.tools import Tools
+        current = await self.service._user(user)
+        if not ENABLE_PLUGINS:
+            return []
+        owner = None if _get(current, "role") == "admin" and BYPASS_ADMIN_ACCESS_CONTROL else _get(current, "id")
+        result = []
+        for tool in await Tools.get_tools(defer_content=True, user_id=owner, permission="read"):
+            for spec in _get(tool, "specs", []):
+                if not isinstance(spec, dict) or not spec.get("name"):
+                    continue
+                try:
+                    item = await self.inspect_registered(current, _get(tool, "id"), spec["name"])
+                    item["kind"] = "request"
+                    if spec["name"] in FUNCTIONS:
+                        item = {**await self.inspect(current, _get(tool, "id"), spec["name"]), "kind": "read", "name": _get(tool, "name", "")}
+                    result.append(item)
+                except WorkflowError:
+                    continue
+        return result
+
     async def capabilities(self, user):
         """Access-filtered metadata for publication/pickers; no code loading."""
         from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL
@@ -424,16 +544,35 @@ class NativeBridge:
         if _get(current, "role") != "admin":
             _fail("admin_required", "자동 실행 허용은 기존 전체 관리자만 변경할 수 있습니다.")
         with self.service._db(write=True) as db:
-            row = db.execute("SELECT revision FROM native_approvals WHERE tool_id=? AND function=?", (reference["tool_id"], reference["function"])).fetchone()
-            if (row["revision"] if row else 0) != expected:
-                _fail("native_approval_conflict")
-            new_reference = {**reference, "revision": expected + 1}
-            state = "allowed" if body["action"] == "approve" else "disabled"
-            values = (reference["tool_id"], reference["function"], expected + 1, _json(new_reference), evidence.strip(), _get(current, "id"), state, _now())
-            db.execute("INSERT INTO native_approvals VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(tool_id,function) DO UPDATE SET "
-                       "revision=excluded.revision,reference=excluded.reference,evidence=excluded.evidence,actor=excluded.actor,"
-                       "state=excluded.state,updated_at=excluded.updated_at", values)
-            db.execute("INSERT INTO native_approval_events(tool_id,function,revision,reference,evidence,actor,state,updated_at) VALUES(?,?,?,?,?,?,?,?)", values)
+            return self.store_approval(db, current, reference, evidence, body["action"])
+
+    def store_approval(self, db, current, reference, evidence, action="approve"):
+        """Shared transaction writer after caller's current Native snapshot check.
+
+        Used by the original approval endpoint and the integrated B5 command so
+        a contract review and its Native read approval commit atomically.
+        """
+        if _get(current, "role") != "admin":
+            _fail("admin_required", "자동 실행 허용은 기존 전체 관리자만 변경할 수 있습니다.")
+        if action not in {"approve", "disable"} or not isinstance(reference, dict) or set(reference) != set(REFERENCE_KEYS):
+            _fail("native_reference_invalid")
+        expected = reference.get("revision")
+        if type(expected) is not int or expected < 0:
+            _fail("native_revision_invalid")
+        if not isinstance(evidence, str) or not 8 <= len(evidence.strip()) <= 2000 or re.search(r"[\x00-\x08\x0b-\x1f]", evidence):
+            _fail("native_approval_evidence_required", "정확한 코드·시험·환경 검토 근거를 입력해 주세요.")
+        if re.search(r"(bearer\s|authorization|password\s*=|token\s*=|pat\s*=|cookie\s*=)", evidence, re.I):
+            _fail("native_approval_evidence_invalid")
+        row = db.execute("SELECT revision FROM native_approvals WHERE tool_id=? AND function=?", (reference["tool_id"], reference["function"])).fetchone()
+        if (row["revision"] if row else 0) != expected:
+            _fail("native_approval_conflict")
+        new_reference = {**reference, "revision": expected + 1}
+        state = "allowed" if action == "approve" else "disabled"
+        values = (reference["tool_id"], reference["function"], expected + 1, _json(new_reference), evidence.strip(), _get(current, "id"), state, _now())
+        db.execute("INSERT INTO native_approvals VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(tool_id,function) DO UPDATE SET "
+                   "revision=excluded.revision,reference=excluded.reference,evidence=excluded.evidence,actor=excluded.actor,"
+                   "state=excluded.state,updated_at=excluded.updated_at", values)
+        db.execute("INSERT INTO native_approval_events(tool_id,function,revision,reference,evidence,actor,state,updated_at) VALUES(?,?,?,?,?,?,?,?)", values)
         return {"reference": new_reference, "state": state, "normalizer": NORMALIZER}
 
     async def check(self, user, reference):
@@ -491,3 +630,117 @@ class NativeBridge:
         except Exception:
             raw = {"ok": False, "error": {"code": "native_call_failed"}}
         return normalize_result(reference["function"], raw, reference, context, (user_valves["PAT"],))
+
+
+WORK_CHAT_FUNCTIONS = frozenset({"ees_workflow_view", "ees_workflow_propose", "ees_workflow_display"})
+
+
+async def _chat_work_access(user, tool):
+    """Read registered Native metadata only; do not load unreviewed source."""
+    from pathlib import Path
+    from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL
+    from open_webui.env import ENABLE_PLUGINS
+    from open_webui.models.users import Users
+    from open_webui.models.groups import Groups
+    from open_webui.models.access_grants import AccessGrants
+    current = await Users.get_user_by_id(_get(user, "id"))
+    if not ENABLE_PLUGINS or current is None or _get(current, "role") not in {"admin", "user"}:
+        _fail("work_chat_access_denied")
+    if tool is None or _get(tool, "id") != "ees_workflow":
+        _fail("work_chat_tool_unconfigured")
+    source = Path(__file__).with_name("ees_workflow_tool.py").read_bytes()
+    source_hash = hashlib.sha256(source).hexdigest()
+    if hashlib.sha256(_get(tool, "content", "").encode("utf-8")).hexdigest() != source_hash:
+        _fail("work_chat_tool_review_required")
+    specs = _get(tool, "specs", [])
+    if not isinstance(specs, list) or {spec.get("name") for spec in specs} != WORK_CHAT_FUNCTIONS:
+        _fail("work_chat_tool_review_required")
+    groups = {_get(group, "id") for group in await Groups.get_groups_by_member_id(_get(current, "id"))}
+    if not ((_get(current, "role") == "admin" and BYPASS_ADMIN_ACCESS_CONTROL) or _get(tool, "user_id") == _get(current, "id") or await AccessGrants.has_access(user_id=_get(current, "id"),resource_type="tool",resource_id="ees_workflow",permission="read",user_group_ids=groups)):
+        _fail("work_chat_access_denied")
+    return current, source_hash
+
+
+async def select_chat_work_tools(request, user, metadata, tool_ids, form_data):
+    """Add only the explicitly installed safe Work tool to a scoped Native chat.
+
+    This chooses an existing Native registration; it never writes tool/model
+    assets. Ordinary chats and headless calls keep Native behavior unchanged.
+    """
+    if getattr(request.state, "ees_workflow_headless", False) or metadata.get("internal"):
+        return tool_ids
+    reference = (metadata.get("user_message") or {}).get("meta", {}).get("ees_work_reference", {})
+    if not isinstance(reference, dict) or reference.get("kind") != "workspace":
+        return tool_ids
+    try:
+        from open_webui.models.tools import Tools
+        from open_webui.models.chats import Chats
+        from .ees_workflow import _production_service
+        actor, source_hash = await _chat_work_access(user, await Tools.get_tool_by_id("ees_workflow"))
+        chat = await Chats.get_chat_by_id(metadata.get("chat_id", ""))
+        if chat is None or _get(chat, "user_id") != _get(actor, "id"):
+            _fail("work_chat_owner_required")
+        service = _production_service()
+        actor, _, groups = await service._work_actor(actor)
+        with service._db() as db:
+            if reference.get("run_id"):
+                row = service._work_run(db, actor, groups, reference["run_id"])
+                if row["workflow_id"] != reference.get("workflow_id"):
+                    _fail("work_chat_context_changed")
+                definition = json.loads(row["snapshot"])["definition"]
+                if reference.get("job_id") and reference["job_id"] not in definition["nodes"]:
+                    _fail("work_chat_context_changed")
+            else:
+                row = service._work_definition(db, actor, groups, reference.get("workflow_id"))
+            if type(reference.get("revision")) is not int or row["revision"] != reference["revision"]:
+                _fail("work_chat_context_changed")
+        scoped = {key: reference.get(key, "") for key in ("workflow_id", "run_id", "job_id", "revision", "context_id")}
+        if any(not isinstance(scoped[key], str) or len(scoped[key]) > (4096 if key == "context_id" else 200) for key in ("workflow_id", "run_id", "job_id", "context_id")):
+            _fail("work_chat_context_invalid")
+        request.state.ees_work_tool_source_hash = source_hash
+        request.state.ees_work_chat_status = "ready"
+        metadata["ees_work_reference"] = {"kind": "workspace", **scoped}
+        # Context is data, not executable instructions or credentials. Native
+        # retains model selection, tool approval mode and actual dispatch.
+        context_message = {"role": "system", "content": "EES Work context (read-only reference): " + _json(scoped) + ". Use ees_workflow_view to read current authorized data. You may propose an unsaved draft; never claim saved, published, executed or approved. Human changes happen in the work panel."}
+        form_data.setdefault("messages", []).append(context_message)
+        return list(dict.fromkeys([*(tool_ids or []), "ees_workflow"]))
+    except WorkflowError as error:
+        request.state.ees_work_chat_status = error.code
+    except Exception:
+        request.state.ees_work_chat_status = "work_chat_unavailable"
+    return [tool_id for tool_id in (tool_ids or []) if tool_id != "ees_workflow"]
+
+
+async def check_chat_work_tool(request, user, tool):
+    """Called inside Native's existing asset guard before local code loading."""
+    expected = getattr(request.state, "ees_work_tool_source_hash", None)
+    if _get(tool, "id") == "ees_workflow":
+        _actor, observed = await _chat_work_access(user, tool)
+        if expected is not None and observed != expected:
+            _fail("work_chat_tool_changed")
+        request.state.ees_work_tool_source_hash = observed
+
+
+def wrap_chat_work_tools(request, user, tools):
+    """Preserve Native tool callables; refresh ACL/source before each call."""
+    expected = getattr(request.state, "ees_work_tool_source_hash", None)
+    if not expected:
+        return tools
+    for item in tools.values():
+        if item.get("tool_id") != "ees_workflow":
+            continue
+        function = item.get("spec", {}).get("name", "")
+        while function.startswith("ees_workflow_") and function not in WORK_CHAT_FUNCTIONS:
+            function = function[len("ees_workflow_"):]
+        if function not in WORK_CHAT_FUNCTIONS:
+            _fail("work_chat_tool_review_required")
+        original = item["callable"]
+        async def guarded(*args, _native=original, **kwargs):
+            from open_webui.models.tools import Tools
+            actor, observed = await _chat_work_access(user, await Tools.get_tool_by_id("ees_workflow"))
+            if observed != expected:
+                _fail("work_chat_tool_changed")
+            return await _native(*args, **kwargs)
+        item["callable"] = guarded
+    return tools

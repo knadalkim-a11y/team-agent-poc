@@ -11,6 +11,7 @@ from __future__ import annotations
 import ast
 import asyncio
 from contextlib import asynccontextmanager
+from copy import deepcopy
 from http.cookies import SimpleCookie
 import hashlib
 import importlib
@@ -167,9 +168,14 @@ class NativeAuthFixture:
 
         self.stub("open_webui.events", EVENTS=EventNames(), publish_event=publish_event)
         # Unrelated asset/export/usage endpoints are not used by these tests.
-        for module, attribute in (("knowledge", "Knowledges"), ("models", "Models"), ("tools", "Tools"),
+        for module, attribute in (("knowledge", "Knowledges"), ("models", "Models"),
                                   ("oauth_sessions", "OAuthSessions"), ("chats", "Chats"), ("chat_messages", "ChatMessages")):
             self.stub("open_webui.models." + module, **{attribute: types.SimpleNamespace()})
+        # The integrated operations projection enumerates current Native tool
+        # grants. Use the actual model and empty fixture table, not a synthetic
+        # allow-all implementation of its newly used get_tools method.
+        self.load("open_webui.utils.valves")
+        self.tools = self.load("open_webui.models.tools")
         self.auth_router = self.load("open_webui.routers.auths")
         self.user_router = self.load("open_webui.routers.users")
         self.group_router = self.load("open_webui.routers.groups")
@@ -210,7 +216,7 @@ class NativeAuthFixture:
         with ZipFile(self.wheel) as wheel:
             names = [name for name in wheel.namelist()
                      if name.startswith("open_webui/ees_workflow") and name.endswith(".py")]
-            names.extend(("open_webui/workflow_seed.json", "open_webui/workflow_policy.json"))
+            names.append("open_webui/workflow_policy.json")
             for name in names:
                 (package / Path(name).name).write_bytes(wheel.read(name))
         sys.modules["open_webui"].__path__.append(str(package))
@@ -290,9 +296,32 @@ class NativeAuthUIServer(NativeUIServer):
         # Optional transport barriers: the real authenticated handler has
         # already produced its result before a delayed response is released.
         self.authoring_read_gate = None
+        self.proposal_requests = []
+        self.proposal_gate = None
+        self.proposal_answer = "합성 모델 제안"
+        # Only the model transport is synthetic. Native verified-user and ACL
+        # reads still run, while workspace_proposal performs real scope/revision
+        # validation both before and after this bounded response.
+        server = self
+        class ProposalTransport:
+            async def propose(self, actor, model_id, context, instruction):
+                current = await fixture.users.Users.get_user_by_id(actor["id"])
+                if (current is None or current.role == "pending" or model_id != "fixture-model"
+                        or not await fixture.acl.AccessGrants.has_access(current.id, "model", model_id, "read")):
+                    raise fixture.backend.WorkflowError("model_unavailable", "현재 모델 접근 권한이 없습니다.")
+                server.proposal_requests.append({"actor_id":current.id,"context":deepcopy(context),"instruction":instruction})
+                proposal = deepcopy(context["source"])
+                proposal["description"] = server.proposal_answer
+                for node in proposal["nodes"].values():
+                    if node["type"] != "p":
+                        node["instructions"] = server.proposal_answer
+                return {"ok":True,"proposal":proposal,"summary":server.proposal_answer,"saved":False}
+        fixture.workflow.operations.model = ProposalTransport()
         self.authoring_reply_finished = threading.Event()
 
     def server_close(self):
+        if self.proposal_gate:
+            self.proposal_gate["release"].set()
         if self.authoring_read_gate:
             self.authoring_read_gate["release"].set()
         super().server_close()
@@ -318,13 +347,21 @@ class NativeAuthUIHandler(NativeUIHandler):
         self.server.requests.append((self.command, path))
         gate = self.server.authoring_read_gate
         held_response = False
-        if gate and self.command == "GET" and path == "/api/ees-work/authoring" and response.status_code == 200:
+        if gate and self.command == "GET" and path == "/api/ees-work/workspace" and response.status_code == 200:
             body = response.json()
-            if body.get("actor_id") == gate["actor_id"] and (body.get("process") or {}).get("process_id") == gate["process_id"]:
+            if (body.get("capabilities") or {}).get("actor_id") == gate["actor_id"] and (body.get("workflow") or {}).get("id") == gate["workflow_id"]:
                 held_response = True
                 gate["started"].set()
                 if not gate["release"].wait(timeout=30):
                     self.server.errors.append("Authoring response barrier timed out")
+        proposal_gate = self.server.proposal_gate
+        held_proposal = False
+        if (proposal_gate and self.command == "POST" and path == "/api/ees-work/workspace/proposal"
+                and response.status_code == 200 and response.json().get("workflow_id") == proposal_gate["workflow_id"]):
+            held_proposal = True
+            proposal_gate["started"].set()
+            if not proposal_gate["release"].wait(timeout=30):
+                self.server.errors.append("Proposal response barrier timed out")
         self.send_response(response.status_code)
         for key, value in response.headers.multi_items():
             if key.lower() not in {"content-length", "transfer-encoding", "connection"}:
@@ -337,6 +374,8 @@ class NativeAuthUIHandler(NativeUIHandler):
             pass
         if held_response:
             gate["finished"].set()
+        if held_proposal:
+            proposal_gate["finished"].set()
         return True
 
     def do_GET(self):

@@ -29,9 +29,36 @@ EXCLUDED_PARTS = frozenset({
 SENSITIVE_NAME = re.compile(r"(^|[._-])(env|key|secret|credentials?|tokens?|pat)([._-]|$)", re.I)
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
 # Accepted output contract of build_ees_webui.py; update together on a version change.
-BRANDING_VERSION = "0.11.3+ees.12"
+BRANDING_VERSION = "0.11.3+ees.13"
 BRANDING_UPSTREAM = "0.11.3"
 BRANDING_SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
+
+# Content retirement is an exact path list. Shared runtime/connectors remain shipped
+# even though their containing directory historically included the word "demo".
+RETIRED_CONTENT = frozenset({
+    "agent-pack/ees-prompt-suggestions.json",
+    "agent-pack/system-prompts/ems-demo-assistant.md",
+    "agent-pack/system-prompts/apc-demo-assistant.md",
+    "agent-pack/system-prompts/fdc-demo-assistant.md",
+    "agent-pack/system-prompts/ees-orchestration-demo.md",
+    "agent-pack/system-prompts/ees-integrated-assistant.md",
+    "agent-pack/knowledge/poc-policy.md",
+    "agent-pack/skills/confluence-read/SKILL.md",
+    "agent-pack/skills/policy-grounded-answer/SKILL.md",
+    "agent-pack/skills/structured-troubleshooting/SKILL.md",
+    "agent-pack/skills/ees-work-demo/scripts/ees_work_demo.py",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_examples.py",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_seed.json",
+    "agent-pack/skills/ees-work-demo/ui/index.html",
+    "agent-pack/skills/ees-work-demo/ui/ees-work.js",
+    "agent-pack/skills/ees-work-demo/ui/ees-work.css",
+    "agent-pack/skills/ems-work-order/references/wo-mockup.html",
+    "agent-pack/skills/ems-work-order/scripts/wo_demo_tool.py",
+    "agent-pack/skills/cross-system-analysis/scripts/demo_data_tool.py",
+    "agent-pack/skills/cross-system-analysis/scripts/specialists_tool.py",
+    "agent-pack/skills/cross-system-analysis/ui/work-panel.js",
+    "agent-pack/skills/cross-system-analysis/ui/cooperation-panel.js",
+})
 
 
 class BundleError(ValueError):
@@ -56,6 +83,8 @@ def source_state(root):
 
 def included_source(name):
     path = PurePosixPath(name)
+    if name in RETIRED_CONTENT:
+        return False
     if path.is_absolute() or ".." in path.parts or "\\" in name:
         return False
     if name in GUIDES or name in PROFILE_ASSETS:
@@ -147,8 +176,8 @@ def build_bundle(root, output_dir, branding_dir=None, allow_dirty=False):
         files.update(additions)
     source_url = REPOSITORY_URL + "/tree/" + commit
     files["BUNDLE-README.md"] = (
-        "# EES 팀 시연 적용 묶음\n\n"
-        "Agent Pack과 선택한 사용 안내를 담은 수동 적용 자료입니다.\n"
+        "# EES Work 검토용 배포 후보\n\n"
+        "공통 도구·서버 원본과 사용 안내를 담은 검토용 자료입니다. 데모 콘텐츠는 등록하지 않습니다.\n"
         "이 ZIP은 서버 설치·재시작·데이터 이전을 실행하지 않습니다.\n\n"
         "팀원 안내: docs/07-team-quickstart.md\n\n"
         "운영자 적용 안내: docs/03-openwebui-native-agent.md\n\n"

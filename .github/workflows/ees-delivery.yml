@@ -32,6 +32,7 @@ on:
       - 'tests/test_ees_update_download.py'
       - 'tests/test_confluence*.py'
       - 'tests/test_jira_read.py'
+      - 'tests/test_jira_work_contract.py'
       - 'tests/test_github_tool.py'
       - 'tests/test_wo_demo*'
       - 'tests/test_ees_branding_build.py'
@@ -43,6 +44,19 @@ on:
       - 'tests/test_ees_work_c_phase3_privacy.py'
       - 'tests/test_ees_work_routes.py'
       - 'tests/test_ees_workflow*.py'
+      - 'tests/test_ees_integrated*.py'
+      - 'tests/test_ees_work_workspace.py'
+      - 'tests/test_ees_work_operations.py'
+      - 'tests/ees_work_integrated*.py'
+      - 'tests/ees_work_native_chat.py'
+      - 'tests/ees_workspace_ui_fixture.cjs'
+      - 'tests/test_ees_v4*.cjs'
+      - 'evals/assets/restructure-step0b-20261001/venv-final-inventory.json'
+      - 'tests/ees_delivery_*.py'
+      - 'tests/ees_delivery_*.json'
+      - 'tests/test_ees_delivery_suite.py'
+      - 'tests/test_ees_delivery_artifacts.py'
+      - 'tests/ees_delivery_artifacts_fixture.py'
       - 'tests/ees_workflow_native_fixture.py'
       - 'tests/test_ees_execution*'
       - 'tests/test_ees_work_authoring*.py'
@@ -67,14 +81,13 @@ on:
 permissions:
   contents: read
 
+env:
+  EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+
 jobs:
-  check:
-    name: Delivery checks (${{ matrix.os }})
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-24.04, windows-2022]
-    runs-on: ${{ matrix.os }}
+  fixtures:
+    name: Prepare pinned program fixtures and test coverage
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -84,162 +97,117 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.11'
-      - run: python -m unittest discover -s tests -p test_ees_branding_build.py -v
-      - run: python -m unittest discover -s tests -p test_demo_bundle.py -v
-      - name: Install fixed test dependencies
-        run: python -m pip install uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
-      - name: Verify authenticated demo file routes without user data
-        env:
-          EES_REQUIRE_WORK_ROUTES: '1'
-        run: python -m unittest discover -s tests -p test_ees_work_routes.py -v
-      - name: Verify Confluence read and plain results
-        run: python -m unittest discover -s tests -p "test_confluence*.py" -v
-      - name: Verify Jira read and plain results
-        run: python -m unittest discover -s tests -p test_jira_read.py -v
-      - name: Verify GitHub read and plain results
-        run: python -m unittest discover -s tests -p test_github_tool.py -v
-      - name: Verify scoped editor state and response isolation
-        run: python -m unittest discover -s tests -p test_ees_work_designer.py -v
-      - name: Verify WO demo Tool
-        run: python -m unittest discover -s tests -p test_wo_demo_tool.py -v
-      - name: Verify WO demo local form state
-        run: node tests/test_wo_demo_state.cjs
-      - name: Verify cooperation panel state and isolation
-        run: node tests/test_ees_cooperation_panel.cjs
-      - name: Verify deployment boundaries, child lifecycle, and NLTK imports
-        env:
-          EES_RUN_REAL_UV_TEST: '1'
-          EES_RUN_REAL_NLTK_TEST: '1'
-        run: python -m unittest discover -s tests -p test_ees_deploy_*.py -v
-      - name: Require real Windows IOCP accept and subprocess validation
-        if: runner.os == 'Windows'
-        run: python -I -B tests/test_ees_deploy_accept.py --require-windows -v
-      - run: python -m unittest discover -s tests -p test_manage_ees.py -v
-      - name: Verify one-command upgrade
-        run: python -m unittest discover -s tests -p test_ees_upgrade.py -v
-      - name: Verify download boundaries
-        run: python -m unittest discover -s tests -p test_ees_update_download.py -v
-      - name: Verify demo data and asset provisioning
-        run: python -m unittest discover -s tests -p "test_ees_demo*.py" -v
-      - name: Verify ApplyDemo operator entry
-        run: python -m unittest discover -s tests -p test_ees_apply_demo.py -v
-      - name: Download the fixed upstream wheel for program validation
+      - name: Audit every retained or explicitly replaced test ID
+        run: python tests/ees_delivery_suite.py --audit --output dist/ees-delivery-coverage
+      - name: Verify source-only packaging checks
+        run: |
+          python -m unittest discover -s tests -p test_ees_branding_build.py -v
+          python -m unittest discover -s tests -p test_demo_bundle.py -v
+      - name: Download the fixed upstream wheel
         run: |
           python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
-      - name: Build the real program fixture without installing it
-        run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
-      - name: Prepare the fixed pre-authoring program for Restore validation
+      - name: Build current and unchanged historical program fixtures once
         run: |
+          python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
           git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/legacy-source.tar a443d30c6694df0e1cbe082a0b99aa5f2d566917
           python -c "import tarfile; tarfile.open('dist/legacy-source.tar').extractall('dist/legacy-source', filter='data')"
           python dist/legacy-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/legacy-branding
-      - name: Prepare the fixed pre-execution program for Restore and writer-guard validation
-        run: |
           git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/previous-source.tar 991cdb1d80ae07471fb50594831d74fe602b1ef7
           python -c "import tarfile; tarfile.open('dist/previous-source.tar').extractall('dist/previous-source', filter='data')"
           python dist/previous-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/previous-branding
-      - name: Diagnose the two Windows fixture failures independently
-        id: windows_residual
-        if: runner.os == 'Windows'
-        env:
-          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
-          EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
-          EES_REQUIRE_LEGACY_WORKFLOW: '1'
-          EES_REQUIRE_ASSET_NATIVE: '1'
-          EES_REQUIRE_MODEL_NATIVE: '1'
-        run: python -X warn_default_encoding -W error::EncodingWarning tests/ees_workflow_windows_diagnostics.py --output dist/ees-windows-diagnostics --previous-wheel dist/previous-branding/open_webui-0.11.3+ees.11-py3-none-any.whl --previous-source dist/previous-source
-      - name: Keep the complete Windows fixture diagnostics
-        if: always() && runner.os == 'Windows' && steps.windows_residual.outcome != 'skipped'
+          git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/previous12-source.tar 8027aaf2e654778f052a966e5a49feed0fc54f69
+          python -c "import tarfile; tarfile.open('dist/previous12-source.tar').extractall('dist/previous12-source', filter='data')"
+          python dist/previous12-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/previous12-branding
+      - name: Share exact program bytes with all required suites
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: ees-windows-fixture-diagnostics
-          path: dist/ees-windows-diagnostics
+          name: ees-pinned-fixtures-${{ github.sha }}
+          path: |
+            dist/upstream
+            dist/branding
+            dist/legacy-branding
+            dist/previous-branding
+            dist/legacy-source
+            dist/previous-source
+            dist/previous12-source
+            dist/previous12-branding
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Keep the test-ID coverage audit
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ees-delivery-coverage-${{ github.sha }}
+          path: dist/ees-delivery-coverage
           if-no-files-found: error
           retention-days: 7
-      - name: Verify shared workflow service and real chat Tool
-        env:
-          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
-          EES_REQUIRE_ASSET_NATIVE: '1'
-          EES_REQUIRE_MODEL_NATIVE: '1'
-          EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
-          EES_REQUIRE_LEGACY_WORKFLOW: '1'
-        run: python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p "test_ees_workflow*.py" -v
-      - name: Verify durable chat controls and execution panel state
-        run: |
-          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_execution_tool.py -v
-          node tests/test_ees_execution_ui.cjs
-      - name: Verify scoped authoring and the actual previous program
-        env:
-          EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
-          EES_REQUIRE_LEGACY_WORKFLOW: '1'
-        run: python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_authoring.py -v
-      - name: Verify Native signup, approval, scoped authoring and account recovery
-        if: runner.os == 'Linux'
-        env:
-          EES_TEST_CHROME: google-chrome
-          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
-          EES_TEST_BRANDING_DIR: dist/branding
-          EES_REQUIRE_AUTHORING_NATIVE: '1'
-        run: |
-          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_authoring_native.py -v
-          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_authoring_account_switch.py -v
-      - name: Require guarded asset writes
-        env:
-          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
-          EES_TEST_BRANDING_DIR: dist/branding
-          EES_REQUIRE_ASSET_GUARD: '1'
-        run: python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_asset_guard.py -v
-      - name: Require native asset writer integration
-        env:
-          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
-          EES_TEST_BRANDING_DIR: dist/branding
-          EES_REQUIRE_ASSET_NATIVE: '1'
-        run: python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_asset_native.py -v
-      - name: Verify patched native draft and chat creation against the pinned source
-        env:
-          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
-          EES_TEST_BRANDING_DIR: dist/branding
-        run: python -m unittest discover -s tests -p test_ees_branding_build.py -v
-      - name: Verify native Open WebUI workflow and real composer integration
-        if: runner.os == 'Linux'
-        env:
-          EES_TEST_CHROME: google-chrome
-          EES_TEST_BRANDING_DIR: dist/branding
-          EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
-        run: |
-          python -m unittest discover -s tests -p test_ees_work_demo.py -v
-          python -m unittest discover -s tests -p test_ees_work_c_phase1_native.py -v
-          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_c_phase2_native.py -v
-          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_c_phase3_native.py -v
-          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_c_phase3_privacy.py -v
-      - name: Keep EES Work browser evidence
-        if: always() && runner.os == 'Linux'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+
+  service:
+    name: ${{ matrix.suite }} (${{ matrix.os }})
+    needs: fixtures
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+        suite: [services, contracts, platform]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    env:
+      EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+      EES_TEST_BRANDING_DIR: dist/branding
+      EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
+      EES_TEST_PREVIOUS_WORKFLOW_WHEEL: dist/previous-branding/open_webui-0.11.3+ees.11-py3-none-any.whl
+      EES_REQUIRE_WORK_ROUTES: '1'
+      EES_REQUIRE_ASSET_GUARD: '1'
+      EES_REQUIRE_ASSET_NATIVE: '1'
+      EES_REQUIRE_MODEL_NATIVE: '1'
+      EES_REQUIRE_LEGACY_WORKFLOW: '1'
+      EES_TEST_PREVIOUS_C_WHEEL: dist/previous12-branding/open_webui-0.11.3+ees.12-py3-none-any.whl
+      EES_REQUIRE_PREVIOUS_C: '1'
+      EES_REQUIRE_PREVIOUS_WORKFLOW: '1'
+      EES_RUN_REAL_UV_TEST: '1'
+      EES_RUN_REAL_NLTK_TEST: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          name: ees-work-browser-evidence
-          path: dist/ees-work-screenshots
-          if-no-files-found: ignore
-          retention-days: 7
-      - name: Verify chat theme in the runner's Chrome
-        if: runner.os == 'Linux'
-        env:
-          EES_TEST_CHROME: google-chrome
-          EES_TEST_BRANDING_DIR: dist/branding
-        run: python -m unittest discover -s tests -p test_ees_chat_theme.py -v
-      - name: Verify specialist execution against the fixed WebUI source
-        env:
-          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
-        run: python -m unittest discover -s tests -p test_ees_specialists_tool.py -v
-      - name: Verify program-only Apply and Restore
-        env:
-          EES_TEST_BRANDING_DIR: dist/branding
-          EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
-          EES_REQUIRE_LEGACY_WORKFLOW: '1'
-          EES_TEST_PREVIOUS_WORKFLOW_WHEEL: dist/previous-branding/open_webui-0.11.3+ees.11-py3-none-any.whl
-          EES_REQUIRE_PREVIOUS_WORKFLOW: '1'
-        run: python -m unittest discover -s tests -p test_ees_webui_customization.py -v
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+      - name: Install fixed test dependencies
+        run: python -m pip install ${{ env.EES_FIXED_TEST_DEPENDENCIES }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ees-pinned-fixtures-${{ github.sha }}
+          path: dist
+      - name: Retain real Windows build and LF archive validation
+        if: runner.os == 'Windows' && matrix.suite == 'platform'
+        run: |
+          python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/windows-branding
+          git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/windows-legacy-source.tar a443d30c6694df0e1cbe082a0b99aa5f2d566917
+          python -c "import tarfile; tarfile.open('dist/windows-legacy-source.tar').extractall('dist/windows-legacy-source', filter='data')"
+          python dist/windows-legacy-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/windows-legacy-branding
+          git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/windows-previous-source.tar 991cdb1d80ae07471fb50594831d74fe602b1ef7
+          python -c "import tarfile; tarfile.open('dist/windows-previous-source.tar').extractall('dist/windows-previous-source', filter='data')"
+          python dist/windows-previous-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/windows-previous-branding
+          git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/windows-previous12-source.tar 8027aaf2e654778f052a966e5a49feed0fc54f69
+          python -c "import tarfile; tarfile.open('dist/windows-previous12-source.tar').extractall('dist/windows-previous12-source', filter='data')"
+          python dist/windows-previous12-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/windows-previous12-branding
+          python -c "import os,pathlib; values={'EES_TEST_BRANDING_DIR':'dist/windows-branding','EES_TEST_LEGACY_WORKFLOW_WHEEL':'dist/windows-legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl','EES_TEST_PREVIOUS_WORKFLOW_WHEEL':'dist/windows-previous-branding/open_webui-0.11.3+ees.11-py3-none-any.whl','EES_TEST_PREVIOUS_WORKFLOW_SOURCE':'dist/windows-previous-source','EES_TEST_PREVIOUS_C_WHEEL':'dist/windows-previous12-branding/open_webui-0.11.3+ees.12-py3-none-any.whl'}; pathlib.Path(os.environ['GITHUB_ENV']).open('a',encoding='utf-8').write(''.join(key+'='+value+'\n' for key,value in values.items()))"
+      - name: Run the complete assigned module set
+        id: suite
+        run: python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite ${{ matrix.suite }} --output dist/ees-results
+      - name: Require real Windows IOCP accept and subprocess validation
+        if: runner.os == 'Windows' && matrix.suite == 'platform'
+        run: python -I -B tests/test_ees_deploy_accept.py --require-windows -v
+      - name: Diagnose the two Windows fixture failures independently
+        id: windows_residual
+        if: runner.os == 'Windows' && matrix.suite == 'platform'
+        run: python -X warn_default_encoding -W error::EncodingWarning tests/ees_workflow_windows_diagnostics.py --output dist/ees-windows-diagnostics --previous-wheel $env:EES_TEST_PREVIOUS_WORKFLOW_WHEEL --previous-source $env:EES_TEST_PREVIOUS_WORKFLOW_SOURCE
       - name: Parse the Windows PowerShell entry point
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && matrix.suite == 'platform'
         shell: powershell
         run: |
           $tokens = $null
@@ -247,8 +215,182 @@ jobs:
           [void][System.Management.Automation.Language.Parser]::ParseFile(
             (Join-Path $PWD 'scripts/manage-ees.ps1'), [ref]$tokens, [ref]$parseErrors)
           if ($parseErrors.Count -gt 0) { throw 'PowerShell entry point has syntax errors.' }
-      - run: python scripts/check_docs.py
-      - run: git diff --check
+      - name: Check documentation and patch whitespace
+        if: matrix.suite == 'services'
+        run: |
+          python scripts/check_docs.py
+          git diff --check
+      - name: Keep all per-test results including failures and skips
+        if: always() && steps.suite.outcome != 'skipped'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ees-results-${{ matrix.suite }}-${{ matrix.os }}
+          path: dist/ees-results
+          if-no-files-found: error
+          retention-days: 7
+      - name: Keep complete Windows fixture diagnostics
+        if: always() && runner.os == 'Windows' && matrix.suite == 'platform' && steps.windows_residual.outcome != 'skipped'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ees-windows-fixture-diagnostics
+          path: dist/ees-windows-diagnostics
+          if-no-files-found: error
+          retention-days: 7
+
+  native:
+    name: ${{ matrix.suite }} (ubuntu-24.04)
+    needs: fixtures
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [native-account, native-work, native-compose, native-execution]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      EES_TEST_CHROME: google-chrome
+      EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+      EES_TEST_BRANDING_DIR: dist/branding
+      EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
+      EES_REQUIRE_AUTHORING_NATIVE: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+      - name: Install fixed test dependencies
+        run: python -m pip install ${{ env.EES_FIXED_TEST_DEPENDENCIES }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ees-pinned-fixtures-${{ github.sha }}
+          path: dist
+      - name: Run the assigned real Native browser integration
+        id: native
+        run: python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite ${{ matrix.suite }} --output dist/ees-results
+      - name: Verify actual browser files before artifact upload
+        if: always() && steps.native.outcome != 'skipped'
+        run: python tests/ees_delivery_suite.py --browser-evidence dist/ees-work-screenshots --output dist/ees-results
+      - name: Keep browser results and actual evidence files
+        if: always() && steps.native.outcome != 'skipped'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ees-work-browser-evidence-${{ matrix.suite }}
+          path: |
+            dist/ees-results
+            dist/ees-work-screenshots
+          if-no-files-found: error
+          retention-days: 7
+
+  native-product:
+    name: Complete Native product (ubuntu-24.04)
+    needs: fixtures
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+      - name: Restore the already verified fixed product dependency inventory
+        run: |
+          python -c "import json,pathlib; packages=json.loads(pathlib.Path('evals/assets/restructure-step0b-20261001/venv-final-inventory.json').read_text(encoding='utf-8'))['packages']; assert len(packages)==199; pathlib.Path('product-verification-requirements.txt').write_text(''.join(name+'=='+version+'\n' for name,version in sorted(packages.items())),encoding='utf-8')"
+          python -m pip install --no-deps -r product-verification-requirements.txt
+          python -c "import importlib.metadata,json,pathlib; packages=json.loads(pathlib.Path('evals/assets/restructure-step0b-20261001/venv-final-inventory.json').read_text(encoding='utf-8'))['packages']; assert all(importlib.metadata.version(name)==version for name,version in packages.items())"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ees-pinned-fixtures-${{ github.sha }}
+          path: dist
+      - name: Restore the exact upstream text-attachment dependency missing from the older inventory
+        run: |
+          python -c "import zipfile; z=zipfile.ZipFile('dist/upstream/open_webui-0.11.3-py3-none-any.whl'); metadata=z.read('open_webui-0.11.3.dist-info/METADATA').decode('utf-8'); assert 'Requires-Dist: ftfy==6.3.1' in metadata.splitlines()"
+          python -m pip install --no-deps ftfy==6.3.1 wcwidth==0.2.13
+          python -c "import ftfy,importlib.metadata; assert importlib.metadata.version('ftfy')=='6.3.1'; assert importlib.metadata.version('wcwidth')=='0.2.13'; assert 'wcwidth' in ' '.join(importlib.metadata.requires('ftfy')); assert ftfy.fix_text('한글')=='한글'"
+      - name: Start the actual CLI and verify browser writes, reload and restart
+        id: product
+        run: python tests/ees_work_integrated_app.py --wheel dist/branding/open_webui-0.11.3+ees.13-py3-none-any.whl --chrome "$(command -v google-chrome)" --output dist/ees-native-product
+      - name: Verify central Native chat with actual registered read and proposal tools
+        id: native_chat
+        run: python tests/ees_work_native_chat.py --wheel dist/branding/open_webui-0.11.3+ees.13-py3-none-any.whl --chrome "$(command -v google-chrome)" --output dist/ees-native-product/central-chat
+      - name: Record the successfully tested integration tree
+        run: |
+          echo "EES_TESTED_TREE=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_ENV"
+          echo "EES_TESTED_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Select the review head only for candidate packaging
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          clean: false
+      - name: Prepare the exact tested head as a review candidate
+        env:
+          REVIEW_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse 'HEAD^{tree}')" = "$EES_TESTED_TREE"
+          python scripts/build_demo_bundle.py --output-dir dist/ees-review-candidate --branding-dir dist/branding
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          from zipfile import ZipFile
+          output=Path('dist/ees-review-candidate')
+          bundles=list(output.glob('*.zip'))
+          assert len(bundles)==1, bundles
+          with ZipFile(bundles[0]) as archive:
+              raw=archive.read('manifest.json')
+              manifest=json.loads(raw)
+              assert manifest['source_commit']==os.environ['REVIEW_SOURCE_SHA']
+              assert manifest['source_dirty'] is False
+              for item in manifest['files']:
+                  content=archive.read(item['path'])
+                  assert len(content)==item['size'] and hashlib.sha256(content).hexdigest()==item['sha256'], item['path']
+          (output/'candidate-manifest.json').write_bytes(raw)
+          files=[{'path':path.name,'bytes':path.stat().st_size,'sha256':hashlib.sha256(path.read_bytes()).hexdigest()} for path in sorted(output.iterdir())]
+          (output/'candidate-sha256.json').write_text(json.dumps({'source_commit':manifest['source_commit'],'source_dirty':False,'tested_commit':os.environ['EES_TESTED_COMMIT'],'tested_tree':os.environ['EES_TESTED_TREE'],'files':files},indent=2)+'\n',encoding='utf-8')
+          print(json.dumps({'source_commit':manifest['source_commit'],'files':files},indent=2))
+          PY
+      - name: Keep the hashed review candidate for this exact head
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ees-review-candidate-${{ github.event.pull_request.head.sha || github.sha }}
+          path: dist/ees-review-candidate
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Verify actual full-product evidence files
+        if: always() && steps.product.outcome != 'skipped'
+        run: python tests/ees_delivery_suite.py --browser-evidence dist/ees-native-product --output dist/ees-native-product-results
+      - name: Keep actual full-product results and screen evidence
+        if: always() && steps.product.outcome != 'skipped'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ees-native-complete-product-${{ github.sha }}
+          path: |
+            dist/ees-native-product
+            dist/ees-native-product-results
+          if-no-files-found: error
+          retention-days: 7
+
+  check:
+    # Preserve the previous required check names. Neither a cancelled shard nor
+    # an unexecuted dependency can make these release gates green.
+    name: Delivery checks (${{ matrix.os }})
+    needs: [fixtures, service, native, native-product]
+    if: always()
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 2
+    steps:
+      - name: Require every fixture, service, platform and Native result
+        env:
+          FIXTURES_RESULT: ${{ needs.fixtures.result }}
+          SERVICE_RESULT: ${{ needs.service.result }}
+          NATIVE_RESULT: ${{ needs.native.result }}
+          PRODUCT_RESULT: ${{ needs.native-product.result }}
+        run: python -c "import os; results={key:os.environ[key] for key in ('FIXTURES_RESULT','SERVICE_RESULT','NATIVE_RESULT','PRODUCT_RESULT')}; print(results); assert all(value=='success' for value in results.values()), results"
 
   package:
     name: Prepare delivery files

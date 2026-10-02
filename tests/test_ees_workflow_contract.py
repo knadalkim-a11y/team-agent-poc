@@ -6,12 +6,13 @@ import sys
 from types import ModuleType
 import unittest
 from test_ees_work_authoring import AuthoringFixture
+from workflow_fixture import legacy_definition
 
 PACKAGE = ModuleType("ees_contract_test_subject")
 PACKAGE.__path__ = [str(Path(__file__).resolve().parents[1] / "agent-pack/skills/ees-work-demo/scripts")]
 sys.modules[PACKAGE.__name__] = PACKAGE
 contract = importlib.import_module(PACKAGE.__name__ + ".ees_workflow_contract")
-examples = importlib.import_module(PACKAGE.__name__ + ".ees_workflow_examples")
+examples = __import__("workflow_fixture").load_workflow_examples(PACKAGE.__name__)
 definition = importlib.import_module(PACKAGE.__name__ + ".ees_workflow_definition")
 
 
@@ -23,7 +24,7 @@ def refs():
 
 
 def catalog(workflow):
-    value = definition._seed()
+    value = legacy_definition()
     value["nodes"].update(deepcopy(workflow["nodes"]))
     root = workflow["nodes"][workflow["process_id"]]
     value["roots"][root["category"]].append(root["id"])

@@ -120,23 +120,26 @@ class NativeAccountAPITests(unittest.TestCase):
         assigned = self.request("POST", "/api/v1/groups/id/" + group_id + "/users/add", {
             "user_ids": [pending["id"]]}, self.admin["token"])
         self.assertEqual(assigned.status_code, 200, assigned.text)
-        linked = self.request("POST", "/api/ees-work/authoring/action", {
-            "action": "set_system_group", "system_id": "EMS", "expected_mapping_revision": 0, "request_id": str(uuid4()),
-            "payload": {"group_id": group_id, "active": True}}, self.admin["token"])
+        linked = self.request("POST", "/api/ees-work/workspace/command", {
+            "action": "save_access", "system_id": "EMS", "factory_id": "*", "expected_revision": 0,
+            "request_id": str(uuid4()), "principal_kind": "group", "principal_id": group_id,
+            "roles": ["manager", "participant"]}, self.admin["token"])
         self.assertEqual(linked.status_code, 200, linked.text)
         for method, path, body in (
-            ("GET", "/api/ees-work/authoring/capabilities", None),
-            ("GET", "/api/ees-work/authoring?system_id=EMS", None),
-            ("POST", "/api/ees-work/authoring/action", {"action": "create", "system_id": "EMS", "payload": {"name": "denied", "category": "setup"}}),
-            ("POST", "/api/ees-work/action", {"action": "create", "payload": {"site_id": "us-a", "system": "EMS", "process_id": "setup-p"}}),
+            ("GET", "/api/ees-work/workspace?system_id=EMS", None),
+            ("GET", "/api/ees-work/operations?system_id=EMS", None),
+            ("POST", "/api/ees-work/workspace/command", {"action":"create_workflow","system_id":"EMS","name":"denied","expected_revision":0,"request_id":str(uuid4())}),
+            ("POST", "/api/ees-work/operations", {"action":"execute_job","run_id":"missing","job_id":"missing","expected_revision":0,"request_id":str(uuid4())}),
         ):
             response = self.request(method, path, body, pending["token"])
             self.assertIn(response.status_code, {401, 403}, response.text)
         self.approve(pending)
-        self.assertTrue(self.request("GET", "/api/ees-work/authoring/capabilities", token=pending["token"]).json()["can_author"])
+        permitted=self.request("GET", "/api/ees-work/workspace", token=pending["token"])
+        self.assertEqual(permitted.status_code,200,permitted.text)
+        self.assertTrue(permitted.json()["capabilities"]["can_author"])
         recalled = self.request("POST", "/api/v1/users/" + pending["id"] + "/update", {"role": "pending"}, self.admin["token"])
         self.assertEqual(recalled.status_code, 200, recalled.text)
-        self.assertIn(self.request("GET", "/api/ees-work/state", token=pending["token"]).status_code, {401, 403})
+        self.assertIn(self.request("GET", "/api/ees-work/workspace", token=pending["token"]).status_code, {401, 403})
 
 
 class NativeAuthoringBrowserTests(unittest.TestCase):
@@ -187,6 +190,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.wait("!!document.querySelector('#email')")
 
     def tearDown(self):
+        self.capture_failure_evidence()
         self.assertEqual(self.server.errors, [])
 
     def evidence_directory(self):
@@ -413,122 +417,78 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.assertEqual(denied.status_code, 403, denied.text)
         self.screenshot("nu-closed-native-signup")
 
-    def test_admin_restored_publication_reconcile_preserves_draft_ui(self):
-        """A changed/removed publication needs explicit, non-publishing adoption.
+    def work_command(self, action, expected_revision=0, **values):
+        body={"action":action,"expected_revision":expected_revision,"request_id":str(uuid4()),**values}
+        result=self.browser_api("POST","/api/ees-work/workspace/command",body)
+        self.assertEqual(result["status"],200,result);self.assertTrue(result["data"]["ok"],result)
+        return result["data"]
 
-        The temporary catalog arrangement isolates this Native UI gate. The
-        separate AuthoringRestoreTests execute the actual supported ees.10
-        writer; this test does not present fixture writes as an old UI Restore.
-        """
-        from workflow_fixture import publish_fixture_definition
+    def enter_authoring(self):
+        self.wait("document.querySelector('#ees-work-entry')")
+        self.open_sidebar();self.click('[data-action="mode"][data-mode="author"]')
+        self.wait("document.querySelector('#ees-work-designer')")
 
-        def action(name, process=None, payload=None):
-            body = {"action": name, "system_id": "EMS", "request_id": str(uuid4()), "payload": payload or {}}
-            if process:
-                body.update(process_id=process["process_id"], expected_draft_revision=process["draft_revision"],
-                            expected_owner_revision=process["owner_revision"])
-            result = self.api("POST", "/api/ees-work/authoring/action", body, self.admin["token"])
-            self.assertEqual(result.status_code, 200, result.text)
-            return result.json()["process"]
+    def create_ui_procedure(self,name):
+        self.enter_authoring()
+        self.wait("document.querySelector('[data-author-action=create]') && !document.querySelector('[data-author-action=create]').disabled")
+        self.click('[data-author-action="create"]')
+        self.wait("document.querySelector('#ees-work-dialog')?.open")
+        self.assertTrue(self.browser.evaluate("document.activeElement?.hasAttribute('data-dialog-close')"))
+        self.fill('#ees-work-dialog [name="name"]',name);self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('[data-author-action=add_stage]')")
+        state=self.browser_api("GET","/api/ees-work/workspace")["data"]
+        return next(item["id"] for item in state["workflows"] if item["name"]==name)
 
-        def catalog():
-            with self.fixture.workflow._db() as db:
-                return db.execute("SELECT published FROM catalog WHERE id=1").fetchone()[0]
+    def test_native_authoring_conflict_keeps_unsaved_draft_and_published_version(self):
+        self.login_ui("administrator@example.test","Fixture-admin-only-42!")
+        key=self.create_ui_procedure("동시 편집 검증")
+        self.click('[data-author-action="add_stage"]');self.fill('#ew-author-node [name="name"]','아직 저장하지 않은 단계')
+        prior=self.browser_api("GET","/api/ees-work/workspace?workflow_id="+key)["data"]["workflow"]
+        changed=deepcopy(prior["draft"]);changed["name"]='다른 요청의 저장'
+        saved=self.work_command('save_draft',expected_revision=prior['revision'],workflow_id=key,definition=changed)
+        self.click('[data-author-action="save"]')
+        self.wait("document.querySelector('#ees-work-designer [role=alert]')")
+        self.assertEqual(self.read('#ew-author-node [name="name"]','value'),'아직 저장하지 않은 단계')
+        after=self.browser_api("GET","/api/ees-work/workspace?workflow_id="+key)["data"]["workflow"]
+        self.assertEqual(after['draft']['name'],'다른 요청의 저장');self.assertEqual(after['revision'],saved['revision'])
+        self.assertIsNone(after['published_version']);self.screenshot('integrated-native-authoring-conflict')
 
-        process = action("create", payload={"name": "복원 후 기준 확인 합성 절차", "category": "ops"})
-        process = action("publish", action("validate_draft", process))
-        process_id = process["process_id"]
-        path = "/api/ees-work/authoring?system_id=EMS&process_id=" + process_id
-        draft = deepcopy(process["workflow"])
-        draft["nodes"][process_id]["instructions"] = "복원 전 저장한 담당자의 미게시 원문"
-        process = action("save_draft", process, {"workflow": draft})
+
+    def test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft(self):
         self.login_ui("administrator@example.test", "Fixture-admin-only-42!")
-
-        for changed_state in ("changed", "removed"):
-            with self.subTest(publication=changed_state):
-                published = json.loads(catalog())
-                if changed_state == "changed":
-                    published["nodes"][process_id]["name"] = "이전 프로그램에서 바뀐 게시 절차"
-                    published["nodes"][process_id]["instructions"] = "현재 게시본에만 있는 복원 중 안내"
-                else:
-                    for node_id in draft["nodes"]:
-                        published["nodes"].pop(node_id)
-                    for roots in published["roots"].values():
-                        roots[:] = [node_id for node_id in roots if node_id != process_id]
-                publish_fixture_definition(self.fixture.workflow, published)
-                previous = self.fixture.workflow
-                reloaded = type(previous)(previous.database, previous.user_lookup, previous.chat_lookup,
-                    previous.asset_lookup, group_lookup=previous.group_lookup, group_list_lookup=previous.group_list_lookup)
-                self.fixture.workflow = self.fixture.backend._service = self.server.workflow = reloaded
-                process = self.api("GET", path, token=self.admin["token"]).json()["process"]
-                self.assertEqual(process["publication_reconciliation"]["state"], changed_state)
-                self.assertTrue(process["publication_reconciliation"]["required"])
-                self.assertTrue(process["publication_reconciliation"]["can_reconcile"])
-                before_publication, before_draft = catalog(), deepcopy(process["workflow"])
-                before_revision = process["draft_revision"]
-                self.navigate("/?ees=workflow")
-                self.wait("document.querySelector('#ees-work-manage-system:not(:disabled)')?.value === 'EMS'")
-                self.select_native("#ees-work-manage-process", process_id)
-                self.wait("document.querySelector('#ees-work-node-form [name=instructions]')?.value === '복원 전 저장한 담당자의 미게시 원문'")
-                self.click('#ees-work-designer [data-action=process_actions]')
-                self.wait("document.querySelector('#ees-work-dialog')?.open")
-                self.click('#ees-work-dialog details > summary')
-                self.assertIn("복원 전 저장한 담당자의 미게시 원문", self.text("#ees-work-dialog"))
-                self.assertIn("현재 게시본 없음" if changed_state == "removed" else "현재 게시본에만 있는 복원 중 안내", self.text("#ees-work-dialog"))
-                self.select_native('#ees-work-dialog select[name=action]', 'reconcile_publication')
-                self.click('#ees-work-dialog [data-dialog-close]')
-                self.wait("!document.querySelector('#ees-work-dialog')")
-                self.assertEqual(catalog(), before_publication)
-                self.assertEqual(self.api("GET", path, token=self.admin["token"]).json()["process"], process)
-
-                if changed_state == "changed":
-                    dirty_text = "기준 확인보다 먼저 보존해야 하는 현재 미저장 입력"
-                    self.fill('#ees-work-node-form [name=instructions]', dirty_text)
-                    write_count = self.server.requests.count(("POST", "/api/ees-work/authoring/action"))
-                    self.click('#ees-work-designer [data-action=process_actions]')
-                    self.wait("document.querySelector('#ees-work-dialog')?.open")
-                    self.select_native('#ees-work-dialog select[name=action]', 'reconcile_publication')
-                    self.click('#ees-work-dialog [data-dialog-confirm]')
-                    self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('변경한 초안을 먼저 저장해 주세요.')")
-                    self.assertEqual(self.server.requests.count(("POST", "/api/ees-work/authoring/action")), write_count)
-                    self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), dirty_text)
-                    self.assertEqual(catalog(), before_publication)
-                    self.assertEqual(self.api("GET", path, token=self.admin["token"]).json()["process"], process)
-                    # Explicitly discard this local-only probe through the
-                    # existing P switch dialog, without rewriting its saved draft.
-                    self.click('#ees-work-manage-process')
-                    self.key("Home", 36)
-                    self.key("Enter", 13)
-                    self.key("Tab", 9)
-                    self.wait("document.querySelector('#ees-work-dialog')?.open")
-                    self.click('#ees-work-dialog input[name=choice][value=discard]')
-                    self.click('#ees-work-dialog [data-dialog-confirm]')
-                    self.wait("document.querySelector('#ees-work-manage-process')?.value === '' && !document.querySelector('#ees-work-dialog')")
-                    self.select_native('#ees-work-manage-process', process_id)
-                    self.wait("document.querySelector('#ees-work-node-form [name=instructions]')?.value === '복원 전 저장한 담당자의 미게시 원문'")
-
-                self.click('#ees-work-designer [data-action=process_actions]')
-                self.wait("document.querySelector('#ees-work-dialog')?.open")
-                self.select_native('#ees-work-dialog select[name=action]', 'reconcile_publication')
-                self.screenshot("sa-restore-" + changed_state + "-explicit-baseline-dialog")
-                self.click('#ees-work-dialog [data-dialog-confirm]')
-                self.eventually(lambda: self.api("GET", path, token=self.admin["token"]).json()["process"]["draft_revision"] == before_revision + 1)
-                adopted = self.api("GET", path, token=self.admin["token"]).json()["process"]
-                self.assertEqual(adopted["workflow"], before_draft)
-                self.assertEqual(adopted["owner_revision"], process["owner_revision"])
-                self.assertFalse(adopted["publication_reconciliation"]["required"])
-                self.assertIsNone(adopted["validated_revision"])
-                self.assertEqual(catalog(), before_publication, "Adopting a baseline must not publish")
-                self.wait("!document.querySelector('#ees-work-dialog') && document.querySelector('#ees-work-designer [data-action=publish]')?.disabled")
-                self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), "복원 전 저장한 담당자의 미게시 원문")
-                self.click('#ees-work-designer [data-action=validate_draft]')
-                self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('게시 전 확인 완료')")
-                self.click('#ees-work-designer [data-action=publish]', confirm=True)
-                self.eventually(lambda: self.api("GET", path, token=self.admin["token"]).json()["process"]["published_workflow"] == before_draft)
-                process = self.api("GET", path, token=self.admin["token"]).json()["process"]
-                self.assertEqual(process["workflow"], before_draft)
-                self.assertFalse(process["publication_reconciliation"]["required"])
-                self.screenshot("sa-restore-" + changed_state + "-republished")
+        key=self.create_ui_procedure("제안 경계 검증")
+        self.click('[data-author-action=add_stage]')
+        self.fill('#ew-author-node [name=instructions]', '직접 편집한 미저장 값')
+        self.click('[data-author-action=node][data-id=""]')
+        self.click('.ew-author-ai > summary'); self.fill('[name=ai_prompt]', '설명 제안')
+        self.wait("!document.querySelector('[data-author-action=ai_propose]')?.disabled")
+        self.server.proposal_answer='반영 전 합성 제안'
+        self.click('[data-author-action=ai_propose]')
+        self.wait("document.querySelector('[data-author-action=ai_apply]')")
+        self.click('.ew-author-stage [data-author-action=node]')
+        self.assertEqual(self.read('#ew-author-node [name=instructions]','value'),'직접 편집한 미저장 값')
+        before=self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow']
+        self.assertEqual(before['revision'],1); self.assertNotEqual(before['draft'].get('description'),'반영 전 합성 제안')
+        self.click('[data-author-action=ai_apply]')
+        self.assertEqual(self.read('#ew-author-node [name=instructions]','value'),'반영 전 합성 제안')
+        self.assertEqual(self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow'],before)
+        gate={'workflow_id':key,'started':threading.Event(),'release':threading.Event(),'finished':threading.Event()}
+        self.server.proposal_gate=gate;self.addCleanup(gate['release'].set)
+        self.click('[data-author-action=node][data-id=""]')
+        if not self.read('.ew-author-ai','open'):
+            self.click('.ew-author-ai > summary')
+        self.fill('[name=ai_prompt]','취소할 추가 제안'); self.click('[data-author-action=ai_propose]')
+        self.assertTrue(gate['started'].wait(5)); self.click('[data-author-action=ai_cancel]'); gate['release'].set()
+        self.assertTrue(gate['finished'].wait(5))
+        self.wait("!document.querySelector('[data-author-action=ai_apply]')")
+        self.click('.ew-author-stage [data-author-action=node]')
+        self.assertEqual(self.read('#ew-author-node [name=instructions]','value'),'반영 전 합성 제안')
+        self.assertEqual(self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow'],before)
+        self.click('[data-author-action=save]')
+        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('초안 r2')")
+        after=self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow']
+        self.assertEqual(after['draft']['description'],'반영 전 합성 제안');self.assertIsNone(after['published_version'])
+        self.screenshot('integrated-native-ai-proposal-not-auto-save')
 
     def test_native_new_signup_and_approval_ui(self):
         account = self.signup_ui()
@@ -578,213 +538,41 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.screenshot("sa-approved-first-chat")
         self.assertTrue(self.server.completions)
         self.assertEqual(self.server.chats[self.first_chat]["user_id"], account.id)
-        self.navigate("/c/" + self.first_chat)
-        self.wait("!!document.querySelector('#chat-input')")
-        self.open_sidebar()
-        self.select_scope("site", "us-a")
-        self.select_scope("system", "EMS")
-        self.choose("scope-j", chat_id=self.first_chat)
-        self.click("#ees-work-run", confirm=True)
-        self.wait("!document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
-        first_case = self.current(self.first_chat)["case"]
-        self.assertEqual(first_case["jobs"]["scope-j"]["status"], "passed")
-        self.logout_ui(account.name)
-        self.login_ui("administrator@example.test", "Fixture-admin-only-42!")
-        created = self.api("POST", "/api/v1/groups/create", {"name": "EES · EMS 절차 담당",
-            "description": "합성 업무 절차 담당 그룹", "permissions": {}, "data": {"config": {"share": False}}}, self.admin["token"])
-        self.assertEqual(created.status_code, 200, created.text)
-        group_id = created.json()["id"]
-        self.group_member_ui(group_id, account, True)
-        self.assertEqual([g.id for g in self.fixture.run(self.fixture.groups.Groups.get_groups_by_member_id(account.id))], [group_id])
-        self.navigate("/?ees=workflow")
-        self.wait("!!document.querySelector('#ees-work-manage-system:not(:disabled)') && !!document.querySelector('#ees-work-designer [data-action=system_settings]')")
-        self.click('#ees-work-designer [data-action="system_settings"]')
-        group_form = '.ew-system-group[data-system-id="EMS"]'
-        self.wait("!!document.querySelector(" + json.dumps(group_form) + ")")
-        self.select_native(group_form + ' select[name="group_id"]', group_id)
-        if not self.read(group_form + ' input[name="active"]', "checked"):
-            self.click(group_form + ' input[name="active"]')
-        self.click(group_form + ' button[type="submit"]')
-        self.wait("document.querySelector('#ees-work-dialog')?.open")
-        self.click('#ees-work-dialog [data-dialog-confirm]')
-        self.wait("!document.querySelector('#ees-work-dialog')")
-        self.eventually(lambda: any(item["system_id"] == "EMS" and item["group_id"] == group_id
-            for item in self.api("GET", "/api/ees-work/authoring?system_id=EMS", token=self.admin["token"]).json()["system_groups"]))
-        self.wait("!!document.querySelector('#ees-work-manage-system:not(:disabled)')")
-        self.click('#ees-work-designer [data-action="system_settings"]')
-        self.wait("document.querySelector('.ew-system-group[data-system-id=EMS]')?.innerText.includes('정상')")
-        self.logout_ui("합성 기존 관리자")
-        self.login_ui(account.email, "Fixture-person-only-42!")
-        self.navigate("/?ees=workflow")
-        self.wait("document.querySelector('#ees-work-manage-system:not(:disabled)')?.value === 'EMS'")
-        self.assertEqual(self.read('#ees-work-manage-system', 'value'), 'EMS')
+        # Native approval alone grants no EES scope and no Native workspace permission.
+        empty=self.browser_api("GET","/api/ees-work/workspace")["data"]
+        self.assertEqual(empty['workflows'],[]);self.assertFalse(empty['capabilities']['can_author'])
+        forbidden=self.browser_api('POST','/api/ees-work/workspace/command',{'action':'create_workflow','system_id':'EMS','name':'권한 없는 생성','expected_revision':0,'request_id':str(uuid4())})
+        self.assertEqual(forbidden['status'],403,forbidden)
+        group=self.api('POST','/api/v1/groups/create',{'name':'이름으로 권한을 얻지 않는 합성 그룹','description':'synthetic','permissions':{}},self.admin['token']).json()
+        membership=self.api('POST','/api/v1/groups/id/'+group['id']+'/users/add',{'user_ids':[account.id]},self.admin['token'])
+        self.assertEqual(membership.status_code,200,membership.text)
+        unmapped=self.browser_api('GET','/api/ees-work/workspace')['data'];self.assertFalse(unmapped['capabilities']['can_author'])
+        grant=self.api('POST','/api/ees-work/workspace/command',{'action':'save_access','system_id':'EMS','factory_id':'*','principal_kind':'group','principal_id':group['id'],'roles':['manager','participant'],'expected_revision':0,'request_id':str(uuid4())},self.admin['token'])
+        self.assertEqual(grant.status_code,200,grant.text)
+        self.browser.evaluate('window.__eesNativeWorkV1.refresh()')
+        # A new authorization scope does not silently choose a workplace.
+        self.click('#ees-work-system-trigger')
+        self.wait("document.querySelector('[data-action=choose_system][data-system-id=EMS]')")
+        self.click('[data-action=choose_system][data-system-id=EMS]')
+        key=self.create_ui_procedure('합성 담당자 작성 절차')
+        self.click('[data-author-action="add_stage"]');self.fill('#ew-author-node [name="name"]','현장 확인')
+        self.click('[data-author-action="node"][data-id=""]');self.click('[data-author-action="add_job"]')
+        self.fill('#ew-author-node [name="name"]','사람의 명시적 판정')
+        self.click('[data-author-action="save"]');self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장 초안 r2')")
+        self.click('[data-author-action="validate"]');self.wait("document.querySelector('[data-author-action=publish]')")
+        self.click('[data-author-action="publish"]');self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('게시 v1')")
+        published=self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow']
+        self.assertEqual(published['published_version'],1);self.assert_user_workspace_zero()
+        self.assertEqual(self.fixture.run(self.fixture.groups.Groups.get_group_by_id(group['id'])).permissions,{})
+        self.assertEqual(self.server.chats[self.first_chat]['user_id'],account.id)
+        self.screenshot('integrated-native-group-author-published')
+        removed=self.api('POST','/api/v1/groups/id/'+group['id']+'/users/remove',{'user_ids':[account.id]},self.admin['token'])
+        self.assertEqual(removed.status_code,200,removed.text)
+        self.browser.evaluate('window.__eesNativeWorkV1.refresh()')
+        denied=self.browser_api('POST','/api/ees-work/workspace/command',{'action':'save_draft','workflow_id':key,'definition':published['draft'],'expected_revision':published['revision'],'request_id':str(uuid4())})
+        self.assertEqual(denied['status'],403,denied)
         self.assert_user_workspace_zero()
-        self.assertEqual(self.fixture.run(self.fixture.groups.Groups.get_group_by_id(group_id)).permissions, {})
-        self.screenshot("sa-user-authoring-entry")
-        self.click('#ees-work-designer [data-action="add_process"]')
-        self.wait("document.querySelector('#ees-work-dialog')?.open")
-        for _ in range(8):
-            self.key("Tab", 9)
-            self.assertTrue(self.browser.evaluate("document.querySelector('#ees-work-dialog').contains(document.activeElement)"))
-        self.key("Escape", 27)
-        self.wait("!document.querySelector('#ees-work-dialog')")
-        self.assertEqual(self.browser.evaluate("document.activeElement?.dataset.action"), "add_process")
-        self.click('#ees-work-designer [data-action="add_process"]')
-        self.wait("document.querySelector('#ees-work-dialog')?.open")
-        process_name = "EMS 설비 교대 인수인계 및 전산 변경 확인 절차"
-        self.fill('#ees-work-dialog input[name="name"]', process_name)
-        self.click('#ees-work-dialog [data-dialog-confirm]')
-        self.wait("document.querySelector('#ees-work-node-form [name=name]')?.value === " + json.dumps(process_name))
-        process_id = self.read('#ees-work-manage-process', 'value')
-        path = "/api/ees-work/authoring?system_id=EMS&process_id=" + process_id
-        scoped = self.browser_api("GET", path)["data"]
-        nodes = scoped["process"]["workflow"]["nodes"]
-        task_id = next(key for key, node in nodes.items() if node["type"] == "t")
-        job_id = next(key for key, node in nodes.items() if node["type"] == "j")
-        for identifier, name, instructions in (
-            (process_id, process_name, "교대 전 EMS 변경 내용과 전산 기록을 순서대로 확인합니다."),
-            (task_id, "현장 변경 내역 대조", "담당자의 기록을 확인하고 다음 교대에 인계합니다."),
-            (job_id, "변경 내역과 교대 인계 확인", "전산 기록과 인계 내용을 사람이 직접 확인합니다."),
-        ):
-            self.click('#ees-work-designer [data-action="edit_node"][data-node-id="' + identifier + '"]')
-            self.fill('#ees-work-node-form [name=name]', name)
-            self.fill('#ees-work-node-form [name=instructions]', instructions)
-            self.click('#ees-work-node-form > button[type=submit]')
-        self.click('#ees-work-designer [data-action=save_draft]')
-        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('저장된 초안')")
-        self.click('#ees-work-designer [data-action=validate_draft]')
-        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('게시 전 확인 완료')")
-        self.click('#ees-work-designer [data-action=publish]', confirm=True)
-        self.wait("document.querySelector('.ew-designer-status')?.innerText.includes('게시 v')")
-        self.assert_user_workspace_zero()
-        published = self.browser_api("GET", path)["data"]["process"]
-        self.assertEqual(published["published_workflow"]["nodes"][job_id]["name"], "변경 내역과 교대 인계 확인")
-        original_case = self.browser_api("GET", "/api/ees-work/state?case_id=" + first_case["id"])["data"]["case"]
-        self.assertEqual(original_case["definition"], first_case["definition"])
-        self.assertEqual(original_case["jobs"]["scope-j"]["status"], "passed")
-        self.screenshot("sa-user-published-procedure")
-        self.navigate("/?ees=workflow")
-        self.wait("!!document.querySelector('#ees-work-manage-process:not(:disabled)')")
-        self.assert_user_workspace_zero()
-        for system in ("APC", "COMMON"):
-            denied = self.browser_api("POST", "/api/ees-work/authoring/action", {
-                "action": "create", "system_id": system, "request_id": "forbidden-" + system,
-                "payload": {"name": "forbidden process", "category": "setup"}})
-            self.assertEqual(denied["status"], 403, denied)
-        author_browser = self.browser
-        author_token = self.browser.evaluate("localStorage.token")
-        self.select_native('#ees-work-manage-process', process_id)
-        self.wait("!!document.querySelector('#ees-work-node-form')")
-        self.fill('#ees-work-node-form [name=instructions]', "권한 회수 중 보존할 미저장 작성 내용")
-
-        # A second real signup and approval uses independent browser storage.
-        ordinary_browser = self.new_browser("chrome-ordinary")
-        ordinary = self.signup_ui("ordinary.b@example.test", "합성 일반 사용자 B")
-        self.wait("document.body.innerText.includes('계정 활성화 대기')")
-        self.click_text("로그아웃")
-        self.login_ui("administrator@example.test", "Fixture-admin-only-42!")
-        self.open_user_editor(ordinary.email)
-        self.select_native('select[aria-label]', 'user')
-        self.click('button[type="submit"]')
-        self.wait("!document.querySelector('select[aria-label]')")
-        self.logout_ui("합성 기존 관리자")
-        self.login_ui(ordinary.email, "Fixture-person-only-42!")
-        self.wait("!!document.querySelector('#chat-input')")
-        self.assert_user_workspace_zero()
-        self.assertFalse(self.browser_api("GET", "/api/ees-work/authoring/capabilities")["data"]["can_author"])
-        self.fill("#chat-input", "다른 일반 사용자도 게시된 EMS 업무 절차를 이용합니다")
-        self.click("#send-message-button")
-        self.wait("location.pathname.startsWith('/c/')")
-        ordinary_chat = self.browser.evaluate("location.pathname.split('/')[2]")
-        self.eventually(lambda: any(message.get("role") == "assistant" and message.get("done")
-            for message in self.server.chats.get(ordinary_chat, {}).get("chat", {}).get("history", {}).get("messages", {}).values()))
-        self.navigate("/c/" + ordinary_chat)
-        self.wait("!!document.querySelector('#chat-input') && document.body.innerText.includes('실제 대화 입력이 전달되었습니다.')")
-        self.open_sidebar()
-        self.select_scope("site", "us-a")
-        self.select_scope("system", "EMS")
-        self.choose(process_id, chat_id=ordinary_chat)
-        self.choose(task_id, chat_id=ordinary_chat)
-        self.choose(job_id, chat_id=ordinary_chat)
-        self.assertEqual(self.read("#ees-work-content h2"), "변경 내역과 교대 인계 확인")
-        self.click("#ees-work-run", confirm=True)
-        self.wait("!document.querySelector('#ees-work-panel')?.matches('[aria-busy=true]')")
-        ordinary_case = self.current(ordinary_chat)["case"]
-        self.assertEqual(ordinary_case["jobs"][job_id]["status"], "passed")
-        self.assertEqual(ordinary_case["definition"]["nodes"][job_id]["name"], "변경 내역과 교대 인계 확인")
-        self.assertEqual(ordinary_case["definition"]["nodes"][job_id]["instructions"], "전산 기록과 인계 내용을 사람이 직접 확인합니다.")
-        self.screenshot("sa-ordinary-user-published-a-panel")
-
-        admin_browser = self.new_browser("chrome-admin-recall")
-        self.login_ui("administrator@example.test", "Fixture-admin-only-42!")
-        self.group_member_ui(group_id, account, False)
-        self.browser = author_browser
-        self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), "권한 회수 중 보존할 미저장 작성 내용")
-        self.click('#ees-work-designer [data-action=save_draft]')
-        self.wait("!!document.querySelector('#ees-work-designer [data-action=save_draft]:disabled')")
-        self.assertEqual(self.read('#ees-work-node-form [name=instructions]', 'value'), "권한 회수 중 보존할 미저장 작성 내용")
-        for action in ("save_draft", "validate_draft", "publish"):
-            rejected = self.api("POST", "/api/ees-work/authoring/action", {
-                "action": action, "system_id": "EMS", "process_id": process_id,
-                "expected_owner_revision": published["owner_revision"],
-                "expected_draft_revision": published["draft_revision"], "request_id": str(uuid4()),
-                "payload": {"workflow": published["workflow"]} if action == "save_draft" else {}}, author_token)
-            self.assertEqual(rejected.status_code, 404, rejected.text)
-            self.assertEqual(rejected.json()["error"]["code"], "process_not_found")
-        self.assert_user_workspace_zero()
-        self.assertFalse(self.browser_api("GET", "/api/ees-work/authoring/capabilities")["data"]["can_author"])
-        self.screenshot("sa-recalled-author-preserved-local-draft")
-        saved = self.api("GET", path, token=self.admin["token"]).json()["process"]
-        self.assertEqual(saved["draft_revision"], published["draft_revision"])
-        self.assertNotIn("권한 회수 중", json.dumps(saved, ensure_ascii=False))
-        # Removing authorship leaves approved personal runtime available.
-        self.assertEqual(self.api("GET", "/api/ees-work/state?case_id=" + first_case["id"], token=author_token).status_code, 200)
-        self.browser = admin_browser
-        self.open_user_editor(account.email)
-        self.select_native('select[aria-label]', 'pending')
-        self.click('button[type="submit"]')
-        self.wait("!document.querySelector('select[aria-label]')")
-        self.assertEqual(self.fixture.run(self.fixture.users.Users.get_user_by_id(account.id)).role, "pending")
-        self.assertIn(self.api("GET", "/api/ees-work/state", token=author_token).status_code, {401, 403})
-        self.browser = ordinary_browser
-        self.assertEqual(self.browser_api("GET", "/api/ees-work/state?case_id=" + ordinary_case["id"])["status"], 200)
-
-        # Recreate the Native ASGI app, DB engines, workflow service and HTTP
-        # listener with the same Native/EES database files. Chat transport is
-        # explicitly synthetic memory, so only copy it for case ownership.
-        from native_auth_fixture import NativeAuthFixture, NativeAuthUIServer
-        old_fixture, old_server = self.fixture, self.server
-        chats = dict(old_fixture.chats)
-        directory = old_fixture.directory
-        old_server.shutdown()
-        old_server.server_close()
-        old_fixture.close()
-        self.fixture = NativeAuthFixture(self.wheel_path, directory)
-        self.addCleanup(self.fixture.close)
-        self.fixture.run(self.fixture.start())
-        self.fixture.chats.update(chats)
-        self.fixture.run(self.fixture.install_workflow())
-        self.server = NativeAuthUIServer(self.wheel_path, self.fixture)
-        self.addCleanup(self.server.server_close)
-        threading.Thread(target=self.server.serve_forever, daemon=True).start()
-        self.addCleanup(self.server.shutdown)
-        self.browser = ordinary_browser
-        self.login_ui(ordinary.email, "Fixture-person-only-42!")
-        self.assert_user_workspace_zero()
-        self.assertEqual(self.fixture.run(self.fixture.users.Users.get_user_by_id(account.id)).role, "pending")
-        self.assertEqual(self.fixture.run(self.fixture.groups.Groups.get_groups_by_member_id(account.id)), [])
-        self.assertEqual(self.fixture.run(self.fixture.groups.Groups.get_group_by_id(group_id)).permissions, {})
-        restored = self.api("GET", path, token=self.admin["token"]).json()
-        self.assertTrue(any(item["system_id"] == "EMS" and item["group_id"] == group_id and item["active"]
-            for item in restored["system_groups"]))
-        after = restored["process"]
-        self.assertEqual(after, saved)
-        state = self.browser_api("GET", "/api/ees-work/state?case_id=" + ordinary_case["id"])
-        self.assertEqual(state["status"], 200, state)
-        self.assertEqual(state["data"]["case"]["jobs"][job_id]["status"], "passed")
-        self.navigate("/c/" + ordinary_chat)
-        self.wait("!!document.querySelector('#chat-input')")
-        self.screenshot("sa-same-db-reinitialized-ordinary-user")
 
 
 if __name__ == "__main__":
