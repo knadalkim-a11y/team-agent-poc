@@ -709,20 +709,32 @@ class ExecutionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.bridge.calls, [])
 
     async def test_result_commit_failure_rolls_back_and_recovers_unknown(self):
-        self.runtime.lease_seconds = .1
+        # Keep the real lease while reaching the injected commit failure. A
+        # 100 ms lease can expire first on Windows and bypass call_recorded.
         run = await self.start(await self.plan("new-operations-jira-j"))
         original_event = self.runtime._event
+        injected = []
         def fail_result_commit(db, state, kind, detail=None):
             if kind == "call_recorded":
+                injected.append(kind)
                 raise sqlite3.OperationalError("synthetic disk write failure")
             return original_event(db, state, kind, detail)
         with patch.object(self.runtime, "_event", side_effect=fail_result_commit):
             with self.assertRaises(sqlite3.OperationalError):
                 await self.runtime.process_once()
-        with self.service._db() as db:
-            call = db.execute("SELECT state FROM execution_calls WHERE run_id=?", (run["id"],)).fetchone()
+        self.assertEqual(injected, ["call_recorded"])
+        with self.service._db(write=True) as db:
+            call = db.execute("SELECT state,data FROM execution_calls WHERE run_id=?", (run["id"],)).fetchone()
             self.assertEqual(call["state"], "running")
-        await asyncio.sleep(.13)
+            self.assertNotIn("result", json.loads(call["data"]))
+            # process_once has finished its finally block and stopped its
+            # heartbeat. Expire only this abandoned lease, without a wall-clock
+            # race or changing the production recovery implementation.
+            row = db.execute("SELECT worker FROM execution_runs WHERE id=?", (run["id"],)).fetchone()
+            self.assertEqual(row["worker"], self.runtime.worker_id)
+            changed = db.execute("UPDATE execution_runs SET lease=? WHERE id=? AND worker=?",
+                                 (time.time() - 1, run["id"], self.runtime.worker_id))
+            self.assertEqual(changed.rowcount, 1)
         await self.runtime.process_once()
         recovered = await self.state(run)
         self.assertEqual(recovered["status"], "unknown")
@@ -785,7 +797,6 @@ from test_ees_workflow_execution import build_service,Bridge
 async def main():
     bridge=Bridge()
     service=build_service(sys.argv[1],bridge)
-    service.execution.lease_seconds=.15
     if sys.argv[2]=='slow':
         original=bridge.invoke
         async def slow(*args):
@@ -814,11 +825,24 @@ asyncio.run(main())
             self.assertTrue(marker.exists())
             process.kill()
             await asyncio.to_thread(process.communicate, timeout=5)
+            self.assertIsNotNone(process.returncode)
+            self.assertNotEqual(process.returncode, 0)
         finally:
             if process.poll() is None:
                 process.kill()
                 await asyncio.to_thread(process.communicate, timeout=5)
-        await asyncio.sleep(.2)
+        # The real child has exited after persisting a dispatch. Keep the
+        # production lease during live work, then expire just the dead worker's
+        # lease to test recovery without relying on a 150 ms timing window.
+        with self.service._db(write=True) as db:
+            row = db.execute("SELECT worker FROM execution_runs WHERE id=?", (next_run["id"],)).fetchone()
+            self.assertIsNotNone(row["worker"])
+            self.assertNotEqual(row["worker"], self.runtime.worker_id)
+            call = db.execute("SELECT state FROM execution_calls WHERE run_id=?", (next_run["id"],)).fetchone()
+            self.assertEqual(call["state"], "running")
+            changed = db.execute("UPDATE execution_runs SET lease=? WHERE id=? AND worker=?",
+                                 (time.time() - 1, next_run["id"], row["worker"]))
+            self.assertEqual(changed.rowcount, 1)
         await self.runtime.process_once()
         recovered = await self.state(next_run)
         self.assertEqual(recovered["status"], "unknown", recovered)
