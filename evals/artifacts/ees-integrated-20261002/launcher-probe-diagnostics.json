@@ -1,0 +1,62 @@
+{
+  "recorded_date_utc": "2026-10-02",
+  "purpose": "Preserve the already completed targeted launcher-probe diagnostic verification. No test rerun was performed to create this record.",
+  "execution_timestamp_note": "The execution tool did not provide an absolute start timestamp; the session date and original elapsed result are retained without inventing a time.",
+  "environment": {
+    "os": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "python": "3.11.16",
+    "python_executable": ".venv/bin/python",
+    "node": "v24.19.0",
+    "node_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "environment_observation": "Versions queried after the recorded test execution; no dependencies were changed during this diagnostic task."
+  },
+  "verification": {
+    "working_directory": "repository root",
+    "command": ".venv/bin/python -m unittest -v tests.test_ees_branding_build.LauncherProbeDiagnosticsTests tests.test_ees_branding_build.BrandingBuildTests.test_launcher_assembly_order_is_private_and_has_one_runtime_asset",
+    "exit_code": 0,
+    "tests_run": 2,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "unittest_elapsed_seconds": 0.172,
+    "combined_output": "test_timeout_retains_observed_stages_and_never_reports_assertion_success (tests.test_ees_branding_build.LauncherProbeDiagnosticsTests.test_timeout_retains_observed_stages_and_never_reports_assertion_success) ... ok\ntest_launcher_assembly_order_is_private_and_has_one_runtime_asset (tests.test_ees_branding_build.BrandingBuildTests.test_launcher_assembly_order_is_private_and_has_one_runtime_asset) ... ok\n\n----------------------------------------------------------------------\nRan 2 tests in 0.172s\n\nOK\n",
+    "output_provenance": "Preserved from the original execution tool output; no separate execution log file was generated.",
+    "additional_check": {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "output": ""
+    }
+  },
+  "original_windows_failure": {
+    "run_id": 36956218460,
+    "job_id": 110679973342,
+    "log_path": "dist/integrated/ci-36956218460-platform-windows.log",
+    "test": "test_ees_branding_build.BrandingBuildTests.test_launcher_assembly_order_is_private_and_has_one_runtime_asset",
+    "observed": "subprocess.TimeoutExpired after 10 seconds for Node -e with the synthetic assembled fixture.",
+    "cause": "unconfirmed",
+    "limitations": "The original probe emitted no entry or completion stages. Its log cannot distinguish Node startup delay, VM evaluation, or process/pipe completion. A later Node draft-hook probe passed. Local Linux success does not resolve the Windows cause."
+  },
+  "synthetic_input": {
+    "bytes": 208,
+    "sha256": "c7bf9c7bf270383a3eaf5febc759fe32ba05afad6af9702a6f7679c46928797f",
+    "scope": "Two synchronous fixture factories and window.fixture assignment inside an IIFE. This probe does not execute the product launcher or access a user database."
+  },
+  "diagnostic_change": {
+    "file": "tests/test_ees_branding_build.py",
+    "outer_timeout_seconds_before": 10,
+    "outer_timeout_seconds_after": 10,
+    "vm_timeout_ms": 1000,
+    "assertions": "All original assembly order, single shipped runtime asset, factory result order, and private global boundary assertions remain. Explicit completion markers and success output checks were added.",
+    "stages": [
+      "launcher-node-entry",
+      "launcher-vm-entry",
+      "launcher-vm-complete",
+      "launcher-assertions-complete"
+    ],
+    "failure_evidence": "Synchronous stderr stages are included in timeout assertion messages; fixture length and SHA256 are included. The existing EvidenceResult stores failure traceback details in the CI JSON artifact as well as the log.",
+    "retry_added": false,
+    "product_changed": false,
+    "ci_changed_by_this_task": false
+  },
+  "remaining_verification": "Observe the next Windows CI run under the separately changed smaller partition. Even a subsequent pass does not establish the original timeout cause."
+}

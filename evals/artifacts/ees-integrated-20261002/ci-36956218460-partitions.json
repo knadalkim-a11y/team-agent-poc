@@ -1,0 +1,177 @@
+{
+  "run_id": 36956218460,
+  "head": "e15eabeb6cd33aa2662d0e0ff13b931ad468e5a7",
+  "job_ids": {
+    "windows_platform": 110679973342,
+    "windows_contracts": 110679973424
+  },
+  "observation": {
+    "windows_platform": "cancelled at job10min after 58 customization methods completed; interrupted manage_ees PowerShellResume. Earlier assetNative2 cleanup errors and Node probe10sec timeout also preserved. IOCP explicit gate/Windows historical diagnostics/PowerShell parse steps unexecuted.",
+    "windows_contracts": "completed failure,89 tests executed: authoring29 with6 cleanup errors; examples5 PASS358.070s, execution37 PASS25.275s, model5 PASS0.419s, Native bridge13 PASS51.579s.",
+    "platform_previous_fixes": "Synthetic docs resolve43 tests PASS and Windows stop-target16 tests PASS; original LF digest mismatch absent, two Native asset cases instead fail on cleanup SQLite handle."
+  },
+  "changes": {
+    "program-install": "Move remaining58 current customization IDs from platform into own required Linux/Windows suite; restore3 remain independent.",
+    "native-contracts": "Move entire Native examples module5 from contracts into own required Linux/Windows suite based on358sec observed duration; remaining84 stay contracts.",
+    "required_gates": "Same service matrix remains dependency of both Delivery checks, all new combinations required. Same10min timeout, no skip/assertion/hash/trigger/protection changes. Windows fixed source rebuild and package inspection still platform only; other jobs use exact shared artifacts."
+  },
+  "validation": {
+    "runner_tests": 10,
+    "runner_result": "PASS",
+    "runner_log": "dist/integrated/ci-36956218460-partition-runner.log",
+    "baseline_ids": 1332,
+    "current_ids": 1183,
+    "audit_errors": [],
+    "runtime_collection": "No cases executed again for this partition-only check. Actual unittest collection matches all61 customization and5 Native examples IDs."
+  },
+  "customization_assignments": {
+    "program-install": [
+      "test_ees_webui_customization.CustomizationTests.test_all_apply_transition_failures_are_explicitly_restorable",
+      "test_ees_webui_customization.CustomizationTests.test_apply_idempotence_first_restore_and_original_state_preserved",
+      "test_ees_webui_customization.CustomizationTests.test_asset_guard_missing_from_current_program_stops_before_changes",
+      "test_ees_webui_customization.CustomizationTests.test_backup_tampering_blocks_restore_without_changing_active",
+      "test_ees_webui_customization.CustomizationTests.test_checkonly_reads_without_importing_or_writing",
+      "test_ees_webui_customization.CustomizationTests.test_data_path_interpreter_env_overlap_and_dotenv_fail_readonly",
+      "test_ees_webui_customization.CustomizationTests.test_ees12_inventory_is_frozen_and_frontend_namespaces_cannot_be_interchanged",
+      "test_ees_webui_customization.CustomizationTests.test_exhausted_windows_promote_preserves_pending_and_can_manually_resume",
+      "test_ees_webui_customization.CustomizationTests.test_exhausted_windows_restore_retains_verified_previous_for_explicit_retry",
+      "test_ees_webui_customization.CustomizationTests.test_extracted_code_metadata_and_frontend_select_the_same_app",
+      "test_ees_webui_customization.CustomizationTests.test_failed_first_program_promotion_requires_restore_and_preserves_original",
+      "test_ees_webui_customization.CustomizationTests.test_final_record_failure_does_not_clear_pending_in_memory",
+      "test_ees_webui_customization.CustomizationTests.test_hardlinks_and_symlinks_are_not_applied_or_removed",
+      "test_ees_webui_customization.CustomizationTests.test_identical_app_from_new_commit_restores_previous_commit",
+      "test_ees_webui_customization.CustomizationTests.test_installed_current_program_requires_guard_but_ees8_backup_does_not",
+      "test_ees_webui_customization.CustomizationTests.test_installed_ees3_still_requires_theme_assets_after_wrapper_update",
+      "test_ees_webui_customization.CustomizationTests.test_installed_ees6_still_requires_its_own_work_assets_after_wrapper_update",
+      "test_ees_webui_customization.CustomizationTests.test_installed_legacy_apply_portal_restore_preserves_original_runtime_and_ca",
+      "test_ees_webui_customization.CustomizationTests.test_interrupted_extract_is_pending_and_restore_discards_only_owned_stage",
+      "test_ees_webui_customization.CustomizationTests.test_interrupted_legacy_restore_keeps_legacy_record_until_cleanup",
+      "test_ees_webui_customization.CustomizationTests.test_interrupted_previous_retirement_preserves_intact_current_app",
+      "test_ees_webui_customization.CustomizationTests.test_interrupted_restore_deletion_resumes_using_record_last",
+      "test_ees_webui_customization.CustomizationTests.test_legacy_or_malformed_record_is_rejected_before_mutation",
+      "test_ees_webui_customization.CustomizationTests.test_legacy_selection_rejects_mixed_metadata_and_frontend",
+      "test_ees_webui_customization.CustomizationTests.test_locked_directory_rename_preserves_previous_and_can_restore",
+      "test_ees_webui_customization.CustomizationTests.test_missing_tampered_and_extra_active_files_block_apply_and_restore",
+      "test_ees_webui_customization.CustomizationTests.test_original_app_and_metadata_must_match_registered_paths",
+      "test_ees_webui_customization.CustomizationTests.test_original_packaging_docs_are_verified_but_not_installed",
+      "test_ees_webui_customization.CustomizationTests.test_packaging_doc_only_change_keeps_app_identity_and_restores_prior_commit",
+      "test_ees_webui_customization.CustomizationTests.test_previous_theme_versions_checkonly_apply_and_restore_preserve_runtime",
+      "test_ees_webui_customization.CustomizationTests.test_previous_theme_versions_pending_can_resume_and_restore",
+      "test_ees_webui_customization.CustomizationTests.test_readonly_applicability_checks_backup_and_unrecorded_staging",
+      "test_ees_webui_customization.CustomizationTests.test_restore_returns_immediately_preceding_program_only_once",
+      "test_ees_webui_customization.CustomizationTests.test_resume_final_record_failure_retains_new_owner_and_remains_restorable",
+      "test_ees_webui_customization.CustomizationTests.test_resume_manual_first_promotion_commits_without_moving_files_and_restores_original",
+      "test_ees_webui_customization.CustomizationTests.test_resume_rejects_incomplete_changed_extra_or_linked_program_files",
+      "test_ees_webui_customization.CustomizationTests.test_resume_rejects_missing_or_changed_previous_before_recording",
+      "test_ees_webui_customization.CustomizationTests.test_resume_rejects_missing_pending_and_premature_or_duplicate_staging",
+      "test_ees_webui_customization.CustomizationTests.test_resume_rejects_wrong_bundle_target_and_inconsistent_transaction_readonly",
+      "test_ees_webui_customization.CustomizationTests.test_resume_updated_and_identical_bytes_preserves_exact_predecessor",
+      "test_ees_webui_customization.CustomizationTests.test_successful_and_noop_apply_restore_never_wait",
+      "test_ees_webui_customization.CustomizationTests.test_theme_assets_missing_from_otherwise_valid_record_stop_before_changes",
+      "test_ees_webui_customization.CustomizationTests.test_wheel_install_paths_hooks_metadata_frontend_and_record_rejected",
+      "test_ees_webui_customization.CustomizationTests.test_work_files_missing_from_otherwise_valid_record_stop_before_changes",
+      "test_ees_webui_customization.CustomizationTests.test_wrong_baseline_requirements_and_commit_do_not_write",
+      "test_ees_webui_customization.ProgramRenameTests.test_cancellation_during_wait_stops_without_retry",
+      "test_ees_webui_customization.ProgramRenameTests.test_dangling_destination_link_is_rejected_before_any_rename",
+      "test_ees_webui_customization.ProgramRenameTests.test_destination_created_during_wait_is_never_replaced",
+      "test_ees_webui_customization.ProgramRenameTests.test_exhaustion_preserves_original_error_and_owned_directory",
+      "test_ees_webui_customization.ProgramRenameTests.test_external_promotion_is_not_adopted_as_success",
+      "test_ees_webui_customization.ProgramRenameTests.test_non_windows_and_other_errors_do_not_wait_or_retry",
+      "test_ees_webui_customization.ProgramRenameTests.test_path_denial_after_wait_is_not_misreported_as_a_rename_failure",
+      "test_ees_webui_customization.ProgramRenameTests.test_path_safety_is_rechecked_after_wait",
+      "test_ees_webui_customization.ProgramRenameTests.test_real_windows_directory_lock_released_during_wait_then_promotes",
+      "test_ees_webui_customization.ProgramRenameTests.test_replaced_source_identity_stops_after_wait",
+      "test_ees_webui_customization.ProgramRenameTests.test_transient_windows_denials_retry_only_the_same_fixed_move",
+      "test_ees_webui_customization.RealBrandingWheelTests.test_real_built_wheel_has_complete_purelib_app_metadata_and_frontend",
+      "test_ees_webui_customization.RealBrandingWheelTests.test_saved_workflow_survives_real_upgrade_then_previous_program_restore"
+    ],
+    "restore-ees10": [
+      "test_ees_webui_customization.CustomizationTests.test_real_ees10_to_authoring_apply_restore_preserves_program_and_data"
+    ],
+    "restore-ees11": [
+      "test_ees_webui_customization.CustomizationTests.test_real_ees11_to_execution_apply_restore_preserves_program_and_data"
+    ],
+    "restore-ees12": [
+      "test_ees_webui_customization.CustomizationTests.test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory"
+    ]
+  },
+  "native_contract_ids": [
+    "test_ees_workflow_examples_native.NativeWorkflowExamplesTests.test_a_t2_scope_waits_without_dispatching_outside_dependencies",
+    "test_ees_workflow_examples_native.NativeWorkflowExamplesTests.test_a_t_only_then_p_three_native_functions_and_grounded_summary",
+    "test_ees_workflow_examples_native.NativeWorkflowExamplesTests.test_b_same_confluence_search_candidate_wait_resume_and_body",
+    "test_ees_workflow_examples_native.NativeWorkflowExamplesTests.test_model_invented_counts_ci_and_foreign_evidence_never_complete",
+    "test_ees_workflow_examples_native.NativeWorkflowExamplesTests.test_truncated_document_stops_and_does_not_run_summary"
+  ],
+  "source_evidence": [
+    {
+      "path": "dist/integrated/ci-36956218460-platform-windows.log",
+      "sha256": "d291d562dce4ccc05cd53405cb4165df9b8f7c9219d4cda89bb06312e9ccb9b6",
+      "bytes": 236096,
+      "signals": [
+        {
+          "line": 680,
+          "text": "2026-10-02T02:39:47.0622883Z ERROR: test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication (test_ees_asset_native.NativeAuthoringAssetReadTests.test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication)"
+        },
+        {
+          "line": 717,
+          "text": "2026-10-02T02:39:47.0648196Z ERROR: test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets (test_ees_asset_native.NativeAuthoringAssetReadTests.test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets)"
+        },
+        {
+          "line": 790,
+          "text": "2026-10-02T02:40:28.3583075Z ERROR: test_launcher_assembly_order_is_private_and_has_one_runtime_asset (test_ees_branding_build.BrandingBuildTests.test_launcher_assembly_order_is_private_and_has_one_runtime_asset)"
+        },
+        {
+          "line": 1321,
+          "text": "2026-10-02T02:45:24.3101090Z Ran 58 tests in 224.363s"
+        },
+        {
+          "line": 1413,
+          "text": "2026-10-02T02:45:30.9566983Z test_adapter_forwards_resume_and_check_only_and_rejects_other_actions (test_manage_ees.PowerShellResumeTests.test_adapter_forwards_resume_and_check_only_and_rejects_other_actions) ... Traceback (most recent call last):"
+        },
+        {
+          "line": 1484,
+          "text": "2026-10-02T02:45:31.1561528Z ##[error]The operation was canceled."
+        }
+      ]
+    },
+    {
+      "path": "dist/integrated/ci-36956218460-contracts-windows.log",
+      "sha256": "84d19cbef3fe9a8347a849dd8de3ca219dea897c1bce8a7829dde9c863172918",
+      "bytes": 171080,
+      "signals": [
+        {
+          "line": 536,
+          "text": "2026-10-02T02:36:56.6479802Z ERROR: test_sa23_exact_legacy_archive_and_explicit_partial_import (test_ees_work_authoring.AuthoringRestoreTests.test_sa23_exact_legacy_archive_and_explicit_partial_import)"
+        },
+        {
+          "line": 565,
+          "text": "2026-10-02T02:36:56.6506311Z ERROR: test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication)"
+        },
+        {
+          "line": 594,
+          "text": "2026-10-02T02:36:56.6520324Z ERROR: test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process)"
+        },
+        {
+          "line": 623,
+          "text": "2026-10-02T02:36:56.6534472Z ERROR: test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state)"
+        },
+        {
+          "line": 652,
+          "text": "2026-10-02T02:36:56.6549295Z ERROR: test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit)"
+        },
+        {
+          "line": 681,
+          "text": "2026-10-02T02:36:56.6563079Z ERROR: test_sa19_publish_and_audit_failure_roll_back_one_transaction (test_ees_work_authoring.SystemAuthoringTests.test_sa19_publish_and_audit_failure_roll_back_one_transaction)"
+        },
+        {
+          "line": 710,
+          "text": "2026-10-02T02:36:56.6576120Z Ran 29 tests in 12.503s"
+        },
+        {
+          "line": 756,
+          "text": "2026-10-02T02:42:54.9254627Z Ran 5 tests in 358.070s"
+        }
+      ]
+    }
+  ]
+}

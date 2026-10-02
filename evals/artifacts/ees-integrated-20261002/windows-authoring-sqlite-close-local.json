@@ -1,0 +1,87 @@
+{
+  "date_utc": "2026-10-02T02:48:12.443689+00:00",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "python": "3.11.16 (main, Sep 24 2026, 17:56:40) [Clang 22.1.3 ]",
+  "tests": [
+    "SystemAuthoringTests.test_sa19_publish_and_audit_failure_roll_back_one_transaction",
+    "AuthoringRestoreTests.test_sa23_exact_legacy_archive_and_explicit_partial_import",
+    "AuthoringRestoreTests.test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication",
+    "AuthoringRestoreTests.test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit",
+    "AuthoringRestoreTests.test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state",
+    "AuthoringRestoreTests.test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process"
+  ],
+  "tests_run": 6,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "strict_default_encoding": true,
+  "connections_kept_alive_until_after_cleanup": 423,
+  "open_connections": [],
+  "changed_connection_sites": [
+    384,
+    394,
+    684,
+    715,
+    732,
+    737,
+    750,
+    777,
+    783,
+    833,
+    852,
+    869,
+    887,
+    921
+  ],
+  "executed_changed_connection_sites": [
+    384,
+    394,
+    684,
+    715,
+    732,
+    737,
+    750,
+    777,
+    783,
+    833,
+    852,
+    869,
+    887,
+    921
+  ],
+  "historical_fixture_bytes": "unchanged; pinned ees.10 and b41e239 checks executed by test helpers",
+  "initial_harness_selection": "No tests ran: sa23/sa25 belong to AuthoringRestoreTests, corrected selectors.",
+  "windows_execution": "not run locally; next Windows CI required",
+  "provenance": {
+    "role": "One-off local diagnostic harness, not a CI entrypoint or a new product test gate.",
+    "working_directory": "repository root",
+    "environment": {
+      "PYTHONPATH": "tests",
+      "EES_TEST_LEGACY_WORKFLOW_WHEEL": "dist/integrated/previous10-branding/open_webui-0.11.3+ees.10-py3-none-any.whl",
+      "EES_REQUIRE_LEGACY_WORKFLOW": "1"
+    },
+    "executed_command": "PYTHONPATH=tests EES_TEST_LEGACY_WORKFLOW_WHEEL=dist/integrated/previous10-branding/open_webui-0.11.3+ees.10-py3-none-any.whl EES_REQUIRE_LEGACY_WORKFLOW=1 .venv/bin/python -X warn_default_encoding -W error::EncodingWarning - <<'PY'\nfrom datetime import datetime, timezone\nimport inspect\nimport json\nfrom pathlib import Path\nimport platform\nimport sqlite3\nimport sys\nimport unittest\nfrom unittest.mock import patch\nimport test_ees_work_authoring as module\n\nnames = [\n    'SystemAuthoringTests.test_sa19_publish_and_audit_failure_roll_back_one_transaction',\n    'AuthoringRestoreTests.test_sa23_exact_legacy_archive_and_explicit_partial_import',\n    'AuthoringRestoreTests.test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication',\n    'AuthoringRestoreTests.test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit',\n    'AuthoringRestoreTests.test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state',\n    'AuthoringRestoreTests.test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process',\n]\nsource = Path(module.__file__).resolve()\nexpected_lines = {number for number, line in enumerate(source.read_text(encoding='utf-8').splitlines(), 1)\n                  if 'with closing(sqlite3.connect(self.database)) as db, db:' in line}\nassert len(expected_lines) == 14\noriginal = sqlite3.connect\nconnections = []\ndef tracked_connect(*args, **kwargs):\n    caller = inspect.currentframe().f_back\n    origin = (str(Path(caller.f_code.co_filename).resolve()), caller.f_lineno)\n    connection = original(*args, **kwargs)\n    connections.append((connection, origin))\n    return connection\n\noutput = Path('dist/integrated/windows-authoring-sqlite-close-local.log')\nwith output.open('w', encoding='utf-8') as stream:\n    with patch.object(sqlite3, 'connect', tracked_connect):\n        result = unittest.TextTestRunner(stream=stream, verbosity=2).run(\n            unittest.TestLoader().loadTestsFromNames(names, module=module))\n    open_connections = []\n    for connection, origin in connections:\n        try:\n            connection.execute('SELECT 1')\n        except sqlite3.ProgrammingError:\n            continue\n        else:\n            open_connections.append(origin)\n        finally:\n            connection.close()\n    covered_lines = {line for _, (path, line) in connections if path == str(source)} & expected_lines\n    report = {'date_utc': datetime.now(timezone.utc).isoformat(), 'platform': platform.platform(),\n              'python': sys.version, 'tests': names, 'tests_run': result.testsRun,\n              'failures': len(result.failures), 'errors': len(result.errors), 'skips': len(result.skipped),\n              'strict_default_encoding': True, 'connections_kept_alive_until_after_cleanup': len(connections),\n              'open_connections': open_connections, 'changed_connection_sites': sorted(expected_lines),\n              'executed_changed_connection_sites': sorted(covered_lines),\n              'historical_fixture_bytes': 'unchanged; pinned ees.10 and b41e239 checks executed by test helpers',\n              'initial_harness_selection': 'No tests ran: sa23/sa25 belong to AuthoringRestoreTests, corrected selectors.',\n              'windows_execution': 'not run locally; next Windows CI required'}\n    stream.write(json.dumps(report, ensure_ascii=False, indent=2) + '\\n')\nPath('dist/integrated/windows-authoring-sqlite-close-local.json').write_text(\n    json.dumps(report, ensure_ascii=False, indent=2) + '\\n', encoding='utf-8')\nprint(json.dumps(report, ensure_ascii=False, indent=2))\nassert result.wasSuccessful() and result.testsRun == 6 and not result.skipped\nassert not open_connections, open_connections\nassert covered_lines == expected_lines, (expected_lines, covered_lines)\nPY",
+    "stdin_source": {
+      "path": "evals/artifacts/ees-integrated-20261002/windows-authoring-sqlite-close-harness.py",
+      "sha256": "6eb13fcc6bc15d91c8535c24f5a9b05e70cccb364de6f94e45c646631deeb59b",
+      "preservation": "Exact successful stdin source preserved from the executed command; not rerun while adding provenance."
+    },
+    "reproduction_command": "PYTHONPATH=tests EES_TEST_LEGACY_WORKFLOW_WHEEL=dist/integrated/previous10-branding/open_webui-0.11.3+ees.10-py3-none-any.whl EES_REQUIRE_LEGACY_WORKFLOW=1 .venv/bin/python -X warn_default_encoding -W error::EncodingWarning evals/artifacts/ees-integrated-20261002/windows-authoring-sqlite-close-harness.py",
+    "standard_focused_invocation": {
+      "command": "PYTHONPATH=tests EES_TEST_LEGACY_WORKFLOW_WHEEL=dist/integrated/previous10-branding/open_webui-0.11.3+ees.10-py3-none-any.whl EES_REQUIRE_LEGACY_WORKFLOW=1 .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -v test_ees_work_authoring.SystemAuthoringTests.test_sa19_publish_and_audit_failure_roll_back_one_transaction test_ees_work_authoring.AuthoringRestoreTests.test_sa23_exact_legacy_archive_and_explicit_partial_import test_ees_work_authoring.AuthoringRestoreTests.test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication test_ees_work_authoring.AuthoringRestoreTests.test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit test_ees_work_authoring.AuthoringRestoreTests.test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state test_ees_work_authoring.AuthoringRestoreTests.test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process",
+      "status": "Reference only, not separately executed. The recorded run loaded these exact tests inside the connection-tracking harness."
+    },
+    "test_source": {
+      "path": "tests/test_ees_work_authoring.py",
+      "sha256": "0ff66311eeea9072a509c48c049df564202d7fd4130e57d64beb7527984f9308"
+    },
+    "source_commit_at_provenance_recording": "bb2ffa791e6a999c5414fe01088af90982b98ef5",
+    "original_generated_report_sha256": "b80e6f2ed31625956134ed3d473e48c10f208586da1db335c9222a767282b266",
+    "output": {
+      "path": "evals/artifacts/ees-integrated-20261002/windows-authoring-sqlite-close-local.log",
+      "sha256": "81688f19e8d73fad653db3c96bf4d7763b2cba2302f57881cd4aabf22ec7477f",
+      "scope": "unittest runner output and generated JSON; incidental asyncio stderr timing messages were returned by the execution tool, not this log stream."
+    },
+    "no_rerun_for_provenance": true
+  }
+}

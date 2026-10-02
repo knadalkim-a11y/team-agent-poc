@@ -1,0 +1,122 @@
+{
+  "moved": true,
+  "reason": "same_live_animation_advanced",
+  "elapsed_ms": 55.59999999962747,
+  "replacements": 0,
+  "first": {
+    "timestamp": 1285.9,
+    "connected": true,
+    "visible": true,
+    "visibility": "visible",
+    "reduced_motion": false,
+    "name": "ew-running",
+    "transform": "matrix(0.994518, 0.104568, -0.104568, 0.994518, 0, 0)",
+    "pending": false,
+    "play_state": "running",
+    "current_time": 16.67299999931715,
+    "start_time": 1269.227000000683,
+    "rect": {
+      "x": 1460.207275390625,
+      "y": 130.2073211669922,
+      "width": 17.58544921875,
+      "height": 17.585372924804688
+    }
+  },
+  "second": {
+    "timestamp": 1302.6,
+    "connected": true,
+    "visible": true,
+    "visibility": "visible",
+    "reduced_motion": false,
+    "name": "ew-running",
+    "transform": "matrix(0.978096, 0.208155, -0.208155, 0.978096, 0, 0)",
+    "pending": false,
+    "play_state": "running",
+    "current_time": 33.37299999931709,
+    "start_time": 1269.227000000683,
+    "rect": {
+      "x": 1459.510009765625,
+      "y": 129.50999450683594,
+      "width": 18.97998046875,
+      "height": 18.980010986328125
+    }
+  },
+  "samples": [
+    {
+      "timestamp": 1252.5,
+      "connected": true,
+      "visible": true,
+      "visibility": "visible",
+      "reduced_motion": false,
+      "name": "ew-running",
+      "transform": "matrix(1, 0, 0, 1, 0, 0)",
+      "pending": true,
+      "play_state": "running",
+      "current_time": 0,
+      "start_time": null,
+      "rect": {
+        "x": 1461,
+        "y": 131,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "timestamp": 1269.2,
+      "connected": true,
+      "visible": true,
+      "visibility": "visible",
+      "reduced_motion": false,
+      "name": "ew-running",
+      "transform": "matrix(1, 0, 0, 1, 0, 0)",
+      "pending": true,
+      "play_state": "running",
+      "current_time": 0,
+      "start_time": null,
+      "rect": {
+        "x": 1461,
+        "y": 131,
+        "width": 16,
+        "height": 16
+      }
+    },
+    {
+      "timestamp": 1285.9,
+      "connected": true,
+      "visible": true,
+      "visibility": "visible",
+      "reduced_motion": false,
+      "name": "ew-running",
+      "transform": "matrix(0.994518, 0.104568, -0.104568, 0.994518, 0, 0)",
+      "pending": false,
+      "play_state": "running",
+      "current_time": 16.67299999931715,
+      "start_time": 1269.227000000683,
+      "rect": {
+        "x": 1460.207275390625,
+        "y": 130.2073211669922,
+        "width": 17.58544921875,
+        "height": 17.585372924804688
+      }
+    },
+    {
+      "timestamp": 1302.6,
+      "connected": true,
+      "visible": true,
+      "visibility": "visible",
+      "reduced_motion": false,
+      "name": "ew-running",
+      "transform": "matrix(0.978096, 0.208155, -0.208155, 0.978096, 0, 0)",
+      "pending": false,
+      "play_state": "running",
+      "current_time": 33.37299999931709,
+      "start_time": 1269.227000000683,
+      "rect": {
+        "x": 1459.510009765625,
+        "y": 129.50999450683594,
+        "width": 18.97998046875,
+        "height": 18.980010986328125
+      }
+    }
+  ]
+}
