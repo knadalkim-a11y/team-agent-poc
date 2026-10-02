@@ -10,6 +10,7 @@ tables/routers, rather than replacing persistence with a mock dictionary.
 from __future__ import annotations
 
 import asyncio
+from contextlib import closing
 from copy import deepcopy
 import hashlib
 import importlib
@@ -708,7 +709,7 @@ class NativeAuthoringAssetReadTests(unittest.IsolatedAsyncioTestCase):
 
     def native_digest(self):
         """Hash all logical Native rows, including source, valves, ACL and owners."""
-        with sqlite3.connect(self.fixture.directory / "webui.db") as db:
+        with closing(sqlite3.connect(self.fixture.directory / "webui.db")) as db, db:
             names = [row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
             rows = {name: sorted(db.execute('SELECT * FROM "' + name.replace('"', '""') + '"').fetchall(), key=repr)
                     for name in names if not name.startswith("sqlite_")}
