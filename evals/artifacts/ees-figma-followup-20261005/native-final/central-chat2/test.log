@@ -1,0 +1,10 @@
+{"name": "empty Native installation", "workflows": 0, "runs": 0}
+{"name": "Native model availability", "models": [{"id": "c3-synthetic-model", "direct": null, "owned_by": "openai"}, {"id": "arena-model", "direct": null, "owned_by": "arena"}]}
+Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 193.50571899940405, "product": "HeadlessChrome/153.0.8010.52"}
+{"name": "actual built Native render", "viewport": [1920, 1080]}
+{"name": "explicit packaged read-only Work tool registration", "id": "ees_workflow", "source_sha256": "12a538febf1843aeb7e0ccad64e72545c097858d94a165e046cba259f61ba8fe", "private_native_grant": true, "model_presets_created": false}
+{"name": "actual Native authenticated socket join sent", "credential_payload_recorded": false}
+{"name": "physical central chat executes actual registered authorized read", "workflow_id": "f98586db-f5d1-4e67-bc3b-7a51bc382bb9", "revision": 2, "stored_work_unchanged": true}
+{"name": "physical central proposal then separate apply and save", "draft_revision": 3, "published": false, "runs": 0, "chat_id": "7572607f-4a42-4e62-9ddf-2192bde4b272", "native_tool_history_saved": true, "model_boundary": "Loopback synthetic tool-call selection only; actual Native registered tool execution"}
+{"name": "physical input suggestion preview apply then separate save", "run_id": "05b4c133-394b-4a93-8d97-1bd32c6a8a6b", "proposal_count": 1, "attempts": 0}
+{"name": "physical immutable historical message reference after second attempt", "message_id": "9795f8ef-4874-48ae-bcca-5ffce0d095bc", "attempt_id": "ab38b149-06e0-4a65-9754-c4492ebab61f", "latest_attempts": 2, "readonly": true}

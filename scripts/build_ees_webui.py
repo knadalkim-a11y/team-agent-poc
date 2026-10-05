@@ -50,6 +50,10 @@ V4_ICON_FILES += tuple("v4/" + name for name in (
     "35b2e.svg", "a28e3.svg", "b22ad.svg", "f1e53.svg", "b456d.svg",
     "52271.svg", "63982.svg", "6d84b.svg", "1c98e.svg", "478bf.svg",
 ))
+V4_ICON_FILES += tuple("v4/" + name for name in (
+    "f4cb1.svg", "3dae2.svg", "e9ac2.svg", "30679.svg", "2b3d1.svg",
+    "1a06f.svg", "2fe77.svg", "2eb05.svg", "b355c.svg", "66c71.svg", "45242.svg",
+))
 UI_FILES.update({name: name for name in V4_ICON_FILES})
 WORK_LAUNCHER_SOURCES = ("ees-work-view.js", "ees-work-designer.js", "ees-work-launcher.js")
 WORK_DIR = ASSET_DIR.parents[2] / "agent-pack" / "skills" / "ees-work-demo"

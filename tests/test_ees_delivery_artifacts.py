@@ -83,7 +83,14 @@ class DeliveryArtifactsTests(unittest.IsolatedAsyncioTestCase):
                 current = await self.state()
                 denied = await self.service.workspace_command(self.user, self.body('decide',current['revision'],run_id=self.run_id,job_id=job,result_revision=row['result_revision'],item_id=item['id'],verdict=verdict,note=note))
                 self.assertFalse(denied['ok'], denied)
-                self.assertEqual(denied['error']['code'], 'item_not_found')
+                # A finalized attempt rejects every additional final decision
+                # before inspecting item eligibility. Exclusion is separately
+                # tested below while this amended list is still unconfirmed.
+                self.assertEqual(denied['error']['code'], 'decision_conflict' if current['jobs'][job]['status']=='completed' else 'item_not_found')
+                after = await self.state()
+                self.assertEqual(after['revision'], current['revision'])
+                self.assertEqual(after['jobs'][job]['decisions'], current['jobs'][job]['decisions'])
+                self.assertEqual(after['jobs'][job]['status'], current['jobs'][job]['status'])
                 continue
             current = await self.state()
             await self.core('decide',current['revision'],run_id=self.run_id,job_id=job,result_revision=row['result_revision'],item_id=item['id'],verdict=verdict,note=note)
@@ -164,6 +171,9 @@ class DeliveryArtifactsTests(unittest.IsolatedAsyncioTestCase):
         changed=await self.state()
         self.assertEqual(changed['jobs']['documents']['status'],'review_required')
         self.assertEqual(next(a for a in changed['attempts'] if a['id']==first['id'])['snapshot']['arguments']['issue_keys'],['APPX-1','APPX-2','APPX-3'])
+        excluded=await self.service.workspace_command(self.user,self.body('decide',changed['revision'],run_id=self.run_id,job_id='cr-list',result_revision=changed['jobs']['cr-list']['result_revision'],item_id='APPX-1',verdict='completed'))
+        self.assertFalse(excluded['ok']); self.assertEqual(excluded['error']['code'],'item_not_found')
+        self.assertEqual((await self.state())['jobs']['cr-list']['decisions'],changed['jobs']['cr-list']['decisions'])
         await self.decide('cr-list')
         second=await self.execute('documents')
         self.assertEqual(second['snapshot']['arguments']['issue_keys'],['APPX-3'])

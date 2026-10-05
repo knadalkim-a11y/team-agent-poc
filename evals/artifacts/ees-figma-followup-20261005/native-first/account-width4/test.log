@@ -1,0 +1,60 @@
+test_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai) ... <repo>/.venv/lib/python3.11/site-packages/ldap3/utils/asn1.py:50: DeprecationWarning: tagMap is deprecated. Please use TAG_MAP instead.
+  from pyasn1.codec.ber.encoder import tagMap, typeMap, AbstractItemEncoder
+<repo>/.venv/lib/python3.11/site-packages/ldap3/utils/asn1.py:50: DeprecationWarning: typeMap is deprecated. Please use TYPE_MAP instead.
+  from pyasn1.codec.ber.encoder import tagMap, typeMap, AbstractItemEncoder
+Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 187.3360319996209, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: test_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tests/test_ees_work_authoring_account_switch.py", line 110, in test_same_profile_native_logout_login_discards_late_a_read_and_ai
+    self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===400")
+  File "<repo>/tests/test_ees_work_authoring_native.py", line 317, in wait
+    self.fail("Timed out: " + expression + "\n" + self.text("body") + "\nReadiness: " + repr(readiness) + "\nUnknown: " + repr(self.server.unknown))
+AssertionError: Timed out: document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===400
+Skip to main content
+EES Work
+업무
+워크스페이스
+
+작업 위치
+
+공장
+전체 공장
+시스템
+FDC
+내 업무
+워크플로우 찾기
+실행 기록
+대화 기록
+
+업무
+
+운영
+B 전용 합성 절차
+셋업
+장애대응
+합성 계정 A
+대화
+참고
+일반 대화
+업무 열기
+새 대화
+
+
+
+
+음성 모드 사용
+내 업무
+닫기
+지금 처리할 내 업무가 없습니다
+EES Work
+Readiness: {'route': '/', 'nativeReady': True, 'pickerDisabled': False}
+Unknown: []
+
+----------------------------------------------------------------------
+Ran 1 test in 19.199s
+
+FAILED (failures=1)

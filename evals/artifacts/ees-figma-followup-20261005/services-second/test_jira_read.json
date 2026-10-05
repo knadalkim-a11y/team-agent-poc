@@ -1,0 +1,119 @@
+{
+  "module": "test_jira_read.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.242,
+  "tests_run": 25,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 25,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_jira_read.JiraReadTests.test_arbitrary_endpoints_cannot_receive_credentials",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_auth_preflight_failure_does_not_fetch_issues_or_counts",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_concurrent_credentials_are_request_local_and_redacted",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_connection_error_does_not_serialize_sensitive_exception",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_dashboard_counts_do_not_derive_totals_from_issue_page",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_disabled_missing_secret_or_unencrypted_context_is_closed",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_failed_count_is_unknown_and_does_not_pollute_successful_projects",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_field_availability_and_assignee_identity_do_not_guess",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_invalid_listing_cannot_return_untrusted_page_rows",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_invalid_project_or_paging_stops_before_requests",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_issue_scope_is_checked_before_and_after_metadata_request",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_later_page_failure_never_applies_offset_to_reduced_scope",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_missing_or_anonymous_auth_identity_is_not_success",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_moved_or_mismatched_issue_stops_before_description_fetch",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_nonjson_oversize_and_bad_payload_are_errors",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_page_limit_and_next_page_preserve_full_count",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_partial_scope_suppresses_cursor_until_first_page_recovery",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_public_dashboard_keeps_partial_counts_and_safe_errors_in_json",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_public_dashboard_returns_json_with_counts_scope_and_next_page",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_public_inputs_cannot_supply_jql_url_or_pat",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_public_issue_wrapper_reads_text_with_fixed_source",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_reflected_credential_is_removed_before_content_processing",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_request_fixed_get_tls_and_credential_scope",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_selected_project_does_not_query_other_projects",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_read.JiraReadTests.test_zero_counts_are_successful_and_distinct_from_unavailable",
+      "status": "passed"
+    }
+  ]
+}

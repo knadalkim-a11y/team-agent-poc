@@ -1,0 +1,81 @@
+test_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 163.08344599929114, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: test_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tests/test_ees_work_authoring_account_switch.py", line 92, in test_same_profile_native_logout_login_discards_late_a_read_and_ai
+    self.eventually(lambda: self.browser_api('GET','/api/ees-work/workspace')['data'].get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')==400)
+  File "<repo>/tests/test_ees_work_authoring_native.py", line 260, in eventually
+    self.fail("Native persistence did not settle\n" + self.text("body") + repr(self.server.requests[-12:]))
+AssertionError: Native persistence did not settle
+Skip to main content
+EES Work
+업무
+워크스페이스
+
+관리 시스템
+
+FDC
+담당
+업무 절차
+1
+도구
+0
+스킬·지침
+
+최근 편집
+
+B 전용 합성 절차
+Native 모델·도구 관리
+합성 계정 B
+B 전용 합성 절차
+참고
+일반 대화
+업무 열기
+새 대화
+
+
+
+
+음성 모드 사용
+워크스페이스
+닫기
+업무 절차
+FDC
+업무 절차 목록
+B 전용 합성 절차초안 r1
+절차 설정
+
+운영 · FDC · 게시본 없음 · 저장 안 됨
+
+기본 절차
+구조
+실행 방식
+판정 규칙
+게시 기록
+구조
+새 단계
+작업 이름
+설명
+수행 안내
+사람이 정하는 값
+값 이름	형식	쓰이는 곳	저장 범위	편집
+선언한 값이 없습니다.
+값 추가
+위로
+아래로
+삭제
+변경 있음 · 저장 안 됨
+게시 전 확인
+초안 저장
+EES Work[('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('POST', '/ws/socket.io/'), ('GET', '/ws/socket.io/'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace')]
+
+----------------------------------------------------------------------
+Ran 1 test in 17.987s
+
+FAILED (failures=1)
+UI_STATE {"revision": 1, "state": {"selection": {"mode": "work", "tab": "my_work", "panel_open": true, "system_id": "FDC", "factory_id": "", "workflow_id": "", "run_id": "", "job_id": "", "collapsed": []}}}
+UI response body unavailable after Native navigation
+UI_REQ {"action":"save_ui","expected_revision":0,"request_id":"8ad36a27-a88f-42d6-a4de-d1bcd2de64b4","state":{"selection":{"mode":"author","tab":"overview","panel_open":true,"system_id":"FDC","factory_id":"","workflow_id":"c5e9923a-8cc0-4d83-9bb5-fa0ea5f965c2","run_id":"","job_id":"","collapsed":[],"chat_reference":null,"panel_width":400}}} UI_RESP {'body': '{"ok":false,"error":{"code":"revision_conflict","message":"다른 변경이 있습니다. 최신 내용을 다시 확인해 주세요."}}', 'base64Encoded': False}

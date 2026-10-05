@@ -66,6 +66,9 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
             self.fixture.chats[identifier]=record
         a_text='A만의 저장하지 않은 수행 안내';a_question='A의 비공개 작성 질문';a_answer='늦게 도착한 계정 A 전용 응답';b_text='B가 현재 직접 작성한 수행 안내'
         self.login_ui(account_a['email'],'Fixture-person-only-42!');self.open_workflow(workflow_a)
+        self.click('[data-ees-panel-resize]');self.key('End',35)
+        self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===720")
+        self.eventually(lambda: self.browser_api('GET','/api/ees-work/workspace')['data'].get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')==720)
         self.fill('#ew-author-node [name=instructions]',a_text)
         self.click('[data-author-action=node][data-id=""]')
         self.click('.ew-author-ai > summary');self.fill('[name=ai_prompt]',a_question)
@@ -83,6 +86,10 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.browser.navigate('about:blank');self.browser.call('Runtime.enable');self.browser.call('Network.enable')
         self.navigate('/');self.wait("document.querySelector('#chat-input.ProseMirror')")
         self.logout_ui(account_a['name']);self.login_ui(account_b['email'],'Fixture-person-only-42!');self.open_workflow(workflow_b)
+        self.assertEqual(self.browser.evaluate("document.querySelector('#ees-work-panel').getBoundingClientRect().width"),480)
+        self.click('[data-ees-panel-resize]');self.key('Home',36)
+        self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===400")
+        self.eventually(lambda: self.browser_api('GET','/api/ees-work/workspace')['data'].get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')==400)
         self.fill('#ew-author-node [name=instructions]',b_text);new_session=self.browser.session
         self.assertEqual(self.browser_api('GET','/api/v1/auths/')['data']['id'],account_b['id'])
         settings=self.browser_api('GET','/api/v1/users/user/settings')['data']
@@ -100,6 +107,9 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.activate_tab(old_session)
         self.wait("document.querySelector('#ees-work-system-trigger')?.textContent.includes('FDC')")
         self.assertEqual(self.browser_api('GET','/api/v1/auths/')['data']['id'],account_b['id'])
+        # This background tab restored B before B changed the preference. Its
+        # active display may stay at B's previous width, never A's private 720.
+        self.assertNotEqual(self.browser.evaluate("document.querySelector('#ees-work-panel').getBoundingClientRect().width"),720)
         for secret in (a_text,a_question,a_answer):self.assertNotIn(secret,self.authoring_content())
         self.assertEqual(self.browser_api('GET','/api/v1/users/user/settings')['data']['ui']['params']['system'],'NU05 private Native setting B')
         self.screenshot('nu05-former-a-tab-now-b')
@@ -113,12 +123,18 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.assertIn(b_text,context)
         for secret in (a_text,a_question,a_answer):self.assertNotIn(secret,context)
         self.assertEqual(self.read('#ew-author-node [name=instructions]','value'),b_text)
+        # After all original late-response/privacy assertions, reloading the
+        # former A tab must restore the latest stored B preference.
+        self.activate_tab(old_session);self.navigate('/')
+        self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===400")
+        self.activate_tab(new_session)
         for account,workflow in ((account_a,workflow_a),(account_b,workflow_b)):
             stored=self.api('GET','/api/ees-work/workspace?workflow_id='+workflow['id'],token=account['token'])
             self.assertEqual(stored.status_code,200,stored.text)
+            self.assertEqual(stored.json()['ui_state']['state']['selection']['panel_width'],720 if account['id']==account_a['id'] else 400)
             self.assertEqual(stored.json()['workflow']['revision'],workflow['revision'])
             self.assertEqual(stored.json()['workflow']['draft'],workflow['draft'])
-        (self.evidence_directory()/'sa26-nu05-account-switch.json').write_text(json.dumps({'same_profile':True,'native_logout_signin_ui':True,'actual_native_acl':True,'delayed_authenticated_a_read_and_proposal':True,'b_unsaved_draft_preserved':True,'old_tab_a_private_state_cleared':True,'b_model_context_excludes_a':True,'native_settings_and_chat_ownership_separate':True,'automatic_persistence':False,'synthetic_boundary':'Only model transport/chat storage are synthetic; Native auth, users, membership, ACL and workspace storage are real.'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        (self.evidence_directory()/'sa26-nu05-account-switch.json').write_text(json.dumps({'same_profile':True,'native_logout_signin_ui':True,'actual_native_acl':True,'delayed_authenticated_a_read_and_proposal':True,'b_unsaved_draft_preserved':True,'old_tab_a_private_state_cleared':True,'b_model_context_excludes_a':True,'native_settings_and_chat_ownership_separate':True,'private_panel_widths':{'A':720,'B':400},'automatic_authoring_persistence':False,'synthetic_boundary':'Only model transport/chat storage are synthetic; Native auth, users, membership, ACL and workspace storage are real.'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 
 if __name__=='__main__':

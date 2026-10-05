@@ -1,0 +1,87 @@
+{
+  "module": "test_ees_workflow_model.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.353,
+  "tests_run": 17,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 17,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_base_pipeline_and_session_auth_are_rejected_before_model_call",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_browser_or_code_models_are_explicitly_unsupported",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_context_model_endpoint_and_nested_overrides_are_rejected_for_both_providers",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_current_model_acl_revocation_stops_generation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_exact_native_parameter_transforms_cannot_add_hidden_context",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_initial_chat_cap_field_remains_unsupported_and_responses_is_supported",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_input_proposal_adapter_preserves_dynamic_declarations_for_candidate_gate",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_native_catalog_zero_one_multiple_and_no_implicit_substitution",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_no_model_budget_never_calls_native_path",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_only_successful_declared_sources_and_size_budget",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_pinned_provider_routes_reject_preset_change_at_parameter_application",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_proposal_context_fields_and_tool_calls_are_never_commands",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_proposal_rejects_changed_pinned_model_before_generation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_raw_native_base_model_needs_no_fake_preset_row",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_scoped_context_current_identity_and_reserved_request",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_supported_sampling_limits_and_reasoning_preserve_preset",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_model.ModelTests.test_tool_calls_free_prose_and_extra_keys_never_become_success",
+      "status": "passed"
+    }
+  ]
+}

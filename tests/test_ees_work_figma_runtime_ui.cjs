@@ -149,3 +149,75 @@ test('late draft save cannot acknowledge or repaint after another work target is
  h.view.readReview=()=>({dirty:true,inputs:{text:'kept'},attempt_id:'a',result_revision:2,revision:0});let acknowledgements=0;h.view.clearReview=()=>acknowledgements++;
  h.setReply(()=>pending.promise);const waiting=h.api.handleClick({dataset:{action:'save_review_draft'}});h.api.setSelection({job_id:'other'});pending.resolve({ok:true,run:{jobs:{j:{review_draft:{revision:1,text:'kept'}}}}});await waiting;assert.equal(acknowledgements,0);assert.equal(h.calls.length,1);
 });
+
+test('request fields follow native schema types and bindings, with reason outside EES values',()=>{
+ const node={tool_contract_id:'restart',inputs:[{id:'wait',type:'text',name:'old'},{id:'stop',type:'text'},{id:'reason',type:'text'}],argument_bindings:{timeout:{input:'wait'},mode:{input:'stop'}}},tools=[{id:'restart',input_schema:{type:'object',required:['timeout'],properties:{timeout:{type:'integer',title:'종료 대기',minimum:0,maximum:300},mode:{type:'string',enum:['graceful','force']}}}}];
+ const fields=html('workRequestFields(node,tools)',{node,tools});assert.equal(fields.length,2);assert.equal(fields[0].type,'number');assert.equal(fields[0].id,'wait');assert.equal(fields[1].type,'single');assert.equal(fields.some(field=>field.id==='reason'),false);
+ const out=html('workInputHTML(field,60)',{field:fields[0]});assert.match(out,/type="number" step="1" min="0" max="300"/);
+ assert.equal(html('workRequestFields(node,[])',{node}),null);
+});
+test('ad-hoc start lists active factories and disables only those with active work',()=>{
+ const data={workflow:{id:'w',name:'Setup',published_version:2},factories:[{id:'a',name:'Alpha',system_id:'EMS'},{id:'b',name:'Beta',system_id:'EMS'}],workflow_active_runs:[{id:'existing',workflow_id:'w',factory_id:'a',status:'open',progress:{}}]},selection={system_id:'EMS',factory_id:'b'},definition={execution_scope:'factory',nodes:{}};
+ const out=html('workAdhocStartHTML(data,selection,definition)',{data,selection,definition});assert.match(out,/data-run-id="existing"/);assert.match(out,/<option value="a" disabled>Alpha · 이미 진행 중/);assert.match(out,/<option value="b" selected>Beta/);assert.match(out,/data-action="start_run" data-start-inline/);assert.doesNotMatch(out,/김도윤|미국 공장|완료 0\/0/);
+ data.workflow_active_runs[0].progress={completed:0,total:1};assert.match(html('workAdhocStartHTML(data,selection,definition)',{data,selection,definition}),/완료 0\/1/);
+});
+test('item verdict options stay pending and AI suggestions cannot enable final confirmation',()=>{
+ const job={result_block:'item_verdict',judgments:[{id:'approved',label:'승인',status:'completed'},{id:'unknown',label:'판단 불가',status:'unknown'}]},saved={result:{items:[{id:'one',ai_suggestion:'completed'},{id:'two'}]}};
+ const out=html('workResultHTML(job,saved,{verdictDraft:{one:{verdict:"completed",judgment_id:"approved"}}})',{job,saved});assert.match(out,/내 선택 · 확정 전 · 자동 저장/);assert.match(out,/data-action="confirm_verdicts"[^>]* disabled/);assert.match(out,/value="approved" data-verdict="completed" data-judgment-id="approved" selected>승인/);
+ const ready=html('workResultHTML(job,saved,{verdictDraft:{one:{verdict:"completed",judgment_id:"approved"},two:{verdict:"unknown"}}})',{job,saved});assert.doesNotMatch(ready,/data-action="confirm_verdicts"[^>]* disabled/);
+});
+test('A7 has automatic save status and no save button, and basis cards expose actual time',()=>{
+ const out=html('workReviewDraftHTML({},saved,{reviewDraft:{dirty:true,inputs:{text:"new"}}})',{saved:{attempt_id:'a',result:{text:'old'}}});assert.match(out,/자동 저장 대기 중/);assert.doesNotMatch(out,/data-action="save_review_draft"/);
+ assert.match(html('workMessageReferenceHTML({kind:"workspace",workflow_id:"w",created_at:"2026-10-05T07:00:00Z"},"m")'),/기준 시각/);
+ assert.match(html('workPartialSourceHTML({snapshot:{prerequisite_sources:{source:{status:"partial"}}}})'),/부분 결과에서 시작함/);
+});
+test('navigation flushes edits made while an older review autosave is still in flight',async()=>{
+ const h=controller(),first=deferred(),started=deferred();let text='first',savedText='base',serial=1,revision=0,saves=0;
+ h.api.setSelection({run_id:'r',job_id:'j'});const state={run:{id:'r',revision:1,definition:{nodes:{j:{result_block:'ai_review'}}},jobs:{j:{attempt_id:'a'}}}};h.api.setState(state);
+ h.view.readReview=()=>({dirty:text!==savedText,inputs:{text},serial,revision,attempt_id:'a',result_revision:1,key:'key'});h.view.clearReview=(key,ack,rev,value)=>{savedText=value;revision=rev;};
+ h.setReply(call=>{if(call.body?.action==='save_review_draft'){saves++;if(saves===1){started.resolve();return first.promise;}return {ok:true,run:{jobs:{j:{review_draft:{revision:2,text:call.body.text}}}}};}return {ok:true,...state,systems:[],workflows:[],runs:[]};});
+ const saving=h.api.handleClick({dataset:{action:'save_review_draft'}});await started.promise;text='latest';serial++;
+ const navigating=h.api.select({job_id:'next'},{fetch:false});first.resolve({ok:true,run:{jobs:{j:{review_draft:{revision:1,text:'first'}}}}});await saving;await navigating;
+ assert.equal(saves,2);assert.equal(savedText,'latest');assert.equal(h.api.snapshot().selection.job_id,'next');
+});
+test('failed automatic review save keeps the current work and preserves its draft',async()=>{
+ const h=controller();h.api.setSelection({run_id:'r',job_id:'j'});h.api.setState({run:{id:'r',revision:1,definition:{nodes:{j:{result_block:'ai_review'}}},jobs:{j:{attempt_id:'a'}}}});
+ h.view.readReview=()=>({dirty:true,inputs:{text:'kept'},attempt_id:'a',result_revision:1,revision:0});h.setReply(()=>({ok:false,error:{message:'save failed'}}));
+ assert.equal(await h.api.select({job_id:'next'},{fetch:false}),null);assert.equal(h.api.snapshot().selection.job_id,'j');assert.match(h.api.snapshot().error,/save failed/);
+});
+test('same-status custom words retain distinct pending IDs and final immutable wording',()=>{
+ const job={result_block:'item_verdict',judgments:[{id:'accepted',label:'승인',status:'completed'},{id:'conditional',label:'조건부 승인',status:'completed'}]},saved={result:{items:[{id:'one'}]}};
+ const out=html('workResultHTML(job,saved,{verdictDraft:{one:{judgment_id:"conditional",verdict:"completed"}}})',{job,saved});
+ assert.match(out,/value="conditional" data-verdict="completed" data-judgment-id="conditional" selected>조건부 승인/);assert.doesNotMatch(out,/value="accepted"[^>]* selected/);
+ const final=html('workResultHTML(job,saved)',{job,saved:{...saved,status:'completed',decisions:{one:{verdict:'completed',note:'선택한 판정: 조건부 승인 (conditional)'}}}});assert.match(final,/선택한 판정: 조건부 승인/);assert.doesNotMatch(final,/data-item-verdict|data-action="confirm_verdicts"/);
+ const legacy=html('workResultHTML(job,saved)',{job,saved:{...saved,status:'completed',result:{items:[{id:'one'},{id:'optional',required:false}]},decisions:{one:{verdict:'completed'}}}});assert.doesNotMatch(legacy,/data-action="confirm_verdicts"/);
+});
+test('partial provenance survives a failed human verdict without changing its primary status',()=>{
+ const attempt={snapshot:{prerequisite_sources:{source:{status:'failed',attempt_id:'source-attempt'}}}},run={attempts:[{id:'source-attempt',status:'partial',result:{completeness:'partial'}}]};
+ assert.match(html('workPartialSourceHTML(attempt,run)',{attempt,run}),/부분 결과에서 시작함/);
+ assert.match(html('workResultHTML({result_block:"item_verdict"},{status:"failed",result:{completeness:"partial",items:[]}})'),/부분 결과/);
+});
+test('private verdict autosave persists exact term without deciding and restores after reload',async()=>{
+ const h=controller();h.api.setSelection({run_id:'r',job_id:'j'});h.api.setState({run:{id:'r',jobs:{j:{attempt_id:'a',decisions:{}}}}});
+ const target={dataset:{itemId:'one'},value:'conditional',selectedOptions:[{dataset:{verdict:'completed',judgmentId:'conditional'}}],closest:selector=>selector==='[data-ees-work]'?{}:null,matches:selector=>selector==='[data-item-verdict]'};
+ h.api.handleEvent({type:'change',target});for(const callback of [...h.timers.values()])callback();await new Promise(setImmediate);
+ const writes=h.calls.filter(call=>call.body);assert.equal(writes.length,1);assert.equal(writes[0].body.action,'save_ui');assert.deepEqual(writes[0].body.state.selection.verdict_drafts['r/j/a'].one,{verdict:'completed',judgment_id:'conditional'});
+ const other=controller();other.api.setRestored(false);other.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,ui_state:{revision:1,state:writes[0].body.state},systems:[],workflows:[],runs:[]}:{ok:true});await other.api.refresh();assert.equal(other.api.snapshot().selection.verdict_drafts['r/j/a'].one.judgment_id,'conditional');
+});
+test('private draft storage failure is visible and never discards pending selection',async()=>{
+ const h=controller();h.api.setSelection({run_id:'r',job_id:'j',request_reasons:{'r/j':'x'.repeat(40000)}});h.api.setState({run:{id:'r',jobs:{j:{attempt_id:'a',decisions:{}}}}});
+ await h.api.handleClick({dataset:{action:'retry_private_save'}});for(const callback of [...h.timers.values()])callback();await new Promise(setImmediate);
+ assert.match(h.api.snapshot().error,/자동 저장 실패/);assert.equal(h.api.snapshot().selection.request_reasons['r/j'].length,40000);assert.equal(h.calls.length,0);
+});
+test('schema field ordering is not an edit while changed values retain save protection',()=>{
+ const context=renderer();run(context,'var drafts=createWorkInputDrafts();var original={target:"AP",stop:"graceful",wait:0,nested:{b:false,a:""}};drafts.edit("request",{nested:{a:"",b:false},wait:0,stop:"graceful",target:"AP"},1,original)');
+ assert.equal(run(context,'drafts.read("request",original,1).dirty'),false);
+ run(context,'drafts.edit("request",{target:"AP",stop:"graceful",wait:1,nested:{a:"",b:false}},1,original)');assert.equal(run(context,'drafts.read("request",original,1).dirty'),true);
+ assert.equal(run(context,'workValuesEqual({a:[1,2]},{a:[2,1]})'),false);assert.equal(run(context,'workValuesEqual({a:false},{a:0})'),false);assert.equal(run(context,'workValuesEqual({a:""},{})'),false);
+});
+test('missing evidence and external request URLs never become local undefined links',()=>{
+ for(const value of [undefined,null,'','   ',{},false])assert.equal(html('workUI.safeURL(value)',{value}),'');
+ assert.doesNotMatch(html('workChecklistHTML([{id:"a",name:"A"}],{})'),/근거 열기|href=/);
+ assert.doesNotMatch(html('workRequestHTML({},{})'),/EES에서 보기|href=/);
+ assert.match(html('workChecklistHTML([{id:"a",url:"https://example.invalid/evidence"}],{})'),/https:\/\/example.invalid\/evidence/);
+});

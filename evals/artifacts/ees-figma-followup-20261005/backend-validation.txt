@@ -1,0 +1,23 @@
+Backend follow-up validation 2026-10-05
+Product files: agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py and ees_workflow_operations.py.
+Existing test modules extended; no new suite registration.
+Commands (repo .venv Python 3.11):
+.venv/bin/python -m unittest discover -s tests -p 'test_ees_work_figma_contracts.py' -q: 20 tests PASS, 0.509s.
+.venv/bin/python -m unittest discover -s tests -p 'test_ees_work_operations.py' -q: 38 tests PASS, 0.836s.
+.venv/bin/python -m unittest discover -s tests -p 'test_ees_work_workspace.py' -q: 51 tests PASS, 0.881s.
+.venv/bin/python -m unittest discover -s tests -p 'test_ees_work_figma_schedule.py' -q: 19 tests PASS, 1.647s.
+All use real temporary SQLite/public commands with synthetic Native identities/transports. No actual EES request.
+Initial failures: schedule suite 18 tests/2 failures (1.520s): historical early-open and queue-head starvation assertions encoded superseded after_previous_closed behavior. Kept test IDs, changed to C12 schedule-only opening and bounded due-queue progress; added prior-open, legacy config acceptance, restart deduplication and old cycle snapshot immutability test.
+Fixture correction: initial workspace async tests mistakenly appended to unittest.TestCase class produced unawaited coroutine RuntimeWarnings. Moved into WorkspaceTests IsolatedAsyncioTestCase and reran actual async behavior (51 PASS, 1.001s; final 0.881s). Warning run not treated as evidence.
+Review fix: confirm_verdicts accepts unchanged preexisting item decisions, inserts only missing decisions, forbids rewriting and requires every displayed result ID (including optional metadata items); explicit legacy partial-decision test PASS. Revoked evidence leaves zero changes.
+Unconfigured behavior: direct tool registered/reviewed only with owner/allowlist/dedicated account/least privilege metadata; dispatch consumes fresh intent then returns direct_executor_unconfigured, even if ordinary EES connector exists; no executor or shell added. effect_criterion stays mandatory. request_reason stored separately, included intent fingerprint, never enters EES inputs.
+C12 compatibility: legacy after_previous_closed config remains accepted but future scheduler materialization follows next_at regardless prior state; existing definition/run/cycle snapshots unchanged. on_schedule supported. Optional execution_scope is workflow-level; absent legacy behavior preserved, explicit system canonical factory empty with original ACL; factory-scoped on-demand duplicate starts blocked atomically, no existing run deletion.
+
+Final independent review supplements before build freeze:
+- Direct reconciliation cannot call ordinary EES connector status/effect or fabricate effect_verified. Exact reviewed contract kind/reference gate blocks direct/request through ordinary execute_job; rechecked pre-attempt transaction and before Native invoke. Real concurrent tool_save read-to-direct regression passes with zero attempts and zero Native calls.
+- Request intent includes exact server-snapshot inputs only after current Native/requester/actor checks; generic _public_request remains redacted.
+- D-5 warning includes existing hold policy.
+- Legacy completed item-verdict records remain finalized even with old optional metadata items undecided. Batch requires all displayed choices, preserves required-only aggregate completion and immutable existing decisions.
+- Optional judgment_id validated against frozen node/global definition and basic status; server appends exact term and stable ID to note while preserving user note. Same-status different labels tested; no schema migration.
+- Any item_verdict must await human finalization, including legacy tool-mode human_confirmation=false flags.
+Final command operations39 PASS 0.767s. Remaining exact times in root messages.

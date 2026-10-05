@@ -1,0 +1,17 @@
+✔ Native conversation remains the original center DOM while the work panel mounts after it (5.129805ms)
+✔ closing or changing work mode preserves Native chat and the authoring mount boundary (1.256382ms)
+✔ panel scroll restores per personal target and never writes a shared run selection (2.183879ms)
+✔ confirmation dialog starts on cancel and Escape closure never accepts the command (0.937482ms)
+✔ workspace refresh retains active input identity and text selection without taking Native focus (1.791187ms)
+✔ published procedure overview opens before a run exists without dereferencing run state (1.417795ms)
+✔ workspace navigation separates managed-system authoring from work scope and actual tasks (0.913706ms)
+✔ polling preserves an explicit model choice only for its actor and work target while revocation clears it (4.393716ms)
+✔ a delayed workspace read never rolls private UI revision behind a completed width save (10.243557ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 109.922771

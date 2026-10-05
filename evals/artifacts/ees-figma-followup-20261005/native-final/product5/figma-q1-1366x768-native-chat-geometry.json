@@ -1,0 +1,73 @@
+{
+  "viewport": [
+    1366,
+    768
+  ],
+  "document_width": 1366,
+  "sidebar": {
+    "x": 0,
+    "y": 0,
+    "width": 56,
+    "height": 768,
+    "bottom": 768,
+    "right": 56
+  },
+  "panel": {
+    "x": 886,
+    "y": 0,
+    "width": 480,
+    "height": 768,
+    "bottom": 768,
+    "right": 1366
+  },
+  "chat": {
+    "x": 56,
+    "y": 0,
+    "width": 830,
+    "height": 768,
+    "bottom": 768,
+    "right": 886
+  },
+  "action": {
+    "x": 887,
+    "y": 709,
+    "width": 479,
+    "height": 59,
+    "bottom": 768,
+    "right": 1366
+  },
+  "messages": [
+    {
+      "x": 91,
+      "y": 128,
+      "width": 760,
+      "height": 108.75,
+      "bottom": 236.75,
+      "right": 851
+    },
+    {
+      "x": 91,
+      "y": 264.75,
+      "width": 760,
+      "height": 74.75,
+      "bottom": 339.5,
+      "right": 851
+    },
+    {
+      "x": 91,
+      "y": 367.5,
+      "width": 760,
+      "height": 116.75,
+      "bottom": 484.25,
+      "right": 851
+    },
+    {
+      "x": 91,
+      "y": 512.25,
+      "width": 760,
+      "height": 140.75,
+      "bottom": 653,
+      "right": 851
+    }
+  ]
+}

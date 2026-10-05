@@ -1,0 +1,1254 @@
+{
+  "schema": 1,
+  "scope": "Passing actual Native checks for Figma followup; per-case wheel hashes define validation scope",
+  "final_scope_complete": true,
+  "source": {
+    "base_commit": "f9337175a1d9bd6a351f4da780c0ea4407765a14",
+    "dirty": true,
+    "exact_historical_source_tree_identity_claimed": false
+  },
+  "builds": [
+    {
+      "build": 3,
+      "manifest": "tested-build3-manifest.json",
+      "wheel": {
+        "filename": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+        "sha256": "f23bfb5d443d0f3df7d56d76c4c82f3ff320a348c66572329bb68ea198751a5b",
+        "size": 152091172
+      }
+    },
+    {
+      "build": 4,
+      "manifest": "tested-build4-manifest.json",
+      "wheel": {
+        "filename": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+        "sha256": "51b10e3ef545b2d6123dffc34014c973a3c9327488f08d4addb8b10d59959ddf",
+        "size": 152091427
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "runtime3",
+      "wheel_sha256": "f23bfb5d443d0f3df7d56d76c4c82f3ff320a348c66572329bb68ea198751a5b",
+      "status": "passed",
+      "tests": 8,
+      "passed": 8,
+      "purpose": "Actual Native runtime A4 typed request, A5 cycle, A6 list, A7 review, S1/S2/S3 and atomic verdict flows."
+    },
+    {
+      "id": "layout3",
+      "wheel_sha256": "f23bfb5d443d0f3df7d56d76c4c82f3ff320a348c66572329bb68ea198751a5b",
+      "status": "passed",
+      "tests": 2,
+      "passed": 2,
+      "purpose": "Actual Native geometry, 768px fixed footer, reading width, viewport overlay, drag width and contrast. Precedes final cross-tab persistence fix."
+    },
+    {
+      "id": "product5",
+      "wheel_sha256": "f23bfb5d443d0f3df7d56d76c4c82f3ff320a348c66572329bb68ea198751a5b",
+      "status": "passed",
+      "completed_checkpoints": 20,
+      "purpose": "Actual Native product gate including B2-2 rules, C12 advisory publication, A8, A7 autosave, immutable history, scheduled opening and Q1 geometry."
+    },
+    {
+      "id": "central-chat2",
+      "wheel_sha256": "f23bfb5d443d0f3df7d56d76c4c82f3ff320a348c66572329bb68ea198751a5b",
+      "status": "passed",
+      "completed_checkpoints": 9,
+      "purpose": "Actual registered tool read/proposal, distinct human apply/save, input proposal without execution and exact old-attempt reference."
+    },
+    {
+      "id": "layout4",
+      "wheel_sha256": "51b10e3ef545b2d6123dffc34014c973a3c9327488f08d4addb8b10d59959ddf",
+      "status": "passed",
+      "tests": 2,
+      "passed": 2,
+      "purpose": "Final build actual Native Q1 geometry,768px action footer,reading width,viewport overlay,physical drag restore and contrast."
+    },
+    {
+      "id": "account-width4-restored",
+      "wheel_sha256": "51b10e3ef545b2d6123dffc34014c973a3c9327488f08d4addb8b10d59959ddf",
+      "status": "passed",
+      "tests": 1,
+      "passed": 1,
+      "purpose": "Same-profile actual Native logout/login privacy; delayed old actor read/AI discarded, actorB width400 persisted after UI conflict and restored after former actorA tab reload. No unrequested background width live-sync claim."
+    }
+  ],
+  "boundaries": {
+    "upstream_version": "0.11.3",
+    "synthetic_fixtures_only": true,
+    "no_business_operations_requested": true,
+    "no_claim_that_all_cases_tested_the_same_wheel": true,
+    "first_failure_evidence": "../native-first/manifest.json",
+    "pngs_copied_byte_for_byte": true,
+    "json_and_logs": "Local filesystem roots removed; credential-bearing field names redacted if present. API /workspace routes and synthetic identities retained.",
+    "source_hashes_before_sanitization": true
+  },
+  "omitted": [
+    {
+      "source": "dist/ees-followup-product5/native-attachment-restored.json",
+      "reason": "Repeated baseline Native upload/chat screenshot; retained report records these checkpoints, central-chat2 preserves targeted Native tool interaction"
+    },
+    {
+      "source": "dist/ees-followup-product5/native-attachment-restored.png",
+      "reason": "Repeated baseline Native upload/chat screenshot; retained report records these checkpoints, central-chat2 preserves targeted Native tool interaction"
+    },
+    {
+      "source": "dist/ees-followup-product5/native-attachment-saved.json",
+      "reason": "Repeated baseline Native upload/chat screenshot; retained report records these checkpoints, central-chat2 preserves targeted Native tool interaction"
+    },
+    {
+      "source": "dist/ees-followup-product5/native-attachment-saved.png",
+      "reason": "Repeated baseline Native upload/chat screenshot; retained report records these checkpoints, central-chat2 preserves targeted Native tool interaction"
+    },
+    {
+      "source": "dist/ees-followup-product5/native-chat-saved.json",
+      "reason": "Repeated baseline Native upload/chat screenshot; retained report records these checkpoints, central-chat2 preserves targeted Native tool interaction"
+    },
+    {
+      "source": "dist/ees-followup-product5/native-chat-saved.png",
+      "reason": "Repeated baseline Native upload/chat screenshot; retained report records these checkpoints, central-chat2 preserves targeted Native tool interaction"
+    },
+    {
+      "source": "dist/ees-followup-product5/native-file-upload.json",
+      "reason": "Repeated baseline Native upload/chat screenshot; retained report records these checkpoints, central-chat2 preserves targeted Native tool interaction"
+    },
+    {
+      "source": "dist/ees-followup-product5/native-file-upload.png",
+      "reason": "Repeated baseline Native upload/chat screenshot; retained report records these checkpoints, central-chat2 preserves targeted Native tool interaction"
+    },
+    {
+      "source": "dist/ees-followup-product5/native-narrow.json",
+      "reason": "Repeated baseline Native upload/chat screenshot; retained report records these checkpoints, central-chat2 preserves targeted Native tool interaction"
+    },
+    {
+      "source": "dist/ees-followup-product5/native-narrow.png",
+      "reason": "Repeated baseline Native upload/chat screenshot; retained report records these checkpoints, central-chat2 preserves targeted Native tool interaction"
+    },
+    {
+      "source": "dist/ees-followup-product5/native-reduced-motion.json",
+      "reason": "Repeated baseline Native upload/chat screenshot; retained report records these checkpoints, central-chat2 preserves targeted Native tool interaction"
+    },
+    {
+      "source": "dist/ees-followup-product5/native-reduced-motion.png",
+      "reason": "Repeated baseline Native upload/chat screenshot; retained report records these checkpoints, central-chat2 preserves targeted Native tool interaction"
+    },
+    {
+      "source": "dist/ees-followup-product5/synthetic-native-upload.txt",
+      "reason": "Temporary fixture text or unrelated non-evidence file"
+    }
+  ],
+  "files": [
+    {
+      "file": "runtime3/figma-a4-typed-request-unconnected.png",
+      "source": "dist/ees-followup-runtime3/figma-a4-typed-request-unconnected.png",
+      "source_sha256": "47077e4fd1ca93186965e7714761ece1ea1113b24bf6e035f8d580df9a4f075c",
+      "sha256": "47077e4fd1ca93186965e7714761ece1ea1113b24bf6e035f8d580df9a4f075c",
+      "bytes": 115261,
+      "transformations": []
+    },
+    {
+      "file": "runtime3/figma-a5-cycle-overview.png",
+      "source": "dist/ees-followup-runtime3/figma-a5-cycle-overview.png",
+      "source_sha256": "405736b780b0109b13fbe909ab2ced7290146694d18f958b3e3923cad9a0eeba",
+      "sha256": "405736b780b0109b13fbe909ab2ced7290146694d18f958b3e3923cad9a0eeba",
+      "bytes": 101619,
+      "transformations": []
+    },
+    {
+      "file": "runtime3/figma-a6-empty-lookup-manual-preview.png",
+      "source": "dist/ees-followup-runtime3/figma-a6-empty-lookup-manual-preview.png",
+      "source_sha256": "0761d7cd17bbfa0a2eb2461530a76347f0f84a2d7c96b0e6f141e91b444c920b",
+      "sha256": "0761d7cd17bbfa0a2eb2461530a76347f0f84a2d7c96b0e6f141e91b444c920b",
+      "bytes": 108622,
+      "transformations": []
+    },
+    {
+      "file": "runtime3/figma-a6-list-confirmed.png",
+      "source": "dist/ees-followup-runtime3/figma-a6-list-confirmed.png",
+      "source_sha256": "d8027581dab86a674cd3acea64f8e9b82b6acf215586cf2fc0bd89e8c66886ba",
+      "sha256": "d8027581dab86a674cd3acea64f8e9b82b6acf215586cf2fc0bd89e8c66886ba",
+      "bytes": 113157,
+      "transformations": []
+    },
+    {
+      "file": "runtime3/figma-a7-delivery-review-blocked.png",
+      "source": "dist/ees-followup-runtime3/figma-a7-delivery-review-blocked.png",
+      "source_sha256": "48f7e40b13aea8c61d76c83095c5a3e2d27a65d7893f262b52ecb694a768c88e",
+      "sha256": "48f7e40b13aea8c61d76c83095c5a3e2d27a65d7893f262b52ecb694a768c88e",
+      "bytes": 105320,
+      "transformations": []
+    },
+    {
+      "file": "runtime3/figma-r3-pending-and-final-verdicts.png",
+      "source": "dist/ees-followup-runtime3/figma-r3-pending-and-final-verdicts.png",
+      "source_sha256": "ef8cfdf968bf941c1a01c2fc679b3c3c4ae54fb62c2caed1511e9f99b6fb00f9",
+      "sha256": "ef8cfdf968bf941c1a01c2fc679b3c3c4ae54fb62c2caed1511e9f99b6fb00f9",
+      "bytes": 100347,
+      "transformations": []
+    },
+    {
+      "file": "runtime3/figma-review-purpose-saved.png",
+      "source": "dist/ees-followup-runtime3/figma-review-purpose-saved.png",
+      "source_sha256": "e12d071ac400f529931156d58c3e3a5835635d75bda35e26ea25d55b732c4830",
+      "sha256": "e12d071ac400f529931156d58c3e3a5835635d75bda35e26ea25d55b732c4830",
+      "bytes": 102540,
+      "transformations": []
+    },
+    {
+      "file": "runtime3/figma-s1-human-permission-readonly.png",
+      "source": "dist/ees-followup-runtime3/figma-s1-human-permission-readonly.png",
+      "source_sha256": "4ba42ba35c7faea3b73e2c9c1465078e32cf737b3512b897bf6661701a5dc241",
+      "sha256": "4ba42ba35c7faea3b73e2c9c1465078e32cf737b3512b897bf6661701a5dc241",
+      "bytes": 95095,
+      "transformations": []
+    },
+    {
+      "file": "runtime3/figma-s2-readonly-history-reference.png",
+      "source": "dist/ees-followup-runtime3/figma-s2-readonly-history-reference.png",
+      "source_sha256": "318da0bd74c90a45fde7b89a35fbfa0adc51337a9d2262d7528c0f91312ad074",
+      "sha256": "318da0bd74c90a45fde7b89a35fbfa0adc51337a9d2262d7528c0f91312ad074",
+      "bytes": 103173,
+      "transformations": []
+    },
+    {
+      "file": "runtime3/figma-s3-checklist-criterion-versus-tool.png",
+      "source": "dist/ees-followup-runtime3/figma-s3-checklist-criterion-versus-tool.png",
+      "source_sha256": "a485a37b4ad011069365b173a23680e5891a8caf940ee6f283b1bbfdddb4fa62",
+      "sha256": "a485a37b4ad011069365b173a23680e5891a8caf940ee6f283b1bbfdddb4fa62",
+      "bytes": 98343,
+      "transformations": []
+    },
+    {
+      "file": "runtime3/test.log",
+      "source": "dist/ees-followup-runtime3.log",
+      "source_sha256": "099dc7656464353d7735803d73611911c267cf6481fa60e14681f8d90275fa5c",
+      "sha256": "099dc7656464353d7735803d73611911c267cf6481fa60e14681f8d90275fa5c",
+      "bytes": 2768,
+      "transformations": []
+    },
+    {
+      "file": "layout3/q1-1366x768.json",
+      "source": "dist/ees-followup-layout3/q1-1366x768.json",
+      "source_sha256": "5c71d9b152a8cac88575b7d75992438ab70c3ce6e467bb4ce8213b22d3fe77ac",
+      "sha256": "5c71d9b152a8cac88575b7d75992438ab70c3ce6e467bb4ce8213b22d3fe77ac",
+      "bytes": 691,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout3/q1-1366x768.png",
+      "source": "dist/ees-followup-layout3/q1-1366x768.png",
+      "source_sha256": "5f56283594c5a8af57b22c82a3888dac2089cb80564df594e667684531f259c6",
+      "sha256": "5f56283594c5a8af57b22c82a3888dac2089cb80564df594e667684531f259c6",
+      "bytes": 63428,
+      "transformations": []
+    },
+    {
+      "file": "layout3/q1-1920x768.json",
+      "source": "dist/ees-followup-layout3/q1-1920x768.json",
+      "source_sha256": "6921cd0000b9dcea39d560bc9e16d5c425c76a57649b3cac1f853764f2b76137",
+      "sha256": "6921cd0000b9dcea39d560bc9e16d5c425c76a57649b3cac1f853764f2b76137",
+      "bytes": 698,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout3/q1-1920x768.png",
+      "source": "dist/ees-followup-layout3/q1-1920x768.png",
+      "source_sha256": "25ae07a0058ce4eacf4a4e0d9ecd28c6ef95e3d1fbefc1ddc9413e6fd23e5ce8",
+      "sha256": "25ae07a0058ce4eacf4a4e0d9ecd28c6ef95e3d1fbefc1ddc9413e6fd23e5ce8",
+      "bytes": 84697,
+      "transformations": []
+    },
+    {
+      "file": "layout3/q1-contrast.json",
+      "source": "dist/ees-followup-layout3/q1-contrast.json",
+      "source_sha256": "6dd6eec42dede75d876cb4c4222a0cce8ad1f5decd140994646e7c0d52c8c2cb",
+      "sha256": "6dd6eec42dede75d876cb4c4222a0cce8ad1f5decd140994646e7c0d52c8c2cb",
+      "bytes": 205,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout3/q1-overlay-close-reopen.json",
+      "source": "dist/ees-followup-layout3/q1-overlay-close-reopen.json",
+      "source_sha256": "5181a9e4d1936633ae84307e7835a307647facf4aaf04ad84f24201ca6e7d226",
+      "sha256": "5181a9e4d1936633ae84307e7835a307647facf4aaf04ad84f24201ca6e7d226",
+      "bytes": 697,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout3/q1-overlay-close-reopen.png",
+      "source": "dist/ees-followup-layout3/q1-overlay-close-reopen.png",
+      "source_sha256": "2ca2ce2a619db6cdcb94b69cc75e615e65964ad45c1368ce580db02376c85489",
+      "sha256": "2ca2ce2a619db6cdcb94b69cc75e615e65964ad45c1368ce580db02376c85489",
+      "bytes": 54774,
+      "transformations": []
+    },
+    {
+      "file": "layout3/q1-private-width-640.png",
+      "source": "dist/ees-followup-layout3/q1-private-width-640.png",
+      "source_sha256": "3bca5b8057f4fcb1e37938be73b6e3d71c612365b9226f8103f5bd37fda4b38b",
+      "sha256": "3bca5b8057f4fcb1e37938be73b6e3d71c612365b9226f8103f5bd37fda4b38b",
+      "bytes": 58652,
+      "transformations": []
+    },
+    {
+      "file": "layout3/test.log",
+      "source": "temporary-logs/ees-layout-native3.log",
+      "source_sha256": "a3781bcb4a66a7fbc5561c31eecb4bc92609eaa27662b4d5dd10ed8f1b8225f9",
+      "sha256": "a3781bcb4a66a7fbc5561c31eecb4bc92609eaa27662b4d5dd10ed8f1b8225f9",
+      "bytes": 711,
+      "transformations": []
+    },
+    {
+      "file": "product5/a0-empty.json",
+      "source": "dist/ees-followup-product5/a0-empty.json",
+      "source_sha256": "0cb919feb7cde3351b6becff94dd24e6b3b4d600bd085a394d958b25dffba974",
+      "sha256": "0cb919feb7cde3351b6becff94dd24e6b3b4d600bd085a394d958b25dffba974",
+      "bytes": 35892,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/a0-empty.png",
+      "source": "dist/ees-followup-product5/a0-empty.png",
+      "source_sha256": "59647693251844fa9be7e0d48ee7347f679fcb59189fb047c2fae0a7ff052145",
+      "sha256": "59647693251844fa9be7e0d48ee7347f679fcb59189fb047c2fae0a7ff052145",
+      "bytes": 52413,
+      "transformations": []
+    },
+    {
+      "file": "product5/a1-human-complete.json",
+      "source": "dist/ees-followup-product5/a1-human-complete.json",
+      "source_sha256": "0da4d810688f36e105edac2a30fbe047d4638663256bfd6d164235e52a5427b0",
+      "sha256": "0da4d810688f36e105edac2a30fbe047d4638663256bfd6d164235e52a5427b0",
+      "bytes": 41276,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/a1-human-complete.png",
+      "source": "dist/ees-followup-product5/a1-human-complete.png",
+      "source_sha256": "babcec26471285b6a9f43af9728237c72798e39bc092df13d68f962c258b00ff",
+      "sha256": "babcec26471285b6a9f43af9728237c72798e39bc092df13d68f962c258b00ff",
+      "bytes": 91080,
+      "transformations": []
+    },
+    {
+      "file": "product5/a1-input-saved-not-complete.json",
+      "source": "dist/ees-followup-product5/a1-input-saved-not-complete.json",
+      "source_sha256": "78bc1f025d175969dccf6004c9d18d5f370292238226d4bd15c5d12af1d18f5f",
+      "sha256": "78bc1f025d175969dccf6004c9d18d5f370292238226d4bd15c5d12af1d18f5f",
+      "bytes": 40682,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/a1-input-saved-not-complete.png",
+      "source": "dist/ees-followup-product5/a1-input-saved-not-complete.png",
+      "source_sha256": "e9041f969a22d28a9ceee458462f8face6c445215efca5d6248c3f385ee5cd36",
+      "sha256": "e9041f969a22d28a9ceee458462f8face6c445215efca5d6248c3f385ee5cd36",
+      "bytes": 87290,
+      "transformations": []
+    },
+    {
+      "file": "product5/b2-published.json",
+      "source": "dist/ees-followup-product5/b2-published.json",
+      "source_sha256": "f7efcfc21cc17e9a0c547480d1bd6d2066e9025e75ff14f039a08c58b2bb49dd",
+      "sha256": "f7efcfc21cc17e9a0c547480d1bd6d2066e9025e75ff14f039a08c58b2bb49dd",
+      "bytes": 38764,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/b2-published.png",
+      "source": "dist/ees-followup-product5/b2-published.png",
+      "source_sha256": "082d6bccb1135d1e40bc35e6387cc9ff2a2008ddfbd633da27bfadb943a60676",
+      "sha256": "082d6bccb1135d1e40bc35e6387cc9ff2a2008ddfbd633da27bfadb943a60676",
+      "bytes": 73919,
+      "transformations": []
+    },
+    {
+      "file": "product5/b3-saved-authoring.json",
+      "source": "dist/ees-followup-product5/b3-saved-authoring.json",
+      "source_sha256": "63bf2b50cdd64f5f5e2401c0b82bad30dd3f9e475ee1ca6b7ae550bd61f15bc3",
+      "sha256": "63bf2b50cdd64f5f5e2401c0b82bad30dd3f9e475ee1ca6b7ae550bd61f15bc3",
+      "bytes": 46812,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/b3-saved-authoring.png",
+      "source": "dist/ees-followup-product5/b3-saved-authoring.png",
+      "source_sha256": "03d23341f221f516c5aa0b19fc84cf8279e32d6617b8440ff3f2d46b34cd013a",
+      "sha256": "03d23341f221f516c5aa0b19fc84cf8279e32d6617b8440ff3f2d46b34cd013a",
+      "bytes": 88641,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-a5-cycle-geometry.json",
+      "source": "dist/ees-followup-product5/figma-a5-cycle-geometry.json",
+      "source_sha256": "c5c7974cc2e2b00fdacd00a897a5de3fa44c82d9b1bebe00fbf2e302bdd59ad1",
+      "sha256": "c5c7974cc2e2b00fdacd00a897a5de3fa44c82d9b1bebe00fbf2e302bdd59ad1",
+      "bytes": 14313,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-a5-cycle-overview.json",
+      "source": "dist/ees-followup-product5/figma-a5-cycle-overview.json",
+      "source_sha256": "f636771f7434f09f41c9c55e3f2db607ac2d7fd4ba87e346ac60055c8bf8bdef",
+      "sha256": "f636771f7434f09f41c9c55e3f2db607ac2d7fd4ba87e346ac60055c8bf8bdef",
+      "bytes": 45104,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-a5-cycle-overview.png",
+      "source": "dist/ees-followup-product5/figma-a5-cycle-overview.png",
+      "source_sha256": "c7cf51d29da14c48d5eb3f4d215edfe359845dd64ad7609f5c08d685278112f5",
+      "sha256": "c7cf51d29da14c48d5eb3f4d215edfe359845dd64ad7609f5c08d685278112f5",
+      "bytes": 104469,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-a6-list-confirmed.json",
+      "source": "dist/ees-followup-product5/figma-a6-list-confirmed.json",
+      "source_sha256": "f0f750fcd6ccd7e43f44119823ac3815dd3dc4118688b2daee732edbb6cdc4cb",
+      "sha256": "f0f750fcd6ccd7e43f44119823ac3815dd3dc4118688b2daee732edbb6cdc4cb",
+      "bytes": 46319,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-a6-list-confirmed.png",
+      "source": "dist/ees-followup-product5/figma-a6-list-confirmed.png",
+      "source_sha256": "c1e43f6f17176b02300aaa48652fa13431808566aac767e7bf5ebda1ed8143f7",
+      "sha256": "c1e43f6f17176b02300aaa48652fa13431808566aac767e7bf5ebda1ed8143f7",
+      "bytes": 107699,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-a6-list-geometry.json",
+      "source": "dist/ees-followup-product5/figma-a6-list-geometry.json",
+      "source_sha256": "c5bd149e65aaf066cc5787ad852512c691d7c7c15c00d22ce77b21a62cc2c7cd",
+      "sha256": "c5bd149e65aaf066cc5787ad852512c691d7c7c15c00d22ce77b21a62cc2c7cd",
+      "bytes": 11120,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-a6-list-local-selection.json",
+      "source": "dist/ees-followup-product5/figma-a6-list-local-selection.json",
+      "source_sha256": "698bdba4bae482f0a751a49c75e2d02f78d19ffdf437a02627ea47220690a1cf",
+      "sha256": "698bdba4bae482f0a751a49c75e2d02f78d19ffdf437a02627ea47220690a1cf",
+      "bytes": 44820,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-a6-list-local-selection.png",
+      "source": "dist/ees-followup-product5/figma-a6-list-local-selection.png",
+      "source_sha256": "1ffbab3e36dba0e1602d49eeb17b27989930cf2c3470b1b67288ec27b9452b13",
+      "sha256": "1ffbab3e36dba0e1602d49eeb17b27989930cf2c3470b1b67288ec27b9452b13",
+      "bytes": 114766,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-a7-confirmed-readonly.json",
+      "source": "dist/ees-followup-product5/figma-a7-confirmed-readonly.json",
+      "source_sha256": "e4240fd829a935d248ce3ec967200783d3fe278237e884fd4de4991e07ecfb1f",
+      "sha256": "e4240fd829a935d248ce3ec967200783d3fe278237e884fd4de4991e07ecfb1f",
+      "bytes": 47559,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-a7-confirmed-readonly.png",
+      "source": "dist/ees-followup-product5/figma-a7-confirmed-readonly.png",
+      "source_sha256": "8e2862d0609b5a9d1ea5147550152f990f13aff1d4646c1a9d91c83c0ca1a473",
+      "sha256": "8e2862d0609b5a9d1ea5147550152f990f13aff1d4646c1a9d91c83c0ca1a473",
+      "bytes": 107058,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-a7-delivery-reviewed-still-blocked.json",
+      "source": "dist/ees-followup-product5/figma-a7-delivery-reviewed-still-blocked.json",
+      "source_sha256": "6b7a57196128062c27c9f8ebf4e109da1a65c1cd71ec99e3ca3893d22fb87d93",
+      "sha256": "6b7a57196128062c27c9f8ebf4e109da1a65c1cd71ec99e3ca3893d22fb87d93",
+      "bytes": 51609,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-a7-delivery-reviewed-still-blocked.png",
+      "source": "dist/ees-followup-product5/figma-a7-delivery-reviewed-still-blocked.png",
+      "source_sha256": "835478f75f0bd53bad26f21b972eae0fc6b66c11344d86878a72aeae5ca86f97",
+      "sha256": "835478f75f0bd53bad26f21b972eae0fc6b66c11344d86878a72aeae5ca86f97",
+      "bytes": 124597,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-a7-review-geometry.json",
+      "source": "dist/ees-followup-product5/figma-a7-review-geometry.json",
+      "source_sha256": "73ffa76bf007167084739e0cc924c443168e8e74f9db526a3551567c2a7eed69",
+      "sha256": "73ffa76bf007167084739e0cc924c443168e8e74f9db526a3551567c2a7eed69",
+      "bytes": 10327,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-a7-review-only-autosaved.json",
+      "source": "dist/ees-followup-product5/figma-a7-review-only-autosaved.json",
+      "source_sha256": "0db481dbff9cbdc14612f20cb464658dc840f171b34449c1c06629049c6dcaaf",
+      "sha256": "0db481dbff9cbdc14612f20cb464658dc840f171b34449c1c06629049c6dcaaf",
+      "bytes": 46242,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-a7-review-only-autosaved.png",
+      "source": "dist/ees-followup-product5/figma-a7-review-only-autosaved.png",
+      "source_sha256": "66d9f1a900a7236d7c6b21f454aadb35c94e89ef8c1169252d754431c0f4b1c5",
+      "sha256": "66d9f1a900a7236d7c6b21f454aadb35c94e89ef8c1169252d754431c0f4b1c5",
+      "bytes": 110435,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-a8-active-factory-duplicate-disabled.json",
+      "source": "dist/ees-followup-product5/figma-a8-active-factory-duplicate-disabled.json",
+      "source_sha256": "34647a80fbbb2c4364ba672ec87bb84b2d8b217b4f652a25f5f3760aeea0fad3",
+      "sha256": "34647a80fbbb2c4364ba672ec87bb84b2d8b217b4f652a25f5f3760aeea0fad3",
+      "bytes": 49731,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-a8-active-factory-duplicate-disabled.png",
+      "source": "dist/ees-followup-product5/figma-a8-active-factory-duplicate-disabled.png",
+      "source_sha256": "e4856edba3908ad736ce0aa078c60fc905b39bf9893a3176fa371b06ec450de7",
+      "sha256": "e4856edba3908ad736ce0aa078c60fc905b39bf9893a3176fa371b06ec450de7",
+      "bytes": 100567,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-a8-factory-ready.json",
+      "source": "dist/ees-followup-product5/figma-a8-factory-ready.json",
+      "source_sha256": "c1c7cce7680ea9d3ebe2f76cce74dac29b1a23e940251752a9f1d92a43990ca7",
+      "sha256": "c1c7cce7680ea9d3ebe2f76cce74dac29b1a23e940251752a9f1d92a43990ca7",
+      "bytes": 48409,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-a8-factory-ready.png",
+      "source": "dist/ees-followup-product5/figma-a8-factory-ready.png",
+      "source_sha256": "d89b99b41d81b895df8de178706426fa8d3939a8f72804a0ec24acafe7484b35",
+      "sha256": "d89b99b41d81b895df8de178706426fa8d3939a8f72804a0ec24acafe7484b35",
+      "bytes": 90760,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-a8-first-start.json",
+      "source": "dist/ees-followup-product5/figma-a8-first-start.json",
+      "source_sha256": "22ab44e73af854805a0a64d60e5edbea03cf576df457e1ece9f6540a56693fa2",
+      "sha256": "22ab44e73af854805a0a64d60e5edbea03cf576df457e1ece9f6540a56693fa2",
+      "bytes": 38452,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-a8-first-start.png",
+      "source": "dist/ees-followup-product5/figma-a8-first-start.png",
+      "source_sha256": "80b3b3f0c8e504bb16d3a8a6080bd62e8192bcbd3b4dc61c0ad03eae453d6022",
+      "sha256": "80b3b3f0c8e504bb16d3a8a6080bd62e8192bcbd3b4dc61c0ad03eae453d6022",
+      "bytes": 82199,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-b21-schedule-geometry.json",
+      "source": "dist/ees-followup-product5/figma-b21-schedule-geometry.json",
+      "source_sha256": "933ec12d7d11e550c3f47e3b43af99996992af3db99dfcdf8b72bbeda62b3bd0",
+      "sha256": "933ec12d7d11e550c3f47e3b43af99996992af3db99dfcdf8b72bbeda62b3bd0",
+      "bytes": 12652,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-b21-schedule-preview.json",
+      "source": "dist/ees-followup-product5/figma-b21-schedule-preview.json",
+      "source_sha256": "4783873c32a3b2974b293ff756e52d9810185ffddf2307f4ed58fdfd59ed3644",
+      "sha256": "4783873c32a3b2974b293ff756e52d9810185ffddf2307f4ed58fdfd59ed3644",
+      "bytes": 44860,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-b21-schedule-preview.png",
+      "source": "dist/ees-followup-product5/figma-b21-schedule-preview.png",
+      "source_sha256": "268df06611973750bdc6c3c0935e0905592a7acaa44a45c02c07b1681facb644",
+      "sha256": "268df06611973750bdc6c3c0935e0905592a7acaa44a45c02c07b1681facb644",
+      "bytes": 152722,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-b22-saved-job-rules.json",
+      "source": "dist/ees-followup-product5/figma-b22-saved-job-rules.json",
+      "source_sha256": "829b194c347af5c935856437a490b27aa2f38aa75030591f769845eb9075ee02",
+      "sha256": "829b194c347af5c935856437a490b27aa2f38aa75030591f769845eb9075ee02",
+      "bytes": 43961,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-b22-saved-job-rules.png",
+      "source": "dist/ees-followup-product5/figma-b22-saved-job-rules.png",
+      "source_sha256": "769599be8c84ea72a9b9d3beffff5f3ad59aec8287cb206f907d5ca778f246d5",
+      "sha256": "769599be8c84ea72a9b9d3beffff5f3ad59aec8287cb206f907d5ca778f246d5",
+      "bytes": 109635,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-b23-delivery-advisory-publish-enabled.json",
+      "source": "dist/ees-followup-product5/figma-b23-delivery-advisory-publish-enabled.json",
+      "source_sha256": "1cca239485884de079f31e17e9649294aefc46cb798c91bc15829223e5daa60b",
+      "sha256": "1cca239485884de079f31e17e9649294aefc46cb798c91bc15829223e5daa60b",
+      "bytes": 49393,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-b23-delivery-advisory-publish-enabled.png",
+      "source": "dist/ees-followup-product5/figma-b23-delivery-advisory-publish-enabled.png",
+      "source_sha256": "70d4e2bec9d1fd58100802b3c431bfe23854a0efa5b332f5dad6cd5c036d075d",
+      "sha256": "70d4e2bec9d1fd58100802b3c431bfe23854a0efa5b332f5dad6cd5c036d075d",
+      "bytes": 121769,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-b23-publish-review.json",
+      "source": "dist/ees-followup-product5/figma-b23-publish-review.json",
+      "source_sha256": "bf023c5b06d993434c5ad90ca2ca4174072385de2452bb73219863126df38067",
+      "sha256": "bf023c5b06d993434c5ad90ca2ca4174072385de2452bb73219863126df38067",
+      "bytes": 39028,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-b23-publish-review.png",
+      "source": "dist/ees-followup-product5/figma-b23-publish-review.png",
+      "source_sha256": "15b17f895ffb0025ed0e5a86b7e8c14e2accfc80c9c4a620e6ebe8732ccfcbb6",
+      "sha256": "15b17f895ffb0025ed0e5a86b7e8c14e2accfc80c9c4a620e6ebe8732ccfcbb6",
+      "bytes": 98057,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-q1-1366x768-human-action-geometry.json",
+      "source": "dist/ees-followup-product5/figma-q1-1366x768-human-action-geometry.json",
+      "source_sha256": "488ac0dc6aa9f2896e0b741834f0932f60cc5df45196d64018709326b88a96e1",
+      "sha256": "488ac0dc6aa9f2896e0b741834f0932f60cc5df45196d64018709326b88a96e1",
+      "bytes": 554,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-q1-1366x768-human-action.json",
+      "source": "dist/ees-followup-product5/figma-q1-1366x768-human-action.json",
+      "source_sha256": "85440746ea8c325a56806b15ffc686dd874bcd8a8906754b30fc588d80f33bdc",
+      "sha256": "85440746ea8c325a56806b15ffc686dd874bcd8a8906754b30fc588d80f33bdc",
+      "bytes": 40236,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-q1-1366x768-human-action.png",
+      "source": "dist/ees-followup-product5/figma-q1-1366x768-human-action.png",
+      "source_sha256": "f9c3d5252f8181e82604f0fd3fb9e20722d672cb9b13fac6ce6b5800f9592769",
+      "sha256": "f9c3d5252f8181e82604f0fd3fb9e20722d672cb9b13fac6ce6b5800f9592769",
+      "bytes": 61906,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-q1-1366x768-native-chat-geometry.json",
+      "source": "dist/ees-followup-product5/figma-q1-1366x768-native-chat-geometry.json",
+      "source_sha256": "b5f26e80aaf6c73b7a30c338a8bccd097c63b0f225d4f2468be41172bf56034f",
+      "sha256": "b5f26e80aaf6c73b7a30c338a8bccd097c63b0f225d4f2468be41172bf56034f",
+      "bytes": 1083,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-q1-1366x768-native-chat.json",
+      "source": "dist/ees-followup-product5/figma-q1-1366x768-native-chat.json",
+      "source_sha256": "2ccc80b5439ff68563b232f7500a8e5393188683fb4c192d5d13f7288e6a0195",
+      "sha256": "2ccc80b5439ff68563b232f7500a8e5393188683fb4c192d5d13f7288e6a0195",
+      "bytes": 48799,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-q1-1366x768-native-chat.png",
+      "source": "dist/ees-followup-product5/figma-q1-1366x768-native-chat.png",
+      "source_sha256": "04113b3ea2f9a8bdfd0d6d5cf8d2c24dd755529f74873c44f9e367a1b99c54f1",
+      "sha256": "04113b3ea2f9a8bdfd0d6d5cf8d2c24dd755529f74873c44f9e367a1b99c54f1",
+      "bytes": 98995,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-s1-empty-geometry.json",
+      "source": "dist/ees-followup-product5/figma-s1-empty-geometry.json",
+      "source_sha256": "75b1b8f42b99d4fe0ef58c27921bf3a16c330d2d118aadb05fb89dc71fdf782a",
+      "sha256": "75b1b8f42b99d4fe0ef58c27921bf3a16c330d2d118aadb05fb89dc71fdf782a",
+      "bytes": 9484,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-s1-empty.json",
+      "source": "dist/ees-followup-product5/figma-s1-empty.json",
+      "source_sha256": "55e4967c3c0e48c9f106b8bf5da42065cdf560be3c79d56c84262cf4f6e76ae2",
+      "sha256": "55e4967c3c0e48c9f106b8bf5da42065cdf560be3c79d56c84262cf4f6e76ae2",
+      "bytes": 40302,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-s1-empty.png",
+      "source": "dist/ees-followup-product5/figma-s1-empty.png",
+      "source_sha256": "6194aac85afc8a836f448bbb04d91708de39ceefd016df4db22d6e980a699240",
+      "sha256": "6194aac85afc8a836f448bbb04d91708de39ceefd016df4db22d6e980a699240",
+      "bytes": 55573,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-s1-read-retry-awaits-human.json",
+      "source": "dist/ees-followup-product5/figma-s1-read-retry-awaits-human.json",
+      "source_sha256": "9ba86418930c99ed39fa35dc5419df3159210ebbc2a661c0b93a9a20e7261e50",
+      "sha256": "9ba86418930c99ed39fa35dc5419df3159210ebbc2a661c0b93a9a20e7261e50",
+      "bytes": 46100,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-s1-read-retry-awaits-human.png",
+      "source": "dist/ees-followup-product5/figma-s1-read-retry-awaits-human.png",
+      "source_sha256": "dd8db04ca37f3933dfd387c92fcebf4cbf0b4173005ba41d5bfdb9d8a6c59d8e",
+      "sha256": "dd8db04ca37f3933dfd387c92fcebf4cbf0b4173005ba41d5bfdb9d8a6c59d8e",
+      "bytes": 106985,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-s1-read-retry-server.json",
+      "source": "dist/ees-followup-product5/figma-s1-read-retry-server.json",
+      "source_sha256": "faa9914d06755cd376a0dad614eade95ce18a7e28c9726b6b45862350d74a39d",
+      "sha256": "faa9914d06755cd376a0dad614eade95ce18a7e28c9726b6b45862350d74a39d",
+      "bytes": 31002,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-s2-filter-geometry.json",
+      "source": "dist/ees-followup-product5/figma-s2-filter-geometry.json",
+      "source_sha256": "0459ef080f6239f5bfe41564c279abc3b4ed145dd4d4dd8165e8117c9974238a",
+      "sha256": "0459ef080f6239f5bfe41564c279abc3b4ed145dd4d4dd8165e8117c9974238a",
+      "bytes": 10339,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-s2-filtered-records.json",
+      "source": "dist/ees-followup-product5/figma-s2-filtered-records.json",
+      "source_sha256": "4a076c15117e8400b5d37e10ea1d2c200799d8dc52b5fb1d39bee6985c41149d",
+      "sha256": "4a076c15117e8400b5d37e10ea1d2c200799d8dc52b5fb1d39bee6985c41149d",
+      "bytes": 53838,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-s2-filtered-records.png",
+      "source": "dist/ees-followup-product5/figma-s2-filtered-records.png",
+      "source_sha256": "54a3c2bcb7f5fb1b2bc7e1fc07b60ad5404fa540f18f6f5647565819c02141e7",
+      "sha256": "54a3c2bcb7f5fb1b2bc7e1fc07b60ad5404fa540f18f6f5647565819c02141e7",
+      "bytes": 101702,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-s2-history-geometry.json",
+      "source": "dist/ees-followup-product5/figma-s2-history-geometry.json",
+      "source_sha256": "aa04c706e910b607635e506fe60ad545a3efc728bdd129005ee17c20dfd87ee7",
+      "sha256": "aa04c706e910b607635e506fe60ad545a3efc728bdd129005ee17c20dfd87ee7",
+      "bytes": 22983,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-s2-narrow-readonly-before-scroll.json",
+      "source": "dist/ees-followup-product5/figma-s2-narrow-readonly-before-scroll.json",
+      "source_sha256": "e8622d70e09173cbf82a891d69f7f9537c9df07aff696ebd2a1c2f07b2c0351e",
+      "sha256": "e8622d70e09173cbf82a891d69f7f9537c9df07aff696ebd2a1c2f07b2c0351e",
+      "bytes": 58992,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-s2-narrow-readonly-before-scroll.png",
+      "source": "dist/ees-followup-product5/figma-s2-narrow-readonly-before-scroll.png",
+      "source_sha256": "7d084411d18e64547779b76e78a2454578ce3062c84341278809968cdfeef868",
+      "sha256": "7d084411d18e64547779b76e78a2454578ce3062c84341278809968cdfeef868",
+      "bytes": 126687,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-s2-narrow-scroll.json",
+      "source": "dist/ees-followup-product5/figma-s2-narrow-scroll.json",
+      "source_sha256": "56cf9c2322516b261634ea4a00cd6ed4cb6a552a79931025161aa73c073d4f7d",
+      "sha256": "56cf9c2322516b261634ea4a00cd6ed4cb6a552a79931025161aa73c073d4f7d",
+      "bytes": 59106,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-s2-narrow-scroll.png",
+      "source": "dist/ees-followup-product5/figma-s2-narrow-scroll.png",
+      "source_sha256": "e88482454fd6dec4520e63209c6dfd79500aad49004cbc5b01944ac6ea84e0cd",
+      "sha256": "e88482454fd6dec4520e63209c6dfd79500aad49004cbc5b01944ac6ea84e0cd",
+      "bytes": 135252,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-s2-native-historical-answer.json",
+      "source": "dist/ees-followup-product5/figma-s2-native-historical-answer.json",
+      "source_sha256": "2151ad03e580cd00125f354f7ddb5c1faf4891f9488d9a45b5a7e94dd6040d2d",
+      "sha256": "2151ad03e580cd00125f354f7ddb5c1faf4891f9488d9a45b5a7e94dd6040d2d",
+      "bytes": 60727,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-s2-native-historical-answer.png",
+      "source": "dist/ees-followup-product5/figma-s2-native-historical-answer.png",
+      "source_sha256": "a97d659c56c264d97b2f24fbc74ad94ed349cbcaebe88a1f2e6e04efff0358f1",
+      "sha256": "a97d659c56c264d97b2f24fbc74ad94ed349cbcaebe88a1f2e6e04efff0358f1",
+      "bytes": 195661,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-s2-native-historical-tool.json",
+      "source": "dist/ees-followup-product5/figma-s2-native-historical-tool.json",
+      "source_sha256": "a83cb485906f0470d7bf106cd6192744ef9870d3bdedec8a8040cd27a8c28fcd",
+      "sha256": "a83cb485906f0470d7bf106cd6192744ef9870d3bdedec8a8040cd27a8c28fcd",
+      "bytes": 22495,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-s2-readonly-original-values.json",
+      "source": "dist/ees-followup-product5/figma-s2-readonly-original-values.json",
+      "source_sha256": "af4519dd6d4c5817511154915657718a9367726d4661e75b2fb64498d8ad9ac4",
+      "sha256": "af4519dd6d4c5817511154915657718a9367726d4661e75b2fb64498d8ad9ac4",
+      "bytes": 59726,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/figma-s2-readonly-original-values.png",
+      "source": "dist/ees-followup-product5/figma-s2-readonly-original-values.png",
+      "source_sha256": "96dbc53fe2dc567ff3ce92cdc8973b106c13b2c4a4aa6a7c7d9fffb2e604ce31",
+      "sha256": "96dbc53fe2dc567ff3ce92cdc8973b106c13b2c4a4aa6a7c7d9fffb2e604ce31",
+      "bytes": 178584,
+      "transformations": []
+    },
+    {
+      "file": "product5/figma-s2-restored-narrow-scroll.json",
+      "source": "dist/ees-followup-product5/figma-s2-restored-narrow-scroll.json",
+      "source_sha256": "29d747f0396a10bf98091fc2546b4ca24be6f27a338d3eacbc96f08e5823f329",
+      "sha256": "29d747f0396a10bf98091fc2546b4ca24be6f27a338d3eacbc96f08e5823f329",
+      "bytes": 1284,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/publish-confirmation-cancel-focus.json",
+      "source": "dist/ees-followup-product5/publish-confirmation-cancel-focus.json",
+      "source_sha256": "4d073781e5eae56fa2a8f86f2d0fcd4181983253e93caa2da1cbe86a2ff90383",
+      "sha256": "4d073781e5eae56fa2a8f86f2d0fcd4181983253e93caa2da1cbe86a2ff90383",
+      "bytes": 38134,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product5/publish-confirmation-cancel-focus.png",
+      "source": "dist/ees-followup-product5/publish-confirmation-cancel-focus.png",
+      "source_sha256": "6db74a225c5358000da1ab0cd0ca91e41afd0ad655787f1d2060a788e49b1af5",
+      "sha256": "6db74a225c5358000da1ab0cd0ca91e41afd0ad655787f1d2060a788e49b1af5",
+      "bytes": 114731,
+      "transformations": []
+    },
+    {
+      "file": "product5/report.json",
+      "source": "dist/ees-followup-product5/report.json",
+      "source_sha256": "41de80cf9fc4d4320f2bf22b43666b0e182b8fff778cb8f014e946dde8e05ff7",
+      "sha256": "7d2a3c74ff1def51e46b199e8602e9b04060f5492cd1a9f9f0a26dd1affa3309",
+      "bytes": 14168,
+      "transformations": [
+        "JSON formatting normalized",
+        "local filesystem paths or secret field values redacted"
+      ]
+    },
+    {
+      "file": "product5/test.log",
+      "source": "dist/ees-followup-product5.log",
+      "source_sha256": "5f7b0100e8556dd893c0d47e87667c9875370de0da47d45e5c75aae8231d85d8",
+      "sha256": "5f7b0100e8556dd893c0d47e87667c9875370de0da47d45e5c75aae8231d85d8",
+      "bytes": 5135,
+      "transformations": []
+    },
+    {
+      "file": "central-chat2/a0-empty.json",
+      "source": "dist/ees-followup-central-chat2/a0-empty.json",
+      "source_sha256": "a9db8358bfa8796b237082625515dad3c1d6ac8f6c589ed07f41c909a5e30d93",
+      "sha256": "a9db8358bfa8796b237082625515dad3c1d6ac8f6c589ed07f41c909a5e30d93",
+      "bytes": 35877,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "central-chat2/a0-empty.png",
+      "source": "dist/ees-followup-central-chat2/a0-empty.png",
+      "source_sha256": "f8568e50a998ad26826634bce2990e54be70790af538b9facd3c41455d70a814",
+      "sha256": "f8568e50a998ad26826634bce2990e54be70790af538b9facd3c41455d70a814",
+      "bytes": 52411,
+      "transformations": []
+    },
+    {
+      "file": "central-chat2/input-proposal-before-human.json",
+      "source": "dist/ees-followup-central-chat2/input-proposal-before-human.json",
+      "source_sha256": "d35db8edfe9c86c3506e3b59c42eb08c0293f635396079d1abb5803cbc4c8b12",
+      "sha256": "d35db8edfe9c86c3506e3b59c42eb08c0293f635396079d1abb5803cbc4c8b12",
+      "bytes": 53340,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "central-chat2/input-proposal-before-human.png",
+      "source": "dist/ees-followup-central-chat2/input-proposal-before-human.png",
+      "source_sha256": "1ba9395c16d4331f88d36d7d2fb73f6c6a6a4627e148a3f64cc95b0379a63947",
+      "sha256": "1ba9395c16d4331f88d36d7d2fb73f6c6a6a4627e148a3f64cc95b0379a63947",
+      "bytes": 153412,
+      "transformations": []
+    },
+    {
+      "file": "central-chat2/input-proposal-human-saved-not-executed.json",
+      "source": "dist/ees-followup-central-chat2/input-proposal-human-saved-not-executed.json",
+      "source_sha256": "e06294471c5b55cd9ce2ca942722d92c38248b966208a4f5c4902df9fb4d1d72",
+      "sha256": "e06294471c5b55cd9ce2ca942722d92c38248b966208a4f5c4902df9fb4d1d72",
+      "bytes": 53594,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "central-chat2/input-proposal-human-saved-not-executed.png",
+      "source": "dist/ees-followup-central-chat2/input-proposal-human-saved-not-executed.png",
+      "source_sha256": "5640a678c6f274858f7481a6bfb849ca20783b2e937b438aa44bedfb176e64c9",
+      "sha256": "5640a678c6f274858f7481a6bfb849ca20783b2e937b438aa44bedfb176e64c9",
+      "bytes": 140402,
+      "transformations": []
+    },
+    {
+      "file": "central-chat2/native-central-human-applied-unsaved.json",
+      "source": "dist/ees-followup-central-chat2/native-central-human-applied-unsaved.json",
+      "source_sha256": "cb8c1b7c1f5f4df924dac2d75d896fbda64b805b4a08af998c78226e0bdd033b",
+      "sha256": "cb8c1b7c1f5f4df924dac2d75d896fbda64b805b4a08af998c78226e0bdd033b",
+      "bytes": 52725,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "central-chat2/native-central-human-applied-unsaved.png",
+      "source": "dist/ees-followup-central-chat2/native-central-human-applied-unsaved.png",
+      "source_sha256": "2bacfcf295b2ec7a81c1a68fe4ae38cccadfb7acb03c0733e939eb46bb1e482c",
+      "sha256": "2bacfcf295b2ec7a81c1a68fe4ae38cccadfb7acb03c0733e939eb46bb1e482c",
+      "bytes": 142986,
+      "transformations": []
+    },
+    {
+      "file": "central-chat2/native-central-human-saved-draft.json",
+      "source": "dist/ees-followup-central-chat2/native-central-human-saved-draft.json",
+      "source_sha256": "788528f8b9f2f4b7189384fe73142b9948e55734cd5a6bd8e45c66c3d175f8cd",
+      "sha256": "788528f8b9f2f4b7189384fe73142b9948e55734cd5a6bd8e45c66c3d175f8cd",
+      "bytes": 52963,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "central-chat2/native-central-human-saved-draft.png",
+      "source": "dist/ees-followup-central-chat2/native-central-human-saved-draft.png",
+      "source_sha256": "b728ad9f46d3e6c8e33716ccb27c979bc08e0676789dc80654799d5a5c02ca18",
+      "sha256": "b728ad9f46d3e6c8e33716ccb27c979bc08e0676789dc80654799d5a5c02ca18",
+      "bytes": 139586,
+      "transformations": []
+    },
+    {
+      "file": "central-chat2/native-central-proposal-before-human.json",
+      "source": "dist/ees-followup-central-chat2/native-central-proposal-before-human.json",
+      "source_sha256": "6a911a45a570103d84adb5336f021067538452000716abb77ab19d772246b021",
+      "sha256": "6a911a45a570103d84adb5336f021067538452000716abb77ab19d772246b021",
+      "bytes": 55727,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "central-chat2/native-central-proposal-before-human.png",
+      "source": "dist/ees-followup-central-chat2/native-central-proposal-before-human.png",
+      "source_sha256": "0be02090424c2cf79f421b3c7af7aa544739d213dfe2c592a01d44caf365d20a",
+      "sha256": "0be02090424c2cf79f421b3c7af7aa544739d213dfe2c592a01d44caf365d20a",
+      "bytes": 140493,
+      "transformations": []
+    },
+    {
+      "file": "central-chat2/native-central-read-tool.json",
+      "source": "dist/ees-followup-central-chat2/native-central-read-tool.json",
+      "source_sha256": "16d20b60a8a49ddce395727739a66757bf5cf8a137a923aebdc418c1f98126c0",
+      "sha256": "16d20b60a8a49ddce395727739a66757bf5cf8a137a923aebdc418c1f98126c0",
+      "bytes": 51564,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "central-chat2/native-central-read-tool.png",
+      "source": "dist/ees-followup-central-chat2/native-central-read-tool.png",
+      "source_sha256": "9ed8072af810ea0abd0a796a767988b33ace180f3449f40d6907510cdd89193f",
+      "sha256": "9ed8072af810ea0abd0a796a767988b33ace180f3449f40d6907510cdd89193f",
+      "bytes": 112887,
+      "transformations": []
+    },
+    {
+      "file": "central-chat2/native-message-reference-exact-old-attempt.json",
+      "source": "dist/ees-followup-central-chat2/native-message-reference-exact-old-attempt.json",
+      "source_sha256": "a90402d457b2d201513df743f61528583d5534cbfd604dd2f146d4ae5353a930",
+      "sha256": "a90402d457b2d201513df743f61528583d5534cbfd604dd2f146d4ae5353a930",
+      "bytes": 54702,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "central-chat2/native-message-reference-exact-old-attempt.png",
+      "source": "dist/ees-followup-central-chat2/native-message-reference-exact-old-attempt.png",
+      "source_sha256": "981d6775b30178e46b21ecc07929c127882c8c420278a10e3f1441aef0ef15b8",
+      "sha256": "981d6775b30178e46b21ecc07929c127882c8c420278a10e3f1441aef0ef15b8",
+      "bytes": 144854,
+      "transformations": []
+    },
+    {
+      "file": "central-chat2/report.json",
+      "source": "dist/ees-followup-central-chat2/report.json",
+      "source_sha256": "70c41bbea3250cd8227165e0ef3310862d43ffb58a526a1783c929c1d0960fb1",
+      "sha256": "646f1678c85793eae7aefe1b4d5c7b3e687a649745432e0c290f7491ade73958",
+      "bytes": 29692,
+      "transformations": [
+        "JSON formatting normalized",
+        "local filesystem paths or secret field values redacted"
+      ]
+    },
+    {
+      "file": "central-chat2/test.log",
+      "source": "dist/ees-followup-central-chat2.log",
+      "source_sha256": "a9566cf62aa565004d521dd35264494655ceb8e7b66eeb8e5b9fe6eace327868",
+      "sha256": "a9566cf62aa565004d521dd35264494655ceb8e7b66eeb8e5b9fe6eace327868",
+      "bytes": 1632,
+      "transformations": []
+    },
+    {
+      "file": "layout4/q1-1366x768.json",
+      "source": "dist/ees-followup-layout4/q1-1366x768.json",
+      "source_sha256": "5c71d9b152a8cac88575b7d75992438ab70c3ce6e467bb4ce8213b22d3fe77ac",
+      "sha256": "5c71d9b152a8cac88575b7d75992438ab70c3ce6e467bb4ce8213b22d3fe77ac",
+      "bytes": 691,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout4/q1-1366x768.png",
+      "source": "dist/ees-followup-layout4/q1-1366x768.png",
+      "source_sha256": "9d4af55e3552872af7c7c1526b84c3bd069e898039f5ed6bf57e32ce3b6852d1",
+      "sha256": "9d4af55e3552872af7c7c1526b84c3bd069e898039f5ed6bf57e32ce3b6852d1",
+      "bytes": 63499,
+      "transformations": []
+    },
+    {
+      "file": "layout4/q1-1920x768.json",
+      "source": "dist/ees-followup-layout4/q1-1920x768.json",
+      "source_sha256": "6921cd0000b9dcea39d560bc9e16d5c425c76a57649b3cac1f853764f2b76137",
+      "sha256": "6921cd0000b9dcea39d560bc9e16d5c425c76a57649b3cac1f853764f2b76137",
+      "bytes": 698,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout4/q1-1920x768.png",
+      "source": "dist/ees-followup-layout4/q1-1920x768.png",
+      "source_sha256": "57586c50c50de382dafec432f3d26a9e0517b8b78476a2b69b1bb0f5587eafb2",
+      "sha256": "57586c50c50de382dafec432f3d26a9e0517b8b78476a2b69b1bb0f5587eafb2",
+      "bytes": 84779,
+      "transformations": []
+    },
+    {
+      "file": "layout4/q1-contrast.json",
+      "source": "dist/ees-followup-layout4/q1-contrast.json",
+      "source_sha256": "bc01a6e7361b805dfd418b76871e70e88415ce97c7b8ce72ac567c280ec99899",
+      "sha256": "bc01a6e7361b805dfd418b76871e70e88415ce97c7b8ce72ac567c280ec99899",
+      "bytes": 236,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout4/q1-overlay-close-reopen.json",
+      "source": "dist/ees-followup-layout4/q1-overlay-close-reopen.json",
+      "source_sha256": "5181a9e4d1936633ae84307e7835a307647facf4aaf04ad84f24201ca6e7d226",
+      "sha256": "5181a9e4d1936633ae84307e7835a307647facf4aaf04ad84f24201ca6e7d226",
+      "bytes": 697,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout4/q1-overlay-close-reopen.png",
+      "source": "dist/ees-followup-layout4/q1-overlay-close-reopen.png",
+      "source_sha256": "5e01c72db1249c499c7a743beb8042638e4da6c75b01e2bebb5fe153dcc22781",
+      "sha256": "5e01c72db1249c499c7a743beb8042638e4da6c75b01e2bebb5fe153dcc22781",
+      "bytes": 54855,
+      "transformations": []
+    },
+    {
+      "file": "layout4/q1-private-width-640.png",
+      "source": "dist/ees-followup-layout4/q1-private-width-640.png",
+      "source_sha256": "03e7c91ea0a5458245991c807ed9995f69bee556c1a00814401789ba8a0b5966",
+      "sha256": "03e7c91ea0a5458245991c807ed9995f69bee556c1a00814401789ba8a0b5966",
+      "bytes": 58661,
+      "transformations": []
+    },
+    {
+      "file": "layout4/test.log",
+      "source": "temporary-logs/ees-layout-native4.log",
+      "source_sha256": "1b0773322424e5a1813fe85eee97424bd2eccfad5620c51f272127938328ae38",
+      "sha256": "1b0773322424e5a1813fe85eee97424bd2eccfad5620c51f272127938328ae38",
+      "bytes": 712,
+      "transformations": []
+    },
+    {
+      "file": "account-width4-restored/nu05-former-a-tab-now-b.png",
+      "source": "dist/ees-followup-account-width4-restored/nu05-former-a-tab-now-b.png",
+      "source_sha256": "c9311a882172c3e9bb4ce1785d91c03e84835bacdc752a139278d91bdcb0be34",
+      "sha256": "c9311a882172c3e9bb4ce1785d91c03e84835bacdc752a139278d91bdcb0be34",
+      "bytes": 48870,
+      "transformations": []
+    },
+    {
+      "file": "account-width4-restored/sa26-b-after-late-a-responses.png",
+      "source": "dist/ees-followup-account-width4-restored/sa26-b-after-late-a-responses.png",
+      "source_sha256": "97ab453a5a09ee28beb9204c54c9d4ef44a7cde2c46f0424d27b12468a16116f",
+      "sha256": "97ab453a5a09ee28beb9204c54c9d4ef44a7cde2c46f0424d27b12468a16116f",
+      "bytes": 84868,
+      "transformations": []
+    },
+    {
+      "file": "account-width4-restored/sa26-nu05-account-switch.json",
+      "source": "dist/ees-followup-account-width4-restored/sa26-nu05-account-switch.json",
+      "source_sha256": "718b40b2fc02a2e2800a861bafc85041b1966f756b482b9b5e14c09412b59e13",
+      "sha256": "718b40b2fc02a2e2800a861bafc85041b1966f756b482b9b5e14c09412b59e13",
+      "bytes": 565,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "account-width4-restored/test.log",
+      "source": "temporary-logs/ees-account-width4-restored.log",
+      "source_sha256": "25f475fa50e68008ff2f910ce3bb3282e6863ce9275917be5c5dc25a33f22208",
+      "sha256": "c9a5498d45a98fa2a63cb87037f509edfb1460c50c76eb52b43ea7019ce565da",
+      "bytes": 859,
+      "transformations": [
+        "local filesystem paths redacted"
+      ]
+    },
+    {
+      "file": "tested-build3-manifest.json",
+      "source": "dist/branding-followup3/manifest.json",
+      "source_sha256": "3ce0d31225a9ad8576cd38690297289fe9b451c3d2d47c2671b071231d4fa844",
+      "sha256": "3ce0d31225a9ad8576cd38690297289fe9b451c3d2d47c2671b071231d4fa844",
+      "bytes": 8671,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "tested-build4-manifest.json",
+      "source": "dist/branding-followup4/manifest.json",
+      "source_sha256": "2bc34a295ea6293b8e1fd1b233af4dcb508fe793d680dd1cfc6015c2538e1fca",
+      "sha256": "2bc34a295ea6293b8e1fd1b233af4dcb508fe793d680dd1cfc6015c2538e1fca",
+      "bytes": 8671,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    }
+  ]
+}

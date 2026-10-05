@@ -194,8 +194,8 @@ def validate_schedule_definition(schedule, nodes):
     template = data.get("name_template", "")
     if not isinstance(template, str) or len(template) > 160 or "{" in template.replace("{date}", "") or "}" in template.replace("{date}", ""):
         fail("schedule_name_invalid", "회차 이름의 {date}는 일정 기준일입니다. 업무 입력 날짜와 자동 연결되지 않습니다.")
-    for key, supported in (("opening", "after_previous_closed"), ("closing", "after_last_stage"), ("non_working_days", "notify_no_shift"), ("catch_up", "miss")):
-        if key in data and data[key] != supported:
+    for key, supported in (("opening", ("on_schedule", "after_previous_closed")), ("closing", ("after_last_stage",)), ("non_working_days", ("notify_no_shift",)), ("catch_up", ("miss",))):
+        if key in data and data[key] not in supported:
             fail("schedule_rule_invalid")
     deadlines = data.get("stage_deadlines", {})
     if not isinstance(deadlines, dict) or len(deadlines) > 100:
@@ -390,7 +390,7 @@ class OperationsRuntime:
             if receipt is not None:
                 return receipt
             current_tool = self._tool(db, tool["id"])
-            if current_tool["revision"] != tool["revision"] or current_tool["state"] != "approved" or current_tool["kind"] != "request":
+            if current_tool["revision"] != tool["revision"] or current_tool["state"] != "approved" or current_tool["kind"] not in {"request", "direct"}:
                 fail("tool_review_required")
             run = self.service._work_run(db, actor, groups, run["id"], write=True)
             self._scope(db, actor, groups, run["system_id"], run["factory_id"], "approver" if action == "request_approve" else "requester")
@@ -411,10 +411,15 @@ class OperationsRuntime:
                     fail("request_input_mismatch", "저장된 이번 입력과 요청 대상이 다릅니다. 값을 먼저 저장해 주세요.")
                 source_hash = digest({"inputs": snapshot.get("inputs", {}), "sources": snapshot.get("settings_sources", {})})
                 schema_check(tool["input_schema"], inputs)
+                request_reason = body.get("request_reason", "")
+                if not isinstance(request_reason, str) or len(request_reason) > 4000:
+                    fail("request_reason_invalid", "요청 사유는 4,000자 이내의 글로 입력해 주세요.")
                 previous = db.execute("SELECT data FROM work_external_requests WHERE run_id=? AND job_id=?", (run["id"], job_id)).fetchall()
                 if any(json.loads(row[0])["state"] in {"requested", "accepted", "running", "reported_complete", "unknown"} for row in previous):
                     fail("previous_request_unresolved", "이전 요청의 접수·효과를 먼저 확인해 주세요. 자동 재요청하지 않습니다.")
                 request = {"id": str(uuid4()), "run_id": run["id"], "job_id": job_id, "actor": value(actor, "id"), "revision": 1, "run_revision": run["revision"], "tool_contract_id": tool["id"], "tool_revision": tool["revision"], "reference": deepcopy(tool["reference"]), "input_hash": digest(inputs), "input_source_hash": source_hash, "inputs": inputs, "approval_count": required, "approvals": [], "state": "approval_pending" if required else "ready", "created_at": self.clock(), "effect_criterion": deepcopy(job.get("effect_criterion", {})), "correlation_id": str(uuid4()), "job_number": None, "reported_complete": False, "effect_verified": False, "connector_configured": self.connector is not None}
+                request.update(request_reason=request_reason, execution_actor="EES Work" if tool["kind"] == "direct" else "EES")
+                if tool["kind"] == "direct": request["connector_configured"] = False
             else:
                 request = self._request(db, actor, groups, request["id"], write=True)
                 self._revision(body, request["revision"])
@@ -444,7 +449,7 @@ class OperationsRuntime:
                     token = secrets.token_urlsafe(32)
                     binding = self._binding(request)
                     db.execute("INSERT INTO work_request_intents(hash,request_id,actor,binding,expires) VALUES(?,?,?,?,?)", (digest(token), request["id"], value(actor, "id"), digest(binding), self.clock() + INTENT_TTL))
-                    outcome = {"ok": True, "request": self._public_request(request), "intent_token": token, "expires_at": self.clock() + INTENT_TTL}
+                    outcome = {"ok": True, "request": {**self._public_request(request), "inputs": deepcopy(request["inputs"])}, "intent_token": token, "expires_at": self.clock() + INTENT_TTL}
                     return self._remember(db, actor, body, outcome)
             self._save_request(db, request)
             self._event(db, request["id"], actor, action, {"revision": request["revision"], "state": request["state"]})
@@ -452,7 +457,7 @@ class OperationsRuntime:
 
     @staticmethod
     def _binding(request):
-        return {"action": "request_dispatch", **{key: request[key] for key in ("id", "actor", "revision", "run_revision", "tool_revision", "input_hash", "input_source_hash", "approvals", "state")}}
+        return {"action": "request_dispatch", "request_reason": request.get("request_reason", ""), **{key: request[key] for key in ("id", "actor", "revision", "run_revision", "tool_revision", "input_hash", "input_source_hash", "approvals", "state")}}
 
     @staticmethod
     def _public_request(request):
@@ -463,7 +468,7 @@ class OperationsRuntime:
         if action == "tool_save":
             data = clean(body.get("tool", {}))
             kind = data.get("kind", "read")
-            if kind not in {"read", "request"}:
+            if kind not in {"read", "request", "direct"}:
                 fail("tool_kind_invalid")
             system = identifier(data.get("system_id"))
             with self.service._db() as db:
@@ -482,7 +487,7 @@ class OperationsRuntime:
                 data = self._tool(db, body.get("tool_contract_id"))
                 self._scope(db, actor, groups, data["system_id"], role="owner")
             checked = await self._inspect_reference(actor, data["reference"], data["kind"])
-            if data["kind"] == "request" and data.get("status_function"):
+            if data["kind"] in {"request", "direct"} and data.get("status_function"):
                 status_contract = await self.bridge.inspect_registered(actor, data["reference"]["tool_id"], data["status_function"])
                 if action == "tool_review" and data.get("status_reference") != status_contract["reference"]:
                     fail("native_version_changed")
@@ -506,24 +511,26 @@ class OperationsRuntime:
                 guide = urlsplit(data.get("guide_url", ""))
                 if guide.scheme not in {"https", "http"} or not guide.netloc or guide.username or guide.password:
                     fail("guide_required", "담당자가 확인할 기능 가이드 링크가 필요합니다.")
-                if data["kind"] == "request" and (not data.get("status_function") or not data.get("output_schema") or not data.get("responsible_user_id")):
+                if data["kind"] in {"request", "direct"} and (not data.get("status_function") or not data.get("output_schema") or not data.get("responsible_user_id")):
                     fail("request_contract_incomplete", "EES 기능·상태 조회·결과 형식·담당자를 확인해 주세요.")
-                if data["kind"] == "request":
+                if data["kind"] in {"request", "direct"}:
                     validate_output_schema(data["output_schema"])
+                if data["kind"] == "direct": self._validate_direct_contract(data)
                 if data["state"] not in {"draft", "rejected"}:
                     fail("tool_state_conflict")
                 data["state"] = "review_requested"
-                if data["kind"] == "request":
+                if data["kind"] in {"request", "direct"}:
                     data["status_reference"] = status_contract["reference"]
                 data["revision"] += 1
             else:
                 data = previous
                 if data["state"] != "review_requested" or body.get("decision") not in {"approve", "reject"}:
                     fail("tool_state_conflict")
-                if data["kind"] == "request" and data.get("responsible_user_id") != value(actor, "id"):
+                if data["kind"] in {"request", "direct"} and data.get("responsible_user_id") != value(actor, "id"):
                     fail("responsible_reviewer_required")
-                if data["kind"] == "request" and body["decision"] == "approve":
+                if data["kind"] in {"request", "direct"} and body["decision"] == "approve":
                     validate_output_schema(data.get("output_schema"))
+                    if data["kind"] == "direct": self._validate_direct_contract(data)
                 if data["kind"] == "read" and body["decision"] == "approve" and checked.get("state") != "allowed":
                     data["reference"] = self.bridge.store_approval(db, actor, data["reference"], body.get("evidence", ""))["reference"]
                 data["state"] = "approved" if body["decision"] == "approve" else "rejected"
@@ -533,6 +540,18 @@ class OperationsRuntime:
             db.execute("INSERT INTO work_tool_contracts VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET revision=excluded.revision,state=excluded.state,data=excluded.data", (key, data["system_id"], data["revision"], data["state"], dump(data)))
             self._event(db, key, actor, action, {"revision": data["revision"], "state": data["state"]})
             return self._remember(db, actor, body, {"ok": True, "tool": data})
+
+    @staticmethod
+    def _validate_direct_contract(tool):
+        contract = tool.get("exception_contract")
+        if (not isinstance(contract, dict) or not isinstance(contract.get("api_unavailable_reason"), str)
+                or not contract["api_unavailable_reason"].strip() or contract.get("owner_user_id") != tool.get("responsible_user_id")
+                or not isinstance(contract.get("account_reference"), str) or not contract["account_reference"].strip()
+                or contract.get("least_privilege") is not True or not isinstance(contract.get("allowed_commands"), list)
+                or not contract["allowed_commands"] or len(contract["allowed_commands"]) > 30):
+            fail("direct_contract_incomplete", "API 미제공 사유·담당자 소유·허용 명령 ID·최소 권한 전용 계정 참조를 확인해 주세요.")
+        for command in contract["allowed_commands"]:
+            identifier(command)
 
     async def _approved_request(self, actor, groups, request_id):
         with self.service._db() as db:
@@ -582,6 +601,10 @@ class OperationsRuntime:
             if not intent or intent["consumed"] or intent["expires"] <= self.clock() or intent["request_id"] != request["id"] or intent["actor"] != value(actor, "id") or intent["binding"] != digest(self._binding(request)):
                 fail("confirmation_expired", "요청 내용을 다시 확인해 주세요.")
             db.execute("UPDATE work_request_intents SET consumed=1 WHERE hash=?", (intent["hash"],))
+            if tool["kind"] == "direct":
+                request.update(state="blocked", reason="direct_executor_unconfigured", execution_actor="EES Work", revision=request["revision"] + 1)
+                self._save_request(db, request)
+                return self._remember(db, actor, body, {"ok": False, "request": self._public_request(request), "error": {"code": "direct_executor_unconfigured", "message": "담당자 소유의 허용 명령·전용 계정·효과 조회 연결을 확인해야 합니다. 직접 실행 연결은 아직 구성되지 않았습니다."}})
             if self.connector is None:
                 request.update(state="blocked", reason="ees_connector_unconfigured", revision=request["revision"] + 1)
                 self._save_request(db, request)
@@ -649,6 +672,8 @@ class OperationsRuntime:
             tool = self._tool(db, request["tool_contract_id"])
             run = self.service._work_run(db, actor, groups, request["run_id"])
             self._scope(db, actor, groups, run["system_id"], run["factory_id"], "requester")
+            if tool["kind"] == "direct":
+                fail("direct_executor_unconfigured", "직접 실행과 효과 조회 연결이 아직 구성되지 않았습니다.")
         await self._inspect_reference(actor, request["reference"], "request")
         with self.service._db(write=True) as db:
             receipt = self._receipt(db, actor, body)
@@ -744,6 +769,10 @@ class OperationsRuntime:
                 definition_data = json.loads(version_row[0])
                 if definition_data.get("mode") != "periodic":
                     fail("periodic_workflow_required")
+                if definition_data.get("execution_scope") == "system": factory_id = ""
+                if definition_data.get("execution_scope") == "factory" and not factory_id:
+                    fail("factory_required", "예약할 공장을 선택해 주세요.")
+                self._scope(db, actor, groups, system, factory_id, "owner")
             rule = validate_schedule_definition(rule, definition_data.get("nodes", {}))
             if type(supplied.get("lifecycle_enabled", False)) is not bool:
                 fail("schedule_lifecycle_invalid")
@@ -814,43 +843,16 @@ class OperationsRuntime:
         now = self.clock()
         count = 0
         with self.service._db(write=True) as db:
-            # Filter ineligible sequential reservations before the batch limit:
-            # 100 old open cycles must not starve an unrelated due reservation.
-            rows = db.execute("""WITH candidates AS (
-                SELECT s.*, l.id AS previous_slot, l.status AS previous_state,
-                    r.status AS previous_run_status,
-                    (COALESCE(json_extract(s.data,'$.lifecycle_enabled'),0)=1 AND
-                     COALESCE(json_extract(s.data,'$.rule.opening'),'')='after_previous_closed') AS sequential
-                FROM work_schedules s LEFT JOIN work_schedule_slots l ON l.id=(
-                    SELECT id FROM work_schedule_slots WHERE schedule_id=s.id ORDER BY scheduled_at DESC LIMIT 1)
-                LEFT JOIN work_runs r ON r.id=json_extract(l.data,'$.run_id') WHERE s.enabled=1)
-                SELECT * FROM candidates WHERE
-                    (next_at<=? OR (sequential AND previous_run_status='completed')) AND
-                    (NOT sequential OR previous_slot IS NULL OR previous_state='missed' OR previous_run_status='completed')
-                ORDER BY next_at,id LIMIT 100""", (now,)).fetchall()
+            # C12: scheduled time alone opens a cycle. The accepted legacy
+            # opening label is no longer a gate, and saved snapshots stay intact.
+            rows = db.execute("SELECT * FROM work_schedules WHERE enabled=1 AND next_at<=? ORDER BY next_at,id LIMIT 100", (now,)).fetchall()
             for row in rows:
                 schedule = json.loads(row["data"])
                 stamp = row["next_at"]
-                sequential = schedule.get("lifecycle_enabled") and schedule["rule"].get("opening") == "after_previous_closed"
-                early = False
-                if sequential:
-                    previous = db.execute("SELECT data FROM work_schedule_slots WHERE schedule_id=? ORDER BY scheduled_at DESC LIMIT 1", (row["id"],)).fetchone()
-                    if previous:
-                        previous = json.loads(previous[0])
-                        run = db.execute("SELECT status FROM work_runs WHERE id=?", (previous.get("run_id"),)).fetchone()
-                        # Only this opted-in reservation's immediately preceding
-                        # cycle controls opening. Unrelated/older runs do not.
-                        if run and run["status"] == "completed":
-                            stamp = max(stamp, next_slot(schedule["rule"], previous["scheduled_at"]))
-                            early = stamp > now
-                        elif previous["state"] != "missed":
-                            continue
-                        # A missed slot never opened a cycle. Keep recording
-                        # subsequent due slots; it cannot open a future one early.
                 # Bound one worker tick. A long outage is recorded in batches,
                 # never silently collapsed into a new normal/success marker.
                 for _ in range(100):
-                    if stamp > now and not early:
+                    if stamp > now:
                         break
                     key = digest({"workflow": row["workflow_id"], "scope": row["scope"], "at": stamp})
                     status = "missed" if now - stamp > schedule["grace_seconds"] else "queued"
@@ -860,8 +862,6 @@ class OperationsRuntime:
                     if inserted:
                         self._event(db, key, "EES Work", "schedule_materialized", {"state": status, "scheduled_at": stamp, "schedule_id": row["id"]})
                     stamp = next_slot(schedule["rule"], stamp)
-                    if sequential:
-                        break
                 schedule["next_at"] = stamp
                 db.execute("UPDATE work_schedules SET next_at=?,data=? WHERE id=?", (stamp, dump(schedule), row["id"]))
         return count
@@ -1246,6 +1246,7 @@ class OperationsRuntime:
             run = self.service._work_run(db, actor, groups, identifier(body.get("run_id")), write=True)
             snapshot = self.service._work_snapshot(db, run, identifier(body.get("job_id")))
             job = snapshot["job"]
+            self._check_read_contract(db, job)
         options_snapshot = await self.service._work_resolve_job_options(actor, run["id"], job["id"])
         kind = self._job_kind(job)
         skill_snapshots = await self._skills(actor, job, snapshot["definition"])
@@ -1318,6 +1319,7 @@ class OperationsRuntime:
             receipt = self._receipt(db, actor, body)
             if receipt is not None:
                 return receipt
+            self._check_read_contract(db, job)
             if kind == "tool":
                 current_arguments, current_sources, _ = self._resolve_arguments(db, run, job, snapshot["inputs"])
                 if current_arguments != arguments or current_sources != argument_sources:
@@ -1354,6 +1356,8 @@ class OperationsRuntime:
             for record in (argument_records if kind == "tool" else records):
                 await self.service._work_check_evidence(actor, record)
             if kind == "tool":
+                with self.service._db() as db:
+                    self._check_read_contract(db, job)
                 result = await self.bridge.invoke(actor, reference, arguments, {"run_id": run["id"], "job_id": job["id"], "call_id": attempt["id"]})
             elif job.get("result_block") in {"item_verdict", "ai_review"}:
                 proposal_kind = "verdicts" if job["result_block"] == "item_verdict" else "report"
@@ -1368,6 +1372,7 @@ class OperationsRuntime:
                 context = {"context_id": attempt["id"], "target_id": job["id"], "revision": attempt["number"], "kind": proposal_kind,
                            "model_identity": model_identity, "item_ids": [str(item["id"]) for item in source_items],
                            "source": {"results": stored_results, "human_decisions": source_decisions, "inputs": attempt["inputs"], "skills": skill_snapshots,
+                                      "judgment_rules": {"judgments": deepcopy(job.get("judgments", snapshot["definition"].get("judgments", []))), "suggestion_rules": deepcopy(job.get("suggestion_rules", {})), "confirmation_notes": job.get("confirmation_notes", "")},
                                       "limitations": ["Attachment presence and access metadata do not prove document content or adequacy.", "This is an AI suggestion, not a human decision or a sent report."]}}
                 proposed = await self.model.propose(actor, model_identity["id"], context, job.get("instructions") or "Review only the supplied current evidence; preserve unknowns and human decisions. Do not infer document adequacy from metadata.")
                 expected_context = {key: context[key] for key in ("context_id", "target_id", "revision", "kind")}
@@ -1589,6 +1594,16 @@ class OperationsRuntime:
     def _job_kind(job):
         return "request" if job.get("result_block") == "change_request" else job.get("mode", job.get("kind", job.get("execution", {}).get("kind", "human")))
 
+    def _check_read_contract(self, db, job):
+        key = job.get("tool_contract_id") or (job.get("tool_reference") or {}).get("contract_id")
+        if not key: return
+        tool = self._tool(db, key)
+        if tool["kind"] in {"request", "direct"}:
+            fail("request_confirmation_required", "상태 변경 도구는 요청 확인 창에서만 진행할 수 있습니다.")
+        reference = deepcopy(job.get("tool_reference") or {}); reference.pop("contract_id", None)
+        if tool["state"] != "approved" or tool["revision"] != job.get("tool_contract_revision") or reference != tool["reference"]:
+            fail("tool_contract_changed")
+
     def validate_publication(self, db, definition, actor, groups):
         errors = []
         for job in definition.get("nodes", {}).values():
@@ -1604,13 +1619,29 @@ class OperationsRuntime:
                     fail("tool_review_required")
                 if type(job.get("tool_contract_revision")) is not int or job["tool_contract_revision"] != tool["revision"]:
                     fail("tool_contract_changed")
-                if self._job_kind(job) == "request" and tool["kind"] != "request":
+                if self._job_kind(job) == "request" and tool["kind"] not in {"request", "direct"}:
                     fail("request_contract_required")
+                if tool["kind"] in {"request", "direct"} and self._job_kind(job) != "request":
+                    fail("request_contract_required")
+                reference = deepcopy(job.get("tool_reference") or {}); reference.pop("contract_id", None)
+                if reference and reference != tool["reference"]:
+                    fail("tool_contract_reference_mismatch")
                 if self._job_kind(job) == "request" and not job.get("effect_criterion"):
                     fail("effect_criterion_required")
+                if tool["kind"] == "direct": self._validate_direct_contract(tool)
             except WorkflowError as error:
                 errors.append(job.get("id", "") + ": " + error.code)
         return errors
+
+    def publication_warnings(self, db, definition):
+        warnings = []
+        for job in definition.get("nodes", {}).values():
+            key = job.get("tool_contract_id") or (job.get("tool_reference") or {}).get("contract_id")
+            if not key: continue
+            row = db.execute("SELECT data FROM work_tool_contracts WHERE id=?", (key,)).fetchone()
+            if row and json.loads(row[0]).get("kind") == "direct":
+                warnings.append(job.get("id", "") + ": 직접 실행 · 예외 도구입니다. API 미제공 사유·담당자 소유·허용 명령·전용 계정과 효과 확인을 권장합니다. 실행 주체는 EES Work입니다.")
+        return warnings
 
     async def _skills(self, actor, job, definition=None):
         refs = job.get("skills", [])

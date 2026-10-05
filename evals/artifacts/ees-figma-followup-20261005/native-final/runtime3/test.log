@@ -1,0 +1,21 @@
+test_ai_review_autosaves_without_sending_and_confirmation_freezes_text (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_ai_review_autosaves_without_sending_and_confirmation_freezes_text) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 166.9023169997672, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_assigned_human_task_exposes_readonly_inputs_and_no_mutation_button (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_assigned_human_task_exposes_readonly_inputs_and_no_mutation_button) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 190.5447790004473, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_checklist_criterion_and_tool_evidence_are_distinct_in_native_panel (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_checklist_criterion_and_tool_evidence_are_distinct_in_native_panel) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 164.17060699950525, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_closed_record_uses_old_shared_values_and_asking_only_changes_reference (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_closed_record_uses_old_shared_values_and_asking_only_changes_reference) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 155.5891870002597, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_delivery_purpose_review_is_recorded_but_completion_remains_blocked (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_delivery_purpose_review_is_recorded_but_completion_remains_blocked) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 178.08088599940675, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 172.00772300020617, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_list_preview_add_exclude_confirm_and_history_preserve_original (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_list_preview_add_exclude_confirm_and_history_preserve_original) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 182.54006000006484, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_pending_item_choices_survive_reload_before_atomic_confirmation (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_pending_item_choices_survive_reload_before_atomic_confirmation) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 191.824724000071, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 18.984s
+
+OK

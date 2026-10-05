@@ -346,6 +346,95 @@ class FigmaWorkspaceContracts(unittest.IsolatedAsyncioTestCase):
         job = (await self.state(run_id=run['id']))['run']['jobs']['j']
         self.assertTrue(job['can_review_request']); self.assertFalse(job['can_request']); self.assertFalse(job['can_reconcile'])
 
+    async def test_item_verdict_confirmation_is_complete_atomic_and_partial_stays_partial(self):
+        for status in ('succeeded', 'partial'):
+            with self.subTest(status=status):
+                run = await self.prepared(block='item_verdict', status=status, result={'completeness': 'partial' if status == 'partial' else 'complete', 'items': [{'id': 'cr1'}, {'id': 'cr2'}]})
+                attempt = self.current(run)
+                body = {'run_id': run['id'], 'job_id': 'j', 'attempt_id': attempt['id'], 'expected_revision': run['revision'], 'result_revision': attempt['number']}
+                choices = [{'item_id': key, 'verdict': 'completed'} for key in ('cr1', 'cr2')]
+                for incomplete in (choices[:1], [choices[0], choices[0]], [choices[0], {'item_id': 'foreign', 'verdict': 'completed'}]):
+                    rejected = await self.command('confirm_verdicts', actor='a', **body, verdicts=incomplete)
+                    self.assertEqual(rejected['error']['code'], 'verdict_selection_required')
+                    self.assertEqual((await self.state(run_id=run['id']))['run']['jobs']['j']['decisions'], [])
+                confirmed = await self.command('confirm_verdicts', actor='a', **body, verdicts=choices)
+                self.assertTrue(confirmed['ok'], confirmed)
+                self.assertEqual(confirmed['run']['jobs']['j']['status'], 'partial' if status == 'partial' else 'completed')
+                self.assertEqual(len(confirmed['run']['jobs']['j']['decisions']), 2)
+                repeated = await self.command('confirm_verdicts', actor='a', **{**body, 'expected_revision': confirmed['revision']}, verdicts=choices)
+                self.assertEqual(repeated['error']['code'], 'decision_conflict')
+
+    async def test_item_verdict_confirmation_rolls_back_on_revoked_source(self):
+        run = await self.prepared(block='item_verdict', result={'items': [{'id': 'cr1'}, {'id': 'cr2'}]})
+        attempt = self.current(run); self.bridge.allowed = False
+        result = await self.command('confirm_verdicts', actor='a', run_id=run['id'], job_id='j', attempt_id=attempt['id'], expected_revision=run['revision'], result_revision=attempt['number'], verdicts=[{'item_id': key, 'verdict': 'completed'} for key in ('cr1', 'cr2')])
+        self.assertEqual(result['error']['code'], 'native_access_denied')
+        with self.service._db() as db: self.assertEqual(db.execute('SELECT count(*) FROM work_decisions WHERE attempt_id=?', (attempt['id'],)).fetchone()[0], 0)
+
+    async def test_item_verdict_batch_completes_legacy_partial_decisions_without_overwriting(self):
+        run = await self.prepared(block='item_verdict', result={'items': [{'id': 'cr1'}, {'id': 'cr2'}, {'id': 'optional', 'required': False}]})
+        attempt = self.current(run)
+        first = await self.command('decide', actor='a', run_id=run['id'], job_id='j', expected_revision=run['revision'], result_revision=attempt['number'], item_id='cr1', verdict='completed', note='기존 개별 확정')
+        self.assertTrue(first['ok'], first)
+        original = deepcopy(first['run']['jobs']['j']['decisions'][0])
+        body = {'run_id': run['id'], 'job_id': 'j', 'attempt_id': attempt['id'], 'expected_revision': first['revision'], 'result_revision': attempt['number']}
+        changed = await self.command('confirm_verdicts', actor='a', **body, verdicts=[{'item_id': 'cr1', 'verdict': 'failed'}, {'item_id': 'cr2', 'verdict': 'completed'}, {'item_id': 'optional', 'verdict': 'failed'}])
+        self.assertEqual(changed['error']['code'], 'decision_conflict')
+        self.assertEqual((await self.state(run_id=run['id']))['run']['jobs']['j']['decisions'], [original])
+        finished = await self.command('confirm_verdicts', actor='a', **body, verdicts=[{'item_id': 'cr1', 'verdict': 'completed'}, {'item_id': 'cr2', 'verdict': 'completed'}, {'item_id': 'optional', 'verdict': 'failed'}])
+        self.assertTrue(finished['ok'], finished)
+        self.assertEqual(finished['run']['jobs']['j']['status'], 'completed')
+        self.assertIn(original, finished['run']['jobs']['j']['decisions'])
+        self.assertEqual(len(finished['run']['jobs']['j']['decisions']), 3)
+
+    async def test_completed_legacy_optional_item_remains_final_after_upgrade(self):
+        run = await self.prepared(block='item_verdict', result={'items': [{'id': 'required'}, {'id': 'optional', 'required': False}]})
+        attempt = self.current(run)
+        first = await self.command('decide', actor='a', run_id=run['id'], job_id='j', expected_revision=run['revision'], result_revision=attempt['number'], item_id='required', verdict='completed')
+        self.assertEqual(first['run']['jobs']['j']['status'], 'completed')
+        original = deepcopy(first['run']['jobs']['j']['decisions'])
+        blocked = await self.command('confirm_verdicts', actor='a', run_id=run['id'], job_id='j', attempt_id=attempt['id'], expected_revision=first['revision'], result_revision=attempt['number'], verdicts=[{'item_id': 'optional', 'verdict': 'failed'}])
+        self.assertEqual(blocked['error']['code'], 'decision_conflict')
+        direct = await self.command('decide', actor='a', run_id=run['id'], job_id='j', expected_revision=first['revision'], result_revision=attempt['number'], item_id='optional', verdict='failed')
+        self.assertEqual(direct['error']['code'], 'decision_conflict')
+        current = (await self.state(run_id=run['id']))['run']
+        self.assertEqual(current['jobs']['j']['status'], 'completed'); self.assertEqual(current['jobs']['j']['decisions'], original)
+
+    async def test_custom_judgment_id_preserves_exact_same_status_term_in_immutable_note(self):
+        def labels(definition):
+            definition['nodes']['j']['judgments'] = [
+                {'id': 'approved', 'label': '승인', 'status': 'completed', 'consequence': '검토 완료'},
+                {'id': 'conditional', 'label': '조건부 승인', 'status': 'completed', 'consequence': '조건을 함께 기록'}]
+        run = await self.prepared(block='item_verdict', change=labels, result={'items': [{'id': 'cr1'}]})
+        attempt = self.current(run)
+        body = {'run_id': run['id'], 'job_id': 'j', 'attempt_id': attempt['id'], 'expected_revision': run['revision'], 'result_revision': attempt['number']}
+        rejected = await self.command('confirm_verdicts', actor='a', **body, verdicts=[{'item_id': 'cr1', 'verdict': 'failed', 'judgment_id': 'conditional'}])
+        self.assertEqual(rejected['error']['code'], 'invalid_judgment')
+        confirmed = await self.command('confirm_verdicts', actor='a', **body, verdicts=[{'item_id': 'cr1', 'verdict': 'completed', 'judgment_id': 'conditional', 'note': '점검 조건을 확인함'}])
+        self.assertTrue(confirmed['ok'], confirmed)
+        decision = confirmed['run']['jobs']['j']['decisions'][0]
+        self.assertEqual(decision['note'], '점검 조건을 확인함\n선택한 판정: 조건부 승인 (conditional)')
+        self.assertEqual(decision['verdict'], 'completed')
+        self.assertEqual(confirmed['run']['definition']['nodes']['j']['judgments'][1]['consequence'], '조건을 함께 기록')
+
+    async def test_tool_item_verdict_always_waits_for_explicit_human_confirmation(self):
+        key, definition, revision = await self.create(mode='tool', block='item_verdict')
+        definition['nodes']['j']['human_confirmation'] = False
+        self.assertTrue(workspace.definition_check(definition)[0])
+        run = await self.start(key, revision=revision)
+        # Previously published flags remain readable, but cannot cause a new
+        # tool result to become a human final decision without a command.
+        with self.service._db(write=True) as db:
+            snapshot = json.loads(db.execute('SELECT snapshot FROM work_runs WHERE id=?', (run['id'],)).fetchone()[0])
+            snapshot['definition']['nodes']['j']['human_confirmation'] = False
+            db.execute('UPDATE work_runs SET snapshot=? WHERE id=?', (json.dumps(snapshot), run['id']))
+        actor, _, groups = await self.service._work_actor(self.users['a'])
+        with self.service._db(write=True) as db:
+            attempt = self.service._work_begin_attempt(db, actor, groups, run['id'], 'j', run['revision'])
+            result = self.service._work_finish_attempt(db, attempt['id'], 'succeeded', {'items': [{'id': 'cr1'}], 'completeness': 'complete'})
+            self.assertEqual(result['status'], 'waiting_confirmation')
+            self.assertEqual(db.execute('SELECT count(*) FROM work_decisions WHERE attempt_id=?', (attempt['id'],)).fetchone()[0], 0)
+
 
 if __name__ == '__main__':
     unittest.main()

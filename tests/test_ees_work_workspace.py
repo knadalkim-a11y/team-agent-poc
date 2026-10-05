@@ -795,6 +795,70 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(denied['error']['code'], 'execution_unresolved')
 
 
+    async def test_on_demand_factory_start_is_atomic_and_other_scopes_remain_available(self):
+        for factory in ('f1', 'f2'):
+            await self.command('save_factory', factory_id=factory, system_id='EMS', name=factory)
+        key, definition, revision = await self.create()
+        definition['execution_scope'] = 'factory'
+        await self.command('save_draft', workflow_id=key, expected_revision=revision, definition=definition)
+        await self.command('validate_workflow', workflow_id=key, expected_revision=revision+1)
+        published = await self.command('publish_workflow', workflow_id=key, expected_revision=revision+1)
+        required = await self.command('start_run', actor='a', workflow_id=key, expected_revision=published['revision'])
+        self.assertEqual(required['error']['code'], 'factory_required')
+        outcomes = await asyncio.gather(*(self.command('start_run', actor=actor, workflow_id=key, factory_id='f1', expected_revision=published['revision']) for actor in ('a', 'b')))
+        self.assertEqual(sum(item['ok'] for item in outcomes), 1)
+        self.assertEqual(next(item for item in outcomes if not item['ok'])['error']['code'], 'factory_run_active')
+        first = next(item['run'] for item in outcomes if item['ok'])
+        second = await self.start(key, revision=published['revision'], factory_id='f2')
+        # Each authorized active scope is discoverable for the selected workflow,
+        # while normal displayed runs remain filtered by the current factory.
+        visible = await self.state(workflow_id=key, factory_id='f1')
+        self.assertEqual({item['factory_id'] for item in visible['workflow_active_runs']}, {'f1', 'f2'})
+        self.assertEqual({item['factory_id'] for item in visible['runs']}, {'f1'})
+        cancelled = await self.command('cancel_run', actor=first['owner'], run_id=first['id'], expected_revision=first['revision'], reason='합성 검사 종료')
+        self.assertTrue(cancelled['ok'])
+        replacement = await self.start(key, revision=published['revision'], factory_id='f1')
+        self.assertNotEqual(replacement['id'], first['id']); self.assertNotEqual(second['id'], replacement['id'])
+
+    async def test_system_scope_is_visible_across_factory_selection_without_broadening_acl(self):
+        await self.command('save_factory', factory_id='f1', system_id='EMS', name='f1')
+        key, definition, revision = await self.create()
+        definition['execution_scope'] = 'system'
+        await self.command('save_draft', workflow_id=key, expected_revision=revision, definition=definition)
+        await self.command('validate_workflow', workflow_id=key, expected_revision=revision+1)
+        published = await self.command('publish_workflow', workflow_id=key, expected_revision=revision+1)
+        run = await self.start(key, revision=published['revision'], factory_id='f1', sharing={'group_ids': ['g']})
+        self.assertEqual(run['factory_id'], '')
+        visible = await self.state(workflow_id=key, run_id=run['id'], factory_id='f1')
+        self.assertEqual(visible['run']['id'], run['id']); self.assertIn(run['id'], [item['id'] for item in visible['runs']])
+        await self.command('save_access', principal_kind='user', principal_id='c', system_id='EMS', factory_id='f1', roles=['participant'])
+        denied = await self.command('start_run', actor='c', workflow_id=key, factory_id='f1', expected_revision=published['revision'])
+        self.assertFalse(denied['ok'])
+        self.assertNotIn(run['id'], [item['id'] for item in (await self.state('c', workflow_id=key, factory_id='f1'))['runs']])
+
+    async def test_judgment_rules_are_validated_and_missing_operational_policies_are_advisory(self):
+        key, definition, revision = await self.create(mode='ai', block='item_verdict', dependent=True)
+        node = definition['nodes']['j']
+        node['judgments'] = [{'id': 'approve', 'label': '승인', 'status': 'completed', 'consequence': '필수 확인 후 완료'}, {'id': 'unknown', 'label': '미확인', 'status': 'unknown'}]
+        node['suggestion_rules'] = {'provisional': True, 'description': '사람이 최종 확정', 'rules': [{'id': 'r1', 'condition': '근거가 부족함', 'outcome': 'none', 'judgment_id': ''}], 'human_only_judgment_ids': ['approve']}
+        node['confirmation_notes'] = '승인 근거를 직접 확인합니다.'
+        definition['unapproved_policy'] = 'hold'
+        definition['nodes']['next'].update(mode='ai', result_block='ai_review', completion={'kind': 'delivery'})
+        saved = await self.command('save_draft', workflow_id=key, expected_revision=revision, definition=definition)
+        self.assertTrue(saved['ok'], saved)
+        checked = await self.command('validate_workflow', workflow_id=key, expected_revision=saved['revision'])
+        self.assertEqual(checked['validation']['errors'], [])
+        for term in ('D-5', '송부 방식', '임시값'):
+            self.assertTrue(any(term in text for text in checked['validation']['warnings']))
+        self.assertTrue(checked['validation']['checks'])
+        published = await self.command('publish_workflow', workflow_id=key, expected_revision=saved['revision'])
+        self.assertTrue(published['ok'], published)
+        run = await self.start(key, revision=published['revision'])
+        self.assertEqual(run['definition']['nodes']['j']['suggestion_rules'], node['suggestion_rules'])
+        invalid = deepcopy(definition); invalid['nodes']['j']['suggestion_rules']['human_only_judgment_ids'] = ['missing']
+        self.assertTrue(workspace.definition_check(invalid)[0])
+
+
 class DefinitionTests(unittest.TestCase):
     def test_all_eight_types_valid_and_invalid(self):
         values = {'text': '', 'number': 0, 'datetime': '2026-10-02T12:00:00+09:00', 'single': 'a', 'multi': ['a'], 'list': ['x'], 'person': {'kind': 'group', 'id': 'native-id'}, 'boolean': False}
@@ -808,6 +872,7 @@ class DefinitionTests(unittest.TestCase):
         self.assertIsNone(workspace._condition({'field': 'missing', 'op': 'eq', 'value': 1}, {}))
         self.assertFalse(workspace._condition({'all': [{'field': 'a', 'op': 'eq', 'value': 1}, {'field': 'b', 'op': 'eq', 'value': 2}]}, {'a': 0}))
         self.assertTrue(workspace._condition({'any': [{'field': 'a', 'op': 'eq', 'value': 1}, {'field': 'b', 'op': 'eq', 'value': 2}]}, {'a': 1}))
+
 
 
 if __name__ == '__main__': unittest.main()

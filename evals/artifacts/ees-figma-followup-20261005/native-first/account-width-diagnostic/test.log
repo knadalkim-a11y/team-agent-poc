@@ -1,0 +1,15 @@
+test_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 208.8253910005733, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: test_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tests/test_ees_work_authoring_account_switch.py", line 110, in test_same_profile_native_logout_login_discards_late_a_read_and_ai
+    self.assertEqual(self.browser.evaluate("document.querySelector('#ees-work-panel').getBoundingClientRect().width"),400)
+AssertionError: 480 != 400
+
+----------------------------------------------------------------------
+Ran 1 test in 10.646s
+
+FAILED (failures=1)

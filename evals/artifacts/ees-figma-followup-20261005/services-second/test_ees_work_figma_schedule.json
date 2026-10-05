@@ -1,0 +1,95 @@
+{
+  "module": "test_ees_work_figma_schedule.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 1.783,
+  "tests_run": 19,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 19,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_close_scanner_advances_past_100_revoked_native_identities",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_completed_predecessor_opens_next_cycle_early_only_after_human_confirmation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_current_source_revocation_between_retry_attempts_blocks_dispatch",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_inflight_timeout_is_unknown_and_cannot_automatically_resend",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_input_change_between_attempts_stops_automatic_retry",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_interleaved_human_requested_new_attempt_is_not_retried_or_overwritten",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_lifecycle_requires_exact_published_rule_and_explicit_delegation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_monotonic_deadline_ends_retry_chain_without_wall_clock_extension",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_negative_effect_evidence_is_terminal_failure_not_unknown_or_later_success",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_open_cycle_queue_heads_do_not_starve_independent_due_reservation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_preview_is_unsaved_authorized_and_never_reserves_or_shifts_holidays",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_queued_slot_rechecks_current_native_identity_and_delegation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_retry_is_explicit_bounded_and_lost_response_receipt_never_restarts_budget",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_retry_schema_limits_and_read_only_function_allowlist",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_retry_success_retains_failed_evidence_and_waits_for_human",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_saved_cycle_keeps_version_rule_and_dates_after_new_publication",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_schedule_opens_while_previous_cycle_remains_open_and_restart_deduplicates",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_unknown_effect_keeps_unresolved_request_and_never_resends",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_schedule.ScheduleContracts.test_unknown_partial_auth_rate_limit_and_untrusted_flags_never_retry",
+      "status": "passed"
+    }
+  ]
+}

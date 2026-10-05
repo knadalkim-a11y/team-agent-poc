@@ -1,0 +1,9 @@
+test_authored_real_http_recheck_preserves_unknown_verdict_and_report_draft (test_ees_delivery_artifacts.DeliveryArtifactsTests.test_authored_real_http_recheck_preserves_unknown_verdict_and_report_draft) ... Executing <Task pending name='Task-2' coro=<DeliveryArtifactsTests.test_authored_real_http_recheck_preserves_unknown_verdict_and_report_draft() running at <repo>/tests/test_ees_delivery_artifacts.py:132> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at <python-runtime>/lib/python3.11/asyncio/futures.py:387, Task.task_wakeup()] created at <python-runtime>/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at <python-runtime>/lib/python3.11/asyncio/base_events.py:181] created at <python-runtime>/lib/python3.11/asyncio/runners.py:100> took 0.111 seconds
+ok
+test_confirmed_list_reorder_exclusion_and_source_recheck_preserve_exact_binding (test_ees_delivery_artifacts.DeliveryArtifactsTests.test_confirmed_list_reorder_exclusion_and_source_recheck_preserve_exact_binding) ... ok
+test_partial_list_cannot_authorize_attachment_batch_or_hide_missing_crs (test_ees_delivery_artifacts.DeliveryArtifactsTests.test_partial_list_cannot_authorize_attachment_batch_or_hide_missing_crs) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 2.286s
+
+OK

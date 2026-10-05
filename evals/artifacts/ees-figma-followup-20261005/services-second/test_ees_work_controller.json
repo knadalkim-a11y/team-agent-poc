@@ -1,0 +1,23 @@
+{
+  "module": "test_ees_work_controller.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.35,
+  "tests_run": 1,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 1,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_controller.IntegratedControllerTests.test_async_identity_receipt_and_evidence_contracts",
+      "status": "passed"
+    }
+  ]
+}

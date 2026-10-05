@@ -1,0 +1,48 @@
+{
+  "restored": {
+    "loaded": true,
+    "busy": false,
+    "loading": false,
+    "error": false,
+    "reference": {
+      "kind": "workspace",
+      "reference_kind": "historical",
+      "workflow_id": "56fd21da-f709-4857-88f2-8d56e37ea369",
+      "run_id": "9de7b5f4-fd71-4b82-982d-453ee1314d32",
+      "job_id": "qa-list",
+      "attempt_id": "7a19925c-1766-4f86-9b0e-d47efa08ff7e",
+      "version": 1,
+      "result_revision": 2,
+      "created_at": "2026-10-05T08:23:46.216+00:00",
+      "revision": 14,
+      "system_id": "EMS",
+      "factory_id": "",
+      "context_id": "[2,true,\"/c/7914d165-ca56-4caa-abcf-bdf2957e6aa2\",\"\",\"EMS\",\"\",\"56fd21da-f709-4857-88f2-8d56e37ea369\",\"9de7b5f4-fd71-4b82-982d-453ee1314d32\",\"\"]"
+    },
+    "selector_visible": true
+  },
+  "before": {
+    "top": 0,
+    "height": 752,
+    "total": 1534,
+    "width": 479,
+    "total_width": 479,
+    "x": 627,
+    "y": 424,
+    "open": true
+  },
+  "after": {
+    "top": 180,
+    "height": 752,
+    "total": 1534,
+    "width": 479,
+    "total_width": 479,
+    "x": 627,
+    "y": 424,
+    "open": true
+  },
+  "physical_input": "CDP mouseWheel",
+  "readonly_controls_absent": true,
+  "run_revision_unchanged": true,
+  "note": "Document/font readiness alone is not Work restoration evidence."
+}

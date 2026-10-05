@@ -123,6 +123,8 @@ class ScheduleContracts(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(self.slots()), 1)
 
     async def test_completed_predecessor_opens_next_cycle_early_only_after_human_confirmation(self):
+        # Historical test ID retained. C12 supersedes early opening: completing
+        # a predecessor closes that cycle but never advances the calendar.
         wid, definition = await self.published()
         await self.reserve(wid, definition)
         await self.runtime.process_once(); first = await self.state(self.slots()[0]['run_id'])
@@ -131,9 +133,12 @@ class ScheduleContracts(unittest.IsolatedAsyncioTestCase):
         await self.core('human_confirm', first['revision'], run_id=first['id'], job_id='j1')
         await self.runtime.process_once()
         self.assertEqual((await self.state(first['id']))['status'], 'completed')
+        self.assertEqual(len(self.slots()), 1)
+        self.now += 86400
+        await self.runtime.process_once()
         self.assertEqual(len(self.slots()), 2)
         second = await self.state(self.slots()[-1]['run_id'])
-        self.assertGreater(self.slots()[-1]['scheduled_at'], self.now)
+        self.assertEqual(self.slots()[-1]['scheduled_at'], self.now)
         self.assertEqual(second['cycle']['date'], '2026-10-03'); self.assertEqual(second['status'], 'open')
         self.assertEqual(second['attempts'], []); self.assertEqual(self.bridge.calls, [])
 
@@ -173,8 +178,32 @@ class ScheduleContracts(unittest.IsolatedAsyncioTestCase):
         self.clone_queue_head(schedule, slot, 100)
         other, other_definition = await self.published()
         independent = await self.reserve(other, other_definition, lifecycle_enabled=False)
-        self.assertEqual(self.runtime._materialize(), 1)
+        # Prior open cycles are eligible under C12. The bounded queue advances
+        # their next_at, letting the independent tail be reached next tick.
+        self.assertGreater(self.runtime._materialize(), 0)
+        self.assertGreater(self.runtime._materialize(), 0)
         self.assertEqual(sum(item['schedule_id'] == independent['id'] for item in self.slots()), 1)
+
+    async def test_schedule_opens_while_previous_cycle_remains_open_and_restart_deduplicates(self):
+        for opening in ('on_schedule', 'after_previous_closed'):
+            with self.subTest(opening=opening):
+                wid, definition = await self.published(rule=self.rule(opening=opening))
+                schedule = await self.reserve(wid, definition)
+                await self.runtime.process_once()
+                first_slot = next(item for item in self.slots() if item['schedule_id'] == schedule['id'])
+                first = await self.state(first_slot['run_id'])
+                original_cycle = deepcopy(first['cycle'])
+                self.now += 86400
+                await self.runtime.process_once()
+                own = [item for item in self.slots() if item['schedule_id'] == schedule['id']]
+                self.assertEqual(len(own), 2)
+                self.assertNotEqual(own[0]['run_id'], own[1]['run_id'])
+                self.assertEqual((await self.state(first['id']))['status'], 'open')
+                self.assertEqual((await self.state(first['id']))['cycle'], original_cycle)
+                restarted = ops.OperationsRuntime(self.service, bridge=self.bridge, clock=lambda: self.now)
+                await restarted.process_once()
+                self.assertEqual(len([item for item in self.slots() if item['schedule_id'] == schedule['id']]), 2)
+                await self.runtime.command(self.user, self.body('schedule_disable', schedule['revision'], schedule_id=schedule['id']))
 
     async def test_close_scanner_advances_past_100_revoked_native_identities(self):
         wid, definition = await self.published()

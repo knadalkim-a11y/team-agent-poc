@@ -99,9 +99,10 @@ class IntegratedNativeCase(unittest.TestCase):
 
     def open_sidebar(self):
         opened = "(()=>{const e=document.querySelector('#sidebar'),r=e?.getBoundingClientRect();return e?.getAttribute('aria-hidden')==='false'&&!e.inert&&r.width>200&&r.x>=0&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+50));})()"
-        self.wait(opened + " || !!document.querySelector('button[aria-label=\"사이드바 열기\"]')")
+        self.wait(opened + " || !!document.querySelector('[data-ees-sidebar-toggle],button[aria-label=\"사이드바 열기\"]')")
         if not self.browser.evaluate(opened):
-            self.click('button[aria-label="사이드바 열기"]')
+            selector = '[data-ees-sidebar-toggle]' if self.browser.evaluate("!!document.querySelector('[data-ees-sidebar-toggle]')") else 'button[aria-label="사이드바 열기"]'
+            self.click(selector)
         self.wait(opened)
 
     def tearDown(self):
@@ -157,6 +158,11 @@ class IntegratedNativeCase(unittest.TestCase):
         control = '[data-action="workflow"][data-workflow-id="' + key + '"]'
         self.wait('document.querySelector(' + json.dumps(control) + ')')
         self.click(control)
+        run_control = '#ees-work-panel .ew-active-runs [data-action="open_run"][data-run-id="' + run['id'] + '"]'
+        self.wait('document.querySelector(' + json.dumps(run_control) + ') || (window.__eesNativeWorkV1.captureReference()?.run_id === ' + json.dumps(run['id']) + ' && document.querySelector("#ees-work-panel [data-action=job]"))')
+        if self.browser.evaluate('!!document.querySelector(' + json.dumps(run_control) + ')'):
+            self.click(run_control)
+            self.wait('window.__eesNativeWorkV1.captureReference()?.run_id === ' + json.dumps(run['id']))
         if job:
             selector = '#ees-work-panel [data-action="job"][data-job-id="' + job + '"]'
             self.wait('document.querySelector(' + json.dumps(selector) + ')')

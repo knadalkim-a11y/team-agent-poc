@@ -636,5 +636,127 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(datetime.fromtimestamp(result,timezone.utc).isoformat(),'2026-02-28T10:00:00+00:00')
         with self.assertRaises(workflow.WorkflowError):ops.next_slot({'frequency':'daily','timezone':'invented','anchor':'2026-01-31T10:00:00'},after)
 
+    async def test_request_reason_is_separate_bound_metadata_not_an_ees_argument(self):
+        tool = await self.make_contract()
+        wid = await self.make_workflow('human', contract=tool)
+        run = await self.start(wid)
+        request = (await self.runtime.command(self.user, self.body('request_prepare', run['revision'], run_id=run['run_id'], job_id='j1', tool_contract_id=tool['id'], inputs={'target': 'synthetic-target'}, request_reason='정기 점검 후 요청')))['request']
+        self.assertEqual(request['request_reason'], '정기 점검 후 요청')
+        self.assertEqual(request['execution_actor'], 'EES')
+        intent = await self.intent(request)
+        self.assertEqual(intent['request']['inputs'], {'target': 'synthetic-target'})
+        self.assertNotIn('inputs', self.runtime._public_request({'inputs': {'target': 'synthetic-target'}}))
+        # An altered persisted reason invalidates the already confirmed token.
+        with self.service._db(write=True) as db:
+            stored = json.loads(db.execute('SELECT data FROM work_external_requests WHERE id=?', (request['id'],)).fetchone()[0])
+            original = deepcopy(stored)
+            stored['request_reason'] = '다른 사유'
+            self.runtime._save_request(db, stored)
+        with self.assertRaises(workflow.WorkflowError) as error:
+            await self.runtime.command(self.user, self.body('request_dispatch', request['revision'], external_request_id=request['id'], intent_token=intent['intent_token']))
+        self.assertEqual(error.exception.code, 'confirmation_expired')
+        with self.service._db(write=True) as db: self.runtime._save_request(db, original)
+        connector = Connector(); self.runtime.connector = connector
+        async def capture(actor, current_tool, inputs, correlation):
+            self.assertEqual(inputs, {'target': 'synthetic-target'})
+            connector.calls.append(correlation)
+            return {'state': 'accepted', 'job_number': 'synthetic-job-1'}
+        connector.request = capture
+        sent = await self.runtime.command(self.user, self.body('request_dispatch', request['revision'], external_request_id=request['id'], intent_token=intent['intent_token']))
+        self.assertTrue(sent['ok']); self.assertEqual(len(connector.calls), 1)
+
+    async def test_direct_exception_requires_owned_contract_and_is_never_dispatched_to_ees(self):
+        tool = (await self.runtime.command(self.user, self.body('tool_save', tool={'system_id': 'EMS', 'kind': 'direct', 'name': '담당자 전용 허용 명령', 'reference': deepcopy(REQUEST_REF), 'guide_url': 'https://guide.invalid/direct', 'responsible_user_id': 'bob', 'status_function': 'service_status', 'output_schema': {'type': 'object'}})))['tool']
+        with self.assertRaises(workflow.WorkflowError) as error:
+            await self.runtime.command(self.user, self.body('tool_submit', tool['revision'], tool_contract_id=tool['id']))
+        self.assertEqual(error.exception.code, 'direct_contract_incomplete')
+        tool['exception_contract'] = {'api_unavailable_reason': '담당자 확인: API 제공 불가', 'owner_user_id': 'bob', 'allowed_commands': ['restart-service-reviewed-v1'], 'account_reference': 'native-dedicated-operator', 'least_privilege': True}
+        tool = (await self.runtime.command(self.user, self.body('tool_save', tool['revision'], tool=tool)))['tool']
+        tool = (await self.runtime.command(self.user, self.body('tool_submit', tool['revision'], tool_contract_id=tool['id'])))['tool']
+        with self.assertRaises(workflow.WorkflowError) as error:
+            await self.runtime.command(self.users['carol'], self.body('tool_review', tool['revision'], tool_contract_id=tool['id'], decision='approve'))
+        self.assertEqual(error.exception.code, 'responsible_reviewer_required')
+        tool = (await self.runtime.command(self.users['bob'], self.body('tool_review', tool['revision'], tool_contract_id=tool['id'], decision='approve')))['tool']
+        wid = await self.make_workflow('human', contract=tool)
+        with self.service._db() as db:
+            definition = json.loads(db.execute('SELECT definition FROM work_versions WHERE workflow_id=?', (wid,)).fetchone()[0])
+            self.assertTrue(self.runtime.publication_warnings(db, definition))
+            del definition['nodes']['j1']['effect_criterion']
+            self.assertIn('j1: effect_criterion_required', self.runtime.validate_publication(db, definition, self.user, {'team'}))
+        run = await self.start(wid)
+        request = (await self.runtime.command(self.user, self.body('request_prepare', run['revision'], run_id=run['run_id'], job_id='j1', tool_contract_id=tool['id'], request_reason='예외 승인 기록')))['request']
+        self.assertEqual(request['execution_actor'], 'EES Work')
+        self.assertFalse(request['connector_configured'])
+        intent = await self.intent(request)
+        self.runtime.connector = Connector()
+        result = await self.runtime.command(self.user, self.body('request_dispatch', request['revision'], external_request_id=request['id'], intent_token=intent['intent_token']))
+        self.assertFalse(result['ok']); self.assertEqual(result['error']['code'], 'direct_executor_unconfigured')
+        self.assertEqual(self.runtime.connector.calls, []); self.assertEqual(self.bridge.calls, [])
+        observed = []
+        async def forbidden_observation(*args):
+            observed.append(args)
+            return {'state': 'reported_complete', 'satisfied': True, 'evidence': ['synthetic']}
+        self.runtime.connector.status = forbidden_observation
+        self.runtime.connector.effect = forbidden_observation
+        with self.assertRaises(workflow.WorkflowError) as error:
+            await self.runtime.command(self.user, self.body('request_reconcile', result['request']['revision'], external_request_id=request['id']))
+        self.assertEqual(error.exception.code, 'direct_executor_unconfigured'); self.assertEqual(observed, [])
+        with self.service._db() as db:
+            recorded = json.loads(db.execute('SELECT data FROM work_external_requests WHERE id=?', (request['id'],)).fetchone()[0])
+            self.assertEqual(recorded['state'], 'blocked'); self.assertFalse(recorded['effect_verified'])
+        # Reviewed exception contracts must never become ordinary read actions,
+        # including an old published definition that predates this guard.
+        ordinary = await self.make_workflow('tool')
+        normal_run = await self.start(ordinary)
+        with self.service._db() as db:
+            definition = json.loads(db.execute('SELECT draft FROM work_definitions WHERE id=?', (ordinary,)).fetchone()[0])
+        definition['nodes']['j1'].update(tool_contract_id=tool['id'], tool_contract_revision=tool['revision'], result_block='checklist')
+        await self.core('save_draft', 3, workflow_id=ordinary, definition=definition)
+        checked = await self.core('validate_workflow', 4, workflow_id=ordinary)
+        self.assertIn('j1: request_contract_required', checked['validation']['errors'])
+        with self.service._db(write=True) as db:
+            snapshot = json.loads(db.execute('SELECT snapshot FROM work_runs WHERE id=?', (normal_run['run_id'],)).fetchone()[0])
+            snapshot['definition'] = definition
+            db.execute('UPDATE work_runs SET snapshot=? WHERE id=?', (ops.dump(snapshot), normal_run['run_id']))
+        with self.assertRaises(workflow.WorkflowError) as error:
+            await self.runtime.command(self.user, self.body('execute_job', normal_run['revision'], run_id=normal_run['run_id'], job_id='j1'))
+        self.assertEqual(error.exception.code, 'request_confirmation_required'); self.assertEqual(self.bridge.calls, [])
+
+    def test_request_schema_rejects_typed_value_substitutions(self):
+        schema = {'type': 'object', 'properties': {'wait': {'type': 'integer', 'minimum': 0}, 'enabled': {'type': 'boolean'}, 'mode': {'type': 'string', 'enum': ['safe']}, 'ids': {'type': 'array', 'items': {'type': 'integer'}}}, 'required': ['wait', 'enabled', 'mode', 'ids']}
+        values = {'wait': 30, 'enabled': False, 'mode': 'safe', 'ids': [1, 2]}
+        ops.schema_check(schema, values)
+        for change in ({'wait': '30'}, {'wait': True}, {'enabled': 'false'}, {'mode': 'unsafe'}, {'ids': ['1']}, {'reason': 'unexpected'}):
+            with self.subTest(change=change), self.assertRaises(workflow.WorkflowError): ops.schema_check(schema, {**values, **change})
+
+    async def test_read_contract_change_during_native_check_prevents_dispatch(self):
+        original_inspect = self.bridge.inspect
+        async def approved_inspect(*args): return {**await original_inspect(*args), 'state': 'allowed'}
+        self.bridge.inspect = approved_inspect
+        tool = (await self.runtime.command(self.user, self.body('tool_save', tool={'system_id': 'EMS', 'kind': 'read', 'name': '검토된 조회', 'reference': deepcopy(REF), 'guide_url': 'https://guide.invalid/read'})))['tool']
+        tool = (await self.runtime.command(self.user, self.body('tool_submit', tool['revision'], tool_contract_id=tool['id'])))['tool']
+        tool = (await self.runtime.command(self.users['bob'], self.body('tool_review', tool['revision'], tool_contract_id=tool['id'], decision='approve')))['tool']
+        wid = await self.make_workflow()
+        with self.service._db() as db: definition = json.loads(db.execute('SELECT draft FROM work_definitions WHERE id=?', (wid,)).fetchone()[0])
+        definition['nodes']['j1'].update(tool_contract_id=tool['id'], tool_contract_revision=tool['revision'])
+        await self.core('save_draft', 3, workflow_id=wid, definition=definition)
+        await self.core('validate_workflow', 4, workflow_id=wid)
+        await self.core('publish_workflow', 4, workflow_id=wid)
+        run = await self.core('start_run', 5, workflow_id=wid, inputs={'target': 'synthetic-target'})
+        original_check, changed = self.bridge.check, False
+        async def concurrent_edit(*args):
+            nonlocal changed
+            checked = await original_check(*args)
+            if not changed:
+                changed = True
+                await self.runtime.command(self.user, self.body('tool_save', tool['revision'], tool={**tool, 'name': '직접 실행 전환 초안', 'kind': 'direct', 'reference': deepcopy(REQUEST_REF)}))
+            return checked
+        self.bridge.check = concurrent_edit
+        with self.assertRaises(workflow.WorkflowError) as error:
+            await self.runtime.command(self.user, self.body('execute_job', run['revision'], run_id=run['run_id'], job_id='j1'))
+        self.assertEqual(error.exception.code, 'request_confirmation_required')
+        self.assertEqual(self.bridge.calls, [])
+        with self.service._db() as db: self.assertEqual(db.execute('SELECT count(*) FROM work_attempts WHERE run_id=?', (run['run_id'],)).fetchone()[0], 0)
+
 
 if __name__=='__main__':unittest.main()

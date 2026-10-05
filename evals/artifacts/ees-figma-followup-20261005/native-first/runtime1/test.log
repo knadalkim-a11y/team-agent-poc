@@ -1,0 +1,135 @@
+test_ai_review_autosaves_without_sending_and_confirmation_freezes_text (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_ai_review_autosaves_without_sending_and_confirmation_freezes_text) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 182.5245720001476, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_assigned_human_task_exposes_readonly_inputs_and_no_mutation_button (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_assigned_human_task_exposes_readonly_inputs_and_no_mutation_button) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 237.00920800001768, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_checklist_criterion_and_tool_evidence_are_distinct_in_native_panel (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_checklist_criterion_and_tool_evidence_are_distinct_in_native_panel) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 195.97410900041723, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_closed_record_uses_old_shared_values_and_asking_only_changes_reference (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_closed_record_uses_old_shared_values_and_asking_only_changes_reference) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 180.47985099929065, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_delivery_purpose_review_is_recorded_but_completion_remains_blocked (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_delivery_purpose_review_is_recorded_but_completion_remains_blocked) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 164.10152400021616, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 165.59046099973784, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_list_preview_add_exclude_confirm_and_history_preserve_original (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_list_preview_add_exclude_confirm_and_history_preserve_original) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 181.31420800000342, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_pending_item_choices_survive_reload_before_atomic_confirmation (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_pending_item_choices_survive_reload_before_atomic_confirmation) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 202.5000009998621, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+======================================================================
+FAIL: test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tests/test_ees_work_figma_runtime_native.py", line 114, in test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch
+    self.wait("document.querySelector('#ees-work-dialog')?.innerText.includes('합성 확인 사유')")
+  File "<repo>/tests/ees_work_integrated_fixture.py", line 189, in wait
+    self.fail('Timed out: ' + expression + '\n' + self.text('body') + '\nUnknown routes:' + repr(self.server.unknown))
+AssertionError: Timed out: document.querySelector('#ees-work-dialog')?.innerText.includes('합성 확인 사유')
+Skip to main content
+EES Work
+업무
+워크스페이스
+
+작업 위치
+
+공장
+전체 공장
+시스템
+EMS
+내 업무
+1
+워크플로우 찾기
+실행 기록
+대화 기록
+
+업무
+
+운영
+합성 절차
+셋업
+장애대응
+Fixture Administrator
+합성 작업 0
+참고
+합성 작업 0
+업무 열기
+새 대화
+기존 대화
+채팅 대화
+
+기존 질문
+
+Fixture AI
+
+기존 대화 기록
+
+
+
+
+음성 모드 사용
+업무
+합성 절차
+닫기
+변경한 입력을 먼저 저장해 주세요. 저장하지 않은 값으로 실행하거나 판정하지 않았습니다.
+진행 건
+합성 절차
+2026. 10. 05. 04:12 개시 · 0/1단계
+다른 진행 건
+← 회차 개요
+합성 작업 0
+대기
+
+합성 자료로 저장·판정 경계를 검증합니다.
+
+현재 상태
+실행 기록
+업무 설정
+이번 진행 건 입력 이번 실행에 사용
+AI 입력 초안
+종료 방식 *
+선택 안 함
+graceful
+force
+대상 서버 *
+종료 대기 *
+입력 저장
+요청 사유
+EES 요청
+요청 보냄
+EES Work
+대기
+접수
+EES
+대기
+실행 중
+EES
+대기
+완료 보고
+EES
+대기
+효과 확인
+EES Work
+대기
+
+EES 완료 보고와 효과 확인이 모두 끝나야 업무를 완료합니다.
+
+EES에서 보기
+요청 내용 확인…
+Unknown routes:[]
+
+======================================================================
+FAIL: test_list_preview_add_exclude_confirm_and_history_preserve_original (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_list_preview_add_exclude_confirm_and_history_preserve_original)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tests/test_ees_work_figma_runtime_native.py", line 167, in test_list_preview_add_exclude_confirm_and_history_preserve_original
+    empty_run = self.execute(self.start(empty_key)); self.open_run(empty_key, empty_run)
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tests/ees_work_integrated_fixture.py", line 168, in open_run
+    self.click(selector)
+  File "<repo>/tests/ees_work_integrated_fixture.py", line 208, in click
+    self.assertIsNotNone(point, 'Control not visibly ready for a physical click:' + selector)
+AssertionError: unexpectedly None : Control not visibly ready for a physical click:#ees-work-panel [data-action="job"][data-job-id="job-0"]
+
+----------------------------------------------------------------------
+Ran 8 tests in 33.215s
+
+FAILED (failures=2)

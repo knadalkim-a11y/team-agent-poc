@@ -1,0 +1,38 @@
+✔ input save keeps mutation controls busy until the acknowledged state finishes refreshing (7.737171ms)
+✔ review save cannot continue confirmation after its refresh loses the selected work context (1.701032ms)
+✔ an explicit early navigation survives initial saved-selection restoration and late startup reads (1.766149ms)
+✔ early selection patches are cleared on account reset and do not replace another account restoration (2.257379ms)
+✔ history expansion restoration uses exact attempt keys and the current panel position (2.281305ms)
+✔ real view list reader returns an isolated snapshot without an undefined helper (1.193117ms)
+✔ assignment labels use only the permitted Native people list and preserve principal kind (1.258785ms)
+✔ new delivery effect and retry failures are translated without masking human explanations (5.014861ms)
+✔ list inclusion is a local preview and candidates are never selected by default (1.962866ms)
+✔ saved human additions retain their source label and never increase the immutable lookup count (3.051735ms)
+✔ failed lookup hides previous payload while partial keeps explicit incompleteness (1.220047ms)
+✔ zero included items can be saved while completion policy remains explicitly unresolved (0.645683ms)
+✔ a completed empty lookup permits explicit additions without pretending it was never executed (1.694201ms)
+✔ read-only report cannot edit or save and unavailable dispatch is never clickable (1.698027ms)
+✔ revoked evidence never redisplays a locally preserved list or review draft (1.246837ms)
+✔ request reviewer and requester controls use distinct current capabilities (1.63385ms)
+✔ failed or stale report never permits editing a previous result as current evidence (1.079596ms)
+✔ historical values compare only the stored shared input without replacing it (1.279787ms)
+✔ records are scoped and put active runs first without inventing a date range (13.589363ms)
+✔ empty work shows only the earliest real scheduled execution (1.082851ms)
+✔ asking about a historical record only changes private reference and never dispatches (1.646099ms)
+✔ question from a historical row preserves its exact attempt instead of the newest row (2.536139ms)
+✔ draft save sends immutable attempt and both revisions without executing or deciding (1.7462ms)
+✔ late draft save cannot acknowledge or repaint after another work target is selected (2.012231ms)
+✔ request fields follow native schema types and bindings, with reason outside EES values (2.187364ms)
+✔ ad-hoc start lists active factories and disables only those with active work (0.988589ms)
+✔ item verdict options stay pending and AI suggestions cannot enable final confirmation (1.960853ms)
+✔ A7 has automatic save status and no save button, and basis cards expose actual time (2.007022ms)
+✔ navigation flushes edits made while an older review autosave is still in flight (1.731787ms)
+✔ failed automatic review save keeps the current work and preserves its draft (1.207117ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 204.555384

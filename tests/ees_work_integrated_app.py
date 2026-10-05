@@ -187,6 +187,17 @@ if(performance.now()>end)return resolve(null);requestAnimationFrame(check)}check
             self.browser.call('Input.dispatchKeyEvent',{'type':kind,'key':'a','code':'KeyA','windowsVirtualKeyCode':65,'modifiers':2})
         self.browser.call('Input.insertText',{'text':value})
 
+    def select(self, selector, value):
+        """Select an enabled Native option with keyboard input."""
+        index=self.browser.evaluate('[...document.querySelector('+json.dumps(selector)+').options].filter(o=>!o.disabled).findIndex(o=>o.value==='+json.dumps(value)+')')
+        assert index>=0,('Requested choice must be enabled',selector,value)
+        self.click(selector)
+        for kind in ('keyDown','keyUp'):self.browser.call('Input.dispatchKeyEvent',{'type':kind,'key':'Home','windowsVirtualKeyCode':36})
+        for _ in range(index):
+            for kind in ('keyDown','keyUp'):self.browser.call('Input.dispatchKeyEvent',{'type':kind,'key':'ArrowDown','windowsVirtualKeyCode':40})
+        for kind in ('keyDown','keyUp'):self.browser.call('Input.dispatchKeyEvent',{'type':kind,'key':'Enter','windowsVirtualKeyCode':13})
+        self.wait('document.querySelector('+json.dumps(selector)+')?.value==='+json.dumps(value))
+
     def navigate(self, path):
         before=self.browser.evaluate('performance.timeOrigin')
         target=self.base+path
@@ -309,6 +320,11 @@ def integrated_flow(gate):
     identifier=workflow['id']
     g.click('[data-author-action="validate"]')
     g.wait('!!document.querySelector(\'[data-author-action="publish"]\')')
+    g.wait('!!document.querySelector(".ew-author-validation")')
+    checked=g.api('/api/ees-work/workspace?workflow_id='+identifier)['workflow']
+    assert checked['validation']['revision']==checked['revision'] and not checked['validation']['errors']
+    assert g.browser.evaluate('!document.querySelector(\'[data-author-action="publish"]\').disabled')
+    g.capture('figma-b23-publish-review')
     g.click('[data-author-action="publish"]')
     g.wait("document.activeElement?.matches('#ees-work-dialog [data-dialog-cancel]')")
     assert g.browser.evaluate("(()=>{const r=document.querySelector('#ees-work-dialog').getBoundingClientRect();return Math.abs(r.x+r.width/2-innerWidth/2)<2&&Math.abs(r.y+r.height/2-innerHeight/2)<2})()"), 'confirmation dialog must be centered'
@@ -321,11 +337,14 @@ def integrated_flow(gate):
     g.record('physical authoring save validate publish',workflow_id=identifier,version=1)
     g.click('[data-action="mode"][data-mode="work"]')
     g.click('[data-action="workflow"][data-workflow-id="'+identifier+'"]')
-    g.click('[data-action="start_run"]')
-    g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.wait('!!document.querySelector(".ew-adhoc-start")')
+    g.type('#ees-work-start [name="evidence_note"]','개발용 시작 근거')
+    g.capture('figma-a8-first-start')
+    g.click('[data-action="start_run"][data-start-inline]')
     g.wait('!!document.querySelector(\'[data-action="job"]\')')
     state=g.api('/api/ees-work/workspace?workflow_id='+identifier)
     run=state['runs'][0];run_id=run['id']
+    assert run['inputs']['evidence_note']=='개발용 시작 근거'
     job_id=next(key for key,node in run['definition']['nodes'].items() if node['type']=='j')
     g.click('[data-action="job"][data-job-id="'+job_id+'"]')
     g.type('#ees-work-inputs [name="evidence_note"]','개발용 합성 근거 v1')
@@ -335,6 +354,8 @@ def integrated_flow(gate):
     assert saved['inputs']['evidence_note']=='개발용 합성 근거 v1'
     assert saved['jobs'][job_id]['status']!='completed'
     g.capture('a1-input-saved-not-complete')
+    q1_native_geometry(g,'figma-q1-1366x768-human-action',require_action=True)
+    g.browser.call('Emulation.setDeviceMetricsOverride',{'width':1920,'height':1080,'deviceScaleFactor':1,'mobile':False})
     g.click('[data-action="confirm"]')
     g.wait("document.activeElement?.matches('#ees-work-dialog [data-dialog-cancel]')")
     g.browser.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Escape','windowsVirtualKeyCode':27})
@@ -363,6 +384,7 @@ def integrated_flow(gate):
     assert g.api('/api/v1/chats/'+chat_id)['chat']['history']==chat['history']
     g.record('Native physical send and storage reload',saved_messages=len(messages),chat_id=chat_id,model_boundary='loopback synthetic HTTP only')
     chat = native_attachment_flow(g, chat_id)
+    q1_native_geometry(g,'figma-q1-1366x768-native-chat',require_messages=True)
     g.browser.call('Emulation.setDeviceMetricsOverride',{'width':1100,'height':800,'deviceScaleFactor':1,'mobile':False})
     g.capture('native-narrow')
     assert g.browser.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'horizontal document overflow'
@@ -374,6 +396,37 @@ def integrated_flow(gate):
     assert g.api('/api/ees-work/workspace?run_id='+run_id)['run']['attempts']==complete['attempts']
     assert g.api('/api/v1/chats/'+chat_id)['chat']['history']==chat['history']
     g.record('Native and work restart persistence',chat_preserved=True,attempts_preserved=True)
+
+
+def q1_native_geometry(g, name, *, require_action=False, require_messages=False):
+    """Read the actual Native layout at the supported 768-pixel height."""
+    g.browser.call('Emulation.setDeviceMetricsOverride',{'width':1366,'height':768,'deviceScaleFactor':1,'mobile':False})
+    g.wait('document.body.dataset.eesSidebarCompact==="true" && Math.abs(document.querySelector("#sidebar").getBoundingClientRect().width-56)<1')
+    stable=g.browser.evaluate('''new Promise(resolve=>{let last='',same=0;const end=performance.now()+3000;
+function check(){const elements=['#sidebar','#ees-work-panel','.ees-integrated-chat'].map(s=>document.querySelector(s));
+const key=JSON.stringify(elements.map(e=>{const r=e?.getBoundingClientRect();return r?[r.x,r.y,r.width,r.height]:null;}));
+same=key===last?same+1:0;last=key;if(same>=3&&elements.every(Boolean))return resolve(true);
+if(performance.now()>end)return resolve(false);requestAnimationFrame(check);}check();})''')
+    assert stable,'Native layout did not settle after viewport change'
+    geometry=g.browser.evaluate('''(()=>{const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom,right:r.right};};
+return {viewport:[innerWidth,innerHeight],document_width:document.documentElement.scrollWidth,
+sidebar:rect(document.querySelector('#sidebar')),panel:rect(document.querySelector('#ees-work-panel')),
+chat:rect(document.querySelector('.ees-integrated-chat')),action:rect(document.querySelector('#ees-work-panel>.ew-job-actions')),
+messages:[...document.querySelectorAll('.message-listitem')].filter(e=>e.getClientRects().length).map(rect)};})()''')
+    (g.out/(name+'-geometry.json')).write_text(json.dumps(geometry,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    assert geometry['document_width']<=1367,geometry
+    assert abs(geometry['sidebar']['width']-56)<1,geometry
+    assert abs(geometry['panel']['width']-480)<1,geometry
+    assert 0<=geometry['panel']['x'] and geometry['panel']['right']<=1367,geometry
+    if require_action:
+        action=geometry['action'];assert action and action['height']>0 and action['y']>=0 and action['bottom']<=769,geometry
+    if require_messages:
+        assert geometry['messages'],geometry
+        bound=min(760,geometry['chat']['width']-48)
+        assert all(item['width']<=bound+1 for item in geometry['messages']),(bound,geometry)
+    g.capture(name)
+    g.record('Q1 actual Native layout at 1366x768',action_bar_visible=require_action,
+        message_width_checked=require_messages,geometry=geometry)
 
 
 def native_attachment_flow(g, chat_id):
@@ -635,7 +688,36 @@ def figma_delta_flow(g):
     g.record('latest Figma isolated API fixtures',workflow_id=workflow_id,native_tool_source_sha256=hashlib.sha256(source.encode()).hexdigest(),
         business_completion=False,external_boundary='Loopback synthetic Jira and model HTTP only')
 
+    # Isolated unpublished checklist fixture makes B2-2 meaningful without
+    # changing the existing human_confirm contract exercised above.
+    rule_fixture=command('create_workflow',name='합성 작업별 판정 지침',system_id='EMS',mode='on_demand')
+    rule_id=rule_fixture['workflow_id'];rule_definition=rule_fixture['workflow']['draft']
+    rule_root=next(iter(rule_definition['nodes']))
+    rule_definition['nodes'][rule_root]['children']=['rule-stage']
+    rule_definition['nodes']['rule-stage']={'id':'rule-stage','type':'t','name':'근거 확인',
+        'parent':rule_root,'children':['rule-checklist'],'deps':[]}
+    rule_definition['nodes']['rule-checklist']={'id':'rule-checklist','type':'j','name':'사람이 확정하는 확인 항목',
+        'parent':'rule-stage','children':[],'deps':[],'mode':'human','result_block':'checklist',
+        'inputs':[],'instructions':'합성 확인 항목의 근거를 사람이 확인합니다.'}
+    command('save_draft',1,workflow_id=rule_id,definition=rule_definition)
     g.navigate('/');g.wait_work_ready()
+    g.click('[data-action="mode"][data-mode="author"]');g.click('[data-action="procedures"]')
+    g.click('[data-author-action="open"][data-id="'+rule_id+'"]')
+    g.click('[data-author-action="tab"][data-tab="rules"]')
+    g.wait('document.querySelector(\'select[name="rule_job_id"]\')?.value==="rule-checklist"')
+    assert g.browser.evaluate('document.querySelectorAll(".ew-author-rule-card tbody tr").length>0')
+    guidance='합성 근거만 제안에 사용하며 사람의 판정을 대신하지 않습니다.'
+    g.type('#ew-author-rules [name="suggestion_description"]',guidance)
+    g.click('[data-author-action="save"]')
+    g.wait('!document.querySelector(\'[data-author-action="validate"]\')?.disabled')
+    saved_rules=g.api('/api/ees-work/workspace?workflow_id='+rule_id)['workflow']
+    assert saved_rules['draft']['nodes']['rule-checklist']['suggestion_rules']['description']==guidance
+    assert not saved_rules['published_version']
+    assert not any(run['workflow_id']==rule_id for run in g.api('/api/ees-work/workspace?workflow_id='+rule_id)['runs'])
+    g.capture('figma-b22-saved-job-rules')
+    g.record('Figma B2-2 physical job rule edit and draft save',workflow_id=rule_id,
+        result_block='checklist',published=False,business_completion=False)
+
     # Procedure navigation is rendered only inside the actual workspace mode.
     g.click('[data-action="mode"][data-mode="author"]')
     g.wait('document.querySelector(\'[data-action="mode"][data-mode="author"]\')?.getAttribute("aria-pressed")==="true"')
@@ -643,6 +725,7 @@ def figma_delta_flow(g):
     g.click('[data-author-action="open"][data-id="'+workflow_id+'"]')
     g.click('[data-author-action="tab"][data-tab="schedule"]')
     g.click('[data-author-action="run_mode"][data-id="periodic"]')
+    g.select('#ew-author-schedule [name="opening"]','on_schedule')
     g.type('#ew-author-schedule [name="interval"]','2')
     g.type('#ew-author-schedule [name="name_template"]','{date} 실제 검수 회차')
     g.click('[data-author-action="schedule_preview"]')
@@ -652,11 +735,13 @@ def figma_delta_flow(g):
     saved=g.api('/api/ees-work/workspace?workflow_id='+workflow_id)['workflow']
     assert saved['draft']['mode']=='periodic' and saved['draft']['schedule']['interval']==2
     assert saved['draft']['schedule']['name_template']=='{date} 실제 검수 회차'
+    assert saved['draft']['schedule']['opening']=='on_schedule'
     assert saved['published_version']==1 and saved['published']['mode']=='on_demand'
+    assert saved['published']['schedule']['opening']=='after_previous_closed','An old immutable publication must retain its snapshot'
     assert not g.api('/api/ees-work/operations?system_id=EMS')['schedules']
     g.record('Figma B2-1 physical schedule preview and draft save',draft_revision=saved['revision'],published_version=1,reservation_created=False)
     g.click('[data-action="mode"][data-mode="work"]');g.click('[data-action="workflow"][data-workflow-id="'+workflow_id+'"]')
-    g.click('[data-action="start_run"]');g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.click('[data-action="start_run"][data-start-inline]')
     g.wait('!!document.querySelector(\'[data-action="job"][data-job-id="qa-list"]\')')
     run_id=g.api('/api/ees-work/workspace?workflow_id='+workflow_id)['runs'][0]['id']
     g.wait_work_ready(workflow_id=workflow_id,run_id=run_id)
@@ -714,6 +799,7 @@ def figma_delta_flow(g):
     assert next(item for item in edited['attempts'] if item['job_id']=='qa-report')['result']==original_report
     assert edited['definition']['nodes']['qa-report']['completion']['kind']=='review' and original_report['sent'] is False
     assert g.browser.evaluate('!document.querySelector(\'[data-action="send_review_draft"]\')')
+    assert g.browser.evaluate('!document.querySelector(\'[data-action="save_review_draft"]\')'),'A7 draft must autosave without a save button'
     assets('figma-a7-review',{'b22ad.svg':13});g.capture('figma-a7-review-only-autosaved')
     g.click('[data-action="confirm"]');g.click('#ees-work-dialog [data-dialog-confirm]')
     final=settle_server(lambda value:value['jobs']['qa-report']['status']=='completed','Review confirmation missing')
@@ -794,18 +880,32 @@ def figma_delta_flow(g):
         current_value_not_substituted=True,attempts=len(closed['attempts']),actual_native_historical_tool_calls=1,
         stored_chat_messages=expected_messages,narrow_work_ready=True,physical_scroll_verified=True)
 
+    factory_id='synthetic-c12-factory'
+    command('save_factory',factory_id=factory_id,system_id='EMS',name='합성 C12 검수 공장',attributes={})
     made=command('create_workflow',name='합성 실제 송부 차단 검수',system_id='EMS',mode='on_demand')
     delivery_id=made['workflow_id'];delivery=made['workflow']['draft'];delivery_root=next(iter(delivery['nodes']))
+    delivery['execution_scope']='factory'
     delivery['nodes'][delivery_root]['children']=['delivery-stage']
     delivery['nodes']['delivery-stage']={'id':'delivery-stage','type':'t','name':'송부 검토','parent':delivery_root,'children':['delivery-report'],'deps':[]}
     delivery['nodes']['delivery-report']={'id':'delivery-report','type':'j','name':'실제 송부 목적 초안','parent':'delivery-stage','children':[],'deps':[],
         'mode':'ai','result_block':'ai_review','human_confirmation':True,'inputs':[],'completion':{'kind':'delivery'},'instructions':'합성 송부 검토만 수행합니다.'}
     command('save_draft',1,workflow_id=delivery_id,definition=delivery)
-    assert command('validate_workflow',2,workflow_id=delivery_id)['validation']['errors']==[]
-    command('publish_workflow',2,workflow_id=delivery_id)
     g.browser.call('Emulation.setDeviceMetricsOverride',{'width':1920,'height':1080,'deviceScaleFactor':1,'mobile':False})
-    g.navigate('/');g.wait_work_ready();g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')
-    g.click('[data-action="start_run"]');g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.navigate('/');g.wait_work_ready();g.click('[data-action="mode"][data-mode="author"]')
+    g.click('[data-action="procedures"]');g.click('[data-author-action="open"][data-id="'+delivery_id+'"]')
+    g.click('[data-author-action="validate"]');g.wait('!!document.querySelector(".ew-author-validation")')
+    advisory=g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['workflow']['validation']
+    assert not advisory['errors'] and any('송부 방식' in str(item) for item in advisory['warnings']),advisory
+    assert g.browser.evaluate('!document.querySelector(\'[data-author-action="publish"]\').disabled')
+    g.capture('figma-b23-delivery-advisory-publish-enabled')
+    g.click('[data-author-action="publish"]');g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.wait('document.querySelector("#ees-work-designer")?.innerText.includes("게시 v1")')
+    assert g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['workflow']['published_version']==1
+    g.record('Figma B2-3 delivery recommendation permits physical publish',recommendations=len(advisory['warnings']),external_delivery=False)
+    g.click('[data-action="mode"][data-mode="work"]');g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')
+    g.select('#ees-start-factory',factory_id)
+    g.capture('figma-a8-factory-ready')
+    g.click('[data-action="start_run"][data-start-inline]')
     g.click('[data-action="job"][data-job-id="delivery-report"]');select_execution_model();g.click('[data-action="execute"]')
     g.wait('document.querySelector("#ees-review-text")?.value.includes("합성 AI 검토 원문")',20000)
     delivery_run_id=g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['runs'][0]['id']
@@ -824,6 +924,16 @@ def figma_delta_flow(g):
     assert g.api('/api/ees-work/workspace?run_id='+delivery_run_id)['run']==blocked
     g.record('Figma A7 delivery purpose review cannot close or claim sent',completion_kind='delivery',human_review_saved=True,
         business_status='blocked',reason='delivery_unconfigured',actual_delivery=False)
+    assert blocked['factory_id']==factory_id
+    g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')
+    g.wait('!!document.querySelector(".ew-active-runs")')
+    assert g.browser.evaluate('document.querySelector(\'#ees-start-factory option[value="'+factory_id+'"]\')?.disabled')
+    assert g.browser.evaluate('document.querySelector(\'.ew-active-runs [data-run-id="'+delivery_run_id+'"]\')?.getClientRects().length>0')
+    assert g.browser.evaluate('document.querySelector(\'[data-action="start_run"][data-start-inline]\')?.disabled')
+    assert g.api('/api/ees-work/workspace?run_id='+delivery_run_id)['run']==blocked
+    g.capture('figma-a8-active-factory-duplicate-disabled')
+    g.record('Figma A8 active factory remains visible and duplicate start is disabled',factory_id=factory_id,
+        existing_run_unchanged=True,duplicate_created=False)
 
 
 def main():

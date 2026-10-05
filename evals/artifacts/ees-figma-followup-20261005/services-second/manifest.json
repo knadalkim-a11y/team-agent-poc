@@ -1,0 +1,301 @@
+{
+  "schema": 1,
+  "scope": "Second source service suite and separate delivery artifact retest; original failed suite result preserved",
+  "wheel_validation": false,
+  "source_dirty": true,
+  "exact_historical_source_tree_identity_claimed": false,
+  "suite": {
+    "status": "failed",
+    "passed_modules": 33,
+    "failed_modules": 1,
+    "failure": "test_ees_delivery_artifacts: expected item_not_found but stale expected revision correctly returned decision_conflict."
+  },
+  "delivery_artifacts_retest": {
+    "status": "passed",
+    "tests": 3,
+    "passed": 3,
+    "diagnosis": "Fixture now supplies the current expected revision before asserting missing item; no failure result overwritten."
+  },
+  "source_checks": {
+    "official_wheel_packaging": {
+      "status": "passed",
+      "tests": 1,
+      "passed": 1,
+      "scope": "Real pinned wheel patch, RECORD and unrelated-content preservation test; separate from Native per-wheel results."
+    },
+    "test_id_audit": {
+      "status": "passed",
+      "baseline": "b41e23917273e1d2d0ead1ddadfea75b2dda1e32",
+      "old_ids": 1332,
+      "current_ids": 1283,
+      "errors": []
+    }
+  },
+  "sanitization": "Filesystem roots removed; credentials redacted if present; synthetic IDs and outcomes retained.",
+  "files": [
+    {
+      "file": "suite.json",
+      "source": "dist/ees-followup-services-final/suite.json",
+      "source_sha256": "874b035579610bffc803167e9f972aea1d525b70437b1ebd5c75e8aacb21bc48",
+      "sha256": "874b035579610bffc803167e9f972aea1d525b70437b1ebd5c75e8aacb21bc48",
+      "bytes": 2735,
+      "sanitized": false
+    },
+    {
+      "file": "test_confluence_canary.json",
+      "source": "dist/ees-followup-services-final/test_confluence_canary.json",
+      "source_sha256": "0258702c030a88f5ea8d86bee280e4d855bd22a611248651d33bd6ddebec435d",
+      "sha256": "0258702c030a88f5ea8d86bee280e4d855bd22a611248651d33bd6ddebec435d",
+      "bytes": 5254,
+      "sanitized": false
+    },
+    {
+      "file": "test_confluence_read.json",
+      "source": "dist/ees-followup-services-final/test_confluence_read.json",
+      "source_sha256": "e4500c14d13c920f51683bf0c5755c3cdf528d1839152b688a1b4366d92006f1",
+      "sha256": "e4500c14d13c920f51683bf0c5755c3cdf528d1839152b688a1b4366d92006f1",
+      "bytes": 7592,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_apply_demo.json",
+      "source": "dist/ees-followup-services-final/test_ees_apply_demo.json",
+      "source_sha256": "81037a1eaf5aae3f295f4ac0465dd177c851b78ce6d68706e4bcab74f303a284",
+      "sha256": "81037a1eaf5aae3f295f4ac0465dd177c851b78ce6d68706e4bcab74f303a284",
+      "bytes": 3004,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_delivery_artifacts.json",
+      "source": "dist/ees-followup-services-final/test_ees_delivery_artifacts.json",
+      "source_sha256": "768c7bf5af8974c6b604fcbaefc6ba726e22efb7b07869eb7d065ece07c6d64a",
+      "sha256": "f519b8ffdbe7d7de3e37f64ca1f0f745d2efbbf11914c25a3b7ed223aa2a480a",
+      "bytes": 2050,
+      "sanitized": true
+    },
+    {
+      "file": "test_ees_demo_assets.json",
+      "source": "dist/ees-followup-services-final/test_ees_demo_assets.json",
+      "source_sha256": "90c0d8515079d4f0d0cf2cac7b9af36b13dd08f1279b716ba749d29518773692",
+      "sha256": "90c0d8515079d4f0d0cf2cac7b9af36b13dd08f1279b716ba749d29518773692",
+      "bytes": 1305,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_demo_data_tool.json",
+      "source": "dist/ees-followup-services-final/test_ees_demo_data_tool.json",
+      "source_sha256": "c74b1e2b3d17dbc0c5a93f92ebeff9dec410b34e33bcd99dca7d2f9e5655a06a",
+      "sha256": "c74b1e2b3d17dbc0c5a93f92ebeff9dec410b34e33bcd99dca7d2f9e5655a06a",
+      "bytes": 829,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_execution_tool.json",
+      "source": "dist/ees-followup-services-final/test_ees_execution_tool.json",
+      "source_sha256": "97e506608c5375f272f70cd9317640ebaf774ca98819aa98668f0dba563ee436",
+      "sha256": "97e506608c5375f272f70cd9317640ebaf774ca98819aa98668f0dba563ee436",
+      "bytes": 642,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_specialists_tool.json",
+      "source": "dist/ees-followup-services-final/test_ees_specialists_tool.json",
+      "source_sha256": "29518edc328381b11e3378e74c322b24f013812190c536ff120a585fc405ef36",
+      "sha256": "29518edc328381b11e3378e74c322b24f013812190c536ff120a585fc405ef36",
+      "bytes": 828,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_work_controller.json",
+      "source": "dist/ees-followup-services-final/test_ees_work_controller.json",
+      "source_sha256": "106102cf1279111b34e350bfaf77a4c3f6e54a35ccbf274ebc1b5ba9e17bc8cd",
+      "sha256": "106102cf1279111b34e350bfaf77a4c3f6e54a35ccbf274ebc1b5ba9e17bc8cd",
+      "bytes": 495,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_work_designer.json",
+      "source": "dist/ees-followup-services-final/test_ees_work_designer.json",
+      "source_sha256": "7fd40cc7bfa4bf8932c060b1407f369d4627776972abe657ab215dbab445d74d",
+      "sha256": "7fd40cc7bfa4bf8932c060b1407f369d4627776972abe657ab215dbab445d74d",
+      "bytes": 479,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_work_figma_authoring.json",
+      "source": "dist/ees-followup-services-final/test_ees_work_figma_authoring.json",
+      "source_sha256": "d082ebcb65055ad7226fa910d447fe67b8b475f06397e0a8efe511c591f06716",
+      "sha256": "d082ebcb65055ad7226fa910d447fe67b8b475f06397e0a8efe511c591f06716",
+      "bytes": 1881,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_work_figma_contracts.json",
+      "source": "dist/ees-followup-services-final/test_ees_work_figma_contracts.json",
+      "source_sha256": "e016bbb80cad546ad97a7f655760d397a37b4f6c9ecaf37ffbc7cfe961966897",
+      "sha256": "e016bbb80cad546ad97a7f655760d397a37b4f6c9ecaf37ffbc7cfe961966897",
+      "bytes": 4355,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_work_figma_schedule.json",
+      "source": "dist/ees-followup-services-final/test_ees_work_figma_schedule.json",
+      "source_sha256": "fd2f8776e06302ea9a36e1c23e4be8765031c4f2604e076fa4a99fac2c78fff2",
+      "sha256": "fd2f8776e06302ea9a36e1c23e4be8765031c4f2604e076fa4a99fac2c78fff2",
+      "bytes": 3562,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_work_history_reference.json",
+      "source": "dist/ees-followup-services-final/test_ees_work_history_reference.json",
+      "source_sha256": "fd9bb78b91d3d276f8e27552ef352dde4e491e87c8aece8cca915a6aba768ff9",
+      "sha256": "fd9bb78b91d3d276f8e27552ef352dde4e491e87c8aece8cca915a6aba768ff9",
+      "bytes": 1228,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_work_operations.json",
+      "source": "dist/ees-followup-services-final/test_ees_work_operations.json",
+      "source_sha256": "75d157032a0e0a121ea8061831368559b373089aeff03315c9a0ffdeb531a075",
+      "sha256": "75d157032a0e0a121ea8061831368559b373089aeff03315c9a0ffdeb531a075",
+      "bytes": 6238,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_work_panel.json",
+      "source": "dist/ees-followup-services-final/test_ees_work_panel.json",
+      "source_sha256": "fdb60d48b2c65ffc8d2bdc45fb3b81ae033830dbc4b0ec4cf31203b9e66471d4",
+      "sha256": "fdb60d48b2c65ffc8d2bdc45fb3b81ae033830dbc4b0ec4cf31203b9e66471d4",
+      "bytes": 478,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_work_routes.json",
+      "source": "dist/ees-followup-services-final/test_ees_work_routes.json",
+      "source_sha256": "b6f2592a94be47667ff508e94867f2e56574c3a48cf69c41645a2e50a879181d",
+      "sha256": "b6f2592a94be47667ff508e94867f2e56574c3a48cf69c41645a2e50a879181d",
+      "bytes": 1441,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_work_v4.json",
+      "source": "dist/ees-followup-services-final/test_ees_work_v4.json",
+      "source_sha256": "282d495def1680a4927bac24007643b9708ff4a4114dcbc3b5a88c0333217032",
+      "sha256": "282d495def1680a4927bac24007643b9708ff4a4114dcbc3b5a88c0333217032",
+      "bytes": 480,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_work_workspace.json",
+      "source": "dist/ees-followup-services-final/test_ees_work_workspace.json",
+      "source_sha256": "5ba5f5648f5d7e3ef81611a2c8838a757e604d7c93630e69da4cc28c4767e806",
+      "sha256": "5ba5f5648f5d7e3ef81611a2c8838a757e604d7c93630e69da4cc28c4767e806",
+      "bytes": 8302,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_workflow.json",
+      "source": "dist/ees-followup-services-final/test_ees_workflow.json",
+      "source_sha256": "598bda7c5022e40b4396071e2fae197e530047f2d0653d864441291f67c0776c",
+      "sha256": "598bda7c5022e40b4396071e2fae197e530047f2d0653d864441291f67c0776c",
+      "bytes": 9054,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_workflow_contract.json",
+      "source": "dist/ees-followup-services-final/test_ees_workflow_contract.json",
+      "source_sha256": "cf863ce13d7f93ba4f8ba4bace89785aa6e8bc6c09d6756b39330a20ed0f4dc0",
+      "sha256": "cf863ce13d7f93ba4f8ba4bace89785aa6e8bc6c09d6756b39330a20ed0f4dc0",
+      "bytes": 3005,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_workflow_model.json",
+      "source": "dist/ees-followup-services-final/test_ees_workflow_model.json",
+      "source_sha256": "faf3f250ceac1acde4d6388309d089cd22b833c534cad87467a14fcf9da3aeeb",
+      "sha256": "faf3f250ceac1acde4d6388309d089cd22b833c534cad87467a14fcf9da3aeeb",
+      "bytes": 2908,
+      "sanitized": false
+    },
+    {
+      "file": "test_ees_workflow_tool.json",
+      "source": "dist/ees-followup-services-final/test_ees_workflow_tool.json",
+      "source_sha256": "a7a26d2297e1bf6a9ed4da97f2005c2f92ff7bffd7c8966a5e4c0852c406cd3b",
+      "sha256": "a7a26d2297e1bf6a9ed4da97f2005c2f92ff7bffd7c8966a5e4c0852c406cd3b",
+      "bytes": 1837,
+      "sanitized": false
+    },
+    {
+      "file": "test_github_tool.json",
+      "source": "dist/ees-followup-services-final/test_github_tool.json",
+      "source_sha256": "d4e06a29c1517941293258dce1b407708359bd08912674ba02b1919ebdb996f6",
+      "sha256": "d4e06a29c1517941293258dce1b407708359bd08912674ba02b1919ebdb996f6",
+      "bytes": 5383,
+      "sanitized": false
+    },
+    {
+      "file": "test_jira_read.json",
+      "source": "dist/ees-followup-services-final/test_jira_read.json",
+      "source_sha256": "2b284c69bfe5cfa39359e5afa91a1aaeea508ece3a3a09c90fd8a3f5be99d141",
+      "sha256": "2b284c69bfe5cfa39359e5afa91a1aaeea508ece3a3a09c90fd8a3f5be99d141",
+      "bytes": 3838,
+      "sanitized": false
+    },
+    {
+      "file": "test_jira_work_contract.json",
+      "source": "dist/ees-followup-services-final/test_jira_work_contract.json",
+      "source_sha256": "8601d53b055b75cacc6d7fde7c1d6f52d5dd3666a274b6948586a9b7181226db",
+      "sha256": "8601d53b055b75cacc6d7fde7c1d6f52d5dd3666a274b6948586a9b7181226db",
+      "bytes": 3433,
+      "sanitized": false
+    },
+    {
+      "file": "test_wo_demo_tool.json",
+      "source": "dist/ees-followup-services-final/test_wo_demo_tool.json",
+      "source_sha256": "ba1a2ddffaac7215a1b5e1d76b6ef75e72318a47b4c61a4868bbc4d9cbb8119e",
+      "sha256": "ba1a2ddffaac7215a1b5e1d76b6ef75e72318a47b4c61a4868bbc4d9cbb8119e",
+      "bytes": 784,
+      "sanitized": false
+    },
+    {
+      "file": "test.log",
+      "source": "dist/ees-followup-services-final.log",
+      "source_sha256": "9f067029b87ca7f35893ced21ab97a3ae6cbaae63d3c86ea6cacacffc36af55a",
+      "sha256": "9b075c9d4c8c92f897398c0707ee7e77ee3a574e903bffa44b1bd670bc0c4766",
+      "bytes": 102584,
+      "sanitized": true
+    },
+    {
+      "file": "delivery-artifacts-retest/test_ees_delivery_artifacts.json",
+      "source": "dist/ees-followup-delivery-artifacts-retest/test_ees_delivery_artifacts.json",
+      "source_sha256": "e5b077492d08cd41720ef0d3cd51722e350b2e3c5fd49c4a6431dab12b595014",
+      "sha256": "e5b077492d08cd41720ef0d3cd51722e350b2e3c5fd49c4a6431dab12b595014",
+      "bytes": 883,
+      "sanitized": false
+    },
+    {
+      "file": "delivery-artifacts-retest/test.log",
+      "source": "dist/ees-followup-delivery-artifacts-retest.log",
+      "source_sha256": "8e527b089c4177cb7155c4d2286e1f58a2bb9ad54c51561d6c70d9ea50fead94",
+      "sha256": "69991cc530271ba913ca0ab09789191a8fa9cf8406c22bf24422a8f28edbb553",
+      "bytes": 1337,
+      "sanitized": true
+    },
+    {
+      "file": "source-checks/package.log",
+      "source": "dist/ees-followup-package-final.log",
+      "source_sha256": "07b23613a9ae638c9fcc3edca08907fc1d56a7d6ac46df94dc5125552ddd1315",
+      "sha256": "07b23613a9ae638c9fcc3edca08907fc1d56a7d6ac46df94dc5125552ddd1315",
+      "bytes": 272,
+      "sanitized": false
+    },
+    {
+      "file": "source-checks/test-id-audit.log",
+      "source": "temporary-logs/ees-followup-audit.log",
+      "source_sha256": "a0829ff1b5f35c0f95635b883d6752d970e734d375275df4c60f05933bea3809",
+      "sha256": "a0829ff1b5f35c0f95635b883d6752d970e734d375275df4c60f05933bea3809",
+      "bytes": 109,
+      "sanitized": false
+    }
+  ]
+}

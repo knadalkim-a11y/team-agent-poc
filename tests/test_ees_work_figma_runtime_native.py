@@ -32,6 +32,98 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertTrue(result['ok'], result)
         return self.state(run_id=run['id'])['run']
 
+    def test_pending_item_choices_survive_reload_before_atomic_confirmation(self):
+        self.bridge.result = {'status': 'succeeded', 'completeness': 'complete', 'items': [
+            {'id': 'ONE', 'name': '합성 항목 1', 'ai_suggestion': 'completed'},
+            {'id': 'TWO', 'name': '합성 항목 2', 'required': False}]}
+        key = self.author(mode='tool', block='item_verdict', jobs=1)
+        run = self.execute(self.start(key)); self.open_run(key, run)
+        self.assertTrue(self.read('[data-action=confirm_verdicts]', 'disabled'))
+        self.choose('[data-item-verdict][data-item-id=ONE]', 'completed')
+        self.assertTrue(self.read('[data-action=confirm_verdicts]', 'disabled'))
+        self.choose('[data-item-verdict][data-item-id=TWO]', 'unknown')
+        self.wait("!document.querySelector('[data-action=confirm_verdicts]')?.disabled")
+        import time
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            drafts = self.state()['ui_state']['state'].get('selection', {}).get('verdict_drafts', {})
+            if any(value.get('TWO', {}).get('verdict') == 'unknown' for value in drafts.values()):
+                break
+            time.sleep(.025)
+        else:
+            self.fail('Pending choices were not persisted before reload')
+        self.assertEqual(self.state(run_id=run['id'])['run']['jobs']['job-0']['decisions'], [])
+        self.navigate('/c/existing-chat'); self.wait("document.querySelector('[data-item-verdict][data-item-id=TWO]')?.value==='unknown'")
+        self.assertEqual(self.read('[data-item-verdict][data-item-id=ONE]', 'value'), 'completed')
+        self.click('[data-action=confirm_verdicts]'); self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('.ew-result-items')?.innerText.includes('모든 항목의 판정이 확정')")
+        saved = self.state(run_id=run['id'])['run']['jobs']['job-0']
+        self.assertEqual({d['item_id']: d['verdict'] for d in saved['decisions']}, {'ONE': 'completed', 'TWO': 'unknown'})
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('.ew-confirmed-verdict').length"), 2)
+        self.screenshot('figma-r3-pending-and-final-verdicts')
+
+    def test_checklist_criterion_and_tool_evidence_are_distinct_in_native_panel(self):
+        self.bridge.result = {'status': 'succeeded', 'completeness': 'complete', 'items': [
+            {'id': 'QUEUE', 'name': '대기열 감소', 'status': 'failed', 'criterion': '조회한 대기열이 감소함',
+             'evidence': [{'name': '합성 대기열 조회', 'tool_id': 'synthetic-read', 'status': 'succeeded',
+                           'action': '현재 대기열 조회', 'success_criterion': '응답에 건수 포함', 'result': '100 → 120'}]}]}
+        key = self.author(mode='tool', block='checklist', jobs=1)
+        run = self.execute(self.start(key)); self.open_run(key, run)
+        self.assertEqual(self.read('.ew-check-item > .ew-status', 'dataset.status'), 'failed')
+        self.assertEqual(self.read('.ew-check-evidence .ew-status', 'dataset.status'), 'succeeded')
+        self.click('.ew-check-evidence summary')
+        self.assertIn('통과 기준 · 조회한 대기열이 감소함', self.text('.ew-check-item'))
+        self.assertIn('정상 실행 기준 · 응답에 건수 포함', self.text('.ew-check-evidence'))
+        self.assertIn('100 → 120', self.text('.ew-check-evidence'))
+        self.assertEqual(self.state(run_id=run['id'])['run']['jobs']['job-0']['decisions'], [])
+        self.screenshot('figma-s3-checklist-criterion-versus-tool')
+
+    def test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch(self):
+        reference = {'tool_id': 'synthetic-ees', 'function': 'restart', 'revision': 1, 'content_hash': 'a' * 64, 'schema_hash': 'b' * 64}
+        schema = {'type': 'object', 'properties': {'target': {'type': 'string', 'title': '대상 서버'},
+            'stop': {'type': 'string', 'title': '종료 방식', 'enum': ['graceful', 'force']},
+            'wait': {'type': 'integer', 'title': '종료 대기', 'minimum': 0, 'maximum': 300}}, 'required': ['target', 'stop', 'wait']}
+        async def inspect(actor, tool_id, function):
+            return {'reference': {**reference, 'function': function}, 'schema': deepcopy(schema)}
+        self.bridge.inspect_registered = inspect
+        self.users['other-user']['role'] = 'admin'
+        def operation(action, revision=0, user=None, **kwargs):
+            result = asyncio.run(self.server.workflow.operations.command(user or self.server.user,
+                dict(action=action, expected_revision=revision, request_id=str(uuid4()), **kwargs)))
+            self.assertTrue(result['ok'], result); return result
+        tool = operation('tool_save', tool={'system_id': 'EMS', 'kind': 'request', 'name': '합성 재시작',
+            'reference': reference, 'guide_url': 'https://example.invalid/guide', 'responsible_user_id': 'other-user',
+            'status_function': 'status', 'output_schema': {'type': 'object'}})['tool']
+        tool = operation('tool_submit', tool['revision'], tool_contract_id=tool['id'])['tool']
+        tool = operation('tool_review', tool['revision'], user=self.users['other-user'], tool_contract_id=tool['id'], decision='approve')['tool']
+        key = self.author(jobs=1, fields=[{'id': 'target', 'name': '대상', 'type': 'text', 'scope': 'run'},
+            {'id': 'stop', 'type': 'single', 'scope': 'run', 'options': ['graceful', 'force']},
+            {'id': 'wait', 'type': 'number', 'scope': 'run'}])
+        draft = deepcopy(self.state(workflow_id=key)['workflow']['draft'])
+        draft['nodes']['job-0'].update(result_block='change_request', tool_contract_id=tool['id'], tool_contract_revision=tool['revision'],
+            approval_count=0, effect_criterion={'check': 'registered-status'})
+        self.command('save_draft', workflow_id=key, expected_revision=3, definition=draft)
+        self.command('validate_workflow', workflow_id=key, expected_revision=4)
+        self.command('publish_workflow', workflow_id=key, expected_revision=4)
+        run = self.start(key, inputs={'target': 'SYNTHETIC-AP', 'stop': 'graceful', 'wait': 60}); self.open_run(key, run)
+        self.assertEqual(self.read('[data-work-input][name=wait]', 'type'), 'number')
+        self.assertEqual(self.read('[data-work-input][name=wait]', 'max'), '300')
+        self.assertEqual(self.read('[data-work-input][name=stop]', 'tagName'), 'SELECT')
+        self.fill('#ees-request-reason', '합성 확인 사유')
+        self.click('[data-action=request_intent]')
+        self.wait("document.querySelector('#ees-work-dialog')?.innerText.includes('합성 확인 사유')")
+        self.assertIn('SYNTHETIC-AP', self.text('#ees-work-dialog'))
+        self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('#ees-work-panel')?.innerText.includes('연결')")
+        with self.server.workflow._db() as db:
+            import json
+            request = json.loads(db.execute('SELECT data FROM work_external_requests WHERE run_id=?', (run['id'],)).fetchone()[0])
+        self.assertEqual(request['inputs'], {'target': 'SYNTHETIC-AP', 'stop': 'graceful', 'wait': 60})
+        self.assertEqual(request['request_reason'], '합성 확인 사유')
+        self.assertNotEqual(request['state'], 'effect_verified')
+        self.assertEqual(self.bridge.calls, [])
+        self.screenshot('figma-a4-typed-request-unconnected')
+
     def test_list_preview_add_exclude_confirm_and_history_preserve_original(self):
         self.bridge.result = {'status': 'succeeded', 'completeness': 'complete',
             'items': [{'id': 'CR-1', 'title': '합성 조회 1', 'status': '검증 완료'},

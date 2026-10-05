@@ -1,0 +1,43 @@
+{
+  "module": "test_ees_demo_assets.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.025,
+  "tests_run": 6,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 6,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_demo_assets.RetiredRegistrationTests.test_asset_journal_rejects_symlink_without_touching_target",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_demo_assets.RetiredRegistrationTests.test_backup_payload_preserves_user_metadata_grants_and_base_connection",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_demo_assets.RetiredRegistrationTests.test_current_manifest_has_no_automatic_tools_models_or_skills",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_demo_assets.RetiredRegistrationTests.test_historical_manifest_cannot_reactivate_registration",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_demo_assets.RetiredRegistrationTests.test_new_restart_repeat_and_old_journal_never_recreate_demo",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_demo_assets.RetirementOperatorTests.test_preview_is_private_read_only_and_requires_exact_plan_approval",
+      "status": "passed"
+    }
+  ]
+}

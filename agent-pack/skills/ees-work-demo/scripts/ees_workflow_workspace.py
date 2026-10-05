@@ -104,6 +104,8 @@ def definition_check(definition, complete=True):
         errors.append('관리 시스템을 선택해 주세요.')
     if definition.get('category', 'ops') not in CATEGORIES or definition.get('mode', 'on_demand') not in ('periodic', 'on_demand', 'emergency'):
         errors.append('업무 분류와 실행 방식을 확인해 주세요.')
+    if definition.get('execution_scope') not in (None, 'factory', 'system'):
+        errors.append('업무 범위는 공장 단위 또는 시스템 단위로 선택해 주세요.')
     for field, supported in (('completion_policy', 'all_required_approved'), ('unapproved_policy', 'hold'), ('delivery_policy', 'draft_only')):
         if definition.get(field) not in (None, '', supported):
             errors.append(f'{field}: 지원하는 정책을 선택하고 설명은 별도 메모에 기록해 주세요.')
@@ -145,6 +147,32 @@ def definition_check(definition, complete=True):
                 errors.append(f'{key}: 하위 작업을 추가해 주세요.')
             continue
         jobs.append(node)
+        judgments = node.get('judgments', definition.get('judgments', []))
+        if not isinstance(judgments, list) or len(judgments) > 30 or any(not isinstance(item, dict) or not _id(item.get('id')) or not isinstance(item.get('label'), str) or not item['label'].strip() or item.get('status') not in ('completed', 'failed', 'unknown', 'action_required') or not isinstance(item.get('consequence', ''), str) for item in judgments):
+            errors.append(f'{key}: 판정 문구와 기본 상태 연결을 확인해 주세요.')
+            judgments = []
+        judgment_ids = {item['id'] for item in judgments}
+        if len(judgment_ids) != len(judgments):
+            errors.append(f'{key}: 판정 ID는 중복될 수 없습니다.')
+        if not isinstance(node.get('confirmation_notes', ''), str):
+            errors.append(f'{key}: 사람 확인 안내는 글로 입력해 주세요.')
+        suggestions = node.get('suggestion_rules')
+        if suggestions is not None:
+            valid = isinstance(suggestions, dict) and type(suggestions.get('provisional', False)) is bool and isinstance(suggestions.get('description', ''), str)
+            rules = suggestions.get('rules', []) if isinstance(suggestions, dict) else None
+            human_only = suggestions.get('human_only_judgment_ids', []) if isinstance(suggestions, dict) else None
+            valid = valid and isinstance(rules, list) and len(rules) <= 50 and isinstance(human_only, list) and all(isinstance(item, str) and item in judgment_ids for item in human_only)
+            if valid:
+                valid = all(isinstance(rule, dict) and _id(rule.get('id')) and isinstance(rule.get('condition'), str) and rule.get('outcome') in ('none', 'judgment') and (rule.get('outcome') != 'judgment' or isinstance(rule.get('judgment_id'), str) and rule['judgment_id'] in judgment_ids and rule['judgment_id'] not in human_only) for rule in rules)
+                valid = valid and len({rule['id'] for rule in rules}) == len(rules)
+            if not valid:
+                errors.append(f'{key}: AI 제안 규칙과 연결한 판정을 확인해 주세요.')
+            elif complete and suggestions.get('provisional'):
+                warnings.append(f'{key}: AI 판정 제안 규칙이 임시값입니다. 확인을 권장합니다.')
+        if complete and node.get('result_block') == 'item_verdict' and definition.get('unapproved_policy') in (None, '', 'hold'):
+            warnings.append(f'{key}: D-5 이후 미승인 CR 처리 방식이 정해지지 않았습니다. 게시는 가능하며 해당 처리는 확인 필요로 남습니다.')
+        if complete and isinstance(node.get('completion'), dict) and node['completion'].get('kind') == 'delivery':
+            warnings.append(f'{key}: 송부 방식이 연결되지 않았습니다. 게시는 가능하며 해당 작업의 보내기는 막힙니다.')
         if node.get('children'):
             errors.append(f'{key}: 작업에 하위 항목을 둘 수 없습니다.')
         dependency_policy = node.get('dependency_policy', 'all_completed')
@@ -152,7 +180,7 @@ def definition_check(definition, complete=True):
             errors.append(f'{key}: 판정 완료 근거의 사용은 AI 결과 초안에만 허용됩니다.')
         if node.get('mode', 'human') not in ('human', 'tool', 'ai') or node.get('result_block', 'human_confirm') not in BLOCKS:
             errors.append(f'{key}: 실행 방법과 주 결과 블록을 확인해 주세요.')
-        if node.get('mode') == 'ai' and node.get('result_block') in ('ai_review', 'item_verdict') and node.get('human_confirmation', True) is not True:
+        if (node.get('result_block') == 'item_verdict' or node.get('mode') == 'ai' and node.get('result_block') == 'ai_review') and node.get('human_confirmation', True) is not True:
             errors.append(f'{key}: AI 제안과 항목 판정은 사람 확인이 필요합니다.')
         if not isinstance(node.get('human_confirmation', True), bool):
             errors.append(f'{key}: 사람 확인 조건을 확인해 주세요.')
@@ -659,7 +687,7 @@ class WorkspaceMixin:
         if not row or row['status'] != 'running':
             _fail('attempt_finished', '이미 기록된 실행 결과는 바꿀 수 없습니다.')
         job = json.loads(row['snapshot'])['job']
-        state = ('waiting_confirmation' if job.get('human_confirmation', True) or (job.get('mode') == 'ai' and job.get('result_block') in ('ai_review', 'item_verdict')) else 'completed') if status == 'succeeded' else status
+        state = ('waiting_confirmation' if job.get('human_confirmation', True) or job.get('result_block') == 'item_verdict' or (job.get('mode') == 'ai' and job.get('result_block') == 'ai_review') else 'completed') if status == 'succeeded' else status
         run = db.execute('SELECT * FROM work_runs WHERE id=?', (row['run_id'],)).fetchone()
         current_snapshot = self._work_snapshot(db, run, row['job_id'])
         current_inputs = current_snapshot['inputs']
@@ -792,6 +820,7 @@ class WorkspaceMixin:
         value['published'] = json.loads(versions[0]['definition']) if versions else None
         value['name'] = (value.get('draft') or value['published'] or {}).get('name', '')
         value['mode'] = (value.get('draft') or value['published'] or {}).get('mode', 'on_demand')
+        value['execution_scope'] = (value.get('draft') or value['published'] or {}).get('execution_scope')
         value['category'] = (value.get('draft') or value['published'] or {}).get('category', 'ops')
         value['settings'] = []
         for setting in db.execute('SELECT * FROM work_settings WHERE workflow_id=?', (row['id'],)):
@@ -1007,7 +1036,7 @@ class WorkspaceMixin:
                         self._work_authorize_scope(db, actor, groups, system_id, factory_id, 'viewer')
                     elif not self._work_system_visible(db, actor, groups, system_id):
                         _fail('scope_forbidden', '이 작업 위치의 권한이 없습니다.')
-                factories, systems, workflows, runs = [], [], [], []
+                factories, systems, workflows, runs, workflow_active_runs = [], [], [], [], []
                 for system in (*SYSTEMS, 'COMMON'):
                     try:
                         if factory_id:
@@ -1036,7 +1065,14 @@ class WorkspaceMixin:
                     except WorkflowError:
                         continue
                 for row in db.execute('SELECT * FROM work_runs ORDER BY created_at DESC,id'):
-                    if system_id and row['system_id'] != system_id or factory_id and row['factory_id'] != factory_id: continue
+                    if workflow_id and row['workflow_id'] == workflow_id and row['status'] not in TERMINAL:
+                        try:
+                            self._work_run(db, actor, groups, row['id'])
+                            workflow_active_runs.append({key: row[key] for key in ('id', 'workflow_id', 'system_id', 'factory_id', 'owner', 'status', 'version', 'revision', 'created_at')})
+                        except WorkflowError:
+                            pass
+                    system_scope = json.loads(row['snapshot'])['definition'].get('execution_scope') == 'system'
+                    if system_id and row['system_id'] != system_id or factory_id and row['factory_id'] != factory_id and not system_scope: continue
                     try:
                         self._work_run(db, actor, groups, row['id'])
                     except WorkflowError:
@@ -1051,7 +1087,7 @@ class WorkspaceMixin:
                 if (selected_workflow and system_id and selected_workflow['system_id'] != system_id
                         or selected_run and (workflow_id and selected_run['workflow_id'] != workflow_id
                                              or system_id and selected_run['system_id'] != system_id
-                                             or factory_id and selected_run['factory_id'] != factory_id)):
+                                             or factory_id and selected_run['factory_id'] != factory_id and selected_run['definition'].get('execution_scope') != 'system')):
                     _fail('target_mismatch', '선택한 절차·진행 건·작업 위치가 서로 다릅니다. 대상을 다시 선택해 주세요.')
                 if factory_id and selected_workflow:
                     factory = db.execute('SELECT system_id FROM work_factories WHERE id=?', (factory_id,)).fetchone()
@@ -1068,6 +1104,7 @@ class WorkspaceMixin:
                 access = [dict(row) | {'roles': json.loads(row['roles'])} for row in db.execute('SELECT * FROM work_access ORDER BY id')] if capabilities['is_admin'] else []
                 return {'ok': True, 'protocol': 2, 'capabilities': capabilities, 'systems': systems, 'factories': factories,
                         'workflows': workflows, 'runs': runs, 'workflow': selected_workflow, 'run': selected_run,
+                        'workflow_active_runs': workflow_active_runs,
                         'my_work': my_work, 'my_work_count': len(my_work), 'access': access, 'people': people, 'native_groups': native_groups,
                         'ui_state': {'revision': ui['revision'], 'state': json.loads(ui['state'])} if ui else {'revision': 0, 'state': {}},
                         'legacy_count': db.execute('SELECT COUNT(*) FROM cases WHERE owner=?', (_value(actor, 'id'),)).fetchone()[0]}
@@ -1134,7 +1171,7 @@ class WorkspaceMixin:
                 if not target or _value(target, 'id') != body.get('principal_id') or _value(target, 'role') not in ('user', 'admin'):
                     _fail('native_user_required', '현재 승인된 Native 사용자 ID를 선택해 주세요.')
             evidence_access = await self._work_evidence_access(actor, groups, body.get('run_id', '')) if body.get('run_id') else set()
-            if action in ('decide', 'amend_items', 'confirm_list', 'save_review_draft'):
+            if action in ('decide', 'confirm_verdicts', 'amend_items', 'confirm_list', 'save_review_draft'):
                 with self._db() as db:
                     run = self._work_run(db, actor, groups, body.get('run_id'))
                     job = db.execute('SELECT current_attempt FROM work_jobs WHERE run_id=? AND job_id=?', (run['id'], body.get('job_id'))).fetchone()
@@ -1182,7 +1219,11 @@ class WorkspaceMixin:
                         publication_errors.append(node.get('id', '') + ': Native 도구의 현재 권한과 지문을 확인할 수 없습니다.')
                         continue
                     try:
-                        await bridge.check(actor, ref)
+                        if node.get('result_block') == 'change_request':
+                            observed = await bridge.inspect_registered(actor, ref.get('tool_id', ''), ref.get('function', ''))
+                            if observed['reference'] != ref: raise ValueError('request reference changed')
+                        else:
+                            await bridge.check(actor, ref)
                     except Exception:
                         publication_errors.append(node.get('id', '') + ': Native 도구 계약이 변경되었거나 현재 사용할 권한이 없습니다.')
             # Native identity/group membership may change while registry checks await.
@@ -1266,6 +1307,7 @@ class WorkspaceMixin:
             else:
                 definition = {'id': key, 'name': body.get('name', '새 업무 절차'), 'system_id': system, 'category': body.get('category', 'ops'), 'mode': body.get('mode', 'on_demand'),
                               'nodes': {root: {'id': root, 'name': body.get('name', '새 업무 절차'), 'type': 'p', 'parent': None, 'children': [], 'deps': []}}}
+                if body.get('execution_scope') is not None: definition['execution_scope'] = body['execution_scope']
             errors, _ = definition_check(definition, False)
             if errors: _fail('invalid_definition', '\n'.join(errors))
             db.execute('INSERT INTO work_definitions VALUES(?,?,?,1,NULL,NULL,?,?)', (key, system, _dump(definition), actor_id, now))
@@ -1314,7 +1356,9 @@ class WorkspaceMixin:
             errors.extend(publication_errors)
             if hasattr(self, 'operations') and hasattr(self.operations, 'validate_publication'):
                 errors.extend(self.operations.validate_publication(db, definition, actor, groups))
-            validation = {'revision': row['revision'], 'definition_hash': _hash(definition), 'resource_versions': publication_resources or {'skills': {}}, 'errors': errors, 'warnings': warnings, 'checked_at': now}
+                warnings.extend(self.operations.publication_warnings(db, definition))
+            validation = {'revision': row['revision'], 'definition_hash': _hash(definition), 'resource_versions': publication_resources or {'skills': {}}, 'errors': errors, 'warnings': warnings, 'checked_at': now,
+                          'checks': ['P/T/J 구조·선행 연결·입력 형식', '현재 도구·지침 참조와 게시 권한'] if not errors else []}
             if action == 'validate_workflow':
                 db.execute('UPDATE work_definitions SET validation=? WHERE id=?', (_dump(validation), row['id']))
                 return {'workflow_id': row['id'], 'revision': row['revision'], 'validation': validation}
@@ -1332,9 +1376,14 @@ class WorkspaceMixin:
             published = db.execute('SELECT * FROM work_versions WHERE workflow_id=? AND version=?', (row['id'], version)).fetchone()
             if not published: _fail('publication_required', '게시된 절차 버전을 선택해 주세요.')
             definition = json.loads(published['definition']); factory_id = body.get('factory_id', '')
+            if definition.get('execution_scope') == 'system': factory_id = ''
+            if definition.get('execution_scope') == 'factory' and not factory_id:
+                _fail('factory_required', '시작할 공장을 선택해 주세요.')
             self._work_authorize_scope(db, actor, groups, row['system_id'], factory_id, 'participant')
             factory = db.execute('SELECT * FROM work_factories WHERE id=? AND system_id=?', (factory_id, row['system_id'])).fetchone() if factory_id else None
             if factory_id and not factory: _fail('factory_not_found', '등록된 공장을 선택해 주세요.')
+            if definition.get('mode', 'on_demand') == 'on_demand' and factory_id and db.execute("SELECT 1 FROM work_runs WHERE workflow_id=? AND factory_id=? AND status NOT IN ('completed','cancelled') LIMIT 1", (row['id'], factory_id)).fetchone():
+                _fail('factory_run_active', '이 공장에서 같은 업무가 진행 중입니다. 기존 진행 건을 확인해 주세요.')
             sharing = body.get('sharing', {'group_ids': []})
             if not isinstance(sharing, dict) or set(sharing) != {'group_ids'} or not isinstance(sharing['group_ids'], list) or any(group not in {item['id'] for item in native_groups} for group in sharing['group_ids']): _fail('invalid_sharing', '현재 Native 참여 그룹을 선택해 주세요.')
             if sharing['group_ids'] and not capabilities['is_admin'] and not set(sharing['group_ids']) <= groups: _fail('sharing_forbidden', '참여 중인 그룹만 연결할 수 있습니다.')
@@ -1361,7 +1410,7 @@ class WorkspaceMixin:
                 self.operations.enqueue_scope(db, actor, groups, key, expected_revision=1, request_id='emergency-' + key, emergency=True)
             run = self._work_run_view(db, actor, groups, self._work_run(db, actor, groups, key))
             return {'run_id': key, 'workflow_id': row['id'], 'revision': 1, 'run': run}
-        if action in ('save_inputs', 'claim_task', 'human_confirm', 'decide', 'close_run', 'cancel_run', 'link_chat', 'amend_items', 'release_task', 'confirm_list', 'save_review_draft'):
+        if action in ('save_inputs', 'claim_task', 'human_confirm', 'decide', 'confirm_verdicts', 'close_run', 'cancel_run', 'link_chat', 'amend_items', 'release_task', 'confirm_list', 'save_review_draft'):
             row = self._work_run(db, actor, groups, body.get('run_id'), write=True); _revision(body, row['revision'])
             if action == 'link_chat':
                 db.execute('INSERT OR IGNORE INTO work_chat_links VALUES(?,?,?,?)', (actor_id, body['chat_id'], row['id'], now))
@@ -1393,7 +1442,24 @@ class WorkspaceMixin:
                 if job['claim_actor'] and job['claim_actor'] != actor_id: _fail('task_claimed', '다른 담당자가 처리 중입니다.')
                 node = json.loads(row['snapshot'])['definition']['nodes'][job_id]; assignee = node.get('assignee')
                 if assignee and assignee.get('id') not in ({actor_id} if assignee.get('kind') == 'user' else groups): _fail('assignee_required', '배정된 담당자 또는 그룹만 처리할 수 있습니다.')
-                if action == 'save_review_draft':
+                if action == 'confirm_verdicts':
+                    current = db.execute('SELECT * FROM work_attempts WHERE id=?', (job['current_attempt'],)).fetchone()
+                    if node.get('result_block') != 'item_verdict' or not current or current['id'] != body.get('attempt_id') or current['number'] != body.get('result_revision'):
+                        _fail('result_revision_conflict', '확정할 현재 판정 근거를 다시 확인해 주세요.')
+                    if job['status'] == 'completed':
+                        _fail('decision_conflict', '이미 확정한 판정입니다. 새 근거 없이 변경할 수 없습니다.')
+                    items = json.loads(current['result'] or '{}').get('items', [])
+                    required = {str(item['id']) for item in items if isinstance(item, dict) and 'id' in item}
+                    choices = body.get('verdicts')
+                    existing = {item['item_id']: item['verdict'] for item in db.execute('SELECT item_id,verdict FROM work_decisions WHERE attempt_id=?', (current['id'],))}
+                    if not required or not isinstance(choices, list) or any(not isinstance(item, dict) or set(item) - {'item_id', 'verdict', 'note', 'judgment_id'} or not isinstance(item.get('item_id'), str) or item.get('verdict') not in ('completed', 'failed', 'unknown', 'action_required') for item in choices) or len(choices) != len({item['item_id'] for item in choices}) or not {item['item_id'] for item in choices} <= required or required - existing.keys() - {item['item_id'] for item in choices}:
+                        _fail('verdict_selection_required', '모든 항목의 판정을 선택한 뒤 확정해 주세요.')
+                    if required <= existing.keys() or any(item['item_id'] in existing and existing[item['item_id']] != item['verdict'] for item in choices):
+                        _fail('decision_conflict', '이미 확정한 판정입니다. 새 근거 없이 변경할 수 없습니다.')
+                    for choice in choices:
+                        if choice['item_id'] not in existing:
+                            self._work_decide(db, actor, row, job, node, {**body, **choice})
+                elif action == 'save_review_draft':
                     current = db.execute('SELECT * FROM work_attempts WHERE id=?', (job['current_attempt'],)).fetchone()
                     if node.get('result_block') != 'ai_review' or not current or current['id'] != body.get('attempt_id') or current['number'] != body.get('result_revision'):
                         _fail('result_revision_conflict', '편집할 현재 초안의 근거를 다시 확인해 주세요.')
@@ -1507,6 +1573,8 @@ class WorkspaceMixin:
         if not job['current_attempt']:
             _fail('result_revision_conflict', '현재 결과를 다시 확인한 뒤 판정해 주세요.')
         attempt = db.execute('SELECT * FROM work_attempts WHERE id=?', (job['current_attempt'],)).fetchone()
+        if job['status'] == 'completed' and db.execute('SELECT 1 FROM work_decisions WHERE attempt_id=?', (attempt['id'],)).fetchone():
+            _fail('decision_conflict', '이미 확정한 판정입니다. 새 근거 없이 변경할 수 없습니다.')
         if node.get('result_block') == 'change_request':
             external = db.execute("SELECT data FROM work_external_requests WHERE run_id=? AND job_id=? AND state='effect_verified'", (run['id'], job['job_id'])).fetchall()
             verified = any((record := json.loads(item['data'])).get('attempt_id') == attempt['id'] and record.get('reported_complete') is True and record.get('effect_verified') is True for item in external)
@@ -1525,6 +1593,14 @@ class WorkspaceMixin:
         verdict = body.get('verdict'); item_id = body.get('item_id', 'job')
         if verdict not in ('completed', 'failed', 'unknown', 'action_required') or not _id(item_id):
             _fail('invalid_verdict', '판정의 업무 의미와 항목 ID를 확인해 주세요.')
+        note = str(body.get('note', ''))[:4000]
+        if body.get('judgment_id') is not None:
+            judgments = node.get('judgments', prior_snapshot['definition'].get('judgments', []))
+            judgment = next((item for item in judgments if isinstance(item, dict) and item.get('id') == body['judgment_id']), None)
+            if not judgment or judgment.get('status') != verdict or not isinstance(judgment.get('label'), str) or len(judgment['label']) > 160:
+                _fail('invalid_judgment', '선택한 판정 문구와 기본 상태를 확인해 주세요.')
+            suffix = '\n선택한 판정: ' + judgment['label'] + ' (' + judgment['id'] + ')'
+            note = note[:4000-len(suffix)] + suffix
         result = json.loads(attempt['result']) if attempt['result'] else {}
         items = result.get('items', []) if isinstance(result, dict) else []
         required = {str(item['id']) for item in items if isinstance(item, dict) and 'id' in item and item.get('required', True)}
@@ -1532,7 +1608,10 @@ class WorkspaceMixin:
             required = {str(item['id']) for item in items if isinstance(item, dict) and 'id' in item and item.get('required', True) and item.get('selected', True)}
             if not required and verdict == 'completed':
                 _fail('zero_selection_policy_required', '선택 항목이 없는 목록의 완료 정책이 정해지지 않았습니다. 확정을 보류합니다.')
-        if node.get('result_block') in ('checklist', 'list_confirm', 'item_verdict') and required:
+        if node.get('result_block') == 'item_verdict' and items:
+            if item_id not in {str(item['id']) for item in items if isinstance(item, dict) and 'id' in item}:
+                _fail('item_not_found', '현재 결과의 항목을 선택해 주세요.')
+        elif node.get('result_block') in ('checklist', 'list_confirm') and required:
             if item_id not in required: _fail('item_not_found', '현재 결과의 필수 항목을 선택해 주세요.')
         elif item_id != 'job': _fail('item_not_found', '현재 작업 결과를 확인해 주세요.')
         # Every decision is evidence-bound. A second click cannot override an
@@ -1547,7 +1626,7 @@ class WorkspaceMixin:
             if review:
                 _revision({'expected_revision': body.get('review_revision')}, review['revision'])
         decision_id, decided_at = str(uuid4()), _now()
-        db.execute('INSERT INTO work_decisions VALUES(?,?,?,?,?,?,?,?,?,?)', (decision_id, run['id'], job['job_id'], item_id, attempt['id'], attempt['number'], verdict, str(body.get('note', ''))[:4000], _value(actor, 'id'), decided_at))
+        db.execute('INSERT INTO work_decisions VALUES(?,?,?,?,?,?,?,?,?,?)', (decision_id, run['id'], job['job_id'], item_id, attempt['id'], attempt['number'], verdict, note, _value(actor, 'id'), decided_at))
         if node.get('result_block') == 'ai_review':
             text = review['text'] if review else next((result[key] for key in ('text', 'draft', 'summary') if isinstance(result.get(key), str)), '')
             db.execute('INSERT INTO work_review_revisions VALUES(?,?,?,?,?,?)', (attempt['id'], (review['revision'] if review else 0) + 1, text, _value(actor, 'id'), decided_at, decision_id))
@@ -1555,7 +1634,7 @@ class WorkspaceMixin:
         resolved = not required or required <= {item['item_id'] for item in decisions}
         state = 'waiting_confirmation'
         if resolved:
-            meanings = {item['verdict'] for item in decisions}
+            meanings = {item['verdict'] for item in decisions if not required or item['item_id'] in required}
             state = 'completed' if meanings == {'completed'} else 'failed' if 'failed' in meanings else 'unknown' if 'unknown' in meanings else 'waiting_input'
             if attempt['status'] == 'partial' and state == 'completed': state = 'partial'
         reason = job['reason']

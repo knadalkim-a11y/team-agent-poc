@@ -231,9 +231,11 @@ def input_and_history_flow(g,key,chat_id):
     g.click('[data-author-action=validate]');g.click('[data-author-action=publish]');g.click('#ees-work-dialog [data-dialog-confirm]')
     g.wait('document.querySelector("#ees-work-designer")?.innerText.includes("게시 v1")')
     g.click('[data-action=mode][data-mode=work]');g.click('[data-action=workflow][data-workflow-id="'+key+'"]')
-    g.click('[data-action=start_run]');g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.click('[data-action=start_run][data-start-inline]')
     g.wait('document.querySelector("[data-action=job]")')
     run=g.api('/api/ees-work/workspace?workflow_id='+key)['runs'][0];run_id=run['id']
+    assert run['workflow_id']==key and run['version']==1 and run['status']=='open' and not run['attempts'],run
+    g.wait_work_ready(workflow_id=key,run_id=run_id)
     job=next(node for node in run['definition']['nodes'].values() if node['type']=='j')
     g.click('[data-action=job][data-job-id="'+job['id']+'"]')
     before=g.api('/api/ees-work/workspace?run_id='+run_id)['run']

@@ -547,7 +547,9 @@ class BrandingBuildTests(unittest.TestCase):
         # Independent approved Figma inventory: do not derive the expectation
         # from the builder list whose omission caused the original failure.
         added = ('1c98e', '35b2e', '478bf', '52271', '63982',
-                 '6d84b', 'a28e3', 'b22ad', 'b456d', 'f1e53')
+                 '6d84b', 'a28e3', 'b22ad', 'b456d', 'f1e53',
+                 'f4cb1', '3dae2', 'e9ac2', '30679', '2b3d1',
+                 '1a06f', '2fe77', '2eb05', 'b355c', '66c71', '45242')
         self.build('figma-icons')
         with ZipFile(self.root / 'figma-icons' / builder.WHEEL_FILENAME) as archive:
             for name in added:

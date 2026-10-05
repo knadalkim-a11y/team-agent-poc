@@ -1,0 +1,155 @@
+{
+  "module": "test_confluence_canary.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.11,
+  "tests_run": 34,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 34,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_44_character_fernet_key",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_cli_conflicts_and_arbitrary_input_rejected_before_version_or_file_access",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_cli_rejects_arbitrary_input_without_echoing_it",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_committed_wal_is_read",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_conflicting_check_modes_rejected_before_file_access",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_duplicate_and_mixed_plaintext_records_do_not_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_encrypted_value_matches_existing_key_and_db_is_unchanged",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_error_does_not_disclose_values_or_traceback",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_github_cli_checks_version_before_reading",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_github_cli_suppresses_error_details",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_github_cli_uses_fixed_mode_and_prints_only_counts_and_booleans",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_github_committed_wal_target_and_plaintext_are_read",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_github_duplicate_labels_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_github_duplicate_marker_for_same_or_different_tool_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_github_existing_markers_in_target_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_github_marker_in_another_tool_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_github_missing_or_case_mismatched_label_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_github_plaintext_in_db_and_journal_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_github_requires_fresh_marker_under_exact_target_and_preserves_db",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_jira_cli_checks_version_before_reading_and_outputs_only_result",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_jira_cli_uses_fixed_mode_and_suppresses_error_details",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_jira_committed_wal_target_and_plaintext_are_read",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_jira_duplicate_labels_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_jira_duplicate_marker_for_same_or_different_tool_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_jira_marker_in_another_tool_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_jira_missing_or_case_mismatched_label_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_jira_old_marker_in_target_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_jira_plaintext_and_file_residue_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_jira_requires_fresh_marker_under_exact_target_and_preserves_db",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_missing_db_is_not_created",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_plaintext_dict_cannot_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_plaintext_residue_in_journal_prevents_pass",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_scan_detects_chunk_boundary_and_utf16",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_canary.CanaryCheckTests.test_wrong_key_and_absent_canary_do_not_pass",
+      "status": "passed"
+    }
+  ]
+}
