@@ -896,6 +896,10 @@ def figma_delta_flow(g):
     g.click('[data-author-action="validate"]');g.wait('!!document.querySelector(".ew-author-validation")')
     advisory=g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['workflow']['validation']
     assert not advisory['errors'] and any('송부 방식' in str(item) for item in advisory['warnings']),advisory
+    # The validation panel can render while its follow-up workspace read is
+    # still pending. Require the physical publish action to be ready before
+    # assessing advisory-only publication; never enable it from the fixture.
+    g.wait('document.querySelector(\'[data-author-action="publish"]\')?.disabled === false')
     assert g.browser.evaluate('!document.querySelector(\'[data-author-action="publish"]\').disabled')
     g.capture('figma-b23-delivery-advisory-publish-enabled')
     g.click('[data-author-action="publish"]');g.click('#ees-work-dialog [data-dialog-confirm]')

@@ -744,6 +744,7 @@ async def select_chat_work_tools(request, user, metadata, tool_ids, form_data):
             if reference.get("reference_kind") != "historical" and (type(reference.get("revision")) is not int or row["revision"] != reference["revision"]):
                 _fail("work_chat_context_changed")
         scoped = {key: reference.get(key, "") for key in ("workflow_id", "run_id", "job_id", "revision", "context_id")}
+        scoped["created_at"] = row["updated_at"]
         if any(not isinstance(scoped[key], str) or len(scoped[key]) > (4096 if key == "context_id" else 200) for key in ("workflow_id", "run_id", "job_id", "context_id")):
             _fail("work_chat_context_invalid")
         historical = reference.get("reference_kind") == "historical"

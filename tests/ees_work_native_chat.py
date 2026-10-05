@@ -275,6 +275,7 @@ def input_and_history_flow(g,key,chat_id):
     message=next(item for item in chat['history']['messages'].values() if item.get('role')=='user' and item.get('content')==question)
     ref=message['meta']['ees_work_reference']
     assert ref['attempt_id']==first_attempt['id'] and ref['version']==1 and ref['result_revision']==1,ref
+    assert ref.get('created_at')==first['updated_at'],ref
     g.type('[data-work-input][name=note]','나중에 저장한 두 번째 입력')
     g.click('[data-action=save_inputs]');g.wait('!document.querySelector("[data-action=save_inputs]")?.disabled')
     g.click('[data-action=confirm]');g.click('#ees-work-dialog [data-dialog-confirm]')
@@ -282,7 +283,10 @@ def input_and_history_flow(g,key,chat_id):
     latest=g.api('/api/ees-work/workspace?run_id='+run_id)['run'];assert len(latest['attempts'])==2
     assert latest['attempts'][0]==first_attempt
     selector='#message-'+message['id']+' .ees-work-message-reference [data-action=open_reference]'
-    g.wait('document.querySelector('+json.dumps(selector)+')');g.click(selector)
+    g.wait('document.querySelector('+json.dumps(selector)+')')
+    card=g.browser.evaluate('document.querySelector('+json.dumps(selector)+').innerText')
+    assert '기준 시각' in card and '기록 없음' not in card,card
+    g.click(selector)
     g.wait('document.querySelector("#ees-work-panel")?.innerText.includes("대화에서 참조한 과거 기록")')
     g.click('#ees-work-panel .ew-history summary')
     visible=g.browser.evaluate('document.querySelector("#ees-work-panel").innerText')

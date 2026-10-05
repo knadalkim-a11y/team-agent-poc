@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-05",
+  "integration_base": "4b618e22267c1bd1f9f75c1aab3fb10e24831b00",
+  "first_ci": {
+    "run": 37284962975,
+    "native_compose_job": 111681950199,
+    "complete_product_job": 111681950144,
+    "conclusion": "failure; two observed Native gates; retained original run"
+  },
+  "changes": [
+    "B2-3 blocked publication and error navigation use current UI",
+    "Wait for actual publish readiness within existing bounded gate; no DOM mutation",
+    "Current message basis time is stored and taken from authorized server revision; historical attempt time preserved"
+  ],
+  "local": {
+    "remote_native_before_fix": {
+      "passed": 12,
+      "failed": 1,
+      "skipped": 0,
+      "wheel": "51b10e3ef545b2d6123dffc34014c973a3c9327488f08d4addb8b10d59959ddf"
+    },
+    "corrected_native_authoring": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "native_registration_context": {
+      "passed": 14,
+      "failed": 0,
+      "skipped": 0
+    },
+    "historical_reference": {
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    "node_runtime_and_execution": {
+      "passed": 100,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "reports": {
+    "ci-followup-full-product-report.json": {
+      "status": "passed",
+      "checkpoints": 20,
+      "wheel_sha256": "51b10e3ef545b2d6123dffc34014c973a3c9327488f08d4addb8b10d59959ddf",
+      "sha256": "3c189ce1b72049169f327fa00bb8aab844bfa0598252aab55b94f4aad027c50e"
+    },
+    "ci-followup-central-chat-report.json": {
+      "status": "passed",
+      "checkpoints": 9,
+      "wheel_sha256": "0b9366bab1187048be2db5329af46b337e4d84002bd05f4f2de10f32cf422943",
+      "sha256": "a10d8d3980ff3e35cd303e37b5687796f4e0350b9b23dee038d341e16b4e2e4a"
+    }
+  },
+  "source_sha256": {
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py": "22c91cb6857a3ec2fbae6c5582f077a8420831eed2a7754dd0c4a73212a64b7a",
+    "branding/ees/ui/ees-work-launcher.js": "839d140b661a4eb63f49cc97e9be755ff688f91f8b84134c590a07cb2c49a18c",
+    "tests/test_ees_workflow_native.py": "22de1527801660cf183a5538867dbe26cfc3b17bd3ef505b930b5b50529d787d",
+    "tests/test_ees_work_figma_authoring_native.py": "d59ebf5fc6b4c0179995ead831e55c5bd7073dac4e932761f9a103bdc1b8fb19",
+    "tests/ees_work_integrated_app.py": "ec938fc63f50c7d631d3915ecd6c913b0a76ce8c78a207c7fcb70a05b5e01950",
+    "tests/ees_work_native_chat.py": "8325a7513b3a7d62d587c2416c0c625a7039ce536573b3e8ab3da00e1e1bc941"
+  },
+  "boundary": "Reports use actual Native app and temporary synthetic users/data with loopback external model/Jira. Full product ran prior to timestamp addition; central chat ran final timestamp source. Exact final head automatic CI recorded in PR73. No deployment or operational requests."
+}

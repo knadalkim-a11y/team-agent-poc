@@ -166,7 +166,7 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         service=self.fixture.workflow.WorkflowService(self.fixture.directory/'chat-work.sqlite3',self.fixture.native_users.Users.get_user_by_id,lambda _:None)
         created=await service.workspace_command(self.admin,{'action':'create_workflow','system_id':'EMS','name':'Chat scope','mode':'on_demand','expected_revision':0,'request_id':'chat-create'})
         self.assertTrue(created['ok'],created)
-        reference={'kind':'workspace','workflow_id':created['workflow_id'],'run_id':'','job_id':'','revision':1,'context_id':'editor-context-1'}
+        reference={'kind':'workspace','workflow_id':created['workflow_id'],'run_id':'','job_id':'','revision':1,'context_id':'editor-context-1','created_at':'1900-01-01T00:00:00Z'}
         metadata={'chat_id':'synthetic-chat','user_message':{'meta':{'ees_work_reference':reference}}}
         chat_lookup=AsyncMock(return_value=SimpleNamespace(user_id='admin'))
         request=Request({'type':'http','app':self.fixture.app,'headers':[],'state':{}})
@@ -178,6 +178,8 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
             selected=await self.native.select_chat_work_tools(request,self.admin,metadata,[],body)
             self.assertEqual(selected,['ees_workflow'],request.state.ees_work_chat_status)
             self.assertEqual(metadata['ees_work_reference']['kind'],'workspace')
+            self.assertEqual(metadata['ees_work_reference']['created_at'],created['workflow']['updated_at'])
+            self.assertNotEqual(metadata['ees_work_reference']['created_at'],reference['created_at'])
             self.assertIn('editor-context-1',body['messages'][-1]['content'])
             reference['revision']=2
             rejected=await self.native.select_chat_work_tools(Request({'type':'http','app':self.fixture.app,'headers':[],'state':{}}),self.admin,metadata,[],{'messages':[]})
