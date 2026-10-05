@@ -1,0 +1,9 @@
+{
+  "suite": "native-work",
+  "results": [
+    {
+      "module": "test_ees_work_demo.py",
+      "exit_code": 0
+    }
+  ]
+}

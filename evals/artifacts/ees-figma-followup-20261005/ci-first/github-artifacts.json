@@ -1,0 +1,120 @@
+{
+  "run_id": 37284962975,
+  "source_endpoint": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/runs/37284962975/artifacts",
+  "artifacts": [
+    {
+      "id": 11333754112,
+      "name": "ees-native-complete-product-cad7684f5d634e1a3178cc86b7a49c7d48bb6d99",
+      "size_in_bytes": 3509926,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11333754112",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11333754112/zip",
+      "expired": false,
+      "created_at": "2026-10-05T08:42:42Z",
+      "expires_at": "2026-10-12T08:42:40Z",
+      "updated_at": "2026-10-05T08:42:42Z",
+      "digest": "sha256:fb85ee1ea24cfb4c460dc5ca953fb30a8dcbb93f58acd40c285682bb7aa61c40",
+      "workflow_run": {
+        "id": 37284962975,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "4b618e22267c1bd1f9f75c1aab3fb10e24831b00"
+      }
+    },
+    {
+      "id": 11333328299,
+      "name": "ees-work-browser-evidence-native-account",
+      "size_in_bytes": 536955,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11333328299",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11333328299/zip",
+      "expired": false,
+      "created_at": "2026-10-05T08:41:54Z",
+      "expires_at": "2026-10-12T08:41:53Z",
+      "updated_at": "2026-10-05T08:41:54Z",
+      "digest": "sha256:60c35d42de834ac82ac094942d97f82683a281675f0370b703f5873f64198b06",
+      "workflow_run": {
+        "id": 37284962975,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "4b618e22267c1bd1f9f75c1aab3fb10e24831b00"
+      }
+    },
+    {
+      "id": 11334261193,
+      "name": "ees-work-browser-evidence-native-work",
+      "size_in_bytes": 449855,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11334261193",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11334261193/zip",
+      "expired": false,
+      "created_at": "2026-10-05T08:41:33Z",
+      "expires_at": "2026-10-12T08:41:32Z",
+      "updated_at": "2026-10-05T08:41:33Z",
+      "digest": "sha256:effce20e48bc41378d47b919ff509588c91a9371526e413aa796c57aaa6818a0",
+      "workflow_run": {
+        "id": 37284962975,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "4b618e22267c1bd1f9f75c1aab3fb10e24831b00"
+      }
+    },
+    {
+      "id": 11334291593,
+      "name": "ees-work-browser-evidence-native-compose",
+      "size_in_bytes": 2765708,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11334291593",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11334291593/zip",
+      "expired": false,
+      "created_at": "2026-10-05T08:42:44Z",
+      "expires_at": "2026-10-12T08:42:42Z",
+      "updated_at": "2026-10-05T08:42:44Z",
+      "digest": "sha256:a378667c7c0b9c5a967f6ca442c7e0a98889de5b638e1c2a1fe0f61dad86696e",
+      "workflow_run": {
+        "id": 37284962975,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "4b618e22267c1bd1f9f75c1aab3fb10e24831b00"
+      }
+    },
+    {
+      "id": 11333957299,
+      "name": "ees-work-browser-evidence-native-execution",
+      "size_in_bytes": 353162,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11333957299",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11333957299/zip",
+      "expired": false,
+      "created_at": "2026-10-05T08:41:40Z",
+      "expires_at": "2026-10-12T08:41:39Z",
+      "updated_at": "2026-10-05T08:41:40Z",
+      "digest": "sha256:435f8d7f33a5886fef7d4ffee98fd38c9e2b15f0dc530abb7c43bfc53047631b",
+      "workflow_run": {
+        "id": 37284962975,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "4b618e22267c1bd1f9f75c1aab3fb10e24831b00"
+      }
+    },
+    {
+      "id": 11333229502,
+      "name": "ees-delivery-coverage-cad7684f5d634e1a3178cc86b7a49c7d48bb6d99",
+      "size_in_bytes": 19675,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11333229502",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11333229502/zip",
+      "expired": false,
+      "created_at": "2026-10-05T08:40:19Z",
+      "expires_at": "2026-10-12T08:40:18Z",
+      "updated_at": "2026-10-05T08:40:19Z",
+      "digest": "sha256:b325e038b20c1d480049bc077c0f32570217629f86bd0660c17cf5673d0d8f32",
+      "workflow_run": {
+        "id": 37284962975,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/ees-restructure-step0a-20261001",
+        "head_sha": "4b618e22267c1bd1f9f75c1aab3fb10e24831b00"
+      }
+    }
+  ]
+}

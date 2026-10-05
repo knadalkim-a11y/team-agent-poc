@@ -1,0 +1,25 @@
+{
+  "suite": "native-compose",
+  "results": [
+    {
+      "module": "test_ees_work_c_phase1_native.py",
+      "exit_code": 0
+    },
+    {
+      "module": "test_ees_work_c_phase2_native.py",
+      "exit_code": 0
+    },
+    {
+      "module": "test_ees_work_figma_authoring_native.py",
+      "exit_code": 1
+    },
+    {
+      "module": "test_ees_work_figma_layout_native.py",
+      "exit_code": 0
+    },
+    {
+      "module": "test_ees_work_figma_runtime_native.py",
+      "exit_code": 0
+    }
+  ]
+}

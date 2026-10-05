@@ -1,0 +1,45 @@
+{
+  "source": "GitHub Git Data API GET commits",
+  "commits": [
+    {
+      "sha": "cad7684f5d634e1a3178cc86b7a49c7d48bb6d99",
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/git/commits/cad7684f5d634e1a3178cc86b7a49c7d48bb6d99",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/commit/cad7684f5d634e1a3178cc86b7a49c7d48bb6d99",
+      "tree": {
+        "sha": "62bc7e8ce480051717ae81ec91a24039da923a80",
+        "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/git/trees/62bc7e8ce480051717ae81ec91a24039da923a80"
+      },
+      "parents": [
+        {
+          "sha": "55832bad328cdfb91c1c284749f7959dd664176c",
+          "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/git/commits/55832bad328cdfb91c1c284749f7959dd664176c",
+          "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/commit/55832bad328cdfb91c1c284749f7959dd664176c"
+        },
+        {
+          "sha": "4b618e22267c1bd1f9f75c1aab3fb10e24831b00",
+          "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/git/commits/4b618e22267c1bd1f9f75c1aab3fb10e24831b00",
+          "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/commit/4b618e22267c1bd1f9f75c1aab3fb10e24831b00"
+        }
+      ],
+      "message": "Merge 4b618e22267c1bd1f9f75c1aab3fb10e24831b00 into 55832bad328cdfb91c1c284749f7959dd664176c"
+    },
+    {
+      "sha": "4b618e22267c1bd1f9f75c1aab3fb10e24831b00",
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/git/commits/4b618e22267c1bd1f9f75c1aab3fb10e24831b00",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/commit/4b618e22267c1bd1f9f75c1aab3fb10e24831b00",
+      "tree": {
+        "sha": "62bc7e8ce480051717ae81ec91a24039da923a80",
+        "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/git/trees/62bc7e8ce480051717ae81ec91a24039da923a80"
+      },
+      "parents": [
+        {
+          "sha": "f9337175a1d9bd6a351f4da780c0ea4407765a14",
+          "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/git/commits/f9337175a1d9bd6a351f4da780c0ea4407765a14",
+          "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/commit/f9337175a1d9bd6a351f4da780c0ea4407765a14"
+        }
+      ],
+      "message": "feat(work): implement Figma C08-C12 follow-up in existing draft"
+    }
+  ],
+  "same_tree": true
+}

@@ -1,0 +1,67 @@
+{
+  "module": "test_ees_work_demo.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 42.503,
+  "tests_run": 12,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 12,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_empty_state_has_no_seed_run_or_fake_success",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_enter_in_work_input_does_not_send_chat_or_run_job",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_human_cancel_then_explicit_confirm_and_history",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_input_save_is_not_execute_and_repeat_click_is_single_write",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_lookup_failure_removes_previously_visible_private_evidence",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_model_zero_one_multiple_use_native_source_without_demo_presets",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_native_message_send_stream_and_work_panel_are_independent",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_native_three_regions_fonts_and_narrow_geometry",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_navigation_preserves_local_input_and_does_not_change_business_revision",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_scope_and_history_do_not_bind_or_replace_native_chat",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_scope_dialog_escape_cancel_and_chat_draft_preservation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_demo.EESWorkNativeBrowserTests.test_sidebar_close_restore_retains_chat_and_work_input",
+      "status": "passed"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "valid": true,
+  "screenshots": 9,
+  "files": [
+    {
+      "path": "integrated-native-ai-proposal-not-auto-save.png",
+      "bytes": 82065,
+      "sha256": "1663cb8f04375663271f493edfde392c7d9e874df8f69bd786fd9c39bac81780"
+    },
+    {
+      "path": "integrated-native-authoring-conflict.png",
+      "bytes": 95446,
+      "sha256": "d0cc415302ce7dcd9719c8e379d3166bbc2da9400b920a8e135d35d5d3e8a63c"
+    },
+    {
+      "path": "integrated-native-group-author-published.png",
+      "bytes": 90642,
+      "sha256": "e936c388dcb6b6577cf11c4c175e2127026036c13a4e4c9a112acf736a2eea7d"
+    },
+    {
+      "path": "nu-closed-native-signup.png",
+      "bytes": 17210,
+      "sha256": "6c9f4d2e4032f3e1208b164f2e99ed5d2a42eb415e625a374cbd48e3bcb804bf"
+    },
+    {
+      "path": "nu05-former-a-tab-now-b.png",
+      "bytes": 70368,
+      "sha256": "b40801ef822bf607dd12e2a9243ed5525aed9bbac908398a8036d2f32a253591"
+    },
+    {
+      "path": "sa-approved-first-chat.png",
+      "bytes": 68110,
+      "sha256": "57c7bce20024f4a707d03d5414c892ea36b1011f01b25fb1c740c79556ad2c3c"
+    },
+    {
+      "path": "sa-native-approved-user.png",
+      "bytes": 49403,
+      "sha256": "aaef91d64da34a624d27a52aa3c400a400f833b03814bc5a7a75535ea862db3a"
+    },
+    {
+      "path": "sa-signup-pending-fonts.json",
+      "bytes": 780,
+      "sha256": "52b1f39d35f35710df5bf3594ae27a35b7f72d2654549551ced5305ad9511422"
+    },
+    {
+      "path": "sa-signup-pending.png",
+      "bytes": 39910,
+      "sha256": "e775030bf2b7b7f312158bf24ebfbb9b346aeee8a81bdfd89c5fb30c596b1e38"
+    },
+    {
+      "path": "sa26-b-after-late-a-responses.png",
+      "bytes": 83257,
+      "sha256": "b41cbde2e6155139603fb5da018d80d24842d9291e9dd946fa6312a5e5bc5ba8"
+    },
+    {
+      "path": "sa26-nu05-account-switch.json",
+      "bytes": 565,
+      "sha256": "718b40b2fc02a2e2800a861bafc85041b1966f756b482b9b5e14c09412b59e13"
+    }
+  ]
+}

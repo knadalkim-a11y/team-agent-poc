@@ -323,6 +323,7 @@ def integrated_flow(gate):
     g.wait('!!document.querySelector(".ew-author-validation")')
     checked=g.api('/api/ees-work/workspace?workflow_id='+identifier)['workflow']
     assert checked['validation']['revision']==checked['revision'] and not checked['validation']['errors']
+    g.wait('document.querySelector(\'[data-author-action="publish"]\')?.disabled===false')
     assert g.browser.evaluate('!document.querySelector(\'[data-author-action="publish"]\').disabled')
     g.capture('figma-b23-publish-review')
     g.click('[data-author-action="publish"]')

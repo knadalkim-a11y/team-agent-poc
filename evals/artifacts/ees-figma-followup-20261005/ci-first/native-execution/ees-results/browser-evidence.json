@@ -1,0 +1,31 @@
+{
+  "valid": true,
+  "screenshots": 5,
+  "files": [
+    {
+      "path": "integrated-current-scope-revoked.png",
+      "bytes": 58655,
+      "sha256": "f69be99d3aa7c8ab2a8df3f44b5ce445f4df82f22b99cf17fb2bdb40b09dcc37"
+    },
+    {
+      "path": "integrated-history-failed-closed.png",
+      "bytes": 58553,
+      "sha256": "29563720ce0762c02d798e8457c5c9c26681662427a36d6d0d909829cae66be7"
+    },
+    {
+      "path": "integrated-late-read-new-target.png",
+      "bytes": 83131,
+      "sha256": "6d085147d202e5c6f401834eaaea507c584bdcb4a4e54a0926b12e0e25a526a3"
+    },
+    {
+      "path": "integrated-late-write-original-target.png",
+      "bytes": 91543,
+      "sha256": "c921cbf13418831278f24671969ac49ac8536d1933fe26d423e88ffd6ce66e7c"
+    },
+    {
+      "path": "integrated-two-native-tabs-conflict.png",
+      "bytes": 96181,
+      "sha256": "99f37fbcbb96b8a872ca51f1b1da3c83dc501ccf86c72b88279395a4f94fd6b7"
+    }
+  ]
+}

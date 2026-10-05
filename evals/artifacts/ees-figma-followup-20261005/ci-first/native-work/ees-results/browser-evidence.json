@@ -1,0 +1,41 @@
+{
+  "valid": true,
+  "screenshots": 7,
+  "files": [
+    {
+      "path": "integrated-empty-native.png",
+      "bytes": 57666,
+      "sha256": "50c9d76f8b98cb5ed835ad7c4752cf15f9ebbb62d57c857821d213e97f8fd584"
+    },
+    {
+      "path": "integrated-human-confirm-history.png",
+      "bytes": 98469,
+      "sha256": "e11fc2abfa6f8df63351560b845c1c168d7fe9cb7157fd2b4eb9050288b0f6e2"
+    },
+    {
+      "path": "integrated-layout-1180.png",
+      "bytes": 34960,
+      "sha256": "3cab35922d82a7542876234dcb7d27a847e2ee2e429ae9461e6701a077408a00"
+    },
+    {
+      "path": "integrated-layout-1440.png",
+      "bytes": 55463,
+      "sha256": "c266303864e17712339002efab94b74a3d4c59d285703922fb64b43119678c81"
+    },
+    {
+      "path": "integrated-layout-1920.png",
+      "bytes": 57684,
+      "sha256": "9177115197ba3e2a0e202603965c73f18b90310779719114dd114512b75e3938"
+    },
+    {
+      "path": "integrated-native-chat-and-work.png",
+      "bytes": 98978,
+      "sha256": "3f5ba1aa02635de5472c863738c3dc3373896c9c5923ff4410f30d9c06989616"
+    },
+    {
+      "path": "integrated-saved-input-not-execution.png",
+      "bytes": 91638,
+      "sha256": "c33ab0015b2d452d85dc78b3181143ff0bc6c1d0fba193c44cffa1b548e31a7b"
+    }
+  ]
+}
