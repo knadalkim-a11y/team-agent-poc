@@ -1,0 +1,249 @@
+const assetPathPrefix = "temporary-figma-asset/62aa50cf-d84d-46c3-b3c2-262de4e29593";
+const imgStateUnknown = `${assetPathPrefix}/3dae2.svg`;
+const imgIconChevronDown = `${assetPathPrefix}/ead50.svg`;
+
+type ButtonV4Props = {
+  className?: string;
+  label?: string;
+  style?: "Primary" | "Secondary" | "Text";
+};
+
+function ButtonV4({ className, label = "버튼", style = "Primary" }: ButtonV4Props) {
+  const isSecondary = style === "Secondary";
+  const isText = style === "Text";
+  return (
+    <div className={className || `content-stretch flex h-[34px] items-center justify-center relative rounded-[6px] ${isText ? "px-[6px]" : isSecondary ? "bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid px-[14px]" : "bg-[var(--ees-brand-solid,#2f5f98)] px-[14px]"}`} id={isText ? "node-746_645" : isSecondary ? "node-746_643" : "node-746_641"}>
+      {style === "Primary" && (
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-inverse,white)] tracking-[-0.042px] whitespace-nowrap" data-node-id="746:642">
+          {label}
+        </p>
+      )}
+      {isSecondary && (
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="746:644">
+          {label}
+        </p>
+      )}
+      {isText && (
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-brand-text,#2f5f98)] tracking-[-0.042px] whitespace-nowrap" data-node-id="746:646">
+          {label}
+        </p>
+      )}
+    </div>
+  );
+}
+
+type StatusGlyphV4Props = {
+  className?: string;
+  state?: "Unknown";
+};
+
+function StatusGlyphV4({ className, state = "Unknown" }: StatusGlyphV4Props) {
+  return (
+    <div className={className || "relative size-[16px]"} data-node-id="746:639">
+      <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgStateUnknown} />
+    </div>
+  );
+}
+
+export default function B23() {
+  return (
+    <div className="bg-[var(--ees-surface-sidebar,#fafafa)] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col gap-[12px] items-start overflow-clip p-[24px] relative rounded-[8px] size-full" data-node-id="958:1145" data-name="B2-3 · 절차 개요 · 게시 전 확인 결과">
+      <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="958:1146">
+        B2에서 ‘게시 전 확인’을 눌렀을 때 업무 패널에 나오는 결과 (배포 산출물 점검 초안 v0.1)
+      </p>
+      <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex flex-col gap-[16px] items-start overflow-clip pt-[18px] px-[20px] relative rounded-[8px] shrink-0 w-full" data-node-id="958:1147" data-name="Pre-publish check">
+        <div className="[word-break:break-word] content-stretch flex gap-[10px] items-center overflow-clip relative shrink-0 w-full whitespace-nowrap" data-node-id="958:1148" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Bold'] font-bold leading-[28px] relative shrink-0 text-[20px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.2px]" data-node-id="958:1149">
+            게시 전 확인
+          </p>
+          <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)]" data-node-id="958:1150">
+            15:20 확인 · 검사 10개
+          </p>
+        </div>
+        <div className="content-stretch flex flex-col gap-[6px] items-start overflow-clip relative shrink-0 w-full" data-node-id="958:1151" data-name="Frame">
+          <div className="content-stretch flex gap-[6px] items-center overflow-clip relative shrink-0" data-node-id="958:1152" data-name="Frame">
+            <div className="relative shrink-0 size-[14px]" data-node-id="958:1153" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown} />
+            </div>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="958:1155">
+              게시를 막는 문제
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-strong,#3f4147)] whitespace-nowrap" data-node-id="958:1156">
+              0
+            </p>
+          </div>
+        </div>
+        <div className="content-stretch flex flex-col gap-[6px] items-start overflow-clip relative shrink-0 w-full" data-node-id="958:1178" data-name="Frame">
+          <div className="content-stretch flex gap-[6px] items-center overflow-clip relative shrink-0" data-node-id="958:1179" data-name="Frame">
+            <div className="relative shrink-0 size-[14px]" data-node-id="958:1180" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown} />
+            </div>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-status-attention,#96590c)] tracking-[-0.042px] whitespace-nowrap" data-node-id="958:1182">
+              확인 권장
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="958:1183">
+              4
+            </p>
+          </div>
+          <div className="border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[6px] shrink-0 w-full" data-node-id="958:1184" data-name="Frame">
+            <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[10px] items-start overflow-clip pl-[12px] pr-[10px] py-[10px] relative shrink-0 w-full" data-node-id="958:1158" data-name="Frame">
+              <div className="content-stretch flex flex-col items-start overflow-clip pt-[2px] relative shrink-0" data-node-id="958:1159" data-name="Frame">
+                <StatusGlyphV4 className="relative shrink-0 size-[16px]" />
+              </div>
+              <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col font-['Noto_Sans_KR:Regular'] font-normal gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="958:1163" data-name="Frame">
+                <p className="leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="958:1164">
+                  2 1차 점검 · 점검 결과 송부
+                </p>
+                <p className="leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-[min-content]" data-node-id="958:1165">
+                  송부 방식(메일 · Jira 댓글)이 정해지지 않았습니다 · 정해질 때까지 이 작업에서 보내기가 막힙니다
+                </p>
+              </div>
+              <ButtonV4 className="content-stretch flex h-[34px] items-center justify-center px-[6px] relative rounded-[6px] shrink-0" label="열기" style="Text" />
+            </div>
+            <div className="content-stretch flex gap-[10px] items-start overflow-clip pl-[12px] pr-[10px] py-[10px] relative shrink-0 w-full" data-node-id="958:1168" data-name="Frame">
+              <div className="content-stretch flex flex-col items-start overflow-clip pt-[2px] relative shrink-0" data-node-id="958:1169" data-name="Frame">
+                <StatusGlyphV4 className="relative shrink-0 size-[16px]" />
+              </div>
+              <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col font-['Noto_Sans_KR:Regular'] font-normal gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="958:1173" data-name="Frame">
+                <p className="leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="958:1174">
+                  3 보완·재점검 · 재판정 · 배포 포함 확정
+                </p>
+                <p className="leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-[min-content]" data-node-id="958:1175">
+                  D-5 이후에도 미승인인 CR을 어떻게 처리할지 정해지지 않았습니다 · 정해질 때까지 이 작업에서 처리 방식을 확인해야 합니다
+                </p>
+              </div>
+              <ButtonV4 className="content-stretch flex h-[34px] items-center justify-center px-[6px] relative rounded-[6px] shrink-0" label="열기" style="Text" />
+            </div>
+            <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[10px] items-start overflow-clip pl-[12px] pr-[10px] py-[10px] relative shrink-0 w-full" data-node-id="958:1185" data-name="Frame">
+              <div className="content-stretch flex flex-col items-start overflow-clip pt-[2px] relative shrink-0" data-node-id="958:1186" data-name="Frame">
+                <StatusGlyphV4 className="relative shrink-0 size-[16px]" />
+              </div>
+              <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col font-['Noto_Sans_KR:Regular'] font-normal gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="958:1191" data-name="Frame">
+                <p className="leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="958:1192">
+                  판정 규칙 · CR별 판정
+                </p>
+                <p className="leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-[min-content]" data-node-id="958:1193">
+                  AI 판정 제안 규칙이 임시값입니다
+                </p>
+              </div>
+              <ButtonV4 className="content-stretch flex h-[34px] items-center justify-center px-[6px] relative rounded-[6px] shrink-0" label="열기" style="Text" />
+            </div>
+            <div className="content-stretch flex gap-[10px] items-start overflow-clip pl-[12px] pr-[10px] py-[10px] relative shrink-0 w-full" data-node-id="958:1196" data-name="Frame">
+              <div className="content-stretch flex flex-col items-start overflow-clip pt-[2px] relative shrink-0" data-node-id="958:1197" data-name="Frame">
+                <StatusGlyphV4 className="relative shrink-0 size-[16px]" />
+              </div>
+              <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col font-['Noto_Sans_KR:Regular'] font-normal gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="958:1202" data-name="Frame">
+                <p className="leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="958:1203">
+                  2 1차 점검 · CR별 필수 문서 확인
+                </p>
+                <p className="leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-[min-content]" data-node-id="958:1204">
+                  첨부 파일 이름 규칙이 없어 AI가 판정을 제안하지 못하는 경우가 자주 생길 수 있습니다
+                </p>
+              </div>
+              <ButtonV4 className="content-stretch flex h-[34px] items-center justify-center px-[6px] relative rounded-[6px] shrink-0" label="열기" style="Text" />
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex flex-col items-start overflow-clip relative shrink-0 w-full" data-node-id="958:1207" data-name="Frame">
+          <div className="content-stretch flex gap-[6px] items-center overflow-clip relative shrink-0" data-node-id="958:1208" data-name="Frame">
+            <div className="relative shrink-0 size-[14px]" data-node-id="958:9414" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown} />
+            </div>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="958:1211">
+              통과
+            </p>
+            <p className="[word-break:break-word] font-['Inter:Medium'] font-medium leading-[18px] not-italic relative shrink-0 text-[13px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="958:1212">
+              6
+            </p>
+          </div>
+        </div>
+        <div className="[word-break:break-word] content-stretch flex flex-col font-['Noto_Sans_KR:Regular'] font-normal gap-[3px] items-start leading-[18px] overflow-clip pl-[22px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-full" data-node-id="958:1213" data-name="Frame">
+          <p className="relative shrink-0 w-full" data-node-id="958:1214">
+            · 모든 작업에 결과 형태가 있음
+          </p>
+          <p className="relative shrink-0 w-full" data-node-id="958:1215">
+            · 선행 관계에 순환이 없음
+          </p>
+          <p className="relative shrink-0 w-full" data-node-id="958:1216">
+            · 사용하는 도구가 모두 EES 담당자 확인을 마침
+          </p>
+          <p className="relative shrink-0 w-full" data-node-id="958:1217">
+            · 운영 상태를 바꾸는 작업 없음 (요청 도구 검사 해당 없음)
+          </p>
+          <p className="relative shrink-0 w-full" data-node-id="958:1218">
+            · 사람이 정하는 값 4개 모두 쓰이는 곳이 있음
+          </p>
+          <p className="relative shrink-0 w-full" data-node-id="958:1219">
+            · 단계 기한이 일정 규칙과 맞음
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-solid border-t content-stretch flex gap-[10px] items-center overflow-clip pb-[14px] pt-[12px] relative shrink-0 w-full" data-node-id="958:1220" data-name="Action bar">
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-px relative text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)]" data-node-id="958:1221">
+            확인 권장 4건은 게시 뒤에도 고칠 수 있습니다
+          </p>
+          <ButtonV4 className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex h-[34px] items-center justify-center px-[14px] relative rounded-[6px] shrink-0" label="다시 확인" style="Secondary" />
+          <ButtonV4 className="bg-[var(--ees-brand-solid,#2f5f98)] content-stretch flex h-[34px] items-center justify-center px-[14px] relative rounded-[6px] shrink-0" label="게시" />
+        </div>
+      </div>
+      <div className="[word-break:break-word] bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col gap-[4px] items-start overflow-clip px-[14px] py-[12px] relative rounded-[6px] shrink-0 w-full" data-node-id="958:1226" data-name="Check catalog">
+        <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="958:1227">
+          검사 목록 · 막는 문제 / 확인 권장
+        </p>
+        <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="958:1228">
+          · 막음 · 결과 형태 · 수행 방식이 없는 작업 (R3)
+        </p>
+        <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="958:1229">
+          · 막음 · 선행 관계 순환, 존재하지 않는 작업을 가리키는 선행 조건
+        </p>
+        <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="958:1230">
+          · 막음 · EES 담당자 확인 전인 도구를 쓰는 작업 (R6)
+        </p>
+        <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="958:1231">
+          · 막음 · 요청 도구가 아닌 방식으로 운영 상태를 바꾸는 작업 (R5 규칙 7)
+        </p>
+        <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="958:1232">
+          · 막음 · EES 실행 요청 뒤에 효과 확인 작업이 없음 (R3 규칙 8)
+        </p>
+        <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="958:1233">
+          · 막음 · 판정 단어가 기본 상태 기호에 연결되지 않음 (R3 규칙 4)
+        </p>
+        <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="958:1234">
+          · 막음 · ‘정해지지 않음’으로 남은 사람이 정하는 값 중 필수인 것
+        </p>
+        <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="958:1235">
+          · 막음 · 기본에서 지운 작업을 공장별 값이 가리킴 (R2)
+        </p>
+        <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="958:1236">
+          · 권장 · 정해지지 않은 절차 결정(송부 방식, D-5 이후 미승인 CR 처리): 게시는 되고, 해당 작업에서 막히거나 확인 필요로 남음 · 임시값인 판정 제안 규칙 · AI 제안이 자주 비게 되는 설정(첨부 파일 이름 규칙 없음 등) · 공장별 차이가 전체 작업의 절반을 넘음 (R2) · 쓰이는 곳이 없는 값
+        </p>
+        <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="1002:14">
+          · 확인 필요 · 단계 기한이 일정 규칙과 맞지 않을 때 게시를 막을지, 확인 권장으로 둘지
+        </p>
+      </div>
+      <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] w-[min-content]" data-node-id="958:1237">
+        규칙 · 막는 문제가 하나라도 있으면 게시 버튼은 비활성이고 이유를 적는다. 각 항목의 ‘열기’는 해당 작업이나 탭으로 이동한다. 확인 결과는 저장하지 않고, 누를 때마다 새로 검사한다.
+      </p>
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: EES v4/Label: Font(family: "Noto Sans KR", style: Medium, size: 12, weight: 500, lineHeight: 16, letterSpacing: 0), EES v4/Title: Font(family: "Noto Sans KR", style: Bold, size: 20, weight: 700, lineHeight: 28, letterSpacing: -1), EES v4/Meta: Font(family: "Noto Sans KR", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), EES v4/Body Medium: Font(family: "Noto Sans KR", style: Medium, size: 14, weight: 500, lineHeight: 22, letterSpacing: -0.30000001192092896), EES v4/Number: Font(family: "Inter", style: Medium, size: 13, weight: 500, lineHeight: 18, letterSpacing: 0), EES v4/Body: Font(family: "Noto Sans KR", style: Regular, size: 14, weight: 400, lineHeight: 22, letterSpacing: -0.30000001192092896).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Status glyph v4
+**Node ID:** 746:640
+
+16px 상태 기호. Action=사람 조치 필요, Running=실행 중(끊긴 원 · 실제 화면에서 1초에 한 바퀴 회전, 동작 줄이기 설정 시 정지), Failed=실패, Done=완료, Waiting=대기·미실행, Unknown=판정 미확인·놓침. 항상 상태 문구 또는 툴팁과 함께.
+
+## Button v4
+**Node ID:** 746:647
+
+높이 34, 반경 6. 영역당 Primary 하나. Text는 표 안의 행동과 보조 링크.
+Images and SVGs will be stored as constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.

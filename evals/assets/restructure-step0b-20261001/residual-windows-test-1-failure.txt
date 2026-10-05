@@ -1,0 +1,35 @@
+C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads (test_ees_workflow.WorkflowPreservationTests.test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads) ... Executing <Task finished name='Task-2' coro=<WorkflowPreservationTests.test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads() done, defined at D:\a\team-agent-poc\team-agent-poc\tests\test_ees_workflow.py:1109> exception=AssertionError("'5941f77ae1d773026fe940cad58d8e9e72cb9a30a8280b61f91ddc6cc7246e2c' != 'ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd'\n- 5941f77ae1d773026fe940cad58d8e9e72cb9a30a8280b61f91ddc6cc7246e2c\n+ ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd\n : Restore must execute the supported real ees.10 artifact") created at C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\runners.py:100> took 0.125 seconds
+FAIL
+
+======================================================================
+FAIL: test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads (test_ees_workflow.WorkflowPreservationTests.test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\unittest\async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\unittest\async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "D:\a\team-agent-poc\team-agent-poc\tests\test_ees_workflow.py", line 1110, in test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads
+    legacy_backend = load_legacy_workflow(self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\a\team-agent-poc\team-agent-poc\tests\workflow_fixture.py", line 47, in load_legacy_workflow
+    test.assertEqual(hashlib.sha256(Path(path).read_bytes()).hexdigest(), expected,
+AssertionError: '5941f77ae1d773026fe940cad58d8e9e72cb9a30a8280b61f91ddc6cc7246e2c' != 'ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd'
+- 5941f77ae1d773026fe940cad58d8e9e72cb9a30a8280b61f91ddc6cc7246e2c
++ ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd
+ : Restore must execute the supported real ees.10 artifact
+
+----------------------------------------------------------------------
+Ran 1 test in 0.125s
+
+FAILED (failures=1)

@@ -1,0 +1,6 @@
+test_confirmed_list_reorder_exclusion_and_source_recheck_preserve_exact_binding (tests.test_ees_delivery_artifacts.DeliveryArtifactsTests.test_confirmed_list_reorder_exclusion_and_source_recheck_preserve_exact_binding) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 1.002s
+
+OK

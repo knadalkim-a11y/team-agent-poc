@@ -1,0 +1,82 @@
+test_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai) ... <repo>/.venv/lib/python3.11/site-packages/ldap3/utils/asn1.py:50: DeprecationWarning: tagMap is deprecated. Please use TAG_MAP instead.
+  from pyasn1.codec.ber.encoder import tagMap, typeMap, AbstractItemEncoder
+<repo>/.venv/lib/python3.11/site-packages/ldap3/utils/asn1.py:50: DeprecationWarning: typeMap is deprecated. Please use TYPE_MAP instead.
+  from pyasn1.codec.ber.encoder import tagMap, typeMap, AbstractItemEncoder
+Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 185.29778000083752, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: test_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tests/test_ees_work_authoring_account_switch.py", line 92, in test_same_profile_native_logout_login_discards_late_a_read_and_ai
+    self.eventually(lambda: self.browser_api('GET','/api/ees-work/workspace')['data'].get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')==400)
+  File "<repo>/tests/test_ees_work_authoring_native.py", line 260, in eventually
+    self.fail("Native persistence did not settle\n" + self.text("body") + repr(self.server.requests[-12:]))
+AssertionError: Native persistence did not settle
+Skip to main content
+EES Work
+업무
+워크스페이스
+
+관리 시스템
+
+FDC
+담당
+업무 절차
+1
+도구
+0
+스킬·지침
+
+최근 편집
+
+B 전용 합성 절차
+Native 모델·도구 관리
+합성 계정 B
+B 전용 합성 절차
+참고
+일반 대화
+업무 열기
+새 대화
+
+
+
+
+음성 모드 사용
+워크스페이스
+닫기
+업무 절차
+FDC
+업무 절차 목록
+B 전용 합성 절차초안 r1
+절차 설정
+
+운영 · FDC · 게시본 없음 · 저장 안 됨
+
+기본 절차
+구조
+실행 방식
+판정 규칙
+게시 기록
+구조
+새 단계
+작업 이름
+설명
+수행 안내
+사람이 정하는 값
+값 이름	형식	쓰이는 곳	저장 범위	편집
+선언한 값이 없습니다.
+값 추가
+위로
+아래로
+삭제
+변경 있음 · 저장 안 됨
+게시 전 확인
+초안 저장
+EES Work[('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('POST', '/ws/socket.io/'), ('GET', '/ws/socket.io/'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace'), ('GET', '/api/ees-work/workspace')]
+
+----------------------------------------------------------------------
+Ran 1 test in 17.436s
+
+FAILED (failures=1)

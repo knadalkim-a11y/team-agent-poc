@@ -1,0 +1,223 @@
+{
+  "module": "test_confluence_read.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.436,
+  "tests_run": 51,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 51,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_anonymous_upstream_identity_is_not_authenticated",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_anonymous_user_cannot_supply_token",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_body_boundary_does_not_reveal_partial_pat",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_check_access_uses_fixed_get_and_request_scoped_pat",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_concurrent_search_results_remain_user_specific",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_concurrent_users_get_separate_request_headers",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_direct_page_id_in_forbidden_space_never_loads_body",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_disabled_by_default",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_empty_space_allowlist_is_closed",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_encryption_must_be_enabled",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_get_page_checks_metadata_before_loading_body",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_get_page_preserves_table_cells_and_inline_text",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_html_entity_encoded_pat_is_redacted_before_body_cutoff",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_html_login_page_is_not_accepted_as_api_response",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_http_opt_in_preserves_endpoint_and_skips_unused_ca",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_http_permission_does_not_weaken_https_or_skip_its_ca",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_http_requires_admin_opt_in_and_can_be_disabled_again",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_http_search_and_page_links_preserve_fixed_origin",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_invalid_base_urls_are_rejected_before_network",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_invalid_search_input_never_issues_request",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_invalid_space_cannot_modify_cql",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_malformed_json_is_safe_failure",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_missing_base_url_is_closed",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_missing_page_space_is_closed",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_network_timeout_and_tls_failures_do_not_reflect_exception",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_no_shared_pat_fallback_or_credential_cache",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_non_search_bad_request_is_not_a_query_or_pat_error",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_only_three_read_functions_are_exposed",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_page_id_rejects_urls_traversal_query_and_non_numeric",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_page_space_is_rechecked_on_body_response",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_pat_cannot_inject_headers",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_pat_field_is_ui_masked",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_pat_reflected_by_upstream_is_not_returned",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_proxy_environment_is_not_used_by_default",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_redirect_is_not_followed_and_does_not_expose_location",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_rejected_search_guides_query_change_without_retry_or_private_details",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_remote_links_cannot_override_fixed_confluence_origin",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_repeat_reads_make_fresh_requests",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_response_bytes_are_bounded",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_search_cql_injection_is_rejected_or_quoted_literal",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_search_cql_omits_unsupported_status_predicate",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_search_does_not_disclose_out_of_allowlist_results",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_search_scope_matches_explicit_default_and_allowed_spaces",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_search_uses_fixed_endpoint_and_bounded_limit",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_title_boundary_does_not_reveal_partial_pat",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_tls_verification_and_no_redirect_handler_are_installed",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_unexpected_json_shape_is_safe_failure",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_unknown_space_never_issues_search",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_upstream_http_errors_are_safe_and_not_retried",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_user_and_token_are_required",
+      "status": "passed"
+    },
+    {
+      "id": "test_confluence_read.ConfluenceReadTests.test_user_default_space_does_not_bypass_admin_allowlist",
+      "status": "passed"
+    }
+  ]
+}

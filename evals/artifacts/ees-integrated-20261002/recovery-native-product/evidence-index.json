@@ -1,0 +1,3010 @@
+{
+  "collected_at": "2026-10-02T07:23:35.679330+00:00",
+  "result": "passed",
+  "checkpoints": 15,
+  "process_exit_code": 0,
+  "browser_exit_code": 0,
+  "source_directory": "dist/recovery/native-product-mode-fix",
+  "execution_time": "2026-10-02T07:18:55.211774+00:00",
+  "source_commit": "455bc06fb72bcc595bfc0b0c53824dd8e2616fed",
+  "source_dirty": true,
+  "gate_sha256": "a6a47422e01d86e63fa9986b610258e0895c7121488b6478d0796eeed708b068",
+  "wheel_sha256": "f3899eab7db84df3696ae17ee3f5352e92df788a09b49e611d3658f59169a866",
+  "provenance": "New real product execution after workspace recovery using reconstructed test a6a47422. This is not a reconstruction or relabeling of the lost successful run screenshots/JSON.",
+  "prior_limits": "Lost pre-recovery run had 15 functional checkpoints but narrow Work loading and busy autosave captures. Those original files are unavailable; this run supplies new explicit Work readiness/readonly/scroll evidence.",
+  "counts": {
+    "original_files": 64,
+    "png": 26,
+    "json": 37,
+    "synthetic_attachment_text": 1,
+    "original_support_files": 2,
+    "derived_support_files": 2,
+    "index_files": 1,
+    "total_preserved_files": 69
+  },
+  "integrity": {
+    "all_original_copy_hashes_match": true,
+    "nine_product_sources_match_actual_report_commit": true,
+    "wheel_hash_rechecked": true,
+    "safety": "Output text checked for known fixture credential values and common PAT/auth markers; none found. No authorization headers, generated secret, Native DB or real user assets copied."
+  },
+  "historical": {
+    "main_requests": 2,
+    "actual_native_tool_calls": 1,
+    "exact_historical_tool_results": 1,
+    "ancillary_retrieval_queries": 1,
+    "errors": [],
+    "old_failure_task_kind": "Not confirmed: the lost original failure did not capture its extra payload. Current run separately observes the exact pinned query template."
+  },
+  "work_readiness": {
+    "a7_autosave": "Server review revision plus non-busy rendered textarea and maintained focus checked before capture.",
+    "s2_narrow": "Exact restored workflow/run/original attempt, loaded non-busy panel, physically opened history, old EESEMS plus current-value-different marker, readonly control absence, no horizontal overflow, and real mouseWheel scroll verified.",
+    "scroll_before": {
+      "top": 0,
+      "height": 752,
+      "total": 1534,
+      "width": 419,
+      "total_width": 419,
+      "x": 687,
+      "y": 424,
+      "open": true
+    },
+    "scroll_after": {
+      "top": 180,
+      "height": 752,
+      "total": 1534,
+      "width": 419,
+      "total_width": 419,
+      "x": 687,
+      "y": 424,
+      "open": true
+    },
+    "evidence": "figma-s2-restored-narrow-scroll.json"
+  },
+  "visual_review": "Root directly reviewed narrow history PNG; other screenshot review is tracked separately. This index validates file integrity, captured DOM readiness, work state and geometry, not design pixel equality.",
+  "environment": "environment.json",
+  "source_inventory": "source-inventory.json",
+  "geometry": [
+    {
+      "file": "figma-a5-cycle-geometry.json",
+      "status": "passed",
+      "expected": {
+        "a28e3.svg": 13,
+        "b22ad.svg": 13,
+        "69549.svg": 14
+      },
+      "visible_assets": 18
+    },
+    {
+      "file": "figma-a6-list-geometry.json",
+      "status": "passed",
+      "expected": {
+        "f1e53.svg": 13,
+        "b456d.svg": 13
+      },
+      "visible_assets": 14
+    },
+    {
+      "file": "figma-a7-review-geometry.json",
+      "status": "passed",
+      "expected": {
+        "b22ad.svg": 13
+      },
+      "visible_assets": 13
+    },
+    {
+      "file": "figma-b21-schedule-geometry.json",
+      "status": "passed",
+      "expected": {
+        "ead50.svg": 14,
+        "1fc4e.svg": 14
+      },
+      "visible_assets": 15
+    },
+    {
+      "file": "figma-s1-empty-geometry.json",
+      "status": "passed",
+      "expected": {
+        "52271.svg": 16
+      },
+      "visible_assets": 12
+    },
+    {
+      "file": "figma-s2-filter-geometry.json",
+      "status": "passed",
+      "expected": {
+        "6d84b.svg": 11
+      },
+      "visible_assets": 13
+    },
+    {
+      "file": "figma-s2-history-geometry.json",
+      "status": "passed",
+      "expected": {
+        "1c98e.svg": 14
+      },
+      "visible_assets": 29
+    }
+  ],
+  "captures": [
+    {
+      "file": "a0-empty.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "none"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 532
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 515,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "a1-human-complete.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361",
+          "run_id": "bed55917-55d8-4a02-8dde-ee250010c2aa",
+          "job_id": "job-e0370b66-3034-4405-8c54-f12f7a465406",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 3,
+          "attempt_id": "fa3eb88f-b845-4e94-9b98-3904acea2ee4",
+          "result_revision": 1,
+          "revision": 5,
+          "context_id": "[8,true,\"/\",\"\",\"EMS\",\"\",\"ef889d04-48fb-4f88-b77d-55683ac33361\",\"bed55917-55d8-4a02-8dde-ee250010c2aa\",\"job-e0370b66-3034-4405-8c54-f12f7a465406\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 496
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 515,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "a1-input-saved-not-complete.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361",
+          "run_id": "bed55917-55d8-4a02-8dde-ee250010c2aa",
+          "job_id": "job-e0370b66-3034-4405-8c54-f12f7a465406",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 3,
+          "attempt_id": null,
+          "result_revision": null,
+          "revision": 2,
+          "context_id": "[8,true,\"/\",\"\",\"EMS\",\"\",\"ef889d04-48fb-4f88-b77d-55683ac33361\",\"bed55917-55d8-4a02-8dde-ee250010c2aa\",\"job-e0370b66-3034-4405-8c54-f12f7a465406\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 496
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 515,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "b2-published.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361",
+          "run_id": "",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 3,
+          "revision": 3,
+          "context_id": "[4,true,\"/\",\"\",\"EMS\",\"\",\"ef889d04-48fb-4f88-b77d-55683ac33361\",\"\",\"\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": null
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 418
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 465,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1340,
+            "y": 0,
+            "width": 580,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-designer",
+          "tag": "SECTION",
+          "rect": {
+            "x": 1341,
+            "y": 48,
+            "width": 579,
+            "height": 1032
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "b3-saved-authoring.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361",
+          "run_id": "",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": null,
+          "workflow_revision": 2,
+          "revision": 2,
+          "context_id": "[4,true,\"/\",\"\",\"EMS\",\"\",\"ef889d04-48fb-4f88-b77d-55683ac33361\",\"\",\"\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": null
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 418
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 465,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1340,
+            "y": 0,
+            "width": 580,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-designer",
+          "tag": "SECTION",
+          "rect": {
+            "x": 1341,
+            "y": 48,
+            "width": 579,
+            "height": 1032
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-a5-cycle-overview.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+          "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 4,
+          "revision": 1,
+          "context_id": "[8,true,\"/\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 532
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 515,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-a6-list-confirmed.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+          "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+          "job_id": "qa-list",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 4,
+          "attempt_id": "eaae0317-846c-423b-a7f8-d38a4fc37a05",
+          "result_revision": 3,
+          "revision": 9,
+          "context_id": "[9,true,\"/\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"qa-list\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 532
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 515,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-a6-list-local-selection.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+          "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+          "job_id": "qa-list",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 4,
+          "attempt_id": "687d987a-55c2-456a-a824-fcdcee405de1",
+          "result_revision": 2,
+          "revision": 5,
+          "context_id": "[9,true,\"/\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"qa-list\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 532
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 515,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-a7-confirmed-readonly.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+          "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+          "job_id": "qa-report",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 4,
+          "attempt_id": "df9eb2e5-a1ac-43f6-8b32-176b9ef15ac4",
+          "result_revision": 1,
+          "revision": 13,
+          "context_id": "[11,true,\"/\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"qa-report\"]"
+        },
+        "review": {
+          "readOnly": true,
+          "revision": "2",
+          "value": "사람이 보완한 실제 제품 검토 본문. 합성 자료이며 송부하지 않았습니다."
+        },
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 532
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 515,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-a7-delivery-reviewed-still-blocked.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "90601bd4-7db1-4253-8b93-9a778b029a47",
+          "run_id": "46d8d112-8a8c-4314-84b7-6a383212b022",
+          "job_id": "delivery-report",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 3,
+          "attempt_id": "ab756bf9-a749-4d17-afb2-ba11a1bc97ef",
+          "result_revision": 1,
+          "revision": 4,
+          "context_id": "[5,true,\"/\",\"\",\"EMS\",\"\",\"90601bd4-7db1-4253-8b93-9a778b029a47\",\"46d8d112-8a8c-4314-84b7-6a383212b022\",\"delivery-report\"]"
+        },
+        "review": {
+          "readOnly": true,
+          "revision": "1",
+          "value": "합성 AI 검토 원문: 실제 송부하지 않은 결과 초안입니다."
+        },
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 568
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 515,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-a7-review-only-autosaved.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+          "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+          "job_id": "qa-report",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 4,
+          "attempt_id": "df9eb2e5-a1ac-43f6-8b32-176b9ef15ac4",
+          "result_revision": 1,
+          "revision": 12,
+          "context_id": "[11,true,\"/\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"qa-report\"]"
+        },
+        "review": {
+          "readOnly": false,
+          "revision": "1",
+          "value": "사람이 보완한 실제 제품 검토 본문. 합성 자료이며 송부하지 않았습니다."
+        },
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 532
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 515,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-b21-schedule-preview.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+          "run_id": "",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 3,
+          "revision": 3,
+          "context_id": "[5,true,\"/\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"\",\"\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": null
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 454
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 465,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1340,
+            "y": 0,
+            "width": 580,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-designer",
+          "tag": "SECTION",
+          "rect": {
+            "x": 1341,
+            "y": 48,
+            "width": 579,
+            "height": 1032
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-s1-empty.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361",
+          "run_id": "bed55917-55d8-4a02-8dde-ee250010c2aa",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 3,
+          "revision": 5,
+          "context_id": "[3,true,\"/\",\"\",\"EMS\",\"\",\"ef889d04-48fb-4f88-b77d-55683ac33361\",\"bed55917-55d8-4a02-8dde-ee250010c2aa\",\"\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 496
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 515,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-s1-read-retry-awaits-human.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+          "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+          "job_id": "qa-list",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 4,
+          "attempt_id": "687d987a-55c2-456a-a824-fcdcee405de1",
+          "result_revision": 2,
+          "revision": 5,
+          "context_id": "[9,true,\"/\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"qa-list\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 532
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 515,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-s2-filtered-records.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+          "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 4,
+          "revision": 14,
+          "context_id": "[5,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 532
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 495,
+            "y": 981,
+            "width": 706,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-s2-narrow-readonly-before-scroll.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1100,
+        800
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "reference_kind": "historical",
+          "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+          "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+          "job_id": "qa-list",
+          "attempt_id": "687d987a-55c2-456a-a824-fcdcee405de1",
+          "version": 1,
+          "result_revision": 2,
+          "created_at": "2026-10-02T07:19:27.953+00:00",
+          "revision": 14,
+          "system_id": "EMS",
+          "factory_id": "",
+          "context_id": "[2,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"\"]"
+        },
+        "review": null,
+        "open_history": [
+          "history-687d987a-55c2-456a-a824-fcdcee405de1"
+        ],
+        "scroll": {
+          "top": 0,
+          "height": 752,
+          "total": 1534,
+          "width": 419,
+          "total_width": 419
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 532
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 844,
+            "height": 800
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 303,
+            "y": 701,
+            "width": 330,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 680,
+            "y": 0,
+            "width": 420,
+            "height": 800
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-s2-narrow-scroll.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1100,
+        800
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "reference_kind": "historical",
+          "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+          "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+          "job_id": "qa-list",
+          "attempt_id": "687d987a-55c2-456a-a824-fcdcee405de1",
+          "version": 1,
+          "result_revision": 2,
+          "created_at": "2026-10-02T07:19:27.953+00:00",
+          "revision": 14,
+          "system_id": "EMS",
+          "factory_id": "",
+          "context_id": "[2,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"\"]"
+        },
+        "review": null,
+        "open_history": [
+          "history-687d987a-55c2-456a-a824-fcdcee405de1"
+        ],
+        "scroll": {
+          "top": 180,
+          "height": 752,
+          "total": 1534,
+          "width": 419,
+          "total_width": 419
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 532
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 844,
+            "height": 800
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 303,
+            "y": 701,
+            "width": 330,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 680,
+            "y": 0,
+            "width": 420,
+            "height": 800
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-s2-native-historical-answer.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "reference_kind": "historical",
+          "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+          "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+          "job_id": "qa-list",
+          "attempt_id": "687d987a-55c2-456a-a824-fcdcee405de1",
+          "version": 1,
+          "result_revision": 2,
+          "created_at": "2026-10-02T07:19:27.953+00:00",
+          "revision": 14,
+          "system_id": "EMS",
+          "factory_id": "",
+          "context_id": "[6,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"\"]"
+        },
+        "review": null,
+        "open_history": [
+          "history-687d987a-55c2-456a-a824-fcdcee405de1"
+        ],
+        "scroll": {
+          "top": 476,
+          "height": 1032,
+          "total": 1508,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 532
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 495,
+            "y": 981,
+            "width": 706,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "figma-s2-readonly-original-values.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+          "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 4,
+          "revision": 14,
+          "context_id": "[6,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"\"]"
+        },
+        "review": null,
+        "open_history": [
+          "history-687d987a-55c2-456a-a824-fcdcee405de1"
+        ],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1508,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 532
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 495,
+            "y": 981,
+            "width": 706,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "native-attachment-restored.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361",
+          "run_id": "bed55917-55d8-4a02-8dde-ee250010c2aa",
+          "job_id": "job-e0370b66-3034-4405-8c54-f12f7a465406",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 3,
+          "attempt_id": "fa3eb88f-b845-4e94-9b98-3904acea2ee4",
+          "result_revision": 1,
+          "revision": 5,
+          "context_id": "[2,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"ef889d04-48fb-4f88-b77d-55683ac33361\",\"bed55917-55d8-4a02-8dde-ee250010c2aa\",\"job-e0370b66-3034-4405-8c54-f12f7a465406\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 496
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 495,
+            "y": 981,
+            "width": 706,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "native-attachment-saved.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361",
+          "run_id": "bed55917-55d8-4a02-8dde-ee250010c2aa",
+          "job_id": "job-e0370b66-3034-4405-8c54-f12f7a465406",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 3,
+          "attempt_id": "fa3eb88f-b845-4e94-9b98-3904acea2ee4",
+          "result_revision": 1,
+          "revision": 5,
+          "context_id": "[2,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"ef889d04-48fb-4f88-b77d-55683ac33361\",\"bed55917-55d8-4a02-8dde-ee250010c2aa\",\"job-e0370b66-3034-4405-8c54-f12f7a465406\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 496
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 495,
+            "y": 981,
+            "width": 706,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "native-chat-saved.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361",
+          "run_id": "bed55917-55d8-4a02-8dde-ee250010c2aa",
+          "job_id": "job-e0370b66-3034-4405-8c54-f12f7a465406",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 3,
+          "attempt_id": "fa3eb88f-b845-4e94-9b98-3904acea2ee4",
+          "result_revision": 1,
+          "revision": 5,
+          "context_id": "[9,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"ef889d04-48fb-4f88-b77d-55683ac33361\",\"bed55917-55d8-4a02-8dde-ee250010c2aa\",\"job-e0370b66-3034-4405-8c54-f12f7a465406\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 496
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 495,
+            "y": 981,
+            "width": 706,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "native-file-upload.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361",
+          "run_id": "bed55917-55d8-4a02-8dde-ee250010c2aa",
+          "job_id": "job-e0370b66-3034-4405-8c54-f12f7a465406",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 3,
+          "attempt_id": "fa3eb88f-b845-4e94-9b98-3904acea2ee4",
+          "result_revision": 1,
+          "revision": 5,
+          "context_id": "[2,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"ef889d04-48fb-4f88-b77d-55683ac33361\",\"bed55917-55d8-4a02-8dde-ee250010c2aa\",\"job-e0370b66-3034-4405-8c54-f12f7a465406\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 1032,
+          "total": 1032,
+          "width": 479,
+          "total_width": 479
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 496
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 495,
+            "y": 981,
+            "width": 706,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1440,
+            "y": 0,
+            "width": 480,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "native-narrow.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1100,
+        800
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361",
+          "run_id": "bed55917-55d8-4a02-8dde-ee250010c2aa",
+          "job_id": "job-e0370b66-3034-4405-8c54-f12f7a465406",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 3,
+          "attempt_id": "fa3eb88f-b845-4e94-9b98-3904acea2ee4",
+          "result_revision": 1,
+          "revision": 5,
+          "context_id": "[2,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"ef889d04-48fb-4f88-b77d-55683ac33361\",\"bed55917-55d8-4a02-8dde-ee250010c2aa\",\"job-e0370b66-3034-4405-8c54-f12f7a465406\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 752,
+          "total": 752,
+          "width": 419,
+          "total_width": 419
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 496
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 844,
+            "height": 800
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 303,
+            "y": 701,
+            "width": 330,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 680,
+            "y": 0,
+            "width": 420,
+            "height": 800
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "native-reduced-motion.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1100,
+        800
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361",
+          "run_id": "bed55917-55d8-4a02-8dde-ee250010c2aa",
+          "job_id": "job-e0370b66-3034-4405-8c54-f12f7a465406",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 3,
+          "attempt_id": "fa3eb88f-b845-4e94-9b98-3904acea2ee4",
+          "result_revision": 1,
+          "revision": 5,
+          "context_id": "[2,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"ef889d04-48fb-4f88-b77d-55683ac33361\",\"bed55917-55d8-4a02-8dde-ee250010c2aa\",\"job-e0370b66-3034-4405-8c54-f12f7a465406\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": {
+          "top": 0,
+          "height": 752,
+          "total": 752,
+          "width": 419,
+          "total_width": 419
+        }
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 496
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 844,
+            "height": 800
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 303,
+            "y": 701,
+            "width": 330,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 680,
+            "y": 0,
+            "width": 420,
+            "height": 800
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        }
+      ]
+    },
+    {
+      "file": "publish-confirmation-cancel-focus.json",
+      "ready": "complete",
+      "fonts": "loaded",
+      "errors": [],
+      "viewport": [
+        1920,
+        1080
+      ],
+      "work_state": {
+        "busy": "false",
+        "loading": false,
+        "reference": {
+          "kind": "workspace",
+          "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361",
+          "run_id": "",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": null,
+          "workflow_revision": 2,
+          "revision": 2,
+          "context_id": "[4,true,\"/\",\"\",\"EMS\",\"\",\"ef889d04-48fb-4f88-b77d-55683ac33361\",\"\",\"\"]"
+        },
+        "review": null,
+        "open_history": [],
+        "scroll": null
+      },
+      "elements": [
+        {
+          "id": "ees-work-entry",
+          "tag": "SECTION",
+          "rect": {
+            "x": 0,
+            "y": 50,
+            "width": 255,
+            "height": 418
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-container",
+          "tag": "DIV",
+          "rect": {
+            "x": 256,
+            "y": 0,
+            "width": 1664,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "chat-input",
+          "tag": "DIV",
+          "rect": {
+            "x": 465,
+            "y": 965,
+            "width": 666,
+            "height": 22
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-panel",
+          "tag": "ASIDE",
+          "rect": {
+            "x": 1340,
+            "y": 0,
+            "width": 580,
+            "height": 1080
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-designer",
+          "tag": "SECTION",
+          "rect": {
+            "x": 1341,
+            "y": 48,
+            "width": 579,
+            "height": 1032
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "flex",
+          "overflow": "visible"
+        },
+        {
+          "id": "ees-work-dialog",
+          "tag": "DIALOG",
+          "rect": {
+            "x": 610,
+            "y": 436,
+            "width": 700,
+            "height": 208
+          },
+          "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "display": "block",
+          "overflow": "auto"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "file": "a0-empty.json",
+      "bytes": 35212,
+      "sha256": "f7472646b431cc66b22e48489e386fdbc12ac30429e932386cda2785f3bf8d2a",
+      "source": "dist/recovery/native-product-mode-fix/a0-empty.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "a0-empty.png",
+      "bytes": 52408,
+      "sha256": "5124d390a08140aba873fcf502e42e52b154438d2f175e43e614d72f56f95b36",
+      "source": "dist/recovery/native-product-mode-fix/a0-empty.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "a1-human-complete.json",
+      "bytes": 40281,
+      "sha256": "441c895d8b370025b50bd7b4e4d1615bcd50943fa84ed27c5a3e522d3c700652",
+      "source": "dist/recovery/native-product-mode-fix/a1-human-complete.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "a1-human-complete.png",
+      "bytes": 85882,
+      "sha256": "2640b01ff1e9d96d5071eebfc7442dd3994402d079bf89babd6fd6d1565aaa54",
+      "source": "dist/recovery/native-product-mode-fix/a1-human-complete.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "a1-input-saved-not-complete.json",
+      "bytes": 39726,
+      "sha256": "986cb93fc6877aa426c62571c95925bafc91fb93398ab801c858d690db6a2ca8",
+      "source": "dist/recovery/native-product-mode-fix/a1-input-saved-not-complete.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "a1-input-saved-not-complete.png",
+      "bytes": 81801,
+      "sha256": "ab06585ef27e4073589797eeb4ad104cee4b9ed205769503c09d7a1acf3d3679",
+      "source": "dist/recovery/native-product-mode-fix/a1-input-saved-not-complete.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "b2-published.json",
+      "bytes": 46993,
+      "sha256": "eb9b6c0b714632d77ce2e5eb05938db110cd52b8787110b3da144c37a30fe08d",
+      "source": "dist/recovery/native-product-mode-fix/b2-published.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "b2-published.png",
+      "bytes": 90267,
+      "sha256": "7c83813e84f6e30882f677ca769a1d6b06c8a427696418c78185628432c6dc31",
+      "source": "dist/recovery/native-product-mode-fix/b2-published.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "b3-saved-authoring.json",
+      "bytes": 46284,
+      "sha256": "bf8a928d41a6c71d046ec524b28202ab1e89959a9f5cb227059a7aff17d19976",
+      "source": "dist/recovery/native-product-mode-fix/b3-saved-authoring.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "b3-saved-authoring.png",
+      "bytes": 88852,
+      "sha256": "19eee2b4d31f3e34a8eeaa38ce3898782b670d9325f61f54540442320b2bda79",
+      "source": "dist/recovery/native-product-mode-fix/b3-saved-authoring.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a5-cycle-geometry.json",
+      "bytes": 14313,
+      "sha256": "2fec694757b63debb8ab370a515af86c16714b435b332a319abcf43802a67dc1",
+      "source": "dist/recovery/native-product-mode-fix/figma-a5-cycle-geometry.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a5-cycle-overview.json",
+      "bytes": 43308,
+      "sha256": "64ae80eafc49bed974f11c52c827f5207397bdcbafb1c57e93da4470863c2ea9",
+      "source": "dist/recovery/native-product-mode-fix/figma-a5-cycle-overview.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a5-cycle-overview.png",
+      "bytes": 101693,
+      "sha256": "72dbfd3715d66105b881b219b8e1b62dbdf085160574bf450fdc6c93b7e9b270",
+      "source": "dist/recovery/native-product-mode-fix/figma-a5-cycle-overview.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a6-list-confirmed.json",
+      "bytes": 44717,
+      "sha256": "34641040bf9fa41638965bf8c447ae0d07a74b8df32dae7d8c029ec4d404b371",
+      "source": "dist/recovery/native-product-mode-fix/figma-a6-list-confirmed.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a6-list-confirmed.png",
+      "bytes": 106672,
+      "sha256": "265432026ff2eeb7c4ea21cb5200a4c54306f0d234c2518fec5a36b2cb4ff80b",
+      "source": "dist/recovery/native-product-mode-fix/figma-a6-list-confirmed.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a6-list-geometry.json",
+      "bytes": 11120,
+      "sha256": "1b91860e81c21667aaa00b2550b7bc5eff3eb8a10523d0e90267c6185c8dc6e0",
+      "source": "dist/recovery/native-product-mode-fix/figma-a6-list-geometry.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a6-list-local-selection.json",
+      "bytes": 43063,
+      "sha256": "38ef01510b91fb76ea55e1ae3cf3abedbca323cf61350304083d2a800a9634e7",
+      "source": "dist/recovery/native-product-mode-fix/figma-a6-list-local-selection.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a6-list-local-selection.png",
+      "bytes": 111866,
+      "sha256": "67c45a812f54a19c3a5daf6ea85f0ad8ff3ffd584e92b4d36ad715c3ea7fdb15",
+      "source": "dist/recovery/native-product-mode-fix/figma-a6-list-local-selection.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a7-confirmed-readonly.json",
+      "bytes": 46000,
+      "sha256": "32ca8a02638eb756e0d5634c7d58f49522afbef436aaf88c42b1f6c62d204dd6",
+      "source": "dist/recovery/native-product-mode-fix/figma-a7-confirmed-readonly.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a7-confirmed-readonly.png",
+      "bytes": 105136,
+      "sha256": "4997984ee7110c89436eeb35fb794576fd7a8b72a55a45333da881595f2815e1",
+      "source": "dist/recovery/native-product-mode-fix/figma-a7-confirmed-readonly.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a7-delivery-reviewed-still-blocked.json",
+      "bytes": 49150,
+      "sha256": "678e1940b9799aa44f52749cbedf03cfacded6af673ddd986d0c949a4a07bb20",
+      "source": "dist/recovery/native-product-mode-fix/figma-a7-delivery-reviewed-still-blocked.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a7-delivery-reviewed-still-blocked.png",
+      "bytes": 121860,
+      "sha256": "17349c4b7aae63487f7e2de86316244150b1c868c042f77657d36b4768ffbae6",
+      "source": "dist/recovery/native-product-mode-fix/figma-a7-delivery-reviewed-still-blocked.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a7-review-geometry.json",
+      "bytes": 10327,
+      "sha256": "5429b00970f0c8b3f5daf26fb8556c52946cc2413bf0c988f29d7013dfc49dff",
+      "source": "dist/recovery/native-product-mode-fix/figma-a7-review-geometry.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a7-review-only-autosaved.json",
+      "bytes": 44732,
+      "sha256": "6574bf82eb9037d773fd661e806865ed411afcbef7c9117145c3656667c1d6b5",
+      "source": "dist/recovery/native-product-mode-fix/figma-a7-review-only-autosaved.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-a7-review-only-autosaved.png",
+      "bytes": 108783,
+      "sha256": "b967542bfb8172d1843e20b11e4a1d16322bb83fbcfee03f34fffa0a5aea8b5e",
+      "source": "dist/recovery/native-product-mode-fix/figma-a7-review-only-autosaved.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-b21-schedule-geometry.json",
+      "bytes": 11874,
+      "sha256": "a48cbff2617cd23b4deafda3eb01f5e1fdb1aa7fff06cbff1661c59cd4eacd48",
+      "source": "dist/recovery/native-product-mode-fix/figma-b21-schedule-geometry.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-b21-schedule-preview.json",
+      "bytes": 43409,
+      "sha256": "f8854d5ee4ff1d8fdcb4b8266d1d59e33f3364c93e2fcd1ec9f183c40cc293f4",
+      "source": "dist/recovery/native-product-mode-fix/figma-b21-schedule-preview.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-b21-schedule-preview.png",
+      "bytes": 149433,
+      "sha256": "47e86a23a5a9339b2ee7c7e924ecf0e7c268285c72ce065c743d7952c2f1ac96",
+      "source": "dist/recovery/native-product-mode-fix/figma-b21-schedule-preview.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s1-empty-geometry.json",
+      "bytes": 9484,
+      "sha256": "960e2888ef36d28dc1a1eb1a095960c180b948420d52e9aeb43de17fc180887c",
+      "source": "dist/recovery/native-product-mode-fix/figma-s1-empty-geometry.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s1-empty.json",
+      "bytes": 39433,
+      "sha256": "d5a0beeeda87caf3ad07c015d03bdc0555a9ce26501fe5ea3f2ed093f2f03c45",
+      "source": "dist/recovery/native-product-mode-fix/figma-s1-empty.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s1-empty.png",
+      "bytes": 55563,
+      "sha256": "c3b03a66a4ac86062081b5367f59ff84ace4fca8d06ad96b115a39f270bd21f7",
+      "source": "dist/recovery/native-product-mode-fix/figma-s1-empty.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s1-read-retry-awaits-human.json",
+      "bytes": 44441,
+      "sha256": "2dcebe3e0cf5e9470d27bb7705917f467c72a53516bdcc6ef579cc0f0447198b",
+      "source": "dist/recovery/native-product-mode-fix/figma-s1-read-retry-awaits-human.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s1-read-retry-awaits-human.png",
+      "bytes": 103662,
+      "sha256": "de26f9f05308b508fd4764e780077d2deb15d62d9baa57cfba1d2ca1ed99ee5e",
+      "source": "dist/recovery/native-product-mode-fix/figma-s1-read-retry-awaits-human.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s1-read-retry-server.json",
+      "bytes": 31002,
+      "sha256": "30df99e2a022e8f249295b75c5f6bd9120bcfef4f036669db6d7101cfe248f79",
+      "source": "dist/recovery/native-product-mode-fix/figma-s1-read-retry-server.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-filter-geometry.json",
+      "bytes": 10339,
+      "sha256": "7378f85c9cc409e1829dde6ac62dfb3368688c03765012eeb8ad82f27cc89750",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-filter-geometry.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-filtered-records.json",
+      "bytes": 52407,
+      "sha256": "d3a732c87b51e39a95c5ea18efb22e169ecc85c8cf6ccc1cc7bedc293c6745ca",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-filtered-records.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-filtered-records.png",
+      "bytes": 99062,
+      "sha256": "9395e9b0943cdd647b3c99edad41b44b7712097dd2e08198d654fb512714f2d9",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-filtered-records.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-history-geometry.json",
+      "bytes": 22975,
+      "sha256": "078f10f0567ef8da167ec6abefccbbe30d451aae2a90aa4cdf9ef863974227df",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-history-geometry.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-narrow-readonly-before-scroll.json",
+      "bytes": 57706,
+      "sha256": "21064805df28b5ed13cb70d97b883f8bbb75475cedff9d509f3a5f8eea9c77d5",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-narrow-readonly-before-scroll.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-narrow-readonly-before-scroll.png",
+      "bytes": 142469,
+      "sha256": "8b8402d9ce8699af91f014d41d9d61e79cb5f3851276ac76b13643db5e0dfac5",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-narrow-readonly-before-scroll.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-narrow-scroll.json",
+      "bytes": 58139,
+      "sha256": "1005d78e312c67c7c700d5e0cbcbde910782feb4b8b773ebde076fbf40c7f014",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-narrow-scroll.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-narrow-scroll.png",
+      "bytes": 149103,
+      "sha256": "93199e729e92457570ffcc03d7f2f327a6322d4689dfe23831bf5cc781cf96f9",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-narrow-scroll.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-native-historical-answer.json",
+      "bytes": 59019,
+      "sha256": "97b68e75bfcb75ca305830e9f85bfac9f319ef7eee7224b820306763a9aa2a18",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-native-historical-answer.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-native-historical-answer.png",
+      "bytes": 188590,
+      "sha256": "bf5bb0c97fc6f56e65912706672104bdfd3fb1b8debb6f28a6a1b6e4116dcb23",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-native-historical-answer.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-native-historical-tool.json",
+      "bytes": 22495,
+      "sha256": "9c3cc6f2ea5f76d185f9f5f463916d7410ae42d081c386257c3ecf28d6dc92ba",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-native-historical-tool.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-readonly-original-values.json",
+      "bytes": 57987,
+      "sha256": "76898ea9b863bfbd96890882209a01727a4ade42b7ea73a216cf2bd1efa7cd7a",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-readonly-original-values.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-readonly-original-values.png",
+      "bytes": 172317,
+      "sha256": "9effcba2c2153df18dcd205a069fadb78a2b1a641771d7a94320ea3993ae6644",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-readonly-original-values.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "figma-s2-restored-narrow-scroll.json",
+      "bytes": 1284,
+      "sha256": "e18eda7573805732e8c61033a01796c1e9c1236a4ed354a42016d23b772f91ec",
+      "source": "dist/recovery/native-product-mode-fix/figma-s2-restored-narrow-scroll.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "native-attachment-restored.json",
+      "bytes": 47487,
+      "sha256": "ab4fa0b1b5bf698fcde17f8fb932e93704c8122a74922c08b8bbe152e2e3ade6",
+      "source": "dist/recovery/native-product-mode-fix/native-attachment-restored.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "native-attachment-restored.png",
+      "bytes": 87637,
+      "sha256": "4a3704e62c45ba60febae11a3b53020752ce1378d60585466eea0cb973569ed7",
+      "source": "dist/recovery/native-product-mode-fix/native-attachment-restored.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "native-attachment-saved.json",
+      "bytes": 48196,
+      "sha256": "3d844f402b1d504cc931816fcc9e00cc6aeafc921826a1b49c18de087e976ad9",
+      "source": "dist/recovery/native-product-mode-fix/native-attachment-saved.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "native-attachment-saved.png",
+      "bytes": 124919,
+      "sha256": "1c052318a3d3cd9d69e1ce4350adf8448857b38393ce1e7a784d66b737b0256d",
+      "source": "dist/recovery/native-product-mode-fix/native-attachment-saved.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "native-chat-saved.json",
+      "bytes": 49974,
+      "sha256": "29a785bc735c60b98a915b6663c3a0938309a3f3294967ccdacedb3a2a77350a",
+      "source": "dist/recovery/native-product-mode-fix/native-chat-saved.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "native-chat-saved.png",
+      "bytes": 102717,
+      "sha256": "e3ddd60179ca3787a1cf2f91f77fc16a4b8d45da44d292e56f12efcdebbb6050",
+      "source": "dist/recovery/native-product-mode-fix/native-chat-saved.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "native-file-upload.json",
+      "bytes": 49219,
+      "sha256": "ee89ff51c7417df6ce45d1835e20d6b9e5956e7338336ec5a67649a410404a5a",
+      "source": "dist/recovery/native-product-mode-fix/native-file-upload.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "native-file-upload.png",
+      "bytes": 107204,
+      "sha256": "b4b51a8e88081600ddaaa8b086fdb0e9d4895ab6579909624ea926fe33d9b439",
+      "source": "dist/recovery/native-product-mode-fix/native-file-upload.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "native-narrow.json",
+      "bytes": 47319,
+      "sha256": "ae5243551d8d1db29ef1e44ed49bdc1234cf0dc4c8075ded64ef080f7980b7a5",
+      "source": "dist/recovery/native-product-mode-fix/native-narrow.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "native-narrow.png",
+      "bytes": 108691,
+      "sha256": "b50d6703e5ca1b1aae8faed1835539ebd733c0cbc0a4287378c056994424cde4",
+      "source": "dist/recovery/native-product-mode-fix/native-narrow.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "native-reduced-motion.json",
+      "bytes": 47076,
+      "sha256": "0c4b593c20395e4ac2129de01440ba604ef472e029996c8bf93296e7fc8d2f90",
+      "source": "dist/recovery/native-product-mode-fix/native-reduced-motion.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "native-reduced-motion.png",
+      "bytes": 108674,
+      "sha256": "a6090d668d0ee98f3f1fb341747f46843ae6027fa4a8a6c725cb1f1e1186c090",
+      "source": "dist/recovery/native-product-mode-fix/native-reduced-motion.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "publish-confirmation-cancel-focus.json",
+      "bytes": 45966,
+      "sha256": "4ec7005456ad046f83f3c7fd9518af9a3bbde70316c445533236da80bc0f4906",
+      "source": "dist/recovery/native-product-mode-fix/publish-confirmation-cancel-focus.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "publish-confirmation-cancel-focus.png",
+      "bytes": 107764,
+      "sha256": "282b7c34243998effac4b31c9ecfca4d94d7e2da793e8d8dccbccb4bb45622f6",
+      "source": "dist/recovery/native-product-mode-fix/publish-confirmation-cancel-focus.png",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "report.json",
+      "bytes": 11168,
+      "sha256": "d85ec9ea38f8671774ccb079e39dbd85258e50f7a9ce2575a27da63f2a14772a",
+      "source": "dist/recovery/native-product-mode-fix/report.json",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "synthetic-native-upload.txt",
+      "bytes": 79,
+      "sha256": "cfc3fdf55f3172a09b12635a125c1d6065974965a5c43521dcba3e5b328be4cc",
+      "source": "dist/recovery/native-product-mode-fix/synthetic-native-upload.txt",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "actual-native-product.log",
+      "bytes": 3223,
+      "sha256": "e2532fe3a7afc295504c81d0f45da1fd35a349c37a0d874c23d7a9640515963e",
+      "source": "dist/recovery/native-product-mode-fix.log",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "gate-loaded-a6a47422.py.txt",
+      "bytes": 65726,
+      "sha256": "a6a47422e01d86e63fa9986b610258e0895c7121488b6478d0796eeed708b068",
+      "source": "tests/ees_work_integrated_app.py",
+      "kind": "original_execution_output"
+    },
+    {
+      "file": "source-inventory.json",
+      "bytes": 2246,
+      "sha256": "07680c6feeb1660be61d09f846e246079e25bf9d66b984ffeee2aac9296fab52",
+      "kind": "derived_new_execution_evidence"
+    },
+    {
+      "file": "environment.json",
+      "bytes": 2396,
+      "sha256": "388c00e5a0a15d545232736bf1ae4a5524a59081c24ee1b143531ebfe1dc4880",
+      "kind": "derived_new_execution_evidence"
+    }
+  ]
+}

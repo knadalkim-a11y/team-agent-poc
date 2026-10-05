@@ -1,0 +1,1160 @@
+{
+  "artifact": {
+    "id": 11210490755,
+    "name": "ees-native-complete-product-f3d543db54afd4ff495d396c18582053bdc00b85",
+    "size_in_bytes": 2160671,
+    "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11210490755",
+    "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11210490755/zip",
+    "expired": false,
+    "created_at": "2026-10-02T04:55:24Z",
+    "expires_at": "2026-10-09T04:55:23Z",
+    "updated_at": "2026-10-02T04:55:24Z",
+    "digest": "sha256:ad037f665aaf1942c5946b4f85542205035aa38aa1453428683c693fe0bc02df",
+    "workflow_run": {
+      "id": 36966415796,
+      "repository_id": 1355435001,
+      "head_repository_id": 1355435001,
+      "head_branch": "docs/ees-restructure-step0a-20261001",
+      "head_sha": "5556b573c8ab4430eb44b7e608fc6a8045e0e2bd"
+    }
+  },
+  "verified": true,
+  "members": [
+    {
+      "path": "ees-native-product/a0-empty.json",
+      "bytes": 36451,
+      "sha256": "af2a62c9e64f67d53df4df2bcae32a0f85e174b205d50fda853bf87d04bc01db"
+    },
+    {
+      "path": "ees-native-product/a0-empty.png",
+      "bytes": 55137,
+      "sha256": "9f99625921ad6c146a69e6a97b2983ad6a379cab121aebd9d4fec2b2d525ef97"
+    },
+    {
+      "path": "ees-native-product/a1-human-complete.json",
+      "bytes": 41005,
+      "sha256": "7d769f6a81b65e5491f52a2b5d98fea74d590808c14fa4d824a64cbd97630f37"
+    },
+    {
+      "path": "ees-native-product/a1-human-complete.png",
+      "bytes": 73805,
+      "sha256": "dee574d43f650b7695d6e424a0bb5b442032584ff4ba566f06227320b7351856"
+    },
+    {
+      "path": "ees-native-product/a1-input-saved-not-complete.json",
+      "bytes": 40609,
+      "sha256": "e72aefe447b5cac550676975a5c8c11e1d74534f41a6df1a772dc2f901cc16c4"
+    },
+    {
+      "path": "ees-native-product/a1-input-saved-not-complete.png",
+      "bytes": 72766,
+      "sha256": "9222f6291ca7ffdf7e467e78034bd8528ab9ebab7672b8fa505f5ed47b56cf93"
+    },
+    {
+      "path": "ees-native-product/b2-published.json",
+      "bytes": 48199,
+      "sha256": "5913a6c9d4d72cbfb4413dd459254d67f1ea340e217c590913882c17cdb490eb"
+    },
+    {
+      "path": "ees-native-product/b2-published.png",
+      "bytes": 88505,
+      "sha256": "b5da463deaf6c4fd4cb7f2a10c2395aed8221a0ddc18d5d8860b9b8915cef39c"
+    },
+    {
+      "path": "ees-native-product/b3-saved-authoring.json",
+      "bytes": 47468,
+      "sha256": "2b678ff01b2a82195f69d9ea472deb95d3670b4acecc9e9125dbd804b3d1af6a"
+    },
+    {
+      "path": "ees-native-product/b3-saved-authoring.png",
+      "bytes": 87075,
+      "sha256": "17894c28f1346cd021915991e53fd744f34822b439cf1fd43455a4f630c774a8"
+    },
+    {
+      "path": "ees-native-product/central-chat/a0-empty.json",
+      "bytes": 36470,
+      "sha256": "3ceb017c92714e333a1b1547195076eb7098bbd2c015d646eafc1970f1932c4e"
+    },
+    {
+      "path": "ees-native-product/central-chat/a0-empty.png",
+      "bytes": 55141,
+      "sha256": "24f8633d31ffdefc9b426fa72604467514e69b361800fba6dc86530f5ca7c4e2"
+    },
+    {
+      "path": "ees-native-product/central-chat/input-proposal-before-human.json",
+      "bytes": 51457,
+      "sha256": "3cb816c5ee0ca5bb8a130f57acd3f5d6d019ab7e2ae952c85bfdeef040e7c3f8"
+    },
+    {
+      "path": "ees-native-product/central-chat/input-proposal-before-human.png",
+      "bytes": 138948,
+      "sha256": "e2a1c443823afa609ebf5e6a42c6846aabc248bcc0518b0cef4b9e502fbac9ca"
+    },
+    {
+      "path": "ees-native-product/central-chat/input-proposal-human-saved-not-executed.json",
+      "bytes": 52845,
+      "sha256": "9415a5c6e531b9c00ce1af547cb91c4887d2988b7bbb2c4bbd55d2d8dcc797c8"
+    },
+    {
+      "path": "ees-native-product/central-chat/input-proposal-human-saved-not-executed.png",
+      "bytes": 126128,
+      "sha256": "703e3c3fa962c3d8ab20c683904900c22b4bfec2f781370ca2f3798beabac34a"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-human-applied-unsaved.json",
+      "bytes": 53157,
+      "sha256": "42b53e6d9ec220ff7f9dc79df710009c15e4f32a3d91761a9d3cd97ff799dd25"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-human-applied-unsaved.png",
+      "bytes": 140136,
+      "sha256": "a2ad3d1c6ce9d8a1ee5e800b1a866c464930d7b8fd297286dc9ca115b6556abb"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-human-saved-draft.png",
+      "bytes": 137157,
+      "sha256": "60567c8225d550bb8c32768cdadc0d9075f1891882f95c65afe137881c059b2d"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-proposal-before-human.json",
+      "bytes": 56158,
+      "sha256": "c53986210ab6f452b6f9b06eb4b40caa713fe742c891f608d8713cd50023c53e"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-human-saved-draft.json",
+      "bytes": 53393,
+      "sha256": "4186169e676ef05e9b906de31bdbb1f5c92600a8049510f06dd415700aef7262"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-proposal-before-human.png",
+      "bytes": 138651,
+      "sha256": "f82aeded40dd618fd4131fa26e4c070a5e1d1ea47876997db403a08c9dbbadb6"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-read-tool.json",
+      "bytes": 52153,
+      "sha256": "93fd982e2768ffce67b681b5f7c7feb11d499edc48e6d48a17f32b65fbf8164f"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-central-read-tool.png",
+      "bytes": 112784,
+      "sha256": "7a98bdd89c60acad5c43636cd0e65776ff4ef086d92f5c80e52f792a7fbe7587"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-message-reference-exact-old-attempt.json",
+      "bytes": 52958,
+      "sha256": "6a5b3922cba4edd645af9d1a3300343a7b25515ef0ba00cd6349cc7d1dcabea6"
+    },
+    {
+      "path": "ees-native-product/central-chat/native-message-reference-exact-old-attempt.png",
+      "bytes": 139874,
+      "sha256": "c79ac810761f1e0d6f58dfc36c3a911b445e27abaa8a39782351e0753e252f62"
+    },
+    {
+      "path": "ees-native-product/central-chat/report.json",
+      "bytes": 30222,
+      "sha256": "232917c16d4158910c1bac2b20c7be9515b7c3fbab4959a11e771733f5736100"
+    },
+    {
+      "path": "ees-native-product/native-attachment-restored.json",
+      "bytes": 48901,
+      "sha256": "2be45684222eeb79f49a544bef2b2b06811de70088b4d1abc4a24f140a69c70c"
+    },
+    {
+      "path": "ees-native-product/native-attachment-restored.png",
+      "bytes": 108692,
+      "sha256": "c738e8a5717a8a6170b108f7deccb3317a2de1536598eea2bb7423319ede929b"
+    },
+    {
+      "path": "ees-native-product/native-attachment-saved.json",
+      "bytes": 48778,
+      "sha256": "f1de831f36101213aaf3be24267da176fd1670afa9734cad6ff0e72b142457d5"
+    },
+    {
+      "path": "ees-native-product/native-attachment-saved.png",
+      "bytes": 112556,
+      "sha256": "7bf0106a9b9491d87c059e9f83cd44c7bab8e3eaf0efb94599567027fbba3b1a"
+    },
+    {
+      "path": "ees-native-product/native-chat-saved.json",
+      "bytes": 50621,
+      "sha256": "d245400fc5221ecee0fbefa4c0774cd65bb81922cd33276bd948075cea39073e"
+    },
+    {
+      "path": "ees-native-product/native-chat-saved.png",
+      "bytes": 91647,
+      "sha256": "e330dd3b0239e37b3458a72f1d847536a139072f4234500f9c7753d744d4b4e2"
+    },
+    {
+      "path": "ees-native-product/native-file-upload.json",
+      "bytes": 50544,
+      "sha256": "dfd477a098ef63f82503ae0447934e5402d2b43b66e8bd31e974bab44a98d61e"
+    },
+    {
+      "path": "ees-native-product/native-file-upload.png",
+      "bytes": 96321,
+      "sha256": "b8490675896af14bfd5e0650696cbd06b3610c5af29ae5f44e34bd56b260a409"
+    },
+    {
+      "path": "ees-native-product/native-narrow.json",
+      "bytes": 48764,
+      "sha256": "360b293b0daa9a22035f9a52232bb8da3bfb39914c577323462d2125df7c47e7"
+    },
+    {
+      "path": "ees-native-product/native-narrow.png",
+      "bytes": 96869,
+      "sha256": "0954e8d600bb57d9d317d36b24ce4169073b0fbd83b4bc64e4a4c9efd4d0c7f6"
+    },
+    {
+      "path": "ees-native-product/native-reduced-motion.json",
+      "bytes": 48551,
+      "sha256": "79240fab3ba92620e7b3e77cb5b77ca80fe951bec9751f3b56a06875f7e39e94"
+    },
+    {
+      "path": "ees-native-product/native-reduced-motion.png",
+      "bytes": 96854,
+      "sha256": "964b3b0423d1b11451f905c3cddf9d881df10d4a33d7489970d4c2d1c3507c71"
+    },
+    {
+      "path": "ees-native-product/publish-confirmation-cancel-focus.json",
+      "bytes": 47169,
+      "sha256": "7a598f3fb4ddf797a037c5c4be57255aafacb1eb64bdfe392b11253b450a5b89"
+    },
+    {
+      "path": "ees-native-product/publish-confirmation-cancel-focus.png",
+      "bytes": 106927,
+      "sha256": "d621cc04069e37daf448fbe79b5a90614e9e4de00e40f152c31854f8c8fcf397"
+    },
+    {
+      "path": "ees-native-product/report.json",
+      "bytes": 9551,
+      "sha256": "04611e67deca7bd221a4f57494aef821325aef79f0bebb7ac7cb1724dc407192"
+    },
+    {
+      "path": "ees-native-product/synthetic-native-upload.txt",
+      "bytes": 79,
+      "sha256": "cfc3fdf55f3172a09b12635a125c1d6065974965a5c43521dcba3e5b328be4cc"
+    },
+    {
+      "path": "ees-native-product-results/browser-evidence.json",
+      "bytes": 7316,
+      "sha256": "728216eb55911b466a05cceb64832e64bd163fc23baac7e9799eed7d6689de9a"
+    }
+  ],
+  "counts": {
+    ".json": 23,
+    ".png": 20,
+    ".txt": 1
+  },
+  "reports": [
+    {
+      "path": "dist/integrated/ci-36966415796/11210490755/ees-native-product/report.json",
+      "report": {
+        "time": "2026-10-02T04:54:29.285681+00:00",
+        "scope": "Complete packaged Native app gate for the integrated work contract.\n\nOne temporary DATA_DIR and a loopback synthetic model are used. Native auth,\nchat/file storage, workflow APIs, worker and frontend are the built product.\nNo company credentials, DB or service is read. Physical CDP input drives UI;\nread-only DOM evaluation inspects readiness and results. Failure evidence is\ncaptured before browser shutdown. This is distinct from the Native fixtures.\n",
+        "source_commit": "f3d543db54afd4ff495d396c18582053bdc00b85",
+        "source_dirty": true,
+        "wheel": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+        "wheel_sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3",
+        "steps": [
+          {
+            "name": "empty Native installation",
+            "workflows": 0,
+            "runs": 0
+          },
+          {
+            "name": "Native model availability",
+            "models": [
+              {
+                "id": "c3-synthetic-model",
+                "direct": null,
+                "owned_by": "openai"
+              },
+              {
+                "id": "arena-model",
+                "direct": null,
+                "owned_by": "arena"
+              }
+            ]
+          },
+          {
+            "name": "actual built Native render",
+            "viewport": [
+              1920,
+              1080
+            ]
+          },
+          {
+            "name": "physical authoring save validate publish",
+            "workflow_id": "ca20daa1-bb3b-40b8-b0e2-4a23d9848332",
+            "version": 1
+          },
+          {
+            "name": "run input save cancel confirmation and actual completion",
+            "run_id": "2d167573-160e-4c63-a456-64bc06363403",
+            "attempts": 1,
+            "version": 1
+          },
+          {
+            "name": "Native physical send and storage reload",
+            "saved_messages": 2,
+            "chat_id": "d3b073bd-f261-49dc-8093-bcd6a61526e0",
+            "model_boundary": "loopback synthetic HTTP only"
+          },
+          {
+            "name": "Native attachment chooser upload process send reload",
+            "file_id": "7de08f47-5224-499e-91a0-57c3f3bc7969",
+            "chat_id": "d3b073bd-f261-49dc-8093-bcd6a61526e0",
+            "model_boundary": "Only model response and embedding vectors are loopback synthesis"
+          },
+          {
+            "name": "Native and work restart persistence",
+            "chat_preserved": true,
+            "attempts_preserved": true
+          }
+        ],
+        "status": "passed",
+        "browser_cleanup_diagnostics": {
+          "stage": "ready",
+          "elapsed_ms": 19717.427491999955,
+          "pid": 2602,
+          "exit_code": 0,
+          "browser_version": {
+            "protocolVersion": "1.3",
+            "product": "Chrome/154.0.8037.57",
+            "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+            "jsVersion": "15.4.80.11"
+          },
+          "target_id": "66CD0D96CF840A773708AE7C090B3E85",
+          "session_attached": false,
+          "buffer_bytes": 0,
+          "last_command": {
+            "id": 295,
+            "method": "Browser.close",
+            "session_attached": false,
+            "timeout_seconds": 5,
+            "elapsed_ms": 0.5036960000097679,
+            "completed": true
+          },
+          "recent_responses": [
+            {
+              "method": "Network.webSocketFrameError",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.webSocketClosed",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.requestWillBeSent",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.loadingFailed",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.requestWillBeSent",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.loadingFailed",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.requestWillBeSent",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.loadingFailed",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.requestWillBeSent",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.loadingFailed",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.requestWillBeSent",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.loadingFailed",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.webSocketCreated",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.webSocketFrameError",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.webSocketClosed",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.requestWillBeSent",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.loadingFailed",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.requestWillBeSent",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "method": "Network.loadingFailed",
+              "sessionId": "45072687C066E3187B1197D72C8E457E"
+            },
+            {
+              "id": 295
+            }
+          ],
+          "stderr_tail": "[2602:2626:1002/045438.944329:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2602:2626:1002/045438.946113:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2602:2626:1002/045439.083405:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2602:2626:1002/045439.142583:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2602:2602:1002/045439.450236:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2602:2602:1002/045439.450303:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2602:2626:1002/045439.450307:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2602:2626:1002/045439.450341:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2602:2602:1002/045439.453158:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2602:2602:1002/045439.460462:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2602:2626:1002/045439.462079:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2602:2602:1002/045439.548739:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2602:2602:1002/045439.549654:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2602:2626:1002/045439.549727:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2602:2602:1002/045439.553783:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2602:2602:1002/045439.631708:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files\n[2602:2602:1002/045439.632299:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2602:2626:1002/045439.632456:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2602:2602:1002/045439.686153:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2602:2626:1002/045439.686454:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2602:2602:1002/045439.718246:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2602:2628:1002/045442.973014:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\nCreated TensorFlow Lite XNNPACK delegate for CPU.\n",
+          "first_failure": null,
+          "bootstrap_observation": null
+        }
+      }
+    },
+    {
+      "path": "dist/integrated/ci-36966415796/11210490755/ees-native-product/central-chat/report.json",
+      "report": {
+        "time": "2026-10-02T04:55:01.510307+00:00",
+        "scope": "Complete packaged Native app gate for the integrated work contract.\n\nOne temporary DATA_DIR and a loopback synthetic model are used. Native auth,\nchat/file storage, workflow APIs, worker and frontend are the built product.\nNo company credentials, DB or service is read. Physical CDP input drives UI;\nread-only DOM evaluation inspects readiness and results. Failure evidence is\ncaptured before browser shutdown. This is distinct from the Native fixtures.\n",
+        "source_commit": "f3d543db54afd4ff495d396c18582053bdc00b85",
+        "source_dirty": true,
+        "wheel": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+        "wheel_sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3",
+        "steps": [
+          {
+            "name": "empty Native installation",
+            "workflows": 0,
+            "runs": 0
+          },
+          {
+            "name": "Native model availability",
+            "models": [
+              {
+                "id": "c3-synthetic-model",
+                "direct": null,
+                "owned_by": "openai"
+              },
+              {
+                "id": "arena-model",
+                "direct": null,
+                "owned_by": "arena"
+              }
+            ]
+          },
+          {
+            "name": "actual built Native render",
+            "viewport": [
+              1920,
+              1080
+            ]
+          },
+          {
+            "name": "explicit packaged read-only Work tool registration",
+            "id": "ees_workflow",
+            "source_sha256": "74622ba69fe47340e7a497b320912871e547730d79e77d0eea77d64c681c61c8",
+            "private_native_grant": true,
+            "model_presets_created": false
+          },
+          {
+            "name": "actual Native authenticated socket join sent",
+            "credential_payload_recorded": false
+          },
+          {
+            "name": "physical central chat executes actual registered authorized read",
+            "workflow_id": "8dcf9424-2e8a-4466-8830-b0fac6d9a98e",
+            "revision": 2,
+            "stored_work_unchanged": true
+          },
+          {
+            "name": "physical central proposal then separate apply and save",
+            "draft_revision": 3,
+            "published": false,
+            "runs": 0,
+            "chat_id": "75d6abd4-8fde-4d9e-bc5f-934aa4fc2ef5",
+            "native_tool_history_saved": true,
+            "model_boundary": "Loopback synthetic tool-call selection only; actual Native registered tool execution"
+          },
+          {
+            "name": "physical input suggestion preview apply then separate save",
+            "run_id": "1a5e0eb4-56b0-464d-bccc-c882a0e490ba",
+            "proposal_count": 1,
+            "attempts": 0
+          },
+          {
+            "name": "physical immutable historical message reference after second attempt",
+            "message_id": "0f6a0b60-4fa3-4b6d-a526-25d6e68e8eab",
+            "attempt_id": "5398e59c-1fa0-4023-a4c2-85122c73b2be",
+            "latest_attempts": 2,
+            "readonly": true
+          }
+        ],
+        "status": "passed",
+        "api_failures": [],
+        "native_messages": [
+          {
+            "id": "4d8299ea-4551-4293-8e5c-26d1388d26c9",
+            "role": "user",
+            "content": "중앙 대화 준비",
+            "done": null,
+            "meta": {
+              "ees_work_reference": {
+                "kind": "workspace",
+                "workflow_id": "8dcf9424-2e8a-4466-8830-b0fac6d9a98e",
+                "run_id": "",
+                "job_id": "",
+                "system_id": "EMS",
+                "factory_id": "",
+                "version": null,
+                "workflow_revision": 2,
+                "revision": 2,
+                "context_id": "[4,true,\"/\",\"\",\"EMS\",\"\",\"8dcf9424-2e8a-4466-8830-b0fac6d9a98e\",\"\",\"\"]"
+              }
+            }
+          },
+          {
+            "id": "e5173b65-f0db-4763-86e2-e8a89f31a4fe",
+            "role": "assistant",
+            "content": "중앙 대화의 합성 연결 준비 완료",
+            "done": true,
+            "meta": null
+          },
+          {
+            "id": "3479d906-37ed-44ba-b228-1c225a1ec803",
+            "role": "user",
+            "content": "중앙 도구로 현재 절차를 조회해 줘",
+            "done": null,
+            "meta": {
+              "ees_work_reference": {
+                "kind": "workspace",
+                "workflow_id": "8dcf9424-2e8a-4466-8830-b0fac6d9a98e",
+                "run_id": "",
+                "job_id": "",
+                "system_id": "EMS",
+                "factory_id": "",
+                "version": null,
+                "workflow_revision": 2,
+                "revision": 2,
+                "context_id": "[5,true,\"/c/75d6abd4-8fde-4d9e-bc5f-934aa4fc2ef5\",\"\",\"EMS\",\"\",\"8dcf9424-2e8a-4466-8830-b0fac6d9a98e\",\"\",\"\"]"
+              }
+            }
+          },
+          {
+            "id": "919c7dda-632e-4199-b941-c7b94dd58cd8",
+            "role": "assistant",
+            "content": "중앙 도구 조회 완료",
+            "done": true,
+            "meta": null
+          },
+          {
+            "id": "b980fb7b-c2e4-427e-9daa-c36c96cd9df6",
+            "role": "user",
+            "content": "설명을 보완한 초안을 제안해 줘. 저장하지 말고 검토하게 해 줘",
+            "done": null,
+            "meta": {
+              "ees_work_reference": {
+                "kind": "workspace",
+                "workflow_id": "8dcf9424-2e8a-4466-8830-b0fac6d9a98e",
+                "run_id": "",
+                "job_id": "",
+                "system_id": "EMS",
+                "factory_id": "",
+                "version": null,
+                "workflow_revision": 2,
+                "revision": 2,
+                "context_id": "[5,true,\"/c/75d6abd4-8fde-4d9e-bc5f-934aa4fc2ef5\",\"\",\"EMS\",\"\",\"8dcf9424-2e8a-4466-8830-b0fac6d9a98e\",\"\",\"\"]"
+              }
+            }
+          },
+          {
+            "id": "2a3dc5c6-b9a1-4bf8-9a0d-c9e12ea831d1",
+            "role": "assistant",
+            "content": "중앙 제안은 검토 전이며 저장하지 않았습니다",
+            "done": true,
+            "meta": null
+          },
+          {
+            "id": "0f6a0b60-4fa3-4b6d-a526-25d6e68e8eab",
+            "role": "user",
+            "content": "첫 번째 완료 근거를 대화에 남겨 줘",
+            "done": null,
+            "meta": {
+              "ees_work_reference": {
+                "kind": "workspace",
+                "workflow_id": "8dcf9424-2e8a-4466-8830-b0fac6d9a98e",
+                "run_id": "1a5e0eb4-56b0-464d-bccc-c882a0e490ba",
+                "job_id": "job-78a63fe2-1704-4019-a7ee-b7b57bbafaed",
+                "system_id": "EMS",
+                "factory_id": "",
+                "version": 1,
+                "workflow_revision": 5,
+                "attempt_id": "5398e59c-1fa0-4023-a4c2-85122c73b2be",
+                "result_revision": 1,
+                "revision": 5,
+                "context_id": "[9,true,\"/c/75d6abd4-8fde-4d9e-bc5f-934aa4fc2ef5\",\"\",\"EMS\",\"\",\"8dcf9424-2e8a-4466-8830-b0fac6d9a98e\",\"1a5e0eb4-56b0-464d-bccc-c882a0e490ba\",\"job-78a63fe2-1704-4019-a7ee-b7b57bbafaed\"]"
+              }
+            }
+          },
+          {
+            "id": "2eed23d8-f699-4246-b0a4-6296349fab77",
+            "role": "assistant",
+            "content": "첫 번째 완료 근거를 참조한 대화 응답",
+            "done": true,
+            "meta": null
+          }
+        ],
+        "model_boundary": {
+          "calls": [
+            {
+              "mode": "read",
+              "function": "ees_workflow_view",
+              "arguments": {
+                "workflow_id": "8dcf9424-2e8a-4466-8830-b0fac6d9a98e"
+              }
+            },
+            {
+              "mode": "propose",
+              "function": "ees_workflow_propose",
+              "arguments": {
+                "workflow_id": "8dcf9424-2e8a-4466-8830-b0fac6d9a98e",
+                "base_revision": 2,
+                "definition": {
+                  "id": "8dcf9424-2e8a-4466-8830-b0fac6d9a98e",
+                  "name": "중앙 대화 제안 검증",
+                  "system_id": "EMS",
+                  "category": "ops",
+                  "mode": "on_demand",
+                  "nodes": {
+                    "p-b29f0e8f20ce": {
+                      "id": "p-b29f0e8f20ce",
+                      "name": "중앙 대화 제안 검증",
+                      "type": "p",
+                      "parent": null,
+                      "children": [
+                        "stage-b015174b-1e85-4b0a-bf4a-90b7d4a184ad"
+                      ],
+                      "deps": []
+                    },
+                    "stage-b015174b-1e85-4b0a-bf4a-90b7d4a184ad": {
+                      "id": "stage-b015174b-1e85-4b0a-bf4a-90b7d4a184ad",
+                      "type": "t",
+                      "parent": "p-b29f0e8f20ce",
+                      "name": "새 단계",
+                      "description": "",
+                      "instructions": "중앙 대화 제안 · 사람 반영 전",
+                      "children": [],
+                      "mode": "human",
+                      "inputs": [],
+                      "result_block": "human_confirm",
+                      "deps": [],
+                      "human_confirmation": true,
+                      "completion": {
+                        "rule": ""
+                      }
+                    }
+                  },
+                  "description": "중앙 대화에서 제안한 미저장 설명"
+                },
+                "context_id": "[5,true,\"/c/75d6abd4-8fde-4d9e-bc5f-934aa4fc2ef5\",\"\",\"EMS\",\"\",\"8dcf9424-2e8a-4466-8830-b0fac6d9a98e\",\"\",\"\"]"
+              }
+            }
+          ],
+          "models": [
+            {
+              "mode": "plain",
+              "advertised_tool_names": [
+                "ees_workflow_display",
+                "ees_workflow_propose",
+                "ees_workflow_view",
+                "get_current_timestamp",
+                "calculate_timestamp",
+                "ask_user",
+                "list_knowledge_bases",
+                "search_knowledge_bases",
+                "query_knowledge_bases",
+                "grep_knowledge_files",
+                "search_knowledge_files",
+                "query_knowledge_files",
+                "view_knowledge_file",
+                "search_chats",
+                "view_chat",
+                "search_memories",
+                "list_memory_paths",
+                "read_memory_path",
+                "list_memories",
+                "update_memory",
+                "add_memory",
+                "replace_memory_content",
+                "delete_memory",
+                "search_notes",
+                "view_note",
+                "write_note",
+                "replace_note_content",
+                "create_tasks",
+                "update_task",
+                "create_automation",
+                "update_automation",
+                "list_automations",
+                "toggle_automation",
+                "delete_automation",
+                "search_calendar_events",
+                "create_calendar_event",
+                "update_calendar_event",
+                "delete_calendar_event"
+              ],
+              "stream": true,
+              "roles": [
+                "system",
+                "user"
+              ]
+            },
+            {
+              "mode": "read",
+              "advertised_tool_names": [
+                "ees_workflow_display",
+                "ees_workflow_propose",
+                "ees_workflow_view",
+                "get_current_timestamp",
+                "calculate_timestamp",
+                "ask_user",
+                "list_knowledge_bases",
+                "search_knowledge_bases",
+                "query_knowledge_bases",
+                "grep_knowledge_files",
+                "search_knowledge_files",
+                "query_knowledge_files",
+                "view_knowledge_file",
+                "search_chats",
+                "view_chat",
+                "search_memories",
+                "list_memory_paths",
+                "read_memory_path",
+                "list_memories",
+                "update_memory",
+                "add_memory",
+                "replace_memory_content",
+                "delete_memory",
+                "search_notes",
+                "view_note",
+                "write_note",
+                "replace_note_content",
+                "create_tasks",
+                "update_task",
+                "create_automation",
+                "update_automation",
+                "list_automations",
+                "toggle_automation",
+                "delete_automation",
+                "search_calendar_events",
+                "create_calendar_event",
+                "update_calendar_event",
+                "delete_calendar_event"
+              ],
+              "stream": true,
+              "roles": [
+                "system",
+                "user",
+                "assistant",
+                "user"
+              ]
+            },
+            {
+              "mode": "read",
+              "advertised_tool_names": [
+                "ees_workflow_display",
+                "ees_workflow_propose",
+                "ees_workflow_view",
+                "get_current_timestamp",
+                "calculate_timestamp",
+                "ask_user",
+                "list_knowledge_bases",
+                "search_knowledge_bases",
+                "query_knowledge_bases",
+                "grep_knowledge_files",
+                "search_knowledge_files",
+                "query_knowledge_files",
+                "view_knowledge_file",
+                "search_chats",
+                "view_chat",
+                "search_memories",
+                "list_memory_paths",
+                "read_memory_path",
+                "list_memories",
+                "update_memory",
+                "add_memory",
+                "replace_memory_content",
+                "delete_memory",
+                "search_notes",
+                "view_note",
+                "write_note",
+                "replace_note_content",
+                "create_tasks",
+                "update_task",
+                "create_automation",
+                "update_automation",
+                "list_automations",
+                "toggle_automation",
+                "delete_automation",
+                "search_calendar_events",
+                "create_calendar_event",
+                "update_calendar_event",
+                "delete_calendar_event"
+              ],
+              "stream": true,
+              "roles": [
+                "system",
+                "user",
+                "assistant",
+                "user",
+                "assistant",
+                "tool"
+              ]
+            },
+            {
+              "mode": "propose",
+              "advertised_tool_names": [
+                "ees_workflow_display",
+                "ees_workflow_propose",
+                "ees_workflow_view",
+                "get_current_timestamp",
+                "calculate_timestamp",
+                "ask_user",
+                "list_knowledge_bases",
+                "search_knowledge_bases",
+                "query_knowledge_bases",
+                "grep_knowledge_files",
+                "search_knowledge_files",
+                "query_knowledge_files",
+                "view_knowledge_file",
+                "search_chats",
+                "view_chat",
+                "search_memories",
+                "list_memory_paths",
+                "read_memory_path",
+                "list_memories",
+                "update_memory",
+                "add_memory",
+                "replace_memory_content",
+                "delete_memory",
+                "search_notes",
+                "view_note",
+                "write_note",
+                "replace_note_content",
+                "create_tasks",
+                "update_task",
+                "create_automation",
+                "update_automation",
+                "list_automations",
+                "toggle_automation",
+                "delete_automation",
+                "search_calendar_events",
+                "create_calendar_event",
+                "update_calendar_event",
+                "delete_calendar_event"
+              ],
+              "stream": true,
+              "roles": [
+                "system",
+                "user",
+                "assistant",
+                "user",
+                "assistant",
+                "tool",
+                "assistant",
+                "user"
+              ]
+            },
+            {
+              "mode": "propose",
+              "advertised_tool_names": [
+                "ees_workflow_display",
+                "ees_workflow_propose",
+                "ees_workflow_view",
+                "get_current_timestamp",
+                "calculate_timestamp",
+                "ask_user",
+                "list_knowledge_bases",
+                "search_knowledge_bases",
+                "query_knowledge_bases",
+                "grep_knowledge_files",
+                "search_knowledge_files",
+                "query_knowledge_files",
+                "view_knowledge_file",
+                "search_chats",
+                "view_chat",
+                "search_memories",
+                "list_memory_paths",
+                "read_memory_path",
+                "list_memories",
+                "update_memory",
+                "add_memory",
+                "replace_memory_content",
+                "delete_memory",
+                "search_notes",
+                "view_note",
+                "write_note",
+                "replace_note_content",
+                "create_tasks",
+                "update_task",
+                "create_automation",
+                "update_automation",
+                "list_automations",
+                "toggle_automation",
+                "delete_automation",
+                "search_calendar_events",
+                "create_calendar_event",
+                "update_calendar_event",
+                "delete_calendar_event"
+              ],
+              "stream": true,
+              "roles": [
+                "system",
+                "user",
+                "assistant",
+                "user",
+                "assistant",
+                "tool",
+                "assistant",
+                "user",
+                "assistant",
+                "tool"
+              ]
+            },
+            {
+              "mode": "plain",
+              "advertised_tool_names": [],
+              "stream": false,
+              "roles": [
+                "system",
+                "user"
+              ]
+            },
+            {
+              "mode": "plain",
+              "advertised_tool_names": [
+                "ees_workflow_display",
+                "ees_workflow_propose",
+                "ees_workflow_view",
+                "get_current_timestamp",
+                "calculate_timestamp",
+                "ask_user",
+                "list_knowledge_bases",
+                "search_knowledge_bases",
+                "query_knowledge_bases",
+                "grep_knowledge_files",
+                "search_knowledge_files",
+                "query_knowledge_files",
+                "view_knowledge_file",
+                "search_chats",
+                "view_chat",
+                "search_memories",
+                "list_memory_paths",
+                "read_memory_path",
+                "list_memories",
+                "update_memory",
+                "add_memory",
+                "replace_memory_content",
+                "delete_memory",
+                "search_notes",
+                "view_note",
+                "write_note",
+                "replace_note_content",
+                "create_tasks",
+                "update_task",
+                "create_automation",
+                "update_automation",
+                "list_automations",
+                "toggle_automation",
+                "delete_automation",
+                "search_calendar_events",
+                "create_calendar_event",
+                "update_calendar_event",
+                "delete_calendar_event"
+              ],
+              "stream": true,
+              "roles": [
+                "system",
+                "user",
+                "assistant",
+                "user",
+                "assistant",
+                "tool",
+                "assistant",
+                "user",
+                "assistant",
+                "tool",
+                "assistant",
+                "user"
+              ]
+            }
+          ],
+          "tool_results": [
+            {
+              "role": "tool",
+              "tool_call_id": "call_6f3fd25d1a164041adfa92f065270627",
+              "content": "{\n  \"ok\": true,\n  \"workflows\": [\n    {\n      \"id\": \"8dcf9424-2e8a-4466-8830-b0fac6d9a98e\",\n      \"system_id\": \"EMS\",\n      \"revision\": 2,\n      \"published_version\": null,\n      \"created_by\": \"a485c917-1c15-4bcb-8c53-f94e88154cd5\",\n      \"updated_at\": \"2026-10-02T04:55:12.925+00:00\",\n      \"draft\": {\n        \"id\": \"8dcf9424-2e8a-4466-8830-b0fac6d9a98e\",\n        \"name\": \"중앙 대화 제안 검증\",\n        \"system_id\": \"EMS\",\n        \"category\": \"ops\",\n        \"mode\": \"on_demand\",\n        \"nodes\": {\n          \"p-b29f0e8f20ce\": {\n            \"id\": \"p-b29f0e8f20ce\",\n            \"name\": \"중앙 대화 제안 검증\",\n            \"type\": \"p\",\n            \"parent\": null,\n            \"children\": [\n              \"stage-b015174b-1e85-4b0a-bf4a-90b7d4a184ad\"\n            ],\n            \"deps\": []\n          },\n          \"stage-b015174b-1e85-4b0a-bf4a-90b7d4a184ad\": {\n            \"id\": \"stage-b015174b-1e85-4b0a-bf4a-90b7d4a184ad\",\n            \"type\": \"t\",\n            \"parent\": \"p-b29f0e8f20ce\",\n            \"name\": \"새 단계\",\n            \"description\": \"\",\n            \"instructions\": \"저장된 기준 안내\",\n            \"children\": [],\n            \"mode\": \"human\",\n            \"inputs\": [],\n            \"result_block\": \"human_confirm\",\n            \"deps\": [],\n            \"human_confirmation\": true,\n            \"completion\": {\n              \"rule\": \"\"\n            }\n          }\n        }\n      },\n      \"can_manage\": true,\n      \"validation\": null,\n      \"versions\": [],\n      \"published\": null,\n      \"name\": \"중앙 대화 제안 검증\",\n      \"mode\": \"on_demand\",\n      \"category\": \"ops\",\n      \"settings\": []\n    }\n  ],\n  \"workflow\": {\n    \"id\": \"8dcf9424-2e8a-4466-8830-b0fac6d9a98e\",\n    \"system_id\": \"EMS\",\n    \"revision\": 2,\n    \"published_version\": null,\n    \"created_by\": \"a485c917-1c15-4bcb-8c53-f94e88154cd5\",\n    \"updated_at\": \"2026-10-02T04:55:12.925+00:00\",\n    \"draft\": {\n      \"id\": \"8dcf9424-2e8a-4466-8830-b0fac6d9a98e\",\n      \"name\": \"중앙 대화 제안 검증\",\n      \"system_id\": \"EMS\",\n      \"category\": \"ops\",\n      \"mode\": \"on_demand\",\n      \"nodes\": {\n        \"p-b29f0e8f20ce\": {\n          \"id\": \"p-b29f0e8f20ce\",\n          \"name\": \"중앙 대화 제안 검증\",\n          \"type\": \"p\",\n          \"parent\": null,\n          \"children\": [\n            \"stage-b015174b-1e85-4b0a-bf4a-90b7d4a184ad\"\n          ],\n          \"deps\": []\n        },\n        \"stage-b015174b-1e85-4b0a-bf4a-90b7d4a184ad\": {\n          \"id\": \"stage-b015174b-1e85-4b0a-bf4a-90b7d4a184ad\",\n          \"type\": \"t\",\n          \"parent\": \"p-b29f0e8f20ce\",\n          \"name\": \"새 단계\",\n          \"description\": \"\",\n          \"instructions\": \"저장된 기준 안내\",\n          \"children\": [],\n          \"mode\": \"human\",\n          \"inputs\": [],\n          \"result_block\": \"human_confirm\",\n          \"deps\": [],\n          \"human_confirmation\": true,\n          \"completion\": {\n            \"rule\": \"\"\n          }\n        }\n      }\n    },\n    \"can_manage\": true,\n    \"validation\": null,\n    \"versions\": [],\n    \"published\": null,\n    \"name\": \"중앙 대화 제안 검증\",\n    \"mode\": \"on_demand\",\n    \"category\": \"ops\",\n    \"settings\": []\n  },\n  \"run\": null,\n  \"runs\": [],\n  \"my_work\": [],\n  \"capabilities\": {\n    \"actor_id\": \"a485c917-1c15-4bcb-8c53-f94e88154cd5\",\n    \"is_admin\": true,\n    \"managed_systems\": [\n      \"EMS\",\n      \"APC\",\n      \"FDC\",\n      \"EGIS\",\n      \"EPT\",\n      \"COMMON\"\n    ],\n    \"can_author\": true\n  },\n  \"work_context\": {\n    \"workflow_id\": \"8dcf9424-2e8a-4466-8830-b0fac6d9a98e\",\n    \"run_id\": \"\",\n    \"job_id\": \"\",\n    \"revision\": 2,\n    \"context_id\": \"[5,true,\\\"/c/75d6abd4-8fde-4d9e-bc5f-934aa4fc2ef5\\\",\\\"\\\",\\\"EMS\\\",\\\"\\\",\\\"8dcf9424-2e8a-4466-8830-b0fac6d9a98e\\\",\\\"\\\",\\\"\\\"]\"\n  }\n}"
+            },
+            {
+              "role": "tool",
+              "tool_call_id": "call_59a8a65b06374810bdeb4e9a6d9e5915",
+              "content": "{\n  \"ok\": true,\n  \"proposal\": {\n    \"ok\": true,\n    \"preview\": true,\n    \"saved\": false\n  },\n  \"saved\": false,\n  \"published\": false,\n  \"message\": \"사용자가 편집 화면에서 제안을 검토하고 반영·저장해야 합니다.\"\n}"
+            }
+          ],
+          "input_proposals": [
+            {
+              "context": {
+                "context_id": "[9,true,\"/c/75d6abd4-8fde-4d9e-bc5f-934aa4fc2ef5\",\"\",\"EMS\",\"\",\"8dcf9424-2e8a-4466-8830-b0fac6d9a98e\",\"1a5e0eb4-56b0-464d-bccc-c882a0e490ba\",\"job-78a63fe2-1704-4019-a7ee-b7b57bbafaed\"]",
+                "target_id": "job-78a63fe2-1704-4019-a7ee-b7b57bbafaed",
+                "revision": 1,
+                "kind": "inputs"
+              },
+              "instruction": "개발용 자료 메모를 제안해 줘. 저장하지 마.",
+              "untrusted_source": {
+                "job": {
+                  "id": "job-78a63fe2-1704-4019-a7ee-b7b57bbafaed",
+                  "name": "입력 제안과 과거 근거",
+                  "instructions": ""
+                },
+                "fields": [
+                  {
+                    "id": "note",
+                    "name": "자료 메모",
+                    "type": "text",
+                    "scope": "run",
+                    "required": false,
+                    "description": "",
+                    "unit": "",
+                    "options_source": "manual",
+                    "options": [],
+                    "depends_on": [],
+                    "tool_argument": ""
+                  }
+                ],
+                "current_inputs": {}
+              }
+            }
+          ],
+          "errors": []
+        },
+        "browser_cleanup_diagnostics": {
+          "stage": "ready",
+          "elapsed_ms": 8986.637473999963,
+          "pid": 2943,
+          "exit_code": 0,
+          "browser_version": {
+            "protocolVersion": "1.3",
+            "product": "Chrome/154.0.8037.57",
+            "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+            "jsVersion": "15.4.80.11"
+          },
+          "target_id": "4A9A3CEC993CEA24336DC1DECEE81EEA",
+          "session_attached": false,
+          "buffer_bytes": 0,
+          "last_command": {
+            "id": 323,
+            "method": "Browser.close",
+            "session_attached": false,
+            "timeout_seconds": 5,
+            "elapsed_ms": 0.18358300002319083,
+            "completed": true
+          },
+          "recent_responses": [
+            {
+              "method": "Network.dataReceived",
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "method": "Network.loadingFinished",
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "method": "Network.requestWillBeSent",
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "method": "Network.requestWillBeSentExtraInfo",
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "method": "Network.responseReceivedExtraInfo",
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "method": "Network.responseReceived",
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "method": "Network.dataReceived",
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "method": "Network.loadingFinished",
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "id": 312,
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "id": 313,
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "id": 314,
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "id": 315,
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "id": 316,
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "id": 317,
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "id": 318,
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "id": 319,
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "id": 320,
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "id": 321,
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "id": 322,
+              "sessionId": "DE5CD48734C154E1A197CC9FC666335E"
+            },
+            {
+              "id": 323
+            }
+          ],
+          "stderr_tail": "[2943:2965:1002/045510.175383:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2943:2965:1002/045510.175832:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2943:2965:1002/045510.231993:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2943:2965:1002/045510.264871:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2943:2943:1002/045510.359913:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2943:2943:1002/045510.359961:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2943:2965:1002/045510.360148:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2943:2965:1002/045510.360160:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2943:2943:1002/045510.361692:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2943:2943:1002/045510.364922:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2943:2965:1002/045510.365280:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2943:2943:1002/045510.391012:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2943:2943:1002/045510.391308:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2943:2965:1002/045510.392559:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2943:2943:1002/045510.395635:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2943:2943:1002/045510.409783:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2943:2943:1002/045510.409835:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files\n[2943:2965:1002/045510.409847:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2943:2943:1002/045510.448222:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2943:2965:1002/045510.448372:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2943:2943:1002/045510.498451:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2943:2967:1002/045513.684774:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\n",
+          "first_failure": null,
+          "bootstrap_observation": null
+        }
+      }
+    }
+  ]
+}

@@ -53,6 +53,82 @@ class ModelTests(unittest.IsolatedAsyncioTestCase):
         return await self.adapter.invoke(self.user, self.node, self.context, self.results,
                                          {"arbitrary_input": "never-forward-input"})
 
+    async def test_raw_native_base_model_needs_no_fake_preset_row(self):
+        self.runtime.Models.get_model_by_id.return_value = None
+        result = await self.invoke()
+        self.assertEqual(result["status"], "succeeded")
+        self.runtime.check_access.assert_awaited_once_with(self.user, self.app.state.MODELS["permitted"], model_info=None)
+        self.assertEqual(result["provenance"]["model_id"], "permitted")
+        # The pinned Native ACL can reject an unconfigured base model for a
+        # normal user; removing our fake-row dependency never bypasses it.
+        self.runtime.check_access.side_effect = RuntimeError("Native model not found")
+        with self.assertRaises(subject.WorkflowError) as error:
+            await self.invoke()
+        self.assertEqual(error.exception.code, "model_unavailable")
+        self.user.role = "admin"
+        self.runtime.bypass_admin = True
+        self.assertEqual((await self.invoke())["status"], "succeeded")
+
+    async def test_native_catalog_zero_one_multiple_and_no_implicit_substitution(self):
+        self.app.state.MODELS = {}
+        self.assertEqual(await self.adapter.available(self.user), [])
+        with self.assertRaises(subject.WorkflowError): await self.adapter.resolve(self.user)
+        self.app.state.MODELS = {"permitted": {"id": "permitted", "name": "기반 모델"}}
+        self.assertEqual(len(await self.adapter.available(self.user)), 1)
+        with self.assertRaises(subject.WorkflowError): await self.adapter.resolve(self.user)
+        selected = await self.adapter.resolve(self.user, "permitted")
+        self.assertEqual(selected["name"], "기반 모델")
+        self.app.state.MODELS["second"] = {"id": "second", "name": "두 번째"}
+        self.assertEqual(len(await self.adapter.available(self.user)), 2)
+        with self.assertRaises(subject.WorkflowError): await self.adapter.resolve(self.user, "retired-preset")
+        self.app.state.config = SimpleNamespace(DEFAULT_MODELS="permitted")
+        self.assertEqual((await self.adapter.resolve(self.user))["id"], "permitted")
+
+    async def test_proposal_context_fields_and_tool_calls_are_never_commands(self):
+        context = {"context_id": "panel-1", "target_id": "job-1", "revision": 7, "kind": "inputs",
+                   "fields": [{"id": "count", "type": "number", "required": True}], "source": {"count": 1}}
+        expected = {key: context[key] for key in ("context_id", "target_id", "revision", "kind")}
+        self.runtime.generate.return_value = {"choices": [{"message": {"content": json.dumps({"context": expected, "proposal": {"count": 2}})}}]}
+        result = await self.adapter.propose(self.user, "permitted", context, "값 제안")
+        self.assertFalse(result["saved"]); self.assertFalse(result["executed"])
+        self.assertEqual(result["proposal"], {"count": 2})
+        for output in ({"context": {**expected, "revision": 6}, "proposal": {"count": 2}},
+                       {"context": expected, "proposal": {"undeclared": "x"}},
+                       {"context": expected, "proposal": {"count": 2}, "action": "publish"}):
+            self.runtime.generate.return_value = {"choices": [{"message": {"content": json.dumps(output)}}]}
+            with self.assertRaises(subject.WorkflowError) as error:
+                await self.adapter.propose(self.user, "permitted", context, "값 제안")
+            self.assertEqual(error.exception.code, "model_result_invalid")
+        self.runtime.generate.return_value = {"choices": [{"message": {"content": "{}", "tool_calls": [{"function": {"name": "publish"}}]}}]}
+        with self.assertRaises(subject.WorkflowError): await self.adapter.propose(self.user, "permitted", context, "값 제안")
+
+    async def test_proposal_rejects_changed_pinned_model_before_generation(self):
+        identity=await self.adapter.resolve(self.user,'permitted')
+        context={'context_id':'attempt-1','target_id':'j1','revision':1,'kind':'report','source':{},'model_identity':{**identity,'name':'stale identity'}}
+        with self.assertRaises(subject.WorkflowError) as error:
+            await self.adapter.propose(self.user,'permitted',context,'현재 근거만 정리해 주세요.')
+        self.assertEqual(error.exception.code,'model_configuration_changed')
+        self.runtime.generate.assert_not_awaited()
+
+    async def test_input_proposal_adapter_preserves_dynamic_declarations_for_candidate_gate(self):
+        fields=[{'id':'project','type':'text'}, {'id':'status','type':'single','options_source':'tool','depends_on':['project']},
+                {'id':'fixed','type':'single','options_source':'manual','options':['allowed']}]
+        context={'context_id':'private-inputs','target_id':'j1','revision':1,'kind':'inputs','fields':fields,
+                 'source':{'current_inputs':{'project':'old'},'fields':[fields[0],{**fields[1],'options_source':'manual','options':[{'id':'old-status','name':'Old status'}]},fields[2]]}}
+        expected={key:context[key] for key in ('context_id','target_id','revision','kind')}
+        async def propose(values):
+            self.runtime.generate.return_value={'choices':[{'message':{'content':json.dumps({'context':expected,'proposal':values})}}]}
+            return await self.adapter.propose(self.user,'permitted',context,'현재 입력을 제안해 주세요.')
+        result=await propose({'project':'new','status':'new-status'})
+        self.assertEqual(result['proposal'],{'project':'new','status':'new-status'})
+        self.assertFalse(result['saved']);self.assertFalse(result['executed'])
+        # Dynamic membership must be resolved against the final candidate by
+        # the workspace gate. Manual membership and type checks remain here.
+        for invalid in ({'status':[]},{'fixed':'not-allowed'},{'undeclared':'value'}):
+            with self.subTest(invalid=invalid):
+                with self.assertRaises(subject.WorkflowError) as error: await propose(invalid)
+                self.assertEqual(error.exception.code,'model_result_invalid')
+
     async def test_scoped_context_current_identity_and_reserved_request(self):
         result = await self.invoke()
         self.service._user.assert_awaited_once_with(self.user)

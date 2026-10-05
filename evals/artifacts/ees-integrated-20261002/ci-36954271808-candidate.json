@@ -1,0 +1,17 @@
+{
+  "run": 36954271808,
+  "head": "89d910ea56bb0e5ea095120bd380bb3e705e75b0",
+  "artifact_id": 11204839923,
+  "source_tree": "205a8c25a5c81c12b5e8c27c0de299bbc2f508b3",
+  "artifact_outer_sha256": "3e929a24dce674c621d6c736f2f817d722585b523f727f5816468a95ad24d6e4",
+  "zip_sha256": "c57a91565603138382652f70be9ef8b13749edcc2e700447ca40e45225541c89",
+  "manifest_sha256": "406f960a3a83a8db1a7eb1d6afce679273f37848f69efa0588abab3c3863ddda",
+  "wheel_sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3",
+  "ci_manifest_members_validated": true,
+  "source_dirty": false,
+  "local_zip_members_verified": 29,
+  "local_record_rows_verified": 5998,
+  "ci_and_local_zip_hash_equal": true,
+  "ci_uploaded_files": 3,
+  "boundary": "First candidate only; whole CI failure, not release-approved. Whole outer artifact not downloaded due32MiB file limit/direct URL403; identical locally generated candidate was fully verified."
+}

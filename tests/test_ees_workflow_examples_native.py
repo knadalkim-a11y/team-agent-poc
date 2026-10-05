@@ -32,7 +32,7 @@ class NativeWorkflowExamplesTests(unittest.IsolatedAsyncioTestCase):
         self.service, self.bridge = self.fixture.service, self.fixture.bridge
         self.service.execution.bridge = self.bridge
         self.addAsyncCleanup(self.service.execution.stop)
-        self.examples = importlib.import_module("open_webui.ees_workflow_examples")
+        self.examples = __import__("workflow_fixture").load_workflow_examples("open_webui")
         self.model_module = importlib.import_module("open_webui.ees_workflow_model")
         self.refs = {}
         for family in ("confluence", "jira", "github"):

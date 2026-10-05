@@ -1,0 +1,580 @@
+{
+  "reference": {
+    "kind": "workspace",
+    "reference_kind": "historical",
+    "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+    "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+    "job_id": "qa-list",
+    "attempt_id": "687d987a-55c2-456a-a824-fcdcee405de1",
+    "version": 1,
+    "result_revision": 2,
+    "created_at": "2026-10-02T07:19:27.953+00:00",
+    "revision": 14,
+    "system_id": "EMS",
+    "factory_id": "",
+    "context_id": "[6,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"\"]"
+  },
+  "calls": [
+    {
+      "function": "ees_workflow_view",
+      "reference": {
+        "attempt_id": "687d987a-55c2-456a-a824-fcdcee405de1",
+        "context_id": "[6,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"\"]",
+        "created_at": "2026-10-02T07:19:27.953+00:00",
+        "job_id": "qa-list",
+        "read_only": true,
+        "reference_kind": "historical",
+        "result_revision": 2,
+        "revision": 14,
+        "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+        "version": 1,
+        "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039"
+      },
+      "arguments": {
+        "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+        "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9"
+      }
+    }
+  ],
+  "results": [
+    {
+      "ok": true,
+      "work_context": {
+        "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+        "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+        "job_id": "qa-list",
+        "attempt_id": "687d987a-55c2-456a-a824-fcdcee405de1",
+        "version": 1,
+        "result_revision": 2,
+        "context_id": "[6,true,\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\",\"\",\"EMS\",\"\",\"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\"\"]",
+        "reference_kind": "historical",
+        "read_only": true,
+        "created_at": "2026-10-02T07:19:27.953+00:00"
+      },
+      "historical": {
+        "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+        "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+        "job_id": "qa-list",
+        "version": 1,
+        "attempt": {
+          "id": "687d987a-55c2-456a-a824-fcdcee405de1",
+          "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+          "job_id": "qa-list",
+          "number": 2,
+          "actor_id": "cd6f890e-8675-4874-a67c-c8edcc3b71aa",
+          "inputs": {
+            "project": "EESEMS"
+          },
+          "snapshot": {
+            "actor_id": "cd6f890e-8675-4874-a67c-c8edcc3b71aa",
+            "argument_sources": {},
+            "arguments": {
+              "date_field": "updated",
+              "end_date": "2026-09-30",
+              "project_key": "EESEMS",
+              "start_at": 0,
+              "start_date": "2026-09-01",
+              "status_ids": [
+                "1"
+              ]
+            },
+            "condition_results": {
+              "p-cbdc558bf55e": true,
+              "qa-list": true,
+              "qa-report": true,
+              "qa-stage": true
+            },
+            "deadline": {
+              "at": null,
+              "calendar_status": "unset",
+              "reason": "deadline_unset"
+            },
+            "deadline_source": null,
+            "definition": {
+              "category": "ops",
+              "id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039",
+              "mode": "on_demand",
+              "name": "합성 변경 화면 검수",
+              "nodes": {
+                "p-cbdc558bf55e": {
+                  "children": [
+                    "qa-stage"
+                  ],
+                  "deps": [],
+                  "id": "p-cbdc558bf55e",
+                  "name": "합성 변경 화면 검수",
+                  "parent": null,
+                  "type": "p"
+                },
+                "qa-list": {
+                  "argument_bindings": {
+                    "date_field": {
+                      "constant": "updated"
+                    },
+                    "end_date": {
+                      "constant": "2026-09-30"
+                    },
+                    "project_key": {
+                      "input": "project"
+                    },
+                    "start_at": {
+                      "constant": 0
+                    },
+                    "start_date": {
+                      "constant": "2026-09-01"
+                    },
+                    "status_ids": {
+                      "constant": [
+                        "1"
+                      ]
+                    }
+                  },
+                  "children": [],
+                  "deps": [],
+                  "human_confirmation": true,
+                  "id": "qa-list",
+                  "inputs": [
+                    {
+                      "id": "project",
+                      "name": "조회 프로젝트",
+                      "required": true,
+                      "scope": "workflow",
+                      "type": "text"
+                    }
+                  ],
+                  "instructions": "실제 Native 등록 도구로 합성 Jira 목록을 조회합니다.",
+                  "mode": "tool",
+                  "name": "합성 Jira 목록 확정",
+                  "parent": "qa-stage",
+                  "read_retry": {
+                    "count": 1,
+                    "deadline_seconds": 30
+                  },
+                  "result_block": "list_confirm",
+                  "tool_reference": {
+                    "config_hash": "5a3d2a0e2c955ac4be1bbda8ff858d9dc7ee5cebf4738bbb391b36cf552b12fd",
+                    "content_hash": "d6bb9bee2a7919b994008393d48188cd43d1a26404b013f21bc6d56f3e95085c",
+                    "environment": "native-0.11.3:bd6e86c3271c491d1295f0e831d9d56d519c9072fb423e49f827a2e9af7bde9b",
+                    "function": "jira_search_crs",
+                    "revision": 1,
+                    "schema_hash": "0366341e475b675c249813acd1f45a594f27a5374d5fce050e93cc8414ed9762",
+                    "tool_id": "integrated_figma_jira"
+                  },
+                  "type": "j"
+                },
+                "qa-report": {
+                  "children": [],
+                  "completion": {
+                    "kind": "review"
+                  },
+                  "deps": [
+                    "qa-list"
+                  ],
+                  "human_confirmation": true,
+                  "id": "qa-report",
+                  "inputs": [],
+                  "instructions": "확정 목록을 바탕으로 검토 초안을 작성합니다. 실제 송부하지 않습니다.",
+                  "mode": "ai",
+                  "name": "합성 결과 초안 검토",
+                  "parent": "qa-stage",
+                  "result_block": "ai_review",
+                  "type": "j"
+                },
+                "qa-stage": {
+                  "children": [
+                    "qa-list",
+                    "qa-report"
+                  ],
+                  "deps": [],
+                  "id": "qa-stage",
+                  "name": "합성 조회와 검토",
+                  "parent": "p-cbdc558bf55e",
+                  "type": "t"
+                }
+              },
+              "resource_versions": {
+                "skills": {}
+              },
+              "schedule": {
+                "anchor": "2026-10-04T09:00",
+                "catch_up": "miss",
+                "closing": "after_last_stage",
+                "frequency": "daily",
+                "interval": 1,
+                "name_template": "{date} 합성 회차",
+                "non_working_days": "notify_no_shift",
+                "opening": "after_previous_closed",
+                "stage_deadlines": {
+                  "qa-stage": {
+                    "offset_days": -1
+                  }
+                },
+                "timezone": "UTC"
+              },
+              "system_id": "EMS"
+            },
+            "definition_hash": "aa0d5493ad2fdf508b34031e7183489d7bae8c82810ddcdde304cf825852f331",
+            "evidence_attempt_ids": [],
+            "factory": null,
+            "inputs": {
+              "project": "EESEMS"
+            },
+            "job": {
+              "argument_bindings": {
+                "date_field": {
+                  "constant": "updated"
+                },
+                "end_date": {
+                  "constant": "2026-09-30"
+                },
+                "project_key": {
+                  "input": "project"
+                },
+                "start_at": {
+                  "constant": 0
+                },
+                "start_date": {
+                  "constant": "2026-09-01"
+                },
+                "status_ids": {
+                  "constant": [
+                    "1"
+                  ]
+                }
+              },
+              "children": [],
+              "deps": [],
+              "human_confirmation": true,
+              "id": "qa-list",
+              "inputs": [
+                {
+                  "id": "project",
+                  "name": "조회 프로젝트",
+                  "required": true,
+                  "scope": "workflow",
+                  "type": "text"
+                }
+              ],
+              "instructions": "실제 Native 등록 도구로 합성 Jira 목록을 조회합니다.",
+              "mode": "tool",
+              "name": "합성 Jira 목록 확정",
+              "parent": "qa-stage",
+              "read_retry": {
+                "count": 1,
+                "deadline_seconds": 30
+              },
+              "result_block": "list_confirm",
+              "tool_reference": {
+                "config_hash": "5a3d2a0e2c955ac4be1bbda8ff858d9dc7ee5cebf4738bbb391b36cf552b12fd",
+                "content_hash": "d6bb9bee2a7919b994008393d48188cd43d1a26404b013f21bc6d56f3e95085c",
+                "environment": "native-0.11.3:bd6e86c3271c491d1295f0e831d9d56d519c9072fb423e49f827a2e9af7bde9b",
+                "function": "jira_search_crs",
+                "revision": 1,
+                "schema_hash": "0366341e475b675c249813acd1f45a594f27a5374d5fce050e93cc8414ed9762",
+                "tool_id": "integrated_figma_jira"
+              },
+              "type": "j"
+            },
+            "model_id": null,
+            "options": {},
+            "prerequisite_sources": {},
+            "read_retry": {
+              "count": 1,
+              "deadline_seconds": 30,
+              "number": 1,
+              "root_request_id": "9c0ee1d3-f76f-4b1a-93fa-c06d119e85ae"
+            },
+            "settings_sources": {
+              "project": {
+                "factory_id": "",
+                "revision": 1,
+                "scope": "workflow"
+              }
+            },
+            "skills": [],
+            "source_references": [],
+            "tool_reference": {
+              "config_hash": "5a3d2a0e2c955ac4be1bbda8ff858d9dc7ee5cebf4738bbb391b36cf552b12fd",
+              "content_hash": "d6bb9bee2a7919b994008393d48188cd43d1a26404b013f21bc6d56f3e95085c",
+              "environment": "native-0.11.3:bd6e86c3271c491d1295f0e831d9d56d519c9072fb423e49f827a2e9af7bde9b",
+              "function": "jira_search_crs",
+              "revision": 1,
+              "schema_hash": "0366341e475b675c249813acd1f45a594f27a5374d5fce050e93cc8414ed9762",
+              "tool_id": "integrated_figma_jira"
+            },
+            "version": 1
+          },
+          "status": "succeeded",
+          "result": {
+            "version": "ees.native.read.v1",
+            "status": "succeeded",
+            "transport": "succeeded",
+            "completeness": "complete",
+            "data": {
+              "ok": true,
+              "status": "complete",
+              "issues": [
+                {
+                  "key": "EESEMS-1",
+                  "project_key": "EESEMS",
+                  "summary": "합성 이슈",
+                  "status": "Open",
+                  "status_category": "new",
+                  "assignee": null,
+                  "assignee_id": null,
+                  "assignee_known": true,
+                  "priority": null,
+                  "priority_known": true,
+                  "updated": "2026-09-29T00:00:00.000+0000",
+                  "due_date": null,
+                  "due_date_known": true,
+                  "url": "http://127.0.0.1:43757/browse/EESEMS-1",
+                  "date_field": "updated",
+                  "date_value": "2026-09-29T00:00:00.000+0000",
+                  "attachments": [],
+                  "attachment_metadata_complete": true,
+                  "content_reviewed": false
+                }
+              ],
+              "listing": {
+                "ok": true,
+                "total": 1,
+                "returned": 1,
+                "start_at": 0,
+                "next_start_at": null
+              },
+              "scope": {
+                "project_key": "EESEMS",
+                "status_ids": [
+                  "1"
+                ],
+                "date_field": "updated",
+                "start_date": "2026-09-01",
+                "end_date": "2026-09-30"
+              },
+              "errors": [],
+              "fetched_at": "2026-10-02T07:19:28+00:00",
+              "untrusted_content": true,
+              "content_reviewed": false,
+              "notice": "조회 날짜 경계는 Jira 개인 계정의 시간대 기준입니다. 페이지 조회는 동시점 스냅샷이 아닙니다. 첨부 존재·이름은 내용 적정성 승인이 아닙니다. 부분 결과는 완전한 대상 목록으로 확정하지 마세요."
+            },
+            "evidence": [
+              {
+                "kind": "jira_issue",
+                "id": "EESEMS-1",
+                "url": "http://127.0.0.1:43757/browse/EESEMS-1"
+              }
+            ],
+            "provenance": {
+              "tool_id": "integrated_figma_jira",
+              "function": "jira_search_crs",
+              "revision": 1,
+              "content_hash": "d6bb9bee2a7919b994008393d48188cd43d1a26404b013f21bc6d56f3e95085c",
+              "schema_hash": "0366341e475b675c249813acd1f45a594f27a5374d5fce050e93cc8414ed9762",
+              "config_hash": "5a3d2a0e2c955ac4be1bbda8ff858d9dc7ee5cebf4738bbb391b36cf552b12fd",
+              "environment": "native-0.11.3:bd6e86c3271c491d1295f0e831d9d56d519c9072fb423e49f827a2e9af7bde9b",
+              "run_id": "ecab4d53-29cc-40d6-b811-d435b89cb3f9",
+              "call_id": "687d987a-55c2-456a-a824-fcdcee405de1",
+              "job_id": "qa-list"
+            },
+            "untrusted_content": true,
+            "items": [
+              {
+                "id": "EESEMS-1",
+                "name": "합성 이슈",
+                "label": "합성 이슈",
+                "url": "http://127.0.0.1:43757/browse/EESEMS-1",
+                "required": true,
+                "source": {
+                  "tool_id": "integrated_figma_jira",
+                  "function": "jira_search_crs",
+                  "item_id": "EESEMS-1"
+                },
+                "source_record": {
+                  "key": "EESEMS-1",
+                  "project_key": "EESEMS",
+                  "summary": "합성 이슈",
+                  "status": "Open",
+                  "status_category": "new",
+                  "assignee": null,
+                  "assignee_id": null,
+                  "assignee_known": true,
+                  "priority": null,
+                  "priority_known": true,
+                  "updated": "2026-09-29T00:00:00.000+0000",
+                  "due_date": null,
+                  "due_date_known": true,
+                  "url": "http://127.0.0.1:43757/browse/EESEMS-1",
+                  "date_field": "updated",
+                  "date_value": "2026-09-29T00:00:00.000+0000",
+                  "attachments": [],
+                  "attachment_metadata_complete": true,
+                  "content_reviewed": false
+                },
+                "evidence": [
+                  {
+                    "label": "원본 조회",
+                    "status": "succeeded"
+                  }
+                ]
+              }
+            ]
+          },
+          "created_at": "2026-10-02T07:19:27.953+00:00",
+          "finished_at": "2026-10-02T07:19:28.150+00:00",
+          "review_history": []
+        },
+        "decisions": []
+      }
+    }
+  ],
+  "errors": [],
+  "routes": [
+    {
+      "kind": "native_retrieval_query",
+      "roles": [
+        "user"
+      ],
+      "message_count": 1,
+      "stream": false,
+      "tool_count": 0,
+      "exact_question": false,
+      "has_historical_reference": false,
+      "question_in_content": true,
+      "contents": [
+        {
+          "type": "str",
+          "sha256": "85665a9a4cfe7938641493a81bdd005f1e648820e101f126480377e0e5a6cc9e",
+          "prefix": "### Task:\nAnalyze the chat history to determine the necessity of generating search queries, in the given language. By default, **prioritize generating 1-3 broad"
+        }
+      ],
+      "synthetic_queries": [
+        "EESEMS 합성 첨부 검증"
+      ]
+    },
+    {
+      "kind": "historical_main",
+      "roles": [
+        "system",
+        "user",
+        "assistant",
+        "user",
+        "assistant",
+        "user",
+        "user"
+      ],
+      "message_count": 7,
+      "stream": true,
+      "tool_count": 38,
+      "exact_question": true,
+      "has_historical_reference": true,
+      "question_in_content": true,
+      "contents": [
+        {
+          "type": "str",
+          "sha256": "775dea079075f97bfd298125bf07dbeb20546d6a11e02a0acdc605a585db7d06",
+          "prefix": "EES Work context (read-only reference): {\"attempt_id\":\"687d987a-55c2-456a-a824-fcdcee405de1\",\"context_id\":\"[6,true,\\\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\\\",\\"
+        },
+        {
+          "type": "str",
+          "sha256": "f6abc5f7a7bfed873cbfdfab4c4347ccdd28ee94aca5d18e5a3ab7cb0e794270",
+          "prefix": "개발용 합성 대화 저장 확인"
+        },
+        {
+          "type": "str",
+          "sha256": "702f0430a35a861f92d130dcf7145ab9e7389b8f33a021919e04b9e9484cb950",
+          "prefix": "합성 모델 응답: 실제 Native 대화 서비스 연결을 확인했습니다."
+        },
+        {
+          "type": "str",
+          "sha256": "2b1bc37732239e2d7d95cec16cb8ddea4ad7dcee07c2cfb40a98158d7377d94d",
+          "prefix": "<attached_files>\n<file type=\"file\" id=\"dbe16f80-1dda-4a78-85fc-5ee68c1eaa1d\" url=\"dbe16f80-1dda-4a78-85fc-5ee68c1eaa1d\" content_type=\"text/plain\" name=\"syntheti"
+        },
+        {
+          "type": "str",
+          "sha256": "073c5b5780513a63beefbc96f9c8c6fd956e539be094674f07e2f6b6ab48aec3",
+          "prefix": "합성 첨부 응답: Native 파일과 대화 저장 확인"
+        },
+        {
+          "type": "str",
+          "sha256": "838c64c859c302edc68bf6179923cc5700567aa373edbaca3c2977d6114eef26",
+          "prefix": "이 당시 조회 시도의 프로젝트와 결과만 설명해 줘. 현재 값이나 다른 시도는 사용하지 마."
+        },
+        {
+          "type": "str",
+          "sha256": "452b4b1bf87c683131c632bc61c666028b106a588960ac5270c336c0dfa4761f",
+          "prefix": "### Task:\nRespond to the user query using the provided context, incorporating inline citations in the format [id] **only when the <source> tag includes an expli"
+        }
+      ]
+    },
+    {
+      "kind": "historical_main",
+      "roles": [
+        "system",
+        "user",
+        "assistant",
+        "user",
+        "assistant",
+        "user",
+        "user",
+        "assistant",
+        "tool"
+      ],
+      "message_count": 9,
+      "stream": true,
+      "tool_count": 38,
+      "exact_question": true,
+      "has_historical_reference": true,
+      "question_in_content": true,
+      "contents": [
+        {
+          "type": "str",
+          "sha256": "775dea079075f97bfd298125bf07dbeb20546d6a11e02a0acdc605a585db7d06",
+          "prefix": "EES Work context (read-only reference): {\"attempt_id\":\"687d987a-55c2-456a-a824-fcdcee405de1\",\"context_id\":\"[6,true,\\\"/c/0a935e76-3f68-43fe-b40d-12e3b8feada4\\\",\\"
+        },
+        {
+          "type": "str",
+          "sha256": "f6abc5f7a7bfed873cbfdfab4c4347ccdd28ee94aca5d18e5a3ab7cb0e794270",
+          "prefix": "개발용 합성 대화 저장 확인"
+        },
+        {
+          "type": "str",
+          "sha256": "702f0430a35a861f92d130dcf7145ab9e7389b8f33a021919e04b9e9484cb950",
+          "prefix": "합성 모델 응답: 실제 Native 대화 서비스 연결을 확인했습니다."
+        },
+        {
+          "type": "str",
+          "sha256": "2b1bc37732239e2d7d95cec16cb8ddea4ad7dcee07c2cfb40a98158d7377d94d",
+          "prefix": "<attached_files>\n<file type=\"file\" id=\"dbe16f80-1dda-4a78-85fc-5ee68c1eaa1d\" url=\"dbe16f80-1dda-4a78-85fc-5ee68c1eaa1d\" content_type=\"text/plain\" name=\"syntheti"
+        },
+        {
+          "type": "str",
+          "sha256": "073c5b5780513a63beefbc96f9c8c6fd956e539be094674f07e2f6b6ab48aec3",
+          "prefix": "합성 첨부 응답: Native 파일과 대화 저장 확인"
+        },
+        {
+          "type": "str",
+          "sha256": "838c64c859c302edc68bf6179923cc5700567aa373edbaca3c2977d6114eef26",
+          "prefix": "이 당시 조회 시도의 프로젝트와 결과만 설명해 줘. 현재 값이나 다른 시도는 사용하지 마."
+        },
+        {
+          "type": "str",
+          "sha256": "452b4b1bf87c683131c632bc61c666028b106a588960ac5270c336c0dfa4761f",
+          "prefix": "### Task:\nRespond to the user query using the provided context, incorporating inline citations in the format [id] **only when the <source> tag includes an expli"
+        },
+        {
+          "type": "str",
+          "sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+          "prefix": ""
+        },
+        {
+          "type": "str",
+          "sha256": "6c3face1caf5ce2ca95b34d574cd057df766f3a3e7a8ea5b651251d720294e25",
+          "prefix": "{\n  \"ok\": true,\n  \"work_context\": {\n    \"workflow_id\": \"7d580f98-e8e2-4a24-95d8-e1054e0dd039\",\n    \"run_id\": \"ecab4d53-29cc-40d6-b811-d435b89cb3f9\",\n    \"job_id"
+        }
+      ]
+    }
+  ],
+  "scope": "Actual Native dispatch and storage; synthetic external model",
+  "query_template_sha256": "2a933edf706e523d9966a117549686ed2b72313b97c548e83d7abb06d9f40261"
+}

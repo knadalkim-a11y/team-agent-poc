@@ -1,0 +1,244 @@
+{
+  "module": "test_ees_workflow.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 1.232,
+  "tests_run": 56,
+  "no_test_failures": true,
+  "status": "incomplete",
+  "counts": {
+    "passed": 55,
+    "failed": 0,
+    "error": 0,
+    "skipped": 1,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_workflow.DefinitionValidationTests.test_add_reorder_move_and_remove_nodes_with_correct_links_are_valid",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.DefinitionValidationTests.test_cycles_missing_references_wrong_parent_duplicates_and_common_policy",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.DefinitionValidationTests.test_explicit_historical_fixture_preserves_pre_split_bytes_and_order",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.DefinitionValidationTests.test_malformed_editor_fields_return_errors_instead_of_crashing",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.DefinitionValidationTests.test_product_default_is_empty_and_independent_of_historical_fixture",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.DefinitionValidationTests.test_retired_catalog_writers_exist_only_in_pinned_test_fixture",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.DefinitionValidationTests.test_validation_error_order_and_common_policy_message_are_unchanged",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowPreservationTests.test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads",
+      "status": "skipped",
+      "detail": "EES_TEST_LEGACY_WORKFLOW_WHEEL must identify the supported ees.10 wheel. Required in the release gate."
+    },
+    {
+      "id": "test_ees_workflow.WorkflowRouteTests.test_routes_use_verified_identity_and_no_store",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_actual_draft_content_needs_review_before_completion",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_additive_receipts_keep_legacy_read_write_and_new_replay_compatible",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_case_summaries_keep_factory_history_and_snapshot_node_progress",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_case_tree_uses_frozen_structure_after_catalog_removes_a_job",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_completed_execution_blocks_result_changes_and_keeps_new_runs_separate",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_concurrent_first_requests_do_not_duplicate_case_or_execution",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_current_identity_and_user_ownership_cannot_be_forged",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_exact_run_retry_returns_current_state_without_reexecuting_or_reselecting",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_existing_chat_ownership_and_one_case_per_chat_are_enforced",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_external_tool_reference_is_blocked_and_never_executed_as_mock",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_first_failed_action_keeps_case_and_replay_does_not_create_again",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_first_input_write_is_atomic_and_replays_after_restart",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_first_write_completed_scope_requires_explicit_new_case",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_first_write_requires_existing_scope_choice_and_hides_inaccessible_candidates",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_history_read_does_not_change_current_selection_revision_or_timestamps",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_inaccessible_linked_chats_are_omitted_from_read_and_action_summaries",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_incomplete_draft_can_save_but_cannot_execute_or_publish",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_initial_catalog_has_no_fabricated_progress_or_chat",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_input_change_invalidates_only_dependent_results_preserving_evidence",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_legacy_creation_timestamp_stays_unknown_without_a_read_migration",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_malformed_action_create_and_unreadable_draft_are_rejected",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_management_counts_use_all_descendant_jobs_and_exclude_inapplicable",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_management_metrics_separate_waiting_review_problems_and_ready_jobs",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_management_readiness_checks_connection_and_current_skill_access_without_writing",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_multiple_checks_failure_skip_retry_and_history_are_persistent",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_new_published_fixture_freezes_existing_case",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_parent_can_skip_failed_jobs_while_running_independent_work",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_parent_execution_keeps_evidence_when_sibling_input_is_missing",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_parent_execution_never_bulk_confirms_manual_jobs",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_pending_case_binds_after_chat_creation_and_survives_restart",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_prerequisites_manual_confirmation_and_missing_input_do_not_fake_success",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_process_boundary_and_country_conditions",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_replay_rechecks_user_and_current_linked_chat_access",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_request_and_published_version_guards_precede_creation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_selected_context_inherits_instructions_and_current_accessible_skill",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_selection_does_not_execute_and_stale_revision_is_rejected",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_selection_projects_external_skills_only_with_current_access",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_selection_read_does_not_adopt_other_chat_case_or_write",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_selection_validates_scope_version_and_access_but_allows_excluded_read",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_unconnected_job_does_not_claim_a_simulation_ran",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_unexpected_failure_rolls_back_case_receipt_and_execution",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_v4_action_record_confirms_persisted_native_status_not_socket_delivery",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_v4_action_record_read_hides_revoked_inherited_skill_and_fails_closed",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_v4_action_records_read_only_owned_assistant_latest_sanitized_history",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_v4_input_draft_rechecks_inherited_skill_permission_for_case_and_preview",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_v4_input_proposal_checks_scope_schema_and_access_without_writes",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow.WorkflowTests.test_v4_native_undo_status_requires_actual_same_message_receipt",
+      "status": "passed"
+    }
+  ]
+}

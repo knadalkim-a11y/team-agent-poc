@@ -1,0 +1,119 @@
+{
+  "status": "passed",
+  "recorded_at": "2026-10-02T07:15:22.293024+00:00",
+  "source_head_at_recording": "455bc06fb72bcc595bfc0b0c53824dd8e2616fed",
+  "environment": "Recovered repository-local .venv Python3.11.16; strict EncodingWarning errors; pinned upstream and reconstructed fixed ees12 source; no company environment.",
+  "reason": "Pre-loss original37 package/installer evidence files were unavailable after workspace loss; parent reran branding33 separately. This new execution is only the four directly required installer checks plus offline actual-wheel audit.",
+  "commands": [
+    {
+      "command": "EES_TEST_BRANDING_DIR=dist/integrated/branding-16 EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl PYTHONPATH=.:tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_webui_customization.CustomizationTests.test_apply_idempotence_first_restore_and_original_state_preserved test_ees_webui_customization.CustomizationTests.test_work_files_missing_from_otherwise_valid_record_stop_before_changes test_ees_webui_customization.CustomizationTests.test_ees12_inventory_is_frozen_and_frontend_namespaces_cannot_be_interchanged -v",
+      "result": {
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "seconds": 1.38
+      },
+      "meaning": "Apply idempotence/program-only Restore preserves synthetic state; each of101 required files missing from recomputed RECORD is rejected before mutations/events; frozen ees12 inventory18 and namespace cannot be interchanged."
+    },
+    {
+      "command": "git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/recovery-package/previous12-source.tar 8027aaf2e654778f052a966e5a49feed0fc54f69; extract with tarfile filter=data; .venv/bin/python -X warn_default_encoding -W error::EncodingWarning dist/recovery-package/previous12-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/recovery-package/previous12-branding",
+      "result": "Fixed previous source built once. Actual previous wheel matches unchanged test golden hash d35bc2bb4adc789cc93752b49550a47446461f1e54ba0015a3952e6af78ca254."
+    },
+    {
+      "command": "EES_TEST_BRANDING_DIR=dist/integrated/branding-16 EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl EES_TEST_PREVIOUS_C_WHEEL=dist/recovery-package/previous12-branding/open_webui-0.11.3+ees.12-py3-none-any.whl EES_REQUIRE_PREVIOUS_C=1 PYTHONPATH=.:tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_webui_customization.CustomizationTests.test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory -v",
+      "result": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "seconds": 18.624
+      },
+      "meaning": "Actual fixed ees12→current13 Apply, injected promotion interruption, explicit Resume, Restore; prior program bytes and synthetic data/key/interpreter preserved."
+    }
+  ],
+  "previous_source_commit": "8027aaf2e654778f052a966e5a49feed0fc54f69",
+  "previous_archive": {
+    "path": "dist/recovery-package/previous12-source.tar",
+    "bytes": 6113280,
+    "sha256": "65e8abe7b1ecc3d86a8280e362655b6a43a8df7516da76f0a61fb6fff9ea33d6"
+  },
+  "previous_wheel": {
+    "path": "dist/recovery-package/previous12-branding/open_webui-0.11.3+ees.12-py3-none-any.whl",
+    "bytes": 151959136,
+    "sha256": "d35bc2bb4adc789cc93752b49550a47446461f1e54ba0015a3952e6af78ca254"
+  },
+  "current_wheel": {
+    "path": "dist/integrated/branding-16/open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "bytes": 152071954,
+    "sha256": "f3899eab7db84df3696ae17ee3f5352e92df788a09b49e611d3658f59169a866"
+  },
+  "current_manifest": {
+    "path": "dist/integrated/branding-16/manifest.json",
+    "bytes": 8154,
+    "sha256": "71fd7da441b0a237c4f6a10cc1f1cc75edf43dbb08fe2d304d9b55421b527103"
+  },
+  "audit": {
+    "path": "evals/artifacts/ees-integrated-20261002/recovery-package/actual-wheel-audit.json",
+    "members": 6008,
+    "RECORD_rows": 6008,
+    "RECORD_hashes_verified": 6007,
+    "upstream_unchanged_member_bytes": 5850,
+    "backend_source_bytes": 12,
+    "SVG_source_bytes": 87,
+    "current_required_files": 101,
+    "frozen_ees12_required_files": 18,
+    "retired_demo_members": "absent",
+    "index_launcher_sha": "exact"
+  },
+  "source_files": [
+    {
+      "path": "scripts/build_ees_webui.py",
+      "bytes": 50552,
+      "sha256": "aafeeebb7931ab351798e846dae7f81108420d084fd34d6ff7412e043f02ef91"
+    },
+    {
+      "path": "scripts/ees_webui_customization.py",
+      "bytes": 30133,
+      "sha256": "4c3be68ac26661e5bd4f0fb32ff40da47f2a7aa91456128603e815dd6eb95d68"
+    },
+    {
+      "path": "tests/test_ees_webui_customization.py",
+      "bytes": 89169,
+      "sha256": "594d544d5936b09fd7869deb1f2eeb0f1dd4bb5c5e3a112a099cd94cd3cb8407"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/recovery-package/installer-inventory.log",
+      "bytes": 701,
+      "sha256": "1a13aab547d736d08cca19b0da30360b292f8fcccbcfabfb467f85d71c2f5f22"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/recovery-package/actual-ees12-restore.log",
+      "bytes": 311,
+      "sha256": "ae8c7c328a245fdd8b037f48b08d3d8ea04026b6f25de8873b5a8d2cf44a7b50"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/recovery-package/actual-wheel-audit.log",
+      "bytes": 457,
+      "sha256": "f48a2e510c996894d1486566b581b522c6af26cd15cdbadb7e21d3ac56387383"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/recovery-package/previous12-build.log",
+      "bytes": 181,
+      "sha256": "8240388ee72ffa1ec5672daefcce0fa7505598f821d2174bb6922ff2843b7fc3"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/recovery-package/actual-wheel-audit.json",
+      "bytes": 20317,
+      "sha256": "515c353f2652f7fc45d62da563faec1aaf653c37efe1966a22cd142ded313c01"
+    }
+  ],
+  "diff_check": "passed",
+  "boundaries": [
+    "Four tests executed once in the recovered environment; no whole-suite/branding33 repeat, no skips, no assertion/hash/allowlist changes.",
+    "Product wheel is byte-identical to pre-loss build16 but the new record represents new actual checks, not a recreated old log.",
+    "Tests install disposable synthetic program/data and inspect real wheel bytes; no company Apply/Restore or production system change.",
+    "Actual Native product/browser behavior and current CI are reported separately by root.",
+    "No source product, test, CI or managed prose edited by this package task."
+  ]
+}

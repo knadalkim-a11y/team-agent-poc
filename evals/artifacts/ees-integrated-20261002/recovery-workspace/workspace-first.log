@@ -1,0 +1,147 @@
+test_completion_and_read_retry_validation_retains_incomplete_draft (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_completion_and_read_retry_validation_retains_incomplete_draft) ... ok
+test_confirm_list_changes_are_new_evidence_and_all_decisions_are_exact (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_confirm_list_changes_are_new_evidence_and_all_decisions_are_exact) ... ERROR
+test_confirm_list_second_decision_failure_rolls_back_all_writes (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_confirm_list_second_decision_failure_rolls_back_all_writes) ... ERROR
+test_empty_and_fully_excluded_lists_cannot_bypass_completion_policy (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_empty_and_fully_excluded_lists_cannot_bypass_completion_policy) ... ERROR
+test_explicit_delivery_preserves_review_but_blocks_all_successor_policies (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_explicit_delivery_preserves_review_but_blocks_all_successor_policies) ... ok
+test_invalid_or_stale_list_cannot_partially_write (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_invalid_or_stale_list_cannot_partially_write) ... ok
+test_partial_list_never_becomes_completed_or_closes_run (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_partial_list_never_becomes_completed_or_closes_run) ... ok
+test_request_capabilities_follow_current_distinct_roles (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_request_capabilities_follow_current_distinct_roles) ... FAIL
+test_review_autosave_and_confirmation_preserve_original_and_append_only_text (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_review_autosave_and_confirmation_preserve_original_and_append_only_text) ... ERROR
+test_review_current_access_revocation_redacts_state_export_and_receipt (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_review_current_access_revocation_redacts_state_export_and_receipt) ... ok
+test_review_exact_attempt_run_and_review_cas_are_independent (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_review_exact_attempt_run_and_review_cas_are_independent) ... ok
+test_schema1_concurrent_initialization_serializes_and_preserves_data (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_schema1_concurrent_initialization_serializes_and_preserves_data) ... ok
+test_schema1_upgrade_preserves_versions_runs_attempts_and_legacy_data (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_schema1_upgrade_preserves_versions_runs_attempts_and_legacy_data) ... ok
+test_schema_missing_or_malformed_review_table_is_not_silently_repaired (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_schema_missing_or_malformed_review_table_is_not_silently_repaired) ... ok
+test_schema_upgrade_exception_rolls_back_marker_and_table_creation (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_schema_upgrade_exception_rolls_back_marker_and_table_creation) ... ok
+test_stale_inputs_cannot_be_repackaged_as_review_or_list_amendment (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_stale_inputs_cannot_be_repackaged_as_review_or_list_amendment) ... ok
+test_unchanged_list_confirmation_does_not_invent_another_attempt (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_unchanged_list_confirmation_does_not_invent_another_attempt) ... ERROR
+
+======================================================================
+ERROR: test_confirm_list_changes_are_new_evidence_and_all_decisions_are_exact (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_confirm_list_changes_are_new_evidence_and_all_decisions_are_exact)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/tests/test_ees_work_figma_contracts.py", line 235, in test_confirm_list_changes_are_new_evidence_and_all_decisions_are_exact
+    decisions = result['run']['decisions']
+                ~~~~~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'decisions'
+
+======================================================================
+ERROR: test_confirm_list_second_decision_failure_rolls_back_all_writes (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_confirm_list_second_decision_failure_rolls_back_all_writes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/tests/test_ees_work_figma_contracts.py", line 261, in test_confirm_list_second_decision_failure_rolls_back_all_writes
+    self.assertEqual(len(valid['run']['decisions']), 2)
+                         ~~~~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'decisions'
+
+======================================================================
+ERROR: test_empty_and_fully_excluded_lists_cannot_bypass_completion_policy (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_empty_and_fully_excluded_lists_cannot_bypass_completion_policy)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/tests/test_ees_work_figma_contracts.py", line 293, in test_empty_and_fully_excluded_lists_cannot_bypass_completion_policy
+    self.assertEqual((await self.state(run_id=run['id']))['run']['decisions'], [])
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'decisions'
+
+======================================================================
+ERROR: test_review_autosave_and_confirmation_preserve_original_and_append_only_text (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_review_autosave_and_confirmation_preserve_original_and_append_only_text)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/tests/test_ees_work_figma_contracts.py", line 167, in test_review_autosave_and_confirmation_preserve_original_and_append_only_text
+    self.assertEqual(actual['review_history'][-1]['decision_id'], confirmed['run']['decisions'][-1]['id'])
+                                                                  ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'decisions'
+
+======================================================================
+ERROR: test_unchanged_list_confirmation_does_not_invent_another_attempt (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_unchanged_list_confirmation_does_not_invent_another_attempt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/tests/test_ees_work_figma_contracts.py", line 246, in test_unchanged_list_confirmation_does_not_invent_another_attempt
+    self.assertEqual({row['attempt_id'] for row in result['run']['decisions']}, {self.current(run)['id']})
+                                                   ~~~~~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'decisions'
+
+======================================================================
+FAIL: test_request_capabilities_follow_current_distinct_roles (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_request_capabilities_follow_current_distinct_roles)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/dist/runtime/tools/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/tests/test_ees_work_figma_contracts.py", line 342, in test_request_capabilities_follow_current_distinct_roles
+    self.assertTrue(result['ok'], result)
+AssertionError: False is not true : {'ok': False, 'error': {'code': 'revision_conflict', 'message': '다른 변경이 있습니다. 최신 내용을 다시 확인해 주세요.'}}
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.472s
+
+FAILED (failures=1, errors=5)

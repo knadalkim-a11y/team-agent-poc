@@ -1,0 +1,22 @@
+[
+  {
+    "before": {
+      "visibilityState": "visible",
+      "hasFocus": true
+    },
+    "after": {
+      "visibilityState": "visible",
+      "hasFocus": true
+    }
+  },
+  {
+    "before": {
+      "visibilityState": "visible",
+      "hasFocus": true
+    },
+    "after": {
+      "visibilityState": "visible",
+      "hasFocus": true
+    }
+  }
+]

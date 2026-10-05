@@ -1,0 +1,36 @@
+{
+  "body": {
+    "eesV4": "",
+    "eesWorkOpen": "true"
+  },
+  "disabled": true,
+  "matchesDisabled": true,
+  "opacity": "1",
+  "background": "rgb(236, 236, 239)",
+  "cursor": "not-allowed",
+  "radius": "6px",
+  "width": 30,
+  "height": 30,
+  "brand": "#2f5f98",
+  "muted": "#ececef",
+  "buttonClass": "text-white bg-gray-200 dark:text-gray-900 dark:bg-gray-700 disabled transition rounded-full p-[0.3125rem] self-center",
+  "links": [
+    "/static/custom.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/Toaster.DKF17Rty.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/Modal.CSlFhZkq.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/0.DgJjT2oH.css",
+    "/_ees12/chat-theme.css",
+    "/_ees12/ees-work-launcher.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/fuse.K3QA92Pc.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/ConfirmDialog.DaQE45yT.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/Drawer.BBo9ZRVf.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/CodeBracket.X_EDr3Bi.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/Skeleton.BhWVpgOk.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/Messages.DRe9xB1u.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/2.Drs5-UgX.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/VoiceRecording.D0CG4PmL.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/ImportModal.tn0RQdqM.css",
+    "/_ees12/immutable-c26ef160af815dd56/assets/Chat.BvC0wBkN.css"
+  ],
+  "composerText": ""
+}

@@ -193,9 +193,17 @@ def composer_gate(*, out, client, headers, browser, base, chat_id, provider,
         wait('!!document.querySelector("#chat-input.ProseMirror") && !!document.querySelector("#ees-work-entry")')
 
     def open_process():
+        wait('!!document.querySelector("#sidebar") && !!document.querySelector("#ees-work-entry")')
         if browser.evaluate('document.querySelector("#sidebar").getBoundingClientRect().width < 200'):
             click('button[aria-label="사이드바 열기"],button[aria-label="Open sidebar"]')
-        click('[data-work-category="setup"]')
+        wait('document.querySelector("#sidebar").getBoundingClientRect().width >= 200')
+        category = '#ees-work-entry [data-work-category="setup"]'
+        wait('!!document.querySelector(' + json.dumps(category) + ')')
+        # V4 categories are toggles. A restored active category may already be
+        # expanded; clicking it unconditionally would hide the process target.
+        if browser.evaluate('document.querySelector(' + json.dumps(category) + ').getAttribute("aria-expanded") !== "true"'):
+            click(category)
+        wait('document.querySelector(' + json.dumps(category) + ')?.getAttribute("aria-expanded") === "true"')
         selector = '#ees-work-entry [data-action="select"][data-node-id="setup-p"]'
         wait('!!document.querySelector(' + json.dumps(selector) + ')')
         if browser.evaluate('!!document.querySelector(' + json.dumps(selector) + ')?.closest("details:not([open])")'):
@@ -307,11 +315,11 @@ def composer_gate(*, out, client, headers, browser, base, chat_id, provider,
         wait('!!document.querySelector("#ees-work-site-trigger") && !document.querySelector("#ees-work-site-trigger").disabled')
         click('#ees-work-site-trigger')
         click('#ees-work-scope-popover [data-action="scope_choose"][data-picker="site"][data-value="hu-a"]')
-        wait('location.pathname === "/" && document.querySelector("#ees-work-site-trigger")?.value === "hu-a" && !document.querySelector("#ees-work-scope-popover")')
+        wait('location.pathname === "/" && document.querySelector("#ees-work-site-trigger")?.dataset.value === "hu-a" && !document.querySelector("#ees-work-scope-popover")')
         open_process()
         # First product input-save creates the pending work case, exactly as in
         # the established new-chat workflow. It does not submit a chat message.
-        click('#ees-work-tree [data-action="select"][data-node-id="install-t"]')
+        click('#ees-work-entry [data-action="select"][data-node-id="install-t"]')
         click('#ees-work-content [data-work-job="db-j"] [data-action="select"]')
         wait('!!document.querySelector("#ees-work-inputs-save") && !document.querySelector("#ees-work-panel")?.matches("[aria-busy=true]")')
         click('#ees-work-inputs-save')

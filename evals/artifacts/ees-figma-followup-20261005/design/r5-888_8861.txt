@@ -1,0 +1,207 @@
+export default function R5EesWorkEes() {
+  return (
+    <div className="[word-break:break-word] bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col gap-[16px] items-start overflow-clip p-[32px] relative rounded-[8px] size-full" data-node-id="888:8861" data-name="R5 · 규칙: EES Work는 EES를 대신하지 않는다">
+      <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-status-attention,#96590c)] whitespace-nowrap" data-node-id="888:8862">
+        규칙 · 가장 중요
+      </p>
+      <p className="font-['Noto_Sans_KR:Bold'] font-bold leading-[28px] relative shrink-0 text-[20px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.2px] whitespace-nowrap" data-node-id="888:8863">
+        EES Work는 EES를 대신하지 않는다. 실행시키고, 됐는지 확인하고, 검토할 수 있게 남긴다
+      </p>
+      <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] w-[min-content]" data-node-id="888:8864">
+        운영 서버를 바꾸는 일은 지금처럼 검증된 EES가 수행합니다. EES Work는 요청을 보내고, EES가 보고하는 진행 상황을 추적하고, 실제 효과를 독립적으로 확인한 뒤, 사람이 검토할 수 있도록 기록합니다.
+      </p>
+      <div className="border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[6px] shrink-0 w-full" data-node-id="888:8865" data-name="Frame">
+        <div className="bg-[var(--ees-surface-sidebar,#fafafa)] border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex font-['Noto_Sans_KR:Medium'] font-medium gap-[14px] items-start leading-[16px] overflow-clip px-[14px] py-[8px] relative shrink-0 text-[12px] w-full" data-node-id="888:8866" data-name="Frame">
+          <p className="relative shrink-0 text-[color:var(--ees-text-tertiary,#6f717a)] w-[130px]" data-node-id="888:8867">
+            단계
+          </p>
+          <p className="relative shrink-0 text-[color:var(--ees-text-strong,#3f4147)] w-[80px]" data-node-id="888:8868">
+            하는 쪽
+          </p>
+          <p className="flex-[1_0_0] min-w-px relative text-[color:var(--ees-text-strong,#3f4147)]" data-node-id="888:8869">
+            화면 표시
+          </p>
+          <p className="flex-[1_0_0] min-w-px relative text-[color:var(--ees-text-strong,#3f4147)]" data-node-id="888:8870">
+            이 단계가 끝났다는 근거
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-start leading-[22px] overflow-clip px-[14px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="888:8871" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="888:8872">
+            요청
+          </p>
+          <p className="font-['Noto_Sans_KR:Regular'] font-normal relative shrink-0 text-[color:var(--ees-text-secondary,#5c5e65)] w-[80px]" data-node-id="888:8873">
+            EES Work
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="888:8874">
+            요청 보냄 · 시각 · 요청자
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="888:8875">
+            EES API 호출 성공 응답
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-start leading-[22px] overflow-clip px-[14px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="888:8876" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="888:8877">
+            접수
+          </p>
+          <p className="font-['Noto_Sans_KR:Regular'] font-normal relative shrink-0 text-[color:var(--ees-text-secondary,#5c5e65)] w-[80px]" data-node-id="888:8878">
+            EES
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="888:8879">
+            접수 · 작업 번호
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="888:8880">
+            EES가 돌려준 작업 번호
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-start leading-[22px] overflow-clip px-[14px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="888:8881" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="888:8882">
+            실행 · 완료 보고
+          </p>
+          <p className="font-['Noto_Sans_KR:Regular'] font-normal relative shrink-0 text-[color:var(--ees-text-secondary,#5c5e65)] w-[80px]" data-node-id="888:8883">
+            EES
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="888:8884">
+            실행 중 → 완료 보고
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="888:8885">
+            EES의 상태 조회 결과
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-start leading-[22px] overflow-clip px-[14px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="888:8886" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="888:8887">
+            효과 확인
+          </p>
+          <p className="font-['Noto_Sans_KR:Regular'] font-normal relative shrink-0 text-[color:var(--ees-text-secondary,#5c5e65)] w-[80px]" data-node-id="888:8888">
+            EES Work
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="888:8889">
+            효과 확인
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="888:8890">
+            EES Work가 따로 조회한 결과가 완료 기준을 충족 (예: 대기열 감소)
+          </p>
+        </div>
+        <div className="content-stretch flex gap-[14px] items-start leading-[22px] overflow-clip px-[14px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="888:8891" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="888:8892">
+            검토
+          </p>
+          <p className="font-['Noto_Sans_KR:Regular'] font-normal relative shrink-0 text-[color:var(--ees-text-secondary,#5c5e65)] w-[80px]" data-node-id="888:8893">
+            사람
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="888:8894">
+            실행 기록
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="888:8895">
+            요청·보고·확인 결과를 한 화면에서 확인
+          </p>
+        </div>
+      </div>
+      <div className="content-stretch flex flex-col gap-[6px] items-start overflow-clip relative shrink-0 w-full" data-node-id="888:8896" data-name="Frame">
+        <p className="font-['Noto_Sans_KR:Bold'] font-bold leading-[20px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.07px] whitespace-nowrap" data-node-id="888:8897">
+          구현 규칙
+        </p>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="888:8898" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="888:8899">
+            1
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="888:8900">
+            운영 상태를 바꾸는 일은 EES의 기존 기능(API · 배치)을 통해서만 요청한다. EES Work가 서버나 DB에 직접 접속해 바꾸지 않는다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="888:8901" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="888:8902">
+            2
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="888:8903">
+            도구 목록에서 조회 도구(읽기)와 요청 도구(EES에 변경을 요청)를 구분하고, 요청 도구에는 대상 하위 시스템(EMS, FDC 등)과 EES 기능 이름을 함께 적는다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="888:8904" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="888:8905">
+            3
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="888:8906">
+            요청마다 EES의 작업 번호를 받아 저장하고, EES 화면으로 가는 링크를 보여준다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="888:8907" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="888:8908">
+            4
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="888:8909">
+            EES의 완료 보고와 EES Work의 효과 확인을 구분해 표시한다. 둘 다 끝나야 작업이 완료된다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="888:8910" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="888:8911">
+            5
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="888:8912">
+            정해진 시간 안에 보고가 없거나 상태를 조회할 수 없으면 실패가 아니라 미확인으로 둔다. 중복 실행을 막기 위해 자동으로 다시 요청하지 않고, 같은 요청을 다시 보낼 때는 이전 작업 번호의 상태를 먼저 보여준다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="888:8913" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="888:8914">
+            6
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="888:8915">
+            화면 문구는 ‘실행’ 대신 ‘요청’을 쓴다 (예: 재시작 요청). 실제로 실행하는 쪽이 EES라는 것을 사용자가 알 수 있게 한다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="891:776" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="891:777">
+            7
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="891:778">
+            워크스페이스에서 상태를 바꾸는 작업은 등록된 요청 도구로만 만들 수 있다. 게시 전 확인에서 요청 도구가 아닌 방식으로 운영 시스템을 바꾸는 작업이 있으면 게시를 막는다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="891:779" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="891:780">
+            8
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="891:781">
+            EES의 절차·가이드라인은 EES Work에 복제하지 않는다. 요청 도구를 등록할 때 EES 가이드 문서의 링크를 함께 등록하고, 업무 패널의 ‘작업 기준’ 탭에서 링크로 보여준다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="891:782" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="891:783">
+            9
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="891:784">
+            요청 도구의 등록과 변경은 해당 EES 하위 시스템 담당자의 확인을 거친다. EES Work 쪽 작성자가 EES 기능의 입력값을 임의로 늘리거나 바꾸지 않는다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="977:2156" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="977:2157">
+            10
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="977:2158">
+            EES 기능은 API로 요청하는 것이 원칙이다. API가 없으면 먼저 EES 쪽에 API를 요청한다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="977:2159" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="977:2160">
+            11
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="977:2161">
+            예외 · API를 만들 수 없을 때만 ‘직접 실행 도구’(스크립트)를 허용한다. 조건: EES 담당자가 작성·검토·소유한다, 허용된 명령만 실행한다(임의 명령 금지), 전용 계정을 최소 권한으로 쓴다(공용 비밀키 금지), 실행 전 확인 창과 실행 후 효과 확인을 반드시 거친다, 실행 주체는 EES가 아니라 EES Work로 기록한다, 게시 전 확인에서 ‘확인 권장’으로 표시한다.
+          </p>
+        </div>
+      </div>
+      <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] w-[min-content]" data-node-id="888:8916">
+        조회만 하는 작업(예: Jira에서 CR 조회, 서비스 상태 조회)은 EES Work의 조회 도구가 직접 실행합니다. 이 규칙은 운영 상태를 바꾸는 작업에만 적용됩니다.
+      </p>
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: EES v4/Label: Font(family: "Noto Sans KR", style: Medium, size: 12, weight: 500, lineHeight: 16, letterSpacing: 0), EES v4/Title: Font(family: "Noto Sans KR", style: Bold, size: 20, weight: 700, lineHeight: 28, letterSpacing: -1), EES v4/Body: Font(family: "Noto Sans KR", style: Regular, size: 14, weight: 400, lineHeight: 22, letterSpacing: -0.30000001192092896), EES v4/Body Medium: Font(family: "Noto Sans KR", style: Medium, size: 14, weight: 500, lineHeight: 22, letterSpacing: -0.30000001192092896), EES v4/Section: Font(family: "Noto Sans KR", style: Bold, size: 14, weight: 700, lineHeight: 20, letterSpacing: -0.5), EES v4/Mono: Font(family: "Inter", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), EES v4/Meta: Font(family: "Noto Sans KR", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0).
+Images and SVGs will be stored as constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.

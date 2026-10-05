@@ -1,0 +1,17 @@
+{
+  "suite": "native-account",
+  "results": [
+    {
+      "module": "test_ees_chat_theme.py",
+      "exit_code": 0
+    },
+    {
+      "module": "test_ees_work_authoring_account_switch.py",
+      "exit_code": 0
+    },
+    {
+      "module": "test_ees_work_authoring_native.py",
+      "exit_code": 0
+    }
+  ]
+}

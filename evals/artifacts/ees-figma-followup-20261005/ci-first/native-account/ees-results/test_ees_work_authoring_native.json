@@ -1,0 +1,47 @@
+{
+  "module": "test_ees_work_authoring_native.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 30.906,
+  "tests_run": 7,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 7,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_authoring_native.NativeAccountAPITests.test_native_password_change_reset_and_existing_token_without_redis",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_authoring_native.NativeAccountAPITests.test_native_signup_pending_no_membership_and_closed_registration",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_authoring_native.NativeAccountAPITests.test_pending_group_member_cannot_author_or_use_protected_runtime",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_closed_native_signup_ui_and_direct_api",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_authoring_conflict_keeps_unsaved_draft_and_published_version",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_new_signup_and_approval_ui",
+      "status": "passed"
+    }
+  ]
+}

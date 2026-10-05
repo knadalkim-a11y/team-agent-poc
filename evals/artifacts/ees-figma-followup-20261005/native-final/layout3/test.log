@@ -1,0 +1,9 @@
+test_q1_geometry_reading_width_footer_and_baseline_overlay (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 176.1325340003168, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 176.02978899958543, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 6.538s
+
+OK

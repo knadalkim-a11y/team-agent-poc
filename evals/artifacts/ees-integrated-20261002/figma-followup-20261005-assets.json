@@ -1,0 +1,166 @@
+{
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "page": "832:131",
+  "retrieved_at": "2026-10-05T07:56:12.378144+00:00",
+  "method": "Read-only Figma exportAsync SVG_STRING from exact design-context-mapped nodes. Canvas mutatedNodeIds empty. Original export bytes and root dimensions preserved.",
+  "download_attempt": {
+    "result": "rejected",
+    "reason": "57 provided Figma asset URLs returned HTTP200 HTML root,195 bytes,not SVG. No returned HTML was copied to product.",
+    "body_sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7"
+  },
+  "reuse_check": {
+    "existing_inventory": 87,
+    "method": "SHA-256 bytes and terminal-whitespace-normalized hashes plus same-size RGBA raster comparison with Inkscape; no SVG path/body inspection",
+    "new_assets_have_existing_match": false,
+    "controls_retained": [
+      "40095.svg",
+      "7495b.svg"
+    ],
+    "control_notes": "40095 export bytes differ but exact same-size RGBA render matches existing;7495b byte and rendered matches. Existing controls left unchanged."
+  },
+  "assets": [
+    {
+      "file": "f4cb1.svg",
+      "id": "746:634",
+      "name": "State=Done",
+      "width": 16,
+      "height": 16,
+      "bytes": 417,
+      "sha256": "5182cab7944e115091ed3ea7524b5f53fca71fdadf98d89736a2d3d37e0da5d4",
+      "root_tag": "{http://www.w3.org/2000/svg}svg",
+      "root_width": "16",
+      "root_height": "16",
+      "existing_exact_or_terminal_whitespace_matches": []
+    },
+    {
+      "file": "3dae2.svg",
+      "id": "746:639",
+      "name": "State=Unknown",
+      "width": 16,
+      "height": 16,
+      "bytes": 846,
+      "sha256": "658e764857387ca7ce54db0433851d8154fa211c0f00965b4c8345ff53731220",
+      "root_tag": "{http://www.w3.org/2000/svg}svg",
+      "root_width": "16",
+      "root_height": "16",
+      "existing_exact_or_terminal_whitespace_matches": []
+    },
+    {
+      "file": "e9ac2.svg",
+      "id": "920:1017",
+      "name": "Icon/circle-help",
+      "width": 16,
+      "height": 16,
+      "bytes": 777,
+      "sha256": "4054b048ac7360547a4cd6d09deeab250dbe7ac9fa844918a6834ca4c54fa168",
+      "root_tag": "{http://www.w3.org/2000/svg}svg",
+      "root_width": "16",
+      "root_height": "16",
+      "existing_exact_or_terminal_whitespace_matches": []
+    },
+    {
+      "file": "30679.svg",
+      "id": "943:1024",
+      "name": "Last auto run · 정상",
+      "width": 14,
+      "height": 14,
+      "bytes": 450,
+      "sha256": "9466b832882dc341adc63251bc80d18d8918ac868759dfc481df8ba0a6c82c6d",
+      "root_tag": "{http://www.w3.org/2000/svg}svg",
+      "root_width": "14",
+      "root_height": "14",
+      "existing_exact_or_terminal_whitespace_matches": []
+    },
+    {
+      "file": "2b3d1.svg",
+      "id": "868:8621",
+      "name": "Status glyph v4",
+      "width": 14,
+      "height": 14,
+      "bytes": 897,
+      "sha256": "26780eac770f074c2ee6500a731b0886ffba53ea2f5fcf049db0419430819f73",
+      "root_tag": "{http://www.w3.org/2000/svg}svg",
+      "root_width": "14",
+      "root_height": "14",
+      "existing_exact_or_terminal_whitespace_matches": []
+    },
+    {
+      "file": "1a06f.svg",
+      "id": "959:1199",
+      "name": "Icon/chevron-right",
+      "width": 12,
+      "height": 12,
+      "bytes": 221,
+      "sha256": "43c3a0643ed0ed9445dcaf67f7b5bf0e2ce2b937d01000b72654291ef26d9267",
+      "root_tag": "{http://www.w3.org/2000/svg}svg",
+      "root_width": "12",
+      "root_height": "12",
+      "existing_exact_or_terminal_whitespace_matches": []
+    },
+    {
+      "file": "2fe77.svg",
+      "id": "959:1235",
+      "name": "Icon/check",
+      "width": 12,
+      "height": 12,
+      "bytes": 218,
+      "sha256": "83d2650dcd8a56cc3f9bb5d104ba46ea30780a06f6b5f1f59e82b98e426c32e8",
+      "root_tag": "{http://www.w3.org/2000/svg}svg",
+      "root_width": "12",
+      "root_height": "12",
+      "existing_exact_or_terminal_whitespace_matches": []
+    },
+    {
+      "file": "2eb05.svg",
+      "id": "959:1249",
+      "name": "Icon/paperclip",
+      "width": 12,
+      "height": 12,
+      "bytes": 845,
+      "sha256": "d9a106375d2d2f507d3e924601baa5d799cb695a676398ec082fe5bf2cd35dc1",
+      "root_tag": "{http://www.w3.org/2000/svg}svg",
+      "root_width": "12",
+      "root_height": "12",
+      "existing_exact_or_terminal_whitespace_matches": []
+    },
+    {
+      "file": "b355c.svg",
+      "id": "960:1528",
+      "name": "Icon/factory",
+      "width": 14,
+      "height": 14,
+      "bytes": 578,
+      "sha256": "8e612272ac2e155ae746a3047983854eed6ea50c9e33b1074db639250d7841b3",
+      "root_tag": "{http://www.w3.org/2000/svg}svg",
+      "root_width": "14",
+      "root_height": "14",
+      "existing_exact_or_terminal_whitespace_matches": []
+    },
+    {
+      "file": "66c71.svg",
+      "id": "876:717",
+      "name": "Status glyph v4",
+      "width": 12,
+      "height": 12,
+      "bytes": 586,
+      "sha256": "5d071b7af96fe28ad6a848ce9799996cb36af4918fb218552fd3643f0f52c12a",
+      "root_tag": "{http://www.w3.org/2000/svg}svg",
+      "root_width": "12",
+      "root_height": "12",
+      "existing_exact_or_terminal_whitespace_matches": []
+    },
+    {
+      "file": "45242.svg",
+      "id": "876:727",
+      "name": "Status glyph v4",
+      "width": 12,
+      "height": 12,
+      "bytes": 890,
+      "sha256": "543d60c22390dabf690705c8eead3b8cd1df51e28dbf3ac97ef2642f02c360e2",
+      "root_tag": "{http://www.w3.org/2000/svg}svg",
+      "root_width": "12",
+      "root_height": "12",
+      "existing_exact_or_terminal_whitespace_matches": []
+    }
+  ]
+}

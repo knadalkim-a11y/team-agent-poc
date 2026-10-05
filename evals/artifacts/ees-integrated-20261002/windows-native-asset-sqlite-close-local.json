@@ -1,0 +1,50 @@
+{
+  "date_utc": "2026-10-02T02:49:25.841987+00:00",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "python": "3.11.16 (main, Sep 24 2026, 17:56:40) [Clang 22.1.3 ]",
+  "tests": [
+    "NativeAuthoringAssetReadTests.test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets",
+    "NativeAuthoringAssetReadTests.test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication"
+  ],
+  "tests_run": 2,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "strict_default_encoding": true,
+  "native_digest_connections_kept_alive_until_after_cleanup": 10,
+  "open_native_digest_connections": 0,
+  "test_scope": "Pinned upstream real Native tables/ACL fixture and explicit historical authoring; not full product browser or company environment",
+  "windows_execution": "not run locally; next Windows CI required",
+  "provenance": {
+    "role": "One-off local diagnostic harness, not a CI entrypoint or a new product test gate.",
+    "working_directory": "repository root",
+    "environment": {
+      "PYTHONPATH": "tests",
+      "EES_TEST_UPSTREAM_WHEEL": "dist/upstream/open_webui-0.11.3-py3-none-any.whl",
+      "EES_REQUIRE_ASSET_NATIVE": "1"
+    },
+    "executed_command": "PYTHONPATH=tests EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl EES_REQUIRE_ASSET_NATIVE=1 .venv/bin/python -X warn_default_encoding -W error::EncodingWarning - <<'PY'\nfrom datetime import datetime, timezone\nimport inspect\nimport json\nfrom pathlib import Path\nimport platform\nimport sqlite3\nimport sys\nimport unittest\nfrom unittest.mock import patch\nimport test_ees_asset_native as module\n\nnames = [\n 'NativeAuthoringAssetReadTests.test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets',\n 'NativeAuthoringAssetReadTests.test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication',\n]\nsource = Path(module.__file__).resolve()\noriginal = sqlite3.connect\nconnections = []\ndef tracked_connect(*args, **kwargs):\n    caller = inspect.currentframe().f_back\n    connection = original(*args, **kwargs)\n    if Path(caller.f_code.co_filename).resolve() == source and caller.f_code.co_name == 'native_digest':\n        connections.append(connection)\n    return connection\n\noutput = Path('dist/integrated/windows-native-asset-sqlite-close-local.log')\nwith output.open('w', encoding='utf-8') as stream:\n    with patch.object(sqlite3, 'connect', tracked_connect):\n        result = unittest.TextTestRunner(stream=stream, verbosity=2).run(\n            unittest.TestLoader().loadTestsFromNames(names, module=module))\n    open_connections = 0\n    for connection in connections:\n        try:\n            connection.execute('SELECT 1')\n        except sqlite3.ProgrammingError as error:\n            assert 'closed database' in str(error), str(error)\n        else:\n            open_connections += 1\n        finally:\n            connection.close()\n    report = {'date_utc': datetime.now(timezone.utc).isoformat(), 'platform': platform.platform(),\n              'python': sys.version, 'tests': names, 'tests_run': result.testsRun,\n              'failures': len(result.failures), 'errors': len(result.errors), 'skips': len(result.skipped),\n              'strict_default_encoding': True, 'native_digest_connections_kept_alive_until_after_cleanup': len(connections),\n              'open_native_digest_connections': open_connections,\n              'test_scope': 'Pinned upstream real Native tables/ACL fixture and explicit historical authoring; not full product browser or company environment',\n              'windows_execution': 'not run locally; next Windows CI required'}\n    stream.write(json.dumps(report, ensure_ascii=False, indent=2) + '\\n')\nPath('dist/integrated/windows-native-asset-sqlite-close-local.json').write_text(\n    json.dumps(report, ensure_ascii=False, indent=2) + '\\n', encoding='utf-8')\nprint(json.dumps(report, ensure_ascii=False, indent=2))\nassert result.wasSuccessful() and result.testsRun == 2 and not result.skipped\nassert connections and not open_connections\nPY",
+    "stdin_source": {
+      "path": "evals/artifacts/ees-integrated-20261002/windows-native-asset-sqlite-close-harness.py",
+      "sha256": "9741b18d9e2097a3fc38d2a7cd3faa801d2ac8748fcc71d393128cb90cf15d73",
+      "preservation": "Exact successful stdin source preserved from the executed command; not rerun while adding provenance."
+    },
+    "reproduction_command": "PYTHONPATH=tests EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl EES_REQUIRE_ASSET_NATIVE=1 .venv/bin/python -X warn_default_encoding -W error::EncodingWarning evals/artifacts/ees-integrated-20261002/windows-native-asset-sqlite-close-harness.py",
+    "standard_focused_invocation": {
+      "command": "PYTHONPATH=tests EES_TEST_UPSTREAM_WHEEL=dist/upstream/open_webui-0.11.3-py3-none-any.whl EES_REQUIRE_ASSET_NATIVE=1 .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -v test_ees_asset_native.NativeAuthoringAssetReadTests.test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets test_ees_asset_native.NativeAuthoringAssetReadTests.test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication",
+      "status": "Reference only, not separately executed. The recorded run loaded these exact tests inside the connection-tracking harness."
+    },
+    "test_source": {
+      "path": "tests/test_ees_asset_native.py",
+      "sha256": "2ea1b36a3beb0187273e29a79dfb2334c90528b3d771ac1bec8df1c7c9979aac"
+    },
+    "source_commit_at_provenance_recording": "bb2ffa791e6a999c5414fe01088af90982b98ef5",
+    "original_generated_report_sha256": "e6d660e0381897350ae6d71c0ffca13ba01b1c42a047afa6e39b5579839833fb",
+    "output": {
+      "path": "evals/artifacts/ees-integrated-20261002/windows-native-asset-sqlite-close-local.log",
+      "sha256": "b65876741882a4b12d4d27905f62f800c6741193bb35d8f29bc89ed5d05430c5",
+      "scope": "unittest runner output and generated JSON; incidental asyncio stderr timing messages were returned by the execution tool, not this log stream."
+    },
+    "no_rerun_for_provenance": true
+  }
+}

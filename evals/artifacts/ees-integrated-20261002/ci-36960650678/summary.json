@@ -1,0 +1,699 @@
+{
+  "run_id": 36960650678,
+  "head_sha": "403b0685e26f13add0ff4354ba118788a0e95678",
+  "observed_at_utc": "2026-10-02T03:45:17.190612+00:00",
+  "scope": "16 service/contracts/native-contracts/platform/program-install/restore jobs plus aggregate/package; Native/full-product root-owned",
+  "evidence_method": "Final full job logs and artifact metadata. Windows platform and Windows fixture diagnostic ZIPs downloaded and fully read; hashes/size match API. Unchanged suite artifact structures reuse prior 36957905733 actual verification. No rerun.",
+  "count_semantics": "Python execution outcomes from assigned modules, not unique static IDs; Node subprocess cases and extra Windows IOCP/fixture diagnostic executions excluded. Existing OS-specific/optional historical skips remain skipped.",
+  "jobs": [
+    {
+      "job_id": 110693658127,
+      "name": "platform (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 624,
+      "counts": {
+        "passed": 615,
+        "failed": 0,
+        "error": 0,
+        "skipped": 9
+      },
+      "skipped_cases": [
+        {
+          "id": "test_ees_deploy_accept.WindowsIocpTests.test_real_accept_reset_then_new_client_and_subprocess",
+          "status": "skipped",
+          "detail": "Windows CPython 3.11 only"
+        },
+        {
+          "id": "test_ees_deploy_accept.WindowsIocpTests.test_real_completion_then_shutdown_during_retry_or_other_error",
+          "status": "skipped",
+          "detail": "Windows CPython 3.11 only"
+        },
+        {
+          "id": "test_ees_deploy_imports.ImportProbeTests.test_real_nltk_downloader_without_profile_reproduces_value_error",
+          "status": "skipped",
+          "detail": "Windows real NLTK profile regression"
+        },
+        {
+          "id": "test_ees_deploy_imports.ImportProbeTests.test_windows_venv_site_initialization_and_watchdog",
+          "status": "skipped",
+          "detail": "Windows Python 3.11 venv launcher"
+        },
+        {
+          "id": "test_ees_deploy_process.WindowsExplicitTerminationTests.test_disposable_child_identity_refusal_then_termination_preserves_other_child",
+          "status": "skipped",
+          "detail": "Real handle termination is Windows-only."
+        },
+        {
+          "id": "test_ees_deploy_process.WindowsStopHelperTests.test_console_attach_failure_survives_real_helper_stdout_and_parent_parsing",
+          "status": "skipped",
+          "detail": "Real console helper IPC is Windows-only."
+        },
+        {
+          "id": "test_ees_deploy_state.WindowsDpapiTests.test_current_user_dpapi_roundtrip",
+          "status": "skipped",
+          "detail": "Real CurrentUser DPAPI requires Windows"
+        },
+        {
+          "id": "test_ees_deploy_stop_recovery.PowerShellCaptureTests.test_documented_capture_preserves_raw_json_in_windows_powershell_and_pwsh",
+          "status": "skipped",
+          "detail": "Recovery capture guide compatibility is Windows-only."
+        },
+        {
+          "id": "test_ees_deploy_stop_target.WindowsVenvTests.test_actual_venv_child_termination_releases_waiting_launcher",
+          "status": "skipped",
+          "detail": "Disposable CPython 3.11 Windows venv fixture"
+        }
+      ],
+      "artifact_id": 11207732800,
+      "artifact_bytes": 24536,
+      "artifact_digest": "sha256:34b2894357a4d5f8463f970a483a34b67439ab4a444acd1709d8f178f48d153e",
+      "log": "110693658127.log",
+      "log_sha256": "467c11c81dc8453983d70ab0aef59f3ffca75272532f07946e3c4ab6fc99abbf"
+    },
+    {
+      "job_id": 110693658137,
+      "name": "native-contracts (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 5,
+      "counts": {
+        "passed": 5,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "artifact_id": 11206679556,
+      "artifact_bytes": 817,
+      "artifact_digest": "sha256:8fe4c3813823e74fcd997f701209d2639ebaace1442a0c62ac8e542b6f65d61a",
+      "log": "110693658137.log",
+      "log_sha256": "0ae42c853436a52850528c8b1dc0ad81bf0287682827354c6eb2489c3adda0cb"
+    },
+    {
+      "job_id": 110693658167,
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "artifact_id": 11207871938,
+      "artifact_bytes": 676,
+      "artifact_digest": "sha256:10d44c05557f8ca9be08b1b6ee9e203b8b4270807772ddac9b388e264715f178",
+      "log": "110693658167.log",
+      "log_sha256": "eefaddf9449b2bd724cefdf41382093afbbf6deaeebb2a92b4f11126d2faa7b2"
+    },
+    {
+      "job_id": 110693658172,
+      "name": "services (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 396,
+      "counts": {
+        "passed": 396,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "artifact_id": 11207703521,
+      "artifact_bytes": 19291,
+      "artifact_digest": "sha256:8c1da4f8b834a6bc56b87777e5b06a0f2a7f900bb05e1966a54aab992181283d",
+      "log": "110693658172.log",
+      "log_sha256": "9b3d38d85a960b40268f8e7c927a5418dd05cb48a68e4f9e24bdef6b3c7e8a5d"
+    },
+    {
+      "job_id": 110693658173,
+      "name": "program-install (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 58,
+      "counts": {
+        "passed": 56,
+        "failed": 0,
+        "error": 0,
+        "skipped": 2
+      },
+      "skipped_cases": [
+        {
+          "id": "test_ees_webui_customization.ProgramRenameTests.test_real_windows_directory_lock_released_during_wait_then_promotes",
+          "status": "skipped",
+          "detail": "Requires an actual Windows directory sharing lock"
+        },
+        {
+          "id": "test_ees_webui_customization.RealBrandingWheelTests.test_saved_workflow_survives_real_upgrade_then_previous_program_restore",
+          "status": "skipped",
+          "detail": "Supply current and previous shipped wheels for the reverse-compatibility gate"
+        }
+      ],
+      "artifact_id": 11207916580,
+      "artifact_bytes": 2519,
+      "artifact_digest": "sha256:e0e3418a36c7901b004f8cb7f9edeefe361d7b76e0db8df02b1ed10de3066a0b",
+      "log": "110693658173.log",
+      "log_sha256": "d4dbcd3a2651dd782ec84808e5c6df712f8992869b9b570763410bcd85883d58"
+    },
+    {
+      "job_id": 110693658182,
+      "name": "services (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 396,
+      "counts": {
+        "passed": 396,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "artifact_id": 11206949336,
+      "artifact_bytes": 19163,
+      "artifact_digest": "sha256:f5c9ccc507044e871d3dd7cfe2a7eae10c42317e68302646c3e336f9249182e3",
+      "log": "110693658182.log",
+      "log_sha256": "3cdbefc6df5348d8b817ac612e07f3c7c0248f9b39dff7f10430cdf65eae940a"
+    },
+    {
+      "job_id": 110693658201,
+      "name": "contracts (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 84,
+      "counts": {
+        "passed": 84,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "artifact_id": 11207564092,
+      "artifact_bytes": 4312,
+      "artifact_digest": "sha256:ff45aff8dafb70a3509958940a04a548b286847470702244a79cab3a72f37e01",
+      "log": "110693658201.log",
+      "log_sha256": "225240c9b5acdd87f8eb357a470a693589e4ae27e2032b61da959cd5fb2aadc5"
+    },
+    {
+      "job_id": 110693658253,
+      "name": "native-contracts (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 5,
+      "counts": {
+        "passed": 5,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "artifact_id": 11207783211,
+      "artifact_bytes": 826,
+      "artifact_digest": "sha256:8b7d6798a831ca4abb1778eda3ce01c2ce857ac61ddc6e01f59f2ec736930b05",
+      "log": "110693658253.log",
+      "log_sha256": "4f1f098d0216f3c71b27706d167434ecac9fb991368c85112acb86508f8a503e"
+    },
+    {
+      "job_id": 110693658270,
+      "name": "restore-ees11 (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "artifact_id": 11207911949,
+      "artifact_bytes": 682,
+      "artifact_digest": "sha256:08dc913421b1d8b95013357b43f0b3080ec6eb30ab13a3c8773fc69280d47911",
+      "log": "110693658270.log",
+      "log_sha256": "e32539088f7d636d455522dc6b71da3a53483b137f2b35e389ca298fa2c00275"
+    },
+    {
+      "job_id": 110693658278,
+      "name": "platform (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 624,
+      "counts": {
+        "passed": 623,
+        "failed": 0,
+        "error": 0,
+        "skipped": 1
+      },
+      "skipped_cases": [
+        {
+          "id": "test_ees_deploy_port.LocalLifecycleTests.test_owned_fake_child_stops_and_reuses_port",
+          "status": "skipped",
+          "detail": "Local lifecycle uses Linux; Windows remains a separate gate."
+        }
+      ],
+      "artifact_id": 11207204637,
+      "artifact_bytes": 24389,
+      "artifact_digest": "sha256:acc8e1b8d73b49a289a9d45725336cd1489183f42971d0c1b1996a5a1b25a24e",
+      "log": "110693658278.log",
+      "log_sha256": "54604fe9a68f1f39c19d4d814b0c56cdaf8b220eaad29ef51cacef7dffd2fb80"
+    },
+    {
+      "job_id": 110693658281,
+      "name": "restore-ees10 (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "artifact_id": 11207054384,
+      "artifact_bytes": 684,
+      "artifact_digest": "sha256:63596e857bc5acf38b9ab1f71f6b98f03766a6d609989da796181541b854ffc4",
+      "log": "110693658281.log",
+      "log_sha256": "863154cf934d64100ef8c276f0f07d3488199e04d2b81c1e475e496480ea531d"
+    },
+    {
+      "job_id": 110693658299,
+      "name": "restore-ees12 (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "artifact_id": 11207961736,
+      "artifact_bytes": 688,
+      "artifact_digest": "sha256:cb5f8fcde5a3c1f50cc88d75fa2e07cafb8a90799b85eb94dcd4f263064d2072",
+      "log": "110693658299.log",
+      "log_sha256": "05c08fb8ee2a40f3b8e9bf08d6b7ef1edccb197b93204bd943484f36135bbb93"
+    },
+    {
+      "job_id": 110693658314,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "artifact_id": 11207777384,
+      "artifact_bytes": 679,
+      "artifact_digest": "sha256:db6524c268c9f8bef3089339f857d12b4dc7e228060b0aa010b3084e2dc0b0fa",
+      "log": "110693658314.log",
+      "log_sha256": "c92fcb187fb8b5ba80fc67d79390ec27c10e8de68cc022d001c2f89a7c158dfb"
+    },
+    {
+      "job_id": 110693658332,
+      "name": "contracts (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 84,
+      "counts": {
+        "passed": 84,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "artifact_id": 11208026095,
+      "artifact_bytes": 4337,
+      "artifact_digest": "sha256:b9a1af017025a4112e86b3275f77d328dcf884d8abbb0c63c1c07b2a13603167",
+      "log": "110693658332.log",
+      "log_sha256": "2bb8a939b92cbf0e286a5c31d735fa98ff7ed387612a47d16b78a8e3fa063b56"
+    },
+    {
+      "job_id": 110693658335,
+      "name": "program-install (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 58,
+      "counts": {
+        "passed": 57,
+        "failed": 0,
+        "error": 0,
+        "skipped": 1
+      },
+      "skipped_cases": [
+        {
+          "id": "test_ees_webui_customization.RealBrandingWheelTests.test_saved_workflow_survives_real_upgrade_then_previous_program_restore",
+          "status": "skipped",
+          "detail": "Supply current and previous shipped wheels for the reverse-compatibility gate"
+        }
+      ],
+      "artifact_id": 11207154574,
+      "artifact_bytes": 2502,
+      "artifact_digest": "sha256:01df2c7653d462457150a958892a7cdb12201c657579e0bd78e301db93dad5cf",
+      "log": "110693658335.log",
+      "log_sha256": "335cfffa91c6a40103b33425ed4be3facdad537cad086c9059bdfc4577eda82e"
+    },
+    {
+      "job_id": 110693658390,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "artifact_id": 11207479440,
+      "artifact_bytes": 674,
+      "artifact_digest": "sha256:fdd3622f1826961d9d2493ba42dceb34173d2cfb2c1439e8ece438d2aa789f80",
+      "log": "110693658390.log",
+      "log_sha256": "0045e3edae26cd1994f2116d32598b6f1f2cb5baab577a179dcb7d940c9a08ea"
+    }
+  ],
+  "aggregate_and_package": [
+    {
+      "id": 110695217854,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "conclusion": "failure",
+      "reason": "Native-execution failure remains a required gate failure."
+    },
+    {
+      "id": 110695217883,
+      "name": "Delivery checks (windows-2022)",
+      "conclusion": "cancelled",
+      "reason": "Native-execution failure remains a required gate failure."
+    },
+    {
+      "id": 110695247234,
+      "name": "Prepare delivery files",
+      "conclusion": "skipped",
+      "reason": "Existing normal package policy excludes pull_request."
+    }
+  ],
+  "summary": {
+    "success": 16,
+    "failure": 0,
+    "cancelled": 0,
+    "unexecuted": 0,
+    "counts_by_os": {
+      "ubuntu-24.04": {
+        "passed": 1159,
+        "skipped": 11
+      },
+      "windows-2022": {
+        "passed": 1168,
+        "skipped": 2
+      }
+    }
+  },
+  "verified_windows_artifacts": [
+    {
+      "id": 11207204637,
+      "name": "ees-results-platform-windows-2022",
+      "bytes": 24389,
+      "sha256": "acc8e1b8d73b49a289a9d45725336cd1489183f42971d0c1b1996a5a1b25a24e",
+      "api_digest_matches": true,
+      "member_count": 23,
+      "members": [
+        {
+          "name": "suite.json",
+          "bytes": 1872,
+          "sha256": "a4ef91c71f6d2f9752e2aace30fd1fc8b2fddd8c7c4edcd6eea64bcbbec1687f"
+        },
+        {
+          "name": "test_check_docs.json",
+          "bytes": 5849,
+          "sha256": "f441355729e5ab38c1679e10bfabb197b3b2a3a6a0f9ee9ef3120171c27a8316"
+        },
+        {
+          "name": "test_demo_bundle.json",
+          "bytes": 1695,
+          "sha256": "8d492b06e0af7b74f3df87d4637e7fe6a62ee607115a532ffbd2ce858f6b1d48"
+        },
+        {
+          "name": "test_ees_asset_guard.json",
+          "bytes": 2628,
+          "sha256": "2f93be1b8ef91f6f4a96d6dfcaf7daabb2cdbe4ffb278611ac827cc42cb65c8b"
+        },
+        {
+          "name": "test_ees_asset_native.json",
+          "bytes": 8173,
+          "sha256": "1fe611c4127d31a1c42401eed5a28aa206e65f6afc9eb02fd50d867642523358"
+        },
+        {
+          "name": "test_ees_branding_build.json",
+          "bytes": 5644,
+          "sha256": "9be5526982915d696c65f76d8603c9b52babefedab4bb5ea7e3e7fced8cc55d6"
+        },
+        {
+          "name": "test_ees_delivery_suite.json",
+          "bytes": 1951,
+          "sha256": "931cb135e6fb13c477cd5a605714978cb2a1cfb1ab9f674fa05118d8d8680c55"
+        },
+        {
+          "name": "test_ees_deploy_accept.json",
+          "bytes": 3210,
+          "sha256": "81a4ece9317c1de5fcf1f84322631a57072cdf08ac18db71be0e235312897dd2"
+        },
+        {
+          "name": "test_ees_deploy_imports.json",
+          "bytes": 4997,
+          "sha256": "986bef95161d0b307638cfaa5828bb0ef203e45995cfde05bee667a81d051b63"
+        },
+        {
+          "name": "test_ees_deploy_port.json",
+          "bytes": 3580,
+          "sha256": "9604ec1cc8c78aef2c2ba9b2f624654be5d2a7e4e175ab288a05c26a2ccb2362"
+        },
+        {
+          "name": "test_ees_deploy_process.json",
+          "bytes": 11253,
+          "sha256": "39a2f9763d430a6db5119903f5a981f7e612caf69850b9c094da1b026a9f69bf"
+        },
+        {
+          "name": "test_ees_deploy_recover.json",
+          "bytes": 2472,
+          "sha256": "79d7e7fbcdd67e4c44243821cb5c42919b00583290b8b049252fa3f2618e033e"
+        },
+        {
+          "name": "test_ees_deploy_release.json",
+          "bytes": 3601,
+          "sha256": "e4fbafcc756fd6538ede8b2ed8253e4addc4668016e88cbb121b3e9047716c9e"
+        },
+        {
+          "name": "test_ees_deploy_report.json",
+          "bytes": 7926,
+          "sha256": "2803b4fb3358cb71374f87a51891226326f0bbf6c4b4bf010e4ee4d3111bee19"
+        },
+        {
+          "name": "test_ees_deploy_state.json",
+          "bytes": 2319,
+          "sha256": "da208c0a9d08e28719aba3381a3694e9fd38f8c6d77b96f39bc368f69c685d59"
+        },
+        {
+          "name": "test_ees_deploy_stop_recovery.json",
+          "bytes": 5728,
+          "sha256": "4d0b89be759a8a7496e886ad8adfeb407168e103a31e0579e2580cbb6cc88693"
+        },
+        {
+          "name": "test_ees_deploy_stop_target.json",
+          "bytes": 2892,
+          "sha256": "ed1c1cadd3b4ad554f8a843973a6a47a8fded60d921a7abe5eb9569253ee36d3"
+        },
+        {
+          "name": "test_ees_trial_bundle.json",
+          "bytes": 2483,
+          "sha256": "4ff4854d2e08e4bb84ce667104d822458cb7ba914a8f9be126d20d26c1903671"
+        },
+        {
+          "name": "test_ees_trial_upgrade.json",
+          "bytes": 3363,
+          "sha256": "b28ab89f091df894c869e36669a9a8dd99400bc4f8fb2b83de501f843a0ccc6b"
+        },
+        {
+          "name": "test_ees_update_download.json",
+          "bytes": 2673,
+          "sha256": "b016c93bad32478ec523b5ca849e65fe34ad14871c66e279f0b260be034c7ed3"
+        },
+        {
+          "name": "test_ees_upgrade.json",
+          "bytes": 6665,
+          "sha256": "264cc52dbd4fd92434d0848d23f342b9862e47418737160652819f0b10bb0ddb"
+        },
+        {
+          "name": "test_manage_ees.json",
+          "bytes": 16236,
+          "sha256": "be340da7353d16c5e0d5d9d27325a363b951bb1f946e02f17e235d8acaf5c0b5"
+        },
+        {
+          "name": "test_openwebui_windows_launcher.json",
+          "bytes": 2131,
+          "sha256": "c63bf440d41cf1d018af183adcab549244e7b6525b86bfaff1b0c650eb1bdf1e"
+        }
+      ],
+      "process_module_counts": {
+        "passed": 67,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "affected_cases": [
+        {
+          "id": "test_ees_deploy_process.DeployProcessTests.test_another_process_can_stop_saved_identity",
+          "status": "passed"
+        },
+        {
+          "id": "test_ees_deploy_process.DeployProcessTests.test_health_false_and_stop_timeout_do_not_force_kill",
+          "status": "passed"
+        },
+        {
+          "id": "test_ees_deploy_process.DeployProcessTests.test_health_ignores_proxy_and_never_follows_redirects",
+          "status": "passed"
+        },
+        {
+          "id": "test_ees_deploy_process.DeployProcessTests.test_occupied_port_does_not_start_or_stop_any_process",
+          "status": "passed"
+        },
+        {
+          "id": "test_ees_deploy_process.DeployProcessTests.test_start_health_and_graceful_stop",
+          "status": "passed"
+        },
+        {
+          "id": "test_ees_deploy_process.DeployProcessTests.test_startup_failure_does_not_echo_log_contents",
+          "status": "passed"
+        },
+        {
+          "id": "test_ees_deploy_process.DeployProcessTests.test_venv_redirector_or_symlink_preserves_environment_and_graceful_stop",
+          "status": "passed"
+        },
+        {
+          "id": "test_ees_deploy_process.DeployProcessTests.test_wrong_creation_time_or_executable_never_signals",
+          "status": "passed"
+        },
+        {
+          "id": "test_ees_deploy_process.LifecycleEvidenceTests.test_identity_failure_keeps_numeric_state_and_original_exception",
+          "status": "passed"
+        },
+        {
+          "id": "test_ees_deploy_process.LifecycleEvidenceTests.test_owned_child_wait_is_exact_bounded_and_fails_closed",
+          "status": "passed"
+        }
+      ],
+      "real_error_notes_observed": []
+    },
+    {
+      "id": 11208140036,
+      "name": "ees-windows-fixture-diagnostics",
+      "bytes": 3047448,
+      "sha256": "7b6d0d3d2519e586104706b89262119c80cea7ecf9383ba6306403285bf73cec",
+      "api_digest_matches": true,
+      "member_count": 10,
+      "members": [
+        {
+          "name": "legacy-source-inventory.json",
+          "bytes": 53744,
+          "sha256": "7f81b6ea507a9b226604663a3bb90e96e38a5c0fd090fbf90ba0d1f4db388628"
+        },
+        {
+          "name": "legacy-wheel-inventory.json",
+          "bytes": 7172308,
+          "sha256": "1bc6321ecd455b56ca2eb4d79bc2d43fd0a731d512b5777c92b117b92c0e7b11"
+        },
+        {
+          "name": "previous-source-inventory.json",
+          "bytes": 56422,
+          "sha256": "9b0e022e20aef0844fac4caed8bf511f33500c3b951c1356b4698283ce08118a"
+        },
+        {
+          "name": "previous-wheel-inventory.json",
+          "bytes": 7173418,
+          "sha256": "c9d8a7f2c41a0edc363c86d7b0daa04f8008387e4ea2b8ad41dc5ce8ab7c28f7"
+        },
+        {
+          "name": "result.json",
+          "bytes": 3955,
+          "sha256": "97c553e839c4cb68f63986792d236a9821197616805648202c5341a684c457be"
+        },
+        {
+          "name": "test-1.stderr.log",
+          "bytes": 946,
+          "sha256": "c0fbc6f601e5713774eabb6b6926bdd5f2d430839fab8581b4b50f1a88e9e922"
+        },
+        {
+          "name": "test-1.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "test-2.stderr.log",
+          "bytes": 908,
+          "sha256": "2f41223be6167293b4f4fd723b37476accaba85bfee57a2a4579400f137f087a"
+        },
+        {
+          "name": "test-2.stdout.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "upstream-wheel-inventory.json",
+          "bytes": 7132722,
+          "sha256": "1eb134187b5723330cf30c0c87a38a984bc010584f3826a09d1564868e463997"
+        }
+      ],
+      "diagnostic_tests": [
+        {
+          "test": "test_ees_workflow.WorkflowPreservationTests.test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads",
+          "returncode": 0,
+          "timed_out": false,
+          "skipped": false,
+          "seconds": 2.078
+        },
+        {
+          "test": "test_ees_workflow_contract.ContractAuthoringTests.test_p_save_publish_exact_approval_and_reference_remapping",
+          "returncode": 0,
+          "timed_out": false,
+          "skipped": false,
+          "seconds": 0.672
+        }
+      ],
+      "fixed_archive_evidence": {
+        "upstream": {
+          "file": "upstream-wheel-inventory.json",
+          "sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+          "matches_expected_archive": true,
+          "member_count": 5894,
+          "record_issues": [],
+          "duplicate_names": [],
+          "payload_inventory_sha256": "ab070de83319ba780f6fc33f77bbdd1721aa29509f67de744b3164d621a60872"
+        },
+        "legacy": {
+          "file": "legacy-wheel-inventory.json",
+          "sha256": "ad08078b9db2cf484a6af614b95bd4cf7c9910070d2505bc271065278d079ddd",
+          "matches_expected_archive": true,
+          "member_count": 5911,
+          "record_issues": [],
+          "duplicate_names": [],
+          "payload_inventory_sha256": "99c0ad223fc940c6fc9c1d208a8919f8a8d5732bdc8400fbf2c08802bbf56c3c"
+        },
+        "previous": {
+          "file": "previous-wheel-inventory.json",
+          "sha256": "27f6a1c37264d4f205bedb6635c9eaae8a36a5d023d36d1dd595e34728c8b8d3",
+          "matches_expected_archive": true,
+          "member_count": 5912,
+          "record_issues": [],
+          "duplicate_names": [],
+          "payload_inventory_sha256": "529cc8e023e400fb89700e5e4f0a4e44c4e9a12bf1323ee6433bec53f6076c3d"
+        },
+        "legacy_source": {
+          "file": "legacy-source-inventory.json",
+          "commit": "a443d30c6694df0e1cbe082a0b99aa5f2d566917",
+          "issues": [],
+          "file_count": 142
+        },
+        "previous_source": {
+          "file": "previous-source-inventory.json",
+          "commit": "991cdb1d80ae07471fb50594831d74fe602b1ef7",
+          "issues": [],
+          "file_count": 149
+        }
+      }
+    }
+  ],
+  "windows_conclusion": "Actual Windows lifecycle 8 cases and helper 2 cases passed; complete process module 67 passed/0 skipped. No real error notes occurred. This validates the fixture adjustment, not a previously unobserved Win32 root cause. Fixed-package diagnostics 2 passed; extra IOCP 20 passed; Windows build/LF archive/PowerShell steps successful."
+}

@@ -1,0 +1,13 @@
+{
+  "suite": "native-execution",
+  "results": [
+    {
+      "module": "test_ees_work_c_phase3_native.py",
+      "exit_code": 0
+    },
+    {
+      "module": "test_ees_work_c_phase3_privacy.py",
+      "exit_code": 0
+    }
+  ]
+}

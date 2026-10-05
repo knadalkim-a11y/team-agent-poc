@@ -1,0 +1,837 @@
+{
+  "run": 36957905733,
+  "head": "ba3a59af2b719983604042d3bcd31d4d373375cf",
+  "status": "completed",
+  "conclusion": "failure",
+  "observed_at": "2026-10-02T03:05:27.736Z",
+  "jobs": [
+    {
+      "id": 110684893243,
+      "name": "Prepare pinned program fixtures and test coverage",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": []
+    },
+    {
+      "id": 110685231232,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": []
+    },
+    {
+      "id": 110685231268,
+      "name": "native-work (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": []
+    },
+    {
+      "id": 110685231315,
+      "name": "native-execution (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "failure",
+      "non_success_steps": [
+        {
+          "name": "Run the assigned real Native browser integration",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231321,
+      "name": "native-compose (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": []
+    },
+    {
+      "id": 110685231331,
+      "name": "native-account (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": []
+    },
+    {
+      "id": 110685231400,
+      "name": "platform (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231402,
+      "name": "program-install (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231412,
+      "name": "contracts (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231417,
+      "name": "native-contracts (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231432,
+      "name": "services (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231433,
+      "name": "restore-ees12 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231444,
+      "name": "program-install (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231447,
+      "name": "native-contracts (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231449,
+      "name": "contracts (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231467,
+      "name": "platform (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231485,
+      "name": "services (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231497,
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231498,
+      "name": "restore-ees11 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231510,
+      "name": "restore-ees10 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231525,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110685231874,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "non_success_steps": [
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 110686723766,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "non_success_steps": [
+        {
+          "name": "Require every fixture, service, platform and Native result",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "id": 110686723869,
+      "name": "Delivery checks (windows-2022)",
+      "status": "completed",
+      "conclusion": "failure",
+      "non_success_steps": [
+        {
+          "name": "Require every fixture, service, platform and Native result",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "id": 110686748853,
+      "name": "Prepare delivery files",
+      "status": "completed",
+      "conclusion": "skipped",
+      "non_success_steps": []
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11207235706,
+      "name": "ees-results-restore-ees12-windows-2022",
+      "bytes": 688,
+      "digest": "sha256:ef34ba0d9c3bab1e4590d71d241408d2eb669ee9ca30998dfb7402a995c98b62"
+    },
+    {
+      "id": 11207215471,
+      "name": "ees-results-contracts-ubuntu-24.04",
+      "bytes": 4311,
+      "digest": "sha256:73251b20aa39539d46723b9908f921aafd37650e4fe7d647f73415ee7f426de4"
+    },
+    {
+      "id": 11207200615,
+      "name": "ees-work-browser-evidence-native-execution",
+      "bytes": 262630,
+      "digest": "sha256:147700995b3b96798916a3fd116fa72c23e10c308ea481a02d763906da67f041"
+    },
+    {
+      "id": 11207185638,
+      "name": "ees-work-browser-evidence-native-account",
+      "bytes": 541993,
+      "digest": "sha256:f106736ad5d78ac1825c985f2a9fbc3cf6bc3987d73e8b10ff5b214cfd3bfae5"
+    },
+    {
+      "id": 11207080697,
+      "name": "ees-work-browser-evidence-native-work",
+      "bytes": 445063,
+      "digest": "sha256:6471b16b7996495e2b7cd6a3e4d7f7a6b1f2582bc9b51249ed18e732157361dd"
+    },
+    {
+      "id": 11207025717,
+      "name": "ees-results-restore-ees11-ubuntu-24.04",
+      "bytes": 674,
+      "digest": "sha256:74f66cb676b78ddc67bc40313ec0bf7fda83596387020369d26dd89d73644db0"
+    },
+    {
+      "id": 11206961857,
+      "name": "ees-results-services-windows-2022",
+      "bytes": 19280,
+      "digest": "sha256:f715c3c7809b6468677a95d4d4ebb3a5e11982cbc28b0d95f0b05d9abc7f6c6b"
+    },
+    {
+      "id": 11206862099,
+      "name": "ees-windows-fixture-diagnostics",
+      "bytes": 3047449,
+      "digest": "sha256:0932bd3846fb2d1927023a1f2d3f405e940628f43eb2147ead63a34136a8e090"
+    },
+    {
+      "id": 11206836065,
+      "name": "ees-results-platform-ubuntu-24.04",
+      "bytes": 24481,
+      "digest": "sha256:049634195a49f27272d433178b59abcfa33b2ca657eccae725c112a70c4ab4cf"
+    },
+    {
+      "id": 11206806313,
+      "name": "ees-results-restore-ees11-windows-2022",
+      "bytes": 682,
+      "digest": "sha256:ff814a1d7bcd3e8dbd5dd1a17de503827f73940950e2d009b383bbcfb0f1e2ee"
+    },
+    {
+      "id": 11206781137,
+      "name": "ees-results-restore-ees12-ubuntu-24.04",
+      "bytes": 679,
+      "digest": "sha256:cc8ef5310c2779ec1d3c58abf3bb0406cbffe4badef55e418b0c89fbac9b0929"
+    },
+    {
+      "id": 11206632422,
+      "name": "ees-results-native-contracts-ubuntu-24.04",
+      "bytes": 818,
+      "digest": "sha256:b8d5d51e5989b9f63d082cba9854bd718f6537a08b4248e386a23f31e4713cbb"
+    },
+    {
+      "id": 11206602795,
+      "name": "ees-results-platform-windows-2022",
+      "bytes": 24333,
+      "digest": "sha256:bc50fb11a3053e16eff276f9702e987eefac73544fe2217badef20e31d9bfacc"
+    },
+    {
+      "id": 11206578232,
+      "name": "ees-results-native-contracts-windows-2022",
+      "bytes": 824,
+      "digest": "sha256:e19a1c01718791300ac56e2358d29f49ffe1a36aff10853d609cac249cd6f2cd"
+    },
+    {
+      "id": 11206577498,
+      "name": "ees-results-program-install-ubuntu-24.04",
+      "bytes": 2520,
+      "digest": "sha256:9f7d66549ca6afde6716460632590af0bf4f44b7eb708854788078b52a96007d"
+    },
+    {
+      "id": 11206552551,
+      "name": "ees-results-services-ubuntu-24.04",
+      "bytes": 19165,
+      "digest": "sha256:07d5eacf536016d8a2bc41f38a2766ef4a094754e79f9a09e8cacf350ebddfe4"
+    },
+    {
+      "id": 11206438868,
+      "name": "ees-results-contracts-windows-2022",
+      "bytes": 4337,
+      "digest": "sha256:0418d3d578da47066b0536063b1ce9a5c9927eb8109606140ae1ad3d99ff9adf"
+    },
+    {
+      "id": 11206419049,
+      "name": "ees-native-complete-product-a62d15bf82095f2ef70cc1bb23f8a86dabceb13a",
+      "bytes": 2136008,
+      "digest": "sha256:3349f9c2b079585520122046e5e471aef47a8d3f54a7a970e265a0b2e06eefaa"
+    },
+    {
+      "id": 11206408552,
+      "name": "ees-delivery-coverage-a62d15bf82095f2ef70cc1bb23f8a86dabceb13a",
+      "bytes": 19627,
+      "digest": "sha256:a4c2dddc88e65adc3f87c1b2425fe5325e9898218f0c751a3bc489cf82e526d6"
+    },
+    {
+      "id": 11206379347,
+      "name": "ees-results-program-install-windows-2022",
+      "bytes": 2502,
+      "digest": "sha256:35993e9a8313ddb7c12a489cb297d2849dc19d0bbd7cbb72fbf2715b5b45f6a9"
+    },
+    {
+      "id": 11206379177,
+      "name": "ees-results-restore-ees10-windows-2022",
+      "bytes": 684,
+      "digest": "sha256:caa3e117b1b9ea7853f85c4b2bbe7f169c7722fba1f2bfd2d2ab287e2e1fa14b"
+    },
+    {
+      "id": 11206319251,
+      "name": "ees-results-restore-ees10-ubuntu-24.04",
+      "bytes": 673,
+      "digest": "sha256:367779c6ed713eb4bfde6492f0354664094dfcef43c3011ee9e5e436cea9f4d0"
+    },
+    {
+      "id": 11206289519,
+      "name": "ees-review-candidate-ba3a59af2b719983604042d3bcd31d4d373375cf",
+      "bytes": 153033439,
+      "digest": "sha256:291fcdf0db3e704db0277f3cb4536594298440a2c9510bcb3bf40891ef4eb2b9"
+    },
+    {
+      "id": 11206224412,
+      "name": "ees-pinned-fixtures-a62d15bf82095f2ef70cc1bb23f8a86dabceb13a",
+      "bytes": 769918415,
+      "digest": "sha256:21891f792cd04350ea4cf7cce6590866e0095cfdd776c29aa95aebeac6d9a1a2"
+    },
+    {
+      "id": 11206209737,
+      "name": "ees-work-browser-evidence-native-compose",
+      "bytes": 779276,
+      "digest": "sha256:e6da0949cecf576e7505fd03a4b0984235164ba766ac4c43b6af21ce751bffce"
+    }
+  ],
+  "native_failure": {
+    "test": "test_delayed_input_write_keeps_exact_original_run_after_chat_change",
+    "stage": "setUp: Target.createTarget(about:blank) before attached page session",
+    "previous_runs_passed": [
+      36954271808,
+      36956218460
+    ],
+    "cause": "unconfirmed Chromium initialization/transport delay; no retained stderr/response stage in old helper"
+  },
+  "candidate": {
+    "artifact": 11206289519,
+    "zip_sha256": "8716104bab1ca8d8125638db854d4b54c0dec946acf53eb65473580ec9b2857a",
+    "manifest_sha256": "7728e2e074fffd61f0d00b1473d27f6a0806b25954d66676a4c9f5d0f7aa2e0c",
+    "wheel_sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3",
+    "local_and_ci_hashes_equal": true,
+    "whole_ci_approved": false
+  }
+}

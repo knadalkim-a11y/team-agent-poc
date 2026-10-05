@@ -1,0 +1,51 @@
+{
+  "test": "test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_closed_run_remains_readonly_and_uses_its_saved_completion",
+  "last_wait": null,
+  "last_click": null,
+  "capture_errors": [],
+  "browser": {
+    "stage": "browser_handshake",
+    "elapsed_ms": 15084.721466000005,
+    "pid": 2523,
+    "exit_code": null,
+    "browser_version": null,
+    "target_id": null,
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 1,
+      "method": "Browser.getVersion",
+      "session_attached": false,
+      "timeout_seconds": 14.999997786000009,
+      "elapsed_ms": 15010.141915000006,
+      "completed": false
+    },
+    "recent_responses": [],
+    "stderr_tail": "[2523:2548:1002/045426.651827:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2523:2548:1002/045427.906172:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2523:2548:1002/045428.802574:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2523:2548:1002/045429.673697:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2523:2523:1002/045434.331684:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2523:2548:1002/045434.331771:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2523:2523:1002/045434.331812:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2523:2548:1002/045434.331851:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2523:2523:1002/045434.378459:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2523:2523:1002/045434.415613:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2523:2548:1002/045434.422442:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n",
+    "first_failure": {
+      "stage": "browser_handshake",
+      "elapsed_ms": 15082.879591999998,
+      "pid": 2523,
+      "exit_code": null,
+      "browser_version": null,
+      "target_id": null,
+      "session_attached": false,
+      "buffer_bytes": 0,
+      "last_command": {
+        "id": 1,
+        "method": "Browser.getVersion",
+        "session_attached": false,
+        "timeout_seconds": 14.999997786000009,
+        "elapsed_ms": 15010.141915000006,
+        "completed": false
+      },
+      "recent_responses": [],
+      "stderr_tail": "[2523:2548:1002/045426.651827:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2523:2548:1002/045427.906172:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2523:2548:1002/045428.802574:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2523:2548:1002/045429.673697:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2523:2523:1002/045434.331684:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2523:2548:1002/045434.331771:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2523:2523:1002/045434.331812:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2523:2548:1002/045434.331851:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2523:2523:1002/045434.378459:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2523:2523:1002/045434.415613:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2523:2548:1002/045434.422442:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n",
+      "bootstrap_observation": null,
+      "error_type": "AssertionError",
+      "response_timeout": true
+    },
+    "bootstrap_observation": null
+  },
+  "page_capture": "unavailable_no_attached_session"
+}

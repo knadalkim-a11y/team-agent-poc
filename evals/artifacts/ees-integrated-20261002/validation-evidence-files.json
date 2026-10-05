@@ -1,0 +1,61 @@
+{
+  "recorded_at": "2026-10-02T02:04:06.743948+00:00",
+  "boundary": "Synthetic local Native evidence; no company credentials, model/API or production state inspected",
+  "signup_source_build": "07; latest actual signup/approval run; not relabeled as build10",
+  "files": [
+    {
+      "path": "native-accepted-observations.json",
+      "bytes": 9388,
+      "sha256": "b030b36c314682f4bdda4bea2002f617ae3a9cb8b0b191f3e2349f608165af0f",
+      "original": "dist/integrated/validation/native-accepted-observations.json"
+    },
+    {
+      "path": "native-account-switch-result.json",
+      "bytes": 502,
+      "sha256": "343edd5df6acd9dbdf5ebf22031b235540c5a2db727997270ed05cdabab14c91",
+      "original": "dist/integrated/validation/native10-switch-fixture-fixed/test_ees_work_authoring_account_switch.json"
+    },
+    {
+      "path": "native-account-isolation.json",
+      "bytes": 495,
+      "sha256": "265792d5fc3be715fe761fad2ed32a32beb675e8b77ba185206311c4c137ece6",
+      "original": "dist/integrated/native10-fixture-fixed/sa26-nu05-account-switch.json"
+    },
+    {
+      "path": "sa-signup-pending.png",
+      "bytes": 38876,
+      "sha256": "088f0e7213aecdbb086491e4171a7709bc8d72f40b5f462df7ae50c39b45bda6",
+      "original": "dist/integrated/native07/sa-signup-pending.png"
+    },
+    {
+      "path": "sa-signup-pending-fonts.json",
+      "bytes": 780,
+      "sha256": "52b1f39d35f35710df5bf3594ae27a35b7f72d2654549551ced5305ad9511422",
+      "original": "dist/integrated/native07/sa-signup-pending-fonts.json"
+    },
+    {
+      "path": "platform-initial-aggregate.json",
+      "bytes": 4216,
+      "sha256": "9e6aed7b2b8779b976b02c06bbdde71c787478e9849e854b433ff4abb6bac452",
+      "original": "dist/integrated/platform-06/aggregate.json"
+    },
+    {
+      "path": "platform-corrections.json",
+      "bytes": 2526,
+      "sha256": "9b258bcba6b99234bf7bb222d079d9a2d13c8690e6cc36b570169c7e472b1132",
+      "original": "dist/integrated/platform-06/corrections.json"
+    },
+    {
+      "path": "validation-results-compact.json",
+      "bytes": 36766,
+      "sha256": "1a44705ec83137d5b84735cbbc042f50a91633066998b78ada048aad802aec97",
+      "original": "Derived compact summary of stated original results"
+    },
+    {
+      "path": "ci-test-mapping-summary.json",
+      "bytes": 2927,
+      "sha256": "df898f9764b7d49075c99644f337a0ae7a99aa253486607ab92bddbee8e2925f",
+      "original": "Derived compact summary of stated original results"
+    }
+  ]
+}

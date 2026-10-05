@@ -1,0 +1,16 @@
+{"name": "empty Native installation", "workflows": 0, "runs": 0}
+{"name": "Native model availability", "models": [{"id": "c3-synthetic-model", "direct": null, "owned_by": "openai"}, {"id": "arena-model", "direct": null, "owned_by": "arena"}]}
+Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 194.7791349994077, "product": "HeadlessChrome/153.0.8010.52"}
+{"name": "actual built Native render", "viewport": [1920, 1080]}
+{"name": "physical authoring save validate publish", "workflow_id": "ef889d04-48fb-4f88-b77d-55683ac33361", "version": 1}
+{"name": "run input save cancel confirmation and actual completion", "run_id": "bed55917-55d8-4a02-8dde-ee250010c2aa", "attempts": 1, "version": 1}
+{"name": "Native physical send and storage reload", "saved_messages": 2, "chat_id": "0a935e76-3f68-43fe-b40d-12e3b8feada4", "model_boundary": "loopback synthetic HTTP only"}
+{"name": "Native attachment chooser upload process send reload", "file_id": "dbe16f80-1dda-4a78-85fc-5ee68c1eaa1d", "chat_id": "0a935e76-3f68-43fe-b40d-12e3b8feada4", "model_boundary": "Only model response and embedding vectors are loopback synthesis"}
+{"name": "Native and work restart persistence", "chat_preserved": true, "attempts_preserved": true}
+{"name": "latest Figma isolated API fixtures", "workflow_id": "7d580f98-e8e2-4a24-95d8-e1054e0dd039", "native_tool_source_sha256": "d6bb9bee2a7919b994008393d48188cd43d1a26404b013f21bc6d56f3e95085c", "business_completion": false, "external_boundary": "Loopback synthetic Jira and model HTTP only"}
+{"name": "Figma B2-1 physical schedule preview and draft save", "draft_revision": 4, "published_version": 1, "reservation_created": false}
+{"name": "Figma S1 actual HTTP failure and bounded read retry", "attempt_statuses": ["failed", "succeeded"], "external_http_requests": [{"path": "/rest/api/2/myself", "status": 503}, {"path": "/rest/api/2/myself", "status": 200}, {"path": "/rest/api/2/project", "status": 200}, {"path": "/rest/api/2/project/EESEMS/statuses", "status": 200}, {"path": "/rest/api/2/field", "status": 200}, {"path": "/rest/api/2/search", "status": 200}], "native_tool_attempts": 2, "business_completed": false, "failed_result_preserved": true}
+{"name": "Figma A6 physical Native tool call list selection and atomic confirmation", "attempts": 3, "original_result_preserved": true, "confirmed_items": 2}
+{"name": "Figma A7 physical AI review autosave and explicit confirmation", "completion_kind": "review", "actual_delivery": false, "original_result_preserved": true, "autosave_confirmed": false, "send_control_present": false, "confirmed_text": "사람이 보완한 실제 제품 검토 본문. 합성 자료이며 송부하지 않았습니다."}
+{"name": "Figma S2 physical readonly history and reference with restart persistence", "original_shared_value_preserved": true, "current_value_not_substituted": true, "attempts": 4, "actual_native_historical_tool_calls": 1, "stored_chat_messages": 6, "narrow_work_ready": true, "physical_scroll_verified": true}
+{"name": "Figma A7 delivery purpose review cannot close or claim sent", "completion_kind": "delivery", "human_review_saved": true, "business_status": "blocked", "reason": "delivery_unconfigured", "actual_delivery": false}

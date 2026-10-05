@@ -1,0 +1,155 @@
+{
+  "module": "test_github_tool.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.341,
+  "tests_run": 34,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 34,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_github_tool.GitHubReadTests.test_all_page_links_must_match_scope_filters_and_relations",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_base_url_rejects_credentials_paths_and_implicit_http",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_canonical_links_need_consistent_positive_repository_id",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_canonical_next_and_final_links_keep_requests_on_owner_path",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_case_insensitive_repository_and_single_default_are_resolved",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_closed_does_not_mean_merged_and_missing_metadata_stays_unknown",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_concurrent_users_have_request_local_credentials_and_no_shared_cache",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_contradictory_last_and_out_of_range_next_remain_unknown",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_detail_null_body_and_truncation_are_explicit",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_detail_requires_requested_identity_and_body_field",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_direct_detail_omits_single_repository_without_list_preflight",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_direct_detail_omitted_repository_requires_choice_before_network",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_disabled_anonymous_or_unencrypted_requests_stop_before_network",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_explicit_http_opt_in_and_https_tls_preserve_fixed_origin",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_failed_authentication_does_not_request_pull_requests",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_fork_head_is_metadata_and_source_url_uses_only_configured_origin",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_full_page_without_confirmed_next_is_unknown",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_http_error_and_connection_exception_do_not_expose_messages",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_http_failures_are_distinct_from_empty_success_and_redacted",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_invalid_state_page_and_number_stop_before_network",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_last_page_owner_links_work_for_full_short_and_empty_results",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_list_does_not_invent_total_or_fetch_next_page",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_list_uses_merged_timestamp_and_does_not_guess_from_closed_state",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_missing_auth_identity_cannot_fetch_repository_content",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_nonjson_oversized_and_wrong_list_shapes_fail_closed",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_oversized_duplicate_and_wrong_state_pages_are_not_success",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_public_inputs_have_no_network_or_credential_controls",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_reflected_credential_is_removed_and_content_is_untrusted",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_repository_configuration_and_scope_are_validated_before_auth",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_requests_use_fixed_get_headers_page_limits_and_no_redirects",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_scope_mismatch_and_malformed_pr_metadata_never_return_content",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_short_page_with_invalid_next_and_maximum_page_remain_unconfirmed",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_transport_cannot_bypass_allowed_origin_repository_or_endpoint",
+      "status": "passed"
+    },
+    {
+      "id": "test_github_tool.GitHubReadTests.test_unsafe_or_inconsistent_next_links_are_not_followed_or_trusted",
+      "status": "passed"
+    }
+  ]
+}

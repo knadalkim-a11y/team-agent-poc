@@ -1,0 +1,223 @@
+{
+  "module": "test_ees_work_workspace.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.935,
+  "tests_run": 51,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 51,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_workspace.DefinitionTests.test_all_eight_types_valid_and_invalid",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.DefinitionTests.test_condition_three_valued_logic",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_business_calendar_missing_does_not_invent_earlier_date",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_claimant_cannot_release_running_or_unresolved_external_request",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_closed_run_is_read_only_and_historical_progress_survives_restart",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_common_options_use_current_factory_acl",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_concurrent_initialization_preserves_one_empty_schema",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_copy_delivery_pipeline_remaps_only_definition_owned_references",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_cross_job_deadline_setting_invalidates_decision_and_downstream",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_deadline_timezone_boundary_calendar_offset_and_attempt_snapshot",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_draft_conflict_receipt_and_atomic_invalid_publish",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_dynamic_choice_late_response_cannot_cross_input_revision",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_dynamic_invalid_choice_partial_and_revocation_never_fall_back_static",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_dynamic_native_choices_bind_dependencies_and_snapshot_actual_options",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_empty_initializer_restart_and_no_implicit_native_access",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_explicit_claimant_release_preserves_evidence_and_allows_group_reclaim",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_export_excludes_personal_ui_and_private_chat_links",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_factory_manager_updates_only_own_override",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_factory_scoped_field_never_accepts_default_or_run_values",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_factory_specific_members_do_not_gain_all_factory_authority",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_factory_unknown_is_blocked_not_excluded_and_conditions_safe",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_group_task_claim_is_atomic_and_membership_revocation_blocks",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_human_confirmation_retry_invalidates_only_dependents_and_history",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_inherited_stage_dependencies_cannot_publish_a_job_cycle",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_input_change_during_execution_preserves_snapshot_and_requires_recheck",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_judgment_rules_are_validated_and_missing_operational_policies_are_advisory",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_list_amendment_creates_new_evidence_preserves_original_and_reason",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_manual_execution_cannot_bypass_published_trigger",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_migration_preserves_legacy_bytes_and_rolls_back_partial_failure",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_missing_schema_is_not_silently_initialized",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_native_authority_revoked_during_registry_await_cannot_publish",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_native_id_validation_and_corrupt_draft_are_not_replaced",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_native_skill_revision_is_checked_at_publication_and_body_not_copied",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_native_source_permission_revocation_redacts_owned_history_and_blocks_decision",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_old_waiting_result_cannot_be_confirmed_after_upstream_retry",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_on_demand_factory_start_is_atomic_and_other_scopes_remain_available",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_option_and_tool_input_bindings_require_current_job_declaration",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_partial_result_item_decisions_cannot_create_success",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_person_field_requires_actual_native_id",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_private_runs_chat_links_and_ui_state_are_isolated",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_publish_lost_response_replay_after_revision_changed_is_idempotent",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_report_all_resolved_requires_actual_current_decisions_and_never_approves_source",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_selected_workflow_run_and_scope_must_describe_same_target",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_setting_precedence_false_zero_empty_and_attempt_snapshot",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_settings_change_reopens_active_only_and_frozen_history_uses_old_value",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_stale_per_item_decision_cannot_confirm_new_attempt",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_system_scope_is_visible_across_factory_selection_without_broadening_acl",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_transitive_source_retry_keeps_inflight_unknown_as_unknown",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_two_connections_compete_for_one_group_task_without_double_claim",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_upstream_retry_while_dependent_runs_preserves_result_but_requires_review",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_workspace.WorkspaceTests.test_versions_are_immutable_and_open_run_uses_original",
+      "status": "passed"
+    }
+  ]
+}

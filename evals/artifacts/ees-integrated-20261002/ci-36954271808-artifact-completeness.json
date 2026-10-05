@@ -1,0 +1,121 @@
+{
+  "boundary": "Synthetic artifact transport: unchanged fixed Git archives; hidden paths omitted then .github restored. No product changes.",
+  "before": {
+    "files_checked": 91,
+    "links_checked": 3748,
+    "errors": [
+      {
+        "code": "missing_target",
+        "file": "legacy-source/AGENTS.md",
+        "message": "Local link target does not exist.",
+        "line": 93,
+        "target": ".github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "legacy-source/docs/03-openwebui-native-agent.md",
+        "message": "Local link target does not exist.",
+        "line": 862,
+        "target": "../.github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "legacy-source/evals/scenarios.md",
+        "message": "Local link target does not exist.",
+        "line": 1581,
+        "target": "../.github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "legacy-source/evals/scenarios.md",
+        "message": "Local link target does not exist.",
+        "line": 1597,
+        "target": "../.github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "legacy-source/versions.md",
+        "message": "Local link target does not exist.",
+        "line": 99,
+        "target": ".github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "previous-source/AGENTS.md",
+        "message": "Local link target does not exist.",
+        "line": 93,
+        "target": ".github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "previous-source/docs/03-openwebui-native-agent.md",
+        "message": "Local link target does not exist.",
+        "line": 862,
+        "target": "../.github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "previous-source/evals/scenarios.md",
+        "message": "Local link target does not exist.",
+        "line": 1753,
+        "target": "../.github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "previous-source/evals/scenarios.md",
+        "message": "Local link target does not exist.",
+        "line": 1769,
+        "target": "../.github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "previous-source/versions.md",
+        "message": "Local link target does not exist.",
+        "line": 103,
+        "target": ".github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "previous12-source/AGENTS.md",
+        "message": "Local link target does not exist.",
+        "line": 93,
+        "target": ".github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "previous12-source/docs/03-openwebui-native-agent.md",
+        "message": "Local link target does not exist.",
+        "line": 862,
+        "target": "../.github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "previous12-source/evals/scenarios.md",
+        "message": "Local link target does not exist.",
+        "line": 2088,
+        "target": "../.github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "previous12-source/evals/scenarios.md",
+        "message": "Local link target does not exist.",
+        "line": 2104,
+        "target": "../.github/workflows/ees-delivery.yml"
+      },
+      {
+        "code": "missing_target",
+        "file": "previous12-source/versions.md",
+        "message": "Local link target does not exist.",
+        "line": 105,
+        "target": ".github/workflows/ees-delivery.yml"
+      }
+    ],
+    "warnings": []
+  },
+  "after": {
+    "files_checked": 91,
+    "links_checked": 3748,
+    "errors": [],
+    "warnings": []
+  }
+}

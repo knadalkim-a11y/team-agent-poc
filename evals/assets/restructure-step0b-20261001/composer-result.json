@@ -1,0 +1,106 @@
+{
+  "boundary": "Official Native CLI/auth/chat/composer/EES/temporary DB; loopback model response synthesis only",
+  "program_test": "physical CDP Input dispatch; no direct completion or injected message save",
+  "cases": [
+    {
+      "kind": "initial",
+      "chat_id": "7702db56-c13f-4f44-b89f-2c75417e2635",
+      "case_id": "92ca4c54-968f-4d89-8670-0f5314214649",
+      "trusted_input_and_single_click": [
+        {
+          "type": "input",
+          "trusted": true
+        },
+        {
+          "type": "click",
+          "trusted": true
+        }
+      ],
+      "completion_requests": 1,
+      "external_model_calls": 1,
+      "saved_messages": 2,
+      "request_response_visible": true,
+      "same_history_after_reload": true,
+      "rendered_responses": 1,
+      "previous_message_fields_preserved": true,
+      "case_bound_to_expected_chat": true,
+      "site_id": "us-a",
+      "api_errors": [],
+      "request_response_saved_message_correlation": {
+        "request_chat_id": "7702db56-c13f-4f44-b89f-2c75417e2635",
+        "response_chat_id": "7702db56-c13f-4f44-b89f-2c75417e2635",
+        "saved_user_message_id": "5f38b751-7eb7-4e31-b837-6358cc3f79ba",
+        "single_native_task": true
+      }
+    },
+    {
+      "kind": "existing",
+      "chat_id": "7702db56-c13f-4f44-b89f-2c75417e2635",
+      "case_id": "92ca4c54-968f-4d89-8670-0f5314214649",
+      "trusted_input_and_single_click": [
+        {
+          "type": "input",
+          "trusted": true
+        },
+        {
+          "type": "click",
+          "trusted": true
+        }
+      ],
+      "completion_requests": 1,
+      "external_model_calls": 1,
+      "saved_messages": 4,
+      "request_response_visible": true,
+      "same_history_after_reload": true,
+      "rendered_responses": 2,
+      "previous_message_fields_preserved": true,
+      "case_bound_to_expected_chat": true,
+      "site_id": "us-a",
+      "api_errors": [],
+      "request_response_saved_message_correlation": {
+        "request_chat_id": "7702db56-c13f-4f44-b89f-2c75417e2635",
+        "response_chat_id": "7702db56-c13f-4f44-b89f-2c75417e2635",
+        "saved_user_message_id": "c5f9a3f6-08da-458c-a4e9-c14a99a734f0",
+        "single_native_task": true
+      }
+    },
+    {
+      "kind": "new",
+      "chat_id": "bfc7cf07-f858-4d32-aeaa-7a23210fe3b0",
+      "case_id": "a26eb18e-a710-4f98-b807-cda8a5050e16",
+      "trusted_input_and_single_click": [
+        {
+          "type": "input",
+          "trusted": true
+        },
+        {
+          "type": "click",
+          "trusted": true
+        }
+      ],
+      "completion_requests": 1,
+      "external_model_calls": 1,
+      "saved_messages": 2,
+      "request_response_visible": true,
+      "same_history_after_reload": true,
+      "rendered_responses": 1,
+      "previous_message_fields_preserved": true,
+      "case_bound_to_expected_chat": true,
+      "site_id": "hu-a",
+      "api_errors": [],
+      "request_response_saved_message_correlation": {
+        "request_chat_id": null,
+        "response_chat_id": "bfc7cf07-f858-4d32-aeaa-7a23210fe3b0",
+        "saved_user_message_id": "b00c5ade-11d6-4ad0-86dc-c84202298098",
+        "single_native_task": true
+      }
+    }
+  ],
+  "cross_chat_isolation": {
+    "existing_history_unchanged": true,
+    "new_case_migrated_once": true,
+    "pending_cases_remaining": 0,
+    "total_model_calls": 3
+  },
+  "ok": true
+}

@@ -1,0 +1,162 @@
+{
+  "test": "test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_new_signup_and_approval_ui",
+  "boundary": "Synthetic Native authentication fixture",
+  "last_wait": "document.body.innerText.includes('계정 활성화 대기')",
+  "requests": [
+    [
+      "GET",
+      "/api/v1/auths/admin/details"
+    ],
+    [
+      "GET",
+      "/api/ees-work/state"
+    ],
+    [
+      "GET",
+      "/api/v1/auths/"
+    ],
+    [
+      "GET",
+      "/static/custom.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/Toaster.DKF17Rty.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/0.DgJjT2oH.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/Modal.CSlFhZkq.css"
+    ],
+    [
+      "GET",
+      "/_ees12/chat-theme.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/Drawer.BBo9ZRVf.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/fuse.K3QA92Pc.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/CodeBracket.X_EDr3Bi.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/ConfirmDialog.DaQE45yT.css"
+    ],
+    [
+      "GET",
+      "/_ees12/ees-work-launcher.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/Skeleton.BhWVpgOk.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/2.Drs5-UgX.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/VoiceRecording.D0CG4PmL.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/ImportModal.tn0RQdqM.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/Messages.DRe9xB1u.css"
+    ],
+    [
+      "GET",
+      "/_ees12/immutable-c26ef160af815dd56/assets/Chat.BvC0wBkN.css"
+    ],
+    [
+      "GET",
+      "/manifest.json"
+    ]
+  ],
+  "capture_errors": [],
+  "dom": {
+    "route": "/",
+    "readyState": "complete",
+    "visibilityState": "visible",
+    "hasFocus": true,
+    "controls": [
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": null,
+        "role": null,
+        "label": null,
+        "text": "다시 확인",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 911,
+          "y": 586,
+          "width": 98,
+          "height": 38
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": null,
+        "role": null,
+        "label": null,
+        "text": "로그아웃",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "inline-block",
+        "visibility": "visible",
+        "rect": {
+          "x": 911,
+          "y": 632,
+          "width": 98,
+          "height": 16
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": null,
+        "role": null,
+        "label": "Close toast",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 1526,
+          "y": 26,
+          "width": 20,
+          "height": 20
+        },
+        "pointerHit": true
+      }
+    ]
+  }
+}

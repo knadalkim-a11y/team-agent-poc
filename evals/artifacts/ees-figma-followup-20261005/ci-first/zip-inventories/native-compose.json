@@ -1,0 +1,356 @@
+{
+  "artifact_name": "ees-work-browser-evidence-native-compose",
+  "artifact_id": 11334291593,
+  "members": [
+    {
+      "member": "ees-results/browser-evidence.json",
+      "bytes": 7682,
+      "compressed_bytes": 2535,
+      "sha256": "874dbb91194f88faf848210d26838e7a192e404dc5eddf58632c89c357fd2850",
+      "retained": true
+    },
+    {
+      "member": "ees-results/suite.json",
+      "bytes": 497,
+      "compressed_bytes": 148,
+      "sha256": "07e7f05e171cf9ca73835354c462b6ec051ff1c24ae7fa4245909941f9521080",
+      "retained": true
+    },
+    {
+      "member": "ees-results/test_ees_work_c_phase1_native.json",
+      "bytes": 1197,
+      "compressed_bytes": 408,
+      "sha256": "07144e0df9c5145313b5361f8992153123632a98fd99b9cf29f90f4e78ff76de",
+      "retained": true
+    },
+    {
+      "member": "ees-results/test_ees_work_c_phase2_native.json",
+      "bytes": 1344,
+      "compressed_bytes": 421,
+      "sha256": "6f53e35f9f20acaab6f31a48e31a19af96ffa8c2bfb836e0458df03b35a7bb04",
+      "retained": true
+    },
+    {
+      "member": "ees-results/test_ees_work_figma_authoring_native.json",
+      "bytes": 3079,
+      "compressed_bytes": 1467,
+      "sha256": "f3a838af5ce4d5e0c7ea0866557e4f572fb0cef7aa201cdf1adff5db604ad90b",
+      "retained": true
+    },
+    {
+      "member": "ees-results/test_ees_work_figma_layout_native.json",
+      "bytes": 689,
+      "compressed_bytes": 301,
+      "sha256": "ee471bc0cfe2b03ff05b7e257d1715d68ae2c1eb065a6ea7cff8cb8706d94b1c",
+      "retained": true
+    },
+    {
+      "member": "ees-results/test_ees_work_figma_runtime_native.json",
+      "bytes": 1825,
+      "compressed_bytes": 536,
+      "sha256": "d341f1adb3d9c545be4a7e3912cc1b04bc6d423edba02c635777a4a11160da78",
+      "retained": true
+    },
+    {
+      "member": "ees-work-screenshots/figma-a4-typed-request-unconnected.png",
+      "bytes": 114053,
+      "compressed_bytes": 106042,
+      "sha256": "e85b410fd14406106ce77f8e302dfdf0535c83cc87987680ead5495d02a92412",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/figma-a5-cycle-overview.png",
+      "bytes": 102856,
+      "compressed_bytes": 95239,
+      "sha256": "4addc6cf43c30b5f058f2c8108315254bc788b037e305ca3bad65dc88a3d12d3",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/figma-a6-empty-lookup-manual-preview.png",
+      "bytes": 107468,
+      "compressed_bytes": 99662,
+      "sha256": "ad92f4251dbd67e9a08118594a0c136dd88faaecece2bc6a9ef2e8ca0f66a513",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/figma-a6-list-confirmed.png",
+      "bytes": 111842,
+      "compressed_bytes": 103737,
+      "sha256": "922e51a903938dbef52c39a7f25fdc2ce29f64bebd04498ab73d7b9eda9f67a5",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/figma-a7-delivery-review-blocked.png",
+      "bytes": 106930,
+      "compressed_bytes": 98931,
+      "sha256": "0e0a9f9308ee433f8125df90bd1274899fb2fc7383480315f940a0e65e24a5f5",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/figma-r3-pending-and-final-verdicts.png",
+      "bytes": 102310,
+      "compressed_bytes": 94654,
+      "sha256": "f9d2b7637d989a75adf260b08bc74326c9e344aa7246a6d54685d095b0192c9c",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/figma-review-purpose-saved.png",
+      "bytes": 102507,
+      "compressed_bytes": 94103,
+      "sha256": "284c47243c429c741da57efcadda37999d6fdaca5f935c49e059a68266d3cdb6",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/figma-s1-human-permission-readonly.png",
+      "bytes": 94902,
+      "compressed_bytes": 86323,
+      "sha256": "28fb5cfc6b9f2e972dddecedbd2e4f1bdddb7914a2388aea666c92a98f56e28c",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/figma-s2-readonly-history-reference.png",
+      "bytes": 104227,
+      "compressed_bytes": 97373,
+      "sha256": "1e60dea4ee9529e8047bf4b8cc41e3a83a3f4aeddf3626b953ad3b07be087238",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/figma-s3-checklist-criterion-versus-tool.png",
+      "bytes": 97619,
+      "compressed_bytes": 89967,
+      "sha256": "23fde5d98cc57c6084a1e3de3d3aac4087686585b06d0e7470a591814414a573",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-closed-history.png",
+      "bytes": 83164,
+      "compressed_bytes": 75794,
+      "sha256": "325809f623eb23b36ea582e6ba1225d907c6089b052c79f3cbf7169f9dbd6604",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-eight-native-input-types.png",
+      "bytes": 105951,
+      "compressed_bytes": 97376,
+      "sha256": "d640a285df10b0a29c39325d73e92fbf4436e9b7349588c54cdea9a6ed63937d",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-figma-b21-live-preview-dom.json",
+      "bytes": 22589,
+      "compressed_bytes": 3218,
+      "sha256": "31f5006ee8ec183c3836390876f58bb4dca9d1beffa183cd22951c560f8221ab",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-figma-b21-live-preview.png",
+      "bytes": 157029,
+      "compressed_bytes": 148254,
+      "sha256": "0cc125b7955b60acaf5dc668d32169b2d05e4c673c1e0702a8a93f11dc4ea779",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-figma-b21-mouse-focus-saved-dom.json",
+      "bytes": 21631,
+      "compressed_bytes": 3125,
+      "sha256": "09c22934386c2cc620a34e3223be3efe14bffe3ef072f6ce42125d4314a847d2",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-figma-b21-mouse-focus-saved.png",
+      "bytes": 138689,
+      "compressed_bytes": 129729,
+      "sha256": "72485a83330c385ddf58589693ef08a207a86b9d6936bf1dbb084301b8cda2d1",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-figma-b21-published-reservation-dom.json",
+      "bytes": 23465,
+      "compressed_bytes": 3339,
+      "sha256": "80a7abc887259ea596954e1c4bd1adc53bc17f5ab320b732831b53158104b1d1",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-figma-b21-published-reservation.png",
+      "bytes": 155093,
+      "compressed_bytes": 145981,
+      "sha256": "8a71c6689d915b30d75d7e21e6130f01ab389d005030cebdfc9c7edbbf9f918b",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-figma-read-retry-control-observation-dom.json",
+      "bytes": 23213,
+      "compressed_bytes": 3662,
+      "sha256": "e68762e828f674a053ccaad3dc88f599059af3518bcc124d052ea6c9f3999090",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-figma-b21-roundtrip.json",
+      "bytes": 562,
+      "compressed_bytes": 341,
+      "sha256": "4dc9b4e22a1e06e5f8e389c069b3953a892258bd4aafe2937f2291b3ec58873b",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-figma-read-retry-control-observation.json",
+      "bytes": 10026,
+      "compressed_bytes": 2607,
+      "sha256": "fa7fea9d9849d2bc27b3af0f192fe465e7cf29095f76bf699fd9444550354c9a",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-figma-read-retry-control-observation.png",
+      "bytes": 111612,
+      "compressed_bytes": 103838,
+      "sha256": "22524d78fb859fc46e2a12c1754135f2a3535abfa06b11dde8a7244834c90af6",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-immutable-attempts.png",
+      "bytes": 114809,
+      "compressed_bytes": 107351,
+      "sha256": "24f301c835b754040ad7a321213ff4d5ec426198d527e1179827905fc60ee819",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-long-korean-form.png",
+      "bytes": 100748,
+      "compressed_bytes": 88888,
+      "sha256": "9f2037dffc5ee360e0c16ef4af1af6152c51a906e2977a61f7ded61868eaf0f3",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-native-tool-snapshot.png",
+      "bytes": 111973,
+      "compressed_bytes": 103846,
+      "sha256": "5add5cd14609a124b15ebc60d929fcd10872e3eb4fc999a59099234d05e293a8",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-result-failed.png",
+      "bytes": 84731,
+      "compressed_bytes": 77536,
+      "sha256": "2f2ed57aab23fb07f477825d8260ba0edb5701587f8489b25fcfac6298485de8",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-result-partial.png",
+      "bytes": 84400,
+      "compressed_bytes": 76977,
+      "sha256": "ed7fa4eee0f14c7e6b0ae0b4003d8bb895cbc36317fe2e28e050971fbce1f83a",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-result-unknown.png",
+      "bytes": 87726,
+      "compressed_bytes": 78990,
+      "sha256": "7a63254a95b79f7b473c869a07b5e76c6f910594a75020b050d8ce3ab8ce9788",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-running-animation.json",
+      "bytes": 2232,
+      "compressed_bytes": 522,
+      "sha256": "c6ee1321e62f32db43f7e367d0aa6cf42b25d57c895e75b98f05063611277ba5",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-running-animation.png",
+      "bytes": 96955,
+      "compressed_bytes": 89343,
+      "sha256": "b0ac79a2769439aa3dffad960f3abbf0e0894b217d075cd98c4ad01783c9b465",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-running-reduced-motion.png",
+      "bytes": 96762,
+      "compressed_bytes": 88963,
+      "sha256": "991fe41afb6843c777bddcd37982c7db4c555de33b0da91d8a47377050083f45",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately-failure-cleanup.json",
+      "bytes": 7370,
+      "compressed_bytes": 1224,
+      "sha256": "9a8189941fac3ef641fe3eae19bb90161bf799b826513596836bcc6ad64eb5c0",
+      "retained": true
+    },
+    {
+      "member": "ees-work-screenshots/integrated-test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately-failure-dom.json",
+      "bytes": 8995,
+      "compressed_bytes": 1729,
+      "sha256": "bb87df90fa382a63d0482ce31814132f0060a8d2ec9cad95918f24aa5783bf57",
+      "retained": true
+    },
+    {
+      "member": "ees-work-screenshots/integrated-test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately-failure.json",
+      "bytes": 26205,
+      "compressed_bytes": 3296,
+      "sha256": "cefc377e27074cb3584405cc9d9069de5668f2962e691a7a868d7bfd5ecbd67d",
+      "retained": true
+    },
+    {
+      "member": "ees-work-screenshots/integrated-test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately-failure.png",
+      "bytes": 116218,
+      "compressed_bytes": 108184,
+      "sha256": "cb1f7e84a9c718da5c4d32d4acd8b16ccb5ec2520e3979dc3ce1233ba10f0505",
+      "retained": true
+    },
+    {
+      "member": "ees-work-screenshots/q1-1366x768.json",
+      "bytes": 691,
+      "compressed_bytes": 224,
+      "sha256": "5c71d9b152a8cac88575b7d75992438ab70c3ce6e467bb4ce8213b22d3fe77ac",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/q1-1366x768.png",
+      "bytes": 63512,
+      "compressed_bytes": 58686,
+      "sha256": "93b8dcda60b7b5dd44f8894500968b521cd2cd280b462ea22373a4b2c41245c1",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/q1-1920x768.json",
+      "bytes": 698,
+      "compressed_bytes": 229,
+      "sha256": "6921cd0000b9dcea39d560bc9e16d5c425c76a57649b3cac1f853764f2b76137",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/q1-1920x768.png",
+      "bytes": 83868,
+      "compressed_bytes": 77896,
+      "sha256": "8663441dd6ccfa3cf2838b3e3f9bdc37edf115bfcad1af5ac8bb84b57a1494a0",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/q1-contrast.json",
+      "bytes": 236,
+      "compressed_bytes": 157,
+      "sha256": "bc01a6e7361b805dfd418b76871e70e88415ce97c7b8ce72ac567c280ec99899",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/q1-overlay-close-reopen.json",
+      "bytes": 697,
+      "compressed_bytes": 233,
+      "sha256": "5181a9e4d1936633ae84307e7835a307647facf4aaf04ad84f24201ca6e7d226",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/q1-overlay-close-reopen.png",
+      "bytes": 55117,
+      "compressed_bytes": 51185,
+      "sha256": "54cc43d1c7e79d8f4ef6438e11a4562f8500757f5cdc872b64d3f134bdad651a",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/q1-private-width-640.png",
+      "bytes": 57687,
+      "compressed_bytes": 50564,
+      "sha256": "6289953d201556d5a86d3ec7d7a7d5bd1cab42787583469fc876f8662a91f64a",
+      "retained": false
+    }
+  ]
+}

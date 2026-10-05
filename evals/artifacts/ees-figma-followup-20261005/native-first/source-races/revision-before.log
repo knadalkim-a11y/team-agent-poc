@@ -1,0 +1,41 @@
+✔ Native conversation remains the original center DOM while the work panel mounts after it (5.025589ms)
+✔ closing or changing work mode preserves Native chat and the authoring mount boundary (1.257293ms)
+✔ panel scroll restores per personal target and never writes a shared run selection (1.855935ms)
+✔ confirmation dialog starts on cancel and Escape closure never accepts the command (0.914988ms)
+✔ workspace refresh retains active input identity and text selection without taking Native focus (1.864498ms)
+✔ published procedure overview opens before a run exists without dereferencing run state (1.684287ms)
+✔ workspace navigation separates managed-system authoring from work scope and actual tasks (0.921808ms)
+✔ polling preserves an explicit model choice only for its actor and work target while revocation clears it (4.233505ms)
+✖ a delayed workspace read never rolls private UI revision behind a completed width save (8.177124ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 101.35428
+
+✖ failing tests:
+
+test at tests/test_ees_v4_layout.cjs:46:1
+✖ a delayed workspace read never rolls private UI revision behind a completed width save (8.177124ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      0,
+  +   0
+  -   1
+    ]
+  
+      at TestContext.<anonymous> (<repo>/tests/test_ees_v4_layout.cjs:58:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 0, 0 ],
+    expected: [ 0, 1 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

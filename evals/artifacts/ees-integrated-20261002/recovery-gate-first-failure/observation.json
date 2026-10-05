@@ -1,0 +1,45 @@
+{
+  "observed": "Actual PNG/DOM are in work mode with the visible Workspace toggle; no procedure navigation exists. document complete/fonts loaded/Work busy=false/no errors.",
+  "confirmed_cause": "New test attempted procedures before physically entering author/workspace mode. view.js renders procedures only in its author branch; no product defect established.",
+  "correction": "Physical Workspace toggle, assert its aria-pressed state, then physical procedure navigation and existing target procedure open.",
+  "unchanged": "All draft/save/publish/schedule/runtime/history/permission assertions preserved; no product source or DOM state setters changed.",
+  "prior_result": "Nine checkpoints passed before selector failure; complete product gate failed and later steps were not executed.",
+  "old_gate_sha256": "31cbcb101dbe273fc515f28f4a930f14cd37bd89d3b2211a555bbcb40f1f2dee",
+  "new_gate_sha256": "a6a47422e01d86e63fa9986b610258e0895c7121488b6478d0796eeed708b068",
+  "files": [
+    {
+      "name": "actual-native-product.log",
+      "sha256": "8f3dfe19e5ceb97eac53087a96e0251b271d79796a478586b1d08b877a17fef9",
+      "bytes": 2575
+    },
+    {
+      "name": "failure.json",
+      "sha256": "d1fd1088eac5a5ce97e0d8544803e09acaea6e722ad47944031479f634101b7d",
+      "bytes": 40164
+    },
+    {
+      "name": "failure.png",
+      "sha256": "cf8cb00926ba3082bc76de28cd00056c5d00d3a56cf2383da51c28302815058e",
+      "bytes": 57533
+    },
+    {
+      "name": "gate-loaded-31cbcb10.py.txt",
+      "sha256": "31cbcb101dbe273fc515f28f4a930f14cd37bd89d3b2211a555bbcb40f1f2dee",
+      "bytes": 65150
+    },
+    {
+      "name": "report.json",
+      "sha256": "4f053986edd309a6a78efc09b4fc88cff405272f2d216ca4d1abfa57890907a3",
+      "bytes": 14630
+    }
+  ],
+  "retest": "Not run by this agent; root executes new output after changed physical-navigation condition.",
+  "intermediate_unexecuted_gate_sha256": "74ce8f88abbfc0fc3afe0965eaa3938cacbb4dd92de9b3c6614d99bb87bd6e0f",
+  "additional_boundary_assertions": "Before next product run, require exact waiting_confirmation and the complete unfiltered six-call Native HTTP sequence: myself503, myself200, project200, statuses200, field200, search200. Raw full sequence is saved before assertions.",
+  "checks": {
+    "helper_tests": "5 PASS; helper-tests-after-mode-fix.log",
+    "syntax": "PASS",
+    "git_diff_check": "PASS",
+    "next_actual_product": "Root-owned, not yet executed"
+  }
+}

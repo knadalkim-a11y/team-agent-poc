@@ -1,5 +1,7 @@
 # 버전 및 환경 기준
 
+2026-10-02 통합 개발 후보는 **0.11.3+ees.13** / `/_ees13/`이다. 공식 Open WebUI 0.11.3 wheel과 원본 해시는 유지하고 데모 기본 등록·옛 UI를 제거한다. 같은 서버의 Workspace/Operations 모듈과 additive 업무 schema를 포함하며 기존 ees.12 백업 inventory는 동결한다. 정확한 후보 해시·검증과 사내 적용 여부는 [통합 평가](evals/v4-ui-20260930.md#integrated-work-evidence-20261002) 및 [STATUS](docs/STATUS.md)를 따른다. 아래 날짜별 버전은 당시 이력이며 현재 ApplyDemo 재등록 지시가 아니다.
+
 문서 갱신일: 2026-09-25. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
 
 ## Open WebUI 대상 환경

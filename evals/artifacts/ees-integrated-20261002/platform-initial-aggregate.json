@@ -1,0 +1,95 @@
+{
+  "modules": 23,
+  "tests_run": 672,
+  "outcome_counts": {
+    "passed": 648,
+    "failed": 4,
+    "error": 4,
+    "skipped": 20,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "skips": [
+    {
+      "id": "test_ees_deploy_imports.ImportProbeTests.test_real_nltk_downloader_without_profile_reproduces_value_error",
+      "reason": "Windows real NLTK profile regression"
+    },
+    {
+      "id": "test_ees_deploy_imports.ImportProbeTests.test_real_nltk_import_completes_with_profile_environment",
+      "reason": "opt-in real NLTK dependency check"
+    },
+    {
+      "id": "test_ees_deploy_imports.ImportProbeTests.test_windows_venv_site_initialization_and_watchdog",
+      "reason": "Windows Python 3.11 venv launcher"
+    },
+    {
+      "id": "test_manage_ees.PowerShellResumeTests.test_adapter_forwards_resume_and_check_only_and_rejects_other_actions",
+      "reason": "PowerShell adapter execution requires pwsh"
+    },
+    {
+      "id": "test_manage_ees.PowerShellResumeTests.test_documented_manual_apply_and_resume_blocks_parse_in_powershell",
+      "reason": "PowerShell adapter execution requires pwsh"
+    },
+    {
+      "id": "test_ees_deploy_state.WindowsDpapiTests.test_current_user_dpapi_roundtrip",
+      "reason": "Real CurrentUser DPAPI requires Windows"
+    },
+    {
+      "id": "test_ees_deploy_port.LocalLifecycleTests.test_owned_fake_child_stops_and_reuses_port",
+      "reason": "The mounted /proc uses a different PID namespace."
+    },
+    {
+      "id": "test_ees_deploy_release.ReleaseTests.test_real_uv_prepares_tiny_wheels_offline_without_application_import",
+      "reason": "Opt-in real uv test requires Python 3.11 and installed uv."
+    },
+    {
+      "id": "test_ees_deploy_stop_recovery.PowerShellCaptureTests.test_documented_capture_preserves_raw_json_in_windows_powershell_and_pwsh",
+      "reason": "Recovery capture guide compatibility is Windows-only."
+    },
+    {
+      "id": "test_ees_upgrade.PowerShellUpgradeTests.test_adapter_runs_demo_with_saved_environment_and_separate_auth_options",
+      "reason": "PowerShell adapter execution requires pwsh"
+    },
+    {
+      "id": "test_ees_upgrade.PowerShellUpgradeTests.test_adapter_runs_upgrade_entrypoint_and_forwards_only_upgrade_arguments",
+      "reason": "PowerShell adapter execution requires pwsh"
+    },
+    {
+      "id": "setUpClass (test_ees_deploy_process.DeployProcessTests)",
+      "reason": "The mounted /proc uses a different PID namespace; real lifecycle runs in Windows/Linux CI."
+    },
+    {
+      "id": "test_ees_deploy_process.WindowsExplicitTerminationTests.test_disposable_child_identity_refusal_then_termination_preserves_other_child",
+      "reason": "Real handle termination is Windows-only."
+    },
+    {
+      "id": "test_ees_deploy_process.WindowsStopHelperTests.test_console_attach_failure_survives_real_helper_stdout_and_parent_parsing",
+      "reason": "Real console helper IPC is Windows-only."
+    },
+    {
+      "id": "test_ees_deploy_accept.WindowsIocpTests.test_real_accept_reset_then_new_client_and_subprocess",
+      "reason": "Windows CPython 3.11 only"
+    },
+    {
+      "id": "test_ees_deploy_accept.WindowsIocpTests.test_real_completion_then_shutdown_during_retry_or_other_error",
+      "reason": "Windows CPython 3.11 only"
+    },
+    {
+      "id": "test_ees_deploy_stop_target.WindowsVenvTests.test_actual_venv_child_termination_releases_waiting_launcher",
+      "reason": "Disposable CPython 3.11 Windows venv fixture"
+    },
+    {
+      "id": "test_ees_webui_customization.ProgramRenameTests.test_real_windows_directory_lock_released_during_wait_then_promotes",
+      "reason": "Requires an actual Windows directory sharing lock"
+    },
+    {
+      "id": "test_ees_webui_customization.RealBrandingWheelTests.test_saved_workflow_survives_real_upgrade_then_previous_program_restore",
+      "reason": "Supply current and previous shipped wheels for the reverse-compatibility gate"
+    },
+    {
+      "id": "test_ees_trial_upgrade.TrialPowerShellTests.test_public_trial_routes_and_invalid_options",
+      "reason": "PowerShell is unavailable"
+    }
+  ],
+  "note": "Initial full suite preserved; Native fixture and unsupported-version corrections rerun separately."
+}

@@ -1,0 +1,59 @@
+{
+  "module": "test_ees_workflow_tool.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.054,
+  "tests_run": 10,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 10,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_workflow_tool.WorkflowToolTests.test_access_filtered_read_has_no_private_ui_or_intent",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_tool.WorkflowToolTests.test_cross_target_malformed_secret_and_bool_revision_rejected",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_tool.WorkflowToolTests.test_current_chat_reference_is_only_a_scoped_hint_checked_against_server",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_tool.WorkflowToolTests.test_denied_read_cannot_navigate_or_disclose",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_tool.WorkflowToolTests.test_input_preview_uses_server_gate_and_only_local_preview",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_tool.WorkflowToolTests.test_missing_native_chat_and_late_ui_refusal_are_not_success",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_tool.WorkflowToolTests.test_model_strings_are_serialized_data_not_javascript",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_tool.WorkflowToolTests.test_preview_never_saves_publishes_or_executes",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_tool.WorkflowToolTests.test_read_access_does_not_grant_edit_proposal_permission",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_tool.WorkflowToolTests.test_stale_revision_rejected_before_browser",
+      "status": "passed"
+    }
+  ]
+}

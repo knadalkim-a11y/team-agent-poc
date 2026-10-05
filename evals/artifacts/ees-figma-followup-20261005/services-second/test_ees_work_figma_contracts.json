@@ -1,0 +1,111 @@
+{
+  "module": "test_ees_work_figma_contracts.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.607,
+  "tests_run": 23,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 23,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_completed_legacy_optional_item_remains_final_after_upgrade",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_completion_and_read_retry_validation_retains_incomplete_draft",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_confirm_list_changes_are_new_evidence_and_all_decisions_are_exact",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_confirm_list_second_decision_failure_rolls_back_all_writes",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_custom_judgment_id_preserves_exact_same_status_term_in_immutable_note",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_empty_and_fully_excluded_lists_cannot_bypass_completion_policy",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_explicit_delivery_preserves_review_but_blocks_all_successor_policies",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_invalid_or_stale_list_cannot_partially_write",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_item_verdict_batch_completes_legacy_partial_decisions_without_overwriting",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_item_verdict_confirmation_is_complete_atomic_and_partial_stays_partial",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_item_verdict_confirmation_rolls_back_on_revoked_source",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_partial_list_never_becomes_completed_or_closes_run",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_request_capabilities_follow_current_distinct_roles",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_review_autosave_and_confirmation_preserve_original_and_append_only_text",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_review_current_access_revocation_redacts_state_export_and_receipt",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_review_exact_attempt_run_and_review_cas_are_independent",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_schema1_concurrent_initialization_serializes_and_preserves_data",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_schema1_upgrade_preserves_versions_runs_attempts_and_legacy_data",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_schema_missing_or_malformed_review_table_is_not_silently_repaired",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_schema_upgrade_exception_rolls_back_marker_and_table_creation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_stale_inputs_cannot_be_repackaged_as_review_or_list_amendment",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_tool_item_verdict_always_waits_for_explicit_human_confirmation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_unchanged_list_confirmation_does_not_invent_another_attempt",
+      "status": "passed"
+    }
+  ]
+}

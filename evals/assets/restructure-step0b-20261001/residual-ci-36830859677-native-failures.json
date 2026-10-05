@@ -1,0 +1,81 @@
+{
+  "head": "cddf0ebf485dd1e970781841891990fc77c89fb6",
+  "run": 36830859677,
+  "artifact": 11147134607,
+  "source": "unmodified failure DOM/readiness snapshots in actual CI artifact",
+  "failures": [
+    {
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width",
+      "last_wait": "(() => {const p=document.querySelector('#ees-work-panel');return p&&!p.classList.contains('ew-narrow')&&p.getBoundingClientRect().width===parseFloat(p.style.width)})()",
+      "last_click": "#ees-work-entry [data-action=\"select\"][data-node-id=\"setup-p\"]",
+      "capture_errors": []
+    },
+    {
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_a_design_pending_execution_is_not_completion_and_releases_only_one_result",
+      "last_wait": "document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')",
+      "last_click": null,
+      "capture_errors": []
+    },
+    {
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_borderless_step_styles_focus_and_long_name_in_native_light_dark_narrow",
+      "last_wait": "document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')",
+      "last_click": null,
+      "capture_errors": []
+    },
+    {
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_delayed_action_cannot_replace_another_pending_case_at_the_same_url",
+      "last_wait": "performance.getEntriesByType('resource').filter(e=>e.name.endsWith('/api/ees-work/action')).length > 2",
+      "last_click": "#chat-input",
+      "capture_errors": []
+    },
+    {
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_delayed_action_response_cannot_replace_another_chat",
+      "last_wait": "performance.getEntriesByType('resource').filter(e=>e.name.endsWith('/api/ees-work/action')).length > 4",
+      "last_click": "#chat-input",
+      "capture_errors": []
+    },
+    {
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_detail_keeps_opened_attempt_call_and_return_focus_after_new_result",
+      "last_wait": "document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')",
+      "last_click": null,
+      "capture_errors": []
+    },
+    {
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_durable_runtime_panel_plan_real_service_and_browser_return",
+      "last_wait": "!!document.querySelector('#ees-work-context')",
+      "last_click": null,
+      "capture_errors": []
+    },
+    {
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_durable_runtime_poll_updates_left_progress_and_job_header_without_navigation",
+      "last_wait": "!!document.querySelector('#ees-work-context')",
+      "last_click": null,
+      "capture_errors": []
+    },
+    {
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_factory_system_scope_restores_chat_drafts_and_history_never_replaces_current_work",
+      "last_wait": "document.querySelector('#ees-work-site-trigger')?.value === 'us-a' && !!document.querySelector('#chat-input.ProseMirror')",
+      "last_click": null,
+      "capture_errors": []
+    },
+    {
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_first_completion_binds_its_original_factory_after_another_pending_case_is_opened",
+      "last_wait": "document.querySelector('#chat-container')?.innerText.includes('실제 대화 입력이 전달되었습니다.')",
+      "last_click": "#ees-work-entry [data-action=\"select\"][data-node-id=\"setup-p\"]",
+      "capture_errors": []
+    },
+    {
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_input_save_double_click_and_held_enter_never_run_or_send_chat",
+      "last_wait": "document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')",
+      "last_click": null,
+      "capture_errors": []
+    },
+    {
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_integrated_large_job_browser_counts_filters_pages_and_selection",
+      "last_wait": "document.querySelector('#ees-work-context')?.innerText.includes('이 대화에 연결됨')",
+      "last_click": null,
+      "capture_errors": []
+    }
+  ],
+  "claim": "last_wait is an observation, not a complete traceback or root cause. 7 closed-panel waits and 1 removed select-value expectation are being compared against current source/DOM; other failures remain unclassified."
+}

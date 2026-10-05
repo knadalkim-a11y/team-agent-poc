@@ -1,0 +1,1679 @@
+{
+  "run": 36956218460,
+  "head": "e15eabeb6cd33aa2662d0e0ff13b931ad468e5a7",
+  "status": "completed",
+  "conclusion": "failure",
+  "observed_at": "2026-10-02T02:46:48.489Z",
+  "jobs": [
+    {
+      "id": 110679627359,
+      "name": "Prepare pinned program fixtures and test coverage",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Audit every retained or explicitly replaced test ID",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify source-only packaging checks",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Download the fixed upstream wheel",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build current and unchanged historical program fixtures once",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Share exact program bytes with all required suites",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep the test-ID coverage audit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679972901,
+      "name": "native-account (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run the assigned real Native browser integration",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify actual browser files before artifact upload",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep browser results and actual evidence files",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679972923,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Restore the already verified fixed product dependency inventory",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Restore the exact upstream text-attachment dependency missing from the older inventory",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Start the actual CLI and verify browser writes, reload and restart",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify central Native chat with actual registered read and proposal tools",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Record the successfully tested integration tree",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Select the review head only for candidate packaging",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare the exact tested head as a review candidate",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep the hashed review candidate for this exact head",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify actual full-product evidence files",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep actual full-product results and screen evidence",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Select the review head only for candidate packaging",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679972989,
+      "name": "native-execution (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run the assigned real Native browser integration",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify actual browser files before artifact upload",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep browser results and actual evidence files",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679972990,
+      "name": "native-work (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run the assigned real Native browser integration",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify actual browser files before artifact upload",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep browser results and actual evidence files",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973025,
+      "name": "native-compose (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run the assigned real Native browser integration",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Verify actual browser files before artifact upload",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep browser results and actual evidence files",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973124,
+      "name": "platform (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run the complete assigned module set",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep all per-test results including failures and skips",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973134,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run the complete assigned module set",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep all per-test results including failures and skips",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973147,
+      "name": "services (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run the complete assigned module set",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep all per-test results including failures and skips",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973204,
+      "name": "contracts (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run the complete assigned module set",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep all per-test results including failures and skips",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973227,
+      "name": "restore-ees11 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run the complete assigned module set",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep all per-test results including failures and skips",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973233,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run the complete assigned module set",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep all per-test results including failures and skips",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973236,
+      "name": "restore-ees10 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run the complete assigned module set",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep all per-test results including failures and skips",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973261,
+      "name": "restore-ees12 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run the complete assigned module set",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep all per-test results including failures and skips",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973262,
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run the complete assigned module set",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep all per-test results including failures and skips",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973326,
+      "name": "services (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run the complete assigned module set",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep all per-test results including failures and skips",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973342,
+      "name": "platform (windows-2022)",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run the complete assigned module set",
+          "status": "completed",
+          "conclusion": "cancelled"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep all per-test results including failures and skips",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110679973424,
+      "name": "contracts (windows-2022)",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install fixed test dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain real Windows build and LF archive validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Run the complete assigned module set",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Require real Windows IOCP accept and subprocess validation",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Diagnose the two Windows fixture failures independently",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Parse the Windows PowerShell entry point",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Check documentation and patch whitespace",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Keep all per-test results including failures and skips",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Keep complete Windows fixture diagnostics",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110682403941,
+      "name": "Delivery checks (windows-2022)",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require every fixture, service, platform and Native result",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110682403957,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Require every fixture, service, platform and Native result",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 110682428267,
+      "name": "Prepare delivery files",
+      "status": "completed",
+      "conclusion": "skipped",
+      "steps": []
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11206455307,
+      "name": "ees-pinned-fixtures-f6306346588e7dfebfd7728a38651fb72f04e63b",
+      "bytes": 769918415,
+      "digest": "sha256:6ba99b5672fad608882d08a5ca65654334299c7f1f6db4f2733decc98d1ee054",
+      "expired": false
+    },
+    {
+      "id": 11206435601,
+      "name": "ees-results-services-ubuntu-24.04",
+      "bytes": 19163,
+      "digest": "sha256:a4d9774840c0812fec7ac5e7d1db900a638d917993309418a4a7bf7c53427d37",
+      "expired": false
+    },
+    {
+      "id": 11206430989,
+      "name": "ees-results-restore-ees12-windows-2022",
+      "bytes": 686,
+      "digest": "sha256:e7e9e6133cf98b27ef128fc26fc4cdecafc8baba4733610e64c4e457ceac0973",
+      "expired": false
+    },
+    {
+      "id": 11206296314,
+      "name": "ees-results-restore-ees11-ubuntu-24.04",
+      "bytes": 673,
+      "digest": "sha256:b7aa5e976e4a11d7a00dfaef83150ff6c46822beffa8bf3c6cdacb56fdb53980",
+      "expired": false
+    },
+    {
+      "id": 11206261507,
+      "name": "ees-results-restore-ees10-ubuntu-24.04",
+      "bytes": 675,
+      "digest": "sha256:847ddf17b915186e9ffda350bb083da5149117d658a45e28baabc5b305fb0506",
+      "expired": false
+    },
+    {
+      "id": 11206256410,
+      "name": "ees-delivery-coverage-f6306346588e7dfebfd7728a38651fb72f04e63b",
+      "bytes": 19615,
+      "digest": "sha256:92d75fa12a325dea71d3d3a211275d0f101561946b24d80f11666fe893b1596a",
+      "expired": false
+    },
+    {
+      "id": 11206246700,
+      "name": "ees-work-browser-evidence-native-account",
+      "bytes": 542670,
+      "digest": "sha256:3511f18de58847aff770f9037506cfcdd7e5212bbd17be5bb2d66e1914522cf6",
+      "expired": false
+    },
+    {
+      "id": 11206176766,
+      "name": "ees-results-restore-ees12-ubuntu-24.04",
+      "bytes": 679,
+      "digest": "sha256:399a811980322c875fc63e95e580fa26cc3abb74e5e4f329d73fd923329bfe7b",
+      "expired": false
+    },
+    {
+      "id": 11206117861,
+      "name": "ees-review-candidate-e15eabeb6cd33aa2662d0e0ff13b931ad468e5a7",
+      "bytes": 153033439,
+      "digest": "sha256:f9bb49053e995b74d42c91204d3223f6cbc71e38e33ed0c043f63a54bf2c8aa5",
+      "expired": false
+    },
+    {
+      "id": 11206063414,
+      "name": "ees-results-restore-ees10-windows-2022",
+      "bytes": 684,
+      "digest": "sha256:ab011cde3d0d777977cd6012efe2a6a6e8e93c97b5e506fe17e446fc9d997dae",
+      "expired": false
+    },
+    {
+      "id": 11206058223,
+      "name": "ees-work-browser-evidence-native-execution",
+      "bytes": 334465,
+      "digest": "sha256:80ca0165af909d2a18dbc63798e6c72cdeffa36c7d1a6f21017d94523bcca9a3",
+      "expired": false
+    },
+    {
+      "id": 11205978952,
+      "name": "ees-results-services-windows-2022",
+      "bytes": 19288,
+      "digest": "sha256:4dad97c8ed9c1400cc82c2492518c534a87e3c330f601b82e07a706bd5618338",
+      "expired": false
+    },
+    {
+      "id": 11205944221,
+      "name": "ees-results-platform-ubuntu-24.04",
+      "bytes": 26713,
+      "digest": "sha256:e0b97e1c93c811223939beda90359df8521b2040d114b63eda4a1c8924258202",
+      "expired": false
+    },
+    {
+      "id": 11205919350,
+      "name": "ees-results-restore-ees11-windows-2022",
+      "bytes": 682,
+      "digest": "sha256:d77055a4fde5de41c520e6abe1f1247c859cebc4186bb66cc43977257c7afd2c",
+      "expired": false
+    },
+    {
+      "id": 11205839439,
+      "name": "ees-work-browser-evidence-native-work",
+      "bytes": 444892,
+      "digest": "sha256:0d07c47df89451e5fad9d26358778c461d6817b4f5982fbe97ba1392e896008e",
+      "expired": false
+    },
+    {
+      "id": 11205804823,
+      "name": "ees-results-contracts-ubuntu-24.04",
+      "bytes": 4887,
+      "digest": "sha256:895bbd3abeba4644b82a2cd7079ce0264189ee4620b3cde30a8538960c3c42b5",
+      "expired": false
+    },
+    {
+      "id": 11205804743,
+      "name": "ees-native-complete-product-f6306346588e7dfebfd7728a38651fb72f04e63b",
+      "bytes": 2135703,
+      "digest": "sha256:cd860e49457068b49a976c3349802d264e7d8c3c410209c44934d8d2539afe33",
+      "expired": false
+    },
+    {
+      "id": 11205403617,
+      "name": "ees-work-browser-evidence-native-compose",
+      "bytes": 706705,
+      "digest": "sha256:17e5f680001c6a8e0ed4f76bc97e08008d1a113ac928827d2a133ac05c7b6246",
+      "expired": false
+    },
+    {
+      "id": 11205349495,
+      "name": "ees-results-contracts-windows-2022",
+      "bytes": 5691,
+      "digest": "sha256:5f968cf54a4fbe69bdd99b3ac830789ad2de98c35f6f13ae1803d165930648a5",
+      "expired": false
+    },
+    {
+      "id": 11205304804,
+      "name": "ees-results-platform-windows-2022",
+      "bytes": 24079,
+      "digest": "sha256:ac8d5b8c284b3f0fdaaea314d7486175f48299714d8341a33fc4bb278dc4be53",
+      "expired": false
+    }
+  ],
+  "boundary": "Final observed run statuses preserved. Artifact metadata/upload is not a claim every ZIP was downloaded. Native compose failure ZIP was downloaded and original PNG/DOM inspected; previous first-run complete Native evidence remains independently verified. Actual company services were not called."
+}

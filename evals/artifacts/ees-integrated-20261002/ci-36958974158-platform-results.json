@@ -1,0 +1,591 @@
+{
+  "run_id": 36958974158,
+  "head_sha": "10e2c5621e852aa0a2061ed1697e8cfac4ce4a9f",
+  "observed_at_utc": "2026-10-02T03:21:06.318862+00:00",
+  "scope": "16 service/contracts/native-contracts/platform/program-install/restore jobs plus aggregate/package status. Native and complete-product root-owned.",
+  "evidence_method": "Final full job logs and artifact metadata collected. Only new-risk Windows platform artifact downloaded/read/hashed; prior run 36957905733 actual ZIP inspection reused for unchanged suite structure. No CI rerun or tracked-file modification.",
+  "jobs": [
+    {
+      "job_id": 110688486700,
+      "name": "platform (windows-2022)",
+      "conclusion": "failure",
+      "tests_run": 622,
+      "counts": {
+        "passed": 619,
+        "failed": 0,
+        "error": 2,
+        "skipped": 1
+      },
+      "skipped_cases": [
+        {
+          "id": "test_ees_deploy_port.LocalLifecycleTests.test_owned_fake_child_stops_and_reuses_port",
+          "status": "skipped",
+          "detail": "Local lifecycle uses Linux; Windows remains a separate gate."
+        }
+      ],
+      "error_ids": [
+        "test_health_false_and_stop_timeout_do_not_force_kill (test_ees_deploy_process.DeployProcessTests.test_health_false_and_stop_timeout_do_not_force_kill)",
+        "test_health_ignores_proxy_and_never_follows_redirects (test_ees_deploy_process.DeployProcessTests.test_health_ignores_proxy_and_never_follows_redirects)"
+      ],
+      "artifact_id": 11207242363,
+      "artifact_name": "ees-results-platform-windows-2022",
+      "artifact_bytes": 24806,
+      "artifact_digest": "sha256:1658933db2ef886c2a67d05659e388a8ec31f9393fff261bac7c7b87b7e0d15f",
+      "log": "110688486700.log",
+      "log_sha256": "08773e49d4a49b4ea79c0a6df951dab76712314b1f086a429e4e4167f1577032",
+      "skipped_steps": [
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics",
+        "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065"
+      ]
+    },
+    {
+      "job_id": 110688486726,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "error_ids": [],
+      "artifact_id": 11207670397,
+      "artifact_name": "ees-results-restore-ees12-ubuntu-24.04",
+      "artifact_bytes": 679,
+      "artifact_digest": "sha256:923d1713dc0a925a6b5c3b1d7147bdbf66c709e6096c4e200e65350a6f952854",
+      "log": "110688486726.log",
+      "log_sha256": "1c9e4bdd90c1c44a91a0859645b504d4fa9b7af5e511b8daf4c5dfdef264ce8f",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486732,
+      "name": "contracts (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 84,
+      "counts": {
+        "passed": 84,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "error_ids": [],
+      "artifact_id": 11206972168,
+      "artifact_name": "ees-results-contracts-ubuntu-24.04",
+      "artifact_bytes": 4311,
+      "artifact_digest": "sha256:72a3ae7af4a3dcd0666f7406965ed1873251db956e0c21032c1450928fcdafc8",
+      "log": "110688486732.log",
+      "log_sha256": "bf7bdf945eecc755dc0adaa5453bdcc20b317b5d04637f84d6818911479eb2eb",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486758,
+      "name": "platform (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 622,
+      "counts": {
+        "passed": 613,
+        "failed": 0,
+        "error": 0,
+        "skipped": 9
+      },
+      "skipped_cases": [
+        {
+          "id": "test_ees_deploy_accept.WindowsIocpTests.test_real_accept_reset_then_new_client_and_subprocess",
+          "status": "skipped",
+          "detail": "Windows CPython 3.11 only"
+        },
+        {
+          "id": "test_ees_deploy_accept.WindowsIocpTests.test_real_completion_then_shutdown_during_retry_or_other_error",
+          "status": "skipped",
+          "detail": "Windows CPython 3.11 only"
+        },
+        {
+          "id": "test_ees_deploy_imports.ImportProbeTests.test_real_nltk_downloader_without_profile_reproduces_value_error",
+          "status": "skipped",
+          "detail": "Windows real NLTK profile regression"
+        },
+        {
+          "id": "test_ees_deploy_imports.ImportProbeTests.test_windows_venv_site_initialization_and_watchdog",
+          "status": "skipped",
+          "detail": "Windows Python 3.11 venv launcher"
+        },
+        {
+          "id": "test_ees_deploy_process.WindowsExplicitTerminationTests.test_disposable_child_identity_refusal_then_termination_preserves_other_child",
+          "status": "skipped",
+          "detail": "Real handle termination is Windows-only."
+        },
+        {
+          "id": "test_ees_deploy_process.WindowsStopHelperTests.test_console_attach_failure_survives_real_helper_stdout_and_parent_parsing",
+          "status": "skipped",
+          "detail": "Real console helper IPC is Windows-only."
+        },
+        {
+          "id": "test_ees_deploy_state.WindowsDpapiTests.test_current_user_dpapi_roundtrip",
+          "status": "skipped",
+          "detail": "Real CurrentUser DPAPI requires Windows"
+        },
+        {
+          "id": "test_ees_deploy_stop_recovery.PowerShellCaptureTests.test_documented_capture_preserves_raw_json_in_windows_powershell_and_pwsh",
+          "status": "skipped",
+          "detail": "Recovery capture guide compatibility is Windows-only."
+        },
+        {
+          "id": "test_ees_deploy_stop_target.WindowsVenvTests.test_actual_venv_child_termination_releases_waiting_launcher",
+          "status": "skipped",
+          "detail": "Disposable CPython 3.11 Windows venv fixture"
+        }
+      ],
+      "error_ids": [],
+      "artifact_id": 11207551167,
+      "artifact_name": "ees-results-platform-ubuntu-24.04",
+      "artifact_bytes": 24474,
+      "artifact_digest": "sha256:99c9a11dc1e8cade983ff2af8007f2335adfc32f61d7a3ad395baa821b1fb0bc",
+      "log": "110688486758.log",
+      "log_sha256": "1cf43b57279741cd365e7a5043951f5820416c2209ed4db3c8aeedecda6162e5",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486765,
+      "name": "services (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 396,
+      "counts": {
+        "passed": 396,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "error_ids": [],
+      "artifact_id": 11207366803,
+      "artifact_name": "ees-results-services-ubuntu-24.04",
+      "artifact_bytes": 19171,
+      "artifact_digest": "sha256:4b1301af341834101508ce90e0b68aae7c176f59d2b7e5ca348fe89e4b3de365",
+      "log": "110688486765.log",
+      "log_sha256": "adfa6d04fbe47181401c96829a5bf5788bf65ae71ac452a9455873e71f391d52",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486768,
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "error_ids": [],
+      "artifact_id": 11206997104,
+      "artifact_name": "ees-results-restore-ees10-ubuntu-24.04",
+      "artifact_bytes": 675,
+      "artifact_digest": "sha256:e9564cbf1eb7e794a2f2f3a98cacb53c464883f1675758fe68b3707ea37be03c",
+      "log": "110688486768.log",
+      "log_sha256": "7fea9303d433a3a4d4e79da5e41e69aec11f759fab83feebbd2b1e6c304a8a74",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486769,
+      "name": "contracts (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 84,
+      "counts": {
+        "passed": 84,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "error_ids": [],
+      "artifact_id": 11207362149,
+      "artifact_name": "ees-results-contracts-windows-2022",
+      "artifact_bytes": 4338,
+      "artifact_digest": "sha256:34ba37e69a33369495b5493297c54da41588afc5fb5d76f06388d4564b798e4f",
+      "log": "110688486769.log",
+      "log_sha256": "9a7374f8db89cdb47a4a3933e77b31c8cee97b2a77b6048244d4e68feef15660",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486779,
+      "name": "native-contracts (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 5,
+      "counts": {
+        "passed": 5,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "error_ids": [],
+      "artifact_id": 11207601106,
+      "artifact_name": "ees-results-native-contracts-ubuntu-24.04",
+      "artifact_bytes": 817,
+      "artifact_digest": "sha256:45380728355efaebeb8fe127838377a84aceef8e38922cb0a2067babd936ae6b",
+      "log": "110688486779.log",
+      "log_sha256": "3beb4551d5ce6479043d59113ab8d7a26190dcb1aba5c875fc6db459f7428559",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486780,
+      "name": "services (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 396,
+      "counts": {
+        "passed": 396,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "error_ids": [],
+      "artifact_id": 11207237064,
+      "artifact_name": "ees-results-services-windows-2022",
+      "artifact_bytes": 19287,
+      "artifact_digest": "sha256:cb5cfda68d1e9e2c36ad6a203f1050b2b25d8423ab916d53da225aedebb41015",
+      "log": "110688486780.log",
+      "log_sha256": "b4609cae2e9851e6b26ee73040628982a2f520adcd2c36f0e0d7bd24493b406d",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486787,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "error_ids": [],
+      "artifact_id": 11206748680,
+      "artifact_name": "ees-results-restore-ees11-ubuntu-24.04",
+      "artifact_bytes": 672,
+      "artifact_digest": "sha256:9bda38f88db4801c264d7e820ede0f67c5fabae9d262ec12a67ef58872f2d90a",
+      "log": "110688486787.log",
+      "log_sha256": "0ff56fce38eac9d86557797d14e1c8050bab386285db7203a5fafe285b16aa3e",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486791,
+      "name": "native-contracts (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 5,
+      "counts": {
+        "passed": 5,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "error_ids": [],
+      "artifact_id": 11207068955,
+      "artifact_name": "ees-results-native-contracts-windows-2022",
+      "artifact_bytes": 827,
+      "artifact_digest": "sha256:28af1aaf5f66aa1aa8c9d54dc33dd0339505e725c18fe57be58974313ea2c3df",
+      "log": "110688486791.log",
+      "log_sha256": "cd141e9b744dc1108303b3cfe407ca1d4d5e862d6fe2a522d4f99b81aed6d08d",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486795,
+      "name": "program-install (ubuntu-24.04)",
+      "conclusion": "success",
+      "tests_run": 58,
+      "counts": {
+        "passed": 56,
+        "failed": 0,
+        "error": 0,
+        "skipped": 2
+      },
+      "skipped_cases": [
+        {
+          "id": "test_ees_webui_customization.ProgramRenameTests.test_real_windows_directory_lock_released_during_wait_then_promotes",
+          "status": "skipped",
+          "detail": "Requires an actual Windows directory sharing lock"
+        },
+        {
+          "id": "test_ees_webui_customization.RealBrandingWheelTests.test_saved_workflow_survives_real_upgrade_then_previous_program_restore",
+          "status": "skipped",
+          "detail": "Supply current and previous shipped wheels for the reverse-compatibility gate"
+        }
+      ],
+      "error_ids": [],
+      "artifact_id": 11206634087,
+      "artifact_name": "ees-results-program-install-ubuntu-24.04",
+      "artifact_bytes": 2519,
+      "artifact_digest": "sha256:6dab10121338af3ecbb3309b435fb67be00f31c59b04c10e664c1a4dcdbb61a3",
+      "log": "110688486795.log",
+      "log_sha256": "71eaf17339fa78bd89f54f0e027faf13b62ef865868f96464c31790bbdc44b8e",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486801,
+      "name": "restore-ees12 (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "error_ids": [],
+      "artifact_id": 11206634436,
+      "artifact_name": "ees-results-restore-ees12-windows-2022",
+      "artifact_bytes": 687,
+      "artifact_digest": "sha256:2b31849946110acb165e07afea367b17ed8c4681ed0299a397da22a6cd29cbe5",
+      "log": "110688486801.log",
+      "log_sha256": "02a993bfbe24c1bafb62401bcd80a23cb01f4824565d5e09227a06074437da54",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486835,
+      "name": "restore-ees11 (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "error_ids": [],
+      "artifact_id": 11207616038,
+      "artifact_name": "ees-results-restore-ees11-windows-2022",
+      "artifact_bytes": 682,
+      "artifact_digest": "sha256:38c40fed614b00ce14ac0276a3d7830158148b4ff71cc460f98b8303391c071c",
+      "log": "110688486835.log",
+      "log_sha256": "5ffb33244127c7ffd2cde3ebfaa07dc4c09db197ebb54f2df94b95e22798ff3e",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688486853,
+      "name": "restore-ees10 (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 1,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "skipped_cases": [],
+      "error_ids": [],
+      "artifact_id": 11206972410,
+      "artifact_name": "ees-results-restore-ees10-windows-2022",
+      "artifact_bytes": 684,
+      "artifact_digest": "sha256:3e8e3a4b25269c29ed736c486d775125e09c2231a7808c3977f70593e157b2ee",
+      "log": "110688486853.log",
+      "log_sha256": "146fa76807dae490eedc165b859fe5a97fe43351bed3acc3e817bbd8e5ffbb0a",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    },
+    {
+      "job_id": 110688487012,
+      "name": "program-install (windows-2022)",
+      "conclusion": "success",
+      "tests_run": 58,
+      "counts": {
+        "passed": 57,
+        "failed": 0,
+        "error": 0,
+        "skipped": 1
+      },
+      "skipped_cases": [
+        {
+          "id": "test_ees_webui_customization.RealBrandingWheelTests.test_saved_workflow_survives_real_upgrade_then_previous_program_restore",
+          "status": "skipped",
+          "detail": "Supply current and previous shipped wheels for the reverse-compatibility gate"
+        }
+      ],
+      "error_ids": [],
+      "artifact_id": 11207486861,
+      "artifact_name": "ees-results-program-install-windows-2022",
+      "artifact_bytes": 2502,
+      "artifact_digest": "sha256:4bfc0293160c6c7a1f64f211768b964ef5f23974ec6b90fee02301439a8f50b3",
+      "log": "110688487012.log",
+      "log_sha256": "25876cbdbe568e8ce617adddf88751dc79d80a938c0008cf5b4fb1b256c03d8a",
+      "skipped_steps": [
+        "Retain real Windows build and LF archive validation",
+        "Require real Windows IOCP accept and subprocess validation",
+        "Diagnose the two Windows fixture failures independently",
+        "Parse the Windows PowerShell entry point",
+        "Check documentation and patch whitespace",
+        "Keep complete Windows fixture diagnostics"
+      ]
+    }
+  ],
+  "aggregate_and_package": [
+    {
+      "id": 110690053482,
+      "name": "Delivery checks (windows-2022)",
+      "conclusion": "cancelled",
+      "reason": "Required service/platform and complete-product gates were not all successful."
+    },
+    {
+      "id": 110690053483,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "conclusion": "failure",
+      "reason": "Required service/platform and complete-product gates were not all successful."
+    },
+    {
+      "id": 110690086033,
+      "name": "Prepare delivery files",
+      "conclusion": "skipped",
+      "reason": "Normal package is excluded on pull_request by existing workflow condition."
+    }
+  ],
+  "summary": {
+    "success": 15,
+    "failure": 1,
+    "cancelled": 0,
+    "unexecuted": 0,
+    "counts_by_os": {
+      "ubuntu-24.04": {
+        "passed": 1157,
+        "skipped": 11
+      },
+      "windows-2022": {
+        "passed": 1164,
+        "error": 2,
+        "skipped": 2
+      }
+    },
+    "new_errors": "Windows process natural-exit polling: one test body plus one cleanup raised identity-unavailable; actual Win32 error detail unavailable. Product still refused to send a signal. Cause not yet determined.",
+    "previous_success_is_not_current_pass": true,
+    "downstream_windows_specific_gates": "Extra IOCP, residual fixture diagnostics and PowerShell parse steps skipped after Windows assigned-suite failure; not passed in this run."
+  },
+  "new_risk_artifact": {
+    "id": 11207242363,
+    "bytes": 24806,
+    "sha256": "1658933db2ef886c2a67d05659e388a8ec31f9393fff261bac7c7b87b7e0d15f",
+    "api_digest_matches": true,
+    "member_count": 23,
+    "actual_json_counts": {
+      "passed": 619,
+      "skipped": 1,
+      "error": 2
+    },
+    "errors": [
+      {
+        "id": "test_ees_deploy_process.DeployProcessTests.test_health_false_and_stop_timeout_do_not_force_kill",
+        "status": "error",
+        "detail": "Traceback (most recent call last):\n  File \"D:\\a\\team-agent-poc\\team-agent-poc\\tests\\test_ees_deploy_process.py\", line 224, in test_health_false_and_stop_timeout_do_not_force_kill\n    while manager.verify_identity(identity) and time.monotonic() < deadline:\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\a\\team-agent-poc\\team-agent-poc\\scripts\\ees_deploy_process.py\", line 329, in verify_identity\n    return isinstance(identity, dict) and _same(_identity(identity.get('pid')), identity)\n                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\a\\team-agent-poc\\team-agent-poc\\scripts\\ees_deploy_process.py\", line 313, in _identity\n    return _windows_identity(pid)\n           ^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\a\\team-agent-poc\\team-agent-poc\\scripts\\ees_deploy_process.py\", line 275, in _windows_identity\n    raise error\nees_deploy_process_test.ProcessError: Process identity could not be inspected; no signal was sent.\n"
+      },
+      {
+        "id": "test_ees_deploy_process.DeployProcessTests.test_health_ignores_proxy_and_never_follows_redirects",
+        "status": "error",
+        "detail": "Traceback (most recent call last):\n  File \"D:\\a\\team-agent-poc\\team-agent-poc\\tests\\test_ees_deploy_process.py\", line 105, in cleanup_child\n    manager.stop_server(self.identity, timeout=3)\n  File \"D:\\a\\team-agent-poc\\team-agent-poc\\scripts\\ees_deploy_process.py\", line 711, in stop_server\n    raise failure from None\nees_deploy_process_test.ProcessError: Graceful stop failed; inspect the saved operation details.\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\a\\team-agent-poc\\team-agent-poc\\tests\\test_ees_deploy_process.py\", line 109, in cleanup_child\n    while manager.verify_identity(self.identity) and time.monotonic() < deadline:\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\a\\team-agent-poc\\team-agent-poc\\scripts\\ees_deploy_process.py\", line 329, in verify_identity\n    return isinstance(identity, dict) and _same(_identity(identity.get('pid')), identity)\n                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\a\\team-agent-poc\\team-agent-poc\\scripts\\ees_deploy_process.py\", line 313, in _identity\n    return _windows_identity(pid)\n           ^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\a\\team-agent-poc\\team-agent-poc\\scripts\\ees_deploy_process.py\", line 275, in _windows_identity\n    raise error\nees_deploy_process_test.ProcessError: Process identity could not be inspected; no signal was sent.\n"
+      }
+    ]
+  }
+}

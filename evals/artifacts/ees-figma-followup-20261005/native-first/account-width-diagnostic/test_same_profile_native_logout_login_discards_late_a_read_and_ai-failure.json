@@ -1,0 +1,977 @@
+{
+  "test": "test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai",
+  "boundary": "Synthetic Native authentication fixture",
+  "last_wait": "document.querySelector('#ees-work-system-trigger')?.textContent.includes('FDC')",
+  "requests": [
+    [
+      "GET",
+      "/_ees13/v4/7d31f.svg"
+    ],
+    [
+      "GET",
+      "/api/ees-work/workspace"
+    ],
+    [
+      "GET",
+      "/api/v1/auths/"
+    ],
+    [
+      "GET",
+      "/api/ees-work/operations"
+    ],
+    [
+      "GET",
+      "/api/ees-work/workspace"
+    ],
+    [
+      "GET",
+      "/api/ees-work/workspace"
+    ],
+    [
+      "GET",
+      "/api/ees-work/workspace"
+    ],
+    [
+      "GET",
+      "/api/ees-work/workspace"
+    ],
+    [
+      "GET",
+      "/api/ees-work/workspace"
+    ],
+    [
+      "GET",
+      "/api/ees-work/workspace"
+    ],
+    [
+      "GET",
+      "/api/ees-work/workspace"
+    ],
+    [
+      "POST",
+      "/api/ees-work/workspace/command"
+    ],
+    [
+      "GET",
+      "/api/ees-work/workspace"
+    ],
+    [
+      "POST",
+      "/ws/socket.io/"
+    ],
+    [
+      "GET",
+      "/ws/socket.io/"
+    ],
+    [
+      "GET",
+      "/api/v1/auths/"
+    ],
+    [
+      "POST",
+      "/ws/socket.io/"
+    ],
+    [
+      "GET",
+      "/ws/socket.io/"
+    ],
+    [
+      "GET",
+      "/api/v1/users/user/settings"
+    ],
+    [
+      "GET",
+      "/api/v1/auths/"
+    ]
+  ],
+  "capture_errors": [],
+  "dom": {
+    "route": "/",
+    "readyState": "complete",
+    "visibilityState": "visible",
+    "hasFocus": true,
+    "nativeReady": true,
+    "controls": [
+      {
+        "tag": "BUTTON",
+        "id": "sidebar-new-chat-button",
+        "type": null,
+        "role": null,
+        "label": null,
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "none",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "DIV",
+        "id": "sidebar",
+        "type": null,
+        "role": "navigation",
+        "label": "Chat history",
+        "text": null,
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": "false",
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 256,
+          "height": 1080
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": null,
+        "role": null,
+        "label": "사이드바 접기",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 209,
+          "y": 0,
+          "width": 30,
+          "height": 30
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "sidebar-search-button",
+        "type": null,
+        "role": null,
+        "label": "대화 검색",
+        "text": "대화 검색 Ctrl+K",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "업무",
+        "text": "업무",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 11,
+          "y": 53,
+          "width": 115.5,
+          "height": 32
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "워크스페이스",
+        "text": "워크스페이스",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 128.5,
+          "y": 53,
+          "width": 115.5,
+          "height": 32
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "ees-work-site-trigger",
+        "type": "button",
+        "role": null,
+        "label": "공장 선택",
+        "text": "공장전체 공장",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 9,
+          "y": 125,
+          "width": 237,
+          "height": 38
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "ees-work-system-trigger",
+        "type": "button",
+        "role": null,
+        "label": "시스템 선택",
+        "text": "시스템FDC",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 9,
+          "y": 163,
+          "width": 237,
+          "height": 39
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "내 업무",
+        "text": "내 업무",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 8,
+          "y": 215,
+          "width": 239,
+          "height": 36
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "워크플로우 찾기",
+        "text": "워크플로우 찾기",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 8,
+          "y": 251,
+          "width": 239,
+          "height": 36
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "실행 기록",
+        "text": "실행 기록",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 8,
+          "y": 287,
+          "width": 239,
+          "height": 36
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "대화 기록",
+        "text": "대화 기록",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 8,
+          "y": 323,
+          "width": 239,
+          "height": 36
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": null,
+        "text": "B 전용 합성 절차",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 8,
+          "y": 438,
+          "width": 239,
+          "height": 36
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": null,
+        "text": "폴더",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "새 폴더",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": null,
+        "text": "채팅",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "SPAN",
+        "id": "",
+        "type": null,
+        "role": "button",
+        "label": null,
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "contents",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "더보기",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "A",
+        "id": "sidebar-chat-item",
+        "type": null,
+        "role": "button",
+        "label": null,
+        "text": "NU05 A private chat title 56년 전",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "SPAN",
+        "id": "",
+        "type": null,
+        "role": "button",
+        "label": null,
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "contents",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "Chat Menu",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "SPAN",
+        "id": "",
+        "type": null,
+        "role": "button",
+        "label": null,
+        "text": "합성 계정 A",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "contents",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "사용자 메뉴",
+        "text": "합성 계정 A",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 4,
+          "y": 1040,
+          "width": 247,
+          "height": 34
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "업무 패널 열기",
+        "text": "업무 열기",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 1207.359375,
+          "y": 10.5,
+          "width": 58.796875,
+          "height": 26
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": null,
+        "text": "새 대화",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 1272.15625,
+          "y": 10.5,
+          "width": 47.84375,
+          "height": 26
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "new-chat-button",
+        "type": null,
+        "role": null,
+        "label": "New Chat",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "none",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "temporary-chat-button",
+        "type": null,
+        "role": null,
+        "label": "임시 채팅",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 1356,
+          "y": 12,
+          "width": 24,
+          "height": 24
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": null,
+        "role": null,
+        "label": "Controls",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 1388,
+          "y": 12,
+          "width": 24,
+          "height": 24
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": null,
+        "role": null,
+        "label": "UI에서 Fixture AI 정보 확인",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": "true",
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": null,
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "confirm-recording-button",
+        "type": "button",
+        "role": null,
+        "label": "Confirm recording",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "generate-message-pair-button",
+        "type": null,
+        "role": null,
+        "label": "Generate message pair",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "none",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "DIV",
+        "id": "chat-input",
+        "type": null,
+        "role": null,
+        "label": "무엇을 도와드릴까요?",
+        "text": null,
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 519,
+          "y": 965,
+          "width": 658,
+          "height": 22
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "SPAN",
+        "id": "",
+        "type": null,
+        "role": "button",
+        "label": null,
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "contents",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "input-menu-button",
+        "type": "button",
+        "role": null,
+        "label": "더보기",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 511,
+          "y": 997,
+          "width": 30,
+          "height": 30
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "model-selector-model-button",
+        "type": "button",
+        "role": null,
+        "label": "선택된 모델: Fixture AI",
+        "text": "Fixture AI",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "none",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "voice-input-button",
+        "type": "button",
+        "role": null,
+        "label": "Voice Input",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 1030,
+          "y": 997,
+          "width": 30,
+          "height": 30
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "음성 모드 사용",
+        "text": "",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 1107.5,
+          "y": 976,
+          "width": 30,
+          "height": 30
+        },
+        "pointerHit": false
+      },
+      {
+        "tag": "BUTTON",
+        "id": "send-message-button",
+        "type": "submit",
+        "role": null,
+        "label": null,
+        "text": "",
+        "disabled": true,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 1155,
+          "y": 997,
+          "width": 30,
+          "height": 30
+        },
+        "pointerHit": true
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "type": "button",
+        "role": null,
+        "label": "업무 패널 닫기",
+        "text": "닫기",
+        "disabled": false,
+        "hidden": false,
+        "inert": false,
+        "ariaHidden": null,
+        "dataValue": null,
+        "display": "block",
+        "visibility": "visible",
+        "rect": {
+          "x": 1866.078125,
+          "y": 9.5,
+          "width": 37.921875,
+          "height": 28
+        },
+        "pointerHit": true
+      }
+    ]
+  }
+}

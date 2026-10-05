@@ -1,0 +1,182 @@
+{
+  "scope": "Actual built Native UI with synthetic Native authentication/chat and read-only transport fixture; not company integration or full CLI app evidence",
+  "validation_base_head": "e15eabeb6cd33aa2662d0e0ff13b931ad468e5a7",
+  "preserved_at_head": "e15eabeb6cd33aa2662d0e0ff13b931ad468e5a7",
+  "command": "EES_TEST_CHROME=\"$PWD/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell\" EES_TEST_UPSTREAM_WHEEL=\"$PWD/dist/upstream/open_webui-0.11.3-py3-none-any.whl\" EES_TEST_BRANDING_DIR=\"$PWD/dist/integrated/branding-10\" EES_TEST_SCREENSHOT_DIR=\"$PWD/dist/integrated/animation-observation/native-compose\" EES_REQUIRE_AUTHORING_NATIVE=1 .venv/bin/python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite native-compose --output dist/integrated/animation-observation/results > dist/integrated/animation-observation-suite.log 2>&1",
+  "cwd": "/workspace/scratch/1d6bc68344e4/team-agent-poc",
+  "executions": 1,
+  "result": {
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0,
+    "modules": [
+      {
+        "name": "test_ees_work_c_phase1_native",
+        "passed": 5,
+        "seconds": 11.375
+      },
+      {
+        "name": "test_ees_work_c_phase2_native",
+        "passed": 6,
+        "seconds": 11.917
+      }
+    ]
+  },
+  "test_source": {
+    "path": "tests/test_ees_work_c_phase2_native.py",
+    "sha256": "25826ce001606158c7eb3db3b63227f8258f246d92a3ee1f999e2200964852be"
+  },
+  "wheel": {
+    "filename": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3",
+    "size": 152044704
+  },
+  "source_log": {
+    "path": "evals/artifacts/ees-integrated-20261002/animation-observation/native-compose.log",
+    "source_path": "dist/integrated/animation-observation-suite.log",
+    "bytes": 2264,
+    "sha256": "3b92a6914484c278624a058089e43468e2b214fcd565465d9ddc12184461aec1"
+  },
+  "files": [
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/animation-observation/native-compose.log",
+      "source_path": "dist/integrated/animation-observation-suite.log",
+      "bytes": 2264,
+      "sha256": "3b92a6914484c278624a058089e43468e2b214fcd565465d9ddc12184461aec1"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/animation-observation/integrated-running-animation.json",
+      "source_path": "dist/integrated/animation-observation/native-compose/integrated-running-animation.json",
+      "bytes": 3138,
+      "sha256": "c484ec4dc46df49c5b921b3bcdca5217e40b1d4570d8fd9e6158f2a6e00d63e5"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/animation-observation/integrated-running-animation.png",
+      "source_path": "dist/integrated/animation-observation/native-compose/integrated-running-animation.png",
+      "bytes": 82270,
+      "sha256": "5ba8ecdf5cfc0bcc29f12e1d5fa4121763cda3071c1b8dddb9da068761c10f32"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/animation-observation/integrated-running-reduced-motion.png",
+      "source_path": "dist/integrated/animation-observation/native-compose/integrated-running-reduced-motion.png",
+      "bytes": 82061,
+      "sha256": "2af89d72a377599d79ecb34ad3ae607c1e032076869b61d93321b8bb5b61d712"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/animation-observation/suite.json",
+      "source_path": "dist/integrated/animation-observation/results/suite.json",
+      "bytes": 223,
+      "sha256": "504dfd66ec1c9e439c628e7457943694d1a26258dda6c0a4d1b74edc516636a1"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/animation-observation/test_ees_work_c_phase1_native.json",
+      "source_path": "dist/integrated/animation-observation/results/test_ees_work_c_phase1_native.json",
+      "bytes": 1197,
+      "sha256": "fe156f8ec2b52f85e1a68d19a77e50ed29e059bcbd25c350ab8f751e33b662d1"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/animation-observation/test_ees_work_c_phase2_native.json",
+      "source_path": "dist/integrated/animation-observation/results/test_ees_work_c_phase2_native.json",
+      "bytes": 1344,
+      "sha256": "c463bd7a3b0ba7c84719dca085494cfe4ba31cfb184af6c05fcd674557641704"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/animation-observation/original-ci-failure.json",
+      "source_artifact_member": "ees-work-screenshots/integrated-test_running_transport_is_visible_and_cannot_double_execute-failure.json",
+      "bytes": 18471,
+      "sha256": "bde12b2f736defcd5f2739aef732b15b638f1691d767551818cf6e126bf9f67a"
+    },
+    {
+      "path": "evals/artifacts/ees-integrated-20261002/animation-observation/original-ci-failure.png",
+      "source_artifact_member": "ees-work-screenshots/integrated-test_running_transport_is_visible_and_cannot_double_execute-failure.png",
+      "bytes": 80914,
+      "sha256": "aa5e44fc23de6a6c26e59ee9015247605beb729cd5ad503e9cfd9e7e54da4482"
+    }
+  ],
+  "original_failed_ci": {
+    "run_id": 36956218460,
+    "job_id": 110679973025,
+    "artifact_id": 11205403617,
+    "artifact_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/36956218460/artifacts/11205403617",
+    "archive_source_path": "/workspace/scratch/1d6bc68344e4/attachments/98d784f1-fc9c-4549-a1c9-55213fe8a2e1/native-compose-animation-evidence.zip",
+    "archive_sha256": "17e5f680001c6a8e0ed4f76bc97e08008d1a113ac928827d2a133ac05c7b6246",
+    "archive_bytes": 706705,
+    "members": [
+      {
+        "path": "ees-results/browser-evidence.json",
+        "bytes": 1836,
+        "sha256": "e227977b12f1e1746a7ef4df5351bc1ec22131b00a7a32322b78605c3193b0c8"
+      },
+      {
+        "path": "ees-results/suite.json",
+        "bytes": 223,
+        "sha256": "ea4b0bac0c364d93a2de16be726264f712c4aa225045cd9b6d6ab1fade30b228"
+      },
+      {
+        "path": "ees-results/test_ees_work_c_phase1_native.json",
+        "bytes": 1197,
+        "sha256": "0d12aaffa008896706b982ed890e76095f9d6a1141492f84836b3b5ae3ccf76c"
+      },
+      {
+        "path": "ees-results/test_ees_work_c_phase2_native.json",
+        "bytes": 1857,
+        "sha256": "d913f523b42e8c28a3e8ca9192c228072a6a06edd297458240616c647db07fab"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-closed-history.png",
+        "bytes": 72202,
+        "sha256": "6f1be7957e5b4a592a2e51bbc2108d21867130425b0848dce7e57c8ddbf0e936"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-eight-native-input-types.png",
+        "bytes": 98343,
+        "sha256": "0531639e5308d4eb3f5c5ccdac822267176ec339d8fc6b8dadc614aeb99d0c72"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-immutable-attempts.png",
+        "bytes": 104381,
+        "sha256": "80606ef5423f3a6e8e5bdb4d9b373e640fd74a004c79811eab03e97051583338"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-long-korean-form.png",
+        "bytes": 96843,
+        "sha256": "506291c39c191fc27d959956f0e8add209228b7ab14ddfa92faafef5bd594d78"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-native-tool-snapshot.png",
+        "bytes": 97038,
+        "sha256": "e02b05e8583e1412361e920111434b7644b9ba498b01d76c6a6d2694c3d38095"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-result-failed.png",
+        "bytes": 74224,
+        "sha256": "6e75fe3dda3a95cd36daec84e6678f83ec3248a8234e8da742e7388233f1b87c"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-result-partial.png",
+        "bytes": 73663,
+        "sha256": "8fef1c61f96158a3de2ad1402432a935a9526d78bf73af2e24ded5f708d8cf9e"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-result-unknown.png",
+        "bytes": 76541,
+        "sha256": "7d2c148243da98594b50534a4b565d6bafaad9d7ec4a42e6239c2af44677280a"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-test_running_transport_is_visible_and_cannot_double_execute-failure.json",
+        "bytes": 18471,
+        "sha256": "bde12b2f736defcd5f2739aef732b15b638f1691d767551818cf6e126bf9f67a"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-test_running_transport_is_visible_and_cannot_double_execute-failure.png",
+        "bytes": 80914,
+        "sha256": "aa5e44fc23de6a6c26e59ee9015247605beb729cd5ad503e9cfd9e7e54da4482"
+      }
+    ],
+    "observed_failure": "Two fixed-RAF transform samples both identity matrix; original diagnostic did not record animation readiness/currentTime. Original failure capture preserved separately.",
+    "local_diagnostic": "First two observed RAF frames have pending true, current_time0 and start_time null on the same visible connected node; subsequent ready frames advance16.673 to33.373ms with different transforms, replacements0.",
+    "classification": "Test animation-readiness observation defect reproduced; product source unchanged."
+  },
+  "source_log_completed_at": "2026-10-02T02:44:23.033873+00:00",
+  "preserved_at": "2026-10-02T02:46:47.494846+00:00"
+}

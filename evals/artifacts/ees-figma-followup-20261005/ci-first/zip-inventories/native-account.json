@@ -1,0 +1,118 @@
+{
+  "artifact_name": "ees-work-browser-evidence-native-account",
+  "artifact_id": 11333328299,
+  "members": [
+    {
+      "member": "ees-results/suite.json",
+      "bytes": 309,
+      "compressed_bytes": 133,
+      "sha256": "e9ee2e6151e627e641ef3a5e7598ab08412bdb58c8746b116f0c750c80b264c9",
+      "retained": true
+    },
+    {
+      "member": "ees-results/browser-evidence.json",
+      "bytes": 1898,
+      "compressed_bytes": 771,
+      "sha256": "5dbd4cb82aa49cdd924edd5b235ec83048b85242cd5d25f107697fad8e60b43b",
+      "retained": true
+    },
+    {
+      "member": "ees-results/test_ees_chat_theme.json",
+      "bytes": 3955,
+      "compressed_bytes": 924,
+      "sha256": "326f1f454d721d0d37bfd1f57c8eafb7ce4dd1866921da5f779c175d1bbb79f9",
+      "retained": true
+    },
+    {
+      "member": "ees-results/test_ees_work_authoring_account_switch.json",
+      "bytes": 548,
+      "compressed_bytes": 273,
+      "sha256": "6111319578cc275863c18cd628f37370d7a5fdcbe261520b80d60cbe23e26428",
+      "retained": true
+    },
+    {
+      "member": "ees-results/test_ees_work_authoring_native.json",
+      "bytes": 1538,
+      "compressed_bytes": 447,
+      "sha256": "fa83db528cc484ab88e577309f2a4ca55b7ba16b92380c8276886c0973255f60",
+      "retained": true
+    },
+    {
+      "member": "ees-work-screenshots/integrated-native-ai-proposal-not-auto-save.png",
+      "bytes": 82065,
+      "compressed_bytes": 75761,
+      "sha256": "1663cb8f04375663271f493edfde392c7d9e874df8f69bd786fd9c39bac81780",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-native-authoring-conflict.png",
+      "bytes": 95446,
+      "compressed_bytes": 88491,
+      "sha256": "d0cc415302ce7dcd9719c8e379d3166bbc2da9400b920a8e135d35d5d3e8a63c",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-native-group-author-published.png",
+      "bytes": 90642,
+      "compressed_bytes": 83304,
+      "sha256": "e936c388dcb6b6577cf11c4c175e2127026036c13a4e4c9a112acf736a2eea7d",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/nu-closed-native-signup.png",
+      "bytes": 17210,
+      "compressed_bytes": 9426,
+      "sha256": "6c9f4d2e4032f3e1208b164f2e99ed5d2a42eb415e625a374cbd48e3bcb804bf",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/nu05-former-a-tab-now-b.png",
+      "bytes": 70368,
+      "compressed_bytes": 63359,
+      "sha256": "b40801ef822bf607dd12e2a9243ed5525aed9bbac908398a8036d2f32a253591",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/sa-approved-first-chat.png",
+      "bytes": 68110,
+      "compressed_bytes": 60899,
+      "sha256": "57c7bce20024f4a707d03d5414c892ea36b1011f01b25fb1c740c79556ad2c3c",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/sa-native-approved-user.png",
+      "bytes": 49403,
+      "compressed_bytes": 40861,
+      "sha256": "aaef91d64da34a624d27a52aa3c400a400f833b03814bc5a7a75535ea862db3a",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/sa-signup-pending-fonts.json",
+      "bytes": 780,
+      "compressed_bytes": 457,
+      "sha256": "52b1f39d35f35710df5bf3594ae27a35b7f72d2654549551ced5305ad9511422",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/sa-signup-pending.png",
+      "bytes": 39910,
+      "compressed_bytes": 31665,
+      "sha256": "e775030bf2b7b7f312158bf24ebfbb9b346aeee8a81bdfd89c5fb30c596b1e38",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/sa26-b-after-late-a-responses.png",
+      "bytes": 83257,
+      "compressed_bytes": 76825,
+      "sha256": "b41cbde2e6155139603fb5da018d80d24842d9291e9dd946fa6312a5e5bc5ba8",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/sa26-nu05-account-switch.json",
+      "bytes": 565,
+      "compressed_bytes": 319,
+      "sha256": "718b40b2fc02a2e2800a861bafc85041b1966f756b482b9b5e14c09412b59e13",
+      "retained": false
+    }
+  ]
+}

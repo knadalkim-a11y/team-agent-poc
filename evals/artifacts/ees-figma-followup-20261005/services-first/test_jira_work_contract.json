@@ -1,0 +1,95 @@
+{
+  "module": "test_jira_work_contract.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 9.768,
+  "tests_run": 19,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 19,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_attachment_cap_and_personal_credentials_are_preserved",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_attachment_html_login_response_and_metadata_denial_stay_partial",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_batch_attachments_preserve_each_requested_cr_and_same_id_provenance",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_batch_budget_and_per_issue_denial_never_lose_required_cr",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_batch_required_names_are_explicit_and_missing_is_not_document_approval",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_batch_scope_injection_duplicates_and_limits_reject_before_http",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_bounded_page_cap_stays_partial_and_exposes_real_continuation",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_cross_project_response_and_missing_attachment_field_are_not_complete",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_ems_is_not_a_default_project_and_injected_arguments_stop_before_http",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_foreign_or_encoded_attachment_url_never_receives_pat_or_download_request",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_metadata_denial_is_not_an_empty_successful_status_list",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_missing_duplicate_changed_or_denied_page_never_becomes_complete",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_missing_or_denied_attachment_is_distinct_from_absence",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_multiple_pages_produce_complete_list_and_exact_generated_jql",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_new_async_public_methods_round_trip_real_http",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_no_matching_issues_is_legitimate_empty_complete_result",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_real_attachment_metadata_and_range_probe_do_not_claim_content_review",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_real_http_metadata_uses_actual_allowed_visible_keys_statuses_and_date_schema",
+      "status": "passed"
+    },
+    {
+      "id": "test_jira_work_contract.JiraWorkHTTPTests.test_unknown_status_or_wrong_field_type_is_rejected_before_search",
+      "status": "passed"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "module": "test_ees_work_routes.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.851,
+  "tests_run": 7,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 7,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_routes.WorkRouteTests.test_concurrent_draft_change_during_model_call_requires_new_context",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_routes.WorkRouteTests.test_current_authenticated_actor_scope_applies_to_read_and_write",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_routes.WorkRouteTests.test_legacy_history_read_preserves_database_and_enforces_owner",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_routes.WorkRouteTests.test_retired_routes_reject_instead_of_recreate_demo_or_mutate_old_records",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_routes.WorkRouteTests.test_revoked_actor_during_model_call_does_not_receive_proposal",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_routes.WorkRouteTests.test_unavailable_model_and_secret_or_cross_target_proposal_fail_before_call",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_routes.WorkRouteTests.test_unsaved_proposal_exact_context_server_source_and_no_database_write",
+      "status": "passed"
+    }
+  ]
+}

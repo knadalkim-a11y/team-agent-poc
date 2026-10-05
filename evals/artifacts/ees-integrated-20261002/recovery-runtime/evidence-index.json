@@ -1,0 +1,96 @@
+{
+  "at": "2026-10-02T07:09:44.227525+00:00",
+  "scope": "Reconstructed lost uncommitted runtime validation contracts; new tests/evidence, no claim of exact old source or recovered original PNGs.",
+  "native": {
+    "command": "EES_TEST_CHROME=\"$PWD/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell\" EES_TEST_BRANDING_DIR=\"$PWD/dist/integrated/branding-16\" EES_TEST_SCREENSHOT_DIR=\"$PWD/evals/artifacts/ees-integrated-20261002/recovery-runtime/screenshots\" PYTHONPATH=\"$PWD/tests\" .venv/bin/python -m unittest -v test_ees_work_figma_runtime_native",
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 12.261
+  },
+  "ui": {
+    "passed": 96,
+    "failed": 0,
+    "skipped": 0,
+    "runtime": 24,
+    "existing": 72
+  },
+  "environment": {
+    "python": "Python 3.11.16",
+    "chrome": "153.0.8010.52",
+    "wheel": "dist/integrated/branding-16/open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "wheel_sha256": "f3899eab7db84df3696ae17ee3f5352e92df788a09b49e611d3658f59169a866"
+  },
+  "visual_review": {
+    "original_new_pngs_viewed": 7,
+    "readable_korean": true,
+    "broken_icons": false,
+    "checked": [
+      "A5 actors and phase cards",
+      "A6 original lookup2 + human-added2 + source warnings; immutable results",
+      "Empty lookup0 remains editable and unresolved completion remains blocked",
+      "AI original vs saved review and explicit delivery barrier",
+      "Permitted assignee name and readonly controls",
+      "Historical old values/current difference, exact reference and expanded panel/chat focus"
+    ]
+  },
+  "classification": "Actual built Native frontend, workflow service and temporary SQLite with synthetic Native session/external read/model fixtures. No real-company service, authentication or final CI success claim.",
+  "files": [
+    {
+      "path": "native-tests.log",
+      "bytes": 1766,
+      "sha256": "228c6c9940acb825f79d1367f2488a14ab4f0e2110f6f95624de51a973980b04"
+    },
+    {
+      "path": "ui-tests.log",
+      "bytes": 9530,
+      "sha256": "418944628fcc4fc765e51a9987bd6c73e06b9b81b7423952f8eaffa5f3a9b0b9"
+    },
+    {
+      "path": "reconstruction.json",
+      "bytes": 1795,
+      "sha256": "8d508f8fa6554051577c5a3902605fd61b93cbe36af58b04c186347eb9bcfb8c"
+    },
+    {
+      "path": "screenshots/figma-a5-cycle-overview.png",
+      "bytes": 100779,
+      "sha256": "28c48bfc95511345c94e61d366c2c18e56216f092a47ddadae7fccc3985a6417"
+    },
+    {
+      "path": "screenshots/figma-a6-empty-lookup-manual-preview.png",
+      "bytes": 108392,
+      "sha256": "05de3411df2c94144e0558dece42523f0e61f10127ef8cab0304856baa1387ee"
+    },
+    {
+      "path": "screenshots/figma-a6-list-confirmed.png",
+      "bytes": 114782,
+      "sha256": "9ebe4fda09bdcd9922134ea826a1a9d4dc2b4884323d6d517021f4e189987e7a"
+    },
+    {
+      "path": "screenshots/figma-a7-delivery-review-blocked.png",
+      "bytes": 105200,
+      "sha256": "a15a76617f63e5e00e6195c434feaebaf3e2c78b9c1e70495bb985b832bb7d53"
+    },
+    {
+      "path": "screenshots/figma-review-purpose-saved.png",
+      "bytes": 102963,
+      "sha256": "e482eec1e2f5088a29418d0e9b333c59cc5f4794e3eb2e37bf7f5c3e22a3acec"
+    },
+    {
+      "path": "screenshots/figma-s1-human-permission-readonly.png",
+      "bytes": 89471,
+      "sha256": "52550a6d6d80c39d4874230a3f8a764ee7d4c1ded171929fc46e158f90869400"
+    },
+    {
+      "path": "screenshots/figma-s2-readonly-history-reference.png",
+      "bytes": 102871,
+      "sha256": "a39c145ca9bd801703e3678db4b213a7b70f89593271525ceb66ed5be1cf35d0"
+    }
+  ],
+  "source_sha256": {
+    "tests/test_ees_work_figma_runtime_native.py": "31710f6b634b0b84bd802ee053300d8d2ecc9680db255283b2093f286748dd78",
+    "tests/test_ees_work_figma_runtime_ui.cjs": "b3e720e09fbfcf5701691b5d25f7f5691345501cc86593f2e0ede19a3a79ebd5",
+    "branding/ees/ui/ees-work-view.js": "b153f4b9acaa3bbb92ce9f2b85ec0e727cb3dbff63357684f32ca7a25263bc94",
+    "branding/ees/ui/ees-work-launcher.js": "c3db92657f866faabf8c0daff4ab214b8c533025eb0548d855787ba1a2024d39"
+  }
+}

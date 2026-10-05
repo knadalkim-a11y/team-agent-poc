@@ -1,0 +1,1138 @@
+test_44_character_fernet_key (test_confluence_canary.CanaryCheckTests.test_44_character_fernet_key) ... ok
+test_cli_conflicts_and_arbitrary_input_rejected_before_version_or_file_access (test_confluence_canary.CanaryCheckTests.test_cli_conflicts_and_arbitrary_input_rejected_before_version_or_file_access) ... ok
+test_cli_rejects_arbitrary_input_without_echoing_it (test_confluence_canary.CanaryCheckTests.test_cli_rejects_arbitrary_input_without_echoing_it) ... ok
+test_committed_wal_is_read (test_confluence_canary.CanaryCheckTests.test_committed_wal_is_read) ... ok
+test_conflicting_check_modes_rejected_before_file_access (test_confluence_canary.CanaryCheckTests.test_conflicting_check_modes_rejected_before_file_access) ... ok
+test_duplicate_and_mixed_plaintext_records_do_not_pass (test_confluence_canary.CanaryCheckTests.test_duplicate_and_mixed_plaintext_records_do_not_pass) ... ok
+test_encrypted_value_matches_existing_key_and_db_is_unchanged (test_confluence_canary.CanaryCheckTests.test_encrypted_value_matches_existing_key_and_db_is_unchanged) ... ok
+test_error_does_not_disclose_values_or_traceback (test_confluence_canary.CanaryCheckTests.test_error_does_not_disclose_values_or_traceback) ... ok
+test_github_cli_checks_version_before_reading (test_confluence_canary.CanaryCheckTests.test_github_cli_checks_version_before_reading) ... ok
+test_github_cli_suppresses_error_details (test_confluence_canary.CanaryCheckTests.test_github_cli_suppresses_error_details) ... ok
+test_github_cli_uses_fixed_mode_and_prints_only_counts_and_booleans (test_confluence_canary.CanaryCheckTests.test_github_cli_uses_fixed_mode_and_prints_only_counts_and_booleans) ... ok
+test_github_committed_wal_target_and_plaintext_are_read (test_confluence_canary.CanaryCheckTests.test_github_committed_wal_target_and_plaintext_are_read) ... ok
+test_github_duplicate_labels_cannot_pass (test_confluence_canary.CanaryCheckTests.test_github_duplicate_labels_cannot_pass) ... ok
+test_github_duplicate_marker_for_same_or_different_tool_cannot_pass (test_confluence_canary.CanaryCheckTests.test_github_duplicate_marker_for_same_or_different_tool_cannot_pass) ... ok
+test_github_existing_markers_in_target_cannot_pass (test_confluence_canary.CanaryCheckTests.test_github_existing_markers_in_target_cannot_pass) ... ok
+test_github_marker_in_another_tool_cannot_pass (test_confluence_canary.CanaryCheckTests.test_github_marker_in_another_tool_cannot_pass) ... ok
+test_github_missing_or_case_mismatched_label_cannot_pass (test_confluence_canary.CanaryCheckTests.test_github_missing_or_case_mismatched_label_cannot_pass) ... ok
+test_github_plaintext_in_db_and_journal_cannot_pass (test_confluence_canary.CanaryCheckTests.test_github_plaintext_in_db_and_journal_cannot_pass) ... ok
+test_github_requires_fresh_marker_under_exact_target_and_preserves_db (test_confluence_canary.CanaryCheckTests.test_github_requires_fresh_marker_under_exact_target_and_preserves_db) ... ok
+test_jira_cli_checks_version_before_reading_and_outputs_only_result (test_confluence_canary.CanaryCheckTests.test_jira_cli_checks_version_before_reading_and_outputs_only_result) ... ok
+test_jira_cli_uses_fixed_mode_and_suppresses_error_details (test_confluence_canary.CanaryCheckTests.test_jira_cli_uses_fixed_mode_and_suppresses_error_details) ... ok
+test_jira_committed_wal_target_and_plaintext_are_read (test_confluence_canary.CanaryCheckTests.test_jira_committed_wal_target_and_plaintext_are_read) ... ok
+test_jira_duplicate_labels_cannot_pass (test_confluence_canary.CanaryCheckTests.test_jira_duplicate_labels_cannot_pass) ... ok
+test_jira_duplicate_marker_for_same_or_different_tool_cannot_pass (test_confluence_canary.CanaryCheckTests.test_jira_duplicate_marker_for_same_or_different_tool_cannot_pass) ... ok
+test_jira_marker_in_another_tool_cannot_pass (test_confluence_canary.CanaryCheckTests.test_jira_marker_in_another_tool_cannot_pass) ... ok
+test_jira_missing_or_case_mismatched_label_cannot_pass (test_confluence_canary.CanaryCheckTests.test_jira_missing_or_case_mismatched_label_cannot_pass) ... ok
+test_jira_old_marker_in_target_cannot_pass (test_confluence_canary.CanaryCheckTests.test_jira_old_marker_in_target_cannot_pass) ... ok
+test_jira_plaintext_and_file_residue_cannot_pass (test_confluence_canary.CanaryCheckTests.test_jira_plaintext_and_file_residue_cannot_pass) ... ok
+test_jira_requires_fresh_marker_under_exact_target_and_preserves_db (test_confluence_canary.CanaryCheckTests.test_jira_requires_fresh_marker_under_exact_target_and_preserves_db) ... ok
+test_missing_db_is_not_created (test_confluence_canary.CanaryCheckTests.test_missing_db_is_not_created) ... ok
+test_plaintext_dict_cannot_pass (test_confluence_canary.CanaryCheckTests.test_plaintext_dict_cannot_pass) ... ok
+test_plaintext_residue_in_journal_prevents_pass (test_confluence_canary.CanaryCheckTests.test_plaintext_residue_in_journal_prevents_pass) ... ok
+test_scan_detects_chunk_boundary_and_utf16 (test_confluence_canary.CanaryCheckTests.test_scan_detects_chunk_boundary_and_utf16) ... ok
+test_wrong_key_and_absent_canary_do_not_pass (test_confluence_canary.CanaryCheckTests.test_wrong_key_and_absent_canary_do_not_pass) ... ok
+
+----------------------------------------------------------------------
+Ran 34 tests in 0.064s
+
+OK
+test_anonymous_upstream_identity_is_not_authenticated (test_confluence_read.ConfluenceReadTests.test_anonymous_upstream_identity_is_not_authenticated) ... ok
+test_anonymous_user_cannot_supply_token (test_confluence_read.ConfluenceReadTests.test_anonymous_user_cannot_supply_token) ... ok
+test_body_boundary_does_not_reveal_partial_pat (test_confluence_read.ConfluenceReadTests.test_body_boundary_does_not_reveal_partial_pat) ... ok
+test_check_access_uses_fixed_get_and_request_scoped_pat (test_confluence_read.ConfluenceReadTests.test_check_access_uses_fixed_get_and_request_scoped_pat) ... ok
+test_concurrent_search_results_remain_user_specific (test_confluence_read.ConfluenceReadTests.test_concurrent_search_results_remain_user_specific) ... ok
+test_concurrent_users_get_separate_request_headers (test_confluence_read.ConfluenceReadTests.test_concurrent_users_get_separate_request_headers) ... ok
+test_direct_page_id_in_forbidden_space_never_loads_body (test_confluence_read.ConfluenceReadTests.test_direct_page_id_in_forbidden_space_never_loads_body) ... ok
+test_disabled_by_default (test_confluence_read.ConfluenceReadTests.test_disabled_by_default) ... ok
+test_empty_space_allowlist_is_closed (test_confluence_read.ConfluenceReadTests.test_empty_space_allowlist_is_closed) ... ok
+test_encryption_must_be_enabled (test_confluence_read.ConfluenceReadTests.test_encryption_must_be_enabled) ... ok
+test_get_page_checks_metadata_before_loading_body (test_confluence_read.ConfluenceReadTests.test_get_page_checks_metadata_before_loading_body) ... ok
+test_get_page_preserves_table_cells_and_inline_text (test_confluence_read.ConfluenceReadTests.test_get_page_preserves_table_cells_and_inline_text) ... ok
+test_html_entity_encoded_pat_is_redacted_before_body_cutoff (test_confluence_read.ConfluenceReadTests.test_html_entity_encoded_pat_is_redacted_before_body_cutoff) ... ok
+test_html_login_page_is_not_accepted_as_api_response (test_confluence_read.ConfluenceReadTests.test_html_login_page_is_not_accepted_as_api_response) ... ok
+test_http_opt_in_preserves_endpoint_and_skips_unused_ca (test_confluence_read.ConfluenceReadTests.test_http_opt_in_preserves_endpoint_and_skips_unused_ca) ... ok
+test_http_permission_does_not_weaken_https_or_skip_its_ca (test_confluence_read.ConfluenceReadTests.test_http_permission_does_not_weaken_https_or_skip_its_ca) ... ok
+test_http_requires_admin_opt_in_and_can_be_disabled_again (test_confluence_read.ConfluenceReadTests.test_http_requires_admin_opt_in_and_can_be_disabled_again) ... ok
+test_http_search_and_page_links_preserve_fixed_origin (test_confluence_read.ConfluenceReadTests.test_http_search_and_page_links_preserve_fixed_origin) ... ok
+test_invalid_base_urls_are_rejected_before_network (test_confluence_read.ConfluenceReadTests.test_invalid_base_urls_are_rejected_before_network) ... ok
+test_invalid_search_input_never_issues_request (test_confluence_read.ConfluenceReadTests.test_invalid_search_input_never_issues_request) ... ok
+test_invalid_space_cannot_modify_cql (test_confluence_read.ConfluenceReadTests.test_invalid_space_cannot_modify_cql) ... ok
+test_malformed_json_is_safe_failure (test_confluence_read.ConfluenceReadTests.test_malformed_json_is_safe_failure) ... ok
+test_missing_base_url_is_closed (test_confluence_read.ConfluenceReadTests.test_missing_base_url_is_closed) ... ok
+test_missing_page_space_is_closed (test_confluence_read.ConfluenceReadTests.test_missing_page_space_is_closed) ... ok
+test_network_timeout_and_tls_failures_do_not_reflect_exception (test_confluence_read.ConfluenceReadTests.test_network_timeout_and_tls_failures_do_not_reflect_exception) ... ok
+test_no_shared_pat_fallback_or_credential_cache (test_confluence_read.ConfluenceReadTests.test_no_shared_pat_fallback_or_credential_cache) ... ok
+test_non_search_bad_request_is_not_a_query_or_pat_error (test_confluence_read.ConfluenceReadTests.test_non_search_bad_request_is_not_a_query_or_pat_error) ... ok
+test_only_three_read_functions_are_exposed (test_confluence_read.ConfluenceReadTests.test_only_three_read_functions_are_exposed) ... ok
+test_page_id_rejects_urls_traversal_query_and_non_numeric (test_confluence_read.ConfluenceReadTests.test_page_id_rejects_urls_traversal_query_and_non_numeric) ... ok
+test_page_space_is_rechecked_on_body_response (test_confluence_read.ConfluenceReadTests.test_page_space_is_rechecked_on_body_response) ... ok
+test_pat_cannot_inject_headers (test_confluence_read.ConfluenceReadTests.test_pat_cannot_inject_headers) ... ok
+test_pat_field_is_ui_masked (test_confluence_read.ConfluenceReadTests.test_pat_field_is_ui_masked) ... ok
+test_pat_reflected_by_upstream_is_not_returned (test_confluence_read.ConfluenceReadTests.test_pat_reflected_by_upstream_is_not_returned) ... ok
+test_proxy_environment_is_not_used_by_default (test_confluence_read.ConfluenceReadTests.test_proxy_environment_is_not_used_by_default) ... ok
+test_redirect_is_not_followed_and_does_not_expose_location (test_confluence_read.ConfluenceReadTests.test_redirect_is_not_followed_and_does_not_expose_location) ... ok
+test_rejected_search_guides_query_change_without_retry_or_private_details (test_confluence_read.ConfluenceReadTests.test_rejected_search_guides_query_change_without_retry_or_private_details) ... ok
+test_remote_links_cannot_override_fixed_confluence_origin (test_confluence_read.ConfluenceReadTests.test_remote_links_cannot_override_fixed_confluence_origin) ... ok
+test_repeat_reads_make_fresh_requests (test_confluence_read.ConfluenceReadTests.test_repeat_reads_make_fresh_requests) ... ok
+test_response_bytes_are_bounded (test_confluence_read.ConfluenceReadTests.test_response_bytes_are_bounded) ... ok
+test_search_cql_injection_is_rejected_or_quoted_literal (test_confluence_read.ConfluenceReadTests.test_search_cql_injection_is_rejected_or_quoted_literal) ... ok
+test_search_cql_omits_unsupported_status_predicate (test_confluence_read.ConfluenceReadTests.test_search_cql_omits_unsupported_status_predicate) ... ok
+test_search_does_not_disclose_out_of_allowlist_results (test_confluence_read.ConfluenceReadTests.test_search_does_not_disclose_out_of_allowlist_results) ... ok
+test_search_scope_matches_explicit_default_and_allowed_spaces (test_confluence_read.ConfluenceReadTests.test_search_scope_matches_explicit_default_and_allowed_spaces) ... ok
+test_search_uses_fixed_endpoint_and_bounded_limit (test_confluence_read.ConfluenceReadTests.test_search_uses_fixed_endpoint_and_bounded_limit) ... ok
+test_title_boundary_does_not_reveal_partial_pat (test_confluence_read.ConfluenceReadTests.test_title_boundary_does_not_reveal_partial_pat) ... ok
+test_tls_verification_and_no_redirect_handler_are_installed (test_confluence_read.ConfluenceReadTests.test_tls_verification_and_no_redirect_handler_are_installed) ... ok
+test_unexpected_json_shape_is_safe_failure (test_confluence_read.ConfluenceReadTests.test_unexpected_json_shape_is_safe_failure) ... ok
+test_unknown_space_never_issues_search (test_confluence_read.ConfluenceReadTests.test_unknown_space_never_issues_search) ... ok
+test_upstream_http_errors_are_safe_and_not_retried (test_confluence_read.ConfluenceReadTests.test_upstream_http_errors_are_safe_and_not_retried) ... ok
+test_user_and_token_are_required (test_confluence_read.ConfluenceReadTests.test_user_and_token_are_required) ... ok
+test_user_default_space_does_not_bypass_admin_allowlist (test_confluence_read.ConfluenceReadTests.test_user_default_space_does_not_bypass_admin_allowlist) ... ok
+
+----------------------------------------------------------------------
+Ran 51 tests in 0.230s
+
+OK
+test_ambiguous_models_require_one_selection (test_ees_apply_demo.OperatorTests.test_ambiguous_models_require_one_selection) ... ok
+test_connection_override_does_not_reuse_other_servers_model (test_ees_apply_demo.OperatorTests.test_connection_override_does_not_reuse_other_servers_model) ... ok
+test_error_report_contains_only_short_labels (test_ees_apply_demo.OperatorTests.test_error_report_contains_only_short_labels) ... ok
+test_model_list_pagination_and_unique_existing_ees (test_ees_apply_demo.OperatorTests.test_model_list_pagination_and_unique_existing_ees) ... ok
+test_token_storage_is_dpapi_and_scoped_to_webui_url (test_ees_apply_demo.OperatorTests.test_token_storage_is_dpapi_and_scoped_to_webui_url) ... ok
+test_unconfirmed_write_is_not_reported_as_zero_changes (test_ees_apply_demo.OperatorTests.test_unconfirmed_write_is_not_reported_as_zero_changes) ... ok
+test_trial_argument_rejects_abbreviation_and_release_bootstrap_mixing (test_ees_apply_demo.TrialSourceTests.test_trial_argument_rejects_abbreviation_and_release_bootstrap_mixing) ... ok
+test_trial_rejects_dirty_tracked_source (test_ees_apply_demo.TrialSourceTests.test_trial_rejects_dirty_tracked_source) ... ok
+test_trial_rejects_locally_committed_main_not_matching_fetched_main (test_ees_apply_demo.TrialSourceTests.test_trial_rejects_locally_committed_main_not_matching_fetched_main) ... ok
+test_trial_rejects_non_main_checkout (test_ees_apply_demo.TrialSourceTests.test_trial_rejects_non_main_checkout) ... ok
+test_trial_rejects_other_repository (test_ees_apply_demo.TrialSourceTests.test_trial_rejects_other_repository) ... ok
+test_trial_rejects_wrong_pinned_commit (test_ees_apply_demo.TrialSourceTests.test_trial_rejects_wrong_pinned_commit) ... ok
+test_conditional_conflict_and_unavailable_are_safe_typed_errors (test_ees_apply_demo.WebUIHTTPTests.test_conditional_conflict_and_unavailable_are_safe_typed_errors) ... ok
+test_json_utf8_and_bearer_request (test_ees_apply_demo.WebUIHTTPTests.test_json_utf8_and_bearer_request) ... ok
+test_only_get_404_means_absent_and_raw_error_stays_private (test_ees_apply_demo.WebUIHTTPTests.test_only_get_404_means_absent_and_raw_error_stays_private) ... ok
+test_redirect_never_follows_or_exposes_credentials (test_ees_apply_demo.WebUIHTTPTests.test_redirect_never_follows_or_exposes_credentials) ... ok
+test_response_size_and_url_boundaries (test_ees_apply_demo.WebUIHTTPTests.test_response_size_and_url_boundaries) ... ok
+test_retired_apply_refuses_before_transport_credentials_git_or_server_control (test_ees_apply_demo.WebUIHTTPTests.test_retired_apply_refuses_before_transport_credentials_git_or_server_control) ... ok
+test_retired_main_does_not_load_user_config_or_request_credentials (test_ees_apply_demo.WebUIHTTPTests.test_retired_main_does_not_load_user_config_or_request_credentials) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.664s
+
+OK
+test_authored_real_http_recheck_preserves_unknown_verdict_and_report_draft (test_ees_delivery_artifacts.DeliveryArtifactsTests.test_authored_real_http_recheck_preserves_unknown_verdict_and_report_draft) ... ok
+test_confirmed_list_reorder_exclusion_and_source_recheck_preserve_exact_binding (test_ees_delivery_artifacts.DeliveryArtifactsTests.test_confirmed_list_reorder_exclusion_and_source_recheck_preserve_exact_binding) ... ok
+test_partial_list_cannot_authorize_attachment_batch_or_hide_missing_crs (test_ees_delivery_artifacts.DeliveryArtifactsTests.test_partial_list_cannot_authorize_attachment_batch_or_hide_missing_crs) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 2.146s
+
+OK
+test_asset_journal_rejects_symlink_without_touching_target (test_ees_demo_assets.RetiredRegistrationTests.test_asset_journal_rejects_symlink_without_touching_target) ... ok
+test_backup_payload_preserves_user_metadata_grants_and_base_connection (test_ees_demo_assets.RetiredRegistrationTests.test_backup_payload_preserves_user_metadata_grants_and_base_connection) ... ok
+test_current_manifest_has_no_automatic_tools_models_or_skills (test_ees_demo_assets.RetiredRegistrationTests.test_current_manifest_has_no_automatic_tools_models_or_skills) ... ok
+test_historical_manifest_cannot_reactivate_registration (test_ees_demo_assets.RetiredRegistrationTests.test_historical_manifest_cannot_reactivate_registration) ... ok
+test_new_restart_repeat_and_old_journal_never_recreate_demo (test_ees_demo_assets.RetiredRegistrationTests.test_new_restart_repeat_and_old_journal_never_recreate_demo) ... ok
+test_preview_is_private_read_only_and_requires_exact_plan_approval (test_ees_demo_assets.RetirementOperatorTests.test_preview_is_private_read_only_and_requires_exact_plan_approval) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.005s
+
+OK
+test_default_registration_cannot_recreate_retired_tool_or_preset (test_ees_demo_data_tool.RetiredSyntheticDataTests.test_default_registration_cannot_recreate_retired_tool_or_preset) ... ok
+test_real_connectors_and_shared_runtime_remain_available (test_ees_demo_data_tool.RetiredSyntheticDataTests.test_real_connectors_and_shared_runtime_remain_available) ... ok
+test_retired_implementation_cannot_be_imported_or_shipped (test_ees_demo_data_tool.RetiredSyntheticDataTests.test_retired_implementation_cannot_be_imported_or_shipped) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.009s
+
+OK
+test_ai_public_surface_has_no_mutation_or_intent_endpoint (test_ees_execution_tool.ExecutionToolTests.test_ai_public_surface_has_no_mutation_or_intent_endpoint) ... ok
+test_fixed_browser_bridge_rejects_unapproved_method (test_ees_execution_tool.ExecutionToolTests.test_fixed_browser_bridge_rejects_unapproved_method) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.003s
+
+OK
+test_default_registration_cannot_recreate_retired_tool_or_preset (test_ees_specialists_tool.RetiredSpecialistTests.test_default_registration_cannot_recreate_retired_tool_or_preset) ... ok
+test_real_connectors_and_shared_runtime_remain_available (test_ees_specialists_tool.RetiredSpecialistTests.test_real_connectors_and_shared_runtime_remain_available) ... ok
+test_retired_implementation_cannot_be_imported_or_shipped (test_ees_specialists_tool.RetiredSpecialistTests.test_retired_implementation_cannot_be_imported_or_shipped) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.008s
+
+OK
+test_async_identity_receipt_and_evidence_contracts (test_ees_work_controller.IntegratedControllerTests.test_async_identity_receipt_and_evidence_contracts) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.307s
+
+OK
+test_scoped_authoring_state_and_form_contracts (test_ees_work_designer.WorkDesignerTests.test_scoped_authoring_state_and_form_contracts) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.493s
+
+OK
+test_ai_completion_kind_is_explicit_preserved_and_saved_under_current_revision (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_ai_completion_kind_is_explicit_preserved_and_saved_under_current_revision) ... ok
+test_modes_and_explicit_schedule_values_preserve_cas_without_seeding_examples (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_modes_and_explicit_schedule_values_preserve_cas_without_seeding_examples) ... ok
+test_normalized_published_definition_never_replaces_the_authoring_draft (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_normalized_published_definition_never_replaces_the_authoring_draft) ... ok
+test_preview_is_read_only_and_late_results_cannot_replace_edited_or_other_account_state (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_preview_is_read_only_and_late_results_cannot_replace_edited_or_other_account_state) ... ok
+test_read_retry_is_explicit_bounded_draft_policy_without_default_registration (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_read_retry_is_explicit_bounded_draft_policy_without_default_registration) ... ok
+test_schedule_value_change_keeps_existing_controls_for_mouse_focus_transition (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_schedule_value_change_keeps_existing_controls_for_mouse_focus_transition) ... ok
+test_start_input_edit_and_published_schedule_use_real_definition_and_explicit_delegation (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_start_input_edit_and_published_schedule_use_real_definition_and_explicit_delegation) ... ok
+test_workflow_selection_ignores_previous_response_and_preserves_private_dirty_drafts (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_workflow_selection_ignores_previous_response_and_preserves_private_dirty_drafts) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.630s
+
+OK
+test_completion_and_read_retry_validation_retains_incomplete_draft (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_completion_and_read_retry_validation_retains_incomplete_draft) ... ok
+test_confirm_list_changes_are_new_evidence_and_all_decisions_are_exact (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_confirm_list_changes_are_new_evidence_and_all_decisions_are_exact) ... ok
+test_confirm_list_second_decision_failure_rolls_back_all_writes (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_confirm_list_second_decision_failure_rolls_back_all_writes) ... ok
+test_empty_and_fully_excluded_lists_cannot_bypass_completion_policy (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_empty_and_fully_excluded_lists_cannot_bypass_completion_policy) ... ok
+test_explicit_delivery_preserves_review_but_blocks_all_successor_policies (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_explicit_delivery_preserves_review_but_blocks_all_successor_policies) ... ok
+test_invalid_or_stale_list_cannot_partially_write (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_invalid_or_stale_list_cannot_partially_write) ... ok
+test_item_verdict_confirmation_is_complete_atomic_and_partial_stays_partial (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_item_verdict_confirmation_is_complete_atomic_and_partial_stays_partial) ... ok
+test_item_verdict_confirmation_rolls_back_on_revoked_source (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_item_verdict_confirmation_rolls_back_on_revoked_source) ... ok
+test_partial_list_never_becomes_completed_or_closes_run (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_partial_list_never_becomes_completed_or_closes_run) ... ok
+test_request_capabilities_follow_current_distinct_roles (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_request_capabilities_follow_current_distinct_roles) ... ok
+test_review_autosave_and_confirmation_preserve_original_and_append_only_text (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_review_autosave_and_confirmation_preserve_original_and_append_only_text) ... ok
+test_review_current_access_revocation_redacts_state_export_and_receipt (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_review_current_access_revocation_redacts_state_export_and_receipt) ... ok
+test_review_exact_attempt_run_and_review_cas_are_independent (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_review_exact_attempt_run_and_review_cas_are_independent) ... ok
+test_schema1_concurrent_initialization_serializes_and_preserves_data (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_schema1_concurrent_initialization_serializes_and_preserves_data) ... ok
+test_schema1_upgrade_preserves_versions_runs_attempts_and_legacy_data (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_schema1_upgrade_preserves_versions_runs_attempts_and_legacy_data) ... ok
+test_schema_missing_or_malformed_review_table_is_not_silently_repaired (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_schema_missing_or_malformed_review_table_is_not_silently_repaired) ... ok
+test_schema_upgrade_exception_rolls_back_marker_and_table_creation (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_schema_upgrade_exception_rolls_back_marker_and_table_creation) ... ok
+test_stale_inputs_cannot_be_repackaged_as_review_or_list_amendment (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_stale_inputs_cannot_be_repackaged_as_review_or_list_amendment) ... ok
+test_unchanged_list_confirmation_does_not_invent_another_attempt (test_ees_work_figma_contracts.FigmaWorkspaceContracts.test_unchanged_list_confirmation_does_not_invent_another_attempt) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.504s
+
+OK
+test_close_scanner_advances_past_100_revoked_native_identities (test_ees_work_figma_schedule.ScheduleContracts.test_close_scanner_advances_past_100_revoked_native_identities) ... ok
+test_completed_predecessor_opens_next_cycle_early_only_after_human_confirmation (test_ees_work_figma_schedule.ScheduleContracts.test_completed_predecessor_opens_next_cycle_early_only_after_human_confirmation) ... ok
+test_current_source_revocation_between_retry_attempts_blocks_dispatch (test_ees_work_figma_schedule.ScheduleContracts.test_current_source_revocation_between_retry_attempts_blocks_dispatch) ... ok
+test_inflight_timeout_is_unknown_and_cannot_automatically_resend (test_ees_work_figma_schedule.ScheduleContracts.test_inflight_timeout_is_unknown_and_cannot_automatically_resend) ... ok
+test_input_change_between_attempts_stops_automatic_retry (test_ees_work_figma_schedule.ScheduleContracts.test_input_change_between_attempts_stops_automatic_retry) ... ok
+test_interleaved_human_requested_new_attempt_is_not_retried_or_overwritten (test_ees_work_figma_schedule.ScheduleContracts.test_interleaved_human_requested_new_attempt_is_not_retried_or_overwritten) ... ok
+test_lifecycle_requires_exact_published_rule_and_explicit_delegation (test_ees_work_figma_schedule.ScheduleContracts.test_lifecycle_requires_exact_published_rule_and_explicit_delegation) ... ok
+test_monotonic_deadline_ends_retry_chain_without_wall_clock_extension (test_ees_work_figma_schedule.ScheduleContracts.test_monotonic_deadline_ends_retry_chain_without_wall_clock_extension) ... ok
+test_negative_effect_evidence_is_terminal_failure_not_unknown_or_later_success (test_ees_work_figma_schedule.ScheduleContracts.test_negative_effect_evidence_is_terminal_failure_not_unknown_or_later_success) ... ok
+test_open_cycle_queue_heads_do_not_starve_independent_due_reservation (test_ees_work_figma_schedule.ScheduleContracts.test_open_cycle_queue_heads_do_not_starve_independent_due_reservation) ... ok
+test_preview_is_unsaved_authorized_and_never_reserves_or_shifts_holidays (test_ees_work_figma_schedule.ScheduleContracts.test_preview_is_unsaved_authorized_and_never_reserves_or_shifts_holidays) ... ok
+test_queued_slot_rechecks_current_native_identity_and_delegation (test_ees_work_figma_schedule.ScheduleContracts.test_queued_slot_rechecks_current_native_identity_and_delegation) ... ok
+test_retry_is_explicit_bounded_and_lost_response_receipt_never_restarts_budget (test_ees_work_figma_schedule.ScheduleContracts.test_retry_is_explicit_bounded_and_lost_response_receipt_never_restarts_budget) ... ok
+test_retry_schema_limits_and_read_only_function_allowlist (test_ees_work_figma_schedule.ScheduleContracts.test_retry_schema_limits_and_read_only_function_allowlist) ... ok
+test_retry_success_retains_failed_evidence_and_waits_for_human (test_ees_work_figma_schedule.ScheduleContracts.test_retry_success_retains_failed_evidence_and_waits_for_human) ... ok
+test_saved_cycle_keeps_version_rule_and_dates_after_new_publication (test_ees_work_figma_schedule.ScheduleContracts.test_saved_cycle_keeps_version_rule_and_dates_after_new_publication) ... ok
+test_schedule_opens_while_previous_cycle_remains_open_and_restart_deduplicates (test_ees_work_figma_schedule.ScheduleContracts.test_schedule_opens_while_previous_cycle_remains_open_and_restart_deduplicates) ... ok
+test_unknown_effect_keeps_unresolved_request_and_never_resends (test_ees_work_figma_schedule.ScheduleContracts.test_unknown_effect_keeps_unresolved_request_and_never_resends) ... ok
+test_unknown_partial_auth_rate_limit_and_untrusted_flags_never_retry (test_ees_work_figma_schedule.ScheduleContracts.test_unknown_partial_auth_rate_limit_and_untrusted_flags_never_retry) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 1.623s
+
+OK
+test_bad_identity_version_attempt_snapshot_never_falls_back (test_ees_work_history_reference.HistoricalReferenceTests.test_bad_identity_version_attempt_snapshot_never_falls_back) ... ok
+test_current_access_denial_and_evidence_revocation_hide_old_body (test_ees_work_history_reference.HistoricalReferenceTests.test_current_access_denial_and_evidence_revocation_hide_old_body) ... ok
+test_exact_old_attempt_no_current_settings_private_state_or_mutation (test_ees_work_history_reference.HistoricalReferenceTests.test_exact_old_attempt_no_current_settings_private_state_or_mutation) ... ok
+test_explicit_target_override_and_malformed_reference_fail_closed (test_ees_work_history_reference.HistoricalReferenceTests.test_explicit_target_override_and_malformed_reference_fail_closed) ... ok
+test_historical_ai_cannot_propose_or_navigate_even_with_event_handler (test_ees_work_history_reference.HistoricalReferenceTests.test_historical_ai_cannot_propose_or_navigate_even_with_event_handler) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.012s
+
+OK
+test_actual_native_normalizer_drives_common_items_and_completion (test_ees_work_operations.RuntimeTests.test_actual_native_normalizer_drives_common_items_and_completion) ... ok
+test_ai_per_item_suggestions_are_not_human_decisions_and_keep_source_acl (test_ees_work_operations.RuntimeTests.test_ai_per_item_suggestions_are_not_human_decisions_and_keep_source_acl) ... ok
+test_calendar_timezones_month_end_and_dst_are_explicit (test_ees_work_operations.RuntimeTests.test_calendar_timezones_month_end_and_dst_are_explicit) ... ok
+test_change_request_cannot_use_generic_human_completion (test_ees_work_operations.RuntimeTests.test_change_request_cannot_use_generic_human_completion) ... ok
+test_confirmed_list_binding_freezes_actual_ids_and_denies_unconfirmed (test_ees_work_operations.RuntimeTests.test_confirmed_list_binding_freezes_actual_ids_and_denies_unconfirmed) ... ok
+test_daily_schedule_unique_across_two_workers_and_no_delegation_block (test_ees_work_operations.RuntimeTests.test_daily_schedule_unique_across_two_workers_and_no_delegation_block) ... ok
+test_delegated_schedule_actual_worker_pins_version_and_does_not_repeat (test_ees_work_operations.RuntimeTests.test_delegated_schedule_actual_worker_pins_version_and_does_not_repeat) ... ok
+test_direct_exception_requires_owned_contract_and_is_never_dispatched_to_ees (test_ees_work_operations.RuntimeTests.test_direct_exception_requires_owned_contract_and_is_never_dispatched_to_ees) ... ok
+test_effect_probe_rechecks_access_after_status_read (test_ees_work_operations.RuntimeTests.test_effect_probe_rechecks_access_after_status_read) ... ok
+test_emergency_start_enqueues_read_and_never_replays_on_restart (test_ees_work_operations.RuntimeTests.test_emergency_start_enqueues_read_and_never_replays_on_restart) ... ok
+test_future_job_time_and_same_cycle_restore (test_ees_work_operations.RuntimeTests.test_future_job_time_and_same_cycle_restore) ... ok
+test_input_ai_acl_or_revision_change_rejects_late_suggestion (test_ees_work_operations.RuntimeTests.test_input_ai_acl_or_revision_change_rejects_late_suggestion) ... ok
+test_input_ai_dynamic_choices_use_private_draft_and_merged_proposal (test_ees_work_operations.RuntimeTests.test_input_ai_dynamic_choices_use_private_draft_and_merged_proposal) ... ok
+test_input_ai_person_preview_requires_current_native_identity (test_ees_work_operations.RuntimeTests.test_input_ai_person_preview_requires_current_native_identity) ... ok
+test_input_ai_preview_is_declared_scoped_and_never_saved (test_ees_work_operations.RuntimeTests.test_input_ai_preview_is_declared_scoped_and_never_saved) ... ok
+test_one_approval_revoked_identity_blocks_final_dispatch (test_ees_work_operations.RuntimeTests.test_one_approval_revoked_identity_blocks_final_dispatch) ... ok
+test_operations_partial_schema_never_recreates_lost_history (test_ees_work_operations.RuntimeTests.test_operations_partial_schema_never_recreates_lost_history) ... ok
+test_partial_never_success_and_retry_keeps_previous_attempt (test_ees_work_operations.RuntimeTests.test_partial_never_success_and_retry_keeps_previous_attempt) ... ok
+test_private_schedule_not_visible_to_other_system_admin (test_ees_work_operations.RuntimeTests.test_private_schedule_not_visible_to_other_system_admin) ... ok
+test_queued_schedule_delegation_revocation_is_current (test_ees_work_operations.RuntimeTests.test_queued_schedule_delegation_revocation_is_current) ... ok
+test_read_attempt_snapshot_real_dispatch_and_human_completion (test_ees_work_operations.RuntimeTests.test_read_attempt_snapshot_real_dispatch_and_human_completion) ... ok
+test_receipt_read_rechecks_group_after_native_await (test_ees_work_operations.RuntimeTests.test_receipt_read_rechecks_group_after_native_await) ... ok
+test_request_id_different_payload_atomic_conflict (test_ees_work_operations.RuntimeTests.test_request_id_different_payload_atomic_conflict) ... ok
+test_request_output_schema_draft_is_preserved_but_invalid_submit_rejected (test_ees_work_operations.RuntimeTests.test_request_output_schema_draft_is_preserved_but_invalid_submit_rejected) ... ok
+test_request_reason_is_separate_bound_metadata_not_an_ees_argument (test_ees_work_operations.RuntimeTests.test_request_reason_is_separate_bound_metadata_not_an_ees_argument) ... ok
+test_request_schema_rejects_typed_value_substitutions (test_ees_work_operations.RuntimeTests.test_request_schema_rejects_typed_value_substitutions) ... ok
+test_request_target_cannot_override_saved_inputs (test_ees_work_operations.RuntimeTests.test_request_target_cannot_override_saved_inputs) ... ok
+test_schedule_identity_and_current_tool_revocation (test_ees_work_operations.RuntimeTests.test_schedule_identity_and_current_tool_revocation) ... ok
+test_scheduled_read_lease_loss_never_redispatches (test_ees_work_operations.RuntimeTests.test_scheduled_read_lease_loss_never_redispatches) ... ok
+test_scope_current_identity_and_lost_lease_never_dispatch (test_ees_work_operations.RuntimeTests.test_scope_current_identity_and_lost_lease_never_dispatch) ... ok
+test_scope_restarts_and_waits_for_human_then_same_dependency_executor (test_ees_work_operations.RuntimeTests.test_scope_restarts_and_waits_for_human_then_same_dependency_executor) ... ok
+test_secret_inputs_rejected_before_storage (test_ees_work_operations.RuntimeTests.test_secret_inputs_rejected_before_storage) ... ok
+test_tool_draft_schema_review_and_current_reference (test_ees_work_operations.RuntimeTests.test_tool_draft_schema_review_and_current_reference) ... ok
+test_two_distinct_current_approvers_and_content_change_invalidates (test_ees_work_operations.RuntimeTests.test_two_distinct_current_approvers_and_content_change_invalidates) ... ok
+test_two_prepared_requests_cannot_dispatch_same_job_twice (test_ees_work_operations.RuntimeTests.test_two_prepared_requests_cannot_dispatch_same_job_twice) ... ok
+test_unconfigured_connector_explicit_block_and_no_fake_success (test_ees_work_operations.RuntimeTests.test_unconfigured_connector_explicit_block_and_no_fake_success) ... ok
+test_unknown_not_redispatched_reconciliation_and_effect_separate (test_ees_work_operations.RuntimeTests.test_unknown_not_redispatched_reconciliation_and_effect_separate) ... ok
+test_zero_approval_still_requires_short_lived_actor_bound_intent (test_ees_work_operations.RuntimeTests.test_zero_approval_still_requires_short_lived_actor_bound_intent) ... ok
+
+----------------------------------------------------------------------
+Ran 38 tests in 0.827s
+
+OK
+test_typed_draft_authoring_and_result_contracts (test_ees_work_panel.IntegratedPanelTests.test_typed_draft_authoring_and_result_contracts) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.926s
+
+OK
+test_concurrent_draft_change_during_model_call_requires_new_context (test_ees_work_routes.WorkRouteTests.test_concurrent_draft_change_during_model_call_requires_new_context) ... ok
+test_current_authenticated_actor_scope_applies_to_read_and_write (test_ees_work_routes.WorkRouteTests.test_current_authenticated_actor_scope_applies_to_read_and_write) ... ok
+test_legacy_history_read_preserves_database_and_enforces_owner (test_ees_work_routes.WorkRouteTests.test_legacy_history_read_preserves_database_and_enforces_owner) ... ok
+test_retired_routes_reject_instead_of_recreate_demo_or_mutate_old_records (test_ees_work_routes.WorkRouteTests.test_retired_routes_reject_instead_of_recreate_demo_or_mutate_old_records) ... ok
+test_revoked_actor_during_model_call_does_not_receive_proposal (test_ees_work_routes.WorkRouteTests.test_revoked_actor_during_model_call_does_not_receive_proposal) ... ok
+test_unavailable_model_and_secret_or_cross_target_proposal_fail_before_call (test_ees_work_routes.WorkRouteTests.test_unavailable_model_and_secret_or_cross_target_proposal_fail_before_call) ... ok
+test_unsaved_proposal_exact_context_server_source_and_no_database_write (test_ees_work_routes.WorkRouteTests.test_unsaved_proposal_exact_context_server_source_and_no_database_write) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.260s
+
+OK
+test_native_mount_scroll_keyboard_and_result_contracts (test_ees_work_v4.IntegratedLayoutTests.test_native_mount_scroll_keyboard_and_result_contracts) ... 
+  test_native_mount_scroll_keyboard_and_result_contracts (test_ees_work_v4.IntegratedLayoutTests.test_native_mount_scroll_keyboard_and_result_contracts) (script='test_ees_v4_layout.cjs') ... FAIL
+
+======================================================================
+FAIL: test_native_mount_scroll_keyboard_and_result_contracts (test_ees_work_v4.IntegratedLayoutTests.test_native_mount_scroll_keyboard_and_result_contracts) (script='test_ees_v4_layout.cjs')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_work_v4.py", line 26, in test_native_mount_scroll_keyboard_and_result_contracts
+    self.assertEqual(result.returncode, 0, output)
+AssertionError: 1 != 0 : TAP version 13
+# Subtest: Native conversation remains the original center DOM while the work panel mounts after it
+not ok 1 - Native conversation remains the original center DOM while the work panel mounts after it
+  ---
+  duration_ms: 4.162427
+  type: 'test'
+  location: '/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:22:1'
+  failureType: 'testCodeFailure'
+  error: 'window.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    createWorkView (evalmachine.<anonymous>:343:10)
+    evalmachine.<anonymous>:1:1
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+    TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:22:127)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.start (node:internal/test_runner/test:1242:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+  ...
+# Subtest: closing or changing work mode preserves Native chat and the authoring mount boundary
+not ok 2 - closing or changing work mode preserves Native chat and the authoring mount boundary
+  ---
+  duration_ms: 1.346958
+  type: 'test'
+  location: '/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:23:1'
+  failureType: 'testCodeFailure'
+  error: 'window.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    createWorkView (evalmachine.<anonymous>:343:10)
+    evalmachine.<anonymous>:1:1
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+    TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:23:117)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+  ...
+# Subtest: panel scroll restores per personal target and never writes a shared run selection
+not ok 3 - panel scroll restores per personal target and never writes a shared run selection
+  ---
+  duration_ms: 1.204684
+  type: 'test'
+  location: '/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:24:1'
+  failureType: 'testCodeFailure'
+  error: 'window.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    createWorkView (evalmachine.<anonymous>:343:10)
+    evalmachine.<anonymous>:1:1
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+    TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:24:114)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+  ...
+# Subtest: confirmation dialog starts on cancel and Escape closure never accepts the command
+ok 4 - confirmation dialog starts on cancel and Escape closure never accepts the command
+  ---
+  duration_ms: 1.277273
+  type: 'test'
+  ...
+# Subtest: workspace refresh retains active input identity and text selection without taking Native focus
+not ok 5 - workspace refresh retains active input identity and text selection without taking Native focus
+  ---
+  duration_ms: 1.300058
+  type: 'test'
+  location: '/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:28:1'
+  failureType: 'testCodeFailure'
+  error: 'window.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    createWorkView (evalmachine.<anonymous>:343:10)
+    evalmachine.<anonymous>:1:1
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+    TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:28:127)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+  ...
+# Subtest: published procedure overview opens before a run exists without dereferencing run state
+not ok 6 - published procedure overview opens before a run exists without dereferencing run state
+  ---
+  duration_ms: 1.190312
+  type: 'test'
+  location: '/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:31:1'
+  failureType: 'testCodeFailure'
+  error: 'window.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    createWorkView (evalmachine.<anonymous>:343:10)
+    evalmachine.<anonymous>:1:1
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+    TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:31:119)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+  ...
+# Subtest: workspace navigation separates managed-system authoring from work scope and actual tasks
+not ok 7 - workspace navigation separates managed-system authoring from work scope and actual tasks
+  ---
+  duration_ms: 2.816301
+  type: 'test'
+  location: '/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:34:1'
+  failureType: 'testCodeFailure'
+  error: 'window.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    createWorkView (evalmachine.<anonymous>:343:10)
+    evalmachine.<anonymous>:1:1
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+    TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:34:121)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+  ...
+# Subtest: polling preserves an explicit model choice only for its actor and work target while revocation clears it
+not ok 8 - polling preserves an explicit model choice only for its actor and work target while revocation clears it
+  ---
+  duration_ms: 1.267549
+  type: 'test'
+  location: '/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:36:1'
+  failureType: 'testCodeFailure'
+  error: 'window.addEventListener is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    createWorkView (evalmachine.<anonymous>:343:10)
+    evalmachine.<anonymous>:1:1
+    Script.runInContext (node:vm:149:12)
+    Object.runInContext (node:vm:301:6)
+    run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+    TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:37:21)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 1
+# fail 7
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 127.339918
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.489s
+
+FAILED (failures=1)
+test_all_eight_types_valid_and_invalid (test_ees_work_workspace.DefinitionTests.test_all_eight_types_valid_and_invalid) ... ok
+test_condition_three_valued_logic (test_ees_work_workspace.DefinitionTests.test_condition_three_valued_logic) ... ok
+test_business_calendar_missing_does_not_invent_earlier_date (test_ees_work_workspace.WorkspaceTests.test_business_calendar_missing_does_not_invent_earlier_date) ... ok
+test_claimant_cannot_release_running_or_unresolved_external_request (test_ees_work_workspace.WorkspaceTests.test_claimant_cannot_release_running_or_unresolved_external_request) ... ok
+test_closed_run_is_read_only_and_historical_progress_survives_restart (test_ees_work_workspace.WorkspaceTests.test_closed_run_is_read_only_and_historical_progress_survives_restart) ... ok
+test_common_options_use_current_factory_acl (test_ees_work_workspace.WorkspaceTests.test_common_options_use_current_factory_acl) ... ok
+test_concurrent_initialization_preserves_one_empty_schema (test_ees_work_workspace.WorkspaceTests.test_concurrent_initialization_preserves_one_empty_schema) ... ok
+test_copy_delivery_pipeline_remaps_only_definition_owned_references (test_ees_work_workspace.WorkspaceTests.test_copy_delivery_pipeline_remaps_only_definition_owned_references) ... ok
+test_cross_job_deadline_setting_invalidates_decision_and_downstream (test_ees_work_workspace.WorkspaceTests.test_cross_job_deadline_setting_invalidates_decision_and_downstream) ... ok
+test_deadline_timezone_boundary_calendar_offset_and_attempt_snapshot (test_ees_work_workspace.WorkspaceTests.test_deadline_timezone_boundary_calendar_offset_and_attempt_snapshot) ... ok
+test_draft_conflict_receipt_and_atomic_invalid_publish (test_ees_work_workspace.WorkspaceTests.test_draft_conflict_receipt_and_atomic_invalid_publish) ... ok
+test_dynamic_choice_late_response_cannot_cross_input_revision (test_ees_work_workspace.WorkspaceTests.test_dynamic_choice_late_response_cannot_cross_input_revision) ... ok
+test_dynamic_invalid_choice_partial_and_revocation_never_fall_back_static (test_ees_work_workspace.WorkspaceTests.test_dynamic_invalid_choice_partial_and_revocation_never_fall_back_static) ... ok
+test_dynamic_native_choices_bind_dependencies_and_snapshot_actual_options (test_ees_work_workspace.WorkspaceTests.test_dynamic_native_choices_bind_dependencies_and_snapshot_actual_options) ... ok
+test_empty_initializer_restart_and_no_implicit_native_access (test_ees_work_workspace.WorkspaceTests.test_empty_initializer_restart_and_no_implicit_native_access) ... ok
+test_explicit_claimant_release_preserves_evidence_and_allows_group_reclaim (test_ees_work_workspace.WorkspaceTests.test_explicit_claimant_release_preserves_evidence_and_allows_group_reclaim) ... ok
+test_export_excludes_personal_ui_and_private_chat_links (test_ees_work_workspace.WorkspaceTests.test_export_excludes_personal_ui_and_private_chat_links) ... ok
+test_factory_manager_updates_only_own_override (test_ees_work_workspace.WorkspaceTests.test_factory_manager_updates_only_own_override) ... ok
+test_factory_scoped_field_never_accepts_default_or_run_values (test_ees_work_workspace.WorkspaceTests.test_factory_scoped_field_never_accepts_default_or_run_values) ... ok
+test_factory_specific_members_do_not_gain_all_factory_authority (test_ees_work_workspace.WorkspaceTests.test_factory_specific_members_do_not_gain_all_factory_authority) ... ok
+test_factory_unknown_is_blocked_not_excluded_and_conditions_safe (test_ees_work_workspace.WorkspaceTests.test_factory_unknown_is_blocked_not_excluded_and_conditions_safe) ... ok
+test_group_task_claim_is_atomic_and_membership_revocation_blocks (test_ees_work_workspace.WorkspaceTests.test_group_task_claim_is_atomic_and_membership_revocation_blocks) ... ok
+test_human_confirmation_retry_invalidates_only_dependents_and_history (test_ees_work_workspace.WorkspaceTests.test_human_confirmation_retry_invalidates_only_dependents_and_history) ... ok
+test_inherited_stage_dependencies_cannot_publish_a_job_cycle (test_ees_work_workspace.WorkspaceTests.test_inherited_stage_dependencies_cannot_publish_a_job_cycle) ... ok
+test_input_change_during_execution_preserves_snapshot_and_requires_recheck (test_ees_work_workspace.WorkspaceTests.test_input_change_during_execution_preserves_snapshot_and_requires_recheck) ... ok
+test_judgment_rules_are_validated_and_missing_operational_policies_are_advisory (test_ees_work_workspace.WorkspaceTests.test_judgment_rules_are_validated_and_missing_operational_policies_are_advisory) ... ok
+test_list_amendment_creates_new_evidence_preserves_original_and_reason (test_ees_work_workspace.WorkspaceTests.test_list_amendment_creates_new_evidence_preserves_original_and_reason) ... ok
+test_manual_execution_cannot_bypass_published_trigger (test_ees_work_workspace.WorkspaceTests.test_manual_execution_cannot_bypass_published_trigger) ... ok
+test_migration_preserves_legacy_bytes_and_rolls_back_partial_failure (test_ees_work_workspace.WorkspaceTests.test_migration_preserves_legacy_bytes_and_rolls_back_partial_failure) ... ok
+test_missing_schema_is_not_silently_initialized (test_ees_work_workspace.WorkspaceTests.test_missing_schema_is_not_silently_initialized) ... ok
+test_native_authority_revoked_during_registry_await_cannot_publish (test_ees_work_workspace.WorkspaceTests.test_native_authority_revoked_during_registry_await_cannot_publish) ... ok
+test_native_id_validation_and_corrupt_draft_are_not_replaced (test_ees_work_workspace.WorkspaceTests.test_native_id_validation_and_corrupt_draft_are_not_replaced) ... ok
+test_native_skill_revision_is_checked_at_publication_and_body_not_copied (test_ees_work_workspace.WorkspaceTests.test_native_skill_revision_is_checked_at_publication_and_body_not_copied) ... ok
+test_native_source_permission_revocation_redacts_owned_history_and_blocks_decision (test_ees_work_workspace.WorkspaceTests.test_native_source_permission_revocation_redacts_owned_history_and_blocks_decision) ... ok
+test_old_waiting_result_cannot_be_confirmed_after_upstream_retry (test_ees_work_workspace.WorkspaceTests.test_old_waiting_result_cannot_be_confirmed_after_upstream_retry) ... ok
+test_on_demand_factory_start_is_atomic_and_other_scopes_remain_available (test_ees_work_workspace.WorkspaceTests.test_on_demand_factory_start_is_atomic_and_other_scopes_remain_available) ... ok
+test_option_and_tool_input_bindings_require_current_job_declaration (test_ees_work_workspace.WorkspaceTests.test_option_and_tool_input_bindings_require_current_job_declaration) ... ok
+test_partial_result_item_decisions_cannot_create_success (test_ees_work_workspace.WorkspaceTests.test_partial_result_item_decisions_cannot_create_success) ... ok
+test_person_field_requires_actual_native_id (test_ees_work_workspace.WorkspaceTests.test_person_field_requires_actual_native_id) ... ok
+test_private_runs_chat_links_and_ui_state_are_isolated (test_ees_work_workspace.WorkspaceTests.test_private_runs_chat_links_and_ui_state_are_isolated) ... ok
+test_publish_lost_response_replay_after_revision_changed_is_idempotent (test_ees_work_workspace.WorkspaceTests.test_publish_lost_response_replay_after_revision_changed_is_idempotent) ... ok
+test_report_all_resolved_requires_actual_current_decisions_and_never_approves_source (test_ees_work_workspace.WorkspaceTests.test_report_all_resolved_requires_actual_current_decisions_and_never_approves_source) ... ok
+test_selected_workflow_run_and_scope_must_describe_same_target (test_ees_work_workspace.WorkspaceTests.test_selected_workflow_run_and_scope_must_describe_same_target) ... ok
+test_setting_precedence_false_zero_empty_and_attempt_snapshot (test_ees_work_workspace.WorkspaceTests.test_setting_precedence_false_zero_empty_and_attempt_snapshot) ... ok
+test_settings_change_reopens_active_only_and_frozen_history_uses_old_value (test_ees_work_workspace.WorkspaceTests.test_settings_change_reopens_active_only_and_frozen_history_uses_old_value) ... ok
+test_stale_per_item_decision_cannot_confirm_new_attempt (test_ees_work_workspace.WorkspaceTests.test_stale_per_item_decision_cannot_confirm_new_attempt) ... ok
+test_system_scope_is_visible_across_factory_selection_without_broadening_acl (test_ees_work_workspace.WorkspaceTests.test_system_scope_is_visible_across_factory_selection_without_broadening_acl) ... ok
+test_transitive_source_retry_keeps_inflight_unknown_as_unknown (test_ees_work_workspace.WorkspaceTests.test_transitive_source_retry_keeps_inflight_unknown_as_unknown) ... ok
+test_two_connections_compete_for_one_group_task_without_double_claim (test_ees_work_workspace.WorkspaceTests.test_two_connections_compete_for_one_group_task_without_double_claim) ... ok
+test_upstream_retry_while_dependent_runs_preserves_result_but_requires_review (test_ees_work_workspace.WorkspaceTests.test_upstream_retry_while_dependent_runs_preserves_result_but_requires_review) ... ok
+test_versions_are_immutable_and_open_run_uses_original (test_ees_work_workspace.WorkspaceTests.test_versions_are_immutable_and_open_run_uses_original) ... ok
+
+----------------------------------------------------------------------
+Ran 51 tests in 0.909s
+
+OK
+test_add_reorder_move_and_remove_nodes_with_correct_links_are_valid (test_ees_workflow.DefinitionValidationTests.test_add_reorder_move_and_remove_nodes_with_correct_links_are_valid) ... ok
+test_cycles_missing_references_wrong_parent_duplicates_and_common_policy (test_ees_workflow.DefinitionValidationTests.test_cycles_missing_references_wrong_parent_duplicates_and_common_policy) ... ok
+test_explicit_historical_fixture_preserves_pre_split_bytes_and_order (test_ees_workflow.DefinitionValidationTests.test_explicit_historical_fixture_preserves_pre_split_bytes_and_order) ... ok
+test_malformed_editor_fields_return_errors_instead_of_crashing (test_ees_workflow.DefinitionValidationTests.test_malformed_editor_fields_return_errors_instead_of_crashing) ... ok
+test_product_default_is_empty_and_independent_of_historical_fixture (test_ees_workflow.DefinitionValidationTests.test_product_default_is_empty_and_independent_of_historical_fixture) ... ok
+test_retired_catalog_writers_exist_only_in_pinned_test_fixture (test_ees_workflow.DefinitionValidationTests.test_retired_catalog_writers_exist_only_in_pinned_test_fixture) ... ok
+test_validation_error_order_and_common_policy_message_are_unchanged (test_ees_workflow.DefinitionValidationTests.test_validation_error_order_and_common_policy_message_are_unchanged) ... ok
+test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads (test_ees_workflow.WorkflowPreservationTests.test_existing_published_drafts_history_and_skill_snapshot_survive_start_and_reads) ... skipped 'EES_TEST_LEGACY_WORKFLOW_WHEEL must identify the supported ees.10 wheel. Required in the release gate.'
+test_routes_use_verified_identity_and_no_store (test_ees_workflow.WorkflowRouteTests.test_routes_use_verified_identity_and_no_store) ... ok
+test_actual_draft_content_needs_review_before_completion (test_ees_workflow.WorkflowTests.test_actual_draft_content_needs_review_before_completion) ... ok
+test_additive_receipts_keep_legacy_read_write_and_new_replay_compatible (test_ees_workflow.WorkflowTests.test_additive_receipts_keep_legacy_read_write_and_new_replay_compatible) ... ok
+test_case_summaries_keep_factory_history_and_snapshot_node_progress (test_ees_workflow.WorkflowTests.test_case_summaries_keep_factory_history_and_snapshot_node_progress) ... ok
+test_case_tree_uses_frozen_structure_after_catalog_removes_a_job (test_ees_workflow.WorkflowTests.test_case_tree_uses_frozen_structure_after_catalog_removes_a_job) ... ok
+test_completed_execution_blocks_result_changes_and_keeps_new_runs_separate (test_ees_workflow.WorkflowTests.test_completed_execution_blocks_result_changes_and_keeps_new_runs_separate) ... ok
+test_concurrent_first_requests_do_not_duplicate_case_or_execution (test_ees_workflow.WorkflowTests.test_concurrent_first_requests_do_not_duplicate_case_or_execution) ... ok
+test_current_identity_and_user_ownership_cannot_be_forged (test_ees_workflow.WorkflowTests.test_current_identity_and_user_ownership_cannot_be_forged) ... ok
+test_exact_run_retry_returns_current_state_without_reexecuting_or_reselecting (test_ees_workflow.WorkflowTests.test_exact_run_retry_returns_current_state_without_reexecuting_or_reselecting) ... ok
+test_existing_chat_ownership_and_one_case_per_chat_are_enforced (test_ees_workflow.WorkflowTests.test_existing_chat_ownership_and_one_case_per_chat_are_enforced) ... ok
+test_external_tool_reference_is_blocked_and_never_executed_as_mock (test_ees_workflow.WorkflowTests.test_external_tool_reference_is_blocked_and_never_executed_as_mock) ... ok
+test_first_failed_action_keeps_case_and_replay_does_not_create_again (test_ees_workflow.WorkflowTests.test_first_failed_action_keeps_case_and_replay_does_not_create_again) ... ok
+test_first_input_write_is_atomic_and_replays_after_restart (test_ees_workflow.WorkflowTests.test_first_input_write_is_atomic_and_replays_after_restart) ... ok
+test_first_write_completed_scope_requires_explicit_new_case (test_ees_workflow.WorkflowTests.test_first_write_completed_scope_requires_explicit_new_case) ... ok
+test_first_write_requires_existing_scope_choice_and_hides_inaccessible_candidates (test_ees_workflow.WorkflowTests.test_first_write_requires_existing_scope_choice_and_hides_inaccessible_candidates) ... ok
+test_history_read_does_not_change_current_selection_revision_or_timestamps (test_ees_workflow.WorkflowTests.test_history_read_does_not_change_current_selection_revision_or_timestamps) ... ok
+test_inaccessible_linked_chats_are_omitted_from_read_and_action_summaries (test_ees_workflow.WorkflowTests.test_inaccessible_linked_chats_are_omitted_from_read_and_action_summaries) ... ok
+test_incomplete_draft_can_save_but_cannot_execute_or_publish (test_ees_workflow.WorkflowTests.test_incomplete_draft_can_save_but_cannot_execute_or_publish) ... ok
+test_initial_catalog_has_no_fabricated_progress_or_chat (test_ees_workflow.WorkflowTests.test_initial_catalog_has_no_fabricated_progress_or_chat) ... ok
+test_input_change_invalidates_only_dependent_results_preserving_evidence (test_ees_workflow.WorkflowTests.test_input_change_invalidates_only_dependent_results_preserving_evidence) ... ok
+test_legacy_creation_timestamp_stays_unknown_without_a_read_migration (test_ees_workflow.WorkflowTests.test_legacy_creation_timestamp_stays_unknown_without_a_read_migration) ... ok
+test_malformed_action_create_and_unreadable_draft_are_rejected (test_ees_workflow.WorkflowTests.test_malformed_action_create_and_unreadable_draft_are_rejected) ... ok
+test_management_counts_use_all_descendant_jobs_and_exclude_inapplicable (test_ees_workflow.WorkflowTests.test_management_counts_use_all_descendant_jobs_and_exclude_inapplicable) ... ok
+test_management_metrics_separate_waiting_review_problems_and_ready_jobs (test_ees_workflow.WorkflowTests.test_management_metrics_separate_waiting_review_problems_and_ready_jobs) ... ok
+test_management_readiness_checks_connection_and_current_skill_access_without_writing (test_ees_workflow.WorkflowTests.test_management_readiness_checks_connection_and_current_skill_access_without_writing) ... ok
+test_multiple_checks_failure_skip_retry_and_history_are_persistent (test_ees_workflow.WorkflowTests.test_multiple_checks_failure_skip_retry_and_history_are_persistent) ... ok
+test_new_published_fixture_freezes_existing_case (test_ees_workflow.WorkflowTests.test_new_published_fixture_freezes_existing_case) ... ok
+test_parent_can_skip_failed_jobs_while_running_independent_work (test_ees_workflow.WorkflowTests.test_parent_can_skip_failed_jobs_while_running_independent_work) ... ok
+test_parent_execution_keeps_evidence_when_sibling_input_is_missing (test_ees_workflow.WorkflowTests.test_parent_execution_keeps_evidence_when_sibling_input_is_missing) ... ok
+test_parent_execution_never_bulk_confirms_manual_jobs (test_ees_workflow.WorkflowTests.test_parent_execution_never_bulk_confirms_manual_jobs) ... ok
+test_pending_case_binds_after_chat_creation_and_survives_restart (test_ees_workflow.WorkflowTests.test_pending_case_binds_after_chat_creation_and_survives_restart) ... ok
+test_prerequisites_manual_confirmation_and_missing_input_do_not_fake_success (test_ees_workflow.WorkflowTests.test_prerequisites_manual_confirmation_and_missing_input_do_not_fake_success) ... ok
+test_process_boundary_and_country_conditions (test_ees_workflow.WorkflowTests.test_process_boundary_and_country_conditions) ... ok
+test_replay_rechecks_user_and_current_linked_chat_access (test_ees_workflow.WorkflowTests.test_replay_rechecks_user_and_current_linked_chat_access) ... ok
+test_request_and_published_version_guards_precede_creation (test_ees_workflow.WorkflowTests.test_request_and_published_version_guards_precede_creation) ... ok
+test_selected_context_inherits_instructions_and_current_accessible_skill (test_ees_workflow.WorkflowTests.test_selected_context_inherits_instructions_and_current_accessible_skill) ... ok
+test_selection_does_not_execute_and_stale_revision_is_rejected (test_ees_workflow.WorkflowTests.test_selection_does_not_execute_and_stale_revision_is_rejected) ... ok
+test_selection_projects_external_skills_only_with_current_access (test_ees_workflow.WorkflowTests.test_selection_projects_external_skills_only_with_current_access) ... ok
+test_selection_read_does_not_adopt_other_chat_case_or_write (test_ees_workflow.WorkflowTests.test_selection_read_does_not_adopt_other_chat_case_or_write) ... ok
+test_selection_validates_scope_version_and_access_but_allows_excluded_read (test_ees_workflow.WorkflowTests.test_selection_validates_scope_version_and_access_but_allows_excluded_read) ... ok
+test_unconnected_job_does_not_claim_a_simulation_ran (test_ees_workflow.WorkflowTests.test_unconnected_job_does_not_claim_a_simulation_ran) ... ok
+test_unexpected_failure_rolls_back_case_receipt_and_execution (test_ees_workflow.WorkflowTests.test_unexpected_failure_rolls_back_case_receipt_and_execution) ... ok
+test_v4_action_record_confirms_persisted_native_status_not_socket_delivery (test_ees_workflow.WorkflowTests.test_v4_action_record_confirms_persisted_native_status_not_socket_delivery) ... ok
+test_v4_action_record_read_hides_revoked_inherited_skill_and_fails_closed (test_ees_workflow.WorkflowTests.test_v4_action_record_read_hides_revoked_inherited_skill_and_fails_closed) ... ok
+test_v4_action_records_read_only_owned_assistant_latest_sanitized_history (test_ees_workflow.WorkflowTests.test_v4_action_records_read_only_owned_assistant_latest_sanitized_history) ... ok
+test_v4_input_draft_rechecks_inherited_skill_permission_for_case_and_preview (test_ees_workflow.WorkflowTests.test_v4_input_draft_rechecks_inherited_skill_permission_for_case_and_preview) ... ok
+test_v4_input_proposal_checks_scope_schema_and_access_without_writes (test_ees_workflow.WorkflowTests.test_v4_input_proposal_checks_scope_schema_and_access_without_writes) ... ok
+test_v4_native_undo_status_requires_actual_same_message_receipt (test_ees_workflow.WorkflowTests.test_v4_native_undo_status_requires_actual_same_message_receipt) ... ok
+
+----------------------------------------------------------------------
+Ran 56 tests in 1.128s
+
+OK (skipped=1)
+test_approval_change_between_validation_and_publish_preserves_draft (test_ees_workflow_contract.ContractAuthoringTests.test_approval_change_between_validation_and_publish_preserves_draft) ... ok
+test_p_save_publish_exact_approval_and_reference_remapping (test_ees_workflow_contract.ContractAuthoringTests.test_p_save_publish_exact_approval_and_reference_remapping) ... ok
+test_arbitrary_schema_code_and_reserved_arguments_rejected (test_ees_workflow_contract.ContractTests.test_arbitrary_schema_code_and_reserved_arguments_rejected) ... ok
+test_bindings_use_stored_results_and_only_explicit_transform (test_ees_workflow_contract.ContractTests.test_bindings_use_stored_results_and_only_explicit_transform) ... ok
+test_bounded_page_completion_and_real_missing_data_are_distinct (test_ees_workflow_contract.ContractTests.test_bounded_page_completion_and_real_missing_data_are_distinct) ... ok
+test_copy_remaps_evidence_and_candidate_binding (test_ees_workflow_contract.ContractTests.test_copy_remaps_evidence_and_candidate_binding) ... ok
+test_multiple_candidates_wait_and_only_actual_selection_resumes (test_ees_workflow_contract.ContractTests.test_multiple_candidates_wait_and_only_actual_selection_resumes) ... ok
+test_negative_human_confirmation_does_not_complete (test_ees_workflow_contract.ContractTests.test_negative_human_confirmation_does_not_complete) ... ok
+test_result_links_require_declared_preceding_job (test_ees_workflow_contract.ContractTests.test_result_links_require_declared_preceding_job) ... ok
+test_skill_reference_must_belong_to_inherited_native_skill (test_ees_workflow_contract.ContractTests.test_skill_reference_must_belong_to_inherited_native_skill) ... ok
+test_skills_and_fixed_execution_model_boundaries (test_ees_workflow_contract.ContractTests.test_skills_and_fixed_execution_model_boundaries) ... ok
+test_summary_accepts_exact_claims_and_rejects_fabrication_and_prose (test_ees_workflow_contract.ContractTests.test_summary_accepts_exact_claims_and_rejects_fabrication_and_prose) ... ok
+test_summary_requires_exact_limited_scope_and_does_not_claim_full_completion (test_ees_workflow_contract.ContractTests.test_summary_requires_exact_limited_scope_and_does_not_claim_full_completion) ... ok
+test_summary_requires_useful_business_observations_not_only_ok (test_ees_workflow_contract.ContractTests.test_summary_requires_useful_business_observations_not_only_ok) ... ok
+test_transport_success_is_distinct_from_business_and_final_completion (test_ees_workflow_contract.ContractTests.test_transport_success_is_distinct_from_business_and_final_completion) ... ok
+test_two_reusable_workflows_validate_and_do_not_mutate_seed (test_ees_workflow_contract.ContractTests.test_two_reusable_workflows_validate_and_do_not_mutate_seed) ... ok
+test_typed_inputs_enforce_boolean_integer_object_and_identifier_boundaries (test_ees_workflow_contract.ContractTests.test_typed_inputs_enforce_boolean_integer_object_and_identifier_boundaries) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.063s
+
+OK
+test_base_pipeline_and_session_auth_are_rejected_before_model_call (test_ees_workflow_model.ModelTests.test_base_pipeline_and_session_auth_are_rejected_before_model_call) ... ok
+test_browser_or_code_models_are_explicitly_unsupported (test_ees_workflow_model.ModelTests.test_browser_or_code_models_are_explicitly_unsupported) ... ok
+test_context_model_endpoint_and_nested_overrides_are_rejected_for_both_providers (test_ees_workflow_model.ModelTests.test_context_model_endpoint_and_nested_overrides_are_rejected_for_both_providers) ... ok
+test_current_model_acl_revocation_stops_generation (test_ees_workflow_model.ModelTests.test_current_model_acl_revocation_stops_generation) ... ok
+test_exact_native_parameter_transforms_cannot_add_hidden_context (test_ees_workflow_model.ModelTests.test_exact_native_parameter_transforms_cannot_add_hidden_context) ... ok
+test_initial_chat_cap_field_remains_unsupported_and_responses_is_supported (test_ees_workflow_model.ModelTests.test_initial_chat_cap_field_remains_unsupported_and_responses_is_supported) ... ok
+test_input_proposal_adapter_preserves_dynamic_declarations_for_candidate_gate (test_ees_workflow_model.ModelTests.test_input_proposal_adapter_preserves_dynamic_declarations_for_candidate_gate) ... ok
+test_native_catalog_zero_one_multiple_and_no_implicit_substitution (test_ees_workflow_model.ModelTests.test_native_catalog_zero_one_multiple_and_no_implicit_substitution) ... ok
+test_no_model_budget_never_calls_native_path (test_ees_workflow_model.ModelTests.test_no_model_budget_never_calls_native_path) ... ok
+test_only_successful_declared_sources_and_size_budget (test_ees_workflow_model.ModelTests.test_only_successful_declared_sources_and_size_budget) ... ok
+test_pinned_provider_routes_reject_preset_change_at_parameter_application (test_ees_workflow_model.ModelTests.test_pinned_provider_routes_reject_preset_change_at_parameter_application) ... Executing <Task finished name='Task-52' coro=<ModelTests.test_pinned_provider_routes_reject_preset_change_at_parameter_application() done, defined at /workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_workflow_model.py:293> result=None created at /root/.local/share/uv/python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 0.153 seconds
+ok
+test_proposal_context_fields_and_tool_calls_are_never_commands (test_ees_workflow_model.ModelTests.test_proposal_context_fields_and_tool_calls_are_never_commands) ... ok
+test_proposal_rejects_changed_pinned_model_before_generation (test_ees_workflow_model.ModelTests.test_proposal_rejects_changed_pinned_model_before_generation) ... ok
+test_raw_native_base_model_needs_no_fake_preset_row (test_ees_workflow_model.ModelTests.test_raw_native_base_model_needs_no_fake_preset_row) ... ok
+test_scoped_context_current_identity_and_reserved_request (test_ees_workflow_model.ModelTests.test_scoped_context_current_identity_and_reserved_request) ... ok
+test_supported_sampling_limits_and_reasoning_preserve_preset (test_ees_workflow_model.ModelTests.test_supported_sampling_limits_and_reasoning_preserve_preset) ... ok
+test_tool_calls_free_prose_and_extra_keys_never_become_success (test_ees_workflow_model.ModelTests.test_tool_calls_free_prose_and_extra_keys_never_become_success) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.283s
+
+OK
+test_access_filtered_read_has_no_private_ui_or_intent (test_ees_workflow_tool.WorkflowToolTests.test_access_filtered_read_has_no_private_ui_or_intent) ... ok
+test_cross_target_malformed_secret_and_bool_revision_rejected (test_ees_workflow_tool.WorkflowToolTests.test_cross_target_malformed_secret_and_bool_revision_rejected) ... ok
+test_current_chat_reference_is_only_a_scoped_hint_checked_against_server (test_ees_workflow_tool.WorkflowToolTests.test_current_chat_reference_is_only_a_scoped_hint_checked_against_server) ... ok
+test_denied_read_cannot_navigate_or_disclose (test_ees_workflow_tool.WorkflowToolTests.test_denied_read_cannot_navigate_or_disclose) ... ok
+test_input_preview_uses_server_gate_and_only_local_preview (test_ees_workflow_tool.WorkflowToolTests.test_input_preview_uses_server_gate_and_only_local_preview) ... ok
+test_missing_native_chat_and_late_ui_refusal_are_not_success (test_ees_workflow_tool.WorkflowToolTests.test_missing_native_chat_and_late_ui_refusal_are_not_success) ... ok
+test_model_strings_are_serialized_data_not_javascript (test_ees_workflow_tool.WorkflowToolTests.test_model_strings_are_serialized_data_not_javascript) ... ok
+test_preview_never_saves_publishes_or_executes (test_ees_workflow_tool.WorkflowToolTests.test_preview_never_saves_publishes_or_executes) ... ok
+test_read_access_does_not_grant_edit_proposal_permission (test_ees_workflow_tool.WorkflowToolTests.test_read_access_does_not_grant_edit_proposal_permission) ... ok
+test_stale_revision_rejected_before_browser (test_ees_workflow_tool.WorkflowToolTests.test_stale_revision_rejected_before_browser) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.035s
+
+OK
+test_all_page_links_must_match_scope_filters_and_relations (test_github_tool.GitHubReadTests.test_all_page_links_must_match_scope_filters_and_relations) ... ok
+test_base_url_rejects_credentials_paths_and_implicit_http (test_github_tool.GitHubReadTests.test_base_url_rejects_credentials_paths_and_implicit_http) ... ok
+test_canonical_links_need_consistent_positive_repository_id (test_github_tool.GitHubReadTests.test_canonical_links_need_consistent_positive_repository_id) ... ok
+test_canonical_next_and_final_links_keep_requests_on_owner_path (test_github_tool.GitHubReadTests.test_canonical_next_and_final_links_keep_requests_on_owner_path) ... ok
+test_case_insensitive_repository_and_single_default_are_resolved (test_github_tool.GitHubReadTests.test_case_insensitive_repository_and_single_default_are_resolved) ... ok
+test_closed_does_not_mean_merged_and_missing_metadata_stays_unknown (test_github_tool.GitHubReadTests.test_closed_does_not_mean_merged_and_missing_metadata_stays_unknown) ... ok
+test_concurrent_users_have_request_local_credentials_and_no_shared_cache (test_github_tool.GitHubReadTests.test_concurrent_users_have_request_local_credentials_and_no_shared_cache) ... ok
+test_contradictory_last_and_out_of_range_next_remain_unknown (test_github_tool.GitHubReadTests.test_contradictory_last_and_out_of_range_next_remain_unknown) ... ok
+test_detail_null_body_and_truncation_are_explicit (test_github_tool.GitHubReadTests.test_detail_null_body_and_truncation_are_explicit) ... ok
+test_detail_requires_requested_identity_and_body_field (test_github_tool.GitHubReadTests.test_detail_requires_requested_identity_and_body_field) ... ok
+test_direct_detail_omits_single_repository_without_list_preflight (test_github_tool.GitHubReadTests.test_direct_detail_omits_single_repository_without_list_preflight) ... ok
+test_direct_detail_omitted_repository_requires_choice_before_network (test_github_tool.GitHubReadTests.test_direct_detail_omitted_repository_requires_choice_before_network) ... ok
+test_disabled_anonymous_or_unencrypted_requests_stop_before_network (test_github_tool.GitHubReadTests.test_disabled_anonymous_or_unencrypted_requests_stop_before_network) ... ok
+test_explicit_http_opt_in_and_https_tls_preserve_fixed_origin (test_github_tool.GitHubReadTests.test_explicit_http_opt_in_and_https_tls_preserve_fixed_origin) ... ok
+test_failed_authentication_does_not_request_pull_requests (test_github_tool.GitHubReadTests.test_failed_authentication_does_not_request_pull_requests) ... ok
+test_fork_head_is_metadata_and_source_url_uses_only_configured_origin (test_github_tool.GitHubReadTests.test_fork_head_is_metadata_and_source_url_uses_only_configured_origin) ... ok
+test_full_page_without_confirmed_next_is_unknown (test_github_tool.GitHubReadTests.test_full_page_without_confirmed_next_is_unknown) ... ok
+test_http_error_and_connection_exception_do_not_expose_messages (test_github_tool.GitHubReadTests.test_http_error_and_connection_exception_do_not_expose_messages) ... ok
+test_http_failures_are_distinct_from_empty_success_and_redacted (test_github_tool.GitHubReadTests.test_http_failures_are_distinct_from_empty_success_and_redacted) ... ok
+test_invalid_state_page_and_number_stop_before_network (test_github_tool.GitHubReadTests.test_invalid_state_page_and_number_stop_before_network) ... ok
+test_last_page_owner_links_work_for_full_short_and_empty_results (test_github_tool.GitHubReadTests.test_last_page_owner_links_work_for_full_short_and_empty_results) ... ok
+test_list_does_not_invent_total_or_fetch_next_page (test_github_tool.GitHubReadTests.test_list_does_not_invent_total_or_fetch_next_page) ... ok
+test_list_uses_merged_timestamp_and_does_not_guess_from_closed_state (test_github_tool.GitHubReadTests.test_list_uses_merged_timestamp_and_does_not_guess_from_closed_state) ... ok
+test_missing_auth_identity_cannot_fetch_repository_content (test_github_tool.GitHubReadTests.test_missing_auth_identity_cannot_fetch_repository_content) ... ok
+test_nonjson_oversized_and_wrong_list_shapes_fail_closed (test_github_tool.GitHubReadTests.test_nonjson_oversized_and_wrong_list_shapes_fail_closed) ... ok
+test_oversized_duplicate_and_wrong_state_pages_are_not_success (test_github_tool.GitHubReadTests.test_oversized_duplicate_and_wrong_state_pages_are_not_success) ... ok
+test_public_inputs_have_no_network_or_credential_controls (test_github_tool.GitHubReadTests.test_public_inputs_have_no_network_or_credential_controls) ... ok
+test_reflected_credential_is_removed_and_content_is_untrusted (test_github_tool.GitHubReadTests.test_reflected_credential_is_removed_and_content_is_untrusted) ... ok
+test_repository_configuration_and_scope_are_validated_before_auth (test_github_tool.GitHubReadTests.test_repository_configuration_and_scope_are_validated_before_auth) ... ok
+test_requests_use_fixed_get_headers_page_limits_and_no_redirects (test_github_tool.GitHubReadTests.test_requests_use_fixed_get_headers_page_limits_and_no_redirects) ... ok
+test_scope_mismatch_and_malformed_pr_metadata_never_return_content (test_github_tool.GitHubReadTests.test_scope_mismatch_and_malformed_pr_metadata_never_return_content) ... ok
+test_short_page_with_invalid_next_and_maximum_page_remain_unconfirmed (test_github_tool.GitHubReadTests.test_short_page_with_invalid_next_and_maximum_page_remain_unconfirmed) ... ok
+test_transport_cannot_bypass_allowed_origin_repository_or_endpoint (test_github_tool.GitHubReadTests.test_transport_cannot_bypass_allowed_origin_repository_or_endpoint) ... ok
+test_unsafe_or_inconsistent_next_links_are_not_followed_or_trusted (test_github_tool.GitHubReadTests.test_unsafe_or_inconsistent_next_links_are_not_followed_or_trusted) ... ok
+
+----------------------------------------------------------------------
+Ran 34 tests in 0.273s
+
+OK
+test_arbitrary_endpoints_cannot_receive_credentials (test_jira_read.JiraReadTests.test_arbitrary_endpoints_cannot_receive_credentials) ... ok
+test_auth_preflight_failure_does_not_fetch_issues_or_counts (test_jira_read.JiraReadTests.test_auth_preflight_failure_does_not_fetch_issues_or_counts) ... ok
+test_concurrent_credentials_are_request_local_and_redacted (test_jira_read.JiraReadTests.test_concurrent_credentials_are_request_local_and_redacted) ... ok
+test_connection_error_does_not_serialize_sensitive_exception (test_jira_read.JiraReadTests.test_connection_error_does_not_serialize_sensitive_exception) ... ok
+test_dashboard_counts_do_not_derive_totals_from_issue_page (test_jira_read.JiraReadTests.test_dashboard_counts_do_not_derive_totals_from_issue_page) ... ok
+test_disabled_missing_secret_or_unencrypted_context_is_closed (test_jira_read.JiraReadTests.test_disabled_missing_secret_or_unencrypted_context_is_closed) ... ok
+test_failed_count_is_unknown_and_does_not_pollute_successful_projects (test_jira_read.JiraReadTests.test_failed_count_is_unknown_and_does_not_pollute_successful_projects) ... ok
+test_field_availability_and_assignee_identity_do_not_guess (test_jira_read.JiraReadTests.test_field_availability_and_assignee_identity_do_not_guess) ... ok
+test_invalid_listing_cannot_return_untrusted_page_rows (test_jira_read.JiraReadTests.test_invalid_listing_cannot_return_untrusted_page_rows) ... ok
+test_invalid_project_or_paging_stops_before_requests (test_jira_read.JiraReadTests.test_invalid_project_or_paging_stops_before_requests) ... ok
+test_issue_scope_is_checked_before_and_after_metadata_request (test_jira_read.JiraReadTests.test_issue_scope_is_checked_before_and_after_metadata_request) ... ok
+test_later_page_failure_never_applies_offset_to_reduced_scope (test_jira_read.JiraReadTests.test_later_page_failure_never_applies_offset_to_reduced_scope) ... ok
+test_missing_or_anonymous_auth_identity_is_not_success (test_jira_read.JiraReadTests.test_missing_or_anonymous_auth_identity_is_not_success) ... ok
+test_moved_or_mismatched_issue_stops_before_description_fetch (test_jira_read.JiraReadTests.test_moved_or_mismatched_issue_stops_before_description_fetch) ... ok
+test_nonjson_oversize_and_bad_payload_are_errors (test_jira_read.JiraReadTests.test_nonjson_oversize_and_bad_payload_are_errors) ... ok
+test_page_limit_and_next_page_preserve_full_count (test_jira_read.JiraReadTests.test_page_limit_and_next_page_preserve_full_count) ... ok
+test_partial_scope_suppresses_cursor_until_first_page_recovery (test_jira_read.JiraReadTests.test_partial_scope_suppresses_cursor_until_first_page_recovery) ... ok
+test_public_dashboard_keeps_partial_counts_and_safe_errors_in_json (test_jira_read.JiraReadTests.test_public_dashboard_keeps_partial_counts_and_safe_errors_in_json) ... ok
+test_public_dashboard_returns_json_with_counts_scope_and_next_page (test_jira_read.JiraReadTests.test_public_dashboard_returns_json_with_counts_scope_and_next_page) ... ok
+test_public_inputs_cannot_supply_jql_url_or_pat (test_jira_read.JiraReadTests.test_public_inputs_cannot_supply_jql_url_or_pat) ... ok
+test_public_issue_wrapper_reads_text_with_fixed_source (test_jira_read.JiraReadTests.test_public_issue_wrapper_reads_text_with_fixed_source) ... ok
+test_reflected_credential_is_removed_before_content_processing (test_jira_read.JiraReadTests.test_reflected_credential_is_removed_before_content_processing) ... ok
+test_request_fixed_get_tls_and_credential_scope (test_jira_read.JiraReadTests.test_request_fixed_get_tls_and_credential_scope) ... ok
+test_selected_project_does_not_query_other_projects (test_jira_read.JiraReadTests.test_selected_project_does_not_query_other_projects) ... ok
+test_zero_counts_are_successful_and_distinct_from_unavailable (test_jira_read.JiraReadTests.test_zero_counts_are_successful_and_distinct_from_unavailable) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 0.145s
+
+OK
+test_attachment_cap_and_personal_credentials_are_preserved (test_jira_work_contract.JiraWorkHTTPTests.test_attachment_cap_and_personal_credentials_are_preserved) ... ok
+test_attachment_html_login_response_and_metadata_denial_stay_partial (test_jira_work_contract.JiraWorkHTTPTests.test_attachment_html_login_response_and_metadata_denial_stay_partial) ... ok
+test_batch_attachments_preserve_each_requested_cr_and_same_id_provenance (test_jira_work_contract.JiraWorkHTTPTests.test_batch_attachments_preserve_each_requested_cr_and_same_id_provenance) ... ok
+test_batch_budget_and_per_issue_denial_never_lose_required_cr (test_jira_work_contract.JiraWorkHTTPTests.test_batch_budget_and_per_issue_denial_never_lose_required_cr) ... ok
+test_batch_required_names_are_explicit_and_missing_is_not_document_approval (test_jira_work_contract.JiraWorkHTTPTests.test_batch_required_names_are_explicit_and_missing_is_not_document_approval) ... ok
+test_batch_scope_injection_duplicates_and_limits_reject_before_http (test_jira_work_contract.JiraWorkHTTPTests.test_batch_scope_injection_duplicates_and_limits_reject_before_http) ... ok
+test_bounded_page_cap_stays_partial_and_exposes_real_continuation (test_jira_work_contract.JiraWorkHTTPTests.test_bounded_page_cap_stays_partial_and_exposes_real_continuation) ... ok
+test_cross_project_response_and_missing_attachment_field_are_not_complete (test_jira_work_contract.JiraWorkHTTPTests.test_cross_project_response_and_missing_attachment_field_are_not_complete) ... ok
+test_ems_is_not_a_default_project_and_injected_arguments_stop_before_http (test_jira_work_contract.JiraWorkHTTPTests.test_ems_is_not_a_default_project_and_injected_arguments_stop_before_http) ... ok
+test_foreign_or_encoded_attachment_url_never_receives_pat_or_download_request (test_jira_work_contract.JiraWorkHTTPTests.test_foreign_or_encoded_attachment_url_never_receives_pat_or_download_request) ... ok
+test_metadata_denial_is_not_an_empty_successful_status_list (test_jira_work_contract.JiraWorkHTTPTests.test_metadata_denial_is_not_an_empty_successful_status_list) ... ok
+test_missing_duplicate_changed_or_denied_page_never_becomes_complete (test_jira_work_contract.JiraWorkHTTPTests.test_missing_duplicate_changed_or_denied_page_never_becomes_complete) ... ok
+test_missing_or_denied_attachment_is_distinct_from_absence (test_jira_work_contract.JiraWorkHTTPTests.test_missing_or_denied_attachment_is_distinct_from_absence) ... ok
+test_multiple_pages_produce_complete_list_and_exact_generated_jql (test_jira_work_contract.JiraWorkHTTPTests.test_multiple_pages_produce_complete_list_and_exact_generated_jql) ... ok
+test_new_async_public_methods_round_trip_real_http (test_jira_work_contract.JiraWorkHTTPTests.test_new_async_public_methods_round_trip_real_http) ... ok
+test_no_matching_issues_is_legitimate_empty_complete_result (test_jira_work_contract.JiraWorkHTTPTests.test_no_matching_issues_is_legitimate_empty_complete_result) ... ok
+test_real_attachment_metadata_and_range_probe_do_not_claim_content_review (test_jira_work_contract.JiraWorkHTTPTests.test_real_attachment_metadata_and_range_probe_do_not_claim_content_review) ... ok
+test_real_http_metadata_uses_actual_allowed_visible_keys_statuses_and_date_schema (test_jira_work_contract.JiraWorkHTTPTests.test_real_http_metadata_uses_actual_allowed_visible_keys_statuses_and_date_schema) ... ok
+test_unknown_status_or_wrong_field_type_is_rejected_before_search (test_jira_work_contract.JiraWorkHTTPTests.test_unknown_status_or_wrong_field_type_is_rejected_before_search) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 9.687s
+
+OK
+test_default_registration_cannot_recreate_retired_tool_or_preset (test_wo_demo_tool.RetiredWODemoTests.test_default_registration_cannot_recreate_retired_tool_or_preset) ... ok
+test_real_connectors_and_shared_runtime_remain_available (test_wo_demo_tool.RetiredWODemoTests.test_real_connectors_and_shared_runtime_remain_available) ... ok
+test_retired_implementation_cannot_be_imported_or_shipped (test_wo_demo_tool.RetiredWODemoTests.test_retired_implementation_cannot_be_imported_or_shipped) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.008s
+
+OK
+WO simulation retirement/no-re-registration assertions passed
+Specialist cooperation panel retirement/no-re-registration assertions passed
+✔ controller fixture exercises the same command and read boundaries with LF and Windows CRLF (10.006558ms)
+✔ controller fixture fails directly when its required injection marker is missing or duplicated (3.498068ms)
+✔ unknown partial failed and excluded states never render completion (2.900458ms)
+✔ all eight declared input kinds render typed named accessible controls (4.322619ms)
+✔ boolean false number zero and typed enum values survive input rendering (1.770386ms)
+✔ form reading distinguishes unset from false zero and empty multiselect (0.754707ms)
+✔ all eight result blocks render from the same job definition contract (6.429017ms)
+✔ untrusted job output and names are escaped and unsafe links omitted (1.079235ms)
+✔ per-item AI proposal is visibly unconfirmed and requires human verdict (0.736329ms)
+✔ read-only historical result blocks never permit input decisions (1.340449ms)
+✔ evidence presence does not claim attachment content adequacy (0.691421ms)
+✔ request timeline preserves EES report and independent effect confirmation (1.262211ms)
+✔ history uses immutable attempt inputs and result rather than current edited values (1.051063ms)
+✔ missing history is explicitly unexecuted and never a success fixture (0.729879ms)
+✔ My Work uses actual tasks and incident-overdue-today-week-future-undated ordering (0.930131ms)
+✔ empty My Work does not invent an actionable task or normal execution (0.607325ms)
+✔ late workspace reads are discarded after account change (1.50733ms)
+✔ late workspace reads are discarded after selected job changes (1.894643ms)
+✔ lookup failure clears stale private evidence and keeps an explicit read error (1.374139ms)
+✔ lost mutation response reuses the exact request receipt and payload (2.054935ms)
+✔ definitive rejection retires its receipt instead of replaying invalid intent (1.270643ms)
+✔ operations and workspace receipts are distinct authenticated command paths (1.153457ms)
+✔ late successful mutation cannot repopulate another account or scope (1.33478ms)
+✔ normalization selects the exact current attempt and preserves historical decisions (2.186843ms)
+✔ redacted evidence stays null instead of substituting another readable attempt (0.962379ms)
+✔ Native model list keeps actual allowed identities and excludes direct embedding routes (1.038414ms)
+✔ AI reference never contains Native authorization tokens or confirmation intents (0.944943ms)
+✔ late confirmation is rejected after account or selected work context changes (1.664016ms)
+✔ first workspace read refetches after default system selection before accepting operations (1.147418ms)
+✔ allowed model count survives a work selection change but not account change (1.70685ms)
+✔ read-only tab changes retain polling rather than stopping current execution observation (0.951182ms)
+✔ returning from a Native workspace page starts a fresh workspace read (5.812563ms)
+✔ dynamic options use authenticated current-job inputs and never send an execution command (1.860141ms)
+✔ late option results cannot replace a changed input dependency or another job (3.492719ms)
+✔ dynamic option failure disables selection without falling back to manual examples (2.161636ms)
+✔ removed dynamic selection stays explicit and no returned option is automatically chosen (0.809059ms)
+✔ held Enter or Space cannot repeat a mutation while its ordinary first click still runs (2.581187ms)
+✔ scope execution uses the selected P or T and refuses unsaved run drafts (1.352477ms)
+✔ admin management renders existing Native identities and is absent for ordinary participants (1.553209ms)
+✔ admin dialog refuses nonadmin identity before any write or new dialog (2.419854ms)
+✔ text export formats only fetched run history and retains redacted-source notice (1.082981ms)
+✔ legacy records have readonly navigation and escaped values with no execution controls (1.061618ms)
+✔ authenticated Native management navigation suspends view without clearing private drafts (1.60752ms)
+✔ AI item badge disappears only when a saved decision for that item is present (0.8897ms)
+✔ date-only and timezone-qualified saved inputs preserve their exact stored value (1.462883ms)
+✔ first Native chat proposal accepts only the creation-bound old context without a DB write (1.233899ms)
+✔ first-chat context alias rejects another chat account changed version draft or scope (5.408224ms)
+✔ unmatched Native creation finish cannot bless an arbitrary old chat context (1.231935ms)
+✔ start-run mutation uses workflow revision rather than absent run revision (1.085865ms)
+✔ start dialog retains its captured workflow revision across a concurrent refresh (1.790246ms)
+✔ successful read polling preserves command rejection until successful command or explicit context change (1.444955ms)
+✔ first-chat alias is retired when navigating through another conversation (1.731197ms)
+✔ saving one factory setting never promotes unchanged inherited values to overrides (1.494951ms)
+✔ run settings target the run factory while viewing all factories and retain raw overrides (1.516905ms)
+✔ existing empty text and empty list stay distinct from never-assigned optional values (0.9163ms)
+✔ readonly Work tool setup needs Native admin and cancelling preview never writes assets (1.871227ms)
+✔ explicit Work tool confirmation sends preview token source hash and no public grants (2.125781ms)
+✔ input AI proposal preview and apply modify only the private draft until explicit save (1.415301ms)
+✔ AI input preview rejects unknown setting fields and stale apply after user typing (1.239506ms)
+✔ per-message reference records exact immutable attempt and version without chat body or secrets (4.646838ms)
+✔ historical message chip never substitutes latest evidence for an old or absent attempt (1.744347ms)
+✔ execution names the sole currently authorized model and preserves explicit multi-model choice (6.133086ms)
+✔ single model label is visible while multiple actual models retain the chooser (1.053937ms)
+✔ unavailable dynamic inputs explain why AI omitted them without adding values (0.823981ms)
+ℹ tests 64
+ℹ suites 0
+ℹ pass 64
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 135.119343
+✔ new Figma authoring keeps Native conversation untouched and has exact right-panel structure (10.177247ms)
+✔ empty workspace listing does not create drafts or runs (1.868013ms)
+✔ direct editing saves only the chosen definition with current revision and request ID (8.371572ms)
+✔ dirty drafts and per-workflow node selection survive navigation (4.216109ms)
+✔ typing during save preserves later edits and acknowledges only own base revision (4.21625ms)
+✔ same failed payload reuses request identity; different payload receives new identity (5.965934ms)
+✔ revision conflict preserves unsaved text and never silently rebases (3.248672ms)
+✔ authorization denial preserves private draft and blocks subsequent mutation (3.74436ms)
+✔ account reset rejects late save and clears draft cache (3.736116ms)
+✔ late workflow reads cannot overwrite newer selection (1.731738ms)
+✔ publish requires exact saved validated revision and explicit confirmation (18.590817ms)
+✔ all eight input types and result blocks are represented without workflow-specific HTML (1.997568ms)
+✔ declared input and tool argument binding are saved together (3.940594ms)
+✔ stage/job insertion and removal keep referential defects visible for publish validation (3.561563ms)
+✔ factory overrides distinguish an explicit empty value, zero, and absent value (2.753777ms)
+✔ AI model selection uses permitted explicit choice/default and no silent first-of-many fallback (1.276673ms)
+✔ 0 models and model listing failure preserve direct authoring and save (6.592557ms)
+✔ one model hides the selector and multiple models require Native choice (3.0945ms)
+✔ AI proposal is a preview and explicit local application never saves or publishes (2.13778ms)
+✔ late AI proposal after workflow navigation or manual edits is never applied (4.01742ms)
+✔ malformed and cross-context AI output cannot create arbitrary editor state (1.3214ms)
+✔ Native chat proposals require exact personal conversation and target revision (1.37474ms)
+✔ B5 stores inspected Native function reference and immutable input schema (4.903965ms)
+✔ tool review is an explicit operation with designated contract revision (6.525116ms)
+✔ unavailable EES definitions are explicit and never turn into fake request success (1.711598ms)
+✔ unsafe labels and instructions are escaped in the editor (1.981534ms)
+✔ opening a form and reading a draft never marks unchanged definitions dirty (2.845545ms)
+✔ opaque Native references, dangling dependencies and compound conditions survive unrelated edits (2.254715ms)
+✔ factory settings preserve all eight input value types without coercing omitted fields (2.383899ms)
+✔ late model listing after reset cannot overwrite the new account choice (1.487199ms)
+✔ a confirmation opened for one workflow cannot publish after context changes (1.350504ms)
+✔ conflict comparison can discard only by explicit choice and load exact new revision (3.436055ms)
+✔ tool navigation returns to workflow editor without retaining tool-only surface (1.286036ms)
+✔ job trigger persists a bounded offset instead of a browser timer (2.415017ms)
+✔ published periodic schedule explicitly pins user, version, jobs, timezone and delegation (2.199066ms)
+✔ Native skills remain optional and only current permitted IDs are added to a job (3.579811ms)
+✔ unavailable Native skills preserve opaque references and do not block direct human work (4.510683ms)
+✔ a late skill-list response cannot expose the previous account metadata (2.514897ms)
+✔ dynamic Jira options pin discovered Native reference and declared project dependency without static examples (3.091695ms)
+✔ dynamic options cannot invent an unconfigured Native reference or fall back to static entries (3.23425ms)
+✔ common options use current authorized entities and preserve an opaque tool source on description edit (7.486464ms)
+✔ tool selection pins contract revision and unrelated edits cannot silently upgrade an old published reference (5.419842ms)
+✔ AI item verdicts declare their source job and EES requests retain explicit effect criteria (5.038678ms)
+✔ confirmed list bindings and deadline rules store declared references instead of browser calculations (5.059309ms)
+✔ a result report can record all resolved verdicts without converting unknown CRs into approved completion (3.062141ms)
+✔ factory settings fetch dynamic choices from the saved definition and never substitute examples after failure (2.492193ms)
+✔ person settings use current Native people metadata without making free-text users (1.789225ms)
+✔ Native proposal review is visibly open from a selected job and non-structure tabs without saving (10.11984ms)
+✔ job assignee uses only current Native user/group identities and persists exact principal (5.462166ms)
+✔ unavailable existing assignee is preserved on unrelated edits and removed only explicitly (2.69594ms)
+✔ B5 explicitly authored output contract saves an object while Native input schema stays authoritative (2.58977ms)
+✔ invalid output contract remains editable and cannot save or submit stale schema (10.143525ms)
+✔ existing output contract is not silently replaced by metadata when unrelated fields change (2.670942ms)
+✔ input deletion requires confirmation and retains dangling bindings for publish validation (2.780538ms)
+✔ input deletion confirmation cannot mutate a different workflow after navigation (3.73156ms)
+✔ version history displays the exact stored publisher safely (1.303152ms)
+✔ AI composer snapshots physical expansion and live text before a delayed model-list repaint (1.651857ms)
+✔ routine workspace polls preserve the user-open composer and retain an explicitly closed composer (1.900622ms)
+✔ composer text and expansion are private to the workflow and Native conversation and reset on account change (2.282607ms)
+✔ a pending right-composer response is discarded after a conversation switch even if transport ignores abort (1.902435ms)
+✔ B2-2 rules are scoped to eligible jobs and preserve stored judgment IDs and legacy defaults (4.512947ms)
+✔ B2-2 suggestion rules save guidance and human-only IDs without auto-confirmation or reference replacement (3.883288ms)
+✔ B2-2 a job switch while its dialog is open cannot edit a different job (2.439063ms)
+✔ B2-3 advisories do not block publication while blockers remain visible and disabled (3.556986ms)
+✔ B5 direct execution stores only declared exception metadata and retains absent adapter reason (3.85823ms)
+✔ C12 schedule opening and explicit execution scope do not alter preserved drafts on inspection (3.621854ms)
+ℹ tests 66
+ℹ suites 0
+ℹ pass 66
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 263.576762
+✖ Native conversation remains the original center DOM while the work panel mounts after it (4.198863ms)
+✖ closing or changing work mode preserves Native chat and the authoring mount boundary (1.292616ms)
+✖ panel scroll restores per personal target and never writes a shared run selection (1.258676ms)
+✔ confirmation dialog starts on cancel and Escape closure never accepts the command (1.302011ms)
+✖ workspace refresh retains active input identity and text selection without taking Native focus (1.555452ms)
+✖ published procedure overview opens before a run exists without dereferencing run state (1.872129ms)
+✖ workspace navigation separates managed-system authoring from work scope and actual tasks (1.329862ms)
+✖ polling preserves an explicit model choice only for its actor and work target while revocation clears it (1.220988ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 1
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 19.698123
+
+✖ failing tests:
+
+test at tests/test_ees_v4_layout.cjs:22:1
+✖ Native conversation remains the original center DOM while the work panel mounts after it (4.198863ms)
+  evalmachine.<anonymous>:343
+    window.addEventListener('resize',()=>{if(host?.isConnected)layout();});
+           ^
+  
+  TypeError: window.addEventListener is not a function
+      at createWorkView (evalmachine.<anonymous>:343:10)
+      at evalmachine.<anonymous>:1:1
+      at Script.runInContext (node:vm:149:12)
+      at Object.runInContext (node:vm:301:6)
+      at run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+      at TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:22:127)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+
+test at tests/test_ees_v4_layout.cjs:23:1
+✖ closing or changing work mode preserves Native chat and the authoring mount boundary (1.292616ms)
+  evalmachine.<anonymous>:343
+    window.addEventListener('resize',()=>{if(host?.isConnected)layout();});
+           ^
+  
+  TypeError: window.addEventListener is not a function
+      at createWorkView (evalmachine.<anonymous>:343:10)
+      at evalmachine.<anonymous>:1:1
+      at Script.runInContext (node:vm:149:12)
+      at Object.runInContext (node:vm:301:6)
+      at run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+      at TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:23:117)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+
+test at tests/test_ees_v4_layout.cjs:24:1
+✖ panel scroll restores per personal target and never writes a shared run selection (1.258676ms)
+  evalmachine.<anonymous>:343
+    window.addEventListener('resize',()=>{if(host?.isConnected)layout();});
+           ^
+  
+  TypeError: window.addEventListener is not a function
+      at createWorkView (evalmachine.<anonymous>:343:10)
+      at evalmachine.<anonymous>:1:1
+      at Script.runInContext (node:vm:149:12)
+      at Object.runInContext (node:vm:301:6)
+      at run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+      at TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:24:114)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+
+test at tests/test_ees_v4_layout.cjs:28:1
+✖ workspace refresh retains active input identity and text selection without taking Native focus (1.555452ms)
+  evalmachine.<anonymous>:343
+    window.addEventListener('resize',()=>{if(host?.isConnected)layout();});
+           ^
+  
+  TypeError: window.addEventListener is not a function
+      at createWorkView (evalmachine.<anonymous>:343:10)
+      at evalmachine.<anonymous>:1:1
+      at Script.runInContext (node:vm:149:12)
+      at Object.runInContext (node:vm:301:6)
+      at run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+      at TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:28:127)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+
+test at tests/test_ees_v4_layout.cjs:31:1
+✖ published procedure overview opens before a run exists without dereferencing run state (1.872129ms)
+  evalmachine.<anonymous>:343
+    window.addEventListener('resize',()=>{if(host?.isConnected)layout();});
+           ^
+  
+  TypeError: window.addEventListener is not a function
+      at createWorkView (evalmachine.<anonymous>:343:10)
+      at evalmachine.<anonymous>:1:1
+      at Script.runInContext (node:vm:149:12)
+      at Object.runInContext (node:vm:301:6)
+      at run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+      at TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:31:119)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+
+test at tests/test_ees_v4_layout.cjs:34:1
+✖ workspace navigation separates managed-system authoring from work scope and actual tasks (1.329862ms)
+  evalmachine.<anonymous>:343
+    window.addEventListener('resize',()=>{if(host?.isConnected)layout();});
+           ^
+  
+  TypeError: window.addEventListener is not a function
+      at createWorkView (evalmachine.<anonymous>:343:10)
+      at evalmachine.<anonymous>:1:1
+      at Script.runInContext (node:vm:149:12)
+      at Object.runInContext (node:vm:301:6)
+      at run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+      at TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:34:121)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+
+test at tests/test_ees_v4_layout.cjs:36:1
+✖ polling preserves an explicit model choice only for its actor and work target while revocation clears it (1.220988ms)
+  evalmachine.<anonymous>:343
+    window.addEventListener('resize',()=>{if(host?.isConnected)layout();});
+           ^
+  
+  TypeError: window.addEventListener is not a function
+      at createWorkView (evalmachine.<anonymous>:343:10)
+      at evalmachine.<anonymous>:1:1
+      at Script.runInContext (node:vm:149:12)
+      at Object.runInContext (node:vm:301:6)
+      at run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+      at TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_v4_layout.cjs:37:21)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+✔ typed draft preserves false zero empty arrays and an explicitly removed optional field (3.435469ms)
+✔ independent concurrent input changes cannot be silently overwritten (0.725233ms)
+✔ server revision without input change retains the draft without a false conflict (0.694987ms)
+✔ drafts remain isolated between account scope run and job keys (0.68399ms)
+✔ acknowledging a save never overwrites typing after the request (0.798042ms)
+✔ matching save receipt clears only its own acknowledged draft (0.835549ms)
+✔ explicit discard restores saved values without changing server objects (1.236762ms)
+✔ account reset clears every private draft (0.61071ms)
+✔ returned draft snapshots cannot mutate stored drafts or caller inputs (0.848638ms)
+✔ invalid numeric input fails before a save payload is constructed (2.640917ms)
+✔ render recapture after a successful save cannot turn identical server values into a conflict (0.721898ms)
+✔ unchanged server inputs advance the CAS base while preserving unsaved local input (0.550269ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20.470062
+✔ input save keeps mutation controls busy until the acknowledged state finishes refreshing (7.456529ms)
+✔ review save cannot continue confirmation after its refresh loses the selected work context (1.458967ms)
+✔ an explicit early navigation survives initial saved-selection restoration and late startup reads (1.794362ms)
+✔ early selection patches are cleared on account reset and do not replace another account restoration (2.129327ms)
+✔ history expansion restoration uses exact attempt keys and the current panel position (2.631684ms)
+✖ real view list reader returns an isolated snapshot without an undefined helper (1.792289ms)
+✔ assignment labels use only the permitted Native people list and preserve principal kind (1.259256ms)
+✔ new delivery effect and retry failures are translated without masking human explanations (4.6815ms)
+✔ list inclusion is a local preview and candidates are never selected by default (1.637637ms)
+✔ saved human additions retain their source label and never increase the immutable lookup count (3.012416ms)
+✔ failed lookup hides previous payload while partial keeps explicit incompleteness (1.166005ms)
+✔ zero included items can be saved while completion policy remains explicitly unresolved (0.784983ms)
+✔ a completed empty lookup permits explicit additions without pretending it was never executed (1.662964ms)
+✔ read-only report cannot edit or save and unavailable dispatch is never clickable (1.933442ms)
+✔ revoked evidence never redisplays a locally preserved list or review draft (1.635633ms)
+✔ request reviewer and requester controls use distinct current capabilities (2.113112ms)
+✔ failed or stale report never permits editing a previous result as current evidence (1.145365ms)
+✔ historical values compare only the stored shared input without replacing it (1.225064ms)
+✔ records are scoped and put active runs first without inventing a date range (13.560921ms)
+✔ empty work shows only the earliest real scheduled execution (0.925353ms)
+✔ asking about a historical record only changes private reference and never dispatches (1.141118ms)
+✔ question from a historical row preserves its exact attempt instead of the newest row (2.097909ms)
+✔ draft save sends immutable attempt and both revisions without executing or deciding (1.805258ms)
+✔ late draft save cannot acknowledge or repaint after another work target is selected (1.8728ms)
+✔ request fields follow native schema types and bindings, with reason outside EES values (2.104119ms)
+✔ ad-hoc start lists active factories and disables only those with active work (1.211264ms)
+✔ item verdict options stay pending and AI suggestions cannot enable final confirmation (1.711428ms)
+✔ A7 has automatic save status and no save button, and basis cards expose actual time (1.86612ms)
+✔ navigation flushes edits made while an older review autosave is still in flight (1.498767ms)
+✔ failed automatic review save keeps the current work and preserves its draft (1.146997ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 29
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 84.132596
+
+✖ failing tests:
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:49:1
+✖ real view list reader returns an isolated snapshot without an undefined helper (1.792289ms)
+  evalmachine.<anonymous>:343
+    window.addEventListener('resize',()=>{if(host?.isConnected)layout();});
+           ^
+  
+  TypeError: window.addEventListener is not a function
+      at createWorkView (evalmachine.<anonymous>:343:10)
+      at evalmachine.<anonymous>:1:10
+      at Script.runInContext (node:vm:149:12)
+      at Object.runInContext (node:vm:301:6)
+      at run (/workspace/scratch/00f216f942d9/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:7:40)
+      at TestContext.<anonymous> (/workspace/scratch/00f216f942d9/team-agent-poc/tests/test_ees_work_figma_runtime_ui.cjs:51:37)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)

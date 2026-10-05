@@ -1,0 +1,23 @@
+{
+  "recorded_at": "2026-10-02T07:19:12.786548+00:00",
+  "purpose": "Reject missing explicitly assigned .py modules even when they have no historical baseline IDs; retain wildcard and old-ID/partition/Node guards",
+  "results": [
+    {
+      "command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_delivery_suite -v",
+      "exit_code": 1,
+      "log": "coverage-unit.log",
+      "sha256": "8ddd91826b947bf16711d042f974198157e93aa266fac8b2d02ea2e038d3b3ca"
+    },
+    {
+      "command": ".venv/bin/python tests/ees_delivery_suite.py --audit --output /workspace/scratch/1d6bc68344e4/team-agent-poc-recovered/evals/artifacts/ees-integrated-20261002/recovery-workspace/coverage-audit",
+      "exit_code": 0,
+      "log": "coverage-audit.log",
+      "sha256": "fc0be2b074406e4710e86d8d0d09b3c1be3bb00b65243dbe87f18856f4528595"
+    }
+  ],
+  "source_sha256": {
+    "tests/ees_delivery_suite.py": "c9dc438af72a56056c7ea337fd5953fd517c73e6fb763c27d621bff7229ca638",
+    "tests/test_ees_delivery_suite.py": "e78754278947512f17405e4502b0d99dc75a86a53cea007cf8e2e886f1d2af6d"
+  },
+  "scope": "test infrastructure only; no product or CI trigger/protection modification"
+}

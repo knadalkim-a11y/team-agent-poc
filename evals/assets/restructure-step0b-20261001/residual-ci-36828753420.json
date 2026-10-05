@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-10-01T07:26:08.334Z",
+  "repository": "knadalkim-a11y/team-agent-poc",
+  "run": {
+    "run_id": 36828753420,
+    "head_sha": "07d392c7727e798dc48d036d9e579992fc3d2869",
+    "status": "completed",
+    "conclusion": "failure",
+    "created_at": "2026-10-01T07:09:54Z",
+    "updated_at": "2026-10-01T07:20:13Z"
+  },
+  "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/36828753420",
+  "scope": "First residual-diagnostic commit 07d392c only; later uncommitted helper fixes are not covered.",
+  "linux_job": {
+    "id": 110260279201,
+    "status": "completed",
+    "conclusion": "cancelled",
+    "steps": [
+      {
+        "name": "Verify shared workflow service and real chat Tool",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 28
+      },
+      {
+        "name": "Verify durable chat controls and execution panel state",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 29
+      },
+      {
+        "name": "Verify scoped authoring and the actual previous program",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 30
+      },
+      {
+        "name": "Verify Native signup, approval, scoped authoring and account recovery",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 31
+      },
+      {
+        "name": "Require guarded asset writes",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 32
+      },
+      {
+        "name": "Require native asset writer integration",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 33
+      },
+      {
+        "name": "Verify patched native draft and chat creation against the pinned source",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 34
+      },
+      {
+        "name": "Verify native Open WebUI workflow and real composer integration",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "number": 35
+      },
+      {
+        "name": "Keep EES Work browser evidence",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 36
+      },
+      {
+        "name": "Verify chat theme in the runner's Chrome",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 37
+      },
+      {
+        "name": "Verify specialist execution against the fixed WebUI source",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 38
+      },
+      {
+        "name": "Verify program-only Apply and Restore",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 39
+      },
+      {
+        "name": "Parse the Windows PowerShell entry point",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 40
+      },
+      {
+        "name": "Run python scripts/check_docs.py",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 41
+      },
+      {
+        "name": "Run git diff --check",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 42
+      }
+    ]
+  },
+  "verified_suites": [
+    {
+      "name": "Shared workflow service and real chat Tool",
+      "tests": 178,
+      "seconds": 114.115,
+      "result": "PASS"
+    },
+    {
+      "name": "Native signup/approval/scoped authoring",
+      "tests": 6,
+      "seconds": 55.509,
+      "result": "PASS"
+    },
+    {
+      "name": "Native account switch",
+      "tests": 1,
+      "seconds": 9.749,
+      "result": "PASS"
+    },
+    {
+      "name": "Guarded asset writes",
+      "tests": 16,
+      "seconds": 0.691,
+      "result": "PASS"
+    },
+    {
+      "name": "Native asset writer",
+      "tests": 28,
+      "seconds": 37.019,
+      "result": "PASS"
+    },
+    {
+      "name": "Pinned-source CSS/build verification",
+      "tests": 31,
+      "seconds": 20.473,
+      "result": "PASS"
+    }
+  ],
+  "native_workflow_composer_step35": {
+    "result": "cancelled with preceding failures",
+    "observed_fail_lines_including_subtests": 31,
+    "observed_passed_test_lines": 6,
+    "final_unittest_summary_available": false,
+    "first_failure": "test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width (width=1920, theme=light)",
+    "last_recorded_completed_test": "test_right_recorded_attempt_calls_and_inputs_do_not_mix_after_retry_or_publish ... FAIL",
+    "failure_test_names": [
+      "test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width",
+      "test_a_design_pending_execution_is_not_completion_and_releases_only_one_result",
+      "test_borderless_step_styles_focus_and_long_name_in_native_light_dark_narrow",
+      "test_delayed_action_cannot_replace_another_pending_case_at_the_same_url",
+      "test_delayed_action_response_cannot_replace_another_chat",
+      "test_detail_keeps_opened_attempt_call_and_return_focus_after_new_result",
+      "test_durable_runtime_poll_updates_left_progress_and_job_header_without_navigation",
+      "test_factory_system_scope_restores_chat_drafts_and_history_never_replaces_current_work",
+      "test_first_completion_binds_its_original_factory_after_another_pending_case_is_opened",
+      "test_input_save_double_click_and_held_enter_never_run_or_send_chat",
+      "test_integrated_large_job_browser_counts_filters_pages_and_selection",
+      "test_management_scope_run_excludes_human_retry_and_marks_unconnected_unperformed",
+      "test_missing_skill_preview_uses_same_permission_state_in_steps_and_management",
+      "test_native_chat_sidebar_fonts_and_scope_layout_in_light_dark_and_narrow_view",
+      "test_new_chat_binds_pending_case_and_rejects_old_chat_callback",
+      "test_panel_and_ai_tool_run_same_persisted_case_with_retry_history",
+      "test_real_tiptap_chat_stream_and_sidebar_panel_share_one_screen",
+      "test_right_panels_and_details_keyboard_light_dark_narrow",
+      "test_right_record_lookup_failure_and_restriction_do_not_show_stale_evidence",
+      "test_right_recorded_attempt_calls_and_inputs_do_not_mix_after_retry_or_publish"
+    ],
+    "caveat": "Final FAIL traceback/aggregate was not emitted before cancellation. The captured last_wait is evidence of preparation or selector mismatch, not proof that all remaining assertions or product behavior pass."
+  },
+  "cancellation": {
+    "log_at": "2026-10-01T07:20:10.2301396Z",
+    "message": "The operation was canceled.",
+    "first_runner_log_at": "2026-10-01T07:09:57.8574608Z",
+    "duration_seconds_approx": 612.37,
+    "workflow_contract": {
+      "commit": "07d392c7727e798dc48d036d9e579992fc3d2869",
+      "path": ".github/workflows/ees-delivery.yml",
+      "line": 78,
+      "timeout_minutes": 10,
+      "matrix_fail_fast": false
+    },
+    "interpretation": "Timing is consistent with the configured 10-minute job timeout, allowing setup/cleanup overhead. Explicit timeout annotation was not retrieved, so the cancellation trigger is not asserted as definitively proved."
+  },
+  "artifact": {
+    "id": 11146687488,
+    "name": "ees-work-browser-evidence",
+    "size_bytes": 4978192,
+    "digest": "sha256:b7145046bec78879dbfdb439919173feafd40436c8c5eea5623f8116e8d9b140",
+    "actual_zip_digest_matches_rest": true,
+    "member_count": 67,
+    "png_count": 43,
+    "json_count": 24,
+    "failure_png_count": 21,
+    "failure_json_count": 21,
+    "capture_errors_all_empty": true,
+    "upload_step36": "success",
+    "expires_at": "2026-10-08T07:20:10Z"
+  },
+  "font_evidence": {
+    "png": "residual-ci-signup-pending.png",
+    "json": "residual-ci-signup-pending.json",
+    "direct_png_visual_check": "Korean heading, body and button labels render as readable Korean glyphs, not missing-glyph boxes.",
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "koreanCharacters": 28,
+    "platformFonts": [
+      {
+        "familyName": "Noto Sans KR Thin",
+        "postScriptName": "NotoSansKR-Thin",
+        "isCustomFont": false,
+        "glyphCount": 28
+      },
+      {
+        "familyName": "Inter",
+        "postScriptName": "Inter-Regular",
+        "isCustomFont": true,
+        "glyphCount": 13
+      }
+    ]
+  },
+  "tool_limitations": [
+    {
+      "tool": "mcp__codex_apps__github_fetch",
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/jobs/110260279201",
+      "error": "HTTP 400 INVALID_ARGUMENT: GitHub Fetch URL is not an allowed public GitHub repository or search endpoint.",
+      "attempts": 1,
+      "impact": "Full job detail/check-run annotation not retrieved. Purpose-built job/log tools succeeded; failed URL was not retried."
+    }
+  ],
+  "windows": "Delegated to windows_residual; this report does not re-audit Windows.",
+  "mutations": "No workflow rerun/cancel, product/CI code change or internal endpoint access by monitor."
+}

@@ -1,0 +1,31 @@
+{
+  "module": "test_ees_delivery_artifacts.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 2.398,
+  "tests_run": 3,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 3,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_delivery_artifacts.DeliveryArtifactsTests.test_authored_real_http_recheck_preserves_unknown_verdict_and_report_draft",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_delivery_artifacts.DeliveryArtifactsTests.test_confirmed_list_reorder_exclusion_and_source_recheck_preserve_exact_binding",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_delivery_artifacts.DeliveryArtifactsTests.test_partial_list_cannot_authorize_attachment_batch_or_hide_missing_crs",
+      "status": "passed"
+    }
+  ]
+}

@@ -1,0 +1,417 @@
+{
+  "time": "2026-10-05T08:44:55.535585+00:00",
+  "scope": "Complete packaged Native app gate for the integrated work contract.\n\nOne temporary DATA_DIR and a loopback synthetic model are used. Native auth,\nchat/file storage, workflow APIs, worker and frontend are the built product.\nNo company credentials, DB or service is read. Physical CDP input drives UI;\nread-only DOM evaluation inspects readiness and results. Failure evidence is\ncaptured before browser shutdown. This is distinct from the Native fixtures.\nThis gate was reconstructed after workspace loss from the committed base and\nobserved failures. It is not claimed byte-identical to the lost c144 gate.\n",
+  "source_commit": "4b618e22267c1bd1f9f75c1aab3fb10e24831b00",
+  "source_dirty": true,
+  "wheel": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+  "wheel_sha256": "51b10e3ef545b2d6123dffc34014c973a3c9327488f08d4addb8b10d59959ddf",
+  "gate_sha256": "ec938fc63f50c7d631d3915ecd6c913b0a76ce8c78a207c7fcb70a05b5e01950",
+  "execution": {
+    "python": "3.11.16",
+    "argv": [
+      "tests/ees_work_integrated_app.py",
+      "--wheel",
+      "dist/branding-integrated-remote-1/open_webui-0.11.3+ees.13-py3-none-any.whl",
+      "--chrome",
+      "/tmp/ees-browser/chrome-headless-shell-linux64/chrome-headless-shell",
+      "--output",
+      "dist/followup-ci-product-fix"
+    ],
+    "chrome": "/tmp/ees-browser/chrome-headless-shell-linux64/chrome-headless-shell",
+    "reconstructed_after_workspace_loss": true,
+    "prior_lost_gate_byte_identity_claimed": false
+  },
+  "steps": [
+    {
+      "name": "empty Native installation",
+      "workflows": 0,
+      "runs": 0
+    },
+    {
+      "name": "Native model availability",
+      "models": [
+        {
+          "id": "c3-synthetic-model",
+          "direct": null,
+          "owned_by": "openai"
+        },
+        {
+          "id": "arena-model",
+          "direct": null,
+          "owned_by": "arena"
+        }
+      ]
+    },
+    {
+      "name": "actual built Native render",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "name": "physical authoring save validate publish",
+      "workflow_id": "cda43a39-42a8-464a-b530-6b667b64a004",
+      "version": 1
+    },
+    {
+      "name": "Q1 actual Native layout at 1366x768",
+      "action_bar_visible": true,
+      "message_width_checked": false,
+      "geometry": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "document_width": 1366,
+        "sidebar": {
+          "x": 0,
+          "y": 0,
+          "width": 56,
+          "height": 768,
+          "bottom": 768,
+          "right": 56
+        },
+        "panel": {
+          "x": 886,
+          "y": 0,
+          "width": 480,
+          "height": 768,
+          "bottom": 768,
+          "right": 1366
+        },
+        "chat": {
+          "x": 56,
+          "y": 0,
+          "width": 830,
+          "height": 768,
+          "bottom": 768,
+          "right": 886
+        },
+        "action": {
+          "x": 887,
+          "y": 709,
+          "width": 479,
+          "height": 59,
+          "bottom": 768,
+          "right": 1366
+        },
+        "messages": []
+      }
+    },
+    {
+      "name": "run input save cancel confirmation and actual completion",
+      "run_id": "acb42890-530e-4c3e-a9d0-1fd70cd08fe7",
+      "attempts": 1,
+      "version": 1
+    },
+    {
+      "name": "Native physical send and storage reload",
+      "saved_messages": 2,
+      "chat_id": "b74ddca5-6dcf-42bc-9c4c-e334ff8b55cc",
+      "model_boundary": "loopback synthetic HTTP only"
+    },
+    {
+      "name": "Native attachment chooser upload process send reload",
+      "file_id": "223aa1e8-c14f-42d3-8451-7903ee586f38",
+      "chat_id": "b74ddca5-6dcf-42bc-9c4c-e334ff8b55cc",
+      "model_boundary": "Only model response and embedding vectors are loopback synthesis"
+    },
+    {
+      "name": "Q1 actual Native layout at 1366x768",
+      "action_bar_visible": false,
+      "message_width_checked": true,
+      "geometry": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "document_width": 1366,
+        "sidebar": {
+          "x": 0,
+          "y": 0,
+          "width": 56,
+          "height": 768,
+          "bottom": 768,
+          "right": 56
+        },
+        "panel": {
+          "x": 886,
+          "y": 0,
+          "width": 480,
+          "height": 768,
+          "bottom": 768,
+          "right": 1366
+        },
+        "chat": {
+          "x": 56,
+          "y": 0,
+          "width": 830,
+          "height": 768,
+          "bottom": 768,
+          "right": 886
+        },
+        "action": {
+          "x": 887,
+          "y": 709,
+          "width": 479,
+          "height": 59,
+          "bottom": 768,
+          "right": 1366
+        },
+        "messages": [
+          {
+            "x": 91,
+            "y": 128,
+            "width": 760,
+            "height": 108.75,
+            "bottom": 236.75,
+            "right": 851
+          },
+          {
+            "x": 91,
+            "y": 264.75,
+            "width": 760,
+            "height": 74.75,
+            "bottom": 339.5,
+            "right": 851
+          },
+          {
+            "x": 91,
+            "y": 367.5,
+            "width": 760,
+            "height": 116.75,
+            "bottom": 484.25,
+            "right": 851
+          },
+          {
+            "x": 91,
+            "y": 512.25,
+            "width": 760,
+            "height": 140.75,
+            "bottom": 653,
+            "right": 851
+          }
+        ]
+      }
+    },
+    {
+      "name": "Native and work restart persistence",
+      "chat_preserved": true,
+      "attempts_preserved": true
+    },
+    {
+      "name": "latest Figma isolated API fixtures",
+      "workflow_id": "2deba0fd-873e-4fb6-a05b-41aec07a70be",
+      "native_tool_source_sha256": "d6bb9bee2a7919b994008393d48188cd43d1a26404b013f21bc6d56f3e95085c",
+      "business_completion": false,
+      "external_boundary": "Loopback synthetic Jira and model HTTP only"
+    },
+    {
+      "name": "Figma B2-2 physical job rule edit and draft save",
+      "workflow_id": "bea7458a-4bb2-4881-875f-0702b69bf817",
+      "result_block": "checklist",
+      "published": false,
+      "business_completion": false
+    },
+    {
+      "name": "Figma B2-1 physical schedule preview and draft save",
+      "draft_revision": 4,
+      "published_version": 1,
+      "reservation_created": false
+    },
+    {
+      "name": "Figma S1 actual HTTP failure and bounded read retry",
+      "attempt_statuses": [
+        "failed",
+        "succeeded"
+      ],
+      "external_http_requests": [
+        {
+          "path": "/rest/api/2/myself",
+          "status": 503
+        },
+        {
+          "path": "/rest/api/2/myself",
+          "status": 200
+        },
+        {
+          "path": "/rest/api/2/project",
+          "status": 200
+        },
+        {
+          "path": "/rest/api/2/project/EESEMS/statuses",
+          "status": 200
+        },
+        {
+          "path": "/rest/api/2/field",
+          "status": 200
+        },
+        {
+          "path": "/rest/api/2/search",
+          "status": 200
+        }
+      ],
+      "native_tool_attempts": 2,
+      "business_completed": false,
+      "failed_result_preserved": true
+    },
+    {
+      "name": "Figma A6 physical Native tool call list selection and atomic confirmation",
+      "attempts": 3,
+      "original_result_preserved": true,
+      "confirmed_items": 2
+    },
+    {
+      "name": "Figma A7 physical AI review autosave and explicit confirmation",
+      "completion_kind": "review",
+      "actual_delivery": false,
+      "original_result_preserved": true,
+      "autosave_confirmed": false,
+      "send_control_present": false,
+      "confirmed_text": "사람이 보완한 실제 제품 검토 본문. 합성 자료이며 송부하지 않았습니다."
+    },
+    {
+      "name": "Figma S2 physical readonly history and reference with restart persistence",
+      "original_shared_value_preserved": true,
+      "current_value_not_substituted": true,
+      "attempts": 4,
+      "actual_native_historical_tool_calls": 1,
+      "stored_chat_messages": 6,
+      "narrow_work_ready": true,
+      "physical_scroll_verified": true
+    },
+    {
+      "name": "Figma B2-3 delivery recommendation permits physical publish",
+      "recommendations": 1,
+      "external_delivery": false
+    },
+    {
+      "name": "Figma A7 delivery purpose review cannot close or claim sent",
+      "completion_kind": "delivery",
+      "human_review_saved": true,
+      "business_status": "blocked",
+      "reason": "delivery_unconfigured",
+      "actual_delivery": false
+    },
+    {
+      "name": "Figma A8 active factory remains visible and duplicate start is disabled",
+      "factory_id": "synthetic-c12-factory",
+      "existing_run_unchanged": true,
+      "duplicate_created": false
+    }
+  ],
+  "status": "passed",
+  "browser_cleanup_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 37975.245413000266,
+    "pid": 43,
+    "exit_code": 0,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "HeadlessChrome/153.0.8010.52",
+      "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+      "jsVersion": "15.3.76.13"
+    },
+    "target_id": "A4C341A801FA4AFD76202ACE0C368325",
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 971,
+      "method": "Browser.close",
+      "session_attached": false,
+      "timeout_seconds": 5,
+      "elapsed_ms": 0.14418699993257178,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 959,
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 960,
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 961,
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 962,
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 963,
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 964,
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 965,
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 966,
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 967,
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 968,
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 969,
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 970,
+        "sessionId": "511FBB239E97B20D79E205BA8817E241"
+      },
+      {
+        "id": 971
+      }
+    ],
+    "stderr_tail": "[1005/044502.568333:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1005/044502.568703:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1005/044502.569105:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1005/044502.569122:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1005/044502.569307:ERROR:net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)\n[1005/044502.570212:ERROR:device/udev_linux/udev_watcher.cc:51] Failed to initialize a udev monitor.\n[1005/044502.570748:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 61: No such file or directory (2)\n[1005/044502.577333:WARNING:media/gpu/vaapi/vaapi_wrapper.cc:1660] drmGetDevices2() has not found any devices\n[1005/044502.578590:WARNING:sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.\n[1005/044502.608866:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1005/044502.608966:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1005/044502.608970:WARNING:device/bluetooth/dbus/bluez_dbus_manager.cc:209] Floss manager service not available, cannot set Floss enable/disable.\n[1005/044502.611113:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1005/044502.631788:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 97: No such file or directory (2)\n[1005/044502.661926:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1005/044502.661979:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 159.77987899987056,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    "bootstrap_observation": null
+  }
+}

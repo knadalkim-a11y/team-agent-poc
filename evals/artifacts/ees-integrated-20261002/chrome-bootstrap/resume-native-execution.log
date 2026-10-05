@@ -1,0 +1,10 @@
+test_delayed_input_write_keeps_exact_original_run_after_chat_change (test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_delayed_input_write_keeps_exact_original_run_after_chat_change) ... ok
+test_delayed_workspace_read_cannot_replace_new_workflow (test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_delayed_workspace_read_cannot_replace_new_workflow) ... ok
+test_same_account_two_native_targets_keep_local_input_after_conflict (test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_same_account_two_native_targets_keep_local_input_after_conflict) ... ok
+test_failed_history_lookup_never_reveals_previous_attempt_or_input (test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_failed_history_lookup_never_reveals_previous_attempt_or_input) ... ok
+test_revoked_native_actor_scope_removes_open_result_and_author_controls (test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_revoked_native_actor_scope_removes_open_result_and_author_controls) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 12.953s
+
+OK

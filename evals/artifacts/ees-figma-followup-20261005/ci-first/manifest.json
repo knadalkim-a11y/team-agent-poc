@@ -1,0 +1,694 @@
+{
+  "schema": 1,
+  "run_id": 37284962975,
+  "run_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37284962975",
+  "status": "failed",
+  "head_sha": "4b618e22267c1bd1f9f75c1aab3fb10e24831b00",
+  "checkout_merge_sha": "cad7684f5d634e1a3178cc86b7a49c7d48bb6d99",
+  "report_source_dirty": true,
+  "source_dirty_cause_not_inferred": true,
+  "merge_tree_equals_review_head": true,
+  "tree_sha": "62bc7e8ce480051717ae81ec91a24039da923a80",
+  "wheel_sha256": "51b10e3ef545b2d6123dffc34014c973a3c9327488f08d4addb8b10d59959ddf",
+  "gate_sha256": "b62c92f9d2f420a885ceaf6f309dc300441721f681cde0cebe0e03471ae8d7c6",
+  "native_zip_digest_comparisons": 5,
+  "coverage_zip_digest_comparisons": 1,
+  "all_archive_digests_match": true,
+  "archives": [
+    {
+      "artifact_name": "ees-native-complete-product-cad7684f5d634e1a3178cc86b7a49c7d48bb6d99",
+      "artifact_id": 11333754112,
+      "zip_file": "ees-native-complete-product-cad7684f5d634e1a3178cc86b7a49c7d48bb6d99.zip",
+      "github_sha256": "fb85ee1ea24cfb4c460dc5ca953fb30a8dcbb93f58acd40c285682bb7aa61c40",
+      "downloaded_sha256": "fb85ee1ea24cfb4c460dc5ca953fb30a8dcbb93f58acd40c285682bb7aa61c40",
+      "digest_matches": true,
+      "bytes": 3509926,
+      "members": 77,
+      "inventory": "zip-inventories/native-product.json"
+    },
+    {
+      "artifact_name": "ees-work-browser-evidence-native-account",
+      "artifact_id": 11333328299,
+      "zip_file": "ees-work-browser-evidence-native-account.zip",
+      "github_sha256": "60c35d42de834ac82ac094942d97f82683a281675f0370b703f5873f64198b06",
+      "downloaded_sha256": "60c35d42de834ac82ac094942d97f82683a281675f0370b703f5873f64198b06",
+      "digest_matches": true,
+      "bytes": 536955,
+      "members": 16,
+      "inventory": "zip-inventories/native-account.json"
+    },
+    {
+      "artifact_name": "ees-work-browser-evidence-native-work",
+      "artifact_id": 11334261193,
+      "zip_file": "ees-work-browser-evidence-native-work.zip",
+      "github_sha256": "effce20e48bc41378d47b919ff509588c91a9371526e413aa796c57aaa6818a0",
+      "downloaded_sha256": "effce20e48bc41378d47b919ff509588c91a9371526e413aa796c57aaa6818a0",
+      "digest_matches": true,
+      "bytes": 449855,
+      "members": 10,
+      "inventory": "zip-inventories/native-work.json"
+    },
+    {
+      "artifact_name": "ees-work-browser-evidence-native-compose",
+      "artifact_id": 11334291593,
+      "zip_file": "ees-work-browser-evidence-native-compose.zip",
+      "github_sha256": "a378667c7c0b9c5a967f6ca442c7e0a98889de5b638e1c2a1fe0f61dad86696e",
+      "downloaded_sha256": "a378667c7c0b9c5a967f6ca442c7e0a98889de5b638e1c2a1fe0f61dad86696e",
+      "digest_matches": true,
+      "bytes": 2765708,
+      "members": 50,
+      "inventory": "zip-inventories/native-compose.json"
+    },
+    {
+      "artifact_name": "ees-work-browser-evidence-native-execution",
+      "artifact_id": 11333957299,
+      "zip_file": "ees-work-browser-evidence-native-execution.zip",
+      "github_sha256": "435f8d7f33a5886fef7d4ffee98fd38c9e2b15f0dc530abb7c43bfc53047631b",
+      "downloaded_sha256": "435f8d7f33a5886fef7d4ffee98fd38c9e2b15f0dc530abb7c43bfc53047631b",
+      "digest_matches": true,
+      "bytes": 353162,
+      "members": 9,
+      "inventory": "zip-inventories/native-execution.json"
+    },
+    {
+      "artifact_name": "ees-delivery-coverage-cad7684f5d634e1a3178cc86b7a49c7d48bb6d99",
+      "artifact_id": 11333229502,
+      "zip_file": "ees-ci-coverage.zip",
+      "github_sha256": "b325e038b20c1d480049bc077c0f32570217629f86bd0660c17cf5673d0d8f32",
+      "downloaded_sha256": "b325e038b20c1d480049bc077c0f32570217629f86bd0660c17cf5673d0d8f32",
+      "digest_matches": true,
+      "bytes": 19675,
+      "members": 1,
+      "inventory": "zip-inventories/coverage.json"
+    }
+  ],
+  "suite_summaries": [
+    {
+      "suite": "native-account",
+      "status": "passed",
+      "counts": {
+        "passed": 29,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "modules": [
+        {
+          "module": "test_ees_chat_theme.py",
+          "status": "passed",
+          "counts": {
+            "passed": 21,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          }
+        },
+        {
+          "module": "test_ees_work_authoring_account_switch.py",
+          "status": "passed",
+          "counts": {
+            "passed": 1,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          }
+        },
+        {
+          "module": "test_ees_work_authoring_native.py",
+          "status": "passed",
+          "counts": {
+            "passed": 7,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          }
+        }
+      ]
+    },
+    {
+      "suite": "native-work",
+      "status": "passed",
+      "counts": {
+        "passed": 12,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "modules": [
+        {
+          "module": "test_ees_work_demo.py",
+          "status": "passed",
+          "counts": {
+            "passed": 12,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          }
+        }
+      ]
+    },
+    {
+      "suite": "native-compose",
+      "status": "failed",
+      "counts": {
+        "passed": 23,
+        "failed": 1,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "modules": [
+        {
+          "module": "test_ees_work_c_phase1_native.py",
+          "status": "passed",
+          "counts": {
+            "passed": 5,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          }
+        },
+        {
+          "module": "test_ees_work_c_phase2_native.py",
+          "status": "passed",
+          "counts": {
+            "passed": 6,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          }
+        },
+        {
+          "module": "test_ees_work_figma_authoring_native.py",
+          "status": "failed",
+          "counts": {
+            "passed": 2,
+            "failed": 1,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          }
+        },
+        {
+          "module": "test_ees_work_figma_layout_native.py",
+          "status": "passed",
+          "counts": {
+            "passed": 2,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          }
+        },
+        {
+          "module": "test_ees_work_figma_runtime_native.py",
+          "status": "passed",
+          "counts": {
+            "passed": 8,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          }
+        }
+      ]
+    },
+    {
+      "suite": "native-execution",
+      "status": "passed",
+      "counts": {
+        "passed": 5,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "modules": [
+        {
+          "module": "test_ees_work_c_phase3_native.py",
+          "status": "passed",
+          "counts": {
+            "passed": 3,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          }
+        },
+        {
+          "module": "test_ees_work_c_phase3_privacy.py",
+          "status": "passed",
+          "counts": {
+            "passed": 2,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          }
+        }
+      ]
+    }
+  ],
+  "failures": [
+    {
+      "suite": "native-compose",
+      "module": "test_ees_work_figma_authoring_native.py",
+      "tests": 3,
+      "passed": 2,
+      "failed": 1,
+      "diagnosis": "Stale .ew-author-error selector after validate. Dedicated B2-3 correctly rendered read_retry blocker and disabled publish; no unknown routes.",
+      "diagnosis_source": "Retained failed test detail, failure DOM/PNG and source review."
+    },
+    {
+      "suite": "native-product",
+      "completed_checkpoints": 17,
+      "status": "failed",
+      "diagnosis": "Gate asserted publish enabled immediately after the B2-3 validation element appeared. Correct zero blockers and delivery advisory had rendered; refresh remained busy before final button repaint.",
+      "diagnosis_source": "Failure DOM/PNG and source handler/gate review; subsequent bounded readiness retest reported separately."
+    }
+  ],
+  "local_retests": [
+    {
+      "id": "retest-authoring",
+      "scope": "Local test-only correction; not a rerun of the failed automatic CI",
+      "status": "passed",
+      "tests": 3,
+      "passed": 3,
+      "skipped": 0,
+      "wheel_sha256": "51b10e3ef545b2d6123dffc34014c973a3c9327488f08d4addb8b10d59959ddf",
+      "change": "Assert exact B2-3 blocker and disabled publish, then physically navigate through blocker Open. Product unchanged."
+    },
+    {
+      "id": "retest-product",
+      "scope": "Local test-only correction; not a rerun of the failed automatic CI",
+      "status": "passed",
+      "completed_checkpoints": 20,
+      "wheel_sha256": "51b10e3ef545b2d6123dffc34014c973a3c9327488f08d4addb8b10d59959ddf",
+      "source_commit": "4b618e22267c1bd1f9f75c1aab3fb10e24831b00",
+      "source_dirty": true,
+      "gate_sha256": "f39421dcb862a0464e2389485154b36f938a21146230cf5d7c089b5276e19b1b",
+      "change": "Two bounded read-only waits for enabled publish. Retains enabled assertion, physical publish, exact published version, blocked delivery and factory duplicate checks. Product unchanged."
+    }
+  ],
+  "preservation": {
+    "original_failed_ci_not_overwritten": true,
+    "failure_pngs_byte_identical": true,
+    "success_screenshots_omitted_from_first_ci_bundle": true,
+    "all_zip_members_inventoried_and_hashed": true,
+    "synthetic_fixtures_only": true,
+    "sanitization": "Credentials in exact field keys redacted if present; private local filesystem roots replaced; no statuses/assertions changed."
+  },
+  "files": [
+    {
+      "file": "native-product/ees-native-product/failure.json",
+      "source": "ees-native-complete-product-cad7684f5d634e1a3178cc86b7a49c7d48bb6d99.zip!/ees-native-product/failure.json",
+      "source_sha256": "2961237094228abe1bdb5bf38d2a20a96c11fb5f04785d2b7e48ce9c99294328",
+      "sha256": "2961237094228abe1bdb5bf38d2a20a96c11fb5f04785d2b7e48ce9c99294328",
+      "bytes": 51383,
+      "sanitized": false
+    },
+    {
+      "file": "native-product/ees-native-product/failure.png",
+      "source": "ees-native-complete-product-cad7684f5d634e1a3178cc86b7a49c7d48bb6d99.zip!/ees-native-product/failure.png",
+      "source_sha256": "cde42dfabebab2c9964899c0de6b8ecb0a05862adedcb408ba3c1445034db5de",
+      "sha256": "cde42dfabebab2c9964899c0de6b8ecb0a05862adedcb408ba3c1445034db5de",
+      "bytes": 120011,
+      "sanitized": false
+    },
+    {
+      "file": "native-product/ees-native-product/report.json",
+      "source": "ees-native-complete-product-cad7684f5d634e1a3178cc86b7a49c7d48bb6d99.zip!/ees-native-product/report.json",
+      "source_sha256": "1913a83d7edb997533407a83f1a1a6ddbf5ed38c660cc479b36ec556cb7b5770",
+      "sha256": "1913a83d7edb997533407a83f1a1a6ddbf5ed38c660cc479b36ec556cb7b5770",
+      "bytes": 23263,
+      "sanitized": false
+    },
+    {
+      "file": "zip-inventories/native-product.json",
+      "source": "Derived from authenticated downloaded artifact ZIP; all uncompressed member hashes",
+      "source_sha256": "b7c214b9b959bb94aece0729fc676acc8cb4fa8fdad18cf5a55a7a261ba40738",
+      "sha256": "b7c214b9b959bb94aece0729fc676acc8cb4fa8fdad18cf5a55a7a261ba40738",
+      "bytes": 18869,
+      "sanitized": false
+    },
+    {
+      "file": "native-account/ees-results/suite.json",
+      "source": "ees-work-browser-evidence-native-account.zip!/ees-results/suite.json",
+      "source_sha256": "e9ee2e6151e627e641ef3a5e7598ab08412bdb58c8746b116f0c750c80b264c9",
+      "sha256": "e9ee2e6151e627e641ef3a5e7598ab08412bdb58c8746b116f0c750c80b264c9",
+      "bytes": 309,
+      "sanitized": false
+    },
+    {
+      "file": "native-account/ees-results/browser-evidence.json",
+      "source": "ees-work-browser-evidence-native-account.zip!/ees-results/browser-evidence.json",
+      "source_sha256": "5dbd4cb82aa49cdd924edd5b235ec83048b85242cd5d25f107697fad8e60b43b",
+      "sha256": "5dbd4cb82aa49cdd924edd5b235ec83048b85242cd5d25f107697fad8e60b43b",
+      "bytes": 1898,
+      "sanitized": false
+    },
+    {
+      "file": "native-account/ees-results/test_ees_chat_theme.json",
+      "source": "ees-work-browser-evidence-native-account.zip!/ees-results/test_ees_chat_theme.json",
+      "source_sha256": "326f1f454d721d0d37bfd1f57c8eafb7ce4dd1866921da5f779c175d1bbb79f9",
+      "sha256": "326f1f454d721d0d37bfd1f57c8eafb7ce4dd1866921da5f779c175d1bbb79f9",
+      "bytes": 3955,
+      "sanitized": false
+    },
+    {
+      "file": "native-account/ees-results/test_ees_work_authoring_account_switch.json",
+      "source": "ees-work-browser-evidence-native-account.zip!/ees-results/test_ees_work_authoring_account_switch.json",
+      "source_sha256": "6111319578cc275863c18cd628f37370d7a5fdcbe261520b80d60cbe23e26428",
+      "sha256": "6111319578cc275863c18cd628f37370d7a5fdcbe261520b80d60cbe23e26428",
+      "bytes": 548,
+      "sanitized": false
+    },
+    {
+      "file": "native-account/ees-results/test_ees_work_authoring_native.json",
+      "source": "ees-work-browser-evidence-native-account.zip!/ees-results/test_ees_work_authoring_native.json",
+      "source_sha256": "fa83db528cc484ab88e577309f2a4ca55b7ba16b92380c8276886c0973255f60",
+      "sha256": "fa83db528cc484ab88e577309f2a4ca55b7ba16b92380c8276886c0973255f60",
+      "bytes": 1538,
+      "sanitized": false
+    },
+    {
+      "file": "zip-inventories/native-account.json",
+      "source": "Derived from authenticated downloaded artifact ZIP; all uncompressed member hashes",
+      "source_sha256": "89607381e84cb283e9a09095930ee16efa84704143e1fc4f0a6421ab37f550d3",
+      "sha256": "89607381e84cb283e9a09095930ee16efa84704143e1fc4f0a6421ab37f550d3",
+      "bytes": 3993,
+      "sanitized": false
+    },
+    {
+      "file": "native-work/ees-results/browser-evidence.json",
+      "source": "ees-work-browser-evidence-native-work.zip!/ees-results/browser-evidence.json",
+      "source_sha256": "38f601bd1c9d2c1d9e83f7b0db95bcb0f93c8b6ce6ce089f0396c55051979dcc",
+      "sha256": "38f601bd1c9d2c1d9e83f7b0db95bcb0f93c8b6ce6ce089f0396c55051979dcc",
+      "bytes": 1225,
+      "sanitized": false
+    },
+    {
+      "file": "native-work/ees-results/test_ees_work_demo.json",
+      "source": "ees-work-browser-evidence-native-work.zip!/ees-results/test_ees_work_demo.json",
+      "source_sha256": "e5e72ddcfb35b0b846a609b455c5bf6607f21ca616881a8a0e4f6cd1e226db01",
+      "sha256": "e5e72ddcfb35b0b846a609b455c5bf6607f21ca616881a8a0e4f6cd1e226db01",
+      "bytes": 2230,
+      "sanitized": false
+    },
+    {
+      "file": "native-work/ees-results/suite.json",
+      "source": "ees-work-browser-evidence-native-work.zip!/ees-results/suite.json",
+      "source_sha256": "c249bf8ddd57ce81568411670a73bb0aff736be58e15e7084002ea807e6c93ae",
+      "sha256": "c249bf8ddd57ce81568411670a73bb0aff736be58e15e7084002ea807e6c93ae",
+      "bytes": 123,
+      "sanitized": false
+    },
+    {
+      "file": "zip-inventories/native-work.json",
+      "source": "Derived from authenticated downloaded artifact ZIP; all uncompressed member hashes",
+      "source_sha256": "d00ed4d4af9fdc7b4f2c77beb94844a42c945e9bd6cc476699c9dd8561bde517",
+      "sha256": "d00ed4d4af9fdc7b4f2c77beb94844a42c945e9bd6cc476699c9dd8561bde517",
+      "bytes": 2511,
+      "sanitized": false
+    },
+    {
+      "file": "native-compose/ees-results/browser-evidence.json",
+      "source": "ees-work-browser-evidence-native-compose.zip!/ees-results/browser-evidence.json",
+      "source_sha256": "874dbb91194f88faf848210d26838e7a192e404dc5eddf58632c89c357fd2850",
+      "sha256": "874dbb91194f88faf848210d26838e7a192e404dc5eddf58632c89c357fd2850",
+      "bytes": 7682,
+      "sanitized": false
+    },
+    {
+      "file": "native-compose/ees-results/suite.json",
+      "source": "ees-work-browser-evidence-native-compose.zip!/ees-results/suite.json",
+      "source_sha256": "07e7f05e171cf9ca73835354c462b6ec051ff1c24ae7fa4245909941f9521080",
+      "sha256": "07e7f05e171cf9ca73835354c462b6ec051ff1c24ae7fa4245909941f9521080",
+      "bytes": 497,
+      "sanitized": false
+    },
+    {
+      "file": "native-compose/ees-results/test_ees_work_c_phase1_native.json",
+      "source": "ees-work-browser-evidence-native-compose.zip!/ees-results/test_ees_work_c_phase1_native.json",
+      "source_sha256": "07144e0df9c5145313b5361f8992153123632a98fd99b9cf29f90f4e78ff76de",
+      "sha256": "07144e0df9c5145313b5361f8992153123632a98fd99b9cf29f90f4e78ff76de",
+      "bytes": 1197,
+      "sanitized": false
+    },
+    {
+      "file": "native-compose/ees-results/test_ees_work_c_phase2_native.json",
+      "source": "ees-work-browser-evidence-native-compose.zip!/ees-results/test_ees_work_c_phase2_native.json",
+      "source_sha256": "6f53e35f9f20acaab6f31a48e31a19af96ffa8c2bfb836e0458df03b35a7bb04",
+      "sha256": "6f53e35f9f20acaab6f31a48e31a19af96ffa8c2bfb836e0458df03b35a7bb04",
+      "bytes": 1344,
+      "sanitized": false
+    },
+    {
+      "file": "native-compose/ees-results/test_ees_work_figma_authoring_native.json",
+      "source": "ees-work-browser-evidence-native-compose.zip!/ees-results/test_ees_work_figma_authoring_native.json",
+      "source_sha256": "f3a838af5ce4d5e0c7ea0866557e4f572fb0cef7aa201cdf1adff5db604ad90b",
+      "sha256": "0512a271f3bc1c6064c7324ca348b6a4a7dc7fa9215f831bcc4eb2ff28552b0a",
+      "bytes": 2997,
+      "sanitized": true
+    },
+    {
+      "file": "native-compose/ees-results/test_ees_work_figma_layout_native.json",
+      "source": "ees-work-browser-evidence-native-compose.zip!/ees-results/test_ees_work_figma_layout_native.json",
+      "source_sha256": "ee471bc0cfe2b03ff05b7e257d1715d68ae2c1eb065a6ea7cff8cb8706d94b1c",
+      "sha256": "ee471bc0cfe2b03ff05b7e257d1715d68ae2c1eb065a6ea7cff8cb8706d94b1c",
+      "bytes": 689,
+      "sanitized": false
+    },
+    {
+      "file": "native-compose/ees-results/test_ees_work_figma_runtime_native.json",
+      "source": "ees-work-browser-evidence-native-compose.zip!/ees-results/test_ees_work_figma_runtime_native.json",
+      "source_sha256": "d341f1adb3d9c545be4a7e3912cc1b04bc6d423edba02c635777a4a11160da78",
+      "sha256": "d341f1adb3d9c545be4a7e3912cc1b04bc6d423edba02c635777a4a11160da78",
+      "bytes": 1825,
+      "sanitized": false
+    },
+    {
+      "file": "native-compose/ees-work-screenshots/integrated-test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately-failure-cleanup.json",
+      "source": "ees-work-browser-evidence-native-compose.zip!/ees-work-screenshots/integrated-test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately-failure-cleanup.json",
+      "source_sha256": "9a8189941fac3ef641fe3eae19bb90161bf799b826513596836bcc6ad64eb5c0",
+      "sha256": "9a8189941fac3ef641fe3eae19bb90161bf799b826513596836bcc6ad64eb5c0",
+      "bytes": 7370,
+      "sanitized": false
+    },
+    {
+      "file": "native-compose/ees-work-screenshots/integrated-test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately-failure-dom.json",
+      "source": "ees-work-browser-evidence-native-compose.zip!/ees-work-screenshots/integrated-test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately-failure-dom.json",
+      "source_sha256": "bb87df90fa382a63d0482ce31814132f0060a8d2ec9cad95918f24aa5783bf57",
+      "sha256": "bb87df90fa382a63d0482ce31814132f0060a8d2ec9cad95918f24aa5783bf57",
+      "bytes": 8995,
+      "sanitized": false
+    },
+    {
+      "file": "native-compose/ees-work-screenshots/integrated-test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately-failure.json",
+      "source": "ees-work-browser-evidence-native-compose.zip!/ees-work-screenshots/integrated-test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately-failure.json",
+      "source_sha256": "cefc377e27074cb3584405cc9d9069de5668f2962e691a7a868d7bfd5ecbd67d",
+      "sha256": "cefc377e27074cb3584405cc9d9069de5668f2962e691a7a868d7bfd5ecbd67d",
+      "bytes": 26205,
+      "sanitized": false
+    },
+    {
+      "file": "native-compose/ees-work-screenshots/integrated-test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately-failure.png",
+      "source": "ees-work-browser-evidence-native-compose.zip!/ees-work-screenshots/integrated-test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately-failure.png",
+      "source_sha256": "cb1f7e84a9c718da5c4d32d4acd8b16ccb5ec2520e3979dc3ce1233ba10f0505",
+      "sha256": "cb1f7e84a9c718da5c4d32d4acd8b16ccb5ec2520e3979dc3ce1233ba10f0505",
+      "bytes": 116218,
+      "sanitized": false
+    },
+    {
+      "file": "zip-inventories/native-compose.json",
+      "source": "Derived from authenticated downloaded artifact ZIP; all uncompressed member hashes",
+      "source_sha256": "e3ed5471e724d58b957114719d07462012aeb5c776e08b34ee4bf9bc1571eafc",
+      "sha256": "e3ed5471e724d58b957114719d07462012aeb5c776e08b34ee4bf9bc1571eafc",
+      "bytes": 12852,
+      "sanitized": false
+    },
+    {
+      "file": "native-execution/ees-results/browser-evidence.json",
+      "source": "ees-work-browser-evidence-native-execution.zip!/ees-results/browser-evidence.json",
+      "source_sha256": "799ea0b5cbc7bac7a94b498a1f300708b53ab4faf1835153e2c8ceb9d110f350",
+      "sha256": "799ea0b5cbc7bac7a94b498a1f300708b53ab4faf1835153e2c8ceb9d110f350",
+      "bytes": 924,
+      "sanitized": false
+    },
+    {
+      "file": "native-execution/ees-results/suite.json",
+      "source": "ees-work-browser-evidence-native-execution.zip!/ees-results/suite.json",
+      "source_sha256": "36a2afdc1e0840c25a253460f910f6fa1e40bfeccbba492596eac4a76a9618a2",
+      "sha256": "36a2afdc1e0840c25a253460f910f6fa1e40bfeccbba492596eac4a76a9618a2",
+      "bytes": 226,
+      "sanitized": false
+    },
+    {
+      "file": "native-execution/ees-results/test_ees_work_c_phase3_native.json",
+      "source": "ees-work-browser-evidence-native-execution.zip!/ees-results/test_ees_work_c_phase3_native.json",
+      "source_sha256": "b845cd3089530cbfd33a725af67cedeca936a3d0d5df092fa4fa2eaa2e41cea2",
+      "sha256": "b845cd3089530cbfd33a725af67cedeca936a3d0d5df092fa4fa2eaa2e41cea2",
+      "bytes": 858,
+      "sanitized": false
+    },
+    {
+      "file": "native-execution/ees-results/test_ees_work_c_phase3_privacy.json",
+      "source": "ees-work-browser-evidence-native-execution.zip!/ees-results/test_ees_work_c_phase3_privacy.json",
+      "source_sha256": "f878b0d40961f41189bb38905125c0c47924e969c78188446ec51946ab57f9e1",
+      "sha256": "f878b0d40961f41189bb38905125c0c47924e969c78188446ec51946ab57f9e1",
+      "bytes": 714,
+      "sanitized": false
+    },
+    {
+      "file": "zip-inventories/native-execution.json",
+      "source": "Derived from authenticated downloaded artifact ZIP; all uncompressed member hashes",
+      "source_sha256": "3114633da4327a9970a6973fd9ffa395380d4d221446ce5ca1d8ce22945d7992",
+      "sha256": "3114633da4327a9970a6973fd9ffa395380d4d221446ce5ca1d8ce22945d7992",
+      "bytes": 2301,
+      "sanitized": false
+    },
+    {
+      "file": "coverage/coverage.json",
+      "source": "ees-delivery-coverage-cad7684f5d634e1a3178cc86b7a49c7d48bb6d99.zip!/coverage.json",
+      "source_sha256": "3f9dd0ca40300cc5f8449fedd74ab40e26c2198a947c34d67c0f1db2026228b2",
+      "sha256": "3f9dd0ca40300cc5f8449fedd74ab40e26c2198a947c34d67c0f1db2026228b2",
+      "bytes": 330494,
+      "sanitized": false
+    },
+    {
+      "file": "zip-inventories/coverage.json",
+      "source": "Derived from authenticated downloaded artifact ZIP; all uncompressed member hashes",
+      "source_sha256": "e538427d251f4333a5231b1850e6bba669edf347d7922314cd2cc58c45a0b157",
+      "sha256": "e538427d251f4333a5231b1850e6bba669edf347d7922314cd2cc58c45a0b157",
+      "bytes": 346,
+      "sanitized": false
+    },
+    {
+      "file": "github-artifacts.json",
+      "source": "GitHub artifact API response; selected five Native artifacts and coverage artifact",
+      "source_sha256": "7b5330163c0bf51b80362c316c8fea617655ff08418d27e84e6ab011223e6162",
+      "sha256": "7b5330163c0bf51b80362c316c8fea617655ff08418d27e84e6ab011223e6162",
+      "bytes": 5431,
+      "sanitized": false
+    },
+    {
+      "file": "merge-tree-proof.json",
+      "source": "GitHub Git Data API GET commits; selected SHA, tree, parent and URL fields, personal author metadata omitted",
+      "source_sha256": "fd5b5406909617a9d47f46e95b1b05ef3a5d62337b0dcccc225ce7b6d576604c",
+      "sha256": "fd5b5406909617a9d47f46e95b1b05ef3a5d62337b0dcccc225ce7b6d576604c",
+      "bytes": 2398,
+      "sanitized": false
+    },
+    {
+      "file": "retest-authoring/test_ees_work_figma_authoring_native.json",
+      "source": "dist/ci-authoring-fix/results/test_ees_work_figma_authoring_native.json",
+      "source_sha256": "255f0716f1de9a3820fb11207f46c0c668ef15a333e1a2b5c24ce39639367f7f",
+      "sha256": "255f0716f1de9a3820fb11207f46c0c668ef15a333e1a2b5c24ce39639367f7f",
+      "bytes": 939,
+      "sanitized": false
+    },
+    {
+      "file": "retest-authoring/ci-authoring-fix.log",
+      "source": "dist/ci-authoring-fix.log",
+      "source_sha256": "b370a7747c44e3c27c631f3e1c8cdb8ca4e53e8966699c3a4a352ad58a191537",
+      "sha256": "b370a7747c44e3c27c631f3e1c8cdb8ca4e53e8966699c3a4a352ad58a191537",
+      "bytes": 1158,
+      "sanitized": false
+    },
+    {
+      "file": "retest-authoring/integrated-figma-read-retry-publication-blocker-dom.json",
+      "source": "dist/ci-authoring-fix/screenshots/integrated-figma-read-retry-publication-blocker-dom.json",
+      "source_sha256": "a9bd98bb3b7be609c4c1fe5d40867d0ac85f98bd376cb882a073866f42de9570",
+      "sha256": "a9bd98bb3b7be609c4c1fe5d40867d0ac85f98bd376cb882a073866f42de9570",
+      "bytes": 8995,
+      "sanitized": false
+    },
+    {
+      "file": "retest-authoring/integrated-figma-read-retry-publication-blocker.png",
+      "source": "dist/ci-authoring-fix/screenshots/integrated-figma-read-retry-publication-blocker.png",
+      "source_sha256": "280068662d355aa3647c8fd4ae864520fe412e79a71bd38a6e59206b505e6f8d",
+      "sha256": "280068662d355aa3647c8fd4ae864520fe412e79a71bd38a6e59206b505e6f8d",
+      "bytes": 115798,
+      "sanitized": false
+    },
+    {
+      "file": "retest-authoring/integrated-figma-read-retry-human-boundary-dom.json",
+      "source": "dist/ci-authoring-fix/screenshots/integrated-figma-read-retry-human-boundary-dom.json",
+      "source_sha256": "dc5e3bd6cb8a0773ab32ec85998dd4b7befb9b6b97ca251101701ff90d243843",
+      "sha256": "dc5e3bd6cb8a0773ab32ec85998dd4b7befb9b6b97ca251101701ff90d243843",
+      "bytes": 3345,
+      "sanitized": false
+    },
+    {
+      "file": "retest-authoring/integrated-figma-read-retry-human-boundary.png",
+      "source": "dist/ci-authoring-fix/screenshots/integrated-figma-read-retry-human-boundary.png",
+      "source_sha256": "fff96bdcccd03dd31b7dc1221af738ce8c88afe19be2929d23db6f8bbc46d450",
+      "sha256": "fff96bdcccd03dd31b7dc1221af738ce8c88afe19be2929d23db6f8bbc46d450",
+      "bytes": 94284,
+      "sanitized": false
+    },
+    {
+      "file": "retest-authoring/integrated-figma-read-retry-roundtrip.json",
+      "source": "dist/ci-authoring-fix/screenshots/integrated-figma-read-retry-roundtrip.json",
+      "source_sha256": "2ef3e45a2958c4405a2a59e44123f81aedbf5f82a022af9e105ad97d866a102e",
+      "sha256": "2ef3e45a2958c4405a2a59e44123f81aedbf5f82a022af9e105ad97d866a102e",
+      "bytes": 333,
+      "sanitized": false
+    },
+    {
+      "file": "retest-product/report.json",
+      "source": "dist/ci-fullgate-readiness-fix/report.json",
+      "source_sha256": "ee639ce89737790561d959e5214d93dbce7c9504a4abbf0bdffdaecc782fbd49",
+      "sha256": "dea9dd148ae3a8ef2d83c1ed653a246a824af700c9f53c39c6e897a43a4f1379",
+      "bytes": 14135,
+      "sanitized": true
+    },
+    {
+      "file": "retest-product/figma-b23-delivery-advisory-publish-enabled.png",
+      "source": "dist/ci-fullgate-readiness-fix/figma-b23-delivery-advisory-publish-enabled.png",
+      "source_sha256": "c0bc6eeb47668bc5b8b2c50349aa1f5ca61f1f16ba5eefcf5bd0b06f6397929d",
+      "sha256": "c0bc6eeb47668bc5b8b2c50349aa1f5ca61f1f16ba5eefcf5bd0b06f6397929d",
+      "bytes": 121951,
+      "sanitized": false
+    },
+    {
+      "file": "retest-product/figma-b23-delivery-advisory-publish-enabled.json",
+      "source": "dist/ci-fullgate-readiness-fix/figma-b23-delivery-advisory-publish-enabled.json",
+      "source_sha256": "aaa83cd2ba0e0649746c361488ab5dcf29686f3ed6ab82094af35eb06e9b5384",
+      "sha256": "aaa83cd2ba0e0649746c361488ab5dcf29686f3ed6ab82094af35eb06e9b5384",
+      "bytes": 49151,
+      "sanitized": false
+    },
+    {
+      "file": "retest-product/ci-fullgate-readiness-fix.log",
+      "source": "dist/ci-fullgate-readiness-fix.log",
+      "source_sha256": "9838ca35f130c03429d85080bd120e909228f42f34feb2bf49fbbce4ed3275da",
+      "sha256": "9838ca35f130c03429d85080bd120e909228f42f34feb2bf49fbbce4ed3275da",
+      "bytes": 5135,
+      "sanitized": false
+    }
+  ]
+}

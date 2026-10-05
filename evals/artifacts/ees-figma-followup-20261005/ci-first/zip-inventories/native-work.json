@@ -1,0 +1,76 @@
+{
+  "artifact_name": "ees-work-browser-evidence-native-work",
+  "artifact_id": 11334261193,
+  "members": [
+    {
+      "member": "ees-results/browser-evidence.json",
+      "bytes": 1225,
+      "compressed_bytes": 512,
+      "sha256": "38f601bd1c9d2c1d9e83f7b0db95bcb0f93c8b6ce6ce089f0396c55051979dcc",
+      "retained": true
+    },
+    {
+      "member": "ees-results/test_ees_work_demo.json",
+      "bytes": 2230,
+      "compressed_bytes": 590,
+      "sha256": "e5e72ddcfb35b0b846a609b455c5bf6607f21ca616881a8a0e4f6cd1e226db01",
+      "retained": true
+    },
+    {
+      "member": "ees-results/suite.json",
+      "bytes": 123,
+      "compressed_bytes": 97,
+      "sha256": "c249bf8ddd57ce81568411670a73bb0aff736be58e15e7084002ea807e6c93ae",
+      "retained": true
+    },
+    {
+      "member": "ees-work-screenshots/integrated-empty-native.png",
+      "bytes": 57666,
+      "compressed_bytes": 50459,
+      "sha256": "50c9d76f8b98cb5ed835ad7c4752cf15f9ebbb62d57c857821d213e97f8fd584",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-human-confirm-history.png",
+      "bytes": 98469,
+      "compressed_bytes": 91132,
+      "sha256": "e11fc2abfa6f8df63351560b845c1c168d7fe9cb7157fd2b4eb9050288b0f6e2",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-layout-1440.png",
+      "bytes": 55463,
+      "compressed_bytes": 49701,
+      "sha256": "c266303864e17712339002efab94b74a3d4c59d285703922fb64b43119678c81",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-layout-1180.png",
+      "bytes": 34960,
+      "compressed_bytes": 30306,
+      "sha256": "3cab35922d82a7542876234dcb7d27a847e2ee2e429ae9461e6701a077408a00",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-layout-1920.png",
+      "bytes": 57684,
+      "compressed_bytes": 50453,
+      "sha256": "9177115197ba3e2a0e202603965c73f18b90310779719114dd114512b75e3938",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-native-chat-and-work.png",
+      "bytes": 98978,
+      "compressed_bytes": 91637,
+      "sha256": "3f5ba1aa02635de5472c863738c3dc3373896c9c5923ff4410f30d9c06989616",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-saved-input-not-execution.png",
+      "bytes": 91638,
+      "compressed_bytes": 83120,
+      "sha256": "c33ab0015b2d452d85dc78b3181143ff0bc6c1d0fba193c44cffa1b548e31a7b",
+      "retained": false
+    }
+  ]
+}

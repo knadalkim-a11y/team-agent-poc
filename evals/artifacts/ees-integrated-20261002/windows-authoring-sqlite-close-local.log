@@ -1,0 +1,66 @@
+test_sa19_publish_and_audit_failure_roll_back_one_transaction (test_ees_work_authoring.SystemAuthoringTests.test_sa19_publish_and_audit_failure_roll_back_one_transaction) ... ok
+test_sa23_exact_legacy_archive_and_explicit_partial_import (test_ees_work_authoring.AuthoringRestoreTests.test_sa23_exact_legacy_archive_and_explicit_partial_import) ... ok
+test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication) ... ok
+test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit) ... ok
+test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state) ... ok
+test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process (test_ees_work_authoring.AuthoringRestoreTests.test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 2.008s
+
+OK
+{
+  "date_utc": "2026-10-02T02:48:12.443689+00:00",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "python": "3.11.16 (main, Sep 24 2026, 17:56:40) [Clang 22.1.3 ]",
+  "tests": [
+    "SystemAuthoringTests.test_sa19_publish_and_audit_failure_roll_back_one_transaction",
+    "AuthoringRestoreTests.test_sa23_exact_legacy_archive_and_explicit_partial_import",
+    "AuthoringRestoreTests.test_sa25_explicit_admin_reconciliation_resumes_changed_or_removed_publication",
+    "AuthoringRestoreTests.test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit",
+    "AuthoringRestoreTests.test_sa25_real_previous_program_restore_and_reupgrade_preserve_new_and_old_state",
+    "AuthoringRestoreTests.test_sa25_old_publication_shared_reference_cannot_be_changed_through_one_process"
+  ],
+  "tests_run": 6,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "strict_default_encoding": true,
+  "connections_kept_alive_until_after_cleanup": 423,
+  "open_connections": [],
+  "changed_connection_sites": [
+    384,
+    394,
+    684,
+    715,
+    732,
+    737,
+    750,
+    777,
+    783,
+    833,
+    852,
+    869,
+    887,
+    921
+  ],
+  "executed_changed_connection_sites": [
+    384,
+    394,
+    684,
+    715,
+    732,
+    737,
+    750,
+    777,
+    783,
+    833,
+    852,
+    869,
+    887,
+    921
+  ],
+  "historical_fixture_bytes": "unchanged; pinned ees.10 and b41e239 checks executed by test helpers",
+  "initial_harness_selection": "No tests ran: sa23/sa25 belong to AuthoringRestoreTests, corrected selectors.",
+  "windows_execution": "not run locally; next Windows CI required"
+}

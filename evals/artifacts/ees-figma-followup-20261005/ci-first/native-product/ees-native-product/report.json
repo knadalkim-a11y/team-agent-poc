@@ -1,0 +1,515 @@
+{
+  "time": "2026-10-05T08:41:38.865217+00:00",
+  "scope": "Complete packaged Native app gate for the integrated work contract.\n\nOne temporary DATA_DIR and a loopback synthetic model are used. Native auth,\nchat/file storage, workflow APIs, worker and frontend are the built product.\nNo company credentials, DB or service is read. Physical CDP input drives UI;\nread-only DOM evaluation inspects readiness and results. Failure evidence is\ncaptured before browser shutdown. This is distinct from the Native fixtures.\nThis gate was reconstructed after workspace loss from the committed base and\nobserved failures. It is not claimed byte-identical to the lost c144 gate.\n",
+  "source_commit": "cad7684f5d634e1a3178cc86b7a49c7d48bb6d99",
+  "source_dirty": true,
+  "wheel": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+  "wheel_sha256": "51b10e3ef545b2d6123dffc34014c973a3c9327488f08d4addb8b10d59959ddf",
+  "gate_sha256": "b62c92f9d2f420a885ceaf6f309dc300441721f681cde0cebe0e03471ae8d7c6",
+  "execution": {
+    "python": "3.11.16",
+    "argv": [
+      "tests/ees_work_integrated_app.py",
+      "--wheel",
+      "dist/branding/open_webui-0.11.3+ees.13-py3-none-any.whl",
+      "--chrome",
+      "/usr/bin/google-chrome",
+      "--output",
+      "dist/ees-native-product"
+    ],
+    "chrome": "/opt/google/chrome/google-chrome",
+    "reconstructed_after_workspace_loss": true,
+    "prior_lost_gate_byte_identity_claimed": false
+  },
+  "steps": [
+    {
+      "name": "empty Native installation",
+      "workflows": 0,
+      "runs": 0
+    },
+    {
+      "name": "Native model availability",
+      "models": [
+        {
+          "id": "c3-synthetic-model",
+          "direct": null,
+          "owned_by": "openai"
+        },
+        {
+          "id": "arena-model",
+          "direct": null,
+          "owned_by": "arena"
+        }
+      ]
+    },
+    {
+      "name": "actual built Native render",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "name": "physical authoring save validate publish",
+      "workflow_id": "12210faf-2fe8-4e5f-a945-da77e159077e",
+      "version": 1
+    },
+    {
+      "name": "Q1 actual Native layout at 1366x768",
+      "action_bar_visible": true,
+      "message_width_checked": false,
+      "geometry": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "document_width": 1366,
+        "sidebar": {
+          "x": 0,
+          "y": 0,
+          "width": 56,
+          "height": 768,
+          "bottom": 768,
+          "right": 56
+        },
+        "panel": {
+          "x": 886,
+          "y": 0,
+          "width": 480,
+          "height": 768,
+          "bottom": 768,
+          "right": 1366
+        },
+        "chat": {
+          "x": 56,
+          "y": 0,
+          "width": 830,
+          "height": 768,
+          "bottom": 768,
+          "right": 886
+        },
+        "action": {
+          "x": 887,
+          "y": 709,
+          "width": 479,
+          "height": 59,
+          "bottom": 768,
+          "right": 1366
+        },
+        "messages": []
+      }
+    },
+    {
+      "name": "run input save cancel confirmation and actual completion",
+      "run_id": "20d7ea3e-f1e3-4a32-b4d4-d07785ed4881",
+      "attempts": 1,
+      "version": 1
+    },
+    {
+      "name": "Native physical send and storage reload",
+      "saved_messages": 2,
+      "chat_id": "7d8e474b-87ca-4814-85ae-0c1b323a688b",
+      "model_boundary": "loopback synthetic HTTP only"
+    },
+    {
+      "name": "Native attachment chooser upload process send reload",
+      "file_id": "1cdc63e3-e932-4503-8fea-9c97781aceb3",
+      "chat_id": "7d8e474b-87ca-4814-85ae-0c1b323a688b",
+      "model_boundary": "Only model response and embedding vectors are loopback synthesis"
+    },
+    {
+      "name": "Q1 actual Native layout at 1366x768",
+      "action_bar_visible": false,
+      "message_width_checked": true,
+      "geometry": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "document_width": 1366,
+        "sidebar": {
+          "x": 0,
+          "y": 0,
+          "width": 56,
+          "height": 768,
+          "bottom": 768,
+          "right": 56
+        },
+        "panel": {
+          "x": 886,
+          "y": 0,
+          "width": 480,
+          "height": 768,
+          "bottom": 768,
+          "right": 1366
+        },
+        "chat": {
+          "x": 56,
+          "y": 0,
+          "width": 830,
+          "height": 768,
+          "bottom": 768,
+          "right": 886
+        },
+        "action": {
+          "x": 887,
+          "y": 709,
+          "width": 479,
+          "height": 59,
+          "bottom": 768,
+          "right": 1366
+        },
+        "messages": [
+          {
+            "x": 91,
+            "y": 128,
+            "width": 760,
+            "height": 108.75,
+            "bottom": 236.75,
+            "right": 851
+          },
+          {
+            "x": 91,
+            "y": 264.75,
+            "width": 760,
+            "height": 74.75,
+            "bottom": 339.5,
+            "right": 851
+          },
+          {
+            "x": 91,
+            "y": 367.5,
+            "width": 760,
+            "height": 116.75,
+            "bottom": 484.25,
+            "right": 851
+          },
+          {
+            "x": 91,
+            "y": 512.25,
+            "width": 760,
+            "height": 140.75,
+            "bottom": 653,
+            "right": 851
+          }
+        ]
+      }
+    },
+    {
+      "name": "Native and work restart persistence",
+      "chat_preserved": true,
+      "attempts_preserved": true
+    },
+    {
+      "name": "latest Figma isolated API fixtures",
+      "workflow_id": "7b6cb724-454c-44c6-800b-49a57084909a",
+      "native_tool_source_sha256": "d6bb9bee2a7919b994008393d48188cd43d1a26404b013f21bc6d56f3e95085c",
+      "business_completion": false,
+      "external_boundary": "Loopback synthetic Jira and model HTTP only"
+    },
+    {
+      "name": "Figma B2-2 physical job rule edit and draft save",
+      "workflow_id": "0076315a-302c-43c6-b2dc-08613ddfa6a9",
+      "result_block": "checklist",
+      "published": false,
+      "business_completion": false
+    },
+    {
+      "name": "Figma B2-1 physical schedule preview and draft save",
+      "draft_revision": 4,
+      "published_version": 1,
+      "reservation_created": false
+    },
+    {
+      "name": "Figma S1 actual HTTP failure and bounded read retry",
+      "attempt_statuses": [
+        "failed",
+        "succeeded"
+      ],
+      "external_http_requests": [
+        {
+          "path": "/rest/api/2/myself",
+          "status": 503
+        },
+        {
+          "path": "/rest/api/2/myself",
+          "status": 200
+        },
+        {
+          "path": "/rest/api/2/project",
+          "status": 200
+        },
+        {
+          "path": "/rest/api/2/project/EESEMS/statuses",
+          "status": 200
+        },
+        {
+          "path": "/rest/api/2/field",
+          "status": 200
+        },
+        {
+          "path": "/rest/api/2/search",
+          "status": 200
+        }
+      ],
+      "native_tool_attempts": 2,
+      "business_completed": false,
+      "failed_result_preserved": true
+    },
+    {
+      "name": "Figma A6 physical Native tool call list selection and atomic confirmation",
+      "attempts": 3,
+      "original_result_preserved": true,
+      "confirmed_items": 2
+    },
+    {
+      "name": "Figma A7 physical AI review autosave and explicit confirmation",
+      "completion_kind": "review",
+      "actual_delivery": false,
+      "original_result_preserved": true,
+      "autosave_confirmed": false,
+      "send_control_present": false,
+      "confirmed_text": "사람이 보완한 실제 제품 검토 본문. 합성 자료이며 송부하지 않았습니다."
+    },
+    {
+      "name": "Figma S2 physical readonly history and reference with restart persistence",
+      "original_shared_value_preserved": true,
+      "current_value_not_substituted": true,
+      "attempts": 4,
+      "actual_native_historical_tool_calls": 1,
+      "stored_chat_messages": 6,
+      "narrow_work_ready": true,
+      "physical_scroll_verified": true
+    }
+  ],
+  "status": "failed",
+  "failure": {
+    "type": "AssertionError",
+    "message": ""
+  },
+  "browser_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 50364.25435299998,
+    "pid": 2667,
+    "exit_code": null,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/154.0.8037.57",
+      "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+      "jsVersion": "15.4.80.11"
+    },
+    "target_id": "16DB713173D7F4DF6CE6783F13B836DE",
+    "session_attached": true,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 880,
+      "method": "Runtime.evaluate",
+      "session_attached": true,
+      "timeout_seconds": 15,
+      "elapsed_ms": 1.2340440000002673,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "id": 880,
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      }
+    ],
+    "stderr_tail": "[2667:2690:1005/084151.564544:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2690:1005/084151.579781:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2690:1005/084151.898055:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2690:1005/084152.268206:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2667:1005/084154.324254:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2667:1005/084154.324332:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2690:1005/084154.324339:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2690:1005/084154.324379:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2667:1005/084154.335044:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2667:1005/084154.384062:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2690:1005/084154.393268:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2667:1005/084154.669079:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2667:1005/084154.681387:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2690:1005/084154.681526:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2667:1005/084154.690607:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2667:1005/084154.862034:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files\n[2667:2667:1005/084154.863630:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2690:1005/084154.863703:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2667:1005/084155.022249:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2690:1005/084155.022332:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2667:1005/084155.077091:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2693:1005/084158.462954:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\nCreated TensorFlow Lite XNNPACK delegate for CPU.\n[2667:2693:1005/084218.869082:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 6080.9901069999905,
+      "product": "Chrome/154.0.8037.57"
+    },
+    "bootstrap_observation": null
+  },
+  "browser_cleanup_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 50670.59788499995,
+    "pid": 2667,
+    "exit_code": 0,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/154.0.8037.57",
+      "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+      "jsVersion": "15.4.80.11"
+    },
+    "target_id": "16DB713173D7F4DF6CE6783F13B836DE",
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 887,
+      "method": "Browser.close",
+      "session_attached": false,
+      "timeout_seconds": 5,
+      "elapsed_ms": 0.15112299996644651,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "id": 880,
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "id": 881,
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "id": 882,
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "id": 883,
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "id": 884,
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "id": 885,
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "id": 886,
+        "sessionId": "FDC44248E8560514EF8E2311ED17D3A2"
+      },
+      {
+        "id": 887
+      }
+    ],
+    "stderr_tail": "[2667:2690:1005/084151.564544:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2690:1005/084151.579781:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2690:1005/084151.898055:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2690:1005/084152.268206:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2667:1005/084154.324254:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2667:1005/084154.324332:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2690:1005/084154.324339:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2690:1005/084154.324379:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2667:1005/084154.335044:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2667:1005/084154.384062:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2690:1005/084154.393268:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2667:1005/084154.669079:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2667:1005/084154.681387:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2690:1005/084154.681526:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2667:1005/084154.690607:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2667:1005/084154.862034:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files\n[2667:2667:1005/084154.863630:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2690:1005/084154.863703:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2667:1005/084155.022249:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2690:1005/084155.022332:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2667:2667:1005/084155.077091:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2667:2693:1005/084158.462954:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\nCreated TensorFlow Lite XNNPACK delegate for CPU.\n[2667:2693:1005/084218.869082:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 6080.9901069999905,
+      "product": "Chrome/154.0.8037.57"
+    },
+    "bootstrap_observation": null
+  }
+}

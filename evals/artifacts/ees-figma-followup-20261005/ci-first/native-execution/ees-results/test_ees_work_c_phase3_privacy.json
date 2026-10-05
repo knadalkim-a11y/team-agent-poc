@@ -1,0 +1,27 @@
+{
+  "module": "test_ees_work_c_phase3_privacy.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 5.305,
+  "tests_run": 2,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 2,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_failed_history_lookup_never_reveals_previous_attempt_or_input",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_revoked_native_actor_scope_removes_open_result_and_author_controls",
+      "status": "passed"
+    }
+  ]
+}

@@ -1,0 +1,539 @@
+{
+  "before": [
+    {
+      "file": "40095.svg",
+      "src": "/_ees13/v4/40095.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/40095.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        19,
+        136,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "ead50.svg",
+      "src": "/_ees13/v4/ead50.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/ead50.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        14,
+        14
+      ],
+      "layout": [
+        14,
+        14
+      ],
+      "rect": [
+        222,
+        137,
+        14,
+        14
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "f34f3.svg",
+      "src": "/_ees13/v4/f34f3.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/f34f3.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        19,
+        175,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "ead50.svg",
+      "src": "/_ees13/v4/ead50.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/ead50.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        14,
+        14
+      ],
+      "layout": [
+        14,
+        14
+      ],
+      "rect": [
+        222,
+        176,
+        14,
+        14
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "4df0d.svg",
+      "src": "/_ees13/v4/4df0d.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/4df0d.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        225,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "2e769.svg",
+      "src": "/_ees13/v4/2e769.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/2e769.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        261,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "c325d.svg",
+      "src": "/_ees13/v4/c325d.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/c325d.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        297,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "093d6.svg",
+      "src": "/_ees13/v4/093d6.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/093d6.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        333,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "126c7.svg",
+      "src": "/_ees13/v4/126c7.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/126c7.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        28.96875,
+        414,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "f6bbc.svg",
+      "src": "/_ees13/v4/f6bbc.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/f6bbc.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        28.96875,
+        486,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "4fb09.svg",
+      "src": "/_ees13/v4/4fb09.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/4fb09.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        28.96875,
+        522,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "52271.svg",
+      "src": "/_ees13/v4/52271.svg",
+      "currentSrc": "",
+      "complete": false,
+      "loaded": false,
+      "natural": [
+        0,
+        0
+      ],
+      "layout": [
+        0,
+        0
+      ],
+      "rect": [
+        1680.5,
+        104,
+        0,
+        0
+      ],
+      "animation": "none"
+    }
+  ],
+  "expected": {
+    "52271.svg": 16
+  },
+  "scope": "Actual packaged Native product",
+  "status": "passed",
+  "assets": [
+    {
+      "file": "40095.svg",
+      "src": "/_ees13/v4/40095.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/40095.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        19,
+        136,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "ead50.svg",
+      "src": "/_ees13/v4/ead50.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/ead50.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        14,
+        14
+      ],
+      "layout": [
+        14,
+        14
+      ],
+      "rect": [
+        222,
+        137,
+        14,
+        14
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "f34f3.svg",
+      "src": "/_ees13/v4/f34f3.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/f34f3.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        19,
+        175,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "ead50.svg",
+      "src": "/_ees13/v4/ead50.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/ead50.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        14,
+        14
+      ],
+      "layout": [
+        14,
+        14
+      ],
+      "rect": [
+        222,
+        176,
+        14,
+        14
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "4df0d.svg",
+      "src": "/_ees13/v4/4df0d.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/4df0d.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        225,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "2e769.svg",
+      "src": "/_ees13/v4/2e769.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/2e769.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        261,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "c325d.svg",
+      "src": "/_ees13/v4/c325d.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/c325d.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        297,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "093d6.svg",
+      "src": "/_ees13/v4/093d6.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/093d6.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        333,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "126c7.svg",
+      "src": "/_ees13/v4/126c7.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/126c7.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        28.96875,
+        414,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "f6bbc.svg",
+      "src": "/_ees13/v4/f6bbc.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/f6bbc.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        28.96875,
+        486,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "4fb09.svg",
+      "src": "/_ees13/v4/4fb09.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/4fb09.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        28.96875,
+        522,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "52271.svg",
+      "src": "/_ees13/v4/52271.svg",
+      "currentSrc": "http://127.0.0.1:57979/_ees13/v4/52271.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        1672.5,
+        96,
+        16,
+        16
+      ],
+      "animation": "none"
+    }
+  ]
+}

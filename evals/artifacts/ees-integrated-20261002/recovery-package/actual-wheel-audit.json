@@ -1,0 +1,556 @@
+{
+  "status": "passed",
+  "started_at": "2026-10-02T07:13:12.782169+00:00",
+  "completed_at": "2026-10-02T07:13:19.810437+00:00",
+  "source_head": "455bc06fb72bcc595bfc0b0c53824dd8e2616fed",
+  "source_tree": "49eeee9cb35c7451a1c5e816719f61753e614a76",
+  "source_dirty": true,
+  "python": "3.11.16 (main, Sep 24 2026, 17:56:40) [Clang 22.1.3 ]",
+  "command": "PYTHONPATH=. .venv/bin/python -X warn_default_encoding -W error::EncodingWarning dist/recovery-package/audit.py",
+  "wheel": {
+    "path": "dist/integrated/branding-16/open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "bytes": 152071954,
+    "sha256": "f3899eab7db84df3696ae17ee3f5352e92df788a09b49e611d3658f59169a866"
+  },
+  "manifest": {
+    "path": "dist/integrated/branding-16/manifest.json",
+    "bytes": 8154,
+    "sha256": "71fd7da441b0a237c4f6a10cc1f1cc75edf43dbb08fe2d304d9b55421b527103"
+  },
+  "upstream": {
+    "path": "dist/upstream/open_webui-0.11.3-py3-none-any.whl",
+    "bytes": 146072797,
+    "sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
+  },
+  "members": 6008,
+  "record_rows": 6008,
+  "record_hashes_verified": 6007,
+  "upstream_unmodified_members_byte_compared": 5850,
+  "backend_sources_byte_compared": [
+    {
+      "member": "open_webui/ees_workflow.py",
+      "source": "agent-pack/skills/ees-work-demo/scripts/ees_workflow.py",
+      "bytes": 49306,
+      "sha256": "d504659d63ffe56df4990ac6369115bb1c9443bdf8c2b1a635edc6010ccbe502"
+    },
+    {
+      "member": "open_webui/ees_workflow_definition.py",
+      "source": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_definition.py",
+      "bytes": 14317,
+      "sha256": "65430af71bb5dd389b96db9a284029eb7e7381768d10a584c7eee482d6703a57"
+    },
+    {
+      "member": "open_webui/ees_workflow_view.py",
+      "source": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_view.py",
+      "bytes": 11801,
+      "sha256": "585c504fdf510d597f82001076814c341b2818206c1dcc2bc8d1222d45773ec4"
+    },
+    {
+      "member": "open_webui/workflow_policy.json",
+      "source": "agent-pack/skills/ees-work-demo/scripts/workflow_policy.json",
+      "bytes": 306,
+      "sha256": "dcaec7a509c904f679ce01558896f031117962ea8f1ce580c5210e2b35c55d66"
+    },
+    {
+      "member": "open_webui/ees_workflow_authoring.py",
+      "source": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_authoring.py",
+      "bytes": 20160,
+      "sha256": "f918dbcbc1824ca57fbba8881b5eb63a2c354f3452ef315178fda1decdc60cfe"
+    },
+    {
+      "member": "open_webui/ees_workflow_execution.py",
+      "source": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_execution.py",
+      "bytes": 56537,
+      "sha256": "bb3489b385833384af857f2f555035f47905f6d58862a3c8df8fc3b96d8cd47a"
+    },
+    {
+      "member": "open_webui/ees_workflow_native.py",
+      "source": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py",
+      "bytes": 50009,
+      "sha256": "5cc89065e4afeabefe37c5e593c26fb9745bf4dc4e95f39b9aea1d225025bd33"
+    },
+    {
+      "member": "open_webui/ees_workflow_contract.py",
+      "source": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_contract.py",
+      "bytes": 30234,
+      "sha256": "fa8559f4d6a289a19fd1c3a074ff54f07d76f782a04d832daddde5149001de10"
+    },
+    {
+      "member": "open_webui/ees_workflow_model.py",
+      "source": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_model.py",
+      "bytes": 24949,
+      "sha256": "e5054976064c8186c162d01ebc323f16820f9ae05744f2eb37ee13bf11289d1c"
+    },
+    {
+      "member": "open_webui/ees_workflow_workspace.py",
+      "source": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py",
+      "bytes": 129753,
+      "sha256": "176d2a8d7008a5192efc9fe5e88bef2139634df2c2a00d13320e17fb6159594b"
+    },
+    {
+      "member": "open_webui/ees_workflow_operations.py",
+      "source": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_operations.py",
+      "bytes": 116442,
+      "sha256": "823f3b4f5ed19e202caf694774cd10098d6f3c61004972080a3f458ef3ddb1ce"
+    },
+    {
+      "member": "open_webui/ees_workflow_tool.py",
+      "source": "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py",
+      "bytes": 12145,
+      "sha256": "12a538febf1843aeb7e0ccad64e72545c097858d94a165e046cba259f61ba8fe"
+    }
+  ],
+  "svg_sources_byte_compared": [
+    {
+      "member": "open_webui/frontend/_ees13/v4/07d31.svg",
+      "bytes": 144,
+      "sha256": "52ea499d1b3413d70580318e1dbe278db920a3648b2c5d32f97efd844f4396f7"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/093d6.svg",
+      "bytes": 544,
+      "sha256": "8361bccbb63ac176dff05a6e95f48a933510dde3d107eba85caca91770a2dbe1"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/126c7.svg",
+      "bytes": 241,
+      "sha256": "d53b2cbca4d02c981eaecaf98b51c7b87753a2cb2ce7ebfbf7c21ec0fc5c2f49"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/2e769.svg",
+      "bytes": 486,
+      "sha256": "2b8d5f09936bec466b75df147474b2889e67a61b93355f8c7ca5963f6d425a92"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/34f85.svg",
+      "bytes": 221,
+      "sha256": "694be1438dfb9e27d86ba6b75bc9a29ad9b34190ad00737ace8dc90ab70f9fd1"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/40ef1.svg",
+      "bytes": 363,
+      "sha256": "3e3d7298e0c8add61358d056210f4e915eca77bec85fd9805b8e47a10d973d4a"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/44a96.svg",
+      "bytes": 400,
+      "sha256": "439986f9e4babbd6f239cb95605ed99ae5c23c2aba52eecac1c70c371f419777"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/49833.svg",
+      "bytes": 553,
+      "sha256": "43b3ffd7949f3c422d6b1d90eb06a4ec911d991c8d795e30a83bd4080bb79211"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/4df0d.svg",
+      "bytes": 635,
+      "sha256": "f6d725b0be1e836a203f37833e7bfa8ca88adf1bdcd9097aa13ee8ed3f3479bc"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/4fb09.svg",
+      "bytes": 1058,
+      "sha256": "9d0e79ea7a8fa25b889076c2587125f7c0bcaee42cfedaf53ece337dab12a896"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/522b5.svg",
+      "bytes": 809,
+      "sha256": "4c159d103bb4056dc23e490a4df2215aad1dd04c5b40d4b609dc08ef1390618a"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/69549.svg",
+      "bytes": 229,
+      "sha256": "ec6a1bf9d4a7b42a6132dc1cb46894ea9ce459404e7a09f3bba0692cfe611f02"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/721d7.svg",
+      "bytes": 339,
+      "sha256": "e53a557c2da7221c25b3b3b03a02de9b6bc8cd749576e3c86fc7b087cd72dccb"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/730b1.svg",
+      "bytes": 877,
+      "sha256": "9aff2f5504d2306299057c8d20c93e8516c381ffbc54bf56785a18041a4fdd13"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/7bb4a.svg",
+      "bytes": 568,
+      "sha256": "a5f08771fd6364324d8240540d6f832b0901c4e98bc73fef4e94c79f3f415a0f"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/87d9b.svg",
+      "bytes": 335,
+      "sha256": "2299be067a20dcaa368710ee2a458e77082fe33f16a7e7577c0edc7c23c00e9c"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/88026.svg",
+      "bytes": 589,
+      "sha256": "2c864bd486bce0280e6f438406aba558b8fca54fb05cabb3e2f399640d440994"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/92ec5.svg",
+      "bytes": 217,
+      "sha256": "f992ff0ccd4462f36d676341380a8a44ac60242de3fbe88fcc4bc312ef647bc0"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/9c63b.svg",
+      "bytes": 554,
+      "sha256": "cbcfacca41b8975f3d52d9228cef00c3329dbb717a75d5ab144e023bf0ad2cc2"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/a9175.svg",
+      "bytes": 568,
+      "sha256": "e3ee0c6e295ef8b8f7e651a03aa7773d560d233e66701c5a368501125801238f"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/a953c.svg",
+      "bytes": 994,
+      "sha256": "2179f5640dcc4d0281e94ba5f230ade86fab7866ef20ab335a2aa86c1a1864e7"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/b8bc6.svg",
+      "bytes": 517,
+      "sha256": "5da15cd3bb27c09604f344f097b67fffda2b8ecc250b802bbec7787d23c7b15b"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/bddb4.svg",
+      "bytes": 369,
+      "sha256": "b55026cc631d21767e15fa2f4a78b4fa22f5cea807fdfdfc2835b9aa0166cfed"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/c325d.svg",
+      "bytes": 850,
+      "sha256": "77f45eed9813d86e265461795ebf8e8949f7366f29be36f9e76a1b9ce0700739"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/cf77a.svg",
+      "bytes": 547,
+      "sha256": "26ed924a23145c4f3c8b68b638ca171fedde82d9d83cec021b3bb1772332d2ca"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/d448c.svg",
+      "bytes": 846,
+      "sha256": "7e6392c79150f9ea21cd625ca0ed3b0658f0696fd097afde421c0b4fb257da1d"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/d553d.svg",
+      "bytes": 417,
+      "sha256": "d25dd7d39213345981e68598eefd95a70cafbb9549d49f854a1e2d73d99b8cbe"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/e1049.svg",
+      "bytes": 229,
+      "sha256": "dbc4e674c1e26acc0fece7ad74510d9f2e5916c2e3342f7b20ad0f71cde2274a"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/e1472.svg",
+      "bytes": 144,
+      "sha256": "99fe7cd0eb478540ce51802409390e0f8238e10f1ff6de501ae364be5d60cb5f"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/ea639.svg",
+      "bytes": 837,
+      "sha256": "3dc3ba3d4799c5e28a3c2273a0eba98f306f0438ae43cf78ef18366c8dc1e184"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/ead50.svg",
+      "bytes": 229,
+      "sha256": "e01163f5e0c4d1af06e80d4a5a4e1dec7cbef28d1c6777221477bcb6ed9278e8"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/eb94a.svg",
+      "bytes": 363,
+      "sha256": "157914196f301f18bad29e31c105488879e937d597a672c71110ba7e2d04c10b"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/f6bbc.svg",
+      "bytes": 1125,
+      "sha256": "b2a9190a251866678dec4e60fcca8a9e29db9b3e838234e3316654c62083fc3d"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/40095.svg",
+      "bytes": 569,
+      "sha256": "568698ad20328df158f834393622702f379fb03fcd680407fdc2422ec00fd05b"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/f34f3.svg",
+      "bytes": 906,
+      "sha256": "0d03a0582887713bbd65f7c45e4d793d2d90251c1cd23544a31c5624eb6cf413"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/c6340.svg",
+      "bytes": 451,
+      "sha256": "53940b96046fa805f925284ed1ccc08cf582410613a7fde12b712409fdb8e0fa"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/7495b.svg",
+      "bytes": 446,
+      "sha256": "addb3700e6ea0f024b48a534e9bf9bdb243b05c0c8ee0462d8e94254c922eb4e"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/ed85e.svg",
+      "bytes": 602,
+      "sha256": "6726e2511676dd1da73dbf780797175c0ae5caf714f2f9383d94d16b2c9f4c3f"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/08bf3.svg",
+      "bytes": 906,
+      "sha256": "76664d0ea86534856a1354a593998adaca5b785d0778eff87b8b6ab47021f2a9"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/3b2d6.svg",
+      "bytes": 499,
+      "sha256": "3db5bdd8f820d9656c655f458caf5b44e62345a38c11f836359d65810d57fbf4"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/fa106.svg",
+      "bytes": 861,
+      "sha256": "2a673a730475db5071c62adc74ee0875a79576a1499489baf922036faeb0ab32"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/1fc4e.svg",
+      "bytes": 606,
+      "sha256": "4960d2193a41a8e94a2c4a1ba35b4af639a4186db780b1dc3c3685d5bc75b9bc"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/aee94.svg",
+      "bytes": 863,
+      "sha256": "917de761ab58516fa240964e36404230858930db3e981b61c8cde02bc3eb2e21"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/cece5.svg",
+      "bytes": 1249,
+      "sha256": "bf7bcf8484fb6b88ce358c4e20ab599d073a1e0d2911eced2560a6fec7383aac"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/8a225.svg",
+      "bytes": 473,
+      "sha256": "81e00b98fc3aded9cff7188b40a366e5946a85f2a8c832cbf931d22f9dbce383"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/e8a37.svg",
+      "bytes": 922,
+      "sha256": "71efdf68ff4688d436c394716fc3618c9ac077a3029b69c90e2e36a7a5fd31ea"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/d1220.svg",
+      "bytes": 1097,
+      "sha256": "b9812a1bdbce8f6ea13f3741faa6dd458c144b4964f371385f94aadacd5fa08c"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/f908d.svg",
+      "bytes": 713,
+      "sha256": "7e5e7eedc95ab8dbbd4ba9d53ae1d85b5c189cb950f47008399efd47b8b3a1bb"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/da025.svg",
+      "bytes": 619,
+      "sha256": "4f1f116f9249934261b2e7ad100eed6696196c98a63f9858d5725c59fbd4e057"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/7e98c.svg",
+      "bytes": 1099,
+      "sha256": "5567fb956bdf91f8b6f3f6a49e076ab79f5b67c97448402bd376447c245b1052"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/ca02b.svg",
+      "bytes": 1099,
+      "sha256": "5e6e74dca8e85d62069808733724077dd0bcfb993d4736501168de097e639ce1"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/d8f27.svg",
+      "bytes": 375,
+      "sha256": "5fe30bb9f5b8c47e64761f2fa843c7f0244ff03781ca3e55b2af5f0beb666193"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/cda5f.svg",
+      "bytes": 568,
+      "sha256": "ed4db6463c89e539e7089bf49fa27d749af4eb1e2a1003d7a40ffac6a76e53dc"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/6611a.svg",
+      "bytes": 770,
+      "sha256": "520b7b3b1cfa65acdcdd3cee709b30e2f9fada1235cd355933e7a443c1260a05"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/51602.svg",
+      "bytes": 669,
+      "sha256": "a62ea29e265374f1823a0f14ad2fc57fdc6079296bd42bb290f2ca428f0b145d"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/afcd5.svg",
+      "bytes": 708,
+      "sha256": "5456a7dbe5fe59081bd57d7f6a93430ca9f760eebeb252f3b98e12dabba8410d"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/0a1db.svg",
+      "bytes": 728,
+      "sha256": "62ff96008e8af10efc7a61b09ce6f2f2b6d4539ff2276dcb4b9fcc11c621770f"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/1f65b.svg",
+      "bytes": 217,
+      "sha256": "e8ea43e0893578760fd69a1cd177e06758d7b8674e8a1aa6d60ff60cfe01d84e"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/2f929.svg",
+      "bytes": 241,
+      "sha256": "1b235e9db27bf1ef1499f7b1f11d2ffdd3b9cd101480e57538c08da46bdd497c"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/7d31f.svg",
+      "bytes": 338,
+      "sha256": "a70b5cae2fd0029fd696aa16bba9ef4df4ce73804b03c36fe2191d01ae4427ff"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/9d8d5.svg",
+      "bytes": 239,
+      "sha256": "619c314b9ba90083de585a8024656094de48a705811325105feac46e2ca3535c"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/922a3.svg",
+      "bytes": 922,
+      "sha256": "6f222705541d6badedda98e933f65f14c31eadb77a857ddfe40c0a191d174aba"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/49c9b.svg",
+      "bytes": 635,
+      "sha256": "f2a006bec5580b31dac5d4aac4d24a834934dd04baf0dd99ca7e13e6974e6abb"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/31608.svg",
+      "bytes": 927,
+      "sha256": "4ba24d29ee5052b8a8bc647858e2b4c46a1c0b150e3438aa06c372d3ea41e3cc"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/f49d4.svg",
+      "bytes": 1052,
+      "sha256": "59dbc460e66ccde8ea37012df16d33cd6844d066bb01ed1ef56798703d63b27f"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/8fa06.svg",
+      "bytes": 595,
+      "sha256": "c311ea5f0d8cb825c56c4f5c5cfac69eb6caec22cca7f3fd913d77c557ed4bb5"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/b8999.svg",
+      "bytes": 246,
+      "sha256": "a891c08b2d19fb2e947202088a9098f702e45680826bf8fdfd22176c5c715f5e"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/d87d1.svg",
+      "bytes": 595,
+      "sha256": "ed560fdf625a423ed638c8496320e0b9eadbaea35ddda837c3aec4ed19117f83"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/5f62e.svg",
+      "bytes": 1112,
+      "sha256": "19a4beb251f955258e707a5ec287fb16a24ecb9dee12f2b4d4b21fcab50c7662"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/1e4cf.svg",
+      "bytes": 928,
+      "sha256": "0b6a6d93fee1affbbcdc7644d0b40196a4186177a9aae82110602e9f0f045566"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/b944b.svg",
+      "bytes": 1094,
+      "sha256": "5ff567159a58852b6e1596cf71b7a4024941b7d632f3dfca049b655fc6fdfc05"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/4723e.svg",
+      "bytes": 583,
+      "sha256": "a7472d322e10468f97b767a6f59dfc85310a1f034bc69fafb36d6a02a3209128"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/ce467.svg",
+      "bytes": 897,
+      "sha256": "82d414ecafd0216287c414a3bf4b1ca939e11c9c112e99f15c39ef2dc7242821"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/ae415.svg",
+      "bytes": 586,
+      "sha256": "e4c3c2b0d4aa6853b2d35fd82e9a783ed7c876880fe163742776b3c79c6e927f"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/4d983.svg",
+      "bytes": 577,
+      "sha256": "2ed8f1eb000bcfed5993a6aade19dd5acebcf5cc74adba147465ea418a1d06bd"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/66cc7.svg",
+      "bytes": 890,
+      "sha256": "d087c5926dbae15aa3b6bd859c381e68721f996d5eab6d507b5cd97aee41e954"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/8f8a1.svg",
+      "bytes": 568,
+      "sha256": "97774eee1aa6e73b6d38276d300bbc9b4f92d0ad07d0752fa11195c295e8d354"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/35b2e.svg",
+      "bytes": 706,
+      "sha256": "3d682b88739301174faf2c0da653c2e89a3d0d8c8fdc6143811d6697416765d8"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/a28e3.svg",
+      "bytes": 1103,
+      "sha256": "7e7ecdf2454723ee0c97261296c6d9796b170d904493cf8e4930b622b1db02ad"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/b22ad.svg",
+      "bytes": 720,
+      "sha256": "a2acacc6d558f86005cc2bc7855036766b5ad1e5f73402f86fca5bda8f6afdbb"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/f1e53.svg",
+      "bytes": 1103,
+      "sha256": "d060f2c24de506760940fe0c66bd3701ba6f5d867e1d7d835a0b94f2a2f22467"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/b456d.svg",
+      "bytes": 342,
+      "sha256": "e6ab7a68c268effd8ddfcf0906459ee9ec6de168938e76e259053275d915dd33"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/52271.svg",
+      "bytes": 239,
+      "sha256": "fab3bb84c33ff1d4ad4baa770973a87d1bd405ed31726a2f388adc0397d86106"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/63982.svg",
+      "bytes": 506,
+      "sha256": "ccfe08a8ff5f40556b7830ac069107a404a4d066f76207324dfebb2c2e5a0461"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/6d84b.svg",
+      "bytes": 365,
+      "sha256": "87017133500f186737cdbf249d2eed28f2b969bd0be28c55b5e40b7698c3d62f"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/1c98e.svg",
+      "bytes": 539,
+      "sha256": "19e6c0bba7e05ac6173039a82919013f0d39897f0fb4552605e00c3be14696d2"
+    },
+    {
+      "member": "open_webui/frontend/_ees13/v4/478bf.svg",
+      "bytes": 578,
+      "sha256": "8c58b55becaaf020648d75beedd3757ef794b69aaf394314f36d181fb16f28f1"
+    }
+  ],
+  "required_work_files": 101,
+  "frozen_ees12_required_files": 18,
+  "retired_members_absent": [
+    "open_webui/workflow_seed.json",
+    "open_webui/ees_workflow_examples.py",
+    "open_webui/ees_work_demo.py"
+  ],
+  "exact_launcher_cache_sha_in_index": true,
+  "installer_layout": "accepted",
+  "app_record_sha256": "06f45c06c02afe2393d47af10d7b9bdddc3cd983eec524f570bc8164031f84e7",
+  "boundaries": [
+    "New recovered-environment offline audit of actual wheel bytes; no replayed pre-loss evidence used as current success.",
+    "No product/CI/test code edits or company action by this audit; no product/browser feature claim.",
+    "Parent separately ran branding33; this audit does not rerun that module.",
+    "The selected4 installer checks are separate log evidence."
+  ]
+}

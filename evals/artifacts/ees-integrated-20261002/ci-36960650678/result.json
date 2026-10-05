@@ -1,0 +1,298 @@
+{
+  "schema": 1,
+  "run_id": 36960650678,
+  "head_sha": "403b0685e26f13add0ff4354ba118788a0e95678",
+  "main_sha": "55832bad328cdfb91c1c284749f7959dd664176c",
+  "conclusion": "failure",
+  "result_observed_at_utc": "2026-10-02T03:45:17.190612+00:00",
+  "evidence_rechecked_at_utc": "2026-10-02T04:40:46.623247+00:00",
+  "source_final_result_sha256": "94c4818f32d576be38573b2f2a2abe1ca773672c4095b179f0a5cc6814cba0f3",
+  "method": "Preserve completed CI and recheck existing downloaded archive/member hashes only; no test rerun.",
+  "jobs": [
+    {
+      "id": 110693369793,
+      "name": "Prepare pinned program fixtures and test coverage",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658001,
+      "name": "native-compose (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658019,
+      "name": "native-execution (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 110693658054,
+      "name": "native-account (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658078,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658094,
+      "name": "native-work (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658127,
+      "name": "platform (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658137,
+      "name": "native-contracts (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658167,
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658172,
+      "name": "services (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658173,
+      "name": "program-install (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658182,
+      "name": "services (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658201,
+      "name": "contracts (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658253,
+      "name": "native-contracts (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658270,
+      "name": "restore-ees11 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658278,
+      "name": "platform (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658281,
+      "name": "restore-ees10 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658299,
+      "name": "restore-ees12 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658314,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658332,
+      "name": "contracts (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658335,
+      "name": "program-install (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110693658390,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110695217854,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 110695217883,
+      "name": "Delivery checks (windows-2022)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 110695247234,
+      "name": "Prepare delivery files",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "native": {
+    "passed": 43,
+    "failed": 1,
+    "skipped": 0,
+    "actual_browser_passed": 35,
+    "helper_font_passed": 8,
+    "actual_product_steps_passed": 8,
+    "actual_central_chat_steps_passed": 9,
+    "verified_png_files": 50
+  },
+  "platform_summary": {
+    "success": 16,
+    "failure": 0,
+    "cancelled": 0,
+    "unexecuted": 0,
+    "counts_by_os": {
+      "ubuntu-24.04": {
+        "passed": 1159,
+        "skipped": 11
+      },
+      "windows-2022": {
+        "passed": 1168,
+        "skipped": 2
+      }
+    }
+  },
+  "remaining": {
+    "test": "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_delayed_input_write_keeps_exact_original_run_after_chat_change",
+    "stage": "setUp before target/session/product page",
+    "observation": "Browser.getVersion response timeout at 15s; process alive, no responses/buffer, only DBus stderr; underlying first-start delay unconfirmed.",
+    "status": "Required final CI remains failed. No timeout extension, retry, skip, product workaround or company operation."
+  },
+  "actual_product_source_commit": "b3af99c935a2c72eefb201f8296e1e22e053b255",
+  "actual_product_source_note": "Actions pull_request merge checkout reported by the product gates; reviewed candidate uses the exact PR head separately.",
+  "verified_browser_artifacts": [
+    {
+      "artifact_id": 11207906730,
+      "archive_sha256": "51bd4841b8b38246a6fc433fd3d436329cfea8f48745e7f15efb42ed33bb8baa",
+      "archive_bytes": 444995,
+      "verified_members": 10,
+      "png_count": 7,
+      "json_count": 3
+    },
+    {
+      "artifact_id": 11207772329,
+      "archive_sha256": "2a1985f49d9c86378fe9ec8c4a6f61534773812249c53a5c8bf074a110e3e72f",
+      "archive_bytes": 778880,
+      "verified_members": 15,
+      "png_count": 10,
+      "json_count": 5
+    },
+    {
+      "artifact_id": 11207434559,
+      "archive_sha256": "ccee2d55b0a5881c848951e8db4647ee44fe89dd1a354c6c26fa6dce081d95c2",
+      "archive_bytes": 542268,
+      "verified_members": 16,
+      "png_count": 9,
+      "json_count": 7
+    },
+    {
+      "artifact_id": 11206884363,
+      "archive_sha256": "8237b7603fbfc210713a3dc2f77c15ba88759f3302807f3407610d561e5c1612",
+      "archive_bytes": 262664,
+      "verified_members": 9,
+      "png_count": 4,
+      "json_count": 5
+    },
+    {
+      "artifact_id": 11206799646,
+      "archive_sha256": "e04c419e51a7d2a29d23159d76c7adc99fbc6db4fa8eacb26f988e0e58565721",
+      "archive_bytes": 2159675,
+      "verified_members": 44,
+      "png_count": 20,
+      "json_count": 23
+    }
+  ],
+  "verified_file_counts": {
+    "total": 94,
+    "png": 50,
+    "json": 43,
+    "synthetic_text": 1
+  },
+  "candidate": {
+    "source_commit": "403b0685e26f13add0ff4354ba118788a0e95678",
+    "source_tree": "e6515fd097f9fbc1e216734de8be71eb5df5b9f9",
+    "source_dirty": false,
+    "product_version": "0.11.3+ees.13",
+    "product_wheel": {
+      "path": "branding/open_webui-0.11.3+ees.13-py3-none-any.whl",
+      "sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3",
+      "size": 152044704
+    },
+    "artifact_files": [
+      {
+        "path": "EES-demo-403b0685e26f.zip",
+        "size": 153019148,
+        "sha256": "6bb1023f2372a53a69993503970f5ee516ec42b684d139df7d2a612556fd002d"
+      },
+      {
+        "path": "candidate-manifest.json",
+        "size": 13299,
+        "sha256": "3eb5046c049f11bf00377866c680a406030800927faaaf45f0660d456381cc25"
+      },
+      {
+        "path": "program-manifest.json",
+        "size": 7684,
+        "sha256": "a18c2904f9ce5df0b2bb8e4c0761f13f590dd51948814ace5aabd9223e97f8de"
+      }
+    ],
+    "verification": {
+      "validator": "scripts.ees_deploy_release._open_bundle + _validate(exact source commit)",
+      "outer_archive_members": 29,
+      "manifest_members": 28,
+      "duplicate_members": 0,
+      "unlisted_members": 0,
+      "all_member_sha256_and_sizes_match": true,
+      "retired_source_paths_absent": true,
+      "retired_wheel_paths_absent": true,
+      "retained_native_connector_sources_present": true,
+      "explicit_common_work_tool_source_present": true,
+      "wheel_members": 5998,
+      "record_rows": 5998,
+      "record_hashed_members": 5997,
+      "record_sha256": "ae758ff80abcd59e7dc3499ddd20e0a2afdb35e5074e1254340d4d2f8108924a",
+      "record_integrity": "passed",
+      "fixed_upstream_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
+    }
+  },
+  "candidate_limit": "Inner candidate ZIP/manifest match the successful CI product job output and locally validated bytes. Large outer CI archive was not downloaded. Failed required Native gate means this is a review candidate, not fully validated delivery.",
+  "independent_launcher_probe": {
+    "result": "Local wrapper-equivalent HeadlessChrome153 first response in100.9ms; not CI154 reproduction",
+    "syscall_probe": "not executed: ptrace unavailable in this environment",
+    "cause_status": "unconfirmed; no launch, deadline or retry modification"
+  },
+  "continuation": "Resume diagnosis of the required browser bootstrap failure. Do not treat prior passes or this evidence-only reread as root-cause resolution."
+}

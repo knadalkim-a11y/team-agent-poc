@@ -1,0 +1,175 @@
+{
+  "module": "test_ees_work_operations.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.937,
+  "tests_run": 39,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 39,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_actual_native_normalizer_drives_common_items_and_completion",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_ai_per_item_suggestions_are_not_human_decisions_and_keep_source_acl",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_calendar_timezones_month_end_and_dst_are_explicit",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_change_request_cannot_use_generic_human_completion",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_confirmed_list_binding_freezes_actual_ids_and_denies_unconfirmed",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_daily_schedule_unique_across_two_workers_and_no_delegation_block",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_delegated_schedule_actual_worker_pins_version_and_does_not_repeat",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_direct_exception_requires_owned_contract_and_is_never_dispatched_to_ees",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_effect_probe_rechecks_access_after_status_read",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_emergency_start_enqueues_read_and_never_replays_on_restart",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_future_job_time_and_same_cycle_restore",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_input_ai_acl_or_revision_change_rejects_late_suggestion",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_input_ai_dynamic_choices_use_private_draft_and_merged_proposal",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_input_ai_person_preview_requires_current_native_identity",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_input_ai_preview_is_declared_scoped_and_never_saved",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_one_approval_revoked_identity_blocks_final_dispatch",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_operations_partial_schema_never_recreates_lost_history",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_partial_never_success_and_retry_keeps_previous_attempt",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_private_schedule_not_visible_to_other_system_admin",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_queued_schedule_delegation_revocation_is_current",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_read_attempt_snapshot_real_dispatch_and_human_completion",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_read_contract_change_during_native_check_prevents_dispatch",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_receipt_read_rechecks_group_after_native_await",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_request_id_different_payload_atomic_conflict",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_request_output_schema_draft_is_preserved_but_invalid_submit_rejected",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_request_reason_is_separate_bound_metadata_not_an_ees_argument",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_request_schema_rejects_typed_value_substitutions",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_request_target_cannot_override_saved_inputs",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_schedule_identity_and_current_tool_revocation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_scheduled_read_lease_loss_never_redispatches",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_scope_current_identity_and_lost_lease_never_dispatch",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_scope_restarts_and_waits_for_human_then_same_dependency_executor",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_secret_inputs_rejected_before_storage",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_tool_draft_schema_review_and_current_reference",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_two_distinct_current_approvers_and_content_change_invalidates",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_two_prepared_requests_cannot_dispatch_same_job_twice",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_unconfigured_connector_explicit_block_and_no_fake_success",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_unknown_not_redispatched_reconciliation_and_effect_separate",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_operations.RuntimeTests.test_zero_approval_still_requires_short_lived_actor_bound_intent",
+      "status": "passed"
+    }
+  ]
+}

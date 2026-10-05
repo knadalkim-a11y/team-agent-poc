@@ -1,0 +1,11 @@
+{
+  "observed": "uv python install used repository-local interpreter directory but emitted user-bin links by default",
+  "correction": [
+    {
+      "name": "python3.11",
+      "action": "moved uv-created interpreter symlink into repository-local tools/bin",
+      "destination": "dist/runtime/tools/bin/python3.11"
+    }
+  ],
+  "future_bin_dir": "dist/runtime/tools/bin"
+}

@@ -1,0 +1,53 @@
+{
+  "collected_at": "2026-10-02T07:23:35.427205+00:00",
+  "basis": "Post-run read of unchanged product files, each byte-compared to the actual report source_commit; derived new evidence, not the lost inventory.",
+  "source_commit": "455bc06fb72bcc595bfc0b0c53824dd8e2616fed",
+  "wheel_sha256": "f3899eab7db84df3696ae17ee3f5352e92df788a09b49e611d3658f59169a866",
+  "product_sources": [
+    {
+      "path": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py",
+      "sha256": "5cc89065e4afeabefe37c5e593c26fb9745bf4dc4e95f39b9aea1d225025bd33",
+      "matches_executed_source_commit": true
+    },
+    {
+      "path": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_operations.py",
+      "sha256": "823f3b4f5ed19e202caf694774cd10098d6f3c61004972080a3f458ef3ddb1ce",
+      "matches_executed_source_commit": true
+    },
+    {
+      "path": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py",
+      "sha256": "176d2a8d7008a5192efc9fe5e88bef2139634df2c2a00d13320e17fb6159594b",
+      "matches_executed_source_commit": true
+    },
+    {
+      "path": "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py",
+      "sha256": "12a538febf1843aeb7e0ccad64e72545c097858d94a165e046cba259f61ba8fe",
+      "matches_executed_source_commit": true
+    },
+    {
+      "path": "branding/ees/ui/ees-work-designer.js",
+      "sha256": "d15e7b7a7481ac29879ec22e4c0ed7b8fce47ab9b9eecca089208f2b2842b1d7",
+      "matches_executed_source_commit": true
+    },
+    {
+      "path": "branding/ees/ui/ees-work-launcher.js",
+      "sha256": "c3db92657f866faabf8c0daff4ab214b8c533025eb0548d855787ba1a2024d39",
+      "matches_executed_source_commit": true
+    },
+    {
+      "path": "branding/ees/ui/ees-work-view.js",
+      "sha256": "b153f4b9acaa3bbb92ce9f2b85ec0e727cb3dbff63357684f32ca7a25263bc94",
+      "matches_executed_source_commit": true
+    },
+    {
+      "path": "branding/ees/ui/ees-work-launcher.css",
+      "sha256": "dc799f286e667f5688311cea37b843ef247e64e7290f11de4b764897a49eb11b",
+      "matches_executed_source_commit": true
+    },
+    {
+      "path": "scripts/build_ees_webui.py",
+      "sha256": "aafeeebb7931ab351798e846dae7f81108420d084fd34d6ff7412e043f02ef91",
+      "matches_executed_source_commit": true
+    }
+  ]
+}

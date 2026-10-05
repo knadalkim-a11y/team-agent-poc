@@ -1,0 +1,545 @@
+{
+  "artifact_name": "ees-native-complete-product-cad7684f5d634e1a3178cc86b7a49c7d48bb6d99",
+  "artifact_id": 11333754112,
+  "members": [
+    {
+      "member": "ees-native-product/a0-empty.png",
+      "bytes": 51003,
+      "compressed_bytes": 43119,
+      "sha256": "d2358070a4e600555e0106289d93e557b72c6697c9550238f80d5a62b1aa7f16",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/a1-human-complete.json",
+      "bytes": 43021,
+      "compressed_bytes": 9065,
+      "sha256": "19a30961931e6b08aad8e871b1af4032b31f95cfb391728dbee0fb62f7c6a99c",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/a0-empty.json",
+      "bytes": 37609,
+      "compressed_bytes": 7915,
+      "sha256": "03d2f0b5349855b95fb5261a5fa9dcf0fdebc39436cb87192d635d4fdc7d9a21",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/a1-human-complete.png",
+      "bytes": 88919,
+      "compressed_bytes": 80016,
+      "sha256": "b2adba2c2acc2c3f435f7b0e26ac2146100a897614c35bd749b64b748188ee4e",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/a1-input-saved-not-complete.json",
+      "bytes": 42477,
+      "compressed_bytes": 8979,
+      "sha256": "1a4b1df41800a5c8985f346046cf3f1143d93dc5af395ed02aef4b4367970197",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/a1-input-saved-not-complete.png",
+      "bytes": 85258,
+      "compressed_bytes": 77729,
+      "sha256": "71b5674c42958a3866ffd9a77bbc2dcb65519e7c07f2cf4011ad20cb87f919f7",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/b2-published.json",
+      "bytes": 40521,
+      "compressed_bytes": 8689,
+      "sha256": "5cb503d8cb68d3712a3a286c127091289fccba425b5094ab15c06f100166d356",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/b2-published.png",
+      "bytes": 73337,
+      "compressed_bytes": 66139,
+      "sha256": "1f888e93da3724da3d66118c82add6795dbd28d90cebc628b478ded0ae70720d",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/b3-saved-authoring.json",
+      "bytes": 48590,
+      "compressed_bytes": 11233,
+      "sha256": "95ff0493df91ca6bc730c79adf5cef03d1e14358033a5995110c169d1cc44e3a",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/b3-saved-authoring.png",
+      "bytes": 86802,
+      "compressed_bytes": 79012,
+      "sha256": "fa77f1158f6e5e9d346e1d3499325c68be1a301d52fddffc6e83a143b7556e87",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/failure.json",
+      "bytes": 51383,
+      "compressed_bytes": 10082,
+      "sha256": "2961237094228abe1bdb5bf38d2a20a96c11fb5f04785d2b7e48ce9c99294328",
+      "retained": true
+    },
+    {
+      "member": "ees-native-product/failure.png",
+      "bytes": 120011,
+      "compressed_bytes": 112078,
+      "sha256": "cde42dfabebab2c9964899c0de6b8ecb0a05862adedcb408ba3c1445034db5de",
+      "retained": true
+    },
+    {
+      "member": "ees-native-product/figma-a5-cycle-geometry.json",
+      "bytes": 14307,
+      "compressed_bytes": 714,
+      "sha256": "45a2b574d0d283dcb64a03bd5e6e22008c5b7cf4e60699fe96458825567d9772",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a5-cycle-overview.json",
+      "bytes": 47017,
+      "compressed_bytes": 9958,
+      "sha256": "4ff619664adc8aef8cd8a2f6c5fe724791c16eeacf2239e1649303bf01a83b66",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a5-cycle-overview.png",
+      "bytes": 105665,
+      "compressed_bytes": 97623,
+      "sha256": "534ce096d8ea218d0a4e883ef8942350a26f0e899bea331e0090e9d5c27c20c8",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a6-list-confirmed.json",
+      "bytes": 48389,
+      "compressed_bytes": 10186,
+      "sha256": "f407dda49906e915bfa15bcd9fcb7f50f0d35f24b66ace5550ae219de492b9d3",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a6-list-confirmed.png",
+      "bytes": 105974,
+      "compressed_bytes": 97703,
+      "sha256": "a70a8ffad6342a30d39d0194b9bd2baafe4e8f132c26514d4d71ebe8039657b5",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a6-list-geometry.json",
+      "bytes": 11126,
+      "compressed_bytes": 622,
+      "sha256": "165617884493d3a6d2a8c9c5f91f02559d1e6b3ce3f196f39b5350e500e51821",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a6-list-local-selection.json",
+      "bytes": 46763,
+      "compressed_bytes": 9849,
+      "sha256": "3376fe13021fe29675393afdd6ac60975f845db25bdb7126f38c2f1d422bdd2f",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a6-list-local-selection.png",
+      "bytes": 112782,
+      "compressed_bytes": 103958,
+      "sha256": "4d2ef23a2568e0bdcf6168d512fc2fd501aebf44b0e80af0a8d9ba5b69a09699",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a7-confirmed-readonly.json",
+      "bytes": 49565,
+      "compressed_bytes": 10209,
+      "sha256": "cb89367da6e66bf33267ea1469c37559f9e7bc3eb9b9740e8b5b31af19044001",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a7-confirmed-readonly.png",
+      "bytes": 106642,
+      "compressed_bytes": 97844,
+      "sha256": "391f75dff98b10f683f7b5f06f91972ed12dc1aee3092fd88102a44eb8656966",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a7-review-geometry.json",
+      "bytes": 10329,
+      "compressed_bytes": 595,
+      "sha256": "7ffaf63e2d967fad856bcebf44022ed3cea962edd3d66bb6c85a636e58915c49",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a7-review-only-autosaved.png",
+      "bytes": 110059,
+      "compressed_bytes": 101613,
+      "sha256": "79d47de58ced5da4772d0bdf5be90f3a1315fe5907a6093068f59580ec2d5aef",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a7-review-only-autosaved.json",
+      "bytes": 48250,
+      "compressed_bytes": 9910,
+      "sha256": "eccda2e851734fe8542b393f02371359a222f715209f15d1e2dac9476dc63fbf",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a8-first-start.json",
+      "bytes": 40234,
+      "compressed_bytes": 8449,
+      "sha256": "821eca52d69ef17c8d9a48719ea4d30ad312b965214f447352ad0d1fb47a9cd4",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-a8-first-start.png",
+      "bytes": 80288,
+      "compressed_bytes": 73518,
+      "sha256": "56a5f56b7472925bebcf575eb4e137000cb0a85013203efb9c44cb0abdcf7283",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-b21-schedule-geometry.json",
+      "bytes": 12652,
+      "compressed_bytes": 569,
+      "sha256": "c20eda6417bf031e14027b7a04571aefe5ecdbd596e5a37ab34352c3f8423b16",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-b21-schedule-preview.json",
+      "bytes": 46765,
+      "compressed_bytes": 10391,
+      "sha256": "a2c33e15bbdcb72a20874126711f1516ce56b6c998f08a6939b58b91a787596e",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-b21-schedule-preview.png",
+      "bytes": 154706,
+      "compressed_bytes": 145330,
+      "sha256": "1758ec40e259f829d122937ab2ad64b7f48266731ee9a0fd908216d7c41321fb",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-b22-saved-job-rules.json",
+      "bytes": 45670,
+      "compressed_bytes": 10027,
+      "sha256": "03d311c550e32aa45016322dcbfee8e4cd62bc72fe92cdbebdf6d528cb1fcf28",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-b22-saved-job-rules.png",
+      "bytes": 110695,
+      "compressed_bytes": 102350,
+      "sha256": "0da84e7146dd3959f527a3211b657a36a6fb321619627f5ee7a6986eaad3a6de",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-b23-publish-review.json",
+      "bytes": 40783,
+      "compressed_bytes": 8933,
+      "sha256": "50086b625735533ff4288f8a249c403f82c865ded70b606264ba12ebc3821a78",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-b23-publish-review.png",
+      "bytes": 97366,
+      "compressed_bytes": 89428,
+      "sha256": "1ab55323c6d0c0c603e5f65546de29add9211df17af29747345937be6bb767b4",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-q1-1366x768-human-action.json",
+      "bytes": 42014,
+      "compressed_bytes": 8936,
+      "sha256": "8cf7e76fb6ea4621d68cda50dc742693ac0e0c2e49c14729d2153f049eaa32f1",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-q1-1366x768-human-action-geometry.json",
+      "bytes": 554,
+      "compressed_bytes": 187,
+      "sha256": "488ac0dc6aa9f2896e0b741834f0932f60cc5df45196d64018709326b88a96e1",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-q1-1366x768-human-action.png",
+      "bytes": 61036,
+      "compressed_bytes": 57180,
+      "sha256": "b088743312e1ce4b3b56c05fd9960dac09a4567a2f26dc1dcec26fa77f1e920a",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-q1-1366x768-native-chat-geometry.json",
+      "bytes": 1083,
+      "compressed_bytes": 278,
+      "sha256": "b5f26e80aaf6c73b7a30c338a8bccd097c63b0f225d4f2468be41172bf56034f",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-q1-1366x768-native-chat.json",
+      "bytes": 49903,
+      "compressed_bytes": 10875,
+      "sha256": "0d20f4d9bd4380245a2f7ebc7a9c5c79727580457698ef01cca54174bc75b31b",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-q1-1366x768-native-chat.png",
+      "bytes": 97438,
+      "compressed_bytes": 93814,
+      "sha256": "4eb25b3be2bb09eac3d58eb78847b37f73ac5084028240e5908a8c2bbf59d3c1",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s1-empty-geometry.json",
+      "bytes": 9490,
+      "compressed_bytes": 592,
+      "sha256": "eea5b6a0dfa9097a988d5ed52be0210c4581a6705628992972c47bd68d3f20e0",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s1-empty.json",
+      "bytes": 42085,
+      "compressed_bytes": 8949,
+      "sha256": "0c26e2987e625442ca22670c4b89cd01b87c419b23cddccb13ce9b8103c6702e",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s1-empty.png",
+      "bytes": 54167,
+      "compressed_bytes": 46338,
+      "sha256": "3d7663724d2c676674c390d5e307bde240b452b68d021c7144bd40408c0696f0",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s1-read-retry-awaits-human.json",
+      "bytes": 48071,
+      "compressed_bytes": 10164,
+      "sha256": "abc2da64e1c2e9de608eb664607b0bedc92119db1c332375e27747af52ce02d4",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s1-read-retry-awaits-human.png",
+      "bytes": 105079,
+      "compressed_bytes": 96947,
+      "sha256": "b40da2f4488e6643a6a9e6810720e9706da7fd9224cade9f2e1f2d9eb142b979",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s1-read-retry-server.json",
+      "bytes": 31002,
+      "compressed_bytes": 4190,
+      "sha256": "2508940727c9be85e6cdcc1701a66fbd562044df819bd174a96ac007b5b16fa0",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-filter-geometry.json",
+      "bytes": 10329,
+      "compressed_bytes": 596,
+      "sha256": "5a285f5ea6a230b1f4429c0a76efab28dbd7cc0a3ef8ab1e9ed508a2510dec2a",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-filtered-records.json",
+      "bytes": 56036,
+      "compressed_bytes": 11068,
+      "sha256": "e7d0a758e1686ed3488ab3c258bb43e162ba9f1295284c77ecd7cdef072e008e",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-filtered-records.png",
+      "bytes": 100205,
+      "compressed_bytes": 93027,
+      "sha256": "7caec29544b91c0a33e96272a67383f52d907dd8e48f9c754d3094f015f92936",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-history-geometry.json",
+      "bytes": 22981,
+      "compressed_bytes": 934,
+      "sha256": "2d233134adc9d479f2e36c99bc6641ab2e1b6651a580f8ba6a3ef15c9d1e39e8",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-narrow-readonly-before-scroll.json",
+      "bytes": 60879,
+      "compressed_bytes": 12411,
+      "sha256": "16332bb02a9d4b49a98431aa1510c84da2529c4b063a12eb81f845fdceca84e7",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-narrow-readonly-before-scroll.png",
+      "bytes": 131883,
+      "compressed_bytes": 128876,
+      "sha256": "ee80e416ab63a175effcfee315f63579a227f2890fb8bf9b294b9e318fec6248",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-narrow-scroll.json",
+      "bytes": 61150,
+      "compressed_bytes": 12426,
+      "sha256": "9d848104d487ba65a477a81af30d12fd3bcf48e53fa5ebc9ef88b3188f453a53",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-narrow-scroll.png",
+      "bytes": 145394,
+      "compressed_bytes": 142073,
+      "sha256": "153d9b2c7e52e4847b0bf58fb2c652bccc52309aea3e9f0cc93a7c1beeb1a2a5",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-native-historical-answer.json",
+      "bytes": 62641,
+      "compressed_bytes": 12811,
+      "sha256": "2ab036b4ba4c47e04152cdb66e29d1ba15a5ae2079faedc62bab077ee5fe4816",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-native-historical-answer.png",
+      "bytes": 208454,
+      "compressed_bytes": 200721,
+      "sha256": "b73407cdeded9d5e78e440846eba3beba1c2e17f75c569b30a6876a6c9da25f7",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-native-historical-tool.json",
+      "bytes": 22495,
+      "compressed_bytes": 4570,
+      "sha256": "bb23065e0991d4049af8653557a87b34939ab7c04ae4956e01afd1caaaf32212",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-readonly-original-values.json",
+      "bytes": 61610,
+      "compressed_bytes": 12666,
+      "sha256": "aad404780780dbe1429b272649e045ecde9147ee5c7f4c904edcce37f0ece86c",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-readonly-original-values.png",
+      "bytes": 188013,
+      "compressed_bytes": 179370,
+      "sha256": "dbe62c0b697892b1fbef69a03bfb1a2644734133c3a6000f6362acc3dbeaf183",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/figma-s2-restored-narrow-scroll.json",
+      "bytes": 1284,
+      "compressed_bytes": 573,
+      "sha256": "3cb24196d0a8b229ea8a782e9bdfbb6b0f7cd00c9c99391dd66d09bf0c9b1781",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/native-attachment-restored.json",
+      "bytes": 50208,
+      "compressed_bytes": 10903,
+      "sha256": "5b609b0ebe828cb6f34056739a432714c2e23bf7d94d31eb956797c826efde6a",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/native-attachment-restored.png",
+      "bytes": 123390,
+      "compressed_bytes": 115264,
+      "sha256": "b8ea4b955261ee2ddffe4f3d9d733340576c17e93f7d2204d7a1106577eae776",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/native-attachment-saved.json",
+      "bytes": 50905,
+      "compressed_bytes": 11164,
+      "sha256": "4f7ce77afa030e7900f6e926dc0b837115854efe2ef20c53398b80195e6230bd",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/native-attachment-saved.png",
+      "bytes": 128561,
+      "compressed_bytes": 120749,
+      "sha256": "026961c52ce0c2467c69914c6ff0d46bfab030b971befdb2b833e6cd6d5820d6",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/native-chat-saved.json",
+      "bytes": 52690,
+      "compressed_bytes": 10815,
+      "sha256": "58a468798a65a33aebb93660dbf91ec1ba1ba792bb6ba035dac64893ba2dc6a0",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/native-chat-saved.png",
+      "bytes": 105792,
+      "compressed_bytes": 98453,
+      "sha256": "c5ed220e343d040878e963e60069211d748887d07c9c0345a0d4408c7753e37e",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/native-file-upload.json",
+      "bytes": 52661,
+      "compressed_bytes": 11671,
+      "sha256": "35c8c723d769458b936e8d6b0fc216ad966f7c5efa45ebbadc08083a6fd540de",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/native-file-upload.png",
+      "bytes": 112505,
+      "compressed_bytes": 104830,
+      "sha256": "84dbbf0103654845aff2bba9462607078b2434ce9603645a5ab24d2f84a9db56",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/native-narrow.json",
+      "bytes": 50021,
+      "compressed_bytes": 10888,
+      "sha256": "28788f09e2e039ef3ba69c04dea65d52b878528a3eb32b63dcef44dd1b4c7df0",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/native-narrow.png",
+      "bytes": 103182,
+      "compressed_bytes": 100778,
+      "sha256": "a573f4d841d2eaeea047542ec3c2785e4d25860eac024dffae14c68120d4dbd3",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/native-reduced-motion.json",
+      "bytes": 49726,
+      "compressed_bytes": 10870,
+      "sha256": "88f4da9c80ef5a0264f75b531fa0eb41e4f9de7b1cbda31f7ddb1092b2af3460",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/native-reduced-motion.png",
+      "bytes": 103182,
+      "compressed_bytes": 100778,
+      "sha256": "a573f4d841d2eaeea047542ec3c2785e4d25860eac024dffae14c68120d4dbd3",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/publish-confirmation-cancel-focus.json",
+      "bytes": 39890,
+      "compressed_bytes": 8753,
+      "sha256": "1442301957d771de50e1f966c8f727bd3925b5d5538f1012ed29e7ec37891198",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/publish-confirmation-cancel-focus.png",
+      "bytes": 114667,
+      "compressed_bytes": 107445,
+      "sha256": "0ebb1842a4c614ca6ca59f57d32fc84b2e66e9eab01ded88132d1f932e09a561",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product/report.json",
+      "bytes": 23263,
+      "compressed_bytes": 3811,
+      "sha256": "1913a83d7edb997533407a83f1a1a6ddbf5ed38c660cc479b36ec556cb7b5770",
+      "retained": true
+    },
+    {
+      "member": "ees-native-product/synthetic-native-upload.txt",
+      "bytes": 79,
+      "compressed_bytes": 71,
+      "sha256": "cfc3fdf55f3172a09b12635a125c1d6065974965a5c43521dcba3e5b328be4cc",
+      "retained": false
+    },
+    {
+      "member": "ees-native-product-results/browser-evidence.json",
+      "bytes": 12563,
+      "compressed_bytes": 3874,
+      "sha256": "38b4622acc8b5fd4bb737f0549c44b58a70421d912244892cc15f1cc06fdb895",
+      "retained": false
+    }
+  ]
+}

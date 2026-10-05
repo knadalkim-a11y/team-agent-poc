@@ -1,738 +1,387 @@
-/* Native EES workflow: existing sidebar, real chat and shared work panel. */
+/* Authenticated workspace controller. Native owns chat, attachments and models.
+ * Display selection is private UI state, never a shared run mutation. */
 (() => {
   'use strict';
-  if (window.__eesNativeWork) return;
-  const $ = (s, p = document) => p.querySelector(s);
-  const {categories,finished,lineage:workLineage} = workUI;
-  let state = null, generation = 0, request = 0, busy = false, scheduled = false;
-  let lastRoute = '', acceptedRoute = '', identity = '', pendingId = '', pendingSubmitted = false;
-  let category = 'setup', browsingSystem = 'EMS', browsingSite = '', newCase = false, previewVersion = 0;
-  let browseActive = false, browseNodeId = '', runView = 'current', historyCase = null, historyRequest = 0, navigationRequest = 0;
-  let desiredCase = '', desiredNode = '', reopenPanel = false, navigationTarget = '';
-  const scopeSelections = new Map(), chosenCases = new Map(), draftSnapshots = new Map(), creationTickets = new Map(), createdChats = new Map();
-  const previewChats = new Map(), actionRequests = new Map();
-  const heldWorkKeys = new Set();
-  let actionSerial=0;
-  let creationSerial=0;
-  let visibleDraftKey='general', draftTarget=null, draftTimer=null, draftSerial=0;
-  let errorMessage = '', recordLookupError = null, historyLookupError = null, activeRegistration = null;
-  let personalSettingsOpened=false;
-  let scopeReadinessTimer=null;
-  let execution=null,executionError='',executionTimer=null,executionSerial=0,historyExecution=null;
-  const executionStarts=new Map();
-  const inputDraftReceipts=new Map(), messageReferences=new Map();
-  const actionRecordCards=new Map();
-  let actionRecords=[],actionRecordChat='',actionRecordSerial=0;
-  let referenceEnabled=true,suggestionPending=false;
-  const token = () => {try {return localStorage.getItem('token') || '';} catch (_) {return '';}};
-  const chatId = () => {const m = location.pathname.match(/^\/c\/([^/]+)\/?$/); return m ? decodeURIComponent(m[1]) : '';};
-  const authoringRoute = () => (location.pathname==='/'||location.pathname.startsWith('/workspace')) && new URLSearchParams(location.search).get('ees')==='workflow';
-  const chatRoute = () => !authoringRoute()&&(location.pathname === '/' || /^\/c\/[^/]+\/?$/.test(location.pathname));
-  const adminRoute = authoringRoute;
-  const available = () => !/^\/(auth|logout)(\/|$)/.test(location.pathname) && Boolean($('#sidebar-new-chat-button'));
-  const currentCase = () => state?.case;
-  const selectedCase = () => !newCase && currentCase()?.site?.id === browsingSite && currentCase()?.system === browsingSystem ? currentCase() : null;
-  const caseMatchesRoute=()=>Boolean(currentCase()&&chatRoute()&&(currentCase().chat_id || '')===chatId());
-  const definition = () => selectedCase()?.definition || state?.catalog;
-  const selectedId = () => browseActive ? (newCase ? browseNodeId : (selectedCase()?.selected_id || browseNodeId)) : '';
-  const node = id => definition()?.nodes?.[id];
-  const lineage = (id, data = definition()) => workLineage(id,data);
-  const scopeKey = () => browsingSite + '/' + browsingSystem;
-  const caseKey = id => scopeKey() + '/' + id;
-  const processId = () => lineage(selectedId())[0]?.id || (state?.catalog?.roots?.[category] || [])[0] || '';
-  const scopeCases = id => (state?.cases || []).filter(c => c.site?.id === browsingSite && c.system === browsingSystem && (!id || c.process_id === id));
-  function chosenCase(id) {
-    const cases=scopeCases(id), remembered=cases.find(c=>c.id===chosenCases.get(caseKey(id)));
-    if(remembered)return remembered;
-    const active=cases.filter(c=>!finished(c));
-    return active.length===1?active[0]:active.length>1?null:cases[0] || null;
-  }
-  function visibleRoots(group) {
-    const data=state?.catalog;if(!data)return [];
-    return [...new Set([...(data.roots[group] || []),...scopeCases().filter(c=>c.category===group).map(c=>c.process_id)])].filter(p=>{
-      const n=data.nodes[p];return scopeCases(p).length || n&&n.enabled!==false&&(!n.systems||n.systems.includes(browsingSystem));
-    });
-  }
-  function rememberScope() {if(browsingSite)scopeSelections.set(scopeKey(),{category,nodeId:selectedId()});}
-  const scopeReady = () => Boolean(state&&acceptedRoute===location.pathname+location.search&&lastRoute===acceptedRoute&&(!chatRoute()||window.__eesNativeDraftV1?.ready()));
-  const view = createWorkView({callbacks:{scopeReady,registerPanel,selectWork,switchScope,startCase,showHistory,saveInputs,saveDocument,runJob,executionRefresh:retryExecutionRead,executionControl,undoAIDraft,toggleReference,suggest:sendSuggestion,
-    canAuthor:()=>designer.canAuthor(),
-    openAuthoring:async process=>{
-      if(busy||runView==='history'||!state?.catalog?.nodes?.[process])return false;
-      const at=generation,auth=token(),route=location.pathname+location.search;
-      if(!await designer.openProcess(process))return false;
-      if(at!==generation||auth!==token()||route!==location.pathname+location.search)return false;
-      stashDraft();navigate('/?ees=workflow');return true;
-    },
-    openCase:id=>openCase(state?.cases.find(c=>c.id===id)),
-    selectCategory:async wanted=>{category=wanted;const first=visibleRoots(category)[0];if(first)await selectWork(first);else renderNavigator();},
-    showHistoryView:show=>{resetHistory();runView=show?'history':'current';renderPanel();},
-    closePanel:()=>window.__eesWorkPanelV1?.close(chatId()),
-    selectPanel:screen=>window.__eesWorkPanelV1?.select(chatId(),screen,{open:true})
-  }});
-  const designer = createWorkDesigner({callbacks:{
-    authoringModels,authoringReply,authoringRead:path=>authoringAPI(path),authoringWrite:(body,path='authoring/action')=>authoringAPI(path,body)
-  }});
-  function snapshot() {
-    // Each successful read only validates its own current or historical case.
-    // Opening a tab must never turn a failed current read into fresh evidence.
-    const lookupError=runView==='history'?(historyCase?historyLookupError:historyLookupError || recordLookupError):recordLookupError;
-    return {state,category,browsingSystem,browsingSite,browseNodeId,browseActive,runView,historyCase,errorMessage,recordLookupError:lookupError,busy,referenceEnabled,reference:referenceEnabled?referenceTarget():{kind:'none'},
-      chatId:chatId(),chatRoute:chatRoute(),adminRoute:adminRoute(),acceptedRoute,execution:execution?.run?.case_id===selectedCase()?.id?execution:null,executionError:selectedCase()?executionError:'',historyExecution,
-      selectedCaseId:selectedCase()?.id || '',selectedId:selectedId(),processId:processId(),
-      roots:Object.fromEntries(Object.keys(categories).map(group=>[group,visibleRoots(group)])),
-      chosenCases:Object.fromEntries(Object.keys(categories).flatMap(group=>visibleRoots(group).map(id=>[id,chosenCase(id)?.id || ''])))};
-  }
-  function renderView() {view.render(snapshot());}
-  function renderNavigator() {view.renderNavigator(snapshot());}
-  function renderPanel() {view.renderPanel(snapshot());}
-  function renderDesigner() {designer.render(snapshot());}
-  function setBusy() {view.setBusy(busy);designer.setBusy(busy);}
-  function clearScopeReadinessWait() {clearTimeout(scopeReadinessTimer);scopeReadinessTimer=null;}
-  function updateScopeReadiness() {
-    view.updateScopeReadiness();clearScopeReadinessWait();
-    const route=location.pathname+location.search;
-    if(!state||!chatRoute()||acceptedRoute!==route||lastRoute!==route||window.__eesNativeDraftV1?.ready())return;
-    // Native draft stores can finish loading without another DOM mutation.
-    // Recheck only this pending route, stopping as soon as its editor is ready.
-    const at=generation,auth=token();
-    scopeReadinessTimer=setTimeout(()=>{scopeReadinessTimer=null;if(at===generation&&auth===token()&&route===location.pathname+location.search&&available())schedule();},50);
-  }
-  function openPanel() {view.prepare(snapshot());view.openPanel();}
-  function revealSelection(id,data,run,includeSelf=false) {view.revealSelection(id,data,run,includeSelf,{site:browsingSite,system:browsingSystem});}
-  async function api(path, body) {
-    const headers = {'Accept':'application/json'};
-    const access = token(); if (access) headers.Authorization = 'Bearer ' + access;
-    if (body) headers['Content-Type'] = 'application/json';
-    const response = await fetch('/api/ees-work/' + path, {method:body ? 'POST' : 'GET',credentials:'same-origin',cache:'no-store',headers,...(body ? {body:JSON.stringify(body)} : {})});
-    let result;try{result=await response.json();}catch(_){const failure=new Error('업무 정보를 가져오지 못했습니다. 배포 상태를 확인해 주세요.');failure.status=response.status;throw failure;}
-    if (!response.ok || result?.ok === false) {const failure=new Error(result?.error?.message || result?.detail?.message || '업무 정보를 가져오지 못했습니다. 로그인과 배포 상태를 확인해 주세요.');failure.result=result;failure.status=response.status;failure.code=result?.error?.code || result?.detail?.code;throw failure;}
+  if(window.__eesNativeWork)return;
+  const {$,clone,esc,button,dialog,closeDialog}=workUI;
+  const token=()=>{try{return localStorage.getItem('token') || '';}catch(_){return '';}};
+  const chatId=()=>{const match=location.pathname.match(/^\/c\/([^/]+)\/?$/);return match?decodeURIComponent(match[1]):'';};
+  const available=()=>Boolean(token()&&!/^\/(auth|logout)(\/|$)/.test(location.pathname)&&$('#chat-container #chat-pane')&&$('#sidebar-search-button'));
+  let state=null,identity='',epoch=0,serial=0,busy=false,scheduled=false,error='',commandError='',route='',refreshTimer=null,uiTimer=null,uiRevision=0,restored=false,initialSelectionPatch=null;
+  let selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};
+  const receipts=new Map(),optionCache=new Map(),chatCreations=new Map(),chatAliases=new Map();let workEpoch=0;let referenceChat='',referenceTimer=null,referenceRead=0,messageReferences=new Map();let uiWrites=Promise.resolve(),optionTimer=null,pendingInputProposal=null,reviewTimer=null,reviewSaving=null;
+  const context=()=>JSON.stringify([epoch,token()===identity,location.pathname,location.search,selection.system_id,selection.factory_id,selection.workflow_id,selection.run_id,selection.job_id]);
+  const view=createWorkView({callbacks:{panelWidth:width=>{if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:width};selection.panel_width=width;remember(width);}}});
+  const designer=createWorkDesigner({callbacks:{command,read,models:models,openWorkflow:async id=>select({workflow_id:id,run_id:'',job_id:'',mode:'author',tab:'overview'}),changed:refresh,navigate:mode=>select({mode}),operationsRead,operationsCommand,options:async body=>{const at=context();const result=await api('workspace/options',body);if(at!==context())throw new Error('작업 위치가 바뀌어 선택 목록을 적용하지 않았습니다.');return result;},resources:async()=>{const at=context();const result=await api('resources');return at===context()?result:null;},propose:async({signal,...body})=>{const at=context();const result=await api('workspace/proposal',body,signal);if(at!==context())throw new Error('작업 위치가 변경되어 제안을 적용하지 않았습니다.');return result;}}});
+  const snapshot=()=>({state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null}:null,selection:{...clone(selection),chat_id:chatId()},busy,error:error || commandError});
+  function render(){view.render(snapshot());if(selection.mode==='author'&&selection.tab!=='workspace_admin')designer.render({state,selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});}
+  function setBusy(value){busy=value;view.setBusy(value);designer.setBusy?.(value);if(value){clearTimeout(refreshTimer);refreshTimer=setTimeout(refresh,250);}}
+  async function api(path,body,signal){
+    const headers={Accept:'application/json',Authorization:'Bearer '+token()};if(body)headers['Content-Type']='application/json';
+    const response=await fetch('/api/ees-work/'+path,{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',headers,...(body?{body:JSON.stringify(body)}:{}),...(signal?{signal}:{})});
+    let result;try{result=await response.json();}catch(_){throw Object.assign(new Error('응답을 확인하지 못했습니다. 저장·실행 결과를 다시 조회해 주세요.'),{status:response.status});}
+    if(!response.ok||result?.ok===false){const detail=result.error || result.detail || {};throw Object.assign(new Error(detail.message || (typeof detail==='string'?detail:'요청을 완료하지 못했습니다. 권한과 입력을 확인해 주세요.')),{status:response.status,code:detail.code,result});}
     return result;
   }
-  async function authoringAPI(path,body){
-    const auth=token(),at=generation,route=location.pathname+location.search;
-    try{const result=await api(path,body);if(auth!==token()||at!==generation||route!==location.pathname+location.search||!available())return null;return result;}
-    catch(error){if(auth!==token()||at!==generation||route!==location.pathname+location.search||!available())return null;throw error;}
-  }
-  function lookupFailure(error) {
-    // Only read callers use this state. A rejected action is not evidence that
-    // stored records are absent or unreadable; ambiguous not-found stays failed.
-    const restricted=error.status===403 || ['chat_forbidden','admin_required'].includes(error.code);
-    return {kind:restricted?'restricted':'failed',message:restricted?'이 기록에 접근할 권한이 없습니다.':'기록을 조회하지 못했습니다. 다시 조회해 주세요.'};
-  }
-  async function authoringModels() {
-    const headers={Accept:'application/json',Authorization:'Bearer '+token()},options={credentials:'same-origin',cache:'no-store',headers};
-    const [response,settings]=await Promise.all([fetch('/api/models',options),fetch('/api/v1/users/user/settings',options).then(r=>r.ok?r.json():{}).catch(()=>({}))]);
-    if(!response.ok)throw new Error('models_unavailable');
-    const result=await response.json();
-    return {models:(result.data || []).filter(model=>typeof model.id==='string'&&model.id&&!model.direct&&model.type!=='embedding').map(model=>({id:model.id,name:model.name || model.id})),preferred:Array.isArray(settings.ui?.models)?settings.ui.models:[]};
-  }
-  async function authoringReply({model,messages,signal}) {
-    const controller=new AbortController(),abort=()=>controller.abort();signal.addEventListener('abort',abort,{once:true});
-    const timeout=setTimeout(abort,90000),auth=token();
-    try {
-      if(signal.aborted||!designer.canAuthor()||!authoringRoute())throw new Error('작성 요청을 중단했습니다. 현재 초안은 그대로입니다.');
-      // Use the existing authenticated model path without chat creation or tool resolution.
-      // The pinned middleware explicitly treats tools: [] as opting out of builtins.
-      const response=await fetch('/api/chat/completions',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json',Authorization:'Bearer '+auth},signal:controller.signal,body:JSON.stringify({model,messages,stream:false,tools:[],tool_ids:[],features:{}})});
-      if(!response.ok)throw new Error('답변을 받지 못했습니다. 기존 모델 연결과 권한을 확인해 주세요.');
-      let text='';
-      if((response.headers.get('content-type') || '').includes('text/event-stream')){
-        const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='',complete=false;
-        while(true){const {done,value}=await reader.read();buffer=(buffer+decoder.decode(value || new Uint8Array(),{stream:!done})).replace(/\r\n/g,'\n');let end;
-          while((end=buffer.indexOf('\n\n'))>=0){const frame=buffer.slice(0,end);buffer=buffer.slice(end+2);const data=frame.split('\n').filter(line=>line.startsWith('data:')).map(line=>line.slice(5).trimStart()).join('\n');if(!data)continue;if(data==='[DONE]'){complete=true;continue;}const chunk=JSON.parse(data);if(chunk.error)throw new Error('모델 응답이 중단됐습니다. 현재 초안은 그대로입니다.');const choice=chunk.choices?.[0];if(choice?.delta?.tool_calls||choice?.message?.tool_calls)throw new Error('도구 실행 응답은 이 작성 영역에서 사용할 수 없습니다.');text+=choice?.delta?.content || choice?.message?.content || '';if(choice?.finish_reason)complete=true;}
-          if(text.length+buffer.length>48000)throw new Error('답변이 너무 깁니다. 수정할 안내를 나누어 요청해 주세요.');
-          if(done)break;
-        }
-        if(!complete)throw new Error('모델 응답이 끝나기 전에 연결이 종료됐습니다. 초안은 그대로입니다.');
-      }else{
-        const result=await response.json(),message=result.choices?.[0]?.message;
-        if(message?.tool_calls?.length)throw new Error('도구 실행 응답은 이 작성 영역에서 사용할 수 없습니다.');
-        text=message?.content;
-      }
-      if(auth!==token()||signal.aborted)throw new Error('작성 요청을 중단했습니다. 현재 초안은 그대로입니다.');
-      if(typeof text!=='string'||!text.trim()||text.length>48000)throw new Error('답변을 읽지 못했습니다. 현재 초안은 그대로입니다.');
-      return text;
-    }catch(error){if(controller.signal.aborted)throw new Error(signal.aborted?'작성을 중단했습니다.':'응답 대기 시간이 지났습니다. 현재 초안은 그대로입니다.');throw error;}
-    finally{clearTimeout(timeout);signal.removeEventListener('abort',abort);}
-  }
-  function accept(result) {
-    const previousCase=state?.case?.id,firstForRoute=acceptedRoute!==location.pathname+location.search;state = result;recordLookupError=null;acceptedRoute=location.pathname+location.search;
-    if(state.case){browseActive=true;if(chatId())previewChats.delete(chatId());}
-    if(state.case&&state.case.id!==previousCase){browsingSite=state.case.site.id;browsingSystem=state.case.system;category=state.case.definition.nodes[state.case.process_id]?.category || 'setup';browseNodeId=state.case.selected_id;newCase=false;chosenCases.set(caseKey(state.case.process_id),state.case.id);}
-    if(!state.case){const params=new URLSearchParams(location.search),saved=previewChats.get(chatId());if(saved&&saved.auth===token()){browseActive=true;browsingSite=saved.selection.site_id;browsingSystem=saved.selection.system;browseNodeId=saved.selection.node_id;previewVersion=saved.selection.version;category=state.catalog.nodes[saved.selection.process_id]?.category || category;}else if(params.has('ees_site')&&(firstForRoute||!browseActive)){browseActive=true;browsingSite=params.get('ees_site');browsingSystem=params.get('ees_system') || browsingSystem;browseNodeId=params.get('ees_node') || params.get('ees_process') || browseNodeId;const version=Number(params.get('ees_version'));if(Number.isSafeInteger(version)&&version>0)previewVersion=version;category=state.catalog.nodes[lineage(browseNodeId,state.catalog)[0]?.id]?.category || category;}if(!previewVersion)previewVersion=state.catalog.version;}
-    if(!state.catalog.systems.includes(browsingSystem))browsingSystem=state.catalog.systems[0];
-    if(!browsingSite || !state.catalog.sites[browsingSite])browsingSite=Object.keys(state.catalog.sites)[0] || '';
-    if(!state.case){newCase=true;const roots=visibleRoots(category);if(!roots.includes(lineage(browseNodeId,state.catalog)[0]?.id))browseNodeId=roots[0] || '';if(browseActive&&previewVersion!==state.catalog.version&&!errorMessage)errorMessage='게시된 업무 절차가 변경되었습니다. 왼쪽에서 업무를 다시 선택해 새 기준을 확인해 주세요.';}
-    designer.acceptServer(state);
-    if(currentCase())revealSelection(currentCase().selected_id,currentCase().definition,currentCase());
-    if (currentCase()?.chat_id) pendingId = '';
-    render();
-    if(!draftTarget)visibleDraftKey=chatId()?'chat/'+chatId():pendingId?'case/'+pendingId:browseActive?'scope/'+scopeKey()+'/'+processId():'general';
-    restoreDraft();
-    refreshActionRecords(chatId());
-    if(desiredNode && state.case?.id===desiredCase && state.case.chat_id===chatId()) {const wanted=desiredNode;desiredNode='';desiredCase='';reopenPanel=false;action('select',{},wanted).then(result=>{if(result)openPanel();});}
-    else if(reopenPanel && chatRoute()){reopenPanel=false;openPanel();}
-  }
-  async function refresh() {
-    if (!available()) return;
-    const at = generation, scopeEpoch=navigationRequest, serial = ++request, id = chatId(), auth = token(), route = location.pathname + location.search;
-    const current=()=>at===generation&&scopeEpoch===navigationRequest&&serial===request&&auth===token()&&route===location.pathname+location.search&&available();
-    const query = new URLSearchParams({chat_id:id}); if (!id && pendingId) query.set('case_id', pendingId);
-    try {const result = await api('state?' + query);if(!current())return;errorMessage='';accept(result);await refreshExecution();
-      if(!current())return;
-      const shownState=state,couldAuthor=designer.canAuthor();
-      await designer.refreshAuthoring();
-      // The initial panel can precede the capability response. Reuse its
-      // draft/focus-preserving render only when that same view's access changes.
-      if(current()&&state===shownState&&couldAuthor!==designer.canAuthor())renderPanel();
+  async function operationsRead(query={}){const at=context();const result=await api('operations?'+new URLSearchParams(query));return at===context()?result:null;}
+  async function operationsCommand(body){return sendCommand('operations',body);}
+  async function read(query={}){const at=context();const result=await api('workspace?'+new URLSearchParams(Object.entries(query).filter(([,value])=>value!==undefined&&value!==null)));if(at!==context())return null;return result;}
+  function normalized(result){
+    const next=clone(result),workflow=next.workflow;
+    const attention=next.operations?.actionable || [];next.my_work=[...(next.my_work || []),...attention.map(item=>({...item,bucket:'overdue',name:'예약 실행 확인',status:item.state,reason:item.reason}))];
+    const rank={failed:0,missed:1,running:2,succeeded:3};for(const workflow of next.workflows || []){const candidates=(next.operations?.automatic_statuses || []).filter(item=>item.workflow_id===workflow.id&&(!selection.factory_id||item.factory_id===selection.factory_id)).sort((a,b)=>rank[a.status]-rank[b.status]);if(candidates.length)workflow.last_auto_status=candidates[0].status;}
+    if(workflow){workflow.definition=workflow.published?.definition || workflow.published || workflow.definition || workflow.draft;workflow.name=workflow.name || workflow.draft?.name;}
+    const settings=next.settings || workflow?.settings || [];
+    if(Array.isArray(settings)){
+      const factoryId=next.run?.factory_id ?? selection.factory_id,common=settings.find(item=>!item.factory_id),specific=settings.find(item=>item.factory_id===factoryId);
+      next.settings={values:{...(common?.values || {}),...(specific?.values || {})},base_values:common?.values || {},overrides:specific?.values || {},revision:specific?.revision || 0,factory_id:factoryId};
     }
-    catch (error) {if(!current())return;clearActionRecords();errorMessage=error.message;recordLookupError=lookupFailure(error);if(runView==='history'&&historyCase)historyLookupError=historyLookupError || recordLookupError;render();}
+    if(next.run){const attempts=next.run.attempts || [];for(const [id,job] of Object.entries(next.run.jobs || {})){
+      const attempt=attempts.find(item=>item.id===job.current_attempt) || attempts.filter(item=>item.job_id===id).at(-1);
+      if(attempt){job.result=attempt.result;job.attempt_id=attempt.id;job.evidence_access=attempt.evidence_access;}
+      if(Array.isArray(job.decisions)){job.decision_history=clone(job.decisions);job.decisions=Object.fromEntries(job.decisions.filter(item=>item.result_revision===job.result_revision).map(item=>[item.item_id,item]));}
+      const external=(next.operations?.requests || []).filter(item=>item.job_id===id).at(-1);if(external)job.request=external;
+    }}
+    return next;
   }
-  async function action(actionName, payload = {}, nodeId = '', override = {}) {
-    if (busy || !state) return null;
-    busy = true; errorMessage = ''; setBusy();
-    const at = generation, scopeEpoch=navigationRequest, active=selectedCase(), cid = active?.id || '', auth = token(), route = location.pathname + location.search;
-    const isAdmin = ['save_draft','validate_draft','publish'].includes(actionName);
-    const submittedDraft=isAdmin?designer.readDraft():null;
-    const body = {action:actionName,chat_id:chatId(),case_id:cid,node_id:nodeId,payload,expected_revision:isAdmin ? submittedDraft.revision : (active?.revision || 0),...override};
-    const firstWrite=['update_inputs','run'].includes(actionName)&&!body.case_id;
-    if(firstWrite)body.scope={site_id:browsingSite,system:browsingSystem,process_id:processId(),version:previewVersion || state.catalog.version};
-    if(['create','update_inputs','run'].includes(actionName)){
-      // Keep the same key/body for a response-loss retry. State changes or a
-      // different payload are a new intent, still checked by the server CAS.
-      const key=JSON.stringify(body);if(!actionRequests.has(key))actionRequests.set(key,window.crypto?.randomUUID?.() || 'ui-'+Date.now().toString(36)+'-'+(++actionSerial)+'-'+Math.random().toString(36).slice(2));
-      body.request_id=actionRequests.get(key);
+  async function refresh(){
+    if(!available())return null;clearTimeout(refreshTimer);const at=context(),n=++serial;
+    try{
+      const result=await api('workspace?'+new URLSearchParams({system_id:selection.system_id,factory_id:selection.factory_id,workflow_id:selection.workflow_id,run_id:selection.run_id}));
+      if(at!==context()||n!==serial||!available())return null;
+      if(!restored){restored=true;uiRevision=Math.max(uiRevision,result.ui_state?.revision || 0);const saved=result.ui_state?.state?.selection,explicit=initialSelectionPatch;initialSelectionPatch=null;if(saved&&typeof saved==='object')selection={...selection,...saved,...explicit};if(!selection.system_id)selection.system_id=(result.systems?.[0]?.id || result.systems?.[0] || '');if(explicit)remember(explicit.panel_width ?? null);if(at!==context())return refresh();}
+      let operations={};try{operations=await api('operations?'+new URLSearchParams({system_id:selection.system_id,run_id:selection.run_id}));}catch(failure){operations={error:failure.message};}if(at!==context()||n!==serial)return null;uiRevision=Math.max(uiRevision,result.ui_state?.revision ?? uiRevision);let legacy;if(selection.tab==='records'){try{legacy=await api('legacy');}catch(failure){legacy={error:failure.message};}if(at!==context()||n!==serial)return null;}state=normalized({...result,operations,legacy});error='';render();loadOptions();
+      const active=Object.values(state.run?.jobs || {}).some(job=>job.status==='running')||(state.operations?.scope_runs || []).some(scope=>['queued','running'].includes(scope.status))||(state.operations?.requests || []).some(request=>['requested','accepted','running','reported_complete'].includes(request.state));refreshTimer=setTimeout(refresh,active||busy?2500:30000);
+      return state;
+    }catch(failure){if(at!==context()||n!==serial)return null;error=failure.message;state=null;render();return null;}
+  }
+  function revisionFor(action){if(['save_draft','validate_workflow','publish_workflow','start_run','run_start'].includes(action))return state?.workflow?.revision || 0;if(action==='save_settings')return state?.settings?.revision || 0;if(action==='save_ui')return uiRevision;return state?.run?.revision || 0;}
+  async function command(body){return sendCommand('workspace/command',body);}
+  async function sendCommand(path,body){
+    if(!available())throw new Error('로그인을 확인해 주세요.');
+    const at=context(),auth=token(),payload={...body,expected_revision:body.expected_revision ?? revisionFor(body.action)};
+    const key=path+JSON.stringify(payload);if(!payload.request_id)payload.request_id=receipts.get(key) || crypto.randomUUID();receipts.set(key,payload.request_id);
+    let result;
+    try{result=await api(path,payload);receipts.delete(key);}
+    catch(failure){if(failure.status&&failure.status<500)receipts.delete(key);if(auth===token()&&at===context()){commandError=failure.message;render();}throw failure;}
+    if(auth!==token()||at!==context())return null;
+    commandError='';return result;
+  }
+  function remember(panelWidth=null){
+    clearTimeout(uiTimer);const at=context(),auth=token(),saved=clone(selection);
+    uiTimer=setTimeout(()=>{uiWrites=uiWrites.catch(()=>{}).then(async()=>{
+      if(at!==context()||auth!==token()||!available())return;
+      try{if(JSON.stringify({selection:saved}).length>39000)throw new Error('개인 초안 저장 범위를 초과했습니다. 현재 판정 선택을 확정한 뒤 다시 시도해 주세요.');let result;try{result=await api('workspace/command',{action:'save_ui',expected_revision:uiRevision,request_id:crypto.randomUUID(),state:{selection:saved}});}
+      catch(failure){
+        if(failure.code!=='revision_conflict'||panelWidth===null)throw failure;
+        if(auth!==token()||at!==context()||!available())return;
+        const current=await api('workspace?');if(auth!==token()||at!==context()||!available())return;
+        const stored=current.ui_state?.state || {},revision=current.ui_state?.revision || 0;uiRevision=Math.max(uiRevision,revision);
+        // A concurrent tab's private drafts stay intact. Only the explicit
+        // width preference is merged once, never a shared business command.
+        result=await api('workspace/command',{action:'save_ui',expected_revision:revision,request_id:crypto.randomUUID(),state:{...stored,selection:{...(stored.selection || {}),panel_width:panelWidth}}});
+      }if(auth===token()){uiRevision=Math.max(uiRevision,result.ui_state?.revision ?? result.revision ?? uiRevision+1);if(commandError.startsWith('작성한 선택의 자동 저장 실패')){commandError='';render();}}}
+      catch(failure){if(auth===token()&&at===context()&&(panelWidth!==null||Object.keys(saved.verdict_drafts || {}).length||Object.keys(saved.start_inputs || {}).length||Object.keys(saved.request_reasons || {}).length)){commandError='작성한 선택의 자동 저장 실패 · '+failure.message+' 화면의 값은 보존했습니다. 저장을 다시 시도해 주세요.';render();}}
+    });},400);
+  }
+  async function select(patch,{fetch=true}={}){view.capture();const before=context();while(state?.run?.definition?.nodes?.[selection.job_id]?.result_block==='ai_review'&&view.readReview?.().dirty){if(!await saveReviewDraft()||before!==context())return null;view.capture();}clearTimeout(reviewTimer);if(!restored)initialSelectionPatch={...initialSelectionPatch,chat_reference:null,...patch};selection={...selection,chat_reference:null,...patch};epoch++;workEpoch++;chatCreations.clear();chatAliases.clear();pendingInputProposal=null;error='';commandError='';clearTimeout(refreshTimer);remember();render();if(fetch)return refresh();refreshTimer=setTimeout(refresh,2500);loadOptions();return state;}
+  async function mutate(body,{refreshAfter=true,accept=null}={}){if(busy)return null;const at=context();setBusy(true);try{const result=await command(body);if(result&&accept)accept(result);if(result&&refreshAfter&&!await refresh())return null;return at===context()?result:null;}catch(failure){if(at===context()){commandError=failure.message;render();}return null;}finally{setBusy(false);}}
+  async function models(){
+    const auth=token(),headers={Accept:'application/json',Authorization:'Bearer '+auth};
+    const response=await fetch('/api/models',{headers,credentials:'same-origin',cache:'no-store'});if(!response.ok)throw new Error('사용 가능한 모델을 조회하지 못했습니다.');
+    const result=await response.json();if(auth!==token()||auth!==identity)return [];
+    const list=(result.data || []).filter(model=>model.id&&!model.direct&&model.type!=='embedding').map(model=>({id:model.id,name:model.name || model.id}));
+    document.body.dataset.eesModelCount=String(Math.min(list.length,2));return list;
+  }
+  function optionContext(){
+    const run=state?.run,node=run?.definition?.nodes?.[selection.job_id];
+    if(!node||selection.mode==='author'||selection.panel_open===false||!['current','settings'].includes(selection.tab))return null;
+    const draft=view.readInputs(),values={...(run.jobs?.[node.id]?.effective_inputs || {}),...(state.settings?.values || {})};
+    for(const field of node.inputs || [])if((['workflow','factory'].includes(field.scope))===(selection.tab==='settings'))delete values[field.id];Object.assign(values,draft.inputs || {});
+    const inputs=Object.fromEntries((node.inputs || []).filter(field=>Object.hasOwn(values,field.id)).map(field=>[field.id,values[field.id]]));
+    return {node,inputs,marker:context()+JSON.stringify([run.revision,state.settings?.revision,inputs,node.inputs])};
+  }
+  async function loadOptions(forceField=''){
+    const current=optionContext();if(!current)return;
+    const fields=(current.node.inputs || []).filter(field=>['single','multi'].includes(field.type)&&field.options_source&&field.options_source!=='manual'&&(['workflow','factory'].includes(field.scope))===(selection.tab==='settings'));
+    if(!fields.length)return;const at=context();state.input_options ||= {};
+    const pending=[];
+    for(const field of fields){
+      const key=selection.run_id+'/'+selection.job_id+'/'+field.id,marker=current.marker;
+      const cached=optionCache.get(key);if(cached?.marker===marker&&forceField!==field.id){state.input_options[field.id]=cached;continue;}
+      const entry={marker,status:'loading',options:[]};optionCache.set(key,entry);state.input_options[field.id]=entry;
+      const body={workflow_id:selection.workflow_id,run_id:selection.run_id,job_id:selection.job_id,field_id:field.id,factory_id:state.settings?.factory_id ?? selection.factory_id,inputs:current.inputs};
+      pending.push((async()=>{
+        try{const result=await api('workspace/options',body);if(at!==context()||optionContext()?.marker!==marker||optionCache.get(key)!==entry)return;
+          Object.assign(entry,{status:'ready',options:result.options || [],source:result.source,source_context:result.context});
+        }catch(failure){if(at!==context()||optionContext()?.marker!==marker||optionCache.get(key)!==entry)return;Object.assign(entry,{status:'failed',options:[],error:failure.message});}
+      })());
     }
-    try {
-      const result = await api('action', body);
-      if (at !== generation || scopeEpoch !== navigationRequest || auth !== token() || route !== location.pathname + location.search || !available()) return null;
-      if (isAdmin && actionName !== 'validate_draft') designer.markSaved(submittedDraft.definition,result.draft_revision);
-      if ((actionName === 'create'||firstWrite) && !result.case?.chat_id) pendingId = result.case?.id || '';
-      if(firstWrite&&result.case)view.adoptPreviewDraft(result.case.id,nodeId);
-      accept(result); return result;
-    } catch (error) {if (at === generation && scopeEpoch === navigationRequest && auth===token() && route===location.pathname+location.search) {
-      errorMessage = error.message;
-      // A first write can create its case and then fail validation/execution.
-      // Keep that exact case and the user's draft instead of creating another.
-      const saved=error.result;
-      if(firstWrite&&saved?.case&&saved.catalog){if(!saved.case.chat_id)pendingId=saved.case.id;view.adoptPreviewDraft(saved.case.id,nodeId);accept({...saved,ok:true});}
-      else if(['case_selection_required','revision_conflict'].includes(saved?.error?.code)){await refresh();if(at===generation&&scopeEpoch===navigationRequest&&auth===token()&&route===location.pathname+location.search){errorMessage=error.message;render();if(saved.error.code==='revision_conflict')workUI.dialog({title:'저장된 업무가 먼저 변경되었습니다',html:'<p>오래된 화면의 요청으로 기존 기록을 덮어쓰지 않았습니다.</p><p>개인 대화와 작성 중인 초안은 그대로 유지했습니다. 최신 상태와 비교해 이어가세요.</p>',confirmLabel:'최신 상태 보기'}).then(accepted=>{if(accepted&&at===generation&&auth===token())refresh();});}}
-      else render();
-    } return null;}
-    finally {busy = false; setBusy();if(scopeEpoch!==navigationRequest&&available()&&auth===token())refresh();}
+    if(!pending.length)return;render();await Promise.all(pending);if(at===context()&&optionContext()?.marker===current.marker)render();
   }
-  function registerPanel() {
-    const manager=window.__eesWorkPanelV1,id=chatId();
-    if(!chatRoute()||!selectedId()||!state||!manager)return;
-    if(activeRegistration!==id||!manager.available(id,'workflow')){
-      if(activeRegistration!==null)manager.unregister(activeRegistration,'workflow');
-      activeRegistration=id;manager.register(id,view.panelRegistration());
+  async function saveInputs(){if(busy)return;const form=$('#ees-work-inputs');if(form?.querySelectorAll&&[...form.querySelectorAll('input,select,textarea')].some(field=>!field.reportValidity()))return;const draft=view.readInputs();if(draft.conflict){error='다른 사람이 바꾼 값과 먼저 비교해 주세요.';render();return;}const body=draft.settings?{action:'save_settings',workflow_id:selection.workflow_id,factory_id:state.settings?.factory_id ?? selection.factory_id,values:state.settings?.factory_id?workSettingsOverrides(state.settings,draft.inputs,state.run?.definition?.nodes?.[selection.job_id]?.inputs):draft.inputs}:{action:'save_inputs',run_id:selection.run_id,inputs:draft.inputs};await mutate({...body,expected_revision:draft.revision},{accept:result=>view.clearInputs(draft.key,draft.serial,result.revision || draft.revision+1,draft.inputs)});}
+  function executionModel(){const available=state?.operations?.error?[]:state?.operations?.models || [];return available.length===1?available[0].id:$('#ees-work-execution-model')?.value;}
+  function inputsSaved(all=false){const draft=view.readInputs();if(draft.dirty||(all&&view.hasPendingInputs?.())){error='변경한 입력을 먼저 저장해 주세요. 저장하지 않은 값으로 실행하거나 판정하지 않았습니다.';render();return false;}return true;}
+  async function requestIntent(){
+    if(!inputsSaved())return;
+    const at=context(),run=state?.run,node=run?.definition?.nodes?.[selection.job_id];if(!node)return;
+    setBusy(true);
+    try{
+      let request=(state.operations?.requests || []).filter(item=>item.job_id===node.id&&!['cancelled','failed','rejected'].includes(item.state)).at(-1);
+      const reason=selection.request_reasons?.[run.id+'/'+node.id] || '';
+      if(request&&request.actor===state.capabilities?.actor_id&&['ready','approval_pending'].includes(request.state)&&(request.request_reason || '')!==reason){await operationsCommand({action:'request_cancel',external_request_id:request.id,expected_revision:request.revision});if(at!==context())return;request=null;}
+      if(!request){const prepared=await operationsCommand({action:'request_prepare',run_id:run.id,job_id:node.id,tool_contract_id:node.tool_contract_id || node.tool_reference?.contract_id,request_reason:selection.request_reasons?.[run.id+'/'+node.id] || '',expected_revision:run.revision});if(!prepared||at!==context())return;request=prepared.request;}
+      if(request.state==='approval_pending'){await refresh();return;}
+      const intent=await operationsCommand({action:'request_intent',external_request_id:request.id,expected_revision:request.revision});if(!intent||at!==context())return;
+      const info=intent.request || request,requestValues=Object.fromEntries((workRequestFields(node,state.operations?.tools) || []).map(field=>[field.name,field.constant?field.value:run.jobs[node.id].effective_inputs?.[field.id]]));
+      const approved=await confirmDialog({title:node.request_contract?.confirmation_title || (info.execution_actor==='EES Work'?'직접 실행 · 예외 내용을 확인할까요?':'EES에 요청할까요?'),html:`<div class="ew-confirm-target"><strong>${esc(node.name)}</strong><pre>${esc(JSON.stringify(info.inputs || requestValues,null,2))}</pre></div><p>${esc(info.impact || '등록된 EES 기능이 대상 시스템의 상태를 변경합니다.')}</p><p>${esc(info.execution_actor || 'EES')} 완료 보고 뒤 효과를 따로 확인합니다.</p><p>요청 사유 · ${esc(info.request_reason || '미기재')}</p><p>요청한 사람·시각·사유가 기록에 남습니다.</p>`,confirmLabel:node.request_contract?.button_label || '요청 보내기'});
+      if(!approved||at!==context())return;
+      await operationsCommand({action:'request_dispatch',external_request_id:request.id,intent_token:intent.intent_token,expected_revision:info.revision});await refresh();
+    }catch(failure){if(at===context()){error=failure.message;render();}}finally{setBusy(false);}
+  }
+  async function amendItems(){
+    if(busy||!inputsSaved())return;const at=context(),run=state?.run,job=run?.jobs?.[selection.job_id],original=job?.result?.items || [];let items=original.map(item=>({id:item.id,name:item.name || item.title || item.id,note:item.note || ''})),reason='';
+    const rows=()=>items.map((item,index)=>`<fieldset class="ew-amend-row" data-index="${index}"><label>항목 ID<input data-amend-field="id" value="${esc(item.id)}" required></label><label>이름<input data-amend-field="name" value="${esc(item.name)}" required></label><label>보완 내용<input data-amend-field="note" value="${esc(item.note)}"></label><button type="button" data-amend-remove="${index}">목록에서 제외</button></fieldset>`).join('');
+    const pending=dialog({title:'목록 수정 · 다시 검토',note:'이전 근거와 판정은 남깁니다. 바뀐 목록으로 새 시도를 기록하고 후속 확인을 다시 검토합니다.',html:`<div id="ees-amend-list">${rows()}</div><button type="button" id="ees-amend-add">항목 추가</button><label>변경 이유<input id="ees-amend-reason" required></label>`,confirmLabel:'수정한 목록 저장'}),element=$('#ees-work-dialog');
+    element.addEventListener('input',event=>{if(event.target.id==='ees-amend-reason')reason=event.target.value;const row=event.target.closest('[data-index]');if(row&&event.target.dataset.amendField)items[Number(row.dataset.index)][event.target.dataset.amendField]=event.target.value;});
+    element.addEventListener('click',event=>{if(event.target.id==='ees-amend-add'){items.push({id:'',name:'',note:''});$('#ees-amend-list').innerHTML=rows();}if(event.target.dataset.amendRemove!==undefined){items.splice(Number(event.target.dataset.amendRemove),1);$('#ees-amend-list').innerHTML=rows();}});
+    if(await pending&&at===context())await mutate({action:'amend_items',run_id:run.id,job_id:selection.job_id,result_revision:job.result_revision,expected_revision:run.revision,items,reason});
+  }
+  async function addListItem(){
+    if(busy)return;const at=context();let id='',name='';const pending=dialog({title:'번호로 항목 추가',note:'사람이 추가한 항목으로 기록합니다. 실제 원본 조회나 AI 판정을 대신하지 않습니다.',html:'<label>항목 번호<input id="ees-list-add-id" required></label><label>이름<input id="ees-list-add-name" required></label>',confirmLabel:'검토 목록에 추가'});
+    $('#ees-work-dialog').addEventListener('input',()=>{id=$('#ees-list-add-id').value.trim();name=$('#ees-list-add-name').value.trim();});
+    if(await pending&&at===context())view.addListItem({id,name});
+  }
+  async function confirmList(confirm=true){
+    if(busy||!inputsSaved())return;const at=context(),run=state?.run,jobId=selection.job_id,saved=run?.jobs?.[jobId],draft=view.readList();
+    if(!saved||saved.can_decide===false||draft.attempt_id!==saved.attempt_id||draft.result_revision!==saved.result_revision)throw new Error('현재 목록의 근거와 처리 권한을 다시 확인해 주세요.');
+    if(confirm&&!draft.items.some(item=>item.selected))throw new Error('포함할 항목이 없습니다. 빈 목록의 완료 정책을 먼저 확인해 주세요.');
+    let reason='';const pending=dialog({title:confirm?'이 목록으로 확정할까요?':'선택한 목록을 저장할까요?',note:confirm?'선택한 포함·제외와 사람의 확인을 함께 저장합니다. AI 후보를 자동 확정하지 않습니다.':'새 검토 시도로 선택 상태를 저장합니다. 업무 완료로 확정하지 않습니다.',html:`<p>포함 ${draft.items.filter(item=>item.selected).length}건 · 제외 ${draft.items.filter(item=>!item.selected).length}건</p><label>확인·변경 이유<input id="ees-list-confirm-reason" required></label>`,confirmLabel:confirm?'목록 확정':'선택 목록 저장'});
+    $('#ees-list-confirm-reason').addEventListener('input',event=>{reason=event.target.value;});
+    if(await pending&&at===context())await mutate({action:confirm?'confirm_list':'amend_items',run_id:run.id,job_id:jobId,attempt_id:draft.attempt_id,result_revision:draft.result_revision,expected_revision:run.revision,items:draft.items.filter(item=>!item.candidate||item.selected).map(item=>({...clone(item),selected:Boolean(item.selected),required:Boolean(item.selected)})),reason});
+  }
+  function saveReviewDraft(){if(reviewSaving)return reviewSaving;const pending=performSaveReviewDraft().finally(()=>{if(reviewSaving===pending)reviewSaving=null;});reviewSaving=pending;return pending;}
+  async function performSaveReviewDraft(){
+    clearTimeout(reviewTimer);if(busy||!state?.run||!selection.job_id)return false;
+    const draft=view.readReview(),run=state.run,jobId=selection.job_id,saved=run.jobs[jobId];if(!draft.dirty)return true;
+    if(draft.conflict)throw new Error('검토 본문이 다른 곳에서 변경되었습니다. 작성한 값을 보존하고 최신 기록을 먼저 확인해 주세요.');
+    if(saved.can_decide===false||draft.attempt_id!==saved.attempt_id)throw new Error('초안의 실행 근거와 저장 권한을 다시 확인해 주세요.');
+    const result=await mutate({action:'save_review_draft',run_id:run.id,job_id:jobId,attempt_id:draft.attempt_id,result_revision:draft.result_revision,expected_revision:run.revision,review_revision:draft.revision,text:draft.inputs.text},{accept:result=>{const savedReview=result.run?.jobs?.[jobId]?.review_draft;if(!savedReview)throw new Error('저장된 검토 초안의 버전을 확인하지 못했습니다.');view.clearReview(draft.key,draft.serial,savedReview.revision,savedReview.text);}});
+    return Boolean(result);
+  }
+  function scheduleReviewSave(){const at=context();clearTimeout(reviewTimer);reviewTimer=setTimeout(()=>{if(at!==context())return;if(busy){scheduleReviewSave();return;}saveReviewDraft().catch(failure=>{if(at===context()){error=failure.message;render();}});},600);}
+  async function confirmDialog(options){const at=context();const accepted=await dialog(options);return accepted&&at===context();}
+  function previewInputProposal(payload){
+    const values=workInputProposal(payload,state?.run,selection.job_id),draft=view.readInputs();
+    const fields=state.run.definition.nodes[selection.job_id]?.inputs || [],reasons={options_dependency_required:'선행 입력을 먼저 보완해 주세요.',options_unconfigured:'선택 목록 연결을 먼저 설정해 주세요.',options_unavailable:'현재 권한의 선택 목록을 조회하지 못했습니다.'};
+    const warnings=[...(payload.warnings || []),...(payload.unresolved_fields || []).map(item=>`${fields.find(field=>field.id===item.field_id)?.name || item.field_id} · ${reasons[item.reason] || '현재 선택 목록을 먼저 확인해 주세요.'} 이 항목은 AI 초안에 포함하지 않았습니다.`)];
+    pendingInputProposal={values,warnings,context:context(),run_id:selection.run_id,job_id:selection.job_id,revision:state.run.revision,draft:JSON.stringify(draft.inputs)};render();return {ok:true,preview:true,saved:false,executed:false};
+  }
+  function applyInputProposal(){
+    const pending=pendingInputProposal,draft=view.readInputs();
+    if(!pending||pending.context!==context()||pending.run_id!==selection.run_id||pending.job_id!==selection.job_id||pending.revision!==state?.run?.revision||pending.draft!==JSON.stringify(draft.inputs))throw new Error('제안 이후 입력이나 저장 상태가 바뀌었습니다. 현재 값을 보존하고 새 제안을 요청해 주세요.');
+    pendingInputProposal=null;view.applyInputValues(pending.values);render();loadOptions();
+  }
+  async function proposeInputs(){
+    if(busy||!state?.run||!selection.job_id)return;const at=context(),run=state.run,node=run.definition.nodes[selection.job_id],draft=view.readInputs();
+    if(draft.conflict)throw new Error('입력 충돌을 먼저 확인해 주세요.');
+    const availableModels=(state.operations?.models || []);
+    if(!availableModels.length)throw new Error('사용 가능한 Native 업무 모델이 없습니다. 모델 연결과 권한을 확인해 주세요.');
+    let prompt='',modelId=availableModels.length===1?availableModels[0].id:'';
+    const pending=dialog({title:'AI 입력 초안',note:'현재 권한으로 입력 초안을 제안합니다. 저장·실행·판정은 별도 확인이 필요합니다.',html:`<label class="ew-proposal-prompt">요청 내용<textarea id="ees-input-proposal-prompt" rows="4" required></textarea></label>${availableModels.length>1?`<label>Native 모델<select id="ees-input-proposal-model" required><option value="">모델 선택</option>${availableModels.map(model=>`<option value="${esc(model.id)}">${esc(model.name || model.id)}</option>`).join('')}</select></label>`:''}`,confirmLabel:'초안 제안 받기'});
+    $('#ees-work-dialog').addEventListener('input',()=>{prompt=$('#ees-input-proposal-prompt').value;modelId=$('#ees-input-proposal-model')?.value || modelId;});$('#ees-work-dialog').addEventListener('change',()=>{modelId=$('#ees-input-proposal-model')?.value || modelId;});
+    if(!await pending||at!==context())return;const inputs=Object.fromEntries((node.inputs || []).filter(field=>(field.scope || 'run')==='run'&&Object.hasOwn(draft.inputs,field.id)).map(field=>[field.id,draft.inputs[field.id]]));
+    setBusy(true);try{const result=await api('workspace/proposal',{proposal_kind:'inputs',workflow_id:run.workflow_id,run_id:run.id,job_id:node.id,expected_revision:run.revision,context_id:at,inputs,model_id:modelId,prompt});if(at!==context()||draft.revision!==view.readInputs().revision||JSON.stringify(draft.inputs)!==JSON.stringify(view.readInputs().inputs))return;previewInputProposal(result);}finally{setBusy(false);}
+  }
+  async function downloadRun(format,jobId=''){
+    const at=context(),runId=state?.run?.id;if(!runId)return;
+    const result=await api('export?'+new URLSearchParams({run_id:runId}));if(at!==context())return;
+    if(result.format!=='ees-work-run'||result.run?.id!==runId)throw new Error('내보낼 기록의 대상과 형식을 확인하지 못했습니다.');
+    const document=clone(result);
+    if(jobId){const job=document.run.jobs?.[jobId];if(!job)throw new Error('내보낼 결과를 확인하지 못했습니다.');document.run.attempts=(document.run.attempts || []).filter(attempt=>attempt.id===job.current_attempt&&attempt.job_id===jobId);document.run.jobs={[jobId]:job};}
+    const contents=format==='json'?JSON.stringify(document,null,2):workExportText(document),blob=new Blob([contents],{type:format==='json'?'application/json;charset=utf-8':'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),link=window.document.createElement('a');
+    link.href=url;link.download='ees-work-'+runId.replace(/[^a-zA-Z0-9_-]/g,'_')+(jobId?'-result':'')+(format==='json'?'.json':'.txt');window.document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  async function openLegacy(id){
+    const at=context(),legacy=await api('legacy?'+new URLSearchParams({case_id:id}));if(at!==context())return;
+    if(!legacy.read_only||legacy.record?.id!==id)throw new Error('읽기 전용 과거 기록을 확인하지 못했습니다.');
+    const record=legacy.record;
+    return dialog({title:record.process_name || '이전 기록',note:legacy.notice || '사용 중지된 이전 버전의 기록입니다. 여기에서 다시 실행하지 않습니다.',readOnlyDetail:true,html:`${record.simulation?'<p class="ew-warning">시뮬레이션 기록 · 실제 업무 성공을 뜻하지 않습니다.</p>':''}<p>이전 게시 v${esc(record.version)} · ${esc(record.status)}</p><pre>${esc(JSON.stringify({inputs:record.inputs,jobs:record.jobs,progress:record.progress,created_at:record.created_at},null,2))}</pre>`});
+  }
+  async function setupWorkTool(){
+    if(!state?.capabilities?.is_admin)throw new Error('Native 관리자 권한이 필요합니다.');
+    const at=context(),auth=token();
+    const setupAPI=async body=>{const response=await fetch('/api/v1/ees/assets/work-tool/'+(body?'setup':'status'),{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json',Authorization:'Bearer '+auth,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});const result=await response.json();if(!response.ok||result.ok===false)throw new Error(result.error?.message || result.detail?.message || (typeof result.detail==='string'?result.detail:result.reason) || 'Native Work 도구 설정을 확인하지 못했습니다.');return result;};
+    const status=await setupAPI();if(at!==context()||auth!==token())return;
+    const description=`<p>Native 도구 ID · ${esc(status.id)}</p><p>제품 관리 원본 SHA256</p><pre>${esc(status.source_sha256)}</pre><p>허용 함수</p><pre>${esc(JSON.stringify(status.functions || [],null,2))}</pre>`;
+    if(status.state!=='missing')return dialog({title:status.state==='ready'?'Work 대화 도구가 연결되어 있습니다':'기존 Native 도구를 먼저 검토해 주세요',readOnlyDetail:true,html:description+`<p>${esc(status.reason || '현재 등록 항목의 소유자·권한·개인 설정을 그대로 유지합니다.')}</p>`});
+    let grants=[];const people=(state.people || []).filter(person=>person.value?.kind==='user'),groups=state.native_groups || [];
+    const pending=dialog({title:'Native 대화에 Work 도구를 등록할까요?',note:'조회·제안 기능만 등록합니다. 저장·게시·실행·확정 도구를 AI에 추가하지 않습니다.',html:description+`<fieldset class="ew-admin-grants"><legend>읽기·제안 권한</legend><p>선택하지 않으면 등록 관리자 개인 범위입니다. 공개 권한은 만들지 않습니다.</p>${people.map(person=>`<label><input type="checkbox" data-work-grant data-kind="user" value="${esc(person.id)}">${esc(person.name)} · ${esc(person.id)}</label>`).join('')}${groups.map(group=>`<label><input type="checkbox" data-work-grant data-kind="group" value="${esc(group.id)}">${esc(group.name)} · ${esc(group.id)}</label>`).join('')}</fieldset>`,confirmLabel:'확인한 원본 등록'});
+    $('#ees-work-dialog').addEventListener('change',()=>{grants=[...document.querySelectorAll('#ees-work-dialog [data-work-grant]:checked')].map(field=>({principal_type:field.dataset.kind,principal_id:field.value,permission:'read'}));});
+    if(!await pending||at!==context()||auth!==token())return;
+    try{const result=await setupAPI({expected_token:status.expected_token,source_sha256:status.source_sha256,confirmation:'register_readonly_work_tool',access_grants:grants});if(at!==context()||auth!==token())return;commandError='';await refresh();return dialog({title:'Native Work 도구 확인',readOnlyDetail:true,html:`<p>${result.changed?'확인한 제품 원본을 등록했습니다.':'기존 원본과 권한을 유지했습니다.'}</p><p>대화의 Native 통합 도구에서 선택할 수 있습니다. 현재 대화의 도구 선택을 자동으로 바꾸지 않았습니다.</p>`});}
+    catch(failure){if(at===context()&&auth===token()){commandError=failure.message;render();}throw failure;}
+  }
+  async function adminDialog(kind,id=''){
+    if(!state?.capabilities?.is_admin)throw new Error('Native 관리자 권한이 필요합니다.');
+    const at=context(),record=(kind==='factory'?state.factories:state.access)?.find(item=>item.id===id),systems=(state.systems || []).map(item=>typeof item==='string'?item:item.id);
+    const sys=record?.system_id || selection.system_id || systems[0];
+    const option=(value,label,current)=>`<option value="${esc(value)}"${value===current?' selected':''}>${esc(label)}</option>`;
+    const systemSelect=`<label>시스템<select name="system_id"${kind==='factory'&&record?' disabled':''}>${systems.map(value=>option(value,value,sys)).join('')}</select></label>`;
+    let values=kind==='factory'?{factory_id:record?.id || '',system_id:sys,name:record?.name || '',attributes:JSON.stringify(record?.attributes || {},null,2)}:{access_id:record?.id || '',system_id:sys,factory_id:record?.factory_id || '*',principal_kind:record?.principal_kind || 'group',principal_id:record?.principal_kind==='user'?record.principal_id:'',group_id:record?.principal_kind==='group'?record.principal_id:state.native_groups?.[0]?.id || '',roles:record?.roles || [],active:record?Boolean(record.active):true};
+    const html=kind==='factory'?`<div class="ew-admin-form">${systemSelect}<label>공장 ID<input name="factory_id" value="${esc(values.factory_id)}"${record?' readonly':''} placeholder="비우면 새 ID 생성"></label><label>공장 이름<input name="name" value="${esc(values.name)}" required></label><label>공장 속성 · JSON 객체<textarea name="attributes" rows="6">${esc(values.attributes)}</textarea></label><small>기존 공장의 시스템과 ID는 바꾸지 않습니다. 업무 입력·비밀정보를 공장 속성에 넣지 마세요.</small></div>`:`<div class="ew-admin-form">${systemSelect}<label>공장 범위<select name="factory_id">${option('*','시스템 전체 범위',values.factory_id)}${(state.factories || []).map(item=>`<option data-system="${esc(item.system_id)}" value="${esc(item.id)}"${item.id===values.factory_id?' selected':''}${item.system_id!==sys?' disabled':''}>${esc(item.name)}</option>`).join('')}</select></label><label>Native 대상<select name="principal_kind">${option('group','그룹',values.principal_kind)}${option('user','사용자',values.principal_kind)}</select></label><label data-admin-group>Native 그룹<select name="group_id"${values.principal_kind!=='group'?' disabled':''}>${option('','선택 필요',values.group_id)}${(state.native_groups || []).map(group=>option(group.id,group.name+' · '+group.id,values.group_id)).join('')}</select></label><label data-admin-user>기존 Native 사용자 ID<input name="principal_id" value="${esc(values.principal_id)}" list="ees-admin-native-users"${values.principal_kind!=='user'?' disabled':''}><datalist id="ees-admin-native-users">${(state.people || []).filter(person=>person.value?.kind==='user').map(person=>`<option value="${esc(person.id)}">${esc(person.name)}</option>`).join('')}</datalist></label><small>이름으로 사용자를 만들거나 찾지 않습니다. 서버가 현재 승인된 Native ID인지 확인합니다.</small><fieldset><legend>역할</legend>${Object.entries({viewer:'조회',participant:'참여·실행',manager:'절차·설정 관리',requester:'EES 요청',reviewer:'요청 검토'}).map(([role,label])=>`<label><input type="checkbox" name="roles" value="${role}"${values.roles.includes(role)?' checked':''}>${label}</label>`).join('')}</fieldset><label><input type="checkbox" name="active"${values.active?' checked':''}>사용</label></div>`;
+    const pending=dialog({title:kind==='factory'?'공장 정보 저장':'업무 접근 범위 저장',html,confirmLabel:'변경 저장'}),element=$('#ees-work-dialog');
+    const collect=()=>{for(const field of element.querySelectorAll('[name]')){if(field.name==='roles')continue;values[field.name]=field.type==='checkbox'?field.checked:field.value;}if(kind==='access'){values.roles=[...element.querySelectorAll('[name="roles"]:checked')].map(field=>field.value);const user=element.querySelector('[name="principal_id"]'),group=element.querySelector('[name="group_id"]');user.disabled=values.principal_kind!=='user';group.disabled=values.principal_kind!=='group';user.required=values.principal_kind==='user';group.required=values.principal_kind==='group';const factory=element.querySelector('[name="factory_id"]');for(const option of factory.options)option.disabled=Boolean(option.dataset.system&&option.dataset.system!==values.system_id);if(factory.selectedOptions[0]?.disabled){factory.value='*';values.factory_id='*';}}else{const attributes=element.querySelector('[name="attributes"]');try{const parsed=JSON.parse(attributes.value);attributes.setCustomValidity(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?'':'JSON 객체를 입력해 주세요.');}catch(_){attributes.setCustomValidity('유효한 JSON 객체를 입력해 주세요.');}}};
+    element.addEventListener('input',collect);element.addEventListener('change',collect);collect();
+    if(!await pending||at!==context())return;
+    const body=kind==='factory'?{action:'save_factory',factory_id:values.factory_id,system_id:values.system_id,name:values.name,attributes:JSON.parse(values.attributes)}:{action:'save_access',access_id:values.access_id,system_id:values.system_id,factory_id:values.factory_id,principal_kind:values.principal_kind,principal_id:values.principal_kind==='group'?values.group_id:values.principal_id,roles:values.roles,active:values.active};
+    await mutate({...body,expected_revision:record?.revision || 0});
+  }
+  async function handleClick(target){
+    const action=target.dataset.action;if(!action)return;
+    if(action==='open_reference')return openMessageReference(target.dataset.messageId);
+    if(action==='propose_inputs')return proposeInputs();
+    if(action==='add_list_item')return addListItem();
+    if(action==='confirm_list')return confirmList();
+    if(action==='save_list_selection')return confirmList(false);
+    if(action==='save_review_draft')return saveReviewDraft();
+    if(action==='workflow_records')return select({tab:'records',job_id:'',records_workflow:selection.workflow_id});
+    if(action==='all_records')return select({tab:'records',records_workflow:'',workflow_id:'',run_id:'',job_id:''});
+    if(action==='ask_record'){const run=state?.run,attempts=(run?.attempts || []).filter(attempt=>!target.dataset.jobId||attempt.job_id===target.dataset.jobId).slice().sort((a,b)=>String(a.created_at || '').localeCompare(String(b.created_at || ''))||a.number-b.number),attempt=target.dataset.attemptId?attempts.find(item=>item.id===target.dataset.attemptId):attempts.at(-1);if(!run||!attempt)throw new Error('참고할 당시 실행 기록이 없습니다.');selection.chat_reference={kind:'workspace',reference_kind:'historical',workflow_id:run.workflow_id,run_id:run.id,job_id:attempt.job_id,attempt_id:attempt.id,version:run.version,result_revision:attempt.number,created_at:attempt.created_at,revision:run.revision,system_id:run.system_id,factory_id:run.factory_id};remember();render();$('#chat-input')?.focus();return;}
+    if(action==='apply_input_proposal')return applyInputProposal();
+    if(action==='discard_input_proposal'){pendingInputProposal=null;render();return;}
+    if(action==='export_json'||action==='export_text'||action==='export_result'){if(action==='export_result'&&!workUI.finished(state?.run)&&state?.run?.jobs?.[selection.job_id]?.can_decide!==false&&!await saveReviewDraft())return;return downloadRun(action==='export_json'?'json':'text',action==='export_result'?target.dataset.jobId:'');}
+    if(action==='open_legacy')return openLegacy(target.dataset.caseId);
+    if(action==='admin_work_tool')return setupWorkTool();
+    if(action==='workspace_admin')return select({mode:'author',tab:'workspace_admin',workflow_id:'',run_id:'',job_id:''});
+    if(action==='admin_factory'||action==='admin_access')return adminDialog(action==='admin_factory'?'factory':'access',target.dataset.id);
+    if(action==='mode')return select({mode:target.dataset.mode,tab:target.dataset.mode==='author'?'overview':'my_work'});
+    if(action==='scope')return view.scopeDialog();
+    if(action==='choose_factory'||action==='choose_system'){closeDialog();return select({[action==='choose_factory'?'factory_id':'system_id']:target.dataset.factoryId ?? target.dataset.systemId,...(action==='choose_system'?{factory_id:''}:{}),workflow_id:'',run_id:'',job_id:'',tab:'my_work'});}
+    if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id),adhoc=(workflow?.execution_mode || workflow?.mode || 'on_demand')==='on_demand';const runs=(state?.runs || []).filter(run=>run.workflow_id===id&&!workUI.finished(run));return select({workflow_id:id,run_id:!adhoc&&runs.length===1?runs[0].id:'',job_id:'',tab:'overview',panel_open:true});}
+    if(action==='my_work'||action==='records')return select({mode:'work',tab:action,panel_open:true,job_id:'',records_workflow:''});
+    if(action==='open_task'){
+      if(target.dataset.scheduleId){const item=state.operations?.schedules?.find(value=>value.id===target.dataset.scheduleId);if(!item)return;if(await confirmDialog({title:'예약 실행 결과를 확인하셨나요?',html:'<p>실패·놓친 예약을 확인한 사실을 기록합니다. 실행 성공이나 재실행을 뜻하지 않습니다.</p>',confirmLabel:'확인 기록'})){await operationsCommand({action:'schedule_check',schedule_id:item.id,slot_id:target.dataset.taskId,expected_revision:item.revision});await refresh();}return;}
+      await select({workflow_id:target.dataset.workflowId,run_id:target.dataset.runId,job_id:target.dataset.jobId,mode:'work',tab:'current',panel_open:true});
+      const job=state?.run?.jobs?.[target.dataset.jobId];if(job&&!job.claim_actor&&state.run.sharing?.group_ids?.length&&await confirmDialog({title:'이 작업을 맡을까요?',html:'<p>목록을 여는 것만으로 담당자가 지정되지는 않습니다.</p>',confirmLabel:'담당하기'}))await mutate({action:'claim_task',run_id:selection.run_id,job_id:selection.job_id});return;
     }
-    manager.sync();
-  }
-  async function showHistory(id) {
-    if(!scopeCases(processId()).some(c=>c.id===id))return {ok:false};
-    const serial=++historyRequest,at=generation,scopeEpoch=navigationRequest,key=caseKey(processId()),auth=token(),route=location.pathname+location.search;runView='history';historyCase=null;historyExecution=null;
-    try{const result=await api('state?'+new URLSearchParams({case_id:id}));if(serial!==historyRequest||at!==generation||scopeEpoch!==navigationRequest||key!==caseKey(processId())||auth!==token()||route!==location.pathname+location.search||!available())return {ok:false};historyCase=result.case;historyLookupError=null;errorMessage='';renderPanel();openPanel();
-      if(workHasExecution(result.case.definition,result.case.process_id)){const saved=await api('execution/state?'+new URLSearchParams({case_id:id}));if(serial!==historyRequest||at!==generation||scopeEpoch!==navigationRequest||key!==caseKey(processId())||auth!==token()||route!==location.pathname+location.search||!available())return {ok:false};historyExecution=saved;renderPanel();}
-      return {ok:true};}
-    catch(error){if(serial===historyRequest&&at===generation&&scopeEpoch===navigationRequest&&key===caseKey(processId())&&auth===token()&&route===location.pathname+location.search&&available()){errorMessage=error.message;historyLookupError={...lookupFailure(error),caseId:id};renderPanel();}return {ok:false};}
-  }
-  function stashDraft() {
-    const bridge=window.__eesNativeDraftV1,snapshot=bridge?.read();
-    // ready/read verifies the native editor's chat ID against the route. A
-    // newly opened chat may be editable before our state request finishes;
-    // never save its text under the previous workflow's draft owner.
-    if(snapshot){const key=chatId()?'chat/'+chatId():visibleDraftKey;draftSnapshots.set(key,JSON.stringify(snapshot));bridge.flush();}
-  }
-  function restoreDraft() {
-    if(!draftTarget||draftTarget.url!==location.pathname+location.search)return;
-    clearTimeout(draftTimer);const target=draftTarget,serial=draftSerial;
-    const apply=async()=>{
-      if(serial!==draftSerial||draftTarget!==target||target.url!==location.pathname+location.search)return;
-      const bridge=window.__eesNativeDraftV1;
-      if(!bridge?.ready()){draftTimer=setTimeout(apply,50);return;}
-      const saved=draftSnapshots.get(target.key);
-      // Bound conversations reuse the native storage format. An unseen scope
-      // starts with an empty composer instead of inheriting another factory.
-      if(saved!==undefined||!chatId()){
-        const restored=await bridge.restore(saved || JSON.stringify({prompt:'',files:[]}));
-        if(!restored){if(serial===draftSerial)draftTimer=setTimeout(apply,50);return;}
-      }
-      if(serial===draftSerial){visibleDraftKey=target.key;draftTarget=null;updateScopeReadiness();}
-    };
-    apply();
-  }
-  function navigate(url,draftKey='') {
-    stashDraft();navigationTarget=url;
-    if(draftKey){draftSerial++;draftTarget={url,key:draftKey};if(url.startsWith('/?')){const saved=draftSnapshots.get(draftKey);try{if(saved)sessionStorage.setItem('chat-input',saved);else sessionStorage.removeItem('chat-input');}catch(_){}}}
-    const link=document.createElement('a');link.href=url;link.hidden=true;document.body.append(link);link.click();link.remove();
-    restoreDraft();
-  }
-
-  let binding = null;
-  async function ensureChat(id) {
-    if(typeof id!=='string'||!id||!available()||!chatRoute())return {ok:false};
-    if(location.pathname==='/' && pendingId) {
-      // A tool from an older chat may arrive while a new case is being prepared.
-      // Only the real SPA route identifies which chat owns this submission.
-      await new Promise(resolve=>{
-        let timer; const check=()=>{if(location.pathname!=='/'||!available()){clearTimeout(timer);window.navigation?.removeEventListener('navigatesuccess',check);window.removeEventListener('popstate',check);resolve();}};
-        window.navigation?.addEventListener('navigatesuccess',check);window.addEventListener('popstate',check);
-        timer=setTimeout(()=>{window.navigation?.removeEventListener('navigatesuccess',check);window.removeEventListener('popstate',check);resolve();},1200);check();
-      });
+    if(action==='open_run')return select({workflow_id:target.dataset.workflowId,run_id:target.dataset.runId,job_id:'',mode:'work',tab:'overview',panel_open:true});
+    if(action==='job')return select({job_id:target.dataset.jobId,tab:'current'});
+    if(action==='overview')return select({job_id:'',tab:'overview'},{fetch:false});
+    if(action==='tab')return select({tab:target.dataset.tab},{fetch:false});
+    if(action==='close_panel'||action==='open_panel')return select({panel_open:action==='open_panel'},{fetch:false});
+    if(action==='refresh')return refresh();
+    if(action==='reload_options')return loadOptions(target.dataset.fieldId);
+    if(action==='discard_inputs'){view.discardInputs();return;}
+    if(action==='save_inputs')return saveInputs();
+    if(action==='native_workspace'){const link=$('#sidebar a[href^="/workspace"]');link?.click();return;}
+    if(action==='procedures')return select({mode:'author',tab:'overview',workflow_id:'',run_id:'',job_id:''});
+    if(action==='native_skills'){const link=document.createElement('a');link.href='/workspace/skills';document.body.append(link);link.click();link.remove();return;}
+    if(action==='tools')return select({mode:'author',tab:'tools',workflow_id:'',run_id:'',job_id:''});
+    if(action==='new_chat'){$('#sidebar-new-chat-button')?.click();return;}
+    if(action==='chats'){$('#sidebar-search-button')?.click();return;}
+    if(action==='find')return dialog({title:'워크플로우 찾기',html:`<input id="ees-workflow-search" type="search" placeholder="업무 절차 검색" aria-label="업무 절차 검색"><div id="ees-workflow-list">${(state?.workflows || []).map(w=>button(w.name,'find_workflow',`data-workflow-id="${esc(w.id)}"`)).join('') || '<p>등록된 업무 절차가 없습니다.</p>'}</div>`});
+    if(action==='find_workflow'){closeDialog();return select({workflow_id:target.dataset.workflowId,run_id:'',job_id:'',mode:'work',tab:'overview',panel_open:true});}
+    if(action==='start_run'){
+      const at=context(),workflow=state?.workflow;let version=workflow?.published_version,groups=[],link=false;
+      if(target.dataset.startInline!==undefined){const form=$('#ees-work-start');if(!form||[...form.querySelectorAll('input,select,textarea')].some(field=>!field.reportValidity()))return;const def=workflow.definition || workflow.published?.definition || workflow.draft,factory=def.execution_scope==='system'?'':($('#ees-start-factory')?.value || ''),inputs=workReadInputs(form);const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:workflow.id,factory_id:factory,version,inputs,sharing:{group_ids:[...form.querySelectorAll('[data-start-group]:checked')].map(field=>field.value)}},{refreshAfter:false});if(result&&at===context()){const id=result.run?.id || result.run_id || result.id;delete selection.start_inputs?.[workflow.id];await select({factory_id:factory,run_id:id,tab:'overview'});}return;}
+      const pending=dialog({title:'진행 건 시작',note:'선택한 게시 버전과 이번 진행 건을 따로 보존합니다.',html:`<label>게시 버전<select id="ees-start-version">${(workflow?.versions || []).map(item=>`<option value="${item.version}"${item.version===version?' selected':''}>v${item.version} · ${esc(item.published_at || '')}</option>`).join('')}</select></label><fieldset><legend>함께 처리할 Native 그룹</legend><p class="ew-muted">선택하지 않으면 개인 진행 건입니다. 개인 대화 내용은 공유하지 않습니다.</p>${(state.native_groups || []).map(group=>`<label><input type="checkbox" data-start-group value="${esc(group.id)}">${esc(group.name || group.id)}</label>`).join('') || '<p>현재 참여 중인 그룹이 없습니다.</p>'}</fieldset>${chatId()?'<label><input type="checkbox" id="ees-start-chat-link">현재 개인 대화를 이 진행 건에 연결</label>':''}`,confirmLabel:'진행 건 시작'});
+      $('#ees-work-dialog').addEventListener('change',()=>{version=Number($('#ees-start-version').value);groups=[...document.querySelectorAll('[data-start-group]:checked')].map(field=>field.value);link=Boolean($('#ees-start-chat-link')?.checked);});
+      if(!await pending||at!==context())return;
+      const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:selection.workflow_id,factory_id:selection.factory_id,version,inputs:{},sharing:{group_ids:groups}},{refreshAfter:false});if(result){const id=result.run?.id || result.run_id || result.id;await select({run_id:id,tab:'overview'});if(link)await mutate({action:'link_chat',run_id:id,chat_id:chatId()});}return;
     }
-    if(chatId()!==id)return {ok:false};
-    if(!pendingId)return {ok:true,case_id:currentCase()?.id || ''};
-    const created=createdChats.get(id);if(!created || created.caseId!==pendingId || created.auth!==token())return {ok:false};
-    if(binding)return binding;
-    const wanted=pendingId,c=currentCase();
-    if(c?.chat_id&&c.id===wanted)return {ok:true,case_id:wanted};
-    const at=generation,auth=token();
-    binding=(async()=>{
-      try{
-        const candidate=c?.id===wanted?c:(await api('state?'+new URLSearchParams({case_id:wanted}))).case;
-        if(chatId()!==id||auth!==token()||!available()||pendingId!==wanted||!candidate)return {ok:false};
-        const result=await api('action',{action:'bind',chat_id:id,case_id:wanted,node_id:'',payload:{},expected_revision:candidate.revision});
-        if(pendingId===wanted){pendingId='';pendingSubmitted=false;createdChats.delete(id);}
-        if(available()&&auth===token()&&chatId()===id){
-          accept(result);
-          // A different root preview can clear native message history while
-          // creation is in flight. Enter the saved chat through its normal SPA
-          // link so native Chat loads those messages as well as the work case.
-          if(created.resume)navigate('/c/'+encodeURIComponent(id),'chat/'+id);
-          openPanel();
-        }
-        return {ok:true,case_id:result.case?.id || wanted};
-      }catch(error){if(at===generation){errorMessage=error.message;render();}return {ok:false};}
-      finally{binding=null;}
-    })();return binding;
-  }
-  function resetHistory() {runView='current';historyCase=null;historyExecution=null;historyRequest++;historyLookupError=null;}
-  function previewRoute(id) {const values={ees_site:browsingSite,ees_system:browsingSystem,ees_process:id,ees_version:previewVersion || state?.catalog.version};if(browseNodeId&&browseNodeId!==id&&lineage(browseNodeId,state?.catalog)[0]?.id===id)values.ees_node=browseNodeId;return '/?'+new URLSearchParams(values);}
-  async function openCase(c,id='') {
-    if(!c)return {ok:false};
-    const epoch=++navigationRequest;resetHistory();chosenCases.set(caseKey(c.process_id),c.id);browseActive=true;newCase=false;pendingId=c.chat_id?'':c.id;pendingSubmitted=false;
-    const wanted=id || c.selected_id || c.process_id;
-    if(c.chat_id&&c.chat_id!==chatId()) {desiredCase=c.id;desiredNode=wanted;reopenPanel=true;navigate('/c/'+encodeURIComponent(c.chat_id),'chat/'+c.chat_id);return {ok:true};}
-    if(!c.chat_id&&(chatId()||!chatRoute())) {desiredCase=c.id;desiredNode=wanted;reopenPanel=true;navigate(previewRoute(c.process_id),'case/'+c.id);return {ok:true};}
-    const oldDraft=visibleDraftKey;stashDraft();const targetDraft=c.chat_id?'chat/'+c.chat_id:'case/'+c.id;if(targetDraft!==oldDraft){draftSerial++;draftTarget={url:location.pathname+location.search,key:targetDraft};}
-    const at=generation;await refresh();if(at!==generation||epoch!==navigationRequest)return {ok:false};
-    if(currentCase()?.id===c.id&&wanted!==currentCase().selected_id)await action('select',{},wanted);
-    openPanel();return {ok:true};
-  }
-  async function selectWork(id,explicitProcess='') {
-    if(!state)return {ok:false};navigationRequest++;stashDraft();resetHistory();browseActive=true;view.setNavigatorOpen(true);
-    const p=explicitProcess || lineage(id)[0]?.id || lineage(id,state.catalog)[0]?.id;
-    if(!p)return {ok:false};
-    const candidate=chosenCase(p),data=candidate?.tree_nodes?{nodes:candidate.tree_nodes}:state.catalog;
-    if(!data.nodes[id])return {ok:false};
-    category=data.nodes[p]?.category || state.catalog.nodes[p]?.category || category;
-    revealSelection(id,data,candidate,true);browseNodeId=id;rememberScope();
-    if(candidate)return openCase(candidate,id);
-    newCase=true;previewVersion=state.catalog.version;errorMessage='';
-    const targetDraft='scope/'+scopeKey()+'/'+p;
-    if(!chatId()&&visibleDraftKey==='general'){const draft=draftSnapshots.get('general');if(draft)draftSnapshots.set(targetDraft,draft);visibleDraftKey=targetDraft;}
-    else if(currentCase() || (!chatId()&&visibleDraftKey!==targetDraft)){pendingId='';pendingSubmitted=false;reopenPanel=true;navigate(previewRoute(p),targetDraft);return {ok:true};}
-    if(chatId())previewChats.set(chatId(),{auth:token(),selection:publishedSelection()});
-    render();openPanel();return {ok:true};
-  }
-  async function switchScope(site,system,process='') {
-    if(!state?.catalog.sites[site]||!state.catalog.systems.includes(system))return {ok:false};
-    view.closeScopePicker();
-    const serial=++navigationRequest;stashDraft();rememberScope();resetHistory();browsingSite=site;browsingSystem=system;browseActive=true;newCase=true;previewVersion=state.catalog.version;view.setNavigatorOpen(true);
-    const saved=scopeSelections.get(scopeKey());category=saved?.category || category;
-    const roots=visibleRoots(category),requested=process || saved?.nodeId || '';
-    const requestedRoot=lineage(requested,state.catalog)[0]?.id || scopeCases().find(c=>c.tree_nodes?.[requested])?.process_id;
-    browseNodeId=roots.includes(requestedRoot)?requested:roots[0] || '';
-    const p=roots.includes(requestedRoot)?requestedRoot:roots[0] || '',candidate=chosenCase(p);
-    if(candidate)return openCase(candidate,browseNodeId);
-    pendingId='';pendingSubmitted=false;
-    const url=previewRoute(p);reopenPanel=true;
-    if(location.pathname+location.search!==url)navigate(url,'scope/'+scopeKey()+'/'+p);else{await refresh();if(serial===navigationRequest)openPanel();}
-    return {ok:true};
-  }
-  async function startCase() {
-    const p=processId();if(!p)return;
-    const active=scopeCases(p).filter(c=>!finished(c));
-    if(active.length){if(active.length===1)await openCase(active[0]);else{newCase=true;render();openPanel();}return;}
-    stashDraft();const previousDraftKey=visibleDraftKey,separate=Boolean(currentCase()),result=await action('create',{site_id:browsingSite,system:browsingSystem,process_id:p,version:state.catalog.version},'',{case_id:'',chat_id:separate||!chatRoute()?'':chatId(),expected_revision:0});
-    if(!result)return;
-    browseActive=true;newCase=false;view.setNavigatorOpen(true);resetHistory();
-    if(separate||!chatRoute()){visibleDraftKey=previousDraftKey;pendingId=result.case.id;pendingSubmitted=false;reopenPanel=true;navigate(previewRoute(p),'case/'+result.case.id);}
-    else{render();openPanel();}
-  }
-  function canWriteEdits(id) {
-    const edits=view.readJobEdits(id);
-    if(edits.conflict){errorMessage='저장된 내용이 변경되었습니다. 작성 중인 값과 최신 내용을 확인해 주세요.';renderPanel();return false;}
-    if(edits.nodeId&&edits.nodeId!==id){errorMessage='입력을 작성한 업무를 다시 선택해 주세요.';renderPanel();return false;}
-    if(workLegacyExecutionLocked(execution,selectedCase()?.id)){errorMessage='연결 실행이 종료되기 전에는 입력·초안을 반영하거나 이 작업을 완료할 수 없습니다. 작성 중인 내용은 이 화면에 보존됩니다.';renderPanel();return false;}
-    return true;
-  }
-  async function saveInputs(inputs,id=selectedId()) {if(!canWriteEdits(id))return null;return action('update_inputs',{inputs,...(node(id)?.execution?{replace_inputs:true}:{})},id);}
-  const sameValue=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
-  function referenceTarget() {const value=selection(chatId());return value.ok?Object.fromEntries(Object.entries(value).filter(([key])=>key!=='ok')):{kind:'none'};}
-  function toggleReference(){referenceEnabled=!referenceEnabled;renderView();return {ok:true,enabled:referenceEnabled};}
-  function captureReference(id,messageId,userMessage) {
-    if(!chatRoute()||!available()||typeof messageId!=='string')return {kind:'none'};
-    const key=userMessage?.id || messageId,existing=userMessage?.meta?.ees_work_reference;
-    if(existing&&typeof existing==='object')return JSON.parse(JSON.stringify(existing));
-    if(!messageReferences.has(key))messageReferences.set(key,referenceEnabled?referenceTarget():{kind:'none'});
-    return JSON.parse(JSON.stringify(messageReferences.get(key)));
-  }
-  async function sendSuggestion(question) {
-    const bridge=window.__eesNativeDraftV1;
-    if(suggestionPending||typeof question!=='string'||!question.trim()||!scopeReady()||!bridge?.hasPendingContent)return false;
-    if(bridge.hasPendingContent()){errorMessage='작성 중인 글이나 첨부가 있습니다. 먼저 보내거나 직접 정리한 뒤 추천 질문을 선택해 주세요.';renderPanel();return false;}
-    const before=bridge.read(),at=generation,epoch=navigationRequest,auth=token(),route=location.pathname+location.search;
-    if(!before)return false;suggestionPending=true;
-    try {
-      const restored=await bridge.restore(JSON.stringify({...before,prompt:question}));
-      if(!restored||at!==generation||epoch!==navigationRequest||auth!==token()||route!==location.pathname+location.search)return false;
-      const send=$('#send-message-button');
-      if(!send||send.disabled){errorMessage='질문을 입력했습니다. 현재 대화의 보내기 조건을 확인해 주세요.';renderPanel();return false;}
-      send.click();return true;
-    }finally{suggestionPending=false;}
-  }
-  async function applyInputDraft(id,proposal) {
-    if(id!==chatId()||!scopeReady()||busy||runView==='history'||recordLookupError||!proposal||typeof proposal!=='object')return {ok:false,code:'draft_unavailable'};
-    if(typeof proposal.proposalId!=='string'||!/^[A-Za-z0-9._:-]{1,128}$/.test(proposal.proposalId)||typeof proposal.source!=='string'||!proposal.source.trim()||proposal.source.length>500)return {ok:false,code:'invalid_draft'};
-    const target=referenceTarget(),nodeId=target.kind==='published'?target.selection.node_id:target.node_id;
-    const key=token()+'/'+id+'/'+proposal.proposalId,fingerprint=JSON.stringify(proposal),receipt=inputDraftReceipts.get(key);
-    if(receipt){
-      if(receipt.fingerprint!==fingerprint)return {ok:false,code:'proposal_conflict'};
-      if(receipt.action_record.status!=='applied'||!sameValue(target,receipt.target)||JSON.stringify(view.readJobEdits(nodeId))!==receipt.afterDraft)return {ok:false,code:'draft_changed'};
-      const at=generation,epoch=navigationRequest,auth=token();
-      try {
-        await api('input-draft/validate',{chat_id:id,target,inputs:proposal.inputs,...(Object.hasOwn(proposal,'document')?{document:proposal.document}:{})});
-        if(at!==generation||epoch!==navigationRequest||auth!==token()||recordLookupError||!available()||!sameValue(target,referenceTarget())||JSON.stringify(view.readJobEdits(nodeId))!==receipt.afterDraft)return {ok:false,code:'draft_changed'};
-        return {ok:true,replayed:true,action_record:receipt.action_record};
-      }catch(error){return {ok:false,code:error.code || 'draft_unconfirmed'};}
+    if(action==='execute_scope'){if(busy||!inputsSaved(true))return;setBusy(true);try{const model=executionModel();await operationsCommand({action:'execute_scope',run_id:selection.run_id,node_id:target.dataset.nodeId,expected_revision:state.run.revision,...(model?{model_id:model}:{})});await refresh();}finally{setBusy(false);}return;}
+    if(action==='execute'){if(busy||!inputsSaved())return;setBusy(true);try{const model=executionModel();await operationsCommand({action:'execute_job',run_id:selection.run_id,job_id:selection.job_id,expected_revision:state.run.revision,...(model?{model_id:model}:{})});await refresh();}finally{setBusy(false);}return;}
+    if(action==='retry_private_save'){remember();return;}
+    if(action==='confirm_verdicts'){
+      if(busy||!inputsSaved())return;const at=context(),run=state.run,jobId=selection.job_id,saved=run.jobs[jobId],key=run.id+'/'+jobId+'/'+saved.attempt_id,draft=selection.verdict_drafts?.[key] || {},items=saved.result?.items || [];
+      if(!items.length||items.some(item=>!saved.decisions?.[item.id]&&!draft[item.id]?.verdict))throw new Error('모든 항목의 판정을 직접 선택해 주세요.');
+      if(!await confirmDialog({title:'선택한 판정을 확정할까요?',html:`<p>${items.length}개 항목의 판정을 최종 반영합니다. 확정 뒤에는 현재 판정을 수정하지 않습니다.</p>`,confirmLabel:'판정 확정'})||at!==context())return;
+      const result=await mutate({action:'confirm_verdicts',run_id:run.id,job_id:jobId,attempt_id:saved.attempt_id,result_revision:saved.result_revision,expected_revision:run.revision,verdicts:items.map(item=>({item_id:item.id,verdict:saved.decisions?.[item.id]?.verdict || draft[item.id].verdict,...(draft[item.id]?.judgment_id?{judgment_id:draft[item.id].judgment_id}:{}),...(draft[item.id]?.note?{note:draft[item.id].note}:{})}))});if(result){delete selection.verdict_drafts?.[key];remember();render();}return;
     }
-    if(!sameValue(target,proposal.target)||!nodeId||node(nodeId)?.type!=='j')return {ok:false,code:'selection_changed'};
-    const at=generation,epoch=navigationRequest,auth=token(),route=location.pathname+location.search,before=JSON.stringify(view.readJobEdits(nodeId));
-    const current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&sameValue(target,referenceTarget())&&!recordLookupError&&available();
-    try {
-      const checked=await api('input-draft/validate',{chat_id:id,target,inputs:proposal.inputs,...(Object.hasOwn(proposal,'document')?{document:proposal.document}:{})});
-      if(!current()||before!==JSON.stringify(view.readJobEdits(nodeId)))return {ok:false,code:'draft_changed'};
-      const applied=view.applyAIDraft({proposalId:proposal.proposalId,nodeId,caseId:target.case_id || '',revision:target.revision ?? -1,expectedDraftVersion:target.draft_version,inputs:checked.inputs,...(Object.hasOwn(checked,'document')?{document:checked.document}:{}),source:proposal.source});
-      if(!applied?.ok)return applied || {ok:false,code:'draft_unconfirmed'};
-      const action_record={id:proposal.proposalId,status:'applied',node_id:nodeId,case_id:target.case_id || '',fields:applied.fields || applied.changed_fields || Object.keys(checked.inputs),source:proposal.source,persisted:false,executed:false};
-      inputDraftReceipts.set(key,{fingerprint,target:referenceTarget(),afterDraft:JSON.stringify(view.readJobEdits(nodeId)),messageId:proposal.messageId,action_record});renderPanel();return {ok:true,action_record};
-    }catch(error){return {ok:false,code:error.code || 'draft_unconfirmed'};}
-  }
-  async function undoAIDraft(proposalId) {
-    const key=token()+'/'+chatId()+'/'+proposalId,receipt=inputDraftReceipts.get(key);
-    if(!receipt||receipt.action_record.status!=='applied'||busy||recordLookupError||!scopeReady()||runView==='history')return {ok:false,code:'undo_unavailable'};
-    const target=referenceTarget(),at=generation,epoch=navigationRequest,auth=token(),id=chatId(),route=location.pathname+location.search;
-    const current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&id===chatId()&&available()&&scopeReady()&&!recordLookupError;
-    if(!sameValue(target,receipt.target))return {ok:false,code:'selection_changed'};
-    try {
-      await api('input-draft/validate',{chat_id:chatId(),target,inputs:{}});
-      if(!current()||!sameValue(target,referenceTarget()))return {ok:false,code:'selection_changed'};
-      const result=view.undoAIDraft({proposalId,nodeId:receipt.action_record.node_id,caseId:target.case_id || '',revision:target.revision ?? -1});
-      if(!result?.ok){errorMessage='이후 입력이나 저장값이 변경되어 AI 입력을 되돌릴 수 없습니다. 현재 초안은 보존됩니다.';renderPanel();return result || {ok:false,code:'undo_unavailable'};}
-      receipt.action_record={...receipt.action_record,status:'undone'};
-      try {await api('input-draft/undo-record',{chat_id:id,message_id:receipt.messageId || '',proposal_id:proposalId,target});if(current())await refreshActionRecords(id);}
-      catch(error){if(current())errorMessage='업무 초안은 되돌렸지만 대화의 작업 기록 갱신은 확인하지 못했습니다.';}
-      if(!current())return {ok:true,action_record:receipt.action_record};
-      window.dispatchEvent(new CustomEvent('ees-work-draft-action',{detail:{chat_id:id,action_record:receipt.action_record}}));
-      renderPanel();syncActionRecords();return {ok:true,action_record:receipt.action_record};
-    }catch(error){if(current()){errorMessage='현재 작업의 접근 권한을 확인하지 못해 되돌리지 않았습니다. 다시 조회해 주세요.';renderPanel();}return {ok:false,code:error.code || 'undo_unavailable'};}
-  }
-  function clearActionRecordCards(){for(const {element} of actionRecordCards.values())element.remove();actionRecordCards.clear();}
-  function clearActionRecords(){actionRecordSerial++;actionRecords=[];actionRecordChat='';clearActionRecordCards();}
-  async function refreshActionRecords(id) {
-    if(id!==chatId())return {ok:false,code:'records_changed'};
-    if(!id||!chatRoute()||!available()||recordLookupError){clearActionRecords();return {ok:false,code:'records_unavailable'};}
-    const at=generation,auth=token(),route=location.pathname+location.search,serial=++actionRecordSerial;
-    actionRecords=[];actionRecordChat='';clearActionRecordCards();
-    const current=()=>at===generation&&auth===token()&&route===location.pathname+location.search&&serial===actionRecordSerial&&id===chatId()&&available()&&!recordLookupError;
-    try {
-      const result=await api('input-draft/records?'+new URLSearchParams({chat_id:id}));
-      if(!current())return {ok:false,code:'records_changed'};
-      actionRecords=Array.isArray(result.records)?result.records:[];actionRecordChat=id;syncActionRecords();return {ok:true};
-    }catch(error){if(current())clearActionRecords();return {ok:false,code:error.code || 'records_unavailable'};}
-  }
-  function canUndoActionRecord(record) {
-    const receipt=inputDraftReceipts.get(token()+'/'+chatId()+'/'+record.action_record.id);
-    return Boolean(receipt&&receipt.messageId===record.message_id&&receipt.action_record.status==='applied'&&record.action_record.status==='applied'&&
-      !busy&&!recordLookupError&&!executionError&&!workLegacyExecutionLocked(execution,selectedCase()?.id)&&runView!=='history'&&scopeReady()&&sameValue(referenceTarget(),receipt.target)&&
-      JSON.stringify(view.readJobEdits(receipt.action_record.node_id))===receipt.afterDraft);
-  }
-  function syncActionRecords() {
-    // The receipt is read from the existing owned Native chat. This appends a
-    // decoration to a real assistant message; it never creates a chat bubble.
-    if(!scopeReady()||recordLookupError||!chatRoute()||actionRecordChat!==chatId()){clearActionRecordCards();return;}
-    const nativeIds=new Set(window.__eesNativeDraftV1?.workMessageIds?.() || []),wanted=new Set();
-    for(const record of actionRecords){
-      const receipt=record?.action_record;
-      if(!nativeIds.has(record?.message_id)||!receipt||!['applied','undone'].includes(receipt.status)||typeof receipt.id!=='string'||typeof receipt.source!=='string'||!Array.isArray(receipt.fields)||receipt.persisted!==false||receipt.executed!==false)continue;
-      const message=document.getElementById('message-'+record.message_id),host=message?.querySelector('#response-content-container');if(!host)continue;
-      const key=record.message_id+'/'+receipt.id,canUndo=canUndoActionRecord(record),signature=JSON.stringify([receipt,canUndo]);wanted.add(key);
-      const existing=actionRecordCards.get(key);if(existing?.signature===signature&&existing.element.parentNode===host)continue;
-      existing?.element.remove();
-      const card=document.createElement('section');card.className='ees-action-record';card.setAttribute('aria-label','Assistant 입력 변경 기록');
-      const add=(tag,text)=>{const element=document.createElement(tag);element.textContent=text;card.append(element);return element;};
-      add('h4',receipt.status==='undone'?'입력 초안을 되돌렸습니다':'입력 초안에 반영했습니다');
-      add('p','변경 항목: '+receipt.fields.join(', '));add('p','입력 근거: '+receipt.source);
-      add('p','이 AI 반영 당시 저장·점검은 수행하지 않았습니다.');
-      const undo=add('button',receipt.status==='undone'?'되돌림 완료':'되돌리기');undo.type='button';undo.disabled=!canUndo;
-      undo.addEventListener('click',async event=>{event.preventDefault();event.stopPropagation();undo.disabled=true;await undoAIDraft(receipt.id);syncActionRecords();});
-      if(receipt.status==='applied'&&!canUndo)add('p','현재 초안이 달라졌거나 다시 열린 대화에서는 되돌릴 수 없습니다.');
-      host.append(card);actionRecordCards.set(key,{element:card,signature});
+    if(action==='confirm'){
+      if(busy||!inputsSaved())return;if(state?.run?.definition?.nodes?.[selection.job_id]?.result_block==='ai_review'&&!await saveReviewDraft())return;const selectedRun=state?.run,selectedJob=selection.job_id;
+      const delivery=selectedRun?.definition?.nodes?.[selectedJob]?.completion?.kind==='delivery';
+      if(!await confirmDialog({title:delivery?'본문 검토를 확정할까요?':'결과와 근거를 확인하셨나요?',html:'<p>사람의 판정이 실행 당시 결과에 연결되어 저장됩니다. AI 제안은 자동 확정하지 않습니다.</p>'+(delivery?'<p>본문 검토를 저장해도 송부하거나 업무를 완료하지 않습니다. 실제 송부와 결과 확인은 별도입니다.</p>':''),confirmLabel:delivery?'본문 검토 확정':'확인 완료'}))return;
+      const node=selectedRun?.definition?.nodes?.[selectedJob],job=selectedRun?.jobs?.[selectedJob];return mutate({action:node?.mode==='human'?'human_confirm':'decide',run_id:selectedRun.id,job_id:selectedJob,expected_revision:selectedRun.revision,item_id:'job',result_revision:job?.result_revision,...(job?.review_draft?{review_revision:job.review_draft.revision}:{}),verdict:'completed'});
     }
-    for(const [key,{element}] of actionRecordCards)if(!wanted.has(key)){element.remove();actionRecordCards.delete(key);}
+    if(action==='release_task'){const at=context(),run=state.run,job=selection.job_id;if(run?.jobs?.[job]?.claim_actor!==state.capabilities?.actor_id)return;if(await confirmDialog({title:'맡은 작업을 내려놓을까요?',html:'<p>진행 중인 실행과 결과 불명 요청은 먼저 확인해야 합니다. 다른 참여자는 본인의 현재 권한으로 근거를 다시 조회할 수 있습니다.</p>',confirmLabel:'맡기 해제'})&&at===context())return mutate({action:'release_task',run_id:run.id,job_id:job,expected_revision:run.revision});return;}
+    if(action==='amend_items')return amendItems();
+    if(action==='request_intent')return requestIntent();
+    if(action==='approve_request'||action==='reconcile_request'){if(busy)return;setBusy(true);try{await operationsCommand({action:action==='approve_request'?'request_approve':'request_reconcile',external_request_id:target.dataset.requestId,expected_revision:Number(target.dataset.requestRevision)});await refresh();}finally{setBusy(false);}return;}
+    if(action==='close_run'||action==='cancel_run'){const at=context(),run=state.run;let reason='';const pending=dialog({title:action==='close_run'?'이 진행 건을 종료할까요?':'이 진행 건을 취소할까요?',html:'<p>종료 후에는 이 진행 건의 당시 버전과 기록을 읽기 전용으로 보존합니다.</p>'+(action==='cancel_run'?'<label>취소 이유<input id="ees-cancel-reason" required></label>':''),confirmLabel:action==='close_run'?'진행 건 종료':'진행 건 취소'});$('#ees-cancel-reason')?.addEventListener('input',event=>{reason=event.target.value;});if(await pending&&at===context())return mutate({action,run_id:run.id,expected_revision:run.revision,...(reason?{reason}:{})});}
   }
-  async function saveDocument(document,id=selectedId()) {
-    if(!canWriteEdits(id))return null;
-    const saved=selectedCase()?.node_states?.[id];
-    if(saved?.applicable===false||saved?.status==='skipped'||saved?.missing?.length||saved?.block_reason==='skill_unavailable'){errorMessage='초안을 반영하려면 작업의 적용 조건·선행 작업·필수 스킬 권한을 확인해 주세요. 작성 중인 내용은 이 화면에 보존됩니다.';renderPanel();return null;}
-    return action('run',{document},id);
-  }
-  async function executionForm(schema,values,title,extra='',confirmLabel='확인') {
-    let submitted=null;
-    const html='<form id="ees-runtime-input-form">'+workExecutionInputsHTML(schema,values)+'</form>'+extra;
-    const promise=workUI.dialog({title,html,confirmLabel}),dialog=document.querySelector('#ees-work-dialog'),form=dialog?.querySelector('form');
-    dialog?.querySelector('[data-dialog-confirm]')?.addEventListener('click',event=>{
-      try {if(!form.reportValidity()){event.stopImmediatePropagation();return;}submitted=workExecutionInputsRead(form,schema);}
-      catch(error){event.stopImmediatePropagation();let note=dialog.querySelector('[data-input-error]');if(!note){note=document.createElement('p');note.dataset.inputError='';note.setAttribute('role','alert');form.append(note);}note.textContent='입력 형식을 확인해 주세요. '+error.message;}
-    },true);
-    dialog?.querySelectorAll('[data-candidate-id]').forEach(button=>button.addEventListener('click',()=>{const input=form.elements.namedItem(button.dataset.inputKey || 'page_id');if(input){input.value=button.dataset.candidateId;input.focus();}}));
-    return await promise?submitted:null;
-  }
-  function executionRequestId(body) {
-    const key='execution:'+JSON.stringify(body);if(!actionRequests.has(key))actionRequests.set(key,window.crypto?.randomUUID?.() || 'runtime-'+Date.now().toString(36)+'-'+(++actionSerial));return actionRequests.get(key);
-  }
-  function retryExecutionRead() {
-    const pastId=runView==='history'?(historyCase?.id || historyLookupError?.caseId):null;
-    // Each case must pass its own lookup; a past success never clears a
-    // failed current read, and a current success cannot revive stale history.
-    if(pastId)return showHistory(pastId);
-    return recordLookupError?refresh():refreshExecution();
-  }
-  async function refreshExecution() {
-    clearTimeout(executionTimer);executionTimer=null;
-    if(!available()||!state||!selectedCase()||!workHasExecution(definition(),processId())){execution=null;executionError='';return;}
-    const at=generation,epoch=navigationRequest,auth=token(),route=location.pathname+location.search,cid=selectedCase().id,serial=++executionSerial;
-    const current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&serial===executionSerial&&cid===selectedCase()?.id&&available();
-    try {const result=await api('execution/state?'+new URLSearchParams({case_id:cid,chat_id:chatId()}));if(!current())return;
-      const changed=result.run?.id!==execution?.run?.id||result.run?.revision!==execution?.run?.revision;
-      if(changed&&!busy){const projected=await api('state?'+new URLSearchParams({case_id:cid,chat_id:chatId()}));if(!current())return;
-        // The view captures unsaved inputs before replacing its server snapshot.
-        // A newer selection/write must never be replaced by this polling read.
-        if(projected.case?.id===cid&&projected.case.revision>=(selectedCase()?.revision || 0)){execution=result;executionError='';accept(projected);}
-      }
-      if(!changed||!busy){execution=result;executionError='';renderPanel();}
-      if(busy||result.runs?.some(run=>['queued','running'].includes(run.status))||['queued','running'].includes(result.run?.status))executionTimer=setTimeout(()=>{executionTimer=null;if(current())refreshExecution();},1800);
-    }catch(error){if(current()){executionError=error.message;renderPanel();}}
-  }
-  async function startExecution(id) {
-    if(busy)return;const at=generation,epoch=navigationRequest,auth=token(),route=location.pathname+location.search;
-    const current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&available();
-    busy=true;errorMessage='';setBusy();
-    try {
-      const c=selectedCase(),edits=node(id)?.type==='j'?view.readJobEdits(id):null;
-      if(edits?.conflict)throw new Error('저장된 내용과 작성 중인 입력을 확인한 뒤 실행 계획을 여세요.');
-      const body={node_id:id,chat_id:chatId(),inputs:edits?.inputs || {},...(c?{case_id:c.id}:{scope:{site_id:browsingSite,system:browsingSystem,process_id:processId(),version:previewVersion || state.catalog.version}})};
-      let response=await api('execution/plan',body);if(!current())return;
-      const plan=response.plan,limits=plan.limits?.duration_seconds?'<p>허용 실행 시간 '+Math.ceil(plan.limits.duration_seconds/60)+'분</p>':'';
-      const scope='<ul>'+plan.jobs.map(jobId=>{const job=node(jobId);return '<li>'+workUI.esc(job?.name || jobId)+' · '+workUI.esc(job?.execution?.kind==='ai'?'근거 요약':job?.execution?.kind==='human'?'사람 확인':(job?.execution?.calls || []).map(call=>call.reference.function).join(', '))+'</li>';}).join('')+'</ul>';
-      const expiry=typeof plan.expires_at==='number'?new Date(plan.expires_at*1000).toLocaleString():plan.expires_at || '미기록';
-      const inputs=await executionForm(plan.input_schema || {},plan.inputs || {},node(id).name+' · 실행 계획','<p>대상 작업 '+plan.jobs.length+'개 · 승인 유효 시각 '+workUI.esc(expiry)+'</p>'+scope+limits+'<p>계획 확인만으로 실행되지 않습니다. 실행 시작을 선택하면 위 범위와 입력으로 접수합니다.</p><p>개인 연결은 기존 도구 설정을 사용합니다. 계정·키는 입력하지 마세요.</p>','실행 시작');
-      if(!current()||inputs===null)return;
-      const intent=JSON.stringify({...body,inputs});let start=executionStarts.get(intent);
-      if(!start){response=await api('execution/plan',{...body,inputs});if(!current())return;const accepted=response.plan;start={action:'start',plan_id:accepted.id,plan_hash:accepted.hash,chat_id:chatId()};start.request_id=executionRequestId(start);executionStarts.set(intent,start);}
-      let result;try{result=await api('execution/action',start);executionStarts.delete(intent);}
-      catch(error){if(error.result?.ok===false||(error.status>=400&&error.status<500))executionStarts.delete(intent);throw error;}
-      if(!current())return;
-      execution={ok:true,run:result.run,runs:[result.run]};executionError='';
-      if(result.run?.case_id){if(!chatId())pendingId=result.run.case_id;await refresh();}
-      else renderPanel();
-    }catch(error){if(current()){errorMessage=error.message;renderPanel();}}
-    finally {busy=false;setBusy();}
-  }
-  async function executionControl(data) {
-    if(busy)return;
-    // A selected J/T may belong to an earlier, disjoint run in the same case.
-    // Use the displayed run receipt, never the latest unrelated run.
-    const run=[execution?.run,...(execution?.runs || [])].find(item=>item?.id===data.runId);
-    if(recordLookupError)return refresh();
-    if(executionError||!run||String(run.revision)!==data.revision)return refreshExecution();
-    const at=generation,epoch=navigationRequest,auth=token(),route=location.pathname+location.search,current=()=>at===generation&&epoch===navigationRequest&&auth===token()&&route===location.pathname+location.search&&available();
-    let action=data.runtimeAction,inputs;
-    if(action==='inputs'){
-      const candidates=(run.calls || []).flatMap(call=>call.result?.data?.results || []);
-      const choices=candidates.filter(item=>item.page_id || item.id).map(item=>'<p><button type="button" data-candidate-id="'+workUI.esc(item.page_id || item.id)+'">'+workUI.esc(item.title || item.name || item.page_id || item.id)+' · '+workUI.esc(item.page_id || item.id)+'</button></p>').join('');
-      inputs=await executionForm(run.input_schema || {},run.inputs || {},'실행 입력 확인','<p>입력을 반영한 뒤 이어가기를 선택해야 다음 호출이 진행됩니다. 이미 실행한 호출의 입력·결과는 변경되지 않습니다.</p>'+(candidates.length?'<details open><summary>조회된 후보 · 선택해 주세요</summary>'+choices+'<pre>'+workUI.esc(JSON.stringify(candidates,null,2))+'</pre></details>':''),'입력 반영');
-      if(inputs===null||!current())return;
+  function handleEvent(event){
+    if(view.layoutEvent?.(event))return;
+    const author=designer.handleEvent?.(event);if(author?.handled){if(author.preventDefault)event.preventDefault();return;}
+    const target=event.target;if(event.type==='submit'&&target.closest?.('[data-ees-work]')){event.preventDefault();return;}if(event.type==='keydown'&&event.repeat&&target.closest?.('[data-mutation]')){event.preventDefault();event.stopImmediatePropagation();return;}if(!target?.closest?.('[data-ees-work]'))return;
+    if(event.type==='click'){const buttonTarget=target.closest('button[data-action]');if(!buttonTarget||buttonTarget.disabled)return;event.preventDefault();Promise.resolve(handleClick(buttonTarget)).catch(failure=>{error=failure.message;render();});}
+    if(event.type==='input'){
+      if(target.id==='ees-factory-search'||target.id==='ees-workflow-search'){const list=$(target.id==='ees-factory-search'?'#ees-factory-list':'#ees-workflow-list');list?.querySelectorAll('button').forEach(item=>{item.hidden=!item.textContent.toLocaleLowerCase().includes(target.value.toLocaleLowerCase());});}
+      if(target.closest?.('#ees-work-start')){const form=target.closest('#ees-work-start');selection.start_inputs ||= {};selection.start_inputs[selection.workflow_id]=workReadInputs(form);selection.start_groups ||= {};selection.start_groups[selection.workflow_id]=[...form.querySelectorAll('[data-start-group]:checked')].map(field=>field.value);remember();return;}
+      if(target.id==='ees-request-reason'){selection.request_reasons ||= {};selection.request_reasons[selection.run_id+'/'+selection.job_id]=target.value;remember();return;}
+      if(target.id==='ees-review-text'){view.capture();scheduleReviewSave();}
+      if(target.matches?.('[data-work-input]')){view.capture();clearTimeout(optionTimer);optionTimer=setTimeout(()=>loadOptions(),300);}
     }
-    if(action==='confirm'&&!await workUI.dialog({title:'내용을 직접 확인하셨나요?',html:'<p>'+workUI.esc(node(data.jobId)?.rule || '등록된 완료 조건을 직접 확인해 주세요.')+'</p>',confirmLabel:'확인 완료'}))return;
-    if(action==='cancel'&&!await workUI.dialog({title:'이 실행을 취소할까요?',html:'<p>다음 호출을 중지합니다. 이미 보낸 요청의 결과가 취소되었다고 판단하지 않습니다.</p>',confirmLabel:'실행 취소'}))return;
-    if(!current())return;busy=true;setBusy();
-    const body={action,run_id:run.id,expected_revision:run.revision,chat_id:chatId(),...(inputs?{inputs}:{}),...(data.jobId?{job_id:data.jobId}:{})};body.request_id=executionRequestId(body);
-    try{const result=await api('execution/action',body);if(!current())return;execution={ok:true,run:result.run,runs:[result.run]};executionError='';await refresh();}
-    catch(error){if(current()){errorMessage=error.message;await refreshExecution();renderPanel();}}
-    finally{busy=false;setBusy();}
+    if(event.type==='change'&&target.id==='ees-start-factory'){select({factory_id:target.value,start_factory_id:target.value});return;}
+    if(event.type==='change'&&target.matches?.('[data-item-verdict]')){const saved=state?.run?.jobs?.[selection.job_id];if(!saved||saved.can_decide===false||saved.decisions?.[target.dataset.itemId])return;const key=selection.run_id+'/'+selection.job_id+'/'+saved.attempt_id;selection.verdict_drafts ||= {};selection.verdict_drafts[key] ||= {};const option=target.selectedOptions?.[0];selection.verdict_drafts[key][target.dataset.itemId]={verdict:option?.dataset.verdict || target.value,...(option?.dataset.judgmentId?{judgment_id:option.dataset.judgmentId}:{})};remember();render();return;}
+    if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
+    if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}
+    if(event.type==='toggle'&&target.matches?.('[data-category]')){selection.collapsed=[...document.querySelectorAll('#ees-work-entry details:not([open])')].map(item=>item.dataset.category);remember();}
   }
-  async function runJob(id,activation=null) {
-    // A second click in the save gesture is not a separate execution intent.
-    if(activation?.detail>1)return;
-    const n=node(id);if(!n)return;
-    if(workHasExecution(definition(),id)){await startExecution(id);return;}
-    if(n.type==='j'){
-      if(!canWriteEdits(id))return;
-      const edits=view.readJobEdits(id);
-      if(edits.inputsChanged||edits.documentChanged){errorMessage='작성한 입력이나 초안을 먼저 반영한 뒤 진행해 주세요.';renderPanel();return;}
-      if(['manual','draft'].includes(n.mode)&&!confirm(`${n.name || '선택한 업무'}\n${n.rule || '등록된 완료 조건을 직접 확인해 주세요.'}\n\n직접 확인한 내용으로 완료를 기록할까요?`))return;
-    }
-    await action('run',n.type!=='j'?{retry_failed:false}:n.mode==='manual'||n.mode==='draft'?{confirm:true}:{},id);
-  }
-  async function editAction(name) {
-    const draft=designer.readDraft();
-    if(name==='save_draft'){await action(name,{definition:draft.definition});return;}
-    if(draft.dirty){errorMessage='변경한 초안을 먼저 저장해 주세요.';renderDesigner();return;}
-    if(name==='publish'&&!await designer.confirmPublish())return;
-    await action(name);
-  }
-  function render() {renderView();renderDesigner();updateScopeReadiness();}
-  function cleanup() {
-    clearActionRecords();
-    clearScopeReadinessWait();clearTimeout(executionTimer);executionTimer=null;execution=null;executionError='';executionSerial++;executionStarts.clear();
-    personalSettingsOpened=false;$('#ees-personal-settings-guide')?.remove();
-    generation++;request++;state=null;acceptedRoute='';pendingId='';pendingSubmitted=false;browseActive=false;previewVersion=0;scopeSelections.clear();chosenCases.clear();draftSnapshots.clear();creationTickets.clear();createdChats.clear();previewChats.clear();actionRequests.clear();draftSerial++;draftTarget=null;clearTimeout(draftTimer);resetHistory();errorMessage='';recordLookupError=null;
-    inputDraftReceipts.clear();messageReferences.clear();referenceEnabled=true;suggestionPending=false;
-    if(activeRegistration!==null)window.__eesWorkPanelV1?.unregister(activeRegistration,'workflow');activeRegistration=null;
-    view.reset();designer.reset();
-  }
-  function sync() {
-    scheduled=false;
-    const auth=token();
-    if(!available()){if(state||$('#ees-work-entry'))cleanup();lastRoute='';identity=auth;return;}
-    if(identity!==auth){cleanup();window.__eesWorkPanelV1?.destroy();identity=auth;lastRoute='';}
-    openPersonalSettings();
-    if(!window.__eesWorkPanelV1)window.__eesStartWorkPanelV1?.();
-    view.prepare(snapshot());designer.prepare(snapshot());
-    const path=location.pathname+location.search;
-    if(lastRoute!==path){
-      clearActionRecords();
-      clearScopeReadinessWait();clearTimeout(executionTimer);executionTimer=null;execution=null;executionError='';executionSerial++;
-      view.closeScopePicker();const previous=lastRoute;lastRoute=path;generation++;request++;resetHistory();
-      // A first completion can arrive after another factory was previewed on
-      // the root route. Its server-issued chat still belongs to the captured
-      // creation ticket, not whichever case is currently being browsed.
-      const created=createdChats.get(chatId());
-      if(previous.split('?')[0]==='/'&&created?.auth===auth){pendingId=created.caseId || '';pendingSubmitted=true;desiredCase='';desiredNode='';reopenPanel=false;draftSerial++;draftTarget=null;clearTimeout(draftTimer);if(created.selection){previewChats.set(chatId(),{auth,selection:created.selection});createdChats.delete(chatId());}}
-      if(path!==navigationTarget&&!pendingSubmitted){browseActive=false;reopenPanel=false;desiredNode='';desiredCase='';pendingId='';}navigationTarget='';
-      if(activeRegistration!==null){window.__eesWorkPanelV1?.unregister(activeRegistration,'workflow');activeRegistration=null;}view.detach();
-      if(!adminRoute())designer.restoreWorkspace();else{view.setNavigatorOpen(false);renderNavigator();}
-      if(pendingId&&pendingSubmitted&&previous.split('?')[0]==='/'&&chatId()){ensureChat(chatId());return;}
-      // A captured published selection has no pending case to bind. Its
-      // one-time route transition must not keep unrelated chats in this scope.
-      if(!pendingId)pendingSubmitted=false;
-      state=null;recordLookupError=null;view.prepare(snapshot());designer.prepare(snapshot());refresh();return;
-    }
-    view.sync(snapshot());designer.sync(snapshot());updateScopeReadiness();syncActionRecords();
-  }
-  function openPersonalSettings() {
-    if(new URLSearchParams(location.search).get('ees')!=='tool-settings'||!chatRoute()){
-      personalSettingsOpened=false;$('#ees-personal-settings-guide')?.remove();return;
-    }
-    if(personalSettingsOpened||!window.__eesNativeDraftV1?.ready()||!$('#chat-input.ProseMirror'))return;
-    // This is the pinned Native button, including its native permission check.
-    // Opening Controls does not select a Tool, read a key or write UserValves.
-    const control=$('nav button[aria-label="Controls"]');if(!control)return;
-    personalSettingsOpened=true;
-    const pane=$('#controls-container'),bounds=pane?.getBoundingClientRect();
-    if(!bounds||bounds.width<40||bounds.height<40)control.click();
-    const guide=document.createElement('p');guide.id='ees-personal-settings-guide';guide.setAttribute('role','status');
-    guide.textContent='개인 도구 설정: Controls의 Valves(밸브)에서 도구를 선택하세요. 권한과 도구에 따라 설정 항목이 다릅니다. 업무 초안은 원래 탭에 보존됩니다.';
-    const host=$('#controls-container') || control.closest('nav');host?.prepend(guide);
-  }
+  function reset(){reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();document.querySelectorAll('.ees-work-message-reference').forEach(element=>element.remove());epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;delete document.body.dataset.eesModelCount;selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
+  function sync(){scheduled=false;const auth=token();if(auth!==identity){reset();identity=auth;route='';}if(!available()){if(!auth||/^\/(auth|logout)(\/|$)/.test(location.pathname)){if(state||document.body.dataset.eesIntegrated)reset();}else if(route){epoch++;serial++;clearTimeout(refreshTimer);clearTimeout(uiTimer);view.suspend?.();}route='';return;}const current=location.pathname+location.search;if(route!==current){for(const [key,alias] of chatAliases)if(alias.chat_id!==chatId())chatAliases.delete(key);route=current;epoch++;refresh();models().catch(()=>{});}else view.sync(snapshot());syncMessageReferences();}
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(sync);}}
-  function publishedSelection() {return {site_id:browsingSite,system:browsingSystem,process_id:processId(),node_id:selectedId(),version:previewVersion || state?.catalog.version};}
-  function selection(id) {
-    if(typeof id!=='string'||id!==chatId()||!available()||!chatRoute())return {ok:false,code:'selection_unconfirmed'};
-    // The native first-message hook captures a preview before its new chat
-    // route exists. Reading that capture never creates or binds a work case.
-    if(!state||acceptedRoute!==location.pathname+location.search){const saved=previewChats.get(id);if(saved?.auth===token())return {ok:true,kind:'published',selection:{...saved.selection}};const created=createdChats.get(id);if(created?.auth===token()&&created.caseId)return {ok:true,kind:'case',case_id:created.caseId,node_id:created.nodeId,revision:created.revision};return {ok:false,code:'selection_unconfirmed'};}
-    if(runView==='history')return historyCase?{ok:true,kind:'history',case_id:historyCase.id,node_id:historyCase.process_id,revision:historyCase.revision}:{ok:false,code:'selection_required'};
-    if(!browseActive||!selectedId())return {ok:true,kind:'none'};
-    const c=selectedCase(),draftVersion=view.draftVersion?.(selectedId()),draft=Number.isSafeInteger(draftVersion)?{draft_version:draftVersion}:{};
-    return c?{ok:true,kind:'case',case_id:c.id,node_id:selectedId(),revision:c.revision,...draft}:{ok:true,kind:'published',selection:publishedSelection(),...draft};
+  ['click','input','change','toggle','keydown','submit'].forEach(type=>document.addEventListener(type,handleEvent,true));
+  window.addEventListener('popstate',schedule);window.addEventListener('storage',event=>{if(event.key==='token')schedule();});
+  new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});
+  window.__eesNativeWork=true;
+  const reference=()=>available()&&selection.chat_reference&&selection.chat_reference.run_id===state?.run?.id?{...clone(selection.chat_reference),context_id:context()}:available()&&selection.workflow_id?{kind:'workspace',workflow_id:selection.workflow_id,run_id:selection.run_id,job_id:selection.job_id,system_id:state?.run?.system_id || selection.system_id,factory_id:state?.run?.factory_id ?? selection.factory_id,version:state?.run?.version ?? state?.workflow?.published_version,workflow_revision:state?.workflow?.revision,attempt_id:state?.run?.jobs?.[selection.job_id]?.current_attempt,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,revision:state?.run?.revision ?? state?.workflow?.revision ?? 0,created_at:state?.run?.updated_at ?? state?.workflow?.updated_at,context_id:context()}:{kind:'none'};
+  function renderMessageReferences(){
+    if(!chatId()||referenceChat!==chatId())return;
+    for(const [id,reference] of messageReferences){const message=document.getElementById?.('message-'+id);if(!message)continue;const html=workMessageReferenceHTML(reference,id);if(!html)continue;let chip=message.querySelector('.ees-work-message-reference');if(!chip){chip=document.createElement('div');chip.className='ees-work-message-reference';chip.dataset.eesWork='';message.append(chip);}if(chip.innerHTML!==html)chip.innerHTML=html;}
   }
-  function beginChatCreation() {
-    if(!chatRoute())return '';
-    if(location.pathname!=='/'||!available()||!browseActive||!state)return null;
-    const c=selectedCase();if(c&&c.id!==pendingId)return null;
-    const ticket=String(++creationSerial);creationTickets.set(ticket,{caseId:c?pendingId:'',nodeId:c?.selected_id,revision:c?.revision,selection:c?null:publishedSelection(),auth:token(),route:location.pathname+location.search});return ticket;
+  async function readMessageReferences(){
+    referenceTimer=null;const id=chatId(),auth=token(),n=++referenceRead;if(!id||!available())return;
+    try{const response=await fetch('/api/v1/chats/'+encodeURIComponent(id),{headers:{Accept:'application/json',Authorization:'Bearer '+auth},credentials:'same-origin',cache:'no-store'});if(!response.ok)throw new Error('Native 대화 참조 조회 실패');const result=await response.json();if(id!==chatId()||auth!==token()||n!==referenceRead)return;
+      const messages=Object.values(result.chat?.history?.messages || {}),next=new Map();for(const message of messages){const ref=message.meta?.ees_work_reference;if(message.id&&ref?.kind==='workspace'&&ref.workflow_id)next.set(message.id,clone(ref));}
+      referenceChat=id;messageReferences=next;renderMessageReferences();
+    }catch(_){if(id===chatId()&&auth===token()&&n===referenceRead){referenceChat=id;messageReferences.clear();document.querySelectorAll('.ees-work-message-reference').forEach(element=>element.remove());}}
   }
-  function finishChatCreation(ticket,id) {
-    const record=creationTickets.get(ticket);creationTickets.delete(ticket);
-    if(!record||typeof id!=='string'||!id||record.auth!==token()||!available())return;
-    record.resume=record.route!==location.pathname+location.search||Boolean(record.caseId&&currentCase()?.id!==record.caseId);
-    createdChats.set(id,record);
-    if(record.selection)previewChats.set(id,{auth:record.auth,selection:record.selection});
-    if(record.selection||pendingId===record.caseId){pendingSubmitted=true;schedule();}
+  function syncMessageReferences(){
+    if(referenceChat!==chatId()){referenceChat=chatId();messageReferences.clear();clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;}
+    renderMessageReferences();if(chatId()&&referenceTimer===null)referenceTimer=setTimeout(readMessageReferences,700);
   }
-  // The controller is the only owner of global listeners and route observation.
-  function handleEvent(event) {
-    if(event.type==='keyup')heldWorkKeys.delete(event.key);
-    if(event.type==='keydown'&&['Enter',' ','Spacebar'].includes(event.key)){
-      const target=event.target;
-      const workControl=target.closest?.('#ees-work-panel button[data-mutation]') ||
-        event.key==='Enter'&&target.closest?.('#ees-work-inputs');
-      // A render can remove the focused save control while Enter is held.
-      // Keep consuming its repeats until release, including when focus is body.
-      if(event.repeat&&(workControl||heldWorkKeys.has(event.key))){event.preventDefault();event.stopImmediatePropagation();return;}
-      if(workControl)heldWorkKeys.add(event.key);
+  async function openMessageReference(id){
+    const ref=messageReferences.get(id);if(!ref||referenceChat!==chatId())throw new Error('이 대화의 업무 참조를 다시 확인해 주세요.');
+    const copied={workflow_id:ref.workflow_id,run_id:ref.run_id || '',job_id:ref.job_id || '',attempt_id:ref.attempt_id,version:ref.version,result_revision:ref.result_revision};
+    return select({mode:'work',tab:'historical_reference',panel_open:true,workflow_id:ref.workflow_id,run_id:ref.run_id || '',job_id:ref.job_id || '',system_id:ref.system_id || selection.system_id,factory_id:ref.factory_id || '',historical_reference:copied});
+  }
+  function chatBoundary(){
+    const draft=selection.mode==='author'?designer.readDraft?.():null;
+    return JSON.stringify([workEpoch,selection.mode,selection.system_id,selection.factory_id,selection.workflow_id,selection.run_id,selection.job_id,state?.run?.revision ?? state?.workflow?.revision ?? 0,draft?.revision,draft?.definition]);
+  }
+  function beginChatCreation(){
+    if(!available()||chatId()||location.pathname!=='/')return '';
+    const id=crypto.randomUUID();chatCreations.set(id,{actor:token(),context_id:context(),boundary:chatBoundary()});
+    while(chatCreations.size>8)chatCreations.delete(chatCreations.keys().next().value);return id;
+  }
+  function finishChatCreation(id,createdChatId){
+    const captured=chatCreations.get(id);chatCreations.delete(id);
+    if(!captured||typeof createdChatId!=='string'||!createdChatId||captured.actor!==token()||captured.boundary!==chatBoundary()||(chatId()&&chatId()!==createdChatId)||(!chatId()&&location.pathname!=='/'))return;
+    chatAliases.set(captured.context_id,{...captured,chat_id:createdChatId});
+    while(chatAliases.size>8)chatAliases.delete(chatAliases.keys().next().value);
+  }
+  function acceptNativeProposal(id,payload){
+    if(id!==chatId()||!available()||selection.chat_reference)return {ok:false,code:'context_changed'};
+    if(payload?.context_id!==context()){
+      const alias=chatAliases.get(payload?.context_id);
+      if(!alias||alias.actor!==token()||alias.chat_id!==id||alias.boundary!==chatBoundary())return {ok:false,code:'context_changed'};
     }
-    const result=designer.handleEvent(event);
-    const outcome=result.handled?result:view.handleEvent(event);
-    if(['input','change','submit','click'].includes(event.type))schedule();
-    if(outcome.preventDefault)event.preventDefault();
-    if(outcome.handled){
-      if(event.type==='keydown'||event.type==='keyup')event.stopImmediatePropagation();
-      else if(event.type==='click'||event.type==='submit')event.stopPropagation();
-    }
+    if(payload?.proposal_kind==='inputs')return previewInputProposal(payload);
+    if(selection.mode==='author')designer.render({state,selection:{...clone(selection),chat_id:id},host:view.authoringHost()});
+    return designer.acceptProposal(payload,{chatId:id});
   }
-  document.addEventListener('click',handleEvent,true);document.addEventListener('submit',handleEvent,true);
-  for(const kind of ['input','change','focusin','pointermove','pointerup','pointercancel','lostpointercapture'])document.addEventListener(kind,handleEvent);
-  document.addEventListener('pointerdown',handleEvent,true);document.addEventListener('scroll',handleEvent,true);
-  // Picker activation is captured before the native global composer keys.
-  window.addEventListener('keydown',handleEvent,true);window.addEventListener('keyup',handleEvent,true);
-  window.addEventListener('blur',()=>heldWorkKeys.clear());
-  document.addEventListener('keydown',handleEvent);
-  window.addEventListener('ees-work-changed',async event=>{const detail=event.detail||{};if(detail.chat_id!==undefined&&detail.chat_id!==chatId())return;const at=generation;await refresh();if(at===generation&&detail.open_requested)openPanel();});
-  window.addEventListener('popstate',schedule);window.navigation?.addEventListener('navigatesuccess',schedule);
-  window.addEventListener('storage',schedule);window.addEventListener('resize',handleEvent);
-  const observer=new MutationObserver(schedule);observer.observe(document.documentElement,{childList:true,subtree:true});
-  window.__eesNativeWork= true;
-  window.__eesNativeWorkV1={ensureChat,beginChatCreation,finishChatCreation,selection,captureReference,applyInputDraft,undoInputDraft:undoAIDraft,refreshActionRecords,refresh,open:openPanel,display:async(id,options)=>{
-    if(typeof id!=='string'||id!==chatId()||!available()||!state||!options||typeof options!=='object'||Array.isArray(options))return {ok:false};
-    if(Object.keys(options).some(key=>!['panel_open','navigator_open','pinned','category','system','site_id','process_id','node_id','case_id','history_open','history_case_id','workspace'].includes(key)))return {ok:false};
-    if(['panel_open','navigator_open','pinned','workspace','history_open'].some(key=>key in options&&typeof options[key]!=='boolean'))return {ok:false};
-    if('category' in options&&!Object.hasOwn(categories,options.category))return {ok:false};
-    if('system' in options&&!state.catalog.systems.includes(options.system))return {ok:false};
-    if('site_id' in options&&!state.catalog.sites[options.site_id])return {ok:false};
-    if('process_id' in options&&state.catalog.nodes[options.process_id]?.type!=='p')return {ok:false};
-    if('node_id' in options&&typeof options.node_id!=='string')return {ok:false};
-    if(options.node_id&&!node(options.node_id)&&!state.catalog.nodes[options.node_id])return {ok:false};
-    if(options.node_id&&options.process_id&&lineage(options.node_id,state.catalog)[0]?.id!==options.process_id)return {ok:false};
-    if(options.workspace){if(!designer.canAuthor())return {ok:false};navigate('/?ees=workflow');return {ok:true};}
-    if(options.history_case_id)return showHistory(options.history_case_id);
-    if(options.case_id){const c=state.cases.find(c=>c.id===options.case_id);if(!c)return {ok:false};browsingSite=c.site.id;browsingSystem=c.system;return openCase(c);}
-    if('category' in options)category=options.category;
-    if(options.site_id||options.system){return switchScope(options.site_id || browsingSite,options.system || browsingSystem,options.node_id || options.process_id || '');}
-    if(options.node_id||options.process_id)await selectWork(options.node_id || options.process_id,options.process_id || '');
-    if('navigator_open' in options)view.setNavigatorOpen(options.navigator_open);
-    if('history_open' in options){resetHistory();runView=options.history_open?'history':'current';renderPanel();openPanel();}
-    renderNavigator();
-    if(options.panel_open===true){browseActive=true;openPanel();}
-    else if(options.panel_open===false)window.__eesWorkPanelV1?.close(id);
-    return {ok:true};
-  }};
-
+  window.__eesNativeWorkV1=Object.freeze({refresh,open:()=>select({panel_open:true},{fetch:false}),selection:id=>id===chatId()?{ok:true,...reference()}:{ok:false,code:'selection_unconfirmed'},captureReference:()=>reference(),beginChatCreation,finishChatCreation,ensureChat:async()=>({ok:true}),refreshActionRecords:()=>{},propose:acceptNativeProposal,display:async(id,options)=>{if(id!==chatId()||!available())return {ok:false};const allowed=['panel_open','workflow_id','run_id','job_id'];if(Object.keys(options || {}).some(key=>!allowed.includes(key)))return {ok:false};const result=await select(options);if(!result||options.workflow_id&&result.workflow?.id!==options.workflow_id||options.run_id&&result.run?.id!==options.run_id||options.job_id&&!result.run?.definition?.nodes?.[options.job_id])return {ok:false};return {ok:true};}});
   schedule();
 })();

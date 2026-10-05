@@ -1,0 +1,51 @@
+{
+  "observed_at": "2026-10-02T02:17:52.768770+00:00",
+  "sources": [
+    {
+      "url": "https://pypi.org/pypi/pandas/3.0.3/json",
+      "response_sha256": "0ed14136170ca7b10d6f10580d5c5bcb4d682f9a3c427198a2bca4bcdce3e5b2",
+      "version": "3.0.3",
+      "relevant_requires_dist": [
+        "tzdata; sys_platform == \"win32\"",
+        "tzdata; sys_platform == \"emscripten\""
+      ],
+      "wheels": []
+    },
+    {
+      "url": "https://pypi.org/pypi/tzdata/2026.4/json",
+      "response_sha256": "47765f2d72ad6d2568e3717c8ac15292dfa6e06cd89b3cd2cb15643cf42b3218",
+      "version": "2026.4",
+      "relevant_requires_dist": [],
+      "wheels": [
+        {
+          "filename": "tzdata-2026.4-py2.py3-none-any.whl",
+          "sha256": "c2169a8b0a7a5e9674da5a135ccdfb2b3e671b333ed9fed17b41f73c34476e81"
+        }
+      ]
+    }
+  ],
+  "upstream": {
+    "wheel_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+    "metadata_sha256": "0b687e303df3fc13c7c48af19b75e67e2d18cdfbe03fafadc31181ff7bb68e45",
+    "relevant_requires_dist": [
+      "Requires-Dist: pandas==3.0.3",
+      "Requires-Dist: pytz==2026.2"
+    ]
+  },
+  "test_pin": "tzdata==2026.4",
+  "pin_reason": "No existing tzdata pin. Exact available official release for the Windows standard-library ZoneInfo fallback, aligned with existing fixed test pytz 2026.4; pandas 3.0.3 requires tzdata on Windows without a version pin.",
+  "local_environment": {
+    "repository_venv_only": true,
+    "tzdata_version": "2026.4",
+    "existing_199_pins_changed": false,
+    "package_count_after_prior_ftfy_additions": 202
+  },
+  "validation": {
+    "command_prefix": "PYTHONTZPATH='' PYTHONPATH=tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest -v",
+    "tests": 11,
+    "result": "PASS",
+    "log": "dist/integrated/ci-36954271808-tzdata-focused.log",
+    "boundary": "OS zoneinfo path disabled to exercise installed tzdata; Linux test, not Windows runtime proof"
+  },
+  "operational_boundary": "Normal official product dependency installation brings Windows tzdata through pinned pandas3.0.3. Minimal test dependencies lacked it. Existing company Windows environments were not inspected or changed; confirm importlib.metadata.version(tzdata) and ZoneInfo UTC/Asia/Seoul in their existing interpreter through read-only CheckOnly before application. No global package install."
+}

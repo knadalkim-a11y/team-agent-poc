@@ -1,0 +1,87 @@
+{
+  "module": "test_ees_workflow_contract.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.103,
+  "tests_run": 17,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 17,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_workflow_contract.ContractAuthoringTests.test_approval_change_between_validation_and_publish_preserves_draft",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractAuthoringTests.test_p_save_publish_exact_approval_and_reference_remapping",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_arbitrary_schema_code_and_reserved_arguments_rejected",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_bindings_use_stored_results_and_only_explicit_transform",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_bounded_page_completion_and_real_missing_data_are_distinct",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_copy_remaps_evidence_and_candidate_binding",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_multiple_candidates_wait_and_only_actual_selection_resumes",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_negative_human_confirmation_does_not_complete",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_result_links_require_declared_preceding_job",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_skill_reference_must_belong_to_inherited_native_skill",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_skills_and_fixed_execution_model_boundaries",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_summary_accepts_exact_claims_and_rejects_fabrication_and_prose",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_summary_requires_exact_limited_scope_and_does_not_claim_full_completion",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_summary_requires_useful_business_observations_not_only_ok",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_transport_success_is_distinct_from_business_and_final_completion",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_two_reusable_workflows_validate_and_do_not_mutate_seed",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_workflow_contract.ContractTests.test_typed_inputs_enforce_boolean_integer_object_and_identifier_boundaries",
+      "status": "passed"
+    }
+  ]
+}

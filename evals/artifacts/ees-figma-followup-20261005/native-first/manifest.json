@@ -1,0 +1,788 @@
+{
+  "schema": 1,
+  "scope": "First Native failures and intermediate layout retest; synthetic fixtures only",
+  "not_final_head_validation": true,
+  "source": {
+    "base_commit": "f9337175a1d9bd6a351f4da780c0ea4407765a14",
+    "dirty": true,
+    "exact_historical_source_tree_identity_claimed": false
+  },
+  "first_native_wheel": {
+    "path": "dist/branding-followup1/open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "sha256": "938b28254c0078d07bcac9741d7d703888bcb082b51b42626272c86e37762357",
+    "upstream_version": "0.11.3",
+    "upstream_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+    "browser": "HeadlessChrome/153.0.8010.52",
+    "python": "3.11.16",
+    "unused_build_not_tested_here": {
+      "path": "dist/branding-layout2/open_webui-0.11.3+ees.13-py3-none-any.whl",
+      "sha256": "4e733bcd49788102a52df0aba8ddb13807a0a8b8a6256cc17db102ff4fb4b254"
+    }
+  },
+  "third_native_wheel": {
+    "path": "dist/branding-followup3/open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "sha256": "f23bfb5d443d0f3df7d56d76c4c82f3ff320a348c66572329bb68ea198751a5b",
+    "note": "Subsequent product4 and account-width3 failures, before followup4; not a final validation result."
+  },
+  "fourth_native_wheel": {
+    "path": "dist/branding-followup4/open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "sha256": "51b10e3ef545b2d6123dffc34014c973a3c9327488f08d4addb8b10d59959ddf",
+    "note": "Account-width4 failed an added live cross-tab synchronization assumption; no product change before the retained reload restoration retest."
+  },
+  "cases": [
+    {
+      "id": "runtime1",
+      "kind": "actual-native",
+      "status": "failed",
+      "tests": 8,
+      "passed": 6,
+      "failed": 2,
+      "test_command": ".venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_work_figma_runtime_native.py -v",
+      "environment": {
+        "EES_REQUIRE_AUTHORING_NATIVE": "1",
+        "EES_TEST_BRANDING_DIR": "dist/branding-followup1",
+        "EES_TEST_SCREENSHOT_DIR": "dist/ees-followup-runtime1"
+      },
+      "diagnosis": [
+        "Product bug: object key order incorrectly treated saved A4 typed values as dirty.",
+        "Fixture bug: open_run helper expected an immediately selectable job after the new A8 overview."
+      ],
+      "retest_in_this_bundle": false,
+      "wheel_sha256": "938b28254c0078d07bcac9741d7d703888bcb082b51b42626272c86e37762357"
+    },
+    {
+      "id": "layout1",
+      "kind": "actual-native",
+      "status": "failed",
+      "tests": 2,
+      "passed": 0,
+      "failed_tests": 2,
+      "reported_failure_events": 3,
+      "diagnosis": [
+        "Geometry read during the Native width transition: 633.46875 instead of settled 830.",
+        "Synthetic second actor omitted permissions.chat, causing upstream Native crash; teardown recorded the same browser failure again."
+      ],
+      "retest": "layout2",
+      "wheel_sha256": "938b28254c0078d07bcac9741d7d703888bcb082b51b42626272c86e37762357"
+    },
+    {
+      "id": "layout2",
+      "kind": "actual-native",
+      "status": "passed",
+      "tests": 2,
+      "passed": 2,
+      "same_product_wheel_as_layout1": true,
+      "diagnosis": [
+        "Wait for settled Native chat width; clone the complete synthetic actor permission schema.",
+        "This intermediate pass does not cover later discovered same-actor width revision and initial restore races."
+      ],
+      "wheel_sha256": "938b28254c0078d07bcac9741d7d703888bcb082b51b42626272c86e37762357"
+    },
+    {
+      "id": "product1",
+      "kind": "actual-native",
+      "status": "failed",
+      "completed_checkpoints": 11,
+      "diagnosis": [
+        "Gate assertion incorrectly demanded all workspace runs were empty instead of filtering the target workflow.",
+        "Q1 geometry checkpoint was captured during a width transition; preserved without claiming settled measurements."
+      ],
+      "wheel_sha256": "938b28254c0078d07bcac9741d7d703888bcb082b51b42626272c86e37762357"
+    },
+    {
+      "id": "product2",
+      "kind": "actual-native",
+      "status": "failed",
+      "completed_checkpoints": 12,
+      "diagnosis": [
+        "B2-2 checkpoint passed. New fixture reloaded from author mode then waited on the runtime-only loaded state."
+      ],
+      "wheel_sha256": "938b28254c0078d07bcac9741d7d703888bcb082b51b42626272c86e37762357"
+    },
+    {
+      "id": "product3",
+      "kind": "actual-native",
+      "status": "failed",
+      "completed_checkpoints": 12,
+      "diagnosis": [
+        "Attempted immediate work-mode change and reload raced private view persistence; still timed out on runtime loaded state."
+      ],
+      "wheel_sha256": "938b28254c0078d07bcac9741d7d703888bcb082b51b42626272c86e37762357"
+    },
+    {
+      "id": "central-chat1",
+      "kind": "actual-native",
+      "status": "failed",
+      "completed_checkpoints": 7,
+      "diagnosis": [
+        "Actual registered read/proposal/apply/save checkpoints passed. Gate then expected a legacy start_run confirmation dialog removed by A8 inline start."
+      ],
+      "wheel_sha256": "938b28254c0078d07bcac9741d7d703888bcb082b51b42626272c86e37762357"
+    },
+    {
+      "id": "account-width1",
+      "kind": "actual-native",
+      "status": "failed",
+      "tests": 1,
+      "failed": 1,
+      "diagnosis": [
+        "Actor B width 400 was visible but did not settle in persisted private selection; subsequent deterministic source test isolated UI revision rollback."
+      ],
+      "wheel_sha256": "938b28254c0078d07bcac9741d7d703888bcb082b51b42626272c86e37762357"
+    },
+    {
+      "id": "account-width-diagnostic",
+      "kind": "actual-native",
+      "status": "failed",
+      "tests": 1,
+      "failed": 1,
+      "diagnosis": [
+        "B width 400 persisted; immediate old-tab restoration assertion observed 480 before restore settled."
+      ],
+      "wheel_sha256": "938b28254c0078d07bcac9741d7d703888bcb082b51b42626272c86e37762357"
+    },
+    {
+      "id": "product4",
+      "kind": "actual-native",
+      "status": "failed",
+      "completed_checkpoints": 12,
+      "diagnosis": [
+        "Gate incorrectly expected an unselected schedule value to normalize. Existing after_previous_closed is deliberately retained and displayed as a legacy setting that now opens on schedule.",
+        "Next gate physically selects on_schedule before save and separately checks the immutable previous publication snapshot."
+      ],
+      "wheel_sha256": "f23bfb5d443d0f3df7d56d76c4c82f3ff320a348c66572329bb68ea198751a5b"
+    },
+    {
+      "id": "account-width3",
+      "kind": "actual-native",
+      "status": "failed",
+      "tests": 1,
+      "failed": 1,
+      "diagnosis": [
+        "Cross-tab private UI revision conflict: actor B server revision was 1; width save sent expected_revision 0 and returned revision_conflict. Width 400 failed to persist.",
+        "Same-actor monotonic revision and initial restore fixes alone did not resolve this additional race; retained for the next product fix and retest."
+      ],
+      "wheel_sha256": "f23bfb5d443d0f3df7d56d76c4c82f3ff320a348c66572329bb68ea198751a5b"
+    },
+    {
+      "id": "account-width4",
+      "kind": "actual-native",
+      "status": "failed",
+      "tests": 1,
+      "failed": 1,
+      "diagnosis": [
+        "Actor B width 400 persisted after the conflict fix. Added test incorrectly expected a background tab already restored at 480 to live-sync a later width write.",
+        "Retest retains prior privacy assertions, rejects old actor A width 720, then explicitly reloads the former A tab to verify stored actor B width 400. No product change."
+      ],
+      "wheel_sha256": "51b10e3ef545b2d6123dffc34014c973a3c9327488f08d4addb8b10d59959ddf"
+    },
+    {
+      "id": "source-races/revision-before",
+      "kind": "source-node-test",
+      "status": "failed",
+      "tests": 9,
+      "passed": 8,
+      "failed": 1,
+      "wheel_validation": false,
+      "diagnosis": [
+        "Delayed workspace read rolled same-actor uiRevision back; CAS revisions were [0,0] rather than [0,1]."
+      ]
+    },
+    {
+      "id": "source-races/revision-after",
+      "kind": "source-node-test",
+      "status": "passed",
+      "tests": 9,
+      "passed": 9,
+      "wheel_validation": false,
+      "diagnosis": [
+        "Monotonic same-actor UI revision fix; actor change still resets revision to 0."
+      ]
+    },
+    {
+      "id": "source-races/early-restore-before",
+      "kind": "source-node-test",
+      "status": "failed",
+      "tests": 10,
+      "passed": 9,
+      "failed": 1,
+      "wheel_validation": false,
+      "diagnosis": [
+        "Initial restore overwrote explicit early resize 640 with older saved width 720."
+      ]
+    },
+    {
+      "id": "source-races/early-restore-after",
+      "kind": "source-node-test",
+      "status": "passed",
+      "tests": 10,
+      "passed": 10,
+      "wheel_validation": false,
+      "diagnosis": [
+        "Early explicit panel width retained in initial selection patch, scoped to current actor."
+      ]
+    }
+  ],
+  "evidence_policy": {
+    "original_failure_statuses_preserved": true,
+    "diagnosis_is_post_run_review": true,
+    "pngs_copied_byte_for_byte": true,
+    "json_and_logs": "Local filesystem roots removed; exact credential-bearing field names redacted if present. API /workspace routes and synthetic identities retained.",
+    "source_hashes_before_sanitization": true,
+    "omitted": [
+      "Unrelated success screenshots from failed runtime/product gates",
+      "Temporary synthetic uploaded text files",
+      "Unused wheel files",
+      "Unexecuted stale-build refusals"
+    ],
+    "no_operational_or_external_business_requests": true,
+    "no_final_build_pass_claimed": true
+  },
+  "files": [
+    {
+      "file": "runtime1/integrated-test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch-failure-cleanup.json",
+      "source": "dist/ees-followup-runtime1/integrated-test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch-failure-cleanup.json",
+      "source_sha256": "ee18ce40b74f3e6f97bffe88957f70fb2cad0ce32e9b09dcb79a4d133a17a5c8",
+      "sha256": "ee18ce40b74f3e6f97bffe88957f70fb2cad0ce32e9b09dcb79a4d133a17a5c8",
+      "bytes": 5652,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "runtime1/integrated-test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch-failure.json",
+      "source": "dist/ees-followup-runtime1/integrated-test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch-failure.json",
+      "source_sha256": "b5d9139144b46d78dda3cfe6c24020e93f75c646ed9174837edf559c6f8add98",
+      "sha256": "b5d9139144b46d78dda3cfe6c24020e93f75c646ed9174837edf559c6f8add98",
+      "bytes": 24465,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "runtime1/integrated-test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch-failure.png",
+      "source": "dist/ees-followup-runtime1/integrated-test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch-failure.png",
+      "source_sha256": "500008a7698bcb986d44905c69a1ec8c9450386d79453d3b1a61adaa284c32ed",
+      "sha256": "500008a7698bcb986d44905c69a1ec8c9450386d79453d3b1a61adaa284c32ed",
+      "bytes": 117652,
+      "transformations": []
+    },
+    {
+      "file": "runtime1/integrated-test_list_preview_add_exclude_confirm_and_history_preserve_original-failure-cleanup.json",
+      "source": "dist/ees-followup-runtime1/integrated-test_list_preview_add_exclude_confirm_and_history_preserve_original-failure-cleanup.json",
+      "source_sha256": "da1b21a8008e4ecc33d4451fd243e28a95a95ab26367945b045f4ee745494fe7",
+      "sha256": "da1b21a8008e4ecc33d4451fd243e28a95a95ab26367945b045f4ee745494fe7",
+      "bytes": 6322,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "runtime1/integrated-test_list_preview_add_exclude_confirm_and_history_preserve_original-failure.json",
+      "source": "dist/ees-followup-runtime1/integrated-test_list_preview_add_exclude_confirm_and_history_preserve_original-failure.json",
+      "source_sha256": "c575c0b8b977c3f02a7e32db002047e6c335994a4205808ea329549bc6775f01",
+      "sha256": "c575c0b8b977c3f02a7e32db002047e6c335994a4205808ea329549bc6775f01",
+      "bytes": 23919,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "runtime1/integrated-test_list_preview_add_exclude_confirm_and_history_preserve_original-failure.png",
+      "source": "dist/ees-followup-runtime1/integrated-test_list_preview_add_exclude_confirm_and_history_preserve_original-failure.png",
+      "source_sha256": "cd94c09704ac4711a4e01dd63b81f06c8e3176d8c18e4387974c7dc20c9cd46b",
+      "sha256": "cd94c09704ac4711a4e01dd63b81f06c8e3176d8c18e4387974c7dc20c9cd46b",
+      "bytes": 85042,
+      "transformations": []
+    },
+    {
+      "file": "layout1/integrated-test_q1_geometry_reading_width_footer_and_baseline_overlay-failure-cleanup.json",
+      "source": "dist/ees-followup-layout1/integrated-test_q1_geometry_reading_width_footer_and_baseline_overlay-failure-cleanup.json",
+      "source_sha256": "3e1b39bfb9c6158e0fc9226a17567613d9d1ac9f904bed891825417c2705e0a9",
+      "sha256": "3e1b39bfb9c6158e0fc9226a17567613d9d1ac9f904bed891825417c2705e0a9",
+      "bytes": 5336,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout1/integrated-test_q1_geometry_reading_width_footer_and_baseline_overlay-failure.json",
+      "source": "dist/ees-followup-layout1/integrated-test_q1_geometry_reading_width_footer_and_baseline_overlay-failure.json",
+      "source_sha256": "139d1b63dd6d319ce989b6fbe5f4dee7f4d59c61b79251b15ddf98ac9456f6d1",
+      "sha256": "139d1b63dd6d319ce989b6fbe5f4dee7f4d59c61b79251b15ddf98ac9456f6d1",
+      "bytes": 24238,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout1/integrated-test_q1_geometry_reading_width_footer_and_baseline_overlay-failure.png",
+      "source": "dist/ees-followup-layout1/integrated-test_q1_geometry_reading_width_footer_and_baseline_overlay-failure.png",
+      "source_sha256": "f0ab3997514cd2eda587dd808499d7d13ade18569fd009ea85df88c8bf8875e1",
+      "sha256": "f0ab3997514cd2eda587dd808499d7d13ade18569fd009ea85df88c8bf8875e1",
+      "bytes": 63543,
+      "transformations": []
+    },
+    {
+      "file": "layout1/integrated-test_q1_physical_drag_restores_per_actor_width_and_contrast-failure-cleanup.json",
+      "source": "dist/ees-followup-layout1/integrated-test_q1_physical_drag_restores_per_actor_width_and_contrast-failure-cleanup.json",
+      "source_sha256": "5ba80f06783711fee25984bfe1e17f4c26cdd4935148ee4ddec62bc324a686f2",
+      "sha256": "5ba80f06783711fee25984bfe1e17f4c26cdd4935148ee4ddec62bc324a686f2",
+      "bytes": 5422,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout1/integrated-test_q1_physical_drag_restores_per_actor_width_and_contrast-failure.json",
+      "source": "dist/ees-followup-layout1/integrated-test_q1_physical_drag_restores_per_actor_width_and_contrast-failure.json",
+      "source_sha256": "867180ddea718a0fc80fe3f755d047b8117951e27730faaaae7336a657ce861b",
+      "sha256": "867180ddea718a0fc80fe3f755d047b8117951e27730faaaae7336a657ce861b",
+      "bytes": 9513,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout1/integrated-test_q1_physical_drag_restores_per_actor_width_and_contrast-failure.png",
+      "source": "dist/ees-followup-layout1/integrated-test_q1_physical_drag_restores_per_actor_width_and_contrast-failure.png",
+      "source_sha256": "512a869986f0c9d17253ef67d0cf11853383142ea7508fc3e689b7c85549197b",
+      "sha256": "512a869986f0c9d17253ef67d0cf11853383142ea7508fc3e689b7c85549197b",
+      "bytes": 22606,
+      "transformations": []
+    },
+    {
+      "file": "product1/failure.json",
+      "source": "dist/ees-followup-product1/failure.json",
+      "source_sha256": "42d400e1550cc2e0a3f8c44cf2a8f6f77fae9a0ae67e66a0c4f486a9fbd04653",
+      "sha256": "42d400e1550cc2e0a3f8c44cf2a8f6f77fae9a0ae67e66a0c4f486a9fbd04653",
+      "bytes": 43856,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product1/failure.png",
+      "source": "dist/ees-followup-product1/failure.png",
+      "source_sha256": "bb9c134780f4a0a3996e6ea838f66252d6958f1eae99539a6ab691a1100b5890",
+      "sha256": "bb9c134780f4a0a3996e6ea838f66252d6958f1eae99539a6ab691a1100b5890",
+      "bytes": 109633,
+      "transformations": []
+    },
+    {
+      "file": "product1/report.json",
+      "source": "dist/ees-followup-product1/report.json",
+      "source_sha256": "eafe65895d66dcd26d31892d983bbdef708ac31da9b33061e37ac2478283f99c",
+      "sha256": "b97d0c44880fd7d43fdbc636c0f863d495088ee8e3dd8a1ebfe6240311779b8b",
+      "bytes": 17200,
+      "transformations": [
+        "JSON formatting normalized",
+        "local filesystem paths or secret field values redacted"
+      ]
+    },
+    {
+      "file": "product2/failure.json",
+      "source": "dist/ees-followup-product2/failure.json",
+      "source_sha256": "b14260742bca7280e6e38abc999e159614b82dae312e6dfc9ea47a7c7f1d548a",
+      "sha256": "b14260742bca7280e6e38abc999e159614b82dae312e6dfc9ea47a7c7f1d548a",
+      "bytes": 41783,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product2/failure.png",
+      "source": "dist/ees-followup-product2/failure.png",
+      "source_sha256": "26fd6e0a1c3a0fdc36bcbc30b978438900b698df705faf4ec5673a093790fc9a",
+      "sha256": "26fd6e0a1c3a0fdc36bcbc30b978438900b698df705faf4ec5673a093790fc9a",
+      "bytes": 87790,
+      "transformations": []
+    },
+    {
+      "file": "product2/report.json",
+      "source": "dist/ees-followup-product2/report.json",
+      "source_sha256": "84f190982609386f2acca1c53e1f8f33a64c173157a1558a224b33945f5168c3",
+      "sha256": "010d8fc82d9d18c72ff1922fa206c65437fda779d6a5fac66e5a35f081616941",
+      "bytes": 16989,
+      "transformations": [
+        "JSON formatting normalized",
+        "local filesystem paths or secret field values redacted"
+      ]
+    },
+    {
+      "file": "product3/failure.json",
+      "source": "dist/ees-followup-product3/failure.json",
+      "source_sha256": "82a57beafc76f922b09bee2e1f5e4d03b07d031c4a8f81965bc5af79dc841743",
+      "sha256": "82a57beafc76f922b09bee2e1f5e4d03b07d031c4a8f81965bc5af79dc841743",
+      "bytes": 41707,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product3/failure.png",
+      "source": "dist/ees-followup-product3/failure.png",
+      "source_sha256": "949414c38cbd2bcc2a2e826b17ea2216813447edb9cf9b0933a05dcf21741937",
+      "sha256": "949414c38cbd2bcc2a2e826b17ea2216813447edb9cf9b0933a05dcf21741937",
+      "bytes": 87789,
+      "transformations": []
+    },
+    {
+      "file": "product3/report.json",
+      "source": "dist/ees-followup-product3/report.json",
+      "source_sha256": "ba8956f742092bd5be22d85c6a20967422a6c82eca08be1658cf2ef2f9566dbf",
+      "sha256": "77254690beeee7b3efde388f2571c06bd5c8b838094dd0bd2374ff8c469494e3",
+      "bytes": 16987,
+      "transformations": [
+        "JSON formatting normalized",
+        "local filesystem paths or secret field values redacted"
+      ]
+    },
+    {
+      "file": "central-chat1/failure.json",
+      "source": "dist/ees-followup-central-chat1/failure.json",
+      "source_sha256": "0c63862ef1a9440768d7a182364a344393f166c4a221a0ab1610ae4f6ad2ff73",
+      "sha256": "0c63862ef1a9440768d7a182364a344393f166c4a221a0ab1610ae4f6ad2ff73",
+      "bytes": 52722,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "central-chat1/failure.png",
+      "source": "dist/ees-followup-central-chat1/failure.png",
+      "source_sha256": "cacb9f1ad810055f0e5b2cd1a3dc699831dae697b05aad2f1e74344f297bb54e",
+      "sha256": "cacb9f1ad810055f0e5b2cd1a3dc699831dae697b05aad2f1e74344f297bb54e",
+      "bytes": 144546,
+      "transformations": []
+    },
+    {
+      "file": "central-chat1/report.json",
+      "source": "dist/ees-followup-central-chat1/report.json",
+      "source_sha256": "b84d611d60083724c54bcddfe65f67190c59cef3f11a79235d17cedb11b97395",
+      "sha256": "66aefa643b7c1aaeec393dcbe6621abda48a1816f9a4fc8a28411a5fbc25bb95",
+      "bytes": 30854,
+      "transformations": [
+        "JSON formatting normalized",
+        "local filesystem paths or secret field values redacted"
+      ]
+    },
+    {
+      "file": "account-width1/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "source": "dist/ees-followup-account-width1/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "source_sha256": "b8a49142cc18ab2c0361a8dbdf2fc08f835dd4740a5266b26d713432f00c643f",
+      "sha256": "b8a49142cc18ab2c0361a8dbdf2fc08f835dd4740a5266b26d713432f00c643f",
+      "bytes": 28481,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "account-width1/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png",
+      "source": "dist/ees-followup-account-width1/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png",
+      "source_sha256": "1e15e342eda8579598da243dc12ce0238498b44fe3b9c6890822f3621c477648",
+      "sha256": "1e15e342eda8579598da243dc12ce0238498b44fe3b9c6890822f3621c477648",
+      "bytes": 80384,
+      "transformations": []
+    },
+    {
+      "file": "account-width-diagnostic/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "source": "dist/ees-followup-account-width-diagnostic/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "source_sha256": "c5f15cba2403a80a2651030fa5e7698c5c2d669c7a5f96b655d8da49ca34be72",
+      "sha256": "c5f15cba2403a80a2651030fa5e7698c5c2d669c7a5f96b655d8da49ca34be72",
+      "bytes": 21877,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "account-width-diagnostic/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png",
+      "source": "dist/ees-followup-account-width-diagnostic/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png",
+      "source_sha256": "c9311a882172c3e9bb4ce1785d91c03e84835bacdc752a139278d91bdcb0be34",
+      "sha256": "c9311a882172c3e9bb4ce1785d91c03e84835bacdc752a139278d91bdcb0be34",
+      "bytes": 48870,
+      "transformations": []
+    },
+    {
+      "file": "product4/failure.json",
+      "source": "dist/ees-followup-product4/failure.json",
+      "source_sha256": "d482b17d6dc6bc2fbf390622a38ea44fbf84ea544fd2e34e0439192295e2db65",
+      "sha256": "d482b17d6dc6bc2fbf390622a38ea44fbf84ea544fd2e34e0439192295e2db65",
+      "bytes": 45229,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "product4/failure.png",
+      "source": "dist/ees-followup-product4/failure.png",
+      "source_sha256": "1d175613c256132f02c639974c3a4c6e147ec20e6f3413625c5b6fd6bda8e39d",
+      "sha256": "1d175613c256132f02c639974c3a4c6e147ec20e6f3413625c5b6fd6bda8e39d",
+      "bytes": 151045,
+      "transformations": []
+    },
+    {
+      "file": "product4/report.json",
+      "source": "dist/ees-followup-product4/report.json",
+      "source_sha256": "55d06009088faa4622e3ff76a186401ca871abe415568874764f1afca8b1603e",
+      "sha256": "667f6e6bdbccf68a7b91e1d677b349cb755cde7b699004ded0483458bcc10398",
+      "bytes": 17299,
+      "transformations": [
+        "JSON formatting normalized",
+        "local filesystem paths or secret field values redacted"
+      ]
+    },
+    {
+      "file": "account-width3/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "source": "dist/ees-followup-account-width3/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "source_sha256": "76da3175cf510b87b80cb4875f518175b25620af13d4678119b92de864ce2b84",
+      "sha256": "76da3175cf510b87b80cb4875f518175b25620af13d4678119b92de864ce2b84",
+      "bytes": 28481,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "account-width3/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png",
+      "source": "dist/ees-followup-account-width3/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png",
+      "source_sha256": "e018250aee5d24fa11d8fe6af3d622b1b9d8bd790f39ae43a0a6775b703c4416",
+      "sha256": "e018250aee5d24fa11d8fe6af3d622b1b9d8bd790f39ae43a0a6775b703c4416",
+      "bytes": 79660,
+      "transformations": []
+    },
+    {
+      "file": "account-width4/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "source": "dist/ees-followup-account-width4/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "source_sha256": "10066f15ea9f7659761e2451ebbaea6ac545eacab2d357e41b0422472e34f6ae",
+      "sha256": "10066f15ea9f7659761e2451ebbaea6ac545eacab2d357e41b0422472e34f6ae",
+      "bytes": 21755,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "account-width4/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png",
+      "source": "dist/ees-followup-account-width4/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png",
+      "source_sha256": "c9311a882172c3e9bb4ce1785d91c03e84835bacdc752a139278d91bdcb0be34",
+      "sha256": "c9311a882172c3e9bb4ce1785d91c03e84835bacdc752a139278d91bdcb0be34",
+      "bytes": 48870,
+      "transformations": []
+    },
+    {
+      "file": "layout2/q1-1366x768.json",
+      "source": "dist/ees-followup-layout2/q1-1366x768.json",
+      "source_sha256": "5c71d9b152a8cac88575b7d75992438ab70c3ce6e467bb4ce8213b22d3fe77ac",
+      "sha256": "5c71d9b152a8cac88575b7d75992438ab70c3ce6e467bb4ce8213b22d3fe77ac",
+      "bytes": 691,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout2/q1-1366x768.png",
+      "source": "dist/ees-followup-layout2/q1-1366x768.png",
+      "source_sha256": "d381749ab87658a28f3341337d56ebc6aa3cc8217cd9270e5c71a21943b1d153",
+      "sha256": "d381749ab87658a28f3341337d56ebc6aa3cc8217cd9270e5c71a21943b1d153",
+      "bytes": 63410,
+      "transformations": []
+    },
+    {
+      "file": "layout2/q1-1920x768.json",
+      "source": "dist/ees-followup-layout2/q1-1920x768.json",
+      "source_sha256": "6921cd0000b9dcea39d560bc9e16d5c425c76a57649b3cac1f853764f2b76137",
+      "sha256": "6921cd0000b9dcea39d560bc9e16d5c425c76a57649b3cac1f853764f2b76137",
+      "bytes": 698,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout2/q1-1920x768.png",
+      "source": "dist/ees-followup-layout2/q1-1920x768.png",
+      "source_sha256": "935eb4b0efc4b43c2c5199b80b9b814ed555f333c11734a9b55b378cfdc88d58",
+      "sha256": "935eb4b0efc4b43c2c5199b80b9b814ed555f333c11734a9b55b378cfdc88d58",
+      "bytes": 84676,
+      "transformations": []
+    },
+    {
+      "file": "layout2/q1-contrast.json",
+      "source": "dist/ees-followup-layout2/q1-contrast.json",
+      "source_sha256": "6dd6eec42dede75d876cb4c4222a0cce8ad1f5decd140994646e7c0d52c8c2cb",
+      "sha256": "6dd6eec42dede75d876cb4c4222a0cce8ad1f5decd140994646e7c0d52c8c2cb",
+      "bytes": 205,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout2/q1-overlay-close-reopen.json",
+      "source": "dist/ees-followup-layout2/q1-overlay-close-reopen.json",
+      "source_sha256": "5181a9e4d1936633ae84307e7835a307647facf4aaf04ad84f24201ca6e7d226",
+      "sha256": "5181a9e4d1936633ae84307e7835a307647facf4aaf04ad84f24201ca6e7d226",
+      "bytes": 697,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "layout2/q1-overlay-close-reopen.png",
+      "source": "dist/ees-followup-layout2/q1-overlay-close-reopen.png",
+      "source_sha256": "6c29f7c3938e785fe301266848c92d40b1a73347d09d085f846cdd8512943da3",
+      "sha256": "6c29f7c3938e785fe301266848c92d40b1a73347d09d085f846cdd8512943da3",
+      "bytes": 54760,
+      "transformations": []
+    },
+    {
+      "file": "layout2/q1-private-width-640.png",
+      "source": "dist/ees-followup-layout2/q1-private-width-640.png",
+      "source_sha256": "43a81dfb39e0c0a337fc4372c2ac4e0254f4e53e1415e89d44735677eee8663c",
+      "sha256": "43a81dfb39e0c0a337fc4372c2ac4e0254f4e53e1415e89d44735677eee8663c",
+      "bytes": 58666,
+      "transformations": []
+    },
+    {
+      "file": "runtime1/test.log",
+      "source": "dist/ees-followup-runtime1.log",
+      "source_sha256": "766ddef4802f04610848d899ebdef78f597ea83782df04f55a6e6de7c6af8077",
+      "sha256": "9152a1f74a9ff741744c49d5560a982e10d8657e573b6fda95b7c92bec2d77d7",
+      "bytes": 6102,
+      "transformations": [
+        "local filesystem paths redacted"
+      ]
+    },
+    {
+      "file": "layout1/test.log",
+      "source": "temporary-logs/ees-layout-native1.log",
+      "source_sha256": "d73094f5749e42d33cd99f9cc72121c4a4a8ed0342c5ecc3777ef3181adc3c92",
+      "sha256": "426a60097700da7fed30d73e3039df0326fce35d792443b5e2d6404fda765299",
+      "bytes": 5538,
+      "transformations": [
+        "local filesystem paths redacted"
+      ]
+    },
+    {
+      "file": "layout2/test.log",
+      "source": "temporary-logs/ees-layout-native2.log",
+      "source_sha256": "dadf9278faeedd472fb75559cf486a7e5d59c3a0d9059475ae8a71a0d0d8ed89",
+      "sha256": "dadf9278faeedd472fb75559cf486a7e5d59c3a0d9059475ae8a71a0d0d8ed89",
+      "bytes": 712,
+      "transformations": []
+    },
+    {
+      "file": "account-width1/test.log",
+      "source": "temporary-logs/ees-account-width1.log",
+      "source_sha256": "133d6f6c1ce4a59c47ae54460594ef5f91cc44f4290e22305bd693219a963f6b",
+      "sha256": "41b0fb2ec6cde34f3db73d027076ddd69c3439bdf00c837c67cb0dfa8ad69905",
+      "bytes": 3034,
+      "transformations": [
+        "local filesystem paths redacted"
+      ]
+    },
+    {
+      "file": "account-width-diagnostic/test.log",
+      "source": "temporary-logs/ees-account-width-diagnostic.log",
+      "source_sha256": "1e87b20af8f31486390fbc41dc30abeaa3aaf49320fded290fb6f61829b30137",
+      "sha256": "d3acfbf8758ad4818f6faf7cb7963bdce1fceb6495fac5f720b3f76e41ee5882",
+      "bytes": 1137,
+      "transformations": [
+        "local filesystem paths redacted"
+      ]
+    },
+    {
+      "file": "account-width3/test.log",
+      "source": "temporary-logs/ees-account-width3.log",
+      "source_sha256": "393e046d7d1e7a53489be293d7c3caeed387d068be06dd12fbca496f74923584",
+      "sha256": "6212f0469bc494dfea9db39fa00a01dcd3ffbf9596ff8104d6a37a3cdd2419c9",
+      "bytes": 3393,
+      "transformations": [
+        "local filesystem paths redacted"
+      ]
+    },
+    {
+      "file": "account-width4/test.log",
+      "source": "temporary-logs/ees-account-width4.log",
+      "source_sha256": "3990820d9cdd9838b21dda3f88f968956086262ce6a38f691613351b1a12ef2e",
+      "sha256": "45391e46b9d6f78c6d8f8d36f5363f13b8e7995ee587ad35a38c1b1f94c2c48f",
+      "bytes": 2316,
+      "transformations": [
+        "local filesystem paths redacted"
+      ]
+    },
+    {
+      "file": "product4/test.log",
+      "source": "dist/ees-followup-product4.log",
+      "source_sha256": "cb2c0b87deed7147b41d684756eb37c43d33c17d1614e4dc5552c11868f52d91",
+      "sha256": "7d25f44d4b3dd427fb4bc0aa91178b31ce48f11c4b435407fe91d46d02326366",
+      "bytes": 3647,
+      "transformations": [
+        "local filesystem paths redacted"
+      ]
+    },
+    {
+      "file": "source-races/revision-before.log",
+      "source": "temporary-logs/ees-layout-revision-before.log",
+      "source_sha256": "4cd04746dd7e38d8db84027a717d2cf41ae04038db3c532cf2f832c961dc38c3",
+      "sha256": "07aa6851e8f65df098b2e2ff30afc0356f513392b24a0036a312a2c9549320d8",
+      "bytes": 1758,
+      "transformations": [
+        "local filesystem paths redacted"
+      ]
+    },
+    {
+      "file": "source-races/revision-after.log",
+      "source": "temporary-logs/ees-layout-revision-after.log",
+      "source_sha256": "373374672dc6febb7e004532aaaa0dd7747b851270c6fff0d60295f19c573b7d",
+      "sha256": "373374672dc6febb7e004532aaaa0dd7747b851270c6fff0d60295f19c573b7d",
+      "bytes": 1070,
+      "transformations": []
+    },
+    {
+      "file": "source-races/early-restore-before.log",
+      "source": "temporary-logs/ees-layout-early-before.log",
+      "source_sha256": "8820917e236c6d1c0e9e15f25920b783c7701cd72745c40a7842a13660020df4",
+      "sha256": "1b1b81d611f6266a699cfc3d6669b298ca8bc961e95736536aa3a8be50f44440",
+      "bytes": 1796,
+      "transformations": [
+        "local filesystem paths redacted"
+      ]
+    },
+    {
+      "file": "source-races/early-restore-after.log",
+      "source": "temporary-logs/ees-layout-early-after.log",
+      "source_sha256": "615f646fc3b2b72b47ea3c119a712ce1d80569fa607c07184f4452b50c3e39bd",
+      "sha256": "615f646fc3b2b72b47ea3c119a712ce1d80569fa607c07184f4452b50c3e39bd",
+      "bytes": 1172,
+      "transformations": []
+    },
+    {
+      "file": "tested-build-manifest.json",
+      "source": "dist/branding-followup1/manifest.json",
+      "source_sha256": "575dc704d3eb50e8e942ce532b4fa6bc67e4517435805a6fc556d298f5ca7e57",
+      "sha256": "575dc704d3eb50e8e942ce532b4fa6bc67e4517435805a6fc556d298f5ca7e57",
+      "bytes": 8671,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "tested-build3-manifest.json",
+      "source": "dist/branding-followup3/manifest.json",
+      "source_sha256": "3ce0d31225a9ad8576cd38690297289fe9b451c3d2d47c2671b071231d4fa844",
+      "sha256": "3ce0d31225a9ad8576cd38690297289fe9b451c3d2d47c2671b071231d4fa844",
+      "bytes": 8671,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    },
+    {
+      "file": "tested-build4-manifest.json",
+      "source": "dist/branding-followup4/manifest.json",
+      "source_sha256": "2bc34a295ea6293b8e1fd1b233af4dcb508fe793d680dd1cfc6015c2538e1fca",
+      "sha256": "2bc34a295ea6293b8e1fd1b233af4dcb508fe793d680dd1cfc6015c2538e1fca",
+      "bytes": 8671,
+      "transformations": [
+        "JSON formatting normalized"
+      ]
+    }
+  ]
+}

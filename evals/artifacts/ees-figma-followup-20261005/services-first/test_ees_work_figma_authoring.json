@@ -1,0 +1,51 @@
+{
+  "module": "test_ees_work_figma_authoring.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.632,
+  "tests_run": 8,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 8,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_ai_completion_kind_is_explicit_preserved_and_saved_under_current_revision",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_modes_and_explicit_schedule_values_preserve_cas_without_seeding_examples",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_normalized_published_definition_never_replaces_the_authoring_draft",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_preview_is_read_only_and_late_results_cannot_replace_edited_or_other_account_state",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_read_retry_is_explicit_bounded_draft_policy_without_default_registration",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_schedule_value_change_keeps_existing_controls_for_mouse_focus_transition",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_start_input_edit_and_published_schedule_use_real_definition_and_explicit_delegation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_workflow_selection_ignores_previous_response_and_preserves_private_dirty_drafts",
+      "status": "passed"
+    }
+  ]
+}

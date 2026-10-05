@@ -1,0 +1,87 @@
+{
+  "baseline": "b41e23917273e1d2d0ead1ddadfea75b2dda1e32",
+  "old_ids": 1332,
+  "current_ids": 1181,
+  "errors": [],
+  "suites": {
+    "services": [
+      "test_confluence_canary.py",
+      "test_confluence_read.py",
+      "test_ees_apply_demo.py",
+      "test_ees_delivery_artifacts.py",
+      "test_ees_demo_assets.py",
+      "test_ees_demo_data_tool.py",
+      "test_ees_execution_tool.py",
+      "test_ees_specialists_tool.py",
+      "test_ees_work_controller.py",
+      "test_ees_work_designer.py",
+      "test_ees_work_operations.py",
+      "test_ees_work_panel.py",
+      "test_ees_work_routes.py",
+      "test_ees_work_v4.py",
+      "test_ees_work_workspace.py",
+      "test_ees_workflow.py",
+      "test_ees_workflow_contract.py",
+      "test_ees_workflow_model.py",
+      "test_ees_workflow_tool.py",
+      "test_github_tool.py",
+      "test_jira_read.py",
+      "test_jira_work_contract.py",
+      "test_wo_demo_tool.py"
+    ],
+    "contracts": [
+      "test_ees_work_authoring.py",
+      "test_ees_workflow_examples_native.py",
+      "test_ees_workflow_execution.py",
+      "test_ees_workflow_model_native.py",
+      "test_ees_workflow_native.py"
+    ],
+    "platform": [
+      "test_check_docs.py",
+      "test_demo_bundle.py",
+      "test_ees_asset_guard.py",
+      "test_ees_asset_native.py",
+      "test_ees_branding_build.py",
+      "test_ees_delivery_suite.py",
+      "test_ees_deploy_accept.py",
+      "test_ees_deploy_imports.py",
+      "test_ees_deploy_port.py",
+      "test_ees_deploy_process.py",
+      "test_ees_deploy_recover.py",
+      "test_ees_deploy_release.py",
+      "test_ees_deploy_report.py",
+      "test_ees_deploy_state.py",
+      "test_ees_deploy_stop_recovery.py",
+      "test_ees_deploy_stop_target.py",
+      "test_ees_trial_bundle.py",
+      "test_ees_trial_upgrade.py",
+      "test_ees_update_download.py",
+      "test_ees_upgrade.py",
+      "test_ees_webui_customization.py",
+      "test_manage_ees.py",
+      "test_openwebui_windows_launcher.py"
+    ],
+    "native-account": [
+      "test_ees_chat_theme.py",
+      "test_ees_work_authoring_account_switch.py",
+      "test_ees_work_authoring_native.py"
+    ],
+    "native-work": [
+      "test_ees_work_demo.py"
+    ],
+    "native-compose": [
+      "test_ees_work_c_phase1_native.py",
+      "test_ees_work_c_phase2_native.py"
+    ],
+    "native-execution": [
+      "test_ees_work_c_phase3_native.py",
+      "test_ees_work_c_phase3_privacy.py"
+    ]
+  },
+  "source_manifest": "tests/ees_delivery_baseline.json",
+  "source_runner": "tests/ees_delivery_suite.py",
+  "manifest_sha256": "cde480f205c2047b4165de128ae0e13777963f32045997efcc0f9e3cb0de8641",
+  "original_workflow_module_count": 47,
+  "original_workflow_test_id_count": 1165,
+  "interpretation": "Static assignment audit, not runtime test success. Original tests removed for retired behavior require named replacements and reasons; unassigned new Python modules fail audit."
+}

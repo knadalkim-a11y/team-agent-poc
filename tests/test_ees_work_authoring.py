@@ -6,6 +6,7 @@ is a separate gate. Restore coverage requires the captured supported old module.
 """
 
 import asyncio
+from contextlib import closing
 from copy import deepcopy
 import importlib
 import hashlib
@@ -18,7 +19,7 @@ import tempfile
 from types import ModuleType
 import unittest
 from unittest.mock import patch
-from workflow_fixture import load_legacy_workflow
+from workflow_fixture import load_legacy_workflow, arrange_legacy_catalog
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +28,7 @@ PACKAGE = ModuleType("ees_authoring_test_subject")
 PACKAGE.__path__ = [str(SOURCE)]
 sys.modules[PACKAGE.__name__] = PACKAGE
 workflow = importlib.import_module(PACKAGE.__name__ + ".ees_workflow")
+historical = __import__("workflow_fixture").historical_facade(PACKAGE.__name__)
 
 
 class AuthoringFixture:
@@ -47,6 +49,7 @@ class AuthoringFixture:
         self.requests = 0
         self.chats = {"chat-ems": {"id": "chat-ems", "user_id": "ems-a"}}
         self.service = self.new_service()
+        arrange_legacy_catalog(self.service)
         for system, group in (("EMS", "g-ems"), ("APC", "g-apc"), ("FDC", "g-fdc")):
             result = await self.action("admin", "set_system_group", system_id=system,
                                        expected_mapping_revision=0, payload={"group_id": group, "active": True})
@@ -66,7 +69,7 @@ class AuthoringFixture:
         return list(deepcopy(self.groups).values())
 
     def new_service(self):
-        return workflow.WorkflowService(self.database, self.user_lookup,
+        return historical.WorkflowService(self.database, self.user_lookup,
             lambda key: deepcopy(self.chats.get(key)), lambda _: deepcopy(self.assets),
             group_lookup=self.group_lookup, group_list_lookup=self.group_list_lookup)
 
@@ -118,31 +121,56 @@ class AuthoringFixture:
         self.assertNotIn("FOREIGN-UNPUBLISHED-TEXT", rendered)
 
     def catalog(self):
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db:
             row = db.execute("SELECT published,draft,revision,validated FROM catalog WHERE id=1").fetchone()
         return row
 
     def business_rows(self):
         """Audit rejection rows may grow; protected data must stay unchanged."""
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db:
             names = [row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
             return {name: sorted(db.execute('SELECT * FROM "' + name.replace('"', '""') + '"').fetchall(), key=repr)
                     for name in names if not any(word in name for word in ("audit", "sqlite_"))}
 
     def audit_table(self):
-        with sqlite3.connect(self.database) as db:
-            tables = [row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%audit%'")]
+        with closing(sqlite3.connect(self.database)) as db:
+            tables = [row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='authoring_audit'")]
         self.assertEqual(len(tables), 1, tables)
         return tables[0]
 
     def audit_rows(self):
         table = self.audit_table()
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db:
             db.row_factory = sqlite3.Row
             return [dict(row) for row in db.execute('SELECT * FROM "' + table + '" ORDER BY rowid')]
 
 
 class SystemAuthoringTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
+    async def test_fixture_read_helpers_release_sqlite_connections(self):
+        # sqlite3's transaction context does not close the connection. Holding
+        # each returned object makes leaks observable on Linux too, before a
+        # Windows TemporaryDirectory cleanup attempts to remove the open file.
+        original_connect = sqlite3.connect
+        for helper in (self.catalog, self.business_rows, self.audit_table, self.audit_rows):
+            connections = []
+
+            def tracked_connect(*args, **kwargs):
+                connection = original_connect(*args, **kwargs)
+                connections.append(connection)
+                return connection
+
+            with self.subTest(helper=helper.__name__):
+                try:
+                    with patch.object(sqlite3, "connect", side_effect=tracked_connect):
+                        helper()
+                    self.assertTrue(connections, "The real SQLite read must run")
+                    for connection in connections:
+                        with self.assertRaises(sqlite3.ProgrammingError):
+                            connection.execute("SELECT 1")
+                finally:
+                    for connection in connections:
+                        connection.close()
+
     async def test_sa01_02_current_groups_grant_systems_without_changing_native_role(self):
         for actor, expected in (("ordinary", []), ("ems-a", ["EMS"]), ("ems-b", ["EMS"]),
                                 ("dual", ["EMS", "FDC"]), ("apc", ["APC"])):
@@ -353,7 +381,7 @@ class SystemAuthoringTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
         before = self.business_rows()
         audit_before = self.audit_rows()
         audit = self.audit_table()
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db, db:
             db.execute('CREATE TRIGGER test_reject_audit BEFORE INSERT ON "' + audit + '" '
                        "BEGIN SELECT RAISE(ABORT,'SYNTHETIC-AUDIT-WRITE-FAILURE'); END")
         try:
@@ -363,7 +391,7 @@ class SystemAuthoringTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
             self.assertEqual(self.business_rows(), before)
             self.assertEqual(self.audit_rows(), audit_before)
         finally:
-            with sqlite3.connect(self.database) as db:
+            with closing(sqlite3.connect(self.database)) as db, db:
                 db.execute("DROP TRIGGER test_reject_audit")
         published = await self.action("ems-a", "publish", checked["process"])
         self.assertTrue(published["ok"], published)
@@ -653,7 +681,7 @@ class AuthoringRestoreTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
                 draft = deepcopy(process["workflow"])
                 draft["nodes"][process["process_id"]]["description"] = "신형에서 따로 보존한 미게시 초안"
                 process = await self.save("ems-a", process, draft)
-                with sqlite3.connect(self.database) as db:
+                with closing(sqlite3.connect(self.database)) as db, db:
                     draft_bytes = db.execute("SELECT draft FROM process_management WHERE process_id=?", (process["process_id"],)).fetchone()[0]
                     other_row = db.execute("SELECT * FROM process_management WHERE process_id=?", (other["process_id"],)).fetchone()
                     case_rows = db.execute("SELECT * FROM cases ORDER BY id").fetchall()
@@ -684,7 +712,7 @@ class AuthoringRestoreTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(reconciled["owner_revision"], current["owner_revision"])
                 self.assertEqual(reconciled["published_version"], current["published_version"])
                 self.assertEqual(self.catalog(), catalog_before, "Reconciliation does not publish")
-                with sqlite3.connect(self.database) as db:
+                with closing(sqlite3.connect(self.database)) as db, db:
                     self.assertEqual(db.execute("SELECT draft FROM process_management WHERE process_id=?", (process["process_id"],)).fetchone()[0], draft_bytes)
                     self.assertEqual(db.execute("SELECT * FROM process_management WHERE process_id=?", (other["process_id"],)).fetchone(), other_row)
                     self.assertEqual(db.execute("SELECT * FROM cases ORDER BY id").fetchall(), case_rows)
@@ -701,12 +729,12 @@ class AuthoringRestoreTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
                     self.assert_denied(await self.action("admin", "delete", reconciled), "published_process_requires_disable")
                 checked = await self.action("ems-a", "validate_draft", reconciled)
                 self.assertTrue(checked["ok"], checked)
-                with sqlite3.connect(self.database) as db:
+                with closing(sqlite3.connect(self.database)) as db, db:
                     validated_row = db.execute("SELECT * FROM process_management WHERE process_id=?", (process["process_id"],)).fetchone()
                 noop = await self.action("admin", "reconcile_publication", checked["process"], payload=payload)
                 self.assertTrue(noop["ok"], noop)
                 self.assertEqual(noop["process"], checked["process"], "A new request for the same baseline preserves validation")
-                with sqlite3.connect(self.database) as db:
+                with closing(sqlite3.connect(self.database)) as db, db:
                     self.assertEqual(db.execute("SELECT * FROM process_management WHERE process_id=?", (process["process_id"],)).fetchone(), validated_row)
                 published_result = await self.action("ems-a", "publish", noop["process"])
                 self.assertTrue(published_result["ok"], published_result)
@@ -719,7 +747,7 @@ class AuthoringRestoreTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
                     self.assertEqual(published[key], prior[key], key)
                 self.assertEqual({key: value for key, value in published["nodes"].items() if key not in draft["nodes"]},
                                  {key: value for key, value in prior["nodes"].items() if key not in draft["nodes"]})
-                with sqlite3.connect(self.database) as db:
+                with closing(sqlite3.connect(self.database)) as db, db:
                     self.assertEqual(db.execute("SELECT * FROM cases ORDER BY id").fetchall(), case_rows)
 
     async def test_sa25_reconciliation_rejects_stale_publication_and_rolls_back_failed_audit(self):
@@ -746,13 +774,13 @@ class AuthoringRestoreTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
             self.assert_denied(await self.service.authoring_action(self.principal("admin"), stale_revision),
                                "draft_revision_conflict", "workflow_baseline_changed")
             self.assertEqual(self.business_rows(), before)
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db, db:
             db.execute("CREATE TRIGGER deny_reconciliation_audit BEFORE INSERT ON authoring_audit BEGIN SELECT RAISE(ABORT,'synthetic audit failure'); END")
         audit_before = self.audit_rows()
         self.assert_denied(await self.service.authoring_action(self.principal("admin"), request), "authoring_unavailable")
         self.assertEqual(self.business_rows(), before)
         self.assertEqual(self.audit_rows(), audit_before)
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db, db:
             db.execute("DROP TRIGGER deny_reconciliation_audit")
         reconciled = await self.service.authoring_action(self.principal("admin"), request)
         self.assertTrue(reconciled["ok"], reconciled)
@@ -802,7 +830,7 @@ class AuthoringRestoreTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
         await self.old_action(legacy, {"action": "validate_draft", "expected_revision": saved["draft_revision"]})
         before = self.catalog()
         self.service = self.new_service()
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db, db:
             archive = db.execute("SELECT id,published,draft,revision,validated FROM authoring_legacy").fetchone()
         self.assertEqual(archive[1:], before, "Exact original strings and revisions must survive migration")
         self.assertEqual(self.catalog()[0], before[0])
@@ -821,7 +849,7 @@ class AuthoringRestoreTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.catalog()[0], before[0], "Import must not publish any changes")
         self.assert_denied(await self.service.get_authoring(self.principal("ems-a"), legacy_id=archive[0]))
         restarted = self.new_service()
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db, db:
             self.assertEqual(db.execute("SELECT published,draft,revision,validated FROM authoring_legacy WHERE id=?",
                                        (archive[0],)).fetchone(), before)
         reread = await restarted.get_authoring(self.principal("admin"), "UNASSIGNED", "setup-p")
@@ -838,7 +866,7 @@ class AuthoringRestoreTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
         document = deepcopy(process["workflow"])
         document["nodes"][process["process_id"]]["description"] = "신형에서 저장한 미게시 초안"
         process = await self.save("ems-a", process, document)
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db, db:
             metadata_before = {table: db.execute("SELECT * FROM " + table).fetchall() for table in
                 ("system_groups", "process_management", "authoring_ids", "authoring_requests", "authoring_audit")}
         # Sequential fallback, with the exact supported wheel's service operating
@@ -856,7 +884,7 @@ class AuthoringRestoreTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
         await self.old_action(legacy, {"action": "validate_draft", "expected_revision": saved["draft_revision"]})
         fallback_bytes = self.catalog()
         self.service = self.new_service()
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db, db:
             for table, expected in metadata_before.items():
                 self.assertEqual(db.execute("SELECT * FROM " + table).fetchall(), expected, table)
             rows = db.execute("SELECT published,draft,revision,validated FROM authoring_legacy").fetchall()
@@ -890,7 +918,7 @@ class AuthoringRestoreTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
         old_published = self.catalog()
         self.service = self.new_service()
         self.assertEqual(self.catalog()[0], old_published[0])
-        with sqlite3.connect(self.database) as db:
+        with closing(sqlite3.connect(self.database)) as db, db:
             self.assertIn(old_published, db.execute("SELECT published,draft,revision,validated FROM authoring_legacy").fetchall())
         first = (await self.read("ems-a", first))["process"]
         for operation in ("change", "remove"):
@@ -942,7 +970,9 @@ class AuthoringRouteTests(AuthoringFixture, unittest.IsolatedAsyncioTestCase):
                                              headers={"x-test-user": "apc"})
                 self.assertEqual(forbidden.status_code, 404, forbidden.text)
                 forged = self.body("publish", process, user_id="admin", role="admin")
-                self.assertEqual((await client.post("/api/ees-work/authoring/action", headers=headers, json=forged)).status_code, 400)
+                retired = await client.post("/api/ees-work/authoring/action", headers=headers, json=forged)
+                self.assertEqual(retired.status_code, 409)
+                self.assertEqual(retired.json()["error"]["code"], "legacy_execution_retired")
                 stale = self.body("save_draft", process, expected_draft_revision=999, payload={"workflow": process["workflow"]})
                 self.assertEqual((await client.post("/api/ees-work/authoring/action", headers=headers, json=stale)).status_code, 409)
                 self.fail_groups = True

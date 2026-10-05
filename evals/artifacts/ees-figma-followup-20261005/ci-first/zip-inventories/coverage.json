@@ -1,0 +1,13 @@
+{
+  "artifact_name": "ees-delivery-coverage-cad7684f5d634e1a3178cc86b7a49c7d48bb6d99",
+  "artifact_id": 11333229502,
+  "members": [
+    {
+      "member": "coverage.json",
+      "bytes": 330494,
+      "compressed_bytes": 19535,
+      "sha256": "3f9dd0ca40300cc5f8449fedd74ab40e26c2198a947c34d67c0f1db2026228b2",
+      "retained": true
+    }
+  ]
+}

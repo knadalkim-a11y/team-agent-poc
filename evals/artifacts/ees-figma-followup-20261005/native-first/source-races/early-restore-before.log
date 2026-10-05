@@ -1,0 +1,37 @@
+✔ Native conversation remains the original center DOM while the work panel mounts after it (5.705253ms)
+✔ closing or changing work mode preserves Native chat and the authoring mount boundary (1.479889ms)
+✔ panel scroll restores per personal target and never writes a shared run selection (2.161195ms)
+✔ confirmation dialog starts on cancel and Escape closure never accepts the command (1.257464ms)
+✔ workspace refresh retains active input identity and text selection without taking Native focus (1.803315ms)
+✔ published procedure overview opens before a run exists without dereferencing run state (1.763556ms)
+✔ workspace navigation separates managed-system authoring from work scope and actual tasks (0.920977ms)
+✔ polling preserves an explicit model choice only for its actor and work target while revocation clears it (5.21858ms)
+✔ a delayed workspace read never rolls private UI revision behind a completed width save (7.970063ms)
+✖ an explicit early panel resize wins over an older saved width and stays actor scoped (2.417952ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 121.387293
+
+✖ failing tests:
+
+test at tests/test_ees_v4_layout.cjs:65:1
+✖ an explicit early panel resize wins over an older saved width and stays actor scoped (2.417952ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  720 !== 640
+  
+      at TestContext.<anonymous> (<repo>/tests/test_ees_v4_layout.cjs:68:31)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 720,
+    expected: 640,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

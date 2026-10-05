@@ -1,0 +1,49 @@
+{
+  "ees-native-product/report.json": {
+    "time": "2026-10-02T03:13:38.859427+00:00",
+    "scope": "Complete packaged Native app gate for the integrated work contract.\n\nOne temporary DATA_DIR and a loopback synthetic model are used. Native auth,\nchat/file storage, workflow APIs, worker and frontend are the built product.\nNo company credentials, DB or service is read. Physical CDP input drives UI;\nread-only DOM evaluation inspects readiness and results. Failure evidence is\ncaptured before browser shutdown. This is distinct from the Native fixtures.\n",
+    "source_commit": "530c5576f62514e067243aab74f112bb7ede893b",
+    "source_dirty": true,
+    "wheel": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "wheel_sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3",
+    "steps": [
+      {
+        "name": "empty Native installation",
+        "workflows": 0,
+        "runs": 0
+      },
+      {
+        "name": "Native model availability",
+        "models": [
+          {
+            "id": "c3-synthetic-model",
+            "direct": null,
+            "owned_by": "openai"
+          },
+          {
+            "id": "arena-model",
+            "direct": null,
+            "owned_by": "arena"
+          }
+        ]
+      }
+    ],
+    "status": "failed",
+    "failure": {
+      "type": "AssertionError",
+      "message": "Chrome DevTools response timed out."
+    },
+    "capture_error": "AssertionError: Runtime.evaluate: {'code': -32601, 'message': \"'Runtime.evaluate' wasn't found\"}"
+  },
+  "ees-native-product-results/browser-evidence.json": {
+    "valid": false,
+    "screenshots": 0,
+    "files": [
+      {
+        "path": "report.json",
+        "bytes": 1416,
+        "sha256": "2ec0a4f4615b87fb0877b1baa27674b4efa72c937ca7e09615e6178d1059cdbc"
+      }
+    ]
+  }
+}

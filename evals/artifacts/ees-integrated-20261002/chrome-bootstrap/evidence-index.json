@@ -1,0 +1,178 @@
+{
+  "base_head": "a1c20eefa3096d337a17cc204036c0349f8743e6",
+  "observed_at": "2026-10-02T03:04:49.269741+00:00",
+  "scope": "Test helper CDP initialization hardening and bootstrap diagnostics; product sources unchanged. Actual built Native UI with synthetic Native auth/chat/provider fixture, not company service or complete CLI app evidence.",
+  "commands": [
+    {
+      "command": "PYTHONPATH=tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_chat_theme -v > dist/integrated/chrome-bootstrap-helper-regression.log 2>&1",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 0.014,
+      "executions": 1,
+      "meaning": "Existing pinned-font rejection plus5 transport regressions: interleaved real pipe event/response; no request params in diagnostic; verified handshake and target share existing15s budget; invalid response creates no target; first timeout/stderr snapshot survives later cleanup response; no page CDP capture without attached session."
+    },
+    {
+      "command": "EES_TEST_CHROME=\"$PWD/dist/runtime/tools/chrome-headless-shell-linux64/chrome-headless-shell\" EES_TEST_UPSTREAM_WHEEL=\"$PWD/dist/upstream/open_webui-0.11.3-py3-none-any.whl\" EES_TEST_BRANDING_DIR=\"$PWD/dist/integrated/branding-10\" EES_TEST_SCREENSHOT_DIR=\"$PWD/dist/integrated/chrome-bootstrap/native-execution\" EES_REQUIRE_AUTHORING_NATIVE=1 .venv/bin/python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite native-execution --output dist/integrated/chrome-bootstrap/results > dist/integrated/chrome-bootstrap-native-execution.log 2>&1",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "executions": 1,
+      "modules": [
+        {
+          "name": "test_ees_work_c_phase3_native",
+          "passed": 3,
+          "seconds": 8.195
+        },
+        {
+          "name": "test_ees_work_c_phase3_privacy",
+          "passed": 2,
+          "seconds": 3.735
+        }
+      ]
+    }
+  ],
+  "cwd": "/workspace/scratch/1d6bc68344e4/team-agent-poc",
+  "wheel": {
+    "filename": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "sha256": "d4534d5f3caae7a118a259691f01c55bd38516776520e85f1d3f67d3c0259ba3",
+    "size": 152044704
+  },
+  "test_sources": [
+    {
+      "path": "tests/test_ees_chat_theme.py",
+      "sha256": "6c0a82ebfe39bdb0fa70751691cb7650224e31b11ed04604b15041b1d144baec"
+    },
+    {
+      "path": "tests/ees_work_integrated_fixture.py",
+      "sha256": "76becba57bc7e62412c36e8373c1b9857454ef84445b4a566c3929bbafca362e"
+    }
+  ],
+  "files": [
+    {
+      "source_path": "dist/integrated/chrome-bootstrap-helper-regression.log",
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/helper-regression.log",
+      "bytes": 1302,
+      "sha256": "79330cb9653acd8a109e02ef5f614fbef4be5be86899e0532be30cd19f5b1cc0"
+    },
+    {
+      "source_path": "dist/integrated/chrome-bootstrap-native-execution.log",
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/native-execution.log",
+      "bytes": 1186,
+      "sha256": "1d7aee2ea575e7b939bb057b05b065be5c89571d2b3e3f3477425fd41867ac6e"
+    },
+    {
+      "source_path": "dist/integrated/chrome-bootstrap/results/suite.json",
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/suite.json",
+      "bytes": 226,
+      "sha256": "36a2afdc1e0840c25a253460f910f6fa1e40bfeccbba492596eac4a76a9618a2"
+    },
+    {
+      "source_path": "dist/integrated/chrome-bootstrap/results/test_ees_work_c_phase3_native.json",
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/test_ees_work_c_phase3_native.json",
+      "bytes": 857,
+      "sha256": "69c2f2f587a84a241bbe2c75a438266871d2fff5051d062a32ca77cdf00b4e9d"
+    },
+    {
+      "source_path": "dist/integrated/chrome-bootstrap/results/test_ees_work_c_phase3_privacy.json",
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/test_ees_work_c_phase3_privacy.json",
+      "bytes": 714,
+      "sha256": "dc922e9492f05cf8ac0e081f31c5a733037721108e4aec81cec2bd8018c80e7c"
+    }
+  ],
+  "screenshot_references": [
+    {
+      "path": "dist/integrated/chrome-bootstrap/native-execution/integrated-current-scope-revoked.png",
+      "bytes": 59395,
+      "sha256": "d7e972152a86bd0c0847e72cea0af2f51a2f4a905f1d0cfbb873a4a29b2e7ae7"
+    },
+    {
+      "path": "dist/integrated/chrome-bootstrap/native-execution/integrated-history-failed-closed.png",
+      "bytes": 59331,
+      "sha256": "2b74ae2a3bb04d9c2f5591eced393ff762230a448844d8c8359e0a6ddd9f8ad6"
+    },
+    {
+      "path": "dist/integrated/chrome-bootstrap/native-execution/integrated-late-read-new-target.png",
+      "bytes": 83926,
+      "sha256": "c017669e103fcd9d1902cfe4f47414057b9807aff49cad1df9721b24ef72fda9"
+    },
+    {
+      "path": "dist/integrated/chrome-bootstrap/native-execution/integrated-late-write-original-target.png",
+      "bytes": 81428,
+      "sha256": "bc5106a4bea89004dd65c56d76ace9b8c088fcdba06098972f7f6e91350350c3"
+    },
+    {
+      "path": "dist/integrated/chrome-bootstrap/native-execution/integrated-two-native-tabs-conflict.png",
+      "bytes": 86693,
+      "sha256": "972a555f0eac5fa79507ef448d1e3f7afb905395131a85020c2af9f31917414b"
+    }
+  ],
+  "original_failure": {
+    "run_id": 36957905733,
+    "job_id": 110685231315,
+    "artifact_id": 11207200615,
+    "artifact_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/36957905733/artifacts/11207200615",
+    "archive_source_path": "/workspace/scratch/1d6bc68344e4/attachments/601e9b9e-c7d2-4ead-8648-52810f23694d/native-execution-bootstrap-failure.zip",
+    "archive_sha256": "147700995b3b96798916a3fd116fa72c23e10c308ea481a02d763906da67f041",
+    "archive_bytes": 262630,
+    "members": [
+      {
+        "path": "ees-results/browser-evidence.json",
+        "bytes": 972,
+        "sha256": "9c929950e99d33e10240dd2af59909d9f54a44794cc73715a6f8c7eb34c6789d"
+      },
+      {
+        "path": "ees-results/test_ees_work_c_phase3_native.json",
+        "bytes": 1764,
+        "sha256": "de1448c182dcc347f377d43afbdd37b7d305a10c7d43e1afcce7007695b04837"
+      },
+      {
+        "path": "ees-results/suite.json",
+        "bytes": 226,
+        "sha256": "1e2f7d9f4367631f209c58130f2fc10d451a07a1ee79f1143567e97b86a878c4"
+      },
+      {
+        "path": "ees-results/test_ees_work_c_phase3_privacy.json",
+        "bytes": 714,
+        "sha256": "44b4c4bd247bb6e6c8fba4606336f348fa9b5c20eb3777d0be6f8149fff26714"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-current-scope-revoked.png",
+        "bytes": 58655,
+        "sha256": "f69be99d3aa7c8ab2a8df3f44b5ce445f4df82f22b99cf17fb2bdb40b09dcc37"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-history-failed-closed.png",
+        "bytes": 58572,
+        "sha256": "6177cce7ca2ece9831b30f63a656255b006016c008acef1f902e4c98a8091d1d"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-late-read-new-target.png",
+        "bytes": 85542,
+        "sha256": "612a1ebae50a5c85654d5acb6a6e50fb842016af6320621b6b646e349ed1f1a8"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-test_delayed_input_write_keeps_exact_original_run_after_chat_change-failure.json",
+        "bytes": 265,
+        "sha256": "697e8e8130aeb7d670905227ead46e390970dc60646dfddc152d6297ab9017bd"
+      },
+      {
+        "path": "ees-work-screenshots/integrated-two-native-tabs-conflict.png",
+        "bytes": 85414,
+        "sha256": "86dfab5e2573dbd751487c9ac9bcf7ae92edd46b4b5b4826292721d6494f287c"
+      }
+    ],
+    "preserved_json": {
+      "path": "evals/artifacts/ees-integrated-20261002/chrome-bootstrap/original-ci-failure.json",
+      "member": "ees-work-screenshots/integrated-test_delayed_input_write_keeps_exact_original_run_after_chat_change-failure.json",
+      "sha256": "697e8e8130aeb7d670905227ead46e390970dc60646dfddc152d6297ab9017bd"
+    },
+    "observed": "First Target.createTarget about:blank response timed out during setUp before product navigation; remaining4 tests passed. Original failure JSON has no click/wait and only screenshot/DOM AssertionError, without process/stderr/transport readiness data.",
+    "prior_similar_evidence": [
+      "evals/scenarios.md:3224",
+      "evals/scenarios.md:3426"
+    ],
+    "classification": "Initialization hardening and evidence collection gap corrected; underlying Chromium startup delay remains unconfirmed. One successful changed-helper run is not proof of the original delay root cause being fixed.",
+    "time_budget": "Browser.getVersion and initial Target.createTarget share one existing15-second monotonic budget; no retry, fixed sleep, timeout increase or product assertion weakening."
+  }
+}

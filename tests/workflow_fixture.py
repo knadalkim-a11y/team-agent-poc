@@ -64,3 +64,70 @@ def load_legacy_workflow(test):
                 sys.modules.pop(key, None)
     test.addCleanup(cleanup_modules)
     return importlib.import_module(package.__name__ + ".ees_workflow")
+
+
+def arrange_legacy_catalog(service):
+    """Explicit test-only historical snapshot, never a product initializer.
+
+    Preserve its version/revision just as importing a historical database does;
+    publish_fixture_definition separately models a subsequent publication.
+    """
+    definition = legacy_definition()
+    raw = json.dumps(definition, ensure_ascii=False, separators=(",", ":"))
+    with service._db(write=True) as db:
+        db.execute("UPDATE catalog SET published=?,draft=?,revision=0,validated=NULL WHERE id=1", (raw, raw))
+        service._init_authoring(db)
+    return definition
+
+
+def load_workflow_examples(package_name):
+    """Load explicit historical definitions for contract regression, never registration."""
+    import importlib.util
+    name = package_name + ".ees_workflow_examples"
+    spec = importlib.util.spec_from_file_location(name, Path(__file__).parent / "fixtures/ees_workflow_examples.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def legacy_definition():
+    """Fresh historical content for explicit regression fixtures only."""
+    definition = json.loads((Path(__file__).parent / "fixtures/workflow_seed.json").read_text(encoding="utf-8"))
+    policy = Path(__file__).resolve().parents[1] / "agent-pack/skills/ees-work-demo/scripts/workflow_policy.json"
+    definition["skills"] = {"common": json.loads(policy.read_text(encoding="utf-8")), **definition["skills"]}
+    return definition
+
+
+def historical_facade(package_name):
+    """Pinned b41e239 facade for retired writer regression fixtures.
+
+    This is intentionally a hybrid test arrangement: the old writer facade
+    and authoring mixin are fixed; relative validators/Native adapters are current.
+    It is never shipped and is not evidence of an old complete product. The
+    load_legacy_workflow helper still loads the actual ees.10 wheel for Restore.
+    """
+    import importlib.util
+    path = Path(__file__).parent / "fixtures/legacy_workflow_b41e239.py"
+    expected = "3080e5767ce0d767bb6f6789fe25bbfff959bfbb107b3d45ad3b897a73ab77a5"
+    if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+        raise AssertionError("Historical writer fixture differs from b41e239")
+    name = package_name + "._historical_workflow_b41e239"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+        authoring_path = path.with_name("legacy_authoring_b41e239.py")
+        if hashlib.sha256(authoring_path.read_bytes()).hexdigest() != "0ea0bd1229c8d751ac1b2c67c8128b08fca27ba5bb34439312e99c871ee2d55a":
+            raise AssertionError("Historical authoring fixture differs from b41e239")
+        authoring_name = package_name + "._historical_authoring_b41e239"
+        authoring_spec = importlib.util.spec_from_file_location(authoring_name, authoring_path)
+        authoring = importlib.util.module_from_spec(authoring_spec)
+        sys.modules[authoring_name] = authoring
+        authoring_spec.loader.exec_module(authoring)
+        # Current Native adapters and historical writers share only the error
+        # type. Production classes never inherit or import these old writers.
+        authoring.WorkflowError = module.WorkflowError
+        module.WorkflowService.__bases__ = (authoring.AuthoringMixin,)
+    return sys.modules[name]

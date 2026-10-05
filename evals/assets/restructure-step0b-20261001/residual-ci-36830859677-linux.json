@@ -1,0 +1,199 @@
+{
+  "run_id": 36830859677,
+  "run_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/36830859677",
+  "status": "completed",
+  "conclusion": "cancelled",
+  "head_sha": "cddf0ebf485dd1e970781841891990fc77c89fb6",
+  "created_at": "2026-10-01T07:31:53Z",
+  "updated_at": "2026-10-01T07:42:12Z",
+  "observed_at_utc": "2026-10-01T07:45:18.906Z",
+  "linux": {
+    "job_id": 110266885231,
+    "status": "completed",
+    "conclusion": "cancelled",
+    "steps": [
+      {
+        "name": "Verify shared workflow service and real chat Tool",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 28
+      },
+      {
+        "name": "Verify durable chat controls and execution panel state",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 29
+      },
+      {
+        "name": "Verify scoped authoring and the actual previous program",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 30
+      },
+      {
+        "name": "Verify Native signup, approval, scoped authoring and account recovery",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 31
+      },
+      {
+        "name": "Require guarded asset writes",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 32
+      },
+      {
+        "name": "Require native asset writer integration",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 33
+      },
+      {
+        "name": "Verify patched native draft and chat creation against the pinned source",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 34
+      },
+      {
+        "name": "Verify native Open WebUI workflow and real composer integration",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "number": 35
+      },
+      {
+        "name": "Keep EES Work browser evidence",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 36
+      },
+      {
+        "name": "Verify chat theme in the runner's Chrome",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 37
+      },
+      {
+        "name": "Verify specialist execution against the fixed WebUI source",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 38
+      },
+      {
+        "name": "Verify program-only Apply and Restore",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 39
+      },
+      {
+        "name": "Parse the Windows PowerShell entry point",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 40
+      },
+      {
+        "name": "Run python scripts/check_docs.py",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 41
+      },
+      {
+        "name": "Run git diff --check",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 42
+      }
+    ],
+    "suites": [
+      {
+        "name": "shared workflow",
+        "tests": 178,
+        "seconds": 112.685,
+        "result": "PASS"
+      },
+      {
+        "name": "scoped authoring",
+        "tests": 29,
+        "seconds": 2.672,
+        "result": "PASS"
+      },
+      {
+        "name": "Native authoring",
+        "tests": 6,
+        "seconds": 54.369,
+        "result": "PASS"
+      },
+      {
+        "name": "Native account switch",
+        "tests": 1,
+        "seconds": 9.813,
+        "result": "PASS"
+      },
+      {
+        "name": "guarded assets",
+        "tests": 16,
+        "seconds": 0.674,
+        "result": "PASS"
+      },
+      {
+        "name": "Native writer",
+        "tests": 28,
+        "seconds": 36.298,
+        "result": "PASS"
+      },
+      {
+        "name": "pinned-source CSS/build",
+        "tests": 31,
+        "seconds": 20.348,
+        "result": "PASS"
+      }
+    ],
+    "integration": {
+      "step": 35,
+      "conclusion": "cancelled",
+      "preceding_failures": true,
+      "completed_test_methods_with_failure_artifacts": 12,
+      "passed_test_methods_before_cancel": 4,
+      "first_failure": "test_a_design_long_korean_panels_dialog_scroll_and_retained_user_width subtests",
+      "last_failure": "test_integrated_large_job_browser_counts_filters_pages_and_selection",
+      "last_completed_test": "test_integrated_workspace_hierarchy_search_preserves_local_edits_and_old_case ... ok",
+      "last_completed_test_at": "2026-10-01T07:42:07.0103166Z",
+      "cancelled_at": "2026-10-01T07:42:08.6874642Z",
+      "final_summary_available": false,
+      "later_commands": "C1/C2/C3 Native and C3 privacy commands in the same step were not reached; test_ees_work_demo did not finish.",
+      "caveat": "Artifact count is not a final unittest total. The configured 10-minute Linux job limit remains; explicit timeout annotation not queried after prior endpoint allowlist rejection."
+    }
+  },
+  "package": {
+    "job_id": 110270053475,
+    "status": "completed",
+    "conclusion": "skipped"
+  },
+  "artifact": {
+    "id": 11147134607,
+    "name": "ees-work-browser-evidence",
+    "size_bytes": 3332188,
+    "sha256": "b8bb9aae55efb81aa80784df8442b75a60cb92294bd51c566a66c154788b9a87",
+    "actual_digest_matches_rest": true,
+    "member_count": 44,
+    "png_count": 29,
+    "json_count": 15,
+    "failure_png_json_pairs": 12,
+    "zip": "/workspace/scratch/1d6bc68344e4/attachments/89438fe0-2376-44b7-8100-d8197db72208/step0b-ci-36830859677-linux-evidence.zip",
+    "inspection": "/workspace/scratch/1d6bc68344e4/ci-36830859677-linux-artifact/inspection.json",
+    "expires_at": "2026-10-08T07:42:08Z"
+  },
+  "font": {
+    "direct_view": "sa-signup-pending.png opened; Korean heading, body and buttons readable without missing-glyph boxes.",
+    "json": "sa-signup-pending-fonts.json",
+    "readyState": "complete",
+    "fontStatus": "loaded",
+    "korean_characters": 28,
+    "actual_platform_font": "Noto Sans KR Thin",
+    "postScriptName": "NotoSansKR-Thin",
+    "glyphCount": 28,
+    "isCustomFont": false
+  },
+  "tab_activation": "Both transitions observed hidden/hasFocus=false to visible/hasFocus=true.",
+  "windows": "Separately assigned; no Windows logs downloaded by this monitor.",
+  "mutations": "No repo modifications or workflow rerun/cancel; scratch evidence only."
+}

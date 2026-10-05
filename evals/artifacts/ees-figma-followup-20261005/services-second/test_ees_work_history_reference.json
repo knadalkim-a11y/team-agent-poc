@@ -1,0 +1,39 @@
+{
+  "module": "test_ees_work_history_reference.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 0.052,
+  "tests_run": 5,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 5,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_history_reference.HistoricalReferenceTests.test_bad_identity_version_attempt_snapshot_never_falls_back",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_history_reference.HistoricalReferenceTests.test_current_access_denial_and_evidence_revocation_hide_old_body",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_history_reference.HistoricalReferenceTests.test_exact_old_attempt_no_current_settings_private_state_or_mutation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_history_reference.HistoricalReferenceTests.test_explicit_target_override_and_malformed_reference_fail_closed",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_history_reference.HistoricalReferenceTests.test_historical_ai_cannot_propose_or_navigate_even_with_event_handler",
+      "status": "passed"
+    }
+  ]
+}

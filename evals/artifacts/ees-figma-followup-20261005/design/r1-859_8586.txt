@@ -1,0 +1,317 @@
+const assetPathPrefix = "temporary-figma-asset/4d90dca6-f5a7-4f3a-b931-2179872b397a";
+const imgStatusGlyphV4 = `${assetPathPrefix}/30679.svg`;
+const imgStatusGlyphV5 = `${assetPathPrefix}/7495b.svg`;
+const imgStatusGlyphV6 = `${assetPathPrefix}/2b3d1.svg`;
+const imgStatusGlyphV7 = `${assetPathPrefix}/478bf.svg`;
+
+export default function R1() {
+  return (
+    <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col gap-[18px] items-start overflow-clip p-[32px] relative rounded-[8px] size-full" data-node-id="859:8586" data-name="R1 · 규칙: 워크플로우와 실행">
+      <div className="content-stretch flex items-start overflow-clip relative shrink-0" data-node-id="859:8587" data-name="Frame">
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-status-attention,#96590c)] whitespace-nowrap" data-node-id="859:8588">
+          규칙
+        </p>
+      </div>
+      <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[28px] relative shrink-0 text-[20px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.2px] whitespace-nowrap" data-node-id="859:8589">
+        워크플로우는 정의, 실행은 그 안에서 열린다
+      </p>
+      <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] w-[min-content]" data-node-id="859:8590">
+        사이드바는 찾아가는 곳이라 워크플로우 이름만 보입니다. 할 일은 ‘내 업무’에 모이고, 회차·진행 건·날짜 같은 상세는 업무 패널에 나타납니다. 예외는 하나뿐입니다. 주기 업무는 자동 실행이 제대로 돌았는지를 이름 오른쪽의 상태 기호로 보여줍니다.
+      </p>
+      <div className="[word-break:break-word] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[6px] shrink-0 w-full" data-node-id="859:8591" data-name="Run modes">
+        <div className="bg-[var(--ees-surface-sidebar,#fafafa)] border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex font-['Noto_Sans_KR:Medium'] font-medium gap-[14px] items-start leading-[16px] overflow-clip px-[14px] py-[9px] relative shrink-0 text-[12px] w-full" data-node-id="859:8592" data-name="Frame">
+          <p className="relative shrink-0 text-[color:var(--ees-text-tertiary,#6f717a)] w-[170px]" data-node-id="859:8593">
+            ​
+          </p>
+          <p className="flex-[1_0_0] min-w-px relative text-[color:var(--ees-text-strong,#3f4147)]" data-node-id="859:8594">
+            주기 (periodic)
+          </p>
+          <p className="flex-[1_0_0] min-w-px relative text-[color:var(--ees-text-strong,#3f4147)]" data-node-id="859:8595">
+            수시 (on_demand)
+          </p>
+          <p className="flex-[1_0_0] min-w-px relative text-[color:var(--ees-text-strong,#3f4147)]" data-node-id="859:8596">
+            비상 (event)
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-start leading-[22px] overflow-clip px-[14px] py-[9px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="859:8597" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[170px]" data-node-id="859:8598">
+            예시
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8599">
+            배포 산출물 점검, 일일 시스템 점검
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8600">
+            신규 공장 횡전개
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8601">
+            AP 응답 장애 1차 대응
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-start leading-[22px] overflow-clip px-[14px] py-[9px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="859:8602" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[170px]" data-node-id="859:8603">
+            실행이 열리는 방식
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8604">
+            일정 규칙에 따라 자동
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8605">
+            사람이 대상을 정하고 시작
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8606">
+            장애를 인지한 사람이 바로 시작 · 긴급 보고는 메신저·전화 등 별도 채널
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-start leading-[22px] overflow-clip px-[14px] py-[9px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="859:8607" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[170px]" data-node-id="859:8608">
+            동시 실행
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8609">
+            보통 1회차 (일정이 밀리면 2회차 가능)
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8610">
+            여러 건
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8611">
+            여러 건
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-start leading-[22px] overflow-clip px-[14px] py-[9px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="859:8612" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[170px]" data-node-id="859:8613">
+            실행 건의 이름
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8614">
+            회차 날짜 · “10.13 배포”
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8615">
+            대상 · “천안 공장”
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8616">
+            발생 시각과 현상 · “14:20 라인 3 알람 누락”
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-start leading-[22px] overflow-clip px-[14px] py-[9px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="859:8617" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[170px]" data-node-id="859:8618">
+            사이드바 표시
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8619">
+            이름 + 마지막 자동 실행의 상태 기호
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8620">
+            이름만 (기호 없음)
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8621">
+            이름만 (기호 없음)
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-start leading-[22px] overflow-clip px-[14px] py-[9px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="859:8622" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[170px]" data-node-id="859:8623">
+            열었을 때 업무 패널
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8624">
+            이번 회차 개요
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8625">
+            진행 건이 1개면 그 건, 여러 개면 목록
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8626">
+            진행 중인 대응 목록, 가장 최근 건 우선
+          </p>
+        </div>
+        <div className="content-stretch flex gap-[14px] items-start leading-[22px] overflow-clip px-[14px] py-[9px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="859:8627" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[170px]" data-node-id="859:8628">
+            도구 단계
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8629">
+            예약 시각에 자동 실행
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8630">
+            사람이 시작하거나 앞 작업 완료 시
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="859:8631">
+            시작하면 바로 자동 실행해 1차 확인 결과를 보여줌
+          </p>
+        </div>
+      </div>
+      <div className="[word-break:break-word] content-stretch flex flex-col gap-[6px] items-start overflow-clip relative shrink-0 w-full" data-node-id="859:8632" data-name="Rules">
+        <p className="font-['Noto_Sans_KR:Bold'] font-bold leading-[20px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.07px] whitespace-nowrap" data-node-id="859:8633">
+          구현 규칙
+        </p>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="859:8634" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="859:8635">
+            1
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="859:8636">
+            워크플로우 정의에 실행 방식(periodic · on_demand · event)과, 주기 실행이면 일정 규칙(예: 격주 화요일, 기준일 2026-09-15)을 저장한다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="859:8637" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="859:8638">
+            2
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="859:8639">
+            주기 실행의 회차는 일정 규칙으로 계산해 자동으로 열고 닫는다. 정의는 바뀌지 않으며, 업무 패널의 ‘이번 회차’ 띠만 다음 회차로 바뀐다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="859:8640" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="859:8641">
+            3
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="859:8642">
+            끝난 회차·진행 건은 실행 기록(읽기 전용)으로 옮기고, 그 실행에 쓴 사람이 정하는 값과 절차 버전을 함께 남긴다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="859:8643" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="859:8644">
+            4
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="859:8645">
+            예약된 자동 실행은 시각을 표시하고, 사람에게는 판단이 필요한 시점(목록 확정, 판정)에만 할 일을 만든다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="859:8646" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="859:8647">
+            5
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="859:8648">
+            사이드바에는 날짜·회차·할 일 수를 표시하지 않는다. 상태 기호는 주기 업무에만, 아래 네 가지만 쓴다. 수시 업무와 장애대응에는 기호를 붙이지 않는다(긴급 장애 보고는 메신저·전화 등 별도 채널의 몫).
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="868:8594" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="868:8595">
+            6
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="868:8596">
+            주기 업무의 기호는 가장 최근 ‘예정된 자동 실행’ 하나의 결과만 나타낸다. 사람의 확인 대기는 실패가 아니므로 기호를 바꾸지 않고 ‘내 업무’에 할 일로 만든다. 마우스를 올리면 마지막 실행 시각·결과·다음 실행 시각을 보여준다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="868:8597" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="868:8598">
+            7
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="868:8599">{`분류를 접으면 그 안의 가장 나쁜 상태(실패 > 놓침 > 실행 중 > 정상)를 분류 옆에 하나만 표시한다.`}</p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="872:8594" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="872:8595">
+            8
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="872:8596">
+            장애대응 분류에는 장애를 인지한 뒤의 1차 처리 절차만 둔다. 장애를 예방하기 위한 정기 점검은 운영 분류의 주기 업무로 만든다.
+          </p>
+        </div>
+        <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="960:9881" data-name="Frame">
+          <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="960:9882">
+            9
+          </p>
+          <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="960:9883">
+            공장 단위 업무(예: 신규 공장 횡전개)는 작업 위치가 ‘전체 공장’이면 모든 공장의 진행 건을, 특정 공장이면 그 공장의 진행 건만 보여준다. 새로 시작할 때 이미 진행 중인 공장은 고를 수 없다. 시스템 단위 업무(예: 배포 산출물 점검)는 공장 선택과 관계없이 같은 회차를 보여준다.
+          </p>
+        </div>
+      </div>
+      <div className="border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[6px] shrink-0 w-full" data-node-id="868:8600" data-name="Auto-run glyphs">
+        <div className="[word-break:break-word] bg-[var(--ees-surface-sidebar,#fafafa)] border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex font-['Noto_Sans_KR:Medium'] font-medium gap-[14px] items-start leading-[16px] overflow-clip px-[14px] py-[8px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] w-full" data-node-id="868:8601" data-name="Frame">
+          <p className="h-[16px] relative shrink-0 w-[64px]" data-node-id="868:8602">
+            기호
+          </p>
+          <p className="h-[16px] relative shrink-0 w-[96px]" data-node-id="868:8603">
+            상태
+          </p>
+          <p className="flex-[1_0_0] min-w-px relative" data-node-id="868:8604">
+            뜻
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-center overflow-clip px-[14px] py-[9px] relative shrink-0 w-full" data-node-id="868:8605" data-name="Frame">
+          <div className="content-stretch flex h-[16px] items-start overflow-clip relative shrink-0 w-[64px]" data-node-id="868:8606" data-name="Frame">
+            <div className="relative shrink-0 size-[14px]" data-node-id="868:8607" data-name="Status glyph v4">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgStatusGlyphV4} />
+            </div>
+          </div>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium h-[22px] leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-[96px]" data-node-id="868:8610">
+            정상
+          </p>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="868:8611">
+            예정된 시각에 실행됐고, 도구가 정상 실행되어 단계가 끝까지 진행됨
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-center overflow-clip px-[14px] py-[9px] relative shrink-0 w-full" data-node-id="868:8612" data-name="Frame">
+          <div className="content-stretch flex h-[16px] items-start overflow-clip relative shrink-0 w-[64px]" data-node-id="868:8613" data-name="Frame">
+            <div className="relative shrink-0 size-[14px]" data-node-id="868:8614" data-name="Status glyph v4">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgStatusGlyphV5} />
+            </div>
+          </div>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium h-[22px] leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-[96px]" data-node-id="868:8617">
+            실패
+          </p>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="868:8618">
+            도구 실행이 멈췄거나 확인 항목이 기준을 통과하지 못함 · 담당자에게 할 일 생성
+          </p>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[14px] items-center overflow-clip px-[14px] py-[9px] relative shrink-0 w-full" data-node-id="868:8619" data-name="Frame">
+          <div className="content-stretch flex h-[16px] items-start overflow-clip relative shrink-0 w-[64px]" data-node-id="868:8620" data-name="Frame">
+            <div className="relative shrink-0 size-[14px]" data-node-id="868:8621" data-name="Status glyph v4">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgStatusGlyphV6} />
+            </div>
+          </div>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium h-[22px] leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-[96px]" data-node-id="868:8625">
+            놓침
+          </p>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="868:8626">
+            예정된 시각이 지났는데 실행 기록이 없음 · 가장 먼저 확인해야 하는 상태
+          </p>
+        </div>
+        <div className="content-stretch flex gap-[14px] items-center overflow-clip px-[14px] py-[9px] relative shrink-0 w-full" data-node-id="868:8627" data-name="Frame">
+          <div className="content-stretch flex h-[16px] items-start overflow-clip relative shrink-0 w-[64px]" data-node-id="868:8628" data-name="Frame">
+            <div className="relative shrink-0 size-[14px]" data-node-id="868:8629" data-name="Status glyph v4">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgStatusGlyphV7} />
+            </div>
+          </div>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium h-[22px] leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-[96px]" data-node-id="868:8632">
+            실행 중
+          </p>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="868:8633">
+            지금 자동 실행이 진행 중 · 끊긴 원이 화면에서 회전함 (동작 줄이기 설정이면 정지)
+          </p>
+        </div>
+      </div>
+      <div className="content-stretch flex gap-[14px] items-center overflow-clip relative shrink-0 w-full" data-node-id="868:8634" data-name="Hover example">
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="868:8635">
+          주기 업무 기호에 마우스를 올렸을 때
+        </p>
+        <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex flex-col gap-[4px] items-start overflow-clip px-[12px] py-[10px] relative rounded-[8px] shadow-[0px_4px_12px_0px_rgba(17,24,39,0.06),0px_1px_2px_0px_rgba(17,24,39,0.05)] shrink-0" data-node-id="868:528" data-name="Tooltip · 마지막 자동 실행">
+          <div className="content-stretch flex gap-[6px] items-center overflow-clip relative shrink-0" data-node-id="868:529" data-name="Frame">
+            <div className="relative shrink-0 size-[14px]" data-node-id="868:530" data-name="Status glyph v4">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgStatusGlyphV5} />
+            </div>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="868:533">
+              일일 시스템 점검 · 실패
+            </p>
+          </div>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="868:534">
+            마지막 자동 실행 10.01 09:00
+          </p>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-status-danger,#bf3a2b)] whitespace-nowrap" data-node-id="868:535">
+            응답 확인 실패 · 담당자에게 할 일 생성됨
+          </p>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="868:536">
+            다음 실행 10.02 09:00
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: EES v4/Label: Font(family: "Noto Sans KR", style: Medium, size: 12, weight: 500, lineHeight: 16, letterSpacing: 0), EES v4/Title: Font(family: "Noto Sans KR", style: Bold, size: 20, weight: 700, lineHeight: 28, letterSpacing: -1), EES v4/Body: Font(family: "Noto Sans KR", style: Regular, size: 14, weight: 400, lineHeight: 22, letterSpacing: -0.30000001192092896), EES v4/Body Medium: Font(family: "Noto Sans KR", style: Medium, size: 14, weight: 500, lineHeight: 22, letterSpacing: -0.30000001192092896), EES v4/Section: Font(family: "Noto Sans KR", style: Bold, size: 14, weight: 700, lineHeight: 20, letterSpacing: -0.5), EES v4/Mono: Font(family: "Inter", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), EES v4/Meta: Font(family: "Noto Sans KR", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), EES Opus/Raised: Effect(type: DROP_SHADOW, color: #1118270D, offset: (0, 1), radius: 2, spread: 0); Effect(type: DROP_SHADOW, color: #1118270F, offset: (0, 4), radius: 12, spread: 0).
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Status glyph v4
+**Node ID:** 746:640
+
+16px 상태 기호. Action=사람 조치 필요, Running=실행 중(끊긴 원 · 실제 화면에서 1초에 한 바퀴 회전, 동작 줄이기 설정 시 정지), Failed=실패, Done=완료, Waiting=대기·미실행, Unknown=판정 미확인·놓침. 항상 상태 문구 또는 툴팁과 함께.
+Images and SVGs will be stored as constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.

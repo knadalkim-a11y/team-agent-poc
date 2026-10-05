@@ -1,0 +1,17 @@
+{
+  "boundary": "Local Git core.autocrlf=true byte reproduction; not a Windows runtime test. Original fixture SHA assertions unchanged.",
+  "files": [
+    {
+      "path": "tests/fixtures/legacy_workflow_b41e239.py",
+      "fixed_sha256": "3080e5767ce0d767bb6f6789fe25bbfff959bfbb107b3d45ad3b897a73ab77a5",
+      "autocrlf_checkout_sha256": "e343654a812d214fa6c1c19e614eeaa52716388b6c04e057ef819f53049676b0",
+      "explicit_lf_checkout_sha256": "3080e5767ce0d767bb6f6789fe25bbfff959bfbb107b3d45ad3b897a73ab77a5"
+    },
+    {
+      "path": "tests/fixtures/legacy_authoring_b41e239.py",
+      "fixed_sha256": "0ea0bd1229c8d751ac1b2c67c8128b08fca27ba5bb34439312e99c871ee2d55a",
+      "autocrlf_checkout_sha256": "b3c4fba632db1b158ec43c0bd5120854e760f891eb2a4ea380190db927b26453",
+      "explicit_lf_checkout_sha256": "0ea0bd1229c8d751ac1b2c67c8128b08fca27ba5bb34439312e99c871ee2d55a"
+    }
+  ]
+}

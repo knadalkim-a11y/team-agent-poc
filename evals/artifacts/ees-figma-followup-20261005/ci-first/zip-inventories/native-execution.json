@@ -1,0 +1,69 @@
+{
+  "artifact_name": "ees-work-browser-evidence-native-execution",
+  "artifact_id": 11333957299,
+  "members": [
+    {
+      "member": "ees-results/browser-evidence.json",
+      "bytes": 924,
+      "compressed_bytes": 423,
+      "sha256": "799ea0b5cbc7bac7a94b498a1f300708b53ab4faf1835153e2c8ceb9d110f350",
+      "retained": true
+    },
+    {
+      "member": "ees-results/suite.json",
+      "bytes": 226,
+      "compressed_bytes": 122,
+      "sha256": "36a2afdc1e0840c25a253460f910f6fa1e40bfeccbba492596eac4a76a9618a2",
+      "retained": true
+    },
+    {
+      "member": "ees-results/test_ees_work_c_phase3_native.json",
+      "bytes": 858,
+      "compressed_bytes": 332,
+      "sha256": "b845cd3089530cbfd33a725af67cedeca936a3d0d5df092fa4fa2eaa2e41cea2",
+      "retained": true
+    },
+    {
+      "member": "ees-results/test_ees_work_c_phase3_privacy.json",
+      "bytes": 714,
+      "compressed_bytes": 318,
+      "sha256": "f878b0d40961f41189bb38905125c0c47924e969c78188446ec51946ab57f9e1",
+      "retained": true
+    },
+    {
+      "member": "ees-work-screenshots/integrated-current-scope-revoked.png",
+      "bytes": 58655,
+      "compressed_bytes": 51341,
+      "sha256": "f69be99d3aa7c8ab2a8df3f44b5ce445f4df82f22b99cf17fb2bdb40b09dcc37",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-history-failed-closed.png",
+      "bytes": 58553,
+      "compressed_bytes": 51256,
+      "sha256": "29563720ce0762c02d798e8457c5c9c26681662427a36d6d0d909829cae66be7",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-late-read-new-target.png",
+      "bytes": 83131,
+      "compressed_bytes": 75945,
+      "sha256": "6d085147d202e5c6f401834eaaea507c584bdcb4a4e54a0926b12e0e25a526a3",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-late-write-original-target.png",
+      "bytes": 91543,
+      "compressed_bytes": 83077,
+      "sha256": "c921cbf13418831278f24671969ac49ac8536d1933fe26d423e88ffd6ce66e7c",
+      "retained": false
+    },
+    {
+      "member": "ees-work-screenshots/integrated-two-native-tabs-conflict.png",
+      "bytes": 96181,
+      "compressed_bytes": 88618,
+      "sha256": "99f37fbcbb96b8a872ca51f1b1da3c83dc501ccf86c72b88279395a4f94fd6b7",
+      "retained": false
+    }
+  ]
+}

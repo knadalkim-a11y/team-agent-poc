@@ -1,0 +1,27 @@
+{
+  "boundary": "Two Chrome targets sharing one synthetic Native account and actual EES service/SQLite",
+  "different_tabs": true,
+  "case_id": "75571cb7-3d3e-4d78-931a-663603fe123f",
+  "second_tab_saved": {
+    "status": "pending",
+    "checks": [],
+    "attempt": 0,
+    "inputs": {
+      "db": "둘째 탭에서 먼저 저장한 합성 입력"
+    },
+    "history": [],
+    "document": ""
+  },
+  "first_tab_unsaved": "첫 탭의 미저장 합성 입력",
+  "after_conflict": {
+    "status": "pending",
+    "checks": [],
+    "attempt": 0,
+    "inputs": {
+      "db": "둘째 탭에서 먼저 저장한 합성 입력"
+    },
+    "history": [],
+    "document": ""
+  },
+  "completion_count": 0
+}

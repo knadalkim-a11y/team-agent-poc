@@ -1,0 +1,318 @@
+export default function R3() {
+  return (
+    <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex gap-[32px] items-start overflow-clip p-[32px] relative rounded-[8px] size-full" data-node-id="875:536" data-name="R3 · 규칙: 업무 패널은 작업 정의에서 조립된다">
+      <div className="border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[8px] shrink-0 w-[300px]" data-node-id="875:537" data-name="Panel anatomy">
+        <div className="bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[8px] h-[36px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="875:538" data-name="Frame">
+          <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex items-center justify-center overflow-clip relative rounded-[9px] shrink-0 size-[18px]" data-node-id="875:539" data-name="Frame">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="875:540">
+              1
+            </p>
+          </div>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-px relative text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:541">
+            업무 헤더
+          </p>
+        </div>
+        <div className="bg-[var(--ees-surface-sidebar,#fafafa)] border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[8px] h-[32px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="875:542" data-name="Frame">
+          <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex items-center justify-center overflow-clip relative rounded-[9px] shrink-0 size-[18px]" data-node-id="875:543" data-name="Frame">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="875:544">
+              2
+            </p>
+          </div>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-px relative text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:545">
+            회차 · 진행 건 띠
+          </p>
+        </div>
+        <div className="bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[8px] h-[64px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="875:546" data-name="Frame">
+          <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex items-center justify-center overflow-clip relative rounded-[9px] shrink-0 size-[18px]" data-node-id="875:547" data-name="Frame">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="875:548">
+              3
+            </p>
+          </div>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-px relative text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:549">
+            작업 머리 · 상태 · 기한
+          </p>
+        </div>
+        <div className="bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[8px] h-[32px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="875:550" data-name="Frame">
+          <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex items-center justify-center overflow-clip relative rounded-[9px] shrink-0 size-[18px]" data-node-id="875:551" data-name="Frame">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="875:552">
+              4
+            </p>
+          </div>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-px relative text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:553">
+            탭 · 현재 상태 / 실행 기록 / 작업 기준
+          </p>
+        </div>
+        <div className="bg-[var(--ees-surface-selected,#eef3f9)] border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[8px] h-[300px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="875:554" data-name="Frame">
+          <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex items-center justify-center overflow-clip relative rounded-[9px] shrink-0 size-[18px]" data-node-id="875:555" data-name="Frame">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="875:556">
+              5
+            </p>
+          </div>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-px relative text-[12px] text-[color:var(--ees-brand-text,#2f5f98)]" data-node-id="875:557">
+            블록 영역 · 작업 정의에 따라 조립
+          </p>
+        </div>
+        <div className="bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[8px] h-[44px] items-center overflow-clip px-[12px] relative shrink-0 w-full" data-node-id="875:558" data-name="Frame">
+          <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex items-center justify-center overflow-clip relative rounded-[9px] shrink-0 size-[18px]" data-node-id="875:559" data-name="Frame">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="875:560">
+              6
+            </p>
+          </div>
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-px relative text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:561">
+            하단 행동 바 · 주 행동 하나
+          </p>
+        </div>
+      </div>
+      <div className="[word-break:break-word] content-stretch flex flex-col gap-[16px] items-start overflow-clip relative shrink-0 w-[900px]" data-node-id="875:562" data-name="Frame">
+        <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-status-attention,#96590c)] whitespace-nowrap" data-node-id="875:563">
+          규칙
+        </p>
+        <p className="font-['Noto_Sans_KR:Bold'] font-bold leading-[28px] relative shrink-0 text-[20px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.2px] whitespace-nowrap" data-node-id="875:564">
+          업무 패널은 작업마다 그리지 않는다. 작업 정의에서 조립된다
+        </p>
+        <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-full relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] w-[min-content]" data-node-id="875:565">
+          워크스페이스에서 작업을 정의하면, 업무 패널은 고정된 틀(1~4, 6)과 정해진 블록(5)으로 자동 구성됩니다. 새 워크플로우를 만들어도 화면을 새로 설계하거나 개발하지 않습니다. 작성자는 화면을 고르지 않고 작업의 성격만 정합니다.
+        </p>
+        <div className="border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[6px] shrink-0 w-full" data-node-id="875:566" data-name="Block library">
+          <div className="bg-[var(--ees-surface-sidebar,#fafafa)] border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex font-['Noto_Sans_KR:Medium'] font-medium gap-[12px] items-start leading-[16px] overflow-clip px-[12px] py-[8px] relative shrink-0 text-[12px] w-full" data-node-id="875:567" data-name="Frame">
+            <p className="relative shrink-0 text-[color:var(--ees-text-tertiary,#6f717a)] w-[130px]" data-node-id="875:568">
+              블록
+            </p>
+            <p className="flex-[1_0_0] min-w-px relative text-[color:var(--ees-text-strong,#3f4147)]" data-node-id="875:569">
+              나타나는 조건 (작업 정의)
+            </p>
+            <p className="flex-[1_0_0] min-w-px relative text-[color:var(--ees-text-strong,#3f4147)]" data-node-id="875:570">
+              사람이 하는 일
+            </p>
+            <p className="flex-[1_0_0] min-w-px relative text-[color:var(--ees-text-strong,#3f4147)]" data-node-id="875:571">
+              예
+            </p>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[12px] items-start leading-[22px] overflow-clip px-[12px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="875:572" data-name="Frame">
+            <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="875:573">
+              사람이 정하는 값
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:574">
+              작업에 ‘사람이 정하는 값’이 선언됨
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:575">
+              값 확인 · 수정 · 저장
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:576">
+              Jira 프로젝트, 필수 첨부
+            </p>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[12px] items-start leading-[22px] overflow-clip px-[12px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="875:577" data-name="Frame">
+            <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="875:578">
+              예약 실행 안내
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:579">
+              주기 실행이고 도구 단계가 예약됨
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:580">
+              예약 시각 확인 · 필요하면 지금 실행
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:581">
+              10.05 09:00 자동 조회
+            </p>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[12px] items-start leading-[22px] overflow-clip px-[12px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="875:582" data-name="Frame">
+            <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="875:583">
+              확인 항목 결과 · checklist
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:584">
+              결과 형태 = 확인 항목
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:585">
+              판정과 도구 실행 결과 확인
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:586">
+              연결 · 응답 확인
+            </p>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[12px] items-start leading-[22px] overflow-clip px-[12px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="875:587" data-name="Frame">
+            <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="875:588">
+              목록 확정 · list_confirm
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:589">
+              결과 형태 = 목록
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:590">
+              빠진 항목 추가 · 잘못 들어간 항목 제외 후 확정
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:591">
+              배포 대상 CR 목록
+            </p>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[12px] items-start leading-[22px] overflow-clip px-[12px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="875:592" data-name="Frame">
+            <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="875:593">
+              항목별 판정 · item_verdict
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:594">
+              결과 형태 = 항목별 판정 (판정 단어 정의 포함)
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:595">
+              AI 제안을 보고 항목마다 판정 확정
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:596">
+              CR별 승인 · 조건부 · 미승인
+            </p>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[12px] items-start leading-[22px] overflow-clip px-[12px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="875:597" data-name="Frame">
+            <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="875:598">
+              초안 검토 · ai_review
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:599">
+              수행 방식 = AI 초안
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:600">
+              초안 수정 후 승인 · 송부
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:601">
+              점검 결과 송부 메일
+            </p>
+          </div>
+          <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[12px] items-start leading-[22px] overflow-clip px-[12px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="875:602" data-name="Frame">
+            <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="875:603">
+              사람 확인 · checklist
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:604">
+              수행 방식 = 사람 확인
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:605">
+              확인 항목 체크 · 근거 남기기
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="875:606">
+              설치 · 설정 확인
+            </p>
+          </div>
+          <div className="content-stretch flex gap-[12px] items-start leading-[22px] overflow-clip px-[12px] py-[8px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="883:752" data-name="Frame">
+            <p className="font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[130px]" data-node-id="883:753">
+              EES 실행 요청 (추가)
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="883:754">
+              사용하는 도구가 EES에 상태 변경을 요청하는 요청 도구임
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="883:755">
+              요청 내용·영향 검토 → (절차에 정했으면 승인) → 확인 창 → EES에 요청 → 진행 추적 · 효과 확인
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal min-w-px relative text-[color:var(--ees-text-secondary,#5c5e65)]" data-node-id="883:756">
+              서비스 재시작 요청, 리프레시 요청
+            </p>
+          </div>
+        </div>
+        <div className="content-stretch flex flex-col gap-[6px] items-start overflow-clip relative shrink-0 w-full" data-node-id="875:607" data-name="Frame">
+          <p className="font-['Noto_Sans_KR:Bold'] font-bold leading-[20px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.07px] whitespace-nowrap" data-node-id="875:608">
+            구현 규칙
+          </p>
+          <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="875:609" data-name="Frame">
+            <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="875:610">
+              1
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="875:611">
+              작업 정의는 최소한 수행 방식(사람 확인 · 도구 실행 · AI 초안), 결과 형태(확인 항목 · 목록 · 항목별 판정 · 초안), 판정 단어(기본: 통과 · 실패 · 미확인), 사람이 정하는 값, 사용하는 도구, 기한, 다음 작업을 가진다.
+            </p>
+          </div>
+          <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="875:612" data-name="Frame">
+            <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="875:613">
+              2
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="875:614">
+              블록은 위에서 아래로 ‘사람이 정하는 값 → 예약 실행 안내 → 결과 블록’ 순서로 놓는다. 한 작업의 결과 블록은 하나다.
+            </p>
+          </div>
+          <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="875:615" data-name="Frame">
+            <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="875:616">
+              3
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="875:617">
+              하단 행동 바의 주 행동은 블록과 상태에서 정해진다 (예: 목록 확정 블록 → ‘목록 확정’, 항목별 판정 → ‘판정 확정’, 초안 검토 → ‘검토하고 보내기’).
+            </p>
+          </div>
+          <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="875:618" data-name="Frame">
+            <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="875:619">
+              4
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="875:620">
+              판정 단어는 절차마다 정할 수 있지만, 각 단어는 반드시 기본 상태 기호(완료 · 실패 · 미확인 · 사람 조치 필요) 중 하나에 연결한다. 화면의 색과 모양은 이 연결을 따른다.
+            </p>
+          </div>
+          <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="875:621" data-name="Frame">
+            <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="875:622">
+              5
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="875:623">
+              기존 블록으로 표현되지 않는 업무가 생기면 그때 블록을 추가한다. 블록 추가는 개발 작업이며, 작업마다 화면을 만드는 일은 없다.
+            </p>
+          </div>
+          <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="875:624" data-name="Frame">
+            <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="875:625">
+              6
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="875:626">
+              결과 형태(result_block: checklist · list_confirm · item_verdict · ai_review)와 실행 검증기(all_complete · observed · selection · grounded_summary)는 별개 설정이다. 일대일로 묶지 않고, 작업마다 결과 표시 형태와 완료 조건을 따로 정의한다. (PR #73 소스 확인, 10.02)
+            </p>
+          </div>
+          <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="883:757" data-name="Frame">
+            <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="883:758">
+              7
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="883:759">
+              EES 실행 요청 블록은 항상 ‘요청 내용 요약 → 영향 → 요청 후 확인 → 결과 미확인 시 처리 → 복구 방법(EES 가이드 링크)’을 보여주고, 요청 권한이 있는 사람에게만 요청 버튼을 연다. 승인 여부는 작업 정의의 설정(필요 없음 · 1명 · 2명)이며, 필요 없음이어도 요청 전 확인 창은 항상 거친다. 대화에서 요청해도 대화가 직접 요청하지 않는다. 승인 설정은 요청 도구를 쓰는 작업의 편집 화면에만 나타난다. 복구 방법은 EES Work가 정하지 않는다.
+            </p>
+          </div>
+          <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="883:760" data-name="Frame">
+            <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="883:761">
+              8
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="883:762">
+              EES 실행 요청 다음에는 효과 확인(확인 항목 결과 블록)이 반드시 이어져야 한다. 게시 전 확인에서 이를 검사한다.
+            </p>
+          </div>
+          <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="931:2252" data-name="Frame">
+            <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="931:2253">
+              9
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="931:2254">
+              항목별 판정 블록에서 항목의 판정을 고르는 것은 자동 저장되는 ‘선택(확정 전)’이다. 하단 ‘판정 확정’만 최종 반영이며, 모든 항목이 선택되어야 열린다. 확정 후 수정 방법은 확인 필요.
+            </p>
+          </div>
+          <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="962:1571" data-name="Frame">
+            <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="962:1572">
+              10
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="962:1573">
+              확인 항목 결과와 사람 확인은 화면에서 같은 부품으로 그린다. 항목마다 판정하는 쪽(도구 또는 사람)과 필요한 근거가 다를 뿐이다. PR #73 코드에서는 checklist와 human_confirm이 별도 값이며, 둘을 하나로 합칠지는 구현 때 확인 필요.
+            </p>
+          </div>
+          <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="962:1574" data-name="Frame">
+            <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="962:1575">
+              11
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="962:1576">
+              AI의 항목별 판정 제안과 초안은 근거 검증(grounded_summary)을 거치지 않는다. 화면에서 ‘검증됨’ · ‘근거 확인 완료’처럼 표시하지 않고 ‘AI 제안’ · ‘AI 초안’으로만 표시하며, 내용은 사람이 확정한다.
+            </p>
+          </div>
+          <div className="content-stretch flex font-normal gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="962:1577" data-name="Frame">
+            <p className="font-['Inter:Regular'] leading-[18px] not-italic relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] whitespace-nowrap" data-node-id="962:1578">
+              12
+            </p>
+            <p className="flex-[1_0_0] font-['Noto_Sans_KR:Regular'] leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="962:1579">
+              실행 성공과 업무 완료는 다르다. 사람 확인이 필요한 작업은 실행이 성공해도 ‘확인 필요’로 남고, 부분 조회(observed)는 사람이 확인해도 ‘부분 결과’로 남는다(S1 참고).
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+These styles are contained in the design: EES v4/Label: Font(family: "Noto Sans KR", style: Medium, size: 12, weight: 500, lineHeight: 16, letterSpacing: 0), EES v4/Meta: Font(family: "Noto Sans KR", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), EES v4/Title: Font(family: "Noto Sans KR", style: Bold, size: 20, weight: 700, lineHeight: 28, letterSpacing: -1), EES v4/Body: Font(family: "Noto Sans KR", style: Regular, size: 14, weight: 400, lineHeight: 22, letterSpacing: -0.30000001192092896), EES v4/Body Medium: Font(family: "Noto Sans KR", style: Medium, size: 14, weight: 500, lineHeight: 22, letterSpacing: -0.30000001192092896), EES v4/Section: Font(family: "Noto Sans KR", style: Bold, size: 14, weight: 700, lineHeight: 20, letterSpacing: -0.5), EES v4/Mono: Font(family: "Inter", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0).
+Images and SVGs will be stored as constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.

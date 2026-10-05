@@ -1,0 +1,164 @@
+{
+  "queried_at": "2026-10-02T07:20:20.153Z",
+  "run_id": 36967461066,
+  "head": "659d3ac1bfb646e720aa87d9ec3b7de189ab0eb0",
+  "counts": {
+    "success": 21,
+    "cancelled": 2,
+    "failure": 1,
+    "skipped": 1
+  },
+  "jobs": [
+    {
+      "id": 110714199730,
+      "name": "Prepare pinned program fixtures and test coverage",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510483,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510507,
+      "name": "native-account (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510508,
+      "name": "native-execution (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510522,
+      "name": "native-work (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510566,
+      "name": "native-compose (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510730,
+      "name": "services (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510744,
+      "name": "native-contracts (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510748,
+      "name": "contracts (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510750,
+      "name": "platform (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510754,
+      "name": "services (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510762,
+      "name": "native-contracts (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510766,
+      "name": "restore-ees10 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510767,
+      "name": "platform (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510773,
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 110714510775,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510781,
+      "name": "restore-ees11 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510807,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510826,
+      "name": "program-install (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510866,
+      "name": "restore-ees12 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510887,
+      "name": "program-install (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110714510908,
+      "name": "contracts (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 110716774094,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 110716774133,
+      "name": "Delivery checks (windows-2022)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 110716799318,
+      "name": "Prepare delivery files",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "boundary": "Read-only requery after workspace loss. No rerun or success inferred from cancelled/skipped."
+}

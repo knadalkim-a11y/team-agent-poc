@@ -18,7 +18,7 @@ from types import ModuleType, SimpleNamespace
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from workflow_fixture import publish_fixture_definition, load_legacy_workflow
+from workflow_fixture import publish_fixture_definition, load_legacy_workflow, arrange_legacy_catalog, legacy_definition
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +28,7 @@ PACKAGE.__path__ = [str(SOURCE.parent)]
 # Use real relative imports without taking over the production module names.
 sys.modules[PACKAGE.__name__] = PACKAGE
 workflow = importlib.import_module(f"{PACKAGE.__name__}.ees_workflow")
+historical = __import__("workflow_fixture").historical_facade(PACKAGE.__name__)
 
 
 class WorkflowTests(unittest.IsolatedAsyncioTestCase):
@@ -43,7 +44,8 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
                       "chat-admin": {"id": "chat-admin", "user_id": "admin"}}
         self.lookup_user = AsyncMock(side_effect=lambda key: deepcopy(self.users.get(key)))
         self.lookup_chat = AsyncMock(side_effect=lambda key: deepcopy(self.chats.get(key)))
-        self.service = workflow.WorkflowService(self.database, self.lookup_user, self.lookup_chat)
+        self.service = historical.WorkflowService(self.database, self.lookup_user, self.lookup_chat)
+        arrange_legacy_catalog(self.service)
         self.alice, self.admin = self.users["alice"], self.users["admin"]
 
     async def create(self, *, user=None, **payload):
@@ -120,20 +122,20 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         socket.get_event_emitter = AsyncMock(return_value=emit)
         body = {"chat_id": "chat-a", "message_id": "message-a", "proposal_id": "proposal-a", "target": target}
         receipt = {"id": "proposal-a", "status": "applied", "fields": ["db"], "source": "사용자 제공 대상", "persisted": False, "executed": False}
-        with patch.object(workflow, "_production_service", return_value=self.service), patch.dict(sys.modules, {
+        with patch.object(historical, "_production_service", return_value=self.service), patch.dict(sys.modules, {
                 "open_webui.models.chats": chats, "open_webui.socket.main": socket}):
-            missing = await workflow.record_input_draft_undo(self.alice, body)
+            missing = await historical.record_input_draft_undo(self.alice, body)
             self.assertEqual(missing["error"]["code"], "receipt_unavailable")
-            applied = await workflow.record_input_draft(self.alice, "chat-a", "message-a", target, receipt)
+            applied = await historical.record_input_draft(self.alice, "chat-a", "message-a", target, receipt)
             self.assertTrue(applied["ok"], applied)
-            forbidden = await workflow.record_input_draft_undo(self.users["bob"], body)
+            forbidden = await historical.record_input_draft_undo(self.users["bob"], body)
             self.assertFalse(forbidden["ok"])
-            forged = await workflow.record_input_draft_undo(self.alice, {**body, "description": "forged completion"})
+            forged = await historical.record_input_draft_undo(self.alice, {**body, "description": "forged completion"})
             self.assertFalse(forged["ok"])
-            undone = await workflow.record_input_draft_undo(self.alice, body)
+            undone = await historical.record_input_draft_undo(self.alice, body)
             self.assertTrue(undone["ok"], undone)
             self.assertEqual([item["ees_work_action"]["status"] for item in message["statusHistory"]], ["applied", "undone"])
-            replay = await workflow.record_input_draft_undo(self.alice, body)
+            replay = await historical.record_input_draft_undo(self.alice, body)
             self.assertTrue(replay["replayed"])
             self.assertEqual(len(message["statusHistory"]), 2)
 
@@ -141,7 +143,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         assets = {"tools": [], "skills": [{"id": "native-policy"}], "skill_bodies": {"native-policy": "approved policy"},
                   "skill_versions": {"native-policy": 1}, "available": True}
         self.service.asset_lookup = AsyncMock(side_effect=lambda user: deepcopy(assets))
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["skills"]["parent-policy"] = {"id": "parent-policy", "source": "open_webui", "reference": "native-policy", "body": ""}
         definition["nodes"]["setup-p"]["skills"].append("parent-policy")
         await self.publish(definition)
@@ -168,12 +170,12 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         socket = ModuleType("open_webui.socket.main")
         emitter = AsyncMock()
         socket.get_event_emitter = AsyncMock(return_value=emitter)
-        with patch.object(workflow, "_production_service", return_value=self.service), patch.dict(sys.modules, {
+        with patch.object(historical, "_production_service", return_value=self.service), patch.dict(sys.modules, {
                 "open_webui.models.chats": chats, "open_webui.socket.main": socket}):
-            missing = await workflow.record_input_draft(self.alice, "chat-a", "message-a", target, receipt)
+            missing = await historical.record_input_draft(self.alice, "chat-a", "message-a", target, receipt)
             self.assertEqual(missing, {"ok": False, "code": "record_unconfirmed"})
             self.assertEqual(chats.Chats.get_chat_by_id.await_count, 2)
-            malformed = await workflow.record_input_draft(self.alice, "chat-a", "message-a", target, {**receipt, "executed": True})
+            malformed = await historical.record_input_draft(self.alice, "chat-a", "message-a", target, {**receipt, "executed": True})
             self.assertEqual(malformed["code"], "invalid_receipt")
             self.assertEqual(emitter.await_count, 1)
 
@@ -220,7 +222,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         assets = {"tools": [], "skills": [{"id": "native-policy"}], "skill_bodies": {"native-policy": "approved policy"},
                   "skill_versions": {"native-policy": 1}, "available": True}
         self.service.asset_lookup = AsyncMock(side_effect=lambda _: deepcopy(assets))
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["skills"]["parent-policy"] = {"id": "parent-policy", "source": "open_webui", "reference": "native-policy", "body": ""}
         definition["nodes"]["setup-p"]["skills"].append("parent-policy")
         await self.publish(definition)
@@ -250,7 +252,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         case = await self.step(case, "bind", chat_id="chat-a")
         case = await self.step(case, "select", "db-j")
         case = await self.step(case, "update_inputs", "db-j", {"inputs": {"db": "승인 진단 대상 A"}})
-        restarted = workflow.WorkflowService(self.database, self.lookup_user, self.lookup_chat)
+        restarted = historical.WorkflowService(self.database, self.lookup_user, self.lookup_chat)
         restored = (await restarted.get_state(self.alice, chat_id="chat-a"))["case"]
         self.assertEqual(restored, case)
         self.assertEqual(restored["selected_id"], "db-j")
@@ -261,7 +263,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         created_at = american["created_at"]
         self.assertIsNotNone(created_at)
         self.assertEqual(american["status"], "pending")
-        with patch.object(workflow, "_now", return_value="2026-09-15T10:00:00.000+00:00"):
+        with patch.object(historical, "_now", return_value="2026-09-15T10:00:00.000+00:00"):
             american = await self.step(american, "run", "scope-j", {"confirm": True})
         self.assertEqual(american["status"], "in_progress")
         hungarian = await self.create(site_id="hu-a", system="FDC")
@@ -286,7 +288,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_case_tree_uses_frozen_structure_after_catalog_removes_a_job(self):
         old = await self.create()
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["nodes"].pop("db-j")
         definition["nodes"]["install-t"]["children"].remove("db-j")
         definition["nodes"]["interface-j"]["deps"].remove("db-j")
@@ -419,7 +421,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(case["node_states"]["setup-p"]["failed_count"], 0)
 
     async def test_input_change_invalidates_only_dependent_results_preserving_evidence(self):
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["nodes"]["handoff-j"] = {
             **deepcopy(definition["nodes"]["scope-j"]), "id": "handoff-j", "name": "최종 인계 확인",
             "parent": "interface-t", "deps": ["interface-j"],
@@ -493,7 +495,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("ops-j", case["jobs"])
         self.assertEqual((await self.act(case, "run", "ops-j"))["error"]["code"], "node_not_found")
         self.assertEqual((await self.act(case, "run", "interface-j"))["error"]["code"], "not_applicable")
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["nodes"]["infra-j"]["condition"] = "new-infra"
         definition["nodes"]["install-t"]["condition"] = "country:한국"
         await self.publish(definition)
@@ -504,7 +506,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(american["node_states"]["ap-j"]["applicable"])
 
     async def test_management_metrics_separate_waiting_review_problems_and_ready_jobs(self):
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["nodes"]["scope-j"]["mode"] = "draft"
         await self.publish(definition)
         case = await self.create(site_id="hu-a")
@@ -532,7 +534,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
                           case["node_states"]["install-t"]["ready_count"]), (1, 1))
 
     async def test_management_readiness_checks_connection_and_current_skill_access_without_writing(self):
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["tools"]["network"].update(source="open_webui", reference="private-tool", adapter="unavailable")
         definition["skills"]["private"] = {"id": "private", "name": "승인 절차", "type": "skill",
                                              "body": "", "source": "open_webui", "reference": "private-skill"}
@@ -567,7 +569,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(resumed["jobs"]["db-j"]["status"], "passed")
 
     async def test_management_counts_use_all_descendant_jobs_and_exclude_inapplicable(self):
-        definition = workflow._seed()
+        definition = legacy_definition()
         for index in range(120):
             node_id = f"many-{index}"
             definition["nodes"][node_id] = {**deepcopy(definition["nodes"]["db-j"]),
@@ -585,7 +587,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(case["node_states"]["setup-p"]["incomplete_count"], 84)
 
     async def test_unconnected_job_does_not_claim_a_simulation_ran(self):
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["tools"]["network"].update(source="open_webui", reference="native-read", adapter="unavailable")
         await self.publish(definition)
         case = await self.create(process_id="ops-p")
@@ -636,7 +638,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
             result = await self.service.handle_action(self.admin, body)
             self.assertFalse(result["ok"], body)
         for reference in ({"id": "skill"}, ["skill"]):
-            definition = workflow._seed()
+            definition = legacy_definition()
             definition["skills"]["connection"].update(source="open_webui", reference=reference)
             result = await self.service.handle_action(self.admin, {"action": "save_draft", "expected_revision": 0,
                                                                   "payload": {"definition": definition}})
@@ -644,7 +646,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await self.service.get_state(self.admin))["draft_revision"], 0)
 
     async def test_external_tool_reference_is_blocked_and_never_executed_as_mock(self):
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["tools"]["health"].update(source="open_webui", reference="actual-tool", adapter="unavailable")
         definition["nodes"]["ap-j"]["failOnce"] = False
         await self.publish(definition)
@@ -658,7 +660,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(case["jobs"]["ap-j"]["history"][0]["status"], "blocked")
 
     async def test_selected_context_inherits_instructions_and_current_accessible_skill(self):
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["nodes"]["setup-p"]["instructions"] = "공장 범위를 먼저 확인"
         definition["nodes"]["db-j"]["instructions"] = "DB 식별 결과를 설명"
         definition["skills"]["webui-skill:read"] = {"id": "webui-skill:read", "name": "기존 읽기 스킬",
@@ -692,7 +694,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(failed["error"]["code"], "skill_unavailable")
 
     async def test_actual_draft_content_needs_review_before_completion(self):
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["nodes"]["scope-j"]["mode"] = "draft"
         await self.publish(definition)
         case = await self.create()
@@ -741,7 +743,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(state["error"]["code"], code)
         denied = await self.service.get_state(self.alice, chat_id="chat-b", selection=self.selection())
         self.assertEqual(denied["error"]["code"], "chat_forbidden")
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["nodes"]["scope-j"]["enabled"] = False
         await self.publish(definition)
         read = await self.service.get_state(self.alice, selection=self.selection(version=2))
@@ -756,7 +758,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
     async def test_selection_projects_external_skills_only_with_current_access(self):
         assets = {"tools": [], "skills": [], "skill_bodies": {"owned": "허용된 작업 지침"}}
         self.service.asset_lookup = lambda _: deepcopy(assets)
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["skills"]["team"] = {"id": "team", "name": "팀 지침", "type": "skill",
                                         "source": "open_webui", "reference": "owned", "body": ""}
         definition["nodes"]["scope-j"]["skills"] = ["team"]
@@ -780,7 +782,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(first["case"]["selected_id"], "db-j")
         self.assertEqual(first["case"]["jobs"]["db-j"]["inputs"], {"db": "선택한 승인 대상"})
         self.assertTrue(all(job["attempt"] == 0 for job in first["case"]["jobs"].values()))
-        restarted = workflow.WorkflowService(self.database, self.lookup_user, self.lookup_chat)
+        restarted = historical.WorkflowService(self.database, self.lookup_user, self.lookup_chat)
         replay = await restarted.handle_action(self.alice, body)
         self.assertTrue(replay["replayed"])
         self.assertEqual(replay["case"], first["case"])
@@ -924,7 +926,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
             db.execute("UPDATE cases SET chat_id=?,data=? WHERE id=? AND owner=?",
                        (None, workflow._dump(legacy), legacy["id"], "alice"))
             receipt = db.execute("SELECT * FROM action_requests").fetchone()
-        restarted = workflow.WorkflowService(self.database, self.lookup_user, self.lookup_chat)
+        restarted = historical.WorkflowService(self.database, self.lookup_user, self.lookup_chat)
         replay = await restarted.handle_action(self.alice, body)
         self.assertTrue(replay["replayed"])
         self.assertEqual(replay["case"]["selected_id"], "install-t")
@@ -935,7 +937,7 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
                              (published, draft, revision, validated))
 
     async def test_concurrent_first_requests_do_not_duplicate_case_or_execution(self):
-        services = [workflow.WorkflowService(self.database, self.users.get, self.chats.get) for _ in range(2)]
+        services = [historical.WorkflowService(self.database, self.users.get, self.chats.get) for _ in range(2)]
         barrier = threading.Barrier(2, timeout=5)
         body = self.first_request()
         def send(service):
@@ -951,10 +953,29 @@ class WorkflowTests(unittest.IsolatedAsyncioTestCase):
 
 
 class DefinitionValidationTests(unittest.TestCase):
-    def test_composed_seed_preserves_pre_split_bytes_and_order(self):
+    def test_product_default_is_empty_and_independent_of_historical_fixture(self):
+        empty = workflow._seed()
+        self.assertEqual(empty["nodes"], {})
+        self.assertEqual(empty["tools"], {})
+        self.assertEqual(empty["skills"], {})
+        self.assertEqual(empty["sites"], {})
+        self.assertTrue(all(not values for values in empty["roots"].values()))
+        self.assertTrue(legacy_definition()["nodes"])
+        self.assertEqual(workflow._seed(), empty)
+
+
+    def test_retired_catalog_writers_exist_only_in_pinned_test_fixture(self):
+        for name in ("handle_action", "authoring_action", "_run_job", "_write_publication"):
+            with self.subTest(method=name):
+                self.assertFalse(hasattr(workflow.WorkflowService, name))
+                self.assertTrue(hasattr(historical.WorkflowService, name))
+        self.assertTrue(hasattr(workflow.WorkflowService, "get_authoring"))
+        self.assertTrue(hasattr(workflow.WorkflowService, "workspace_command"))
+
+    def test_explicit_historical_fixture_preserves_pre_split_bytes_and_order(self):
         # Captured from the R0 facade before moving common policy/helpers.
         # This covers JSON ordering as well as values without duplicating seed.
-        seed = workflow._seed()
+        seed = legacy_definition()
         encoded = workflow._dump(seed).encode("utf-8")
         self.assertEqual(len(encoded), 11651)
         self.assertEqual(hashlib.sha256(encoded).hexdigest(),
@@ -963,17 +984,17 @@ class DefinitionValidationTests(unittest.TestCase):
         self.assertEqual(list(seed["skills"]), ["common", "setup", "connection", "handoff"])
         self.assertEqual(seed["version"], 1)
         seed["skills"]["common"]["body"] = "caller changed its private copy"
-        self.assertNotEqual(seed["skills"]["common"], workflow._seed()["skills"]["common"])
+        self.assertNotEqual(seed["skills"]["common"], legacy_definition()["skills"]["common"])
 
     def test_validation_error_order_and_common_policy_message_are_unchanged(self):
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["nodes"]["db-j"]["deps"].append("missing-job")
         definition["nodes"]["ap-j"]["condition"] = "country:없는나라"
         self.assertEqual(workflow.validate_definition(definition), [
             "db-j: 삭제되거나 없는 deps 참조가 있습니다.",
             "ap-j: 적용 조건을 확인해 주세요.",
         ])
-        definition = workflow._seed()
+        definition = legacy_definition()
         definition["skills"]["common"]["body"] = "공통 규칙 삭제"
         self.assertEqual(workflow.validate_definition(definition),
                          ["공통 실행 지침은 변경하거나 해제할 수 없습니다."])
@@ -995,7 +1016,7 @@ class DefinitionValidationTests(unittest.TestCase):
         ]
         for mutate in changes:
             with self.subTest(change=changes.index(mutate)):
-                definition = workflow._seed()
+                definition = legacy_definition()
                 mutate(definition)
                 self.assertTrue(workflow.validate_definition(definition))
 
@@ -1003,22 +1024,22 @@ class DefinitionValidationTests(unittest.TestCase):
         for field, bad in (("children", {}), ("deps", [None]), ("parent", []), ("bindings", []),
                            ("condition", {}), ("systems", "EMS"), ("name", 17), ("tools", [None]), ("mode", None)):
             with self.subTest(field=field):
-                definition = workflow._seed()
+                definition = legacy_definition()
                 definition["nodes"]["db-j"][field] = bad
                 self.assertTrue(workflow.validate_definition(definition))
-        definition = workflow._seed()
+        definition = legacy_definition()
         del definition["tools"]["gateway"]["input"]
         self.assertTrue(workflow.validate_definition(definition))
-        definition = workflow._seed()
+        definition = legacy_definition()
         del definition["nodes"]["db-j"]["parent"]
         self.assertTrue(workflow.validate_definition(definition))
         for group, key in (("tools", "gateway"), ("skills", "setup")):
-            definition = workflow._seed()
+            definition = legacy_definition()
             definition[group][key]["source"] = {"invalid": "object"}
             self.assertTrue(workflow.validate_definition(definition))
 
     def test_add_reorder_move_and_remove_nodes_with_correct_links_are_valid(self):
-        definition = workflow._seed()
+        definition = legacy_definition()
         additional = deepcopy(definition["nodes"]["scope-j"])
         additional.update(id="scope2-j", name="범위 추가 확인", parent="prep-t")
         definition["nodes"]["scope2-j"] = additional
@@ -1132,7 +1153,8 @@ class WorkflowPreservationTests(unittest.IsolatedAsyncioTestCase):
                                                        lambda _: deepcopy(assets))
                 after_migration = self.rows(database)
                 self.assertEqual(after_migration["cases"], before["cases"], "Startup must not rewrite cases")
-                self.assertEqual(after_migration["catalog"][0][1], before["catalog"][0][1], "Published bytes stay unchanged")
+                self.assertEqual(after_migration["catalog"], before["catalog"],
+                                 "Published, draft, revision and validation bytes stay unchanged")
                 with closing(sqlite3.connect(database)) as db:
                     archived = db.execute("SELECT published,draft,revision,validated FROM authoring_legacy").fetchall()
                 self.assertIn(tuple(before["catalog"][0][1:]), archived,
@@ -1142,9 +1164,10 @@ class WorkflowPreservationTests(unittest.IsolatedAsyncioTestCase):
                     admin = await workflow.get_state(users["admin"])
                 self.assertEqual(state, prior_state)
                 self.assertEqual(admin["catalog"], prior_admin["catalog"])
-                self.assertEqual(admin["draft"], admin["catalog"])
-                self.assertIsNone(admin["validated_revision"])
-                self.assertEqual(admin["draft_revision"], 3)
+                self.assertEqual(admin["draft"], prior_admin["draft"])
+                self.assertNotEqual(admin["draft"], admin["catalog"], "Unpublished user edits must not be reset")
+                self.assertEqual(admin["validated_revision"], prior_admin["validated_revision"])
+                self.assertEqual(admin["draft_revision"], prior_admin["draft_revision"])
                 self.assertEqual(state["case"]["definition"]["skills"]["common"]["body"],
                                  "진행 건 시작 당시 공통 정책")
                 self.assertEqual(state["case"]["context"]["skills"][-1]["body"], "진행 시작 당시 승인 절차")
@@ -1168,8 +1191,11 @@ class WorkflowRouteTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         users = {"alice": {"id": "alice", "role": "user"}, "admin": {"id": "admin", "role": "admin"}}
-        self.service = workflow.WorkflowService(Path(temporary.name) / "ees-work.sqlite3", users.get,
-            lambda chat_id: {"id": chat_id, "user_id": "alice"} if chat_id == "chat-a" else None)
+        database = Path(temporary.name) / "ees-work.sqlite3"
+        lookup_chat = lambda chat_id: {"id": chat_id, "user_id": "alice"} if chat_id == "chat-a" else None
+        self.historical = historical.WorkflowService(database, users.get, lookup_chat)
+        arrange_legacy_catalog(self.historical)
+        self.service = workflow.WorkflowService(database, users.get, lookup_chat)
         self.patch = patch.object(workflow, "_service", self.service)
         self.patch.start()
         self.addCleanup(self.patch.stop)
@@ -1199,15 +1225,18 @@ class WorkflowRouteTests(unittest.TestCase):
             self.assertEqual(records.json(), {"ok": True, "records": []})
         created = self.client.post("/api/ees-work/action", headers=headers, json={"action": "create", "chat_id": "chat-a",
                                                                                   "user": {"id": "admin", "role": "admin"}})
-        self.assertEqual(created.status_code, 200)
+        self.assertEqual(created.status_code, 409)
+        self.assertEqual(created.json()["error"]["code"], "legacy_execution_retired")
         self.assertEqual(created.headers["cache-control"], "no-store")
-        case = created.json()["case"]
+        # Historical record fixture is arranged through the internal service only.
+        case = asyncio.run(self.historical.handle_action({"id": "alice", "role": "user"},
+            {"action": "create", "chat_id": "chat-a"}))["case"]
         actual = self.client.get("/api/ees-work/state?chat_id=chat-a", headers=headers)
         self.assertEqual(actual.json()["case"]["id"], case["id"])
         denied = self.client.post("/api/ees-work/action", headers=headers,
                                  json={"action": "publish", "expected_revision": 0, "role": "admin"})
         self.assertEqual(denied.status_code, 409)
-        self.assertEqual(denied.json()["error"]["code"], "authoring_upgrade_required")
+        self.assertEqual(denied.json()["error"]["code"], "legacy_execution_retired")
         stale = self.client.post("/api/ees-work/action", headers=headers,
                                 json={"action": "select", "case_id": case["id"], "node_id": "db-j", "expected_revision": 99})
         self.assertEqual(stale.status_code, 409)

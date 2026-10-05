@@ -1,0 +1,58 @@
+test_q1_geometry_reading_width_footer_and_baseline_overlay (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 159.86610199979623, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 155.62808899994707, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast) ... FAIL
+
+======================================================================
+FAIL: test_q1_geometry_reading_width_footer_and_baseline_overlay (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tests/test_ees_work_figma_layout_native.py", line 48, in test_q1_geometry_reading_width_footer_and_baseline_overlay
+    self.assertEqual(geometry['chat']['width'],width-sidebar-480)
+AssertionError: 633.46875 != 830
+
+======================================================================
+FAIL: test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tests/test_ees_work_figma_layout_native.py", line 87, in test_q1_physical_drag_restores_per_actor_width_and_contrast
+    self.navigate('/');self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===480")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<repo>/tests/ees_work_integrated_fixture.py", line 189, in wait
+    self.fail('Timed out: ' + expression + '\n' + self.text('body') + '\nUnknown routes:' + repr(self.server.unknown))
+AssertionError: Timed out: document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===480
+Skip to main content
+EES Work
+새 대화
+Ctrl+Shift+O
+대화 검색
+Ctrl+K
+폴더
+채팅
+1969
+기존 대화
+56년 전
+기존 대화
+56년 전
+Other synthetic user
+Unknown routes:[('GET', '/api/v1/users/other-user/profile/image')]
+
+======================================================================
+FAIL: test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/tests/ees_work_integrated_fixture.py", line 116, in tearDown
+    self.assertEqual(errors, [], errors)
+AssertionError: Lists differ: ["TypeError: Cannot read properties of und[984 chars]22)"] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+"TypeError: Cannot read properties of undefined (reading 'chat')\n    at http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/zKJlHFgk.js:19:13249\n    at Re (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/7a2fV5I9.js:1:34117)\n    at http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/zKJlHFgk.js:19:13137\n    at http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/Dw-yaK-_.js:1:2501\n    at Vr (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/7a2fV5I9.js:1:31860)\n    at Ue (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/7a2fV5I9.js:1:32943)\n    at B (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/7a2fV5I9.js:1:27774)\n    at ii (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/7a2fV5I9.js:1:29085)\n    at G (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/Dw-yaK-_.js:1:2485)\n    at xw (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/zKJlHFgk.js:19:13122)"
+
+Diff is 1159 characters long. Set self.maxDiff to None to see it. : ["TypeError: Cannot read properties of undefined (reading 'chat')\n    at http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/zKJlHFgk.js:19:13249\n    at Re (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/7a2fV5I9.js:1:34117)\n    at http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/zKJlHFgk.js:19:13137\n    at http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/Dw-yaK-_.js:1:2501\n    at Vr (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/7a2fV5I9.js:1:31860)\n    at Ue (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/7a2fV5I9.js:1:32943)\n    at B (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/7a2fV5I9.js:1:27774)\n    at ii (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/7a2fV5I9.js:1:29085)\n    at G (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/Dw-yaK-_.js:1:2485)\n    at xw (http://127.0.0.1:40959/_ees13/immutable-c75505c2f1bfa3c25/chunks/zKJlHFgk.js:19:13122)"]
+
+----------------------------------------------------------------------
+Ran 2 tests in 12.984s
+
+FAILED (failures=3)

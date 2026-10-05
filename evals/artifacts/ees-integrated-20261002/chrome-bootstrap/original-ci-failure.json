@@ -1,0 +1,9 @@
+{
+  "test": "test_ees_work_c_phase3_native.CPhaseThreeNativeTests.test_delayed_input_write_keeps_exact_original_run_after_chat_change",
+  "last_wait": null,
+  "last_click": null,
+  "capture_errors": [
+    "screenshot:AssertionError",
+    "dom:AssertionError"
+  ]
+}
