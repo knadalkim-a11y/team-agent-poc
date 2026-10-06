@@ -4,6 +4,50 @@ const test=require('node:test'),assert=require('node:assert/strict'),crypto=requ
 const {renderer,run,controller,deferred}=require('./ees_workspace_ui_fixture.cjs');
 const html=(source,values={})=>run(renderer(values),source);
 
+test('help question includes canonical term ID and visible authoring context without hidden state',()=>{
+ const question=html('workUI.helpQuestion(term,context)',{term:{id:'read_tool',name:'정보 읽기'},context:{screen:'정보 읽기 도구',draftName:'점검 조회',kind:'read',secret:'not-visible'}});
+ assert.match(question,/도움말 용어 ID: read_tool/);assert.match(question,/현재 화면: 정보 읽기 도구/);assert.match(question,/초안 이름: 점검 조회/);assert.match(question,/하는 일: 정보 읽기/);assert.doesNotMatch(question,/not-visible/);
+});
+test('help fills the Native draft without sending and preserves attachments tools models and literal text',async()=>{
+ const h=controller(),original={prompt:'이미 작성한 <검토> & "질문"\n둘째 줄',files:[{id:'upload-1',name:'memo.txt'}],selectedToolIds:['tool-owned'],selectedModels:['model-a'],params:{temperature:.1}};let updated,focused=0;
+ h.context.document.querySelector=selector=>selector==='#chat-input'?{focus(){focused++;}}:{};
+ h.context.window.__eesNativeDraftV1={ready:()=>true,read:()=>original,restore:async value=>{updated=JSON.parse(value);return true;}};
+ assert.equal(await h.designer.callbacks.askHelp('뜻을 알려줘 <그대로>'),true);
+ assert.equal(updated.prompt,original.prompt+'\n\n뜻을 알려줘 <그대로>');assert.deepEqual({...updated,prompt:original.prompt},original);assert.equal(original.prompt,'이미 작성한 <검토> & "질문"\n둘째 줄');assert.equal(h.calls.length,0);assert.equal(focused,1);
+});
+test('help refuses a loading or absent Native draft and never overwrites unconfirmed content',async()=>{
+ const h=controller();let restored=0;
+ await assert.rejects(h.designer.callbacks.askHelp('질문'),/대화 입력창/);
+ h.context.window.__eesNativeDraftV1={ready:()=>false,read:()=>({prompt:'keep'}),restore:async()=>{restored++;return true;}};
+ await assert.rejects(h.designer.callbacks.askHelp('질문'),/대화 입력창/);
+ h.context.window.__eesNativeDraftV1.ready=()=>true;h.context.window.__eesNativeDraftV1.read=()=>null;
+ await assert.rejects(h.designer.callbacks.askHelp('질문'),/작성 중인 대화/);assert.equal(restored,0);assert.equal(h.calls.length,0);
+});
+test('help insertion serializes competing choices and reports restore failure without sending',async()=>{
+ const h=controller(),pending=deferred();let calls=0;
+ h.context.window.__eesNativeDraftV1={ready:()=>true,read:()=>({prompt:'keep'}),restore:()=>{calls++;return pending.promise;}};
+ const first=h.designer.callbacks.askHelp('첫 질문');await assert.rejects(h.designer.callbacks.askHelp('둘째 질문'),/앞서 고른 질문/);
+ pending.resolve(false);await assert.rejects(first,/질문을 입력창에 넣지 못했습니다/);assert.equal(calls,1);assert.equal(h.calls.length,0);
+});
+test('help detects account change before restoring and never copies the old draft into a new actor',async()=>{
+ const h=controller();let restores=0;
+ h.context.window.__eesNativeDraftV1={ready:()=>true,read:()=>{h.setAuth('actor-b-token');return {prompt:'actor-a-draft'};},restore:async()=>{restores++;return true;}};
+ await assert.rejects(h.designer.callbacks.askHelp('질문'),/대화 위치가 바뀌었습니다/);assert.equal(restores,0);
+});
+test('help detects route changes during Native restore and does not focus a different conversation',async()=>{
+ const h=controller(),pending=deferred();let focused=0;
+ h.context.document.querySelector=selector=>selector==='#chat-input'?{focus(){focused++;}}:{};
+ h.context.window.__eesNativeDraftV1={ready:()=>true,read:()=>({prompt:'keep'}),restore:()=>pending.promise};
+ const filling=h.designer.callbacks.askHelp('질문');h.context.location.pathname='/c/other';pending.resolve(true);
+ await assert.rejects(filling,/대화 위치가 바뀌었습니다/);assert.equal(focused,0);assert.equal(h.calls.length,0);
+});
+test('author tools expose help-only metadata while workflow and historical references remain unchanged',()=>{
+ const h=controller();h.api.setSelection({mode:'author',tab:'tools',system_id:'EMS',workflow_id:'old-work',run_id:'old-run'});
+ const help=h.api.reference();assert.equal(help.kind,'help');assert.equal(help.system_id,'EMS');assert.ok(help.context_id);assert.equal(Object.hasOwn(help,'workflow_id'),false);assert.equal(Object.hasOwn(help,'run_id'),false);
+ h.api.setSelection({tab:'overview'});assert.equal(h.api.reference().kind,'workspace');assert.equal(h.api.reference().workflow_id,'old-work');
+ h.api.setSelection({mode:'work',chat_reference:{kind:'workspace',reference_kind:'historical',workflow_id:'old-work',run_id:'old-run',attempt_id:'kept'}});h.api.setState({run:{id:'old-run'}});assert.equal(h.api.reference().attempt_id,'kept');
+});
+
 test('input save keeps mutation controls busy until the acknowledged state finishes refreshing',async()=>{
  const h=controller(),pending=deferred(),reading=deferred(),busy=[];let dialogs=0,acknowledgements=0;
  h.api.setSelection({run_id:'r',job_id:'j'});h.api.setState({run:{id:'r',revision:1,definition:{nodes:{j:{mode:'human'}}},jobs:{j:{}}}});

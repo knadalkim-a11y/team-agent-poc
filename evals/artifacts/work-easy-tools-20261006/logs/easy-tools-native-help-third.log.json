@@ -1,0 +1,22 @@
+{
+  "original_filename": "easy-tools-native-help-third.log",
+  "original_sha256": "6a602bfb0d815e90da9821ea1d10b593bc9c93e9d7ef34f64f10487c6992cf69",
+  "encoding": "UTF-8",
+  "lines": [
+    "test_help_keyboard_escape_and_questions_fill_native_composer_without_sending (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_help_keyboard_escape_and_questions_fill_native_composer_without_sending) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 122.05297000036808, \"product\": \"HeadlessChrome/153.0.8010.52\"}\n",
+    "FAIL\n",
+    "\n",
+    "======================================================================\n",
+    "FAIL: test_help_keyboard_escape_and_questions_fill_native_composer_without_sending (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_help_keyboard_escape_and_questions_fill_native_composer_without_sending)\n",
+    "----------------------------------------------------------------------\n",
+    "Traceback (most recent call last):\n",
+    "  File \"/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_figma_authoring_native.py\", line 234, in test_help_keyboard_escape_and_questions_fill_native_composer_without_sending\n",
+    "    self.assertTrue(after['prompt'].startswith(before['prompt'] + '\\n\\n'))\n",
+    "AssertionError: False is not true\n",
+    "\n",
+    "----------------------------------------------------------------------\n",
+    "Ran 1 test in 1.945s\n",
+    "\n",
+    "FAILED (failures=1)\n"
+  ]
+}

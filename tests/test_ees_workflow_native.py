@@ -13,6 +13,7 @@ from urllib.parse import parse_qs, urlsplit
 from urllib.error import HTTPError
 
 from starlette.requests import Request
+from fastapi import HTTPException
 
 ROOT = Path(__file__).resolve().parents[1]
 WHEEL = Path(os.environ.get("EES_TEST_UPSTREAM_WHEEL", ROOT / "dist/upstream/open_webui-0.11.3-py3-none-any.whl"))
@@ -191,7 +192,9 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
             unrelated=AsyncMock(return_value={'other':True})
             tools=self.native.wrap_chat_work_tools(request,self.reader,{'ees_workflow_view':{'tool_id':'other','spec':{'name':'ees_workflow_view'},'callable':unrelated},'ees_workflow_ees_workflow_view':{'tool_id':'ees_workflow','spec':{'name':'ees_workflow_ees_workflow_view'},'callable':original}})
             self.assertIs(tools['ees_workflow_view']['callable'],unrelated)
-            self.assertTrue((await tools['ees_workflow_ees_workflow_view']['callable']())['ok'])
+            viewed = await tools['ees_workflow_ees_workflow_view']['callable']()
+            self.assertTrue(viewed['ok'])
+            self.assertEqual(viewed['help'], (await service.workspace_state(self.admin))['help'])
             await self.fixture.acl.AccessGrants.set_access_grants('tool','ees_workflow',[])
             await self.assert_code('work_chat_access_denied',tools['ees_workflow_ees_workflow_view']['callable']())
             self.assertEqual(original.await_count,1)
@@ -229,6 +232,131 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("synthetic-admin-pat", json.dumps(reader))
         self.assertNotIn("synthetic-reader-pat", json.dumps(admin))
 
+    async def test_help_chat_uses_one_source_without_a_saved_workflow_or_tool_reregistration(self):
+        status = (await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')).json()
+        registered = await self.fixture.request('POST', '/api/v1/ees/assets/work-tool/setup', payload={
+            'source_sha256': status['source_sha256'], 'expected_token': status['expected_token'],
+            'confirmation': 'register_readonly_work_tool',
+            'access_grants': [{'principal_type': 'user', 'principal_id': 'reader', 'permission': 'read'}]})
+        self.assertEqual(registered.status_code, 200, registered.text)
+        service = self.fixture.workflow.WorkflowService(self.fixture.directory / 'help-work.sqlite3',
+            self.fixture.native_users.Users.get_user_by_id, lambda _: None)
+        reference = {'kind': 'help', 'system_id': 'EMS', 'context_id': 'unsaved-tool-context',
+                     'workflow_id': 'not-a-saved-procedure', 'intent_token': 'never copy'}
+        metadata = {'chat_id': 'help-chat', 'user_message': {'meta': {'ees_work_reference': reference}}}
+        request = Request({'type': 'http', 'app': self.fixture.app, 'headers': [], 'state': {}})
+        body = {'messages': [{'role': 'user', 'content': '[read_tool] 새 도구 초안에서 정보 읽기는 무슨 뜻인가요?'}]}
+        chat_lookup = AsyncMock(return_value=SimpleNamespace(user_id='admin'))
+        modules = {'open_webui.models.chats': SimpleNamespace(Chats=SimpleNamespace(get_chat_by_id=chat_lookup))}
+        with patch.object(self.native, '__file__', str(self.fixture.directory / 'ees_workflow_native.py')), \
+                patch.object(self.fixture.workflow, '_production_service', return_value=service), \
+                patch.dict(sys.modules, modules):
+            selected = await self.native.select_chat_work_tools(request, self.admin, metadata, ['unrelated'], body)
+            self.assertEqual(selected, ['ees_workflow'], request.state.ees_work_chat_status)
+            self.assertEqual(metadata['ees_work_reference'],
+                             {'kind': 'help', 'system_id': 'EMS', 'context_id': 'unsaved-tool-context'})
+            self.assertIn('Call ees_workflow_view', body['messages'][-1]['content'])
+            self.assertNotIn('never copy', body['messages'][-1]['content'])
+            # Native's real stored Tool source and reserved-argument binder are
+            # used; the wrapper narrows this message to public help only.
+            tools = await self.fixture.binding.get_tools(request, selected, self.admin,
+                {'__user__': self.admin.model_dump(), '__metadata__': metadata})
+            wrapped = self.native.wrap_chat_work_tools(request, self.admin, tools)
+            self.assertEqual(len(wrapped), 1)
+            item = next(iter(wrapped.values()))
+            self.assertTrue(item['spec']['name'].endswith('ees_workflow_view'))
+            before = service.database.read_bytes()
+            ai = await item['callable'](workflow_id='unrelated-secret', run_id='do-not-read')
+            ui = await service.workspace_state(self.admin)
+            self.assertEqual(set(ai), {'ok', 'help', 'help_context'})
+            self.assertEqual(ai['help'], ui['help'])
+            self.assertEqual(ui['workflows'], [])
+            self.assertEqual(service.database.read_bytes(), before)
+            self.assertIn('도움말에 없는 내용', ai['help']['answer_guidance']['unknown'])
+            self.assertTrue(all(term['evidence'].startswith('근거 · EES Work 도움말 ‘') for term in ai['help']['terms']))
+            # A changed canonical file reaches UI and AI without changing the
+            # registered Tool source, which is protected by its existing hash.
+            view = sys.modules['open_webui.ees_workflow_view']
+            help_path = self.fixture.directory / 'workflow_help.json'
+            changed = deepcopy(ui['help']); changed['terms'][0]['summary'] = '공통 원본 변경 확인'
+            help_path.write_text(json.dumps(changed), encoding='utf-8')
+            with patch.object(view, '__file__', str(help_path.with_name('ees_workflow_view.py'))):
+                new_ui = await service.workspace_state(self.admin)
+                new_ai = await item['callable']()
+            self.assertEqual(new_ai['help'], new_ui['help'])
+            self.assertEqual(new_ai['help']['terms'][0]['summary'], '공통 원본 변경 확인')
+            final_status = (await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')).json()
+            self.assertEqual(final_status['source_sha256'], status['source_sha256'])
+            # Invalid context and another person's chat cannot activate help.
+            for change in ({'context_id': ''}, {'system_id': 'unavailable-system'}):
+                bad = {'chat_id': 'help-chat', 'user_message': {'meta': {'ees_work_reference': {**reference, **change}}}}
+                with self.assertRaises(HTTPException) as blocked:
+                    await self.native.select_chat_work_tools(
+                        Request({'type': 'http', 'app': self.fixture.app, 'headers': [], 'state': {}}),
+                        self.admin, bad, [], {'messages': []})
+                self.assertEqual(blocked.exception.status_code, 409)
+            chat_lookup.return_value = SimpleNamespace(user_id='reader')
+            with self.assertRaises(HTTPException):
+                await self.native.select_chat_work_tools(
+                    Request({'type': 'http', 'app': self.fixture.app, 'headers': [], 'state': {}}),
+                    self.admin, metadata, [], {'messages': []})
+            # Native Tool ownership alone cannot retain the system context
+            # after its work permission is revoked during the same message.
+            await self.fixture.native_users.Users.update_user_by_id('admin', {'role': 'user'})
+            with self.assertRaises(HTTPException) as revoked:
+                await item['callable']()
+            self.assertEqual(revoked.exception.status_code, 409)
+
+    async def test_help_connection_failure_blocks_chat_before_unrelated_tools_or_model(self):
+        reference = {'kind': 'help', 'system_id': '', 'context_id': 'new-tool'}
+        metadata = {'chat_id': 'help-chat', 'user_message': {'meta': {'ees_work_reference': reference}}}
+        chat_lookup = AsyncMock(return_value=SimpleNamespace(user_id='reader'))
+        modules = {'open_webui.models.chats': SimpleNamespace(Chats=SimpleNamespace(get_chat_by_id=chat_lookup))}
+        service = self.fixture.workflow.WorkflowService(self.fixture.directory / 'help-failure.sqlite3',
+            self.fixture.native_users.Users.get_user_by_id, lambda _: None)
+        async def blocked_selection(expected, **values):
+            request = Request({'type': 'http', 'app': self.fixture.app, 'headers': [], 'state': {}})
+            with self.assertRaises(HTTPException) as failure:
+                await self.native.select_chat_work_tools(request, self.reader, metadata,
+                    ['unrelated-write-tool', 'ees_workflow'], values.pop('body', {'messages': []}), **values)
+            self.assertEqual(failure.exception.status_code, 409)
+            self.assertIn('도움말 연결을 확인하지 못해', failure.exception.detail)
+            self.assertIn('관리자에게', failure.exception.detail)
+            self.assertNotIn('근거 ·', failure.exception.detail)
+            self.assertEqual(request.state.ees_work_chat_status, expected)
+        with patch.object(self.native, '__file__', str(self.fixture.directory / 'ees_workflow_native.py')), \
+                patch.object(self.fixture.workflow, '_production_service', return_value=service), \
+                patch.dict(sys.modules, modules):
+            await blocked_selection('work_chat_tool_unconfigured')
+            status = (await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')).json()
+            registered = await self.fixture.request('POST', '/api/v1/ees/assets/work-tool/setup', payload={
+                'source_sha256': status['source_sha256'], 'expected_token': status['expected_token'],
+                'confirmation': 'register_readonly_work_tool',
+                'access_grants': [{'principal_type': 'user', 'principal_id': 'reader', 'permission': 'read'}]})
+            self.assertEqual(registered.status_code, 200, registered.text)
+            await blocked_selection('work_help_tools_override', explicit_tools=True)
+            await blocked_selection('work_help_tools_override', body={'messages': [], 'tools': [{'function': 'unrelated'}]})
+            request = Request({'type': 'http', 'app': self.fixture.app, 'headers': [], 'state': {}})
+            await self.native.select_chat_work_tools(request, self.reader, metadata, [], {'messages': []})
+            original, unrelated = AsyncMock(), AsyncMock()
+            # The final guard runs after Native builtin/MCP/terminal assembly.
+            wrapped = self.native.wrap_chat_work_tools(request, self.reader, {
+                'ees_workflow_view': {'tool_id': 'ees_workflow', 'spec': {'name': 'ees_workflow_view'}, 'callable': original},
+                'terminal': {'spec': {'name': 'terminal'}, 'callable': unrelated},
+                'builtin': {'spec': {'name': 'builtin'}, 'callable': unrelated}})
+            self.assertEqual(set(wrapped), {'ees_workflow_view'})
+            with self.assertRaises(HTTPException):
+                self.native.wrap_chat_work_tools(request, self.reader, {'builtin': {'spec': {'name': 'builtin'}, 'callable': unrelated}})
+            await self.fixture.acl.AccessGrants.set_access_grants('tool', 'ees_workflow', [])
+            await blocked_selection('work_chat_access_denied')
+            with self.assertRaises(HTTPException) as revoked:
+                await wrapped['ees_workflow_view']['callable']()
+            self.assertEqual(revoked.exception.status_code, 409)
+            original.assert_not_awaited(); unrelated.assert_not_awaited()
+            tool = await self.fixture.tools.Tools.get_tool_by_id('ees_workflow')
+            await self.fixture.tools.Tools.update_tool_by_id('ees_workflow', {'content': tool.content + '\n# changed\n'})
+            await blocked_selection('work_chat_tool_review_required')
+
     async def test_integrated_read_review_commits_existing_native_approval(self):
         refs = await self.fixture.register_read_tool("confluence")
         disabled = await self.bridge.approval_action(self.admin, {"action": "disable", "reference": refs["get_page"], "evidence": "synthetic review reset"})
@@ -247,11 +375,19 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_registered_request_metadata_never_loads_code_and_obeys_acl(self):
         await self.fixture.register_read_tool("confluence")
+        tool = await self.fixture.tools.Tools.get_tool_by_id("fixture_confluence")
+        specs = deepcopy(tool.specs)
+        specs[0]['title'] = '안내 문서 찾기'
+        specs[1]['description'] = '문서 내용 읽기\nAdditional developer detail'
+        await self.fixture.tools.Tools.update_tool_by_id('fixture_confluence', {'specs': specs})
         with patch.object(self.fixture.plugin, "load_tool_module_by_id", side_effect=AssertionError("metadata must not execute code")):
             contract = await self.bridge.inspect_registered(self.reader, "fixture_confluence", "get_page")
             self.assertFalse(contract["executable"])
             self.assertEqual(contract["reason"], "ees_connector_unconfigured")
             self.assertEqual(set(contract["schema"]["properties"]), {"page_id"})
+            listing = await self.bridge.registered_capabilities(self.reader)
+            self.assertEqual({item['function_name'] for item in listing}, {'안내 문서 찾기', '문서 내용 읽기'})
+            self.assertTrue(all(item['tool_name'] == 'confluence' and item['kind'] == 'read' for item in listing))
             await self.fixture.acl.AccessGrants.set_access_grants("tool", "fixture_confluence", [])
             await self.assert_code("native_access_denied", self.bridge.inspect_registered(self.reader, "fixture_confluence", "get_page"))
 

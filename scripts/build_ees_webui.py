@@ -95,6 +95,14 @@ WORK_FILES = tuple(WORK_ASSETS.values()) + tuple(TARGET_APP + name for name in (
 # Current UI references must be present even when a truncated archive has a
 # recomputed RECORD. Shipped prior-version inventories above stay unchanged.
 WORK_FILES += tuple(TARGET_APP + name for name in V4_ICON_FILES)
+# Already selected ees.13 programs and Restore backups predate these two
+# assets. Freeze that inventory while requiring both for new incoming wheels.
+WORK_FILES_V13 = WORK_FILES
+EASY_AUTHORING_ASSETS = {"scripts/" + name: "open_webui/" + name for name in (
+    "workflow_help.json", "workflow_tool_examples.json",
+)}
+WORK_ASSETS.update(EASY_AUTHORING_ASSETS)
+WORK_FILES += tuple(EASY_AUTHORING_ASSETS.values())
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {
@@ -492,10 +500,10 @@ def prepare_asset_guard_replacements(source, replacements):
             text = _one_replace(text, "    tool_ids = form_data.pop('tool_ids', None)\n",
                 "    tool_ids = form_data.pop('tool_ids', None)\n"
                 "    from open_webui.ees_workflow_native import select_chat_work_tools, wrap_chat_work_tools\n"
-                "    tool_ids = await select_chat_work_tools(request, user, metadata, tool_ids, form_data)\n", filename)
-            text = _one_replace(text, "            if mcp_tools_dict:\n",
-                "            tools_dict = wrap_chat_work_tools(request, user, tools_dict)\n\n"
-                "            if mcp_tools_dict:\n", filename)
+                "    tool_ids = await select_chat_work_tools(request, user, metadata, tool_ids, form_data, explicit_tools=payload_tools is not None)\n", filename)
+            text = _one_replace(text, "        if tools_dict:\n",
+                "        tools_dict = wrap_chat_work_tools(request, user, tools_dict)\n\n"
+                "        if tools_dict:\n", filename)
             text += "\nEES_WORK_NATIVE_CHAT_CONTEXT = 1\n"
         if filename in {"open_webui/routers/openai.py", "open_webui/routers/ollama.py"}:
             text = _guard_headless_model_parameters(text, filename)

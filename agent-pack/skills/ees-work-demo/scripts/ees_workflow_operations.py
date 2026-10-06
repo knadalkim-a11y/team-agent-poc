@@ -13,6 +13,7 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 import inspect
 import json
+from pathlib import Path
 import re
 import secrets
 import time
@@ -26,6 +27,11 @@ INTENT_TTL = 120
 LEASE_SECONDS = 30
 REQUEST_STATES = {"prepared", "approval_pending", "ready", "requested", "accepted", "running", "reported_complete", "effect_verified", "failed", "rejected", "unknown", "blocked"}
 SECRET_KEY = re.compile(r"(^|_)(pat|password|secret|token|cookie|authorization|headers)($|_)", re.I)
+
+
+def tool_examples():
+    """Read-only authoring suggestions; never register or connect a tool."""
+    return json.loads(Path(__file__).with_name("workflow_tool_examples.json").read_text(encoding="utf-8"))
 
 
 def value(obj, key, default=None):
@@ -486,6 +492,8 @@ class OperationsRuntime:
             with self.service._db() as db:
                 data = self._tool(db, body.get("tool_contract_id"))
                 self._scope(db, actor, groups, data["system_id"], role="owner")
+            if not data.get("reference"):
+                fail("tool_function_unconnected", "필요한 기능이 아직 연결되지 않았습니다. 연결된 기능을 고른 뒤 확인을 요청해 주세요.")
             checked = await self._inspect_reference(actor, data["reference"], data["kind"])
             if data["kind"] in {"request", "direct"} and data.get("status_function"):
                 status_contract = await self.bridge.inspect_registered(actor, data["reference"]["tool_id"], data["status_function"])
@@ -502,15 +510,33 @@ class OperationsRuntime:
             row = db.execute("SELECT data FROM work_tool_contracts WHERE id=?", (key,)).fetchone()
             previous = json.loads(row[0]) if row else None
             self._revision(body, previous["revision"] if previous else 0)
+            if action != "tool_save" and (not previous or previous["revision"] != data["revision"]):
+                fail("revision_conflict")
             if action == "tool_save":
                 if previous and previous["system_id"] != data["system_id"]:
                     fail("tool_system_immutable")
+                # These legacy values are no longer editable in the simple
+                # form. Omission must not erase stored user data; neither
+                # value configures execution or automatic reconciliation.
+                for field in ("timeout_seconds", "completion_wait_seconds"):
+                    if previous and field not in data and field in previous:
+                        data[field] = deepcopy(previous[field])
                 data = {**data, "id": key, "revision": (previous["revision"] if previous else 0) + 1, "state": "draft", "editor": value(actor, "id"), "updated_at": self.clock(), "reviewer": None}
             elif action == "tool_submit":
                 data = previous
-                guide = urlsplit(data.get("guide_url", ""))
-                if guide.scheme not in {"https", "http"} or not guide.netloc or guide.username or guide.password:
-                    fail("guide_required", "담당자가 확인할 기능 가이드 링크가 필요합니다.")
+                guide_url = data.get("guide_url")
+                if guide_url is None:
+                    guide_url = ""
+                if not isinstance(guide_url, str):
+                    fail("guide_required", "가이드 문서는 http 또는 https 주소로 입력해 주세요.")
+                if data["kind"] != "read" or guide_url.strip():
+                    try:
+                        guide = urlsplit(guide_url.strip())
+                        valid_guide = guide.scheme in {"https", "http"} and bool(guide.netloc) and not guide.username and not guide.password
+                    except ValueError:
+                        valid_guide = False
+                    if not valid_guide:
+                        fail("guide_required", "담당자가 확인할 가이드 문서의 http 또는 https 주소를 입력해 주세요.")
                 if data["kind"] in {"request", "direct"} and (not data.get("status_function") or not data.get("output_schema") or not data.get("responsible_user_id")):
                     fail("request_contract_incomplete", "EES 기능·상태 조회·결과 형식·담당자를 확인해 주세요.")
                 if data["kind"] in {"request", "direct"}:
@@ -1560,7 +1586,8 @@ class OperationsRuntime:
             state = "failed" if state in {"failed", "blocked", "unknown"} else "missed" if state == "missed" else "running" if state in {"queued", "running"} else "succeeded" if state == "succeeded" else None
             if state is not None:
                 automatic[(slot["workflow_id"], slot["factory_id"])] = {"workflow_id": slot["workflow_id"], "factory_id": slot["factory_id"], "status": state, "scheduled_at": slot["scheduled_at"]}
-        return {"ok": True, "scope_runs": scopes, "tools": tools, "native_functions": native_functions, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
+        can_author_direct = value(actor, "role") == "admin" or any(item["id"] == value(actor, "id") for item in reviewers)
+        return {"ok": True, "scope_runs": scopes, "tools": tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
 
     def start(self):
         self._closing = False

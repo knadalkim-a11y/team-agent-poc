@@ -1,0 +1,32 @@
+[
+  {
+    "id": "jira-query",
+    "name": "Jira 조회",
+    "description": "배포 전에 대상 CR의 승인 상태와 관련 내용을 확인합니다.",
+    "kind": "read",
+    "match": {"function": "jira_search_crs"}
+  },
+  {
+    "id": "service-status",
+    "name": "서비스 상태 조회",
+    "description": "점검할 서비스의 현재 상태를 확인합니다. EMS 정보 읽기 기능 연결이 필요합니다.",
+    "kind": "read",
+    "match": {"tool_id": "ems", "function": "service_status"},
+    "requires_read_allowlist": true
+  },
+  {
+    "id": "collection-queue",
+    "name": "수집 대기열 조회",
+    "description": "데이터 수집이 지연되는지 대기열 상태를 확인합니다. EMS 정보 읽기 기능 연결이 필요합니다.",
+    "kind": "read",
+    "match": {"tool_id": "ems", "function": "collection_queue"},
+    "requires_read_allowlist": true
+  },
+  {
+    "id": "restart-service",
+    "name": "서비스 재시작 요청",
+    "description": "점검한 서비스를 재시작하도록 EES에 요청합니다. 실제 기능 연결과 담당자 확인이 필요합니다.",
+    "kind": "request",
+    "match": {"tool_id": "ops", "function": "restart_service"}
+  }
+]

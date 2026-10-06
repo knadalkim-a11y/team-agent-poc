@@ -1,0 +1,14 @@
+{
+  "original_filename": "easy-tools-actual-existing-ees13-after.log",
+  "original_sha256": "fa5d3e0e058ad6314f95d112f011b2a54ab76bbd2250bca7a5a44bdf4e56c7bf",
+  "encoding": "UTF-8",
+  "lines": [
+    "actual_previous_wheel: dist/http-id-fixed/open_webui-0.11.3+ees.13-py3-none-any.whl\n",
+    "actual_previous_wheel_sha256: 914de1290d28069f32c937c62c180f21c27519611cf7827d1defe3b0e6b494c0\n",
+    "actual_previous_installed_inventory: PASS 6017 files\n",
+    "apply_current_inventory_synthetic_candidate: PASS\n",
+    "restore_actual_previous_program_exact_hashes_and_preserved_runtime_data: PASS\n",
+    "actual_old_wheel_as_new_incoming_candidate: REJECT The complete app, frontend and metadata must be present together.\n",
+    "scope: existing actual wheel + current inventory helper fixture; not a final current build verification\n"
+  ]
+}

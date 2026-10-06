@@ -7,7 +7,7 @@ transport are synthetic. The complete CLI gate verifies real login separately.
 import asyncio
 from copy import deepcopy
 import json
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from ees_work_integrated_fixture import IntegratedNativeCase
 
@@ -15,6 +15,46 @@ from ees_work_integrated_fixture import IntegratedNativeCase
 class FigmaAuthoringNativeTests(IntegratedNativeCase):
     def operations(self):
         return asyncio.run(self.server.workflow.operations.state(self.server.user, system_id='EMS'))
+
+    def tool_connections(self):
+        """Register metadata only in this synthetic transport, never Native assets."""
+        self.connected_tools = []
+
+        def function(tool_id, name, function_name, kind):
+            return {'name': name, 'function_name': function_name, 'kind': kind,
+                    'reference': {'tool_id': tool_id, 'function': function_name,
+                                  'revision': 1, 'content_hash': 'a' * 64,
+                                  'schema_hash': 'b' * 64},
+                    'schema': {'type': 'object', 'properties': {
+                        'target': {'type': 'string', 'title': '대상'}}, 'required': ['target']}}
+
+        async def registered(actor):
+            return deepcopy(self.connected_tools)
+
+        async def inspect(actor, tool_id, function_name):
+            item = next((item for item in self.connected_tools
+                         if item['reference']['tool_id'] == tool_id
+                         and item['reference']['function'] == function_name), None)
+            if item is None:
+                raise self.backend.WorkflowError('native_access_denied', '연결된 기능을 확인해 주세요.')
+            return deepcopy(item)
+
+        self.bridge.registered_capabilities = registered
+        self.bridge.inspect = inspect
+        self.bridge.inspect_registered = inspect
+        return function
+
+    def tool_command(self, action, revision=0, **kwargs):
+        result = asyncio.run(self.server.workflow.operations.command(self.server.user, {
+            'action': action, 'expected_revision': revision,
+            'request_id': str(uuid4()), **kwargs}))
+        self.assertTrue(result['ok'], result)
+        return result
+
+    def open_tools(self):
+        self.click('[data-action="mode"][data-mode="author"]')
+        self.click('[data-action="tools"]')
+        self.wait("document.querySelector('[data-author-action=tool_create]')")
 
     def screenshot(self, label, *, wait_for_fonts=True):
         directory = super().screenshot(label, wait_for_fonts=wait_for_fonts)
@@ -26,11 +66,208 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
           return {scope:'built Native UI; synthetic session and data',
             path:location.pathname,ready:document.readyState,fonts:document.fonts.status,
             viewport:[innerWidth,innerHeight],active:{tag:active?.tagName,id:active?.id,name:active?.name},
-            panel:region(panel),authoring:region(author)};
+            panel:region(panel),authoring:region(author),
+            nativeDraft:window.__eesNativeDraftV1?.read?.(),
+            nativeInput:region(document.querySelector('#chat-input'))};
         })()""")
         (directory / (label + '-dom.json')).write_text(
             json.dumps(observed, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         return directory
+
+    def test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip(self):
+        function = self.tool_connections()
+        self.refresh()
+        self.open_tools()
+        self.click('[data-author-action="tool_create"]')
+        self.assertIn('예시에서 시작', self.text('#ees-work-designer'))
+        self.assertIn('아직 연결된 기능이 없습니다', self.text('#ees-work-designer'))
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-author-action=tool_example]').length"), 4)
+        self.assertEqual(self.operations()['tools'], [])
+        self.screenshot('easy-tools-empty-starter')
+        self.click('[data-author-action="tool_example"][data-id="collection-queue"]')
+        self.assertIn('필요한 기능이 아직 연결되지 않았습니다', self.text('#ees-work-designer'))
+        self.assertTrue(self.read('[data-author-action="tool_review"]', 'disabled'))
+        self.click('[data-author-action="tool_save"]')
+        self.wait("document.querySelector('#ees-work-designer footer')?.textContent.includes('저장된 초안')")
+        unconnected = self.operations()['tools'][0]
+        self.assertEqual(unconnected['name'], '수집 대기열 조회')
+        self.assertEqual(unconnected['kind'], 'read')
+        self.assertEqual(unconnected['reference'], {})
+        self.assertEqual(unconnected['state'], 'draft')
+        self.assertTrue(self.read('[data-author-action="tool_review"]', 'disabled'))
+        self.assertEqual([body['action'] for body in self.server.workspace_commands], ['tool_save'])
+        self.screenshot('easy-tools-unconnected-saved')
+
+        self.connected_tools.append(function('jira', '합성 Jira', 'jira_search_crs', 'read'))
+        self.refresh()
+        self.click('[data-author-action="tool_list"]')
+        self.click('[data-author-action="tool_create"]')
+        self.wait("document.querySelector('[data-author-action=tool_pick]')")
+        self.assertEqual(self.read('[data-author-action="tool_example"][data-id="jira-query"] .ew-tool-connection', 'dataset.connected'), 'true')
+        self.fill('#ew-tool-search', 'jira_search')
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[data-author-action=tool_pick]')].map(e=>e.dataset.id)"), ['jira:jira_search_crs'])
+        self.click('[data-author-action="tool_pick"][data-id="jira:jira_search_crs"]')
+        self.fill('#ew-author-tool [name=name]', '합성 CR 확인')
+        self.assertIn('하는 일: 정보 읽기', self.text('#ees-work-designer'))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-author-tool [name=kind],#ew-author-tool [name=timeout_seconds],#ew-author-tool [name=responsible_user_id]')"))
+        self.assertFalse(self.read('.ew-tool-advanced', 'open'))
+        self.assertEqual(self.read('#ew-author-tool [name=guide_url]', 'value'), '')
+        self.click('[data-author-action="tool_save"]')
+        self.wait("document.querySelector('[data-author-action=tool_review]')?.disabled === false")
+        self.screenshot('easy-tools-read-ready')
+        self.click('[data-author-action="tool_review"]')
+        self.wait("document.querySelector('#ees-work-designer')?.textContent.includes('담당자 확인 대기')")
+        saved = next(item for item in self.operations()['tools'] if item['name'] == '합성 CR 확인')
+        self.assertEqual(saved['reference'], self.connected_tools[0]['reference'])
+        self.assertEqual(saved['input_schema'], self.connected_tools[0]['schema'])
+        self.assertEqual(saved['state'], 'review_requested')
+        self.assertEqual(saved.get('guide_url', ''), '')
+        self.assertNotEqual(saved['id'], unconnected['id'])
+        self.assertEqual(self.bridge.calls, [])
+        self.assertEqual(self.server.completions, [])
+
+    def test_easy_request_choices_missing_output_and_legacy_time_values_roundtrip(self):
+        function = self.tool_connections()
+        primary = function('ops', '합성 EES', 'restart_service', 'request')
+        self.connected_tools.extend([primary,
+            function('ops', '합성 EES', 'restart_status', 'request'),
+            function('unrelated', '다른 연결', 'other_status', 'request')])
+        legacy = self.tool_command('tool_save', tool={
+            'name': '기존 요청 도구', 'system_id': 'EMS', 'kind': 'request',
+            'reference': primary['reference'], 'status_function': 'restart_status',
+            'responsible_user_id': self.server.user['id'],
+            'guide_url': 'https://example.invalid/guide',
+            'output_schema': {'type': 'object', 'properties': {'kept': {'type': 'boolean'}}},
+            'timeout_seconds': 47, 'completion_wait_seconds': 651})['tool']
+        self.refresh()
+        self.open_tools()
+        self.click('[data-author-action="tool_open"][data-id="' + legacy['id'] + '"]')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=timeout_seconds],[name=completion_wait_seconds],[name=kind]')"))
+        self.fill('#ew-author-tool [name=description]', '기존 값을 보존하는 설명 수정')
+        self.click('[data-author-action="tool_save"]')
+        self.wait("document.querySelector('#ees-work-designer footer')?.textContent.includes('저장된 초안')")
+        saved = next(item for item in self.operations()['tools'] if item['id'] == legacy['id'])
+        self.assertEqual(saved['timeout_seconds'], 47)
+        self.assertEqual(saved['completion_wait_seconds'], 651)
+        self.assertEqual(saved['output_schema'], legacy['output_schema'])
+        self.assertEqual(saved['description'], '기존 값을 보존하는 설명 수정')
+
+        self.click('[data-author-action="tool_list"]')
+        self.click('[data-author-action="tool_create"]')
+        self.click('[data-author-action="tool_pick"][data-id="ops:restart_service"]')
+        self.assertIn('하는 일: EES에 작업 부탁', self.text('#ees-work-designer'))
+        self.assertEqual(self.read('[name=status_function]', 'value'), 'restart_status')
+        self.assertEqual(self.browser.evaluate("[...document.querySelector('[name=status_function]').options].map(e=>e.value)"), ['', 'restart_status'])
+        self.assertIn(self.server.user['name'], self.text('#ees-work-designer'))
+        self.assertFalse(self.read('.ew-tool-advanced', 'open'))
+        self.assertEqual(self.read('[name=output_schema_json]', 'value'), '')
+        self.fill('#ew-author-tool [name=guide_url]', 'https://example.invalid/request-guide')
+        self.click('[data-author-action="tool_save"]')
+        self.wait("document.querySelector('#ees-work-designer footer')?.textContent.includes('저장된 초안')")
+        self.assertIn('결과 형식이 비어 있습니다', self.text('#ew-tool-submit-reason'))
+        self.assertTrue(self.read('[data-author-action="tool_review"]', 'disabled'))
+        created = next(item for item in self.operations()['tools'] if item['id'] != legacy['id'])
+        self.assertEqual(created['status_function'], 'restart_status')
+        self.assertEqual(created['responsible_user_id'], self.server.user['id'])
+        self.assertNotIn('output_schema', created)
+        self.screenshot('easy-tools-request-output-required')
+        self.click('.ew-tool-advanced > summary')
+        self.fill('#ew-author-tool [name=output_schema_json]', '{"type":"object","properties":{"status":{"type":"string"}},"required":["status"]}')
+        self.click('[data-author-action="tool_save"]')
+        self.wait("document.querySelector('[data-author-action=tool_review]')?.disabled === false")
+        self.screenshot('easy-tools-request-ready')
+        self.click('[data-author-action="tool_review"]')
+        self.wait("document.querySelector('#ees-work-designer')?.textContent.includes('담당자 확인 대기')")
+        submitted = next(item for item in self.operations()['tools'] if item['id'] == created['id'])
+        self.assertEqual(submitted['state'], 'review_requested')
+        self.assertEqual(submitted['status_reference'], self.connected_tools[1]['reference'])
+        self.assertEqual(self.bridge.calls, [])
+        self.assertEqual(self.server.completions, [])
+
+    def test_help_keyboard_escape_and_questions_fill_native_composer_without_sending(self):
+        def enter_button():
+            # CDP needs Enter's character data to synthesize the native button
+            # activation (keydown alone does not emit keypress/click).
+            for kind in ('keyDown', 'keyUp'):
+                self.browser.call('Input.dispatchKeyEvent', {
+                    'type': kind, 'key': 'Enter', 'code': 'Enter',
+                    'windowsVirtualKeyCode': 13, 'nativeVirtualKeyCode': 13,
+                    **({'text': '\r', 'unmodifiedText': '\r'} if kind == 'keyDown' else {}),
+                })
+
+        self.tool_connections()
+        self.fill('#chat-input', '보존할 개인 대화 초안')
+        before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.refresh()
+        self.open_tools()
+        self.click('[data-author-action="tool_create"]')
+        self.click('[data-author-action="tool_example"][data-id="jira-query"]')
+        self.click('#ew-author-tool [name=name]')
+        for _ in range(12):
+            self.key('Tab', 9)
+            if self.browser.evaluate("document.activeElement?.matches('[data-author-action=help][data-id=read_tool]')"):
+                break
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=help][data-id=read_tool]')"))
+        enter_button()
+        self.wait("document.querySelector('#ees-work-help')")
+        self.assertEqual(self.read('#ees-work-help', 'getAttribute("role")'), 'dialog')
+        source_term = next(item for item in self.state()['help']['terms'] if item['id'] == 'read_tool')
+        self.assertEqual(self.text('#ees-work-help .ew-help-summary'), source_term['summary'])
+        self.assertIn(source_term['example'], self.text('#ees-work-help .ew-help-example'))
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-help-close]')"))
+        self.screenshot('easy-tools-help-keyboard-open')
+        # Normal workspace refresh replaces authoring controls. An open help
+        # popover must keep its content and return focus to the current button.
+        self.refresh()
+        self.wait("document.querySelector('#ees-work-help')")
+        self.assertEqual(self.text('#ees-work-help .ew-help-summary'), source_term['summary'])
+        self.key('Escape', 27)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-help')"))
+        focus = self.browser.evaluate("(()=>{const e=document.activeElement,s=getComputedStyle(e);return {trigger:e.matches('[data-author-action=help][data-id=read_tool]'),visible:e.matches(':focus-visible'),style:s.outlineStyle,width:parseFloat(s.outlineWidth)};})()")
+        self.assertTrue(focus['trigger'], focus)
+        self.assertTrue(focus['visible'], focus)
+        self.assertNotEqual(focus['style'], 'none', focus)
+        self.assertGreater(focus['width'], 0, focus)
+        enter_button()
+        self.wait("document.querySelector('#ees-work-help')")
+        self.click('#ees-work-help [data-help-ask]')
+        self.wait("window.__eesNativeDraftV1?.read()?.prompt?.includes('read_tool')")
+        after = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        directory = self.screenshot('easy-tools-help-native-draft')
+        (directory / 'easy-tools-help-draft-roundtrip.json').write_text(json.dumps({
+            'scope': 'built Native composer; synthetic personal draft and transport',
+            'before': before, 'after': after, 'completion_count': len(self.server.completions),
+            'input': self.browser.evaluate("(()=>{const e=document.querySelector('#chat-input');return {html:e?.innerHTML,text:e?.textContent};})()"),
+        }, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.assertTrue(after['prompt'].startswith(before['prompt']))
+        # Native Tiptap serializes a blank paragraph with interior spaces.
+        self.assertRegex(after['prompt'][len(before['prompt']):], r'^\n[ \t]*\nEES Work 도움말')
+        for text in ('도움말 용어 ID: read_tool', '현재 화면:', '초안 이름: Jira 조회', '하는 일: 정보 읽기'):
+            self.assertIn(text, after['prompt'])
+        self.assertEqual({key: value for key, value in before.items() if key != 'prompt'},
+                         {key: value for key, value in after.items() if key != 'prompt'})
+        self.assertEqual(self.server.completions, [])
+        self.assertEqual(self.operations()['tools'], [])
+        self.click('.ew-tool-advanced > summary')
+        self.click('[data-author-action="help"][data-id="output_schema"]')
+        self.wait("document.querySelector('#ees-work-help')")
+        self.refresh()
+        self.wait("document.querySelector('.ew-tool-advanced')?.open && document.querySelector('#ees-work-help')")
+        self.assertEqual(self.text('#ees-work-help-title'), '결과 형식')
+        self.screenshot('easy-tools-help-advanced-refresh')
+        self.key('Escape', 27)
+        advanced_focus = self.browser.evaluate("(()=>{const e=document.activeElement;return {trigger:e.matches('[data-author-action=help][data-id=output_schema]'),visible:e.getClientRects().length>0,open:document.querySelector('.ew-tool-advanced')?.open};})()")
+        self.assertEqual(advanced_focus, {'trigger': True, 'visible': True, 'open': True})
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-help')"))
+        self.click('[data-author-action="tool_list"]')
+        self.click('[data-author-action="tool_create"]')
+        self.click('[data-author-action="tool_question"][data-id="1"]')
+        self.wait("window.__eesNativeDraftV1?.read()?.prompt?.includes('Jira에서 CR 승인 상태를 확인하는 도구를 만들고 싶어')")
+        question = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.assertTrue(question['prompt'].startswith(after['prompt']))
+        self.assertRegex(question['prompt'][len(after['prompt']):], r'^\n[ \t]*\nJira에서 CR 승인 상태')
+        self.assertEqual(self.server.completions, [])
+        self.assertEqual(self.operations()['tools'], [])
 
     def test_missing_random_uuid_creates_and_saves_draft_in_native_ui(self):
         # Loopback is trustworthy in Chrome. Explicit API removal reproduces

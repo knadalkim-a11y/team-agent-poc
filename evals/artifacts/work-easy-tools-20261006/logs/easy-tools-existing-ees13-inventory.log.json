@@ -1,0 +1,12 @@
+{
+  "original_filename": "easy-tools-existing-ees13-inventory.log",
+  "original_sha256": "46b1d224adb91a0b46f9f2c54666d2b69995b12bef04c747cfd491ab2449ccf9",
+  "encoding": "UTF-8",
+  "lines": [
+    "prior_wheel: dist/http-id-fixed/open_webui-0.11.3+ees.13-py3-none-any.whl\n",
+    "version: 0.11.3+ees.13\n",
+    "current_WORK_FILES_missing: ['open_webui/workflow_help.json', 'open_webui/workflow_tool_examples.json']\n",
+    "original_inventory: PASS 6019 RECORD rows\n",
+    "current_inventory: REJECT The complete app, frontend and metadata must be present together.\n"
+  ]
+}

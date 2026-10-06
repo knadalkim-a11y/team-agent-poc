@@ -1,0 +1,296 @@
+{
+  "scope": "Development verification: pinned Open WebUI 0.11.3 UI, real temporary SQLite, synthetic Native identity, functions and model. No in-house deployment or EES/EMS execution.",
+  "base_commit": "29b95b56917a5b587056d33f1df4d43783ecfdb2",
+  "branch": "feat/work-easy-tools-20261006",
+  "build3": {
+    "filename": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "sha256": "d609ce9cece2484acde8f7dca9d51d41ab4edad5cdc7b4ef0d61ecc5eeb0dd8f",
+    "size": 152103834
+  },
+  "build2_sha256": "6fbfcba26308cfe6349106699c1c76a67ae76c8c1aca9e7a71308dda1b1b1447",
+  "native": {
+    "read_and_request": "build2: 2 passed",
+    "help_including_advanced_refresh": "build3: 1 passed",
+    "chrome": "153.0.8010.52"
+  },
+  "ui_node": {
+    "passed": 132,
+    "failed": 0
+  },
+  "operations": {
+    "passed": 48
+  },
+  "native_bridge": {
+    "passed": 16
+  },
+  "installer": {
+    "passed": 60,
+    "skipped": 6,
+    "actual_prior_ees13_apply_restore": "passed with synthetic current inventory candidate; exact existing artifact/file/data preservation checked"
+  },
+  "sources": {
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow.py": "d504659d63ffe56df4990ac6369115bb1c9443bdf8c2b1a635edc6010ccbe502",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_authoring.py": "f918dbcbc1824ca57fbba8881b5eb63a2c354f3452ef315178fda1decdc60cfe",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_contract.py": "fa8559f4d6a289a19fd1c3a074ff54f07d76f782a04d832daddde5149001de10",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_definition.py": "65430af71bb5dd389b96db9a284029eb7e7381768d10a584c7eee482d6703a57",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_execution.py": "bb3489b385833384af857f2f555035f47905f6d58862a3c8df8fc3b96d8cd47a",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_model.py": "e5054976064c8186c162d01ebc323f16820f9ae05744f2eb37ee13bf11289d1c",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py": "3c8ccdfa652ec01c1d04620f20ce3b6f287ead27d1ed71aa72a1cd7bbbfd92dc",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_operations.py": "7f11b8a1d3ef0385f5057af78cff9ed381e3bd2ab1698cc7ac2febdcdc5201cc",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_view.py": "b40840efadff7347556ef59771b8d4eec53e66c39c16bd532c8114a1132fe29a",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py": "f8281b40adb5522ede77c2baad9b22b4fa250d01005ad742a1dbdf1d4235ae93",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_help.json": "b5f90131c9e7bc083cb055a4f9698103fe75a1441e680362083d5a0d3f3557c4",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_policy.json": "dcaec7a509c904f679ce01558896f031117962ea8f1ce580c5210e2b35c55d66",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py": "12a538febf1843aeb7e0ccad64e72545c097858d94a165e046cba259f61ba8fe",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_tool_examples.json": "1233b8fa52a1160f8678090b02d928835d89108bedd38d0f9d32a56518262646",
+    "branding/ees/ui/ees-work-designer.js": "3c0b6f6fe264b7c3310c0c3d1c7001a29d1822cfc1628532eb09a1584c76730c",
+    "branding/ees/ui/ees-work-launcher.css": "6b7b71dff19e31734935b315a93845ac33d1d78277304d070c44d3112db77edf",
+    "branding/ees/ui/ees-work-launcher.js": "52217576e35a578cfeb3c145356c210be0f3d314f9599f6e457b4ff592ee20a1",
+    "branding/ees/ui/ees-work-view.js": "e02909bb16c04ac8d0af9212e7a9cce92c45f9afa18cf94fc76a585e19c74bf1",
+    "scripts/build_ees_webui.py": "30be53316bfc56d71b4d2c2a04c94363af28d3e1d2684fe04d73d1b8df82b183",
+    "scripts/ees_webui_customization.py": "90b44ab57f14b735cf4deac41edffca5bf78c6c66717ac77eada530e8ffef860"
+  },
+  "evidence_files": [
+    {
+      "path": "logs/easy-tools-actual-existing-ees13-after.log.json",
+      "sha256": "dc5f343dd71bc7708996fcf29019b30f970f4d1506307d333e1d5e0237071df7",
+      "bytes": 845
+    },
+    {
+      "path": "logs/easy-tools-existing-ees13-inventory.log.json",
+      "sha256": "d87695984f735103d1af90e32f98d96fb03b4a1e7d6615e857d395369182503b",
+      "bytes": 578
+    },
+    {
+      "path": "logs/easy-tools-installed-ees13-before.log.json",
+      "sha256": "3c3cfca4f877e58599d42031c0c4a981082f10fae0acb6aab5a88b1366250481",
+      "bytes": 2037
+    },
+    {
+      "path": "logs/easy-tools-installer-after.log.json",
+      "sha256": "4eb618f9f10d2e21249e0ca496a639fb27b631758503c38275cc2769039647ed",
+      "bytes": 13834
+    },
+    {
+      "path": "logs/easy-tools-native-first.log.json",
+      "sha256": "d631d45b233d7b599b9f25ca2696f1c63d695f186488320570ccae4ef71b646d",
+      "bytes": 6911
+    },
+    {
+      "path": "logs/easy-tools-native-help-build3.log.json",
+      "sha256": "49659948d3af5afe58b623ce4c0b91b439bc1b5be7e3760b94f3495937d60a2c",
+      "bytes": 708
+    },
+    {
+      "path": "logs/easy-tools-native-help-second.log.json",
+      "sha256": "7bd7cff000e8df53c3e68c053a7ddb9d41fae64d761d4c08cbddb4875407290d",
+      "bytes": 567
+    },
+    {
+      "path": "logs/easy-tools-native-help-third.log.json",
+      "sha256": "308a8e17b1d6d5dc1faa6e9f4c3a705ae78ea1cddf3aae65f9ded84a242c3fbf",
+      "bytes": 1507
+    },
+    {
+      "path": "logs/easy-tools-native-second.log.json",
+      "sha256": "8dc1b9b021ac7f52de13d4b630aef0c66665e90fda1bc109e3cc11071603dc1b",
+      "bytes": 1064
+    },
+    {
+      "path": "logs/easy-tools-node-first.log.json",
+      "sha256": "e535b2658d4512bbaa43f5e88d8d72acbf2f668b3d292cb9303da98b77c99bcc",
+      "bytes": 38153
+    },
+    {
+      "path": "logs/easy-tools-node-race-first.log.json",
+      "sha256": "5fbead6aa48b982d77194bce987da3d73283f00f62509ff741a00084da45808b",
+      "bytes": 20537
+    },
+    {
+      "path": "logs/easy-tools-operations-after.log.json",
+      "sha256": "ce3c8df313aa44b2d228b2f8967584b0c12efc45af8d8bfbff9f5b563a1ab438",
+      "bytes": 9026
+    },
+    {
+      "path": "logs/easy-tools-revision-before.log.json",
+      "sha256": "989bdd8d17fb62c0e10c6d6cf79f0558188015e40a86f2bfdda9b1af6169daf9",
+      "bytes": 2666
+    },
+    {
+      "path": "logs/easy-tools-ui-final.log.json",
+      "sha256": "08737b0fd97eda6413aa0469b339922ade63889759f2ad922b0c77cc50f27d29",
+      "bytes": 14924
+    },
+    {
+      "path": "native/easy-tools-empty-starter-dom.json",
+      "sha256": "f4f863bc1682804775d34a865e8a2d527e10a42816725f8087509e53a696c27f",
+      "bytes": 12008
+    },
+    {
+      "path": "native/easy-tools-empty-starter.png",
+      "sha256": "fa574ab6ed964478e8ac0be284d146eae8176af23216937eaab2ce08c8a946e8",
+      "bytes": 122589
+    },
+    {
+      "path": "native/easy-tools-help-advanced-refresh-dom.json",
+      "sha256": "8365fd5185a0b036e6d92b63f96e38a26aad70ec392fe9bca4dc7578be533901",
+      "bytes": 13564
+    },
+    {
+      "path": "native/easy-tools-help-advanced-refresh.png",
+      "sha256": "b7e04f89d852ff7a4137dd969522922dfaff10ea1a2a71862913f8d16e31b207",
+      "bytes": 180525
+    },
+    {
+      "path": "native/easy-tools-help-draft-roundtrip.json",
+      "sha256": "02bafb7e43b7d1064179490d522f610c0fc73e5656f6699c5652f4d6bdb1bded",
+      "bytes": 1474
+    },
+    {
+      "path": "native/easy-tools-help-keyboard-open-dom.json",
+      "sha256": "60f0e56fc174a4b9222573abba78840617e571072773eb78e44454f3f4fb1c3e",
+      "bytes": 12365
+    },
+    {
+      "path": "native/easy-tools-help-keyboard-open.png",
+      "sha256": "4dcc009a9f4787b112ec4ff96bc8683bf8ea9e5b187eabe3fc230408482c774a",
+      "bytes": 148411
+    },
+    {
+      "path": "native/easy-tools-help-native-draft-dom.json",
+      "sha256": "4a02abeeed12fcbbdc96c1e8e9f07bb1eca1c51e49df32456a1c1e9d56b006ba",
+      "bytes": 13003
+    },
+    {
+      "path": "native/easy-tools-help-native-draft.png",
+      "sha256": "f5bc3f44bf8c8586831ec5a538f3b77d7b6926b78fc4458334d70b8c9cd25e53",
+      "bytes": 136291
+    },
+    {
+      "path": "native/easy-tools-read-ready-dom.json",
+      "sha256": "fa03cb6e7143fdfb075010213039c2a7dbd732112289a8e72424bcad51e72d65",
+      "bytes": 11147
+    },
+    {
+      "path": "native/easy-tools-read-ready.png",
+      "sha256": "8ebe7c4f831b01c328cecc48a6c36037e40b21f6b67bd6f3f432335f093bd37c",
+      "bytes": 118656
+    },
+    {
+      "path": "native/easy-tools-request-output-required-dom.json",
+      "sha256": "1315f1c0bf81d1530cc9d6d06f4e35b84ff4455477b97aca9ee645ff1831bf77",
+      "bytes": 13767
+    },
+    {
+      "path": "native/easy-tools-request-output-required.png",
+      "sha256": "ae476906ffa29567502ad65c616aa1bdf52194aef31758d4cd70cfec966f0ee8",
+      "bytes": 116328
+    },
+    {
+      "path": "native/easy-tools-request-ready-dom.json",
+      "sha256": "7361bd2cbf5f93ed259890f16888ce5035e3f4c755b46b04c06807396944578a",
+      "bytes": 13871
+    },
+    {
+      "path": "native/easy-tools-request-ready.png",
+      "sha256": "115b1360504f6cb4006168c607cf61110d1255f13d7f75c6fc1185aaee9834a7",
+      "bytes": 113951
+    },
+    {
+      "path": "native/easy-tools-unconnected-saved-dom.json",
+      "sha256": "93f5215bc80c7febfb1864af73df12f10ff6fb9cb585dba7a8d53d6dac7f5419",
+      "bytes": 11929
+    },
+    {
+      "path": "native/easy-tools-unconnected-saved.png",
+      "sha256": "25f4513e3617b2cfb5e8d2c361df25adc21072b6e933fa359a401cbd2ff2d6f3",
+      "bytes": 128643
+    },
+    {
+      "path": "native/integrated-test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip-failure-cleanup.json",
+      "sha256": "f141547e9c1cb8fa897f0d62eccdd5c4d57fecd2731ba1ca695ee5851e97a3db",
+      "bytes": 6440
+    },
+    {
+      "path": "native/integrated-test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip-failure-dom.json",
+      "sha256": "ccda831474bf7af8b24627bbf67acb95c5f36bb145a45ef2415f978cebc533ba",
+      "bytes": 11155
+    },
+    {
+      "path": "native/integrated-test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip-failure.json",
+      "sha256": "90a7f7e4d893ebad9ecc657130153d9d187bc006046761057eaab0249e4854f2",
+      "bytes": 25157
+    },
+    {
+      "path": "native/integrated-test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip-failure.png",
+      "sha256": "842c24f21f1e0c2f9b926c76bf157ba15dd24ec3b0d96be7584a275790be78d1",
+      "bytes": 117281
+    },
+    {
+      "path": "native/integrated-test_help_keyboard_escape_and_questions_fill_native_composer_without_sending-attempt2-failure-cleanup.json",
+      "sha256": "aff4037638ab6491ac542ef38cb300583a8f0fad7ac703ca9fcab9deab20f67c",
+      "bytes": 5839
+    },
+    {
+      "path": "native/integrated-test_help_keyboard_escape_and_questions_fill_native_composer_without_sending-attempt2-failure-dom.json",
+      "sha256": "3096d7170b6724ddb60cf560cb9eb4c3a528b133e763060a024fb8402584b3c0",
+      "bytes": 11654
+    },
+    {
+      "path": "native/integrated-test_help_keyboard_escape_and_questions_fill_native_composer_without_sending-attempt2-failure.json",
+      "sha256": "d393b6f696a98aa45069618fd6d9408eca66ad2bb82ef5b1ccfd76ab13137d19",
+      "bytes": 23746
+    },
+    {
+      "path": "native/integrated-test_help_keyboard_escape_and_questions_fill_native_composer_without_sending-attempt2-failure.png",
+      "sha256": "fe2dab67d8a5742c5e841cc39805ef834e3a13c9fe07fb1e97ce63e498a9c981",
+      "bytes": 136293
+    },
+    {
+      "path": "native/integrated-test_help_keyboard_escape_and_questions_fill_native_composer_without_sending-attempt3-failure-cleanup.json",
+      "sha256": "14d13f95aa2d0d27c4ed27e8da94acbbc903c413f76fcb81b0a1582efe160808",
+      "bytes": 5788
+    },
+    {
+      "path": "native/integrated-test_help_keyboard_escape_and_questions_fill_native_composer_without_sending-attempt3-failure-dom.json",
+      "sha256": "3096d7170b6724ddb60cf560cb9eb4c3a528b133e763060a024fb8402584b3c0",
+      "bytes": 11654
+    },
+    {
+      "path": "native/integrated-test_help_keyboard_escape_and_questions_fill_native_composer_without_sending-attempt3-failure.json",
+      "sha256": "d1b699a529adcc76d173d3b5d9f58710a151ab95cf2323a65479f9c088082e46",
+      "bytes": 23718
+    },
+    {
+      "path": "native/integrated-test_help_keyboard_escape_and_questions_fill_native_composer_without_sending-attempt3-failure.png",
+      "sha256": "fe2dab67d8a5742c5e841cc39805ef834e3a13c9fe07fb1e97ce63e498a9c981",
+      "bytes": 136293
+    },
+    {
+      "path": "native/integrated-test_help_keyboard_escape_and_questions_fill_native_composer_without_sending-failure-cleanup.json",
+      "sha256": "14d13f95aa2d0d27c4ed27e8da94acbbc903c413f76fcb81b0a1582efe160808",
+      "bytes": 5788
+    },
+    {
+      "path": "native/integrated-test_help_keyboard_escape_and_questions_fill_native_composer_without_sending-failure-dom.json",
+      "sha256": "3096d7170b6724ddb60cf560cb9eb4c3a528b133e763060a024fb8402584b3c0",
+      "bytes": 11654
+    },
+    {
+      "path": "native/integrated-test_help_keyboard_escape_and_questions_fill_native_composer_without_sending-failure.json",
+      "sha256": "d1b699a529adcc76d173d3b5d9f58710a151ab95cf2323a65479f9c088082e46",
+      "bytes": 23718
+    },
+    {
+      "path": "native/integrated-test_help_keyboard_escape_and_questions_fill_native_composer_without_sending-failure.png",
+      "sha256": "fe2dab67d8a5742c5e841cc39805ef834e3a13c9fe07fb1e97ce63e498a9c981",
+      "bytes": 136293
+    }
+  ],
+  "limits": [
+    "First help PNG was overwritten by later failure collection; first failure is retained in easy-tools-native-first.log. attempt2/attempt3 captures describe their own attempt, not the first.",
+    "DOM textContent readiness timeout cause was not established. CDP Enter character data and Native blank paragraph serialization were confirmed independently.",
+    "Real in-house model help-grounding quality, operational EES/EMS, user usability and deployment were not verified."
+  ],
+  "logs_encoding": "Lossless UTF-8 lines with line endings plus original SHA256 in *.log.json; join lines to recover original bytes."
+}

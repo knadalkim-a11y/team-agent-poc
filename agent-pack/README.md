@@ -11,6 +11,8 @@
 | [Workspace](skills/ees-work-demo/scripts/ees_workflow_workspace.py) | 초안/게시본/진행/설정/판정/개인 상태 |
 | [Operations](skills/ees-work-demo/scripts/ees_workflow_operations.py) | 승인된 호출/예약/도구 검토/요청과 효과 추적 |
 | [AI Tool](skills/ees-work-demo/scripts/workflow_tool.py) | 조회·초안 제안·화면 안내만 노출; 저장/게시/실행/확정 없음 |
+| [공통 도움말](skills/ees-work-demo/scripts/workflow_help.json) | UI와 대화 조회가 함께 읽는 용어·예시·근거 지침의 단일 원본 |
+| [도구 시작 예시](skills/ees-work-demo/scripts/workflow_tool_examples.json) | 새 초안의 합성 이름·설명; 실제 연결은 현재 등록 기능에서 확인하며 자동 등록/실행 없음 |
 | [공통 정책](policies/common-policy.md) | 권한·비밀정보·미수행/실패 보호의 관리 근거; 자동 Skill 등록 아님 |
 | [관리 범위](ees-demo.json) | 빈 기본 등록 목록, 폐기 ID·보존 경계 |
 

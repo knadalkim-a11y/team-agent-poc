@@ -1,0 +1,16 @@
+{
+  "original_filename": "easy-tools-native-second.log",
+  "original_sha256": "79babafdfbb5429041a11ecda9edb663157147f44fda9e9601cc0462c7f4e854",
+  "encoding": "UTF-8",
+  "lines": [
+    "test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 117.06623099962599, \"product\": \"HeadlessChrome/153.0.8010.52\"}\n",
+    "ok\n",
+    "test_easy_request_choices_missing_output_and_legacy_time_values_roundtrip (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_easy_request_choices_missing_output_and_legacy_time_values_roundtrip) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 127.60898700071266, \"product\": \"HeadlessChrome/153.0.8010.52\"}\n",
+    "ok\n",
+    "\n",
+    "----------------------------------------------------------------------\n",
+    "Ran 2 tests in 4.261s\n",
+    "\n",
+    "OK\n"
+  ]
+}

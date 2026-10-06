@@ -9,6 +9,7 @@ import sys
 import tempfile
 from types import ModuleType
 import unittest
+from unittest.mock import patch
 from uuid import uuid4
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -80,6 +81,31 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await self.state('c'))['systems'], [])
         denied = await self.command('create_workflow', actor='c', system_id='EMS', name='무권한')
         self.assertEqual(denied['error']['code'], 'scope_forbidden')
+
+    async def test_help_reads_the_shipped_single_source_without_persisting_a_copy(self):
+        view = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_view')
+        source = ROOT / 'agent-pack/skills/ees-work-demo/scripts/workflow_help.json'
+        expected = json.loads(source.read_text(encoding='utf-8'))
+        actual = (await self.state())['help']
+        self.assertEqual(actual['source'], expected['source'])
+        self.assertEqual([{key: value for key, value in term.items() if key != 'evidence'}
+                          for term in actual['terms']], expected['terms'])
+        ids = [term['id'] for term in actual['terms']]
+        self.assertEqual(len(ids), len(set(ids)))
+        for term in actual['terms']:
+            self.assertTrue(set(term['related']) <= set(ids))
+            self.assertEqual(term['evidence'], f"근거 · EES Work 도움말 ‘{term['name']}’")
+        self.assertIn('도움말에 없는 내용', actual['answer_guidance']['unknown'])
+        # Move the canonical source for this test only. The response must read
+        # the changed file, not a duplicated hard-coded explanation or DB row.
+        expected['terms'][0]['summary'] = '시험용 원본 변경'
+        (Path(self.temp.name) / 'workflow_help.json').write_text(json.dumps(expected), encoding='utf-8')
+        before = self.database.read_bytes()
+        with patch.object(view, '__file__', str(Path(self.temp.name) / 'ees_workflow_view.py')):
+            changed = await self.state()
+        self.assertEqual(changed['help']['terms'][0]['summary'], '시험용 원본 변경')
+        self.assertEqual(self.database.read_bytes(), before)
+        self.assertEqual((await self.state())['help'], actual)
 
     async def test_versions_are_immutable_and_open_run_uses_original(self):
         key, definition, revision = await self.create()

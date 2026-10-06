@@ -1,0 +1,9 @@
+{
+  "original_filename": "easy-tools-native-help-second.log",
+  "original_sha256": "554e33eadc5fb7d6ab5eb718a916d8d61ecb86f5c876c8751a8dc23a9810ad41",
+  "encoding": "UTF-8",
+  "lines": [
+    "test_help_keyboard_escape_and_questions_fill_native_composer_without_sending (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_help_keyboard_escape_and_questions_fill_native_composer_without_sending) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 117.7309319973574, \"product\": \"HeadlessChrome/153.0.8010.52\"}\n",
+    "FAIL\n"
+  ]
+}
