@@ -1,0 +1,206 @@
+{
+  "draft_preserved": true,
+  "scope": "actual compiled Native routes/composer; text/nonimage Native snapshot; synthetic session, capability response, attachment and selected asset IDs; existing model/params stay Native-owned; not a Native ACL test",
+  "skills-procedure": {
+    "path": "/workspace/skills",
+    "return_bar": {
+      "x": 256,
+      "y": 0,
+      "bottom": 44,
+      "width": 1664,
+      "height": 44,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "static",
+      "flex": "0 0 auto",
+      "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(250, 250, 250)"
+    },
+    "search": {
+      "request": {
+        "url": "http://127.0.0.1:35015/api/v1/skills/list?query=native-menu-procedure&page=1&order_by=updated_at&direction=desc",
+        "method": "GET"
+      },
+      "status": 200,
+      "response": {
+        "items": [],
+        "total": 0
+      },
+      "displayed_query": "native-menu-procedure"
+    }
+  },
+  "skills-tool": {
+    "path": "/workspace/skills",
+    "return_bar": {
+      "x": 256,
+      "y": 0,
+      "bottom": 44,
+      "width": 1664,
+      "height": 44,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "static",
+      "flex": "0 0 auto",
+      "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(250, 250, 250)"
+    },
+    "search": {
+      "request": {
+        "url": "http://127.0.0.1:35015/api/v1/skills/list?query=native-menu-tool&page=1&order_by=updated_at&direction=desc",
+        "method": "GET"
+      },
+      "status": 200,
+      "response": {
+        "items": [],
+        "total": 0
+      },
+      "displayed_query": "native-menu-tool"
+    }
+  },
+  "skills-procedure-start": {
+    "path": "/workspace/skills",
+    "return_bar": {
+      "x": 256,
+      "y": 0,
+      "bottom": 44,
+      "width": 1664,
+      "height": 44,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "static",
+      "flex": "0 0 auto",
+      "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(250, 250, 250)"
+    },
+    "search": {
+      "request": {
+        "url": "http://127.0.0.1:35015/api/v1/skills/list?query=native-menu-procedure-start&page=1&order_by=updated_at&direction=desc",
+        "method": "GET"
+      },
+      "status": 200,
+      "response": {
+        "items": [],
+        "total": 0
+      },
+      "displayed_query": "native-menu-procedure-start"
+    }
+  },
+  "native-missing-mount": {
+    "path": "/workspace/skills",
+    "return_bar": null,
+    "search": {
+      "request": {
+        "url": "http://127.0.0.1:40159/api/v1/skills/list?query=missing-mount-search&page=1&order_by=updated_at&direction=desc",
+        "method": "GET"
+      },
+      "status": 200,
+      "response": {
+        "items": [],
+        "total": 0
+      },
+      "displayed_query": "missing-mount-search"
+    }
+  },
+  "direct-native-search": {
+    "path": "/workspace/skills",
+    "return_bar": null,
+    "search": {
+      "request": {
+        "url": "http://127.0.0.1:40159/api/v1/skills/list?query=direct-native-search&page=1&order_by=updated_at&direction=desc",
+        "method": "GET"
+      },
+      "status": 200,
+      "response": {
+        "items": [],
+        "total": 0
+      },
+      "displayed_query": "direct-native-search"
+    }
+  },
+  "admin_modal_removed_after_return": true,
+  "image_block": {
+    "path": "/c/existing-chat",
+    "mime": "image/png",
+    "prompt": "이미지와 함께 보존할 개인 질문"
+  },
+  "mask_icons": [
+    {
+      "button": "AI 도우미모델",
+      "layout": {
+        "x": 16,
+        "y": 358,
+        "bottom": 374,
+        "width": 16,
+        "height": 16,
+        "display": "block",
+        "visibility": "visible",
+        "position": "static",
+        "flex": "0 0 16px",
+        "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+        "maskImage": "url(\"http://127.0.0.1:39693/_ees13/v4/51602.svg?v=a62ea29e265374f1823a0f14ad2fc57fdc6079296bd42bb290f2ca428f0b145d\")",
+        "background": "rgb(111, 113, 122)"
+      }
+    },
+    {
+      "button": "기능 연결도구",
+      "layout": {
+        "x": 16,
+        "y": 504,
+        "bottom": 520,
+        "width": 16,
+        "height": 16,
+        "display": "block",
+        "visibility": "visible",
+        "position": "static",
+        "flex": "0 0 16px",
+        "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+        "maskImage": "url(\"http://127.0.0.1:39693/_ees13/v4/f6bbc.svg?v=b2a9190a251866678dec4e60fcca8a9e29db9b3e838234e3316654c62083fc3d\")",
+        "background": "rgb(111, 113, 122)"
+      }
+    },
+    {
+      "button": "공장·접근 범위",
+      "layout": {
+        "x": 16,
+        "y": 541,
+        "bottom": 557,
+        "width": 16,
+        "height": 16,
+        "display": "block",
+        "visibility": "visible",
+        "position": "static",
+        "flex": "0 0 16px",
+        "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+        "maskImage": "url(\"http://127.0.0.1:39693/_ees13/v4/40095.svg?v=568698ad20328df158f834393622702f379fb03fcd680407fdc2422ec00fd05b\")",
+        "background": "rgb(111, 113, 122)"
+      }
+    },
+    {
+      "button": "관리자 설정관리자",
+      "layout": {
+        "x": 16,
+        "y": 578,
+        "bottom": 594,
+        "width": 16,
+        "height": 16,
+        "display": "block",
+        "visibility": "visible",
+        "position": "static",
+        "flex": "0 0 16px",
+        "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+        "maskImage": "url(\"http://127.0.0.1:39693/_ees13/v4/88026.svg?v=2c864bd486bce0280e6f438406aba558b8fca54fb05cabb3e2f399640d440994\")",
+        "background": "rgb(111, 113, 122)"
+      }
+    }
+  ],
+  "visually_reviewed_pngs": [
+    "menu-c15-admin-menu.png",
+    "menu-c15-skills-procedure.png",
+    "menu-c15-native-admin-unsaved.png",
+    "menu-c15-native-image-blocked.png"
+  ],
+  "visual_observation": "Menu labels and icons aligned; return bar in normal flow above Skills content and within original settings modal; real PNG preview and visible departure-block message coexist."
+}

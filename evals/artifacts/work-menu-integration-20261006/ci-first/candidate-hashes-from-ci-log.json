@@ -1,0 +1,25 @@
+{
+  "provenance": "Product job log, CI computed; candidate ZIP not downloaded by this reviewer",
+  "candidate": {
+    "source_commit": "92f59d000a420e7500e95082e0b4140b9b105363",
+    "files": [
+      {
+        "path": "EES-demo-92f59d000a42.zip",
+        "bytes": 153197843,
+        "sha256": "7ac9027f143ffe8850fbe59bd0475621668bbd377b1a7f48fdf079ba9348ddb0"
+      },
+      {
+        "path": "candidate-manifest.json",
+        "bytes": 15070,
+        "sha256": "11cfb683a7833559babda6fb20304fd461302e238d569c9cb4e181e0faadc6fd"
+      }
+    ]
+  },
+  "tested_commit": "a41378232b205f9aaad5f780e46474e1b1887678",
+  "tested_tree": "ab26f9cc8e56c6f1495c81ab848741d96dd2b9b3",
+  "candidate_source_dirty": false,
+  "inner_manifest_all_listed_files_size_and_sha256_assertion_step": "success",
+  "artifact_id": 11398995961,
+  "artifact_bytes": 153213905,
+  "artifact_upload_sha256": "f7b4c04cbe6731b0ffab3b0b0e7f0e03220c2f939190951031e8efc7fb2296a8"
+}

@@ -1,0 +1,380 @@
+{
+  "schema_version": 1,
+  "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+  "reviewed_on": "2026-10-06",
+  "summary_written_at_utc": "2026-10-06T07:56:06.936015+00:00",
+  "retrieval_time_note": "Figma responses did not expose API timestamps; retrieved_on is the known review date, evidence_saved_at_utc is the local write time immediately after retrieval, not asserted as the exact request time.",
+  "mandatory_skill": "figma:figma-design-to-code",
+  "read_only_figma": true,
+  "latest_change": {
+    "node": "898:31",
+    "entry_node": "1047:2",
+    "entry": "C15",
+    "later_change_observed": false
+  },
+  "nodes": [
+    {
+      "node_id": "1041:825",
+      "screenshot": "1041_825.png",
+      "screenshot_sha256": "4abafcef920ff460b4fecb238db3db34e28ae4a8d89255ad824a189eba2e0a82",
+      "context": "1041_825.txt",
+      "context_sha256": "cd8b82707a5da8109ece360ac7ec29daac44cb4abb855593547d6557479e9c63",
+      "evidence_saved_at_utc": "2026-10-06T07:47:40.304740+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "1041:832",
+      "screenshot": "1041_832.png",
+      "screenshot_sha256": "f31d7d23e1581de92171d167240eb4158f7a5118a58fcbc3cbfb37fbdc179490",
+      "context": "1041_832.txt",
+      "context_sha256": "7c3d6dd6ed395623cb36531142bb36478a680799b5c729f11d6f1ac06f22fa51",
+      "evidence_saved_at_utc": "2026-10-06T07:47:39.164721+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "1046:1260",
+      "screenshot": "1046_1260.png",
+      "screenshot_sha256": "39da4570bd00d59a8413da7b85ccef472e333e559aadb2406bcdfe721acc8d2d",
+      "context": "1046_1260.txt",
+      "context_sha256": "982e40e41064bd5838ab1ef314b7c85488f54fed107a7edf56036617ed3a7091",
+      "evidence_saved_at_utc": "2026-10-06T07:47:47.180855+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "1046:1467",
+      "screenshot": "1046_1467.png",
+      "screenshot_sha256": "10ad6cae498751c1dc1c27b00fd2d8e94182f8fbc465da9ffe80c39ddcf6295a",
+      "context": "1046_1467.txt",
+      "context_sha256": "84e48288441533cb47cdbefe4923cd1e7e5510ae6f7305eae7f8849a39e2b0c3",
+      "evidence_saved_at_utc": "2026-10-06T07:47:48.316874+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "1046:1665",
+      "screenshot": "1046_1665.png",
+      "screenshot_sha256": "26fad9777abfd6d805f9cff8074746b9dd7d2b4e612cb8df8e05978e684b1516",
+      "context": "1046_1665.txt",
+      "context_sha256": "6099820de38fddf544db726aa63fcab05bbb22f09c173b9e2b6f210b9779be65",
+      "evidence_saved_at_utc": "2026-10-06T07:47:49.452893+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "1046:1920",
+      "screenshot": "1046_1920.png",
+      "screenshot_sha256": "afdeff85e0906c9f0a337b6facbbf81070db5483d39794847bdc384a9c8a90a4",
+      "context": "1046_1920.txt",
+      "context_sha256": "8a7b791205a4256ff98010170cff7ee296c8f6c0878b828018463a754ec7e8a5",
+      "evidence_saved_at_utc": "2026-10-06T07:47:50.596912+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "1046:2124",
+      "screenshot": "1046_2124.png",
+      "screenshot_sha256": "ec31b28bca7cc9b101f54879cd203b5b3eeb6f9d163d4219f0e8b781daccaffe",
+      "context": "1046_2124.txt",
+      "context_sha256": "68a0f4fecaf5fd35c05fe137f652593fff7491476927001d8f00653a8d1c4f2c",
+      "evidence_saved_at_utc": "2026-10-06T07:47:38.072702+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "832:8468",
+      "screenshot": "832_8468.png",
+      "screenshot_sha256": "03eb0ee05b75a60b277e235057e8fc872cf4e0ecb118ac61579e1b521c12ce2b",
+      "context": "832_8468.txt",
+      "context_sha256": "13301b17e78eb7de9c42bc7923b24a3aa2280e64ebda70f862f7eb5c5e7df52b",
+      "evidence_saved_at_utc": "2026-10-06T07:47:43.724797+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "835:323",
+      "screenshot": "835_323.png",
+      "screenshot_sha256": "389e31b1d5bddc3df89969baad7f40550578c176e004264d064447db81bfb942",
+      "context": "835_323.txt",
+      "context_sha256": "99583606ded63f644a55e13e5973474c5b04a4503e28b8210300a3fe75374163",
+      "evidence_saved_at_utc": "2026-10-06T07:47:41.488760+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "836:372",
+      "screenshot": "836_372.png",
+      "screenshot_sha256": "7aa737ac271bfba75a21b3b8a0ff720b94d1d9623c497097d194c41529ced800",
+      "context": "836_372.txt",
+      "context_sha256": "118eeb3a8afb4d67dadcabf3ea9c5169cb1009fc2fb5d3f8ab180b40f5cdd4da",
+      "evidence_saved_at_utc": "2026-10-06T07:47:42.624779+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "863:464",
+      "screenshot": "863_464.png",
+      "screenshot_sha256": "6d4624fb67d74036de1f7c80d4a225989682e6c93003e519b05dc1ac816c6f2c",
+      "context": "863_464.txt",
+      "context_sha256": "53c310f76506144b574d6bc8f142ff1e068256d9f1b5bc202d7dd2369768e3dd",
+      "evidence_saved_at_utc": "2026-10-06T07:47:44.840816+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "898:31",
+      "screenshot": "898_31.png",
+      "screenshot_sha256": "e8d42d966588fb1c124ab9317cf043066dc87e926f94dc719c1444d66f645729",
+      "context": "898_31.txt",
+      "context_sha256": "4f0a1eaf88b2db5ebc78f483376072a6254d4dd3450aa0365028ed89e7709d37",
+      "evidence_saved_at_utc": "2026-10-06T07:47:36.428675+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "920:728",
+      "screenshot": "920_728.png",
+      "screenshot_sha256": "dac892362d69a8188f1adf23e39374964fa83ec35dd821e33ae3c12b082ca988",
+      "context": "920_728.txt",
+      "context_sha256": "428c1c6f74c0fa049cf1ede79932e79ffde9bb26fdb26d04727e4b997e8ac2e4",
+      "evidence_saved_at_utc": "2026-10-06T07:47:45.980834+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "922:785",
+      "screenshot": "922_785.png",
+      "screenshot_sha256": "0c448982666a7dbc0999499c0557644e101124c7b248d2121a039860a85e4084",
+      "context": "922_785.txt",
+      "context_sha256": "3d636e4920f56c8386e06177d582dc2b6b4451a916cbc6c0af9d7fd6f969daaf",
+      "evidence_saved_at_utc": "2026-10-06T07:47:51.832932+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "1046:2314",
+      "screenshot": "assets/1046_2314.png",
+      "screenshot_sha256": "f3e755607d194e5a50c6015b3a67be896ca725dc851d8f94de80c35892a18f92",
+      "context": "assets/1046_2314.txt",
+      "context_sha256": "acba49d929a2e24dbbd5b7a24a40a0645b490be9bf4e87ed2dcee440910a5373",
+      "evidence_saved_at_utc": "2026-10-06T07:51:34.268648+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "1046:2328",
+      "screenshot": "assets/1046_2328.png",
+      "screenshot_sha256": "bf60ac288440d42c66f1793f49b2d71871c9ab20c6572c5dc900a0ac5f75250f",
+      "context": "assets/1046_2328.txt",
+      "context_sha256": "e5b592e3d00ac88cfca0d583e9ac8869be0591307f4d1b47ef7d33868ef7ce70",
+      "evidence_saved_at_utc": "2026-10-06T07:51:35.384666+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "1046:2332",
+      "screenshot": "assets/1046_2332.png",
+      "screenshot_sha256": "00a87d1ef5ab67797bf625cea56655995bbc7dafc56d847134bfc133a7a7111c",
+      "context": "assets/1046_2332.txt",
+      "context_sha256": "f828f3379694a290354ad626e5a5ca9e42782d6dedb61e8543d0c025a94829dc",
+      "evidence_saved_at_utc": "2026-10-06T07:51:36.516685+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "1046:2335",
+      "screenshot": "assets/1046_2335.png",
+      "screenshot_sha256": "1f3efa93f028c58558d6199e8ed0c28c2830a4d9491e81b425f0ef29bbf7ffd9",
+      "context": "assets/1046_2335.txt",
+      "context_sha256": "3fb20e519427ed64376ace88e829e3e7950fa13ad6001bf3bfd02c398288b6f5",
+      "evidence_saved_at_utc": "2026-10-06T07:51:37.624704+00:00",
+      "retrieved_on": "2026-10-06"
+    },
+    {
+      "node_id": "1046:2360",
+      "screenshot": "assets/1046_2360.png",
+      "screenshot_sha256": "845a6394df8a5cef89f480da50c7a8a1d02bafa7bfde89f3f43f310594622cda",
+      "context": "assets/1046_2360.txt",
+      "context_sha256": "9386b73122bc44af7f6b013affed13a482f5f310d42329a1783c948e8d96c153",
+      "evidence_saved_at_utc": "2026-10-06T07:51:38.732722+00:00",
+      "retrieved_on": "2026-10-06"
+    }
+  ],
+  "normalization_method": "Use code before SUPER CRITICAL, remove balanced Sidebar div, then remove data-node-id/data-name attributes, normalize temporary asset URL prefix and exported function name, remove blank lines/trailing spaces; hash UTF-8 remaining code.",
+  "a_to_d_comparisons": [
+    {
+      "previous_node": "1026:70",
+      "main_node": "1046:1260",
+      "previous_context_sha256": "6af5aa331736a99b184a2dfaad2668629887a8fdb9fc38a8724802c001948ff5",
+      "main_context_sha256": "982e40e41064bd5838ab1ef314b7c85488f54fed107a7edf56036617ed3a7091",
+      "normalized_without_sidebar_equal": true,
+      "normalized_previous_sha256": "bc135e355b8de2281920cd2e0eecdeb07f26317de7c41156d4d372fbe57bf55b",
+      "normalized_main_sha256": "bc135e355b8de2281920cd2e0eecdeb07f26317de7c41156d4d372fbe57bf55b",
+      "normalized_diff_sha256": "e14159554cdd81068ece191ea39cb9b73324929a68675a77d7b80342d8172d69",
+      "actual_difference": "sidebar group captions added; skills count 5 replaced by 12px native-name label 스킬; root frame name/node IDs changed"
+    },
+    {
+      "previous_node": "1028:70",
+      "main_node": "1046:1467",
+      "previous_context_sha256": "27f0309c6f666100039e990b3df688f7500a1b782cc5f7e9759d32354eaa648b",
+      "main_context_sha256": "84e48288441533cb47cdbefe4923cd1e7e5510ae6f7305eae7f8849a39e2b0c3",
+      "normalized_without_sidebar_equal": true,
+      "normalized_previous_sha256": "685272ab90ee634a669b3fbf65d26252fcf2eed74cec0daeef092e03ac4be4a4",
+      "normalized_main_sha256": "685272ab90ee634a669b3fbf65d26252fcf2eed74cec0daeef092e03ac4be4a4",
+      "normalized_diff_sha256": "250d037ab9c1f5e7d32f785b9c780ea3d4d804e8081697c41054ccdf48e00f6d",
+      "actual_difference": "sidebar group captions added; skills count 5 replaced by 12px native-name label 스킬; root frame name/node IDs changed"
+    },
+    {
+      "previous_node": "1029:137",
+      "main_node": "920:728",
+      "previous_context_sha256": "5e802d45dabe7f8b8974135d0faf77c35def7f45f56b4c4861a38fe8cabb7b21",
+      "main_context_sha256": "428c1c6f74c0fa049cf1ede79932e79ffde9bb26fdb26d04727e4b997e8ac2e4",
+      "normalized_without_sidebar_equal": true,
+      "normalized_previous_sha256": "4852b60e96eff4d8759dac5d42bb97a7708fb5a946ecfab06559bdd25f6a6925",
+      "normalized_main_sha256": "4852b60e96eff4d8759dac5d42bb97a7708fb5a946ecfab06559bdd25f6a6925",
+      "normalized_diff_sha256": "15216ab3a62baeda7392dd6512e4204c3f7438e9b857d1cd4973cfa94f261d2c",
+      "actual_difference": "sidebar group captions added; skills count 5 replaced by 12px native-name label 스킬; root frame name/node IDs changed"
+    },
+    {
+      "previous_node": "1031:200",
+      "main_node": "1046:1665",
+      "previous_context_sha256": "d726938b8223e78d4aae2aff4781b9178414dd4249d6a0bff5da9cbc956b7da1",
+      "main_context_sha256": "6099820de38fddf544db726aa63fcab05bbb22f09c173b9e2b6f210b9779be65",
+      "normalized_without_sidebar_equal": true,
+      "normalized_previous_sha256": "c4d5cb0c1a540ec90c519ac4eadcd6dfb9e40aa280fc98a1634eb73724823190",
+      "normalized_main_sha256": "c4d5cb0c1a540ec90c519ac4eadcd6dfb9e40aa280fc98a1634eb73724823190",
+      "normalized_diff_sha256": "9a5f1379fd2e795ce3248eb37d822c760762b6a8f1b4ca8e6cde6b5a17774012",
+      "actual_difference": "sidebar group captions added; skills count 5 replaced by 12px native-name label 스킬; root frame name/node IDs changed"
+    },
+    {
+      "previous_node": "1033:275",
+      "main_node": "1046:1920",
+      "previous_context_sha256": "4e116c0cb1aa3e7101e245058f6992876620591502328a45b8f9a11f5a84fef1",
+      "main_context_sha256": "8a7b791205a4256ff98010170cff7ee296c8f6c0878b828018463a754ec7e8a5",
+      "normalized_without_sidebar_equal": true,
+      "normalized_previous_sha256": "dbcb3357a5d926f0cf2a9f116f8990f720ad4a0cd19f65c70612b06d6b0c956e",
+      "normalized_main_sha256": "dbcb3357a5d926f0cf2a9f116f8990f720ad4a0cd19f65c70612b06d6b0c956e",
+      "normalized_diff_sha256": "4e46fc0ffc368a5ff49ba56af0f2398db938c71e9b45fad6a1cb8b153e2654c6",
+      "actual_difference": "sidebar group captions added; skills count 5 replaced by 12px native-name label 스킬; root frame name/node IDs changed"
+    }
+  ],
+  "additional_menu_only_comparisons": [
+    {
+      "node": "836:372",
+      "diff_sha256": "5e983723c362b79837ab33ce0e21e00f4ff678d6abb75cdd14a16ba92c67fba8"
+    },
+    {
+      "node": "863:464",
+      "diff_sha256": "84cc36ea9489a7aeff39e1f74f43564109e712fd01b772cab567e26f3caa548a"
+    }
+  ],
+  "new_svg_download_failures": [
+    {
+      "status": 200,
+      "content_type": "text/html",
+      "bytes": 195,
+      "response_sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+      "valid_svg": false,
+      "figma_asset": "83565.svg"
+    },
+    {
+      "status": 200,
+      "content_type": "text/html",
+      "bytes": 195,
+      "response_sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+      "valid_svg": false,
+      "figma_asset": "5bc95.svg"
+    },
+    {
+      "status": 200,
+      "content_type": "text/html",
+      "bytes": 195,
+      "response_sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+      "valid_svg": false,
+      "figma_asset": "4d978.svg"
+    },
+    {
+      "status": 200,
+      "content_type": "text/html",
+      "bytes": 195,
+      "response_sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+      "valid_svg": false,
+      "figma_asset": "4308e.svg"
+    },
+    {
+      "status": 200,
+      "content_type": "text/html",
+      "bytes": 195,
+      "response_sha256": "5b131ca14aa96311d3432b0062c7443d3b0e6346ec279bd376a75f0a76bcd5d7",
+      "valid_svg": false,
+      "figma_asset": "0ae98.svg"
+    }
+  ],
+  "final_asset_mapping": [
+    {
+      "slot": "models",
+      "figma_node": "1046:2314",
+      "figma_asset_unavailable": "83565.svg",
+      "existing_repo_asset": "branding/ees/ui/v4/51602.svg",
+      "existing_asset_sha256": "a62ea29e265374f1823a0f14ad2fc57fdc6079296bd42bb290f2ca428f0b145d",
+      "existing_intrinsic_size_px": 15,
+      "rendered_slot_px": 16,
+      "existing_stroke_color": "#2F5F98",
+      "figma_slot_color": "#6F717A",
+      "css_color_treatment": "CSS alpha mask using existing SVG; background color uses EES tertiary token for navigation and brand token for return",
+      "svg_bytes_modified": false,
+      "remaining_difference": "15px source expanded to 16px; geometry and stroke width scale by 16/15",
+      "geometry_review": "individual Figma slot render compared with existing SVG rendered at 16px; visual same-shape candidate, no exact vector or full-fidelity claim"
+    },
+    {
+      "slot": "tools",
+      "figma_node": "1046:2328",
+      "figma_asset_unavailable": "5bc95.svg",
+      "existing_repo_asset": "branding/ees/ui/v4/f6bbc.svg",
+      "existing_asset_sha256": "b2a9190a251866678dec4e60fcca8a9e29db9b3e838234e3316654c62083fc3d",
+      "existing_intrinsic_size_px": 16,
+      "rendered_slot_px": 16,
+      "existing_stroke_color": "#3F4147",
+      "figma_slot_color": "#6F717A",
+      "css_color_treatment": "CSS alpha mask using existing SVG; background color uses EES tertiary token for navigation and brand token for return",
+      "svg_bytes_modified": false,
+      "remaining_difference": "intrinsic 16px preserved; exact original vector-byte match unavailable",
+      "geometry_review": "individual Figma slot render compared with existing SVG rendered at 16px; visual same-shape candidate, no exact vector or full-fidelity claim"
+    },
+    {
+      "slot": "factory",
+      "figma_node": "1046:2332",
+      "figma_asset_unavailable": "4d978.svg",
+      "existing_repo_asset": "branding/ees/ui/v4/40095.svg",
+      "existing_asset_sha256": "568698ad20328df158f834393622702f379fb03fcd680407fdc2422ec00fd05b",
+      "existing_intrinsic_size_px": 16,
+      "rendered_slot_px": 16,
+      "existing_stroke_color": "#3F4147",
+      "figma_slot_color": "#6F717A",
+      "css_color_treatment": "CSS alpha mask using existing SVG; background color uses EES tertiary token for navigation and brand token for return",
+      "svg_bytes_modified": false,
+      "remaining_difference": "intrinsic 16px preserved; exact original vector-byte match unavailable",
+      "geometry_review": "individual Figma slot render compared with existing SVG rendered at 16px; visual same-shape candidate, no exact vector or full-fidelity claim"
+    },
+    {
+      "slot": "admin",
+      "figma_node": "1046:2335",
+      "figma_asset_unavailable": "4308e.svg",
+      "existing_repo_asset": "branding/ees/ui/v4/88026.svg",
+      "existing_asset_sha256": "2c864bd486bce0280e6f438406aba558b8fca54fb05cabb3e2f399640d440994",
+      "existing_intrinsic_size_px": 16,
+      "rendered_slot_px": 16,
+      "existing_stroke_color": "#A3A5AC",
+      "figma_slot_color": "#6F717A",
+      "css_color_treatment": "CSS alpha mask using existing SVG; background color uses EES tertiary token for navigation and brand token for return",
+      "svg_bytes_modified": false,
+      "remaining_difference": "intrinsic 16px preserved; exact original vector-byte match unavailable",
+      "geometry_review": "individual Figma slot render compared with existing SVG rendered at 16px; visual same-shape candidate, no exact vector or full-fidelity claim"
+    },
+    {
+      "slot": "return",
+      "figma_node": "1046:2360",
+      "figma_asset_unavailable": "0ae98.svg",
+      "existing_repo_asset": "branding/ees/ui/v4/eb94a.svg",
+      "existing_asset_sha256": "157914196f301f18bad29e31c105488879e937d597a672c71110ba7e2d04c10b",
+      "existing_intrinsic_size_px": 14,
+      "rendered_slot_px": 16,
+      "existing_stroke_color": "#6F717A",
+      "figma_slot_color": "#2F5F98",
+      "css_color_treatment": "CSS alpha mask using existing SVG; background color uses EES tertiary token for navigation and brand token for return",
+      "svg_bytes_modified": false,
+      "remaining_difference": "14px source expanded to 16px; geometry and stroke width scale by 16/14",
+      "geometry_review": "individual Figma slot render compared with existing SVG rendered at 16px; visual same-shape candidate, no exact vector or full-fidelity claim"
+    }
+  ],
+  "comparison_image_sha256": "ace2f3088b015f6e0e51508d73d5aa2433736bc8e60530f5ec1a0855704e493a",
+  "icon_coverage_comparison_sha256": "01e75274a3513a0ee79bd1653debfbaa186dcde59ffe6293d0097fb79df48a2e",
+  "source_assets_changed": false,
+  "visual_fidelity_claim": "A-D body code is equal after declared normalization; new E menu geometry follows queried Figma; five existing SVG masks are documented reuse with scale differences, not full-fidelity replacement. Actual Native render review is pending.",
+  "raw_figma_artifacts_included": false
+}

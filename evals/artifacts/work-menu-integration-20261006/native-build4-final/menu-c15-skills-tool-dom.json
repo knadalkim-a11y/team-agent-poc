@@ -1,0 +1,85 @@
+{
+  "scope": "built Native UI; synthetic session and data",
+  "path": "/workspace/skills",
+  "ready": "complete",
+  "fonts": "loaded",
+  "nativeMount": {
+    "chatPane": false,
+    "sidebarSearch": true,
+    "sidebarToggle": false
+  },
+  "viewport": [
+    1920,
+    1080
+  ],
+  "active": {
+    "tag": "BUTTON",
+    "id": "",
+    "name": ""
+  },
+  "panel": null,
+  "authoring": null,
+  "nativeMenu": {
+    "settingsTabs": null,
+    "returnBar": {
+      "x": 256,
+      "y": 0,
+      "bottom": 44,
+      "width": 1664,
+      "height": 44,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "static",
+      "flex": "0 0 auto",
+      "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(250, 250, 250)"
+    },
+    "workspace": {
+      "x": 256,
+      "y": 84,
+      "bottom": 1080,
+      "width": 1664,
+      "height": 996,
+      "display": "block",
+      "visibility": "visible",
+      "position": "static",
+      "flex": "1 1 0%",
+      "font": "16px / 24px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "search": {
+      "text": "전체\n기능을 찾을 수 없습니다\n검색어 또는 필터를 변경하여 다시 시도해 보세요.",
+      "html": "<div class=\"  pb-1 px-3 flex-1 min-w-0 max-h-full overflow-y-auto overflow-x-hidden\" id=\"workspace-container\"><!----><!----><input type=\"file\" accept=\".md,.json\" hidden=\"\"> <div class=\"space-y-1\"><div class=\"flex h-8 w-full items-center gap-2\"><div class=\"flex min-w-0 flex-1\"><div class=\" self-center ml-1 mr-3\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" aria-hidden=\"true\" stroke-width=\"1.5\" class=\"size-3.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z\"></path></svg><!----></div> <input class=\" w-full text-sm pr-4 py-1 rounded-r-xl outline-hidden bg-transparent\" aria-label=\"스킬 검색\" placeholder=\"스킬 검색\"> <div class=\"self-center pl-1.5 translate-y-[0.5px] rounded-l-xl bg-transparent\"><button class=\"p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 transition\" aria-label=\"검색 초기화\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\" stroke-width=\"2\" class=\"size-3\"><!----><path d=\"M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z\"></path></svg><!----></button></div><!----></div> <div class=\"flex max-w-[55%] shrink-0 overflow-x-auto scrollbar-none\"><div class=\"flex w-fit gap-0.5 text-center text-sm rounded-full bg-transparent whitespace-nowrap\"><button type=\"button\" class=\"focus-ring relative h-8 w-full flex items-center gap-0.5 px-1.5 py-1.5 bg-transparent rounded-xl text-[0.8125rem] font-normal text-gray-700 transition hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100\" aria-expanded=\"false\"><span class=\"inline-flex h-input w-full outline-hidden bg-transparent truncate placeholder-gray-400 focus:outline-hidden\">전체</span> <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" aria-hidden=\"true\" stroke-width=\"2.5\" class=\" size-3.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m19.5 8.25-7.5 7.5-7.5-7.5\"></path></svg><!----><!----></button> <!----><!----></div></div></div> <div class=\"flex w-full flex-col items-center justify-center py-16 pb-24\"><div class=\"max-w-sm text-center text-gray-900 dark:text-gray-100\"><div class=\"mb-1.5 text-sm\">기능을 찾을 수 없습니다</div> <div class=\"text-center text-xs leading-5 text-gray-500\">검색어 또는 필터를 변경하여 다시 시도해 보세요.</div></div></div><!----></div> <!----><!----><!----></div>"
+    },
+    "items": [],
+    "captions": []
+  },
+  "layout": {
+    "panel": null,
+    "scroll": null,
+    "radio": null,
+    "selected": null,
+    "unselected": null,
+    "name": null,
+    "footer": null,
+    "back": null,
+    "questionGroup": null,
+    "firstQuestion": null,
+    "cardGaps": []
+  },
+  "nativeInput": null,
+  "native_search": {
+    "request": {
+      "url": "http://127.0.0.1:38885/api/v1/skills/list?query=native-menu-tool&page=1&order_by=updated_at&direction=desc",
+      "method": "GET"
+    },
+    "status": 200,
+    "response": {
+      "items": [],
+      "total": 0
+    },
+    "displayed_query": "native-menu-tool"
+  }
+}

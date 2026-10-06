@@ -1,0 +1,252 @@
+{
+  "browser": {
+    "stage": "ready",
+    "elapsed_ms": 15435.59372499999,
+    "pid": 2557,
+    "exit_code": null,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/154.0.8037.57",
+      "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+      "jsVersion": "15.4.80.11"
+    },
+    "target_id": "85D9D054F47DC5663D1E2138E5B60E7E",
+    "session_attached": true,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 297,
+      "method": "Runtime.evaluate",
+      "session_attached": true,
+      "timeout_seconds": 15,
+      "elapsed_ms": 0.5976399999951809,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "id": 278,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 279,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 280,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 281,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 282,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 283,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 284,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 285,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 286,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 287,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 288,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 289,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 290,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 291,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 292,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 293,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 294,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 295,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 296,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 297,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      }
+    ],
+    "stderr_tail": "[2557:2581:1006/065024.490456:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2581:1006/065024.492438:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2581:1006/065024.615330:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2581:1006/065024.672108:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065024.928036:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065024.928094:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2581:1006/065024.928233:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2581:1006/065024.928245:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065024.929622:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065024.932013:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2581:1006/065024.932579:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065024.983925:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065024.985103:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2581:1006/065024.987320:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065024.990673:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065025.044409:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065025.044463:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files\n[2557:2581:1006/065025.044548:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065025.095648:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2581:1006/065025.096791:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065025.155797:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2583:1006/065028.347581:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\nCreated TensorFlow Lite XNNPACK delegate for CPU.\n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 944.6538669999995,
+      "product": "Chrome/154.0.8037.57"
+    },
+    "bootstrap_observation": null
+  },
+  "path": "/",
+  "ready": "complete",
+  "fonts": "loaded",
+  "body_flags": {
+    "sveltekitPreloadData": "hover",
+    "eesIntegrated": "true",
+    "eesSidebarCompact": "false",
+    "eesModelCount": "2"
+  },
+  "viewport": [
+    1920,
+    1080
+  ],
+  "active": {
+    "tag": "BODY",
+    "id": "",
+    "text": "\n\t\t\n\t\t\t\n\t\t\t\t{\n\t\t\t\t\t__sveltekit_1s580li = {\n\t\t\t\t\t\tbase: \"\"\n\t\t\t\t\t};\n\n\t\t\t\t\tconst element = document.cur",
+    "html": "<body data-sveltekit-preload-data=\"hover\" data-ees-integrated=\"true\" data-ees-sidebar-compact=\"false\" data-ees-model-count=\"2\">\n\t\t<div style=\"display: contents\">\n\t\t\t<script>\n\t\t\t\t{\n\t\t\t\t\t__sveltekit_1s580li = {\n\t\t\t\t\t\tbase: \"\"\n\t\t\t\t\t};\n\n\t\t\t\t\tconst element = document.currentScript.parentElement;\n\n\t\t\t\t\tPromise.all([\n\t\t\t\t\t\timport(\"/_ees13/immutable-c75505c2f1bfa3c25/entry/start.DPWwxNfx.js\"),\n\t\t\t\t\t\timport(\"/_ees13/immutable-c75505c2f1bfa3c25/entry/app.BAcIwRZC.js\")\n\t\t\t\t\t]).then(([kit, app]) => {\n\t\t\t\t\t\tkit.start(app, element);\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t</script>\n\t\t<!----><!----><a href=\"#main-content\" class=\"sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-gray-900 focus:shadow-lg dark:focus:bg-gray-800 dark:focus:text-gray-100\">Skip to main content</a> <!----> <!----><!----><!----><!----><!----><!----><!----> <!----><!----> <!----> <div class=\"app relative\"><div class=\" tex"
+  },
+  "text": "Skip to main content\nEES Work\n업무\n워크스페이스\n\n관리 시스템\n\nEMS\n담당\n업무 절차\n0\n도구\n0\n스킬·지침\n\n최근 편집\n\n최근 편집한 절차가 없습니다.\n\nNative 모델·도구 관리\n공장·접근 범위\n통합 검증 관리자\n새 업무 절차 만들기\n참고\n일반 대화\n업무 열기\n새 대화\n업무 도우미\n\n새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나, 하시는 일을 순서대로 말해 주시면 단계와 작업으로 나눠 정리하는 방법을 안내합니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.\n\n이렇게 시작할 수 있습니다\n\n신규 공장 횡전개 예시를 복사해서 우리 공장에 맞게 고치고 싶어\n분류와 실행 방식(주기 · 수시 · 비상)이 뭔지 알려줘\n예시 없이, 하는 일을 말로 설명해서 만들고 싶어\n질문을 입력창에 채웁니다. 내용을 확인하고 직접 보내 주세요.\n\n\n\n\nc3-synthetic-model\n음성 모드 사용\n워크스페이스\n닫기\n업무 절차\nEMS\n업무 절차 목록\n새 업무 절차\n\n예시를 복사해 고치거나 빈 절차로 시작합니다. 게시하기 전에는 업무 화면에 나타나지 않습니다.\n\n예시에서 시작\n단계 구성을 미리 보고 내 초안으로 복사합니다\n배포 산출물 점검\n운영\n주기 · 격주 화요일 · 제안\n단계 4 · 작업 9 · 대상 확정부터 문서 점검, 재점검과 최종 확인까지 구성한 예시입니다.\n신규 공장 횡전개\n셋업\n수시 · 공장별\n단계 4 · 작업 6 · 공장마다 범위를 정하고 인프라, 설치와 연결 상태를 확인하는 예시입니다.\n일일 시스템 점검\n운영\n주기 · 매일 · 제안\n단계 1 · 작업 1 · 연결된 조회 기능으로 시스템 상태를 확인하는 간단한 예시입니다.\n직접 만들기\n빈 절차로 시작\n이름만 정하고 시작합니다. 분류(운영)와 실행 방식(수시)은 나중에 바꿀 수 있습니다.\n절차 이름\n\n분류나 실행 방식이 헷갈리면 도움말을 읽거나 대화창에 물어보세요.\n\n분류 도움말\n실행 방식 도움말\n수행 범위 도움말\n이름을 정하고 빈 초안을 만듭니다\n취소\n초안 만들기",
+  "elements": [
+    {
+      "id": "ees-work-entry",
+      "tag": "SECTION",
+      "rect": {
+        "x": 0,
+        "y": 50,
+        "width": 255,
+        "height": 450
+      },
+      "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "display": "block",
+      "overflow": "visible"
+    },
+    {
+      "id": "chat-container",
+      "tag": "DIV",
+      "rect": {
+        "x": 256,
+        "y": 0,
+        "width": 1664,
+        "height": 1080
+      },
+      "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "display": "flex",
+      "overflow": "visible"
+    },
+    {
+      "id": "chat-input",
+      "tag": "DIV",
+      "rect": {
+        "x": 469,
+        "y": 965,
+        "width": 658,
+        "height": 22
+      },
+      "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "display": "block",
+      "overflow": "visible"
+    },
+    {
+      "id": "ees-work-panel",
+      "tag": "ASIDE",
+      "rect": {
+        "x": 1340,
+        "y": 0,
+        "width": 580,
+        "height": 1080
+      },
+      "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "display": "flex",
+      "overflow": "visible"
+    },
+    {
+      "id": "ees-work-designer",
+      "tag": "SECTION",
+      "rect": {
+        "x": 1341,
+        "y": 48,
+        "width": 579,
+        "height": 1032
+      },
+      "font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "display": "flex",
+      "overflow": "visible"
+    }
+  ],
+  "work_state": {
+    "busy": "false",
+    "loading": false,
+    "reference": {
+      "kind": "help",
+      "system_id": "EMS",
+      "context_id": "[3,true,\"/\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]"
+    },
+    "review": null,
+    "open_history": [],
+    "scroll": null
+  },
+  "native_structure": {
+    "[data-ees-native-toolbar]": "<nav data-ees-native-toolbar=\"\" class=\"sticky top-0 z-30 w-full pt-0.5 pb-1 -mb-12 flex flex-col items-center drag-region\"><div class=\"flex items-center w-full pl-1.5 pr-1\"><div id=\"navbar-bg-gradient-to-b\" class=\"invisible bg-linear-to-b via-40% to-97% from-white/90 via-white/50 to-transparent dark:from-gray-900/90 dark:via-gray-900/50 dark:to-transparent pointer-events-none absolute inset-0 -bottom-10 z-[-1]\"></div> <div class=\" flex max-w-full w-full mx-auto bg-transparent\"><div class=\"flex items-center w-full max-w-full\"><!----> <div class=\"flex-1 overflow-hidden max-w-full mt-0.5 py-0.5 pl-1 ml-1\"><div class=\"pointer-events-none invisible flex max-w-full min-w-0 items-center gap-2\"><div class=\"min-w-0 truncate py-1 text-left text-[0.9375rem] font-normal text-gray-700 dark:text-gray-300\">새 채팅</div></div><!----></div> <div class=\"lg:mr-1 flex flex-none items-center gap-2 self-center\"><!----><!----><div class=\"flex\"><!----><button class=\"flex size-6 cursor-pointer items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-50/40 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/40 dark:hover:text-gray-200\" id=\"temporary-chat-button\" aria-label=\"임시 채팅\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\" class=\"size-4.5\"><path d=\"M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.8214 2.48697 15.5291 3.33782 17L2.5 21.5L7 20.6622C8.47087 21.513 10.1786 22 12 22Z\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"2.5 3.5\"></path></svg><!----></button></div><!----> <!----><!----> <!----> <!----><div class=\"flex\"><!----><button class=\"flex size-6 cursor-pointer items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-50/40 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/40 dark:hover:text-gray-200\" aria-label=\"Controls\"><svg xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" class=\"size-5\" stroke-width=\"1\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75\"></path></svg><!----></button></div><!----> <!----><!----></div></div></div></div> <!----> <div class=\"absolute top-[100%] left-0 right-0 h-fit\"><!----></div></nav>",
+    "#message-input-container": "<div id=\"message-input-container\" class=\"flex-1 flex flex-col relative w-full shadow-lg rounded-3xl border  border-gray-100/30 dark:border-gray-850/30 hover:border-gray-200 focus-within:border-gray-100 hover:dark:border-gray-800 focus-within:dark:border-gray-800   transition px-0.5 bg-white/5 dark:bg-gray-500/5 backdrop-blur-sm dark:text-gray-100\" dir=\"auto\"><!----> <!----> <div class=\"px-2 relative\"><!----> <div id=\"chat-input-container\" class=\"scrollbar-hidden rtl:text-right ltr:text-left bg-transparent dark:text-gray-100 outline-hidden w-full pb-0.5 px-1 resize-none h-fit max-h-96 overflow-auto pt-2\"><!----><!----><!----><!----> <div dir=\"auto\" class=\"relative w-full min-w-full input-prose min-h-fit h-full \"><div contenteditable=\"true\" translate=\"no\" class=\"tiptap ProseMirror\" tabindex=\"0\" id=\"chat-input\" aria-label=\"무엇을 도와드릴까요?\"><p data-placeholder=\"무엇을 도와드릴까요?\" class=\"is-empty is-editor-empty\"><br class=\"ProseMirror-trailingBreak\"></p></div></div><!----></div></div> <div class=\" flex justify-between mt-0.5 mb-2 mx-0.5 max-w-full\" dir=\"ltr\"><div class=\"ml-1 self-end flex items-center flex-1 min-w-0\"><!----><!----><!----> <input id=\"camera-input\" type=\"file\" accept=\"image/*\" capture=\"environment\" class=\"hidden\"> <span style=\"display: contents; cursor: pointer;\" role=\"button\" aria-haspopup=\"true\" aria-expanded=\"false\"><!----><div class=\"flex\"><!----><!----><button type=\"button\" id=\"input-menu-button\" class=\"bg-transparent hover:bg-gray-100 text-gray-700 dark:text-white dark:hover:bg-gray-800 rounded-full size-[1.875rem] flex justify-center items-center outline-hidden focus:outline-hidden shrink-0\" aria-label=\"더보기\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\" class=\"size-5\"><path d=\"M6 12H12M18 12H12M12 12V6M12 12V18\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg><!----></button></div><!----> <!----><!----></span> <!----><!----><!----> <div class=\"flex self-center w-[0.0625rem] h-4 mx-1 bg-gray-200/50 dark:bg-gray-800/50 shrink-0\"></div><!----> <div class=\"flex flex-1 items-center min-w-0 overflow-x-auto scrollbar-none\"><span style=\"display: contents; cursor: pointer;\" role=\"button\" aria-haspopup=\"true\" aria-expanded=\"false\"><!----><div class=\"flex\"><!----><!----><button type=\"button\" id=\"integration-menu-button\" class=\"bg-transparent hover:bg-gray-100 text-gray-700 dark:text-white dark:hover:bg-gray-800 rounded-full size-[1.875rem] flex justify-center items-center outline-hidden focus:outline-hidden shrink-0\" aria-label=\"통합\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\" class=\"size-4.5\"><path d=\"M5.21173 15.1113L2.52473 12.4243C2.29041 12.1899 2.29041 11.8101 2.52473 11.5757L5.21173 8.88873C5.44605 8.65442 5.82595 8.65442 6.06026 8.88873L8.74727 11.5757C8.98158 11.8101 8.98158 12.1899 8.74727 12.4243L6.06026 15.1113C5.82595 15.3456 5.44605 15.3456 5.21173 15.1113Z\"></path><path d=\"M11.5757 21.475L8.88874 18.788C8.65443 18.5537 8.65443 18.1738 8.88874 17.9395L11.5757 15.2525C11.8101 15.0182 12.19 15.0182 12.4243 15.2525L15.1113 17.9395C15.3456 18.1738 15.3456 18.5537 15.1113 18.788L12.4243 21.475C12.19 21.7094 11.8101 21.7094 11.5757 21.475Z\"></path><path d=\"M11.5757 8.7475L8.88874 6.06049C8.65443 5.82618 8.65443 5.44628 8.88874 5.21197L11.5757 2.52496C11.8101 2.29065 12.19 2.29065 12.4243 2.52496L15.1113 5.21197C15.3456 5.44628 15.3456 5.82618 15.1113 6.06049L12.4243 8.7475C12.19 8.98181 11.8101 8.98181 11.5757 8.7475Z\"></path><path d=\"M17.9396 15.1113L15.2526 12.4243C15.0183 12.1899 15.0183 11.8101 15.2526 11.5757L17.9396 8.88873C18.174 8.65442 18.5539 8.65442 18.7882 8.88873L21.4752 11.5757C21.7095 11.8101 21.7095 12.1899 21.4752 12.4243L18.7882 15.1113C18.5539 15.3456 18.174 15.3456 17.9396 15.1113Z\"></path></svg><!----></button></div><!----> <!----><!----></span> <!----><!----> <!----> <div class=\"ml-1 flex gap-1.5 shrink-0\"><!----> <!----> <!----> <!----> <!----> <!----> <!----> <!----></div></div></div> <div class=\"self-end flex space-x-1 mr-1 min-w-0 gap-[0.03125rem]\"><div class=\"flex min-w-0 max-w-[10rem] items-center sm:max-w-[13rem]\"><div class=\"flex min-w-0 max-w-full flex-col items-start\"><div class=\"flex min-w-0 max-w-full\"><div class=\"min-w-0 max-w-full overflow-hidden\"><div class=\"min-w-0 max-w-full\"><!----><!----><!----> <div class=\"relative w-full\"><button aria-haspopup=\"listbox\" type=\"button\" class=\"focus-ring relative w-full outline-hidden focus:outline-hidden\" aria-label=\"선택된 모델: c3-synthetic-model\" aria-expanded=\"false\" id=\"model-selector-model-button\"><div class=\"flex w-full min-w-0 text-left px-0.5 bg-transparent items-center gap-1.5 rounded-lg pl-2 pr-1.5 py-1 text-[0.8125rem] font-normal text-gray-600 transition-colors duration-100 hover:bg-gray-50/40 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800/40 dark:hover:text-gray-200 justify-between placeholder-gray-400\"><span class=\"min-w-0 flex-1 truncate\">c3-synthetic-model</span> <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" aria-hidden=\"true\" stroke-width=\"2.5\" class=\"ml-1 size-2.5 shrink-0 self-center\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m19.5 8.25-7.5 7.5-7.5-7.5\"></path></svg><!----></div></button> <!----></div><!----></div></div></div></div><!----></div> <!----> <!----><!----><!----><div class=\"flex\"><!----><button id=\"voice-input-button\" class=\" text-gray-600 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200 transition rounded-full p-1.5 self-center mr-0.5\" type=\"button\" aria-label=\"Voice Input\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"1.5\" class=\"size-[1.125rem]\"><rect x=\"9\" y=\"2\" width=\"6\" height=\"12\" rx=\"3\"></rect><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M5 10v1a7 7 0 0 0 14 0v-1M12 18v4m0 0H9m3 0h3\"></path></svg><!----></button></div><!----> <!----><!----> <details class=\"ees-native-voice-menu\"><summary>음성 모드 사용</summary><div><div class=\" flex items-center\"><!----><div class=\"flex\"><!----><button class=\" bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100 transition rounded-full p-[0.3125rem] self-center\" type=\"button\" aria-label=\"음성 모드 사용\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"currentColor\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2.5\" class=\"size-5\"><path d=\"M12 4L12 20\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M8 9L8 15\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M20 10L20 14\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M4 10L4 14\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M16 7L16 17\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg><!----></button></div><!----> <!----><!----></div><!----></div></details> <div class=\" flex items-center\"><!----><div class=\"flex\"><!----><button id=\"send-message-button\" type=\"submit\" class=\"text-white bg-gray-200 dark:text-gray-900 dark:bg-gray-700 disabled transition rounded-full p-[0.3125rem] self-center\" disabled=\"\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 16 16\" fill=\"currentColor\" class=\"size-5\"><path fill-rule=\"evenodd\" d=\"M8 14a.75.75 0 0 1-.75-.75V4.56L4.03 7.78a.75.75 0 0 1-1.06-1.06l4.5-4.5a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06L8.75 4.56v8.69A.75.75 0 0 1 8 14Z\" clip-rule=\"evenodd\"></path></svg><!----></button></div><!----> <!----><!----></div><!----><!----><!----></div></div></div>",
+    "#sidebar": "<div role=\"navigation\" data-ees-native-sidebar=\"\" aria-label=\"Chat history\" aria-hidden=\"false\" class=\"h-screen max-h-[100dvh] min-h-screen select-none bg-gray-50 dark:bg-gray-950 z-50   shrink-0 text-gray-700 dark:text-gray-300 text-[0.8125rem] leading-5 fixed top-0 left-0 overflow-x-hidden\n         svelte-6dohdz\" data-state=\"true\" id=\"sidebar\" style=\"width: var(--sidebar-width); transition: width 250ms cubic-bezier(0.22, 1, 0.36, 1);\"><div class=\" my-auto flex flex-col justify-between h-screen max-h-[100dvh] w-[var(--sidebar-width)] overflow-x-hidden scrollbar-hidden z-50 border-e border-gray-50 dark:border-gray-850/30\"><div class=\"sidebar px-1 pt-1.5 pb-1 flex justify-between space-x-1 text-gray-600 dark:text-gray-400 sticky top-0 z-10 -mb-2\"><a class=\"flex items-center rounded-xl size-8.5 h-full justify-center hover:bg-gray-100 dark:hover:bg-gray-900 transition no-drag-region\" href=\"/\" draggable=\"false\"><img crossorigin=\"anonymous\" class=\"sidebar-new-chat-icon size-5 rounded-full\" alt=\"\" src=\"/static/favicon.png\"></a> <a href=\"/\" class=\"flex flex-1 px-0.5\"><div id=\"sidebar-webui-name\" class=\" self-center font-normal text-gray-700 dark:text-gray-200\">EES Work</div></a> <!----><div class=\"flex\"><!----><button class=\"flex size-[1.875rem] justify-center items-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition cursor-[w-resize]\" aria-label=\"사이드바 접기\" data-ees-sidebar-toggle=\"\" aria-expanded=\"true\" title=\"사이드바 접기\"><div class=\" self-center\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\" class=\"size-4\"><path d=\"M19 21L5 21C3.89543 21 3 20.1046 3 19L3 5C3 3.89543 3.89543 3 5 3L19 3C20.1046 3 21 3.89543 21 5L21 19C21 20.1046 20.1046 21 19 21Z\"></path><path d=\"M9.5 21V3\"></path><path d=\"M5.5 10L7.25 12L5.5 14\"></path></svg><!----></div></button></div><!----> <!----><!----> <div class=\"invisible sidebar-bg-gradient-to-b bg-linear-to-b from-gray-50 dark:from-gray-950 to-transparent from-50% pointer-events-none absolute inset-0 -z-10 -mb-6\"></div></div> <div class=\"relative flex flex-col flex-1 overflow-y-auto scrollbar-hidden space-y-1.5 pt-2.5 pb-2.5\"><div class=\"pb-1\" data-ees-native-navigation=\"\"><div class=\"px-1 flex justify-center text-gray-700 dark:text-gray-300\"><a id=\"sidebar-new-chat-button\" class=\"group grow flex items-center space-x-2 rounded-xl px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-900 transition outline-none\" href=\"/\" draggable=\"false\" aria-label=\"새 대화\"><div class=\"self-center flex size-4 shrink-0 items-center justify-center\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" class=\" size-4\" stroke-width=\"1.5\"><path d=\"M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg><!----></div> <div class=\"flex flex-1 self-center translate-y-[0.5px]\"><div class=\" self-center text-[0.8125rem] leading-5\">새 대화</div></div> <!----><div class=\"hidden md:flex items-center self-center text-xs text-gray-400 dark:text-gray-600  hover-reveal \"><span>Ctrl+Shift+O</span></div><!----></a></div> <div class=\"px-1 flex justify-center text-gray-700 dark:text-gray-300\"><button id=\"sidebar-search-button\" class=\"group grow flex items-center space-x-2 rounded-xl px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-900 transition outline-none\" draggable=\"false\" aria-label=\"대화 검색\"><div class=\"self-center flex size-4 shrink-0 items-center justify-center\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" class=\"size-4\" stroke-width=\"1.5\"><path d=\"M17 17L21 21\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M3 11C3 15.4183 6.58172 19 11 19C13.213 19 15.2161 18.1015 16.6644 16.6493C18.1077 15.2022 19 13.2053 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11Z\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg><!----></div> <div class=\"flex flex-1 self-center translate-y-[0.5px]\"><div class=\" self-center text-[0.8125rem] leading-5\">대화 검색</div></div> <!----><div class=\"hidden md:flex items-center self-center text-xs text-gray-400 dark:text-gray-600  hover-reveal \"><span>Ctrl+K</span></div><!----></button></div><section id=\"ees-work-entry\" data-ees-work=\"\" aria-label=\"업무 탐색\"><nav class=\"ew-mode\" aria-label=\"작업 모드\"><button type=\"button\" data-action=\"mode\" data-mode=\"work\" aria-label=\"업무\" aria-pressed=\"false\"><img class=\"ew-icon\" src=\"/_ees13/v4/4df0d.svg\" alt=\"\" aria-hidden=\"true\"><span>업무</span></button><button type=\"button\" data-action=\"mode\" data-mode=\"author\" aria-label=\"워크스페이스\" aria-pressed=\"true\"><img class=\"ew-icon\" src=\"/_ees13/v4/cece5.svg\" alt=\"\" aria-hidden=\"true\"><span>워크스페이스</span></button></nav><p class=\"ew-nav-caption\">관리 시스템</p><div class=\"ew-scope\"><button type=\"button\" data-action=\"scope\" id=\"ees-work-system-trigger\" aria-label=\"시스템 선택\" aria-haspopup=\"dialog\"><img class=\"ew-icon\" src=\"/_ees13/v4/f34f3.svg\" alt=\"\" aria-hidden=\"true\"><span>EMS</span><small>담당</small><img class=\"ew-icon\" src=\"/_ees13/v4/ead50.svg\" alt=\"\" aria-hidden=\"true\"></button></div><nav class=\"ew-nav-links\"><button type=\"button\" data-action=\"procedures\" aria-label=\"업무 절차\" title=\"업무 절차\" aria-current=\"page\"><img class=\"ew-icon\" src=\"/_ees13/v4/e8a37.svg\" alt=\"\" aria-hidden=\"true\"><span>업무 절차</span><small>0</small></button><button type=\"button\" data-action=\"tools\" aria-label=\"도구\" title=\"도구\"><img class=\"ew-icon\" src=\"/_ees13/v4/cece5.svg\" alt=\"\" aria-hidden=\"true\"><span>도구</span><small>0</small></button><button type=\"button\" data-action=\"native_skills\" aria-label=\"스킬·지침\" title=\"스킬·지침\"><img class=\"ew-icon\" src=\"/_ees13/v4/f908d.svg\" alt=\"\" aria-hidden=\"true\"><span>스킬·지침</span></button></nav><p class=\"ew-nav-caption\">최근 편집</p><nav class=\"ew-workflows ew-recent\"><p class=\"ew-empty\">최근 편집한 절차가 없습니다.</p></nav><nav class=\"ew-native-management\"><button type=\"button\" data-action=\"native_workspace\">Native 모델·도구 관리</button><button type=\"button\" data-action=\"workspace_admin\">공장·접근 범위</button></nav></section> <div id=\"pinned-menu-items-list\"><!----><div class=\"px-1 flex justify-center text-gray-700 dark:text-gray-300\" data-id=\"notes\"><a draggable=\"false\" id=\"sidebar-notes-button\" class=\"grow flex items-center space-x-2 rounded-xl px-2 py-1.5 transition hover:bg-gray-100 dark:hover:bg-gray-900 svelte-6dohdz\" href=\"/notes\" aria-label=\"노트\"><div class=\"self-center flex size-4 shrink-0 items-center justify-center\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" class=\"size-4\" stroke-width=\"1.5\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" stroke=\"currentColor\" stroke-linecap=\"round\"></path><path d=\"M6 17L20 17\" stroke=\"currentColor\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" stroke=\"currentColor\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M9 7L15 7\" stroke=\"currentColor\" stroke-linecap=\"round\"></path></svg><!----></div> <div class=\"flex self-center translate-y-[0.5px]\"><div class=\" self-center text-[0.8125rem] leading-5\">노트</div></div></a></div><!----><div class=\"px-1 flex justify-center text-gray-700 dark:text-gray-300\" data-id=\"workspace\"><a draggable=\"false\" id=\"sidebar-workspace-button\" class=\"grow flex items-center space-x-2 rounded-xl px-2 py-1.5 transition hover:bg-gray-100 dark:hover:bg-gray-900 svelte-6dohdz\" href=\"/workspace\" aria-label=\"워크스페이스\"><div class=\"self-center flex size-4 shrink-0 items-center justify-center\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" class=\"size-4\" stroke-width=\"1.5\"><path d=\"M13.9922 17H16.9922M19.9922 17H16.9922M16.9922 17V14M16.9922 17V20\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M4 9.4V4.6C4 4.26863 4.26863 4 4.6 4H9.4C9.73137 4 10 4.26863 10 4.6V9.4C10 9.73137 9.73137 10 9.4 10H4.6C4.26863 10 4 9.73137 4 9.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"></path><path d=\"M4 19.4V14.6C4 14.2686 4.26863 14 4.6 14H9.4C9.73137 14 10 14.2686 10 14.6V19.4C10 19.7314 9.73137 20 9.4 20H4.6C4.26863 20 4 19.7314 4 19.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"></path><path d=\"M14 9.4V4.6C14 4.26863 14.2686 4 14.6 4H19.4C19.7314 4 20 4.26863 20 4.6V9.4C20 9.73137 19.7314 10 19.4 10H14.6C14.2686 10 14 9.73137 14 9.4Z\" stroke=\"currentColor\" stroke-width=\"1.5\"></path></svg><!----></div> <div class=\"flex self-center translate-y-[0.5px]\"><div class=\" self-center text-[0.8125rem] leading-5\">워크스페이스</div></div></a></div></div></div> <!----> <!----> <!----> <div class=\"relative \"><!----><!----> <div id=\"\" class=\"w-full\"><div class=\"w-full cursor-pointer\"><div><div class=\"flex items-start justify-between\"><div class=\"flex items-center justify-between h-6 w-full pl-3.5 pr-1.5 shrink-0\"><button type=\"button\" class=\"group flex flex-1 h-full items-center gap-1 text-left text-xs text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 transition-colors duration-100 \" aria-expanded=\"false\" aria-controls=\"sidebar-folders-content\"><span>폴더</span> <span class=\"flex opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-100\" style=\"transform: rotate(0deg);\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" class=\"size-[0.6875rem]\" stroke-width=\"1.5\"><path d=\"M9 6L15 12L9 18\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg><!----></span></button> <div class=\"contents\"><!----></div> <button type=\"button\" class=\"flex items-center justify-center w-7 h-7 rounded-lg text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 transition-colors duration-100\" aria-label=\"새 폴더\"><!----><div class=\"flex\"><!----><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" class=\"size-3.5\" stroke-width=\"1.5\"><path d=\"M6 12H12M18 12H12M12 12V6M12 12V18\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></div><!----> <!----><!----></button><!----></div><!----> <!----></div> <!----></div></div><!----> <!----><!----></div><!----><!----></div><!----> <div class=\"relative \"><!----><!----> <div id=\"\" class=\"w-full\"><div class=\"w-full cursor-pointer\"><div><div class=\"flex items-start justify-between\"><div class=\"flex items-center justify-between h-6 w-full pl-3.5 pr-1.5 shrink-0\"><button type=\"button\" class=\"group flex flex-1 h-full items-center gap-1 text-left text-xs text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 transition-colors duration-100 \" aria-expanded=\"true\" aria-controls=\"sidebar-chats-content\"><span>채팅</span> <span class=\"flex opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-100\" style=\"transform: rotate(90deg);\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" class=\"size-[0.6875rem]\" stroke-width=\"1.5\"><path d=\"M9 6L15 12L9 18\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg><!----></span></button> <div class=\"contents\"><span style=\"display: contents; cursor: pointer;\" role=\"button\" aria-haspopup=\"true\" aria-expanded=\"false\"><!----><div class=\"flex\"><!----><button type=\"button\" class=\"flex items-center justify-center w-7 h-7 rounded-lg text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 transition-colors duration-100\" aria-label=\"더보기\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" class=\"size-3.5\" stroke-width=\"2\"><path d=\"M20 12.5C20.2761 12.5 20.5 12.2761 20.5 12C20.5 11.7239 20.2761 11.5 20 11.5C19.7239 11.5 19.5 11.7239 19.5 12C19.5 12.2761 19.7239 12.5 20 12.5Z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M12 12.5C12.2761 12.5 12.5 12.2761 12.5 12C12.5 11.7239 12.2761 11.5 12 11.5C11.7239 11.5 11.5 11.7239 11.5 12C11.5 12.2761 11.7239 12.5 12 12.5Z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M4 12.5C4.27614 12.5 4.5 12.2761 4.5 12C4.5 11.7239 4.27614 11.5 4 11.5C3.72386 11.5 3.5 11.7239 3.5 12C3.5 12.2761 3.72386 12.5 4 12.5Z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg><!----></button></div><!----> <!----><!----></span> <!----><!----></div> <!----></div><!----> <!----></div> <!----></div></div><!----> <!----><div><div slot=\"content\" id=\"sidebar-chats-content\" class=\"w-full px-1.5\"><!----><!----> <div class=\" flex-1 flex flex-col overflow-y-auto scrollbar-hidden\"><div class=\"pt-1.5\"><!----><!----> <!----><!----></div></div><!----></div><!----></div><!----></div><!----><!----></div><!----></div> <div class=\"px-1 pt-1 pb-1.5 sticky bottom-0 z-10 -mt-2 sidebar\"><div class=\" sidebar-bg-gradient-to-t bg-linear-to-t from-gray-50 dark:from-gray-950 to-transparent from-50% pointer-events-none absolute inset-0 -z-10 -mt-6\"></div> <div class=\"flex flex-col\"><!----><!----><!----> <span style=\"display: contents; cursor: pointer;\" role=\"button\" aria-haspopup=\"true\" aria-expanded=\"false\"><!----><button type=\"button\" class=\" flex items-center rounded-xl py-1.5 px-1.5 w-full hover:bg-gray-100 dark:hover:bg-gray-900 transition\" aria-label=\"사용자 메뉴\"><div class=\" self-center mr-3 relative flex-shrink-0\"><img class=\"size-5.5 object-cover rounded-full\" src=\"/api/v1/users/4f6ce66e-4a90-495c-9edb-b4e0dd67adce/profile/image\" alt=\"사용자 프로필 메뉴 열기\" aria-label=\"사용자 프로필 메뉴 열기\"> <div class=\"absolute -bottom-0.5 -right-0.5\"><span class=\"relative flex size-2.5\"><span class=\"relative inline-flex size-2.5 rounded-full bg-green-500 border-2 border-white dark:border-gray-900\"></span></span></div><!----></div> <div class=\" self-center font-normal truncate\">통합 검증 관리자</div></button><!----></span> <!----><!----><!----></div></div></div></div>"
+  },
+  "native_empty_headings": [
+    {
+      "html": "<h2>새 업무 절차</h2>",
+      "parent": "<div class=\"ew-procedure-start\"><button type=\"button\" data-author-action=\"procedure_cancel\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees13/v4/eb94a.svg\" alt=\"\" aria-hidden=\"true\">업무 절차 목록</button><h2>새 업무 절차</h2><p class=\"ew-author-muted\">예시를 복사해 고치거나 빈 절차로 시작합니다. 게시하기 전에는 업무 화면에 나타나지 않습니다.</p><section class=\"ew-procedure-section\"><div class=\"ew-procedure-section-heading\"><h3>예시에서 시작</h3><small>단계 구성을 미리 보고 내 초안으로 복사합니다</small></div><div class=\"ew-procedure-choices\"><section class=\"ew-procedure-card\" data-selected=\"false\"><label class=\"ew-procedure-choice\" for=\"ew-procedure-delivery_review\"><input id=\"ew-procedure-delivery_review\" type=\"radio\" name=\"procedure_template\" value=\"delivery_review\"><span class=\"ew-procedure-choice-text\"><span class=\"ew-procedure-title\"><strong>배포 산출물 점검</strong><span class=\"ew-author-tag\">운영</span><span class=\"ew-author-tag\">주기 · 격주 화요일 · 제안</span></span><small>단계 4 · 작업 9 · 대상 확정부터 문서 점검, 재점검과 최종 확인까지 구성한 예시입니다.</small></span></label></section><section class=\"ew-procedure-card\" data-selected=\"false\"><label class=\"ew-procedure-choice\" for=\"ew-procedure-factory_rollout\"><input id=\"ew-procedure-factory_rollout\" type=\"radio\" name=\"procedure_template\" value=\"factory_rollout\"><span class=\"ew-procedure-choice-text\"><span class=\"ew-procedure-title\"><strong>신규 공장 횡전개</strong><span class=\"ew-author-tag\">셋업</span><span class=\"ew-author-tag\">수시 · 공장별</span></span><small>단계 4 · 작업 6 · 공장마다 범위를 정하고 인프라, 설치와 연결 상태를 확인하는 예시입니다.</small></span></label></section><section class=\"ew-procedure-card\" data-selected=\"false\"><label class=\"ew-procedure-choice\" for=\"ew-procedure-daily_check\"><input id=\"ew-procedure-daily_check\" type=\"radio\" name=\"procedure_template\" value=\"daily_check\"><span class=\"ew-procedure-choice-text\"><span class=\"ew-procedure-title\"><strong>일일 시스템 점검</strong><span class=\"ew-author-tag\">운영</span><span class=\"ew-author-tag\">주기 · 매일 · 제안</span></span><small>단계 1 · 작업 1 · 연결된 조회 기능으로 시스템 상태를 확인하는 간단한 예시입니다.</small></span></label></section></div></section><section class=\"ew-procedure-section\"><h3>직접 만들기</h3><div class=\"ew-procedure-choices\"><section class=\"ew-procedure-card\" data-selected=\"true\"><label class=\"ew-procedure-choice\" for=\"ew-procedure-blank\"><input id=\"ew-procedure-blank\" type=\"radio\" name=\"procedure_template\" value=\"blank\" checked=\"\"><span class=\"ew-procedure-choice-text\"><span class=\"ew-procedure-title\"><strong>빈 절차로 시작</strong></span><small>이름만 정하고 시작합니다. 분류(운영)와 실행 방식(수시)은 나중에 바꿀 수 있습니다.</small></span></label><div class=\"ew-procedure-preview\"><label class=\"ew-procedure-name\" for=\"ew-procedure-name\">절차 이름<input id=\"ew-procedure-name\" name=\"procedure_name\" value=\"\" required=\"\" maxlength=\"160\" autocomplete=\"off\"></label></div></section></div></section><aside class=\"ew-procedure-help\"><p>분류나 실행 방식이 헷갈리면 도움말을 읽거나 대화창에 물어보세요.</p><div><button type=\"button\" data-author-action=\"help\" data-id=\"category\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">분류 도움말</button><button type=\"button\" data-author-action=\"help\" data-id=\"run_mode\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">실행 방식 도움말</button><button type=\"button\" data-author-action=\"help\" data-id=\"execution_scope\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">수행 범위 도움말</button></div></aside></div>"
+    }
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    }
+  ]
+}

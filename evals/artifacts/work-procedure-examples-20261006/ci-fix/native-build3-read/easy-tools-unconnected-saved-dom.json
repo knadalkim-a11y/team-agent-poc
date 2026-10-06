@@ -1,0 +1,105 @@
+{
+  "scope": "built Native UI; synthetic session and data",
+  "path": "/c/existing-chat",
+  "ready": "complete",
+  "fonts": "loaded",
+  "nativeMount": {
+    "chatPane": true,
+    "sidebarSearch": true,
+    "sidebarToggle": false
+  },
+  "viewport": [
+    1920,
+    1080
+  ],
+  "active": {
+    "tag": "BODY",
+    "id": ""
+  },
+  "panel": {
+    "text": "워크스페이스\n닫기\n도구\nEMS\n도구 목록\n수집 대기열 조회초안 · 확인 전\n도구 이름\n하는 일: 정보 읽기\n무슨 뜻인가요?\n\n운영 시스템을 바꾸지 않고 읽기만 합니다\n\n연결된 기능\n무슨 뜻인가요?\n필요한 기능이 아직 연결되지 않았습니다\nundefined:undefined\n하위 시스템: EMS\n바꾸기\n무엇을 왜 조회하나요\n무슨 뜻인가요?\n조회할 내용과 목적\n\nAI가 이 설명을 보고 언제 쓸지 판단합니다\n\n확인과 참고\n확인하는 사람\n무슨 뜻인가요?\n\nEMS 담당자 중 한 명이 확인합니다.\n\n가이드 문서 · 선택\n무슨 뜻인가요?\n참고 문서 링크\n\n조회 결과를 이해하는 데 필요한 문서가 있으면 추가해 주세요.\n\n고급 · 개발자용\n\n담당자 확인 전에는 도구를 업무 절차에서 고를 수 없습니다.\n\n저장된 초안\n초안 저장\n확인 요청 보내기\n\n필요한 기능이 아직 연결되지 않았습니다. 연결된 기능을 고르거나 관리자에게 등록을 요청해 주세요.",
+    "html": "<aside id=\"ees-work-panel\" data-ees-work=\"\" aria-label=\"업무 패널\" data-ees-mode=\"author\" aria-busy=\"false\" data-ees-overlay=\"false\" style=\"--ees-panel-width: 480px;\"><header class=\"ew-panel-header\"><strong>워크스페이스</strong><span></span><button type=\"button\" data-action=\"close_panel\" aria-label=\"업무 패널 닫기\" class=\"ew-icon-button\">닫기</button></header><div id=\"ees-work-authoring-panel\" class=\"ew-scroll\"><section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\"><header>도구<small>EMS</small></header><div class=\"ew-author-scroll\"><button type=\"button\" data-author-action=\"tool_list\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees13/v4/eb94a.svg\" alt=\"\" aria-hidden=\"true\">도구 목록</button><h2>수집 대기열 조회<span class=\"ew-author-tag\" data-state=\"draft\">초안 · 확인 전</span></h2><form id=\"ew-author-tool\"><label>도구 이름<input name=\"name\" value=\"수집 대기열 조회\" required=\"\" maxlength=\"160\"></label><section class=\"ew-tool-section\"><div class=\"ew-author-heading\"><h3>하는 일: 정보 읽기</h3><button type=\"button\" data-author-action=\"help\" data-id=\"read_tool\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">무슨 뜻인가요?</button></div><p class=\"ew-author-muted\">운영 시스템을 바꾸지 않고 읽기만 합니다</p></section><section class=\"ew-tool-section\"><div class=\"ew-author-heading\"><h3>연결된 기능</h3><button type=\"button\" data-author-action=\"help\" data-id=\"connected_function\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">무슨 뜻인가요?</button></div><div class=\"ew-tool-selected\"><span><strong>필요한 기능이 아직 연결되지 않았습니다</strong><small>undefined:undefined</small><small>하위 시스템: EMS</small></span><button type=\"button\" data-author-action=\"tool_change\" class=\"ew-author-link\">바꾸기</button></div></section><section class=\"ew-tool-section\"><div class=\"ew-author-heading\"><h3>무엇을 왜 조회하나요</h3><button type=\"button\" data-author-action=\"help\" data-id=\"tool_purpose\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">무슨 뜻인가요?</button></div><label>조회할 내용과 목적<textarea name=\"description\" placeholder=\"예: 배포 전에 CR 승인 상태를 확인\" maxlength=\"2000\">데이터 수집이 지연되는지 대기열 상태를 확인합니다. EMS 정보 읽기 기능 연결이 필요합니다.</textarea></label><p class=\"ew-author-muted\">AI가 이 설명을 보고 언제 쓸지 판단합니다</p></section><section class=\"ew-tool-section\"><h3>확인과 참고</h3><div class=\"ew-author-heading\"><span>확인하는 사람</span><button type=\"button\" data-author-action=\"help\" data-id=\"reviewer\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">무슨 뜻인가요?</button></div><p class=\"ew-author-muted\">EMS 담당자 중 한 명이 확인합니다.</p><div class=\"ew-author-heading\"><span>가이드 문서 · 선택</span><button type=\"button\" data-author-action=\"help\" data-id=\"guide_url\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">무슨 뜻인가요?</button></div><label>참고 문서 링크<input name=\"guide_url\" value=\"\" type=\"url\" placeholder=\"참고할 문서가 있으면 링크를 입력하세요\"></label><p class=\"ew-author-muted\">조회 결과를 이해하는 데 필요한 문서가 있으면 추가해 주세요.</p></section><details class=\"ew-tool-advanced\"><summary>고급 · 개발자용</summary><div class=\"ew-author-heading\"><h3>결과 형식</h3><button type=\"button\" data-author-action=\"help\" data-id=\"output_schema\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">무슨 뜻인가요?</button></div><label>출력 JSON Schema · 선택<textarea name=\"output_schema_json\" spellcheck=\"false\" maxlength=\"32000\"></textarea></label><p class=\"ew-author-muted\">정보 읽기 도구에서는 선택입니다.</p><p class=\"ew-author-muted\">실행 시간 한도는 작업의 실행 규칙을 따릅니다. 작업 기본값은 60초입니다.</p></details></form><p class=\"ew-author-note\">담당자 확인 전에는 도구를 업무 절차에서 고를 수 없습니다.</p></div><footer><small data-tool-summary=\"\">저장된 초안</small><button type=\"button\" data-author-action=\"tool_save\" data-mutation=\"\">초안 저장</button><button type=\"button\" data-author-action=\"tool_review\" data-mutation=\"\" class=\"ew-primary\" aria-describedby=\"ew-tool-submit-reason\" disabled=\"\">확인 요청 보내기</button><p id=\"ew-tool-submit-reason\" class=\"ew-tool-submit-reason\">필요한 기능이 아직 연결되지 않았습니다. 연결된 기능을 고르거나 관리자에게 등록을 요청해 주세요.</p></footer></section></div><div data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-label=\"업무 패널 너비\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-valuenow=\"480\"></div></aside>"
+  },
+  "authoring": {
+    "text": "도구\nEMS\n도구 목록\n수집 대기열 조회초안 · 확인 전\n도구 이름\n하는 일: 정보 읽기\n무슨 뜻인가요?\n\n운영 시스템을 바꾸지 않고 읽기만 합니다\n\n연결된 기능\n무슨 뜻인가요?\n필요한 기능이 아직 연결되지 않았습니다\nundefined:undefined\n하위 시스템: EMS\n바꾸기\n무엇을 왜 조회하나요\n무슨 뜻인가요?\n조회할 내용과 목적\n\nAI가 이 설명을 보고 언제 쓸지 판단합니다\n\n확인과 참고\n확인하는 사람\n무슨 뜻인가요?\n\nEMS 담당자 중 한 명이 확인합니다.\n\n가이드 문서 · 선택\n무슨 뜻인가요?\n참고 문서 링크\n\n조회 결과를 이해하는 데 필요한 문서가 있으면 추가해 주세요.\n\n고급 · 개발자용\n\n담당자 확인 전에는 도구를 업무 절차에서 고를 수 없습니다.\n\n저장된 초안\n초안 저장\n확인 요청 보내기\n\n필요한 기능이 아직 연결되지 않았습니다. 연결된 기능을 고르거나 관리자에게 등록을 요청해 주세요.",
+    "html": "<section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\"><header>도구<small>EMS</small></header><div class=\"ew-author-scroll\"><button type=\"button\" data-author-action=\"tool_list\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees13/v4/eb94a.svg\" alt=\"\" aria-hidden=\"true\">도구 목록</button><h2>수집 대기열 조회<span class=\"ew-author-tag\" data-state=\"draft\">초안 · 확인 전</span></h2><form id=\"ew-author-tool\"><label>도구 이름<input name=\"name\" value=\"수집 대기열 조회\" required=\"\" maxlength=\"160\"></label><section class=\"ew-tool-section\"><div class=\"ew-author-heading\"><h3>하는 일: 정보 읽기</h3><button type=\"button\" data-author-action=\"help\" data-id=\"read_tool\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">무슨 뜻인가요?</button></div><p class=\"ew-author-muted\">운영 시스템을 바꾸지 않고 읽기만 합니다</p></section><section class=\"ew-tool-section\"><div class=\"ew-author-heading\"><h3>연결된 기능</h3><button type=\"button\" data-author-action=\"help\" data-id=\"connected_function\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">무슨 뜻인가요?</button></div><div class=\"ew-tool-selected\"><span><strong>필요한 기능이 아직 연결되지 않았습니다</strong><small>undefined:undefined</small><small>하위 시스템: EMS</small></span><button type=\"button\" data-author-action=\"tool_change\" class=\"ew-author-link\">바꾸기</button></div></section><section class=\"ew-tool-section\"><div class=\"ew-author-heading\"><h3>무엇을 왜 조회하나요</h3><button type=\"button\" data-author-action=\"help\" data-id=\"tool_purpose\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">무슨 뜻인가요?</button></div><label>조회할 내용과 목적<textarea name=\"description\" placeholder=\"예: 배포 전에 CR 승인 상태를 확인\" maxlength=\"2000\">데이터 수집이 지연되는지 대기열 상태를 확인합니다. EMS 정보 읽기 기능 연결이 필요합니다.</textarea></label><p class=\"ew-author-muted\">AI가 이 설명을 보고 언제 쓸지 판단합니다</p></section><section class=\"ew-tool-section\"><h3>확인과 참고</h3><div class=\"ew-author-heading\"><span>확인하는 사람</span><button type=\"button\" data-author-action=\"help\" data-id=\"reviewer\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">무슨 뜻인가요?</button></div><p class=\"ew-author-muted\">EMS 담당자 중 한 명이 확인합니다.</p><div class=\"ew-author-heading\"><span>가이드 문서 · 선택</span><button type=\"button\" data-author-action=\"help\" data-id=\"guide_url\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">무슨 뜻인가요?</button></div><label>참고 문서 링크<input name=\"guide_url\" value=\"\" type=\"url\" placeholder=\"참고할 문서가 있으면 링크를 입력하세요\"></label><p class=\"ew-author-muted\">조회 결과를 이해하는 데 필요한 문서가 있으면 추가해 주세요.</p></section><details class=\"ew-tool-advanced\"><summary>고급 · 개발자용</summary><div class=\"ew-author-heading\"><h3>결과 형식</h3><button type=\"button\" data-author-action=\"help\" data-id=\"output_schema\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">무슨 뜻인가요?</button></div><label>출력 JSON Schema · 선택<textarea name=\"output_schema_json\" spellcheck=\"false\" maxlength=\"32000\"></textarea></label><p class=\"ew-author-muted\">정보 읽기 도구에서는 선택입니다.</p><p class=\"ew-author-muted\">실행 시간 한도는 작업의 실행 규칙을 따릅니다. 작업 기본값은 60초입니다.</p></details></form><p class=\"ew-author-note\">담당자 확인 전에는 도구를 업무 절차에서 고를 수 없습니다.</p></div><footer><small data-tool-summary=\"\">저장된 초안</small><button type=\"button\" data-author-action=\"tool_save\" data-mutation=\"\">초안 저장</button><button type=\"button\" data-author-action=\"tool_review\" data-mutation=\"\" class=\"ew-primary\" aria-describedby=\"ew-tool-submit-reason\" disabled=\"\">확인 요청 보내기</button><p id=\"ew-tool-submit-reason\" class=\"ew-tool-submit-reason\">필요한 기능이 아직 연결되지 않았습니다. 연결된 기능을 고르거나 관리자에게 등록을 요청해 주세요.</p></footer></section>"
+  },
+  "layout": {
+    "panel": {
+      "x": 1440,
+      "y": 0,
+      "width": 480,
+      "height": 1080,
+      "clientWidth": 479,
+      "scrollWidth": 479,
+      "clientHeight": 1080,
+      "scrollHeight": 1080,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(255, 255, 255)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px 0px 0px 1px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "scroll": {
+      "x": 1441,
+      "y": 96,
+      "width": 479,
+      "height": 881,
+      "clientWidth": 479,
+      "scrollWidth": 479,
+      "clientHeight": 881,
+      "scrollHeight": 1035,
+      "scrollTop": 0,
+      "overflowY": "auto",
+      "background": "rgba(0, 0, 0, 0)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "radio": null,
+    "selected": null,
+    "unselected": null,
+    "name": null,
+    "footer": {
+      "x": 1441,
+      "y": 977,
+      "width": 479,
+      "height": 103,
+      "clientWidth": 479,
+      "scrollWidth": 479,
+      "clientHeight": 102,
+      "scrollHeight": 102,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(255, 255, 255)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "1px 0px 0px",
+      "borderRadius": "0px",
+      "minHeight": "auto"
+    },
+    "back": null,
+    "questionGroup": null,
+    "firstQuestion": null,
+    "cardGaps": []
+  },
+  "nativeDraft": {
+    "prompt": "",
+    "files": [],
+    "selectedToolIds": [],
+    "selectedSkillIds": [],
+    "selectedFilterIds": [],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "nativeInput": {
+    "text": "\n",
+    "html": "<div contenteditable=\"true\" translate=\"no\" class=\"tiptap ProseMirror\" tabindex=\"0\" id=\"chat-input\" aria-label=\"업무를 물어보거나, 필요한 작업을 요청하세요\"><p data-placeholder=\"업무를 물어보거나, 필요한 작업을 요청하세요\" class=\"is-empty is-editor-empty\"><br class=\"ProseMirror-trailingBreak\"></p></div>"
+  }
+}

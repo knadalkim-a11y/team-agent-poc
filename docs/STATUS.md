@@ -1,5 +1,26 @@
 # 현재 작업 상태
 
+## 2026-10-06 · C15 권한별 메뉴와 Open WebUI 왕복
+
+- **기준:** 최신 첨부의 추가 E를 같은 [Draft PR #76](https://github.com/knadalkim-a11y/team-agent-poc/pull/76)에 반영한다. 착수 head `e9a34e16d158c7553cfcf66a2cfc01ff794ebbd0`의 [CI 37427430144](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37427430144)는 24 success·기존 조건부1skip이며, main은 `e55bfb125ddf84d14030b1b56bb604bd8b14d088`이다. 선행 #74/#75 병합과 C15 이후 변경 없음, 기존 A–D 본문 동일을 확인했다.
+- **구현:** [착수 비교표](mockups/ees-work/TASK.md#menu-integration-20261006)에 따라 세 메뉴 묶음·서버의 실제 Native 권한·직접 경로·원래 위치 복귀를 추가했다. Native 관리자 설정의 모달 redirect와 계정 전환 중 늦은 flush를 보완했다. 관측 가능한 이미지/업로드 중 첨부는 이동을 차단하고 이유를 표시한다.
+- **로컬 검증:** 서버73·실제 Native 계정 API6개 통과. Node 관련 범위225개는 freeze2의 author95/execution64와 마지막 runtime66을 합친 범위이며 단일225개 실행은 아니다. 최종 build4의 실제 Native5개는 PASS/0skip/exit0이며 스킬 검색·관리자 모달 왕복·미저장 작성 값·이미지 차단·직접 진입/삽입점 부재·역할 메뉴를 확인했다. build4 SHA256은 `ecf138543e933a6c8ecefa13887c8210142068bb47e06e4743f9a25661a86c1a`다. [최초 실패·빌드·시각 보완·한계 기록](../evals/v4-ui-20260930.md#menu-integration-evidence-20261006)을 보존한다.
+- **첫 CI 보완:** head `92f59d0`의 [CI 37434967430](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37434967430)에서 양 OS services/platform이 기존 시험의 권한 fixture·CSS 참조 목록 누락으로 실패했다. 해당 시험2개만 갱신하고 제품 권한·builder·실제 Native gate는 유지했다. 같은 run의 Native compose34개와 전체 제품/중앙 대화 checkpoint는 통과했으며, 최초 실패와 보완 결과는 위 검증 기록에 보존한다.
+- **경계와 다음:** 파일 선택 직후 미리보기 전 준비 구간의 완전 보존은 Native 신호가 없어 미확인이다. 새로고침/탭 종료 시 메모리 복귀 정보는 사라진다. 실제 사내 적용·비기본 모델 설정 전체·실제 답변 품질은 별도 확인 대상이다. 최종 HEAD의 자동 CI·후보는 같은 PR 본문/Checks에서 판정하며 병합·Draft 해제·배포·실제 EES/EMS 연결은 포함하지 않는다.
+
+아래 항목은 선행 작업 당시의 기록이다.
+
+## 2026-10-06 · 새 절차 예시 구현·첫 CI 보완
+
+- **기준:** 사용자 승인으로 [PR #75](https://github.com/knadalkim-a11y/team-agent-poc/pull/75)를 병합했다. 최종 head `481fb553f8f94b990edcda4659cdd32f0065cc0a`의 [CI 37413644400](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37413644400)는 completed/success이며 24개 job 성공과 기존 조건부 1개 skip을 확인했다. 병합 main `e55bfb125ddf84d14030b1b56bb604bd8b14d088`에서 새 브랜치를 시작했다.
+- **현재 작업:** [제품 수정 전 비교표](mockups/ees-work/TASK.md#procedure-examples-20261006)에 따라 C 예시 3개·서버 초안 복사·빈 절차 기본값·절차 화면 D를 구현하고 [Draft PR #76](https://github.com/knadalkim-a11y/team-agent-poc/pull/76)을 게시했다. Figma C/Note/B2/B4와 C13을 대조했으며 AP 장애 예시는 제외한다. 새 생성 의도와 요청 재시도를 구분하고 취소·시스템 전환 뒤 늦은 응답을 차단한다.
+- **초기 로컬 검증:** 관련 서버71PASS, 작성기·런타임 Node142PASS, 패키징2PASS, 설치61PASS/기존 조건부6SKIP이다. 실제 이전112/114 설치의 파일·DB·키 보존과 Apply/Restore를 확인했다. 실제 빌드 Native는 UUID 없는 빈 절차1개(build1)와 C 예시/도움말/대화/게시 차단1개(build2)가 통과했다. 580px 및600px의 이름·footer 접근을 확인했으며, 600px은 Native 메뉴를 다시 여는 조건이다.
+- **첫 CI와 보완:** head5669699의 [run37425706328](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37425706328)은 전체 제품 검사에서 실패했다. Native-compose29개·최종600px 메뉴 조건과 양 OS 서버/설치/복구는 통과했다. 이름 입력 후 첫 생성 클릭 중 footer 교체가 클릭을 없애는 결함을 재현했고, 같은 원인의 도구 저장도 확인했다. 두 입력 경로에서 버튼을 유지하며 필수값·권한·busy 상태를 갱신한다. 작성기94개가 통과했으며 실제 입력 직후 첫 클릭 회귀로 보완했다.
+- **근거와 한계:** [최초 실패·수정·최종 화면·해시](../evals/v4-ui-20260930.md#procedure-examples-evidence-20261006)를 보존한다. 보완 build3 SHA256은 `7eb76af53b3ce34cb42cd6a2f782c8a7467ed75ea1c2612a199ce6f41ee664a6`이며 입력 직후 첫 클릭의 Native3개를 확인했다. 세 번째 시험 로그 누락은 보존하고 해당 read1개의 독립 Ran1/OK로 보완했다. 기존 전체 Native 제품·중앙 대화 gate의 바이트/기한은 변경하지 않았다. 실제 사내 적용·모델 답변 품질은 미확인이다.
+- **다음 작업:** 같은 Draft PR #76 본문/Checks에서 보완한 정확한 최종 HEAD의 자동 CI·배포 후보를 판정한다. 이 문서의 이전 head·로컬 성공을 최종 원격 성공으로 대신하지 않는다. 새 PR 병합·사내 적용·운영 연결은 포함하지 않는다.
+
+아래 항목은 선행 작업 당시의 기록이다.
+
 ## 2026-10-06 · 공통 도움말과 쉬운 도구 등록 구현·검증
 
 - **기준:** 사용자 승인으로 [PR #74](https://github.com/knadalkim-a11y/team-agent-poc/pull/74)를 병합했다. 최종 head `ea5108542bd1d774bedaca4ed394e6ec4edff9be`의 [CI 37409566696](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37409566696) 성공을 확인했고, 병합 main `29b95b56917a5b587056d33f1df4d43783ecfdb2`에서 `feat/work-easy-tools-20261006`을 시작했다.

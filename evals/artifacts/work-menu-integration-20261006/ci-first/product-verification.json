@@ -1,0 +1,273 @@
+{
+  "run_id": 37434967430,
+  "job_id": 112174917674,
+  "review_head": "92f59d000a420e7500e95082e0b4140b9b105363",
+  "tested_merge": "a41378232b205f9aaad5f780e46474e1b1887678",
+  "tested_and_review_tree": "ab26f9cc8e56c6f1495c81ab848741d96dd2b9b3",
+  "artifact_id": 11399340527,
+  "artifact_bytes": 5071520,
+  "artifact_sha256": "b1e77d7aeaf2a05df1c9c283e41d06a6cad2a6d6b67c31f8ee83ad2943b6d806",
+  "artifact_api_digest_matches": true,
+  "zip_crc_pass": true,
+  "artifact_file_count": 100,
+  "evidence_listed_file_count": 99,
+  "evidence_file_sizes_and_sha256_all_match": true,
+  "png_count": 42,
+  "all_png_magic_and_decoder_verification_pass": true,
+  "png_dimensions": {
+    "ees-native-product/a0-empty.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/a1-human-complete.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/a1-input-saved-not-complete.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/b2-published.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/b3-saved-authoring.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/central-chat/a0-empty.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/central-chat/input-proposal-before-human.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/central-chat/input-proposal-human-saved-not-executed.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/central-chat/native-central-human-applied-unsaved.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/central-chat/native-central-human-saved-draft.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/central-chat/native-central-proposal-before-human.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/central-chat/native-central-read-tool.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/central-chat/native-message-reference-exact-old-attempt.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-a5-cycle-overview.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-a6-list-confirmed.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-a6-list-local-selection.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-a7-confirmed-readonly.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-a7-delivery-reviewed-still-blocked.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-a7-review-only-autosaved.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-a8-active-factory-duplicate-disabled.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-a8-factory-ready.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-a8-first-start.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-b21-schedule-preview.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-b22-saved-job-rules.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-b23-delivery-advisory-publish-enabled.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-b23-publish-review.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-q1-1366x768-human-action.png": [
+      1366,
+      768
+    ],
+    "ees-native-product/figma-q1-1366x768-native-chat.png": [
+      1366,
+      768
+    ],
+    "ees-native-product/figma-s1-empty.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-s1-read-retry-awaits-human.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-s2-filtered-records.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-s2-narrow-readonly-before-scroll.png": [
+      1100,
+      800
+    ],
+    "ees-native-product/figma-s2-narrow-scroll.png": [
+      1100,
+      800
+    ],
+    "ees-native-product/figma-s2-native-historical-answer.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/figma-s2-readonly-original-values.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/native-attachment-restored.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/native-attachment-saved.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/native-chat-saved.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/native-file-upload.png": [
+      1920,
+      1080
+    ],
+    "ees-native-product/native-narrow.png": [
+      1100,
+      800
+    ],
+    "ees-native-product/native-reduced-motion.png": [
+      1100,
+      800
+    ],
+    "ees-native-product/publish-confirmation-cancel-focus.png": [
+      1920,
+      1080
+    ]
+  },
+  "reports": {
+    "ees-native-product/report.json": {
+      "time": "2026-10-06T08:18:30.351692+00:00",
+      "source_commit": "a41378232b205f9aaad5f780e46474e1b1887678",
+      "source_dirty": true,
+      "wheel": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+      "wheel_sha256": "ecf138543e933a6c8ecefa13887c8210142068bb47e06e4743f9a25661a86c1a",
+      "gate_sha256": "8929df2937cc7ceed582ade419eb23059d08555ec4a0dc5b1f50267e467738ef",
+      "status": "passed",
+      "execution": {
+        "python": "3.11.16",
+        "argv": [
+          "tests/ees_work_integrated_app.py",
+          "--wheel",
+          "dist/branding/open_webui-0.11.3+ees.13-py3-none-any.whl",
+          "--chrome",
+          "/usr/bin/google-chrome",
+          "--output",
+          "dist/ees-native-product"
+        ],
+        "chrome": "/opt/google/chrome/google-chrome",
+        "reconstructed_after_workspace_loss": true,
+        "prior_lost_gate_byte_identity_claimed": false
+      },
+      "step_count": 20,
+      "step_names": [
+        "empty Native installation",
+        "Native model availability",
+        "actual built Native render",
+        "physical authoring save validate publish",
+        "Q1 actual Native layout at 1366x768",
+        "run input save cancel confirmation and actual completion",
+        "Native physical send and storage reload",
+        "Native attachment chooser upload process send reload",
+        "Q1 actual Native layout at 1366x768",
+        "Native and work restart persistence",
+        "latest Figma isolated API fixtures",
+        "Figma B2-2 physical job rule edit and draft save",
+        "Figma B2-1 physical schedule preview and draft save",
+        "Figma S1 actual HTTP failure and bounded read retry",
+        "Figma A6 physical Native tool call list selection and atomic confirmation",
+        "Figma A7 physical AI review autosave and explicit confirmation",
+        "Figma S2 physical readonly history and reference with restart persistence",
+        "Figma B2-3 delivery recommendation permits physical publish",
+        "Figma A7 delivery purpose review cannot close or claim sent",
+        "Figma A8 active factory remains visible and duplicate start is disabled"
+      ]
+    },
+    "ees-native-product/central-chat/report.json": {
+      "time": "2026-10-06T08:19:38.109014+00:00",
+      "source_commit": "a41378232b205f9aaad5f780e46474e1b1887678",
+      "source_dirty": true,
+      "wheel": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+      "wheel_sha256": "ecf138543e933a6c8ecefa13887c8210142068bb47e06e4743f9a25661a86c1a",
+      "gate_sha256": "8929df2937cc7ceed582ade419eb23059d08555ec4a0dc5b1f50267e467738ef",
+      "status": "passed",
+      "execution": {
+        "python": "3.11.16",
+        "argv": [
+          "tests/ees_work_native_chat.py",
+          "--wheel",
+          "dist/branding/open_webui-0.11.3+ees.13-py3-none-any.whl",
+          "--chrome",
+          "/usr/bin/google-chrome",
+          "--output",
+          "dist/ees-native-product/central-chat"
+        ],
+        "chrome": "/opt/google/chrome/google-chrome",
+        "reconstructed_after_workspace_loss": true,
+        "prior_lost_gate_byte_identity_claimed": false
+      },
+      "step_count": 9,
+      "step_names": [
+        "empty Native installation",
+        "Native model availability",
+        "actual built Native render",
+        "explicit packaged read-only Work tool registration",
+        "actual Native authenticated socket join sent",
+        "physical central chat executes actual registered authorized read",
+        "physical central proposal then separate apply and save",
+        "physical input suggestion preview apply then separate save",
+        "physical immutable historical message reference after second attempt"
+      ]
+    }
+  },
+  "scope_note": "This is first CI for review head 92f59d0 only, not any subsequent correction. Whole run has another job failure. Gate source_dirty=true includes untracked files; candidate source_dirty=false uses tracked-only git status. No candidate archive downloaded or independently rehashed by this reviewer."
+}

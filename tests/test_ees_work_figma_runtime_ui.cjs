@@ -4,6 +4,118 @@ const test=require('node:test'),assert=require('node:assert/strict'),crypto=requ
 const {renderer,run,controller,deferred}=require('./ees_workspace_ui_fixture.cjs');
 const html=(source,values={})=>run(renderer(values),source);
 
+const nativeCapabilities=(overrides={})=>({actor_id:'a',is_admin:false,can_author:false,managed_systems:[],native_access_available:true,native_access:{models:false,knowledge:false,prompts:false,skills:false,tools:false,admin:false},...overrides});
+function nativeNavigationHarness(capabilities=nativeCapabilities({is_admin:true,can_author:true,native_access:{models:true,knowledge:true,prompts:true,skills:true,tools:true,admin:true}})){
+ const h=controller(),navigation=[],bars=[],restores=[];let current={prompt:'대화 초안',files:[{id:'kept-file'}],selectedToolIds:['kept-tool'],selectedModels:['kept-model'],params:{temperature:.2}},ready=true;
+ const state={capabilities,systems:['EMS'],workflows:[],runs:[],operations:{},ui_state:{revision:0,state:{}}};
+ h.api.setState(state);h.api.setSelection({mode:'author',system_id:'EMS',workflow_id:'w',run_id:'',job_id:'j',tab:'overview',panel_width:620});h.context.location.pathname='/c/original';h.context.location.search='?keep=1';
+ h.context.document.createElement=tag=>{assert.equal(tag,'a');return {href:'',click(){navigation.push(this.href);const next=new URL(this.href,'http://native.test');h.context.location.pathname=next.pathname;h.context.location.search=next.search;},remove(){}};};
+ h.context.document.body.append=()=>{};
+ h.context.document.querySelector=selector=>['#chat-container #chat-pane','#sidebar-search-button'].includes(selector)?(/^\/(workspace|admin)/.test(h.context.location.pathname)?null:{}):null;
+ h.view.showNativeReturn=name=>{bars.push(name);return Boolean(name);};h.designer.canNavigate=()=>true;h.designer.readDraft=()=>({definition:{name:'미저장 작성'},dirty:true});
+ h.context.window.__eesNativeDraftV1={ready:()=>ready,read:()=>JSON.parse(JSON.stringify(current)),flush:()=>true,restore:async serialized=>{current=JSON.parse(serialized);restores.push(current);return true;}};
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,...state}:{ok:true});
+ return {...h,navigation,bars,restores,state,setDraft:value=>{current=value;},readDraft:()=>current,setReady:value=>{ready=value;},async open(id='skills'){await h.api.handleClick({dataset:{action:'native_open',nativeId:id}});h.api.sync();},async back(){await h.api.handleClick({dataset:{action:'native_return'}});h.api.sync();await new Promise(resolve=>setImmediate(resolve));}};
+}
+
+test('workspace menu uses server permissions for three groups and hides unavailable Native destinations',()=>{
+ const admin=nativeCapabilities({is_admin:true,can_author:true,native_access:{models:true,knowledge:true,prompts:true,skills:true,tools:true,admin:true}});
+ const rendered=html('workWorkspaceMenuHTML({capabilities}, {tab:"tools"})',{capabilities:admin});
+ assert.equal((rendered.match(/class="ew-nav-group"/g)||[]).length,3);for(const label of ['업무 만들기','Open WebUI에서 열기','관리자만','스킬·지침','AI 도우미','참고 문서','빠른 문장','기능 연결','공장·접근 범위','관리자 설정'])assert.ok(rendered.includes(label),label);
+ assert.match(rendered,/<small class="ew-nav-native-name">모델<\/small>/);assert.doesNotMatch(rendered,/native_workspace|native_skills|Native 모델/);
+ const author=nativeCapabilities({can_author:true,managed_systems:['EMS'],native_access:{skills:true,tools:true}}),authorHTML=html('workWorkspaceMenuHTML({capabilities}, {})',{capabilities:author});
+ assert.match(authorHTML,/업무 만들기|data-native-id="skills"/);assert.doesNotMatch(authorHTML,/관리자만|기능 연결|공장·접근 범위|data-native-id="models"/);
+ for(const cap of [nativeCapabilities(),{...admin,native_access_available:false},{...admin,native_access_available:undefined},{...admin,native_access:{skills:'true'}}]){
+  const output=html('workWorkspaceMenuHTML({capabilities}, {})',{capabilities:cap});assert.doesNotMatch(output,/data-action="native_open"/);
+ }
+});
+test('tools-only permission keeps D9 workspace access with an honest empty menu and no admin link',()=>{
+ const capabilities=nativeCapabilities({native_access:{tools:true}});
+ assert.equal(html('workCanWorkspace(capabilities)',{capabilities}),true);
+ const output=html('workWorkspaceMenuHTML({capabilities}, {})',{capabilities});assert.match(output,/EES Work에서 열 수 있는 항목이 없습니다/);assert.doesNotMatch(output,/data-action=|기능 연결/);
+ assert.equal(html('workCanWorkspace(capabilities)',{capabilities:nativeCapabilities()}),false);
+ assert.equal(html('workCanWorkspace(capabilities)',{capabilities:nativeCapabilities({managed_systems:['OTHER']})}),true);
+});
+test('blocked Native navigation has a visible escaped authoring alert without replacing its editor',()=>{
+ const error='첨부한 이미지는 먼저 보내거나 제거한 뒤 열어 주세요. <개인 글>';
+ const output=html('workWorkspaceMenuHTML({capabilities}, {}, error)',{capabilities:nativeCapabilities({can_author:true}),error});assert.match(output,/role="alert" data-native-navigation-error/);assert.match(output,/첨부한 이미지는 먼저 보내거나 제거/);assert.match(output,/&lt;개인 글&gt;/);assert.doesNotMatch(output,/<개인 글>/);
+});
+test('forged denied Native and author actions do not navigate or mutate state',async()=>{
+ const h=nativeNavigationHarness(nativeCapabilities());h.api.setSelection({mode:'work'});
+ for(const nativeId of ['skills','tools','admin','https://foreign.invalid/','__proto__'])await h.api.handleClick({dataset:{action:'native_open',nativeId}});
+ for(const action of ['procedures','tools','workspace_admin','native_skills','native_workspace'])await h.api.handleClick({dataset:{action}});
+ await h.api.handleClick({dataset:{action:'mode',mode:'author'}});
+ assert.equal(h.api.snapshot().selection.mode,'work');assert.equal(h.navigation.length,0);assert.equal(h.calls.length,0);
+});
+test('all six allowed Native destinations use direct static routes without a sidebar link',async()=>{
+ for(const id of ['skills','models','knowledge','prompts','tools','admin']){const h=nativeNavigationHarness();await h.open(id);assert.deepEqual(h.navigation,[id==='admin'?'/admin/settings':'/workspace/'+id]);assert.ok(h.bars.at(-1));assert.equal(h.calls.filter(call=>call.body).length,0);}
+});
+test('Native return preserves EES selection and unsaved designer session plus the full composer without sending',async()=>{
+ const h=nativeNavigationHarness(),before=JSON.parse(JSON.stringify(h.api.snapshot().selection)),draft=JSON.parse(JSON.stringify(h.readDraft()));let captures=0,designerCaptures=0,closed=0;
+ h.view.capture=()=>captures++;h.designer.readDraft=()=>{designerCaptures++;return {dirty:true};};h.designer.closeStart=()=>closed++;
+ await h.open();h.setDraft({prompt:'',files:[],selectedModels:['default']});await h.back();
+ assert.deepEqual(h.navigation,['/workspace/skills','/c/original?keep=1']);assert.deepEqual(JSON.parse(JSON.stringify(h.api.snapshot().selection)),before);assert.deepEqual(h.readDraft(),draft);assert.equal(h.restores.length,1);assert.equal(captures,2);assert.equal(designerCaptures,2);assert.equal(closed,0);assert.equal(h.bars.at(-1),null);assert.equal(h.calls.filter(call=>call.body).length,0);
+});
+test('Native loaded draft is not reimported and different nonempty content is never overwritten',async()=>{
+ for(const different of [false,true]){const h=nativeNavigationHarness();await h.open();if(different)h.setDraft({prompt:'귀환한 대화의 새 글',files:[],selectedToolIds:['new']});await h.back();assert.equal(h.restores.length,0);if(different)assert.equal(h.readDraft().prompt,'귀환한 대화의 새 글');}
+});
+test('return waits for the matching Native editor and respects new model tool or text interactions',async()=>{
+ for(const type of ['input','change','click','keydown']){
+  const h=nativeNavigationHarness();await h.open();h.setReady(false);await h.back();assert.equal(h.restores.length,0);
+  h.api.handleEvent({type,isTrusted:true,target:{closest:selector=>selector==='#chat-container'?{}:null}});
+  const next={prompt:'',files:[],selectedModels:['new-model'],selectedToolIds:['new-tool']};h.setDraft(next);h.setReady(true);h.api.sync();await new Promise(resolve=>setImmediate(resolve));assert.equal(h.restores.length,0);assert.deepEqual(h.readDraft(),next);
+ }
+});
+test('Native departure blocks busy editors and failed or changed draft flushes',async()=>{
+ const busy=nativeNavigationHarness();busy.designer.canNavigate=()=>false;await assert.rejects(busy.open(),/저장 또는 화면 준비/);assert.equal(busy.navigation.length,0);
+ const failed=nativeNavigationHarness();failed.context.window.__eesNativeDraftV1.flush=()=>false;await assert.rejects(failed.open(),/보존하지 못했습니다/);assert.equal(failed.navigation.length,0);
+ const changed=nativeNavigationHarness(),pending=deferred();changed.context.window.__eesNativeDraftV1.flush=()=>pending.promise;const moving=changed.open();changed.setDraft({prompt:'flush 중 새 입력'});pending.resolve(true);await assert.rejects(moving,/대화 내용이 바뀌었습니다/);assert.equal(changed.navigation.length,0);assert.equal(changed.readDraft().prompt,'flush 중 새 입력');
+});
+test('image previews and uploading attachments block departure before and after Native flush',async()=>{
+ for(const kind of ['image','unavailable','uploading'])for(const duringFlush of [false,true]){
+  const h=nativeNavigationHarness(),original=h.context.document.querySelector;let blocked=!duringFlush;
+  h.context.document.querySelector=selector=>selector==='#chat-input'?{closest:()=>({querySelector:query=>{assert.equal(query,'[data-cy="image"], [data-cy="image-unavailable"]');return blocked&&kind!=='uploading'?{dataset:{cy:kind}}:null;}})}:original(selector);
+  const before=JSON.parse(JSON.stringify(h.readDraft()));if(kind==='uploading'&&!duringFlush)h.setDraft({...before,files:[{id:'pending',status:'uploading'}]});
+  if(duringFlush)h.context.window.__eesNativeDraftV1.flush=()=>{blocked=true;if(kind==='uploading')h.setDraft({...before,files:[{id:'pending',status:'uploading'}]});return true;};
+  await assert.rejects(h.open(),kind==='uploading'?/업로드가 끝난 뒤/:/첨부한 이미지/);assert.equal(h.navigation.length,0);assert.equal(h.readDraft().prompt,before.prompt);assert.equal(h.restores.length,0);
+ }
+ const ready=nativeNavigationHarness();await ready.open();assert.equal(ready.navigation.length,1,'a completed ordinary file remains navigable');
+});
+test('pending Native navigation cannot cross an account or work context change',async()=>{
+ for(const change of ['account','scope','route']){const h=nativeNavigationHarness(),pending=deferred();h.context.window.__eesNativeDraftV1.flush=()=>pending.promise;const moving=h.open();if(change==='account')h.setAuth('actor-b');else if(change==='scope')h.api.setSelection({system_id:'OTHER'});else h.context.location.pathname='/c/other';pending.resolve(true);await moving;assert.equal(h.navigation.length,0);assert.equal(h.restores.length,0);}
+});
+test('account reset releases an old pending Native flush without unlocking the new account operation',async()=>{
+ const h=nativeNavigationHarness(),oldFlush=deferred(),newFlush=deferred();let flushing=0;
+ h.context.window.__eesNativeDraftV1.flush=()=>{flushing++;return flushing===1?oldFlush.promise:newFlush.promise;};
+ const old=h.api.handleClick({dataset:{action:'native_open',nativeId:'skills'}});h.setAuth('actor-b-token');h.api.reset();h.api.setIdentity();h.api.setState({...h.state,capabilities:{...h.state.capabilities,actor_id:'b'}});
+ const next=h.api.handleClick({dataset:{action:'native_open',nativeId:'models'}});assert.equal(flushing,2);
+ oldFlush.resolve(true);await old;await assert.rejects(h.api.handleClick({dataset:{action:'native_open',nativeId:'skills'}}),/저장 또는 화면 준비/);
+ newFlush.resolve(true);await next;assert.deepEqual(h.navigation,['/workspace/models']);
+});
+test('Native tickets clear on direct unrelated navigation logout actor change and completed return',async()=>{
+ const direct=nativeNavigationHarness();direct.context.location.pathname='/workspace/skills';direct.context.location.search='';direct.api.sync();assert.equal(direct.bars.at(-1),null);
+ for(const boundary of ['chat','unrelated','logout','actor','session']){const h=nativeNavigationHarness();await h.open();if(boundary==='chat')h.context.location.pathname='/c/other';if(boundary==='unrelated')h.context.location.pathname='/notes';if(boundary==='logout')h.context.location.pathname='/auth';if(boundary==='actor')h.api.setState({...h.state,capabilities:{...h.state.capabilities,actor_id:'b'}});if(boundary==='session')h.setAuth('actor-b-token');h.api.sync();await h.api.handleClick({dataset:{action:'native_return'}});assert.equal(h.navigation.length,1,boundary);assert.equal(h.restores.length,0,boundary);assert.equal(h.bars.at(-1),null,boundary);}
+ const returned=nativeNavigationHarness();await returned.open();await returned.back();returned.context.location.pathname='/workspace/models';returned.context.location.search='';returned.api.sync();assert.equal(returned.bars.at(-1),null);
+});
+test('admin settings query redirect keeps its ticket only for the verified Native modal and closes it before return',async()=>{
+ const h=nativeNavigationHarness();let open=false,closed=0;const content={tagName:'DIV',firstElementChild:{tagName:'DIV'}},parent={},modal={querySelector:selector=>selector==='#settings-tabs-container'?tabs:selector==='#settings-tabs-container > button'?{click(){open=false;closed++;}}:null},tabs={closest:()=>open?modal:null,querySelector:()=>({}),nextElementSibling:content,parentElement:parent};content.parentElement=parent;
+ const original=h.context.document.querySelector;h.context.document.querySelector=selector=>selector==='#settings-tabs-container'?(open?tabs:null):original(selector);
+ await h.open('admin');h.context.location.pathname='/';h.context.location.search='?settings=admin%3Ageneral';h.api.sync();assert.equal(h.bars.at(-1),'관리자');
+ open=true;h.context.location.search='';h.api.sync();assert.equal(h.bars.at(-1),'관리자');assert.equal(h.restores.length,0);assert.equal(html('workNativeReturnHost("/")',{document:h.context.document}),content);
+ await h.back();assert.equal(closed,1);assert.deepEqual(h.navigation,['/admin/settings','/c/original?keep=1']);assert.equal(h.bars.at(-1),null);
+});
+test('closing an admin modal retires its ticket and ordinary settings never get an EES return bar',async()=>{
+ const h=nativeNavigationHarness();let open=true;const tabs={closest:()=>open?{}:null,querySelector:()=>({})},original=h.context.document.querySelector;h.context.document.querySelector=selector=>selector==='#settings-tabs-container'?(open?tabs:null):original(selector);
+ await h.open('admin');h.context.location.pathname='/';h.context.location.search='';h.api.sync();assert.equal(h.bars.at(-1),'관리자');open=false;h.api.sync();assert.equal(h.bars.at(-1),null);assert.equal(h.restores.length,0);
+ const direct=nativeNavigationHarness();direct.context.location.pathname='/';direct.context.location.search='?settings=general';direct.api.sync();assert.equal(direct.bars.at(-1),null);
+});
+test('Native return mount requires verified layout and otherwise leaves Native DOM untouched',()=>{
+ const original={name:'native-form'},parent={children:[original],contains:node=>node===content},content={parentElement:null,previousElementSibling:{tagName:'NAV'}};content.parentElement=parent;
+ const document={querySelector:selector=>selector==='#workspace-container'?content:null,querySelectorAll:()=>[]};
+ assert.equal(html('workNativeReturnHost("/workspace/skills")',{document}),parent);assert.deepEqual(parent.children,[original]);content.previousElementSibling={tagName:'SECTION'};assert.equal(html('workNativeReturnHost("/workspace/skills")',{document}),null);assert.deepEqual(parent.children,[original]);
+ const nav={parentElement:parent,nextElementSibling:{tagName:'DIV'},querySelector:selector=>['a[href="/admin"]','a[href="/admin/settings"]'].includes(selector)?{}:null};document.querySelectorAll=()=>[nav];assert.equal(html('workNativeReturnHost("/admin/settings")',{document}),parent);nav.querySelector=()=>null;assert.equal(html('workNativeReturnHost("/admin/settings")',{document}),null);assert.equal(html('workNativeReturnHost("/notes")',{document}),null);
+});
+
 test('help question includes canonical term ID and visible authoring context without hidden state',()=>{
  const question=html('workUI.helpQuestion(term,context)',{term:{id:'read_tool',name:'정보 읽기'},context:{screen:'정보 읽기 도구',draftName:'점검 조회',kind:'read',secret:'not-visible'}});
  assert.match(question,/도움말 용어 ID: read_tool/);assert.match(question,/현재 화면: 정보 읽기 도구/);assert.match(question,/초안 이름: 점검 조회/);assert.match(question,/하는 일: 정보 읽기/);assert.doesNotMatch(question,/not-visible/);
@@ -46,6 +158,28 @@ test('author tools expose help-only metadata while workflow and historical refer
  const help=h.api.reference();assert.equal(help.kind,'help');assert.equal(help.system_id,'EMS');assert.ok(help.context_id);assert.equal(Object.hasOwn(help,'workflow_id'),false);assert.equal(Object.hasOwn(help,'run_id'),false);
  h.api.setSelection({tab:'overview'});assert.equal(h.api.reference().kind,'workspace');assert.equal(h.api.reference().workflow_id,'old-work');
  h.api.setSelection({mode:'work',chat_reference:{kind:'workspace',reference_kind:'historical',workflow_id:'old-work',run_id:'old-run',attempt_id:'kept'}});h.api.setState({run:{id:'old-run'}});assert.equal(h.api.reference().attempt_id,'kept');
+});
+
+test('procedure starter questions keep the Native draft and use help metadata until the starter closes',async()=>{
+ const h=controller(),original={prompt:'이미 작성한 절차 메모',files:[{id:'kept-file'}],selectedModels:['owned-model'],selectedToolIds:['owned-tool']};let restored,active={screen:'새 업무 절차',draftName:'시험 공장 절차',templateId:'factory_rollout'},synced;
+ h.designer.readStartContext=()=>active;h.view.sync=value=>{synced=value;};h.api.setState({capabilities:{actor_id:'a'}});h.api.setSelection({mode:'author',tab:'overview',system_id:'EMS',workflow_id:'existing-work',run_id:'existing-run'});
+ h.designer.callbacks.startContextChanged(active);assert.equal(synced.procedure_start.draftName,'시험 공장 절차');
+ h.context.window.__eesNativeDraftV1={ready:()=>true,read:()=>original,restore:async value=>{restored=JSON.parse(value);return true;}};
+ h.context.document.querySelector=selector=>selector==='#chat-input'?{focus(){}}:{};
+ const reference=h.api.reference();assert.equal(reference.kind,'help');assert.equal(Object.hasOwn(reference,'workflow_id'),false);
+ await h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'0'}});
+ assert.ok(restored.prompt.startsWith(original.prompt+'\n\n신규 공장 횡전개 예시'));assert.match(restored.prompt,/초안 이름: 시험 공장 절차/);assert.deepEqual({...restored,prompt:original.prompt},original);assert.equal(h.calls.length,0);
+ active=null;h.designer.callbacks.startContextChanged(null);assert.equal(synced.procedure_start,null);assert.equal(h.api.reference().kind,'workspace');assert.equal(h.api.reference().workflow_id,'existing-work');
+ restored=null;await h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'1'}});assert.equal(restored,null);
+});
+test('procedure question choices reject unavailable or invalid context without changing a draft',async()=>{
+ const h=controller();let restores=0;h.designer.readStartContext=()=>({screen:'새 업무 절차'});h.api.setSelection({mode:'author',tab:'overview'});
+ h.context.window.__eesNativeDraftV1={ready:()=>true,read:()=>({prompt:'keep'}),restore:async()=>{restores++;return true;}};
+ for(const questionIndex of ['-1','3','NaN'])await h.api.handleClick({dataset:{action:'procedure_question',questionIndex}});
+ h.api.setSelection({mode:'work'});await h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'0'}});assert.equal(restores,0);assert.equal(h.calls.length,0);
+});
+test('procedure introduction has exactly three keyboard buttons and no automatic send control',()=>{
+ const rendered=html('workProcedureStartHTML({screen:"새 업무 절차",draftName:"<secret>"})');assert.equal((rendered.match(/data-action="procedure_question"/g)||[]).length,3);assert.match(rendered,/type="button"/);assert.match(rendered,/내용을 확인하고 직접 보내 주세요/);assert.doesNotMatch(rendered,/<secret>|type="submit"/);assert.equal(html('workProcedureStartHTML(null)'),'');
 });
 
 test('input save keeps mutation controls busy until the acknowledged state finishes refreshing',async()=>{

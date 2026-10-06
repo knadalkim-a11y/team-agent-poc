@@ -1,0 +1,85 @@
+{
+  "scope": "built Native UI; synthetic session and data",
+  "path": "/",
+  "ready": "complete",
+  "fonts": "loaded",
+  "nativeMount": {
+    "chatPane": true,
+    "sidebarSearch": true,
+    "sidebarToggle": false
+  },
+  "viewport": [
+    1920,
+    1080
+  ],
+  "active": {
+    "tag": "BUTTON",
+    "id": "",
+    "name": ""
+  },
+  "panel": null,
+  "authoring": null,
+  "nativeMenu": {
+    "draftReady": true,
+    "settingsTabs": {
+      "x": 317.5,
+      "y": 109,
+      "bottom": 971,
+      "width": 240,
+      "height": 862,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "static",
+      "flex": "0 0 auto",
+      "font": "16px / 24px -apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "maskImage": "none",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "returnBar": {
+      "x": 577.5,
+      "y": 125,
+      "bottom": 169,
+      "width": 998,
+      "height": 44,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "static",
+      "flex": "0 0 auto",
+      "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(250, 250, 250)"
+    },
+    "workspace": null,
+    "search": null,
+    "items": [],
+    "captions": []
+  },
+  "layout": {
+    "panel": null,
+    "scroll": null,
+    "radio": null,
+    "selected": null,
+    "unselected": null,
+    "name": null,
+    "footer": null,
+    "back": null,
+    "questionGroup": null,
+    "firstQuestion": null,
+    "cardGaps": []
+  },
+  "nativeDraft": {
+    "prompt": "",
+    "files": [],
+    "selectedToolIds": [],
+    "selectedSkillIds": [],
+    "selectedFilterIds": [],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "nativeInput": {
+    "text": "\n",
+    "html": "<div contenteditable=\"true\" translate=\"no\" class=\"tiptap ProseMirror\" tabindex=\"0\" id=\"chat-input\" aria-label=\"무엇을 도와드릴까요?\"><p data-placeholder=\"무엇을 도와드릴까요?\" class=\"is-empty is-editor-empty\"><br class=\"ProseMirror-trailingBreak\"></p></div>"
+  },
+  "native_search": null
+}

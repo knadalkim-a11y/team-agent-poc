@@ -1,0 +1,421 @@
+[
+  {
+    "id": "delivery_review",
+    "name": "배포 산출물 점검",
+    "description": "대상 확정부터 문서 점검, 재점검과 최종 확인까지 구성한 예시입니다.",
+    "schedule_suggestion": "격주 화요일 · 제안",
+    "definition": {
+      "category": "ops",
+      "mode": "periodic",
+      "nodes": {
+        "delivery_review-root": {
+          "id": "delivery_review-root",
+          "type": "p",
+          "name": "배포 산출물 점검",
+          "parent": null,
+          "children": [
+            "delivery-target",
+            "delivery-first",
+            "delivery-recheck",
+            "delivery-followup"
+          ],
+          "deps": []
+        },
+        "delivery-target": {
+          "id": "delivery-target",
+          "type": "t",
+          "name": "대상 확정",
+          "parent": "delivery_review-root",
+          "children": [
+            "delivery-list"
+          ],
+          "deps": []
+        },
+        "delivery-list": {
+          "id": "delivery-list",
+          "name": "배포 대상 CR 목록 만들기",
+          "mode": "tool",
+          "result_block": "list_confirm",
+          "instructions": "예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "delivery-target",
+          "children": [],
+          "deps": [],
+          "human_confirmation": true,
+          "inputs": [],
+          "argument_bindings": {}
+        },
+        "delivery-first": {
+          "id": "delivery-first",
+          "type": "t",
+          "name": "1차 점검",
+          "parent": "delivery_review-root",
+          "children": [
+            "delivery-documents",
+            "delivery-verdict",
+            "delivery-report"
+          ],
+          "deps": [
+            "delivery-target"
+          ]
+        },
+        "delivery-documents": {
+          "id": "delivery-documents",
+          "name": "CR별 필수 문서 확인",
+          "mode": "tool",
+          "result_block": "values",
+          "instructions": "예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "delivery-first",
+          "children": [],
+          "deps": [],
+          "human_confirmation": true,
+          "inputs": [],
+          "argument_bindings": {}
+        },
+        "delivery-verdict": {
+          "id": "delivery-verdict",
+          "name": "CR별 판정",
+          "mode": "ai",
+          "result_block": "item_verdict",
+          "instructions": "조회 근거를 바탕으로 초안을 만들고 사람이 확인합니다. 사용할 모델과 판정 기준을 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "delivery-first",
+          "children": [],
+          "deps": [
+            "delivery-documents"
+          ],
+          "human_confirmation": true,
+          "inputs": []
+        },
+        "delivery-report": {
+          "id": "delivery-report",
+          "name": "점검 결과 송부",
+          "mode": "ai",
+          "result_block": "ai_review",
+          "instructions": "조회 근거를 바탕으로 초안을 만들고 사람이 확인합니다. 사용할 모델과 판정 기준을 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "delivery-first",
+          "children": [],
+          "deps": [
+            "delivery-verdict"
+          ],
+          "human_confirmation": true,
+          "inputs": [],
+          "completion": {
+            "kind": "delivery"
+          }
+        },
+        "delivery-recheck": {
+          "id": "delivery-recheck",
+          "type": "t",
+          "name": "보완·재점검",
+          "parent": "delivery_review-root",
+          "children": [
+            "delivery-additions",
+            "delivery-reapprove"
+          ],
+          "deps": [
+            "delivery-first"
+          ]
+        },
+        "delivery-additions": {
+          "id": "delivery-additions",
+          "name": "미승인 CR 추가 제출 확인",
+          "mode": "tool",
+          "result_block": "values",
+          "instructions": "예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "delivery-recheck",
+          "children": [],
+          "deps": [],
+          "human_confirmation": true,
+          "inputs": [],
+          "argument_bindings": {}
+        },
+        "delivery-reapprove": {
+          "id": "delivery-reapprove",
+          "name": "재판정·배포 포함 확정",
+          "mode": "human",
+          "result_block": "item_verdict",
+          "instructions": "담당자가 실제 확인한 내용을 기록합니다. 확인 기준은 사용할 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "delivery-recheck",
+          "children": [],
+          "deps": [
+            "delivery-additions"
+          ],
+          "human_confirmation": true,
+          "inputs": []
+        },
+        "delivery-followup": {
+          "id": "delivery-followup",
+          "type": "t",
+          "name": "조건부 승인 후속",
+          "parent": "delivery_review-root",
+          "children": [
+            "delivery-final-documents",
+            "delivery-final-verdict",
+            "delivery-final-report"
+          ],
+          "deps": [
+            "delivery-recheck"
+          ]
+        },
+        "delivery-final-documents": {
+          "id": "delivery-final-documents",
+          "name": "조건부 승인 CR 최종 제출 확인",
+          "mode": "tool",
+          "result_block": "values",
+          "instructions": "예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "delivery-followup",
+          "children": [],
+          "deps": [],
+          "human_confirmation": true,
+          "inputs": [],
+          "argument_bindings": {}
+        },
+        "delivery-final-verdict": {
+          "id": "delivery-final-verdict",
+          "name": "최종 판정",
+          "mode": "human",
+          "result_block": "item_verdict",
+          "instructions": "담당자가 실제 확인한 내용을 기록합니다. 확인 기준은 사용할 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "delivery-followup",
+          "children": [],
+          "deps": [
+            "delivery-final-documents"
+          ],
+          "human_confirmation": true,
+          "inputs": []
+        },
+        "delivery-final-report": {
+          "id": "delivery-final-report",
+          "name": "최종 결과 송부",
+          "mode": "ai",
+          "result_block": "ai_review",
+          "instructions": "조회 근거를 바탕으로 초안을 만들고 사람이 확인합니다. 사용할 모델과 판정 기준을 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "delivery-followup",
+          "children": [],
+          "deps": [
+            "delivery-final-verdict"
+          ],
+          "human_confirmation": true,
+          "inputs": [],
+          "completion": {
+            "kind": "delivery"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "factory_rollout",
+    "name": "신규 공장 횡전개",
+    "description": "공장마다 범위를 정하고 인프라, 설치와 연결 상태를 확인하는 예시입니다.",
+    "schedule_suggestion": "",
+    "definition": {
+      "category": "setup",
+      "mode": "on_demand",
+      "execution_scope": "factory",
+      "nodes": {
+        "factory_rollout-root": {
+          "id": "factory_rollout-root",
+          "type": "p",
+          "name": "신규 공장 횡전개",
+          "parent": null,
+          "children": [
+            "factory-preparation",
+            "factory-infrastructure",
+            "factory-installation",
+            "factory-interface"
+          ],
+          "deps": []
+        },
+        "factory-preparation": {
+          "id": "factory-preparation",
+          "type": "t",
+          "name": "사전준비",
+          "parent": "factory_rollout-root",
+          "children": [
+            "factory-scope"
+          ],
+          "deps": []
+        },
+        "factory-scope": {
+          "id": "factory-scope",
+          "name": "셋업 범위 확인",
+          "mode": "human",
+          "result_block": "human_confirm",
+          "instructions": "담당자가 실제 확인한 내용을 기록합니다. 확인 기준은 사용할 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "factory-preparation",
+          "children": [],
+          "deps": [],
+          "human_confirmation": true,
+          "inputs": []
+        },
+        "factory-infrastructure": {
+          "id": "factory-infrastructure",
+          "type": "t",
+          "name": "AP·DB 인프라 준비",
+          "parent": "factory_rollout-root",
+          "children": [
+            "factory-infrastructure-check"
+          ],
+          "deps": [
+            "factory-preparation"
+          ]
+        },
+        "factory-infrastructure-check": {
+          "id": "factory-infrastructure-check",
+          "name": "인프라 준비 확인",
+          "mode": "tool",
+          "result_block": "values",
+          "instructions": "예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "factory-infrastructure",
+          "children": [],
+          "deps": [],
+          "human_confirmation": true,
+          "inputs": [],
+          "argument_bindings": {}
+        },
+        "factory-installation": {
+          "id": "factory-installation",
+          "type": "t",
+          "name": "시스템 설치",
+          "parent": "factory_rollout-root",
+          "children": [
+            "factory-installation-check",
+            "factory-db-check",
+            "factory-ap-check"
+          ],
+          "deps": [
+            "factory-infrastructure"
+          ]
+        },
+        "factory-installation-check": {
+          "id": "factory-installation-check",
+          "name": "설치·설정 확인",
+          "mode": "human",
+          "result_block": "human_confirm",
+          "instructions": "담당자가 실제 확인한 내용을 기록합니다. 확인 기준은 사용할 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "factory-installation",
+          "children": [],
+          "deps": [],
+          "human_confirmation": true,
+          "inputs": []
+        },
+        "factory-db-check": {
+          "id": "factory-db-check",
+          "name": "DB 연결 확인",
+          "mode": "tool",
+          "result_block": "values",
+          "instructions": "예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "factory-installation",
+          "children": [],
+          "deps": [
+            "factory-installation-check"
+          ],
+          "human_confirmation": true,
+          "inputs": [],
+          "argument_bindings": {}
+        },
+        "factory-ap-check": {
+          "id": "factory-ap-check",
+          "name": "AP 연결 확인",
+          "mode": "tool",
+          "result_block": "values",
+          "instructions": "예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "factory-installation",
+          "children": [],
+          "deps": [
+            "factory-db-check"
+          ],
+          "human_confirmation": true,
+          "inputs": [],
+          "argument_bindings": {}
+        },
+        "factory-interface": {
+          "id": "factory-interface",
+          "type": "t",
+          "name": "시스템 간 인터페이스 확인",
+          "parent": "factory_rollout-root",
+          "children": [
+            "factory-interface-check"
+          ],
+          "deps": [
+            "factory-installation"
+          ]
+        },
+        "factory-interface-check": {
+          "id": "factory-interface-check",
+          "name": "인터페이스 검증",
+          "mode": "tool",
+          "result_block": "values",
+          "instructions": "예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "factory-interface",
+          "children": [],
+          "deps": [],
+          "human_confirmation": true,
+          "inputs": [],
+          "argument_bindings": {}
+        }
+      }
+    }
+  },
+  {
+    "id": "daily_check",
+    "name": "일일 시스템 점검",
+    "description": "연결된 조회 기능으로 시스템 상태를 확인하는 간단한 예시입니다.",
+    "schedule_suggestion": "매일 · 제안",
+    "definition": {
+      "category": "ops",
+      "mode": "periodic",
+      "nodes": {
+        "daily_check-root": {
+          "id": "daily_check-root",
+          "type": "p",
+          "name": "일일 시스템 점검",
+          "parent": null,
+          "children": [
+            "daily-stage"
+          ],
+          "deps": []
+        },
+        "daily-stage": {
+          "id": "daily-stage",
+          "type": "t",
+          "name": "일일 점검",
+          "parent": "daily_check-root",
+          "children": [
+            "daily-status"
+          ],
+          "deps": []
+        },
+        "daily-status": {
+          "id": "daily-status",
+          "name": "시스템 상태 확인",
+          "mode": "tool",
+          "result_block": "values",
+          "instructions": "예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.",
+          "type": "j",
+          "parent": "daily-stage",
+          "children": [],
+          "deps": [],
+          "human_confirmation": true,
+          "inputs": [],
+          "argument_bindings": {}
+        }
+      }
+    }
+  }
+]

@@ -1,0 +1,626 @@
+{
+  "scope": "Pinned Open WebUI 0.11.3, actual browser and temporary SQLite, synthetic identities/models/functions. No in-house deployment or EES/EMS execution.",
+  "base_commit": "e55bfb125ddf84d14030b1b56bb604bd8b14d088",
+  "branch": "feat/work-procedure-examples-20261006",
+  "build2": {
+    "filename": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "bytes": 152110443,
+    "sha256": "8bf5314ff771a9ea1987aa51d5828b04cf1194028c7047fa765afdbc654d0ef0"
+  },
+  "build1_sha256": "01ef124941319188455ea889c696b95839578a28de45c78548dc4116961e8889",
+  "ui_node": {
+    "authoring": 92,
+    "runtime": 50,
+    "failed": 0
+  },
+  "backend_related": {
+    "passed": 71
+  },
+  "packaging": {
+    "passed": 2
+  },
+  "installer": {
+    "passed": 61,
+    "skipped": 6,
+    "actual_prior_wheels": "112 and 114 inventories: Apply/Restore against a synthetic current inventory; all original files, DB, key and interpreter preserved"
+  },
+  "native": {
+    "chrome": "153.0.8010.52",
+    "uuid_blank": "build1 / attempt1 passed",
+    "procedure_examples": "build2 / attempt4 passed",
+    "attempt1": "C failed at unguarded panel access on 600px resize; UUID blank passed",
+    "attempt2": "C failed at 600px panel readiness; Native sidebar was closed",
+    "attempt3": "C failed at same readiness because immediate old DOM presence skipped the planned menu click",
+    "attempt4": "C passed after actual visible Native sidebar toggle click; desktop 580px, adjacent card gaps 0; narrow panel x56 width544 and horizontal overflow0",
+    "final_test_change": "Added explicit sidebar-search absence and visible toggle readiness after attempt4; compile/diff checked, exact final test behavior awaits mandatory CI. No product change."
+  },
+  "figma": {
+    "file": "XK2wTos6sEuxSHhIj7cqg6",
+    "nodes": [
+      "1033:275",
+      "1033:562",
+      "836:372",
+      "863:464",
+      "898:31"
+    ],
+    "last_change": "C13, no C14+ observed",
+    "differences": [
+      "3 examples, AP example excluded per handover",
+      "daily stage/job names are synthetic defaults",
+      "3 new SVG requests returned HTML; Native radio and existing help text used",
+      "existing shell headers and prior Native conversation retained"
+    ],
+    "reference_png_sha256": {
+      "898_31.png": "d98b7e631cddec6cd21fe834a53127615cd959052b92528092e311f4598f03f3",
+      "863_464.png": "0458c651410bf8515bd4798e6f35ea87c0d080ac6d1da51c5e48dac658606d95",
+      "836_372.png": "c9aa5002dbdc8f3498f1d13ba8aacbfe44cf0674d77392a100ec6b3bb3f41675",
+      "1033_275.png": "effecba018aecb8c39d5c3b3316fa6935537155a7b18397f170dd500c1162ced",
+      "1033_562.png": "a7a31de4b846b2078b4c2ae43b6dee699818dca7f5aae779f1935a16a368b709"
+    }
+  },
+  "sources": {
+    "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py": "12a538febf1843aeb7e0ccad64e72545c097858d94a165e046cba259f61ba8fe",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_view.py": "b40840efadff7347556ef59771b8d4eec53e66c39c16bd532c8114a1132fe29a",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_operations.py": "7f11b8a1d3ef0385f5057af78cff9ed381e3bd2ab1698cc7ac2febdcdc5201cc",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_authoring.py": "f918dbcbc1824ca57fbba8881b5eb63a2c354f3452ef315178fda1decdc60cfe",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py": "c42193f3474d5ca6112dbd492458ed5f42fd8548d59306eb656eba27852bc5a0",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow.py": "d504659d63ffe56df4990ac6369115bb1c9443bdf8c2b1a635edc6010ccbe502",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_contract.py": "fa8559f4d6a289a19fd1c3a074ff54f07d76f782a04d832daddde5149001de10",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_execution.py": "bb3489b385833384af857f2f555035f47905f6d58862a3c8df8fc3b96d8cd47a",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_model.py": "e5054976064c8186c162d01ebc323f16820f9ae05744f2eb37ee13bf11289d1c",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_definition.py": "65430af71bb5dd389b96db9a284029eb7e7381768d10a584c7eee482d6703a57",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py": "3c8ccdfa652ec01c1d04620f20ce3b6f287ead27d1ed71aa72a1cd7bbbfd92dc",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_help.json": "b5f90131c9e7bc083cb055a4f9698103fe75a1441e680362083d5a0d3f3557c4",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_tool_examples.json": "1233b8fa52a1160f8678090b02d928835d89108bedd38d0f9d32a56518262646",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_policy.json": "dcaec7a509c904f679ce01558896f031117962ea8f1ce580c5210e2b35c55d66",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_procedure_examples.json": "9748a2dd44ca6c90809402a1093b65d44a47fcbc446952001ad31eb936728d93",
+    "branding/ees/ui/ees-work-view.js": "4bb5392906c07781ff186d70620e9640f4e8f1cf60eb7a71e2b0bfa18caf43f7",
+    "branding/ees/ui/ees-work-launcher.js": "654150ea9d9d8778d5e0867b8f7013096a3f929e87dc0d28ca8c31a9c49e7260",
+    "branding/ees/ui/ees-work-designer.js": "511fa2c433a033e13d92ca72e56b860c68956f4be48ca929e302a5baf37afd96",
+    "branding/ees/ui/ees-work-launcher.css": "62990690189d0b384c6fdd1f94019d7305422bdeaa938325a74ce1a6fa939b93",
+    "scripts/build_ees_webui.py": "bfa03f905bf60bebc83e5ea8df99180bae573a6eab588a790e65095205329056",
+    "scripts/ees_webui_customization.py": "199d7fdf1babe21321afab7e00061dff7b408a8d3b3e5edf18fc0bc6a4fd4001"
+  },
+  "artifacts": {
+    "authoring-node-contract-fix.log": {
+      "bytes": 9533,
+      "sha256": "cec3ae8509337a6ea1a7f0157c5d320dcec37a5cc62efda9211a2bd11330f23c"
+    },
+    "authoring-node-contract-fix.log.json": {
+      "bytes": 9779,
+      "sha256": "0bbf9254812c7b87556bc1bd511b843e251cabb1f703b37ea641e5f4effcd270"
+    },
+    "authoring-node-first.log": {
+      "bytes": 44225,
+      "sha256": "2a3b907c778487024b9d47c4f2e04aefe3083aca6b47cc6efa30b30741a58123"
+    },
+    "authoring-node-first.log.json": {
+      "bytes": 45776,
+      "sha256": "57b8dd19be14a9c2af9e08a80e10f7dd522d99de0491d7b689f86b12c3f55ac2"
+    },
+    "authoring-node-fixture-fix.log": {
+      "bytes": 10107,
+      "sha256": "07587adf6cabe1c3e702d9e103368f75c9c235ea07ae64c05a24c7a7a52d806f"
+    },
+    "authoring-node-fixture-fix.log.json": {
+      "bytes": 10370,
+      "sha256": "0c35184821c28e9c3a1df5d2631b10d10c8ba52c63b797a955d3af860ddc8825"
+    },
+    "ci-first/backend-review.json": {
+      "bytes": 13281,
+      "sha256": "4b193455a16e52cd38287e3ba61e8615128e038145a5e387ed57dcaf592db311"
+    },
+    "ci-first/direct-create-first.json": {
+      "bytes": 7663,
+      "sha256": "dba9239e8668a4879e472afc32ffe24ab67c63e4e3c7f514ddd662a65e73332a"
+    },
+    "ci-first/direct-create-first.log.json": {
+      "bytes": 3811,
+      "sha256": "c46e21e5ba5b12df7312c68f7e3d0cfec6ceaa08675598af1e9bfdd231016fd4"
+    },
+    "ci-first/direct-tool-first.json": {
+      "bytes": 2319,
+      "sha256": "e5fed96321490fabdc59c5d23cf6bd822c4106568668d8b1b6ab885058a347ba"
+    },
+    "ci-first/direct-tool-first.log.json": {
+      "bytes": 3046,
+      "sha256": "17683b236c3b1319788da7ac40e3fdaa0ea880996bae751cd8156cf5bd0d1b6b"
+    },
+    "ci-first/ees-native-product/a0-empty.json": {
+      "bytes": 37599,
+      "sha256": "11bc50a1ef03fcece45cb70d54a14d0245c6258ef9048b310d79b4813dc5ba3a"
+    },
+    "ci-first/ees-native-product/a0-empty.png": {
+      "bytes": 51003,
+      "sha256": "d2358070a4e600555e0106289d93e557b72c6697c9550238f80d5a62b1aa7f16"
+    },
+    "ci-first/ees-native-product/failure.json": {
+      "bytes": 43648,
+      "sha256": "ea0250e27f1d0bef84546b85f3cef9ddb581e526e42ee925a9e0579dad0a0032"
+    },
+    "ci-first/ees-native-product/failure.png": {
+      "bytes": 158587,
+      "sha256": "56fab055257ff2208f04092ed35d0f150fc7d07121ce5a0a4330da28c67bf0dc"
+    },
+    "ci-first/ees-native-product/report.json": {
+      "bytes": 16041,
+      "sha256": "200d39fcd76897bd2a776002c6c659af5d9821a7623df3a066117b54478bfb3d"
+    },
+    "ci-first/ees-native-product-results/browser-evidence.json": {
+      "bytes": 797,
+      "sha256": "c21bbd30242490a4ea889bf9016fe7403d69e306cd16275735079f1784786a1d"
+    },
+    "ci-first/formal-blank-before-fix.log.json": {
+      "bytes": 4011,
+      "sha256": "abef8c2ef62dd131bf5c1bf5416df1c3867bdf7c8b23ce17171f34e96f14e5d7"
+    },
+    "ci-first/full-product-job.log.json": {
+      "bytes": 109374,
+      "sha256": "dd32f5536e9190bb503387814f5889fec7b466b957b09c4552d419b40f66dcf1"
+    },
+    "ci-first/installer-review.json": {
+      "bytes": 8957,
+      "sha256": "d69fd0b83d67ede120d805dab71da3b59674fab4371a6c0184470294470f1239"
+    },
+    "ci-first/jobs.json": {
+      "bytes": 3714,
+      "sha256": "8754e498bf40cb4f88ed83a6e51668da278f178e208d557d9f768a165b9068de"
+    },
+    "ci-first/native-compose-review.json": {
+      "bytes": 29923,
+      "sha256": "224c6eb19a1fcc9235c82e712ed2fbb353942f5792c927b1bef2e6344a9f49af"
+    },
+    "ci-fix/authoring-footer-final.log.json": {
+      "bytes": 10026,
+      "sha256": "6b01749b7355509de88ac72c2a71c6d7d99e3e5745695e72f0de1aed0a571d0e"
+    },
+    "ci-fix/build3.log.json": {
+      "bytes": 310,
+      "sha256": "2e7909ed413d0739b10b62d5fb335c7b63a50675d48c94c47c1fbc6728d14910"
+    },
+    "ci-fix/gate-helper-preservation.json": {
+      "bytes": 328,
+      "sha256": "6c6c1637c5deaa052505e18b0a5fb20bebb46549185b9fb4080fb4d81a409b2f"
+    },
+    "ci-fix/native-build3/easy-tools-empty-starter-dom.json": {
+      "bytes": 14339,
+      "sha256": "7ed4d9473fb5ab4e1a979c7b5026a906f26ee6ec9dd107a5726dedb97519cf0e"
+    },
+    "ci-fix/native-build3/easy-tools-empty-starter.png": {
+      "bytes": 122589,
+      "sha256": "ae18ec2bd4045697d9dfa17002bb8672cfa42713595660016b23e1bdd0c1b5a2"
+    },
+    "ci-fix/native-build3/easy-tools-read-ready-dom.json": {
+      "bytes": 13523,
+      "sha256": "00309b969a1d2206232171214e078bd41b436fa973fcc063fba177db215c5d0b"
+    },
+    "ci-fix/native-build3/easy-tools-read-ready.png": {
+      "bytes": 118652,
+      "sha256": "3cd8c32a3ff23dbcb885b4b36ffdaebdfae39ce70342ce593701b181efbc74b3"
+    },
+    "ci-fix/native-build3/easy-tools-unconnected-saved-dom.json": {
+      "bytes": 14308,
+      "sha256": "72b596e634af354037ec15e682656f9b41cc2160ace8d95d01150240b8bbb1d6"
+    },
+    "ci-fix/native-build3/easy-tools-unconnected-saved.png": {
+      "bytes": 128640,
+      "sha256": "dc6ce2999f7d16fae5010b9fab8fb0817a8f3d6c861cd267df0ba9b3b82cf14c"
+    },
+    "ci-fix/native-build3/http-id-native-create-save-reload-dom.json": {
+      "bytes": 10643,
+      "sha256": "d696c09f537b54a92010b8570cde10d1bd33029c85e939778c4f655e0626b779"
+    },
+    "ci-fix/native-build3/http-id-native-create-save-reload.png": {
+      "bytes": 82551,
+      "sha256": "1ded98f0a1c33eb0c65b6368abfbcefb85c5eae024758024f1ad5c3832b26849"
+    },
+    "ci-fix/native-build3/procedure-examples-created-publication-blocked-dom.json": {
+      "bytes": 14588,
+      "sha256": "30d0d07304f3ace4582193fc985c76614ae6d703950f92ca198e91c348e0d068"
+    },
+    "ci-fix/native-build3/procedure-examples-created-publication-blocked.png": {
+      "bytes": 144696,
+      "sha256": "eeb3d5c541f57b2e984dbc5b4b96043cb0b676953ec3b119bc3f99fb47752d83"
+    },
+    "ci-fix/native-build3/procedure-examples-factory-preview-dom.json": {
+      "bytes": 19827,
+      "sha256": "83f78ebc85e15343003b8388a910a15033b2cb641102ed194f5a44f16948abca"
+    },
+    "ci-fix/native-build3/procedure-examples-factory-preview.png": {
+      "bytes": 178426,
+      "sha256": "d5d7f8b7c87f7047e0b9efbc3b8e250f440700bbea3d0e1679cfc6a29d7333f6"
+    },
+    "ci-fix/native-build3/procedure-examples-keyboard-preview-dom.json": {
+      "bytes": 20297,
+      "sha256": "be3fd9d7ace9e9ea54d35d64e6ff35bf14f1ddf4ab6b72402822e127bcb0bff3"
+    },
+    "ci-fix/native-build3/procedure-examples-keyboard-preview.png": {
+      "bytes": 182806,
+      "sha256": "381e87f47fc741205669f597ef84c8839bb0fa53d28fd5c46282ec16a1bb4104"
+    },
+    "ci-fix/native-build3/procedure-examples-narrow-name-and-footer-dom.json": {
+      "bytes": 18793,
+      "sha256": "7ccb857ee7b1f17a347ceb3f5f8be3aaab5d01c1ef4f500747d86258b8a91aca"
+    },
+    "ci-fix/native-build3/procedure-examples-narrow-name-and-footer.png": {
+      "bytes": 85269,
+      "sha256": "141cd54206eb83aca7d65025696ffc12c82f022312fcbce2e8411bc0e52e4bd9"
+    },
+    "ci-fix/native-build3/procedure-examples-native-question-draft-dom.json": {
+      "bytes": 20423,
+      "sha256": "3b8bfe5d876e5fc3dfc0b78594f29622149f4495eb982484365a174f5f83046d"
+    },
+    "ci-fix/native-build3/procedure-examples-native-question-draft.png": {
+      "bytes": 190045,
+      "sha256": "0ef15b61fae6cce857ae67d1a5849b4bfc51826b7994d88384dcc0ae45a72e6c"
+    },
+    "ci-fix/native-build3/run.log.json": {
+      "bytes": 1058,
+      "sha256": "917dda2c06a09480e5c5f2a0b33bc26d3a2d09898c812b03a1925907ca241b55"
+    },
+    "ci-fix/native-build3-read/easy-tools-empty-starter-dom.json": {
+      "bytes": 14339,
+      "sha256": "7ed4d9473fb5ab4e1a979c7b5026a906f26ee6ec9dd107a5726dedb97519cf0e"
+    },
+    "ci-fix/native-build3-read/easy-tools-empty-starter.png": {
+      "bytes": 122589,
+      "sha256": "fa574ab6ed964478e8ac0be284d146eae8176af23216937eaab2ce08c8a946e8"
+    },
+    "ci-fix/native-build3-read/easy-tools-read-ready-dom.json": {
+      "bytes": 13523,
+      "sha256": "00309b969a1d2206232171214e078bd41b436fa973fcc063fba177db215c5d0b"
+    },
+    "ci-fix/native-build3-read/easy-tools-read-ready.png": {
+      "bytes": 118654,
+      "sha256": "103c98c3890887cceffbddf77d2c484c07eb801b4fe09cc1fb49ab8c1344ada2"
+    },
+    "ci-fix/native-build3-read/easy-tools-unconnected-saved-dom.json": {
+      "bytes": 14308,
+      "sha256": "72b596e634af354037ec15e682656f9b41cc2160ace8d95d01150240b8bbb1d6"
+    },
+    "ci-fix/native-build3-read/easy-tools-unconnected-saved.png": {
+      "bytes": 128643,
+      "sha256": "25f4513e3617b2cfb5e8d2c361df25adc21072b6e933fa359a401cbd2ff2d6f3"
+    },
+    "ci-fix/native-build3-read/result.json": {
+      "bytes": 903,
+      "sha256": "71a88963cd14e5faa76f31c536e93b1f292c35549e32e07252c3868581190710"
+    },
+    "ci-fix/native-build3-read/run.log.json": {
+      "bytes": 594,
+      "sha256": "8d4a94f2887f1048145ab0b21afdd5eb791ac081ac618f12ee9743c7da37dd2a"
+    },
+    "copy-stage-deadlines-first-observation.json": {
+      "bytes": 1065,
+      "sha256": "6bded9e3f9ed3e411bf19c91016c7db4f308957dac2cca214be57f4cb0f64bad"
+    },
+    "logs/procedure-build-1.log.json": {
+      "bytes": 320,
+      "sha256": "e346d7e5bfb36c14d66e2985b71af5dc95b0bd92dea436887baf74b616867058"
+    },
+    "logs/procedure-build-2.log.json": {
+      "bytes": 320,
+      "sha256": "360c6ce4e4050a3b27e336d8b9f3c8de688880618862a5ccb003b8ba3663295a"
+    },
+    "logs/procedure-examples-backend.log.json": {
+      "bytes": 12866,
+      "sha256": "fb1081bdd7d74f31b1117f6d10402d92e6c180f4cccf3a9a8f19072b42a16d58"
+    },
+    "logs/procedure-installer-after.log.json": {
+      "bytes": 13417,
+      "sha256": "2e77ca5b71661481ec0adc36e8b8a01f9f7f03b599c391a600761fb069e0418f"
+    },
+    "logs/procedure-inventory-114-before.log.json": {
+      "bytes": 1860,
+      "sha256": "1b880b0a58ebaadff038d3f13449faffeb44ef2fbdb3d007f7b90ada5cff9346"
+    },
+    "logs/procedure-inventory-before.log.json": {
+      "bytes": 1763,
+      "sha256": "383b089335493c12b6958797ab511a64a4e2232a20b88a376caffd4d18cde882"
+    },
+    "logs/procedure-packaging-after.log.json": {
+      "bytes": 617,
+      "sha256": "b4db2d3e0985895357145696f5441914e8e46a17e4fb83354d01b0539826f117"
+    },
+    "logs/procedure-prior-installations-after.log.json": {
+      "bytes": 1309,
+      "sha256": "19fd70ff9815b9c364bed689e00bfbaffc1e2dcaf6a55221d6c85a88e2c9393c"
+    },
+    "logs/procedure-runtime-node.log.json": {
+      "bytes": 5359,
+      "sha256": "2c11ade7de0152fcd811b80af07d9ac6d9783c6bce1d8bea5d7bdf3739393b06"
+    },
+    "logs/procedure-suite-audit.log.json": {
+      "bytes": 260,
+      "sha256": "091112c3dd28a9df9d2364ecf31236cc42ee4db5538c8bade4fe56d4fcd543e5"
+    },
+    "native-attempt-1/http-id-native-create-save-reload-dom.json": {
+      "bytes": 10181,
+      "sha256": "43d3e26080a32dca753db794ed91f158b5d1f6867ffa1a33f9c023395e9978a5"
+    },
+    "native-attempt-1/http-id-native-create-save-reload.png": {
+      "bytes": 82551,
+      "sha256": "1ded98f0a1c33eb0c65b6368abfbcefb85c5eae024758024f1ad5c3832b26849"
+    },
+    "native-attempt-1/integrated-test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft-failure-cleanup.json": {
+      "bytes": 6256,
+      "sha256": "337d1b598959d696a7620223c85244a90049f856e09873991172b6806fd5760c"
+    },
+    "native-attempt-1/integrated-test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft-failure-dom.json": {
+      "bytes": 1614,
+      "sha256": "6e362b4e053b3225822dce90ecba52042e4780e114eef0c058b7433a78fd9500"
+    },
+    "native-attempt-1/integrated-test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft-failure.json": {
+      "bytes": 13772,
+      "sha256": "421726318c6755719ba579908da4c660b1c5029640002259b9b0084c329d9579"
+    },
+    "native-attempt-1/integrated-test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft-failure.png": {
+      "bytes": 28971,
+      "sha256": "e864f585be05b8c3d7c6d5dfc076dde2044cf23eb96a0ba2adb5346e5ca6171e"
+    },
+    "native-attempt-1/procedure-examples-created-publication-blocked-dom.json": {
+      "bytes": 14098,
+      "sha256": "d827cb8cc7ca013f14f8db4f9fa1daf014ad285657c0ba064b8202990d4e8229"
+    },
+    "native-attempt-1/procedure-examples-created-publication-blocked.png": {
+      "bytes": 142876,
+      "sha256": "9f0ce9096d3da56fd5e623684eea1bfa089cc7f5547ec3f7fca284af136ff6f9"
+    },
+    "native-attempt-1/procedure-examples-factory-preview-dom.json": {
+      "bytes": 17649,
+      "sha256": "6fc8edcd7394eb4f1ace8329336a5a8b8df5e671dc3b4585eb64184ddf18c710"
+    },
+    "native-attempt-1/procedure-examples-factory-preview.png": {
+      "bytes": 179780,
+      "sha256": "a2dab1a322552a9f0a7aadb9dfc0dbc7c49170bbca106b882afc907b53dc0a32"
+    },
+    "native-attempt-1/procedure-examples-keyboard-preview-dom.json": {
+      "bytes": 18119,
+      "sha256": "1f1c6ab66a08c3f2deee743055225ead831d157d8270bc98bcec94cc21267bab"
+    },
+    "native-attempt-1/procedure-examples-keyboard-preview.png": {
+      "bytes": 183773,
+      "sha256": "adeb43a7094c60c5bd2a5ad8999f457ef054d262b24221eb50003327e55dc9de"
+    },
+    "native-attempt-1/procedure-examples-native-question-draft-dom.json": {
+      "bytes": 18245,
+      "sha256": "530cc00e517b8c469c7013046a15f0b3b93d256f04e1acf81cb1b526b5539449"
+    },
+    "native-attempt-1/procedure-examples-native-question-draft.png": {
+      "bytes": 192018,
+      "sha256": "0c697c752003f1479a266a49ba9110c24b9466b7399d62ca590d40b83bbdf404"
+    },
+    "native-attempt-1/run.log": {
+      "bytes": 2393,
+      "sha256": "f8e0a2a6938a51a6802ec868fb6c18abc4c2a35eb14969946966756cdd6e589b"
+    },
+    "native-attempt-1/run.log.json": {
+      "bytes": 2583,
+      "sha256": "8c0b78ec7d2f0f527ca131bdf012cf2d5e82459d207a5e8c68a5039740eaf7ff"
+    },
+    "native-attempt-2/integrated-test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft-failure-cleanup.json": {
+      "bytes": 5879,
+      "sha256": "3fd9fd6d224dedb5af25ae0239dd440624fcdb37e66413d323982919870f891f"
+    },
+    "native-attempt-2/integrated-test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft-failure-dom.json": {
+      "bytes": 1614,
+      "sha256": "6e362b4e053b3225822dce90ecba52042e4780e114eef0c058b7433a78fd9500"
+    },
+    "native-attempt-2/integrated-test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft-failure.json": {
+      "bytes": 13338,
+      "sha256": "368744abbffa8f901c87f9229f0ea53630d085a37358708b974bc033c8c4c862"
+    },
+    "native-attempt-2/integrated-test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft-failure.png": {
+      "bytes": 29708,
+      "sha256": "a3f283efbf2c92bc7376b966eeb7e9c076a63b4da10012228b8219c645e5523d"
+    },
+    "native-attempt-2/procedure-examples-created-publication-blocked-dom.json": {
+      "bytes": 14098,
+      "sha256": "36c2a2ccba9f3d94f43e8e25a001a2b2c0e67720b099aa8e24d93909a7e44e3f"
+    },
+    "native-attempt-2/procedure-examples-created-publication-blocked.png": {
+      "bytes": 143098,
+      "sha256": "1f7185e0bd94178c575e983e322395cbbb2914800bd587a18de72ca36f0154df"
+    },
+    "native-attempt-2/procedure-examples-factory-preview-dom.json": {
+      "bytes": 17649,
+      "sha256": "6fc8edcd7394eb4f1ace8329336a5a8b8df5e671dc3b4585eb64184ddf18c710"
+    },
+    "native-attempt-2/procedure-examples-factory-preview.png": {
+      "bytes": 179781,
+      "sha256": "2c7d7ce74201ce28889a9acac7e222351b93f2483a7994ded04995e8e5c9d665"
+    },
+    "native-attempt-2/procedure-examples-keyboard-preview-dom.json": {
+      "bytes": 18119,
+      "sha256": "1f1c6ab66a08c3f2deee743055225ead831d157d8270bc98bcec94cc21267bab"
+    },
+    "native-attempt-2/procedure-examples-keyboard-preview.png": {
+      "bytes": 183774,
+      "sha256": "14ca16a9903fec3b5c5490be6f25162baac3bf9001762597eb5ece21ddf2a1fd"
+    },
+    "native-attempt-2/procedure-examples-native-question-draft-dom.json": {
+      "bytes": 18245,
+      "sha256": "530cc00e517b8c469c7013046a15f0b3b93d256f04e1acf81cb1b526b5539449"
+    },
+    "native-attempt-2/procedure-examples-native-question-draft.png": {
+      "bytes": 192018,
+      "sha256": "0c697c752003f1479a266a49ba9110c24b9466b7399d62ca590d40b83bbdf404"
+    },
+    "native-attempt-2/run.log": {
+      "bytes": 1893,
+      "sha256": "39b1345d9f47121a88965ce7cdedfd8e52bbe1744093c97b4cdbd51f5a5d76a1"
+    },
+    "native-attempt-2/run.log.json": {
+      "bytes": 2088,
+      "sha256": "cc0e9eb2c680776ad7ab5f58561b747bca2d623adfb0f9fe908c6b7b5605bc6c"
+    },
+    "native-attempt-3/integrated-test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft-failure-cleanup.json": {
+      "bytes": 5882,
+      "sha256": "e9a1e1cdaeea9357571016203940694a28451a94ff3d025a0e854c45fb08df81"
+    },
+    "native-attempt-3/integrated-test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft-failure-dom.json": {
+      "bytes": 1806,
+      "sha256": "b4a95c96cc3a3ddb068f1ed9fd208646e451b9f52e7ce3f14a24ea76671dec13"
+    },
+    "native-attempt-3/integrated-test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft-failure.json": {
+      "bytes": 13338,
+      "sha256": "1c7c7d326284b4a1c8507838bcb00cb119c164d0eb08c1fa34b6ae160ce72eda"
+    },
+    "native-attempt-3/integrated-test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft-failure.png": {
+      "bytes": 29708,
+      "sha256": "a3f283efbf2c92bc7376b966eeb7e9c076a63b4da10012228b8219c645e5523d"
+    },
+    "native-attempt-3/procedure-examples-created-publication-blocked-dom.json": {
+      "bytes": 14560,
+      "sha256": "0b1d54c1af0250ba2dfe5bf5e19b25d0622b99ad1ee508f91a1daba166fbfec5"
+    },
+    "native-attempt-3/procedure-examples-created-publication-blocked.png": {
+      "bytes": 142657,
+      "sha256": "49a2a3d4ded3522472ef3efe07c445df74f28108bb80de24c7f7075dd14d7aba"
+    },
+    "native-attempt-3/procedure-examples-factory-preview-dom.json": {
+      "bytes": 19749,
+      "sha256": "cde10a5f0ac30824aebbaeee1c4579880b90400b439226b743c3f617554580bb"
+    },
+    "native-attempt-3/procedure-examples-factory-preview.png": {
+      "bytes": 178426,
+      "sha256": "d5d7f8b7c87f7047e0b9efbc3b8e250f440700bbea3d0e1679cfc6a29d7333f6"
+    },
+    "native-attempt-3/procedure-examples-keyboard-preview-dom.json": {
+      "bytes": 20219,
+      "sha256": "802f7d2b80fdbd7d25b711dbc92b97abd63b7acf4fec8fa785967a2cf3f6372e"
+    },
+    "native-attempt-3/procedure-examples-keyboard-preview.png": {
+      "bytes": 182806,
+      "sha256": "381e87f47fc741205669f597ef84c8839bb0fa53d28fd5c46282ec16a1bb4104"
+    },
+    "native-attempt-3/procedure-examples-native-question-draft-dom.json": {
+      "bytes": 20345,
+      "sha256": "c7d2b5cf7524edcf2568dc079669d5963f3b161ecb7936bcc668a02c6c540ffa"
+    },
+    "native-attempt-3/procedure-examples-native-question-draft.png": {
+      "bytes": 190045,
+      "sha256": "0ef15b61fae6cce857ae67d1a5849b4bfc51826b7994d88384dcc0ae45a72e6c"
+    },
+    "native-attempt-3/run.log": {
+      "bytes": 1893,
+      "sha256": "948d986fc5b8b8e8c514205ba58fb9e900712e51038b53131645d7fcbf16ebc2"
+    },
+    "native-attempt-3/run.log.json": {
+      "bytes": 2088,
+      "sha256": "3dac2c2734e8fcc634cdaefc701033b84d31aa00ef5042b01d058f7c83821220"
+    },
+    "native-attempt-4/procedure-examples-created-publication-blocked-dom.json": {
+      "bytes": 14560,
+      "sha256": "8d7f1d86ba3aa4a51e6cd99d525e12fac4f08aa6fd99c58add48e61ef32bb388"
+    },
+    "native-attempt-4/procedure-examples-created-publication-blocked.png": {
+      "bytes": 143069,
+      "sha256": "c55855f7689431ebcb6a3e5b6371cd1e5ad278fa2016517dc637cecb7b65c594"
+    },
+    "native-attempt-4/procedure-examples-factory-preview-dom.json": {
+      "bytes": 19771,
+      "sha256": "e8403bcb88f39a5191537be172cc7ffe66781619813f6d727d35935a08f37040"
+    },
+    "native-attempt-4/procedure-examples-factory-preview.png": {
+      "bytes": 178426,
+      "sha256": "d5d7f8b7c87f7047e0b9efbc3b8e250f440700bbea3d0e1679cfc6a29d7333f6"
+    },
+    "native-attempt-4/procedure-examples-keyboard-preview-dom.json": {
+      "bytes": 20241,
+      "sha256": "9da82d0c16fa332fef46745fa17e8f84abf50df6e8400618f685ed8142c781ae"
+    },
+    "native-attempt-4/procedure-examples-keyboard-preview.png": {
+      "bytes": 182806,
+      "sha256": "381e87f47fc741205669f597ef84c8839bb0fa53d28fd5c46282ec16a1bb4104"
+    },
+    "native-attempt-4/procedure-examples-narrow-name-and-footer-dom.json": {
+      "bytes": 18737,
+      "sha256": "b4bea68552b4aefa7d65e916883471ffe23b1a7119de8dfd4c6c48bae0d7098b"
+    },
+    "native-attempt-4/procedure-examples-narrow-name-and-footer.png": {
+      "bytes": 85269,
+      "sha256": "141cd54206eb83aca7d65025696ffc12c82f022312fcbce2e8411bc0e52e4bd9"
+    },
+    "native-attempt-4/procedure-examples-native-question-draft-dom.json": {
+      "bytes": 20367,
+      "sha256": "011303b02a740a7aae121fbe425d624f6dab83e0c20406885ce9fe25b291c2a7"
+    },
+    "native-attempt-4/procedure-examples-native-question-draft.png": {
+      "bytes": 190045,
+      "sha256": "0ef15b61fae6cce857ae67d1a5849b4bfc51826b7994d88384dcc0ae45a72e6c"
+    },
+    "native-attempt-4/run.log": {
+      "bytes": 465,
+      "sha256": "7c77dce312551431ad7904b9021ab62d9f9ef7d183e913be43450de2a3cc30f7"
+    },
+    "native-attempt-4/run.log.json": {
+      "bytes": 619,
+      "sha256": "6d27920773ab4614f60df47b8a91d5ea3a0d2621188108bbe12de553b0919390"
+    },
+    "prior-installations-probe.json": {
+      "bytes": 4288,
+      "sha256": "afef7295e83bad54e8e8a1d7cbb6025f0b66fe94808bbc3c73f5d9c80ad945c9"
+    },
+    "procedure-prior-installations-result.json": {
+      "bytes": 1194,
+      "sha256": "076dfbd9ba443cab82f4301b559747ba79f990e86ce51c76425e4683dbed75d3"
+    }
+  },
+  "sources_before_first_ci": {
+    "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py": "12a538febf1843aeb7e0ccad64e72545c097858d94a165e046cba259f61ba8fe",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_view.py": "b40840efadff7347556ef59771b8d4eec53e66c39c16bd532c8114a1132fe29a",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_operations.py": "7f11b8a1d3ef0385f5057af78cff9ed381e3bd2ab1698cc7ac2febdcdc5201cc",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_authoring.py": "f918dbcbc1824ca57fbba8881b5eb63a2c354f3452ef315178fda1decdc60cfe",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py": "c42193f3474d5ca6112dbd492458ed5f42fd8548d59306eb656eba27852bc5a0",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow.py": "d504659d63ffe56df4990ac6369115bb1c9443bdf8c2b1a635edc6010ccbe502",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_contract.py": "fa8559f4d6a289a19fd1c3a074ff54f07d76f782a04d832daddde5149001de10",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_execution.py": "bb3489b385833384af857f2f555035f47905f6d58862a3c8df8fc3b96d8cd47a",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_model.py": "e5054976064c8186c162d01ebc323f16820f9ae05744f2eb37ee13bf11289d1c",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_definition.py": "65430af71bb5dd389b96db9a284029eb7e7381768d10a584c7eee482d6703a57",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py": "3c8ccdfa652ec01c1d04620f20ce3b6f287ead27d1ed71aa72a1cd7bbbfd92dc",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_help.json": "b5f90131c9e7bc083cb055a4f9698103fe75a1441e680362083d5a0d3f3557c4",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_tool_examples.json": "1233b8fa52a1160f8678090b02d928835d89108bedd38d0f9d32a56518262646",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_policy.json": "dcaec7a509c904f679ce01558896f031117962ea8f1ce580c5210e2b35c55d66",
+    "agent-pack/skills/ees-work-demo/scripts/workflow_procedure_examples.json": "9748a2dd44ca6c90809402a1093b65d44a47fcbc446952001ad31eb936728d93",
+    "branding/ees/ui/ees-work-view.js": "4bb5392906c07781ff186d70620e9640f4e8f1cf60eb7a71e2b0bfa18caf43f7",
+    "branding/ees/ui/ees-work-launcher.js": "654150ea9d9d8778d5e0867b8f7013096a3f929e87dc0d28ca8c31a9c49e7260",
+    "branding/ees/ui/ees-work-designer.js": "f482dc5ab518f35f60b8ac36d6dd655b127e47b83597f571a26cd455d4bbe43b",
+    "branding/ees/ui/ees-work-launcher.css": "62990690189d0b384c6fdd1f94019d7305422bdeaa938325a74ce1a6fa939b93",
+    "scripts/build_ees_webui.py": "bfa03f905bf60bebc83e5ea8df99180bae573a6eab588a790e65095205329056",
+    "scripts/ees_webui_customization.py": "199d7fdf1babe21321afab7e00061dff7b408a8d3b3e5edf18fc0bc6a4fd4001"
+  },
+  "build3": {
+    "filename": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "bytes": 152110795,
+    "sha256": "7eb76af53b3ce34cb42cd6a2f782c8a7467ed75ea1c2612a199ce6f41ee664a6"
+  },
+  "first_ci": {
+    "run_id": 37425706328,
+    "head": "5669699be790821c3d7fe2e1b3c34d0da0f89ce1",
+    "checkout_merge": "6b4888935cdee227043711436deb0f8beec7379e",
+    "status": "failure",
+    "job_conclusions": {
+      "success": 21,
+      "failure": 2,
+      "cancelled": 1,
+      "skipped": 1
+    },
+    "native_compose": "29 passed / 0 skipped including C and UUID blank; final 600px readiness passed",
+    "failure": "Complete Native product: input change replaced pressed footer button; no create click or create_workflow request",
+    "reproduced_related_path": "Tool name input then first Save click; same footer replacement defect",
+    "evidence": "ci-first/"
+  },
+  "ci_fix": {
+    "product_change": "Preserve procedure/tool footer buttons on input/change; update text and existing disabled logic in place",
+    "node_authoring": {
+      "passed": 94,
+      "failed": 0
+    },
+    "native": "blank + example individual ok in first batch; read separately Ran 1 / OK / exit 0 after incomplete first-batch output",
+    "native_log_limitation": "First batch exit0 but third test output and suite summary missing; cause unconfirmed, original preserved; not claimed a complete three-test raw summary",
+    "gate_helpers": "ProductGate and native_chat unchanged from first CI",
+    "final_ci": "Pending next exact head; PR76 body/Checks is authoritative",
+    "evidence": "ci-fix/"
+  }
+}

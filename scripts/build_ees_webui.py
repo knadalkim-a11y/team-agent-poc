@@ -103,6 +103,11 @@ EASY_AUTHORING_ASSETS = {"scripts/" + name: "open_webui/" + name for name in (
 )}
 WORK_ASSETS.update(EASY_AUTHORING_ASSETS)
 WORK_FILES += tuple(EASY_AUTHORING_ASSETS.values())
+# PR #75's installed ees.13 programs include the help/tool pair but predate
+# procedure examples. Keep both shipped inventories independently restorable.
+WORK_FILES_V13_EASY_AUTHORING = WORK_FILES
+WORK_ASSETS["scripts/workflow_procedure_examples.json"] = "open_webui/workflow_procedure_examples.json"
+WORK_FILES += (WORK_ASSETS["scripts/workflow_procedure_examples.json"],)
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {

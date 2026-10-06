@@ -1,0 +1,224 @@
+{
+  "scope": {
+    "recorded_at": "2026-10-06",
+    "kind": "First CI failure and focused local fixture correction evidence",
+    "head_sha": "92f59d000a420e7500e95082e0b4140b9b105363",
+    "run_id": 37434967430,
+    "run_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37434967430",
+    "tested_merge": "a41378232b205f9aaad5f780e46474e1b1887678",
+    "tested_tree": "ab26f9cc8e56c6f1495c81ab848741d96dd2b9b3",
+    "run_status": "completed",
+    "run_conclusion": "failure",
+    "job_counts": {
+      "success": 18,
+      "failure": 5,
+      "cancelled": 1,
+      "skipped": 1
+    },
+    "final_jobs": "jobs.json",
+    "not_evidence_for": "Any subsequent corrected head, actual company deployment or real model response quality"
+  },
+  "initial_failures": {
+    "jobs": "failed-jobs.json",
+    "services_both_os": {
+      "confirmed_cause": "Two legacy layout test snapshots omitted the explicit can_author and native_access capabilities now consumed by the menu; the authoring mount and skills menu were correctly withheld.",
+      "observed": "Node subtests 2 and 7 failed; Python IntegratedLayoutTests wrapper failed once per OS.",
+      "correction": "Only those authorized test snapshots now supply can_author=true and the explicitly granted skills access. Product ACL and fallback were unchanged."
+    },
+    "platform_both_os": {
+      "confirmed_cause": "The official-wheel test expected no launcher CSS icon references; C15 adds five menu/return mask icon URLs whose existing builder correctly attaches content hashes.",
+      "observed": "Expected raw 51602.svg URL differed from the built URL containing its SHA256 cache key.",
+      "correction": "Independent explicit expected set updated to 51602/f6bbc/40095/88026/eb94a. Fixed/mutated fixtures and font/non-icon byte checks retained."
+    },
+    "aggregate_jobs": "Delivery checks Ubuntu failed; Windows check cancelled; Prepare delivery files skipped. These are not successful checks."
+  },
+  "local_followup": {
+    "scope": "Focused local checks after test-only changes, not a remote rerun",
+    "layout": {
+      "command_manifest": "layout-fix-validation.json",
+      "node": "layout-fixed-node.log.json",
+      "node_passed": 12,
+      "python": "layout-fixed-python.log.json",
+      "python_passed": 1,
+      "strict_encoding_warning": true
+    },
+    "platform": {
+      "command_manifest": "platform-fix-command.json",
+      "result": "platform-fix-result.json",
+      "raw_log": "platform-fixed-python.log.json",
+      "passed": 1,
+      "unittest_seconds": 18.203,
+      "strict_encoding_warning": true
+    },
+    "changed_test_paths": [
+      "tests/test_ees_v4_layout.cjs",
+      "tests/test_ees_branding_build.py"
+    ],
+    "product_source_changed_for_correction": false,
+    "corrected_test_sha256": {
+      "tests/test_ees_v4_layout.cjs": "8931200035e405aea791a598ca803b4fc1d2a67244a921034e220027d4945853",
+      "tests/test_ees_branding_build.py": "ad3c121214d178261b3544a3de8f7d3f2f4259997824e23690810ac7425d23b5"
+    }
+  },
+  "passed_subset": {
+    "product": {
+      "verification": "product-verification.json",
+      "candidate_ci_hashes": "candidate-hashes-from-ci-log.json",
+      "checkpoints": 20,
+      "central_chat_checkpoints": 9,
+      "pngs": 42,
+      "notes": "Downloaded small evidence ZIP and independently checked digest/CRC/file hashes/PNG decoding. Candidate was not downloaded; hashes and full inner-manifest verification are from successful CI step. Gate source_dirty=true includes untracked files; candidate false uses tracked-only status."
+    },
+    "compose": {
+      "audit": "native-compose-audit.json",
+      "menu_review": "native-compose-menu-review.json",
+      "passed": 34,
+      "new_menu_tests": 5,
+      "pngs": 61,
+      "review_owner": "uuid_review",
+      "notes": "ZIP/full inventory verified by uuid_review; four CI PNGs visually reviewed. Capability UI fixture is not an actual Native ACL proof."
+    },
+    "limitation": "Successful jobs do not turn this first run into success."
+  },
+  "source_roots": {
+    "backend": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend",
+    "product": "/workspace/scratch/abe8513396cb/menu-c15-ci-product",
+    "compose": "/workspace/scratch/abe8513396cb/menu-c15-ci-native"
+  },
+  "preservation": {
+    "raw_logs": "Selected exact contiguous failing shards and complete short local correction logs are UTF-8 lossless JSON content + byte length + SHA256; excerpt provenance includes full source SHA256 and line bounds.",
+    "large_success_artifacts": "PNG/ZIP/full successful job logs remain in scratch and original GitHub artifact; not duplicated here.",
+    "secret_screen": {
+      "patterns": [
+        "github_or_api_key",
+        "private_key",
+        "jwt",
+        "signed_url"
+      ],
+      "findings": [],
+      "manual_review": "Selected failure content is test output and public CI paths. Full source job credential-looking lines contain only GitHub *** masks. No company credentials or production data observed."
+    }
+  },
+  "files": [
+    {
+      "path": "services-ubuntu-failure.json",
+      "bytes": 7664,
+      "sha256": "98cefa12d9e440d43bb8885d595e841f5efdbf93ad0262f587db2defe40713d5",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/services-ubuntu/test_ees_work_v4.json"
+    },
+    {
+      "path": "services-ubuntu-failure.log.json",
+      "bytes": 12511,
+      "sha256": "edd7439175c6408994adf42e089db901a8ac60cc784fda508be33f12900f623e",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/services-ubuntu-job.log"
+    },
+    {
+      "path": "services-windows-failure.json",
+      "bytes": 7646,
+      "sha256": "8a7a63f741a64e81c7b826eb0f66f6bf6caab7ce5d1864ac3dc9243ed40d7df4",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/services-windows/test_ees_work_v4.json"
+    },
+    {
+      "path": "services-windows-failure.log.json",
+      "bytes": 12847,
+      "sha256": "ce70fd59839180395ebd131ce2430a597a9c49432e0dbc38da92a2f4b73a58d4",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/services-windows-job.log"
+    },
+    {
+      "path": "platform-ubuntu-failure.json",
+      "bytes": 6346,
+      "sha256": "3db72b0238aa109a17116a3b15098fa9017c5af533fd58bd0badae6901ef8cf9",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/platform-ubuntu/test_ees_branding_build.json"
+    },
+    {
+      "path": "platform-ubuntu-failure.log.json",
+      "bytes": 9131,
+      "sha256": "d26190a9938c0f8d363311b4009c4964598110ecaec6b0bd73ece005867ae89b",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/platform-ubuntu-job.log"
+    },
+    {
+      "path": "platform-windows-failure.json",
+      "bytes": 6482,
+      "sha256": "fe05265342b4109afa9d0054823d69d78fc81a2866ffc9c25d1895ed9e8871d3",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/platform-windows/test_ees_branding_build.json"
+    },
+    {
+      "path": "platform-windows-failure.log.json",
+      "bytes": 9116,
+      "sha256": "822a7d2cd7bfdc49ba964ff4344014456f2c4a94d48b97a3f4971d242a8eb204",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/platform-windows-job.log"
+    },
+    {
+      "path": "failed-jobs.json",
+      "bytes": 7694,
+      "sha256": "0c9f4415c8564a98d6743fbaebd9d96e5fca7468a9d8d9cc547e8e2f0b497d53",
+      "source": null
+    },
+    {
+      "path": "layout-fix-validation.json",
+      "bytes": 1009,
+      "sha256": "a985ba972268650edccdc62fe17a1874a08982c9e694c5d6790e1ecb6bbc2095",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/layout-fix-validation.json"
+    },
+    {
+      "path": "layout-fixed-node.log.json",
+      "bytes": 3438,
+      "sha256": "46ae4033769235226abd522ebe039d5a0ad229c8110a1c084b7079a355b93467",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/layout-fixed-node.log"
+    },
+    {
+      "path": "layout-fixed-python.log.json",
+      "bytes": 589,
+      "sha256": "eb7150ecf0d13f9ee78e5981eb20989aab5742db2de688000099bd12c628f0d1",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/layout-fixed-python.log"
+    },
+    {
+      "path": "platform-fix-result.json",
+      "bytes": 628,
+      "sha256": "f14e407842c22ae3314a84918570245ba943938fafa01855bd8a1cffa9265357",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-native/platform-fix/result.json"
+    },
+    {
+      "path": "platform-fixed-python.log.json",
+      "bytes": 611,
+      "sha256": "469def1433a71493c1f293bcdf694583b4d03be94181860bf8b14c874dc6e9ab",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-native/platform-fix/unittest.log"
+    },
+    {
+      "path": "platform-fix-command.json",
+      "bytes": 1731,
+      "sha256": "6feead96d9d5224ecab9886939e2d8ae5741baf598d50c31dc7ecb82ebdf820d",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-native/platform-fix"
+    },
+    {
+      "path": "product-verification.json",
+      "bytes": 8619,
+      "sha256": "14e8b64c847ae14972efc1c7aa9db07a0d2e198da25360be59b8c39ea571bada",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-product/verification.json"
+    },
+    {
+      "path": "candidate-hashes-from-ci-log.json",
+      "bytes": 944,
+      "sha256": "3203b0995bbe05b9348ed52f6c53b4d81a6316b2ad84a2b41f0fbaeb4403ea9d",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-product/candidate-hashes-from-ci-log.json"
+    },
+    {
+      "path": "native-compose-audit.json",
+      "bytes": 9592,
+      "sha256": "cd68f6523c92cfc63530d4c19f5f7cf601ee331933d611d51cf3c6dadb0bbdb2",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-native/audit.json"
+    },
+    {
+      "path": "native-compose-menu-review.json",
+      "bytes": 6403,
+      "sha256": "575e6c6b5e9b29eb4f774dbd1e27cc3042352ccc369097b7ae3f2f1270886891",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-native/menu-review.json"
+    },
+    {
+      "path": "jobs.json",
+      "bytes": 3994,
+      "sha256": "5383836aba19c753ac99d31277087d38c006997309ab3d6d13a405dff5f69663",
+      "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-product/final-jobs-summary.json"
+    }
+  ]
+}

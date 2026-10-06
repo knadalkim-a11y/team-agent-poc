@@ -82,6 +82,49 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         denied = await self.command('create_workflow', actor='c', system_id='EMS', name='무권한')
         self.assertEqual(denied['error']['code'], 'scope_forbidden')
 
+    async def test_native_menu_unavailable_preserves_separate_work_authority(self):
+        # A standalone Work service must not infer Native access from its own
+        # manager/admin grants when the Native permission provider is absent.
+        with patch.dict(sys.modules, {'open_webui.models.config': None}):
+            for actor in ('a', 'admin', 'c'):
+                with self.subTest(actor=actor):
+                    capabilities = (await self.state(actor))['capabilities']
+                    self.assertEqual(capabilities['native_access'], {
+                        key: False for key in ('models', 'knowledge', 'prompts', 'skills', 'tools', 'admin')})
+                    self.assertFalse(capabilities['native_access_available'])
+                    self.assertEqual(capabilities['can_author'], actor != 'c')
+                    self.assertEqual(capabilities['is_admin'], actor == 'admin')
+
+    async def test_native_menu_rechecks_actor_and_membership_after_permission_awaits(self):
+        native = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_native')
+        original_users, original_groups = deepcopy(self.users), deepcopy(self.memberships)
+        for change, actor in (('role', 'admin'), ('groups', 'a'), ('pending', 'a')):
+            with self.subTest(change=change):
+                self.users, self.memberships = deepcopy(original_users), deepcopy(original_groups)
+
+                async def changed_while_reading(user):
+                    await asyncio.sleep(0)
+                    if change == 'groups':
+                        self.memberships[actor] = []
+                    else:
+                        self.users[actor]['role'] = 'user' if change == 'role' else 'pending'
+                    return {'native_access': dict.fromkeys(
+                        ('models', 'knowledge', 'prompts', 'skills', 'tools', 'admin'), True),
+                        'native_access_available': True}
+
+                with patch.object(native, 'native_workspace_access', changed_while_reading):
+                    state = await self.service.workspace_state(self.users[actor])
+                if change == 'pending':
+                    self.assertEqual(state['error']['code'], 'unauthorized')
+                    self.assertNotIn('capabilities', state)
+                else:
+                    self.assertTrue(state['ok'], state)
+                    caps = state['capabilities']
+                    self.assertFalse(any(caps['native_access'].values()))
+                    self.assertFalse(caps['native_access_available'])
+                    self.assertFalse(caps['is_admin'])
+                    self.assertEqual(caps['can_author'], change == 'groups')
+
     async def test_help_reads_the_shipped_single_source_without_persisting_a_copy(self):
         view = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_view')
         source = ROOT / 'agent-pack/skills/ees-work-demo/scripts/workflow_help.json'
@@ -107,6 +150,123 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.database.read_bytes(), before)
         self.assertEqual((await self.state())['help'], actual)
 
+    async def test_procedure_examples_are_public_summaries_from_one_shipped_source(self):
+        source = ROOT / 'agent-pack/skills/ees-work-demo/scripts/workflow_procedure_examples.json'
+        examples = json.loads(source.read_text(encoding='utf-8'))
+        before = self.database.read_bytes()
+        state = await self.state('c')
+        self.assertFalse(state['capabilities']['can_author'])
+        self.assertEqual(state['workflows'], [])
+        self.assertEqual(self.database.read_bytes(), before)
+        summaries = state['procedure_examples']
+        self.assertEqual([(item['id'], item['stage_count'], item['job_count']) for item in summaries],
+            [('delivery_review', 4, 9), ('factory_rollout', 4, 6), ('daily_check', 1, 1)])
+        self.assertTrue(all('definition' not in item and 'nodes' not in item for item in summaries))
+        self.assertEqual([item['name'] for item in summaries], [item['name'] for item in examples])
+        # A program-data edit must reach both the public summary and the draft
+        # created by ID. Client-provided or duplicated template bodies cannot.
+        examples[1]['name'] = '변경된 합성 예시'
+        root = next(node for node in examples[1]['definition']['nodes'].values() if node['type'] == 'p')
+        stage = examples[1]['definition']['nodes'][root['children'][0]]
+        stage['name'] = '변경된 합성 단계'
+        (Path(self.temp.name) / source.name).write_text(json.dumps(examples), encoding='utf-8')
+        with patch.object(workspace, '__file__', str(Path(self.temp.name) / 'ees_workflow_workspace.py')):
+            self.assertEqual((await self.state())['procedure_examples'][1]['stages'][0]['name'], '변경된 합성 단계')
+            created = await self.command('create_workflow', system_id='EMS', template_id='factory_rollout')
+        self.assertTrue(created['ok'], created)
+        self.assertEqual(created['workflow']['draft']['name'], '변경된 합성 예시')
+        self.assertIn('변경된 합성 단계', [node['name'] for node in created['workflow']['draft']['nodes'].values()])
+        self.assertEqual((await self.state())['procedure_examples'], summaries)
+
+    async def test_procedure_examples_create_fresh_unpublished_unconnected_drafts_only(self):
+        existing_id, existing_definition, _ = await self.create()
+        granted = await self.command('save_access', principal_kind='user', principal_id='c',
+            system_id='EMS', factory_id='*', roles=['viewer'])
+        self.assertTrue(granted['ok'], granted)
+        protected = ('work_versions', 'work_runs', 'work_settings', 'work_schedules',
+                     'work_schedule_slots', 'work_factories', 'work_tool_contracts')
+        def snapshot():
+            with self.service._db() as db:
+                return {table: [tuple(row) for row in db.execute('SELECT * FROM ' + table)] for table in protected}
+        before = snapshot()
+        source = ROOT / 'agent-pack/skills/ees-work-demo/scripts/workflow_procedure_examples.json'
+        original = source.read_bytes(); canonical = json.loads(original)
+        used_ids, created_ids = set(), set()
+        for example, counts, category, mode, scope in zip(canonical, [(4, 9), (4, 6), (1, 1)],
+                ['ops', 'setup', 'ops'], ['periodic', 'on_demand', 'periodic'], [None, 'factory', None]):
+            for attempt in range(2):
+                name = example['name'] + ' 합성 초안 ' + str(attempt)
+                result = await self.command('create_workflow', actor='a', system_id='EMS',
+                    template_id=example['id'], name=name)
+                self.assertTrue(result['ok'], result)
+                record, key = result['workflow'], result['workflow_id']; definition = record['draft']
+                self.assertIsNone(record['published_version'])
+                self.assertEqual(result['revision'], 1)
+                self.assertNotIn(key, created_ids); created_ids.add(key)
+                nodes = definition['nodes']; self.assertTrue(set(nodes).isdisjoint(used_ids)); used_ids.update(nodes)
+                self.assertTrue(set(nodes).isdisjoint(example['definition']['nodes']))
+                self.assertEqual((sum(n['type'] == 't' for n in nodes.values()), sum(n['type'] == 'j' for n in nodes.values())), counts)
+                self.assertEqual((definition['category'], definition['mode'], definition.get('execution_scope')), (category, mode, scope))
+                self.assertEqual(definition['system_id'], 'EMS')
+                self.assertEqual(next(n['name'] for n in nodes.values() if n['type'] == 'p'), name)
+                self.assertNotIn('schedule', definition)
+                self.assertEqual(workspace.definition_check(definition, False)[0], [])
+                tools = [node for node in nodes.values() if node.get('mode') == 'tool']
+                self.assertTrue(tools)
+                self.assertTrue(all(not node.get('tool_reference') and not node.get('tool_contract_id') for node in nodes.values()))
+                self.assertTrue(all(not node.get('model_id') for node in nodes.values()))
+                checked = await self.command('validate_workflow', actor='a', workflow_id=key, expected_revision=1)
+                self.assertTrue(checked['ok'], checked)
+                self.assertTrue(any('도구 참조' in error for error in checked['validation']['errors']))
+                blocked = await self.command('publish_workflow', actor='a', workflow_id=key, expected_revision=1)
+                self.assertEqual(blocked['error']['code'], 'validation_required')
+        self.assertEqual(snapshot(), before)
+        self.assertEqual(source.read_bytes(), original)
+        self.assertTrue(created_ids.isdisjoint({item['id'] for item in (await self.state('c'))['workflows']}))
+        self.assertEqual((await self.state(workflow_id=existing_id))['workflow']['draft'], existing_definition)
+
+    async def test_procedure_example_identifier_overrides_and_manager_scope_are_checked(self):
+        for invalid in ('missing', '../workflow_help.json', '', None, False, {'id': 'daily_check'}):
+            with self.subTest(template_id=invalid):
+                result = await self.command('create_workflow', actor='a', system_id='EMS', template_id=invalid)
+                self.assertEqual(result['error']['code'], 'procedure_example_not_found')
+        for field, value in (('definition', {'nodes': {}}), ('nodes', {}), ('category', 'incident'),
+                             ('mode', 'emergency'), ('execution_scope', 'system'), ('schedule', {})):
+            result = await self.command('create_workflow', actor='a', system_id='EMS', template_id='daily_check', **{field: value})
+            self.assertEqual(result['error']['code'], 'procedure_example_override')
+        for actor, system in (('c', 'EMS'), ('a', 'FDC')):
+            result = await self.command('create_workflow', actor=actor, system_id=system, template_id='daily_check')
+            self.assertEqual(result['error']['code'], 'scope_forbidden')
+        bad_revision = await self.command('create_workflow', actor='a', system_id='EMS',
+            template_id='daily_check', expected_revision=1)
+        self.assertEqual(bad_revision['error']['code'], 'revision_conflict')
+        with self.service._db() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_definitions').fetchone()[0], 0)
+        blank = await self.command('create_workflow', actor='a', system_id='EMS', name='이름만 정한 절차')
+        self.assertTrue(blank['ok'], blank)
+        definition = blank['workflow']['draft']
+        self.assertEqual((definition['category'], definition['mode']), ('ops', 'on_demand'))
+        self.assertNotIn('execution_scope', definition)
+        self.assertEqual(len(definition['nodes']), 1)
+
+    async def test_procedure_example_retry_keeps_one_draft_and_rechecks_manager_permission(self):
+        body = {'action': 'create_workflow', 'system_id': 'EMS', 'template_id': 'factory_rollout',
+                'name': '재시도 합성 초안', 'expected_revision': 0, 'request_id': 'example-retry'}
+        first = await self.service.workspace_command(self.users['a'], body)
+        self.assertTrue(first['ok'], first)
+        self.assertEqual(await self.service.workspace_command(self.users['a'], body), first)
+        changed = await self.service.workspace_command(self.users['a'], {**body, 'template_id': 'daily_check'})
+        self.assertEqual(changed['error']['code'], 'request_conflict')
+        grant = next(item for item in (await self.state('admin'))['access'] if item['principal_id'] == 'a')
+        revoked = await self.command('save_access', access_id=grant['id'], system_id='EMS', factory_id='*',
+            principal_kind='user', principal_id='a', roles=['viewer'], expected_revision=grant['revision'])
+        self.assertTrue(revoked['ok'], revoked)
+        replay = await self.service.workspace_command(self.users['a'], body)
+        self.assertEqual(replay['error']['code'], 'scope_forbidden')
+        with self.service._db() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_definitions').fetchone()[0], 1)
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM work_audit WHERE action='create_workflow'").fetchone()[0], 1)
+
     async def test_versions_are_immutable_and_open_run_uses_original(self):
         key, definition, revision = await self.create()
         run = await self.start(key)
@@ -130,6 +290,10 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
                         argument_bindings={'issues': {'result': {'job_id': 'j', 'path': ['items'], 'value_field': 'id', 'confirmed': True}},
                                            'field': {'input': 'j'}, 'literal': {'constant': {'job_id': 'j'}}})
         definition['factory_overrides'] = {'j': {'factory_id': 'j', 'note': 'j'}}
+        definition['mode'] = 'periodic'
+        definition['schedule'] = {'frequency': 'weekly', 'interval': 2, 'timezone': 'UTC',
+            'anchor': '2026-10-06T09:00:00', 'weekday': 1,
+            'stage_deadlines': {'t': {'offset_days': -8, 'end_offset_days': -6}}}
         saved = await self.command('save_draft', workflow_id=key, definition=definition, expected_revision=revision)
         self.assertTrue(saved['ok'], saved)
         copied = await self.command('copy_workflow', workflow_id=key, expected_revision=saved['revision'], name='Copied pipeline')
@@ -147,6 +311,8 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(target['inputs'][0]['id'], 'j'); self.assertEqual(target['tool_contract_id'], 'j')
         self.assertEqual(target['tool_reference'], next_job['tool_reference'])
         self.assertEqual(actual['factory_overrides'], {source_id: {'factory_id': 'j', 'note': 'j'}})
+        self.assertEqual(actual['schedule']['stage_deadlines'], {nodes['단계']['id']: {'offset_days': -8, 'end_offset_days': -6}})
+        self.assertEqual(actual['schedule']['anchor'], definition['schedule']['anchor'])
         self.assertEqual(workspace.definition_check(actual)[0], [])
         with self.service._db() as db:
             original = json.loads(db.execute('SELECT draft FROM work_definitions WHERE id=?', (key,)).fetchone()[0])

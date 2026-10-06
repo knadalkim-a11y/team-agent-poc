@@ -1,0 +1,139 @@
+{
+  "trace": [
+    {
+      "kind": "pointerdown",
+      "tag": "INPUT",
+      "id": "ew-procedure-name",
+      "name": "procedure_name",
+      "focus": "ew-procedure-blank",
+      "value": ""
+    },
+    {
+      "kind": "mousedown",
+      "tag": "INPUT",
+      "id": "ew-procedure-name",
+      "name": "procedure_name",
+      "focus": "ew-procedure-blank",
+      "buttonConnected": true,
+      "value": ""
+    },
+    {
+      "kind": "focusin",
+      "tag": "INPUT",
+      "id": "ew-procedure-name",
+      "name": "procedure_name",
+      "focus": "ew-procedure-name",
+      "buttonConnected": true,
+      "value": ""
+    },
+    {
+      "kind": "pointerup",
+      "tag": "INPUT",
+      "id": "ew-procedure-name",
+      "name": "procedure_name",
+      "focus": "ew-procedure-name",
+      "buttonConnected": true,
+      "value": ""
+    },
+    {
+      "kind": "mouseup",
+      "tag": "INPUT",
+      "id": "ew-procedure-name",
+      "name": "procedure_name",
+      "focus": "ew-procedure-name",
+      "buttonConnected": true,
+      "value": ""
+    },
+    {
+      "kind": "click",
+      "tag": "INPUT",
+      "id": "ew-procedure-name",
+      "name": "procedure_name",
+      "focus": "ew-procedure-name",
+      "buttonConnected": true,
+      "value": ""
+    },
+    {
+      "kind": "pointerdown",
+      "tag": "BUTTON",
+      "id": "",
+      "action": "procedure_create",
+      "name": "",
+      "focus": "ew-procedure-name",
+      "buttonConnected": true,
+      "value": "합성 배포 자료 확인"
+    },
+    {
+      "kind": "mousedown",
+      "tag": "BUTTON",
+      "id": "",
+      "action": "procedure_create",
+      "name": "",
+      "focus": "ew-procedure-name",
+      "buttonConnected": true,
+      "value": "합성 배포 자료 확인"
+    },
+    {
+      "kind": "change",
+      "tag": "INPUT",
+      "id": "ew-procedure-name",
+      "name": "procedure_name",
+      "focus": "",
+      "buttonConnected": false,
+      "value": "합성 배포 자료 확인"
+    },
+    {
+      "kind": "blur",
+      "tag": "INPUT",
+      "id": "ew-procedure-name",
+      "name": "procedure_name",
+      "focus": "",
+      "buttonConnected": false,
+      "value": "합성 배포 자료 확인"
+    },
+    {
+      "kind": "pointerup",
+      "tag": "BUTTON",
+      "id": "",
+      "action": "procedure_create",
+      "name": "",
+      "focus": "",
+      "buttonConnected": false,
+      "value": "합성 배포 자료 확인"
+    },
+    {
+      "kind": "mouseup",
+      "tag": "BUTTON",
+      "id": "",
+      "action": "procedure_create",
+      "name": "",
+      "focus": "",
+      "buttonConnected": false,
+      "value": "합성 배포 자료 확인"
+    }
+  ],
+  "workspace_commands": [
+    {
+      "action": "save_ui",
+      "expected_revision": 0,
+      "request_id": "68c12b18-a0c0-45fd-a760-cbc9bb3a7878",
+      "state": {
+        "selection": {
+          "mode": "author",
+          "tab": "overview",
+          "panel_open": true,
+          "system_id": "EMS",
+          "factory_id": "",
+          "workflow_id": "",
+          "run_id": "",
+          "job_id": "",
+          "collapsed": [],
+          "chat_reference": null
+        }
+      }
+    }
+  ],
+  "workflows": [],
+  "starter": "<div class=\"ew-procedure-start\"><button type=\"button\" data-author-action=\"procedure_cancel\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees13/v4/eb94a.svg\" alt=\"\" aria-hidden=\"true\">업무 절차 목록</button><h2>새 업무 절차</h2><p class=\"ew-author-muted\">예시를 복사해 고치거나 빈 절차로 시작합니다. 게시하기 전에는 업무 화면에 나타나지 않습니다.</p><section class=\"ew-procedure-section\"><div class=\"ew-procedure-section-heading\"><h3>예시에서 시작</h3><small>단계 구성을 미리 보고 내 초안으로 복사합니다</small></div><div class=\"ew-procedure-choices\"><section class=\"ew-procedure-card\" data-selected=\"false\"><label class=\"ew-procedure-choice\" for=\"ew-procedure-delivery_review\"><input id=\"ew-procedure-delivery_review\" type=\"radio\" name=\"procedure_template\" value=\"delivery_review\"><span class=\"ew-procedure-choice-text\"><span class=\"ew-procedure-title\"><strong>배포 산출물 점검</strong><span class=\"ew-author-tag\">운영</span><span class=\"ew-author-tag\">주기 · 격주 화요일 · 제안</span></span><small>단계 4 · 작업 9 · 대상 확정부터 문서 점검, 재점검과 최종 확인까지 구성한 예시입니다.</small></span></label></section><section class=\"ew-procedure-card\" data-selected=\"false\"><label class=\"ew-procedure-choice\" for=\"ew-procedure-factory_rollout\"><input id=\"ew-procedure-factory_rollout\" type=\"radio\" name=\"procedure_template\" value=\"factory_rollout\"><span class=\"ew-procedure-choice-text\"><span class=\"ew-procedure-title\"><strong>신규 공장 횡전개</strong><span class=\"ew-author-tag\">셋업</span><span class=\"ew-author-tag\">수시 · 공장별</span></span><small>단계 4 · 작업 6 · 공장마다 범위를 정하고 인프라, 설치와 연결 상태를 확인하는 예시입니다.</small></span></label></section><section class=\"ew-procedure-card\" data-selected=\"false\"><label class=\"ew-procedure-choice\" for=\"ew-procedure-daily_check\"><input id=\"ew-procedure-daily_check\" type=\"radio\" name=\"procedure_template\" value=\"daily_check\"><span class=\"ew-procedure-choice-text\"><span class=\"ew-procedure-title\"><strong>일일 시스템 점검</strong><span class=\"ew-author-tag\">운영</span><span class=\"ew-author-tag\">주기 · 매일 · 제안</span></span><small>단계 1 · 작업 1 · 연결된 조회 기능으로 시스템 상태를 확인하는 간단한 예시입니다.</small></span></label></section></div></section><section class=\"ew-procedure-section\"><h3>직접 만들기</h3><div class=\"ew-procedure-choices\"><section class=\"ew-procedure-card\" data-selected=\"true\"><label class=\"ew-procedure-choice\" for=\"ew-procedure-blank\"><input id=\"ew-procedure-blank\" type=\"radio\" name=\"procedure_template\" value=\"blank\" checked=\"\"><span class=\"ew-procedure-choice-text\"><span class=\"ew-procedure-title\"><strong>빈 절차로 시작</strong></span><small>이름만 정하고 시작합니다. 분류(운영)와 실행 방식(수시)은 나중에 바꿀 수 있습니다.</small></span></label><div class=\"ew-procedure-preview\"><label class=\"ew-procedure-name\" for=\"ew-procedure-name\">절차 이름<input id=\"ew-procedure-name\" name=\"procedure_name\" value=\"\" required=\"\" maxlength=\"160\" autocomplete=\"off\"></label></div></section></div></section><aside class=\"ew-procedure-help\"><p>분류나 실행 방식이 헷갈리면 도움말을 읽거나 대화창에 물어보세요.</p><div><button type=\"button\" data-author-action=\"help\" data-id=\"category\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">분류 도움말</button><button type=\"button\" data-author-action=\"help\" data-id=\"run_mode\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">실행 방식 도움말</button><button type=\"button\" data-author-action=\"help\" data-id=\"execution_scope\" class=\"ew-help-trigger\" aria-haspopup=\"dialog\">수행 범위 도움말</button></div></aside></div>",
+  "footer": "<footer><small>이름을 정하고 빈 초안을 만듭니다</small><button type=\"button\" data-author-action=\"procedure_cancel\">취소</button><button type=\"button\" data-author-action=\"procedure_create\" data-mutation=\"\" class=\"ew-primary\" aria-describedby=\"ew-procedure-create-reason\">초안 만들기</button><p id=\"ew-procedure-create-reason\" class=\"ew-procedure-create-reason\"></p></footer>"
+}

@@ -1,0 +1,28 @@
+{
+  "scope": "First observed failure, reported from tool stdout; not a reconstructed raw log.",
+  "raw_log_available": false,
+  "environment": "Linux / Python 3.12.14",
+  "branch": "feat/work-procedure-examples-20261006",
+  "source_phase": "After shared copy helper extraction, before schedule.stage_deadlines remapping",
+  "command": "PYTHONPATH=tests:. .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_workspace.WorkspaceTests.test_copy_delivery_pipeline_remaps_only_definition_owned_references -v",
+  "result": {
+    "tests": 1,
+    "failures": 1,
+    "seconds": 0.014
+  },
+  "actual": {
+    "t": {
+      "offset_days": -8,
+      "end_offset_days": -6
+    }
+  },
+  "expected": {
+    "t-d436d5a31a1d": {
+      "offset_days": -8,
+      "end_offset_days": -6
+    }
+  },
+  "confirmed_cause": "Copied stage_deadlines retained the original stage ID.",
+  "fix": "Remap keys using the same definition-owned ID mapping as the copied stages.",
+  "verification": "New regression passes; included in 71 related backend tests."
+}

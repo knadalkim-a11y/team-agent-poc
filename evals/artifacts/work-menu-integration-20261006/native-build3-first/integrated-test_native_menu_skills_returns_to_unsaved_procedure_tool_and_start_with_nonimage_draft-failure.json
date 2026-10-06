@@ -1,0 +1,392 @@
+{
+  "test": "test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft",
+  "last_wait": "performance.getEntriesByType('resource').some(e=>{const u=new URL(e.name);return u.pathname==='/api/v1/skills/list'&&u.searchParams.get('query')===\"native-menu-procedure\";})",
+  "last_click": "#workspace-container input[aria-label]",
+  "capture_errors": [],
+  "browser": {
+    "stage": "ready",
+    "elapsed_ms": 10351.060257999052,
+    "pid": 8,
+    "exit_code": null,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "HeadlessChrome/153.0.8010.52",
+      "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+      "jsVersion": "15.3.76.13"
+    },
+    "target_id": "F4A31484828935DB79319C66C8397FD7",
+    "session_attached": true,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 430,
+      "method": "Runtime.evaluate",
+      "session_attached": true,
+      "timeout_seconds": 15,
+      "elapsed_ms": 0.8593189995735884,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "id": 411,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 412,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 413,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 414,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 415,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 416,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 417,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 418,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 419,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 420,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 421,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 422,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 423,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 424,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 425,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 426,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 427,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 428,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 429,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      },
+      {
+        "id": 430,
+        "sessionId": "F9A7D30D07AA95A92F0CFD0BCF71FC43"
+      }
+    ],
+    "stderr_tail": "[1006/040256.119075:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1006/040256.119162:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1006/040256.120024:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1006/040256.120112:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1006/040256.120183:ERROR:net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)\n[1006/040256.121058:ERROR:device/udev_linux/udev_watcher.cc:51] Failed to initialize a udev monitor.\n[1006/040256.121886:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 25: No such file or directory (2)\n[1006/040256.130030:WARNING:media/gpu/vaapi/vaapi_wrapper.cc:1660] drmGetDevices2() has not found any devices\n[1006/040256.131450:WARNING:sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.\n[1006/040256.134013:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1006/040256.134123:WARNING:device/bluetooth/dbus/bluez_dbus_manager.cc:209] Floss manager service not available, cannot set Floss enable/disable.\n[1006/040256.134236:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1006/040256.136640:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1006/040256.156165:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 59: No such file or directory (2)\n[1006/040256.175908:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1006/040256.175946:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1006/040257.061602:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1006/040257.062755:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1006/040257.094712:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1006/040257.095152:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1006/040257.342318:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1006/040257.342718:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 127.97986599616706,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    "bootstrap_observation": null
+  },
+  "dom": {
+    "route": "/workspace/skills",
+    "ready": "complete",
+    "fonts": "loaded",
+    "controls": [
+      {
+        "id": "sidebar-new-chat-button",
+        "label": null,
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": "사이드바 닫기",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 217,
+          "y": 6,
+          "width": 30,
+          "height": 30
+        }
+      },
+      {
+        "id": "sidebar-search-button",
+        "label": "대화 검색",
+        "text": " 대화 검색 Ctrl+K",
+        "disabled": false,
+        "rect": {
+          "x": 4,
+          "y": 74,
+          "width": 247,
+          "height": 32
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "폴더 ",
+        "disabled": false,
+        "rect": {
+          "x": 14,
+          "y": 148,
+          "width": 207,
+          "height": 24
+        }
+      },
+      {
+        "id": "",
+        "label": "새 폴더",
+        "text": " ",
+        "disabled": false,
+        "rect": {
+          "x": 221,
+          "y": 146,
+          "width": 28,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "채팅 ",
+        "disabled": false,
+        "rect": {
+          "x": 14,
+          "y": 178,
+          "width": 207,
+          "height": 24
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " ",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": "더보기",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 221,
+          "y": 176,
+          "width": 28,
+          "height": 28
+        }
+      },
+      {
+        "id": "sidebar-chat-item",
+        "label": null,
+        "text": "   기존 대화 56년 전",
+        "disabled": false,
+        "rect": {
+          "x": 6,
+          "y": 228,
+          "width": 243,
+          "height": 32
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " ",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": "Chat Menu",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 219,
+          "y": 234,
+          "width": 20,
+          "height": 20
+        }
+      },
+      {
+        "id": "sidebar-chat-item",
+        "label": null,
+        "text": "   기존 대화 56년 전",
+        "disabled": false,
+        "rect": {
+          "x": 6,
+          "y": 260,
+          "width": 243,
+          "height": 32
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " ",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": "Chat Menu",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 219,
+          "y": 266,
+          "width": 20,
+          "height": 20
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "  Fixture Administrator",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": "사용자 메뉴",
+        "text": "  Fixture Administrator",
+        "disabled": false,
+        "rect": {
+          "x": 4,
+          "y": 1040,
+          "width": 247,
+          "height": 34
+        }
+      },
+      {
+        "id": "",
+        "action": "native_return",
+        "label": null,
+        "text": "EES Work로 돌아가기",
+        "disabled": false,
+        "rect": {
+          "x": 273,
+          "y": 11,
+          "width": 157.421875,
+          "height": 22
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "생성",
+        "disabled": false,
+        "rect": {
+          "x": 1845,
+          "y": 54,
+          "width": 42,
+          "height": 24
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": "Open create menu",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 1887,
+          "y": 54,
+          "width": 23,
+          "height": 24
+        }
+      },
+      {
+        "id": "",
+        "label": "검색 초기화",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 1832,
+          "y": 92.5,
+          "width": 16,
+          "height": 16
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "전체 ",
+        "disabled": false,
+        "rect": {
+          "x": 1856,
+          "y": 84,
+          "width": 52,
+          "height": 32
+        }
+      }
+    ],
+    "navigationAncestors": []
+  }
+}

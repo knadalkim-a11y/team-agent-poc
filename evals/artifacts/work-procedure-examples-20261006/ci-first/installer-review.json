@@ -1,0 +1,268 @@
+{
+  "run_id": 37425706328,
+  "head_sha": "5669699be790821c3d7fe2e1b3c34d0da0f89ce1",
+  "complete_expected_artifacts": true,
+  "artifacts": [
+    {
+      "name": "ees-results-restore-ees10-ubuntu-24.04",
+      "id": 11394977772,
+      "digest": "sha256:f46858df94b2a34afbeda8b04eefb627ae959f0f60a7d4f81acfdaa224da15a7",
+      "bytes": 673,
+      "crc_ok": true
+    },
+    {
+      "name": "ees-results-program-install-ubuntu-24.04",
+      "id": 11394947950,
+      "digest": "sha256:bbb09584e6f09f863c414218a372949a8a8afb8a42088b3f3c73fc590e0f5825",
+      "bytes": 2664,
+      "crc_ok": true
+    },
+    {
+      "name": "ees-results-restore-ees12-ubuntu-24.04",
+      "id": 11394862957,
+      "digest": "sha256:e9107edb8fde5d0783969ee97c600dd5f9857740a777eb2ad6f23f3e9a458aab",
+      "bytes": 678,
+      "crc_ok": true
+    },
+    {
+      "name": "ees-results-restore-ees11-ubuntu-24.04",
+      "id": 11394793226,
+      "digest": "sha256:410a9600a02983e5bd807af8f204a26368b6ea316829528509d795a2c8c96d11",
+      "bytes": 674,
+      "crc_ok": true
+    },
+    {
+      "name": "ees-results-restore-ees11-windows-2022",
+      "id": 11395391814,
+      "digest": "sha256:0073ce48f9be5afb2c74957d74a591fa74bf6d1d22bdb05d273564367e3b33e0",
+      "bytes": 681,
+      "crc_ok": true
+    },
+    {
+      "name": "ees-results-restore-ees10-windows-2022",
+      "id": 11395247417,
+      "digest": "sha256:e682d6ec117473230d7a10aa2dd483b8ed5bb47018cd0ca0da25a1645c080bf5",
+      "bytes": 685,
+      "crc_ok": true
+    },
+    {
+      "name": "ees-results-restore-ees12-windows-2022",
+      "id": 11395182981,
+      "digest": "sha256:0e31ff5a9b842e11e8393889e1a54c87822101deeaa057add23b6c241bf39958",
+      "bytes": 687,
+      "crc_ok": true
+    },
+    {
+      "name": "ees-results-program-install-windows-2022",
+      "id": 11394914309,
+      "digest": "sha256:3a8d38a0eccfad82e4a94e669d895a04e435953b276d629999a5fd66bd26690b",
+      "bytes": 2648,
+      "crc_ok": true
+    }
+  ],
+  "modules": [
+    {
+      "artifact": "ees-results-restore-ees10-ubuntu-24.04",
+      "module": "test_ees_webui_customization.py",
+      "suite": "restore-ees10",
+      "tests_run": 1,
+      "status": "passed",
+      "exit_code": 0,
+      "passed": 1,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "expected-failure": 0,
+      "unexpected-success": 0,
+      "seconds": 21.291
+    },
+    {
+      "artifact": "ees-results-program-install-ubuntu-24.04",
+      "module": "test_ees_webui_customization.py",
+      "suite": "program-install",
+      "tests_run": 64,
+      "status": "incomplete",
+      "exit_code": 0,
+      "passed": 62,
+      "failed": 0,
+      "error": 0,
+      "skipped": 2,
+      "expected-failure": 0,
+      "unexpected-success": 0,
+      "seconds": 37.78
+    },
+    {
+      "artifact": "ees-results-restore-ees12-ubuntu-24.04",
+      "module": "test_ees_webui_customization.py",
+      "suite": "restore-ees12",
+      "tests_run": 1,
+      "status": "passed",
+      "exit_code": 0,
+      "passed": 1,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "expected-failure": 0,
+      "unexpected-success": 0,
+      "seconds": 21.414
+    },
+    {
+      "artifact": "ees-results-restore-ees11-ubuntu-24.04",
+      "module": "test_ees_webui_customization.py",
+      "suite": "restore-ees11",
+      "tests_run": 1,
+      "status": "passed",
+      "exit_code": 0,
+      "passed": 1,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "expected-failure": 0,
+      "unexpected-success": 0,
+      "seconds": 18.062
+    },
+    {
+      "artifact": "ees-results-restore-ees11-windows-2022",
+      "module": "test_ees_webui_customization.py",
+      "suite": "restore-ees11",
+      "tests_run": 1,
+      "status": "passed",
+      "exit_code": 0,
+      "passed": 1,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "expected-failure": 0,
+      "unexpected-success": 0,
+      "seconds": 141.922
+    },
+    {
+      "artifact": "ees-results-restore-ees10-windows-2022",
+      "module": "test_ees_webui_customization.py",
+      "suite": "restore-ees10",
+      "tests_run": 1,
+      "status": "passed",
+      "exit_code": 0,
+      "passed": 1,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "expected-failure": 0,
+      "unexpected-success": 0,
+      "seconds": 148.578
+    },
+    {
+      "artifact": "ees-results-restore-ees12-windows-2022",
+      "module": "test_ees_webui_customization.py",
+      "suite": "restore-ees12",
+      "tests_run": 1,
+      "status": "passed",
+      "exit_code": 0,
+      "passed": 1,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "expected-failure": 0,
+      "unexpected-success": 0,
+      "seconds": 170.188
+    },
+    {
+      "artifact": "ees-results-program-install-windows-2022",
+      "module": "test_ees_webui_customization.py",
+      "suite": "program-install",
+      "tests_run": 64,
+      "status": "incomplete",
+      "exit_code": 0,
+      "passed": 63,
+      "failed": 0,
+      "error": 0,
+      "skipped": 1,
+      "expected-failure": 0,
+      "unexpected-success": 0,
+      "seconds": 406.985
+    }
+  ],
+  "relevant_outcomes": [
+    {
+      "artifact": "ees-results-program-install-ubuntu-24.04",
+      "id": "test_ees_webui_customization.CustomizationTests.test_current_ees13_partial_cleanup_uses_its_complete_record_inventory",
+      "status": "passed"
+    },
+    {
+      "artifact": "ees-results-program-install-ubuntu-24.04",
+      "id": "test_ees_webui_customization.CustomizationTests.test_easy_tools_ees13_apply_restore_preserves_its_verified_inventory",
+      "status": "passed"
+    },
+    {
+      "artifact": "ees-results-program-install-ubuntu-24.04",
+      "id": "test_ees_webui_customization.CustomizationTests.test_ees13_inventory_compatibility_never_allows_current_json_or_record_tampering",
+      "status": "passed"
+    },
+    {
+      "artifact": "ees-results-program-install-ubuntu-24.04",
+      "id": "test_ees_webui_customization.CustomizationTests.test_ees13_legacy_inventory_rejects_a_half_present_help_asset_pair",
+      "status": "passed"
+    },
+    {
+      "artifact": "ees-results-program-install-ubuntu-24.04",
+      "id": "test_ees_webui_customization.CustomizationTests.test_ees13_previous_inventory_is_frozen_and_old_incoming_bundle_is_rejected",
+      "status": "passed"
+    },
+    {
+      "artifact": "ees-results-program-install-ubuntu-24.04",
+      "id": "test_ees_webui_customization.CustomizationTests.test_pre_easy_tools_ees13_apply_restore_preserves_its_verified_inventory",
+      "status": "passed"
+    },
+    {
+      "artifact": "ees-results-program-install-windows-2022",
+      "id": "test_ees_webui_customization.CustomizationTests.test_current_ees13_partial_cleanup_uses_its_complete_record_inventory",
+      "status": "passed"
+    },
+    {
+      "artifact": "ees-results-program-install-windows-2022",
+      "id": "test_ees_webui_customization.CustomizationTests.test_easy_tools_ees13_apply_restore_preserves_its_verified_inventory",
+      "status": "passed"
+    },
+    {
+      "artifact": "ees-results-program-install-windows-2022",
+      "id": "test_ees_webui_customization.CustomizationTests.test_ees13_inventory_compatibility_never_allows_current_json_or_record_tampering",
+      "status": "passed"
+    },
+    {
+      "artifact": "ees-results-program-install-windows-2022",
+      "id": "test_ees_webui_customization.CustomizationTests.test_ees13_legacy_inventory_rejects_a_half_present_help_asset_pair",
+      "status": "passed"
+    },
+    {
+      "artifact": "ees-results-program-install-windows-2022",
+      "id": "test_ees_webui_customization.CustomizationTests.test_ees13_previous_inventory_is_frozen_and_old_incoming_bundle_is_rejected",
+      "status": "passed"
+    },
+    {
+      "artifact": "ees-results-program-install-windows-2022",
+      "id": "test_ees_webui_customization.CustomizationTests.test_pre_easy_tools_ees13_apply_restore_preserves_its_verified_inventory",
+      "status": "passed"
+    }
+  ],
+  "skips": [
+    {
+      "artifact": "ees-results-program-install-ubuntu-24.04",
+      "id": "test_ees_webui_customization.ProgramRenameTests.test_real_windows_directory_lock_released_during_wait_then_promotes",
+      "status": "skipped",
+      "detail": "Requires an actual Windows directory sharing lock"
+    },
+    {
+      "artifact": "ees-results-program-install-ubuntu-24.04",
+      "id": "test_ees_webui_customization.RealBrandingWheelTests.test_saved_workflow_survives_real_upgrade_then_previous_program_restore",
+      "status": "skipped",
+      "detail": "Supply current and previous shipped wheels for the reverse-compatibility gate"
+    },
+    {
+      "artifact": "ees-results-program-install-windows-2022",
+      "id": "test_ees_webui_customization.RealBrandingWheelTests.test_saved_workflow_survives_real_upgrade_then_previous_program_restore",
+      "status": "skipped",
+      "detail": "Supply current and previous shipped wheels for the reverse-compatibility gate"
+    }
+  ],
+  "problems": []
+}

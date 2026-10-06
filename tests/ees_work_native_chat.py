@@ -170,7 +170,7 @@ def central_flow(g):
     assert g.api('/api/ees-work/workspace')['workflows']==[]
     g.record('explicit packaged read-only Work tool registration',id='ees_workflow',source_sha256=status['source_sha256'],private_native_grant=True,model_presets_created=False)
     g.click('[data-action="mode"][data-mode="author"]');g.click('[data-author-action="create"]')
-    g.type('#ees-work-dialog [name="name"]','중앙 대화 제안 검증');g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.click('[name=procedure_template][value=blank]');g.type('#ew-procedure-name','중앙 대화 제안 검증');g.click('[data-author-action=procedure_create]')
     g.wait('document.querySelector("[data-author-action=add_stage]")')
     g.click('[data-author-action=add_stage]');g.type('#ew-author-node [name=instructions]','저장된 기준 안내')
     g.click('[data-author-action=save]');g.wait('document.querySelector("#ees-work-designer")?.innerText.includes("초안 r2")')

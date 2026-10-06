@@ -299,8 +299,9 @@ def integrated_flow(gate):
     # All business writes in this flow are actual visible user controls.
     g.click('[data-action="mode"][data-mode="author"]')
     g.click('[data-author-action="create"]')
-    g.type('#ees-work-dialog input[name="name"]','합성 배포 자료 확인')
-    g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.click('[name=procedure_template][value=blank]')
+    g.type('#ew-procedure-name','합성 배포 자료 확인')
+    g.click('[data-author-action=procedure_create]')
     g.wait('!!document.querySelector(\'[data-author-action="add_stage"]\')')
     g.click('[data-author-action="add_stage"]')
     g.type('#ew-author-node input[name="name"]','자료 검토')

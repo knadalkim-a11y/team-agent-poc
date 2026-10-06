@@ -24,6 +24,7 @@
 - **개발을 이어갈 GPT**: [AGENTS.md](AGENTS.md) → [현재 상태](docs/STATUS.md) → 해당 기능 파일과 테스트.
 - **설치·운영할 사람**: [환경 기준](versions.md)을 읽고, 최초 설치는 [설치·기동](docs/01-openwebui-install.md), 기존 EES 환경의 업데이트는 [래퍼 운영](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)에서 시작합니다.
 - **팀원 안내 초안**: [EES Work 시작 안내](docs/07-team-quickstart.md) — 팀 시연용 준비본. 실제 전달 상태는 STATUS에서 확인.
+- **권한별 메뉴와 Open WebUI 왕복**: [메뉴 사용 안내](docs/03-openwebui-native-agent.md#menu-integration-20261006) · [C15 구현 계약](docs/mockups/ees-work/TASK.md#menu-integration-20261006). EES 작성 권한과 원래 Open WebUI 권한을 구분하며 작성 중인 내용을 같은 로그인 세션에서 보존합니다.
 - **시스템 담당자 작성·게시**: [v1.1 권한/보존 계약](docs/mockups/ees-work/TASK.md#system-authoring-20260924) → [가입·첫 이용·P 작성 안내](docs/07-team-quickstart.md#system-authoring-20260924) · [관리자 운영/복원/세션 경계](docs/03-openwebui-native-agent.md#system-authoring-20260924) · [SA/NU·사내 OP 평가](evals/scenarios.md#system-authoring-20260924). Native 개인 계정/그룹을 사용하고 담당 시스템의 선택 P만 저장·검사·게시합니다. 기존 업무 이용/실행/개인 자료 권한은 별도이며 A안 화면을 재사용합니다.
 - **공통 Native 도구·P/T 자동 실행**: [09-25 계약·두 예제](docs/mockups/ees-work/TASK.md#shared-native-runtime-20260925) → [승인·운영·복원 경계](docs/03-openwebui-native-agent.md#shared-native-runtime-20260925) · [사용 안내](docs/07-team-quickstart.md#shared-native-runtime-20260925) · [TR-01~24 근거](evals/scenarios.md#shared-native-runtime-20260925). 기존 등록본·ACL·개인 설정으로 실행하며 채팅과 패널이 같은 영속 서비스를 사용합니다. 기존 모의 진행과 새 실행 계약을 구분하고 Windows 셋업 자동화는 후속으로 유지합니다.
 - **이전 EES Work 4차 UI 구현 근거**: [v1.1 구현 범위·재사용](docs/mockups/ees-work/TASK.md#v4-ui-20260930) → [V4-01~15·실제 검증 경계](evals/v4-ui-20260930.md). 왼쪽은 공장/시스템 작업 공간과 업무 탐색, 중앙은 목록·입력/실행/결과와 상세 정보, 오른쪽은 실제 Native EES Assistant입니다. 초안·저장값·실행 snapshot과 다음 질문 참고·메시지 당시 참고·실행 대상을 구분합니다. 실제 schema·저장/승인/실행·P/T·Workspace/게시·권한 서비스를 재사용하며 기존 대화/첨부와 사용자 자산을 유지합니다. [09-28 C안](docs/mockups/ees-work/TASK.md#c-design-phase1-20260928), [09-23 A안](docs/mockups/ees-work/TASK.md#a-design-20260923), [09-22 진행/기록](docs/mockups/ees-work/TASK.md#right-panel-20260922), [업무 패널·대화 계약](docs/mockups/ees-work/TASK.md#work-panel-chat-design-20260916)은 당시 기능/검사 근거로 보존하며 당시 V4 외형 기준을 대체하지 않습니다. 새 재구성의 화면 기준은 위 Step 0-A의 현재 Figma입니다. 장기 [공동 진행과 개인 대화 분리](docs/mockups/ees-work/TASK.md#ees-work-shared-target)는 현재 사용자별 진행 건과 별개입니다.
@@ -87,6 +88,7 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 |---|---|
 | 공개 인증 API·이전 기록 조회 | [ees_workflow.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow.py) |
 | 새 절차·게시 버전·진행 건·설정·판정·공유/개인 상태 | [ees_workflow_workspace.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py) |
+| 새 절차의 합성 예시·단계/작업 구조 | [workflow_procedure_examples.json](agent-pack/skills/ees-work-demo/scripts/workflow_procedure_examples.json), [작성 안내](docs/03-openwebui-native-agent.md#procedure-examples-20261006) |
 | 예약·실행 시도·도구 검토·서버 확인·EES 요청 추적 | [ees_workflow_operations.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_operations.py) |
 | 시스템 담당 인가·P별 초안/게시·legacy 보존·감사 | [ees_workflow_authoring.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_authoring.py) |
 | 정의 읽기·참조/입력/게시 검증 | [ees_workflow_definition.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_definition.py) |

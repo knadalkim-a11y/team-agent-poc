@@ -1,0 +1,39 @@
+{
+  "scope": "built Native UI; synthetic session and data",
+  "path": "/c/existing-chat",
+  "ready": "complete",
+  "fonts": "loaded",
+  "viewport": [
+    600,
+    900
+  ],
+  "active": {
+    "tag": "BODY",
+    "id": ""
+  },
+  "panel": null,
+  "authoring": null,
+  "layout": {
+    "panel": null,
+    "scroll": null,
+    "radio": null,
+    "selected": null,
+    "unselected": null,
+    "name": null,
+    "footer": null
+  },
+  "nativeDraft": {
+    "prompt": "새 절차 전에 작성한 개인 질문\n  \n신규 공장 횡전개 예시를 복사해서 우리 공장에 맞게 고치고 싶어\n현재 화면: 새 업무 절차\n초안 이름: 합성 횡전개 절차",
+    "files": [],
+    "selectedToolIds": [],
+    "selectedSkillIds": [],
+    "selectedFilterIds": [],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "nativeInput": {
+    "text": "새 절차 전에 작성한 개인 질문\n\n\n\n\n신규 공장 횡전개 예시를 복사해서 우리 공장에 맞게 고치고 싶어\n\n현재 화면: 새 업무 절차\n\n초안 이름: 합성 횡전개 절차",
+    "html": "<div contenteditable=\"true\" translate=\"no\" class=\"tiptap ProseMirror\" tabindex=\"0\" id=\"chat-input\" aria-label=\"업무를 물어보거나, 필요한 작업을 요청하세요\"><p>새 절차 전에 작성한 개인 질문</p><p><br class=\"ProseMirror-trailingBreak\"></p><p>신규 공장 횡전개 예시를 복사해서 우리 공장에 맞게 고치고 싶어</p><p>현재 화면: 새 업무 절차</p><p>초안 이름: 합성 횡전개 절차</p></div>"
+  }
+}

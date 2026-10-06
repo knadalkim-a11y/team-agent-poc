@@ -1,0 +1,432 @@
+{
+  "run_id": 37425706328,
+  "head_sha": "5669699be790821c3d7fe2e1b3c34d0da0f89ce1",
+  "ci_checkout_merge_sha": "6b4888935cdee227043711436deb0f8beec7379e",
+  "scope": "Read-only inspection of actual GitHub per-test artifacts and decoded job logs; no tests rerun, no product edits",
+  "suites": [
+    {
+      "artifact": {
+        "id": 11395102861,
+        "name": "ees-results-contracts-ubuntu-24.04",
+        "size_in_bytes": 4409,
+        "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11395102861",
+        "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11395102861/zip",
+        "expired": false,
+        "created_at": "2026-10-06T06:50:13Z",
+        "expires_at": "2026-10-13T06:50:12Z",
+        "updated_at": "2026-10-06T06:50:13Z",
+        "digest": "sha256:7eedd237b835453f2b9a20169fbbbd3a02b76c516d7a8682a3b80f99e054aa72",
+        "workflow_run": {
+          "id": 37425706328,
+          "repository_id": 1355435001,
+          "head_repository_id": 1355435001,
+          "head_branch": "feat/work-procedure-examples-20261006",
+          "head_sha": "5669699be790821c3d7fe2e1b3c34d0da0f89ce1"
+        }
+      },
+      "zip_sha256_verified": "7eedd237b835453f2b9a20169fbbbd3a02b76c516d7a8682a3b80f99e054aa72",
+      "job_id": 112145212267,
+      "job_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37425706328/job/112145212267",
+      "encoding_command_verified": "python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite contracts --output dist/ees-results",
+      "python_outcome_counts": {
+        "passed": 87
+      },
+      "module_exit_codes": [
+        {
+          "module": "test_ees_work_authoring.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow_execution.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow_model_native.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow_native.py",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "artifact": {
+        "id": 11394677459,
+        "name": "ees-results-services-ubuntu-24.04",
+        "size_in_bytes": 23110,
+        "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11394677459",
+        "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11394677459/zip",
+        "expired": false,
+        "created_at": "2026-10-06T06:50:49Z",
+        "expires_at": "2026-10-13T06:50:48Z",
+        "updated_at": "2026-10-06T06:50:49Z",
+        "digest": "sha256:e251389d09e59343ea257218bf89bdd6dc9b1f8e9796eee0de19cf1276c1266c",
+        "workflow_run": {
+          "id": 37425706328,
+          "repository_id": 1355435001,
+          "head_repository_id": 1355435001,
+          "head_branch": "feat/work-procedure-examples-20261006",
+          "head_sha": "5669699be790821c3d7fe2e1b3c34d0da0f89ce1"
+        }
+      },
+      "zip_sha256_verified": "e251389d09e59343ea257218bf89bdd6dc9b1f8e9796eee0de19cf1276c1266c",
+      "job_id": 112145212321,
+      "job_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37425706328/job/112145212321",
+      "encoding_command_verified": "python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite services --output dist/ees-results",
+      "python_outcome_counts": {
+        "passed": 472
+      },
+      "module_exit_codes": [
+        {
+          "module": "test_confluence_canary.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_confluence_read.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_apply_demo.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_delivery_artifacts.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_demo_assets.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_demo_data_tool.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_execution_tool.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_specialists_tool.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_controller.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_designer.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_figma_authoring.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_figma_contracts.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_figma_schedule.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_history_reference.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_operations.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_panel.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_routes.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_v4.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_workspace.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow_contract.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow_model.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow_tool.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_github_tool.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_jira_read.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_jira_work_contract.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_wo_demo_tool.py",
+          "exit_code": 0
+        },
+        {
+          "node": "test_wo_demo_state.cjs",
+          "exit_code": 0
+        },
+        {
+          "node": "test_ees_cooperation_panel.cjs",
+          "exit_code": 0
+        },
+        {
+          "node": "test_ees_execution_ui.cjs",
+          "exit_code": 0
+        },
+        {
+          "node": "test_ees_work_authoring_ui.cjs",
+          "exit_code": 0
+        },
+        {
+          "node": "test_ees_v4_layout.cjs",
+          "exit_code": 0
+        },
+        {
+          "node": "test_ees_v4_drafts.cjs",
+          "exit_code": 0
+        },
+        {
+          "node": "test_ees_work_figma_runtime_ui.cjs",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "artifact": {
+        "id": 11394288237,
+        "name": "ees-results-contracts-windows-2022",
+        "size_in_bytes": 4430,
+        "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11394288237",
+        "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11394288237/zip",
+        "expired": false,
+        "created_at": "2026-10-06T06:51:23Z",
+        "expires_at": "2026-10-13T06:51:23Z",
+        "updated_at": "2026-10-06T06:51:23Z",
+        "digest": "sha256:968bd34ed41c0c5f36cc0350dab04ce5b8c5a8b50ccd4f6780537af89c57d526",
+        "workflow_run": {
+          "id": 37425706328,
+          "repository_id": 1355435001,
+          "head_repository_id": 1355435001,
+          "head_branch": "feat/work-procedure-examples-20261006",
+          "head_sha": "5669699be790821c3d7fe2e1b3c34d0da0f89ce1"
+        }
+      },
+      "zip_sha256_verified": "968bd34ed41c0c5f36cc0350dab04ce5b8c5a8b50ccd4f6780537af89c57d526",
+      "job_id": 112145212436,
+      "job_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37425706328/job/112145212436",
+      "encoding_command_verified": "python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite contracts --output dist/ees-results",
+      "python_outcome_counts": {
+        "passed": 87
+      },
+      "module_exit_codes": [
+        {
+          "module": "test_ees_work_authoring.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow_execution.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow_model_native.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow_native.py",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "artifact": {
+        "id": 11394283385,
+        "name": "ees-results-services-windows-2022",
+        "size_in_bytes": 23258,
+        "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11394283385",
+        "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11394283385/zip",
+        "expired": false,
+        "created_at": "2026-10-06T06:52:44Z",
+        "expires_at": "2026-10-13T06:52:43Z",
+        "updated_at": "2026-10-06T06:52:44Z",
+        "digest": "sha256:e3660d020a0f422c8fda864288b0f8a1fb1baf8f28159d03d316980fd7db70c2",
+        "workflow_run": {
+          "id": 37425706328,
+          "repository_id": 1355435001,
+          "head_repository_id": 1355435001,
+          "head_branch": "feat/work-procedure-examples-20261006",
+          "head_sha": "5669699be790821c3d7fe2e1b3c34d0da0f89ce1"
+        }
+      },
+      "zip_sha256_verified": "e3660d020a0f422c8fda864288b0f8a1fb1baf8f28159d03d316980fd7db70c2",
+      "job_id": 112145212441,
+      "job_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37425706328/job/112145212441",
+      "encoding_command_verified": "python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite services --output dist/ees-results",
+      "python_outcome_counts": {
+        "passed": 472
+      },
+      "module_exit_codes": [
+        {
+          "module": "test_confluence_canary.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_confluence_read.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_apply_demo.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_delivery_artifacts.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_demo_assets.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_demo_data_tool.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_execution_tool.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_specialists_tool.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_controller.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_designer.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_figma_authoring.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_figma_contracts.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_figma_schedule.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_history_reference.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_operations.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_panel.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_routes.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_v4.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_work_workspace.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow_contract.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow_model.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_ees_workflow_tool.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_github_tool.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_jira_read.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_jira_work_contract.py",
+          "exit_code": 0
+        },
+        {
+          "module": "test_wo_demo_tool.py",
+          "exit_code": 0
+        },
+        {
+          "node": "test_wo_demo_state.cjs",
+          "exit_code": 0
+        },
+        {
+          "node": "test_ees_cooperation_panel.cjs",
+          "exit_code": 0
+        },
+        {
+          "node": "test_ees_execution_ui.cjs",
+          "exit_code": 0
+        },
+        {
+          "node": "test_ees_work_authoring_ui.cjs",
+          "exit_code": 0
+        },
+        {
+          "node": "test_ees_v4_layout.cjs",
+          "exit_code": 0
+        },
+        {
+          "node": "test_ees_v4_drafts.cjs",
+          "exit_code": 0
+        },
+        {
+          "node": "test_ees_work_figma_runtime_ui.cjs",
+          "exit_code": 0
+        }
+      ]
+    }
+  ]
+}

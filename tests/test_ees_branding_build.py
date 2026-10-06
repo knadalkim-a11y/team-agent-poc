@@ -192,6 +192,13 @@ async def run():
     assert "도움말에 없는 내용" in ui_state["help"]["answer_guidance"]["unknown"]
     examples = json.loads((root / "open_webui/workflow_tool_examples.json").read_text(encoding="utf-8"))
     assert len(examples) == 4
+    procedure_source = (root / "open_webui/workflow_procedure_examples.json").read_bytes()
+    procedures = json.loads(procedure_source)
+    summaries = ui_state["procedure_examples"]
+    assert {item["id"] for item in procedures} == {item["id"] for item in summaries}
+    assert {item["id"]: (item["stage_count"], item["job_count"]) for item in summaries} == {
+        "delivery_review": (4, 9), "factory_rollout": (4, 6), "daily_check": (1, 1)}
+    assert all("definition" not in item for item in summaries)
     # This is an emitted-package persistence contract, not an HTTP approval
     # test. Arrange explicit synthetic work through the internal service;
     # the LLM-visible Tool only reads or offers a local review proposal.
@@ -226,6 +233,7 @@ async def run():
     assert not retired["ok"] and retired["error"]["code"] == "legacy_execution_retired", retired
     assert not (root / ".webui_secret_key").exists()
     assert not (root / "data" / "webui.db").exists()
+    assert (root / "open_webui/workflow_procedure_examples.json").read_bytes() == procedure_source
 asyncio.run(run())
 print("installed_workflow_contract=pass")
 '''
@@ -238,13 +246,14 @@ print("installed_workflow_contract=pass")
             test.assertFalse(any(name.startswith("open_webui/ees_work_demo_ui/") for name in archive.namelist()))
             test.assertEqual(archive.read("open_webui/ees_workflow_tool.py"),
                              (builder.WORK_DIR / "scripts/workflow_tool.py").read_bytes())
-            for name in ("workflow_help.json", "workflow_tool_examples.json"):
+            for name in ("workflow_help.json", "workflow_tool_examples.json", "workflow_procedure_examples.json"):
                 test.assertEqual(archive.read("open_webui/" + name),
                                  (builder.WORK_DIR / "scripts" / name).read_bytes())
             for name in ("ees_workflow.py", "ees_workflow_definition.py", "ees_workflow_view.py", "ees_workflow_authoring.py",
                          "ees_workflow_execution.py", "ees_workflow_native.py", "ees_workflow_contract.py",
                          "ees_workflow_workspace.py", "ees_workflow_operations.py", "ees_workflow_model.py",
-                         "ees_workflow_tool.py", "workflow_policy.json", "workflow_help.json", "workflow_tool_examples.json"):
+                         "ees_workflow_tool.py", "workflow_policy.json", "workflow_help.json", "workflow_tool_examples.json",
+                         "workflow_procedure_examples.json"):
                 target = root / "open_webui" / name
                 target.parent.mkdir(exist_ok=True)
                 target.write_bytes(archive.read("open_webui/" + name))
@@ -1187,13 +1196,16 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
                     self.assertEqual(copied, source.read(origin))
                     self.assertEqual(hashlib.sha256(copied).hexdigest(), expected)
                 # Independently reviewed CSS references, not the builder's icon
-                # list or prepared output. Current icons are DOM images; CSS has no
-                # icon URL references. Its font URLs and every byte must survive.
+                # list or prepared output. The menu/return mask icons below use
+                # CSS URLs; font URLs and bytes outside icon values must survive.
                 # The independent fixed/mutated URL fixtures above still verify
                 # allowed rewriting, wrong/missing hashes and unrelated drift.
                 for filename, references in {
                     "chat-theme.css": (),
-                    "ees-work-launcher.css": (),
+                    "ees-work-launcher.css": (
+                        "v4/51602.svg", "v4/f6bbc.svg", "v4/40095.svg",
+                        "v4/88026.svg", "v4/eb94a.svg",
+                    ),
                 }.items():
                     icons = {relative: (builder.UI_DIR / relative).read_bytes() for relative in references}
                     for relative, content in icons.items():

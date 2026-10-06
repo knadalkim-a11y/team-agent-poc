@@ -1,0 +1,7 @@
+{
+  "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-native/platform-fix/unittest.log",
+  "provenance": "Local strict EncodingWarning check of exact previously failing official-wheel test, not remote CI success",
+  "bytes": 272,
+  "sha256": "eb36b97f3ad76c31226260277a32646525670ff7a49c230b9d06aa5d22280e60",
+  "content": "test_real_pinned_wheel_patches_records_and_unrelated_content (test_ees_branding_build.OfficialWheelTests.test_real_pinned_wheel_patches_records_and_unrelated_content) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 18.203s\n\nOK\n"
+}

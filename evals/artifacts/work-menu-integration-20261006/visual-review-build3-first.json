@@ -1,0 +1,84 @@
+{
+  "reviewed_at_utc": "2026-10-06T08:07:31.998714+00:00",
+  "scope": "Visual review only: actual built Native UI with synthetic fixtures; first functional run has unresolved failures, no functional PASS claimed.",
+  "build": "menu-c15 build3, reported wheel SHA prefix 6429b",
+  "references": [
+    "1046:2124",
+    "1046:2296",
+    "1046:2317",
+    "1046:2318",
+    "1046:2359"
+  ],
+  "reviewed_artifacts": [
+    {
+      "name": "menu-c15-admin-menu.png",
+      "sha256": "a9db0953e35771beac054eb8eae3170d64085cb607cde21052bb2277b1029f0e"
+    },
+    {
+      "name": "menu-c15-author-menu.png",
+      "sha256": "74eea17e67128f4e113540f04b38393e27370fce82325da60be0589ec3dd82fb"
+    },
+    {
+      "name": "menu-c15-member-work-only.png",
+      "sha256": "818bfc1ef33ff1d8a9620bb1d6f90254791275be199e4e78abc9bb063ef822bf"
+    },
+    {
+      "name": "menu-c15-tools-only-menu.png",
+      "sha256": "78692b2f2be6830bca3712b6e18c1d6676ffb1a8c3a080c4e4ad2f2f685dc18d"
+    },
+    {
+      "name": "menu-c15-native-admin-unsaved.png",
+      "sha256": "41eebac18e0853c33323bd58a33cc309916bd09aa06a8dc310066340a5f67cbf"
+    },
+    {
+      "name": "integrated-test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft-failure.png",
+      "sha256": "baecc7d5ad14fd802560322f92b940d68dc925115f8e519c68e9c6b3cf3fe895"
+    },
+    {
+      "name": "menu-c15-direct-native-search.png",
+      "sha256": "aa0e3ccde2440e14ea678ef6d1011489da5abaecef3e74d2f6d0e9c2de4bfb33"
+    },
+    {
+      "name": "menu-c15-native-missing-mount.png",
+      "sha256": "3af9bcaf0a593155bf8f7efd525898ec7f4560c33a0bd8cfde44fdde96d084c4"
+    },
+    {
+      "name": "integrated-test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving-failure.png",
+      "sha256": "9afe3763b348eafb9d4a19e6a8b40b6b65337cf10ecd0d9879b3ecbbab46261d"
+    }
+  ],
+  "findings": [
+    {
+      "id": "mask-icon-flex-growth",
+      "status": "confirmed visual/source defect; correction approved, waiting for running-test freeze release",
+      "observed": "Four span-mask menu rows shift icons to roughly x61 and labels to x118; img rows retain icon center near x24 and label x42.",
+      "cause": "#ees-work-entry .ew-nav-links button>span{flex:1} overrides generic .ew-icon{flex:none}; mask region grows and the contained icon centers within it.",
+      "minimal_fix": "Add flex:0 0 16px to #ees-work-entry .ew-nav-group .ew-nav-button>.ew-icon",
+      "computed_style_status": "Existing saved DOM JSON covers panel geometry only; actual nav/icon flex and x measurements requested from Native fixture owner."
+    },
+    {
+      "id": "knowledge-icon-mapping",
+      "status": "confirmed visual/source defect; view owner notified",
+      "observed": "참고 문서 uses the blue workflow icon e8a37.svg.",
+      "expected": "R7 node1046:2318 uses exact existing file-text asset 730b1.svg.",
+      "minimal_fix": "Change fixed knowledge menu asset mapping to 730b1.svg."
+    },
+    {
+      "id": "tools-only-panel-guidance",
+      "status": "copy inconsistency reported; no source change",
+      "observed": "Left menu states EES Work has no available items; right panel instructs opening a left menu item.",
+      "suggestion": "Use an empty-state explanation consistent with the left menu, without changing permission policy."
+    }
+  ],
+  "matching_visual_observations": [
+    "Admin group labels and original Native menu names are visible in the required order; EES/native/Admin groups are distinct.",
+    "Author example has only authorized skills/prompts Native entries and no administrator group.",
+    "Work-only member has no workspace switch.",
+    "Tools-only non-admin shows workspace switch and empty menu rather than administrator tools.",
+    "Skills return bar appears in normal flow above original tabs/search/create; no visible covering of controls.",
+    "Admin modal return bar sits at the top of original settings content without covering sidebar/settings inputs/save control.",
+    "Direct Native entry and missing-mount captures have no return bar and retain original Native screen."
+  ],
+  "known_asset_difference": "Five masks reuse existing SVG alpha paths; target colors corrected in CSS, 15px sparkle and14px arrow expand to16px with documented stroke scaling. Full-fidelity vector match not claimed.",
+  "source_modified_during_review": false
+}

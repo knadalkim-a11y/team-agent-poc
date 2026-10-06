@@ -1,0 +1,6 @@
+{
+  "sha256": "6b6307070876f193b7a0c6d7c7066f0dbeda4808d3c618bd269100378c0d9489",
+  "bytes": 734,
+  "content": "test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 127.97986599616706, \"product\": \"HeadlessChrome/153.0.8010.52\"}\nFAIL\ntest_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 123.35965399688575, \"product\": \"HeadlessChrome/153.0.8010.52\"}\nFAIL\n",
+  "note": "Original log stops after two FAIL lines; complete summary absent. Reported process exit1 and three failure artifacts are distinguished from missing test completion output."
+}

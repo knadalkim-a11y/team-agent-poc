@@ -1,0 +1,283 @@
+{
+  "time": "2026-10-06T06:50:14.571917+00:00",
+  "scope": "Complete packaged Native app gate for the integrated work contract.\n\nOne temporary DATA_DIR and a loopback synthetic model are used. Native auth,\nchat/file storage, workflow APIs, worker and frontend are the built product.\nNo company credentials, DB or service is read. Physical CDP input drives UI;\nread-only DOM evaluation inspects readiness and results. Failure evidence is\ncaptured before browser shutdown. This is distinct from the Native fixtures.\nThis gate was reconstructed after workspace loss from the committed base and\nobserved failures. It is not claimed byte-identical to the lost c144 gate.\n",
+  "source_commit": "6b4888935cdee227043711436deb0f8beec7379e",
+  "source_dirty": true,
+  "wheel": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+  "wheel_sha256": "8bf5314ff771a9ea1987aa51d5828b04cf1194028c7047fa765afdbc654d0ef0",
+  "gate_sha256": "8929df2937cc7ceed582ade419eb23059d08555ec4a0dc5b1f50267e467738ef",
+  "execution": {
+    "python": "3.11.16",
+    "argv": [
+      "tests/ees_work_integrated_app.py",
+      "--wheel",
+      "dist/branding/open_webui-0.11.3+ees.13-py3-none-any.whl",
+      "--chrome",
+      "/usr/bin/google-chrome",
+      "--output",
+      "dist/ees-native-product"
+    ],
+    "chrome": "/opt/google/chrome/google-chrome",
+    "reconstructed_after_workspace_loss": true,
+    "prior_lost_gate_byte_identity_claimed": false
+  },
+  "steps": [
+    {
+      "name": "empty Native installation",
+      "workflows": 0,
+      "runs": 0
+    },
+    {
+      "name": "Native model availability",
+      "models": [
+        {
+          "id": "c3-synthetic-model",
+          "direct": null,
+          "owned_by": "openai"
+        },
+        {
+          "id": "arena-model",
+          "direct": null,
+          "owned_by": "arena"
+        }
+      ]
+    },
+    {
+      "name": "actual built Native render",
+      "viewport": [
+        1920,
+        1080
+      ]
+    }
+  ],
+  "status": "failed",
+  "failure": {
+    "type": "AssertionError",
+    "message": "Readiness failed: !!document.querySelector('[data-author-action=\"add_stage\"]')"
+  },
+  "browser_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 15435.59372499999,
+    "pid": 2557,
+    "exit_code": null,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/154.0.8037.57",
+      "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+      "jsVersion": "15.4.80.11"
+    },
+    "target_id": "85D9D054F47DC5663D1E2138E5B60E7E",
+    "session_attached": true,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 297,
+      "method": "Runtime.evaluate",
+      "session_attached": true,
+      "timeout_seconds": 15,
+      "elapsed_ms": 0.5976399999951809,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "id": 278,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 279,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 280,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 281,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 282,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 283,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 284,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 285,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 286,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 287,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 288,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 289,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 290,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 291,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 292,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 293,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 294,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 295,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 296,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 297,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      }
+    ],
+    "stderr_tail": "[2557:2581:1006/065024.490456:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2581:1006/065024.492438:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2581:1006/065024.615330:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2581:1006/065024.672108:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065024.928036:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065024.928094:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2581:1006/065024.928233:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2581:1006/065024.928245:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065024.929622:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065024.932013:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2581:1006/065024.932579:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065024.983925:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065024.985103:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2581:1006/065024.987320:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065024.990673:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065025.044409:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065025.044463:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files\n[2557:2581:1006/065025.044548:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065025.095648:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2581:1006/065025.096791:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065025.155797:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2583:1006/065028.347581:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\nCreated TensorFlow Lite XNNPACK delegate for CPU.\n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 944.6538669999995,
+      "product": "Chrome/154.0.8037.57"
+    },
+    "bootstrap_observation": null
+  },
+  "browser_cleanup_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 15741.984325999994,
+    "pid": 2557,
+    "exit_code": 0,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/154.0.8037.57",
+      "revision": "@73c14f6228d7cd537c855007e8f88678969cc0eb",
+      "jsVersion": "15.4.80.11"
+    },
+    "target_id": "85D9D054F47DC5663D1E2138E5B60E7E",
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 304,
+      "method": "Browser.close",
+      "session_attached": false,
+      "timeout_seconds": 5,
+      "elapsed_ms": 4.45362600001431,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "id": 285,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 286,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 287,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 288,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 289,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 290,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 291,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 292,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 293,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 294,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 295,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 296,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 297,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 298,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 299,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 300,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 301,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 302,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 303,
+        "sessionId": "34B03B913D3091F276ADC4468A2070F3"
+      },
+      {
+        "id": 304
+      }
+    ],
+    "stderr_tail": "[2557:2581:1006/065024.490456:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2581:1006/065024.492438:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2581:1006/065024.615330:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2581:1006/065024.672108:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065024.928036:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065024.928094:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2581:1006/065024.928233:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2581:1006/065024.928245:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065024.929622:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065024.932013:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2581:1006/065024.932579:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065024.983925:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065024.985103:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2581:1006/065024.987320:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065024.990673:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065025.044409:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2557:1006/065025.044463:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files\n[2557:2581:1006/065025.044548:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065025.095648:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2581:1006/065025.096791:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[2557:2557:1006/065025.155797:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[2557:2583:1006/065028.347581:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\nCreated TensorFlow Lite XNNPACK delegate for CPU.\n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 944.6538669999995,
+      "product": "Chrome/154.0.8037.57"
+    },
+    "bootstrap_observation": null
+  }
+}

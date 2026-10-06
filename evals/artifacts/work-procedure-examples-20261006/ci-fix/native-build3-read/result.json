@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "testsRun": 1,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "python_exit_status": 0,
+  "exit_status_source": "functions.exec exec_command / write_stdin: shell mkdir && env python unittest with no pipeline or trailing command",
+  "argv": [
+    ".venv/bin/python",
+    "-X",
+    "warn_default_encoding",
+    "-W",
+    "error::EncodingWarning",
+    "-m",
+    "unittest",
+    "test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip",
+    "-v"
+  ],
+  "result_source": "Complete independent unittest run.log summary and observed Python command exit status; written after the already-completed run, not an in-run finally hook.",
+  "log_sha256": "37b2473043311df9311980e96acc3668c2965afa6ecd0a8889f862ab3c6f3289",
+  "wheel_sha256": "7eb76af53b3ce34cb42cd6a2f782c8a7467ed75ea1c2612a199ce6f41ee664a6"
+}

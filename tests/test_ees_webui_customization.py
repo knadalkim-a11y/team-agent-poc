@@ -50,10 +50,13 @@ PRE_EXECUTION_WORK_FILES = PRE_AUTHORING_WORK_FILES + (
 PRE_INTEGRATED_WORK_FILES = PRE_EXECUTION_WORK_FILES + tuple(
     "open_webui/ees_workflow_" + name + ".py" for name in ("execution", "native", "contract", "examples", "model"))
 
-# The 112 paths shipped before easy authoring, frozen independently of the
-# builder's live inventory. The digest uses sorted paths joined with LF.
+# Shipped inventories before easy authoring and procedure examples, frozen
+# independently of the builder. Digests use sorted paths joined with LF.
 PRE_EASY_TOOLS_INVENTORY_SHA256 = "b577f1a5a04a33a808998d5a6b2908eb2af0735b5aa98bd0cbfbc9f38d2fde47"
+PRE_PROCEDURE_EXAMPLES_INVENTORY_SHA256 = "34e87132a5ef7d04e7218922e5c5f8617b1efcd8c1b8b8cdb0d6ffe08256c487"
 EASY_TOOLS_FILES = ("open_webui/workflow_help.json", "open_webui/workflow_tool_examples.json")
+PROCEDURE_EXAMPLES_FILE = "open_webui/workflow_procedure_examples.json"
+AUTHORING_FILES = EASY_TOOLS_FILES + (PROCEDURE_EXAMPLES_FILE,)
 
 
 def digest(content):
@@ -682,23 +685,42 @@ class CustomizationTests(unittest.TestCase):
         previous = sorted(branding.WORK_FILES_V13)
         self.assertEqual(len(previous), 112)
         self.assertEqual(digest("\n".join(previous).encode("utf-8")), PRE_EASY_TOOLS_INVENTORY_SHA256)
-        self.assertEqual(set(branding.WORK_FILES) - set(previous), set(EASY_TOOLS_FILES))
-        self.write_bundle(make_wheel(missing=EASY_TOOLS_FILES))
-        before = self.tree()
-        with self.assertRaisesRegex(custom.CustomizationError, "complete app"):
-            self.apply()
-        self.assertEqual(self.tree(), before)
-        self.assertEqual(self.events, [])
+        easy_tools = sorted(branding.WORK_FILES_V13_EASY_AUTHORING)
+        self.assertEqual(len(easy_tools), 114)
+        self.assertEqual(digest("\n".join(easy_tools).encode("utf-8")), PRE_PROCEDURE_EXAMPLES_INVENTORY_SHA256)
+        self.assertEqual(set(easy_tools) - set(previous), set(EASY_TOOLS_FILES))
+        self.assertEqual(set(branding.WORK_FILES) - set(easy_tools), {PROCEDURE_EXAMPLES_FILE})
+        self.assertEqual(len(branding.WORK_FILES), 115)
+        for missing in (AUTHORING_FILES, (PROCEDURE_EXAMPLES_FILE,)):
+            with self.subTest(previous_inventory=115-len(missing)):
+                self.write_bundle(make_wheel(missing=missing))
+                before = self.tree()
+                with self.assertRaisesRegex(custom.CustomizationError, "complete app"):
+                    self.apply()
+                self.assertEqual(self.tree(), before)
+                self.assertEqual(self.events, [])
 
     def test_pre_easy_tools_ees13_apply_restore_preserves_its_verified_inventory(self):
-        previous = self.install_legacy_program(version="0.11.3+ees.13", missing=EASY_TOOLS_FILES)
+        previous = self.install_legacy_program(version="0.11.3+ees.13", missing=AUTHORING_FILES)
         custom.validate_program(self.program, previous)
         before = self.tree()
         self.assertTrue(self.apply()["changed"])
         current = self.registry["customization"]["active"]
         custom.validate_program(self.program, current)
-        for name in EASY_TOOLS_FILES:
+        for name in AUTHORING_FILES:
             self.assertTrue((self.program / name).is_file())
+        self.assertEqual(self.restore()["source_commit"], previous["source_commit"])
+        custom.validate_program(self.program, previous)
+        self.assertEqual(self.tree(), before)
+        self.assertFalse(self.restore()["changed"])
+
+    def test_easy_tools_ees13_apply_restore_preserves_its_verified_inventory(self):
+        previous = self.install_legacy_program(version="0.11.3+ees.13", missing=(PROCEDURE_EXAMPLES_FILE,))
+        custom.validate_program(self.program, previous)
+        before = self.tree()
+        self.assertTrue(self.apply()["changed"])
+        custom.validate_program(self.program, self.registry["customization"]["active"])
+        self.assertTrue((self.program / PROCEDURE_EXAMPLES_FILE).is_file())
         self.assertEqual(self.restore()["source_commit"], previous["source_commit"])
         custom.validate_program(self.program, previous)
         self.assertEqual(self.tree(), before)
@@ -709,8 +731,16 @@ class CustomizationTests(unittest.TestCase):
         selected = copy.deepcopy(self.registry["customization"]["active"])
         record_path = self.program / custom.RECORD
         original_record = record_path.read_bytes()
-        originals = {name: (self.program / name).read_bytes() for name in EASY_TOOLS_FILES}
-        for missing in ((EASY_TOOLS_FILES[0],), (EASY_TOOLS_FILES[1],), EASY_TOOLS_FILES):
+        originals = {name: (self.program / name).read_bytes() for name in AUTHORING_FILES}
+        # Removing the procedure example alone would resemble the genuine
+        # 114-path predecessor; the current selection still requires its hash.
+        for name in AUTHORING_FILES:
+            with self.subTest(tampered=name):
+                (self.program / name).write_bytes(b"tampered JSON")
+                with self.assertRaisesRegex(custom.CustomizationError, "file changed"):
+                    custom.validate_program(self.program, selected)
+                (self.program / name).write_bytes(originals[name])
+        for missing in (*((name,) for name in AUTHORING_FILES), EASY_TOOLS_FILES, AUTHORING_FILES):
             with self.subTest(missing=missing):
                 for name in missing:
                     (self.program / name).unlink()
@@ -738,9 +768,13 @@ class CustomizationTests(unittest.TestCase):
         custom.validate_program(self.program, selected)
 
     def test_ees13_legacy_inventory_rejects_a_half_present_help_asset_pair(self):
-        for missing in EASY_TOOLS_FILES:
+        # The only shipped states are no JSON, the original two, and all three.
+        invalid_missing = ((EASY_TOOLS_FILES[0],), (EASY_TOOLS_FILES[1],),
+                           EASY_TOOLS_FILES, (EASY_TOOLS_FILES[0], PROCEDURE_EXAMPLES_FILE),
+                           (EASY_TOOLS_FILES[1], PROCEDURE_EXAMPLES_FILE))
+        for missing in invalid_missing:
             with self.subTest(missing=missing):
-                previous = self.install_legacy_program(version="0.11.3+ees.13", missing=(missing,))
+                previous = self.install_legacy_program(version="0.11.3+ees.13", missing=missing)
                 with self.assertRaisesRegex(custom.CustomizationError, "complete app"):
                     custom.validate_program(self.program, previous)
                 shutil.rmtree(self.program)
@@ -748,7 +782,7 @@ class CustomizationTests(unittest.TestCase):
     def test_current_ees13_partial_cleanup_uses_its_complete_record_inventory(self):
         self.apply()
         selected = self.registry["customization"]["active"]
-        (self.program / EASY_TOOLS_FILES[0]).unlink()
+        (self.program / PROCEDURE_EXAMPLES_FILE).unlink()
         self.assertTrue((self.program / EASY_TOOLS_FILES[1]).is_file())
         # An interrupted removal still has a complete, verified RECORD even
         # when one JSON file is already gone. Finish only that selected tree.
