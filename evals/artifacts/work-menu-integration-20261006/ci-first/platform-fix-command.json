@@ -1,0 +1,8 @@
+{
+  "command": "cd /workspace/scratch/abe8513396cb/team-agent-poc\nEES_TEST_UPSTREAM_WHEEL=\"$PWD/dist/upstream/open_webui-0.11.3-py3-none-any.whl\" PYTHONPATH=tests:. .venv/bin/python -X warn_default_encoding -W error::EncodingWarning /workspace/scratch/abe8513396cb/menu-c15-ci-native/platform-fix/run_selected.py\n",
+  "runner": {
+    "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-native/platform-fix/run_selected.py",
+    "sha256": "b9aba6808439704a08a4f2a656cf489599e8f6d4de62bb3ecd958f7a6e79a0c1",
+    "content": "from collections import Counter\nimport hashlib\nimport json\nimport os\nfrom pathlib import Path\nimport time\nimport unittest\nfrom ees_delivery_suite import EvidenceResult\n\noutput = Path(__file__).resolve().parent\nidentifier = 'test_ees_branding_build.OfficialWheelTests.test_real_pinned_wheel_patches_records_and_unrelated_content'\nstarted = time.monotonic()\nwith (output / 'unittest.log').open('w', encoding='utf-8') as stream:\n    result = unittest.TextTestRunner(stream=stream, verbosity=2, resultclass=EvidenceResult).run(\n        unittest.defaultTestLoader.loadTestsFromName(identifier))\nwheel = Path(os.environ['EES_TEST_UPSTREAM_WHEEL'])\nreport = {'selected_id': identifier, 'tests_run': result.testsRun,\n          'successful': result.wasSuccessful(), 'elapsed_seconds': time.monotonic()-started,\n          'counts': dict(Counter(item['status'] for item in result.outcomes)), 'outcomes': result.outcomes,\n          'upstream_wheel': str(wheel), 'upstream_sha256': hashlib.sha256(wheel.read_bytes()).hexdigest()}\n(output / 'result.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\\n', encoding='utf-8')\nraise SystemExit(not result.wasSuccessful())\n"
+  }
+}

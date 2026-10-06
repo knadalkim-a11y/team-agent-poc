@@ -1,0 +1,152 @@
+{
+  "module": "test_ees_branding_build.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 21.171,
+  "tests_run": 33,
+  "no_test_failures": false,
+  "status": "failed",
+  "counts": {
+    "passed": 32,
+    "failed": 1,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_added_figma_icons_are_packaged_and_missing_source_fails_closed",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_asset_guard_inventory_and_emitted_lifecycle_cache_order",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_asset_writer_hash_drift_fails_even_when_patch_anchor_remains",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_incomplete_archive_is_rejected_before_manifest_publication",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_incomplete_theme_changed_font_and_target_collision_fail_before_writing",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_launcher_assembly_order_is_private_and_has_one_runtime_asset",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_launcher_linked_source_or_directory_fails_before_output",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_launcher_missing_empty_duplicate_and_swapped_units_fail_before_output",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_missing_asset_or_wheel_entry_fails_before_writing",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_missing_asset_writer_member_fails_before_writing",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_missing_empty_and_linked_asset_guard_runtime_fail_before_writing",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_missing_mock_runtime_fails_before_writing",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_missing_required_hook_fails_after_whole_file_hash_check",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_native_chunk_change_readdresses_entire_cyclic_graph_without_version_change",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_native_empty_layout_hooks_only_add_attributes_to_existing_factories",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_native_empty_layout_template_drift_fails_before_output",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_native_fixture_rejects_a_launcher_not_built_from_current_sources",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_only_reviewed_content_changes_and_frontend_cache_namespace_moves",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_output_collision_never_overwrites_existing_release",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_packaged_workflow_and_managed_tool_share_public_contract",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_patch_drift_fails_before_writing",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_reproducible_wheel_manifest_and_record_preserve_original",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_runtime_installation_inventory_matches_all_builder_hooks",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_same_version_ui_change_updates_only_its_content_cache_key",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_theme_content_change_gets_new_url_without_readdressing_native_modules",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_v4_icon_hash_updates_dynamic_map_and_relative_and_absolute_css_urls",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_work_draft_hook_never_imports_or_persists_tool_approval_mode",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_work_name_migrates_registered_brand_names_and_preserves_custom_name",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.BrandingBuildTests.test_wrong_source_hash_fails_without_output",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.CssCacheIntegrityTests.test_accepts_only_reviewed_relative_absolute_and_repeated_icon_urls",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.LauncherProbeDiagnosticsTests.test_timeout_retains_observed_stages_and_never_reports_assertion_success",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.OfficialWheelTests.test_native_chat_bridges_preserve_approval_and_bind_only_successful_main_creation",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_branding_build.OfficialWheelTests.test_real_pinned_wheel_patches_records_and_unrelated_content",
+      "status": "failed",
+      "detail": "Traceback (most recent call last):\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_branding_build.py\", line 1210, in test_real_pinned_wheel_patches_records_and_unrelated_content\n    assert_css_icon_cache_keys(self, (builder.UI_DIR / filename).read_bytes(),\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_branding_build.py\", line 57, in assert_css_icon_cache_keys\n    test.assertEqual(after.group(\"url\"), expected, \"CSS URL or icon digest differs\")\nAssertionError: b'/_ees13/v4/51602.svg?v=a62ea29e265374f1823a0f14ad2fc57fdc6079[22 chars]145d' != b'/_ees13/v4/51602.svg' : CSS URL or icon digest differs\n"
+    }
+  ]
+}

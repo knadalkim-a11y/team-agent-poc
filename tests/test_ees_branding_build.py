@@ -1196,13 +1196,16 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
                     self.assertEqual(copied, source.read(origin))
                     self.assertEqual(hashlib.sha256(copied).hexdigest(), expected)
                 # Independently reviewed CSS references, not the builder's icon
-                # list or prepared output. Current icons are DOM images; CSS has no
-                # icon URL references. Its font URLs and every byte must survive.
+                # list or prepared output. The menu/return mask icons below use
+                # CSS URLs; font URLs and bytes outside icon values must survive.
                 # The independent fixed/mutated URL fixtures above still verify
                 # allowed rewriting, wrong/missing hashes and unrelated drift.
                 for filename, references in {
                     "chat-theme.css": (),
-                    "ees-work-launcher.css": (),
+                    "ees-work-launcher.css": (
+                        "v4/51602.svg", "v4/f6bbc.svg", "v4/40095.svg",
+                        "v4/88026.svg", "v4/eb94a.svg",
+                    ),
                 }.items():
                     icons = {relative: (builder.UI_DIR / relative).read_bytes() for relative in references}
                     for relative, content in icons.items():

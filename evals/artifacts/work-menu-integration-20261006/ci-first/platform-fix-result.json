@@ -1,0 +1,17 @@
+{
+  "selected_id": "test_ees_branding_build.OfficialWheelTests.test_real_pinned_wheel_patches_records_and_unrelated_content",
+  "tests_run": 1,
+  "successful": true,
+  "elapsed_seconds": 18.233714436995797,
+  "counts": {
+    "passed": 1
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_branding_build.OfficialWheelTests.test_real_pinned_wheel_patches_records_and_unrelated_content",
+      "status": "passed"
+    }
+  ],
+  "upstream_wheel": "/workspace/scratch/abe8513396cb/team-agent-poc/dist/upstream/open_webui-0.11.3-py3-none-any.whl",
+  "upstream_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
+}

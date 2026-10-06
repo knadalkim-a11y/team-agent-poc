@@ -1,0 +1,39 @@
+{
+  "results": [
+    {
+      "name": "layout-fixed-node",
+      "command": [
+        "node",
+        "--test",
+        "--test-reporter=tap",
+        "tests/test_ees_v4_layout.cjs"
+      ],
+      "cwd": "/workspace/scratch/abe8513396cb/team-agent-poc",
+      "env": {
+        "PYTHONPATH": "tests:."
+      },
+      "exit_code": 0,
+      "log": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/layout-fixed-node.log"
+    },
+    {
+      "name": "layout-fixed-python",
+      "command": [
+        "/workspace/scratch/abe8513396cb/team-agent-poc/.venv/bin/python",
+        "-X",
+        "warn_default_encoding",
+        "-W",
+        "error::EncodingWarning",
+        "-m",
+        "unittest",
+        "test_ees_work_v4.IntegratedLayoutTests",
+        "-v"
+      ],
+      "cwd": "/workspace/scratch/abe8513396cb/team-agent-poc",
+      "env": {
+        "PYTHONPATH": "tests:."
+      },
+      "exit_code": 0,
+      "log": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/layout-fixed-python.log"
+    }
+  ]
+}

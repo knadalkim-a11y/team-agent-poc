@@ -97,6 +97,14 @@
     "tests/ees_work_native_chat.py": {
       "sha256": "f4a4cd60700aa702c3f95ce9b1b161f378ee7efa58ee3eff8f4fbcd5435696f6",
       "unchanged_from_baseline": true
+    },
+    "tests/test_ees_v4_layout.cjs": {
+      "sha256": "8931200035e405aea791a598ca803b4fc1d2a67244a921034e220027d4945853",
+      "bytes": 13859
+    },
+    "tests/test_ees_branding_build.py": {
+      "sha256": "ad3c121214d178261b3544a3de8f7d3f2f4259997824e23690810ac7425d23b5",
+      "bytes": 76241
     }
   },
   "files": {
@@ -123,6 +131,90 @@
     "ci-audit-coverage.json": {
       "sha256": "3b5dfd48803ac4d9a17159599051ea6c599fdf450361c625c4bc3f4eeef50b5d",
       "bytes": 331284
+    },
+    "ci-first/candidate-hashes-from-ci-log.json": {
+      "sha256": "3203b0995bbe05b9348ed52f6c53b4d81a6316b2ad84a2b41f0fbaeb4403ea9d",
+      "bytes": 944
+    },
+    "ci-first/failed-jobs.json": {
+      "sha256": "0c9f4415c8564a98d6743fbaebd9d96e5fca7468a9d8d9cc547e8e2f0b497d53",
+      "bytes": 7694
+    },
+    "ci-first/jobs.json": {
+      "sha256": "5383836aba19c753ac99d31277087d38c006997309ab3d6d13a405dff5f69663",
+      "bytes": 3994
+    },
+    "ci-first/layout-fix-validation.json": {
+      "sha256": "a985ba972268650edccdc62fe17a1874a08982c9e694c5d6790e1ecb6bbc2095",
+      "bytes": 1009
+    },
+    "ci-first/layout-fixed-node.log.json": {
+      "sha256": "46ae4033769235226abd522ebe039d5a0ad229c8110a1c084b7079a355b93467",
+      "bytes": 3438
+    },
+    "ci-first/layout-fixed-python.log.json": {
+      "sha256": "eb7150ecf0d13f9ee78e5981eb20989aab5742db2de688000099bd12c628f0d1",
+      "bytes": 589
+    },
+    "ci-first/native-compose-audit.json": {
+      "sha256": "cd68f6523c92cfc63530d4c19f5f7cf601ee331933d611d51cf3c6dadb0bbdb2",
+      "bytes": 9592
+    },
+    "ci-first/native-compose-menu-review.json": {
+      "sha256": "575e6c6b5e9b29eb4f774dbd1e27cc3042352ccc369097b7ae3f2f1270886891",
+      "bytes": 6403
+    },
+    "ci-first/platform-fix-command.json": {
+      "sha256": "6feead96d9d5224ecab9886939e2d8ae5741baf598d50c31dc7ecb82ebdf820d",
+      "bytes": 1731
+    },
+    "ci-first/platform-fix-result.json": {
+      "sha256": "f14e407842c22ae3314a84918570245ba943938fafa01855bd8a1cffa9265357",
+      "bytes": 628
+    },
+    "ci-first/platform-fixed-python.log.json": {
+      "sha256": "469def1433a71493c1f293bcdf694583b4d03be94181860bf8b14c874dc6e9ab",
+      "bytes": 611
+    },
+    "ci-first/platform-ubuntu-failure.json": {
+      "sha256": "3db72b0238aa109a17116a3b15098fa9017c5af533fd58bd0badae6901ef8cf9",
+      "bytes": 6346
+    },
+    "ci-first/platform-ubuntu-failure.log.json": {
+      "sha256": "d26190a9938c0f8d363311b4009c4964598110ecaec6b0bd73ece005867ae89b",
+      "bytes": 9131
+    },
+    "ci-first/platform-windows-failure.json": {
+      "sha256": "fe05265342b4109afa9d0054823d69d78fc81a2866ffc9c25d1895ed9e8871d3",
+      "bytes": 6482
+    },
+    "ci-first/platform-windows-failure.log.json": {
+      "sha256": "822a7d2cd7bfdc49ba964ff4344014456f2c4a94d48b97a3f4971d242a8eb204",
+      "bytes": 9116
+    },
+    "ci-first/product-verification.json": {
+      "sha256": "14e8b64c847ae14972efc1c7aa9db07a0d2e198da25360be59b8c39ea571bada",
+      "bytes": 8619
+    },
+    "ci-first/services-ubuntu-failure.json": {
+      "sha256": "98cefa12d9e440d43bb8885d595e841f5efdbf93ad0262f587db2defe40713d5",
+      "bytes": 7664
+    },
+    "ci-first/services-ubuntu-failure.log.json": {
+      "sha256": "edd7439175c6408994adf42e089db901a8ac60cc784fda508be33f12900f623e",
+      "bytes": 12511
+    },
+    "ci-first/services-windows-failure.json": {
+      "sha256": "8a7a63f741a64e81c7b826eb0f66f6bf6caab7ce5d1864ac3dc9243ed40d7df4",
+      "bytes": 7646
+    },
+    "ci-first/services-windows-failure.log.json": {
+      "sha256": "ce70fd59839180395ebd131ce2430a597a9c49432e0dbc38da92a2f4b73a58d4",
+      "bytes": 12847
+    },
+    "ci-first/verification.json": {
+      "sha256": "0e6e9b3a25848cdc1e36e996f4095b0c2af1c1090a32ffb45639500733c32beb",
+      "bytes": 10158
     },
     "figma-review.json": {
       "sha256": "59a0fe768efa794c64d08a53fffc60b41aeb80720116849d2dfa7f72c572a925",
@@ -412,5 +504,13 @@
       "sha256": "646a05716b0d947e9f0fd939e9b0f2774c50d269d12baa30fcd0dc4be16ac19f",
       "bytes": 4366
     }
+  },
+  "first_remote_ci": {
+    "head": "92f59d000a420e7500e95082e0b4140b9b105363",
+    "run_id": 37434967430,
+    "conclusion": "failure",
+    "evidence": "ci-first/verification.json",
+    "fix_scope": "two existing test fixtures and documentation/evidence; product build inputs unchanged",
+    "final_head_verdict": "Draft PR76 body and Checks"
   }
 }

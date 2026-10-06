@@ -1,0 +1,171 @@
+{
+  "run_id": 37434967430,
+  "head_sha": "92f59d000a420e7500e95082e0b4140b9b105363",
+  "jobs": [
+    {
+      "name": "services-ubuntu",
+      "job_id": 112174918798,
+      "job_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37434967430/job/112174918798",
+      "job_conclusion": "failure",
+      "artifact": {
+        "id": 11399001177,
+        "name": "ees-results-services-ubuntu-24.04",
+        "size_in_bytes": 25010,
+        "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11399001177",
+        "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11399001177/zip",
+        "expired": false,
+        "created_at": "2026-10-06T08:19:25Z",
+        "expires_at": "2026-10-13T08:19:24Z",
+        "updated_at": "2026-10-06T08:19:25Z",
+        "digest": "sha256:8ad9c1945b186885f1958ab5bc9da23ec1263121e6b69907e8f2c949d2f9763d",
+        "workflow_run": {
+          "id": 37434967430,
+          "repository_id": 1355435001,
+          "head_repository_id": 1355435001,
+          "head_branch": "feat/work-procedure-examples-20261006",
+          "head_sha": "92f59d000a420e7500e95082e0b4140b9b105363"
+        }
+      },
+      "downloaded_artifact_sha256": "8ad9c1945b186885f1958ab5bc9da23ec1263121e6b69907e8f2c949d2f9763d",
+      "python_counts": {
+        "passed": 473,
+        "failed": 1,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "failed_module_report": "services-ubuntu-failure.json",
+      "failed_shard_log": "services-ubuntu-failure.log.json",
+      "failed_test_ids": [
+        "test_ees_work_v4.IntegratedLayoutTests.test_native_mount_scroll_keyboard_and_result_contracts (script='test_ees_v4_layout.cjs')"
+      ],
+      "direct_node_exit_code": 1,
+      "source_verified_report": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/verified-reports-initial.json"
+    },
+    {
+      "name": "services-windows",
+      "job_id": 112174918329,
+      "job_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37434967430/job/112174918329",
+      "job_conclusion": "failure",
+      "artifact": {
+        "id": 11399436302,
+        "name": "ees-results-services-windows-2022",
+        "size_in_bytes": 25149,
+        "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11399436302",
+        "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11399436302/zip",
+        "expired": false,
+        "created_at": "2026-10-06T08:22:45Z",
+        "expires_at": "2026-10-13T08:22:44Z",
+        "updated_at": "2026-10-06T08:22:45Z",
+        "digest": "sha256:b088ef3c07a6ec6569020675e16912248373c1f3a0e2d0ce21ba27e3f428e124",
+        "workflow_run": {
+          "id": 37434967430,
+          "repository_id": 1355435001,
+          "head_repository_id": 1355435001,
+          "head_branch": "feat/work-procedure-examples-20261006",
+          "head_sha": "92f59d000a420e7500e95082e0b4140b9b105363"
+        }
+      },
+      "downloaded_artifact_sha256": "b088ef3c07a6ec6569020675e16912248373c1f3a0e2d0ce21ba27e3f428e124",
+      "python_counts": {
+        "passed": 473,
+        "failed": 1,
+        "error": 0,
+        "skipped": 0,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "failed_module_report": "services-windows-failure.json",
+      "failed_shard_log": "services-windows-failure.log.json",
+      "failed_test_ids": [
+        "test_ees_work_v4.IntegratedLayoutTests.test_native_mount_scroll_keyboard_and_result_contracts (script='test_ees_v4_layout.cjs')"
+      ],
+      "direct_node_exit_code": 1,
+      "source_verified_report": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/verified-reports-windows.json"
+    },
+    {
+      "name": "platform-ubuntu",
+      "job_id": 112174918342,
+      "job_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37434967430/job/112174918342",
+      "job_conclusion": "failure",
+      "artifact": {
+        "id": 11399425201,
+        "name": "ees-results-platform-ubuntu-24.04",
+        "size_in_bytes": 24926,
+        "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11399425201",
+        "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11399425201/zip",
+        "expired": false,
+        "created_at": "2026-10-06T08:20:03Z",
+        "expires_at": "2026-10-13T08:20:03Z",
+        "updated_at": "2026-10-06T08:20:03Z",
+        "digest": "sha256:15b9c0d95ef25375275636185e8d1e1dfded3112039c6808e606e4697f251285",
+        "workflow_run": {
+          "id": 37434967430,
+          "repository_id": 1355435001,
+          "head_repository_id": 1355435001,
+          "head_branch": "feat/work-procedure-examples-20261006",
+          "head_sha": "92f59d000a420e7500e95082e0b4140b9b105363"
+        }
+      },
+      "downloaded_artifact_sha256": "15b9c0d95ef25375275636185e8d1e1dfded3112039c6808e606e4697f251285",
+      "python_counts": {
+        "passed": 616,
+        "failed": 1,
+        "error": 0,
+        "skipped": 9,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "failed_module_report": "platform-ubuntu-failure.json",
+      "failed_shard_log": "platform-ubuntu-failure.log.json",
+      "failed_test_ids": [
+        "test_ees_branding_build.OfficialWheelTests.test_real_pinned_wheel_patches_records_and_unrelated_content"
+      ],
+      "direct_node_exit_code": null,
+      "source_verified_report": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/verified-reports-initial.json"
+    },
+    {
+      "name": "platform-windows",
+      "job_id": 112174918188,
+      "job_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37434967430/job/112174918188",
+      "job_conclusion": "failure",
+      "artifact": {
+        "id": 11398503635,
+        "name": "ees-results-platform-windows-2022",
+        "size_in_bytes": 24768,
+        "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11398503635",
+        "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/11398503635/zip",
+        "expired": false,
+        "created_at": "2026-10-06T08:22:40Z",
+        "expires_at": "2026-10-13T08:22:39Z",
+        "updated_at": "2026-10-06T08:22:40Z",
+        "digest": "sha256:351da3f7d29aa7c7a9850858b40a89a0c04514d2dc171e3ce85f4a9410d3166a",
+        "workflow_run": {
+          "id": 37434967430,
+          "repository_id": 1355435001,
+          "head_repository_id": 1355435001,
+          "head_branch": "feat/work-procedure-examples-20261006",
+          "head_sha": "92f59d000a420e7500e95082e0b4140b9b105363"
+        }
+      },
+      "downloaded_artifact_sha256": "351da3f7d29aa7c7a9850858b40a89a0c04514d2dc171e3ce85f4a9410d3166a",
+      "python_counts": {
+        "passed": 624,
+        "failed": 1,
+        "error": 0,
+        "skipped": 1,
+        "expected-failure": 0,
+        "unexpected-success": 0
+      },
+      "failed_module_report": "platform-windows-failure.json",
+      "failed_shard_log": "platform-windows-failure.log.json",
+      "failed_test_ids": [
+        "test_ees_branding_build.OfficialWheelTests.test_real_pinned_wheel_patches_records_and_unrelated_content"
+      ],
+      "direct_node_exit_code": null,
+      "source_verified_report": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/verified-reports-windows.json"
+    }
+  ],
+  "count_note": "services failed Python wrapper embeds the same two failing Node subtests; do not count the direct Node run as a separate root cause."
+}

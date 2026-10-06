@@ -1,0 +1,7 @@
+{
+  "source": "/workspace/scratch/abe8513396cb/menu-c15-ci-backend/layout-fixed-python.log",
+  "provenance": "Local strict EncodingWarning wrapper check after layout fixture correction; includes both Node suites",
+  "bytes": 255,
+  "sha256": "9b2266d2b9b852fb43223b28a7e7434007170876ce4071df19a4b10eba2bd0ce",
+  "content": "test_native_mount_scroll_keyboard_and_result_contracts (test_ees_work_v4.IntegratedLayoutTests.test_native_mount_scroll_keyboard_and_result_contracts) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.424s\n\nOK\n"
+}
