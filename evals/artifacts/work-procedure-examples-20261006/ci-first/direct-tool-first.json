@@ -1,0 +1,106 @@
+{
+  "trace": [
+    {
+      "kind": "pointerdown",
+      "tag": "INPUT",
+      "name": "name",
+      "value": "수집 대기열 조회"
+    },
+    {
+      "kind": "mousedown",
+      "tag": "INPUT",
+      "name": "name",
+      "buttonConnected": true,
+      "value": "수집 대기열 조회"
+    },
+    {
+      "kind": "pointerup",
+      "tag": "INPUT",
+      "name": "name",
+      "buttonConnected": true,
+      "value": "수집 대기열 조회"
+    },
+    {
+      "kind": "mouseup",
+      "tag": "INPUT",
+      "name": "name",
+      "buttonConnected": true,
+      "value": "수집 대기열 조회"
+    },
+    {
+      "kind": "click",
+      "tag": "INPUT",
+      "name": "name",
+      "buttonConnected": true,
+      "value": "수집 대기열 조회"
+    },
+    {
+      "kind": "pointerdown",
+      "tag": "BUTTON",
+      "action": "tool_save",
+      "name": "",
+      "buttonConnected": true,
+      "value": "첫 클릭 도구 저장"
+    },
+    {
+      "kind": "mousedown",
+      "tag": "BUTTON",
+      "action": "tool_save",
+      "name": "",
+      "buttonConnected": true,
+      "value": "첫 클릭 도구 저장"
+    },
+    {
+      "kind": "change",
+      "tag": "INPUT",
+      "name": "name",
+      "buttonConnected": false,
+      "value": "첫 클릭 도구 저장"
+    },
+    {
+      "kind": "blur",
+      "tag": "INPUT",
+      "name": "name",
+      "buttonConnected": false,
+      "value": "첫 클릭 도구 저장"
+    },
+    {
+      "kind": "pointerup",
+      "tag": "BUTTON",
+      "action": "tool_save",
+      "name": "",
+      "buttonConnected": false,
+      "value": "첫 클릭 도구 저장"
+    },
+    {
+      "kind": "mouseup",
+      "tag": "BUTTON",
+      "action": "tool_save",
+      "name": "",
+      "buttonConnected": false,
+      "value": "첫 클릭 도구 저장"
+    }
+  ],
+  "workspace_commands": [
+    {
+      "action": "save_ui",
+      "expected_revision": 0,
+      "request_id": "7b806de6-0378-46e5-b55d-2f0b0e907718",
+      "state": {
+        "selection": {
+          "mode": "author",
+          "tab": "tools",
+          "panel_open": true,
+          "system_id": "EMS",
+          "factory_id": "",
+          "workflow_id": "",
+          "run_id": "",
+          "job_id": "",
+          "collapsed": [],
+          "chat_reference": null
+        }
+      }
+    }
+  ],
+  "tools": []
+}

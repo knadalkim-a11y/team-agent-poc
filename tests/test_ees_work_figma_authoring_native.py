@@ -110,13 +110,17 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.fill('#ew-tool-search', 'jira_search')
         self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[data-author-action=tool_pick]')].map(e=>e.dataset.id)"), ['jira:jira_search_crs'])
         self.click('[data-author-action="tool_pick"][data-id="jira:jira_search_crs"]')
-        self.fill('#ew-author-tool [name=name]', '합성 CR 확인')
+        self.click('#ew-author-tool [name=name]')
+        self.key('a', 65, 2)
+        self.browser.call('Input.insertText', {'text': '합성 CR 확인'})
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('#ew-author-tool [name=name]')"))
         self.assertIn('하는 일: 정보 읽기', self.text('#ees-work-designer'))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-author-tool [name=kind],#ew-author-tool [name=timeout_seconds],#ew-author-tool [name=responsible_user_id]')"))
         self.assertFalse(self.read('.ew-tool-advanced', 'open'))
         self.assertEqual(self.read('#ew-author-tool [name=guide_url]', 'value'), '')
         self.click('[data-author-action="tool_save"]')
         self.wait("document.querySelector('[data-author-action=tool_review]')?.disabled === false")
+        self.assertEqual(sum(body['action']=='tool_save' for body in self.server.workspace_commands), 2)
         self.screenshot('easy-tools-read-ready')
         self.click('[data-author-action="tool_review"]')
         self.wait("document.querySelector('#ees-work-designer')?.textContent.includes('담당자 확인 대기')")
@@ -355,12 +359,16 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.state()['workflows'], [])
         self.screenshot('procedure-examples-native-question-draft')
 
+        self.click('#ew-procedure-name')
+        self.key('a', 65, 2)
+        self.browser.call('Input.insertText', {'text': '합성 횡전개 절차 최종'})
+        self.assertEqual(self.browser.evaluate('document.activeElement?.id'), 'ew-procedure-name')
         self.click('[data-author-action="procedure_create"]')
         self.wait("document.querySelector('[data-author-action=add_stage]')")
         created = [body for body in self.server.workspace_commands if body.get('action') == 'create_workflow']
         self.assertEqual(len(created), 1)
         self.assertEqual(created[0]['template_id'], 'factory_rollout')
-        self.assertEqual(created[0]['name'], '합성 횡전개 절차')
+        self.assertEqual(created[0]['name'], '합성 횡전개 절차 최종')
         self.assertEqual(created[0]['system_id'], 'EMS')
         self.assertEqual(UUID(created[0]['request_id']).version, 4)
         self.assertNotIn('definition', created[0])
@@ -446,11 +454,18 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action="mode"][data-mode="author"]')
         self.click('[data-author-action="create"]')
         self.click('[name=procedure_template][value=blank]')
-        self.fill('#ew-procedure-name', 'HTTP 초안 생성 검증')
+        # Keep the input focused until the real mouse press on Create. A
+        # change handler must not replace that pressed button before mouseup.
+        self.click('#ew-procedure-name')
+        self.key('a', 65, 2)
+        self.browser.call('Input.insertText', {'text': 'HTTP 초안 생성 검증'})
+        self.assertEqual(self.browser.evaluate('document.activeElement?.id'), 'ew-procedure-name')
         self.click('[data-author-action=procedure_create]')
         self.wait("document.querySelector('[data-author-action=add_stage]')")
-        created = next(body for body in self.server.workspace_commands
-                       if body.get('action') == 'create_workflow')
+        creations = [body for body in self.server.workspace_commands
+                     if body.get('action') == 'create_workflow']
+        self.assertEqual(len(creations), 1)
+        created = creations[0]
         self.assertEqual(created['name'], 'HTTP 초안 생성 검증')
         self.assertEqual(UUID(created['request_id']).version, 4)
         record = next(item for item in self.state()['workflows']

@@ -1,0 +1,31 @@
+{
+  "valid": true,
+  "screenshots": 2,
+  "files": [
+    {
+      "path": "a0-empty.json",
+      "bytes": 37599,
+      "sha256": "11bc50a1ef03fcece45cb70d54a14d0245c6258ef9048b310d79b4813dc5ba3a"
+    },
+    {
+      "path": "a0-empty.png",
+      "bytes": 51003,
+      "sha256": "d2358070a4e600555e0106289d93e557b72c6697c9550238f80d5a62b1aa7f16"
+    },
+    {
+      "path": "failure.json",
+      "bytes": 43648,
+      "sha256": "ea0250e27f1d0bef84546b85f3cef9ddb581e526e42ee925a9e0579dad0a0032"
+    },
+    {
+      "path": "failure.png",
+      "bytes": 158587,
+      "sha256": "56fab055257ff2208f04092ed35d0f150fc7d07121ce5a0a4330da28c67bf0dc"
+    },
+    {
+      "path": "report.json",
+      "bytes": 16041,
+      "sha256": "200d39fcd76897bd2a776002c6c659af5d9821a7623df3a066117b54478bfb3d"
+    }
+  ]
+}

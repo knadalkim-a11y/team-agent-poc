@@ -1,0 +1,12 @@
+[
+  {
+    "path": "tests/ees_work_integrated_app.py",
+    "matches_HEAD": true,
+    "sha256": "8929df2937cc7ceed582ade419eb23059d08555ec4a0dc5b1f50267e467738ef"
+  },
+  {
+    "path": "tests/ees_work_native_chat.py",
+    "matches_HEAD": true,
+    "sha256": "f4a4cd60700aa702c3f95ce9b1b161f378ee7efa58ee3eff8f4fbcd5435696f6"
+  }
+]

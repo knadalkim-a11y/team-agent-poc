@@ -1,0 +1,5 @@
+{
+  "source": "native-build3-read/run.log",
+  "sha256": "37b2473043311df9311980e96acc3668c2965afa6ecd0a8889f862ab3c6f3289",
+  "content": "test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 123.72011900151847, \"product\": \"HeadlessChrome/153.0.8010.52\"}\nok\n\n----------------------------------------------------------------------\nRan 1 test in 2.170s\n\nOK\n"
+}

@@ -1,0 +1,5 @@
+{
+  "source": "native-build3/run.log",
+  "sha256": "22e347c5f5b081a8f57d13d5bfa5a8912528438a64843ceaffdfc4cf1836d609",
+  "content": "test_missing_random_uuid_creates_and_saves_draft_in_native_ui (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_missing_random_uuid_creates_and_saves_draft_in_native_ui) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 124.86715699924389, \"product\": \"HeadlessChrome/153.0.8010.52\"}\nok\ntest_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 119.97989999508718, \"product\": \"HeadlessChrome/153.0.8010.52\"}\nok\ntest_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip) ... "
+}
