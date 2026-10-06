@@ -1,0 +1,50 @@
+{
+  "viewport": [
+    1366,
+    768
+  ],
+  "sidebar": {
+    "x": 0,
+    "y": 0,
+    "width": 56,
+    "height": 768,
+    "bottom": 768
+  },
+  "panel": {
+    "x": 886,
+    "y": 0,
+    "width": 480,
+    "height": 768,
+    "bottom": 768
+  },
+  "chat": {
+    "x": 56,
+    "y": 0,
+    "width": 830,
+    "height": 768,
+    "bottom": 768
+  },
+  "message": {
+    "x": 91,
+    "y": 128,
+    "width": 760,
+    "height": 108.75,
+    "bottom": 236.75
+  },
+  "composer": {
+    "x": 91,
+    "y": 642,
+    "width": 760,
+    "height": 110,
+    "bottom": 752
+  },
+  "footer": {
+    "x": 887,
+    "y": 709,
+    "width": 479,
+    "height": 59,
+    "bottom": 768
+  },
+  "overflow": false,
+  "overlay": "false"
+}

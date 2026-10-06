@@ -45,7 +45,7 @@
 - **착수 관측:** #73 병합 후 위 main과 관련 PR 조회에서 선행 수정 반영을 찾지 못했다. 당시 `crypto.randomUUID()` 직접 호출이 10곳(designer 6, launcher 4)에 남아 있었고, 수정 전 신규 회귀 7개가 실패했다. 이 관측은 첨부의 사내 HTTP ‘초안 만들기’ 오류 보고와 부합하나 실제 사내 재현 성공을 뜻하지 않는다.
 - **구현 완료:** `ees-work-view.js`의 공통 `workUI.newId()`로 위 10곳의 작성/요청/화면/대화 식별자를 전환했다. 지원 환경에서는 native `crypto.randomUUID`, 미지원 환경에서는 `crypto.getRandomValues` 기반 UUIDv4를 사용한다. 기존 요청 receipt 재사용·revision·권한·중복 방지·개인 초안 보호와 배포 모듈 경로를 유지했다. 인증 토큰이나 서버 권한 체계는 변경하지 않았다.
 - **로컬 검증:** 관련 Node는 기존 103개와 신규 7개를 합쳐 110개 PASS, strict 패키징 2개 PASS다. Chrome 153의 실제 빌드 Native UI·임시 SQLite에서 randomUUID를 시험용으로 미제공한 상태로 초안 생성→단계/작업 추가→초안 revision 2 저장→새로고침 후 조회 1개 PASS를 확인했다. loopback 보안 문맥·합성 세션/대화/모델을 사용했으며 실제 사내 HTTP·Windows 검사는 아니다. 수정 전 실패와 세부 명령·근거는 [기존 평가 기록](../../../evals/v4-ui-20260930.md#work-http-id-20261006)에 보존한다.
-- **검사 연결:** delivery 검사 목록 점검은 old 1332 / current 1285 / errors 0이며, 새 Native 시험은 기존 native-compose에 자동 포함된다. 이는 검사 목록 확인 수치이며 전체 시험 PASS 수가 아니다. 문서/공백 검사와 최종 HEAD의 원격 CI는 각각 별도로 기록한다. 원격 CI는 아직 게시 전·미확인이며 생성할 Draft PR의 Checks에서 확정한다.
+- **검사 연결:** delivery 검사 목록 점검은 old 1332 / current 1285 / errors 0이며, 새 Native 시험은 기존 native-compose에 자동 포함된다. 이는 검사 목록 확인 수치이며 전체 시험 PASS 수가 아니다. 문서/공백 검사와 최종 HEAD의 원격 CI는 각각 별도로 기록한다. Draft PR #74의 첫 CI에서 신규 UUID Native 시험은 passed였다. 기존 Q1 폭 비교의 1/64px 차이는 시험만 보완했으며 최종 HEAD의 CI 결과는 같은 PR 본문/Checks에서 확정한다.
 - **구현 경계:** 선행 hotfix만 구현·검증하여 Draft PR로 준비했다. A/B/D는 첨부 0절대로 해당 수정이 병합된 최신 main에서 시작하고 C는 그다음 PR이다. 위 C13 비교표와 결정 기본안은 보존하며, 이번 hotfix의 병합·Draft 해제·사내 적용·A/B/C/D 제품 구현은 수행하지 않았다.
 
 <a id="restructure-step0b-20261001"></a>

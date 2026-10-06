@@ -4,10 +4,10 @@
 
 - **현재 작업:** #73 병합 후 main `a454e9e01b40d6d89a62ca93d9daa12af77de284`에서 `fix/work-http-id-20261006`으로 선행 긴급 수정을 준비했다. `workUI.newId()`가 `crypto.randomUUID`를 우선 사용하고, 없으면 `getRandomValues`로 UUIDv4를 생성한다. 작성기 6곳·launcher 4곳을 공통 함수로 전환했다.
 - **검증:** 관련 Node 110개(기존 103·신규 7), 실제 빌드 Native 작성·저장·새로고침 1개, strict 패키징 2개가 통과했다. 수정 전 신규 7개 실패와 최초 시도는 [기존 평가 기록](../evals/v4-ui-20260930.md#work-http-id-20261006)에 보존한다. CI 검사 목록 점검은 누락 오류 0이며 새 Native 시험도 기존 native-compose에 포함된다.
-- **확인 범위:** Chrome 153·임시 SQLite·합성 세션/대화/모델에서 `randomUUID`만 시험용으로 미제공한 검사다. loopback의 보안 문맥에서 수행했으므로 실제 사내 HTTP·Windows 시험이나 사내 사용성 검증으로 간주하지 않는다. 원격 CI는 아직 게시 전·미확인이며 최종 HEAD의 판정은 생성할 Draft PR의 Checks로 확정한다.
+- **확인 범위:** Chrome 153·임시 SQLite·합성 세션/대화/모델에서 `randomUUID`만 시험용으로 미제공한 검사다. loopback의 보안 문맥에서 수행했으므로 실제 사내 HTTP·Windows 시험이나 사내 사용성 검증으로 간주하지 않는다. [Draft PR #74](https://github.com/knadalkim-a11y/team-agent-poc/pull/74)를 게시했다. 첫 CI에서 신규 초안 검사 포함 작성4개는 통과했고 기존 Q1 폭 검사의 1/64px 차이를 확인해 시험만 보완했다. 최종 HEAD의 판정은 PR 본문/Checks로 확정한다.
 - **후속:** [쉬운 작성 화면 비교표·D1–D8](mockups/ees-work/TASK.md#easy-authoring-20261006)와 Figma 작업실 5개/C13을 확인했다. 첨부 0절에 따라 A/B/D는 선행 수정이 병합된 최신 main에서 시작하고, C의 새 절차 예시는 다음 PR로 진행한다. 현재 A/B/C/D 제품 구현은 미착수다.
 - **경계:** 기존 권한·요청 receipt·revision·사용자 자료를 보존했다. 이번 hotfix의 병합·Draft 해제·사내 적용과 Figma 수정은 수행하지 않았다.
-- **게시 승인:** 최초 push는 자동 승인 검토에서 목적지 전송 권한 미확인으로 차단됐고, 사용자가 2026-10-06 해당 저장소로 수정 코드·시험 증거 push와 Draft PR 생성을 명시 승인했다. 같은 브랜치를 게시하고 정확한 HEAD의 자동 CI 결과를 PR 본문/Checks에 기록한다. 병합·Draft 해제·사내 적용 승인은 포함하지 않는다.
+- **게시 승인:** 최초 push는 자동 승인 검토에서 목적지 전송 권한 미확인으로 차단됐고, 사용자가 2026-10-06 해당 저장소로 수정 코드·시험 증거 push와 Draft PR 생성을 명시 승인했다. GitHub 앱으로 같은 브랜치를 게시했으며 원격 tree와 로컬 검증본의 동일성을 확인했다. 정확한 HEAD의 자동 CI 결과를 PR 본문/Checks에 기록한다. 병합·Draft 해제·사내 적용 승인은 포함하지 않는다.
 
 아래 10-05 및 이전 항목은 당시 상태를 보존한 기록이다. 현재 작업 범위는 위 10-06 항목을 따른다.
 

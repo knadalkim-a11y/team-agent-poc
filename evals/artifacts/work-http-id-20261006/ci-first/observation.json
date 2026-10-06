@@ -1,0 +1,44 @@
+{
+  "head": "4d7ca41ec1254b6e5954d98c42015cb18ad9de4e",
+  "run_id": 37408940722,
+  "native_compose_job": 112093087982,
+  "artifact": {
+    "id": 11388192858,
+    "sha256": "33c45992f6cd28f929844acdae8ff3e6ba634f47476fe621a0d64d6ba872ac58",
+    "digest_verified": true
+  },
+  "failure": {
+    "test": "test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay",
+    "expected_chat_width": 504,
+    "observed_chat_width": 503.984375,
+    "difference_css_px": 0.015625,
+    "chrome": "154.0.8037.57",
+    "reason": "Exact float assertion failed; no product CSS changed. Browser root cause not established."
+  },
+  "authoring_module": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "new_uuid_test": "passed"
+  },
+  "test_only_correction": {
+    "chat_width_tolerance_css_px": 0.015625,
+    "fixed_widths_still_exact": [
+      56,
+      720
+    ],
+    "added_checks": [
+      "chat right touches panel left",
+      "panel right reaches viewport right",
+      "no horizontal overflow"
+    ],
+    "local_result": {
+      "passed": 1,
+      "seconds": 2.449,
+      "chrome": "153.0.8010.52",
+      "scope": "Built Native UI; temporary workflow SQLite; synthetic session/chat/model"
+    },
+    "local_command": "EES_TEST_CHROME=\"$PWD/dist/tools/chrome-headless-shell-linux64/chrome-headless-shell\" EES_TEST_BRANDING_DIR=\"$PWD/dist/http-id-fixed\" EES_TEST_SCREENSHOT_DIR=\"$PWD/evals/artifacts/work-http-id-20261006/layout-after\" PYTHONPATH=tests:. python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay -v"
+  },
+  "latest_remote_result": "See PR74 exact HEAD Checks; first failure remains retained"
+}
