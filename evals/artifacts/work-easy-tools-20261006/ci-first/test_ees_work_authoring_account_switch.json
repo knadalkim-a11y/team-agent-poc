@@ -1,0 +1,24 @@
+{
+  "module": "test_ees_work_authoring_account_switch.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 27.343,
+  "tests_run": 1,
+  "no_test_failures": false,
+  "status": "failed",
+  "counts": {
+    "passed": 0,
+    "failed": 1,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai",
+      "status": "failed",
+      "detail": "Traceback (most recent call last):\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_account_switch.py\", line 68, in test_same_profile_native_logout_login_discards_late_a_read_and_ai\n    self.login_ui(account_a['email'],'Fixture-person-only-42!');self.open_workflow(workflow_a)\n                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_account_switch.py\", line 53, in open_workflow\n    self.wait('document.querySelector('+json.dumps(selector)+')')\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py\", line 317, in wait\n    self.fail(\"Timed out: \" + expression + \"\\n\" + self.text(\"body\") + \"\\nReadiness: \" + repr(readiness) + \"\\nUnknown: \" + repr(self.server.unknown))\nAssertionError: Timed out: document.querySelector(\"[data-author-action=\\\"open\\\"][data-id=\\\"7abf1a45-b990-4d2e-bd04-9609dcb78632\\\"]\")\nSkip to main content\nEES Work\n업무\n워크스페이스\n\n관리 시스템\n\n선택 필요\n조회\n업무 절차\n0\n도구\n0\n스킬·지침\n\n최근 편집\n\n최근 편집한 절차가 없습니다.\n\nNative 모델·도구 관리\n합성 계정 A\n대화\n참고\n일반 대화\n업무 열기\n새 대화\n\n\n\n\n음성 모드 사용\n워크스페이스\n닫기\n업무 절차\n\n이 범위를 수정할 담당 권한이 없습니다. 작성 중인 내용은 이 로그인 세션에 보존됩니다.\n\n선택한 시스템의 업무 절차 0개\n새 절차\n\n절차를 만들거나 선택하세요. 게시한 변경은 새 진행 건부터 적용됩니다.\n\n업무 절차 찾기\n아직 업무 절차가 없습니다.\n새 절차를 만들고 필요한 작업을 작성하세요.\nEES Work\nReadiness: {'route': '/', 'nativeReady': True}\nUnknown: []\n"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "source": "dist/easy-tools-account-after.log",
+  "encoding": "utf-8",
+  "sha256": "083f58e3e1a0205fb6038f162e6f8196b2ce756c1fd5e87b266a8dfdc5abe2be",
+  "lines": [
+    "test_native_password_change_reset_and_existing_token_without_redis (test_ees_work_authoring_native.NativeAccountAPITests.test_native_password_change_reset_and_existing_token_without_redis)\n",
+    "NU-06: password changes block old credentials; token revocation needs Redis. ... Cannot revoke tokens for user 19aec427-348c-4abf-9f6a-a54a36782820: Redis is not configured, existing sessions stay valid until expiry.\n",
+    "Cannot revoke tokens for user 19aec427-348c-4abf-9f6a-a54a36782820: Redis is not configured, existing sessions stay valid until expiry.\n",
+    "ok\n",
+    "test_native_signup_pending_no_membership_and_closed_registration (test_ees_work_authoring_native.NativeAccountAPITests.test_native_signup_pending_no_membership_and_closed_registration)\n",
+    "NU-01/02: actual signup ignores client role; closed API rejects. ... ok\n",
+    "test_pending_group_member_cannot_author_or_use_protected_runtime (test_ees_work_authoring_native.NativeAccountAPITests.test_pending_group_member_cannot_author_or_use_protected_runtime)\n",
+    "NU-02/08: group membership never bypasses current Native approval. ... ok\n",
+    "test_closed_native_signup_ui_and_direct_api (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_closed_native_signup_ui_and_direct_api) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 147.40519800034235, \"product\": \"HeadlessChrome/153.0.8010.52\"}\n",
+    "ok\n",
+    "test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 217.42874099800247, \"product\": \"HeadlessChrome/153.0.8010.52\"}\n",
+    "ok\n",
+    "test_native_authoring_conflict_keeps_unsaved_draft_and_published_version (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_authoring_conflict_keeps_unsaved_draft_and_published_version) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 126.17648800005554, \"product\": \"HeadlessChrome/153.0.8010.52\"}\n",
+    "ok\n",
+    "test_native_new_signup_and_approval_ui (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_new_signup_and_approval_ui) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 125.37017200156697, \"product\": \"HeadlessChrome/153.0.8010.52\"}\n",
+    "ok\n",
+    "test_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai) ... Chrome startup: {\"budget_seconds\": 30, \"ready_elapsed_ms\": 217.47657600280945, \"product\": \"HeadlessChrome/153.0.8010.52\"}\n",
+    "ok\n",
+    "\n",
+    "----------------------------------------------------------------------\n",
+    "Ran 8 tests in 33.099s\n",
+    "\n",
+    "OK\n"
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "valid": true,
+  "screenshots": 39,
+  "files": [
+    {
+      "path": "easy-tools-empty-starter-dom.json",
+      "bytes": 12671,
+      "sha256": "014d0edda327f72b2a0908ae03113a8fa096910088bd5ad50929dd843e9dbe2f"
+    },
+    {
+      "path": "easy-tools-empty-starter.png",
+      "bytes": 121318,
+      "sha256": "f8410f792523ba280c71115a2bc53ff0f6342d3a1da5a0338bfd355ded09e671"
+    },
+    {
+      "path": "easy-tools-help-advanced-refresh-dom.json",
+      "bytes": 13564,
+      "sha256": "8365fd5185a0b036e6d92b63f96e38a26aad70ec392fe9bca4dc7578be533901"
+    },
+    {
+      "path": "easy-tools-help-advanced-refresh.png",
+      "bytes": 174768,
+      "sha256": "000497255ea1391057984b69ed5c46a80ae50432af571970598c42dc9793a31b"
+    },
+    {
+      "path": "easy-tools-help-draft-roundtrip.json",
+      "bytes": 1474,
+      "sha256": "02bafb7e43b7d1064179490d522f610c0fc73e5656f6699c5652f4d6bdb1bded"
+    },
+    {
+      "path": "easy-tools-help-keyboard-open-dom.json",
+      "bytes": 12365,
+      "sha256": "60f0e56fc174a4b9222573abba78840617e571072773eb78e44454f3f4fb1c3e"
+    },
+    {
+      "path": "easy-tools-help-keyboard-open.png",
+      "bytes": 146349,
+      "sha256": "337ad3cdc5180c2981e38b8d9b991480f2ddd35b1f71a6046eff92caeba6c5f6"
+    },
+    {
+      "path": "easy-tools-help-native-draft-dom.json",
+      "bytes": 13003,
+      "sha256": "4a02abeeed12fcbbdc96c1e8e9f07bb1eca1c51e49df32456a1c1e9d56b006ba"
+    },
+    {
+      "path": "easy-tools-help-native-draft.png",
+      "bytes": 133412,
+      "sha256": "444ae3ccd00951b258a98efe939ca90c0b7d09abd5e0fefcfa32d94cbc1a185e"
+    },
+    {
+      "path": "easy-tools-read-ready-dom.json",
+      "bytes": 11810,
+      "sha256": "1feb812b8a86dc1f8ff5dd12c38164d11c67ecdecda903bd9b37ef86bee0876f"
+    },
+    {
+      "path": "easy-tools-read-ready.png",
+      "bytes": 117125,
+      "sha256": "4d93b1d4f15614d13687158f76e8b57730f0fb6980a0ef7430a4f9bfb7a8ee42"
+    },
+    {
+      "path": "easy-tools-request-output-required-dom.json",
+      "bytes": 14430,
+      "sha256": "4f9976d3c59460b0a290d022bc6d2a6cbd3e8fa1595f8cb85e71b6f0809ec289"
+    },
+    {
+      "path": "easy-tools-request-output-required.png",
+      "bytes": 115456,
+      "sha256": "c0add03e41baa20eebd731c1b7944cc93a85a4a9c6384feeee2c045d2eb657cc"
+    },
+    {
+      "path": "easy-tools-request-ready-dom.json",
+      "bytes": 15200,
+      "sha256": "9c2bf4630d3bde6f2b1242f24a555a99670402f93d269301af85600e3fa12a20"
+    },
+    {
+      "path": "easy-tools-request-ready.png",
+      "bytes": 121570,
+      "sha256": "bffacd83d45db3de9e44ff9e10efd401556990c8197489c423c73f95ee76ec1c"
+    },
+    {
+      "path": "easy-tools-unconnected-saved-dom.json",
+      "bytes": 12592,
+      "sha256": "d3e238411feba096dce4b39d0d5d64f50ed2517f94da2a66de22c5a35582cded"
+    },
+    {
+      "path": "easy-tools-unconnected-saved.png",
+      "bytes": 127126,
+      "sha256": "b04000ebda0200f2e6c44d0201689aae8592582efeabfc9752a079463550faa3"
+    },
+    {
+      "path": "figma-a4-typed-request-unconnected.png",
+      "bytes": 114198,
+      "sha256": "fee11ba05056eb387dff5e6677d6caaf37e417cc8c7c72c0e5664408f6dc0d12"
+    },
+    {
+      "path": "figma-a5-cycle-overview.png",
+      "bytes": 103037,
+      "sha256": "0e9ce17387b6d425c08607326457b22f8cea1a07f3e883f0133fc6cb140118b2"
+    },
+    {
+      "path": "figma-a6-empty-lookup-manual-preview.png",
+      "bytes": 107757,
+      "sha256": "2a3951ee854dc434766f4b5a9637eb0b579848bb46b50571351358595dfc8532"
+    },
+    {
+      "path": "figma-a6-list-confirmed.png",
+      "bytes": 112132,
+      "sha256": "a17c0b76321a4eecf314cc3b0d7dde13994a56152a75ed4483b68d1efb56d58e"
+    },
+    {
+      "path": "figma-a7-delivery-review-blocked.png",
+      "bytes": 107085,
+      "sha256": "a9b81c6c517a5c91115cde400bb92edab714b176353c12e0a3fcd0c247fed118"
+    },
+    {
+      "path": "figma-r3-pending-and-final-verdicts.png",
+      "bytes": 102651,
+      "sha256": "befe741c3163f43887ff722a38648814f80e14380ca6bcd77fbb84264785d180"
+    },
+    {
+      "path": "figma-review-purpose-saved.png",
+      "bytes": 102881,
+      "sha256": "6c87ad89ee5a2c1a5469c5e281e37ba065a16f84ad4074c1ee80e7748d6d384f"
+    },
+    {
+      "path": "figma-s1-human-permission-readonly.png",
+      "bytes": 95059,
+      "sha256": "04c85ab02e5f3e241e7ccaacb0e4a99d81e12556e5f250cc5902b3407b1265d8"
+    },
+    {
+      "path": "figma-s2-readonly-history-reference.png",
+      "bytes": 103973,
+      "sha256": "d525c552d03758528d6c528c307e9a12bbb739e9c480c6c184311598b420ae8d"
+    },
+    {
+      "path": "figma-s3-checklist-criterion-versus-tool.png",
+      "bytes": 97767,
+      "sha256": "610fa8a63ea92aad75cfb77a87f46db2aa66e52e14902e53771348bfcd088b00"
+    },
+    {
+      "path": "http-id-native-create-save-reload-dom.json",
+      "bytes": 8976,
+      "sha256": "3b30451d26ccf2d78f779417d39a85d0a3bc20470c12086eb197caa2c3ac7116"
+    },
+    {
+      "path": "http-id-native-create-save-reload.png",
+      "bytes": 81177,
+      "sha256": "701e7b0cbf7c10373e4285120c181033b3002586f9741c1071c2d31dc643a2d0"
+    },
+    {
+      "path": "integrated-eight-native-input-types.png",
+      "bytes": 105978,
+      "sha256": "fb175b03f5c4f9ffad64babf868574780d662d43419b362241a9eaf496c32481"
+    },
+    {
+      "path": "integrated-figma-b21-live-preview-dom.json",
+      "bytes": 23252,
+      "sha256": "eeb7f7dc7e7ad75b7d0954533cb6963772fe2eeaaa657008dff03e07ccfe91c3"
+    },
+    {
+      "path": "integrated-figma-b21-live-preview.png",
+      "bytes": 156617,
+      "sha256": "cc493033d6bd2ce73df3e46c1d431ee2d072c3a0284778bc18f68f6e37477138"
+    },
+    {
+      "path": "integrated-figma-b21-mouse-focus-saved-dom.json",
+      "bytes": 22294,
+      "sha256": "a0fc4e7e26aab12f62d404f992c2fc4365cfec2531184382f2ed79c285c41e69"
+    },
+    {
+      "path": "integrated-figma-b21-mouse-focus-saved.png",
+      "bytes": 138699,
+      "sha256": "0d80c6b7c6ad4697b65e1d60780ba9b4d2b96e969e4ded85cdc046932a301143"
+    },
+    {
+      "path": "integrated-figma-b21-published-reservation-dom.json",
+      "bytes": 24128,
+      "sha256": "8ec1778579175317c6d6e25b1519edb01baafdb66bece9dcb98a2bd84a673e87"
+    },
+    {
+      "path": "integrated-figma-b21-published-reservation.png",
+      "bytes": 154674,
+      "sha256": "2ddd8d8c5becd47704fccaa673b085b141f6e4e94bf62371ea53033acdf322af"
+    },
+    {
+      "path": "integrated-figma-b21-roundtrip.json",
+      "bytes": 562,
+      "sha256": "c95363169bd7aeb06b4c2503b9d892f868f957f4451736cea9ac401770b47c6c"
+    },
+    {
+      "path": "integrated-figma-read-retry-control-observation-dom.json",
+      "bytes": 23876,
+      "sha256": "e22ec26cd87a5e69e49ba695a5d133877a7c90aa609422554621b8bb1600640c"
+    },
+    {
+      "path": "integrated-figma-read-retry-control-observation.json",
+      "bytes": 10028,
+      "sha256": "81e9efcb9165232f37172b5387ed97721bcc3e085b8744a51aab16b88a07cace"
+    },
+    {
+      "path": "integrated-figma-read-retry-control-observation.png",
+      "bytes": 111612,
+      "sha256": "b2ac196263413927fcae9a6f0f937afa66080ba792ccd275540d61db5b7425a8"
+    },
+    {
+      "path": "integrated-figma-read-retry-human-boundary-dom.json",
+      "bytes": 4008,
+      "sha256": "c3e71991633e14d5ac1968ce000ab96118b3b29e053508507cc63f1e98899402"
+    },
+    {
+      "path": "integrated-figma-read-retry-human-boundary.png",
+      "bytes": 93955,
+      "sha256": "0231adc2b488a9fb556d45432294773e7e8d491aacc2bf16eb1162d1cd1a637d"
+    },
+    {
+      "path": "integrated-figma-read-retry-publication-blocker-dom.json",
+      "bytes": 9658,
+      "sha256": "0ef1da716645f314197c0c8596a85ed705b0ac3ed183f8cc7743f86ca7f50372"
+    },
+    {
+      "path": "integrated-figma-read-retry-publication-blocker.png",
+      "bytes": 116106,
+      "sha256": "e6b0fe7b036ce9f7445fc505ba36e880bd453c45b48de979366f881077c6ea01"
+    },
+    {
+      "path": "integrated-figma-read-retry-roundtrip.json",
+      "bytes": 333,
+      "sha256": "2ef3e45a2958c4405a2a59e44123f81aedbf5f82a022af9e105ad97d866a102e"
+    },
+    {
+      "path": "integrated-immutable-attempts.png",
+      "bytes": 114694,
+      "sha256": "a61d7c9a03716a0da5d4d816ac133d639db2bc82c244ee8c25bb453ebdad337a"
+    },
+    {
+      "path": "integrated-long-korean-form.png",
+      "bytes": 100771,
+      "sha256": "8fbcb3e72c7874c2131186d2ee4c6a15e34b2a7f06955b6ff20acc9c8e9f2b41"
+    },
+    {
+      "path": "integrated-native-tool-snapshot.png",
+      "bytes": 112121,
+      "sha256": "8cb8cfbe2b55905748f84027f1a6cc7fcfc62ebc1249893a5eeafd7951da9181"
+    },
+    {
+      "path": "integrated-result-failed.png",
+      "bytes": 84860,
+      "sha256": "2667d9b7e1b8b2bbb779da96b257c30d1888f2120ab08a8ca5e3d685fc8f27a9"
+    },
+    {
+      "path": "integrated-result-partial.png",
+      "bytes": 84574,
+      "sha256": "9c382dbe870754b2378eda2d7bd3c7dc58ce74188d58414edbd7fc88f63da574"
+    },
+    {
+      "path": "integrated-result-unknown.png",
+      "bytes": 87826,
+      "sha256": "4270eb03431f3de7fbda26da6f811a3d52e459ff0305188b019a0a80d85c0974"
+    },
+    {
+      "path": "integrated-running-animation.json",
+      "bytes": 2200,
+      "sha256": "31ce45ea7d9fd28ae647eb176ed620f49c2f6c867aef29d950287aca2a39d683"
+    },
+    {
+      "path": "integrated-running-animation.png",
+      "bytes": 97066,
+      "sha256": "8a9b3eae7172ffeabcc66898c007e19764c04b647e244fef8c73acf72ab0de02"
+    },
+    {
+      "path": "integrated-running-reduced-motion.png",
+      "bytes": 96869,
+      "sha256": "435aed79bd521e3e7486769f75b83b7a64c5af3e3577ef1fd9b3fcdf88c1bc9d"
+    },
+    {
+      "path": "integrated-test_closed_run_remains_readonly_and_uses_its_saved_completion-failure-cleanup.json",
+      "bytes": 7613,
+      "sha256": "da3d3daae421ff4ea80f6da9f38d4b6bd85b9371649a72296ec368b137f32dc3"
+    },
+    {
+      "path": "integrated-test_closed_run_remains_readonly_and_uses_its_saved_completion-failure.json",
+      "bytes": 5760,
+      "sha256": "8a4b42ab53b2d303d94e41d656b6e235f34cb03598d78e4607959c270352699f"
+    },
+    {
+      "path": "q1-1366x768.json",
+      "bytes": 691,
+      "sha256": "5c71d9b152a8cac88575b7d75992438ab70c3ce6e467bb4ce8213b22d3fe77ac"
+    },
+    {
+      "path": "q1-1366x768.png",
+      "bytes": 63660,
+      "sha256": "947fa1343c0547b8571fb08b644bb0608bf799f8a8bf329c375973a329c3f0a9"
+    },
+    {
+      "path": "q1-1920x768.json",
+      "bytes": 698,
+      "sha256": "6921cd0000b9dcea39d560bc9e16d5c425c76a57649b3cac1f853764f2b76137"
+    },
+    {
+      "path": "q1-1920x768.png",
+      "bytes": 84020,
+      "sha256": "94a4c9634356176cf23d959847e841f08321043ae40e6111d8e06f087b9dcb51"
+    },
+    {
+      "path": "q1-contrast.json",
+      "bytes": 236,
+      "sha256": "bc01a6e7361b805dfd418b76871e70e88415ce97c7b8ce72ac567c280ec99899"
+    },
+    {
+      "path": "q1-overlay-close-reopen.json",
+      "bytes": 697,
+      "sha256": "5181a9e4d1936633ae84307e7835a307647facf4aaf04ad84f24201ca6e7d226"
+    },
+    {
+      "path": "q1-overlay-close-reopen.png",
+      "bytes": 55112,
+      "sha256": "bed75970dc4d25f58c7da9a4eefc4493e8648159878f10955ccbe45ea05b9aa6"
+    },
+    {
+      "path": "q1-private-width-640.png",
+      "bytes": 57690,
+      "sha256": "55dadab85b9eff9f1cfaff279906dd1d5f1f598939ca79f7d076b3753bfbd67e"
+    },
+    {
+      "path": "q1-wide-panel-1280x768.json",
+      "bytes": 691,
+      "sha256": "faf4b48ea422ecfe6bb34fcb81e4895413ccc1627191245ec8615f41f8808178"
+    },
+    {
+      "path": "q1-wide-panel-1280x768.png",
+      "bytes": 62096,
+      "sha256": "1ee2dafaa56d1dc40cd8bc4796bca2f207a420507c324764e5fc44d8db463a57"
+    }
+  ]
+}

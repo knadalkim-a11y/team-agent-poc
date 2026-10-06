@@ -1,0 +1,96 @@
+{
+  "base_head": "ec2517266c324fa760002f034f515e698248a309",
+  "wheel_sha256": "d609ce9cece2484acde8f7dca9d51d41ab4edad5cdc7b4ef0d61ecc5eeb0dd8f",
+  "chrome": "153.0.8010.52",
+  "results": {
+    "same_wheel_api_reproduction": "1 ERROR FileNotFoundError before fix",
+    "authoring_and_account_switch": "8 PASS, 33.099s",
+    "native_authoring_asset_read": "2 PASS, 3.086s"
+  },
+  "scope": "Temporary real Native authentication/database and built UI, synthetic accounts and external dependencies. Test fixture only; product wheel unchanged. Remote Chrome154 final CI pending.",
+  "sources": [
+    {
+      "path": "tests/native_auth_fixture.py",
+      "sha256": "a8ed30eb459c3bcd889b669677e7138c1d06476eda2abe9917adbd1c0105857e"
+    },
+    {
+      "path": "tests/test_ees_asset_native.py",
+      "sha256": "56300e290645f37fe554d9b136e5abb1b3df6e474819d8d9f81dd5bdd0117fa3"
+    },
+    {
+      "path": "tests/test_ees_work_authoring_native.py",
+      "sha256": "87b04917278715367ed8224c5d8e6df914c753a3ab2ceb7b456b3232a4da510d"
+    }
+  ],
+  "logs": [
+    {
+      "path": "logs/easy-tools-account-repro.log.json",
+      "sha256": "56e134f794b8fdde96fe5df0af9639ffabca4f29869d45d037a40aa96f07195c"
+    },
+    {
+      "path": "logs/easy-tools-account-after.log.json",
+      "sha256": "8247bddbc6cf10384c3747839cb07d077b4b73e08d6ab6fc782c284ef7b8cbe0"
+    },
+    {
+      "path": "logs/easy-tools-asset-copy-after.log.json",
+      "sha256": "b001587e55f05220208d837a4d622fabf880107de701582c2496332eb2a0cb27"
+    }
+  ],
+  "files": [
+    {
+      "path": "native-account-ci-fix/integrated-native-ai-proposal-not-auto-save.png",
+      "bytes": 83864,
+      "sha256": "59e020628e3e2326ea0743bcb49f2adebd4e6eb440d023494f9ed22ebbbcb2de"
+    },
+    {
+      "path": "native-account-ci-fix/integrated-native-authoring-conflict.png",
+      "bytes": 96503,
+      "sha256": "4fbc016e4679ea9fda0881720126f7e76afb430084f6bbaa3c0aa68e76abe463"
+    },
+    {
+      "path": "native-account-ci-fix/integrated-native-group-author-published.png",
+      "bytes": 89736,
+      "sha256": "fc0fbe466718bd4c5b70262f5902d59dc2487ef9fb213e7d564f1688ba64e910"
+    },
+    {
+      "path": "native-account-ci-fix/nu-closed-native-signup.png",
+      "bytes": 17793,
+      "sha256": "600b865d11c82da3174c5011d1d86606435aaf80dd0422f4c66102919fa3984f"
+    },
+    {
+      "path": "native-account-ci-fix/nu05-former-a-tab-now-b.png",
+      "bytes": 52522,
+      "sha256": "acc04b79ca6c77a475625ad62defc97c4a55a6b3722ab484d88dc8710058fd2a"
+    },
+    {
+      "path": "native-account-ci-fix/sa-approved-first-chat.png",
+      "bytes": 69245,
+      "sha256": "7dba980c3169d5c6e1868deef2b77cc37a6726e7f15bf500fa6d54fd3a4ec0cd"
+    },
+    {
+      "path": "native-account-ci-fix/sa-native-approved-user.png",
+      "bytes": 48173,
+      "sha256": "9f12ec2268e19249a2e9c0c3e36a30788d5312bc88233f02c5e64e20dd126c02"
+    },
+    {
+      "path": "native-account-ci-fix/sa-signup-pending-fonts.json",
+      "bytes": 780,
+      "sha256": "52b1f39d35f35710df5bf3594ae27a35b7f72d2654549551ced5305ad9511422"
+    },
+    {
+      "path": "native-account-ci-fix/sa-signup-pending.png",
+      "bytes": 39573,
+      "sha256": "0f8f2c0b27dc1773ed26f392f3f9d4c713f77dde5515687c0d1ec90ef2fb5bdc"
+    },
+    {
+      "path": "native-account-ci-fix/sa26-b-after-late-a-responses.png",
+      "bytes": 84876,
+      "sha256": "b8e2e21c18de5eab9ee00c956cdfc734e494f3b1abbf53e0d0a9e9ef18eeeafc"
+    },
+    {
+      "path": "native-account-ci-fix/sa26-nu05-account-switch.json",
+      "bytes": 565,
+      "sha256": "718b40b2fc02a2e2800a861bafc85041b1966f756b482b9b5e14c09412b59e13"
+    }
+  ]
+}

@@ -3,10 +3,11 @@
 ## 2026-10-06 · 공통 도움말과 쉬운 도구 등록 구현·검증
 
 - **기준:** 사용자 승인으로 [PR #74](https://github.com/knadalkim-a11y/team-agent-poc/pull/74)를 병합했다. 최종 head `ea5108542bd1d774bedaca4ed394e6ec4edff9be`의 [CI 37409566696](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37409566696) 성공을 확인했고, 병합 main `29b95b56917a5b587056d33f1df4d43783ecfdb2`에서 `feat/work-easy-tools-20261006`을 시작했다.
-- **현재 작업:** [착수 비교표와 D1–D8 기본안](mockups/ees-work/TASK.md#easy-authoring-20261006)에 따라 A 공통 도움말·대화창 연결, B 쉬운 도구 등록, 도구 화면 D 안내를 구현·검증했다. 새 Draft PR과 정확한 최종 HEAD의 자동 CI를 준비한다. 절차 예시 C는 이번 PR 병합 후 다음 PR이다.
+- **현재 작업:** [착수 비교표와 D1–D8 기본안](mockups/ees-work/TASK.md#easy-authoring-20261006)에 따라 A 공통 도움말·대화창 연결, B 쉬운 도구 등록, 도구 화면 D 안내를 구현·검증하고 [Draft PR #75](https://github.com/knadalkim-a11y/team-agent-poc/pull/75)를 게시했다. 첫 CI에서 확인된 시험용 패키지 자료 누락을 보완하며, 정확한 최종 HEAD의 판정은 PR 본문/Checks에서 관리한다. 절차 예시 C는 이번 PR 병합 후 다음 PR이다.
 - **디자인:** Figma 변경 기록과 관련 화면/Note를 읽기 전용으로 재조회했다. C13 이후 변경이 없고 A/B 관련 내용·스타일·화면 PNG도 이전 조회와 동일하다.
 - **검증:** 최종 UI Node132PASS, Operations48PASS, Native bridge16PASS, Workspace/공개 Tool/과거 조회67PASS, 관련 패키징 PASS다. 실제 빌드 Native3흐름(읽기·요청·도움말)이 통과했고, 고급 도움말 갱신 후 초점까지 최종 build3에서 확인했다. installer60PASS/6SKIP와 실제 이전 ees.13의 파일·자료 보존 Apply/Restore를 검증했다. [처음 실패·독립 검토 보완·빌드/화면 근거](../evals/v4-ui-20260930.md#easy-authoring-evidence-20261006)를 보존하며, 최종 원격 HEAD/CI·배포 후보는 새 PR 본문/Checks에서 확정한다.
 - **보완:** 시스템별 비공개 초안과 저장 중 입력을 보존하고, 요청/direct 필수 계약·현재 권한·검사중 revision을 재검한다. 도움말 실패는 모델 호출 전에 안내하고, 기존 설치의 인증된 이전 파일 목록만 복구 가능하게 유지한다. 현재 신규 묶음의 JSON 필수 검사와 기존 RECORD/file hash 보호는 유지했다.
+- **첫 CI:** 신규 Native3흐름과 전체 Native 제품은 통과했지만 계정 시험 fixture의 JSON 복사 누락과 별도 Chrome 준비30초 초과로 필수2개 job이 실패했다. [최초 실패·확정 원인·보완 및 미확정 지연](../evals/v4-ui-20260930.md#easy-authoring-evidence-20261006)을 보존한다. 제품 및 Chrome 준비 기한은 유지하고 누락을 고친 새 head의 자동 CI로 판정한다.
 - **경계:** 새 PR의 병합·Draft 해제·사내 배포·실제 EES/EMS 연결·Figma 수정·사용자 자산 삭제는 수행하지 않는다. 실제 사내 적용·사용성 결과는 미확인이다.
 
 아래 항목은 선행 작업 당시의 기록이다.

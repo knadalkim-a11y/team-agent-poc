@@ -215,8 +215,11 @@ class NativeAuthFixture:
         package.mkdir(exist_ok=True)
         with ZipFile(self.wheel) as wheel:
             names = [name for name in wheel.namelist()
-                     if name.startswith("open_webui/ees_workflow") and name.endswith(".py")]
-            names.append("open_webui/workflow_policy.json")
+                     if (name.startswith("open_webui/ees_workflow") and name.endswith(".py"))
+                     or (name.startswith("open_webui/workflow_") and name.endswith(".json"))]
+            # The installed modules read their packaged data beside __file__.
+            # Copy the wheel's feature data too; never substitute source-tree
+            # help/examples or a fixture-only fallback for missing assets.
             for name in names:
                 (package / Path(name).name).write_bytes(wheel.read(name))
         sys.modules["open_webui"].__path__.append(str(package))
