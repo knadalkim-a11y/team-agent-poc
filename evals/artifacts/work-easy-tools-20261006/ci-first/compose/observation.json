@@ -1,0 +1,64 @@
+{
+  "run_id": 37412904933,
+  "job_id": 112105346496,
+  "head": "ec2517266c324fa760002f034f515e698248a309",
+  "artifact_id": 11389584621,
+  "artifact_sha256": "72ce7b993ef5617c48b5df5f533190dcf8d87db41e83b5da5c088ae81262db73",
+  "artifact_bytes": 3928070,
+  "preserved_files": [
+    {
+      "archive_path": "ees-results/browser-evidence.json",
+      "path": "browser-evidence.json",
+      "bytes": 11476,
+      "sha256": "4d54cb7b6a2a1a5f6e6217aa284043f83bbc8144caf0ca97d3ffcdf4676de184"
+    },
+    {
+      "archive_path": "ees-results/suite.json",
+      "path": "suite.json",
+      "bytes": 497,
+      "sha256": "0fb21ea03e07678f0b9f0582052eae6af428bb026ae75fe1a0d6990e5fbd0bb1"
+    },
+    {
+      "archive_path": "ees-results/test_ees_work_c_phase1_native.json",
+      "path": "test_ees_work_c_phase1_native.json",
+      "bytes": 1644,
+      "sha256": "a4993af153a8ebc6195852989b94a9a361d121f4f34b2e98ce6d78ff68f9cd8d"
+    },
+    {
+      "archive_path": "ees-results/test_ees_work_c_phase2_native.json",
+      "path": "test_ees_work_c_phase2_native.json",
+      "bytes": 1344,
+      "sha256": "7b70df965ce69a014e66e29427f11638ed31380179b5e91323dc4c4db3edb5e2"
+    },
+    {
+      "archive_path": "ees-results/test_ees_work_figma_authoring_native.json",
+      "path": "test_ees_work_figma_authoring_native.json",
+      "bytes": 1691,
+      "sha256": "6a01a02b2e5cd3c5c277c9e280f12a417884a68e3ed196887588f975f3ed6709"
+    },
+    {
+      "archive_path": "ees-results/test_ees_work_figma_layout_native.json",
+      "path": "test_ees_work_figma_layout_native.json",
+      "bytes": 689,
+      "sha256": "dc326631e14f84c9818b92f0630ece870a352745236fb9f6f9fd820adeb2d007"
+    },
+    {
+      "archive_path": "ees-results/test_ees_work_figma_runtime_native.json",
+      "path": "test_ees_work_figma_runtime_native.json",
+      "bytes": 1825,
+      "sha256": "0ba48906327015fe0f6354698d7a148b1c175c128d80e0f8f260236f0516ad89"
+    },
+    {
+      "archive_path": "ees-work-screenshots/integrated-test_closed_run_remains_readonly_and_uses_its_saved_completion-failure-cleanup.json",
+      "path": "integrated-test_closed_run_remains_readonly_and_uses_its_saved_completion-failure-cleanup.json",
+      "bytes": 7613,
+      "sha256": "da3d3daae421ff4ea80f6da9f38d4b6bd85b9371649a72296ec368b137f32dc3"
+    },
+    {
+      "archive_path": "ees-work-screenshots/integrated-test_closed_run_remains_readonly_and_uses_its_saved_completion-failure.json",
+      "path": "integrated-test_closed_run_remains_readonly_and_uses_its_saved_completion-failure.json",
+      "bytes": 5760,
+      "sha256": "8a4b42ab53b2d303d94e41d656b6e235f34cb03598d78e4607959c270352699f"
+    }
+  ]
+}

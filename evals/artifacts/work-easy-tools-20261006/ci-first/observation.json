@@ -1,0 +1,95 @@
+{
+  "run_id": 37412904933,
+  "job_id": 112105346440,
+  "head": "ec2517266c324fa760002f034f515e698248a309",
+  "artifact_id": 11389941409,
+  "artifact_sha256": "6fdb26fa7f77760e57eb003c647c23b4142b17b3e58ef693e0ffbb19362d65ea",
+  "artifact_bytes": 405238,
+  "preserved_files": [
+    {
+      "archive_path": "ees-results/browser-evidence.json",
+      "path": "browser-evidence.json",
+      "bytes": 2542,
+      "sha256": "fb92ad98a567ba71c66359360fd222a6cef52b86d40ee08a74e95f04a73d3e44"
+    },
+    {
+      "archive_path": "ees-results/test_ees_chat_theme.json",
+      "path": "test_ees_chat_theme.json",
+      "bytes": 3957,
+      "sha256": "9564a67dbb75cec1114d0cb10fb2c13695b3b4d66d0970a83b3576a3064dd377"
+    },
+    {
+      "archive_path": "ees-results/suite.json",
+      "path": "suite.json",
+      "bytes": 309,
+      "sha256": "41a4530864bdf590fbccc07969b9568db9e642736770e1a5af30217191e60bf4"
+    },
+    {
+      "archive_path": "ees-results/test_ees_work_authoring_account_switch.json",
+      "path": "test_ees_work_authoring_account_switch.json",
+      "bytes": 2480,
+      "sha256": "f925298a3e1fc277c5e5a62bf36ff6da8d8519b992fc0d528fee17aafbe0a2f9"
+    },
+    {
+      "archive_path": "ees-results/test_ees_work_authoring_native.json",
+      "path": "test_ees_work_authoring_native.json",
+      "bytes": 15348,
+      "sha256": "297c576945896877766faba6804ea46844206ce03bb321dc2c99e9e0c7c09311"
+    },
+    {
+      "archive_path": "ees-work-screenshots/sa-signup-pending-fonts.json",
+      "path": "sa-signup-pending-fonts.json",
+      "bytes": 780,
+      "sha256": "52b1f39d35f35710df5bf3594ae27a35b7f72d2654549551ced5305ad9511422"
+    },
+    {
+      "archive_path": "ees-work-screenshots/test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft-failure.png",
+      "path": "test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft-failure.png",
+      "bytes": 69748,
+      "sha256": "6a1c5fcaaa66f239e2b972b9256e33e96c02f547b32c4120782a9c302b45367c"
+    },
+    {
+      "archive_path": "ees-work-screenshots/test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft-failure.json",
+      "path": "test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft-failure.json",
+      "bytes": 19826,
+      "sha256": "b9936a1f6f9ff61f9951d24389a0cf12ac27b1cf7d64fec63e3fa1eede3d525f"
+    },
+    {
+      "archive_path": "ees-work-screenshots/test_native_authoring_conflict_keeps_unsaved_draft_and_published_version-failure.json",
+      "path": "test_native_authoring_conflict_keeps_unsaved_draft_and_published_version-failure.json",
+      "bytes": 19828,
+      "sha256": "136edf11b0d2a91c5b9b6f717d97f93d14592b9be9888203da9af95d714d6ba4"
+    },
+    {
+      "archive_path": "ees-work-screenshots/test_native_authoring_conflict_keeps_unsaved_draft_and_published_version-failure.png",
+      "path": "test_native_authoring_conflict_keeps_unsaved_draft_and_published_version-failure.png",
+      "bytes": 69748,
+      "sha256": "6a1c5fcaaa66f239e2b972b9256e33e96c02f547b32c4120782a9c302b45367c"
+    },
+    {
+      "archive_path": "ees-work-screenshots/test_native_new_signup_and_approval_ui-failure.json",
+      "path": "test_native_new_signup_and_approval_ui-failure.json",
+      "bytes": 29767,
+      "sha256": "c3dae2c254fe95628f56f008fdbbdba89a09d15d9d93124f310181efa7f801f5"
+    },
+    {
+      "archive_path": "ees-work-screenshots/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "path": "test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "bytes": 21296,
+      "sha256": "9673eec7e746f9a0e2c454f189f8bbdb9ec002b0de85d9b4af0ebc455f9f50ac"
+    },
+    {
+      "archive_path": "ees-work-screenshots/test_native_new_signup_and_approval_ui-failure.png",
+      "path": "test_native_new_signup_and_approval_ui-failure.png",
+      "bytes": 67283,
+      "sha256": "7e2e0121c5581ce6337023b7150f585a6820f208f37677460f119910e0c5e560"
+    },
+    {
+      "archive_path": "ees-work-screenshots/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png",
+      "path": "test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png",
+      "bytes": 69378,
+      "sha256": "314631f184191460a97649a4e4c0c869e922a031a4eae0ccd54b97f1dc7ad4b3"
+    }
+  ],
+  "finding": "NativeAuthFixture copied Python modules and workflow_policy.json only; workspace help lookup raises FileNotFoundError for workflow_help.json. Original failures remain failures."
+}

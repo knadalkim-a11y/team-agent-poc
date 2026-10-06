@@ -1,0 +1,28 @@
+{
+  "original_filename": "easy-tools-installed-ees13-before.log",
+  "original_sha256": "587339cfba3abded85ba291e7f779bf196d35c3545d6453f0f6f25ee46ea1a0b",
+  "encoding": "UTF-8",
+  "lines": [
+    "test_pre_easy_tools_ees13_apply_restore_preserves_its_verified_inventory (test_ees_webui_customization.CustomizationTests.test_pre_easy_tools_ees13_apply_restore_preserves_its_verified_inventory) ... ERROR\n",
+    "\n",
+    "======================================================================\n",
+    "ERROR: test_pre_easy_tools_ees13_apply_restore_preserves_its_verified_inventory (test_ees_webui_customization.CustomizationTests.test_pre_easy_tools_ees13_apply_restore_preserves_its_verified_inventory)\n",
+    "----------------------------------------------------------------------\n",
+    "Traceback (most recent call last):\n",
+    "  File \"/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_webui_customization.py\", line 695, in test_pre_easy_tools_ees13_apply_restore_preserves_its_verified_inventory\n",
+    "    custom.validate_program(self.program, previous)\n",
+    "  File \"/workspace/scratch/abe8513396cb/team-agent-poc/scripts/ees_webui_customization.py\", line 310, in validate_program\n",
+    "    _check_tree(Path(path), selection)\n",
+    "  File \"/workspace/scratch/abe8513396cb/team-agent-poc/scripts/ees_webui_customization.py\", line 287, in _check_tree\n",
+    "    rows = _record_rows(record, version=version)\n",
+    "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+    "  File \"/workspace/scratch/abe8513396cb/team-agent-poc/scripts/ees_webui_customization.py\", line 146, in _record_rows\n",
+    "    raise CustomizationError(\"The complete app, frontend and metadata must be present together.\")\n",
+    "scripts.ees_webui_customization.CustomizationError: The complete app, frontend and metadata must be present together.\n",
+    "\n",
+    "----------------------------------------------------------------------\n",
+    "Ran 1 test in 0.028s\n",
+    "\n",
+    "FAILED (errors=1)\n"
+  ]
+}

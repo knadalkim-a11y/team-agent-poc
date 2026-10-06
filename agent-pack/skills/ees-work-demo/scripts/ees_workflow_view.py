@@ -1,8 +1,22 @@
 """Pure procedure planning and saved workflow case views."""
 
 from copy import deepcopy
+import json
+from pathlib import Path
 
 from .ees_workflow_definition import SYSTEMS, _ancestors, _dependencies, _leaves
+
+
+def workflow_help():
+    """Read the shipped public help used by both the work panel and chat.
+
+    This is program content, never a user asset or a claim about a connection.
+    Read on demand so no independent UI/model copy or process cache can drift.
+    """
+    result = json.loads(Path(__file__).with_name("workflow_help.json").read_text(encoding="utf-8"))
+    for term in result["terms"]:
+        term["evidence"] = f"근거 · {result['source']} ‘{term['name']}’"
+    return result
 
 
 def _workflow(definition, process_id, assets, *, case_id="", snapshots=None):

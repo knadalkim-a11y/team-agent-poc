@@ -1,0 +1,28 @@
+{
+  "scope": "built Native composer; synthetic personal draft and transport",
+  "before": {
+    "prompt": "보존할 개인 대화 초안",
+    "files": [],
+    "selectedToolIds": [],
+    "selectedSkillIds": [],
+    "selectedFilterIds": [],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "after": {
+    "prompt": "보존할 개인 대화 초안\n  \nEES Work 도움말 ‘정보 읽기’의 뜻과 지금 화면에서 쓰는 방법을 알려줘.\n도움말 용어 ID: read_tool\n현재 화면: 도구 작성\n초안 이름: Jira 조회\n하는 일: 정보 읽기",
+    "files": [],
+    "selectedToolIds": [],
+    "selectedSkillIds": [],
+    "selectedFilterIds": [],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "completion_count": 0,
+  "input": {
+    "html": "<p>보존할 개인 대화 초안</p><p><br class=\"ProseMirror-trailingBreak\"></p><p>EES Work 도움말 ‘정보 읽기’의 뜻과 지금 화면에서 쓰는 방법을 알려줘.</p><p>도움말 용어 ID: read_tool</p><p>현재 화면: 도구 작성</p><p>초안 이름: Jira 조회</p><p>하는 일: 정보 읽기</p>",
+    "text": "보존할 개인 대화 초안EES Work 도움말 ‘정보 읽기’의 뜻과 지금 화면에서 쓰는 방법을 알려줘.도움말 용어 ID: read_tool현재 화면: 도구 작성초안 이름: Jira 조회하는 일: 정보 읽기"
+  }
+}

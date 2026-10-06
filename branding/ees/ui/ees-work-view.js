@@ -25,7 +25,59 @@ const workUI = (() => {
   const badge = status => `<span class="ew-badge" data-status="${esc(status)}">${esc(statuses[status] || status || '미확인')}</span>`;
   const time = value => {if(value===undefined||value===null||value==='')return '';const date=typeof value==='number'?new Date(value*1000):new Date(value);return Number.isNaN(date.getTime())?String(value):new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(date);};
   const safeURL = value => {if(typeof value!=='string'||!value.trim())return '';try{const url=new URL(value,location.origin);return ['https:','http:'].includes(url.protocol)?url.href:'';}catch(_){return '';}};
-  let activeDialog=null;
+  let activeDialog=null,activeHelp=null;
+  function helpQuestion(term,context={}){
+    const lines=[`EES Work 도움말 ‘${term.name || term.id}’의 뜻과 지금 화면에서 쓰는 방법을 알려줘.`,`도움말 용어 ID: ${term.id}`];
+    if(context.screen)lines.push(`현재 화면: ${context.screen}`);
+    if(context.draftName)lines.push(`초안 이름: ${context.draftName}`);
+    if(context.kind)lines.push(`하는 일: ${{read:'정보 읽기',request:'EES에 작업 부탁',direct:'직접 실행 · 예외'}[context.kind] || context.kind}`);
+    return lines.join('\n');
+  }
+  function closeHelp({restoreFocus=true}={}){activeHelp?.close(restoreFocus);}
+  function reanchorHelp(root,context){activeHelp?.reanchor(root,context);}
+  function showHelp({termId,help,context={},trigger,onAsk}){
+    closeHelp({restoreFocus:false});
+    const terms=Array.isArray(help?.terms)?help.terms:[],term=terms.find(item=>item.id===termId);
+    const selected=term || {id:termId,name:'도움말 확인',summary:'도움말에 없는 내용입니다. 담당자에게 확인해 주세요.'};
+    const related=(selected.related || []).map(id=>terms.find(item=>item.id===id)).filter(Boolean);
+    const element=document.createElement('section');let previous=trigger || document.activeElement;
+    const position=()=>{
+      if(!element.isConnected)return;if(trigger&&!trigger.isConnected){closeHelp({restoreFocus:false});return;}
+      const viewportWidth=window.innerWidth || document.documentElement.clientWidth,viewportHeight=window.innerHeight || document.documentElement.clientHeight;
+      const rect=trigger?.getBoundingClientRect?.() || {left:12,right:viewportWidth-12,top:12,bottom:12};
+      const width=Math.min(360,Math.max(0,viewportWidth-24));element.style.width=width+'px';element.style.maxHeight=Math.max(0,viewportHeight-24)+'px';
+      element.style.left=Math.max(12,Math.min(rect.right-width,viewportWidth-width-12))+'px';
+      const height=element.getBoundingClientRect().height,below=rect.bottom+8;
+      element.style.top=Math.max(12,below+height<=viewportHeight-12?below:Math.min(rect.top-height-8,viewportHeight-height-12))+'px';
+    };
+    element.id='ees-work-help';element.className='ew-help-popover';element.dataset.eesWork='';element.setAttribute('role','dialog');element.setAttribute('aria-labelledby','ees-work-help-title');
+    const aliases=item=>(item.aliases || []).length?`<small>예전 이름: ${esc(item.aliases.join(' · '))}</small>`:'';
+    element.innerHTML=`<header><div><strong id="ees-work-help-title">${esc(selected.name)}</strong>${aliases(selected)}</div><button type="button" class="ew-help-close" data-help-close aria-label="도움말 닫기">닫기</button></header><p class="ew-help-summary">${esc(selected.summary)}</p>${selected.example?`<p class="ew-help-example">예: ${esc(selected.example)}</p>`:''}${related.length?`<section class="ew-help-related"><h3>관련 도움말</h3>${related.map(item=>`<article><div><strong>${esc(item.name)}</strong>${aliases(item)}</div><p>${esc(item.summary)}</p></article>`).join('')}</section>`:''}<p class="ew-help-error" data-help-error role="alert" hidden></p><footer><button type="button" class="ew-help-ask" data-help-ask${typeof onAsk!=='function'?' disabled':''}>${icon('1c98e')}대화창에서 더 묻기</button><small>도움말 · ${esc(selected.name)}</small></footer>`;
+    const priorExpanded=previous?.getAttribute?.('aria-expanded'),priorControls=previous?.getAttribute?.('aria-controls');
+    previous?.setAttribute?.('aria-expanded','true');previous?.setAttribute?.('aria-controls',element.id);
+    const restoreAttribute=(name,value)=>value===null||value===undefined?previous?.removeAttribute?.(name):previous?.setAttribute?.(name,value);
+    const close=restoreFocus=>{
+      if(activeHelp?.element!==element)return;activeHelp=null;element.remove();
+      document.removeEventListener('keydown',onKey,true);document.removeEventListener('pointerdown',onOutside,true);window.removeEventListener('resize',position);document.removeEventListener('scroll',position,true);
+      restoreAttribute('aria-expanded',priorExpanded);restoreAttribute('aria-controls',priorControls);if(restoreFocus&&previous?.isConnected)previous.focus({preventScroll:true});
+    };
+    const onKey=event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();close(true);}};
+    const onOutside=event=>{if(!element.contains(event.target)&&!previous?.contains?.(event.target))close(false);};
+    const reanchor=(root,nextContext)=>{
+      const replacement=[...(root?.querySelectorAll?.('[data-author-action="help"]') || [])].find(control=>control.dataset.id===termId);
+      if(!replacement){const focused=element.contains(document.activeElement);close(false);if(focused)root?.querySelector?.('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled)')?.focus?.({preventScroll:true});return;}
+      if(trigger!==replacement){restoreAttribute('aria-expanded',priorExpanded);restoreAttribute('aria-controls',priorControls);trigger=replacement;previous=replacement;previous.setAttribute('aria-expanded','true');previous.setAttribute('aria-controls',element.id);}
+      if(nextContext)context=nextContext;position();
+    };
+    activeHelp={element,close,reanchor};document.body.append(element);position();
+    document.addEventListener('keydown',onKey,true);document.addEventListener('pointerdown',onOutside,true);window.addEventListener('resize',position);document.addEventListener('scroll',position,true);
+    element.querySelector('[data-help-close]').addEventListener('click',()=>close(true));
+    element.querySelector('[data-help-ask]').addEventListener('click',async()=>{
+      const button=element.querySelector('[data-help-ask]'),message=element.querySelector('[data-help-error]');button.disabled=true;message.hidden=true;
+      try{const result=await onAsk(helpQuestion(selected,context));if(result===false)throw new Error('대화 입력창을 준비한 뒤 다시 시도해 주세요.');close(false);}catch(error){if(activeHelp?.element===element){message.textContent=error.message || '질문을 입력창에 넣지 못했습니다. 다시 시도해 주세요.';message.hidden=false;button.disabled=false;position();}}
+    });
+    element.querySelector('[data-help-close]').focus({preventScroll:true});return element;
+  }
   function closeDialog(){activeDialog?.close();}
   function dialog({title,html='',confirmLabel='',note='',restoreFocus=null,readOnlyDetail=false}){
     closeDialog();const previous=document.activeElement,element=document.createElement('dialog');
@@ -42,7 +94,7 @@ const workUI = (() => {
       element.showModal();element.querySelector('[data-dialog-close]').focus({preventScroll:true});
     });
   }
-  return Object.freeze({$,esc,clone,newId,categories,levels,statuses,icon,button,finished,lineage,badge,safeURL,time,dialog,closeDialog});
+  return Object.freeze({$,esc,clone,newId,categories,levels,statuses,icon,button,finished,lineage,badge,safeURL,time,dialog,closeDialog,helpQuestion,showHelp,closeHelp,reanchorHelp});
 })();
 
 function workStatusHTML(status,label=''){

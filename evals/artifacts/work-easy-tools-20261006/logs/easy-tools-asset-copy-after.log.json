@@ -1,0 +1,19 @@
+{
+  "source": "dist/easy-tools-asset-copy-after.log",
+  "encoding": "utf-8",
+  "sha256": "4026efce8a81d4f6c35e1638794256713391d71b438c044844f93d6e529d3220",
+  "lines": [
+    "test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication (test_ees_asset_native.NativeAuthoringAssetReadTests.test_sa12_18_actual_native_acl_revocation_keeps_opaque_draft_but_blocks_publication) ... Executing <Task pending name='Task-1' coro=<NativeAuthoringAssetReadTests.asyncSetUp() running at /workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_asset_native.py:620> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:448> cb=[_run_until_complete_cb() at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:181] created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py:100> took 1.268 seconds\n",
+    "Executing <Task pending name='Task-1' coro=<NativeAuthoringAssetReadTests.asyncSetUp() running at /workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_asset_native.py:675> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:448> cb=[_run_until_complete_cb() at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:181] created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py:100> took 0.171 seconds\n",
+    "ok\n",
+    "test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets (test_ees_asset_native.NativeAuthoringAssetReadTests.test_sa12_actual_native_public_asset_references_do_not_grant_workspace_or_write_assets) ... Executing <Task pending name='Task-46' coro=<NativeAuthoringAssetReadTests.asyncSetUp() running at /workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_asset_native.py:620> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:448> cb=[_run_until_complete_cb() at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:181] created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py:100> took 0.787 seconds\n",
+    "Executing <Task pending name='Task-46' coro=<NativeAuthoringAssetReadTests.asyncSetUp() running at /workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_asset_native.py:624> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:448> cb=[_run_until_complete_cb() at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:181] created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py:100> took 0.108 seconds\n",
+    "Executing <Task pending name='Task-46' coro=<NativeAuthoringAssetReadTests.asyncSetUp() running at /workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_asset_native.py:675> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:448> cb=[_run_until_complete_cb() at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:181] created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py:100> took 0.233 seconds\n",
+    "ok\n",
+    "\n",
+    "----------------------------------------------------------------------\n",
+    "Ran 2 tests in 3.086s\n",
+    "\n",
+    "OK\n"
+  ]
+}

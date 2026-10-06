@@ -1,0 +1,71 @@
+{
+  "valid": true,
+  "screenshots": 8,
+  "files": [
+    {
+      "path": "nu-closed-native-signup.png",
+      "bytes": 17210,
+      "sha256": "6c9f4d2e4032f3e1208b164f2e99ed5d2a42eb415e625a374cbd48e3bcb804bf"
+    },
+    {
+      "path": "sa-approved-first-chat.png",
+      "bytes": 67283,
+      "sha256": "7e2e0121c5581ce6337023b7150f585a6820f208f37677460f119910e0c5e560"
+    },
+    {
+      "path": "sa-native-approved-user.png",
+      "bytes": 49496,
+      "sha256": "a46d1385b0cd75b1bb9d6a540963d81b34f1919bde5c58101a888432125c9382"
+    },
+    {
+      "path": "sa-signup-pending-fonts.json",
+      "bytes": 780,
+      "sha256": "52b1f39d35f35710df5bf3594ae27a35b7f72d2654549551ced5305ad9511422"
+    },
+    {
+      "path": "sa-signup-pending.png",
+      "bytes": 39099,
+      "sha256": "251859a4fe45b8bc4fc10e44048d4fb9fe63aa3ce8f1544b2c7097eee86a64e4"
+    },
+    {
+      "path": "test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft-failure.json",
+      "bytes": 19826,
+      "sha256": "b9936a1f6f9ff61f9951d24389a0cf12ac27b1cf7d64fec63e3fa1eede3d525f"
+    },
+    {
+      "path": "test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft-failure.png",
+      "bytes": 69748,
+      "sha256": "6a1c5fcaaa66f239e2b972b9256e33e96c02f547b32c4120782a9c302b45367c"
+    },
+    {
+      "path": "test_native_authoring_conflict_keeps_unsaved_draft_and_published_version-failure.json",
+      "bytes": 19828,
+      "sha256": "136edf11b0d2a91c5b9b6f717d97f93d14592b9be9888203da9af95d714d6ba4"
+    },
+    {
+      "path": "test_native_authoring_conflict_keeps_unsaved_draft_and_published_version-failure.png",
+      "bytes": 69748,
+      "sha256": "6a1c5fcaaa66f239e2b972b9256e33e96c02f547b32c4120782a9c302b45367c"
+    },
+    {
+      "path": "test_native_new_signup_and_approval_ui-failure.json",
+      "bytes": 29767,
+      "sha256": "c3dae2c254fe95628f56f008fdbbdba89a09d15d9d93124f310181efa7f801f5"
+    },
+    {
+      "path": "test_native_new_signup_and_approval_ui-failure.png",
+      "bytes": 67283,
+      "sha256": "7e2e0121c5581ce6337023b7150f585a6820f208f37677460f119910e0c5e560"
+    },
+    {
+      "path": "test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "bytes": 21296,
+      "sha256": "9673eec7e746f9a0e2c454f189f8bbdb9ec002b0de85d9b4af0ebc455f9f50ac"
+    },
+    {
+      "path": "test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png",
+      "bytes": 69378,
+      "sha256": "314631f184191460a97649a4e4c0c869e922a031a4eae0ccd54b97f1dc7ad4b3"
+    }
+  ]
+}

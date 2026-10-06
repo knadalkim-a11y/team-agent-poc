@@ -759,4 +759,203 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
         with self.service._db() as db: self.assertEqual(db.execute('SELECT count(*) FROM work_attempts WHERE run_id=?', (run['run_id'],)).fetchone()[0], 0)
 
 
+    async def test_tool_examples_are_canonical_suggestions_and_never_register_tools(self):
+        native = importlib.import_module(package.__name__ + '.ees_workflow_native')
+        declared = json.loads(Path(ops.__file__).with_name('workflow_tool_examples.json').read_text(encoding='utf-8'))
+        available = [{'kind': 'read', 'reference': {**REF, 'function': 'jira_search_crs'}, 'schema': deepcopy(SCHEMA)}]
+        async def capabilities(actor): return deepcopy(available) if self.bridge.allowed else []
+        self.bridge.registered_capabilities = capabilities
+        state = await self.runtime.state(self.user, system_id='EMS')
+        self.assertEqual(state['tool_examples'], declared)
+        self.assertEqual(len(declared), 4)
+        self.assertEqual(len({example['id'] for example in declared}), 4)
+        self.assertEqual(declared[0]['match'], {'function': 'jira_search_crs'})
+        self.assertIn(declared[0]['match']['function'], native.FUNCTIONS)
+        for example in declared[1:3]:
+            self.assertEqual(example['kind'], 'read')
+            self.assertTrue(example['requires_read_allowlist'])
+            self.assertNotIn(example['match']['function'], native.FUNCTIONS)
+        self.assertEqual(declared[3]['kind'], 'request')
+        self.assertEqual(declared[3]['match'], {'tool_id': 'ops', 'function': 'restart_service'})
+        self.assertTrue(all(not {'reference', 'input_schema', 'output_schema', 'connected', 'approved', 'adapter'} & set(example) for example in declared))
+        self.assertEqual(state['native_functions'], available)
+        self.assertEqual(state['tools'], [])
+        state['tool_examples'][0]['name'] = '외부에서 바꾼 응답'
+        self.bridge.allowed = False
+        after = await self.runtime.state(self.user, system_id='EMS')
+        self.assertEqual(after['tool_examples'], declared)
+        self.assertEqual(after['native_functions'], [])
+        self.assertEqual(after['tools'], [])
+        with self.service._db() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_tool_contracts').fetchone()[0], 0)
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_operation_receipts').fetchone()[0], 0)
+
+    async def test_direct_authoring_hint_uses_current_system_authorized_reviewers(self):
+        self.users['bob']['role'] = self.users['carol']['role'] = 'user'
+        self.assertTrue((await self.runtime.state(self.user, system_id='EMS'))['can_author_direct'])
+        self.assertFalse((await self.runtime.state(self.users['bob'], system_id='EMS'))['can_author_direct'])
+        grant = await self.core('save_access', system_id='EMS', factory_id='*', principal_kind='user', principal_id='bob', roles=['manager'])
+        await self.core('save_access', system_id='FDC', factory_id='*', principal_kind='user', principal_id='carol', roles=['manager'])
+        await self.core('save_factory', system_id='EMS', factory_id='one', name='합성 공장')
+        await self.core('save_access', system_id='EMS', factory_id='one', principal_kind='user', principal_id='carol', roles=['manager'])
+        bob = await self.runtime.state(self.users['bob'], system_id='EMS')
+        self.assertTrue(bob['can_author_direct'])
+        self.assertIn('bob', [item['id'] for item in bob['reviewers']])
+        self.assertNotIn('carol', [item['id'] for item in bob['reviewers']])
+        self.assertFalse((await self.runtime.state(self.users['carol'], system_id='EMS'))['can_author_direct'])
+        self.assertTrue((await self.runtime.state(self.users['carol'], system_id='FDC'))['can_author_direct'])
+        await self.core('save_access', grant['revision'], access_id=grant['access_id'], system_id='EMS', factory_id='*', principal_kind='user', principal_id='bob', roles=['manager'], active=False)
+        self.assertFalse((await self.runtime.state(self.users['bob'], system_id='EMS'))['can_author_direct'])
+        with self.assertRaises(workflow.WorkflowError) as error:
+            await self.runtime.command(self.users['bob'], self.body('tool_save', tool={'system_id':'EMS','kind':'direct','name':'권한 회수 뒤 생성'}))
+        self.assertEqual(error.exception.code, 'scope_forbidden')
+
+    async def test_unconnected_examples_save_idempotent_drafts_but_cannot_submit(self):
+        for kind in ('read', 'request', 'direct'):
+            with self.subTest(kind=kind):
+                body = self.body('tool_save', tool={'system_id':'EMS','kind':kind,'name':'연결 전 예시','description':'직접 보완할 합성 초안'})
+                saved = await self.runtime.command(self.user, body)
+                replay = await self.runtime.command(self.user, body)
+                self.assertEqual(saved, replay)
+                self.assertEqual(saved['tool']['reference'], {})
+                self.assertEqual(saved['tool']['input_schema'], {'type':'object','properties':{},'required':[]})
+                self.assertEqual(saved['tool']['state'], 'draft')
+                with self.assertRaises(workflow.WorkflowError) as error:
+                    await self.runtime.command(self.user, self.body('tool_submit', saved['tool']['revision'], tool_contract_id=saved['tool']['id']))
+                self.assertEqual(error.exception.code, 'tool_function_unconnected')
+                self.assertIn('필요한 기능이 아직 연결되지 않았습니다', error.exception.message)
+                with self.service._db() as db:
+                    stored = self.runtime._tool(db, saved['tool']['id'])
+                self.assertEqual(stored, saved['tool'])
+        self.assertEqual(self.bridge.calls, [])
+        with self.service._db() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_tool_contracts').fetchone()[0], 3)
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_operation_receipts').fetchone()[0], 3)
+
+    async def test_read_guide_is_optional_and_owner_self_review_retains_native_approval(self):
+        approvals = []
+        def store_approval(db, actor, reference, evidence):
+            approvals.append({'actor':actor['id'],'reference':deepcopy(reference),'evidence':evidence})
+            return {'reference':deepcopy(reference)}
+        self.bridge.store_approval = store_approval
+        tool = (await self.runtime.command(self.user, self.body('tool_save', tool={'system_id':'EMS','kind':'read','name':'가이드 없는 정보 읽기','reference':deepcopy(REF)})))['tool']
+        submitted = (await self.runtime.command(self.user, self.body('tool_submit',tool['revision'],tool_contract_id=tool['id'])))['tool']
+        self.assertEqual(submitted['state'], 'review_requested')
+        self.assertNotIn('guide_url', submitted)
+        reviewed = (await self.runtime.command(self.user, self.body('tool_review',submitted['revision'],tool_contract_id=tool['id'],decision='approve',evidence='합성 코드 및 계약 검사 근거')))['tool']
+        self.assertEqual(reviewed['state'], 'approved')
+        self.assertEqual(reviewed['reviewer'], self.user['id'])
+        self.assertEqual(approvals, [{'actor':'alice','reference':REF,'evidence':'합성 코드 및 계약 검사 근거'}])
+
+    async def test_optional_read_guide_still_rejects_invalid_provided_urls(self):
+        for guide in ('javascript:alert(1)', 'https://user:password@example.invalid', 'https://[invalid', 17):
+            with self.subTest(guide=guide):
+                tool = (await self.runtime.command(self.user, self.body('tool_save', tool={'system_id':'EMS','kind':'read','name':'가이드 검증','reference':deepcopy(REF),'guide_url':guide})))['tool']
+                with self.assertRaises(workflow.WorkflowError) as error:
+                    await self.runtime.command(self.user, self.body('tool_submit',tool['revision'],tool_contract_id=tool['id']))
+                self.assertEqual(error.exception.code, 'guide_required')
+        for kind in ('request', 'direct'):
+            with self.subTest(kind=kind):
+                tool = (await self.runtime.command(self.user, self.body('tool_save', tool={'system_id':'EMS','kind':kind,'name':'가이드 필수','reference':deepcopy(REQUEST_REF),'status_function':'service_status','output_schema':{'type':'object'},'responsible_user_id':'bob'})))['tool']
+                with self.assertRaises(workflow.WorkflowError) as error:
+                    await self.runtime.command(self.user, self.body('tool_submit',tool['revision'],tool_contract_id=tool['id']))
+                self.assertEqual(error.exception.code, 'guide_required')
+
+    async def test_hidden_legacy_tool_times_survive_resave_omission_without_execution_defaults(self):
+        original = {'system_id':'EMS','kind':'request','name':'기존 시간 값','timeout_seconds':37,'completion_wait_seconds':701,'description':'합성 초안'}
+        saved = (await self.runtime.command(self.user, self.body('tool_save',tool=original)))['tool']
+        patch = {key:val for key,val in saved.items() if key not in ('timeout_seconds','completion_wait_seconds')}
+        patch['description'] = '이름과 설명만 수정'
+        body = self.body('tool_save',saved['revision'],tool=patch)
+        result = await self.runtime.command(self.user,body)
+        self.assertEqual(result['tool']['timeout_seconds'],37)
+        self.assertEqual(result['tool']['completion_wait_seconds'],701)
+        self.assertEqual(result,await self.runtime.command(self.user,body))
+        self.assertEqual(result['tool']['state'],'draft')
+        self.assertNotIn('execution',result['tool'])
+        fresh = (await self.runtime.command(self.user,self.body('tool_save',tool={'system_id':'EMS','kind':'read','name':'새 초안'})))['tool']
+        self.assertNotIn('timeout_seconds',fresh)
+        self.assertNotIn('completion_wait_seconds',fresh)
+        stale = self.body('tool_save',saved['revision'],tool=patch)
+        with self.assertRaises(workflow.WorkflowError) as error: await self.runtime.command(self.user,stale)
+        self.assertEqual(error.exception.code,'revision_conflict')
+
+    async def test_read_optional_guide_keeps_native_schema_revision_and_current_acl_checks(self):
+        definition={'system_id':'EMS','kind':'read','name':'가이드 선택','reference':deepcopy(REF)}
+        with self.assertRaises(workflow.WorkflowError) as error:
+            await self.runtime.command(self.user,self.body('tool_save',tool={**definition,'input_schema':{'type':'object','properties':{'unregistered':{'type':'string'}}}}))
+        self.assertEqual(error.exception.code,'native_schema_mismatch')
+        body=self.body('tool_save',tool=definition)
+        tool=(await self.runtime.command(self.user,body))['tool']
+        self.bridge.allowed=False
+        with self.assertRaises(workflow.WorkflowError) as error: await self.runtime.command(self.user,body)
+        self.assertEqual(error.exception.code,'native_access_denied')
+        self.bridge.allowed=True
+        async def changed_reference(*args): return {'reference':{**REF,'revision':2},'schema':deepcopy(SCHEMA)}
+        self.bridge.inspect=changed_reference
+        with self.assertRaises(workflow.WorkflowError) as error:
+            await self.runtime.command(self.user,self.body('tool_submit',tool['revision'],tool_contract_id=tool['id']))
+        self.assertEqual(error.exception.code,'native_version_changed')
+        with self.service._db() as db:self.assertEqual(self.runtime._tool(db,tool['id'])['state'],'draft')
+
+    async def test_status_function_must_belong_to_selected_tool_and_keeps_its_reviewed_version(self):
+        inspected=[]
+        status_reference={**REQUEST_REF,'function':'service_status','schema_hash':'s'*64}
+        async def inspect_registered(actor, tool_id, function):
+            await self.bridge.check(actor,REQUEST_REF)
+            inspected.append((tool_id,function))
+            if tool_id!=REQUEST_REF['tool_id'] or function not in (REQUEST_REF['function'],'service_status'):
+                ops.fail('native_function_missing')
+            return {'reference':deepcopy(status_reference if function=='service_status' else REQUEST_REF),'schema':deepcopy(SCHEMA)}
+        self.bridge.inspect_registered=inspect_registered
+        definition={'system_id':'EMS','kind':'request','name':'등록 상태 확인','reference':deepcopy(REQUEST_REF),'guide_url':'https://guide.invalid/function','responsible_user_id':'bob','status_function':'other_tool_status','output_schema':{'type':'object'}}
+        tool=(await self.runtime.command(self.user,self.body('tool_save',tool=definition)))['tool']
+        with self.assertRaises(workflow.WorkflowError) as error:
+            await self.runtime.command(self.user,self.body('tool_submit',tool['revision'],tool_contract_id=tool['id']))
+        self.assertEqual(error.exception.code,'native_function_missing')
+        self.assertEqual(inspected[-1],(REQUEST_REF['tool_id'],'other_tool_status'))
+        tool=(await self.runtime.command(self.user,self.body('tool_save',tool['revision'],tool={**tool,'status_function':'service_status'})))['tool']
+        tool=(await self.runtime.command(self.user,self.body('tool_submit',tool['revision'],tool_contract_id=tool['id'])))['tool']
+        self.assertEqual(tool['status_reference'],status_reference)
+        self.assertEqual(inspected[-1],(REQUEST_REF['tool_id'],'service_status'))
+        status_reference['schema_hash']='v'*64
+        with self.assertRaises(workflow.WorkflowError) as error:
+            await self.runtime.command(self.users['bob'],self.body('tool_review',tool['revision'],tool_contract_id=tool['id'],decision='approve'))
+        self.assertEqual(error.exception.code,'native_version_changed')
+        with self.service._db() as db:self.assertEqual(self.runtime._tool(db,tool['id'])['state'],'review_requested')
+
+    async def test_tool_submit_and_review_reject_contract_changed_during_native_inspection(self):
+        original_inspect = self.bridge.inspect
+        for action in ('tool_submit', 'tool_review'):
+            with self.subTest(action=action):
+                self.bridge.inspect = original_inspect
+                tool = (await self.runtime.command(self.user, self.body('tool_save', tool={'system_id':'EMS','kind':'read','name':'검사할 원본','reference':deepcopy(REF)})))['tool']
+                if action == 'tool_review':
+                    tool = (await self.runtime.command(self.user, self.body('tool_submit',tool['revision'],tool_contract_id=tool['id'])))['tool']
+                changed = False
+                async def concurrent_edit(*args):
+                    nonlocal changed
+                    checked = await original_inspect(*args)
+                    if not changed:
+                        changed = True
+                        edited = (await self.runtime.command(self.user, self.body('tool_save',tool['revision'],tool={**tool,'name':'검사 중 저장된 새 계약'})))['tool']
+                        if action == 'tool_review':
+                            await self.runtime.command(self.user, self.body('tool_submit',edited['revision'],tool_contract_id=edited['id']))
+                    return {**checked, 'state':'allowed'}
+                self.bridge.inspect = concurrent_edit
+                # Guessing the revision after the concurrent write must not
+                # substitute that uninspected contract for the original one.
+                body = self.body(action,tool['revision']+(2 if action=='tool_review' else 1),tool_contract_id=tool['id'],decision='approve')
+                with self.assertRaises(workflow.WorkflowError) as error:
+                    await self.runtime.command(self.user,body)
+                self.assertEqual(error.exception.code,'revision_conflict')
+                with self.service._db() as db:
+                    stored = self.runtime._tool(db,tool['id'])
+                    self.assertIsNone(self.runtime._receipt(db,self.user,body))
+                self.assertEqual(stored['name'],'검사 중 저장된 새 계약')
+                self.assertEqual(stored['state'],'review_requested' if action=='tool_review' else 'draft')
+                self.assertIsNone(stored['reviewer'])
+        self.assertEqual(self.bridge.calls,[])
+
+
 if __name__=='__main__':unittest.main()

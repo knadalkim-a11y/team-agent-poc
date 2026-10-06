@@ -1,0 +1,27 @@
+{
+  "module": "test_ees_work_figma_layout_native.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 9.278,
+  "tests_run": 2,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 2,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast",
+      "status": "passed"
+    }
+  ]
+}

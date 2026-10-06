@@ -647,8 +647,8 @@ class NativeAuthoringAssetReadTests(unittest.IsolatedAsyncioTestCase):
         package = fixture.directory / "authoring-module"
         package.mkdir()
         for name, content in additions.items():
-            if name.startswith("open_webui/ees_workflow") and name.endswith(".py") or name in (
-                    "open_webui/workflow_seed.json", "open_webui/workflow_policy.json"):
+            if (name.startswith("open_webui/ees_workflow") and name.endswith(".py")) or (
+                    name.startswith("open_webui/workflow_") and name.endswith(".json")):
                 (package / Path(name).name).write_bytes(content)
                 if name.endswith(".py"):
                     self.assertEqual(content, fixture.members[name])

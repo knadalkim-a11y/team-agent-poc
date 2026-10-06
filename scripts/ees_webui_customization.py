@@ -102,7 +102,7 @@ def _allowed_name(name, info=branding.TARGET_INFO):
             and not name.lower().endswith((".pyc", ".pyo")))
 
 
-def _record_rows(content, *, allow_packaging=False, version=branding.VERSION):
+def _record_rows(content, *, allow_packaging=False, version=branding.VERSION, allow_legacy_inventory=False):
     info, app = _version_paths(version)
     record_name = info + "RECORD"
     required = {record_name, info + "METADATA", info + "WHEEL", "open_webui/__init__.py",
@@ -114,7 +114,8 @@ def _record_rows(content, *, allow_packaging=False, version=branding.VERSION):
     if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"}:
         # Previous installations keep their own frontend namespace after the
         # wrapper upgrades. Validate their files before Apply/Restore as well.
-        work_files = (branding.WORK_FILES if version == "0.11.3+ees.13" else
+        current_work_files = branding.WORK_FILES_V13 if allow_legacy_inventory else branding.WORK_FILES
+        work_files = (current_work_files if version == "0.11.3+ees.13" else
                       branding.WORK_FILES_V12 if version == "0.11.3+ees.12" else
                       branding.WORK_FILES_V11 if version == "0.11.3+ees.11" else
                       branding.WORK_FILES_V9 if version in {"0.11.3+ees.9", "0.11.3+ees.10"}
@@ -144,6 +145,10 @@ def _record_rows(content, *, allow_packaging=False, version=branding.VERSION):
             folded.add(name.casefold())
         if not required.issubset(rows) or len(rows) > 10000:
             raise CustomizationError("The complete app, frontend and metadata must be present together.")
+        if allow_legacy_inventory and version == "0.11.3+ees.13":
+            added = set(branding.WORK_FILES) - set(branding.WORK_FILES_V13)
+            if added.intersection(rows) and not added.issubset(rows):
+                raise CustomizationError("The complete app, frontend and metadata must be present together.")
         if any(name.startswith(branding.SOURCE_APP) for name in rows):
             raise CustomizationError("The selected wheel still contains the original frontend location.")
         if any(name.startswith(f"open_webui/frontend/{namespace}/")
@@ -284,7 +289,11 @@ def _check_tree(path, selection, *, partial=False, staging=False):
     record = files[record_name].read_bytes()
     if hashlib.sha256(record).hexdigest() != selection["record_sha256"]:
         raise CustomizationError("The selected program RECORD changed; preserve it for review.")
-    rows = _record_rows(record, version=version)
+    # The recorded hash identifies the exact selected installation. Existing
+    # ees.13 programs may predate the two authoring assets; new incoming wheels
+    # still use the strict current inventory in _wheel_layout. Exact file and
+    # RECORD checks below also cover current programs and interrupted cleanup.
+    rows = _record_rows(record, version=version, allow_legacy_inventory=True)
     if (not set(files).issubset(rows) or (not partial and set(files) != set(rows))):
         raise CustomizationError("The selected program has missing or unexpected files.")
     for name, target in files.items():

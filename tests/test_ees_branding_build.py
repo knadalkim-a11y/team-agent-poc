@@ -147,7 +147,7 @@ class CssCacheIntegrityTests(unittest.TestCase):
 def assert_workflow_package(test, wheel):
     """Resolve the actual emitted sibling imports/resources and native Tool API."""
     probe = r'''
-import asyncio, importlib, importlib.util, sys, types
+import asyncio, importlib, importlib.util, json, sys, types
 from pathlib import Path
 root = Path(sys.argv[1])
 # Only the unrelated CLI parent initializer is isolated. All workflow modules
@@ -186,6 +186,12 @@ async def run():
     empty = await tool.ees_workflow_view(**args)
     assert empty["ok"] and empty["workflows"] == [] and empty["runs"] == [], empty
     assert not empty["capabilities"]["can_author"]
+    ui_state = await service.workspace_state(users["alice"])
+    source_help = json.loads((root / "open_webui/workflow_help.json").read_text(encoding="utf-8"))
+    assert ui_state["help"]["terms"][0]["summary"] == source_help["terms"][0]["summary"]
+    assert "도움말에 없는 내용" in ui_state["help"]["answer_guidance"]["unknown"]
+    examples = json.loads((root / "open_webui/workflow_tool_examples.json").read_text(encoding="utf-8"))
+    assert len(examples) == 4
     # This is an emitted-package persistence contract, not an HTTP approval
     # test. Arrange explicit synthetic work through the internal service;
     # the LLM-visible Tool only reads or offers a local review proposal.
@@ -232,10 +238,13 @@ print("installed_workflow_contract=pass")
             test.assertFalse(any(name.startswith("open_webui/ees_work_demo_ui/") for name in archive.namelist()))
             test.assertEqual(archive.read("open_webui/ees_workflow_tool.py"),
                              (builder.WORK_DIR / "scripts/workflow_tool.py").read_bytes())
+            for name in ("workflow_help.json", "workflow_tool_examples.json"):
+                test.assertEqual(archive.read("open_webui/" + name),
+                                 (builder.WORK_DIR / "scripts" / name).read_bytes())
             for name in ("ees_workflow.py", "ees_workflow_definition.py", "ees_workflow_view.py", "ees_workflow_authoring.py",
                          "ees_workflow_execution.py", "ees_workflow_native.py", "ees_workflow_contract.py",
                          "ees_workflow_workspace.py", "ees_workflow_operations.py", "ees_workflow_model.py",
-                         "ees_workflow_tool.py", "workflow_policy.json"):
+                         "ees_workflow_tool.py", "workflow_policy.json", "workflow_help.json", "workflow_tool_examples.json"):
                 target = root / "open_webui" / name
                 target.parent.mkdir(exist_ok=True)
                 target.write_bytes(archive.read("open_webui/" + name))
@@ -374,13 +383,17 @@ def fixture_members():
         "open_webui/frontend/static/custom.css": b"/* original frontend style stays intact */\n",
     }
     members["open_webui/utils/middleware.py"] = b"""async def process_chat_payload(request, form_data, user, metadata, model):
+    payload_tools = form_data.get('tools', None)
     tool_ids = form_data.pop('tool_ids', None)
     tools_dict = {}
-    if tool_ids:
-        if True:
+    if payload_tools is None:
+        if tool_ids:
             tools_dict = await get_tools(request, tool_ids, user, {})
             if mcp_tools_dict:
                 tools_dict.update(mcp_tools_dict)
+        tools_dict.update(await get_builtin_tools(request))
+        if tools_dict:
+            metadata['tools'] = tools_dict
     return form_data, tools_dict
 """
     members.update(guard_fixture_members())
@@ -479,6 +492,9 @@ def assert_asset_guard_patches(test, built):
     test.assertIn("EES_WORK_NATIVE_CHAT_CONTEXT = 1", middleware)
     test.assertLess(middleware.index("await select_chat_work_tools"), middleware.index("await get_tools("))
     test.assertGreater(middleware.index("wrap_chat_work_tools(request, user, tools_dict)"), middleware.index("await get_tools("))
+    test.assertGreater(middleware.index("wrap_chat_work_tools(request, user, tools_dict)"), middleware.index("await get_builtin_tools("))
+    test.assertLess(middleware.index("wrap_chat_work_tools(request, user, tools_dict)"), middleware.index("metadata['tools'] = tools_dict"))
+    test.assertIn("explicit_tools=payload_tools is not None", middleware)
     main = built.read("open_webui/main.py").decode()
     tree = ast.parse(main)
     life = next(node for node in tree.body if isinstance(node, ast.AsyncFunctionDef) and node.name == "lifespan")

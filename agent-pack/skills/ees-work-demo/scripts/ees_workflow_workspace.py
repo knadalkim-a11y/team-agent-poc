@@ -17,6 +17,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .ees_workflow_authoring import WorkflowError, _value, _resolve, _now, _hash, _fail
 from .ees_workflow_definition import SYSTEMS, CATEGORIES, IDENTIFIER, MAX_DOCUMENT_BYTES, _dump
+from .ees_workflow_view import workflow_help
 
 INPUT_TYPES = ('text', 'number', 'datetime', 'single', 'multi', 'list', 'person', 'boolean')
 BLOCKS = ('values', 'schedule', 'checklist', 'list_confirm', 'item_verdict', 'ai_review', 'human_confirm', 'change_request')
@@ -1102,7 +1103,7 @@ class WorkspaceMixin:
                     except WorkflowError: pass
                 capabilities['can_author'] = bool(capabilities['managed_systems'])
                 access = [dict(row) | {'roles': json.loads(row['roles'])} for row in db.execute('SELECT * FROM work_access ORDER BY id')] if capabilities['is_admin'] else []
-                return {'ok': True, 'protocol': 2, 'capabilities': capabilities, 'systems': systems, 'factories': factories,
+                return {'ok': True, 'protocol': 2, 'help': workflow_help(), 'capabilities': capabilities, 'systems': systems, 'factories': factories,
                         'workflows': workflows, 'runs': runs, 'workflow': selected_workflow, 'run': selected_run,
                         'workflow_active_runs': workflow_active_runs,
                         'my_work': my_work, 'my_work_count': len(my_work), 'access': access, 'people': people, 'native_groups': native_groups,

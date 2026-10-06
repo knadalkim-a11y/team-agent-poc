@@ -1,0 +1,33 @@
+{
+  "original_filename": "easy-tools-revision-before.log",
+  "original_sha256": "bdef99cf0b3792187ca169699155b9e134f41f896ae1ad4c6ca954b084bd8704",
+  "encoding": "UTF-8",
+  "lines": [
+    "test_tool_submit_and_review_reject_contract_changed_during_native_inspection (test_ees_work_operations.RuntimeTests.test_tool_submit_and_review_reject_contract_changed_during_native_inspection) ... \n",
+    "  test_tool_submit_and_review_reject_contract_changed_during_native_inspection (test_ees_work_operations.RuntimeTests.test_tool_submit_and_review_reject_contract_changed_during_native_inspection) (action='tool_submit') ... FAIL\n",
+    "  test_tool_submit_and_review_reject_contract_changed_during_native_inspection (test_ees_work_operations.RuntimeTests.test_tool_submit_and_review_reject_contract_changed_during_native_inspection) (action='tool_review') ... FAIL\n",
+    "\n",
+    "======================================================================\n",
+    "FAIL: test_tool_submit_and_review_reject_contract_changed_during_native_inspection (test_ees_work_operations.RuntimeTests.test_tool_submit_and_review_reject_contract_changed_during_native_inspection) (action='tool_submit')\n",
+    "----------------------------------------------------------------------\n",
+    "Traceback (most recent call last):\n",
+    "  File \"/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_operations.py\", line 949, in test_tool_submit_and_review_reject_contract_changed_during_native_inspection\n",
+    "    with self.assertRaises(workflow.WorkflowError) as error:\n",
+    "         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+    "AssertionError: WorkflowError not raised\n",
+    "\n",
+    "======================================================================\n",
+    "FAIL: test_tool_submit_and_review_reject_contract_changed_during_native_inspection (test_ees_work_operations.RuntimeTests.test_tool_submit_and_review_reject_contract_changed_during_native_inspection) (action='tool_review')\n",
+    "----------------------------------------------------------------------\n",
+    "Traceback (most recent call last):\n",
+    "  File \"/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_operations.py\", line 949, in test_tool_submit_and_review_reject_contract_changed_during_native_inspection\n",
+    "    with self.assertRaises(workflow.WorkflowError) as error:\n",
+    "         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+    "AssertionError: WorkflowError not raised\n",
+    "\n",
+    "----------------------------------------------------------------------\n",
+    "Ran 1 test in 0.013s\n",
+    "\n",
+    "FAILED (failures=2)\n"
+  ]
+}
