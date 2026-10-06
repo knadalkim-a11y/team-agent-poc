@@ -1,0 +1,49 @@
+{
+  "initial_evidence": "integrated-test_missing_random_uuid_creates_and_saves_draft_in_native_ui-failure.json",
+  "browser_cleanup_diagnostics": {
+    "stage": "browser_handshake",
+    "elapsed_ms": 85.22646800338407,
+    "pid": 8,
+    "exit_code": -11,
+    "browser_version": null,
+    "target_id": null,
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 1,
+      "method": "Browser.getVersion",
+      "session_attached": false,
+      "timeout_seconds": 29.924739562997274,
+      "elapsed_ms": 8.966542001871858,
+      "completed": false
+    },
+    "recent_responses": [],
+    "stderr_tail": "",
+    "first_failure": {
+      "stage": "browser_handshake",
+      "elapsed_ms": 84.23760500227218,
+      "pid": 8,
+      "exit_code": -11,
+      "browser_version": null,
+      "target_id": null,
+      "session_attached": false,
+      "buffer_bytes": 0,
+      "last_command": {
+        "id": 1,
+        "method": "Browser.getVersion",
+        "session_attached": false,
+        "timeout_seconds": 29.924739562997274,
+        "elapsed_ms": 8.966542001871858,
+        "completed": false
+      },
+      "recent_responses": [],
+      "stderr_tail": "",
+      "browser_startup": null,
+      "bootstrap_observation": null,
+      "error_type": "AssertionError",
+      "response_timeout": false
+    },
+    "browser_startup": null,
+    "bootstrap_observation": null
+  }
+}

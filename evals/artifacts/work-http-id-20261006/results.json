@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-06",
+  "base": "a454e9e01b40d6d89a62ca93d9daa12af77de284",
+  "branch": "fix/work-http-id-20261006",
+  "environment": {
+    "python": "3.12.14",
+    "node": "v24.19.0",
+    "chrome": "153.0.8010.52",
+    "upstream": "Open WebUI 0.11.3"
+  },
+  "source_sha256": {
+    "branding/ees/ui/ees-work-view.js": "5bc3995c3cb697cc3f1b168a8317bfa2c311627aa47f2bef9d7072412622e7fc",
+    "branding/ees/ui/ees-work-designer.js": "afdd7f5a8f440d0339fc263e7ab744a17f994994542196fd1a546c0e1455155c",
+    "branding/ees/ui/ees-work-launcher.js": "c1e4ab8d96c8808bd05dab9e26d3b2c11eb176bdf9b0d74085ec6b0683b024ec",
+    "tests/test_ees_work_authoring_ui.cjs": "8c9e698f4b0510999d0e870af8f0bcb1a906bbc55c75d96064ca2bdfc32974d5",
+    "tests/test_ees_work_figma_runtime_ui.cjs": "8a612abe55a527fd20d11c734cd8d961597c20ef4b32a83e08028e8c04d82fd3",
+    "tests/test_ees_work_figma_authoring_native.py": "b3e5755f0c2acdb4e433bd283349b1cf01b0f257fe0a7955bf34c3df5b626f59"
+  },
+  "commands": {
+    "node": "node --test tests/test_ees_work_authoring_ui.cjs tests/test_ees_work_figma_runtime_ui.cjs",
+    "build": "python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/http-id-fixed",
+    "native": "EES_TEST_CHROME=\"$PWD/dist/tools/chrome-headless-shell-linux64/chrome-headless-shell\" EES_TEST_BRANDING_DIR=\"$PWD/dist/http-id-fixed\" EES_TEST_SCREENSHOT_DIR=\"$PWD/evals/artifacts/work-http-id-20261006/native-final\" PYTHONPATH=tests:. python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_missing_random_uuid_creates_and_saves_draft_in_native_ui -v",
+    "packaging": "PYTHONPATH=tests:. python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_branding_build.BrandingBuildTests.test_launcher_assembly_order_is_private_and_has_one_runtime_asset test_ees_branding_build.BrandingBuildTests.test_same_version_ui_change_updates_only_its_content_cache_key -v",
+    "audit": "python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --audit --output /workspace/scratch/abe8513396cb/uuid-delivery-audit"
+  },
+  "results": {
+    "node_before": {
+      "pass": 103,
+      "fail": 7
+    },
+    "node_after": {
+      "pass": 110,
+      "fail": 0,
+      "skip": 0
+    },
+    "native_final": {
+      "pass": 1,
+      "duration_seconds": 2.329,
+      "scope": "Built upstream Native browser UI + real temporary workflow SQLite; synthetic session/chat/model. randomUUID removed only in test."
+    },
+    "packaging": {
+      "pass": 2,
+      "duration_seconds": 0.173
+    },
+    "delivery_audit": {
+      "old_ids": 1332,
+      "current_ids": 1285,
+      "errors": []
+    }
+  },
+  "browser_incident": {
+    "first": "Executable unavailable; 0 tests",
+    "second": "Chrome exit -11 before handshake",
+    "observed_binary_bytes": 52232192,
+    "archive_binary_bytes": 197258568,
+    "action": "Re-extracted pinned official archive, checked member length and executable mode; no product change",
+    "cause": "Unknown; successful re-extraction is recovery, not root-cause resolution",
+    "third": "UI create/add/save passed; reload assumed author panel selection restored. Test now explicitly reopens author mode and same draft.",
+    "final": "PASS"
+  },
+  "inhouse_deployment": "Not performed",
+  "ci": "Not yet published; exact HEAD automatic run will be recorded on the Draft PR"
+}

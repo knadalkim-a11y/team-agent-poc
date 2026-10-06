@@ -4,6 +4,17 @@ const workUI = (() => {
   const $ = (selector, parent = document) => parent?.querySelector(selector) || null;
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const clone = value => value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+  function newId(){
+    const provider=globalThis.crypto;
+    if(typeof provider?.randomUUID==='function')return provider.randomUUID();
+    // Intranet HTTP has getRandomValues but may not expose randomUUID.
+    // Keep UUID v4 request/node IDs without weakening randomness or patching Native globals.
+    if(typeof provider?.getRandomValues!=='function')throw new Error('요청 번호를 만들 수 없습니다. 지원되는 브라우저에서 다시 시도해 주세요.');
+    const bytes=provider.getRandomValues(new Uint8Array(16));
+    bytes[6]=(bytes[6]&0x0f)|0x40;bytes[8]=(bytes[8]&0x3f)|0x80;
+    const hex=Array.from(bytes,value=>value.toString(16).padStart(2,'0')).join('');
+    return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+  }
   const categories = {ops:'운영',setup:'셋업',incident:'장애대응'};
   const levels = {p:'업무 절차',t:'단계',j:'작업'};
   const statuses = {open:'진행 중',unstarted:'미실행',pending:'대기',scheduled:'예약',ready:'시작 가능',running:'실행 중',in_progress:'진행 중',awaiting_input:'입력 필요',awaiting_confirmation:'사람 확인 필요',review_required:'다시 검토 필요',completed:'완료',succeeded:'도구 성공',success:'도구 성공',failed:'실패',partial:'부분 결과',unknown:'결과 미확인',missed:'예약 놓침',excluded:'적용 제외',cancelled:'취소',blocked:'진행 조건 확인',draft:'초안',published:'게시됨',review:'검토 필요',waiting:'대기',waiting_input:'입력 필요',waiting_confirmation:'사람 확인 필요',reported_complete:'완료 보고',accepted:'접수',requested:'요청 보냄',effect_verified:'효과 확인'};
@@ -31,7 +42,7 @@ const workUI = (() => {
       element.showModal();element.querySelector('[data-dialog-close]').focus({preventScroll:true});
     });
   }
-  return Object.freeze({$,esc,clone,categories,levels,statuses,icon,button,finished,lineage,badge,safeURL,time,dialog,closeDialog});
+  return Object.freeze({$,esc,clone,newId,categories,levels,statuses,icon,button,finished,lineage,badge,safeURL,time,dialog,closeDialog});
 })();
 
 function workStatusHTML(status,label=''){

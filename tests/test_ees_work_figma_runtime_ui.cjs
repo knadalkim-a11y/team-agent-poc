@@ -1,6 +1,6 @@
 /* Reconstructed from recorded source reads and patches after workspace loss.
  * These are controller/renderer contracts, not Native product evidence. */
-const test=require('node:test'),assert=require('node:assert/strict');
+const test=require('node:test'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const {renderer,run,controller,deferred}=require('./ees_workspace_ui_fixture.cjs');
 const html=(source,values={})=>run(renderer(values),source);
 
@@ -220,4 +220,35 @@ test('missing evidence and external request URLs never become local undefined li
  assert.doesNotMatch(html('workChecklistHTML([{id:"a",name:"A"}],{})'),/근거 열기|href=/);
  assert.doesNotMatch(html('workRequestHTML({},{})'),/EES에서 보기|href=/);
  assert.match(html('workChecklistHTML([{id:"a",url:"https://example.invalid/evidence"}],{})'),/https:\/\/example.invalid\/evidence/);
+});
+
+
+const uuidV4=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const httpCrypto=()=>({getRandomValues:bytes=>crypto.webcrypto.getRandomValues(bytes)});
+test('shared ID helper prefers the native randomUUID with its receiver',()=>{
+ const expected='12345678-1234-4234-8234-123456789abc';let calls=0;
+ const provider={randomUUID(){assert.equal(this,provider);calls++;return expected;},getRandomValues(){assert.fail('native UUID must be preferred');}};
+ assert.equal(html('workUI.newId()',{crypto:provider}),expected);assert.equal(calls,1);
+});
+test('shared ID fallback sets UUID version and variant while preserving random bytes',()=>{
+ for(const fill of [0,255]){
+  let calls=0;const provider={getRandomValues(bytes){assert.equal(this,provider);assert.equal(bytes.constructor.name,'Uint8Array');assert.equal(bytes.length,16);calls++;bytes.fill(fill);return bytes;}};
+  const id=html('workUI.newId()',{crypto:provider});assert.equal(id,fill?'ffffffff-ffff-4fff-bfff-ffffffffffff':'00000000-0000-4000-8000-000000000000');assert.equal(calls,1);
+ }
+ const context=renderer({crypto:httpCrypto()}),ids=Array.from({length:128},()=>run(context,'workUI.newId()'));
+ ids.forEach(id=>assert.match(id,uuidV4));assert.equal(new Set(ids).size,ids.length);
+});
+test('shared ID generation refuses missing secure randomness',()=>{
+ for(const unavailable of [undefined,{}, {randomUUID:null,getRandomValues:null}])assert.throws(()=>html('workUI.newId()',{crypto:unavailable}),/[가-힣]/);
+ const failure=new Error('random source failed');assert.throws(()=>html('workUI.newId()',{crypto:{getRandomValues(){throw failure;}}}),error=>error===failure);
+});
+test('missing randomUUID preserves runtime command receipt and first-chat boundaries',async()=>{
+ const h=controller();h.context.crypto=httpCrypto();let attempts=0;
+ h.setReply(()=>{if(!attempts++)throw new Error('response lost');return {ok:true};});
+ const body={action:'save_inputs',run_id:'r',expected_revision:4,inputs:{value:false}};
+ await assert.rejects(h.api.command(body),/response lost/);await h.api.command(body);assert.match(h.calls[0].body.request_id,uuidV4);assert.deepEqual(h.calls[0].body,h.calls[1].body);
+ await h.api.command({...body,inputs:{value:true}});assert.notEqual(h.calls[2].body.request_id,h.calls[0].body.request_id);
+ h.api.setSelection({mode:'author',workflow_id:'w'});h.api.setState({workflow:{revision:2}});h.designer.readDraft=()=>({revision:2,definition:{id:'w',name:'draft'}});
+ const source=h.api.context(),creation=h.api.beginChatCreation();assert.match(creation,uuidV4);h.api.finishChatCreation(creation,'native-new');h.context.location.pathname='/c/native-new';
+ assert.equal(h.api.acceptNativeProposal('native-new',{context_id:source}).ok,true);h.setAuth('another-account');assert.equal(h.api.acceptNativeProposal('native-new',{context_id:source}).ok,false);
 });
