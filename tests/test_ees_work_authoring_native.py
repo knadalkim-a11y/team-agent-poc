@@ -12,10 +12,12 @@ from copy import deepcopy
 import os
 from pathlib import Path
 import shutil
+import sys
 import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 from uuid import uuid4
 
 
@@ -59,6 +61,138 @@ class NativeAccountAPITests(unittest.TestCase):
                               {"role": "user"}, self.admin["token"])
         self.assertEqual(result.status_code, 200, result.text)
         self.assertEqual(result.json()["role"], "user")
+
+    def native_menu_capabilities(self, account):
+        response = self.request("GET", "/api/ees-work/workspace", token=account["token"])
+        self.assertEqual(response.status_code, 200, response.text)
+        capabilities = response.json()["capabilities"]
+        self.assertEqual(set(capabilities["native_access"]),
+                         {"models", "knowledge", "prompts", "skills", "tools", "admin"})
+        self.assertTrue(all(type(value) is bool for value in capabilities["native_access"].values()))
+        self.assertIs(type(capabilities["native_access_available"]), bool)
+        return capabilities
+
+    def install_menu_workflow(self):
+        if not os.environ.get("EES_TEST_BRANDING_DIR"):
+            self.skipTest("Built EES wheel is required")
+        self.fixture.run(self.fixture.install_workflow())
+
+    def test_workspace_native_menu_reads_current_defaults_groups_and_revocation(self):
+        """Current Native grants, not login snapshots or EES roles, drive menus."""
+        self.install_menu_workflow()
+        account = self.signup()
+        self.assertEqual(self.request("GET", "/api/ees-work/workspace", token=account["token"]).status_code, 401)
+        self.approve(account)
+        caps = self.native_menu_capabilities(account)
+        self.assertTrue(caps["native_access_available"])
+        self.assertFalse(any(caps["native_access"].values()))
+        self.assertFalse(caps["can_author"])
+        admin = self.native_menu_capabilities(self.admin)
+        self.assertTrue(all(admin["native_access"].values()))
+
+        grant = self.request("POST", "/api/v1/groups/create", {
+            "name": "Native menu grants", "description": "synthetic",
+            "permissions": {"workspace": {"models": True, "skills": True, "knowledge": False, "prompts": False}}},
+            self.admin["token"])
+        self.assertEqual(grant.status_code, 200, grant.text)
+        group_id = grant.json()["id"]
+        assigned = self.request("POST", "/api/v1/groups/id/" + group_id + "/users/add",
+                                {"user_ids": [account["id"]]}, self.admin["token"])
+        self.assertEqual(assigned.status_code, 200, assigned.text)
+        caps = self.native_menu_capabilities(account)
+        self.assertEqual({key for key, value in caps["native_access"].items() if value}, {"models", "skills"})
+        self.assertFalse(caps["can_author"], "Native group permission must not grant EES authorship")
+
+        defaults = self.request("GET", "/api/v1/users/default/permissions", token=self.admin["token"])
+        self.assertEqual(defaults.status_code, 200, defaults.text)
+        changed = defaults.json()
+        changed["workspace"].update(knowledge=True, prompts=True, models_import=True)
+        saved = self.request("POST", "/api/v1/users/default/permissions", changed, self.admin["token"])
+        self.assertEqual(saved.status_code, 200, saved.text)
+        caps = self.native_menu_capabilities(account)
+        self.assertEqual({key for key, value in caps["native_access"].items() if value},
+                         {"models", "skills", "knowledge", "prompts"}, "Group false does not override default true")
+
+        removed = self.request("POST", "/api/v1/groups/id/" + group_id + "/users/remove",
+                               {"user_ids": [account["id"]]}, self.admin["token"])
+        self.assertEqual(removed.status_code, 200, removed.text)
+        caps = self.native_menu_capabilities(account)
+        self.assertEqual({key for key, value in caps["native_access"].items() if value}, {"knowledge", "prompts"})
+        self.assertFalse(caps["native_access"]["models"], "Import permission alone is not Native workspace menu access")
+        changed["workspace"].update(knowledge=False, prompts=False)
+        saved = self.request("POST", "/api/v1/users/default/permissions", changed, self.admin["token"])
+        self.assertEqual(saved.status_code, 200, saved.text)
+        self.assertFalse(any(self.native_menu_capabilities(account)["native_access"].values()))
+        changed["workspace"]["tools"] = True
+        saved = self.request("POST", "/api/v1/users/default/permissions", changed, self.admin["token"])
+        self.assertEqual(saved.status_code, 200, saved.text)
+        caps = self.native_menu_capabilities(account)
+        self.assertEqual({key for key, value in caps["native_access"].items() if value}, {"tools"})
+        self.assertFalse(caps["can_author"], "D9 includes tools-only users without EES author grants")
+        self.assertFalse(caps["is_admin"])
+
+    def test_workspace_native_menu_tools_plugin_and_provider_failure_keep_work_separate(self):
+        self.install_menu_workflow()
+        account = self.signup()
+        self.approve(account)
+        linked = self.request("POST", "/api/ees-work/workspace/command", {
+            "action": "save_access", "system_id": "EMS", "factory_id": "*", "expected_revision": 0,
+            "request_id": str(uuid4()), "principal_kind": "user", "principal_id": account["id"],
+            "roles": ["manager"]}, self.admin["token"])
+        self.assertEqual(linked.status_code, 200, linked.text)
+        caps = self.native_menu_capabilities(account)
+        self.assertTrue(caps["can_author"])
+        self.assertFalse(any(caps["native_access"].values()))
+
+        defaults = self.request("GET", "/api/v1/users/default/permissions", token=self.admin["token"]).json()
+        defaults["workspace"]["tools"] = True
+        saved = self.request("POST", "/api/v1/users/default/permissions", defaults, self.admin["token"])
+        self.assertEqual(saved.status_code, 200, saved.text)
+        caps = self.native_menu_capabilities(account)
+        self.assertEqual({key for key, value in caps["native_access"].items() if value}, {"tools"})
+        self.assertFalse(caps["is_admin"])
+        with patch.object(sys.modules["open_webui.env"], "ENABLE_PLUGINS", False):
+            self.assertFalse(any(self.native_menu_capabilities(account)["native_access"].values()))
+            admin = self.native_menu_capabilities(self.admin)
+            self.assertFalse(admin["native_access"]["tools"])
+            self.assertTrue(admin["native_access"]["admin"])
+
+        original_get = self.fixture.config.get
+
+        async def unavailable(key, *args, **kwargs):
+            if key == "user.permissions":
+                raise RuntimeError("synthetic secret diagnostic must never reach the response")
+            return await original_get(key, *args, **kwargs)
+
+        with patch.object(self.fixture.config, "get", unavailable):
+            caps = self.native_menu_capabilities(account)
+        self.assertFalse(any(caps["native_access"].values()))
+        self.assertFalse(caps["native_access_available"])
+        self.assertTrue(caps["can_author"])
+        self.assertNotIn("synthetic secret", json.dumps(caps))
+        self.assertTrue(self.native_menu_capabilities(account)["native_access"]["tools"], "Recovery is read afresh")
+
+    def test_workspace_native_menu_rechecks_pending_during_permission_lookup(self):
+        self.install_menu_workflow()
+        account = self.signup()
+        self.approve(account)
+        original_permission = self.fixture.permissions.has_permission
+        revoked = False
+
+        async def revoke_during_lookup(user_id, *args, **kwargs):
+            nonlocal revoked
+            result = await original_permission(user_id, *args, **kwargs)
+            if not revoked:
+                revoked = True
+                await self.fixture.users.Users.update_user_by_id(account["id"], {"role": "pending"})
+            return result
+
+        with patch.object(self.fixture.permissions, "has_permission", revoke_during_lookup):
+            response = self.request("GET", "/api/ees-work/workspace", token=account["token"])
+        self.assertTrue(revoked)
+        self.assertEqual(response.status_code, 401, response.text)
+        self.assertEqual(response.json()["error"]["code"], "unauthorized")
+        self.assertNotIn("capabilities", response.json())
 
     def test_native_signup_pending_no_membership_and_closed_registration(self):
         """NU-01/02: actual signup ignores client role; closed API rejects."""

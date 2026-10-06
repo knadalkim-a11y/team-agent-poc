@@ -1,0 +1,403 @@
+{
+  "schema_version": 1,
+  "reviewed_at_utc": "2026-10-06T08:11:08.466969+00:00",
+  "build": "menu-c15 build4-final",
+  "result": "pass within reviewed visual scope; documented SVG scale differences retained",
+  "scope": "Read-only review of existing build4 PNGs and computed DOM measurements at 1920x1080; no new tests or source edits. Actual built Native UI uses synthetic sessions/capability fixtures. This visual review does not certify company deployment or actual intranet account ACL.",
+  "figma_refs": [
+    "1046:2124",
+    "1046:2296",
+    "1046:2317",
+    "1046:2318",
+    "1046:2359"
+  ],
+  "functional_run_separate_evidence": {
+    "source": "result.json",
+    "sha256": "81570e0644edce599a58c303c96df22dd768b2666cae05794b4d10d16e256db8",
+    "complete": true,
+    "successful": true,
+    "tests_run": 5,
+    "counts": {
+      "passed": 5
+    }
+  },
+  "first_failure_preserved": {
+    "build": "build3-first",
+    "review_name": "visual-review-build3-first.json",
+    "review_sha256": "646a05716b0d947e9f0fd939e9b0f2774c50d269d12baa30fcd0dc4be16ac19f",
+    "findings": [
+      "span-mask flex growth shifted four menu icons and labels",
+      "knowledge entry used workflow icon",
+      "tools-only right-panel guidance contradicted empty left menu"
+    ],
+    "first_pngs_unchanged": true
+  },
+  "resolved_findings": [
+    {
+      "id": "mask-icon-flex-growth",
+      "fix": "Add flex:0 0 16px to .ew-nav-group .ew-nav-button>.ew-icon",
+      "result": "All nine administrator rows now have icon left x16, width16, height16, flex0 0 16px and label x42; PNG confirms aligned icon/label columns.",
+      "items": [
+        {
+          "label": "업무 절차",
+          "row_height": 36,
+          "row_font": "500 14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "icon": {
+            "x": 16,
+            "width": 16,
+            "height": 16,
+            "flex": "0 0 16px",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "mask_asset": null,
+          "label_x": 42,
+          "native_name": "0",
+          "native_name_font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif"
+        },
+        {
+          "label": "도구",
+          "row_height": 36,
+          "row_font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "icon": {
+            "x": 16,
+            "width": 16,
+            "height": 16,
+            "flex": "0 0 16px",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "mask_asset": null,
+          "label_x": 42,
+          "native_name": "0",
+          "native_name_font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif"
+        },
+        {
+          "label": "스킬·지침",
+          "row_height": 36,
+          "row_font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "icon": {
+            "x": 16,
+            "width": 16,
+            "height": 16,
+            "flex": "0 0 16px",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "mask_asset": null,
+          "label_x": 42,
+          "native_name": "스킬",
+          "native_name_font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif"
+        },
+        {
+          "label": "AI 도우미",
+          "row_height": 36,
+          "row_font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "icon": {
+            "x": 16,
+            "width": 16,
+            "height": 16,
+            "flex": "0 0 16px",
+            "background": "rgb(111, 113, 122)"
+          },
+          "mask_asset": "51602.svg",
+          "label_x": 42,
+          "native_name": "모델",
+          "native_name_font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif"
+        },
+        {
+          "label": "참고 문서",
+          "row_height": 36,
+          "row_font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "icon": {
+            "x": 16,
+            "width": 16,
+            "height": 16,
+            "flex": "0 0 16px",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "mask_asset": null,
+          "label_x": 42,
+          "native_name": "지식",
+          "native_name_font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif"
+        },
+        {
+          "label": "빠른 문장",
+          "row_height": 36,
+          "row_font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "icon": {
+            "x": 16,
+            "width": 16,
+            "height": 16,
+            "flex": "0 0 16px",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "mask_asset": null,
+          "label_x": 42,
+          "native_name": "프롬프트",
+          "native_name_font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif"
+        },
+        {
+          "label": "기능 연결",
+          "row_height": 36,
+          "row_font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "icon": {
+            "x": 16,
+            "width": 16,
+            "height": 16,
+            "flex": "0 0 16px",
+            "background": "rgb(111, 113, 122)"
+          },
+          "mask_asset": "f6bbc.svg",
+          "label_x": 42,
+          "native_name": "도구",
+          "native_name_font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif"
+        },
+        {
+          "label": "공장·접근 범위",
+          "row_height": 36,
+          "row_font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "icon": {
+            "x": 16,
+            "width": 16,
+            "height": 16,
+            "flex": "0 0 16px",
+            "background": "rgb(111, 113, 122)"
+          },
+          "mask_asset": "40095.svg",
+          "label_x": 42,
+          "native_name": null,
+          "native_name_font": null
+        },
+        {
+          "label": "관리자 설정",
+          "row_height": 36,
+          "row_font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "icon": {
+            "x": 16,
+            "width": 16,
+            "height": 16,
+            "flex": "0 0 16px",
+            "background": "rgb(111, 113, 122)"
+          },
+          "mask_asset": "88026.svg",
+          "label_x": 42,
+          "native_name": "관리자",
+          "native_name_font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif"
+        }
+      ]
+    },
+    {
+      "id": "knowledge-icon-mapping",
+      "fix": "Use exact existing file-text730b1.svg instead of workflow e8a37.svg",
+      "result": "Screenshot shows file-text icon in the same x16/16px slot. Fixed view target points to730b1; original repo asset bytes unchanged.",
+      "figma_icon_node": "1046:2318",
+      "repo_asset": "branding/ees/ui/v4/730b1.svg"
+    },
+    {
+      "id": "tools-only-panel-guidance",
+      "fix": "Use an empty-state sentence consistent with the empty left menu",
+      "result": "워크스페이스\n닫기\n\n현재 계정으로 EES Work에서 열 수 있는 항목이 없습니다.",
+      "native_menu_items": 0
+    }
+  ],
+  "captions": [
+    {
+      "text": "업무 만들기",
+      "layout": {
+        "x": 8,
+        "y": 176,
+        "bottom": 202,
+        "width": 239,
+        "height": 26,
+        "display": "block",
+        "visibility": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "font": "500 12px / 16px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+        "maskImage": "none",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    },
+    {
+      "text": "Open WebUI에서 열기",
+      "layout": {
+        "x": 8,
+        "y": 275,
+        "bottom": 311,
+        "width": 239,
+        "height": 36,
+        "display": "block",
+        "visibility": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "font": "500 12px / 16px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+        "maskImage": "none",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    },
+    {
+      "text": "관리자만",
+      "layout": {
+        "x": 8,
+        "y": 458,
+        "bottom": 494,
+        "width": 239,
+        "height": 36,
+        "display": "block",
+        "visibility": "visible",
+        "position": "static",
+        "flex": "0 1 auto",
+        "font": "500 12px / 16px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+        "maskImage": "none",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    }
+  ],
+  "return_bar_review": {
+    "skills": {
+      "bar": {
+        "x": 256,
+        "y": 0,
+        "bottom": 44,
+        "width": 1664,
+        "height": 44,
+        "display": "flex",
+        "visibility": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+        "maskImage": "none",
+        "background": "rgb(250, 250, 250)"
+      },
+      "native_workspace": {
+        "x": 256,
+        "y": 84,
+        "bottom": 1080,
+        "width": 1664,
+        "height": 996,
+        "display": "block",
+        "visibility": "visible",
+        "position": "static",
+        "flex": "1 1 0%",
+        "font": "16px / 24px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+        "maskImage": "none",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "nonoverlap": true,
+      "visual_observation": "44px static normal-flow line above original tabs/search/create; tab row and input controls remain visible."
+    },
+    "admin_settings": {
+      "bar": {
+        "x": 577.5,
+        "y": 125,
+        "bottom": 169,
+        "width": 998,
+        "height": 44,
+        "display": "flex",
+        "visibility": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+        "maskImage": "none",
+        "background": "rgb(250, 250, 250)"
+      },
+      "native_settings_tabs": {
+        "x": 317.5,
+        "y": 109,
+        "bottom": 971,
+        "width": 240,
+        "height": 862,
+        "display": "flex",
+        "visibility": "visible",
+        "position": "static",
+        "flex": "0 0 auto",
+        "font": "16px / 24px -apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+        "maskImage": "none",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      "visual_observation": "44px static normal-flow line at top of settings content; left settings tabs remain separate and Native input/toggle/save controls are visible without bar overlap."
+    }
+  },
+  "role_rendering_observations": [
+    "Administrator shows three groups and all defined menu labels/right-side Native names.",
+    "Author fixture shows EES creation plus authorized skills/prompts only, no administrator group.",
+    "Work-only member has no workspace switch.",
+    "Tools-only non-admin has workspace switch and consistent empty-state guidance."
+  ],
+  "known_asset_deviation": {
+    "color": "CSS mask uses original SVG alpha and target EES tertiary/brand colors. Measured mask navigation color is rgb(111,113,122).",
+    "sources_unchanged": true,
+    "scale_differences": [
+      {
+        "slot": "models",
+        "source": "51602.svg",
+        "intrinsic_px": 15,
+        "display_px": 16,
+        "stroke_scale": 1.0666666666666667
+      },
+      {
+        "slot": "return",
+        "source": "eb94a.svg",
+        "intrinsic_px": 14,
+        "display_px": 16,
+        "stroke_scale": 1.1428571428571428
+      }
+    ],
+    "other_masks": [
+      "tools:f6bbc.svg16px",
+      "factory:40095.svg16px",
+      "admin:88026.svg16px"
+    ],
+    "claim": "Five newly supplied Figma SVG downloads failed; existing-vector reuse is documented, exact original vector-byte or full-fidelity equivalence is not claimed."
+  },
+  "blocking_visual_findings_in_reviewed_scope": [],
+  "reviewed_artifacts": [
+    {
+      "name": "menu-c15-admin-menu.png",
+      "sha256": "13416a9660424952ca4a3ba227a3d01d2936b6daa7ed0fbb70d2827d6de71929"
+    },
+    {
+      "name": "menu-c15-admin-menu-dom.json",
+      "sha256": "9d75e908a11ff1d9c3825fd7590fc482c770f01cb77384eda3147de8517153dc"
+    },
+    {
+      "name": "menu-c15-author-menu.png",
+      "sha256": "74eea17e67128f4e113540f04b38393e27370fce82325da60be0589ec3dd82fb"
+    },
+    {
+      "name": "menu-c15-author-menu-dom.json",
+      "sha256": "d9ccc963ea21dc3db8494faca5df7086c42fd9299fc104a32cfd6e9707944f87"
+    },
+    {
+      "name": "menu-c15-member-work-only.png",
+      "sha256": "818bfc1ef33ff1d8a9620bb1d6f90254791275be199e4e78abc9bb063ef822bf"
+    },
+    {
+      "name": "menu-c15-member-work-only-dom.json",
+      "sha256": "8f38de50e377b0de11ff9ba21fef9cb2c5a163c587ad216cc8b0e8d9255be89d"
+    },
+    {
+      "name": "menu-c15-tools-only-menu.png",
+      "sha256": "9326d60c766371e7c4fee6dbb6da9d20727ce771a980ae409414e9607d42468a"
+    },
+    {
+      "name": "menu-c15-tools-only-menu-dom.json",
+      "sha256": "0d28d77995075f1c21365bfb6b4426cf50a0bf2f9afe95881700a26e66851dd7"
+    },
+    {
+      "name": "menu-c15-native-admin-unsaved.png",
+      "sha256": "228b2f99f3401b62366f34d4546a03af6f9137448044433819997fb4667939c0"
+    },
+    {
+      "name": "menu-c15-native-admin-unsaved-dom.json",
+      "sha256": "a9cda270eb3ef2f885e1fb4b22d8176721a553f0cd523d37ee61066da2e0161c"
+    },
+    {
+      "name": "menu-c15-skills-procedure.png",
+      "sha256": "baecc7d5ad14fd802560322f92b940d68dc925115f8e519c68e9c6b3cf3fe895"
+    },
+    {
+      "name": "menu-c15-skills-procedure-dom.json",
+      "sha256": "22e800db08a5b39e3551789cb720764ca62aee008274a59f75492b69a735e44b"
+    }
+  ],
+  "source_modified_during_final_review": false
+}

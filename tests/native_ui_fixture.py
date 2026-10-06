@@ -7,6 +7,8 @@ temporary database. This is not a live-model or in-house authentication test.
 """
 
 import asyncio
+from email import policy
+from email.parser import BytesParser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import mimetypes
@@ -66,6 +68,7 @@ class NativeUIServer(ThreadingHTTPServer):
         self.workspace_response_hold.set()
         self.tool_call = None
         self.completions = []
+        self.uploaded_file = None
         self.authoring_requests = []
         self.authoring_answer = '현재 업무의 목적과 완료 조건을 확인한 뒤 안내를 작성하세요.'
         self.authoring_status = 200
@@ -215,10 +218,21 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                     "ui": {"default_interface_settings": {}}, "code": {"engine": "pyodide"}})
             if path == "/api/v1/auths/":
                 return self.send_content(self.server.user)
+            # Synthetic administrator settings metadata only. The original
+            # compiled Native modal, inputs and routing are served unchanged.
+            if path == "/api/v1/auths/admin/config":
+                return self.send_content({"DEFAULT_INTERFACE_SETTINGS": {},
+                    "WEBUI_URL": "https://fixture.invalid", "RESPONSE_WATERMARK": ""})
+            if path == "/api/events":
+                return self.send_content({"schema": "0.11.3", "events": []})
+            if path == "/api/events/webhooks":
+                return self.send_content([])
             if path in {"/api/v1/users/fixture-admin/profile/image", "/api/v1/models/model/profile/image"}:
                 return self.send_content(self.server.wheel.read("open_webui/frontend/static/user.png"), "image/png")
             if path == "/api/v1/files/fixture-file/process/status":
                 return self.send_content('data: {"status":"completed"}\n\ndata: [DONE]\n\n', "text/event-stream")
+            if path == "/api/v1/files/fixture-file/content" and self.server.uploaded_file:
+                return self.send_content(*self.server.uploaded_file)
             if path == "/api/version":
                 return self.send_content({"version": "0.11.3", "deployment_id": "fixture"})
             if path == "/api/version/updates":
@@ -297,7 +311,7 @@ class NativeUIHandler(BaseHTTPRequestHandler):
             if path.endswith("/info") and path.startswith("/api/v1/users/"):
                 return self.send_content(self.server.user)
             name = "open_webui/frontend" + path
-            if path in {"/", "/auth", "/workspace"} or path.startswith(("/c/", "/workspace/")):
+            if path in {"/", "/auth", "/workspace", "/admin/settings"} or path.startswith(("/c/", "/workspace/")):
                 name = "open_webui/frontend/index.html"
             if name in self.server.assets:
                 return self.send_content(self.server.wheel.read(name), mimetypes.guess_type(name)[0] or "application/octet-stream")
@@ -326,6 +340,18 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                             pending.put(values[0] if values else None)
                 return self.send_content("ok", "text/plain")
             if path == "/api/v1/files/":
+                # Preserve the actual Native multipart upload's bytes and MIME
+                # type so its original image component can render real PNGs.
+                message = BytesParser(policy=policy.default).parsebytes(
+                    ("Content-Type: " + self.headers.get("Content-Type", "") + "\r\n\r\n").encode("utf-8") + raw)
+                part = next((part for part in message.iter_parts() if part.get_filename()), None)
+                if part is not None:
+                    data, content_type = part.get_payload(decode=True), part.get_content_type()
+                    self.server.uploaded_file = (data, content_type)
+                    name = part.get_filename()
+                    return self.send_content({"id": "fixture-file", "user_id": self.server.user["id"],
+                        "filename": name, "meta": {"name": name, "content_type": content_type, "size": len(data)},
+                        "data": {"status": "completed"}, "created_at": 1})
                 return self.send_content({"id": "fixture-file", "user_id": self.server.user["id"],
                     "filename": "attachment.txt", "meta": {"name": "attachment.txt", "content_type": "text/plain", "size": 12},
                     "data": {"status": "completed"}, "created_at": 1})

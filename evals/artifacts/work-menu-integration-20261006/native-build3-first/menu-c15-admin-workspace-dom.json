@@ -1,0 +1,121 @@
+{
+  "scope": "built Native UI; synthetic session and data",
+  "path": "/c/existing-chat",
+  "ready": "complete",
+  "fonts": "loaded",
+  "nativeMount": {
+    "chatPane": true,
+    "sidebarSearch": true,
+    "sidebarToggle": false
+  },
+  "viewport": [
+    1920,
+    1080
+  ],
+  "active": {
+    "tag": "BUTTON",
+    "id": "",
+    "name": ""
+  },
+  "panel": {
+    "text": "워크스페이스\n닫기\n업무 절차\nEMS\n업무 절차 목록\n메뉴 왕복 절차초안 r1\n절차 설정\n\n운영 · EMS · 게시본 없음 · 저장 안 됨\n\n기본 절차\n구조\n실행 방식\n판정 규칙\n게시 기록\n구조\n새 단계\n작업 이름\n설명\n수행 안내\n사람이 정하는 값\n값 이름\t형식\t쓰이는 곳\t저장 범위\t편집\n선언한 값이 없습니다.\n값 추가\n위로\n아래로\n삭제\n변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "html": "<aside id=\"ees-work-panel\" data-ees-work=\"\" aria-label=\"업무 패널\" data-ees-mode=\"author\" aria-busy=\"false\" data-ees-overlay=\"false\" style=\"--ees-panel-width: 480px;\"><header class=\"ew-panel-header\"><strong>워크스페이스</strong><span></span><button type=\"button\" data-action=\"close_panel\" aria-label=\"업무 패널 닫기\" class=\"ew-icon-button\">닫기</button></header><div id=\"ees-work-authoring-panel\" class=\"ew-scroll\"><section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\"><header>업무 절차<small>EMS</small></header><div class=\"ew-author-scroll\"><button type=\"button\" data-author-action=\"list\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees13/v4/eb94a.svg\" alt=\"\" aria-hidden=\"true\">업무 절차 목록</button><div class=\"ew-author-heading\"><h2>메뉴 왕복 절차<span class=\"ew-author-tag\" data-state=\"draft\">초안 r1</span></h2><button type=\"button\" data-author-action=\"edit_workflow\" class=\"ew-author-link\">절차 설정</button></div><p class=\"ew-author-muted\">운영 · EMS · 게시본 없음 · 저장 안 됨</p><nav class=\"ew-author-factories\" aria-label=\"공장별 차이\"><button type=\"button\" data-author-action=\"factory\" data-id=\"\" aria-selected=\"true\">기본 절차</button></nav><nav class=\"ew-author-tabs\" aria-label=\"절차 편집\"><button type=\"button\" data-author-action=\"tab\" data-tab=\"structure\" aria-selected=\"true\">구조</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"schedule\" aria-selected=\"false\">실행 방식</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"rules\" aria-selected=\"false\">판정 규칙</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"history\" aria-selected=\"false\">게시 기록</button></nav><button type=\"button\" data-author-action=\"node\" data-id=\"\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees13/v4/eb94a.svg\" alt=\"\" aria-hidden=\"true\">구조</button><h2>새 단계</h2><form id=\"ew-author-node\"><div class=\"ew-author-fields\"><label>작업 이름<input name=\"name\" value=\"새 단계\" required=\"\" maxlength=\"160\"></label><label>설명<textarea name=\"description\"></textarea></label><label>수행 안내<textarea name=\"instructions\"></textarea></label></div><fieldset><legend>사람이 정하는 값</legend><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan=\"5\">선언한 값이 없습니다.</td></tr></tbody></table><button type=\"button\" data-author-action=\"input_add\" class=\"ew-author-link\"><img class=\"ew-icon\" src=\"/_ees13/v4/7d31f.svg\" alt=\"\" aria-hidden=\"true\">값 추가</button></fieldset><div class=\"ew-author-inline\"><button type=\"button\" data-author-action=\"move_up\">위로</button><button type=\"button\" data-author-action=\"move_down\">아래로</button><button type=\"button\" data-author-action=\"delete_node\">삭제</button></div></form></div><footer><small data-author-status=\"\">변경 있음 · 저장 안 됨</small><button type=\"button\" data-author-action=\"validate\" data-mutation=\"\" disabled=\"\">게시 전 확인</button><button type=\"button\" data-author-action=\"save\" data-mutation=\"\" class=\"ew-primary\">초안 저장</button></footer></section></div><div data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-label=\"업무 패널 너비\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-valuenow=\"480\"></div></aside>"
+  },
+  "authoring": {
+    "text": "업무 절차\nEMS\n업무 절차 목록\n메뉴 왕복 절차초안 r1\n절차 설정\n\n운영 · EMS · 게시본 없음 · 저장 안 됨\n\n기본 절차\n구조\n실행 방식\n판정 규칙\n게시 기록\n구조\n새 단계\n작업 이름\n설명\n수행 안내\n사람이 정하는 값\n값 이름\t형식\t쓰이는 곳\t저장 범위\t편집\n선언한 값이 없습니다.\n값 추가\n위로\n아래로\n삭제\n변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "html": "<section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\"><header>업무 절차<small>EMS</small></header><div class=\"ew-author-scroll\"><button type=\"button\" data-author-action=\"list\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees13/v4/eb94a.svg\" alt=\"\" aria-hidden=\"true\">업무 절차 목록</button><div class=\"ew-author-heading\"><h2>메뉴 왕복 절차<span class=\"ew-author-tag\" data-state=\"draft\">초안 r1</span></h2><button type=\"button\" data-author-action=\"edit_workflow\" class=\"ew-author-link\">절차 설정</button></div><p class=\"ew-author-muted\">운영 · EMS · 게시본 없음 · 저장 안 됨</p><nav class=\"ew-author-factories\" aria-label=\"공장별 차이\"><button type=\"button\" data-author-action=\"factory\" data-id=\"\" aria-selected=\"true\">기본 절차</button></nav><nav class=\"ew-author-tabs\" aria-label=\"절차 편집\"><button type=\"button\" data-author-action=\"tab\" data-tab=\"structure\" aria-selected=\"true\">구조</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"schedule\" aria-selected=\"false\">실행 방식</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"rules\" aria-selected=\"false\">판정 규칙</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"history\" aria-selected=\"false\">게시 기록</button></nav><button type=\"button\" data-author-action=\"node\" data-id=\"\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees13/v4/eb94a.svg\" alt=\"\" aria-hidden=\"true\">구조</button><h2>새 단계</h2><form id=\"ew-author-node\"><div class=\"ew-author-fields\"><label>작업 이름<input name=\"name\" value=\"새 단계\" required=\"\" maxlength=\"160\"></label><label>설명<textarea name=\"description\"></textarea></label><label>수행 안내<textarea name=\"instructions\"></textarea></label></div><fieldset><legend>사람이 정하는 값</legend><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan=\"5\">선언한 값이 없습니다.</td></tr></tbody></table><button type=\"button\" data-author-action=\"input_add\" class=\"ew-author-link\"><img class=\"ew-icon\" src=\"/_ees13/v4/7d31f.svg\" alt=\"\" aria-hidden=\"true\">값 추가</button></fieldset><div class=\"ew-author-inline\"><button type=\"button\" data-author-action=\"move_up\">위로</button><button type=\"button\" data-author-action=\"move_down\">아래로</button><button type=\"button\" data-author-action=\"delete_node\">삭제</button></div></form></div><footer><small data-author-status=\"\">변경 있음 · 저장 안 됨</small><button type=\"button\" data-author-action=\"validate\" data-mutation=\"\" disabled=\"\">게시 전 확인</button><button type=\"button\" data-author-action=\"save\" data-mutation=\"\" class=\"ew-primary\">초안 저장</button></footer></section>"
+  },
+  "layout": {
+    "panel": {
+      "x": 1440,
+      "y": 0,
+      "width": 480,
+      "height": 1080,
+      "clientWidth": 479,
+      "scrollWidth": 479,
+      "clientHeight": 1080,
+      "scrollHeight": 1080,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(255, 255, 255)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px 0px 0px 1px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "scroll": {
+      "x": 1441,
+      "y": 96,
+      "width": 479,
+      "height": 925,
+      "clientWidth": 479,
+      "scrollWidth": 479,
+      "clientHeight": 925,
+      "scrollHeight": 925,
+      "scrollTop": 0,
+      "overflowY": "auto",
+      "background": "rgba(0, 0, 0, 0)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "radio": null,
+    "selected": null,
+    "unselected": null,
+    "name": null,
+    "footer": {
+      "x": 1441,
+      "y": 1021,
+      "width": 479,
+      "height": 59,
+      "clientWidth": 479,
+      "scrollWidth": 479,
+      "clientHeight": 58,
+      "scrollHeight": 58,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(255, 255, 255)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "1px 0px 0px",
+      "borderRadius": "0px",
+      "minHeight": "auto"
+    },
+    "back": null,
+    "questionGroup": null,
+    "firstQuestion": null,
+    "cardGaps": []
+  },
+  "nativeDraft": {
+    "prompt": "메뉴 왕복 중 보존할 개인 질문",
+    "files": [
+      {
+        "type": "file",
+        "id": "fixture-file",
+        "name": "menu-draft.txt",
+        "url": "/api/v1/files/fixture-file/content",
+        "status": "processed",
+        "size": 7
+      }
+    ],
+    "selectedToolIds": [
+      "fixture-selected-tool"
+    ],
+    "selectedSkillIds": [
+      "fixture-selected-skill"
+    ],
+    "selectedFilterIds": [
+      "fixture-selected-filter"
+    ],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "nativeInput": {
+    "text": "메뉴 왕복 중 보존할 개인 질문",
+    "html": "<div contenteditable=\"true\" translate=\"no\" class=\"tiptap ProseMirror\" tabindex=\"0\" id=\"chat-input\" aria-label=\"업무를 물어보거나, 필요한 작업을 요청하세요\"><p>메뉴 왕복 중 보존할 개인 질문</p></div>"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "scope": "built Native UI; synthetic session and data",
+  "path": "/workspace/skills",
+  "ready": "complete",
+  "fonts": "loaded",
+  "nativeMount": {
+    "chatPane": false,
+    "sidebarSearch": true,
+    "sidebarToggle": false
+  },
+  "viewport": [
+    1920,
+    1080
+  ],
+  "active": {
+    "tag": "BUTTON",
+    "id": "",
+    "name": ""
+  },
+  "panel": null,
+  "authoring": null,
+  "layout": {
+    "panel": null,
+    "scroll": null,
+    "radio": null,
+    "selected": null,
+    "unselected": null,
+    "name": null,
+    "footer": null,
+    "back": null,
+    "questionGroup": null,
+    "firstQuestion": null,
+    "cardGaps": []
+  },
+  "nativeInput": null
+}

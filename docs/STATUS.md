@@ -1,5 +1,14 @@
 # 현재 작업 상태
 
+## 2026-10-06 · C15 권한별 메뉴와 Open WebUI 왕복
+
+- **기준:** 최신 첨부의 추가 E를 같은 [Draft PR #76](https://github.com/knadalkim-a11y/team-agent-poc/pull/76)에 반영한다. 착수 head `e9a34e16d158c7553cfcf66a2cfc01ff794ebbd0`의 [CI 37427430144](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37427430144)는 24 success·기존 조건부1skip이며, main은 `e55bfb125ddf84d14030b1b56bb604bd8b14d088`이다. 선행 #74/#75 병합과 C15 이후 변경 없음, 기존 A–D 본문 동일을 확인했다.
+- **구현:** [착수 비교표](mockups/ees-work/TASK.md#menu-integration-20261006)에 따라 세 메뉴 묶음·서버의 실제 Native 권한·직접 경로·원래 위치 복귀를 추가했다. Native 관리자 설정의 모달 redirect와 계정 전환 중 늦은 flush를 보완했다. 관측 가능한 이미지/업로드 중 첨부는 이동을 차단하고 이유를 표시한다.
+- **로컬 검증:** 서버73·실제 Native 계정 API6개 통과. Node 관련 범위225개는 freeze2의 author95/execution64와 마지막 runtime66을 합친 범위이며 단일225개 실행은 아니다. 최종 build4의 실제 Native5개는 PASS/0skip/exit0이며 스킬 검색·관리자 모달 왕복·미저장 작성 값·이미지 차단·직접 진입/삽입점 부재·역할 메뉴를 확인했다. build4 SHA256은 `ecf138543e933a6c8ecefa13887c8210142068bb47e06e4743f9a25661a86c1a`다. [최초 실패·빌드·시각 보완·한계 기록](../evals/v4-ui-20260930.md#menu-integration-evidence-20261006)을 보존한다.
+- **경계와 다음:** 파일 선택 직후 미리보기 전 준비 구간의 완전 보존은 Native 신호가 없어 미확인이다. 새로고침/탭 종료 시 메모리 복귀 정보는 사라진다. 실제 사내 적용·비기본 모델 설정 전체·실제 답변 품질은 별도 확인 대상이다. 최종 HEAD의 자동 CI·후보는 같은 PR 본문/Checks에서 판정하며 병합·Draft 해제·배포·실제 EES/EMS 연결은 포함하지 않는다.
+
+아래 항목은 선행 작업 당시의 기록이다.
+
 ## 2026-10-06 · 새 절차 예시 구현·첫 CI 보완
 
 - **기준:** 사용자 승인으로 [PR #75](https://github.com/knadalkim-a11y/team-agent-poc/pull/75)를 병합했다. 최종 head `481fb553f8f94b990edcda4659cdd32f0065cc0a`의 [CI 37413644400](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37413644400)는 completed/success이며 24개 job 성공과 기존 조건부 1개 skip을 확인했다. 병합 main `e55bfb125ddf84d14030b1b56bb604bd8b14d088`에서 새 브랜치를 시작했다.

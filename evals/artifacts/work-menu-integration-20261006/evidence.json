@@ -1,0 +1,416 @@
+{
+  "scope": "C15 E menu integration, local source before publication; final remote HEAD/CI in Draft PR76",
+  "baseline_head": "e9a34e16d158c7553cfcf66a2cfc01ff794ebbd0",
+  "branch": "feat/work-procedure-examples-20261006",
+  "request": {
+    "filename": "handover-easy-authoring-gpt-1.md",
+    "sha256": "bd7f6578cceb6cb068c557edf1a6a797423c9a9ab2a3258d8c0108a1966e9e2b"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "node": "24.19.0",
+    "chrome": "153.0.8010.52",
+    "native": "0.11.3"
+  },
+  "wheel": {
+    "filename": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "sha256": "ecf138543e933a6c8ecefa13887c8210142068bb47e06e4743f9a25661a86c1a",
+    "size": 152116217
+  },
+  "results": {
+    "source_tests": 73,
+    "actual_native_api_tests": 6,
+    "node_related_scope": 225,
+    "node_scope_single_run": false,
+    "actual_native_ui_tests": 5,
+    "native_ui_skips": 0
+  },
+  "limitations": [
+    "Native UI transport/session/menu capabilities are synthetic; actual ACL uses separate Native API6 checks.",
+    "Initial FileReader/compression before Native preview/files appears is not observable; attachment preservation is not guaranteed in that interval.",
+    "Observed image/uploading attachments block departure; model UI and empty params were checked, not every non-default model setting.",
+    "Memory return ticket is lost after full reload/tab close/logout; no new persistent store.",
+    "SVG5 original downloads failed; reused alpha masks leave scaled stroke-width differences.",
+    "Company rollout, live EES/EMS and model quality/SSO/Redis are unverified."
+  ],
+  "source_files": {
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py": {
+      "sha256": "f5da3742c994a3244522d1772d1ac592dee1001241c5993bf797126fd00bb0cc",
+      "bytes": 55643
+    },
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py": {
+      "sha256": "f638a29321efe1f3623a098dc93e6a7c0a256ad3fdde75ef7644a6ce6c12f0d9",
+      "bytes": 141799
+    },
+    "branding/ees/ui/ees-work-view.js": {
+      "sha256": "47352b9123856e86e22e68d35be9471e8e53d4b438a7859758ac6a40b3d02979",
+      "bytes": 105409
+    },
+    "branding/ees/ui/ees-work-launcher.js": {
+      "sha256": "d09d6eac341e9c78e2946d7e5d976a7cb86c4067f800a259be503c9828738829",
+      "bytes": 75855
+    },
+    "branding/ees/ui/ees-work-designer.js": {
+      "sha256": "d8dc5c9b1d9015a70209db8403a71f55ee292e0371a80bc6987f50818e3666d8",
+      "bytes": 126074
+    },
+    "branding/ees/ui/ees-work-launcher.css": {
+      "sha256": "ab98492d167524e0ae0c472b15a10cdcfaf8b60feea9893d71d1b615e6e66d8e",
+      "bytes": 67127
+    },
+    "tests/native_ui_fixture.py": {
+      "sha256": "07cad45dc9f61dbe8d39cc680d37ca9d16e92b3b93755f0fb161c148cd61db36",
+      "bytes": 27316
+    },
+    "tests/test_ees_work_authoring_native.py": {
+      "sha256": "43b7a161675b2b4fd86a5d532a3f8508c7fc513863065cc116d79099450dd225",
+      "bytes": 47028
+    },
+    "tests/test_ees_work_authoring_ui.cjs": {
+      "sha256": "27125fdf4ec3ea24e62e6ee82afbdc248e5bf0fa3cbd8a727328201c288742e9",
+      "bytes": 91840
+    },
+    "tests/test_ees_work_figma_authoring_native.py": {
+      "sha256": "75912378aacd8eb2f7d604bc86d1ffed3e164dacc7fe2ff759a0e2ce1f745a1e",
+      "bytes": 77426
+    },
+    "tests/test_ees_work_figma_runtime_ui.cjs": {
+      "sha256": "e4158c89a790b54d68bc625c71d29a643496cf264f99cbd87bee6bdc82445dd6",
+      "bytes": 55062
+    },
+    "tests/test_ees_work_workspace.py": {
+      "sha256": "28a9dc0b5cb4c13663b5cf6d9190448b6edbe2e26d269e0e04e6855ccb7e8a5d",
+      "bytes": 82105
+    },
+    "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py": {
+      "sha256": "12a538febf1843aeb7e0ccad64e72545c097858d94a165e046cba259f61ba8fe",
+      "unchanged_from_baseline": true
+    },
+    "scripts/build_ees_webui.py": {
+      "sha256": "bfa03f905bf60bebc83e5ea8df99180bae573a6eab588a790e65095205329056",
+      "unchanged_from_baseline": true
+    },
+    "tests/ees_work_integrated_app.py": {
+      "sha256": "8929df2937cc7ceed582ade419eb23059d08555ec4a0dc5b1f50267e467738ef",
+      "unchanged_from_baseline": true
+    },
+    "tests/ees_work_native_chat.py": {
+      "sha256": "f4a4cd60700aa702c3f95ce9b1b161f378ee7efa58ee3eff8f4fbcd5435696f6",
+      "unchanged_from_baseline": true
+    }
+  },
+  "files": {
+    "backend-evidence.json": {
+      "sha256": "f0b62ca7395acf1494e2f07793f2e733b9e0c039c563245e56c664575f1ede79",
+      "bytes": 22145
+    },
+    "build-1-manifest.json": {
+      "sha256": "9cfaa3e99b4694c3e957808d15130616eff049890bed67e353d19bf0314b3575",
+      "bytes": 8805
+    },
+    "build-2-manifest.json": {
+      "sha256": "fd22dba250f7a668a73d7dd0d8795636730baf827951d5cad1845c9bd924b72e",
+      "bytes": 8805
+    },
+    "build-3-manifest.json": {
+      "sha256": "53fdc51a191d2addc7642a0640a5bd9ae18db41122be8e3ebff22203b72acfde",
+      "bytes": 8805
+    },
+    "build-4-manifest.json": {
+      "sha256": "dbe64ceb3611c38bf80d9f27571f9c02346bd585d931638a6c5e61d58b1ccb37",
+      "bytes": 8805
+    },
+    "ci-audit-coverage.json": {
+      "sha256": "3b5dfd48803ac4d9a17159599051ea6c599fdf450361c625c4bc3f4eeef50b5d",
+      "bytes": 331284
+    },
+    "figma-review.json": {
+      "sha256": "59a0fe768efa794c64d08a53fffc60b41aeb80720116849d2dfa7f72c572a925",
+      "bytes": 19012
+    },
+    "final-visual-review.json": {
+      "sha256": "e8f4552a9719e093d5fff5dec5aceb3b55748471689fca1221e5c1fc42ab1def",
+      "bytes": 14136
+    },
+    "native-build3-first/integrated-test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving-failure-cleanup.json": {
+      "sha256": "0da15e9ccc6acf4cc449a8c53fbb1a85190129d3156b846b2aeae0b872258b13",
+      "bytes": 6196
+    },
+    "native-build3-first/integrated-test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving-failure-dom.json": {
+      "sha256": "e2a0384abbff213dbd791014dc7a3b4e45a5ca50e1c39cf933cbce1d5da9ab66",
+      "bytes": 19997
+    },
+    "native-build3-first/integrated-test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving-failure.json": {
+      "sha256": "efbd06839d3755b4d0544000d45ae0749bb0cee113fb030e42ead32d6da0fc86",
+      "bytes": 25273
+    },
+    "native-build3-first/integrated-test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving-failure.png": {
+      "sha256": "9afe3763b348eafb9d4a19e6a8b40b6b65337cf10ecd0d9879b3ecbbab46261d",
+      "bytes": 190725
+    },
+    "native-build3-first/integrated-test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt-failure-cleanup.json": {
+      "sha256": "3bd78521fdd0942673e4c2af5542423bce51e81d850264fdd93001725ce6efd0",
+      "bytes": 5905
+    },
+    "native-build3-first/integrated-test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt-failure-dom.json": {
+      "sha256": "44d50260a986ba0c31838290a74e6fe85e8d9489a73d4b41bfb36331918e5345",
+      "bytes": 3390
+    },
+    "native-build3-first/integrated-test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt-failure.json": {
+      "sha256": "265569c68b6191decc4a690ab0ba3b13e0be9ca9fe952569e3bad9cf886b80fd",
+      "bytes": 22263
+    },
+    "native-build3-first/integrated-test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt-failure.png": {
+      "sha256": "22880299d8ca2bc91e00c3836c8ffd772ce953f5f229c2ab1e49aed139860fb0",
+      "bytes": 61005
+    },
+    "native-build3-first/integrated-test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft-failure-cleanup.json": {
+      "sha256": "d56764c43f794a7a157a7d60c3fbbdb02efe6e85ab0c7eafb0b6b6930e8b8e1e",
+      "bytes": 5884
+    },
+    "native-build3-first/integrated-test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft-failure-dom.json": {
+      "sha256": "7fa1f6b5ce2671b69ce416919a198fc28a64b44a8f6c70811579bd63f06f84e9",
+      "bytes": 659
+    },
+    "native-build3-first/integrated-test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft-failure.json": {
+      "sha256": "c221b0880e699a504aedd6e359553ed53b0524aedbec09fb452ec6d2bd77c1ab",
+      "bytes": 11550
+    },
+    "native-build3-first/integrated-test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft-failure.png": {
+      "sha256": "baecc7d5ad14fd802560322f92b940d68dc925115f8e519c68e9c6b3cf3fe895",
+      "bytes": 43317
+    },
+    "native-build3-first/menu-c15-admin-menu-dom.json": {
+      "sha256": "16fa432b17c8ac0e009e49d79453b79fd745ceb34152c54402d9ce33307c75ce",
+      "bytes": 5517
+    },
+    "native-build3-first/menu-c15-admin-menu.png": {
+      "sha256": "a9db0953e35771beac054eb8eae3170d64085cb607cde21052bb2277b1029f0e",
+      "bytes": 82093
+    },
+    "native-build3-first/menu-c15-admin-workspace-dom.json": {
+      "sha256": "1d2f03bba28715954e25705d5bca3898860cae06b6f9e242fc5d93f3063eb742",
+      "bytes": 10526
+    },
+    "native-build3-first/menu-c15-admin-workspace.png": {
+      "sha256": "66b246543e5f3f5e905e21f5a0e04ece88299adb8e0b0cb3c4b451325260b111",
+      "bytes": 108399
+    },
+    "native-build3-first/menu-c15-author-menu-dom.json": {
+      "sha256": "16fa432b17c8ac0e009e49d79453b79fd745ceb34152c54402d9ce33307c75ce",
+      "bytes": 5517
+    },
+    "native-build3-first/menu-c15-author-menu.png": {
+      "sha256": "74eea17e67128f4e113540f04b38393e27370fce82325da60be0589ec3dd82fb",
+      "bytes": 71274
+    },
+    "native-build3-first/menu-c15-direct-native-search-dom.json": {
+      "sha256": "7fa1f6b5ce2671b69ce416919a198fc28a64b44a8f6c70811579bd63f06f84e9",
+      "bytes": 659
+    },
+    "native-build3-first/menu-c15-direct-native-search.png": {
+      "sha256": "aa0e3ccde2440e14ea678ef6d1011489da5abaecef3e74d2f6d0e9c2de4bfb33",
+      "bytes": 37067
+    },
+    "native-build3-first/menu-c15-member-work-only-dom.json": {
+      "sha256": "0c96148bc54c672072677cfcb7b38492754539d428a0cde4484d3755c878c4c7",
+      "bytes": 2701
+    },
+    "native-build3-first/menu-c15-member-work-only.png": {
+      "sha256": "818bfc1ef33ff1d8a9620bb1d6f90254791275be199e4e78abc9bb063ef822bf",
+      "bytes": 57005
+    },
+    "native-build3-first/menu-c15-native-admin-unsaved-dom.json": {
+      "sha256": "f2f87ecc18d4726fc9acce5ece7085bfd5c9b37064836a75245aec66849fee93",
+      "bytes": 1216
+    },
+    "native-build3-first/menu-c15-native-admin-unsaved.png": {
+      "sha256": "41eebac18e0853c33323bd58a33cc309916bd09aa06a8dc310066340a5f67cbf",
+      "bytes": 111421
+    },
+    "native-build3-first/menu-c15-native-missing-mount-dom.json": {
+      "sha256": "7fa1f6b5ce2671b69ce416919a198fc28a64b44a8f6c70811579bd63f06f84e9",
+      "bytes": 659
+    },
+    "native-build3-first/menu-c15-native-missing-mount.png": {
+      "sha256": "3af9bcaf0a593155bf8f7efd525898ec7f4560c33a0bd8cfde44fdde96d084c4",
+      "bytes": 37223
+    },
+    "native-build3-first/menu-c15-role-scope.json": {
+      "sha256": "e9fad5ed30111e2212c584fdd12b6633a10abec6408ce899ea5dbbc4dc3fe212",
+      "bytes": 635
+    },
+    "native-build3-first/menu-c15-tools-only-menu-dom.json": {
+      "sha256": "85dbdbc96129c73fdba85af11c5c09819daa0116d0ecf8d5b6524faf4732204f",
+      "bytes": 2578
+    },
+    "native-build3-first/menu-c15-tools-only-menu.png": {
+      "sha256": "78692b2f2be6830bca3712b6e18c1d6676ffb1a8c3a080c4e4ad2f2f685dc18d",
+      "bytes": 47924
+    },
+    "native-build3-first.log.json": {
+      "sha256": "3681e7be3f230042ca2898db65875d2a27732d32459fb8ace4e6059f6b7b1f8b",
+      "bytes": 1055
+    },
+    "native-build4-final/menu-c15-admin-menu-dom.json": {
+      "sha256": "9d75e908a11ff1d9c3825fd7590fc482c770f01cb77384eda3147de8517153dc",
+      "bytes": 27513
+    },
+    "native-build4-final/menu-c15-admin-menu.png": {
+      "sha256": "13416a9660424952ca4a3ba227a3d01d2936b6daa7ed0fbb70d2827d6de71929",
+      "bytes": 82075
+    },
+    "native-build4-final/menu-c15-admin-workspace-dom.json": {
+      "sha256": "b0a314ba8103ffd5feeac8e1ceba7b15e3d3ac3c469cd0903c96fbb0640eed94",
+      "bytes": 32522
+    },
+    "native-build4-final/menu-c15-admin-workspace.png": {
+      "sha256": "fc28f49d008239ed97d1706f7cf8c2cd857835cfa7f70eecbdcb16b323b455a8",
+      "bytes": 108381
+    },
+    "native-build4-final/menu-c15-author-menu-dom.json": {
+      "sha256": "d9ccc963ea21dc3db8494faca5df7086c42fd9299fc104a32cfd6e9707944f87",
+      "bytes": 15787
+    },
+    "native-build4-final/menu-c15-author-menu.png": {
+      "sha256": "74eea17e67128f4e113540f04b38393e27370fce82325da60be0589ec3dd82fb",
+      "bytes": 71274
+    },
+    "native-build4-final/menu-c15-direct-native-search-dom.json": {
+      "sha256": "1566012c5a0ee147e3a4b447cd13d94e88b330254174c7451f3378b3285bd328",
+      "bytes": 4350
+    },
+    "native-build4-final/menu-c15-direct-native-search.png": {
+      "sha256": "aa0e3ccde2440e14ea678ef6d1011489da5abaecef3e74d2f6d0e9c2de4bfb33",
+      "bytes": 37067
+    },
+    "native-build4-final/menu-c15-draft-preservation.json": {
+      "sha256": "8bfc5f9b0108aaaddd39af4c18e2899c0fcbe01d0fd4b1ed70fa02c9de8792d1",
+      "bytes": 1545
+    },
+    "native-build4-final/menu-c15-member-work-only-dom.json": {
+      "sha256": "8f38de50e377b0de11ff9ba21fef9cb2c5a163c587ad216cc8b0e8d9255be89d",
+      "bytes": 2901
+    },
+    "native-build4-final/menu-c15-member-work-only.png": {
+      "sha256": "818bfc1ef33ff1d8a9620bb1d6f90254791275be199e4e78abc9bb063ef822bf",
+      "bytes": 57005
+    },
+    "native-build4-final/menu-c15-native-admin-returned-dom.json": {
+      "sha256": "d48c81b63620e641e4e92b6e1e605e3e914952b652a7fe7674542d66160055f2",
+      "bytes": 41993
+    },
+    "native-build4-final/menu-c15-native-admin-returned.png": {
+      "sha256": "f300e983e69c79b4b488fdb4885202274820a38ef8569eb170ae5ba6a52ec012",
+      "bytes": 190735
+    },
+    "native-build4-final/menu-c15-native-admin-unsaved-dom.json": {
+      "sha256": "a9cda270eb3ef2f885e1fb4b22d8176721a553f0cd523d37ee61066da2e0161c",
+      "bytes": 2346
+    },
+    "native-build4-final/menu-c15-native-admin-unsaved.png": {
+      "sha256": "228b2f99f3401b62366f34d4546a03af6f9137448044433819997fb4667939c0",
+      "bytes": 111395
+    },
+    "native-build4-final/menu-c15-native-image-blocked-dom.json": {
+      "sha256": "8e191e39905d7c8a74a6ce1f8326b5ddfd62ea1e17b6224e06a22aedba49a313",
+      "bytes": 28187
+    },
+    "native-build4-final/menu-c15-native-image-blocked.png": {
+      "sha256": "e2301f6848b7b8d025426fa1e3d0faaa91e3dae28aaa89c1371076b546492b56",
+      "bytes": 89277
+    },
+    "native-build4-final/menu-c15-native-missing-mount-dom.json": {
+      "sha256": "7077e7812c89fe1009cd55fbfd7858b499002bf384f1e33b9e2bc6170a7a8c3c",
+      "bytes": 3996
+    },
+    "native-build4-final/menu-c15-native-missing-mount.png": {
+      "sha256": "b8db06b05ab169995806a931f2ecc576c782e4bc5b686e66165bea3be9e7f5fa",
+      "bytes": 37225
+    },
+    "native-build4-final/menu-c15-procedure-returned-dom.json": {
+      "sha256": "ff2504f2e5eb86f3aa17351403af9d6306bca2c69c546693f4c1d0f1697899f7",
+      "bytes": 33101
+    },
+    "native-build4-final/menu-c15-procedure-returned.png": {
+      "sha256": "64b5401f1781519f8d206bff85d99a1fca432b29b07b48745b1411635bdc4ceb",
+      "bytes": 111674
+    },
+    "native-build4-final/menu-c15-procedure-start-returned-dom.json": {
+      "sha256": "9ed94fc94db1d74c0504809add49d3f16210b2bc6a524edc27c554b2de0dc4d5",
+      "bytes": 40967
+    },
+    "native-build4-final/menu-c15-procedure-start-returned.png": {
+      "sha256": "0c072383b0cd891ad8e12a1b5148d1ab6c94373a18a6f8f50bab465f93f0aa1c",
+      "bytes": 177702
+    },
+    "native-build4-final/menu-c15-role-scope.json": {
+      "sha256": "e9fad5ed30111e2212c584fdd12b6633a10abec6408ce899ea5dbbc4dc3fe212",
+      "bytes": 635
+    },
+    "native-build4-final/menu-c15-skills-procedure-dom.json": {
+      "sha256": "22e800db08a5b39e3551789cb720764ca62aee008274a59f75492b69a735e44b",
+      "bytes": 4714
+    },
+    "native-build4-final/menu-c15-skills-procedure-start-dom.json": {
+      "sha256": "0f5692fcba34839b07a340a505b8db6b9f212250fbae75666ac439f6b991f7a1",
+      "bytes": 4726
+    },
+    "native-build4-final/menu-c15-skills-procedure-start.png": {
+      "sha256": "b38109f5981b717f80b620fa6250f00b01a35be346b57d9497e30e2c2bb57ba5",
+      "bytes": 43651
+    },
+    "native-build4-final/menu-c15-skills-procedure.png": {
+      "sha256": "baecc7d5ad14fd802560322f92b940d68dc925115f8e519c68e9c6b3cf3fe895",
+      "bytes": 43317
+    },
+    "native-build4-final/menu-c15-skills-tool-dom.json": {
+      "sha256": "69650539afe89abac4f4f98ba7fa3e40ba9b2f2f517e93f9de2824d549b6ef8c",
+      "bytes": 4704
+    },
+    "native-build4-final/menu-c15-skills-tool.png": {
+      "sha256": "243bfa373dca87e16d7490e86a39e378e6f9da784d4c737d1316c58035971001",
+      "bytes": 42815
+    },
+    "native-build4-final/menu-c15-tool-returned-dom.json": {
+      "sha256": "3f76f4ade25c9a8a298955a4e28850001546b2875c356b126004bec5808f1457",
+      "bytes": 36676
+    },
+    "native-build4-final/menu-c15-tool-returned.png": {
+      "sha256": "cde4abc50e33b4dec305a222c84a988c46154adde2e9e92da28acf3291240495",
+      "bytes": 137484
+    },
+    "native-build4-final/menu-c15-tools-only-menu-dom.json": {
+      "sha256": "0d28d77995075f1c21365bfb6b4426cf50a0bf2f9afe95881700a26e66851dd7",
+      "bytes": 2824
+    },
+    "native-build4-final/menu-c15-tools-only-menu.png": {
+      "sha256": "9326d60c766371e7c4fee6dbb6da9d20727ce771a980ae409414e9607d42468a",
+      "bytes": 49622
+    },
+    "native-build4-final/result.json": {
+      "sha256": "81570e0644edce599a58c303c96df22dd768b2666cae05794b4d10d16e256db8",
+      "bytes": 1929
+    },
+    "native-build4-final/unittest.log.json": {
+      "sha256": "2069bd86a21ddec941fc53f856ac8bdda9073abeebe3043b4d79ca27fa8cde2d",
+      "bytes": 1406
+    },
+    "native-runner-source.json": {
+      "sha256": "35c92cc08b7698bdc3f47e693ce71e4818e5346287648bc7b459178c7ccf9c1e",
+      "bytes": 2129
+    },
+    "node-evidence.json": {
+      "sha256": "1945d5038a141527d9fd9ccb3771f51389d51bbafa1813d0a442037a7aff4e23",
+      "bytes": 86241
+    },
+    "upstream-admin-route.json": {
+      "sha256": "711c253f0eb37769d4f3adf21dfd140601cfd8c67e1810027baed265228f3f40",
+      "bytes": 3482
+    },
+    "visual-review-build3-first.json": {
+      "sha256": "646a05716b0d947e9f0fd939e9b0f2774c50d269d12baa30fcd0dc4be16ac19f",
+      "bytes": 4366
+    }
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "initial_evidence": "integrated-test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving-failure.json",
+  "browser_cleanup_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 1824.7456460012472,
+    "pid": 346,
+    "exit_code": 0,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "HeadlessChrome/153.0.8010.52",
+      "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+      "jsVersion": "15.3.76.13"
+    },
+    "target_id": "14CEA43251CB73030866B3FFDBA5BF4D",
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 89,
+      "method": "Browser.close",
+      "session_attached": false,
+      "timeout_seconds": 5,
+      "elapsed_ms": 0.5833440009155311,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "id": 82,
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "id": 83,
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "id": 84,
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "id": 85,
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "id": 86,
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "id": 87,
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "id": 88,
+        "sessionId": "DE53EACDCF617AD88D319C6A2EE973CD"
+      },
+      {
+        "id": 89
+      }
+    ],
+    "stderr_tail": "[1006/040306.678928:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1006/040306.679020:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1006/040306.679795:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1006/040306.679813:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1006/040306.679900:ERROR:net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)\n[1006/040306.680586:ERROR:device/udev_linux/udev_watcher.cc:51] Failed to initialize a udev monitor.\n[1006/040306.681348:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 363: No such file or directory (2)\n[1006/040306.690271:WARNING:media/gpu/vaapi/vaapi_wrapper.cc:1660] drmGetDevices2() has not found any devices\n[1006/040306.692095:WARNING:sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.\n[1006/040306.696065:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1006/040306.696159:WARNING:device/bluetooth/dbus/bluez_dbus_manager.cc:209] Floss manager service not available, cannot set Floss enable/disable.\n[1006/040306.696283:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1006/040306.698430:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1006/040306.710346:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 397: No such file or directory (2)\n[1006/040306.730244:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1006/040306.730277:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1006/040307.380425:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1006/040307.383228:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1006/040307.544426:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1006/040307.545024:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1006/040307.959347:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1006/040307.961341:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 123.35965399688575,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    "bootstrap_observation": null
+  }
+}

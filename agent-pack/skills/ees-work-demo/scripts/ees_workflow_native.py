@@ -51,6 +51,38 @@ def _get(obj, key, default=None):
     return obj.get(key, default) if isinstance(obj, dict) else getattr(obj, key, default)
 
 
+async def native_workspace_access(user):
+    """Project pinned Native menu permissions without loading assets or code.
+
+    Native's current config/group checks remain authoritative. Work manager
+    grants and resource read ACLs do not grant Native workspace authoring.
+    """
+    keys = ('models', 'knowledge', 'prompts', 'skills', 'tools', 'admin')
+    unavailable = {'native_access': dict.fromkeys(keys, False), 'native_access_available': False}
+    role = _get(user, 'role')
+    if role not in ('user', 'admin'):
+        return unavailable
+    try:
+        from open_webui.env import ENABLE_PLUGINS
+        from open_webui.models.config import Config
+        from open_webui.utils.access_control import has_permission
+
+        access = dict.fromkeys(keys, role == 'admin')
+        if role != 'admin':
+            defaults = await Config.get('user.permissions')
+            if not isinstance(defaults, dict):
+                return unavailable
+            for key in keys[:-1]:
+                access[key] = bool(await has_permission(
+                    _get(user, 'id'), 'workspace.' + key, deepcopy(defaults)))
+        access['tools'] = bool(ENABLE_PLUGINS and access['tools'])
+        return {'native_access': access, 'native_access_available': True}
+    except Exception:
+        # Menu discovery must not grant access or expose raw Native failures.
+        # Existing Work state and its separate authorization remain available.
+        return unavailable
+
+
 def _json(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
 

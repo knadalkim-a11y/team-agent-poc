@@ -82,6 +82,49 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         denied = await self.command('create_workflow', actor='c', system_id='EMS', name='무권한')
         self.assertEqual(denied['error']['code'], 'scope_forbidden')
 
+    async def test_native_menu_unavailable_preserves_separate_work_authority(self):
+        # A standalone Work service must not infer Native access from its own
+        # manager/admin grants when the Native permission provider is absent.
+        with patch.dict(sys.modules, {'open_webui.models.config': None}):
+            for actor in ('a', 'admin', 'c'):
+                with self.subTest(actor=actor):
+                    capabilities = (await self.state(actor))['capabilities']
+                    self.assertEqual(capabilities['native_access'], {
+                        key: False for key in ('models', 'knowledge', 'prompts', 'skills', 'tools', 'admin')})
+                    self.assertFalse(capabilities['native_access_available'])
+                    self.assertEqual(capabilities['can_author'], actor != 'c')
+                    self.assertEqual(capabilities['is_admin'], actor == 'admin')
+
+    async def test_native_menu_rechecks_actor_and_membership_after_permission_awaits(self):
+        native = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_native')
+        original_users, original_groups = deepcopy(self.users), deepcopy(self.memberships)
+        for change, actor in (('role', 'admin'), ('groups', 'a'), ('pending', 'a')):
+            with self.subTest(change=change):
+                self.users, self.memberships = deepcopy(original_users), deepcopy(original_groups)
+
+                async def changed_while_reading(user):
+                    await asyncio.sleep(0)
+                    if change == 'groups':
+                        self.memberships[actor] = []
+                    else:
+                        self.users[actor]['role'] = 'user' if change == 'role' else 'pending'
+                    return {'native_access': dict.fromkeys(
+                        ('models', 'knowledge', 'prompts', 'skills', 'tools', 'admin'), True),
+                        'native_access_available': True}
+
+                with patch.object(native, 'native_workspace_access', changed_while_reading):
+                    state = await self.service.workspace_state(self.users[actor])
+                if change == 'pending':
+                    self.assertEqual(state['error']['code'], 'unauthorized')
+                    self.assertNotIn('capabilities', state)
+                else:
+                    self.assertTrue(state['ok'], state)
+                    caps = state['capabilities']
+                    self.assertFalse(any(caps['native_access'].values()))
+                    self.assertFalse(caps['native_access_available'])
+                    self.assertFalse(caps['is_admin'])
+                    self.assertEqual(caps['can_author'], change == 'groups')
+
     async def test_help_reads_the_shipped_single_source_without_persisting_a_copy(self):
         view = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_view')
         source = ROOT / 'agent-pack/skills/ees-work-demo/scripts/workflow_help.json'

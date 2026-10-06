@@ -1,5 +1,40 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="menu-integration-20261006"></a>
+
+## EES Work 메뉴 통합 · C15 후속 · 2026-10-06
+
+**제품 수정 전 착수 기록:** 새 첨부 `handover-easy-authoring-gpt-1.md`의 작업 E와 D9/D10을 반영한다. 선행 HTTP ID 수정 [#74](https://github.com/knadalkim-a11y/team-agent-poc/pull/74)는 병합됐고 최신 main은 `e55bfb125ddf84d14030b1b56bb604bd8b14d088`이다. [Draft #76](https://github.com/knadalkim-a11y/team-agent-poc/pull/76)의 현재 head `e9a34e16d158c7553cfcf66a2cfc01ff794ebbd0`·로컬 원본이 같고 작업 트리는 깨끗했다. A/B는 main, C와 첫 클릭 보완은 #76에 있으며 해당 head의 [CI37427430144](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37427430144)는24 success/기존 PR 조건부1 skip이다. 미병합 PR을 병합하거나 그 위에 새 PR을 쌓지 않고 같은 PR을 갱신한다.
+
+**최신 설계:** Figma `XK2wTos6sEuxSHhIj7cqg6` 메인832:131, 변경 기록898:31에서 C15(1047:2)가 최신이고 이후 항목은 없음을 확인했다. R7 1046:2124, 작업실 원안1041:558/1041:329 및 Note1041:832/1041:825를 읽기 전용으로 대조한다. A–D 메인1046:1260/1467/1665/1920·920:728과 기존 작업실 원본의 정규화 비교에서는 본문/오른쪽 패널이 동일하고 왼쪽 메뉴만 달라졌다. B2 836:372·B4 863:464도 같은 메뉴 차이다. 이미 완료한 작성 기능을 다시 구현하지 않는다.
+
+| 화면·규칙 | 현재 구현 | 최신 설계 | 차이 | 처리 |
+|---|---|---|---|---|
+| 워크스페이스 메뉴 | 업무 절차·도구·스킬, 하단 Native 모델·도구 관리 | 업무 만들기 / Open WebUI에서 열기 / 관리자만 | 그룹·업무용 이름·원래 메뉴 명칭 없음 | 기존 navigator/CSS 안에서 그룹과 허용 항목을 구성. 오른쪽 원래 명칭을 작게 표시 |
+| Native 이동 | 스킬은 직접 경로, Native workspace는 숨은 sidebar 링크 클릭 | 각 실제 화면으로 직접 이동 | 링크 없으면 반응 없고 대상 불명확 | 고정된 같은-origin 경로 표와 실제 SPA anchor 이동. 모델·지식·프롬프트·스킬·도구 편집 화면은 재구현하지 않음 |
+| 권한별 메뉴 | EES is_admin만 전달, 모드 전환은 항상 표시 | 서버가 현재 Native 권한 판정, 관리자 메뉴 분리 | Native 설정/그룹 권한과 불일치 가능 | capabilities에 native_access6종 및 조회 가능 여부 추가. 실제 Native 권한 함수 재사용, 기존 EES 권한은 별도로 유지 |
+| D9 업무/워크스페이스 전환 | 모든 계정에 전환 버튼 | EES 작성 또는 Native workspace 권한 하나 이상 | 권한 없는 팀원도 빈 workspace 진입 | 서버 capability로 표시·클릭 검증. 권한 없는 기존 author 선택은 work로 정규화하되 비공개 작성 값은 삭제하지 않음 |
+| 관리자만 | Native 관리와 공장·접근 범위가 혼합 | 기능 연결·공장/접근 범위·관리자 설정 | 기능 연결과 업무 도구 구분 어려움 | 기능 연결→workspace/tools, 관리자 설정→admin/settings. 모두 관리자만, Native tools는 plugins 활성 조건도 유지 |
+| Native에서 돌아오기 | 별도 출발 표시/복귀 줄 없음 | EES에서 연 경우만 원래 위치로 돌아가기 | 위치와 Native 대화 초안의 소실 위험 | 기존 capture/read/flush·선택·designer 메모리를 재사용. 계정/인증 세션/원래 대화에 묶은 메모리 복귀 정보와 normal-flow 줄 추가 |
+| 직접 진입·mount 부재 | Native 자체 탐색 유지 | 원래 Native 진입을 막지 않음, 삽입점 없으면 줄만 생략 | wrapper가 원래 화면에 간섭하면 안 됨 | 발신 정보 없는 직접 진입에는 줄 없음. 실제 컨테이너 검증 후 추가하며 예상 구조 없으면 Native DOM/동작을 그대로 둠 |
+
+### 원본 권한·경로와 경계
+
+- 고정 Open WebUI0.11.3 wheel의 `models/config.py:Config.get('user.permissions')`는 현재 DB/default 설정을 읽는다. `utils/access_control/__init__.py:has_permission`은 현재 그룹 허용 또는 기본 허용을 판정하며, 그룹 false는 기본 true를 취소하지 않는다. models/knowledge/prompts/skills/tools의 실제 create router와 원본 source map의 `workspace/+layout.svelte` 메뉴/경로 guard를 대조했다. 메뉴에는 import 대체 권한이 아닌 `workspace.<항목>`을 사용한다. 기본5종은 false, admin은 기본권한을 우회하며 tools에는 `ENABLE_PLUGINS` 조건이 추가된다. pending은 기존 인증에서 차단한다.
+- 경로는 `/workspace/models`, `/workspace/knowledge`, `/workspace/prompts`, `/workspace/skills`, `/workspace/tools`, `/admin/settings`다. Native 원본 화면·인증·라우트 보호·DB·공개 Tool 인터페이스는 바꾸지 않는다. Native 권한 조회 실패/모듈 부재는 허용으로 바꾸지 않으며, 권한 없음과 조회 불가를 별도 capability로 구분한다.
+- D9의 명시 조건을 유지한다. 비관리자에게 Native tools만 허용된 경우 전환 버튼은 보이지만 관리자만의 기능 연결은 숨긴다. 다른 허용 항목이 없다면 ‘EES Work에서 열 수 있는 항목이 없습니다’라는 빈 상태를 표시한다. 원래 Native 진입은 D10대로 유지하며 이 모서리를 이유로 권한을 확대하거나 D9 전환 조건을 임의 변경하지 않는다.
+- `select()`는 새 절차 시작 화면을 닫으므로 Native 왕복에서 그대로 호출하지 않는다. 기존 view.suspend/designer 상태와 별도 얇은 이동 경로를 재사용한다. 진행 중 저장을 방해하지 않으며 마지막 입력을 capture한다. 복원은 같은 actor/세션/원래 chat/복귀 의도와 Native bridge 준비를 재확인하고, 복귀 후 사용자가 새로 입력한 내용을 이전 snapshot으로 덮지 않는다. 로그아웃·계정 변경·다른 대화·무관 경로 이탈·복귀 완료 시 복귀 정보를 폐기한다.
+- 새 영속 저장 계층은 추가하지 않는다. 전체 페이지 새로고침이나 탭 종료 후에는 메모리 복귀 정보가 사라지는 경계이며, 원래 Native 화면/탐색은 유지한다. 워크스페이스의 확인된 컨테이너 및 관리자 layout의 실제 구조에 줄을 normal flow로 추가하고, 삽입점을 찾지 못하면 줄만 생략한다.
+- 원본 source map 후속 확인에서 `/admin/settings`가 `/?settings=admin%3Ageneral`을 거쳐 query를 제거하고 Native 설정 모달을 연다는 사실을 확인했다. 실제 관리자 탭·설정 컨테이너를 확인한 모달 내용 영역에 복귀 줄을 붙이며 원래 닫기 동작을 유지한다. Native draft의 `read/flush`는 이미지 첨부를 제외하고 모델 선택·params도 별도 Native 상태로 관리하므로 ‘전체 snapshot’으로 보존을 단정하지 않는다. 원본 bridge는 바꾸지 않고 이미지/미완료 업로드는 이동을 차단해 보존하며, 모델 등은 실제 표시·원래 복원 경로로 별도 검증한다.
+
+### 수정·검증 범위
+
+Native 파일 선택 직후 FileReader/이미지 압축이 끝나기 전에는 미리보기·files 항목·준비 완료 신호가 없다. 원본 input 값도 즉시 비워져 이 구간의 완료/실패를 wrapper가 확정할 수 없다. 따라서 관측 가능한 이미지 및 uploading 상태를 이동 전후로 차단하며, 최초 준비 구간의 완전 보존은 미확인으로 남긴다. 임의 timeout 해제·toast 추측·FileReader monkeypatch·새 Native 원본 패치는 추가하지 않는다. 사용자 안내에는 미리보기/업로드 상태가 나타난 뒤 메뉴를 사용하도록 명시한다.
+
+서버는 기존 native/workspace 읽기의 capability 확장, 화면은 기존 launcher/view/CSS와 필요한 공통 도움말 표현만 수정한다. 관련 Node·Native 계정/그룹·API·실제 빌드 브라우저 시험을 보완한다. 관리자가 직접 Native 화면 기능을 사용하고 돌아오기, 일반/작성자/tools-only 메뉴, 현재 그룹/기본권한 철회·plugins 비활성·pending, 허위 메뉴 클릭, 개인 선택/미저장 절차·도구·시작 화면과 대화/첨부/모델/도구 보존, 직접 진입·계정 전환·mount 부재를 완료 조건으로 둔다. 최초 실패와 보완은 기존 evals 기록에 보존하고 문서·같은 Draft PR·정확한 최종 head CI까지 마친다. 병합·Draft 해제·사내 적용·실제 EES/EMS 연결·Figma 수정·실제 사용자 자산 삭제는 포함하지 않는다.
+
+**구현·로컬 검수 결과:** 세 메뉴 묶음·현재 Native 권한·고정 경로·스킬/관리자 모달 복귀를 구현했다. 서버73·실제 Native 계정 API6개, Node 관련225개 범위, 최종 build4 Native5개가 통과했다. 계정 전환 중 남던 이동 busy와 author 오류 안내·mask 아이콘 정렬을 보완했고 처음 관측을 보존했다. 실제 PNG/DOM에서 메뉴36px·icon16px·복귀 줄44px의 정상 흐름과 기존 Native 요소 비가림을 확인했다. 최종 wheel SHA256 `ecf138543e933a6c8ecefa13887c8210142068bb47e06e4743f9a25661a86c1a`. Figma 원본 SVG5개 다운로드 실패에 따른 선 굵기 차이, 최초 FileReader 구간·비기본 모델 params 전체·실제 사내 사용성은 확인 범위 밖이다. [명령·원문·시각 검수·실패/미확정 기록](../../../evals/v4-ui-20260930.md#menu-integration-evidence-20261006)과 같은 Draft PR의 최종 원격 CI를 구분한다.
+
 <a id="procedure-examples-20261006"></a>
 
 ## 새 절차 예시와 작성 시작 안내 · 2026-10-06

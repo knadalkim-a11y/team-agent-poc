@@ -4,6 +4,9 @@
 
 ## 2026-10-06
 
+- C15 기준으로 워크스페이스를 업무 만들기·Open WebUI에서 열기·관리자만으로 묶고, 현재 Native 기본·그룹 권한에 맞는 항목만 표시한다. 원래 스킬/모델/지식/프롬프트/도구와 관리자 설정 화면을 직접 열며 EES 경유 때만 복귀 줄을 제공한다. [메뉴 안내](docs/03-openwebui-native-agent.md#menu-integration-20261006), [계약과 권한 경계](docs/mockups/ees-work/TASK.md#menu-integration-20261006).
+- Native 관리자 설정의 모달 redirect를 처리하고 같은 계정·대화의 작성 중인 값으로 돌아오게 했다. 계정 전환 뒤 남던 이동 busy를 operation별로 분리했다. 관측 가능한 이미지·업로드 첨부는 이동을 차단하고 안내하며, 최초 FileReader 준비 구간은 원본 신호의 한계로 남긴다. [최초 관측과 검증](evals/v4-ui-20260930.md#menu-integration-evidence-20261006).
+
 - 새 절차를 예시 3개 또는 이름만 입력하는 빈 초안에서 시작하도록 했다. 서버 공통 원본의 새 ID 복사·미연결 게시 차단·일정 제안만 제공하며 기존 불변 게시본을 보존한다. 시작 질문은 Native 대화 입력창에만 채운다. [사용 안내](docs/03-openwebui-native-agent.md#procedure-examples-20261006), [구현 범위](docs/mockups/ees-work/TASK.md#procedure-examples-20261006).
 - 새 예시 JSON을 포함한 115개 파일을 신규 번들에 요구하고, 인증된 이전 ees.13의 112/114개 목록은 업데이트·Restore에 허용했다. 기존 복사 시 단계별 일정 참조 ID도 새 단계 ID로 바꾸도록 보완했다.
 - 첫 CI에서 이름 입력 직후 생성 버튼의 첫 클릭이 유실되는 문제와 직접 관련된 도구 저장 경로의 같은 결함을 재현했다. 입력창의 change 처리에서 눌린 버튼을 교체하지 않도록 보완하고, 초점을 유지한 실제 입력→첫 클릭을 회귀 조건으로 추가했다. [최초 실패와 조치](evals/v4-ui-20260930.md#procedure-examples-evidence-20261006).

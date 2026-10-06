@@ -1,0 +1,31 @@
+{
+  "scope": "Read-only pinned upstream source-map inspection; requires actual compiled Native browser verification",
+  "facts": [
+    "/admin/settings redirects to /?settings=admin%3Ageneral",
+    "Native layout opens settings then consumes query; final location is /",
+    "Original General WebUI URL input can be edited without submitting settings"
+  ],
+  "sources": [
+    {
+      "map": "open_webui/frontend/_app/immutable/nodes/18.q5EOK5hs.js.map",
+      "source": "../../../../../../src/routes/(app)/admin/settings/+page.svelte",
+      "sha256": "ee830e5bc6730db87d9d7b923e43906ba2cb2acdebdad9c119155ff991702fd5",
+      "fragment": "<script>\n\timport { goto } from '$app/navigation';\n\timport { onMount } from 'svelte';\n\n\tonMount(() => {\n\t\tgoto('/?settings=admin%3Ageneral', { replaceState: true });\n\t});\n</script>\n"
+    },
+    {
+      "map": "open_webui/frontend/_app/immutable/nodes/2.Db9ODmx4.js.map",
+      "source": "../../../../../../src/lib/components/chat/SettingsModal.svelte",
+      "sha256": "206ecef8e8d32fc62d63e919d374c05608a73b9bf271bd4f465354d6a113b9c6",
+      "observed_selectors": [
+        "#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]"
+      ],
+      "scope": "settings tab structure; tab-admin-general is aria-controls, not a generated panel id"
+    },
+    {
+      "map": "open_webui/frontend/_app/immutable/nodes/2.Db9ODmx4.js.map",
+      "source": "../../../../../../src/routes/(app)/+layout.svelte",
+      "sha256": "3e547eaf66969957c12a3ee5833e93282f66c6fb0ce598dc8a5e7f82b908364e",
+      "fragment": "\n\t\t\t\tname: t.name,\n\t\t\t\tkey: localStorage.token,\n\t\t\t\tcontexts: t.contexts ?? {},\n\t\t\t\tconfig: t.config ?? {}\n\t\t\t}))\n\t\t]);\n\t};\n\n\tconst setBanners = async () => {\n\t\tconst bannersData = await getBanners(localStorage.token);\n\t\tbanners.set(bannersData);\n\t};\n\n\tconst setTools = async () => {\n\t\tconst toolsData = await getTools(localStorage.token);\n\t\ttools.set(toolsData);\n\t};\n\n\tconst openSettingsFromUrl = async () => {\n\t\tconst requestedSettings = $page.url.searchParams.get('settings');\n\t\tif (!requestedSettings) {\n\t\t\t// Param handled and stripped; allow the same deep link to be\n\t\t\t// handled again later in this session.\n\t\t\thandledSettingsUrl = '';\n\t\t\treturn;\n\t\t}\n\n\t\tconst urlKey = `${$page.url.pathname}${$page.url.search}${$page.url.hash}`;\n\t\tif (handledSettingsUrl === urlKey) {\n\t\t\treturn;\n\t\t}\n\t\thandledSettingsUrl = urlKey;\n\n\t\tshowSettings.set(\n\t\t\trequestedSettings.startsWith('admin:') && $user?.role !== 'admin'\n\t\t\t\t? 'general'\n\t\t\t\t: requestedSettings\n\t\t);\n\n\t\tconst params = new URLSearchParams($page.url.searchParams);\n\t\tparams.delete('settings');\n\t\tconst query = params.toString();\n\t\tawait goto(`${$page.url.pathname}${query ? `?${query}` : ''}${$page.url.hash}`, {\n\t\t\treplaceState: true,\n\t\t\tnoScroll: true,\n\t\t\tkeepFocus: true\n\t\t});\n\t};\n\n\tconst gotoAuth = async () => {\n\t\tconst currentUrl = `${$page.url.pathname}${$page.url.search}`;\n\t\tawait goto(`/auth?redirect=${encodeURIComponent(currentUrl)}`);\n\t};\n\n\tconst navigateChat = async (direction: -1 | 1) => {\n\t\tif (!$chats?.length) return;\n\n\t\tconst currentIndex = $chats.findIndex((chat) => chat.id === $chatId);\n\t\tconst nextChat = currentIndex === -1 ? $chats[0] : $chats[currentIndex + direction];\n\n\t\tif (nextChat) {\n\t\t\tawait goto(`/c/${nextChat"
+    }
+  ]
+}

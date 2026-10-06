@@ -1076,10 +1076,19 @@ class WorkspaceMixin:
 
     async def workspace_state(self, user, workflow_id='', run_id='', system_id='', factory_id=''):
         try:
+            from .ees_workflow_native import native_workspace_access
             actor, capabilities, groups = await self._work_actor(user)
+            observed_role, observed_groups = _value(actor, 'role'), groups
             people, native_groups = await self._work_people(actor, capabilities, groups)
             evidence_access = await self._work_evidence_access(actor, groups)
+            native_access = await native_workspace_access(actor)
             actor, capabilities, groups = await self._work_actor(actor)
+            if _value(actor, 'role') != observed_role or groups != observed_groups:
+                # Account/group revocation may finish during Native reads. Do
+                # not return menu grants collected for the earlier identity.
+                native_access = {'native_access': dict.fromkeys(native_access['native_access'], False),
+                                 'native_access_available': False}
+            capabilities.update(native_access)
             with self._db() as db:
                 if system_id:
                     if factory_id:
