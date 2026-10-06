@@ -1,0 +1,670 @@
+TAP version 13
+# Subtest: new Figma authoring keeps Native conversation untouched and has exact right-panel structure
+ok 1 - new Figma authoring keeps Native conversation untouched and has exact right-panel structure
+  ---
+  duration_ms: 16.659846
+  type: 'test'
+  ...
+# Subtest: empty workspace listing does not create drafts or runs
+ok 2 - empty workspace listing does not create drafts or runs
+  ---
+  duration_ms: 2.266699
+  type: 'test'
+  ...
+# Subtest: direct editing saves only the chosen definition with current revision and request ID
+ok 3 - direct editing saves only the chosen definition with current revision and request ID
+  ---
+  duration_ms: 7.919553
+  type: 'test'
+  ...
+# Subtest: dirty drafts and per-workflow node selection survive navigation
+ok 4 - dirty drafts and per-workflow node selection survive navigation
+  ---
+  duration_ms: 4.874578
+  type: 'test'
+  ...
+# Subtest: typing during save preserves later edits and acknowledges only own base revision
+ok 5 - typing during save preserves later edits and acknowledges only own base revision
+  ---
+  duration_ms: 5.631744
+  type: 'test'
+  ...
+# Subtest: same failed payload reuses request identity; different payload receives new identity
+ok 6 - same failed payload reuses request identity; different payload receives new identity
+  ---
+  duration_ms: 4.990331
+  type: 'test'
+  ...
+# Subtest: revision conflict preserves unsaved text and never silently rebases
+ok 7 - revision conflict preserves unsaved text and never silently rebases
+  ---
+  duration_ms: 4.972295
+  type: 'test'
+  ...
+# Subtest: authorization denial preserves private draft and blocks subsequent mutation
+ok 8 - authorization denial preserves private draft and blocks subsequent mutation
+  ---
+  duration_ms: 4.212275
+  type: 'test'
+  ...
+# Subtest: account reset rejects late save and clears draft cache
+ok 9 - account reset rejects late save and clears draft cache
+  ---
+  duration_ms: 3.656773
+  type: 'test'
+  ...
+# Subtest: late workflow reads cannot overwrite newer selection
+ok 10 - late workflow reads cannot overwrite newer selection
+  ---
+  duration_ms: 3.8558
+  type: 'test'
+  ...
+# Subtest: publish requires exact saved validated revision and explicit confirmation
+ok 11 - publish requires exact saved validated revision and explicit confirmation
+  ---
+  duration_ms: 22.615926
+  type: 'test'
+  ...
+# Subtest: all eight input types and result blocks are represented without workflow-specific HTML
+ok 12 - all eight input types and result blocks are represented without workflow-specific HTML
+  ---
+  duration_ms: 2.565456
+  type: 'test'
+  ...
+# Subtest: declared input and tool argument binding are saved together
+ok 13 - declared input and tool argument binding are saved together
+  ---
+  duration_ms: 4.44907
+  type: 'test'
+  ...
+# Subtest: stage/job insertion and removal keep referential defects visible for publish validation
+ok 14 - stage/job insertion and removal keep referential defects visible for publish validation
+  ---
+  duration_ms: 3.753117
+  type: 'test'
+  ...
+# Subtest: factory overrides distinguish an explicit empty value, zero, and absent value
+ok 15 - factory overrides distinguish an explicit empty value, zero, and absent value
+  ---
+  duration_ms: 4.145895
+  type: 'test'
+  ...
+# Subtest: AI model selection uses permitted explicit choice/default and no silent first-of-many fallback
+ok 16 - AI model selection uses permitted explicit choice/default and no silent first-of-many fallback
+  ---
+  duration_ms: 1.751727
+  type: 'test'
+  ...
+# Subtest: 0 models and model listing failure preserve direct authoring and save
+ok 17 - 0 models and model listing failure preserve direct authoring and save
+  ---
+  duration_ms: 22.889957
+  type: 'test'
+  ...
+# Subtest: one model hides the selector and multiple models require Native choice
+ok 18 - one model hides the selector and multiple models require Native choice
+  ---
+  duration_ms: 2.389832
+  type: 'test'
+  ...
+# Subtest: AI proposal is a preview and explicit local application never saves or publishes
+ok 19 - AI proposal is a preview and explicit local application never saves or publishes
+  ---
+  duration_ms: 2.984885
+  type: 'test'
+  ...
+# Subtest: late AI proposal after workflow navigation or manual edits is never applied
+ok 20 - late AI proposal after workflow navigation or manual edits is never applied
+  ---
+  duration_ms: 5.066566
+  type: 'test'
+  ...
+# Subtest: malformed and cross-context AI output cannot create arbitrary editor state
+ok 21 - malformed and cross-context AI output cannot create arbitrary editor state
+  ---
+  duration_ms: 2.300228
+  type: 'test'
+  ...
+# Subtest: Native chat proposals require exact personal conversation and target revision
+ok 22 - Native chat proposals require exact personal conversation and target revision
+  ---
+  duration_ms: 2.033208
+  type: 'test'
+  ...
+# Subtest: B5 stores inspected Native function reference and immutable input schema
+ok 23 - B5 stores inspected Native function reference and immutable input schema
+  ---
+  duration_ms: 5.015579
+  type: 'test'
+  ...
+# Subtest: tool review is an explicit operation with designated contract revision
+ok 24 - tool review is an explicit operation with designated contract revision
+  ---
+  duration_ms: 3.412216
+  type: 'test'
+  ...
+# Subtest: unavailable EES definitions are explicit and never turn into fake request success
+ok 25 - unavailable EES definitions are explicit and never turn into fake request success
+  ---
+  duration_ms: 2.48082
+  type: 'test'
+  ...
+# Subtest: unsafe labels and instructions are escaped in the editor
+ok 26 - unsafe labels and instructions are escaped in the editor
+  ---
+  duration_ms: 2.856172
+  type: 'test'
+  ...
+# Subtest: opening a form and reading a draft never marks unchanged definitions dirty
+ok 27 - opening a form and reading a draft never marks unchanged definitions dirty
+  ---
+  duration_ms: 3.671885
+  type: 'test'
+  ...
+# Subtest: opaque Native references, dangling dependencies and compound conditions survive unrelated edits
+ok 28 - opaque Native references, dangling dependencies and compound conditions survive unrelated edits
+  ---
+  duration_ms: 4.664343
+  type: 'test'
+  ...
+# Subtest: factory settings preserve all eight input value types without coercing omitted fields
+ok 29 - factory settings preserve all eight input value types without coercing omitted fields
+  ---
+  duration_ms: 5.073005
+  type: 'test'
+  ...
+# Subtest: late model listing after reset cannot overwrite the new account choice
+ok 30 - late model listing after reset cannot overwrite the new account choice
+  ---
+  duration_ms: 2.381871
+  type: 'test'
+  ...
+# Subtest: a confirmation opened for one workflow cannot publish after context changes
+ok 31 - a confirmation opened for one workflow cannot publish after context changes
+  ---
+  duration_ms: 2.131857
+  type: 'test'
+  ...
+# Subtest: conflict comparison can discard only by explicit choice and load exact new revision
+ok 32 - conflict comparison can discard only by explicit choice and load exact new revision
+  ---
+  duration_ms: 3.647397
+  type: 'test'
+  ...
+# Subtest: tool navigation returns to workflow editor without retaining tool-only surface
+ok 33 - tool navigation returns to workflow editor without retaining tool-only surface
+  ---
+  duration_ms: 2.177985
+  type: 'test'
+  ...
+# Subtest: job trigger persists a bounded offset instead of a browser timer
+ok 34 - job trigger persists a bounded offset instead of a browser timer
+  ---
+  duration_ms: 5.46277
+  type: 'test'
+  ...
+# Subtest: published periodic schedule explicitly pins user, version, jobs, timezone and delegation
+ok 35 - published periodic schedule explicitly pins user, version, jobs, timezone and delegation
+  ---
+  duration_ms: 3.751785
+  type: 'test'
+  ...
+# Subtest: Native skills remain optional and only current permitted IDs are added to a job
+ok 36 - Native skills remain optional and only current permitted IDs are added to a job
+  ---
+  duration_ms: 4.280858
+  type: 'test'
+  ...
+# Subtest: unavailable Native skills preserve opaque references and do not block direct human work
+ok 37 - unavailable Native skills preserve opaque references and do not block direct human work
+  ---
+  duration_ms: 3.847178
+  type: 'test'
+  ...
+# Subtest: a late skill-list response cannot expose the previous account metadata
+ok 38 - a late skill-list response cannot expose the previous account metadata
+  ---
+  duration_ms: 3.420548
+  type: 'test'
+  ...
+# Subtest: dynamic Jira options pin discovered Native reference and declared project dependency without static examples
+ok 39 - dynamic Jira options pin discovered Native reference and declared project dependency without static examples
+  ---
+  duration_ms: 4.017103
+  type: 'test'
+  ...
+# Subtest: dynamic options cannot invent an unconfigured Native reference or fall back to static entries
+ok 40 - dynamic options cannot invent an unconfigured Native reference or fall back to static entries
+  ---
+  duration_ms: 3.589872
+  type: 'test'
+  ...
+# Subtest: common options use current authorized entities and preserve an opaque tool source on description edit
+ok 41 - common options use current authorized entities and preserve an opaque tool source on description edit
+  ---
+  duration_ms: 6.422128
+  type: 'test'
+  ...
+# Subtest: tool selection pins contract revision and unrelated edits cannot silently upgrade an old published reference
+ok 42 - tool selection pins contract revision and unrelated edits cannot silently upgrade an old published reference
+  ---
+  duration_ms: 2.885836
+  type: 'test'
+  ...
+# Subtest: AI item verdicts declare their source job and EES requests retain explicit effect criteria
+ok 43 - AI item verdicts declare their source job and EES requests retain explicit effect criteria
+  ---
+  duration_ms: 4.612855
+  type: 'test'
+  ...
+# Subtest: confirmed list bindings and deadline rules store declared references instead of browser calculations
+ok 44 - confirmed list bindings and deadline rules store declared references instead of browser calculations
+  ---
+  duration_ms: 4.291564
+  type: 'test'
+  ...
+# Subtest: a result report can record all resolved verdicts without converting unknown CRs into approved completion
+ok 45 - a result report can record all resolved verdicts without converting unknown CRs into approved completion
+  ---
+  duration_ms: 4.226487
+  type: 'test'
+  ...
+# Subtest: factory settings fetch dynamic choices from the saved definition and never substitute examples after failure
+ok 46 - factory settings fetch dynamic choices from the saved definition and never substitute examples after failure
+  ---
+  duration_ms: 3.610182
+  type: 'test'
+  ...
+# Subtest: person settings use current Native people metadata without making free-text users
+ok 47 - person settings use current Native people metadata without making free-text users
+  ---
+  duration_ms: 3.736182
+  type: 'test'
+  ...
+# Subtest: Native proposal review is visibly open from a selected job and non-structure tabs without saving
+ok 48 - Native proposal review is visibly open from a selected job and non-structure tabs without saving
+  ---
+  duration_ms: 10.829556
+  type: 'test'
+  ...
+# Subtest: job assignee uses only current Native user/group identities and persists exact principal
+ok 49 - job assignee uses only current Native user/group identities and persists exact principal
+  ---
+  duration_ms: 4.612095
+  type: 'test'
+  ...
+# Subtest: unavailable existing assignee is preserved on unrelated edits and removed only explicitly
+ok 50 - unavailable existing assignee is preserved on unrelated edits and removed only explicitly
+  ---
+  duration_ms: 2.975501
+  type: 'test'
+  ...
+# Subtest: B5 explicitly authored output contract saves an object while Native input schema stays authoritative
+ok 51 - B5 explicitly authored output contract saves an object while Native input schema stays authoritative
+  ---
+  duration_ms: 3.953467
+  type: 'test'
+  ...
+# Subtest: invalid output contract remains editable and cannot save or submit stale schema
+ok 52 - invalid output contract remains editable and cannot save or submit stale schema
+  ---
+  duration_ms: 13.789904
+  type: 'test'
+  ...
+# Subtest: existing output contract is not silently replaced by metadata when unrelated fields change
+ok 53 - existing output contract is not silently replaced by metadata when unrelated fields change
+  ---
+  duration_ms: 3.168761
+  type: 'test'
+  ...
+# Subtest: input deletion requires confirmation and retains dangling bindings for publish validation
+ok 54 - input deletion requires confirmation and retains dangling bindings for publish validation
+  ---
+  duration_ms: 3.958364
+  type: 'test'
+  ...
+# Subtest: input deletion confirmation cannot mutate a different workflow after navigation
+ok 55 - input deletion confirmation cannot mutate a different workflow after navigation
+  ---
+  duration_ms: 3.486257
+  type: 'test'
+  ...
+# Subtest: version history displays the exact stored publisher safely
+ok 56 - version history displays the exact stored publisher safely
+  ---
+  duration_ms: 2.338767
+  type: 'test'
+  ...
+# Subtest: AI composer snapshots physical expansion and live text before a delayed model-list repaint
+ok 57 - AI composer snapshots physical expansion and live text before a delayed model-list repaint
+  ---
+  duration_ms: 2.758646
+  type: 'test'
+  ...
+# Subtest: routine workspace polls preserve the user-open composer and retain an explicitly closed composer
+ok 58 - routine workspace polls preserve the user-open composer and retain an explicitly closed composer
+  ---
+  duration_ms: 2.98147
+  type: 'test'
+  ...
+# Subtest: composer text and expansion are private to the workflow and Native conversation and reset on account change
+ok 59 - composer text and expansion are private to the workflow and Native conversation and reset on account change
+  ---
+  duration_ms: 4.466606
+  type: 'test'
+  ...
+# Subtest: a pending right-composer response is discarded after a conversation switch even if transport ignores abort
+ok 60 - a pending right-composer response is discarded after a conversation switch even if transport ignores abort
+  ---
+  duration_ms: 2.592196
+  type: 'test'
+  ...
+# Subtest: B2-2 rules are scoped to eligible jobs and preserve stored judgment IDs and legacy defaults
+ok 61 - B2-2 rules are scoped to eligible jobs and preserve stored judgment IDs and legacy defaults
+  ---
+  duration_ms: 4.840377
+  type: 'test'
+  ...
+# Subtest: B2-2 suggestion rules save guidance and human-only IDs without auto-confirmation or reference replacement
+ok 62 - B2-2 suggestion rules save guidance and human-only IDs without auto-confirmation or reference replacement
+  ---
+  duration_ms: 4.564373
+  type: 'test'
+  ...
+# Subtest: B2-2 a job switch while its dialog is open cannot edit a different job
+ok 63 - B2-2 a job switch while its dialog is open cannot edit a different job
+  ---
+  duration_ms: 3.046938
+  type: 'test'
+  ...
+# Subtest: B2-3 advisories do not block publication while blockers remain visible and disabled
+ok 64 - B2-3 advisories do not block publication while blockers remain visible and disabled
+  ---
+  duration_ms: 4.328378
+  type: 'test'
+  ...
+# Subtest: B5 direct execution stores only declared exception metadata and retains absent adapter reason
+ok 65 - B5 direct execution stores only declared exception metadata and retains absent adapter reason
+  ---
+  duration_ms: 3.669712
+  type: 'test'
+  ...
+# Subtest: C12 schedule opening and explicit execution scope do not alter preserved drafts on inspection
+ok 66 - C12 schedule opening and explicit execution scope do not alter preserved drafts on inspection
+  ---
+  duration_ms: 6.989028
+  type: 'test'
+  ...
+# Subtest: B5 direct classification selects registered Native metadata without configuring execution
+ok 67 - B5 direct classification selects registered Native metadata without configuring execution
+  ---
+  duration_ms: 3.318455
+  type: 'test'
+  ...
+# Subtest: missing randomUUID permits create and authoring IDs through the shared helper
+ok 68 - missing randomUUID permits create and authoring IDs through the shared helper
+  ---
+  duration_ms: 8.509878
+  type: 'test'
+  ...
+# Subtest: missing randomUUID keeps authoring retries idempotent and changed edits distinct
+ok 69 - missing randomUUID keeps authoring retries idempotent and changed edits distinct
+  ---
+  duration_ms: 5.821187
+  type: 'test'
+  ...
+# Subtest: missing randomUUID keeps AI proposal context and explicit apply without saving
+ok 70 - missing randomUUID keeps AI proposal context and explicit apply without saving
+  ---
+  duration_ms: 2.686348
+  type: 'test'
+  ...
+# Subtest: input save keeps mutation controls busy until the acknowledged state finishes refreshing
+ok 71 - input save keeps mutation controls busy until the acknowledged state finishes refreshing
+  ---
+  duration_ms: 9.832547
+  type: 'test'
+  ...
+# Subtest: review save cannot continue confirmation after its refresh loses the selected work context
+ok 72 - review save cannot continue confirmation after its refresh loses the selected work context
+  ---
+  duration_ms: 1.657495
+  type: 'test'
+  ...
+# Subtest: an explicit early navigation survives initial saved-selection restoration and late startup reads
+ok 73 - an explicit early navigation survives initial saved-selection restoration and late startup reads
+  ---
+  duration_ms: 1.881561
+  type: 'test'
+  ...
+# Subtest: early selection patches are cleared on account reset and do not replace another account restoration
+ok 74 - early selection patches are cleared on account reset and do not replace another account restoration
+  ---
+  duration_ms: 2.869432
+  type: 'test'
+  ...
+# Subtest: history expansion restoration uses exact attempt keys and the current panel position
+ok 75 - history expansion restoration uses exact attempt keys and the current panel position
+  ---
+  duration_ms: 2.381189
+  type: 'test'
+  ...
+# Subtest: real view list reader returns an isolated snapshot without an undefined helper
+ok 76 - real view list reader returns an isolated snapshot without an undefined helper
+  ---
+  duration_ms: 1.332768
+  type: 'test'
+  ...
+# Subtest: assignment labels use only the permitted Native people list and preserve principal kind
+ok 77 - assignment labels use only the permitted Native people list and preserve principal kind
+  ---
+  duration_ms: 1.568161
+  type: 'test'
+  ...
+# Subtest: new delivery effect and retry failures are translated without masking human explanations
+ok 78 - new delivery effect and retry failures are translated without masking human explanations
+  ---
+  duration_ms: 4.036772
+  type: 'test'
+  ...
+# Subtest: list inclusion is a local preview and candidates are never selected by default
+ok 79 - list inclusion is a local preview and candidates are never selected by default
+  ---
+  duration_ms: 1.554851
+  type: 'test'
+  ...
+# Subtest: saved human additions retain their source label and never increase the immutable lookup count
+ok 80 - saved human additions retain their source label and never increase the immutable lookup count
+  ---
+  duration_ms: 2.709542
+  type: 'test'
+  ...
+# Subtest: failed lookup hides previous payload while partial keeps explicit incompleteness
+ok 81 - failed lookup hides previous payload while partial keeps explicit incompleteness
+  ---
+  duration_ms: 1.144786
+  type: 'test'
+  ...
+# Subtest: zero included items can be saved while completion policy remains explicitly unresolved
+ok 82 - zero included items can be saved while completion policy remains explicitly unresolved
+  ---
+  duration_ms: 0.635172
+  type: 'test'
+  ...
+# Subtest: a completed empty lookup permits explicit additions without pretending it was never executed
+ok 83 - a completed empty lookup permits explicit additions without pretending it was never executed
+  ---
+  duration_ms: 1.725927
+  type: 'test'
+  ...
+# Subtest: read-only report cannot edit or save and unavailable dispatch is never clickable
+ok 84 - read-only report cannot edit or save and unavailable dispatch is never clickable
+  ---
+  duration_ms: 2.800419
+  type: 'test'
+  ...
+# Subtest: revoked evidence never redisplays a locally preserved list or review draft
+ok 85 - revoked evidence never redisplays a locally preserved list or review draft
+  ---
+  duration_ms: 1.26726
+  type: 'test'
+  ...
+# Subtest: request reviewer and requester controls use distinct current capabilities
+ok 86 - request reviewer and requester controls use distinct current capabilities
+  ---
+  duration_ms: 1.706448
+  type: 'test'
+  ...
+# Subtest: failed or stale report never permits editing a previous result as current evidence
+ok 87 - failed or stale report never permits editing a previous result as current evidence
+  ---
+  duration_ms: 1.143584
+  type: 'test'
+  ...
+# Subtest: historical values compare only the stored shared input without replacing it
+ok 88 - historical values compare only the stored shared input without replacing it
+  ---
+  duration_ms: 1.276984
+  type: 'test'
+  ...
+# Subtest: records are scoped and put active runs first without inventing a date range
+ok 89 - records are scoped and put active runs first without inventing a date range
+  ---
+  duration_ms: 14.211456
+  type: 'test'
+  ...
+# Subtest: empty work shows only the earliest real scheduled execution
+ok 90 - empty work shows only the earliest real scheduled execution
+  ---
+  duration_ms: 1.244205
+  type: 'test'
+  ...
+# Subtest: asking about a historical record only changes private reference and never dispatches
+ok 91 - asking about a historical record only changes private reference and never dispatches
+  ---
+  duration_ms: 1.270165
+  type: 'test'
+  ...
+# Subtest: question from a historical row preserves its exact attempt instead of the newest row
+ok 92 - question from a historical row preserves its exact attempt instead of the newest row
+  ---
+  duration_ms: 2.302672
+  type: 'test'
+  ...
+# Subtest: draft save sends immutable attempt and both revisions without executing or deciding
+ok 93 - draft save sends immutable attempt and both revisions without executing or deciding
+  ---
+  duration_ms: 3.047269
+  type: 'test'
+  ...
+# Subtest: late draft save cannot acknowledge or repaint after another work target is selected
+ok 94 - late draft save cannot acknowledge or repaint after another work target is selected
+  ---
+  duration_ms: 1.164185
+  type: 'test'
+  ...
+# Subtest: request fields follow native schema types and bindings, with reason outside EES values
+ok 95 - request fields follow native schema types and bindings, with reason outside EES values
+  ---
+  duration_ms: 2.24089
+  type: 'test'
+  ...
+# Subtest: ad-hoc start lists active factories and disables only those with active work
+ok 96 - ad-hoc start lists active factories and disables only those with active work
+  ---
+  duration_ms: 1.686398
+  type: 'test'
+  ...
+# Subtest: item verdict options stay pending and AI suggestions cannot enable final confirmation
+ok 97 - item verdict options stay pending and AI suggestions cannot enable final confirmation
+  ---
+  duration_ms: 1.584556
+  type: 'test'
+  ...
+# Subtest: A7 has automatic save status and no save button, and basis cards expose actual time
+ok 98 - A7 has automatic save status and no save button, and basis cards expose actual time
+  ---
+  duration_ms: 1.889382
+  type: 'test'
+  ...
+# Subtest: navigation flushes edits made while an older review autosave is still in flight
+ok 99 - navigation flushes edits made while an older review autosave is still in flight
+  ---
+  duration_ms: 1.388682
+  type: 'test'
+  ...
+# Subtest: failed automatic review save keeps the current work and preserves its draft
+ok 100 - failed automatic review save keeps the current work and preserves its draft
+  ---
+  duration_ms: 1.025297
+  type: 'test'
+  ...
+# Subtest: same-status custom words retain distinct pending IDs and final immutable wording
+ok 101 - same-status custom words retain distinct pending IDs and final immutable wording
+  ---
+  duration_ms: 1.873489
+  type: 'test'
+  ...
+# Subtest: partial provenance survives a failed human verdict without changing its primary status
+ok 102 - partial provenance survives a failed human verdict without changing its primary status
+  ---
+  duration_ms: 1.27396
+  type: 'test'
+  ...
+# Subtest: private verdict autosave persists exact term without deciding and restores after reload
+ok 103 - private verdict autosave persists exact term without deciding and restores after reload
+  ---
+  duration_ms: 21.549317
+  type: 'test'
+  ...
+# Subtest: private draft storage failure is visible and never discards pending selection
+ok 104 - private draft storage failure is visible and never discards pending selection
+  ---
+  duration_ms: 1.903914
+  type: 'test'
+  ...
+# Subtest: schema field ordering is not an edit while changed values retain save protection
+ok 105 - schema field ordering is not an edit while changed values retain save protection
+  ---
+  duration_ms: 1.239729
+  type: 'test'
+  ...
+# Subtest: missing evidence and external request URLs never become local undefined links
+ok 106 - missing evidence and external request URLs never become local undefined links
+  ---
+  duration_ms: 6.676961
+  type: 'test'
+  ...
+# Subtest: shared ID helper prefers the native randomUUID with its receiver
+ok 107 - shared ID helper prefers the native randomUUID with its receiver
+  ---
+  duration_ms: 0.974101
+  type: 'test'
+  ...
+# Subtest: shared ID fallback sets UUID version and variant while preserving random bytes
+ok 108 - shared ID fallback sets UUID version and variant while preserving random bytes
+  ---
+  duration_ms: 5.488758
+  type: 'test'
+  ...
+# Subtest: shared ID generation refuses missing secure randomness
+ok 109 - shared ID generation refuses missing secure randomness
+  ---
+  duration_ms: 3.277894
+  type: 'test'
+  ...
+# Subtest: missing randomUUID preserves runtime command receipt and first-chat boundaries
+ok 110 - missing randomUUID preserves runtime command receipt and first-chat boundaries
+  ---
+  duration_ms: 1.961801
+  type: 'test'
+  ...
+1..110
+# tests 110
+# suites 0
+# pass 110
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 420.706139

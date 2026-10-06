@@ -7,6 +7,7 @@ transport are synthetic. The complete CLI gate verifies real login separately.
 import asyncio
 from copy import deepcopy
 import json
+from uuid import UUID
 
 from ees_work_integrated_fixture import IntegratedNativeCase
 
@@ -30,6 +31,52 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         (directory / (label + '-dom.json')).write_text(
             json.dumps(observed, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         return directory
+
+    def test_missing_random_uuid_creates_and_saves_draft_in_native_ui(self):
+        # Loopback is trustworthy in Chrome. Explicit API removal reproduces
+        # the intranet capability boundary, not a real insecure-origin test.
+        self.browser.evaluate("Object.defineProperty(crypto,'randomUUID',{value:undefined,configurable:true});true")
+        self.assertEqual(self.browser.evaluate('typeof crypto.randomUUID'), 'undefined')
+        self.assertEqual(self.browser.evaluate('typeof crypto.getRandomValues'), 'function')
+        self.click('[data-action="mode"][data-mode="author"]')
+        self.click('[data-author-action="create"]')
+        self.fill('#ees-work-dialog [name="name"]', 'HTTP 초안 생성 검증')
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("document.querySelector('[data-author-action=add_stage]')")
+        created = next(body for body in self.server.workspace_commands
+                       if body.get('action') == 'create_workflow')
+        self.assertEqual(created['name'], 'HTTP 초안 생성 검증')
+        self.assertEqual(UUID(created['request_id']).version, 4)
+        record = next(item for item in self.state()['workflows']
+                      if item['name'] == created['name'])
+        key = record['id']
+        self.click('[data-author-action="add_stage"]')
+        self.click('[data-author-action="tab"][data-tab="structure"]')
+        self.click('[data-author-action="add_job"]')
+        self.click('[data-author-action="save"]')
+        self.wait("!document.querySelector('[data-author-action=validate]')?.disabled")
+        saved = self.state(workflow_id=key)['workflow']
+        self.assertEqual(saved['revision'], 2)
+        self.assertIsNone(saved['published_version'])
+        stage = next(node for node in saved['draft']['nodes'].values() if node['type'] == 't')
+        job = next(node for node in saved['draft']['nodes'].values() if node['type'] == 'j')
+        self.assertEqual(UUID(stage['id'].removeprefix('stage-')).version, 4)
+        self.assertEqual(UUID(job['id'].removeprefix('job-')).version, 4)
+        self.assertEqual(job['parent'], stage['id'])
+        self.assertIn(job['id'], stage['children'])
+        request_ids = [body['request_id'] for body in self.server.workspace_commands
+                       if body.get('action') in ('create_workflow', 'save_draft')]
+        self.assertEqual(len(request_ids), 2)
+        self.assertEqual(len(set(request_ids)), 2)
+        self.assertTrue(all(UUID(value).version == 4 for value in request_ids))
+        self.browser.call('Page.reload')
+        self.wait("document.querySelector('#ees-work-entry')")
+        self.open_sidebar()
+        self.click('[data-action="mode"][data-mode="author"]')
+        self.click('[data-author-action="open"][data-id="' + key + '"]')
+        self.wait("document.querySelector('[data-author-action=save]')")
+        self.assertEqual(self.state(workflow_id=key)['workflow']['draft'], saved['draft'])
+        self.screenshot('http-id-native-create-save-reload')
 
     def test_schedule_mouse_field_transition_keeps_focus_and_saves_both_values(self):
         key = self.author(name='합성 일정 포커스 검증', jobs=1)

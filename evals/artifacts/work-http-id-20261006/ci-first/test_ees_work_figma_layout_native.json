@@ -1,0 +1,28 @@
+{
+  "module": "test_ees_work_figma_layout_native.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 6.581,
+  "tests_run": 2,
+  "no_test_failures": false,
+  "status": "failed",
+  "counts": {
+    "passed": 1,
+    "failed": 1,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay",
+      "status": "failed",
+      "detail": "Traceback (most recent call last):\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_figma_layout_native.py\", line 66, in test_q1_geometry_reading_width_footer_and_baseline_overlay\n    self.assertEqual(self.geometry()['chat']['width'],504)\nAssertionError: 503.984375 != 504\n"
+    },
+    {
+      "id": "test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast",
+      "status": "passed"
+    }
+  ]
+}

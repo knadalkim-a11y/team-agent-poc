@@ -60,7 +60,7 @@
   async function sendCommand(path,body){
     if(!available())throw new Error('로그인을 확인해 주세요.');
     const at=context(),auth=token(),payload={...body,expected_revision:body.expected_revision ?? revisionFor(body.action)};
-    const key=path+JSON.stringify(payload);if(!payload.request_id)payload.request_id=receipts.get(key) || crypto.randomUUID();receipts.set(key,payload.request_id);
+    const key=path+JSON.stringify(payload);if(!payload.request_id)payload.request_id=receipts.get(key) || workUI.newId();receipts.set(key,payload.request_id);
     let result;
     try{result=await api(path,payload);receipts.delete(key);}
     catch(failure){if(failure.status&&failure.status<500)receipts.delete(key);if(auth===token()&&at===context()){commandError=failure.message;render();}throw failure;}
@@ -71,7 +71,7 @@
     clearTimeout(uiTimer);const at=context(),auth=token(),saved=clone(selection);
     uiTimer=setTimeout(()=>{uiWrites=uiWrites.catch(()=>{}).then(async()=>{
       if(at!==context()||auth!==token()||!available())return;
-      try{if(JSON.stringify({selection:saved}).length>39000)throw new Error('개인 초안 저장 범위를 초과했습니다. 현재 판정 선택을 확정한 뒤 다시 시도해 주세요.');let result;try{result=await api('workspace/command',{action:'save_ui',expected_revision:uiRevision,request_id:crypto.randomUUID(),state:{selection:saved}});}
+      try{if(JSON.stringify({selection:saved}).length>39000)throw new Error('개인 초안 저장 범위를 초과했습니다. 현재 판정 선택을 확정한 뒤 다시 시도해 주세요.');let result;try{result=await api('workspace/command',{action:'save_ui',expected_revision:uiRevision,request_id:workUI.newId(),state:{selection:saved}});}
       catch(failure){
         if(failure.code!=='revision_conflict'||panelWidth===null)throw failure;
         if(auth!==token()||at!==context()||!available())return;
@@ -79,7 +79,7 @@
         const stored=current.ui_state?.state || {},revision=current.ui_state?.revision || 0;uiRevision=Math.max(uiRevision,revision);
         // A concurrent tab's private drafts stay intact. Only the explicit
         // width preference is merged once, never a shared business command.
-        result=await api('workspace/command',{action:'save_ui',expected_revision:revision,request_id:crypto.randomUUID(),state:{...stored,selection:{...(stored.selection || {}),panel_width:panelWidth}}});
+        result=await api('workspace/command',{action:'save_ui',expected_revision:revision,request_id:workUI.newId(),state:{...stored,selection:{...(stored.selection || {}),panel_width:panelWidth}}});
       }if(auth===token()){uiRevision=Math.max(uiRevision,result.ui_state?.revision ?? result.revision ?? uiRevision+1);if(commandError.startsWith('작성한 선택의 자동 저장 실패')){commandError='';render();}}}
       catch(failure){if(auth===token()&&at===context()&&(panelWidth!==null||Object.keys(saved.verdict_drafts || {}).length||Object.keys(saved.start_inputs || {}).length||Object.keys(saved.request_reasons || {}).length)){commandError='작성한 선택의 자동 저장 실패 · '+failure.message+' 화면의 값은 보존했습니다. 저장을 다시 시도해 주세요.';render();}}
     });},400);
@@ -363,7 +363,7 @@
   }
   function beginChatCreation(){
     if(!available()||chatId()||location.pathname!=='/')return '';
-    const id=crypto.randomUUID();chatCreations.set(id,{actor:token(),context_id:context(),boundary:chatBoundary()});
+    const id=workUI.newId();chatCreations.set(id,{actor:token(),context_id:context(),boundary:chatBoundary()});
     while(chatCreations.size>8)chatCreations.delete(chatCreations.keys().next().value);return id;
   }
   function finishChatCreation(id,createdChatId){

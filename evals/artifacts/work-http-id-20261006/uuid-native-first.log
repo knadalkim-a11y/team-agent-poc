@@ -1,0 +1,14 @@
+setUpClass (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests) ... ERROR
+
+======================================================================
+ERROR: setUpClass (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/abe8513396cb/team-agent-poc/tests/ees_work_integrated_fixture.py", line 60, in setUpClass
+    raise RuntimeError('The Native browser gate requires Chrome and the built product')
+RuntimeError: The Native browser gate requires Chrome and the built product
+
+----------------------------------------------------------------------
+Ran 0 tests in 0.000s
+
+FAILED (errors=1)

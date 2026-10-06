@@ -1,0 +1,7 @@
+test_missing_random_uuid_creates_and_saves_draft_in_native_ui (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_missing_random_uuid_creates_and_saves_draft_in_native_ui) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 150.03225399777875, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.329s
+
+OK

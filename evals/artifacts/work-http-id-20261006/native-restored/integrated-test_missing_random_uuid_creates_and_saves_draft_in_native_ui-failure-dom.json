@@ -1,0 +1,19 @@
+{
+  "scope": "built Native UI; synthetic session and data",
+  "path": "/c/existing-chat",
+  "ready": "complete",
+  "fonts": "loaded",
+  "viewport": [
+    1920,
+    1080
+  ],
+  "active": {
+    "tag": "DIV",
+    "id": "chat-input"
+  },
+  "panel": {
+    "text": "내 업무\n닫기\n지금 처리할 내 업무가 없습니다",
+    "html": "<aside id=\"ees-work-panel\" data-ees-work=\"\" aria-label=\"업무 패널\" data-ees-mode=\"work\" aria-busy=\"false\" data-ees-overlay=\"false\" style=\"--ees-panel-width: 480px;\"><header class=\"ew-panel-header\"><strong>내 업무</strong><span></span><button type=\"button\" data-action=\"close_panel\" aria-label=\"업무 패널 닫기\" class=\"ew-icon-button\">닫기</button></header><div id=\"ees-work-content\" class=\"ew-scroll\"><div class=\"ew-empty ew-my-work-empty\"><span class=\"ew-empty-symbol\"><img class=\"ew-icon\" src=\"/_ees13/v4/52271.svg\" alt=\"\" aria-hidden=\"true\"></span><h3>지금 처리할 내 업무가 없습니다</h3></div></div><div data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-label=\"업무 패널 너비\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-valuenow=\"480\"></div></aside>"
+  },
+  "authoring": null
+}

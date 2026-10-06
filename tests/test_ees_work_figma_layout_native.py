@@ -62,9 +62,17 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.click('[data-ees-sidebar-toggle]')
         # Widening by itself does not activate the unresolved overlay policy.
         self.resize_keyboard('End',35)
-        self.assertEqual(self.geometry()['panel']['width'],720)
-        self.assertEqual(self.geometry()['chat']['width'],504)
-        self.assertEqual(self.geometry()['overlay'],'false')
+        geometry=self.geometry()
+        self.assertEqual(geometry['sidebar']['width'],56)
+        self.assertEqual(geometry['panel']['width'],720)
+        # The flex remainder may differ by one observed 1/64 CSS pixel.
+        # Keep exact fixed widths and check adjoining edges and overflow too.
+        self.assertAlmostEqual(geometry['chat']['width'],504,delta=1/64)
+        self.assertAlmostEqual(geometry['chat']['x']+geometry['chat']['width'],geometry['panel']['x'],delta=1/64)
+        self.assertAlmostEqual(geometry['panel']['x']+geometry['panel']['width'],1280,delta=1/64)
+        self.assertEqual(geometry['overlay'],'false')
+        self.assertFalse(geometry['overflow'])
+        self.evidence('q1-wide-panel-1280x768')
         self.resize_keyboard('Home',36)
         self.assertEqual(self.geometry()['panel']['width'],400)
         self.viewport(1095)

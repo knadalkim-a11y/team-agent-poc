@@ -1,0 +1,35 @@
+{
+  "module": "test_ees_work_figma_authoring_native.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 12.419,
+  "tests_run": 4,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 4,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_missing_random_uuid_creates_and_saves_draft_in_native_ui",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_schedule_mouse_field_transition_keeps_focus_and_saves_both_values",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_schedule_preview_save_publish_and_explicit_delegation_preserve_existing_cycle",
+      "status": "passed"
+    }
+  ]
+}

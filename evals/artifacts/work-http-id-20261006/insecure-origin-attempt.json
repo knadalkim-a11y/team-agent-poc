@@ -1,0 +1,22 @@
+{
+  "result": "NOT VERIFIED",
+  "scope": "Optional real insecure-origin helper probe, no in-house server",
+  "attempts": [
+    {
+      "result": "ReferenceError: workUI is not defined",
+      "interpretation": "Page not reached; not product failure"
+    },
+    {
+      "diagnostic": {
+        "url": "chrome-error://chromewebdata/",
+        "ready": "complete",
+        "workUI": "undefined"
+      }
+    },
+    {
+      "navigation_error": "net::ERR_EMPTY_RESPONSE"
+    }
+  ],
+  "setup": "Existing ChromePipe; local ThreadingHTTPServer on 127.0.0.1; ees-http.test mapped only to loopback via host-resolver-rules, no-proxy-server",
+  "followup": "No further routing changes or retries. Browser Native test explicitly removes randomUUID on secure loopback; actual in-house HTTP remains unverified."
+}

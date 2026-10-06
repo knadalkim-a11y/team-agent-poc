@@ -1,0 +1,248 @@
+✔ new Figma authoring keeps Native conversation untouched and has exact right-panel structure (22.489767ms)
+✔ empty workspace listing does not create drafts or runs (3.172386ms)
+✔ direct editing saves only the chosen definition with current revision and request ID (10.667703ms)
+✔ dirty drafts and per-workflow node selection survive navigation (6.225683ms)
+✔ typing during save preserves later edits and acknowledges only own base revision (7.404951ms)
+✔ same failed payload reuses request identity; different payload receives new identity (7.119824ms)
+✔ revision conflict preserves unsaved text and never silently rebases (5.370812ms)
+✔ authorization denial preserves private draft and blocks subsequent mutation (5.952524ms)
+✔ account reset rejects late save and clears draft cache (5.307197ms)
+✔ late workflow reads cannot overwrite newer selection (3.391594ms)
+✔ publish requires exact saved validated revision and explicit confirmation (26.85417ms)
+✔ all eight input types and result blocks are represented without workflow-specific HTML (2.969832ms)
+✔ declared input and tool argument binding are saved together (4.269401ms)
+✔ stage/job insertion and removal keep referential defects visible for publish validation (3.858335ms)
+✔ factory overrides distinguish an explicit empty value, zero, and absent value (4.105736ms)
+✔ AI model selection uses permitted explicit choice/default and no silent first-of-many fallback (2.050484ms)
+✔ 0 models and model listing failure preserve direct authoring and save (26.155784ms)
+✔ one model hides the selector and multiple models require Native choice (2.950483ms)
+✔ AI proposal is a preview and explicit local application never saves or publishes (3.152766ms)
+✔ late AI proposal after workflow navigation or manual edits is never applied (5.454388ms)
+✔ malformed and cross-context AI output cannot create arbitrary editor state (2.331154ms)
+✔ Native chat proposals require exact personal conversation and target revision (2.519437ms)
+✔ B5 stores inspected Native function reference and immutable input schema (5.687056ms)
+✔ tool review is an explicit operation with designated contract revision (4.902009ms)
+✔ unavailable EES definitions are explicit and never turn into fake request success (2.579137ms)
+✔ unsafe labels and instructions are escaped in the editor (3.209903ms)
+✔ opening a form and reading a draft never marks unchanged definitions dirty (3.692826ms)
+✔ opaque Native references, dangling dependencies and compound conditions survive unrelated edits (4.558975ms)
+✔ factory settings preserve all eight input value types without coercing omitted fields (2.919818ms)
+✔ late model listing after reset cannot overwrite the new account choice (2.225306ms)
+✔ a confirmation opened for one workflow cannot publish after context changes (2.46797ms)
+✔ conflict comparison can discard only by explicit choice and load exact new revision (3.974629ms)
+✔ tool navigation returns to workflow editor without retaining tool-only surface (2.073419ms)
+✔ job trigger persists a bounded offset instead of a browser timer (2.966948ms)
+✔ published periodic schedule explicitly pins user, version, jobs, timezone and delegation (2.884455ms)
+✔ Native skills remain optional and only current permitted IDs are added to a job (5.105405ms)
+✔ unavailable Native skills preserve opaque references and do not block direct human work (4.365896ms)
+✔ a late skill-list response cannot expose the previous account metadata (5.481087ms)
+✔ dynamic Jira options pin discovered Native reference and declared project dependency without static examples (3.732876ms)
+✔ dynamic options cannot invent an unconfigured Native reference or fall back to static entries (3.280458ms)
+✔ common options use current authorized entities and preserve an opaque tool source on description edit (4.719115ms)
+✔ tool selection pins contract revision and unrelated edits cannot silently upgrade an old published reference (3.417994ms)
+✔ AI item verdicts declare their source job and EES requests retain explicit effect criteria (5.873376ms)
+✔ confirmed list bindings and deadline rules store declared references instead of browser calculations (5.879875ms)
+✔ a result report can record all resolved verdicts without converting unknown CRs into approved completion (4.185865ms)
+✔ factory settings fetch dynamic choices from the saved definition and never substitute examples after failure (3.131214ms)
+✔ person settings use current Native people metadata without making free-text users (2.590274ms)
+✔ Native proposal review is visibly open from a selected job and non-structure tabs without saving (11.396746ms)
+✔ job assignee uses only current Native user/group identities and persists exact principal (5.781688ms)
+✔ unavailable existing assignee is preserved on unrelated edits and removed only explicitly (3.025005ms)
+✔ B5 explicitly authored output contract saves an object while Native input schema stays authoritative (3.259096ms)
+✔ invalid output contract remains editable and cannot save or submit stale schema (11.720201ms)
+✔ existing output contract is not silently replaced by metadata when unrelated fields change (3.061279ms)
+✔ input deletion requires confirmation and retains dangling bindings for publish validation (4.929089ms)
+✔ input deletion confirmation cannot mutate a different workflow after navigation (3.239516ms)
+✔ version history displays the exact stored publisher safely (1.9011ms)
+✔ AI composer snapshots physical expansion and live text before a delayed model-list repaint (2.589582ms)
+✔ routine workspace polls preserve the user-open composer and retain an explicitly closed composer (2.488851ms)
+✔ composer text and expansion are private to the workflow and Native conversation and reset on account change (2.659176ms)
+✔ a pending right-composer response is discarded after a conversation switch even if transport ignores abort (2.744434ms)
+✔ B2-2 rules are scoped to eligible jobs and preserve stored judgment IDs and legacy defaults (4.957252ms)
+✔ B2-2 suggestion rules save guidance and human-only IDs without auto-confirmation or reference replacement (4.377703ms)
+✔ B2-2 a job switch while its dialog is open cannot edit a different job (4.146567ms)
+✔ B2-3 advisories do not block publication while blockers remain visible and disabled (4.257814ms)
+✔ B5 direct execution stores only declared exception metadata and retains absent adapter reason (4.099897ms)
+✔ C12 schedule opening and explicit execution scope do not alter preserved drafts on inspection (4.746065ms)
+✔ B5 direct classification selects registered Native metadata without configuring execution (3.241309ms)
+✖ missing randomUUID permits create and authoring IDs through the shared helper (2.539287ms)
+✖ missing randomUUID keeps authoring retries idempotent and changed edits distinct (5.070592ms)
+✖ missing randomUUID keeps AI proposal context and explicit apply without saving (2.823593ms)
+✔ input save keeps mutation controls busy until the acknowledged state finishes refreshing (12.469945ms)
+✔ review save cannot continue confirmation after its refresh loses the selected work context (2.472266ms)
+✔ an explicit early navigation survives initial saved-selection restoration and late startup reads (2.781159ms)
+✔ early selection patches are cleared on account reset and do not replace another account restoration (3.318595ms)
+✔ history expansion restoration uses exact attempt keys and the current panel position (3.082331ms)
+✔ real view list reader returns an isolated snapshot without an undefined helper (1.738517ms)
+✔ assignment labels use only the permitted Native people list and preserve principal kind (1.691296ms)
+✔ new delivery effect and retry failures are translated without masking human explanations (5.844712ms)
+✔ list inclusion is a local preview and candidates are never selected by default (2.210865ms)
+✔ saved human additions retain their source label and never increase the immutable lookup count (3.863242ms)
+✔ failed lookup hides previous payload while partial keeps explicit incompleteness (1.675142ms)
+✔ zero included items can be saved while completion policy remains explicitly unresolved (0.894842ms)
+✔ a completed empty lookup permits explicit additions without pretending it was never executed (2.347549ms)
+✔ read-only report cannot edit or save and unavailable dispatch is never clickable (2.491035ms)
+✔ revoked evidence never redisplays a locally preserved list or review draft (1.789503ms)
+✔ request reviewer and requester controls use distinct current capabilities (2.53481ms)
+✔ failed or stale report never permits editing a previous result as current evidence (1.546148ms)
+✔ historical values compare only the stored shared input without replacing it (1.832958ms)
+✔ records are scoped and put active runs first without inventing a date range (29.36857ms)
+✔ empty work shows only the earliest real scheduled execution (1.471796ms)
+✔ asking about a historical record only changes private reference and never dispatches (1.577154ms)
+✔ question from a historical row preserves its exact attempt instead of the newest row (4.760527ms)
+✔ draft save sends immutable attempt and both revisions without executing or deciding (2.569192ms)
+✔ late draft save cannot acknowledge or repaint after another work target is selected (2.591906ms)
+✔ request fields follow native schema types and bindings, with reason outside EES values (2.813989ms)
+✔ ad-hoc start lists active factories and disables only those with active work (2.040559ms)
+✔ item verdict options stay pending and AI suggestions cannot enable final confirmation (2.418075ms)
+✔ A7 has automatic save status and no save button, and basis cards expose actual time (2.560129ms)
+✔ navigation flushes edits made while an older review autosave is still in flight (1.76069ms)
+✔ failed automatic review save keeps the current work and preserves its draft (1.056814ms)
+✔ same-status custom words retain distinct pending IDs and final immutable wording (1.754841ms)
+✔ partial provenance survives a failed human verdict without changing its primary status (1.116764ms)
+✔ private verdict autosave persists exact term without deciding and restores after reload (19.298082ms)
+✔ private draft storage failure is visible and never discards pending selection (5.825754ms)
+✔ schema field ordering is not an edit while changed values retain save protection (6.286976ms)
+✔ missing evidence and external request URLs never become local undefined links (7.172453ms)
+✖ shared ID helper prefers the native randomUUID with its receiver (1.542593ms)
+✖ shared ID fallback sets UUID version and variant while preserving random bytes (1.039528ms)
+✖ shared ID generation refuses missing secure randomness (1.225838ms)
+✖ missing randomUUID preserves runtime command receipt and first-chat boundaries (1.803985ms)
+ℹ tests 110
+ℹ suites 0
+ℹ pass 103
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 460.723718
+
+✖ failing tests:
+
+test at tests/test_ees_work_authoring_ui.cjs:145:1
+✖ missing randomUUID permits create and authoring IDs through the shared helper (2.539287ms)
+  TypeError: Cannot read properties of undefined (reading 'action')
+      at TestContext.<anonymous> (/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_authoring_ui.cjs:148:59)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_authoring_ui.cjs:168:1
+✖ missing randomUUID keeps authoring retries idempotent and changed edits distinct (5.070592ms)
+  TypeError: Cannot read properties of undefined (reading 'request_id')
+      at TestContext.<anonymous> (/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_authoring_ui.cjs:171:27)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_authoring_ui.cjs:175:1
+✖ missing randomUUID keeps AI proposal context and explicit apply without saving (2.823593ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_authoring_ui.cjs:177:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:228:1
+✖ shared ID helper prefers the native randomUUID with its receiver (1.542593ms)
+  evalmachine.<anonymous>:1
+  workUI.newId()
+         ^
+  
+  TypeError: workUI.newId is not a function
+      at evalmachine.<anonymous>:1:8
+      at Script.runInContext (node:vm:149:12)
+      at Object.runInContext (node:vm:301:6)
+      at run (/workspace/scratch/abe8513396cb/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:8:40)
+      at html (/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_figma_runtime_ui.cjs:5:32)
+      at TestContext.<anonymous> (/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_figma_runtime_ui.cjs:231:15)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:233:1
+✖ shared ID fallback sets UUID version and variant while preserving random bytes (1.039528ms)
+  evalmachine.<anonymous>:1
+  workUI.newId()
+         ^
+  
+  TypeError: workUI.newId is not a function
+      at evalmachine.<anonymous>:1:8
+      at Script.runInContext (node:vm:149:12)
+      at Object.runInContext (node:vm:301:6)
+      at run (/workspace/scratch/abe8513396cb/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:8:40)
+      at html (/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_figma_runtime_ui.cjs:5:32)
+      at TestContext.<anonymous> (/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_figma_runtime_ui.cjs:236:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:241:1
+✖ shared ID generation refuses missing secure randomness (1.225838ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /[가-힣]/. Input:
+  
+  'TypeError: workUI.newId is not a function'
+  
+      at TestContext.<anonymous> (/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_figma_runtime_ui.cjs:242:89)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: evalmachine.<anonymous>:1
+    workUI.newId()
+           ^
+    
+    TypeError: workUI.newId is not a function
+        at evalmachine.<anonymous>:1:8
+        at Script.runInContext (node:vm:149:12)
+        at Object.runInContext (node:vm:301:6)
+        at run (/workspace/scratch/abe8513396cb/team-agent-poc/tests/ees_workspace_ui_fixture.cjs:8:40)
+        at html (/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_figma_runtime_ui.cjs:5:32)
+        at /workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_figma_runtime_ui.cjs:242:100
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_figma_runtime_ui.cjs:242:89)
+        at Test.runInAsyncScope (node:async_hooks:227:14),
+    expected: /[가-힣]/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:245:1
+✖ missing randomUUID preserves runtime command receipt and first-chat boundaries (1.803985ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /response lost/. Input:
+  
+  'TypeError: crypto.randomUUID is not a function'
+  
+      at async TestContext.<anonymous> (/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_figma_runtime_ui.cjs:249:2)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: TypeError: crypto.randomUUID is not a function
+        at sendCommand (evalmachine.<anonymous>:63:114)
+        at Object.command (evalmachine.<anonymous>:59:39)
+        at TestContext.<anonymous> (/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_figma_runtime_ui.cjs:249:29)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1382:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+        at Test.postRun (node:internal/test_runner/test:1522:19)
+        at Test.run (node:internal/test_runner/test:1447:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:960:7),
+    expected: /response lost/,
+    operator: 'rejects',
+    diff: 'simple'
+  }

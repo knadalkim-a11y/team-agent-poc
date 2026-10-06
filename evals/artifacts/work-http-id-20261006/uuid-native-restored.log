@@ -1,0 +1,62 @@
+test_missing_random_uuid_creates_and_saves_draft_in_native_ui (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_missing_random_uuid_creates_and_saves_draft_in_native_ui) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 270.8769799974107, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: test_missing_random_uuid_creates_and_saves_draft_in_native_ui (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_missing_random_uuid_creates_and_saves_draft_in_native_ui)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/abe8513396cb/team-agent-poc/tests/test_ees_work_figma_authoring_native.py", line 74, in test_missing_random_uuid_creates_and_saves_draft_in_native_ui
+    self.wait("document.querySelector('[data-author-action=save]')")
+  File "/workspace/scratch/abe8513396cb/team-agent-poc/tests/ees_work_integrated_fixture.py", line 190, in wait
+    self.fail('Timed out: ' + expression + '\n' + self.text('body') + '\nUnknown routes:' + repr(self.server.unknown))
+AssertionError: Timed out: document.querySelector('[data-author-action=save]')
+Skip to main content
+EES Work
+업무
+워크스페이스
+
+작업 위치
+
+공장
+전체 공장
+시스템
+EMS
+내 업무
+워크플로우 찾기
+실행 기록
+대화 기록
+
+업무
+
+운영
+HTTP 초안 생성 검증
+셋업
+장애대응
+Fixture Administrator
+대화
+참고
+일반 대화
+업무 열기
+새 대화
+기존 대화
+채팅 대화
+
+기존 질문
+
+Fixture AI
+
+기존 대화 기록
+
+
+
+
+음성 모드 사용
+내 업무
+닫기
+지금 처리할 내 업무가 없습니다
+Unknown routes:[]
+
+----------------------------------------------------------------------
+Ran 1 test in 11.068s
+
+FAILED (failures=1)
