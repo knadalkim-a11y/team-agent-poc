@@ -1,5 +1,15 @@
 # 현재 작업 상태
 
+## 2026-10-06 · 새 절차 예시 구현·로컬 검증 완료
+
+- **기준:** 사용자 승인으로 [PR #75](https://github.com/knadalkim-a11y/team-agent-poc/pull/75)를 병합했다. 최종 head `481fb553f8f94b990edcda4659cdd32f0065cc0a`의 [CI 37413644400](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37413644400)는 completed/success이며 24개 job 성공과 기존 조건부 1개 skip을 확인했다. 병합 main `e55bfb125ddf84d14030b1b56bb604bd8b14d088`에서 새 브랜치를 시작했다.
+- **현재 작업:** [제품 수정 전 비교표](mockups/ees-work/TASK.md#procedure-examples-20261006)에 따라 C 예시 3개·서버 초안 복사·빈 절차 기본값·절차 화면 D를 구현하고 새 Draft PR로 준비했다. Figma C/Note/B2/B4와 C13을 대조했으며 AP 장애 예시는 제외한다. 새 생성 의도와 요청 재시도를 구분하고 취소·시스템 전환 뒤 늦은 응답을 차단한다.
+- **검증:** 관련 서버71PASS, 작성기·런타임 Node142PASS, 패키징2PASS, 설치61PASS/기존 조건부6SKIP이다. 실제 이전112/114 설치의 파일·DB·키 보존과 Apply/Restore를 확인했다. 실제 빌드 Native는 UUID 없는 빈 절차1개(build1)와 C 예시/도움말/대화/게시 차단1개(build2)가 통과했다. 580px 및600px의 이름·footer 접근을 확인했으며, 600px은 Native 메뉴를 다시 여는 조건이다.
+- **근거와 한계:** [최초 실패·수정·최종 화면·해시](../evals/v4-ui-20260930.md#procedure-examples-evidence-20261006)를 보존한다. build2 SHA256은 `8bf5314ff771a9ea1987aa51d5828b04cf1194028c7047fa765afdbc654d0ef0`이다. 마지막 시험의 메뉴 닫힘 대기 보강은 compile/diff까지 확인했고 정확한 최종 HEAD의 CI에서 판정한다. 실제 사내 적용·모델 답변 품질은 미확인이다.
+- **다음 작업:** 게시된 새 Draft PR 본문/Checks에서 정확한 최종 HEAD의 자동 CI·배포 후보를 확인한다. 이 문서의 로컬 성공을 최종 원격 성공으로 대신하지 않는다. 새 PR 병합·사내 적용·운영 연결은 포함하지 않는다.
+
+아래 항목은 선행 작업 당시의 기록이다.
+
 ## 2026-10-06 · 공통 도움말과 쉬운 도구 등록 구현·검증
 
 - **기준:** 사용자 승인으로 [PR #74](https://github.com/knadalkim-a11y/team-agent-poc/pull/74)를 병합했다. 최종 head `ea5108542bd1d774bedaca4ed394e6ec4edff9be`의 [CI 37409566696](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/37409566696) 성공을 확인했고, 병합 main `29b95b56917a5b587056d33f1df4d43783ecfdb2`에서 `feat/work-easy-tools-20261006`을 시작했다.

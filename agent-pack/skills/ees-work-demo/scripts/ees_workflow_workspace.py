@@ -10,6 +10,7 @@ from datetime import datetime, timezone, timedelta
 import hashlib
 import json
 import math
+from pathlib import Path
 import re
 import sqlite3
 from uuid import uuid4
@@ -24,6 +25,54 @@ BLOCKS = ('values', 'schedule', 'checklist', 'list_confirm', 'item_verdict', 'ai
 TERMINAL = {'completed', 'cancelled'}
 SECRET_KEYS = re.compile(r'(^|_)(pat|password|secret|token|authorization|api_key|credential)(_|$)', re.I)
 ROLES = ('viewer', 'participant', 'manager', 'requester', 'reviewer')
+
+
+def _procedure_examples():
+    """Read shipped examples, never saved procedures or Native registrations."""
+    return json.loads(Path(__file__).with_name('workflow_procedure_examples.json').read_text(encoding='utf-8'))
+
+
+def _procedure_example_summaries():
+    summaries = []
+    for example in _procedure_examples():
+        definition = example['definition']; nodes = definition['nodes']
+        root = next(node for node in nodes.values() if node['type'] == 'p')
+        stages = [nodes[key] for key in root['children']]
+        summaries.append({key: example[key] for key in ('id', 'name', 'description', 'schedule_suggestion')} | {
+            'category': definition['category'], 'mode': definition['mode'],
+            'execution_scope': definition.get('execution_scope'),
+            'stage_count': len(stages), 'job_count': sum(node['type'] == 'j' for node in nodes.values()),
+            'stages': [{'name': stage['name'], 'job_count': len(stage['children'])} for stage in stages]})
+    return summaries
+
+
+def _copy_definition_nodes(definition):
+    """Reissue only definition-owned IDs for a saved procedure or an example."""
+    definition = deepcopy(definition)
+    mapping = {old: ('p-' if node['type'] == 'p' else 't-' if node['type'] == 't' else 'j-') + uuid4().hex[:12]
+               for old, node in definition['nodes'].items()}
+    definition['nodes'] = {mapping[old]: dict(node, id=mapping[old], parent=mapping.get(node.get('parent')),
+        children=[mapping[child] for child in node.get('children', [])], deps=[mapping[dep] for dep in node.get('deps', [])])
+        for old, node in definition['nodes'].items()}
+    # Native asset IDs, input IDs, literal arguments and connector evidence
+    # stay unchanged even when their string equals an old node ID.
+    for node in definition['nodes'].values():
+        for field in ('result_source_job_id', 'effect_job_id'):
+            if node.get(field) in mapping:
+                node[field] = mapping[node[field]]
+        criterion = node.get('effect_criterion')
+        if isinstance(criterion, dict) and criterion.get('job_id') in mapping:
+            criterion['job_id'] = mapping[criterion['job_id']]
+        for binding in node.get('argument_bindings', {}).values():
+            result = binding.get('result') if isinstance(binding, dict) else None
+            if isinstance(result, dict) and result.get('job_id') in mapping:
+                result['job_id'] = mapping[result['job_id']]
+    if isinstance(definition.get('factory_overrides'), dict):
+        definition['factory_overrides'] = {mapping.get(node_id, node_id): value for node_id, value in definition['factory_overrides'].items()}
+    schedule = definition.get('schedule')
+    if isinstance(schedule, dict) and isinstance(schedule.get('stage_deadlines'), dict):
+        schedule['stage_deadlines'] = {mapping.get(stage_id, stage_id): rule for stage_id, rule in schedule['stage_deadlines'].items()}
+    return definition
 
 
 def _public(value, depth=0):
@@ -1103,7 +1152,8 @@ class WorkspaceMixin:
                     except WorkflowError: pass
                 capabilities['can_author'] = bool(capabilities['managed_systems'])
                 access = [dict(row) | {'roles': json.loads(row['roles'])} for row in db.execute('SELECT * FROM work_access ORDER BY id')] if capabilities['is_admin'] else []
-                return {'ok': True, 'protocol': 2, 'help': workflow_help(), 'capabilities': capabilities, 'systems': systems, 'factories': factories,
+                return {'ok': True, 'protocol': 2, 'help': workflow_help(), 'procedure_examples': _procedure_example_summaries(),
+                        'capabilities': capabilities, 'systems': systems, 'factories': factories,
                         'workflows': workflows, 'runs': runs, 'workflow': selected_workflow, 'run': selected_run,
                         'workflow_active_runs': workflow_active_runs,
                         'my_work': my_work, 'my_work_count': len(my_work), 'access': access, 'people': people, 'native_groups': native_groups,
@@ -1286,25 +1336,21 @@ class WorkspaceMixin:
             self._work_authorize_scope(db, actor, groups, system, '', 'manager')
             key = str(uuid4()); root = 'p-' + uuid4().hex[:12]
             if source:
-                definition = json.loads(source['draft']); mapping = {old: ('p-' if node['type'] == 'p' else 't-' if node['type'] == 't' else 'j-') + uuid4().hex[:12] for old, node in definition['nodes'].items()}
-                definition['nodes'] = {mapping[old]: dict(node, id=mapping[old], parent=mapping.get(node.get('parent')), children=[mapping[child] for child in node.get('children', [])], deps=[mapping[dep] for dep in node.get('deps', [])]) for old, node in definition['nodes'].items()}
-                # Only definition-owned references move. Native asset IDs,
-                # input IDs, literal arguments and connector evidence remain
-                # unchanged even when their string equals an old node ID.
-                for node in definition['nodes'].values():
-                    for field in ('result_source_job_id', 'effect_job_id'):
-                        if node.get(field) in mapping:
-                            node[field] = mapping[node[field]]
-                    criterion = node.get('effect_criterion')
-                    if isinstance(criterion, dict) and criterion.get('job_id') in mapping:
-                        criterion['job_id'] = mapping[criterion['job_id']]
-                    for binding in node.get('argument_bindings', {}).values():
-                        result = binding.get('result') if isinstance(binding, dict) else None
-                        if isinstance(result, dict) and result.get('job_id') in mapping:
-                            result['job_id'] = mapping[result['job_id']]
-                if isinstance(definition.get('factory_overrides'), dict):
-                    definition['factory_overrides'] = {mapping.get(node_id, node_id): value for node_id, value in definition['factory_overrides'].items()}
+                definition = _copy_definition_nodes(json.loads(source['draft']))
                 definition['id'] = key; definition['name'] = body.get('name') or definition['name'] + ' 복사'
+            elif 'template_id' in body:
+                template_id = body['template_id']
+                if not isinstance(template_id, str) or not template_id:
+                    _fail('procedure_example_not_found', '시작할 예시를 다시 선택해 주세요.')
+                if any(field in body for field in ('definition', 'nodes', 'category', 'mode', 'execution_scope', 'schedule')):
+                    _fail('procedure_example_override', '예시와 절차 이름으로 초안을 만든 뒤 절차 설정에서 고쳐 주세요.')
+                example = next((item for item in _procedure_examples() if item['id'] == template_id), None)
+                if example is None:
+                    _fail('procedure_example_not_found', '시작할 예시를 다시 선택해 주세요.')
+                definition = _copy_definition_nodes(example['definition'])
+                definition.update(id=key, name=body.get('name', example['name']), system_id=system)
+                for node in definition['nodes'].values():
+                    if node['type'] == 'p': node['name'] = definition['name']
             else:
                 definition = {'id': key, 'name': body.get('name', '새 업무 절차'), 'system_id': system, 'category': body.get('category', 'ops'), 'mode': body.get('mode', 'on_demand'),
                               'nodes': {root: {'id': root, 'name': body.get('name', '새 업무 절차'), 'type': 'p', 'parent': None, 'children': [], 'deps': []}}}

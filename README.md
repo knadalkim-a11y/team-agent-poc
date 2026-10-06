@@ -87,6 +87,7 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 |---|---|
 | 공개 인증 API·이전 기록 조회 | [ees_workflow.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow.py) |
 | 새 절차·게시 버전·진행 건·설정·판정·공유/개인 상태 | [ees_workflow_workspace.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py) |
+| 새 절차의 합성 예시·단계/작업 구조 | [workflow_procedure_examples.json](agent-pack/skills/ees-work-demo/scripts/workflow_procedure_examples.json), [작성 안내](docs/03-openwebui-native-agent.md#procedure-examples-20261006) |
 | 예약·실행 시도·도구 검토·서버 확인·EES 요청 추적 | [ees_workflow_operations.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_operations.py) |
 | 시스템 담당 인가·P별 초안/게시·legacy 보존·감사 | [ees_workflow_authoring.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_authoring.py) |
 | 정의 읽기·참조/입력/게시 검증 | [ees_workflow_definition.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_definition.py) |

@@ -1,0 +1,5 @@
+{
+  "filename": "procedure-packaging-after.log",
+  "sha256": "6aa40e74aa5a926386e9aa07c77e937a20339862278fb3e88a9cc8c4a1ec80db",
+  "text": "test_packaged_workflow_and_managed_tool_share_public_contract (test_ees_branding_build.BrandingBuildTests.test_packaged_workflow_and_managed_tool_share_public_contract) ... ok\ntest_only_reviewed_content_changes_and_frontend_cache_namespace_moves (test_ees_branding_build.BrandingBuildTests.test_only_reviewed_content_changes_and_frontend_cache_namespace_moves) ... ok\n\n----------------------------------------------------------------------\nRan 2 tests in 0.352s\n\nOK\n"
+}

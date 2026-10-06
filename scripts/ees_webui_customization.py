@@ -146,8 +146,10 @@ def _record_rows(content, *, allow_packaging=False, version=branding.VERSION, al
         if not required.issubset(rows) or len(rows) > 10000:
             raise CustomizationError("The complete app, frontend and metadata must be present together.")
         if allow_legacy_inventory and version == "0.11.3+ees.13":
-            added = set(branding.WORK_FILES) - set(branding.WORK_FILES_V13)
-            if added.intersection(rows) and not added.issubset(rows):
+            work_files = set(rows).intersection(branding.WORK_FILES)
+            inventories = (set(branding.WORK_FILES_V13), set(branding.WORK_FILES_V13_EASY_AUTHORING),
+                           set(branding.WORK_FILES))
+            if work_files not in inventories:
                 raise CustomizationError("The complete app, frontend and metadata must be present together.")
         if any(name.startswith(branding.SOURCE_APP) for name in rows):
             raise CustomizationError("The selected wheel still contains the original frontend location.")
@@ -290,9 +292,9 @@ def _check_tree(path, selection, *, partial=False, staging=False):
     if hashlib.sha256(record).hexdigest() != selection["record_sha256"]:
         raise CustomizationError("The selected program RECORD changed; preserve it for review.")
     # The recorded hash identifies the exact selected installation. Existing
-    # ees.13 programs may predate the two authoring assets; new incoming wheels
-    # still use the strict current inventory in _wheel_layout. Exact file and
-    # RECORD checks below also cover current programs and interrupted cleanup.
+    # ees.13 programs may predate the help/tool pair or procedure examples;
+    # incoming wheels still use the strict current inventory in _wheel_layout.
+    # Exact file and RECORD checks below cover current programs and cleanup.
     rows = _record_rows(record, version=version, allow_legacy_inventory=True)
     if (not set(files).issubset(rows) or (not partial and set(files) != set(rows))):
         raise CustomizationError("The selected program has missing or unexpected files.")

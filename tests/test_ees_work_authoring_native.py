@@ -436,9 +436,9 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.enter_authoring()
         self.wait("document.querySelector('[data-author-action=create]') && !document.querySelector('[data-author-action=create]').disabled")
         self.click('[data-author-action="create"]')
-        self.wait("document.querySelector('#ees-work-dialog')?.open")
-        self.assertTrue(self.browser.evaluate("document.activeElement?.hasAttribute('data-dialog-close')"))
-        self.fill('#ees-work-dialog [name="name"]',name);self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('.ew-procedure-start')")
+        self.click('[name=procedure_template][value=blank]')
+        self.fill('#ew-procedure-name',name);self.click('[data-author-action=procedure_create]')
         self.wait("document.querySelector('[data-author-action=add_stage]')")
         state=self.browser_api("GET","/api/ees-work/workspace")["data"]
         return next(item["id"] for item in state["workflows"] if item["name"]==name)

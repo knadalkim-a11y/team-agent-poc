@@ -48,6 +48,28 @@ test('author tools expose help-only metadata while workflow and historical refer
  h.api.setSelection({mode:'work',chat_reference:{kind:'workspace',reference_kind:'historical',workflow_id:'old-work',run_id:'old-run',attempt_id:'kept'}});h.api.setState({run:{id:'old-run'}});assert.equal(h.api.reference().attempt_id,'kept');
 });
 
+test('procedure starter questions keep the Native draft and use help metadata until the starter closes',async()=>{
+ const h=controller(),original={prompt:'이미 작성한 절차 메모',files:[{id:'kept-file'}],selectedModels:['owned-model'],selectedToolIds:['owned-tool']};let restored,active={screen:'새 업무 절차',draftName:'시험 공장 절차',templateId:'factory_rollout'},synced;
+ h.designer.readStartContext=()=>active;h.view.sync=value=>{synced=value;};h.api.setState({capabilities:{actor_id:'a'}});h.api.setSelection({mode:'author',tab:'overview',system_id:'EMS',workflow_id:'existing-work',run_id:'existing-run'});
+ h.designer.callbacks.startContextChanged(active);assert.equal(synced.procedure_start.draftName,'시험 공장 절차');
+ h.context.window.__eesNativeDraftV1={ready:()=>true,read:()=>original,restore:async value=>{restored=JSON.parse(value);return true;}};
+ h.context.document.querySelector=selector=>selector==='#chat-input'?{focus(){}}:{};
+ const reference=h.api.reference();assert.equal(reference.kind,'help');assert.equal(Object.hasOwn(reference,'workflow_id'),false);
+ await h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'0'}});
+ assert.ok(restored.prompt.startsWith(original.prompt+'\n\n신규 공장 횡전개 예시'));assert.match(restored.prompt,/초안 이름: 시험 공장 절차/);assert.deepEqual({...restored,prompt:original.prompt},original);assert.equal(h.calls.length,0);
+ active=null;h.designer.callbacks.startContextChanged(null);assert.equal(synced.procedure_start,null);assert.equal(h.api.reference().kind,'workspace');assert.equal(h.api.reference().workflow_id,'existing-work');
+ restored=null;await h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'1'}});assert.equal(restored,null);
+});
+test('procedure question choices reject unavailable or invalid context without changing a draft',async()=>{
+ const h=controller();let restores=0;h.designer.readStartContext=()=>({screen:'새 업무 절차'});h.api.setSelection({mode:'author',tab:'overview'});
+ h.context.window.__eesNativeDraftV1={ready:()=>true,read:()=>({prompt:'keep'}),restore:async()=>{restores++;return true;}};
+ for(const questionIndex of ['-1','3','NaN'])await h.api.handleClick({dataset:{action:'procedure_question',questionIndex}});
+ h.api.setSelection({mode:'work'});await h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'0'}});assert.equal(restores,0);assert.equal(h.calls.length,0);
+});
+test('procedure introduction has exactly three keyboard buttons and no automatic send control',()=>{
+ const rendered=html('workProcedureStartHTML({screen:"새 업무 절차",draftName:"<secret>"})');assert.equal((rendered.match(/data-action="procedure_question"/g)||[]).length,3);assert.match(rendered,/type="button"/);assert.match(rendered,/내용을 확인하고 직접 보내 주세요/);assert.doesNotMatch(rendered,/<secret>|type="submit"/);assert.equal(html('workProcedureStartHTML(null)'),'');
+});
+
 test('input save keeps mutation controls busy until the acknowledged state finishes refreshing',async()=>{
  const h=controller(),pending=deferred(),reading=deferred(),busy=[];let dialogs=0,acknowledgements=0;
  h.api.setSelection({run_id:'r',job_id:'j'});h.api.setState({run:{id:'r',revision:1,definition:{nodes:{j:{mode:'human'}}},jobs:{j:{}}}});

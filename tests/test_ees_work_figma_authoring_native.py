@@ -63,10 +63,13 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
           const author=document.querySelector('#ees-work-designer');
           const active=document.activeElement;
           const region=e=>e?{text:e.innerText,html:e.outerHTML}:null;
+          const geometry=selector=>{const e=document.querySelector(selector);if(!e)return null;const r=e.getBoundingClientRect(),c=getComputedStyle(e);return {x:r.x,y:r.y,width:r.width,height:r.height,clientWidth:e.clientWidth,scrollWidth:e.scrollWidth,clientHeight:e.clientHeight,scrollHeight:e.scrollHeight,scrollTop:e.scrollTop,overflowY:c.overflowY,background:c.backgroundColor,outline:c.outline,focusVisible:e.matches(':focus-visible'),borderWidth:c.borderWidth,borderRadius:c.borderRadius,minHeight:c.minHeight};};
           return {scope:'built Native UI; synthetic session and data',
             path:location.pathname,ready:document.readyState,fonts:document.fonts.status,
+            nativeMount:{chatPane:!!document.querySelector('#chat-container #chat-pane'),sidebarSearch:!!document.querySelector('#sidebar-search-button'),sidebarToggle:!!document.querySelector('#sidebar-toggle-button')},
             viewport:[innerWidth,innerHeight],active:{tag:active?.tagName,id:active?.id,name:active?.name},
             panel:region(panel),authoring:region(author),
+            layout:{panel:geometry('#ees-work-panel'),scroll:geometry('.ew-author-scroll'),radio:geometry('[name=procedure_template]:checked'),selected:geometry('.ew-procedure-card[data-selected=true]'),unselected:geometry('.ew-procedure-card[data-selected=false]'),name:geometry('#ew-procedure-name'),footer:geometry('#ees-work-designer>footer'),back:geometry('.ew-author-procedure-start .ew-author-back'),questionGroup:geometry('.ew-procedure-questions'),firstQuestion:geometry('.ew-procedure-questions>button'),cardGaps:[...document.querySelectorAll('.ew-procedure-choices>.ew-procedure-card')].filter(e=>e.previousElementSibling).map(e=>e.getBoundingClientRect().top-e.previousElementSibling.getBoundingClientRect().bottom)},
             nativeDraft:window.__eesNativeDraftV1?.read?.(),
             nativeInput:region(document.querySelector('#chat-input'))};
         })()""")
@@ -269,6 +272,171 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.server.completions, [])
         self.assertEqual(self.operations()['tools'], [])
 
+    def test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft(self):
+        self.browser.evaluate("Object.defineProperty(crypto,'randomUUID',{value:undefined,configurable:true});true")
+        self.fill('#chat-input', '새 절차 전에 작성한 개인 질문')
+        before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.click('[data-action="mode"][data-mode="author"]')
+        original_reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
+        original_panel_width = self.browser.evaluate("document.querySelector('#ees-work-panel').getBoundingClientRect().width")
+        self.click('[data-author-action="create"]')
+        self.wait("document.querySelector('.ew-procedure-start')")
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[name=procedure_template]')].map(e=>e.value)"),
+                         ['delivery_review', 'factory_rollout', 'daily_check', 'blank'])
+        self.assertEqual(self.read('[name=procedure_template]:checked', 'value'), 'factory_rollout')
+        self.assertEqual(self.read('#ew-procedure-name', 'value'), '신규 공장 횡전개')
+        for stage in ('사전준비', 'AP·DB 인프라 준비', '시스템 설치', '시스템 간 인터페이스 확인'):
+            self.assertIn(stage, self.text('.ew-procedure-stages'))
+        self.assertEqual(self.state()['workflows'], [])
+        self.assertEqual(self.operations()['schedules'], [])
+        self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference().kind'), 'help')
+        self.wait("Math.abs(document.querySelector('#ees-work-panel').getBoundingClientRect().width-580)<1.5")
+        layout = self.browser.evaluate("""(()=>{const panel=document.querySelector('#ees-work-panel'),scroll=document.querySelector('.ew-author-scroll'),radio=document.querySelector('[name=procedure_template]:checked');return {radioWidth:radio.getBoundingClientRect().width,radioHeight:radio.getBoundingClientRect().height,selected:getComputedStyle(document.querySelector('.ew-procedure-card[data-selected=true]')).backgroundColor,unselected:getComputedStyle(document.querySelector('.ew-procedure-card[data-selected=false]')).backgroundColor,overflow:getComputedStyle(scroll).overflowY,scrollHeight:scroll.scrollHeight,clientHeight:scroll.clientHeight,panelOverflow:panel.scrollWidth-panel.clientWidth,cardGaps:[...document.querySelector('.ew-procedure-choices').children].slice(1).map(e=>e.getBoundingClientRect().top-e.previousElementSibling.getBoundingClientRect().bottom)};})()""")
+        self.assertAlmostEqual(layout['radioWidth'], 16, delta=0.5)
+        self.assertAlmostEqual(layout['radioHeight'], 16, delta=0.5)
+        self.assertNotEqual(layout['selected'], layout['unselected'])
+        self.assertIn(layout['overflow'], ('auto', 'scroll'))
+        self.assertGreaterEqual(layout['scrollHeight'], layout['clientHeight'])
+        self.assertLessEqual(layout['panelOverflow'], 1)
+        self.assertEqual(len(layout['cardGaps']), 2)
+        self.assertTrue(all(abs(gap)<=1/64 for gap in layout['cardGaps']), layout['cardGaps'])
+        self.screenshot('procedure-examples-factory-preview')
+        # Native radio navigation must select and repaint the corresponding
+        # preview without creating or publishing any workflow.
+        self.click('[name=procedure_template][value=factory_rollout]')
+        self.key('ArrowUp', 38)
+        self.wait("document.querySelector('[name=procedure_template]:checked')?.value === 'delivery_review'")
+        self.assertEqual(self.read('#ew-procedure-name', 'value'), '배포 산출물 점검')
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[name=procedure_template]:checked:focus-visible')"))
+        self.assertTrue(self.browser.evaluate("parseFloat(getComputedStyle(document.activeElement).outlineWidth)>0"))
+        self.screenshot('procedure-examples-keyboard-preview')
+        self.key('ArrowDown', 40)
+        self.wait("document.querySelector('[name=procedure_template]:checked')?.value === 'factory_rollout'")
+        self.fill('#ew-procedure-name', '합성 횡전개 절차')
+        self.click('[data-author-action="procedure_cancel"]')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-procedure-start')"))
+        self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference().kind'), original_reference['kind'])
+        self.wait("Math.abs(document.querySelector('#ees-work-panel').getBoundingClientRect().width-" + str(original_panel_width) + ")<1.5")
+        self.assertEqual(self.state()['workflows'], [])
+        self.click('[data-author-action="create"]')
+        self.assertEqual(self.read('#ew-procedure-name', 'value'), '합성 횡전개 절차')
+
+        self.click('#ees-work-system-trigger')
+        self.click('[data-action=choose_system][data-system-id=APC]')
+        self.wait("document.querySelector('#ees-work-system-trigger')?.textContent.includes('APC')")
+        if not self.browser.evaluate("!!document.querySelector('.ew-procedure-start')"):
+            self.click('[data-author-action="create"]')
+        self.assertNotEqual(self.read('#ew-procedure-name', 'value'), '합성 횡전개 절차')
+        self.fill('#ew-procedure-name', 'APC 별도 초안 이름')
+        self.click('#ees-work-system-trigger')
+        self.click('[data-action=choose_system][data-system-id=EMS]')
+        self.wait("document.querySelector('#ees-work-system-trigger')?.textContent.includes('EMS')")
+        if not self.browser.evaluate("!!document.querySelector('.ew-procedure-start')"):
+            self.click('[data-author-action="create"]')
+        self.assertEqual(self.read('#ew-procedure-name', 'value'), '합성 횡전개 절차')
+
+        self.wait("document.querySelector('#ees-work-procedure-start [data-action=procedure_question]')")
+        question_selector = '#ees-work-procedure-start [data-action=procedure_question][data-question-index="0"]'
+        question_style = self.browser.evaluate("""(()=>{const group=getComputedStyle(document.querySelector('.ew-procedure-questions')),first=getComputedStyle(document.querySelector('.ew-procedure-questions>button'));return {radius:first.borderRadius,border:first.borderWidth,groupBorder:group.borderWidth,groupStyle:group.borderStyle};})()""")
+        self.assertEqual(question_style['radius'], '0px')
+        self.assertEqual(question_style['border'], '0px')
+        self.assertEqual(question_style['groupBorder'], '1px')
+        self.assertEqual(question_style['groupStyle'], 'solid')
+        question = self.text(question_selector).strip()
+        self.click(question_selector)
+        self.wait('window.__eesNativeDraftV1?.read()?.prompt?.includes(' + json.dumps(question) + ')')
+        after = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.assertTrue(after['prompt'].startswith(before['prompt']))
+        self.assertRegex(after['prompt'][len(before['prompt']):], r'^\n[ \t]*\n')
+        self.assertEqual({key: value for key, value in before.items() if key != 'prompt'},
+                         {key: value for key, value in after.items() if key != 'prompt'})
+        self.assertEqual(self.server.completions, [])
+        self.assertEqual(self.state()['workflows'], [])
+        self.screenshot('procedure-examples-native-question-draft')
+
+        self.click('[data-author-action="procedure_create"]')
+        self.wait("document.querySelector('[data-author-action=add_stage]')")
+        created = [body for body in self.server.workspace_commands if body.get('action') == 'create_workflow']
+        self.assertEqual(len(created), 1)
+        self.assertEqual(created[0]['template_id'], 'factory_rollout')
+        self.assertEqual(created[0]['name'], '합성 횡전개 절차')
+        self.assertEqual(created[0]['system_id'], 'EMS')
+        self.assertEqual(UUID(created[0]['request_id']).version, 4)
+        self.assertNotIn('definition', created[0])
+        record = self.state()['workflows'][0]
+        saved = self.state(workflow_id=record['id'])['workflow']
+        self.assertEqual(saved['revision'], 1)
+        self.assertIsNone(saved['published_version'])
+        definition = saved['draft']
+        self.assertEqual((definition['category'], definition['mode'], definition['execution_scope']),
+                         ('setup', 'on_demand', 'factory'))
+        nodes = definition['nodes']
+        self.assertEqual(sum(node['type'] == 'p' for node in nodes.values()), 1)
+        self.assertEqual(sum(node['type'] == 't' for node in nodes.values()), 4)
+        self.assertEqual(sum(node['type'] == 'j' for node in nodes.values()), 6)
+        self.assertEqual(len({node['id'] for node in nodes.values()}), 11)
+        for key, node in nodes.items():
+            self.assertEqual(key, node['id'])
+            self.assertRegex(key, r'^[ptj]-[0-9a-f]{12}$')
+            self.assertTrue(all(value in nodes for value in node.get('children', []) + node.get('deps', [])))
+            if node.get('parent'):
+                self.assertIn(key, nodes[node['parent']]['children'])
+        tool_jobs = [node for node in nodes.values() if node.get('mode') == 'tool']
+        self.assertTrue(tool_jobs)
+        self.assertTrue(all(not node.get('tool_reference') and not node.get('tool_contract_id') for node in tool_jobs))
+        self.assertEqual(self.operations()['schedules'], [])
+        self.assertEqual(self.bridge.calls, [])
+        self.assertIn('도구 연결 전', self.text('#ees-work-designer'))
+        self.click('[data-author-action="edit_workflow"]')
+        category_help = '#ees-work-dialog [data-author-action=help][data-id=category]'
+        self.click(category_help)
+        self.wait("document.querySelector('#ees-work-help')")
+        self.assertIn('분류', self.text('#ees-work-help'))
+        self.key('Escape', 27)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-help')"))
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
+        self.assertTrue(self.browser.evaluate('document.activeElement === document.querySelector(' + json.dumps(category_help) + ')'))
+        self.click('#ees-work-dialog-cancel')
+        self.assertEqual(self.state(workflow_id=record['id'])['workflow']['revision'], 1)
+        self.click('[data-author-action="validate"]')
+        self.wait("document.querySelector('.ew-author-validation')")
+        validated = self.state(workflow_id=record['id'])['workflow']
+        self.assertTrue(validated['validation']['errors'])
+        self.assertRegex(' '.join(validated['validation']['errors']), r'도구|연결|Native')
+        self.assertTrue(self.read('[data-author-action=publish]', 'disabled'))
+        self.assertIsNone(validated['published_version'])
+        self.assertEqual(self.server.completions, [])
+        self.screenshot('procedure-examples-created-publication-blocked')
+
+        # At a narrow viewport the same starter remains scrollable, and its
+        # name and fixed footer can both be reached without horizontal overflow.
+        self.click('[data-author-action="list"]')
+        self.click('[data-author-action="create"]')
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 600, 'height': 900, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait('innerWidth === 600')
+        # Native replaces its desktop sidebar at this breakpoint. Reopen its
+        # actual sidebar control before expecting Work to mount again.
+        self.wait("!document.querySelector('#sidebar-search-button') && document.querySelector('#sidebar-toggle-button')?.getBoundingClientRect().width > 0")
+        self.click('#sidebar-toggle-button')
+        self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width<=innerWidth")
+        if not self.browser.evaluate("!!document.querySelector('.ew-procedure-start')"):
+            self.click('[data-author-action="create"]')
+        self.click('[name=procedure_template][value=blank]')
+        self.fill('#ew-procedure-name', '좁은 화면에서 보존할 이름')
+        self.assertEqual(self.read('#ew-procedure-name', 'value'), '좁은 화면에서 보존할 이름')
+        narrow = self.browser.evaluate("""(()=>{const panel=document.querySelector('#ees-work-panel'),name=document.querySelector('#ew-procedure-name'),footer=document.querySelector('#ees-work-designer>footer'),r=footer.getBoundingClientRect();return {overflow:panel.scrollWidth-panel.clientWidth,nameVisible:name.getBoundingClientRect().width>0,footerTop:r.top,footerBottom:r.bottom,viewport:innerHeight};})()""")
+        self.assertLessEqual(narrow['overflow'], 1)
+        self.assertTrue(narrow['nameVisible'])
+        self.assertGreaterEqual(narrow['footerTop'], 0)
+        self.assertLessEqual(narrow['footerBottom'], narrow['viewport']+1)
+        self.assertFalse(self.read('[data-author-action=procedure_cancel]', 'disabled'))
+        self.screenshot('procedure-examples-narrow-name-and-footer')
+        self.click('[data-author-action="procedure_cancel"]')
+        self.assertEqual(len(self.state()['workflows']), 1)
+        self.assertEqual(self.server.completions, [])
+
     def test_missing_random_uuid_creates_and_saves_draft_in_native_ui(self):
         # Loopback is trustworthy in Chrome. Explicit API removal reproduces
         # the intranet capability boundary, not a real insecure-origin test.
@@ -277,8 +445,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.browser.evaluate('typeof crypto.getRandomValues'), 'function')
         self.click('[data-action="mode"][data-mode="author"]')
         self.click('[data-author-action="create"]')
-        self.fill('#ees-work-dialog [name="name"]', 'HTTP 초안 생성 검증')
-        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.click('[name=procedure_template][value=blank]')
+        self.fill('#ew-procedure-name', 'HTTP 초안 생성 검증')
+        self.click('[data-author-action=procedure_create]')
         self.wait("document.querySelector('[data-author-action=add_stage]')")
         created = next(body for body in self.server.workspace_commands
                        if body.get('action') == 'create_workflow')
@@ -294,6 +463,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("!document.querySelector('[data-author-action=validate]')?.disabled")
         saved = self.state(workflow_id=key)['workflow']
         self.assertEqual(saved['revision'], 2)
+        self.assertEqual(saved['draft']['category'], 'ops')
+        self.assertEqual(saved['draft']['mode'], 'on_demand')
+        self.assertFalse(saved['draft'].get('execution_scope'))
         self.assertIsNone(saved['published_version'])
         stage = next(node for node in saved['draft']['nodes'].values() if node['type'] == 't')
         job = next(node for node in saved['draft']['nodes'].values() if node['type'] == 'j')
