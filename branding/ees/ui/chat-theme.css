@@ -289,3 +289,60 @@ body:has(:where(#chat-container)) #sidebar-chat-item:hover {
 .ees-native-voice-menu > summary::-webkit-details-marker {display:none;}
 .ees-native-voice-menu > summary:focus-visible {outline:2px solid var(--ees-blue);outline-offset:2px;}
 .ees-native-voice-menu > div {position:absolute;right:0;bottom:calc(100% + 8px);padding:12px;border:1px solid var(--ees-line);border-radius:8px;background:var(--ees-paper);z-index:40;}
+
+/* C18/F4: the pinned Native workspace, settings and personal Valves retain
+ * their forms, layout, validation, and editors. Only light-theme palette and
+ * UI font are shared with EES Work. Modal backdrops are deliberately outside
+ * the surface selector; syntax, math, and explicit monospace are excluded. */
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) {
+  font-family:var(--ees-font-sans,var(--ees-font));
+  color:var(--ees-text-primary);
+  background-color:var(--ees-surface-default);
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) :is(button,input,textarea,select):not(:where(.font-mono,.font-mono *,.cm-editor *,.monaco-editor *,pre *,code *)) {
+  font-family:var(--ees-font-sans,var(--ees-font));
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) :is(.text-gray-400,.text-gray-500,.text-gray-600):not(:where(.cm-editor *,.monaco-editor *,pre *,code *,.hljs *,.katex *)) {
+  color:var(--ees-text-secondary);
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) :is(.text-gray-700,.text-gray-800):not(:where(.cm-editor *,.monaco-editor *,pre *,code *,.hljs *,.katex *)) {
+  color:var(--ees-text-strong);
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) :is(.text-gray-900,.text-gray-950,.text-black):not(:where(.cm-editor *,.monaco-editor *,pre *,code *,.hljs *,.katex *)) {
+  color:var(--ees-text-primary);
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) .bg-gray-50:not(:where(.cm-editor,.cm-editor *,.monaco-editor,.monaco-editor *,pre,pre *,code,code *)) {
+  background-color:var(--ees-surface-sidebar);
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) :is(.bg-gray-100,.bg-gray-200):not(:where(.cm-editor,.cm-editor *,.monaco-editor,.monaco-editor *,pre,pre *,code,code *)) {
+  background-color:var(--ees-surface-muted);
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) :is(.border-gray-100,.border-gray-200) {
+  border-color:var(--ees-line-divider);
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),textarea,select):not(:where(.cm-editor *,.monaco-editor *,pre *,code *)) {
+  color:var(--ees-text-primary);
+  background-color:var(--ees-surface-default);
+  border-color:var(--ees-line-control);
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) :is(input,textarea)::placeholder {
+  color:var(--ees-text-secondary);
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) button:is(.bg-black,.bg-gray-900,.bg-gray-950) {
+  color:var(--ees-text-inverse);
+  background-color:var(--ees-brand-solid);
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) button:is(.bg-black,.bg-gray-900,.bg-gray-950):hover:not(:disabled) {
+  background-color:var(--ees-brand-hover);
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) :is(button,a):is([class~="hover:bg-gray-50"],[class~="hover:bg-gray-100"]):hover:not(:disabled):not([aria-selected="true"]) {
+  background-color:var(--ees-surface-hover);
+}
+html:not(.dark) body[data-ees-integrated] .modal #settings-tabs-container [role="tab"][aria-selected="true"] {
+  color:var(--ees-brand-text);
+  background-color:var(--ees-surface-selected);
+}
+html:not(.dark) body[data-ees-integrated] :is([data-ees-native-surface],.modal[role="dialog"]>div,.chat-control-valves) :is(button,input,select,textarea,a):focus-visible:not(:where(.cm-editor *,.monaco-editor *)) {
+  outline:2px solid var(--ees-brand-text);
+  outline-offset:2px;
+}

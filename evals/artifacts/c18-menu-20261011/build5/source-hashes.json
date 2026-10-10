@@ -1,0 +1,9 @@
+{
+  "branding/ees/ui/ees-work-launcher.js": "07275e2f3b443177e26418af55ab6bcade804ed796fd1273b20ccffecade66e7",
+  "branding/ees/ui/ees-work-view.js": "d3613daedff313e2aa7276d6356a2f5736740dcc0130b8636c46c43ea29c93c9",
+  "branding/ees/ui/ees-work-launcher.css": "5f5df03a10e8bf45d96d51a2142dc4506b12edbdc99e801893e32edde92fbfc6",
+  "branding/ees/ui/chat-theme.css": "29bd3b3a3fc3e6ff0624db4e2570f36290622312696149ea2d28e6eee5032186",
+  "scripts/build_ees_webui.py": "445959debf27b91f6e18676e7ca5f062e3ba728feeeba703137d37b6aa62022e",
+  "tests/test_ees_work_figma_authoring_native.py": "19534caf7b885b9784739054e286bdabccb13aba139c63628377606fd49b6058",
+  "tests/test_ees_work_figma_layout_native.py": "75993d947867805b480eb238aed7ea01257ff15d1b0b840346e9d2f54d89f629"
+}

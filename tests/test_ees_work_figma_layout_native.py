@@ -104,9 +104,52 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
           const style=getComputedStyle(document.querySelector('#ees-work-panel')),hex=n=>style.getPropertyValue(n).trim();
           const lum=h=>{const c=h.replace('#','').match(/../g).map(x=>parseInt(x,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
           const ratio=(a,b)=>(Math.max(lum(a),lum(b))+.05)/(Math.min(lum(a),lum(b))+.05);
-          return {amber:hex('--ees-status-attention'),green:hex('--ees-status-success'),attention:ratio(hex('--ees-status-attention'),hex('--ees-status-attention-bg')),success:ratio(hex('--ees-status-success'),hex('--ees-status-success-bg')),danger:ratio(hex('--ees-status-danger'),hex('--ees-status-danger-bg')),body:ratio(hex('--ees-text-primary'),'#ffffff'),secondary:ratio(hex('--ees-text-secondary'),'#ffffff'),meta:ratio(hex('--ees-text-tertiary'),'#fafafa')};
+          return {amber:hex('--ees-status-attention'),green:hex('--ees-status-success'),attention:ratio(hex('--ees-status-attention'),hex('--ees-status-attention-bg')),success:ratio(hex('--ees-status-success'),hex('--ees-status-success-bg')),danger:ratio(hex('--ees-status-danger'),hex('--ees-status-danger-bg')),body:ratio(hex('--ees-text-primary'),'#ffffff'),secondary:ratio(hex('--ees-text-secondary'),'#ffffff'),secondaryPanel:ratio(hex('--ees-text-secondary'),hex('--ees-surface-panel')),meta:ratio(hex('--ees-text-tertiary'),'#fafafa'),metaPanel:ratio(hex('--ees-text-tertiary'),hex('--ees-surface-panel'))};
         })()""")
         self.assertEqual(ratios['amber'],'#96590c');self.assertEqual(ratios['green'],'#2a744c')
-        for name in ('attention','success','danger','body','secondary','meta'):self.assertGreaterEqual(ratios[name],4.5,name)
+        for name in ('attention','success','danger','body','secondary','secondaryPanel','meta','metaPanel'):self.assertGreaterEqual(ratios[name],4.5,name)
         directory=self.screenshot('q1-private-width-640')
         (directory/'q1-contrast.json').write_text(json.dumps(ratios,indent=2)+'\n',encoding='utf-8')
+
+    def test_c18_panel_cards_input_hover_and_keyboard_focus(self):
+        self.author(name='화면 색상 검증 절차', jobs=1)
+        self.browser.evaluate('window.__eesNativeWorkV1.refresh()')
+        self.click('[data-action=mode][data-mode=author]')
+        self.wait("document.querySelector('.ew-author-list>button')")
+
+        def background(selector):
+            return self.browser.evaluate('getComputedStyle(document.querySelector(' + json.dumps(selector) + ')).backgroundColor')
+
+        def hover(selector):
+            point = self.browser.evaluate('(()=>{const r=document.querySelector(' + json.dumps(selector) + ').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()')
+            self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseMoved', **point})
+            self.wait('document.querySelector(' + json.dumps(selector) + ').matches(":hover")')
+
+        observed = {name: background(selector) for name, selector in {
+            'panel': '#ees-work-panel', 'author': '#ees-work-designer',
+            'card': '.ew-author-list', 'input': '#ew-author-search',
+            'chat': '#chat-container #chat-pane'}.items()}
+        self.assertEqual(observed, {'panel': 'rgb(243, 243, 245)', 'author': 'rgb(243, 243, 245)',
+            'card': 'rgb(255, 255, 255)', 'input': 'rgb(255, 255, 255)', 'chat': 'rgb(255, 255, 255)'})
+        hover('.ew-author-list>button')
+        observed['cardHover'] = background('.ew-author-list>button')
+        self.assertEqual(observed['cardHover'], 'rgb(243, 243, 245)')
+        hover('#ees-work-panel>.ew-panel-header .ew-icon-button')
+        observed['headerHover'] = background('#ees-work-panel>.ew-panel-header .ew-icon-button')
+        self.assertEqual(observed['headerHover'], 'rgb(236, 236, 239)')
+        self.click('#ew-author-search')
+        self.key('Tab', 9)
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('.ew-author-list>button:focus-visible')"))
+        observed['keyboardOutline'] = self.browser.evaluate('getComputedStyle(document.activeElement).outline')
+        self.assertIn('solid', observed['keyboardOutline'])
+        self.assertIn('2px', observed['keyboardOutline'])
+        directory = self.screenshot('c18-panel-card-focus-desktop')
+        (directory / 'c18-panel-computed.json').write_text(json.dumps(observed, indent=2) + '\n', encoding='utf-8')
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 600, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait('innerWidth === 600')
+        self.wait("!document.querySelector('#sidebar-search-button') && document.querySelector('#sidebar-toggle-button')?.getBoundingClientRect().width > 0")
+        self.click('#sidebar-toggle-button')
+        self.wait("document.querySelector('#ees-work-panel')")
+        self.assertFalse(self.geometry()['overflow'])
+        self.screenshot('c18-panel-card-narrow')

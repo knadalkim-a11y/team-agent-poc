@@ -1,0 +1,125 @@
+✔ Native conversation remains the original center DOM while the work panel mounts after it (5.498484ms)
+✔ closing or changing work mode preserves Native chat and the authoring mount boundary (1.646952ms)
+✔ Native shell mounts only the EES menu with the verified sidebar anchor and no chat pane (1.071224ms)
+✔ Native shell suspends chat layout and restores the same panel and Native chat nodes on return (1.90494ms)
+✔ Native capability refresh cannot turn untouched hidden run inputs into an incomplete draft (3.401475ms)
+✔ missing sidebar anchor leaves Native screen untouched and creates no EES shell (0.772734ms)
+✔ panel scroll restores per personal target and never writes a shared run selection (1.477496ms)
+✔ confirmation dialog starts on cancel and Escape closure never accepts the command (1.006557ms)
+✔ workspace refresh retains active input identity and text selection without taking Native focus (2.611965ms)
+✔ published procedure overview opens before a run exists without dereferencing run state (2.026353ms)
+✔ workspace navigation separates managed-system authoring from work scope and actual tasks (1.005825ms)
+✔ polling preserves an explicit model choice only for its actor and work target while revocation clears it (2.532546ms)
+✔ a delayed workspace read never rolls private UI revision behind a completed width save (10.177474ms)
+✔ an explicit early panel resize wins over an older saved width and stays actor scoped (1.630036ms)
+✔ a width conflict retries only that preference while preserving another tab private draft (1.777988ms)
+✔ width conflict recovery stops on account change and never retries twice (2.76126ms)
+✔ workspace menu uses server permissions for three groups and hides unavailable Native destinations (8.98723ms)
+✔ tools-only permission keeps D9 workspace access with an honest empty menu and no admin link (2.195418ms)
+✔ blocked Native navigation has a visible escaped authoring alert without replacing its editor (0.795529ms)
+✔ forged denied Native and author actions do not navigate or mutate state (3.512252ms)
+✔ all six allowed Native destinations use direct static routes without a sidebar link (16.746661ms)
+✔ same-section EES menu preserves selection and unsaved designer session plus the full composer without sending (3.064938ms)
+✔ Native loaded draft is not reimported and different nonempty content is never overwritten (3.925063ms)
+✔ return waits for the matching Native editor and respects new model tool or text interactions (7.711548ms)
+✔ Native departure blocks busy editors and failed or changed draft flushes (7.873458ms)
+✔ image previews and uploading attachments block departure before and after Native flush (8.544744ms)
+✔ pending Native navigation cannot cross an account or work context change (4.233708ms)
+✔ account reset releases an old pending Native flush without unlocking the new account operation (1.880833ms)
+✔ removed native_return action cannot navigate or alter the saved selection (2.076028ms)
+✔ Native tickets cannot copy drafts across unrelated navigation logout actor or session changes (15.278389ms)
+✔ Browser Back restores the exact prior chat draft without an EES return action (1.867163ms)
+✔ Native-to-Native menu navigation keeps one original chat draft across all destinations (2.549561ms)
+✔ same-section tools menu restores its exact authoring selection without closing the draft (2.142338ms)
+✔ a different EES menu destination is applied only after returning to the original chat (3.64354ms)
+✔ direct Native entry loads capabilities with no chat pane and EES destinations use the chat root (1.590106ms)
+✔ a failed Native capability read hides actions but keeps the original draft until explicit same-actor retry (2.761992ms)
+✔ retry after a failed Native capability read never revives another actor or session return ticket (3.775609ms)
+✔ Native entry with a missing sidebar mount does not fetch or show a synthetic shell (1.31429ms)
+✔ admin settings query redirect stays inside the shell and its Native close preserves the original chat (2.207005ms)
+✔ closing the Native admin modal returns to the saved chat without a duplicate return bar (2.425384ms)
+✔ switching an opened admin modal to a personal tab keeps it open until Native closes it (2.09766ms)
+✔ ordinary settings are not mistaken for the Native admin modal (1.056732ms)
+✔ help question includes canonical term ID and visible authoring context without hidden state (0.572943ms)
+✔ help fills the Native draft without sending and preserves attachments tools models and literal text (1.290915ms)
+✔ help refuses a loading or absent Native draft and never overwrites unconfirmed content (1.138466ms)
+✔ help insertion serializes competing choices and reports restore failure without sending (1.007298ms)
+✔ help detects account change before restoring and never copies the old draft into a new actor (0.940968ms)
+✔ help detects route changes during Native restore and does not focus a different conversation (1.324426ms)
+✖ author tools expose help-only metadata while workflow and historical references remain unchanged (2.252354ms)
+✔ procedure starter questions keep the Native draft and use help metadata until the starter closes (1.392608ms)
+✔ procedure question choices reject unavailable or invalid context without changing a draft (1.199918ms)
+✔ procedure introduction has exactly three keyboard buttons and no automatic send control (1.3674ms)
+✔ input save keeps mutation controls busy until the acknowledged state finishes refreshing (1.54655ms)
+✔ review save cannot continue confirmation after its refresh loses the selected work context (1.490806ms)
+✔ an explicit early navigation survives initial saved-selection restoration and late startup reads (1.372107ms)
+✔ early selection patches are cleared on account reset and do not replace another account restoration (1.491237ms)
+✔ history expansion restoration uses exact attempt keys and the current panel position (2.014886ms)
+✔ real view list reader returns an isolated snapshot without an undefined helper (1.135971ms)
+✔ assignment labels use only the permitted Native people list and preserve principal kind (1.138115ms)
+✔ new delivery effect and retry failures are translated without masking human explanations (4.261722ms)
+✔ list inclusion is a local preview and candidates are never selected by default (3.137627ms)
+✔ saved human additions retain their source label and never increase the immutable lookup count (3.761637ms)
+✔ failed lookup hides previous payload while partial keeps explicit incompleteness (1.789055ms)
+✔ zero included items can be saved while completion policy remains explicitly unresolved (0.832925ms)
+✔ a completed empty lookup permits explicit additions without pretending it was never executed (1.811389ms)
+✔ read-only report cannot edit or save and unavailable dispatch is never clickable (2.257391ms)
+✔ revoked evidence never redisplays a locally preserved list or review draft (1.702696ms)
+✔ request reviewer and requester controls use distinct current capabilities (1.702035ms)
+✔ failed or stale report never permits editing a previous result as current evidence (1.251295ms)
+✔ historical values compare only the stored shared input without replacing it (1.233589ms)
+✔ records are scoped and put active runs first without inventing a date range (13.97153ms)
+✔ empty work shows only the earliest real scheduled execution (1.12816ms)
+✔ asking about a historical record only changes private reference and never dispatches (4.117984ms)
+✔ question from a historical row preserves its exact attempt instead of the newest row (2.221667ms)
+✔ draft save sends immutable attempt and both revisions without executing or deciding (1.477155ms)
+✔ late draft save cannot acknowledge or repaint after another work target is selected (1.414541ms)
+✔ request fields follow native schema types and bindings, with reason outside EES values (2.319054ms)
+✔ ad-hoc start lists active factories and disables only those with active work (2.069958ms)
+✔ item verdict options stay pending and AI suggestions cannot enable final confirmation (2.198062ms)
+✔ A7 has automatic save status and no save button, and basis cards expose actual time (2.350651ms)
+✔ navigation flushes edits made while an older review autosave is still in flight (1.775064ms)
+✔ failed automatic review save keeps the current work and preserves its draft (1.258717ms)
+✔ same-status custom words retain distinct pending IDs and final immutable wording (2.066073ms)
+✔ partial provenance survives a failed human verdict without changing its primary status (1.175141ms)
+✔ private verdict autosave persists exact term without deciding and restores after reload (11.667279ms)
+✔ private draft storage failure is visible and never discards pending selection (2.141496ms)
+✔ schema field ordering is not an edit while changed values retain save protection (1.304345ms)
+✔ missing evidence and external request URLs never become local undefined links (6.855348ms)
+✔ shared ID helper prefers the native randomUUID with its receiver (0.700625ms)
+✔ shared ID fallback sets UUID version and variant while preserving random bytes (5.130911ms)
+✔ shared ID generation refuses missing secure randomness (3.002844ms)
+✔ missing randomUUID preserves runtime command receipt and first-chat boundaries (2.472695ms)
+ℹ tests 92
+ℹ suites 0
+ℹ pass 91
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 334.887495
+
+✖ failing tests:
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:194:1
+✖ author tools expose help-only metadata while workflow and historical references remain unchanged (2.252354ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'none'
+  - 'workspace'
+  
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_runtime_ui.cjs:197:46)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'none',
+    expected: 'workspace',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

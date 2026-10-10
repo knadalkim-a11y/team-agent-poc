@@ -2,6 +2,12 @@
 
 완료된 변경·중요 결정과 날짜별 관찰을 기록합니다. 다음 작업과 최신 배포 상태는 [STATUS](docs/STATUS.md), 시험별 현재 판정은 [평가표](evals/scenarios.md)가 원본입니다. 과거 실패 기록을 현재 장애나 재실행 지시로 해석하지 않습니다.
 
+## 2026-10-11
+
+- C18 PR 1은 업무 만들기·AI 설정·관리자만 메뉴를 제공하고, Native workspace 화면에서도 EES 메뉴를 유지한다. 별도 복귀 줄을 없애고 메뉴/Back/원래 설정 닫기로 같은 문서의 작업 위치와 작성 중 값을 보존한다. 팀원 자산4종은 후속 EES 편집기 전에 원래 화면으로 열린다.
+- C21/C33의 회색 업무 패널·흰 카드/입력·구분되는 hover, Native 설정/개인 키 창의 색·글꼴을 반영했다. 원본 메뉴 SVG4개를 패키징하고 이전 프로그램112/114/115개 inventory의 검증·복원 경계를 유지했다.
+- 설정 모달의 개인 탭 전환·일시 조회 실패·분리된 입력폼 capture의 관련 회귀를 보완했다. [계약](docs/mockups/ees-work/TASK.md#merge-ui-20261011), [검증과 한계](evals/v4-ui-20260930.md#merge-ui-evidence-20261011).
+
 ## 2026-10-06
 
 - C15 기준으로 워크스페이스를 업무 만들기·Open WebUI에서 열기·관리자만으로 묶고, 현재 Native 기본·그룹 권한에 맞는 항목만 표시한다. 원래 스킬/모델/지식/프롬프트/도구와 관리자 설정 화면을 직접 열며 EES 경유 때만 복귀 줄을 제공한다. [메뉴 안내](docs/03-openwebui-native-agent.md#menu-integration-20261006), [계약과 권한 경계](docs/mockups/ees-work/TASK.md#menu-integration-20261006).

@@ -1,0 +1,17 @@
+======================================================================
+ERROR: test_ees_work_figma_contracts (unittest.loader._FailedTest.test_ees_work_figma_contracts)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_ees_work_figma_contracts
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_contracts.py", line 14, in <module>
+    import test_ees_work_workspace as base
+ModuleNotFoundError: No module named 'test_ees_work_workspace'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

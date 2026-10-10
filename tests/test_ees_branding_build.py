@@ -574,7 +574,8 @@ class BrandingBuildTests(unittest.TestCase):
         added = ('1c98e', '35b2e', '478bf', '52271', '63982',
                  '6d84b', 'a28e3', 'b22ad', 'b456d', 'f1e53',
                  'f4cb1', '3dae2', 'e9ac2', '30679', '2b3d1',
-                 '1a06f', '2fe77', '2eb05', 'b355c', '66c71', '45242')
+                 '1a06f', '2fe77', '2eb05', 'b355c', '66c71', '45242',
+                 '83565', '54b2e', '4d978', '4308e')
         self.build('figma-icons')
         with ZipFile(self.root / 'figma-icons' / builder.WHEEL_FILENAME) as archive:
             for name in added:
@@ -1196,15 +1197,14 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
                     self.assertEqual(copied, source.read(origin))
                     self.assertEqual(hashlib.sha256(copied).hexdigest(), expected)
                 # Independently reviewed CSS references, not the builder's icon
-                # list or prepared output. The menu/return mask icons below use
+                # list or prepared output. The C18 menu mask icons below use
                 # CSS URLs; font URLs and bytes outside icon values must survive.
                 # The independent fixed/mutated URL fixtures above still verify
                 # allowed rewriting, wrong/missing hashes and unrelated drift.
                 for filename, references in {
                     "chat-theme.css": (),
                     "ees-work-launcher.css": (
-                        "v4/51602.svg", "v4/f6bbc.svg", "v4/40095.svg",
-                        "v4/88026.svg", "v4/eb94a.svg",
+                        "v4/83565.svg", "v4/54b2e.svg", "v4/4d978.svg", "v4/4308e.svg",
                     ),
                 }.items():
                     icons = {relative: (builder.UI_DIR / relative).read_bytes() for relative in references}

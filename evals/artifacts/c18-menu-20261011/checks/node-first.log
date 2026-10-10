@@ -1,0 +1,236 @@
+✔ Native conversation remains the original center DOM while the work panel mounts after it (6.509041ms)
+✔ closing or changing work mode preserves Native chat and the authoring mount boundary (2.016971ms)
+✖ Native shell mounts only the EES menu with the verified sidebar anchor and no chat pane (1.126067ms)
+✖ Native shell suspends chat layout and restores the same panel and Native chat nodes on return (2.60691ms)
+✔ missing sidebar anchor leaves Native screen untouched and creates no EES shell (1.524729ms)
+✔ panel scroll restores per personal target and never writes a shared run selection (2.345105ms)
+✔ confirmation dialog starts on cancel and Escape closure never accepts the command (1.035621ms)
+✔ workspace refresh retains active input identity and text selection without taking Native focus (2.377594ms)
+✔ published procedure overview opens before a run exists without dereferencing run state (1.383576ms)
+✔ workspace navigation separates managed-system authoring from work scope and actual tasks (2.546549ms)
+✔ polling preserves an explicit model choice only for its actor and work target while revocation clears it (3.430812ms)
+✔ a delayed workspace read never rolls private UI revision behind a completed width save (11.372003ms)
+✔ an explicit early panel resize wins over an older saved width and stays actor scoped (1.647644ms)
+✔ a width conflict retries only that preference while preserving another tab private draft (1.651991ms)
+✔ width conflict recovery stops on account change and never retries twice (2.682073ms)
+✔ workspace menu uses server permissions for three groups and hides unavailable Native destinations (10.784697ms)
+✔ tools-only permission keeps D9 workspace access with an honest empty menu and no admin link (2.584236ms)
+✔ blocked Native navigation has a visible escaped authoring alert without replacing its editor (1.194691ms)
+✔ forged denied Native and author actions do not navigate or mutate state (4.27212ms)
+✔ all six allowed Native destinations use direct static routes without a sidebar link (22.403972ms)
+✖ same-section EES menu preserves selection and unsaved designer session plus the full composer without sending (3.461268ms)
+✔ Native loaded draft is not reimported and different nonempty content is never overwritten (4.497008ms)
+✔ return waits for the matching Native editor and respects new model tool or text interactions (6.267798ms)
+✔ Native departure blocks busy editors and failed or changed draft flushes (5.523076ms)
+✔ image previews and uploading attachments block departure before and after Native flush (8.103295ms)
+✔ pending Native navigation cannot cross an account or work context change (4.433002ms)
+✔ account reset releases an old pending Native flush without unlocking the new account operation (1.394703ms)
+✔ removed native_return action cannot navigate or alter the saved selection (1.748536ms)
+✔ Native tickets cannot copy drafts across unrelated navigation logout actor or session changes (14.36262ms)
+✔ Browser Back restores the exact prior chat draft without an EES return action (1.857209ms)
+✖ Native-to-Native menu navigation keeps one original chat draft across all destinations (2.179275ms)
+✖ same-section tools menu restores its exact authoring selection without closing the draft (1.899793ms)
+✖ a different EES menu destination is applied only after returning to the original chat (1.861166ms)
+✖ direct Native entry loads capabilities with no chat pane and EES destinations use the chat root (1.698581ms)
+✔ Native entry with a missing sidebar mount does not fetch or show a synthetic shell (1.209393ms)
+✖ admin settings query redirect stays inside the shell and its Native close preserves the original chat (2.347268ms)
+✔ closing the Native admin modal returns to the saved chat without a duplicate return bar (2.046775ms)
+✔ ordinary settings are not mistaken for the Native admin modal (1.222803ms)
+✔ help question includes canonical term ID and visible authoring context without hidden state (0.61028ms)
+✔ help fills the Native draft without sending and preserves attachments tools models and literal text (1.090624ms)
+✔ help refuses a loading or absent Native draft and never overwrites unconfirmed content (0.957032ms)
+✔ help insertion serializes competing choices and reports restore failure without sending (0.944684ms)
+✔ help detects account change before restoring and never copies the old draft into a new actor (0.87564ms)
+✔ help detects route changes during Native restore and does not focus a different conversation (1.168731ms)
+✔ author tools expose help-only metadata while workflow and historical references remain unchanged (1.027118ms)
+✔ procedure starter questions keep the Native draft and use help metadata until the starter closes (1.378278ms)
+✔ procedure question choices reject unavailable or invalid context without changing a draft (0.9288ms)
+✔ procedure introduction has exactly three keyboard buttons and no automatic send control (1.06166ms)
+✔ input save keeps mutation controls busy until the acknowledged state finishes refreshing (1.778781ms)
+✔ review save cannot continue confirmation after its refresh loses the selected work context (1.252068ms)
+✔ an explicit early navigation survives initial saved-selection restoration and late startup reads (1.253359ms)
+✔ early selection patches are cleared on account reset and do not replace another account restoration (1.398307ms)
+✔ history expansion restoration uses exact attempt keys and the current panel position (1.783709ms)
+✔ real view list reader returns an isolated snapshot without an undefined helper (1.26064ms)
+✔ assignment labels use only the permitted Native people list and preserve principal kind (1.214601ms)
+✔ new delivery effect and retry failures are translated without masking human explanations (3.558454ms)
+✔ list inclusion is a local preview and candidates are never selected by default (1.370456ms)
+✔ saved human additions retain their source label and never increase the immutable lookup count (2.501121ms)
+✔ failed lookup hides previous payload while partial keeps explicit incompleteness (1.098706ms)
+✔ zero included items can be saved while completion policy remains explicitly unresolved (0.634766ms)
+✔ a completed empty lookup permits explicit additions without pretending it was never executed (1.71157ms)
+✔ read-only report cannot edit or save and unavailable dispatch is never clickable (2.078033ms)
+✔ revoked evidence never redisplays a locally preserved list or review draft (1.129072ms)
+✔ request reviewer and requester controls use distinct current capabilities (1.737248ms)
+✔ failed or stale report never permits editing a previous result as current evidence (1.241351ms)
+✔ historical values compare only the stored shared input without replacing it (1.390586ms)
+✔ records are scoped and put active runs first without inventing a date range (20.180981ms)
+✔ empty work shows only the earliest real scheduled execution (1.03475ms)
+✔ asking about a historical record only changes private reference and never dispatches (1.187069ms)
+✔ question from a historical row preserves its exact attempt instead of the newest row (3.534688ms)
+✔ draft save sends immutable attempt and both revisions without executing or deciding (1.392679ms)
+✔ late draft save cannot acknowledge or repaint after another work target is selected (1.354331ms)
+✔ request fields follow native schema types and bindings, with reason outside EES values (2.136311ms)
+✔ ad-hoc start lists active factories and disables only those with active work (1.581624ms)
+✔ item verdict options stay pending and AI suggestions cannot enable final confirmation (1.765902ms)
+✔ A7 has automatic save status and no save button, and basis cards expose actual time (1.952133ms)
+✔ navigation flushes edits made while an older review autosave is still in flight (1.5791ms)
+✔ failed automatic review save keeps the current work and preserves its draft (1.376304ms)
+✔ same-status custom words retain distinct pending IDs and final immutable wording (1.865001ms)
+✔ partial provenance survives a failed human verdict without changing its primary status (1.539791ms)
+✔ private verdict autosave persists exact term without deciding and restores after reload (15.383148ms)
+✔ private draft storage failure is visible and never discards pending selection (1.882588ms)
+✔ schema field ordering is not an edit while changed values retain save protection (1.108621ms)
+✔ missing evidence and external request URLs never become local undefined links (5.291306ms)
+✔ shared ID helper prefers the native randomUUID with its receiver (0.65012ms)
+✔ shared ID fallback sets UUID version and variant while preserving random bytes (4.605332ms)
+✔ shared ID generation refuses missing secure randomness (2.716615ms)
+✔ missing randomUUID preserves runtime command receipt and first-chat boundaries (2.008658ms)
+ℹ tests 88
+ℹ suites 0
+ℹ pass 80
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 316.02981
+
+✖ failing tests:
+
+test at tests/test_ees_v4_layout.cjs:24:1
+✖ Native shell mounts only the EES menu with the verified sidebar anchor and no chat pane (1.126067ms)
+  TypeError: document.querySelectorAll is not a function or its return value is not iterable
+      at ensure (evalmachine.<anonymous>:406:78)
+      at Object.render (evalmachine.<anonymous>:543:83)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_v4_layout.cjs:25:536)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_v4_layout.cjs:27:1
+✖ Native shell suspends chat layout and restores the same panel and Native chat nodes on return (2.60691ms)
+  TypeError: document.querySelectorAll is not a function or its return value is not iterable
+      at ensure (evalmachine.<anonymous>:406:78)
+      at Object.render (evalmachine.<anonymous>:543:83)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_v4_layout.cjs:28:450)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:55:1
+✖ same-section EES menu preserves selection and unsaved designer session plus the full composer without sending (3.461268ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      '/workspace/skills',
+  -   '/c/original?keep=1'
+    ]
+  
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_runtime_ui.cjs:59:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ '/workspace/skills' ],
+    expected: [ '/workspace/skills', '/c/original?keep=1' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:106:1
+✖ Native-to-Native menu navigation keeps one original chat draft across all destinations (2.179275ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '/workspace/prompts'
+  - '/c/original?keep=1'
+  
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_runtime_ui.cjs:107:496)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/workspace/prompts',
+    expected: '/c/original?keep=1',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:109:1
+✖ same-section tools menu restores its exact authoring selection without closing the draft (1.899793ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '/workspace/skills'
+  - '/c/original?keep=1'
+  
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_runtime_ui.cjs:110:279)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/workspace/skills',
+    expected: '/c/original?keep=1',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:112:1
+✖ a different EES menu destination is applied only after returning to the original chat (1.861166ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '/workspace/skills'
+  - '/c/original?keep=1'
+  
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_runtime_ui.cjs:113:276)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/workspace/skills',
+    expected: '/c/original?keep=1',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:115:1
+✖ direct Native entry loads capabilities with no chat pane and EES destinations use the chat root (1.698581ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  undefined !== '/'
+  
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_runtime_ui.cjs:116:672)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: '/',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:121:1
+✖ admin settings query redirect stays inside the shell and its Native close preserves the original chat (2.347268ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_runtime_ui.cjs:123:395)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

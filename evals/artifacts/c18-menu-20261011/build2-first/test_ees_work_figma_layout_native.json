@@ -1,0 +1,32 @@
+{
+  "module": "test_ees_work_figma_layout_native",
+  "selected_ids": [
+    "test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_c18_panel_cards_input_hover_and_keyboard_focus",
+    "test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay",
+    "test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast"
+  ],
+  "seconds": 17.455,
+  "tests_run": 3,
+  "status": "failed",
+  "counts": {
+    "passed": 2,
+    "failed": 1,
+    "error": 0,
+    "skipped": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_c18_panel_cards_input_hover_and_keyboard_focus",
+      "status": "failed",
+      "detail": "Traceback (most recent call last):\n  File \"/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_layout_native.py\", line 148, in test_c18_panel_cards_input_hover_and_keyboard_focus\n    self.viewport(600)\n  File \"/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_layout_native.py\", line 25, in viewport\n    self.wait('document.body.dataset.eesSidebarCompact === ' + json.dumps(str(width < 1440).lower()))\n  File \"/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/ees_work_integrated_fixture.py\", line 190, in wait\n    self.fail('Timed out: ' + expression + '\\n' + self.text('body') + '\\nUnknown routes:' + repr(self.server.unknown))\nAssertionError: Timed out: document.body.dataset.eesSidebarCompact === \"true\"\nSkip to main content\n기존 대화\n채팅 대화\n\n기존 질문\n\nFixture AI\n\n기존 대화 기록\n\n\n\n\nFixture AI\n음성 모드 사용\nUnknown routes:[]\n"
+    },
+    {
+      "id": "test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast",
+      "status": "passed"
+    }
+  ]
+}

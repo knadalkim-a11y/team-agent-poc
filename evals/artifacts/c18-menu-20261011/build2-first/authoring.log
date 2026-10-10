@@ -1,0 +1,40 @@
+test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 280.7265750006991, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 168.59995899994829, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_menu_missing_mount_and_direct_entry_keep_original_skills_search (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_missing_mount_and_direct_entry_keep_original_skills_search) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 158.52917400025035, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 162.9723579999336, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_menu_uses_server_capabilities_for_admin_author_member_and_tools_only (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_uses_server_capabilities_for_admin_author_member_and_tools_only) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 155.26354299981904, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_personal_key_uses_original_valves_controls_and_theme (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_key_uses_original_valves_controls_and_theme) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 212.77692400053638, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_native_personal_settings_keep_original_tabs_and_close_controls (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_settings_keep_original_tabs_and_close_controls) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 155.52168199974403, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_shell_browser_back_preserves_draft_and_mobile_navigation (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_shell_browser_back_preserves_draft_and_mobile_navigation) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 149.07886299988604, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: test_native_personal_key_uses_original_valves_controls_and_theme (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_key_uses_original_valves_controls_and_theme)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_authoring_native.py", line 359, in test_native_personal_key_uses_original_valves_controls_and_theme
+    self.assertEqual(self.read(key, 'type'), 'password')
+AssertionError: 'text' != 'password'
+- text
++ password
+
+
+======================================================================
+FAIL: test_native_shell_browser_back_preserves_draft_and_mobile_navigation (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_shell_browser_back_preserves_draft_and_mobile_navigation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_authoring_native.py", line 422, in test_native_shell_browser_back_preserves_draft_and_mobile_navigation
+    self.assertFalse(self.browser.evaluate("[...document.querySelector('#workspace-container').previousElementSibling.querySelectorAll('a[href^=\"/workspace\"]')].some(e=>e.getBoundingClientRect().height>0)"))
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 8 tests in 21.708s
+
+FAILED (failures=2)

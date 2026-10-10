@@ -1,0 +1,39 @@
+test_c18_panel_cards_input_hover_and_keyboard_focus (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_c18_panel_cards_input_hover_and_keyboard_focus) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 290.9135949994379, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_q1_geometry_reading_width_footer_and_baseline_overlay (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 158.77383699989878, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 157.99969599993346, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+======================================================================
+FAIL: test_c18_panel_cards_input_hover_and_keyboard_focus (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_c18_panel_cards_input_hover_and_keyboard_focus)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_layout_native.py", line 148, in test_c18_panel_cards_input_hover_and_keyboard_focus
+    self.viewport(600)
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_layout_native.py", line 25, in viewport
+    self.wait('document.body.dataset.eesSidebarCompact === ' + json.dumps(str(width < 1440).lower()))
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/ees_work_integrated_fixture.py", line 190, in wait
+    self.fail('Timed out: ' + expression + '\n' + self.text('body') + '\nUnknown routes:' + repr(self.server.unknown))
+AssertionError: Timed out: document.body.dataset.eesSidebarCompact === "true"
+Skip to main content
+기존 대화
+채팅 대화
+
+기존 질문
+
+Fixture AI
+
+기존 대화 기록
+
+
+
+
+Fixture AI
+음성 모드 사용
+Unknown routes:[]
+
+----------------------------------------------------------------------
+Ran 3 tests in 17.455s
+
+FAILED (failures=1)

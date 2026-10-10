@@ -1,0 +1,26 @@
+{
+  "baseline_main": "7670a1b8f43e122250e0b766bc86986a2abb34ee",
+  "scope": "#78 PR 1 only; native frontend + real temporary EES SQLite + synthetic session/API; no company deployment",
+  "python": "3.12.14",
+  "chrome": "153.0.8010.52",
+  "open_webui": "0.11.3",
+  "build3_sha256": "119f24a337eb0ca2cac871faa988ce97184a8ca8b865b6a492c5e3555078bd4f",
+  "build4_sha256": "3a68dcba49d534a95a5f6d4880b75dc93b9aad04e10800a806d4b1b81b836fe7",
+  "build5": {
+    "wheel": "/workspace/scratch/f5cd50d81fb4/c18-native-build5/open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "sha256": "2fd66d01d7be73e130e65edbb8792dd235352b7ef3a1001a9b89a177a07296f4",
+    "bytes": 152120001
+  },
+  "final_native_env": {
+    "EES_TEST_CHROME": "/workspace/scratch/abe8513396cb/team-agent-poc/dist/tools/chrome-headless-shell-linux64/chrome-headless-shell",
+    "EES_TEST_BRANDING_DIR": "/workspace/scratch/f5cd50d81fb4/c18-native-build5",
+    "EES_TEST_SCREENSHOT_DIR": "/workspace/scratch/f5cd50d81fb4/c18-native-results5/authoring"
+  },
+  "equivalent_unittest_command": "PYTHONPATH=.:tests python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_shell_browser_back_preserves_draft_and_mobile_navigation test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft",
+  "actual_runner": "Existing ees_delivery_suite.EvidenceResult through temporary scoped runner; same two unchanged test IDs; JSON results in build5/",
+  "final_node_commands": [
+    "node --test --test-reporter=tap tests/test_ees_work_figma_runtime_ui.cjs tests/test_ees_v4_layout.cjs",
+    "node --test --test-reporter=tap tests/test_ees_work_authoring_ui.cjs tests/test_ees_execution_ui.cjs"
+  ],
+  "checks": "95 + 159 node PASS; 23 contracts PASS; 96 packaging PASS + 6 optional SKIP; staged Native results, not final full11 run"
+}

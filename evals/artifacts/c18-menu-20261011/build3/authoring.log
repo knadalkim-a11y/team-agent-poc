@@ -1,0 +1,66 @@
+test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 154.2386679993797, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_native_personal_key_uses_original_valves_controls_and_theme (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_key_uses_original_valves_controls_and_theme) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 151.93607299988798, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_shell_browser_back_preserves_draft_and_mobile_navigation (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_shell_browser_back_preserves_draft_and_mobile_navigation) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 152.2883309999088, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_authoring_native.py", line 204, in test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft
+    self.assertEqual(self.skills_roundtrip('procedure'), full_draft)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_authoring_native.py", line 146, in skills_roundtrip
+    self.assert_reference_preserved(reference)
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_authoring_native.py", line 86, in assert_reference_preserved
+    self.assertEqual({key: value for key, value in after.items() if key != 'context_id'},
+AssertionError: {'kin[134 chars]'', 'revision': 0} != {'kin[134 chars]'', 'version': None, 'workflow_revision': 1, '[55 chars]:00'}
++ {'created_at': '2026-10-10T23:43:52.813+00:00',
+- {'factory_id': '',
+? ^
+
++  'factory_id': '',
+? ^
+
+   'job_id': '',
+   'kind': 'workspace',
+-  'revision': 0,
+?              ^
+
++  'revision': 1,
+?              ^
+
+   'run_id': '',
+   'system_id': 'EMS',
++  'version': None,
+-  'workflow_id': '3cba08ad-689a-4a76-81ed-4e7b4ee4d049'}
+?                                                       ^
+
++  'workflow_id': '3cba08ad-689a-4a76-81ed-4e7b4ee4d049',
+?                                                       ^
+
++  'workflow_revision': 1}
+
+======================================================================
+FAIL: test_native_shell_browser_back_preserves_draft_and_mobile_navigation (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_shell_browser_back_preserves_draft_and_mobile_navigation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_authoring_native.py", line 441, in test_native_shell_browser_back_preserves_draft_and_mobile_navigation
+    self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+AssertionError: {'prompt': '', 'files': [], 'selectedToolIds': [], 's[134 chars]alse} != {'prompt': '뒤로 가기로 복원할 개인 질문', 'files': [], 'selected[150 chars]alse}
+  {'codeInterpreterEnabled': False,
+   'files': [],
+   'imageGenerationEnabled': False,
+-  'prompt': '',
++  'prompt': '뒤로 가기로 복원할 개인 질문',
+   'selectedFilterIds': [],
+   'selectedSkillIds': [],
+   'selectedToolIds': [],
+   'webSearchEnabled': False}
+
+----------------------------------------------------------------------
+Ran 3 tests in 6.540s
+
+FAILED (failures=2)

@@ -1,0 +1,10 @@
+{
+  "panel": "rgb(243, 243, 245)",
+  "author": "rgb(243, 243, 245)",
+  "card": "rgb(255, 255, 255)",
+  "input": "rgb(255, 255, 255)",
+  "chat": "rgb(255, 255, 255)",
+  "cardHover": "rgb(243, 243, 245)",
+  "headerHover": "rgb(236, 236, 239)",
+  "keyboardOutline": "oklch(0.623 0.214 259.815) solid 2px"
+}

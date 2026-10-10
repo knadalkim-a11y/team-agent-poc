@@ -1298,3 +1298,26 @@ Native 인증·사용자·그룹·대화·첨부 DB는 기존 원본이다. 업�
 중단 이후 작업 공간 일부가 사라져 06:54 UTC에 미커밋 시험·새 증거 원본을 읽을 수 없었다. 제품은 GitHub 보존 commit `2770382fa29968abe0d469ac9f49988806fbacc3`, tree `15976fe195deaec0cc89873eee4c159e91a847ed`로 정확히 복구했다. 도구에 남은 Figma 원본은 복구했으나 유실된 PNG/시험 원문을 동일 바이트로 재생성했다고 주장하지 않는다. 시험 재구성과 새 검수 결과·복구 불가 증거는 [날짜별 평가](../../../evals/v4-ui-20260930.md#integrated-recovery-20261002)에서 구분한다.
 
 복구 후 최종 제품 검수 뒤 **2026-10-02 07:25:04 UTC** A6/A7 context·렌더를 다시 조회했다. 생성 asset URL을 제외한 context와 렌더 바이트가 06:32 비교본과 동일했다. [최종 관련 화면 비교](../../../evals/artifacts/ees-integrated-20261002/figma-27-frame-review/recovery-final-recheck.json). 페이지 전체 조회 기준은 앞선 06:32이며 모든 페이지를 반복 조회한 것으로 표현하지 않는다.
+
+<a id="merge-ui-20261011"></a>
+
+## 2026-10-11 · #78 C18 메뉴·화면 통합 / PR 1
+
+제품 변경 전 기록. 기준 main `7670a1b8f43e122250e0b766bc86986a2abb34ee`. [착수 계획](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6092543547)과 [확정 답변](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6103124361), [Figma C33 반영](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6103168726)을 따른다. Figma 파일 `XK2wTos6sEuxSHhIj7cqg6`은 읽기만 한다. PR 1(F1/F2/F4/F5)만 최신 main에서 구현·검증하고 `Refs #78` Draft로 제출한 뒤 멈춘다. PR 적층·미승인 병합·사내 적용·#79/#77 동시 구현은 하지 않는다. PR 2는 승인된 병합 후 최신 main에서 시작한다.
+
+| 화면·규칙 | 현재 구현 | 최신 설계 | 차이 | 처리 |
+|---|---|---|---|---|
+| F1 / B1·R7 메뉴 | 업무 만들기 / Open WebUI에서 열기 / 관리자만 | 업무 만들기에 스킬, AI 설정에 모델·지식·프롬프트 | 묶음/용어 | D9·서버 capability·빈 묶음/빈 상태 보존 |
+| F2 / Native 경로 | workspace/admin에서 EES 중단, 별도 복귀 줄 | EES 메뉴 유지, 원래 화면/설정 창 | chat-pane 종속 mount | 메뉴만 유지하는 상태 분리. PR 1은 팀원 4종도 원래 화면 유지. 원본 탭만 숨기고 모바일 메뉴 버튼 보존 |
+| F2 / 복귀 보호 | ticket에 위치·초안·계정 신원과 복귀 줄 | 복귀 줄 제거, 메뉴로 돌아옴 | 표시와 보호 결합 | 표시/줄 전용 탐색 제거; 동일 문서의 위치·초안·첨부·계정 보호는 검증 후 보존 |
+| F4 / Native 테마 | 일부 workspace 글꼴 | 관리자/개인 설정/개인 키 창 색·글꼴 | 적용 범위 | 래퍼 CSS만 사용, 원래 배치·검증·코드 편집기 보존 |
+| F5 / 업무 패널 | 흰 패널과 공용 --ew-bg | panel #F3F3F5, 흰 카드/입력, 회차 띠 #FAFAFA, 대화 흰색 | 패널/카드 구분 | panel 전용 토큰, 설명 secondary, 필요한 대비 4.5:1 확인 |
+| C33 / Q1 hover `1228:2594` | hover 공용 | 흰 카드 안 #F3F3F5, 회색 패널 위 #ECECEF | 같은 회색 hover 무효 | 머리/탭/아래 막대별 구분 |
+
+후속 PR 결정(Q2–Q4): 기본 읽기 범위는 ‘비공개’, 설명 ‘만든 사람과, 고칠 수 있게 지정한 사람만 볼 수 있습니다’. 관리자 접근은 Native 정책에 따르며 화면으로 약속하지 않는다. 지침 변경은 자동/직접 실행 모두 회차의 고정 지침 계약 검사에서 차단되며 옛 게시 버전의 새 회차도 차단된다. 재검사·재게시·새 버전 선택 뒤 여는 회차부터 바뀐 지침을 쓴다. 기존 회차 이관/재시작/스냅샷 변경은 제외하고 종료 처리 정책은 #79 계획에서 다룬다. 영향은 볼 수 있는 이름과 볼 수 없는 개수만. 참고 문서 재처리는 지식 쓰기와 파일 처리 권한 모두 필요하며 나머지는 버튼을 숨기고 업로더/관리자 요청을 안내한다. 미검증 ‘모든 대화 즉시 적용’ 문구는 노출하지 않는다.
+
+고정 Native 원본: Open WebUI0.11.3 공식 wheel SHA256 `8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547`, ZIP5894개 확인. 10-10 손상 캐시는 **사외 Work 검증 환경** `/workspace/scratch/abe8513396cb/team-agent-poc/dist/upstream/`의 공식 wheel(74,928,128 bytes, SHA256 e505ed81…/BadZipFile)과 해당 checkout의 파생 ees.13 wheel(30,359,040 bytes, 비ZIP)이었다. 사내 PC 캐시라는 증거는 없으며 사내 캐시 상태는 미확인이다. 기존 파일은 보존하고 공식 CI 다운로드로 별도 임시 경로에 확보했다. wheel의 `(app)/+layout.svelte` source map은 Sidebar가 workspace 자식 밖에 남음을 보여 주며 workspace nav에는 모바일 열기 버튼이 같이 있으므로 nav 전체를 숨기지 않는다.
+
+원본 API 근거(후속 PR 전 재사용): 모델·스킬 전체 form은 숨은 meta/params 보존, 지식 편집은 파일 목록을 재작성하지 않음, 프롬프트 data/meta/tags 보존. ACL 미변경은 생략/null 유지, 재전송 시 Native 공유권한 필터에 유실 가능(`utils/access_control/__init__.py:220–298`). updated_at은 초 단위이고 일반 update에 CAS 없음: 시각+내용 비교, 남는 GET/write 경합 명시. 모델 읽기 전용 단건은 params 비노출(`routers/models.py:588–623`). 재처리는 지식 쓰기 확인 뒤 벡터 삭제가 파일 권한 검사보다 앞섬(`routers/knowledge.py:1521–1561`, `routers/retrieval.py:1869–1874`): 권한을 먼저 확인해야 함. has_user_valves는 키 필수 의미가 아님.
+
+PR 1 완료 조건: 역할/권한·직접 진입·workspace 메뉴 전환·관리자 모달·개인 설정·모바일 버튼·삽입점 부재·미저장 작성 값·대화/첨부·업로드 차단·계정 전환·Back을 관련 Node/실제 Native 검사로 확인한다. 실제 제품 computed style/포커스/좁은 화면과 Figma를 대조한다. 최초 실패와 환경 한계는 기존 evals에 보존한다. 코드/검사·가이드·STATUS·CHANGELOG 반영 후 문서 검사와 diff, 최종 Draft head CI를 확인한다. 사내 적용과 실제 사용자 사용성은 별도 미확인이다.
