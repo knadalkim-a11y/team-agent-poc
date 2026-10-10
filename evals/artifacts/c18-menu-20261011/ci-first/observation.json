@@ -1,0 +1,14 @@
+[
+  {
+    "initial_asserted_font": "-apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+    "before": {
+      "entry": false,
+      "panel": false,
+      "fonts": "loaded",
+      "chatReady": true,
+      "modalFont": "-apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\""
+    },
+    "after_ms": 42.63,
+    "after_font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif"
+  }
+]

@@ -313,6 +313,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.native_menu_fixture()
         self.navigate('/?settings=general')
         self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-general][aria-selected=true]')")
+        # Native can open its modal before the authenticated EES workspace
+        # finishes mounting. Assert the theme once its real scope is present.
+        self.wait("document.body.dataset.eesIntegrated === 'true' && document.querySelector('#ees-work-entry') && document.querySelector('#ees-work-panel')")
         modal = '[role=dialog][aria-modal=true]:has(#settings-tabs-container)'
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
         self.assertGreater(self.browser.evaluate("document.querySelector('#settings-tabs-container > button').getBoundingClientRect().height"), 0)
