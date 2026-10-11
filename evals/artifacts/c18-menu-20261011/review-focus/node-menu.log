@@ -1,0 +1,580 @@
+TAP version 13
+# Subtest: Native conversation remains the original center DOM while the work panel mounts after it
+ok 1 - Native conversation remains the original center DOM while the work panel mounts after it
+  ---
+  duration_ms: 8.257941
+  type: 'test'
+  ...
+# Subtest: closing or changing work mode preserves Native chat and the authoring mount boundary
+ok 2 - closing or changing work mode preserves Native chat and the authoring mount boundary
+  ---
+  duration_ms: 2.343985
+  type: 'test'
+  ...
+# Subtest: Native shell mounts only the EES menu with the verified sidebar anchor and no chat pane
+ok 3 - Native shell mounts only the EES menu with the verified sidebar anchor and no chat pane
+  ---
+  duration_ms: 1.474453
+  type: 'test'
+  ...
+# Subtest: Native shell suspends chat layout and restores the same panel and Native chat nodes on return
+ok 4 - Native shell suspends chat layout and restores the same panel and Native chat nodes on return
+  ---
+  duration_ms: 3.443495
+  type: 'test'
+  ...
+# Subtest: Native capability refresh cannot turn untouched hidden run inputs into an incomplete draft
+ok 5 - Native capability refresh cannot turn untouched hidden run inputs into an incomplete draft
+  ---
+  duration_ms: 4.897819
+  type: 'test'
+  ...
+# Subtest: missing sidebar anchor leaves Native screen untouched and creates no EES shell
+ok 6 - missing sidebar anchor leaves Native screen untouched and creates no EES shell
+  ---
+  duration_ms: 1.087864
+  type: 'test'
+  ...
+# Subtest: panel scroll restores per personal target and never writes a shared run selection
+ok 7 - panel scroll restores per personal target and never writes a shared run selection
+  ---
+  duration_ms: 2.034128
+  type: 'test'
+  ...
+# Subtest: confirmation dialog starts on cancel and Escape closure never accepts the command
+ok 8 - confirmation dialog starts on cancel and Escape closure never accepts the command
+  ---
+  duration_ms: 1.311213
+  type: 'test'
+  ...
+# Subtest: workspace refresh retains active input identity and text selection without taking Native focus
+ok 9 - workspace refresh retains active input identity and text selection without taking Native focus
+  ---
+  duration_ms: 3.116023
+  type: 'test'
+  ...
+# Subtest: published procedure overview opens before a run exists without dereferencing run state
+ok 10 - published procedure overview opens before a run exists without dereferencing run state
+  ---
+  duration_ms: 2.053928
+  type: 'test'
+  ...
+# Subtest: workspace navigation separates managed-system authoring from work scope and actual tasks
+ok 11 - workspace navigation separates managed-system authoring from work scope and actual tasks
+  ---
+  duration_ms: 1.388787
+  type: 'test'
+  ...
+# Subtest: polling preserves an explicit model choice only for its actor and work target while revocation clears it
+ok 12 - polling preserves an explicit model choice only for its actor and work target while revocation clears it
+  ---
+  duration_ms: 3.758159
+  type: 'test'
+  ...
+# Subtest: a delayed workspace read never rolls private UI revision behind a completed width save
+ok 13 - a delayed workspace read never rolls private UI revision behind a completed width save
+  ---
+  duration_ms: 14.346705
+  type: 'test'
+  ...
+# Subtest: an explicit early panel resize wins over an older saved width and stays actor scoped
+ok 14 - an explicit early panel resize wins over an older saved width and stays actor scoped
+  ---
+  duration_ms: 2.316925
+  type: 'test'
+  ...
+# Subtest: a width conflict retries only that preference while preserving another tab private draft
+ok 15 - a width conflict retries only that preference while preserving another tab private draft
+  ---
+  duration_ms: 2.867225
+  type: 'test'
+  ...
+# Subtest: width conflict recovery stops on account change and never retries twice
+ok 16 - width conflict recovery stops on account change and never retries twice
+  ---
+  duration_ms: 3.721044
+  type: 'test'
+  ...
+# Subtest: workspace menu uses server permissions for three groups and hides unavailable Native destinations
+ok 17 - workspace menu uses server permissions for three groups and hides unavailable Native destinations
+  ---
+  duration_ms: 13.297118
+  type: 'test'
+  ...
+# Subtest: tools-only permission keeps D9 workspace access with an honest empty menu and no admin link
+ok 18 - tools-only permission keeps D9 workspace access with an honest empty menu and no admin link
+  ---
+  duration_ms: 3.714075
+  type: 'test'
+  ...
+# Subtest: blocked Native navigation has a visible escaped authoring alert without replacing its editor
+ok 19 - blocked Native navigation has a visible escaped authoring alert without replacing its editor
+  ---
+  duration_ms: 1.034404
+  type: 'test'
+  ...
+# Subtest: forged denied Native and author actions do not navigate or mutate state
+ok 20 - forged denied Native and author actions do not navigate or mutate state
+  ---
+  duration_ms: 5.42787
+  type: 'test'
+  ...
+# Subtest: all six allowed Native destinations use direct static routes without a sidebar link
+ok 21 - all six allowed Native destinations use direct static routes without a sidebar link
+  ---
+  duration_ms: 25.470269
+  type: 'test'
+  ...
+# Subtest: same-section EES menu preserves selection and unsaved designer session plus the full composer without sending
+ok 22 - same-section EES menu preserves selection and unsaved designer session plus the full composer without sending
+  ---
+  duration_ms: 4.782508
+  type: 'test'
+  ...
+# Subtest: Native loaded draft is not reimported and different nonempty content is never overwritten
+ok 23 - Native loaded draft is not reimported and different nonempty content is never overwritten
+  ---
+  duration_ms: 5.298009
+  type: 'test'
+  ...
+# Subtest: return waits for the matching Native editor and respects new model tool or text interactions
+ok 24 - return waits for the matching Native editor and respects new model tool or text interactions
+  ---
+  duration_ms: 6.976072
+  type: 'test'
+  ...
+# Subtest: Native departure blocks busy editors and failed or changed draft flushes
+ok 25 - Native departure blocks busy editors and failed or changed draft flushes
+  ---
+  duration_ms: 4.864089
+  type: 'test'
+  ...
+# Subtest: image previews and uploading attachments block departure before and after Native flush
+ok 26 - image previews and uploading attachments block departure before and after Native flush
+  ---
+  duration_ms: 7.158421
+  type: 'test'
+  ...
+# Subtest: pending Native navigation cannot cross an account or work context change
+ok 27 - pending Native navigation cannot cross an account or work context change
+  ---
+  duration_ms: 3.747123
+  type: 'test'
+  ...
+# Subtest: account reset releases an old pending Native flush without unlocking the new account operation
+ok 28 - account reset releases an old pending Native flush without unlocking the new account operation
+  ---
+  duration_ms: 1.263462
+  type: 'test'
+  ...
+# Subtest: removed native_return action cannot navigate or alter the saved selection
+ok 29 - removed native_return action cannot navigate or alter the saved selection
+  ---
+  duration_ms: 1.576273
+  type: 'test'
+  ...
+# Subtest: Native tickets cannot copy drafts across unrelated navigation logout actor or session changes
+ok 30 - Native tickets cannot copy drafts across unrelated navigation logout actor or session changes
+  ---
+  duration_ms: 9.019894
+  type: 'test'
+  ...
+# Subtest: Browser Back restores the exact prior chat draft without an EES return action
+ok 31 - Browser Back restores the exact prior chat draft without an EES return action
+  ---
+  duration_ms: 4.69493
+  type: 'test'
+  ...
+# Subtest: Native-to-Native menu navigation keeps one original chat draft across all destinations
+ok 32 - Native-to-Native menu navigation keeps one original chat draft across all destinations
+  ---
+  duration_ms: 1.9134
+  type: 'test'
+  ...
+# Subtest: same-section tools menu restores its exact authoring selection without closing the draft
+ok 33 - same-section tools menu restores its exact authoring selection without closing the draft
+  ---
+  duration_ms: 1.608781
+  type: 'test'
+  ...
+# Subtest: a different EES menu destination is applied only after returning to the original chat
+ok 34 - a different EES menu destination is applied only after returning to the original chat
+  ---
+  duration_ms: 3.42587
+  type: 'test'
+  ...
+# Subtest: Native return exposes the restored chat view and reference only after both full state and draft are ready
+ok 35 - Native return exposes the restored chat view and reference only after both full state and draft are ready
+  ---
+  duration_ms: 3.110765
+  type: 'test'
+  ...
+# Subtest: a queued EES menu action waits for full state even when the returning Native draft restores first
+ok 36 - a queued EES menu action waits for full state even when the returning Native draft restores first
+  ---
+  duration_ms: 1.76394
+  type: 'test'
+  ...
+# Subtest: failed full state after Native return shows an error without publishing a zero-revision work reference
+ok 37 - failed full state after Native return shows an error without publishing a zero-revision work reference
+  ---
+  duration_ms: 2.764815
+  type: 'test'
+  ...
+# Subtest: direct Native entry loads capabilities with no chat pane and EES destinations use the chat root
+ok 38 - direct Native entry loads capabilities with no chat pane and EES destinations use the chat root
+  ---
+  duration_ms: 1.569744
+  type: 'test'
+  ...
+# Subtest: a failed Native capability read hides actions but keeps the original draft until explicit same-actor retry
+ok 39 - a failed Native capability read hides actions but keeps the original draft until explicit same-actor retry
+  ---
+  duration_ms: 2.462369
+  type: 'test'
+  ...
+# Subtest: retry after a failed Native capability read never revives another actor or session return ticket
+ok 40 - retry after a failed Native capability read never revives another actor or session return ticket
+  ---
+  duration_ms: 3.584933
+  type: 'test'
+  ...
+# Subtest: Native entry with a missing sidebar mount does not fetch or show a synthetic shell
+ok 41 - Native entry with a missing sidebar mount does not fetch or show a synthetic shell
+  ---
+  duration_ms: 1.272906
+  type: 'test'
+  ...
+# Subtest: admin settings query redirect stays inside the shell and its Native close preserves the original chat
+ok 42 - admin settings query redirect stays inside the shell and its Native close preserves the original chat
+  ---
+  duration_ms: 2.06967
+  type: 'test'
+  ...
+# Subtest: closing the Native admin modal returns to the saved chat without a duplicate return bar
+ok 43 - closing the Native admin modal returns to the saved chat without a duplicate return bar
+  ---
+  duration_ms: 1.857938
+  type: 'test'
+  ...
+# Subtest: switching an opened admin modal to a personal tab keeps it open until Native closes it
+ok 44 - switching an opened admin modal to a personal tab keeps it open until Native closes it
+  ---
+  duration_ms: 1.860682
+  type: 'test'
+  ...
+# Subtest: ordinary settings are not mistaken for the Native admin modal
+ok 45 - ordinary settings are not mistaken for the Native admin modal
+  ---
+  duration_ms: 1.092691
+  type: 'test'
+  ...
+# Subtest: help question includes canonical term ID and visible authoring context without hidden state
+ok 46 - help question includes canonical term ID and visible authoring context without hidden state
+  ---
+  duration_ms: 0.579685
+  type: 'test'
+  ...
+# Subtest: help fills the Native draft without sending and preserves attachments tools models and literal text
+ok 47 - help fills the Native draft without sending and preserves attachments tools models and literal text
+  ---
+  duration_ms: 1.200449
+  type: 'test'
+  ...
+# Subtest: help refuses a loading or absent Native draft and never overwrites unconfirmed content
+ok 48 - help refuses a loading or absent Native draft and never overwrites unconfirmed content
+  ---
+  duration_ms: 1.219036
+  type: 'test'
+  ...
+# Subtest: help insertion serializes competing choices and reports restore failure without sending
+ok 49 - help insertion serializes competing choices and reports restore failure without sending
+  ---
+  duration_ms: 0.998241
+  type: 'test'
+  ...
+# Subtest: help detects account change before restoring and never copies the old draft into a new actor
+ok 50 - help detects account change before restoring and never copies the old draft into a new actor
+  ---
+  duration_ms: 0.898955
+  type: 'test'
+  ...
+# Subtest: help detects route changes during Native restore and does not focus a different conversation
+ok 51 - help detects route changes during Native restore and does not focus a different conversation
+  ---
+  duration_ms: 0.93607
+  type: 'test'
+  ...
+# Subtest: author tools expose help-only metadata while workflow and historical references remain unchanged
+ok 52 - author tools expose help-only metadata while workflow and historical references remain unchanged
+  ---
+  duration_ms: 1.196744
+  type: 'test'
+  ...
+# Subtest: procedure starter questions keep the Native draft and use help metadata until the starter closes
+ok 53 - procedure starter questions keep the Native draft and use help metadata until the starter closes
+  ---
+  duration_ms: 1.633227
+  type: 'test'
+  ...
+# Subtest: procedure question choices reject unavailable or invalid context without changing a draft
+ok 54 - procedure question choices reject unavailable or invalid context without changing a draft
+  ---
+  duration_ms: 0.888289
+  type: 'test'
+  ...
+# Subtest: procedure introduction has exactly three keyboard buttons and no automatic send control
+ok 55 - procedure introduction has exactly three keyboard buttons and no automatic send control
+  ---
+  duration_ms: 1.123966
+  type: 'test'
+  ...
+# Subtest: input save keeps mutation controls busy until the acknowledged state finishes refreshing
+ok 56 - input save keeps mutation controls busy until the acknowledged state finishes refreshing
+  ---
+  duration_ms: 1.648199
+  type: 'test'
+  ...
+# Subtest: review save cannot continue confirmation after its refresh loses the selected work context
+ok 57 - review save cannot continue confirmation after its refresh loses the selected work context
+  ---
+  duration_ms: 1.320566
+  type: 'test'
+  ...
+# Subtest: an explicit early navigation survives initial saved-selection restoration and late startup reads
+ok 58 - an explicit early navigation survives initial saved-selection restoration and late startup reads
+  ---
+  duration_ms: 1.178657
+  type: 'test'
+  ...
+# Subtest: early selection patches are cleared on account reset and do not replace another account restoration
+ok 59 - early selection patches are cleared on account reset and do not replace another account restoration
+  ---
+  duration_ms: 2.950068
+  type: 'test'
+  ...
+# Subtest: history expansion restoration uses exact attempt keys and the current panel position
+ok 60 - history expansion restoration uses exact attempt keys and the current panel position
+  ---
+  duration_ms: 2.743934
+  type: 'test'
+  ...
+# Subtest: real view list reader returns an isolated snapshot without an undefined helper
+ok 61 - real view list reader returns an isolated snapshot without an undefined helper
+  ---
+  duration_ms: 1.195773
+  type: 'test'
+  ...
+# Subtest: assignment labels use only the permitted Native people list and preserve principal kind
+ok 62 - assignment labels use only the permitted Native people list and preserve principal kind
+  ---
+  duration_ms: 1.053542
+  type: 'test'
+  ...
+# Subtest: new delivery effect and retry failures are translated without masking human explanations
+ok 63 - new delivery effect and retry failures are translated without masking human explanations
+  ---
+  duration_ms: 4.049288
+  type: 'test'
+  ...
+# Subtest: list inclusion is a local preview and candidates are never selected by default
+ok 64 - list inclusion is a local preview and candidates are never selected by default
+  ---
+  duration_ms: 1.672665
+  type: 'test'
+  ...
+# Subtest: saved human additions retain their source label and never increase the immutable lookup count
+ok 65 - saved human additions retain their source label and never increase the immutable lookup count
+  ---
+  duration_ms: 2.932171
+  type: 'test'
+  ...
+# Subtest: failed lookup hides previous payload while partial keeps explicit incompleteness
+ok 66 - failed lookup hides previous payload while partial keeps explicit incompleteness
+  ---
+  duration_ms: 1.159009
+  type: 'test'
+  ...
+# Subtest: zero included items can be saved while completion policy remains explicitly unresolved
+ok 67 - zero included items can be saved while completion policy remains explicitly unresolved
+  ---
+  duration_ms: 0.646283
+  type: 'test'
+  ...
+# Subtest: a completed empty lookup permits explicit additions without pretending it was never executed
+ok 68 - a completed empty lookup permits explicit additions without pretending it was never executed
+  ---
+  duration_ms: 1.551837
+  type: 'test'
+  ...
+# Subtest: read-only report cannot edit or save and unavailable dispatch is never clickable
+ok 69 - read-only report cannot edit or save and unavailable dispatch is never clickable
+  ---
+  duration_ms: 1.878439
+  type: 'test'
+  ...
+# Subtest: revoked evidence never redisplays a locally preserved list or review draft
+ok 70 - revoked evidence never redisplays a locally preserved list or review draft
+  ---
+  duration_ms: 1.145409
+  type: 'test'
+  ...
+# Subtest: request reviewer and requester controls use distinct current capabilities
+ok 71 - request reviewer and requester controls use distinct current capabilities
+  ---
+  duration_ms: 1.897216
+  type: 'test'
+  ...
+# Subtest: failed or stale report never permits editing a previous result as current evidence
+ok 72 - failed or stale report never permits editing a previous result as current evidence
+  ---
+  duration_ms: 1.265395
+  type: 'test'
+  ...
+# Subtest: historical values compare only the stored shared input without replacing it
+ok 73 - historical values compare only the stored shared input without replacing it
+  ---
+  duration_ms: 1.26185
+  type: 'test'
+  ...
+# Subtest: records are scoped and put active runs first without inventing a date range
+ok 74 - records are scoped and put active runs first without inventing a date range
+  ---
+  duration_ms: 21.190161
+  type: 'test'
+  ...
+# Subtest: empty work shows only the earliest real scheduled execution
+ok 75 - empty work shows only the earliest real scheduled execution
+  ---
+  duration_ms: 1.298544
+  type: 'test'
+  ...
+# Subtest: asking about a historical record only changes private reference and never dispatches
+ok 76 - asking about a historical record only changes private reference and never dispatches
+  ---
+  duration_ms: 1.428595
+  type: 'test'
+  ...
+# Subtest: question from a historical row preserves its exact attempt instead of the newest row
+ok 77 - question from a historical row preserves its exact attempt instead of the newest row
+  ---
+  duration_ms: 3.928239
+  type: 'test'
+  ...
+# Subtest: draft save sends immutable attempt and both revisions without executing or deciding
+ok 78 - draft save sends immutable attempt and both revisions without executing or deciding
+  ---
+  duration_ms: 1.898187
+  type: 'test'
+  ...
+# Subtest: late draft save cannot acknowledge or repaint after another work target is selected
+ok 79 - late draft save cannot acknowledge or repaint after another work target is selected
+  ---
+  duration_ms: 1.131577
+  type: 'test'
+  ...
+# Subtest: request fields follow native schema types and bindings, with reason outside EES values
+ok 80 - request fields follow native schema types and bindings, with reason outside EES values
+  ---
+  duration_ms: 2.70748
+  type: 'test'
+  ...
+# Subtest: ad-hoc start lists active factories and disables only those with active work
+ok 81 - ad-hoc start lists active factories and disables only those with active work
+  ---
+  duration_ms: 1.550506
+  type: 'test'
+  ...
+# Subtest: item verdict options stay pending and AI suggestions cannot enable final confirmation
+ok 82 - item verdict options stay pending and AI suggestions cannot enable final confirmation
+  ---
+  duration_ms: 1.687618
+  type: 'test'
+  ...
+# Subtest: A7 has automatic save status and no save button, and basis cards expose actual time
+ok 83 - A7 has automatic save status and no save button, and basis cards expose actual time
+  ---
+  duration_ms: 2.61922
+  type: 'test'
+  ...
+# Subtest: navigation flushes edits made while an older review autosave is still in flight
+ok 84 - navigation flushes edits made while an older review autosave is still in flight
+  ---
+  duration_ms: 1.907852
+  type: 'test'
+  ...
+# Subtest: failed automatic review save keeps the current work and preserves its draft
+ok 85 - failed automatic review save keeps the current work and preserves its draft
+  ---
+  duration_ms: 1.284173
+  type: 'test'
+  ...
+# Subtest: same-status custom words retain distinct pending IDs and final immutable wording
+ok 86 - same-status custom words retain distinct pending IDs and final immutable wording
+  ---
+  duration_ms: 2.061538
+  type: 'test'
+  ...
+# Subtest: partial provenance survives a failed human verdict without changing its primary status
+ok 87 - partial provenance survives a failed human verdict without changing its primary status
+  ---
+  duration_ms: 1.223153
+  type: 'test'
+  ...
+# Subtest: private verdict autosave persists exact term without deciding and restores after reload
+ok 88 - private verdict autosave persists exact term without deciding and restores after reload
+  ---
+  duration_ms: 14.471609
+  type: 'test'
+  ...
+# Subtest: private draft storage failure is visible and never discards pending selection
+ok 89 - private draft storage failure is visible and never discards pending selection
+  ---
+  duration_ms: 1.985857
+  type: 'test'
+  ...
+# Subtest: schema field ordering is not an edit while changed values retain save protection
+ok 90 - schema field ordering is not an edit while changed values retain save protection
+  ---
+  duration_ms: 1.020754
+  type: 'test'
+  ...
+# Subtest: missing evidence and external request URLs never become local undefined links
+ok 91 - missing evidence and external request URLs never become local undefined links
+  ---
+  duration_ms: 5.704096
+  type: 'test'
+  ...
+# Subtest: shared ID helper prefers the native randomUUID with its receiver
+ok 92 - shared ID helper prefers the native randomUUID with its receiver
+  ---
+  duration_ms: 0.716305
+  type: 'test'
+  ...
+# Subtest: shared ID fallback sets UUID version and variant while preserving random bytes
+ok 93 - shared ID fallback sets UUID version and variant while preserving random bytes
+  ---
+  duration_ms: 4.604827
+  type: 'test'
+  ...
+# Subtest: shared ID generation refuses missing secure randomness
+ok 94 - shared ID generation refuses missing secure randomness
+  ---
+  duration_ms: 3.175441
+  type: 'test'
+  ...
+# Subtest: missing randomUUID preserves runtime command receipt and first-chat boundaries
+ok 95 - missing randomUUID preserves runtime command receipt and first-chat boundaries
+  ---
+  duration_ms: 1.708859
+  type: 'test'
+  ...
+1..95
+# tests 95
+# suites 0
+# pass 95
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 376.400055

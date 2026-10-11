@@ -1,0 +1,17 @@
+test_native_admin_dialog_contains_keyboard_focus_and_menu_click_preserves_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_admin_dialog_contains_keyboard_focus_and_menu_click_preserves_draft) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 307.0054039999377, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: test_native_admin_dialog_contains_keyboard_focus_and_menu_click_preserves_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_admin_dialog_contains_keyboard_focus_and_menu_click_preserves_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18-review/tests/test_ees_work_figma_authoring_native.py", line 325, in test_native_admin_dialog_contains_keyboard_focus_and_menu_click_preserves_draft
+    self.click('#ees-work-entry [data-action=procedures]')
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18-review/tests/ees_work_integrated_fixture.py", line 209, in click
+    self.assertIsNotNone(point, 'Control not visibly ready for a physical click:' + selector)
+AssertionError: unexpectedly None : Control not visibly ready for a physical click:#ees-work-entry [data-action=procedures]
+
+----------------------------------------------------------------------
+Ran 1 test in 7.770s
+
+FAILED (failures=1)

@@ -1,0 +1,7 @@
+test_native_admin_dialog_contains_keyboard_focus (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_admin_dialog_contains_keyboard_focus) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 163.0322900000465, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.789s
+
+OK

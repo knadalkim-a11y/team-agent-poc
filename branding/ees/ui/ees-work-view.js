@@ -365,7 +365,7 @@ function workWorkspaceMenuHTML(state,selection,error=''){
   const native=target=>item('native_open',target.icon,target.label,{native:target.name,id:target.id,active:selection.native_id===target.id});
   const group=(title,items)=>items?`<section class="ew-nav-group"><h3 class="ew-nav-group-title">${title}</h3><nav class="ew-nav-links">${items}</nav></section>`:'';
   const create=workCanCreate(capabilities)?item('procedures','e8a37','업무 절차',{count:current.length,active:!selection.native_id&&!['tools','workspace_admin'].includes(selection.tab)})+item('tools','d1220','도구',{count:state.operations?.error?undefined:(state.operations?.tools || []).length,active:!selection.native_id&&selection.tab==='tools'}):'';
-  const skill=workNativeAllowed(capabilities,'skills')?native(workNativeTargets[0]):'';
+  const skill=workNativeAllowed(capabilities,'skills')?native(workNativeTargets.find(item=>item.id==='skills')):'';
   const ordinary=workNativeTargets.filter(target=>!target.admin&&target.id!=='skills'&&workNativeAllowed(capabilities,target.id)).map(native).join('');
   const admin=capabilities.is_admin===true?[workNativeAllowed(capabilities,'tools')?native(workNativeTargets.find(target=>target.id==='tools')):'',item('workspace_admin','f34f3','공장·접근 범위',{active:!selection.native_id&&selection.tab==='workspace_admin'}),workNativeAllowed(capabilities,'admin')?native(workNativeTargets.find(target=>target.id==='admin')):''].join(''):'';
   const groups=group('업무 만들기',create+skill)+group('AI 설정',ordinary)+group('관리자만',admin);

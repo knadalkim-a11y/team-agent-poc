@@ -1321,3 +1321,7 @@ Native 인증·사용자·그룹·대화·첨부 DB는 기존 원본이다. 업�
 원본 API 근거(후속 PR 전 재사용): 모델·스킬 전체 form은 숨은 meta/params 보존, 지식 편집은 파일 목록을 재작성하지 않음, 프롬프트 data/meta/tags 보존. ACL 미변경은 생략/null 유지, 재전송 시 Native 공유권한 필터에 유실 가능(`utils/access_control/__init__.py:220–298`). updated_at은 초 단위이고 일반 update에 CAS 없음: 시각+내용 비교, 남는 GET/write 경합 명시. 모델 읽기 전용 단건은 params 비노출(`routers/models.py:588–623`). 재처리는 지식 쓰기 확인 뒤 벡터 삭제가 파일 권한 검사보다 앞섬(`routers/knowledge.py:1521–1561`, `routers/retrieval.py:1869–1874`): 권한을 먼저 확인해야 함. has_user_valves는 키 필수 의미가 아님.
 
 PR 1 완료 조건: 역할/권한·직접 진입·workspace 메뉴 전환·관리자 모달·개인 설정·모바일 버튼·삽입점 부재·미저장 작성 값·대화/첨부·업로드 차단·계정 전환·Back을 관련 Node/실제 Native 검사로 확인한다. 실제 제품 computed style/포커스/좁은 화면과 Figma를 대조한다. 최초 실패와 환경 한계는 기존 evals에 보존한다. 코드/검사·가이드·STATUS·CHANGELOG 반영 후 문서 검사와 diff, 최종 Draft head CI를 확인한다. 사내 적용과 실제 사용자 사용성은 별도 미확인이다.
+
+10-11 설계 검토 후속: 사용자가 PR80의 설계 일치를 확인하고 빠른 시작 권한 안내, 관리자 모달의 실제 Tab 초점 확인/필요시 inert, 스킬 대상의 id 조회를 요청했다. 왼쪽 메뉴 클릭의 닫기→이동은 보존한다. 같은 PR의 최종 CI 성공 후 병합까지 승인됐으며 사내 적용은 제외한다. PR 2는 병합된 최신 main에서 시작한다. [검토 반영 댓글](https://github.com/knadalkim-a11y/team-agent-poc/pull/80#issuecomment-6108286563).
+
+실측 차이 / Q5: Native 관리자 창은 Tab·Shift+Tab 228회에서 초점 이탈이 없으나 전체 화면 배경막이 왼쪽 메뉴의 실제 마우스 클릭을 차단했다. 메뉴 이벤트가 도달한 뒤의 닫기→이동 코드와 실제 클릭 가능 여부를 구분한다. [#78 질문](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6108310347)에서 관리자 창의 왼쪽 EES 메뉴 영역만 클릭 차단에서 제외하는 안을 제시했으며, 답변 전에는 Native 배경 동작을 바꾸거나 병합하지 않는다. 키보드 초점 보호와 기존 모달/CSS는 유지한다. [실측 증거](../../../evals/v4-ui-20260930.md#c18-review-focus-20261011).
