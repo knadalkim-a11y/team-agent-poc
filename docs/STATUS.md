@@ -1,5 +1,13 @@
 # 현재 작업 상태
 
+## 2026-10-12 · 실제 설치 SHA 확인과 적용 안내 정정
+
+- **사내 첫 결과:** 사용자가 기존 안내를 실행했고 예상 원본 불일치로 Update·Stop·Apply 전에 중단했다. 실제 설치 원본은 `7670a1b8f43e122250e0b766bc86986a2abb34ee`(PR #76), `valid=true / running=true`다. 프로그램 파일 검증·등록 프로세스 확인이며 웹 접속 health, 새 적용 성공, 로그인·기존 대화는 미확인이다.
+- **현재 작업:** 사용자 승인에 따라 [적용 블록](03-openwebui-native-agent.md#internal-pilot-20261012)의 예상 설치 SHA 한 줄만 정정해 별도 Draft PR에서 검토·Windows 구문/길이 검사를 받는다. 제품·배포 스크립트·복구 블록을 변경하지 않으며 이번 문서 PR은 병합하지 않는다. [사내 중단과 기존 main hover 실패 기록](../evals/v4-ui-20260930.md#internal-pilot-installed-sha-20261012)에 최초 결과와 확인 한계를 함께 보존한다.
+- **고정 대상과 다음 작업:** PR #81 병합 SHA `f0148aa0de592df89ab841c7c9e82cd6ca268149`의 [main CI38193958368](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38193958368)는 25개 작업 모두 성공했다. 적용 대상과 main은 이 SHA로 고정하고, 새 안내 블록의 CI 확인 후 사용자가 직접 실행한다. 별도 문서 브랜치의 SHA를 적용하지 않는다. 사내 결과를 받을 때까지 main 병합·PR2·#79·#77 착수를 보류한다.
+
+아래는 정정 전 준비 이력이다.
+
 ## 2026-10-12 · 첫 사내 적용 준비
 
 - **병합 완료:** [PR #80](https://github.com/knadalkim-a11y/team-agent-poc/pull/80)의 Q5는 Native 배경막·초점 제한 유지로 확정했다. 제품 변경 없이 결정을 기록했고 최종 head `7415dfd3851942343237acd594b486e19e0c4b87`의 [CI38189324021](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38189324021) 24 success/조건부1skip을 확인해 main `2f0e00c8a40beb72ed5aae39943ac2f3c7c43e89`로 병합했다. 최초 CI 실패와 Native39PASS는 [기존 기록](../evals/v4-ui-20260930.md#c18-review-focus-20261011)에 연결한다.

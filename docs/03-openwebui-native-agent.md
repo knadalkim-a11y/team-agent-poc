@@ -12,7 +12,7 @@
 
 | 할 일 | 안내 |
 |---|---|
-| 사내 ees.12 → 현재 main, 첫 실제 업무 | [한 번 적용·실패 대응·확인 5개](#internal-pilot-20261012) · [팀원 업무 안내](07-team-quickstart.md#first-work-20261012) |
+| 확인된 사내 설치본 → 검토된 main, 첫 실제 업무 | [한 번 적용·실패 대응·확인 5개](#internal-pilot-20261012) · [팀원 업무 안내](07-team-quickstart.md#first-work-20261012) |
 | 새 EES Work 후보·자산 정리 경계 | [통합 설치·복구](#integrated-work-install-20261002) |
 | 프로그램·래퍼 업데이트 | [Upgrade](#ees-wrapper-upgrade) |
 | 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
@@ -20,9 +20,11 @@
 
 <a id="internal-pilot-20261012"></a>
 
-## 사내 ees.12에서 현재 EES Work로 적용 준비 · 2026-10-12
+## 확인된 사내 설치본에서 EES Work 적용 · 2026-10-12
 
-[#78 결정](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6115636532)에 따른 **준비 PR 검토·CI·병합 후 사용자가 실행할 안내**다. PR #80은 main `2f0e00c8a40beb72ed5aae39943ac2f3c7c43e89`에 병합됐지만, 아래 SHA에는 **이 준비 PR까지 병합하고 CI를 확인한 최종 main**을 넣는다. 아직 사내 적용하지 않았다. 설치본은 10-01 복구 ees.12로 보고됐고 정확한 설치 SHA는 미수신이다. 예상 원본은 `3a51f9d2bc604e768a59a522d6f34a34c2cb05d3`이며 Status가 다르면 그 원본부터 확인한다.
+[#78 결정](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6115636532)에 따라 PR #81까지 병합한 **적용 대상은 `f0148aa0de592df89ab841c7c9e82cd6ca268149`로 고정**한다. 같은 SHA의 [main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38193958368)는 성공했다. 사내 첫 실행에서 실제 설치 원본은 `7670a1b8f43e122250e0b766bc86986a2abb34ee`(PR #76 병합본), `valid=true / running=true`로 확인됐다. 이전 안내의 3a51 추정과 달라 Update·Stop·Apply 전에 중단됐으며, 새 적용 성공과 웹 접속은 아직 미확인이다.
+
+사용자 승인으로 아래 적용 블록의 **예상 설치 SHA 한 줄만** 실제 값으로 정정한다. 이 안내 정정은 별도 Draft PR에서 검토·Windows CI로 확인하고 병합하지 않는다. 사내 clone은 해당 문서 브랜치로 바꾸지 않으며, SHA 질문에는 위의 적용 대상 `f0148aa0de592df89ab841c7c9e82cd6ca268149`를 넣는다. 나머지 적용 블록과 복구 블록은 그대로다. 사내 결과를 받을 때까지 main을 고정한다. [중단·정정·검증 범위](../evals/v4-ui-20260930.md#internal-pilot-installed-sha-20261012).
 
 전달은 기존 **Update → Upgrade -TrialCommit** 하나를 사용한다. [09-21 사내 성공](../evals/scenarios.md#integrated-work-beta-20260921)의 `6b58beb3dbad`는 Stop→Backup→Apply와 running=true를 확인했다. [10-01 재배포](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001)는 준비·해시 검증 뒤 process_stop에서 멈췄다. 이 경로가 현재 새 원본에서도 사내 성공했다고 확대하지 않는다. TrialCommit 자체는 CI를 조회하지 않으므로 실행 전에 검토자가 정확한 병합 SHA와 CI 성공을 확정해야 한다. 기본 Upgrade 산출물 경로·수동 ZIP을 섞지 않는다.
 
@@ -39,7 +41,7 @@
     $eesStatus = & $eesManager -Action Status -Config $eesCfg | ConvertFrom-Json
     Write-Host ('EES before commit={0} valid={1} running={2}' -f $eesStatus.current_commit, $eesStatus.program_valid, $eesStatus.managed_process_running)
     if ($eesStatus.program_valid -ne $true -or $eesStatus.program_incomplete -or
-        $eesStatus.current_commit -cne '3a51f9d2bc604e768a59a522d6f34a34c2cb05d3') {
+        $eesStatus.current_commit -cne '7670a1b8f43e122250e0b766bc86986a2abb34ee') {
         throw '설치 원본/상태가 예상과 다릅니다. before 한 줄로 확인하고 중단합니다.'
     }
     & $eesManager -Action Update -Config $eesCfg
