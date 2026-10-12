@@ -302,7 +302,9 @@ class SourceTests(unittest.TestCase):
 
     def test_partial_add_cleanup_preserves_unrelated_worktree(self):
         other = self.root / "unrelated"
+        self.git("config", "core.autocrlf", "true")
         self.git("worktree", "add", "--detach", str(other), self.commit)
+        original_bytes = (other / "source.txt").read_bytes()
         self.addCleanup(lambda: self.git("worktree", "remove", "--force", str(other)))
         original = bundles._git
         def partial(*arguments, **kwargs):
@@ -315,7 +317,7 @@ class SourceTests(unittest.TestCase):
                 self.prepare()
         self.assertFalse(list(self.root.glob("ees-*")))
         self.assertEqual(list(self.state.iterdir()), [])
-        self.assertEqual((other / "source.txt").read_bytes(), b"reviewed\nsource\n")
+        self.assertEqual((other / "source.txt").read_bytes(), original_bytes)
 
     def test_cleanup_failure_does_not_replace_original_failure(self):
         original = bundles._remove_source
