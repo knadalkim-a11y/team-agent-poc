@@ -1,0 +1,30 @@
+{
+  "module": "test_ees_webui_customization.py",
+  "partition": "restore-ees12",
+  "selected_ids": [
+    "test_ees_webui_customization.CustomizationTests.test_real_ees12_v4_apply_restore_preserves_program_and_additive_work_database",
+    "test_ees_webui_customization.CustomizationTests.test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory"
+  ],
+  "seconds": 34.98,
+  "tests_run": 2,
+  "no_test_failures": true,
+  "status": "passed",
+  "counts": {
+    "passed": 2,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_webui_customization.CustomizationTests.test_real_ees12_v4_apply_restore_preserves_program_and_additive_work_database",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_webui_customization.CustomizationTests.test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory",
+      "status": "passed"
+    }
+  ]
+}

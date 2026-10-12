@@ -362,6 +362,19 @@ class RecoveryFlowTests(RequestFixture):
             self.run_recovery()
         self.assert_not_terminated()
 
+    def test_actual_preflight_timezone_failure_prevents_termination_and_apply(self):
+        self.mock["preflight"].side_effect = self.preflight
+        self.config["cwd"] = str(self.root)
+        with patch.object(recovery.manager, "selected_program"), \
+                patch.object(recovery.manager.customization, "check_applicability"), \
+                patch.object(recovery.manager.processes, "check_accept_runtime"), \
+                patch.object(recovery.upgrade, "check_timezone_runtime", \
+                             side_effect=recovery.upgrade.UpgradeError("timezone_data_unavailable")):
+            with self.assertRaisesRegex(recovery.upgrade.UpgradeError, "timezone_data_unavailable"):
+                self.run_recovery()
+        self.assertEqual(self.progress["stage"], "preflight")
+        self.assert_not_terminated()
+
     def test_port_occupied_initially_or_before_termination_blocks_action(self):
         for values in ((RuntimeError("listener returned"),), (None, RuntimeError("listener returned"))):
             with self.subTest(values=values):

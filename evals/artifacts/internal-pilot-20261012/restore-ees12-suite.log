@@ -1,0 +1,7 @@
+test_real_ees12_v4_apply_restore_preserves_program_and_additive_work_database (test_ees_webui_customization.CustomizationTests.test_real_ees12_v4_apply_restore_preserves_program_and_additive_work_database) ... ok
+test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory (test_ees_webui_customization.CustomizationTests.test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 34.930s
+
+OK

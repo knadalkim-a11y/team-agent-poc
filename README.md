@@ -23,6 +23,7 @@
 
 - **개발을 이어갈 GPT**: [AGENTS.md](AGENTS.md) → [현재 상태](docs/STATUS.md) → 해당 기능 파일과 테스트.
 - **설치·운영할 사람**: [환경 기준](versions.md)을 읽고, 최초 설치는 [설치·기동](docs/01-openwebui-install.md), 기존 EES 환경의 업데이트는 [래퍼 운영](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)에서 시작합니다.
+- **사내 ees.12 업데이트·첫 실제 업무**: [적용·실패 대응·확인 5개](docs/03-openwebui-native-agent.md#internal-pilot-20261012) → [도구 등록·게시·팀원 완료](docs/07-team-quickstart.md#first-work-20261012).
 - **팀원 안내 초안**: [EES Work 시작 안내](docs/07-team-quickstart.md) — 팀 시연용 준비본. 실제 전달 상태는 STATUS에서 확인.
 - **권한별 메뉴와 Open WebUI 왕복**: [메뉴 사용 안내](docs/03-openwebui-native-agent.md#menu-integration-20261006) · [C18 PR 1 구현 계약](docs/mockups/ees-work/TASK.md#merge-ui-20261011). EES 작성 권한과 원래 Open WebUI 권한을 구분하며 작성 중인 내용을 같은 로그인 세션에서 보존합니다.
 - **시스템 담당자 작성·게시**: [v1.1 권한/보존 계약](docs/mockups/ees-work/TASK.md#system-authoring-20260924) → [가입·첫 이용·P 작성 안내](docs/07-team-quickstart.md#system-authoring-20260924) · [관리자 운영/복원/세션 경계](docs/03-openwebui-native-agent.md#system-authoring-20260924) · [SA/NU·사내 OP 평가](evals/scenarios.md#system-authoring-20260924). Native 개인 계정/그룹을 사용하고 담당 시스템의 선택 P만 저장·검사·게시합니다. 기존 업무 이용/실행/개인 자료 권한은 별도이며 A안 화면을 재사용합니다.

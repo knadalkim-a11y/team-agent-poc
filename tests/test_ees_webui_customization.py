@@ -512,7 +512,15 @@ class CustomizationTests(unittest.TestCase):
             "0.11.3+ees.12", "8027aaf2e654778f052a966e5a49feed0fc54f69",
             "d35bc2bb4adc789cc93752b49550a47446461f1e54ba0015a3952e6af78ca254", exercise_resume=True)
 
-    def _real_previous_apply_restore(self, previous_env, required_env, version, commit, wheel_hash, *, exercise_resume=False):
+    def test_real_ees12_v4_apply_restore_preserves_program_and_additive_work_database(self):
+        self._real_previous_apply_restore(
+            "EES_TEST_PREVIOUS_V4_WHEEL", "EES_REQUIRE_PREVIOUS_V4",
+            "0.11.3+ees.12", "3a51f9d2bc604e768a59a522d6f34a34c2cb05d3",
+            "9dac33de8c93b722bf055ececdde77e68d85db953dc74ba9993bba70dfa8e57c",
+            previous_visual=True, exercise_work_database=True)
+
+    def _real_previous_apply_restore(self, previous_env, required_env, version, commit, wheel_hash, *,
+                                     exercise_resume=False, previous_visual=False, exercise_work_database=False):
         current_dir = os.environ.get("EES_TEST_BRANDING_DIR")
         previous_file = os.environ.get(previous_env)
         if not current_dir or not previous_file:
@@ -550,6 +558,10 @@ class CustomizationTests(unittest.TestCase):
         before = program_hashes()
         preserved = {path: path.read_bytes() for path in (
             self.root / "data/webui.db", self.root / "cwd/.webui_secret_key", self.python)}
+        work_database = self.root / "data/ees-work.sqlite3"
+        if exercise_work_database:
+            self._real_v4_database_phase("before")
+            work_before = work_database.read_bytes()
         current = (Path(current_dir) / branding.WHEEL_FILENAME).read_bytes()
         layout = custom._wheel_layout(current)
         selected = {"source_commit": COMMIT, "webui_version": branding.VERSION,
@@ -578,8 +590,16 @@ class CustomizationTests(unittest.TestCase):
             self.assertTrue((self.program / ("open_webui/ees_workflow_" + name + ".py")).is_file())
         self.assertFalse((self.program / "open_webui/ees_workflow_examples.py").exists())
         self.assertFalse((self.program / "open_webui/workflow_seed.json").exists())
+        if exercise_work_database:
+            self.assertEqual(work_database.read_bytes(), work_before, "Apply only replaces program files")
+            self._real_v4_database_phase("after")
+            work_after = work_database.read_bytes()
+            self.assertNotEqual(work_after, work_before, "ees.13 initialization and saved procedure add data")
         self.assertEqual(self.restore()["source_commit"], old_selection["source_commit"])
         custom.validate_program(self.program, old_selection)
+        if exercise_work_database:
+            self.assertEqual(work_database.read_bytes(), work_after, "Program Restore does not roll back the work DB")
+            self._real_v4_database_phase("restore")
         self.assertEqual(program_hashes(), before)
         self.assertEqual((self.program / "open_webui/ees_workflow_authoring.py").exists(),
                          version in {"0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"})
@@ -589,10 +609,76 @@ class CustomizationTests(unittest.TestCase):
         if version == "0.11.3+ees.12":
             old_app = custom._version_paths(version)[1]
             self.assertFalse((self.program / branding.TARGET_APP).exists(), "Restore removes the new frontend namespace")
-            self.assertFalse((self.program / old_app / "brand-layers.svg").exists())
-            self.assertTrue((self.program / old_app / "immutable").is_dir())
+            self.assertEqual((self.program / old_app / "brand-layers.svg").exists(), previous_visual)
+            self.assertEqual((self.program / old_app / "immutable").is_dir(), not previous_visual)
+            self.assertEqual(bool(list((self.program / old_app).glob("immutable-c*"))), previous_visual)
         for path, value in preserved.items():
             self.assertEqual(path.read_bytes(), value)
+
+    def _real_v4_database_phase(self, phase):
+        # Each phase imports only the physically selected wheel's modules in a
+        # new interpreter. The Native CLI/auth surroundings are not started;
+        # the legacy writer, SQLite migration and both readers are real code.
+        probe = r'''
+import asyncio, importlib, json, sqlite3, sys, types
+from contextlib import closing
+from pathlib import Path
+from uuid import uuid4
+program, data, phase = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+package = types.ModuleType("open_webui")
+package.__path__ = [str(program / "open_webui")]
+sys.modules["open_webui"] = package
+workflow = importlib.import_module("open_webui.ees_workflow")
+assert Path(workflow.__file__).parent == program / "open_webui"
+user = {"id": "fixture-admin", "role": "admin"}
+chat = {"id": "preserved-chat", "user_id": user["id"]}
+database = data / "ees-work.sqlite3"
+expected_file = data.parent / "expected-v4-workflow.json"
+service = workflow.WorkflowService(database, lambda key: user if key == user["id"] else None,
+    lambda key: chat if key == chat["id"] else None)
+def rows():
+    with closing(sqlite3.connect(database)) as db:
+        return {name: db.execute("SELECT * FROM " + name + " ORDER BY id").fetchall()
+                for name in ("catalog", "cases")}
+def saved_work():
+    with closing(sqlite3.connect(database)) as db:
+        return {name: db.execute("SELECT * FROM " + name + " ORDER BY rowid").fetchall()
+                for name in ("work_schema", "work_definitions", "work_receipts", "work_audit")}
+async def run():
+    if phase == "before":
+        created = await service.handle_action(user, {"action": "create", "chat_id": chat["id"], "payload": {}})
+        assert created["ok"], created
+        state = await service.get_state(user, chat_id=chat["id"])
+        assert state["ok"] and state["case"], state
+        expected_file.write_text(json.dumps({"state": state, "rows": rows()}, ensure_ascii=False), encoding="utf-8")
+        with closing(sqlite3.connect(database)) as db:
+            assert not db.execute("SELECT name FROM sqlite_master WHERE name='work_schema'").fetchall()
+        return
+    expected = json.loads(expected_file.read_text(encoding="utf-8"))
+    assert json.loads(json.dumps(rows())) == expected["rows"], "Legacy catalog/cases were rewritten"
+    if phase == "after":
+        created = await service.workspace_command(user, {"action": "create_workflow",
+            "request_id": str(uuid4()), "expected_revision": 0, "system_id": "EMS", "name": "ees.13 복원 경계 확인"})
+        assert created["ok"], created
+        state = await service.workspace_state(user)
+        assert state["ok"] and any(item["id"] == created["workflow_id"] for item in state["workflows"]), state
+        expected.update(work_id=created["workflow_id"], work_rows=saved_work())
+        expected_file.write_text(json.dumps(expected, ensure_ascii=False), encoding="utf-8")
+    else:
+        state = await service.get_state(user, chat_id=chat["id"])
+        assert state == expected["state"], "Restored ees.12 must read the original catalog and case"
+        assert expected["work_id"] not in state["catalog"]["nodes"]
+        assert json.loads(json.dumps(saved_work())) == expected["work_rows"], "ees.13 records remain after Restore"
+        assert not hasattr(service, "workspace_state"), "The restored service is the actual ees.12 program"
+    assert json.loads(json.dumps(rows())) == expected["rows"]
+asyncio.run(run())
+print("v4_database_" + phase + "=pass")
+'''
+        result = subprocess.run([sys.executable, "-I", "-B", "-X", "warn_default_encoding",
+            "-W", "error::EncodingWarning", "-c", probe, str(self.program), str(self.root / "data"), phase],
+            cwd=self.root, capture_output=True, text=True, encoding="utf-8", timeout=20)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "v4_database_" + phase + "=pass")
 
     def test_restore_returns_immediately_preceding_program_only_once(self):
         self.apply()
