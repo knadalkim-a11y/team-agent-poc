@@ -24,6 +24,7 @@ def deploy(config, commit, timeout, progress):
         progress["stage"] = "trial_source"
         trial_checkout(commit)
         progress["wrapper_commit"] = commit
+        bundles.require_local_build_supported()
         env = manager.states.runtime_environment(config)
         registry = manager.read_registry(config)
         progress["stage"] = "preflight"
@@ -99,7 +100,8 @@ def main(argv=None):
         rename = manager.program_rename_detail(error)
         if rename:
             code = "program_rename_blocked"
-        next_step = ("update_reviewed_main" if stage == "trial_source"
+        next_step = ("use_ci_artifact" if code == "ci_frontend_artifact_required"
+                     else "update_reviewed_main" if stage == "trial_source"
                      else "check_status" if stage == "health_check" or code == "server_not_running"
                      else "inspect_apply" if stage == "apply"
                      else "check_download_access" if stage in {"prepare_bundle", "upstream_download"}

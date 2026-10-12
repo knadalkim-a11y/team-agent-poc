@@ -12,6 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| #83 소스 빌드·원본 Native 동등성·CI ZIP·이전 프로그램 복원 | [1단계 검증·첫 빌드 실패·미확인 범위](v4-ui-20260930.md#source-frontend-phase1-evidence-20261013) |
 | 사내 ees.12 적용 준비·시간대/복원·팀원 첫 업무 | [준비 검증·실패·자동/사내 확인 경계](v4-ui-20260930.md#internal-pilot-prep-20261012) · [사내 확인5개](../docs/03-openwebui-native-agent.md#internal-pilot-checks-20261012) |
 | 권한별 메뉴·Open WebUI 왕복 | [C15·실제 Native 권한·개인 초안·복귀 줄·직접 진입 경계](v4-ui-20260930.md#menu-integration-evidence-20261006) |
 | 새 절차 예시·중앙 작성 안내 | [서버 공통 원본·ID/권한/게시 경계·Native 화면·이전 설치 보존](v4-ui-20260930.md#procedure-examples-evidence-20261006) |

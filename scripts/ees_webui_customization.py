@@ -107,22 +107,23 @@ def _record_rows(content, *, allow_packaging=False, version=branding.VERSION, al
     record_name = info + "RECORD"
     required = {record_name, info + "METADATA", info + "WHEEL", "open_webui/__init__.py",
                 "open_webui/env.py", "open_webui/main.py", "open_webui/frontend/index.html", app + "version.json"}
-    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"}:
+    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13", "0.11.3+ees.14"}:
         required.update(app + name for name in branding.THEME_FILES)
     if version == "0.11.3+ees.5":
         required.update(branding.LEGACY_WORK_FILES)
-    if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"}:
+    if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13", "0.11.3+ees.14"}:
         # Previous installations keep their own frontend namespace after the
         # wrapper upgrades. Validate their files before Apply/Restore as well.
-        current_work_files = branding.WORK_FILES_V13 if allow_legacy_inventory else branding.WORK_FILES
-        work_files = (current_work_files if version == "0.11.3+ees.13" else
+        prior13_files = branding.WORK_FILES_V13 if allow_legacy_inventory else branding.WORK_FILES_V13_COMPLETE
+        work_files = (branding.WORK_FILES if version == "0.11.3+ees.14" else
+                      prior13_files if version == "0.11.3+ees.13" else
                       branding.WORK_FILES_V12 if version == "0.11.3+ees.12" else
                       branding.WORK_FILES_V11 if version == "0.11.3+ees.11" else
                       branding.WORK_FILES_V9 if version in {"0.11.3+ees.9", "0.11.3+ees.10"}
                       else branding.WORK_FILES_V6)
         required.update(app + name[len(branding.TARGET_APP):] if name.startswith(branding.TARGET_APP)
                         else name for name in work_files)
-    if version in {"0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"}:
+    if version in {"0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13", "0.11.3+ees.14"}:
         # Earlier program backups predate the guard and must remain restorable.
         required.update(branding.ASSET_GUARD_FILES)
     rows = {}
@@ -146,9 +147,13 @@ def _record_rows(content, *, allow_packaging=False, version=branding.VERSION, al
         if not required.issubset(rows) or len(rows) > 10000:
             raise CustomizationError("The complete app, frontend and metadata must be present together.")
         if allow_legacy_inventory and version == "0.11.3+ees.13":
-            work_files = set(rows).intersection(branding.WORK_FILES)
-            inventories = (set(branding.WORK_FILES_V13), set(branding.WORK_FILES_V13_EASY_AUTHORING),
-                           set(branding.WORK_FILES_V13_PROCEDURE_EXAMPLES), set(branding.WORK_FILES))
+            def prior_namespace(files):
+                return {app + name[len(branding.TARGET_APP):] if name.startswith(branding.TARGET_APP)
+                        else name for name in files}
+            work_files = set(rows).intersection(prior_namespace(branding.WORK_FILES_V13_COMPLETE))
+            inventories = tuple(prior_namespace(files) for files in (
+                branding.WORK_FILES_V13, branding.WORK_FILES_V13_EASY_AUTHORING,
+                branding.WORK_FILES_V13_PROCEDURE_EXAMPLES, branding.WORK_FILES_V13_COMPLETE))
             if work_files not in inventories:
                 raise CustomizationError("The complete app, frontend and metadata must be present together.")
         if any(name.startswith(branding.SOURCE_APP) for name in rows):

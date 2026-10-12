@@ -19,7 +19,11 @@
   // A Native capability snapshot is not the selected workspace. Present the
   // returning editor only after its workspace and Native draft are ready.
   const chatPrepared=()=>readyRoute===route&&(!route||route===location.pathname+location.search+'#chat')&&(!nativeTicket||nativeTicket.phase==='leaving');
-  function render(){if(!nativePage()&&!chatPrepared()){view.suspend?.();return;}view.render(snapshot());if(available()&&selection.mode==='author'&&selection.tab!=='workspace_admin'&&workCanCreate(state?.capabilities))designer.render({state,selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});}
+  // The source app.html gate is armed only on the first authenticated chat load.
+  // Release after the complete initial EES layout, including authoring, succeeds.
+  // Errors before that point use its independent, bounded fail-open timer.
+  function startupReady(rendered){if(rendered===true&&chatPrepared()&&!nativePage()&&document.documentElement.dataset?.eesStartup==='pending')window.dispatchEvent(new Event('ees:startup-ready'));}
+  function render(){if(!nativePage()&&!chatPrepared()){view.suspend?.();return;}const rendered=view.render(snapshot());if(available()&&selection.mode==='author'&&selection.tab!=='workspace_admin'&&workCanCreate(state?.capabilities))designer.render({state,selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});startupReady(rendered);}
   function setBusy(value){busy=value;view.setBusy(value);designer.setBusy?.(value);if(value){clearTimeout(refreshTimer);refreshTimer=setTimeout(refresh,250);}}
   const adminNativePage=()=>location.pathname==='/'&&(new URLSearchParams(location.search).get('settings')?.startsWith('admin:')||Boolean(workNativeSettingsModal())||Boolean(nativeTicket?.adminSeen&&workNativeSettingsModal(true)));
   const nativePage=()=>/^\/(workspace|admin)(\/|$)/.test(location.pathname)||adminNativePage();
@@ -483,7 +487,7 @@
       route=current;readyRoute='';epoch++;render();
       refresh().then(()=>resumeNativeAction()).catch(failure=>{error=failure.message;render();});
       if(available())models().catch(()=>{});
-    }else{if(nativePage()||chatPrepared())view.sync(snapshot());resumeNativeAction().catch(failure=>{error=failure.message;render();});}
+    }else{if(nativePage()||chatPrepared())startupReady(view.sync(snapshot()));resumeNativeAction().catch(failure=>{error=failure.message;render();});}
     if(available())syncMessageReferences();
   }
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(sync);}}

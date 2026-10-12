@@ -51,6 +51,19 @@ class RequestFixture(unittest.TestCase):
 
 
 class RequestTests(RequestFixture):
+    def test_reused_program_identity_requires_ci_marker_and_exact_inner_filename(self):
+        retained = self.bundle.with_name("EES-demo-" + OLDER[:12] + ".zip")
+        retained.write_bytes(self.bundle.read_bytes())
+        result = self.request["failure"]["result"]
+        result.update(bundle=str(retained), artifact_commit=OLDER, source_verification="github_actions")
+        self.assertEqual(recovery.validate_failure(self.config, self.request, HEAD), retained)
+        for marker, commit in (("local_trial", OLDER), ("local_ci_artifact", OLDER),
+                               (None, OLDER), ("github_actions", "bad"), ("github_actions", HEAD)):
+            with self.subTest(marker=marker, commit=commit):
+                result.update(source_verification=marker, artifact_commit=commit)
+                with self.assertRaisesRegex(recovery.RecoveryError, "retained_bundle_mismatch"):
+                    recovery.validate_failure(self.config, self.request, HEAD)
+
     def test_reads_powershell_bom_and_retained_bundle(self):
         self.path.write_text(json.dumps(self.request), encoding="utf-8-sig")
         actual = recovery.read_request(self.config, self.path)
@@ -287,6 +300,47 @@ class RecoveryFlowTests(RequestFixture):
         self.assertNotIn("last_backup", result)
         self.assertNotIn("private-backup", json.dumps(result))
         self.assert_preserved()
+
+    def test_reused_ci_program_is_inspected_and_applied_with_its_own_commit(self):
+        retained = self.bundle.with_name("EES-demo-" + OLDER[:12] + ".zip")
+        retained.write_bytes(self.bundle.read_bytes())
+        self.request["failure"]["result"].update(bundle=str(retained), artifact_commit=OLDER,
+                                                   source_verification="github_actions")
+        self.write_request()
+        def apply(config, registry, bundle, commit, env, record, owner):
+            self.assertEqual((bundle, commit), (retained, OLDER))
+            self.assertIsNone(registry["process"])
+            self.assertEqual(registry["last_backup"], self.backup)
+            registry["customization"]["active"] = {"source_commit": OLDER}
+        self.mock["apply"].side_effect = apply
+        with patch.object(recovery.upgrade, "checkout", return_value=HEAD) as checkout, \
+                patch.object(recovery.upgrade, "compatible_program", return_value=True) as compatible:
+            result = self.run_recovery()
+        self.assertEqual(checkout.call_count, 2)
+        self.assertEqual(compatible.call_count, 2)
+        compatible.assert_called_with(OLDER, HEAD)
+        self.assertEqual(self.mock["inspect"].call_args.args[1:3], (retained, OLDER))
+        self.assertEqual(result["source_commit"], OLDER)
+        self.assertTrue(result["backup_verified"])
+        self.mock["terminate"].assert_called_once()
+
+    def test_incompatible_or_changed_reused_program_never_terminates(self):
+        retained = self.bundle.with_name("EES-demo-" + OLDER[:12] + ".zip")
+        retained.write_bytes(self.bundle.read_bytes())
+        self.request["failure"]["result"].update(bundle=str(retained), artifact_commit=OLDER,
+                                                   source_verification="github_actions")
+        self.write_request()
+        self.protected[self.path] = self.path.read_bytes()
+        self.protected[retained] = retained.read_bytes()
+        for compatibility, checkouts, code in (([False], [HEAD], "retained_program_incompatible"),
+                                               ([True, False], [HEAD, HEAD], "retained_program_incompatible"),
+                                               ([True], [HEAD, recovery.upgrade.UpgradeError("local_changes")], "local_changes")):
+            with self.subTest(code=code, checks=len(compatibility)), \
+                    patch.object(recovery.upgrade, "compatible_program", side_effect=compatibility), \
+                    patch.object(recovery.upgrade, "checkout", side_effect=checkouts), \
+                    self.assertRaisesRegex(ValueError, code):
+                self.run_recovery()
+            self.assert_not_terminated()
 
     def test_local_trial_uses_the_same_inspection_termination_backup_and_apply_flow(self):
         trial_bundle = self.root / "trial-build-example" / self.bundle.name

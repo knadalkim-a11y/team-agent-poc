@@ -153,3 +153,59 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('#ees-work-panel')")
         self.assertFalse(self.geometry()['overflow'])
         self.screenshot('c18-panel-card-narrow')
+
+    def test_source_startup_root_and_existing_chat_reveal_only_after_ees_layout(self):
+        # Observe the real head gate before Native or launcher scripts execute.
+        # A held workspace read makes the old Native-first flash observable.
+        observer = self.browser.call('Page.addScriptToEvaluateOnNewDocument', {'source': """
+          window.__eesStartupEvidence={samples:[],ready:null};
+          window.addEventListener('ees:startup-ready',()=>{
+            window.__eesStartupEvidence.ready={at:performance.now(),
+              entry:!!document.querySelector('#ees-work-entry'),
+              panel:!!document.querySelector('#ees-work-panel'),
+              layout:!!document.querySelector('.ees-integrated-row')};
+          },{once:true});
+          const record=()=>{
+            const data=window.__eesStartupEvidence,body=document.body;
+            if(body)data.samples.push({at:performance.now(),
+              visible:getComputedStyle(body).visibility==='visible',
+              native:!!document.querySelector('#chat-container'),
+              entry:!!document.querySelector('#ees-work-entry'),
+              panel:!!document.querySelector('#ees-work-panel')});
+            if(!data.ready||!data.samples.at(-1)?.visible)requestAnimationFrame(record);
+          };requestAnimationFrame(record);
+        """})['identifier']
+        self.addCleanup(lambda: self.browser.call('Page.removeScriptToEvaluateOnNewDocument', {'identifier': observer}))
+        for path in ('/', '/c/existing-chat'):
+            self.server.delay_next_workspace = True
+            self.server.workspace_response_started.clear()
+            self.server.workspace_response_hold.clear()
+            self.navigate(path)
+            self.wait("document.documentElement?.dataset.eesStartup === 'pending' && document.querySelector('#chat-container')")
+            self.assertTrue(self.server.workspace_response_started.wait(timeout=2), "Held workspace read was not reached")
+            self.assertEqual(self.browser.evaluate("getComputedStyle(document.body).visibility"), 'hidden')
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-entry')"))
+            self.server.workspace_response_hold.set()
+            self.wait("window.__eesStartupEvidence?.ready && !document.documentElement.dataset.eesStartup && getComputedStyle(document.body).visibility === 'visible'")
+            self.wait("window.__eesStartupEvidence.samples.at(-1)?.visible")
+            evidence = self.browser.evaluate('window.__eesStartupEvidence')
+            self.assertTrue(evidence['ready']['entry'])
+            self.assertTrue(evidence['ready']['panel'])
+            self.assertTrue(evidence['ready']['layout'])
+            self.assertLess(evidence['ready']['at'], 4000, 'Successful startup must beat the fail-open fallback')
+            self.assertFalse(any(item['native'] and item['visible'] and not (item['entry'] and item['panel'])
+                                 for item in evidence['samples']), evidence)
+        self.assertIn('기존 대화 기록', self.text('body'))
+
+    def test_source_startup_missing_launcher_fails_open_with_native_chat_accessible(self):
+        self.browser.call('Network.setBlockedURLs', {'urls': ['*/_ees14/ees-work-launcher.js*']})
+        self.addCleanup(lambda: self.browser.call('Network.setBlockedURLs', {'urls': []}))
+        self.navigate('/c/existing-chat')
+        self.wait("document.documentElement?.dataset.eesStartup === 'pending' && document.querySelector('#chat-input.ProseMirror')")
+        self.assertEqual(self.browser.evaluate("getComputedStyle(document.querySelector('#chat-input')).visibility"), 'hidden')
+        self.assertFalse(self.browser.evaluate("!!window.__eesNativeWork"))
+        self.wait("!document.documentElement.dataset.eesStartup && getComputedStyle(document.querySelector('#chat-input')).visibility === 'visible'", timeout=5000)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-entry')"))
+        self.assertIn('기존 대화 기록', self.text('body'))
+        self.click('#chat-input')
+        self.assertTrue(self.browser.evaluate("document.activeElement.id === 'chat-input'"))

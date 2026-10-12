@@ -37,6 +37,17 @@ def metadata(**changes):
 
 
 class UpstreamTests(unittest.TestCase):
+    def test_source_frontend_direct_prepare_rejects_before_git_download_or_files(self):
+        with patch.object(bundles.branding, "SOURCE_FRONTEND_REQUIRED", True, create=True), \
+                patch.object(bundles, "_checkout") as checkout, \
+                patch.object(bundles, "_upstream") as upstream, \
+                patch.object(bundles.tempfile, "mkdtemp") as create:
+            with self.assertRaisesRegex(bundles.TrialBundleError, "ci_frontend_artifact_required"):
+                bundles.prepare({}, "a" * 40, None, {})
+        checkout.assert_not_called()
+        upstream.assert_not_called()
+        create.assert_not_called()
+
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
@@ -156,6 +167,10 @@ class UpstreamTests(unittest.TestCase):
 @unittest.skipUnless(shutil.which("git"), "Git is required")
 class SourceTests(unittest.TestCase):
     def setUp(self):
+        # These remain the supported historical ees.13 packaging boundaries.
+        legacy = patch.object(bundles.branding, "SOURCE_FRONTEND_REQUIRED", False, create=True)
+        legacy.start()
+        self.addCleanup(legacy.stop)
         temporary = tempfile.TemporaryDirectory(dir=os.environ.get("RUNNER_TEMP"))
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)

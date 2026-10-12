@@ -23,6 +23,26 @@ class RecoveryError(ValueError):
         super().__init__(code)
 
 
+def bundle_commit(result, wrapper_commit):
+    """Keep the reviewed wrapper identity separate from reused CI program bytes."""
+    if "artifact_commit" not in result:
+        return wrapper_commit  # Historical Upgrade/Trial failure records.
+    commit = result["artifact_commit"]
+    if (result.get("source_verification") not in {"github_actions", "local_ci_artifact"}
+            or not isinstance(commit, str) or not upgrade.HEX40.fullmatch(commit)
+            or (result.get("source_verification") == "local_ci_artifact" and commit != wrapper_commit)):
+        raise RecoveryError("retained_bundle_mismatch")
+    return commit
+
+
+def require_compatible_program(program_commit, wrapper_commit):
+    """Recheck reused program identity offline before authorizing termination."""
+    if program_commit != wrapper_commit:
+        upgrade.checkout(wrapper_commit)
+        if not upgrade.compatible_program(program_commit, wrapper_commit):
+            raise RecoveryError("retained_program_incompatible")
+
+
 def read_request(config, path):
     path = manager.states._regular(path)
     root = Path(config["state_root"]).resolve()
@@ -63,7 +83,7 @@ def validate_failure(config, request, commit):
                           and bundle.parent.name.startswith("trial-build-")))
     if (bundle.resolve().parent.parent != root
             or not allowed_parent
-            or bundle.name != "EES-demo-" + commit[:12] + ".zip"):
+            or bundle.name != "EES-demo-" + bundle_commit(result, commit)[:12] + ".zip"):
         raise RecoveryError("retained_bundle_mismatch")
     return bundle
 
@@ -74,8 +94,10 @@ def recover(config, args, progress):
     commit = manager.commit_id(args.commit)
     request = read_request(config, args.request)
     bundle = validate_failure(config, request, commit)
+    program_commit = bundle_commit(request["failure"]["result"], commit)
     progress["bundle"] = str(bundle)
     with manager.locked(config, track_owner=True) as owner:
+        require_compatible_program(program_commit, commit)
         registry = manager.read_registry(config)
         if registry != request["registry"]:
             raise RecoveryError("deployment_changed")
@@ -92,10 +114,11 @@ def recover(config, args, progress):
         # The approved incident has no listener. Do not terminate a recovered
         # service or any process after the recorded deployment has changed.
         manager.require_free_port(config)
-        manager.customization.inspect_bundle(config, bundle, commit, env)
+        manager.customization.inspect_bundle(config, bundle, program_commit, env)
         if (manager.read_registry(config) != registry
                 or read_request(config, args.request) != request):
             raise RecoveryError("deployment_changed")
+        require_compatible_program(program_commit, commit)
         manager.require_free_port(config)
         progress["stage"] = "process_stop"
         progress["terminated"] = None
@@ -116,7 +139,7 @@ def recover(config, args, progress):
         progress["backup_verified"] = True
         progress["stage"] = "apply"
         progress["changed"] = None
-        manager.customization.apply(config, registry, bundle, commit, env, manager.record, owner)
+        manager.customization.apply(config, registry, bundle, program_commit, env, manager.record, owner)
         progress["changed"] = True
         manager.start_selected(config, registry["current"], env, registry,
                                health_timeout=args.health_timeout, progress=progress)

@@ -62,6 +62,7 @@
 | [agent-pack/](agent-pack/README.md) | 서비스 Assistant에 배포할 Prompt·정책·Skill·합성 Knowledge 원본 |
 | [agent-pack/skills/confluence-read/](agent-pack/skills/confluence-read/) | 기능 단위 묶음: 지침과 실행 코드를 함께 관리 |
 | [scripts/](scripts/) | 개발·운영자의 시작·점검·배포물 생성 스크립트 |
+| [frontend/](frontend/) | 고정 Open WebUI 0.11.3 소스 manifest·순서가 있는 Svelte 패치; CI에서 빌드하고 사내에는 ZIP 전달 |
 | [branding/ees/](branding/ees/) | EES 이름·아이콘 배포 자산; [빌드·배포 안내](docs/03-openwebui-native-agent.md#release-delivery) |
 | [config/](config/) | 비밀값 없는 설정 예제 |
 | [tests/](tests/) | 자동 실행하는 검증 코드 |
@@ -110,6 +111,7 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 | 서버 요청·대화 연결·개인 초안·응답 순서 | [ees-work-launcher.js](branding/ees/ui/ees-work-launcher.js) |
 | 공장 선택·단계별 진행·업무 패널·조건 탐색/복귀·읽기 전용 수행 상세·크기 | [ees-work-view.js](branding/ees/ui/ees-work-view.js) |
 | 시스템/P별 절차 편집·미저장 초안·권한 상태·Native 셸 복원 | [ees-work-designer.js](branding/ees/ui/ees-work-designer.js) |
+| 고정 소스 프런트엔드 빌드·검증 | [build_ees_frontend.py](scripts/build_ees_frontend.py) |
 | 소스 조립·wheel 파일 목록·해시 | [build_ees_webui.py](scripts/build_ees_webui.py) |
 
 factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 유지합니다. ees.11의 P별 작성 프로토콜·추가 메타데이터와 기존 전체 초안 호환은 [별도 계약](docs/mockups/ees-work/TASK.md#system-authoring-20260924)을 따릅니다. 화면 분리와 이전 프로그램 복원 검증의 실제 범위는 [R2/R3 기록](evals/scenarios.md#work-ui-refactor-20260915)을 따릅니다.

@@ -751,6 +751,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         original_panel_width = self.browser.evaluate("document.querySelector('#ees-work-panel').getBoundingClientRect().width")
         self.click('[data-author-action="create"]')
         self.wait("document.querySelector('.ew-procedure-start')")
+        self.assertEqual(self.text('.ew-procedure-intro > p:first-of-type'),
+                         '새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
         self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[name=procedure_template]')].map(e=>e.value)"),
                          ['delivery_review', 'factory_rollout', 'daily_check', 'blank'])

@@ -41,6 +41,10 @@ class TrialUpgradeTests(unittest.TestCase):
         self.output = io.StringIO()
         self.lock_held = False
         self.mock = {}
+        # Preserve tests for the historical ees.13 local-build transaction.
+        legacy = patch.object(trial.bundles.branding, "SOURCE_FRONTEND_REQUIRED", False, create=True)
+        legacy.start()
+        self.addCleanup(legacy.stop)
         self.bundle = self.root / "trial-build-synthetic" / ("EES-demo-" + HEAD[:12] + ".zip")
         self.bundle.parent.mkdir()
         self.bundle.write_bytes(b"synthetic exact reviewed bundle")
@@ -155,6 +159,19 @@ class TrialUpgradeTests(unittest.TestCase):
         self.assertEqual(saved["result"]["asset_registration_reason"], "demo_registration_retired")
         self.assertIn("registration=not_applicable reason=demo_registration_retired", self.output.getvalue())
         self.assertNotIn("synthetic-preserved-key", self.output.getvalue() + json.dumps(saved))
+
+    def test_source_frontend_trial_is_rejected_before_download_noop_or_server_changes(self):
+        self.active["source_commit"] = HEAD  # Even a same-commit repeat cannot build locally.
+        with patch.object(trial.bundles.branding, "SOURCE_FRONTEND_REQUIRED", True):
+            self.assertEqual(self.run_main(), 1)
+        self.assert_no_server_changes()
+        for name in ("prepare", "inspect", "health", "environment", "read", "cleanup", "github"):
+            self.mock[name].assert_not_called()
+        result = json.loads((self.root / "last-failure.json").read_bytes())["result"]
+        self.assertEqual((result["stage"], result["code"], result["next"]),
+                         ("trial_source", "ci_frontend_artifact_required", "use_ci_artifact"))
+        self.assertFalse(result["changed"])
+        self.assertEqual(self.events, ["lock", "unlock"])
 
     def test_preparation_and_full_inspection_failure_never_stop_or_call_demo(self):
         for failing in ("prepare", "inspect"):

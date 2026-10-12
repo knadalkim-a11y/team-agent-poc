@@ -45,6 +45,12 @@ class TrialBundleError(ValueError):
         super().__init__(code)
 
 
+def require_local_build_supported():
+    """Never build a source-frontend release without its verified CI output."""
+    if branding.SOURCE_FRONTEND_REQUIRED:
+        raise TrialBundleError("ci_frontend_artifact_required")
+
+
 class _NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, request, fp, code, msg, headers, newurl):
         return None
@@ -247,6 +253,7 @@ def _remove_source(source):
 
 def prepare(config, commit, proxy, progress):
     """Return a retained exact bundle; the caller must inspect before any Stop."""
+    require_local_build_supported()
     _checkout(commit)
     states._safe(Path(config["state_root"]))
     parent = states._safe(ROOT.parent)

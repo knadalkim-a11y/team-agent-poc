@@ -1,5 +1,107 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="source-frontend-phase1-20261013"></a>
+
+## 화면 구조 전환 1단계와 2단계 아키텍처 검토안 · 2026-10-13
+
+**기준과 범위:** 최신 main `1c6ddaa04f05b2eea02bbf15155b8602f1e4a1a8`, [#83 본문](https://github.com/knadalkim-a11y/team-agent-poc/issues/83)·[설계 8문항](https://github.com/knadalkim-a11y/team-agent-poc/issues/83#issuecomment-6120603126), [#84 동작 정의 v1](https://github.com/knadalkim-a11y/team-agent-poc/issues/84)·[C35 회차 장면과 A4 질문](https://github.com/knadalkim-a11y/team-agent-poc/issues/84#issuecomment-6132989710)·[C36 카드 컴포넌트](https://github.com/knadalkim-a11y/team-agent-poc/issues/84#issuecomment-6133140485)을 읽고 [착수 계획과 설계안 v1](https://github.com/knadalkim-a11y/team-agent-poc/issues/83#issuecomment-6133363909)을 게시했다. 이번 구현은 소스 화면 빌드·CI 전달 경로와 지정한 깜빡임/안내 문구 보완까지다. 아래 8문항은 **2단계 검토안이며 확정·구현 완료가 아니다.** 2단계 화면 이전과 #77·#79는 설계 검토 및 새 구조의 지시 정리 뒤에 시작한다. 병합·Draft 해제·main 직접 push·사내 실행·Figma 수정은 이번 범위 밖이다.
+
+### 1단계 구현 계약
+
+Open WebUI v0.11.3의 정확한 원본 커밋 `2a960a59fe1dbbd35282f0556b3666d81102e781`과 npm lock 해시를 고정한다. EES 변경은 원본 전체 복사 대신 **순서 있는 unified patch 묶음**으로 보관한다. 원본 SHA와 적용 전제 확인 뒤 패치를 적용해 소스 차이와 실패 위치를 리뷰할 수 있게 한다. 버전은 `0.11.3+ees.14`, 전용 정적 경로는 `/_ees14/`로 구분하며 서버 Python 수정·업무 엔진·DB·권한 계약은 재사용한다. CI의 고정 Node 22·lock으로 화면을 빌드하고, 고정 공식 wheel의 Pyodide 정적 파일을 재사용해 별도의 최신 패키지 조회가 화면 산출물에 섞이지 않게 한다.
+
+EES 패치 없는 소스 빌드와 공식 wheel에 같은 Native 로그인·대화·입력/첨부·이동 검사를 먼저 수행해 동작 동일성을 확인한다. 컴파일 파일명·해시의 일치를 동작 동일성으로 대신하지 않는다. 이후 EES 패치 화면을 프로그램 ZIP에 포함하고 기존 Linux·Windows·Native 검사를 유지한다. `build_ees_webui.py`의 컴파일 JS/CSS/HTML 바이트 치환은 Svelte·앱 설정·HTML 소스 수정으로 옮기되, `ees-work-launcher/view/designer`가 만드는 임시 DOM 화면은 1단계에서 유지한다. 이를 덮어 그리기 화면 전체의 제거 완료로 표현하지 않는다.
+
+첫 페인트 전 준비 가림은 EES 준비 성공 또는 정해진 제한시간에 반드시 해제한다. 스크립트·권한·API 실패와 Native 직접 경로에서 빈 화면에 갇히지 않는지 검사한다. 새 절차의 업무 도우미 본문은 #83 지정 문장으로 바꾸며, 대화만으로 초안을 생성하는 기능을 이번에 추가하지 않는다.
+
+전달 기본안은 **기존 Upgrade의 CI 산출물 다운로드**, 실패 시 대안은 **브라우저로 받은 ZIP의 수동 Apply**다. 기존 프로그램 식별·해시·버전·백업·복구와 짧은 결과를 재사용하기 위한 선택이다. 사내 API 다운로드는 아직 확인되지 않았으며 다운로드 실패는 Stop 전에 끝나야 한다. 기존 자동 Upgrade의 검증 백업 누락을 기존 백업 함수로 보완하고 wrapper SHA와 artifact SHA를 구분해 종료 실패 복구를 유지한다. 수동 대안도 보호 없는 Stop→Apply 조합으로 안내하지 않는다. ees.14를 사내에서 빌드하는 `TrialCommit`은 다운로드/Stop 전에 `ci_frontend_artifact_required`로 거부하며, ees.13 Apply→Restore와 데이터·키·사용자 자산 보존을 검사한다. 사용자 복사 블록은 각 2,500자 이내, 결과 전달은 1~2줄로 제한한다. 구현·CI 결과와 실제 사내 적용 성공은 별도로 기록한다.
+
+### 1. 화면 위치·라우트·레이아웃
+
+기존 인증과 `/`, `/c/[id]`, `/workspace/...`, `/admin/...` 경로를 보존한다. 인증된 `(app)/+layout.svelte`의 `EesShell`이 왼쪽 메뉴·중앙 대화·오른쪽 업무의 틀을 첫 렌더부터 소유한다. 왼쪽은 EES 메뉴로 교체하되 Native 대화 목록·검색·계정 기능을 재사용하고 중앙은 기존 `Chat.svelte`, 오른쪽은 EES 컴포넌트로 구성한다. 늦는 내용은 각 영역 안에서만 대기 표시한다.
+
+업무 대상 선택은 같은 대화 라우트 안의 query/store 변경으로 처리해 대상마다 대화를 새로 만들지 않는다. Native 메뉴로 이동할 때도 중앙 대화 호스트를 unmount하지 않고 감춰 작성 중 입력·첨부를 보존한다. Native 페이지는 기존 route slot으로 보여 주고 복귀 때 같은 대화/업무 상태를 사용한다. 기존 관리자 설정 창과 닫기·이동 계약은 유지하며 관리자 화면을 새로 구현하지 않는다. 현재 `Chat.svelte`의 route 구독이 Native 이동을 새 대화로 오인하지 않도록 대화 ID 전달 경계를 2단계 구현 때 명시적으로 분리한다.
+
+### 2. 상태 관리·메뉴 왕복 보존
+
+Native의 `user/models/chatId/settings`, socket·대화 이력은 그대로 공유한다. EES store에 인증·모델·대화 사본을 만들지 않으며, EES store는 선택한 대상·편집 초안·제안 검토·펼침·스크롤·초점만 소유한다. 메모리 상태는 계정과 대상별로 분리하고 로그아웃·계정 전환 때 지운다. 진행 중 요청을 중단하고 이전 계정/대상의 늦은 응답이 새 화면을 덮지 않게 한다.
+
+#84의 보존 범위는 같은 로그인 세션의 메뉴 이동이다. 미전송 글·첨부·미저장 입력은 메모리에 두고 새로고침 뒤에는 저장된 것만 다시 읽는다. 원본 `Chat.svelte`는 component-local `prompt/files`를 `sessionStorage`에서 복구하므로 현재 동작과 다르다. 2단계 EES 대화 경로에서는 이 draft 복구를 메모리 상태로 대체한다. 이미 보낸 대화·첨부, 서버에 저장한 절차·입력과 Native 사용자 설정은 보존한다. 이미지·업로드 중 첨부까지 호스트와 업로드 상태를 유지하는 시험이 통과한 뒤 현재 왕복 ticket·draft bridge와 첨부 이동 제한을 제거한다.
+
+질문 화면의 자동 저장은 #77 G19의 후속 계약이며 이번에 구현하지 않는다. 일반 회차 입력은 개인 초안과 공유 저장값을 계속 분리한다. 카드의 영속 처리 기록은 저장된 기록이지 미저장 입력을 새로고침 뒤 자동 복원하는 근거가 아니다.
+
+### 3. 서버 통신 하나로 모으기
+
+2단계에서 `$lib/apis/ees-work.ts` 하나로 `/api/ees-work`의 state·workspace·operations·resources 호출을 모은다. Native 인증 방식을 재사용하고 별도 토큰 저장소를 만들지 않는다. 요청 ID·expected revision·구조화 오류·AbortSignal·계정/대상 변경 후 응답 폐기를 공통 처리한다. 서버가 현재 권한·정의·revision·요청 확인을 계속 검증하며 화면의 버튼 비활성화가 서버 검사를 대신하지 않는다. 새 서버나 별도 인증 체계는 추가하지 않는다. 이번 1단계는 기존 JS API 연결을 유지한다.
+
+### 4. 대화 카드·제안과 사람의 반영
+
+사용자 메시지를 실제 전송할 때 `ees_work_reference`에 그 순간의 대상·버전·revision·당시 기록·기준 시각을 고정한다. 오른쪽 대상 변경이 지난 메시지의 참고를 바꾸지 않는다. historical 참고에서는 AI가 제안하거나 화면을 옮길 수 없으며, 사용자가 당시 기록을 직접 여는 행위도 읽기 전용으로 처리한다.
+
+도구 결과는 실행 코드나 HTML 대신 버전 있는 구조화 데이터로 전달한다. 기본 계약은 `schema_version`, `card_id`, `kind`, `chat_id`, `message_id`, `tool_call_id`, `target`, `snapshot_at`, `base_revision`, `proposal_id`, `state`, 안전한 `summary`다. Native 응답 메시지 안에서 초안/수정/입력 제안·작업 결과·확인 필요·화면 열림을 렌더한다. 카드 안에는 [오른쪽에서 보기] 또는 [확인하러 가기]만 두며 화면 열림 알림에는 버튼이 없다. 반영·버리기·저장·게시·실행·판정 확정·송부는 오른쪽 행동 막대에서만 수행한다. 도구 단계는 실제 진행에 맞춰 업무 읽는 중·초안 정리 중·제안 도착처럼 표시한다.
+
+현재 `workflow_tool.py`의 `execute` RPC·8초 제한과 `window.__eesNativeWorkV1` 전달 다리는 검증된 결과→같은 앱의 store 전달로 바꾼다. **과거 카드의 현재 상태·새로고침·다른 탭/대화의 중복 제안을 처리하려면 기존 EES 서버에 제안 ID·대상·기준·상태·처리 시각을 영속 관리하는 2단계 보완이 필요하다.** Native 메시지는 카드 참조를 보존하고 EES API가 현재 상태를 제공한다. 읽기/이동/반영 때 현재 권한을 다시 검사하며 권한 철회·삭제 뒤 과거 요약이 계속 노출되지 않게 한다. 서버 기록의 상세 스키마·API·보존 정책·기존 버전 복구 호환성은 검토 후 정하며 이번 1단계에는 추가하지 않는다.
+
+| 제안 대상 | 검토 중 하나의 범위 | 지난 제안으로 바꾸는 조건 |
+|---|---|---|
+| 공동 절차 초안 | 같은 workflow draft 전체에 하나. 제안자별로 별도 pending을 허용하지 않음 | 새 제안, 사람이 직접 편집, 공동 저장 revision 변경 |
+| 회차의 개인 입력 초안 | `user/run/job`이 한 대상. 다른 사람의 개인 입력 초안과 구분 | 같은 개인 대상의 새 제안·직접 편집, 기준 run/input revision 변경 |
+
+서버가 대상별 교체를 직렬화하고 카드 ID/요청 ID/세대로 중복·늦은 결과를 차단한다. 직접 편집은 해당 화면의 제안을 즉시 지난 제안으로 바꾸고 서버 기록에도 전달한다. 반영 직전에는 현재 권한·서버 revision과 제안 기준인 로컬 초안의 동일성을 다시 확인한다. 서버에 저장하지 못한 상태 갱신을 완료로 표시하지 않는다. 다른 대화의 카드도 같은 `proposal_id` 상태를 재조회한다. 실시간 갱신 전달 방식과 충돌 시 사용자 안내는 2단계 검토 항목이다.
+
+검토 중·반영됨(시각)·버림(시각)·지난 제안·열 수 없음·제안 실패·기록 대화를 별도로 표시한다. `revision_conflict`는 초안 변경, `workflow_manage_forbidden`는 편집 권한 없음, `browser_unconfirmed`는 반영 미확인/저장되지 않음, `historical_read_only`는 기록 대화로 안내한다. `program_upgrade_required`·도구 미등록·권한 없음은 대화 위에 관리자에게 요청할 한 줄을 보이고 일반 대화는 유지한다. 실제 오류를 성공 문구로 감추지 않는다.
+
+모델이 보내는 전체 정의는 기존 서버 검증기를 재사용하며 화면은 기준 초안과 비교한 변경만 사람의 말로 요약한다. JSON 원문은 표시하지 않는다. 빈 초안의 첫 제안은 날짜별 할 일·정해야 할 것·반영 후 모습을 요약한다. 제안을 반영하면 해당 칸에 도우미 출처를 표시하고 사람이 그 칸을 수정하면 꼬리표를 지운다. 입력 제안의 ‘반영됨’은 개인 초안에 넣은 사실이며 공유 저장·실행 성공을 뜻하지 않는다.
+
+새 절차에서 설명을 **처음 전송할 때만** 임시 이름의 빈 초안을 한 번 생성하고 제안한다. 고르거나 입력창에 예시를 채운 것만으로 생성하지 않는다. [반영하고 질문 화면 열기]는 질문 ①로, [버리기]는 임시 이름의 빈 초안을 남기고 빈 질문 ①로 이동한다. 질문 화면의 수정 제안 대기 중에는 [버리기]/[반영]을 표시하고 처리 또는 직접 편집 무효화 뒤 [다음]을 복원한다. 편집 화면·입력 칸의 별도 모델 요청란은 없애고 [도우미에게 묻기]는 대화 입력만 채워 초점을 옮기며 자동 전송하지 않는다.
+
+사내 모델이 전체 정의를 도구 인자로 안정적으로 생성하는지는 미확인이다. 구현 후 첫 제안 1건·수정 제안 1건으로 확인한다. 필요하면 같은 대화 도구에서 기존 서버 제안 생성기를 재사용하는 방안을 검토하되 별도 AI 요청창을 다시 만들지 않는다. 이 fallback의 선택과 비용/오류 표시 역시 2단계 검토 뒤 확정한다.
+
+### 5. Figma 토큰·카드 컴포넌트
+
+| Figma C36 컴포넌트 | 노드 | 2단계 코드 대응과 규칙 |
+|---|---|---|
+| Chat card header | `950:1160` | `ChatCardHeader`: Title, 필수 Snapshot(대상·기준 시각), Icon, State. 높이 38px |
+| Chat card row | `1260:2881` | `ChatCardRow`: Field의 Label 너비 84px·Value, Item의 Status·Text·선택 Code |
+| Chat card footer | `1261:2873` | `ChatCardFooter`: Note와 이동 Action 하나 |
+| Chat notice | `1261:2877` | `ChatNotice`: Icon·Text, 버튼 없음 |
+
+카드는 머리 1 + 줄 N + 바닥 0~1을 세로로 쌓고 surface/default, line/divider 1px, 모서리 8px를 사용한다. 일부 화면 프레임의 머리 36px보다 C36 컴포넌트 38px를 우선한다. 검토 중 Brand, 반영됨 Success, 버림·지난 제안·기록 Neutral, 열 수 없음 Attention, 실패 Danger를 기존 EES Work v4 변수에 대응한다. `surface/line/text/brand/status` 의미를 CSS 변수와 component scope로 옮기고 간격·모서리는 C1의 값으로 둔다. Figma 색을 읽지 않고 임의 근사값으로 대체하지 않는다. `chat-theme.css`의 광역 덮어쓰기는 해당 영역 이전 뒤 제거하며 Native 관리자 화면까지 임의 재테마하지 않는다.
+
+**읽기 전용 디자인 대조 범위:** 2026-10-13 파일 `XK2wTos6sEuxSHhIj7cqg6`, 메인 `832:131`의 C34/C35/C36 설명과 위 #84 두 댓글을 기준으로 R9 `1249:3531`, C1 머리·줄·알림, A4 `881:659`의 문맥과 렌더를 조회했다. 헤더 38px·Field label 84px·모서리 8px·의미 토큰 대응을 확인했다. B1-2a `1249:2583`의 상세 조회는 시간 초과여서 대조 완료로 기록하지 않는다. B1-3a `1249:2919`, B1-6a `1249:3206`, A3 `875:8674` 전체와 모든 변형/폭의 시각 일치도 아직 검수하지 않았다. 카드 footer 규칙은 C36 댓글의 명시 계약이며 직접 전체 렌더 검수를 완료했다는 뜻이 아니다. 구현할 화면의 최신 Figma와 동작 정의가 다르면 그 차이를 질문으로 남긴다. Figma 원본 수정과 현재 코드의 2단계 시각 일치 주장은 하지 않는다.
+
+### 6. 공존과 이전 순서
+
+1단계 소스 빌드·전달 경로 증명 → 설계 검토·확정 → 2단계 공통 shell/store/API → 왼쪽 메뉴·Native 왕복 → 오른쪽 조회·회차 → 요청·확인 → 작성 화면·대화 제안 순서다. 같은 영역은 새 컴포넌트 또는 기존 임시 DOM 화면 중 하나만 소유해 이중 렌더·이중 이벤트/명령을 막는다. 변경 영역의 보존·권한·동작 시험이 대체된 뒤 observer·전역 bridge·HTML renderer·CSS를 함께 제거한다. 다른 영역이 쓰는 공통 helper는 마지막 사용처 이전까지 유지한다. #77·#79와 #78 남은 작업은 새 구조로 정리된 지시 전에는 시작하지 않는다.
+
+### 7. 시험 유지·대체
+
+서버·권한·revision·배포·백업·Restore 시험은 유지한다. Node의 순수 입력/판정/초안 경계 시험은 모듈을 옮겨 유지한다. 컴파일 문자열/DOM 모양만 검사하는 시험은 같은 의미의 소스 hook·Svelte 컴포넌트·실제 Native 브라우저 검사로 대체한 뒤 제거하며, 먼저 삭제하거나 skip으로 성공을 만들지 않는다. 기존 Linux·Windows·Native CI와 실제 빌드 프로그램을 사용하는 검사를 계속 사용한다.
+
+2단계 추가 경계는 초기 세 영역·키보드/모달, 메뉴 왕복 중 글/이미지/업로드/초안/펼침/스크롤, 새로고침/로그아웃/계정 전환, 메시지 참고 고정, 다른 대상 카드 이동, historical 읽기 전용, 지연·중복·다른 탭/대화 제안, 공동 초안 pending 직렬화, 직접 편집 stale, 권한 철회·삭제, 저장 실패, 첫 전송만 초안 생성, 반영/버림 후 질문 화면과 지난 카드 상태다. Figma computed style·가시 초점과 카드 머리 38px를 실제 렌더에서 대조한다. 사내 모델 품질·실제 사내 사용성은 합성 검사 통과와 구분한다.
+
+### 8. 재사용과 버릴 접착 코드
+
+`workAuthoring`의 `nodes/jobs/inputList/putNode/removeNode/proposal`, `workInputProposal`, `workSettingsOverrides`, `workRequestFields`, `workValuesEqual`, `createWorkInputDrafts`의 순수 판단·dirty/conflict/acknowledge 규칙을 모듈로 옮겨 재사용한다. 현재 서버의 정의·권한·revision·요청 확인·효과 확인·결과 판정을 재사용하고 화면에 업무 판정을 복제하지 않는다. DOM query·`innerHTML`·전역 MutationObserver·Native DOM 강제 이동·window 전역 다리는 새 컴포넌트로 가져가지 않는다.
+
+### A4 요청값 저장 결정안과 현재 코드 근거
+
+**요청과 함께 묵시 저장하지 않는다.** [반영] → 개인 입력 초안 → [입력 저장] → [재시작 요청…] → 확인 창 → [요청 보내기]를 유지한다. dirty 상태에서 요청을 막고 저장 행동을 안내한다. #84 C35는 반영 후 장면을 아직 그리지 않았으므로 그 상태에 저장 행동을 표시하는 안으로 검토를 요청한다. 확인 창을 열거나 취소하는 일이 입력을 몰래 저장하거나 실행하지 않게 한다.
+
+기준 main의 [`ees-work-launcher.js`](../../../branding/ees/ui/ees-work-launcher.js) `inputsSaved()`와 `requestIntent()`는 미저장 입력을 차단한다. `request_prepare`는 입력값 자체 대신 저장된 run revision을 사용한다. [`ees_workflow_operations.py`](../../../agent-pack/skills/ees-work-demo/scripts/ees_workflow_operations.py)는 저장 snapshot으로 요청 입력을 만들고 서로 다른 입력을 `request_input_mismatch`, 뒤에 입력/도구/run revision이 바뀌면 `request_stale`로 거부한다. [`test_request_target_cannot_override_saved_inputs`](../../../tests/test_ees_work_operations.py)가 저장 입력 보호를 검증한다. 요청과 동시 저장은 이 계약을 바꾸는 별도 선택이며 이번 1단계 구현에 넣지 않는다.
+
+### 라이선스 원본과 배포 전 확인 항목
+
+고정 upstream 커밋의 [LICENSE](https://github.com/open-webui/open-webui/blob/2a960a59fe1dbbd35282f0556b3666d81102e781/LICENSE), [LICENSE_NOTICE](https://github.com/open-webui/open-webui/blob/2a960a59fe1dbbd35282f0556b3666d81102e781/LICENSE_NOTICE), [LICENSE_HISTORY](https://github.com/open-webui/open-webui/blob/2a960a59fe1dbbd35282f0556b3666d81102e781/LICENSE_HISTORY)를 읽었다. 소스·바이너리 산출물 전달에 저작권·조건·면책 고지를 보존하며 아래 요약으로 원문을 대체하지 않는다. 이전 기여분의 MIT/BSD 조건은 LICENSE_NOTICE/HISTORY에 따라 보존한다.
+
+- LICENSE 제4조는 이름·로고 등 Open WebUI 식별 브랜딩을 바꾸거나 가리거나 제거하는 것을 기본적으로 제한한다. 예외는 매 연속 30일 기간에 직접 접근하는 자연인 최종 사용자 총수가 50명 이하인 배포/배포물, 권리자의 사전 서면 허가, 해당 변경을 명시적으로 허용하는 체결된 enterprise license다.
+- 회사 규모·계정 수·동시 접속 수만으로 50명 이하 예외를 판단하지 않는다. 실제 운영의 연속 30일 접근자 수 또는 서면 허가/계약 해당 여부는 이번 코드 환경에서 확인하지 못했다. **어떤 예외를 적용할지는 사내 배포 검토 때 확인할 항목**이며, EES 브랜딩이 이미 존재한다는 사실을 허가의 증거로 삼지 않는다.
+- 원문 고지와 라이선스 파일을 임의 삭제·축약하지 않는다. 고지를 남기는 것과 브랜딩 변경 예외를 충족하는 것은 별개다. 기존 이름·로고 변경을 이번 단계에서 허용 범위 확대나 새로운 권리 판단으로 해석하지 않는다.
+
+### 2단계 확정 전 검토할 것
+
+8문항 전체, 공동 초안 전역 pending 하나/개인 입력 대상 키, A4의 별도 입력 저장을 설계 검토로 확정한다. 특히 영속 제안 레코드의 상세 스키마·API·상태 동시 갱신/보존·이전 프로그램 복구 호환성, Native 대화 호스트와 sessionStorage 대체 범위, 사내 모델 형식 실패 시 같은 대화 안의 서버 생성기 사용 여부가 미확정이다. B1 상세 Figma 대조와 사내 모델/운영 라이선스 조건 확인도 남아 있다. 이 목록은 1단계 구현을 막는 새 승인 절차가 아니며, 2단계를 이번에 구현해도 된다는 뜻도 아니다.
+
 <a id="menu-integration-20261006"></a>
 
 ## EES Work 메뉴 통합 · C15 후속 · 2026-10-06

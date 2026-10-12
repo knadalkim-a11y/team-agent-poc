@@ -19,7 +19,7 @@ const workUI = (() => {
   const procedureQuestions = Object.freeze(['신규 공장 횡전개 예시를 복사해서 우리 공장에 맞게 고치고 싶어','분류와 실행 방식(주기 · 수시 · 비상)이 뭔지 알려줘','예시 없이, 하는 일을 말로 설명해서 만들고 싶어']);
   const levels = {p:'업무 절차',t:'단계',j:'작업'};
   const statuses = {open:'진행 중',unstarted:'미실행',pending:'대기',scheduled:'예약',ready:'시작 가능',running:'실행 중',in_progress:'진행 중',awaiting_input:'입력 필요',awaiting_confirmation:'사람 확인 필요',review_required:'다시 검토 필요',completed:'완료',succeeded:'도구 성공',success:'도구 성공',failed:'실패',partial:'부분 결과',unknown:'결과 미확인',missed:'예약 놓침',excluded:'적용 제외',cancelled:'취소',blocked:'진행 조건 확인',draft:'초안',published:'게시됨',review:'검토 필요',waiting:'대기',waiting_input:'입력 필요',waiting_confirmation:'사람 확인 필요',reported_complete:'완료 보고',accepted:'접수',requested:'요청 보냄',effect_verified:'효과 확인'};
-  const icon = (name,label='') => `<img class="ew-icon" src="/_ees13/v4/${esc(String(name).replace(/\.svg$/,''))}.svg" alt="${esc(label)}"${label?'':' aria-hidden="true"'}>`;
+  const icon = (name,label='') => `<img class="ew-icon" src="/_ees14/v4/${esc(String(name).replace(/\.svg$/,''))}.svg" alt="${esc(label)}"${label?'':' aria-hidden="true"'}>`;
   const button = (label,action,attrs='') => `<button type="button" data-action="${esc(action)}" ${attrs}>${esc(label)}</button>`;
   const finished = run => ['completed','cancelled'].includes(run?.status);
   const lineage = (id, definition) => {const path=[],seen=new Set();while(id && definition?.nodes?.[id] && !seen.has(id)){seen.add(id);const node=definition.nodes[id];path.unshift(node);id=node.parent;}return path;};
@@ -339,7 +339,7 @@ function workRestorePanelPosition(host,position){
 function workProcedureStartHTML(context){
   if(!context)return '';
   const {esc,icon}=workUI;
-  return `<div class="ew-procedure-intro"><small>${icon('cf77a','')}업무 도우미</small><p>새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나, 하시는 일을 순서대로 말해 주시면 단계와 작업으로 나눠 정리하는 방법을 안내합니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.</p><p class="ew-muted">이렇게 시작할 수 있습니다</p><div class="ew-procedure-questions">${workUI.procedureQuestions.map((question,index)=>`<button type="button" data-action="procedure_question" data-question-index="${index}">${icon('cf77a')}<span>${esc(question)}</span>${icon('69549')}</button>`).join('')}</div><small>질문을 입력창에 채웁니다. 내용을 확인하고 직접 보내 주세요.</small></div>`;
+  return `<div class="ew-procedure-intro"><small>${icon('cf77a','')}업무 도우미</small><p>새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.</p><p class="ew-muted">이렇게 시작할 수 있습니다</p><div class="ew-procedure-questions">${workUI.procedureQuestions.map((question,index)=>`<button type="button" data-action="procedure_question" data-question-index="${index}">${icon('cf77a')}<span>${esc(question)}</span>${icon('69549')}</button>`).join('')}</div><small>질문을 입력창에 채웁니다. 내용을 확인하고 직접 보내 주세요.</small></div>`;
 }
 
 // These are the pinned Native destinations, not URLs supplied by a page or user.
@@ -540,8 +540,8 @@ function createWorkView({callbacks}){
     for(const root of [host,entry,header]){const target=[...(root?.querySelectorAll('button,input,select,textarea,a,summary,[data-ees-panel-resize]') || [])].find(item=>saved.attributes.every(([name,value])=>item.getAttribute(name)===value));if(!target||target.disabled)continue;target.focus({preventScroll:true});if(typeof saved.start==='number'&&typeof target.setSelectionRange==='function'){try{target.setSelectionRange(saved.start,saved.end,saved.direction);}catch(_){}}return;}
   }
   function refreshResults(){const focus=focusSnapshot();capture();panel();restoreFocus(focus);}
-  function render(value){const focus=focusSnapshot();capture();snapshot=value;if(!ensure())return;navigator();if(!snapshot.native_shell){panel();context();layout();}restoreFocus(focus);}
-  function sync(value){snapshot=value;if(!ensure())return;if(snapshot.native_shell){navigator();return;}if(!entry.firstChild)navigator();if(!host.firstChild)panel();context();layout();}
+  function render(value){const focus=focusSnapshot();capture();snapshot=value;if(!ensure())return false;navigator();if(!snapshot.native_shell){panel();context();layout();}restoreFocus(focus);return true;}
+  function sync(value){snapshot=value;if(!ensure())return false;if(snapshot.native_shell){navigator();return true;}if(!entry.firstChild)navigator();if(!host.firstChild)panel();context();layout();return true;}
   function readInputs(){capture();const settings=selection().tab==='settings';return {...drafts.read(inputKey(),settings?state().settings?.values || {}:state().run?.inputs || {},settings?state().settings?.revision || 0:state().run?.revision || 0),key:inputKey(),settings};}
   function applyInputValues(values){capture();const source=state().run?.inputs || {},revision=state().run?.revision || 0,existing=drafts.read(inputKey(),source,revision);drafts.edit(inputKey(),{...existing.inputs,...values},revision,source);panel();}
   function clearInputs(key,serial,revision,values){drafts.acknowledge(key,serial,revision,values);}

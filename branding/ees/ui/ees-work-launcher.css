@@ -337,11 +337,11 @@ body[data-ees-integrated] #sidebar .relative:not(:has(#ees-work-entry)):has([ari
 #ees-work-entry .ew-nav-group .ew-nav-button[aria-current=page]{background:var(--ees-surface-selected);color:var(--ees-brand-text);font-weight:500;}
 /* Exact C18 Figma 16px icon exports; mask color follows the active menu state. */
 [data-ees-work] .ew-native-icon{width:16px;height:16px;background:var(--ees-text-tertiary);mask:var(--ew-native-icon-source) center/contain no-repeat;}
-[data-ees-work] .ew-native-icon[data-native-icon=models]{--ew-native-icon-source:url('/_ees13/v4/83565.svg');}
-[data-ees-work] .ew-native-icon[data-native-icon=tools]{--ew-native-icon-source:url('/_ees13/v4/54b2e.svg');}
-[data-ees-work] .ew-native-icon[data-native-icon=factory]{--ew-native-icon-source:url('/_ees13/v4/4d978.svg');}
+[data-ees-work] .ew-native-icon[data-native-icon=models]{--ew-native-icon-source:url('/_ees14/v4/83565.svg');}
+[data-ees-work] .ew-native-icon[data-native-icon=tools]{--ew-native-icon-source:url('/_ees14/v4/54b2e.svg');}
+[data-ees-work] .ew-native-icon[data-native-icon=factory]{--ew-native-icon-source:url('/_ees14/v4/4d978.svg');}
 #ees-work-entry [aria-current=page] .ew-native-icon{background:var(--ees-brand-text);}
-[data-ees-work] .ew-native-icon[data-native-icon=admin]{--ew-native-icon-source:url('/_ees13/v4/4308e.svg');}
+[data-ees-work] .ew-native-icon[data-native-icon=admin]{--ew-native-icon-source:url('/_ees14/v4/4308e.svg');}
 .ew-scope-columns.ew-system-only{grid-template-columns:1fr;}
 
 

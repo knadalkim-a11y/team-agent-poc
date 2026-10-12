@@ -1815,6 +1815,14 @@ class PowerShellResumeTests(unittest.TestCase):
         section = guide.split('<a id="ees-wrapper-manual-promote"></a>', 1)[1]
         blocks = re.findall(r"```powershell\n(.*?)\n```", section, re.DOTALL)[:2]
         self.assertEqual(len(blocks), 2)
+        names = ["manual-apply", "manual-resume"]
+        for anchor in ("source-frontend-apply-20261013", "source-frontend-local-zip-20261013",
+                       "source-frontend-stop-recovery-20261013"):
+            section = guide.split('<a id="' + anchor + '"></a>', 1)[1].split('<a id=', 1)[0]
+            additions = re.findall(r"```powershell\n(.*?)\n```", section, re.DOTALL)
+            self.assertEqual(len(additions), 1, anchor + " must expose one independently copyable block")
+            names.append(anchor)
+            blocks.extend(additions)
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             parser = root / "parse.ps1"
@@ -1828,7 +1836,7 @@ if ($parseErrors.Count -gt 0) {
     exit 1
 }
 """, encoding="utf-8")
-            for name, block in zip(("manual-apply", "manual-resume"), blocks):
+            for name, block in zip(names, blocks):
                 with self.subTest(block=name):
                     self.assertLessEqual(len(block), 2500)
                     source = root / (name + ".ps1")
