@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-12",
+  "python": "3.12.14",
+  "chrome": "153.0.8010.52",
+  "scope": "Actual built Native frontend; real workflow/operations service on temporary SQLite; synthetic Native auth/chat/model/capability responses. No real company deployment or auth/ACL claim.",
+  "ci": {
+    "run": 38188731213,
+    "job": 114616963905,
+    "head": "dc127cee21515ffcb9828bd43276c72d50e4cd6b",
+    "failure": "Expected workspace_commands=[tool_save], observed [tool_save,save_ui]"
+  },
+  "cause": "Native fixture records operations and workspace command requests in one list. Existing remember() persists personal selection after a 400ms debounce. The test compared all requests to one business tool_save command and incorrectly failed if UI persistence occurred before the assertion.",
+  "change": "Exclude only save_ui from this exact single business-command assertion. All other business commands still fail the expectation; product, timing limits, UI save behavior and subsequent tool-save/submit assertions remain unchanged.",
+  "reproduction": {
+    "description": "Scratch subclass waits read-only for ordinary save_ui at existing starter screenshot checkpoint; sends no injected command and uses the existing 9-second wait bound. Old assertion failed with [save_ui,tool_save].",
+    "log": "before.log",
+    "payload": "before-commands.json",
+    "result": "FAIL 1/1 in 2.195s"
+  },
+  "validation": [
+    {
+      "test": "test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip",
+      "log": "after-target.log",
+      "result": "PASS 1/1 in 2.376s; zero skips"
+    },
+    {
+      "test": "same test under scratch observed-save_ui scheduling",
+      "log": "after-probe.log",
+      "payload": "after-probe-commands.json",
+      "result": "PASS 1/1 in 2.637s; zero skips"
+    }
+  ],
+  "payload_findings": "save_ui has only state.selection (author/tools/EMS/navigation preferences). Initial business change is one unconnected draft tool revision1/reference{}. Complete test keeps it and separately saves+submits the connected tool; external calls and completions remain empty.",
+  "wheel_sha256": "ccdb59a37f8d5e5024abfc0044fd892baa4f6f1d156f79d97f7725476cec2681",
+  "chrome_sha256": "0f2256d365ab3d82a2c79ce41f65a03dfd8d7eaa4d689a1b88bc22b6842b1f1e",
+  "test_sha256": "cbbf01178b86f06e116c71cdda2812dcc45a6287ea4cd41b9b41c16e8a79bef7",
+  "products_unchanged": true
+}

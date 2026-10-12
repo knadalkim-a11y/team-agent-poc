@@ -1,0 +1,17 @@
+test_pointer_probe (__main__.PointerProbe.test_pointer_probe) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 169.43117599930702, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: test_pointer_probe (__main__.PointerProbe.test_pointer_probe)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/c18-review-native-results/pointer-click-probe.py", line 54, in test_pointer_probe
+    self.click('#ees-work-entry [data-action=procedures]')
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18-review/tests/ees_work_integrated_fixture.py", line 209, in click
+    self.assertIsNotNone(point, 'Control not visibly ready for a physical click:' + selector)
+AssertionError: unexpectedly None : Control not visibly ready for a physical click:#ees-work-entry [data-action=procedures]
+
+----------------------------------------------------------------------
+Ran 1 test in 7.683s
+
+FAILED (failures=1)

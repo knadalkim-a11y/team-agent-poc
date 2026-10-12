@@ -6,25 +6,29 @@ const html=(source,values={})=>run(renderer(values),source);
 
 const nativeCapabilities=(overrides={})=>({actor_id:'a',is_admin:false,can_author:false,managed_systems:[],native_access_available:true,native_access:{models:false,knowledge:false,prompts:false,skills:false,tools:false,admin:false},...overrides});
 function nativeNavigationHarness(capabilities=nativeCapabilities({is_admin:true,can_author:true,native_access:{models:true,knowledge:true,prompts:true,skills:true,tools:true,admin:true}})){
- const h=controller(),navigation=[],bars=[],restores=[];let current={prompt:'대화 초안',files:[{id:'kept-file'}],selectedToolIds:['kept-tool'],selectedModels:['kept-model'],params:{temperature:.2}},ready=true;
+ const h=controller(),navigation=[],restores=[];let current={prompt:'대화 초안',files:[{id:'kept-file'}],selectedToolIds:['kept-tool'],selectedModels:['kept-model'],params:{temperature:.2}},ready=true;
  const state={capabilities,systems:['EMS'],workflows:[],runs:[],operations:{},ui_state:{revision:0,state:{}}};
  h.api.setState(state);h.api.setSelection({mode:'author',system_id:'EMS',workflow_id:'w',run_id:'',job_id:'j',tab:'overview',panel_width:620});h.context.location.pathname='/c/original';h.context.location.search='?keep=1';
  h.context.document.createElement=tag=>{assert.equal(tag,'a');return {href:'',click(){navigation.push(this.href);const next=new URL(this.href,'http://native.test');h.context.location.pathname=next.pathname;h.context.location.search=next.search;},remove(){}};};
  h.context.document.body.append=()=>{};
- h.context.document.querySelector=selector=>['#chat-container #chat-pane','#sidebar-search-button'].includes(selector)?(/^\/(workspace|admin)/.test(h.context.location.pathname)?null:{}):null;
- h.view.showNativeReturn=name=>{bars.push(name);return Boolean(name);};h.designer.canNavigate=()=>true;h.designer.readDraft=()=>({definition:{name:'미저장 작성'},dirty:true});
+ h.context.document.querySelector=selector=>selector==='#sidebar-search-button'?{}:selector==='#chat-container #chat-pane'&&!/^\/(workspace|admin)/.test(h.context.location.pathname)?{}:null;
+ h.designer.canNavigate=()=>true;h.designer.readDraft=()=>({definition:{name:'미저장 작성'},dirty:true});
  h.context.window.__eesNativeDraftV1={ready:()=>ready,read:()=>JSON.parse(JSON.stringify(current)),flush:()=>true,restore:async serialized=>{current=JSON.parse(serialized);restores.push(current);return true;}};
  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,...state}:{ok:true});
- return {...h,navigation,bars,restores,state,setDraft:value=>{current=value;},readDraft:()=>current,setReady:value=>{ready=value;},async open(id='skills'){await h.api.handleClick({dataset:{action:'native_open',nativeId:id}});h.api.sync();},async back(){await h.api.handleClick({dataset:{action:'native_return'}});h.api.sync();await new Promise(resolve=>setImmediate(resolve));}};
+ return {...h,navigation,restores,state,setDraft:value=>{current=value;},readDraft:()=>current,setReady:value=>{ready=value;},async open(id='skills'){await h.api.handleClick({dataset:{action:'native_open',nativeId:id}});h.api.sync();await new Promise(setImmediate);},async back(action='procedures',extra={}){const target={dataset:{action,...extra},closest:selector=>['[data-ees-work]','#ees-work-entry','button[data-action]'].includes(selector)?target:null};h.api.handleEvent({type:'click',isTrusted:true,target,preventDefault(){},stopImmediatePropagation(){}});h.api.sync();await new Promise(setImmediate);}};
 }
 
 test('workspace menu uses server permissions for three groups and hides unavailable Native destinations',()=>{
  const admin=nativeCapabilities({is_admin:true,can_author:true,native_access:{models:true,knowledge:true,prompts:true,skills:true,tools:true,admin:true}});
  const rendered=html('workWorkspaceMenuHTML({capabilities}, {tab:"tools"})',{capabilities:admin});
- assert.equal((rendered.match(/class="ew-nav-group"/g)||[]).length,3);for(const label of ['업무 만들기','Open WebUI에서 열기','관리자만','스킬·지침','AI 도우미','참고 문서','빠른 문장','기능 연결','공장·접근 범위','관리자 설정'])assert.ok(rendered.includes(label),label);
- assert.match(rendered,/<small class="ew-nav-native-name">모델<\/small>/);assert.doesNotMatch(rendered,/native_workspace|native_skills|Native 모델/);
+ assert.equal((rendered.match(/class="ew-nav-group"/g)||[]).length,3);for(const label of ['업무 만들기','AI 설정','관리자만','스킬·지침','AI 도우미','참고 문서','빠른 문장','기능 연결','공장·접근 범위','관리자 설정'])assert.ok(rendered.includes(label),label);
+ assert.match(rendered,/<small class="ew-nav-native-name">모델<\/small>/);assert.doesNotMatch(rendered,/native_workspace|native_skills|Native 모델|Open WebUI에서 열기|native_return/);
+ const nativeSelected=html('workWorkspaceMenuHTML({capabilities,workflows:[{id:"kept",name:"Previous draft",updated_at:"2026-10-11"}]}, {workflow_id:"kept",tab:"overview",native_id:"skills"})',{capabilities:admin});
+ assert.equal((nativeSelected.match(/aria-current="page"/g)||[]).length,1);assert.match(nativeSelected,/data-native-id="skills"[^>]*aria-current="page"/);
+ const groups=[...rendered.matchAll(/<section class="ew-nav-group"><h3 class="ew-nav-group-title">([^<]+)<\/h3><nav class="ew-nav-links">(.*?)<\/nav><\/section>/g)].map(match=>[match[1],match[2]]);
+ assert.match(groups[0][1],/data-native-id="skills"/);assert.doesNotMatch(groups[0][1],/data-native-id="(?:models|knowledge|prompts)"/);for(const id of ['models','knowledge','prompts'])assert.ok(groups[1][1].includes('data-native-id="'+id+'"'));assert.doesNotMatch(groups[1][1],/data-native-id="skills"/);
  const author=nativeCapabilities({can_author:true,managed_systems:['EMS'],native_access:{skills:true,tools:true}}),authorHTML=html('workWorkspaceMenuHTML({capabilities}, {})',{capabilities:author});
- assert.match(authorHTML,/업무 만들기|data-native-id="skills"/);assert.doesNotMatch(authorHTML,/관리자만|기능 연결|공장·접근 범위|data-native-id="models"/);
+ assert.match(authorHTML,/업무 만들기/);assert.match(authorHTML,/data-native-id="skills"/);assert.doesNotMatch(authorHTML,/AI 설정/);assert.doesNotMatch(authorHTML,/관리자만|기능 연결|공장·접근 범위|data-native-id="models"/);
  for(const cap of [nativeCapabilities(),{...admin,native_access_available:false},{...admin,native_access_available:undefined},{...admin,native_access:{skills:'true'}}]){
   const output=html('workWorkspaceMenuHTML({capabilities}, {})',{capabilities:cap});assert.doesNotMatch(output,/data-action="native_open"/);
  }
@@ -48,13 +52,13 @@ test('forged denied Native and author actions do not navigate or mutate state',a
  assert.equal(h.api.snapshot().selection.mode,'work');assert.equal(h.navigation.length,0);assert.equal(h.calls.length,0);
 });
 test('all six allowed Native destinations use direct static routes without a sidebar link',async()=>{
- for(const id of ['skills','models','knowledge','prompts','tools','admin']){const h=nativeNavigationHarness();await h.open(id);assert.deepEqual(h.navigation,[id==='admin'?'/admin/settings':'/workspace/'+id]);assert.ok(h.bars.at(-1));assert.equal(h.calls.filter(call=>call.body).length,0);}
+ for(const id of ['skills','models','knowledge','prompts','tools','admin']){const h=nativeNavigationHarness();await h.open(id);assert.deepEqual(h.navigation,[id==='admin'?'/admin/settings':'/workspace/'+id]);assert.equal(h.renders.at(-1)?.native_shell,true);assert.equal(h.renders.at(-1)?.native_id,id);assert.equal(h.calls.filter(call=>call.body).length,0);}
 });
-test('Native return preserves EES selection and unsaved designer session plus the full composer without sending',async()=>{
+test('same-section EES menu preserves selection and unsaved designer session plus the full composer without sending',async()=>{
  const h=nativeNavigationHarness(),before=JSON.parse(JSON.stringify(h.api.snapshot().selection)),draft=JSON.parse(JSON.stringify(h.readDraft()));let captures=0,designerCaptures=0,closed=0;
  h.view.capture=()=>captures++;h.designer.readDraft=()=>{designerCaptures++;return {dirty:true};};h.designer.closeStart=()=>closed++;
  await h.open();h.setDraft({prompt:'',files:[],selectedModels:['default']});await h.back();
- assert.deepEqual(h.navigation,['/workspace/skills','/c/original?keep=1']);assert.deepEqual(JSON.parse(JSON.stringify(h.api.snapshot().selection)),before);assert.deepEqual(h.readDraft(),draft);assert.equal(h.restores.length,1);assert.equal(captures,2);assert.equal(designerCaptures,2);assert.equal(closed,0);assert.equal(h.bars.at(-1),null);assert.equal(h.calls.filter(call=>call.body).length,0);
+ assert.deepEqual(h.navigation,['/workspace/skills','/c/original?keep=1']);assert.deepEqual(JSON.parse(JSON.stringify(h.api.snapshot().selection)),before);assert.deepEqual(h.readDraft(),draft);assert.equal(h.restores.length,1);assert.equal(captures,2);assert.equal(designerCaptures,2);assert.equal(closed,0);assert.equal(h.calls.filter(call=>call.body).length,0);
 });
 test('Native loaded draft is not reimported and different nonempty content is never overwritten',async()=>{
  for(const different of [false,true]){const h=nativeNavigationHarness();await h.open();if(different)h.setDraft({prompt:'귀환한 대화의 새 글',files:[],selectedToolIds:['new']});await h.back();assert.equal(h.restores.length,0);if(different)assert.equal(h.readDraft().prompt,'귀환한 대화의 새 글');}
@@ -92,28 +96,92 @@ test('account reset releases an old pending Native flush without unlocking the n
  oldFlush.resolve(true);await old;await assert.rejects(h.api.handleClick({dataset:{action:'native_open',nativeId:'skills'}}),/저장 또는 화면 준비/);
  newFlush.resolve(true);await next;assert.deepEqual(h.navigation,['/workspace/models']);
 });
-test('Native tickets clear on direct unrelated navigation logout actor change and completed return',async()=>{
- const direct=nativeNavigationHarness();direct.context.location.pathname='/workspace/skills';direct.context.location.search='';direct.api.sync();assert.equal(direct.bars.at(-1),null);
- for(const boundary of ['chat','unrelated','logout','actor','session']){const h=nativeNavigationHarness();await h.open();if(boundary==='chat')h.context.location.pathname='/c/other';if(boundary==='unrelated')h.context.location.pathname='/notes';if(boundary==='logout')h.context.location.pathname='/auth';if(boundary==='actor')h.api.setState({...h.state,capabilities:{...h.state.capabilities,actor_id:'b'}});if(boundary==='session')h.setAuth('actor-b-token');h.api.sync();await h.api.handleClick({dataset:{action:'native_return'}});assert.equal(h.navigation.length,1,boundary);assert.equal(h.restores.length,0,boundary);assert.equal(h.bars.at(-1),null,boundary);}
- const returned=nativeNavigationHarness();await returned.open();await returned.back();returned.context.location.pathname='/workspace/models';returned.context.location.search='';returned.api.sync();assert.equal(returned.bars.at(-1),null);
+test('removed native_return action cannot navigate or alter the saved selection',async()=>{
+ const h=nativeNavigationHarness();await h.open();const before=JSON.parse(JSON.stringify(h.api.snapshot().selection));await h.api.handleClick({dataset:{action:'native_return'}});assert.deepEqual(h.navigation,['/workspace/skills']);assert.deepEqual(JSON.parse(JSON.stringify(h.api.snapshot().selection)),before);assert.equal(h.restores.length,0);
 });
-test('admin settings query redirect keeps its ticket only for the verified Native modal and closes it before return',async()=>{
- const h=nativeNavigationHarness();let open=false,closed=0;const content={tagName:'DIV',firstElementChild:{tagName:'DIV'}},parent={},modal={querySelector:selector=>selector==='#settings-tabs-container'?tabs:selector==='#settings-tabs-container > button'?{click(){open=false;closed++;}}:null},tabs={closest:()=>open?modal:null,querySelector:()=>({}),nextElementSibling:content,parentElement:parent};content.parentElement=parent;
- const original=h.context.document.querySelector;h.context.document.querySelector=selector=>selector==='#settings-tabs-container'?(open?tabs:null):original(selector);
- await h.open('admin');h.context.location.pathname='/';h.context.location.search='?settings=admin%3Ageneral';h.api.sync();assert.equal(h.bars.at(-1),'관리자');
- open=true;h.context.location.search='';h.api.sync();assert.equal(h.bars.at(-1),'관리자');assert.equal(h.restores.length,0);assert.equal(html('workNativeReturnHost("/")',{document:h.context.document}),content);
- await h.back();assert.equal(closed,1);assert.deepEqual(h.navigation,['/admin/settings','/c/original?keep=1']);assert.equal(h.bars.at(-1),null);
+test('Native tickets cannot copy drafts across unrelated navigation logout actor or session changes',async()=>{
+ for(const boundary of ['chat','unrelated','logout','actor','session']){const h=nativeNavigationHarness();await h.open();if(boundary==='chat')h.context.location.pathname='/c/other';if(boundary==='unrelated')h.context.location.pathname='/notes';if(boundary==='logout')h.context.location.pathname='/auth';if(boundary==='actor')h.api.setState({...h.state,capabilities:{...h.state.capabilities,actor_id:'b'}});if(boundary==='session')h.setAuth('actor-b-token');h.api.sync();await h.api.handleClick({dataset:{action:'native_return'}});assert.equal(h.navigation.length,1,boundary);assert.equal(h.restores.length,0,boundary);}
 });
-test('closing an admin modal retires its ticket and ordinary settings never get an EES return bar',async()=>{
- const h=nativeNavigationHarness();let open=true;const tabs={closest:()=>open?{}:null,querySelector:()=>({})},original=h.context.document.querySelector;h.context.document.querySelector=selector=>selector==='#settings-tabs-container'?(open?tabs:null):original(selector);
- await h.open('admin');h.context.location.pathname='/';h.context.location.search='';h.api.sync();assert.equal(h.bars.at(-1),'관리자');open=false;h.api.sync();assert.equal(h.bars.at(-1),null);assert.equal(h.restores.length,0);
- const direct=nativeNavigationHarness();direct.context.location.pathname='/';direct.context.location.search='?settings=general';direct.api.sync();assert.equal(direct.bars.at(-1),null);
+test('Browser Back restores the exact prior chat draft without an EES return action',async()=>{
+ const h=nativeNavigationHarness(),before=JSON.parse(JSON.stringify(h.api.snapshot().selection)),draft=JSON.parse(JSON.stringify(h.readDraft()));await h.open();h.setDraft({prompt:'',files:[]});h.context.location.pathname='/c/original';h.context.location.search='?keep=1';h.api.sync();await new Promise(setImmediate);assert.deepEqual(h.navigation,['/workspace/skills']);assert.deepEqual(h.readDraft(),draft);assert.deepEqual(JSON.parse(JSON.stringify(h.api.snapshot().selection)),before);assert.equal(h.restores.length,1);
 });
-test('Native return mount requires verified layout and otherwise leaves Native DOM untouched',()=>{
- const original={name:'native-form'},parent={children:[original],contains:node=>node===content},content={parentElement:null,previousElementSibling:{tagName:'NAV'}};content.parentElement=parent;
- const document={querySelector:selector=>selector==='#workspace-container'?content:null,querySelectorAll:()=>[]};
- assert.equal(html('workNativeReturnHost("/workspace/skills")',{document}),parent);assert.deepEqual(parent.children,[original]);content.previousElementSibling={tagName:'SECTION'};assert.equal(html('workNativeReturnHost("/workspace/skills")',{document}),null);assert.deepEqual(parent.children,[original]);
- const nav={parentElement:parent,nextElementSibling:{tagName:'DIV'},querySelector:selector=>['a[href="/admin"]','a[href="/admin/settings"]'].includes(selector)?{}:null};document.querySelectorAll=()=>[nav];assert.equal(html('workNativeReturnHost("/admin/settings")',{document}),parent);nav.querySelector=()=>null;assert.equal(html('workNativeReturnHost("/admin/settings")',{document}),null);assert.equal(html('workNativeReturnHost("/notes")',{document}),null);
+test('Native-to-Native menu navigation keeps one original chat draft across all destinations',async()=>{
+ const h=nativeNavigationHarness(),draft=JSON.parse(JSON.stringify(h.readDraft()));let flushes=0;h.context.window.__eesNativeDraftV1.flush=()=>{flushes++;return true;};await h.open('skills');h.setReady(false);await h.open('models');await h.open('knowledge');await h.open('prompts');assert.equal(flushes,1);assert.deepEqual(h.navigation,['/workspace/skills','/workspace/models','/workspace/knowledge','/workspace/prompts']);h.setDraft({prompt:'',files:[]});h.setReady(true);await h.back();assert.equal(h.navigation.at(-1),'/c/original?keep=1');assert.deepEqual(h.readDraft(),draft);assert.equal(h.restores.length,1);
+});
+test('same-section tools menu restores its exact authoring selection without closing the draft',async()=>{
+ const h=nativeNavigationHarness();h.api.setSelection({mode:'author',tab:'tools',workflow_id:'',job_id:'',run_id:''});const before=JSON.parse(JSON.stringify(h.api.snapshot().selection));let closed=0;h.designer.closeStart=()=>closed++;await h.open();await h.back('tools');assert.equal(h.navigation.at(-1),'/c/original?keep=1');assert.deepEqual(JSON.parse(JSON.stringify(h.api.snapshot().selection)),before);assert.equal(closed,0);
+});
+test('a different EES menu destination is applied only after returning to the original chat',async()=>{
+ for(const [action,extra,mode,tab] of [['mode',{mode:'work'},'work','my_work'],['tools',{},'author','tools']]){const h=nativeNavigationHarness(),draft=JSON.parse(JSON.stringify(h.readDraft()));await h.open();h.setDraft({prompt:'',files:[]});await h.back(action,extra);assert.equal(h.navigation.at(-1),'/c/original?keep=1');assert.equal(h.api.snapshot().selection.mode,mode);assert.equal(h.api.snapshot().selection.tab,tab);assert.deepEqual(h.readDraft(),draft);assert.equal(h.restores.length,1);assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);}
+});
+test('Native return exposes the restored chat view and reference only after both full state and draft are ready',async()=>{
+ for(const first of ['state','draft']){
+  const h=nativeNavigationHarness(),stateRead=deferred(),draftRestore=deferred(),draft=JSON.parse(JSON.stringify(h.readDraft())),complete={...h.state,workflow:{id:'w',revision:7,published_version:3}};
+  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?(h.context.location.pathname.startsWith('/workspace')?{ok:true,...h.state,workflow:null,run:null}:stateRead.promise):{ok:true});
+  await h.open();const before=h.renders.length;h.setDraft({prompt:'',files:[]});
+  h.context.window.__eesNativeDraftV1.restore=async serialized=>{await draftRestore.promise;h.setDraft(JSON.parse(serialized));return true;};
+  await h.back();
+  const assertWaiting=()=>{assert.equal(h.context.window.__eesNativeWorkV1.captureReference().kind,'none');assert.equal(h.renders.slice(before).filter(value=>!value.native_shell).length,0);};
+  assertWaiting();
+  if(first==='state')stateRead.resolve({ok:true,...complete});else draftRestore.resolve();
+  await new Promise(setImmediate);assertWaiting();
+  if(first==='state')draftRestore.resolve();else stateRead.resolve({ok:true,...complete});
+  await new Promise(setImmediate);
+  assert.deepEqual(h.readDraft(),draft);assert.equal(h.renders.at(-1).native_shell,false);assert.equal(h.renders.at(-1).state.workflow.revision,7);
+  const reference=h.context.window.__eesNativeWorkV1.captureReference();assert.equal(reference.kind,'workspace');assert.equal(reference.revision,7);assert.equal(reference.version,3);
+ }
+});
+test('a queued EES menu action waits for full state even when the returning Native draft restores first',async()=>{
+ const h=nativeNavigationHarness(),stateRead=deferred(),draft=JSON.parse(JSON.stringify(h.readDraft()));
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?(h.context.location.pathname.startsWith('/workspace')?{ok:true,...h.state}:stateRead.promise):{ok:true});
+ await h.open();h.setDraft({prompt:'',files:[]});await h.back('tools');assert.deepEqual(h.readDraft(),draft);assert.equal(h.api.snapshot().selection.tab,'overview');assert.equal(h.api.snapshot().selection.workflow_id,'w');
+ stateRead.resolve({ok:true,...h.state});await new Promise(setImmediate);assert.equal(h.api.snapshot().selection.tab,'tools');assert.equal(h.api.snapshot().selection.workflow_id,'');
+});
+test('failed full state after Native return shows an error without publishing a zero-revision work reference',async()=>{
+ for(const delayedDraft of [false,true]){
+  const h=nativeNavigationHarness(),draftRestore=deferred();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?(h.context.location.pathname.startsWith('/workspace')?{ok:true,...h.state}:{httpError:true,status:503,error:{message:'업무 조회 실패'}}):{ok:true});
+  await h.open();h.setDraft({prompt:'',files:[]});if(delayedDraft)h.context.window.__eesNativeDraftV1.restore=async serialized=>{await draftRestore.promise;h.setDraft(JSON.parse(serialized));return true;};
+  await h.back();draftRestore.resolve();await new Promise(setImmediate);assert.equal(h.api.snapshot().state,null);assert.match(h.api.snapshot().error,/업무 조회 실패/);assert.equal(h.context.window.__eesNativeWorkV1.captureReference().kind,'none');assert.equal(h.renders.at(-1).native_shell,false);assert.match(h.renders.at(-1).error,/업무 조회 실패/);
+ }
+});
+test('direct Native entry loads capabilities with no chat pane and EES destinations use the chat root',async()=>{
+ const h=nativeNavigationHarness(nativeCapabilities({can_author:true,native_access:{skills:true}}));h.context.location.pathname='/workspace/skills';h.context.location.search='';h.setReady(false);h.api.setState(null);h.api.sync();await new Promise(setImmediate);assert.ok(h.calls.some(call=>call.url.startsWith('/api/ees-work/workspace?')));assert.equal(h.renders.at(-1)?.native_shell,true);assert.equal(h.renders.at(-1)?.native_id,'skills');assert.equal(h.calls.some(call=>call.url.startsWith('/api/ees-work/operations?')),false);await h.api.handleClick({dataset:{action:'native_open',nativeId:'models'}});assert.equal(h.navigation.length,0);await h.back('tools');assert.equal(h.navigation.at(-1),'/');assert.equal(h.api.snapshot().selection.mode,'author');assert.equal(h.api.snapshot().selection.tab,'tools');assert.equal(h.restores.length,0);
+});
+test('a failed Native capability read hides actions but keeps the original draft until explicit same-actor retry',async()=>{
+ const h=nativeNavigationHarness(),draft=JSON.parse(JSON.stringify(h.readDraft())),before=JSON.parse(JSON.stringify(h.api.snapshot().selection));let failed=true;
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?(failed?{httpError:true,status:503,error:{message:'권한 조회 실패'}}:{ok:true,...h.state}):{ok:true});
+ await h.open();h.api.sync();await new Promise(setImmediate);assert.equal(h.api.snapshot().state,null);assert.match(h.api.snapshot().error,/권한 조회 실패/);
+ const menu=html('workWorkspaceMenuHTML({}, {}, error)',{error:h.api.snapshot().error});assert.match(menu,/data-action="refresh">다시 확인/);assert.doesNotMatch(menu,/data-action="(?:native_open|procedures|tools|workspace_admin)"/);
+ await h.back('procedures');await h.open('models');assert.deepEqual(h.navigation,['/workspace/skills']);assert.equal(h.restores.length,0);assert.deepEqual(h.readDraft(),draft);
+ failed=false;await h.back('refresh');assert.deepEqual(h.navigation,['/workspace/skills']);assert.equal(h.api.snapshot().state.capabilities.actor_id,'a');assert.equal(h.api.snapshot().error,'');assert.ok(h.calls.filter(call=>call.url.startsWith('/api/ees-work/workspace?')).every(call=>call.url==='/api/ees-work/workspace?'),'Native capability reads exclude stale EES scope and run identifiers');
+ h.setDraft({prompt:'',files:[]});await h.back();assert.deepEqual(h.navigation,['/workspace/skills','/c/original?keep=1']);assert.deepEqual(h.readDraft(),draft);assert.equal(h.restores.length,1);assert.deepEqual(JSON.parse(JSON.stringify(h.api.snapshot().selection)),before);
+});
+test('retry after a failed Native capability read never revives another actor or session return ticket',async()=>{
+ for(const boundary of ['actor','session']){
+  const h=nativeNavigationHarness();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{httpError:true,status:503,error:{message:'권한 조회 실패'}}:{ok:true});await h.open();h.api.sync();await new Promise(setImmediate);assert.equal(h.api.snapshot().state,null);
+  if(boundary==='session')h.setAuth('actor-b-token');const next={...h.state,capabilities:{...h.state.capabilities,actor_id:'b'}};h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,...next}:{ok:true});await h.back('refresh');h.api.sync();await new Promise(setImmediate);assert.equal(h.api.snapshot().state.capabilities.actor_id,'b');h.setDraft({prompt:'새 계정의 입력',files:[]});await h.back();assert.equal(h.navigation.at(-1),'/');assert.equal(h.navigation.includes('/c/original?keep=1'),false,boundary);assert.equal(h.restores.length,0,boundary);assert.equal(h.readDraft().prompt,'새 계정의 입력');
+ }
+});
+test('Native entry with a missing sidebar mount does not fetch or show a synthetic shell',async()=>{
+ const h=nativeNavigationHarness();h.context.location.pathname='/workspace/skills';h.context.location.search='';h.context.document.querySelector=()=>null;let suspended=0;h.view.suspend=()=>suspended++;h.api.sync();await new Promise(setImmediate);assert.equal(h.calls.length,0);assert.equal(h.renders.length,0);assert.equal(h.navigation.length,0);
+});
+test('admin settings query redirect stays inside the shell and its Native close preserves the original chat',async()=>{
+ const h=nativeNavigationHarness();let open=false,closed=0;const modal={querySelector:selector=>selector==='#settings-tabs-container > button'?{click(){open=false;closed++;}}:null},tabs={closest:()=>open?modal:null,querySelector:()=>({})};const original=h.context.document.querySelector;h.context.document.querySelector=selector=>selector==='#settings-tabs-container'?(open?tabs:null):original(selector);
+ await h.open('admin');h.context.location.pathname='/';h.context.location.search='?settings=admin%3Ageneral';h.api.sync();await new Promise(setImmediate);assert.equal(h.renders.at(-1)?.native_shell,true);open=true;h.context.location.search='';h.api.sync();await new Promise(setImmediate);assert.equal(h.renders.at(-1)?.native_shell,true);assert.equal(h.restores.length,0);await h.back();assert.equal(closed,1);assert.deepEqual(h.navigation,['/admin/settings','/c/original?keep=1']);
+});
+test('closing the Native admin modal returns to the saved chat without a duplicate return bar',async()=>{
+ const h=nativeNavigationHarness();let open=true;const tabs={closest:()=>open?{}:null,querySelector:()=>({})},original=h.context.document.querySelector;h.context.document.querySelector=selector=>selector==='#settings-tabs-container'?(open?tabs:null):original(selector);await h.open('admin');h.context.location.pathname='/';h.context.location.search='';h.api.sync();await new Promise(setImmediate);open=false;h.api.sync();await new Promise(setImmediate);assert.equal(h.navigation.at(-1),'/c/original?keep=1');assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);
+});
+test('switching an opened admin modal to a personal tab keeps it open until Native closes it',async()=>{
+ const h=nativeNavigationHarness(),draft=JSON.parse(JSON.stringify(h.readDraft()));let open=false,adminTab=true;
+ const modal={},tabs={closest:()=>open?modal:null,querySelector:()=>adminTab?{}:null},original=h.context.document.querySelector;
+ h.context.document.querySelector=selector=>selector==='#settings-tabs-container'?(open?tabs:null):original(selector);
+ await h.open('admin');h.context.location.pathname='/';h.context.location.search='';open=true;h.api.sync();await new Promise(setImmediate);assert.equal(h.renders.at(-1)?.native_shell,true);
+ adminTab=false;h.api.sync();await new Promise(setImmediate);assert.deepEqual(h.navigation,['/admin/settings']);assert.equal(open,true);assert.equal(h.renders.at(-1)?.native_shell,true);assert.equal(h.renders.at(-1)?.native_id,'admin');assert.equal(h.restores.length,0);assert.deepEqual(h.readDraft(),draft);
+ open=false;h.api.sync();await new Promise(setImmediate);assert.equal(h.navigation.at(-1),'/c/original?keep=1');assert.equal(h.restores.length,0);assert.deepEqual(h.readDraft(),draft);
+});
+test('ordinary settings are not mistaken for the Native admin modal',()=>{
+ const document={querySelector:()=>({closest:()=>({}),querySelector:()=>null})};assert.equal(html('workNativeSettingsModal()',{document}),null);const modal={};document.querySelector=()=>({closest:()=>modal,querySelector:()=>({})});assert.equal(html('workNativeSettingsModal()',{document}),modal);
 });
 
 test('help question includes canonical term ID and visible authoring context without hidden state',()=>{
@@ -156,7 +224,7 @@ test('help detects route changes during Native restore and does not focus a diff
 test('author tools expose help-only metadata while workflow and historical references remain unchanged',()=>{
  const h=controller();h.api.setSelection({mode:'author',tab:'tools',system_id:'EMS',workflow_id:'old-work',run_id:'old-run'});
  const help=h.api.reference();assert.equal(help.kind,'help');assert.equal(help.system_id,'EMS');assert.ok(help.context_id);assert.equal(Object.hasOwn(help,'workflow_id'),false);assert.equal(Object.hasOwn(help,'run_id'),false);
- h.api.setSelection({tab:'overview'});assert.equal(h.api.reference().kind,'workspace');assert.equal(h.api.reference().workflow_id,'old-work');
+ h.api.setSelection({tab:'overview'});assert.equal(h.api.reference().kind,'none');h.api.setState({capabilities:{actor_id:'a'},workflow:{id:'old-work',revision:7},run:{id:'old-run',workflow_id:'old-work',revision:11,version:3}});assert.equal(h.api.reference().kind,'workspace');assert.equal(h.api.reference().workflow_id,'old-work');assert.equal(h.api.reference().revision,11);
  h.api.setSelection({mode:'work',chat_reference:{kind:'workspace',reference_kind:'historical',workflow_id:'old-work',run_id:'old-run',attempt_id:'kept'}});h.api.setState({run:{id:'old-run'}});assert.equal(h.api.reference().attempt_id,'kept');
 });
 

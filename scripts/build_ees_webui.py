@@ -108,6 +108,15 @@ WORK_FILES += tuple(EASY_AUTHORING_ASSETS.values())
 WORK_FILES_V13_EASY_AUTHORING = WORK_FILES
 WORK_ASSETS["scripts/workflow_procedure_examples.json"] = "open_webui/workflow_procedure_examples.json"
 WORK_FILES += (WORK_ASSETS["scripts/workflow_procedure_examples.json"],)
+# PR #76 shipped procedure examples before the C18 menu icons. Preserve its
+# exact inventory for selected programs and program-only Restore backups.
+WORK_FILES_V13_PROCEDURE_EXAMPLES = WORK_FILES
+MENU_ICON_FILES = tuple("v4/" + name for name in (
+    "83565.svg", "54b2e.svg", "4d978.svg", "4308e.svg",
+))
+V4_ICON_FILES += MENU_ICON_FILES
+UI_FILES.update({name: name for name in MENU_ICON_FILES})
+WORK_FILES += tuple(TARGET_APP + name for name in MENU_ICON_FILES)
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {

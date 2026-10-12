@@ -1,0 +1,28 @@
+{
+  "module": "test_ees_work_figma_authoring_native",
+  "selected_ids": [
+    "test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_key_uses_original_valves_controls_and_theme",
+    "test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_shell_browser_back_preserves_draft_and_mobile_navigation"
+  ],
+  "seconds": 0.079,
+  "tests_run": 2,
+  "status": "failed",
+  "counts": {
+    "passed": 0,
+    "failed": 0,
+    "error": 2,
+    "skipped": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_key_uses_original_valves_controls_and_theme",
+      "status": "error",
+      "detail": "Traceback (most recent call last):\n  File \"/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/ees_work_integrated_fixture.py\", line 68, in setUp\n    self.server = NativeUIServer(self.wheel_path)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/native_ui_fixture.py\", line 52, in __init__\n    raise ValueError(\"Native UI wheel launcher differs from the current assembled sources.\")\nValueError: Native UI wheel launcher differs from the current assembled sources.\n"
+    },
+    {
+      "id": "test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_shell_browser_back_preserves_draft_and_mobile_navigation",
+      "status": "error",
+      "detail": "Traceback (most recent call last):\n  File \"/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/ees_work_integrated_fixture.py\", line 68, in setUp\n    self.server = NativeUIServer(self.wheel_path)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/native_ui_fixture.py\", line 52, in __init__\n    raise ValueError(\"Native UI wheel launcher differs from the current assembled sources.\")\nValueError: Native UI wheel launcher differs from the current assembled sources.\n"
+    }
+  ]
+}

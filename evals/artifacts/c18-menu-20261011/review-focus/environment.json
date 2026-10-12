@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-11",
+  "scope": "Actual compiled Open WebUI 0.11.3 frontend and production EES UI with temporary workflow SQLite; synthetic session, Native capabilities, chat and model API responses. No real company authentication, ACL, user assets or deployment.",
+  "python": "3.12.14",
+  "chrome": "HeadlessChrome/153.0.8010.52",
+  "chrome_sha256": "0f2256d365ab3d82a2c79ce41f65a03dfd8d7eaa4d689a1b88bc22b6842b1f1e",
+  "chrome_zip_sha256": "944dc1eae654637fed4d57650198774f9c43b45f34e48febb84f43c541b5de76",
+  "upstream_wheel_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+  "build": {
+    "filename": "open_webui-0.11.3+ees.13-py3-none-any.whl",
+    "sha256": "ccdb59a37f8d5e5024abfc0044fd892baa4f6f1d156f79d97f7725476cec2681",
+    "size": 152119999
+  },
+  "sources": {
+    "branding/ees/ui/ees-work-view.js": "5bda38ab9b529569c8454d6e57ab6a1b37a6b19bc6e46d39db905d1f7c18078e",
+    "branding/ees/ui/ees-work-launcher.js": "07275e2f3b443177e26418af55ab6bcade804ed796fd1273b20ccffecade66e7",
+    "branding/ees/ui/ees-work-launcher.css": "5f5df03a10e8bf45d96d51a2142dc4506b12edbdc99e801893e32edde92fbfc6",
+    "branding/ees/ui/chat-theme.css": "29bd3b3a3fc3e6ff0624db4e2570f36290622312696149ea2d28e6eee5032186",
+    "tests/test_ees_work_figma_authoring_native.py": "fa537d9ddbc09633a5b93c90a3b3549ea091ac17355157b8f884c342369787fa"
+  },
+  "initial_setup_failure": {
+    "log": "focus-first.log",
+    "old_chrome_bytes": 2214912,
+    "expected_chrome_bytes": 197258568,
+    "observation": "Existing Chrome executable was truncated; ELF section headers beyond EOF; process exit -11 before Browser.getVersion. Original file retained. Existing validated ZIP extracted into scratch; no download, dependency installation or company change."
+  },
+  "initial_combined_test": {
+    "log": "focus-normal-chrome.log",
+    "result": "Keyboard 228 events contained; physical menu click failed Native backdrop hit-test."
+  },
+  "final_keyboard_test": {
+    "test": "test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_admin_dialog_contains_keyboard_focus",
+    "result": "PASS",
+    "controls": 55,
+    "tab_events": 114,
+    "shift_tab_events": 114,
+    "escaped": 0,
+    "menu_focused": 0,
+    "inert": false,
+    "first_last_wrap_verified": true,
+    "evidence": "focus-final/menu-c18-admin-keyboard-focus.json",
+    "log": "focus-final/focus.log"
+  },
+  "pointer_probe": {
+    "source": "pointer-click-probe.py",
+    "log": "pointer-probe/probe.log",
+    "result": "FAIL; current full-screen Native modal backdrop blocks pointer from reaching underlying menu",
+    "evidence": "pointer-probe/menu-c18-admin-keyboard-focus.json",
+    "question": "https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6108310347"
+  },
+  "commands": {
+    "build": "python scripts/build_ees_webui.py --wheel /workspace/scratch/f5cd50d81fb4/tmp-upstream78/open_webui-0.11.3-py3-none-any.whl --output-dir /workspace/scratch/f5cd50d81fb4/c18-review-build",
+    "focus": "EES_TEST_CHROME=/workspace/scratch/f5cd50d81fb4/c18-review-tools/chrome-headless-shell-linux64/chrome-headless-shell EES_TEST_BRANDING_DIR=/workspace/scratch/f5cd50d81fb4/c18-review-build EES_TEST_SCREENSHOT_DIR=/workspace/scratch/f5cd50d81fb4/c18-review-native-results/focus-final PYTHONPATH=tests python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_admin_dialog_contains_keyboard_focus -v",
+    "node": "node --test --test-reporter=tap tests/test_ees_work_figma_runtime_ui.cjs tests/test_ees_v4_layout.cjs",
+    "docs": "python scripts/check_docs.py"
+  },
+  "source_head": "ced84d0ef2e51faa4d1d72375c80457a5d41df55",
+  "source_dirty": true
+}

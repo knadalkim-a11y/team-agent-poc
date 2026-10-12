@@ -1,0 +1,9 @@
+test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 182.15826100095, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_shell_browser_back_preserves_draft_and_mobile_navigation (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_shell_browser_back_preserves_draft_and_mobile_navigation) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 159.92105300028925, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 6.982s
+
+OK

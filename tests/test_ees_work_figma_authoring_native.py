@@ -16,6 +16,7 @@ from unittest.mock import patch
 from uuid import UUID, uuid4
 
 from ees_work_integrated_fixture import IntegratedNativeCase
+from native_ui_fixture import NativeUIHandler
 
 
 class FigmaAuthoringNativeTests(IntegratedNativeCase):
@@ -126,19 +127,17 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
         self.browser.evaluate('window.__menuRoundtripDocument=' + json.dumps(label))
         self.click('[data-action=native_open][data-native-id=skills]')
-        self.wait("location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input[aria-label]') && document.querySelector('#ees-work-native-return')")
+        self.wait("location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input[aria-label]') && document.querySelector('#ees-work-entry [data-action=procedures]')")
         self.assertEqual(self.browser.evaluate('window.__menuRoundtripDocument'), label)
-        self.assertEqual(self.read('#ees-work-native-return', 'getAttribute("role")'), 'region')
-        self.assertIn('지금은 Open WebUI 화면입니다 · 스킬', self.text('#ees-work-native-return'))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel')"))
-        geometry = self.browser.evaluate("""(()=>{const bar=document.querySelector('#ees-work-native-return'),native=document.querySelector('#workspace-container'),a=bar.getBoundingClientRect(),b=native.getBoundingClientRect();return {barBottom:a.bottom,nativeTop:b.top,position:getComputedStyle(bar).position,barHeight:a.height};})()""")
-        self.assertNotIn(geometry['position'], ('absolute', 'fixed'))
-        self.assertGreater(geometry['barHeight'], 0)
-        self.assertLessEqual(geometry['barBottom'], geometry['nativeTop'] + 1 / 64)
+        self.assertEqual(self.read('[data-action=native_open][data-native-id=skills]', 'getAttribute("aria-current")'), 'page')
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-work-entry [aria-current=page]')].map(e=>e.dataset.nativeId)"), ['skills'])
+        self.assertFalse(self.browser.evaluate("[...document.querySelectorAll('#workspace-container')][0].previousElementSibling.querySelector('a[href=\"/workspace/skills\"]')?.getBoundingClientRect().height > 0"))
         query = 'native-menu-' + label
         self.search_native_skills('#workspace-container input[aria-label]', query)
-        self.screenshot('menu-c15-skills-' + label)
-        self.click('#ees-work-native-return [data-action=native_return]')
+        self.screenshot('menu-c18-skills-' + label)
+        self.click('#ees-work-entry [data-action=' + ('tools' if label == 'tool' else 'procedures') + ']')
         self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ees-work-designer') && !document.querySelector('#ees-work-native-return')")
         self.assertEqual(self.browser.evaluate('window.__menuRoundtripDocument'), label)
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), before)
@@ -162,7 +161,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             nativeMount:{chatPane:!!document.querySelector('#chat-container #chat-pane'),sidebarSearch:!!document.querySelector('#sidebar-search-button'),sidebarToggle:!!document.querySelector('#sidebar-toggle-button')},
             viewport:[innerWidth,innerHeight],active:{tag:active?.tagName,id:active?.id,name:active?.name},
             panel:region(panel),authoring:region(author),
-            nativeMenu:{draftReady:window.__eesNativeDraftV1?.ready?.(),settingsTabs:box(document.querySelector('#settings-tabs-container')),returnBar:box(document.querySelector('#ees-work-native-return')),workspace:box(document.querySelector('#workspace-container')),search:region(document.querySelector('#workspace-container,#fixture-unrecognized-workspace')),items:[...document.querySelectorAll('.ew-nav-button')].map(e=>({text:e.textContent,button:box(e),children:[...e.children].map(child=>({tag:child.tagName,text:child.textContent,layout:box(child)}))})),captions:[...document.querySelectorAll('.ew-nav-group-title')].map(e=>({text:e.textContent,layout:box(e)}))},
+            nativeTheme:{modalSurface:box(document.querySelector('.modal[role=dialog]>div')),selectedSettingsTab:box(document.querySelector('#settings-tabs-container [aria-selected=true]')),valves:box(document.querySelector('.chat-control-valves')),valveInput:box(document.querySelector('.chat-control-valves input'))},
+            nativeMenu:{draftReady:window.__eesNativeDraftV1?.ready?.(),settingsTabs:box(document.querySelector('#settings-tabs-container')),returnBar:box(document.querySelector('#ees-work-native-return')),workspace:box(document.querySelector('#workspace-container')),workspaceNav:box(document.querySelector('#workspace-container')?.previousElementSibling),workspaceTabs:[...document.querySelectorAll('#workspace-container')][0]?.previousElementSibling?[...document.querySelector('#workspace-container').previousElementSibling.querySelectorAll('a')].map(e=>({href:e.getAttribute('href'),box:box(e)})):[],search:region(document.querySelector('#workspace-container')),items:[...document.querySelectorAll('.ew-nav-button')].map(e=>({text:e.textContent,button:box(e),children:[...e.children].map(child=>({tag:child.tagName,text:child.textContent,layout:box(child)}))})),captions:[...document.querySelectorAll('.ew-nav-group-title')].map(e=>({text:e.textContent,layout:box(e)}))},
             layout:{panel:geometry('#ees-work-panel'),scroll:geometry('.ew-author-scroll'),radio:geometry('[name=procedure_template]:checked'),selected:geometry('.ew-procedure-card[data-selected=true]'),unselected:geometry('.ew-procedure-card[data-selected=false]'),name:geometry('#ew-procedure-name'),footer:geometry('#ees-work-designer>footer'),back:geometry('.ew-author-procedure-start .ew-author-back'),questionGroup:geometry('.ew-procedure-questions'),firstQuestion:geometry('.ew-procedure-questions>button'),cardGaps:[...document.querySelectorAll('.ew-procedure-choices>.ew-procedure-card')].filter(e=>e.previousElementSibling).map(e=>e.getBoundingClientRect().top-e.previousElementSibling.getBoundingClientRect().bottom)},
             nativeDraft:window.__eesNativeDraftV1?.read?.(),
             nativeInput:region(document.querySelector('#chat-input'))};
@@ -200,12 +200,12 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.fill('#ew-author-node [name=name]', '아직 저장하지 않은 메뉴 단계')
         self.fill('#ew-author-node [name=instructions]', '복귀 후에도 유지할 미저장 설명')
         saved = self.state(workflow_id=workflow_id)['workflow']
-        self.screenshot('menu-c15-admin-workspace')
+        self.screenshot('menu-c18-admin-workspace')
         self.assertEqual(self.skills_roundtrip('procedure'), full_draft)
         self.assertEqual(self.read('#ew-author-node [name=name]', 'value'), '아직 저장하지 않은 메뉴 단계')
         self.assertEqual(self.read('#ew-author-node [name=instructions]', 'value'), '복귀 후에도 유지할 미저장 설명')
         self.assertEqual(self.state(workflow_id=workflow_id)['workflow'], saved)
-        self.screenshot('menu-c15-procedure-returned')
+        self.screenshot('menu-c18-procedure-returned')
 
         self.click('[data-action=tools]')
         self.wait("document.querySelector('[data-author-action=tool_create]')")
@@ -217,7 +217,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.read('#ew-author-tool [name=name]', 'value'), '미저장 개인 도구 이름')
         self.assertEqual(self.read('#ew-author-tool [name=description]', 'value'), '배포 전에 필요한 승인 상태를 확인')
         self.assertEqual(self.operations()['tools'], [])
-        self.screenshot('menu-c15-tool-returned')
+        self.screenshot('menu-c18-tool-returned')
 
         self.click('[data-action=procedures]')
         self.click('[data-author-action=create]')
@@ -229,8 +229,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(len(self.state()['workflows']), 1)
         self.assertEqual(self.server.chats['existing-chat'], original_chat)
         self.assertEqual(self.server.completions, [])
-        directory = self.screenshot('menu-c15-procedure-start-returned')
-        (directory / 'menu-c15-draft-preservation.json').write_text(json.dumps({
+        directory = self.screenshot('menu-c18-procedure-start-returned')
+        (directory / 'menu-c18-draft-preservation.json').write_text(json.dumps({
             'scope': 'actual compiled Native routes/composer; text/nonimage Native snapshot; synthetic session, capability response, attachment and selected asset IDs; existing model/params stay Native-owned; not a Native ACL test',
             'before': full_draft, 'after': self.browser.evaluate('window.__eesNativeDraftV1.read()'),
             'chat_models': self.server.chats['existing-chat']['chat']['models'],
@@ -249,30 +249,76 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action=native_open][data-native-id=admin]')
         self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]') && document.querySelector('[role=dialog][aria-modal=true] input[type=text][placeholder*=\"localhost:3000\"]')")
         self.assertEqual(self.browser.evaluate('location.pathname + location.search'), '/')
-        self.wait("document.querySelector('#ees-work-native-return')")
-        self.assertIn('지금은 Open WebUI 화면입니다 · 관리자', self.text('#ees-work-native-return'))
-        self.assertTrue(self.browser.evaluate("document.querySelector('#ees-work-native-return').closest('[role=dialog][aria-modal=true]')?.contains(document.querySelector('#settings-tabs-container'))"))
+        self.wait("document.querySelector('#ees-work-entry')")
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
         original_url = self.read('[role=dialog] input[type=text][placeholder*="localhost:3000"]', 'value')
         self.assertEqual(original_url, 'https://fixture.invalid')
         self.fill('[role=dialog] input[type=text][placeholder*="localhost:3000"]', 'https://unsaved-fixture.invalid')
         self.assertEqual(self.read('[role=dialog] input[type=text][placeholder*="localhost:3000"]', 'value'), 'https://unsaved-fixture.invalid')
-        self.screenshot('menu-c15-native-admin-unsaved')
-        self.click('#ees-work-native-return [data-action=native_return]')
+        self.screenshot('menu-c18-native-admin-unsaved')
+        self.click('#settings-tabs-container > button')
         self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ew-procedure-name') && !document.querySelector('#settings-tabs-container') && !document.querySelector('#ees-work-native-return')")
         self.assertEqual(self.read('#ew-procedure-name', 'value'), '관리자 설정을 다녀올 새 절차')
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
         self.assert_reference_preserved(reference)
-        self.screenshot('menu-c15-native-admin-returned')
+        self.screenshot('menu-c18-native-admin-returned')
 
         self.click('[data-action=native_open][data-native-id=admin]')
-        self.wait("document.querySelector('[role=dialog] input[type=text][placeholder*=\"localhost:3000\"]')?.value === 'https://fixture.invalid' && document.querySelector('#ees-work-native-return')")
+        self.wait("document.querySelector('[role=dialog] input[type=text][placeholder*=\"localhost:3000\"]')?.value === 'https://fixture.invalid'")
         self.assertFalse(any(method != 'GET' and path in {
             '/api/v1/auths/admin/config', '/api/v1/auths/admin/config/update',
             '/api/v1/configs/banners', '/api/events/webhooks'} for method, path in self.server.requests))
         self.assertEqual(self.server.completions, [])
         self.assertEqual(self.state()['workflows'], [])
-        self.click('#ees-work-native-return [data-action=native_return]')
+        self.click('#settings-tabs-container [role=tab][aria-controls=tab-general]')
+        self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-general][aria-selected=true]')")
+        self.assertEqual(self.browser.evaluate('location.pathname'), '/')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
+        self.screenshot('menu-c18-admin-to-personal-settings')
+        self.click('#settings-tabs-container > button')
         self.wait("location.pathname === '/c/existing-chat' && !document.querySelector('#settings-tabs-container')")
+
+    def test_native_admin_dialog_contains_keyboard_focus(self):
+        self.native_menu_fixture()
+        self.click('[data-action=mode][data-mode=author]')
+        self.click('[data-action=native_open][data-native-id=admin]')
+        self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]') && document.querySelector('[role=dialog][aria-modal=true] input[type=text][placeholder*=\"localhost:3000\"]') && document.querySelector('#ees-work-entry [data-action=procedures]')")
+        observe = """(()=>{
+          const modal=document.querySelector('[role=dialog][aria-modal=true]:has(#settings-tabs-container)');
+          const controls=[...modal.querySelectorAll('a[href],button,input,select,textarea,[tabindex]')].filter(e=>e.tabIndex>=0&&!e.matches(':disabled')&&!e.closest('[inert]')&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
+          const describe=e=>({tag:e?.tagName,id:e?.id||'',name:e?.name||'',role:e?.getAttribute('role'),label:e?.getAttribute('aria-label')||'',text:e?.textContent?.trim().slice(0,80)||''});
+          const active=document.activeElement,menu=document.querySelector('#ees-work-entry');
+          return {path:location.pathname,dialog:!!modal,contained:modal.contains(active),menuFocused:menu.contains(active),menuInert:!!menu.closest('[inert]'),active:describe(active),index:controls.indexOf(active),controls:controls.map(describe)};
+        })()"""
+        # Establish focus with a real pointer, then use trusted browser Tab
+        # events. DOM dispatchEvent/focus() cannot prove Native's focus trap.
+        self.click('[role=dialog] input[type=text][placeholder*="localhost:3000"]')
+        initial = self.browser.evaluate(observe)
+        self.assertTrue(initial['contained'])
+        self.assertGreater(len(initial['controls']), 2)
+        sequence = []
+        for direction, modifiers in (('Tab', 0), ('Shift+Tab', 8)):
+            for index in range(len(initial['controls']) * 2 + 4):
+                self.key('Tab', 9, modifiers)
+                record = self.browser.evaluate(observe)
+                record.pop('controls')
+                record.update(direction=direction,step=index+1)
+                sequence.append(record)
+        menu_pointer = self.browser.evaluate("""(()=>{const e=document.querySelector('#ees-work-entry [data-action=procedures]'),r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2,hit=document.elementFromPoint(x,y);return {point:{x,y},reachable:e.contains(hit),hit:{tag:hit?.tagName,id:hit?.id,classes:hit?.className,role:hit?.getAttribute('role')},menuInert:!!e.closest('[inert]')};})()""")
+        directory = self.screenshot('menu-c18-admin-keyboard-focus')
+        (directory / 'menu-c18-admin-keyboard-focus.json').write_text(json.dumps({
+            'scope': 'actual compiled Open WebUI 0.11.3 modal and trusted Chrome CDP keyboard/pointer; temporary workflow SQLite and synthetic Native session/capability responses; not real company authentication or ACL verification',
+            'initial': initial, 'sequence': sequence, 'menu_pointer': menu_pointer,
+        }, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.assertTrue(all(item['dialog'] and item['contained'] and not item['menuFocused']
+                            for item in sequence), sequence)
+        for direction in ('Tab', 'Shift+Tab'):
+            visited = [item['index'] for item in sequence if item['direction'] == direction]
+            self.assertIn(0, visited)
+            self.assertIn(len(initial['controls']) - 1, visited)
+            self.assertLess(len(set(visited)), len(visited), 'Expected a complete focus cycle')
+            boundary = (len(initial['controls']) - 1, 0) if direction == 'Tab' else (0, len(initial['controls']) - 1)
+            self.assertIn(boundary, list(zip(visited, visited[1:])))
 
     def test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt(self):
         self.native_menu_fixture()
@@ -303,29 +349,146 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), before)
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
         self.assertEqual(self.server.completions, [])
-        self.screenshot('menu-c15-native-image-blocked')
+        self.screenshot('menu-c18-native-image-blocked')
+
+    def test_native_personal_settings_keep_original_tabs_and_close_controls(self):
+        self.native_menu_fixture()
+        self.navigate('/?settings=general')
+        self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-general][aria-selected=true]')")
+        # Native can open its modal before the authenticated EES workspace
+        # finishes mounting. Assert the theme once its real scope is present.
+        self.wait("document.body.dataset.eesIntegrated === 'true' && document.querySelector('#ees-work-entry') && document.querySelector('#ees-work-panel')")
+        modal = '[role=dialog][aria-modal=true]:has(#settings-tabs-container)'
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
+        self.assertGreater(self.browser.evaluate("document.querySelector('#settings-tabs-container > button').getBoundingClientRect().height"), 0)
+        typography = self.browser.evaluate("""(()=>{const tabs=document.querySelector('#settings-tabs-container'),modal=tabs.closest('[role=dialog][aria-modal=true]'),tab=tabs.querySelector('[role=tab][aria-selected=true]');return {modal:getComputedStyle(modal.firstElementChild).fontFamily,tab:getComputedStyle(tab).fontFamily,tabCount:tabs.querySelectorAll('[role=tab]').length};})()""")
+        self.assertIn('EES Inter', typography['modal'])
+        self.assertIn('EES Inter', typography['tab'])
+        self.assertGreater(typography['tabCount'], 1)
+        self.screenshot('menu-c18-native-personal-settings')
+        self.click('#settings-tabs-container > button')
+        self.wait('!document.querySelector(' + json.dumps(modal) + ') && window.__eesNativeDraftV1?.ready()')
+        self.assertEqual(self.server.completions, [])
+
+    def test_native_personal_key_uses_original_valves_controls_and_theme(self):
+        # Original compiled Native UserValves component and published API paths;
+        # a synthetic tool/schema/value only, not real credentials or ACL proof.
+        original_get = NativeUIHandler.do_GET
+
+        def fixture_get(handler):
+            path = urlsplit(handler.path).path
+            responses = {
+                '/api/v1/tools/': [{'id': 'fixture-personal-key', 'name': '합성 개인 키 도구',
+                                   'has_user_valves': True, 'specs': []}],
+                '/api/v1/tools/id/fixture-personal-key/valves/user': {'API_KEY': 'synthetic-key-only'},
+                '/api/v1/tools/id/fixture-personal-key/valves/user/spec': {
+                    'type': 'object', 'properties': {'API_KEY': {'title': '합성 개인 키',
+                        'description': '실제 키가 아닌 화면 검증 값입니다.', 'type': 'string',
+                        'input': {'type': 'password'}}}, 'required': ['API_KEY']},
+            }
+            if path in responses:
+                handler.server.requests.append(('GET', path))
+                return handler.send_content(responses[path])
+            return original_get(handler)
+
+        provider = patch.object(NativeUIHandler, 'do_GET', fixture_get)
+        provider.start()
+        self.addCleanup(provider.stop)
+        self.browser.evaluate("localStorage.setItem('chatControls.valves','true')")
+        self.navigate('/c/existing-chat')
+        self.wait("window.__eesNativeDraftV1?.ready() && document.querySelector('button[aria-label=Controls]')")
+        self.click('button[aria-label=Controls]')
+        self.wait("document.querySelector('select:has(option[value=fixture-personal-key])')")
+        self.choose('select:has(option[value=fixture-personal-key])', 'fixture-personal-key')
+        self.wait("document.querySelector('.chat-control-valves #valve-API_KEY')")
+        key = '.chat-control-valves #valve-API_KEY'
+        # Pinned SensitiveInput keeps type=text and masks with .password.
+        # Verify the actual masking and its original show/hide control.
+        self.assertEqual(self.read(key, 'type'), 'text')
+        self.assertEqual(self.browser.evaluate('getComputedStyle(document.querySelector(' + json.dumps(key) + ')).webkitTextSecurity'), 'disc')
+        self.assertEqual(self.read(key, 'value'), 'synthetic-key-only')
+        self.assertTrue(self.read(key, 'required'))
+        styles = self.browser.evaluate("""(()=>{const e=document.querySelector('.chat-control-valves'),input=e.querySelector('input');return {font:getComputedStyle(e).fontFamily,inputFont:getComputedStyle(input).fontFamily,background:getComputedStyle(e).backgroundColor,inputBackground:getComputedStyle(input).backgroundColor};})()""")
+        self.assertIn('EES Inter', styles['font'])
+        self.assertIn('EES Inter', styles['inputFont'])
+        self.assertEqual(styles['background'], 'rgb(255, 255, 255)')
+        self.assertEqual(styles['inputBackground'], 'rgb(255, 255, 255)')
+        reveal = '.chat-control-valves button[aria-pressed]'
+        self.click(reveal)
+        self.assertEqual(self.read(reveal, 'getAttribute("aria-pressed")'), 'true')
+        self.assertEqual(self.browser.evaluate('getComputedStyle(document.querySelector(' + json.dumps(key) + ')).webkitTextSecurity'), 'none')
+        self.click(reveal)
+        self.assertEqual(self.browser.evaluate('getComputedStyle(document.querySelector(' + json.dumps(key) + ')).webkitTextSecurity'), 'disc')
+        self.screenshot('menu-c18-native-personal-key')
+        self.assertFalse(any(method != 'GET' and '/valves/user' in path for method, path in self.server.requests))
+        self.assertEqual(self.server.completions, [])
 
     def test_native_menu_missing_mount_and_direct_entry_keep_original_skills_search(self):
         self.native_menu_fixture()
         self.click('[data-action=mode][data-mode=author]')
         self.click('[data-action=native_open][data-native-id=skills]')
-        self.wait("location.pathname === '/workspace/skills' && document.querySelector('#ees-work-native-return')")
+        self.wait("location.pathname === '/workspace/skills' && document.querySelector('#ees-work-entry') && document.querySelector('#workspace-container input[aria-label]')")
         # Fault injection changes only the test DOM's mount identifier. The
         # original compiled search component and its handlers remain in place.
-        self.browser.evaluate("""(()=>{const content=document.querySelector('#workspace-container'),parent=content.parentNode,next=content.nextSibling;content.id='fixture-unrecognized-workspace';parent.removeChild(content);parent.insertBefore(content,next);return true;})()""")
-        self.wait("!document.querySelector('#ees-work-native-return')")
-        self.search_native_skills('#fixture-unrecognized-workspace input[aria-label]', 'missing-mount-search')
+        self.browser.evaluate("""(()=>{const anchor=document.querySelector('#sidebar-search-button'),parent=anchor.parentNode,next=anchor.nextSibling;anchor.id='fixture-unrecognized-sidebar-search';parent.removeChild(anchor);parent.insertBefore(anchor,next);return true;})()""")
+        self.wait("!document.querySelector('#ees-work-entry')")
+        self.search_native_skills('#workspace-container input[aria-label]', 'missing-mount-search')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel')"))
-        self.screenshot('menu-c15-native-missing-mount')
+        self.screenshot('menu-c18-native-missing-mount')
 
         # A fresh direct Native route has no EES departure ticket.
         self.navigate('/workspace/skills')
-        self.wait("location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input[aria-label]')")
+        self.wait("location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input[aria-label]') && document.querySelector('#ees-work-entry')")
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel')"))
         self.search_native_skills('#workspace-container input[aria-label]', 'direct-native-search')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
         self.assertEqual(self.server.completions, [])
-        self.screenshot('menu-c15-direct-native-search')
+        self.screenshot('menu-c18-direct-native-search')
+
+        # All four asset kinds remain the compiled Native screens in PR 1.
+        # Switching them must not require the chat editor to exist.
+        self.open_sidebar()
+        for target in ('models', 'knowledge', 'prompts', 'skills'):
+            self.click('[data-action=native_open][data-native-id=' + target + ']')
+            self.wait('location.pathname === ' + json.dumps('/workspace/' + target)
+                      + ' && document.querySelector("#workspace-container input")'
+                      + ' && document.querySelector("#ees-work-entry [data-action=native_open][data-native-id=' + target + '][aria-current=page]")')
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel,#ees-work-native-return')"))
+        self.click('#ees-work-entry [data-action=procedures]')
+        self.wait("location.pathname === '/' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ees-work-designer')")
+        self.assertEqual(self.state()['workflows'], [])
+
+    def test_native_shell_browser_back_preserves_draft_and_mobile_navigation(self):
+        self.native_menu_fixture()
+        self.fill('#chat-input', '뒤로 가기로 복원할 개인 질문')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.click('[data-action=mode][data-mode=author]')
+        self.click('[data-author-action=create]')
+        self.fill('#ew-procedure-name', '브라우저 뒤로 가기 중인 미저장 절차')
+        self.click('[data-action=native_open][data-native-id=skills]')
+        self.wait("location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input[aria-label]')")
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 600, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait('innerWidth === 600')
+        self.wait("(()=>{const nav=document.querySelector('#workspace-container')?.previousElementSibling;return nav?.querySelector('button')?.getBoundingClientRect().height>0;})()")
+        # At mobile width Native unmounts a closed sidebar. Open its preserved
+        # control first, then verify the EES menu replaces the duplicated tabs.
+        self.click('nav #sidebar-toggle-button')
+        self.wait("document.querySelector('#ees-work-entry') && document.body.classList.contains('ees-work-native-shell')")
+        self.wait("document.querySelector('#sidebar')?.getBoundingClientRect().x >= 0")
+        mobile_button = self.browser.evaluate("(()=>{const nav=document.querySelector('#workspace-container').previousElementSibling;return [...nav.querySelectorAll('button')].filter(e=>e.getBoundingClientRect().height>0).map(e=>({label:e.getAttribute('aria-label'),display:getComputedStyle(e).display,height:e.getBoundingClientRect().height}));})()")
+        self.assertTrue(mobile_button)
+        self.assertFalse(self.browser.evaluate("[...document.querySelector('#workspace-container').previousElementSibling.querySelectorAll('a[href^=\"/workspace\"]')].some(e=>e.getBoundingClientRect().height>0)"))
+        self.assertFalse(self.browser.evaluate('document.documentElement.scrollWidth > innerWidth'))
+        self.screenshot('menu-c18-native-mobile')
+        self.browser.evaluate('history.back()')
+        self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ew-procedure-name')")
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.assertEqual(self.read('#ew-procedure-name', 'value'), '브라우저 뒤로 가기 중인 미저장 절차')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
+        self.assertEqual(self.server.completions, [])
+        self.screenshot('menu-c18-mobile-browser-back')
 
     def test_native_menu_uses_server_capabilities_for_admin_author_member_and_tools_only(self):
         self.native_menu_fixture()
@@ -336,9 +499,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
 
         self.assertEqual(menu_ids(), ['skills', 'models', 'knowledge', 'prompts', 'tools', 'admin'])
         self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-nav-group-title')].map(e=>e.textContent)"),
-                         ['업무 만들기', 'Open WebUI에서 열기', '관리자만'])
+                         ['업무 만들기', 'AI 설정', '관리자만'])
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=native_skills],[data-action=native_workspace]')"))
-        self.screenshot('menu-c15-admin-menu')
+        self.screenshot('menu-c18-admin-menu')
 
         self.command('save_access', principal_kind='user', principal_id=self.server.user['id'],
                      system_id='EMS', factory_id='*', roles=['manager', 'participant'])
@@ -349,7 +512,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(menu_ids(), ['skills', 'prompts'])
         self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-action=tools]')"))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=workspace_admin]')"))
-        self.screenshot('menu-c15-author-menu')
+        self.screenshot('menu-c18-author-menu')
 
         self.server.user['role'] = 'admin'
         grant = next(item for item in self.state()['access'] if item['principal_id'] == self.server.user['id'])
@@ -361,7 +524,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("!document.querySelector('[data-action=mode][data-mode=author]')")
         self.assertEqual(menu_ids(), [])
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-designer')"))
-        self.screenshot('menu-c15-member-work-only')
+        self.screenshot('menu-c18-member-work-only')
 
         self.menu_grants['tools'] = True
         self.refresh()
@@ -370,8 +533,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(menu_ids(), [])
         self.assertIn('EES Work에서 열 수 있는 항목이 없습니다', self.text('#ees-work-entry'))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=tools],[data-action=workspace_admin]')"))
-        directory = self.screenshot('menu-c15-tools-only-menu')
-        (directory / 'menu-c15-role-scope.json').write_text(json.dumps({
+        directory = self.screenshot('menu-c18-tools-only-menu')
+        (directory / 'menu-c18-role-scope.json').write_text(json.dumps({
             'scope': 'server capability rendering with synthetic Native permission provider; actual Native account/API ACL is a separate gate',
             'cases': ['admin', 'EES manager with skills/prompts', 'viewer without Native workspace grants', 'Native tools-only non-admin'],
             'tools_only_capabilities': self.state()['capabilities'],
@@ -398,7 +561,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(unconnected['reference'], {})
         self.assertEqual(unconnected['state'], 'draft')
         self.assertTrue(self.read('[data-author-action="tool_review"]', 'disabled'))
-        self.assertEqual([body['action'] for body in self.server.workspace_commands], ['tool_save'])
+        # Menu selection has its own debounced personal UI save. Its timing
+        # must not change the required single business command for this draft.
+        self.assertEqual([body['action'] for body in self.server.workspace_commands
+                          if body['action'] != 'save_ui'], ['tool_save'])
         self.screenshot('easy-tools-unconnected-saved')
 
         self.connected_tools.append(function('jira', '합성 Jira', 'jira_search_crs', 'read'))

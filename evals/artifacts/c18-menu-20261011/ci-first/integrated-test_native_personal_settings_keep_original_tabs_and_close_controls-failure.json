@@ -1,0 +1,1107 @@
+{
+  "test": "test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_settings_keep_original_tabs_and_close_controls",
+  "last_wait": "document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-general][aria-selected=true]')",
+  "last_click": null,
+  "capture_errors": [],
+  "browser": {
+    "stage": "ready",
+    "elapsed_ms": 2508.9435769999964,
+    "pid": 12300,
+    "exit_code": null,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/154.0.8037.97",
+      "revision": "@b510e9d7cd3a2fbd78d0ddc42234103206c5f78d",
+      "jsVersion": "15.4.80.20"
+    },
+    "target_id": "5892C5D87D69568047066B66FFBDD70C",
+    "session_attached": true,
+    "buffer_bytes": 3103,
+    "last_command": {
+      "id": 49,
+      "method": "Runtime.evaluate",
+      "session_attached": true,
+      "timeout_seconds": 15,
+      "elapsed_ms": 9.18171300000381,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "id": 47,
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "id": 48,
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      },
+      {
+        "id": 49,
+        "sessionId": "9B1448B8CACEB53E99C33FB0B66D14AB"
+      }
+    ],
+    "stderr_tail": "[12300:12321:1010/235521.300879:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[12300:12321:1010/235521.302333:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[12300:12321:1010/235521.351625:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[12300:12321:1010/235521.385374:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[12300:12300:1010/235521.475744:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[12300:12321:1010/235521.475875:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[12300:12300:1010/235521.475906:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[12300:12321:1010/235521.475956:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[12300:12300:1010/235521.482462:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[12300:12300:1010/235521.486037:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[12300:12321:1010/235521.487143:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[12300:12300:1010/235521.515669:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[12300:12300:1010/235521.516453:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[12300:12321:1010/235521.516527:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[12300:12300:1010/235521.525614:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[12300:12300:1010/235521.570662:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files\n[12300:12300:1010/235521.570699:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[12300:12321:1010/235521.570775:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[12300:12300:1010/235521.591900:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[12300:12321:1010/235521.594208:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[12300:12300:1010/235521.628782:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 354.12853799999766,
+      "product": "Chrome/154.0.8037.97"
+    },
+    "bootstrap_observation": null
+  },
+  "dom": {
+    "route": "/",
+    "ready": "complete",
+    "fonts": "loaded",
+    "controls": [
+      {
+        "id": "sidebar-new-chat-button",
+        "label": null,
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": "사이드바 접기",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 209,
+          "y": 0,
+          "width": 30,
+          "height": 30
+        }
+      },
+      {
+        "id": "sidebar-search-button",
+        "label": "대화 검색",
+        "text": " 대화 검색 Ctrl+K",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "action": "mode",
+        "label": "업무",
+        "text": "업무",
+        "disabled": false,
+        "rect": {
+          "x": 11,
+          "y": 53,
+          "width": 115.5,
+          "height": 32
+        }
+      },
+      {
+        "id": "",
+        "action": "mode",
+        "label": "워크스페이스",
+        "text": "워크스페이스",
+        "disabled": false,
+        "rect": {
+          "x": 128.5,
+          "y": 53,
+          "width": 115.5,
+          "height": 32
+        }
+      },
+      {
+        "id": "ees-work-site-trigger",
+        "action": "scope",
+        "label": "공장 선택",
+        "text": "공장전체 공장",
+        "disabled": false,
+        "rect": {
+          "x": 9,
+          "y": 125,
+          "width": 237,
+          "height": 38
+        }
+      },
+      {
+        "id": "ees-work-system-trigger",
+        "action": "scope",
+        "label": "시스템 선택",
+        "text": "시스템EMS",
+        "disabled": false,
+        "rect": {
+          "x": 9,
+          "y": 163,
+          "width": 237,
+          "height": 39
+        }
+      },
+      {
+        "id": "",
+        "action": "my_work",
+        "label": "내 업무",
+        "text": "내 업무",
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 215,
+          "width": 239,
+          "height": 36
+        }
+      },
+      {
+        "id": "",
+        "action": "find",
+        "label": "워크플로우 찾기",
+        "text": "워크플로우 찾기",
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 251,
+          "width": 239,
+          "height": 36
+        }
+      },
+      {
+        "id": "",
+        "action": "records",
+        "label": "실행 기록",
+        "text": "실행 기록",
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 287,
+          "width": 239,
+          "height": 36
+        }
+      },
+      {
+        "id": "",
+        "action": "chats",
+        "label": "대화 기록",
+        "text": "대화 기록",
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 323,
+          "width": 239,
+          "height": 36
+        }
+      },
+      {
+        "id": "",
+        "label": "운영",
+        "text": "운영",
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 406,
+          "width": 239,
+          "height": 32
+        }
+      },
+      {
+        "id": "",
+        "label": "셋업",
+        "text": "셋업",
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 442,
+          "width": 239,
+          "height": 32
+        }
+      },
+      {
+        "id": "",
+        "label": "장애대응",
+        "text": "장애대응",
+        "disabled": false,
+        "rect": {
+          "x": 8,
+          "y": 478,
+          "width": 239,
+          "height": 32
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "폴더 ",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": "새 폴더",
+        "text": " ",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "채팅 ",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " ",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": "더보기",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "sidebar-chat-item",
+        "label": null,
+        "text": "   기존 대화 56년 전",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " ",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": "Chat Menu",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "sidebar-chat-item",
+        "label": null,
+        "text": "   기존 대화 56년 전",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " ",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": "Chat Menu",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "  Fixture Administrator",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": "사용자 메뉴",
+        "text": "  Fixture Administrator",
+        "disabled": false,
+        "rect": {
+          "x": 4,
+          "y": 1040,
+          "width": 247,
+          "height": 34
+        }
+      },
+      {
+        "id": "",
+        "action": "open_panel",
+        "label": "업무 패널 열기",
+        "text": "업무 열기",
+        "disabled": false,
+        "rect": {
+          "x": 1206.71875,
+          "y": 10.5,
+          "width": 59.140625,
+          "height": 26
+        }
+      },
+      {
+        "id": "",
+        "action": "new_chat",
+        "label": null,
+        "text": "새 대화",
+        "disabled": false,
+        "rect": {
+          "x": 1271.859375,
+          "y": 10.5,
+          "width": 48.140625,
+          "height": 26
+        }
+      },
+      {
+        "id": "new-chat-button",
+        "label": "New Chat",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "temporary-chat-button",
+        "label": "임시 채팅",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 1356,
+          "y": 12,
+          "width": 24,
+          "height": 24
+        }
+      },
+      {
+        "id": "",
+        "label": "Controls",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 1388,
+          "y": 12,
+          "width": 24,
+          "height": 24
+        }
+      },
+      {
+        "id": "",
+        "label": "UI에서 Fixture AI 정보 확인",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "confirm-recording-button",
+        "label": "Confirm recording",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "generate-message-pair-button",
+        "label": "Generate message pair",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " ",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "input-menu-button",
+        "label": "더보기",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 511,
+          "y": 997,
+          "width": 30,
+          "height": 30
+        }
+      },
+      {
+        "id": "model-selector-model-button",
+        "label": "선택된 모델: Fixture AI",
+        "text": "Fixture AI ",
+        "disabled": false,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "voice-input-button",
+        "label": "Voice Input",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 1029,
+          "y": 997,
+          "width": 30,
+          "height": 30
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "음성 모드 사용",
+        "disabled": false,
+        "rect": {
+          "x": 1065.5,
+          "y": 997,
+          "width": 85,
+          "height": 30
+        }
+      },
+      {
+        "id": "",
+        "label": "음성 모드 사용",
+        "text": "",
+        "disabled": false,
+        "rect": {
+          "x": 1107.5,
+          "y": 976,
+          "width": 30,
+          "height": 30
+        }
+      },
+      {
+        "id": "send-message-button",
+        "label": null,
+        "text": "",
+        "disabled": true,
+        "rect": {
+          "x": 1155,
+          "y": 997,
+          "width": 30,
+          "height": 30
+        }
+      },
+      {
+        "id": "",
+        "action": "close_panel",
+        "label": "업무 패널 닫기",
+        "text": "닫기",
+        "disabled": false,
+        "rect": {
+          "x": 1866,
+          "y": 9.5,
+          "width": 38,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 뒤로",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 113,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 일반",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 223,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 인터페이스",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 252,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 알림",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 281,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " Keyboard",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 310,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 통합",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 365,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 오디오",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 420,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 데이터 제어",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 475,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 사용량",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 504,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 보관된 채팅",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 533,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 계정",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 588,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 정보",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 617,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 일반",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 702,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 인증",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 731,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 연결",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 786,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 모델",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 815,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " Sub-agents",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 844,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 인터페이스",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 899,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 오디오",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 928,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 이미지들",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 957,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 평가",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 1012,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 분석",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 1041,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 통합",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 1096,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 문서",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 1125,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 웹 검색",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 1154,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 코드 실행",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 1183,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 파이프라인",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 1212,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": " 데이터베이스",
+        "disabled": false,
+        "rect": {
+          "x": 321.5,
+          "y": 1267,
+          "width": 231,
+          "height": 28
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "보기",
+        "disabled": false,
+        "rect": {
+          "x": 1547.40625,
+          "y": 428.109375,
+          "width": 22.09375,
+          "height": 16
+        }
+      },
+      {
+        "id": "",
+        "label": null,
+        "text": "저장",
+        "disabled": false,
+        "rect": {
+          "x": 1521.734375,
+          "y": 923,
+          "width": 53.765625,
+          "height": 32
+        }
+      }
+    ],
+    "navigationAncestors": [
+      {
+        "tag": "SECTION",
+        "id": "ees-work-entry",
+        "display": "block",
+        "visibility": "visible",
+        "width": 255,
+        "height": 532
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "display": "block",
+        "visibility": "visible",
+        "width": 255,
+        "height": 532
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "display": "flex",
+        "visibility": "visible",
+        "width": 255,
+        "height": 1004
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "display": "flex",
+        "visibility": "visible",
+        "width": 256,
+        "height": 1080
+      },
+      {
+        "tag": "DIV",
+        "id": "sidebar",
+        "display": "block",
+        "visibility": "visible",
+        "width": 256,
+        "height": 1080
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "display": "flex",
+        "visibility": "visible",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "display": "block",
+        "visibility": "visible",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "display": "contents",
+        "visibility": "visible",
+        "width": 0,
+        "height": 0
+      },
+      {
+        "tag": "BODY",
+        "id": "",
+        "display": "block",
+        "visibility": "visible",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "tag": "HTML",
+        "id": "",
+        "display": "block",
+        "visibility": "visible",
+        "width": 1920,
+        "height": 1080
+      }
+    ]
+  }
+}

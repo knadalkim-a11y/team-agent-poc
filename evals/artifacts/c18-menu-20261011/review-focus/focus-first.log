@@ -1,0 +1,22 @@
+test_native_admin_dialog_contains_keyboard_focus_and_menu_click_preserves_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_admin_dialog_contains_keyboard_focus_and_menu_click_preserves_draft) ... FAIL
+
+======================================================================
+FAIL: test_native_admin_dialog_contains_keyboard_focus_and_menu_click_preserves_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_admin_dialog_contains_keyboard_focus_and_menu_click_preserves_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18-review/tests/ees_work_integrated_fixture.py", line 90, in setUp
+    self.browser.navigate('about:blank')
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18-review/tests/test_ees_chat_theme.py", line 292, in navigate
+    version = self.call("Browser.getVersion", timeout=deadline - time.monotonic())
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18-review/tests/test_ees_chat_theme.py", line 265, in call
+    response = self.receive(deadline)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18-review/tests/test_ees_chat_theme.py", line 244, in receive
+    raise AssertionError("Chrome DevTools pipe closed: " + self.diagnostics()["stderr_tail"][-2000:])
+AssertionError: Chrome DevTools pipe closed:
+
+----------------------------------------------------------------------
+Ran 1 test in 0.655s
+
+FAILED (failures=1)

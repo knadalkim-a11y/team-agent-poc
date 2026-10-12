@@ -1,0 +1,17 @@
+test_native_personal_settings_keep_original_tabs_and_close_controls (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_settings_keep_original_tabs_and_close_controls) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 155.49118799935968, "product": "HeadlessChrome/153.0.8010.52"}
+FONT OBSERVATION {"initial_asserted_font": "-apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"", "before": {"entry": false, "panel": false, "fonts": "loaded", "chatReady": true, "modalFont": "-apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\""}, "after_ms": 42.63, "after_font": "\"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif"}
+FAIL
+
+======================================================================
+FAIL: test_native_personal_settings_keep_original_tabs_and_close_controls (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_settings_keep_original_tabs_and_close_controls)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-c18/tests/test_ees_work_figma_authoring_native.py", line 320, in test_native_personal_settings_keep_original_tabs_and_close_controls
+    self.assertIn('EES Inter', typography['modal'])
+  File "<stdin>", line 17, in observe_assert
+AssertionError: 'EES Inter' not found in '-apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
+
+----------------------------------------------------------------------
+Ran 1 test in 1.922s
+
+FAILED (failures=1)
