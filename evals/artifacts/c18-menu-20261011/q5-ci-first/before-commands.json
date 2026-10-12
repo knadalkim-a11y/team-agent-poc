@@ -1,0 +1,61 @@
+{
+  "scope": "actual browser; real workflow commands on temporary SQLite, synthetic Native session; existing save_ui observed before first tool save",
+  "commands": [
+    {
+      "action": "save_ui",
+      "expected_revision": 0,
+      "request_id": "32056438-59fc-46fb-ab93-72beaa3c15e4",
+      "state": {
+        "selection": {
+          "mode": "author",
+          "tab": "tools",
+          "panel_open": true,
+          "system_id": "EMS",
+          "factory_id": "",
+          "workflow_id": "",
+          "run_id": "",
+          "job_id": "",
+          "collapsed": [],
+          "chat_reference": null
+        }
+      }
+    },
+    {
+      "action": "tool_save",
+      "system_id": "EMS",
+      "workflow_id": "",
+      "expected_revision": 0,
+      "tool": {
+        "name": "수집 대기열 조회",
+        "description": "데이터 수집이 지연되는지 대기열 상태를 확인합니다. EMS 정보 읽기 기능 연결이 필요합니다.",
+        "kind": "read",
+        "system_id": "EMS",
+        "state": "draft",
+        "revision": 0
+      },
+      "request_id": "f394eb0d-1cc4-4d8a-a5a0-d3fbe7103e2e"
+    }
+  ],
+  "tools": [
+    {
+      "description": "데이터 수집이 지연되는지 대기열 상태를 확인합니다. EMS 정보 읽기 기능 연결이 필요합니다.",
+      "editor": "fixture-admin",
+      "id": "71a6201e-2596-4729-9134-a4b99527c3b2",
+      "input_schema": {
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "kind": "read",
+      "name": "수집 대기열 조회",
+      "reference": {},
+      "reviewer": null,
+      "revision": 1,
+      "state": "draft",
+      "system_id": "EMS",
+      "updated_at": 1791765854.8687372
+    }
+  ],
+  "external_calls": [],
+  "completions": []
+}

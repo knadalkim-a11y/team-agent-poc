@@ -1,0 +1,7 @@
+test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip (__main__.SaveUIObservation.test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 151.8386439997812, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.637s
+
+OK

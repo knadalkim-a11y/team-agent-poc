@@ -561,7 +561,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(unconnected['reference'], {})
         self.assertEqual(unconnected['state'], 'draft')
         self.assertTrue(self.read('[data-author-action="tool_review"]', 'disabled'))
-        self.assertEqual([body['action'] for body in self.server.workspace_commands], ['tool_save'])
+        # Menu selection has its own debounced personal UI save. Its timing
+        # must not change the required single business command for this draft.
+        self.assertEqual([body['action'] for body in self.server.workspace_commands
+                          if body['action'] != 'save_ui'], ['tool_save'])
         self.screenshot('easy-tools-unconnected-saved')
 
         self.connected_tools.append(function('jira', '합성 Jira', 'jira_search_crs', 'read'))

@@ -1,0 +1,25 @@
+2026-10-12T00:41:39.9154809Z FAIL: test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip)
+2026-10-12T00:41:39.9156490Z ----------------------------------------------------------------------
+2026-10-12T00:41:39.9157258Z Traceback (most recent call last):
+2026-10-12T00:41:39.9167766Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_figma_authoring_native.py", line 564, in test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip
+2026-10-12T00:41:39.9169381Z     self.assertEqual([body['action'] for body in self.server.workspace_commands], ['tool_save'])
+2026-10-12T00:41:39.9170584Z AssertionError: Lists differ: ['tool_save', 'save_ui'] != ['tool_save']
+2026-10-12T00:41:39.9171010Z
+2026-10-12T00:41:39.9171177Z First list contains 1 additional elements.
+2026-10-12T00:41:39.9171570Z First extra element 1:
+2026-10-12T00:41:39.9171866Z 'save_ui'
+2026-10-12T00:41:39.9172009Z
+2026-10-12T00:41:39.9172142Z - ['tool_save', 'save_ui']
+2026-10-12T00:41:39.9172461Z + ['tool_save']
+2026-10-12T00:41:39.9172629Z
+2026-10-12T00:41:39.9172838Z ----------------------------------------------------------------------
+2026-10-12T00:41:39.9173373Z Ran 17 tests in 63.444s
+2026-10-12T00:41:39.9173570Z
+2026-10-12T00:41:39.9173690Z FAILED (failures=1)
+2026-10-12T00:41:40.6258890Z test_c18_panel_cards_input_hover_and_keyboard_focus (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_c18_panel_cards_input_hover_and_keyboard_focus) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 350.23267400001146, "product": "Chrome/154.0.8037.97"}
+2026-10-12T00:41:43.3344302Z ok
+2026-10-12T00:41:43.7939127Z test_q1_geometry_reading_width_footer_and_baseline_overlay (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 374.5763740000143, "product": "Chrome/154.0.8037.97"}
+2026-10-12T00:41:46.9806815Z ok
+2026-10-12T00:41:47.4444332Z test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 379.07587199998716, "product": "Chrome/154.0.8037.97"}
+2026-10-12T00:41:52.3362512Z ok
+2026-10-12T00:41:52.3362773Z
