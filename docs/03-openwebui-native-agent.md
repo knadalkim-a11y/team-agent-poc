@@ -75,9 +75,42 @@ Stop 완료 뒤 백업은 DATA_DIR 전체(업무 DB와 WAL·첨부 포함)·키�
 | `apply` / `program_rename_blocked` 등 | 보관 ZIP·pending을 보존한다. `next=manual_promote`인 정확한 promote 상태만 [기존 Resume](#ees-wrapper-manual-resume)를 따른다. 그 밖에는 [미완료 Apply/Restore](#ees-wrapper-restore)로 판단하고 폴더를 임의 이동하지 않는다. |
 | `process_start`, `health_check`, `process_record` / 실패 code | Start/Upgrade를 반복하지 않는다. `Status -Summary`와 사내 보존 기록으로 실행 중/기동 불확실/미완료를 먼저 구분한 뒤 Stop·프로그램 Restore 필요 여부를 정한다. health 실패만으로 서버 종료를 단정하지 않는다. |
 
-**새 종료 실패 복구 경로:** Status는 읽기 전용이므로 한 번 확인할 수 있다. Update 등 기록을 바꾸는 명령보다 먼저 이번 `last-operation.json`과 `deployment.json`을 각각 `failure`, `registry`로 담은 UTF-8 `state_root/stop-recovery-<GUID32>.json`을 보존한다. `action=upgrade`, failed=true, stage=process_stop, changed=false, 이번 wrapper_commit과 보관 ZIP인지 확인한다. 다른 단계/기록이면 중단한다. 정상 접속으로 돌아왔거나 registry가 달라졌으면 강제 종료하지 않는다.
+<a id="internal-pilot-stop-recovery-20261012"></a>
 
-사내 운영자가 단일 등록 서버의 강제 종료를 선택할 때만, 등록 `source_python -I -B`로 기존 `scripts/ees_deploy_stop_recovery.py`에 `--config` 기존 설정, `--request` 이번 요청, `--commit` **실패한 Upgrade의 전체 SHA**, `--terminate-recorded-process --health-timeout 120`을 전달한다. 도구는 현재 프로그램·환경·ZIP·빈 포트와 PID/실행 파일/생성 시각·단일 venv 부모/자식을 검사하고, 해당 서버만 종료한 뒤 백업→Apply→Start/health를 잇는다. 불일치·불확실 상태는 중단하며 자동 강제 종료는 없다. 성공 기준은 `action=recover_stop result=ok backup=verified running=true`와 화면 확인이다. 요청·ZIP을 바꿔 재시도하거나 09-10/10-01의 과거 요청·SHA를 재사용하지 않는다. [기존 복구의 보호 조건과 이력](#ees-stop-recovery).
+**새 종료 실패 복구 경로:** 09-10·10-01 모두 종료 실패 뒤 서버가 접속을 받지 않았다. 이번 적용에서도 같은 상황이 생겼을 때 **사용자가 복구 실행을 선택한 경우에만** 아래 두 번째 블록을 사용한다. 첫 적용 블록과 같은 clone·설정으로 실행하며 Update·Upgrade·Stop을 먼저 반복하지 않는다. Status는 읽기 전용이므로 한 번 확인할 수 있다. 정상 접속으로 돌아왔거나 실패 단계가 다르면 이 블록을 실행하지 않는다.
+
+현재 clone의 변경 없는 HEAD와 **이번 실패의 wrapper_commit**이 같고, upgrade·failed=true·process_stop·changed=false일 때만 failure/registry 요청을 UTF-8로 보존한다. 원래 실패·registry·ZIP은 사내에 남긴다. 복구 도구가 잠금 아래 현재 registry·프로그램·환경·보관 ZIP·빈 포트와 PID/실행 파일/생성 시각·단일 venv 부모/자식을 다시 검사하며, 불일치나 포트가 회복된 상태면 강제 종료 전에 멈춘다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $eesCfg = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $eesCommit = & git -C $eesRepo rev-parse HEAD
+    if ($LASTEXITCODE -ne 0 -or $eesCommit -cnotmatch '\A[0-9a-f]{40}\z') { throw 'HEAD 조회 실패' }
+    $eesChanges = & git -C $eesRepo status --porcelain --untracked-files=no
+    if ($LASTEXITCODE -ne 0 -or $eesChanges) { throw '로컬 변경을 보존하고 복구를 중단합니다.' }
+    $eesConfig = Get-Content -Raw -Encoding UTF8 $eesCfg | ConvertFrom-Json
+    $eesFailure = Get-Content -Raw -Encoding UTF8 (Join-Path $eesConfig.state_root 'last-operation.json')
+    $eesLast = $eesFailure | ConvertFrom-Json
+    if ($eesLast.action -cne 'upgrade' -or $eesLast.failed -isnot [bool] -or
+        $eesLast.failed -ne $true -or $eesLast.result.stage -cne 'process_stop' -or
+        $eesLast.result.changed -isnot [bool] -or $eesLast.result.changed -ne $false -or
+        $eesLast.result.wrapper_commit -cne $eesCommit) {
+        throw '이번 종료 실패/원본과 다릅니다. 기록을 보존하고 중단합니다.'
+    }
+    $eesRegistry = Get-Content -Raw -Encoding UTF8 (Join-Path $eesConfig.state_root 'deployment.json')
+    $eesRequest = Join-Path $eesConfig.state_root ('stop-recovery-' + [guid]::NewGuid().ToString('N') + '.json')
+    $eesJson = '{"failure":' + $eesFailure + ',"registry":' + $eesRegistry + '}'
+    [IO.File]::WriteAllText($eesRequest, $eesJson, [Text.UTF8Encoding]::new($false))
+    & $eesConfig.source_python -I -B (Join-Path $eesRepo 'scripts\ees_deploy_stop_recovery.py') `
+        --config $eesCfg --request $eesRequest --commit $eesCommit `
+        --terminate-recorded-process --health-timeout 120
+    if ($LASTEXITCODE -ne 0) { throw '복구 중단: 마지막 EES 결과로 확인합니다.' }
+}
+```
+
+이 블록에는 검증된 단일 서버의 명시적 강제 종료가 포함된다. 도구는 종료 뒤 검증 백업→보관 ZIP Apply→Start/health를 진행한다. 성공 기준은 `action=recover_stop result=ok backup=verified running=true`와 화면 확인이다. 실패하면 마지막 `stage/code`만 전달하고 요청 파일·ZIP을 바꾸어 반복하지 않는다. 블록을 실행하면 `last-operation.json`이 복구 결과로 바뀌므로 이후 판단에는 방금 보존한 요청도 유지한다. 09-10/10-01의 과거 요청·SHA를 재사용하지 않는다. [기존 복구의 보호 조건과 이력](#ees-stop-recovery).
 
 ### 프로그램 Restore와 업무 DB 복원
 
