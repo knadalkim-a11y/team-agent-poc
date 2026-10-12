@@ -3,8 +3,8 @@
 ## 2026-10-12 · 적용 묶음의 Git 원본 준비 실패
 
 - **새 사내 결과:** 예상 SHA 정정 블록을 실행한 뒤 사용자가 `upgrade / failed / changed=false / wrapper_changed=false / trial_source_failed / TrialBundleError / ees_trial_bundle.py:180`을 보고했다. 전사된 stage는 `trail_build`, wrapper는 `f0148aa9de59`이며 실제 저장값과 구분한다. 코드상 대응 단계는 `trial_build`이고 Update 뒤 서버 Stop·Backup·Apply 전에 중단하는 경로다. 실패 뒤 웹 접속·현재 서버 상태는 미확인이다.
-- **14:49 KST 추가 결과·다음 확인 하나:** 사용자가 읽기 확인 결과 `longpaths=unset / max_path=290`을 보고했다. Git의 긴 경로 제한이 유력한 후보이나 원래 Git 오류는 없어 원인 확정은 아니다. 사용자가 해당 저장소에만 `core.longpaths=true`를 설정·조회한 뒤, 앞서 검토·Windows CI를 통과한 동일 적용 블록으로 한 번 재시도하도록 안내한다. [관측·가설·검증 한계](../evals/v4-ui-20260930.md#internal-pilot-trial-source-failure-20261012)를 보존하며 아직 설정·재시도는 미실행이다.
-- **범위 유지:** 설정 명령은 기존 적용 블록 밖에 두며 제품·적용/복구 블록·의존성·캐시를 변경하지 않는다. 별도 prepare-only 경로를 만들거나 종료 실패 복구를 실행하지 않는다. 재실패 시 반복하지 않고 새 stage/code로 판단한다. 기존 Draft PR #82에는 사건 기록만 추가하며 main과 적용 대상 `f0148aa0de592df89ab841c7c9e82cd6ca268149`를 유지하고 병합하지 않는다.
+- **14:56 KST 재시도 결과:** 로컬 Git 긴 경로 설정 후 한 번 재시도하는 안내 뒤, 사용자가 `trial_build / operation_failed / StateError / ees_deploy_state.py:142 / changed=false / wrapper=f0148aa0de59`를 보고했다. `_safe`가 검사 경로의 존재를 확인하지 못한 오류이며 Stop 이전이다. 이 단계에서는 원본 파일 검사 또는 완성 ZIP 검사로 좁힐 수 있으나 어느 경로인지는 저장 결과만으로 알 수 없다. [최초 실패·재시도·검증 한계](../evals/v4-ui-20260930.md#internal-pilot-trial-source-failure-20261012)를 보존한다.
+- **다음 확인 하나·범위:** 14:49의 `longpaths=unset / max_path=290`과 현재 오류를 근거로, 유효 Git longpaths/sparseCheckout와 Windows LongPathsEnabled를 읽기 전용으로 한 줄 확인한다. Git의 긴 경로 설정과 Python의 Windows 긴 경로 조건은 별개이며 실제 파일 누락과 아직 구분되지 않는다. 새 worktree/prepare·재적용·복구·PC 정책 변경 없이 결과를 기다린다. 제품·시험·적용/복구 블록은 변경하지 않고 기존 Draft PR #82에 기록만 추가한다. main/적용 대상 `f0148aa0de592df89ab841c7c9e82cd6ca268149`와 병합 보류를 유지한다.
 
 ## 2026-10-12 · 실제 설치 SHA 확인과 적용 안내 정정
 
