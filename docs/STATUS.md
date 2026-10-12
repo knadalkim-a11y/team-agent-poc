@@ -4,7 +4,8 @@
 
 - **새 사내 결과:** 예상 SHA 정정 블록을 실행한 뒤 사용자가 `upgrade / failed / changed=false / wrapper_changed=false / trial_source_failed / TrialBundleError / ees_trial_bundle.py:180`을 보고했다. 전사된 stage는 `trail_build`, wrapper는 `f0148aa9de59`이며 실제 저장값과 구분한다. 코드상 대응 단계는 `trial_build`이고 Update 뒤 서버 Stop·Backup·Apply 전에 중단하는 경로다. 실패 뒤 웹 접속·현재 서버 상태는 미확인이다.
 - **14:56 KST 재시도 결과:** 로컬 Git 긴 경로 설정 후 한 번 재시도하는 안내 뒤, 사용자가 `trial_build / operation_failed / StateError / ees_deploy_state.py:142 / changed=false / wrapper=f0148aa0de59`를 보고했다. `_safe`가 검사 경로의 존재를 확인하지 못한 오류이며 Stop 이전이다. 이 단계에서는 원본 파일 검사 또는 완성 ZIP 검사로 좁힐 수 있으나 어느 경로인지는 저장 결과만으로 알 수 없다. [최초 실패·재시도·검증 한계](../evals/v4-ui-20260930.md#internal-pilot-trial-source-failure-20261012)를 보존한다.
-- **다음 확인 하나·범위:** 14:49의 `longpaths=unset / max_path=290`과 현재 오류를 근거로, 유효 Git longpaths/sparseCheckout와 Windows LongPathsEnabled를 읽기 전용으로 한 줄 확인한다. Git의 긴 경로 설정과 Python의 Windows 긴 경로 조건은 별개이며 실제 파일 누락과 아직 구분되지 않는다. 새 worktree/prepare·재적용·복구·PC 정책 변경 없이 결과를 기다린다. 제품·시험·적용/복구 블록은 변경하지 않고 기존 Draft PR #82에 기록만 추가한다. main/적용 대상 `f0148aa0de592df89ab841c7c9e82cd6ca268149`와 병합 보류를 유지한다.
+- **15:07 KST 확인·다음 작업 하나:** 사용자가 `git=true / win32=0 / sparse=unset`을 보고했다. Git 긴 경로 처리는 켜졌고 Windows 긴 경로 지원은 꺼져 있어 Python의 290자 경로 확인 실패 가설과 강하게 부합한다. 개별 실패 경로는 미확인이다. 임시 원본 worktree만 짧은 고유 경로로 분리하고 실제 파일/디렉터리 길이 검사·기존 보호를 유지하는 [구체적인 수정 계획](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6118780138)을 #78에 남겼다. PR #82의 문서 범위를 코드·검사 보완까지 넓히는 사용자 확인을 기다린다.
+- **범위:** 추가 사내 진단/재적용·복구·PC 정책 변경을 안내하지 않는다. 계획 확인 전 제품·시험·적용/복구 블록은 그대로이며 사건 기록만 갱신한다. main/현재 적용 대상 `f0148aa0de592df89ab841c7c9e82cd6ca268149`와 병합 보류를 유지한다. 구현 승인과 향후 병합·수정 SHA의 사내 적용 승인을 구분한다.
 
 ## 2026-10-12 · 실제 설치 SHA 확인과 적용 안내 정정
 
