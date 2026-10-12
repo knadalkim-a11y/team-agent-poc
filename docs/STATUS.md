@@ -1,5 +1,11 @@
 # 현재 작업 상태
 
+## 2026-10-12 · 적용 묶음의 Git 원본 준비 실패
+
+- **새 사내 결과:** 예상 SHA 정정 블록을 실행한 뒤 사용자가 `upgrade / failed / changed=false / wrapper_changed=false / trial_source_failed / TrialBundleError / ees_trial_bundle.py:180`을 보고했다. 전사된 stage는 `trail_build`, wrapper는 `f0148aa9de59`이며 실제 저장값과 구분한다. 코드상 대응 단계는 `trial_build`이고 Update 뒤 서버 Stop·Backup·Apply 전에 중단하는 경로다. 실패 뒤 웹 접속·현재 서버 상태는 미확인이다.
+- **다음 확인 하나:** 원래 Git 오류가 고정 오류 코드로 치환돼 실패한 Git 호출·종료 코드·stderr는 현재 기록만으로 알 수 없다. Windows 전체 경로 길이와 Git `core.longpaths`를 읽기 전용으로 확인해 경로 제한 가설을 좁힌다. [관측·가설·검증 한계](../evals/v4-ui-20260930.md#internal-pilot-trial-source-failure-20261012)를 보존하며 아직 원인을 확정하지 않는다.
+- **범위 유지:** 적용·Stop·종료 실패 복구를 반복하지 않는다. 제품·설정·의존성·캐시를 변경하지 않으며 기존 Draft PR #82에는 사건 기록만 추가한다. main과 적용 대상 `f0148aa0de592df89ab841c7c9e82cd6ca268149`를 유지하고 병합하지 않는다.
+
 ## 2026-10-12 · 실제 설치 SHA 확인과 적용 안내 정정
 
 - **사내 첫 결과:** 사용자가 기존 안내를 실행했고 예상 원본 불일치로 Update·Stop·Apply 전에 중단했다. 실제 설치 원본은 `7670a1b8f43e122250e0b766bc86986a2abb34ee`(PR #76), `valid=true / running=true`다. 프로그램 파일 검증·등록 프로세스 확인이며 웹 접속 health, 새 적용 성공, 로그인·기존 대화는 미확인이다.
