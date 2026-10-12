@@ -353,8 +353,18 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
 
     def test_native_personal_settings_keep_original_tabs_and_close_controls(self):
         self.native_menu_fixture()
+        # Observe the head gate from document creation. A later timeout/release
+        # must not mask hiding Native's modal before its focus trap activates.
+        observer = self.browser.call('Page.addScriptToEvaluateOnNewDocument', {'source': """
+          window.__eesSettingsGateChanges=0;
+          new MutationObserver(records=>{window.__eesSettingsGateChanges+=records.length;})
+            .observe(document,{subtree:true,attributes:true,attributeFilter:['data-ees-startup']});
+        """})['identifier']
+        self.addCleanup(lambda: self.browser.call('Page.removeScriptToEvaluateOnNewDocument', {'identifier': observer}))
         self.navigate('/?settings=general')
         self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-general][aria-selected=true]')")
+        self.assertEqual(self.browser.evaluate('window.__eesSettingsGateChanges'), 0,
+                         'Native settings hard loads must never arm the chat startup gate')
         # Native can open its modal before the authenticated EES workspace
         # finishes mounting. Assert the theme once its real scope is present.
         self.wait("document.body.dataset.eesIntegrated === 'true' && document.querySelector('#ees-work-entry') && document.querySelector('#ees-work-panel')")
@@ -365,9 +375,67 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertIn('EES Inter', typography['modal'])
         self.assertIn('EES Inter', typography['tab'])
         self.assertGreater(typography['tabCount'], 1)
+        self.assertEqual(self.browser.evaluate('getComputedStyle(document.querySelector(' + json.dumps(modal) + ')).visibility'), 'visible')
+        self.click('#settings-tabs-container [role=tab][aria-selected=true]')
+        for modifiers in (0, 8):
+            self.key('Tab', 9, modifiers)
+            self.assertTrue(self.browser.evaluate('document.querySelector(' + json.dumps(modal) + ').contains(document.activeElement)'))
         self.screenshot('menu-c18-native-personal-settings')
         self.click('#settings-tabs-container > button')
         self.wait('!document.querySelector(' + json.dumps(modal) + ') && window.__eesNativeDraftV1?.ready()')
+        self.assertEqual(self.server.completions, [])
+
+    def test_native_initial_changelog_keeps_focus_while_chat_startup_is_hidden(self):
+        # Actual Native ChangelogModal selection: an administrator who has not
+        # seen this version. Only HTTP settings/release-note data are synthetic.
+        original_get = NativeUIHandler.do_GET
+
+        def fixture_get(handler):
+            path = urlsplit(handler.path).path
+            if path == '/api/v1/users/user/settings':
+                handler.server.requests.append(('GET', path))
+                return handler.send_content({'ui': {'models': ['fixture-model'],
+                    'showChangelog': True, 'version': '0.11.2', 'autoFollowUps': False}})
+            if path == '/api/changelog':
+                handler.server.requests.append(('GET', path))
+                return handler.send_content({'0.11.3': {'date': '2026-10-13',
+                    'fixed': [{'raw': '<p>Synthetic release-note fixture</p>'}]}})
+            return original_get(handler)
+
+        patched = patch.object(NativeUIHandler, 'do_GET', fixture_get)
+        patched.start()
+        self.addCleanup(patched.stop)
+        self.server.delay_next_workspace = True
+        self.server.workspace_response_started.clear()
+        self.server.workspace_response_hold.clear()
+        self.navigate('/c/existing-chat')
+        modal = '[role=dialog][aria-modal=true]:not(:has(#settings-tabs-container))'
+        self.wait('document.documentElement?.dataset.eesStartup === "pending" && document.querySelector(' + json.dumps(modal) + ')')
+        self.assertTrue(self.server.workspace_response_started.wait(timeout=2), 'Held workspace read was not reached')
+        self.assertEqual(self.browser.evaluate('getComputedStyle(document.body).visibility'), 'hidden')
+        self.assertEqual(self.browser.evaluate('getComputedStyle(document.querySelector(' + json.dumps(modal) + ')).visibility'), 'visible')
+        self.assertEqual(self.browser.evaluate('getComputedStyle(document.querySelector(' + json.dumps(modal + ' button') + ')).visibility'), 'visible')
+        self.wait('document.querySelector(' + json.dumps(modal) + ')?.textContent.includes("Synthetic release-note fixture")')
+        self.assertIn('Synthetic release-note fixture', self.text(modal))
+        # A temporary, non-interactive CSS probe inside the actual Native modal
+        # verifies that the gate cannot override a child's own hidden state.
+        self.assertEqual(self.browser.evaluate("""(()=>{
+          const modal=document.querySelector('[role=dialog][aria-modal=true]');
+          const probe=document.createElement('span');probe.style.visibility='hidden';
+          modal.append(probe);const visibility=getComputedStyle(probe).visibility;probe.remove();
+          return visibility;
+        })()"""), 'hidden')
+        self.wait('document.querySelector(' + json.dumps(modal) + ')?.contains(document.activeElement)')
+        for modifiers in (0, 8):
+            self.key('Tab', 9, modifiers)
+            self.assertTrue(self.browser.evaluate('document.querySelector(' + json.dumps(modal) + ').contains(document.activeElement)'))
+        self.assertEqual(self.browser.evaluate('document.documentElement.dataset.eesStartup'), 'pending')
+        self.screenshot('startup-native-changelog-during-gate')
+        self.click(modal + ' button')
+        self.wait('!document.querySelector(' + json.dumps(modal) + ')')
+        self.assertEqual(self.browser.evaluate('document.documentElement.dataset.eesStartup'), 'pending')
+        self.server.workspace_response_hold.set()
+        self.wait("!document.documentElement.dataset.eesStartup && document.querySelector('#ees-work-entry') && document.querySelector('#ees-work-panel') && window.__eesNativeDraftV1?.ready()")
         self.assertEqual(self.server.completions, [])
 
     def test_native_personal_key_uses_original_valves_controls_and_theme(self):

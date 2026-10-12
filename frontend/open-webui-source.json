@@ -11,7 +11,7 @@
   "node": "v22.16.0",
   "npm": "10.9.2",
   "patched_files": {
-    "src/app.html": "ebd8f31f56f93fa99fca9f92f39c759a56829daa4db3d37866ec8414eea779b8",
+    "src/app.html": "a423b395718b1b8cb664fd3407bde043db65a2c02087c2b333ad8cbc5c325fea",
     "src/lib/components/channel/Channel.svelte": "d1b2b57eb615641645b381f76af1e32328132c31dd7830b5edb1b2ad88bc7248",
     "src/lib/components/chat/Chat.svelte": "1f783a1b5767f1b330ed4320abfa1706e2500d21aec7d70d50006f5bb514296c",
     "src/lib/components/chat/MessageInput.svelte": "65e4555e76155596256731f7092f09707b2af0cedcc9398ca38353574bef04ec",
@@ -26,7 +26,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "644501cf7619823f479ec734d40181ff3086229c77e5b65e0ca256ba3297804a"
+      "sha256": "1bd014c47d57789247bdc6fbe08b1458c1022ac382bdbdf021b782d1e1b48024"
     }
   ],
   "pyodide_files": {

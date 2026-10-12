@@ -1,20 +1,23 @@
 diff --git a/src/app.html b/src/app.html
-index 667808e..036fc91 100644
+index 667808e..eb67127 100644
 --- a/src/app.html
 +++ b/src/app.html
-@@ -2,6 +2,30 @@
+@@ -2,6 +2,33 @@
  <html lang="en">
  	<head>
  		<meta charset="utf-8" />
 +		<!-- EES startup gate: hide only authenticated chat hard loads, never re-arm on SPA navigation. -->
 +		<style id="ees-startup-style">
 +			html[data-ees-startup='pending'] body,
-+			html[data-ees-startup='pending'] body * { visibility: hidden !important; }
++			html[data-ees-startup='pending'] body :not([aria-modal='true'], [aria-modal='true'] *) { visibility: hidden !important; }
++			/* Native dialogs must retain focusable controls while their background waits.
++			   Inherit visibility normally inside them, preserving their own hidden children. */
++			html[data-ees-startup='pending'] body [aria-modal='true'] { visibility: visible !important; }
 +		</style>
 +		<script id="ees-startup-gate">
 +			(() => {
 +				if (!/^\/(?:c\/[^/]+\/?)?$/.test(location.pathname) ||
-+					new URLSearchParams(location.search).get('settings')?.startsWith('admin:')) return;
++					new URLSearchParams(location.search).get('settings')) return;
 +				try { if (!localStorage.getItem('token')) return; } catch (_) { return; }
 +				const root = document.documentElement;
 +				const release = () => {
@@ -33,7 +36,7 @@ index 667808e..036fc91 100644
  		<!-- LICENSE covers this Open WebUI branding surface, including name, logo,
  		visual, textual, symbolic identifiers, metadata, and surrounding UI.
  		Do not alter, remove, obscure, or replace it except as LICENSE permits:
-@@ -125,8 +149,11 @@
+@@ -125,8 +152,11 @@
  			})();
  		</script>
  

@@ -112,7 +112,9 @@ function startupGate({pathname='/',search='',token='fixture-token',storageError=
  const scripts=[...added.matchAll(/<script id="ees-startup-gate">([\s\S]*?)<\/script>/g)];
  assert.equal(scripts.length,1,'The exact source app.html startup gate must be present once');
  const css=added.match(/<style id="ees-startup-style">([\s\S]*?)<\/style>/)?.[1];
- assert.match(css,/html\[data-ees-startup='pending'\] body \*\s*\{ visibility: hidden !important; \}/);
+ assert.match(css,/body :not\(\[aria-modal='true'\], \[aria-modal='true'\] \*\)\s*\{ visibility: hidden !important; \}/);
+ assert.match(css,/body \[aria-modal='true'\]\s*\{ visibility: visible !important; \}/);
+ assert.doesNotMatch(css,/\[aria-modal='true'\] \*\s*\{ visibility: visible/,'Native hidden modal children retain their own visibility');
  const dataset={},timers=new Map(),listeners=new Map();let id=0,now=0;
  const window={addEventListener(type,callback){listeners.set(type,callback);},removeEventListener(type,callback){if(listeners.get(type)===callback)listeners.delete(type);},dispatchEvent(event){listeners.get(event.type)?.(event);}};
  const context={document:{documentElement:{dataset}},location:{pathname,search},URLSearchParams,window,localStorage:{getItem(){if(storageError)throw Error('Storage unavailable');return token;}},setTimeout(callback,ms){const key=++id;timers.set(key,{at:now+ms,callback});return key;},clearTimeout:key=>timers.delete(key)};
@@ -136,7 +138,8 @@ test('missing launcher and stalled API always fail open at the independent four-
 });
 test('Native routes, signed-out or unavailable storage and disabled JavaScript are never hidden',()=>{
  for(const pathname of ['/auth','/logout','/workspace/models','/admin/settings','/c/extra/path','/s/shared'])assert.equal(startupGate({pathname}).dataset.eesStartup,undefined,pathname);
- for(const options of [{search:'?settings=admin:general'},{token:''},{storageError:true},{execute:false}])assert.equal(startupGate(options).dataset.eesStartup,undefined,JSON.stringify(options));
+ for(const pathname of ['/','/c/existing-chat'])for(const search of ['?settings=admin:general','?settings=general','?settings=account','?settings=about'])assert.equal(startupGate({pathname,search}).dataset.eesStartup,undefined,pathname+search);
+ for(const options of [{token:''},{storageError:true},{execute:false}])assert.equal(startupGate(options).dataset.eesStartup,undefined,JSON.stringify(options));
 });
 test('launcher releases startup only after a completed view and authoring render',async()=>{
  const h=controller(),events=[];h.context.document.documentElement.dataset={eesStartup:'pending'};h.context.Event=class{constructor(type){this.type=type;}};
