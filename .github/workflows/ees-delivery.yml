@@ -208,6 +208,29 @@ jobs:
           python -c "import tarfile; tarfile.open('dist/windows-previous12-source.tar').extractall('dist/windows-previous12-source', filter='data')"
           python dist/windows-previous12-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/windows-previous12-branding
           python -c "import os,pathlib; values={'EES_TEST_BRANDING_DIR':'dist/windows-branding','EES_TEST_LEGACY_WORKFLOW_WHEEL':'dist/windows-legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl','EES_TEST_PREVIOUS_WORKFLOW_WHEEL':'dist/windows-previous-branding/open_webui-0.11.3+ees.11-py3-none-any.whl','EES_TEST_PREVIOUS_WORKFLOW_SOURCE':'dist/windows-previous-source','EES_TEST_PREVIOUS_C_WHEEL':'dist/windows-previous12-branding/open_webui-0.11.3+ees.12-py3-none-any.whl'}; pathlib.Path(os.environ['GITHUB_ENV']).open('a',encoding='utf-8').write(''.join(key+'='+value+'\n' for key,value in values.items()))"
+      - name: Verify trial source preparation with Windows long paths disabled
+        if: runner.os == 'Windows' && matrix.suite == 'platform'
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $path = 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem'
+          $name = 'LongPathsEnabled'
+          $before = (Get-ItemProperty -LiteralPath $path -Name $name -ErrorAction Stop).$name
+          try {
+            Set-ItemProperty -LiteralPath $path -Name $name -Value 0 -ErrorAction Stop
+            if ((Get-ItemProperty -LiteralPath $path -Name $name).$name -ne 0) {
+              throw 'LongPathsEnabled was not disabled.'
+            }
+            $env:EES_TEST_REQUIRE_WIN32_PATHS_DISABLED = '1'
+            python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_trial_bundle.SourceTests.test_full_repository_prepares_with_long_paths_disabled -v
+            if ($LASTEXITCODE -ne 0) { throw 'Trial long-path regression failed.' }
+          } finally {
+            Remove-Item Env:EES_TEST_REQUIRE_WIN32_PATHS_DISABLED -ErrorAction SilentlyContinue
+            Set-ItemProperty -LiteralPath $path -Name $name -Value $before -ErrorAction Stop
+            if ((Get-ItemProperty -LiteralPath $path -Name $name).$name -ne $before) {
+              throw 'LongPathsEnabled was not restored.'
+            }
+          }
       - name: Run the complete assigned module set
         id: suite
         run: python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite ${{ matrix.suite }} --output dist/ees-results

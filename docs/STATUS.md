@@ -1,5 +1,30 @@
 # 현재 작업 상태
 
+## 2026-10-12 · PR #82 병합본의 사내 재실행
+
+- **현재 결정:** 사용자가 PR #82의 코드 보완을 승인했다. 문서를 병합 후 절차에 맞추고 최종 head CI 성공 후 병합한다. **적용 대상은 PR #82의 병합 SHA**이며, 해당 SHA의 main CI 성공을 확인한 뒤 [#78](https://github.com/knadalkim-a11y/team-agent-poc/issues/78)에 전체 40자리 SHA와 결과를 확정한다. f0148에는 긴 경로 보완이 없으므로 재실행 대상으로 사용하지 않는다.
+- **변경:** 임시 원본만 clone 부모의 고유 폴더로 분리하고 Windows 경로 예산을 사전 검사한다. 원본 바이트·로컬/링크 보호·기존 state_root ZIP/복구 계약을 유지하며 정리 실패는 최초 오류와 함께 남긴다. 설치/데이터/키/Windows 정책·기존 복사 블록은 변경하지 않는다.
+- **검증:** 코드head951e799의 [CI38213662729](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38213662729)는24개 성공/조건부1skip이다. Windows 정책0에서 기존290자 경로의 읽기 실패와 새241자 경로의 준비·정리 성공을 재현했고 정책 복원 뒤 전체 platform 검사도 통과했다. 관련 Linux76개 중74PASS/Windows 전용2skip과 [최초 실패·검증 한계](../evals/v4-ui-20260930.md#internal-pilot-trial-source-failure-20261012)를 함께 보존한다. 이후 문서만 고친 최종 head와 병합 SHA의 CI는 PR #82 및 #78에 구분해 기록한다.
+- **다음 작업 하나:** 사용자가 #78에서 확정한 병합 SHA와 [적용·복구 원문 블록](03-openwebui-native-agent.md#internal-pilot-20261012)으로 사내 재실행한다. 예상 설치 SHA는 `7670a1b8f43e122250e0b766bc86986a2abb34ee` 그대로다. 실제 적용·로그인·기존 대화와 [확인5개](03-openwebui-native-agent.md#internal-pilot-checks-20261012)는 미확인이다. 그 결과를 받을 때까지 후속 병합과 #78 PR2~4·#79·#77 착수는 보류한다.
+- **최초 Windows CI 보완:** 코드head5b21398의 platform 시험에서 무관한 worktree 보존 시험이 실제 CRLF를 LF로 잘못 기대해1실패했다. 실행 전/후 바이트 보존 비교로 고쳤고 Linux에서도 CRLF checkout을 명시해 같은 조건을 재검한다. Windows 정책0 핵심 검사는 전체 suite보다 먼저 실행해 결과를 독립적으로 얻으며 기존 전체 검사를 유지한다. 제품 코드·기존 블록은 직전 head와 같다.
+
+아래 두 절은 PR #82 검토 승인 전의 실패·판단 이력이다. 당시 f0148 고정·병합/재실행 보류는 위 결정으로 대체됐으며 현재 실행 지시가 아니다.
+
+## 2026-10-12 · 적용 묶음의 Git 원본 준비 실패
+
+- **새 사내 결과:** 예상 SHA 정정 블록을 실행한 뒤 사용자가 `upgrade / failed / changed=false / wrapper_changed=false / trial_source_failed / TrialBundleError / ees_trial_bundle.py:180`을 보고했다. 전사된 stage는 `trail_build`, wrapper는 `f0148aa9de59`이며 실제 저장값과 구분한다. 코드상 대응 단계는 `trial_build`이고 Update 뒤 서버 Stop·Backup·Apply 전에 중단하는 경로다. 실패 뒤 웹 접속·현재 서버 상태는 미확인이다.
+- **14:56 KST 재시도 결과:** 로컬 Git 긴 경로 설정 후 한 번 재시도하는 안내 뒤, 사용자가 `trial_build / operation_failed / StateError / ees_deploy_state.py:142 / changed=false / wrapper=f0148aa0de59`를 보고했다. `_safe`가 검사 경로의 존재를 확인하지 못한 오류이며 Stop 이전이다. 이 단계에서는 원본 파일 검사 또는 완성 ZIP 검사로 좁힐 수 있으나 어느 경로인지는 저장 결과만으로 알 수 없다. [최초 실패·재시도·검증 한계](../evals/v4-ui-20260930.md#internal-pilot-trial-source-failure-20261012)를 보존한다.
+- **15:07 KST 당시 판단:** 사용자가 `git=true / win32=0 / sparse=unset`을 보고했다. Git 긴 경로 처리는 켜졌고 Windows 긴 경로 지원은 꺼져 있어 Python의 290자 경로 확인 실패 가설과 강하게 부합했다. 개별 실패 경로는 미확인이다. 임시 원본 worktree만 짧은 고유 경로로 분리하고 실제 파일/디렉터리 길이 검사·기존 보호를 유지하는 [구체적인 수정 계획](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6118780138)을 #78에 남겼다. 당시 코드·검사 보완까지 사용자 확인을 기다렸으나 구현 보류 범위가 넓었다고 정정하고 수정·검증을 완료했다.
+- **당시 범위:** 추가 사내 진단/재적용·복구·PC 정책 변경을 안내하지 않았고 사건 기록만 갱신했다. 당시 main/적용 대상 `f0148aa0de592df89ab841c7c9e82cd6ca268149`와 병합 보류는 위 PR #82 승인·새 병합 SHA 확정 절차로 대체됐다.
+
+## 2026-10-12 · 실제 설치 SHA 확인과 적용 안내 정정
+
+- **사내 첫 결과:** 사용자가 기존 안내를 실행했고 예상 원본 불일치로 Update·Stop·Apply 전에 중단했다. 실제 설치 원본은 `7670a1b8f43e122250e0b766bc86986a2abb34ee`(PR #76), `valid=true / running=true`다. 프로그램 파일 검증·등록 프로세스 확인이며 웹 접속 health, 새 적용 성공, 로그인·기존 대화는 미확인이다.
+- **당시 작업:** 사용자 승인에 따라 [적용 블록](03-openwebui-native-agent.md#internal-pilot-20261012)의 예상 설치 SHA 한 줄만 정정해 Draft PR #82에서 검토·Windows 구문/길이 검사를 받았다. 처음에는 문서 수정·병합 보류 범위였고 이후 긴 경로 보완을 같은 PR에 포함했다. [사내 중단과 기존 main hover 실패 기록](../evals/v4-ui-20260930.md#internal-pilot-installed-sha-20261012)에 최초 결과와 확인 한계를 함께 보존한다.
+- **당시 대상:** PR #81 병합 SHA `f0148aa0de592df89ab841c7c9e82cd6ca268149`의 [main CI38193958368](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38193958368)는 25개 작업 모두 성공했다. 당시 이 SHA로 고정해 사용자가 실행했고 이후 긴 경로 오류가 발생했다. 현재 적용 대상은 위 PR #82 병합 SHA 확정 절차를 따른다.
+
+아래는 정정 전 준비 이력이다.
+
 ## 2026-10-12 · 첫 사내 적용 준비
 
 - **병합 완료:** [PR #80](https://github.com/knadalkim-a11y/team-agent-poc/pull/80)의 Q5는 Native 배경막·초점 제한 유지로 확정했다. 제품 변경 없이 결정을 기록했고 최종 head `7415dfd3851942343237acd594b486e19e0c4b87`의 [CI38189324021](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38189324021) 24 success/조건부1skip을 확인해 main `2f0e00c8a40beb72ed5aae39943ac2f3c7c43e89`로 병합했다. 최초 CI 실패와 Native39PASS는 [기존 기록](../evals/v4-ui-20260930.md#c18-review-focus-20261011)에 연결한다.

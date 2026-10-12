@@ -114,6 +114,8 @@ def main(argv=None):
                   "local_error": manager.local_error_detail(error)}
         if "bundle" in progress:
             result["bundle"] = progress["bundle"]
+        if progress.get("cleanup_failed"):
+            result["cleanup_failed"] = True
         if rename:
             result["program_rename"] = rename
         upgrade.report(args, result, failed=True)

@@ -12,7 +12,7 @@
 
 | 할 일 | 안내 |
 |---|---|
-| 사내 ees.12 → 현재 main, 첫 실제 업무 | [한 번 적용·실패 대응·확인 5개](#internal-pilot-20261012) · [팀원 업무 안내](07-team-quickstart.md#first-work-20261012) |
+| 확인된 사내 설치본 → 검토된 main, 첫 실제 업무 | [한 번 적용·실패 대응·확인 5개](#internal-pilot-20261012) · [팀원 업무 안내](07-team-quickstart.md#first-work-20261012) |
 | 새 EES Work 후보·자산 정리 경계 | [통합 설치·복구](#integrated-work-install-20261002) |
 | 프로그램·래퍼 업데이트 | [Upgrade](#ees-wrapper-upgrade) |
 | 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
@@ -20,9 +20,13 @@
 
 <a id="internal-pilot-20261012"></a>
 
-## 사내 ees.12에서 현재 EES Work로 적용 준비 · 2026-10-12
+## 확인된 사내 설치본에서 EES Work 적용 · 2026-10-12
 
-[#78 결정](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6115636532)에 따른 **준비 PR 검토·CI·병합 후 사용자가 실행할 안내**다. PR #80은 main `2f0e00c8a40beb72ed5aae39943ac2f3c7c43e89`에 병합됐지만, 아래 SHA에는 **이 준비 PR까지 병합하고 CI를 확인한 최종 main**을 넣는다. 아직 사내 적용하지 않았다. 설치본은 10-01 복구 ees.12로 보고됐고 정확한 설치 SHA는 미수신이다. 예상 원본은 `3a51f9d2bc604e768a59a522d6f34a34c2cb05d3`이며 Status가 다르면 그 원본부터 확인한다.
+**적용 대상은 임시 원본 경로 보완을 포함한 PR #82의 병합 SHA다.** 해당 SHA의 main CI 성공을 확인한 뒤 [#78](https://github.com/knadalkim-a11y/team-agent-poc/issues/78)에 확정한 전체 40자리 값을 아래 적용 블록의 질문에 입력한다. 사용자가 직접 사내 재실행을 진행하며, 적용·로그인·기존 대화의 실제 결과는 별도로 확인한다.
+
+[#78 결정](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6115636532)에 따른 최초 대상은 PR #81 병합본 `f0148aa0de592df89ab841c7c9e82cd6ca268149`였고, 당시 [main CI](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38193958368)는 성공했다. 이 SHA에는 긴 경로 보완이 없으므로 재실행 대상으로 사용하지 않는다. 사내 첫 실행에서 실제 설치 원본은 `7670a1b8f43e122250e0b766bc86986a2abb34ee`(PR #76 병합본), `valid=true / running=true`로 확인됐다. 이전 안내의 3a51 추정과 달라 Update·Stop·Apply 전에 중단됐으며, 새 적용 성공과 웹 접속은 아직 미확인이다.
+
+최초 안내는 사용자 승인으로 아래 적용 블록의 **예상 설치 SHA 한 줄만** 실제 값으로 정정했고 같은 PR #82에 긴 경로 실패 보완을 포함했다. 예상 설치 SHA와 아래 적용·복구 블록 원문은 그대로 유지한다. 사내 clone은 main을 사용하고, PR head가 아닌 #78에서 확정한 병합 SHA를 적용한다. [중단·정정·검증 범위](../evals/v4-ui-20260930.md#internal-pilot-installed-sha-20261012).
 
 전달은 기존 **Update → Upgrade -TrialCommit** 하나를 사용한다. [09-21 사내 성공](../evals/scenarios.md#integrated-work-beta-20260921)의 `6b58beb3dbad`는 Stop→Backup→Apply와 running=true를 확인했다. [10-01 재배포](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001)는 준비·해시 검증 뒤 process_stop에서 멈췄다. 이 경로가 현재 새 원본에서도 사내 성공했다고 확대하지 않는다. TrialCommit 자체는 CI를 조회하지 않으므로 실행 전에 검토자가 정확한 병합 SHA와 CI 성공을 확정해야 한다. 기본 Upgrade 산출물 경로·수동 ZIP을 섞지 않는다.
 
@@ -39,7 +43,7 @@
     $eesStatus = & $eesManager -Action Status -Config $eesCfg | ConvertFrom-Json
     Write-Host ('EES before commit={0} valid={1} running={2}' -f $eesStatus.current_commit, $eesStatus.program_valid, $eesStatus.managed_process_running)
     if ($eesStatus.program_valid -ne $true -or $eesStatus.program_incomplete -or
-        $eesStatus.current_commit -cne '3a51f9d2bc604e768a59a522d6f34a34c2cb05d3') {
+        $eesStatus.current_commit -cne '7670a1b8f43e122250e0b766bc86986a2abb34ee') {
         throw '설치 원본/상태가 예상과 다릅니다. before 한 줄로 확인하고 중단합니다.'
     }
     & $eesManager -Action Update -Config $eesCfg
@@ -62,6 +66,8 @@ Stop 완료 뒤 백업은 DATA_DIR 전체(업무 DB와 WAL·첨부 포함)·키�
 <a id="internal-pilot-failures-20261012"></a>
 
 ### 실패한 단계에서 고를 다음 행동
+
+PR #82의 병합본은 임시 원본 worktree만 clone 부모의 고유 `ees-…` 폴더로 분리한다. Windows 파일 경로는 UTF-16 기준260자 미만, 생성 디렉터리는248자 이하인지 생성 전과 실제 생성 후 검사하며 초과하면 `trial_build / trial_source_path_too_long`으로 Stop 전에 끝낸다. 링크/reparse·네트워크 경로·원본 바이트 검사는 유지한다. ZIP·공식 wheel 캐시·실패 기록은 기존 state_root에 남고 설치·DATA_DIR·키·Windows 정책은 바꾸지 않는다. 정리는 이번 호출의 고유 worktree만 대상으로 하며 정리도 실패하면 원래 오류와 `cleanup_failed=true`를 사내 결과에 보존한다. 경로 초과로 중단되면 해당 결과를 확인하며 임의 이동·정책 변경·반복 적용으로 넘기지 않는다.
 
 최종 줄의 `stage/code`(프로세스 오류는 `operation/reason`도 표시)만 짧게 전달한다. 원래 실패/상세 로그·ZIP·등록 상태는 사내에 보존한다. 09-10·10-01 종료 실패의 근본원인은 **미확정**이며, 명시 복구 성공이 원인 해결을 뜻하지 않는다.
 
@@ -114,9 +120,9 @@ Stop 완료 뒤 백업은 DATA_DIR 전체(업무 DB와 WAL·첨부 포함)·키�
 
 ### 프로그램 Restore와 업무 DB 복원
 
-정상 적용을 마친 뒤 프로그램만 되돌릴 때는 기존 **Stop → Restore → Start**를 사용한다. 미완료 적용이면 위 표의 pending 경로를 먼저 따른다. Restore는 직전 ees.12 프로그램 파일을 복원하며 DB·개인 PAT·대화·설정·관리 자산을 과거로 돌리지 않는다.
+정상 적용을 마친 뒤 프로그램만 되돌릴 때는 기존 **Stop → Restore → Start**를 사용한다. 미완료 적용이면 위 표의 pending 경로를 먼저 따른다. Restore는 직전 프로그램 파일을 복원하며 DB·개인 PAT·대화·설정·관리 자산을 과거로 돌리지 않는다.
 
-3a51의 ees.12는 이전 catalog/cases를 읽고 ees.13이 추가한 `work_*` 테이블은 읽지 않는다. 프로그램 Restore 뒤에도 새 테이블/자료는 그대로 남는다. 따라서 이전 기록을 다시 읽는 것과 **ees.13에서 새로 만든 절차/회차를 ees.12에서 이어가기**는 다르며 후자는 지원하지 않는다. 이번 실제 버전 왕복 시험은 이 경계와 기존 자료·키·프로그램 바이트 보존을 검사한다.
+과거 버전 왕복 시험의 3a51 ees.12는 이전 catalog/cases를 읽고 ees.13이 추가한 `work_*` 테이블은 읽지 않는다. 프로그램 Restore 뒤에도 새 테이블/자료는 그대로 남는다. 따라서 이전 기록을 다시 읽는 것과 **ees.13에서 새로 만든 절차/회차를 ees.12에서 이어가기**는 다르며 후자는 지원하지 않는다. 이 시험은 해당 버전 경계와 기존 자료·키·프로그램 바이트 보존을 검사한 것이며, 현재 예상 설치 SHA 7670a1b를 ees.12로 뜻하지 않는다.
 
 프로그램 문제만이면 DB 백업 복원을 함께 하지 않는다. DB 자체가 손상됐거나 적용 전 시점으로 자료까지 되돌리기로 정한 경우에만 별도 데이터 복원을 판단한다. 모든 쓰기 프로세스를 멈추고 적용 후 자료도 보존한 뒤, 같은 시점의 업무 DB·WAL·Native DB·첨부·키·설정 묶음을 사용해야 한다. 새 회차/대화가 사라질 수 있으므로 현재 프로그램 Restore에 자동 연결하지 않는다. [자료 복구의 기존 경계](#integrated-work-install-20261002)를 따른다.
 
