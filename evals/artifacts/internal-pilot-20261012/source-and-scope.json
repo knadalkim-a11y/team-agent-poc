@@ -1,0 +1,17 @@
+{
+  "historical_commit": "3a51f9d2bc604e768a59a522d6f34a34c2cb05d3",
+  "historical_wheel_sha256": "9dac33de8c93b722bf055ececdde77e68d85db953dc74ba9993bba70dfa8e57c",
+  "current_wheel_sha256": "ccdb59a37f8d5e5024abfc0044fd892baa4f6f1d156f79d97f7725476cec2681",
+  "current_additions_checked": 132,
+  "current_addition_mismatches": 0,
+  "source_scope": "current PR80 product source preserved; rollout scripts are outside the wheel",
+  "first_run": "restore-v4-first.log",
+  "first_run_result": "1 PASS, 16.497 s, 0 skips",
+  "suite_selection_tests": "11 PASS, 0.013 s",
+  "limits": [
+    "Native CLI, login and Start health not run in this test",
+    "user/chat lookups synthetic; actual selected WorkflowService and SQLite persistence",
+    "runtime dependency probe and bundle loading isolated; real wheel staging, promotion and Restore",
+    "program Restore preserves ees.13 work rows but old ees.12 does not expose the new work API"
+  ]
+}

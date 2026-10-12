@@ -106,6 +106,7 @@ class TrialUpgradeTests(unittest.TestCase):
             "validate": patch.object(trial.manager.customization, "validate_program", return_value=self.root / "program"),
             "applicability": patch.object(trial.manager.customization, "check_applicability"),
             "accept": patch.object(trial.manager.processes, "check_accept_runtime", return_value="compatible"),
+            "timezone": patch.object(trial.upgrade, "check_timezone_runtime"),
             "prepare": patch.object(trial.bundles, "prepare", side_effect=prepare),
             "inspect": patch.object(trial.manager.customization, "inspect_bundle", side_effect=inspect),
             "stop": patch.object(trial.manager, "stop_registered", side_effect=stop),
@@ -168,7 +169,7 @@ class TrialUpgradeTests(unittest.TestCase):
                     self.mock[failing].side_effect = original
 
     def test_protected_program_and_reused_environment_checked_before_preparation(self):
-        for failing in ("validate", "applicability", "accept"):
+        for failing in ("validate", "applicability", "accept", "timezone"):
             with self.subTest(failing=failing):
                 self.mock[failing].side_effect = ValueError("synthetic incompatible state")
                 try:
@@ -177,6 +178,18 @@ class TrialUpgradeTests(unittest.TestCase):
                     self.assert_no_server_changes()
                 finally:
                     self.mock[failing].side_effect = None
+
+    def test_timezone_failure_reports_preflight_code_without_server_changes(self):
+        for code in ("timezone_data_unavailable", "timezone_check_timeout"):
+            with self.subTest(code=code):
+                self.mock["timezone"].side_effect = trial.upgrade.UpgradeError(code)
+                self.assertEqual(self.run_main(), 1)
+                saved = json.loads((self.root / "last-failure.json").read_bytes())
+                self.assertEqual(saved["result"]["stage"], "preflight")
+                self.assertEqual(saved["result"]["code"], code)
+                self.assertFalse(saved["result"]["changed"])
+                self.mock["prepare"].assert_not_called()
+                self.assert_no_server_changes()
 
     def test_incomplete_operation_and_nonoriginal_interpreter_block_before_preparation(self):
         original = copy.deepcopy(self.registry)

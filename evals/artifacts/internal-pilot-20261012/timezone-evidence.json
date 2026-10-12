@@ -1,0 +1,72 @@
+{
+  "checked_at": "2026-10-12T00:59:14.806671+00:00",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "python": "3.12.14",
+  "base_commit": "2f0e00c8a40beb72ed5aae39943ac2f3c7c43e89",
+  "files": [
+    {
+      "path": "scripts/ees_upgrade.py",
+      "sha256": "8eb7899a6db1cf32d8d6751ffa119918c08f9bee7fea5caee0c368e2dcc86cf5"
+    },
+    {
+      "path": "tests/test_ees_upgrade.py",
+      "sha256": "06ea12f3284e3cbf336b1967e71803ed12e9a5e9fbec573e6de38a7c6a039416"
+    },
+    {
+      "path": "tests/test_ees_trial_upgrade.py",
+      "sha256": "accac1acc977b275d70a03d9fefd05a1148d662af303704d39599254d1d53cb7"
+    },
+    {
+      "path": "tests/test_ees_deploy_stop_recovery.py",
+      "sha256": "740769e5dc1bac0d2f9dac1007cdb3f63a28b6bf5517fe9ecc131d48de7b5867"
+    }
+  ],
+  "results": [
+    {
+      "command": "python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_upgrade.py -v",
+      "total": 43,
+      "passed": 41,
+      "skipped": 2,
+      "failed": 0,
+      "log": "timezone-test_ees_upgrade.py.log",
+      "log_sha256": "1364785a8b36515125f12871e9f19ed57577bcd4e3309efa2148d22f3f9dab3f"
+    },
+    {
+      "command": "python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_trial_upgrade.py -v",
+      "total": 19,
+      "passed": 18,
+      "skipped": 1,
+      "failed": 0,
+      "log": "timezone-test_ees_trial_upgrade.py.log",
+      "log_sha256": "24ba0a5b8e43092f56ee4dee23c4e53e8bb029c2a099fef2dc9988729346d399"
+    },
+    {
+      "command": "python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_deploy_stop_recovery.py -v",
+      "total": 34,
+      "passed": 33,
+      "skipped": 1,
+      "failed": 0,
+      "log": "timezone-test_ees_deploy_stop_recovery.py-rerun.log",
+      "log_sha256": "e163c3ede23d6c62fd35fa2d9e719f6019cb3c62a2f60bb52286162bc58284d1"
+    },
+    {
+      "command": "python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_trial_bundle.py -v",
+      "total": 14,
+      "passed": 14,
+      "skipped": 0,
+      "failed": 0,
+      "log": "timezone-test_ees_trial_bundle.py.log",
+      "log_sha256": "46353848baae721b90b8fc776f7a7bd441c97d739eef0c57afa8140672c177ab"
+    }
+  ],
+  "first_failure": {
+    "log": "timezone-test_ees_deploy_stop_recovery.py.log",
+    "cause": "New actual-preflight test reached existing accept-runtime call whose reduced recovery fixture lacked cwd; added cwd only to new test fixture.",
+    "product_change_for_failure": false,
+    "log_sha256": "cba9f4e291fa0e11f722ff7e09e5b4d5390cbe6650e896eee788c159aca13595"
+  },
+  "limits": [
+    "Local Linux validation; PowerShell-dependent tests skipped. Windows CI pending. No actual company deployment."
+  ],
+  "diff_check": "pass"
+}

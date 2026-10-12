@@ -183,6 +183,32 @@ def bootstrap(config, args, client, progress, *, runner="ees_upgrade.py", runner
     return code, target, before
 
 
+def check_timezone_runtime(config, env):
+    """Read the reused interpreter's time-zone data before any server change."""
+    probe = """import sys
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+try:
+    ZoneInfo('Asia/Seoul')
+except ZoneInfoNotFoundError:
+    print('EES timezone_check=unavailable')
+    sys.exit(2)
+print('EES timezone_check=compatible')
+"""
+    try:
+        result = subprocess.run([str(config["source_python"]), "-I", "-B", "-c", probe],
+                                cwd=config["cwd"], env=env, stdin=subprocess.DEVNULL,
+                                capture_output=True, timeout=10, check=False)
+    except subprocess.TimeoutExpired:
+        raise UpgradeError("timezone_check_timeout") from None
+    except (OSError, subprocess.SubprocessError):
+        raise UpgradeError("timezone_check_failed") from None
+    if result.returncode == 0 and result.stdout.strip() == b"EES timezone_check=compatible":
+        return
+    if result.returncode == 2 and result.stdout.strip() == b"EES timezone_check=unavailable":
+        raise UpgradeError("timezone_data_unavailable")
+    raise UpgradeError("timezone_check_failed")
+
+
 def preflight(config, registry, env):
     manager.require_idle(registry)
     if registry.get("pending") or registry.get("launch_uncertain"):
@@ -192,6 +218,7 @@ def preflight(config, registry, env):
     manager.selected_program(config, registry)
     manager.customization.check_applicability(config, registry, env)
     manager.processes.check_accept_runtime(config["source_python"], config["cwd"])
+    check_timezone_runtime(config, env)
 
 
 def artifact_key(artifact):

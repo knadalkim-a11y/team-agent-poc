@@ -12,10 +12,127 @@
 
 | 할 일 | 안내 |
 |---|---|
+| 사내 ees.12 → 현재 main, 첫 실제 업무 | [한 번 적용·실패 대응·확인 5개](#internal-pilot-20261012) · [팀원 업무 안내](07-team-quickstart.md#first-work-20261012) |
 | 새 EES Work 후보·자산 정리 경계 | [통합 설치·복구](#integrated-work-install-20261002) |
 | 프로그램·래퍼 업데이트 | [Upgrade](#ees-wrapper-upgrade) |
 | 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
 | 실패 기록·등록 위치 확인 | [실패 판단](#ees-update-failure-causes)·[사내 기록](#ees-local-state) |
+
+<a id="internal-pilot-20261012"></a>
+
+## 사내 ees.12에서 현재 EES Work로 적용 준비 · 2026-10-12
+
+[#78 결정](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6115636532)에 따른 **준비 PR 검토·CI·병합 후 사용자가 실행할 안내**다. PR #80은 main `2f0e00c8a40beb72ed5aae39943ac2f3c7c43e89`에 병합됐지만, 아래 SHA에는 **이 준비 PR까지 병합하고 CI를 확인한 최종 main**을 넣는다. 아직 사내 적용하지 않았다. 설치본은 10-01 복구 ees.12로 보고됐고 정확한 설치 SHA는 미수신이다. 예상 원본은 `3a51f9d2bc604e768a59a522d6f34a34c2cb05d3`이며 Status가 다르면 그 원본부터 확인한다.
+
+전달은 기존 **Update → Upgrade -TrialCommit** 하나를 사용한다. [09-21 사내 성공](../evals/scenarios.md#integrated-work-beta-20260921)의 `6b58beb3dbad`는 Stop→Backup→Apply와 running=true를 확인했다. [10-01 재배포](../evals/v4-ui-20260930.md#v4-stop-timeout-20261001)는 준비·해시 검증 뒤 process_stop에서 멈췄다. 이 경로가 현재 새 원본에서도 사내 성공했다고 확대하지 않는다. TrialCommit 자체는 CI를 조회하지 않으므로 실행 전에 검토자가 정확한 병합 SHA와 CI 성공을 확정해야 한다. 기본 Upgrade 산출물 경로·수동 ZIP을 섞지 않는다.
+
+기존 등록 계정의 PowerShell과 clone을 사용한다. 별도 경로/설정으로 운영했다면 `$eesRepo`, `$eesCfg`만 기존 값으로 맞춘다. 아래 한 블록은 **Status → Update/원본 대조 → 등록 Python 시간대·원본/묶음 사전 확인 → Stop → 검증 백업 → Apply → Start/health**를 묶는다. Status는 프로세스 신원·프로그램 파일 확인이며 접속 health와 다르다. 예상 설치 원본 불일치·invalid·incomplete는 서버 변경 전에 중단한다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $eesCfg = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $eesManager = Join-Path $eesRepo 'scripts\manage-ees.ps1'
+    $eesCommit = Read-Host '준비 PR 병합·CI 확인 후 전달받은 main 전체 40자리 SHA'
+    if ($eesCommit -cnotmatch '\A[0-9a-f]{40}\z') { throw '확정한 전체 SHA가 필요합니다.' }
+    $eesStatus = & $eesManager -Action Status -Config $eesCfg | ConvertFrom-Json
+    Write-Host ('EES before commit={0} valid={1} running={2}' -f $eesStatus.current_commit, $eesStatus.program_valid, $eesStatus.managed_process_running)
+    if ($eesStatus.program_valid -ne $true -or $eesStatus.program_incomplete -or
+        $eesStatus.current_commit -cne '3a51f9d2bc604e768a59a522d6f34a34c2cb05d3') {
+        throw '설치 원본/상태가 예상과 다릅니다. before 한 줄로 확인하고 중단합니다.'
+    }
+    & $eesManager -Action Update -Config $eesCfg
+    $eesHead = & git -C $eesRepo rev-parse HEAD
+    if ($LASTEXITCODE -ne 0) { throw 'HEAD 조회 실패' }
+    $eesMain = & git -C $eesRepo rev-parse origin/main
+    if ($LASTEXITCODE -ne 0) { throw 'origin/main 조회 실패' }
+    if ($eesHead -cne $eesCommit -or $eesMain -cne $eesCommit) {
+        throw '검토 원본과 다릅니다. 적용하지 않고 중단합니다.'
+    }
+    # Upgrade가 시간대/캐시 검사 뒤 Stop → Backup → Apply → Start를 수행합니다.
+    & $eesManager -Action Upgrade -Config $eesCfg -TrialCommit $eesCommit -HealthTimeout 120 -Summary
+}
+```
+
+등록 `source_python`으로 `ZoneInfo('Asia/Seoul')`을 격리 실행해 Windows 시간대 자료를 확인한다. 누락·10초 초과·검사 실패는 `preflight/timezone_*`로 **Stop 이전**에 끝난다. 현재 Python·호환 의존성·Windows CA·DATA_DIR·키·주소·프록시는 재사용하며, 자동 설치/새 환경을 만들지 않는다. 공식 wheel 캐시는 크기와 고정 SHA256을 매번 검사한다. 손상은 `upstream_cache_mismatch`로 종료 전에 차단하고 손상 파일을 덮어쓰거나 다시 내려받아 증거를 지우지 않는다. [검사와 Windows 적용/Restore 근거](../evals/v4-ui-20260930.md#internal-pilot-prep-20261012).
+
+Stop 완료 뒤 백업은 DATA_DIR 전체(업무 DB와 WAL·첨부 포함)·키·설정을 사내에 보관하고 해시·원본 불변·복사 `webui.db`의 SQLite quick_check를 확인한다. 업무 DB의 논리 정합성 전체를 검사했다고 해석하지 않는다. 백업과 기록이 모두 성공해야 Apply로 넘어간다. 성공은 마지막 `action=upgrade result=ok stage=complete running=true`, 전달한 `commit`과 ees.13 버전, 실제 로그인으로 확인한다. 현재 경로는 ApplyDemo를 호출하지 않는다(`registration=not_applicable reason=demo_registration_retired`). Work 도구와 권한 준비는 아래 화면 절차로 진행한다.
+
+<a id="internal-pilot-failures-20261012"></a>
+
+### 실패한 단계에서 고를 다음 행동
+
+최종 줄의 `stage/code`(프로세스 오류는 `operation/reason`도 표시)만 짧게 전달한다. 원래 실패/상세 로그·ZIP·등록 상태는 사내에 보존한다. 09-10·10-01 종료 실패의 근본원인은 **미확정**이며, 명시 복구 성공이 원인 해결을 뜻하지 않는다.
+
+| stage / code 또는 reason | 다음 행동 |
+|---|---|
+| `trial_source` / `checkout_changed`, `trial_main_mismatch`, `local_changes` | 적용 전 중단. 검토 SHA·HEAD·origin/main·로컬 수정을 확인한다. 강제 reset하지 않는다. |
+| `preflight` / `timezone_data_unavailable`, `timezone_check_timeout`, `timezone_check_failed` | 서버 종료 전 중단. 등록 Python의 시간대 자료/실행 가능 여부를 확인한다. 같은 명령 반복·의존성 전체 재설치를 하지 않는다. |
+| `prepare_bundle`, `upstream_download`, `trial_build`, `inspect_bundle` / `upstream_cache_mismatch` 등 | 서버 종료 전 중단. 해당 원본/다운로드/해시 문제만 확인한다. 손상 캐시·실패 기록을 보존하고 TLS 해제·캐시 전체 삭제를 하지 않는다. |
+| `process_stop` / `stop_timeout` 또는 `operation_failed` | Upgrade·Stop을 반복하지 않는다. 아래 **새 종료 실패 복구 경로**를 사용한다. 아직 백업/적용 전이다. |
+| `backup`, `backup_record` / 실패 code | 적용 전 중단. 백업 실패와 선택된 기존 프로그램·미완료 상태를 확인한다. 기존 프로그램이 유효하고 완전히 종료됐으며 미완료 적용이 없을 때만 기존 Start 한 번으로 서비스를 복구한다. |
+| `apply` / `program_rename_blocked` 등 | 보관 ZIP·pending을 보존한다. `next=manual_promote`인 정확한 promote 상태만 [기존 Resume](#ees-wrapper-manual-resume)를 따른다. 그 밖에는 [미완료 Apply/Restore](#ees-wrapper-restore)로 판단하고 폴더를 임의 이동하지 않는다. |
+| `process_start`, `health_check`, `process_record` / 실패 code | Start/Upgrade를 반복하지 않는다. `Status -Summary`와 사내 보존 기록으로 실행 중/기동 불확실/미완료를 먼저 구분한 뒤 Stop·프로그램 Restore 필요 여부를 정한다. health 실패만으로 서버 종료를 단정하지 않는다. |
+
+<a id="internal-pilot-stop-recovery-20261012"></a>
+
+**새 종료 실패 복구 경로:** 09-10·10-01 모두 종료 실패 뒤 서버가 접속을 받지 않았다. 이번 적용에서도 같은 상황이 생겼을 때 **사용자가 복구 실행을 선택한 경우에만** 아래 두 번째 블록을 사용한다. 첫 적용 블록과 같은 clone·설정으로 실행하며 Update·Upgrade·Stop을 먼저 반복하지 않는다. Status는 읽기 전용이므로 한 번 확인할 수 있다. 정상 접속으로 돌아왔거나 실패 단계가 다르면 이 블록을 실행하지 않는다.
+
+현재 clone의 변경 없는 HEAD와 **이번 실패의 wrapper_commit**이 같고, upgrade·failed=true·process_stop·changed=false일 때만 failure/registry 요청을 UTF-8로 보존한다. 원래 실패·registry·ZIP은 사내에 남긴다. 복구 도구가 잠금 아래 현재 registry·프로그램·환경·보관 ZIP·빈 포트와 PID/실행 파일/생성 시각·단일 venv 부모/자식을 다시 검사하며, 불일치나 포트가 회복된 상태면 강제 종료 전에 멈춘다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $eesCfg = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $eesCommit = & git -C $eesRepo rev-parse HEAD
+    if ($LASTEXITCODE -ne 0 -or $eesCommit -cnotmatch '\A[0-9a-f]{40}\z') { throw 'HEAD 조회 실패' }
+    $eesChanges = & git -C $eesRepo status --porcelain --untracked-files=no
+    if ($LASTEXITCODE -ne 0 -or $eesChanges) { throw '로컬 변경을 보존하고 복구를 중단합니다.' }
+    $eesConfig = Get-Content -Raw -Encoding UTF8 $eesCfg | ConvertFrom-Json
+    $eesFailure = Get-Content -Raw -Encoding UTF8 (Join-Path $eesConfig.state_root 'last-operation.json')
+    $eesLast = $eesFailure | ConvertFrom-Json
+    if ($eesLast.action -cne 'upgrade' -or $eesLast.failed -isnot [bool] -or
+        $eesLast.failed -ne $true -or $eesLast.result.stage -cne 'process_stop' -or
+        $eesLast.result.changed -isnot [bool] -or $eesLast.result.changed -ne $false -or
+        $eesLast.result.wrapper_commit -cne $eesCommit) {
+        throw '이번 종료 실패/원본과 다릅니다. 기록을 보존하고 중단합니다.'
+    }
+    $eesRegistry = Get-Content -Raw -Encoding UTF8 (Join-Path $eesConfig.state_root 'deployment.json')
+    $eesRequest = Join-Path $eesConfig.state_root ('stop-recovery-' + [guid]::NewGuid().ToString('N') + '.json')
+    $eesJson = '{"failure":' + $eesFailure + ',"registry":' + $eesRegistry + '}'
+    [IO.File]::WriteAllText($eesRequest, $eesJson, [Text.UTF8Encoding]::new($false))
+    & $eesConfig.source_python -I -B (Join-Path $eesRepo 'scripts\ees_deploy_stop_recovery.py') `
+        --config $eesCfg --request $eesRequest --commit $eesCommit `
+        --terminate-recorded-process --health-timeout 120
+    if ($LASTEXITCODE -ne 0) { throw '복구 중단: 마지막 EES 결과로 확인합니다.' }
+}
+```
+
+이 블록에는 검증된 단일 서버의 명시적 강제 종료가 포함된다. 도구는 종료 뒤 검증 백업→보관 ZIP Apply→Start/health를 진행한다. 성공 기준은 `action=recover_stop result=ok backup=verified running=true`와 화면 확인이다. 실패하면 마지막 `stage/code`만 전달하고 요청 파일·ZIP을 바꾸어 반복하지 않는다. 블록을 실행하면 `last-operation.json`이 복구 결과로 바뀌므로 이후 판단에는 방금 보존한 요청도 유지한다. 09-10/10-01의 과거 요청·SHA를 재사용하지 않는다. [기존 복구의 보호 조건과 이력](#ees-stop-recovery).
+
+### 프로그램 Restore와 업무 DB 복원
+
+정상 적용을 마친 뒤 프로그램만 되돌릴 때는 기존 **Stop → Restore → Start**를 사용한다. 미완료 적용이면 위 표의 pending 경로를 먼저 따른다. Restore는 직전 ees.12 프로그램 파일을 복원하며 DB·개인 PAT·대화·설정·관리 자산을 과거로 돌리지 않는다.
+
+3a51의 ees.12는 이전 catalog/cases를 읽고 ees.13이 추가한 `work_*` 테이블은 읽지 않는다. 프로그램 Restore 뒤에도 새 테이블/자료는 그대로 남는다. 따라서 이전 기록을 다시 읽는 것과 **ees.13에서 새로 만든 절차/회차를 ees.12에서 이어가기**는 다르며 후자는 지원하지 않는다. 이번 실제 버전 왕복 시험은 이 경계와 기존 자료·키·프로그램 바이트 보존을 검사한다.
+
+프로그램 문제만이면 DB 백업 복원을 함께 하지 않는다. DB 자체가 손상됐거나 적용 전 시점으로 자료까지 되돌리기로 정한 경우에만 별도 데이터 복원을 판단한다. 모든 쓰기 프로세스를 멈추고 적용 후 자료도 보존한 뒤, 같은 시점의 업무 DB·WAL·Native DB·첨부·키·설정 묶음을 사용해야 한다. 새 회차/대화가 사라질 수 있으므로 현재 프로그램 Restore에 자동 연결하지 않는다. [자료 복구의 기존 경계](#integrated-work-install-20261002)를 따른다.
+
+<a id="internal-pilot-checks-20261012"></a>
+
+### 적용 후 확인 5개
+
+#74~#76·#80의 사내 확인을 아래 한 목록으로 모은다. 관리자가 준비한 뒤 **관리자가 아닌 팀원 1명**이 5번을 끝내야 첫 적용 목표가 완료된다. 사용 방법은 [실제 업무 1건 안내](07-team-quickstart.md#first-work-20261012)를 따른다.
+
+1. **설치와 기존 자료:** Start health 성공·예정 commit/ees.13, 기존 계정 로그인과 대화·첨부 접근을 확인한다.
+2. **관리자 준비와 권한:** Work 도구 설정 확인/등록, 기반 모델·읽기 기능·Work 도구의 팀원 사용 권한, EES 참여·실행 범위를 확인한다. 관리자 스킬 메뉴 왕복과 설정 창 닫기, 팀원에게 허용된 메뉴만 표시되는지도 본다. 스킬 내용은 바꾸지 않는다.
+3. **읽기 도구와 도움말:** 이미 연결된 정보 읽기 기능 하나를 초안 저장→확인 요청→담당 확인까지 마친다. 같은 화면의 도움말 질문을 대화로 보내 실제 AI 답변·근거를 확인한다.
+4. **절차 작성과 게시:** 횡전개 예시의 4단계·6작업 미리보기를 확인하고, 실제 업무는 이름만으로 빈 절차를 만들어 저장·다시 열기 후 읽기→AI 초안→사람 확인으로 작성·게시한다. 예시를 운영 실행하지 않는다.
+5. **팀원 실제 완료:** 팀원이 본인 계정/개인 연결로 새 진행 건을 열어 실제 읽기→AI 초안 검토→사람 확인→진행 건 종료까지 마친다. 업무 내용은 사내에서 고른다.
+
+결과는 `1 OK / 2 OK / 3 실패: 화면 문구 / 4 미실행 / 5 미실행`처럼 **한 줄**이면 된다. 전체 로그·화면 사진·파일·PAT·업무 내용은 전달하지 않는다. 사내 결과에서 나온 결함을 먼저 처리하고, 적용 성공과 5번 완료 뒤 C18 PR2를 최신 main에서 시작한다. #79·#77도 그 전에는 착수하지 않는다.
 
 ## 30초 구조 요약
 
@@ -1434,6 +1551,8 @@ J의 **사용 구성**은 진행 건에 적용된 고정 정의와 사용 가능
 
 <a id="ees-wrapper-trial"></a>
 
+> 아래는 2026-09 한시 운영 당시 기록이다. 현재 적용은 [10-12 단일 안내](#internal-pilot-20261012)를 따른다. 현재 TrialCommit은 CI 생략 승인이나 ApplyDemo 재등록을 뜻하지 않으며, 실행 전 최종 병합본 CI를 확인한다.
+
 <a id="ees-step-progress-20260922"></a>
 
 <a id="ees-sidebar-final-20260922"></a>
@@ -1703,6 +1822,8 @@ Start의 `stage=health_check` 시간 초과는 지정한 시간 안에 정상 �
 }
 ```
 
+<a id="ees-wrapper-manual-resume"></a>
+
 Resume은 정상 작업 잠금과 서버 종료·포트 검사를 유지합니다. 저장된 pending=apply/promote와 같은 ZIP/commit, 이전 선택 기록, program 전체 해시/metadata, 직전 보관본을 확인하고 staging이 없을 때만 완료 기록을 남깁니다. 새 작업 소유자를 먼저 기록하며 완료 저장 실패 시 미완료 상태를 보존합니다. 별도 경로 입력·시험 복사본 채택·파일 이동/추출·남은 잠금 회수·자동 Restore/Start/재시도는 추가하지 않습니다. Resume 실패 시 Start도 실행되지 않으며 기존 명시적 Restore는 유지합니다. `-Resume -CheckOnly`는 같은 완료 조건의 읽기 검증이고 서버를 종료하거나 완료 기록을 쓰지 않습니다.
 
 사내 결과는 **Apply/Resume와 Start 결과 한 줄, 이름/아이콘·기존 대화·대표 조회 확인 한 줄**만 전달합니다. 실패하면 마지막 EES 줄의 action/result/stage와 표시된 오류 코드만 전달하며, 수동 이름 변경 실패는 그 사실 한 줄이면 됩니다. Start의 health 시간 초과 뒤에는 Start/uvx를 반복하지 않고 위의 지연 기동 안내를 따릅니다. Resume 성공은 프로그램 적용 기록 완료이며 실제 사내 성공은 Start/화면 확인과 구분합니다. [구현·검증 및 사내 결과](../evals/scenarios.md#ees-wrapper-manual-resume).
@@ -1948,7 +2069,7 @@ C18 PR 1에서는 Open WebUI 항목을 원래 화면으로 열면서 왼쪽 EES 
 
 이 변경은 기존 Native 화면·권한 검사·자산·공개 Tool 등록을 수정하지 않습니다. 참고 문서나 빠른 문장을 업무 절차에 자동 연결하지 않으며 사용자 자산 재등록도 필요하지 않습니다. EES 메뉴를 붙일 자리를 찾지 못하면 EES 틀만 생략하고 원래 화면 기능을 유지합니다. 업무 패널은 회색 바탕, 카드·입력과 대화는 흰색으로 구분합니다. [C18 PR 1 구현 계약](mockups/ees-work/TASK.md#merge-ui-20261011)과 [검증 기록](../evals/v4-ui-20260930.md#merge-ui-evidence-20261011)에서 확인 범위와 한계를 관리합니다.
 
-**별도 승인한 사내 적용 후에만 확인할 항목:** ① 횡전개 예시 초안의4단계·6작업 ② 이름만으로 빈 절차 생성 ③ 연결된 Jira 기능의 정보 읽기·초안 저장·확인 요청 ④ 도움말 질문의 AI 답변과 근거 ⑤ 권한 없는 팀원의 전환 버튼 숨김 및 관리자의 스킬 왕복. 결과는 `1 OK / 2 OK / 3 실패: 화면 문구`처럼 항목별 한 줄이면 됩니다. 화면 사진·전체 로그·파일 전달은 필요하지 않습니다. 이번 개발 완료를 사내 적용 성공으로 간주하지 않습니다.
+**사내 적용 후 확인:** #74~#76·#80의 항목은 [적용 후 확인 5개](#internal-pilot-checks-20261012)로 통합했다. 당시 개발/사외 검증과 실제 사내 결과를 구분한다.
 
 <a id="procedure-examples-20261006"></a>
 

@@ -1327,3 +1327,12 @@ PR 1 완료 조건: 역할/권한·직접 진입·workspace 메뉴 전환·관�
 실측 차이 / Q5: Native 관리자 창은 Tab·Shift+Tab 228회에서 초점 이탈이 없으나 전체 화면 배경막이 왼쪽 메뉴의 실제 마우스 클릭을 차단했다. 메뉴 이벤트가 도달한 뒤의 닫기→이동 코드와 실제 클릭 가능 여부를 구분한다. [#78 질문](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6108310347)에서 관리자 창의 왼쪽 EES 메뉴 영역만 클릭 차단에서 제외하는 안을 제시했으며, 답변 전에는 Native 배경 동작을 바꾸거나 병합하지 않는다. 키보드 초점 보호와 기존 모달/CSS는 유지한다. [실측 증거](../../../evals/v4-ui-20260930.md#c18-review-focus-20261011).
 
 10-12 Q5 확정: [답변과 순서 변경](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6115636532)에 따라 배경막은 Native 그대로 두고 메뉴 클릭 예외를 추가하지 않는다. 창 밖 메뉴가 어두워지고 클릭 차단되며 Tab은 창 안에 머무는 것이 지원 동작이다. 앞선 메뉴 클릭→닫기 의견은 실제 화면 확인 전 의견으로 정정한다. 복귀 코드는 다른 경로와 겹칠 수 있어 보존한다. 코드 변경 없이 안내·결정만 기록한 뒤 최종 head CI 성공을 확인해 PR80을 병합한다. 이후 PR 2~4·#79·#77보다 사내 적용 준비1~5를 우선하며, 최신 main의 새 브랜치·Draft PR 하나에서 적용/복구 안내와 필요한 검사만 준비한다. 실제 사내 실행은 준비 PR 검토·병합 뒤 사용자가 수행한다.
+
+
+<a id="internal-pilot-prep-20261012"></a>
+
+### 2026-10-12 순서 변경 · 사내 적용 준비
+
+[#78 확정](https://github.com/knadalkim-a11y/team-agent-poc/issues/78#issuecomment-6115636532)에 따라 Q5는 Native 배경막/초점 제한을 유지하며 제품·Figma 변경 없이 기록한다. PR80 최종 CI 성공과 병합 이후 준비 항목1~5를 새 Draft PR 하나로 만든다. 착수 기준 main은 `2f0e00c8a40beb72ed5aae39943ac2f3c7c43e89`다. 기존 공통 Upgrade 사전 검사에 등록 Python의 시간대 확인을 더하고,8027만 있던 Windows ees.12 회귀에 실제3a51을 추가한다. UI 구현이나 PR2 작업은 포함하지 않는다.
+
+[적용·실패 대응·사내 확인5개](../../03-openwebui-native-agent.md#internal-pilot-20261012)와 [읽기→AI초안→사람 확인의 첫 업무](../../07-team-quickstart.md#first-work-20261012)가 현재 운영 안내다. 준비 PR 검토/병합 뒤 사용자가 사내에서 실행한다. 실제 적용 성공과 비관리 팀원1명의 회차 완료 전에는 PR2~4·#79·#77을 시작하지 않는다. 시간대 누락·공식 캐시 손상·미완료/원본 불일치는 서버 종료 전에 차단하며, 프로그램 Restore는 ees.13 업무 DB를 되돌리지 않는다. [검증 증거](../../../evals/v4-ui-20260930.md#internal-pilot-prep-20261012).

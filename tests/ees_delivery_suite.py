@@ -69,7 +69,8 @@ CASE_PARTITIONS = {
         "program-install": None,  # Every remaining/currently added method stays here.
         "restore-ees10": ["test_ees_webui_customization.CustomizationTests.test_real_ees10_to_authoring_apply_restore_preserves_program_and_data"],
         "restore-ees11": ["test_ees_webui_customization.CustomizationTests.test_real_ees11_to_execution_apply_restore_preserves_program_and_data"],
-        "restore-ees12": ["test_ees_webui_customization.CustomizationTests.test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory"],
+        "restore-ees12": ["test_ees_webui_customization.CustomizationTests.test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory",
+                          "test_ees_webui_customization.CustomizationTests.test_real_ees12_v4_apply_restore_preserves_program_and_additive_work_database"],
     },
 }
 

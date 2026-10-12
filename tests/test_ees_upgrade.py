@@ -23,6 +23,54 @@ TOKEN = "synthetic-update-token"
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class RegisteredTimezoneTests(unittest.TestCase):
+    def test_probe_uses_registered_interpreter_and_restored_environment(self):
+        config = {"source_python": "registered-python", "cwd": "registered-cwd"}
+        env = {"DATA_DIR": "preserved-data", "WEBUI_SECRET_KEY": "private-fixture"}
+        before = dict(env)
+        result = subprocess.CompletedProcess([], 0, b"EES timezone_check=compatible\r\n", b"")
+        with patch.object(upgrade.subprocess, "run", return_value=result) as run:
+            self.assertIsNone(upgrade.check_timezone_runtime(config, env))
+        command = run.call_args.args[0]
+        self.assertEqual(command[:4], ["registered-python", "-I", "-B", "-c"])
+        self.assertIn("ZoneInfo('Asia/Seoul')", command[4])
+        self.assertEqual(run.call_args.kwargs, {"cwd": "registered-cwd", "env": env,
+                         "stdin": subprocess.DEVNULL, "capture_output": True, "timeout": 10, "check": False})
+        self.assertIs(run.call_args.kwargs["env"], env)
+        self.assertEqual(env, before)
+
+    def test_missing_data_timeout_and_invalid_probe_results_have_fixed_codes(self):
+        private = b"synthetic-private-path-and-secret"
+        cases = (
+            (subprocess.CompletedProcess([], 2, b"EES timezone_check=unavailable\n", private), "timezone_data_unavailable"),
+            (subprocess.TimeoutExpired("registered-python", 10, output=private, stderr=private), "timezone_check_timeout"),
+            (OSError(private.decode()), "timezone_check_failed"),
+            (subprocess.CompletedProcess([], 0, private, private), "timezone_check_failed"),
+            (subprocess.CompletedProcess([], 1, b"EES timezone_check=compatible\n", private), "timezone_check_failed"),
+            (subprocess.CompletedProcess([], 2, private, private), "timezone_check_failed"),
+        )
+        for result, code in cases:
+            with self.subTest(code=code, result=type(result).__name__):
+                options = {"side_effect": result} if isinstance(result, Exception) else {"return_value": result}
+                with patch.object(upgrade.subprocess, "run", **options):
+                    with self.assertRaises(upgrade.UpgradeError) as raised:
+                        upgrade.check_timezone_runtime({"source_python": "registered-python", "cwd": "registered-cwd"}, {})
+                self.assertEqual(raised.exception.code, code)
+                self.assertEqual(str(raised.exception), code)
+
+    def test_real_registered_python_probe_does_not_write_to_working_directory(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            original = directory / "preserved.txt"
+            original.write_bytes(b"registered working directory")
+            env = dict(os.environ)
+            before = dict(env)
+            upgrade.check_timezone_runtime({"source_python": sys.executable, "cwd": temporary}, env)
+            self.assertEqual(list(directory.iterdir()), [original])
+            self.assertEqual(original.read_bytes(), b"registered working directory")
+            self.assertEqual(env, before)
+
+
 class UpgradeDeploymentTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -77,6 +125,7 @@ class UpgradeDeploymentTests(unittest.TestCase):
             "validate": patch.object(upgrade.manager.customization, "validate_program", return_value=self.root / "program"),
             "applicability": patch.object(upgrade.manager.customization, "check_applicability"),
             "accept_check": patch.object(upgrade.manager.processes, "check_accept_runtime", return_value="compatible"),
+            "timezone": patch.object(upgrade, "check_timezone_runtime"),
             "inspect": patch.object(upgrade.manager.customization, "inspect_bundle", side_effect=lambda *a: self.selected),
             "stop": patch.object(upgrade.manager, "stop_registered", side_effect=stop),
             "stopped": patch.object(upgrade.manager, "require_stopped", side_effect=lambda *a: self.events.append("require_stopped")),
@@ -116,6 +165,14 @@ class UpgradeDeploymentTests(unittest.TestCase):
             "synthetic incompatible runtime", reason="accept_guard_incompatible")
         with self.assertRaises(upgrade.manager.processes.ProcessError):
             self.deploy()
+        self.assert_no_server_changes()
+        self.client.download_artifact.assert_not_called()
+
+    def test_timezone_failure_is_rejected_before_download_or_server_change(self):
+        self.mock["timezone"].side_effect = upgrade.UpgradeError("timezone_data_unavailable")
+        with self.assertRaisesRegex(upgrade.UpgradeError, "timezone_data_unavailable"):
+            self.deploy()
+        self.assertEqual(self.progress["stage"], "preflight")
         self.assert_no_server_changes()
         self.client.download_artifact.assert_not_called()
 
