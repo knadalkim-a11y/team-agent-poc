@@ -8,6 +8,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
@@ -155,7 +156,7 @@ class UpstreamTests(unittest.TestCase):
 @unittest.skipUnless(shutil.which("git"), "Git is required")
 class SourceTests(unittest.TestCase):
     def setUp(self):
-        temporary = tempfile.TemporaryDirectory()
+        temporary = tempfile.TemporaryDirectory(dir=os.environ.get("RUNNER_TEMP"))
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
         self.source = self.root / "repo"
@@ -214,6 +215,164 @@ class SourceTests(unittest.TestCase):
             "source_verification": "local_trial", "process": {"error_type": "process"},
             "bundle": str(bundle)}}}
         self.assertEqual(recovery.validate_failure(self.config, failure, self.commit), bundle)
+
+    def test_full_repository_prepares_with_long_paths_disabled(self):
+        required = os.environ.get("EES_TEST_REQUIRE_WIN32_PATHS_DISABLED") == "1"
+        policy = None
+        if os.name == "nt":
+            import winreg
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                                r"SYSTEM\CurrentControlSet\Control\FileSystem") as key:
+                try:
+                    policy = winreg.QueryValueEx(key, "LongPathsEnabled")[0]
+                except FileNotFoundError:
+                    policy = 0
+        if required:
+            self.assertEqual(os.name, "nt")
+            self.assertEqual(policy, 0)
+        repository = Path(__file__).resolve().parents[1]
+        archive = subprocess.run(["git", "-C", str(repository), "archive", "HEAD"],
+                                 check=True, capture_output=True, timeout=60).stdout
+        with tarfile.open(fileobj=io.BytesIO(archive)) as source_archive:
+            source_archive.extractall(self.source, filter="data")
+        self.git("add", "-f", "--all")
+        self.git("commit", "-m", "Full tracked repository fixture")
+        self.commit = self.git("rev-parse", "HEAD")
+        self.git("update-ref", "refs/remotes/origin/main", self.commit)
+        self.git("config", "core.longpaths", "true")
+        names = self.git("ls-tree", "-r", "-z", "--name-only", "HEAD").split("\0")
+        units = lambda path: len(str(path).encode("utf-16-le")) // 2
+        longest = max(filter(None, names), key=units)
+        self.assertGreater(len(names), 1000)
+        size = 290 - units(self.root / "trial-build-12345678" / "source" / longest) - 1
+        self.assertGreater(size, 0)
+        self.state = self.root / ("s" * size)
+        self.state.mkdir()
+        self.config["state_root"] = str(self.state)
+        old_source = self.state / "trial-build-12345678" / "source"
+        old_source.parent.mkdir()
+        self.assertEqual(units(old_source / longest), 290)
+        try:
+            self.git("-c", "core.autocrlf=false", "worktree", "add", "--detach", str(old_source), self.commit)
+            old_exists = (old_source / longest).exists()
+            if required:
+                self.assertFalse(old_exists, "The old 290-unit path must reproduce the Python failure")
+        finally:
+            # Git handles the deliberately long paths even when Python cannot.
+            entries = self.git("worktree", "list", "--porcelain", "-z").split("\0")
+            if any(row.startswith("worktree ") and Path(row[9:]) == old_source for row in entries):
+                self.git("worktree", "remove", "--force", str(old_source))
+            old_source.parent.rmdir()
+        with patch.object(bundles, "_build", side_effect=self.build):
+            bundle = self.prepare()
+        self.assertLess(max(units(self.built_source / name) for name in filter(None, names)), 260)
+        self.assertEqual(self.built_source.parent, self.source.parent)
+        self.assertFalse(self.built_source.exists())
+        self.assertEqual(bundle.parent.parent, self.state)
+        self.assertEqual(list(bundle.parent.iterdir()), [bundle])
+        print("EES path regression policy=%s old_max=290 old_exists=%s new_max=%s source_removed=True" %
+              (policy, old_exists, max(units(self.built_source / name) for name in filter(None, names))))
+
+    def test_path_budget_rejects_before_download_or_temporary_files(self):
+        with patch.object(bundles, "WINDOWS_PATHS", True), \
+                patch.object(bundles, "_git", wraps=bundles._git) as git_call, \
+                patch.object(bundles, "_check_source_paths", side_effect=bundles.TrialBundleError("trial_source_path_too_long")):
+            with self.assertRaisesRegex(bundles.TrialBundleError, "trial_source_path_too_long"):
+                self.prepare()
+        self.upstream.assert_not_called()
+        self.assertEqual(list(self.state.iterdir()), [])
+        self.assertFalse(list(self.root.glob("ees-*")))
+        self.assertFalse(any(call.args[:2] == ("worktree", "add") for call in git_call.call_args_list))
+
+    def test_windows_utf16_file_and_directory_limits(self):
+        with patch.object(bundles, "WINDOWS_PATHS", True):
+            for directory, filename, valid in ((10, 248, True), (10, 249, False),
+                                                (247, 1, True), (248, 1, True), (249, 1, False)):
+                # A leading slash and separator count too, independently of the host OS.
+                source = Path("/" + "s" * (directory - 1))
+                with patch.object(bundles, "_git", return_value="f" * filename):
+                    if valid:
+                        bundles._check_source_paths(source, self.commit)
+                    else:
+                        with self.assertRaisesRegex(bundles.TrialBundleError, "trial_source_path_too_long"):
+                            bundles._check_source_paths(source, self.commit)
+            with patch.object(bundles, "_git", return_value="\U0001f600" * 128):
+                with self.assertRaisesRegex(bundles.TrialBundleError, "trial_source_path_too_long"):
+                    bundles._check_source_paths(Path("/ss"), self.commit)
+
+    def test_partial_add_cleanup_preserves_unrelated_worktree(self):
+        other = self.root / "unrelated"
+        self.git("worktree", "add", "--detach", str(other), self.commit)
+        self.addCleanup(lambda: self.git("worktree", "remove", "--force", str(other)))
+        original = bundles._git
+        def partial(*arguments, **kwargs):
+            result = original(*arguments, **kwargs)
+            if arguments[:2] == ("worktree", "add"):
+                raise bundles.TrialBundleError("trial_source_failed")
+            return result
+        with patch.object(bundles, "_git", side_effect=partial):
+            with self.assertRaisesRegex(bundles.TrialBundleError, "trial_source_failed"):
+                self.prepare()
+        self.assertFalse(list(self.root.glob("ees-*")))
+        self.assertEqual(list(self.state.iterdir()), [])
+        self.assertEqual((other / "source.txt").read_bytes(), b"reviewed\nsource\n")
+
+    def test_cleanup_failure_does_not_replace_original_failure(self):
+        original = bundles._remove_source
+        retained = []
+        def failed_cleanup(source):
+            retained.append(source)
+            raise PermissionError("synthetic locked path")
+        try:
+            with patch.object(bundles, "_build", side_effect=bundles.TrialBundleError("trial_build_failed")), \
+                    patch.object(bundles, "_remove_source", side_effect=failed_cleanup):
+                with self.assertRaisesRegex(bundles.TrialBundleError, "trial_build_failed"):
+                    self.prepare()
+            self.assertTrue(self.progress["cleanup_failed"])
+        finally:
+            for source in retained:
+                original(source)
+
+    def test_linked_source_parent_is_rejected_before_download(self):
+        link = self.root / "parent-link"
+        try:
+            link.symlink_to(self.root, target_is_directory=True)
+        except OSError:
+            self.skipTest("Creating symlinks requires OS permission")
+        with patch.object(bundles, "ROOT", link / "repo"):
+            with self.assertRaises(bundles.states.StateError):
+                self.prepare()
+        self.upstream.assert_not_called()
+        self.assertFalse(list(self.root.glob("ees-*")))
+
+    def test_source_creation_failure_cleans_only_output(self):
+        original = bundles.tempfile.mkdtemp
+        sentinel = self.root / "ees-unrelated"
+        sentinel.mkdir()
+        (sentinel / "keep").write_bytes(b"user content")
+        def create(*args, **kwargs):
+            if kwargs.get("prefix") == "ees-":
+                raise PermissionError("synthetic source creation failure")
+            return original(*args, **kwargs)
+        with patch.object(bundles.tempfile, "mkdtemp", side_effect=create):
+            with self.assertRaises(PermissionError):
+                self.prepare()
+        self.assertEqual(list(self.state.iterdir()), [])
+        self.assertEqual((sentinel / "keep").read_bytes(), b"user content")
+
+    def test_cleanup_refuses_replaced_source_link_and_preserves_target(self):
+        outside = self.root / "outside"
+        outside.mkdir()
+        (outside / "keep").write_bytes(b"user content")
+        source = self.root / "ees-replaced"
+        try:
+            source.symlink_to(outside, target_is_directory=True)
+        except OSError:
+            self.skipTest("Creating symlinks requires OS permission")
+        with self.assertRaises(bundles.states.StateError):
+            bundles._remove_source(source)
+        self.assertEqual((outside / "keep").read_bytes(), b"user content")
+        self.assertTrue(source.is_symlink())
 
     def test_build_failure_cleans_created_worktree_and_temporary_output(self):
         with patch.object(bundles, "_build", side_effect=bundles.TrialBundleError("trial_build_failed")):

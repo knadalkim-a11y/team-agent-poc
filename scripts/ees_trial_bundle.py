@@ -34,6 +34,7 @@ MAX_JSON_BYTES = 1024 * 1024
 MAX_WHEEL_BYTES = 256 * 1024 * 1024
 MAX_DOWNLOAD_SECONDS = 600
 HEX40 = re.compile(r"[0-9a-f]{40}")
+WINDOWS_PATHS = os.name == "nt"
 
 
 class TrialBundleError(ValueError):
@@ -221,19 +222,47 @@ def _source_bytes(source, commit):
             raise TrialBundleError("trial_source_changed")
 
 
+def _check_source_paths(source, commit):
+    """Keep checkout files/directories usable without Win32 long-path policy."""
+    if not WINDOWS_PATHS:
+        return
+    units = lambda path: len(str(path).encode("utf-16-le")) // 2
+    names = _git("ls-tree", "-r", "-z", "--name-only", commit).split("\0")
+    for name in filter(None, names):
+        path = source / name
+        # MAX_PATH includes NUL. Directory creation also reserves 12 units.
+        if units(path) >= 260 or any(units(parent) > 248 for parent in path.parents):
+            raise TrialBundleError("trial_source_path_too_long")
+
+
+def _remove_source(source):
+    """Remove only this call's checked temporary path, including partial add."""
+    states._safe(source, exists=False)
+    entries = _git("worktree", "list", "--porcelain", "-z").split("\0")
+    if any(entry.startswith("worktree ") and Path(entry[9:]) == source for entry in entries):
+        _git("worktree", "remove", "--force", str(source))
+    elif source.exists():
+        shutil.rmtree(source)
+
+
 def prepare(config, commit, proxy, progress):
     """Return a retained exact bundle; the caller must inspect before any Stop."""
     _checkout(commit)
     states._safe(Path(config["state_root"]))
+    parent = states._safe(ROOT.parent)
+    progress["stage"] = "trial_build"
+    # Source is short-lived beside the clone. Retained output stays in state_root.
+    _check_source_paths(parent / "ees-00000000", commit)
     wheel = _upstream(config, proxy, progress)
     progress["stage"] = "trial_build"
     directory = Path(tempfile.mkdtemp(prefix="trial-build-", dir=config["state_root"]))
-    source, output = directory / "source", directory
-    created = False
+    source, output = None, directory
     completed = False
     try:
+        source = Path(tempfile.mkdtemp(prefix="ees-", dir=parent))
+        states._safe(source)
+        _check_source_paths(source, commit)
         _git("worktree", "add", "--detach", str(source), commit)
-        created = True
         if (_git("rev-parse", "HEAD", cwd=source) != commit
                 or _git("status", "--porcelain", "--untracked-files=no", cwd=source)):
             raise TrialBundleError("trial_source_changed")
@@ -242,17 +271,25 @@ def prepare(config, commit, proxy, progress):
         _source_bytes(source, commit)
         _checkout(commit)
         bundle = states._regular(output / ("EES-demo-" + commit[:12] + ".zip"))
-        _git("worktree", "remove", "--force", str(source))
-        created = False
+        _remove_source(source)
+        source = None
         shutil.rmtree(output / "branding")
         completed = True
         progress["bundle"] = str(bundle)
         return bundle
     finally:
-        if created:
-            _git("worktree", "remove", "--force", str(source))
-        if not completed:
-            shutil.rmtree(directory)
+        failed = sys.exc_info()[0] is not None
+        try:
+            if source is not None:
+                _remove_source(source)
+            if not completed:
+                states._safe(directory)
+                shutil.rmtree(directory)
+        except (OSError, ValueError, RuntimeError):
+            # Do not replace the first failure with a secondary cleanup error.
+            if not failed:
+                raise
+            progress["cleanup_failed"] = True
 
 
 def cleanup(config, bundle):

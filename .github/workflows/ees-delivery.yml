@@ -211,6 +211,29 @@ jobs:
       - name: Run the complete assigned module set
         id: suite
         run: python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite ${{ matrix.suite }} --output dist/ees-results
+      - name: Verify trial source preparation with Windows long paths disabled
+        if: runner.os == 'Windows' && matrix.suite == 'platform'
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $path = 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem'
+          $name = 'LongPathsEnabled'
+          $before = (Get-ItemProperty -LiteralPath $path -Name $name -ErrorAction Stop).$name
+          try {
+            Set-ItemProperty -LiteralPath $path -Name $name -Value 0 -ErrorAction Stop
+            if ((Get-ItemProperty -LiteralPath $path -Name $name).$name -ne 0) {
+              throw 'LongPathsEnabled was not disabled.'
+            }
+            $env:EES_TEST_REQUIRE_WIN32_PATHS_DISABLED = '1'
+            python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_trial_bundle.SourceTests.test_full_repository_prepares_with_long_paths_disabled -v
+            if ($LASTEXITCODE -ne 0) { throw 'Trial long-path regression failed.' }
+          } finally {
+            Remove-Item Env:EES_TEST_REQUIRE_WIN32_PATHS_DISABLED -ErrorAction SilentlyContinue
+            Set-ItemProperty -LiteralPath $path -Name $name -Value $before -ErrorAction Stop
+            if ((Get-ItemProperty -LiteralPath $path -Name $name).$name -ne $before) {
+              throw 'LongPathsEnabled was not restored.'
+            }
+          }
       - name: Require real Windows IOCP accept and subprocess validation
         if: runner.os == 'Windows' && matrix.suite == 'platform'
         run: python -I -B tests/test_ees_deploy_accept.py --require-windows -v

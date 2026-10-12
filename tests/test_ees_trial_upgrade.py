@@ -168,6 +168,35 @@ class TrialUpgradeTests(unittest.TestCase):
                 finally:
                     self.mock[failing].side_effect = original
 
+    def test_source_path_limit_failure_preserves_running_instance_and_specific_summary(self):
+        registry = copy.deepcopy(self.registry)
+        environment = copy.deepcopy(self.environment)
+
+        def path_limit(config, commit, proxy, progress):
+            self.assertTrue(self.lock_held)
+            progress["stage"] = "trial_build"
+            raise trial.bundles.TrialBundleError("trial_source_path_too_long")
+
+        self.mock["prepare"].side_effect = path_limit
+        self.assertEqual(self.run_main(), 1)
+        self.mock["prepare"].assert_called_once()
+        self.assert_no_server_changes()
+        for name in ("inspect", "record", "cleanup"):
+            self.mock[name].assert_not_called()
+        self.assertEqual(self.registry, registry)
+        self.assertEqual(self.environment, environment)
+        self.assertEqual(self.events, ["lock", "unlock"])
+        self.assertFalse(self.lock_held)
+        saved = json.loads((self.root / "last-failure.json").read_bytes())["result"]
+        self.assertEqual(saved["stage"], "trial_build")
+        self.assertEqual(saved["code"], "trial_source_path_too_long")
+        self.assertEqual(saved["next"], "inspect_local_result")
+        self.assertFalse(saved["changed"])
+        self.assertFalse(saved["backup_verified"])
+        self.assertNotIn("bundle", saved)
+        self.assertIn("code=trial_source_path_too_long", self.output.getvalue())
+        self.assertNotIn("synthetic-preserved-key", self.output.getvalue() + json.dumps(saved))
+
     def test_protected_program_and_reused_environment_checked_before_preparation(self):
         for failing in ("validate", "applicability", "accept", "timezone"):
             with self.subTest(failing=failing):

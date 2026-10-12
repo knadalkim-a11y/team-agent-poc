@@ -1,5 +1,11 @@
 # 현재 작업 상태
 
+## 2026-10-12 · 임시 원본 긴 경로 보완 검증
+
+- **진행 정정:** 사용자가 구현까지 보류한 이유를 지적했다. 기존 사내 적용 실패 보완 범위에서 코드·검증·Draft 반영을 이어가고 병합/새 SHA의 사내 실행만 보류한다. 아래 계획 승인 대기 기록은 당시 상태다.
+- **변경:** 임시 원본만 clone 부모의 고유 폴더로 분리하고 Windows 경로 예산을 사전 검사한다. 원본 바이트·로컬/링크 보호·기존 state_root ZIP/복구 계약을 유지하며 정리 실패는 최초 오류와 함께 남긴다. 설치/데이터/키/Windows 정책·기존 복사 블록은 변경하지 않는다.
+- **검증·다음 작업:** 관련 Linux76개 중74PASS/Windows 전용2skip, 전체 저장소 fixture의 기존290자→새235자와 원본 검사/정리를 확인했다. 실제 Windows 정책0의 재현·새 준비 성공은 추가 CI에서 확인한다. [최초 실패·검증 한계](../evals/v4-ui-20260930.md#internal-pilot-trial-source-failure-20261012). 현재 main/적용 대상f0148·미병합을 유지하며 PR #82의 CI·검토 결과를 먼저 확인한다.
+
 ## 2026-10-12 · 적용 묶음의 Git 원본 준비 실패
 
 - **새 사내 결과:** 예상 SHA 정정 블록을 실행한 뒤 사용자가 `upgrade / failed / changed=false / wrapper_changed=false / trial_source_failed / TrialBundleError / ees_trial_bundle.py:180`을 보고했다. 전사된 stage는 `trail_build`, wrapper는 `f0148aa9de59`이며 실제 저장값과 구분한다. 코드상 대응 단계는 `trial_build`이고 Update 뒤 서버 Stop·Backup·Apply 전에 중단하는 경로다. 실패 뒤 웹 접속·현재 서버 상태는 미확인이다.
