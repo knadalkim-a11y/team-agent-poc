@@ -59,7 +59,7 @@ SUITES = {
     "native-work": ["test_ees_work_demo.py"],
     "native-compose": ["test_ees_work_c_phase1_native.py", "test_ees_work_c_phase2_native.py",
         "test_ees_work_figma_authoring_native.py", "test_ees_work_figma_runtime_native.py",
-        "test_ees_work_figma_layout_native.py"],
+        "test_ees_work_figma_layout_native.py", "test_ees_source_shell_native.py"],
     "native-execution": ["test_ees_work_c_phase3_native.py", "test_ees_work_c_phase3_privacy.py"],
 }
 # Each real fixed-wheel Apply/Restore performs a full filesystem walk. On

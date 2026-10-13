@@ -34,15 +34,7 @@
 @keyframes ew-running{to{transform:rotate(360deg);}}
 @media(prefers-reduced-motion:reduce){[data-ees-work] .ew-status>.ew-icon{animation:none!important;}[data-ees-work] *{scroll-behavior:auto!important;}}
 .ew-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;}
-/* Keep the Native sidebar/account/resize controls, replace its workflow navigation. */
-body[data-ees-integrated] #sidebar{color:var(--ees-text-strong);background:var(--ees-surface-sidebar);}
-body[data-ees-integrated] #sidebar>div,body[data-ees-integrated] #sidebar .sidebar{background:var(--ees-surface-sidebar);}
-body[data-ees-integrated] #sidebar[data-ees-native-sidebar]>div{border-right:1px solid var(--ees-line-divider);}
-body[data-ees-integrated] #sidebar[data-ees-native-sidebar]>div>.sidebar:first-child{height:48px;min-height:48px;padding:0 12px 0 16px;gap:8px;}
-body[data-ees-integrated] #sidebar-webui-name{font-family:var(--ees-font-sans);font-size:14px;line-height:20px;font-weight:700;color:var(--ees-text-primary);}
-body[data-ees-integrated] [data-ees-native-navigation]>div:has(>#sidebar-search-button),body[data-ees-integrated] [data-ees-native-navigation]>div:has(>#sidebar-new-chat-button){display:none;}
-body[data-ees-integrated] [data-ees-native-navigation]{gap:0;padding:0;}
-body[data-ees-integrated] [data-ees-native-navigation] #ees-work-entry{order:-1;}
+/* Source-rendered navigation; Native DOM is not hidden or repositioned. */
 #ees-work-entry{padding:0 8px;background:var(--ees-surface-sidebar);min-width:0;}
 #ees-work-entry .ew-mode{display:flex;gap:2px;background:var(--ees-surface-muted);padding:3px;border-radius:7px;margin:0 0 10px;}
 #ees-work-entry .ew-mode button{flex:1;border:0;padding:2px 8px;min-height:32px;font-size:12px;font-weight:400;background:transparent;color:var(--ees-text-secondary);}
@@ -66,9 +58,6 @@ body[data-ees-integrated] [data-ees-native-navigation] #ees-work-entry{order:-1;
 #ees-work-entry .ew-workflows button[aria-current=page]{background:var(--ees-surface-selected);}
 #ees-work-entry .ew-workflows .ew-status>span{display:none;}
 /* Native chat remains the central flexible column; work is the right 480px panel. */
-body[data-ees-integrated] .ees-integrated-row{position:relative;display:flex;min-width:0;min-height:0;}
-body[data-ees-integrated] .ees-integrated-chat{display:flex;flex-direction:column;flex:1 1 0;min-width:0!important;min-height:0;height:100%;max-width:none;}
-body[data-ees-integrated] .ees-integrated-chat #chat-pane{min-width:0;min-height:0;flex:1 1 0;}
 #ees-work-panel{position:relative;display:flex;flex-direction:column;flex:0 0 480px;width:480px;min-width:0;min-height:0;height:100%;border-left:1px solid var(--ees-line-divider);background:var(--ees-surface-panel);}
 #ees-work-panel>.ew-panel-header{flex:none;display:flex;align-items:center;gap:8px;min-height:48px;padding:0 16px 0 20px;border-bottom:1px solid var(--ees-line-divider);font-size:14px;line-height:20px;}
 #ees-work-panel>.ew-panel-header>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--ees-text-tertiary);}
@@ -145,7 +134,7 @@ body[data-ees-integrated] .ees-integrated-chat #chat-pane{min-width:0;min-height
 #ees-work-dialog>h2{margin-bottom:16px;}
 #ees-work-dialog>.ew-muted{margin-bottom:20px;}
 #ees-work-dialog .ew-dialog-body p+p{margin-top:12px;}
-#ees-work-dialog footer{display:flex;justify-content:flex-end;gap:8px;margin-top:24px;}
+#ees-work-dialog>footer{display:flex;justify-content:flex-end;gap:8px;margin-top:24px;}
 #ees-work-dialog:has(.ew-confirm-target){width:min(470px,calc(100vw - 32px));}
 .ew-confirm-target{background:var(--ees-surface-sidebar);padding:10px 12px;border-radius:6px;margin-bottom:16px;}
 .ew-scope-columns{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
@@ -158,21 +147,7 @@ body[data-ees-integrated] .ees-integrated-chat #chat-pane{min-width:0;min-height
 #ees-workflow-list{display:grid;gap:5px;margin-top:12px;}
 #ees-workflow-list>button{text-align:left;}
 /* Native composer, messages and menus retain their real handlers and focus. */
-body[data-ees-integrated] #chat-container{font-family:var(--ees-font-sans);color:var(--ees-text-primary);background:#fff;}
-body[data-ees-integrated] #chat-container #messages-container .message-listitem{max-width:800px;margin-inline:auto;padding-inline:20px;font-size:14px;line-height:22px;}
-body[data-ees-integrated] #chat-container .markdown-prose{font-size:14px!important;line-height:22px;}
-body[data-ees-integrated] #chat-container #message-input-container{border:1px solid var(--ees-line-control);border-radius:8px;background:#fff;box-shadow:none;padding:12px;}
-body[data-ees-integrated] #chat-container #chat-input{font-size:14px;line-height:22px;}
-body[data-ees-integrated] #chat-container [data-ees-native-empty-frame]{display:flex;flex:1;flex-direction:column;min-height:0;}
-body[data-ees-integrated] #chat-container [data-ees-native-empty-chat]{display:flex;flex:1;flex-direction:column;min-height:0;max-width:none;width:100%;margin:0;padding:0;transform:none;}
-body[data-ees-integrated] #chat-container [data-ees-native-empty-main],body[data-ees-integrated] #chat-container [data-ees-native-empty-content]{display:flex;flex:1;flex-direction:column;min-height:0;width:100%;justify-content:flex-start;}
-body[data-ees-integrated] #chat-container [data-ees-native-empty-composer]{margin-top:auto;width:100%;max-width:800px;padding:12px 20px;margin-inline:auto;}
-body[data-ees-integrated] #chat-container #chat-pane [class~='max-w-[58rem]']:not([data-ees-native-empty-chat]):has(#message-input-container){max-width:800px;padding-inline:20px;}
-body[data-ees-integrated] #chat-container [data-ees-native-empty-description]{padding:16px 20px;font-size:14px;line-height:22px;}
 /* Pinned Native S8 logo/name is decorative; the composer keeps its real model selector. */
-body[data-ees-integrated] #chat-container [data-ees-native-empty-model]{display:none;}
-body[data-ees-integrated] #chat-container #send-message-button{background:var(--ees-brand-solid);border-radius:6px;color:#fff;}
-body[data-ees-integrated] #chat-container #send-message-button:disabled{background:var(--ees-surface-muted);color:var(--ees-text-tertiary);}
 @media(max-width:1199px){#ees-work-context{padding-inline:12px;}#ees-work-context .ew-reference{max-width:100px;}}
 @media(max-width:960px){#ees-work-context>div>small,#ees-work-context .ew-reference{display:none;}}
 @media(max-width:600px){#ees-work-content{padding:12px 16px 20px;}#ees-work-panel>.ew-panel-header{padding-inline:16px;}.ew-input-row{display:block;padding:10px;}.ew-input-row>span:first-child{display:block;width:auto;padding:0;margin-bottom:5px;}.ew-scope-columns{grid-template-columns:1fr;gap:16px;}.ew-job-actions{margin-inline:-16px;bottom:-20px;padding:10px 16px;}#ees-work-dialog{padding:18px;}#ees-work-context>span{display:none;}}
@@ -274,16 +249,6 @@ body[data-ees-integrated] #chat-container #send-message-button:disabled{backgrou
 .ew-author pre {white-space:pre-wrap;font-size:11px;max-height:360px;overflow:auto;}
 .ew-author details {font-size:12px;margin:10px 0;}
 .ew-author summary {cursor:pointer;color:var(--ew-blue,#2f5f98);padding:5px 0;}
-body[data-ees-integrated] #chat-container [data-ees-native-empty-chat]{translate:none;}
-body[data-ees-integrated] #chat-container [data-ees-native-empty-suggestions]{display:none;}
-body[data-ees-integrated] #chat-container [data-ees-native-empty-content]{align-items:stretch;}
-body[data-ees-integrated] #chat-container [data-ees-native-empty-composer]{flex:none;padding-bottom:24px;}
-body[data-ees-integrated] #chat-container [data-ees-native-toolbar]{position:absolute!important;top:0;right:12px;left:auto;width:auto;max-width:100px;height:48px;min-height:48px;padding:0;margin:0!important;background:#fff;z-index:30;}
-body[data-ees-integrated] #chat-container [data-ees-native-toolbar]>div:first-child{height:48px;min-height:48px;padding:0;}
-body[data-ees-integrated] #chat-container #navbar-bg-gradient-to-b{background:#fff;bottom:0;}
-body[data-ees-integrated] #ees-work-context{padding-right:120px;}
-body[data-ees-integrated] #sidebar [data-ees-native-navigation]>div:not(:has(#ees-work-entry)){display:none;}
-body[data-ees-integrated] #sidebar [data-ees-native-navigation]>#ees-work-entry{display:block;}
 #ees-work-entry summary>span:first-of-type{flex:1;}
 #ees-work-entry details[open] .ew-category-auto{display:none;}
 .ew-auto-status{display:inline-flex;align-items:center;flex:none;}
@@ -296,8 +261,6 @@ body[data-ees-integrated] #sidebar [data-ees-native-navigation]>#ees-work-entry{
 /* Native dialog reset omits browser centering; explicit geometry and cancel focus. */
 #ees-work-dialog{inset:0;margin:auto;}
 #ees-work-dialog [data-dialog-close]:focus{outline:2px solid var(--ees-brand-text);outline-offset:2px;box-shadow:var(--ees-focus-ring);}
-body[data-ees-integrated][data-ees-model-count="1"] #model-selector-model-button{display:none;}
-body[data-ees-integrated] #sidebar .relative:not(:has(#ees-work-entry)):has([aria-controls="sidebar-folders-content"]),body[data-ees-integrated] #sidebar .relative:not(:has(#ees-work-entry)):has([aria-controls="sidebar-chats-content"]){display:none;}
 .ew-option-source{display:block;overflow-wrap:anywhere;}
 #ees-work-entry .ew-nav-links button,#ees-work-entry .ew-workflows button,#ees-work-entry summary{font-size:14px;}
 
@@ -348,8 +311,6 @@ body[data-ees-integrated] #sidebar .relative:not(:has(#ees-work-entry)):has([ari
 
 
 /* Exactly one 20px gutter around the 760px Native empty composer. */
-body[data-ees-integrated] #chat-container [data-ees-native-empty-chat]{max-width:none;padding:0;}
-body[data-ees-integrated] #chat-container [data-ees-native-empty-composer] [class~='max-w-[58rem]']:has(#message-input-container){max-width:none;padding-inline:0;}
 
 .ew-admin-grants{border:1px solid var(--ees-line-divider);padding:14px;margin-top:16px;display:grid;gap:8px;}
 .ew-admin-grants label{display:flex;align-items:center;gap:8px;font-size:12px;overflow-wrap:anywhere;}
@@ -485,28 +446,8 @@ body[data-ees-integrated] #chat-container [data-ees-native-empty-composer] [clas
 
 /* Q1 · fixed navigation, private panel sizing and readable Native conversation.
    Default-width viewport overlay; drag-induced <560 is a separate decision. */
-body[data-ees-integrated]{--ees-sidebar-width:256px;}
-body[data-ees-integrated][data-ees-sidebar-compact=true]{--ees-sidebar-width:56px;}
-body[data-ees-integrated]:not(.ees-work-native-shell) #sidebar[data-ees-native-sidebar]{width:var(--ees-sidebar-width)!important;max-width:var(--ees-sidebar-width);margin-left:0!important;transform:none!important;transition:none!important;}
-body[data-ees-integrated]:not(.ees-work-native-shell) #sidebar[data-ees-native-sidebar]>div{width:var(--ees-sidebar-width);}
-body[data-ees-integrated] #chat-container{width:calc(100% - var(--ees-sidebar-width))!important;max-width:calc(100% - var(--ees-sidebar-width))!important;}
-body[data-ees-integrated]:not(.ees-work-native-shell) #sidebar .cursor-col-resize{display:none;}
 #ees-work-entry .ew-mode .ew-icon{display:none;}
-body[data-ees-sidebar-compact=true] #sidebar>div>.sidebar:first-child{padding:0;justify-content:center;gap:0;}
-body[data-ees-sidebar-compact=true] #sidebar>div>.sidebar:first-child>a{display:none;}
-body[data-ees-sidebar-compact=true] #ees-work-entry{padding:0 6px;}
-body[data-ees-sidebar-compact=true] #ees-work-entry .ew-mode{display:grid;background:transparent;padding:0;gap:4px;}
-body[data-ees-sidebar-compact=true] #ees-work-entry .ew-mode .ew-icon{display:inline-block;}
-body[data-ees-sidebar-compact=true] #ees-work-entry :is(.ew-nav-caption,.ew-nav-group-title,.ew-empty,.ew-native-management){display:none;}
-body[data-ees-sidebar-compact=true] #ees-work-entry :is(.ew-mode button,.ew-scope button,.ew-nav-links button,summary){justify-content:center;padding:9px 0;gap:0;}
-body[data-ees-sidebar-compact=true] #ees-work-entry :is(.ew-mode button,.ew-scope button,.ew-nav-links button,summary)>:is(span,small):not(.ew-icon){display:none;}
-body[data-ees-sidebar-compact=true] #ees-work-entry .ew-scope{border:0;background:transparent;}
-body[data-ees-sidebar-compact=true] #ees-work-entry .ew-scope button{background:transparent;}
-body[data-ees-sidebar-compact=true] #ees-work-entry .ew-scope button>.ew-icon:last-child{display:none;}
-body[data-ees-sidebar-compact=true] #ees-work-entry summary::before,body[data-ees-sidebar-compact=true] #ees-work-entry .ew-workflows button{display:none;}
-body[data-ees-sidebar-compact=true] #sidebar :is(button[aria-label="사용자 메뉴"],button[aria-label="User menu"]){justify-content:center;padding:8px;}
-body[data-ees-sidebar-compact=true] #sidebar :is(button[aria-label="사용자 메뉴"],button[aria-label="User menu"])>div:first-child{margin-right:0;}
-body[data-ees-sidebar-compact=true] #sidebar :is(button[aria-label="사용자 메뉴"],button[aria-label="User menu"])>div+div{display:none;}
+[data-ees-source-sidebar][data-compact=true] #ees-work-entry .ew-mode .ew-icon{display:inline-block;}
 #ees-work-panel{flex-basis:var(--ees-panel-width,480px);width:var(--ees-panel-width,480px);}
 #ees-work-panel>[data-ees-panel-resize]{position:absolute;left:-4px;top:0;bottom:0;width:8px;cursor:col-resize;touch-action:none;z-index:46;background:transparent;}
 #ees-work-panel>[data-ees-panel-resize]:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:-2px;}
@@ -514,9 +455,6 @@ body[data-ees-sidebar-compact=true] #sidebar :is(button[aria-label="사용자 �
 body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-panel>:is(.ew-job-actions,.ew-next-action){position:static;flex:none;bottom:auto;margin:0;padding:12px 20px;max-height:40%;overflow:auto;background:var(--ees-surface-panel);}
 #ees-work-panel>.ew-job-actions>p{margin:0;}
-body[data-ees-integrated] #chat-container #messages-container .message-listitem{width:min(760px,calc(100% - 48px));max-width:760px;padding-inline:0;}
-body[data-ees-integrated] #chat-container [data-ees-native-empty-composer],body[data-ees-integrated] #chat-container #chat-pane [class~='max-w-[58rem]']:not([data-ees-native-empty-chat]):has(#message-input-container){width:min(760px,calc(100% - 48px));max-width:760px;padding-inline:0;margin-inline:auto;}
-body[data-ees-integrated] #chat-container [data-ees-native-empty-composer] [class~='max-w-[58rem]']:has(#message-input-container){width:100%;max-width:none;}
 /* Tertiary text on the selected background needs the stronger secondary tone. */
 [data-ees-work] :is(.ew-notice,.ew-tag[data-tone=brand],.ew-input-proposal) small{color:var(--ees-text-secondary);}
 #ees-work-panel[data-ees-overlay=true]{position:absolute;z-index:45;inset:0 0 0 auto;width:min(var(--ees-panel-width,480px),100%);max-width:100%;box-shadow:-4px 0 12px #1118270d;}
@@ -655,6 +593,10 @@ body[data-ees-integrated] #chat-container [data-ees-native-empty-composer] [clas
 #ees-work-panel .ew-author-back:hover:not(:disabled),
 #ees-work-panel>footer .ew-text:hover:not(:disabled),
 #ees-work-panel .ew-author>footer .ew-text:hover:not(:disabled){background:var(--ees-surface-panel-hover);}
-/* Workspace's original nav also owns its mobile sidebar toggle and create
- * menu: hide only duplicate section links, never the nav itself. */
-body.ees-work-native-shell nav:has(+ #workspace-container) a[href^="/workspace/"]{display:none;}
+
+/* Q1 reading widths inside the source-owned conversation region. Apply one
+ * 24px gutter to Native's input wrapper; the empty-chat wrappers add none. */
+[data-ees-source-shell] #chat-container #messages-container .message-listitem:not(.max-w-full){width:min(760px,calc(100% - 48px));max-width:760px;padding-inline:0;margin-inline:auto;}
+[data-ees-source-shell] #chat-container [data-ees-source-empty-chat]{width:100%;max-width:none;padding-inline:0;}
+[data-ees-source-shell] #chat-container [data-ees-native-empty-composer]{width:100%;max-width:none;}
+[data-ees-source-shell] #chat-container #chat-pane [class~='max-w-[58rem]']:not([data-ees-source-empty-chat]):has(#message-input-container){width:min(760px,calc(100% - 48px));max-width:760px;padding-inline:0;margin-inline:auto;}

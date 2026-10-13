@@ -234,7 +234,8 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                 return self.send_content({"status": True, "name": "EES Workflow", "version": "0.11.3",
                     "default_locale": "ko-KR", "default_models": "fixture-model", "default_prompt_suggestions": [],
                     "oauth": {"providers": {}}, "features": {"auth": True, "enable_websocket": False,
-                    "enable_login_form": True, "enable_folders": True, "enable_version_update_check": False},
+                    "enable_login_form": True, "enable_folders": True, "enable_version_update_check": False,
+                    "enable_plugins": getattr(self.server, "native_plugins_enabled", False)},
                     "permissions": {}, "audio": {"tts": {"engine": "", "voice": ""}, "stt": {"engine": ""}},
                     "file": {"max_size": 10, "max_count": 5, "image_compression": {"width": 1920, "height": 1080}},
                     "ui": {"default_interface_settings": {}}, "code": {"engine": "pyodide"}})
@@ -264,7 +265,9 @@ class NativeUIHandler(BaseHTTPRequestHandler):
             if path == "/api/v1/users/user/settings":
                 return self.send_content({"ui": {"models": ["fixture-model"], "showChangelog": False,
                                                  "version": "0.11.3", "autoFollowUps": False}})
-            if path in {"/api/v1/models/list", "/api/v1/knowledge/list", "/api/v1/tools/list",
+            if path == "/api/v1/tools/list":
+                return self.send_content([])
+            if path in {"/api/v1/models/list", "/api/v1/knowledge/list",
                         "/api/v1/knowledge/search", "/api/v1/prompts/list", "/api/v1/skills/list"}:
                 return self.send_content({"items": [], "total": 0})
             if path == "/api/ees-work/workspace" and self.server.workflow:
@@ -314,7 +317,7 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                 return self.send_content([] if int(query.get("page", ["1"])[0]) > 1 else list(self.server.chats.values()))
             if path in {"/api/v1/chats/all/tags", "/api/v1/chats/tags", "/api/v1/chats/pinned",
                         "/api/v1/configs/banners", "/api/v1/tools/", "/api/v1/functions/", "/api/v1/skills/",
-                        "/api/v1/prompts/", "/api/v1/folders/", "/api/v1/terminals/", "/api/v1/users/groups",
+                        "/api/v1/prompts/", "/api/v1/prompts/tags", "/api/v1/folders/", "/api/v1/terminals/", "/api/v1/users/groups",
                         "/api/v1/models/tags", "/api/v1/models/base/tags", "/api/v1/channels/", "/api/v1/folders/shared",
                         "/api/v1/groups/"}:
                 return self.send_content([])

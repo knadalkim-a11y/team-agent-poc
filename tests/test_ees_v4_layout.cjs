@@ -8,24 +8,25 @@ function dom(){
   const el={id,dataset:{},style:{setProperty(name,value){this[name]=String(value);},removeProperty(name){delete this[name];}},children:[],parentElement:null,isConnected:false,hidden:false,scrollTop:0,attributes:{},classList:{add:value=>classes.add(value),remove:value=>classes.delete(value),contains:value=>classes.has(value),toggle(value,force){const enabled=force===undefined?!classes.has(value):Boolean(force);if(enabled)classes.add(value);else classes.delete(value);return enabled;}},
    setAttribute(name,value){this.attributes[name]=String(value);},removeAttribute(name){delete this.attributes[name];},getAttribute(name){return name==='id'?this.id:this.attributes[name] ?? null;},hasAttribute(name){return name==='id'?Boolean(this.id):Object.hasOwn(this.attributes,name);},querySelector(selector){return ids.get(selector.slice(1)) || null;},querySelectorAll(selector){return selector==='button,input,select,textarea,a,summary,[data-ees-panel-resize]'?(this.mockControls || []):[];},contains(target){return target===this||this.children.includes(target)||(this.mockControls || []).includes(target);},
    append(child){child.remove();child.parentElement=this;child.isConnected=true;this.children.push(child);if(child.id)ids.set(child.id,child);},prepend(child){this.append(child);this.children.splice(this.children.indexOf(child),1);this.children.unshift(child);},
-   remove(){if(this.parentElement)this.parentElement.children=this.parentElement.children.filter(child=>child!==this);this.parentElement=null;this.isConnected=false;},
-   insertAdjacentElement(_,child){this.parentElement.append(child);},focus(){doc.activeElement=this;},addEventListener(type,fn){events.set(type,fn);},dispatch(type){events.get(type)?.({target:this});},showModal(){this.open=true;},close(){this.open=false;events.get('close')?.();},matches:()=>false};
-  Object.defineProperty(el,'innerHTML',{get:()=>html,set(value){html=value;if(el.replaceControls)el.mockControls=el.replaceControls();for(const match of value.matchAll(/id="([^"]+)"/g)){if(!ids.has(match[1]))ids.set(match[1],element(match[1]));}if(value.includes('data-dialog-close')){const cancel=element('cancel');el.querySelector=selector=>selector==='[data-dialog-close]'?cancel:selector==='[data-dialog-confirm]'?element('confirm'):ids.get(selector.slice(1)) || null;} }});
+   replaceChildren(){this.children=[];html='';},remove(){if(this.parentElement)this.parentElement.children=this.parentElement.children.filter(child=>child!==this);this.parentElement=null;this.isConnected=false;},
+   insertAdjacentElement(_,child){this.parentElement.append(child);},focus(){doc.activeElement=this;},getBoundingClientRect:()=>({left:0,right:360,top:0,bottom:30,width:360,height:100}),addEventListener(type,fn){events.set(type,fn);},removeEventListener(type,fn){if(events.get(type)===fn)events.delete(type);},dispatch(type,event={}){events.get(type)?.({target:this,...event});},showModal(){this.open=true;},close(){this.open=false;events.get('close')?.();},matches:()=>false};
+  Object.defineProperty(el,'innerHTML',{get:()=>html,set(value){html=value;if(el.replaceControls)el.mockControls=el.replaceControls();for(const match of value.matchAll(/id="([^"]+)"/g)){if(!ids.has(match[1]))ids.set(match[1],element(match[1]));}if(value.includes('data-dialog-close')){const cancel=element('cancel');el.querySelector=selector=>selector==='[data-dialog-close]'?cancel:selector==='[data-dialog-confirm]'?element('confirm'):ids.get(selector.slice(1)) || null;}if(value.includes('data-help-close')){const controls=Object.fromEntries(['close','ask','error'].map(name=>['[data-help-'+name+']',element('help-'+name)]));el.querySelector=selector=>controls[selector] || ids.get(selector.slice(1)) || null;} }});
   Object.defineProperty(el,'firstChild',{get:()=>el.children[0] || (html?{}:null)});if(id)ids.set(id,el);return el;
  }
  const body=element('body'),sidebar=element('sidebar'),anchorParent=element('anchor-parent'),anchor=element('sidebar-search-button'),row=element('row'),column=element('native-column'),pane=element('chat-pane');
  body.isConnected=true;body.append(sidebar);sidebar.append(anchorParent);anchorParent.append(anchor);body.append(row);row.append(column);column.append(pane);
  doc={body,activeElement:body,createElement:()=>element(),querySelector:selector=>selector==='#chat-container #chat-pane'?pane:ids.get(selector.slice(1)) || null,querySelectorAll:selector=>selector==='nav'?[]:[],getElementById:id=>ids.get(id)};
- const context=renderer({document:doc});return {context,ids,body,row,column,pane,document:doc,element};
+ const panel=element('ees-work-panel'),overlays=element('ees-work-overlays');row.append(panel);body.append(overlays);const published=[];
+ const context=renderer({document:doc});context.window.__eesSourceShellV1={hosts:()=>({panel,overlays}),publish:value=>published.push(value)};return {context,ids,body,row,column,pane,panel,overlays,published,document:doc,element};
 }
 const snapshot=(patch={})=>({state:{capabilities:{actor_id:'a'},systems:['EMS'],factories:[],workflows:[],runs:[],my_work:[]},selection:{mode:'work',tab:'my_work',panel_open:true,system_id:'EMS',factory_id:'',...patch}});
-test('Native conversation remains the original center DOM while the work panel mounts after it',()=>{const h=dom();const view=run(h.context,'createWorkView({callbacks:{}})');view.render(snapshot());assert.equal(h.row.children[0],h.column);assert.equal(h.row.children[1].id,'ees-work-panel');assert.equal(h.pane.parentElement,h.column);assert.equal(h.column.classList.contains('ees-integrated-chat'),true);assert.match(h.ids.get('ees-work-entry').innerHTML,/전체 공장/);});
-test('closing or changing work mode preserves Native chat and the authoring mount boundary',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})');view.render(snapshot());view.render(snapshot({panel_open:false}));assert.equal(h.ids.get('ees-work-panel').hidden,true);assert.equal(h.pane.parentElement,h.column);const author=snapshot({mode:'author',panel_open:true});author.state.capabilities.can_author=true;view.render(author);assert.ok(view.authoringHost());assert.equal(h.pane.parentElement,h.column);view.reset();assert.equal(h.pane.parentElement,h.column);assert.equal(h.column.classList.contains('ees-integrated-chat'),false);});
-test('Native shell mounts only the EES menu with the verified sidebar anchor and no chat pane',()=>{
- const h=dom(),original=h.document.querySelector;h.document.querySelector=selector=>selector==='#chat-container #chat-pane'?null:original(selector);h.context.location.pathname='/workspace/skills';h.context.location.search='';const view=run(h.context,'createWorkView({callbacks:{}})'),value=snapshot();value.native_shell=true;value.native_id='skills';value.state.capabilities={actor_id:'a',can_author:true,native_access_available:true,native_access:{skills:true,models:false,knowledge:false,prompts:false,tools:false,admin:false}};view.render(value);const entry=h.ids.get('ees-work-entry');assert.equal(entry.isConnected,true);assert.match(entry.innerHTML,/업무 만들기/);assert.match(entry.innerHTML,/data-native-id="skills"[^>]*aria-current="page"/);assert.doesNotMatch(entry.innerHTML,/AI 설정|관리자만|native_return/);assert.equal(h.ids.has('ees-work-panel'),false);assert.equal(h.ids.has('ees-work-context'),false);assert.equal(h.pane.parentElement,h.column);assert.equal(h.column.classList.contains('ees-integrated-chat'),false);
+test('legacy content uses only the source-supplied right slot without mutating Native nodes',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),before=[...h.row.children];view.render(snapshot());assert.deepEqual(h.row.children,before);assert.equal(h.pane.parentElement,h.column);assert.equal(h.column.classList.contains('ees-integrated-chat'),false);assert.equal(h.ids.has('ees-work-entry'),false);assert.match(h.panel.innerHTML,/내 업무/);assert.equal(h.published.at(-1).context_title,'대화');});
+test('panel visibility is source state and reset preserves source-owned mount boundary',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})');view.render(snapshot());view.render(snapshot({panel_open:false}));assert.equal(h.published.at(-1).selection.panel_open,false);assert.equal(h.panel.hidden,false);const author=snapshot({mode:'author',panel_open:true});author.state.capabilities.can_author=true;view.render(author);assert.ok(view.authoringHost());view.reset();assert.equal(h.pane.parentElement,h.column);assert.equal(h.panel.parentElement,h.row);assert.equal(h.panel.innerHTML,'');});
+test('Native capability snapshots publish menu state without legacy menu or content rendering',()=>{
+ const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),value={...snapshot(),native_shell:true,native_id:'skills'};value.state.capabilities={actor_id:'a',can_author:true,native_access_available:true,native_access:{skills:true}};view.render(value);assert.equal(h.published.at(-1).native_id,'skills');assert.equal(h.panel.innerHTML,'');assert.equal(h.ids.has('ees-work-entry'),false);assert.equal(h.ids.has('ees-work-context'),false);assert.equal(h.pane.parentElement,h.column);
 });
-test('Native shell suspends chat layout and restores the same panel and Native chat nodes on return',()=>{
- const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),value=snapshot({mode:'author'});value.state.capabilities.can_author=true;view.render(value);const panel=h.ids.get('ees-work-panel'),entry=h.ids.get('ees-work-entry'),original=h.document.querySelector;h.document.querySelector=selector=>selector==='#chat-container #chat-pane'?null:original(selector);h.context.location.pathname='/workspace/models';h.context.location.search='';view.render({...value,native_shell:true,native_id:'models'});assert.equal(entry.isConnected,true);assert.equal(panel.isConnected,false);assert.equal(h.column.classList.contains('ees-integrated-chat'),false);assert.equal(h.pane.parentElement,h.column);h.document.querySelector=original;h.context.location.pathname='/c/original';view.render(value);assert.equal(h.ids.get('ees-work-panel'),panel);assert.equal(panel.parentElement,h.row);assert.equal(h.ids.get('ees-work-entry'),entry);assert.equal(h.pane.parentElement,h.column);assert.equal(h.column.classList.contains('ees-integrated-chat'),true);
+test('Native navigation preserves the exact source panel and Native chat nodes',()=>{
+ const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),value=snapshot({mode:'author'});value.state.capabilities.can_author=true;view.render(value);const body=h.panel.innerHTML;view.render({...value,native_shell:true,native_id:'models'});assert.equal(h.panel.parentElement,h.row);assert.equal(h.panel.innerHTML,body);assert.equal(h.pane.parentElement,h.column);view.render(value);assert.equal(h.panel.parentElement,h.row);assert.equal(h.pane.parentElement,h.column);
 });
 test('Native capability refresh cannot turn untouched hidden run inputs into an incomplete draft',()=>{
  const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),value=snapshot({workflow_id:'w',run_id:'r',job_id:'j',tab:'current'});
@@ -33,14 +34,22 @@ test('Native capability refresh cannot turn untouched hidden run inputs into an 
  view.render(value);const form=h.ids.get('ees-work-inputs'),field={name:'visible',value:'saved',type:'text',disabled:false,dataset:{workInput:''}};form.dataset={settings:'false',revision:'3'};form.querySelectorAll=selector=>selector==='[data-work-input]'?[field]:[];
  assert.equal(view.readInputs().dirty,false);
  const native={...value,state:{...value.state,run:null,workflow:null},native_shell:true,native_id:'skills'};
- view.render(native);assert.equal(h.ids.get('ees-work-panel').isConnected,false);view.render(native);view.render(value);
+ view.render(native);assert.equal(h.ids.get('ees-work-panel').isConnected,true);view.render(native);view.render(value);
  const returned=view.readInputs();assert.deepEqual(JSON.parse(JSON.stringify(returned.inputs)),{visible:'saved',hidden:'keep'});assert.equal(returned.dirty,false);assert.equal(returned.conflict,false);
 });
-test('missing sidebar anchor leaves Native screen untouched and creates no EES shell',()=>{
- const h=dom(),original=h.document.querySelector;h.document.querySelector=selector=>['#sidebar-search-button','#chat-container #chat-pane'].includes(selector)?null:original(selector);h.context.location.pathname='/workspace/skills';h.context.location.search='';const children=[...h.body.children],view=run(h.context,'createWorkView({callbacks:{}})');view.render({...snapshot(),native_shell:true,native_id:'skills'});assert.deepEqual(h.body.children,children);assert.equal(h.ids.has('ees-work-entry'),false);assert.equal(h.ids.has('ees-work-panel'),false);assert.equal(h.body.dataset.eesIntegrated,undefined);
+test('missing source content slot fails closed without constructing a replacement around Native',()=>{
+ const h=dom();h.context.window.__eesSourceShellV1.hosts=()=>({});const children=[...h.body.children],view=run(h.context,'createWorkView({callbacks:{}})');assert.equal(view.render({...snapshot(),native_shell:true,native_id:'skills'}),false);assert.deepEqual(h.body.children,children);assert.equal(h.ids.has('ees-work-entry'),false);assert.equal(h.body.dataset.eesIntegrated,undefined);
 });
-test('panel scroll restores per personal target and never writes a shared run selection',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})');view.render(snapshot());h.ids.get('ees-work-content').scrollTop=157;view.render(snapshot({tab:'records'}));h.ids.get('ees-work-content').scrollTop=22;view.render(snapshot());assert.equal(h.ids.get('ees-work-content').scrollTop,157);assert.equal(h.context.document.body.dataset.eesIntegrated,'true');});
-test('confirmation dialog starts on cancel and Escape closure never accepts the command',async()=>{const h=dom();const waiting=run(h.context,'workUI.dialog({title:"요청 확인",html:"<p>대상</p>",confirmLabel:"요청"})');const dialog=h.body.children.find(item=>item.id==='ees-work-dialog');assert.equal(h.document.activeElement.id,'cancel');dialog.dispatch('cancel');dialog.close();assert.equal(await waiting,false);assert.equal(h.document.activeElement,h.body);});
+test('panel scroll restores per personal target and never writes a shared run selection',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})');view.render(snapshot());h.ids.get('ees-work-content').scrollTop=157;view.render(snapshot({tab:'records'}));h.ids.get('ees-work-content').scrollTop=22;view.render(snapshot());assert.equal(h.ids.get('ees-work-content').scrollTop,157);assert.equal(h.context.document.body.dataset.eesIntegrated,undefined);});
+test('confirmation dialog starts on cancel and Escape closure never accepts the command',async()=>{const h=dom();const waiting=run(h.context,'workUI.dialog({title:"요청 확인",html:"<p>대상</p>",confirmLabel:"요청"})');const dialog=h.overlays.children.find(item=>item.id==='ees-work-dialog');assert.equal(h.document.activeElement.id,'cancel');dialog.dispatch('cancel');dialog.close();assert.equal(await waiting,false);assert.equal(h.document.activeElement,h.body);});
+test('dialog capture closes nested help before closing the confirmation and cleans it on programmatic close',async()=>{
+ const h=dom();h.context.window.innerHeight=800;const waiting=run(h.context,'workUI.dialog({title:"요청 확인",confirmLabel:"요청"})'),dialog=h.overlays.children.find(item=>item.id==='ees-work-dialog'),trigger=h.element('help-trigger');dialog.append(trigger);h.context.trigger=trigger;
+ const show=()=>run(h.context,'workUI.showHelp({termId:"category",help:{terms:[{id:"category",name:"분류",summary:"절차 분류"}]},trigger})');let help=show();assert.equal(help.parentElement,dialog);
+ // An ancestor capture listener runs before the focused help child's handler.
+ dialog.dispatch('keydown',{target:h.document.activeElement,key:'Escape',preventDefault(){},stopPropagation(){}});
+ assert.equal(dialog.open,true);assert.equal(help.isConnected,false);assert.equal(h.document.activeElement,trigger);
+ help=show();dialog.close();assert.equal(help.isConnected,false);assert.equal(await waiting,false);
+});
 
 
 test('workspace refresh retains active input identity and text selection without taking Native focus',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})');view.render(snapshot());const host=h.ids.get('ees-work-panel'),field=h.element('input-original');field.id='ew-run-evidence';field.setAttribute('name','evidence');field.selectionStart=2;field.selectionEnd=5;field.selectionDirection='forward';host.mockControls=[field];field.focus();let replacement;host.replaceControls=()=>{replacement=h.element('ew-run-evidence');replacement.setAttribute('name','evidence');replacement.setSelectionRange=(start,end,direction)=>{replacement.range=[start,end,direction];};return [replacement];};view.render(snapshot());assert.equal(h.document.activeElement,replacement);assert.deepEqual(replacement.range,[2,5,'forward']);h.pane.focus();view.render(snapshot());assert.equal(h.document.activeElement,h.pane);});
@@ -49,7 +58,7 @@ test('workspace refresh retains active input identity and text selection without
 test('published procedure overview opens before a run exists without dereferencing run state',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),value=snapshot({workflow_id:'w',tab:'overview'});value.state.workflow={id:'w',name:'게시한 절차',published_version:1,published:{nodes:{p:{id:'p',type:'p',children:['j']},j:{id:'j',type:'j',parent:'p',mode:'tool',name:'조회'}}}};view.render(value);assert.match(h.ids.get('ees-work-panel').innerHTML,/data-action="start_run"/);assert.doesNotMatch(h.ids.get('ees-work-panel').innerHTML,/data-action="execute_scope"/);});
 
 
-test('workspace navigation separates managed-system authoring from work scope and actual tasks',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),value=snapshot({mode:'author'});value.state.capabilities={actor_id:'a',managed_systems:['EMS'],can_author:true,native_access_available:true,native_access:{models:false,knowledge:false,prompts:false,skills:true,tools:false,admin:false}};value.state.workflows=[{id:'w',name:'저장된 편집',system_id:'EMS',category:'ops',updated_at:'2026-10-02'}];view.render(value);const nav=h.ids.get('ees-work-entry').innerHTML;assert.match(nav,/관리 시스템/);assert.match(nav,/최근 편집/);assert.match(nav,/저장된 편집/);assert.match(nav,/스킬·지침/);assert.doesNotMatch(nav,/data-action="my_work"|전체 공장/);assert.equal(h.ids.get('ees-work-panel').dataset.eesMode,'author');});
+test('authoring capability and selection are published for the source navigation',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),value=snapshot({mode:'author'});value.state.capabilities={actor_id:'a',managed_systems:['EMS'],can_author:true,native_access_available:true,native_access:{skills:true}};value.state.workflows=[{id:'w',name:'저장된 편집',system_id:'EMS',category:'ops',updated_at:'2026-10-02'}];view.render(value);const published=h.published.at(-1);assert.deepEqual(published.state.capabilities,value.state.capabilities);assert.deepEqual(published.state.workflows,value.state.workflows);assert.equal(published.selection.mode,'author');assert.equal(h.ids.get('ees-work-panel').dataset.eesMode,'author');});
 
 test('polling preserves an explicit model choice only for its actor and work target while revocation clears it',()=>{
  const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),value=snapshot({workflow_id:'w',run_id:'r',job_id:'j',tab:'current'});
@@ -88,6 +97,14 @@ test('an explicit early panel resize wins over an older saved width and stays ac
  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,systems:[],workflows:[],runs:[],ui_state:{revision:1,state:{selection:{panel_width:400}}}}:{ok:true});
  await h.api.refresh();assert.equal(h.api.snapshot().selection.panel_width,400);
 });
+test('source resize before actor restoration persists its explicit width after the workspace read',async()=>{
+ const h=controller();h.api.reset();h.setAuth('actor-b-token');h.api.setIdentity();
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'b'},systems:['EMS'],workflows:[],runs:[],ui_state:{revision:4,state:{selection:{panel_width:720,system_id:'EMS'}}}}:{ok:true,revision:5});
+ await h.api.sourceAction({action:'panel_width',width:'400'});assert.equal(h.api.snapshot().selection.panel_width,400);
+ await h.api.refresh();assert.equal(h.api.snapshot().selection.panel_width,400);
+ for(const callback of [...h.timers.values()])callback();await new Promise(setImmediate);
+ const writes=h.calls.filter(call=>call.body?.action==='save_ui');assert.equal(writes.length,1);assert.equal(writes[0].body.state.selection.panel_width,400);assert.equal(writes[0].body.expected_revision,4);assert.equal(writes[0].options.headers.Authorization,'Bearer actor-b-token');
+});
 
 test('a width conflict retries only that preference while preserving another tab private draft',async()=>{
  const h=controller(),stored={selection:{tab:'current',panel_width:480,verdict_drafts:{other:{item:{verdict:'pending'}}},start_inputs:{other:{name:'keep'}}},other:'preserved'};let saves=0;
@@ -103,66 +120,24 @@ test('width conflict recovery stops on account change and never retries twice',a
  second.view.callbacks.panelWidth(720);[...second.timers.values()].at(-1)();await new Promise(setImmediate);assert.equal(second.calls.filter(c=>c.body).length,2);assert.match(second.api.snapshot().error,/자동 저장 실패/);assert.equal(second.api.snapshot().selection.panel_width,720);
 });
 
-// Execute the source app.html gate that the pinned build applies, rather than a
-// separately maintained copy of its timing or route logic.
-function startupGate({pathname='/',search='',token='fixture-token',storageError=false,execute=true}={}){
- const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
- const patch=fs.readFileSync(path.join(__dirname,'../frontend/patches/0001-ees-native-hooks.patch'),'utf8');
- const added=patch.split(/\r?\n/).filter(line=>line.startsWith('+')&&!line.startsWith('+++')).map(line=>line.slice(1)).join('\n');
- const scripts=[...added.matchAll(/<script id="ees-startup-gate">([\s\S]*?)<\/script>/g)];
- assert.equal(scripts.length,1,'The exact source app.html startup gate must be present once');
- const css=added.match(/<style id="ees-startup-style">([\s\S]*?)<\/style>/)?.[1];
- assert.match(css,/body :not\(\[aria-modal='true'\], \[aria-modal='true'\] \*\)\s*\{ visibility: hidden !important; \}/);
- assert.match(css,/body \[aria-modal='true'\]\s*\{ visibility: visible !important; \}/);
- assert.doesNotMatch(css,/\[aria-modal='true'\] \*\s*\{ visibility: visible/,'Native hidden modal children retain their own visibility');
- const dataset={},timers=new Map(),listeners=new Map();let id=0,now=0;
- const window={addEventListener(type,callback){listeners.set(type,callback);},removeEventListener(type,callback){if(listeners.get(type)===callback)listeners.delete(type);},dispatchEvent(event){listeners.get(event.type)?.(event);}};
- const context={document:{documentElement:{dataset}},location:{pathname,search},URLSearchParams,window,localStorage:{getItem(){if(storageError)throw Error('Storage unavailable');return token;}},setTimeout(callback,ms){const key=++id;timers.set(key,{at:now+ms,callback});return key;},clearTimeout:key=>timers.delete(key)};
- if(execute)vm.runInNewContext(scripts[0][1],context);
- return {dataset,window,context,timers,listeners,advance(ms){now+=ms;for(const [key,timer] of [...timers])if(timer.at<=now){timers.delete(key);timer.callback();}}};
-}
-test('source head gate hides root and existing conversation until successful EES layout',()=>{
- for(const pathname of ['/','/c/existing-chat','/c/existing-chat/']){
-  const h=startupGate({pathname});assert.equal(h.dataset.eesStartup,'pending');
-  h.advance(3999);assert.equal(h.dataset.eesStartup,'pending');
-  h.window.dispatchEvent({type:'ees:startup-ready'});assert.equal(h.dataset.eesStartup,undefined);assert.equal(h.timers.size,0);assert.equal(h.listeners.size,0);
-  h.context.location.pathname='/c/another-chat';h.window.dispatchEvent({type:'popstate'});assert.equal(h.dataset.eesStartup,undefined,'SPA navigation does not re-arm a completed gate');
- }
-});
-test('missing launcher and stalled API always fail open at the independent four-second bound',()=>{
- for(const pathname of ['/','/c/existing-chat']){
-  const h=startupGate({pathname});assert.equal(h.dataset.eesStartup,'pending');
-  h.advance(4000);assert.equal(h.dataset.eesStartup,undefined);assert.equal(h.listeners.size,0);
-  h.window.dispatchEvent({type:'ees:startup-ready'});assert.equal(h.dataset.eesStartup,undefined);
- }
-});
-test('Native routes, signed-out or unavailable storage and disabled JavaScript are never hidden',()=>{
- for(const pathname of ['/auth','/logout','/workspace/models','/admin/settings','/c/extra/path','/s/shared'])assert.equal(startupGate({pathname}).dataset.eesStartup,undefined,pathname);
- for(const pathname of ['/','/c/existing-chat'])for(const search of ['?settings=admin:general','?settings=general','?settings=account','?settings=about'])assert.equal(startupGate({pathname,search}).dataset.eesStartup,undefined,pathname+search);
- for(const options of [{token:''},{storageError:true},{execute:false}])assert.equal(startupGate(options).dataset.eesStartup,undefined,JSON.stringify(options));
-});
-test('launcher releases startup only after a completed view and authoring render',async()=>{
- const h=controller(),events=[];h.context.document.documentElement.dataset={eesStartup:'pending'};h.context.Event=class{constructor(type){this.type=type;}};
- h.context.window.dispatchEvent=event=>events.push(event.type);
- h.api.setSelection({mode:'author'});
- h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a',can_author:true},systems:[],workflows:[],runs:[],ui_state:{revision:0,state:{}}}:{ok:true});
- const order=[];h.view.render=()=>{order.push('view');return true;};h.designer.render=()=>{order.push('designer');assert.equal(events.length,0);};
- await h.api.refresh();assert.deepEqual(order,['view','designer']);assert.deepEqual(events,['ees:startup-ready']);
-});
-test('a missing mount or throwing layout never reports successful startup',async()=>{
- for(const behavior of ['missing','exception']){
-  const h=controller(),events=[];h.context.document.documentElement.dataset={eesStartup:'pending'};h.context.Event=class{constructor(type){this.type=type;}};h.context.window.dispatchEvent=event=>events.push(event.type);
-  h.view.render=()=>{if(behavior==='exception')throw Error('layout_failed');return false;};
-  if(behavior==='exception')await assert.rejects(h.api.refresh(),/layout_failed/);else await h.api.refresh();
-  assert.deepEqual(events,[],behavior);assert.equal(h.context.document.documentElement.dataset.eesStartup,'pending');
- }
+test('runtime never arms or releases a document hiding gate on success or failure',async()=>{
+ const {launcherSource}=require('./ees_workspace_ui_fixture.cjs');assert.doesNotMatch(launcherSource,/eesStartup|startup-ready|startupReady|visibility/);
+ for(const behavior of ['success','missing','exception']){const h=controller(),events=[];h.context.window.dispatchEvent=event=>events.push(event.type);h.view.render=()=>{if(behavior==='exception')throw Error('layout_failed');return behavior==='success';};if(behavior==='exception')await assert.rejects(h.api.refresh(),/layout_failed/);else await h.api.refresh();assert.deepEqual(events,[]);}
 });
 test('view completion signal follows actual mount success and the creation card states current capability exactly',()=>{
  const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})');assert.equal(view.render(snapshot()),true);
- const original=h.document.querySelector;h.document.querySelector=selector=>selector==='#sidebar-search-button'?null:original(selector);assert.equal(view.render(snapshot()),false);assert.equal(view.sync(snapshot()),false);
+ h.context.window.__eesSourceShellV1.hosts=()=>({});assert.equal(view.render(snapshot()),false);assert.equal(view.sync(snapshot()),false);
  const card=run(h.context,'workProcedureStartHTML({kind:"new"})');
  assert.ok(card.includes('새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.'));
  assert.doesNotMatch(card,/하시는 일을 순서대로 말해 주시면|예시 없이, 하는 일을 말로 설명해서 만들고 싶어/);
  assert.equal(run(h.context,'workUI.procedureQuestions[2]'),'빈 절차로 시작하면 무엇부터 정하나요?');
  assert.match(card,/data-question-index="2"[^>]*>.*?<span>빈 절차로 시작하면 무엇부터 정하나요\?<\/span>/);
+});
+
+test('Native portal skin is gated by the first-render source without hiding or moving Native surfaces',()=>{
+ const fs=require('node:fs'),path=require('node:path'),css=fs.readFileSync(path.join(__dirname,'../branding/ees/ui/chat-theme.css'),'utf8');
+ const sourceSkin=css.slice(css.indexOf('/* Source-present Native skin:'));
+ assert.doesNotMatch(sourceSkin,/body\[data-ees-integrated\]|visibility:|display:\s*none|position:/);
+ for(const selector of sourceSkin.matchAll(/([^{}]+)\{/g))assert.ok(selector[1].includes('body:has([data-ees-source-shell])'),selector[1]);
+ assert.match(sourceSkin,/\.modal\[role="dialog"\]>div/);assert.doesNotMatch(sourceSkin,/::backdrop/);assert.match(sourceSkin,/:focus-visible/);assert.match(sourceSkin,/\.cm-editor/);assert.match(sourceSkin,/\.katex/);
 });

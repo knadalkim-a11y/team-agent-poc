@@ -18,6 +18,7 @@ from zipfile import ZipFile
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_CONFIG = ROOT / "frontend" / "open-webui-source.json"
 SOURCE_PREFIX = "open_webui/frontend/"
+MAX_MANIFEST_BYTES = 1024 * 1024
 
 
 def _sha(content):
@@ -209,7 +210,8 @@ def _verify_output(files, config, mode):
         scripts = b"\n".join(content for name, content in files.items()
                              if name.startswith(app_dir + "/") and name.endswith(".js"))
         for marker in (b"__eesNativeDraftV1", b"__eesNativeWorkV1", b"ees_work_reference",
-                       b"beginChatCreation", b"finishChatCreation", b"data-ees-native-sidebar"):
+                       b"beginChatCreation", b"finishChatCreation", b"__eesSourceShellV1",
+                       b"data-ees-source-sidebar", b"data-ees-source-shell"):
             if marker not in scripts:
                 raise ValueError("Frontend output lost a Native integration hook.")
         if b"EES_THEME_SHA256" in files["index.html"]:
@@ -227,7 +229,8 @@ def build(source_dir, wheel, output_dir, *, baseline=False):
     pyodide, original_pyodide_lock = _copy_official_pyodide(source, wheel, config)
     if not baseline:
         _apply_ees(source, config, wheel)
-    source_files = {name: _sha((source / name).read_bytes()) for name in config["source_files"]}
+    source_names = config["source_files"] if baseline else config["patched_files"]
+    source_files = {name: _sha((source / name).read_bytes()) for name in source_names}
     env = os.environ.copy()
     # npm run build normally supplies this variable. We call Vite directly to
     # avoid the upstream moving Pyodide downloader, so preserve that input.
@@ -249,7 +252,7 @@ def build(source_dir, wheel, output_dir, *, baseline=False):
     # Ensure patch/source/asset edits during a long build cannot be published as
     # if they came from the original reviewed inputs.
     if inputs != _source_inputs(mode) or source_files != {
-            name: _sha((source / name).read_bytes()) for name in config["source_files"]}:
+            name: _sha((source / name).read_bytes()) for name in source_names}:
         raise ValueError("Frontend inputs changed while building.")
     manifest = {"schema": 1, "mode": mode, "upstream_commit": config["commit"],
                 "lock_sha256": config["lock_sha256"], "license_sha256": config["license_sha256"],
@@ -260,9 +263,12 @@ def build(source_dir, wheel, output_dir, *, baseline=False):
                 "source_files": config["source_files"] if baseline else config["patched_files"],
                 "compiled_source_files": source_files,
                 "pyodide_files": pyodide, "files": _digest_map(files)}
+    manifest_bytes = (json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+    if len(manifest_bytes) > MAX_MANIFEST_BYTES:
+        raise ValueError("Frontend manifest exceeds the supported 1 MiB size.")
     output.mkdir(parents=True)
     shutil.move(str(source / "build"), str(output / "build"))
-    (output / "manifest.json").write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    (output / "manifest.json").write_bytes(manifest_bytes)
     validate_frontend(output, mode=mode)
     return manifest
 

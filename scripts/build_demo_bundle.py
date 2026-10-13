@@ -28,6 +28,7 @@ EXCLUDED_PARTS = frozenset({
 })
 SENSITIVE_NAME = re.compile(r"(^|[._-])(env|key|secret|credentials?|tokens?|pat)([._-]|$)", re.I)
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
+MAX_MANIFEST_BYTES = 1024 * 1024
 # Accepted output contract of build_ees_webui.py; update together on a version change.
 BRANDING_VERSION = "0.11.3+ees.14"
 BRANDING_UPSTREAM = "0.11.3"
@@ -133,6 +134,8 @@ def branding_files(directory):
     if len(wheels) != 1:
         raise BundleError("Branding directory must contain exactly one wheel and manifest.json.")
     manifest_bytes = read_regular(directory, "manifest.json")
+    if len(manifest_bytes) > MAX_MANIFEST_BYTES:
+        raise BundleError("Branding manifest exceeds the supported 1 MiB size.")
     try:
         manifest = json.loads(manifest_bytes)
     except (ValueError, UnicodeError) as error:
@@ -192,7 +195,11 @@ def build_bundle(root, output_dir, branding_dir=None, allow_dirty=False):
         "files": [{"path": name, "size": len(content), "sha256": digest(content)}
                   for name, content in sorted(files.items())],
     }
-    files["manifest.json"] = (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")
+    # Keep every inventory/hash; whitespace alone must not exhaust the existing
+    # deployment parser's 1 MiB limit as source-built frontend files increase.
+    files["manifest.json"] = (json.dumps(manifest, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+    if len(files["manifest.json"]) > MAX_MANIFEST_BYTES:
+        raise BundleError("Bundle manifest exceeds the supported 1 MiB size.")
     if source_state(root) != state:
         raise BundleError("Git source state changed while building; retry from a stable checkout.")
     output_dir = Path(output_dir)

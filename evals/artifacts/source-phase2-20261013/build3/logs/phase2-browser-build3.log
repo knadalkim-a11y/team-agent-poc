@@ -1,0 +1,17 @@
+test_every_navigation_has_source_chrome_without_native_overlay_frames (test_ees_source_shell_native.SourceShellNativeTests.test_every_navigation_has_source_chrome_without_native_overlay_frames) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 159.19718499935698, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_c18_panel_cards_input_hover_and_keyboard_focus (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_c18_panel_cards_input_hover_and_keyboard_focus) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 146.98038999631535, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_q1_geometry_reading_width_footer_and_baseline_overlay (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 160.69700299703982, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 138.17592400300782, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_source_startup_missing_launcher_fails_open_with_native_chat_accessible (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_source_startup_missing_launcher_fails_open_with_native_chat_accessible) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 192.37616799364332, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_source_startup_root_and_existing_chat_reveal_only_after_ees_layout (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_source_startup_root_and_existing_chat_reveal_only_after_ees_layout) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 148.04350300255464, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 17.379s
+
+OK

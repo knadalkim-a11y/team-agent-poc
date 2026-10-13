@@ -375,14 +375,15 @@ class CustomizationTests(unittest.TestCase):
         self.probe_mock = self.probe.start()
         self.addCleanup(self.probe.stop)
 
-    def write_bundle(self, content=None, commit=COMMIT):
+    def write_bundle(self, content=None, commit=COMMIT, manifest_options=None):
         content = content or make_wheel()
+        manifest_options = manifest_options or {}
         built = {"schema_version": 1, "version": branding.VERSION, "upstream_version": branding.UPSTREAM_VERSION,
                  "source": {"filename": branding.SOURCE_FILENAME, "sha256": branding.SOURCE_SHA256},
                  "wheel": {"filename": branding.WHEEL_FILENAME, "size": len(content), "sha256": digest(content)}}
         members = {name: b"synthetic guide" for name in release.bundles.GUIDES}
         members.update({"agent-pack/test.md": b"synthetic asset", "BUNDLE-README.md": b"synthetic readme",
-                        "branding/manifest.json": json.dumps(built).encode(), "branding/" + branding.WHEEL_FILENAME: content})
+                        "branding/manifest.json": json.dumps(built, **manifest_options).encode(), "branding/" + branding.WHEEL_FILENAME: content})
         manifest = {"schema_version": 1, "source_commit": commit, "source_dirty": False,
                     "source_url": release.bundles.REPOSITORY_URL + "/tree/" + commit, "branding": built,
                     "files": [{"path": name, "size": len(value), "sha256": digest(value)} for name, value in members.items()]}
@@ -390,7 +391,7 @@ class CustomizationTests(unittest.TestCase):
         with zipfile.ZipFile(self.bundle, "w") as archive:
             for name, value in members.items():
                 archive.writestr(name, value)
-            archive.writestr("manifest.json", json.dumps(manifest).encode())
+            archive.writestr("manifest.json", json.dumps(manifest, **manifest_options).encode())
 
     def record(self, config, registry, event):
         self.events.append(event)
@@ -819,6 +820,25 @@ print("v4_database_" + phase + "=pass")
         custom.validate_program(self.program, previous)
         self.assertEqual(self.tree(), before)
         self.assertFalse(self.restore()["changed"])
+
+    def test_indented_and_compact_bundle_apply_restore_preserve_ees13_and_ees14(self):
+        for version in ("0.11.3+ees.13", "0.11.3+ees.14"):
+            for label, options in (("legacy", {"indent": 2}), ("compact", {"separators": (",", ":")})):
+                with self.subTest(previous=version, format=label):
+                    self.write_bundle(manifest_options=options)
+                    previous = self.install_legacy_program(version=version)
+                    before = self.tree()
+                    self.assertEqual(custom.inspect_bundle(self.config, self.bundle, COMMIT, self.env)["webui_version"],
+                                     branding.VERSION)
+                    self.assertEqual(before, self.tree())
+                    self.assertTrue(self.apply()["changed"])
+                    custom.validate_program(self.program, self.registry["customization"]["active"])
+                    self.assertFalse(self.apply()["changed"])
+                    self.assertEqual(self.restore()["source_commit"], previous["source_commit"])
+                    custom.validate_program(self.program, previous)
+                    self.assertEqual(self.tree(), before)
+                    self.assertEqual(self.registry["runtime_ca_sha256"], "d" * 64)
+                    shutil.rmtree(self.program)
 
     def test_easy_tools_ees13_apply_restore_preserves_its_verified_inventory(self):
         previous = self.install_legacy_program(version="0.11.3+ees.13", missing=(PROCEDURE_EXAMPLES_FILE,) + C18_ICON_FILES)

@@ -11,14 +11,28 @@
   "node": "v22.16.0",
   "npm": "10.9.2",
   "patched_files": {
-    "src/app.html": "61a75799656e590b26728650e3f38f15b701f3f0e5af308a2a73f545c4a8c9a9",
+    "src/app.html": "c4cbc4c924c891233ded693ece3dad7642114e0ce0ab9e2faee45f5140b7dbb4",
+    "src/lib/apis/ees-work.ts": "1359d979c0d87edf2c7fe27cfc36494eec54e14958b644230834ce9d5034f52e",
     "src/lib/components/channel/Channel.svelte": "49454dd5aa86f0bc1424ca286d1a7ffccef3103a81c5ac36a99ffc9fe03e2bfc",
-    "src/lib/components/chat/Chat.svelte": "1f783a1b5767f1b330ed4320abfa1706e2500d21aec7d70d50006f5bb514296c",
-    "src/lib/components/chat/MessageInput.svelte": "65e4555e76155596256731f7092f09707b2af0cedcc9398ca38353574bef04ec",
-    "src/lib/components/chat/Navbar.svelte": "8a3a831fb840b9b037d204039c5f1793b4ef3662ddce6c8b751d281b0283fa52",
-    "src/lib/components/chat/Placeholder.svelte": "48cb4eaf9d094e7c22f3df8b6b8e0f965e10dddeeba59427b4fede7d7743560d",
-    "src/lib/components/layout/Sidebar.svelte": "77ba2ae430b8e37c09d7ad44f8a9be17975a2840983242295dad752f9cf6a1a8",
+    "src/lib/components/chat/Chat.svelte": "65e1d5f8dc17887a592795e0add9aeb3d7228ed3c1c33fd9a28568f7507a8521",
+    "src/lib/components/chat/MessageInput.svelte": "15268374d960172401c29ad671feb4955cfa681df6688da78a859ae6ad1425fb",
+    "src/lib/components/chat/Messages/UserMessage.svelte": "91722046babf095ea399092a9cfd2ea5a0b6141956f78c26f36a5527c53c4936",
+    "src/lib/components/chat/Navbar.svelte": "4b22e695898df3f082b997eafb1c57fd0b06dc26659396f1dc9c80cc724016ab",
+    "src/lib/components/chat/Placeholder.svelte": "98bc824db4db64cd8ac3bab67b42b779b53f2ef7bc41703ba579b653f71095bd",
+    "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
+    "src/lib/components/ees/EesNavigation.svelte": "66406fb93ecf29a395be0827358b19e518381df564511e85e75dbb6f6e36439a",
+    "src/lib/components/ees/EesProcedureIntro.svelte": "be450efa24dc93bec3a8349b08f74014da92117807a33988958850a0f5843743",
+    "src/lib/components/ees/EesShell.svelte": "701e4cbaeccde501eaea0ca750296615b93869d17830b9fbc7143ecaddf7b222",
+    "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
+    "src/lib/components/ees/state.ts": "c0f57104c8a9e3842b2f6de2aa179b8dad4b03e7d03e849a9142133b2c87c089",
+    "src/lib/components/layout/Sidebar.svelte": "9d08f54fdaa101ef2cf06c159e5defe421b366c695f26a15c4045bf3ba556096",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
+    "src/lib/i18n/locales/ko-KR/translation.json": "b2ffbd87f265cc2b7ae18eef694c9ea09593100d59a13b9b68f1a27b0ac32c19",
+    "src/routes/(app)/+layout.svelte": "6e235011199f1eb11107a2d444e5db8c6fb89d13b6e93b9e5980523bf87226f6",
+    "src/routes/(app)/+page.svelte": "7cdd5f35c6d1064663d2bafd03263585ca270ce24d26788a656d465339e6cb03",
+    "src/routes/(app)/c/[id]/+page.svelte": "2cf8b7796915e7711e467a4142d96ad1d4afc0366221236620719193d91d0ad2",
+    "src/routes/(app)/folders/[folderId]/+page.svelte": "3d5ab0fda767627ae3c4b773c77ec150bf4cdccff5c8d5cc976c07cae612acdc",
+    "src/routes/(app)/workspace/+layout.svelte": "5ac4f3ffe09e4820024c06289c341ffd564aa0dbe1d57f8157c866d78325126d",
     "src/routes/+layout.svelte": "6b71d56baa7e12380b9076682d35a75e5d59f2e6186ed0d005c105f5f563476c",
     "svelte.config.js": "95f9ac49b1c1c3c14f23f5a06300de631d974f725ce8c4958f799d42955e1f37",
     "vite.config.ts": "793bfdc367867f486b504434bbbb79d0b7c69a5b4bd8572c0368138b60598bd2"
@@ -26,7 +40,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "78e80c1d27d248f4e94382d24f293e40a0d190883ffa90791dabc816301492dd"
+      "sha256": "4d0b9cad3143d33e6b9709b4d45553b01630d43d868e68c4acecc963639598d5"
     }
   ],
   "pyodide_files": {
@@ -98,10 +112,17 @@
     "src/lib/components/channel/Channel.svelte": "849853ada14f9cb240b4752a9a1cc80d34f9cf0e1c5e8ada74b06b9b163e49e7",
     "src/lib/components/chat/Chat.svelte": "acdc9c0856664fbc73aaf822bdfac8c486715c8dd3734ca7e7544541a346bada",
     "src/lib/components/chat/MessageInput.svelte": "72e278e8329ffff068f1ff8dbbe5c848240b69a0182411154c56df286cbb2226",
+    "src/lib/components/chat/Messages/UserMessage.svelte": "ff75d1461b9aff69f1f7b4b9cd88a4933d1cd5d70c81e51237274b8e2a57f09f",
     "src/lib/components/chat/Navbar.svelte": "2ab3318e406d55ab874ebe97b3669ebe0b6d04a7d0a66b692f0c1fa3129e2f4d",
     "src/lib/components/chat/Placeholder.svelte": "8ba5d38df1579de0b96742a57dfeedbcd81fb72a673d3c3032c77401df0a1331",
     "src/lib/components/layout/Sidebar.svelte": "e7c417808351138ea2ae1566412f4ead696df4a68212402d024010925f49a753",
     "src/lib/constants.ts": "9d7ec9a98066a08cbfd93cbc11f67f1858703d28a8e13534eea265c138db4f67",
+    "src/lib/i18n/locales/ko-KR/translation.json": "2408f6e27737eba3c1386cde921cdbe436297262fd3921c309aba948601560dd",
+    "src/routes/(app)/+layout.svelte": "3e547eaf66969957c12a3ee5833e93282f66c6fb0ce598dc8a5e7f82b908364e",
+    "src/routes/(app)/+page.svelte": "93004a9563cead4c14d04367932ceaccd31c5d0e3d21c2f7918c0a12c4ee32ab",
+    "src/routes/(app)/c/[id]/+page.svelte": "c6b8a83af3057766bc8de23f9b7c6609b1feb41d83464d3aa342de3024c9642a",
+    "src/routes/(app)/folders/[folderId]/+page.svelte": "5d590eaa043878dccdc37837ee3fec0cf1e12da7c39d636a41f395a7b17f1214",
+    "src/routes/(app)/workspace/+layout.svelte": "a0845e83a821a91f4674b30e642c8b87a3decb96dd4ec15d9627e25bec3c465d",
     "src/routes/+layout.svelte": "b55bf48c09452f78f44c638468c7ad67b724ae444fa9dbcad5c072addc7fea0e",
     "svelte.config.js": "50560c9826eeefc4b0cd638a5003dc50e2877be4ecfaba738b24469a9396e67f",
     "vite.config.ts": "28470caa9ccd734f928dcebb670ea9b5488d81fad1b7d2b00b99dda86c3e10d3"

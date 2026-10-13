@@ -98,7 +98,7 @@ class IntegratedNativeCase(unittest.TestCase):
         self.wait("document.querySelector('#ees-work-panel') && document.querySelector('#ees-work-system-trigger')?.getBoundingClientRect().height > 0")
 
     def open_sidebar(self):
-        opened = "(()=>{const e=document.querySelector('#sidebar'),r=e?.getBoundingClientRect();return e?.getAttribute('aria-hidden')==='false'&&!e.inert&&r.width>200&&r.x>=0&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+50));})()"
+        opened = "(()=>{const e=document.querySelector('#sidebar'),r=e?.getBoundingClientRect();return !!e&&(e.hasAttribute('data-ees-source-sidebar')||e.getAttribute('aria-hidden')==='false')&&!e.inert&&r.width>200&&r.x>=0&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+50));})()"
         self.wait(opened + " || !!document.querySelector('[data-ees-sidebar-toggle],button[aria-label=\"사이드바 열기\"]')")
         if not self.browser.evaluate(opened):
             selector = '[data-ees-sidebar-toggle]' if self.browser.evaluate("!!document.querySelector('[data-ees-sidebar-toggle]')") else 'button[aria-label="사이드바 열기"]'

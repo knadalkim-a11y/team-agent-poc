@@ -140,25 +140,18 @@ class DemoBundleTests(unittest.TestCase):
         self.assertEqual(artifact.read_bytes(), before)
 
     def test_branding_is_optional_and_manifest_is_preserved(self):
-        branding = self.base / "branding"
-        branding.mkdir()
-        wheel = b"Synthetic wheel bytes; not an install test"
-        wheel_name = "open_webui-0.11.3+ees.14-py3-none-any.whl"
-        (branding / wheel_name).write_bytes(wheel)
-        manifest = {"schema_version": 1, "upstream_version": "0.11.3", "version": "0.11.3+ees.14",
-                    "source": {"filename": "open_webui-0.11.3-py3-none-any.whl",
-                               "sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"},
-                    "wheel": {"filename": wheel_name, "size": len(wheel),
-                              "sha256": hashlib.sha256(wheel).hexdigest()},
-                    "changed_files": ["synthetic.txt"]}
-        original = json.dumps(manifest, indent=2).encode()
-        (branding / "manifest.json").write_bytes(original)
+        branding, wheel, manifest = self.branding_fixture()
+        wheel_name = manifest["wheel"]["filename"]
         (branding / ".env").write_text("SYNTHETIC_EXCLUDED_VALUE", encoding="utf-8")
-        contents = self.contents(self.build(branding_dir=branding))
-        self.assertEqual(json.loads(contents["manifest.json"])["branding"], manifest)
-        self.assertEqual(contents["branding/manifest.json"], original)
-        self.assertEqual(contents["branding/" + wheel_name], wheel)
-        self.assertNotIn("branding/.env", contents)
+        for label, options in (("indented", {"indent": 2}), ("compact", {"separators": (",", ":")})):
+            with self.subTest(format=label):
+                original = (json.dumps(manifest, **options) + "\n").encode("utf-8")
+                (branding / "manifest.json").write_bytes(original)
+                contents = self.contents(self.build(label, branding_dir=branding))
+                self.assertEqual(json.loads(contents["manifest.json"])["branding"], manifest)
+                self.assertEqual(contents["branding/manifest.json"], original)
+                self.assertEqual(contents["branding/" + wheel_name], wheel)
+                self.assertNotIn("branding/.env", contents)
         (branding / wheel_name).write_bytes(wheel + b"changed")
         with self.assertRaisesRegex(BUNDLE.BundleError, "do not match"):
             self.build("changed-wheel", branding_dir=branding)
@@ -173,6 +166,53 @@ class DemoBundleTests(unittest.TestCase):
         (branding / "second.whl").write_bytes(wheel)
         with self.assertRaisesRegex(BUNDLE.BundleError, "exactly one wheel"):
             self.build("ambiguous", branding_dir=branding)
+
+    def branding_fixture(self):
+        branding = self.base / "branding"
+        branding.mkdir()
+        wheel = b"Synthetic wheel bytes; not an install test"
+        wheel_name = "open_webui-0.11.3+ees.14-py3-none-any.whl"
+        (branding / wheel_name).write_bytes(wheel)
+        manifest = {"schema_version": 1, "upstream_version": "0.11.3", "version": "0.11.3+ees.14",
+                    "source": {"filename": "open_webui-0.11.3-py3-none-any.whl",
+                               "sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"},
+                    "wheel": {"filename": wheel_name, "size": len(wheel),
+                              "sha256": hashlib.sha256(wheel).hexdigest()},
+                    "changed_files": ["synthetic.txt"]}
+        original = json.dumps(manifest, indent=2).encode()
+        (branding / "manifest.json").write_bytes(original)
+        return branding, wheel, manifest
+
+    def test_manifest_byte_budget_rejects_before_zip_publication(self):
+        from scripts import ees_deploy_release as release
+        self.assertEqual(BUNDLE.MAX_MANIFEST_BYTES, release.MAX_JSON_BYTES)
+        self.assertEqual(BUNDLE.MAX_MANIFEST_BYTES, 1024 * 1024)
+        branding, _, manifest = self.branding_fixture()
+        # A real nested manifest/hash row is included. Unicode makes a character
+        # count insufficient, and the cap includes the final LF byte.
+        manifest["note"] = "한" + "x" * 1000000
+        (branding / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
+        measured = len(self.contents(self.build("measure", branding_dir=branding))["manifest.json"])
+        manifest["note"] += "x" * (BUNDLE.MAX_MANIFEST_BYTES - measured)
+        for extra in (0, 1):
+            with self.subTest(extra_byte=extra):
+                candidate = {**manifest, "note": manifest["note"] + "x" * extra}
+                (branding / "manifest.json").write_text(json.dumps(candidate, ensure_ascii=False), encoding="utf-8")
+                if not extra:
+                    raw = self.contents(self.build("boundary", branding_dir=branding))["manifest.json"]
+                    self.assertEqual(len(raw), BUNDLE.MAX_MANIFEST_BYTES)
+                    self.assertEqual(release._json(raw)["branding"], candidate)
+                else:
+                    with self.assertRaisesRegex(BUNDLE.BundleError, "Bundle manifest exceeds"):
+                        self.build("over", branding_dir=branding)
+                    self.assertFalse((self.base / "over").exists())
+        # Preserve legacy indented bytes instead of silently rewriting them to
+        # conceal an unsupported input; no archive is published on overflow.
+        raw = (branding / "manifest.json").read_bytes()
+        (branding / "manifest.json").write_bytes(raw + b" " * (BUNDLE.MAX_MANIFEST_BYTES + 1 - len(raw)))
+        with self.assertRaisesRegex(BUNDLE.BundleError, "Branding manifest exceeds"):
+            self.build("oversized-branding", branding_dir=branding)
+        self.assertFalse((self.base / "oversized-branding").exists())
 
     def test_tracked_symlink_cannot_import_an_external_file(self):
         outside = self.base / "outside.py"

@@ -1,0 +1,34 @@
+[
+  {
+    "at": 3196.6999999955297,
+    "label": "monitor-negative-control",
+    "path": "/c/existing-chat",
+    "source": true,
+    "menu": true,
+    "bodyHidden": false,
+    "missingSource": false,
+    "legacy": [
+      "sidebar-new-chat-icon"
+    ],
+    "content": true,
+    "adminDialog": false,
+    "sourceText": true,
+    "startupGate": null
+  },
+  {
+    "at": 3210.7999999970198,
+    "label": "monitor-negative-control",
+    "path": "/c/existing-chat",
+    "source": true,
+    "menu": true,
+    "bodyHidden": false,
+    "missingSource": false,
+    "legacy": [
+      "sidebar-new-chat-icon"
+    ],
+    "content": true,
+    "adminDialog": false,
+    "sourceText": true,
+    "startupGate": null
+  }
+]

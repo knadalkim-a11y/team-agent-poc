@@ -1,0 +1,35 @@
+test_every_navigation_has_source_chrome_without_native_overlay_frames (test_ees_source_shell_native.SourceShellNativeTests.test_every_navigation_has_source_chrome_without_native_overlay_frames) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 156.7673570025363, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_c18_panel_cards_input_hover_and_keyboard_focus (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_c18_panel_cards_input_hover_and_keyboard_focus) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 166.98829099914292, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_q1_geometry_reading_width_footer_and_baseline_overlay (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 187.11618000088492, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 167.09511700173607, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_source_startup_missing_launcher_fails_open_with_native_chat_accessible (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_source_startup_missing_launcher_fails_open_with_native_chat_accessible) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 177.8221990025486, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_source_startup_root_and_existing_chat_reveal_only_after_ees_layout (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_source_startup_root_and_existing_chat_reveal_only_after_ees_layout) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 182.7997059954214, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+======================================================================
+FAIL: test_q1_geometry_reading_width_footer_and_baseline_overlay (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_figma_layout_native.py", line 68, in test_q1_geometry_reading_width_footer_and_baseline_overlay
+    self.assertEqual(geometry['panel']['width'],720)
+AssertionError: 480 != 720
+
+======================================================================
+FAIL: test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_figma_layout_native.py", line 101, in test_q1_physical_drag_restores_per_actor_width_and_contrast
+    self.wait_saved_width(400)
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_figma_layout_native.py", line 20, in wait_saved_width
+    self.fail('Private panel width did not persist: '+str(width))
+AssertionError: Private panel width did not persist: 400
+
+----------------------------------------------------------------------
+Ran 6 tests in 21.514s
+
+FAILED (failures=2)

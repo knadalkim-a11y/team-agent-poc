@@ -1,42 +1,16 @@
 diff --git a/src/app.html b/src/app.html
-index 667808e..e801ee1 100644
+index 667808e..67e457e 100644
 --- a/src/app.html
 +++ b/src/app.html
-@@ -2,6 +2,33 @@
+@@ -2,6 +2,7 @@
  <html lang="en">
  	<head>
  		<meta charset="utf-8" />
-+		<!-- EES startup gate: hide only authenticated chat hard loads, never re-arm on SPA navigation. -->
-+		<style id="ees-startup-style">
-+			html[data-ees-startup='pending'] body,
-+			html[data-ees-startup='pending'] body :not([aria-modal='true'], [aria-modal='true'] *) { visibility: hidden !important; }
-+			/* Native dialogs must retain focusable controls while their background waits.
-+			   Inherit visibility normally inside them, preserving their own hidden children. */
-+			html[data-ees-startup='pending'] body [aria-modal='true'] { visibility: visible !important; }
-+		</style>
-+		<script id="ees-startup-gate">
-+			(() => {
-+				if (!/^\/(?:c\/[^/]+\/?)?$/.test(location.pathname) ||
-+					new URLSearchParams(location.search).get('settings')) return;
-+				try { if (!localStorage.getItem('token')) return; } catch (_) { return; }
-+				const root = document.documentElement;
-+				const release = () => {
-+					delete root.dataset.eesStartup;
-+					clearTimeout(timeout);
-+					window.removeEventListener('ees:startup-ready', release);
-+				};
-+				// Install the independent fallback before hiding anything. Missing or failed
-+				// launcher/API/authentication must not leave an inaccessible blank page.
-+				const timeout = setTimeout(release, 4000);
-+				window.addEventListener('ees:startup-ready', release, { once: true });
-+				root.dataset.eesStartup = 'pending';
-+			})();
-+		</script>
 +
  		<!-- LICENSE covers this Open WebUI branding surface, including name, logo,
  		visual, textual, symbolic identifiers, metadata, and surrounding UI.
  		Do not alter, remove, obscure, or replace it except as LICENSE permits:
-@@ -125,8 +152,11 @@
+@@ -125,8 +126,11 @@
  			})();
  		</script>
  
@@ -49,6 +23,84 @@ index 667808e..e801ee1 100644
  		%sveltekit.head%
  	</head>
  
+diff --git a/src/lib/apis/ees-work.ts b/src/lib/apis/ees-work.ts
+new file mode 100644
+index 0000000..62964f8
+--- /dev/null
++++ b/src/lib/apis/ees-work.ts
+@@ -0,0 +1,72 @@
++import { get } from 'svelte/store';
++import { user } from '$lib/stores';
++import i18next from 'i18next';
++
++const message = (key: string, fallback: string) => i18next.t(key, { defaultValue: fallback });
++
++// Use the current Native session for every request. No EES credential copy is kept.
++export async function eesRequest(path: string, body?: unknown, signal?: AbortSignal) {
++	const actor = get(user)?.id;
++	const token = localStorage.token;
++	if (!actor || !token)
++		throw Object.assign(new Error(message('EES.Api.SignIn', 'Sign in and try again.')), {
++			status: 401,
++			code: 'auth_required'
++		});
++	const assertOwner = () => {
++		if (get(user)?.id !== actor || localStorage.token !== token)
++			throw Object.assign(
++				new Error(
++					message('EES.Api.ContextChanged', 'Your session changed. Open this screen again.')
++				),
++				{ status: 409, code: 'context_changed' }
++			);
++	};
++	assertOwner();
++	const headers: Record<string, string> = {
++		Accept: 'application/json',
++		Authorization: 'Bearer ' + token
++	};
++	if (body) headers['Content-Type'] = 'application/json';
++	const response = await fetch('/api/ees-work/' + path, {
++		method: body ? 'POST' : 'GET',
++		credentials: 'same-origin',
++		cache: 'no-store',
++		headers,
++		...(body ? { body: JSON.stringify(body) } : {}),
++		...(signal ? { signal } : {})
++	});
++	assertOwner();
++	let result;
++	try {
++		result = await response.json();
++	} catch {
++		assertOwner();
++		throw Object.assign(
++			new Error(
++				message(
++					'EES.Api.InvalidResponse',
++					'The response could not be read. Check the saved or execution result again.'
++				)
++			),
++			{ status: response.status }
++		);
++	}
++	assertOwner();
++	if (!response.ok || result?.ok === false) {
++		const detail = result.error || result.detail || {};
++		throw Object.assign(
++			new Error(
++				detail.message ||
++					(typeof detail === 'string'
++						? detail
++						: message(
++								'EES.Api.RequestFailed',
++								'The request could not be completed. Check your permissions and input.'
++							))
++			),
++			{ status: response.status, code: detail.code, result }
++		);
++	}
++	return result;
++}
 diff --git a/src/lib/components/channel/Channel.svelte b/src/lib/components/channel/Channel.svelte
 index d552ba8..384bf93 100644
 --- a/src/lib/components/channel/Channel.svelte
@@ -67,10 +119,18 @@ index d552ba8..384bf93 100644
  </svelte:head>
  
 diff --git a/src/lib/components/chat/Chat.svelte b/src/lib/components/chat/Chat.svelte
-index 875aee0..7641172 100644
+index 875aee0..032cac8 100644
 --- a/src/lib/components/chat/Chat.svelte
 +++ b/src/lib/components/chat/Chat.svelte
-@@ -790,13 +790,20 @@
+@@ -109,6 +109,7 @@
+ 	import MessageInput from '$lib/components/chat/MessageInput.svelte';
+ 	import Messages from '$lib/components/chat/Messages.svelte';
+ 	import Navbar from '$lib/components/chat/Navbar.svelte';
++	import EesProcedureIntro from '$lib/components/ees/EesProcedureIntro.svelte';
+ 	import ChatControls from './ChatControls.svelte';
+ 	import EventConfirmDialog from '../common/ConfirmDialog.svelte';
+ 	import DeleteConfirmDialog from '../common/ConfirmDialog.svelte';
+@@ -790,13 +791,20 @@
  		initEmbeddedDraft();
  	}
  
@@ -78,7 +138,7 @@ index 875aee0..7641172 100644
 +	const eesNativeDraftLoad = async (load) => {
 +		eesNativeDraftLoads++;
 +		try { return await load(); }
-+		finally { eesNativeDraftLoads--; }
++		finally { eesNativeDraftLoads--; queueMicrotask(() => window.__eesNativeWorkV1?.sync?.()); }
 +	};
 +
  	let saveControlsTimer;
@@ -92,7 +152,7 @@ index 875aee0..7641172 100644
  		noteChatDebug('navigateHandler start');
  		// Mark the outgoing chat as read before loading the new one.
  		// $chatId still holds the previous chat here — loadChat() updates it.
-@@ -859,9 +866,9 @@
+@@ -859,9 +867,9 @@
  				activeChatId: $chatId
  			});
  		}
@@ -104,7 +164,7 @@ index 875aee0..7641172 100644
  		clearTimeout(saveControlsTimer);
  		await saveControls();
  
-@@ -899,7 +906,7 @@
+@@ -899,7 +907,7 @@
  		loading = false;
  		await tick();
  		messageInput?.focus({ preventScroll: true });
@@ -113,19 +173,24 @@ index 875aee0..7641172 100644
  
  	const onSelect = async (e) => {
  		const { type, data } = e;
-@@ -1530,6 +1537,47 @@
+@@ -1530,6 +1538,52 @@
  	};
  
  	onMount(() => {
 +		// The main Chat owns its Native draft bridge; embedded notes never replace it.
 +		// Approval mode is user/chat policy, not transferable draft content.
 +		const eesNativeDraftApi = {
++			persistent: true,
++			activeChatId: () => $chatId,
++			attachmentState: () => ({images:files.some(file=>file.type==='image'),uploading:files.some(file=>file.status==='uploading')}),
++			newChat: () => initNewChat(),
++			focus: () => messageInput?.focus({preventScroll:true}),
 +			ready: () => {
 +				if (embedded || $temporaryChatEnabled || loading || !messageInput || eesNativeDraftLoads) return false;
 +				const path = window.location.pathname;
 +				const match = path.match(/^\/c\/([^/]+)\/?$/);
 +				let expected;
-+				try { expected = match ? decodeURIComponent(match[1]) : path === '/' ? '' : null; }
++				try { expected = match ? decodeURIComponent(match[1]) : (path === '/' || /^\/folders\/[^/]+\/?$/.test(path)) ? '' : null; }
 +				catch { return false; }
 +				return expected !== null && (chatIdProp || '') === expected && ($chatId || '') === expected;
 +			},
@@ -161,7 +226,16 @@ index 875aee0..7641172 100644
  		loading = true;
  		console.log('mounted');
  		window.addEventListener('message', onMessageHandler);
-@@ -1582,7 +1630,7 @@
+@@ -1553,7 +1607,7 @@
+ 		}
+ 
+ 		const pageSubscribe = page.subscribe(async (p) => {
+-			if (p.url.pathname === '/' || p.url.pathname.startsWith('/folders/')) {
++			if ((p.url.pathname === '/' || p.url.pathname.startsWith('/folders/')) && window.__eesSourceShellV1?.shouldInitChat?.(p.url.pathname) !== false) {
+ 				await tick();
+ 				initNewChat();
+ 			}
+@@ -1582,7 +1636,7 @@
  			`chat-input${chatIdProp ? `-${chatIdProp}` : ''}`
  		);
  
@@ -170,7 +244,7 @@ index 875aee0..7641172 100644
  			if (!chatIdProp) {
  				loading = false;
  				await tick();
-@@ -1604,10 +1652,11 @@
+@@ -1604,10 +1658,11 @@
  			}
  
  			messageInput?.focus({ preventScroll: true });
@@ -183,16 +257,31 @@ index 875aee0..7641172 100644
  			try {
  				clearTimeout(saveControlsTimer);
  				saveControls();
-@@ -1990,7 +2039,7 @@
+@@ -1990,7 +2045,12 @@
  		}, 0);
  	};
  
 -	const initNewChat = async () => {
 +	const initNewChat = () => eesNativeDraftLoad(async () => {
++		loadedChatIdProp = '';
++		if (!embedded && $page.url.pathname.includes('/c/')) {
++			if (window.__eesSourceShellV1?.newChatStarted) await window.__eesSourceShellV1.newChatStarted();
++			else window.history.replaceState(history.state, '', `/`);
++		}
  		console.log('initNewChat');
  		resetWebSearchConfirmation();
  
-@@ -2233,7 +2282,7 @@
+@@ -2112,9 +2172,6 @@
+ 		await showCallOverlay.set(false);
+ 		await showArtifacts.set(false);
+ 
+-		if (!embedded && $page.url.pathname.includes('/c/')) {
+-			window.history.replaceState(history.state, '', `/`);
+-		}
+ 
+ 		autoScroll = true;
+ 
+@@ -2233,7 +2290,7 @@
  
  		await tick();
  		messageInput?.focus({ preventScroll: true });
@@ -201,7 +290,7 @@ index 875aee0..7641172 100644
  
  	const loadChat = async () => {
  		noteChatDebug('loadChat start');
-@@ -3545,6 +3594,9 @@
+@@ -3545,6 +3602,9 @@
  		const useChatVariablesFallback =
  			!_chatId || $temporaryChatEnabled || isTemporaryChatId(_chatId);
  
@@ -211,7 +300,7 @@ index 875aee0..7641172 100644
  		const res = await generateOpenAIChatCompletion(
  			localStorage.token,
  			{
-@@ -3592,7 +3644,15 @@
+@@ -3592,7 +3652,15 @@
  				id: responseMessageId,
  				...(messageIdsList ? { message_ids: messageIdsList } : {}),
  				parent_id: userMessage?.parentId ?? null,
@@ -228,15 +317,19 @@ index 875aee0..7641172 100644
  				...(regenerationPrompt ? { regeneration_prompt: regenerationPrompt } : {}),
  				...(continueResponse ? { assistant_message_id: responseMessageId } : {}),
  
-@@ -3661,6 +3721,7 @@
+@@ -3661,7 +3729,10 @@
  					});
  					await chatId.set(res.chat_id);
  					if (!$temporaryChatEnabled && !embedded) {
+-						window.history.replaceState(history.state, '', `/c/${res.chat_id}`);
 +						try { if (eesCompletionCreation) eesCompletionOwner?.finishChatCreation?.(eesCompletionCreation, res.chat_id); } catch {}
- 						window.history.replaceState(history.state, '', `/c/${res.chat_id}`);
++						loadedChatIdProp = res.chat_id;
++						if (window.__eesSourceShellV1?.adoptChat) await window.__eesSourceShellV1.adoptChat(res.chat_id);
++						else window.history.replaceState(history.state, '', `/c/${res.chat_id}`);
  						await refreshChatList(localStorage.token);
  
-@@ -3923,6 +3984,9 @@
+ 						// Persist chat-level params (system prompt, advanced
+@@ -3923,6 +3994,9 @@
  
  	const initChatHandler = async (history) => {
  		let _chatId = $chatId;
@@ -246,7 +339,7 @@ index 875aee0..7641172 100644
  		const selectedFolderId = $selectedFolder?.id;
  
  		if (!$temporaryChatEnabled) {
-@@ -3944,6 +4008,7 @@
+@@ -3944,10 +4018,13 @@
  			);
  
  			_chatId = chat.id;
@@ -254,7 +347,201 @@ index 875aee0..7641172 100644
  			await chatId.set(_chatId);
  
  			if (!embedded) {
-@@ -4574,7 +4639,7 @@
+-				window.history.replaceState(history.state, '', `/c/${_chatId}`);
++				loadedChatIdProp = _chatId;
++				if (window.__eesSourceShellV1?.adoptChat) await window.__eesSourceShellV1.adoptChat(_chatId);
++				else window.history.replaceState(history.state, '', `/c/${_chatId}`);
+ 			}
+ 
+ 			await tick();
+@@ -3971,6 +4048,7 @@
+ 	};
+ 
+ 	const saveChatHandler = async (_chatId, history) => {
++		if (!eesDraftAlive || $user?.id !== eesDraftOwner) return;
+ 		if ($chatId == _chatId) {
+ 			if (!$temporaryChatEnabled) {
+ 				chat = await updateChatById(localStorage.token, _chatId, {
+@@ -3985,6 +4063,8 @@
+ 	};
+ 
+ 	const saveControls = async () => {
++		if (!eesDraftAlive || $user?.id !== eesDraftOwner) return;
++		const ownerChatId = $chatId;
+ 		if (!$chatId || $temporaryChatEnabled) return;
+ 		const loaded = chat?.chat ?? {};
+ 		if (equal(params, loaded.params ?? {}) && equal(chatFiles, loaded.files ?? [])) return;
+@@ -3997,9 +4077,12 @@
+ 			return null;
+ 		});
+ 		// Refresh the dedupe baseline so a later revert still saves.
+-		if (res) chat = res;
++		if (res && eesDraftAlive && $user?.id === eesDraftOwner && $chatId === ownerChatId) chat = res;
+ 	};
+ 
++	const eesDraftOwner = $user?.id;
++	let eesDraftAlive = true;
++	onDestroy(() => {eesDraftAlive = false; clearTimeout(saveDraftTimeout);});
+ 	const MAX_DRAFT_LENGTH = 5000;
+ 	let saveDraftTimeout: ReturnType<typeof setTimeout> | null = null;
+ 	const getDraftChatId = () => chatIdProp || null;
+@@ -4023,13 +4106,14 @@
+ 	});
+ 
+ 	const saveDraft = async (draft: any, chatId: string | null = null, debounce = true) => {
++		if (!eesDraftAlive || $user?.id !== eesDraftOwner) return false;
+ 		if (saveDraftTimeout) {
+ 			clearTimeout(saveDraftTimeout);
+ 		}
+ 
+ 		if (draft.prompt !== null && draft.prompt.length < MAX_DRAFT_LENGTH) {
+ 			const key = `chat-input${chatId ? `-${chatId}` : ''}`;
+-			const write = () => sessionStorage.setItem(key, JSON.stringify(draft));
++			const write = () => { if (eesDraftAlive && $user?.id === eesDraftOwner) sessionStorage.setItem(key, JSON.stringify(draft)); };
+ 			if (debounce) {
+ 				saveDraftTimeout = setTimeout(write, 500);
+ 			} else {
+@@ -4055,6 +4139,7 @@
+ 	};
+ 
+ 	const clearDraft = async (chatId: string | null = null) => {
++		if (!eesDraftAlive || $user?.id !== eesDraftOwner) return false;
+ 		if (saveDraftTimeout) {
+ 			clearTimeout(saveDraftTimeout);
+ 		}
+@@ -4242,66 +4327,13 @@
+ <div
+ 	class="{embedded
+ 		? 'h-full'
+-		: 'h-screen max-h-[100dvh]'} transition-width duration-200 ease-in-out {$showSidebar &&
++		: 'h-full min-h-0'} transition-width duration-200 ease-in-out {$showSidebar &&
+ 	!embedded
+-		? '  md:max-w-[calc(100%-var(--sidebar-width))]'
++		? ''
+ 		: ' '} w-full max-w-full min-w-0 flex flex-col"
+ 	id={chatContainerId}
+ >
+-	{#if !loading}
+-		<div in:fade={{ duration: 50 }} class="w-full h-full flex flex-col">
+-			{#if !embedded && $selectedFolder && $selectedFolder?.meta?.background_image_url}
+-				<div
+-					class="absolute top-0 left-0 w-full h-full bg-cover bg-center bg-no-repeat"
+-					style="background-image: url({$selectedFolder?.meta?.background_image_url})  "
+-				/>
+-
+-				<div
+-					class="absolute top-0 left-0 w-full h-full bg-linear-to-t from-white to-white/85 dark:from-gray-900 dark:to-gray-900/90 z-0"
+-				/>
+-			{:else if !embedded && ($settings?.backgroundImageUrl ?? $config?.license_metadata?.background_image_url ?? null)}
+-				<div
+-					class="absolute top-0 left-0 w-full h-full bg-cover bg-center bg-no-repeat"
+-					style="background-image: url({$settings?.backgroundImageUrl ??
+-						$config?.license_metadata?.background_image_url})  "
+-				/>
+-
+-				<div
+-					class="absolute top-0 left-0 w-full h-full bg-linear-to-t from-white to-white/85 dark:from-gray-900 dark:to-gray-900/90 z-0"
+-				/>
+-			{/if}
+-
+-			<div class="w-full h-full flex">
+-				<div class="h-full flex relative max-w-full min-w-0 flex-1 flex-col">
+-					<FilesOverlay show={dragged} />
+-					{#if embedded}
+-						<div
+-							class="h-10 shrink-0 flex items-center justify-between gap-2 border-b border-gray-50/80 px-3 text-gray-700 dark:border-gray-850/40 dark:text-gray-200"
+-						>
+-							<div class="flex min-w-0 items-center gap-2">
+-								<EmbeddedChatHistoryDropdown
+-									title={embeddedHeaderTitle}
+-									chats={embeddedChats}
+-									canCreateNew={!!onNewEmbeddedChat &&
+-										Object.keys(history?.messages ?? {}).length > 0}
+-									{loading}
+-									onNewChat={onNewEmbeddedChat}
+-									onSelectChat={onSelectEmbeddedChat}
+-									onDeleteChat={onDeleteEmbeddedChat}
+-								/>
+-							</div>
+-							<Tooltip content={$i18n.t('Close')} placement="bottom">
+-								<button
+-									type="button"
+-									class="rounded-md p-1 text-gray-500 transition hover:text-gray-900 dark:hover:text-white"
+-									on:click={() => onCloseEmbedded?.()}
+-									aria-label={$i18n.t('Close')}
+-								>
+-									<XMark className="size-4" strokeWidth="2" />
+-								</button>
+-							</Tooltip>
+-						</div>
+-					{:else}
++	{#if !embedded}
+ 						<Navbar
+ 							bind:this={navbarElement}
+ 							{readOnly}
+@@ -4363,6 +4395,61 @@
+ 								}
+ 							}}
+ 						/>
++		<EesProcedureIntro />
++	{/if}
++	{#if !loading}
++		<div in:fade={{ duration: 50 }} class="w-full flex-1 min-h-0 flex flex-col">
++			{#if !embedded && $selectedFolder && $selectedFolder?.meta?.background_image_url}
++				<div
++					class="absolute top-0 left-0 w-full h-full bg-cover bg-center bg-no-repeat"
++					style="background-image: url({$selectedFolder?.meta?.background_image_url})  "
++				/>
++
++				<div
++					class="absolute top-0 left-0 w-full h-full bg-linear-to-t from-white to-white/85 dark:from-gray-900 dark:to-gray-900/90 z-0"
++				/>
++			{:else if !embedded && ($settings?.backgroundImageUrl ?? $config?.license_metadata?.background_image_url ?? null)}
++				<div
++					class="absolute top-0 left-0 w-full h-full bg-cover bg-center bg-no-repeat"
++					style="background-image: url({$settings?.backgroundImageUrl ??
++						$config?.license_metadata?.background_image_url})  "
++				/>
++
++				<div
++					class="absolute top-0 left-0 w-full h-full bg-linear-to-t from-white to-white/85 dark:from-gray-900 dark:to-gray-900/90 z-0"
++				/>
++			{/if}
++
++			<div class="w-full flex-1 min-h-0 flex">
++				<div class="h-full flex relative max-w-full min-w-0 flex-1 flex-col">
++					<FilesOverlay show={dragged} />
++					{#if embedded}
++						<div
++							class="h-10 shrink-0 flex items-center justify-between gap-2 border-b border-gray-50/80 px-3 text-gray-700 dark:border-gray-850/40 dark:text-gray-200"
++						>
++							<div class="flex min-w-0 items-center gap-2">
++								<EmbeddedChatHistoryDropdown
++									title={embeddedHeaderTitle}
++									chats={embeddedChats}
++									canCreateNew={!!onNewEmbeddedChat &&
++										Object.keys(history?.messages ?? {}).length > 0}
++									{loading}
++									onNewChat={onNewEmbeddedChat}
++									onSelectChat={onSelectEmbeddedChat}
++									onDeleteChat={onDeleteEmbeddedChat}
++								/>
++							</div>
++							<Tooltip content={$i18n.t('Close')} placement="bottom">
++								<button
++									type="button"
++									class="rounded-md p-1 text-gray-500 transition hover:text-gray-900 dark:hover:text-white"
++									on:click={() => onCloseEmbedded?.()}
++									aria-label={$i18n.t('Close')}
++								>
++									<XMark className="size-4" strokeWidth="2" />
++								</button>
++							</Tooltip>
++						</div>
+ 					{/if}
+ 					<div id="chat-pane" class="flex flex-col flex-auto z-10 w-full @container overflow-auto">
+ 						{#if ($settings?.landingPageMode === 'chat' && !$selectedFolder) || createMessagesList(history, history.currentId).length > 0}
+@@ -4574,7 +4661,7 @@
  								</div>
  							</div>
  						{:else}
@@ -264,7 +551,7 @@ index 875aee0..7641172 100644
  									{history}
  									bind:selectedModels
 diff --git a/src/lib/components/chat/MessageInput.svelte b/src/lib/components/chat/MessageInput.svelte
-index a2df614..d3dfc0e 100644
+index a2df614..ff81873 100644
 --- a/src/lib/components/chat/MessageInput.svelte
 +++ b/src/lib/components/chat/MessageInput.svelte
 @@ -2034,7 +2034,7 @@
@@ -272,11 +559,27 @@ index a2df614..d3dfc0e 100644
  															navigator.msMaxTouchPoints > 0
  														)}
 -													placeholder={placeholder ? placeholder : $i18n.t('Send a Message')}
-+													placeholder={placeholder ? placeholder : $i18n.language?.startsWith('ko') ? '업무를 물어보거나, 필요한 작업을 요청하세요' : $i18n.t('Send a Message')}
++													placeholder={placeholder ? placeholder : $i18n.t('EES.Composer.Placeholder', {defaultValue:'Ask about your work or request a task'})}
  													largeTextAsFile={($settings?.largeTextAsFile ?? false) && !shiftKey}
  													autocomplete={$config?.features?.enable_autocomplete_generation &&
  														($settings?.promptAutocomplete ?? false)}
-@@ -2616,6 +2616,15 @@
+@@ -2520,6 +2520,7 @@
+ 								</div>
+ 
+ 								<div class="self-end flex space-x-1 mr-1 min-w-0 gap-[0.03125rem]">
++									{#if embedded || $models.length !== 1}
+ 									<div class="flex min-w-0 max-w-[10rem] items-center sm:max-w-[13rem]">
+ 										<ModelSelector
+ 											bind:this={modelSelector}
+@@ -2530,6 +2531,7 @@
+ 											triggerClassName="items-center gap-1.5 rounded-lg pl-2 pr-1.5 py-1 text-[0.8125rem] font-normal text-gray-600 transition-colors duration-100 hover:bg-gray-50/40 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800/40 dark:hover:text-gray-200"
+ 										/>
+ 									</div>
++									{/if}
+ 
+ 									{#if hasChatVariables}
+ 										<Tooltip content={$i18n.t('Chat Variables')} placement="top">
+@@ -2616,6 +2618,15 @@
  										{/if}
  
  										{#if !embedded && prompt === '' && files.length === 0 && ($_user?.role === 'admin' || ($_user?.permissions?.chat?.call ?? true))}
@@ -292,7 +595,7 @@ index a2df614..d3dfc0e 100644
  											<div class=" flex items-center">
  												<!-- {$i18n.t('Call')} -->
  												<Tooltip content={$i18n.t('Voice mode')}>
-@@ -2678,7 +2687,9 @@
+@@ -2678,7 +2689,9 @@
  													</button>
  												</Tooltip>
  											</div>
@@ -303,7 +606,7 @@ index a2df614..d3dfc0e 100644
  											<div class=" flex items-center">
  												<Tooltip
  													content={uploadPending
-@@ -2712,7 +2723,6 @@
+@@ -2712,7 +2725,6 @@
  													</button>
  												</Tooltip>
  											</div>
@@ -311,20 +614,156 @@ index a2df614..d3dfc0e 100644
  									{/if}
  								</div>
  							</div>
+diff --git a/src/lib/components/chat/Messages/UserMessage.svelte b/src/lib/components/chat/Messages/UserMessage.svelte
+index c7a4f3c..9786167 100644
+--- a/src/lib/components/chat/Messages/UserMessage.svelte
++++ b/src/lib/components/chat/Messages/UserMessage.svelte
+@@ -1,4 +1,5 @@
+ <script lang="ts">
++	import {referenceSlot} from '$lib/components/ees/state';
+ 	import { toast } from 'svelte-sonner';
+ 	import { tick, getContext, onMount } from 'svelte';
+ 
+@@ -135,6 +136,7 @@
+ 	id="message-{message.id}"
+ 	style="scroll-margin-top: 3rem;"
+ >
++	<div data-ees-work data-ees-reference-slot use:referenceSlot={message.id}></div>
+ 	{#if !($settings?.chatBubble ?? true) && !(message?.meta?.internal === true && message?.meta?.type === 'subagent') && !(message?.meta?.internal === true && message?.meta?.type === 'timer')}
+ 		<div class={`shrink-0 ltr:mr-2 rtl:ml-2 hidden @lg:flex mt-0.5`}>
+ 			<!-- LICENSE covers this Open WebUI fallback logo.
 diff --git a/src/lib/components/chat/Navbar.svelte b/src/lib/components/chat/Navbar.svelte
-index b6a045e..492730c 100644
+index b6a045e..4454074 100644
 --- a/src/lib/components/chat/Navbar.svelte
 +++ b/src/lib/components/chat/Navbar.svelte
-@@ -79,6 +79,7 @@
+@@ -1,4 +1,6 @@
+ <script lang="ts">
++	import { eesSnapshot, eesAction } from '$lib/components/ees/state';
++	import EesIcon from '$lib/components/ees/EesIcon.svelte';
+ 	import { getContext } from 'svelte';
+ 	import { toast } from 'svelte-sonner';
+ 
+@@ -39,6 +41,7 @@
+ 
+ 	const i18n = getContext('i18n');
+ 
++	export let pending = false;
+ 	export let initNewChat: Function;
+ 	export let readOnly: boolean = false;
+ 	export let shareEnabled: boolean = false;
+@@ -79,48 +82,27 @@
  />
  
  <nav
-+	data-ees-native-toolbar
- 	class="sticky top-0 z-30 w-full {$mobile
- 		? 'pt-1.5'
- 		: 'pt-0.5'} pb-1 -mb-12 flex flex-col items-center drag-region"
+-	class="sticky top-0 z-30 w-full {$mobile
+-		? 'pt-1.5'
+-		: 'pt-0.5'} pb-1 -mb-12 flex flex-col items-center drag-region"
++	id="ees-work-context"
++	data-ees-work
++	data-ees-source-chat-toolbar
++	inert={pending}
++	aria-busy={pending}
++	class="relative z-30 w-full flex flex-col items-center drag-region shrink-0"
+ >
+-	<div class="flex items-center w-full {$mobile ? 'px-2.5' : 'pl-1.5 pr-1'}">
+-		<div
+-			id="navbar-bg-gradient-to-b"
+-			class="{chat?.id
+-				? 'visible'
+-				: 'invisible'} bg-linear-to-b via-40% to-97% from-white/90 via-white/50 to-transparent dark:from-gray-900/90 dark:via-gray-900/50 dark:to-transparent pointer-events-none absolute inset-0 -bottom-10 z-[-1]"
+-		></div>
++	<div class="flex items-center w-full">
+ 
+ 		<div class=" flex max-w-full w-full mx-auto bg-transparent">
+ 			<div class="flex items-center w-full max-w-full">
+-				{#if $mobile && !$showSidebar}
+-					<div class="mr-1 flex flex-none items-center self-center">
+-						<Tooltip content={$showSidebar ? $i18n.t('Close Sidebar') : $i18n.t('Open Sidebar')}>
+-							<button
+-								id="sidebar-toggle-button"
+-								class="flex cursor-pointer rounded-lg text-gray-500 transition hover:bg-gray-50/40 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/40 dark:hover:text-gray-200"
+-								on:click={() => {
+-									showSidebar.set(!$showSidebar);
+-								}}
+-								aria-label={$showSidebar ? $i18n.t('Close Sidebar') : $i18n.t('Open Sidebar')}
+-							>
+-								<div class="self-center p-1.5">
+-									<Sidebar className="size-4" />
+-								</div>
+-							</button>
+-						</Tooltip>
+-					</div>
+-				{/if}
++
+ 
+ 				<div
+-					class="flex-1 overflow-hidden max-w-full mt-0.5 py-0.5 pl-1 {$showSidebar ? 'ml-1' : ''}"
++					class="flex-1 overflow-hidden max-w-full"
+ 				>
+-					{#if chat?.id}
+ 						<div class="flex max-w-full min-w-0 items-center gap-2 mr-2">
+ 							<div
+-								class="min-w-0 truncate py-1 text-left text-[0.9375rem] font-normal text-gray-700 dark:text-gray-300"
++								class="ees-context-title min-w-0 truncate py-1 text-left text-sm font-medium leading-[22px] tracking-[-0.042px] text-gray-700 dark:text-gray-300"
+ 							>
+-								{title || chat?.chat?.title || $i18n.t('New Chat')}
++								{$eesSnapshot.context_title || $i18n.t('EES.Conversation',{defaultValue:'Conversation'})}
+ 							</div>
+ 
+ 							{#if shareEnabled && chat && (chat.id || $temporaryChatEnabled)}
+@@ -150,18 +132,14 @@
+ 								</Menu>
+ 							{/if}
+ 						</div>
+-					{:else}
+-						<div class="pointer-events-none invisible flex max-w-full min-w-0 items-center gap-2">
+-							<div
+-								class="min-w-0 truncate py-1 text-left text-[0.9375rem] font-normal text-gray-700 dark:text-gray-300"
+-							>
+-								{$i18n.t('New Chat')}
+-							</div>
+-						</div>
+-					{/if}
++
+ 				</div>
+ 
+-				<div class="lg:mr-1 flex flex-none items-center gap-2 self-center">
++				<div class="ees-context-actions flex flex-none items-center gap-2 self-center">
++                    <span class="ees-reference-caption">{$i18n.t('EES.Reference',{defaultValue:'Reference'})}</span>
++                    <span class="ew-reference">{$eesSnapshot.reference_label || $i18n.t('EES.GeneralConversation',{defaultValue:'General conversation'})}</span>
++                    <button data-action="open_panel" aria-label={$i18n.t('EES.OpenPanel',{defaultValue:'Open work panel'})} on:click={()=>eesAction({action:'open_panel'})}><EesIcon name="a9175"/></button>
++                    <button data-action="new_chat" on:click={()=>window.__eesSourceShellV1?.newChat?.()}>{$i18n.t('EES.Nav.NewChat',{defaultValue:'New chat'})}</button>
+ 					<!-- <div class="md:hidden flex self-center w-[0.0625rem] h-5 mx-2 bg-gray-300 dark:bg-stone-700" /> -->
+ 
+ 					{#if $user?.role === 'user' ? ($user?.permissions?.chat?.temporary ?? true) && !($user?.permissions?.chat?.temporary_enforced ?? false) : true}
+@@ -248,12 +226,6 @@
+ 		</div>
+ 	</div>
+ 
+-	{#if $temporaryChatEnabled && isTemporaryChatId($chatId)}
+-		<div class=" w-full z-30 text-center">
+-			<div class="text-xs text-gray-500">{$i18n.t('Temporary Chat')}</div>
+-		</div>
+-	{/if}
+-
+ 	<div class="absolute top-[100%] left-0 right-0 h-fit">
+ 		{#if !history.currentId && !$chatId && ($banners.length > 0 || ($config?.license_metadata?.type ?? null) === 'trial' || (($config?.license_metadata?.seats ?? null) !== null && $config?.user_count > $config?.license_metadata?.seats))}
+ 			<div class=" w-full z-30">
+@@ -310,3 +282,12 @@
+ 		{/if}
+ 	</div>
+ </nav>
++
++<style>
++ #ees-work-context {height:48px;min-height:48px;padding:0;flex:none;display:flex;justify-content:center;border-bottom:1px solid #e6e6e9;background:#fff;font-size:14px;}
++ #ees-work-context > div:first-child {padding:0 24px;}
++ .ees-context-actions {min-width:0;font-size:13px;}
++ .ees-reference-caption {color:#7a7d85;}
++ .ees-context-actions button {padding:4px;border-radius:6px;}
++ .ees-context-actions button:hover {background:#eef0f3;}
++</style>
 diff --git a/src/lib/components/chat/Placeholder.svelte b/src/lib/components/chat/Placeholder.svelte
-index c183993..3d6b7f1 100644
+index c183993..3251003 100644
 --- a/src/lib/components/chat/Placeholder.svelte
 +++ b/src/lib/components/chat/Placeholder.svelte
 @@ -94,7 +94,7 @@
@@ -332,7 +771,7 @@ index c183993..3d6b7f1 100644
  </script>
  
 -<div class="m-auto w-full max-w-[58rem] px-1 @2xl:px-20 translate-y-6 py-24 text-center">
-+<div data-ees-native-empty-chat class="m-auto w-full max-w-[58rem] px-1 @2xl:px-20 translate-y-6 py-24 text-center">
++<div data-ees-source-empty-chat class="mt-auto w-full max-w-[58rem] mx-auto px-1 @2xl:px-10 pb-4 text-center">
  	{#if $temporaryChatEnabled}
  		<Tooltip
  			content={$i18n.t("This chat won't appear in history and your messages will not be saved.")}
@@ -347,26 +786,114 @@ index c183993..3d6b7f1 100644
  			{#if $selectedFolder}
  				<FolderTitle
  					folder={$selectedFolder}
-@@ -123,7 +123,7 @@
+@@ -122,113 +122,10 @@
+ 						selectedFolder.set(null);
  					}}
  				/>
- 			{:else}
+-			{:else}
 -				<div class="flex flex-row justify-center gap-2.5 @sm:gap-3 w-fit px-5 max-w-xl">
-+				<div data-ees-native-empty-model class="flex flex-row justify-center gap-2.5 @sm:gap-3 w-fit px-5 max-w-xl">
- 					<div class="flex shrink-0 justify-center">
- 						<div class="flex -space-x-4 mb-0.5" in:fade={{ duration: 100 }}>
- 							{#each models as model, modelIdx}
-@@ -180,7 +180,7 @@
- 					</div>
- 				</div>
+-					<div class="flex shrink-0 justify-center">
+-						<div class="flex -space-x-4 mb-0.5" in:fade={{ duration: 100 }}>
+-							{#each models as model, modelIdx}
+-								<Tooltip
+-									content={(models[modelIdx]?.info?.meta?.tags ?? [])
+-										.map((tag) => tag.name.toUpperCase())
+-										.join(', ')}
+-									placement="top"
+-								>
+-									<button
+-										aria-hidden={models.length <= 1}
+-										aria-label={$i18n.t('Get information on {{name}} in the UI', {
+-											name: models[modelIdx]?.name
+-										})}
+-										on:click={() => {
+-											selectedModelIdx = modelIdx;
+-										}}
+-									>
+-										<img
+-											src={`${WEBUI_API_BASE_URL}/models/model/profile/image?id=${model?.id}&lang=${$i18n.language}`}
+-											class=" size-9 @sm:size-10 rounded-2xl"
+-											aria-hidden="true"
+-											draggable="false"
+-											on:error={(e) => {
+-												// LICENSE covers this Open WebUI fallback logo.
+-												// Do not alter, remove, obscure, or replace it except as LICENSE permits:
+-												// https://docs.openwebui.com/license.
+-												e.currentTarget.src = '/favicon.png';
+-											}}
+-										/>
+-									</button>
+-								</Tooltip>
+-							{/each}
+-						</div>
+-					</div>
  
+-					<div
+-						class=" text-2xl @sm:text-2xl line-clamp-1 flex items-center"
+-						in:fade={{ duration: 100 }}
+-					>
+-						{#if models[selectedModelIdx]?.name}
+-							<Tooltip
+-								content={models[selectedModelIdx]?.name}
+-								placement="top"
+-								className=" flex items-center "
+-							>
+-								<span class="line-clamp-1">
+-									{models[selectedModelIdx]?.name}
+-								</span>
+-							</Tooltip>
+-						{:else}
+-							{$i18n.t('Hello, {{name}}', { name: $user?.name })}
+-						{/if}
+-					</div>
+-				</div>
+-
 -				<div class="flex mt-1 mb-2">
-+				<div data-ees-native-empty-description class="flex mt-1 mb-2">
- 					<div in:fade={{ duration: 100, delay: 50 }}>
- 						{#if models[selectedModelIdx]?.info?.meta?.description ?? null}
- 							<Tooltip
-@@ -228,7 +228,7 @@
- 				</div>
+-					<div in:fade={{ duration: 100, delay: 50 }}>
+-						{#if models[selectedModelIdx]?.info?.meta?.description ?? null}
+-							<Tooltip
+-								className=" w-fit"
+-								content={DOMPurify.sanitize(
+-									marked.parse(
+-										sanitizeResponseContent(
+-											models[selectedModelIdx]?.info?.meta?.description ?? ''
+-										).replaceAll('\n', '<br>')
+-									)
+-								)}
+-								placement="top"
+-							>
+-								<div
+-									class="mt-0.5 px-2 text-sm font-normal text-gray-500 dark:text-gray-400 line-clamp-2 max-w-xl markdown"
+-								>
+-									{@html DOMPurify.sanitize(
+-										marked.parse(
+-											sanitizeResponseContent(
+-												models[selectedModelIdx]?.info?.meta?.description ?? ''
+-											).replaceAll('\n', '<br>')
+-										)
+-									)}
+-								</div>
+-							</Tooltip>
+-
+-							{#if models[selectedModelIdx]?.info?.meta?.user}
+-								<div class="mt-0.5 text-sm font-normal text-gray-400 dark:text-gray-500">
+-									By
+-									{#if models[selectedModelIdx]?.info?.meta?.user.community}
+-										<a
+-											href="https://openwebui.com/m/{models[selectedModelIdx]?.info?.meta?.user
+-												.username}"
+-											>{models[selectedModelIdx]?.info?.meta?.user.name
+-												? models[selectedModelIdx]?.info?.meta?.user.name
+-												: `@${models[selectedModelIdx]?.info?.meta?.user.username}`}</a
+-										>
+-									{:else}
+-										{models[selectedModelIdx]?.info?.meta?.user.name}
+-									{/if}
+-								</div>
+-							{/if}
+-						{/if}
+-					</div>
+-				</div>
  			{/if}
  
 -			<div class="text-base font-normal @md:max-w-3xl w-full py-3 {atSelectedModel ? 'mt-2' : ''}">
@@ -374,7 +901,7 @@ index c183993..3d6b7f1 100644
  				{#if !($selectedFolder && folderReadOnly)}
  					<MessageInput
  						bind:this={messageInput}
-@@ -273,11 +273,11 @@
+@@ -273,21 +170,8 @@
  	</div>
  
  	{#if $selectedFolder}
@@ -382,122 +909,1401 @@ index c183993..3d6b7f1 100644
 +		<div data-ees-native-empty-folder class="mx-auto px-4 md:max-w-3xl md:px-6 min-h-62" in:fade={{ duration: 200, delay: 200 }}>
  			<FolderPlaceholder folder={$selectedFolder} />
  		</div>
- 	{:else}
+-	{:else}
 -		<div class="mx-auto max-w-2xl mt-2" in:fade={{ duration: 200, delay: 200 }}>
-+		<div data-ees-native-empty-suggestions class="mx-auto max-w-2xl mt-2" in:fade={{ duration: 200, delay: 200 }}>
- 			<div class="mx-5">
- 				<Suggestions
- 					suggestionPrompts={atSelectedModel?.info?.meta?.suggestion_prompts ??
+-			<div class="mx-5">
+-				<Suggestions
+-					suggestionPrompts={atSelectedModel?.info?.meta?.suggestion_prompts ??
+-						models[selectedModelIdx]?.info?.meta?.suggestion_prompts ??
+-						$config?.default_prompt_suggestions ??
+-						[]}
+-					inputValue={prompt}
+-					{onSelect}
+-				/>
+-			</div>
+-		</div>
+ 	{/if}
+ </div>
+diff --git a/src/lib/components/ees/EesIcon.svelte b/src/lib/components/ees/EesIcon.svelte
+new file mode 100644
+index 0000000..a509ea5
+--- /dev/null
++++ b/src/lib/components/ees/EesIcon.svelte
+@@ -0,0 +1,11 @@
++<script lang="ts">
++	import connectionsIcon from './icons/5bc95.svg';
++	export let name = '';
++</script>
++
++<img
++	class="ew-icon"
++	src={name === '5bc95' ? connectionsIcon : `/_ees14/v4/${name}.svg`}
++	alt=""
++	aria-hidden="true"
++/>
+diff --git a/src/lib/components/ees/EesNavigation.svelte b/src/lib/components/ees/EesNavigation.svelte
+new file mode 100644
+index 0000000..374d8ed
+--- /dev/null
++++ b/src/lib/components/ees/EesNavigation.svelte
+@@ -0,0 +1,261 @@
++<script lang="ts">
++	import { getContext } from 'svelte';
++	import { eesSnapshot, eesAction, eesCompact } from './state';
++	import Icon from './EesIcon.svelte';
++	const i18n: any = getContext('i18n');
++	const targets = [
++		['skills', 'f908d', 'EES.Nav.Skills', 'Guidance'],
++		['models', '83565', 'EES.Nav.Models', 'AI assistants'],
++		['knowledge', '730b1', 'EES.Nav.Knowledge', 'Reference documents'],
++		['prompts', '093d6', 'EES.Nav.Prompts', 'Quick phrases'],
++		['tools', '5bc95', 'EES.Nav.Connections', 'Connections'],
++		['admin', '4308e', 'EES.Nav.Admin', 'Administrator settings']
++	];
++	const nativeNames = {
++		skills: ['EES.Native.Skills', 'Skills'],
++		models: ['EES.Native.Models', 'Models'],
++		knowledge: ['EES.Native.Knowledge', 'Knowledge'],
++		prompts: ['EES.Native.Prompts', 'Prompts'],
++		tools: ['EES.Native.Tools', 'Tools'],
++		admin: ['EES.Native.Admin', 'Admin']
++	};
++	const automatic = {
++		failed: ['7495b', 'EES.Automatic.Failed', 'Failed'],
++		missed: ['ce467', 'EES.Automatic.Missed', 'Missed'],
++		running: ['478bf', 'EES.Automatic.Running', 'Running'],
++		succeeded: ['c6340', 'EES.Automatic.Succeeded', 'Succeeded']
++	};
++	const normal = [
++		['my_work', '4df0d', 'EES.Nav.MyWork', 'My work'],
++		['find', '2e769', 'EES.Nav.Find', 'Find workflows'],
++		['records', 'c325d', 'EES.Nav.Records', 'Execution history'],
++		['chats', '093d6', 'EES.Nav.Chats', 'Chat history']
++	];
++	const groups = [
++		['ops', '126c7', 'EES.Category.Operations', 'Operations'],
++		['setup', 'f6bbc', 'EES.Category.Setup', 'Setup'],
++		['incident', '4fb09', 'EES.Category.Incident', 'Incident response']
++	];
++	$: data = $eesSnapshot.state || {};
++	$: s = $eesSnapshot.selection || {};
++	$: cap = data.capabilities || {};
++	$: author = $eesSnapshot.native_shell || s.mode === 'author';
++	$: create = cap.is_admin === true || cap.can_author === true || cap.can_manage === true;
++	$: canWorkspace =
++		create ||
++		cap.managed_systems?.length ||
++		(cap.native_access_available && Object.values(cap.native_access || {}).some(Boolean));
++	$: current = (data.workflows || []).filter((w) => !s.system_id || w.system_id === s.system_id);
++	$: system = (data.systems || []).find((x) => (x.id || x) === s.system_id);
++	$: factory = (data.factories || []).find((x) => x.id === s.factory_id);
++	$: nativeAllowed = (id) =>
++		cap.native_access_available === true &&
++		cap.native_access?.[id] === true &&
++		(!['admin', 'tools'].includes(id) || cap.is_admin === true);
++	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
++</script>
++
++<section id="ees-work-entry" data-ees-work aria-label={t('EES.Nav.Navigation', 'Work navigation')}>
++	{#if $eesSnapshot.state === null}
++		{#if !$eesSnapshot.error}<p class="ew-empty" role="status">
++				{t('EES.Loading', 'Loading…')}
++			</p>{/if}
++	{:else}
++		{#if canWorkspace}<nav class="ew-mode" aria-label={t('EES.Nav.Mode', 'Work mode')}>
++				<button
++					data-action="mode"
++					data-mode="work"
++					aria-pressed={!author}
++					on:click={() => eesAction({ action: 'mode', mode: 'work' })}
++					><Icon name="4df0d" /><span>{t('EES.Nav.Work', 'Work')}</span></button
++				>
++				<button
++					data-action="mode"
++					data-mode="author"
++					aria-pressed={author}
++					on:click={() => eesAction({ action: 'mode', mode: 'author' })}
++					><Icon name="cece5" /><span>{t('EES.Nav.Workspace', 'Workspace')}</span></button
++				>
++			</nav>{/if}
++		<p class="ew-nav-caption">
++			{t(
++				author ? 'EES.Nav.ManagedSystem' : 'EES.Nav.WorkLocation',
++				author ? 'Managed system' : 'Work location'
++			)}
++		</p>
++		<div class="ew-scope">
++			{#if !author}<button
++					id="ees-work-site-trigger"
++					data-action="scope"
++					aria-label={t('EES.Nav.Factory', 'Choose factory')}
++					aria-haspopup="dialog"
++					on:click={() => eesAction({ action: 'scope' })}
++					><Icon name="40095" /><small>{t('EES.Factory', 'Factory')}</small><span
++						>{factory?.name || t('EES.AllFactories', 'All factories')}</span
++					><Icon name="ead50" /></button
++				>{/if}
++			<button
++				id="ees-work-system-trigger"
++				data-action="scope"
++				aria-label={t('EES.Nav.System', 'Choose system')}
++				aria-haspopup="dialog"
++				on:click={() => eesAction({ action: 'scope' })}
++				><Icon name="f34f3" /><small>{t('EES.System', 'System')}</small><span
++					>{system?.name || system?.id || system || t('EES.Select', 'Select')}</span
++				><Icon name="ead50" /></button
++			>
++		</div>
++		{#if author}
++			<section class="ew-nav-group">
++				<h3 class="ew-nav-group-title">{t('EES.Nav.CreateWork', 'Create work')}</h3>
++				<nav class="ew-nav-links">
++					{#if create}{#each [['procedures', 'e8a37', 'EES.Nav.Procedures', 'Procedures'], ['tools', 'd1220', 'EES.Nav.Tools', 'Tools']] as [action, icon, key, label]}<button
++								class="ew-nav-button"
++								data-action={action}
++								aria-current={!$eesSnapshot.native_id &&
++								(action === 'tools'
++									? s.tab === 'tools'
++									: !['tools', 'workspace_admin'].includes(s.tab))
++									? 'page'
++									: undefined}
++								on:click={() => eesAction({ action })}
++								><Icon name={icon} /><span>{t(key, label)}</span
++								>{#if action === 'procedures' || !data.operations?.error}<small
++										>{action === 'procedures'
++											? current.length
++											: (data.operations?.tools || []).length}</small
++									>{/if}</button
++							>{/each}{/if}
++					{#if nativeAllowed('skills')}<button
++							class="ew-nav-button"
++							data-action="native_open"
++							data-native-id="skills"
++							aria-current={$eesSnapshot.native_id === 'skills' ? 'page' : undefined}
++							on:click={() => eesAction({ action: 'native_open', nativeId: 'skills' })}
++							><Icon name="f908d" /><span>{t('EES.Nav.Skills', 'Guidance')}</span><small
++								class="ew-nav-native-name">{t(...nativeNames.skills)}</small
++							></button
++						>{/if}
++				</nav>
++			</section>
++			{#if targets.slice(1, 4).some((item) => nativeAllowed(item[0]))}<section class="ew-nav-group">
++					<h3 class="ew-nav-group-title">{t('EES.Nav.AI', 'AI settings')}</h3>
++					<nav class="ew-nav-links">
++						{#each targets.slice(1, 4) as [id, icon, key, label]}{#if nativeAllowed(id)}<button
++									class="ew-nav-button"
++									data-action="native_open"
++									data-native-id={id}
++									aria-current={$eesSnapshot.native_id === id ? 'page' : undefined}
++									on:click={() => eesAction({ action: 'native_open', nativeId: id })}
++									><Icon name={icon} /><span>{t(key, label)}</span><small class="ew-nav-native-name"
++										>{t(...nativeNames[id])}</small
++									></button
++								>{/if}{/each}
++					</nav>
++				</section>{/if}
++			{#if cap.is_admin === true}<section class="ew-nav-group">
++					<h3 class="ew-nav-group-title">{t('EES.Nav.AdminOnly', 'Administrators only')}</h3>
++					<nav class="ew-nav-links">
++						{#each [targets[4], null, targets[5]] as target}
++							{#if target === null}<button
++									class="ew-nav-button"
++									data-action="workspace_admin"
++									aria-current={!$eesSnapshot.native_id && s.tab === 'workspace_admin'
++										? 'page'
++										: undefined}
++									on:click={() => eesAction({ action: 'workspace_admin' })}
++									><Icon name="4d978" /><span>{t('EES.Nav.Access', 'Factories and access')}</span
++									></button
++								>
++							{:else if nativeAllowed(target[0])}<button
++									class="ew-nav-button"
++									data-action="native_open"
++									data-native-id={target[0]}
++									aria-current={$eesSnapshot.native_id === target[0] ? 'page' : undefined}
++									on:click={() => eesAction({ action: 'native_open', nativeId: target[0] })}
++									><Icon name={target[1]} /><span>{t(target[2], target[3])}</span><small
++										class="ew-nav-native-name">{t(...nativeNames[target[0]])}</small
++									></button
++								>{/if}
++						{/each}
++					</nav>
++				</section>{/if}
++			{#if !create && !targets.some((item) => nativeAllowed(item[0]))}<p class="ew-empty">
++					{t('EES.NoAccessibleScreens', 'No screens are available in EES Workflow.')}
++				</p>{/if}
++			{#if create && current.length}<p class="ew-nav-caption">
++					{t('EES.Nav.Recent', 'Recently edited')}
++				</p>
++				<nav class="ew-workflows ew-recent">
++					{#each current
++						.filter((w) => w.updated_at)
++						.slice()
++						.sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)))
++						.slice(0, 8) as w}<button
++							data-action="workflow"
++							data-workflow-id={w.id}
++							on:click={() => eesAction({ action: 'workflow', workflowId: w.id })}
++							><Icon
++								name={{ ops: '126c7', setup: 'f6bbc', incident: '4fb09' }[w.category] || 'e8a37'}
++							/><span>{w.name}</span></button
++						>{/each}
++				</nav>{/if}
++		{:else}
++			<nav class="ew-nav-links">
++				{#each normal as [action, icon, key, label]}<button
++						data-action={action}
++						aria-label={t(key, label)}
++						aria-current={s.tab === action ? 'page' : undefined}
++						on:click={() => {
++							if (action === 'chats') eesCompact.set(false);
++							eesAction({ action });
++						}}
++						><Icon name={icon} /><span>{t(key, label)}</span
++						>{#if action === 'my_work' && data.my_work?.length}<small>{data.my_work.length}</small
++							>{/if}</button
++					>{/each}
++			</nav>
++			<p class="ew-nav-caption">{t('EES.Nav.Work', 'Work')}</p>
++			<nav class="ew-workflows">
++				{#each groups as [id, icon, key, label]}<details
++						data-category={id}
++						open={!s.collapsed?.includes(id)}
++						on:toggle={(event) =>
++							eesAction({
++								action: 'category',
++								category: id,
++								open: String(event.currentTarget.open)
++							})}
++					>
++						<summary aria-label={t(key, label)}
++							><Icon name={icon} /><span>{t(key, label)}</span></summary
++						>{#each current.filter((w) => w.category === id) as w}<button
++								data-action="workflow"
++								data-workflow-id={w.id}
++								aria-current={w.id === s.workflow_id ? 'page' : undefined}
++								on:click={() => eesAction({ action: 'workflow', workflowId: w.id })}
++								><span>{w.name}</span>{#if automatic[w.last_auto_status]}<span
++										class="ew-auto-status"
++										data-status={w.last_auto_status}
++										role="img"
++										aria-label={t('EES.Automatic.Last', 'Last automatic execution') +
++											' · ' +
++											t(automatic[w.last_auto_status][1], automatic[w.last_auto_status][2])}
++										title={t('EES.Automatic.Last', 'Last automatic execution') +
++											' · ' +
++											t(automatic[w.last_auto_status][1], automatic[w.last_auto_status][2])}
++										><Icon name={automatic[w.last_auto_status][0]} /></span
++									>{/if}</button
++							>{/each}
++					</details>{/each}
++				{#if !current.length}<p class="ew-empty">
++						{t('EES.NoProcedures', 'No procedures are registered.')}
++					</p>{/if}
++			</nav>
++		{/if}
++	{/if}
++	{#if $eesSnapshot.error}<p class="ew-error" role="alert">{$eesSnapshot.error}</p>
++		<button data-action="refresh" on:click={() => eesAction({ action: 'refresh' })}
++			>{t('EES.Retry', 'Check again')}</button
++		>{/if}
++</section>
+diff --git a/src/lib/components/ees/EesProcedureIntro.svelte b/src/lib/components/ees/EesProcedureIntro.svelte
+new file mode 100644
+index 0000000..510f3ca
+--- /dev/null
++++ b/src/lib/components/ees/EesProcedureIntro.svelte
+@@ -0,0 +1,49 @@
++<script lang="ts">
++	import { getContext } from 'svelte';
++	import { eesSnapshot, eesAction } from './state';
++	import Icon from './EesIcon.svelte';
++	const i18n: any = getContext('i18n');
++	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
++	const questions = [
++		[
++			'EES.Procedure.Question1',
++			'I want to copy the factory rollout example and adapt it to our factory'
++		],
++		[
++			'EES.Procedure.Question2',
++			'Explain categories and execution modes (periodic, on-demand, emergency)'
++		],
++		['EES.Procedure.Question3', 'What should I decide first when starting an empty procedure?']
++	];
++</script>
++
++{#if $eesSnapshot.procedure_start}<section
++		id="ees-work-procedure-start"
++		data-ees-work
++		aria-label={t('EES.Procedure.Start', 'Start a procedure')}
++	>
++		<div class="ew-procedure-intro">
++			<small><Icon name="cf77a" />{t('EES.Helper', 'Work assistant')}</small>
++			<p>
++				{t(
++					'EES.Procedure.Intro',
++					'Copy a similar example and adapt it, or start with an empty procedure. Ask a question below to learn how. Drafts appear in work only after publication.'
++				)}
++			</p>
++			<div class="ew-procedure-questions">
++				{#each questions as question, index}<button
++						data-action="procedure_question"
++						data-question-index={index}
++						on:click={() =>
++							eesAction({ action: 'procedure_question', questionIndex: String(index) })}
++						><span>{t(question[0], question[1])}</span><Icon name="69549" /></button
++					>{/each}
++			</div>
++			<small
++				>{t(
++					'EES.Procedure.FillOnly',
++					'The question fills the composer. Review it and send it yourself.'
++				)}</small
++			>
++		</div>
++	</section>{/if}
+diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
+new file mode 100644
+index 0000000..14e2852
+--- /dev/null
++++ b/src/lib/components/ees/EesShell.svelte
+@@ -0,0 +1,379 @@
++<script lang="ts">
++	import { getContext, onMount, tick } from 'svelte';
++	import { get } from 'svelte/store';
++	import { goto, afterNavigate, beforeNavigate } from '$app/navigation';
++	import { page } from '$app/stores';
++	import { eesRequest } from '$lib/apis/ees-work';
++	import { user, selectedFolder, showSettings, showSearch } from '$lib/stores';
++	import Sidebar from '$lib/components/layout/Sidebar.svelte';
++	import Chat from '$lib/components/chat/Chat.svelte';
++	import Navbar from '$lib/components/chat/Navbar.svelte';
++	import Spinner from '$lib/components/common/Spinner.svelte';
++	import { eesSnapshot, eesCompact, eesAction, eesSync, eesReferenceHosts } from './state';
++	const i18n: any = getContext('i18n');
++	export let loaded = false;
++	let panel: HTMLElement, overlays: HTMLElement;
++	let mounted = false,
++		width = typeof window !== 'undefined' ? window.innerWidth : 1440;
++	let retainedChatId = $page.params.id || '',
++		hasChat = /^\/(?:c\/[^/]+\/?)?$/.test($page.url.pathname);
++	let lastChatPath: string | null = hasChat && retainedChatId ? $page.url.pathname : null;
++	let transientWidth: number | null = null;
++	let compactBreakpoint = width < 1440;
++	$: if (width < 1440 !== compactBreakpoint) {
++		compactBreakpoint = width < 1440;
++		eesCompact.set(compactBreakpoint);
++	}
++	let resizing = false,
++		dragX = 0,
++		dragWidth = 480;
++
++	const clamp = (value) => Math.max(400, Math.min(720, Math.round(Number(value) || 480)));
++	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
++	$: folderRoute = /^\/folders\/[^/]+\/?$/.test($page.url.pathname);
++	$: folderReady = !folderRoute || $selectedFolder?.id === $page.params.folderId;
++	$: chatRoute = folderRoute || /^\/(?:c\/[^/]+\/?)?$/.test($page.url.pathname);
++	$: nativeRoute = !chatRoute;
++	$: admin = typeof $showSettings === 'string' && $showSettings.startsWith('admin:');
++	$: if (chatRoute && folderReady) {
++		retainedChatId = $page.params.id || '';
++		hasChat = true;
++		if (retainedChatId) lastChatPath = $page.url.pathname;
++	}
++	$: s = $eesSnapshot.selection || {};
++	$: panelWidth = transientWidth ?? ($eesSnapshot.procedure_start ? 580 : clamp(s.panel_width));
++	$: panelOpen = !nativeRoute && s.panel_open !== false;
++	$: panelOverlay =
++		width - ($eesCompact ? 56 : 256) - ($eesSnapshot.procedure_start ? 580 : 480) < 560;
++	$: if (mounted) {
++		$page.url.pathname;
++		$page.url.search;
++		$user?.id;
++		$showSettings;
++		tick().then(eesSync);
++	}
++	function clearPrivateDrafts() {
++		lastChatPath = null;
++		selectedFolder.set(null);
++		for (const key of Object.keys(sessionStorage))
++			if (key.startsWith('chat-input')) sessionStorage.removeItem(key);
++		eesSnapshot.set({
++			state: null,
++			selection: { mode: 'work', tab: 'my_work', panel_open: true, collapsed: [] }
++		});
++	}
++	function rememberOwner(id) {
++		const old = sessionStorage.getItem('ees-source-draft-owner');
++		if (old && old !== id) clearPrivateDrafts();
++		if (id) sessionStorage.setItem('ees-source-draft-owner', id);
++		else sessionStorage.removeItem('ees-source-draft-owner');
++	}
++	async function navigate(path) {
++		if (path === '/admin/settings') {
++			showSettings.set('admin:general');
++			await tick();
++			eesSync();
++			return;
++		}
++		showSettings.set(false);
++		await goto(path);
++		await tick();
++		eesSync();
++	}
++	async function newChat() {
++		showSettings.set(false);
++		selectedFolder.set(null);
++		if ($page.url.pathname !== '/') await goto('/');
++		else await window.__eesNativeDraftV1?.newChat?.();
++		await tick();
++		eesSync();
++	}
++	function setWidth(next, persist = false) {
++		transientWidth = clamp(next);
++		if (persist) {
++			eesAction({ action: 'panel_width', width: transientWidth });
++			transientWidth = null;
++		}
++	}
++	function resizeStart(e) {
++		if (e.button !== 0) return;
++		e.preventDefault();
++		// The prevented pointer event needs explicit focus for keyboard resizing.
++		e.currentTarget.focus({ preventScroll: true });
++		resizing = true;
++		dragX = e.clientX;
++		dragWidth = panelWidth;
++		e.currentTarget.setPointerCapture(e.pointerId);
++	}
++	function resizeMove(e) {
++		if (resizing) setWidth(dragWidth + dragX - e.clientX);
++	}
++	function resizeEnd() {
++		if (!resizing) return;
++		resizing = false;
++		setWidth(panelWidth, true);
++	}
++	// A direct folder route waits for Native's folder permission/selection load.
++	// Menu returns to the same folder keep the live composer untouched.
++	$: if (mounted && folderRoute && folderReady) {
++		const path = $page.url.pathname;
++		tick().then(() => {
++			if (location.pathname === path && bridge.shouldInitChat(path))
++				window.__eesNativeDraftV1?.newChat?.();
++		});
++	}
++	const bridge = {
++		request: eesRequest,
++		adoptChat: async (id) => {
++			if (window.__eesNativeDraftV1?.activeChatId?.() !== id) return;
++			retainedChatId = id;
++			lastChatPath = `/c/${id}`;
++			window.__eesNativeWorkV1?.chatCreated?.(id);
++			if (nativeRoute || admin) {
++				eesSync();
++				return;
++			}
++			await goto(lastChatPath, { replaceState: true, keepFocus: true, noScroll: true });
++			await tick();
++			eesSync();
++		},
++		retainFolder: () => nativeRoute,
++		newChatStarted: async () => {
++			selectedFolder.set(null);
++			retainedChatId = '';
++			lastChatPath = '/';
++			await goto('/', { replaceState: true, keepFocus: true, noScroll: true });
++		},
++		hosts: () => ({ panel, overlays }),
++		screen: () => ({
++			active: Boolean(get(user)),
++			native: nativeRoute || admin,
++			admin,
++			chatReady: chatRoute && folderReady && Boolean(window.__eesNativeDraftV1?.ready?.()),
++			path: location.pathname,
++			search: location.search
++		}),
++		publish: (snapshot) => eesSnapshot.set(snapshot),
++		toggleSidebar: () => eesCompact.set(!get(eesCompact)),
++		navigate,
++		closeSettings: () => showSettings.set(false),
++		newChat,
++		searchChats: () => showSearch.set(true),
++		focusComposer: () => window.__eesNativeDraftV1?.focus?.(),
++		referenceHost: (id) => eesReferenceHosts.get(id),
++		shouldInitChat: (path) => {
++			if (
++				path.startsWith('/folders/') &&
++				get(selectedFolder)?.id !== decodeURIComponent(path.split('/')[2])
++			)
++				return false;
++			if (path === lastChatPath) return false;
++			lastChatPath = path;
++			return true;
++		}
++	};
++	if (typeof window !== 'undefined') {
++		rememberOwner($user?.id || '');
++		window.__eesSourceShellV1 = bridge;
++	}
++	// A stable Chat instance keeps live image attachments and Native composer state
++	// while source routing switches the visible region. No DOM is moved or rediscovered.
++	beforeNavigate(() => {
++		window.__eesNativeDraftV1?.flush?.();
++	});
++	afterNavigate(() => {
++		if (mounted) tick().then(eesSync);
++	});
++	onMount(() => {
++		rememberOwner($user?.id || '');
++		window.__eesSourceShellV1 = bridge;
++		mounted = true;
++		eesSync();
++		let previous = $user?.id || '';
++		const unsubscribe = user.subscribe((value) => {
++			const next = value?.id || '';
++			if (next !== previous) {
++				clearPrivateDrafts();
++				rememberOwner(next);
++				previous = next;
++				eesSync();
++			}
++		});
++		return () => {
++			unsubscribe();
++			mounted = false;
++			if (window.__eesSourceShellV1 === bridge) delete window.__eesSourceShellV1;
++		};
++	});
++</script>
++
++<svelte:window bind:innerWidth={width} />
++<div
++	data-ees-source-shell
++	data-ees-route={nativeRoute ? 'native' : 'chat'}
++	class="ees-source-shell"
++	on:pointerdown={(event) => window.__eesNativeWorkV1?.dismissHelp?.(event)}
++>
++	<Sidebar />
++	<section class="ees-center" aria-label={t('EES.Conversation', 'Conversation')}>
++		{#if !nativeRoute && (!loaded || !hasChat || !folderReady)}<Navbar
++				history={{ currentId: null }}
++				initNewChat={() => {}}
++				pending
++			/>{/if}
++		<main id="main-content" class="ees-main">
++			{#if loaded}
++				{#if hasChat}{#key $user?.id}<div
++							class="ees-chat-region"
++							hidden={nativeRoute || !folderReady}
++							inert={nativeRoute || !folderReady}
++							aria-hidden={nativeRoute || !folderReady}
++							on:input={() => window.__eesNativeWorkV1?.interaction?.()}
++							on:change={() => window.__eesNativeWorkV1?.interaction?.()}
++						>
++							<Chat chatIdProp={retainedChatId} />
++						</div>{/key}{/if}
++				{#if nativeRoute}<div class="ees-native-region" data-ees-native-surface>
++						<slot />
++					</div>{:else}<slot />{/if}
++			{:else}<div class="ees-region-loading" role="status">
++					<Spinner className="size-5" /><span>{t('EES.Loading', 'Loading…')}</span>
++				</div>{/if}
++		</main>
++	</section>
++	<section
++		class="ees-panel-region"
++		style:width={`${panelWidth}px`}
++		data-overlay={panelOverlay}
++		hidden={!panelOpen}
++		inert={!panelOpen}
++		aria-label={t('EES.Panel', 'Work panel')}
++	>
++		<div
++			class="ees-panel-resize"
++			data-ees-panel-resize
++			hidden={Boolean($eesSnapshot.procedure_start)}
++			role="separator"
++			tabindex="0"
++			aria-label={t('EES.PanelWidth', 'Work panel width')}
++			aria-orientation="vertical"
++			aria-valuemin="400"
++			aria-valuemax="720"
++			aria-valuenow={panelWidth}
++			on:pointerdown={resizeStart}
++			on:pointermove={resizeMove}
++			on:pointerup={resizeEnd}
++			on:pointercancel={() => {
++				resizing = false;
++				transientWidth = null;
++			}}
++			on:keydown={(event) => {
++				const next = {
++					ArrowLeft: panelWidth + 16,
++					ArrowRight: panelWidth - 16,
++					Home: 400,
++					End: 720
++				}[event.key];
++				if (next !== undefined) {
++					event.preventDefault();
++					setWidth(next, true);
++				}
++			}}
++		></div>
++		<aside
++			id="ees-work-panel"
++			data-ees-work
++			data-ees-source-slot
++			bind:this={panel}
++			aria-label={t('EES.Panel', 'Work panel')}
++		></aside>
++	</section>
++	<div data-ees-overlay-slot bind:this={overlays}></div>
++</div>
++
++<style>
++	.ees-source-shell {
++		display: flex;
++		position: relative;
++		width: 100%;
++		height: 100dvh;
++		min-height: 0;
++		overflow: hidden;
++		background: #fff;
++		color: #1f2023;
++	}
++	.ees-center {
++		display: flex;
++		flex: 1;
++		flex-direction: column;
++		min-width: 0;
++		min-height: 0;
++	}
++	.ees-main,
++	.ees-chat-region,
++	.ees-native-region {
++		flex: 1;
++		width: 100%;
++		height: 100%;
++		min-height: 0;
++		min-width: 0;
++		overflow: hidden;
++	}
++	.ees-chat-region {
++		display: flex;
++		flex-direction: column;
++	}
++	.ees-chat-region[hidden],
++	.ees-panel-region[hidden] {
++		display: none;
++	}
++	.ees-native-region {
++		display: flex;
++	}
++	.ees-region-loading {
++		display: flex;
++		align-items: center;
++		justify-content: center;
++		gap: 8px;
++		height: 100%;
++		font-size: 14px;
++	}
++	.ees-panel-region {
++		position: relative;
++		flex: none;
++		height: 100%;
++		min-height: 0;
++		border-left: 1px solid #e6e6e9;
++		background: #fff;
++	}
++	.ees-panel-region[data-overlay='true'] {
++		position: absolute;
++		right: 0;
++		top: 0;
++		z-index: 35;
++		box-shadow: -8px 0 24px #0001;
++		max-width: calc(100% - 56px);
++	}
++	.ees-panel-region :global(#ees-work-panel) {
++		width: 100%;
++		height: 100%;
++		max-height: 100%;
++		position: relative;
++		inset: auto;
++		border: 0;
++	}
++	.ees-panel-resize {
++		position: absolute;
++		left: -4px;
++		top: 0;
++		bottom: 0;
++		width: 8px;
++		z-index: 2;
++		cursor: col-resize;
++		touch-action: none;
++	}
++	.ees-panel-resize:focus-visible {
++		outline: 2px solid #2f5f98;
++		outline-offset: -3px;
++	}
++</style>
+diff --git a/src/lib/components/ees/icons/5bc95.svg b/src/lib/components/ees/icons/5bc95.svg
+new file mode 100644
+index 0000000..59f7e8d
+--- /dev/null
++++ b/src/lib/components/ees/icons/5bc95.svg
+@@ -0,0 +1,5 @@
++<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
++<path d="M13.6667 10.6669V5.33352C13.6715 5.11825 13.6184 4.90563 13.5129 4.71795C13.4073 4.53028 13.2532 4.37447 13.0667 4.26686L8.59998 1.73352C8.41756 1.6282 8.21063 1.57275 7.99998 1.57275C7.78934 1.57275 7.58241 1.6282 7.39998 1.73352L2.93332 4.26686C2.74681 4.37447 2.59268 4.53028 2.48712 4.71795C2.38155 4.90563 2.32843 5.11825 2.33332 5.33352V10.6669C2.32843 10.8821 2.38155 11.0948 2.48712 11.2824C2.59268 11.4701 2.74681 11.6259 2.93332 11.7335L7.39998 14.2669C7.58241 14.3722 7.78934 14.4276 7.99998 14.4276C8.21063 14.4276 8.41756 14.3722 8.59998 14.2669L13.0667 11.7335C13.2532 11.6259 13.4073 11.4701 13.5129 11.2824C13.6184 11.0948 13.6715 10.8821 13.6667 10.6669Z" stroke="#6F717A" stroke-width="1.41667" stroke-linecap="round" stroke-linejoin="round"/>
++<path d="M2.53333 4.7334L7.99999 8.00007L13.4667 4.7334" stroke="#6F717A" stroke-width="1.41667" stroke-linecap="round" stroke-linejoin="round"/>
++<path d="M8 14.4V8" stroke="#6F717A" stroke-width="1.41667" stroke-linecap="round" stroke-linejoin="round"/>
++</svg>
+diff --git a/src/lib/components/ees/state.ts b/src/lib/components/ees/state.ts
+new file mode 100644
+index 0000000..fd0c757
+--- /dev/null
++++ b/src/lib/components/ees/state.ts
+@@ -0,0 +1,29 @@
++import { writable } from 'svelte/store';
++export const eesSnapshot = writable<any>({
++	state: null,
++	selection: { mode: 'work', tab: 'my_work', panel_open: true, collapsed: [] },
++	busy: false,
++	error: ''
++});
++export const eesCompact = writable(typeof window !== 'undefined' && window.innerWidth < 1440);
++export const eesReferenceHosts = new Map<string, HTMLElement>();
++export const eesSync = () => {
++	if (typeof window !== 'undefined') window.__eesNativeWorkV1?.sync?.();
++};
++export const eesAction = (dataset: Record<string, any>) =>
++	window.__eesNativeWorkV1?.action?.(dataset);
++export function referenceSlot(node: HTMLElement, id: string) {
++	eesReferenceHosts.set(id, node);
++	eesSync();
++	return {
++		update(next: string) {
++			if (eesReferenceHosts.get(id) === node) eesReferenceHosts.delete(id);
++			id = next;
++			eesReferenceHosts.set(id, node);
++			eesSync();
++		},
++		destroy() {
++			if (eesReferenceHosts.get(id) === node) eesReferenceHosts.delete(id);
++		}
++	};
++}
 diff --git a/src/lib/components/layout/Sidebar.svelte b/src/lib/components/layout/Sidebar.svelte
-index 007df31..1d08067 100644
+index 007df31..55d13cc 100644
 --- a/src/lib/components/layout/Sidebar.svelte
 +++ b/src/lib/components/layout/Sidebar.svelte
-@@ -653,7 +653,8 @@
+@@ -92,6 +92,8 @@
+ 	import CheckIcon from '../icons/Check.svelte';
+ 	import MoreHorizontalIcon from './Sidebar/icons/MoreHorizontal.svelte';
+ 	import MobileSwipePanel from '../common/MobileSwipePanel.svelte';
++	import EesNavigation from '$lib/components/ees/EesNavigation.svelte';
++	import {eesSnapshot,eesCompact} from '$lib/components/ees/state';
+ 
+ 	const BREAKPOINT = 768;
+ 	const DEFAULT_PINNED_ITEMS = ['notes', 'workspace'];
+@@ -652,52 +654,7 @@
+ 	});
  
  	onMount(async () => {
- 		try {
+-		try {
 -			const width = Number(localStorage.getItem('sidebarWidth'));
-+			const savedWidth = localStorage.getItem('sidebarWidth');
-+			const width = savedWidth === null ? (window.innerWidth < 1536 ? 224 : 256) : Number(savedWidth);
- 			if (!Number.isNaN(width) && width >= MIN_WIDTH && width <= MAX_WIDTH) {
- 				sidebarWidth.set(width);
- 			}
-@@ -664,7 +665,7 @@
- 			document.documentElement.style.setProperty('--sidebar-width', `${w}px`);
- 		});
- 
+-			if (!Number.isNaN(width) && width >= MIN_WIDTH && width <= MAX_WIDTH) {
+-				sidebarWidth.set(width);
+-			}
+-		} catch {}
+-
+-		document.documentElement.style.setProperty('--sidebar-width', `${$sidebarWidth}px`);
+-		sidebarWidth.subscribe((w) => {
+-			document.documentElement.style.setProperty('--sidebar-width', `${w}px`);
+-		});
+-
 -		showSidebar.set(!$mobile ? localStorage.sidebar === 'true' : false);
-+		showSidebar.set(!$mobile ? (localStorage.getItem('sidebar') === null || localStorage.sidebar === 'true') : false);
+-
+-		const unsubscribers = [
+-			mobile.subscribe((value) => {
+-				if ($showSidebar && value) {
+-					showSidebar.set(false);
+-				}
+-
+-				if ($showSidebar && !value) {
+-					const navElement = document.getElementsByTagName('nav')[0];
+-					if (navElement) {
+-						navElement.style['-webkit-app-region'] = 'drag';
+-					}
+-				}
+-			}),
+-			showSidebar.subscribe(async (value) => {
+-				localStorage.sidebar = value;
+-
+-				// nav element is not available on the first render
+-				const navElement = document.getElementsByTagName('nav')[0];
+-
+-				if (navElement) {
+-					if ($mobile) {
+-						if (!value) {
+-							navElement.style['-webkit-app-region'] = 'drag';
+-						} else {
+-							navElement.style['-webkit-app-region'] = 'no-drag';
+-						}
+-					} else {
+-						navElement.style['-webkit-app-region'] = 'drag';
+-					}
+-				}
+-			})
+-		];
++		const unsubscribers = [];
  
- 		const unsubscribers = [
- 			mobile.subscribe((value) => {
-@@ -980,7 +981,7 @@
+ 		window.addEventListener('keydown', onKeyDown);
+ 		window.addEventListener('keyup', onKeyUp);
+@@ -891,474 +848,13 @@
+ 	on:pointercancel={resizeEndHandler}
+ />
  
- 				<div class="-gap-0.5">
- 					<div class="">
+-<MobileSwipePanel
+-	open={$showSidebar}
+-	enabled={$mobile}
+-	width={$sidebarWidth}
+-	onOpenChange={(open) => showSidebar.set(open)}
+-	let:visible
+-	let:progress
+-	let:panelStyle
+-	let:backdropStyle
+->
+-	<!-- svelte-ignore a11y-no-static-element-interactions -->
+-
+-	{#if visible}
+-		<div
+-			class=" {$isApp
+-				? ' ml-[4.5rem] md:ml-0'
+-				: ''} fixed md:hidden z-40 top-0 right-0 left-0 bottom-0 bg-black w-full min-h-screen h-screen flex justify-center overflow-hidden overscroll-contain {progress >
+-			0.02
+-				? ''
+-				: 'pointer-events-none'}"
+-			style={backdropStyle}
+-			on:mousedown={() => {
+-				showSidebar.set(false);
+-			}}
+-		></div>
+-	{/if}
+-
+-	<SearchModal
+-		bind:show={$showSearch}
+-		onClose={() => {
+-			if ($mobile) {
+-				showSidebar.set(false);
+-			}
+-		}}
+-	/>
+-
+-	<button
+-		id="sidebar-new-chat-button"
+-		class="hidden"
+-		on:click={() => {
+-			goto('/');
+-			newChatHandler();
+-		}}
+-	/>
+-
+-	{#if !$mobile && !$showSidebar}
+-		<div
+-			class="w-[calc(42px*var(--app-text-scale,1))] shrink-0 py-[calc(0.25rem*var(--app-text-scale,1))] px-[calc(0.25rem*var(--app-text-scale,1))] flex flex-col justify-between text-gray-700 dark:text-gray-300 hover:bg-gray-50/30 dark:hover:bg-gray-800/30 h-full z-10 transition-all border-e-[0.5px] border-gray-50 dark:border-gray-850/30"
+-			id="sidebar"
+-			role="navigation"
+-			aria-label={$i18n.t('Chat history')}
+-		>
+-			<button
+-				class="flex flex-col flex-1 {isWindows ? 'cursor-pointer' : 'cursor-[e-resize]'}"
+-				on:click={async () => {
+-					showSidebar.set(!$showSidebar);
+-				}}
+-			>
+-				<div class="pb-1">
+-					<Tooltip
+-						content={$showSidebar ? $i18n.t('Close Sidebar') : $i18n.t('Open Sidebar')}
+-						placement="right"
+-					>
+-						<button
+-							class="flex size-8.5 items-center justify-center transition group {isWindows
+-								? 'cursor-pointer'
+-								: 'cursor-[e-resize]'}"
+-							aria-label={$showSidebar ? $i18n.t('Close Sidebar') : $i18n.t('Open Sidebar')}
+-						>
+-							<div
+-								class="self-center flex size-[calc(30px*var(--app-text-scale,1))] items-center justify-center rounded-lg transition group-hover:bg-gray-100 dark:group-hover:bg-gray-900"
+-							>
+-								<!-- LICENSE covers this Open WebUI sidebar logo.
+-							Do not alter, remove, obscure, or replace it except as LICENSE permits:
+-							https://docs.openwebui.com/license. -->
+-								<img
+-									src="{WEBUI_BASE_URL}/static/favicon.png"
+-									class="sidebar-new-chat-icon size-5 rounded-full group-hover:hidden"
+-									alt=""
+-								/>
+-
+-								<Sidebar className="size-4 hidden group-hover:flex" />
+-							</div>
+-						</button>
+-					</Tooltip>
+-				</div>
+-
+-				<div class="-gap-0.5">
+-					<div class="">
 -						<Tooltip content={$i18n.t('New Chat')} placement="right">
-+						<Tooltip content={$i18n.language?.startsWith('ko') ? '새 대화' : $i18n.t('New Chat')} placement="right">
- 							<a
- 								class=" cursor-pointer flex size-8 items-center justify-center transition group"
- 								href="/"
-@@ -992,7 +993,7 @@
- 									goto('/');
- 									newChatHandler();
- 								}}
+-							<a
+-								class=" cursor-pointer flex size-8 items-center justify-center transition group"
+-								href="/"
+-								draggable="false"
+-								on:click={async (e) => {
+-									e.stopImmediatePropagation();
+-									e.preventDefault();
+-
+-									goto('/');
+-									newChatHandler();
+-								}}
 -								aria-label={$i18n.t('New Chat')}
-+								aria-label={$i18n.language?.startsWith('ko') ? '새 대화' : $i18n.t('New Chat')}
- 							>
- 								<div
- 									class="self-center flex size-[calc(30px*var(--app-text-scale,1))] items-center justify-center rounded-lg transition group-hover:bg-gray-100 dark:group-hover:bg-gray-900"
-@@ -1004,7 +1005,7 @@
- 					</div>
- 
- 					<div>
+-							>
+-								<div
+-									class="self-center flex size-[calc(30px*var(--app-text-scale,1))] items-center justify-center rounded-lg transition group-hover:bg-gray-100 dark:group-hover:bg-gray-900"
+-								>
+-									<EditPencilIcon className="size-4" strokeWidth="1.5" />
+-								</div>
+-							</a>
+-						</Tooltip>
+-					</div>
+-
+-					<div>
 -						<Tooltip content={$i18n.t('Search')} placement="right">
-+						<Tooltip content={$i18n.language?.startsWith('ko') ? '대화 검색' : $i18n.t('Search')} placement="right">
- 							<button
- 								class=" cursor-pointer flex size-8 items-center justify-center transition group"
- 								on:click={(e) => {
-@@ -1014,7 +1015,7 @@
- 									showSearch.set(true);
- 								}}
- 								draggable="false"
+-							<button
+-								class=" cursor-pointer flex size-8 items-center justify-center transition group"
+-								on:click={(e) => {
+-									e.stopImmediatePropagation();
+-									e.preventDefault();
+-
+-									showSearch.set(true);
+-								}}
+-								draggable="false"
 -								aria-label={$i18n.t('Search')}
-+								aria-label={$i18n.language?.startsWith('ko') ? '대화 검색' : $i18n.t('Search')}
- 							>
- 								<div
- 									class="self-center flex size-[calc(30px*var(--app-text-scale,1))] items-center justify-center rounded-lg transition group-hover:bg-gray-100 dark:group-hover:bg-gray-900"
-@@ -1119,6 +1120,7 @@
- 			bind:this={navElement}
- 			id={visible ? 'sidebar' : undefined}
- 			role="navigation"
-+			data-ees-native-sidebar
- 			aria-label={$i18n.t('Chat history')}
- 			aria-hidden={!$showSidebar}
- 			inert={!$showSidebar}
-@@ -1207,7 +1209,7 @@
- 						}
- 					}}
- 				>
+-							>
+-								<div
+-									class="self-center flex size-[calc(30px*var(--app-text-scale,1))] items-center justify-center rounded-lg transition group-hover:bg-gray-100 dark:group-hover:bg-gray-900"
+-								>
+-									<SearchIcon className="size-4" strokeWidth="1.5" />
+-								</div>
+-							</button>
+-						</Tooltip>
+-					</div>
+-
+-					{#each pinnedItems as itemId (itemId)}
+-						{@const meta = getMenuItemMeta(itemId)}
+-						{#if meta && isMenuItemVisible(itemId)}
+-							<div class="">
+-								<Tooltip content={$i18n.t(meta.label)} placement="right">
+-									<a
+-										class=" cursor-pointer flex size-8 items-center justify-center transition group"
+-										href={meta.href}
+-										on:click={async (e) => {
+-											e.stopImmediatePropagation();
+-											e.preventDefault();
+-											goto(meta.href);
+-											itemClickHandler();
+-										}}
+-										draggable="false"
+-										aria-label={$i18n.t(meta.label)}
+-									>
+-										<div
+-											class="self-center flex size-[calc(30px*var(--app-text-scale,1))] items-center justify-center rounded-lg transition {itemId ===
+-											activeMenuItemId
+-												? ($settings?.highContrastMode ?? false)
+-													? 'bg-black/[0.035] dark:bg-white/[0.06]'
+-													: 'bg-black/[0.035] dark:bg-white/[0.045]'
+-												: 'group-hover:bg-gray-100 dark:group-hover:bg-gray-900'}"
+-										>
+-											{#if itemId === 'notes'}
+-												<NotesIcon className="size-4" strokeWidth="1.5" />
+-											{:else if itemId === 'workspace'}
+-												<WorkspaceIcon className="size-4" strokeWidth="1.5" />
+-											{:else if itemId === 'automations'}
+-												<ClockIcon className="size-4" strokeWidth="1.5" />
+-											{:else if itemId === 'calendar'}
+-												<CalendarIcon className="size-4" strokeWidth="1.5" />
+-											{:else if itemId === 'playground'}
+-												<CodeIcon className="size-4" strokeWidth="1.5" />
+-											{/if}
+-										</div>
+-									</a>
+-								</Tooltip>
+-							</div>
+-						{/if}
+-					{/each}
+-				</div>
+-			</button>
+-
+-			<div>
+-				<div>
+-					<div class=" flex justify-center items-center">
+-						{#if $user !== undefined && $user !== null}
+-							<UserMenu role={$user?.role} profile={$config?.features?.enable_user_status ?? true}>
+-								<button
+-									type="button"
+-									class=" cursor-pointer flex size-8.5 items-center justify-center transition group"
+-									aria-label={$i18n.t('User menu')}
+-								>
+-									<div
+-										class="self-center relative flex size-[calc(30px*var(--app-text-scale,1))] items-center justify-center rounded-lg transition group-hover:bg-gray-100 dark:group-hover:bg-gray-900"
+-									>
+-										<img
+-											src={`${WEBUI_API_BASE_URL}/users/${$user?.id}/profile/image`}
+-											class="size-5.5 object-cover rounded-full"
+-											alt={$i18n.t('Open User Profile Menu')}
+-											aria-label={$i18n.t('Open User Profile Menu')}
+-										/>
+-
+-										{#if $config?.features?.enable_user_status}
+-											<div class="absolute -bottom-0.5 -right-0.5">
+-												<span class="relative flex size-2.5">
+-													<span
+-														class="relative inline-flex size-2.5 rounded-full {true
+-															? 'bg-green-500'
+-															: 'bg-gray-300 dark:bg-gray-700'} border-2 border-white dark:border-gray-900"
+-													></span>
+-												</span>
+-											</div>
+-										{/if}
+-									</div>
+-								</button>
+-							</UserMenu>
+-						{/if}
+-					</div>
+-				</div>
+-			</div>
+-		</div>
+-	{/if}
+-
+-	<!-- {$i18n.t('New Folder')} -->
+-	<!-- {$i18n.t('Pinned')} -->
+-
+-	{#if visible || !$mobile}
+-		<div
+-			bind:this={navElement}
+-			id={visible ? 'sidebar' : undefined}
+-			role="navigation"
+-			aria-label={$i18n.t('Chat history')}
+-			aria-hidden={!$showSidebar}
+-			inert={!$showSidebar}
+-			class="h-screen max-h-[100dvh] min-h-screen select-none {$mobile
+-				? visible
+-					? 'bg-gray-50 dark:bg-gray-950 z-50'
+-					: 'bg-transparent z-0 pointer-events-none'
+-				: `bg-gray-50 dark:bg-gray-950 z-50 ${$showSidebar ? '' : 'pointer-events-none'}`} {$isApp
+-				? `ml-[4.5rem] md:ml-0 `
+-				: $mobile
+-					? ''
+-					: ''} shrink-0 text-gray-700 dark:text-gray-300 text-[0.8125rem] leading-5 fixed top-0 left-0 overflow-x-hidden
+-        "
+-			style={$mobile
+-				? panelStyle
+-				: `width: ${$showSidebar ? 'var(--sidebar-width)' : '0'}; transition: width 250ms cubic-bezier(0.22, 1, 0.36, 1);`}
+-			data-state={$showSidebar}
+-		>
+-			<div
+-				class=" my-auto flex flex-col justify-between h-screen max-h-[100dvh] w-[var(--sidebar-width)] overflow-x-hidden scrollbar-hidden z-50 border-e border-gray-50 dark:border-gray-850/30"
+-			>
+-				<div
+-					class="sidebar px-1 pt-1.5 pb-1 flex justify-between space-x-1 text-gray-600 dark:text-gray-400 sticky top-0 z-10 -mb-2"
+-				>
+-					<a
+-						class="flex items-center rounded-xl size-8.5 h-full justify-center hover:bg-gray-100 dark:hover:bg-gray-900 transition no-drag-region"
+-						href="/"
+-						draggable="false"
+-						on:click={newChatHandler}
+-					>
+-						<!-- LICENSE covers this Open WebUI sidebar logo.
+-					Do not alter, remove, obscure, or replace it except as LICENSE permits:
+-					https://docs.openwebui.com/license. -->
+-						<img
+-							crossorigin="anonymous"
+-							src="{WEBUI_BASE_URL}/static/favicon.png"
+-							class="sidebar-new-chat-icon size-5 rounded-full"
+-							alt=""
+-						/>
+-					</a>
+-
+-					<a href="/" class="flex flex-1 px-0.5" on:click={newChatHandler}>
+-						<!-- LICENSE covers this Open WebUI sidebar name.
+-					Do not alter, remove, obscure, or replace it except as LICENSE permits:
+-					https://docs.openwebui.com/license. -->
+-						<div
+-							id="sidebar-webui-name"
+-							class=" self-center font-normal text-gray-700 dark:text-gray-200"
+-						>
+-							{$WEBUI_NAME}
+-						</div>
+-					</a>
+-					<Tooltip
+-						content={$showSidebar ? $i18n.t('Close Sidebar') : $i18n.t('Open Sidebar')}
+-						placement="bottom"
+-					>
+-						<button
+-							class="flex size-[1.875rem] justify-center items-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition {isWindows
+-								? 'cursor-pointer'
+-								: 'cursor-[w-resize]'}"
+-							on:click={() => {
+-								showSidebar.set(!$showSidebar);
+-							}}
+-							aria-label={$showSidebar ? $i18n.t('Close Sidebar') : $i18n.t('Open Sidebar')}
+-						>
+-							<div class=" self-center">
+-								<Sidebar className="size-4" />
+-							</div>
+-						</button>
+-					</Tooltip>
+-
+-					<div
+-						class="{scrollTop > 0
+-							? 'visible'
+-							: 'invisible'} sidebar-bg-gradient-to-b bg-linear-to-b from-gray-50 dark:from-gray-950 to-transparent from-50% pointer-events-none absolute inset-0 -z-10 -mb-6"
+-					></div>
+-				</div>
+-
+-				<div
+-					class="relative flex flex-col flex-1 overflow-y-auto scrollbar-hidden space-y-1.5 pt-2.5 pb-2.5"
+-					on:scroll={(e) => {
+-						if (e.target.scrollTop === 0) {
+-							scrollTop = 0;
+-						} else {
+-							scrollTop = e.target.scrollTop;
+-						}
+-					}}
+-				>
 -					<div class="pb-1">
-+					<div class="pb-1" data-ees-native-navigation>
- 						<div class="px-1 flex justify-center text-gray-700 dark:text-gray-300">
- 							<a
- 								id="sidebar-new-chat-button"
-@@ -1215,14 +1217,14 @@
- 								href="/"
- 								draggable="false"
- 								on:click={newChatHandler}
+-						<div class="px-1 flex justify-center text-gray-700 dark:text-gray-300">
+-							<a
+-								id="sidebar-new-chat-button"
+-								class="group grow flex items-center space-x-2 rounded-xl px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-900 transition outline-none"
+-								href="/"
+-								draggable="false"
+-								on:click={newChatHandler}
 -								aria-label={$i18n.t('New Chat')}
-+								aria-label={$i18n.language?.startsWith('ko') ? '새 대화' : $i18n.t('New Chat')}
- 							>
- 								<div class="self-center flex size-4 shrink-0 items-center justify-center">
- 									<EditPencilIcon className=" size-4" strokeWidth="1.5" />
- 								</div>
- 
- 								<div class="flex flex-1 self-center translate-y-[0.5px]">
+-							>
+-								<div class="self-center flex size-4 shrink-0 items-center justify-center">
+-									<EditPencilIcon className=" size-4" strokeWidth="1.5" />
+-								</div>
+-
+-								<div class="flex flex-1 self-center translate-y-[0.5px]">
 -									<div class=" self-center text-[0.8125rem] leading-5">{$i18n.t('New Chat')}</div>
-+									<div class=" self-center text-[0.8125rem] leading-5">{$i18n.language?.startsWith('ko') ? '새 대화' : $i18n.t('New Chat')}</div>
- 								</div>
- 
- 								<HotkeyHint name="newChat" className=" hover-reveal " />
-@@ -1237,14 +1239,14 @@
- 									showSearch.set(true);
- 								}}
- 								draggable="false"
+-								</div>
+-
+-								<HotkeyHint name="newChat" className=" hover-reveal " />
+-							</a>
+-						</div>
+-
+-						<div class="px-1 flex justify-center text-gray-700 dark:text-gray-300">
+-							<button
+-								id="sidebar-search-button"
+-								class="group grow flex items-center space-x-2 rounded-xl px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-900 transition outline-none"
+-								on:click={() => {
+-									showSearch.set(true);
+-								}}
+-								draggable="false"
 -								aria-label={$i18n.t('Search')}
-+								aria-label={$i18n.language?.startsWith('ko') ? '대화 검색' : $i18n.t('Search')}
- 							>
- 								<div class="self-center flex size-4 shrink-0 items-center justify-center">
- 									<SearchIcon strokeWidth="1.5" className="size-4" />
- 								</div>
- 
- 								<div class="flex flex-1 self-center translate-y-[0.5px]">
+-							>
+-								<div class="self-center flex size-4 shrink-0 items-center justify-center">
+-									<SearchIcon strokeWidth="1.5" className="size-4" />
+-								</div>
+-
+-								<div class="flex flex-1 self-center translate-y-[0.5px]">
 -									<div class=" self-center text-[0.8125rem] leading-5">{$i18n.t('Search')}</div>
-+									<div class=" self-center text-[0.8125rem] leading-5">{$i18n.language?.startsWith('ko') ? '대화 검색' : $i18n.t('Search')}</div>
- 								</div>
- 								<HotkeyHint name="search" className=" hover-reveal " />
- 							</button>
+-								</div>
+-								<HotkeyHint name="search" className=" hover-reveal " />
+-							</button>
+-						</div>
+-
+-						<div id="pinned-menu-items-list">
+-							{#each pinnedItems as itemId (itemId)}
+-								{@const meta = getMenuItemMeta(itemId)}
+-								{#if meta && isMenuItemVisible(itemId)}
+-									<div
+-										class="px-1 flex justify-center text-gray-700 dark:text-gray-300"
+-										data-id={itemId}
+-									>
+-										<a
+-											id="sidebar-{itemId}-button"
+-											class="grow flex items-center space-x-2 rounded-xl px-2 py-1.5 transition {itemId ===
+-											activeMenuItemId
+-												? ($settings?.highContrastMode ?? false)
+-													? 'bg-black/[0.035] dark:bg-white/[0.06]'
+-													: 'bg-black/[0.035] dark:bg-white/[0.045]'
+-												: 'hover:bg-gray-100 dark:hover:bg-gray-900'}"
+-											href={meta.href}
+-											on:click={itemClickHandler}
+-											draggable="false"
+-											aria-label={$i18n.t(meta.label)}
+-										>
+-											<div class="self-center flex size-4 shrink-0 items-center justify-center">
+-												{#if itemId === 'notes'}
+-													<NotesIcon className="size-4" strokeWidth="1.5" />
+-												{:else if itemId === 'workspace'}
+-													<WorkspaceIcon className="size-4" strokeWidth="1.5" />
+-												{:else if itemId === 'automations'}
+-													<ClockIcon className="size-4" strokeWidth="1.5" />
+-												{:else if itemId === 'calendar'}
+-													<CalendarIcon className="size-4" strokeWidth="1.5" />
+-												{:else if itemId === 'playground'}
+-													<CodeIcon className="size-4" strokeWidth="1.5" />
+-												{/if}
+-											</div>
+-
+-											<div class="flex self-center translate-y-[0.5px]">
+-												<div class=" self-center text-[0.8125rem] leading-5">
+-													{$i18n.t(meta.label)}
+-												</div>
+-											</div>
+-										</a>
+-									</div>
+-								{/if}
+-							{/each}
+-						</div>
+-					</div>
+-
+-					{#if $visiblePinnedModels.length > 0}
+-						<SidebarSection
+-							id="sidebar-models"
+-							bind:open={showPinnedModels}
+-							name={$i18n.t('Models')}
+-							dragAndDrop={false}
+-						>
+-							<PinnedModelList bind:selectedChatId {shiftKey} />
+-						</SidebarSection>
+-					{/if}
+-
+-					{#if ($config?.features?.enable_notes ?? false) && ($user?.role === 'admin' || ($user?.permissions?.features?.notes ?? true)) && $pinnedNotes.length > 0}
+-						<SidebarSection
+-							id="sidebar-pinned-notes"
+-							bind:open={showPinnedNotes}
+-							name={$i18n.t('Notes')}
+-							dragAndDrop={false}
+-							onAdd={async () => {
+-								const note = await createNoteHandler('New Note');
+-								if (note) {
+-									goto(`/notes/${note.id}`);
+-								}
+-							}}
+-							onAddLabel={$i18n.t('New Note')}
+-						>
+-							<PinnedNoteList bind:selectedChatId />
+-						</SidebarSection>
+-					{/if}
+-
+-					{#if $config?.features?.enable_channels && ($user?.role === 'admin' || ($user?.permissions?.features?.channels ?? true))}
+-						<SidebarSection
+-							id="sidebar-channels"
+-							bind:open={showChannels}
+-							name={$i18n.t('Channels')}
+-							dragAndDrop={false}
+-							onAdd={$user?.role === 'admin' || ($user?.permissions?.features?.channels ?? true)
+-								? async () => {
+-										await tick();
+-
+-										setTimeout(() => {
+-											showCreateChannel = true;
+-										}, 0);
+-									}
+-								: null}
+-							onAddLabel={$i18n.t('Create Channel')}
+-						>
+-							{#each $channels as channel, channelIdx (`${channel?.id}`)}
+-								<ChannelItem
+-									{channel}
+-									onUpdate={async () => {
+-										await initChannels();
+-									}}
+-								/>
+-
+-								{#if channelIdx < $channels.length - 1 && channel.type !== $channels[channelIdx + 1]?.type}<hr
+-										class=" border-gray-100/40 dark:border-gray-800/10 my-1.5 w-full"
+-									/>
+-								{/if}
+-							{/each}
+-						</SidebarSection>
+-					{/if}
+-
++<SearchModal bind:show={$showSearch} />
++<aside id="sidebar" data-ees-source-sidebar data-compact={$eesCompact} bind:this={navElement} aria-label={$i18n.t('EES.Nav.Navigation',{defaultValue:'Work navigation'})}>
++ <header class="ees-product"><a href="/" on:click|preventDefault={()=>window.__eesSourceShellV1?.newChat()} aria-label="EES Workflow"><span class="ees-product-icon">E</span><strong>EES Workflow</strong></a><button data-ees-sidebar-toggle aria-expanded={!$eesCompact} aria-label={$i18n.t($eesCompact?'EES.Sidebar.Expand':'EES.Sidebar.Collapse',{defaultValue:$eesCompact?'Expand sidebar':'Collapse sidebar'})} on:click={()=>eesCompact.set(!$eesCompact)}><Sidebar className="size-4"/></button></header>
++ <div class="ees-sidebar-scroll">
++ <EesNavigation />
++ <div class="ees-chat-controls"><button id="sidebar-new-chat-button" on:click={()=>window.__eesSourceShellV1?.newChat()}><EditPencilIcon className="size-4"/><span>{$i18n.t('EES.Nav.NewChat',{defaultValue:'New chat'})}</span></button><button id="sidebar-search-button" on:click={()=>showSearch.set(true)}><SearchIcon className="size-4"/><span>{$i18n.t('EES.Nav.Search',{defaultValue:'Search chats'})}</span></button></div>
++ <div class="ees-native-history" hidden={$eesSnapshot.selection?.tab!=='chats'||$eesCompact||$eesSnapshot.native_shell} inert={$eesSnapshot.selection?.tab!=='chats'||$eesCompact||$eesSnapshot.native_shell}>
+ 					{#if $config?.features?.enable_folders && ($user?.role === 'admin' || ($user?.permissions?.features?.folders ?? true))}
+ 						<SidebarSection
+ 							id="sidebar-folders"
+@@ -1698,15 +1194,8 @@
+ 							</div>
+ 						</div>
+ 					</SidebarSection>
+-				</div>
+-
+-				<div class="px-1 pt-1 pb-1.5 sticky bottom-0 z-10 -mt-2 sidebar">
+-					<div
+-						class=" sidebar-bg-gradient-to-t bg-linear-to-t from-gray-50 dark:from-gray-950 to-transparent from-50% pointer-events-none absolute inset-0 -z-10 -mt-6"
+-					></div>
+-					<div class="flex flex-col">
+-						{#if $user !== undefined && $user !== null}
+-							<UserMenu
++ </div></div>
++ <footer class="ees-profile"><UserMenu
+ 								role={$user?.role}
+ 								profile={$config?.features?.enable_user_status ?? true}
+ 								className="w-[calc(var(--sidebar-width)-1rem)]"
+@@ -1738,34 +1227,13 @@
+ 									</div>
+ 									<div class=" self-center font-normal truncate">{$user?.name}</div>
+ 								</button>
+-							</UserMenu>
+-						{/if}
+-					</div>
+-				</div>
+-			</div>
+-		</div>
+-
+-		{#if !$mobile && visible}
+-			<div
+-				class="relative flex items-center justify-center group border-r border-gray-50 dark:border-gray-850/30 hover:border-gray-200 dark:hover:border-gray-800 transition z-20 bg-transparent p-0 appearance-none"
+-				id="sidebar-resizer"
+-				on:pointerdown={resizeStartHandler}
+-				role="separator"
+-			>
+-				<div
+-					class=" absolute -left-1.5 -right-1.5 -top-0 -bottom-0 z-20 cursor-col-resize bg-transparent"
+-					style="touch-action: none;"
+-				></div>
+-			</div>
+-		{/if}
+-	{/if}
+-</MobileSwipePanel>
+-
++							</UserMenu></footer>
++</aside>
+ <style>
+-	@media (max-width: 767px) {
+-		#sidebar {
+-			will-change: transform;
+-			touch-action: pan-y;
+-		}
+-	}
++ #sidebar{position:relative;display:flex;flex-direction:column;flex:none;width:256px;height:100%;min-width:0;background:#fafafa;border-right:1px solid #e6e6e9;overflow:hidden;font-size:14px;color:#1f2023}
++ #sidebar[data-compact=true]{width:56px}.ees-product{height:48px;flex:none;display:flex;align-items:center;gap:8px;padding:0 12px 0 16px}.ees-product a{display:flex;align-items:center;gap:8px;flex:1;white-space:nowrap}.ees-product-icon{width:22px;height:22px;display:grid;place-items:center;background:#2f5f98;color:white;border-radius:6px;font-size:12px;font-weight:600}.ees-product strong{font-size:14px}.ees-product button{padding:4px}.ees-sidebar-scroll{flex:1;min-height:0;overflow:auto}.ees-profile{padding:8px;border-top:1px solid #e6e6e9}.ees-chat-controls{display:flex;flex-direction:column;padding:8px;gap:4px}.ees-chat-controls button{display:flex;gap:8px;align-items:center;text-align:left;min-height:34px;padding:6px 8px;border-radius:6px}.ees-chat-controls button:hover{background:#eef0f3}.ees-native-history[hidden]{display:none}.ees-native-history{padding:0 8px}
++ #sidebar[data-compact=true] :global(.ew-mode span),#sidebar[data-compact=true] :global(.ew-nav-caption),#sidebar[data-compact=true] :global(.ew-nav-label),#sidebar[data-compact=true] :global(.ew-nav-links span),#sidebar[data-compact=true] :global(.ew-nav-links small),#sidebar[data-compact=true] :global(.ew-scope span),#sidebar[data-compact=true] :global(.ew-scope small),#sidebar[data-compact=true] :global(.ew-scope .ew-icon:last-child),#sidebar[data-compact=true] :global(.ew-workflows details>button),#sidebar[data-compact=true] :global(.ew-workflows summary>span),#sidebar[data-compact=true] :global(.ew-empty),#sidebar[data-compact=true] :global(.ew-nav-group-title),#sidebar[data-compact=true] :global(.ew-recent),#sidebar[data-compact=true] .ees-product strong,#sidebar[data-compact=true] .ees-product-icon,#sidebar[data-compact=true] .ees-chat-controls span{display:none}
++ #sidebar[data-compact=true] .ees-product{padding:0;justify-content:center}#sidebar[data-compact=true] .ees-product a{display:none}#sidebar[data-compact=true] :global(.ew-mode){flex-direction:column}#sidebar[data-compact=true] :global(.ew-mode button){padding:8px}#sidebar[data-compact=true] :global(.ew-workflows summary){justify-content:center}#sidebar[data-compact=true] :global(.ew-workflows summary::after){display:none}#sidebar[data-compact=true] :global(.ew-scope button){justify-content:center;padding:8px}
+ </style>
++
++
 diff --git a/src/lib/constants.ts b/src/lib/constants.ts
 index 172ed9a..8873d62 100644
 --- a/src/lib/constants.ts
@@ -511,6 +2317,344 @@ index 172ed9a..8873d62 100644
  
  export const WEBUI_HOSTNAME = '';
  export const WEBUI_BASE_URL = '';
+diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/ko-KR/translation.json
+index 8eba682..a41234c 100644
+--- a/src/lib/i18n/locales/ko-KR/translation.json
++++ b/src/lib/i18n/locales/ko-KR/translation.json
+@@ -3081,5 +3081,74 @@
+ 	"Youtube Language": "Youtube 언어",
+ 	"Youtube Proxy URL": "Youtube 프록시 URL",
+ 	"Zoom in": "",
+-	"Zoom out": ""
++	"Zoom out": "",
++	"EES.Nav.Navigation": "업무 탐색",
++	"EES.Nav.Mode": "작업 모드",
++	"EES.Nav.Work": "업무",
++	"EES.Nav.Workspace": "워크스페이스",
++	"EES.Nav.ManagedSystem": "관리 시스템",
++	"EES.Nav.WorkLocation": "작업 위치",
++	"EES.Nav.Factory": "공장 선택",
++	"EES.Nav.System": "시스템 선택",
++	"EES.Factory": "공장",
++	"EES.AllFactories": "전체 공장",
++	"EES.System": "시스템",
++	"EES.Select": "선택 필요",
++	"EES.Nav.CreateWork": "업무 만들기",
++	"EES.Nav.Procedures": "업무 절차",
++	"EES.Nav.Tools": "도구",
++	"EES.Nav.Skills": "스킬·지침",
++	"EES.Nav.Models": "AI 도우미",
++	"EES.Nav.Knowledge": "참고 문서",
++	"EES.Nav.Prompts": "빠른 문장",
++	"EES.Nav.Connections": "기능 연결",
++	"EES.Nav.Admin": "관리자 설정",
++	"EES.Nav.AI": "AI 설정",
++	"EES.Nav.AdminOnly": "관리자만",
++	"EES.Nav.Access": "공장·접근 범위",
++	"EES.Nav.Recent": "최근 편집",
++	"EES.Nav.MyWork": "내 업무",
++	"EES.Nav.Find": "워크플로우 찾기",
++	"EES.Nav.Records": "실행 기록",
++	"EES.Nav.Chats": "대화 기록",
++	"EES.Category.Operations": "운영",
++	"EES.Category.Setup": "셋업",
++	"EES.Category.Incident": "장애대응",
++	"EES.NoProcedures": "등록된 업무 절차가 없습니다.",
++	"EES.Retry": "다시 확인",
++	"EES.Sidebar.Expand": "사이드바 펼치기",
++	"EES.Sidebar.Collapse": "사이드바 접기",
++	"EES.Nav.NewChat": "새 대화",
++	"EES.Nav.Search": "대화 검색",
++	"EES.Conversation": "대화",
++	"EES.Reference": "참고",
++	"EES.GeneralConversation": "일반 대화",
++	"EES.OpenPanel": "업무 패널 열기",
++	"EES.Panel": "업무 패널",
++	"EES.PanelWidth": "업무 패널 너비",
++	"EES.Loading": "불러오는 중…",
++	"EES.Composer.Placeholder": "업무를 물어보거나, 필요한 작업을 요청하세요",
++	"EES.Procedure.Start": "새 절차 작성 안내",
++	"EES.Helper": "업무 도우미",
++	"EES.Procedure.Intro": "새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.",
++	"EES.Procedure.FillOnly": "질문을 입력창에 채웁니다. 내용을 확인하고 직접 보내 주세요.",
++	"EES.NoAccessibleScreens": "EES Workflow에서 열 수 있는 항목이 없습니다",
++	"EES.Procedure.Question1": "신규 공장 횡전개 예시를 복사해서 우리 공장에 맞게 고치고 싶어",
++	"EES.Procedure.Question2": "분류와 실행 방식(주기 · 수시 · 비상)이 뭔지 알려줘",
++	"EES.Procedure.Question3": "빈 절차로 시작하면 무엇부터 정하나요?",
++	"EES.Native.Skills": "스킬",
++	"EES.Native.Models": "모델",
++	"EES.Native.Knowledge": "지식",
++	"EES.Native.Prompts": "프롬프트",
++	"EES.Native.Tools": "도구",
++	"EES.Native.Admin": "관리자",
++	"EES.Api.SignIn": "로그인한 뒤 다시 시도해 주세요.",
++	"EES.Api.ContextChanged": "계정이 바뀌었습니다. 화면을 다시 열어 주세요.",
++	"EES.Api.InvalidResponse": "응답을 확인하지 못했습니다. 저장·실행 결과를 다시 조회해 주세요.",
++	"EES.Api.RequestFailed": "요청을 완료하지 못했습니다. 권한과 입력을 확인해 주세요.",
++	"EES.Automatic.Last": "마지막 자동 실행",
++	"EES.Automatic.Failed": "실패",
++	"EES.Automatic.Missed": "놓침",
++	"EES.Automatic.Running": "실행 중",
++	"EES.Automatic.Succeeded": "정상"
+ }
+diff --git a/src/routes/(app)/+layout.svelte b/src/routes/(app)/+layout.svelte
+index 633a9f7..943bf69 100644
+--- a/src/routes/(app)/+layout.svelte
++++ b/src/routes/(app)/+layout.svelte
+@@ -43,7 +43,7 @@
+ 		chats
+ 	} from '$lib/stores';
+ 
+-	import Sidebar from '$lib/components/layout/Sidebar.svelte';
++	import EesShell from '$lib/components/ees/EesShell.svelte';
+ 	import SettingsModal from '$lib/components/chat/SettingsModal.svelte';
+ 	import ChangelogModal from '$lib/components/ChangelogModal.svelte';
+ 	import AccountPending from '$lib/components/layout/Overlay/AccountPending.svelte';
+@@ -287,11 +287,11 @@
+ 				} else if (shortcut === Shortcut.NEW_CHAT) {
+ 					console.log('Shortcut triggered: NEW_CHAT');
+ 					event.preventDefault();
+-					document.getElementById('sidebar-new-chat-button')?.click();
++					window.__eesSourceShellV1?.newChat();
+ 				} else if (shortcut === Shortcut.FOCUS_INPUT) {
+ 					console.log('Shortcut triggered: FOCUS_INPUT');
+ 					event.preventDefault();
+-					document.getElementById('chat-input')?.focus();
++					window.__eesSourceShellV1?.focusComposer();
+ 				} else if (shortcut === Shortcut.COPY_LAST_CODE_BLOCK) {
+ 					console.log('Shortcut triggered: COPY_LAST_CODE_BLOCK');
+ 					event.preventDefault();
+@@ -303,7 +303,7 @@
+ 				} else if (shortcut === Shortcut.TOGGLE_SIDEBAR) {
+ 					console.log('Shortcut triggered: TOGGLE_SIDEBAR');
+ 					event.preventDefault();
+-					showSidebar.set(!$showSidebar);
++					window.__eesSourceShellV1?.toggleSidebar();
+ 				} else if (shortcut === Shortcut.NAVIGATE_CHAT_UP) {
+ 					console.log('Shortcut triggered: NAVIGATE_CHAT_UP');
+ 					event.preventDefault();
+@@ -530,21 +530,7 @@
+ 					</div>
+ 				{/if}
+ 
+-				<Sidebar />
+-
+-				{#if loaded}
+-					<main id="main-content" class="contents">
+-						<slot />
+-					</main>
+-				{:else}
+-					<div
+-						class="w-full flex-1 h-full flex items-center justify-center {$showSidebar
+-							? '  md:max-w-[calc(100%-var(--sidebar-width))]'
+-							: ' '}"
+-					>
+-						<Spinner className="size-5" />
+-					</div>
+-				{/if}
++<EesShell {loaded}><slot /></EesShell>
+ 			{/if}
+ 		</div>
+ 	</div>
+diff --git a/src/routes/(app)/+page.svelte b/src/routes/(app)/+page.svelte
+index 6d566c6..cf4eb73 100644
+--- a/src/routes/(app)/+page.svelte
++++ b/src/routes/(app)/+page.svelte
+@@ -2,7 +2,6 @@
+ 	import { onMount } from 'svelte';
+ 	import { toast } from 'svelte-sonner';
+ 
+-	import Chat from '$lib/components/chat/Chat.svelte';
+ 	import { page } from '$app/stores';
+ 
+ 	onMount(() => {
+@@ -12,4 +11,4 @@
+ 	});
+ </script>
+ 
+-<Chat />
++<!-- Main Chat is owned by EesShell across routes. -->
+diff --git a/src/routes/(app)/c/[id]/+page.svelte b/src/routes/(app)/c/[id]/+page.svelte
+index 53a2b61..3f77d9a 100644
+--- a/src/routes/(app)/c/[id]/+page.svelte
++++ b/src/routes/(app)/c/[id]/+page.svelte
+@@ -1,7 +1 @@
+-<script lang="ts">
+-	import { page } from '$app/stores';
+-
+-	import Chat from '$lib/components/chat/Chat.svelte';
+-</script>
+-
+-<Chat chatIdProp={$page.params.id} />
++<!-- Main Chat is owned by EesShell across routes. -->
+diff --git a/src/routes/(app)/folders/[folderId]/+page.svelte b/src/routes/(app)/folders/[folderId]/+page.svelte
+index 9aee4da..08ebc41 100644
+--- a/src/routes/(app)/folders/[folderId]/+page.svelte
++++ b/src/routes/(app)/folders/[folderId]/+page.svelte
+@@ -4,7 +4,6 @@
+ 	import { onDestroy, onMount } from 'svelte';
+ 	import { toast } from 'svelte-sonner';
+ 
+-	import Chat from '$lib/components/chat/Chat.svelte';
+ 	import Spinner from '$lib/components/common/Spinner.svelte';
+ 	import { getFolderById } from '$lib/apis/folders';
+ 	import { selectedFolder } from '$lib/stores';
+@@ -39,13 +38,12 @@
+ 	});
+ 
+ 	onDestroy(() => {
+-		selectedFolder.set(null);
++		// The source-owned Chat still uses this folder while a Native screen is open.
++		if (!window.__eesSourceShellV1?.retainFolder?.()) selectedFolder.set(null);
+ 	});
+ </script>
+ 
+-{#if ready}
+-	<Chat />
+-{:else}
++{#if !ready}
+ 	<div class="w-full h-screen flex items-center justify-center">
+ 		<Spinner />
+ 	</div>
+diff --git a/src/routes/(app)/workspace/+layout.svelte b/src/routes/(app)/workspace/+layout.svelte
+index 11eed46..a11e88a 100644
+--- a/src/routes/(app)/workspace/+layout.svelte
++++ b/src/routes/(app)/workspace/+layout.svelte
+@@ -116,132 +116,9 @@
+ 
+ {#if loaded}
+ 	<div
+-		class="flex flex-col flex-1 min-w-0 w-full h-screen max-h-[100dvh] transition-width duration-200 ease-in-out {$showSidebar
+-			? 'md:max-w-[calc(100%-var(--sidebar-width))]'
+-			: 'md:max-w-[calc(100%-42px)]'} max-w-full"
++		class="flex flex-col flex-1 min-w-0 w-full h-full max-w-full"
+ 	>
+-		<nav class="pb-1 px-2.5 pt-2 backdrop-blur-xl drag-region select-none">
+-			<div class="flex items-center gap-0.5 md:gap-1">
+-				{#if $mobile}
+-					<div class="{$showSidebar ? 'md:hidden' : ''} self-center flex flex-none items-center">
+-						<Tooltip
+-							content={$showSidebar ? $i18n.t('Close Sidebar') : $i18n.t('Open Sidebar')}
+-							interactive={true}
+-						>
+-							<button
+-								id="sidebar-toggle-button"
+-								class=" cursor-pointer flex rounded-lg hover:bg-gray-100 dark:hover:bg-gray-850 transition cursor-"
+-								aria-label={$showSidebar ? $i18n.t('Close Sidebar') : $i18n.t('Open Sidebar')}
+-								on:click={() => {
+-									showSidebar.set(!$showSidebar);
+-								}}
+-							>
+-								<div class=" self-center p-1.5">
+-									<Sidebar className="size-4" />
+-								</div>
+-							</button>
+-						</Tooltip>
+-					</div>
+-				{/if}
+-
+-				<div class="flex w-full items-center">
+-					<div
+-						class="flex min-w-0 mr-1.5 items-center gap-0.5 md:gap-1 scrollbar-none overflow-x-auto w-fit text-center text-sm font-normal rounded-full bg-transparent py-1 touch-auto pointer-events-auto"
+-					>
+-						{#if $user?.role === 'admin' || $user?.permissions?.workspace?.models}
+-							<a
+-								draggable="false"
+-								aria-current={activeWorkspaceSection === 'models' ? 'page' : null}
+-								class="min-w-fit px-1 text-sm inline-flex items-center gap-1 {activeWorkspaceSection ===
+-								'models'
+-									? 'text-gray-900 dark:text-gray-100'
+-									: 'text-gray-300 dark:text-gray-600 hover:text-gray-700 dark:hover:text-white'} transition select-none"
+-								href="/workspace/models"
+-							>
+-								<span>{$i18n.t('Models')}</span>
+-								<span class="text-sm opacity-60">
+-									{formatCount($workspaceCounts.models)}
+-								</span>
+-							</a>
+-						{/if}
+-
+-						{#if $user?.role === 'admin' || $user?.permissions?.workspace?.knowledge}
+-							<a
+-								draggable="false"
+-								aria-current={activeWorkspaceSection === 'knowledge' ? 'page' : null}
+-								class="min-w-fit px-1 text-sm inline-flex items-center gap-1 {activeWorkspaceSection ===
+-								'knowledge'
+-									? 'text-gray-900 dark:text-gray-100'
+-									: 'text-gray-300 dark:text-gray-600 hover:text-gray-700 dark:hover:text-white'} transition select-none"
+-								href="/workspace/knowledge"
+-							>
+-								<span>{$i18n.t('Knowledge')}</span>
+-								<span class="text-sm opacity-60">
+-									{formatCount($workspaceCounts.knowledge)}
+-								</span>
+-							</a>
+-						{/if}
+-
+-						{#if $user?.role === 'admin' || $user?.permissions?.workspace?.prompts}
+-							<a
+-								draggable="false"
+-								aria-current={activeWorkspaceSection === 'prompts' ? 'page' : null}
+-								class="min-w-fit px-1 text-sm inline-flex items-center gap-1 {activeWorkspaceSection ===
+-								'prompts'
+-									? 'text-gray-900 dark:text-gray-100'
+-									: 'text-gray-300 dark:text-gray-600 hover:text-gray-700 dark:hover:text-white'} transition select-none"
+-								href="/workspace/prompts"
+-							>
+-								<span>{$i18n.t('Prompts')}</span>
+-								<span class="text-sm opacity-60">
+-									{formatCount($workspaceCounts.prompts)}
+-								</span>
+-							</a>
+-						{/if}
+-
+-						{#if $user?.role === 'admin' || $user?.permissions?.workspace?.skills}
+-							<a
+-								draggable="false"
+-								aria-current={activeWorkspaceSection === 'skills' ? 'page' : null}
+-								class="min-w-fit px-1 text-sm inline-flex items-center gap-1 {activeWorkspaceSection ===
+-								'skills'
+-									? 'text-gray-900 dark:text-gray-100'
+-									: 'text-gray-300 dark:text-gray-600 hover:text-gray-700 dark:hover:text-white'} transition select-none"
+-								href="/workspace/skills"
+-							>
+-								<span>{$i18n.t('Skills')}</span>
+-								<span class="text-sm opacity-60">
+-									{formatCount($workspaceCounts.skills)}
+-								</span>
+-							</a>
+-						{/if}
+-
+-						{#if $config?.features?.enable_plugins && ($user?.role === 'admin' || $user?.permissions?.workspace?.tools)}
+-							<a
+-								draggable="false"
+-								aria-current={activeWorkspaceSection === 'tools' ? 'page' : null}
+-								class="min-w-fit px-1 text-sm inline-flex items-center gap-1 {activeWorkspaceSection ===
+-								'tools'
+-									? 'text-gray-900 dark:text-gray-100'
+-									: 'text-gray-300 dark:text-gray-600 hover:text-gray-700 dark:hover:text-white'} transition select-none"
+-								href="/workspace/tools"
+-							>
+-								<span>{$i18n.t('Tools')}</span>
+-								<span class="text-sm opacity-60">
+-									{formatCount($workspaceCounts.tools)}
+-								</span>
+-							</a>
+-						{/if}
+-					</div>
+-
+-					<div class="ml-auto flex shrink-0 items-center gap-1">
+-						<SplitCreateButton actions={visibleActions} />
+-					</div>
+-				</div>
+-
+-				<!-- <div class="flex items-center text-xl font-normal">{$i18n.t('Workspace')}</div> -->
+-			</div>
+-		</nav>
++		<header data-ees-source-workspace-heading class="h-12 shrink-0 flex items-center px-4 border-b border-gray-200 gap-2"><h1 class="font-semibold flex-1">{$i18n.t(({models:'EES.Nav.Models',knowledge:'EES.Nav.Knowledge',prompts:'EES.Nav.Prompts',skills:'EES.Nav.Skills',tools:'EES.Nav.Connections'})[activeWorkspaceSection] || 'EES.Nav.Workspace',{defaultValue:'Workspace'})}</h1><SplitCreateButton actions={visibleActions}/></header>
+ 
+ 		<div
+ 			class="  pb-1 px-3 flex-1 min-w-0 max-h-full overflow-y-auto overflow-x-hidden"
 diff --git a/src/routes/+layout.svelte b/src/routes/+layout.svelte
 index cd832fd..49017b1 100644
 --- a/src/routes/+layout.svelte

@@ -5263,7 +5263,7 @@
         "test_ees_execution_ui.cjs"
       ],
       "node_tests": [
-        "Native conversation remains the original center DOM while the work panel mounts after it",
+        "legacy content uses only the source-supplied right slot without mutating Native nodes",
         "panel scroll restores per personal target and never writes a shared run selection",
         "unknown partial failed and excluded states never render completion",
         "read-only historical result blocks never permit input decisions"
@@ -5280,7 +5280,7 @@
         "test_ees_execution_ui.cjs"
       ],
       "node_tests": [
-        "Native conversation remains the original center DOM while the work panel mounts after it",
+        "legacy content uses only the source-supplied right slot without mutating Native nodes",
         "panel scroll restores per personal target and never writes a shared run selection",
         "unknown partial failed and excluded states never render completion",
         "read-only historical result blocks never permit input decisions"
@@ -5297,7 +5297,7 @@
         "test_ees_execution_ui.cjs"
       ],
       "node_tests": [
-        "Native conversation remains the original center DOM while the work panel mounts after it",
+        "legacy content uses only the source-supplied right slot without mutating Native nodes",
         "panel scroll restores per personal target and never writes a shared run selection",
         "unknown partial failed and excluded states never render completion",
         "read-only historical result blocks never permit input decisions"
@@ -5314,7 +5314,7 @@
         "test_ees_execution_ui.cjs"
       ],
       "node_tests": [
-        "Native conversation remains the original center DOM while the work panel mounts after it",
+        "legacy content uses only the source-supplied right slot without mutating Native nodes",
         "panel scroll restores per personal target and never writes a shared run selection",
         "unknown partial failed and excluded states never render completion",
         "read-only historical result blocks never permit input decisions"
@@ -5331,7 +5331,7 @@
         "test_ees_execution_ui.cjs"
       ],
       "node_tests": [
-        "Native conversation remains the original center DOM while the work panel mounts after it",
+        "legacy content uses only the source-supplied right slot without mutating Native nodes",
         "panel scroll restores per personal target and never writes a shared run selection",
         "unknown partial failed and excluded states never render completion",
         "read-only historical result blocks never permit input decisions"
@@ -5348,7 +5348,7 @@
         "test_ees_execution_ui.cjs"
       ],
       "node_tests": [
-        "Native conversation remains the original center DOM while the work panel mounts after it",
+        "legacy content uses only the source-supplied right slot without mutating Native nodes",
         "panel scroll restores per personal target and never writes a shared run selection",
         "unknown partial failed and excluded states never render completion",
         "read-only historical result blocks never permit input decisions"
@@ -5365,7 +5365,7 @@
         "test_ees_execution_ui.cjs"
       ],
       "node_tests": [
-        "Native conversation remains the original center DOM while the work panel mounts after it",
+        "legacy content uses only the source-supplied right slot without mutating Native nodes",
         "panel scroll restores per personal target and never writes a shared run selection",
         "unknown partial failed and excluded states never render completion",
         "read-only historical result blocks never permit input decisions"
@@ -5382,7 +5382,7 @@
         "test_ees_execution_ui.cjs"
       ],
       "node_tests": [
-        "Native conversation remains the original center DOM while the work panel mounts after it",
+        "legacy content uses only the source-supplied right slot without mutating Native nodes",
         "panel scroll restores per personal target and never writes a shared run selection",
         "unknown partial failed and excluded states never render completion",
         "read-only historical result blocks never permit input decisions"
@@ -5458,7 +5458,7 @@
     }
   },
   "javascript_migrations": {
-    "reason": "Integrated contract replaces legacy workflow/demo layouts. Each old module retains its safety categories in new unit fixtures, with real Native browser tests separately validating geometry and interactions.",
+    "reason": "Integrated contract replaces legacy workflow/demo layouts. Each old module retains its safety categories in new unit fixtures, with real Native browser tests separately validating geometry and interactions. Phase 2-1 replaces DOM-mounted layout with source-owned slots; renamed layout tests retain exact Native node ownership, independent panel visibility, private target scroll, cancel focus and draft preservation without hiding or moving Native DOM.",
     "old": {
       "test_ees_v4_layout.cjs": [
         "initial sidebar, open, close, detached refresh and route exit keep separate shell and panel lifecycles",
@@ -5508,8 +5508,8 @@
     },
     "new": {
       "test_ees_v4_layout.cjs": [
-        "Native conversation remains the original center DOM while the work panel mounts after it",
-        "closing or changing work mode preserves Native chat and the authoring mount boundary",
+        "legacy content uses only the source-supplied right slot without mutating Native nodes",
+        "panel visibility is source state and reset preserves source-owned mount boundary",
         "panel scroll restores per personal target and never writes a shared run selection",
         "confirmation dialog starts on cancel and Escape closure never accepts the command"
       ],

@@ -1,6 +1,6 @@
 # Team Agent POC
 
-현재 작업은 [2026-10-02 EES Work 통합 구현](docs/mockups/ees-work/TASK.md#integrated-work-20261002)이다. 왼쪽 작업 위치·탐색, 가운데 Native 대화, 오른쪽 업무/작성 패널을 변경 가능한 Figma 기준으로 구현한다. 기존 Native 인증·대화·첨부·모델 연결과 GitHub/Jira/Confluence의 실제 도구·개인 설정을 재사용한다. 새 설치는 데모 절차·전문 Assistant preset·등록 Skill 콘텐츠 없이 시작하며 ApplyDemo 재등록은 중지된다. 과거 조사/실패와 실제 사내 적용 상태는 [STATUS](docs/STATUS.md) 및 연결된 평가에 보존한다. 새 프로그램 준비를 실제 사내 적용 완료로 해석하지 않는다.
+현재 작업은 [#83 소스 화면 전환 2단계](docs/mockups/ees-work/TASK.md#source-phase2-20261013)다. 왼쪽 작업 위치·탐색, 가운데 Native 대화, 오른쪽 업무/작성 패널을 변경 가능한 Figma 기준으로 구현한다. 기존 Native 인증·대화·첨부·모델 연결과 GitHub/Jira/Confluence의 실제 도구·개인 설정을 재사용한다. 새 설치는 데모 절차·전문 Assistant preset·등록 Skill 콘텐츠 없이 시작하며 ApplyDemo 재등록은 중지된다. 과거 조사/실패와 실제 사내 적용 상태는 [STATUS](docs/STATUS.md) 및 연결된 평가에 보존한다. 새 프로그램 준비를 실제 사내 적용 완료로 해석하지 않는다.
 
 비개발자가 EES Workflow의 Chat UI에서 사내 문서와 업무 시스템을 활용하고, 관리자가 정한 공통 정책과 업무 처리 절차를 적용받는 플랫폼 POC입니다. 범용 대화·업무용 Prompt/Skill 공유를 유지하며 Open WebUI Native를 활용합니다. **공식 Open WebUI 패키지와 우리 프로젝트 래퍼** 두 구성으로 관리하며, 이 저장소는 사내 설정·Agent Pack과 Open WebUI 수정사항·빌드/적용 절차를 관리합니다. 기존 Python·호환 의존성을 재사용하고 데이터·키는 프로그램 변경과 분리합니다. [단순 유지보수 기준](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)과 실제 구현·적용 상태는 [STATUS](docs/STATUS.md)를 따릅니다.
 
@@ -23,7 +23,7 @@
 
 - **개발을 이어갈 GPT**: [AGENTS.md](AGENTS.md) → [현재 상태](docs/STATUS.md) → 해당 기능 파일과 테스트.
 - **설치·운영할 사람**: [환경 기준](versions.md)을 읽고, 최초 설치는 [설치·기동](docs/01-openwebui-install.md), 기존 EES 환경의 업데이트는 [래퍼 운영](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)에서 시작합니다.
-- **사내 ees.13 업데이트·첫 실제 업무**: [소스 프런트엔드 적용·실패 대응](docs/03-openwebui-native-agent.md#source-frontend-apply-20261013) → [도구 등록·게시·팀원 완료](docs/07-team-quickstart.md#first-work-20261012). GitHub 토큰이 없으면 [브라우저 ZIP 적용](docs/03-openwebui-native-agent.md#source-frontend-local-zip-20261013)을 처음부터 사용합니다.
+- **1단계 적용 이력·첫 실제 업무**: [소스 프런트엔드 적용·실패 대응](docs/03-openwebui-native-agent.md#source-frontend-apply-20261013) → [도구 등록·게시·팀원 완료](docs/07-team-quickstart.md#first-work-20261012). GitHub 토큰이 없으면 [브라우저 ZIP 적용](docs/03-openwebui-native-agent.md#source-frontend-local-zip-20261013)을 처음부터 사용합니다.
 - **팀원 안내 초안**: [EES Workflow 시작 안내](docs/07-team-quickstart.md) — 팀 시연용 준비본. 실제 전달 상태는 STATUS에서 확인.
 - **권한별 메뉴와 Open WebUI 왕복**: [메뉴 사용 안내](docs/03-openwebui-native-agent.md#menu-integration-20261006) · [C18 PR 1 구현 계약](docs/mockups/ees-work/TASK.md#merge-ui-20261011). EES 작성 권한과 원래 Open WebUI 권한을 구분하며 작성 중인 내용을 같은 로그인 세션에서 보존합니다.
 - **시스템 담당자 작성·게시**: [v1.1 권한/보존 계약](docs/mockups/ees-work/TASK.md#system-authoring-20260924) → [가입·첫 이용·P 작성 안내](docs/07-team-quickstart.md#system-authoring-20260924) · [관리자 운영/복원/세션 경계](docs/03-openwebui-native-agent.md#system-authoring-20260924) · [SA/NU·사내 OP 평가](evals/scenarios.md#system-authoring-20260924). Native 개인 계정/그룹을 사용하고 담당 시스템의 선택 P만 저장·검사·게시합니다. 기존 업무 이용/실행/개인 자료 권한은 별도이며 A안 화면을 재사용합니다.

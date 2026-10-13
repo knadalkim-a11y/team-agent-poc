@@ -289,6 +289,51 @@ class ReleaseTests(unittest.TestCase):
         self.assertEqual((self.target / "agent-pack/skill.md").read_bytes(), b"synthetic skill\n")
         self.assertEqual(len(list(p for p in self.target.rglob("*") if p.is_file())), len(self.members) + 1)
 
+    def test_legacy_indented_and_compact_manifests_keep_identical_validation(self):
+        for label, options in (("legacy", {"indent": 2}), ("compact", {"separators": (",", ":")})):
+            with self.subTest(format=label):
+                self.prepare_members()
+                nested = (json.dumps(self.manifest["branding"], **options) + "\n").encode("utf-8")
+                self.members["branding/manifest.json"] = nested
+                self.write_bundle()
+                self.members["manifest.json"] = (json.dumps(self.manifest, **options) + "\n").encode("utf-8")
+                with zipfile.ZipFile(self.bundle, "w") as archive:
+                    for name, content in self.members.items():
+                        archive.writestr(name, content)
+                self.assertEqual(release.validate_bundle(self.bundle, COMMIT), self.manifest)
+                target = self.root / label
+                release.extract_bundle(self.bundle, COMMIT, target)
+                self.assertEqual((target / "branding/manifest.json").read_bytes(), nested)
+                self.assertEqual((target / "manifest.json").read_bytes(), self.members["manifest.json"])
+
+    def test_outer_and_nested_manifest_exact_byte_limit_and_duplicate_guard(self):
+        self.assertEqual(release.MAX_JSON_BYTES, 1024 * 1024)
+        for nested in (False, True):
+            for extra in (0, 1):
+                with self.subTest(nested=nested, extra_byte=extra):
+                    self.prepare_members()
+                    if nested:
+                        raw = self.members["branding/manifest.json"]
+                        self.members["branding/manifest.json"] = raw + b" " * (release.MAX_JSON_BYTES + extra - len(raw))
+                    self.write_bundle()
+                    raw = json.dumps(self.manifest).encode("utf-8")
+                    if not nested:
+                        raw += b" " * (release.MAX_JSON_BYTES + extra - len(raw))
+                    with zipfile.ZipFile(self.bundle, "w") as archive:
+                        for name, content in self.members.items():
+                            archive.writestr(name, content)
+                        archive.writestr("manifest.json", raw)
+                    if extra:
+                        with self.assertRaises(release.ReleaseError):
+                            release.extract_bundle(self.bundle, COMMIT, self.target)
+                        self.assertFalse(self.target.exists())
+                    else:
+                        self.assertEqual(release.validate_bundle(self.bundle, COMMIT), self.manifest)
+        for raw in (b'{"schema_version":1,"schema_version":1}',
+                    b'{\n  "schema_version": 1,\n  "schema_version": 1\n}'):
+            with self.subTest(raw=raw), self.assertRaises(release.ReleaseError):
+                release._json(raw)
+
     def test_invalid_zip_paths_duplicates_and_links_fail_before_extraction(self):
         for name in ("../escape.py", "/absolute.py", "dir\\escape.py", "dir/../escape.py", "dir//escape.py",
                      "dir/CON.txt", "dir/file:stream", "dir/trailing. ", "Agent-Pack/Skill.md", "manifest.json"):

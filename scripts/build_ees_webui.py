@@ -22,6 +22,7 @@ from zipfile import ZIP_DEFLATED, BadZipFile, ZipFile, ZipInfo
 UPSTREAM_VERSION = "0.11.3"
 VERSION = "0.11.3+ees.14"
 SOURCE_FRONTEND_REQUIRED = True
+MAX_MANIFEST_BYTES = 1024 * 1024
 PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6", "0.11.3+ees.7": "_ees7", "0.11.3+ees.8": "_ees8", "0.11.3+ees.9": "_ees9", "0.11.3+ees.10": "_ees10", "0.11.3+ees.11": "_ees11", "0.11.3+ees.12": "_ees12", "0.11.3+ees.13": "_ees13", "0.11.3+ees.14": "_ees14"}
 SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
 SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
@@ -596,7 +597,12 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR, frontend_dir=No
                 "source_frontend": frontend_manifest,
             }
             manifest_file = Path(temporary) / "manifest.json"
-            manifest_file.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+            # Preserve the full provenance/inventory schema while staying under
+            # the unchanged deployment parser bound. Reject before publishing.
+            manifest_bytes = (json.dumps(manifest, separators=(",", ":"), ensure_ascii=False) + "\n").encode("utf-8")
+            if len(manifest_bytes) > MAX_MANIFEST_BYTES:
+                raise ValueError("Branding manifest exceeds the supported 1 MiB size.")
+            manifest_file.write_bytes(manifest_bytes)
             # Hard links publish complete files without overwriting a racing build.
             os.link(built, wheel_target)
             try:

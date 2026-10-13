@@ -621,6 +621,30 @@ class BrandingBuildTests(unittest.TestCase):
         self.assertEqual(first["source"]["sha256"], self.source_hash)
         self.assertEqual(first["wheel"]["sha256"], builder.sha256_file(self.root / "first" / builder.WHEEL_FILENAME))
 
+    def test_manifest_byte_budget_preserves_nested_inventory_before_publication(self):
+        from scripts import ees_deploy_release as release
+        self.assertEqual(builder.MAX_MANIFEST_BYTES, release.MAX_JSON_BYTES)
+        self.assertEqual(builder.MAX_MANIFEST_BYTES, 1024 * 1024)
+        self.frontend_manifest["note"] = "한" + "x" * 1000000
+        manifest_path = self.frontend_dir / "manifest.json"
+        manifest_path.write_text(json.dumps(self.frontend_manifest, ensure_ascii=False), encoding="utf-8")
+        measured = self.build("measure-limit", refresh_frontend=False)
+        size = (self.root / "measure-limit" / "manifest.json").stat().st_size
+        self.frontend_manifest["note"] += "x" * (builder.MAX_MANIFEST_BYTES - size)
+        manifest_path.write_text(json.dumps(self.frontend_manifest, ensure_ascii=False), encoding="utf-8")
+        expected = self.build("at-limit", refresh_frontend=False)
+        raw = (self.root / "at-limit" / "manifest.json").read_bytes()
+        self.assertEqual(len(raw), builder.MAX_MANIFEST_BYTES)
+        self.assertEqual(release._json(raw), expected)
+        self.assertEqual(expected["source_frontend"], self.frontend_manifest)
+        self.assertEqual(expected["changed_files"], measured["changed_files"])
+        assert_record(self, self.root / "at-limit" / builder.WHEEL_FILENAME)
+        self.frontend_manifest["note"] += "x"
+        manifest_path.write_text(json.dumps(self.frontend_manifest, ensure_ascii=False), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "Branding manifest exceeds"):
+            self.build("over-limit", refresh_frontend=False)
+        self.assertEqual(list((self.root / "over-limit").iterdir()), [])
+
     def test_added_figma_icons_are_packaged_and_missing_source_fails_closed(self):
         # Independent approved Figma inventory: do not derive the expectation
         # from the builder list whose omission caused the original failure.

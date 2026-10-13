@@ -1,0 +1,140 @@
+test_easy_request_choices_missing_output_and_legacy_time_values_roundtrip (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_easy_request_choices_missing_output_and_legacy_time_values_roundtrip) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 467.12621099868556, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 203.26857599866344, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_help_keyboard_escape_and_questions_fill_native_composer_without_sending (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_help_keyboard_escape_and_questions_fill_native_composer_without_sending) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 163.06404300121358, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_missing_random_uuid_creates_and_saves_draft_in_native_ui (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_missing_random_uuid_creates_and_saves_draft_in_native_ui) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 158.14869300083956, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_admin_dialog_contains_keyboard_focus (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_admin_dialog_contains_keyboard_focus) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 165.43917800299823, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_folder_uses_one_chat_and_preserves_draft_through_asset_navigation (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_folder_uses_one_chat_and_preserves_draft_through_asset_navigation) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 166.13360899646068, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_native_initial_changelog_keeps_focus_while_chat_startup_is_hidden (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_initial_changelog_keeps_focus_while_chat_startup_is_hidden) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 181.1913400015328, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 168.2735199938179, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 166.91939099837327, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_menu_missing_mount_and_direct_entry_keep_original_skills_search (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_missing_mount_and_direct_entry_keep_original_skills_search) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 193.83644899789942, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 166.65509800077416, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_native_menu_upload_in_flight_finishes_in_persistent_composer (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_upload_in_flight_finishes_in_persistent_composer) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 165.94328799692448, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_menu_uses_server_capabilities_for_admin_author_member_and_tools_only (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_uses_server_capabilities_for_admin_author_member_and_tools_only) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 181.74152400024468, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_personal_key_uses_original_valves_controls_and_theme (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_key_uses_original_valves_controls_and_theme) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 180.28074099856894, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_personal_settings_keep_original_tabs_and_close_controls (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_settings_keep_original_tabs_and_close_controls) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 188.5307959964848, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_shell_browser_back_preserves_draft_and_mobile_navigation (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_shell_browser_back_preserves_draft_and_mobile_navigation) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 164.3467169997166, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 159.437122005329, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 220.04195000045002, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_schedule_mouse_field_transition_keeps_focus_and_saves_both_values (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_schedule_mouse_field_transition_keeps_focus_and_saves_both_values) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 161.1548990040319, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_schedule_preview_save_publish_and_explicit_delegation_preserve_existing_cycle (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_schedule_preview_save_publish_and_explicit_delegation_preserve_existing_cycle) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 246.50934799865354, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+======================================================================
+FAIL: test_native_folder_uses_one_chat_and_preserves_draft_through_asset_navigation (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_folder_uses_one_chat_and_preserves_draft_through_asset_navigation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_figma_authoring_native.py", line 522, in test_native_folder_uses_one_chat_and_preserves_draft_through_asset_navigation
+    self.wait('document.querySelector(' + json.dumps(folder_button) + ')?.checkVisibility({visibilityProperty:true})')
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/ees_work_integrated_fixture.py", line 190, in wait
+    self.fail('Timed out: ' + expression + '\n' + self.text('body') + '\nUnknown routes:' + repr(self.server.unknown))
+AssertionError: Timed out: document.querySelector("#folder-source-folder-button")?.checkVisibility({visibilityProperty:true})
+Skip to main content
+E
+EES Workflow
+업무
+워크스페이스
+
+작업 위치
+
+공장
+전체 공장
+시스템
+EMS
+내 업무
+워크플로우 찾기
+실행 기록
+대화 기록
+
+업무
+
+운영
+셋업
+장애대응
+
+등록된 업무 절차가 없습니다.
+
+새 대화
+대화 검색
+Fixture Administrator
+대화
+참고
+일반 대화
+새 대화
+채팅 대화
+
+기존 질문
+
+Fixture AI
+
+기존 대화 기록
+
+
+
+
+음성 모드 사용
+내 업무
+닫기
+지금 처리할 내 업무가 없습니다
+작업
+새 대화 시작
+1969
+기존 대화
+1969.12.31.
+기존 대화
+1969.12.31.
+대화를 선택하여 미리 보기
+Unknown routes:[]
+
+======================================================================
+FAIL: test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_figma_authoring_native.py", line 228, in test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft
+    self.assertEqual(self.skills_roundtrip('procedure'), full_draft)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_figma_authoring_native.py", line 159, in skills_roundtrip
+    self.assert_reference_preserved(reference)
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_figma_authoring_native.py", line 85, in assert_reference_preserved
+    self.assertTrue(after.get('context_id'))
+AssertionError: None is not true
+
+======================================================================
+FAIL: test_native_shell_browser_back_preserves_draft_and_mobile_navigation (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_shell_browser_back_preserves_draft_and_mobile_navigation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_figma_authoring_native.py", line 747, in test_native_shell_browser_back_preserves_draft_and_mobile_navigation
+    self.assertEqual(self.read('#ew-procedure-name', 'value'), '브라우저 뒤로 가기 중인 미저장 절차')
+AssertionError: None != '브라우저 뒤로 가기 중인 미저장 절차'
+
+======================================================================
+FAIL: test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_figma_authoring_native.py", line 1133, in test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft
+    self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 20 tests in 58.642s
+
+FAILED (failures=4)

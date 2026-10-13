@@ -5,11 +5,14 @@
   if(window.__eesNativeWork)return;
   const {$,clone,esc,button,dialog,closeDialog}=workUI;
   const token=()=>{try{return localStorage.getItem('token') || '';}catch(_){return '';}};
+  const blankChatPath=path=>/^\/(?:folders\/[^/]+\/?)?$/.test(String(path || '').split('?')[0]);
   const chatId=()=>{const match=location.pathname.match(/^\/c\/([^/]+)\/?$/);return match?decodeURIComponent(match[1]):'';};
-  const available=()=>Boolean(token()&&!/^\/(auth|logout|workspace|admin)(\/|$)/.test(location.pathname)&&!adminNativePage()&&$('#chat-container #chat-pane')&&$('#sidebar-search-button'));
+  const source=()=>window.__eesSourceShellV1;
+  const screen=()=>source()?.screen?.() || {};
+  const available=()=>Boolean(token()&&screen().active&&!screen().native&&screen().chatReady);
   let state=null,identity='',epoch=0,serial=0,busy=false,scheduled=false,error='',commandError='',route='',readyRoute='',refreshTimer=null,uiTimer=null,uiRevision=0,restored=false,initialSelectionPatch=null;
   let procedureStart=null;
-  let nativeTicket=null,nativeNavigationBusy=false,nativeReturnTimer=null,pendingNativeAction=null;
+  let nativeTicket=null,nativeNavigationBusy=false,pendingNativeAction=null;
   let selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};
   const receipts=new Map(),optionCache=new Map(),chatCreations=new Map(),chatAliases=new Map();let workEpoch=0;let referenceChat='',referenceTimer=null,referenceRead=0,messageReferences=new Map();let uiWrites=Promise.resolve(),optionTimer=null,pendingInputProposal=null,reviewTimer=null,reviewSaving=null;
   const context=()=>JSON.stringify([epoch,token()===identity,location.pathname,location.search,selection.system_id,selection.factory_id,selection.workflow_id,selection.run_id,selection.job_id]);
@@ -19,29 +22,17 @@
   // A Native capability snapshot is not the selected workspace. Present the
   // returning editor only after its workspace and Native draft are ready.
   const chatPrepared=()=>readyRoute===route&&(!route||route===location.pathname+location.search+'#chat')&&(!nativeTicket||nativeTicket.phase==='leaving');
-  // The source app.html gate is armed only on the first authenticated chat load.
-  // Release after the complete initial EES layout, including authoring, succeeds.
-  // Errors before that point use its independent, bounded fail-open timer.
-  function startupReady(rendered){if(rendered===true&&chatPrepared()&&!nativePage()&&document.documentElement.dataset?.eesStartup==='pending')window.dispatchEvent(new Event('ees:startup-ready'));}
-  function render(){if(!nativePage()&&!chatPrepared()){view.suspend?.();return;}const rendered=view.render(snapshot());if(available()&&selection.mode==='author'&&selection.tab!=='workspace_admin'&&workCanCreate(state?.capabilities))designer.render({state,selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});startupReady(rendered);}
+  function render(){bindHosts();if(!nativePage()&&!chatPrepared()){view.render({...snapshot(),state:null});return;}view.render(snapshot());if(available()&&selection.mode==='author'&&selection.tab!=='workspace_admin'&&workCanCreate(state?.capabilities))designer.render({state,selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});}
   function setBusy(value){busy=value;view.setBusy(value);designer.setBusy?.(value);if(value){clearTimeout(refreshTimer);refreshTimer=setTimeout(refresh,250);}}
-  const adminNativePage=()=>location.pathname==='/'&&(new URLSearchParams(location.search).get('settings')?.startsWith('admin:')||Boolean(workNativeSettingsModal())||Boolean(nativeTicket?.adminSeen&&workNativeSettingsModal(true)));
-  const nativePage=()=>/^\/(workspace|admin)(\/|$)/.test(location.pathname)||adminNativePage();
-  const shellAvailable=()=>Boolean(token()&&nativePage()&&$('#sidebar-search-button'));
+  const adminNativePage=()=>Boolean(screen().admin);
+  const nativePage=()=>Boolean(screen().native);
+  const shellAvailable=()=>Boolean(token()&&screen().active&&nativePage());
   const screenAvailable=()=>available()||shellAvailable();
   const actor=()=>state?.capabilities?.actor_id || '';
   const nativeTicketIdentity=ticket=>ticket&&ticket===nativeTicket&&ticket.auth===token()&&ticket.auth===identity;
   const nativeTicketCurrent=ticket=>nativeTicketIdentity(ticket)&&Boolean(actor())&&ticket.actor===actor();
-  function clearNativeTicket(){clearTimeout(nativeReturnTimer);nativeReturnTimer=null;nativeTicket=null;}
-  function nativeAnchor(path){const link=document.createElement('a');link.href=path;document.body.append(link);try{link.click();}finally{link.remove();}}
-  function nativeAttachmentIssue(draft){
-    // Native's draft exporter omits type=image entries. Inspect only its current
-    // composer previews, never images in old messages or model profile icons.
-    const form=$('#chat-input')?.closest?.('form');
-    if(form?.querySelector('[data-cy="image"], [data-cy="image-unavailable"]'))return '첨부한 이미지는 이 화면에서 먼저 보내거나 제거한 뒤 열어 주세요. 작성 중인 내용은 유지됩니다.';
-    if(draft?.files?.some(file=>file.status==='uploading'))return '첨부 파일을 올리고 있습니다. 업로드가 끝난 뒤 열어 주세요. 작성 중인 내용은 유지됩니다.';
-    return '';
-  }
+  function clearNativeTicket(){nativeTicket=null;}
+  function nativeAnchor(path){return source()?.navigate?.(path);}
   async function openNative(id){
     const target=workNativeTargets.find(item=>item.id===id);
     if(!screenAvailable()||!actor()||!target||!workNativeAllowed(state?.capabilities,id))return;
@@ -51,21 +42,18 @@
       nativeAnchor(target.path);return;
     }
     const bridge=window.__eesNativeDraftV1,at=context(),auth=token(),owner=actor();
-    if(!bridge?.ready?.()||typeof bridge.flush!=='function')throw new Error('대화 입력창을 준비한 뒤 다시 열어 주세요. 작성 중인 내용은 유지됩니다.');
+    if(bridge?.persistent!==true||!bridge.ready?.()||typeof bridge.flush!=='function')throw new Error('대화 입력창을 준비한 뒤 다시 열어 주세요. 작성 중인 내용은 유지됩니다.');
     const draft=bridge.read();
     if(!draft||typeof draft!=='object'||Array.isArray(draft))throw new Error('작성 중인 대화 내용을 확인하지 못했습니다. 현재 화면에서 다시 시도해 주세요.');
-    const attachmentIssue=nativeAttachmentIssue(draft);if(attachmentIssue)throw new Error(attachmentIssue);
     view.capture();designer.readDraft?.();workUI.closeHelp({restoreFocus:false});
     const navigationOperation={};nativeNavigationBusy=navigationOperation;
     try{
       if(await bridge.flush()===false)throw new Error('작성 중인 대화를 보존하지 못했습니다. 현재 화면에서 다시 시도해 주세요.');
       if(at!==context()||auth!==token()||owner!==actor()||bridge!==window.__eesNativeDraftV1||!bridge.ready())return;
-      const latestAttachmentIssue=nativeAttachmentIssue(bridge.read());if(latestAttachmentIssue)throw new Error(latestAttachmentIssue);
-      if(JSON.stringify(bridge.read())!==JSON.stringify(draft))throw new Error('대화 내용이 바뀌었습니다. 현재 입력을 유지했으니 메뉴를 다시 열어 주세요.');
       designer.readDraft?.();view.capture();
       // The Native flush owns persistence. The return ticket and authoring
       // drafts stay in this document only; no token or new draft store is written.
-      nativeTicket={auth,actor:owner,path:location.pathname+location.search,selection:clone(selection),draft:clone(draft),target:id,name:target.name,phase:'leaving',interacted:false,restoring:false,adminSeen:false};
+      nativeTicket={auth,actor:owner,boundary:chatBoundary(),path:location.pathname+location.search,target:id,name:target.name,phase:'leaving',adminSeen:false};
       nativeAnchor(target.path);
     }finally{if(nativeNavigationBusy===navigationOperation)nativeNavigationBusy=false;}
   }
@@ -80,9 +68,8 @@
       action==='tools'&&selection.mode==='author'&&selection.tab==='tools'||
       action==='workspace_admin'&&selection.tab==='workspace_admin');
     pendingNativeAction={auth:token(),actor:actor(),path:ticket?.path || '/',dataset:{...target.dataset},same};
-    const modal=workNativeSettingsModal(true);
-    if(modal){const close=modal.querySelector('#settings-tabs-container > button');if(!close)return;close.click();}
-    if(ticket){ticket.phase='returning';ticket.interacted=false;}
+    source()?.closeSettings?.();
+    if(ticket)ticket.phase='returning';
     nativeAnchor(ticket?.path || '/');
   }
   async function resumeNativeAction(){
@@ -92,24 +79,13 @@
     if(pending.auth!==token()||pending.actor!==actor()||pending.path!==location.pathname+location.search||pending.same)return;
     await handleClick({dataset:pending.dataset});
   }
-  async function restoreNativeDraft(ticket){
-    if(!nativeTicketCurrent(ticket)||ticket.restoring||location.pathname+location.search!==ticket.path)return;
+  function resumeNativeView(ticket){
+    if(!nativeTicketCurrent(ticket)||location.pathname+location.search!==ticket.path)return;
     const bridge=window.__eesNativeDraftV1;
-    if(!available()||!bridge?.ready?.()){clearTimeout(nativeReturnTimer);nativeReturnTimer=setTimeout(schedule,100);return;}
-    const current=bridge.read();
-    if(!current||typeof current!=='object'||Array.isArray(current))return;
-    ticket.restoring=true;
-    try{
-      // Native normally reloads the flushed draft itself. Never import over
-      // an interaction after returning, or over different nonempty content.
-      if(!ticket.interacted&&JSON.stringify(current)!==JSON.stringify(ticket.draft)){
-        const hasContent=Boolean(current.prompt?.trim()||current.files?.length);
-        if(!hasContent&&nativeTicketCurrent(ticket)&&bridge===window.__eesNativeDraftV1&&bridge.ready()){
-          if(!await bridge.restore(JSON.stringify(ticket.draft)))throw new Error('대화 초안을 다시 표시하지 못했습니다. 입력창의 내용을 확인해 주세요.');
-        }
-      }
-    }catch(failure){if(nativeTicketCurrent(ticket)){commandError=failure.message;render();}}
-    finally{if(nativeTicketIdentity(ticket)){clearNativeTicket();render();resumeNativeAction().catch(failure=>{error=failure.message;render();});}}
+    // Source retains the same Chat instance. Flush only supports Native reload
+    // recovery; menu round trips never reimport or reconstruct its draft.
+    if(!available()||bridge?.persistent!==true||!bridge.ready?.())return;
+    clearNativeTicket();render();resumeNativeAction().catch(failure=>{error=failure.message;render();});
   }
   function syncNativeReturn(){
     const ticket=nativeTicket;
@@ -120,7 +96,7 @@
     if(!actor())return;
     if(nativePage()){
       if(ticket.phase==='leaving')ticket.phase='native';
-      if(adminNativePage()&&workNativeSettingsModal())ticket.adminSeen=true;
+      if(adminNativePage())ticket.adminSeen=true;
       return;
     }
     if(ticket.adminSeen&&ticket.phase!=='returning'){ticket.phase='returning';nativeAnchor(ticket.path);return;}
@@ -129,14 +105,12 @@
     if(ticket.phase==='native')ticket.phase='returning'; // Browser Back is also an explicit return.
     // The same SPA document kept private selection and designer state. Avoid
     // select(), whose normal work navigation deliberately closes the C starter.
-    restoreNativeDraft(ticket);
+    resumeNativeView(ticket);
   }
   async function api(path,body,signal){
-    const headers={Accept:'application/json',Authorization:'Bearer '+token()};if(body)headers['Content-Type']='application/json';
-    const response=await fetch('/api/ees-work/'+path,{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',headers,...(body?{body:JSON.stringify(body)}:{}),...(signal?{signal}:{})});
-    let result;try{result=await response.json();}catch(_){throw Object.assign(new Error('응답을 확인하지 못했습니다. 저장·실행 결과를 다시 조회해 주세요.'),{status:response.status});}
-    if(!response.ok||result?.ok===false){const detail=result.error || result.detail || {};throw Object.assign(new Error(detail.message || (typeof detail==='string'?detail:'요청을 완료하지 못했습니다. 권한과 입력을 확인해 주세요.')),{status:response.status,code:detail.code,result});}
-    return result;
+    const bridge=source();
+    if(typeof bridge?.request!=='function')throw new Error('업무 화면 연결을 준비한 뒤 다시 시도해 주세요.');
+    return bridge.request(path,body,signal);
   }
   async function operationsRead(query={}){const at=context();const result=await api('operations?'+new URLSearchParams(query));return at===context()?result:null;}
   async function operationsCommand(body){return sendCommand('operations',body);}
@@ -155,7 +129,7 @@
     let restored;helpWriting=true;try{restored=await bridge.restore(JSON.stringify(next));}finally{helpWriting=false;}
     if(at!==context()||auth!==token()||window.__eesNativeDraftV1!==bridge)throw new Error('대화 위치가 바뀌었습니다. 현재 입력창의 질문을 확인해 주세요.');
     if(!restored)throw new Error('질문을 입력창에 넣지 못했습니다. 작성 중인 내용은 그대로입니다.');
-    $('#chat-input')?.focus?.({preventScroll:true});return true;
+    source()?.focusComposer?.();return true;
   }
   async function read(query={}){const at=context();const result=await api('workspace?'+new URLSearchParams(Object.entries(query).filter(([,value])=>value!==undefined&&value!==null)));if(at!==context())return null;return result;}
   function normalized(result){
@@ -185,7 +159,7 @@
       if(at!==context()||n!==serial||!screenAvailable())return null;
       if(!restored){restored=true;uiRevision=Math.max(uiRevision,result.ui_state?.revision || 0);const saved=result.ui_state?.state?.selection,explicit=initialSelectionPatch;initialSelectionPatch=null;if(saved&&typeof saved==='object')selection={...selection,...saved,...explicit};if(!selection.system_id)selection.system_id=(result.systems?.[0]?.id || result.systems?.[0] || '');if(explicit)remember(explicit.panel_width ?? null);if(at!==context())return refresh();}
       if(nativePage()){state=normalized({...result,operations:state?.operations || {}});error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
-      let operations={};try{operations=await api('operations?'+new URLSearchParams({system_id:selection.system_id,run_id:selection.run_id}));}catch(failure){operations={error:failure.message};}if(at!==context()||n!==serial)return null;uiRevision=Math.max(uiRevision,result.ui_state?.revision ?? uiRevision);let legacy;if(selection.tab==='records'){try{legacy=await api('legacy');}catch(failure){legacy={error:failure.message};}if(at!==context()||n!==serial)return null;}state=normalized({...result,operations,legacy});if(selection.mode==='author'&&!workCanWorkspace(state.capabilities)){selection={...selection,mode:'work',tab:'my_work'};}error='';readyRoute=route;render();loadOptions();
+      let operations={};try{operations=await api('operations?'+new URLSearchParams({system_id:selection.system_id,run_id:selection.run_id}));}catch(failure){operations={error:failure.message};}if(at!==context()||n!==serial)return null;uiRevision=Math.max(uiRevision,result.ui_state?.revision ?? uiRevision);let legacy;if(selection.tab==='records'){try{legacy=await api('legacy');}catch(failure){legacy={error:failure.message};}if(at!==context()||n!==serial)return null;}state=normalized({...result,operations,legacy});if(selection.mode==='author'&&!workCanWorkspace(state.capabilities)){selection={...selection,mode:'work',tab:'my_work'};}error='';readyRoute=route;syncNativeReturn();render();loadOptions();
       const active=Object.values(state.run?.jobs || {}).some(job=>job.status==='running')||(state.operations?.scope_runs || []).some(scope=>['queued','running'].includes(scope.status))||(state.operations?.requests || []).some(request=>['requested','accepted','running','reported_complete'].includes(request.state));refreshTimer=setTimeout(refresh,active||busy?2500:30000);
       return state;
     }catch(failure){if(at!==context()||n!==serial)return null;error=failure.message;state=null;readyRoute=route;render();return null;}
@@ -226,7 +200,7 @@
     const response=await fetch('/api/models',{headers,credentials:'same-origin',cache:'no-store'});if(!response.ok)throw new Error('사용 가능한 모델을 조회하지 못했습니다.');
     const result=await response.json();if(auth!==token()||auth!==identity)return [];
     const list=(result.data || []).filter(model=>model.id&&!model.direct&&model.type!=='embedding').map(model=>({id:model.id,name:model.name || model.id}));
-    document.body.dataset.eesModelCount=String(Math.min(list.length,2));return list;
+    source()?.modelCount?.(list.length);return list;
   }
   function optionContext(){
     const run=state?.run,node=run?.definition?.nodes?.[selection.job_id];
@@ -335,7 +309,7 @@
     const document=clone(result);
     if(jobId){const job=document.run.jobs?.[jobId];if(!job)throw new Error('내보낼 결과를 확인하지 못했습니다.');document.run.attempts=(document.run.attempts || []).filter(attempt=>attempt.id===job.current_attempt&&attempt.job_id===jobId);document.run.jobs={[jobId]:job};}
     const contents=format==='json'?JSON.stringify(document,null,2):workExportText(document),blob=new Blob([contents],{type:format==='json'?'application/json;charset=utf-8':'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),link=window.document.createElement('a');
-    link.href=url;link.download='ees-work-'+runId.replace(/[^a-zA-Z0-9_-]/g,'_')+(jobId?'-result':'')+(format==='json'?'.json':'.txt');window.document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    link.href=url;link.download='ees-work-'+runId.replace(/[^a-zA-Z0-9_-]/g,'_')+(jobId?'-result':'')+(format==='json'?'.json':'.txt');source()?.hosts?.()?.overlays?.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   async function openLegacy(id){
     const at=context(),legacy=await api('legacy?'+new URLSearchParams({case_id:id}));if(at!==context())return;
@@ -374,6 +348,8 @@
   }
   async function handleClick(target){
     const action=target.dataset.action;if(!action)return;
+    if(action==='panel_width'){const width=Number(target.dataset.width);if(Number.isFinite(width)){selection.panel_width=Math.max(400,Math.min(720,Math.round(width)));if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:selection.panel_width};remember(selection.panel_width);render();}return;}
+    if(action==='category'){const value=target.dataset.category;if(!Object.hasOwn(workUI.categories,value))return;const collapsed=new Set(selection.collapsed || []);if(target.dataset.open==='true')collapsed.delete(value);else collapsed.add(value);selection.collapsed=[...collapsed];remember();return;}
     if(action==='procedure_question'){
       const current=designer.readStartContext?.(),index=Number(target.dataset.questionIndex),question=workUI.procedureQuestions[index];
       if(!current||!Number.isInteger(index)||!question||selection.mode!=='author')return;
@@ -387,7 +363,7 @@
     if(action==='save_review_draft')return saveReviewDraft();
     if(action==='workflow_records')return select({tab:'records',job_id:'',records_workflow:selection.workflow_id});
     if(action==='all_records')return select({tab:'records',records_workflow:'',workflow_id:'',run_id:'',job_id:''});
-    if(action==='ask_record'){const run=state?.run,attempts=(run?.attempts || []).filter(attempt=>!target.dataset.jobId||attempt.job_id===target.dataset.jobId).slice().sort((a,b)=>String(a.created_at || '').localeCompare(String(b.created_at || ''))||a.number-b.number),attempt=target.dataset.attemptId?attempts.find(item=>item.id===target.dataset.attemptId):attempts.at(-1);if(!run||!attempt)throw new Error('참고할 당시 실행 기록이 없습니다.');selection.chat_reference={kind:'workspace',reference_kind:'historical',workflow_id:run.workflow_id,run_id:run.id,job_id:attempt.job_id,attempt_id:attempt.id,version:run.version,result_revision:attempt.number,created_at:attempt.created_at,revision:run.revision,system_id:run.system_id,factory_id:run.factory_id};remember();render();$('#chat-input')?.focus();return;}
+    if(action==='ask_record'){const run=state?.run,attempts=(run?.attempts || []).filter(attempt=>!target.dataset.jobId||attempt.job_id===target.dataset.jobId).slice().sort((a,b)=>String(a.created_at || '').localeCompare(String(b.created_at || ''))||a.number-b.number),attempt=target.dataset.attemptId?attempts.find(item=>item.id===target.dataset.attemptId):attempts.at(-1);if(!run||!attempt)throw new Error('참고할 당시 실행 기록이 없습니다.');selection.chat_reference={kind:'workspace',reference_kind:'historical',workflow_id:run.workflow_id,run_id:run.id,job_id:attempt.job_id,attempt_id:attempt.id,version:run.version,result_revision:attempt.number,created_at:attempt.created_at,revision:run.revision,system_id:run.system_id,factory_id:run.factory_id};remember();render();source()?.focusComposer?.();return;}
     if(action==='apply_input_proposal')return applyInputProposal();
     if(action==='discard_input_proposal'){pendingInputProposal=null;render();return;}
     if(action==='export_json'||action==='export_text'||action==='export_result'){if(action==='export_result'&&!workUI.finished(state?.run)&&state?.run?.jobs?.[selection.job_id]?.can_decide!==false&&!await saveReviewDraft())return;return downloadRun(action==='export_json'?'json':'text',action==='export_result'?target.dataset.jobId:'');}
@@ -417,8 +393,8 @@
     if(action==='native_open')return openNative(target.dataset.nativeId);
     if(action==='procedures'){if(!workCanCreate(state?.capabilities))return;return select({mode:'author',tab:'overview',workflow_id:'',run_id:'',job_id:''});}
     if(action==='tools'){if(!workCanCreate(state?.capabilities))return;return select({mode:'author',tab:'tools',workflow_id:'',run_id:'',job_id:''});}
-    if(action==='new_chat'){$('#sidebar-new-chat-button')?.click();return;}
-    if(action==='chats'){$('#sidebar-search-button')?.click();return;}
+    if(action==='new_chat'){return source()?.newChat?.();}
+    if(action==='chats')return select({mode:'work',tab:'chats'},{fetch:false});
     if(action==='find')return dialog({title:'워크플로우 찾기',html:`<input id="ees-workflow-search" type="search" placeholder="업무 절차 검색" aria-label="업무 절차 검색"><div id="ees-workflow-list">${(state?.workflows || []).map(w=>button(w.name,'find_workflow',`data-workflow-id="${esc(w.id)}"`)).join('') || '<p>등록된 업무 절차가 없습니다.</p>'}</div>`});
     if(action==='find_workflow'){closeDialog();return select({workflow_id:target.dataset.workflowId,run_id:'',job_id:'',mode:'work',tab:'overview',panel_open:true});}
     if(action==='start_run'){
@@ -450,12 +426,12 @@
     if(action==='approve_request'||action==='reconcile_request'){if(busy)return;setBusy(true);try{await operationsCommand({action:action==='approve_request'?'request_approve':'request_reconcile',external_request_id:target.dataset.requestId,expected_revision:Number(target.dataset.requestRevision)});await refresh();}finally{setBusy(false);}return;}
     if(action==='close_run'||action==='cancel_run'){const at=context(),run=state.run;let reason='';const pending=dialog({title:action==='close_run'?'이 진행 건을 종료할까요?':'이 진행 건을 취소할까요?',html:'<p>종료 후에는 이 진행 건의 당시 버전과 기록을 읽기 전용으로 보존합니다.</p>'+(action==='cancel_run'?'<label>취소 이유<input id="ees-cancel-reason" required></label>':''),confirmLabel:action==='close_run'?'진행 건 종료':'진행 건 취소'});$('#ees-cancel-reason')?.addEventListener('input',event=>{reason=event.target.value;});if(await pending&&at===context())return mutate({action,run_id:run.id,expected_revision:run.revision,...(reason?{reason}:{})});}
   }
+  async function sourceAction(dataset){
+    if(!dataset||typeof dataset!=='object')return;
+    try{if(nativePage()&&!['native_open','refresh','category'].includes(dataset.action)){returnFromNative({dataset});return;}return await handleClick({dataset});}
+    catch(failure){error=failure.message;render();}
+  }
   function handleEvent(event){
-    if(nativeTicket&&event.isTrusted&&['input','change','click','keydown'].includes(event.type)&&event.target?.closest?.('#chat-container')){
-      if(nativeTicket.phase==='leaving'&&location.pathname+location.search===nativeTicket.path)clearNativeTicket();
-      else if(nativeTicket.phase==='returning'||nativeTicket.phase==='native'&&!nativePage())nativeTicket.interacted=true;
-    }
-    if(view.layoutEvent?.(event))return;
     const author=designer.handleEvent?.(event);if(author?.handled){if(author.preventDefault)event.preventDefault();return;}
     const target=event.target;if(event.type==='submit'&&target.closest?.('[data-ees-work]')){event.preventDefault();return;}if(event.type==='keydown'&&event.repeat&&target.closest?.('[data-mutation]')){event.preventDefault();event.stopImmediatePropagation();return;}if(!target?.closest?.('[data-ees-work]'))return;
     if(event.type==='click'){const buttonTarget=target.closest('button[data-action]');if(!buttonTarget||buttonTarget.disabled)return;event.preventDefault();if(nativePage()&&buttonTarget.closest('#ees-work-entry')&&!['native_open','refresh'].includes(buttonTarget.dataset.action)){returnFromNative(buttonTarget);return;}Promise.resolve(handleClick(buttonTarget)).catch(failure=>{error=failure.message;render();});}
@@ -470,14 +446,13 @@
     if(event.type==='change'&&target.matches?.('[data-item-verdict]')){const saved=state?.run?.jobs?.[selection.job_id];if(!saved||saved.can_decide===false||saved.decisions?.[target.dataset.itemId])return;const key=selection.run_id+'/'+selection.job_id+'/'+saved.attempt_id;selection.verdict_drafts ||= {};selection.verdict_drafts[key] ||= {};const option=target.selectedOptions?.[0];selection.verdict_drafts[key][target.dataset.itemId]={verdict:option?.dataset.verdict || target.value,...(option?.dataset.judgmentId?{judgment_id:option.dataset.judgmentId}:{})};remember();render();return;}
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
     if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}
-    if(event.type==='toggle'&&target.matches?.('[data-category]')){selection.collapsed=[...document.querySelectorAll('#ees-work-entry details:not([open])')].map(item=>item.dataset.category);remember();}
   }
-  function reset(){readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();document.querySelectorAll('.ees-work-message-reference').forEach(element=>element.remove());epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;delete document.body.dataset.eesModelCount;selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
+  function reset(){readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;source()?.modelCount?.(0);selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
   function sync(){
-    scheduled=false;const auth=token();if(auth!==identity){reset();identity=auth;route='';}
+    scheduled=false;bindHosts();const auth=token();if(auth!==identity){reset();identity=auth;route='';}
     syncNativeReturn();
     if(!screenAvailable()){
-      if(!auth||/^\/(auth|logout)(\/|$)/.test(location.pathname)){if(state||document.body.dataset.eesIntegrated)reset();}
+      if(!auth||/^\/(auth|logout)(\/|$)/.test(location.pathname)){if(state)reset();}
       else if(route){epoch++;serial++;clearTimeout(refreshTimer);clearTimeout(uiTimer);view.suspend?.();}
       route='';readyRoute='';return;
     }
@@ -487,25 +462,38 @@
       route=current;readyRoute='';epoch++;render();
       refresh().then(()=>resumeNativeAction()).catch(failure=>{error=failure.message;render();});
       if(available())models().catch(()=>{});
-    }else{if(nativePage()||chatPrepared())startupReady(view.sync(snapshot()));resumeNativeAction().catch(failure=>{error=failure.message;render();});}
+    }else{if(nativePage()||chatPrepared())view.sync(snapshot());resumeNativeAction().catch(failure=>{error=failure.message;render();});}
     if(available())syncMessageReferences();
   }
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(sync);}}
-  ['click','input','change','toggle','keydown','submit'].forEach(type=>document.addEventListener(type,handleEvent,true));
-  window.addEventListener('popstate',schedule);window.addEventListener('storage',event=>{if(event.key==='token')schedule();});
-  new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});
+  const boundHosts=new Set(),eventTypes=['click','input','change','toggle','keydown','submit'];
+  function bindHosts(){
+    const hosts=source()?.hosts?.() || {},current=new Set([hosts.panel,hosts.overlays].filter(Boolean));
+    for(const host of boundHosts)if(!current.has(host)){for(const type of eventTypes)host.removeEventListener(type,handleEvent,true);boundHosts.delete(host);}
+    for(const host of current)if(!boundHosts.has(host)){for(const type of eventTypes)host.addEventListener(type,handleEvent,true);boundHosts.add(host);}
+  }
+  // Source lifecycle explicitly publishes route/account/ready changes.
+  // No observer, document event interception or history monkey patch is needed.
+
   window.__eesNativeWork=true;
   const reference=()=>!chatPrepared()?{kind:'none'}:available()&&selection.mode==='author'&&(selection.tab==='tools'||designer.readStartContext?.())?{kind:'help',system_id:selection.system_id || '',context_id:context()}:available()&&selection.chat_reference&&selection.chat_reference.run_id===state?.run?.id?{...clone(selection.chat_reference),context_id:context()}:available()&&state&&selection.workflow_id?{kind:'workspace',workflow_id:selection.workflow_id,run_id:selection.run_id,job_id:selection.job_id,system_id:state?.run?.system_id || selection.system_id,factory_id:state?.run?.factory_id ?? selection.factory_id,version:state?.run?.version ?? state?.workflow?.published_version,workflow_revision:state?.workflow?.revision,attempt_id:state?.run?.jobs?.[selection.job_id]?.current_attempt,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,revision:state?.run?.revision ?? state?.workflow?.revision ?? 0,created_at:state?.run?.updated_at ?? state?.workflow?.updated_at,context_id:context()}:{kind:'none'};
+  const renderedReferenceHosts=new Set();
+  function clearMessageReferences(){for(const host of renderedReferenceHosts)host.replaceChildren();renderedReferenceHosts.clear();}
   function renderMessageReferences(){
     if(!chatId()||referenceChat!==chatId())return;
-    for(const [id,reference] of messageReferences){const message=document.getElementById?.('message-'+id);if(!message)continue;const html=workMessageReferenceHTML(reference,id);if(!html)continue;let chip=message.querySelector('.ees-work-message-reference');if(!chip){chip=document.createElement('div');chip.className='ees-work-message-reference';chip.dataset.eesWork='';message.append(chip);}if(chip.innerHTML!==html)chip.innerHTML=html;}
+    for(const host of renderedReferenceHosts)if(!host.isConnected)renderedReferenceHosts.delete(host);
+    for(const [id,reference] of messageReferences){
+      const host=source()?.referenceHost?.(id),html=workMessageReferenceHTML(reference,id);if(!host||!html)continue;
+      renderedReferenceHosts.add(host);if(host.innerHTML!==html)host.innerHTML=html;
+      if(!boundHosts.has(host)){for(const type of eventTypes)host.addEventListener(type,handleEvent,true);boundHosts.add(host);}
+    }
   }
   async function readMessageReferences(){
     referenceTimer=null;const id=chatId(),auth=token(),n=++referenceRead;if(!id||!available())return;
     try{const response=await fetch('/api/v1/chats/'+encodeURIComponent(id),{headers:{Accept:'application/json',Authorization:'Bearer '+auth},credentials:'same-origin',cache:'no-store'});if(!response.ok)throw new Error('Native 대화 참조 조회 실패');const result=await response.json();if(id!==chatId()||auth!==token()||n!==referenceRead)return;
       const messages=Object.values(result.chat?.history?.messages || {}),next=new Map();for(const message of messages){const ref=message.meta?.ees_work_reference;if(message.id&&ref?.kind==='workspace'&&ref.workflow_id)next.set(message.id,clone(ref));}
       referenceChat=id;messageReferences=next;renderMessageReferences();
-    }catch(_){if(id===chatId()&&auth===token()&&n===referenceRead){referenceChat=id;messageReferences.clear();document.querySelectorAll('.ees-work-message-reference').forEach(element=>element.remove());}}
+    }catch(_){if(id===chatId()&&auth===token()&&n===referenceRead){referenceChat=id;messageReferences.clear();clearMessageReferences();}}
   }
   function syncMessageReferences(){
     if(referenceChat!==chatId()){referenceChat=chatId();messageReferences.clear();clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;}
@@ -521,15 +509,25 @@
     return JSON.stringify([workEpoch,selection.mode,selection.system_id,selection.factory_id,selection.workflow_id,selection.run_id,selection.job_id,state?.run?.revision ?? state?.workflow?.revision ?? 0,draft?.revision,draft?.definition]);
   }
   function beginChatCreation(){
-    if(!available()||chatId()||location.pathname!=='/')return '';
-    const id=workUI.newId();chatCreations.set(id,{actor:token(),context_id:context(),boundary:chatBoundary()});
+    if(!available()||chatId()||!blankChatPath(location.pathname))return '';
+    const id=workUI.newId();chatCreations.set(id,{actor:token(),context_id:context(),path:location.pathname+location.search,boundary:chatBoundary()});
     while(chatCreations.size>8)chatCreations.delete(chatCreations.keys().next().value);return id;
   }
   function finishChatCreation(id,createdChatId){
     const captured=chatCreations.get(id);chatCreations.delete(id);
-    if(!captured||typeof createdChatId!=='string'||!createdChatId||captured.actor!==token()||captured.boundary!==chatBoundary()||(chatId()&&chatId()!==createdChatId)||(!chatId()&&location.pathname!=='/'))return;
+    const returning=nativeTicketCurrent(nativeTicket)&&blankChatPath(nativeTicket.path)&&nativeTicket.path===captured?.path;
+    if(!captured||typeof createdChatId!=='string'||!createdChatId||captured.actor!==token()||captured.boundary!==(returning?nativeTicket.boundary:chatBoundary())||(chatId()&&chatId()!==createdChatId)||(!chatId()&&!blankChatPath(location.pathname)&&!returning))return;
     chatAliases.set(captured.context_id,{...captured,chat_id:createdChatId});
     while(chatAliases.size>8)chatAliases.delete(chatAliases.keys().next().value);
+  }
+  function chatCreated(id){
+    // Only the source Chat calls this after accepting its own first-chat ID.
+    // A late completion may update the return destination without leaving Native.
+    const ticket=nativeTicket;
+    if(typeof id!=='string'||!id||id.length>200||/[/?#]/.test(id)||!nativeTicketCurrent(ticket)||!blankChatPath(ticket.path))return false;
+    const previous=ticket.path,next='/c/'+encodeURIComponent(id);ticket.path=next;
+    if(pendingNativeAction?.auth===ticket.auth&&pendingNativeAction.actor===ticket.actor&&pendingNativeAction.path===previous)pendingNativeAction.path=next;
+    return true;
   }
   function acceptNativeProposal(id,payload){
     if(id!==chatId()||!available()||selection.chat_reference)return {ok:false,code:'context_changed'};
@@ -541,6 +539,6 @@
     if(selection.mode==='author')designer.render({state,selection:{...clone(selection),chat_id:id},host:view.authoringHost()});
     return designer.acceptProposal(payload,{chatId:id});
   }
-  window.__eesNativeWorkV1=Object.freeze({refresh,open:()=>select({panel_open:true},{fetch:false}),selection:id=>id===chatId()?{ok:true,...reference()}:{ok:false,code:'selection_unconfirmed'},captureReference:()=>reference(),beginChatCreation,finishChatCreation,ensureChat:async()=>({ok:true}),refreshActionRecords:()=>{},propose:acceptNativeProposal,display:async(id,options)=>{if(id!==chatId()||!available())return {ok:false};const allowed=['panel_open','workflow_id','run_id','job_id'];if(Object.keys(options || {}).some(key=>!allowed.includes(key)))return {ok:false};const result=await select(options);if(!result||options.workflow_id&&result.workflow?.id!==options.workflow_id||options.run_id&&result.run?.id!==options.run_id||options.job_id&&!result.run?.definition?.nodes?.[options.job_id])return {ok:false};return {ok:true};}});
+  window.__eesNativeWorkV1=Object.freeze({sync:schedule,action:sourceAction,dismissHelp:workUI.dismissHelp,refresh,open:()=>select({panel_open:true},{fetch:false}),selection:id=>id===chatId()?{ok:true,...reference()}:{ok:false,code:'selection_unconfirmed'},captureReference:()=>reference(),chatCreated,beginChatCreation,finishChatCreation,ensureChat:async()=>({ok:true}),refreshActionRecords:()=>{},propose:acceptNativeProposal,display:async(id,options)=>{if(id!==chatId()||!available())return {ok:false};const allowed=['panel_open','workflow_id','run_id','job_id'];if(Object.keys(options || {}).some(key=>!allowed.includes(key)))return {ok:false};const result=await select(options);if(!result||options.workflow_id&&result.workflow?.id!==options.workflow_id||options.run_id&&result.run?.id!==options.run_id||options.job_id&&!result.run?.definition?.nodes?.[options.job_id])return {ok:false};return {ok:true};}});
   schedule();
 })();
