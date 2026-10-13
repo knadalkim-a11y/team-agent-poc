@@ -38,6 +38,28 @@ class WorkRouteTests(unittest.IsolatedAsyncioTestCase):
             'workflow_id':self.identifier,'expected_revision':self.revision,'context_id':'editor-context','model_id':'native-model',
             'prompt':'명확한 합성 절차로 제안해 줘',**extra})
 
+    async def test_helper_status_is_member_authenticated_read_only_and_never_cached(self):
+        from importlib import import_module
+        native = import_module(workflow.__package__ + '.ees_workflow_native')
+        status = AsyncMock(return_value={'ok': True, 'available': True, 'protocol': 1, 'model_id': 'selected-model'})
+        before = self.service.database.read_bytes()
+        with patch.object(native, 'help_chat_status', status):
+            unauthorized = await self.client.get('/api/ees-work/help/status?model_id=selected-model')
+            self.assertEqual(unauthorized.status_code, 401)
+            status.assert_not_awaited()
+            result = await self.client.get('/api/ees-work/help/status', headers={'Authorization': 'Bearer reader'},
+                params={'model_id': 'selected-model', 'system_id': 'EMS', 'chat_id': 'owned-chat'})
+            self.assertEqual(result.status_code, 200, result.text)
+            self.assertEqual(result.headers['cache-control'], 'no-store')
+            self.assertTrue(result.json()['available'])
+            self.assertEqual(status.await_args.args[1:], (self.users['reader'], 'selected-model', 'EMS', 'owned-chat'))
+            status.return_value = {'ok': True, 'available': False, 'protocol': 1, 'code': 'work_chat_access_denied',
+                                   'message': '업무 도우미를 사용할 수 없습니다.'}
+            result = await self.client.get('/api/ees-work/help/status', headers={'Authorization': 'Bearer reader'})
+            self.assertEqual(result.status_code, 200, result.text)
+            self.assertFalse(result.json()['available'])
+        self.assertEqual(self.service.database.read_bytes(), before)
+
     async def test_current_authenticated_actor_scope_applies_to_read_and_write(self):
         for headers,code in [({},401),({'Authorization':'Bearer reader'},403)]:
             result=await self.client.get('/api/ees-work/workspace?workflow_id='+self.identifier,headers=headers)

@@ -1,0 +1,7 @@
+test_empty_and_existing_guide_source_geometry (__main__.HelperDesignProbe.test_empty_and_existing_guide_source_geometry) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 466.3143880025018, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.139s
+
+OK

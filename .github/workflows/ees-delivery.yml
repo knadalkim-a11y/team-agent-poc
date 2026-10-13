@@ -51,6 +51,7 @@ on:
       - 'tests/test_ees_work_operations.py'
       - 'tests/test_ees_work_figma*'
       - 'tests/test_ees_source_shell_native.py'
+      - 'tests/test_ees_helper_chat_native.py'
       - 'tests/ees_source_frame_monitor.py'
       - 'tests/test_ees_work_history_reference.py'
       - 'tests/ees_work_integrated*.py'
@@ -447,7 +448,7 @@ jobs:
       - name: Start the actual CLI and verify browser writes, reload and restart
         id: product
         run: python tests/ees_work_integrated_app.py --wheel dist/branding/open_webui-0.11.3+ees.14-py3-none-any.whl --chrome "$(command -v google-chrome)" --output dist/ees-native-product
-      - name: Verify central Native chat with actual registered read and proposal tools
+      - name: Verify central Native chat and isolated helper with actual registered tools
         id: native_chat
         run: python tests/ees_work_native_chat.py --wheel dist/branding/open_webui-0.11.3+ees.14-py3-none-any.whl --chrome "$(command -v google-chrome)" --output dist/ees-native-product/central-chat
       - name: Record the successfully tested integration tree

@@ -1,0 +1,37 @@
+{
+  "scope": "actual built Native UI; synthetic account, permission response and model transport",
+  "completion_count": 1,
+  "status_requests": [
+    {
+      "model_id": "fixture-model",
+      "system_id": "EMS",
+      "chat_id": "existing-chat"
+    }
+  ],
+  "observed": {
+    "path": "/c/existing-chat",
+    "helperState": {
+      "busy": false,
+      "notice": ""
+    },
+    "draft": {
+      "prompt": "도움말과 별개인 개인 질문",
+      "files": [],
+      "selectedToolIds": [],
+      "selectedSkillIds": [],
+      "selectedFilterIds": [],
+      "imageGenerationEnabled": false,
+      "webSearchEnabled": false,
+      "codeInterpreterEnabled": false
+    },
+    "guideInChat": false,
+    "guideInPanel": false,
+    "references": [
+      "참고: 도구 작성 · Jira 조회"
+    ],
+    "helperLabels": [
+      "업\n업무 도우미"
+    ],
+    "horizontalOverflow": false
+  }
+}

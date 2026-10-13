@@ -1,0 +1,118 @@
+{
+  "old": {
+    "kind": "help",
+    "system_id": "EMS",
+    "context_id": "[3,true,\"/c/existing-chat\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]"
+  },
+  "frames": [
+    {
+      "at": 1061.6000000014901,
+      "reference": {
+        "kind": "none"
+      },
+      "helper": {
+        "busy": true,
+        "notice": ""
+      },
+      "label": "시스템APC"
+    },
+    {
+      "at": 1064.3999999985099,
+      "reference": {
+        "kind": "none"
+      },
+      "helper": {
+        "busy": true,
+        "notice": ""
+      },
+      "label": "시스템APC"
+    },
+    {
+      "at": 1081.1000000014901,
+      "reference": {
+        "kind": "none"
+      },
+      "helper": {
+        "busy": true,
+        "notice": ""
+      },
+      "label": "시스템APC"
+    },
+    {
+      "at": 1097,
+      "reference": {
+        "kind": "none"
+      },
+      "helper": {
+        "busy": true,
+        "notice": ""
+      },
+      "label": "시스템APC"
+    },
+    {
+      "at": 1113.6000000014901,
+      "reference": {
+        "kind": "none"
+      },
+      "helper": {
+        "busy": true,
+        "notice": ""
+      },
+      "label": "시스템APC"
+    },
+    {
+      "at": 1130.3000000044703,
+      "reference": {
+        "kind": "none"
+      },
+      "helper": {
+        "busy": true,
+        "notice": ""
+      },
+      "label": "시스템APC"
+    },
+    {
+      "at": 1146.8999999985099,
+      "reference": {
+        "kind": "none"
+      },
+      "helper": {
+        "busy": true,
+        "notice": ""
+      },
+      "label": "시스템APC"
+    },
+    {
+      "at": 1163.7000000029802,
+      "reference": {
+        "kind": "none"
+      },
+      "helper": {
+        "busy": true,
+        "notice": ""
+      },
+      "label": "시스템APC"
+    }
+  ],
+  "after": {
+    "reference": {
+      "kind": "none"
+    },
+    "helper": {
+      "busy": false,
+      "notice": ""
+    },
+    "draft": {
+      "prompt": "화면 이동 중에도 유지할 개인 질문",
+      "files": [],
+      "selectedToolIds": [],
+      "selectedSkillIds": [],
+      "selectedFilterIds": [],
+      "imageGenerationEnabled": false,
+      "webSearchEnabled": false,
+      "codeInterpreterEnabled": false
+    }
+  },
+  "completions": 0,
+  "unknown": []
+}

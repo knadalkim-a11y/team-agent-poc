@@ -17,7 +17,7 @@
   const receipts=new Map(),optionCache=new Map(),chatCreations=new Map(),chatAliases=new Map();let workEpoch=0;let referenceChat='',referenceTimer=null,referenceRead=0,messageReferences=new Map();let uiWrites=Promise.resolve(),optionTimer=null,pendingInputProposal=null,reviewTimer=null,reviewSaving=null;
   const context=()=>JSON.stringify([epoch,token()===identity,location.pathname,location.search,selection.system_id,selection.factory_id,selection.workflow_id,selection.run_id,selection.job_id]);
   const view=createWorkView({callbacks:{panelWidth:width=>{if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:width};selection.panel_width=width;remember(width);}}});
-  const designer=createWorkDesigner({callbacks:{command,read,models:models,askHelp,startContextChanged:value=>{procedureStart=value;if(state&&available()&&chatPrepared())view.sync(snapshot());},openWorkflow:async id=>select({workflow_id:id,run_id:'',job_id:'',mode:'author',tab:'overview'}),changed:refresh,navigate:mode=>select({mode}),operationsRead,operationsCommand,options:async body=>{const at=context();const result=await api('workspace/options',body);if(at!==context())throw new Error('작업 위치가 바뀌어 선택 목록을 적용하지 않았습니다.');return result;},resources:async()=>{const at=context();const result=await api('resources');return at===context()?result:null;},propose:async({signal,...body})=>{const at=context();const result=await api('workspace/proposal',body,signal);if(at!==context())throw new Error('작업 위치가 변경되어 제안을 적용하지 않았습니다.');return result;}}});
+  const designer=createWorkDesigner({callbacks:{command,read,models:models,askHelp,helpState:()=>source()?.helpState?.(),startContextChanged:value=>{procedureStart=value;if(state&&available()&&chatPrepared())view.sync(snapshot());},openWorkflow:async id=>select({workflow_id:id,run_id:'',job_id:'',mode:'author',tab:'overview'}),changed:refresh,navigate:mode=>select({mode}),operationsRead,operationsCommand,options:async body=>{const at=context();const result=await api('workspace/options',body);if(at!==context())throw new Error('작업 위치가 바뀌어 선택 목록을 적용하지 않았습니다.');return result;},resources:async()=>{const at=context();const result=await api('resources');return at===context()?result:null;},propose:async({signal,...body})=>{const at=context();const result=await api('workspace/proposal',body,signal);if(at!==context())throw new Error('작업 위치가 변경되어 제안을 적용하지 않았습니다.');return result;}}});
   const snapshot=()=>({state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null}:null,selection:{...clone(selection),chat_id:chatId()},native_shell:nativePage(),native_id:nativePage()?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:procedureStart});
   // A Native capability snapshot is not the selected workspace. Present the
   // returning editor only after its workspace and Native draft are ready.
@@ -114,22 +114,30 @@
   }
   async function operationsRead(query={}){const at=context();const result=await api('operations?'+new URLSearchParams(query));return at===context()?result:null;}
   async function operationsCommand(body){return sendCommand('operations',body);}
-  let helpWriting=false;
-  async function askHelp(question){
-    if(helpWriting)throw new Error('앞서 고른 질문을 입력창에 넣고 있습니다. 잠시 뒤 다시 시도해 주세요.');
-    if(typeof question!=='string'||!question.trim())throw new Error('대화창에 넣을 질문을 확인해 주세요.');
-    const at=context(),auth=token(),bridge=window.__eesNativeDraftV1;
-    if(!available()||!bridge?.ready?.())throw new Error('대화 입력창을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.');
-    const draft=bridge.read();
-    if(!draft||typeof draft!=='object'||Array.isArray(draft)||draft.prompt!==undefined&&typeof draft.prompt!=='string')throw new Error('작성 중인 대화 내용을 확인하지 못했습니다. 입력창에서 다시 시도해 주세요.');
-    const prompt=draft.prompt || '',next={...draft,prompt:prompt+(prompt?'\n\n':'')+question.trim()};
-    if(at!==context()||auth!==token()||window.__eesNativeDraftV1!==bridge||!bridge.ready())throw new Error('대화 위치가 바뀌었습니다. 현재 화면에서 다시 시도해 주세요.');
-    // Restore the complete current Native snapshot so attachments and selected
-    // tools/models survive. This hook changes a draft; it never submits it.
-    let restored;helpWriting=true;try{restored=await bridge.restore(JSON.stringify(next));}finally{helpWriting=false;}
-    if(at!==context()||auth!==token()||window.__eesNativeDraftV1!==bridge)throw new Error('대화 위치가 바뀌었습니다. 현재 입력창의 질문을 확인해 주세요.');
-    if(!restored)throw new Error('질문을 입력창에 넣지 못했습니다. 작성 중인 내용은 그대로입니다.');
-    source()?.focusComposer?.();return true;
+  let helpWriting=null;
+  function syncHelpState(){workUI.syncHelpState?.();designer.syncHelpState?.();}
+  async function askHelp(question,visible={}){
+    const bridge=source(),at=context(),auth=token();
+    if(helpWriting||bridge?.helpState?.()?.busy)throw new Error('앞선 답변을 마친 뒤 질문을 보내 주세요.');
+    if(typeof question!=='string'||!question.trim()||question.length>8000)throw new Error('대화에 보낼 질문을 확인해 주세요.');
+    if(!available()||!chatPrepared()||typeof bridge?.askHelp!=='function')throw new Error('업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.');
+    const reference={kind:'help',system_id:selection.system_id || '',context_id:at};
+    for(const [name,value,limit] of [['screen',visible.screen,200],['term_id',visible.term_id,100],['title',visible.title ?? visible.draftName,200]]){
+      if(value===undefined||value==='')continue;
+      if(typeof value!=='string'||value.length>limit)throw new Error('질문의 참고 정보를 확인해 주세요.');
+      reference[name]=value;
+    }
+    if(auth!==token()||at!==context()||bridge!==source())return false;
+    const operation={};helpWriting=operation;
+    try{
+      // Source Chat owns one real send. Never read, replace or restore the live
+      // composer; its text, attachments and selected assets stay untouched.
+      const result=await bridge.askHelp({question:question.trim(),reference:Object.freeze(reference)});
+      if(auth!==token()||at!==context()||bridge!==source())return false;
+      if(result?.accepted===false)return false; // Source already owns the one-line notice.
+      if(result?.accepted!==true)throw new Error('질문을 보내지 못했습니다. 업무 도우미 연결을 확인해 주세요.');
+      return true;
+    }finally{if(helpWriting===operation)helpWriting=null;syncHelpState();}
   }
   async function read(query={}){const at=context();const result=await api('workspace?'+new URLSearchParams(Object.entries(query).filter(([,value])=>value!==undefined&&value!==null)));if(at!==context())return null;return result;}
   function normalized(result){
@@ -351,9 +359,9 @@
     if(action==='panel_width'){const width=Number(target.dataset.width);if(Number.isFinite(width)){selection.panel_width=Math.max(400,Math.min(720,Math.round(width)));if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:selection.panel_width};remember(selection.panel_width);render();}return;}
     if(action==='category'){const value=target.dataset.category;if(!Object.hasOwn(workUI.categories,value))return;const collapsed=new Set(selection.collapsed || []);if(target.dataset.open==='true')collapsed.delete(value);else collapsed.add(value);selection.collapsed=[...collapsed];remember();return;}
     if(action==='procedure_question'){
-      const current=designer.readStartContext?.(),index=Number(target.dataset.questionIndex),question=workUI.procedureQuestions[index];
-      if(!current||!Number.isInteger(index)||!question||selection.mode!=='author')return;
-      return askHelp(question+'\n현재 화면: '+current.screen+(current.draftName?'\n초안 이름: '+current.draftName:''));
+      const current=designer.readStartContext?.(),index=Number(target.dataset.questionIndex),fallback=workUI.procedureQuestions[index];
+      if(!current||!Number.isInteger(index)||!fallback||selection.mode!=='author')return;
+      return askHelp(typeof target.dataset.question==='string'?target.dataset.question:fallback,current);
     }
     if(action==='open_reference')return openMessageReference(target.dataset.messageId);
     if(action==='propose_inputs')return proposeInputs();
@@ -447,9 +455,9 @@
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
     if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}
   }
-  function reset(){readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;source()?.modelCount?.(0);selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
+  function reset(){helpWriting=null;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;source()?.modelCount?.(0);selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
   function sync(){
-    scheduled=false;bindHosts();const auth=token();if(auth!==identity){reset();identity=auth;route='';}
+    scheduled=false;bindHosts();syncHelpState();const auth=token();if(auth!==identity){reset();identity=auth;route='';}
     syncNativeReturn();
     if(!screenAvailable()){
       if(!auth||/^\/(auth|logout)(\/|$)/.test(location.pathname)){if(state)reset();}
@@ -539,6 +547,6 @@
     if(selection.mode==='author')designer.render({state,selection:{...clone(selection),chat_id:id},host:view.authoringHost()});
     return designer.acceptProposal(payload,{chatId:id});
   }
-  window.__eesNativeWorkV1=Object.freeze({sync:schedule,action:sourceAction,dismissHelp:workUI.dismissHelp,refresh,open:()=>select({panel_open:true},{fetch:false}),selection:id=>id===chatId()?{ok:true,...reference()}:{ok:false,code:'selection_unconfirmed'},captureReference:()=>reference(),chatCreated,beginChatCreation,finishChatCreation,ensureChat:async()=>({ok:true}),refreshActionRecords:()=>{},propose:acceptNativeProposal,display:async(id,options)=>{if(id!==chatId()||!available())return {ok:false};const allowed=['panel_open','workflow_id','run_id','job_id'];if(Object.keys(options || {}).some(key=>!allowed.includes(key)))return {ok:false};const result=await select(options);if(!result||options.workflow_id&&result.workflow?.id!==options.workflow_id||options.run_id&&result.run?.id!==options.run_id||options.job_id&&!result.run?.definition?.nodes?.[options.job_id])return {ok:false};return {ok:true};}});
+  window.__eesNativeWorkV1=Object.freeze({sync:schedule,action:sourceAction,dismissHelp:workUI.dismissHelp,refresh,open:()=>select({panel_open:true},{fetch:false}),selection:id=>id===chatId()?{ok:true,...reference()}:{ok:false,code:'selection_unconfirmed'},captureReference:()=>reference(),helpContext:()=>available()&&chatPrepared()?{context_id:context(),system_id:selection.system_id || ''}:null,chatCreated,beginChatCreation,finishChatCreation,ensureChat:async()=>({ok:true}),refreshActionRecords:()=>{},propose:acceptNativeProposal,display:async(id,options)=>{if(id!==chatId()||!available())return {ok:false};const allowed=['panel_open','workflow_id','run_id','job_id'];if(Object.keys(options || {}).some(key=>!allowed.includes(key)))return {ok:false};const result=await select(options);if(!result||options.workflow_id&&result.workflow?.id!==options.workflow_id||options.run_id&&result.run?.id!==options.run_id||options.job_id&&!result.run?.definition?.nodes?.[options.job_id])return {ok:false};return {ok:true};}});
   schedule();
 })();

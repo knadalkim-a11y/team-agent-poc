@@ -1,0 +1,69 @@
+{
+  "scope": "actual built Native UI; synthetic account, permission response and model transport",
+  "completion_count": 1,
+  "status_requests": [
+    {
+      "model_id": "fixture-model",
+      "system_id": "EMS",
+      "chat_id": "existing-chat"
+    }
+  ],
+  "observed": {
+    "path": "/c/existing-chat",
+    "helperState": {
+      "busy": false,
+      "notice": ""
+    },
+    "draft": {
+      "prompt": "아직 보내지 않을 개인 질문",
+      "files": [
+        {
+          "type": "file",
+          "file": {
+            "id": "fixture-file",
+            "user_id": "fixture-admin",
+            "filename": "personal-draft.txt",
+            "meta": {
+              "name": "personal-draft.txt",
+              "content_type": "text/plain",
+              "size": 28
+            },
+            "data": {
+              "status": "completed"
+            },
+            "created_at": 1
+          },
+          "id": "fixture-file",
+          "url": "fixture-file",
+          "name": "personal-draft.txt",
+          "status": "uploaded",
+          "size": 28,
+          "error": "",
+          "itemId": "0b412e25-ad13-4f44-aa1d-c0388fb33049",
+          "content_type": "text/plain"
+        }
+      ],
+      "selectedToolIds": [
+        "synthetic-personal-tool"
+      ],
+      "selectedSkillIds": [
+        "synthetic-personal-skill"
+      ],
+      "selectedFilterIds": [
+        "synthetic-personal-filter"
+      ],
+      "imageGenerationEnabled": false,
+      "webSearchEnabled": false,
+      "codeInterpreterEnabled": false
+    },
+    "guideInChat": true,
+    "guideInPanel": false,
+    "references": [
+      "참고: 새 업무 절차 · 신규 공장 횡전개"
+    ],
+    "helperLabels": [
+      "업\n업무 도우미"
+    ],
+    "horizontalOverflow": false
+  }
+}

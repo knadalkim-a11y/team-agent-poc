@@ -1,0 +1,13 @@
+test_concurrent_draft_change_during_model_call_requires_new_context (test_ees_work_routes.WorkRouteTests.test_concurrent_draft_change_during_model_call_requires_new_context) ... ok
+test_current_authenticated_actor_scope_applies_to_read_and_write (test_ees_work_routes.WorkRouteTests.test_current_authenticated_actor_scope_applies_to_read_and_write) ... ok
+test_helper_status_is_member_authenticated_read_only_and_never_cached (test_ees_work_routes.WorkRouteTests.test_helper_status_is_member_authenticated_read_only_and_never_cached) ... ok
+test_legacy_history_read_preserves_database_and_enforces_owner (test_ees_work_routes.WorkRouteTests.test_legacy_history_read_preserves_database_and_enforces_owner) ... ok
+test_retired_routes_reject_instead_of_recreate_demo_or_mutate_old_records (test_ees_work_routes.WorkRouteTests.test_retired_routes_reject_instead_of_recreate_demo_or_mutate_old_records) ... ok
+test_revoked_actor_during_model_call_does_not_receive_proposal (test_ees_work_routes.WorkRouteTests.test_revoked_actor_during_model_call_does_not_receive_proposal) ... ok
+test_unavailable_model_and_secret_or_cross_target_proposal_fail_before_call (test_ees_work_routes.WorkRouteTests.test_unavailable_model_and_secret_or_cross_target_proposal_fail_before_call) ... ok
+test_unsaved_proposal_exact_context_server_source_and_no_database_write (test_ees_work_routes.WorkRouteTests.test_unsaved_proposal_exact_context_server_source_and_no_database_write) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.270s
+
+OK

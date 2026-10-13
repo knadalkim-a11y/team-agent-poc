@@ -1,0 +1,1807 @@
+✔ tests/ees_workspace_ui_fixture.cjs (86.177816ms)
+Specialist cooperation panel retirement/no-re-registration assertions passed
+✔ tests/test_ees_cooperation_panel.cjs (91.497987ms)
+✔ controller fixture exercises the same command and read boundaries with LF and Windows CRLF (14.550551ms)
+✔ controller fixture fails directly when its required injection marker is missing or duplicated (4.080049ms)
+✔ unknown partial failed and excluded states never render completion (2.965222ms)
+✔ all eight declared input kinds render typed named accessible controls (6.878835ms)
+✔ boolean false number zero and typed enum values survive input rendering (1.804757ms)
+✔ form reading distinguishes unset from false zero and empty multiselect (1.27185ms)
+✔ all eight result blocks render from the same job definition contract (5.8266ms)
+✔ untrusted job output and names are escaped and unsafe links omitted (0.982692ms)
+✔ per-item AI proposal is visibly unconfirmed and requires human verdict (0.786933ms)
+✔ read-only historical result blocks never permit input decisions (0.922233ms)
+✔ evidence presence does not claim attachment content adequacy (0.748536ms)
+✔ request timeline preserves EES report and independent effect confirmation (1.289736ms)
+✔ history uses immutable attempt inputs and result rather than current edited values (1.250367ms)
+✔ missing history is explicitly unexecuted and never a success fixture (0.654316ms)
+✔ My Work uses actual tasks and incident-overdue-today-week-future-undated ordering (0.916865ms)
+✔ empty My Work does not invent an actionable task or normal execution (0.595711ms)
+✔ late workspace reads are discarded after account change (1.346169ms)
+✔ late workspace reads are discarded after selected job changes (1.162969ms)
+✔ lookup failure clears stale private evidence and keeps an explicit read error (1.193594ms)
+✔ lost mutation response reuses the exact request receipt and payload (2.214403ms)
+✔ definitive rejection retires its receipt instead of replaying invalid intent (1.655767ms)
+✔ operations and workspace receipts are distinct authenticated command paths (1.131252ms)
+✔ late successful mutation cannot repopulate another account or scope (1.352228ms)
+✔ normalization selects the exact current attempt and preserves historical decisions (1.160645ms)
+✔ redacted evidence stays null instead of substituting another readable attempt (1.074428ms)
+✔ Native model list keeps actual allowed identities and excludes direct embedding routes (1.377695ms)
+✔ AI reference never contains Native authorization tokens or confirmation intents (1.240022ms)
+✔ late confirmation is rejected after account or selected work context changes (2.13842ms)
+✔ first workspace read refetches after default system selection before accepting operations (1.268835ms)
+✔ allowed model count survives a work selection change but not account change (4.872845ms)
+✔ read-only tab changes retain polling rather than stopping current execution observation (1.205321ms)
+✔ returning from a Native workspace page starts a fresh workspace read (13.866321ms)
+✔ dynamic options use authenticated current-job inputs and never send an execution command (1.755614ms)
+✔ late option results cannot replace a changed input dependency or another job (4.336347ms)
+✔ dynamic option failure disables selection without falling back to manual examples (2.292608ms)
+✔ removed dynamic selection stays explicit and no returned option is automatically chosen (0.885118ms)
+✔ held Enter or Space cannot repeat a mutation while its ordinary first click still runs (22.569732ms)
+✔ scope execution uses the selected P or T and refuses unsaved run drafts (2.006154ms)
+✔ admin management renders existing Native identities and is absent for ordinary participants (1.719902ms)
+✔ admin dialog refuses nonadmin identity before any write or new dialog (1.661816ms)
+✔ text export formats only fetched run history and retains redacted-source notice (1.163179ms)
+✔ legacy records have readonly navigation and escaped values with no execution controls (0.887151ms)
+✔ authenticated source navigation preserves private drafts and resets only for account change (2.992983ms)
+✔ AI item badge disappears only when a saved decision for that item is present (0.814693ms)
+✔ date-only and timezone-qualified saved inputs preserve their exact stored value (1.552223ms)
+✔ first Native chat proposal accepts only the creation-bound old context without a DB write (1.665461ms)
+✔ first-chat context alias rejects another chat account changed version draft or scope (5.264279ms)
+✔ unmatched Native creation finish cannot bless an arbitrary old chat context (1.146334ms)
+✔ start-run mutation uses workflow revision rather than absent run revision (1.938214ms)
+✔ start dialog retains its captured workflow revision across a concurrent refresh (1.826599ms)
+✔ successful read polling preserves command rejection until successful command or explicit context change (1.545204ms)
+✔ first-chat alias is retired when navigating through another conversation (3.01159ms)
+✔ saving one factory setting never promotes unchanged inherited values to overrides (1.688825ms)
+✔ run settings target the run factory while viewing all factories and retain raw overrides (1.225011ms)
+✔ existing empty text and empty list stay distinct from never-assigned optional values (0.661016ms)
+✔ readonly Work tool setup needs Native admin and cancelling preview never writes assets (1.782294ms)
+✔ explicit Work tool confirmation sends preview token source hash and no public grants (1.485515ms)
+✔ input AI proposal preview and apply modify only the private draft until explicit save (1.257007ms)
+✔ AI input preview rejects unknown setting fields and stale apply after user typing (1.39432ms)
+✔ per-message reference records exact immutable attempt and version without chat body or secrets (1.363695ms)
+✔ historical message chip never substitutes latest evidence for an old or absent attempt (2.137599ms)
+✔ execution names the sole currently authorized model and preserves explicit multi-model choice (6.889411ms)
+✔ single model label is visible while multiple actual models retain the chooser (1.250017ms)
+✔ unavailable dynamic inputs explain why AI omitted them without adding values (1.124902ms)
+✔ typed draft preserves false zero empty arrays and an explicitly removed optional field (3.381537ms)
+✔ independent concurrent input changes cannot be silently overwritten (0.828705ms)
+✔ server revision without input change retains the draft without a false conflict (0.759001ms)
+✔ drafts remain isolated between account scope run and job keys (0.663631ms)
+✔ acknowledging a save never overwrites typing after the request (1.011014ms)
+✔ matching save receipt clears only its own acknowledged draft (0.71743ms)
+✔ explicit discard restores saved values without changing server objects (1.243447ms)
+✔ account reset clears every private draft (0.768085ms)
+✔ returned draft snapshots cannot mutate stored drafts or caller inputs (0.869745ms)
+✔ invalid numeric input fails before a save payload is constructed (2.481517ms)
+✔ render recapture after a successful save cannot turn identical server values into a conflict (0.725012ms)
+✔ unchanged server inputs advance the CAS base while preserving unsaved local input (0.696639ms)
+✔ legacy content uses only the source-supplied right slot without mutating Native nodes (6.406247ms)
+✔ panel visibility is source state and reset preserves source-owned mount boundary (1.749686ms)
+✔ Native capability snapshots publish menu state without legacy menu or content rendering (1.017834ms)
+✔ Native navigation preserves the exact source panel and Native chat nodes (1.036121ms)
+✔ Native capability refresh cannot turn untouched hidden run inputs into an incomplete draft (5.03422ms)
+✔ missing source content slot fails closed without constructing a replacement around Native (1.126375ms)
+✔ panel scroll restores per personal target and never writes a shared run selection (1.18461ms)
+✔ confirmation dialog starts on cancel and Escape closure never accepts the command (1.192973ms)
+✔ dialog capture closes nested help before closing the confirmation and cleans it on programmatic close (1.947137ms)
+✔ workspace refresh retains active input identity and text selection without taking Native focus (2.079212ms)
+✔ published procedure overview opens before a run exists without dereferencing run state (5.162409ms)
+✔ authoring capability and selection are published for the source navigation (0.760554ms)
+✔ polling preserves an explicit model choice only for its actor and work target while revocation clears it (2.417763ms)
+✔ a delayed workspace read never rolls private UI revision behind a completed width save (11.847067ms)
+✔ an explicit early panel resize wins over an older saved width and stays actor scoped (1.965745ms)
+✔ source resize before actor restoration persists its explicit width after the workspace read (3.014295ms)
+✔ a width conflict retries only that preference while preserving another tab private draft (2.301461ms)
+✔ width conflict recovery stops on account change and never retries twice (3.346875ms)
+✔ runtime never arms or releases a document hiding gate on success or failure (4.052679ms)
+✖ view completion signal follows actual mount success and the creation card states current capability exactly (1.291668ms)
+✔ Native portal skin is gated by the first-render source without hiding or moving Native surfaces (0.46057ms)
+✖ new Figma authoring keeps Native conversation untouched and has exact right-panel structure (14.016834ms)
+✖ empty workspace listing does not create drafts or runs (2.186581ms)
+✖ direct editing saves only the chosen definition with current revision and request ID (3.759345ms)
+✖ dirty drafts and per-workflow node selection survive navigation (2.142616ms)
+✖ typing during save preserves later edits and acknowledges only own base revision (1.715475ms)
+✖ same failed payload reuses request identity; different payload receives new identity (3.09312ms)
+✖ revision conflict preserves unsaved text and never silently rebases (2.182085ms)
+✖ authorization denial preserves private draft and blocks subsequent mutation (2.341521ms)
+✖ account reset rejects late save and clears draft cache (1.877765ms)
+✖ late workflow reads cannot overwrite newer selection (3.169794ms)
+✖ publish requires exact saved validated revision and explicit confirmation (1.73313ms)
+✖ all eight input types and result blocks are represented without workflow-specific HTML (1.737758ms)
+✖ declared input and tool argument binding are saved together (2.783453ms)
+✖ stage/job insertion and removal keep referential defects visible for publish validation (2.624293ms)
+✖ factory overrides distinguish an explicit empty value, zero, and absent value (2.359577ms)
+✖ AI model selection uses permitted explicit choice/default and no silent first-of-many fallback (2.600954ms)
+✖ 0 models and model listing failure preserve direct authoring and save (2.386347ms)
+✖ one model hides the selector and multiple models require Native choice (3.759836ms)
+✖ AI proposal is a preview and explicit local application never saves or publishes (2.052533ms)
+✖ late AI proposal after workflow navigation or manual edits is never applied (1.992955ms)
+✖ malformed and cross-context AI output cannot create arbitrary editor state (1.630099ms)
+✖ Native chat proposals require exact personal conversation and target revision (1.970702ms)
+✖ B5 stores inspected Native function reference and immutable input schema (5.582905ms)
+✖ tool review is an explicit operation with designated contract revision (6.420567ms)
+✖ unavailable EES definitions are explicit and never turn into fake request success (2.119712ms)
+✖ unsafe labels and instructions are escaped in the editor (7.332536ms)
+✖ opening a form and reading a draft never marks unchanged definitions dirty (1.845227ms)
+✖ opaque Native references, dangling dependencies and compound conditions survive unrelated edits (1.972494ms)
+✖ factory settings preserve all eight input value types without coercing omitted fields (1.608356ms)
+✖ late model listing after reset cannot overwrite the new account choice (1.45494ms)
+✖ a confirmation opened for one workflow cannot publish after context changes (1.715775ms)
+✖ conflict comparison can discard only by explicit choice and load exact new revision (1.632682ms)
+✖ tool navigation returns to workflow editor without retaining tool-only surface (1.363785ms)
+✖ job trigger persists a bounded offset instead of a browser timer (1.38035ms)
+✖ published periodic schedule explicitly pins user, version, jobs, timezone and delegation (1.445776ms)
+✖ Native skills remain optional and only current permitted IDs are added to a job (1.432506ms)
+✖ unavailable Native skills preserve opaque references and do not block direct human work (1.456051ms)
+✖ a late skill-list response cannot expose the previous account metadata (3.70878ms)
+✖ dynamic Jira options pin discovered Native reference and declared project dependency without static examples (8.935529ms)
+✖ dynamic options cannot invent an unconfigured Native reference or fall back to static entries (3.896107ms)
+✖ common options use current authorized entities and preserve an opaque tool source on description edit (1.667475ms)
+✖ tool selection pins contract revision and unrelated edits cannot silently upgrade an old published reference (1.599473ms)
+✖ AI item verdicts declare their source job and EES requests retain explicit effect criteria (1.562639ms)
+✖ confirmed list bindings and deadline rules store declared references instead of browser calculations (1.649418ms)
+✖ a result report can record all resolved verdicts without converting unknown CRs into approved completion (1.382603ms)
+✖ factory settings fetch dynamic choices from the saved definition and never substitute examples after failure (1.512435ms)
+✖ person settings use current Native people metadata without making free-text users (1.481169ms)
+✖ Native proposal review is visibly open from a selected job and non-structure tabs without saving (1.300722ms)
+✖ job assignee uses only current Native user/group identities and persists exact principal (1.658121ms)
+✖ unavailable existing assignee is preserved on unrelated edits and removed only explicitly (1.57015ms)
+✖ B5 explicitly authored output contract saves an object while Native input schema stays authoritative (1.510632ms)
+✖ invalid output contract remains editable and cannot save or submit stale schema (1.52934ms)
+✖ existing output contract is not silently replaced by metadata when unrelated fields change (1.260152ms)
+✖ input deletion requires confirmation and retains dangling bindings for publish validation (1.735695ms)
+✖ input deletion confirmation cannot mutate a different workflow after navigation (2.094475ms)
+✖ version history displays the exact stored publisher safely (2.121185ms)
+✖ AI composer snapshots physical expansion and live text before a delayed model-list repaint (1.599083ms)
+✖ routine workspace polls preserve the user-open composer and retain an explicitly closed composer (1.566154ms)
+✖ composer text and expansion are private to the workflow and Native conversation and reset on account change (1.477173ms)
+✖ a pending right-composer response is discarded after a conversation switch even if transport ignores abort (1.581477ms)
+✖ B2-2 rules are scoped to eligible jobs and preserve stored judgment IDs and legacy defaults (1.869313ms)
+✖ B2-2 suggestion rules save guidance and human-only IDs without auto-confirmation or reference replacement (1.492375ms)
+✖ B2-2 a job switch while its dialog is open cannot edit a different job (1.512645ms)
+✖ B2-3 advisories do not block publication while blockers remain visible and disabled (2.561856ms)
+✖ B5 direct execution stores only declared exception metadata and retains absent adapter reason (2.125461ms)
+✖ C12 schedule opening and explicit execution scope do not alter preserved drafts on inspection (2.372877ms)
+✖ B5 direct classification selects registered Native metadata without configuring execution (2.159791ms)
+✖ missing randomUUID permits create and authoring IDs through the shared helper (2.255042ms)
+✖ missing randomUUID keeps authoring retries idempotent and changed edits distinct (2.278587ms)
+✖ missing randomUUID keeps AI proposal context and explicit apply without saving (2.52404ms)
+✖ easy tool starter groups live connections and searches names without creating a contract (2.204718ms)
+✖ tool examples resolve current connections anew and EMS read examples remain unconnected (2.13184ms)
+✖ choosing a live function determines kind and new output contracts are never fabricated (14.971153ms)
+✖ removed time fields remain opaque and survive unrelated read and request resaves (2.117209ms)
+✖ request state choices stay within the connected tool and sole reviewer and state function are preselected (1.497773ms)
+✖ multiple request state functions and reviewers require a choice and changing a function preserves authored text (1.547306ms)
+✖ read confirmation is allowed after save without a guide and explicit next step clears when complete (1.735645ms)
+✖ direct exception creation is hidden and inert without an eligible reviewer capability (1.510772ms)
+✖ unconnected examples still save with missing randomUUID but never submit or execute (1.345889ms)
+✖ tool drafts are private to actor and system and return without crossing the selected system (1.318718ms)
+✖ Native navigation waits for a real authoring save or load while preserving the draft (1.673252ms)
+✖ tool save acknowledges its revision and keeps edits typed while the save is pending (1.383825ms)
+✖ late tool save cannot replace a different tool opened during the request (1.71848ms)
+✖ legacy direct metadata survives an ordinary author resave while exception controls remain hidden (1.40697ms)
+✖ direct function replacement lists only request functions and rejects a forged read selection (1.829383ms)
+✖ server tool validation errors explain the next action and preserve the editable draft (1.721714ms)
+✖ new procedure opens three summarized examples and a blank choice without creating or exposing definition controls (1.638041ms)
+✖ example start submits only the selected server template and edited name and opens the acknowledged draft (1.40748ms)
+✖ blank start asks only for a name and leaves defaults to the server (1.487899ms)
+✖ starter cancellation reentry and system navigation preserve separate selected examples and names without writing (1.399679ms)
+✖ failed creation retries one request while successful repeated starts use different request IDs (1.49573ms)
+✖ late creation cannot replace a changed or reopened starter or a different system (1.449823ms)
+✖ procedure creation disables template name and cancel controls until its response (1.620365ms)
+✖ procedure name input and change preserve footer controls while updating summary validity and submitted value (1.731418ms)
+✖ tool field input and change preserve Save and Review controls while reflecting required and dirty state (1.711239ms)
+✔ workspace menu uses server permissions for three groups and hides unavailable Native destinations (11.573182ms)
+✔ tools-only permission keeps D9 workspace access with an honest empty menu and no admin link (2.635485ms)
+✔ blocked Native navigation has a visible escaped authoring alert without replacing its editor (0.768646ms)
+✔ forged denied Native and author actions do not navigate or mutate state (4.468804ms)
+✔ all six allowed Native destinations use direct static routes without a sidebar link (24.350603ms)
+✔ same-section EES menu preserves selection and unsaved designer session plus the full composer without sending (3.45838ms)
+✔ delayed first chat creation keeps Native open and returns root or folder drafts to the created chat (4.679045ms)
+✔ late first chat signals cannot rewrite existing chat or another actor return tickets (6.409391ms)
+✔ Native loaded draft is not reimported and different nonempty content is never overwritten (8.319192ms)
+✔ return waits for the persistent Native editor and never imports over new interaction state (6.816714ms)
+✔ Native departure blocks busy editors and failed or changed draft flushes (4.623983ms)
+✔ missing persistent source Chat refuses departure without reconstructing Native DOM (1.276226ms)
+✔ pending Native navigation cannot cross an account or work context change (4.482824ms)
+✔ account reset releases an old pending Native flush without unlocking the new account operation (1.364877ms)
+✔ removed native_return action cannot navigate or alter the saved selection (1.837866ms)
+✔ chat history menu publishes its own selection and never opens the separate search dialog (1.382502ms)
+✔ Native tickets cannot copy drafts across unrelated navigation logout actor or session changes (19.606543ms)
+✔ Browser Back preserves the exact live draft without importing a snapshot (2.196065ms)
+✔ Native-to-Native menu navigation keeps the persistent Chat across all destinations (5.991424ms)
+✔ same-section tools menu restores its exact authoring selection without closing the draft (2.065061ms)
+✔ a different EES menu destination is applied only after returning to the original chat (4.604003ms)
+✔ Native return publishes a reference only after full state and the persistent Chat are ready (3.99292ms)
+✔ a queued EES menu action waits for full state even when the persistent Chat is ready first (2.214442ms)
+✔ failed full state after Native return shows an error without publishing a zero-revision work reference (3.295249ms)
+✔ explicit retry after a failed return finishes its ticket without a DOM observer lifecycle tick (1.986706ms)
+✔ direct Native entry loads capabilities with no chat pane and EES destinations use the chat root (1.98312ms)
+✔ a failed Native capability read hides actions but keeps the original draft until explicit same-actor retry (2.781069ms)
+✔ retry after a failed Native capability read never revives another actor or session return ticket (4.180908ms)
+✔ source availability is independent of Native sidebar and chat DOM anchors (1.474058ms)
+✔ source admin state stays inside the shell and explicit close preserves original chat (2.106322ms)
+✔ source admin close returns to saved chat without inspecting Native modal nodes (2.528156ms)
+✔ source admin session may keep its Native personal tab open until explicitly closed (1.980116ms)
+✔ ordinary source settings do not claim admin state or inspect Native modal markup (1.44166ms)
+✔ persistent source Chat keeps live images and uploads through Native without reimport (1.804286ms)
+✔ runtime owns only supplied slots and registers no document-wide event hooks or observer (0.703159ms)
+✖ help question includes canonical term ID and visible authoring context without hidden state (1.391517ms)
+✖ help fills the Native draft without sending and preserves attachments tools models and literal text (1.261995ms)
+✖ help refuses a loading or absent Native draft and never overwrites unconfirmed content (1.221926ms)
+✖ help insertion serializes competing choices and reports restore failure without sending (1.282856ms)
+✖ help detects account change before restoring and never copies the old draft into a new actor (1.303656ms)
+✖ help detects route changes during Native restore and does not focus a different conversation (1.170259ms)
+✔ author tools expose help-only metadata while workflow and historical references remain unchanged (0.999276ms)
+✖ procedure starter questions keep the Native draft and use help metadata until the starter closes (1.34657ms)
+✔ procedure question choices reject unavailable or invalid context without changing a draft (1.19773ms)
+✖ procedure introduction has exactly three keyboard buttons and no automatic send control (0.8125ms)
+✔ input save keeps mutation controls busy until the acknowledged state finishes refreshing (1.876593ms)
+✔ review save cannot continue confirmation after its refresh loses the selected work context (4.840984ms)
+✔ an explicit early navigation survives initial saved-selection restoration and late startup reads (1.528719ms)
+✔ early selection patches are cleared on account reset and do not replace another account restoration (1.490142ms)
+✔ history expansion restoration uses exact attempt keys and the current panel position (2.143508ms)
+✔ real view list reader returns an isolated snapshot without an undefined helper (1.331517ms)
+✔ assignment labels use only the permitted Native people list and preserve principal kind (1.397094ms)
+✔ new delivery effect and retry failures are translated without masking human explanations (4.572667ms)
+✔ list inclusion is a local preview and candidates are never selected by default (2.169355ms)
+✔ saved human additions retain their source label and never increase the immutable lookup count (3.17403ms)
+✔ failed lookup hides previous payload while partial keeps explicit incompleteness (1.272601ms)
+✔ zero included items can be saved while completion policy remains explicitly unresolved (0.779832ms)
+✔ a completed empty lookup permits explicit additions without pretending it was never executed (1.649347ms)
+✔ read-only report cannot edit or save and unavailable dispatch is never clickable (1.973757ms)
+✔ revoked evidence never redisplays a locally preserved list or review draft (4.570744ms)
+✔ request reviewer and requester controls use distinct current capabilities (1.92217ms)
+✔ failed or stale report never permits editing a previous result as current evidence (1.342714ms)
+✔ historical values compare only the stored shared input without replacing it (1.329915ms)
+✔ records are scoped and put active runs first without inventing a date range (15.603387ms)
+✔ empty work shows only the earliest real scheduled execution (1.13004ms)
+✔ asking about a historical record only changes private reference and never dispatches (1.450353ms)
+✔ question from a historical row preserves its exact attempt instead of the newest row (2.328861ms)
+✔ draft save sends immutable attempt and both revisions without executing or deciding (1.58385ms)
+✔ late draft save cannot acknowledge or repaint after another work target is selected (1.223959ms)
+✔ request fields follow native schema types and bindings, with reason outside EES values (2.09757ms)
+✔ ad-hoc start lists active factories and disables only those with active work (1.971273ms)
+✔ item verdict options stay pending and AI suggestions cannot enable final confirmation (1.640394ms)
+✔ A7 has automatic save status and no save button, and basis cards expose actual time (2.33471ms)
+✔ navigation flushes edits made while an older review autosave is still in flight (1.611742ms)
+✔ failed automatic review save keeps the current work and preserves its draft (1.638351ms)
+✔ same-status custom words retain distinct pending IDs and final immutable wording (2.136387ms)
+✔ partial provenance survives a failed human verdict without changing its primary status (1.404276ms)
+✔ private verdict autosave persists exact term without deciding and restores after reload (12.861576ms)
+✔ private draft storage failure is visible and never discards pending selection (2.055838ms)
+✔ schema field ordering is not an edit while changed values retain save protection (1.176558ms)
+✔ missing evidence and external request URLs never become local undefined links (5.036322ms)
+✔ shared ID helper prefers the native randomUUID with its receiver (0.709018ms)
+✔ shared ID fallback sets UUID version and variant while preserving random bytes (8.136834ms)
+✔ shared ID generation refuses missing secure randomness (3.182453ms)
+✔ missing randomUUID preserves runtime command receipt and first-chat boundaries (1.762665ms)
+✔ missing source API fails closed with no duplicate runtime transport (1.566315ms)
+✔ source API receives the original command contract and keeps runtime late-target guards (1.049741ms)
+ℹ Error: Test "help insertion serializes competing choices and reports restore failure without sending" at tests/test_ees_work_figma_runtime_ui.cjs:231:1 generated asynchronous activity after the test ended. This activity created the error "Error: 업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다." and would have caused the test to fail, but instead triggered an unhandledRejection event.
+WO simulation retirement/no-re-registration assertions passed
+✔ tests/test_wo_demo_state.cjs (66.956643ms)
+ℹ tests 282
+ℹ suites 0
+ℹ pass 178
+ℹ fail 104
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 412.812596
+
+✖ failing tests:
+
+test at tests/test_ees_v4_layout.cjs:127:1
+✖ view completion signal follows actual mount success and the creation card states current capability exactly (1.291668ms)
+  evalmachine.<anonymous>:1
+  workProcedureStartHTML({kind:"new"})
+  ^
+  
+  ReferenceError: workProcedureStartHTML is not defined
+      at evalmachine.<anonymous>:1:1
+      at Script.runInContext (node:vm:149:12)
+      at Object.runInContext (node:vm:301:6)
+      at run (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/ees_workspace_ui_fixture.cjs:8:40)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_v4_layout.cjs:130:13)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+
+test at tests/test_ees_work_authoring_ui.cjs:38:1
+✖ new Figma authoring keeps Native conversation untouched and has exact right-panel structure (14.016834ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:38:118)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+
+test at tests/test_ees_work_authoring_ui.cjs:39:1
+✖ empty workspace listing does not create drafts or runs (2.186581ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:39:81)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:40:1
+✖ direct editing saves only the chosen definition with current revision and request ID (3.759345ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:40:111)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:41:1
+✖ dirty drafts and per-workflow node selection survive navigation (2.142616ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:41:90)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:42:1
+✖ typing during save preserves later edits and acknowledges only own base revision (1.715475ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:42:107)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:43:1
+✖ same failed payload reuses request identity; different payload receives new identity (3.09312ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:43:111)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:44:1
+✖ revision conflict preserves unsaved text and never silently rebases (2.182085ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:44:94)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:45:1
+✖ authorization denial preserves private draft and blocks subsequent mutation (2.341521ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:45:102)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:46:1
+✖ account reset rejects late save and clears draft cache (1.877765ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:46:81)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:47:1
+✖ late workflow reads cannot overwrite newer selection (3.169794ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:47:79)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:48:1
+✖ publish requires exact saved validated revision and explicit confirmation (1.73313ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:48:100)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:49:1
+✖ all eight input types and result blocks are represented without workflow-specific HTML (1.737758ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:49:108)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:50:1
+✖ declared input and tool argument binding are saved together (2.783453ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:50:86)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:51:1
+✖ stage/job insertion and removal keep referential defects visible for publish validation (2.624293ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:51:114)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:52:1
+✖ factory overrides distinguish an explicit empty value, zero, and absent value (2.359577ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:52:104)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:53:1
+✖ AI model selection uses permitted explicit choice/default and no silent first-of-many fallback (2.600954ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:53:116)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:54:1
+✖ 0 models and model listing failure preserve direct authoring and save (2.386347ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:54:129)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:55:1
+✖ one model hides the selector and multiple models require Native choice (3.759836ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:55:97)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:56:1
+✖ AI proposal is a preview and explicit local application never saves or publishes (2.052533ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:56:107)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:57:1
+✖ late AI proposal after workflow navigation or manual edits is never applied (1.992955ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:57:138)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:58:1
+✖ malformed and cross-context AI output cannot create arbitrary editor state (1.630099ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:58:96)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:59:1
+✖ Native chat proposals require exact personal conversation and target revision (1.970702ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:59:99)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:60:1
+✖ B5 stores inspected Native function reference and immutable input schema (5.582905ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:60:99)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:61:1
+✖ tool review is an explicit operation with designated contract revision (6.420567ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:61:97)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:62:1
+✖ unavailable EES definitions are explicit and never turn into fake request success (2.119712ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:62:108)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:63:1
+✖ unsafe labels and instructions are escaped in the editor (7.332536ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:63:83)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:65:1
+✖ opening a form and reading a draft never marks unchanged definitions dirty (1.845227ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:65:101)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:66:1
+✖ opaque Native references, dangling dependencies and compound conditions survive unrelated edits (1.972494ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:66:122)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:67:1
+✖ factory settings preserve all eight input value types without coercing omitted fields (1.608356ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:67:112)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:68:1
+✖ late model listing after reset cannot overwrite the new account choice (1.45494ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:68:97)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:70:1
+✖ a confirmation opened for one workflow cannot publish after context changes (1.715775ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:70:102)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:71:1
+✖ conflict comparison can discard only by explicit choice and load exact new revision (1.632682ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:71:110)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:72:1
+✖ tool navigation returns to workflow editor without retaining tool-only surface (1.363785ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:72:105)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:73:1
+✖ job trigger persists a bounded offset instead of a browser timer (1.38035ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:73:91)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:74:1
+✖ published periodic schedule explicitly pins user, version, jobs, timezone and delegation (1.445776ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:74:115)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:76:1
+✖ Native skills remain optional and only current permitted IDs are added to a job (1.432506ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:76:106)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:77:1
+✖ unavailable Native skills preserve opaque references and do not block direct human work (1.456051ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:77:114)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:78:1
+✖ a late skill-list response cannot expose the previous account metadata (3.70878ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:78:97)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:80:1
+✖ dynamic Jira options pin discovered Native reference and declared project dependency without static examples (8.935529ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:80:135)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:81:1
+✖ dynamic options cannot invent an unconfigured Native reference or fall back to static entries (3.896107ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:81:120)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:82:1
+✖ common options use current authorized entities and preserve an opaque tool source on description edit (1.667475ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:82:128)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:83:1
+✖ tool selection pins contract revision and unrelated edits cannot silently upgrade an old published reference (1.599473ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:83:135)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:84:1
+✖ AI item verdicts declare their source job and EES requests retain explicit effect criteria (1.562639ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:84:117)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:85:1
+✖ confirmed list bindings and deadline rules store declared references instead of browser calculations (1.649418ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:85:127)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:86:1
+✖ a result report can record all resolved verdicts without converting unknown CRs into approved completion (1.382603ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:86:131)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:87:1
+✖ factory settings fetch dynamic choices from the saved definition and never substitute examples after failure (1.512435ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:87:135)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:88:1
+✖ person settings use current Native people metadata without making free-text users (1.481169ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:88:108)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:90:1
+✖ Native proposal review is visibly open from a selected job and non-structure tabs without saving (1.300722ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:90:179)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:91:1
+✖ job assignee uses only current Native user/group identities and persists exact principal (1.658121ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:91:115)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:92:1
+✖ unavailable existing assignee is preserved on unrelated edits and removed only explicitly (1.57015ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:92:116)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:93:1
+✖ B5 explicitly authored output contract saves an object while Native input schema stays authoritative (1.510632ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:93:127)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:94:1
+✖ invalid output contract remains editable and cannot save or submit stale schema (1.52934ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:94:165)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:95:1
+✖ existing output contract is not silently replaced by metadata when unrelated fields change (1.260152ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:95:117)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:96:1
+✖ input deletion requires confirmation and retains dangling bindings for publish validation (1.735695ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:96:116)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:97:1
+✖ input deletion confirmation cannot mutate a different workflow after navigation (2.094475ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:97:106)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:98:1
+✖ version history displays the exact stored publisher safely (2.121185ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:98:85)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:100:1
+✖ AI composer snapshots physical expansion and live text before a delayed model-list repaint (1.599083ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:100:117)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:101:1
+✖ routine workspace polls preserve the user-open composer and retain an explicitly closed composer (1.566154ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:101:123)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:102:1
+✖ composer text and expansion are private to the workflow and Native conversation and reset on account change (1.477173ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:102:134)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:103:1
+✖ a pending right-composer response is discarded after a conversation switch even if transport ignores abort (1.581477ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:103:133)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:105:1
+✖ B2-2 rules are scoped to eligible jobs and preserve stored judgment IDs and legacy defaults (1.869313ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:106:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:117:1
+✖ B2-2 suggestion rules save guidance and human-only IDs without auto-confirmation or reference replacement (1.492375ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:118:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:127:1
+✖ B2-2 a job switch while its dialog is open cannot edit a different job (1.512645ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:128:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:132:1
+✖ B2-3 advisories do not block publication while blockers remain visible and disabled (2.561856ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:133:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:139:1
+✖ B5 direct execution stores only declared exception metadata and retains absent adapter reason (2.125461ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:140:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:145:1
+✖ C12 schedule opening and explicit execution scope do not alter preserved drafts on inspection (2.372877ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:146:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:150:1
+✖ B5 direct classification selects registered Native metadata without configuring execution (2.159791ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:151:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:158:1
+✖ missing randomUUID permits create and authoring IDs through the shared helper (2.255042ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:159:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:180:1
+✖ missing randomUUID keeps authoring retries idempotent and changed edits distinct (2.278587ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:181:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:187:1
+✖ missing randomUUID keeps AI proposal context and explicit apply without saving (2.52404ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:188:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:195:1
+✖ easy tool starter groups live connections and searches names without creating a contract (2.204718ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:196:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:201:1
+✖ tool examples resolve current connections anew and EMS read examples remain unconnected (2.13184ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:202:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:207:1
+✖ choosing a live function determines kind and new output contracts are never fabricated (14.971153ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:208:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:210:1
+✖ removed time fields remain opaque and survive unrelated read and request resaves (2.117209ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:211:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:213:1
+✖ request state choices stay within the connected tool and sole reviewer and state function are preselected (1.497773ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:214:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:216:1
+✖ multiple request state functions and reviewers require a choice and changing a function preserves authored text (1.547306ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:217:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:219:1
+✖ read confirmation is allowed after save without a guide and explicit next step clears when complete (1.735645ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:220:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:222:1
+✖ direct exception creation is hidden and inert without an eligible reviewer capability (1.510772ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:223:45)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:225:1
+✖ unconnected examples still save with missing randomUUID but never submit or execute (1.345889ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:226:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:230:1
+✖ tool drafts are private to actor and system and return without crossing the selected system (1.318718ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:231:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:236:1
+✖ Native navigation waits for a real authoring save or load while preserving the draft (1.673252ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:237:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:242:1
+✖ tool save acknowledges its revision and keeps edits typed while the save is pending (1.383825ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:243:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:246:1
+✖ late tool save cannot replace a different tool opened during the request (1.71848ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:247:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:251:1
+✖ legacy direct metadata survives an ordinary author resave while exception controls remain hidden (1.40697ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:252:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:254:1
+✖ direct function replacement lists only request functions and rejects a forged read selection (1.829383ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:255:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:258:1
+✖ server tool validation errors explain the next action and preserve the editable draft (1.721714ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:259:167)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:262:1
+✖ new procedure opens three summarized examples and a blank choice without creating or exposing definition controls (1.638041ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:263:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:266:1
+✖ example start submits only the selected server template and edited name and opens the acknowledged draft (1.40748ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:267:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:269:1
+✖ blank start asks only for a name and leaves defaults to the server (1.487899ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:270:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:272:1
+✖ starter cancellation reentry and system navigation preserve separate selected examples and names without writing (1.399679ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:273:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:276:1
+✖ failed creation retries one request while successful repeated starts use different request IDs (1.49573ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:277:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:280:1
+✖ late creation cannot replace a changed or reopened starter or a different system (1.449823ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:281:58)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:286:1
+✖ procedure creation disables template name and cancel controls until its response (1.620365ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:287:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:291:1
+✖ procedure name input and change preserve footer controls while updating summary validity and submitted value (1.731418ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:292:61)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_authoring_ui.cjs:298:1
+✖ tool field input and change preserve Save and Review controls while reflecting required and dirty state (1.711239ms)
+  ReferenceError: window is not defined
+      at syncHelpState (evalmachine.<anonymous>:285:47)
+      at setBusy (evalmachine.<anonymous>:286:764)
+      at paint (evalmachine.<anonymous>:283:5)
+      at Object.render (evalmachine.<anonymous>:162:5)
+      at h.render (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:26)
+      at harness (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:32:79)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_authoring_ui.cjs:299:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:212:1
+✖ help question includes canonical term ID and visible authoring context without hidden state (1.391517ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /도움말 용어 ID: read_tool/. Input:
+  
+  'EES Workflow 도움말 ‘정보 읽기’의 뜻과 지금 화면에서 쓰는 방법을 알려줘.'
+  
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:214:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'EES Workflow 도움말 ‘정보 읽기’의 뜻과 지금 화면에서 쓰는 방법을 알려줘.',
+    expected: /도움말 용어 ID: read_tool/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:216:1
+✖ help fills the Native draft without sending and preserves attachments tools models and literal text (1.261995ms)
+  Error: 업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.
+      at Object.askHelp (evalmachine.<anonymous>:123:81)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:220:42)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:223:1
+✖ help refuses a loading or absent Native draft and never overwrites unconfirmed content (1.221926ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /대화 입력창/. Input:
+  
+  'Error: 업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.'
+  
+      at async TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:225:2)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: 업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.
+        at Object.askHelp (evalmachine.<anonymous>:123:81)
+        at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:225:44)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1382:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+        at Test.postRun (node:internal/test_runner/test:1522:19)
+        at Test.run (node:internal/test_runner/test:1447:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:960:7),
+    expected: /대화 입력창/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:231:1
+✖ help insertion serializes competing choices and reports restore failure without sending (1.282856ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /앞서 고른 질문/. Input:
+  
+  'Error: 업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.'
+  
+      at async TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:234:51)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: 업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.
+        at Object.askHelp (evalmachine.<anonymous>:123:81)
+        at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:234:93)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1382:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+        at Test.postRun (node:internal/test_runner/test:1522:19)
+        at Test.run (node:internal/test_runner/test:1447:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:960:7),
+    expected: /앞서 고른 질문/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:237:1
+✖ help detects account change before restoring and never copies the old draft into a new actor (1.303656ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /대화 위치가 바뀌었습니다/. Input:
+  
+  'Error: 업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.'
+  
+      at async TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:240:2)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: 업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.
+        at Object.askHelp (evalmachine.<anonymous>:123:81)
+        at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:240:44)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1382:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+        at Test.postRun (node:internal/test_runner/test:1522:19)
+        at Test.run (node:internal/test_runner/test:1447:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:960:7),
+    expected: /대화 위치가 바뀌었습니다/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:242:1
+✖ help detects route changes during Native restore and does not focus a different conversation (1.170259ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /대화 위치가 바뀌었습니다/. Input:
+  
+  'Error: 업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.'
+  
+      at async TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:247:2)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: 업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.
+        at Object.askHelp (evalmachine.<anonymous>:123:81)
+        at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:246:37)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1382:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+        at Test.postRun (node:internal/test_runner/test:1522:19)
+        at Test.run (node:internal/test_runner/test:1447:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:960:7),
+    expected: /대화 위치가 바뀌었습니다/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:256:1
+✖ procedure starter questions keep the Native draft and use help metadata until the starter closes (1.34657ms)
+  Error: 업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.
+      at askHelp (evalmachine.<anonymous>:123:81)
+      at Object.handleClick (evalmachine.<anonymous>:363:14)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:263:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_figma_runtime_ui.cjs:274:1
+✖ procedure introduction has exactly three keyboard buttons and no automatic send control (0.8125ms)
+  evalmachine.<anonymous>:1
+  workProcedureStartHTML({screen:"새 업무 절차",draftName:"<secret>"})
+  ^
+  
+  ReferenceError: workProcedureStartHTML is not defined
+      at evalmachine.<anonymous>:1:1
+      at Script.runInContext (node:vm:149:12)
+      at Object.runInContext (node:vm:301:6)
+      at run (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/ees_workspace_ui_fixture.cjs:8:40)
+      at html (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:5:32)
+      at TestContext.<anonymous> (/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2-2/tests/test_ees_work_figma_runtime_ui.cjs:275:17)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)

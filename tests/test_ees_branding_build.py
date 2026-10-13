@@ -382,19 +382,97 @@ def fixture_members():
         "open_webui/static/custom.css": b"/* existing user style stays intact */\n",
         "open_webui/frontend/static/custom.css": b"/* original frontend style stays intact */\n",
     }
+    # Minimal pinned control-flow boundaries; assertions below verify policy
+    # ordering, pre-persistence checks, and both Native dispatch paths.
+    members["open_webui/main.py"] += b"""
+async def chat_completion(request, form_data, user):
+    try:
+        metadata = {}
+        if is_new_chat:
+            metadata['chat_id'] = str(uuid4())
+        await Chats.insert_new_chat(user.id, {
+                                'models': [entry['model_id'] for entry in message_ids],
+        })
+        if existing_chat:
+            if valid:
+                if owner:
+                    if chat_fields:
+                        await Chats.update_chat_by_id(chat_id, chat_fields, touch=False)
+        await Chats.upsert_message_to_chat_by_id_and_message_id(chat_id, user_message_id, user_message)
+    except HTTPException:
+        raise
+    async def process_chat(request, form_data, user, metadata, model, tasks=None):
+        try:
+            form_data, metadata, events = await process_chat_payload(request, form_data, user, metadata, model)
+            response = await chat_completion_handler(request, form_data, user)
+        finally:
+            if (
+                    chat_id
+                    and getattr(request.state, 'internal', False) is not True
+            ):
+                await process_pending_internal_messages(request, chat_id, user.id, {})
+"""
     members["open_webui/utils/middleware.py"] = b"""async def process_chat_payload(request, form_data, user, metadata, model):
+    if is_saved_chat_id(chat_id) and user_message_id:
+        if db_messages:
+            for message in form_data['messages']:
+                if message.get('role') == 'user' and image_files:
+                    message['content'] = image_files
+    if is_saved_chat_id(chat_id) and user_message_id:
+        if getattr(request.state, 'direct', False):
+            compaction_models = models
+        await compact_messages_for_request(request)
+    form_data = await convert_url_images_to_base64(form_data, user=user)
+    if folder_id and user:
+        folder = await get_folder(folder_id)
+    if model_knowledge and metadata.get('params', {}).get('function_calling') == 'legacy':
+        await read_model_knowledge(model_knowledge)
     payload_tools = form_data.get('tools', None)
+    form_data = await process_pipeline_inlet_filter(request, form_data, user, models)
+    filter_functions = await get_filter_functions(request, model, metadata.get('filter_ids', []))
+    form_data, flags = await process_filter_functions(request, form_data=form_data)
+    features = form_data.pop('features', None) or {}
+    await handle_features(features)
     tool_ids = form_data.pop('tool_ids', None)
+    skill_ids = list(set(selected_skill_ids) | set(model_skill_ids))
+    available_skills = []
     tools_dict = {}
     if payload_tools is None:
         if tool_ids:
             tools_dict = await get_tools(request, tool_ids, user, {})
             if mcp_tools_dict:
                 tools_dict.update(mcp_tools_dict)
-        tools_dict.update(await get_builtin_tools(request))
+        if use_builtin_tools:
+            form_data['messages'] = await add_file_context(form_data.get('messages', []), chat_id, user)
+            tools_dict.update(await get_builtin_tools(request))
         if tools_dict:
             metadata['tools'] = tools_dict
+    if file_context_enabled:
+        await read_files(form_data)
+    if model_knowledge:
+        await read_model_knowledge(model_knowledge)
     return form_data, tools_dict
+
+async def execute_tool_call_for_output(request, form_data, user, metadata):
+    tools = metadata.get('tools', {})
+    await tools[function_name]['callable'](**params)
+
+async def process_chat_response(request, form_data, user, metadata):
+    if response:
+        async def stream():
+            try:
+                if tool_calls:
+                    tools = metadata.get('tools', {})
+                    if tools:
+                        new_form_data = await process_filter_functions(request, form_data=form_data)
+                        res = await generate_chat_completion(
+                            request, new_form_data, user)
+                        if pending:
+                            new_form_data = await process_filter_functions(request, form_data=form_data)
+                            res = await generate_chat_completion(
+                                request, new_form_data, user)
+            finally:
+                await finish()
 """
     members.update(guard_fixture_members())
     for prefix in ("open_webui/static/", "open_webui/frontend/static/"):
@@ -495,7 +573,23 @@ def assert_asset_guard_patches(test, built):
     test.assertGreater(middleware.index("wrap_chat_work_tools(request, user, tools_dict)"), middleware.index("await get_builtin_tools("))
     test.assertLess(middleware.index("wrap_chat_work_tools(request, user, tools_dict)"), middleware.index("metadata['tools'] = tools_dict"))
     test.assertIn("explicit_tools=payload_tools is not None", middleware)
+    test.assertLess(middleware.index("await process_filter_functions"), middleware.index("await enforce_chat_work_help"))
+    test.assertLess(middleware.index("await enforce_chat_work_help"), middleware.index("features = form_data.pop"))
+    test.assertEqual(middleware.count("dispatch=True)"), 4)
+    test.assertIn("get_filter_functions(request, model, metadata.get('filter_ids', []))", middleware)
+    for boundary in ("if folder_id and user", "if file_context_enabled", "if use_builtin_tools", "if model_knowledge"):
+        for line in middleware.splitlines():
+            if line.lstrip().startswith(boundary):
+                test.assertIn("ees_work_help_protocol", line)
+    test.assertIn("if getattr(request.state, 'ees_work_help_protocol', None) == 1:\n        skill_ids = []", middleware)
+
     main = built.read("open_webui/main.py").decode()
+    test.assertLess(main.index("await prepare_chat_work_help"), main.index("await Chats.insert_new_chat"))
+    test.assertLess(main.index("await prepare_chat_work_help"), main.index("await Chats.upsert_message_to_chat_by_id_and_message_id"))
+    test.assertLess(main.index("await enforce_chat_work_help"), main.index("await chat_completion_handler"))
+    test.assertIn("and getattr(request.state, 'ees_work_help_protocol', None) != 1", main)
+    test.assertIn("if chat_fields and getattr(request.state, 'ees_work_help_protocol', None) != 1:", main)
+    test.assertIn("'models': getattr(request.state, 'ees_work_help_composer_models', None)", main)
     tree = ast.parse(main)
     life = next(node for node in tree.body if isinstance(node, ast.AsyncFunctionDef) and node.name == "lifespan")
     start = next(node for node in life.body if isinstance(node, ast.Expr) and isinstance(node.value, ast.Await)

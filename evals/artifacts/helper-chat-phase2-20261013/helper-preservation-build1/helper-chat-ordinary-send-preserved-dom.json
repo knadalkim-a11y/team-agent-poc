@@ -1,0 +1,33 @@
+{
+  "scope": "actual built Native UI; synthetic account, permission response and model transport",
+  "completion_count": 1,
+  "status_requests": [],
+  "observed": {
+    "path": "/c/existing-chat",
+    "helperState": {
+      "busy": false,
+      "notice": ""
+    },
+    "draft": {
+      "prompt": "",
+      "files": [],
+      "selectedToolIds": [
+        "synthetic-personal-tool"
+      ],
+      "selectedSkillIds": [
+        "synthetic-personal-skill"
+      ],
+      "selectedFilterIds": [
+        "synthetic-personal-filter"
+      ],
+      "imageGenerationEnabled": false,
+      "webSearchEnabled": false,
+      "codeInterpreterEnabled": false
+    },
+    "guideInChat": true,
+    "guideInPanel": false,
+    "references": [],
+    "helperLabels": [],
+    "horizontalOverflow": false
+  }
+}

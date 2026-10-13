@@ -13,21 +13,23 @@
   "patched_files": {
     "src/app.html": "c4cbc4c924c891233ded693ece3dad7642114e0ce0ab9e2faee45f5140b7dbb4",
     "src/lib/apis/ees-work.ts": "b0b65b445bf94d7a4ad54c6ccb497f20ec72ffa2fb5e7379b523f77ccc7fa252",
+    "src/lib/apis/openai/index.ts": "4fc60216e9fdfc930bef83fc34a739ce1767ad2f0a3a3525592f7bd9a0f199e5",
     "src/lib/components/channel/Channel.svelte": "49454dd5aa86f0bc1424ca286d1a7ffccef3103a81c5ac36a99ffc9fe03e2bfc",
-    "src/lib/components/chat/Chat.svelte": "65e1d5f8dc17887a592795e0add9aeb3d7228ed3c1c33fd9a28568f7507a8521",
+    "src/lib/components/chat/Chat.svelte": "df24b194c8f49a1e4590e60f9d012f546ee184cac21188f9c7e42dd4a6d58a06",
     "src/lib/components/chat/MessageInput.svelte": "15268374d960172401c29ad671feb4955cfa681df6688da78a859ae6ad1425fb",
-    "src/lib/components/chat/Messages/UserMessage.svelte": "91722046babf095ea399092a9cfd2ea5a0b6141956f78c26f36a5527c53c4936",
+    "src/lib/components/chat/Messages/ResponseMessage.svelte": "88a64c5d18ef5f39cab0bac897c6cd47f9aa742d253a789ecf3e97280e5c3ed8",
+    "src/lib/components/chat/Messages/UserMessage.svelte": "c677b13bf160de1bf0fafceef00ba5df098d661e6728c0dd5b1e6427b3e2eef8",
     "src/lib/components/chat/Navbar.svelte": "4b22e695898df3f082b997eafb1c57fd0b06dc26659396f1dc9c80cc724016ab",
-    "src/lib/components/chat/Placeholder.svelte": "98bc824db4db64cd8ac3bab67b42b779b53f2ef7bc41703ba579b653f71095bd",
+    "src/lib/components/chat/Placeholder.svelte": "54e33b3997e9ce6bd78ea2b39f0d5b3bf280f8c494549eeb3d440df290cd6f97",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
     "src/lib/components/ees/EesNavigation.svelte": "66406fb93ecf29a395be0827358b19e518381df564511e85e75dbb6f6e36439a",
-    "src/lib/components/ees/EesProcedureIntro.svelte": "be450efa24dc93bec3a8349b08f74014da92117807a33988958850a0f5843743",
-    "src/lib/components/ees/EesShell.svelte": "6d7dc88a4792538417e2cc22d5c6d9fc100d7859fcabd79ac5f7527995ab9432",
+    "src/lib/components/ees/EesProcedureIntro.svelte": "42d6ec5f8236059057bd5d8900cdbd161fd33d38c6c4192d5e8c962e107a49fd",
+    "src/lib/components/ees/EesShell.svelte": "63cf62375b08665a1314e0313173345c6480af7a46fbace6c48148e9b0bf7edb",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
-    "src/lib/components/ees/state.ts": "440e01445c9bbf1d7b3a66d2950fc1d149009b9583b4eeb4fe4b044e12ea1c74",
+    "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
     "src/lib/components/layout/Sidebar.svelte": "9d08f54fdaa101ef2cf06c159e5defe421b366c695f26a15c4045bf3ba556096",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
-    "src/lib/i18n/locales/ko-KR/translation.json": "abc06acfc620ff4023c6b172dbbaa94fd2fa69b2e72362a085ac7a0da9e575cd",
+    "src/lib/i18n/locales/ko-KR/translation.json": "67943c9f468cf9874c0344264706f67bfb34474be826eb39dd24816e275fb7e3",
     "src/routes/(app)/+layout.svelte": "6e235011199f1eb11107a2d444e5db8c6fb89d13b6e93b9e5980523bf87226f6",
     "src/routes/(app)/+page.svelte": "7cdd5f35c6d1064663d2bafd03263585ca270ce24d26788a656d465339e6cb03",
     "src/routes/(app)/c/[id]/+page.svelte": "2cf8b7796915e7711e467a4142d96ad1d4afc0366221236620719193d91d0ad2",
@@ -40,7 +42,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "dde30d3adc3b987cbde750d7a416dcbf2778d5bfe46100d341ebdb3adc610dda"
+      "sha256": "10b6107a90b7f32cac58b99e167ce2f60313082bd606541e9027699ed63f9939"
     }
   ],
   "pyodide_files": {
@@ -109,9 +111,11 @@
   "schema": 1,
   "source_files": {
     "src/app.html": "1608a0e17962b74dc53a3d104029f562575e202c926ffe0cc1a55b13000f9354",
+    "src/lib/apis/openai/index.ts": "3c1ea65b5f6bec2355168edc144ec9f3f7ba124d710ba984df9c9e59c38b2e31",
     "src/lib/components/channel/Channel.svelte": "849853ada14f9cb240b4752a9a1cc80d34f9cf0e1c5e8ada74b06b9b163e49e7",
     "src/lib/components/chat/Chat.svelte": "acdc9c0856664fbc73aaf822bdfac8c486715c8dd3734ca7e7544541a346bada",
     "src/lib/components/chat/MessageInput.svelte": "72e278e8329ffff068f1ff8dbbe5c848240b69a0182411154c56df286cbb2226",
+    "src/lib/components/chat/Messages/ResponseMessage.svelte": "64fb38010aa936ec0eea0d9c0dd79a087b9c5026f94be8d08139fbd6529c1270",
     "src/lib/components/chat/Messages/UserMessage.svelte": "ff75d1461b9aff69f1f7b4b9cd88a4933d1cd5d70c81e51237274b8e2a57f09f",
     "src/lib/components/chat/Navbar.svelte": "2ab3318e406d55ab874ebe97b3669ebe0b6d04a7d0a66b692f0c1fa3129e2f4d",
     "src/lib/components/chat/Placeholder.svelte": "8ba5d38df1579de0b96742a57dfeedbcd81fb72a673d3c3032c77401df0a1331",

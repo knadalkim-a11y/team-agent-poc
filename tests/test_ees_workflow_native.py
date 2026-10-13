@@ -1,5 +1,6 @@
 """TR-01..06/10/19/20: real pinned Native read bridge, synthetic HTTP only."""
 import asyncio
+import ast
 from copy import deepcopy
 import hashlib
 import json
@@ -231,6 +232,157 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual({pat for _, pat in self.http_calls}, {"Bearer synthetic-reader-pat", "Bearer synthetic-admin-pat"})
         self.assertNotIn("synthetic-admin-pat", json.dumps(reader))
         self.assertNotIn("synthetic-reader-pat", json.dumps(admin))
+
+    async def help_send_fixture(self):
+        """Real stored Tool/model ACLs; pinned Native model check, no model IO."""
+        status = (await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')).json()
+        result = await self.fixture.request('POST', '/api/v1/ees/assets/work-tool/setup', payload={
+            'source_sha256': status['source_sha256'], 'expected_token': status['expected_token'],
+            'confirmation': 'register_readonly_work_tool',
+            'access_grants': [{'principal_type': 'user', 'principal_id': 'reader', 'permission': 'read'}]})
+        self.assertEqual(result.status_code, 200, result.text)
+        created = await self.fixture.models.Models.insert_new_model(self.fixture.models.ModelForm(
+            id='helper-model', name='Synthetic helper model', params={}, meta={},
+            access_grants=[{'principal_type': 'user', 'principal_id': 'reader', 'permission': 'read'}]), 'admin')
+        self.assertIsNotNone(created)
+        self.fixture.app.state.MODELS = {'helper-model': {'id': 'helper-model', 'owned_by': 'openai'}}
+        sys.modules['open_webui.env'].BYPASS_MODEL_ACCESS_CONTROL = False
+        models = sys.modules['open_webui.utils.models']
+        access = sys.modules['open_webui.utils.access_control']
+        models.__dict__.update(Models=self.fixture.models.Models, Groups=self.fixture.native_groups.Groups,
+            AccessGrants=self.fixture.acl.AccessGrants, has_access=access.has_access,
+            has_base_model_access=access.has_base_model_access)
+        definitions = [node for node in ast.parse(self.fixture.members['open_webui/utils/models.py']).body
+                       if isinstance(node, ast.AsyncFunctionDef) and node.name == 'check_model_access']
+        self.assertEqual(len(definitions), 1)
+        exec(compile(ast.Module(body=definitions, type_ignores=[]), 'pinned-native-model-access', 'exec'), models.__dict__)
+        service = self.fixture.workflow.WorkflowService(self.fixture.directory / 'help-send.sqlite3',
+            self.fixture.native_users.Users.get_user_by_id, lambda _: None)
+        self.chat_lookup = AsyncMock(return_value=SimpleNamespace(user_id='reader'))
+        modules = {'open_webui.models.chats': SimpleNamespace(Chats=SimpleNamespace(get_chat_by_id=self.chat_lookup))}
+        for context in (patch.object(self.native, '__file__', str(self.fixture.directory / 'ees_workflow_native.py')),
+                        patch.object(self.fixture.workflow, '_production_service', return_value=service),
+                        patch.dict(sys.modules, modules)):
+            context.start(); self.addCleanup(context.stop)
+        return service
+
+    def help_send_input(self):
+        request = Request({'type': 'http', 'app': self.fixture.app, 'headers': [], 'state': {}})
+        reference = {'kind': 'help', 'system_id': '', 'context_id': 'tool-draft', 'screen': 'tools',
+                     'title': '새 도구', 'term_id': 'read_tool', 'ignored_secret': 'not forwarded'}
+        metadata = {'chat_id': 'owned-chat', 'params': {'function_calling': 'native'},
+            'user_message': {'id': 'help-user-message', 'content': '정보 읽기는 무엇인가요?',
+                             'files': [{'id': 'draft-file'}], 'meta': {'ees_work_help': 1, 'ees_work_reference': reference}}}
+        selected = dict(features={'web_search': True, 'code_interpreter': True}, files=[{'id': 'draft-file'}],
+                        skill_ids=['private-skill'], tool_servers=[{'url': 'https://synthetic.invalid'}],
+                        terminal_id='private-terminal', filter_ids=['selected-filter'], tool_ids=['private-write'])
+        metadata.update(deepcopy(selected))
+        body = {'model': 'helper-model', 'messages': [{'role': 'user', 'content': '정보 읽기는 무엇인가요?'}],
+                **deepcopy(selected)}
+        return request, metadata, body
+
+    async def test_helper_preflight_current_native_model_tool_acl_and_scope_without_writes(self):
+        service = await self.help_send_fixture()
+        request, _, _ = self.help_send_input()
+        before = service.database.read_bytes()
+        ready = await self.native.help_chat_status(request, self.reader, 'helper-model', '', 'owned-chat')
+        self.assertEqual(ready, {'ok': True, 'available': True, 'protocol': 1, 'model_id': 'helper-model'})
+        self.assertEqual(service.database.read_bytes(), before)
+        self.chat_lookup.return_value = SimpleNamespace(user_id='admin')
+        denied = await self.native.help_chat_status(request, self.reader, 'helper-model', '', 'owned-chat')
+        self.assertFalse(denied['available']); self.assertEqual(denied['code'], 'work_chat_owner_required')
+        self.chat_lookup.return_value = SimpleNamespace(user_id='reader')
+        denied = await self.native.help_chat_status(request, self.reader, 'helper-model', 'missing-system', 'owned-chat')
+        self.assertFalse(denied['available']); self.assertEqual(denied['code'], 'scope_forbidden')
+        await self.fixture.acl.AccessGrants.set_access_grants('model', 'helper-model', [])
+        denied = await self.native.help_chat_status(request, self.reader, 'helper-model')
+        self.assertFalse(denied['available']); self.assertEqual(denied['code'], 'work_help_model_unavailable')
+        await self.fixture.acl.AccessGrants.set_access_grants('model', 'helper-model',
+            [{'principal_type': 'user', 'principal_id': 'reader', 'permission': 'read'}])
+        await self.fixture.acl.AccessGrants.set_access_grants('tool', 'ees_workflow', [])
+        denied = await self.native.help_chat_status(request, self.reader, 'helper-model')
+        self.assertFalse(denied['available']); self.assertEqual(denied['code'], 'work_chat_access_denied')
+        self.assertNotIn('source_sha256', denied); self.assertNotIn('https://', json.dumps(denied))
+
+    async def test_helper_prepare_strips_only_this_request_before_persistence_and_no_fallback(self):
+        await self.help_send_fixture()
+        request, metadata, body = self.help_send_input()
+        body['ees_work_composer_models'] = ['helper-model', 'other-selected-model']
+        self.assertTrue(await self.native.prepare_chat_work_help(request, self.reader, metadata, body,
+            message_ids=[{'model_id': 'helper-model', 'message_id': 'helper-answer'}]))
+        self.assertEqual(request.state.ees_work_help_composer_models, ['helper-model', 'other-selected-model'])
+        self.assertNotIn('ees_work_composer_models', body)
+        self.assertEqual(metadata['user_message']['models'], ['helper-model'])
+        for item in (metadata, body):
+            self.assertEqual(item['tool_ids'], ['ees_workflow'])
+            self.assertFalse(any(item[key] for key in ('features', 'files', 'skill_ids', 'tool_servers', 'terminal_id', 'filter_ids')))
+        self.assertEqual(metadata['user_message']['content'], '정보 읽기는 무엇인가요?')
+        self.assertEqual(metadata['user_message']['files'], [])
+        self.assertNotIn('ignored_secret', metadata['ees_work_reference'])
+        self.assertEqual(metadata['user_message']['meta']['ees_work_reference'], metadata['ees_work_reference'])
+        for change in ({'tools': []}, {'model': 'missing-model'}, {'model': 'arena-model'}):
+            self.fixture.app.state.MODELS['arena-model'] = {'id': 'arena-model', 'owned_by': 'arena'}
+            request, metadata, body = self.help_send_input(); body.update(change)
+            before = deepcopy(metadata)
+            with self.assertRaises(HTTPException) as denied:
+                await self.native.prepare_chat_work_help(request, self.reader, metadata, body)
+            self.assertEqual(denied.exception.status_code, 409)
+            self.assertIs(denied.exception.detail['persisted'], False)
+            self.assertEqual(metadata, before)
+        request, metadata, body = self.help_send_input(); metadata['chat_id'] = ''
+        self.assertTrue(await self.native.prepare_chat_work_help(request, self.reader, metadata, body, is_new_chat=True))
+        request, metadata, body = self.help_send_input(); metadata['user_message']['meta'].pop('ees_work_help')
+        before = deepcopy((metadata, body))
+        self.assertFalse(await self.native.prepare_chat_work_help(request, self.reader, metadata, body))
+        self.assertEqual((metadata, body), before)
+        # The older ordinary composer help reference still selects read-only
+        # help without destructively clearing the user's send controls/files.
+        selected = await self.native.select_chat_work_tools(request, self.reader, metadata, body['tool_ids'], body)
+        self.assertEqual(selected, ['ees_workflow'])
+        self.assertEqual(metadata['user_message']['files'], before[0]['user_message']['files'])
+        await self.native.enforce_chat_work_help(request, self.reader, metadata, body, dispatch=True)
+
+    async def test_helper_policy_filter_and_dispatch_recheck_reject_mutated_powers_and_context(self):
+        await self.help_send_fixture()
+        request, metadata, body = self.help_send_input()
+        await self.native.prepare_chat_work_help(request, self.reader, metadata, body)
+        await self.native.enforce_chat_work_help(request, self.reader, metadata, body)
+        for key, value in (('features', {'web_search': True}), ('tool_ids', ['unrelated']),
+                           ('files', [{'id': 'injected'}]), ('tools', [{'type': 'function'}]),
+                           ('skill_ids', ['injected']), ('tool_servers', ['injected']), ('model', 'other')):
+            changed = {**body, key: value}
+            with self.assertRaises(HTTPException) as denied:
+                await self.native.enforce_chat_work_help(request, self.reader, metadata, changed)
+            self.assertIs(denied.exception.detail['persisted'], True)
+        selected = await self.native.select_chat_work_tools(request, self.reader, metadata, body['tool_ids'], body)
+        tools = await self.fixture.binding.get_tools(request, selected, self.reader,
+            {'__user__': self.reader.model_dump(), '__metadata__': metadata})
+        metadata['tools'] = self.native.wrap_chat_work_tools(request, self.reader, tools)
+        body['tools'] = [{'type': 'function', 'function': item['spec']} for item in metadata['tools'].values()]
+        await self.native.enforce_chat_work_help(request, self.reader, metadata, body, dispatch=True)
+        original = next(iter(metadata['tools'].values()))['callable']
+        forged = deepcopy(metadata); next(iter(forged['tools'].values()))['callable'] = AsyncMock()
+        for changed_meta, changed_body in ((forged, body),
+                (metadata, {**body, 'tools': [{'type': 'function', 'function': {'name': 'write'}}]}),
+                (metadata, {**body, 'messages': [{'role': 'user', 'content': 'context removed'}]}),
+                ({**metadata, 'ees_work_reference': {**metadata['ees_work_reference'], 'title': 'changed'}}, body)):
+            with self.assertRaises(HTTPException):
+                await self.native.enforce_chat_work_help(request, self.reader, changed_meta, changed_body, dispatch=True)
+        for routing_key, routing_value in (('direct', True), ('type', 'external'),
+                                           ('server', {'url': 'https://synthetic.invalid'}), ('tool_id', 'other')):
+            # Keep the legitimate callable identity: Native direct dispatch can
+            # otherwise bypass it and send a browser execute:tool request.
+            routed = {**metadata, 'tools': {key: {**item, routing_key: routing_value}
+                                           for key, item in metadata['tools'].items()}}
+            with self.assertRaises(HTTPException):
+                await self.native.enforce_chat_work_help(request, self.reader, routed, body, dispatch=True)
+        # The wrapper itself refreshes model permission, including a revocation
+        # between two tool calls in one assistant response.
+        await self.fixture.acl.AccessGrants.set_access_grants('model', 'helper-model', [])
+        with self.assertRaises(HTTPException):
+            await original()
+        with self.assertRaises(HTTPException):
+            await self.native.enforce_chat_work_help(request, self.reader, metadata, body, dispatch=True)
 
     async def test_help_chat_uses_one_source_without_a_saved_workflow_or_tool_reregistration(self):
         status = (await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')).json()

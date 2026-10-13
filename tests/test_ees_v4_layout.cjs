@@ -50,6 +50,13 @@ test('dialog capture closes nested help before closing the confirmation and clea
  assert.equal(dialog.open,true);assert.equal(help.isConnected,false);assert.equal(h.document.activeElement,trigger);
  help=show();dialog.close();assert.equal(help.isConnected,false);assert.equal(await waiting,false);
 });
+test('help footer sends question and visible context separately and follows Native response busy state',async()=>{
+ const h=dom();h.context.window.innerHeight=800;let busy=true,sent;
+ h.context.window.__eesSourceShellV1.helpState=()=>({busy});h.context.onAsk=async(question,context)=>{sent={question,context};return true;};
+ const help=run(h.context,'workUI.showHelp({termId:"read_tool",help:{terms:[{id:"read_tool",name:"정보 읽기",summary:"읽기만 합니다"}]},context:{screen:"도구 작성",draftName:"점검 조회"},onAsk})'),button=help.querySelector('[data-help-ask]');
+ assert.equal(button.disabled,true);busy=false;run(h.context,'workUI.syncHelpState()');assert.equal(button.disabled,false);button.dispatch('click');await new Promise(setImmediate);
+ assert.equal(sent.question,'EES Workflow 도움말 ‘정보 읽기’의 뜻과 지금 화면에서 쓰는 방법을 알려줘.');assert.deepEqual(JSON.parse(JSON.stringify(sent.context)),{screen:'도구 작성',draftName:'점검 조회',term_id:'read_tool'});assert.equal(help.isConnected,false);
+});
 
 
 test('workspace refresh retains active input identity and text selection without taking Native focus',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})');view.render(snapshot());const host=h.ids.get('ees-work-panel'),field=h.element('input-original');field.id='ew-run-evidence';field.setAttribute('name','evidence');field.selectionStart=2;field.selectionEnd=5;field.selectionDirection='forward';host.mockControls=[field];field.focus();let replacement;host.replaceControls=()=>{replacement=h.element('ew-run-evidence');replacement.setAttribute('name','evidence');replacement.setSelectionRange=(start,end,direction)=>{replacement.range=[start,end,direction];};return [replacement];};view.render(snapshot());assert.equal(h.document.activeElement,replacement);assert.deepEqual(replacement.range,[2,5,'forward']);h.pane.focus();view.render(snapshot());assert.equal(h.document.activeElement,h.pane);});
@@ -124,14 +131,11 @@ test('runtime never arms or releases a document hiding gate on success or failur
  const {launcherSource}=require('./ees_workspace_ui_fixture.cjs');assert.doesNotMatch(launcherSource,/eesStartup|startup-ready|startupReady|visibility/);
  for(const behavior of ['success','missing','exception']){const h=controller(),events=[];h.context.window.dispatchEvent=event=>events.push(event.type);h.view.render=()=>{if(behavior==='exception')throw Error('layout_failed');return behavior==='success';};if(behavior==='exception')await assert.rejects(h.api.refresh(),/layout_failed/);else await h.api.refresh();assert.deepEqual(events,[]);}
 });
-test('view completion signal follows actual mount success and the creation card states current capability exactly',()=>{
+test('view reports source slot mount success and leaves procedure introduction to source components',()=>{
  const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})');assert.equal(view.render(snapshot()),true);
  h.context.window.__eesSourceShellV1.hosts=()=>({});assert.equal(view.render(snapshot()),false);assert.equal(view.sync(snapshot()),false);
- const card=run(h.context,'workProcedureStartHTML({kind:"new"})');
- assert.ok(card.includes('새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.'));
- assert.doesNotMatch(card,/하시는 일을 순서대로 말해 주시면|예시 없이, 하는 일을 말로 설명해서 만들고 싶어/);
+ const {viewSource}=require('./ees_workspace_ui_fixture.cjs');assert.doesNotMatch(viewSource,/function workProcedureStartHTML/);
  assert.equal(run(h.context,'workUI.procedureQuestions[2]'),'빈 절차로 시작하면 무엇부터 정하나요?');
- assert.match(card,/data-question-index="2"[^>]*>.*?<span>빈 절차로 시작하면 무엇부터 정하나요\?<\/span>/);
 });
 
 test('Native portal skin is gated by the first-render source without hiding or moving Native surfaces',()=>{

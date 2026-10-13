@@ -32,13 +32,8 @@ const workUI = (() => {
   const overlayHost=()=>window.__eesSourceShellV1?.hosts?.()?.overlays;
   function mountOverlay(element,trigger=null){const host=trigger&&activeDialog?.contains?.(trigger)?activeDialog:overlayHost();if(!host)throw new Error('업무 화면을 준비한 뒤 다시 시도해 주세요.');host.append(element);}
   function dismissHelp(event){if(activeHelp&&!activeHelp.element.contains(event.target)&&!activeHelp.trigger?.contains?.(event.target))activeHelp.close(false);}
-  function helpQuestion(term,context={}){
-    const lines=[`EES Workflow 도움말 ‘${term.name || term.id}’의 뜻과 지금 화면에서 쓰는 방법을 알려줘.`,`도움말 용어 ID: ${term.id}`];
-    if(context.screen)lines.push(`현재 화면: ${context.screen}`);
-    if(context.draftName)lines.push(`초안 이름: ${context.draftName}`);
-    if(context.kind)lines.push(`하는 일: ${{read:'정보 읽기',request:'EES에 작업 부탁',direct:'직접 실행 · 예외'}[context.kind] || context.kind}`);
-    return lines.join('\n');
-  }
+  const helpQuestion=term=>`EES Workflow 도움말 ‘${term.name || term.id}’의 뜻과 지금 화면에서 쓰는 방법을 알려줘.`;
+  function syncHelpState(){if(activeHelp)activeHelp.element.querySelector('[data-help-ask]').disabled=typeof activeHelp.onAsk!=='function'||Boolean(window.__eesSourceShellV1?.helpState?.()?.busy);}
   function closeHelp({restoreFocus=true}={}){activeHelp?.close(restoreFocus);}
   function reanchorHelp(root,context){activeHelp?.reanchor(root,context);}
   function showHelp({termId,help,context={},trigger,onAsk}){
@@ -74,12 +69,12 @@ const workUI = (() => {
       if(trigger!==replacement){restoreAttribute('aria-expanded',priorExpanded);restoreAttribute('aria-controls',priorControls);trigger=replacement;previous=replacement;previous.setAttribute('aria-expanded','true');previous.setAttribute('aria-controls',element.id);}
       if(nextContext)context=nextContext;position();
     };
-    activeHelp={element,close,reanchor,trigger};mountOverlay(element,trigger);position();
+    activeHelp={element,close,reanchor,trigger,onAsk};mountOverlay(element,trigger);position();syncHelpState();
     element.addEventListener('keydown',onKey,true);window.addEventListener('resize',position);for(const host of scrollHosts)host.addEventListener('scroll',position,true);
     element.querySelector('[data-help-close]').addEventListener('click',()=>close(true));
     element.querySelector('[data-help-ask]').addEventListener('click',async()=>{
       const button=element.querySelector('[data-help-ask]'),message=element.querySelector('[data-help-error]');button.disabled=true;message.hidden=true;
-      try{const result=await onAsk(helpQuestion(selected,context));if(result===false)throw new Error('대화 입력창을 준비한 뒤 다시 시도해 주세요.');close(false);}catch(error){if(activeHelp?.element===element){message.textContent=error.message || '질문을 입력창에 넣지 못했습니다. 다시 시도해 주세요.';message.hidden=false;button.disabled=false;position();}}
+      try{const result=await onAsk(helpQuestion(selected),{...context,term_id:selected.id});if(result===false)return;close(false);}catch(error){if(activeHelp?.element===element){message.textContent=error.message || '질문을 보내지 못했습니다. 다시 시도해 주세요.';message.hidden=false;position();}}finally{syncHelpState();}
     });
     element.querySelector('[data-help-close]').focus({preventScroll:true});return element;
   }
@@ -99,7 +94,7 @@ const workUI = (() => {
       element.showModal();element.querySelector('[data-dialog-close]').focus({preventScroll:true});
     });
   }
-  return Object.freeze({$,esc,clone,newId,categories,procedureQuestions,executionActorLabel,levels,statuses,icon,button,finished,lineage,badge,safeURL,time,dialog,closeDialog,helpQuestion,showHelp,closeHelp,reanchorHelp,dismissHelp});
+  return Object.freeze({$,esc,clone,newId,categories,procedureQuestions,executionActorLabel,levels,statuses,icon,button,finished,lineage,badge,safeURL,time,dialog,closeDialog,helpQuestion,showHelp,closeHelp,reanchorHelp,dismissHelp,syncHelpState});
 })();
 
 function workStatusHTML(status,label=''){
@@ -338,12 +333,6 @@ function workRestorePanelPosition(host,position){
   const expanded=new Set(position.expanded || []);
   for(const detail of host.querySelectorAll('details[data-key]'))detail.open=expanded.has(detail.dataset.key);
   const content=host.querySelector('#ees-work-content');if(content)content.scrollTop=position.scroll;
-}
-
-function workProcedureStartHTML(context){
-  if(!context)return '';
-  const {esc,icon}=workUI;
-  return `<div class="ew-procedure-intro"><small>${icon('cf77a','')}업무 도우미</small><p>새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.</p><p class="ew-muted">이렇게 시작할 수 있습니다</p><div class="ew-procedure-questions">${workUI.procedureQuestions.map((question,index)=>`<button type="button" data-action="procedure_question" data-question-index="${index}">${icon('cf77a')}<span>${esc(question)}</span>${icon('69549')}</button>`).join('')}</div><small>질문을 입력창에 채웁니다. 내용을 확인하고 직접 보내 주세요.</small></div>`;
 }
 
 // These are the pinned Native destinations, not URLs supplied by a page or user.

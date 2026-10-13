@@ -338,6 +338,31 @@ def prepare_asset_guard_replacements(source, replacements):
         if filename == "open_webui/utils/tools.py":
             text = _guard_local_tool_loading(text, filename)
         if filename == "open_webui/utils/middleware.py":
+            text = _guard_import(text, "from open_webui.ees_workflow_native import enforce_chat_work_help")
+            text = _one_replace(text, "    if is_saved_chat_id(chat_id) and user_message_id:\n        if getattr(request.state, 'direct', False)",
+                "    if is_saved_chat_id(chat_id) and user_message_id and getattr(request.state, 'ees_work_help_protocol', None) != 1:\n        if getattr(request.state, 'direct', False)", filename)
+            text = _one_replace(text, "                if message.get('role') == 'user' and image_files:\n",
+                "                if message.get('role') == 'user' and image_files and getattr(request.state, 'ees_work_help_protocol', None) != 1:\n", filename)
+            text = _one_replace(text, "    form_data = await convert_url_images_to_base64(form_data, user=user)\n",
+                "    if getattr(request.state, 'ees_work_help_protocol', None) != 1:\n"
+                "        form_data = await convert_url_images_to_base64(form_data, user=user)\n", filename)
+            text = _one_replace(text, "        if use_builtin_tools:\n",
+                "        if use_builtin_tools and getattr(request.state, 'ees_work_help_protocol', None) != 1:\n", filename)
+            text = _one_replace(text, "    features = form_data.pop('features', None) or {}\n",
+                "    await enforce_chat_work_help(request, user, metadata, form_data)\n"
+                "    features = form_data.pop('features', None) or {}\n", filename)
+            text = _one_replace(text, "    if folder_id and user:\n",
+                "    if folder_id and user and getattr(request.state, 'ees_work_help_protocol', None) != 1:\n", filename)
+            text = _one_replace(text, "    if model_knowledge and metadata.get('params', {}).get('function_calling') == 'legacy':\n",
+                "    if model_knowledge and metadata.get('params', {}).get('function_calling') == 'legacy' and getattr(request.state, 'ees_work_help_protocol', None) != 1:\n", filename)
+            text = _one_replace(text, "    if model_knowledge:\n",
+                "    if model_knowledge and getattr(request.state, 'ees_work_help_protocol', None) != 1:\n", filename)
+            text = _one_replace(text, "    available_skills = []\n",
+                "    if getattr(request.state, 'ees_work_help_protocol', None) == 1:\n"
+                "        skill_ids = []\n"
+                "    available_skills = []\n", filename)
+            text = _one_replace(text, "    if file_context_enabled:\n",
+                "    if file_context_enabled and getattr(request.state, 'ees_work_help_protocol', None) != 1:\n", filename)
             text = _one_replace(text, "    tool_ids = form_data.pop('tool_ids', None)\n",
                 "    tool_ids = form_data.pop('tool_ids', None)\n"
                 "    from open_webui.ees_workflow_native import select_chat_work_tools, wrap_chat_work_tools\n"
@@ -345,10 +370,39 @@ def prepare_asset_guard_replacements(source, replacements):
             text = _one_replace(text, "        if tools_dict:\n",
                 "        tools_dict = wrap_chat_work_tools(request, user, tools_dict)\n\n"
                 "        if tools_dict:\n", filename)
+            # Check both Native tool dispatch paths and each model continuation
+            # after the retained policy request filters have run.
+            text = _one_replace(text, "\n    tools = metadata.get('tools', {})\n",
+                "\n    await enforce_chat_work_help(request, user, metadata, form_data, dispatch=True)\n"
+                "    tools = metadata.get('tools', {})\n", filename)
+            text = _one_replace(text, "\n                    tools = metadata.get('tools', {})\n",
+                "\n                    await enforce_chat_work_help(request, user, metadata, form_data, dispatch=True)\n"
+                "                    tools = metadata.get('tools', {})\n", filename)
+            for indent in (" " * 24, " " * 28):
+                before = "\n" + indent + "res = await generate_chat_completion(\n"
+                text = _one_replace(text, before,
+                    "\n" + indent + "await enforce_chat_work_help(request, user, metadata, new_form_data, dispatch=True)" + before, filename)
             text += "\nEES_WORK_NATIVE_CHAT_CONTEXT = 1\n"
         if filename in {"open_webui/routers/openai.py", "open_webui/routers/ollama.py"}:
             text = _guard_headless_model_parameters(text, filename)
         if filename == "open_webui/main.py":
+            text = _one_replace(text, "        if is_new_chat:\n            metadata['chat_id'] = str(uuid4())\n",
+                "        from open_webui.ees_workflow_native import prepare_chat_work_help\n"
+                "        if await prepare_chat_work_help(request, user, metadata, form_data, is_new_chat=is_new_chat, message_ids=message_ids):\n"
+                "            tasks = None\n"
+                "        if is_new_chat:\n            metadata['chat_id'] = str(uuid4())\n", filename)
+            text = _one_replace(text, "                                'models': [entry['model_id'] for entry in message_ids],\n",
+                "                                'models': getattr(request.state, 'ees_work_help_composer_models', None) or [entry['model_id'] for entry in message_ids],\n", filename)
+            text = _one_replace(text, "                    if chat_fields:\n                        await Chats.update_chat_by_id(chat_id, chat_fields, touch=False)\n",
+                "                    if chat_fields and getattr(request.state, 'ees_work_help_protocol', None) != 1:\n"
+                "                        await Chats.update_chat_by_id(chat_id, chat_fields, touch=False)\n", filename)
+            text = _one_replace(text, "            response = await chat_completion_handler(request, form_data, user)\n",
+                "            from open_webui.ees_workflow_native import enforce_chat_work_help\n"
+                "            await enforce_chat_work_help(request, user, metadata, form_data, dispatch=True)\n"
+                "            response = await chat_completion_handler(request, form_data, user)\n", filename)
+            text = _one_replace(text, "                    and getattr(request.state, 'internal', False) is not True\n",
+                "                    and getattr(request.state, 'internal', False) is not True\n"
+                "                    and getattr(request.state, 'ees_work_help_protocol', None) != 1\n", filename)
             node, = [n for n in ast.parse(text).body if isinstance(n, ast.AsyncFunctionDef) and n.name == "lifespan"]
             lines = text.splitlines(keepends=True)
             body = "".join(lines[node.lineno - 1:node.end_lineno])

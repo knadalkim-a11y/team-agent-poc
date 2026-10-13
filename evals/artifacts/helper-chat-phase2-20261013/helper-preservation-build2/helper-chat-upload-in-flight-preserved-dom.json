@@ -1,0 +1,63 @@
+{
+  "scope": "actual built Native UI; synthetic account, permission response and model transport",
+  "completion_count": 1,
+  "status_requests": [
+    {
+      "model_id": "fixture-model",
+      "system_id": "EMS",
+      "chat_id": "existing-chat"
+    }
+  ],
+  "observed": {
+    "path": "/c/existing-chat",
+    "helperState": {
+      "busy": false,
+      "notice": ""
+    },
+    "draft": {
+      "prompt": "업로드 완료를 기다리는 개인 질문",
+      "files": [
+        {
+          "type": "file",
+          "file": {
+            "id": "fixture-file",
+            "user_id": "fixture-admin",
+            "filename": "uploading-personal.png",
+            "meta": {
+              "name": "uploading-personal.png",
+              "content_type": "image/png",
+              "size": 7858
+            },
+            "data": {
+              "status": "completed"
+            },
+            "created_at": 1
+          },
+          "id": "fixture-file",
+          "url": "fixture-file",
+          "name": "uploading-personal.png",
+          "status": "uploaded",
+          "size": 7858,
+          "error": "",
+          "itemId": "8bdc31d3-b9b4-40ab-b7d4-b526604949b7",
+          "content_type": "image/png"
+        }
+      ],
+      "selectedToolIds": [],
+      "selectedSkillIds": [],
+      "selectedFilterIds": [],
+      "imageGenerationEnabled": false,
+      "webSearchEnabled": false,
+      "codeInterpreterEnabled": false
+    },
+    "guideInChat": true,
+    "guideInPanel": false,
+    "references": [
+      "참고: 새 업무 절차 · 신규 공장 횡전개"
+    ],
+    "helperLabels": [
+      "업\n업무 도우미"
+    ],
+    "horizontalOverflow": false
+  }
+}
