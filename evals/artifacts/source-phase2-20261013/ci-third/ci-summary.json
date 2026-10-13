@@ -1,0 +1,204 @@
+{
+  "scope": "PR86 third CI; selector-only historical-reference fixture repair",
+  "run_id": 38369140072,
+  "run_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38369140072",
+  "pr_head": "6b7d4aea93d2efb624e95a7e7a5a63c686d028ec",
+  "tested_merge": "74c47c995caf52e1a5bcd67446172656cb5b06ad",
+  "counts": {
+    "success": 28,
+    "failure": 2,
+    "cancelled": 1,
+    "skipped": 1
+  },
+  "jobs": [
+    {
+      "id": 115201463063,
+      "name": "Pinned Native source baseline and EES frontend build",
+      "conclusion": "success"
+    },
+    {
+      "id": 115203514533,
+      "name": "Prepare pinned program fixtures and test coverage",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204286620,
+      "name": "native-work (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204286731,
+      "name": "native-execution (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204286757,
+      "name": "native-account (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204286840,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "conclusion": "failure"
+    },
+    {
+      "id": 115204286875,
+      "name": "native-compose (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204286998,
+      "name": "platform (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287000,
+      "name": "program-install (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287043,
+      "name": "contracts (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287061,
+      "name": "services (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287064,
+      "name": "native-contracts (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287088,
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287103,
+      "name": "services (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287105,
+      "name": "contracts (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287126,
+      "name": "program-wheel (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287171,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287187,
+      "name": "restore-ees13 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287192,
+      "name": "native-contracts (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287207,
+      "name": "program-install (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287221,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287224,
+      "name": "native-grounding (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287233,
+      "name": "platform (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287236,
+      "name": "native-grounding (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287272,
+      "name": "restore-ees12 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287301,
+      "name": "restore-ees13 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287338,
+      "name": "program-wheel (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287340,
+      "name": "restore-ees11 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115204287405,
+      "name": "restore-ees10 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 115207553522,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "conclusion": "failure"
+    },
+    {
+      "id": 115207553554,
+      "name": "Delivery checks (windows-2022)",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 115207625238,
+      "name": "Prepare delivery files",
+      "conclusion": "skipped"
+    }
+  ],
+  "independent_failure": {
+    "job_id": 115204286840,
+    "step": "Verify central Native chat with actual registered read and proposal tools",
+    "file": "tests/ees_work_native_chat.py",
+    "line": 286,
+    "old_selector": "#message-<exact message id> .ees-work-message-reference [data-action=open_reference]",
+    "new_selector": "#message-<exact message id> [data-ees-reference-slot] [data-action=open_reference]",
+    "finding": "Actual rendered historical reference card and immutable old attempt metadata present; legacy wrapper selector absent. All behavioral and permission assertions retained."
+  },
+  "artifact": {
+    "id": 11798853924,
+    "zip_sha256": "58989b421b44204ebfc47208be95fcd693f61fe39bee3101cebf652f0e00237f",
+    "bytes": 5091921,
+    "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38369140072/artifacts/11798853924"
+  },
+  "probe": {
+    "wheel_sha256": "1b9ffa24cfca97f2fa40f01652b01b918e3b19eadbb2f4856cf599d1dca35193",
+    "first": {
+      "result": "1 FAIL",
+      "seconds": 3.139,
+      "cause": "Probe save_inputs command incorrectly used values= instead of inputs=; product correctly recorded empty inputs."
+    },
+    "corrected": {
+      "result": "1 PASS",
+      "seconds": 2.752,
+      "change": "Probe argument only: values= to inputs=; same immutable wheel."
+    },
+    "boundary": "Real built source UI, Chrome153 and Work SQLite; synthetic Native auth/chat storage and external transport. Not a complete Native CLI/provider gate."
+  }
+}

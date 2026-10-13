@@ -1,5 +1,16 @@
 # 현재 작업 상태
 
+## 2026-10-13 · 사내 `.14` 적용 보고와 #83 2단계 착수
+
+- **사내 적용 원본:** 사용자가 2026-10-13 브라우저 ZIP으로 main `4e89341a4db453bab16fc91baa0af7884b92fef9`를 적용하고 `result=ok / stage=complete / running=true / commit=4e89341`을 보고했다. 실행 결과는 사용자 보고이며 첫 로딩(새로고침·주소 직접 열기)의 깜빡임 여부와 기존 대화·업무 화면 정상 여부는 미기입/미확인이다.
+- **사용자 관측:** 메뉴·패널 이동 때 Native 화면이 먼저 보이고 EES 화면이 덮는다. 새 절차의 ‘업무 도우미’는 오른쪽 상자이고 질문 버튼은 입력창에 글만 넣는다. 당시 적용본의 전역 MutationObserver·Native DOM 교체와 입력만 채우는 경로가 이 관측에 부합한다. 최초 로딩 가림만으로 이동 중 덮어 그리기가 해결됐다고 하지 않는다. [적용·관측·검증 경계](../evals/v4-ui-20260930.md#source-phase2-internal-20261013).
+- **승인된 범위:** 최신 main 위 2-1 Draft PR에서 소스가 처음부터 세 영역·왼쪽 메뉴·이동을 소유하도록 전환한다. 완료한 2-1을 기반으로 별도 2-2 Draft PR에서 업무 도우미 안내·질문을 대화 안에 넣고 즉시 전송·문맥 참고·작성 중 글/첨부 보존을 구현한다. 두 PR의 의존 관계를 명시하고 검토 변경을 분리한다. [착수 계약](mockups/ees-work/TASK.md#source-phase2-20261013).
+- **2-1 구현·검증:** 소스 컴포넌트가 세 영역·왼쪽 메뉴·라우트를 소유하고 런처의 전역 감시/가로채기·Native DOM 변경·4초 가림을 제거했다. Figma C39 이후 지정5화면, `EES.*` i18n/한국어·영어 fallback과1MiB 목록 보호를 대조했다. 최종 로컬 build3의 이동/레이아웃6개·보존20개가 통과했고21구간145프레임에서 원래 메뉴 노출·소스 틀 소실0건이다. 실제 사내 인증/모델 시험과 구분하며, 최초 실패·한계·남는 임시 렌더는 [검증 기록](../evals/v4-ui-20260930.md#source-phase2-internal-20261013)과 [이전 표](mockups/ees-work/TASK.md#source-phase2-20261013)에 남긴다. 원격 최종 head CI는 Draft PR 게시 뒤 별도로 판정한다.
+- **2-1 CI 후 보완:** [Draft PR #86](https://github.com/knadalkim-a11y/team-agent-poc/pull/86)을 게시했다. 두 번째 CI에서 발견한 다른 탭 계정 변경의 Native 재초기화 누락과 기존 DOM 검사 이전을 보완했다. 새 build4의 계정/작성5개·이동/레이아웃6개가 통과했고21구간154프레임에서 원래 메뉴 노출0이었다. Windows의 누적 시간 초과는 같은 검사를 필수4+1개로 나눠 재검한다. 최초 실패·최신 원자료는 [같은 평가 기록](../evals/v4-ui-20260930.md#source-phase2-internal-20261013)에 보존하며 최종 head CI는 PR Checks에서 판정한다. 세 번째 CI의 구형 과거 참고 선택자를 소스 slot으로 고쳤으며 새 head CI를 기다린다.
+- **다음 작업 하나:** 두 Draft [PR #86](https://github.com/knadalkim-a11y/team-agent-poc/pull/86)·[PR #87](https://github.com/knadalkim-a11y/team-agent-poc/pull/87)의 최종 head CI를 확인하고 #86→#87 순서의 검토를 기다린다. 두 PR 모두 병합·Draft 해제·main 직접 push·사내 실행·Figma 수정은 하지 않는다. #77·#79와 말로 초안 만들기(B1-2a)는 범위 밖이다. 적용 안내는 사용자가 두 PR을 병합한 뒤 최종 main CI·ZIP을 기준으로 하나만 준비하며 결과 항목에 `menu_flash`·`helper_chat`을 포함한다.
+
+아래 #85 작업은 병합·사내 적용 보고 이전의 기록이다. 현재 승인 범위는 위 2단계 지시를 따른다.
+
 ## 2026-10-13 · #85 검토 반영과 #83 설계안 보완
 
 - **기준과 범위:** main `1c6ddaa04f05b2eea02bbf15155b8602f1e4a1a8`에서 `feat/source-frontend-phase1-20261013`을 시작했다. [#83 설계·착수 댓글](https://github.com/knadalkim-a11y/team-agent-poc/issues/83#issuecomment-6133363909)과 [8문항 설계안](mockups/ees-work/TASK.md#source-frontend-phase1-20261013)을 게시했다. 이번 구현은 고정 0.11.3 소스/CI 빌드·컴파일 후 바이트 패치 제거·초기 깜빡임/안내 문구·CI ZIP 전달/복구까지다. 2단계 화면 이전과 #77·#79는 미구현이며 설계 검토·확정 뒤 별도로 시작한다.

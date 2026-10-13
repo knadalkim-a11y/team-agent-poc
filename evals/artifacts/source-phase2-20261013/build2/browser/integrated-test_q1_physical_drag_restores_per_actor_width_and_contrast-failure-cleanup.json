@@ -1,0 +1,115 @@
+{
+  "initial_evidence": "integrated-test_q1_physical_drag_restores_per_actor_width_and_contrast-failure.json",
+  "browser_cleanup_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 7866.826277000655,
+    "pid": 1257,
+    "exit_code": 0,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "HeadlessChrome/153.0.8010.52",
+      "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+      "jsVersion": "15.3.76.13"
+    },
+    "target_id": "31DE73533E3F3414C913F2A8F5B8EA92",
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 78,
+      "method": "Browser.close",
+      "session_attached": false,
+      "timeout_seconds": 5,
+      "elapsed_ms": 0.18562400509836152,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "id": 76,
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "id": 77,
+        "sessionId": "3F0764809A998119F164497009C6522A"
+      },
+      {
+        "id": 78
+      }
+    ],
+    "stderr_tail": "[1013/030153.770057:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1013/030153.770130:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1013/030153.771225:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1013/030153.771281:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1013/030153.771321:ERROR:net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)\n[1013/030153.772679:ERROR:device/udev_linux/udev_watcher.cc:51] Failed to initialize a udev monitor.\n[1013/030153.772781:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 1274: No such file or directory (2)\n[1013/030153.781523:WARNING:media/gpu/vaapi/vaapi_wrapper.cc:1660] drmGetDevices2() has not found any devices\n[1013/030153.782954:WARNING:sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.\n[1013/030153.817164:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1013/030153.817234:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1013/030153.817244:WARNING:device/bluetooth/dbus/bluez_dbus_manager.cc:209] Floss manager service not available, cannot set Floss enable/disable.\n[1013/030153.819686:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1013/030153.844213:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 1312: No such file or directory (2)\n[1013/030153.878519:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1013/030153.878566:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 167.09511700173607,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    "bootstrap_observation": null
+  }
+}

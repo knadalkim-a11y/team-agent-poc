@@ -1,0 +1,17 @@
+test_closed_native_signup_ui_and_direct_api (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_closed_native_signup_ui_and_direct_api) ... /workspace/scratch/f5cd50d81fb4/team-agent-poc-phase1/.venv/lib/python3.12/site-packages/ldap3/utils/asn1.py:50: DeprecationWarning: tagMap is deprecated. Please use TAG_MAP instead.
+  from pyasn1.codec.ber.encoder import tagMap, typeMap, AbstractItemEncoder
+/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase1/.venv/lib/python3.12/site-packages/ldap3/utils/asn1.py:50: DeprecationWarning: typeMap is deprecated. Please use TYPE_MAP instead.
+  from pyasn1.codec.ber.encoder import tagMap, typeMap, AbstractItemEncoder
+Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 215.9143990065786, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 143.98475099733332, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_authoring_conflict_keeps_unsaved_draft_and_published_version (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_authoring_conflict_keeps_unsaved_draft_and_published_version) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 134.68323199776933, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_new_signup_and_approval_ui (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_new_signup_and_approval_ui) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 137.66480200138176, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 20.616s
+
+OK

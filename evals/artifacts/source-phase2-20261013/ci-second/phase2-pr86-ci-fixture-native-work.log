@@ -1,0 +1,29 @@
+test_empty_state_has_no_seed_run_or_fake_success (test_ees_work_demo.EESWorkNativeBrowserTests.test_empty_state_has_no_seed_run_or_fake_success) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 251.1140219939989, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_enter_in_work_input_does_not_send_chat_or_run_job (test_ees_work_demo.EESWorkNativeBrowserTests.test_enter_in_work_input_does_not_send_chat_or_run_job) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 150.69722399493912, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_human_cancel_then_explicit_confirm_and_history (test_ees_work_demo.EESWorkNativeBrowserTests.test_human_cancel_then_explicit_confirm_and_history) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 155.72238599997945, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_input_save_is_not_execute_and_repeat_click_is_single_write (test_ees_work_demo.EESWorkNativeBrowserTests.test_input_save_is_not_execute_and_repeat_click_is_single_write) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 157.43558200483676, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_lookup_failure_removes_previously_visible_private_evidence (test_ees_work_demo.EESWorkNativeBrowserTests.test_lookup_failure_removes_previously_visible_private_evidence) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 134.8225289984839, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_model_zero_one_multiple_use_native_source_without_demo_presets (test_ees_work_demo.EESWorkNativeBrowserTests.test_model_zero_one_multiple_use_native_source_without_demo_presets) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 189.74585599789862, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_message_send_stream_and_work_panel_are_independent (test_ees_work_demo.EESWorkNativeBrowserTests.test_native_message_send_stream_and_work_panel_are_independent) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 174.57126400404377, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_native_three_regions_fonts_and_narrow_geometry (test_ees_work_demo.EESWorkNativeBrowserTests.test_native_three_regions_fonts_and_narrow_geometry) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 142.3421959989355, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_navigation_preserves_local_input_and_does_not_change_business_revision (test_ees_work_demo.EESWorkNativeBrowserTests.test_navigation_preserves_local_input_and_does_not_change_business_revision) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 136.9690659994376, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_scope_and_history_do_not_bind_or_replace_native_chat (test_ees_work_demo.EESWorkNativeBrowserTests.test_scope_and_history_do_not_bind_or_replace_native_chat) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 204.12602700525895, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_scope_dialog_escape_cancel_and_chat_draft_preservation (test_ees_work_demo.EESWorkNativeBrowserTests.test_scope_dialog_escape_cancel_and_chat_draft_preservation) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 155.46467099920847, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_sidebar_close_restore_retains_chat_and_work_input (test_ees_work_demo.EESWorkNativeBrowserTests.test_sidebar_close_restore_retains_chat_and_work_input) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 140.89011299802223, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 25.869s
+
+OK

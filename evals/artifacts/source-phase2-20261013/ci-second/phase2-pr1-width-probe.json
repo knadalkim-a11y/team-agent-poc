@@ -1,0 +1,933 @@
+{
+  "before": {
+    "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"480\"></div>",
+    "panel": 479,
+    "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"480\"></div>"
+  },
+  "trace": [
+    {
+      "t": 1341.5,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1358,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1374,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1390.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1407.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1424.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1445.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1457.3999999985099,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1474.1000000014901,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1490.7999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1507.3999999985099,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1524,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1543.1000000014901,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1557.3999999985099,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1574.1000000014901,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1590.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1607.3999999985099,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1624.1000000014901,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1640.6000000014901,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1657.3999999985099,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1674.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1690.7999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1707.3999999985099,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1724.1000000014901,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1741.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1757.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1774.1000000014901,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1790.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1807.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1824,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1840.6000000014901,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1857.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1874.1000000014901,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1890.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1907.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1923.8999999985099,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1940.6000000014901,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1957.3999999985099,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1974,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 1990.6000000014901,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2007.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2024,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2040.6000000014901,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2057.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2074,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2090.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2107.5,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2124.10000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2140.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2157.39999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2174.10000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2190.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2207.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2224,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2240.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2257.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2273.89999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2290.7999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2307.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2324,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2341.39999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2357.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2374.10000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2390.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2407.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2424.10000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2440.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2457.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2474,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2490.7999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2507.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2524.10000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2540.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2557.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2574.10000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2590.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2607.39999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2624.10000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2640.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2657.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2674,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2690.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2707.39999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2724,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2740.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2757.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2774,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2790.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2807.39999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2823.89999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2840.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2857.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2873.89999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2890.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2907.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2924,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2940.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2957.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2974,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 2990.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3007.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3023.89999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3040.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3057.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3074,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3090.7999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3107.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3124.10000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3140.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3157.39999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3174,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3190.5,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3207.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3223.89999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3240.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3257.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3273.89999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3290.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3307.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3323.89999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3340.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3357.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3373.89999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3390.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3407.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3423.89999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3440.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3457.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3474.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3490.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3507.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3524.10000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3540.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3557.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3574,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3590.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3607.2000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3623.89999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3640.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3657.5,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3673.89999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3690.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3707.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3723.89999999851,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3740.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3757.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3774,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3790.60000000149,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3807.2999999970198,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3824,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    },
+    {
+      "t": 3840.7000000029802,
+      "active": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>",
+      "panel": 719,
+      "handle": "<div class=\"ees-panel-resize svelte-1ca81nl\" data-ees-panel-resize=\"\" role=\"separator\" tabindex=\"0\" aria-orientation=\"vertical\" aria-valuemin=\"400\" aria-valuemax=\"720\" aria-label=\"업무 패널 너비\" aria-valuenow=\"720\"></div>"
+    }
+  ],
+  "state": {
+    "revision": 1,
+    "state": {
+      "selection": {
+        "mode": "author",
+        "tab": "overview",
+        "panel_open": true,
+        "system_id": "EMS",
+        "factory_id": "",
+        "workflow_id": "c8b124d2-fe05-4c46-903a-97186a72db61",
+        "run_id": "",
+        "job_id": "",
+        "collapsed": [],
+        "chat_reference": null,
+        "panel_width": 720
+      }
+    }
+  }
+}

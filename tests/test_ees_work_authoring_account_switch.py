@@ -66,8 +66,10 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
             self.fixture.chats[identifier]=record
         a_text='A만의 저장하지 않은 수행 안내';a_question='A의 비공개 작성 질문';a_answer='늦게 도착한 계정 A 전용 응답';b_text='B가 현재 직접 작성한 수행 안내'
         self.login_ui(account_a['email'],'Fixture-person-only-42!');self.open_workflow(workflow_a)
+        # The source region owns the stored column width; its legacy content
+        # slot excludes the region border and is therefore one pixel narrower.
         self.click('[data-ees-panel-resize]');self.key('End',35)
-        self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===720")
+        self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===720")
         self.eventually(lambda: self.browser_api('GET','/api/ees-work/workspace')['data'].get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')==720)
         self.fill('#ew-author-node [name=instructions]',a_text)
         self.click('[data-author-action=node][data-id=""]')
@@ -86,9 +88,9 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.browser.navigate('about:blank');self.browser.call('Runtime.enable');self.browser.call('Network.enable')
         self.navigate('/');self.wait("document.querySelector('#chat-input.ProseMirror')")
         self.logout_ui(account_a['name']);self.login_ui(account_b['email'],'Fixture-person-only-42!');self.open_workflow(workflow_b)
-        self.assertEqual(self.browser.evaluate("document.querySelector('#ees-work-panel').getBoundingClientRect().width"),480)
+        self.assertEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),480)
         self.click('[data-ees-panel-resize]');self.key('Home',36)
-        self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===400")
+        self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===400")
         self.eventually(lambda: self.browser_api('GET','/api/ees-work/workspace')['data'].get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')==400)
         self.fill('#ew-author-node [name=instructions]',b_text);new_session=self.browser.session
         self.assertEqual(self.browser_api('GET','/api/v1/auths/')['data']['id'],account_b['id'])
@@ -109,7 +111,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.assertEqual(self.browser_api('GET','/api/v1/auths/')['data']['id'],account_b['id'])
         # This background tab restored B before B changed the preference. Its
         # active display may stay at B's previous width, never A's private 720.
-        self.assertNotEqual(self.browser.evaluate("document.querySelector('#ees-work-panel').getBoundingClientRect().width"),720)
+        self.assertNotEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),720)
         for secret in (a_text,a_question,a_answer):self.assertNotIn(secret,self.authoring_content())
         self.assertEqual(self.browser_api('GET','/api/v1/users/user/settings')['data']['ui']['params']['system'],'NU05 private Native setting B')
         self.screenshot('nu05-former-a-tab-now-b')
@@ -126,7 +128,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         # After all original late-response/privacy assertions, reloading the
         # former A tab must restore the latest stored B preference.
         self.activate_tab(old_session);self.navigate('/')
-        self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===400")
+        self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===400")
         self.activate_tab(new_session)
         for account,workflow in ((account_a,workflow_a),(account_b,workflow_b)):
             stored=self.api('GET','/api/ees-work/workspace?workflow_id='+workflow['id'],token=account['token'])

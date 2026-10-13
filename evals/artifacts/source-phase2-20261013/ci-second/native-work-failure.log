@@ -1,0 +1,105 @@
+2026-10-13T07:54:07.6135007Z ======================================================================
+2026-10-13T07:54:07.6136174Z FAIL: test_model_zero_one_multiple_use_native_source_without_demo_presets (test_ees_work_demo.EESWorkNativeBrowserTests.test_model_zero_one_multiple_use_native_source_without_demo_presets) (count=0)
+2026-10-13T07:54:07.6137981Z ----------------------------------------------------------------------
+2026-10-13T07:54:07.6138469Z Traceback (most recent call last):
+2026-10-13T07:54:07.6147546Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_demo.py", line 149, in test_model_zero_one_multiple_use_native_source_without_demo_presets
+2026-10-13T07:54:07.6148710Z     self.wait("document.body?.dataset.eesModelCount === " + json.dumps(str(count)))
+2026-10-13T07:54:07.6149624Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_fixture.py", line 190, in wait
+2026-10-13T07:54:07.6150588Z     self.fail('Timed out: ' + expression + '\n' + self.text('body') + '\nUnknown routes:' + repr(self.server.unknown))
+2026-10-13T07:54:07.6151339Z AssertionError: Timed out: document.body?.dataset.eesModelCount === "0"
+2026-10-13T07:54:07.6151835Z Skip to main content
+2026-10-13T07:54:07.6152101Z E
+2026-10-13T07:54:07.6152325Z EES Workflow
+2026-10-13T07:54:07.6152809Z 업무
+2026-10-13T07:54:07.6153080Z 워크스페이스
+2026-10-13T07:54:07.6153220Z
+2026-10-13T07:54:07.6153345Z 작업 위치
+2026-10-13T07:54:07.6153475Z
+2026-10-13T07:54:07.6153592Z 공장
+2026-10-13T07:54:07.6154097Z 전체 공장
+2026-10-13T07:54:07.6154352Z 시스템
+2026-10-13T07:54:07.6154564Z EMS
+2026-10-13T07:54:07.6154795Z 내 업무
+2026-10-13T07:54:07.6161392Z ======================================================================
+2026-10-13T07:54:07.6162394Z FAIL: test_model_zero_one_multiple_use_native_source_without_demo_presets (test_ees_work_demo.EESWorkNativeBrowserTests.test_model_zero_one_multiple_use_native_source_without_demo_presets) (count=1)
+2026-10-13T07:54:07.6163420Z ----------------------------------------------------------------------
+2026-10-13T07:54:07.6163845Z Traceback (most recent call last):
+2026-10-13T07:54:07.6164727Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_demo.py", line 149, in test_model_zero_one_multiple_use_native_source_without_demo_presets
+2026-10-13T07:54:07.6165670Z     self.wait("document.body?.dataset.eesModelCount === " + json.dumps(str(count)))
+2026-10-13T07:54:07.6166464Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_fixture.py", line 190, in wait
+2026-10-13T07:54:07.6167442Z     self.fail('Timed out: ' + expression + '\n' + self.text('body') + '\nUnknown routes:' + repr(self.server.unknown))
+2026-10-13T07:54:07.6168171Z AssertionError: Timed out: document.body?.dataset.eesModelCount === "1"
+2026-10-13T07:54:07.6168623Z Skip to main content
+2026-10-13T07:54:07.6168865Z E
+2026-10-13T07:54:07.6169084Z EES Workflow
+2026-10-13T07:54:07.6169512Z 업무
+2026-10-13T07:54:07.6169753Z 워크스페이스
+2026-10-13T07:54:07.6169875Z
+2026-10-13T07:54:07.6169991Z 작업 위치
+2026-10-13T07:54:07.6170102Z
+2026-10-13T07:54:07.6170218Z 공장
+2026-10-13T07:54:07.6170447Z 전체 공장
+2026-10-13T07:54:07.6170668Z 시스템
+2026-10-13T07:54:07.6170879Z EMS
+2026-10-13T07:54:07.6171111Z 내 업무
+2026-10-13T07:54:07.6177718Z ======================================================================
+2026-10-13T07:54:07.6178744Z FAIL: test_model_zero_one_multiple_use_native_source_without_demo_presets (test_ees_work_demo.EESWorkNativeBrowserTests.test_model_zero_one_multiple_use_native_source_without_demo_presets) (count=2)
+2026-10-13T07:54:07.6179763Z ----------------------------------------------------------------------
+2026-10-13T07:54:07.6180162Z Traceback (most recent call last):
+2026-10-13T07:54:07.6181081Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_demo.py", line 149, in test_model_zero_one_multiple_use_native_source_without_demo_presets
+2026-10-13T07:54:07.6182190Z     self.wait("document.body?.dataset.eesModelCount === " + json.dumps(str(count)))
+2026-10-13T07:54:07.6183150Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_fixture.py", line 190, in wait
+2026-10-13T07:54:07.6184093Z     self.fail('Timed out: ' + expression + '\n' + self.text('body') + '\nUnknown routes:' + repr(self.server.unknown))
+2026-10-13T07:54:07.6184764Z AssertionError: Timed out: document.body?.dataset.eesModelCount === "2"
+2026-10-13T07:54:07.6185197Z Skip to main content
+2026-10-13T07:54:07.6185443Z E
+2026-10-13T07:54:07.6185672Z EES Workflow
+2026-10-13T07:54:07.6185926Z 업무
+2026-10-13T07:54:07.6186157Z 워크스페이스
+2026-10-13T07:54:07.6186283Z
+2026-10-13T07:54:07.6186394Z 작업 위치
+2026-10-13T07:54:07.6186519Z
+2026-10-13T07:54:07.6186639Z 공장
+2026-10-13T07:54:07.6187027Z 전체 공장
+2026-10-13T07:54:07.6187415Z 시스템
+2026-10-13T07:54:07.6187618Z EMS
+2026-10-13T07:54:07.6187843Z 내 업무
+2026-10-13T07:54:07.6194086Z ======================================================================
+2026-10-13T07:54:07.6194941Z FAIL: test_sidebar_close_restore_retains_chat_and_work_input (test_ees_work_demo.EESWorkNativeBrowserTests.test_sidebar_close_restore_retains_chat_and_work_input)
+2026-10-13T07:54:07.6195805Z ----------------------------------------------------------------------
+2026-10-13T07:54:07.6196207Z Traceback (most recent call last):
+2026-10-13T07:54:07.6197079Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_demo.py", line 126, in test_sidebar_close_restore_retains_chat_and_work_input
+2026-10-13T07:54:07.6198106Z     self.wait("document.querySelector('#ees-work-panel')?.hidden")
+2026-10-13T07:54:07.6198845Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_fixture.py", line 190, in wait
+2026-10-13T07:54:07.6199821Z     self.fail('Timed out: ' + expression + '\n' + self.text('body') + '\nUnknown routes:' + repr(self.server.unknown))
+2026-10-13T07:54:07.6200545Z AssertionError: Timed out: document.querySelector('#ees-work-panel')?.hidden
+2026-10-13T07:54:07.6201019Z Skip to main content
+2026-10-13T07:54:07.6201282Z E
+2026-10-13T07:54:07.6201501Z EES Workflow
+2026-10-13T07:54:07.6201776Z 업무
+2026-10-13T07:54:07.6202012Z 워크스페이스
+2026-10-13T07:54:07.6202144Z
+2026-10-13T07:54:07.6202265Z 작업 위치
+2026-10-13T07:54:07.6202387Z
+2026-10-13T07:54:07.6202502Z 공장
+2026-10-13T07:54:07.6202734Z 전체 공장
+2026-10-13T07:54:07.6202964Z 시스템
+2026-10-13T07:54:07.6203167Z EMS
+2026-10-13T07:54:07.6203385Z 내 업무
+2026-10-13T07:54:07.6209277Z ----------------------------------------------------------------------
+2026-10-13T07:54:07.6209847Z Ran 12 tests in 66.547s
+2026-10-13T07:54:07.6210015Z
+2026-10-13T07:54:07.6210131Z FAILED (failures=4)
+2026-10-13T07:54:07.7019998Z ##[error]Process completed with exit code 1.
+2026-10-13T07:54:07.7075821Z ##[group]Run python tests/ees_delivery_suite.py --browser-evidence dist/ees-work-screenshots --output dist/ees-results
+2026-10-13T07:54:07.7076503Z [36;1mpython tests/ees_delivery_suite.py --browser-evidence dist/ees-work-screenshots --output dist/ees-results[0m
+2026-10-13T07:54:07.7136400Z shell: /usr/bin/bash -e {0}
+2026-10-13T07:54:07.7136642Z env:
+2026-10-13T07:54:07.7137692Z   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-13T07:54:07.7138565Z   EES_TEST_CHROME: google-chrome
+2026-10-13T07:54:07.7138886Z   EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+2026-10-13T07:54:07.7139227Z   EES_TEST_BRANDING_DIR: dist/branding
+2026-10-13T07:54:07.7139506Z   EES_TEST_FRONTEND_DIR: dist/frontend
+2026-10-13T07:54:07.7139768Z   EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
+2026-10-13T07:54:07.7140039Z   EES_REQUIRE_AUTHORING_NATIVE: 1
+2026-10-13T07:54:07.7140351Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64

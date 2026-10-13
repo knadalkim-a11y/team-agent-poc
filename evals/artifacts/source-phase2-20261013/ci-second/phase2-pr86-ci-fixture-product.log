@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/ees_work_integrated_app.py", line 963, in <module>
+    main()
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/ees_work_integrated_app.py", line 952, in main
+    gate.run()
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/ees_work_integrated_app.py", line 282, in run
+    self.setup()
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/ees_work_integrated_app.py", line 261, in setup
+    self.launch()
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/ees_work_integrated_app.py", line 123, in launch
+    raise RuntimeError('Native CLI exited; sanitized local startup summary available')
+RuntimeError: Native CLI exited; sanitized local startup summary available

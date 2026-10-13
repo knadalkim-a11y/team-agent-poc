@@ -10,13 +10,14 @@ from copy import deepcopy
 import importlib
 import json
 from pathlib import Path
+import threading
 import time
 from urllib.parse import parse_qs, urlsplit
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
 from ees_work_integrated_fixture import IntegratedNativeCase
-from native_ui_fixture import NativeUIHandler
+from native_ui_fixture import MODELS, NativeUIHandler
 
 
 class FigmaAuthoringNativeTests(IntegratedNativeCase):
@@ -86,6 +87,17 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual({key: value for key, value in after.items() if key != 'context_id'},
                          {key: value for key, value in before.items() if key != 'context_id'})
 
+    def assert_source_shell(self):
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-ees-source-shell] [data-ees-source-sidebar] #ees-work-entry')"))
+        self.assertFalse(self.browser.evaluate("[...document.querySelectorAll('#sidebar-search-button,.sidebar-new-chat-icon')].some(node=>!node.closest('[data-ees-source-sidebar]'))"),
+                         'The Native sidebar is no longer a mount anchor or a hidden duplicate')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
+
+    def assert_work_panel_not_displayed(self):
+        # The source shell may retain its panel slot across Native navigation.
+        # Its contents must not cover the original asset-management screen.
+        self.assertFalse(self.browser.evaluate("(()=>{const panel=document.querySelector('#ees-work-panel');return !!panel&&panel.checkVisibility({visibilityProperty:true})&&panel.getBoundingClientRect().height>0;})()"))
+
     def search_native_skills(self, selector, query):
         first_event = len(self.browser.events)
         self.fill(selector, query)
@@ -130,15 +142,18 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input[aria-label]') && document.querySelector('#ees-work-entry [data-action=procedures]')")
         self.assertEqual(self.browser.evaluate('window.__menuRoundtripDocument'), label)
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel')"))
+        self.assert_work_panel_not_displayed()
+        self.assert_source_shell()
         self.assertEqual(self.read('[data-action=native_open][data-native-id=skills]', 'getAttribute("aria-current")'), 'page')
         self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-work-entry [aria-current=page]')].map(e=>e.dataset.nativeId)"), ['skills'])
-        self.assertFalse(self.browser.evaluate("[...document.querySelectorAll('#workspace-container')][0].previousElementSibling.querySelector('a[href=\"/workspace/skills\"]')?.getBoundingClientRect().height > 0"))
+        self.assertFalse(self.browser.evaluate("document.querySelector('#workspace-container')?.previousElementSibling?.querySelector('a[href=\"/workspace/skills\"]')?.getBoundingClientRect().height > 0"))
         query = 'native-menu-' + label
         self.search_native_skills('#workspace-container input[aria-label]', query)
         self.screenshot('menu-c18-skills-' + label)
         self.click('#ees-work-entry [data-action=' + ('tools' if label == 'tool' else 'procedures') + ']')
-        self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ees-work-designer') && !document.querySelector('#ees-work-native-return')")
+        # Persistent source slots exist before the returning workspace read is
+        # validated. The reference becomes available at that actual boundary.
+        self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && window.__eesNativeWorkV1?.captureReference()?.context_id && document.querySelector('#ees-work-designer') && !document.querySelector('#ees-work-native-return')")
         self.assertEqual(self.browser.evaluate('window.__menuRoundtripDocument'), label)
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), before)
         self.assertEqual(self.read('#model-selector-model-button', 'getAttribute("aria-label")'), model)
@@ -159,6 +174,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
           return {scope:'built Native UI; synthetic session and data',
             path:location.pathname,ready:document.readyState,fonts:document.fonts.status,
             nativeMount:{chatPane:!!document.querySelector('#chat-container #chat-pane'),sidebarSearch:!!document.querySelector('#sidebar-search-button'),sidebarToggle:!!document.querySelector('#sidebar-toggle-button')},
+            sourceShell:{root:box(document.querySelector('[data-ees-source-shell]')),sidebar:box(document.querySelector('[data-ees-source-sidebar]')),panelSlot:box(document.querySelector('[data-ees-source-slot]')),persistentChat:window.__eesNativeDraftV1?.persistent===true,startupGate:document.documentElement.dataset.eesStartup||null},
             viewport:[innerWidth,innerHeight],active:{tag:active?.tagName,id:active?.id,name:active?.name},
             panel:region(panel),authoring:region(author),
             nativeTheme:{modalSurface:box(document.querySelector('.modal[role=dialog]>div')),selectedSettingsTab:box(document.querySelector('#settings-tabs-container [aria-selected=true]')),valves:box(document.querySelector('.chat-control-valves')),valveInput:box(document.querySelector('.chat-control-valves input'))},
@@ -173,6 +189,16 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         return directory
 
     def test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft(self):
+        # With one available model the approved source UI omits the selector.
+        # Supply two synthetic choices to verify the real Native selected model
+        # before and after navigation, without a test-only product state hook.
+        second_model = deepcopy(MODELS[0])
+        second_model.update(id='fixture-other-model', name='Other Fixture AI')
+        second_model['info'].update(id='fixture-other-model', name='Other Fixture AI')
+        self.server.models = [deepcopy(MODELS[0]), second_model]
+        self.navigate('/c/existing-chat')
+        self.wait("window.__eesNativeDraftV1?.ready() && document.querySelector('#model-selector-model-button') && document.querySelector('#ees-work-entry')")
+        self.open_sidebar()
         self.native_menu_fixture()
         self.tool_connections()
         self.wait('window.__eesNativeDraftV1?.ready()')
@@ -248,7 +274,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
         self.click('[data-action=native_open][data-native-id=admin]')
         self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]') && document.querySelector('[role=dialog][aria-modal=true] input[type=text][placeholder*=\"localhost:3000\"]')")
-        self.assertEqual(self.browser.evaluate('location.pathname + location.search'), '/')
+        self.assertEqual(self.browser.evaluate('location.pathname + location.search'), '/c/existing-chat')
         self.wait("document.querySelector('#ees-work-entry')")
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
         original_url = self.read('[role=dialog] input[type=text][placeholder*="localhost:3000"]', 'value')
@@ -260,7 +286,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ew-procedure-name') && !document.querySelector('#settings-tabs-container') && !document.querySelector('#ees-work-native-return')")
         self.assertEqual(self.read('#ew-procedure-name', 'value'), '관리자 설정을 다녀올 새 절차')
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
-        self.assert_reference_preserved(reference)
+        # Opening the original modal now leaves the source route and Chat in
+        # place. Its reference remains the same, rather than a new route token.
+        self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference()'), reference)
         self.screenshot('menu-c18-native-admin-returned')
 
         self.click('[data-action=native_open][data-native-id=admin]')
@@ -272,7 +300,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.state()['workflows'], [])
         self.click('#settings-tabs-container [role=tab][aria-controls=tab-general]')
         self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-general][aria-selected=true]')")
-        self.assertEqual(self.browser.evaluate('location.pathname'), '/')
+        self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
         self.screenshot('menu-c18-admin-to-personal-settings')
         self.click('#settings-tabs-container > button')
@@ -321,6 +349,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertIn(boundary, list(zip(visited, visited[1:])))
 
     def test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt(self):
+        # Keep the historical test ID in the audit. Phase 2-1 replaces the old
+        # departure block with a persistent Native Chat that preserves images.
         self.native_menu_fixture()
         self.fill('#chat-input', '이미지와 함께 보존할 개인 질문')
         # A real PNG goes through the unchanged Native input-file handler;
@@ -341,15 +371,26 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.server.uploaded_file[1], 'image/png')
         self.assertTrue(self.server.uploaded_file[0].startswith(b'\x89PNG\r\n\x1a\n'))
         self.assertEqual(before['files'][0]['file']['meta']['size'], len(self.server.uploaded_file[0]))
+        self.assertTrue(self.browser.evaluate('window.__eesNativeDraftV1.persistent === true'))
+        self.browser.evaluate("window.__eesPreservedComposer=document.querySelector('#chat-input');window.__eesPreservedImage=document.querySelector('#message-input-container [data-cy=image]');true")
         self.click('[data-action=mode][data-mode=author]')
         self.click('[data-action=native_open][data-native-id=skills]')
-        self.wait("document.querySelector('[data-native-navigation-error][role=alert]')?.textContent.includes('이미지')")
-        self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
+        self.wait("location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input[aria-label]')")
+        self.assert_source_shell()
+        self.assert_work_panel_not_displayed()
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-native-navigation-error][role=alert]')"))
+        self.assertTrue(self.browser.evaluate("document.querySelector('#chat-input')===window.__eesPreservedComposer && document.querySelector('#message-input-container [data-cy=image]')===window.__eesPreservedImage"))
+        self.assertEqual(self.read('#chat-input', 'textContent'), before['prompt'])
+        self.search_native_skills('#workspace-container input[aria-label]', 'preserved-image-roundtrip')
+        self.click('#ees-work-entry [data-action=procedures]')
+        self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ees-work-designer')")
+        self.assertTrue(self.browser.evaluate("document.querySelector('#chat-input')===window.__eesPreservedComposer && document.querySelector('#message-input-container [data-cy=image]')===window.__eesPreservedImage"))
         self.assertEqual(self.read(image_selector, 'src'), image)
+        self.assertGreater(self.read(image_selector, 'naturalWidth'), 0)
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), before)
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
         self.assertEqual(self.server.completions, [])
-        self.screenshot('menu-c18-native-image-blocked')
+        self.screenshot('menu-phase2-native-image-preserved-roundtrip')
 
     def test_native_personal_settings_keep_original_tabs_and_close_controls(self):
         self.native_menu_fixture()
@@ -366,12 +407,15 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.browser.evaluate('window.__eesSettingsGateChanges'), 0,
                          'Native settings hard loads must never arm the chat startup gate')
         # Native can open its modal before the authenticated EES workspace
-        # finishes mounting. Assert the theme once its real scope is present.
-        self.wait("document.body.dataset.eesIntegrated === 'true' && document.querySelector('#ees-work-entry') && document.querySelector('#ees-work-panel')")
+        # finishes mounting. Its portaled Native form retains the approved
+        # shared EES typography without moving it into the source shell.
+        self.wait("document.querySelector('[data-ees-source-shell] #ees-work-entry') && document.querySelector('#ees-work-panel')")
+        self.assert_source_shell()
         modal = '[role=dialog][aria-modal=true]:has(#settings-tabs-container)'
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
         self.assertGreater(self.browser.evaluate("document.querySelector('#settings-tabs-container > button').getBoundingClientRect().height"), 0)
-        typography = self.browser.evaluate("""(()=>{const tabs=document.querySelector('#settings-tabs-container'),modal=tabs.closest('[role=dialog][aria-modal=true]'),tab=tabs.querySelector('[role=tab][aria-selected=true]');return {modal:getComputedStyle(modal.firstElementChild).fontFamily,tab:getComputedStyle(tab).fontFamily,tabCount:tabs.querySelectorAll('[role=tab]').length};})()""")
+        typography = self.browser.evaluate("""(()=>{const tabs=document.querySelector('#settings-tabs-container'),modal=tabs.closest('[role=dialog][aria-modal=true]'),tab=tabs.querySelector('[role=tab][aria-selected=true]');return {modal:getComputedStyle(modal.firstElementChild).fontFamily,tab:getComputedStyle(tab).fontFamily,native:getComputedStyle(document.body).fontFamily,insideShell:!!modal.closest('[data-ees-source-shell]'),tabCount:tabs.querySelectorAll('[role=tab]').length};})()""")
+        self.assertFalse(typography['insideShell'])
         self.assertIn('EES Inter', typography['modal'])
         self.assertIn('EES Inter', typography['tab'])
         self.assertGreater(typography['tabCount'], 1)
@@ -385,7 +429,145 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait('!document.querySelector(' + json.dumps(modal) + ') && window.__eesNativeDraftV1?.ready()')
         self.assertEqual(self.server.completions, [])
 
+    def test_native_menu_upload_in_flight_finishes_in_persistent_composer(self):
+        self.native_menu_fixture()
+        self.fill('#chat-input', '업로드 중 이동해도 보존할 개인 질문')
+        original_post = NativeUIHandler.do_POST
+        upload_started, upload_hold = threading.Event(), threading.Event()
+        self.addCleanup(upload_hold.set)
+
+        def held_upload(handler):
+            if urlsplit(handler.path).path == '/api/v1/files/':
+                upload_started.set()
+                if not upload_hold.wait(timeout=8):
+                    raise AssertionError('The browser did not release the held upload')
+            return original_post(handler)
+
+        provider = patch.object(NativeUIHandler, 'do_POST', held_upload)
+        provider.start()
+        self.addCleanup(provider.stop)
+        sample = Path(self.temporary.name) / 'menu-upload-in-flight.png'
+        sample.write_bytes(self.server.wheel.read('open_webui/frontend/static/user.png'))
+        self.browser.call('DOM.enable')
+        document = self.browser.call('DOM.getDocument')['root']['nodeId']
+        upload = self.browser.call('DOM.querySelector', {'nodeId': document,
+            'selector': '#chat-container input[type=file][multiple]'})['nodeId']
+        self.assertGreater(upload, 0)
+        self.browser.call('DOM.setFileInputFiles', {'nodeId': upload, 'files': [str(sample)]})
+        self.assertTrue(upload_started.wait(timeout=2), 'Native upload request was not received')
+        self.wait('window.__eesNativeDraftV1?.attachmentState().uploading')
+        before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.assertEqual(len(before['files']), 1)
+        self.assertEqual(before['files'][0]['status'], 'uploading')
+        self.browser.evaluate("window.__eesUploadingComposer=document.querySelector('#chat-input');true")
+        self.click('[data-action=mode][data-mode=author]')
+        self.click('[data-action=native_open][data-native-id=skills]')
+        self.wait("location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input[aria-label]')")
+        self.assert_source_shell()
+        self.assertTrue(self.browser.evaluate("document.querySelector('#chat-input')===window.__eesUploadingComposer"))
+        self.assertEqual(self.read('#chat-input', 'textContent'), before['prompt'])
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-native-navigation-error][role=alert]')"))
+        upload_hold.set()
+        image_selector = '#message-input-container [data-cy=image]'
+        self.wait('document.querySelector(' + json.dumps(image_selector) + ')?.naturalWidth > 0')
+        self.click('#ees-work-entry [data-action=procedures]')
+        self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ees-work-designer')")
+        self.assertTrue(self.browser.evaluate("document.querySelector('#chat-input')===window.__eesUploadingComposer"))
+        after = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.assertEqual({key: value for key, value in after.items() if key != 'files'},
+                         {key: value for key, value in before.items() if key != 'files'})
+        self.assertEqual(len(after['files']), 1)
+        self.assertEqual(after['files'][0]['itemId'], before['files'][0]['itemId'])
+        self.assertNotEqual(after['files'][0]['status'], 'uploading')
+        self.assertEqual(after['files'][0]['id'], 'fixture-file')
+        self.assertEqual(after['files'][0]['content_type'], 'image/png')
+        self.assertEqual(after['files'][0]['file']['meta']['size'], len(sample.read_bytes()))
+        self.assertEqual(self.server.uploaded_file, (sample.read_bytes(), 'image/png'))
+        self.assertGreater(self.read(image_selector, 'naturalWidth'), 0)
+        self.assertEqual(self.server.completions, [])
+        self.screenshot('menu-phase2-upload-in-flight-preserved')
+
+    def test_native_folder_uses_one_chat_and_preserves_draft_through_asset_navigation(self):
+        # Exercise the real compiled folder row, route and Native Chat. Only
+        # folder metadata and model transport are synthetic; no source overlay.
+        self.native_menu_fixture()
+        original_get = NativeUIHandler.do_GET
+        folder = {'id': 'source-folder', 'user_id': self.server.user['id'],
+                  'name': '합성 보존 폴더', 'parent_id': None, 'is_expanded': True,
+                  'data': {'model_ids': ['fixture-model']}, 'meta': {},
+                  'created_at': 1, 'updated_at': 1}
+
+        def folder_get(handler):
+            path = urlsplit(handler.path).path
+            responses = {
+                '/api/v1/folders/': [folder],
+                '/api/v1/folders/source-folder': folder,
+                '/api/v1/folders/source-folder/shared/chats': {'chats': [], 'has_more': False},
+            }
+            if path in responses:
+                handler.server.requests.append(('GET', path))
+                return handler.send_content(responses[path])
+            if path == '/folders/source-folder':
+                handler.server.requests.append(('GET', path))
+                return handler.send_content(handler.server.read_frontend('open_webui/frontend/index.html'), 'text/html')
+            return original_get(handler)
+
+        provider = patch.object(NativeUIHandler, 'do_GET', folder_get)
+        provider.start()
+        self.addCleanup(provider.stop)
+        self.browser.evaluate("localStorage.setItem('sidebar-folders-folder-state','true');true")
+        self.navigate('/c/existing-chat')
+        self.wait("window.__eesNativeDraftV1?.ready() && document.querySelector('#ees-work-entry [data-action=chats]')")
+        self.open_sidebar()
+        self.click('#ees-work-entry [data-action=chats]')
+        folder_button = '#folder-source-folder-button'
+        self.wait('document.querySelector(' + json.dumps(folder_button) + ')?.checkVisibility({visibilityProperty:true})')
+        self.browser.evaluate("window.__eesFolderChatRoot=document.querySelector('#chat-container');window.__eesFolderDraftBridge=window.__eesNativeDraftV1;true")
+        self.click(folder_button)
+        self.wait("location.pathname === '/folders/source-folder' && window.__eesNativeDraftV1?.ready()")
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('#chat-container').length"), 1)
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('#chat-input').length"), 1)
+        self.assertTrue(self.browser.evaluate("document.querySelector('#chat-container')===window.__eesFolderChatRoot && window.__eesNativeDraftV1===window.__eesFolderDraftBridge"))
+        self.fill('#chat-input', '폴더에서 생성할 개인 합성 대화')
+        sample = Path(self.temporary.name) / 'folder-preserved-image.png'
+        sample.write_bytes(self.server.wheel.read('open_webui/frontend/static/user.png'))
+        self.browser.call('DOM.enable')
+        document = self.browser.call('DOM.getDocument')['root']['nodeId']
+        upload = self.browser.call('DOM.querySelector', {'nodeId': document,
+            'selector': '#chat-container input[type=file][multiple]'})['nodeId']
+        self.assertGreater(upload, 0)
+        self.browser.call('DOM.setFileInputFiles', {'nodeId': upload, 'files': [str(sample)]})
+        image_selector = '#message-input-container [data-cy=image]'
+        self.wait('document.querySelector(' + json.dumps(image_selector) + ')?.naturalWidth > 0')
+        before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.browser.evaluate("window.__eesFolderImage=document.querySelector('#message-input-container [data-cy=image]');true")
+        self.click('[data-action=mode][data-mode=author]')
+        self.click('[data-action=native_open][data-native-id=skills]')
+        self.wait("location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input[aria-label]')")
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('#chat-container').length"), 1)
+        self.assertTrue(self.browser.evaluate("document.querySelector('#chat-container')===window.__eesFolderChatRoot && window.__eesNativeDraftV1===window.__eesFolderDraftBridge"))
+        self.click('#ees-work-entry [data-action=procedures]')
+        self.wait("location.pathname === '/folders/source-folder' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ees-work-designer')")
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('#chat-container').length"), 1)
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('#chat-input').length"), 1)
+        self.assertTrue(self.browser.evaluate("document.querySelector('#chat-container')===window.__eesFolderChatRoot && window.__eesNativeDraftV1===window.__eesFolderDraftBridge && document.querySelector('#message-input-container [data-cy=image]')===window.__eesFolderImage"))
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), before)
+        self.assertEqual(self.server.completions, [])
+        self.screenshot('menu-phase2-folder-native-roundtrip')
+        self.click('#send-message-button')
+        self.wait("location.pathname.startsWith('/c/') && document.querySelector('#messages-container')?.textContent.includes('실제 대화 입력이 전달되었습니다.')")
+        self.assertEqual(len(self.server.completions), 1)
+        self.assertEqual(self.server.completions[0]['model'], 'fixture-model')
+        self.assertEqual(self.server.completions[0]['folder_id'], folder['id'])
+        self.assertEqual(self.server.completions[0]['user_message']['content'], before['prompt'])
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('#chat-container').length"), 1)
+        self.assertTrue(self.browser.evaluate("document.querySelector('#chat-container')===window.__eesFolderChatRoot && window.__eesNativeDraftV1===window.__eesFolderDraftBridge"))
+        self.assertEqual(folder['name'], '합성 보존 폴더')
+        self.screenshot('menu-phase2-folder-new-chat-single-instance')
+
     def test_native_initial_changelog_keeps_focus_while_chat_startup_is_hidden(self):
+        # Historical test ID retained: the source shell now makes the first
+        # frame itself correct, so the former whole-body startup gate is absent.
         # Actual Native ChangelogModal selection: an administrator who has not
         # seen this version. Only HTTP settings/release-note data are synthetic.
         original_get = NativeUIHandler.do_GET
@@ -408,17 +590,25 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.server.delay_next_workspace = True
         self.server.workspace_response_started.clear()
         self.server.workspace_response_hold.clear()
+        observer = self.browser.call('Page.addScriptToEvaluateOnNewDocument', {'source': """
+          window.__eesChangelogGateChanges=0;
+          new MutationObserver(records=>{window.__eesChangelogGateChanges+=records.length;})
+            .observe(document,{subtree:true,attributes:true,attributeFilter:['data-ees-startup']});
+        """})['identifier']
+        self.addCleanup(lambda: self.browser.call('Page.removeScriptToEvaluateOnNewDocument', {'identifier': observer}))
         self.navigate('/c/existing-chat')
         modal = '[role=dialog][aria-modal=true]:not(:has(#settings-tabs-container))'
-        self.wait('document.documentElement?.dataset.eesStartup === "pending" && document.querySelector(' + json.dumps(modal) + ')')
+        self.wait("document.querySelector('[data-ees-source-shell]') && document.querySelector(" + json.dumps(modal) + ')')
         self.assertTrue(self.server.workspace_response_started.wait(timeout=2), 'Held workspace read was not reached')
-        self.assertEqual(self.browser.evaluate('getComputedStyle(document.body).visibility'), 'hidden')
+        self.assertEqual(self.browser.evaluate('getComputedStyle(document.body).visibility'), 'visible')
+        self.assertFalse(self.browser.evaluate('Boolean(document.documentElement.dataset.eesStartup)'))
+        self.assertEqual(self.browser.evaluate('window.__eesChangelogGateChanges'), 0)
         self.assertEqual(self.browser.evaluate('getComputedStyle(document.querySelector(' + json.dumps(modal) + ')).visibility'), 'visible')
         self.assertEqual(self.browser.evaluate('getComputedStyle(document.querySelector(' + json.dumps(modal + ' button') + ')).visibility'), 'visible')
         self.wait('document.querySelector(' + json.dumps(modal) + ')?.textContent.includes("Synthetic release-note fixture")')
         self.assertIn('Synthetic release-note fixture', self.text(modal))
         # A temporary, non-interactive CSS probe inside the actual Native modal
-        # verifies that the gate cannot override a child's own hidden state.
+        # verifies that the EES shell theme respects a child's own hidden state.
         self.assertEqual(self.browser.evaluate("""(()=>{
           const modal=document.querySelector('[role=dialog][aria-modal=true]');
           const probe=document.createElement('span');probe.style.visibility='hidden';
@@ -429,11 +619,12 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         for modifiers in (0, 8):
             self.key('Tab', 9, modifiers)
             self.assertTrue(self.browser.evaluate('document.querySelector(' + json.dumps(modal) + ').contains(document.activeElement)'))
-        self.assertEqual(self.browser.evaluate('document.documentElement.dataset.eesStartup'), 'pending')
-        self.screenshot('startup-native-changelog-during-gate')
+        self.assertFalse(self.browser.evaluate('Boolean(document.documentElement.dataset.eesStartup)'))
+        self.screenshot('startup-native-changelog-source-shell')
         self.click(modal + ' button')
         self.wait('!document.querySelector(' + json.dumps(modal) + ')')
-        self.assertEqual(self.browser.evaluate('document.documentElement.dataset.eesStartup'), 'pending')
+        self.assertEqual(self.browser.evaluate('window.__eesChangelogGateChanges'), 0)
+        self.assertEqual(self.browser.evaluate('getComputedStyle(document.body).visibility'), 'visible')
         self.server.workspace_response_hold.set()
         self.wait("!document.documentElement.dataset.eesStartup && document.querySelector('#ees-work-entry') && document.querySelector('#ees-work-panel') && window.__eesNativeDraftV1?.ready()")
         self.assertEqual(self.server.completions, [])
@@ -493,36 +684,41 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
 
     def test_native_menu_missing_mount_and_direct_entry_keep_original_skills_search(self):
         self.native_menu_fixture()
+        self.assert_source_shell()
+        self.browser.evaluate("window.__eesPreservedSourceSidebar=document.querySelector('[data-ees-source-sidebar]');true")
         self.click('[data-action=mode][data-mode=author]')
         self.click('[data-action=native_open][data-native-id=skills]')
         self.wait("location.pathname === '/workspace/skills' && document.querySelector('#ees-work-entry') && document.querySelector('#workspace-container input[aria-label]')")
-        # Fault injection changes only the test DOM's mount identifier. The
-        # original compiled search component and its handlers remain in place.
-        self.browser.evaluate("""(()=>{const anchor=document.querySelector('#sidebar-search-button'),parent=anchor.parentNode,next=anchor.nextSibling;anchor.id='fixture-unrecognized-sidebar-search';parent.removeChild(anchor);parent.insertBefore(anchor,next);return true;})()""")
-        self.wait("!document.querySelector('#ees-work-entry')")
+        # Keep this historical ID: the source-owned search control may retain
+        # Native's keyboard shortcut ID, but it must not be a DOM mount anchor.
+        self.browser.evaluate("document.querySelector('#sidebar-search-button').id='fixture-unrecognized-sidebar-search';true")
+        self.assert_source_shell()
+        self.assertTrue(self.browser.evaluate("document.querySelector('[data-ees-source-sidebar]')===window.__eesPreservedSourceSidebar"))
         self.search_native_skills('#workspace-container input[aria-label]', 'missing-mount-search')
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel')"))
-        self.screenshot('menu-c18-native-missing-mount')
+        self.assert_work_panel_not_displayed()
+        self.screenshot('menu-phase2-native-without-dom-mount')
 
         # A fresh direct Native route has no EES departure ticket.
         self.navigate('/workspace/skills')
         self.wait("location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input[aria-label]') && document.querySelector('#ees-work-entry')")
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel')"))
+        self.assert_work_panel_not_displayed()
+        self.assert_source_shell()
         self.search_native_skills('#workspace-container input[aria-label]', 'direct-native-search')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
         self.assertEqual(self.server.completions, [])
         self.screenshot('menu-c18-direct-native-search')
 
-        # All four asset kinds remain the compiled Native screens in PR 1.
-        # Switching them must not require the chat editor to exist.
+        # All four asset kinds remain the compiled Native screens in 2-1.
+        # A direct Native entry must not require a previous chat departure.
         self.open_sidebar()
         for target in ('models', 'knowledge', 'prompts', 'skills'):
             self.click('[data-action=native_open][data-native-id=' + target + ']')
             self.wait('location.pathname === ' + json.dumps('/workspace/' + target)
                       + ' && document.querySelector("#workspace-container input")'
                       + ' && document.querySelector("#ees-work-entry [data-action=native_open][data-native-id=' + target + '][aria-current=page]")')
-            self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel,#ees-work-native-return')"))
+            self.assert_work_panel_not_displayed()
+            self.assert_source_shell()
         self.click('#ees-work-entry [data-action=procedures]')
         self.wait("location.pathname === '/' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ees-work-designer')")
         self.assertEqual(self.state()['workflows'], [])
@@ -539,19 +735,16 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.browser.call('Emulation.setDeviceMetricsOverride', {
             'width': 600, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
         self.wait('innerWidth === 600')
-        self.wait("(()=>{const nav=document.querySelector('#workspace-container')?.previousElementSibling;return nav?.querySelector('button')?.getBoundingClientRect().height>0;})()")
-        # At mobile width Native unmounts a closed sidebar. Open its preserved
-        # control first, then verify the EES menu replaces the duplicated tabs.
-        self.click('nav #sidebar-toggle-button')
-        self.wait("document.querySelector('#ees-work-entry') && document.body.classList.contains('ees-work-native-shell')")
-        self.wait("document.querySelector('#sidebar')?.getBoundingClientRect().x >= 0")
-        mobile_button = self.browser.evaluate("(()=>{const nav=document.querySelector('#workspace-container').previousElementSibling;return [...nav.querySelectorAll('button')].filter(e=>e.getBoundingClientRect().height>0).map(e=>({label:e.getAttribute('aria-label'),display:getComputedStyle(e).display,height:e.getBoundingClientRect().height}));})()")
-        self.assertTrue(mobile_button)
-        self.assertFalse(self.browser.evaluate("[...document.querySelector('#workspace-container').previousElementSibling.querySelectorAll('a[href^=\"/workspace\"]')].some(e=>e.getBoundingClientRect().height>0)"))
+        # The source shell owns responsive navigation from its first render;
+        # the original workspace tabs/sidebar are not mounted then covered.
+        self.open_sidebar()
+        self.assert_source_shell()
+        self.wait("document.querySelector('[data-ees-source-sidebar]')?.getBoundingClientRect().x >= 0")
+        self.assertFalse(self.browser.evaluate("[...(document.querySelector('#workspace-container').previousElementSibling?.querySelectorAll('a[href^=\"/workspace\"]') || [])].some(e=>e.getBoundingClientRect().height>0)"))
         self.assertFalse(self.browser.evaluate('document.documentElement.scrollWidth > innerWidth'))
         self.screenshot('menu-c18-native-mobile')
         self.browser.evaluate('history.back()')
-        self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ew-procedure-name')")
+        self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && window.__eesNativeWorkV1?.captureReference()?.context_id && document.querySelector('#ew-procedure-name')")
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
         self.assertEqual(self.read('#ew-procedure-name', 'value'), '브라우저 뒤로 가기 중인 미저장 절차')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
@@ -960,10 +1153,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.browser.call('Emulation.setDeviceMetricsOverride', {
             'width': 600, 'height': 900, 'deviceScaleFactor': 1, 'mobile': False})
         self.wait('innerWidth === 600')
-        # Native replaces its desktop sidebar at this breakpoint. Reopen its
-        # actual sidebar control before expecting Work to mount again.
-        self.wait("!document.querySelector('#sidebar-search-button') && document.querySelector('#sidebar-toggle-button')?.getBoundingClientRect().width > 0")
-        self.click('#sidebar-toggle-button')
+        # Source-owned slots survive the breakpoint without the old Native
+        # sidebar mount anchor or a second render of the authoring screen.
+        self.assert_source_shell()
         self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width<=innerWidth")
         if not self.browser.evaluate("!!document.querySelector('.ew-procedure-start')"):
             self.click('[data-author-action="create"]')

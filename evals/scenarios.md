@@ -12,6 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| #85 사내 `.14` 적용·이동 중 깜빡임·#83 소스 화면 전환 | [사용자 결과·원인 판단 범위·2단계 보존/프레임 검사](v4-ui-20260930.md#source-phase2-internal-20261013) |
 | #83 소스 빌드·원본 Native 동등성·CI ZIP·이전 프로그램 복원 | [1단계 검증·첫 빌드 실패·미확인 범위](v4-ui-20260930.md#source-frontend-phase1-evidence-20261013) |
 | 사내 ees.12 적용 준비·시간대/복원·팀원 첫 업무 | [준비 검증·실패·자동/사내 확인 경계](v4-ui-20260930.md#internal-pilot-prep-20261012) · [사내 확인5개](../docs/03-openwebui-native-agent.md#internal-pilot-checks-20261012) |
 | 권한별 메뉴·Open WebUI 왕복 | [C15·실제 Native 권한·개인 초안·복귀 줄·직접 진입 경계](v4-ui-20260930.md#menu-integration-evidence-20261006) |

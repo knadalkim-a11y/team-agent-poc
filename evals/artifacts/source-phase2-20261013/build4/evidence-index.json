@@ -1,0 +1,204 @@
+{
+  "files": [
+    {
+      "path": "phase2-branding-4-manifest.json",
+      "bytes": 940154,
+      "sha256": "528d900a8c0b6c852f81342f175edadf40d9cbb61d87b0c3f70958c0a3fedb5f"
+    },
+    {
+      "path": "phase2-branding-4.log",
+      "bytes": 181,
+      "sha256": "7d5a4912d7ad45e117beb334865038f47a7e122561bc3ebd45012cd344608ade"
+    },
+    {
+      "path": "phase2-browser-build4/c18-panel-card-focus-desktop.png",
+      "bytes": 73392,
+      "sha256": "48076f0341f755d401b57c217673924c507c46150876d4a35bfade4d36895cbd"
+    },
+    {
+      "path": "phase2-browser-build4/c18-panel-card-narrow.png",
+      "bytes": 33181,
+      "sha256": "dcba59a313f6a70bef26832fbac46d8382ee2f2f32ccf1854b596a7a6e4c3d1e"
+    },
+    {
+      "path": "phase2-browser-build4/c18-panel-computed.json",
+      "bytes": 304,
+      "sha256": "c257056ec315756f34dd4b75583e08bc2153e6d65c5f279acbff56aea9b4b074"
+    },
+    {
+      "path": "phase2-browser-build4/q1-1366x768.json",
+      "bytes": 910,
+      "sha256": "835630b162c5f2985a084c6b136584fb247c4200056387c3d34efdefa48abc28"
+    },
+    {
+      "path": "phase2-browser-build4/q1-1366x768.png",
+      "bytes": 64871,
+      "sha256": "8066afdeda1e2c0badf299c4b4b9c632f6e9bc473c885e71f9343b62c21a583d"
+    },
+    {
+      "path": "phase2-browser-build4/q1-1920x768.json",
+      "bytes": 920,
+      "sha256": "2535db0b5c5ff9cadb7e68f2aa114edb3838e8d0d0d63fc683fe327c22613b49"
+    },
+    {
+      "path": "phase2-browser-build4/q1-1920x768.png",
+      "bytes": 86948,
+      "sha256": "2ad59033ef795f72534daa01160b4940d5097c5de36828ac0b148d4316be1658"
+    },
+    {
+      "path": "phase2-browser-build4/q1-contrast.json",
+      "bytes": 309,
+      "sha256": "150fe9fa197e59c2f247835007a3403ec9a6b64b068b501db8f2007287b513aa"
+    },
+    {
+      "path": "phase2-browser-build4/q1-overlay-close-reopen.json",
+      "bytes": 917,
+      "sha256": "1d3419284fcbcaa0b7440e1a41288b57cd4cf1e28bf81f43ca07afc53c7926c3"
+    },
+    {
+      "path": "phase2-browser-build4/q1-overlay-close-reopen.png",
+      "bytes": 56556,
+      "sha256": "570108fde684dd00b00589e6aede41d03aee630ab3d3ea759e850d1052bc8e66"
+    },
+    {
+      "path": "phase2-browser-build4/q1-private-width-640.png",
+      "bytes": 60472,
+      "sha256": "c55f261413d26fae1a98c0838c8c8f237f876400116d2736d7cc8f243e70d014"
+    },
+    {
+      "path": "phase2-browser-build4/q1-wide-panel-1280x768.json",
+      "bytes": 910,
+      "sha256": "f9caf6faea4ccaa89da710f3f482c32e4627fc36021ab4104226bd164783597c"
+    },
+    {
+      "path": "phase2-browser-build4/q1-wide-panel-1280x768.png",
+      "bytes": 63380,
+      "sha256": "f624cef76504a4c02e54e5e79cfc939691636637cfdafbc79caa6fa74e5808b6"
+    },
+    {
+      "path": "phase2-browser-build4/source-shell-all-navigation-final.png",
+      "bytes": 85662,
+      "sha256": "f3d3acd9c79fcdf2030f80d531abb3e0ac29beea466c70c9880a8a7d0fb18700"
+    },
+    {
+      "path": "phase2-browser-build4/source-shell-all-navigation-frames.json",
+      "bytes": 51491,
+      "sha256": "022f983f9a93568b404e6b1ad825338c1278469f205140db6cf738691d994ba6"
+    },
+    {
+      "path": "phase2-browser-build4/source-shell-first-loading-frames.json",
+      "bytes": 18865,
+      "sha256": "ada1b671c6ad3d2101225b3bcf8acbfc488db368698fd92d42444554cfea3c32"
+    },
+    {
+      "path": "phase2-browser-build4/source-shell-first-loading.png",
+      "bytes": 60454,
+      "sha256": "765081de6db7459ed8d3be3470e1553c69a40b8f399f80e3d8117c1869571ab4"
+    },
+    {
+      "path": "phase2-browser-build4/source-shell-missing-runtime-frames.json",
+      "bytes": 10683,
+      "sha256": "3e824fc66dd2b807d56322f86dd79ce97e575de428b9b1983bb92dda86b5bf78"
+    },
+    {
+      "path": "phase2-browser-build4/source-shell-missing-runtime.png",
+      "bytes": 36146,
+      "sha256": "6752ea660bb62b5d4afab725b4a1929d801d5b26d38d4740560e0451d555cf81"
+    },
+    {
+      "path": "phase2-browser-build4/source-shell-monitor-negative-control.json",
+      "bytes": 703,
+      "sha256": "9cbd756b728b24131efec6186f0dc91bb0ed29d601f411e533bd641759dec61b"
+    },
+    {
+      "path": "phase2-browser-build4.log",
+      "bytes": 2000,
+      "sha256": "097b90350b29f7dc143c8259bc61f068ef82f8f8fecd44e6f00b181022bb5a1d"
+    },
+    {
+      "path": "phase2-frontend-4-manifest.json",
+      "bytes": 610121,
+      "sha256": "31b1a8addc3adfa8e6dd104e2829caf051fdc97e82f6e146a4bced6a426f08c7"
+    },
+    {
+      "path": "phase2-frontend-4.log",
+      "bytes": 339640,
+      "sha256": "879f5cf58dc16ab7b4829361461f7f6d791dc0ec50ee517876ad1159d84ed2a5"
+    },
+    {
+      "path": "phase2-pr1-account-build4.log",
+      "bytes": 953,
+      "sha256": "ecd35b4090fe29075074f712dd859398e36429d312e8b5add8e61c6b2cd90768"
+    },
+    {
+      "path": "phase2-pr1-auth-build4/integrated-native-ai-proposal-not-auto-save.png",
+      "bytes": 98301,
+      "sha256": "3a289987d6560baf7f4194f2a9bc76bde9e025d3ef203bc7037e0a35da79e40b"
+    },
+    {
+      "path": "phase2-pr1-auth-build4/integrated-native-authoring-conflict.png",
+      "bytes": 117034,
+      "sha256": "7c7d3aae96841c37d7a8ed4013530473d78f669274af8a6cbe144e2bf8539fe7"
+    },
+    {
+      "path": "phase2-pr1-auth-build4/integrated-native-group-author-published.png",
+      "bytes": 90332,
+      "sha256": "e4ebcb15ce4fcd89ba162fc419ff021782f9c69088eed0d1d2dd69fa1c464ced"
+    },
+    {
+      "path": "phase2-pr1-auth-build4/nu-closed-native-signup.png",
+      "bytes": 18432,
+      "sha256": "45f287d920c77e0e61dff4c406d5cd999e199a295bc68ec21f2964385c9466c4"
+    },
+    {
+      "path": "phase2-pr1-auth-build4/nu05-former-a-tab-now-b.png",
+      "bytes": 50794,
+      "sha256": "a03cbceb73e53d883cbe7e4f37596c88816f9bd688c54a3c62d9fa4599b099a3"
+    },
+    {
+      "path": "phase2-pr1-auth-build4/sa-approved-first-chat.png",
+      "bytes": 69000,
+      "sha256": "fe7cef4fe7967216b15881a431ca9e36f71280459b2c87ea3908718f028406e4"
+    },
+    {
+      "path": "phase2-pr1-auth-build4/sa-native-approved-user.png",
+      "bytes": 70577,
+      "sha256": "227c224b8b0d04cb14b250d68ee34c6d6ab4c471a592a03b00999c748898fc8e"
+    },
+    {
+      "path": "phase2-pr1-auth-build4/sa-signup-pending-fonts.json",
+      "bytes": 780,
+      "sha256": "52b1f39d35f35710df5bf3594ae27a35b7f72d2654549551ced5305ad9511422"
+    },
+    {
+      "path": "phase2-pr1-auth-build4/sa-signup-pending.png",
+      "bytes": 38876,
+      "sha256": "088f0e7213aecdbb086491e4171a7709bc8d72f40b5f462df7ae50c39b45bda6"
+    },
+    {
+      "path": "phase2-pr1-auth-build4/sa26-b-after-late-a-responses.png",
+      "bytes": 85487,
+      "sha256": "b837d97cf43759bf6958f8e5d2d7c7f33b1b56f70786ee8d836b5545dee91e91"
+    },
+    {
+      "path": "phase2-pr1-auth-build4/sa26-nu05-account-switch.json",
+      "bytes": 565,
+      "sha256": "718b40b2fc02a2e2800a861bafc85041b1966f756b482b9b5e14c09412b59e13"
+    },
+    {
+      "path": "phase2-pr1-authoring-build4.log",
+      "bytes": 1832,
+      "sha256": "cffe1b518696f833a4a30eb6216fef79f7aa208ab22c274b51ce0be65ce1cdd4"
+    },
+    {
+      "path": "phase2-pr1-session-epoch-probe.log",
+      "bytes": 307,
+      "sha256": "640df89e0415e6ecbd6538b0d6464fa7160f294f6e70d0944ff8c686133f11f4"
+    },
+    {
+      "path": "phase2-pr1-session-source-test.log",
+      "bytes": 3606,
+      "sha256": "8efa8eb2b18e11cbe6281136b099ee884211a388864b1ed26adc4c3b59a4408a"
+    }
+  ]
+}

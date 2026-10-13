@@ -8,6 +8,7 @@ import json
 import time
 
 from ees_work_integrated_fixture import IntegratedNativeCase
+import ees_source_frame_monitor as frame_monitor
 
 
 class FigmaLayoutNativeTests(IntegratedNativeCase):
@@ -22,13 +23,13 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.browser.call('Emulation.setDeviceMetricsOverride', {
             'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
         self.wait('innerWidth === ' + str(width))
-        self.wait('document.body.dataset.eesSidebarCompact === ' + json.dumps(str(width < 1440).lower()))
-        self.wait("Math.abs(document.querySelector('#chat-container').getBoundingClientRect().width - "+str(width-(56 if width<1440 else 256))+") < .01")
+        self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === " + json.dumps(str(width < 1440).lower()))
+        self.wait("Math.abs(document.querySelector('[data-ees-source-shell]').getBoundingClientRect().width - "+str(width)+") < .01")
 
     def geometry(self):
         return self.browser.evaluate("""(()=>{
           const box=s=>{const e=document.querySelector(s),r=e?.getBoundingClientRect();return r?{x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom}:null;};
-          return {viewport:[innerWidth,innerHeight],sidebar:box('#sidebar'),panel:box('#ees-work-panel'),chat:box('.ees-integrated-chat'),message:box('.message-listitem'),composer:box('#message-input-container'),footer:box('#ees-work-panel>.ew-job-actions'),overflow:document.documentElement.scrollWidth>innerWidth,overlay:document.querySelector('#ees-work-panel').dataset.eesOverlay};
+          return {viewport:[innerWidth,innerHeight],sidebar:box('#sidebar'),panel:box('.ees-panel-region'),chat:box('.ees-chat-region'),header:box('#ees-work-context'),headerTitle:box('#ees-work-context .ees-context-title'),message:box('.message-listitem'),composer:box('#message-input-container'),footer:box('#ees-work-panel>.ew-job-actions'),overflow:document.documentElement.scrollWidth>innerWidth,overlay:document.querySelector('.ees-panel-region').dataset.overlay};
         })()""")
 
     def evidence(self, label):
@@ -50,6 +51,8 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             self.assertEqual(geometry['chat']['width'],width-sidebar-480)
             self.assertEqual(geometry['overlay'],'false')
             self.assertFalse(geometry['overflow'])
+            self.assertEqual(geometry['header']['height'],48)
+            self.assertAlmostEqual(geometry['headerTitle']['x']-geometry['header']['x'],24,delta=1/64)
             self.assertAlmostEqual(geometry['composer']['width'],min(760,geometry['chat']['width']-48),delta=1)
             self.assertLessEqual(geometry['message']['width'],min(760,geometry['chat']['width']-48)+1)
             self.assertLessEqual(geometry['footer']['bottom'],768)
@@ -79,9 +82,9 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.assertEqual(self.geometry()['overlay'],'true')
         self.assertEqual(self.geometry()['chat']['width'],1039)
         self.click('[data-action=close_panel]')
-        self.wait("document.querySelector('#ees-work-panel').hidden")
+        self.wait("document.querySelector('.ees-panel-region').hidden")
         self.click('[data-action=open_panel]')
-        self.wait("!document.querySelector('#ees-work-panel').hidden")
+        self.wait("!document.querySelector('.ees-panel-region').hidden")
         self.evidence('q1-overlay-close-reopen')
 
     def test_q1_physical_drag_restores_per_actor_width_and_contrast(self):
@@ -89,17 +92,17 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.browser.call('Input.dispatchMouseEvent',{'type':'mousePressed',**handle,'button':'left','buttons':1,'clickCount':1})
         self.browser.call('Input.dispatchMouseEvent',{'type':'mouseMoved','x':handle['x']-160,'y':handle['y'],'button':'left','buttons':1})
         self.browser.call('Input.dispatchMouseEvent',{'type':'mouseReleased','x':handle['x']-160,'y':handle['y'],'button':'left','buttons':0,'clickCount':1})
-        self.wait("document.querySelector('#ees-work-panel').getBoundingClientRect().width === 640")
+        self.wait("document.querySelector('.ees-panel-region').getBoundingClientRect().width === 640")
         self.wait_saved_width(640)
         actor_a=dict(self.server.user)
-        self.navigate('/c/existing-chat');self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===640")
+        self.navigate('/c/existing-chat');self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===640")
         self.users['other-user']={**deepcopy(actor_a),'id':'other-user','name':'Other synthetic user'}
         self.server.user=self.users['other-user']
-        self.navigate('/');self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===480")
+        self.navigate('/');self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===480")
         self.resize_keyboard('Home',36)
         self.wait_saved_width(400)
         self.server.user=actor_a
-        self.navigate('/c/existing-chat');self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===640")
+        self.navigate('/c/existing-chat');self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===640")
         ratios=self.browser.evaluate("""(()=>{
           const style=getComputedStyle(document.querySelector('#ees-work-panel')),hex=n=>style.getPropertyValue(n).trim();
           const lum=h=>{const c=h.replace('#','').match(/../g).map(x=>parseInt(x,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
@@ -148,64 +151,55 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.browser.call('Emulation.setDeviceMetricsOverride', {
             'width': 600, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
         self.wait('innerWidth === 600')
-        self.wait("!document.querySelector('#sidebar-search-button') && document.querySelector('#sidebar-toggle-button')?.getBoundingClientRect().width > 0")
-        self.click('#sidebar-toggle-button')
+        self.wait("document.querySelector('[data-ees-source-sidebar][data-compact=true]') && document.querySelector('[data-ees-sidebar-toggle]')?.getBoundingClientRect().width > 0")
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-ees-source-sidebar] #sidebar-search-button')"))
         self.wait("document.querySelector('#ees-work-panel')")
         self.assertFalse(self.geometry()['overflow'])
         self.screenshot('c18-panel-card-narrow')
 
     def test_source_startup_root_and_existing_chat_reveal_only_after_ees_layout(self):
-        # Observe the real head gate before Native or launcher scripts execute.
-        # A held workspace read makes the old Native-first flash observable.
-        observer = self.browser.call('Page.addScriptToEvaluateOnNewDocument', {'source': """
-          window.__eesStartupEvidence={samples:[],ready:null};
-          window.addEventListener('ees:startup-ready',()=>{
-            window.__eesStartupEvidence.ready={at:performance.now(),
-              entry:!!document.querySelector('#ees-work-entry'),
-              panel:!!document.querySelector('#ees-work-panel'),
-              layout:!!document.querySelector('.ees-integrated-row')};
-          },{once:true});
-          const record=()=>{
-            const data=window.__eesStartupEvidence,body=document.body;
-            if(body)data.samples.push({at:performance.now(),
-              visible:getComputedStyle(body).visibility==='visible',
-              native:!!document.querySelector('#chat-container'),
-              entry:!!document.querySelector('#ees-work-entry'),
-              panel:!!document.querySelector('#ees-work-panel')});
-            if(!data.ready||!data.samples.at(-1)?.visible)requestAnimationFrame(record);
-          };requestAnimationFrame(record);
-        """})['identifier']
-        self.addCleanup(lambda: self.browser.call('Page.removeScriptToEvaluateOnNewDocument', {'identifier': observer}))
+        # Retain the original test ID but replace the retired four-second body
+        # gate contract: source chrome must be visible before slow business data.
+        frame_monitor.install(self)
+        results = {}
         for path in ('/', '/c/existing-chat'):
             self.server.delay_next_workspace = True
             self.server.workspace_response_started.clear()
             self.server.workspace_response_hold.clear()
             self.navigate(path)
-            self.wait("document.documentElement?.dataset.eesStartup === 'pending' && document.querySelector('#chat-container')")
+            self.wait("document.querySelector('[data-ees-source-shell]') && document.querySelector('[data-ees-source-sidebar]') && document.querySelector('#chat-input.ProseMirror')")
             self.assertTrue(self.server.workspace_response_started.wait(timeout=2), "Held workspace read was not reached")
-            self.assertEqual(self.browser.evaluate("getComputedStyle(document.body).visibility"), 'hidden')
-            self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-entry')"))
+            self.assertEqual(self.browser.evaluate("getComputedStyle(document.body).visibility"), 'visible')
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-startup-gate,#ees-startup-style')"))
+            self.assertFalse(self.browser.evaluate("!!document.documentElement.dataset.eesStartup"))
             self.server.workspace_response_hold.set()
-            self.wait("window.__eesStartupEvidence?.ready && !document.documentElement.dataset.eesStartup && getComputedStyle(document.body).visibility === 'visible'")
-            self.wait("window.__eesStartupEvidence.samples.at(-1)?.visible")
-            evidence = self.browser.evaluate('window.__eesStartupEvidence')
-            self.assertTrue(evidence['ready']['entry'])
-            self.assertTrue(evidence['ready']['panel'])
-            self.assertTrue(evidence['ready']['layout'])
-            self.assertLess(evidence['ready']['at'], 4000, 'Successful startup must beat the fail-open fallback')
-            self.assertFalse(any(item['native'] and item['visible'] and not (item['entry'] and item['panel'])
-                                 for item in evidence['samples']), evidence)
+            self.wait("window.__eesNativeWorkV1 && document.querySelector('#ees-work-entry') && document.querySelector('#ees-work-panel')")
+            evidence = frame_monitor.collect(self, labels=('first-load',))
+            frame_monitor.assert_clean(self, evidence, labels=('first-load',))
+            results[path] = evidence
         self.assertIn('기존 대화 기록', self.text('body'))
+        directory = self.screenshot('source-shell-first-loading')
+        (directory / 'source-shell-first-loading-frames.json').write_text(
+            json.dumps(results, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
     def test_source_startup_missing_launcher_fails_open_with_native_chat_accessible(self):
+        # Retain the old ID's failure-recovery protection. A missing right-panel
+        # runtime must keep the *source* menu and real Native composer usable;
+        # falling back to the retired Native sidebar is no longer acceptable.
+        frame_monitor.install(self)
         self.browser.call('Network.setBlockedURLs', {'urls': ['*/_ees14/ees-work-launcher.js*']})
         self.addCleanup(lambda: self.browser.call('Network.setBlockedURLs', {'urls': []}))
         self.navigate('/c/existing-chat')
-        self.wait("document.documentElement?.dataset.eesStartup === 'pending' && document.querySelector('#chat-input.ProseMirror')")
-        self.assertEqual(self.browser.evaluate("getComputedStyle(document.querySelector('#chat-input')).visibility"), 'hidden')
-        self.assertFalse(self.browser.evaluate("!!window.__eesNativeWork"))
-        self.wait("!document.documentElement.dataset.eesStartup && getComputedStyle(document.querySelector('#chat-input')).visibility === 'visible'", timeout=5000)
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-entry')"))
+        self.wait("document.querySelector('[data-ees-source-shell]') && document.querySelector('[data-ees-source-sidebar]') && document.querySelector('#chat-input.ProseMirror')")
+        self.assertEqual(self.browser.evaluate("getComputedStyle(document.querySelector('#chat-input')).visibility"), 'visible')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-startup-gate,#ees-startup-style')"))
+        self.assertFalse(self.browser.evaluate("!!window.__eesNativeWorkV1"))
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-entry')"))
         self.assertIn('기존 대화 기록', self.text('body'))
-        self.click('#chat-input')
-        self.assertTrue(self.browser.evaluate("document.activeElement.id === 'chat-input'"))
+        self.fill('#chat-input', '실행 코드가 없어도 보존되는 개인 초안')
+        self.assertIn('실행 코드가 없어도 보존되는 개인 초안', self.text('#chat-input'))
+        evidence = frame_monitor.collect(self, labels=('first-load',))
+        frame_monitor.assert_clean(self, evidence, labels=('first-load',))
+        directory = self.screenshot('source-shell-missing-runtime')
+        (directory / 'source-shell-missing-runtime-frames.json').write_text(
+            json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

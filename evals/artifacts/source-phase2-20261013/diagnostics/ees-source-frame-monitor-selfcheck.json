@@ -1,0 +1,11 @@
+{
+  "scope": "observer self-check only, synthetic source-marked DOM, not product validation",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "HeadlessChrome/153.0.8010.52",
+    "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+    "jsVersion": "15.3.76.13"
+  },
+  "clean_frames": 3,
+  "one_frame_negative_control_detected": 2
+}

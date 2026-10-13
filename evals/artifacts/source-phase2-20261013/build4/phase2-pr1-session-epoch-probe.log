@@ -1,0 +1,6 @@
+test_cross_tab_session_owner_reload_same_owner_preservation_and_late_guards (tests.test_ees_frontend_build.SourceSessionTests.test_cross_tab_session_owner_reload_same_owner_preservation_and_late_guards) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.066s
+
+OK

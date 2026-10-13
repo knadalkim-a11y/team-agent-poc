@@ -1,6 +1,6 @@
 # 버전 및 환경 기준
 
-2026-10-13 #83 1단계 개발 후보는 **0.11.3+ees.14** / `/_ees14/`이다. Open WebUI **0.11.3** 소스 커밋 `2a960a59fe1dbbd35282f0556b3666d81102e781`과 package-lock을 고정하고, CI의 Node 22.16.0/npm 10.9.2로 프런트엔드를 빌드한다. 기존 공식 Python wheel 해시와 의존성·서버/API·사용자 저장 형식은 유지한다. 소스 패치·원본/산출물 해시는 `frontend/open-webui-source.json` 및 CI manifest에서 검사한다. 사내에는 Node/npm이 필요 없다. 2단계 화면 이전과 #77·#79는 미구현이다. 현재 사내 `.13`과 신규 후보의 검증/적용 상태는 [STATUS](docs/STATUS.md)에서 구분한다.
+2026-10-13 #83 1·2단계의 프로그램 버전은 **0.11.3+ees.14** / `/_ees14/`이다. Open WebUI **0.11.3** 소스 커밋 `2a960a59fe1dbbd35282f0556b3666d81102e781`과 package-lock을 고정하고, CI의 Node 22.16.0/npm 10.9.2로 프런트엔드를 빌드한다. 기존 공식 Python wheel 해시와 의존성·서버/API·사용자 저장 형식은 유지한다. 소스 패치·원본/산출물 해시는 `frontend/open-webui-source.json` 및 CI manifest에서 검사한다. 사내에는 Node/npm이 필요 없다. 2단계도 같은 `.14`를 유지하며 정확한 Git SHA와 manifest 해시로 소스·산출물을 구분한다. 사내 main4e89341 적용 보고와 2단계 후보의 검증/적용 상태는 [STATUS](docs/STATUS.md)에서 구분한다. #77·#79는 이번 범위 밖이다.
 
 문서 갱신일: 2026-09-25. 설치 기준 확인일은 2026-09-03이며 이후 런타임·모델 관찰은 아래 날짜별 사용자 보고를 따릅니다. 이 문서는 버전·경로·실행 전제를 관리합니다. 진행 상태·다음 작업은 [STATUS](docs/STATUS.md), 성공 여부는 [평가표](evals/scenarios.md)에서 확인합니다.
 

@@ -50,6 +50,7 @@ SUITES = {
     "program-install": ["test_ees_webui_customization.py"],
     "program-wheel": ["test_ees_webui_customization.py"],
     "native-contracts": ["test_ees_workflow_examples_native.py"],
+    "native-grounding": ["test_ees_workflow_examples_native.py"],
     "restore-ees10": ["test_ees_webui_customization.py"],
     "restore-ees11": ["test_ees_webui_customization.py"],
     "restore-ees12": ["test_ees_webui_customization.py"],
@@ -59,7 +60,7 @@ SUITES = {
     "native-work": ["test_ees_work_demo.py"],
     "native-compose": ["test_ees_work_c_phase1_native.py", "test_ees_work_c_phase2_native.py",
         "test_ees_work_figma_authoring_native.py", "test_ees_work_figma_runtime_native.py",
-        "test_ees_work_figma_layout_native.py"],
+        "test_ees_work_figma_layout_native.py", "test_ees_source_shell_native.py"],
     "native-execution": ["test_ees_work_c_phase3_native.py", "test_ees_work_c_phase3_privacy.py"],
 }
 # Each real fixed-wheel Apply/Restore performs a full filesystem walk. On
@@ -68,6 +69,13 @@ SUITES = {
 # The current full-wheel Apply/Restore also has its own required job; all
 # remaining methods stay together without changing the ten-minute limit.
 CASE_PARTITIONS = {
+    # Windows CI exhausted the job budget after 278s of preparation and the
+    # first three successful examples. Isolate the three-run grounding case;
+    # keep every original ID/assertion and the same ten-minute required jobs.
+    "test_ees_workflow_examples_native.py": {
+        "native-contracts": None,
+        "native-grounding": ["test_ees_workflow_examples_native.NativeWorkflowExamplesTests.test_model_invented_counts_ci_and_foreign_evidence_never_complete"],
+    },
     "test_ees_webui_customization.py": {
         "program-install": None,  # Every remaining/currently added method stays here.
         "program-wheel": ["test_ees_webui_customization.RealBrandingWheelTests.test_real_built_wheel_has_complete_purelib_app_metadata_and_frontend"],

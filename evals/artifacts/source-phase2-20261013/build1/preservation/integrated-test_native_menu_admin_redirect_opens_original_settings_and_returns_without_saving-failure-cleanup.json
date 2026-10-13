@@ -1,0 +1,115 @@
+{
+  "initial_evidence": "integrated-test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving-failure.json",
+  "browser_cleanup_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 1886.623457998212,
+    "pid": 2312,
+    "exit_code": 0,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "HeadlessChrome/153.0.8010.52",
+      "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+      "jsVersion": "15.3.76.13"
+    },
+    "target_id": "8753137E36F31CD1BEE8BFEA0436E7D3",
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 88,
+      "method": "Browser.close",
+      "session_attached": false,
+      "timeout_seconds": 5,
+      "elapsed_ms": 0.12256099580554292,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "id": 76,
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "id": 77,
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "id": 78,
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "id": 79,
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "id": 80,
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "id": 81,
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "id": 82,
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "id": 83,
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "id": 84,
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "id": 85,
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "id": 86,
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "id": 87,
+        "sessionId": "77CFCBE0D8E3A832AF9A4E6B4B6E918E"
+      },
+      {
+        "id": 88
+      }
+    ],
+    "stderr_tail": "[1013/024639.931755:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1013/024639.931868:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1013/024639.933105:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1013/024639.933170:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1013/024639.933318:ERROR:net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)\n[1013/024639.934238:ERROR:device/udev_linux/udev_watcher.cc:51] Failed to initialize a udev monitor.\n[1013/024639.935520:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 2329: No such file or directory (2)\n[1013/024639.945811:WARNING:media/gpu/vaapi/vaapi_wrapper.cc:1660] drmGetDevices2() has not found any devices\n[1013/024639.947721:WARNING:sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.\n[1013/024639.990189:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1013/024639.990278:WARNING:device/bluetooth/dbus/bluez_dbus_manager.cc:209] Floss manager service not available, cannot set Floss enable/disable.\n[1013/024639.990865:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1013/024639.996448:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1013/024640.021846:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 2366: No such file or directory (2)\n[1013/024640.062050:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1013/024640.062086:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1013/024640.911080:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1013/024640.914219:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1013/024641.060697:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1013/024641.061463:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1013/024641.363526:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n[1013/024641.366504:WARNING:ui/events/keycodes/dom/keycode_converter.cc:314] unrecognized code string 'a'\n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 184.5753119996516,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    "bootstrap_observation": null
+  }
+}

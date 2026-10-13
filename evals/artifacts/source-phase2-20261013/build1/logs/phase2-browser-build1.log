@@ -1,0 +1,92 @@
+test_every_navigation_has_source_chrome_without_native_overlay_frames (test_ees_source_shell_native.SourceShellNativeTests.test_every_navigation_has_source_chrome_without_native_overlay_frames) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 185.35680299828527, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_c18_panel_cards_input_hover_and_keyboard_focus (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_c18_panel_cards_input_hover_and_keyboard_focus) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 177.481954000541, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_q1_geometry_reading_width_footer_and_baseline_overlay (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 194.4552759960061, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 186.98374499945203, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+test_source_startup_missing_launcher_fails_open_with_native_chat_accessible (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_source_startup_missing_launcher_fails_open_with_native_chat_accessible) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 166.85781800333643, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+test_source_startup_root_and_existing_chat_reveal_only_after_ees_layout (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_source_startup_root_and_existing_chat_reveal_only_after_ees_layout) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 165.44392000650987, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+======================================================================
+FAIL: test_every_navigation_has_source_chrome_without_native_overlay_frames (test_ees_source_shell_native.SourceShellNativeTests.test_every_navigation_has_source_chrome_without_native_overlay_frames)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_source_shell_native.py", line 87, in test_every_navigation_has_source_chrome_without_native_overlay_frames
+    self.step(label, '[data-action=native_open][data-native-id=' + target + ']',
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_source_shell_native.py", line 32, in step
+    self.wait(condition)
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/ees_work_integrated_fixture.py", line 190, in wait
+    self.fail('Timed out: ' + expression + '\n' + self.text('body') + '\nUnknown routes:' + repr(self.server.unknown))
+AssertionError: Timed out: location.pathname === "/workspace/tools" && document.querySelector("#workspace-container input")
+Skip to main content
+E
+EES Workflow
+업무
+워크스페이스
+
+관리 시스템
+
+시스템
+EMS
+업무 만들기
+업무 절차
+1
+도구
+0
+스킬·지침
+스킬
+AI 설정
+AI 도우미
+모델
+참고 문서
+지식
+빠른 문장
+프롬프트
+관리자만
+기능 연결
+도구
+공장·접근 범위
+관리자 설정
+관리자
+
+최근 편집
+
+화면 이동 검증 절차
+새 대화
+대화 검색
+Fixture Administrator
+AI 도우미
+생성
+전체
+작업
+모델을 찾을 수 없습니다
+검색어 또는 필터를 변경하여 다시 시도해 보세요.
+모델 / EES Workflow
+Unknown routes:[('GET', '/api/v1/prompts/tags')]
+
+======================================================================
+FAIL: test_q1_geometry_reading_width_footer_and_baseline_overlay (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_figma_layout_native.py", line 54, in test_q1_geometry_reading_width_footer_and_baseline_overlay
+    self.assertAlmostEqual(geometry['composer']['width'],min(760,geometry['chat']['width']-48),delta=1)
+AssertionError: 1008 != 760 within 1 delta (248 difference)
+
+======================================================================
+FAIL: test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_figma_layout_native.py", line 101, in test_q1_physical_drag_restores_per_actor_width_and_contrast
+    self.wait_saved_width(400)
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_figma_layout_native.py", line 20, in wait_saved_width
+    self.fail('Private panel width did not persist: '+str(width))
+AssertionError: Private panel width did not persist: 400
+
+----------------------------------------------------------------------
+Ran 6 tests in 28.679s
+
+FAILED (failures=3)

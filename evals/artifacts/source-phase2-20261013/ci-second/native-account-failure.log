@@ -1,0 +1,161 @@
+2026-10-13T07:55:04.3162008Z ----------------------------------------------------------------------
+2026-10-13T07:55:04.3162684Z Ran 21 tests in 0.130s
+2026-10-13T07:55:04.3162912Z
+2026-10-13T07:55:04.3163051Z OK
+2026-10-13T07:55:14.5182049Z test_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 7886.359325999991, "product": "Chrome/154.0.8037.97"}
+2026-10-13T07:55:27.6209553Z FAIL
+2026-10-13T07:55:28.0027903Z
+2026-10-13T07:55:28.0030878Z ======================================================================
+2026-10-13T07:55:28.0032524Z FAIL: test_same_profile_native_logout_login_discards_late_a_read_and_ai (test_ees_work_authoring_account_switch.NativeAuthoringAccountSwitchTests.test_same_profile_native_logout_login_discards_late_a_read_and_ai)
+2026-10-13T07:55:28.0033681Z ----------------------------------------------------------------------
+2026-10-13T07:55:28.0034305Z Traceback (most recent call last):
+2026-10-13T07:55:28.0042040Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_account_switch.py", line 68, in test_same_profile_native_logout_login_discards_late_a_read_and_ai
+2026-10-13T07:55:28.0043157Z     self.login_ui(account_a['email'],'Fixture-person-only-42!');self.open_workflow(workflow_a)
+2026-10-13T07:55:28.0044009Z                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T07:55:28.0044764Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_account_switch.py", line 51, in open_workflow
+2026-10-13T07:55:28.0045475Z     self.enter_authoring()
+2026-10-13T07:55:28.0046084Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 566, in enter_authoring
+2026-10-13T07:55:28.0046811Z     self.open_sidebar();self.click('[data-action="mode"][data-mode="author"]')
+2026-10-13T07:55:28.0047301Z     ^^^^^^^^^^^^^^^^^^^
+2026-10-13T07:55:28.0047886Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 489, in open_sidebar
+2026-10-13T07:55:28.0048514Z     self.wait(opened + " || " + opening)
+2026-10-13T07:55:28.0049418Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 455, in wait
+2026-10-13T07:55:28.0050261Z     self.fail("Timed out: " + expression + "\n" + self.text("body") + "\nReadiness: " + repr(readiness) + "\nUnknown: " + repr(self.server.unknown))
+2026-10-13T07:55:28.0051081Z AssertionError: Timed out: (()=>{const e=document.querySelector('#sidebar'),r=e?.getBoundingClientRect();
+2026-10-13T07:55:28.0051812Z             return e?.getAttribute('aria-hidden')==='false'&&!e.inert&&r.width>200&&r.x>=0
+2026-10-13T07:55:28.0053027Z                 &&r.right<=innerWidth&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+50));})() || [...document.querySelectorAll('button[aria-label="사이드바 열기"]')].some(e=>{
+2026-10-13T07:55:28.0053855Z             const r=e.getBoundingClientRect();return !e.disabled&&r.width>0&&r.height>0
+2026-10-13T07:55:28.0054507Z                 &&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})
+2026-10-13T07:55:28.0054958Z Skip to main content
+2026-10-13T07:55:28.0055332Z E
+2026-10-13T07:55:28.0055618Z EES Workflow
+2026-10-13T07:55:28.0055943Z 업무
+2026-10-13T07:55:28.0056285Z 워크스페이스
+2026-10-13T07:55:28.0056429Z
+2026-10-13T07:55:28.0056583Z 작업 위치
+2026-10-13T07:55:28.0056784Z
+2026-10-13T07:55:28.0056934Z 공장
+2026-10-13T07:55:28.0066016Z ----------------------------------------------------------------------
+2026-10-13T07:55:28.0066431Z Ran 1 test in 23.581s
+2026-10-13T07:55:28.0066638Z
+2026-10-13T07:55:28.0066777Z FAILED (failures=1)
+2026-10-13T07:55:28.3413906Z test_native_password_change_reset_and_existing_token_without_redis (test_ees_work_authoring_native.NativeAccountAPITests.test_native_password_change_reset_and_existing_token_without_redis)
+2026-10-13T07:55:32.2505531Z NU-06: password changes block old credentials; token revocation needs Redis. ... Cannot revoke tokens for user 103365b3-bee8-4b94-9c45-92e4d2a8a95e: Redis is not configured, existing sessions stay valid until expiry.
+2026-10-13T07:55:33.1545112Z Cannot revoke tokens for user 103365b3-bee8-4b94-9c45-92e4d2a8a95e: Redis is not configured, existing sessions stay valid until expiry.
+2026-10-13T07:55:33.7624362Z ok
+2026-10-13T07:55:33.7625282Z test_native_signup_pending_no_membership_and_closed_registration (test_ees_work_authoring_native.NativeAccountAPITests.test_native_signup_pending_no_membership_and_closed_registration)
+2026-10-13T07:55:35.4352825Z NU-01/02: actual signup ignores client role; closed API rejects. ... ok
+2026-10-13T07:55:35.4354378Z test_pending_group_member_cannot_author_or_use_protected_runtime (test_ees_work_authoring_native.NativeAccountAPITests.test_pending_group_member_cannot_author_or_use_protected_runtime)
+2026-10-13T07:55:37.3126412Z NU-02/08: group membership never bypasses current Native approval. ... ok
+2026-10-13T07:55:37.3127483Z test_workspace_native_menu_reads_current_defaults_groups_and_revocation (test_ees_work_authoring_native.NativeAccountAPITests.test_workspace_native_menu_reads_current_defaults_groups_and_revocation)
+2026-10-13T07:55:39.2636220Z Current Native grants, not login snapshots or EES roles, drive menus. ... ok
+2026-10-13T07:55:41.0243569Z test_workspace_native_menu_rechecks_pending_during_permission_lookup (test_ees_work_authoring_native.NativeAccountAPITests.test_workspace_native_menu_rechecks_pending_during_permission_lookup) ... ok
+2026-10-13T07:55:42.8977337Z test_workspace_native_menu_tools_plugin_and_provider_failure_keep_work_separate (test_ees_work_authoring_native.NativeAccountAPITests.test_workspace_native_menu_tools_plugin_and_provider_failure_keep_work_separate) ... ok
+2026-10-13T07:55:44.7391692Z test_closed_native_signup_ui_and_direct_api (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_closed_native_signup_ui_and_direct_api) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 354.89532399998325, "product": "Chrome/154.0.8037.97"}
+2026-10-13T07:56:29.2362107Z ======================================================================
+2026-10-13T07:56:29.2363645Z FAIL: test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft)
+2026-10-13T07:56:29.2364812Z ----------------------------------------------------------------------
+2026-10-13T07:56:29.2365332Z Traceback (most recent call last):
+2026-10-13T07:56:29.2367941Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 597, in test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft
+2026-10-13T07:56:29.2369514Z     key=self.create_ui_procedure("제안 경계 검증")
+2026-10-13T07:56:29.2370136Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T07:56:29.2371353Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 570, in create_ui_procedure
+2026-10-13T07:56:29.2372212Z     self.enter_authoring()
+2026-10-13T07:56:29.2373123Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 566, in enter_authoring
+2026-10-13T07:56:29.2374139Z     self.open_sidebar();self.click('[data-action="mode"][data-mode="author"]')
+2026-10-13T07:56:29.2374850Z     ^^^^^^^^^^^^^^^^^^^
+2026-10-13T07:56:29.2375744Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 489, in open_sidebar
+2026-10-13T07:56:29.2376671Z     self.wait(opened + " || " + opening)
+2026-10-13T07:56:29.2377562Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 455, in wait
+2026-10-13T07:56:29.2379199Z     self.fail("Timed out: " + expression + "\n" + self.text("body") + "\nReadiness: " + repr(readiness) + "\nUnknown: " + repr(self.server.unknown))
+2026-10-13T07:56:29.2380529Z AssertionError: Timed out: (()=>{const e=document.querySelector('#sidebar'),r=e?.getBoundingClientRect();
+2026-10-13T07:56:29.2381534Z             return e?.getAttribute('aria-hidden')==='false'&&!e.inert&&r.width>200&&r.x>=0
+2026-10-13T07:56:29.2383354Z                 &&r.right<=innerWidth&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+50));})() || [...document.querySelectorAll('button[aria-label="사이드바 열기"]')].some(e=>{
+2026-10-13T07:56:29.2384718Z             const r=e.getBoundingClientRect();return !e.disabled&&r.width>0&&r.height>0
+2026-10-13T07:56:29.2385697Z                 &&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})
+2026-10-13T07:56:29.2386477Z Skip to main content
+2026-10-13T07:56:29.2386903Z E
+2026-10-13T07:56:29.2387357Z EES Workflow
+2026-10-13T07:56:29.2387808Z 업무
+2026-10-13T07:56:29.2388212Z 워크스페이스
+2026-10-13T07:56:29.2388458Z
+2026-10-13T07:56:29.2388853Z 작업 위치
+2026-10-13T07:56:29.2389010Z
+2026-10-13T07:56:29.2389165Z 공장
+2026-10-13T07:56:29.2398297Z ======================================================================
+2026-10-13T07:56:29.2399432Z FAIL: test_native_authoring_conflict_keeps_unsaved_draft_and_published_version (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_authoring_conflict_keeps_unsaved_draft_and_published_version)
+2026-10-13T07:56:29.2400381Z ----------------------------------------------------------------------
+2026-10-13T07:56:29.2400867Z Traceback (most recent call last):
+2026-10-13T07:56:29.2402131Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 582, in test_native_authoring_conflict_keeps_unsaved_draft_and_published_version
+2026-10-13T07:56:29.2403373Z     key=self.create_ui_procedure("동시 편집 검증")
+2026-10-13T07:56:29.2404247Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T07:56:29.2405233Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 570, in create_ui_procedure
+2026-10-13T07:56:29.2406210Z     self.enter_authoring()
+2026-10-13T07:56:29.2407216Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 566, in enter_authoring
+2026-10-13T07:56:29.2408356Z     self.open_sidebar();self.click('[data-action="mode"][data-mode="author"]')
+2026-10-13T07:56:29.2409473Z     ^^^^^^^^^^^^^^^^^^^
+2026-10-13T07:56:29.2410434Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 489, in open_sidebar
+2026-10-13T07:56:29.2411476Z     self.wait(opened + " || " + opening)
+2026-10-13T07:56:29.2412486Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 455, in wait
+2026-10-13T07:56:29.2413905Z     self.fail("Timed out: " + expression + "\n" + self.text("body") + "\nReadiness: " + repr(readiness) + "\nUnknown: " + repr(self.server.unknown))
+2026-10-13T07:56:29.2415187Z AssertionError: Timed out: (()=>{const e=document.querySelector('#sidebar'),r=e?.getBoundingClientRect();
+2026-10-13T07:56:29.2416281Z             return e?.getAttribute('aria-hidden')==='false'&&!e.inert&&r.width>200&&r.x>=0
+2026-10-13T07:56:29.2417844Z                 &&r.right<=innerWidth&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+50));})() || [...document.querySelectorAll('button[aria-label="사이드바 열기"]')].some(e=>{
+2026-10-13T07:56:29.2419362Z             const r=e.getBoundingClientRect();return !e.disabled&&r.width>0&&r.height>0
+2026-10-13T07:56:29.2420419Z                 &&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})
+2026-10-13T07:56:29.2421348Z Skip to main content
+2026-10-13T07:56:29.2421814Z E
+2026-10-13T07:56:29.2422181Z EES Workflow
+2026-10-13T07:56:29.2422653Z 업무
+2026-10-13T07:56:29.2423169Z 워크스페이스
+2026-10-13T07:56:29.2423381Z
+2026-10-13T07:56:29.2423623Z 작업 위치
+2026-10-13T07:56:29.2423843Z
+2026-10-13T07:56:29.2424053Z 공장
+2026-10-13T07:56:29.2434599Z ======================================================================
+2026-10-13T07:56:29.2435319Z FAIL: test_native_new_signup_and_approval_ui (test_ees_work_authoring_native.NativeAuthoringBrowserTests.test_native_new_signup_and_approval_ui)
+2026-10-13T07:56:29.2436059Z ----------------------------------------------------------------------
+2026-10-13T07:56:29.2436533Z Traceback (most recent call last):
+2026-10-13T07:56:29.2437308Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 695, in test_native_new_signup_and_approval_ui
+2026-10-13T07:56:29.2438117Z     key=self.create_ui_procedure('합성 담당자 작성 절차')
+2026-10-13T07:56:29.2438940Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T07:56:29.2439606Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 570, in create_ui_procedure
+2026-10-13T07:56:29.2440319Z     self.enter_authoring()
+2026-10-13T07:56:29.2440912Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 566, in enter_authoring
+2026-10-13T07:56:29.2441617Z     self.open_sidebar();self.click('[data-action="mode"][data-mode="author"]')
+2026-10-13T07:56:29.2442065Z     ^^^^^^^^^^^^^^^^^^^
+2026-10-13T07:56:29.2442666Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 489, in open_sidebar
+2026-10-13T07:56:29.2443313Z     self.wait(opened + " || " + opening)
+2026-10-13T07:56:29.2443896Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_authoring_native.py", line 455, in wait
+2026-10-13T07:56:29.2444825Z     self.fail("Timed out: " + expression + "\n" + self.text("body") + "\nReadiness: " + repr(readiness) + "\nUnknown: " + repr(self.server.unknown))
+2026-10-13T07:56:29.2445630Z AssertionError: Timed out: (()=>{const e=document.querySelector('#sidebar'),r=e?.getBoundingClientRect();
+2026-10-13T07:56:29.2446296Z             return e?.getAttribute('aria-hidden')==='false'&&!e.inert&&r.width>200&&r.x>=0
+2026-10-13T07:56:29.2447331Z                 &&r.right<=innerWidth&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+50));})() || [...document.querySelectorAll('button[aria-label="사이드바 열기"]')].some(e=>{
+2026-10-13T07:56:29.2448123Z             const r=e.getBoundingClientRect();return !e.disabled&&r.width>0&&r.height>0
+2026-10-13T07:56:29.2448928Z                 &&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})
+2026-10-13T07:56:29.2449437Z Skip to main content
+2026-10-13T07:56:29.2449784Z E
+2026-10-13T07:56:29.2450057Z EES Workflow
+2026-10-13T07:56:29.2450839Z 업무
+2026-10-13T07:56:29.2451277Z 워크스페이스
+2026-10-13T07:56:29.2451431Z
+2026-10-13T07:56:29.2451603Z 작업 위치
+2026-10-13T07:56:29.2451812Z
+2026-10-13T07:56:29.2451949Z 공장
+2026-10-13T07:56:29.2463293Z ----------------------------------------------------------------------
+2026-10-13T07:56:29.2463714Z Ran 10 tests in 60.895s
+2026-10-13T07:56:29.2463897Z
+2026-10-13T07:56:29.2464165Z FAILED (failures=3)
+2026-10-13T07:56:29.5526793Z ##[error]Process completed with exit code 1.
+2026-10-13T07:56:29.5591288Z ##[group]Run python tests/ees_delivery_suite.py --browser-evidence dist/ees-work-screenshots --output dist/ees-results
+2026-10-13T07:56:29.5592142Z [36;1mpython tests/ees_delivery_suite.py --browser-evidence dist/ees-work-screenshots --output dist/ees-results[0m
+2026-10-13T07:56:29.5633468Z shell: /usr/bin/bash -e {0}
+2026-10-13T07:56:29.5633827Z env:
+2026-10-13T07:56:29.5634808Z   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-13T07:56:29.5635895Z   EES_TEST_CHROME: google-chrome
+2026-10-13T07:56:29.5636365Z   EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+2026-10-13T07:56:29.5636849Z   EES_TEST_BRANDING_DIR: dist/branding
+2026-10-13T07:56:29.5637325Z   EES_TEST_FRONTEND_DIR: dist/frontend
+2026-10-13T07:56:29.5637735Z   EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
+2026-10-13T07:56:29.5638120Z   EES_REQUIRE_AUTHORING_NATIVE: 1
+2026-10-13T07:56:29.5638567Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64

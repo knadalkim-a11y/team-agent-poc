@@ -1,0 +1,115 @@
+{
+  "initial_evidence": "integrated-test_native_folder_uses_one_chat_and_preserves_draft_through_asset_navigation-failure.json",
+  "browser_cleanup_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 10708.902405996923,
+    "pid": 1811,
+    "exit_code": 0,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "HeadlessChrome/153.0.8010.52",
+      "revision": "@78e5e45d4bb41035e17ea4da2cc257f496416ac9",
+      "jsVersion": "15.3.76.13"
+    },
+    "target_id": "EB98D011FDEEDDDAB966397DE962133B",
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 404,
+      "method": "Browser.close",
+      "session_attached": false,
+      "timeout_seconds": 5,
+      "elapsed_ms": 0.9747540025273338,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "id": 385,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 386,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 387,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 388,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 389,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 390,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 391,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 392,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 393,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 394,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 395,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 396,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 397,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 398,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 399,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 400,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 401,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 402,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 403,
+        "sessionId": "81032933FE73C02F84C63C348E848171"
+      },
+      {
+        "id": 404
+      }
+    ],
+    "stderr_tail": "[1013/030135.585196:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1013/030135.585329:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1013/030135.586454:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1013/030135.586484:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[1013/030135.586625:ERROR:net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)\n[1013/030135.587502:ERROR:device/udev_linux/udev_watcher.cc:51] Failed to initialize a udev monitor.\n[1013/030135.589355:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 1828: No such file or directory (2)\n[1013/030135.597083:WARNING:media/gpu/vaapi/vaapi_wrapper.cc:1660] drmGetDevices2() has not found any devices\n[1013/030135.598389:WARNING:sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.\n[1013/030135.634156:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1013/030135.634271:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1013/030135.634289:WARNING:device/bluetooth/dbus/bluez_dbus_manager.cc:209] Floss manager service not available, cannot set Floss enable/disable.\n[1013/030135.636708:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1013/030135.660904:ERROR:content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 1863: No such file or directory (2)\n[1013/030135.686032:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[1013/030135.686067:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[1013/030136.826051:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.826086:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828282:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828377:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828436:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828448:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828481:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828488:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828493:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828499:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828504:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828525:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828532:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828543:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828562:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828567:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828573:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828579:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828584:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828590:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n[1013/030136.828595:INFO:CONSOLE:1] \"Invalid keyframe value for property height: NaNpx\", source: http://127.0.0.1:35533/_ees14/immutable/chunks/D2UXpQJ6.js (1)\n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 166.13360899646068,
+      "product": "HeadlessChrome/153.0.8010.52"
+    },
+    "bootstrap_observation": null
+  }
+}

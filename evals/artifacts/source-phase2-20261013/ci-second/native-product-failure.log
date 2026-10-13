@@ -1,0 +1,29 @@
+2026-10-13T07:54:58.8990507Z {"name": "physical authoring save validate publish", "workflow_id": "81c08124-b1d4-4e78-879d-3f1bab081054", "version": 1}
+2026-10-13T07:55:13.7249286Z Traceback (most recent call last):
+2026-10-13T07:55:13.7255378Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_app.py", line 963, in <module>
+2026-10-13T07:55:13.7257047Z     main()
+2026-10-13T07:55:13.7257782Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_app.py", line 952, in main
+2026-10-13T07:55:13.7258421Z     gate.run()
+2026-10-13T07:55:13.7258995Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_app.py", line 285, in run
+2026-10-13T07:55:13.7259581Z     integrated_flow(self)
+2026-10-13T07:55:13.7259997Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_app.py", line 359, in integrated_flow
+2026-10-13T07:55:13.7260516Z     q1_native_geometry(g,'figma-q1-1366x768-human-action',require_action=True)
+2026-10-13T07:55:13.7261065Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_app.py", line 406, in q1_native_geometry
+2026-10-13T07:55:13.7261802Z     g.wait('document.body.dataset.eesSidebarCompact==="true" && Math.abs(document.querySelector("#sidebar").getBoundingClientRect().width-56)<1')
+2026-10-13T07:55:13.7262499Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_app.py", line 155, in wait
+2026-10-13T07:55:13.7262956Z     assert time.monotonic()<deadline,'Readiness failed: '+expression
+2026-10-13T07:55:13.7263238Z            ^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T07:55:13.7263773Z AssertionError: Readiness failed: document.body.dataset.eesSidebarCompact==="true" && Math.abs(document.querySelector("#sidebar").getBoundingClientRect().width-56)<1
+2026-10-13T07:55:13.7745703Z ##[error]Process completed with exit code 1.
+2026-10-13T07:55:13.7810953Z ##[group]Run python tests/ees_delivery_suite.py --browser-evidence dist/ees-native-product --output dist/ees-native-product-results
+2026-10-13T07:55:13.7811686Z [36;1mpython tests/ees_delivery_suite.py --browser-evidence dist/ees-native-product --output dist/ees-native-product-results[0m
+2026-10-13T07:55:13.7867754Z shell: /usr/bin/bash -e {0}
+2026-10-13T07:55:13.7867969Z env:
+2026-10-13T07:55:13.7868725Z   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-13T07:55:13.7869561Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-13T07:55:13.7869917Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+2026-10-13T07:55:13.7870276Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-13T07:55:13.7870580Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-13T07:55:13.7870901Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-13T07:55:13.7871203Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+2026-10-13T07:55:13.7871461Z ##[endgroup]

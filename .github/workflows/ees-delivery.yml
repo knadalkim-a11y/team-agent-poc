@@ -50,6 +50,8 @@ on:
       - 'tests/test_ees_work_workspace.py'
       - 'tests/test_ees_work_operations.py'
       - 'tests/test_ees_work_figma*'
+      - 'tests/test_ees_source_shell_native.py'
+      - 'tests/ees_source_frame_monitor.py'
       - 'tests/test_ees_work_history_reference.py'
       - 'tests/ees_work_integrated*.py'
       - 'tests/ees_work_native_chat.py'
@@ -245,7 +247,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, windows-2022]
-        suite: [services, contracts, native-contracts, platform, program-install, program-wheel, restore-ees10, restore-ees11, restore-ees12, restore-ees13]
+        suite: [services, contracts, native-contracts, native-grounding, platform, program-install, program-wheel, restore-ees10, restore-ees11, restore-ees12, restore-ees13]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     env:

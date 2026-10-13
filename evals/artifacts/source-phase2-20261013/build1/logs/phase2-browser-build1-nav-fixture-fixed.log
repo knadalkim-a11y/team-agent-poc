@@ -1,0 +1,21 @@
+test_every_navigation_has_source_chrome_without_native_overlay_frames (test_ees_source_shell_native.SourceShellNativeTests.test_every_navigation_has_source_chrome_without_native_overlay_frames) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 163.35157299909042, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: test_every_navigation_has_source_chrome_without_native_overlay_frames (test_ees_source_shell_native.SourceShellNativeTests.test_every_navigation_has_source_chrome_without_native_overlay_frames)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/ees_work_integrated_fixture.py", line 116, in tearDown
+    self.assertEqual(errors, [], errors)
+AssertionError: Lists differ: ['TypeError: e(...).filter is not a functi[818 chars]81)'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'TypeError: e(...).filter is not a function\n    at Oe (http://127.0.0.1:39029/_ees14/immutable/nodes/49.CVBH5sOG.js:1:10331)\n    at http://127.0.0.1:39029/_ees14/immutable/nodes/49.CVBH5sOG.js:1:13737\n    at Re (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:34239)\n    at http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:28819\n    at Vr (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:31982)\n    at Ue (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:33065)\n    at zt.cn (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:11650)\n    at zt.dt (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:10618)\n    at zt.flush (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:8732)\n    at Array.<anonymous> (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:9581)'
+
+Diff is 981 characters long. Set self.maxDiff to None to see it. : ['TypeError: e(...).filter is not a function\n    at Oe (http://127.0.0.1:39029/_ees14/immutable/nodes/49.CVBH5sOG.js:1:10331)\n    at http://127.0.0.1:39029/_ees14/immutable/nodes/49.CVBH5sOG.js:1:13737\n    at Re (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:34239)\n    at http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:28819\n    at Vr (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:31982)\n    at Ue (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:33065)\n    at zt.cn (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:11650)\n    at zt.dt (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:10618)\n    at zt.flush (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:8732)\n    at Array.<anonymous> (http://127.0.0.1:39029/_ees14/immutable/chunks/ByCPfgav.js:1:9581)']
+
+----------------------------------------------------------------------
+Ran 1 test in 4.202s
+
+FAILED (failures=1)

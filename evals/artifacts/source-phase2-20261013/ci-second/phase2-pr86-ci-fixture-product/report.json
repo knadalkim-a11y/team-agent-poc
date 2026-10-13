@@ -1,0 +1,30 @@
+{
+  "time": "2026-10-13T08:01:14.317424+00:00",
+  "scope": "Complete packaged Native app gate for the integrated work contract.\n\nOne temporary DATA_DIR and a loopback synthetic model are used. Native auth,\nchat/file storage, workflow APIs, worker and frontend are the built product.\nNo company credentials, DB or service is read. Physical CDP input drives UI;\nread-only DOM evaluation inspects readiness and results. Failure evidence is\ncaptured before browser shutdown. This is distinct from the Native fixtures.\nThis gate was reconstructed after workspace loss from the committed base and\nobserved failures. It is not claimed byte-identical to the lost c144 gate.\n",
+  "source_commit": "dc414c469062f16ec618b85863fb675f3fc85e6e",
+  "source_dirty": true,
+  "wheel": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+  "wheel_sha256": "874d2c1846c840bc5c8b759b702cbd86cc4fdd19f9e56320515d76d4f5dc9a0a",
+  "gate_sha256": "c334d33526baefcb5192e4e81dfbe8cf0dd0fad725d935d3ab585da75128eb48",
+  "execution": {
+    "python": "3.12.14",
+    "argv": [
+      "tests/ees_work_integrated_app.py",
+      "--wheel",
+      "/workspace/scratch/f5cd50d81fb4/phase2-branding-3/open_webui-0.11.3+ees.14-py3-none-any.whl",
+      "--chrome",
+      "/workspace/scratch/f5cd50d81fb4/c18-review-tools/chrome-headless-shell-linux64/chrome-headless-shell",
+      "--output",
+      "/workspace/scratch/f5cd50d81fb4/phase2-pr86-ci-fixture-product"
+    ],
+    "chrome": "/workspace/scratch/f5cd50d81fb4/c18-review-tools/chrome-headless-shell-linux64/chrome-headless-shell",
+    "reconstructed_after_workspace_loss": true,
+    "prior_lost_gate_byte_identity_claimed": false
+  },
+  "steps": [],
+  "status": "failed",
+  "failure": {
+    "type": "RuntimeError",
+    "message": "Native CLI exited; sanitized local startup summary available"
+  }
+}

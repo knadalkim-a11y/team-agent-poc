@@ -124,7 +124,7 @@ class NativeSourceHookTests(unittest.TestCase):
 const assert=require('node:assert/strict');
 let embedded=false,$temporaryChatEnabled=false,$chatId='',chatIdProp='',loading=false,prompt='',files=[];
 let selectedToolIds=[],selectedSkillIds=[],selectedFilterIds=[],webSearchEnabled=false,imageGenerationEnabled=false,codeInterpreterEnabled=false,toolApprovalMode='ask';
-let chat=null,approvalCalls=0,failCreation=false,beginCalls=0,saveDraftTimeout=null;
+let chat=null,approvalCalls=0,failCreation=false,beginCalls=0,saveDraftTimeout=null,loadedChatIdProp='';
 const notifications=[],persisted=[],selectedModels=['model'],params={},chatVariables={},$settings={},$socket={id:'socket'};
 const $selectedFolder=null,$i18n={t:x=>x};
 const messageInput={setText(value){prompt=value;}},history={messages:{}};
@@ -162,6 +162,16 @@ const createNewChat=async()=>{if(failCreation)throw Error('synthetic creation fa
  embedded=false;$chatId='provisional4';window.location.pathname='/';let finish;
  const pending=probeCompletion(new Promise(resolve=>finish=resolve));$chatId='other';window.location.pathname='/c/other';
  finish({chat_id:'late-result'});await pending;assert.equal(notifications.length,2);
+ // Native creation must update the source route and loaded prop together,
+ // without the linked-chat loader resetting the live composer.
+ embedded=false;$temporaryChatEnabled=false;$chatId='provisional5';chatIdProp='';loadedChatIdProp='';window.location.pathname='/';
+ let adopted=0;
+ window.__eesSourceShellV1={adoptChat:async id=>{assert.equal(loadedChatIdProp,id);adopted++;chatIdProp=id;window.location.pathname='/c/'+id;}};
+ files=[{type:'image',url:'live-image'}];prompt='keep draft';
+ await initChatHandler({state:{}});assert.equal(adopted,1);assert.equal(window.__eesNativeDraftV1.ready(),true);
+ assert.equal(files[0].url,'live-image');assert.equal(prompt,'keep draft');
+ $chatId='provisional6';chatIdProp='';loadedChatIdProp='';window.location.pathname='/';
+ await probeCompletion({chat_id:'second-created'});assert.equal(adopted,2);assert.equal(window.__eesNativeDraftV1.ready(),true);
  const original={id:'message',meta:{kept:true}};const recorded=referenceMessage('chat','response',original).user_message;
  window.__eesNativeWorkV1.captureReference=()=>({kind:'work',workflow_id:'later-work'});
  assert.equal(recorded.meta.ees_work_reference.workflow_id,'captured-work');assert.equal(recorded.meta.kept,true);
@@ -184,17 +194,34 @@ class SourcePatchTests(unittest.TestCase):
             current = (root / name).read_text(encoding="utf-8")
             self.assertIn("EES Workflow", current, name)
             self.assertNotRegex(current, r"EES Work(?!flow)", name)
-        for name in ("src/lib/components/chat/Placeholder.svelte", "src/lib/components/chat/Navbar.svelte"):
+        # Stage 2 owns layout in source. Preserve Native input and action
+        # implementations, not the old greeting/toolbar geometry or DOM hooks.
+        for name, pattern in (
+            ("src/lib/components/chat/Placeholder.svelte", rb"<MessageInput\b[\s\S]*?\n\s*/>"),
+            ("src/lib/components/chat/Navbar.svelte", rb"<Menu\b[\s\S]*?</Menu>"),
+        ):
             original = subprocess.check_output(["git", "show", config["commit"] + ":" + name], cwd=root)
             current = (root / name).read_bytes()
-            stripped = re.sub(rb"[ \t]*data-ees-native-[a-z-]+(?:\n)?", b"", current)
-            # Inline attributes retain their following space; multiline nav
-            # attributes remove only their complete newly added source line.
-            if name.endswith("Placeholder.svelte"):
-                stripped = re.sub(rb" data-ees-native-[a-z-]+", b"", current)
-            else:
-                stripped = current.replace(b"\tdata-ees-native-toolbar\n", b"")
-            self.assertEqual(stripped, original, name)
+            self.assertEqual(re.search(pattern, current).group(), re.search(pattern, original).group(), name)
+        shell = (root / "src/lib/components/ees/EesShell.svelte").read_text(encoding="utf-8")
+        for marker in ("data-ees-source-shell", "data-ees-source-slot", "hidden={nativeRoute || !folderReady}", "inert={nativeRoute || !folderReady}"):
+            self.assertIn(marker, shell)
+        self.assertIn("<Chat chatIdProp={retainedChatId}", shell)
+        for name in ("src/routes/(app)/+page.svelte", "src/routes/(app)/c/[id]/+page.svelte", "src/routes/(app)/folders/[folderId]/+page.svelte"):
+            self.assertNotIn("<Chat", (root / name).read_text(encoding="utf-8"))
+        # The newly exported R7 icon is a Vite source input, so prior installed
+        # program/Restore asset inventories do not change.
+        icon_name = "src/lib/components/ees/icons/5bc95.svg"
+        icon = (root / icon_name).read_bytes()
+        self.assertTrue(icon.startswith(b"<svg"))
+        self.assertEqual(frontend._sha(icon), "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7")
+        self.assertEqual(config["patched_files"][icon_name], frontend._sha(icon))
+        self.assertNotIn(icon_name, config["source_files"])
+        self.assertIn("import connectionsIcon from './icons/5bc95.svg'", (root / "src/lib/components/ees/EesIcon.svelte").read_text(encoding="utf-8"))
+        app = (root / "src/app.html").read_text(encoding="utf-8")
+        self.assertNotIn("ees-startup-gate", app)
+        for name in ("src/lib/components/ees/EesShell.svelte", "src/lib/components/ees/EesNavigation.svelte"):
+            self.assertNotIn("MutationObserver", (root / name).read_text(encoding="utf-8"))
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "src/app.html"
             path.parent.mkdir()
@@ -221,7 +248,7 @@ class FrontendProvenanceTests(unittest.TestCase):
         app = self.config["app_dir"]
         self.files = {"index.html": b"<html>source built</html>", "pyodide/fixture.js": b"pinned pyodide",
                       app + "/version.json": json.dumps({"version": self.config["version"]}).encode("utf-8"),
-                      app + "/immutable/entry/start.js": b"__eesNativeDraftV1 __eesNativeWorkV1 ees_work_reference beginChatCreation finishChatCreation data-ees-native-sidebar"}
+                      app + "/immutable/entry/start.js": b"__eesNativeDraftV1 __eesNativeWorkV1 ees_work_reference beginChatCreation finishChatCreation __eesSourceShellV1 data-ees-source-sidebar data-ees-source-shell"}
         for name, content in self.files.items():
             path = self.build / name
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -326,5 +353,267 @@ class FrontendProvenanceTests(unittest.TestCase):
                 frontend._verify_source(self.root, self.config)
 
 
+class FrontendManifestBudgetTests(unittest.TestCase):
+    def test_manifest_exact_limit_keeps_all_hashes_and_overflow_preserves_build(self):
+        from scripts import ees_deploy_release as release
+        self.assertEqual(frontend.MAX_MANIFEST_BYTES, release.MAX_JSON_BYTES)
+        self.assertEqual(frontend.MAX_MANIFEST_BYTES, 1024 * 1024)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source"
+            source.mkdir()
+            (source / "package.json").write_text('{"version":"0.11.3"}', encoding="utf-8")
+            added_source = source / "NewShell.svelte"
+            added_source.write_bytes(b"<main>source component</main>")
+            lock = source / "static/pyodide/pyodide-lock.json"
+            lock.parent.mkdir(parents=True)
+            lock.write_bytes(b"{}")
+            inputs = {"synthetic-budget-input": "x" * 1000000}
+            config = {**frontend.configuration(), "source_files": {"package.json": "f" * 64},
+                      "patched_files": {"package.json": "f" * 64, "NewShell.svelte": frontend._sha(added_source.read_bytes())},
+                      "pyodide_files": {}}
+
+            def build(label, *, source_drift=False):
+                # Isolate manifest publication; compiler/provenance behavior is
+                # covered by the actual source CI and adjacent validator tests.
+                (source / "build").mkdir()
+                (source / "build/index.html").write_bytes(b"synthetic compiled bytes")
+                with (patch.object(frontend, "configuration", return_value=config),
+                      patch.object(frontend, "_verify_source"),
+                      patch.object(frontend, "_source_inputs", side_effect=lambda *_: dict(inputs)),
+                      patch.object(frontend, "_copy_official_pyodide", return_value=({}, b"{}")),
+                      patch.object(frontend, "_apply_ees"),
+                      patch.object(frontend, "_run", side_effect=lambda *_args, **_kwargs:
+                                   added_source.write_bytes(b"unreviewed source drift") if source_drift else None),
+                      patch.object(frontend, "_verify_output"), patch.object(frontend, "validate_frontend")):
+                    return frontend.build(source, root / "fixture.whl", root / label)
+
+            measured = build("measure")
+            size = (root / "measure/manifest.json").stat().st_size
+            inputs["synthetic-budget-input"] += "x" * (frontend.MAX_MANIFEST_BYTES - size)
+            expected = build("boundary")
+            raw = (root / "boundary/manifest.json").read_bytes()
+            self.assertEqual(len(raw), frontend.MAX_MANIFEST_BYTES)
+            self.assertEqual(release._json(raw), expected)
+            self.assertEqual(expected["files"], measured["files"])
+            self.assertEqual(expected["source_inputs"], inputs)
+            self.assertEqual(set(expected["compiled_source_files"]), set(config["patched_files"]))
+            self.assertEqual(expected["compiled_source_files"]["NewShell.svelte"], config["patched_files"]["NewShell.svelte"])
+            inputs["synthetic-budget-input"] += "x"
+            with self.assertRaisesRegex(ValueError, "Frontend manifest exceeds"):
+                build("over")
+            self.assertFalse((root / "over").exists())
+            self.assertEqual((source / "build/index.html").read_bytes(), b"synthetic compiled bytes")
+            shutil.rmtree(source / "build")
+            with self.assertRaisesRegex(ValueError, "inputs changed while building"):
+                build("source-drift", source_drift=True)
+            self.assertFalse((root / "source-drift").exists())
+
+
+@unittest.skipUnless(os.environ.get("EES_TEST_FRONTEND_SOURCE_DIR") and shutil.which("node"),
+                     "The CI patched source checkout is required for source lifecycle probes.")
+class SourceShellLifecycleTests(unittest.TestCase):
+    run_node = NativeDraftHookTests.run_node
+
+    def test_pending_native_draft_callbacks_cannot_cross_account_or_destroyed_owner(self):
+        source = (Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]) /
+                  "src/lib/components/chat/Chat.svelte").read_text(encoding="utf-8")
+        lifecycle = _between(source, "const eesDraftOwner =", "\n\tconst oauthRedirectHandler")
+        clear = _between(source, "const clearDraft =", "\n\tconst moveChatHandler")
+        code = (lifecycle + clear).replace("let saveDraftTimeout: ReturnType<typeof setTimeout> | null", "let saveDraftTimeout")
+        code = code.replace("draft: any", "draft").replace("chatId: string | null", "chatId")
+        probe = r'''
+const assert=require('node:assert/strict');
+let $user={id:'first'}, cleanup, next=1;
+const timers=new Map(), cancelled=[];
+const setTimeout=callback=>{const id=next++;timers.set(id,callback);return id;};
+const clearTimeout=id=>cancelled.push(id);
+const onDestroy=callback=>cleanup=callback;
+const values=new Map([['unrelated','preserved']]);
+const sessionStorage={setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key)};
+''' + code + r'''
+(async()=>{
+ await saveDraft({prompt:'first'},null,true);timers.get(1)();
+ assert.equal(JSON.parse(values.get('chat-input')).prompt,'first');
+ await saveDraft({prompt:'late old draft'},null,true);
+ $user={id:'second'};values.set('chat-input','new account draft');
+ timers.get(2)();assert.equal(values.get('chat-input'),'new account draft');
+ await saveDraft({prompt:'x'.repeat(5001)},null,false);
+ assert.equal(values.get('chat-input'),'new account draft','Old oversized draft must not delete the next account draft');
+ await clearDraft();assert.equal(values.get('chat-input'),'new account draft');
+ $user={id:'first'};cleanup();
+ await saveDraft({prompt:'destroyed'},null,false);
+ await clearDraft();assert.equal(values.get('chat-input'),'new account draft');
+ assert.equal(values.get('unrelated'),'preserved');assert.equal(cancelled.length>0,true);
+ console.log('native_draft_owner=pass');
+})().catch(error=>{console.error(error);process.exitCode=1;});
+'''
+        self.assertEqual(self.run_node(probe), "native_draft_owner=pass")
+
+
+    def test_source_chat_route_creation_folder_return_and_same_chat_reopen(self):
+        root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"])
+        shell = (root / "src/lib/components/ees/EesShell.svelte").read_text(encoding="utf-8")
+        chat = (root / "src/lib/components/chat/Chat.svelte").read_text(encoding="utf-8")
+        bridge = _between(shell, "const bridge = {", "\n\tif (typeof window")
+        reset = _between(chat, "const initNewChat = () => eesNativeDraftLoad(async () => {", "\n\t\tconsole.log('initNewChat')") + "\n});"
+        linked = _between(chat, "$: if (chatIdProp && chatIdProp !== loadedChatIdProp)", "\n\t$: if (embedded")
+        probe = r"""
+const assert=require('node:assert/strict');
+let nativeRoute=false,admin=false,chatRoute=true,folderReady=true,retainedChatId='old',lastChatPath='/c/old';
+let activeId='new',chatIdProp='old',loadedChatIdProp='old',embedded=false,loads=0;
+let panel={},overlays={},eesRequest=()=>{},user={id:'actor'},selectedFolder={id:'folder-a',set() {}};
+const get=value=>value,eesSnapshot={set(){}},eesCompact={set(){}},showSettings={set(){}},showSearch={set(){}},eesReferenceHosts=new Map();
+const window={__eesNativeDraftV1:{activeChatId:()=>activeId,ready:()=>true},__eesNativeWorkV1:{chatCreated:id=>created.push(id)}};
+const created=[],navigations=[],$page={url:{pathname:'/c/old'}};
+const location={pathname:'/c/old',search:''};
+const tick=async()=>{},eesSync=()=>{},navigate=()=>{},newChat=()=>{},noteChatDebug=()=>{};
+const eesNativeDraftLoad=async fn=>fn(),navigateHandler=()=>{loads++;};
+const goto=async(path,options)=>{navigations.push({path,options});location.pathname=path;$page.url.pathname=path;chatIdProp=path.startsWith('/c/')?path.slice(3):'';};
+""" + bridge + reset + "\nconst linkedUpdate=()=>{" + linked.replace("$: ", "", 1) + "};\n" + r"""
+(async()=>{
+ window.__eesSourceShellV1=bridge;
+ await initNewChat();assert.equal(loadedChatIdProp,'');assert.equal(chatIdProp,'');assert.equal(lastChatPath,'/');
+ chatIdProp='old';linkedUpdate();assert.equal(loads,1);assert.equal(loadedChatIdProp,'old');
+ await bridge.adoptChat('new');assert.equal(retainedChatId,'new');assert.equal(location.pathname,'/c/new');assert.equal(navigations.at(-1).options.replaceState,true);
+ nativeRoute=true;location.pathname='/workspace/models';activeId='late';const before=navigations.length;
+ await bridge.adoptChat('late');assert.equal(navigations.length,before);assert.equal(location.pathname,'/workspace/models');assert.equal(retainedChatId,'late');assert.equal(created.at(-1),'late');
+ await bridge.adoptChat('wrong-owner-chat');assert.equal(retainedChatId,'late');
+ nativeRoute=false;lastChatPath='/c/late';
+ selectedFolder={id:'other'};assert.equal(bridge.shouldInitChat('/folders/folder-a'),false);
+ selectedFolder={id:'folder-a'};assert.equal(bridge.shouldInitChat('/folders/folder-a'),true);
+ assert.equal(bridge.shouldInitChat('/folders/folder-a'),false,'Returning from Native must preserve the live folder draft');
+ selectedFolder={id:'folder-b'};assert.equal(bridge.shouldInitChat('/folders/folder-b'),true);
+ console.log('source_routes=pass');
+})().catch(e=>{console.error(e);process.exitCode=1});
+"""
+        result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
+                                text=True, encoding="utf-8", timeout=15)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "source_routes=pass")
+
+    def test_pending_native_control_save_cannot_write_or_apply_across_owner_change(self):
+        source = (Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]) /
+                  "src/lib/components/chat/Chat.svelte").read_text(encoding="utf-8")
+        controls = _between(source, "const saveControls =", "\n\tconst eesDraftOwner")
+        owner = _between(source, "const eesDraftOwner =", "\n\tconst MAX_DRAFT_LENGTH")
+        probe = r'''
+const assert=require('node:assert/strict');
+let $user={id:'first'},$chatId='chat-first',$temporaryChatEnabled=false,cleanup,saveDraftTimeout=null;
+let chat={chat:{params:{original:true}}},params={edited:true},chatFiles=[];
+const onDestroy=callback=>cleanup=callback;
+const localStorage={token:'first-token'},calls=[];
+const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+let settle;
+const updateChatById=(token,id,body)=>{calls.push({token,id,body});return new Promise(resolve=>settle=resolve);};
+''' + owner + controls + r'''
+(async()=>{
+ const pending=saveControls();assert.equal(calls.length,1);
+ $user={id:'second'};$chatId='chat-second';localStorage.token='second-token';
+ const baseline=chat;settle({chat:{params:{late:true}}});await pending;
+ assert.equal(chat,baseline,'An old response cannot replace the current actor baseline');
+ await saveControls();assert.equal(calls.length,1);
+ $user={id:'first'};cleanup();await saveControls();assert.equal(calls.length,1);
+ assert.equal(calls[0].token,'first-token');assert.equal(calls[0].id,'chat-first');
+ console.log('native_controls_owner=pass');
+})().catch(error=>{console.error(error);process.exitCode=1;});
+'''
+        self.assertEqual(self.run_node(probe), "native_controls_owner=pass")
+
+
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(os.environ.get("EES_TEST_FRONTEND_SOURCE_DIR") and shutil.which("node"),
+                     "Patched source and Node are required for common API probes.")
+class SourceApiTests(unittest.TestCase):
+    def test_current_native_session_response_guard_errors_and_abort_signal(self):
+        root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve()
+        source = (root / "src/lib/apis/ees-work.ts").read_text(encoding="utf-8")
+        prelude = "const ts=require(" + json.dumps(str(root / "node_modules/typescript")) + ");\n"
+        prelude += "const source=" + json.dumps(source) + ";\n"
+        probe = prelude + r"""
+const assert=require('node:assert/strict');
+let actor={id:'actor-a'};global.localStorage={token:'token-a'};
+let response={ok:true,status:200,json:async()=>({ok:true,kept:'result'})},calls=[];
+global.fetch=async(url,options)=>{calls.push({url,options});return response;};
+const moduleValue={exports:{}};
+const userStore={},readyStore={};let ready=true;
+const requireStub=name=>name==='svelte/store'?{get:store=>store===readyStore?ready:actor}:name==='$lib/stores'?{user:userStore}:name==='$lib/components/ees/state'?{eesSessionReady:readyStore}:{default:{t:(key,options)=>options.defaultValue}};
+new Function('require','module','exports',ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText)(requireStub,moduleValue,moduleValue.exports);
+const request=moduleValue.exports.eesRequest;
+(async()=>{
+ const controller=new AbortController();
+ ready=false;await assert.rejects(request('state'),e=>e.status===401);assert.equal(calls.length,0);ready=true;
+ assert.equal((await request('state',undefined,controller.signal)).kept,'result');
+ assert.equal(calls[0].url,'/api/ees-work/state');assert.equal(calls[0].options.method,'GET');
+ assert.equal(calls[0].options.headers.Authorization,'Bearer token-a');assert.equal(calls[0].options.credentials,'same-origin');
+ assert.equal(calls[0].options.cache,'no-store');assert.equal(calls[0].options.signal,controller.signal);
+ await request('command',{expected_revision:4});assert.equal(calls[1].options.method,'POST');assert.equal(calls[1].options.body,'{"expected_revision":4}');
+ const denied={ok:false,error:{code:'scope_forbidden',message:'denied'}};
+ response={ok:false,status:403,json:async()=>denied};await assert.rejects(request('state'),e=>e.status===403&&e.code==='scope_forbidden'&&e.result===denied);
+ response={ok:true,status:200,json:async()=>{throw Error('invalid JSON')}};
+ await assert.rejects(request('state'),e=>e.status===200&&e.message.includes('response'));
+ response={ok:true,status:200,json:async()=>{actor={id:'actor-b'};return {private:true}}};
+ await assert.rejects(request('state'),e=>e.status===409&&e.code==='context_changed'&&!e.result);
+ actor={id:'actor-a'};response={ok:true,status:200,json:async()=>{localStorage.token='token-b';return {private:true}}};
+ await assert.rejects(request('state'),e=>e.code==='context_changed'&&!e.result);
+ actor=null;const before=calls.length;await assert.rejects(request('state'),e=>e.status===401);assert.equal(calls.length,before);
+ actor={id:'actor-a'};global.fetch=async(url,options)=>{assert.equal(options.signal,controller.signal);throw Object.assign(Error('aborted'),{name:'AbortError'})};
+ await assert.rejects(request('state',undefined,controller.signal),e=>e.name==='AbortError');
+ console.log('source_api=pass');
+})().catch(e=>{console.error(e);process.exitCode=1});
+"""
+        result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
+                                text=True, encoding="utf-8", timeout=15)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "source_api=pass")
+
+
+@unittest.skipUnless(os.environ.get("EES_TEST_FRONTEND_SOURCE_DIR") and shutil.which("node"),
+                     "Patched source and Node are required for Native session lifecycle probes.")
+class SourceSessionTests(unittest.TestCase):
+    run_node = NativeDraftHookTests.run_node
+
+    def test_cross_tab_session_owner_reload_same_owner_preservation_and_late_guards(self):
+        source = (Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve() /
+                  "src/routes/+layout.svelte").read_text(encoding="utf-8")
+        handler = _between(source, "const eesRevalidateSession =", "\n\tonDestroy(() => { eesSessionAlive")
+        probe = r'''
+const assert=require('node:assert/strict');
+let eesSessionToken='token-a',eesSessionEpoch=0,eesSessionAlive=true,eesSessionFailed=false,$user={id:'a',token:'token-a'};
+let localStorage={token:'token-a'},ready=true,result={id:'a',token:'renewed-a'},held=false,finish,fail=false;
+const sessionStorage={'chat-input':'private draft','ees-source-draft-owner':'a',other:'keep',removeItem(key){delete this[key];}};
+const eesSessionReady={set(value){ready=value;}},user={set(value){$user=value;}},joined=[],paths=[];
+const $socket={emit:(event,value)=>joined.push(value)};
+const window={__eesNativeWorkV1:{sync(){}},location:{replace:path=>paths.push(path)}};
+const getSessionUser=async token=>{if(fail)throw Error('temporary offline');return held?await new Promise(r=>finish=r):result;};
+''' + handler + r'''
+(async()=>{
+ await eesRevalidateSession({type:'storage',key:'unrelated'});assert.equal(paths.length,0);
+ localStorage.token='renewed-a';await eesRevalidateSession({type:'focus'});
+ assert.equal(ready,true);assert.equal($user.id,'a');assert.equal(sessionStorage['chat-input'],'private draft');
+ assert.equal(paths.length,0);assert.equal(joined.length,1);
+ localStorage.token='token-b';result={id:'b',token:'token-b'};fail=true;
+ await eesRevalidateSession({type:'storage',key:'token'});assert.equal(ready,false);assert.equal(eesSessionFailed,true);assert.equal($user.id,'a');
+ assert.equal(eesSessionToken,'renewed-a');assert.equal(sessionStorage['chat-input'],'private draft');assert.equal(paths.length,0);
+ fail=false;held=true;const late=eesRevalidateSession({type:'focus'});
+ localStorage.token='token-c';$user={id:'c',token:'token-c'};
+ await eesRevalidateSession({type:'focus'});finish({id:'b',token:'token-b'});await late;
+ assert.equal($user.id,'c');assert.equal(paths.length,0);assert.equal(ready,true);
+ localStorage.token='token-b';const sameTokenCommit=eesRevalidateSession({type:'focus'});
+ $user={id:'b',token:'token-b',name:'new Native sign-in'};await eesRevalidateSession({type:'focus'});
+ finish({id:'b',token:'token-b',name:'older lookup'});await sameTokenCommit;
+ assert.equal($user.name,'new Native sign-in');assert.equal(paths.length,0);
+ $user={id:'c',token:'token-c'};eesSessionToken='token-c';
+ held=false;localStorage.token='token-b';result={id:'b',token:'token-b'};
+ await eesRevalidateSession({type:'focus'});assert.equal($user,null);assert.equal(ready,false);
+ assert.deepEqual(paths,['/']);assert.equal(sessionStorage['chat-input'],undefined);assert.equal(sessionStorage.other,'keep');
+ $user={id:'b',token:'token-b'};sessionStorage['chat-input']='b draft';localStorage.token='';
+ await eesRevalidateSession({type:'storage',key:'token'});assert.deepEqual(paths,['/','/auth']);assert.equal(sessionStorage['chat-input'],undefined);
+ eesSessionAlive=false;localStorage.token='token-c';await eesRevalidateSession({type:'focus'});assert.equal(paths.length,2);
+ console.log('source_session_owner=pass');
+})().catch(e=>{console.error(e);process.exitCode=1;});
+'''
+        self.assertEqual(self.run_node(probe), "source_session_owner=pass")

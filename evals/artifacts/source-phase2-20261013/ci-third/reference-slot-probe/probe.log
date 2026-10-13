@@ -1,0 +1,7 @@
+runTest (__main__.ReferenceSlotProbe.runTest) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 133.9480189999449, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.752s
+
+OK

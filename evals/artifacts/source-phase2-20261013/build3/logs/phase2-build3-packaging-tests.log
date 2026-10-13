@@ -1,0 +1,113 @@
+test_manifest_exact_limit_keeps_all_hashes_and_overflow_preserves_build (test_ees_frontend_build.FrontendManifestBudgetTests.test_manifest_exact_limit_keeps_all_hashes_and_overflow_preserves_build) ... ok
+test_dirty_source_is_refused_before_any_build_or_output (test_ees_frontend_build.FrontendProvenanceTests.test_dirty_source_is_refused_before_any_build_or_output) ... ok
+test_forged_rehash_cannot_hide_missing_native_hooks_or_old_namespace (test_ees_frontend_build.FrontendProvenanceTests.test_forged_rehash_cannot_hide_missing_native_hooks_or_old_namespace) ... ok
+test_manifest_duplicate_keys_and_symlinked_build_content_are_rejected (test_ees_frontend_build.FrontendProvenanceTests.test_manifest_duplicate_keys_and_symlinked_build_content_are_rejected) ... ok
+test_mismatched_source_lock_patch_version_or_mode_is_rejected (test_ees_frontend_build.FrontendProvenanceTests.test_mismatched_source_lock_patch_version_or_mode_is_rejected) ... ok
+test_program_version_keeps_existing_apply_and_restore_contract (test_ees_frontend_build.FrontendProvenanceTests.test_program_version_keeps_existing_apply_and_restore_contract) ... ok
+test_rehash_cannot_hide_pyodide_or_compiled_source_drift (test_ees_frontend_build.FrontendProvenanceTests.test_rehash_cannot_hide_pyodide_or_compiled_source_drift) ... ok
+test_unsafe_archive_names_are_rejected (test_ees_frontend_build.FrontendProvenanceTests.test_unsafe_archive_names_are_rejected) ... ok
+test_validated_payload_is_exact_and_rejects_added_missing_or_altered_files (test_ees_frontend_build.FrontendProvenanceTests.test_validated_payload_is_exact_and_rejects_added_missing_or_altered_files) ... ok
+test_exact_source_hook_preserves_approval_and_waits_for_all_native_loads (test_ees_frontend_build.NativeDraftHookTests.test_exact_source_hook_preserves_approval_and_waits_for_all_native_loads) ... ok
+test_source_owner_cleanup_and_all_four_load_boundaries_are_present (test_ees_frontend_build.NativeDraftHookTests.test_source_owner_cleanup_and_all_four_load_boundaries_are_present) ... ok
+test_real_native_restore_creation_and_late_completion_boundaries (test_ees_frontend_build.NativeSourceHookTests.test_real_native_restore_creation_and_late_completion_boundaries) ... ok
+test_current_native_session_response_guard_errors_and_abort_signal (test_ees_frontend_build.SourceApiTests.test_current_native_session_response_guard_errors_and_abort_signal) ... ok
+test_layout_hooks_preserve_native_elements_and_reject_source_drift (test_ees_frontend_build.SourcePatchTests.test_layout_hooks_preserve_native_elements_and_reject_source_drift) ... ERROR
+test_pending_native_control_save_cannot_write_or_apply_across_owner_change (test_ees_frontend_build.SourceShellLifecycleTests.test_pending_native_control_save_cannot_write_or_apply_across_owner_change) ... ok
+test_pending_native_draft_callbacks_cannot_cross_account_or_destroyed_owner (test_ees_frontend_build.SourceShellLifecycleTests.test_pending_native_draft_callbacks_cannot_cross_account_or_destroyed_owner) ... ok
+test_source_chat_route_creation_folder_return_and_same_chat_reopen (test_ees_frontend_build.SourceShellLifecycleTests.test_source_chat_route_creation_folder_return_and_same_chat_reopen) ... ERROR
+test_branding_is_optional_and_manifest_is_preserved (test_demo_bundle.DemoBundleTests.test_branding_is_optional_and_manifest_is_preserved) ... ok
+test_bundle_accepts_the_current_program_builder_version (test_demo_bundle.DemoBundleTests.test_bundle_accepts_the_current_program_builder_version) ... ok
+test_clean_readonly_sources_are_unchanged_and_zip_is_reproducible (test_demo_bundle.DemoBundleTests.test_clean_readonly_sources_are_unchanged_and_zip_is_reproducible) ... ok
+test_dirty_sources_require_opt_in_and_record_actual_working_content (test_demo_bundle.DemoBundleTests.test_dirty_sources_require_opt_in_and_record_actual_working_content) ... ok
+test_existing_artifact_is_not_overwritten (test_demo_bundle.DemoBundleTests.test_existing_artifact_is_not_overwritten) ... ok
+test_manifest_byte_budget_rejects_before_zip_publication (test_demo_bundle.DemoBundleTests.test_manifest_byte_budget_rejects_before_zip_publication) ... ok
+test_retired_content_is_absent_but_native_connectors_and_common_runtime_survive (test_demo_bundle.DemoBundleTests.test_retired_content_is_absent_but_native_connectors_and_common_runtime_survive) ... ok
+test_sensitive_runtime_untracked_and_unselected_files_are_excluded (test_demo_bundle.DemoBundleTests.test_sensitive_runtime_untracked_and_unselected_files_are_excluded) ... ok
+test_source_state_change_during_build_is_rejected (test_demo_bundle.DemoBundleTests.test_source_state_change_during_build_is_rejected) ... ok
+test_tracked_symlink_cannot_import_an_external_file (test_demo_bundle.DemoBundleTests.test_tracked_symlink_cannot_import_an_external_file) ... ok
+test_existing_extraction_directory_is_never_overwritten (test_ees_deploy_release.ReleaseTests.test_existing_extraction_directory_is_never_overwritten) ... ok
+test_extra_missing_oversize_and_compression_bomb_are_rejected (test_ees_deploy_release.ReleaseTests.test_extra_missing_oversize_and_compression_bomb_are_rejected) ... ok
+test_invalid_zip_paths_duplicates_and_links_fail_before_extraction (test_ees_deploy_release.ReleaseTests.test_invalid_zip_paths_duplicates_and_links_fail_before_extraction) ... ok
+test_inventory_drift_or_changed_requirements_never_marks_prepared (test_ees_deploy_release.ReleaseTests.test_inventory_drift_or_changed_requirements_never_marks_prepared) ... ok
+test_legacy_indented_and_compact_manifests_keep_identical_validation (test_ees_deploy_release.ReleaseTests.test_legacy_indented_and_compact_manifests_keep_identical_validation) ... ok
+test_manifest_commit_dirty_type_and_digest_mismatches_are_rejected (test_ees_deploy_release.ReleaseTests.test_manifest_commit_dirty_type_and_digest_mismatches_are_rejected) ... ok
+test_missing_offline_dependency_leaves_candidate_inactive (test_ees_deploy_release.ReleaseTests.test_missing_offline_dependency_leaves_candidate_inactive) ... ok
+test_outer_and_nested_manifest_exact_byte_limit_and_duplicate_guard (test_ees_deploy_release.ReleaseTests.test_outer_and_nested_manifest_exact_byte_limit_and_duplicate_guard) ... ok
+test_prepare_uses_exact_offline_inventory_and_preserves_source (test_ees_deploy_release.ReleaseTests.test_prepare_uses_exact_offline_inventory_and_preserves_source) ... ok
+test_prepared_fingerprint_and_inventory_are_revalidated (test_ees_deploy_release.ReleaseTests.test_prepared_fingerprint_and_inventory_are_revalidated) ... ok
+test_probe_rejects_direct_url_and_sanitizes_inspection_failures (test_ees_deploy_release.ReleaseTests.test_probe_rejects_direct_url_and_sanitizes_inspection_failures) ... ok
+test_real_uv_prepares_tiny_wheels_offline_without_application_import (test_ees_deploy_release.ReleaseTests.test_real_uv_prepares_tiny_wheels_offline_without_application_import) ... skipped 'Opt-in real uv test requires Python 3.11 and installed uv.'
+test_validated_extraction_does_not_import_application (test_ees_deploy_release.ReleaseTests.test_validated_extraction_does_not_import_application) ... ok
+test_wheel_record_and_nested_manifest_are_checked (test_ees_deploy_release.ReleaseTests.test_wheel_record_and_nested_manifest_are_checked) ... ok
+test_bad_export_is_rejected_without_creating_bundle (test_ees_deploy_release.WindowsCaTests.test_bad_export_is_rejected_without_creating_bundle) ... ok
+test_collector_is_isolated_uses_saved_environment_and_removes_key_logging (test_ees_deploy_release.WindowsCaTests.test_collector_is_isolated_uses_saved_environment_and_removes_key_logging) ... ok
+test_export_process_failures_are_sanitized_and_leave_no_bundle (test_ees_deploy_release.WindowsCaTests.test_export_process_failures_are_sanitized_and_leave_no_bundle) ... ok
+test_hardlinked_snapshot_is_rejected (test_ees_deploy_release.WindowsCaTests.test_hardlinked_snapshot_is_rejected) ... ok
+test_invalid_digest_missing_tampered_and_unparseable_snapshots_fail (test_ees_deploy_release.WindowsCaTests.test_invalid_digest_missing_tampered_and_unparseable_snapshots_fail) ... ok
+test_real_export_requires_windows (test_ees_deploy_release.WindowsCaTests.test_real_export_requires_windows) ... ok
+test_reparse_directory_or_file_is_rejected_without_overwrite (test_ees_deploy_release.WindowsCaTests.test_reparse_directory_or_file_is_rejected_without_overwrite) ... ok
+test_snapshot_is_immutable_reused_and_outside_venv (test_ees_deploy_release.WindowsCaTests.test_snapshot_is_immutable_reused_and_outside_venv) ... ok
+test_snapshot_verifies_tls_chain_and_still_rejects_hostname_or_untrusted_ca (test_ees_deploy_release.WindowsCaTests.test_snapshot_verifies_tls_chain_and_still_rejects_hostname_or_untrusted_ca) ... ok
+test_added_figma_icons_are_packaged_and_missing_source_fails_closed (test_ees_branding_build.BrandingBuildTests.test_added_figma_icons_are_packaged_and_missing_source_fails_closed) ... ok
+test_asset_guard_inventory_and_emitted_lifecycle_cache_order (test_ees_branding_build.BrandingBuildTests.test_asset_guard_inventory_and_emitted_lifecycle_cache_order) ... ok
+test_asset_writer_hash_drift_fails_even_when_patch_anchor_remains (test_ees_branding_build.BrandingBuildTests.test_asset_writer_hash_drift_fails_even_when_patch_anchor_remains) ... ok
+test_frontend_is_required_and_runtime_hash_mismatch_fails_before_output (test_ees_branding_build.BrandingBuildTests.test_frontend_is_required_and_runtime_hash_mismatch_fails_before_output) ... ok
+test_frontend_validator_failure_cannot_publish_a_wheel (test_ees_branding_build.BrandingBuildTests.test_frontend_validator_failure_cannot_publish_a_wheel) ... ok
+test_incomplete_archive_is_rejected_before_manifest_publication (test_ees_branding_build.BrandingBuildTests.test_incomplete_archive_is_rejected_before_manifest_publication) ... ok
+test_incomplete_theme_changed_font_and_target_collision_fail_before_writing (test_ees_branding_build.BrandingBuildTests.test_incomplete_theme_changed_font_and_target_collision_fail_before_writing) ... ok
+test_launcher_assembly_order_is_private_and_has_one_runtime_asset (test_ees_branding_build.BrandingBuildTests.test_launcher_assembly_order_is_private_and_has_one_runtime_asset) ... ok
+test_launcher_linked_source_or_directory_fails_before_output (test_ees_branding_build.BrandingBuildTests.test_launcher_linked_source_or_directory_fails_before_output) ... ok
+test_launcher_missing_empty_duplicate_and_swapped_units_fail_before_output (test_ees_branding_build.BrandingBuildTests.test_launcher_missing_empty_duplicate_and_swapped_units_fail_before_output) ... ok
+test_manifest_byte_budget_preserves_nested_inventory_before_publication (test_ees_branding_build.BrandingBuildTests.test_manifest_byte_budget_preserves_nested_inventory_before_publication) ... ok
+test_missing_asset_or_wheel_entry_fails_before_writing (test_ees_branding_build.BrandingBuildTests.test_missing_asset_or_wheel_entry_fails_before_writing) ... ok
+test_missing_asset_writer_member_fails_before_writing (test_ees_branding_build.BrandingBuildTests.test_missing_asset_writer_member_fails_before_writing) ... ok
+test_missing_empty_and_linked_asset_guard_runtime_fail_before_writing (test_ees_branding_build.BrandingBuildTests.test_missing_empty_and_linked_asset_guard_runtime_fail_before_writing) ... ok
+test_missing_mock_runtime_fails_before_writing (test_ees_branding_build.BrandingBuildTests.test_missing_mock_runtime_fails_before_writing) ... ok
+test_missing_required_hook_fails_after_whole_file_hash_check (test_ees_branding_build.BrandingBuildTests.test_missing_required_hook_fails_after_whole_file_hash_check) ... ok
+test_native_fixture_rejects_a_launcher_not_built_from_current_sources (test_ees_branding_build.BrandingBuildTests.test_native_fixture_rejects_a_launcher_not_built_from_current_sources) ... ok
+test_only_reviewed_backend_changes_and_whole_source_frontend_are_packaged (test_ees_branding_build.BrandingBuildTests.test_only_reviewed_backend_changes_and_whole_source_frontend_are_packaged) ... ok
+test_output_collision_never_overwrites_existing_release (test_ees_branding_build.BrandingBuildTests.test_output_collision_never_overwrites_existing_release) ... ok
+test_packaged_workflow_and_managed_tool_share_public_contract (test_ees_branding_build.BrandingBuildTests.test_packaged_workflow_and_managed_tool_share_public_contract) ... ok
+test_patch_drift_fails_before_writing (test_ees_branding_build.BrandingBuildTests.test_patch_drift_fails_before_writing) ... ok
+test_reproducible_wheel_manifest_and_record_preserve_original (test_ees_branding_build.BrandingBuildTests.test_reproducible_wheel_manifest_and_record_preserve_original) ... ok
+test_runtime_installation_inventory_matches_all_builder_hooks (test_ees_branding_build.BrandingBuildTests.test_runtime_installation_inventory_matches_all_builder_hooks) ... ok
+test_same_version_ui_change_updates_only_its_content_cache_key (test_ees_branding_build.BrandingBuildTests.test_same_version_ui_change_updates_only_its_content_cache_key) ... ok
+test_source_built_cyclic_modules_and_source_maps_are_copied_without_rewriting (test_ees_branding_build.BrandingBuildTests.test_source_built_cyclic_modules_and_source_maps_are_copied_without_rewriting) ... ok
+test_source_frontend_asset_overlap_or_missing_target_is_rejected (test_ees_branding_build.BrandingBuildTests.test_source_frontend_asset_overlap_or_missing_target_is_rejected) ... ok
+test_source_frontend_branding_mismatch_is_not_silently_rewritten (test_ees_branding_build.BrandingBuildTests.test_source_frontend_branding_mismatch_is_not_silently_rewritten) ... ok
+test_theme_content_change_gets_new_url_without_readdressing_native_modules (test_ees_branding_build.BrandingBuildTests.test_theme_content_change_gets_new_url_without_readdressing_native_modules) ... ok
+test_v4_icon_hash_updates_dynamic_map_and_relative_and_absolute_css_urls (test_ees_branding_build.BrandingBuildTests.test_v4_icon_hash_updates_dynamic_map_and_relative_and_absolute_css_urls) ... ok
+test_work_name_migrates_registered_brand_names_and_preserves_custom_name (test_ees_branding_build.BrandingBuildTests.test_work_name_migrates_registered_brand_names_and_preserves_custom_name) ... ok
+test_wrong_source_hash_fails_without_output (test_ees_branding_build.BrandingBuildTests.test_wrong_source_hash_fails_without_output) ... ok
+test_accepts_only_reviewed_relative_absolute_and_repeated_icon_urls (test_ees_branding_build.CssCacheIntegrityTests.test_accepts_only_reviewed_relative_absolute_and_repeated_icon_urls) ... ok
+test_timeout_retains_observed_stages_and_never_reports_assertion_success (test_ees_branding_build.LauncherProbeDiagnosticsTests.test_timeout_retains_observed_stages_and_never_reports_assertion_success) ... ok
+test_real_pinned_wheel_patches_records_and_unrelated_content (test_ees_branding_build.OfficialWheelTests.test_real_pinned_wheel_patches_records_and_unrelated_content) ... skipped 'Set EES_TEST_UPSTREAM_WHEEL and EES_TEST_FRONTEND_DIR for the offline official wheel audit.'
+
+======================================================================
+ERROR: test_layout_hooks_preserve_native_elements_and_reject_source_drift (test_ees_frontend_build.SourcePatchTests.test_layout_hooks_preserve_native_elements_and_reject_source_drift)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_frontend_build.py", line 220, in test_layout_hooks_preserve_native_elements_and_reject_source_drift
+    self.assertIn("import connectionsIcon from './icons/5bc95.svg'", (root / "src/lib/components/ees/EesIcon.svelte").read_text())
+                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1026, in read_text
+    encoding = io.text_encoding(encoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+EncodingWarning: 'encoding' argument not specified
+
+======================================================================
+ERROR: test_source_chat_route_creation_folder_return_and_same_chat_reopen (test_ees_frontend_build.SourceShellLifecycleTests.test_source_chat_route_creation_folder_return_and_same_chat_reopen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_frontend_build.py", line 456, in test_source_chat_route_creation_folder_return_and_same_chat_reopen
+    shell = (root / "src/lib/components/ees/EesShell.svelte").read_text()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1026, in read_text
+    encoding = io.text_encoding(encoding)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+EncodingWarning: 'encoding' argument not specified
+
+----------------------------------------------------------------------
+Ran 84 tests in 4.073s
+
+FAILED (errors=2, skipped=2)

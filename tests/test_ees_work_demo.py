@@ -123,9 +123,9 @@ class EESWorkNativeBrowserTests(IntegratedNativeCase):
         self.open_run(key, run); self.fill('[data-work-input][name="note"]', '보존할 업무 입력')
         self.fill('#chat-input', '보존할 대화 초안')
         self.click('[data-action="close_panel"]')
-        self.wait("document.querySelector('#ees-work-panel')?.hidden")
+        self.wait("(()=>{const p=document.querySelector('#ees-work-panel'),host=p?.closest('.ees-panel-region');return !!p&&host?.hidden&&host.inert&&p.getClientRects().length===0;})()")
         self.click('[data-action="open_panel"]')
-        self.wait("!document.querySelector('#ees-work-panel')?.hidden")
+        self.wait("(()=>{const p=document.querySelector('#ees-work-panel'),host=p?.closest('.ees-panel-region'),r=p?.getBoundingClientRect();return !!host&&!host.hidden&&!host.inert&&r.width>0&&r.height>0;})()")
         self.assertEqual(self.text('#chat-input'), '보존할 대화 초안')
         self.assertEqual(self.read('[data-work-input][name="note"]', 'value'), '보존할 업무 입력')
         self.assertEqual(self.state(run_id=run['id'])['run']['attempts'], [])
@@ -146,6 +146,21 @@ class EESWorkNativeBrowserTests(IntegratedNativeCase):
             with self.subTest(count=count):
                 self.server.models = [{'id': 'fixture-' + str(i), 'name': '합성 모델 ' + str(i), 'owned_by': 'openai'} for i in range(count)]
                 self.navigate('/c/other-chat' if count % 2 else '/c/existing-chat')
-                self.wait("document.body?.dataset.eesModelCount === " + json.dumps(str(count)))
+                self.wait("window.__eesNativeDraftV1?.ready() && !!document.querySelector('[data-ees-source-shell]')")
+                # Observe the Native source model controls, not a launcher-written
+                # body marker. The single-model source branch omits the selector.
+                if count == 1:
+                    self.wait("!document.querySelector('#model-selector-model-button')")
+                else:
+                    self.click('#model-selector-model-button')
+                    self.wait("document.querySelector('#model-selector-model-button')?.getAttribute('aria-expanded') === 'true'")
+                    if count == 0:
+                        self.wait("document.body.innerText.includes('사용 가능한 모델이 없습니다')")
+                    self.wait("document.querySelectorAll('[role=listbox] [role=option][data-value]').length === " + str(count))
+                    actual = self.browser.evaluate("[...document.querySelectorAll('[role=listbox] [role=option][data-value]')].map(e=>e.dataset.value)")
+                    self.assertEqual(actual, ['fixture-' + str(i) for i in range(count)])
+                    self.key('Escape', 27)
+                available = self.browser.evaluate("fetch('/api/models',{headers:{Authorization:'Bearer '+localStorage.token},cache:'no-store'}).then(r=>r.json()).then(r=>(r.data||[]).map(m=>m.id))")
+                self.assertEqual(available, ['fixture-' + str(i) for i in range(count)])
                 self.assertNotIn('ees_demo_', json.dumps(self.server.models))
                 self.assertEqual(self.state()['workflows'], [])

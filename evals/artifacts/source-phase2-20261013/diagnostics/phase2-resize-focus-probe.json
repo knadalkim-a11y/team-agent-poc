@@ -1,0 +1,31 @@
+{
+  "kind": "isolated source-handler CDP probe; not full product acceptance",
+  "source": "EesShell.svelte resizeStart",
+  "results": [
+    {
+      "fixed": false,
+      "key": "End",
+      "active": "composer",
+      "keys": [],
+      "width": 480
+    },
+    {
+      "fixed": true,
+      "key": "End",
+      "active": "resize",
+      "keys": [
+        "End"
+      ],
+      "width": 720
+    },
+    {
+      "fixed": true,
+      "key": "Home",
+      "active": "resize",
+      "keys": [
+        "Home"
+      ],
+      "width": 400
+    }
+  ]
+}

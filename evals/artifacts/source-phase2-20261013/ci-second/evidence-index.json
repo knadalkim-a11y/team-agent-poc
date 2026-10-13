@@ -1,0 +1,195 @@
+{
+  "scope": "PR86 second CI and local follow-up before source session fix",
+  "files": [
+    {
+      "path": "native-account-failure.log",
+      "bytes": 16898,
+      "sha256": "894db1441013e8ea5fbfc271e99ab04a0ad291b6e27dce8f2aac1b43980ab324"
+    },
+    {
+      "path": "native-product-failure.log",
+      "bytes": 3270,
+      "sha256": "aaa5a086840d200ae04f60dcbf050a4880d177de00eaf96b94b73e80deedea77"
+    },
+    {
+      "path": "native-work-failure.log",
+      "bytes": 8272,
+      "sha256": "4312dea2838dd3fa7077aaed549714fb3dc89f4b8e8cfcf4919494c64215708d"
+    },
+    {
+      "path": "phase2-pr1-account-final.log",
+      "bytes": 3063,
+      "sha256": "e92b3e4e2dc02824adc7e2b98d57ef74e30f7223ecd49b10c791292ee962aab7"
+    },
+    {
+      "path": "phase2-pr1-auth-final.log",
+      "bytes": 5837,
+      "sha256": "ad614257ddcd2a645cd257b54bd166dab6e0f29af6e61991000e7f43f84fe9fe"
+    },
+    {
+      "path": "phase2-pr1-auth-probes/integrated-native-ai-proposal-not-auto-save.png",
+      "bytes": 98301,
+      "sha256": "3a289987d6560baf7f4194f2a9bc76bde9e025d3ef203bc7037e0a35da79e40b"
+    },
+    {
+      "path": "phase2-pr1-auth-probes/integrated-native-authoring-conflict.png",
+      "bytes": 117034,
+      "sha256": "7c7d3aae96841c37d7a8ed4013530473d78f669274af8a6cbe144e2bf8539fe7"
+    },
+    {
+      "path": "phase2-pr1-auth-probes/integrated-native-group-author-published.png",
+      "bytes": 90332,
+      "sha256": "e4ebcb15ce4fcd89ba162fc419ff021782f9c69088eed0d1d2dd69fa1c464ced"
+    },
+    {
+      "path": "phase2-pr1-auth-probes/nu-closed-native-signup.png",
+      "bytes": 18432,
+      "sha256": "45f287d920c77e0e61dff4c406d5cd999e199a295bc68ec21f2964385c9466c4"
+    },
+    {
+      "path": "phase2-pr1-auth-probes/sa-approved-first-chat.png",
+      "bytes": 68986,
+      "sha256": "ace99861fa29f413a3d9eee844c1ddb348cc058393c4b9aaeac68927ef0cee13"
+    },
+    {
+      "path": "phase2-pr1-auth-probes/sa-native-approved-user.png",
+      "bytes": 70526,
+      "sha256": "242c69e5d396c25687e7c96a53e4ec3b35f03893bffab181c9a3ea7a8f4643d3"
+    },
+    {
+      "path": "phase2-pr1-auth-probes/sa-signup-pending-fonts.json",
+      "bytes": 780,
+      "sha256": "52b1f39d35f35710df5bf3594ae27a35b7f72d2654549551ced5305ad9511422"
+    },
+    {
+      "path": "phase2-pr1-auth-probes/sa-signup-pending.png",
+      "bytes": 38922,
+      "sha256": "7966c852f68e93836e3add1dc81a8137db30ed9d435d78aa9738464dd368b2eb"
+    },
+    {
+      "path": "phase2-pr1-auth-probes/sa26-b-after-late-a-responses.png",
+      "bytes": 85492,
+      "sha256": "bc3be0fec842ab683dd16fa0dc3faf77330b1aa7ca90daf7e1f5ef5821fec85b"
+    },
+    {
+      "path": "phase2-pr1-auth-probes/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.json",
+      "bytes": 26775,
+      "sha256": "7ac4fa6d403314627a054a9f34ddf71ccab2bccc737e39e471652ef8e07ceedb"
+    },
+    {
+      "path": "phase2-pr1-auth-probes/test_same_profile_native_logout_login_discards_late_a_read_and_ai-failure.png",
+      "bytes": 91361,
+      "sha256": "74a9386657243ca705abe693722a06810991c3bbcb874c9f7b3c451b3d8bd71c"
+    },
+    {
+      "path": "phase2-pr1-auth-probes.log",
+      "bytes": 5848,
+      "sha256": "9b53b82bb16b55bf436447e8cd842ff19af08847d8292a785969c44990682d91"
+    },
+    {
+      "path": "phase2-pr1-width-probe.json",
+      "bytes": 90415,
+      "sha256": "f4b4175e44fa34d7e607a9d73947bc85e584d8909d3bc5211c0a1a813a70824f"
+    },
+    {
+      "path": "phase2-pr1-width-probe.log",
+      "bytes": 2910,
+      "sha256": "c9f835b1bcaa3750389cc313c22189da949c4d2540bf5b4e79fce11a59b61d64"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-native-work/integrated-empty-native.png",
+      "bytes": 60456,
+      "sha256": "3159086af8b58ee318f785b978062c903d43933b7f34628fd19e70eef88107fc"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-native-work/integrated-human-confirm-history.png",
+      "bytes": 99843,
+      "sha256": "62e52bdf14fad5ad16c72b0324314b12e1194f3ca15083b186a0970aaacb8f4f"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-native-work/integrated-layout-1180.png",
+      "bytes": 36165,
+      "sha256": "e2cb53362e73fcbb3f5544af7e4cf22c2110531d2e29533b3a7724009f424277"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-native-work/integrated-layout-1440.png",
+      "bytes": 58393,
+      "sha256": "9738ccd984a4796bca9c5aa1dda86f3aa713efc6bcea1cf4a8821120875c2949"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-native-work/integrated-layout-1920.png",
+      "bytes": 60463,
+      "sha256": "5221f705718514ea9ca560f99143b8577ae93843fa0c43fe75c9830466845706"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-native-work/integrated-native-chat-and-work.png",
+      "bytes": 97660,
+      "sha256": "877daa027acc6ddc8ab33231a9ff2617041883225ddc0970f026aa5b9f8d1266"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-native-work/integrated-saved-input-not-execution.png",
+      "bytes": 94008,
+      "sha256": "4eeaa1d2bee7a228b89064e798328a3b0826b756c2b6cca2be99457f8eee03f3"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-native-work.log",
+      "bytes": 3640,
+      "sha256": "2830649b6303ee61aa8199eeadb140be4879358a444d37c6a4a06e1c0e4e9cf6"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-product/report.json",
+      "bytes": 1818,
+      "sha256": "02e46b21751ddf8689afdff5b1c7cb3d4faa8ec1085106eef98a01b6ca69f571"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-product.log",
+      "bytes": 839,
+      "sha256": "64d985567d9265c2acd68afe1ebbfb9c4ba6bbedeb3ce0f570ea77cebad8babd"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-q1/integrated-test_exact_product_geometry_probe_on_native_source_fixture-failure-cleanup.json",
+      "bytes": 5533,
+      "sha256": "58334a3f4b99888e2275167b669888ed17f5b048709dd8b17fc988abbbd9f00f"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-q1/integrated-test_exact_product_geometry_probe_on_native_source_fixture-failure.json",
+      "bytes": 23946,
+      "sha256": "adc0f8c50d90d554b6ae326ad071b10baab8ed44fc317cf666885054d0ebaa7d"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-q1/integrated-test_exact_product_geometry_probe_on_native_source_fixture-failure.png",
+      "bytes": 68020,
+      "sha256": "ff438f1b09a6c6d8a5fa181c1ffaf9a373c3010da24e1b42f887b87c9f6baa4f"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-q1/source-q1-action-and-messages-geometry.json",
+      "bytes": 817,
+      "sha256": "a17f6ecef73035c8f9d02ab4d51bcb415e20990f96bf2af83ecbfe811980883b"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-q1-final/source-q1-action-and-messages-geometry.json",
+      "bytes": 817,
+      "sha256": "1085a3aaaa2c699480f553741c431b7fe90bd3589241e80aaa9101dceaf07555"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-q1-final/source-q1-action-and-messages.png",
+      "bytes": 68014,
+      "sha256": "d3941ac1445e719e5fd74a6225be3fcda8ef29a8b5f668988c13884b7d601a7f"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-q1-final.log",
+      "bytes": 1070,
+      "sha256": "c2dd27ee4c0fdd0949c37f9c3b35400c619430afbf807d428a993e9c9e5e5b1f"
+    },
+    {
+      "path": "phase2-pr86-ci-fixture-q1.log",
+      "bytes": 1637,
+      "sha256": "8dbb821941513ca6449efd6afea9c427634179993074b288b04af237c6269833"
+    },
+    {
+      "path": "windows-budget.log",
+      "bytes": 5345,
+      "sha256": "92162c542b7fc19d9a8ac9a2bfd5c1e32173505aa1fb94a6c0b2453b6d19a43e"
+    }
+  ]
+}

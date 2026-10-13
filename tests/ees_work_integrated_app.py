@@ -403,17 +403,17 @@ def integrated_flow(gate):
 def q1_native_geometry(g, name, *, require_action=False, require_messages=False):
     """Read the actual Native layout at the supported 768-pixel height."""
     g.browser.call('Emulation.setDeviceMetricsOverride',{'width':1366,'height':768,'deviceScaleFactor':1,'mobile':False})
-    g.wait('document.body.dataset.eesSidebarCompact==="true" && Math.abs(document.querySelector("#sidebar").getBoundingClientRect().width-56)<1')
+    g.wait('document.querySelector("#sidebar[data-ees-source-sidebar][data-compact=true]") && Math.abs(document.querySelector("#sidebar").getBoundingClientRect().width-56)<1')
     stable=g.browser.evaluate('''new Promise(resolve=>{let last='',same=0;const end=performance.now()+3000;
-function check(){const elements=['#sidebar','#ees-work-panel','.ees-integrated-chat'].map(s=>document.querySelector(s));
+function check(){const elements=['#sidebar','.ees-panel-region','.ees-chat-region'].map(s=>document.querySelector(s));
 const key=JSON.stringify(elements.map(e=>{const r=e?.getBoundingClientRect();return r?[r.x,r.y,r.width,r.height]:null;}));
 same=key===last?same+1:0;last=key;if(same>=3&&elements.every(Boolean))return resolve(true);
 if(performance.now()>end)return resolve(false);requestAnimationFrame(check);}check();})''')
     assert stable,'Native layout did not settle after viewport change'
     geometry=g.browser.evaluate('''(()=>{const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom,right:r.right};};
 return {viewport:[innerWidth,innerHeight],document_width:document.documentElement.scrollWidth,
-sidebar:rect(document.querySelector('#sidebar')),panel:rect(document.querySelector('#ees-work-panel')),
-chat:rect(document.querySelector('.ees-integrated-chat')),action:rect(document.querySelector('#ees-work-panel>.ew-job-actions')),
+sidebar:rect(document.querySelector('#sidebar')),panel:rect(document.querySelector('.ees-panel-region')),
+chat:rect(document.querySelector('.ees-chat-region')),action:rect(document.querySelector('#ees-work-panel>.ew-job-actions')),
 messages:[...document.querySelectorAll('.message-listitem')].filter(e=>e.getClientRects().length).map(rect)};})()''')
     (g.out/(name+'-geometry.json')).write_text(json.dumps(geometry,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     assert geometry['document_width']<=1367,geometry

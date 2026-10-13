@@ -1,0 +1,17 @@
+test_every_navigation_has_source_chrome_without_native_overlay_frames (test_ees_source_shell_native.SourceShellNativeTests.test_every_navigation_has_source_chrome_without_native_overlay_frames) ... ERROR
+
+======================================================================
+ERROR: test_every_navigation_has_source_chrome_without_native_overlay_frames (test_ees_source_shell_native.SourceShellNativeTests.test_every_navigation_has_source_chrome_without_native_overlay_frames)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/ees_work_integrated_fixture.py", line 68, in setUp
+    self.server = NativeUIServer(self.wheel_path)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/native_ui_fixture.py", line 60, in __init__
+    raise ValueError("Native UI wheel launcher differs from the current assembled sources.")
+ValueError: Native UI wheel launcher differs from the current assembled sources.
+
+----------------------------------------------------------------------
+Ran 1 test in 0.043s
+
+FAILED (errors=1)
