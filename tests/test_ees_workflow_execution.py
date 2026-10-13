@@ -790,13 +790,16 @@ class ExecutionTests(unittest.IsolatedAsyncioTestCase):
     async def test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown(self):
         run = await self.start(await self.plan("new-operations-jira-j"))
         program = """
+print('EES_EXEC_PHASE boot',flush=True)
 import asyncio,sys
 from pathlib import Path
 sys.path.insert(0, str(Path.cwd()/'tests'))
 from test_ees_workflow_execution import build_service,Bridge
+print('EES_EXEC_PHASE imported',flush=True)
 async def main():
     bridge=Bridge()
     service=build_service(sys.argv[1],bridge)
+    print('EES_EXEC_PHASE service',flush=True)
     if sys.argv[2]=='slow':
         original=bridge.invoke
         async def slow(*args):
@@ -806,10 +809,21 @@ async def main():
         bridge.invoke=slow
     for _ in range(12):
         if not await service.execution.process_once(): break
+    print('EES_EXEC_PHASE drain_done',flush=True)
 asyncio.run(main())
 """
         # New OS process (not object reconstruction) drains a persisted queue.
-        completed = await asyncio.to_thread(subprocess.run, [sys.executable, "-c", program, str(self.database), "fast", ""], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=10)
+        try:
+            completed = await asyncio.to_thread(subprocess.run, [sys.executable, "-c", program, str(self.database), "fast", ""], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=10)
+        except subprocess.TimeoutExpired as error:
+            output = error.stdout or b""
+            if isinstance(output, bytes):
+                output = output.decode("utf-8", errors="replace")
+            phases = [line.removeprefix("EES_EXEC_PHASE ") for line in output.splitlines()
+                      if line in {"EES_EXEC_PHASE boot", "EES_EXEC_PHASE imported",
+                                  "EES_EXEC_PHASE service", "EES_EXEC_PHASE drain_done"}]
+            error.add_note("fast child phases: " + (", ".join(phases) or "none captured"))
+            raise
         self.assertEqual(completed.returncode, 0, completed.stderr)
         result = await self.state(run)
         self.assertEqual(result["status"], "succeeded", result)

@@ -1,8 +1,10 @@
-"""Actual packaged Native central chat -> registered Work tools -> human draft.
+"""Actual packaged Native central chat, human drafts and isolated helper replies.
 
 Only the OpenAI HTTP model is synthetic. Native tool registration/loading,
 current identity/ACL, chat persistence, event bridge and EES SQLite are actual
 product code. A model proposal must not save, publish, execute or confirm work.
+Helper sends read shipped help only, preserve composer/chat state and fail before
+message persistence/model dispatch when current tool/model access is missing.
 """
 import argparse
 from copy import deepcopy
@@ -14,6 +16,7 @@ import threading
 import time
 from unittest.mock import patch
 from uuid import uuid4
+from urllib.parse import urlencode
 
 import ees_work_integrated_app as integrated
 
@@ -36,6 +39,8 @@ class NativeToolProvider:
         self.calls=[];self.models=[];self.errors=[];self.tool_results=[]
         self.mode='plain';self.reference=None;self.definition=None;self.proposed=None
         self.plain_reply='중앙 대화의 합성 연결 준비 완료';self.input_proposals=[]
+        self.helper_payloads=[];self.helper_results=[];self.helper_question=''
+        self.helper_workflow='';self.helper_reply='업무 도우미가 실제 등록된 읽기 도구로 안내했습니다.'
         self.allow_embeddings=True
         owner=self
         class Handler(BaseHTTPRequestHandler):
@@ -86,6 +91,7 @@ class NativeToolProvider:
                 self.input_proposals.append(deepcopy(scoped))
                 return {'role':'assistant','content':json.dumps({'context':scoped['context'],'proposal':{'note':'AI가 제안한 첫 입력'}},ensure_ascii=False)},'stop'
         if self.mode=='plain':return {'role':'assistant','content':self.plain_reply},'stop'
+        if self.mode=='help':return self.reply_help(body,names)
         last_user=max(i for i,message in enumerate(messages) if message['role']=='user')
         results=[message for message in messages[last_user+1:] if message['role']=='tool']
         if results:
@@ -121,6 +127,46 @@ class NativeToolProvider:
             arguments={'workflow_id':self.reference['workflow_id'],'base_revision':self.reference['revision'],'definition':proposed,'context_id':self.reference['context_id']}
         self.calls.append({'mode':self.mode,'function':candidates[0],'arguments':deepcopy(arguments)})
         return {'role':'assistant','content':None,'tool_calls':[{'id':'call_'+uuid4().hex,'type':'function','function':{'name':candidates[0],'arguments':json.dumps(arguments,ensure_ascii=False)}}]},'tool_calls'
+
+    def reply_help(self,body,names):
+        """Inspect the actual Native HTTP payload, then exercise its real callable."""
+        assert len(names)==1 and (names[0]=='ees_workflow_view' or names[0].endswith('__ees_workflow_view')),names
+        messages=body['messages'];last_user=max(i for i,item in enumerate(messages) if item['role']=='user')
+        assert messages[last_user].get('content')==self.helper_question,messages[last_user]
+        prefix='EES Work help context (read-only reference): '
+        refs=[json.JSONDecoder().raw_decode(item['content'][len(prefix):])[0] for item in messages
+              if isinstance(item.get('content'),str) and item['content'].startswith(prefix)]
+        assert len(refs)==1 and refs[0].get('context_id') and refs[0].get('screen'),refs
+        self.helper_payloads.append({'question':messages[last_user]['content'],'reference':deepcopy(refs[0]),
+                                     'advertised_tool_names':names,'model':body.get('model')})
+        results=[item for item in messages[last_user+1:] if item['role']=='tool']
+        if results:
+            self.tool_results.extend(deepcopy(results));value=self.find_help(results)
+            assert value and value.get('ok') is True and value['help'].get('terms'),results
+            assert value['help_context']=={'kind':'help',**refs[0]},value
+            assert not any(key in value for key in ('workflow','run','historical','proposal')),value
+            self.helper_results.append(deepcopy(value))
+            return {'role':'assistant','content':self.helper_reply},'stop'
+        # Supplying a real workflow ID cannot widen a helper request into a
+        # workflow read. The actual wrapper must still return shipped help only.
+        arguments={'workflow_id':self.helper_workflow}
+        self.calls.append({'mode':'help','function':names[0],'arguments':arguments})
+        return {'role':'assistant','content':None,'tool_calls':[{'id':'call_'+uuid4().hex,'type':'function',
+            'function':{'name':names[0],'arguments':json.dumps(arguments)}}]},'tool_calls'
+
+    @classmethod
+    def find_help(cls,value):
+        if isinstance(value,str):
+            try:return cls.find_help(json.loads(value))
+            except (ValueError,TypeError):return None
+        if isinstance(value,dict):
+            if isinstance(value.get('help'),dict) and isinstance(value.get('help_context'),dict):return value
+            for item in value.values():
+                if found:=cls.find_help(item):return found
+        if isinstance(value,list):
+            for item in value:
+                if found:=cls.find_help(item):return found
+        return None
 
     @classmethod
     def find_workflow(cls,value):
@@ -216,6 +262,7 @@ def central_flow(g):
     g.capture('native-central-human-saved-draft')
     g.record('physical central proposal then separate apply and save',draft_revision=3,published=False,runs=0,chat_id=chat_id,native_tool_history_saved=True,model_boundary='Loopback synthetic tool-call selection only; actual Native registered tool execution')
     input_and_history_flow(g,key,chat_id)
+    helper_chat_flow(g,key,chat_id)
 
 
 def input_and_history_flow(g,key,chat_id):
@@ -297,6 +344,179 @@ def input_and_history_flow(g,key,chat_id):
     g.record('physical immutable historical message reference after second attempt',message_id=message['id'],attempt_id=first_attempt['id'],latest_attempts=2,readonly=True)
 
 
+def helper_chat_flow(g,key,chat_id):
+    """Physical helper send, actual isolated tool dispatch, then live ACL denial."""
+    before=g.api('/api/ees-work/workspace?workflow_id='+key)
+    g.click('[data-action=mode][data-mode=author]')
+    g.click('[data-author-action=list]');g.click('[data-author-action=create]')
+    selector='#ees-work-procedure-start [data-action=procedure_question]'
+    g.wait('document.querySelector('+json.dumps(selector)+') && !document.querySelector('+json.dumps(selector)+').disabled')
+    question=g.browser.evaluate('document.querySelector('+json.dumps(selector)+').innerText.trim()')
+    assert question
+    draft='업무 도우미 질문과 함께 보내지 않을 작성 중인 글'
+    g.type('#chat-input',draft)
+    prior_chat=g.api('/api/v1/chats/'+chat_id)['chat'];count=len(prior_chat['history']['messages'])
+    event_start=len(g.browser.events);call_start=len(g.provider.calls)
+    g.provider.mode='help';g.provider.helper_question=question;g.provider.helper_workflow=key
+    g.click(selector)
+    g.wait('document.querySelector("#chat-container")?.innerText.includes('+json.dumps(g.provider.helper_reply)+')',20000)
+    chat=g.completed_chat(chat_id,count+2)
+    users=[item for item in chat['history']['messages'].values() if item.get('role')=='user' and item.get('content')==question]
+    assert len(users)==1,users
+    message=users[0];reference=deepcopy(message['meta']['ees_work_reference'])
+    assert reference['kind']=='help' and reference['screen']=='새 업무 절차' and reference['context_id'],reference
+    assert message['meta'].get('ees_work_help')==1,message
+    assert not message.get('files') and message.get('models')==['c3-synthetic-model'],message
+    assert g.browser.evaluate('document.querySelector("#chat-input").innerText')==draft
+    assert len(g.provider.calls)==call_start+1 and g.provider.calls[-1]['mode']=='help',g.provider.calls
+    assert len(g.provider.helper_results)==1
+    assert g.provider.helper_payloads[-1]['reference']=={name:value for name,value in reference.items() if name!='kind'}
+    user_selector='#message-'+message['id']
+    g.wait('document.querySelector('+json.dumps(user_selector+' [data-ees-helper-reference]')+')')
+    answer=next(item for item in chat['history']['messages'].values()
+                if item.get('role')=='assistant' and item.get('parentId')==message['id'])
+    model_selector='#message-'+answer['id']+' #response-message-model-name'
+    g.wait('document.querySelector('+json.dumps(model_selector)+')')
+    assert g.browser.evaluate('document.querySelector('+json.dumps(model_selector)+').innerText.trim()')=='c3-synthetic-model'
+    assert not g.browser.evaluate('!!document.querySelector("[data-ees-helper-label]")')
+    # Retain the real browser request as a local template without persisting its
+    # credentials/session ID into evidence. Later API probes change only inputs.
+    requests=[event['params']['request'] for event in g.browser.events[event_start:]
+              if event.get('method')=='Network.requestWillBeSent'
+              and event.get('params',{}).get('request',{}).get('url','').endswith('/api/chat/completions')]
+    candidates=[json.loads(item['postData']) for item in requests if item.get('postData')]
+    template=next(item for item in candidates if (item.get('user_message') or {}).get('content')==question)
+    assert template['user_message']['meta']['ees_work_reference']==reference
+    g.capture('native-helper-question-only-and-reference')
+    g.record('physical helper question directly sends through actual Native model and read-only tool',
+             chat_id=chat_id,message_id=message['id'],question=question,reference=reference,
+             selected_model='c3-synthetic-model',advertised_tools=g.provider.helper_payloads[-1]['advertised_tool_names'],
+             actual_tool_results=1,composer_preserved=True,workflow_argument_cannot_read_work=True)
+
+    g.click('[data-action=mode][data-mode=work]')
+    g.navigate('/c/'+chat_id)
+    g.wait('document.querySelector('+json.dumps(user_selector+' [data-ees-helper-reference]')+')')
+    stored=g.api('/api/v1/chats/'+chat_id)['chat']['history']['messages'][message['id']]
+    assert stored['content']==question and stored['meta']['ees_work_reference']==reference
+    after=g.api('/api/ees-work/workspace?workflow_id='+key)
+    assert after['workflow']==before['workflow'] and after['runs']==before['runs']
+    g.capture('native-helper-reference-reloaded')
+    g.record('helper reference remains immutable after navigation and actual persisted-chat reload',
+             message_id=message['id'],reference=reference,work_unchanged=True)
+
+    # Probe the server boundary with a valid helper request containing unrelated
+    # selected features. Fake selections would fail Native resolution if the
+    # product did not remove them before the existing loading/dispatch paths.
+    saved_chat_models=['c3-synthetic-model','c3-synthetic-model']
+    saved_chat_files=[{'type':'file','id':'preserved-chat-file','name':'synthetic-existing-metadata.txt'}]
+    g.api('/api/v1/chats/'+chat_id,{'chat':{'models':saved_chat_models,'files':saved_chat_files}})
+    injected=helper_request(template,chat_id,reference,'선택된 기능과 자료 없이 도움말만 알려 주세요',
+                            parent_id=chat['history']['currentId'])
+    injected.update(tool_ids=['helper-selected-tool-must-not-load'],filter_ids=['helper-selected-filter-must-not-load'],
+                    skill_ids=['helper-selected-skill-must-not-load'],terminal_id='helper-terminal-must-not-load',
+                    features={'web_search':True,'image_generation':True,'code_interpreter':True},
+                    files=[{'type':'file','id':'helper-file-must-not-read'}],
+                    tool_servers=[{'url':'http://127.0.0.1:1/helper-must-not-connect','type':'openapi'}])
+    injected['user_message']['files']=deepcopy(injected['files'])
+    g.provider.helper_question=injected['user_message']['content']
+    calls=len(g.provider.calls);g.api('/api/chat/completions',injected)
+    chat=g.completed_chat(chat_id,count+4)
+    isolated=chat['history']['messages'][injected['user_message']['id']]
+    assert isolated['content']==g.provider.helper_question and not isolated.get('files'),isolated
+    assert isolated['models']==['c3-synthetic-model']
+    assert chat['models']==saved_chat_models and chat['files']==saved_chat_files,chat
+    assert len(g.provider.calls)==calls+1 and g.provider.calls[-1]['mode']=='help'
+    assert len(g.provider.helper_results)==2
+    assert g.provider.helper_payloads[-1]['advertised_tool_names']==g.provider.helper_payloads[0]['advertised_tool_names']
+    final_work=g.api('/api/ees-work/workspace?workflow_id='+key)
+    assert final_work['workflow']==before['workflow'] and final_work['runs']==before['runs']
+    g.record('actual helper call boundary strips selected tools filters skills files terminal and features',
+             message_id=isolated['id'],actual_helper_results=2,advertised_tools=g.provider.helper_payloads[-1]['advertised_tool_names'],
+             unrelated_asset_resolution=False,stored_message_files=0,
+             existing_chat_models_preserved=saved_chat_models,existing_chat_file_metadata_preserved=True)
+    fresh=helper_request(template,'',reference,'새 대화에서도 업무 도우미가 하나의 안내만 답해 주세요')
+    fresh['ees_work_composer_models']=saved_chat_models
+    g.provider.helper_question=fresh['user_message']['content'];calls=len(g.provider.calls)
+    created=g.api('/api/chat/completions',fresh)
+    assert created['chat_id']!=chat_id,created
+    new_chat=g.completed_chat(created['chat_id'],2)
+    assert new_chat['models']==saved_chat_models,new_chat
+    new_user=new_chat['history']['messages'][fresh['user_message']['id']]
+    assert new_user['models']==['c3-synthetic-model'] and not new_user.get('files'),new_user
+    assert new_user['meta']['ees_work_reference']==reference
+    assert len(g.provider.calls)==calls+1 and len(g.provider.helper_results)==3
+    g.record('actual new helper chat preserves multiple composer models with one assistant answer',
+             chat_id=created['chat_id'],stored_chat_models=saved_chat_models,stored_messages=2,
+             assistant_messages=1,actual_helper_results=3)
+    helper_denial_flow(g,template)
+
+
+def helper_request(template,chat_id,reference,question,*,parent_id=None,model='c3-synthetic-model'):
+    body=deepcopy(template);user_id=str(uuid4());assistant_id=str(uuid4())
+    body.update(model=model,chat_id=chat_id,parent_id=parent_id,
+                messages=[{'role':'user','content':question}],
+                message_ids=[{'model_id':model,'message_id':assistant_id}],
+                user_message={'id':user_id,'parentId':parent_id,'childrenIds':[assistant_id],
+                              'role':'user','content':question,'models':[model],
+                              'timestamp':int(time.time()),'meta':{'ees_work_help':1,'ees_work_reference':deepcopy(reference)}})
+    body.pop('id',None);body.pop('model_item',None)
+    return body
+
+
+def helper_denial_flow(g,template):
+    """Real member and Native ACL APIs: failure is before persistence/provider."""
+    model='c3-synthetic-model'
+    member=g.api('/api/v1/auths/add',{'name':'Helper ACL synthetic member',
+                 'email':'helper-'+uuid4().hex+'@example.test','password':uuid4().hex+'Ab1!','role':'user'})
+    headers={'Authorization':'Bearer '+member['token']}
+    grants=[{'principal_type':'user','principal_id':member['id'],'permission':'read'}]
+    g.api('/api/v1/tools/id/ees_workflow/access/update',{'access_grants':grants})
+    g.api('/api/v1/models/model/access/update',{'id':model,'name':'Synthetic helper model','access_grants':grants})
+    chat=g.api('/api/v1/chats/new',{'chat':{'title':'Helper denial fixture','models':[model],
+               'history':{'messages':{},'currentId':None},'messages':[]}},headers=headers)
+    chat_id=chat['id'];reference={'kind':'help','system_id':'','context_id':'member-help-boundary','screen':'새 업무 절차','title':'새 업무 절차'}
+    def readiness(model_id=model):
+        return g.api('/api/ees-work/help/status?'+urlencode({'model_id':model_id,'chat_id':chat_id}),headers=headers)
+    assert readiness().get('available') is True
+
+    def blocked(label,*,model_id=model,reason=None):
+        status=readiness(model_id);assert status['available'] is False,status
+        before=g.api('/api/v1/chats/'+chat_id,headers=headers)['chat'];providers=len(g.provider.models)
+        chat_list=g.api('/api/v1/chats/',headers=headers)
+        body=helper_request(template,chat_id,reference,'보내지 않아야 하는 업무 도움말 질문',model=model_id)
+        body.pop('session_id',None)
+        response=g.client.post('/api/chat/completions',headers=headers,json=body)
+        assert response.status_code in {400,401,403,409},(label,response.status_code,response.text[:500])
+        detail=response.json().get('detail')
+        if reason is not None:
+            assert response.status_code==409 and isinstance(detail,dict) and detail.get('code')=='work_help_unavailable' and detail.get('reason')==reason and detail.get('persisted') is False,(label,detail)
+        assert g.api('/api/v1/chats/'+chat_id,headers=headers)['chat']==before,label
+        assert len(g.provider.models)==providers,label
+        # A root-message attempt must not create an empty chat or assistant
+        # placeholder either. Exercise both branches of Native persistence.
+        body['chat_id']='';body['parent_id']=None
+        fresh=g.client.post('/api/chat/completions',headers=headers,json=body)
+        assert fresh.status_code==response.status_code,(label,fresh.status_code,fresh.text[:500])
+        assert g.api('/api/v1/chats/',headers=headers)==chat_list,label
+        assert len(g.provider.models)==providers,label
+        g.record('helper unavailable before Native persistence and external model: '+label,
+                 status=response.status_code,readiness_code=status.get('code'),
+                 messages_before=len(before['history']['messages']),messages_after=len(before['history']['messages']),
+                 provider_calls=0,new_chat_created=False,synthetic_member=True)
+
+    blocked('missing selected model',model_id='helper-model-not-installed')
+    g.api('/api/v1/models/model/access/update',{'id':model,'access_grants':[]})
+    blocked('revoked selected model')
+    g.api('/api/v1/models/model/access/update',{'id':model,'access_grants':grants})
+    assert readiness().get('available') is True
+    g.api('/api/v1/tools/id/ees_workflow/access/update',{'access_grants':[]})
+    blocked('revoked helper tool',reason='work_chat_access_denied')
+    g.api('/api/v1/tools/id/ees_workflow/access/update',{'access_grants':grants})
+    assert readiness().get('available') is True
+    g.api('/api/v1/tools/id/ees_workflow/delete',method='DELETE')
+    blocked('missing helper tool',reason='work_chat_tool_unconfigured')
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--wheel',type=Path,required=True);parser.add_argument('--chrome',type=Path,required=True);parser.add_argument('--output',type=Path,required=True)
@@ -329,7 +549,7 @@ def main():
                 try:item['body']=g.browser.call('Network.getResponseBody',{'requestId':event['params']['requestId']}).get('body','')[:2000]
                 except Exception as error:item['capture_error']=type(error).__name__+': '+str(error)[:200]
                 g.report['api_failures'].append(item)
-        g.report['model_boundary']={'calls':g.provider.calls,'models':g.provider.models,'tool_results':g.provider.tool_results,'input_proposals':g.provider.input_proposals,'errors':g.provider.errors}
+        g.report['model_boundary']={'calls':g.provider.calls,'models':g.provider.models,'tool_results':g.provider.tool_results,'input_proposals':g.provider.input_proposals,'helper_payloads':g.provider.helper_payloads,'helper_results':g.provider.helper_results,'errors':g.provider.errors}
         g.write_report();g.close()
 
 

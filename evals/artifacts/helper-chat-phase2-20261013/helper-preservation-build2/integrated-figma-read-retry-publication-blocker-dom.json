@@ -1,0 +1,406 @@
+{
+  "scope": "built Native UI; synthetic session and data",
+  "path": "/c/existing-chat",
+  "ready": "complete",
+  "fonts": "loaded",
+  "nativeMount": {
+    "chatPane": true,
+    "sidebarSearch": true,
+    "sidebarToggle": false
+  },
+  "sourceShell": {
+    "root": {
+      "x": 0,
+      "y": 0,
+      "bottom": 1080,
+      "width": 1920,
+      "height": 1080,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 1 auto",
+      "font": "16px / 24px -apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "maskImage": "none",
+      "background": "rgb(255, 255, 255)"
+    },
+    "sidebar": {
+      "x": 0,
+      "y": 0,
+      "bottom": 1080,
+      "width": 256,
+      "height": 1080,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 0 auto",
+      "font": "14px / 21px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(250, 250, 250)"
+    },
+    "panelSlot": {
+      "x": 1441,
+      "y": 0,
+      "bottom": 1080,
+      "width": 479,
+      "height": 1080,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 0 480px",
+      "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(243, 243, 245)"
+    },
+    "persistentChat": true,
+    "startupGate": null
+  },
+  "viewport": [
+    1920,
+    1080
+  ],
+  "active": {
+    "tag": "BODY",
+    "id": ""
+  },
+  "panel": {
+    "text": "워크스페이스\n닫기\n업무 절차\nEMS\n\n게시 전 확인 내용을 검토해 주세요.\n\n업무 절차 목록\n합성 읽기 재조회 UI 검증초안 r5\n절차 설정\n\n운영 · EMS · 게시 v1\n\n기본 절차\n구조\n실행 방식\n판정 규칙\n게시 기록\n게시 전 확인\n2026. 10. 13. 04:26 · 검사 1개\n게시를 막는 문제 1\n합성 작업 0\njob-0: 조회 재시도는 검증된 읽기 작업에만 0~3회, 전체 1~300초로 설정해 주세요.\n열기\n확인 권장 0\n통과 0\n\n검사 서비스가 개별 통과 항목을 제공하지 않았습니다.\n\n게시를 막는 문제를 해결한 뒤 다시 확인해 주세요.\n\n송부 방식과 미승인 CR 처리 미정은 게시를 막지 않습니다. 해당 작업의 보내기·처리는 정책을 확인할 때까지 막힙니다. 확인을 누를 때마다 현재 초안을 다시 검사합니다.\n\n게시를 막는 문제를 확인해 주세요.\n다시 확인\n게시",
+    "html": "<aside id=\"ees-work-panel\" data-ees-work=\"\" data-ees-source-slot=\"\" aria-label=\"업무 패널\" data-ees-mode=\"author\" aria-busy=\"false\"><header class=\"ew-panel-header\"><strong>워크스페이스</strong><span></span><button type=\"button\" data-action=\"close_panel\" aria-label=\"업무 패널 닫기\" class=\"ew-icon-button\">닫기</button></header><div id=\"ees-work-authoring-panel\" class=\"ew-scroll\"><section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\"><header>업무 절차<small>EMS</small></header><div class=\"ew-author-scroll\"><p role=\"status\" class=\"ew-author-note\">게시 전 확인 내용을 검토해 주세요.</p><button type=\"button\" data-author-action=\"list\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees14/v4/eb94a.svg\" alt=\"\" aria-hidden=\"true\">업무 절차 목록</button><div class=\"ew-author-heading\"><h2>합성 읽기 재조회 UI 검증<span class=\"ew-author-tag\" data-state=\"draft\">초안 r5</span></h2><button type=\"button\" data-author-action=\"edit_workflow\" class=\"ew-author-link\">절차 설정</button></div><p class=\"ew-author-muted\">운영 · EMS · 게시 v1</p><nav class=\"ew-author-factories\" aria-label=\"공장별 차이\"><button type=\"button\" data-author-action=\"factory\" data-id=\"\" aria-selected=\"true\">기본 절차</button></nav><nav class=\"ew-author-tabs\" aria-label=\"절차 편집\"><button type=\"button\" data-author-action=\"tab\" data-tab=\"structure\" aria-selected=\"false\">구조</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"schedule\" aria-selected=\"false\">실행 방식</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"rules\" aria-selected=\"false\">판정 규칙</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"history\" aria-selected=\"false\">게시 기록</button></nav><section class=\"ew-author-validation\"><div class=\"ew-author-heading\"><h2>게시 전 확인</h2><small>2026. 10. 13. 04:26 · 검사 1개</small></div><details open=\"\"><summary>게시를 막는 문제 1</summary><div class=\"ew-author-validation-row\"><span><img class=\"ew-icon\" src=\"/_ees14/v4/44a96.svg\" alt=\"\" aria-hidden=\"true\"><span><small>합성 작업 0</small>job-0: 조회 재시도는 검증된 읽기 작업에만 0~3회, 전체 1~300초로 설정해 주세요.</span></span><button type=\"button\" data-author-action=\"validation_open\" data-id=\"errors:0\" class=\"ew-author-link\">열기</button></div></details><details open=\"\"><summary>확인 권장 0</summary></details><details open=\"\"><summary>통과 0</summary><p class=\"ew-author-muted\">검사 서비스가 개별 통과 항목을 제공하지 않았습니다.</p></details><p class=\"ew-author-validation-summary\">게시를 막는 문제를 해결한 뒤 다시 확인해 주세요.</p></section><p class=\"ew-author-muted\">송부 방식과 미승인 CR 처리 미정은 게시를 막지 않습니다. 해당 작업의 보내기·처리는 정책을 확인할 때까지 막힙니다. 확인을 누를 때마다 현재 초안을 다시 검사합니다.</p></div><footer><small>게시를 막는 문제를 확인해 주세요.</small><button type=\"button\" data-author-action=\"validate\" data-mutation=\"\">다시 확인</button><button type=\"button\" data-author-action=\"publish\" data-mutation=\"\" class=\"ew-primary\" disabled=\"\">게시</button></footer></section></div></aside>"
+  },
+  "authoring": {
+    "text": "업무 절차\nEMS\n\n게시 전 확인 내용을 검토해 주세요.\n\n업무 절차 목록\n합성 읽기 재조회 UI 검증초안 r5\n절차 설정\n\n운영 · EMS · 게시 v1\n\n기본 절차\n구조\n실행 방식\n판정 규칙\n게시 기록\n게시 전 확인\n2026. 10. 13. 04:26 · 검사 1개\n게시를 막는 문제 1\n합성 작업 0\njob-0: 조회 재시도는 검증된 읽기 작업에만 0~3회, 전체 1~300초로 설정해 주세요.\n열기\n확인 권장 0\n통과 0\n\n검사 서비스가 개별 통과 항목을 제공하지 않았습니다.\n\n게시를 막는 문제를 해결한 뒤 다시 확인해 주세요.\n\n송부 방식과 미승인 CR 처리 미정은 게시를 막지 않습니다. 해당 작업의 보내기·처리는 정책을 확인할 때까지 막힙니다. 확인을 누를 때마다 현재 초안을 다시 검사합니다.\n\n게시를 막는 문제를 확인해 주세요.\n다시 확인\n게시",
+    "html": "<section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\"><header>업무 절차<small>EMS</small></header><div class=\"ew-author-scroll\"><p role=\"status\" class=\"ew-author-note\">게시 전 확인 내용을 검토해 주세요.</p><button type=\"button\" data-author-action=\"list\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees14/v4/eb94a.svg\" alt=\"\" aria-hidden=\"true\">업무 절차 목록</button><div class=\"ew-author-heading\"><h2>합성 읽기 재조회 UI 검증<span class=\"ew-author-tag\" data-state=\"draft\">초안 r5</span></h2><button type=\"button\" data-author-action=\"edit_workflow\" class=\"ew-author-link\">절차 설정</button></div><p class=\"ew-author-muted\">운영 · EMS · 게시 v1</p><nav class=\"ew-author-factories\" aria-label=\"공장별 차이\"><button type=\"button\" data-author-action=\"factory\" data-id=\"\" aria-selected=\"true\">기본 절차</button></nav><nav class=\"ew-author-tabs\" aria-label=\"절차 편집\"><button type=\"button\" data-author-action=\"tab\" data-tab=\"structure\" aria-selected=\"false\">구조</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"schedule\" aria-selected=\"false\">실행 방식</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"rules\" aria-selected=\"false\">판정 규칙</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"history\" aria-selected=\"false\">게시 기록</button></nav><section class=\"ew-author-validation\"><div class=\"ew-author-heading\"><h2>게시 전 확인</h2><small>2026. 10. 13. 04:26 · 검사 1개</small></div><details open=\"\"><summary>게시를 막는 문제 1</summary><div class=\"ew-author-validation-row\"><span><img class=\"ew-icon\" src=\"/_ees14/v4/44a96.svg\" alt=\"\" aria-hidden=\"true\"><span><small>합성 작업 0</small>job-0: 조회 재시도는 검증된 읽기 작업에만 0~3회, 전체 1~300초로 설정해 주세요.</span></span><button type=\"button\" data-author-action=\"validation_open\" data-id=\"errors:0\" class=\"ew-author-link\">열기</button></div></details><details open=\"\"><summary>확인 권장 0</summary></details><details open=\"\"><summary>통과 0</summary><p class=\"ew-author-muted\">검사 서비스가 개별 통과 항목을 제공하지 않았습니다.</p></details><p class=\"ew-author-validation-summary\">게시를 막는 문제를 해결한 뒤 다시 확인해 주세요.</p></section><p class=\"ew-author-muted\">송부 방식과 미승인 CR 처리 미정은 게시를 막지 않습니다. 해당 작업의 보내기·처리는 정책을 확인할 때까지 막힙니다. 확인을 누를 때마다 현재 초안을 다시 검사합니다.</p></div><footer><small>게시를 막는 문제를 확인해 주세요.</small><button type=\"button\" data-author-action=\"validate\" data-mutation=\"\">다시 확인</button><button type=\"button\" data-author-action=\"publish\" data-mutation=\"\" class=\"ew-primary\" disabled=\"\">게시</button></footer></section>"
+  },
+  "nativeTheme": {
+    "modalSurface": null,
+    "selectedSettingsTab": null,
+    "valves": null,
+    "valveInput": null
+  },
+  "nativeMenu": {
+    "draftReady": true,
+    "settingsTabs": null,
+    "returnBar": null,
+    "workspace": null,
+    "workspaceNav": null,
+    "workspaceTabs": [],
+    "search": null,
+    "items": [
+      {
+        "text": "업무 절차1",
+        "button": {
+          "x": 8,
+          "y": 200,
+          "bottom": 236,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgb(238, 243, 249)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 210,
+              "bottom": 226,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "500 14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "업무 절차",
+            "layout": {
+              "x": 42,
+              "y": 207,
+              "bottom": 229,
+              "width": 181.03125,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "500 14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "1",
+            "layout": {
+              "x": 233.03125,
+              "y": 209,
+              "bottom": 227,
+              "width": 5.96875,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 1 auto",
+              "font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "도구0",
+        "button": {
+          "x": 8,
+          "y": 237,
+          "bottom": 273,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 247,
+              "bottom": 263,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "도구",
+            "layout": {
+              "x": 42,
+              "y": 244,
+              "bottom": 266,
+              "width": 179.03125,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "0",
+            "layout": {
+              "x": 231.03125,
+              "y": 246,
+              "bottom": 264,
+              "width": 7.96875,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 1 auto",
+              "font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "공장·접근 범위",
+        "button": {
+          "x": 8,
+          "y": 309,
+          "bottom": 345,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 319,
+              "bottom": 335,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "공장·접근 범위",
+            "layout": {
+              "x": 42,
+              "y": 316,
+              "bottom": 338,
+              "width": 197,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      }
+    ],
+    "captions": [
+      {
+        "text": "업무 만들기",
+        "layout": {
+          "x": 8,
+          "y": 174,
+          "bottom": 200,
+          "width": 239,
+          "height": 26,
+          "display": "block",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 12px / 16px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "text": "관리자만",
+        "layout": {
+          "x": 8,
+          "y": 273,
+          "bottom": 309,
+          "width": 239,
+          "height": 36,
+          "display": "block",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 12px / 16px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "panel": {
+      "x": 1441,
+      "y": 0,
+      "width": 479,
+      "height": 1080,
+      "clientWidth": 479,
+      "scrollWidth": 479,
+      "clientHeight": 1080,
+      "scrollHeight": 1080,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(243, 243, 245)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "scroll": {
+      "x": 1441,
+      "y": 96,
+      "width": 479,
+      "height": 925,
+      "clientWidth": 479,
+      "scrollWidth": 479,
+      "clientHeight": 925,
+      "scrollHeight": 925,
+      "scrollTop": 0,
+      "overflowY": "auto",
+      "background": "rgba(0, 0, 0, 0)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "radio": null,
+    "selected": null,
+    "unselected": null,
+    "name": null,
+    "footer": {
+      "x": 1441,
+      "y": 1021,
+      "width": 479,
+      "height": 59,
+      "clientWidth": 479,
+      "scrollWidth": 479,
+      "clientHeight": 58,
+      "scrollHeight": 58,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(243, 243, 245)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "1px 0px 0px",
+      "borderRadius": "0px",
+      "minHeight": "auto"
+    },
+    "back": null,
+    "questionGroup": null,
+    "firstQuestion": null,
+    "cardGaps": []
+  },
+  "nativeDraft": {
+    "prompt": "",
+    "files": [],
+    "selectedToolIds": [],
+    "selectedSkillIds": [],
+    "selectedFilterIds": [],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "nativeInput": {
+    "text": "\n",
+    "html": "<div contenteditable=\"true\" translate=\"no\" class=\"tiptap ProseMirror\" tabindex=\"0\" id=\"chat-input\" aria-label=\"업무를 물어보거나, 필요한 작업을 요청하세요\"><p data-placeholder=\"업무를 물어보거나, 필요한 작업을 요청하세요\" class=\"is-empty is-editor-empty\"><br class=\"ProseMirror-trailingBreak\"></p></div>"
+  },
+  "native_search": null
+}

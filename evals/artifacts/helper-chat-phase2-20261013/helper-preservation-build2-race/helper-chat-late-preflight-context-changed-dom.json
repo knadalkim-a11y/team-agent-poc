@@ -1,0 +1,33 @@
+{
+  "scope": "actual built Native UI; synthetic account, permission response and model transport",
+  "completion_count": 0,
+  "status_requests": [
+    {
+      "model_id": "fixture-model",
+      "system_id": "EMS",
+      "chat_id": "existing-chat"
+    }
+  ],
+  "observed": {
+    "path": "/c/existing-chat",
+    "helperState": {
+      "busy": false,
+      "notice": ""
+    },
+    "draft": {
+      "prompt": "화면 이동 중에도 유지할 개인 질문",
+      "files": [],
+      "selectedToolIds": [],
+      "selectedSkillIds": [],
+      "selectedFilterIds": [],
+      "imageGenerationEnabled": false,
+      "webSearchEnabled": false,
+      "codeInterpreterEnabled": false
+    },
+    "guideInChat": false,
+    "guideInPanel": false,
+    "references": [],
+    "helperLabels": [],
+    "horizontalOverflow": false
+  }
+}

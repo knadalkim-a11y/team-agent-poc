@@ -1,0 +1,4581 @@
+{
+  "scope": "actual compiled Open WebUI 0.11.3 modal and trusted Chrome CDP keyboard/pointer; temporary workflow SQLite and synthetic Native session/capability responses; not real company authentication or ACL verification",
+  "initial": {
+    "path": "/c/existing-chat",
+    "dialog": true,
+    "contained": true,
+    "menuFocused": false,
+    "menuInert": false,
+    "active": {
+      "tag": "INPUT",
+      "id": "",
+      "name": "",
+      "role": null,
+      "label": "",
+      "text": ""
+    },
+    "index": 49,
+    "controls": [
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "뒤로"
+      },
+      {
+        "tag": "INPUT",
+        "id": "search-input-settings-modal",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "일반"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인터페이스"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "알림"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "Keyboard"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "통합"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "오디오"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "데이터 제어"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "사용량"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "보관된 채팅"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "계정"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "정보"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "일반"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인증"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "연결"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "모델"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "Sub-agents"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인터페이스"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "오디오"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "이미지들"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "평가"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "분석"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "통합"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "문서"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "웹 검색"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "코드 실행"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "파이프라인"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "데이터베이스"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "새로운 기능 보기"
+      },
+      {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "문서"
+      },
+      {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "Discord"
+      },
+      {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "X"
+      },
+      {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "GitHub"
+      },
+      {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "맞춤형 테마 설정 및 브랜딩, 전용 지원을 포함한 향상된 기능을 위해 라이선스 플랜으로 업그레이드하세요."
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "INPUT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "SELECT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "스레드 채널"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "TEXTAREA",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "응답에 사용할 워터마크를 입력하세요. 비워두면 워터마크가 적용되지 않습니다.",
+        "text": ""
+      },
+      {
+        "tag": "INPUT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "Default Interface Settings Set system-wide interface defaults for every account."
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "구성"
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "Add banner",
+        "text": ""
+      },
+      {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "저장"
+      }
+    ]
+  },
+  "sequence": [
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 50,
+      "direction": "Tab",
+      "step": 1
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "Default Interface Settings Set system-wide interface defaults for every account."
+      },
+      "index": 51,
+      "direction": "Tab",
+      "step": 2
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "구성"
+      },
+      "index": 52,
+      "direction": "Tab",
+      "step": 3
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "Add banner",
+        "text": ""
+      },
+      "index": 53,
+      "direction": "Tab",
+      "step": 4
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "저장"
+      },
+      "index": 54,
+      "direction": "Tab",
+      "step": 5
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "뒤로"
+      },
+      "index": 0,
+      "direction": "Tab",
+      "step": 6
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "search-input-settings-modal",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 1,
+      "direction": "Tab",
+      "step": 7
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "일반"
+      },
+      "index": 2,
+      "direction": "Tab",
+      "step": 8
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인터페이스"
+      },
+      "index": 3,
+      "direction": "Tab",
+      "step": 9
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "알림"
+      },
+      "index": 4,
+      "direction": "Tab",
+      "step": 10
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "Keyboard"
+      },
+      "index": 5,
+      "direction": "Tab",
+      "step": 11
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "통합"
+      },
+      "index": 6,
+      "direction": "Tab",
+      "step": 12
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "오디오"
+      },
+      "index": 7,
+      "direction": "Tab",
+      "step": 13
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "데이터 제어"
+      },
+      "index": 8,
+      "direction": "Tab",
+      "step": 14
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "사용량"
+      },
+      "index": 9,
+      "direction": "Tab",
+      "step": 15
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "보관된 채팅"
+      },
+      "index": 10,
+      "direction": "Tab",
+      "step": 16
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "계정"
+      },
+      "index": 11,
+      "direction": "Tab",
+      "step": 17
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "정보"
+      },
+      "index": 12,
+      "direction": "Tab",
+      "step": 18
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "일반"
+      },
+      "index": 13,
+      "direction": "Tab",
+      "step": 19
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인증"
+      },
+      "index": 14,
+      "direction": "Tab",
+      "step": 20
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "연결"
+      },
+      "index": 15,
+      "direction": "Tab",
+      "step": 21
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "모델"
+      },
+      "index": 16,
+      "direction": "Tab",
+      "step": 22
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "Sub-agents"
+      },
+      "index": 17,
+      "direction": "Tab",
+      "step": 23
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인터페이스"
+      },
+      "index": 18,
+      "direction": "Tab",
+      "step": 24
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "오디오"
+      },
+      "index": 19,
+      "direction": "Tab",
+      "step": 25
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "이미지들"
+      },
+      "index": 20,
+      "direction": "Tab",
+      "step": 26
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "평가"
+      },
+      "index": 21,
+      "direction": "Tab",
+      "step": 27
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "분석"
+      },
+      "index": 22,
+      "direction": "Tab",
+      "step": 28
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "통합"
+      },
+      "index": 23,
+      "direction": "Tab",
+      "step": 29
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "문서"
+      },
+      "index": 24,
+      "direction": "Tab",
+      "step": 30
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "웹 검색"
+      },
+      "index": 25,
+      "direction": "Tab",
+      "step": 31
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "코드 실행"
+      },
+      "index": 26,
+      "direction": "Tab",
+      "step": 32
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "파이프라인"
+      },
+      "index": 27,
+      "direction": "Tab",
+      "step": 33
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "데이터베이스"
+      },
+      "index": 28,
+      "direction": "Tab",
+      "step": 34
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "새로운 기능 보기"
+      },
+      "index": 29,
+      "direction": "Tab",
+      "step": 35
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "문서"
+      },
+      "index": 30,
+      "direction": "Tab",
+      "step": 36
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "Discord"
+      },
+      "index": 31,
+      "direction": "Tab",
+      "step": 37
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "X"
+      },
+      "index": 32,
+      "direction": "Tab",
+      "step": 38
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "GitHub"
+      },
+      "index": 33,
+      "direction": "Tab",
+      "step": 39
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "맞춤형 테마 설정 및 브랜딩, 전용 지원을 포함한 향상된 기능을 위해 라이선스 플랜으로 업그레이드하세요."
+      },
+      "index": 34,
+      "direction": "Tab",
+      "step": 40
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 35,
+      "direction": "Tab",
+      "step": 41
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 36,
+      "direction": "Tab",
+      "step": 42
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 37,
+      "direction": "Tab",
+      "step": 43
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 38,
+      "direction": "Tab",
+      "step": 44
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 39,
+      "direction": "Tab",
+      "step": 45
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 40,
+      "direction": "Tab",
+      "step": 46
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 41,
+      "direction": "Tab",
+      "step": 47
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 42,
+      "direction": "Tab",
+      "step": 48
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "SELECT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "스레드 채널"
+      },
+      "index": 43,
+      "direction": "Tab",
+      "step": 49
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 44,
+      "direction": "Tab",
+      "step": 50
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 45,
+      "direction": "Tab",
+      "step": 51
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 46,
+      "direction": "Tab",
+      "step": 52
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 47,
+      "direction": "Tab",
+      "step": 53
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "TEXTAREA",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "응답에 사용할 워터마크를 입력하세요. 비워두면 워터마크가 적용되지 않습니다.",
+        "text": ""
+      },
+      "index": 48,
+      "direction": "Tab",
+      "step": 54
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 49,
+      "direction": "Tab",
+      "step": 55
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 50,
+      "direction": "Tab",
+      "step": 56
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "Default Interface Settings Set system-wide interface defaults for every account."
+      },
+      "index": 51,
+      "direction": "Tab",
+      "step": 57
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "구성"
+      },
+      "index": 52,
+      "direction": "Tab",
+      "step": 58
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "Add banner",
+        "text": ""
+      },
+      "index": 53,
+      "direction": "Tab",
+      "step": 59
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "저장"
+      },
+      "index": 54,
+      "direction": "Tab",
+      "step": 60
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "뒤로"
+      },
+      "index": 0,
+      "direction": "Tab",
+      "step": 61
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "search-input-settings-modal",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 1,
+      "direction": "Tab",
+      "step": 62
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "일반"
+      },
+      "index": 2,
+      "direction": "Tab",
+      "step": 63
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인터페이스"
+      },
+      "index": 3,
+      "direction": "Tab",
+      "step": 64
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "알림"
+      },
+      "index": 4,
+      "direction": "Tab",
+      "step": 65
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "Keyboard"
+      },
+      "index": 5,
+      "direction": "Tab",
+      "step": 66
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "통합"
+      },
+      "index": 6,
+      "direction": "Tab",
+      "step": 67
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "오디오"
+      },
+      "index": 7,
+      "direction": "Tab",
+      "step": 68
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "데이터 제어"
+      },
+      "index": 8,
+      "direction": "Tab",
+      "step": 69
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "사용량"
+      },
+      "index": 9,
+      "direction": "Tab",
+      "step": 70
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "보관된 채팅"
+      },
+      "index": 10,
+      "direction": "Tab",
+      "step": 71
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "계정"
+      },
+      "index": 11,
+      "direction": "Tab",
+      "step": 72
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "정보"
+      },
+      "index": 12,
+      "direction": "Tab",
+      "step": 73
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "일반"
+      },
+      "index": 13,
+      "direction": "Tab",
+      "step": 74
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인증"
+      },
+      "index": 14,
+      "direction": "Tab",
+      "step": 75
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "연결"
+      },
+      "index": 15,
+      "direction": "Tab",
+      "step": 76
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "모델"
+      },
+      "index": 16,
+      "direction": "Tab",
+      "step": 77
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "Sub-agents"
+      },
+      "index": 17,
+      "direction": "Tab",
+      "step": 78
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인터페이스"
+      },
+      "index": 18,
+      "direction": "Tab",
+      "step": 79
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "오디오"
+      },
+      "index": 19,
+      "direction": "Tab",
+      "step": 80
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "이미지들"
+      },
+      "index": 20,
+      "direction": "Tab",
+      "step": 81
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "평가"
+      },
+      "index": 21,
+      "direction": "Tab",
+      "step": 82
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "분석"
+      },
+      "index": 22,
+      "direction": "Tab",
+      "step": 83
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "통합"
+      },
+      "index": 23,
+      "direction": "Tab",
+      "step": 84
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "문서"
+      },
+      "index": 24,
+      "direction": "Tab",
+      "step": 85
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "웹 검색"
+      },
+      "index": 25,
+      "direction": "Tab",
+      "step": 86
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "코드 실행"
+      },
+      "index": 26,
+      "direction": "Tab",
+      "step": 87
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "파이프라인"
+      },
+      "index": 27,
+      "direction": "Tab",
+      "step": 88
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "데이터베이스"
+      },
+      "index": 28,
+      "direction": "Tab",
+      "step": 89
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "새로운 기능 보기"
+      },
+      "index": 29,
+      "direction": "Tab",
+      "step": 90
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "문서"
+      },
+      "index": 30,
+      "direction": "Tab",
+      "step": 91
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "Discord"
+      },
+      "index": 31,
+      "direction": "Tab",
+      "step": 92
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "X"
+      },
+      "index": 32,
+      "direction": "Tab",
+      "step": 93
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "GitHub"
+      },
+      "index": 33,
+      "direction": "Tab",
+      "step": 94
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "맞춤형 테마 설정 및 브랜딩, 전용 지원을 포함한 향상된 기능을 위해 라이선스 플랜으로 업그레이드하세요."
+      },
+      "index": 34,
+      "direction": "Tab",
+      "step": 95
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 35,
+      "direction": "Tab",
+      "step": 96
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 36,
+      "direction": "Tab",
+      "step": 97
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 37,
+      "direction": "Tab",
+      "step": 98
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 38,
+      "direction": "Tab",
+      "step": 99
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 39,
+      "direction": "Tab",
+      "step": 100
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 40,
+      "direction": "Tab",
+      "step": 101
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 41,
+      "direction": "Tab",
+      "step": 102
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 42,
+      "direction": "Tab",
+      "step": 103
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "SELECT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "스레드 채널"
+      },
+      "index": 43,
+      "direction": "Tab",
+      "step": 104
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 44,
+      "direction": "Tab",
+      "step": 105
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 45,
+      "direction": "Tab",
+      "step": 106
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 46,
+      "direction": "Tab",
+      "step": 107
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 47,
+      "direction": "Tab",
+      "step": 108
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "TEXTAREA",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "응답에 사용할 워터마크를 입력하세요. 비워두면 워터마크가 적용되지 않습니다.",
+        "text": ""
+      },
+      "index": 48,
+      "direction": "Tab",
+      "step": 109
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 49,
+      "direction": "Tab",
+      "step": 110
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 50,
+      "direction": "Tab",
+      "step": 111
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "Default Interface Settings Set system-wide interface defaults for every account."
+      },
+      "index": 51,
+      "direction": "Tab",
+      "step": 112
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "구성"
+      },
+      "index": 52,
+      "direction": "Tab",
+      "step": 113
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "Add banner",
+        "text": ""
+      },
+      "index": 53,
+      "direction": "Tab",
+      "step": 114
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "구성"
+      },
+      "index": 52,
+      "direction": "Shift+Tab",
+      "step": 1
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "Default Interface Settings Set system-wide interface defaults for every account."
+      },
+      "index": 51,
+      "direction": "Shift+Tab",
+      "step": 2
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 50,
+      "direction": "Shift+Tab",
+      "step": 3
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 49,
+      "direction": "Shift+Tab",
+      "step": 4
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "TEXTAREA",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "응답에 사용할 워터마크를 입력하세요. 비워두면 워터마크가 적용되지 않습니다.",
+        "text": ""
+      },
+      "index": 48,
+      "direction": "Shift+Tab",
+      "step": 5
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 47,
+      "direction": "Shift+Tab",
+      "step": 6
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 46,
+      "direction": "Shift+Tab",
+      "step": 7
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 45,
+      "direction": "Shift+Tab",
+      "step": 8
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 44,
+      "direction": "Shift+Tab",
+      "step": 9
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "SELECT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "스레드 채널"
+      },
+      "index": 43,
+      "direction": "Shift+Tab",
+      "step": 10
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 42,
+      "direction": "Shift+Tab",
+      "step": 11
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 41,
+      "direction": "Shift+Tab",
+      "step": 12
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 40,
+      "direction": "Shift+Tab",
+      "step": 13
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 39,
+      "direction": "Shift+Tab",
+      "step": 14
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 38,
+      "direction": "Shift+Tab",
+      "step": 15
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 37,
+      "direction": "Shift+Tab",
+      "step": 16
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 36,
+      "direction": "Shift+Tab",
+      "step": 17
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 35,
+      "direction": "Shift+Tab",
+      "step": 18
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "맞춤형 테마 설정 및 브랜딩, 전용 지원을 포함한 향상된 기능을 위해 라이선스 플랜으로 업그레이드하세요."
+      },
+      "index": 34,
+      "direction": "Shift+Tab",
+      "step": 19
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "GitHub"
+      },
+      "index": 33,
+      "direction": "Shift+Tab",
+      "step": 20
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "X"
+      },
+      "index": 32,
+      "direction": "Shift+Tab",
+      "step": 21
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "Discord"
+      },
+      "index": 31,
+      "direction": "Shift+Tab",
+      "step": 22
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "문서"
+      },
+      "index": 30,
+      "direction": "Shift+Tab",
+      "step": 23
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "새로운 기능 보기"
+      },
+      "index": 29,
+      "direction": "Shift+Tab",
+      "step": 24
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "데이터베이스"
+      },
+      "index": 28,
+      "direction": "Shift+Tab",
+      "step": 25
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "파이프라인"
+      },
+      "index": 27,
+      "direction": "Shift+Tab",
+      "step": 26
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "코드 실행"
+      },
+      "index": 26,
+      "direction": "Shift+Tab",
+      "step": 27
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "웹 검색"
+      },
+      "index": 25,
+      "direction": "Shift+Tab",
+      "step": 28
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "문서"
+      },
+      "index": 24,
+      "direction": "Shift+Tab",
+      "step": 29
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "통합"
+      },
+      "index": 23,
+      "direction": "Shift+Tab",
+      "step": 30
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "분석"
+      },
+      "index": 22,
+      "direction": "Shift+Tab",
+      "step": 31
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "평가"
+      },
+      "index": 21,
+      "direction": "Shift+Tab",
+      "step": 32
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "이미지들"
+      },
+      "index": 20,
+      "direction": "Shift+Tab",
+      "step": 33
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "오디오"
+      },
+      "index": 19,
+      "direction": "Shift+Tab",
+      "step": 34
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인터페이스"
+      },
+      "index": 18,
+      "direction": "Shift+Tab",
+      "step": 35
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "Sub-agents"
+      },
+      "index": 17,
+      "direction": "Shift+Tab",
+      "step": 36
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "모델"
+      },
+      "index": 16,
+      "direction": "Shift+Tab",
+      "step": 37
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "연결"
+      },
+      "index": 15,
+      "direction": "Shift+Tab",
+      "step": 38
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인증"
+      },
+      "index": 14,
+      "direction": "Shift+Tab",
+      "step": 39
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "일반"
+      },
+      "index": 13,
+      "direction": "Shift+Tab",
+      "step": 40
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "정보"
+      },
+      "index": 12,
+      "direction": "Shift+Tab",
+      "step": 41
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "계정"
+      },
+      "index": 11,
+      "direction": "Shift+Tab",
+      "step": 42
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "보관된 채팅"
+      },
+      "index": 10,
+      "direction": "Shift+Tab",
+      "step": 43
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "사용량"
+      },
+      "index": 9,
+      "direction": "Shift+Tab",
+      "step": 44
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "데이터 제어"
+      },
+      "index": 8,
+      "direction": "Shift+Tab",
+      "step": 45
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "오디오"
+      },
+      "index": 7,
+      "direction": "Shift+Tab",
+      "step": 46
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "통합"
+      },
+      "index": 6,
+      "direction": "Shift+Tab",
+      "step": 47
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "Keyboard"
+      },
+      "index": 5,
+      "direction": "Shift+Tab",
+      "step": 48
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "알림"
+      },
+      "index": 4,
+      "direction": "Shift+Tab",
+      "step": 49
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인터페이스"
+      },
+      "index": 3,
+      "direction": "Shift+Tab",
+      "step": 50
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "일반"
+      },
+      "index": 2,
+      "direction": "Shift+Tab",
+      "step": 51
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "search-input-settings-modal",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 1,
+      "direction": "Shift+Tab",
+      "step": 52
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "뒤로"
+      },
+      "index": 0,
+      "direction": "Shift+Tab",
+      "step": 53
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "저장"
+      },
+      "index": 54,
+      "direction": "Shift+Tab",
+      "step": 54
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "Add banner",
+        "text": ""
+      },
+      "index": 53,
+      "direction": "Shift+Tab",
+      "step": 55
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "구성"
+      },
+      "index": 52,
+      "direction": "Shift+Tab",
+      "step": 56
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "Default Interface Settings Set system-wide interface defaults for every account."
+      },
+      "index": 51,
+      "direction": "Shift+Tab",
+      "step": 57
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 50,
+      "direction": "Shift+Tab",
+      "step": 58
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 49,
+      "direction": "Shift+Tab",
+      "step": 59
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "TEXTAREA",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "응답에 사용할 워터마크를 입력하세요. 비워두면 워터마크가 적용되지 않습니다.",
+        "text": ""
+      },
+      "index": 48,
+      "direction": "Shift+Tab",
+      "step": 60
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 47,
+      "direction": "Shift+Tab",
+      "step": 61
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 46,
+      "direction": "Shift+Tab",
+      "step": 62
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 45,
+      "direction": "Shift+Tab",
+      "step": 63
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 44,
+      "direction": "Shift+Tab",
+      "step": 64
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "SELECT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "스레드 채널"
+      },
+      "index": 43,
+      "direction": "Shift+Tab",
+      "step": 65
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 42,
+      "direction": "Shift+Tab",
+      "step": 66
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 41,
+      "direction": "Shift+Tab",
+      "step": 67
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 40,
+      "direction": "Shift+Tab",
+      "step": 68
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 39,
+      "direction": "Shift+Tab",
+      "step": 69
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 38,
+      "direction": "Shift+Tab",
+      "step": 70
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 37,
+      "direction": "Shift+Tab",
+      "step": 71
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 36,
+      "direction": "Shift+Tab",
+      "step": 72
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "switch",
+        "label": "",
+        "text": ""
+      },
+      "index": 35,
+      "direction": "Shift+Tab",
+      "step": 73
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "맞춤형 테마 설정 및 브랜딩, 전용 지원을 포함한 향상된 기능을 위해 라이선스 플랜으로 업그레이드하세요."
+      },
+      "index": 34,
+      "direction": "Shift+Tab",
+      "step": 74
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "GitHub"
+      },
+      "index": 33,
+      "direction": "Shift+Tab",
+      "step": 75
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "X"
+      },
+      "index": 32,
+      "direction": "Shift+Tab",
+      "step": 76
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "Discord"
+      },
+      "index": 31,
+      "direction": "Shift+Tab",
+      "step": 77
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "A",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "문서"
+      },
+      "index": 30,
+      "direction": "Shift+Tab",
+      "step": 78
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "새로운 기능 보기"
+      },
+      "index": 29,
+      "direction": "Shift+Tab",
+      "step": 79
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "데이터베이스"
+      },
+      "index": 28,
+      "direction": "Shift+Tab",
+      "step": 80
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "파이프라인"
+      },
+      "index": 27,
+      "direction": "Shift+Tab",
+      "step": 81
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "코드 실행"
+      },
+      "index": 26,
+      "direction": "Shift+Tab",
+      "step": 82
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "웹 검색"
+      },
+      "index": 25,
+      "direction": "Shift+Tab",
+      "step": 83
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "문서"
+      },
+      "index": 24,
+      "direction": "Shift+Tab",
+      "step": 84
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "통합"
+      },
+      "index": 23,
+      "direction": "Shift+Tab",
+      "step": 85
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "분석"
+      },
+      "index": 22,
+      "direction": "Shift+Tab",
+      "step": 86
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "평가"
+      },
+      "index": 21,
+      "direction": "Shift+Tab",
+      "step": 87
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "이미지들"
+      },
+      "index": 20,
+      "direction": "Shift+Tab",
+      "step": 88
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "오디오"
+      },
+      "index": 19,
+      "direction": "Shift+Tab",
+      "step": 89
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인터페이스"
+      },
+      "index": 18,
+      "direction": "Shift+Tab",
+      "step": 90
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "Sub-agents"
+      },
+      "index": 17,
+      "direction": "Shift+Tab",
+      "step": 91
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "모델"
+      },
+      "index": 16,
+      "direction": "Shift+Tab",
+      "step": 92
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "연결"
+      },
+      "index": 15,
+      "direction": "Shift+Tab",
+      "step": 93
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인증"
+      },
+      "index": 14,
+      "direction": "Shift+Tab",
+      "step": 94
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "일반"
+      },
+      "index": 13,
+      "direction": "Shift+Tab",
+      "step": 95
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "정보"
+      },
+      "index": 12,
+      "direction": "Shift+Tab",
+      "step": 96
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "계정"
+      },
+      "index": 11,
+      "direction": "Shift+Tab",
+      "step": 97
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "보관된 채팅"
+      },
+      "index": 10,
+      "direction": "Shift+Tab",
+      "step": 98
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "사용량"
+      },
+      "index": 9,
+      "direction": "Shift+Tab",
+      "step": 99
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "데이터 제어"
+      },
+      "index": 8,
+      "direction": "Shift+Tab",
+      "step": 100
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "오디오"
+      },
+      "index": 7,
+      "direction": "Shift+Tab",
+      "step": 101
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "통합"
+      },
+      "index": 6,
+      "direction": "Shift+Tab",
+      "step": 102
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "Keyboard"
+      },
+      "index": 5,
+      "direction": "Shift+Tab",
+      "step": 103
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "알림"
+      },
+      "index": 4,
+      "direction": "Shift+Tab",
+      "step": 104
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "인터페이스"
+      },
+      "index": 3,
+      "direction": "Shift+Tab",
+      "step": 105
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": "tab",
+        "label": "",
+        "text": "일반"
+      },
+      "index": 2,
+      "direction": "Shift+Tab",
+      "step": 106
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "search-input-settings-modal",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 1,
+      "direction": "Shift+Tab",
+      "step": 107
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "뒤로"
+      },
+      "index": 0,
+      "direction": "Shift+Tab",
+      "step": 108
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "저장"
+      },
+      "index": 54,
+      "direction": "Shift+Tab",
+      "step": 109
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "Add banner",
+        "text": ""
+      },
+      "index": 53,
+      "direction": "Shift+Tab",
+      "step": 110
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "구성"
+      },
+      "index": 52,
+      "direction": "Shift+Tab",
+      "step": 111
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": "Default Interface Settings Set system-wide interface defaults for every account."
+      },
+      "index": 51,
+      "direction": "Shift+Tab",
+      "step": 112
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "BUTTON",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 50,
+      "direction": "Shift+Tab",
+      "step": 113
+    },
+    {
+      "path": "/c/existing-chat",
+      "dialog": true,
+      "contained": true,
+      "menuFocused": false,
+      "menuInert": false,
+      "active": {
+        "tag": "INPUT",
+        "id": "",
+        "name": "",
+        "role": null,
+        "label": "",
+        "text": ""
+      },
+      "index": 49,
+      "direction": "Shift+Tab",
+      "step": 114
+    }
+  ],
+  "menu_pointer": {
+    "point": {
+      "x": 127.5,
+      "y": 218
+    },
+    "reachable": false,
+    "hit": {
+      "tag": "DIV",
+      "id": "",
+      "classes": "modal fixed top-0 right-0 left-0 bottom-0 bg-black/45 dark:bg-black/60 w-full h-screen max-h-[100dvh] p-4 sm:p-6 lg:p-8  flex justify-center z-9999 overflow-y-auto overscroll-contain svelte-1vr5p4p",
+      "role": "dialog"
+    },
+    "menuInert": false
+  }
+}

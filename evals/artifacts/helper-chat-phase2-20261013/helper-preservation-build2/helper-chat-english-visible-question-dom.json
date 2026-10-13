@@ -1,0 +1,37 @@
+{
+  "scope": "actual built Native UI; synthetic account, permission response and model transport",
+  "completion_count": 1,
+  "status_requests": [
+    {
+      "model_id": "fixture-model",
+      "system_id": "EMS",
+      "chat_id": "existing-chat"
+    }
+  ],
+  "observed": {
+    "path": "/c/existing-chat",
+    "helperState": {
+      "busy": false,
+      "notice": ""
+    },
+    "draft": {
+      "prompt": "A separate personal draft",
+      "files": [],
+      "selectedToolIds": [],
+      "selectedSkillIds": [],
+      "selectedFilterIds": [],
+      "imageGenerationEnabled": false,
+      "webSearchEnabled": false,
+      "codeInterpreterEnabled": false
+    },
+    "guideInChat": true,
+    "guideInPanel": false,
+    "references": [
+      "Reference: 새 업무 절차 · 신규 공장 횡전개"
+    ],
+    "helperLabels": [
+      "W\nWork assistant"
+    ],
+    "horizontalOverflow": false
+  }
+}

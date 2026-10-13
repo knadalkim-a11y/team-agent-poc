@@ -1,0 +1,59 @@
+{
+  "scope": "actual compiled Native routes/composer; text/nonimage Native snapshot; synthetic session, capability response, attachment and selected asset IDs; existing model/params stay Native-owned; not a Native ACL test",
+  "before": {
+    "prompt": "메뉴 왕복 중 보존할 개인 질문",
+    "files": [
+      {
+        "type": "file",
+        "id": "fixture-file",
+        "name": "menu-draft.txt",
+        "url": "/api/v1/files/fixture-file/content",
+        "status": "processed",
+        "size": 7
+      }
+    ],
+    "selectedToolIds": [
+      "fixture-selected-tool"
+    ],
+    "selectedSkillIds": [
+      "fixture-selected-skill"
+    ],
+    "selectedFilterIds": [
+      "fixture-selected-filter"
+    ],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "after": {
+    "prompt": "메뉴 왕복 중 보존할 개인 질문",
+    "files": [
+      {
+        "type": "file",
+        "id": "fixture-file",
+        "name": "menu-draft.txt",
+        "url": "/api/v1/files/fixture-file/content",
+        "status": "processed",
+        "size": 7
+      }
+    ],
+    "selectedToolIds": [
+      "fixture-selected-tool"
+    ],
+    "selectedSkillIds": [
+      "fixture-selected-skill"
+    ],
+    "selectedFilterIds": [
+      "fixture-selected-filter"
+    ],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "chat_models": [
+    "fixture-model"
+  ],
+  "chat_params": {},
+  "completion_count": 0,
+  "workflow_revision": 1
+}

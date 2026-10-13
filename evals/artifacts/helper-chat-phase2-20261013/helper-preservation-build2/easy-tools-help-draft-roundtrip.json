@@ -1,0 +1,28 @@
+{
+  "scope": "built Native composer; synthetic personal draft and transport",
+  "before": {
+    "prompt": "보존할 개인 대화 초안",
+    "files": [],
+    "selectedToolIds": [],
+    "selectedSkillIds": [],
+    "selectedFilterIds": [],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "after": {
+    "prompt": "보존할 개인 대화 초안",
+    "files": [],
+    "selectedToolIds": [],
+    "selectedSkillIds": [],
+    "selectedFilterIds": [],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "completion_count": 1,
+  "input": {
+    "html": "<p>보존할 개인 대화 초안</p>",
+    "text": "보존할 개인 대화 초안"
+  }
+}

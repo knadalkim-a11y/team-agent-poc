@@ -209,42 +209,46 @@ test('runtime owns only supplied slots and registers no document-wide event hook
  const {launcherSource,viewSource}=require('./ees_workspace_ui_fixture.cjs');assert.doesNotMatch(launcherSource,/MutationObserver|document\.addEventListener|sidebar-search-button|sidebar-new-chat-button|settings-tabs-container/);assert.doesNotMatch(viewSource,/MutationObserver|document\.addEventListener|insertAdjacentElement|pane\.parentElement|anchor\.parentElement/);
 });
 
-test('help question includes canonical term ID and visible authoring context without hidden state',()=>{
+test('source help context is available outside work references and fails closed until chat is ready',()=>{
+ const h=controller();h.api.setSelection({mode:'work',workflow_id:'',system_id:''});
+ const bridge=h.context.window.__eesNativeWorkV1;assert.equal(bridge.captureReference().kind,'none');assert.deepEqual(JSON.parse(JSON.stringify(bridge.helpContext())),{context_id:h.api.context(),system_id:''});
+ const captured=bridge.helpContext();h.api.setSelection({system_id:'EMS'});assert.equal(bridge.helpContext().system_id,'EMS');assert.notEqual(bridge.helpContext().context_id,captured.context_id);assert.equal(captured.system_id,'');
+ h.sourceState.chatReady=false;assert.equal(bridge.helpContext(),null);h.sourceState.chatReady=true;h.context.location.pathname='/workspace/skills';assert.equal(bridge.helpContext(),null);
+});
+test('help question contains only visible question text and keeps context outside its content',()=>{
  const question=html('workUI.helpQuestion(term,context)',{term:{id:'read_tool',name:'정보 읽기'},context:{screen:'정보 읽기 도구',draftName:'점검 조회',kind:'read',secret:'not-visible'}});
- assert.match(question,/도움말 용어 ID: read_tool/);assert.match(question,/현재 화면: 정보 읽기 도구/);assert.match(question,/초안 이름: 점검 조회/);assert.match(question,/하는 일: 정보 읽기/);assert.doesNotMatch(question,/not-visible/);
+ assert.equal(question,'EES Workflow 도움말 ‘정보 읽기’의 뜻과 지금 화면에서 쓰는 방법을 알려줘.');assert.doesNotMatch(question,/read_tool|현재 화면|점검 조회|not-visible/);
 });
-test('help fills the Native draft without sending and preserves attachments tools models and literal text',async()=>{
- const h=controller(),original={prompt:'이미 작성한 <검토> & "질문"\n둘째 줄',files:[{id:'upload-1',name:'memo.txt'}],selectedToolIds:['tool-owned'],selectedModels:['model-a'],params:{temperature:.1}};let updated,focused=0;
- h.context.document.querySelector=selector=>selector==='#chat-input'?{focus(){focused++;}}:{};
- h.context.window.__eesNativeDraftV1={persistent:true,ready:()=>true,read:()=>original,restore:async value=>{updated=JSON.parse(value);return true;}};
- assert.equal(await h.designer.callbacks.askHelp('뜻을 알려줘 <그대로>'),true);
- assert.equal(updated.prompt,original.prompt+'\n\n뜻을 알려줘 <그대로>');assert.deepEqual({...updated,prompt:original.prompt},original);assert.equal(original.prompt,'이미 작성한 <검토> & "질문"\n둘째 줄');assert.equal(h.calls.length,0);assert.equal(focused,1);
+test('help sends through source once with a frozen reference and never reads or changes the composer',async()=>{
+ const h=controller(),original={prompt:'이미 작성한 <검토> & "질문"\n둘째 줄',files:[{id:'upload-1',type:'image',status:'uploading'}],selectedToolIds:['tool-owned'],selectedModels:['model-a'],params:{temperature:.1}},kept=JSON.stringify(original),sent=[];
+ h.context.window.__eesNativeDraftV1={read(){throw Error('must not read draft');},restore(){throw Error('must not replace draft');}};
+ h.context.window.__eesSourceShellV1.askHelp=async payload=>{sent.push(payload);return {accepted:true};};h.api.setSelection({system_id:'EMS'});
+ assert.equal(await h.designer.callbacks.askHelp('뜻을 알려줘 <그대로>',{screen:'도구 작성',term_id:'read_tool',draftName:'점검 조회',secret:'not-visible'}),true);
+ assert.equal(sent.length,1);assert.equal(sent[0].question,'뜻을 알려줘 <그대로>');assert.deepEqual(JSON.parse(JSON.stringify(sent[0].reference)),{kind:'help',system_id:'EMS',context_id:h.api.context(),screen:'도구 작성',term_id:'read_tool',title:'점검 조회'});assert.equal(Object.isFrozen(sent[0].reference),true);assert.equal(JSON.stringify(original),kept);assert.equal(h.calls.length,0);
 });
-test('help refuses a loading or absent Native draft and never overwrites unconfirmed content',async()=>{
- const h=controller();let restored=0;
- await assert.rejects(h.designer.callbacks.askHelp('질문'),/대화 입력창/);
- h.context.window.__eesNativeDraftV1={persistent:true,ready:()=>false,read:()=>({prompt:'keep'}),restore:async()=>{restored++;return true;}};
- await assert.rejects(h.designer.callbacks.askHelp('질문'),/대화 입력창/);
- h.context.window.__eesNativeDraftV1.ready=()=>true;h.context.window.__eesNativeDraftV1.read=()=>null;
- await assert.rejects(h.designer.callbacks.askHelp('질문'),/작성 중인 대화/);assert.equal(restored,0);assert.equal(h.calls.length,0);
+test('help refuses missing source or unready chat without a fallback send or composer mutation',async()=>{
+ const h=controller();let sends=0;await assert.rejects(h.designer.callbacks.askHelp('질문'),/업무 도우미 연결/);
+ h.context.window.__eesSourceShellV1.askHelp=async()=>{sends++;return {accepted:true};};h.sourceState.chatReady=false;
+ await assert.rejects(h.designer.callbacks.askHelp('질문'),/업무 도우미 연결/);h.sourceState.chatReady=true;
+ await assert.rejects(h.designer.callbacks.askHelp('질문',{screen:'x'.repeat(201)}),/참고 정보/);assert.equal(sends,0);assert.equal(h.calls.length,0);
 });
-test('help insertion serializes competing choices and reports restore failure without sending',async()=>{
- const h=controller(),pending=deferred();let calls=0;
- h.context.window.__eesNativeDraftV1={persistent:true,ready:()=>true,read:()=>({prompt:'keep'}),restore:()=>{calls++;return pending.promise;}};
- const first=h.designer.callbacks.askHelp('첫 질문');await assert.rejects(h.designer.callbacks.askHelp('둘째 질문'),/앞서 고른 질문/);
- pending.resolve(false);await assert.rejects(first,/질문을 입력창에 넣지 못했습니다/);assert.equal(calls,1);assert.equal(h.calls.length,0);
+test('help prevents duplicate requests through preflight and the full Native response then reports no-send failure',async()=>{
+ const h=controller(),pending=deferred();let calls=0,busy=false;
+ h.context.window.__eesSourceShellV1.helpState=()=>({busy});h.context.window.__eesSourceShellV1.askHelp=()=>{calls++;return pending.promise;};
+ const first=h.designer.callbacks.askHelp('첫 질문');await assert.rejects(h.designer.callbacks.askHelp('둘째 질문'),/앞선 답변/);
+ pending.resolve({accepted:true});busy=true;assert.equal(await first,true);await assert.rejects(h.designer.callbacks.askHelp('셋째 질문'),/앞선 답변/);assert.equal(calls,1);
+ busy=false;h.context.window.__eesSourceShellV1.askHelp=async()=>({accepted:false,code:'help_unavailable',message:'도우미 권한을 확인해 주세요.'});
+ assert.equal(await h.designer.callbacks.askHelp('다시 질문'),false);assert.equal(h.api.snapshot().error,'');assert.equal(h.calls.length,0);
 });
-test('help detects account change before restoring and never copies the old draft into a new actor',async()=>{
- const h=controller();let restores=0;
- h.context.window.__eesNativeDraftV1={persistent:true,ready:()=>true,read:()=>{h.setAuth('actor-b-token');return {prompt:'actor-a-draft'};},restore:async()=>{restores++;return true;}};
- await assert.rejects(h.designer.callbacks.askHelp('질문'),/대화 위치가 바뀌었습니다/);assert.equal(restores,0);
+test('help rejects an account change before dispatch and never copies a private draft to another actor',async()=>{
+ const h=controller();let sends=0;h.context.window.__eesSourceShellV1.helpState=()=>{h.setAuth('actor-b-token');return {busy:false};};h.context.window.__eesSourceShellV1.askHelp=async()=>{sends++;return {accepted:true};};
+ assert.equal(await h.designer.callbacks.askHelp('질문'),false);assert.equal(sends,0);
 });
-test('help detects route changes during Native restore and does not focus a different conversation',async()=>{
- const h=controller(),pending=deferred();let focused=0;
- h.context.document.querySelector=selector=>selector==='#chat-input'?{focus(){focused++;}}:{};
- h.context.window.__eesNativeDraftV1={persistent:true,ready:()=>true,read:()=>({prompt:'keep'}),restore:()=>pending.promise};
- const filling=h.designer.callbacks.askHelp('질문');h.context.location.pathname='/c/other';pending.resolve(true);
- await assert.rejects(filling,/대화 위치가 바뀌었습니다/);assert.equal(focused,0);assert.equal(h.calls.length,0);
+test('late help acceptance cannot focus or repaint another conversation and retains its submitted reference',async()=>{
+ const h=controller(),pending=deferred();let payload,focused=0;h.context.window.__eesSourceShellV1.focusComposer=()=>focused++;
+ h.context.window.__eesSourceShellV1.askHelp=body=>{payload=body;return pending.promise;};h.api.setSelection({system_id:'EMS'});const before=h.api.context();
+ const sending=h.designer.callbacks.askHelp('질문',{screen:'새 절차',title:'원래 초안'});h.context.location.pathname='/c/other';h.api.setSelection({system_id:'OTHER'});pending.resolve({accepted:true});
+ assert.equal(await sending,false);assert.equal(payload.reference.context_id,before);assert.equal(payload.reference.system_id,'EMS');assert.equal(payload.reference.title,'원래 초안');assert.equal(focused,0);assert.equal(h.calls.length,0);
 });
 test('author tools expose help-only metadata while workflow and historical references remain unchanged',()=>{
  const h=controller();h.api.setSelection({mode:'author',tab:'tools',system_id:'EMS',workflow_id:'old-work',run_id:'old-run'});
@@ -253,26 +257,35 @@ test('author tools expose help-only metadata while workflow and historical refer
  h.api.setSelection({mode:'work',chat_reference:{kind:'workspace',reference_kind:'historical',workflow_id:'old-work',run_id:'old-run',attempt_id:'kept'}});h.api.setState({run:{id:'old-run'}});assert.equal(h.api.reference().attempt_id,'kept');
 });
 
-test('procedure starter questions keep the Native draft and use help metadata until the starter closes',async()=>{
- const h=controller(),original={prompt:'이미 작성한 절차 메모',files:[{id:'kept-file'}],selectedModels:['owned-model'],selectedToolIds:['owned-tool']};let restored,active={screen:'새 업무 절차',draftName:'시험 공장 절차',templateId:'factory_rollout'},synced;
+test('procedure starter questions send visible text with separate help metadata until the starter closes',async()=>{
+ const h=controller();let sent,active={screen:'새 업무 절차',draftName:'시험 공장 절차',templateId:'factory_rollout'},synced;
  h.designer.readStartContext=()=>active;h.view.sync=value=>{synced=value;};h.api.setState({capabilities:{actor_id:'a'}});h.api.setSelection({mode:'author',tab:'overview',system_id:'EMS',workflow_id:'existing-work',run_id:'existing-run'});
  h.designer.callbacks.startContextChanged(active);assert.equal(synced.procedure_start.draftName,'시험 공장 절차');
- h.context.window.__eesNativeDraftV1={persistent:true,ready:()=>true,read:()=>original,restore:async value=>{restored=JSON.parse(value);return true;}};
- h.context.document.querySelector=selector=>selector==='#chat-input'?{focus(){}}:{};
+ h.context.window.__eesSourceShellV1.askHelp=async value=>{sent=value;return {accepted:true};};
  const reference=h.api.reference();assert.equal(reference.kind,'help');assert.equal(Object.hasOwn(reference,'workflow_id'),false);
  await h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'0'}});
- assert.ok(restored.prompt.startsWith(original.prompt+'\n\n신규 공장 횡전개 예시'));assert.match(restored.prompt,/초안 이름: 시험 공장 절차/);assert.deepEqual({...restored,prompt:original.prompt},original);assert.equal(h.calls.length,0);
+ assert.equal(sent.question,'신규 공장 횡전개 예시를 복사해서 우리 공장에 맞게 고치고 싶어');assert.equal(sent.reference.title,'시험 공장 절차');assert.equal(sent.reference.screen,'새 업무 절차');assert.equal(sent.reference.kind,'help');assert.equal(Object.hasOwn(sent.reference,'workflow_id'),false);assert.equal(h.calls.length,0);
  active=null;h.designer.callbacks.startContextChanged(null);assert.equal(synced.procedure_start,null);assert.equal(h.api.reference().kind,'workspace');assert.equal(h.api.reference().workflow_id,'existing-work');
- restored=null;await h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'1'}});assert.equal(restored,null);
+ sent=null;await h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'1'}});assert.equal(sent,null);
 });
-test('procedure question choices reject unavailable or invalid context without changing a draft',async()=>{
- const h=controller();let restores=0;h.designer.readStartContext=()=>({screen:'새 업무 절차'});h.api.setSelection({mode:'author',tab:'overview'});
- h.context.window.__eesNativeDraftV1={persistent:true,ready:()=>true,read:()=>({prompt:'keep'}),restore:async()=>{restores++;return true;}};
+test('procedure question sends the visible translation unchanged while preserving index and length guards',async()=>{
+ const h=controller(),sent=[];h.designer.readStartContext=()=>({screen:'New procedure',draftName:'Factory guide'});h.api.setSelection({mode:'author',tab:'overview',system_id:'EMS'});
+ h.context.window.__eesSourceShellV1.askHelp=async value=>{sent.push(value);return {accepted:true};};
+ const question='What should I decide first when starting a blank procedure?';
+ await h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'2',question}});
+ assert.equal(sent.length,1);assert.equal(sent[0].question,question);assert.equal(sent[0].reference.title,'Factory guide');assert.equal(sent[0].reference.screen,'New procedure');
+ for(const questionIndex of ['-1','3','NaN'])await h.api.handleClick({dataset:{action:'procedure_question',questionIndex,question}});
+ await assert.rejects(h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'2',question:'x'.repeat(8001)}}),/질문을 확인/);assert.equal(sent.length,1);
+});
+test('procedure question choices reject unavailable or invalid context without dispatch',async()=>{
+ const h=controller();let sends=0;h.designer.readStartContext=()=>({screen:'새 업무 절차'});h.api.setSelection({mode:'author',tab:'overview'});
+ h.context.window.__eesSourceShellV1.askHelp=async()=>{sends++;return {accepted:true};};
  for(const questionIndex of ['-1','3','NaN'])await h.api.handleClick({dataset:{action:'procedure_question',questionIndex}});
- h.api.setSelection({mode:'work'});await h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'0'}});assert.equal(restores,0);assert.equal(h.calls.length,0);
+ h.api.setSelection({mode:'work'});await h.api.handleClick({dataset:{action:'procedure_question',questionIndex:'0'}});assert.equal(sends,0);assert.equal(h.calls.length,0);
 });
-test('procedure introduction has exactly three keyboard buttons and no automatic send control',()=>{
- const rendered=html('workProcedureStartHTML({screen:"새 업무 절차",draftName:"<secret>"})');assert.equal((rendered.match(/data-action="procedure_question"/g)||[]).length,3);assert.match(rendered,/type="button"/);assert.match(rendered,/내용을 확인하고 직접 보내 주세요/);assert.doesNotMatch(rendered,/<secret>|type="submit"/);assert.equal(html('workProcedureStartHTML(null)'),'');
+test('runtime keeps the three approved questions and has no old right-side introduction or fill-only copy',()=>{
+ const {viewSource,launcherSource}=require('./ees_workspace_ui_fixture.cjs');assert.doesNotMatch(viewSource,/function workProcedureStartHTML|질문을 입력창에 채웁니다/);assert.doesNotMatch(launcherSource,/bridge\.restore|draft\.prompt/);
+ const questions=html('workUI.procedureQuestions');assert.equal(questions.length,3);assert.equal(questions[2],'빈 절차로 시작하면 무엇부터 정하나요?');
 });
 
 test('input save keeps mutation controls busy until the acknowledged state finishes refreshing',async()=>{

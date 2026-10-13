@@ -703,7 +703,7 @@ async def legacy_state(user, case_id=""):
 
 
 def install(app, verified_user):
-    from fastapi import Body, Depends
+    from fastapi import Body, Depends, Request
     from fastapi.responses import JSONResponse
 
     def response(value):
@@ -723,6 +723,12 @@ def install(app, verified_user):
     async def workspace_route(workflow_id: str = "", run_id: str = "", system_id: str = "",
                               factory_id: str = "", user=Depends(verified_user)):
         return response(await workspace_state(user, workflow_id, run_id, system_id, factory_id))
+
+    @app.get("/api/ees-work/help/status", include_in_schema=False)
+    async def help_status_route(request: Request, model_id: str = "", system_id: str = "",
+                                chat_id: str = "", user=Depends(verified_user)):
+        from .ees_workflow_native import help_chat_status
+        return response(await help_chat_status(request, user, model_id, system_id, chat_id))
 
     @app.post("/api/ees-work/workspace", include_in_schema=False)
     @app.post("/api/ees-work/workspace/command", include_in_schema=False)

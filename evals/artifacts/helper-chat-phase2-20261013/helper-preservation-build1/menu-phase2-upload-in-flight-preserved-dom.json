@@ -1,0 +1,887 @@
+{
+  "scope": "built Native UI; synthetic session and data",
+  "path": "/c/existing-chat",
+  "ready": "complete",
+  "fonts": "loaded",
+  "nativeMount": {
+    "chatPane": true,
+    "sidebarSearch": true,
+    "sidebarToggle": false
+  },
+  "sourceShell": {
+    "root": {
+      "x": 0,
+      "y": 0,
+      "bottom": 1080,
+      "width": 1920,
+      "height": 1080,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 1 auto",
+      "font": "16px / 24px -apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "maskImage": "none",
+      "background": "rgb(255, 255, 255)"
+    },
+    "sidebar": {
+      "x": 0,
+      "y": 0,
+      "bottom": 1080,
+      "width": 256,
+      "height": 1080,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 0 auto",
+      "font": "14px / 21px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(250, 250, 250)"
+    },
+    "panelSlot": {
+      "x": 1441,
+      "y": 0,
+      "bottom": 1080,
+      "width": 479,
+      "height": 1080,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 0 480px",
+      "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(243, 243, 245)"
+    },
+    "persistentChat": true,
+    "startupGate": null
+  },
+  "viewport": [
+    1920,
+    1080
+  ],
+  "active": {
+    "tag": "BODY",
+    "id": ""
+  },
+  "panel": {
+    "text": "워크스페이스\n닫기\n업무 절차\nEMS\nEMS의 업무 절차 0개\n새 절차\n\n절차를 만들거나 선택하세요. 게시한 변경은 새 진행 건부터 적용됩니다.\n\n업무 절차 찾기\n아직 업무 절차가 없습니다.\n새 절차를 만들고 필요한 작업을 작성하세요.",
+    "html": "<aside id=\"ees-work-panel\" data-ees-work=\"\" data-ees-source-slot=\"\" aria-label=\"업무 패널\" data-ees-mode=\"author\" aria-busy=\"false\"><header class=\"ew-panel-header\"><strong>워크스페이스</strong><span></span><button type=\"button\" data-action=\"close_panel\" aria-label=\"업무 패널 닫기\" class=\"ew-icon-button\">닫기</button></header><div id=\"ees-work-authoring-panel\" class=\"ew-scroll\"><section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\"><header>업무 절차<small>EMS</small></header><div class=\"ew-author-scroll\"><div class=\"ew-author-heading\"><h2>EMS의 업무 절차 0개</h2><button type=\"button\" data-author-action=\"create\">새 절차</button></div><p class=\"ew-author-muted\">절차를 만들거나 선택하세요. 게시한 변경은 새 진행 건부터 적용됩니다.</p><label class=\"ew-visually-hidden\" for=\"ew-author-search\">업무 절차 찾기</label><input id=\"ew-author-search\" type=\"search\" value=\"\" placeholder=\"업무 절차 찾기\"><div class=\"ew-author-empty\">아직 업무 절차가 없습니다.<br>새 절차를 만들고 필요한 작업을 작성하세요.</div></div><footer></footer></section></div></aside>"
+  },
+  "authoring": {
+    "text": "업무 절차\nEMS\nEMS의 업무 절차 0개\n새 절차\n\n절차를 만들거나 선택하세요. 게시한 변경은 새 진행 건부터 적용됩니다.\n\n업무 절차 찾기\n아직 업무 절차가 없습니다.\n새 절차를 만들고 필요한 작업을 작성하세요.",
+    "html": "<section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\"><header>업무 절차<small>EMS</small></header><div class=\"ew-author-scroll\"><div class=\"ew-author-heading\"><h2>EMS의 업무 절차 0개</h2><button type=\"button\" data-author-action=\"create\">새 절차</button></div><p class=\"ew-author-muted\">절차를 만들거나 선택하세요. 게시한 변경은 새 진행 건부터 적용됩니다.</p><label class=\"ew-visually-hidden\" for=\"ew-author-search\">업무 절차 찾기</label><input id=\"ew-author-search\" type=\"search\" value=\"\" placeholder=\"업무 절차 찾기\"><div class=\"ew-author-empty\">아직 업무 절차가 없습니다.<br>새 절차를 만들고 필요한 작업을 작성하세요.</div></div><footer></footer></section>"
+  },
+  "nativeTheme": {
+    "modalSurface": null,
+    "selectedSettingsTab": null,
+    "valves": null,
+    "valveInput": null
+  },
+  "nativeMenu": {
+    "draftReady": true,
+    "settingsTabs": null,
+    "returnBar": null,
+    "workspace": null,
+    "workspaceNav": null,
+    "workspaceTabs": [],
+    "search": null,
+    "items": [
+      {
+        "text": "업무 절차0",
+        "button": {
+          "x": 8,
+          "y": 200,
+          "bottom": 236,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgb(238, 243, 249)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 210,
+              "bottom": 226,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "500 14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "업무 절차",
+            "layout": {
+              "x": 42,
+              "y": 207,
+              "bottom": 229,
+              "width": 179.03125,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "500 14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "0",
+            "layout": {
+              "x": 231.03125,
+              "y": 209,
+              "bottom": 227,
+              "width": 7.96875,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 1 auto",
+              "font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "도구0",
+        "button": {
+          "x": 8,
+          "y": 237,
+          "bottom": 273,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 247,
+              "bottom": 263,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "도구",
+            "layout": {
+              "x": 42,
+              "y": 244,
+              "bottom": 266,
+              "width": 179.03125,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "0",
+            "layout": {
+              "x": 231.03125,
+              "y": 246,
+              "bottom": 264,
+              "width": 7.96875,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 1 auto",
+              "font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "스킬·지침스킬",
+        "button": {
+          "x": 8,
+          "y": 274,
+          "bottom": 310,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 284,
+              "bottom": 300,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "스킬·지침",
+            "layout": {
+              "x": 42,
+              "y": 281,
+              "bottom": 303,
+              "width": 165.078125,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "스킬",
+            "layout": {
+              "x": 217.078125,
+              "y": 283,
+              "bottom": 301,
+              "width": 21.921875,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 auto",
+              "font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "AI 도우미모델",
+        "button": {
+          "x": 8,
+          "y": 346,
+          "bottom": 382,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 356,
+              "bottom": 372,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "AI 도우미",
+            "layout": {
+              "x": 42,
+              "y": 353,
+              "bottom": 375,
+              "width": 165.078125,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "모델",
+            "layout": {
+              "x": 217.078125,
+              "y": 355,
+              "bottom": 373,
+              "width": 21.921875,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 auto",
+              "font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "참고 문서지식",
+        "button": {
+          "x": 8,
+          "y": 383,
+          "bottom": 419,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 393,
+              "bottom": 409,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "참고 문서",
+            "layout": {
+              "x": 42,
+              "y": 390,
+              "bottom": 412,
+              "width": 165.078125,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "지식",
+            "layout": {
+              "x": 217.078125,
+              "y": 392,
+              "bottom": 410,
+              "width": 21.921875,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 auto",
+              "font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "빠른 문장프롬프트",
+        "button": {
+          "x": 8,
+          "y": 420,
+          "bottom": 456,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 430,
+              "bottom": 446,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "빠른 문장",
+            "layout": {
+              "x": 42,
+              "y": 427,
+              "bottom": 449,
+              "width": 143.15625,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "프롬프트",
+            "layout": {
+              "x": 195.15625,
+              "y": 429,
+              "bottom": 447,
+              "width": 43.84375,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 auto",
+              "font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "기능 연결도구",
+        "button": {
+          "x": 8,
+          "y": 492,
+          "bottom": 528,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 502,
+              "bottom": 518,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "기능 연결",
+            "layout": {
+              "x": 42,
+              "y": 499,
+              "bottom": 521,
+              "width": 165.078125,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "도구",
+            "layout": {
+              "x": 217.078125,
+              "y": 501,
+              "bottom": 519,
+              "width": 21.921875,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 auto",
+              "font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "공장·접근 범위",
+        "button": {
+          "x": 8,
+          "y": 529,
+          "bottom": 565,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 539,
+              "bottom": 555,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "공장·접근 범위",
+            "layout": {
+              "x": 42,
+              "y": 536,
+              "bottom": 558,
+              "width": 197,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "관리자 설정관리자",
+        "button": {
+          "x": 8,
+          "y": 566,
+          "bottom": 602,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 576,
+              "bottom": 592,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "관리자 설정",
+            "layout": {
+              "x": 42,
+              "y": 573,
+              "bottom": 595,
+              "width": 154.125,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "관리자",
+            "layout": {
+              "x": 206.125,
+              "y": 575,
+              "bottom": 593,
+              "width": 32.875,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 auto",
+              "font": "12px / 18px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      }
+    ],
+    "captions": [
+      {
+        "text": "업무 만들기",
+        "layout": {
+          "x": 8,
+          "y": 174,
+          "bottom": 200,
+          "width": 239,
+          "height": 26,
+          "display": "block",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 12px / 16px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "text": "AI 설정",
+        "layout": {
+          "x": 8,
+          "y": 310,
+          "bottom": 346,
+          "width": 239,
+          "height": 36,
+          "display": "block",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 12px / 16px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "text": "관리자만",
+        "layout": {
+          "x": 8,
+          "y": 456,
+          "bottom": 492,
+          "width": 239,
+          "height": 36,
+          "display": "block",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 12px / 16px \"EES Inter\", \"EES Noto Sans KR\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "panel": {
+      "x": 1441,
+      "y": 0,
+      "width": 479,
+      "height": 1080,
+      "clientWidth": 479,
+      "scrollWidth": 479,
+      "clientHeight": 1080,
+      "scrollHeight": 1080,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(243, 243, 245)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "scroll": {
+      "x": 1441,
+      "y": 96,
+      "width": 479,
+      "height": 959,
+      "clientWidth": 479,
+      "scrollWidth": 479,
+      "clientHeight": 959,
+      "scrollHeight": 959,
+      "scrollTop": 0,
+      "overflowY": "auto",
+      "background": "rgba(0, 0, 0, 0)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "radio": null,
+    "selected": null,
+    "unselected": null,
+    "name": null,
+    "footer": {
+      "x": 1441,
+      "y": 1055,
+      "width": 479,
+      "height": 25,
+      "clientWidth": 479,
+      "scrollWidth": 479,
+      "clientHeight": 24,
+      "scrollHeight": 24,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(243, 243, 245)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "1px 0px 0px",
+      "borderRadius": "0px",
+      "minHeight": "auto"
+    },
+    "back": null,
+    "questionGroup": null,
+    "firstQuestion": null,
+    "cardGaps": []
+  },
+  "nativeDraft": {
+    "prompt": "업로드 중 이동해도 보존할 개인 질문",
+    "files": [
+      {
+        "type": "file",
+        "file": {
+          "id": "fixture-file",
+          "user_id": "fixture-admin",
+          "filename": "menu-upload-in-flight.png",
+          "meta": {
+            "name": "menu-upload-in-flight.png",
+            "content_type": "image/png",
+            "size": 7858
+          },
+          "data": {
+            "status": "completed"
+          },
+          "created_at": 1
+        },
+        "id": "fixture-file",
+        "url": "fixture-file",
+        "name": "menu-upload-in-flight.png",
+        "status": "uploaded",
+        "size": 7858,
+        "error": "",
+        "itemId": "865cc24e-b6d9-4e4e-8f48-2ca55640fab6",
+        "content_type": "image/png"
+      }
+    ],
+    "selectedToolIds": [],
+    "selectedSkillIds": [],
+    "selectedFilterIds": [],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "nativeInput": {
+    "text": "업로드 중 이동해도 보존할 개인 질문",
+    "html": "<div contenteditable=\"true\" translate=\"no\" class=\"tiptap ProseMirror\" tabindex=\"0\" id=\"chat-input\" aria-label=\"업무를 물어보거나, 필요한 작업을 요청하세요\"><p>업로드 중 이동해도 보존할 개인 질문</p></div>"
+  },
+  "native_search": null
+}

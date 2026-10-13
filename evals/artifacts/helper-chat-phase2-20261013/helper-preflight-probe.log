@@ -1,0 +1,8 @@
+test_probe (__main__.Probe.test_probe) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 140.36735700210556, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 1.833s
+
+OK
+{"first": {"at": 1061.6000000014901, "reference": {"kind": "none"}, "helper": {"busy": true, "notice": ""}, "label": "시스템APC"}, "last": {"at": 1163.7000000029802, "reference": {"kind": "none"}, "helper": {"busy": true, "notice": ""}, "label": "시스템APC"}, "after": {"reference": {"kind": "none"}, "helper": {"busy": false, "notice": ""}, "draft": {"prompt": "화면 이동 중에도 유지할 개인 질문", "files": [], "selectedToolIds": [], "selectedSkillIds": [], "selectedFilterIds": [], "imageGenerationEnabled": false, "webSearchEnabled": false, "codeInterpreterEnabled": false}}}

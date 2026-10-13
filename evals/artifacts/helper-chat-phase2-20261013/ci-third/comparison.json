@@ -1,0 +1,88 @@
+{
+  "date": "2026-10-13",
+  "status": "failure preserved; root cause unresolved",
+  "test": "test_ees_workflow_execution.ExecutionTests.test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown",
+  "failure": {
+    "head": "0a8a0a6cefbffc9b38829aa841114aa8a15ddfb3",
+    "run_id": 38375410891,
+    "job_id": 115225542333,
+    "exception": "subprocess.TimeoutExpired",
+    "mode": "fast",
+    "timeout_seconds": 10,
+    "first_failing_line": 812,
+    "slow_dispatch_reached": false,
+    "internal_child_phase": "not recorded by original test",
+    "suite_tests": 37,
+    "suite_seconds": 48.149,
+    "execution_asyncio_slow_task_warnings": 101
+  },
+  "previous_passes": [
+    {
+      "label": "CI2",
+      "run_id": 38372503762,
+      "job_id": 115215674870,
+      "head": "4d10237f27c63722da99c1da53b14aa56d700500",
+      "conclusion": "success",
+      "suite_tests": 37,
+      "suite_seconds": 22.149,
+      "execution_asyncio_slow_task_warnings": 34,
+      "raw_test_checkpoint": "2026-10-13T09:09:12.1909754Z test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown (test_ees_workflow_execution.ExecutionTests.test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown) ... ok"
+    },
+    {
+      "label": "PR86",
+      "run_id": 38372381486,
+      "job_id": 115215450545,
+      "head": "ac2ec0120adb6eb99da833f818977fc524eee112",
+      "conclusion": "success",
+      "suite_tests": 37,
+      "suite_seconds": 19.545,
+      "execution_asyncio_slow_task_warnings": 24,
+      "raw_test_checkpoint": "2026-10-13T09:09:41.4103313Z test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown (test_ees_workflow_execution.ExecutionTests.test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown) ... ok"
+    }
+  ],
+  "code_comparison": {
+    "test_sha256_before": "ac2586a667d94a085e3871e188ae0373f6329efa97a71ad1e9961f30c429461b",
+    "ci2_to_ci3": "Only documentation/evidence and Native chat test entry changed; execution product/test unchanged.",
+    "pr86_to_ci3": "Execution test, legacy fixture, execution runtime and relative validators unchanged. Public workflow facade changed only inside install() for help/status route, unused by this child. Injected Bridge/Model bypass new Native helper path.",
+    "contracts_job_unchanged": true
+  },
+  "diagnostic_change": {
+    "product_changed": false,
+    "ascii_flush_phases": [
+      "boot",
+      "imported",
+      "service",
+      "drain_done"
+    ],
+    "timeout_capture": "Attach recognized captured phases to the same re-raised TimeoutExpired.",
+    "unchanged": [
+      "fast timeout=10",
+      "slow marker poll=100*0.02 seconds",
+      "kill communicate timeout=5",
+      "DB state and dispatch assertions",
+      "no automatic retry"
+    ]
+  },
+  "interpretation": "The suite and surrounding asyncio tasks were slower than the two prior passes. Startup/import delay, SQLite/execution delay and deadlock cannot be distinguished without child phase markers.",
+  "next": "One new-head CI on a new worker, including required documentation and diagnostic-only test change; do not repeatedly rerun if the same failure recurs.",
+  "local_probe": {
+    "platform": "Linux",
+    "python": "existing phase1 Python 3.12 environment",
+    "command": "python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_workflow_execution.ExecutionTests.test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown -v",
+    "result": "1 PASS",
+    "seconds": 0.204,
+    "scope": "Full existing test with diagnostic-only phase markers; does not establish Windows timing."
+  },
+  "files": [
+    {
+      "path": "windows-contracts-failure.log",
+      "size_bytes": 8005,
+      "sha256": "28738002db82e5ba1b1595b19ecedc98adb0296d9a1c8eaff67f83840a41a16c"
+    },
+    {
+      "path": "local-subprocess-probe.log",
+      "size_bytes": 301,
+      "sha256": "b2339f65d69c0ce9587f559d68ea0d951c0af1523599dd5731c5b76851473d81"
+    }
+  ]
+}

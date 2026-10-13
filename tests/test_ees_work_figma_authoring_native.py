@@ -18,6 +18,7 @@ from uuid import UUID, uuid4
 
 from ees_work_integrated_fixture import IntegratedNativeCase
 from native_ui_fixture import MODELS, NativeUIHandler
+from test_ees_helper_chat_native import install_helper_status_fixture
 
 
 class FigmaAuthoringNativeTests(IntegratedNativeCase):
@@ -919,6 +920,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.server.completions, [])
 
     def test_help_keyboard_escape_and_questions_fill_native_composer_without_sending(self):
+        # Historical ID retained: phase 2-2 sends only the question immediately
+        # while preserving the independently authored Native composer draft.
+        install_helper_status_fixture(self)
         def enter_button():
             # CDP needs Enter's character data to synthesize the native button
             # activation (keydown alone does not emit keypress/click).
@@ -965,22 +969,24 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         enter_button()
         self.wait("document.querySelector('#ees-work-help')")
         self.click('#ees-work-help [data-help-ask]')
-        self.wait("window.__eesNativeDraftV1?.read()?.prompt?.includes('read_tool')")
+        self.wait("document.querySelector('#messages-container')?.textContent.includes('실제 대화 입력이 전달되었습니다.') && !window.__eesSourceShellV1.helpState().busy")
         after = self.browser.evaluate('window.__eesNativeDraftV1.read()')
-        directory = self.screenshot('easy-tools-help-native-draft')
+        directory = self.screenshot('easy-tools-help-native-chat')
         (directory / 'easy-tools-help-draft-roundtrip.json').write_text(json.dumps({
             'scope': 'built Native composer; synthetic personal draft and transport',
             'before': before, 'after': after, 'completion_count': len(self.server.completions),
             'input': self.browser.evaluate("(()=>{const e=document.querySelector('#chat-input');return {html:e?.innerHTML,text:e?.textContent};})()"),
         }, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-        self.assertTrue(after['prompt'].startswith(before['prompt']))
-        # Native Tiptap serializes a blank paragraph with interior spaces.
-        self.assertRegex(after['prompt'][len(before['prompt']):], r'^\n[ \t]*\nEES Workflow 도움말')
-        for text in ('도움말 용어 ID: read_tool', '현재 화면:', '초안 이름: Jira 조회', '하는 일: 정보 읽기'):
-            self.assertIn(text, after['prompt'])
-        self.assertEqual({key: value for key, value in before.items() if key != 'prompt'},
-                         {key: value for key, value in after.items() if key != 'prompt'})
-        self.assertEqual(self.server.completions, [])
+        self.assertEqual(after, before)
+        self.assertEqual(len(self.server.completions), 1)
+        help_message = self.server.completions[0]['user_message']
+        self.assertEqual(help_message['meta']['ees_work_reference']['kind'], 'help')
+        self.assertEqual(help_message['meta']['ees_work_reference']['term_id'], 'read_tool')
+        for text in ('read_tool', '현재 화면:', '초안 이름:', before['prompt']):
+            self.assertNotIn(text, help_message['content'])
+        response = '#message-' + self.server.completions[0]['id']
+        self.assertEqual(self.text(response + ' #response-message-model-name').strip(), 'Fixture AI')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-ees-helper-label]')"))
         self.assertEqual(self.operations()['tools'], [])
         self.click('.ew-tool-advanced > summary')
         self.click('[data-author-action="help"][data-id="output_schema"]')
@@ -996,14 +1002,16 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action="tool_list"]')
         self.click('[data-author-action="tool_create"]')
         self.click('[data-author-action="tool_question"][data-id="1"]')
-        self.wait("window.__eesNativeDraftV1?.read()?.prompt?.includes('Jira에서 CR 승인 상태를 확인하는 도구를 만들고 싶어')")
-        question = self.browser.evaluate('window.__eesNativeDraftV1.read()')
-        self.assertTrue(question['prompt'].startswith(after['prompt']))
-        self.assertRegex(question['prompt'][len(after['prompt']):], r'^\n[ \t]*\nJira에서 CR 승인 상태')
-        self.assertEqual(self.server.completions, [])
+        self.wait("document.querySelector('#messages-container')?.textContent.includes('Jira에서 CR 승인 상태를 확인하는 도구를 만들고 싶어') && !window.__eesSourceShellV1.helpState().busy")
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), before)
+        self.assertEqual(len(self.server.completions), 2)
+        self.assertEqual(self.server.completions[1]['user_message']['content'],
+                         'Jira에서 CR 승인 상태를 확인하는 도구를 만들고 싶어')
+        self.assertEqual(self.server.completions[1]['user_message']['meta']['ees_work_reference']['kind'], 'help')
         self.assertEqual(self.operations()['tools'], [])
 
     def test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft(self):
+        install_helper_status_fixture(self)
         self.browser.evaluate("Object.defineProperty(crypto,'randomUUID',{value:undefined,configurable:true});true")
         self.fill('#chat-input', '새 절차 전에 작성한 개인 질문')
         before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
@@ -1012,8 +1020,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         original_panel_width = self.browser.evaluate("document.querySelector('#ees-work-panel').getBoundingClientRect().width")
         self.click('[data-author-action="create"]')
         self.wait("document.querySelector('.ew-procedure-start')")
-        self.assertEqual(self.text('.ew-procedure-intro > p:first-of-type'),
-                         '새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start p,#ees-work-procedure-start small,#ees-work-procedure-start .ees-helper-label')"))
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('#ees-work-procedure-start [data-action=procedure_question]').length"), 3)
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
         self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[name=procedure_template]')].map(e=>e.value)"),
                          ['delivery_review', 'factory_rollout', 'daily_check', 'blank'])
@@ -1071,22 +1079,21 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
 
         self.wait("document.querySelector('#ees-work-procedure-start [data-action=procedure_question]')")
         question_selector = '#ees-work-procedure-start [data-action=procedure_question][data-question-index="0"]'
-        question_style = self.browser.evaluate("""(()=>{const group=getComputedStyle(document.querySelector('.ew-procedure-questions')),first=getComputedStyle(document.querySelector('.ew-procedure-questions>button'));return {radius:first.borderRadius,border:first.borderWidth,groupBorder:group.borderWidth,groupStyle:group.borderStyle};})()""")
+        question_style = self.browser.evaluate("""(()=>{const group=getComputedStyle(document.querySelector('.ees-helper-questions')),first=getComputedStyle(document.querySelector('.ees-helper-questions>button'));return {radius:first.borderRadius,border:first.borderWidth,groupBorder:group.borderWidth,groupStyle:group.borderStyle};})()""")
         self.assertEqual(question_style['radius'], '0px')
         self.assertEqual(question_style['border'], '0px')
         self.assertEqual(question_style['groupBorder'], '1px')
         self.assertEqual(question_style['groupStyle'], 'solid')
         question = self.text(question_selector).strip()
         self.click(question_selector)
-        self.wait('window.__eesNativeDraftV1?.read()?.prompt?.includes(' + json.dumps(question) + ')')
+        self.wait("document.querySelector('#messages-container')?.textContent.includes(" + json.dumps(question) + ") && !window.__eesSourceShellV1.helpState().busy")
         after = self.browser.evaluate('window.__eesNativeDraftV1.read()')
-        self.assertTrue(after['prompt'].startswith(before['prompt']))
-        self.assertRegex(after['prompt'][len(before['prompt']):], r'^\n[ \t]*\n')
-        self.assertEqual({key: value for key, value in before.items() if key != 'prompt'},
-                         {key: value for key, value in after.items() if key != 'prompt'})
-        self.assertEqual(self.server.completions, [])
+        self.assertEqual(after, before)
+        self.assertEqual(len(self.server.completions), 1)
+        self.assertEqual(self.server.completions[0]['user_message']['content'], question)
+        self.assertEqual(self.server.completions[0]['user_message']['meta']['ees_work_reference']['kind'], 'help')
         self.assertEqual(self.state()['workflows'], [])
-        self.screenshot('procedure-examples-native-question-draft')
+        self.screenshot('procedure-examples-native-question-chat')
 
         self.click('#ew-procedure-name')
         self.key('a', 65, 2)
@@ -1143,7 +1150,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertRegex(' '.join(validated['validation']['errors']), r'도구|연결|Native')
         self.assertTrue(self.read('[data-author-action=publish]', 'disabled'))
         self.assertIsNone(validated['published_version'])
-        self.assertEqual(self.server.completions, [])
+        self.assertEqual(len(self.server.completions), 1)
         self.screenshot('procedure-examples-created-publication-blocked')
 
         # At a narrow viewport the same starter remains scrollable, and its
@@ -1171,7 +1178,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.screenshot('procedure-examples-narrow-name-and-footer')
         self.click('[data-author-action="procedure_cancel"]')
         self.assertEqual(len(self.state()['workflows']), 1)
-        self.assertEqual(self.server.completions, [])
+        self.assertEqual(len(self.server.completions), 1)
 
     def test_missing_random_uuid_creates_and_saves_draft_in_native_ui(self):
         # Loopback is trustworthy in Chrome. Explicit API removal reproduces

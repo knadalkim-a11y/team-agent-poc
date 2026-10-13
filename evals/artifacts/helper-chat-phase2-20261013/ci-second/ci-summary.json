@@ -1,0 +1,42 @@
+{
+  "scope": "PR87 second CI; helper entry prerequisite failure before preflight/provider",
+  "run_id": 38372503762,
+  "run_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38372503762",
+  "pr_head": "4d10237f27c63722da99c1da53b14aa56d700500",
+  "tested_merge": "6a35216b9aa2445c794a77a7118d542f73d73b3e",
+  "job_id": 115215674395,
+  "job_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38372503762/job/115215674395",
+  "job_conclusion": "failure",
+  "earlier_stage": "Actual CLI writes/reload/restart and immutable historical message reference passed",
+  "independent_failure": {
+    "file": "tests/ees_work_native_chat.py",
+    "line": 350,
+    "selector": "[data-author-action=create]",
+    "cause": "Author mode preserved the current procedure editor. Its procedure-list button is present, but create belongs to the list screen. The test omitted that navigation.",
+    "helper_preflight_reached": false,
+    "helper_provider_requests": 0,
+    "api_failures": []
+  },
+  "artifact": {
+    "id": 11799758772,
+    "zip_sha256": "d951fa0d1c80ff43b88b88aa5df439eee7f31707042d53c51938db3aed3696f1",
+    "bytes": 6031835,
+    "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38372503762/artifacts/11799758772"
+  },
+  "probe": {
+    "result": "1 PASS",
+    "seconds": 2.685,
+    "wheel_sha256": "6953639186f062f24ac851502d05831a1a67acc7ca2164140faeb4557ada1863",
+    "browser": "HeadlessChrome/153.0.8010.52",
+    "change": "Test prerequisite only: author -> procedure list -> create. Actual provider, ACL, metadata, DB and composer assertions unchanged.",
+    "verified": [
+      "current editor has create count zero",
+      "physical list/create navigation",
+      "question-only body and fixed helper metadata",
+      "composer text unchanged",
+      "work-mode navigation and same-chat reload",
+      "reference and Work SQLite unchanged"
+    ],
+    "boundary": "Real compiled UI and Work SQLite; synthetic Native account/chat storage, helper permission and model transport. Full Native CLI/provider/ACL results remain pending new head CI."
+  }
+}

@@ -559,18 +559,6 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 .ew-author .ew-help-trigger{padding:2px 4px;min-height:28px;font-size:12px;line-height:18px;border:0;background:transparent;color:var(--ees-brand-text);flex:none;}
 .ew-author .ew-help-trigger:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px;}
 
-#ees-work-procedure-start{flex:none;max-height:44%;overflow:auto;padding:28px 20px 12px;}
-.ew-procedure-intro{max-width:768px;margin:0 auto;font-size:12px;line-height:18px;color:var(--ees-text-primary);}
-.ew-procedure-intro>small{display:flex;align-items:center;gap:6px;color:var(--ees-text-secondary);font-size:11px;line-height:16px;}
-.ew-procedure-intro>p{margin:12px 0;}
-.ew-procedure-questions{border:1px solid var(--ees-line-control);border-radius:8px;margin:8px 0;overflow:hidden;}
-#ees-work-procedure-start .ew-procedure-questions>button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border:0;border-radius:0;background:var(--ees-surface-default);text-align:left;font:inherit;}
-#ees-work-procedure-start .ew-procedure-questions>button+button{border-top:1px solid var(--ees-line-divider);}
-.ew-procedure-questions>button>span{flex:1;}
-.ew-procedure-questions>button .ew-icon{width:14px;height:14px;flex:none;}
-.ew-procedure-questions>button:hover{background:var(--ees-surface-hover);}
-.ew-procedure-questions>button:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:-3px;box-shadow:var(--ees-focus-ring);}
-@media(max-width:600px){#ees-work-procedure-start{padding:16px 12px 8px;max-height:38%;}.ew-procedure-questions>button{padding:8px 10px;}}
 
 /* C18/C21: panel canvas is distinct from white cards and controls. The Native
  * conversation and the #FAFAFA cycle strip keep their own surface tokens. */

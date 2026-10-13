@@ -1,0 +1,7 @@
+test_late_denied_preflight_after_screen_change_does_not_add_stale_notice (test_ees_helper_chat_native.HelperChatNativeTests.test_late_denied_preflight_after_screen_change_does_not_add_stale_notice) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 132.47847399907187, "product": "HeadlessChrome/153.0.8010.52"}
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 1.779s
+
+OK

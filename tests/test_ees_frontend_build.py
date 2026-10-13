@@ -117,9 +117,9 @@ class NativeSourceHookTests(unittest.TestCase):
         capture = _between(source, "const eesCompletionOwner =", "\n\t\tconst res = await generateOpenAIChatCompletion")
         response_at = source.index("\n\t\tif (res) {", source.index("const eesCompletionOwner ="))
         response = source[response_at:source.index("\n\t};\n\n\tconst handleOpenAIError", response_at)]
-        completion = "const probeCompletion=async response=>{const _chatId=$chatId,responseMessage={};" + capture + "\nconst res=await response;" + response + "};"
+        completion = "const probeCompletion=async response=>{const _chatId=$chatId,responseMessage={},eesHelp=false;" + capture + "\nconst res=await response;" + response + "};"
         reference = _between(source, "user_message: userMessage ? {", "\n\t\t\t\t...(regenerationPrompt")
-        reference = "const referenceMessage=(_chatId,responseMessageId,userMessage)=>({" + reference + "});"
+        reference = "const referenceMessage=(_chatId,responseMessageId,userMessage)=>{const eesHelp=userMessage?.meta?.ees_work_help===1,model={id:'model'};return ({" + reference + "});};"
         probe = r'''
 const assert=require('node:assert/strict');
 let embedded=false,$temporaryChatEnabled=false,$chatId='',chatIdProp='',loading=false,prompt='',files=[];
@@ -187,7 +187,7 @@ const createNewChat=async()=>{if(failCreation)throw Error('synthetic creation fa
                      "The CI patched source checkout is required for source comparison.")
 class SourcePatchTests(unittest.TestCase):
     def test_layout_hooks_preserve_native_elements_and_reject_source_drift(self):
-        root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"])
+        root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve()
         config = frontend.configuration()
         for name in ("src/app.html", "src/lib/constants.ts", "src/routes/+layout.svelte",
                      "src/lib/components/channel/Channel.svelte"):
@@ -452,7 +452,7 @@ const sessionStorage={setItem:(key,value)=>values.set(key,value),removeItem:key=
 
 
     def test_source_chat_route_creation_folder_return_and_same_chat_reopen(self):
-        root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"])
+        root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve()
         shell = (root / "src/lib/components/ees/EesShell.svelte").read_text(encoding="utf-8")
         chat = (root / "src/lib/components/chat/Chat.svelte").read_text(encoding="utf-8")
         bridge = _between(shell, "const bridge = {", "\n\tif (typeof window")
@@ -569,6 +569,165 @@ const request=moduleValue.exports.eesRequest;
                                 text=True, encoding="utf-8", timeout=15)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.strip(), "source_api=pass")
+
+
+@unittest.skipUnless(os.environ.get("EES_TEST_FRONTEND_SOURCE_DIR") and shutil.which("node"),
+                     "Patched source and Node are required for helper send probes.")
+class SourceHelperTests(unittest.TestCase):
+    run_node = NativeDraftHookTests.run_node
+
+    def source(self, name):
+        return (Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve() / name).read_text(encoding="utf-8")
+
+    def transpile_prelude(self, source):
+        root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve()
+        return "const ts=require(" + json.dumps(str(root / "node_modules/typescript")) + ");\n" + \
+            "const compiled=ts.transpile(" + json.dumps(source) + ", {target:ts.ScriptTarget.ES2022});\n"
+
+    def test_helper_preflight_keeps_draft_and_freezes_model_reference_with_owner_guards(self):
+        source = self.source("src/lib/components/chat/Chat.svelte")
+        helper = _between(source, "const eesAskHelp =", "\n\tconst submitPrompt =")
+        probe = self.transpile_prelude(helper) + r'''
+const assert=require('node:assert/strict');
+let eesHelperPending=false,eesHelperNotice='',eesDraftAlive=true,eesDraftOwner='a';
+let $user={id:'a'},localStorage={token:'a'},$chatId='chat-a',history={messages:{},currentId:'parent'};
+let selectedModels=['first','second'],$models=[{id:'first'},{id:'second'}],chatVariables={},readOnly=false,eesFolderReadOnly=false;
+let nativeBusy=false,ready=true,context={system_id:'',context_id:'context-a'},sent=[],persisted=[];
+const $i18n={t:(_,o)=>o.defaultValue};const sessionStorage={getItem:()=>null,removeItem(){}};
+const draft={prompt:'typed draft',files:[{id:'live-image'}],selectedToolIds:['keep-tool']};
+const getChatInputDraft=()=>draft,saveDraft=async(value,id)=>persisted.push({value,id});
+const eesNativeBusy=()=>nativeBusy,getChatVariablesForm=()=>({missing:false,conflicts:[]});
+const window={__eesNativeDraftV1:{ready:()=>ready},__eesNativeWorkV1:{helpContext:()=>context}};
+let status={available:true,protocol:1,model_id:'first'},finish,hold=false;
+const eesRequest=async path=>{assert.match(path,/model_id=first/);return hold?await new Promise(r=>finish=r):status;};
+const submitPrompt=async(question,files,options)=>{sent.push({question,files,options});history.messages.sent={meta:{ees_work_reference:options.reference}};return 'sent';};
+const ask=eval(compiled+';eesAskHelp');
+const reference={kind:'help',system_id:'',context_id:'context-a',title:'original'};
+(async()=>{
+ hold=true;const first=ask({question:'question only',reference});
+ assert.equal(eesHelperPending,true);assert.equal((await ask({question:'duplicate',reference})).code,'busy');
+ reference.title='changed after click';finish(status);assert.equal((await first).accepted,true);
+ assert.equal(sent.length,1);assert.equal(sent[0].question,'question only');assert.deepEqual(sent[0].files,[]);
+ assert.equal(sent[0].options.reference.title,'original');assert.equal(sent[0].options.modelId,'first');
+ assert.deepEqual(selectedModels,['first','second']);assert.equal(persisted[0].value,draft);
+ hold=false;status={available:false,protocol:1,code:'tool_unavailable',message:'Unavailable'};
+ assert.equal((await ask({question:'blocked',reference})).accepted,false);assert.equal(sent.length,1);
+ status={available:false,protocol:1,code:'tool_unavailable'};
+ assert.equal((await ask({question:'missing reason',reference})).accepted,false);assert.equal(sent.length,1);
+ assert.match(eesHelperNotice,/administrator/i);assert.match(eesHelperNotice,/tool.*permission.*version/i);
+ status={available:true,protocol:1,model_id:'first'};hold=true;
+ const moved=ask({question:'moved',reference});context={system_id:'',context_id:'other'};finish(status);
+ assert.equal((await moved).code,'context_changed');assert.equal(sent.length,1);
+ context={system_id:'',context_id:'context-a'};
+ const deniedMove=ask({question:'old unavailable',reference});context={system_id:'',context_id:'new-screen'};eesHelperNotice='current screen notice';
+ finish({available:false,protocol:1,code:'tool_unavailable',message:'old unavailable result'});
+ assert.equal((await deniedMove).code,'context_changed');assert.equal(eesHelperNotice,'current screen notice');assert.equal(sent.length,1);
+ context={system_id:'',context_id:'context-a'};const stale=ask({question:'old user',reference});
+ $user={id:'b'};localStorage.token='b';eesHelperNotice='new user notice';finish(status);
+ assert.equal((await stale).accepted,false);assert.equal(eesHelperNotice,'new user notice');assert.equal(sent.length,1);
+ $user={id:'a'};localStorage.token='a';nativeBusy=true;hold=false;
+ assert.equal((await ask({question:'busy',reference})).code,'busy');assert.equal(sent.length,1);
+ console.log('source_helper_preflight=pass');
+})().catch(e=>{console.error(e);process.exitCode=1;});
+'''
+        self.assertEqual(self.run_node(probe), "source_helper_preflight=pass")
+
+    def test_helper_pair_rollback_requires_explicit_unpersisted_server_rejection(self):
+        source = self.source("src/lib/components/chat/Chat.svelte")
+        submit = _between(source, "const submitPrompt =", "\n\tconst handleManualCompact")
+        probe = self.transpile_prelude(submit) + r'''
+const assert=require('node:assert/strict');
+let history,chatFiles=[{id:'kept-chat-file'}],selectedModels=['first','second'];
+let eesDraftAlive=true,$user={id:'actor'},$chatId='chat',id=0;
+const uuidv4=()=>`message-${++id}`,equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b),$showCallOverlay=false;
+const messageInput={focus(){throw Error('helper must not focus or replace input');}};
+const saveSessionSelectedModels=()=>{throw Error('helper must not replace model choice');};
+const window={__eesNativeWorkV1:{helpContext:()=>({context_id:'ctx'})}};
+let rejection=null;
+const sendMessage=async(h,parent,options)=>{
+ assert.equal(options.modelId,'first');assert.equal(options.eesHelpGuard(),true);
+ h.messages.child={parentId:parent};h.messages[parent].childrenIds.push('child');h.currentId='child';
+ if(rejection)throw rejection;
+};
+const submit=eval(compiled+';submitPrompt');
+const reset=()=>{history={messages:{parent:{childrenIds:['older']}},currentId:'parent'};};
+const options={modelId:'first',reference:{kind:'help',context_id:'ctx'},actor:'actor',chatId:'chat'};
+(async()=>{
+ reset();const sent=await submit('question',[],options);
+ assert.equal(history.messages[sent].content,'question');assert.deepEqual(history.messages[sent].models,['first']);
+ assert.deepEqual(selectedModels,['first','second']);assert.deepEqual(chatFiles,[{id:'kept-chat-file'}]);
+ reset();rejection={code:'work_help_unavailable',persisted:false};await assert.rejects(submit('no-save',[],options));
+ assert.deepEqual(history,{messages:{parent:{childrenIds:['older']}},currentId:'parent'});
+ reset();rejection={code:'work_help_unavailable',persisted:true};await assert.rejects(submit('already saved',[],options));
+ assert.equal(Object.keys(history.messages).length,3);assert.equal(history.currentId,'child');
+ console.log('source_helper_rollback=pass');
+})().catch(e=>{console.error(e);process.exitCode=1;});
+'''
+        self.assertEqual(self.run_node(probe), "source_helper_rollback=pass")
+
+    def test_native_completion_api_preserves_structured_errors_only_when_requested(self):
+        source = self.source("src/lib/apis/openai/index.ts")
+        api = _between(source, "export const generateOpenAIChatCompletion =", "\nexport const synthesizeOpenAISpeech")
+        api = api.replace("export const", "const", 1)
+        probe = self.transpile_prelude(api) + r'''
+const assert=require('node:assert/strict'),WEBUI_BASE_URL='';
+const detail={code:'work_help_unavailable',persisted:false,message:'Unavailable'};
+const fetch=async()=>({ok:false,json:async()=>({detail})});
+const getErrorMessage=error=>error.detail.message;
+const generate=eval(compiled+';generateOpenAIChatCompletion');
+(async()=>{
+ await assert.rejects(generate('token',{}),error=>error==='Unavailable');
+ await assert.rejects(generate('token',{},'/api',{preserveError:true}),error=>error.detail===detail);
+ console.log('source_helper_api_error=pass');
+})().catch(e=>{console.error(e);process.exitCode=1;});
+'''
+        self.assertEqual(self.run_node(probe), "source_helper_api_error=pass")
+
+    def test_helper_request_isolation_does_not_change_ordinary_native_send(self):
+        source = self.source("src/lib/components/chat/Chat.svelte")
+        send = _between(source, "const sendMessageSocket =", "\n\tconst handleOpenAIError")
+        probe = self.transpile_prelude(send) + r'''
+const assert=require('node:assert/strict');
+let chatFiles=[{id:'doc',type:'doc'}],$chatId='chat';
+const selectedModels=['first','second'],selectedToolIds=['read-tool','direct_server:0'];
+const selectedFilterIds=['personal-filter'],selectedSkillIds=['personal-skill'];
+const $settings={params:{temperature:.3},system:'personal system'},params={top_p:.8};
+const $user={id:'actor',name:'Actor',email:'actor@example.test'},eesDraftOwner='actor',eesDraftAlive=true;
+const localStorage={token:'token'},$temporaryChatEnabled=false,embedded=false;
+const $toolServers=[{id:'direct-tool'}],$terminalServers=[{id:'terminal'}, {url:'http://localhost/terminal'}],$selectedTerminalId='terminal';
+const $models=[{id:'first',info:{meta:{capabilities:{}}}},{id:'second'}],$socket={id:'socket'},$selectedFolder=null;
+const WEBUI_BASE_URL='',chatVariables={},isTemporaryChatId=()=>false,equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+const getFeatures=()=>({web_search:true,code_interpreter:true}),getStopTokens=()=>[],getPromptVariables=()=>({});
+const scrollToBottom=()=>{},tick=async()=>{},shouldAutoScrollResponse=()=>false;
+const CustomEvent=function(type,data){this.type=type;this.detail=data.detail;},eventTarget={dispatchEvent(){}};
+const window={__eesNativeWorkV1:{captureReference:()=>({kind:'help',context_id:'live',system_id:'sys',screen:'live-screen'})}};
+const requests=[];
+const generateOpenAIChatCompletion=async(token,body,url,options)=>{requests.push({body,options});return null;};
+const send=eval(compiled+';sendMessageSocket');
+const ref={kind:'help',context_id:'frozen',system_id:'sys',screen:'frozen-screen'};
+const historyFor=helper=>({messages:{question:{id:'question',parentId:null,role:'user',content:'only question',files:[{id:'doc',type:'doc'}],models:['first'],meta:helper?{ees_work_help:1,ees_work_reference:ref}:{}},answer:{id:'answer',parentId:'question'}}});
+(async()=>{
+ const draftAssets=JSON.stringify({selectedModels,selectedToolIds,selectedFilterIds,selectedSkillIds,$selectedTerminalId});
+ await send($models[0],[{files:[{id:'doc'}]}],historyFor(false),'answer','chat');
+ const ordinary=requests[0].body;
+ assert.deepEqual(ordinary.files,[{id:'doc',type:'doc'}]);assert.deepEqual(ordinary.filter_ids,['personal-filter']);
+ assert.deepEqual(ordinary.tool_ids,['read-tool']);assert.deepEqual(ordinary.skill_ids,['personal-skill']);
+ assert.equal(ordinary.terminal_id,'terminal');assert.equal(ordinary.tool_servers.length,2);assert.equal(ordinary.features.web_search,true);
+ assert.equal(ordinary.user_message.meta.ees_work_reference.screen,'live-screen');assert.equal(ordinary.user_message.meta.ees_work_help,undefined);
+ assert.equal(ordinary.ees_work_composer_models,undefined);
+ await send($models[0],[{files:[{id:'doc'}]}],historyFor(true),'answer','chat');
+ const helper=requests[1].body;
+ assert.equal(helper.files,undefined);assert.equal(helper.filter_ids,undefined);assert.equal(helper.tool_ids,undefined);
+ assert.equal(helper.skill_ids,undefined);assert.equal(helper.terminal_id,undefined);assert.deepEqual(helper.tool_servers,[]);
+ assert.deepEqual(helper.features,{});assert.deepEqual(helper.background_tasks,{});assert.deepEqual(helper.user_message.files,[]);
+ assert.equal(helper.user_message.meta.ees_work_reference.screen,'frozen-screen');assert.equal(helper.user_message.meta.ees_work_help,1);
+ assert.deepEqual(helper.ees_work_composer_models,['first','second']);assert.deepEqual(helper.user_message.models,['first']);
+ assert.equal(JSON.stringify({selectedModels,selectedToolIds,selectedFilterIds,selectedSkillIds,$selectedTerminalId}),draftAssets);
+ assert.deepEqual(chatFiles,[{id:'doc',type:'doc'}]);
+ console.log('source_helper_request_isolation=pass');
+})().catch(e=>{console.error(e);process.exitCode=1;});
+'''
+        self.assertEqual(self.run_node(probe), "source_helper_request_isolation=pass")
 
 
 @unittest.skipUnless(os.environ.get("EES_TEST_FRONTEND_SOURCE_DIR") and shutil.which("node"),

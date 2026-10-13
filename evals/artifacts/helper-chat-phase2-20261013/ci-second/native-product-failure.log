@@ -1,0 +1,29 @@
+2026-10-13T09:07:27.6789055Z {"name": "physical input suggestion preview apply then separate save", "run_id": "04e42ca9-51ba-4a65-a0cc-caecdc7eef61", "proposal_count": 1, "attempts": 0}
+2026-10-13T09:07:29.0790720Z {"name": "physical immutable historical message reference after second attempt", "message_id": "c06933a9-5037-46bb-8267-f065a80f92d8", "attempt_id": "065d875c-e5c6-4bd9-822f-cafcce746d4c", "latest_attempts": 2, "readonly": true}
+2026-10-13T09:07:38.8659931Z Traceback (most recent call last):
+2026-10-13T09:07:38.8674019Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_native_chat.py", line 550, in <module>
+2026-10-13T09:07:38.8675279Z     if __name__=='__main__':main()
+2026-10-13T09:07:38.8675571Z                             ^^^^^^
+2026-10-13T09:07:38.8676194Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_native_chat.py", line 520, in main
+2026-10-13T09:07:38.8676854Z     g.setup();central_flow(g);assert not g.provider.errors,g.provider.errors
+2026-10-13T09:07:38.8677267Z               ^^^^^^^^^^^^^^^
+2026-10-13T09:07:38.8678163Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_native_chat.py", line 265, in central_flow
+2026-10-13T09:07:38.8678766Z     helper_chat_flow(g,key,chat_id)
+2026-10-13T09:07:38.8679366Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_native_chat.py", line 350, in helper_chat_flow
+2026-10-13T09:07:38.8680107Z     g.click('[data-action=mode][data-mode=author]');g.click('[data-author-action=create]')
+2026-10-13T09:07:38.8680611Z                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T09:07:38.8681552Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_app.py", line 177, in click
+2026-10-13T09:07:38.8682272Z     point=self.browser.evaluate(expression); assert point, 'Not clickable: '+selector
+2026-10-13T09:07:38.8682738Z                                                     ^^^^^
+2026-10-13T09:07:38.8683108Z AssertionError: Not clickable: [data-author-action=create]
+2026-10-13T09:07:38.9188396Z ##[error]Process completed with exit code 1.
+2026-10-13T09:07:38.9265607Z ##[group]Run python tests/ees_delivery_suite.py --browser-evidence dist/ees-native-product --output dist/ees-native-product-results
+2026-10-13T09:07:38.9266598Z [36;1mpython tests/ees_delivery_suite.py --browser-evidence dist/ees-native-product --output dist/ees-native-product-results[0m
+2026-10-13T09:07:38.9331803Z shell: /usr/bin/bash -e {0}
+2026-10-13T09:07:38.9332067Z env:
+2026-10-13T09:07:38.9333072Z   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-13T09:07:38.9334229Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-13T09:07:38.9334665Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+2026-10-13T09:07:38.9335158Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-13T09:07:38.9335565Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-13T09:07:38.9335966Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
