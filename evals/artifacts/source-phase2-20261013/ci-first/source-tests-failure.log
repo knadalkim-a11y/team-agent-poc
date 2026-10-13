@@ -1,0 +1,67 @@
+##[group]Run python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_frontend_build -v
+2026-10-13T07:41:33.6025634Z [36;1mpython -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_frontend_build -v[0m
+2026-10-13T07:41:33.6088911Z shell: /usr/bin/bash -e {0}
+2026-10-13T07:41:33.6089161Z env:
+2026-10-13T07:41:33.6090150Z   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-13T07:41:33.6091274Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-13T07:41:33.6091734Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+2026-10-13T07:41:33.6092407Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-13T07:41:33.6092910Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-13T07:41:33.6093299Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-13T07:41:33.6093683Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+2026-10-13T07:41:33.6094060Z   EES_TEST_FRONTEND_SOURCE_DIR: dist/open-webui-source
+2026-10-13T07:41:33.6094357Z ##[endgroup]
+2026-10-13T07:41:33.7353654Z test_manifest_exact_limit_keeps_all_hashes_and_overflow_preserves_build (tests.test_ees_frontend_build.FrontendManifestBudgetTests.test_manifest_exact_limit_keeps_all_hashes_and_overflow_preserves_build) ... ok
+2026-10-13T07:41:33.7527369Z test_dirty_source_is_refused_before_any_build_or_output (tests.test_ees_frontend_build.FrontendProvenanceTests.test_dirty_source_is_refused_before_any_build_or_output) ... ok
+2026-10-13T07:41:33.7858193Z test_forged_rehash_cannot_hide_missing_native_hooks_or_old_namespace (tests.test_ees_frontend_build.FrontendProvenanceTests.test_forged_rehash_cannot_hide_missing_native_hooks_or_old_namespace) ... ok
+2026-10-13T07:41:33.8187223Z test_manifest_duplicate_keys_and_symlinked_build_content_are_rejected (tests.test_ees_frontend_build.FrontendProvenanceTests.test_manifest_duplicate_keys_and_symlinked_build_content_are_rejected) ... ok
+2026-10-13T07:41:33.8526029Z test_mismatched_source_lock_patch_version_or_mode_is_rejected (tests.test_ees_frontend_build.FrontendProvenanceTests.test_mismatched_source_lock_patch_version_or_mode_is_rejected) ... ok
+2026-10-13T07:41:33.8867955Z test_program_version_keeps_existing_apply_and_restore_contract (tests.test_ees_frontend_build.FrontendProvenanceTests.test_program_version_keeps_existing_apply_and_restore_contract) ... ok
+2026-10-13T07:41:33.9348009Z test_rehash_cannot_hide_pyodide_or_compiled_source_drift (tests.test_ees_frontend_build.FrontendProvenanceTests.test_rehash_cannot_hide_pyodide_or_compiled_source_drift) ... ok
+2026-10-13T07:41:33.9511831Z test_unsafe_archive_names_are_rejected (tests.test_ees_frontend_build.FrontendProvenanceTests.test_unsafe_archive_names_are_rejected) ... ok
+2026-10-13T07:41:34.0334228Z test_validated_payload_is_exact_and_rejects_added_missing_or_altered_files (tests.test_ees_frontend_build.FrontendProvenanceTests.test_validated_payload_is_exact_and_rejects_added_missing_or_altered_files) ... ok
+2026-10-13T07:41:34.0611496Z test_exact_source_hook_preserves_approval_and_waits_for_all_native_loads (tests.test_ees_frontend_build.NativeDraftHookTests.test_exact_source_hook_preserves_approval_and_waits_for_all_native_loads) ... ok
+2026-10-13T07:41:34.0625158Z test_source_owner_cleanup_and_all_four_load_boundaries_are_present (tests.test_ees_frontend_build.NativeDraftHookTests.test_source_owner_cleanup_and_all_four_load_boundaries_are_present) ... ok
+2026-10-13T07:41:34.0909828Z test_real_native_restore_creation_and_late_completion_boundaries (tests.test_ees_frontend_build.NativeSourceHookTests.test_real_native_restore_creation_and_late_completion_boundaries) ... ok
+2026-10-13T07:41:34.1147319Z test_current_native_session_response_guard_errors_and_abort_signal (tests.test_ees_frontend_build.SourceApiTests.test_current_native_session_response_guard_errors_and_abort_signal) ... FAIL
+2026-10-13T07:41:34.1208475Z test_layout_hooks_preserve_native_elements_and_reject_source_drift (tests.test_ees_frontend_build.SourcePatchTests.test_layout_hooks_preserve_native_elements_and_reject_source_drift) ... ok
+2026-10-13T07:41:34.1447253Z test_pending_native_control_save_cannot_write_or_apply_across_owner_change (tests.test_ees_frontend_build.SourceShellLifecycleTests.test_pending_native_control_save_cannot_write_or_apply_across_owner_change) ... ok
+2026-10-13T07:41:34.1687156Z test_pending_native_draft_callbacks_cannot_cross_account_or_destroyed_owner (tests.test_ees_frontend_build.SourceShellLifecycleTests.test_pending_native_draft_callbacks_cannot_cross_account_or_destroyed_owner) ... ok
+2026-10-13T07:41:34.1927563Z test_source_chat_route_creation_folder_return_and_same_chat_reopen (tests.test_ees_frontend_build.SourceShellLifecycleTests.test_source_chat_route_creation_folder_return_and_same_chat_reopen) ... ok
+2026-10-13T07:41:34.1929058Z 
+2026-10-13T07:41:34.1929493Z ======================================================================
+2026-10-13T07:41:34.1931595Z FAIL: test_current_native_session_response_guard_errors_and_abort_signal (tests.test_ees_frontend_build.SourceApiTests.test_current_native_session_response_guard_errors_and_abort_signal)
+2026-10-13T07:41:34.1944561Z ----------------------------------------------------------------------
+2026-10-13T07:41:34.1945103Z Traceback (most recent call last):
+2026-10-13T07:41:34.1946003Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_frontend_build.py", line 568, in test_current_native_session_response_guard_errors_and_abort_signal
+2026-10-13T07:41:34.1946879Z     self.assertEqual(result.returncode, 0, result.stderr)
+2026-10-13T07:41:34.1947394Z AssertionError: 1 != 0 : node:internal/modules/cjs/loader:1404
+2026-10-13T07:41:34.1947756Z   throw err;
+2026-10-13T07:41:34.1947958Z   ^
+2026-10-13T07:41:34.1948069Z 
+2026-10-13T07:41:34.1948367Z Error: Cannot find module 'dist/open-webui-source/node_modules/typescript'
+2026-10-13T07:41:34.1948768Z Require stack:
+2026-10-13T07:41:34.1949101Z - /home/runner/work/team-agent-poc/team-agent-poc/[eval]
+2026-10-13T07:41:34.1949595Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+2026-10-13T07:41:34.1950119Z     at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+2026-10-13T07:41:34.1950624Z     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+2026-10-13T07:41:34.1951131Z     at Function._load (node:internal/modules/cjs/loader:1211:37)
+2026-10-13T07:41:34.1951609Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2026-10-13T07:41:34.1952441Z     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+2026-10-13T07:41:34.1952934Z     at Module.require (node:internal/modules/cjs/loader:1487:12)
+2026-10-13T07:41:34.1953363Z     at require (node:internal/modules/helpers:135:16)
+2026-10-13T07:41:34.1953675Z     at [eval]:1:10
+2026-10-13T07:41:34.1953972Z     at runScriptInThisContext (node:internal/vm:209:10) {
+2026-10-13T07:41:34.1954308Z   code: 'MODULE_NOT_FOUND',
+2026-10-13T07:41:34.1954712Z   requireStack: [ '/home/runner/work/team-agent-poc/team-agent-poc/[eval]' ]
+2026-10-13T07:41:34.1955106Z }
+2026-10-13T07:41:34.1955210Z 
+2026-10-13T07:41:34.1955300Z Node.js v22.16.0
+2026-10-13T07:41:34.1955422Z 
+2026-10-13T07:41:34.1955428Z 
+2026-10-13T07:41:34.1955659Z ----------------------------------------------------------------------
+2026-10-13T07:41:34.1956016Z Ran 17 tests in 0.499s
+2026-10-13T07:41:34.1956158Z 
+2026-10-13T07:41:34.1956263Z FAILED (failures=1)
+2026-10-13T07:41:34.2091384Z ##[error]Process completed with exit code 1.
+2026-10-13T07:41:34.2191782Z 

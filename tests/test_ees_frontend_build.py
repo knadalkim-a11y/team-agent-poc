@@ -529,7 +529,7 @@ if __name__ == "__main__":
                      "Patched source and Node are required for common API probes.")
 class SourceApiTests(unittest.TestCase):
     def test_current_native_session_response_guard_errors_and_abort_signal(self):
-        root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"])
+        root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve()
         source = (root / "src/lib/apis/ees-work.ts").read_text(encoding="utf-8")
         prelude = "const ts=require(" + json.dumps(str(root / "node_modules/typescript")) + ");\n"
         prelude += "const source=" + json.dumps(source) + ";\n"
